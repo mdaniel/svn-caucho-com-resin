@@ -113,7 +113,7 @@ public class XslElementNode extends XslNode {
     _gen.printLocation(_systemId, _filename, _startLine);
 
     String []postPrefix = _gen.getNamespaceAlias(namespace);
-    
+
     if (postPrefix != null) {
       prefix = postPrefix[0];
       namespace = postPrefix[1];
@@ -126,7 +126,6 @@ public class XslElementNode extends XslNode {
     if (_excludedNamespaces.get(namespace) != null)
       namespace = null;
     */
-    
     
     //if (_namespace != null) {
       out.print("out.pushElement(");

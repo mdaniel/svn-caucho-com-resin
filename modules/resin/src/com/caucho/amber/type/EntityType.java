@@ -1313,6 +1313,69 @@ public class EntityType extends Type {
   /**
    * Generates the update sql.
    */
+  public void generateUpdateSQLPrefix(CharBuffer sql)
+  {
+    sql.append("UPDATE " + getTable().getName() + " SET ");
+  }
+
+  /**
+   * Generates the update sql.
+   *
+   * @param sql the partially built sql
+   * @param group the dirty group
+   * @param mask the group's mask
+   * @param isFirst marks the first set group
+   */
+  public boolean generateUpdateSQLComponent(CharBuffer sql,
+					    int group,
+					    long mask,
+					    boolean isFirst)
+  {
+    ArrayList<AmberField> fields = getFields();
+
+    while (mask != 0) {
+      int i = 0;
+      for (i = 0; (mask & (1L << i)) == 0; i++) {
+      }
+
+      mask &= ~(1L << i);
+
+      AmberField field = null;
+
+      for (int j = 0; j < fields.size(); j++) {
+	field = fields.get(j);
+	
+	if (field.getIndex() == i + group * 64)
+	  break;
+	else
+	  field = null;
+      }
+
+      if (field != null) {
+	if (! isFirst)
+	  sql.append(", ");
+	isFirst = false;
+	
+	field.generateUpdate(sql);
+      }
+    }
+
+    return isFirst;
+  }
+
+  /**
+   * Generates the update sql.
+   */
+  public void generateUpdateSQLSuffix(CharBuffer sql)
+  {
+    sql.append(" WHERE ");
+
+    sql.append(getId().generateMatchArgWhere(null));
+  }
+
+  /**
+   * Generates the update sql.
+   */
   public String generateUpdateSQL(long mask)
   {
     if (mask == 0)

@@ -224,21 +224,30 @@ public class PropertyField extends AbstractField {
     else {
       out.println(getJavaTypeName() + " oldValue = " + generateSuperGetter() + ";");
 
-      long mask = 1L << getLoadGroupIndex();
+      int maskGroup = getLoadGroupIndex() / 64;
+      String loadVar = "__caucho_loadMask_" + maskGroup;
+
+      long mask = 1L << (getLoadGroupIndex() % 64);
+      
       if (getJavaTypeName().equals("java.lang.String")) {
-	out.println("if ((oldValue == v || v != null && v.equals(oldValue)) && (__caucho_loadMask & " + mask + "L) != 0L)");
+	out.println("if ((oldValue == v || v != null && v.equals(oldValue)) && (" + loadVar + " & " + mask + "L) != 0L)");
 	out.println("  return;");
       }
       else {
-	out.println("if (oldValue == v && (__caucho_loadMask & " + mask + "L) != 0)");
+	out.println("if (oldValue == v && (" + loadVar + " & " + mask + "L) != 0)");
 	out.println("  return;");
       }
 
       out.println(generateSuperSetter("v") + ";");
     
+      int dirtyGroup = getIndex() / 64;
+      String dirtyVar = "__caucho_dirtyMask_" + dirtyGroup;
+
+      long dirtyMask = 1L << (getIndex() % 64);
+      
       out.println();
-      out.println("long oldMask = __caucho_dirtyMask;");
-      out.println("__caucho_dirtyMask |= " + (1L << getIndex()) + "L;");
+      out.println("long oldMask = " + dirtyVar + ";");
+      out.println(dirtyVar + " |= " + dirtyMask + "L;");
       out.println();
       out.println("if (__caucho_session != null && oldMask == 0)");
       out.println("  __caucho_session.update(this);");
@@ -308,8 +317,12 @@ public class PropertyField extends AbstractField {
     }
     else if (_isInsert)
       generateSet(out, pstmt, index, obj);
-    else if (getLoadGroupIndex() != 0)
-      out.println("__caucho_loadMask &= ~" + (1L << getLoadGroupIndex()) + "L;");
+    else if (getLoadGroupIndex() != 0) {
+      int groupIndex = getLoadGroupIndex();
+      int group = groupIndex / 64;
+      long groupMask = 1L << (groupIndex % 64);
+      out.println("__caucho_loadMask_" + group + " &= ~" + groupMask + "L;");
+    }
   }
 
   /**

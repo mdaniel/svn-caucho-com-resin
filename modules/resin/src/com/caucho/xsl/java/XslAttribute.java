@@ -136,9 +136,9 @@ public class XslAttribute extends XslNode {
     
 	generateString(out, _name, '+');
       
-	if (getNamespace() != null) {
+	if (getOutputNamespace() != null) {
 	  out.print(", ");
-	  printNamespace(out, getNamespace());
+	  printNamespace(out, getOutputNamespace());
 	}
     
 	out.println(");");
@@ -153,9 +153,9 @@ public class XslAttribute extends XslNode {
     
       generateString(out, _name, '+');
 
-      if (getNamespace() != null) {
+      if (getOutputNamespace() != null) {
 	out.print(", ");
-	printNamespace(out, getNamespace());
+	printNamespace(out, getOutputNamespace());
       }
 
       out.println(", \"\");");

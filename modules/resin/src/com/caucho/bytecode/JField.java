@@ -52,6 +52,16 @@ abstract public class JField extends JAccessibleObject {
    * Returns the parameterized type of the field.
    */
   abstract public JType getGenericType();
+  
+  /**
+   * Returns true for a transient field
+   */
+  abstract public boolean isTransient();
+  
+  /**
+   * Returns true for a static field
+   */
+  abstract public boolean isStatic();
 
   /**
    * Returns true if equals.

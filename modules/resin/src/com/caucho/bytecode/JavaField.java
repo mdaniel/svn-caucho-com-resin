@@ -30,6 +30,8 @@ package com.caucho.bytecode;
 
 import java.io.*;
 
+import java.lang.reflect.Modifier;
+
 import java.util.*;
 
 import java.util.logging.Logger;
@@ -133,6 +135,22 @@ public class JavaField extends JField {
   public JClass getType()
   {
     return getClassLoader().descriptorToClass(getDescriptor(), 0);
+  }
+  
+  /**
+   * Returns true for a static field.
+   */
+  public boolean isStatic()
+  {
+    return Modifier.isStatic(getAccessFlags());
+  }
+  
+  /**
+   * Returns true for a transient field.
+   */
+  public boolean isTransient()
+  {
+    return Modifier.isTransient(getAccessFlags());
   }
   
   /**

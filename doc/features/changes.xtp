@@ -2,6 +2,17 @@
 
 <s2 title='3.0.snap - Feb 28, 2005'>
 <ul>
+<li>Added archive-path to web-app (rep by D Rice)
+<li>Amber extended to handle more than 64 fields (rep by christian)
+<li>detect illegal "xmlns:" attribute (rep by Jeroen van Vianen)
+<li>log non-serializable values put into sessions
+<li>EJB server start() changed to an environment callback for timing (rep by Andrea Mari)
+<li>ExpressionEvaluator was ignoring FunctionMapper
+<li>Add host-alias-regexp
+<li>make LinkProxy serializable
+<li>in .ear files, the manifest classpath entry is added to the ent-app environment
+<li>XSLT handling of default namespace (rep by James Howe)
+<li>Removed poll_read from accept
 <li>Added com.caucho.jms.resource.ListenerResource and com.caucho.jms.resource.MessageSenderResource.
 <li>Added var to &lt;resource>
 <li>Added $\{root.*} EL variables

@@ -68,6 +68,9 @@ public class WebAppConfig {
   // The app dir
   private String _appDir;
 
+  // The archive path;
+  private String _archivePath;
+
   // startup mode
   private String _startupMode;
 
@@ -186,6 +189,22 @@ public class WebAppConfig {
   public void setDocumentDirectory(RawString dir)
   {
     setAppDir(dir);
+  }
+
+  /**
+   * Sets the archive-path
+   */
+  public void setArchivePath(RawString path)
+  {
+    _archivePath = path.getValue();
+  }
+
+  /**
+   * Gets the archive-path
+   */
+  public String getArchivePath()
+  {
+    return _archivePath;
   }
 
   /**

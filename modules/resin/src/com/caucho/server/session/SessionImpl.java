@@ -308,6 +308,13 @@ public class SessionImpl implements HttpSession, CacheListener {
 
     Object oldValue;
 
+    if (value != null &&
+	! (value instanceof Serializable) &&
+	log.isLoggable(Level.FINE)) {
+      log.fine(L.l("session attribute '{0}' value is non-serializable type '{1}'",
+		   name, value.getClass().getName()));
+    }
+
     synchronized (_values) {
       if (value != null)
         oldValue = _values.put(name, value);

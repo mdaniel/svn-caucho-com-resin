@@ -724,10 +724,9 @@ public class WebAppController extends ExpandDeployController<Application>
     
     if (appDir == null && _config != null) {
       String path = _config.getAppDir();
+      
       if (path != null)
         appDir = PathBuilder.lookupPath(path, _variableResolver);
-
-      System.out.println("PATH: " + path + " " + appDir);
     }
 
     /*
@@ -742,6 +741,30 @@ public class WebAppController extends ExpandDeployController<Application>
       appDir = _app.getAppDir();
 
     return appDir;
+  }
+
+  public Path getArchivePath()
+  {
+    Path path = super.getArchivePath();
+
+    if (path != null)
+      return path;
+    
+    if (_config != null) {
+      String pathString = _config.getArchivePath();
+      
+      if (pathString != null) {
+	try {
+	  path = PathBuilder.lookupPath(pathString, _variableResolver);
+	} catch (ELException e) {
+	  throw new RuntimeException(e);
+	}
+      }
+
+      setArchivePath(path);
+    }
+
+    return path;
   }
 
   /**

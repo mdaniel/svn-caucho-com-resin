@@ -42,6 +42,10 @@ r_auth-constraint = element auth-constraint {
   r_role-name*
 }
 
+r_archive-path =
+  attribute archive-path { string }
+  | element archive-path { string }
+
 r_cache-mapping = element cache-mapping {
   r_url-pattern
 
@@ -664,6 +668,8 @@ r_web-app-Basis =
   & r_access-log*
 
   & r_allow-servlet-el*
+
+  & r_archive-path?
 
   & r_cache-mapping*
 

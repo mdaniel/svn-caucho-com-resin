@@ -258,7 +258,7 @@
          compress="${jar.compress}" index="${jar.index}" update="${jar.update}"
          manifest="${src}/deploy/manifest">
 
-      <fileset dir="${build}/resin">
+      <fileset dir="${modules}/resin/classes">
         <include name="com/caucho/hessian/**"/>
         <include name="com/caucho/services/**"/>
         <include name="com/caucho/j2ee/deployclient/**"/>
@@ -350,7 +350,7 @@
 <!--
        <arg line="${build}/resin/com/caucho/util/L10N.class"/>
 -->
-       <arg line="${build}/resin"/>
+       <arg line="${modules}/resin/classes"/>
     </java>
 
     <jar jarfile="${lib}/resin.jar"
@@ -376,7 +376,7 @@
             <include name="*.jar" />
           </fileset>
        </classpath>
-       <arg line="${build}/webutil"/>
+       <arg line="${modules}/webutil/classes"/>
     </java>
 
     <jar jarfile="${lib}/webutil.jar"
@@ -394,7 +394,7 @@
             <include name="**/*.jar" />
           </fileset>
        </classpath>
-       <arg line="-source ${build}/resin"/>
+       <arg line="-source ${modules}/resin/classes"/>
     </java>
 
     <jar jarfile="${lib}/resin.jar"
@@ -420,7 +420,7 @@
             <include name="**/*.jar" />
           </fileset>
        </classpath>
-       <arg line="-source ${build}/webutil"/>
+       <arg line="-source ${modules}/webutil/classes"/>
     </java>
 
     <jar jarfile="${lib}/webutil.jar"
@@ -564,11 +564,12 @@
     </tar>
 
     <jar destfile="${dist}/hessian-${version}.jar">
-      <fileset dir="${build}/resin">
+      <fileset dir="${modules}/resin/classes">
         <exclude name=".cvsignore"/>
         <exclude name="*~"/>
         <exclude name="**/CVS/**"/>
         <include name="com/caucho/util/CharBuffer.class"/>
+        <include name="com/caucho/util/CharSegment.class"/>
         <include name="com/caucho/hessian/**"/>
         <include name="com/caucho/burlap/**/"/>
         <include name="com/caucho/services/**"/>
@@ -576,7 +577,7 @@
     </jar>
 
     <jar destfile="${dist}/hessian-${version}-src.jar">
-      <fileset dir="${src}/resin">
+      <fileset dir="${modules}/resin/src">
         <exclude name=".cvsignore"/>
         <exclude name="*~"/>
         <exclude name="**/CVS/**"/>
@@ -606,9 +607,9 @@
       <fileset dir=".">
         <include name="**/*.class"/>
       </fileset>
-      <dirset dir="modules">
+      <fileset dir="modules">
         <include name="*/classes"/>
-      </dirset>
+      </fileset>
     </delete>
   </target>
 

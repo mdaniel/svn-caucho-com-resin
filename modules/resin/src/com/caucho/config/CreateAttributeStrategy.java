@@ -76,7 +76,11 @@ public class CreateAttributeStrategy extends AttributeStrategy {
   {
     Object child = _createMethod.invoke(bean);
 
-    builder.configure(child, node);
+    TypeStrategy childStrategy;
+
+    childStrategy = TypeStrategyFactory.getTypeStrategy(child.getClass());
+
+    child = builder.configureImpl(childStrategy, child, node);
 
     setChild(bean, name, child);
   }

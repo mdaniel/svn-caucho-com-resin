@@ -38,7 +38,8 @@ import java.lang.annotation.ElementType;
  */
 public enum CascadeType {
   ALL,
-  CREATE,
+  PERSIST,
   MERGE,
-  REMOVE
+  REMOVE,
+  REFRESH
 }

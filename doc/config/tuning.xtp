@@ -44,12 +44,15 @@ connection open for following requests, Resin can improve performance.
 </p>
 
 <example title='resin.conf for thread-keepalive'>
-...
-&lt;thread-pool>
-  &lt;thread-max>250&lt;/thread-max>
-&lt;/thread-pool>
-&lt;keepalive-max>500&lt;/keepalive-max>
-...
+&lt;resin ...>
+  &lt;thread-pool>
+    &lt;thread-max>250&lt;/thread-max>
+  &lt;/thread-pool>
+
+  &lt;server>
+    &lt;keepalive-max>500&lt;/keepalive-max>
+    &lt;keepalive-timeout>120s&lt;/keepalive-timeout>
+    ...
 </example>
 
 <section title="Timeouts">
@@ -62,23 +65,42 @@ prevents idle clients from hogging Resin resources.</p>
 
 <example>
 ...
-&lt;thread-max>250&lt;/thread-max>
-&lt;thread-keepalive>150&lt;/thread-keepalive>
-&lt;request-timeout>30&lt;/request-timeout>
-&lt;live-time>20&lt;/live-time>
+&lt;thread-pool>
+  &lt;thread-max>250&lt;/thread-max>
+&lt;/thread-pool>
+
+&lt;server>
+
+   &lt;http port="8080" read-timeout="30s" write-timeout="30s"/>
+
 ...
 </example>
 
-<p>In general, the request-timeout and keepalives are less important
+<example>
+...
+&lt;thread-max>250&lt;/thread-max>
+
+&lt;server>
+
+   &lt;cluster>
+     &lt;client-live-time>20s&lt;/client-live-time>
+
+     &lt;srun id="a" port="6802" read-timeout="30s"/>
+   &lt;/cluster>
+
+...
+</example>
+
+<p>In general, the read-timeout and keepalives are less important
 for Resin standalone configurations than Apache/IIS/srun
 configurations.  Very heavy traffic sites may want to reduce the
 timeout for Resin standalone.</p>
 
-<p>Since <var/request-timeout/> will close srun connections, its
-setting needs to take into consideration the <var/live-time/> setting
-for mod_caucho or isapi_srun.  <var/live-time/> is the time the
-plugin will keep a connection open.  <var/request-timeout/> must
-always be larger than <var/live-time/>, otherwise the plugin will try
+<p>Since <var/read-timeout/> will close srun connections, its
+setting needs to take into consideration the <var/client-live-time/> setting
+for mod_caucho or isapi_srun.  <var/client-live-time/> is the time the
+plugin will keep a connection open.  <var/read-timeout/> must
+always be larger than <var/client-live-time/>, otherwise the plugin will try
 to reuse a closed socket.</p>
 
 </section>
@@ -89,10 +111,10 @@ to reuse a closed socket.</p>
 handling because requests are handled differently in the web server.
 Until the web server sends a request to Resin, it can't tell if Resin
 has closed the other end of the socket.  If the JVM has restarted
-or if closed the socket because of <var/request-timeout/>,
+or if closed the socket because of <var/read-timeout/>,
 mod_caucho will not know about the closed socket.  So mod_caucho needs
 to know how long to consider a connection reusable before closing it.
-<var/live-time/> tells the plugin how long it should consider a
+<var/client-live-time/> tells the plugin how long it should consider a
 socket usable.</p>
 
 <p>Because the plugin isn't signalled when Resin closes the socket,
@@ -100,7 +122,7 @@ the socket will remain half-closed until the next web server request.
 A <var/netstat/> will show that as a bunch of sockets in the FIN_WAIT_2
 state.  With Apache, there doesn't appear to be a good way around
 this.  If these become a problem, you can increase
-<var/request-timeout/> and <var/live-time/> so the JVM won't close the
+<var/read-timeout/> and <var/client-live-time/> so the JVM won't close the
 keepalive connections as fast.</p>
 
 <example>
@@ -166,17 +188,25 @@ reused.</p>
 
 <example title='Configuration for a medium-loaded Apache'>
 ...
-&lt;thread-max>250&lt;/thread-max>
-&lt;thread-keepalive>200&lt;/thread-keepalive>
-&lt;request-timeout>120&lt;/request-timeout>
-&lt;live-time>100&lt;/live-time>
+&lt;thread-pool>
+  &lt;thread-max>250&lt;/thread-max>
+ &lt;/thread-pool>
+
+&lt;server>
+  &lt;keepalive-max>250&lt;/keepalive-max>
+  &lt;keepalive-timeout>120s&lt;/keepalive-timeout>
+
+  &lt;cluster>
+    &lt;client-live-time>120s&lt;/client-live-time>
+
+    &lt;srun id="a" port="6802" read-timeout="120s"/>
+  &lt;/cluster>
 ...
 </example>
 
-<p><var/thread-max/> must always be larger than <var/thread-keepalive/>
-and <var/request-timeout/> must always be larger than
-<var/live-time/>.  In addition, <var/thread-keepalive/> should be larger
-than the maximum number of Apache processes.</p>
+<p><var/read-timeout/> must always be larger than
+<var/client-live-time/>.  In addition, <var/keepalive-max/> should be
+larger than the maximum number of Apache processes.</p>
 
 </section>
 

@@ -32,6 +32,7 @@ package com.caucho.bytecode;
 import java.lang.ref.SoftReference;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 
@@ -284,6 +285,22 @@ public class JClassWrapper extends JClass {
     }
 
     return getMethod(cl.getSuperclass(), name, types, jClassLoader);
+  }
+    
+  /**
+   * Returns the public constructors.
+   */
+  public JMethod []getConstructors()
+  {
+    Constructor []methods = _class.getConstructors();
+    
+    JMethod []jMethods = new JMethod[methods.length];
+
+    for (int i = 0; i < methods.length; i++) {
+      jMethods[i] = new JConstructorWrapper(methods[i], getClassLoader());
+    }
+
+    return jMethods;
   }
     
   /**

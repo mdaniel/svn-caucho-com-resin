@@ -41,7 +41,11 @@ r_host = element host {
   & (attribute secure-host-name { string }
     | element secure-host-name { string })?
 
-  & (attribute host-alias { string } | element host-alias { string })*
+  & (attribute host-alias { string }
+     | element host-alias { string })*
+
+  & (attribute host-alias-regexp { string }
+     | element host-alias-regexp { string })*
 
   & r_lazy-init?
 

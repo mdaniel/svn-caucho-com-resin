@@ -44,6 +44,7 @@ import com.caucho.log.Log;
 import com.caucho.security.*;
 import com.caucho.util.*;
 import com.caucho.vfs.*;
+import com.caucho.config.types.Period;
 import com.caucho.sql.*;
 
 import com.caucho.server.webapp.Application;
@@ -243,9 +244,9 @@ public class JdbcAuthenticator extends AbstractAuthenticator {
   /**
    * Sets the max age for a login cookie.
    */
-  public void setCookieMaxAge(long cookieMaxAge)
+  public void setCookieMaxAge(Period cookieMaxAge)
   {
-    _cookieMaxAge = cookieMaxAge;
+    _cookieMaxAge = cookieMaxAge.getPeriod();
   }
 
   /**

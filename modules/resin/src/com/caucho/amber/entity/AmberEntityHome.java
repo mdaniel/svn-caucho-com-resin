@@ -77,7 +77,7 @@ public class AmberEntityHome {
   private volatile boolean _isInit;
 
   private ConfigException _configException;
-
+  
   private Method _cauchoGetBeanMethod;
 
   public AmberEntityHome(AmberManager manager, EntityType type)
@@ -174,10 +174,9 @@ public class AmberEntityHome {
 
     try {
       _homeBean = (Entity) _entityType.getInstanceClass().newInstance();
-    } catch (RuntimeException e) {
-      throw e;
     } catch (Exception e) {
-      throw new ConfigException(e);
+      _configException = new ConfigException(e);
+      throw _configException;
     }
     
     _entityType.start();
@@ -317,6 +316,9 @@ public class AmberEntityHome {
       EntityItem item = _manager.getEntity(getRootType(), key);
 
       if (item == null) {
+	if (_homeBean == null && _configException != null)
+	  throw _configException;
+	
 	Entity cacheEntity;
 	cacheEntity = (Entity) _homeBean.__caucho_home_new(aConn, this, key);
 	

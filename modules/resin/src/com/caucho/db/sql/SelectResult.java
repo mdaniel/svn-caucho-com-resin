@@ -79,8 +79,8 @@ public class SelectResult {
   private Order _order;
   private IntArray _orderIndex;
   
-  private TempBuffer []_tempBuffers = new TempBuffer[32];
-  private byte [][]_buffers = new byte[32][];
+  private TempBuffer []_tempBuffers = new TempBuffer[128];
+  private byte [][]_buffers = new byte[128][];
   private int _length;
   private int _rowCount;
 
@@ -960,13 +960,16 @@ public class SelectResult {
     int rOffset = length & SIZE_MASK;
     int blockId = length >> SIZE_BITS;
     
-    if (rOffset == 0) {
+    byte []buffer = _buffers[blockId];
+    
+    if (buffer == null) {
       TempBuffer tempBuffer = TempBuffer.allocate();
       _tempBuffers[blockId] = tempBuffer;
       _buffers[blockId] = tempBuffer.getBuffer();
+
+      buffer = _buffers[blockId];
     }
 
-    byte []buffer = _buffers[blockId];
     buffer[rOffset] = (byte) value;
 
     _length = length + 1;

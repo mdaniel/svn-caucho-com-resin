@@ -34,6 +34,8 @@ import java.util.*;
 import java.util.logging.*;
 import java.lang.reflect.*;
 
+import javax.servlet.jsp.el.FunctionMapper;
+
 import com.caucho.vfs.*;
 import com.caucho.util.*;
 import com.caucho.log.Log;
@@ -58,6 +60,8 @@ public class ELParser {
   // Static function map
   private Map<String,Method> _staticFunctionMap;
 
+  private FunctionMapper _functionMapper;
+
   private boolean _checkEscape;
 
   public ELParser(String string)
@@ -77,6 +81,7 @@ public class ELParser {
   protected void copy(ELParser parser)
   {
     parser._staticFunctionMap = _staticFunctionMap;
+    parser._functionMapper = _functionMapper;
   }
 
   /**
@@ -85,6 +90,14 @@ public class ELParser {
   public void setStaticFunctionMap(Map<String,Method> map)
   {
     _staticFunctionMap = map;
+  }
+
+  /**
+   * Sets the function mapper
+   */
+  public void setFunctionMapper(FunctionMapper mapper)
+  {
+    _functionMapper = mapper;
   }
 
   /**
@@ -637,10 +650,25 @@ public class ELParser {
    */
   protected Method getStaticMethod(String name)
   {
+    Method method = null;
+    
     if (_staticFunctionMap != null)
-      return _staticFunctionMap.get(name);
-    else
-      return null;
+      method = _staticFunctionMap.get(name);
+
+    if (method == null && _functionMapper != null) {
+      String prefix = "";
+      String localName = name;
+
+      int p = name.indexOf(':');
+      if (p > 0) {
+	prefix = name.substring(0, p);
+	localName = name.substring(p + 1);
+      }
+      
+      method = _functionMapper.resolveFunction(prefix, localName);
+    }
+    
+    return method;
   }
 
   /**

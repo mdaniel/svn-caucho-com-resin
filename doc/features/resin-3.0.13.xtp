@@ -8,6 +8,18 @@
 
 <summary objsummary='localtoc'/>
 
+<section title="archive-path">
+
+<p>Added archive-path to web-app.</p>
+
+</section>
+
+<section title="host-alias-regexp">
+
+<p>Added regexp support for host aliases.</p>
+
+</section>
+
 <section title="IoC configuration for JMS">
 
 <p>Resin now has two IoC resources for JMS, a listener and a

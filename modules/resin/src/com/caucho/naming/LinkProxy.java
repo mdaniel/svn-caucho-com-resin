@@ -43,7 +43,7 @@ import com.caucho.config.types.InitParam;
 /**
  * An object proxy for a foreign JNDI factory.
  */
-public class LinkProxy implements ObjectProxy {
+public class LinkProxy implements ObjectProxy, java.io.Serializable {
   private static L10N L = new L10N(LinkProxy.class);
 
   // The foreign factory

@@ -99,9 +99,10 @@ public class MapBuilder {
     throws ConfigException
   {
     /*
-    TypeBuilderFactory oldFactory = TypeBuilderFactory.getFactory();
+    NodeBuilder oldBuilder = NodeBuilder.getCurrentBuilder();
     ClassLoader oldConfigLoader = null;
     try {
+      if (oldBuilder == null)
       TypeBuilderFactory factory = TypeBuilderFactory.createFactory();
       oldConfigLoader = factory.getConfigVariableResolver().getConfigLoader();
 

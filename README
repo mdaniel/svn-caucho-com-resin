@@ -31,7 +31,7 @@ II) Preconditions
 -----------------
 
 1) Resin needs a Java JDK before it can run.  Resin 3.0 works with 
-JDK 1.5 or greater.  You need the JDK, not the JRE because Resin needs the
+JDK 1.4 or greater.  You need the JDK, not the JRE because Resin needs the
 Java compiler.  We recommend using IBM's jikes compiler.
 
 Some locations for JDKs include:

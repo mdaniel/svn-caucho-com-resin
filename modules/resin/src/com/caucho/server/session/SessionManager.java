@@ -605,18 +605,21 @@ public class SessionManager implements ObjectManager, AlarmListener {
   /**
    * Sets the tcp store.
    */
-  public StoreManager createTcpStore()
+  public void setTcpStore(boolean isEnable)
     throws Exception
   {
-    return createClusterStore();
+    setClusterStore(isEnable);
   }
 
   /**
    * Sets the cluster store.
    */
-  public StoreManager createClusterStore()
+  public void setClusterStore(boolean isEnable)
     throws Exception
   {
+    if (! isEnable)
+      return;
+    
     Cluster cluster = getCluster();
 
     if (cluster == null)
@@ -628,8 +631,6 @@ public class SessionManager implements ObjectManager, AlarmListener {
       throw new ConfigException(L.l("cluster-store in <session-config> requires a configured cluster-store in the <cluster>"));
     
     _storeManager = store;
-
-    return store;
   }
 
   /**

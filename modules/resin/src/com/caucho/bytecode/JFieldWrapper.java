@@ -32,6 +32,7 @@ package com.caucho.bytecode;
 import java.lang.reflect.Field;
 import java.lang.reflect.Type;
 import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Modifier;
 
 /**
  * Wrapper around the Java field for a JField.
@@ -86,5 +87,21 @@ public class JFieldWrapper extends JField {
     } catch (NoSuchMethodError e) {
       return getType();
     }
+  }
+  
+  /**
+   * Returns true for a static field.
+   */
+  public boolean isStatic()
+  {
+    return Modifier.isStatic(_field.getModifiers());
+  }
+  
+  /**
+   * Returns true for a transient field.
+   */
+  public boolean isTransient()
+  {
+    return Modifier.isTransient(_field.getModifiers());
   }
 }

@@ -886,7 +886,7 @@ public class XmlPrinter implements XMLWriter {
       if (localName == null)
         localName = "";
 
-      if (_isHtml && localName.equals(""))
+      if (_isHtml && localName.equals("") && value.equals(""))
         return;
 
       _namespace.put(localName, value);

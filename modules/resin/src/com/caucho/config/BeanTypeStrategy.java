@@ -90,6 +90,14 @@ public class BeanTypeStrategy extends TypeStrategy {
   }
 
   /**
+   * Returns the type name.
+   */
+  public String getTypeName()
+  {
+    return getType().getName();
+  }
+
+  /**
    * Creates an instance of the type.
    *caucho.com/bugtrack
    */

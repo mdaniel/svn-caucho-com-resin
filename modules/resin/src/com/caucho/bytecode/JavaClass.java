@@ -516,6 +516,25 @@ public class JavaClass extends JClass {
   }
   
   /**
+   * Returns the array of declared methods.
+   */
+  public JMethod []getConstructors()
+  {
+    ArrayList<JavaMethod> ctorList = new ArrayList<JavaMethod>();
+    
+    for (JavaMethod method : getMethodList()) {
+      if (method.getName().equals("<init>"))
+	ctorList.add(method);
+    }
+    
+    JMethod[] methods = new JMethod[ctorList.size()];
+
+    ctorList.toArray(methods);
+
+    return methods;
+  }
+  
+  /**
    * Returns the matching method
    */
   public JMethod getMethod(String name, JClass []paramTypes)

@@ -214,9 +214,18 @@ public class EntityComponent extends ClassComponent {
       out.println("public transient com.caucho.amber.entity.EntityItem __caucho_item;");
       out.println("protected transient com.caucho.amber.connection.AmberConnectionImpl __caucho_session;");
       out.println("protected transient int __caucho_state;");
-      out.println("protected transient long __caucho_loadMask;");
-      out.println("protected transient long __caucho_dirtyMask;");
-      out.println("protected transient long __caucho_updateMask;");
+
+      int loadCount = _entityType.getLoadGroupIndex();
+      for (int i = 0; i <= loadCount / 64; i++) {
+	out.println("protected transient long __caucho_loadMask_" + i + ";");
+      }
+
+      int dirtyCount = _entityType.getDirtyIndex();
+      
+      for (int i = 0; i <= dirtyCount / 64; i++) {
+	out.println("protected transient long __caucho_dirtyMask_" + i + ";");
+	out.println("protected transient long __caucho_updateMask_" + i + ";");
+      }
     }
   }
 
@@ -300,7 +309,11 @@ public class EntityComponent extends ClassComponent {
     out.println();
     out.println("public void __caucho_expire()");
     out.println("{");
-    out.println("  __caucho_loadMask = 0L;");
+    
+    int loadCount = _entityType.getLoadGroupIndex();
+    for (int i = 0; i <= loadCount / 64; i++) {
+      out.println("  __caucho_loadMask_" + i + " = 0L;");
+    }
 
     _entityType.generateExpire(out);
     
@@ -431,9 +444,18 @@ public class EntityComponent extends ClassComponent {
     out.println("  __caucho_home = home;");
     
     out.println("__caucho_state = com.caucho.amber.entity.Entity.P_NON_TRANSACTIONAL;");
-    out.println("__caucho_loadMask = 0L;");
-    out.println("__caucho_dirtyMask = 0L;");
-    out.println("__caucho_updateMask = 0L;");
+    
+    int loadCount = _entityType.getLoadGroupIndex();
+    for (int i = 0; i <= loadCount / 64; i++) {
+      out.println("  __caucho_loadMask_" + i + " = 0L;");
+    }
+    
+    int dirtyCount = _entityType.getDirtyIndex();
+    for (int i = 0; i <= dirtyCount / 64; i++) {
+      out.println("  __caucho_dirtyMask_" + i + " = 0L;");
+      out.println("  __caucho_updateMask_" + i + " = 0L;");
+    }
+
     out.println();
     out.println("return true;");
 
@@ -479,9 +501,14 @@ public class EntityComponent extends ClassComponent {
 
     _entityType.generateLoad(out, "rs", "index", 0, 0);
 
-    out.println("__caucho_loadMask |= 1L;");
-    out.println("__caucho_dirtyMask = 0;");
-    out.println("__caucho_updateMask = 0;");
+    out.println("__caucho_loadMask_0 |= 1L;");
+
+    int dirtyCount = _entityType.getDirtyIndex();
+      
+    for (int i = 0; i <= dirtyCount / 64; i++) {
+      out.println("__caucho_dirtyMask_" + i + " = 0;");
+      out.println("__caucho_updateMask_" + i + " = 0;");
+    }
     
     out.println();
     out.println("if (__caucho_item == null) {");
@@ -544,21 +571,58 @@ public class EntityComponent extends ClassComponent {
     out.println("  return true;");
     out.println("}");
     out.println();
-    out.println("long mask = __caucho_dirtyMask;");
-    out.println("__caucho_dirtyMask = 0L;");
-    out.println("__caucho_updateMask |= mask;");
-    out.println();
-    out.println("if (mask == 0L)");
-    out.println("  return true;");
+    out.println("boolean isDirty = false;");
+    
+    int dirtyCount = _entityType.getDirtyIndex();
+      
+    for (int i = 0; i <= dirtyCount / 64; i++) {
+      out.println("long mask_" + i + " = __caucho_dirtyMask_" + i + ";");
+      out.println("__caucho_dirtyMask_" + i + " = 0L;");
+      out.println("__caucho_updateMask_" + i + " |= mask_" + i + ";");
+      
+      out.println();
+      out.println("if (mask_" + i + " != 0L)");
+      out.println("  isDirty = true;");
+    }
 
-    out.println("__caucho_flushUpdate(mask, __caucho_home);");
+    out.println("if (! isDirty)");
+    out.println("  return true;");
+    out.println();
+    out.println("com.caucho.util.CharBuffer cb = new com.caucho.util.CharBuffer();");
+    out.println("__caucho_home.generateUpdateSQLPrefix(cb);");
+    out.println("boolean isFirst = true;");
+
+    for (int i = 0; i <= dirtyCount / 64; i++) {
+      out.println("if (mask_" + i + " != 0L)");
+      out.println("  isFirst = __caucho_home.generateUpdateSQLComponent(cb, " + i + ", mask_" + i + ", isFirst);");
+    }
+    out.println("__caucho_home.generateUpdateSQLSuffix(cb);");
     
+    out.println("java.sql.PreparedStatement pstmt = __caucho_session.prepareStatement(cb.toString());");
+    
+    out.println("int index = 1;");
+
+    ArrayList<AmberField> fields = _entityType.getFields();
+    for (int i = 0; i < fields.size(); i++) {
+      AmberField field = fields.get(i);
+
+      field.generateUpdate(out, "mask", "pstmt", "index");
+    }
+
+    out.println();
+    _entityType.getId().generateSet(out, "pstmt", "index");
+
+    out.println();
+    out.println("pstmt.executeUpdate();");
+
+    out.println();
+    out.println("if (__caucho_log.isLoggable(java.util.logging.Level.FINE))");
+    out.println("  __caucho_log.fine(\"amber update \" + this);");
+
+    out.println();
     out.println("return false;");
-    
     out.popDepth();
     out.println("}");
-
-    generateFlushUpdate(out);
   }
 
   /**
@@ -576,13 +640,6 @@ public class EntityComponent extends ClassComponent {
     if (_entityType.getParentType() != null) {
       out.println("super.__caucho_flushUpdate(mask, home.getParentType());");
     }
-    
-    /* XXX:
-    if (Lifecycle.class.isAssignableFrom(_entityType.getBeanClass())) {
-      println("if (beforeSave(__caucho_session))");
-      println("  return false;");
-    }
-    */
 
     EntityType type = _entityType;
 
@@ -635,10 +692,17 @@ public class EntityComponent extends ClassComponent {
 
     out.println("int state = __caucho_state;");
     out.println("__caucho_state = com.caucho.amber.entity.Entity.P_NON_TRANSACTIONAL;");
-    out.println("long updateMask = __caucho_updateMask;");
-    out.println("__caucho_updateMask = 0L;");
+    
+    int dirtyCount = _entityType.getDirtyIndex();
+    for (int i = 0; i <= dirtyCount / 64; i++) {
+      out.println("long updateMask_" + i + " = __caucho_updateMask_" + i + ";");
+      out.println("__caucho_updateMask_" + i + " = 0L;");
+    }
 
-    out.println("if (updateMask != 0L)");
+    out.print("if (updateMask_0 != 0L");
+    for (int i = 1; i <= dirtyCount / 64; i++)
+      out.print(" || updateMask_" + i + " != 0L");
+    out.println(")");
     out.println("  __caucho_session.update(this);");
 
     out.println("if (__caucho_item != null) {");
@@ -648,21 +712,22 @@ public class EntityComponent extends ClassComponent {
 
     // if loaded in transaction, then copy results
     // ejb/0a06, ejb/0893
-    out.println("if ((__caucho_loadMask & 1L) != 0) {");
+    out.println("if ((__caucho_loadMask_0 & 1L) != 0) {");
     out.pushDepth();
-    out.println("item.__caucho_loadMask = 1L;");
+    out.println("item.__caucho_loadMask_0 = 1L;");
     
     _entityType.generateCopyLoadObject(out, "item", "super", 0);
     
     for (int i = 1; i < _entityType.getLoadGroupIndex(); i++) {
-      long mask = (1L << i);
+      String loadVar = "__caucho_loadMask_" + (i / 64);
+      long mask = (1L << (i % 64));
       
-      out.println("if ((__caucho_loadMask & " + mask + "L) != 0) {");
+      out.println("if ((" + loadVar + " & " + mask + "L) != 0) {");
       out.pushDepth();
       
       _entityType.generateCopyLoadObject(out, "item", "super", i);
 
-      out.println("item.__caucho_loadMask |= " + mask + "L;");
+      out.println("item." + loadVar + " |= " + mask + "L;");
 
       out.popDepth();
       out.println("}");
@@ -672,9 +737,10 @@ public class EntityComponent extends ClassComponent {
     out.println("}");
     
     for (int i = 0; i < _entityType.getDirtyIndex(); i++) {
-      long mask = (1L << i);
+      int group = i / 64;
+      long mask = (1L << (i % 64));
       
-      out.println("if ((updateMask & " + mask + "L) != 0) {");
+      out.println("if ((updateMask_" + group + " & " + mask + "L) != 0) {");
       out.pushDepth();
       
       _entityType.generateCopyUpdateObject(out, "item", "super", i);
@@ -702,8 +768,15 @@ public class EntityComponent extends ClassComponent {
     out.pushDepth();
 
     out.println("__caucho_state = com.caucho.amber.entity.Entity.P_NON_TRANSACTIONAL;");
-    out.println("__caucho_loadMask = 0L;");
-    out.println("__caucho_dirtyMask = 0L;");
+    int loadCount = _entityType.getLoadGroupIndex();
+    for (int i = 0; i <= loadCount / 64; i++) {
+      out.println("__caucho_loadMask_" + i + " = 0L;");
+    }
+    
+    int dirtyCount = _entityType.getDirtyIndex();
+    for (int i = 0; i <= dirtyCount / 64; i++) {
+      out.println("__caucho_dirtyMask_" + i + " = 0L;");
+    }
 
     out.popDepth();
     out.println("}");
@@ -747,8 +820,16 @@ public class EntityComponent extends ClassComponent {
     out.println("  throw new com.caucho.amber.AmberException(\"object \" + " + getDebug() + " + \" is already persistent.\");");
 
     out.println("__caucho_state = com.caucho.amber.entity.Entity.P_NEW;");
-    out.println("__caucho_loadMask = -1L;");
-    out.println("__caucho_dirtyMask = 0L;");
+    
+    int loadCount = _entityType.getLoadGroupIndex();
+    for (int i = 0; i <= loadCount / 64; i++) {
+      out.println("__caucho_loadMask_" + i + " = -1L;");
+    }
+    
+    int dirtyCount = _entityType.getDirtyIndex();
+    for (int i = 0; i <= dirtyCount / 64; i++) {
+      out.println("__caucho_dirtyMask_" + i + " = 0L;");
+    }
 
     /* XXX:
     if (Lifecycle.class.isAssignableFrom(_entityType.getBeanClass())) {
@@ -823,7 +904,9 @@ public class EntityComponent extends ClassComponent {
       _entityType.generateCopyUpdateObject(out, "entity", "super", i);
     }
 
-    out.println("entity.__caucho_loadMask = -1L;");
+    for (int i = 0; i <= loadCount / 64; i++) {
+      out.println("entity.__caucho_loadMask_" + i + " = -1L;");
+    }
 
     out.println();
     out.println("if (__caucho_log.isLoggable(java.util.logging.Level.FINE))");
@@ -933,8 +1016,15 @@ public class EntityComponent extends ClassComponent {
     if (_entityType.getParentType() != null)
       out.println("super.__caucho_loadFromObject(src);");
     else {
-      out.println("__caucho_loadMask = o.__caucho_loadMask;");
-      out.println("__caucho_dirtyMask = 0;");
+      int loadCount = _entityType.getLoadGroupIndex();
+      for (int i = 0; i <= loadCount / 64; i++) {
+	out.println("__caucho_loadMask_" + i + " = o.__caucho_loadMask_" + i + ";");
+      }
+    }
+      
+    int dirtyCount = _entityType.getDirtyIndex();
+    for (int i = 0; i <= dirtyCount / 64; i++) {
+      out.println("__caucho_dirtyMask_" + i + " = 0;");
     }
     
     _entityType.generateLoadFromObject(out, "o");
@@ -1005,7 +1095,7 @@ public class EntityComponent extends ClassComponent {
 
     out.println("o.__caucho_session = aConn;");
     out.println("o.__caucho_state = com.caucho.amber.entity.Entity.P_NON_TRANSACTIONAL;");
-    out.println("o.__caucho_loadMask = __caucho_loadMask & 1L;");
+    out.println("o.__caucho_loadMask_0 = __caucho_loadMask_0 & 1L;");
 
     out.println();
     out.println("return o;");

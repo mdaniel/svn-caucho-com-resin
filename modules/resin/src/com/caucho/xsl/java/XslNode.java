@@ -81,7 +81,8 @@ public abstract class XslNode {
   protected XslNode _parent;
 
   protected ArrayList<XslNode> _children;
-  protected NamespaceContext _namespace;
+  protected NamespaceContext _matchNamespace;
+  protected NamespaceContext _outputNamespace;
 
   private int _varCount;
 
@@ -140,7 +141,8 @@ public abstract class XslNode {
     _parent = parent;
 
     if (parent != null) {
-      _namespace = parent.getNamespace();
+      _matchNamespace = parent.getMatchNamespace();
+      _outputNamespace = parent.getOutputNamespace();
     }
   }
 
@@ -215,9 +217,17 @@ public abstract class XslNode {
   /**
    * Returns the namespaces.
    */
-  public NamespaceContext getNamespace()
+  public NamespaceContext getMatchNamespace()
   {
-    return _namespace;
+    return _matchNamespace;
+  }
+
+  /**
+   * Returns the namespaces.
+   */
+  public NamespaceContext getOutputNamespace()
+  {
+    return _outputNamespace;
   }
 
   /**
@@ -225,7 +235,7 @@ public abstract class XslNode {
    */
   public String getNamespace(String prefix)
   {
-    return NamespaceContext.find(getNamespace(), prefix);
+    return NamespaceContext.find(getOutputNamespace(), prefix);
   }
 
   /**
@@ -238,6 +248,7 @@ public abstract class XslNode {
       addNamespaceAttribute(name, value);
       return;
     }
+    
     if (name.getName().startsWith("xml"))
       return;
     
@@ -263,10 +274,13 @@ public abstract class XslNode {
     
     String localName = name.getLocalName();
 
-    if (localName.equals("xmlns"))
-      localName = "";
 
-    _namespace = new NamespaceContext(_namespace, localName, url);
+    _outputNamespace = new NamespaceContext(_outputNamespace, localName, url);
+
+    if (! localName.equals("xmlns")) {
+      // xsl/04w3
+      _matchNamespace = new NamespaceContext(_matchNamespace, localName, url);
+    }
   }
 
   /**
@@ -998,7 +1012,7 @@ public abstract class XslNode {
     throws XslParseException, IOException
   {
     try {
-      return XPath.parseMatch(pattern, getNamespace()).getPattern();
+      return XPath.parseMatch(pattern, getMatchNamespace()).getPattern();
     } catch (Exception e) {
       throw error(L.l("{0} in pattern `{1}'",
                       e.toString(), pattern));
@@ -1009,7 +1023,7 @@ public abstract class XslNode {
     throws XslParseException
   {
     try {
-      return XPath.parseSelect(pattern, getNamespace()).getPattern();
+      return XPath.parseSelect(pattern, getMatchNamespace()).getPattern();
     } catch (Exception e) {
       throw error(e);
     }
@@ -1029,7 +1043,7 @@ public abstract class XslNode {
   {
     try {
       return XPath.parseExpr(pattern,
-			     getNamespace(),
+			     getMatchNamespace(),
 			     _gen.getNodeListContext());
     } catch (Exception e) {
       throw error(e);

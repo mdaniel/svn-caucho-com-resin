@@ -132,6 +132,8 @@ public class EntityIntrospector {
       throw new ConfigException(L.l("'{0}' is not an @Entity class.",
 				    type));
 
+    validateType(type);
+
     boolean isField = entityAnn.get("access") == AccessType.FIELD;
 
     EjbServerManager serverManager = _ejbManager;
@@ -228,6 +230,46 @@ public class EntityIntrospector {
     }
 
     return entityType;
+  }
+
+  /**
+   * Validates the bean
+   */
+  public void validateType(JClass type)
+    throws ConfigException
+  {
+    if (type.isFinal())
+      throw new ConfigException(L.l("'{0}' must not be final.  Entity beans may not be final.",
+				    type.getName()));
+    
+    if (type.isAbstract())
+      throw new ConfigException(L.l("'{0}' must not be abstract.  Entity beans may not be abstract.",
+				    type.getName()));
+    
+    validateConstructor(type);
+
+    for (JMethod method : type.getMethods()) {
+      if (method.isFinal())
+	throw new ConfigException(L.l("'{0}' must not be final.  Entity beans methods may not be final.",
+				    method.getFullName()));
+    }
+  }
+
+  /**
+   * Checks for a valid constructor.
+   */
+  public void validateConstructor(JClass type)
+    throws ConfigException
+  {
+    for (JMethod ctor : type.getConstructors()) {
+      JClass []param = ctor.getParameterTypes();
+
+      if (param.length == 0 && ctor.isPublic())
+	return;
+    }
+
+    throw new ConfigException(L.l("'{0}' needs a public, no-arg constructor.",
+				  type.getName()));
   }
 
   /**
@@ -633,6 +675,10 @@ public class EntityIntrospector {
 	  paramTypes.length != 0)
 	continue;
 
+      if (type.getMethod("set" + methodName.substring(3),
+			 new JClass[] { method.getReturnType() }) == null)
+	continue;
+
       String fieldName = toFieldName(methodName.substring(3));
 
       if (parentType != null && parentType.getField(fieldName) != null)
@@ -662,6 +708,9 @@ public class EntityIntrospector {
       if (parentType != null && parentType.getField(fieldName) != null)
 	continue;
 
+      if (field.isStatic() || field.isTransient())
+	continue;
+
       JClass fieldType = field.getType();
 
       introspectField(manager, entityType, field, fieldName, fieldType);
@@ -675,7 +724,9 @@ public class EntityIntrospector {
 			       JClass fieldType)
     throws ConfigException
   {
-    if (field.isAnnotationPresent(javax.ejb.Basic.class)) {
+    if (field.isAnnotationPresent(javax.ejb.Id.class)) {
+    }
+    else if (field.isAnnotationPresent(javax.ejb.Basic.class)) {
       addBasic(sourceType, field, fieldName, fieldType);
     }
     else if (field.isAnnotationPresent(javax.ejb.ManyToOne.class)) {
@@ -702,6 +753,11 @@ public class EntityIntrospector {
 						   fieldName,
 						   fieldType));
     }
+    else if (field.isAnnotationPresent(javax.ejb.Transient.class)) {
+    }
+    else {
+      addBasic(sourceType, field, fieldName, fieldType);
+    }
   }
 
   private void addBasic(EntityType sourceType,
@@ -723,7 +779,8 @@ public class EntityIntrospector {
     PropertyField property = new PropertyField(sourceType, fieldName);
     property.setColumn(fieldColumn);
 
-    property.setLazy(basicAnn.get("fetch") == FetchType.LAZY);
+    if (basicAnn != null)
+      property.setLazy(basicAnn.get("fetch") == FetchType.LAZY);
 
     /*
       field.setInsertable(insertable);

@@ -386,12 +386,14 @@ abstract public class AbstractField implements AmberField {
   /**
    * Generates loading cache
    */
-  public void generateUpdate(JavaWriter out, String mask, String pstmt,
+  public void generateUpdate(JavaWriter out, String maskVar, String pstmt,
 			     String index)
     throws IOException
   {
+    int group = getIndex() / 64;
+    long mask = 1L << getIndex() % 64;
     out.println();
-    out.println("if ((" + mask + " & " + (1L << getIndex()) + "L) != 0) {");
+    out.println("if ((" + maskVar + "_" + group + " & " + mask + "L) != 0) {");
     out.pushDepth();
 
     generateSet(out, pstmt, index);

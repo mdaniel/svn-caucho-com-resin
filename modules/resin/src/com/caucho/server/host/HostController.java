@@ -36,6 +36,8 @@ import java.util.LinkedHashMap;
 import java.util.logging.Logger;
 import java.util.logging.Level;
 
+import java.util.regex.Pattern;
+
 import javax.servlet.jsp.el.VariableResolver;
 import javax.servlet.jsp.el.ELException;
 
@@ -93,7 +95,10 @@ class HostController extends ExpandDeployController<Host> {
   private String _regexpName;
 
   // Any host aliases.
-  private ArrayList<String> _entryHostAliases = new ArrayList<String>();
+  private ArrayList<String> _entryHostAliases
+    = new ArrayList<String>();
+  private ArrayList<Pattern> _entryHostAliasRegexps
+    = new ArrayList<Pattern>();
   
   private ArrayList<String> _hostAliases = new ArrayList<String>();
 
@@ -369,8 +374,12 @@ class HostController extends ExpandDeployController<Host> {
 
       ArrayList<String> aliases = null;
 
-      if (_config != null)
+      if (_config != null) {
 	aliases = _config.getHostAliases();
+
+	_entryHostAliasRegexps.addAll(_config.getHostAliasRegexps());
+      }
+      
       for (int i = 0; aliases != null && i < aliases.size(); i++) {
 	String alias = aliases.get(i);
 
@@ -430,6 +439,13 @@ class HostController extends ExpandDeployController<Host> {
 
     for (int i = _hostAliases.size() - 1; i >= 0; i--) {
       if (name.equalsIgnoreCase(_hostAliases.get(i)))
+	return true;
+    }
+
+    for (int i = _entryHostAliasRegexps.size() - 1; i >= 0; i--) {
+      Pattern alias = _entryHostAliasRegexps.get(i);
+
+      if (alias.matcher(name).find())
 	return true;
     }
     

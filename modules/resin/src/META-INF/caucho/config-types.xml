@@ -50,7 +50,7 @@
 
     <javac>com.caucho.java.JavacConfig</javac>
 
-    <jndi-link>com.caucho.config.types.JndiLink</jndi-link>
+    <jndi-link>com.caucho.naming.LinkProxy</jndi-link>
 
     <log>com.caucho.log.LogConfig</log>
 

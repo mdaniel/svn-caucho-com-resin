@@ -60,6 +60,9 @@ public class HostConfig {
 
   // The raw host aliases
   private ArrayList<String> _hostAliases = new ArrayList<String>();
+  
+  private ArrayList<Pattern> _hostAliasRegexps
+    = new ArrayList<Pattern>();
 
   // The regexp pattern
   private Pattern _regexp;
@@ -139,6 +142,27 @@ public class HostConfig {
   public ArrayList<String> getHostAliases()
   {
     return _hostAliases;
+  }
+  
+  /**
+   * Adds a host alias regexp.
+   */
+  public void addHostAliasRegexp(String name)
+  {
+    name = name.trim();
+
+    Pattern pattern = Pattern.compile(name, Pattern.CASE_INSENSITIVE);
+
+    if (! _hostAliasRegexps.contains(pattern))
+      _hostAliasRegexps.add(pattern);
+  }
+
+  /**
+   * Returns the host aliases regexps.
+   */
+  public ArrayList<Pattern> getHostAliasRegexps()
+  {
+    return _hostAliasRegexps;
   }
 
   /**

@@ -125,7 +125,7 @@ public class Bean {
     else if (_type.getAnnotation(Entity.class) != null) {
     }
     else
-      throw new ConfigException(L.l("{0} is an unknown bean type.",
+      throw new ConfigException(L.l("{0} is an unknown bean type.  Beans expect Entity, Stateful, or Stateless class annotations.",
 				    _type.getName()));
   }
 

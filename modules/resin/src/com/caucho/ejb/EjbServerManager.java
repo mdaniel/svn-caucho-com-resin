@@ -62,6 +62,7 @@ import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.loader.DynamicClassLoader;
 import com.caucho.loader.SimpleLoader;
 import com.caucho.loader.EnvironmentLocal;
+import com.caucho.loader.EnvironmentListener;
 
 import com.caucho.loader.enhancer.EnhancingClassLoader;
 
@@ -97,7 +98,7 @@ import com.caucho.ejb.entity2.EntityManagerProxy;
 /**
  * Manages the EJBs.
  */
-public class EjbServerManager implements EJBServerInterface {
+public class EjbServerManager implements EJBServerInterface, EnvironmentListener {
   private static final L10N L = new L10N(EjbServerManager.class);
   protected static final Logger log = Log.open(EjbServerManager.class);
   
@@ -565,7 +566,7 @@ public class EjbServerManager implements EJBServerInterface {
   {
     build();
 
-    start();
+    Environment.addEnvironmentListener(this);
   }
   
   /**
@@ -721,6 +722,25 @@ public class EjbServerManager implements EJBServerInterface {
 	iter.remove();
       }
     }
+  }
+
+  /**
+   * Handles the case where the environment is starting (after init).
+   */
+  public void environmentStart(EnvironmentClassLoader loader)
+  {
+    try {
+      start();
+    } catch (Exception e) {
+      log.log(Level.WARNING, e.toString(), e);
+    }
+  }
+  
+  /**
+   * Handles the case where the environment is stopping
+   */
+  public void environmentStop(EnvironmentClassLoader loader)
+  {
   }
 
   /**

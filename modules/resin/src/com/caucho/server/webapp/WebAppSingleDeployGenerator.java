@@ -204,7 +204,7 @@ public class WebAppSingleDeployGenerator extends DeployGenerator<WebAppControlle
     
     _entry.setParentWebApp(_parentWebApp);
     
-    _entry.addWebAppDefault(_config);
+    _entry.setWebAppConfig(_config);
 
     _entry.setSourceType("single");
 

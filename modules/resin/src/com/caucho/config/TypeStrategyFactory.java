@@ -108,7 +108,10 @@ public class TypeStrategyFactory {
     if (strategy != null)
       return strategy;
 
-    return _envMap.get(new QName(name.getLocalName(), null));
+    if (name.getLocalName() != null && ! name.getLocalName().equals(""))
+      return _envMap.get(new QName(name.getLocalName(), null));
+    else
+      return null;
   }
 
   private static TypeStrategyFactory getFactory(ClassLoader loader)
@@ -258,8 +261,8 @@ public class TypeStrategyFactory {
     {
       String value = builder.configureString(node);
 
-      if (value == null)
-	return Boolean.FALSE;
+      if (value == null || value.equals(""))
+	return Boolean.TRUE;
       else
 	return Expr.toBoolean(value, null) ? Boolean.TRUE : Boolean.FALSE;
     }
@@ -632,6 +635,21 @@ public class TypeStrategyFactory {
   }
 
   private static class InitProgramTypeStrategy extends TypeStrategy {
+    /**
+     * Configures the node as an init program object
+     *
+     * @param builder the builder context.
+     * @param node the configuration node
+     * @param parent
+     */
+    public void configureBean(NodeBuilder builder, Object bean, Node node)
+      throws Exception
+    {
+      InitProgram program = (InitProgram) bean;
+
+      program.addBuilderProgram(new NodeBuilderProgram(builder, node));
+    }
+    
     /**
      * Configures the node as an init program object
      *

@@ -154,6 +154,11 @@ abstract public class JClass extends JAnnotationObject implements JType {
   abstract public JMethod []getMethods();
 
   /**
+   * Returns the constructors.
+   */
+  abstract public JMethod []getConstructors();
+
+  /**
    * Returns the matching method.
    */
   abstract public JMethod getMethod(String name, JClass []param);

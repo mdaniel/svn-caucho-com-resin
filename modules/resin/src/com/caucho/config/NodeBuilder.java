@@ -370,7 +370,7 @@ public class NodeBuilder {
       TypeStrategy typeStrategy;
       typeStrategy = TypeStrategyFactory.getTypeStrategy(bean.getClass());
 
-      configureBeanImpl(typeStrategy, bean, top);
+      typeStrategy.configureBean(this, bean, top);
     } catch (LineConfigException e) {
       throw e;
     } catch (Exception e) {
@@ -460,9 +460,6 @@ public class NodeBuilder {
 
     if (bean == null && ! hasChildren(top)) {
       String value = textValue(top);
-
-      if (value != null)
-        value = value.trim();
 
       if (value != null && value.startsWith("${") && value.endsWith("}")) {
         bean = evalObject(value);
@@ -653,10 +650,7 @@ public class NodeBuilder {
 
     String value = textValue(child);
 
-    if (value != null)
-      return value.trim();
-    else
-      return value;
+    return value;
   }
 
   /**

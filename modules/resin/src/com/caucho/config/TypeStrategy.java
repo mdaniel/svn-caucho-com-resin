@@ -40,8 +40,15 @@ public abstract class TypeStrategy {
   protected static final L10N L = new L10N(TypeStrategy.class);
 
   /**
+   * Returns the type name.
+   */
+  public String getTypeName()
+  {
+    return getClass().getName();
+  }
+  
+  /**
    * Creates a new instance of the type.
-
    */
   public Object create()
     throws Exception
@@ -68,8 +75,9 @@ public abstract class TypeStrategy {
   public AttributeStrategy getAttributeStrategy(QName attrName)
           throws Exception
   {
-    throw new ConfigException(L.l("'{0}' is an unknown attribute.",
-                                  attrName.getName()));
+    throw new ConfigException(L.l("'{0}' is an unknown attribute of {1}.",
+                                  attrName.getName(),
+				  getTypeName()));
   }
 
   /**

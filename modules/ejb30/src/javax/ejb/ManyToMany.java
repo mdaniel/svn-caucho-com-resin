@@ -42,5 +42,5 @@ public @interface ManyToMany {
   String targetEntity() default "";
   CascadeType []cascade() default {};
   FetchType fetch() default FetchType.EAGER;
-  boolean isInverse() default false;
+  String mappedBy() default "";
 }

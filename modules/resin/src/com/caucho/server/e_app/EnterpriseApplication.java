@@ -383,7 +383,7 @@ public class EnterpriseApplication
 	if (contextUrl == null)
 	  contextUrl = webUri;
 
-	WebAppController entry = null;
+	WebAppController controller = null;
 	if (webUri.endsWith(".war")) {
 	  String name = webUri.substring(0, webUri.length() - 4);
 	  int p = name.lastIndexOf('/');
@@ -393,22 +393,24 @@ public class EnterpriseApplication
 	  Path expandPath = _webappsPath;
 	  expandPath.mkdirs();
 
-	  entry = new WebAppController(_container, contextUrl);
-	  entry.setRootDirectory(expandPath.lookup(name));
-	  entry.setArchivePath(path);
+	  controller = new WebAppController(_container, contextUrl);
+	  controller.setRootDirectory(expandPath.lookup(name));
+	  controller.setArchivePath(path);
 	} else {
-	  entry = new WebAppController(_container, contextUrl);
-	  entry.setRootDirectory(path);
+	  controller = new WebAppController(_container, contextUrl);
+	  controller.setRootDirectory(path);
 	}
 
-	entry.setDynamicDeploy(true);
-	entry.setConfigException(configException);
+	controller.setDynamicDeploy(true);
+	controller.setConfigException(configException);
 
-	_webApps.add(entry);
+	controller.setManifestClassLoader(_loader);
 
-	entry.init();
+	_webApps.add(controller);
 
-	_container.getApplicationGenerator().update(entry.getName());
+	controller.init();
+
+	_container.getApplicationGenerator().update(controller.getName());
 
 	if (configException != null)
 	  throw configException;
@@ -457,10 +459,10 @@ public class EnterpriseApplication
 
       /* XXX: double start?
       for (int i = 0; i < _webApps.size(); i++) {
-	WebAppController entry = _webApps.get(i);
+	WebAppController controller = _webApps.get(i);
 
 	try {
-	  entry.start();
+	  controller.start();
 	} catch (Throwable e) {
 	  log.log(Level.WARNING, e.toString(), e);
 	}
@@ -479,10 +481,10 @@ public class EnterpriseApplication
   public WebAppController findWebAppEntry(String name)
   {
     for (int i = 0; i < _webApps.size(); i++) {
-      WebAppController entry = _webApps.get(i);
+      WebAppController controller = _webApps.get(i);
 
-      if (entry.isNameMatch(name))
-	return entry;
+      if (controller.isNameMatch(name))
+	return controller;
     }
 
     return null;
@@ -596,11 +598,11 @@ public class EnterpriseApplication
       _webApps.clear();
       
       for (int i = 0; i < webApps.size(); i++) {
-	WebAppController entry = webApps.get(i);
+	WebAppController controller = webApps.get(i);
 
-	// _parentContainer.undeployWebApp(entry);
+	// _parentContainer.undeployWebApp(controller);
 	
-	entry.destroy();
+	controller.destroy();
       }
     } finally {
       thread.setContextClassLoader(oldLoader);

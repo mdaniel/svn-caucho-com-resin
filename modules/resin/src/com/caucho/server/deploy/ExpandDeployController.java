@@ -73,6 +73,8 @@ abstract public class ExpandDeployController<I extends DeployInstance> extends D
 
   private FileSetType _expandCleanupFileSet;
 
+  // classloader for the manifest entries
+  private DynamicClassLoader _manifestLoader;
   private Manifest _manifest;
 
   protected ExpandDeployController()
@@ -122,6 +124,14 @@ abstract public class ExpandDeployController<I extends DeployInstance> extends D
   public Manifest getManifest()
   {
     return _manifest;
+  }
+
+  /**
+   * Sets the manifest class loader.
+   */
+  public void setManifestClassLoader(DynamicClassLoader loader)
+  {
+    _manifestLoader = loader;
   }
 
   /**
@@ -192,8 +202,14 @@ abstract public class ExpandDeployController<I extends DeployInstance> extends D
     
     String classPath = main.getValue("Class-Path");
 
-    if (classPath != null)
-      loader.addManifestClassPath(classPath, getArchivePath().getParent());
+    Path pwd = getArchivePath().getParent();
+
+    if (classPath == null) {
+    }
+    else if (_manifestLoader != null)
+      _manifestLoader.addManifestClassPath(classPath, pwd);
+    else
+      loader.addManifestClassPath(classPath, pwd);
   }
   
   /**
@@ -203,7 +219,7 @@ abstract public class ExpandDeployController<I extends DeployInstance> extends D
   private boolean expandArchiveImpl()
     throws IOException
   {
-    Path archivePath = _archivePath;
+    Path archivePath = getArchivePath();
 
     if (archivePath == null)
       return true;

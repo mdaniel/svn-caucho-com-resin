@@ -648,13 +648,10 @@ public class XmlParser extends AbstractParser {
       }
       
       ch = _reader.parseName(_text, ch);
-      
-      if (! _text.startsWith("xmlns:") && ! _text.matches("xmlns")) {
+
+      if (! _text.startsWith("xmlns")) {
       }
       else {
-        if (_text.matches("xmlns:"))
-          _text.setLength(5);
-
         QName name;
 
 	if (_isNamespaceAware && _contentHandler instanceof DOMBuilder)
@@ -662,7 +659,19 @@ public class XmlParser extends AbstractParser {
 	else
 	  name = new QName(_text.toString(), null);
 
-	String prefix = _text.length() > 5 ? _text.substring(6) : "";
+	String prefix;
+
+	if (_text.length() > 5) {
+	  prefix = _text.substring(6);
+
+	  if (prefix.equals(""))
+	    throw error(L.l("'{0}' is an illegal namespace declaration.",
+			    _text));
+	}
+	else {
+	  prefix = "";
+	}
+	
 	_text.clear();
 	ch = skipWhitespace(ch);
 	if (ch != '=')

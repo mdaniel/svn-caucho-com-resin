@@ -51,6 +51,6 @@ public class NodeBuilderProgram extends BuilderProgram {
   protected void configureImpl(NodeBuilder builder, Object bean)
     throws Exception
   {
-    builder.configure(bean, _node);
+    builder.configureBean(bean, _node);
   }
 }
