@@ -1,0 +1,81 @@
+<!-- 
+   - Deployment Descriptor for examples.cmp.id.*
+   -
+   - To make development less of a hassle, Resin-CMP will recognize
+   - all *.ejb files that are stored in EjbServlet's WEB-INF
+   - directory as deployment descriptors.
+  -->
+
+<ejb-jar xmlns="http://caucho.com/ns/resin">
+  <enterprise-beans>
+    <entity>
+      <ejb-name>id_StudentBean</ejb-name>
+      <local-home>example.cmp.id.StudentHome</local-home>
+      <local>example.cmp.id.Student</local>
+      <ejb-class>example.cmp.id.StudentBean</ejb-class>
+      <persistence-type>Container</persistence-type>
+      <prim-key-class>String</prim-key-class>
+      <reentrant>True</reentrant>
+      <cmp-version>2.x</cmp-version>
+
+      <abstract-schema-name>id_students</abstract-schema-name>
+
+      <cmp-field><field-name>name</field-name></cmp-field>
+
+      <primkey-field>name</primkey-field>
+
+      <query>
+        <query-method>
+           <method-name>findAll</method-name>
+           <method-params></method-params>
+        </query-method>
+        <ejb-ql>
+          <![CDATA[SELECT o FROM id_students o]]>
+        </ejb-ql>
+      </query>
+  
+    </entity>
+
+    <entity>
+      <ejb-name>id_QuidditchBean</ejb-name>
+      <local-home>example.cmp.id.QuidditchHome</local-home>
+      <local>example.cmp.id.Quidditch</local>
+      <ejb-class>example.cmp.id.QuidditchBean</ejb-class>
+      <persistence-type>Container</persistence-type>
+      <prim-key-class>example.cmp.id.Student</prim-key-class>
+      <reentrant>True</reentrant>
+      <abstract-schema-name>id_quidditch</abstract-schema-name>
+  
+      <cmp-field>
+        <field-name>position</field-name>
+        <sql-column>pos</sql-column>
+      </cmp-field>
+      <cmp-field><field-name>points</field-name></cmp-field>
+  
+      <primkey-field>student</primkey-field>
+    </entity>
+  </enterprise-beans>
+
+  <relationships>
+    <ejb-relation>
+      <ejb-relationship-role>
+        <relationship-role-source>
+           <ejb-name>id_StudentBean</ejb-name>
+        </relationship-role-source>
+        <cmr-field>
+          <cmr-field-name>quidditch</cmr-field-name>
+        </cmr-field>
+      </ejb-relationship-role>
+  
+      <ejb-relationship-role>
+        <relationship-role-source>
+          <ejb-name>id_QuidditchBean</ejb-name>
+        </relationship-role-source>
+        <cmr-field>
+          <cmr-field-name>student</cmr-field-name>
+        </cmr-field>
+      </ejb-relationship-role>
+    </ejb-relation>
+  </relationships>    
+</ejb-jar>
+  

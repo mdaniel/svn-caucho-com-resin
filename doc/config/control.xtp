@@ -1,0 +1,467 @@
+<document>
+<header>
+  <product>resin</product>
+  <title>Control structures, EL Variables, and Functions</title>
+  <description>
+  <p>
+  Resin's configuration files support JSP EL expressions in
+  several contexts, basic control structures for conditional processing, and
+  several useful functions.</p>
+  </description>
+</header>
+
+<body>
+<summary objsummary='localtoc'/>
+
+<section name="vars" title="Environment Variables">
+
+<p>Each Environment in Resin has an associated set of EL objects and
+functions.  The EL Environment is inherited, the objects available in
+<code>host</code> are also available in <code>web-app</code>.</p>
+
+<example title="host regexp">
+&lt;host regexp="www.([^.]+).com"&gt;
+  &lt;root-directory&gt;/opt/www/${'${'}host.regexp[1]}&lt;/root-directory&gt;
+  &lt;document-directory&gt;${'${'}host.rootDir}/doc&lt;/document-directory&gt;
+
+  &lt;context-param server-id="${'${'}server.name}"/&gt;
+&lt;/host&gt;
+</example>
+
+<deftable title="Environment variables">
+<tr><th>variable<th>attribute<th>meaning
+<tr><td>Var<td>&nbsp;<td>System properties, e.g. ${'${'}Var["resin.home"]}
+
+<tr><td>server<td>&nbsp;<td>Server properties
+<tr><td>&nbsp;<td>name<td>The server id, as specified in -server id
+<tr><td>&nbsp;<td>rootDir<td>The server root directory, $SERVER_ROOT
+<tr><td>&nbsp;<td>docDir<td>The server document directory
+
+<tr><td>host<td>&nbsp;<td>Virtual host properties
+<tr><td>&nbsp;<td>url<td>The host's canonical URL
+<tr><td>&nbsp;<td>name<td>The host name
+<tr><td>&nbsp;<td>rootDir<td>The host's root directory
+<tr><td>&nbsp;<td>docDir<td>The host's document directory
+<tr><td>&nbsp;<td>warDir<td>The host's war directory
+<tr><td>&nbsp;<td>warExpandDir<td>The host's war expansion directory
+<tr><td>&nbsp;<td>regexp<td>Regular expression values for host regexp matches
+
+<tr><td>app<td>&nbsp;<td>web-app properties
+<tr><td>&nbsp;<td>url<td>The web-app's canonical URL
+<tr><td>&nbsp;<td>name<td>The web-app name
+<tr><td>&nbsp;<td>contextPath<td>The web-app's context path
+<tr><td>&nbsp;<td>docDir<td>The web-app's document directory
+<tr><td>&nbsp;<td>regexp<td>Regular expression values for web-app url-regexp matches
+</deftable>
+</section>
+
+<section name="init" title="Servlet/Filter bean-style initialization" version="2.1.3">
+
+<p>EL expressions can be used to configure servlets and
+filters. <var/init-param/> values can use JSP EL expressions, including the
+ability to use system properties.
+
+<p>Servlets, filters, and resources can be configured like beans with setter
+methods are called directly (See <a href="doc|config|init">Bean-style
+init)</a>.</p>
+
+<p>One example use use for the bean-style servlet initialization is to avoid
+JNDI lookup inside the servlet code.  For example, a servlet that that uses a
+JDBC DataSource might look like:</p>
+
+<example title="Servlet using JDBC">
+package test;
+
+...
+
+public class TestServlet extends HttpServlet {
+  private DataSource _dataSource;
+
+  /**
+   * Bean setter is called to configure the servlet
+   * before the init() method.
+   */
+  public void setDataSource(DataSource dataSource)
+  {
+    _dataSource = dataSource;
+  }
+
+  ...
+}
+</example>
+
+<p>The servlet is configured as follows:</p>
+
+<example title="Example configuration">
+&lt;web-app&gt;
+  &lt;allow-servlet-el/&gt;
+
+  &lt;servlet servlet-name='test'
+           servlet-class='test.TestServlet'&gt;
+    &lt;init&gt;
+      &lt;data-source&gt;${'${'}jndi:lookup("java:comp/env/jdbc/test")}&lt;/data-source&gt;
+    &lt;/init&gt;
+  &lt;/servlet&gt;
+
+  ...
+&lt;/web-app&gt;
+</example>
+
+<p>The <code>%lt;data-source%gt;</code> xml tag corresponds to the
+<code>setDataSource</code> method of the bena.  More infomation on this
+powerful pattern is in the <a href="doc|config|init">Bean-style init</a>
+section of the documentation.</p>
+</section> <!-- init -->
+
+<section name="control" title="Control Structures" version="3.0.7">
+<p>The resin.conf and web.xml configuration files can use
+control structures.  The syntax of the control structures is deliberately similar to the control structures used in JSTL.  
+
+<p>These can be useful to create a resin.conf which works for both testing and
+deployment, depending on an environment parameter.
+When possible, users should avoid using the control tags when possible
+to keep their configuration files as simple as possible.</p>
+
+<example>
+&lt;web-app xmlns="http://caucho.com/ns/resin"
+            xmlns:resin="http://caucho.com/ns/resin/core">
+  &lt;resin:choose>
+  &lt;resin:when test="\${mode='development'}">
+    &lt;resin:log>Development Mode&lt;/resin:log> 
+  &lt;/resin:when>
+  &lt;resin:when test="\${mode='deploy'}">
+    &lt;resin:log>Deployment Mode&lt;/resin:log> 
+  &lt;/resin:when>
+  &lt;resin:otherwise>
+    &lt;resin:log>Unknown Mode \${mode}&lt;/resin:log>
+  &lt;/resin:otherwise>
+  &lt;resin:choose>
+&lt;/web-app>
+</example>
+
+<p>The source code for the control elements is found in 
+<a href="javadoc|com.caucho.config.core|"/>.</p>
+
+<defun title="resin:set" version="Resin 3.0.7">
+
+<p>resin:set adds an EL variable to the current context.</p>
+
+<def>
+&lt;resin:set var="name" value="\${value}"/>
+</def>
+
+<deftable-childtags>
+<tr><td>name<td>name of the variable to set<td>required
+<tr><td>value<td>value<td>required
+</deftable-childtags>
+</defun>
+
+<defun title="resin:if" version="Resin 3.0.7">
+
+<p>resin:if executes part of the configuration file conditionally.</p>
+
+<def>
+&lt;resin:if test="\${expr}">
+  ...
+&lt;resin:if>
+</def>
+
+<deftable-childtags>
+<tr><td>test<td>the test to perform
+</deftable-childtags>
+</defun>
+
+<defun title="resin:choose" version="Resin 3.0.7">
+
+<p>resin:choose implements an if, elsif, else.</p>
+
+<def>
+&lt;resin:choose>
+  &lt;resin:when test="\${expr1}">
+    ...
+  &lt;/resin:when>
+
+  &lt;resin:when test="\${expr2}">
+    ...
+  &lt;/resin:when>
+
+  &lt;resin:otherwise>
+    ...
+  &lt;/resin:otherwise>
+&lt;resin:choose>
+</def>
+
+<deftable-childtags>
+<tr><td>resin:when<td>
+<tr><td>resin:choose<td>
+</deftable-childtags>
+
+<defun title="resin:when" version="Resin 3.0.7">
+<parents>resin:choose</parents>
+<deftable-childtags>
+<tr><td>test<td>the test to perform
+</deftable-childtags>
+</defun>
+
+<defun title="resin:otherwise" version="Resin 3.0.7">
+<parents>resin:choose</parents>
+<deftable-childtags>
+<tr><td>test<td>the test to perform
+</deftable-childtags>
+</defun>
+</defun> <!-- resin:choose -->
+
+<defun title="resin:log" version="Resin 3.0.7">
+
+<p>Logs a message to the given log file. The content of the element is the
+message.</p>
+
+<example>
+  &lt;resin:log>Starting server \${server.name}&lt;/resin:log>
+</example>
+</defun>
+
+<defun title="resin:import" version="Resin 3.0.7">
+
+<p>resin:import is used to read configuration information from another file.
+The target file is validated by a schema where the schema depends on the
+location of the resin:import.
+A resin:import in &lt;server> will have a target with a top-level
+of &lt;server>.
+</p>
+
+<deftable-childtags>
+<tr><td>path<td>a path to a file<td>either path or fileset is required
+<tr><td>fileset<td>a <a config-tag="fileset"/><td>either path or fileset is required
+<tr><td>optional<td>if true, no error when file does not exist<td>false
+</deftable-childtags>
+
+
+</defun>
+
+<defun title="resin:env" version="Resin 3.0.7">
+
+<p>resin:env creates a new environment for a section of the
+configuration file.  Some users may want to use this to create resources
+or databases with custom &lt;class-loader> tags.</p>
+
+<p>resin:env is tricky and only required for some extraordinary circumstances.
+Using it correctly requires a good understanding of classloaders.</p>
+
+<p>Here is an example of a solution for the situation where a custom access
+logging class requires an old version of a jar that the web application uses as
+well.  The requirement is that the <code>example.MyAccessLog</code> use an old
+version of the classes in Foo.jar, webapps use a newer version of the jar.</p>
+
+<p>In a normal circumstance, <code>access-log</code> is used in the &lt;host>
+environment.  If the <code>example.MyAccessLog</code> uses a class from a jar
+file <code>oldversion-Foo.jar</code>, <code>oldversion-Foo.jar</code> needs to
+available to the classloader for the &lt;host&gt; environment.  Because a
+%lt;web-app&gt; inherits the
+classes of the &lt;host&gt;, the webapp will end up with the
+<code>Foo.jar</code> classes from the host's classloader;
+<code>WEB-INF/lib/Foo.jar</code> will not provide the classes because they have
+already been defined in the parent (host) classloader.</p>
+
+<p>The following example solves the problem by using <code>resin:env</code> to
+create an environment just for the instantiation of the
+<code>example.MyAccessLog</code> class.</p>
+
+<example>
+&lt;host id=''&gt;
+  &lt;resin:env&gt;
+   &lt;class-loader&gt;
+     &lt;library-loader path="/opt/lib/oldversion-Foo.jar"/&gt;
+   &lt;/class-loader&gt;
+
+   &lt;access-log resin:type="example.MyAccessLog"/&gt;
+  &lt;/resin:env&gt;
+
+  ...
+
+  &lt;web-app&gt;
+    &lt;!-- WEB-INF/lib can contain Foo.jar and the classes are not overridden 
+         by the classes in oldversion-Foo.jar.
+       --&gt;
+    ...
+  &lt;/web-app&gt;
+&lt;/host&gt;
+</example>
+
+</defun>
+
+</section> <!-- control -->
+
+
+<section name="functions" title="Functions">
+
+<p>Static functions are available in EL expressions.  Resin also makes utility
+objects avilable as EL variables that provide functions as methods.</p>
+
+<section title="jndi">
+
+<defun title="jndi:lookup">
+
+<p>The configuration EL supports a the static function jndi:lookup.
+jndi:lookup can be used to lookup a JNDI value for the configuration.</p>
+
+<example title="configuring JNDI">
+&lt;servlet servlet-name='foo'
+         servlet-class='qa.FooServlet'&gt;
+  &lt;init&gt;
+    &lt;data-source&gt;${'${'}jndi:lookup("java:comp/env/jdbc/test")}&lt;/data-source&gt;
+  &lt;/init&gt;
+&lt;/servlet&gt;
+</example>
+</defun> <!-- jndi:lookup -->
+</section> <!-- jndi -->
+
+<section title="fmt">
+
+<p>The EL Environment contains a <var/fmt/> object, which has a number of
+useful formatting methods</p>.
+
+<defun title="fmt.timestamp()">
+
+<p>Format a timestamp string.</p>
+
+<example>timestamp(format[,date])</example>
+
+<deftable-parameters>
+<tr><td>format<td>the format string (see below)<td>required
+<tr><td>date<td>an object with <a href="javadoc|java.util.Date|"/> or <a href="javadoc|java.util.Calendar|"/> or <a href="javadoc|com.caucho.util.QDate|"/><td>the current date and time
+</deftable-parameters>
+
+<example>
+msg="The current date and time is ${'${'}timestamp('%Y/%m/%d %H:%M:%S.%s')}"
+msg="time=${'${'}timestamp('[%Y/%m/%d %H:%M:%S.%s]')}"
+</example>
+
+<p><code>format</code> contains regular characters, which are just copied to
+the output string, and percent codes which are substituted with time and date
+values.</p>
+
+<deftable>
+<tr><th>Code<th>Meaning
+<tr><td>%a<td>day of week (short)
+<tr><td>%A<td>day of week (verbose)
+<tr><td>%b<td>day of month (short)
+<tr><td>%B<td>day of month (verbose)
+<tr><td>%c<td>Java locale date
+<tr><td>%d<td>day of month (two-digit)
+<tr><td>%H<td>24-hour (two-digit)
+<tr><td>%I<td>12-hour (two-digit)
+<tr><td>%j<td>day of year (three-digit)
+<tr><td>%m<td>month (two-digit)
+<tr><td>%M<td>minutes
+<tr><td>%p<td>am/pm
+<tr><td>%S<td>seconds
+<tr><td>%s<td>milliseconds
+<tr><td>%W<td>week in year (three-digit)
+<tr><td>%w<td>day of week (one-digit)
+<tr><td>%y<td>year (two-digit)
+<tr><td>%Y<td>year (four-digit)
+<tr><td>%Z<td>time zone (name)
+<tr><td>%z<td>time zone (+/-0800)
+</deftable>
+
+</defun> <!-- timestamp -->
+
+<defun title="fmt.sprintf()">
+<p>Format a string using a sprintf-like format string.</p>
+
+<def>sprintf(format[,arg1, arg2 ... argN])</def>
+
+<deftable-parameters>
+<tr><td>format<td>the format string (see below)<td>required
+<tr><td>arg1..argN<td>the values used for the conversions in the format string<td>n/a
+</deftable-parameters>
+
+<p><code/sprintf/> accepts a series of arguments, applies to each a format 
+specifier  from `format', and returns the formatted data as a string.
+`format' is a string containing two types of objects:  ordinary
+characters (other than `%'), which are copied unchanged to the output, and
+conversion specifications, each of which is introduced by `%'. (To include
+`%' in the output, use `%%' in the format string). </p>
+
+<p>A conversion specification has the following form:</p>
+
+<def>%[FLAGS][WIDTH][.PREC][TYPE]</def>
+
+<p>TYPE is required, the rest are optional.</p>
+
+<p>The following TYPE's are supported:</p>
+
+<deftable>
+<tr><td>%%<td>a percent sign
+<tr><td>%c<td>a character with the given number
+<tr><td>%s<td>a string, a null string becomes "#null"
+<tr><td>%z<td>a string, a null string becomes the empty string ""
+<tr><td>%d<td>a signed integer, in decimal
+<tr><td>%o<td>an integer, in octal
+<tr><td>%u<td>an integer, in decimal
+<tr><td>%x<td>an integer, in hexadecimal
+<tr><td>%X<td>an integer, in hexadecimal using upper-case letters
+<tr><td>%e<td>a floating-point number, in scientific notation
+<tr><td>%E<td>a floating-point number, like %e with an upper-case "E"
+<tr><td>%f<td>a floating-point number, in fixed decimal notation
+<tr><td>%g<td>a floating-point number, in %e or %f notation
+<tr><td>%G<td>a floating-point number, like %g with an upper-case "E"
+<tr><td>%p<td>a pointer (outputs a value like the default of toString())
+</deftable>
+
+<p>Intepret the word `integer' to mean the java type long.  
+Since java does not support unsigned integers, all integers are treated 
+the same.</p>
+
+<p>The following optional FLAGS are supported:</p>
+<deftable>
+<tr><td>0<td>If the TYPE character is an integer leading zeroes are used 
+             to pad the field width instead of spaces (following any 
+             indication of sign or base).
+
+<tr><td>+<td>Include a `+' with positive numbers.
+
+<tr><td>(a space)<td>use a space placeholder for the `+' that would result
+                     from a positive number
+<tr><td>-<td>The result of is left justified, and the right is padded with
+             blanks until the result is `WIDTH' in length.  If you do not 
+             use this flag, the result is right justified, and padded on 
+             the left.
+<tr><td>#<td>an alternate display is used, for `x' and `X' a
+             non-zero result will have an "0x" prefix; for floating 
+             point numbers the result will always contain a decimal point.
+
+<tr><td>j<td>escape a string suitable for a Java string, or a CSV file. 
+             The following escapes are applied: " becomes \", 
+             newline becomes \n, return becomes \r, \ becomes \\.
+
+<tr><td>v<td>escape a string suitable for CSV files, the same as `j'
+             with an additional <code>"</code> placed at the beginning 
+             and ending of the string
+
+<tr><td>m<td>escape a string suitable for a XML file.  The following
+             escapes are applied: &lt; becomes &amp;lt;, 
+             &gt; becomes &amp;gt; &amp; becomes &amp;amp;
+             ' becomes &amp;#039, " becomes &amp;034;
+</deftable>
+
+<p>The optional WIDTH argument specifies a minium width for the field.
+Spaces are used unless the `0' FLAG was used to indicate 0 padding.</p>
+
+<p>The optional PREC argument is introduced with a `.', and gives the 
+maximum number of characters to print; or the minimum
+number of digits to print for integer and hex values; or the maximum 
+number of significant digits for `g' and `G'; or the number of digits 
+to print after the decimal point for floating points.</p>
+
+</defun> <!-- sprintf -->
+</section> <!-- util -->
+
+</section> <!-- functions -->
+
+
+
+</body>
+</document>
+

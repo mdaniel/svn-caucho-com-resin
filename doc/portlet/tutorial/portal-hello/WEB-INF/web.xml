@@ -1,0 +1,45 @@
+<web-app xmlns="http://caucho.com/ns/resin"
+  xmlns:resin="http://caucho.com/ns/resin/core">
+
+  <!-- potentially useful logging:
+  -->
+  <log name="com.caucho.portal" level="all" path="stdout:"
+    format="${log.level} ${log.name} ${log.message}"/>
+  <log name="com.caucho.server.portlet" level="all" path="stdout:"
+    format="${log.level} ${log.name} ${log.message}"/>
+  <log name="example" level="all" path="stdout:"
+    format="${log.level} ${log.name} ${log.message}"/>
+
+  <resource type="com.caucho.server.portlet.PortletContextImpl">
+    <init>
+      <resin:import path="WEB-INF/portlets.xml"/>
+      <parameter-prefix>__</parameter-prefix>
+    </init>
+  </resource>
+
+  <servlet servlet-name="portal" 
+           servlet-class="com.caucho.portal.PortalServlet">
+    <init>
+      <window>
+        <portlet-preferences>
+          <preference name="com.caucho.portal.renderer" 
+                      value="com.caucho.portal.MarkupRenderer"/>
+
+          <preference name="com.caucho.portal.render.stylesheet" 
+                      value="/default.css"/>
+        </portlet-preferences>
+
+        <window>
+          <portlet-name>hello</portlet-name>
+        </window>
+        <window>
+          <portlet-name>hello</portlet-name>
+        </window>
+      </window>
+    </init>
+
+  </servlet>
+
+  <servlet-mapping url-pattern="/portal/*" servlet-name="portal"/>
+</web-app>
+

@@ -1,0 +1,73 @@
+<document>
+  <header>
+    <product>resin</product>
+    <title>Resin 3.0.13 Release Notes</title>
+  </header>
+
+<body>
+
+<summary objsummary='localtoc'/>
+
+<section title="IoC configuration for JMS">
+
+<p>Resin now has two IoC resources for JMS, a listener and a
+message sender.</p>
+
+<p>ListenerResource provides the capabilities of EJB message beans, without
+the complexity of EJB.</p>
+
+<example>
+&lt;resource type="com.caucho.jms.resource.ListenerResource">
+  &lt;init>
+     &lt;connection-factory>\${jmsFactory}&lt;/connection-factory>
+
+     &lt;destination>\${queue}&lt;/destination>
+
+     &lt;listener type="example.MyListener"/>
+  &lt;/init>
+&lt;/resource>
+</example>
+
+</section>
+
+<section title="var for resource/bean">
+
+<p>Resin's IoC configuration tag, &lt;resource> can now accept
+a "var" attribute, storing the resource in EL for later use.</p>
+
+<example>
+&lt;resource var="child"
+           type="example.MyChild">
+&lt;/resource>
+
+&lt;resource jndi-name="bean"
+           type="example.MyBean">
+  &lt;init>
+    &lt;child>\${child}&lt;/child>
+  &lt;/init>
+&lt;/resource>
+</example>
+
+</section>
+
+<section title="resin EL variables">
+
+<p>New configuration EL variables:</p>
+
+<childtable>
+<tr><td>$\{resin.home}<td>Same as $\{resinHome}
+<tr><td>$\{resin.rootDir}<td>Same as $\{serverRoot}
+<tr><td>$\{resin.resinProfessional}<td>Same as $\{isResinProfessional}
+</childtable>
+
+</section>
+
+<section title="Refactoring">
+
+<p>The deploy and config code has been refactored.  Neither change should
+be user-visible.</p>
+
+</section>
+
+</body>
+</document>

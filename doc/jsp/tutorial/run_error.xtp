@@ -1,0 +1,76 @@
+<section>
+  <header>
+    <product>resin</product>
+    <title>Runtime Errors</title>
+    <type>example</type>
+    <resin-2.0>$resin/java_tut/run_error.xtp</resin-2.0>
+    <brief>JSP error reporting during runtime</brief>
+  </header>
+
+
+<p>When the Java code throws an exception, Resin will immediately stop the
+script and report the error to the browser.  For example, we'll force
+a null pointer exception:</p>
+
+<example title='buggy.jsp'>
+&lt;%@ page language=java %&gt;
+
+&lt;% String foo = null; %&gt;
+&lt;%= foo.length() %&gt;
+</example>
+
+<p>The reported error looks something like the following:
+
+<results border=3>
+500 Servlet Exception
+
+java.lang.NullPointerException
+  at work.test.buggy$_jsp._jspService(/test/buggy.jsp:4)
+  at com.caucho.jsp.JavaPage.service(JavaPage.java:72)
+  at com.caucho.jsp.QServlet.service(QServlet.java:152)
+  at com.caucho.server.http.Invocation.service(Invocation.java:183)
+  at com.caucho.server.http.Request.dispatch(Request.java:174)
+  at com.caucho.server.http.HttpRequest.handleRequest(HttpRequest.java:151)
+  at com.caucho.server.http.HttpRequest.handleConnection(HttpRequest.java:114)
+  at com.caucho.server.TcpConnection.run(TcpConnection.java:115)
+  at java.lang.Thread.run(Thread.java)
+</results>
+
+<p>The most important part of the error message is the location:
+`<var>/test/buggy.jsp:4</var>'.  Resin translates the line in the
+generated Java code back to the JSP line.</p>
+
+<section title="What if I get 'Compiled Code' instead of
+lines?">
+
+<p>You should run Resin with -nojit, turning off the just-in-time
+compiler, when developing so you can see the proper line numbers.
+That alone will make development much easier.</p>
+
+<p>Java VMs with just-in-time compilers (jits) compile Java
+bytecodes to machine code.  This makes Java almost as fast as C, but
+removes all the line numbers.  Running with -nojit will disable the
+compiler.  When your code is completely debugged, you can run with the
+compiler enabled.</p>
+
+<p>To see the difference, here's the same stack trace with a JIT
+enabled:</p>
+
+<results>
+500 Servlet Exception
+
+java.lang.NullPointerException
+ at work.test.buggy$_jsp._jspService(Compiled Code)
+ at com.caucho.jsp.JavaPage.service(Compiled Code)
+ at com.caucho.jsp.QServlet.service(Compiled Code)
+ at com.caucho.server.http.Invocation.service(Compiled Code)
+ at com.caucho.server.http.Request.dispatch(Compiled Code)
+ at com.caucho.server.http.HttpRequest.handleRequest(Compiled Code)
+ at com.caucho.server.http.HttpRequest.handleConnection(Compiled Code)
+ at com.caucho.server.TcpConnection.run(Compiled Code)
+ at java.lang.Thread.run(Compiled Code)
+</results>
+
+</section>
+</section>
+

@@ -1,0 +1,86 @@
+<document>
+  <header>
+    <product>resin</product>
+    <resin-2.0>$resin/java_tut/run-at.xtp</resin-2.0>
+    <title>run-at: Periodic Services</title>
+    <description>
+      <p>Some web applications need a task to be run at regular intervals, e.g. once
+        an hour or once a day.  For example, a search application might want to
+        spider the web site every day to automatically pick up any new pages.
+        Syndication applications might poll their news sites every hour to check for
+        updates.</p>
+
+      <p>Resin's <var/run-at/> servlets make periodic tasks simple.  At the
+          specified interval, Resin will execute a configured servlet.  Because the
+          periodic task is implemented as a servlet, the API is familiar and
+          debugging is simple.</p>
+
+      <p><var/run-at/> has several advantages over spawning a new thread.
+          First, when you spawn a thread, you need to make sure you close it properly
+          when the servlet is unloaded.  Servlets can be unloaded at any time.
+          Also, <var/run-at/> automatically handles classloader issues.  A thread
+          implementation needs to ensure that the running thread has the same
+          classloader as the application.</p>
+
+    </description>
+
+  </header>
+
+  <body>
+    <summary/>
+<section title="Sample Service">
+
+<p>The following example doesn't do much.  When the service routine is called,
+is just prints a message to the standard output.</p>
+
+<p>Because there is no request, the <var/request/> and <var/response/>
+objects are just stubs.  There's no reason to ever use them in a
+<var/run-at/> service.  (Yes, that makes the arguments a little silly, but
+it's better than creating a new API.)</p>
+
+<p>The service does have access to the <var/ServletConfig/>
+and <var/ServletContext/> objects.</p>
+
+<example title="TestAlarm.java">
+package test;
+
+import javax.servlet.*;
+
+public class TestAlarm extends GenericServlet {
+  public void service(ServletRequest request,
+                      ServletResponse response)
+    throws IOException, ServletException
+  {
+    System.out.println("alarming");
+  }
+}
+</example>
+
+<p>The alarm is configured as any other servlet, with the addition of the
+<var/run-at/> tag.  The following configuration runs the servlet every
+15 minutes.  If the hour is missing, e.g. <var/:15/> the service is
+run at the specified minute.</p>
+
+<example title="15 minute configuration">
+...
+&lt;servlet name='alarm' servlet-class='test.TestAlarm'>
+  &lt;run-at>:00, :15, :30, :45&lt;/run-at>
+&lt;/servlet>
+...
+</example>
+
+<p>You can also run an alarm every hour.  Just specify the full
+hour:minute in the run-at.  For example, <var/16:30/> runs the service once
+a day at 4:30 PM.</p>
+
+<example title="Daily at 4:30 PM Configuration">
+...
+&lt;servlet name='alarm' servlet-class='test.TestAlarm'>
+  &lt;run-at>16:30&lt;/run-at>
+&lt;/servlet>
+...
+</example>
+
+</section>
+  </body>
+</document>

@@ -1,0 +1,34 @@
+<navigation threaded="true" section="Resin : Installation : " comment="true">
+  <item title="Installation" link="index.xtp">
+    <item link="install.xtp" title="Quick Start" atoc-descend='1'>
+      <title>Quick Start</title>
+    </item>
+    <item link="httpd.xtp" title="Standalone Web Server"/>
+    <item link="cse-apache-unix.xtp" title="Apache on Unix">
+      <description>Configuration for Resin with Apache on Unix</description>
+    </item>
+    <item link="cse-apache-win.xtp" title="Apache on Windows">
+      <description>Configuration for Resin with Apache on Windows</description>
+    </item>
+    <item link="cse-iis.xtp" title="IIS">
+      <description>Configuration for Resin with IIS.0</description>
+    </item>
+<!--
+    <item link="cse-netscape.xtp" title="Netscape">
+      <description>not updated for 3.0</description>
+    </item>
+    <item link="cse-oreilly-website.xtp" title="O'Reilly WebSite">
+      <description>not updated for 3.0</description>
+    </item>
+    <item link="hardcore.xtp" title="Resin HardCore">
+      <description>not updated for 3.0</description>
+    </item>
+-->
+    <item title="Details" link="details.xtp">
+      <item link="plugin-dispatch.xtp" title="Plugin Dispatch"/>
+      <item link="linux-boot.xtp" title="Linux Boot"/>
+    </item>
+    <item title="FAQ" link="faq.xtp" atoc-descend="true"/>
+    <item title="Scrapbook" link="scrapbook.xtp" atoc-descend="true"/>
+  </item>
+</navigation>

@@ -1,0 +1,44 @@
+<document>
+  <header>
+    <product>resin</product>
+    <title>Administration Servlet</title>
+    <type>contents</type>
+    <description>
+      <p>Resin provides a primitive status servlet
+      <var>/admin/resin-status</var>.  It's disabled by default to
+      avoid any security issues.  The servlet must be enabled
+      explicitly.</p>
+    </description>
+  </header>
+
+  <body>
+    <summary/>
+
+
+<example>
+&lt;web-app id='/admin'>
+  &lt;servlet servlet-name='status'
+              servlet-class='com.caucho.servlets.ResinStatusServlet'>
+    &lt;init>
+      &lt;enable>read&lt;/enable>
+    &lt;/init>
+  &lt;/servlet>
+
+  &lt;servlet-mapping url-pattern='/resin-status' servlet-name='status'/>
+
+  &lt;!-- only allow the localhost to use the admin --> 
+  &lt;security-constraint>
+    &lt;web-resource-collection>
+      &lt;url-pattern>/*&lt;/url-pattern>
+    &lt;/web-resource-collection>
+
+    &lt;ip-constraint>
+      &lt;allow&gt;127.0.0.1/32&lt;/allow&gt;
+    &lt;/ip-constraint>
+
+  &lt;/security-constraint>
+&lt;/web-app>
+</example>
+
+</body>
+</document>

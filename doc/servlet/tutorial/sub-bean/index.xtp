@@ -1,0 +1,94 @@
+<document>
+  <header>
+    <product>resin</product>
+    <title>Sub-bean servlet init</title>
+    <description>Servlet initializers using the bean-style initialization can set sub-beans.</description>
+    <type>tutorial</type>
+ <tutorial-startpage>bean</tutorial-startpage>
+
+  </header>
+
+  <body>
+    <summary/>
+
+<section title="BeanServlet">
+
+<example title='WEB-INF/classes/test/Bean.java'>
+package test;
+
+public class Bean {
+  private String _value;
+
+  public void setValue(String value)
+  {
+    _value = value;
+  }
+
+  public String getValue()
+  {
+    return _value;
+  }
+}
+</example>
+
+<example title='WEB-INF/classes/test/BeanServlet.java'>
+package test;
+
+import java.io.*;
+
+import javax.servlet.http.*;
+import javax.servlet.*;
+
+import java.util.*;
+
+public class BeanServlet extends HttpServlet {
+  private ArrayList _beans = new ArrayList();
+
+  public void addBean(Bean bean)
+  {
+    _beans.add(bean);
+  }
+
+  public void doGet (HttpServletRequest req,
+                     HttpServletResponse res)
+    throws ServletException, IOException
+  {
+    res.setContentType("text/html");
+
+    PrintWriter out = res.getWriter();
+
+    for (int i = 0; i &lt; _beans.size(); i++) {
+      Bean bean = (Bean) _beans.get(i);
+
+      out.println(bean.getValue() + "&lt;br>");
+    }
+
+    out.close();
+  }
+}
+</example>
+
+</section>
+
+<section title="Configuration">
+
+<example title="WEB-INF/web.xml">
+&lt;web-app xmlns="http://caucho.com/ns/resin">
+  &lt;servlet servlet-name="bean"
+            servlet-class="test.BeanServlet">
+    &lt;init>
+      &lt;bean value="bean-a"/>
+      &lt;bean value="bean-b"/>
+      &lt;bean value="bean-c"/>
+    &lt;/init>
+  &lt;/servlet>
+
+  &lt;servlet-mapping url-pattern="/bean"
+            servlet-name="bean"/>
+&lt;/web-app>
+</example>
+
+</section>
+
+  </body>
+</document>

@@ -1,0 +1,133 @@
+<document>
+  <header>
+    <product>resin</product>
+    <title>Amber Lifecycle</title>
+
+    <description>The Amber bean lifecycle
+follows the JDO 1.0 model.  Amber supports both transactional
+and non-transactional lifecycles.
+    </description>
+  </header>
+
+  <body>
+
+    <summary/>
+
+<section title="Example configuration">
+
+<p>The lifecycle description uses a single running example, Test, which
+has two properties: <code>getData()</code> which returns a string, and
+<code>getParent()</code> which is a pointer to another Test object.</p>
+
+<example title="Test.hbm.xml">
+&lt;hibernate-mapping>
+  &lt;class name="qa.Test">
+    &lt;id name="id"/>
+
+    &lt;property name="data"/>
+
+    &lt;many-to-one name="parent"/>
+  &lt;/class>
+&lt;/hibernate-mapping>
+</example>
+
+</section>
+
+<section title="Non-Transactional Lifecycle">
+
+<p>Amber's non-transactional lifecycle has three important states:</p>
+
+<ul>
+<li><b>clean:</b> the bean is loaded from the database
+<li><b>dirty:</b> the bean has unwritten changes
+<li><b>hollow:</b> the bean is unloaded (lazily-loaded)
+</ul>
+
+<p>In the diagram below, the red methods (<code>load()</code>,
+<code>getXXX()</code>, and <code>flush()</code>) query and
+update the database.</p>
+
+<figure src="amber-non-xa.gif" width="356" height="140"/>
+
+<p>The <code>aConn.load("1")</code> method loads the bean from the
+database and transitions to the <var/clean/> state.</p>
+
+<p>Calling <code>test.setData("foo")</code> will change to
+the <var/dirty/> state.</p>
+
+<p>Calling <code>aConn.flush()</code> writes the changes to
+the database and changes to the <var/clean/> state.  Amber may
+also flush the changes and change to the clean state
+at any time.  <code>flush()</code> merely guarantees that the changes
+will be flushed to the database.</p>
+
+<p>The <var/hollow/> state represents lazily-loaded entities.  many-to-one
+relations and some queries will return the unloaded bean instead of
+a loaded bean.  When the application calls a <code>getXXX()</code> method,
+the bean will load from the database and change to the <var/clean/> state.
+When the application calls a <code>setXXX()</code> method, the bean
+will change to the <var/dirty/> state.</p>
+
+<example title="sample code">
+// load() queries the database and puts test in the clean state
+qa.Test test = aConn.load(qa.Test.class, "1");
+
+// getter calls remain in the clean state
+System.out.println(test.getData());
+
+// setters change to the dirty state
+test.setData("foo");
+
+// parent is lazily-loaded in the hollow state.
+qa.Test parent = test.getParent();
+
+// the getter loads parent from the database and changes to the clean state
+System.out.println(parent.getData());
+
+// the flush updates test and changes back to the clean state
+aConn.flush();
+
+// closing the connection changes all beans to the transient state
+aConn.close();
+</example>
+
+</section>
+
+<section title="Transactional Lifecycle">
+
+<p>In a transaction, Amber loads the bean from the
+database, even if it was loaded outside of the transaction.
+(Exceptions exist for cases like read-only beans.) By loading the
+bean in the transaction, Amber lets the database handle the
+transactional locking and state consistency.</p>
+
+<p>Just like the non-transactional <var/clean/> and <var/dirty/>
+states, Amber has transactional <var/clean/> and <var/dirty/> states
+called <var/Persistent-clean/> and <var/Persistent-dirty/>.  As in
+the non-transactional case, the <var/hollow/> state represents
+lazily-loaded beans.</p>
+<ul>
+<li><b>persistent-clean:</b> the bean is loaded from the database
+within the transaction
+<li><b>persistent-dirty:</b> the bean has been changed
+<li><b>hollow:</b> the bean is unloaded (lazily-loaded or rolled-back)
+<li><b>persistent-nonXA:</b> the bean was loaded outside of the
+transaction (and would need reloading if used in the transaction)
+</ul>
+
+<figure src="amber-lifecycle.gif" width="511" height="285"/>
+
+<p>The main differences from the non-transactional lifecycle
+are:</p>
+<ul>
+<li>Transactions need a load from inside the transaction.  Loads
+before the transaction cannot be reused.
+<li>Updates occur during the commit() call and change to the
+nonXA-clean state
+<li>Rollbacks change to the hollow state.
+</ul>
+
+</section>
+
+  </body>
+</document>

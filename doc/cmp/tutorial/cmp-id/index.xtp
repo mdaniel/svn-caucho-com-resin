@@ -1,0 +1,16 @@
+<document>
+  <header>
+    <product>resin-ee</product>
+    <title>CMP id</title>
+  </header>
+
+  <body>
+    <summary/>
+
+<section title="Demo">
+<a href="client">Demo</a>
+</section>
+
+     <TODO>javadoc only</TODO>
+  </body>
+</document>

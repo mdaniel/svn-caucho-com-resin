@@ -1,0 +1,126 @@
+<document>
+<header>
+<product>resin</product>
+<title>Instrumenting Resources</title>
+<description>
+<p>
+The facilities of JMX are a convenient way to provide an administration
+interface to objects and components in web applications.  
+</p>
+</description>
+</header>
+
+<body>
+<summary/>
+
+<section title="Instrumenting Resources">
+
+<p>Instrumenting resources so JMX can manage them consists
+of the following steps:</p>
+
+<ol>
+<li>For a class <code/MyFoo/>, create an interface <code/MyFooMBean/> with
+the management interface.
+<li>Class <code/MyFoo/> needs to <var/implement/> the <code/MyFooMBean/> interface.
+<li>Register <code/MyFoo/> with the JMX server.
+</ol>
+
+<section title="Instrumenting a servlet">
+
+<p>Resin will automatically register any servlet which
+implement an MBean interface.  By default, the JMX name will be:</p>
+
+<def>
+web-app:j2eeType=Servlet,name=<var/servlet-name/>
+</def>
+
+<deftable title="ObjectName attributes">
+<tr><th>Attribute<th>Value
+<tr><td>j2eeType<td>Servlet
+<tr><td>WebModule<td>the <var/contextPath/>
+<tr><td>J2EEApplication<td>the host?
+<tr><td>J2EEServer<td>the server-id?
+</deftable>
+
+<p>The domain is <var/web-app/>, the type property
+is javax.servlet.Servlet and the name property is the value
+of &lt;servlet-name>.</p>
+
+<p>JMX clients will use the name to manage the servlet.  For example,
+a client might use the pattern <var/web-app:type=javax.servlet.Servlet,*/>
+to retrieve all managed servlets.</p>
+
+<example title="MyServletMBean.java">
+package test;
+
+public interface MyServletMBean {
+  public int getCount();
+}
+</example>
+
+<example title="MyServlet.java">
+package test;
+
+import java.io.*;
+import javax.servlet.*;
+
+public class MyServlet extends GenericServlet implements MyServletMBean {
+  private int count;
+
+  public int getCount()
+  {
+    return count;
+  }
+
+  public void service(ServletRequest request,
+                      ServletResponse response)
+    throws IOException
+  {
+    PrintWriter out = response.getWriter();
+
+    count++;
+
+    out.println("Hello, world");
+  }
+}
+</example>
+
+</section>
+
+</section>
+
+<section title="Managing Resources">
+
+<p>Managing resources uses the JMX API, primarily using
+the <code/MBeanServer/> object.  In Resin, each web-app has
+its own <code/MBeanServer/>.</p>
+
+<example title="Getting the Count attribute">
+import javax.management.*;
+
+...
+
+MBeanServer server = MBeanServerFactory.createMBeanServer();
+
+ObjectName name = new ObjectName("web-app:j2eeType=javax.servlet.Servlet," +
+                                 "name=hello");
+
+Object value = server.getAttribute(name, "Count");
+
+out.println("Count: " + value);
+</example>
+
+<section title="/resin-status">
+
+<p>The <a href="doc|jmx|servlet">resin-status servlet</a> has a
+primitive generic JMX management view of JMX managed servlets.
+By adding a MBean interface to your servlet, you'll automatically get
+a view of your servlets from /resin-status.
+</p>
+
+</section>
+
+</section>
+
+  </body>
+</document>

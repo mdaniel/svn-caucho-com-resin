@@ -1,0 +1,1057 @@
+<document>
+<header>
+  <product>resin</product>
+  <title>Web Application: Servlets and Filters</title>
+  <version>Resin 3.0</version>
+
+  <description>
+
+  <p>
+  <glossary title="web application" type="inline">
+  A web application is a self-contained
+  subtree of the web site.  It has a distinct Application object
+  (ServletContext), sessions, and servlet mappings.
+  </glossary>
+  </p>
+
+  <p>Web applications are configured with the <a
+  config-tag='web-app'/> tag, which can occur in a number of places.</p>
+      
+  <ul>
+        
+  <li><var type='file'>WEB-INF/web.xml</var> contains a top-level
+  web-app element.  It is the Servlet standard location for defining
+  things like servlet mappings and security roles.</li>
+        
+  <li><var type='file'>WEB-INF/resin-web.xml</var> is also used by
+  Resin and will override and supplement the configuration in <var
+  type='file'>WEB-INF/web.xml</var>.  Use it to specify Resin specific
+  configuration if you prefer to keep <var>WEB-INF/web.xml</var> strictly
+  conforming to the Servlet specification.</li>
+        
+  <li>A web application can also be configured in the main Resin
+  configuration, and in this context <var/web-app/> is a child of <a
+  config-tag="host"/>.</li>
+
+  </ul>
+
+  </description>
+</header>
+
+<summary objsummary='localtoc'/>
+
+<section title="Resin Web Applications">
+
+<defun title="cache-mapping" version="Resin 1.1">
+<parents>web-app-default, web-app</parents>
+      
+<p>Specifies <var/Expires/> times for cacheable pages.</p>
+
+<p>cache-mapping is intended to provide Expires times for pages that
+have Last-Modified or ETags specified, but do not wish to hard-code the
+Expires timeout in the servlet.  For example, Resin's FileServlet relies
+on cache-mapping to set the expires times for static pages.</p>
+      
+<deftable-childtags>
+<tr><td>url-pattern<td>A pattern matching the url:
+<var>/foo/*</var>, <var>/foo</var>, or <var>*.foo</var><td>
+<tr><td>url-regexp<td><TODO>confirm gone for 3.0</TODO> A regular expression matching the url<td>
+<tr><td>expires<td>A time interval.<td>
+</deftable-childtags>
+
+<p>The time interval defaults to seconds, but will allow other periods:</p>
+
+<deftable>
+<tr><th>Suffix<th>Meaning
+<tr><td>s<td>seconds
+<tr><td>m<td>minutes
+<tr><td>h<td>hours
+<tr><td>D<td>days
+</deftable>
+
+<example title="cache-mapping">
+&lt;web-app id='/'&gt;
+
+  &lt;cache-mapping url-pattern='/*'
+                 expires='10'/&gt;
+
+  &lt;cache-mapping url-pattern='*.gif'
+                 expires='15m'/&gt;
+
+&lt;/web-app&gt;
+</example>
+</defun>
+
+<defun title="config-file" version="Resin 3.0">
+<parents>web-app-default, web-app</parents>
+
+<p>Specifies configuration files for the web-app.</p>
+
+<p>The use of files like WEB-INF/web.xml and WEB-INF/resin-web.xml
+are configured using &lt;config-file>.  You can add application-specific
+ configuration files using the &lt;config-file> tag.</p>
+
+<p>Configuration files will be read and applied in the order they
+are specified.</p>
+
+<example title="app-default.xml">
+...
+&lt;config-file&gt;WEB-INF/web.xml&lt;/config-file&gt;
+&lt;config-file&gt;WEB-INF/resin-web.xml&lt;/config-file&gt;
+...
+</example>
+
+</defun>
+    
+<defun title="ear-deploy">
+<parents>host, web-app</parents>
+
+<p>Specifies ear expansion.</p>
+
+<p>ear-deploy can be used in web-apps to define a subdirectory
+for ear expansion.</p>
+
+<deftable-childtags>
+<tr><td>path<td>The path to the deploy directory<td>required
+<tr><td>expand-path<td>directory where ears should be expanded<td>value of path
+</deftable-childtags>
+
+</defun>
+    
+<defun title='jsp'>
+<parents>web-app-default, web-app</parents>
+
+<p>Configures JSP behavior.</p>
+
+<deftable-childtags>
+<tr><td>auto-compile<td>Automatically compile changed JSP files<td>true
+<tr><td>el-ignored<td>Ignore EL expressions in JSP text<td>false
+<tr><td>fast-jstl<td>Optimize JSTL JSP compilation<td>true
+<tr><td>ignore-el-exception<td>Ignore exceptions generated in EL expressions<td>true
+<tr><td>is-xml<td>Default JSP pages to use XML syntax<td>false
+<tr><td>precompile<td>Try to load precompiled JSP pages<td>true
+<tr><td>recompile-on-error<td>Recompile the JSP file when an Error occurs in loading<td>false
+<tr><td>require-source<td>Return 404 when JSP source is deleted<td>false
+<tr><td>dependency-check-interval<td>How often to check the jsp for changes, -1 disables<td>inherited
+<tr><td>session<td>Creates sessions for each JSP page<td>true
+<tr><td>velocity-enabled<td>Enable Velocity statements<td>false
+</deftable-childtags>
+
+<p>The class that corresponds to &lt;jsp&gt; is 
+<a href="javadoc|com.caucho.jsp.cfg.JspPropertyGroup|"/></p>
+
+</defun>
+
+<defun title="multipart-form" version="Resin 1.2" localtoc-indent='1'>
+<parents>web-app-default, web-app</parents>
+
+<p>Enables multipart-mime for forms and file uploads.  multipart-mime
+is disabled by default.</p>
+
+<p>For an uploaded file with a form name of <var/foo/>, the parameter
+value contains the path name to a temporary file containing the uploaded
+file.  <var/foo.filename/> contains the uploaded filename, and
+<var/foo.content-type/> contains the content-type of the uploaded file.
+</p>
+
+<deftable-childtags>
+<tr><td>upload-max<td>maximum size of an upload request (in kb).<td>no limit
+</deftable-childtags>
+
+<p>If the upload is larger than the limit or if multipart-form processing
+is disabled, Resin will not parse the request and will set an error message
+in the "<var/caucho.multipart.form.error/>" request attribute.
+The "<var/caucho.multipart.form.error.size/>" will contain the attempted upload size.
+</p>
+
+<p>Requests can set the maximum by setting the request attribute
+"<var/caucho.multipart.form.upload-max/>" with an Integer or Long value.</p>
+
+<p>By default, multipart-form is disabled.</p>
+</defun>
+
+<defun title='path-mapping'>
+<parents>web-app-default, web-app</parents>
+
+<p>Maps url patterns to real paths.  If using a server like
+IIS, you may need to match the server's path aliases.</p>
+
+<deftable-childtags>
+<tr><td><var/url-pattern/><td>A pattern matching the url: <var>/foo/*</var>, <var>/foo</var>, or <var>*.foo</var>
+<tr><td>url-regexp<td>A regular expression matching the url
+<tr><td>real-path<td>The prefix of the real path.  When used
+with <var/url-regexp/>, allows substitution variables like <var/$1/>.
+</deftable-childtags>
+
+<example>
+&lt;web-app id='/'&gt;
+
+&lt;path-mapping url-pattern='/resin/*'
+              real-path='e:\resin'/&gt;
+
+&lt;path-mapping url-regexp='/~([^/]*)'
+              real-path='e:\home\$1'/&gt;
+
+&lt;/web-app&gt;
+</example>
+</defun>
+
+<defun title='shutdown-wait-max' version="Resin 3.0.4">
+<p>The maximum time Resin will wait for requests to finish before closing the web-app.</p>
+</defun>
+
+<defun title="strict-mapping" version="Resin 1.2">
+<default>false, allowing /foo/bar.jsp/foo.</default>
+<p>Forces servlet-mapping to follow strict Servlet 2.2, disallowing
+PATH_INFO. Value is <var/true/> or <var/false/>.</p>
+
+<example>
+&lt;web-app&gt;
+  &lt;strict-mapping&gt;true&lt;/strict-mapping&gt;
+&lt;/web-app&gt;
+</example>
+</defun>
+
+<defun title="web-app-default">
+<parents>server, host-default, host</parents>
+      
+<p>Establishes the defaults for a <a config-tag="web-app"/>.</p>
+
+<p>When initializing a web-app, all the tags in
+the web-app-defaults sections configure the web-app.  In other words,
+the web-app-default value is essentially a macro that is cut-and-pasted
+before the web-app configuration.</p>
+
+<p>web-app-default is used for defining server-wide behavior, like *.jsp
+handling, and for host-wide behavior.</p>
+
+<example>
+&lt;host>
+  &lt;web-app-default>
+    &lt;servlet servlet-name='test'
+             servlet-class='test.MyServlet'/>
+
+    &lt;servlet-mapping url-pattern='*.text' servlet-class='test'/>
+  &lt;/web-app-default>
+&lt;/host>
+</example>
+
+</defun>
+
+<defun title="web-app">
+<parents>host-default, host, WEB-INF/web.xml, WEB-INF/resin-web.xml</parents>
+
+<p>web-app configures a web application.</p>
+
+<deftable-childtags>
+<tr><td>id<td>The url prefix selecting this application.<td>n/a
+<tr><td>url-regexp<td>A regexp to select this application.<td>n/a
+<tr><td>document-directory<td>The document directory for
+the application, corresponding to a url of <var>/<i>id</i>/</var>. <TODO>(confirm:) Relative to the <a config-tag='host'/> document-directory</TODO>.  Can use regexp replacement variables.<td>Same as id or the regexp match
+<tr><td>startup-mode<td>`automatic', `lazy', or `manual', see <a href="doc|config|resin#startup-mode">Startup and Redeploy Mode</a><td>automatic
+<tr><td>redeploy-mode<td>`automatic' or `manual', see <a href="doc|config|resin#startup-mode">Startup and Redeploy Mode</a><td>automatic
+
+</deftable-childtags>
+
+<p>When specified by <var/id/>, the application will be initialized on
+server start.  When specified by <var/url-regexp/>, the application
+will be initialized at the first request.  This means that
+<var/load-on-startup/> servlets may start later than expected for
+<var/url-regexp/> applications.</p>
+
+<p>The following example creates a web-app for /apache
+using the Apache htdocs directory to serve pages.</p>
+
+<example>
+&lt;host id=''&gt;
+  &lt;web-app id='/apache' document-directory='/usr/local/apache/htdocs'&gt;
+
+  ...
+
+&lt;/host&gt;
+</example>
+
+<p>The following example sets the root application to the IIS
+root directory.  The host and web-app will use the
+<TODO>(confirm:) server root-directory</TODO> as a default.</p>
+
+<example>
+&lt;resin&gt;
+  &lt;server document-directory='c:\inetpub\wwwroot'&gt;
+
+    ...
+
+  &lt;/server&gt;
+&lt;/resin&gt;
+</example>
+
+<p>When the <var/web-app/> is specified with a <var/url-regexp/>,
+<var/document-directory/> can use replacement variables (<var/$2/>).</p>
+
+<p>In the following, each user gets his or her own independent
+application using <var/~user/>.</p>
+
+<example>
+&lt;host id=''>
+
+  &lt;web-app url-regexp='/~([^/]*)'
+           document-directory='/home/$1/public_html'>
+
+    ...
+
+  &lt;/web-app>
+
+&lt;/host&gt;
+</example>
+
+</defun>
+
+<defun title="web-app-deploy">
+<parents>host, web-app</parents>
+
+<p>Specifies war expansion.</p>
+
+<p>web-app-deploy can be used in web-apps to define a subdirectory
+for war expansion.  The tutorials in the documentation
+use web-app-deploy to allow servlet/tutorial/helloworld to be an
+independent war file.</p>
+
+<deftable-childtags>
+<tr><td>path<td>The path to the webapps directory<td>required
+<tr><td>url-prefix<td>url-prefix added to all expanded webapps<td>""
+<tr><td>expand-path<td>directory where wars should be expanded<td>value of path
+<tr><td>lazy-init<td>true if web-apps should only be initialized when first used<td>false
+<tr><td>web-app-default<td>defaults to be applied to expaned web-apps<td>
+<tr><td>web-app<td>overriding configuration for specific web-apps<td>
+</deftable-childtags>
+
+<p>The web-app-deploy can override configuration for an expanded war with
+a matching &lt;web-app> inside the &lt;web-app-deploy>.  The
+&lt;document-directory> is used to match web-apps.</p>
+
+<example title="overriding web.xml">
+&lt;web-app-deploy path="webapps">
+  &lt;web-app context-path="/wiki"
+              document-directory="wiki">
+    &lt;context-param database="jdbc/wiki">
+  &lt;/web-app>
+&lt;/web-app-deploy>
+</example>
+
+</defun>
+
+</section>
+
+<section title="Servlet 2.4">
+
+<p>Resin implements the Servlet 2.4 specification.</p>
+
+<defun title='description' version='Servlet'>
+</defun>
+
+<defun title='display-name' version='Servlet'>
+</defun>
+
+<defun title='distributable' version='Servlet'>
+</defun>
+
+<defun title='context-param' version="Servlet 2.2">
+<parents>web-app</parents>
+
+<p>Initializes application (ServletContext) variables.  <var/context-param/>
+defines initial values for <code>application.getInitParameter("foo")</code>.  See also
+<a href="javadoc|javax.servlet.ServletContext|getInitParameter(String)"/>.</p>
+
+<example title="context-param">
+&lt;web-app id='/'&gt;
+
+  &lt;context-param&gt;
+    &lt;param-name&gt;baz&lt;/param-name&gt;
+    &lt;param-value&gt;value&lt;/param-value&gt;
+  &lt;/context-param&gt;
+
+  &lt;!-- shortcut --&gt;
+  &lt;context-param foo='bar'/&gt;
+
+&lt;/web-app>
+</example>
+</defun>
+
+<defun title='filter' version="Servlet 2.3">
+<p>Defines a filter alias for later mapping.</p>
+
+<deftable-childtags>
+<tr><td>filter-name<td>The filter's name (alias)
+<tr><td>filter-class<td>The filter's class (defaults to filter-name), which extends <a href="javadoc|javax.servlet.Filter|"/>
+<tr><td>init-param<td>Initialization parameters, see <a href="javadoc|javax.servlet.FilterConfig|getInitParameter(String)"/>
+</deftable-childtags>
+
+<p>The following example defines a filter alias 'image'</p>
+<example>
+&lt;web-app id='/'&gt;
+
+  &lt;filter&gt;
+    &lt;filter-name&gt;image&lt;/filter-name&gt;
+    &lt;filter-class&gt;test.MyImage&lt;/filter-class&gt;
+    &lt;init-param&gt;
+      &lt;param-name&gt;title&lt;/param-name&gt;
+      &lt;param-value&gt;Hello, World&lt;/param-value&gt;
+    &lt;/init-param&gt;
+  &lt;/filter&gt;
+
+  &lt;filter-mapping&gt;
+    &lt;filter-name&gt;image&lt;/filter-name&gt;
+    &lt;url-pattern&gt;/images/*&lt;/url-pattern&gt;
+  &lt;/filter-mapping&gt;
+
+&lt;/web-app&gt;
+</example>
+
+<p>The full Servlet 2.3 syntax for <var/init-param/> is supported as
+well as a simple shortcut.</p>
+
+<example>
+&lt;web-app id='/'&gt;
+
+&lt;filter filter-name='test.HelloWorld'&gt;
+  &lt;init-param foo='bar'/&gt;
+
+  &lt;init-param&gt;
+    &lt;param-name&gt;baz&lt;/param-name&gt;
+    &lt;param-value&gt;value&lt;/param-value&gt;
+  &lt;/init-param&gt;
+&lt;/servlet&gt;
+
+&lt;/web-app>
+</example>
+</defun>
+
+<defun title="filter-mapping" version="Servlet 2.3">
+<p>Maps url patterns to filters.  <var/filter-mapping/> has two
+children, <var/url-pattern/> and <var/filter-name/>.
+<var/url-pattern/> selects the urls which should execute the filter.
+</p>
+
+<p><code/filter-name/> can either specify a servlet class directly or it
+can specify a servlet alias defined by <code/filter/>.
+</p>
+
+<deftable-childtags title="Servlet 2.4 definition for filter-mapping">
+<tr><td>filter-name<td>The filter name
+<tr><td>url-pattern<td>A pattern matching the url: <var>/foo/*</var>, <var>/foo</var>, or <var/*.foo/>
+<tr><td>dispatcher<td><TODO/>
+</deftable-childtags>
+
+<deftable-childtags title="Resin extensions to filter-mapping">
+<tr><td>url-regexp<td>A regular expression matching the url
+<tr><td>filter-name<td>The filter name can use replacement vars
+from url-regexp like <var/$1/>.  <TODO>3.0?:</TODO> It can also specify a
+class name directly like <var/test.HelloWorld/><td>n/a
+</deftable-childtags>
+
+<example>
+&lt;web-app&gt;
+
+  &lt;filter&gt;
+    &lt;filter-name&gt;test-filter&lt;/filter-name&gt;
+    &lt;filter-class&gt;test.MyFilter&lt;/filter-class&gt;
+  &lt;/filter&gt;
+
+  &lt;filter-mapping&gt;
+    &lt;filter-name&gt;test-filter&lt;/filter-name&gt;
+    &lt;url-pattern&gt;/hello/*&lt;/url-pattern&gt;
+  &lt;/filter-mapping&gt;
+
+  &lt;servlet&gt;
+    &lt;servlet-name&gt;hello&lt;/servlet-name&gt;
+    &lt;servlet-class&gt;test.HelloWorld&lt;/servlet-class&gt;
+  &lt;/servlet&gt;
+
+  &lt;servlet-mapping&gt;
+    &lt;servlet-name&gt;hello&lt;/servlet-name&gt;
+    &lt;url-pattern&gt;/hello&lt;/url-pattern&gt;
+  &lt;/servlet-mapping&gt;
+&lt;/web-app&gt;
+</example>
+</defun>
+
+<defun title='listener' version='Servlet'>
+</defun>
+
+<defun title='servlet' version="Servlet 2.2">
+<p>Defines a servlet alias for later mapping using <a config-tag="servlet-mapping"/>.</p>
+
+<deftable-childtags>
+<tr><td>servlet-name<td>The servlet's name (alias)
+<tr><td>servlet-class<td>The servlet's class (In Resin, defaults to servlet-name)
+<tr><td>init-param<td>Initialization parameters
+<tr><td>load-on-startup<td>Initializes the servlet when the server starts.
+<tr><td>run-at<td>Times to execute the servlet automatically,
+A Resin extension.
+</deftable-childtags>
+
+<example title="using the &lt;servlet&gt; tag">
+&lt;web-app id='/'&gt;
+
+  &lt;servlet&gt;
+    &lt;servlet-name&gt;hello&lt;/servlet-name&gt;
+    &lt;servlet-class&gt;test.HelloWorld&lt;/servlet-class&gt;
+    &lt;init-param&gt;
+      &lt;param-name&gt;title&lt;/param-name&gt;
+      &lt;param-value&gt;Hello, World&lt;/param-value&gt;
+    &lt;/init-param&gt;
+  &lt;/servlet&gt;
+
+  &lt;!-- using Resin shortcut syntax --&gt;
+  &lt;servlet servlet-name='cron'
+           servlet-class='test.DailyChores'&gt;
+    &lt;init-param title='Daily Chores'/&gt;
+    &lt;load-on-startup/&gt;
+    &lt;run-at&gt;3:00&lt;/run-at&gt;
+  &lt;/servlet&gt;
+
+  &lt;!-- mapping a url to use the servlet --&gt;
+  &lt;servlet-mapping url-pattern='/hello.html'
+                   servlet-name='hello'/&gt;
+
+&lt;/web-app&gt;
+</example>
+
+
+<p>Several <var/servlet/> configurations might configure the same
+servlet class with different <var/init-param/> values.  Each will
+have a separate <var/servlet-name/>.</p>
+      
+<example title="multiple servlets using the same class">
+&lt;web-app>
+  &lt;servlet servlet-name='foo-a'>
+    &lt;servlet-class>test.FooServlet&lt;/servlet-class>
+    &lt;init-param name='foo-a sample'/>
+  &lt;/servlet>
+
+  &lt;servlet servlet-name='foo-b'>
+    &lt;servlet-class>test.FooServlet&lt;/servlet-class>
+    &lt;init-param name='foo-b sample'/>
+  &lt;/servlet>
+&lt;/web-app>
+</example>
+
+<p><var/load-on-startup/> can specify an (optional) integer
+value.  If the value is 0 or greater, it indicates an order for
+servlets to be loaded, servlets with higher numbers get loaded
+after servlets with lower numbers.</p>
+      
+<p>There are a number of named servlets that are usually
+available to a Resin application, as defined in
+<var>$RESIN_HOME/conf/app-default.xml</var>.</p>
+
+<example title="servlet-mapping's in $RESIN_HOME/conf/app-default.xml">
+  &lt;servlet servlet-name="directory"
+           servlet-class="com.caucho.servlets.DirectoryServlet"/&gt;
+
+  &lt;servlet servlet-name="file"
+           servlet-class="com.caucho.servlets.FileServlet"/&gt;
+
+  &lt;servlet servlet-name="jsp"
+           servlet-class="com.caucho.jsp.JspServlet"/&gt;
+
+  &lt;servlet servlet-name="xtp"
+           servlet-class="com.caucho.jsp.XtpServlet"/&gt;
+
+&lt;servlet servlet-name="j_security_check"
+         servlet-class="com.caucho.server.security.FormLoginServlet"/&gt;
+</example>
+</defun>
+
+<defun title="servlet-mapping" version="Servlet 2.2">
+<p>Maps url patterns to servlets.  <var/servlet-mapping/> has two
+children, <var/url-pattern/> and <var/servlet-name/>.
+<var/url-pattern/> selects the urls which should execute the servlet.</p>
+
+<deftable-childtags title="Servlet 2.4 definition for servlet-mapping">
+<tr><td>servlet-name<td>The servlet name<td>n/a
+<tr><td>url-pattern<td>A pattern matching the url:
+<var>/foo/*</var>, <var>/foo</var>, or <var/*.foo/><td>n/a
+</deftable-childtags>
+
+<deftable-childtags title="Resin extensions to servlet-mapping">
+<tr><td>url-regexp<td>A regular expression matching the url<td>n/a
+<tr><td>servlet-name<td>The servlet name can use replacement vars
+from url-regexp like <var/$1/>.  <TODO>3.0?:</TODO> It can also specify a
+class name directly like <var/test.HelloWorld/><td>n/a
+</deftable-childtags>
+
+<example title="servlet-mapping">
+&lt;web-app id='/'&gt;
+
+  &lt;servlet&gt;
+    &lt;servlet-name&gt;hello&lt;/servlet-name&gt;
+    &lt;servlet-class&gt;test.HelloWorld&lt;/servlet-class&gt;
+  &lt;/servlet&gt;
+
+  &lt;servlet-mapping&gt;
+    &lt;url-pattern&gt;/hello.html&lt;/servlet-class&gt;
+    &lt;servlet-name&gt;hello&lt;/servlet-class&gt;
+  &lt;/servlet-mapping&gt;
+
+  &lt;!-- resin shortcut syntax --&gt;
+  &lt;servlet-mapping url-pattern='*.xtp'
+                   servlet-name='com.caucho.jsp.XtpServlet'/&gt;
+
+&lt;/web-app>
+</example>
+<p>In Resin, the special <code/servlet-name/> <var/`invoker'/> is used to dispatch
+servlets by class name.
+
+<warn>Enabling the <var/invoker/> servlet can
+create a security hole in your application.  Any servlet in the
+classpath, perhaps even one in a .jar that you are unaware of,
+could be invoked.</warn>
+
+<example title="servlet invoker">
+&lt;web-app id='/'&gt;
+
+  &lt;!-- used with url like http://localhost:8080/servlets/test.HelloServlet --&gt;
+  &lt;servlet-mapping url-pattern="/servlet/*" servlet-name="invoker"/&gt;
+
+&lt;/web-app>
+</example>
+
+<p>There are a number of mappings to servlets that are usually
+available to a Resin application, as defined in
+<var>$RESIN_HOME/conf/app-default.xml</var>.</p>
+
+<example title="servlet-mapping's in $RESIN_HOME/conf/app-default.xml">
+&lt;servlet-mapping url-pattern="*.jsp" servlet-name="jsp"/&gt;
+&lt;servlet-mapping url-pattern="*.xtp" servlet-name="xtp"/&gt;
+
+&lt;servlet-mapping url-pattern="/servlet/*" servlet-name="invoker"/&gt;
+&lt;servlet-mapping url-pattern="/" servlet-name="file"/&gt;
+</example>
+
+<p>The plugins use servlet-mapping to decide which URLs to send to Resin.
+The following servlet-name values are used by the plugins:</p>
+
+<deftable title="servlet-name values used by plugins">
+<tr><td>plugin_match<td>The plugin will send the request to Resin, but
+Resin will ignore the entry.  Use to get around regexp limitations. (Resin 1.2.2)
+<tr><td>plugin_ignore<td>The plugin will ignore the request.  Use this
+to define a sub-url the web server should handle, not Resin. (Resin 1.2.2)
+</deftable>
+</defun>
+
+<defun title="servlet-regexp" version="Resin 3.0">
+<p>Maps URL by regular expressions to custom servlets.</p>
+
+<example>
+&lt;servlet-regexp url-regexp="/([^.]*).do"
+                servlet-class="qa.\${regexp[1]}Servlet">
+  &lt;init a="b"/>
+&lt;/servlet-regexp>
+</example>
+
+</defun>
+
+<defun title='session-config' version="Servlet 2.2">
+<p>Session configuration parameters.</p>
+
+<deftable-childtags title="Servlet 2.4 definition for session-timeout">
+<tr><td>session-timeout<td>The session timeout in minutes, 0 means never timeout.<td>30 minutes
+</deftable-childtags>
+
+<p>Resin add's a number of <var/session-config/> tags.</p>
+
+<deftable-childtags title="Resin extensions to session-config">
+<tr><td>session-max<td>Maximum active sessions<td>4096
+<tr><td>enable-cookies<td>Enable cookies for sessions. (resin 1.1)<td>true
+<tr><td>enable-url-rewriting<td>Enable URL rewriting for sessions. (resin 1.1)<td>true
+<tr><td>cookie-version<td>Version of the cookie spec for sessions. (resin 1.2)<td>1.0
+<tr><td>cookie-domain<td>Domain for session cookies. (resin 1.2)<td>none
+<tr><td>cookie-max-age<td>Max age for persistent session cookies. (resin 2.0)<td>none
+<tr><td>cookie-length<td>Maximum length of the cookie. <TODO># bits?</TODO>(resin 2.1.1)<td>Integer.MAX_VALUE
+<tr><td>file-store<td>Persistent sessions using a file store. (resin 1.2)<td>none
+<tr><td>use-persistent-store<td>Uses the current <a href="resin.xtp#persistent-store">persistent-store</a> to save sessions. (resin 3.0.8)<td>none
+<tr><td>always-load-session<td>Reload data from the store on every request. (resin 1.2)<td>false
+<tr><td>always-save-session<td>Save session data to the store on every request. (resin 1.2)<td>false
+<tr><td>save-only-on-shutdown<td>Only save session when the application shuts down. (resin 1.2.3)<td>false
+<tr><td>reuse-session-id<td>Reuse the session id even if the session has timed out. (resin 2.0.4)<td>true
+<tr><td>ignore-serialization-errors<td>When persisting a session, ignore any values which don't implement java.io.Serializable<td>false
+<tr><td>invalidate-after-listener<td><TODO/>. (resin 3.0)<td><TODO/>
+</deftable-childtags>
+
+<p>By default, both <code/enable-cookies/> and
+<code/enable-url-rewriting/> are true. To force url rewriting, you
+would create a configuration like:</p>
+
+<example>
+&lt;web-app id='/'&gt;
+
+  &lt;session-config
+   enable-cookies='false'
+   enable-url-rewriting='true'/&gt;
+
+&lt;/web-app&gt;
+</example>
+
+<p>The <var/session-timeout/> and <var/session-max/> are usually
+used together to control the number of
+sessions.  Sessions are stored in an LRU cache. When the number
+of sessions in the cache fills up past <var/session-max/>, the
+oldest sessions are recovered.  In addition, sessions idle for
+longer than <code/session-timeout/> are purged.</p>
+
+<example title="using session-config and session-timeout to control the number of sessions">
+&lt;web-app id='/dir'&gt;
+
+  &lt;session-config&gt;
+     &lt;!-- 2 hour timeout --&gt;
+     &lt;session-timeout&gt;120&lt;/session-timeout&gt;
+     &lt;session-max&gt;4096&lt;/session-max&gt;
+  &lt;/session-config&gt;
+
+&lt;/web-app&gt;
+</example>
+
+
+<p><var/cookie-length/> is used to limit the maximum length for
+the session's generated cookie for special situations like WAP devices.
+Reducing this value reduces the randomness in the cookie and increases the
+chance of session collisions.</p>
+
+<p><var/reuse-session-id/> defaults to true so that Resin can share the session
+id amongst different web-apps.</p>
+
+<p>The class that corresponds to &lt;session-config&gt; is <a href="javadoc|com.caucho.server.session.SessionManager|"/></p>
+
+</defun>
+
+<defun title='mime-mapping' version="Servlet 2.2">
+<parents>web-app-default, web-app</parents>
+<p>Maps url patterns to mime-types.</p>
+
+<deftable-childtags>
+<tr><td>extension<td>url extension
+<tr><td>mime-type<td>the mime-type
+</deftable-childtags>
+
+<example>
+&lt;web-app id='/'&gt;
+
+  &lt;mime-mapping&gt;
+    &lt;extension&gt;.foo&lt;/extension&gt;
+    &lt;mime-type&gt;text/html&lt;/mime-type&gt;
+  &lt;/mime-mapping&gt;
+
+  &lt;!-- resin shortcut syntax --&gt;
+  &lt;mime-mapping extension='.bar'
+                mime-type='text/html'/&gt;
+
+&lt;/web-app&gt;
+</example>
+
+<p>Resin has a long list of default mime types in <var/$RESIN_HOME/conf/app-default.xml/></p>
+</defun>
+
+<defun title="welcome-file-list" version="Servlet 2.2">
+<parents>web-app-default, web-app</parents>
+<default>in $RESIN_HOME/conf/app-default.xml is index.xtp, index.jsp, index.html.</default>
+
+<p>Sets the files to use as when no filename is present in
+url. According to the spec, each file is in a &lt;welcome-file>
+element.</p>
+
+<example>
+&lt;web-app id='/'>
+  &lt;welcome-file-list>
+    &lt;welcome-file>index.jsp&lt;/welcome-file>
+    &lt;welcome-file>index.xtp&lt;/welcome-file>
+    &lt;welcome-file>home.xtp&lt;/welcome-file>
+  &lt;/welcome-file-list>
+&lt;/web-app>
+</example>
+
+<p>Resin also provides a shortcut where you can just list the files:</p>
+
+<example>
+&lt;web-app id='/'>
+  &lt;welcome-file-list>index.jsp, index.xtp, home.xtp&lt;/welcome-file-list>
+&lt;/web-app>
+</example>
+
+</defun>
+
+<defun title='error-page' version="Servlet 2.2">
+<parents>web-app-default, web-app</parents>
+
+<deftable-childtags>
+<tr><td>error-code<td>Select the error page based on an HTTP status code
+<tr><td>exception-type<td>Select the error page based on a Java exception
+<tr><td>location<td>The error page to display
+</deftable-childtags>
+
+<p>By default, Resin returns a 500 Servlet Error and a stack trace for
+exceptions and a simple 404 File Not Found for error pages.  Applications can
+customize the response generated for errors.  </p>
+
+<example title='Catching File Not Found'>
+&lt;web-app&gt;
+  &lt;error-page&gt;
+    &lt;error-code&gt;404&lt;/error-code&gt;
+    &lt;location&gt;/file_not_found.jsp&lt;/location&gt;
+  &lt;/error-page&gt;
+&lt;/web-app&gt;
+</example>
+
+<example title='Catching Exceptions'>
+&lt;web-app id='/foo'&gt;
+      &lt;error-page exception-type='java.lang.NullPointerException'
+                  location='/nullpointer.jsp'/>
+&lt;/web-app>
+</example>
+
+<p>The error page can use request attributes to obtain information about the
+request that caused the error:</p>
+
+<example title="/file_not_found.jsp">
+&lt;%@ page session="false" isErrorPage="true" %&gt;
+
+&lt;html&gt;
+&lt;head&gt;&lt;title&gt;404 Not Found&lt;/title&gt;&lt;/head&gt;
+&lt;body&gt;
+&lt;h1&gt;404 Not Found&lt;/h1&gt;
+
+The url &lt;code&gt;${'${'}requestScope["javax.servlet.error.request_uri"]}&lt;/code&gt; 
+was not found.
+&lt;/body&gt;
+&lt;/html&gt;
+</example>
+
+<section title="Request attributes for error handling">
+
+<deftable>
+<tr><th>Attribute<th>Type
+<tr><td>javax.servlet.error.status_code<td>java.lang.Integer
+<tr><td>javax.servlet.error.message<td>java.lang.String
+<tr><td>javax.servlet.error.request_uri<td>java.lang.String
+<tr><td>javax.servlet.error.servlet_name<td>java.lang.String
+<tr><td>javax.servlet.error.exception<td>java.lang.Throwable
+<tr><td>javax.servlet.error.exception_type<td>java.lang.Class
+</deftable>
+
+</section>
+
+
+<section title="Plugin connection error page">
+
+<p>The following is a special case for the mod_caucho or isapi_srun
+plugin to redirect to another page if it can't connect to srun.
+Unlike the other two forms, this must be in <a config-tag="server"/> as
+below.  It can't be in a specific web-app.
+</p>
+
+<example title="Special can't connect to srun">
+&lt;resin xmlns="http://caucho.com/ns/resin">
+&lt;server>
+
+&lt;error-page exception-type='connection'
+              location='/missing_file.html'/>
+	      
+&lt;/server&gt;
+&lt;/resin&gt;
+</example>
+</section>
+
+</defun>
+
+<defun title='jsp-config' version='Servlet'>
+</defun>
+
+<defun title='resource-env-ref' version='Servlet'>
+</defun>
+
+<defun title='message-destination-ref' version='Servlet'>
+</defun>
+
+<defun title='resource-ref' version='Servlet'>
+</defun>
+
+<defun title="security-constraint" version='Servlet'>
+<parents>web-app-default, web-app</parents>
+
+<p>Specifies protected areas of the web site.  Sites using
+authentication as an optional personalization feature will typically
+not use any security constraints.</p>
+
+<p>Security constraints can also be custom classes.</p>
+
+<example>
+&lt;security-constraint>
+  &lt;web-resource-collection>
+    &lt;url-pattern>/*&lt;/url-pattern>
+  &lt;/web-resource-collection>
+  &lt;auth-constraint role-name='user'>
+&lt;/security-constraint>
+</example>
+</defun>
+
+<defun title="display-name" localtoc-indent='1' version='Servlet'>
+<parents>security-constraint</parents>
+</defun>
+
+<defun title="web-resource-collection" localtoc-indent='1' version='Servlet'>
+<parents>security-constraint</parents>
+
+<p>Specifies a collection of areas of the web site.</p>
+
+<deftable-childtags>
+<tr><td>web-resource-name<td>a name for a web resource collection
+<tr><td>description<td><TODO/>
+<tr><td>url-pattern<td>url patterns describing the resource
+<tr><td>http-method<td>HTTP methods to be restricted.
+<tr><td>method<td><TODO>why two? HTTP methods to be restricted.</TODO>
+</deftable-childtags>
+</defun>
+
+<defun title="auth-constraint" localtoc-indent='1' version='Servlet'>
+<parents>security-constraint</parents>
+
+<p>Requires that authenticated users fill the specified role.
+In Resin's JdbcAuthenticator, normal users are in the "user" role.
+Think of a role as a group of users.</p>
+
+<deftable-childtags>
+<tr><td>role-name<td>Roles which are allowed to access the resource.
+</deftable-childtags>
+
+</defun>
+
+<defun title="user-data-constraint" localtoc-indent='1' version='Servlet'>
+<parents>security-constraint</parents>
+
+<p>Restricts access to secure transports, such as SSL</p>
+
+<deftable-childtags>
+<tr><td>transport-guarantee<td>Required transport properties.  NONE,
+INTEGRAL, and CONFIDENTIAL are allowed values.
+</deftable-childtags>
+
+</defun>
+
+<defun title="constraint" localtoc-indent='1' version='Resin'>
+<parents>security-constraint</parents>
+
+Defines a custom constraint.
+
+<deftable-childtags>
+<tr><td>resin:type<td>A class that extends <a href="javadoc|com.caucho.http.security.AbstractConstraint|"/>
+<tr><td>init<td>initialization parameters, set in the object using Bean-style setters and getters
+</deftable-childtags>
+
+<TODO>example</TODO>
+</defun>
+
+<defun title='login-config' version="Servlet 2.2">
+<parents>web-app-default, web-app</parents>
+<default>no authentication</default>
+
+<deftable-childtags title="Servlet 2.4 definition for login-config">
+<tr><td>auth-method<td>Authentication method, either <var/BASIC/> for HTTP Basic Authentication, <var/FORM/> for form based authentication, or <var/DIGEST/> for HTTP <a href="security|digest">Digest Authentication</a>.
+<tr><td>realm-name<td>The realm name to use in HTTP authentication
+<tr><td>form-login-config<td>Configuration for form login, see <a config-tag="form-login-config"/>
+</deftable-childtags>
+
+<deftable-childtags title="Resin extensions to login-config">
+<tr><td>type<td>Defines a custom class which extends <code>com.caucho.server.security.AbstractLogin</code>
+<tr><td>init<td>Initialization for the custom login class
+</deftable-childtags>
+
+
+<p>HTTP Authentication is defined in the RFC <a
+href="external|spec|http-authentication">HTTP Authentication: Basic and
+Digest</a>.</p> 
+
+<p>HTTP digest authentication is discussed in <a href="security|digest">Digest Passwords</a>.
+
+<TODO>verbose description, examples, etc</TODO>
+
+</defun>
+
+
+<defun title='form-login-config' localtoc-indent='1' version='Servlet'>
+<parents>login-config</parents>
+
+<p>Configures authentication using forms.  The login form has
+specific parameters that the servlet engine's login form processing
+understands.  If the login succeeds, the user will see the original
+page.  If it fails, she will see the error page.</p>
+
+<deftable-childtags title="Servlet 2.4 definition for form-login-config">
+<tr><td>form-login-page<td>The page to be used to prompt the user login<td>none
+<tr><td>form-error-page<td>The error page for unsuccessful login<td>none
+</deftable-childtags>
+
+<deftable-childtags title="Resin extensions to form-login-config">
+<tr><td>internal-forward<td>Use an internal redirect on success instead of a sendRedirect<td>false
+<tr><td>form-uri-priority<td>If true, the form's j_uri will override a stored URI<td>false
+</deftable-childtags>
+
+<p>The form itself must have the action <var/j_security_check/>.  It
+must also have the parameters <var/j_username/> and <var/j_password/>.
+Optionally, it can also have <var/j_uri/> and
+<var/j_use_cookie_auth/>.  <var/j_uri/> gives the next page to display
+when login succeeds.  <var/j_use_cookie_auth/> allows Resin to send a
+persistent cookie to the user to make following login easier.</p>
+
+<p><var/j_use_cookie_auth/> gives control to the user whether to generate
+a persistent cookie.  It lets you implement the "remember me" button.  By
+default, the authentication only lasts for a single session.</p>
+
+<deftable-childtags>
+<tr><td>j_security_check<td>The form's mandatory action
+<tr><td>j_username<td>The user name
+<tr><td>j_password<td>The password
+<tr><td>j_uri<td>Optional Resin extension for the successful display page.
+<tr><td>j_use_cookie_auth<td>Optional Resin extension to allow cookie login.
+</deftable-childtags>
+
+<p>The following is an example of a servlet-standard login page:</p>
+
+<example>
+&lt;form action='j_security_check' method='POST'>
+&lt;table>
+&lt;tr>&lt;td>User:&lt;td>&lt;input name='j_username'>
+&lt;tr>&lt;td>Password:&lt;td>&lt;input name='j_password'>
+&lt;tr>&lt;td colspan=2>hint: the password is 'quidditch'
+&lt;tr>&lt;td>&lt;input type=submit>
+&lt;/table>
+&lt;/form>
+</example>
+
+</defun>
+
+<defun title='security-role' version='Servlet'>
+<TODO>in servlet spec, not in resin rnc</TODO>
+</defun>
+
+<defun title='env-entry' version='Servlet'>
+<TODO>link to env</TODO>
+</defun>
+
+<defun title='ejb-ref' version='Servlet'>
+<parents>web-app-default, web-app</parents>
+</defun>
+
+<defun title='ejb-local-ref' version='Servlet'>
+<parents>web-app-default, web-app</parents>
+</defun>
+
+<defun title='message-destination' version='Servlet'>
+<TODO>in servlet spec, not in resin rnc</TODO>
+</defun>
+
+<defun title='locale-encoding-mapping-list' version='Servlet'>
+<TODO>in servlet spec, not in resin rnc</TODO>
+</defun>
+</section>
+
+</document>

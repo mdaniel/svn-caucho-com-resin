@@ -1,0 +1,49 @@
+<document>
+  <header>
+    <product>resin</product>
+    <resin-2.0>$resin/ref/ejb-ias.xtp</resin-2.0>
+   <title>Inprise Application Server EJB</title>
+  </header>
+
+  <body>
+    <summary/>
+
+From Damon Maria:
+
+<p/>Got 1.2 talking to IAS 4.1 the other day and just thought I'd share my
+experiences to save someone else some time. 
+
+<p/>Here's what to do:
+
+<ol>
+<li>Copy vbjorb.jar and vbejb.jar from AppServer/lib into resin/lib. Just adding
+these into the &lt;classpath .../> in resin.conf doesn't work.
+
+<li>Add the path to your beans into resin.conf:
+
+<example>
+  &lt;classpath id='c:/development/classes'/>
+</example>
+
+<li>Add the JNDI link from resin to the app server in resin.conf:
+
+<example>
+&lt;jndi-link>
+  &lt;jndi-name>java:comp/env/ejb&lt;/jndi-name>
+   &lt;jndi-factory>com.inprise.j2ee.jndi.CtxFactory&lt;/jndi-factory>
+&lt;/jndi-link>
+</example>
+
+<li>Then connect to your beans in servlets/JSP, simply add "java:comp/env/ejb/"
+onto any JNDI paths you use to find your beans. Eg. if I have a bean at the app
+server JNDI path of "TestSession" then in my servlet I use:
+
+<example>
+javax.naming.Context  context = new javax.naming.InitialContext();
+Object ref = context.lookup("java:comp/env/ejb/TestSession");
+home = (TestSessionHome) javax.rmi.PortableRemoteObject.narrow(ref,
+                           TestSessionHome.class);
+</example>
+</ol>
+  </body>
+</document>

@@ -1,0 +1,95 @@
+<document>
+  <header>
+    <product>resin</product>
+    <title>SwiftMQ</title>
+  </header>
+
+  <body>
+    <summary/>
+
+<section title="SwiftMQ">
+
+<p>The <a href="http://www.swiftmq.com">SwiftMQ</a> client is configured
+by adding a <a href="config-index|jndi-link">jndi-link</a> to the web.xml
+or resin.conf.</p>
+
+<p>Resin needs the <var/swiftmq.jar/> from the SwiftMQ distribution in the
+classpath, either in resin/lib/swiftmq.jar or in WEB-INF/lib.</p>
+
+<example title="web.xml">
+&lt;web-app>
+  &lt;jndi-link>
+    &lt;jndi-name>java:comp/env/jms&lt;/jndi-name>
+    &lt;jndi-factory>com.swiftmq.jndi.InitialContextFactoryImpl&lt;/jndi-factory>
+    &lt;init-param java.naming.provider.url="smqp://localhost:4001/timeout=10000"/>
+  &lt;/jndi-link>
+</example>
+
+<p>The SwiftMQ router will need to be started as a separate process.</p>
+
+<p>A sample servlet using the above SwiftMQ configuration sends a
+text message to the queue.</p>
+
+<example title="SendServlet.java">
+package qa;
+
+import java.io.*;
+import javax.servlet.*;
+import javax.servlet.http.*;
+import javax.naming.*;
+import javax.jms.*;
+
+public class SendServlet extends HttpServlet {
+  private QueueConnectionFactory queueFactory;
+  private Queue queue;
+
+  public void init()
+    throws ServletException
+  {
+    try {
+      Context ic = new InitialContext();
+      Context jms = (Context) ic.lookup("java:comp/env/jms");
+
+      queueFactory = (QueueConnectionFactory)
+        jms.lookup("QueueConnectionFactory");
+
+      queue = (Queue) jms.lookup("testqueue@router1");
+    } catch (Exception e) {
+      throw new ServletException(e);
+    }
+  }
+
+  public void service(HttpServletRequest req,
+                      HttpServletResponse res)
+    throws IOException, ServletException
+  {
+    PrintWriter out = res.getWriter();
+
+    QueueConnection conn = null;
+
+    try {
+      conn = queueFactory.createQueueConnection();
+      QueueSession queueSession =
+         conn.createQueueSession(false, Session.AUTO_ACKNOWLEDGE);
+      QueueSender queueSender = queueSession.createSender(queue);
+      TextMessage message = queueSession.createTextMessage();
+
+      message.setText("Test message");
+
+      out.println("Sending message: " + message.getText());
+      queueSender.send(message);
+    } catch (Exception e) {
+      throw new ServletException(e);
+    } finally {
+      try {
+        conn.close();
+      } catch (Exception e) {
+      }
+    }
+  }
+}
+</example>
+
+    </section>
+  </body>
+</document>

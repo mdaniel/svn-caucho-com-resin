@@ -1,0 +1,188 @@
+<body>
+  Transactions with EJB 2.0
+
+  <p>This example lets Hogwarts students sign up for classes online. We're using
+  two CMP beans, <code>Student</code> and <code>Course</code>, to store the
+  Student and Course entities. We're also using a Session Bean to act as a
+  facade to the entity beans.
+
+  <p>This example uses the following schema:
+
+  <pre><code>
+    CREATE TABLE transaction_student (
+      id INTEGER NOT NULL,
+      name VARCHAR(250) NOT NULL,
+      password VARCHAR(250) NOT NULL,
+      gender VARCHAR(6) NOT NULL,
+
+      PRIMARY KEY(name)
+    );
+
+    CREATE TABLE transaction_course(
+      id INTEGER NOT NULL,
+      name VARCHAR(250) NOT NULL,
+      room VARCHAR(250) NOT NULL,
+      teacher VARCHAR(250) NOT NULL,
+      max_student_amount INTEGER,
+
+      PRIMARY KEY(id)
+    );
+
+    CREATE TABLE transaction_student_course_mapping (
+      transaction_student VARCHAR(250) NOT NULL,
+      transaction_course VARCHAR(250) NOT NULL
+    );
+  </code></pre>
+
+  <p><b>Session Beans</b>
+
+  <p>Unlike CMP beans, session beans don't represent entities. They contain
+  business logic and are typically used to group calls to CMP beans, presenting
+  the Client with a simple API. Using a session bean facade keeps our Client
+  servlet clean because
+  much of the business logic can be put inside the session bean. Furthermore,
+  using a session bean facade allows us to take advantage of Resin-CMPs inbuilt
+  transaction management.
+
+  <p>Session Beans have the same general structure as CMP beans. They
+  consist of a Home Interface, a Local Interface, and an Implementation Class.
+  Note that the implementation class needs to implement
+  <code>javax.ejb.SessionBean</code>. In Resin-CMP, you can simply extend
+  <code>com.caucho.servlet.http.AbstractSessionBean</code>, which provides an
+  empty implementation of the <code>SessionBean</code> interface.
+
+  <p>Session beans are defined in the deployment descriptor within a
+  &lt;session> block. We have set the &lt;session-type> value to
+  <code>Stateful</code> to indicate that we want one dedicated Session Bean
+  instance for each client. This lets us save data inside the bean between
+  method calls.<BR>
+  We could have declared our bean to be stateless. Stateless Session beans
+  are more efficient because they can be pooled. But stateless session beans are
+  not as convenient because they cannot store data between client requests.
+
+  <pre><code>
+&nbsp;&lt;session>
+&nbsp;&nbsp;&lt;ejb-name>transaction_registration_session&lt;/ejb-name>
+&nbsp;&nbsp;&lt;local-home>example.cmp.transaction.RegistrationSessionHome&lt;/local-home>
+&nbsp;&nbsp;&lt;local>example.cmp.transaction.RegistrationSession&lt;/local>
+&nbsp;&nbsp;&lt;ejb-class>example.cmp.transaction.RegistrationSessionBean&lt;/ejb-class>
+&nbsp;&nbsp;&lt;session-type>Stateful&lt;/session-type>
+&nbsp;&nbsp;&lt;transaction-type>Container&lt;/transaction-type>
+&nbsp;&lt;/session>
+  </code></pre>
+
+  <p><b>EJB Transactions</b>
+
+  <p>Methods in Session and CMP beans are configured individually for Resin-CMPs
+  automatic transaction support. Transaction management setup is performed
+  in the deployment descriptor's &lt;assembly-descriptor> section. For the
+  <code>transaction_registration_session</code> bean, we set the <code>finalizeRegistration</code> method's
+  &lt;trans-attribute> to "Required". This means that the <code>finalizeRegistration()</code>
+  method will always be part of a transaction.
+
+  <p>All other methods in the <code>transaction_registration_session</code> bean are exempted
+  from Resin-CMP's transaction management because their &lt;trans-attribute>
+  property is set to "Never". This results in a small performance gain because
+  the container has less work to do for these methods.
+
+  <p>The &lt;assembly-descriptor> can be ommitted in Resin-CMP. The container
+  defaults to setting the "Required" attribute for all methods in all EJBs.
+
+  <pre><code>
+&nbsp;&lt;assembly-descriptor>
+&nbsp;&nbsp;&lt;container-transaction>
+&nbsp;&nbsp;&nbsp;&lt;method>
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;ejb-name>transaction_registration_session&lt;/ejb-name>
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;method-intf>Remote&lt;/method-intf>
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;method-name>*&lt;/method-name>
+&nbsp;&nbsp;&nbsp;&lt;/method>
+&nbsp;&nbsp;&nbsp;&lt;trans-attribute>Never&lt;/trans-attribute>
+&nbsp;&nbsp;&lt;/container-transaction>
+&nbsp;&nbsp;&lt;container-transaction>
+&nbsp;&nbsp;&nbsp;&lt;method>
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;ejb-name>transaction_registration_session&lt;/ejb-name>
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;method-intf>Remote&lt;/method-intf>
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;method-name>finalizeRegistration&lt;/method-name>
+&nbsp;&nbsp;&nbsp;&lt;/method>
+&nbsp;&nbsp;&nbsp;&lt;trans-attribute>Required&lt;/trans-attribute>>
+&nbsp;&nbsp;&lt;/container-transaction>
+&nbsp;&nbsp;...
+&nbsp;&lt;/assembly-descriptor>
+  </code></pre>
+
+  <p><b>Security</b>
+
+  <p>The latest EJB 2.0 draft specification does not specify how the container
+  may pass security credentials to its beans. Containers have to come up
+  with their own schemes. Resin-CMP obtains a user
+  <code>Principal</code> object during servlet authentication via Resin Core's
+  <code>Authenticator</code> mechanism. This <code>Principal</code> is
+  automatically passed to any EJBs that your servlet or jsp clients may use.
+
+  <p>The servlet's security is set up in web.xml. Resin's authentication
+  system retains a <code>Principal</code> for each successfully logged in user.
+
+  <pre><code>
+  &nbsp;&lt;login-config auth-method='form'>
+    &nbsp;&lt;form-login-config form-login-page='/login.xtp'
+                        form-error-page='/login_error.xtp'/>
+    &nbsp;&lt;authenticator id='example.cmp.transaction.CMPAuthenticator'/>
+  &nbsp;&lt;/login-config>
+  &nbsp;&lt;security-constraint
+    url-regexp='/servlet/example.cmp.transaction.RegistrationServlet'
+    role-name='student'/>
+  </code></pre>
+
+  <p>In <code>RegistrationSessionBean</code>'s <code>ejbCreate()</code> method,
+  we can obtain this <code>Principal</code> from the SessionContext:
+
+  <pre><code>
+  student = (Student) ctx.getCallerPrincipal();
+  </code></pre>
+
+  <p>Resin-CMP makes sure that the SessionContext knows about the
+  caller <code>Principal</code> that was created during servlet authentication.
+
+  <p><b>The example</b>
+
+  <p>When first called during an <code>HttpServletSession</code>,
+  the <code>RegistrationServlet</code> obtains an instance of the
+  <code>RegistrationSession</code> bean. <code>RegistrationSession</code>
+  is a <b>stateful</b> session bean, dedicated to the current client.
+  The servlet saves a reference in its <code>HttpServletSession</code> object
+  so that we can work with the same Session Bean during subsequent web requests.
+
+  <p>The <code>RegistrationSession</code> bean lets the user select any number
+  of courses and saves the current selections in a <code>Collection</code>
+  object. Selecting and deselecting courses does not cause any interaction
+  with the database.
+
+  <p>The <code>finalizeRegistration()</code> method tries to commit the selected
+  courses to the database. If this succeeds for all courses, the transaction
+  has committed and is successful. If one of the courses cannot be submitted for
+  any reason, all previous course submission to the database are rolled back
+  and the transaction has failed.
+
+  <p>We notify Resin-CMP by calling <code>SessionContext.setRollbackOnly()</code>
+  that the transaction has failed. Resin then rolls back any previous
+  course submissions.
+
+  <p>Our <code>RegistraionSessionBean.java</code> implementation class implements
+  the <code>javax.ejb.SessionSynchronization</code> interface. One of the three
+  methods defined by this interface is <code>afterCompletion(boolean committed)</code>.
+  We can use this method to perform any task based on the outcome of a transaction.
+  For example, in this example, we could send an email notification whenever a new
+  schedule has been successfully committed.
+
+
+</body>
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,117 @@
+<document>
+<header>
+<product>resin</product>
+<title>Installation Scrapbook</title>
+<description>
+<p>A repository of notes and comments that will
+eventually make their way into the documentation.  Please
+treat the information here with caution, it has often not been
+verified.</p>
+</description>
+</header>
+
+<body>
+<summary objsummary-in-localtoc='1'/>
+
+<faq title='Mac OS X startup script'>
+<description>
+</description>
+
+(contributed by Rob Lockstone)
+
+<p>
+Resin can be configured to start automatically when the system
+boots up using StartupItems. Create a directory in
+/Library/StartupItems called "Resin". In that directory are two files:
+</p>
+
+<example title="/Library/StartupItems/Resin/Resin">
+#!/bin/sh
+
+##
+# Resin Application Server
+##
+
+. /etc/rc.common
+
+JAVA_HOME=/Library/Java/Home
+export JAVA_HOME
+RESIN_HOME=/path/to/resin
+export RESIN_HOME
+
+StartService ()
+{
+        ConsoleMessage "Starting Resin"
+        $RESIN_HOME/bin/httpd.sh start -J-server -Xms32M -Xmx64M
+}
+
+StopService ()
+{
+        ConsoleMessage "Stopping Resin"
+        $RESIN_HOME/bin/httpd.sh stop
+}
+
+RestartService ()
+{
+        ConsoleMessage "Restarting Resin"
+        $RESIN_HOME/bin/httpd.sh restart
+}
+
+RunService "$1"
+</example>
+
+<example title="/Library/StartupItems/Resin/StartupParameters.plist">
+{
+  Description     = "Resin Application Server";
+  Provides        = ("Resin");
+  Requires        = ("Web Server");
+  OrderPreference = "None";
+  Messages =
+  {
+    start = "Starting Resin";
+    stop  = "Stopping Resin";
+    restart = "Restarting Resin";
+  };
+}
+</example>
+
+<note>The <code/StartupParameters.plist/> file example above requires that the
+service named "Web Server", which is Apache, is started before Resin starts. If
+you run Resin standalone, remove that dependency.</note>
+
+<p>
+Resin will start automatically when your system boots.
+You can stop, start and restart Resin using the following commands
+from a terminal:
+</p>
+
+<example>
+sudo SystemStarter start Resin
+sudo SystemStarter stop Resin
+sudo SystemStarter restart Resin
+</example>
+
+<p>
+Since Resin is started by root, consider using the <a config-tag="user-name"/>
+and <a config-tag="group-name"/> tags to change the effective user id of Resin:
+</p>
+
+<example title="resin.conf">
+&lt;server&gt;
+  ...
+  &lt;user-name&gt;nobody&lt;/user-name&gt;
+  &lt;group-name&gt;daemon&lt;/group-name&gt;
+  ...
+&lt;/server&gt;
+</example>
+
+<p>
+For more info than you probably want to know about Mac OS X's boot
+process and startup items, see <a href="http://developer.apple.com/documentation/macosx/Conceptual/BPSystemStartup/Concepts/BootProcess.html">Apple's documentation</a>.
+</p>
+
+</faq>
+
+
+</body>
+</document>

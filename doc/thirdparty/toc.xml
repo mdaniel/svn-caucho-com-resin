@@ -1,0 +1,40 @@
+<navigation threaded="true" section="Resin : Third-Party Products : " comment="true">
+  <item link="index.xtp" title="Third-Party Products">
+    <item link="ide.xtp" title="IDE's">
+      <item link="ide-jbuilder.xtp" title="JBuilder (OpenTool)"/>
+      <item link="ide-eclipse.xtp" title="Eclipse"/>
+      <item link="ide-intellij.xtp" title="IntelliJ"/>
+      <item link="ide-kawa.xtp" title="Kawa"/>
+    </item>
+
+    <item link="scottit.xtp" title="Scottit"/>
+
+    <item link="groovy.xtp" title="Groovy"/>
+
+    <item link="php.xtp" title="PHP"/>
+
+    <item link="codelibraries.xtp" title="Code Libraries" atoc-descend="true"/>
+
+    <item link="ejb.xtp" title="EJB Servers" >
+      <item link="ejb-jboss.xtp" title="jBoss"/>
+      <item link="ejb-ias.xtp" title="Inprise"/>
+      <item link="ejb-jonas.xtp" title="JOnAS"/>
+      <item link="ejb-weblogic.xtp" title="Weblogic"/>
+      <item link="ejb-orion.xtp" title="Orion"/>
+    </item>
+
+    <item link="jms.xtp" title="JMS" >
+      <item link="swiftmq.xtp" title="SwiftMQ" />
+      <item link="openjms.xtp" title="OpenJMS" />
+    </item>
+
+    <item title="JCA Resources" >
+      <item link="hibernate.xtp" title="Hibernate" />
+    </item>
+
+    <item link="jmx.xtp" title="JMX" atoc-descend="true"/>
+
+    <item link="sslhardware.xtp" title="SSL Accelerators"/>
+
+  </item>
+</navigation>

@@ -1,0 +1,58 @@
+#!/bin/sh
+#
+# Linux startup script for Resin
+#
+# chkconfig: 345 85 15
+# description: Resin is a Java Web server.
+# processname: wrapper.pl
+#
+# To install, configure this file as needed and copy init.resin
+# to /etc/rc.d/init.d as resin.  Then use "# /sbin/chkconfig resin reset"
+#
+JAVA_HOME=@JAVA_HOME@
+RESIN_HOME=@resin_home@
+PID=$RESIN_HOME/resin.pid
+
+export JAVA_HOME RESIN_HOME
+#
+# If you want to start the entire Resin process as a different user,
+# set this to the user name.  If you need to bind to a protected port,
+# e.g. port 80, you can't use USER, but will need to use bin/resin.
+#
+USER=
+#
+# You can change this to $RESIN_HOME/bin/resin if you need Resin to
+# bind to port 80, but run as a different user.
+#
+EXE=$RESIN_HOME/bin/httpd.sh
+#
+# Sets the commandline arguments.
+#
+ARGS="-java_home $JAVA_HOME -resin_home $RESIN_HOME"
+
+case "$1" in
+  start)
+	echo -n "Starting resin: "
+	if test -n "$USER"; then
+  	  su $USER -c "$EXE -pid $PID start $ARGS"
+	else
+  	  $EXE -pid $PID start $ARGS
+        fi
+	echo
+	;;
+  stop)
+	echo -n "Shutting down resin: "
+	$EXE -pid $PID stop	
+	echo
+	rm -f $PID
+	;;
+  restart)
+	$0 stop
+	$0 start
+	;;
+  *)
+	echo "Usage: $0 {start|stop|restart}"
+	exit 1
+esac
+
+exit 0

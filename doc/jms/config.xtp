@@ -1,0 +1,95 @@
+<document>
+  <header>
+    <product>resin</product>
+    <title>Resin JMS Configuration</title>
+    <description>
+      <p>Configuration for Resin's JMS provider implementation.  The JDBC Queues and Topics provide a persistent messaging store.  The Memory Queues and Topics provide a low-overhead memory-based store.</p>
+    </description>
+  </header>
+
+  <body>
+    <summary no-objsummary='1'/>
+
+<section title='ConnectionFactory'>
+
+<p>The <code>ConnectionFactory</code> resource defines the JMS factory
+for creating JMS connections.</p>
+
+<example title="ConnectionFactory resource">
+&lt;resource jndi-name="jms/factory"
+           type="com.caucho.jms.ConnectionFactoryImpl">
+  &lt;init>
+    &lt;data-source>jdbc/database&lt;/data-source>
+  &lt;/init>
+&lt;/resource>
+</example>
+
+<deftable-childtags>
+<tr><td>data-source<td>Optional JDBC DataSource<td>none
+<tr><td>client-id<td>clientID value for durable subscriptions<td>none
+</deftable-childtags>
+
+</section>
+
+<section title='JDBC Queue/Topic'>
+
+<p>The JDBC Queue and Topic store the messages using a JDBC DataSource.
+The data source will be defined in a &lt;database> element.  Resin's
+internal file-based database can be used for single-JVM messaging.</p>
+
+<example title="Queue configuration with Resin's database">
+&lt;database jndi-name="jdbc/resin">
+  &lt;driver type="com.caucho.db.jdbc.ConnectionPoolDataSourceImpl">
+     &lt;path>WEB-INF/db&lt;/path>
+  &lt;/driver>
+&lt;/database>
+
+&lt;resource jndi-name="jms/my-queue"
+           type="com.caucho.jms.jdbc.JdbcQueue">
+  &lt;init>
+    &lt;queue-name>my-queue&lt;/queue-name>
+    &lt;data-source>jdbc/resin&lt;/data-source>
+  &lt;/init>
+&lt;/resource>
+</example>
+
+<example title="Topic configuration with Resin's database">
+&lt;resource jndi-name="jms/my-topic"
+           type="com.caucho.jms.jdbc.JdbcTopic">
+  &lt;init>
+    &lt;topic-name>my-topic&lt;/topic-name>
+    &lt;data-source>jdbc/resin&lt;/data-source>
+  &lt;/init>
+&lt;/resource>
+</example>
+
+</section>
+
+<section title='Memory Queue/Topic'>
+
+<p>The Memory Queue and Topic are non-persistent.  If the server restarts
+or even if the Queue's environment restarts, the messaging data will be
+lost.  Applications needing persistent messaging should use the JDBC
+Queues.</p>
+
+<example title="Memory Queue configuration">
+&lt;resource jndi-name="jms/my-queue"
+           type="com.caucho.jms.memory.MemoryQueue">
+  &lt;init>
+    &lt;queue-name>my-queue&lt;/queue-name>
+  &lt;/init>
+&lt;/resource>
+</example>
+
+<example title="Memory Topic configuration">
+&lt;resource jndi-name="jms/my-topic"
+           type="com.caucho.jms.memory.MemoryTopic">
+  &lt;init>
+    &lt;topic-name>my-topic&lt;/topic-name>
+  &lt;/init>
+&lt;/resource>
+</example>
+
+</section>
+  </body>
+</document>

@@ -1,0 +1,106 @@
+<body>
+  Introducing CMP Finder methods.
+
+  <p>Finder methods find entities in the database according to criteria
+  specified in the deployment descriptor. This enables you to search and
+  retrieve your data without using JDBC and writing SQL in your code.
+
+  <p>Queries associated with finder methods are specified in the deployment
+  descriptor using EJB 2.0's new query language, EJB-QL. Although EJB-QL is a
+  restriction of SQL, it is powerful enough for typical bean selection.
+  The power of EJB-QL will become more apparent in later examples with the
+  introduction of CMR, Container Managed Relations between entities.
+
+  <p>The following example uses a simple finder method to find all houses
+  in the Hogwarts Wizard Boarding School. It uses this schema:
+
+    <code><pre>
+    DROP TABLE find_courses;
+    CREATE TABLE find_courses (
+      course_id VARCHAR(250) NOT NULL,
+      instructor VARCHAR(250),
+
+      PRIMARY KEY(course_id)
+    );
+
+    INSERT INTO find_courses VALUES('Potions', 'Severus Snape');
+    INSERT INTO find_courses VALUES('Transfiguration', 'Minerva McGonagall');
+    INSERT INTO find_courses VALUES('Defense Against the Dark Arts', 'Remus Lupin');
+    </pre></code>
+
+  <p><b>Defining the finder method in the Home Interface</b>
+
+  <p>Finder methods are declared in the Home Interface. They must begin with
+  the word 'find'. You can define as many finder methods
+  as you want, but you must define at least the <code>findByPrimaryKey(...)
+  </code> method that we saw in the first example.
+
+  <p>Finder methods can be of one of the following three types:
+  <li><code>java.util.Collection</code> if you want to be able to retreive
+  any number of matches (including 0). The returned Collection may contain
+  duplicates. The <code>findAll()</code> method in this package's Home Interface
+  is an example of such a method.</li>
+  <li><code>java.util.Set</code> is used just like a Collection, but the
+  Container makes sure that it contains no duplicates.</li>
+  <li>If you want to retreive only one matching entity, the returntype
+  of the finder method must equal that of the Local Interface. The
+  <code>findCourseByInstructor(String)</code> method in this Bean's Home
+  Interface is an example of such a method.
+
+  <p>If your finder method returns a Local Interface type, it may throw a
+  <code>FinderException</code> in case it could not find a match. Collection
+  and Map types simply return the empty set when they can't find any matches.
+
+  <p>In this example, we have declared the findCourseByInstructor(String)
+  finder method:
+
+  <pre><code>
+  public Course findCourseByInstructor(String instructorName)
+    throws FinderException;
+  </code></pre>
+
+  <p><b>Defining the finder method in the deployment descriptor</b>
+
+  <p>In addition to the method declaration, we also need to define a &lt;query>
+  section in the deployment descriptor for each finder method.
+
+  The findCourseByInstructor method in this example is defined in cmp-find.ejb
+  like this:
+
+  <p><code>
+  &nbsp&lt;query><BR>
+  &nbsp&nbsp&lt;query-method><BR>
+  &nbsp&nbsp&nbsp&lt;method-name>findCourseByInstructor&lt;/method-name><BR>
+  &nbsp&nbsp&lt;method-params><BR>
+  &nbsp&nbsp&lt;method-param>java.lang.String&lt;/method-param><BR>
+  &nbsp&nbsp&nbsp&lt;/method-params><BR>
+  &nbsp&nbsp&lt;/query-method><BR>
+  &nbsp<BR>
+  &nbsp&nbsp&lt;ejb-ql><BR>
+  &nbsp&nbsp&nbsp&lt;![CDATA[SELECT o FROM find_courses o WHERE o.instructor = ?1]]><BR>
+  &nbsp&nbsp&lt;/ejb-ql><BR>
+  &nbsp&lt;/query><BR>
+  </code>
+
+  <p>Note that the method parameters specified in the &lt;query> section need
+  to match the amount and types of parameters specified in the Home Interface.
+
+  <p>The actual query is defined in the &lt;ejb-ql> element above.
+  <li>?1 is a variable and correspondes to the first parameter passed to the
+  method.
+  <li>The <code>FROM</code> section sets up the domain from which we can select
+  entities in the <code>SELECT</code> part of the query.
+
+  <p>For a more comlete guide to EJB-QL, check out the
+  example.cmp.ejbql example.
+
+</body>
+
+
+
+
+
+
+
+
+

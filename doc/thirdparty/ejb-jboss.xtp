@@ -1,0 +1,120 @@
+<document>
+  <header>
+    <product>resin</product>
+    <resin-2.0>$resin/ref/ejb-jboss.xtp</resin-2.0>
+    <title>jBoss EJB</title>
+  </header>
+
+  <body>
+    <summary/>
+
+From Dave Dribin:
+
+<p/>To have a Resin web application use jBoss, do the following:
+
+<ol>
+<li>Copy "ejb.jar", "jboss-client.jar", and "jnp-client.jar" from
+$JBOSS_HOME/client into WEB-INF/lib.
+
+<li>Copy the EJB jar file that you put in $JBOSS_HOME/deploy into
+WEB-INF/lib.
+
+<li>Put the following &lt;web-app> into resin.conf:
+
+<example>
+&lt;web-app id='/web-app-path' app-dir='/real/path/of/web-app'>
+  &lt;jndi-link>
+    &lt;jndi-name>java:comp/env/ejb&lt;/jndi-name>
+    &lt;jndi-factory>org.jnp.interfaces.NamingContextFactory&lt;/jndi-factory>
+    &lt;init-param java.naming.provider.url="localhost:1099"/>
+  &lt;/jndi-link>
+&lt;/web-app>
+</example>
+
+Of course change the JNDI URL if you're running jBoss on a different
+machine.
+
+<li>
+Make sure you map all of your EJBs to the "ejb/" JNDI
+context.  For example, I have this in my jboss.xml:
+
+<example>
+&lt;enterprise-beans>
+  &lt;entity>
+    &lt;ejb-name>UserBean&lt;/ejb-name>
+    &lt;jndi-name>ejb/UserHome&lt;/jndi-name>
+  &lt;/entity>
+
+  .... other beans ....
+
+&lt;/enterprise-beans>
+</example>
+
+This way you can lookup all the Home interfaces in the
+"java:comp/env/ejb/" context.
+</ol>
+
+<p/>I've attached a simple JSP that shows how to access the User EJB.
+
+<p/>And don't forget that if you re-deploy your beans to jBoss, you should
+copy over the jar file into WEB-INF and restart Resin.
+
+<p/>Hope that helps!
+
+<p/>-Dave
+
+<example>
+&lt;!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+&lt;html>
+  &lt;head>
+    &lt;title>EJB Test&lt;/title>
+  &lt;/head>
+
+  &lt;body bgcolor="#FFFFFF">
+    &lt;%@ page import='javax.naming.*' %>
+    &lt;%@ page import='ejbeans.*' %>
+    &lt;%@ page import='javax.rmi.*' %>
+    &lt;h1 align=center>EJB Test&lt;/h1>
+
+    &lt;%
+            // Get a naming context
+            InitialContext jndiContext;
+            Object ref;
+
+            // Get a reference to a UserHome Bean
+            jndiContext = new InitialContext();
+            ref         = jndiContext.lookup("java:comp/env/ejb/UserHome");
+
+            int         userPK;
+
+            UserHome    userHome;
+            User        user;
+
+            userHome = (UserHome)
+                PortableRemoteObject.narrow (ref, UserHome.class);
+
+            userPK  = Integer.parseInt(request.getParameter("pk"));
+            user    = userHome.findByPrimaryKey(new UserPK(userPK));
+    %>
+
+    &lt;table border="3" width="100%">
+        &lt;tr>
+          &lt;th> ID &lt;/th>
+          &lt;th> First Name &lt;/th>
+          &lt;th> Last Name &lt;/th>
+        &lt;/tr>
+
+        &lt;tr>
+          &lt;th> &lt;%= user.getId() %> &lt;/th>
+          &lt;th> &lt;%= user.getFirstName() %> &lt;/th>
+
+          &lt;th> &lt;%= user.getLastName() %> &lt;/th>
+        &lt;/tr>
+
+    &lt;/table>
+
+  &lt;/body>
+&lt;/html>
+</example>
+  </body>
+</document>

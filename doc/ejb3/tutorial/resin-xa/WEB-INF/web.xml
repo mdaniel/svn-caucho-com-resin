@@ -1,0 +1,25 @@
+<web-app xmlns="http://caucho.com/ns/resin">
+  <!--
+     - configures the bytecode enhancer
+    -->
+  <class-loader>
+    <enhancer>
+      <method annotation="javax.ejb.TransactionAttribute"
+              type="com.caucho.transaction.enhancer.TransactionEnhancer"/>
+    </enhancer>
+  </class-loader>
+
+  <!--
+     - configuration for the JNDI server.
+    -->
+  <ejb-server jndi-name="java:comp/env/ejb"
+              data-source="jdbc/resin" create-database-schema="true">
+    <bean type="example.Course"/>
+  </ejb-server>
+
+  <!--
+     - configuration for the client.
+    -->
+  <servlet servlet-name="xa" servlet-class="example.SwapServlet"/>
+  <servlet-mapping url-pattern="/xa" servlet-name="xa"/>
+</web-app>

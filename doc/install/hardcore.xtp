@@ -1,0 +1,140 @@
+<document>
+  <header>
+    <product>resin</product>
+    <resin-2.0>$resin/java_tut/hardcore.xtp</resin-2.0>
+    <title>Resin HardCore</title>
+    <description>
+      <p>Resin HardCore (experimental) is a Linux kernel module.  By pulling the webserver
+        into the kernel single-computer Resin servers and
+        load-balanced servers can greatly improve their performance.
+        HardCore replaces Apache as a web-server, grabbing HTTP
+        requests and passing them to the backend Resin JVMs.  Because
+        HardCore operates entirely in the kernel, it has very low
+        overhead.</p>
+    </description>
+  </header>
+
+  <body>
+    <summary/>
+
+<note>Resin HardCore is experimental.</note>
+
+
+<section title="Basic Operation">
+
+<p>Resin HardCore works much like the Apache/mod_caucho combination.  When a
+new browser request appears on port 80, it accepts the request and
+parses the HTTP header.  It then selects a JVM and forwards the request
+to the backend servlet runner.  When the servlet runner responds, HardCore
+will send the response to the browser.</p>
+
+<p>Unlike Apache/mod_caucho, HardCore passes every request to the servlet
+runner.  In essence, it's a kernel proxy.  Restricting HardCore to a proxy
+tremendously simplifies the configuration and maintenance -- an important
+consideration when writing a kernel application.</p>
+
+<p>Because HardCore is entirely in kernel space, it can quickly forward
+the requests without slow context switches or copying from user space.  Once
+the load-balancing is complete, an Linux box can serve as a low cost
+sticky-session load balancer with much better performance than an
+Apache load balancer.</p>
+
+</section>
+
+<section title="Installation">
+
+<p>The Resin ./configure script will select the Linux sources.  The
+standard make; make install will put a <var/resin.o/> in
+resin-2.0.x/libexec.  <var/resin.o/> is the actual kernel module.</p>
+
+<p>For standard configurations, ./configure will find the source, but
+you can change it with configure arguments (or in the Makefile).</p>
+
+<deftable>
+<tr><td>--with-linux-src=/usr/src/linux<td>Selects the kernel source
+<tr><td>--enable-linux-smp<td>Compiles for an SMP system or not.
+</deftable>
+
+<p>Once you've got a resin.o in libexec, you can install it as a
+module.  The Linux command is <var/insmod/>.</p>
+
+<p>HardCore can take an optional argument, <var/port/>, to select the
+server port.  It defaults to the standard HTTP port 80.</p>
+
+<example>
+unix> ./configure --with-linux-src=/usr/src/linux
+...
+unix> make
+unix> make install
+unix> su root
+unix# /sbin/insmod libexec/resin.o port=81
+
+...
+
+unix# /sbin/rmmod resin
+</example>
+
+</section>
+
+<section title="Configuration in /proc/net/resin">
+
+<p>Once as a module, HardCore creates the <var//proc/net/resin/>
+directory for configuration. It currently contains three files:
+<var/server_port/> to configure the listening port, <var/srun-count/>
+to specify the number of load balancing servlet-runners, and
+<var/srun-n/> to configure each servlet runner.</p>
+
+<deftable>
+<tr><td>server_port<td>Configures the listening port, e.g. 80
+(currently read-only)
+<tr><td>srun-count<td>Configures how many servlet runners to use
+<tr><td>srun-0<td>The IP and port for the first servlet runner
+</deftable>
+
+<p>You can look at those files to see their values:</p>
+
+<example>
+unix# ls /proc/net/resin
+server_port srun-0 srun-count
+unix# cat /proc/net/resin/server_port
+80
+unix# cat /proc/net/resin/srun-count
+1
+unix# cat /proc/net/resin/srun-0
+127.0.0.1 6802
+</example>
+
+<p/>You can also configure <var/srun-0/> to change the servlet runner.
+
+<example>
+unix# echo "192.168.0.3 6810" > /proc/net/resin-srun-0
+</example>
+
+</section>
+
+<section title="Caveats and Errata">
+
+<p>Any bugs in HardCore will likely crash or freeze your computer.  In
+theory it could also do bad things to the filesystem, although that
+hasn't happened to us ... yet.  Working with kernel modules is not
+as safe as a C program and nowhere near as safe as running a Java program.
+</p>
+
+<p>The 12/21 version handles basic GET requests.</p>
+
+<p>The current errata:</p>
+<ul>
+<li>POST requests are not handled
+<li>Date routines have not yet been implemented
+<li>Load-balancing is not yet done
+<li>Failure to contact a srun results in a disconnect instead of an
+error message.
+<li>/caucho-status isn't implemented yet.
+<li>Caching isn't implemented yet.
+<li>Logging isn't implemented yet.
+<li>HTTP/1.1 keepalive isn't implemented.
+</ul>
+
+</section>
+  </body>
+</document>

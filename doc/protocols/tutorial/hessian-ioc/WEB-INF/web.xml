@@ -1,0 +1,32 @@
+<web-app xmlns="http://caucho.com/ns/resin">
+
+  <resource jndi-name="service/greeting"
+            type="example.GreetingImpl">
+    <init>
+      <greeting>Hello from web.xml</greeting>
+    </init>
+  </resource>
+
+  <servlet-mapping url-pattern="/hessian/greeting"
+           servlet-class="com.caucho.hessian.server.HessianServlet">
+    <init>
+      <home>${jndi:lookup("service/greeting")}</home>
+      <home-api>example.GreetingAPI</home-api>
+    </init>
+  </servlet-mapping>
+
+  <reference jndi-name="client/greeting"
+             factory="com.caucho.hessian.client.HessianProxyFactory">
+    <init-param url="${app.getURL()}/hessian/greeting"/>
+    <init-param type="example.GreetingAPI"/>
+  </reference>
+
+  <servlet-mapping url-pattern="/client/greeting"
+                   servlet-class="example.GreetingClientServlet">
+    <init>
+      <name>Hessian</name>
+      <greeting>${jndi:lookup("client/greeting")}</greeting>
+    </init>
+  </servlet-mapping>
+
+</web-app>

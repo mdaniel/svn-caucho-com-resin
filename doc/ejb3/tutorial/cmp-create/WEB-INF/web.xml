@@ -1,0 +1,18 @@
+<web-app xmlns="http://caucho.com/ns/resin">
+  <!--
+     - configuration for the JNDI server.
+    -->
+  <ejb-server data-source="jdbc/resin" create-database-schema="true">
+    <bean type="example.Course"/>
+  </ejb-server>
+
+
+  <!--
+     - configuration for the client.
+    -->
+  <servlet servlet-name="create" servlet-class="example.CreateServlet">
+    <init entity-manager="${jndi:lookup('java:comp/EntityManager')}"/>
+  </servlet>
+
+  <servlet-mapping url-pattern="/create" servlet-name="create"/>
+</web-app>

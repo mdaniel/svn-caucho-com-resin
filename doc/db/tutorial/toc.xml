@@ -1,0 +1,5 @@
+<navigation threaded="true" section="Resin : Database : Tutorial" comment="true">
+  <item title="Tutorials" link="index.xtp">
+    <item link="jdbc-basic/index.xtp" title="Basic"/>
+  </item>
+</navigation>

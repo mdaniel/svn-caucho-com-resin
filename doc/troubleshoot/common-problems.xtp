@@ -1,0 +1,51 @@
+<document>
+<header>
+  <product>resin</product>
+  <title>Common Problems FAQ</title>
+  <description>
+    <p>Commonly encountered problems and error messages and their
+solution.</p>
+  </description>
+</header>
+
+<body>
+<summary objsummary='localtoc'/>
+
+<faq title="Specification version 1.3 of package javax.servlet, J2EE Specification, version 1.3 is not compatible with Resin Resin-3.0.x. Resin-3.0.x requires version 2.4.">
+<description>
+</description>
+
+<p>This error occurs when you have an old or conflicting jar containing the
+servlet api in your CLASSPATH.  The solution is to <a
+href="troubleshoot|technique#classpath">clean up your classpath</a>.</p>
+
+</faq>
+
+<faq title="class file has wrong version 48.0, should be 47.0">
+<description>
+</description>
+
+<p>
+This error occurs when you have an old or conflicting jar 
+in your CLASSPATH.  The solution is to 
+<a href="troubleshoot|technique#classpath">clean up your classpath</a>.
+</p>
+
+<p>
+If it is a Resin jar that is causing the error, you may have jars from a
+previous installation that are causing the error.  This occasionally occurs
+when people try to copy a new installation over an old one, and due to write
+permissions etc. some of the older jars are not replaced.
+</p>
+
+<p>
+If the cleaning of the CLASSPATH (above) does not work, you may need to
+completely remove Resin from
+your system and re-install. 
+</p>
+
+
+</faq>
+
+</body>
+</document>

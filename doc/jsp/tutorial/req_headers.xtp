@@ -1,0 +1,74 @@
+<section>
+  <header>
+    <product>resin</product>
+    <title>Headers</title>
+    <type>example</type>
+    <resin-2.0>$resin/java_tut/req_headers.xtp</resin-2.0>
+    <brief>
+      Browser headers contain information about the browser.
+    </brief>
+    <description>
+      Each browser request sends <var/headers/> along with the URL.
+      Sophisticated servlets can use browser headers to tailor the
+      returned page to the browser.
+    </description>
+  </header>
+
+<p>Sophisticated servlets can use browser headers to tailor the returned page
+to the browser.  For example, a high-quality site can detect a Palm Pilot
+browser and simplify its site design to match the browser capabilities.
+</p>
+
+<p>Each browser request sends <var/headers/> along with the URL.  The
+headers include the browser type (<var/User-Agent/>) and
+language preferences (<var/Accept-Language/> and <var/Accept-Charset/>).  The
+full list is in the official HTTP/1.1 spec, but those three are the most
+important.</p>
+
+<p>Servlet and JSPs grab headers with <var/request.getHeader/>.</p>
+
+<p>The following, like env.jsp in the examples, gets all the headers
+and prints them.  Little "snoop" servlets like this are useful to see what
+headers browsers are sending.</p>
+
+<example title="test.HeaderServlet.java">
+package test;
+
+import java.io.*;
+import java.util.*;
+import javax.servlet.*;
+import javax.servlet.http.*;
+
+public class HeaderServlet extends HttpServlet {
+  public void doGet(HttpServletRequest request,
+                    HttpServletResponse response)
+    throws IOException, ServletException
+  {
+    PrintWriter out = response.getWriter();
+
+    out.println("&lt;table>");
+
+    Enumeration e = request.getHeaderNames();
+    while (e.hasMoreElements()) {
+      String name = (String) e.nextElement();
+
+      out.println("&lt;tr>&lt;td>" + name);
+      out.println("&lt;td>" + request.getHeader(name));
+    }
+
+    out.println("&lt;/table>");
+  }
+}
+</example>
+<results>
+Connection       Keep-Alive 
+User-Agent       Mozilla/4.74 [en] (X11; U; Linux 2.4.0-test1 i686) 
+Host             localhost:8080 
+Accept           image/gif, image/jpeg, image/pjpeg, image/png, */* 
+Accept-Encoding  gzip 
+Accept-Language  en 
+Accept-Charset   iso-8859-1,*,utf-8 
+Cookie           JSESSIONID=7tXlVCaALedCHHkdXy 
+</results>
+
+</section>

@@ -1,0 +1,15 @@
+<navigation threaded="true" section="Resin : Servlets and Filters : " comment="true">
+  <item title="Servlets and Filters" link="index.xtp">
+    <item link="servlet.xtp" title="Servlets"/>
+    <item link="servlet-library.xtp" title="Servlet Lib" atoc-descend='1'>
+      <item link="webdav.xtp" title="WebDAV"/>
+    </item>
+    <item link="run-at.xtp" title="run-at"/>
+    <item link="filter.xtp" title="Filters"/>
+    <item link="filter-library.xtp" title="Filter Lib" atoc-descend='1'/>
+
+    <item title="Tutorials" link="tutorial/index.xtp" atoc-descend='2'/>
+
+    <item title="FAQ" link="faq.xtp" atoc-descend='2'/>
+  </item>
+</navigation>

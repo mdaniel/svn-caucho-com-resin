@@ -1,0 +1,271 @@
+<document>
+<header>
+  <product>resin</product>
+  <resin-2.0>$resin/ref/servlet-library.xtp</resin-2.0>
+  <title>Servlet Library</title>
+  <description>Resin provides a set of convenient servlets in the com.caucho.servlets.* package.</description>
+</header>
+
+<body>
+
+<summary/>
+
+<section title='ErrorStatusServlet'>
+
+<p>Sends an HTTP error code and optionally an error message back
+to the client.</p>  
+
+<deftable-parameters>
+<tr><td>status-code<td>the HTTP status code to send<td>404
+<tr><td>message<td>the message to send<td>no message
+</deftable-parameters>
+
+<p>This servlet is particularily useful for blocking access to portions of your
+web-app that contain files not meant to be accessible to users. In this
+example, the default 404 (meaning "Not Found") is used as the error
+message; the user cannot even determine if the file they are trying to access
+exists.</p>
+
+<example title="Blocking access to files using the ErrorStatusServlet">
+&lt;web-app&gt;
+  &lt;servlet&gt;
+    &lt;servlet-name&gt;block-access&lt;/servlet-name&gt;
+    &lt;servlet-class&gt;com.caucho.servlets.ErrorStatusServlet&lt;/servlet-class&gt;
+  &lt;servlet&gt;
+
+  &lt;servlet-mapping&gt;
+    &lt;servlet-name&gt;block-access&lt;/servlet-name&gt;
+    &lt;url-pattern&gt;/config/*&lt;/url-pattern&gt;
+  &lt;/servlet-mapping&gt;
+  &lt;servlet-mapping&gt;
+    &lt;servlet-name&gt;block-access&lt;/servlet-name&gt;
+    &lt;url-pattern&gt;*.properties&lt;/url-pattern&gt;
+  &lt;/servlet-mapping&gt;
+
+  ...
+
+&lt;/web-app&gt;
+</example>
+
+See <a href="javadoc|com.caucho.servlets.ErrorStatusServlet|"></a>.
+</section>
+
+
+<section title='LoadBalanceServlet'>
+
+<p>Configures a front-end Resin instance to load-balance requests to
+backend Resin instances.  Each LoadBalanceServlet instance will
+distribute the requests to a configured cluster.</p>
+
+<p>The urls that get load balanced are the ones that are mapped to the LoadBalancedServlet, using the usual servlet-mapping. </p>
+
+<p>LoadBalanceServlet supports sticky-sessions. If the request already has a
+session, the backend server matching that session will be used.  Otherwise, the
+least busy backend server will be used as counted by
+number of active requests.  If several backend servers are
+equally busy, the selection uses a round-robin to distribute the load.
+</p>
+
+
+<deftable-parameters>
+<tr><td>cluster-id<td>the cluster that gets the matching requests<td>required
+<tr><td>sticky-sessions<td>whether or not sessions should be sticky<td>true
+</deftable-parameters>
+
+<p>The usual case balances all requests to backend servers.  The front-end Resin
+instance has a resin.conf similar to the one shown here.  It configures
+the front-end instance to balance the load to the backend
+servers.  The backend Resin instances have a resin.conf file that
+configures the web site, similar to a conf file that is used when only one
+instance of Resin used for the server.</p>
+
+<example title="frontend.conf">
+&lt;resin xmlns="http://caucho.com/ns/resin"&gt;
+  &lt;server&gt;
+
+    &lt;http id='frontend' port='8080'/&gt;
+
+    &lt;cluster id='backend'&gt;
+      &lt;srun id='a' host='192.168.0.11' port='6810'/&gt;
+      &lt;srun id='b' host='192.168.0.12' port='6810'/&gt;
+    &lt;/cluster&gt;
+
+    &lt;!-- the front-end does the access logging --&gt;
+    &lt;access-log path='log/access.log'&gt;
+      &lt;rollover-period&gt;2W&lt;/rollover-period&gt;
+    &lt;/access-log&gt;
+
+    &lt;!-- all urls are load balanced to the backend --&gt;
+    &lt;host id=''&gt;
+      &lt;web-app id='/'&gt;
+        &lt;servlet&gt;
+          &lt;servlet-name&gt;backend&lt;/servlet-name&gt;
+          &lt;servlet-class&gt;com.caucho.servlets.LoadBalanceServlet&lt;/servlet-class&gt;
+          &lt;init&gt;
+            &lt;cluster&gt;backend&lt;/cluster&gt;
+          &lt;/init&gt;
+        &lt;/servlet&gt;
+
+        &lt;servlet-mapping url-pattern='/*' servlet-name='backend'/&gt;
+      &lt;/web-app&gt;
+   &lt;/host&gt;
+  &lt;/server&gt;
+&lt;/resin&gt;
+</example>
+
+<p>LoadBalanceServlet is also used to allow a separate JVM for a web-app or a
+host.</p>
+
+<TODO>link to load balancing configuration documentation</TODO>
+
+See <a href="javadoc|com.caucho.servlets.LoadBalanceServlet|"></a>.
+</section>
+
+<section title="CGIServlet">
+
+<p>Implements CGI calls.  The url is assumed to refer to an executable file,
+and the operating system is instructed to execute the program or script.  The
+usual CGI environment variables are set, and the current directory is 
+the value of <code>$RESIN_HOME</code></p>
+
+<example>
+&lt;web-app&gt;
+  &lt;servlet&gt;
+    &lt;servlet-name&gt;cgi&lt;/servlet-name&gt;
+    &lt;servlet-class&gt;com.caucho.servlets.CGIServlet&lt;/servlet-class&gt;
+  &lt;/servlet&gt;
+
+  &lt;servlet-mapping&gt;
+    &lt;servlet-name&gt;cgi&lt;/servlet-name&gt;
+    &lt;url-pattern&gt;*.cgi&lt;/url-pattern&gt;
+  &lt;/servlet-mapping&gt;
+&lt;/web-app&gt;
+</example>
+
+<p>See <a href="javadoc|com.caucho.servlets.CGIServlet|"></a></p>.
+
+<p>A CGI script must output a blank line between the HTTP header(s) and the
+rest of the response.  If no blank line is encountered, the contents of your
+browser page will be blank.  Usually a CGI script will output a
+<code>Content-Type:</code> header and then a blank line before the content:
+</p>
+
+<example title="Minimal CGI script">
+#!/bin/sh
+
+echo "Content-Type: text/html"
+echo
+echo "&lt;h&gt;CGI Test&lt;h1&gt;"
+echo "CGI Test"
+
+echo "&lt;pre&gt;"
+env
+echo "&lt;/pre&gt;"
+
+</example>
+
+</section>
+
+<section title='FastCGIServlet'>
+
+<p>Implements the FastCGI protocol.  FastCGI allows some CGI clients
+like PHP to run quicker and more efficiently.</p>
+
+<deftable-parameters>
+<tr><td>server-address<td>the host and port number, in the form host:port<td>required
+</deftable-parameters>
+
+<p>
+The FastCGIServlet creates a socket connection from Resin to the backend
+program that supports the fastcgi protocol.  <a config-tag="servlet-mapping"/>
+is used to configure the filename patterns of scripts that are handled by the
+backend program.
+</p>
+
+<p>
+The following example configures Resin so that any files within a single webapp
+matching the pattern"*.php" are handled by the backend program:
+</p>
+
+<example title="WEB-INF/web.xml">
+&lt;web-app&gt;
+  &lt;servlet&gt;
+    &lt;servlet-name&gt;php-fastcgi&lt;/servlet-name&gt;
+    &lt;servlet-class&gt;com.caucho.servlets.FastCGIServlet&lt;/servlet-class&gt;
+    &lt;init&gt;
+      &lt;server-address&gt;localhost:6666&lt;/server-address&gt;
+    &lt;/init&gt;
+  &lt;/servlet&gt;
+  &lt;servlet-mapping&gt;
+    &lt;servlet-name&gt;php-fastcgi&lt;/servlet-name&gt;
+    &lt;url-pattern&gt;*.php&lt;/url-pattern&gt;
+  &lt;/servlet-mapping&gt;
+&lt;/web-app&gt;
+</example>
+
+<p>Assuming PHP has been compiled with -fastcgi enabled, you might
+start PHP like:</p>
+
+<example>
+unix&gt; php -b 6666 
+</example>
+
+<p>
+Mapping is enabled for all web-apps with the use of 
+<a config-tag="web-app-default"/>.  In this example, filenames with the pattern
+"*.php" and the pattern "*.phtml" are handled by the backend program: 
+</p>
+
+<example title="resin.conf">
+&lt;web-app-default&gt;
+  &lt;servlet&gt;
+    &lt;servlet-name&gt;php-fastcgi&lt;/servlet-name&gt;
+    &lt;servlet-class&gt;com.caucho.servlets.FastCGIServlet&lt;/servlet-class&gt;
+    &lt;init&gt;
+      &lt;server-address&gt;localhost:6666&lt;/server-address&gt;
+    &lt;/init&gt;
+  &lt;/servlet&gt;
+
+  &lt;servlet-mapping url-pattern="*.php"   servlet-name="php-fastcgi"/>
+  &lt;servlet-mapping url-pattern="*.phtml" servlet-name="php-fastcgi"/>
+
+&lt;/web-app&gt;
+</example>
+
+See <a href="javadoc|com.caucho.servlets.FastCGIServlet|"></a>.
+</section>
+
+<section title='HttpProxyServlet'>
+
+<p>
+<a href="javadoc|com.caucho.servlets.HttpProxyServlet|"/> is a servlet that
+proxies to another server.  This can be useful for providing access to legacy
+backend servers.
+</p>
+
+<example title="HttpProxyServlet">
+  &lt;servlet&gt;
+    &lt;servlet-name&gt;http-proxy&lt;/servlet-name&gt;
+    &lt;servlet-class&gt;com.caucho.servlets.HttpProxyServlet&lt;/servlet-class&gt;
+    &lt;init host='localhost:8081'/&gt;
+  &lt;/servlet&gt;
+
+  &lt;servlet-mapping url-pattern="/foo/*" servlet-name="http-proxy"/&gt;
+  &lt;servlet-mapping url-pattern="/bar/*" servlet-name="http-proxy"/&gt;
+</example>
+
+
+<p>
+There is a bit more power using servlet-regexp and regular expressions:
+</p>
+
+<example title="HttpProxyServlet with regexp">
+&lt;servlet-regexp url-regexp="^/foo(/.*)?"
+                servlet-class="com.caucho.servlets.HttpProxyServlet"&gt;
+  &lt;init host='localhost:8081'/&gt;
+&lt;/servlet-regexp&gt;
+</example>
+</section>
+
+</body>
+</document>

@@ -1,0 +1,48 @@
+<document>
+  <header>
+    <product>resin</product>
+    <resin-2.0>$resin/ref/ide-jbuilder.xtp</resin-2.0>
+    <title>JBuilder</title>
+  </header>
+
+  <body>
+    <summary/>
+<section title="Resin OpenTool">
+
+The Caucho projects section now has an OpenTool jar for Resin at
+<a href="download|jbuilder|ver6">resin-jbuilder-6.jar</a> and
+<a href="download|jbuilder|ver7">resin-jbuilder-7.jar</a>.
+
+<p/>To install the tool, put the resin-jbuilder.jar in the JBuilder lib/ext
+directory, for example, c:\JBuilder6\lib\ext.  Then you can change the
+server using the Project/Project Properties/Server table.
+
+</section>
+
+<section title="Older instructions">
+
+<p/>Kellan Elliott-McCrea writes:
+
+<p/>This works w/ JBuilder 3.5, I assume it will work with 4.  FYI:  I've
+noticed a definite slow down when doing this.
+
+<ol>
+<li>Go To Project Properties - required libraries
+<li>Remove the JSWDK 1.0 stuff from the required libraries, you don't need it
+any more
+<li>Click "Add..." then Click "New..."
+<li>fill out a name for resin, I would naming it Resin 1.2.1 (or whatever
+version you are running)
+<li>Click "Add..."  
+<li>Browse to your resin directory and add all the jar files under the lib
+directory
+<li>Click "OK" to select then "OK" again
+<li>Go to the "Run" tab in properties
+<li>Click "Set"
+<li>Find the class com.caucho.server.http.HttpServer
+<li>Click "OK" to close set window and "OK" to accept properties
+</ol>
+
+</section>
+  </body>
+</document>

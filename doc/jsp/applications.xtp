@@ -1,0 +1,167 @@
+<document xmlns:ct="ct">
+  <header>
+    <product>resin</product>
+    <resin-2.0>$resin/ref/jsp-applications.xtp</resin-2.0>
+    <title>Applications</title>
+    <brief>
+      Applications join JSP pages, script libraries and Java beans
+      into a self-contained web application.
+    </brief>
+    <description>
+      An application collects servlets, JSP pages, scripts and Java
+      Beans into a self-contained web application.  Applications are
+      just generalized virtual hosts, only based on the URL instead of
+      the host name.
+    </description>
+  </header>
+  <body>
+
+<summary/>
+
+<section title='Introduction'>
+
+<p>An application collects servlets, JSP pages, scripts and Java Beans into a
+self-contained web application.  Applications are just generalized virtual
+hosts, only based on the URL instead of the host name.</p>
+
+<p>For example, a
+bulletin board application groups pages for article reading, group
+listing, user registration, and new article posting into a single
+application.</p>
+
+<p>Applications can keep track of user sessions, giving the users the
+illusion of a single application out of disjoint pages.</p>
+
+<ul>
+<li>Resin organizes applications with an application <a
+href='#dir'>directory</a>, WEB-INF
+<li><a href='#session'>Sessions</a> share state for a user's visit to
+the site.
+</ul>
+
+<p>Many, if not most sites, will only use the default application.</p>
+
+</section>
+
+<section name='dir' title='Applications'>
+
+<deftable title='application contents'>
+<tr><th>File/Directory</th><th>Contents</th></tr>
+<tr><td>.</td><td>JSP, HTML and GIF files</td></tr>
+<tr><td>WEB-INF/classes</td><td>Java class files</td></tr>
+<tr><td>WEB-INF/lib</td><td>Java jars</td></tr>
+<tr><td>WEB-INF/tmp</td><td>Temporary servlet files</td></tr>
+<tr><td>WEB-INF/work</td><td>Generated java for JSP and XSLT</td></tr>
+</deftable>
+
+<ul class=none>
+<li><ct:img src='folder.gif'/>&nbsp;example
+<ul class=none>
+  <li><ct:img src='file.gif'/>&nbsp;index.html
+  <li><ct:img src='file.gif'/>&nbsp;folder.gif
+  <li><ct:img src='file.gif'/>&nbsp;article.gif
+  <li><ct:img src='jsp.gif'/>&nbsp;post-article.xtp
+  <li><ct:img src='folder.gif'/>&nbsp;jsp-interest
+  <ul class=none>
+    <li><ct:img src='jsp.gif'/>&nbsp;index.jsp
+    <li><ct:img src='jsp.gif'/>&nbsp;article1.jsp
+    <li><ct:img src='jsp.gif'/>&nbsp;article2.jsp
+  </ul>
+  <li><ct:img src='folder.gif'/>&nbsp;WEB-INF
+  <ul class=none>
+    <li><ct:img src='folder.gif'/>&nbsp;lib
+    <ul class=none>
+      <li><ct:img src='bean.gif'/>&nbsp;bulletin-board.jar
+    </ul>
+    <li><ct:img src='folder.gif'/>&nbsp;classes
+    <ul class=none>
+      <li><ct:img src='bean.gif'/>&nbsp;Navigation.class
+      <li><ct:img src='bean.gif'/>&nbsp;HelloWorld.class
+    </ul>
+    <li><ct:img src='folder.gif'/>&nbsp;xsl
+    <ul class=none>
+      <li><ct:img src='style.gif'/>&nbsp;default.xsl
+      <li><ct:img src='style.gif'/>&nbsp;article.xsl
+    </ul>
+  </ul>
+</ul>
+</ul>
+
+</section>
+
+<section name=beans title='JSP Beans'>
+<p>Java Beans get first class treatment in JSP 1.0.  Beans can be
+created for a page, across a session, or for the entire application.</p>
+
+<p>The classes and lib directories can contain application beans used by <a
+href='jsp|actions#usebean'>jsp:useBean</a>.  These are simply Java
+classes implementing the bitmechanic work of an application.</p>
+
+<p>For example, a shopping cart application may have a set of Java
+classes that perform the security necessary for credit card
+processing.  The application can put those classes in the beans
+directory and access them from the JSP page.</p>
+
+<p>Beans can be created with different lifetimes.</p>
+<ul>
+<li>Application beans last the lifetime of an application.
+<li>Session beans last for a user's session.
+<li>Request beans last for a single request.
+<li>Page beans only last for a single page.
+</ul>
+
+<p>Requests and pages often last the same lifetime, but may differ if one
+page <a href='jsp|actions#forward'>forwards</a> or <a
+href='jsp|actions#include'>includes</a> another page. </p>
+
+<section title='Accessing Beans'>
+<p>Each bean is defined with a <a href='jsp|actions#usebean'>jsp:useBean</a>
+directive.</p>
+
+<p>JSP assigns the created bean object to the JavaScript variable
+named by jsp:useBean.</p>
+
+<p>In addition, the created beans are stored in JSP variables: page
+beans are stored in <code/request/>, session beans are stored in
+<code/session/>, and application beans are stored in
+<code/application/>.  Storing the beans in the JSP variables lets
+other beans and functions retrieve the beans.</p>
+
+<example title='Beans in variables: test.jsp'>
+&lt;jsp:useBean id='test' class='java.util.Hashtable'&gt;
+
+&lt% test.put("a", 1); %&gt;
+&lt%= test.get("a"); %&gt;
+</example>
+
+<example title='Page beans in request: test.jsp'>
+&lt;jsp:useBean id='test' class='java.util.Hashtable'&gt;
+
+&lt;% 
+  var t = request.attributes.test
+  t.put("a", 1);
+%&gt;
+&lt%= test.get("a"); %&gt;
+</example>
+<results>
+1
+</results>
+
+</section>
+
+</section>
+
+<section name=session title='Sessions'>
+<p>Session variables let applications keep track of the user as she moves
+through the site.  Any e-commerce site needs this capability to keep
+track of the user's purchases.</p>
+
+<p>JSP sessions start when the page accesses the <a
+href='jsp|variables#session'>session</a> variable.</p>
+
+<p>Sessions end when the session times out, when the session is
+invalidated, or when the application ends.</p>
+</section>
+
+    </body>
+</document>

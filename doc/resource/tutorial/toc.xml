@@ -1,0 +1,12 @@
+<navigation threaded="true" section="Resin : Resources : Tutorial" comment="true">
+  <item title="Tutorials" link="index.xtp">
+    <item link="basic/index.xtp" title="Basic Resource"/>
+    <item link="injection/index.xtp" title="Injection"/>
+    <item link="jca-lifecycle/index.xtp" title="JCA Lifecycle"/>
+    <item link="jca-work/index.xtp" title="JCA Work"/>
+    <item link="jca-timer/index.xtp" title="JCA Timer"/>
+    <item link="jca-cron/index.xtp" title="JCA Cron"/>
+    <item link="jca-connection/index.xtp" title="JCA Connector"/>
+    <item link="jndi-appconfig/index.xtp" title="JNDI appconfig"/>
+  </item>
+</navigation>

@@ -1,0 +1,16 @@
+<document>
+  <header>
+    <product>resin-ee</product>
+    <title>CMP Initialization</title>
+  </header>
+
+  <body>
+    <summary/>
+
+<section title="Init">
+
+<a href="init">Initialize the Database</a>
+
+</section>
+  </body>
+</document>

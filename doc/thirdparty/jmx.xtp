@@ -1,0 +1,31 @@
+<document>
+<header>
+<product>resin</product>
+<title>JMX</title>
+</header>
+
+<body>
+<summary/>
+
+<section title="MX4J remote administration">
+
+<p>MX4J can be used to remotely administer a Resin server.</p>
+<p>(contributed by D Dunkley)</p>
+
+<p>
+<ol>
+<li>Install the MX4J libraries in <code>$RESIN_HOME/lib/mx4j/*</code>
+<li>start Resin with <br><code>bin/httpd -Djavax.management.builder.initial=mx4j.server.MX4JMBeanServerBuilder</code>
+</ol>
+
+<p>MBeans can be managed with MX4J's GUI console.</p>
+
+<p>See also:</p>
+<ul>
+<li><a href="http://sourceforge.net/projects/mx4j/">MX4J project home page</a>
+</ul>
+
+
+</section>
+</body>
+</document>

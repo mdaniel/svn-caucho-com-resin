@@ -1,0 +1,138 @@
+<document>
+<header>
+  <product>resin</product>
+  <title>Malicious Attacks</title>
+  <description>
+  <p>
+  Resin is a very mature product, and has not had any security
+  reports in a long time.  Here we discuss some common methods
+  used to attack web servers, and how they are handled by Resin
+  and how they apply to your applications.
+  </p>
+  </description>
+</header>
+
+<body>
+
+<summary localtoc="1"/>
+
+<section title="Cross-site scripting">
+<p>Cross-site scripting occurs when a web-site inadvertantly
+includes HTML tags or scripting code that has come from an untrusted
+source (such as a form submit)</p>
+
+<p>Cross-site scripting is primarily an application issue, not an
+app-server issue.  An audit of your code will help you identify any
+areas that may be vulnerable to cross-site scripting issues.</p>
+
+<p>The only case where it could be a Resin issue is for Resin's error messages,
+like 404 messages, and these have been carefully audited to prevent
+the possibilty of cross-site scripting.</p>
+
+<p>For more information on cross-site scripting, the 
+<a href="http://www.cert.org/advisories/CA-2000-02.html">CERT
+advisory</a> on the topic is a useful resource.</p>
+
+<section title="Protecting your site from cross-site scripting">
+<p>The main source of vulnerability is from malicious posting of
+request parameters by users.  The following steps are a good start
+to protecting your site.</p>
+
+<dl>
+
+<dt>'Escape' incoming request parameters to remove HTML code.
+<dd>This is usually accomplished by changing all instances of the
+'&lt;' and '&gt;' characters in form parameters to corresponding
+entities like &amp;lt; and &amp;gt;.  The Quercus example
+application that comes with Resin contains code that you can use as
+a basis.
+
+<dt>Beware of values used in JDBC calls
+<dd>As you are forming SQL statements to use in JDBC, take care that
+a request parameter value does not end up becoming part of an
+SQL statement in such a way that it could change the intended
+function of the SQL statement.
+
+<dt>Allow for unexpected submission of parameters
+<dd>When devloping the code to handle a form submission, or handle
+request parameters in general, do not assume that the parameters are
+valid.  It is quite easy for a malicious user to make their own
+form, or their own URL, and specify whatever form parameters they
+want.
+
+<dt>Do not assume the value of hidden form fields are valid
+<dd>A common practice is to use hidden form fields to hold values
+that your application needs on subsequent requests.  It is very easy
+for a user to change these values and make a submission.
+
+</dl>
+</section>
+</section>
+
+<section title="Serving of raw JSP files">
+<p>A potentially dangerous security problem is the inadvertant
+serving of .jsp files in raw form, exposing information about the
+underlying system.</p>
+
+<p>The most significant area of concern for this with Resin is when
+Resin is used as a servlet runner.  A raw jsp could potentially be
+served up by the main webserver (IIS or Apache, for example) if it
+does not recognize that the page should be handlecd by Resin.</p>
+
+<p>Since this is a configuration issue, it should appear during your
+testing and not suddenly become a problem in a production environment
+that has not had the configuration changed.</p>
+
+<p>There are also some issues regarding this with the underlying
+filesystem, for example a jsp name being passed in such a way that it
+does not match the pattern for jsp files but is recognized by the
+OS/filesystem as a valid filename.  We have covered all of these areas
+that have come to our attention.</p>
+</section>
+
+<section title="Session stealing">
+<p>Resin establishes a session with the user by assigning an id, which
+is then included in subsequent requests as either a cookie or as part
+of the URL.  It is conceivable that someone could use a packet sniffer
+to find the session id of a user and then make a fake request to Resin
+thus gaining access to the session.  This can be avoided by using
+HTTPS.</p>
+</section>
+
+<section title="Denial of Service (DoS) attacks">
+
+<p>
+The most common method used in DoS attacks on a server is to flood the server
+with useless traffic, overloading the network's capacity.  A real DoS attack is
+best handled by a firewall or operating system.  Any real DoS attack is going
+to try to overwhelm your TCP, so you need the OS kernel to refuse to accept
+packets for the offending system.
+</p>
+
+<p>
+For a less extreme DoS attack, you can use
+<a href="doc|filter|library#ThrottleFilter">com.caucho.filters.ThrottleFilter</a> 
+to minimize the number of concurrent
+requests.
+</p>
+
+<p>
+In configurations that use a <a href="doc|config|balance">cluster</a>, the
+ThrottleFilter should be used on the front-end server that is running the
+<code>LoadBalanceFilter</code>. If using IIS or Apache then throttling features
+of those servers should be used.
+</p>
+
+<example title="ThrottleFilter to manage DoS attacks">
+&lt;filter filter-name="throttle" 
+        filter-class="com.caucho.filters.ThrottleFilter"&gt;
+ &lt;init max-concurrent-requests="5"/&gt;
+&lt;/filter&gt;
+
+&lt;filter-mapping url-pattern="/*" filter-name="throttle"/&gt;
+</example>
+
+</section>
+
+</body>
+</document>

@@ -1,0 +1,175 @@
+<document>
+  <header>
+    <product>resin</product>
+    <resin-2.0>$resin/java_tut/isp.xtp</resin-2.0>
+    <title>ISP with Apache</title>
+  </header>
+
+  <body>
+    <summary/>
+
+<section title='File locations'>
+
+<p>This sample configuration has Resin home in /usr/local/resin-2.0 and
+the user's server root set to /home/slytherin/resin.</p>
+
+<p>The user will create her application in /home/slytherin/resin/doc,
+putting classes in doc/WEB-INF/classes and jars in doc/WEB-INF/lib.  If
+she uses a war file, she can put it in /home/slytherin/resin/webapps.
+Resin will expand the war automatically.</p>
+
+<deftable>
+<tr><th>Directory<th>Contents
+<tr><td>/usr/local/resin-2.0<td>root owned Resin home
+<tr><td>/usr/local/resin-2.0/conf/slytherin.conf<td>root-owned slytherin configuration
+<tr><td>/home/slytherin/resin<td>User's server root
+<tr><td>/home/slytherin/resin/doc<td>User's documents
+<tr><td>/home/slytherin/resin/doc/WEB-INF/web.xml<td>Any user-specific configuration
+<tr><td>/home/slytherin/resin/doc/WEB-INF/classes<td>The user's Java classes
+<tr><td>/home/slytherin/resin/doc/WEB-INF/lib<td>The user's jars
+<tr><td>/home/slytherin/resin/webapps<td>auto-expanding war directory
+<tr><td>/home/slytherin/resin/log/stdout.log<td>JVM's standard output
+<tr><td>/home/slytherin/resin/log/stderr.log<td>JVM's standard error
+<tr><td>/home/slytherin/resin/log/error.log<td>Servlet errors
+<tr><td>/home/slytherin/resin/resin.pid<td>JVM's saved process id
+</deftable>
+
+</section>
+
+<section title='slytherin.conf'>
+
+<p>In this configuration, each JVM gets its own configuration file.
+The slytherin.conf is owned and managed by root.  By having root
+control the configuration, you can make sure the mod_caucho/Resin
+communication is properly configured.</p>
+
+<p>The user can customize the configuration by adding a
+doc/WEB-INF/web.xml file following the servlet deployment descriptor.
+ISPs that want give more flexibility can add a &lt;resin:include> directive
+to read a user configuration file.</p>
+
+<example title='slytherin.conf'>
+&lt;caucho.com>
+  &lt;http-server>
+    &lt;app-dir>doc&lt;/app-dir>
+    &lt;srun host='slytherin.caucho.com' port='6802'/>
+
+    &lt;host id='slytherin slytherin.caucho.com'>
+      &lt;error-log id='log/error.log'/>
+
+      &lt;war-dir>webapps&lt;/war-dir>
+
+      &lt;web-app id='/'>
+        &lt;servlet-mapping url-pattern='*.jsp' servlet-name='jsp'/>
+        &lt;servlet-mapping url-pattern='*.xtp' servlet-name='xtp'/>
+      &lt;/web-app>
+    &lt;/host>
+  &lt;/http-server>
+&lt;/caucho.com>
+</example>
+
+<deftable>
+<tr><th>Element<th>Description
+<tr><td>app-dir<td>Configures the document directory as a subdirectory of
+server-root.
+<tr><td>srun<td>Configures the srun port Resin will listen for Apache
+requests.  Browsing http://slytherin/caucho-status will show the
+status of the link.
+<tr><td>host<td>Configures the virtual host.  The host name must match
+the Apache <var/ServerName/>.  Multiple host names are allowed as aliases.
+<tr><td>error-log<td>Servlet error log, relative to $SERVER_ROOT,
+not $APP_DIR.  So it'll appear in resin, not doc.
+<tr><td>war-dir<td>Directory where the user can put foo.war files.  The
+file will be automatically expanded and create an application named foo.
+<tr><td>web-app<td>Defines the user's root application.
+<tr><td>servlet-mapping<td>Defines *.jsp and *.xtp as extensions handled
+by Resin.  mod_caucho needs these to know which files to dispatch to Resin.
+Any other servlet-mappings should be defined in WEB-INF/web.xml.
+</deftable>
+
+</section>
+
+<section title="Apache httpd.conf">
+
+<p>Each Apache virtual host use its own resin.conf file.  You can
+look at the configuration using /caucho-status for the virtual host,
+as usual.</p>
+
+<p>The <var/ServerName/> is particularly important.  mod_caucho
+sends the value of ServerName to the JVM so Resin can choose
+a virtual host.  The ServerName value must match the &lt;host> value.</p>
+
+<example>
+...
+
+&lt;VirtualHost slytherin.caucho.com>
+ServerAlias www.slytherin.caucho.com slytherin
+ServerName slytherin.caucho.com
+
+CauchoConfigFile /usr/local/resin-2.0/conf/slytherin.conf
+&lt;/VirtualHost>
+
+...
+</example>
+
+</section>
+
+<section title="Starting script">
+
+<p>ISPs will generally start the server on system startup as root from
+an init script.  However, the JVM should be running as the user to
+avoid permission problems.</p>
+
+<p>The main tasks of the script are to change to the user by using "su"
+and to set the server-root to the user's root.  The server root needs to
+change to the user's directory so the JVM can write its logs and open
+any needed caching or other temporary files.</p>
+
+<p>An ISP could provide this script to the user after
+removing the "su $USER".  That will give the user a way to start and stop
+the JVM if necessary.</p>
+
+<example title="slytherin-start.sh">
+#!/bin/sh
+
+JAVA_HOME=/usr/java
+export JAVA_HOME
+
+RESIN=/usr/local/resin-2.0
+USER=slytherin
+ROOT=/home/$USER/resin
+
+su $USER -c "$RESIN/bin/httpd.sh -server-root $ROOT \
+                                 -conf $RESIN/conf/$USER.conf \
+                                 start"
+</example>
+
+</section>
+
+<section title="Sample Installation Order">
+
+<ol>
+<li>Untar resin-2.0.x.tar.gz into /usr/local/resin-2.0.x
+<li>You can change the ownership to root if you like:
+<example>
+/usr/local# find resin-2.0.x -exec chown root.root {} \;
+</example>
+<li>create conf/slytherin.conf and modify Apache's httpd.conf to point to it.
+<li>Restart Apache.
+<li>Browse http://slytherin/caucho-status.  The status should be red (off),
+and the host:port and url mappings should match.
+<li>Create /home/slytherin/resin as "slytherin".
+<li>Create the slytherin-start.sh script.
+<li>Start the stytherin-start.sh script.  Error messages will appear in
+the /home/slytherin/resin/log files.
+root with the 
+<li>Resin should now be running as the user.  /caucho-status should now
+be green (on) and JSP files should work.
+<li>You'll probably want to create rc.d/init.d scripts to automatically
+start Resin on system startup.  Make sure you set any needed environment
+variables like JAVA_HOME.
+</ol>
+
+</section>
+  </body>
+</document>

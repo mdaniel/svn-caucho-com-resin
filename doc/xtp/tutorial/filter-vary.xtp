@@ -1,0 +1,142 @@
+<document>
+  <header>
+    <product>resin</product>
+    <resin-2.0>$resin/java_tut/filter-vary.xtp</resin-2.0>
+    <title>Servlet Filter with XTP -- Vary</title>
+    <description>
+      <p>This example uses a servlet filter to select the stylesheet
+        that is used for XTP pages.  If the user adds the style=plain query, the page will
+        use a plain stylesheet.  Otherwise the page will use a fancy
+        stylesheet.</p>
+
+      <p>The Servlet 2.3 specification creates a new way to control
+        servlets: filters.  Filters can inspect and modify the request or
+        response before and after passing the request to the servlet.</p>
+
+      <p>The filter itself just looks at the "style" parameter.  If it's
+        "plain", then the filter will set the <var/caucho.xsl.stylesheet/>
+        parameter to <var/plain.xsl/>.  XTP uses
+        <var/caucho.xsl.stylesheet/> when it transforms the page.</p>
+    </description>
+  </header>
+
+  <body>
+    <summary/>
+
+<example title="test.VaryFilter.java">
+package test;
+
+import java.io.*;
+import javax.servlet.*;
+import javax.servlet.http.*;
+
+public class VaryFilter implements Filter {
+  private FilterConfig config;
+
+  public void init(FilterConfig config)
+  {
+    this.config = config;
+  }
+
+  public void doFilter(ServletRequest request,
+                       ServletResponse response,
+                       FilterChain next)
+    throws IOException, ServletException
+  {
+    HttpServletRequest req = (HttpServletRequest) request;
+
+    String style = req.getParameter("style");
+
+    if ("plain".equals(style))
+      req.setAttribute("caucho.xsl.stylesheet", "plain.xsl");
+    else
+      req.setAttribute("caucho.xsl.stylesheet", "default.xsl");
+
+    next.doFilter(request, response);
+  }
+
+  public void destroy()
+  {
+  }
+}
+</example>
+
+<example title="web.xml">
+&lt;web-app>
+  &lt;filter-mapping url-pattern='*.xtp'
+                  filter-name='test.VaryFilter'/>
+&lt;/web-app>
+</example>
+
+<p>The sample Serif page has a small section and some content.  It's
+parsed as HTML before using the stylesheets.  The default stylesheet
+will color the section header red.  The plain stylesheet leaves it as
+black.</p>
+
+<example title="test.xtp">
+&lt;title>A Sample Title&lt;/title>
+
+&lt;s1 title="A Sample Section">
+
+Some content in the sample section.
+
+&lt;/s1>
+</example>
+
+<p>Unknown tags are copied from the Serif page to the generated HTML
+page unchanged.  So you can just add rules for tags you want to
+change.  The example forces the background of the body to white and
+formats a section with an H3 header colored red.</p>
+
+<example title="default.xsl">
+&lt;xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+                version="1.0">
+
+  &lt;!-- make sure '&lt;' is not printed as '&amp;lt;' -->
+  &lt;xsl:output disable-output-escaping='true'/>
+
+  &lt;!-- copy input to output -->
+  &lt;xsl:template match='*|@*'>
+    &lt;xsl:copy>
+      &lt;xsl:apply-templates select='node()|@*'/>
+    &lt;/xsl:copy>
+  &lt;/xsl:template>
+
+  &lt;xsl:template match="body">
+    &lt;body bgcolor=white>
+      &lt;xsl:apply-templates/>
+    &lt;/body>
+  &lt;/xsl:template>
+
+  &lt;xsl:template match="s1">
+    &lt;h3>&lt;font color=red>&lt;xsl:value-of select="@title"/>&lt;/font>&lt;/h3>
+    &lt;xsl:apply-templates/>
+  &lt;/xsl:template>
+&lt;/xsl:stylesheet>
+</example>
+
+<p>The plain stylesheet leaves the Serif page untouched except for
+converting the section title to use plain H3.</p>
+
+<example title="plain.xsl">
+&lt;xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+                version="1.0">
+
+  &lt;!-- make sure '&lt;' is not printed as '&amp;lt;' -->
+  &lt;xsl:output disable-output-escaping='true'/>
+
+  &lt;!-- copy input to output -->
+  &lt;xsl:template match='*|@*'>
+    &lt;xsl:copy>
+      &lt;xsl:apply-templates select='node()|@*'/>
+    &lt;/xsl:copy>
+  &lt;/xsl:template>
+
+  &lt;xsl:template match="s1">
+    &lt;h3>&lt;xsl:value-of select="@title"/>&lt;/h3>
+    &lt;xsl:apply-templates/>
+  &lt;/xsl:template>
+&lt;/xsl:stylesheet>
+</example>
+  </body>
+</document>

@@ -1,0 +1,43 @@
+<mbean>
+  <class-name>com.caucho.server.resin.ThreadPoolMBean</class-name>
+
+  <description>
+    ThreadPoolMBean manages the Resin-wide thread pool.
+  </description>
+
+  <attribute name="ThreadMax">
+    <description>
+      The configured maximum number of allowed threads.
+    </description>
+  </attribute>
+
+  <attribute name="SpareThreadMin">
+    <description>
+      The configured minimum number of idle threads.
+    </description>
+  </attribute>
+
+  <attribute name="ThreadCount">
+    <description>
+      The current total number of threads managed by the pool.
+    </description>
+  </attribute>
+
+  <attribute name="ActiveThreadCount">
+    <description>
+      The number of threads currently running a ThreadTask.
+    </description>
+  </attribute>
+
+  <attribute name="IdleThreadCount">
+    <description>
+      The number of idle threads waiting for a ThreadTask.
+    </description>
+  </attribute>
+
+  <notification name="com.caucho.server.resin.ThreadPool.max">
+    <description>
+      Notification sent when the maximum number of threads is hit.
+    </description>
+  </notification>
+</mbean>

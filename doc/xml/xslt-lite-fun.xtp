@@ -1,0 +1,642 @@
+<document>
+  <header>
+    <product>resin</product>
+    <resin-2.0>$resin/ref/stylescript.xtp</resin-2.0>
+    <title>XSLT-lite</title>
+  </header>
+
+  <body>
+    <summary/>
+
+<section title="XSLT-lite Core">
+
+<defun name=apply-templates title='$apply-templates(select);'>
+<p>Evaluates the children of the current node.
+<code/$apply-templates/> recursively processes the children.  If a
+template has no <code/$apply-templates()/>, then the children are
+ignored.</p>
+
+<deftable>
+<tr><th>attribute<th>meaning
+<tr><td>select<td>An XPath select pattern selecting the nodes to
+evaluate next. (optional)
+<tr><td>mode<td>only selects templates with the given <var/mode/>
+</deftable>
+
+
+<p>The following example writes the 'a' nodes followed by the 'b'
+nodes and ignores everything else.</p>
+
+<example>
+$template(double) &lt;&lt;
+  $apply-templates(a);
+  $apply-templates(b);
+>>
+</example>
+
+<example>
+&lt;double>
+  &lt;b>b1&lt;/b>
+  &lt;a>a1&lt;/a>
+  &lt;b>b2&lt;/b>
+  &lt;a>a2&lt;/a>
+&lt;/double>
+</example>
+
+<results>
+a1
+a2
+b1
+b2
+</results>
+
+</defun>
+
+<defun name=attribute title='$attribute(name) &lt;&lt;...>>'>
+<p>Adds an attribute to the element.  The name can be computed
+using an attribute value template.</p>
+
+<deftable>
+<tr><th>Attribute<th>Meaning
+<tr><td>name<td>Name of the new attribute.
+</deftable>
+
+<example>
+$template(a) &lt;&lt;
+  &lt;c>
+    $attribute (b{@id}) &lt;&lt;
+      $value-of(c{@id});
+    >>
+  &lt;/c>
+>>
+</example>
+<results>
+&lt;c b3='c3'/>
+</results>
+
+</defun>
+
+<defun name=copy title='$copy() &lt;&lt;...>>'>
+<p>Copies the current node, but not children or attributes, to the
+output.</p>
+
+<p>To copy an element, a stylesheet must copy the attributes as well.
+
+<p>The following example is the identity stylesheet. It copies input
+to the output including the attributes.</p>
+
+<example>
+$template(@*|node()) &lt;&lt;
+  $copy() &lt;&lt;
+    $apply-templates(@*|node());
+  >>
+>>
+</example>
+</defun>
+
+<defun name=if title="$if (test) &lt;&lt;... >>">
+<p>Executes the template if <var/test/> is true.</p>
+
+<example>
+$template(signal) &lt;&lt;
+  $if (@color="red") &lt;&lt;stop>>
+  $else if (@color="green") &lt;&lt;go>>
+  $else &lt;&lt;yield>>
+>>
+</example>
+<example>
+&lt;signal color="green"/>
+&lt;signal color="ultramaroon"/>
+&lt;signal color="red"/>
+</example>
+<results>
+go
+yield
+stop
+</results>
+
+</defun>
+
+<defun name=output title='$output(...);'>
+<p>Controls the output printing.</p>
+
+<deftable>
+<tr><th>Attribute<th>Meaning
+<tr><td>method<td>xml or html or text.  Select printing method
+<tr><td>version<td>XML version
+<tr><td>encoding<td>character set to print the results
+<tr><td>omit-xml-declaration<td>skip the XML or HTML declaration
+<tr><td>indent<td>pretty-print or not
+<tr><td>media-type<td>mime-type
+<tr><td>disable-output-escaping<td>'&lt;' gets printed as '&lt;', not '&amp;lt;'
+</deftable>
+
+</defun>
+
+<defun name=template title='$template(match) &lt;&lt; ... >>'>
+<p>Establishes a pattern and replacement text.
+<code/$template/> registers its pattern with the XSL processing
+engine.  When a node matches the pattern, XSL will process the
+contents of the template.</p>
+
+<p>Pure XSL processes the contents slightly differently than XTP.  XSL
+expects all tags to be valid XML.  XTP is more forgiving.  If the tag is not
+one of those defined by XSL, it will treat the tag as raw text.</p>
+
+<deftable>
+<tr><th>attribute<th>meaning
+<tr><td>match<td>the XPath match pattern (required)
+<tr><td>mode<td>string grouping templates into a special mode
+<tr><td>name<td>Name for later use by call-template
+<tr><td>priority<td>conflict-resolving priority, an integer
+</deftable>
+
+<p>In the following example, the template matches any 'box' tag.  The
+contents of the box are placed in a centered table 80% of the current
+width.</p>
+
+<example>
+$template(box) &lt;&lt;
+<var>  &lt;center&gt;
+  &lt;table width='80%'&gt;
+  &lt;tr&gt;&lt;td&gt;</var>
+    $apply-templates();
+<var>  &lt;/td>&lt;/tr>
+  &lt;/table&gt;
+  &lt;/center&gt;</var>
+>>
+</example>
+
+<example>
+&lt;p&gt;Here's a boxed quote,&lt;/p&gt;
+
+&lt;box&gt;
+To be or not to be...
+&lt;/box&gt;
+</example>
+
+<results>
+&lt;p&gt;Here's a boxed quote,&lt;/p&gt;
+
+&lt;center&gt;
+&lt;table width='80%'&gt;
+&lt;tr&gt;&lt;td&gt;
+  To be or not to be...
+&lt;/td&gt;&lt;/tr>
+&lt;/table&gt;
+&lt;/center&gt;
+</results>
+
+</defun>
+
+<defun name=value-of title="$value-of(select);">
+<p>Writes a calculated value output.</p>  
+
+<p><code/value-of/> is particularly useful for extracting attribute
+values.  The following example creates a JSP tag which adds two
+numbers.</p>
+
+<example>
+$template(ct:sum) &lt;&lt;
+<var>&lt;jsp:expression></var>
+$value-of(@a);<var> + </var>$value-of(@b);
+<var>&lt;/jsp:expression></var>
+>>
+</example>
+</defun>
+
+</section>
+
+<section title="XSLT-lite Elements">
+
+<defun name=apply-imports title='$apply-imports();'>
+<p>Like Java's <code/super/>, calls the overridden template.</p>
+</defun>
+
+<defun name=attribute-set title="$attribute-set(name) &lt;&lt;...>>">
+<p>Defines a named attribute set.  The attributes in the set
+are defined by xsl:attribute elements.</p>
+
+<deftable>
+<tr><th>Attribute<th>Meaning
+<tr><td>name<td>Name of the attribute set.
+</deftable>
+
+<example>
+$attribute-set(font) &lt;&lt;
+  $attribute(font-size) &lt;&lt;12pt>>
+  $attribute(font-weight) &lt;&lt;bold>>
+>>
+
+$template(a) &lt;&lt;
+  &lt;c xsl:use-attribute-sets='font'/>
+>>
+</example>
+<results>
+&lt;c font-size='12pt' font-weight='bold'/>
+</results>
+
+</defun>
+
+<defun name=call-template title='$call-template(name) &lt;&lt;...>>'>
+<p>Calls a named template with the current node.
+<code/$call-template/> lets stylesheets reuse common code, like
+functions.  It works like <code/$apply-templates(.);/>
+except that it calls based on a template name.</p>
+
+<deftable>
+<tr><th>Attribute<th>Meaning
+<tr><td>name<td>template name to call
+<tr><td>mode<td>template mode
+</deftable>
+</defun>
+
+<defun name=choose title='$choose(test) &lt;&lt;...>>'>
+<p>Implements a select block.  The <code/$when/>
+statements are tested in order.  The first matching one is executed.
+If none match, the <code/$otherwise/> block is executed.</p>
+
+<deftable>
+<tr><th>Attribute<th>Meaning
+<tr><td>test<td>XPath expression evaluating to a boolean.
+</deftable>
+
+<example>
+$template(a) &lt;&lt;
+  $choose() <<
+    $when(@color="red") &lt;&lt;stop>>
+    $when(@color="green") &lt;&lt;go>>
+    $otherwise() &lt;&lt;yield>>
+  >>
+>>
+</example>
+
+</defun>
+
+<defun name=comment title='$comment() &lt;&lt;...>>'>
+<p>Creates a new comment.  The contents of the $comment() element
+become the contents of the comment.</p>
+
+<example>
+$template(a) &lt;&lt;
+  $comment() << Text for the comment. >>
+>>
+</example>
+<results>
+&lt;!-- Text for the comment. -->
+</results>
+
+</defun>
+
+<defun name=copy-of title='$copy-of(select);'>
+<p>Copies a sub-tree into the output. <code/$copy-of/> resembles
+<code/$value-of/>.  <code/value-of/> always converts the value to a
+string.  <code/copy-of/> will copy subtrees. </p>
+
+<deftable>
+<tr><th>attribute<th>meaning
+<tr><td>select<td>An XPath expression to be copied.
+</deftable>
+</defun>
+
+<defun name=element title="$element(name) &lt;&lt;...>>">
+<p>Creates a new element.  The name can be computed using
+an attribute value template.</p>
+
+<deftable>
+<tr><th>Attribute<th>Meaning
+<tr><td>name<td>Name of the new element.
+</deftable>
+
+<example>
+$template(a) &lt;&lt;
+  $element(b{@id}) &lt;&lt;
+    <var>&lt;c/></var>
+  >>
+>>
+</example>
+<example>
+&lt;a id="3"/>
+</example>
+<results>
+&lt;b3>&lt;c/>&lt;/b3>
+</results>
+
+</defun>
+
+<defun name=for-each title="$for-each(select) &lt;&lt; ... >>">
+<p>Loops over child select patterns.  <code/$for-each()/>
+gives stylesheets complete control over the actions for child nodes.
+</p>
+
+<p>Usually, stylesheets will want to use the full pattern matching
+capability given by XSL.  Sometimes the specific structure is known,
+like sections in a chapter.  When generating a table of contents, it
+may be easier to scan over the sections.</p>
+
+<example>
+$template(contents) <<
+<var>  &lt;ol&gt;</var>
+  $for-each(section) &lt;&lt;
+    <var>&lt;li&gt;</var>$value-of(@title);<var>&lt;/li></var>
+  >>
+<var>  &lt;/ol&gt;</var>
+>>
+</example>
+
+</defun>
+
+<defun name=import title='$import(href);'>
+<p>Imports a stylesheet.  <code/$import/> lets stylesheets
+borrow from each other.</p>
+
+<deftable>
+<tr><th>Attribute<th>Meaning
+<tr><td>href<td>Path to the imported stylesheet
+</deftable>
+
+</defun>
+
+<defun name=param title='$param(name);'>
+<p>Declares an XSL parameter.  <code/$param/>'s
+<code/select/> parameter as a default.  If the variable has been
+assigned, it uses the old value.</p>
+
+<deftable>
+<tr><th>Attribute<th>Meaning
+<tr><td>name<td>variable name
+<tr><td>select<td>variable value
+</deftable>
+
+<example>
+$template(name=>fun) &lt;&lt;
+  $param(foo, select=>15);
+  $value-of($foo);
+>>
+
+$template(a) &lt;&lt;
+  $call-template(fun) &lt;&lt;
+    $with-param(foo, select=>1+2);
+  >>
+>>
+
+</example>
+<results>
+3
+</results>
+
+</defun>
+
+<defun name=pi title='$processing-instruction(name) &lt;&lt;...>>'>
+<p>Creates a new processing instruction.</p>
+
+<deftable>
+<tr><th>Attribute<th>Meaning
+<tr><td>name<td>Processing instruction name.
+</deftable>
+
+<example>
+$template(a) &lt;&lt;
+  $processing-instruction(foo) &lt;&lt; Text for the PI. >>
+>>
+</example>
+<results>
+&lt;?foo Text for the PI?>
+</results>
+
+</defun>
+
+<defun name=sort title="$sort(...) &lt;&lt;...>>">
+<p>Sorts nodes in $apply-templates or
+$for-each.</p>
+
+<deftable>
+<tr><th>Attribute<th>Meaning
+<tr><td>select<td>value to sort on (default = '.')
+<tr><td>order<td>ascending or descending  (default = ascending)
+<tr><td>data-type<td>text or number (default = text)
+</deftable>
+
+<note>case-order is not implemented</note>
+</defun>
+
+<defun name=text title="$text() &lt;&lt;...>>">
+<p>Writes the contents to the output.  <code/$text/> is
+useful when you need to force spacing or special text.  Usually,
+XSLT-lite will produce the text you expect.  <code/$text/> is there
+for the strange cases when you need full control.</p>
+</defun>
+
+<defun name=variable title='$variable(name);'>
+<p>Assignes an XSL variable.  Variables can be retrieved using
+the XPath variable syntax.</p>
+
+<deftable>
+<tr><th>Attribute<th>Meaning
+<tr><td>name<td>variable name
+<tr><td>select<td>variable value
+</deftable>
+
+<example>
+$variable(foo, select=>1+1);
+
+$template(a) &lt;&lt;
+  $value-of($foo);
+>>
+</example>
+<results>
+2
+</results>
+
+</defun>
+</section>
+
+<section name='xsl' title='Resin extensions'>
+<defun name=expression title="$expr(expr);"
+       version='Resin 1.2'>
+<p>Prints the value of the Java expression, <var/expr/>.
+Stylesheets can use any Java expression.  The following
+variables are pre-defined in stylesheets.</p>
+
+<deftable>
+<tr><th>Variable<th>Meaning
+<tr><td>node<td>The current org.w3c.dom.Node.
+<tr><td>out<td>The com.caucho.xsl.XslWriter.
+</deftable>
+
+<p>In addition, the <var/out/> variable gives access to the servlet
+PageContext with the <var/page/> property.</p>
+
+<example>
+$template(welcome-user) &lt;&lt;
+  $text() &lt;&lt;Welcome back, >>
+  $scriptlet() &lt;&lt;
+    String user = "Harry";
+  >>
+  $expr(user);
+>>
+</example>
+</defun>
+
+<defun name=scriptlet title='$scriptlet() &lt;&lt; statement_list >>'
+       version='Resin 1.2'>
+<p>Executes the <var/statement_list/> scriptlet.  The
+JavaScript code can be any statement list.  The same implicit
+variables are allowed in scriptlets as in expressions.</p>
+
+<p>The following example creates a number of stars:</p>
+
+<example>
+$template(ct:stars) &lt;&lt;
+  $scriptlet() &lt;&lt;
+    int count = Integer.parseInt(node.getAttribute("count"));
+    for (int i = 0; i < count; i++)
+      out.print('*');
+  >>
+>>
+</example>
+
+<example>
+1 = &lt;ct:stars count='1'/>
+9 = &lt;ct:stars count='9'/>
+</example>
+<results>
+1 = *
+9 = *********
+</results>
+
+</defun>
+
+<defun name=declaration title="$declaration">
+<p>Adds declaration code, i.e. code outside of any function.</p>
+
+<example>
+$declaration &lt;&lt;
+double dist(double x1, double y1, double x2, double y2)
+{
+  return Math.sqrt((x1 - x2) * (x1 - x2) +
+                   (y1 - y2) * (y1 - y2));
+}
+>>
+
+</example>
+
+</defun>
+
+<defun name=page title='$directive.page(attributes);'>
+<p>Sets page directives.</p>
+<deftable>
+<tr><th>name<th>meaning
+<tr><td>language<td>script language, default Java
+<tr><td>session<td>use sessions, default false
+<tr><td>errorPage<td>page to display for errors
+<tr><td>errorPage<td>page to display for errors
+<tr><td>import<td>imports Java packages 
+<tr><td>contentType<td>content-type of the generated page
+</deftable>
+
+</defun>
+<!--
+<defun name=cache title='$directive.cache(attributes);'>
+
+<p>Caches the generated JSP file by default.</p>
+
+<p>Caching for XSL is more complicated than for JSP because only some
+templates may be used in a page.  Caching is based on the generated
+page, not simply on the stylesheet.
+
+<p>A page that just uses static
+templates is automatically cached.  Pages that use scripts just for
+simple calculation can also be cached.  But pages that use scripts
+based on the request cannot be cached.</p>
+
+<deftable>
+<tr><th>name<th>meaning
+<tr><td>file<td>the JSP file depends on <var/file/>.
+<tr><td>no-cache<td>do not cache the generated JSP.
+</deftable>
+
+</defun>
+-->
+
+</section>
+
+<section title="Abbreviations">
+
+<defun name=value-of title='$(expr)' index='value-of'>
+<p>$value-of shortcut prints the value of the XPath expression.</p>
+
+<p>The value-of syntax is equivalent to:</p>
+<def>
+$value-of(<var/expr/>);
+</def>
+
+</defun>
+
+<defun name=expression title='&lt;#= expression #&gt;'
+       index='expression'>
+<p>$expression shortcut prints the value of <var/expression/> using
+the page's scripting language.</p>
+
+<p>The expression syntax is equivalent to:</p>
+<def>
+$expr(<var/expression/>);
+</def>
+
+</defun>
+
+<defun name=scriptlet title="&lt;# statement-list #>">
+<p>$scriptlet shortcut executes the statements using the page's
+scripting language.</p>
+
+<p>The <var/scriptlet/> is any statement list in the language,
+e.g. Java.
+
+<p>The scriptlet syntax is equivalent to </p>
+<def>
+$scriptlet() &lt;&lt;
+<var/scriptlet/>
+>>
+</def>
+
+</defun>
+
+<defun name=declaration title='&lt;#! declaration #&gt;'
+       index='declaration'>
+<p>$declaration shortcut defines functions and variables.</p>
+
+<p>The declaration syntax is equivalent to:</p>
+<def>
+$declaration() &lt;&lt;
+<var/declaration/>
+>>
+</def>
+
+<example>
+&lt;#!
+function dist(x1, y1, x2, y2)
+{
+  return Math.sqrt((x1 - x2) * (x1 - x2) +
+                   (y1 - y2) * (y1 - y2));
+}
+#>
+
+ct:dist &lt;&lt;
+($(@x1),$(@y1)) to ($(@x2),$(@y2)) = &lt#=
+dist(node.attribute.x1, node.attribute.y1,
+     node.attribute.x2, node.attribute.y2)
+#>
+
+>>
+</example>
+<example>
+&lt;ct:dist x1='0' y1='0' x2='5' y2='12'/>
+</example>
+<results>
+(0,0) to (5,12) = 13
+</results>
+
+</defun>
+</section>
+  </body>
+</document>

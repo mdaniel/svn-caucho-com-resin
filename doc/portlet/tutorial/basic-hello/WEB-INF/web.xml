@@ -1,0 +1,13 @@
+<web-app xmlns="http://caucho.com/ns/resin"
+         xmlns:resin="http://caucho.com/ns/resin/core">
+
+  <servlet servlet-name="hello" 
+           servlet-class="com.caucho.portal.generic.PortletServlet">
+    <init>
+      <portlet resin:type="example.HelloWorldPortlet"/>
+    </init>
+  </servlet>
+
+  <servlet-mapping url-pattern="/hello" servlet-name="hello"/>
+</web-app>
+

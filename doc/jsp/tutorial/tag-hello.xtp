@@ -1,0 +1,83 @@
+<document>
+  <header>
+    <product>resin</product>
+    <resin-2.0>$resin/java_tut/tag-hello.xtp</resin-2.0>
+    <title>Empty Tag</title>
+    <description>
+      <p>The simplest kind of tag does not evaluate it's contents.</p>
+    </description>
+  </header>
+
+  <body>
+    <summary/>
+
+<section title="Using a taglib">
+
+<p>Using a taglib in a JSP file has two steps.  First, the JSP needs to
+define the <var/prefix/> and the <var/tld/> (tag library descriptor)
+for the tag.</p>
+
+<p>Normally, JSP copies bytes from the .jsp to the browser without
+interpreting it.  The <var/taglib/> directive tells the JSP engine to
+treat elements starting with the prefix as JSP extension tags. </p>
+
+<example title="hello.jsp">
+&lt;%@ taglib prefix="ct" uri="WEB-INF/hello.tld" %>
+Message: &lt;ct:hello/>
+</example>
+<results>
+Message: hello, world
+</results>
+
+</section>
+
+<section title="Defining the tag">
+
+<p>Many simple tags can just extend <var/TagSupport/>.  The hello tag
+implements <var/doStartTag/>.  When the hello tag starts, the JSP will
+execute doStartTag.  In this case, it'll print "hello, world".</p>
+
+<p>Since the content of the hello tag doesn't matter, HelloTag
+returns <var/SKIP_BODY/>.  Empty tags will generally
+return <var/SKIP_BODY/>.</p>
+
+<example title="HelloTag.java">
+package test;
+
+import java.io.*;
+import javax.servlet.jsp.*;
+import javax.servlet.jsp.tagext.*;
+
+public class HelloTag extends TagSupport  {
+  public int doStartTag() throws JspException
+  {
+    try {
+      pageContext.getOut().println("hello, world");
+    } catch (IOException e) {
+    }
+    
+    return SKIP_BODY;
+  }
+}
+</example>
+
+</section>
+
+<section title="Configuring the tag">
+
+<p>Finally, you need to configure the tag in a .tld (tag library
+descriptor) file.  The .tld matches the tag name <var/hello/> with the tag
+class <var/test.HelloTag/>.</p>
+
+<example title="WEB-INF/hello.tld">
+&lt;taglib>
+  &lt;tag>
+    &lt;name>hello&lt;/name>
+    &lt;tagclass>test.HelloTag&lt;/tagclass>
+  &lt;/tag>
+&lt;/taglib>
+</example>
+
+</section>
+  </body>
+</document>

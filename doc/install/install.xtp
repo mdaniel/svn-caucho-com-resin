@@ -1,0 +1,233 @@
+<document>
+  <header>
+    <product>resin</product>
+    <version>Resin 3.0</version>
+    <resin-2.0>$resin/ref/starting.xtp</resin-2.0>
+    <title>Resin Installation Quick Start</title>
+  </header>
+
+  <body>
+    <summary/>
+
+<section name="quickstart" title="Quick Start for the Impatient">
+
+<p>The Resin standalone web server starts 
+listening to HTTP requests on port 8080 and listens on port 6802
+for any Apache or IIS plugin.  Resin can then be
+used for development or evaluation.  The steps are:</p>
+
+<ol>
+<li>Install JDK 1.4 or later.  On Unix, set the JAVA_HOME variable or
+link /usr/java to the java home.  On Windows, check to make sure the
+JDK installation set JAVA_HOME correctly.
+<li>unzip/untar the Resin download
+<li>On Unix, execute use ./configure; make; make install
+<li>Start <var/resin-3.0.0/bin/httpd.sh/> on Unix or <var/resin-3.0.0/bin/httpd.exe/> on Win32
+<li>Browse <code>http://localhost:8080</code>
+<li>Add JSP files like <var/resin-3.0.0/doc/hello.jsp/>.  The URL in your
+browser will be <code>http://localhost:8080/hello.jsp</code>
+<li>Add servlets like <var/resin-3.0.0/doc/WEB-INF/classes/test/HelloServlet.java/>
+<li>Add .war files like <var/resin-3.0.0/webapps/hello.war/>, url in your
+browser is <code>http://localhost:8080/hello</code>
+<li>Create web-apps directly like
+<var/resin-3.0.0/webapps/hello/index.jsp/>
+url in your browser is <code>http://localhost:8080/hello</code>.
+Create a file <var/resin-3.0.0/webapps/hello/WEB-INF/web.xml/> to
+configure the 'hello' web application.
+<li>If needed, modify the Resin configuration in <var/resin-3.0.0/conf/resin.conf/>
+<li>.war files will be deployed in resin-3.0.x/webapps.
+</ol>
+
+<p>Until you're ready to deploy the server, those are all the
+steps needed to get started with Resin.</p>
+
+</section>
+
+<section title='Preconditions'>
+
+<p>Resin needs Java before it can run.  It needs JDK 1.4 or a later JDK.</p>
+
+<p>Sun's JDK for Windows, Solaris, and Linux can be found at
+<a href='http://java.sun.com'>http://java.sun.com</a>.  Sun also has
+links to some other ports of the JDK.</p>
+
+<p>Linux users can also check out the <a href='http://www.ibm.com'>IBM
+JDK</a>.</p>
+
+</section>
+
+<section title="Configuration overview">
+
+<p>Resin has a number of major configuration options, each with a separate
+page:</p>
+
+<ul>
+<li><a href="httpd.xtp">Standalone web server</a> (recommended)</li>
+<li><a href="cse-apache-unix.xtp">Unix Apache</a></li>
+<li><a href="cse-apache-win.xtp">Windows Apache</a></li>
+<li><a href="cse-iis.xtp">Windows IIS</a></li>
+<!--
+<li><a href="cse-netscape.xtp">Netscape iPlanet</a></li>
+-->
+</ul>
+
+<p>
+The <var/httpd/> executable starts Resin for all configurations.
+</p>
+
+<p>If you have any trouble starting Resin, check the FAQ at <a
+href='http://www.caucho.com/quercus/faq'>http://www.caucho.com/quercus/faq</a>.</p>
+
+</section>
+
+<section title='Standalone Web Server'>
+
+<p>The easiest and fastest Resin configuration uses the
+<a href='httpd.xtp'>Resin httpd</a>.  This configuration provides a
+Java HTTP server. We recommend you start with this
+before trying any other configuration.</p>
+
+<figure src='httpd.gif'/>
+
+<p>The server listens at port 8080 in the default configuration and
+can be changed to the HTTP port 80 during deployment.</p>
+
+<section title="On Windows:">
+
+<ol>
+<li>Install JDK 1.4 or later.</li>
+<li>Check that the environemnt variable JAVA_HOME is set to the JDK location, i.e "c:\j2sdk1.4.1_01"</li>
+<li>Unzip resin-3.0.0.zip</li>
+<li>Define the environment variable RESIN_HOME to the location of
+Resin, for example "c:\resin-3.0.0"</li>
+<li>Execute resin-3.0.0/bin/httpd</li>
+<li>Browse http://localhost:8080</li>
+</ol>
+</section>
+
+<section title="On Unix (including Linux and MacOS-X):">
+
+<ol>
+<li>Install JDK 1.4 or later and link /usr/java to the Java home or define the environment variable JAVA_HOME.</li>
+<li>tar -vzxf resin-3.0.0.tar.gz</li>
+<li>cd resin-3.0.0
+<li>./configure</li>
+<li>make</li>
+<li>make install</li>
+<li>Execute resin-3.0.0/bin/httpd.sh</li>
+<li>Browse http://localhost:8080</li>
+</ol>
+
+</section>
+
+<p>For more details, see the <a href="httpd.xtp">Resin standalone</a>
+configuration page.</p>
+
+</section>
+
+<section title='Resin with Apache'>
+
+<p>If you are already using Apache for your web server, you
+can use Resin with Apache on <a
+href='cse-apache-unix.xtp'>Unix</a> or <a
+href='cse-apache-win.xtp'>Win32</a>.  This configuration uses Apache
+to serve html, images, PHP, or Perl, and Resin to
+serve JSPs and Servlets.</p>
+
+<p>The Apache configuration uses two pieces: a C program extending
+Apache (<var/mod_caucho/>) and Java program supporting servlets and
+JSP (<var/srun/>.)  The two pieces communicate with a special high-speed
+protocol.</p>
+
+<figure src='apache_srun.gif'/>
+
+<p>To configure Apache with Resin, you must
+configure both Apache and Resin.  The Resin
+configuration is identical to Resin's httpd configuration.  The Apache
+configuration tells Apache how to find Resin.</p>
+
+<ol>
+<li>Compile mod_caucho.so using <code>./configure --with-apache; make</code></li>
+<li>Any needed Apache httpd.conf changes</li>
+<li>Any needed Resin resin.conf changes</li>
+<li>Restart Apache</li>
+<li>Start Resin with <code>resin-3.0.0/bin/httpd.sh</code> on Unix or
+<code>resin-3.0.0/bin/httpd</code> on Windows.</li>
+</ol>
+
+<p>On Unix, you'll run configure using <code>--with-apache</code> and then <code>make</code>:
+</p>
+
+<example>
+unix> ./configure --with-apache=/usr/local/apache
+unix> make
+unix> make install
+</example>
+</section>
+
+<!--
+<section title='Resin with Netscape'>
+
+<p>On unix, Resin can also be configured to
+<a href='cse-netscape.xtp'>run with Netscape</a>.  The idea is
+the same as for Apache.</p>
+
+<p>On Unix, you'll run configure using <code>--with-netscape</code> and
+then <code>make</code>.
+The argument to <code>--with-netscape</code> is the directory containing the netscape
+start and stop scripts, i.e. the parent of the config directory.</p>
+
+<example>
+unix> ./configure --with-netscape=/usr/local/netscape/https-your-hostname
+unix> make
+</example>
+
+<p>On Windows, the setup program should configure Netscape's obj.conf
+correctly.</p>
+
+</section>
+-->
+
+<section title='Resin with IIS'>
+
+<p>You can also combine <a href='cse-iis.xtp'>IIS and Resin</a>.  IIS
+serves static content like html and images and Resin serves JSPs and
+Servlets.   The IIS configuration requires two pieces:
+<var/isapi_srun.dll/>, an ISAPI extension which lets IIS talk to
+Resin, and <var/srun/>, Resin's Java support.</p>
+
+<figure src='iis_srun.gif'/>
+
+<p>For this setup you must configure both IIS and Resin.  The Resin
+configuration is identical to Resin's httpd configuration.  The IIS
+configuration tells IIS how to find Resin.
+</p>
+
+<ol>
+<li>Setup the registry and IIS using resin-3.0.0/bin/setup</li>
+<li>Any needed Resin resin.conf changes</li>
+<li>Restart IIS</li>
+<li>Start Resin with resin-3.0.0/bin/httpd.</li>
+</ol>
+
+</section>
+
+<!--
+<section title="Resin with O'Reilly WebSite">
+
+<p>You can also combine <a href='cse-oreilly-website.xtp'>WebSite and Resin</a>.
+WebSite serves static content like html and images and Resin serves JSPs and
+Servlets.   The WebSite configuration requires two pieces:
+<var/isapi_srun.dll/>, an ISAPI extension which lets IIS talk to
+Resin, and <var/srun/>, Resin's Java support.
+</p>
+
+<figure src='iis_srun.gif'/>
+
+<p>Configuration is identical to the IIS configuration.</p>
+
+</section>
+-->
+
+  </body>
+</document>

@@ -1,0 +1,10 @@
+<hibernate-mapping>
+  <class name="example.Course" table="amber_find_courses">
+    <id name="id">
+      <generator class="identity"/>
+    </id>
+
+    <property name="name"/>
+    <property name="teacher"/>
+  </class>
+</hibernate-mapping>

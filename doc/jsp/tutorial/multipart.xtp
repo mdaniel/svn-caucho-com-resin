@@ -1,0 +1,55 @@
+<section>
+  <header>
+    <product>resin</product>
+    <title>Multipart Forms and File Uploading</title>
+    <type>example</type>
+    <resin-2.0>$resin/java_tut/multipart.xtp</resin-2.0>
+    <brief>
+      Multipart forms let browsers upload files to the website 
+    </brief>
+    <description>
+      Multipart forms let browsers upload files to the website.  They
+      also have better handling for internationalization.
+    </description>
+  </header>
+
+<p>Multipart forms let browsers upload files to the website.  They also
+have better handling for internationalization.</p>
+
+<p>Default form handling uses the application/x-www-form-urlencoded
+content type. Multipart forms use the multipart/form-data encoding.</p>
+
+<example title='form.html'>
+
+&lt;form action="multipart.jsp" method="POST"
+      enctype="multipart/form-data">
+
+&lt;input type="file" name="file">&lt;br>
+
+&lt;input type="submit">
+&lt;/form>
+
+</example>
+
+<p>Resin's file uploading stores the uploaded file in a temporary
+directory.  A servlet can get the filename for the temporary file by
+retrieving the form parameter.  In the example,
+<var/getParameter("file")/> gets the filename.</p>
+
+<p>Servlets will generally copy the contents of the file to its
+permanent storage, whether stored on disk or in a database.</p>
+
+<example title="multipart.jsp">
+&lt;%
+String fileName = request.getParameter("file");
+FileInputStream is = new FileInputStream(fileName);
+
+int ch;
+while ((ch = is.read()) >= 0)
+  out.print((char) ch);
+
+is.close();
+%>
+</example>
+
+</section>

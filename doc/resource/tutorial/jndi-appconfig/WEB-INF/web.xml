@@ -1,0 +1,33 @@
+<web-app>
+  <!-- make an example.AppConfig object, available with the
+     - JNDI name "java:comp/env/config/Application"
+    -->
+  <resource jndi-name='config/Application'>
+    <type>example.AppConfig</type>
+
+    <!-- config-files-location
+       -
+       - set's the base for subsequent config file lookups.
+       -
+       - EL variables are very useful here, such as 
+       - app.appDir, server.rootDir, host.rootDir
+       -
+       - You can also use an http url, although you will not be able
+       - to write files then.
+      -->
+    <init>
+      <config-files-location>${app.docDir}/WEB-INF/config</config-files-location>
+      <!-- <config-files-location>http://hogwarts.com/config</config-files-location> -->
+    </init>
+  </resource>
+
+  <servlet>
+    <servlet-name>test</servlet-name>
+    <servlet-class>example.TestServlet</servlet-class>
+  </servlet>
+
+  <servlet-mapping>
+    <url-pattern>/test</url-pattern>
+    <servlet-name>test</servlet-name>
+  </servlet-mapping>
+</web-app>

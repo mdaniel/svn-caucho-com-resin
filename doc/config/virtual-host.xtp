@@ -1,0 +1,533 @@
+<document>
+  <header>
+    <product>resin</product>
+    <resin-2.0>$resin/ref/virtual-host.xtp</resin-2.0>
+    <title>Virtual Hosting</title>
+    <description>
+      <p>Each Resin instance can serve many virtual hosts.  The virtual
+        host will have its own servlets and documents.  For greater isolation,
+        you can configure each virtual host to have its own JVM and you can
+        have all the virtual hosts controlled by a single web server.</p>
+    </description>
+
+  </header>
+
+  <body>
+    <summary/>
+
+<section title='Virtual Host Concepts'>
+
+<p>A "virtual host" has a unique <var/domain name/>, but the same <var/ip
+address/> as other domain names.  For example, <code>www.gryffindor.com</code>
+and <code>www.slytherin.com</code> can have the same ip address
+<code/192.168.0.13/> and share the same web server.</p>
+
+<p>In this scenario, both www.gryffindor.com and www.slytherin.com are
+registered with the standard domain name service registry as having the IP
+address <code/192.168.0.13/>.  A user types in the url
+<code/http://www.gryffindor.com/hello.jsp/> in their browser.  The user's
+computer resolves the name <code/www.gryffindor.com/> to the IP address
+<code/192.168.0.13/>.  Resin is the webserver on the machine that has the IP
+address 192.168.0.13, so it receives the request.  Resin determines which
+virtual host to use by looking at the request URL.  Resin get's the from a HTTP
+header submitted by the browser.</p>
+
+<note>IIS, just to be different, uses the term "virtual sites" instead of "virtual hosts".</note>
+
+<section name="concepts" title='Testing virtual hosts'>
+<p>During development and testing, it is often inconvenient or impossible to
+use real virtual host names that are registered as internet sites, and resolve
+to an internet-available IP address.    OS-level features on the test client
+machine can be used to map a virtual host name to an IP address.  
+
+<p>For example, developer's often run the Resin server and the test client
+(usually a browser) on the same machine.  The OS is configured to map the "www.gryffindor.com" and
+"www.slytherin.com" names to "127.0.0.1", pointing these host names back to
+computer that the client is running on.</p>
+
+<p>Unix user's edit the file <code>/etc/hosts</code>:
+
+<example title="/etc/hosts">
+127.0.0.1       localhost
+
+127.0.0.1       www.gryffindor.com
+127.0.0.1       www.slytherin.com
+</example>
+<p>Windows user edit the file <code>C:\WINDOWS\SYSTEM32\DRIVERS\ETC\HOSTS</code>:
+
+<example title="C:\WINDOWS\SYSTEM32\DRIVERS\ETC\HOSTS">
+127.0.0.1       localhost
+
+127.0.0.1       www.gryffindor.com
+127.0.0.1       www.slytherin.com
+</example>
+
+</section>
+</section> <!-- concepts -->
+
+<section title='Standalone Virtual Hosting'>
+
+<p>Configuring the standalone server is the easiest and best
+way of testing a virtual host configuration.  The
+resin.conf is identical for Resin standalone and for Resin as a
+servlet runner.  So even when using an external web server like Apache or IIS,
+it's a good idea to test configuring with Resin standalone.</p>
+
+<p>Each virtual host has its own <a
+href='resin.xtp#host'>host</a> block.  At the very least, each host
+will define the <var/id/> specifying the host name and an
+<var/document-directory/> to specify the document root.</p>
+
+<p>The following sample configuration defines two virtual hosts,
+gryffindor and slytherin, each with its own document directory.</p>
+
+<example title='resin.conf'>
+&lt;server>
+  ...
+
+&lt;host id='gryffindor.caucho.com'>
+  &lt;document-directory>/home/www/gryffindor/docs&lt;/document-directory>
+  ...		    
+&lt;/host>
+
+&lt;host id='slytherin.caucho.com'>
+  &lt;document-directory>/home/www/slytherin/docs&lt;/document-directory>
+  ...		    
+&lt;/host>
+</example>
+
+<p>Browsing http://gryffindor.caucho.com/test.jsp will look for
+/home/www/gryffindor/docs/test.jsp.</p>
+
+<p>Browsing http://slytherin.caucho.com/test.jsp will look for
+/home/www/slytherin/docs/test.jsp.</p>
+
+</section>
+
+<section title='Virtual Hosts with Apache or IIS'>
+
+<p>A common configuration uses virtual hosts with Apache or IIS.
+As usual, Apache or IIS will pass matching requests to Resin.</p>
+
+<section title="Apache">
+<p>The Resin JVM configuration with Apache is identical to the
+standalone configuration.  That similarity makes it easy to debug the
+Apache configuration by retreating to Resin standalone if needed.</p>
+
+<p>The <var/ServerName/> directive in Apache is vital to make Resin's
+virtual hosting work.  When Apache passes the request to Resin, it
+tells Resin the <var/ServerName/>.  Without the <var/ServerName/>,
+Resin can get very confused which host to serve.</p>
+
+<example title='httpd.conf'>
+LoadModule caucho_module /usr/local/apache/libexec/mod_caucho.so
+
+ResinConfigServer localhost 6802
+
+&lt;VirtualHost 127.0.0.1>
+  ServerName gryffindor.caucho.com
+&lt;/VirtualHost>
+
+&lt;VirtualHost 192.168.0.1>
+  ServerName slytherin.caucho.com
+&lt;/VirtualHost>
+</example>
+
+<note>You'll the LoadModule must appear before
+the ResinConfigServer for Apache to properly understand the
+ResinConfigServer command.  If they're missing, Apache will send
+an error.</note>
+</section>
+
+<section title="IIS">
+<p>Configuration and installation for IIS virtual sites is discussed in the <a
+href="doc|install|cse-iis">IIS installation</a> section.</p>
+</section>
+</section> <!-- with Apache or IIS -->
+
+<section title="Dynamic virtual hosts">
+
+<p>Resin can be configured to deploy virtual hosts dynamically.  Instead
+of adding a <a config-tag="host"/> tag to <code>resin.conf</code>, a directory
+on the file-system is established, and subdirectories become virtual hosts.</p>
+
+<p><a config-tag="host-deploy"/> is used in <code>resin.conf</code>:</p>
+
+<example title="host-deploy dynamic virtual hosts">
+&lt;resin xmlns="http://caucho.com/ns/resin"&gt;
+  &lt;host-deploy path="hosts"&gt;
+    &lt;host-default&gt;
+      &lt;class-loader&gt;
+        &lt;compiling-loader path='classes'/&gt;
+        &lt;library-loader path='lib'/&gt;
+      &lt;/class-loader&gt;
+
+      &lt;web-app-deploy path='webapps'/&gt;
+
+      &lt;ear-deploy path='deploy'/&gt;
+      &lt;resource-deploy path='deploy'/&gt;
+      &lt;web-app-deploy path='deploy'/&gt;
+    &lt;/host-default&gt;
+  &lt;/host-deploy&gt;
+&lt;/resin&gt;
+</example>
+
+<p>Any directory created in <code>$RESIN_HOME/hosts</code> will now become a virtual
+host. You can also place a .jar file in <code>$RESIN_HOME/hosts</code>, it is expanded to
+become a virtual host.</p>
+
+<example>
+$RESIN_HOME/hosts/www.gryffindor.com/
+$RESIN_HOME/hosts/www.gryffindor.com/webapps/ROOT/index.jsp
+$RESIN_HOME/hosts/www.gryffindor.com/webapps/foo/index.jsp
+
+$RESIN_HOME/hosts/www.slytherin.com.jar
+</example>
+
+<p>Jar libraries and class files that are shared amongst all webapps in the host
+can be placed in <code/lib/> and <code/classes/> subdirectories of the host:</p>
+
+<example>
+$RESIN_HOME/hosts/www.gryffindor.com/lib/mysql-connector-java-3.1.0-alpha-bin.jar 
+$RESIN_HOME/hosts/www.gryffindor.com/classes/example/CustomAuthenticator.java
+</example>
+
+<p>More information is available in the configuration documentation for <a
+config-tag="host-deploy"/> and <a config-tag="host-default"/>.</p>
+
+</section>
+
+<section title='JVM per virtual host'>
+
+<p>In some ISP setups, it may make sense to assign a JVM for each
+virtual host.  The isolation of web-apps may not be
+sufficient; each host needs a separate JVM.  In this configuration,
+each JVM needs its own srun-port and possibly its own srun-host.</p>
+
+<p>The setup is similar to <a href="doc|config|balance">load-balancing</a>.  A
+front-end web server receives all requests, and is configured to dispath to back-end Resin
+JVM's that correspond to the host name.</p>
+
+<figure src="config-jvmpervirtualhost.png" width="481" height="145"/>
+
+<section title="Back-end JVM's">
+<p>In the most straightforward configuration, each host specific backend JVM
+gets its own resin.conf.  The resin.conf can use <a
+href='doc|config|resin#resin:include'>resin:include</a> to share
+common configuration.</p>
+
+<p>In this example, the virtual hosts <code/www.gryffindor.com/> and
+<code/www.slytherin.com/> each get their own JVM.  The first step is the configuration and
+startup of the back-end, host specific instances of Resin.  The second step is
+the by the configuration of the front-end server that dispatches requests to
+the appropriate back-end JVM.</p>
+
+<example title='$RESIN_HOME/conf/gryffindor.conf'>
+&lt;resin xmlns="http://caucho.com/ns/resin">
+&lt;server>
+  &lt;cluster>
+    &lt;srun id="gryffindor" host="localhost" port="6802" index="1"/>
+  &lt;/cluster>
+
+  &lt;host id='www.gryffindor.com'>
+    &lt;document-directory>/home/www/gryffindor/htdocs&lt;/document-directory>
+
+    &lt;resin:include href='host-common.conf'/>
+  &lt;/host>
+&lt;/server>
+&lt;/resin>
+</example>
+
+<example title='$RESIN_HOME/conf/slytherin.conf'>
+&lt;resin xmlns="http://caucho.com/ns/resin">
+&lt;server>
+  &lt;cluster>
+    &lt;srun id="slytherin" host="localhost" port="6803" index="1"/>
+  &lt;/cluster>
+
+  &lt;host id='www.slytherin.com'>
+    &lt;document-directory>/home/www/slytherin/htdocs&lt;/document-directory>
+
+    &lt;resin:include href='host-common.conf'/>
+  &lt;/host>
+&lt;/server>
+&lt;/resin>
+</example>
+
+<p>Each back-end JVM is started separately:</p>
+
+<example>
+unix> bin/httpd.sh -server gryffindor -conf gryffindor.conf -pid gryffindor.pid start
+unix> bin/httpd.sh -server slytherin -conf slytherin.conf -pid slytherin.pid start
+</example>
+
+<p>On Unix, the <var/-pid/> will let httpd.sh know
+which server to stop:</p>
+
+<example>
+unix> bin/httpd.sh -server gryffindor -conf gryffindor.conf -pid gryffindor.pid stop
+unix> bin/httpd.sh -server slytherin -conf slytherin.conf -pid slytherin.pid stop
+</example>
+</section>
+
+<section title="Resin front-end">
+
+<p>The host-specific back-end JVM's are ready to receive requests on their srun
+ports.  A third instance of Resin in a separate JVM can be used as the
+front-end server. It receives all requests and dispatches to the back-end
+servers.</p>
+
+<figure src="config-jvmpervirtualhost-resin.png" width="481" height="145"/>
+
+<p>The Resin web server is configured using the LoadBalanceServlet to dispatch
+to the back-end JVM's.  A cluster is defined for each back-end JVM, so that the
+LoadBalanceServlet knows how to find them.</p>
+
+<example title="$RESIN_HOME/conf/resin.conf for front-end web server">
+&lt;resin xmlns="http://caucho.com/ns/resin"&gt;
+&lt;server&gt;
+  &lt;http id="resin" port='80'/&gt;
+
+  &lt;cluster id="gryffindor"&gt;
+    &lt;srun id='gryffindor' host='localhost' port='6802' index='1'/&gt;
+  &lt;/cluster&gt;
+
+  &lt;cluster id="slytherin"&gt;
+    &lt;srun id='slytherin' host='localhost' port='6803' index='1'/&gt;
+  &lt;/cluster&gt;
+
+
+  &lt;host id='gryffindor.com'&gt;
+    &lt;web-app id='/'&gt;
+      &lt;servlet&gt;
+        &lt;servlet-name&gt;balance&lt;/servlet-name&gt;
+        &lt;servlet-class&gt;com.caucho.servlets.LoadBalanceServlet&lt;/servlet-class&gt;
+        &lt;init cluster='gryffindor'/&gt;
+      &lt;/servlet&gt;
+      &lt;servlet-mapping url-pattern='/*' servlet-name='balance'/&gt;
+    &lt;/web-app&gt;
+  &lt;/host&gt;
+
+  &lt;host id='slytherin.com'&gt;
+    &lt;web-app id='/'&gt;
+      &lt;servlet&gt;
+        &lt;servlet-name&gt;balance&lt;/servlet-name&gt;
+        &lt;servlet-class&gt;com.caucho.servlets.LoadBalanceServlet&lt;/servlet-class&gt;
+        &lt;init cluster='slytherin'/&gt;
+      &lt;/servlet&gt;
+      &lt;servlet-mapping url-pattern='/*' servlet-name='balance'/&gt;
+    &lt;/web-app&gt;
+  &lt;/host&gt;
+&lt;/server&gt;
+&lt;/resin&gt;
+</example>
+
+<section title="Starting the server's on Unix">
+
+<p>The front-end server JVM is started similar to the back-end JVM's:</p>
+
+<example>
+unix> bin/httpd.sh -server resin -conf conf/resin.conf -pid resin.pid start
+...
+unix> bin/httpd.sh -server resin -conf conf/resin.conf -pid resin.pid stop
+</example>
+
+<p>A script that handles the syntax for all three is convenient, and provides the opportunity 
+to automate more sophisticated startup:</p>
+
+<example title="local-httpd.sh">
+#!/bin/sh
+
+allservers="gryffindor slytherin resin"
+
+# customize args as needed, for example:
+# args="-server -Xmn20M -Xms100M -Xmx100M"
+args=""
+
+usage="
+Script that starts Resin for a server.
+The stdout and stderr are redirected to server specific files.
+The script assumes that RESIN_HOME has been set, or if it is not set that
+it has been started from what RESIN_HOME would be.
+
+USAGE:
+
+$0 [OPTION] {server-id} start [RESINOPTIONS]
+$0 [OPTION] {server-id} stop [RESINOPTIONS]
+  Start or stop the server with the passed server-id
+
+$0 [OPTION] all start [RESINOPTIONS]
+$0 [OPTION] all stop [RESINOPTIONS]
+  Start or stop all of the servers ($allservers)
+
+OPTION:
+    --debug   pass options to Resin that allow a debugger to attach 
+"
+
+# find RESIN_HOME
+
+if test "$RESIN_HOME"; then
+  cd "$RESIN_HOME"
+fi
+
+dbgport=""
+
+# check for extended command line options
+while [ $1 ]; do
+  case "$1" in
+    --h*) # --help
+      shift;
+      echo "$usage" >&2
+      exit 0
+      ;;
+    --d*) # --debug
+      dbgport="5432"
+      shift;
+      ;;
+    --*)
+      echo "$0: invalid option $1, try --help" >&2
+      exit 9
+      ;;
+
+    *) break ;;
+  esac
+done
+
+# get the id of the server to start
+
+id="$1"
+if test -z "$id"; then
+  echo "$usage" >&2
+  exit 9
+fi
+shift
+
+# handle special case of id `all'
+
+if test "$id" = "all"; then
+  id="$allservers"
+fi
+
+
+# start the server
+
+for i in $id; do
+  echo "$i $@"
+
+  if test "$dbgport"; then
+    dbgargs="-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=$dbgport"
+    echo "debugger can attach to server $i on port $dbgport"
+    dbgport=`expr $dbgport + 1`
+  fi
+
+  serverargs="-server $i -conf conf/$i.conf -pid $i.pid"
+  logargs="-stderr log/$i-stderr.log log -stdout log/$i-stdout.log"
+
+  echo bin/httpd.sh $serverargs $logargs $dbgargs $args $@
+done
+</example>
+
+<example title="Using local-httpd.sh">
+unix> ./local-server.sh all start
+...
+unix> ./local-server.sh all stop
+
+
+unix> ./local-server.sh --debug gryffindor start
+unix> ./local-server.sh --debug slytherin start
+unix> ./local-server.sh resin start
+...
+unix> ./local-server.sh all stop
+
+</example>
+</section> <!-- unix startup -->
+
+<section title="Starting the server's on Windows">
+<p>With Windows, each JVM is installed as a service.</p>
+
+<example>
+win> bin/httpd -install-as "Resin" -server resin -conf conf/resin.conf -Xrs
+win> bin/httpd -install-as "Resin www.gryffindor.com" -server gryffindor -conf conf/gryffindor.conf -Xrs
+win> bin/httpd -install-as "Resin www.slytherin.com"-server slytherin -conf conf/slytherin.conf -Xrs
+</example>
+
+<p>You will either need to reboot the machine or start the service from the
+Control Panel/Services panel to start the server. On a machine reboot, NT will
+automatically start the service.</p>
+
+<p>There is a bug in many JDKs which cause the JDK to exit when the
+administrator logs out. JDK 1.4 and later can avoid that bug if the JDK is
+started with -Xrs.</p>
+
+</section> <!-- windows startup -->
+
+</section> <!-- resin frontend -->
+
+<section title="Apache front-end">
+
+<p>The host-specific back-end JVM's are ready to receive requests on their srun
+ports.  Apache is the front-end server, and is configured to dispatch to the
+appropriate back-end Resin JVM for the host: </p>
+
+<figure src="config-jvmpervirtualhost-apache.png" width="481" height="145"/>
+
+<example title='httpd.conf'>
+&lt;VirtualHost 127.0.0.1>
+  ServerName gryffindor.caucho.com
+  ResinConfigServer 192.168.0.10 6802
+&lt;/VirtualHost>
+
+&lt;VirtualHost 192.168.0.1>
+  ServerName slytherin.caucho.com
+  ResinConfigServer 192.168.0.11 6802
+&lt;/VirtualHost>
+</example>
+
+<p>When you restart the Apache web server, you can look at
+<var/http://gryffindor/caucho-status/>
+and <var/http://slytherin/caucho-status/> to check
+your configuration.  Check that each virtual host is using the
+<var/srun-host/> and <var/srun-port/> that you expect.</p>
+</section>
+
+</section> <!-- jvm per virtual host -->
+
+
+<section title='IP-Based Virtual Hosting'>
+
+<p>While Resin's virtual hosting is primarily aimed at named-based
+virtual hosts, it's possible to run Resin with IP-Based virtual hosts.</p>
+
+<p>With IP virtual hosting, each &lt;http> block is configured
+with the virtual host name.  This configuration will override any
+virtual host supplied by the browser.</p>
+
+<example>
+&lt;server>
+  &lt;http host='192.168.0.1' port='80'
+        virtual-host='slytherin.caucho.com'/>
+
+  ...
+
+  &lt;host id='slytherin.caucho.com'>
+    ...
+  &lt;/host>
+&lt;/server>
+</example>
+
+</section>
+
+<section title='Internationalization'>
+
+<p>Resin's virtual hosting understands host names encoded using
+rfc3490 (Internationalizing Domain Names in Applications).  This support
+should be transparent.  Just specify the virtual host as usual, and
+Resin will translate the brower's encoded host name
+the unicode string.</p>
+
+<p>Support, of course, depends on the browser.  <a href="http://devedge.netscape.com/viewsource/2003/idn/">Mozilla 1.4</a> supports the encoding.
+
+</section>
+
+  </body>
+</document>

@@ -1,0 +1,136 @@
+<body>
+  Introducing Container Managed Persistance (CMP) fundamental concepts.
+
+  <p>If you are used to writing webapps based on JSP and Servlets,
+  you know how tedious it can be to use JDBC whenever you need to
+  update your database with new information. By creating EJB components with
+  container managed persistence, you let Resin-CMP generate the tedious SQL
+  to load, store, and cache entity beans from the database.
+
+  <p>
+  <p><b>Overview</b>
+  <p>Each CMP bean needs at least three classes:
+  <li>The home interface (CourseHome.java) to find and create entities,</li>
+  <li>The local interface (Course.java) to represent the actual entities,</li>
+  <li>The implementation class (CourseBean.java) which contains the bean's
+  business logic,</li>
+
+  <p> and one XML file,
+
+  <li>The deployment descriptor (cmp-basic.ejb).</li>
+
+  <p>The bean also needs a database table that it can use to permanently store
+  its fields. Each entity will be stored in a row of this
+  table. (One field must be designated as the primary key). The name of the table
+  is specified in the deployment descriptor by the <font color=green>&lt;abstract-schema-name></font> tag.
+  Our CourseBean will use the following schema:
+
+<code><pre>
+CREATE TABLE basic_courses (
+  course_id VARCHAR(250) NOT NULL,
+  instructor VARCHAR(250),
+  PRIMARY KEY(course_id)
+);
+
+# manually create two sample entities
+INSERT INTO basic_courses VALUES('Potions', 'Severus Snape');
+INSERT INTO basic_courses VALUES('Transfiguration', 'Minerva McGonagall');
+</pre></code>
+
+  <p><b>The Deployment Descriptor</b>
+
+  <p>The deployment Descriptor for the Course Bean looks like this:
+
+<p><code>
+&nbsp&lt;ejb-jar><BR>
+&nbsp&nbsp&lt;enterprise-beans><BR>
+&nbsp&nbsp&nbsp&lt;entity><BR>
+&nbsp&nbsp&nbsp&nbsp<font color=red>&lt;ejb-name>basic_CourseBean&lt;/ejb-name></font><BR>
+&nbsp&nbsp&nbsp&nbsp&lt;local-home>example.cmp.basic.CourseHome&lt;/local-home><BR>
+&nbsp&nbsp&nbsp&nbsp&lt;local>example.cmp.basic.Course&lt;/local><BR>
+&nbsp&nbsp&nbsp&nbsp&lt;ejb-class>example.cmp.basic.CourseBean&lt;/ejb-class><BR>
+&nbsp&nbsp&nbsp&nbsp&lt;persistence-type>Container&lt;/persistence-type><BR>
+&nbsp&nbsp&nbsp&nbsp&lt;reentrant>True&lt;/reentrant><BR>
+&nbsp&nbsp&nbsp&nbsp&lt;prim-key-class>java.lang.String&lt;/prim-key-class><BR>
+&nbsp&nbsp&nbsp&nbsp&lt;primkey-field>courseId&lt;/primkey-field><BR>
+&nbsp&nbsp&nbsp&nbsp<font color=green>&lt;abstract-schema-name>basic_courses&lt;/abstract-schema-name></font><BR>
+&nbsp&nbsp&nbsp&nbsp<font color=blue>&lt;cmp-field><BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp&lt;field-name>instructor&lt;/field-name><BR>
+&nbsp&nbsp&nbsp&nbsp&lt;/cmp-field></font><BR>
+&nbsp&nbsp&nbsp&nbsp&lt;cmp-field><BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp&lt;field-name>courseId&lt;/field-name><BR>
+&nbsp&nbsp&nbsp&nbsp&lt;/cmp-field><BR>
+&nbsp&nbsp&nbsp&lt;/entity><BR>
+&nbsp&nbsp&lt;/enterprise-beans><BR>
+&nbsp&lt;/ejb-jar><BR>
+</code>
+
+  <p><font color=red>&lt;ejb-name></font> denotes the name that this bean is to
+  be referenced by. Resin-CMP also uses this name as the Bean's JNDI name (see below).
+
+  <p>The database schema is defined in the deployment descriptor (cmp-basic.ejb) with
+  <font color=blue>&lt;cmp-field></font> tags. Each &lt;cmp-field> specifies the name of a
+  field that is to be kept persistant by the container. For example, in this
+  example there is a &lt;cmp-field> 'instructor'. Therefore, we need an instructor
+  field in our table, and in the implementation class we need to define two
+  related methods:
+
+  <code><pre>
+    public abstract String getInstructor();
+    public abstract void setInstructor(String val);
+  </pre></code>
+
+  These will be implemented by the container, which fills in the actual JDBC
+  code.
+
+  <p>
+  <p>
+  <b>Using the CMP Bean</b>
+  <p>Before you can use the CMP bean, it needs to be deployed. Resin-CMP looks
+  for *.ejb deployment descriptors in an application's WEB-INF directory.
+  If a found deployment descriptor is valid, Resin-CMP will automatically
+  deploy all beans that it references. This includes the automatic implementation
+  and compilation of the Home and Local interfaces.
+  <p>Once the CMP Bean is deployed, we use the home interface to obtain references
+  to entities that are already stored in the database. First, we use JNDI to
+  find the Home Interface. The deployment descriptor defines where the Home
+  Interface is mapped into JNDI:
+
+  <code><pre>
+      Context ejb = (Context) new InitialContext().lookup("java:comp/env/cmp");
+
+      home = (CourseHome) ejb.lookup("basic_CourseBean");
+  </pre></code>
+
+  <p>The Home Interface must always declare the method
+  findByPrimaryKey(...) that will return the entity associated with a
+  particular primary key. You declare this method abstract and let Resin-CMP
+  implement it for you. Its return type needs to be that of the local interface -
+  in our case, <code>Course</code>.
+  <BR>Since we have initialized the database
+  with two sample records, we know that there is an entity with the
+  primary key "Potions". We can use the findPrimaryKey(...) method to obtain
+  a reference to the associated entity:
+
+  <code><pre>
+    try {
+      Course course = home.findByPrimaryKey("Potions");
+    }
+    catch (FinderException e) {
+      throw new ServletException(e);
+    }
+  </pre></code>
+
+  <p>From here on the application developer starts to really benefit from
+  CMP. If we were to change the instructor for the Potions course, we could
+  call:
+
+  <code><pre>
+      course.setInstructor("Scott");
+  </pre></code>
+
+  This call will automatically update the database to reflect the change in
+  the instructor field. Resin-CMP has generated all neccessary SQL.
+
+
+</body>

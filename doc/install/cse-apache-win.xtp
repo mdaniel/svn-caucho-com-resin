@@ -1,0 +1,180 @@
+<document>
+  <header>
+    <product>resin</product>
+    <resin-2.0>$resin/ref/cse-apache-win.xtp</resin-2.0>
+    <title>Resin with Apache on Windows</title>
+    <description>
+      <p>Resin provides a fast servlet runner for Apache, allowing Apache
+        to run servlets and JSP files.</p>
+      <p>
+        <figure src='apache_srun.gif'/>
+      </p>
+
+      <p>If you have not yet done so, we suggest you use the <a
+      href='install|httpd'>Resin standalone web server</a> option
+      first.</p>
+
+    </description>
+
+  </header>
+
+  <body>
+    <summary/>
+
+
+<section title='Configuring Apache'>
+
+<p>To configure Apache to load the Caucho Server Runner, add the
+following lines to the Apache httpd.conf file:</p>
+
+<example title=httpd.conf>
+LoadModule caucho_module &lt;installdir>/resin-3.0.x/libexec/apache-2.0/mod_caucho.dll
+
+&lt;IfModule mod_caucho.c&gt;
+  ResinConfigServer localhost 6802
+  &lt;Location /caucho-status>
+    SetHandler caucho-status
+  &lt;/Location>
+&lt;/IfModule&gt;
+</example>
+
+<note>The caucho-status is optional and probably should be avoided in
+a production site.  It lets you ask the Caucho Apache module about the
+Caucho status, valuable for debugging.</note>
+
+<section title='Alternate Apache Configuration'>
+
+<p>You can also configure Apache directly, instead of letting
+mod_caucho obtain the configuration from the ResinConfigServer.
+If you use this method, you need ensure the Apache configuration matches the Resin configuration.</p>
+
+<example title=httpd.conf>
+LoadModule caucho_module &lt;installdir>/resin-3.0.x/libexec/apache-2.0/mod_caucho.dll
+
+CauchoHost localhost 6802
+AddHandler caucho-request jsp
+&lt;Location /servlet/*>
+   SetHandler caucho-request
+&lt;/Location>
+</example>
+
+<deftable>
+<tr><th>Apache Command<th>Meaning
+<tr><td>ResinConfigServer <var/host/> <var/port/><td>Adds the Resin JVM at <var/host:port/> as a the configuration server.
+<tr><td>CauchoStatus <var/true/false/><td>Enables/disables the /caucho-status management
+<tr><td>CauchoHost <var/host/> <var/port/><td>Alternative to <var/ResinConfigServer/>, adds the Resin JVM with an srun port at host:port as a servlet runner.
+<tr><td>CauchoBackup <var/host/> <var/port/><td>Alternative to <var/ResinConfigServer/>, adds the Resin JVM with an srun port at host:port as a backup servlet runner.
+<tr><td>
+</deftable>
+
+</section>
+
+<section title="Dispatching">
+
+<p>mod_caucho selects URLs specified by the servlet-mapping directives to go to
+Resin.  Other URLs stay with Apache.  There's a more complete
+discussion of the URL dispatching in the <a
+href="install|plugin-dispatch">plugin-dispatch</a> tutorial.</p>
+
+</section>
+</section>
+<section title='Load Balancing' version='Resin 1.2'>
+
+<p>In Resin 3.0, you can distribute requests to multiple machines.  All
+requests in a session will go to the same host.  In addition, if one
+host goes down, Resin will send the request to the next available machine.</p>
+
+<p>In addition, you can specify backup machines.  The backup only will serve
+requests if all primaries are down.</p>
+
+<p>See the <a href="doc|config|resin">http config</a> section for more
+details.</p>
+
+<example title=resin.conf>
+&lt;resin xmlns="http://caucho.com/ns/resin">
+&lt;server>
+  &lt;cluster>
+    &lt;srun id="a" host="host1" port="6802" index="1"/>
+    &lt;srun id="b" host="host2" port="6802" index="2"/>
+    &lt;srun id="c" host="backup" port="6802" index="3" backup="true"/>
+  ...
+&lt;/server>
+&lt;/resin>
+</example>
+</section>
+
+<section title='Configuring resin.conf'>
+
+<p>The default resin.conf looks in
+<code>resin-3.0.x/webapps/ROOT</code> 
+for JSP files and
+<code>resin-3.0.x/webapps/ROOT/WEB-INF/classes</code>
+for servlets and java source files.  To tell Resin
+to use Apache's document area, you configure an explicit 
+<var/web-app/> with the appropriate document-directory:
+</p>
+
+<example title='resin.conf'>
+&lt;resin xmlns="http://caucho.com/ns/resin"&gt;
+  &lt;server&gt;
+    &lt;host id=""&gt;
+ 
+      &lt;web-app id='/' document-directory="/usr/local/apache/htdocs"/&gt;
+
+    &lt;/host&gt;
+  &lt;/server&gt;
+&lt;/resin&gt;
+</example>
+
+
+</section>
+
+<section title='Testing the servlet engine'>
+
+<p>Now you need to start the servlet engine.  From the resin-3.0.x/
+folder, click on httpd.exe:</p>
+
+<example>
+> resin-3.0.x\httpd.exe
+</example>
+
+<p>Now browse http://localhost/test.jsp.  You should get a 'file not
+found' message.<p/>
+
+<p>Create a test file '/usr/local/apache/htdocs/test.jsp'</p>
+
+<example>
+2 + 2 = &lt;%= 2 + 2 %>
+</example>
+
+<p>Browse http://localhost/test.jsp again.  You should now get:</p>
+
+<results>
+2 + 2 = 4
+</results>
+
+</section>
+
+<section title='Deploying on NT'>
+
+<p>The Servlet Runner can be installed as an NT service.</p>
+
+<p>To install the service, use</p>
+
+<example>
+unix> resin-3.0.x/bin/httpd -install
+</example>
+
+<p>To remove the service, use</p>
+
+<example>
+unix> resin-3.0.x/bin/httpd -remove
+</example>
+
+<p>You will either need to reboot the machine or start the service
+from the Control&nbsp;Panel/Services panel to start the server.  On a
+machine reboot, NT will automatically start the servlet runner.</p>
+
+</section>
+  </body>
+</document>

@@ -1,0 +1,233 @@
+/*
+ * Copyright (c) 1998-2004 Caucho Technology -- all rights reserved
+ *
+ * This file is part of Resin(R) Open Source
+ *
+ * Each copy or derived work must preserve the copyright notice and this
+ * notice unmodified.
+ *
+ * Resin Open Source is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * Resin Open Source is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE, or any warranty
+ * of NON-INFRINGEMENT.  See the GNU General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Resin Open Source; if not, write to the
+ *
+ *   Free Software Foundation, Inc.
+ *   59 Temple Place, Suite 330
+ *   Boston, MA 02111-1307  USA
+ *
+ * @author Scott Ferguson
+ */
+
+package com.caucho.server.dispatch;
+
+import java.io.*;
+import java.util.logging.*;
+
+import javax.servlet.*;
+
+import com.caucho.log.Log;
+
+import com.caucho.util.*;
+import com.caucho.vfs.*;
+import com.caucho.security.*;
+
+/**
+ * A repository for request information gleaned from the uri.
+ */
+public class ServletInvocation {
+  static final Logger log = Log.open(ServletInvocation.class);
+  static final L10N L = new L10N(ServletInvocation.class);
+
+  private ClassLoader _classLoader;
+  
+  private String _contextPath = "";
+  
+  private String _contextUri;
+  private String _servletPath;
+  private String _pathInfo;
+  
+  private String _queryString;
+  
+  private String _servletName;
+  private FilterChain _filterChain;
+
+  /**
+   * Creates a new invocation
+   *
+   * @param contextUri the section of the URI after the context path
+   */
+  public ServletInvocation()
+  {
+    _classLoader = Thread.currentThread().getContextClassLoader();
+  }
+
+  /**
+   * Returns the mapped context-path.
+   */
+  public final String getContextPath()
+  {
+    return _contextPath;
+  }
+
+  /**
+   * Sets the context-path.
+   */
+  public void setContextPath(String path)
+  {
+    _contextPath = path;
+  }
+
+  public void setContextURI(String contextURI)
+  {
+    _contextUri = contextURI;
+    _servletPath = contextURI;
+  }
+
+  /**
+   * Returns the URI tail, i.e. everything after the context path.
+   */
+  public final String getContextURI()
+  {
+    return _contextUri;
+  }
+
+  /**
+   * Returns the mapped servlet path.
+   */
+  public final String getServletPath()
+  {
+    return _servletPath;
+  }
+
+  /**
+   * Sets the mapped servlet path.
+   */
+  public void setServletPath(String servletPath)
+  {
+    _servletPath = servletPath;
+  }
+
+  /**
+   * Returns the mapped path info.
+   */
+  public final String getPathInfo()
+  {
+    return _pathInfo;
+  }
+
+  /**
+   * Sets the mapped path info
+   */
+  public void setPathInfo(String pathInfo)
+  {
+    _pathInfo = pathInfo;
+  }
+
+  /**
+   * Returns the query string.  Characters remain unescaped.
+   */
+  public final String getQueryString()
+  {
+    return _queryString;
+  }
+
+  /**
+   * Returns the query string.  Characters remain unescaped.
+   */
+  public final void setQueryString(String queryString)
+  {
+    _queryString = queryString;
+  }
+
+  /**
+   * Sets the class loader.
+   */
+  public void setClassLoader(ClassLoader loader)
+  {
+    _classLoader = loader;
+  }
+
+  /**
+   * Gets the class loader.
+   */
+  public ClassLoader getClassLoader()
+  {
+    return _classLoader;
+  }
+
+  /**
+   * Sets the servlet name
+   */
+  public void setServletName(String servletName)
+  {
+    _servletName = servletName;
+  }
+
+  /**
+   * Gets the servlet name
+   */
+  public String getServletName()
+  {
+    return _servletName;
+  }
+
+  /**
+   * Sets the filter chain
+   */
+  public void setFilterChain(FilterChain chain)
+  {
+    _filterChain = chain;
+  }
+
+  /**
+   * Gets the filter chain
+   */
+  public FilterChain getFilterChain()
+  {
+    return _filterChain;
+  }
+
+  /**
+   * Service a request.
+   *
+   * @param request the servlet request
+   * @param response the servlet response
+   */
+  public void service(ServletRequest request, ServletResponse response)
+    throws IOException, ServletException
+  {
+    _filterChain.doFilter(request, response);
+  }
+
+  /**
+   * Copies from the invocation.
+   */
+  public void copyFrom(ServletInvocation invocation)
+  {
+    _classLoader = invocation._classLoader;
+    _contextPath = invocation._contextPath;
+  
+    _contextUri = invocation._contextUri;
+    _servletPath = invocation._servletPath;
+    _pathInfo = invocation._pathInfo;
+  
+    _queryString = invocation._queryString;
+  
+    _servletName = invocation._servletName;
+    _filterChain = invocation._filterChain;
+  }
+
+  public String toString()
+  {
+    return "ServletInvocation[" + _contextUri + "]";
+  }
+}

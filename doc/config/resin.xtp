@@ -1,0 +1,787 @@
+<document>
+<header>
+  <product>resin</product>
+  <title>resin.conf: Ports, Virtual Hosts, Clustering and Threads</title>
+  <version>Resin 3.0</version>
+
+  <description>
+
+  <p>Describes the resin, server, host, and port configuration in the resin.conf.</p>
+
+  </description>
+</header>
+
+<summary objsummary='localtoc'/>
+
+<section title="See Also">
+
+<ul>
+<li>See the <a href="index-tags.xtp">index</a> for a list of all the tags.
+<li>See <a href="webapp.xtp">Web Application</a> configuration for web.xml (Servlet) configuration.
+<li>See <a href="env.xtp">Environment</a> configuration for resources: classloader, databases, connectors, and resources.
+<li>See <a href="log.xtp">Log</a> configuration for access log configuration, java.util.logging, and stdout/stderr logging.
+</ul>
+
+</section>
+
+<section title="resin.conf">
+
+<defun title="access-log" version="Resin 3.0">
+<parents>server, host</parents>
+
+<p>Specifies the access log file.</p>
+
+<deftable-childtags>
+<tr><td>path<td>The access log path.<td>required
+<tr><td>format<td>Access log format.<td>see below
+<tr><td>resin:type<td>Class implementing AbstractAccessLog for custom logging.
+<tr><td>rollover-period<td>how often to rollover the log.
+Normally in days (15D), weeks (2W) or months (1M).<td>none
+<tr><td>rollover-size<td>max size of the log before a rollover.<td>10 meg
+<tr><td>archive-format<td>format the name of the archive file.<td>n/a
+</deftable-childtags>
+
+<p>The <var/rollover-period/> variable controls how often the access log
+will be rotated.  When the time runs out, Resin will move the old log
+file to a timestamped one, e.g. access.log20001114.  Rollovers happen
+at midnight in the local time if the time period is a day or longer.
+</p>
+
+<p>The access log formatting variables follow the Apache variables:</p>
+
+<deftable>
+<tr><td>%b<td>result content length
+<tr><td>%h<td>remote IP addr
+<tr><td>%{<var/xxx/>}i<td>request header <var/xxx/>
+<tr><td>%{<var/xxx/>}o<td>response header <var/xxx/>
+<tr><td>%{<var/xxx/>}c<td>cookie value <var/xxx/>
+<tr><td>%n<td>request attribute
+<tr><td>%r<td>request URL
+<tr><td>%s<td>status code
+<tr><td>%{<var/xxx/>}t<td>request date with optional time format string.
+<tr><td>%T<td>time of request in seconds
+<tr><td>%u<td>remote user
+<tr><td>%U<td>request URI
+</deftable>
+
+<p>The default format is:</p>
+
+<def>
+"%h %l %u %t \"%r\" %>s %b \"%{Referer}i\" \"%{User-Agent}i\""
+</def>
+
+<example>
+&lt;server>
+
+  &lt;access-log id='log/access.log'&gt;
+    &lt;rollover-period>2W&lt;/rollover-period>
+  &lt;/access-log>
+
+ ...
+
+&lt;/server&gt;
+</example>
+
+<p>If the web-app doesn't specify an access-log, it will use the host's
+access-log.</p>
+
+</defun>
+
+<defun title="cache" version="Resin 3.0">
+<parents>server</parents>
+
+<p>Configures Resin's internal HTTP proxy cache.
+Resin's cache can dramatically improve performance by avoiding  re-evaluation
+of slowly changing database-backed changes.  We strongly
+recommend using the proxy caching when possible for a simple,
+standards-based performance boost.</p>
+
+<p>Using the proxy cache is described more fully
+in the <a href="doc|performance|caching">caching documentation.</a></p>
+
+<deftable-childtags>
+<tr><td>path<td>filesystem location of the cache<td>required
+<tr><td>enable<td>enables/disables the cache<td>true
+<tr><td>entries<td>max number of entries allowed in the cache<td>1024
+<tr><td>memory-size<td>max size of the cache saved in memory<td>1M
+<tr><td>disk-size<td>max size of the cache saved on disk<td>64M
+</deftable-childtags>
+
+</defun>
+
+<defun title="cluster" version="Resin 3.0">
+<parents>server</parents>
+
+<p>Defines the cluster of Resin JVMs used for load-balancing and for
+sharing distributed sessions.</p>
+
+<example>
+&lt;cluster>
+  &lt;client-live-time>30s&lt;/client-live-time>
+
+  &lt;srun id="a" host="192.168.0.1" port="6802" index="1"/>
+  &lt;srun id="b" host="192.168.0.2" port="6802" index="2"/>
+&lt;/cluster>
+</example>
+
+<deftable-childtags>
+<tr><td>client-live-time<td>How long to keep an idle socket open<td>30s
+<tr><td>client-dead-time<td>How long to treat a server as dead<td>15s
+<tr><td>client-read-timeout<td>Timeout for client reads<td>60s
+<tr><td>client-write-timeout<td>Timeout for client writes<td>60s
+</deftable-childtags>
+
+</defun>
+
+<defun title="document-directory" version="Resin 3.0">
+<parents>host, web-app</parents>
+
+<p>Configures the directory where web pages will be placed when
+using webserver-style deployment instead of war-based deployment.</p>
+</defun>
+
+<defun title="group-name" version="Resin 3.0">
+<parents>resin</parents>
+
+<p>Configures the Unix setuid group name used after Resin binds the
+reserved ports as root.</p>
+
+<p>Note, Linux requires the new thread package (e.g. RedHat 9.0 or
+later) to support group-name.</p>
+</defun>
+
+<defun title="host" version="Resin 3.0">
+<parents>server</parents>
+
+<p>Configures a virtual host.  Virtual hosts must be
+configured explicitly.</p>
+
+<deftable-childtags>
+<tr><td>id<td>primary host name<td>none
+<tr><td>regexp<td>Regular expression based host matching<td>none
+<tr><td>host-name<td>Canonical host name<td>none
+<tr><td>host-alias<td>Aliases matching the same host<td>none
+<tr><td>secure-host-name<td>Host to use for a redirect to SSL<td>none
+<tr><td>root-directory<td>Root directory for host files<td>parent directory
+<tr><td>document-directory<td>Document directory root<td>root-directory
+<tr><td>startup-mode<td>`automatic', `lazy', or `manual', see <a href="doc|config|resin#startup-mode">Startup and Redeploy Mode</a><td>automatic
+</deftable-childtags>
+
+<example title="explicit host">
+&lt;host host-name="www.foo.com">
+  &lt;host-alias>foo.com&lt;/host-alias>
+  &lt;host-alias>web.foo.com&lt;/host-alias>
+
+  &lt;root-directory>/opt/www/www.foo.com&lt;/root-directory>
+
+  ...
+&lt;/host>
+</example>
+
+<example title="regexp host">
+&lt;host regexp="([^.]+)\.foo\.com"&gt;
+  &lt;host-name&gt;${'${'}host.regexp[1]}.foo.com&lt;/host-name&gt;
+
+  &lt;root-directory&gt;/opt/www/www.${'${'}host.regexp[1]}.com&lt;/root-directory&gt;
+
+  ...
+&lt;/host&gt;
+</example>
+
+<p>It is recommended that any &lt;host> using a regexp include
+a &lt;host-name> to set the canonical name for the host.</p>
+
+</defun>
+
+<defun title="host-default" version="Resin 3.0">
+<parents>server, host-deploy</parents>
+
+<p>Defaults for a virtual host.</p>
+
+<p>The host-default can contain any of the host configuration tags.
+It will be used as defaults for any virtual host.</p>
+
+</defun>
+
+<defun title="host-deploy" version="Resin 3.0.4">
+<parents>server</parents>
+
+<p>Configures a deploy directory for virtual host.</p>
+
+<p>The host-deploy will add an EL variable \${name}, referring to
+the name of the host jar file.</p>
+
+<deftable-childtags>
+<tr><td>path<td>path to the deploy directory<td>required
+<tr><td>expand-path<td>path to the expansion directory<td>path
+<tr><td>host-default<td>defaults for the expanded host&td>&nbsp;
+<tr><td>host-name<td>the host name to match<td>\${name}
+</deftable-childtags>
+
+</defun>
+
+<defun title="http" version="Resin 3.0">
+<parents>server</parents>
+
+<p>Configures a HTTP port listening for HTTP requests.</p>
+
+<p>When configuring multiple JVMs, each &lt;http> will have a
+unique &lt;server-id> which allows the -server command-line to select
+which ports the server should listen to.</p>
+
+<deftable-childtags>
+<tr><td>server-id<td>server id matching the -server command line<td>none
+<tr><td>host<td>hostname of the interface to listen to<td>*
+<tr><td>port<td>port to listen to<td>required
+<tr><td>tcp-no-delay<td>sets the NO_DELAY socket parameter<td>true
+<tr><td>read-timeout<td>timeout waiting to read from idle client<td>65s
+<tr><td>write-timeout<td>timeout waiting to write to idle client<td>65s
+<tr><td>socket-listen-backlog<td>The socket factory's listen backlog for receiving sockets<td>100
+<tr><td>virtual-host<td>forces all requests to this &lt;http> to use the named virtual host<td>none
+<tr><td>openssl<td>configures the port to use OpenSSL<td>none
+<tr><td>jsse-ssl<td>configures the port to use JSSE for SSL<td>none
+</deftable-childtags>
+
+</defun>
+
+<defun title="min-free-memory" version="Resin 3.0">
+<parents>resin</parents>
+
+<p>For reliability, Resin periodically checks the amount of free
+memory available.  When the free memory drops below
+&lt;min-free-memory>, even after garbage collection, Resin will force
+a JVM restart.</p>
+
+<p>In general, application developers should use a heap profiler
+to eliminate memory leaks and OutOfMemoryErrors.  Because an
+OutOfMemoryError can cause severe problems with the application, Resin
+detects the low memory before those errors can be thrown.</p>
+
+<default>1M</default>
+
+</defun>
+
+<defun title="openssl" version="Resin 3.0">
+<parents>http, srun, port</parents>
+
+<p>Configures SSL.</p>
+
+<deftable-childtags>
+<tr><td>certificate-file<td>the file containing the server's certificate<td>required
+<tr><td>certificate-key-file<td>the file containing the server's certificate key, if separate from certificate-file<td>certificate-file
+<tr><td>password<td>the certificate key password<td>required
+<tr><td>certificate-chain-file<td>A file containing an intermediate (untrusted) and root (trusted) certificate. See <a href="doc|security|ssl#Certificate-Chains">Certificate Chains</a>.<td>none
+<tr><td>session-cache<td>true or false, enables the SSL session cache<td>true
+<tr><td>session-cache-timeout<td>sets the SSL session cache timeout in seconds<td>300
+<tr><td>verify-client<td>Verify the client, value is one of `require' (the client has to present a valid certificate), `optional' (the client may present a valid certificate), `optional-no-ca' (the client may present a certificate, it may be unverifiable)<td>no client verification
+<tr><td>verify-depth<td>the maximum number of intermediate signers to accept when verifying client certificates<td>-1
+<tr><td>ca-certificate-file<td>a file containing a concatenated list of PEM-encoded certificates recognized for client authentication<td>none
+<tr><td>ca-revocation-file<td>a file containing a concatenated list of PEM-encoded certificates which have been revoked and are no longer valid<td>none
+<tr><td>protocol<td>a combination of +all, -all, +sslv2, -sslv2, +sslv3, -sslv3, +tlsv1, -tlsv1<td>+all
+<tr><td>cipher-suite<td>&nbsp;<td>&nbsp;
+</deftable-childtags>
+
+<p>
+More documentation is available in the <a href="doc|security|ssl">Security
+section.</a>
+</p>
+
+<p>
+The <a href="external|apache|mod_ssl">mod_ssl</a> documentation
+for Apache is a good source of information on OpenSSL.  
+</p>
+
+<deftable title="mod_ssl equivalents to Resin OpenSSL configuration">
+<tr><th>Resin<th><a href="external|apache|mod_ssl">mod_ssl</a>
+<tr><td>certificate-file
+    <td><a href="external|apache|mod_ssl#sslcertificatefile">SSLCertificateFile</a>
+<tr><td>certificate-key-file
+    <td><a href="external|apache|mod_ssl#sslcertificatekeyfile">SSLCertificateKeyFile</a>
+<tr><td>certificate-chain-file
+    <td><a href="external|apache|mod_ssl#sslcertificatechainfile">SSLCertificateChainFile</a>
+<tr><td>session-cache
+    <td><a href="external|apache|mod_ssl#sslsessioncache">SSLSessionCache</a>
+<tr><td>session-cache-timeout
+    <td><a href="external|apache|mod_ssl#sslsessioncachetimeout">SSLSessionCacheTimeout</a>
+<tr><td>verify-client
+    <td><a href="external|apache|mod_ssl#sslverifyclient">SSLVerifyClient</a>
+<tr><td>verify-depth
+    <td><a href="external|apache|mod_ssl#sslverifydepth">SSLVerifyDepth</a>
+<tr><td>ca-certificate-file
+    <td><a href="external|apache|mod_ssl#sslcacertificatefile">SSLCACertificateFile</a>
+<tr><td>ca-revocation-file
+    <td><a href="external|apache|mod_ssl#sslcarevocationfile">SSLCARevocationFile</a>
+<tr><td>protocol
+    <td><a href="external|apache|mod_ssl#sslprotocol">SSLProtocol</a>
+<tr><td>cipher-suite
+    <td><a href="external|apache|mod_ssl#sslciphersuite">SSLCipherSuite</a>
+</deftable>
+
+<p>
+The class that corresponds to &lt;openssl&gt; is 
+<a href="javadoc|com.caucho.vfs.OpenSSLFactory|"/>.  
+</p>
+
+<p>
+
+</defun>
+
+<defun title="persistent-store" version="Resin 3.0.8">
+<parents>server</parents>
+
+<p>Defines the cluster-aware persistent store used for
+sharing distributed sessions.  The allowed types are "jdbc", "cluster"
+and "file".  The "file" type is only recommended in single-server
+configurations.</p>
+
+<p>The &lt;persistent-store> configuration is in the &lt;server> level
+because it needs to share update information across the
+active cluster and the &lt;cluster> definition is at the &lt;server> level.
+Sessions activate the persistent store with the &lt;use-persistent-store>
+tag of the &lt;session-config>.</p>
+
+<p>See <a href="config|sessions.xtp">Persistent sessions</a> for more details.</p>
+
+<example>
+&lt;server>
+  &lt;cluster>
+    &lt;srun id="a" host="192.168.0.1" port="6802" index="1"/>
+    &lt;srun id="b" host="192.168.0.2" port="6802" index="2"/>
+  &lt;/cluster>
+
+  &lt;persistent-store type="jdbc">
+    &lt;init>
+      &lt;data-source>jdbc/session&lt;/data-source>
+
+      &lt;max-idle-time>24h&lt;/max-idle-time>
+    &lt;/init>
+  &lt;/persistent-store>
+
+  &lt;web-app-default>
+    &lt;session-config use-persistent-store="true"/>
+  &lt;/web-app-default>
+&lt;/server>
+</example>
+
+<deftable-childtags title="common tags">
+<tr occur="?"><td>max-idle-time<td>How long idle objects are stored<td>24h
+<tr occur="?"><td>always-load<td>Always load the value<td>false
+<tr occur="?"><td>always-save<td>Always save the value<td>false
+</deftable-childtags>
+
+<deftable-childtags title="jdbc tags">
+<tr occur="+"><td>data-source<td>The JDBC data source<td>required
+<tr occur="?"><td>table-name<td>Database table<td>persistent_session
+<tr occur="?"><td>blob-type<td>Schema type to store values<td>from JDBC meta info
+</deftable-childtags>
+
+<deftable-childtags title="cluster tags">
+<tr occur="+"><td>path<td>Directory to store the sessions<td>required
+</deftable-childtags>
+
+<deftable-childtags title="file tags">
+<tr occur="+"><td>path<td>Directory to store the sessions<td>required
+</deftable-childtags>
+
+</defun>
+
+<defun title="ping" occur='*' version="Resin 3.0">
+<parents>server</parents>
+
+<p>Starts a thread that periodically makes a request to the server, and
+restarts Resin if it fails.  This facility is used to increase server
+reliability - if there is a problem with the server (perhaps from a deadlock or
+an exhaustion of resources), the server is restarted.</p>
+
+<p>A failure occurs if a request to the url returns an HTTP status that is
+not 200.</p>
+
+<p>Since the local process is restarted, it does not make sense to specify a
+url that does not get serviced by the instance of Resin that has the ping
+configuration.  Most configurations use url's that specify `localhost' as
+the host.</p>
+
+<p>This pinging only catches some problems because it's running in the
+same process as Resin itself.  If the entire JDK freezes, this
+thread will freeze as well.  Assuming the JDK doesn't freeze, the
+PingThread will catch errors like deadlocks.</p>
+
+<example title="resin.conf - simple usage of server ping">
+&lt;resin xmlns="http://caucho.com/ns/resin"
+       xmlns:resin="http://caucho.com/ns/resin/core"&gt;
+  ...
+  &lt;server&gt;
+    &lt;ping url="http://localhost/"/&gt;
+    ...
+  &lt;/server&gt;
+&lt;/resin&gt;
+</example>
+
+<example title="resin.conf - configured usage of server ping">
+&lt;resin xmlns="http://caucho.com/ns/resin"
+       xmlns:resin="http://caucho.com/ns/resin/core"&gt;
+  ...
+  &lt;server&gt;
+    &lt;ping&gt;
+      &lt;url&gt;http://localhost:8080/index.jsp&lt;/url&gt;
+      &lt;url&gt;http://localhost:8080/webapp/index.jsp&lt;/url&gt;
+      &lt;url&gt;http://virtualhost/index.jsp&lt;/url&gt;
+      &lt;url&gt;http://localhost:443/index.jsp&lt;/url&gt;
+
+      &lt;sleep-time&gt;5m&lt;/sleep-time&gt;
+      &lt;try-count&gt;5&lt;/try-count&gt;
+    
+      &lt;!-- a very busy server --&gt;
+      &lt;socket-timeout&gt;30s&lt;/socket-timeout&gt;
+    &lt;/ping&gt;
+    ...
+  &lt;/server&gt;
+&lt;/resin&gt;
+</example>
+
+<deftable-childtags>
+<tr occur='+'><td>url<td>A url to ping.<td>required
+<tr occur='?'><td>sleep-time<td>Time to wait between pings.  The first ping is always 15m after the server starts, this is for subsequent pings.<td>15m
+<tr occur='?'><td>try-count<td>If a ping fails, number of times to retry before giving up and restarting <td>required
+<tr occur='?'><td>retry-time<td>time between retries<td>1s
+<tr occur='?'><td>socket-timeout<td>time to wait for server to satrt responding to the tcp connection before giving up<td>10s
+</deftable-childtags>
+
+<p>
+The class that corresponds to &lt;ping&gt; is 
+<a href="javadoc|com.caucho.server.admin.PingThread|"/>.  
+</p>
+
+<section title="Mail notification when ping fails">
+
+<p>A refinement of the ping facility sends an email when the server is
+restarted.</p>
+
+<example title="resin.conf - mail notification when ping fails">
+&lt;resin xmlns="http://caucho.com/ns/resin"
+       xmlns:resin="http://caucho.com/ns/resin/core"&gt;
+  ...
+  &lt;server&gt;
+    &lt;ping resin:type="com.caucho.server.admin.PingMailer"&gt;
+      &lt;url&gt;http://localhost:8080/index.jsp&lt;/url&gt;
+      &lt;url&gt;http://localhost:8080/webapp/index.jsp&lt;/url&gt;
+
+      &lt;mail-to&gt;fred@hogwarts.com&lt;/mail-to&gt;
+      &lt;mail-from&gt;resin@hogwarts.com&lt;/mail-from&gt;
+      &lt;mail-subject&gt;Resin ping has failed for server ${'${'}server.name}&lt;/mail-subject&gt;
+    &lt;/ping&gt;
+    ...
+  &lt;/server&gt;
+&lt;/resin&gt;
+</example>
+</section>
+</defun>
+
+<defun title="resin" version="Resin 3.0">
+      
+<p>Top-level configuration for the resin.conf file.  The &lt;resin>
+tag needs to specify the Resin namespace, to allow for validation
+of the configuration file.</p>
+
+<p>The environment of the top-level &lt;resin> is the global classpath.
+This environment can be important for &lt;log> configuration
+for threads which run with using only the global class loader.
+Because the &lt;resin> environment does not have a dynamic class loader,
+dynamically loaded classes, like custom jars
+in resin/lib are not available.</p>
+
+<example title="resin">
+&lt;resin xmlns="http://caucho.com/ns/resin"&gt;
+  &lt;server>
+    &lt;http id='' host='*' port='8080'/>
+
+    &lt;resin:import path="app-default.xml"/>
+
+    &lt;host id=""/>
+      &lt;web-app id="/"/>
+    &lt;/host>
+  &lt;/server>
+&lt;/resin>
+</example>
+
+<deftable title="EL variables defined by &lt;resin&gt;">
+<tr><th>variable<th>corresponding API<th>&nbsp;
+<tr><td>resin-home<td>CauchoSystem.getResinHome()<td>&nbsp;
+<tr><td>server-root<td>CauchoSystem.getServerRoot()<td>&nbsp;
+</deftable>
+
+<p>The class that corresponds to this tag is <a href="javadoc|com.caucho.server.resin.ResinServer|"/></p>
+
+</defun>
+
+<defun title="root-directory" version="Resin 3.0">
+<parents>server, host</parents>
+
+<p>Specifies the root directory for the &lt;server> and &lt;host>
+contexts. All EL-style directory paths are relative to
+the root-directory.</p>
+
+</defun>
+
+<defun title="security-manager">
+<p>
+Enable the use of the security manager for the JVM.
+</p>
+
+<example>
+&lt;resin xmlns="http://caucho.com/ns/resin"
+       xmlns:resin="http://caucho.com/ns/resin/core"&gt;
+
+  ...
+  &lt;security-manager/&gt;
+  ...
+</example>
+
+<p>See also:</p>
+<ul>
+<li><a href="doc|security|securitymanager">Security Manager</a>
+</ul>
+</defun>
+
+<defun title="security-provider">
+<p>
+Add one or more security providers.  Each entry specifies the name of a
+security provider class.  The name is used to instantiate an instance of the
+object, which is then passed to 
+<a href="javadoc|java.security.Security|addProvider"/>.
+</p>
+
+<example>
+&lt;resin xmlns="http://caucho.com/ns/resin"
+       xmlns:resin="http://caucho.com/ns/resin/core"&gt;
+
+  ...
+
+  &lt;security-provider&gt;com.sun.net.ssl.internal.ssl.Provider&lt;/security-provider&gt;
+  &lt;security-provider&gt;example.MyProvider&lt;/security-provider&gt;
+
+  ...
+
+</example>
+
+</defun>
+
+<defun title="server" version="Resin 3.0">
+<parents>resin</parents>
+
+<p>Main configuration for the server, configuring ports,
+threads and virtual hosts.</p>
+
+<ul>
+<li>Common resources for all virtual hosts and web-apps.
+<li>Thread pooling
+<li>HTTP and SRUN/Cluster ports
+<li>Caching
+<li>virtual host configuration and common web-app-default
+</ul>
+
+<p>The &lt;server> will generally contain a &lt;class-loader> configuration
+which loads the resin/lib jars dynamically, allowing for system-wide jars
+to be dropped into resin/lib.  &lt;server> configures
+the main dynamic environment.  Database pools common to all virtual hosts,
+for example, should be configured in the &lt;server> block.</p>
+
+<p>The &lt;server> configures the &lt;thread-pool> and a set
+of &lt;http> and &lt;srun> ports which share the thread pool.
+Requests received on those ports will use worker threads from the
+thread pool.</p>
+
+<deftable-childtags>
+<tr><td>alternate-session-url-prefix
+    <td>a prefix to add the session to the beginning of the URL as a path
+        prefix instead of the standard ;jsessionid= suffix. For clients like
+        mobile devices with limited memory, this will allow careful web
+        designers to minimize the page size.
+    <td>null
+<tr><td>keepalive-max
+    <td>the maximum number of keepalive connections
+    <td>512
+<tr><td>keepalive-timeout
+    <td>the maximum time a connection is maintained in the keepalive state
+    <td>120s
+</deftable-childtags>
+
+<example title="alternate-session-url-prefix">
+&lt;server&gt;
+  ...
+  &lt;alternate-session-url-prefix&gt;/~J=&lt;/alternate-session-url-prefix&gt;
+  ...
+</example>
+
+<p>The class that corresponds to &lt;server&gt; is <a href="javadoc|com.caucho.server.resin.ServletServer|"/></p>
+
+<section name="server-el" title="EL variables and functions">
+<deftable title="EL variables defined by &lt;server&gt;">
+<tr><th>variable<th>corresponding API
+<tr><td>serverId<td><i>server</i>.getServerId()
+<tr><td>root-dir<td><i>server</i>.getRootDirectory()
+<tr><td>server-root<td><i>server</i>.getRootDirectory()
+</deftable>
+
+<deftable title="EL functions defined by &lt;server&gt;">
+<tr><th>function<th>corresponding API
+<tr><td>jndi:lookup<td><a href="javadoc|com.caucho.naming.Jndi|lookup(String)"/>
+</deftable>
+
+</section>
+</defun> <!-- server -->
+
+<defun title="srun" version="Resin 3.0">
+<parents>cluster</parents>
+
+<p>Configures a clustered HMUX listener.</p>
+
+<p>When configuring Resin in a load-balanced cluster, each Resin instance
+will have its own &lt;srun> configuration, which Resin uses for distributed
+session management and for the load balancing itself.</p>
+
+<p>When configuring multiple JVMs, each &lt;srun> will have a
+unique &lt;server-id> which allows the -server command-line to select
+which ports the server should listen to.</p>
+
+<deftable-childtags>
+<tr><td>backup<td>If true, the server is generally used as a backup<td>false
+<tr><td>host<td>hostname of the interface to listen to<td>*
+<tr><td>index<td>Session index of the srun<td>required
+<tr><td>jsse-ssl<td>configures the port to use JSSE for SSL<td>none
+<tr><td>openssl<td>configures the port to use OpenSSL<td>none
+<tr><td>port<td>port to listen to<td>required
+<tr><td>protocol<td>configures the Srun protocol<td>hmux
+<tr><td>read-timeout<td>timeout waiting to read from idle client<td>65s
+<tr><td>write-timeout<td>timeout waiting to write to idle client<td>65s
+<tr><td>server-id<td>server id matching the -server command line<td>none
+<tr><td>socket-listen-backlog<td>The socket factory's listen backlog for receiving sockets<td>100
+<tr><td>tcp-no-delay<td>sets the NO_DELAY socket parameter<td>true
+</deftable-childtags>
+
+<p>The class that corresponds to &lt;srun&gt; is <a href="javadoc|com.caucho.server.cluster.ClusterPort|"/></p>
+
+</defun>
+
+<defun title="thread-pool" version="Resin 3.0">
+<parents>server</parents>
+
+<p>Configures the thread pool shared among all ports.</p>
+
+<deftable-childtags>
+<tr><td>thread-max<td>maximum number of working threads<td>200
+<!--
+<tr><td>spare-thread-max<td>maximum number of spare working threads<td>20
+-->
+<tr><td>spare-thread-min<td>minimum number of spare working threads<td>5
+</deftable-childtags>
+
+<p>&lt;thread-max> is the absolute maximum number of connection worker
+threads allowed.  &lt;thread-max> may be limited by OS/JVM
+restrictions, especially the stack size.  -Xss and/or ulimit -s may be
+required for large numbers of threads, e.g. "ulimit -s 2048" on some
+versions of Linux would allow for 1024 total threads in the JVM.</p>
+
+<!--
+<p>&lt;spare-thread-max> and &lt;spare-thread-min> configure Resin's
+adaptive thread pooling.  Resin tries to keep between &lt;spare-thead-min>
+and &lt;spare-thread-max> idle threads available at all time.  Sites
+with large spikes in connection loads may need to increase the
+&lt;spare-thread-min> value.</p>
+-->
+
+<p>&lt;spare-thread-min> configures Resin's
+adaptive thread pooling.  Resin tries to keep &lt;spare-thead-min>
+idle threads available at all time.  Sites
+with large spikes in connection loads may need to increase the
+&lt;spare-thread-min> value.</p>
+
+</defun>
+
+<defun title="user-name" version="Resin 3.0">
+<parents>resin</parents>
+
+<p>Configures the Unix setuid user name used after Resin binds the
+reserved ports as root.</p>
+
+<p>Note, Linux requires the new thread package (e.g. RedHat 9.0 or
+later) to support user-name.</p>
+</defun>
+
+</section> <!-- resin.conf -->
+
+<section name="common" title="Common Tags">
+
+<p>There are some conventions for tag names that provide similar functionality.</p>
+
+<defun title="fileset" version="Resin 3.0.7">
+
+<p>&lt;fileset&gt; provides the ability to match a set of files.  It is
+modelled after the ant tag by the same name.</p>
+
+<deftable-childtags>
+<tr><td>dir<td>the starting directory<td>required
+<tr><td>include<td>an include pattern<td>do not include all files
+<tr><td>exclude<td>an exclude pattern<td>do not exclude any files
+</deftable-childtags>
+
+<p>A pattern can contain two special characters: '*' and '**'.  '*' matches any
+part of path, but does not match the path separator.  '**' matches any part of
+a path, including the path separator. </p>
+
+<example>
+&lt;fileset dir="lib"&gt;
+  &lt;include name="*.jar"/&gt;
+&lt;/fileset&gt;
+
+MATCH    lib/foo.jar
+MATCH    lib/bar.jar
+NO MATCH lib/baz/foo.jar
+</example>
+
+<example>
+&lt;fileset dir="lib"&gt;
+  &lt;include name="**/*.jar"/&gt;
+&lt;/fileset&gt;
+
+MATCH    lib/foo.jar
+MATCH    lib/bar.jar
+MATCH    lib/baz/foo.jar
+</example>
+
+<p>
+The class that corresponds to &lt;fileset&gt; is 
+<a href="javadoc|com.caucho.config.types.FileSetType|"/>.  
+The class that corresponds to the &lt;include&gt; and &lt;exclude&gt; patterns
+is <a href="javadoc|com.caucho.config.types.PathPatternType|"/>
+</p>
+
+</defun>
+
+</section> <!-- common -->
+
+<section name="startup-mode" title="Startup and Redeploy Mode">
+
+<p>The <a config-tag="startup-mode"/> is used in a number of places to
+determine the behaviour of a resource when the server starts.</p>
+
+<p>The startup-mode has three values: "automatic", "lazy", and "manual".
+<ul>
+<li>automatic - starts the resource on server start (default)
+<li>lazy - starts the resource on the first use
+<li>manual - waits for JMX to start the resource.
+</ul>
+
+<p>The <a config-tag="redeploy-mode"/> is used in a number of places to
+determine the behaviour of a resource when it is replaced or modified while the
+server is running.</p>
+
+<p>The redeploy-mode has two values: "automatic", and "manual".
+<ul>
+<li>automatic - restarts the resource when it is modified (web.xml, *.class, *.war, etc).
+<li>manual - waits for JMX to restart the resource when changes occur.
+</ul>
+
+</section> <!-- startup-mode -->
+
+</document>

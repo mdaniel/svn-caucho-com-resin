@@ -1,0 +1,52 @@
+<document>
+  <header>
+    <product>resin</product>
+    <resin-2.0>$resin/ref/ejb-weblogic.xtp</resin-2.0>
+    <title>WebLogic EJB</title>
+  </header>
+
+  <body>
+    <summary/>
+
+<example>
+&lt;web-app>
+  &lt;classpath id='/usr/local/weblogic/myserver/clientclasses'/>
+  &lt;classpath id='/usr/local/weblogic/lib/weblogicaux.jar'/>
+  &lt;classpath id='/usr/local/weblogic/classes'/>
+
+  &lt;jndi-link>
+    &lt;jndi-name>java:comp/env/ejb/traderHome&lt;/jndi-name>
+    &lt;jndi-factory>weblogic.jndi.WLInitialContextFactory&lt;/jndi-factory>
+    &lt;init-param java.naming.provider.url="t3://localhost:7001"/>
+    &lt;jndi-lookup>statelessSession.TraderHome&lt;/jndi-lookup>
+  &lt;/jndi-link>
+&lt;/web-app>
+</example>
+
+<example>
+&lt;%@ page import='javax.naming.*' %>
+&lt;%@ page import='examples.ejb.basic.statelessSession.*' %>
+&lt;%@ page import='javax.rmi.*' %>
+&lt;%
+Context ic = new InitialContext();
+
+Object homeObj = ic.lookup("java:comp/env/ejb/traderHome");
+TraderHome home;
+home = (TraderHome) PortableRemoteObject.narrow(homeObj, TraderHome.class);
+
+Trader trader;
+trader = (Trader) PortableRemoteObject.narrow(home.create(), Trader.class);
+
+String stock = request.getParameter("stock");
+int shares = Integer.parseInt(request.getParameter("shares"));
+
+TradeResult result = trader.buy(stock, shares);
+%>
+Bought &lt;%= result.getNumberTraded() %>
+       &lt;%= result.getStockSymbol() %>&lt;br>
+&lt;%
+trader.remove();
+%>
+</example>
+  </body>
+</document>

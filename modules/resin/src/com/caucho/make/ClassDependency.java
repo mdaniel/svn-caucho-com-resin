@@ -1,0 +1,301 @@
+/*
+ * Copyright (c) 1998-2004 Caucho Technology -- all rights reserved
+ *
+ * This file is part of Resin(R) Open Source
+ *
+ * Each copy or derived work must preserve the copyright notice and this
+ * notice unmodified.
+ *
+ * Resin Open Source is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * Resin Open Source is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE, or any warranty
+ * of NON-INFRINGEMENT.  See the GNU General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Resin Open Source; if not, write to the
+ *
+ *   Free Software Foundation, Inc.
+ *   59 Temple Place, Suite 330
+ *   Boston, MA 02111-1307  USA
+ *
+ * @author Scott Ferguson
+ */
+
+package com.caucho.make;
+
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+
+import java.util.Arrays;
+import java.util.Comparator;
+
+import java.util.logging.Logger;
+import java.util.logging.Level;
+
+import com.caucho.util.CharBuffer;
+import com.caucho.util.Base64;
+import com.caucho.util.Crc64;
+
+import com.caucho.log.Log;
+
+/**
+ * Representing a class that might change.
+ */
+public class ClassDependency implements PersistentDependency {
+  private final static Logger log = Log.open(ClassDependency.class);
+  
+  private Class _cl;
+
+  private boolean _checkFields = true;
+  private boolean _checkStatic = true;
+  private boolean _checkProtected = true;
+  private boolean _checkPrivate = true;
+
+  private boolean _isDigestModified;
+  private long _newDigest;
+
+  /**
+   * Creates the class dependency.
+   */
+  public ClassDependency(Class cl)
+  {
+    _cl = cl;
+  }
+
+  /**
+   * Create a new dependency with a given digest.
+   *
+   * @param cl the source class
+   * @param digest the MD5 digest
+   */
+  public ClassDependency(Class cl, long digest)
+  {
+    _cl = cl;
+
+    long newDigest = getDigest();
+
+    if (newDigest != digest) {
+      if (log.isLoggable(Level.FINE))
+        log.fine(_cl.getName() + " digest is modified (old=" + digest + ",new=" + newDigest + ")");
+
+      _isDigestModified = true;
+    }
+  }
+  
+  /**
+   * Returns true if the underlying resource has changed.
+   */
+  public boolean isModified()
+  {
+    return _isDigestModified;
+  }
+
+  /**
+   * Calculates a MD5 digest of the class.
+   */
+  public long getDigest()
+  {
+    try {
+      if (_newDigest != 0)
+	return _newDigest;
+      
+      if (_cl == null)
+        return -1;
+
+      long digest = 37;
+
+      digest = addDigest(digest, _cl.getName());
+
+      digest = addDigest(digest, _cl.getModifiers());
+
+      Class cl = _cl.getSuperclass();
+      if (cl != null)
+        digest = addDigest(digest, cl.getName());
+
+      Class []interfaces = _cl.getInterfaces();
+      Arrays.sort(interfaces, new ClassComparator());
+      for (int i = 0; i < interfaces.length; i++)
+        digest = addDigest(digest, interfaces[i].getName());
+
+      Field []fields = _cl.getFields();
+
+      Arrays.sort(fields, new FieldComparator());
+
+      if (_checkFields) {
+        for (int i = 0; i < fields.length; i++) {
+          if (Modifier.isPrivate(fields[i].getModifiers()) &&
+              ! _checkPrivate)
+            continue;
+          if (Modifier.isProtected(fields[i].getModifiers()) &&
+              ! _checkProtected)
+            continue;
+          
+          digest = addDigest(digest, fields[i].getName());
+          digest = addDigest(digest, fields[i].getModifiers());
+          digest = addDigest(digest, fields[i].getType().getName());
+        }
+      }
+
+      Method []methods = _cl.getMethods();
+      Arrays.sort(methods, new MethodComparator());
+      
+      for (int i = 0; i < methods.length; i++) {
+        Method method = methods[i];
+
+        if (Modifier.isPrivate(method.getModifiers()) && ! _checkPrivate)
+          continue;
+        if (Modifier.isProtected(method.getModifiers()) && ! _checkProtected)
+          continue;
+        if (Modifier.isStatic(method.getModifiers()) && ! _checkStatic)
+          continue;
+          
+        digest = addDigest(digest, method.getName());
+        digest = addDigest(digest, method.getModifiers());
+        digest = addDigest(digest, method.getName());
+
+        Class []param = method.getParameterTypes();
+        for (int j = 0; j < param.length; j++)
+          digest = addDigest(digest, param[j].getName());
+
+        digest = addDigest(digest, method.getReturnType().getName());
+
+        Class []exn = method.getExceptionTypes();
+        for (int j = 0; j < exn.length; j++)
+          digest = addDigest(digest, exn[j].getName());
+      }
+      
+      _newDigest = digest;
+    } catch (Exception e) {
+      log.log(Level.FINER, e.toString(), e);
+
+      _newDigest = -1;
+    }
+
+    return _newDigest;
+  }
+
+  /**
+   * Returns a string which will recreate the dependency.
+   */
+  public String getJavaCreateString()
+  {
+    return ("new com.caucho.make.ClassDependency(" +
+            _cl.getName().replace('$', '.') + ".class, " + getDigest() + "L)");
+  }
+  
+  /**
+   * Adds the int to the digest.
+   */
+  private static long addDigest(long digest, long v)
+  {
+    
+    digest = Crc64.generate(digest, (byte) (v >> 24));
+    digest = Crc64.generate(digest, (byte) (v >> 16));
+    digest = Crc64.generate(digest, (byte) (v >> 8));
+    digest = Crc64.generate(digest, (byte) v);
+
+    return digest;
+  }
+  
+  /**
+   * Adds the string to the digest using a UTF8 encoding.
+   */
+  private static long addDigest(long digest, String string)
+  {
+    return Crc64.generate(digest, string);
+  }
+
+  public boolean isEqual(Object o)
+  {
+    if (o == this)
+      return true;
+    
+    if (! (o instanceof ClassDependency))
+      return false;
+
+    ClassDependency depend = (ClassDependency) o;
+
+    return _cl.equals(depend._cl);
+  }
+
+  static class ClassComparator implements Comparator<Class> {
+    public int compare(Class a, Class b)
+    {
+      if (a == b)
+	return 0;
+      else if (a == null)
+	return -1;
+      else if (b == null)
+	return 1;
+      else if (a.equals(b))
+	return 0;
+
+      return a.getName().compareTo(b.getName());
+    }
+  }
+
+  static class FieldComparator implements Comparator<Field> {
+    public int compare(Field a, Field b)
+    {
+      if (a == b)
+	return 0;
+      else if (a == null)
+	return -1;
+      else if (b == null)
+	return 1;
+
+      int cmp = a.getName().compareTo(b.getName());
+      if (cmp != 0)
+	return cmp;
+      
+      cmp = a.getDeclaringClass().getName().compareTo(b.getDeclaringClass().getName());
+      if (cmp != 0)
+	return cmp;
+      
+      return a.getType().getName().compareTo(b.getType().getName());
+    }
+  }
+
+  static class MethodComparator implements Comparator<Method> {
+    public int compare(Method a, Method b)
+    {
+      if (a == b)
+	return 0;
+      else if (a == null)
+	return -1;
+      else if (b == null)
+	return 1;
+
+      int cmp = a.getName().compareTo(b.getName());
+      if (cmp != 0)
+	return cmp;
+
+      Class []paramA = a.getParameterTypes();
+      Class []paramB = b.getParameterTypes();
+
+      if (paramA.length < paramB.length)
+	return -1;
+      else if (paramB.length < paramA.length)
+	return 1;
+
+      for (int i = 0; i < paramA.length; i++) {
+	cmp = paramA[i].getName().compareTo(paramB[i].getName());
+	if (cmp != 0)
+	  return cmp;
+      }
+      
+      cmp = a.getDeclaringClass().getName().compareTo(b.getDeclaringClass().getName());
+      if (cmp != 0)
+	return cmp;
+      
+      return a.getReturnType().getName().compareTo(b.getReturnType().getName());
+    }
+  }
+}

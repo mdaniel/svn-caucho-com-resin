@@ -1,0 +1,470 @@
+<document>
+  <header>
+    <product>resin-ee</product>
+    <title>Field-based Persistent Objects</title>
+        <description>
+          <p>EJB 3.0 supports a field-based relational model: each
+Java field represents a database column.  The tutorial
+shows the configuration, classes, and client code for a single-table entity. </p>
+        </description>
+    <type>tutorial</type>
+    <tutorial-startpage>basic</tutorial-startpage>
+  </header>
+
+  <body>
+    <summary/>
+
+<section title="Overview">
+
+<p>EJB 3.0 provides a Java model for a relational database, focusing
+on solving that single, specific problem.
+Earlier EJB versions overgeneralized, trying to
+support non-relational data, and lost focus and clarity.  Other
+persistent object specifications, like JDO, tried to provide
+transparent persistence for Java objects and tried to support both
+object and relational databases.  By restricting to relational database
+mapping, EJB 3.0 can provide powerful Java models and still simplify
+the specification and its use.</p>
+
+<p>A typical project using EJB 3.0 starts planning with the
+relational database schema and matching the Java model to that schema.
+This data-driven approach contrasts with a transparent persistent
+object approach which starts with Java classes and then tries to
+create storage to match the Java model, an approach more typical
+of object-oriented databases.  While the transparent persistence model
+may be appropriate for some applications, EJB 3.0 wisely leaves
+transparent persistence to other products and specifications, and
+concentrates on the relational database model.</p>
+
+<p>In a way, EJB 3.0 simply provides an extension
+to SQL queries, returning fully-populated Java objects instead of
+just returning primitive values like Strings.  That somewhat
+understates EJB's capabilities since the Java objects are live,
+updating the database in a object-oriented fashion, and also provides
+caching.  Still, viewing EJB 3.0 as a SQL extension supporting
+relations and objects is a good starting model.</p> 
+
+<p>The tutorial uses "entity" to mean a persistent object.  In EJB 3.0, an
+entity is a Java class instance.</p>
+
+<section title="Differences with EJB 2.1">
+
+<p>The EJB 3.0 draft is primarily a process of removing
+features superfluous to supporting persistent objects.</p>
+
+<ul>
+<li>No home interfaces
+<li>No local interfaces
+<li>No instance pooling
+<li>No special create or remove methods
+<li>No special find or select methods
+<li>Deployment descriptor is optional
+</ul>
+
+<p>EJB 3.0 relies on JDK 1.5 annotations to configure entities in
+a maintainable, self-documenting way.</p>
+
+<ul>
+<li>Only one Java class needed per table (no interface needed)
+<li>Annotation per field
+<li>Annotation directly in Java class
+<li>Direct java instance (no proxy or stub needed)
+</ul>
+
+</section>
+
+</section>
+
+<section title="Files in this tutorial">
+<deftable>
+<tr><td><viewfile-link file="WEB-INF/web.xml"/>
+    <td>web.xml configuration
+<tr><td><viewfile-link file="WEB-INF/classes/example/Course.java"/>
+    <td>The course bean
+<tr><td><viewfile-link file="WEB-INF/classes/example/CourseServlet.java"/>
+    <td>The course servlet
+</deftable>
+</section>
+
+<section title="Database Model">
+
+<p>The tutorial's design begins with its database model.  The
+table is a collection of school courses, each with an assigned teacher.
+The table has an integer primary key "id" and two string data fields, "course"
+and "teacher".</p>
+
+<example title="course.sql">
+CREATE TABLE ejb3_basic_courses (
+  id INTEGER PRIMARY KEY auto_increment,
+
+  course VARCHAR(250),
+  teacher VARCHAR(250)
+);
+
+INSERT INTO ejb3_basic_courses VALUES('Potions', 'Severus Snape');
+INSERT INTO ejb3_basic_courses VALUES('Transfiguration', 'Minerva McGonagall');
+</example>
+
+<p>To judge the complexity of EJB 3.0, it's useful to compare the EJB
+Java model to the simplest possible Java model.  The simple model
+has a single class, <code>Course</code>, for the table and three fields for the
+table's columns.</p>
+
+<example title="Minimal Java model">
+package example;
+
+public class Course {
+  private int _id;
+  private String _course;
+  private String _teacher;
+}
+</example>
+
+<p>The minimal class is missing any description of its intended use as a
+persistent object, information needed for maintainable code.
+In theory, a persistent object tool could use the minimal class
+automatically, but without more information, the source doesn't
+properly describe the class behavior.  Fortunately, the JDK 1.5
+metadata annotations can describe the persistence information in
+a maintainable, self-documenting way.</p>
+
+<p>Of course, those annotations might have default values and should
+be overridable by an optional XML configuration file, but it's
+necessary to annotate the intended function of the entity in the Java
+source itself to properly document and validate the Java code.</p>
+
+</section>
+
+<section title="Persistent Object Implementation">
+
+<p>The minimal Java class needs the following annotations to
+produce a maintainable persistent object:</p>
+
+<ul>
+<li>A annotation to mark the class as persistent.
+<li>An annotation naming the relational table for the class.
+<li>An annotation to mark the primary key and any auto-generation
+capability.
+<li>Annotations to mark each persistent field.
+<li>Annotations naming the columns for the table.
+</ul>
+
+<p>The following code shows the EJB 3.0 annotations for the course
+entity.  As a quick comparison with the minimal Java class shows,
+EJB 3.0 is close to the simplest possible implementation of the
+Java model which provides the necessary annotations in the list.</p>
+
+
+<example title="Course.java">
+package example;
+
+<a href="ejb3|cmp-table.xtp#@Entity">@javax.ejb.Entity</a>(access=javax.ejb.AccessType.FIELD)
+<a href="ejb3|cmp-table.xtp#@Table">@javax.ejb.Table</a>(name="ejb3_basic_course")
+public class Course {
+  <a href="ejb3|cmp-table.xtp#@Id">@javax.ejb.Id</a>(generator=javax.ejb.GeneratorType.AUTO)
+  <a href="ejb3|cmp-table.xtp#@Column">@javax.ejb.Column</a>(name="id")
+  private int _id;
+
+  <a href="ejb3|cmp-table.xtp#@Basic">@javax.ejb.Basic</a>
+  <a href="ejb3|cmp-table.xtp#@Column">@javax.ejb.Column</a>(name="course")
+  private String _course;
+
+  <a href="ejb3|cmp-table.xtp#@Basic">@javax.ejb.Basic</a>
+  <a href="ejb3|cmp-table.xtp#@Column">@javax.ejb.Column</a>(name="teacher")
+  private String _teacher;
+
+  public String course()
+  {
+    return _course;
+  }
+
+  public String teacher()
+  {
+    return _teacher;
+  }
+}
+</example>
+
+<p>The example uses the <code>course()</code>
+and <code>teacher()</code> methods to emphasize that the
+field accesses to _course and _teacher are live, i.e. they
+read and write the database values directly.  (Under the covers, Resin
+uses bytecode enhancement to make this work.)</p>
+
+<section title="@Entity - marking the class as persistent">
+
+<p>Course uses the @Entity to mark the Java class as a field-based
+persistent object.</p>
+
+<example>
+@javax.ejb.Entity(access=FIELD)
+</example>
+
+<p><a href="ejb3|cmp-table.xtp#@Entity">@javax.ejb.Entity</a> declares
+a Java class as an entity bean.</p>
+
+<p>The <code>access=FIELD</code> value
+means the bean's fields are persistent, as in JDO.  Unlike JDO, only
+the bean itself or its children may access the fields.  Other classes
+must use the bean's methods, like getters or setters, to
+indirectly access the fields.  The default <code>access</code> value
+is <code>PROPERTY</code>, meaning method getters are enhanced. </p>
+
+</section>
+
+<section title="@Table - naming the table">
+
+<p><a href="ejb3|cmp-table.xtp#@Table">@javax.ejb.Table</a> specifies
+the SQL database table name to be used.  If <code>@Table</code> is
+unspecified, Resin will use the class name as the table name.</p>
+
+<example>
+@javax.ejb.Table(name="ejb3_basic_course")
+</example>
+
+</section>
+
+<section title="@Id - marking the primary key">
+
+<p>The <a href="ejb3|cmp-table.xtp#@Id">@Id</a> attribute marks the
+bean's primary key.  The <code>EntityManager.find</code> method
+looks up a bean instance with the primary key, and relations use
+the primary key to link beans together.</p>
+
+<example>
+@javax.ejb.Id (generator=AUTO)
+@javax.ejb.Column (name="id")
+private int _id;
+</example>
+
+<p>The optional <code>generator=AUTO</code> specifies automatic
+generation of primary keys when beans are created.  The default
+<code>NONE</code> does not automatically create primary keys.
+<code>AUTO</code> generates primary keys depending on the database.
+Postgres, for example, will use a SEQUENCE, while Resin's built-in
+database will use an auto_increment IDENTITY.</p>
+
+<p>The optional <a
+href="ejb3|cmp-table.xtp#@Column">@Column</a> annotation specifies the
+SQL column name.  The default SQL column for an @Id is "ID".</p>
+
+</section>
+
+<section title="@Basic - marking a persistent field">
+
+<p>The <a href="ejb3|cmp-table.xtp#@Basic">@Basic</a> attribute
+marks a basic data column like a string or integer or double.</p>
+
+<example>
+@javax.ejb.Basic 
+@javax.ejb.Column (name="course")
+private String _course;
+</example>
+
+</section>
+
+<section title="@Column - naming the column">
+
+<p>The optional <a href="ejb3|cmp-table.xtp#@Column">@Column</a>
+annotation specifies SQL column name.  For an @Id, the default
+column name is "ID".  For a @Basic field, the
+default column name is the field name.</p>
+
+</section>
+
+<section title="Under the covers: bytecode enhancement">
+
+<p>Resin processes the bean's class to implement field-enhancement.
+In practice, this means replacing setting a field with a Resin setter
+and getting a field with a Resin getter.</p>
+
+<example>
+public String course()
+{
+  return _course;
+}
+</example>
+
+<p>For example, Resin would process the above method and produce
+something like:</p>
+
+<example>
+public String course()
+{
+  return __caucho_get_course();
+}
+</example>
+
+</section>
+<!--
+<section title="Draft notes: comparing to the simple model">
+
+<p>Although the entity implementation for the EJB draft is close to
+the minimal class, it could be simplified further.</p>
+
+<p>The draft separates "Java" annotations from "SQL" annotations.
+The class has both @Entity and @Table and a data field has @Basic and
+@Column.  These annotations could be merged into a single annotation
+per class or field.  In addition, the FIELD type could be
+make the default since it is likely to be more popular than
+PROPERTY.</p>
+
+<p>The simpler class would look as follows:</p>
+
+<results title="A simpler Course.java">
+package example;
+
+@Entity(tableName="ejb3_basic_course")
+public class Course {
+  @Id(columnName="id", generator=AUTO)
+  private int _id;
+
+  @Basic(columnName="course")
+  private String _course;
+
+  @Basic(columnName="teacher")
+  private String _teacher;
+}
+</results>
+
+<p>Now, one reason the EJB draft doesn't merge the @Column with @Basic
+and @Table with @Entity is because @Column can be used for both @Id
+and @Basic.  The advantage of a separate @Column is more clear with
+the @JoinColumn, which is used for @OneToMany and @ManyToMany (and
+potentially for a @Map).  However, since most of the 
+
+</section>
+-->
+</section>
+
+<section title="Client Servlet">
+
+<p>The client servlet queries the database for all courses and lists
+them.  It uses the <code>EntityManager</code> API to create a
+<code>Query</code> and uses the <code>Query</code> to obtain the results.</p>
+
+
+<example title="CourseServlet.java">
+public class CourseServlet extends HttpServlet {
+  private EntityManager _manager;
+
+  public void setEntityManager(EntityManager manager)
+  {
+    _manager = manager;
+  }
+
+  public void service(HttpServletRequest req, HttpServletResponse res)
+    throws java.io.IOException, ServletException
+  {
+    PrintWriter out = res.getWriter();
+
+    res.setContentType("text/html");
+
+    out.println("&lt;h3>Course Details&lt;/h3>");
+
+    Query query = _manager.createQuery("SELECT o FROM Course o");
+    
+    for (Course course : (List&lt;Course>) query.listResults()) {
+      out.println("course: " + course.course() + "&lt;br>");
+      out.println("teacher: " + course.teacher() + "&lt;br>");
+      out.println("&lt;br>");
+    }
+  }
+}
+</example>
+<results>
+<h3>Course Details</h3>
+course: Potions
+instructor: Severus Snape
+
+course: Transfiguration
+instructor: Minerva McGonagall
+</results>
+
+<section title="EntityManager">
+
+<p><code>EntityManager</code> is the primary interface for
+finding, querying, adding and deleting persistent beans.  It is stored
+in JNDI at java:comp/EntityManager.</p>
+
+<example>
+public void setEntityManager(EntityManager manager)
+{
+  _manager = manager;
+}
+</example>
+
+<p>The example uses dependency injection to configure the entity
+manager.  The web.xml will find the EntityManager in JNDI and
+set it in the servlet before calling the <code>init()</code></p>
+
+<example title="web.xml configuration">
+&lt;servlet servlet-name="basic" servlet-class="example.CourseServlet">
+  &lt;init entity-manager="\${jndi:lookup('java:comp/EntityManager')}"/>
+&lt;/servlet>
+</example>
+
+<p>Of course, a servlet can also use JNDI directly in its
+<code>init()</code> method.</p>
+
+</section>
+
+<section title="Query">
+
+<p><code>Query</code> acts like a <code>PreparedStatement</code> in
+JDBC.  It saves a parsed SQL query and allows for parameters.</p>
+
+<example>
+Query query = _manager.createQuery("SELECT o FROM Course o");
+</example>
+
+<p>The SQL used for EJB 3.0 is an enhanced database SQL.  The query
+can return objects directly ("SELECT&nbsp;o") and it can traverse
+relations ("o.next.data").  In most other respects, it can be thought
+of as regular SQL.</p>
+
+<example>
+List list = query.listResults();
+</example>
+
+<p>The query returns its values with <code>listResults()</code>.
+Queries which return a single value can
+use <code>getSingleResult()</code>.</p>
+
+</section>
+
+</section>
+
+<section title="Resin Configuration">
+
+<p>The Resin configuration is fairly straightforward.  Resin needs to
+start the ejb-server, configure the JDBC data-source, and list the
+beans that will be used.</p>
+
+<example title='WEB-INF/web.xml'>
+&lt;web-app>
+  &lt;!-- server configuration -->
+  &lt;ejb-server data-source="jdbc/resin">
+    &lt;bean type="example.Course"/>
+  &lt;/ejb-server>
+
+  &lt;servlet servlet-name="basic" servlet-class="example.CourseServlet">
+    &lt;init entity-manager="\${jndi:lookup('java:comp/EntityManager')}"/>
+  &lt;/servlet>
+
+  &lt;servlet-mapping url-pattern="/basic" servlet-name="basic"/>
+&lt;/web-app>
+</example>
+
+<p>The &lt;ejb-server> configures Resin's EJB support.  Each &lt;bean>
+adds a new bean (entity, session or message-driven.)</p>
+
+<p>The servlet's &lt;init> method uses dependency injection to
+configure the servlet.  Some applications may want to call JNDI
+directly from within the servlet, although that removes some configuration
+flexibility.</p>
+
+</section>
+
+  </body>
+</document>

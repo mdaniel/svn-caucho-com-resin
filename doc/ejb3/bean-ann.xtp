@@ -1,0 +1,226 @@
+<document>
+<header>
+  <product>resin-ee</product>
+  <title>EJB Bean Annotation</title>
+  <version>Resin 3.0</version>
+
+  <description>
+  <p>Session beans may be configured using dependency injection annotation.</p>
+
+  </description>
+</header>
+
+<note>These annotations will likely change package names to something
+other than javax.ejb as J2EE 1.5 drafts progress.</note>
+
+<summary objsummary='localtoc'/>
+
+<section title="See Also">
+
+<ul>
+<li>See <a href="tutorial/session/index.xtp">session tutorial
+</a> for an example.
+</ul>
+
+</section>
+
+<section title="Bean Annotations">
+
+<defun title="@Entity">
+
+<p>Marks the class as an entity bean.  Each entity bean corresponds to
+a database row. Entity bean persistence is configured with
+the <a href="cmp-table.xtp">CMP annotations</a>.
+
+<p>In EJB 3.0, the application uses entity bean instances directly.  Unlike
+EJB 2.1, there is no pooling, local stub, or home interface for an entity.</p>
+
+<deftable-childtags>
+<tr><td>name<td>The bean's name<td>The bean's class name
+<tr><td>entityType<td>container-managed (CMP) or bean-managed (BMP)<td>CMP
+<tr><td>access<td>field-based (FIELD) or method-getter based (PROPERTY)<td>PROPERTY
+<tr><td>version<td>EJB version<td>3
+</deftable-childtags>
+
+<ul>
+<li>See the <a href="tutorial/cmp-basic/index.xtp">basic tutorial</a>
+for PROPERTY-based entity beans.
+<li>See the <a href="tutorial/cmp-basic-field/index.xtp">basic field
+tutorial</a> for FIELD-based entity beans.
+</ul>
+
+<def>
+@Target(TYPE)
+@Retention(RUNTIME)
+public @interface Entity {
+  String name() default "";
+
+  EntityType entityType() default EntityType.CMP;
+  AccessType access() default AccessType.PROPERTY;
+  int version() default 3;
+}
+</def>
+
+</defun>
+
+<defun title="@TransactionAttribute">
+
+<p>Defines the transaction boundary for session business methods.  The
+default value is REQUIRED.  If 
+@TransactionAttribute annotates the class, it defines the default
+value. </p>
+
+<deftable>
+<tr><th>TransactionAttribute<th>meaning
+<tr><td>REQUIRED<td>Start a new transaction if necessary
+<tr><td>SUPPORTS<td>Don't start a new transaction, but use one if it
+exists
+<tr><td>MANDATORY<td>Require the caller to have started a transaction
+<tr><td>NEVER<td>Forbid the caller to have started a transaction
+<tr><td>REQUIRESNEW<td>Always start a new transaction, suspending the
+old one
+<tr><td>NOTSUPPORTED<td>Suspend any active transaction
+</deftable>
+
+<ul>
+<li>SUPPORTS is typically used for read-only methods
+<li>REQUIRED is typically used for updating (read/write) methods
+</ul>
+
+<def>
+@Target({TYPE,METHOD})
+@Retention(RUNTIME)
+public @interface TransactionAttribute {
+  TransactionAttributeType value() default REQUIRED;
+}
+</def>
+
+</defun>
+
+</section>
+
+<section title="Dependency Injection Annotations">
+
+<defun title="@EJB">
+
+<p>Configures an EJB values for a field or method.</p>
+
+<p>@EJB is essentially a @Resource where it's known that the
+result is an EJB interface.</p>
+
+<deftable-childtags>
+<tr><td>jndiName<td>The jndi name of the resource<td>The field name
+</deftable-childtags>
+
+<p>In the following exaple, Resin will call <code>setFoo</code>
+method with the bean in "java:comp/env/ejb/foo" before the
+session is started.</p>
+
+<example>
+@EJB
+void setFoo(example.Test test)
+{
+  _test = test;
+}
+</example>
+
+<def title="javax.ejb.EJB">
+@Target({TYPE, METHOD, FIELD, PARAMETER})
+@Retention(RUNTIME)
+public @interface EJB {
+  String name() default "";
+  String businessInterface() default "";
+  String jndiName() default "";
+}
+</def>
+
+</defun>
+
+<defun title="@Inject">
+
+<p>Configures a JNDI values for a field or method.</p>
+
+<p>Inject relies heavily on defaults from the field or method name
+and type.  If more information is required, use @Resource, @EJB, or @EJBHome.
+
+<deftable-childtags>
+<tr><td>jndiName<td>The jndi name of the resource<td>The field name
+</deftable-childtags>
+
+<p>In the following exaple, Resin will call <code>setDataSource</code>
+method with the data source in "java:comp/env/jdbc/test" before the
+session is started.</p>
+
+<example>
+@Inject(jndi-name="java:comp/env/jdbc/test")
+void setDataSource(javax.sql.DataSource dataSource)
+{
+  _dataSource = dataSource;
+}
+</example>
+
+<def title="javax.ejb.Inject">
+@Target({METHOD, FIELD})
+@Retention(RUNTIME)
+public @interface Inject {
+  String jndiName() default "";
+}
+</def>
+
+</defun>
+
+<defun title="@Resource">
+
+<p>Configures a JNDI values for a field or method.  @Resource
+is essentially the same as @Inject but provides more configurable
+options.  @Resource can also be used at the Class level to
+declare a dependency in cases where the session bean loads the
+JNDI value by itself.</p>
+
+<deftable-childtags>
+<tr><td>name<td>The name of the resource<td>The field name
+<tr><td>resourceType<td>The resource typed<td>The field type
+<tr><td>authenticationType<td>Whether the container or the application is responsible for authentication<td>CONTAINER
+<tr><td>shareable<td>True if the bean follows JCA shareability requirements.<td>true
+<tr><td>jndiName<td>The jndi name of the resource<td>The field name
+</deftable-childtags>
+
+<p>In the following exaple, Resin will call <code>setDataSource</code>
+method with the data source in "java:comp/env/jdbc/test" before the
+session is started.  The "java:comp/env/jdbc" full name
+is inferred from the DataSource type.</p>
+
+<deftable title="default JNDI names">
+<tr><td>javax.sql.DataSource<td>java:comp/env/jdbc
+<tr><td>javax.mail.*<td>java:comp/env/mail
+<tr><td>javax.ejb.EntityManager<td>java:comp/EntityManager
+<tr><td>javax.transaction.UserTransaction<td>java:comp/UserTransaction
+<tr><td>javax.ejb.EJBHome<td>java:comp/env/ejb
+<tr><td>javax.jms.*<td>java:comp/env/jms
+</deftable>
+
+<example>
+@Resource(name="test")
+void setDataSource(javax.sql.DataSource dataSource)
+{
+  _dataSource = dataSource;
+}
+</example>
+
+<def title="javax.ejb.Resource">
+@Target({TYPE, METHOD, FIELD, PARAMETER})
+@Retention(RetentionPolicy.RUNTIME)
+public @interface Resource {
+  String name() default "";
+  String resourceType() default "";
+  AuthenticationType authenticationType() CONTAINER;
+  boolean shareable() default true;
+  String jndiName() default "";
+}
+</def>
+
+</defun>
+
+</section>
+
+</document>

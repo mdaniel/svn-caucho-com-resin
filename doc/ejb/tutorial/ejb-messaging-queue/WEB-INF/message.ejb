@@ -1,0 +1,9 @@
+<ejb-jar xmlns="http://caucho.com/ns/resin">
+<enterprise-beans>
+  <message-driven>
+    <ejb-name>SimpleMessageBean</ejb-name>
+    <ejb-class>example.SimpleMessageBean</ejb-class>
+    <destination>jms/queue</destination>
+  </message-driven>
+</enterprise-beans>
+</ejb-jar>

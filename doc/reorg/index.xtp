@@ -1,0 +1,295 @@
+<document>
+  <header>
+    <product>resin</product>
+    <title>Documentation Reorg Notes</title>
+    <author>sam@caucho.com</author>
+    <brief>
+      Notes on reorganization for 3.0
+    </brief>
+  </header>
+
+  <body>
+  <summary/>
+
+<section title="priorities">
+<ul>
+<li>rock bottom basics, like put your classes here, make sure servlets
+  are in a class, etc.
+
+<li>jstl/jsp el, mostly because it is new
+
+<li>need for clear examples of using ejb as a client, setting up server
+
+<li>servlets serving binary files
+
+<li>servlets serving binary files from database
+
+<li>databases, specifically an example of jndi config with
+  transaction/without transaction for the major vendors (Oracle, SQL
+  Server, DB2, etc) would be good.
+
+  I was thinking of posting to resin-interest and soliciting some  
+  working examples from people for the various databases.
+  Good idea?
+
+<li>SSL Hardware
+
+<li>Caching.  It's not that people have problems with it, I think it's
+  more they look at it, don't really understand it, and then just
+  forget about it.
+
+<li>multiple jvm, i.e. jvm per host, jvm per web-app etc.
+  I've got some stuff that I have sent to people, I just need to
+  update it for 3.0 and integrate it into the docs.
+
+<li>an XSL "quick start" guide.  i.e. quick pointer on how to get Resin
+  filtering jsp/servlet output with xsl
+</ul>
+</section>
+
+<section title="webapps outline">
+<ul>
+<li>core concepts
+  <ul>
+  <li>web application defined
+  <li>brief blurb on what a servlet is
+  <li>brief blurb on what JSP is
+  <li>application (ServletContext)
+  <li>request/response
+  <li>session 
+  </ul>
+
+<li>file's in a web application (.war)
+  <ul>
+  <li>WEB-INF/web.xml
+  <li>WEB-INF/lib
+  <li>WEB-INF/classes
+  <li>WEB-INF/resin-web.xml
+  </ul>
+
+<li>architecture
+  <ul>
+  <li>model 1 - model 1 1/2 - model 2 (or whatever they are called now)
+  <li>JSF (once it exists)
+  <li>XTP mentioned
+  <li>caching mentioned (details on caching are in performance section)
+  </ul>
+
+<li>common tasks
+  <ul>
+  <li>using a database (brief, link to databases section, also mention
+    CMP)
+  <li>reading/writing configuration files
+  </ul>
+
+<li>make system
+  <ul>
+  <li>automatic compilation explained
+  <li>seperating the java source from compiled classes
+  </ul>
+</ul>
+
+</section>
+
+<section title="and the winner is ....">
+<p>places to update/send announcements to when 3.1 is released:</p>
+<ul>
+<li>http://www.jaagle.com/cat.php?id=124
+<li>http://www.theserverside.com/reviews/matrix.jsp 
+<li>http://www.techmetrix.com/trendmarkers/techmetrixasd.php?file=prof_resin
+</ul>
+</section>
+
+<section title="TODO">
+<dl>
+<dt>'href' in section title
+<dd>does it work>
+<dt>XSLT not XSL
+<dd>
+<dt>javadoc in tutorials
+<dd>need to build javadoc, include
+link in index.xtp for each tutorial
+<dt>ref/servlet-library.xtp, ref/filter-library.xtp
+<dd>(admin servlet now in admin)
+<dt>installation
+<dd>make more like new layout (no single page with install
+summaries)
+<dt>ref/taglib.xtp
+<dd>hrm, jsp or config?
+<dt>faq
+<dd>no integration into toc yet, but <a href="faq|index">available</a>
+<dt>navigation
+<dd>on local deploy, FAQ|ERRATA|CAUCHO|DOWNLOAD in top right
+</dl>
+</section>
+
+<section title="href-map.xml" product="resin">
+<pre><![CDATA[
+The form of an href is 
+"root|topic|page"
+
+Here are some examples:
+
+"doc|jsp|index" becomes "/jsp/index.xtp"
+"doc|xpath|index" becomes "/xml/xpath.xtp"
+
+So the first example doesn't even have an entry in href-map.xml.
+The second one does because 'xpath' is actually currently in the
+"xml/" directory.
+
+And there are some conventions:
+
+"doc|topic|index" or "|topic|"
+    ('doc' and 'index' are defaults)
+
+  - always gives a good starting point for the topic
+
+"doc|topic|fun" 
+  - always a reference like description of function. i.e
+  "doc|xpath|fun" 
+  "doc|xpath|fun#count" 
+  "doc|xslt|fun"  (reference for xslt tags)
+
+"doc|topic|java"
+  - using from java. i.e
+  "doc|xpath|fun"
+  "doc|xml|fun"
+
+"javadoc|packagename|"
+"javadoc|classname|member"
+
+The idea of "root" is that you might need to map a root to different
+places.  So on a local deploy without the javadoc included "javadoc"
+goes to the caucho site, with local deploy it stays local.
+]]></pre>
+</section>
+
+<section title="Format of all documents">
+No more s1,s2,s3 etc. (still supported)
+
+All documents look like:
+<example>
+&lt;document>
+  &lt;header>
+    &lt;product>resin|resin-ee&lt;/product>
+    &lt;resin-2.0>path/of/old/file/if/applicable&lt;/resin-2.0>  -- optional
+    &lt;type>article | contents | tutorial&lt;/type>             -- optional
+    &lt;level>toplevel | toplevel-topic&lt;/level>                 -- optional
+    &lt;title>title of this document&lt;/title>
+    &lt;subtitle>subtitle of this document&lt;/subtitle>         -- optional
+    &lt;date>Aug 31, 1999&lt;/date>                              -- optional
+    &lt;authors>                                              -- optional
+      &lt;person>&lt;/person>
+    &lt;/authors>                                             -- optional
+    &lt;brief>                                                -- optional
+      A brief (one sentence) description
+    &lt;/brief>
+    &lt;description>                                          -- optional
+      &lt;p>A longer description.  The first sentence should stand on
+      it's own, it may be used if no brief description is provided. If
+      it contains multiple paragraphs like this one&lt;/p>
+      &lt;p>The first paragraph should make sense on it's own, as it will
+      be used in annotated tabled of contents. All paragraphs are
+      shown when this page is shown&lt;/p>
+      &lt;p>If no &lto&gt;&lt;/p&gt; are included, then it is as if it was one
+      paragraph.&lt;/p>
+    &lt;/description>
+  &lt;/header>
+
+  
+  &lt;summary/>
+  
+  <i>
+  Summary causes the display of:
+    1) header/description (or header/brief if no description)
+
+    And if this is the topmost section for a displaying page:
+    2) if header.type = 'contents', an
+       annotated table of contents
+    3) not a contents type page, a toclocal (aka summarylist) if there
+       a child sections
+    4) if this page contains &lt;defun/>, an objsummary 
+
+   So for any kind of documentation you can use &lt;summary/&gt; and
+   get something appropriate.
+
+   And for different formatting (i.e. printed docs), the
+   &lt;summary/&gt; can do different things.
+
+   There are also attributes to override the default behaviour.
+  </i>
+
+  &lt;section title='Introduction'>
+    &lt;header>
+      &lt;description>
+        Welcome to the example blah blah blah.
+      &lt;/description>
+    &lt;/header>
+
+    &lt;summary/>
+
+    &lt;section title='Subsection'>
+      this some thing or something
+    &lt;/section>
+  &lt;/section>
+
+  <i>
+  Section: a new section, can be nested.  Can contain a header
+  child or can specify title as an attribute.  Can also contain @href
+  which causes the section header to be a link to some other place
+
+  This use of only &lt;section&gt; allows for extremely flexible
+  rearranging of documents and formatting for different outputs.
+    </i>
+
+&lt;/document>
+</example>
+</section>
+
+<section title="config docs">
+<pre><![CDATA[
+Scott> For example, the <http> description in port-config.xtp would have at the 
+Scott> bottom of the <defun>
+Scott> 
+Scott> <def>
+Scott> http = element http {
+Scott>   (attribute id { string }
+Scott>    | attribute server-id { string }
+Scott>    | element server-id { string })?
+Scott> 
+Scott>   & (attribute port { string } | element port { string })
+Scott> 
+Scott>   & (attribute host { string } | element host { string })?
+Scott> 
+Scott>   & (attribute tcp-no-delay { string } | element tcp-no-delay { string })?
+Scott> 
+Scott>   & (openssl | jsse-ssl)?
+Scott> }
+Scott> </def>
+Scott> 
+]]></pre>
+</section>
+      
+<section title="sections in top-level topics">
+<dl>
+<dt>overview
+<dt>configuration
+<dt>users guide
+<dt>reference
+<dt>articles
+
+<dt>code library
+<dd>snippets of useful code, like current Servlet Filter's
+
+<dt>recommended resources
+<dd>non caucho resources, like specifications
+</dl>
+</section>
+
+<section title="Things that don't fit">
+<ul>
+<li>CGI</li>
+</ul>
+</section>
+</body>
+</document>

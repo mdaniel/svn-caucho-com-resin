@@ -1,0 +1,249 @@
+<document>
+  <header>
+    <product>resin</product>
+    <title>Databases Scrapbook</title>
+    <description>
+      <p>A repository of notes and comments that will
+        eventually make their way into the documentation.  Please
+        treat the information here with caution, it has often not been
+        verified.</p>
+    </description>
+  </header>
+
+  <body>
+    <summary objsummary-in-localtoc='1'/>
+
+      <faq title='What is the class I get as a DataSource?'>
+
+        <p>The DataSource you get is really a com.caucho.sql.DBPool item.  You can 
+        look at the getActiveConnections() and getTotalConnections() to get the 
+        state of the pool.</p>
+      </faq>
+
+
+<faq title="What happens when a request is made and all the connections are in use?">
+<description>
+If I have a dbpool set to 20 max connections, and say 60 people hit the jsp that makes
+connections to the database, what happens to the other 40 people that can't
+get an immediate open connection?  How often does it try (or wait?) to get
+one?  
+</description>
+
+<p>There are a number of configuration variables which control
+that.</p>
+
+<p>First, the pool will wait for a period of time to get a connection.
+That's specified by the connection-wait-time parameter.  The default is
+pretty large, 10 minutes.  In your example, the 40 requests would get
+connections as they become available.</p>
+
+<p>If that times out, then the pool will look at the
+max-overflow-connections.  If there are some overflow connections
+allowed, Resin will try to create a new connection to the database
+anyway.  (The default is zero.)</p>
+
+<p>If all that fails, the pool throws a SQLException.</p>
+
+</faq>
+
+<faq title="How I protect the access to my database?">
+<description>
+<p>
+I need to put the database username and password in my configuration file, how
+can I make sure that only the Resin servers in my cluster can access the
+database?  I don't want outside users to be able to access it.
+</p>
+</description>
+
+<ol>
+
+<li>(the easiest) - the machines in the cluster are behind a firewall, only
+other servers in the cluster can reach the database server.  This is generally
+a good idea even without database considerations.  You configure your firewall
+to let port 80 and 443 through to your frontend load balancing machine.  You
+might also open up a ssh port to the frontend machine for maintenance access.
+
+<li>use the database features to secure the communication.  MySQL,  for
+example, can be configured to only accept connections from certain ip
+addresses, or only from certain username/ip address combinations.  So you
+configure it to only allow connections  from the machines in your cluster.
+
+<li>tunneling tricks, for example you configure your database server to not
+accept connections from anything but localhost, and then you use ssh to tunnel
+a port on each machine in the cluster to the port on the database server.  This
+becomes a more attractive option if you wish to strongly secure all
+communication between machines in the cluster, secure even from local network
+access.  You might, for example, use ssh to tunnel both your database access
+and your srun communication.
+
+</ol>
+</faq>
+
+
+      <faq title='Will the pool be automocatically set to queue if number of connections requested is more than max connections?'>
+
+        <p>You mean block the waiting thread.  Yes.  "queue" doesn't make sense in 
+          this context.
+
+        <p>If you're using the PooledDataSource instead of the Driver SPI, you'll 
+          get the Oracle connection directly.
+
+        <p>Otherwise, you need to case the Connection to
+        com.caucho.sql.UserConnectionAdapter and call getConnection()
+        to get the underlying Oracle connection.</p>
+      </faq>
+
+
+      <faq title="What are the Driver/XADataSource/ConnectionPoolDataSource driver interfaces?">
+        <p>Driver is the old JDBC 1.0 interface.  You should use
+        XADataSource whenever it's available and you are using
+        transactions. Replace the &lt;driver-name> with that class
+        name</p>
+
+        <p>It appears you can't just use an XADataSource
+        everywhere. For "normal" JDBC use
+        ConnectionPoolDataSource. When using JDBC with JTA
+        (UserTransaction), use XADataSource.</p>
+
+        <p>Oracle Configuration for Resin 3.0</p>
+
+        <example title="Oracle Configuration for Resin 3.0 - ConnectionPoolDataSource">
+&lt;database name="jdbc/oracle"
+          driver-class="oracle.jdbc.pool.OracleConnectionPoolDataSource"&gt;
+  &lt;driver-init url="jdbc:oracle:thin:@gryffindor:1521:ferg"
+               user=""
+               password=""/&gt;
+&lt;/database&gt;
+        </example>
+
+        <example title="Oracle Configuration for Resin 3.0 - XADataSource">
+&lt;database name="jdbc/oracle-xa"
+          driver-class="oracle.jdbc.xa.client.OracleXADataSource"&gt;
+  &lt;driver-init url="jdbc:oracle:thin:@gryffindor:1521:ferg"
+               user=""
+               password=""/&gt;
+  &lt;xa&gt;true&lt;/xa&gt;
+&lt;/database&gt;
+        </example>
+
+        <p>JDBC 2.0 upgraded the Driver interface to XADataSource and
+        ConnectionPoolDataSource.  (The names are somewhat misleading.
+        XADataSource and ConnectionPoolDataSource are driver
+        interfaces provided by the database vendor, not application
+        interfaces.)
+
+        <p>The DataSource you get is really a com.caucho.sql.DBPool
+        item.  You can look at the getActiveConnections() and
+        getTotalConnections() to get the state of the pool.</p>
+      </faq>
+
+      <faq title="When is the connetion to the database made?">
+        <description>
+          <p>Does Resin connect to the database when
+          lookup(Context.lookup()) is executed?</p>
+        </description>
+
+        <p>Normally, it will only connect when you do a getConnection().</p>
+
+      </faq>
+
+      <faq title="What does Resin  do if it is given a JDBC Driver that does not support XAResource in a definition of an XA-capable resource?">
+        <description>
+          <p>E.g., the JDBC/ODBC bridge in a Resin &lt;resource-ref> with
+          &lt;res-type> javax.sql.XADataSource. First of all, how does
+          the container detect if a java.sql.Driver is XA-capable?
+          Does it at all?</p>
+        </description>
+
+        <p>java.sql.Drivers never support XAResource. XADataSource is the database 
+        vendor's interface for XA-capable resources.
+
+        <p>Any time you're using the javax.sql.Driver interface
+        directly, you're getting an XA adapter, not the JDBC vendor's
+        XA interface.</p>
+
+        <p>You need to supply the JDBC vendor's XADataSource if you
+        want to use it. </p>
+
+        <p>With Resin's DBPool you can specify that class in the
+        "driver" parameter, but you can also configure the
+        XADataSource separately with a &lt;resource-ref> and then
+        refer to it using "data-source" for Resin's pool.</p>
+      </faq>
+
+
+      <faq title="Upon committing a UserTransaction spanning such a resource, I assume that the Driver underneath cannot take part in a 2-phase-commit?">
+        <description>
+          <p>So, it probably does not get a prepare call on prepare
+          but still a regular non-XA commit call on commit? At least
+          it seems to be this way, because an XA resource with a
+          non-XA Driver beneath it gets committed by a UserTransaction
+          commit.</p>
+        </description>
+
+        <p>Exactly.</p>
+      </faq>
+
+      <faq title="Why do some vendors deliver ConnectionPoolDataSource implementations?">
+        <description>
+          <p>As far as I understand, most application servers including
+          Resin and Tomcat/Tyrex use their own connection pool with
+          the vendor's standard Driver/DataSource/XADataSource
+          implementation. So what good is a ConnectionPoolDataSource
+          provided by the JDBC driver vendor? Maybe for standalone use
+          without a container?</p>
+        </description>
+
+        <p>ConnectionPoolDataSource is a helper class. It works with
+        the application server (Resin) for
+        pooling. ConnectionPoolDataSource doesn't pool directly, just
+        like XADataSource doesn't handle transaction directly (it
+        relies on the app server to register with the TM.)</p>
+
+        <p>The ConnectionPoolDataSource has a callback which tells
+        when the underlying connection has died. That's nice since
+        otherwise Resin needs to heuristically decide if the
+        connection has died.</p>
+
+        <p>The JDBC DataSource API is a bit messy. I see the logic
+        behind it, but it just seems overly complicated.</p>
+      </faq>
+
+
+      <faq title="What is the interaction between container, driver, and application in a distributed transaction?">
+
+       <p>The container is responsible for all pooling, registration
+       with the TM, and the transaction management itself.</p>
+
+       <p>The driver just provides some hooks to better support
+       transactions and pooling. It acts as the RM (Resource Manager),
+       but isn't doing any pooling itself.</p>
+      </faq>
+
+
+      <faq title="Using getConnection(username,password)">
+        <p>It turns out that Jeff's problem was that he had not specified
+          the user/password in the resource-ref in the resin.conf file.
+          In looking through the DBPool code, it's clear that if the
+          getConnection(username,password) method is used, then it needs
+          to match the user/password specified in the resource-ref.  If
+          not, it will always create a new connection.</p>
+        
+        <p>No, it's because the pool only has connections for a single
+        user.  It doesn't make sense for the pool to mix different
+        connections for different users, because that would completely
+        mess up any database permissions.</p>
+
+        <p>In theory, it would be possible to create subpools for each
+        user, but that just doesn't seem to be all that valuable.</p>
+
+      </faq>
+
+<faq title="Can the ping-on-idle interval be changed?">
+<description>Is there a way to configure the ping-on-idle interval? What's the default interval?</description>
+
+<p>There's a ping-interval parameter.  The default value is 60s.</p>
+</faq>
+
+  </body>
+</document>

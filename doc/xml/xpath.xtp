@@ -1,0 +1,552 @@
+<document>
+  <header>
+    <product>resin</product>
+    <resin-2.0>$resin/ref/xpath.xtp</resin-2.0>
+    <title>XML Path Language (XPath)</title>
+    <description>
+      <p>Resin can use XPath, the XML Path Language, to select nodes
+      from an XML tree.  Scripts can select all 'table' children, or
+      even all 'table' elements in an entire HTML file. The XPath
+      language is exceptionally rich.  It can describe an incredible
+      number of node selections. </p>
+
+      <p>Java applications can use the com.caucho.xpath package to use
+      XPath with an XML tree.</p>
+
+      <p>The XML Path Language describes nodes in an XML tree.  It's a
+      mini-language for specifying nodes patterns, like regular
+      expressions are a mini-language for specifying text
+      patterns.</p>
+
+      <p>The language selects sets of nodes.  Each operator in XPath
+      selects a new set based on the old set of nodes.  For example,
+      given a set of chapters, XPath can select all sections in those
+      chapters, chapters with 'advanced' attributes, or grandchildren
+      with 'color' attributes of 'blue'.</p>
+    </description>
+
+
+  </header>
+
+  <body>
+    <summary no-objsummary='1'/>
+
+<section name='Basic' title='Basic Patterns'>
+
+<p>The basic XPath patterns cover 90% of the cases that most stylesheets
+will need.  Because the pattern language is based on familiar
+filesystem paths, the most useful patterns should be easy.</p>
+
+<defun name=node title='node'>
+<p>Selects all child elements with nodeName of <var/node/>.</p>
+
+<example>
+xml = caucho.xml.Xml.parseString(@&lt;&lt;END);
+&lt;top&gt;
+  &lt;a id='1'/&gt;
+  &lt;b&gt;
+    &lt;a id='2'/&gt;
+  &lt;/b&gt;
+  &lt;a id='3'/&gt;
+&lt;/top&gt;
+END
+
+top = xml.documentElement
+
+for (var node in top.select('a'))
+  writeln(node.nodeName, ': ', node.attribute.id);
+</example>
+<results>
+a: 1
+a: 3
+</results>
+
+</defun>
+
+<defun name=star title='*'>
+<p>Selects all child elements.</p>
+</defun>
+
+<defun name=attr title='@attr'>
+<p>Selects the attribute <var/attr/>.</p>
+
+<deftable>
+<tr><td>chapter/@title
+<td>All title attributes of chapters.
+
+<tr><td>//var[@name='keywords']/@content
+    <td>The contents of all var keywords.
+A web spider might use this.
+</deftable>
+</defun>
+
+<defun name=starattr title='@*'>
+<p>Selects all attributes.</p>
+</defun>
+
+<defun name=starattr title='ns:*'>
+<p>Selects elements in the given namespace. Namespace patterns
+only make sense in the context of XSL, where the namespace
+declarations have been made.</p>
+</defun>
+
+<defun name=node title='node()'>
+<p>Matches an org.w3c.dom.Node.</p>
+</defun>
+
+<defun name=text title='text()'>
+<p>Matches a org.w3c.dom.Text node.</p>
+</defun>
+
+<defun name=comment title='comment()'>
+<p>Matches a comment.</p>
+</defun>
+
+<defun name=pi title='processing-instruction()'>
+<p>Matches a org.w3c.dom.ProcessingInstruction node.</p>
+</defun>
+<!--
+<defun name=er title='er()'>
+<p>Matches an org.w3c.dom.EntityReference node.</p>
+</defun>
+-->
+
+<defun name=dot title='.'>
+<p>Selects the current node.</p>
+
+<p>The current node is primarily useful for descendant patterns.
+for some filter patterns.
+
+<deftable>
+<tr><td>.//image</td>
+    <td>Any image descendant.</td>
+
+<tr><td>.//image</td>
+    <td>Any image descendant.</td>
+</deftable>
+
+</defun>
+
+<defun name=parent title='..'>
+<p>Selects the parent of current node.</p>
+
+<deftable>
+<tr><td>../brother</td>
+    <td>All brothers.</td>
+<tr><td>../../aunt</td>
+   <td>All aunts.</td>
+<tr><td>//*[../@color='blue']</td>
+    <td>All elements with blue parents.</td>
+</deftable>
+</defun>
+
+<defun name=root title='/'>
+<p>Selects the document node.</p>
+
+<p>Useful for finding constants in a document.
+
+<deftable>
+<tr><td>/html</td>
+    <td>The single root element.</td>
+<tr><td>/html/head</td>
+    <td>The HTML head section.</td>
+<tr><td>/html/head/var</td>
+    <td>All var tags.</td>
+</deftable>
+</defun>
+
+<defun name=filter title='a[expr]'>
+<p>Select only those nodes matching <var/a/> which also satisfy the
+expression <var/expr/>.</p>
+
+<p>The expression <var/b/> is a combination of <code/and/>,
+<code/or/>, <code/not/>, comparisons and XPath patterns.  An XPath
+expression, e.g. <code/chapter/verse/>, is true if at least one node
+matches the pattern.
+
+<deftable>
+<tr><td>chapter[verse]</td>
+    <td>Chapters with a verse.</td>
+
+<tr><td>chapter[not(verse)]</td>
+    <td>Chapters with no verses.</td>
+
+<tr><td>chapter[not(verse) and not(section)]</td>
+    <td>Chapters with neither verses nor sections.</td>
+
+<tr><td>*[@color='blue']</td>
+    <td>Blue children.</td>
+
+<tr><td>*[@color='blue'][position()=last() - 1]</td>
+    <td>second to last blue child</td>
+</deftable>
+</defun>
+
+<defun name=nth-filter title='a[n]'>
+<p>Selects the <var/n/>th matching node matching <var/a/>
+When a filter's expression is a number, XPath selects based on position.
+This special case of the filter pattern treats selections as ordered
+lists.</p>
+
+<p>The position filter is equivalent to
+<code><var/a/>[position()=<var/n/>]</code></p>
+
+<deftable>
+<tr><td>child[3]
+    <td>third child
+
+<tr><td>child/grandchild[1]
+    <td>first grandchild from every child (not only the first
+grandchild).
+
+<tr><td>child[last()]
+    <td>last child
+</deftable>
+
+</defun>
+
+<defun name=compose title='a/b'>
+<p>For each node matching <var/a/>, add the nodes matching <var/b/>
+to the result.</p>
+
+<p>The following is almost a definition of a/b. 
+<example>
+for (var a in node.select('a')) {
+  for (var b in a.select('b')) {
+    // possible duplicates if a or b
+    // are weird patterns.
+  }
+}
+</example>
+
+<p>Some example interpretations, </p>
+<deftable>
+<tr><td>chapter/verse</td>
+    <td>grandchildren verse with parent chapter.</td>
+
+<tr><td>../span</td>
+    <td>sibling span elements.</td>
+
+<tr><td>./span</td>
+    <td>children span elements.</td>
+
+<tr><td>*/*</td>
+    <td>All grandchildren.</td>
+
+<tr><td>*[color='blue']/verse</td>
+    <td>All grandchildren verse elements with blue colored parents.</td>
+
+<tr><td>a/b/c</td>
+    <td>Great grandchildren c, with parent b and grandparent a.</td>
+</deftable>
+</defun>
+
+<defun name=descendant title='a//b'>
+<p>For each node matching <var/a/>, add the descendant nodes
+matching <var/b/> to the result.  The '//' operator selects all
+descendants matching <var/b/>.  The '/' operator selects all children
+matching <var/b/>.</p>
+
+<deftable>
+<tr><td>chapter//a</td>
+    <td>All links contained in a chapter.</td>
+
+<tr><td>.//image</td>
+    <td>Any image descendant.</td>
+</deftable>
+</defun>
+
+<defun name=root-descendant title='//b'>
+<p>Returns elements in the entire document matching <var/b/>.</p>
+
+<p>This is equivalent to /.//<var/b/>, but less weird.
+
+<deftable>
+<tr><td>//image</td>
+    <td>All images in the document</td>
+<tr><td>//a[@href='http://www.caucho.com']</td>
+    <td>All links to caucho</td>
+</deftable>
+
+</defun>
+
+<defun name=union title='a|b'>
+<p>All nodes matching <var/a/> or <var/b/>.</p>
+
+<p>Some example interpretations, </p>
+<deftable>
+<tr><td>lion|tiger|bear</td>
+    <td>Lions and tigers and bears.</td>
+</deftable>
+</defun>
+
+<defun name=exprroot title='expr/path'>
+<p>Uses an expression as the start of a path.  Usually,
+<var/expr/> will be a special function call, like the <code/id()/>
+function.  <code/expr[expr]/> is also allowed.</p>
+
+<deftable>
+<tr><td>id('314')/@color</td>
+    <td>The color attribute of the element with id 314.</td>
+
+<tr><td>key('id', 'a')[@color='red']</td>
+    <td>Selects the node returned by key if they have a red color.
+    </td>
+</deftable>
+</defun>
+
+</section>
+
+<section name='Axis' title='Node Axes'>
+
+<defun name=child title='child::a'>
+
+<p>The child axis selects children of the current node.  It is entirely
+equivalent to the usual slash notation.  So <code/child::a/child::b/>
+is the same as <code/a/b/>.</p>
+
+<deftable>
+<tr><td>child::chapter</td>
+    <td>Select all chapter elements of the current node.</td>
+
+<tr><td>child::text()</td>
+    <td>All text children.</td>
+
+<tr><td>child::comment()</td>
+    <td>All comment children.</td>
+
+<tr><td>/child::h1</td>
+    <td>Select all top-level h1 elements.</td>
+</deftable>
+</defun>
+
+<defun name=descendant title='descendant::a'>
+
+<p>The descendant axis selects descendants of the current node.  It is 
+equivalent to '//'.  So <code/child::a//child::b/>
+is the same as <code/a//b/>.</p>
+
+<deftable>
+<tr><td>descendant::a</td>
+    <td>Select all hyperlinks below the current node.</td>
+
+<tr><td>/descendant::table</td>
+    <td>Select all tables in the document.</td>
+
+<tr><td>child::section/descendant::image</td>
+    <td>Select all images in a section.</td>
+
+<tr><td>.[descendant::image]</td>
+    <td>Selects the current node if it contains an image.</td>
+</deftable>
+</defun>
+
+<defun name=descendant-or-self title='descendant-or-self::a'>
+
+<p>Selects descendants including the current node.</p>
+</defun>
+
+<defun name=attribute title='attribute::a'>
+
+<p>Selects attributes of the current element.  It is 
+equivalent to @<var/a/>.</p>
+
+<deftable>
+<tr><td>attribute::width</td>
+    <td>Selects the width of the current node.</td>
+
+<tr><td>image[attribute::width > 10]</td>
+    <td>Selects image children with a width attribute
+greater than 10.</td>
+</deftable>
+</defun>
+
+<defun name=following-sibling title='following-sibling::a'>
+
+<p>Selects nodes after the current node.</p>
+
+<deftable>
+<tr><td>following-sibling::chapter</td>
+    <td>Selects following chapters.</td>
+
+<tr><td>h3/following-sibling::text()</td>
+    <td>Following text nodes after an h3.</td>
+</deftable>
+</defun>
+
+<defun name=preceding-sibling title='preceding-sibling::a'>
+
+<p>Selects nodes before the current node.</p>
+
+<p><code/preceding-siblings::/> counts positions backwards.
+So preceding-sibling::a[1] selects the closest preceding sibling.</p>
+
+<deftable>
+<tr><td>preceding-sibling::chapter</td>
+    <td>Selects chapters before chapter 3.</td>
+
+<tr><td>fun/preceding-sibling::comment()</td>
+    <td>Selects the comments before a function.</td>
+</deftable>
+</defun>
+
+<defun name=following title='following::a'>
+
+<p>Selects the first matching node following in document order, excluding
+descendants.  In other words, the following axis will scan through
+every node in document order, starting with <code/getNextSibling()/>.</p>
+
+<p>following, preceding, ancestor and self partition the document.</p>
+</defun>
+
+<defun name=preceding title='preceding::a'>
+
+<p>Selects the first matching node preceding in document order, excluding
+ancestors.  In other words, the preceding axis will scan through
+every node in document order, starting with the root and ending in the
+current node, but it will skip ancestors.</p>
+
+<p>following, preceding, ancestor and self partition the document.</p>
+</defun>
+
+<defun name=parent title='parent::a'>
+
+<p>Selects the parent if it matches.  The '..' pattern from
+the core is equivalent to 'parent::node()'.</p>
+
+<deftable>
+<tr><td>parent::chapter</td>
+    <td>Selects the parent if it's a chapter.</td>
+
+<tr><td>parent::*/@color</td>
+    <td>Selects the color of the parent.</td>
+</deftable>
+</defun>
+
+<defun name=ancestor title='ancestor::a'>
+
+<p>Selects matching ancestors.</p>
+
+<p>following, preceding, ancestor and self partition the document.</p>
+<deftable>
+<tr><td>ancestor::section</td>
+    <td>Selects ancestor sections.</td>
+
+<tr><td>ancestor::*/@color</td>
+    <td>Selects ancestor color attributes.</td>
+</deftable>
+</defun>
+
+<defun name=ancestor-or-self title='ancestor-or-self::a'>
+<p>Selects ancestors including the current node.</p>
+</defun>
+
+<defun name=self title='self::a'>
+
+<p>Selects the current node. '.' is equivalent to 'self::node()'.
+
+<p>following, preceding, ancestor and self partition the document.</p>
+
+<deftable>
+<tr><td>self::chapter</td>
+    <td>Selects the current node if it's a chapter.</td>
+</deftable>
+</defun>
+
+</section>
+
+<section name='expr' title='Expressions'>
+
+<defun name='expr-path' title='path'>
+<p>Selects nodes based on the <var/path/>.</p>
+
+<p>The path interpretation depends on the context.  When filtering
+nodes, the path expression is a boolean.  Any matching node will
+return true.  When the value is a string, as in the xsl:value-of, then
+the textValue is used.</p>
+
+<deftable>
+<tr><td>boolean<td>True if <var/path/> matches any nodes.
+<tr><td>string<td>The text value of the first matching node.
+<tr><td>number<td>The string value converted to a number.
+</deftable>
+</defun>
+
+<defun name='number' title='number'>
+<p>Numbers have the same syntax as Java doubles.</p>
+</defun>
+
+<defun name='string' title='"string"'>
+<p>String literals can use single or double quotes.</p>
+</defun>
+
+<defun name='equals' title='a = b'>
+<p>Standard comparisons.</p>
+
+<p>XPath converts the arguments to a common type before comparison.  The
+conversion priority is boolean, number, string.  In other words, if
+either arg is a boolean, a boolean comparison is used.</p>
+<ol>
+<li>boolean
+<li>number
+<li>string
+</ol>
+
+<p>Node-sets, e.g. chapter/@color, are compared differently.  Each
+node in the node set is compared.  If any matches, then the comparison
+is true.</p>
+
+<deftable>
+<tr><td>a = b<td>True if a equals b.
+<tr><td>a != b<td>True if a is not equal to b.
+<tr><td>a < b<td>True if a is less than b.
+<tr><td>a <= b<td>True if a is less than or equal to b.
+<tr><td>a > b<td>True if a is greater than b.
+<tr><td>a >= b<td>True if a is greater than or equal to b.
+</deftable>
+</defun>
+
+<defun name='equals' title='a + b'>
+<p>Arithmetic expressions.</p>
+
+<deftable>
+<tr><td> - a<td>Unary minus
+<tr><td>a + b<td>Add
+<tr><td>a - b<td>Substract
+<tr><td>a * b<td>Multiply
+<tr><td>a div b<td>Divide
+<tr><td>a mod b<td>Floating point mod, like Java.
+</deftable>
+</defun>
+
+<defun name='group' title='(expr)'>
+<p>Parenthesized expressions.</p>
+</defun>
+
+<defun name='fun' title='fun(arg1, ..., argn)'>
+<p>Function calls.</p>
+
+<p>The function library is in the <a href='xpath|fun'>XPath function</a> section.</p>
+</defun>
+
+<defun name='not' title='not(expr)'>
+<p>Boolean not.</p>
+</defun>
+
+<defun name='or' title='a or b'>
+<p>Boolean or.</p>
+</defun>
+
+<defun name='and' title='a and b'>
+<p>Boolean and.</p>
+</defun>
+
+<defun name='var' title='$var'>
+<p>The value of a variable.  Variables, in general, only make
+sense in a context like XSL.  Normal use of XPath outside of XSL will
+not use variables.
+</defun>
+
+</section>
+  </body>
+</document>

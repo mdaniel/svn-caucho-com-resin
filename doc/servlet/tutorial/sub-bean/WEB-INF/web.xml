@@ -1,0 +1,13 @@
+<web-app xmlns="http://caucho.com/ns/resin">
+  <servlet servlet-name="bean"
+            servlet-class="test.BeanServlet">
+    <init>
+      <bean value="bean-a"/>
+      <bean value="bean-b"/>
+      <bean value="bean-c"/>
+    </init>
+  </servlet>
+
+  <servlet-mapping url-pattern="/bean"
+            servlet-name="bean"/>
+</web-app>

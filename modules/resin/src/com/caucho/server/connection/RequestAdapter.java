@@ -1,0 +1,555 @@
+/*
+ * Copyright (c) 1998-2004 Caucho Technology -- all rights reserved
+ *
+ * This file is part of Resin(R) Open Source
+ *
+ * Each copy or derived work must preserve the copyright notice and this
+ * notice unmodified.
+ *
+ * Resin Open Source is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * Resin Open Source is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE, or any warranty
+ * of NON-INFRINGEMENT.  See the GNU General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Resin Open Source; if not, write to the
+ *   Free SoftwareFoundation, Inc.
+ *   59 Temple Place, Suite 330
+ *   Boston, MA 02111-1307  USA
+ *
+ * @author Scott Ferguson
+ */
+
+package com.caucho.server.connection;
+
+import java.io.*;
+import java.net.*;
+import java.util.*;
+import javax.servlet.*;
+import javax.servlet.http.*;
+
+import com.caucho.util.*;
+import com.caucho.vfs.*;
+
+import com.caucho.server.webapp.Application;
+
+import com.caucho.server.connection.AbstractHttpRequest;
+
+import com.caucho.server.session.SessionManager;
+
+/**
+ * Any requests that depends on an underlying request, like
+ * include() requests or adapters for other servlet engines.
+ */
+public class RequestAdapter extends RequestWrapper
+  implements CauchoRequest {
+  static final L10N L = new L10N(RequestAdapter.class);
+
+  static final int MAX_DEPTH = 64;
+  
+  public static String REQUEST_URI = "javax.servlet.include.request_uri";
+  public static String CONTEXT_PATH = "javax.servlet.include.context_path";
+  public static String SERVLET_PATH = "javax.servlet.include.servlet_path";
+  public static String PATH_INFO = "javax.servlet.include.path_info";
+  public static String QUERY_STRING = "javax.servlet.include.query_string";
+  
+  public static String STATUS_CODE = "javax.servlet.error.status_code";
+  public static String EXCEPTION_TYPE = "javax.servlet.error.exception_type";
+  public static String MESSAGE = "javax.servlet.error.message";
+  public static String EXCEPTION = "javax.servlet.error.exception";
+  public static String ERROR_URI = "javax.servlet.error.request_uri";
+  public static String SERVLET_NAME = "javax.servlet.error.servlet_name";
+  
+  public static String JSP_EXCEPTION = "javax.servlet.jsp.jspException";
+  
+  public static String SHUTDOWN = "com.caucho.shutdown";
+
+  private static final FreeList<RequestAdapter> _freeList =
+    new FreeList<RequestAdapter>(16);
+  
+  // for real adapters
+  private Application _application;
+  private HttpServletResponse _response;
+
+  private HashMap<String,String> _roleMap;
+
+  protected RequestAdapter()
+  {
+    super(null);
+  }
+  
+  protected RequestAdapter(HttpServletRequest request, Application app)
+  {
+    super(request);
+    
+    _application = app;
+  }
+
+  /**
+   * Creates a new RequestAdapter.
+   */
+  public static RequestAdapter create(HttpServletRequest request,
+				      Application app)
+  {
+    RequestAdapter reqAdapt = _freeList.allocate();
+
+    if (reqAdapt == null)
+      return new RequestAdapter(request, app);
+    else {
+      reqAdapt.setRequest(request);
+      reqAdapt._application = app;
+
+      return reqAdapt;
+    }
+  }
+
+  /**
+   * Creates a new RequestAdapter.
+   */
+  public static RequestAdapter create()
+  {
+    RequestAdapter reqAdapt = _freeList.allocate();
+
+    if (reqAdapt != null)
+      return reqAdapt;
+    else
+      return new RequestAdapter();
+  }
+
+  public void init(HttpServletRequest request,
+                   HttpServletResponse response,
+                   Application app)
+    throws ServletException
+  {
+    setRequest(request);
+    
+    _response = response;
+    _application = app;
+
+    if (request == this ||
+	request instanceof CauchoRequest &&
+	((CauchoRequest) request).getRequestDepth(0) > MAX_DEPTH) {
+      throw new ServletException(L.l("too many servlet includes `{0}'",
+                                     request.getRequestURI()));
+    }
+  }
+
+  public boolean isTop()
+  {
+    return false;
+  }
+  
+  public void setApplication(Application app)
+  {
+    _application = app;
+  }
+
+  protected HttpServletResponse getResponse()
+  {
+    return _response;
+  }
+
+  public void setResponse(CauchoResponse response)
+  {
+    _response = response;
+  }
+
+  /**
+   * Returns the underlying read stream.
+   */
+  public ReadStream getStream() throws IOException
+  {
+    if (getRequest() instanceof CauchoRequest)
+      return ((CauchoRequest) getRequest()).getStream();
+    else
+      return null;
+  }
+
+  /**
+   * Returns the URI for the current page: included or top-level.
+   */
+  public String getPageURI()
+  {
+    String uri = (String) getAttribute(REQUEST_URI);
+    
+    if (uri != null)
+      return uri;
+    else
+      return getRequestURI();
+  }
+
+  public static String getPageURI(HttpServletRequest request)
+  {
+    String uri = (String) request.getAttribute(REQUEST_URI);
+    
+    if (uri != null)
+      return uri;
+    else
+      return request.getRequestURI();
+  }
+
+  public String getPageContextPath()
+  {
+    String contextPath = (String) getAttribute(CONTEXT_PATH);
+    
+    if (contextPath != null)
+      return contextPath;
+    else
+      return getContextPath();
+  }
+
+  public static String getPageContextPath(HttpServletRequest request)
+  {
+    String contextPath = (String) request.getAttribute(CONTEXT_PATH);
+    
+    if (contextPath != null)
+      return contextPath;
+    else
+      return request.getContextPath();
+  }
+  
+  /**
+   * Returns the servlet-path for the current page, i.e. this will return the
+   * url of the include page, not the original request.
+   */
+  public String getPageServletPath()
+  {
+    String servletPath = (String) getAttribute(SERVLET_PATH);
+    
+    if (servletPath != null)
+      return servletPath;
+    else
+      return getServletPath();
+  }
+  
+  /**
+   * Returns the servlet-path for the current page, i.e. this will return the
+   * url of the include page, not the original request.
+   */
+  public static String getPageServletPath(HttpServletRequest request)
+  {
+    String servletPath = (String) request.getAttribute(SERVLET_PATH);
+    
+    if (servletPath != null)
+      return servletPath;
+    else
+      return request.getServletPath();
+  }
+
+  /**
+   * Returns the path-info for the current page, i.e. this will return the
+   * url of the include page, not the original request.
+   */
+  public String getPagePathInfo()
+  {
+    String uri = (String) getAttribute(REQUEST_URI);
+    
+    if (uri != null)
+      return (String) getAttribute(PATH_INFO);
+    else
+      return getPathInfo();
+  }
+
+  /**
+   * Returns the path-info for the current page, i.e. this will return the
+   * url of the include page, not the original request.
+   */
+  public static String getPagePathInfo(HttpServletRequest request)
+  {
+    String uri = (String) request.getAttribute(REQUEST_URI);
+    
+    if (uri != null)
+      return (String) request.getAttribute(PATH_INFO);
+    else
+      return request.getPathInfo();
+  }
+  
+  /**
+   * Returns the query-string for the current page, i.e. this will return the
+   * url of the include page, not the original request.
+   */
+  public String getPageQueryString()
+  {
+    String uri = (String) getAttribute(REQUEST_URI);
+    
+    if (uri != null)
+      return (String) getAttribute(QUERY_STRING);
+    else
+      return getQueryString();
+  }
+  
+  /**
+   * Returns the query-string for the current page, i.e. this will return the
+   * url of the include page, not the original request.
+   */
+  public static String getPageQueryString(HttpServletRequest request)
+  {
+    String uri = (String) request.getAttribute(REQUEST_URI);
+    
+    if (uri != null)
+      return (String) request.getAttribute(QUERY_STRING);
+    else
+      return request.getQueryString();
+  }
+
+  public int getRequestDepth(int depth)
+  {
+    if (depth > MAX_DEPTH)
+      throw new RuntimeException(L.l("too many request dispatchers"));
+
+    ServletRequest req = getRequest();
+    while (req != null) {
+      if (req instanceof CauchoRequest)
+	return ((CauchoRequest) req).getRequestDepth(depth + 1);
+      else if (req instanceof ServletRequestWrapper) {
+	ServletRequestWrapper reqWrap = (ServletRequestWrapper) req;
+
+	req = reqWrap.getRequest();
+      }
+      else
+	break;
+    }
+
+    return depth + 2;
+  }
+
+  public void setHeader(String key, String value)
+  {
+  }
+  
+  public Application getApplication()
+  {
+    return _application;
+  }
+
+  public void setVaryCookie(String cookie)
+  {
+    // super.setVaryCookie(cookie);
+
+    if (getRequest() instanceof CauchoRequest)
+      ((CauchoRequest) getRequest()).setVaryCookie(cookie);
+  }
+
+  public String getVaryCookie()
+  {
+    // super.setVaryCookie(cookie);
+
+    if (getRequest() instanceof CauchoRequest)
+      return ((CauchoRequest) getRequest()).getVaryCookie();
+    else
+      return null;
+  }
+
+  public boolean getVaryCookies()
+  {
+    // super.setVaryCookie(cookie);
+
+    if (getRequest() instanceof CauchoRequest)
+      return ((CauchoRequest) getRequest()).getVaryCookies();
+    else
+      return false;
+  }
+
+  public void setHasCookie()
+  {
+    // super.setHasCookie();
+
+    if (getRequest() instanceof CauchoRequest)
+      ((CauchoRequest) getRequest()).setHasCookie();
+  }
+
+  public boolean getHasCookie()
+  {
+    // super.setHasCookie();
+
+    if (getRequest() instanceof CauchoRequest)
+      return ((CauchoRequest) getRequest()).getHasCookie();
+    else
+      return false;
+  }
+      
+  public HttpSession getSession(boolean create)
+  {
+    SessionManager manager = getSessionManager();
+    
+    setVaryCookie(getCookieName(manager));
+
+    HttpSession session = super.getSession(create);
+
+    if (session != null)
+      setHasCookie();
+    
+    return session;
+  }
+
+  public String getRequestedSessionId()
+  {
+    SessionManager manager = getSessionManager();
+    
+    setVaryCookie(getCookieName(manager));
+
+    String id = super.getRequestedSessionId();
+
+    if (id != null)
+      setHasCookie();
+
+    return id;
+  }
+
+  public boolean isRequestedSessionIdValid()
+  {
+    SessionManager manager = getSessionManager();
+    
+    setVaryCookie(getCookieName(manager));
+
+    boolean isValid = super.isRequestedSessionIdValid();
+
+    if (isValid)
+      setHasCookie();
+
+    return isValid;
+  }
+
+  public boolean isRequestedSessionIdFromCookie()
+  {
+    SessionManager manager = getSessionManager();
+    
+    setVaryCookie(getCookieName(manager));
+
+    boolean isValid = super.isRequestedSessionIdFromCookie();
+    if (isValid)
+      setHasCookie();
+
+    return isValid;
+  }
+
+  public boolean isRequestedSessionIdFromURL()
+  {
+    SessionManager manager = getSessionManager();
+
+    setVaryCookie(getCookieName(manager));
+
+    boolean isValid = super.isRequestedSessionIdFromURL();
+    
+    if (isValid)
+      setHasCookie();
+
+    return isValid;
+  }
+
+  protected final SessionManager getSessionManager()
+  {
+    Application app = getApplication();
+    if (app != null)
+      return app.getSessionManager();
+    else
+      return null;
+  }
+
+  protected final String getCookieName(SessionManager manager)
+  {
+    if (isSecure())
+      return manager.getCookieName();
+    else
+      return manager.getSSLCookieName();
+  }
+
+  public Cookie []getCookies()
+  {
+    // page depends on any cookie
+    setVaryCookie(null);
+    
+    Cookie []cookies = super.getCookies();
+    if (cookies != null && cookies.length > 0)
+      setHasCookie();
+
+    return cookies;
+  }
+
+  public Cookie getCookie(String name)
+  {
+    // page depends on this cookie
+    setVaryCookie(name);
+
+    if (getRequest() instanceof CauchoRequest)
+      return ((CauchoRequest) getRequest()).getCookie(name);
+
+    Cookie []cookies = super.getCookies();
+    for (int i = 0; i < cookies.length; i++) {
+      if (cookies[i].getName().equals(name)) {
+        setHasCookie();
+        return cookies[i];
+      }
+    }
+
+    return null;
+  }
+  
+  public void killKeepalive()
+  {
+  }
+  
+  public boolean allowKeepalive()
+  {
+    return true;
+  }
+
+  /**
+   * Sets the role map.
+   */
+  public HashMap<String,String> setRoleMap(HashMap<String,String> map)
+  {
+    HashMap<String,String> oldMap = _roleMap;
+    _roleMap = map;
+
+    return oldMap;
+  }
+
+  /**
+   * Checks the isUserInRole.
+   */
+  public boolean isUserInRole(String role)
+  {
+    if (_roleMap != null) {
+      String newRole = _roleMap.get(role);
+      
+      if (newRole != null)
+	role = newRole;
+    }
+
+    return super.isUserInRole(role);
+  }
+  
+  public boolean authenticate()
+    throws ServletException, IOException
+  {
+    return true;
+  }
+
+  /**
+   * Frees the adapter for reuse.
+   */
+  public static void free(RequestAdapter reqAdapt)
+  {
+    reqAdapt.free();
+
+    _freeList.free(reqAdapt);
+  }
+
+  /**
+   * Clears the adapter.
+   */
+  protected void free()
+  {
+    super.free();
+    
+    _application = null;
+    _response = null;
+  }
+}

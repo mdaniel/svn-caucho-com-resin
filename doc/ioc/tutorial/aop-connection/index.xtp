@@ -1,0 +1,168 @@
+<document>
+  <header>
+    <title>AOP Connection</title>
+        <description>
+          <p>Using AOP to handle JDBC connection management simplifies
+the tedious and error-prone JDBC connection pattern.</p>
+        </description>
+    <type>tutorial</type>
+    <tutorial-startpage>aop</tutorial-startpage>
+  </header>
+
+  <body>
+    <summary/>
+
+<!--
+<section title="Overview">
+
+<p>AOP for connections.</p>
+
+</section>
+-->
+
+<section title="Files in this tutorial">
+<deftable>
+<tr><td><viewfile-link file="WEB-INF/web.xml"/>
+    <td>web.xml configuration
+<tr><td><viewfile-link file="WEB-INF/classes/example/RequireConnection.java"/>
+    <td>The method annotation
+<tr><td><viewfile-link file="WEB-INF/classes/example/ConnectionInterceptor.java"/>
+    <td>The interceptor
+<tr><td><viewfile-link file="WEB-INF/classes/example/SampleServlet.java"/>
+    <td>A sample servlet using the annotation
+</deftable>
+</section>
+
+<section title="Using the ConnectionRequired interceptor">
+
+<p>If a method needs a connection, it adds a @ConnectionRequired
+annotation with the JNDI name of the data source.  The method
+can assume the connection is always passed as the argument.
+If the caller sets the <code>conn</code>, the interceptor uses the
+specified connection, i.e. the method acts as normal.
+If <code>conn</code> is null, the interceptor allocates a connection
+from the data source and passes it to the method.</p>
+
+<example>
+@ConnectionRequired("jdbc/resin")
+void testConnection(Connection conn)
+  throws SQLException
+{
+  ...
+}
+</example>
+
+<p>The application code is pretty basic. It just needs to add
+an annotation.</p>
+
+</section>
+
+<section title="ConnectionInterceptor: Implementing the Interceptor">
+
+<p>The interceptor needs to do a number of things:</p>
+<ul>
+<li>Fetch the DataSource from JNDI
+<li>Find the method's connection argument
+<li>If the connection is null, get a new connection and set the argument
+<li>If there's a new connection, protect the conn.close() in a finally block
+</ul>
+
+<section title="MethodInterceptor.invoke(): JDBC Connection Pattern">
+
+<p>The interceptor implements the standard JDBC connection pattern:
+getting a connection, using it in a protected block, and closing it
+in a finally block.  Instead of running the protected code directly, it
+calls it through the MethodInvocation's proceed block.</p>
+
+<example>
+public Object invoke(MethodInvocation inv) throws Throwable
+{
+  int paramIndex = ...;
+
+  Object []args = inv.getArguments();
+      
+  Connection conn = _dataSource.getConnection();
+
+  try {
+    args[paramIndex] = conn;
+      
+    return inv.proceed();
+  } finally {
+    conn.close();
+  }
+}
+</example>
+
+<p>The MethodInvocation is essentially a closure of the underlying
+method call.  It contains the method to be called and the method arguments.
+The ConnectionInterceptor fills in the argument corresponding to the
+connection.</p>
+
+<p>Because the ConnectionInterceptor code is written once, it's
+straightforward to verify its correctness.  Without this code sharing,
+code using connections must reimplement the connection pattern for each use.
+As anyone who's tried to debug connection code knows, trying to find the
+case which forgot to close the connection is a slow, painful process.  By
+using the method interceptor, you can avoid those kinds of
+hard-to-find bugs.</p>
+
+</section>
+
+</section>
+
+<section title="@RequireConnection">
+
+<p>The @RequireConnection annotation is the critical glue tying
+the application code to the interceptor.</p>
+
+<example>
+@Target(ElementType.METHOD)
+@Retention(RetentionPolicy.RUNTIME)
+public @interface RequireConnection {
+  /**
+   * The jndi name of the data source.
+   */
+  String value();
+}
+</example>
+
+</section>
+
+<section title="Configuration">
+
+<p>The &lt;enhancer> tag in the resin.conf connects the annotation to
+its method enhancer.  The &lt;enhancer> belongs to a class loader
+(since it's implemented by bytecode enhancement), and so can appear
+at any of the &lt;server>, &lt;host>, or &lt;web-app> levels.</p>
+
+<example>
+&lt;class-loader>
+  &lt;enhancer>
+    &lt;method annotation="example.RequireConnection"
+            type="example.ConnectionInterceptor"/>
+  &lt;/enhancer>
+&lt;class-loader>
+</example>
+
+</section>
+
+<section title="Compatibility">
+
+<p>The application code will be entirely compatible with other AOP
+implementations because it only depends on a JDK 1.5 annotation.
+Since annotations are the logical place for this kind of
+information, it's likely that all AOP implementations will eventually
+provide this support.</p>
+
+<p>Writing the method interceptor depends on the standard aopalliance API.
+So an interceptor written to the MethodInterceptor API is fully compatible
+with any other aopalliance AOP implementation such
+as the Spring framework.</p>
+
+<p>The &lt;enhancer> configuration, of course, is
+completely Resin-dependent.</p>
+
+</section>
+
+  </body>
+</document>

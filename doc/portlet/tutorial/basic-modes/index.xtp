@@ -1,0 +1,197 @@
+<document>
+<header>
+<product>resin</product>
+<title>Portlet Modes Tutorial</title>
+<type>tutorial</type>
+<tutorial-startpage>hello</tutorial-startpage>
+<description>
+<p>
+Portlets use modes to subdivide their functionality, performing different tasks
+and creating different content depending on the current mode.  
+</p>
+
+<p>
+This tutorial adds an "edit" mode to the hello world example. The "view" mode
+shows the current identity and color, and the "edit" mode provides the user a
+form for entering the identity and color.
+</p>
+
+</description>
+</header>
+
+<body>
+<summary/>
+
+<section title="Files in this tutorial">
+<deftable>
+<tr><td><viewfile-link file="WEB-INF/classes/example/HelloWorldPortlet.java"/>
+    <td>Portlet
+<tr><td><viewfile-link file="WEB-INF/web.xml"/>
+    <td>web-app configuration
+</deftable>
+</section>
+
+
+<section title="Rendering">
+
+<p>
+The portlet implements the rendering for each mode with a
+<code>do<i>MODE</i>(RenderRequest request, RenderResponse response)</code>
+method.  The <code>render</code> method prepares objects common to the views,
+stores them as request attributes, and then calls the appropriate
+<code>do</code> method.
+</p>
+
+<example title="render()"
+         file="WEB-INF/classes/example/HelloWorldPortlet.java"
+         re-marker="void render">
+  public void render(RenderRequest request, RenderResponse response)
+    throws PortletException, IOException
+  {
+    PortletMode mode = request.getPortletMode();
+
+    // prepare objects in common with all modes and store them
+    // as request attributes
+
+    prepareObjects(request, response);
+
+    if (mode.equals(PortletMode.EDIT)) {
+      doEdit(request, response);
+    }
+    else {
+      doView(request, response);
+    }
+  }
+</example>
+
+<p>
+The <code>prepareObjects()</code> method prepares objects in common to the
+views and stores them as request attributes.  This avoids duplication of code,
+and also anticipates a time when the view might be rendered using JSP.  The JSP
+can easily access the prepared objects because they are stored as request
+attributes.
+</p>
+
+<p>
+In this simple example, the prepared objects are Strings.  Real benefits are
+seen when more complex objects are prepared, for example a render parameter
+might indicate a primary key that is used to retrieve information from a
+database; objects containing that data are prepared in prepareObjects() and
+available for display by the view.
+</p>
+
+<example title="prepareObjects()"
+         file="WEB-INF/classes/example/HelloWorldPortlet.java"
+         re-marker="void prepareObjects">
+  protected void prepareObjects(RenderRequest request, RenderResponse response)
+  {
+    String identity = request.getParameter("identity");
+    if (identity == null)
+      identity = "World";
+
+    String color = request.getParameter("color");
+    if (color == null)
+      color = "silver";
+
+    request.setAttribute("identity", identity);
+    request.setAttribute("color", color);
+  }
+</example>
+
+</section>
+
+<section title="A url link to a different mode">
+<p>
+The <code>mode</code> is maintained from request
+to request.  A url link can cause the mode of the portlet to switch.  </p>
+
+<p>
+In this tutorial, the <code>doView</code> presents a url that switches to the
+"edit" mode.
+</p>
+
+<example title="prepareObjects()"
+         file="WEB-INF/classes/example/HelloWorldPortlet.java"
+         re-marker="void doView"
+         re-start="editUrl">
+
+  PortletURL editUrl = response.createRenderURL();
+  editUrl.setPortletMode(PortletMode.EDIT);
+    
+  out.println("&lt;a href='" + editUrl + "'&gt;Edit&lt;/a&gt;");
+</example>
+</section>
+
+<section title="Switching modes in processAction()">
+
+<p>
+The action handles the form submit.  In this case, only the "edit"
+mode supports actions.
+</p>
+
+<p>
+Once the form is submitted the mode is switched to "view" and the users sees
+the information that was just entered.
+processAction() switches to the "view" mode using
+<code>response.setPortletMode()</code>.
+</p>
+
+<example title="processAction()"
+         file="WEB-INF/classes/example/HelloWorldPortlet.java"
+         re-marker="void processAction"
+         re-start="setPortletMode">
+
+  public void processAction(ActionRequest request, ActionResponse response) 
+    throws PortletException, IOException
+  {
+    PortletMode mode = request.getPortletMode();
+
+    if (mode.equals(PortletMode.EDIT)) { 
+
+      // get the values submitted with the form
+
+      String identity = request.getParameter("identity");
+      String color = request.getParameter("color");
+
+      // set the values of the render parameters
+
+      response.setRenderParameter("identity",identity); 
+      response.setRenderParameter("color",color); 
+
+      // switch to View mode
+<b>
+      response.setPortletMode(PortletMode.VIEW);
+</b>
+    }
+  }
+</example>
+
+<p>
+If a call to setPortletMode() is not made, then the mode is maintained for the
+call to render().  In this example, if the setPortletMode(PortletMode.VIEW)
+call was omitted, then the render() that followed the processAction() would
+still have a mode of "edit".
+</p>
+
+</section>
+
+<section title="Custom Modes">
+<p>
+PortletMode.VIEW, PortletMode.EDIT, PortletMode.HELP are constants 
+for the three standard modes specified by the portlet specification.
+A portlet can also have any number of custom modes.
+</p>
+<p>
+A custom PortletMode java object is created with a String argument to the
+constructor:
+ </p>
+
+<example title="new PortletMode(String)">
+public class MyPortlet implements Portlet {
+
+  final private static PortletMode SECURITY = new PortletMode("security");
+</example>
+
+</section>
+
+</document>

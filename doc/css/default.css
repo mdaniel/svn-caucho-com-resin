@@ -1,0 +1,189 @@
+.website a {
+  text-decoration : none;
+}
+
+.website a:hover {
+  text-decoration : underline;
+}
+
+a.topnav {
+  text-decoration : none;
+  color : #002b80;
+  font-family: Verdana, Arial, Helvetica, sans-serif;
+}
+
+a.leftnav:link {
+  text-decoration : none;
+  color : #002b80;
+}
+
+a.leftnav:hover {
+  text-decoration : underline;
+  color : #002b80;
+}
+
+a.leftnav:visited {
+  text-decoration : none;
+  color :  #cc0044;
+}
+
+.toc {
+/*  background : #b8e6d6; */
+/*  background : #eeeeee; */
+/*  background : #ccddff; */
+/*  background : #ccffee; */
+  background : #ccddff;
+}
+
+.section {
+  background : #ccddff;
+}
+
+.desc {
+  margin : 0 1em 0em 3em;
+}
+
+.faqdesc {
+  font-style: italic;
+}
+
+.egpad {
+  padding : 0.5em 1em;
+  margin : 0;
+}
+
+.side {
+  background : #ccddff;
+  padding : 0.5em;
+  font-size : larger;
+  float : right;
+  width : 30%;
+}
+
+.leftside {
+  background : #ccddff;
+  padding : 0.5em;
+  font-size : larger;
+  float : left;
+  width : 30%;
+}
+
+.glossary {
+  background : #ccddff;
+}
+
+.plainside {
+  float : right;
+  width : 30%;
+}
+
+.def {
+/*  background : #eeccff; */
+  background : #cccccc;
+  color : black;
+  font-family : monospace;
+  font-size : .9em;
+}
+/* XXX: netscape ignores
+caption {
+  font-size : 10em;
+}
+*/
+
+.deftable {
+  background : #eeccff;
+/*  background : #b8e6d6; */
+}
+
+table.deftable th {
+  background : #c78ae6;
+/*  background : #7accb1; */
+}
+
+.example {
+  background : #ffeecc;
+  color : black;
+  font-family : monospace;
+  font-size : .9em;
+}
+
+.example-smaller {
+  background : #ffeecc;
+  color : black;
+  font-family : monospace;
+  font-size : smaller;
+}
+
+span.example {
+  background : #ffeecc;
+  font-family : monospace;
+  color : black;
+  font-size : .9em;
+}
+
+.egcolor {
+  background : #ffeecc;
+  color : black;
+}
+
+.screenshot {
+  background : silver;
+  color : black;
+}
+
+.green {
+  color : black;
+  background : #99ffdd; /* 00ffdd, bbff99, ddffcc, ccffee, ffccdd */
+}
+
+.eg-em {
+/*  color : #0044cc; */
+  color : #003399;
+/* aa00ff, ff0055; 0044cc, 8800cc, cc0044, 0055ff */
+}
+
+.badexample {
+  color : red;
+}
+
+.result {
+  background : #ffccdd;
+  color : black;
+  font-family : monospace;
+  font-size : .9em;
+}
+
+.warn {
+  color : #ff0055;
+}
+
+.todo {
+  color: green;
+}
+
+code {
+  font-family : monospace;
+}
+
+.meta {
+  font-style : italic;
+  color : #003399;
+}
+
+ul.none {
+  list-style : none
+}
+
+dl.atoc-toplevel {
+  margin : 0;
+}
+
+
+dt.atoc-toplevel-1 {
+    font-size : large;
+    font-style : bold;
+    background : #ccddff;
+    padding : 5px;
+    margin : 0.5em;
+}
+

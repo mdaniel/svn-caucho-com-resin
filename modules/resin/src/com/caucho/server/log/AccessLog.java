@@ -1,0 +1,942 @@
+/*
+ * Copyright (c) 1998-2004 Caucho Technology -- all rights reserved
+ *
+ * This file is part of Resin(R) Open Source
+ *
+ * Each copy or derived work must preserve the copyright notice and this
+ * notice unmodified.
+ *
+ * Resin Open Source is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * Resin Open Source is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE, or any warranty
+ * of NON-INFRINGEMENT.  See the GNU General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Resin Open Source; if not, write to the
+ *
+ *   Free Software Foundation, Inc.
+ *   59 Temple Place, Suite 330
+ *   Boston, MA 02111-1307  USA
+ *
+ * @author Scott Ferguson
+ */
+
+package com.caucho.server.log;
+
+import java.util.ArrayList;
+
+import java.util.logging.Logger;
+import java.util.logging.Level;
+
+import java.util.zip.ZipOutputStream;
+import java.util.zip.GZIPOutputStream;
+
+import java.io.OutputStream;
+import java.io.IOException;
+
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import com.caucho.util.*;
+import com.caucho.vfs.*;
+
+import com.caucho.log.Log;
+
+import com.caucho.loader.Environment;
+import com.caucho.loader.CloseListener;
+
+import com.caucho.config.types.Period;
+import com.caucho.config.types.Bytes;
+import com.caucho.config.types.InitProgram;
+import com.caucho.config.ConfigException;
+
+import com.caucho.server.connection.AbstractHttpRequest;
+import com.caucho.server.connection.AbstractHttpResponse;
+
+import com.caucho.server.dispatch.ServletConfigException;
+
+/**
+ * Represents an log of every top-level request to the server.
+ */
+public class AccessLog extends AbstractAccessLog implements AlarmListener {
+  protected static final L10N L = new L10N(AccessLog.class);
+  protected static final Logger log = Log.open(AccessLog.class);
+  
+  // Default maximum log size.
+  private static final long ROLLOVER_SIZE = 32L * 1024L * 1024L;
+  // Milliseconds in a day
+  private static final long DAY = 24L * 3600L * 1000L;
+  // How often to check size
+  private static final long ROLLOVER_CHECK_TIME = 600L * 1000L;
+
+  private static final int BUFFER_SIZE = 65536;
+  private static final int BUFFER_GAP = 8 * 1024;
+  
+  private QDate _calendar = QDate.createLocal();
+  private String _timeFormat;
+  private int _timeFormatSecondOffset = -1;
+  
+  // AccessStream
+  private WriteStream _os;
+  private Object _streamLock = new Object();
+
+  private String _format;
+  private Segment []_segments;
+
+  // prefix for the rollover
+  private String _rolloverPrefix;
+
+  // template for the archived files
+  private String _archiveFormat;
+  
+  // How often the logs are rolled over.
+  private long _rolloverPeriod = -1;
+
+  // Maximum size of the log.
+  private long _rolloverSize = ROLLOVER_SIZE;
+
+  // How often the rolloverSize should be checked
+  private long _rolloverCheckTime = ROLLOVER_CHECK_TIME;
+
+  // The time of the next rollover
+  private long _nextTime = -1;
+
+  private final byte []_bufferA = new byte[BUFFER_SIZE];
+  private int _bufferALength;
+
+  private final byte []_bufferB = new byte[BUFFER_SIZE];
+  private int _bufferBLength;
+
+  private boolean _isBufferA;
+  private Object _bufferLock = new Object();
+
+  private final CharBuffer _cb = new CharBuffer();
+  
+  private final CharBuffer _timeCharBuffer = new CharBuffer();
+  private final ByteBuffer _timeBuffer = new ByteBuffer();
+  private long _lastTime;
+
+  private Alarm _alarm = new Alarm(this);
+
+  /**
+   * Sets the access log format.
+   */
+  public void setFormat(String format)
+  {
+    _format = format;
+  }
+
+  /**
+   * Sets the archive name format
+   */
+  public void setArchiveFormat(String format)
+  {
+    _archiveFormat = format;
+  }
+
+  /**
+   * Sets the log rollover period, rounded up to the nearest hour.
+   *
+   * @param period the new rollover period in milliseconds.
+   */
+  public void setRolloverPeriod(Period period)
+  {
+    _rolloverPeriod = period.getPeriod();
+    
+    if (_rolloverPeriod > 0) {
+      _rolloverPeriod += 3600000L - 1;
+      _rolloverPeriod -= _rolloverPeriod % 3600000L;
+    }
+    else
+      _rolloverPeriod = -1;
+  }
+
+  /**
+   * Sets the log rollover size, rounded up to the megabyte.
+   *
+   * @param size maximum size of the log file
+   */
+  public void setRolloverSize(Bytes bytes)
+  {
+    long size = bytes.getBytes();
+    
+    if (size < 0)
+      _rolloverSize = Integer.MAX_VALUE / 2;
+    else
+      _rolloverSize = size;
+  }
+
+  /**
+   * Sets how often the log rollover will be checked.
+   *
+   * @param period how often the log rollover will be checked.
+   */
+  public void setRolloverCheckTime(long period)
+  {
+    if (period > 1000)
+      _rolloverCheckTime = period;
+    else if (period > 0)
+      _rolloverCheckTime = 1000;
+  }
+
+  public void addInit(InitProgram init)
+    throws Throwable
+  {
+    init.init(this);
+  }
+  
+  /**
+   * Initialize the log.
+   */
+  public void init()
+    throws ServletException, IOException
+  {
+    Environment.addClassLoaderListener(new CloseListener(this));
+    
+    if (_path == null)
+      throw new ServletConfigException(L.l("access-log needs a path"));
+    
+    _path.getParent().mkdirs();
+    
+    _rolloverPrefix = _path.getTail();
+
+    long now = Alarm.getCurrentTime();
+    
+    long lastModified = _path.getLastModified();
+    if (lastModified <= 0)
+      lastModified = now;
+    
+    _calendar.setGMTTime(lastModified);
+    long zone = _calendar.getZoneOffset();
+
+    if (_rolloverPeriod < 0) {
+      _nextTime = now + _rolloverCheckTime;
+    }
+    else {
+      _nextTime = Period.periodEnd(lastModified, _rolloverPeriod);
+      
+      if (log.isLoggable(Level.FINE))
+        log.fine(_path + ": next rollover at " + QDate.formatLocal(_nextTime));
+      
+      if (_nextTime <= now) 
+        rolloverLog(now);
+    }
+
+    openLog();
+    
+    if (_format == null)
+      _format = "%h %l %u %t \"%r\" %>s %b \"%{Referer}i\" \"%{User-Agent}i\"";
+
+    ArrayList<Segment> segments = parseFormat(_format);
+
+    _segments = new Segment[segments.size()];
+    segments.toArray(_segments);
+    
+    if (_timeFormat == null || _timeFormat.equals("")) {
+      _timeFormat = "[%d/%b/%Y:%H:%M:%S %z]";
+      _timeFormatSecondOffset = 0;
+    }
+
+    _alarm.queue(60000);
+  }
+
+  /**
+   * Parses the access log string.
+   */
+  private ArrayList<Segment> parseFormat(String format)
+  {
+    ArrayList<Segment> segments = new ArrayList<Segment>();
+    CharBuffer cb = new CharBuffer();
+
+    int i = 0;
+    while (i < _format.length()) {
+      char ch = _format.charAt(i++);
+
+      if (ch != '%' || i >= _format.length()) {
+	cb.append((char) ch);
+	continue;
+      }
+      
+      String arg = null;
+      ch = _format.charAt(i++);
+      if (ch == '>')
+	ch = _format.charAt(i++);
+      else if (ch == '{') {
+	if (cb.length() > 0)
+	  segments.add(new Segment(this, Segment.TEXT, cb.toString()));
+	cb.clear();
+	while (i < _format.length() && _format.charAt(i++) != '}')
+	  cb.append(_format.charAt(i - 1));
+	arg = cb.toString();
+	cb.clear();
+
+	ch = _format.charAt(i++);
+      }
+
+      switch (ch) {
+      case 'b': case 'c':
+      case 'h': case 'i': case 'l': case 'n':
+      case 'r': case 's':
+      case 'T': case 'o':
+      case 'u': case 'U':
+	if (cb.length() > 0)
+	  segments.add(new Segment(this, Segment.TEXT, cb.toString()));
+	cb.clear();
+	segments.add(new Segment(this, ch, arg));
+	break;
+
+      case 't':
+	if (cb.length() > 0)
+	  segments.add(new Segment(this, Segment.TEXT, cb.toString()));
+	cb.clear();
+	if (arg != null)
+	  _timeFormat = arg;
+	segments.add(new Segment(this, ch, arg));
+	break;
+        
+      default:
+	cb.append('%');
+	i--;
+	break;
+      }
+    }
+
+    cb.append(CauchoSystem.getNewlineString());
+    segments.add(new Segment(this, Segment.TEXT, cb.toString()));
+
+    return segments;
+  }
+
+  /**
+   * Logs a request using the current format.
+   *
+   * @param request the servlet request.
+   * @param response the servlet response.
+   */
+  public void log(HttpServletRequest req,
+		  HttpServletResponse res,
+		  ServletContext application)
+    throws IOException
+  {
+    AbstractHttpRequest request = (AbstractHttpRequest) req;
+    AbstractHttpResponse response = (AbstractHttpResponse) res;
+
+    /*
+    WriteStream os = _os;
+    if (os == null)
+      return;
+    */
+
+    long now = Alarm.getCurrentTime();
+
+    if (_nextTime < now) 
+      rolloverLog(now);
+
+    byte []writeBuffer = null;
+    int writeLength = 0;
+
+    while (true) {
+      synchronized (_bufferLock) {
+	if (_isBufferA) {
+	  byte []bufferA = _bufferA;
+	  int lengthA = _bufferALength;
+	  
+	  if (lengthA + BUFFER_GAP <= BUFFER_SIZE) {
+	    synchronized (bufferA) {
+	      lengthA = log(request, response, bufferA, lengthA, BUFFER_SIZE);
+	      _bufferALength = lengthA;
+	    }
+	    return;
+	  }
+	}
+	else {
+	  byte []bufferB = _bufferB;
+	  int lengthB = _bufferBLength;
+	  
+	  if (lengthB + BUFFER_GAP <= BUFFER_SIZE) {
+	    synchronized (bufferB) {
+	      lengthB = log(request, response, bufferB, lengthB, BUFFER_SIZE);
+	      _bufferBLength = lengthB;
+	    }
+	    return;
+	  }
+	}
+      }
+
+      flush();
+    }
+  }
+  
+  /**
+   * Logs a request using the current format.
+   *
+   * @param request the servlet request.
+   * @param response the servlet response.
+   * @param buffer byte buffer containing the response
+   * @param offset buffer starting offset
+   * @param length length allowed in the buffer
+   *
+   * @return the new tail of the buffer
+   */
+  private int log(AbstractHttpRequest request,
+                  AbstractHttpResponse response,
+                  byte []buffer, int offset, int length)
+    throws IOException
+  {
+    int len = _segments.length;
+    for (int i = 0; i < len; i++) {
+      Segment segment = _segments[i];
+      String value = null;
+      CharBuffer cbValue = null;
+      CharSegment csValue = null;
+
+      switch (segment._code) {
+      case Segment.TEXT:
+        int sublen = segment._data.length;
+        byte []data = segment._data;
+        for (int j = 0; j < sublen; j++)
+          buffer[offset++] = data[j];
+	break;
+        
+      case Segment.CHAR:
+        buffer[offset++] = segment._ch;
+	break;
+
+      case 'b':
+        if (response.getStatusCode() == 304)
+          buffer[offset++] = (byte) '-';
+        else
+          offset = print(buffer, offset, response.getContentLength());
+	break;
+
+        // cookie
+      case 'c':
+        Cookie cookie = request.getCookie(segment._string);
+        if (cookie == null)
+          cookie = response.getCookie(segment._string);
+        if (cookie == null)
+          buffer[offset++] = (byte) '-';
+        else
+          offset = print(buffer, offset, cookie.getValue());
+	break;
+        
+        // set cookie
+      case Segment.SET_COOKIE:
+        ArrayList cookies = response.getCookies();
+        if (cookies == null || cookies.size() == 0)
+          buffer[offset++] = (byte) '-';
+        else {
+          _cb.clear();
+          response.fillCookie(_cb, (Cookie) cookies.get(0), 0, 0);
+
+          offset = print(buffer, offset, _cb.getBuffer(), 0, _cb.getLength());
+        }
+	break;
+
+      case 'h':
+        offset = request.printRemoteAddr(buffer, offset);
+	break;
+
+        // input header
+      case 'i':
+	csValue = request.getHeaderBuffer(segment._string);
+        if (csValue == null)
+          buffer[offset++] = (byte) '-';
+        else
+          offset = print(buffer, offset, csValue);
+	break;
+
+      case 'l':
+        buffer[offset++] = (byte) '-';
+	break;
+
+        // request attribute
+      case 'n':
+        Object oValue = request.getAttribute(segment._string);
+        if (oValue == null)
+          buffer[offset++] = (byte) '-';
+        else
+          offset = print(buffer, offset, String.valueOf(oValue));
+	break;
+
+        // output header
+      case 'o':
+	value = response.getHeader(segment._string);
+        if (value == null)
+          buffer[offset++] = (byte) '-';
+        else
+          offset = print(buffer, offset, value);
+	break;
+
+      case 'r':
+	offset = print(buffer, offset, request.getMethod());
+        
+        buffer[offset++] = (byte) ' ';
+        
+        data = request.getUriBuffer();
+        sublen = request.getUriLength();
+	System.arraycopy(data, 0, buffer, offset, sublen);
+        offset += sublen;
+        buffer[offset++] = (byte) ' ';
+        
+	offset = print(buffer, offset, request.getProtocol());
+	break;
+
+      case 's':
+        int status = response.getStatusCode();
+        buffer[offset++] = (byte) ('0' + (status / 100) % 10);
+        buffer[offset++] = (byte) ('0' + (status / 10) % 10);
+        buffer[offset++] = (byte) ('0' + status % 10);
+	break;
+
+      case 't':
+        long date = Alarm.getCurrentTime();
+        
+        if (date / 1000 != _lastTime / 1000)
+          fillTime(date);
+
+	sublen = _timeBuffer.getLength();
+	data = _timeBuffer.getBuffer();
+	
+	synchronized (_timeBuffer) {
+	  System.arraycopy(data, 0, buffer, offset, sublen);
+	}
+
+        offset += sublen;
+	break;
+
+      case 'T':
+        long startTime = request.getStartTime();
+        long now = Alarm.getCurrentTime();
+
+	offset = print(buffer, offset, (int) ((now - startTime + 500) / 1000));
+	break;
+
+      case 'u':
+	value = request.getRemoteUser(false);
+        if (value == null)
+          buffer[offset++] = (byte) '-';
+        else {
+          buffer[offset++] = (byte) '"';
+          offset = print(buffer, offset, value);
+          buffer[offset++] = (byte) '"';
+        }
+	break;
+
+      case 'U':
+        offset = print(buffer, offset, request.getRequestURI());
+	break;
+
+      default:
+	throw new IOException();
+      }
+    }
+
+    return offset;
+  }
+
+  /**
+   * Check to see if we need to rollover the log.
+   *
+   * @param now current time in milliseconds.
+   */
+  private void rolloverLog(long now)
+  {
+    synchronized (_streamLock) {
+      String savedName = null;
+
+      if (_rolloverPeriod > 0)
+	savedName = getArchiveName(_nextTime - 1);
+      else if (_rolloverPeriod < 0 && _rolloverSize <= _path.getLength())
+	savedName = getArchiveName(_nextTime - 1);
+
+      if (_rolloverPeriod > 0) {
+	_nextTime = Period.periodEnd(now, _rolloverPeriod);
+      
+	if (log.isLoggable(Level.FINE))
+	  log.fine(_path + ": next rollover at " + QDate.formatLocal(_nextTime));
+      }
+      else
+	_nextTime = now + _rolloverCheckTime;
+
+      if (savedName != null) {
+	try {
+	  if (_os != null) {
+	    flush();
+	  }
+	  _os = null;
+	  String tail = _path.getTail();
+	  Path newPath = _path.getParent().lookup(savedName);
+        
+	  try {
+	    newPath.getParent().mkdirs();
+	  } catch (Throwable e) {
+	    log.log(Level.WARNING, e.toString(), e);
+	  }
+        
+	  try {
+	    WriteStream os = newPath.openWrite();
+	    OutputStream out;
+
+	    if (savedName.endsWith(".gz"))
+	      out = new GZIPOutputStream(os);
+	    else if (savedName.endsWith(".zip")) 
+	      out = new ZipOutputStream(os);
+	    else
+	      out = os;
+
+	    try {
+	      _path.writeToStream(out);
+	    } finally {
+	      try {
+		out.close();
+	      } catch (Throwable e) {
+		log.log(Level.WARNING, e.toString(), e);
+	      }
+	    
+	      os.close();
+	    }
+	  
+	    _path.remove();
+	  } catch (Throwable e) {
+	    log.log(Level.WARNING, e.toString(), e);
+	  }
+	} catch (IOException e) {
+	  log.log(Level.INFO, e.toString(), e);
+	}
+
+	openLog();
+      }
+    }
+  }
+
+  /**
+   * Tries to open the log.
+   */
+  private void openLog()
+  {
+    try {
+      if (! _path.getParent().isDirectory())
+	_path.getParent().mkdirs();
+    } catch (Throwable e) {
+      log.log(Level.FINER, e.toString(), e);
+    }
+    
+    synchronized (_streamLock) {
+      for (int i = 0; i < 3 && _os == null; i++) {
+	try {
+	  _os = _path.openAppend();
+	} catch (IOException e) {
+	  log.log(Level.INFO, e.toString(), e);
+	}
+      }
+
+      if (_os == null)
+	log.warning(L.l("Can't open access log file '{0}'.",
+			_path));
+    }
+  }
+
+  /**
+   * Returns the name of the archived file
+   *
+   * @param time the archive date
+   */
+  protected String getArchiveName(long time)
+  {
+    String date;
+
+    if (time <= 0)
+      time = Alarm.getCurrentTime();
+    
+    if (_archiveFormat != null)
+      return _calendar.formatLocal(time, _archiveFormat);
+    else if (_rolloverPeriod % (24 * 3600 * 1000L) == 0)
+      return _rolloverPrefix + "." + _calendar.formatLocal(time, "%Y%m%d");
+    else
+      return _rolloverPrefix + "." + _calendar.formatLocal(time, "%Y%m%d.%H");
+  }
+
+  /**
+   * Prints a CharSegment to the log.
+   *
+   * @param buffer receiving byte buffer.
+   * @param offset offset into the receiving buffer.
+   * @param cb the new char segment to be logged.
+   * @return the new offset into the byte buffer.
+   */
+  private int print(byte []buffer, int offset, CharSegment cb)
+  {
+    char []charBuffer = cb.getBuffer();
+    int cbOffset = cb.getOffset();
+    int length = cb.getLength();
+
+    // truncate for hacker attacks
+    if (buffer.length - offset - 256 < length)
+      length =  buffer.length - offset - 256;
+
+    for (int i = length - 1; i >= 0; i--)
+      buffer[offset + i] = (byte) charBuffer[cbOffset + i];
+
+    return offset + length;
+  }
+
+  /**
+   * Prints a String to the log.
+   *
+   * @param buffer receiving byte buffer.
+   * @param offset offset into the receiving buffer.
+   * @param s the new string to be logged.
+   * @return the new offset into the byte buffer.
+   */
+  private int print(byte []buffer, int offset, String s)
+  {
+    int length = s.length();
+
+    _cb.ensureCapacity(length);
+    char []cBuf = _cb.getBuffer();
+
+    s.getChars(0, length, cBuf, 0);
+
+    for (int i = length - 1; i >= 0; i--)
+      buffer[offset + i] = (byte) cBuf[i];
+
+    return offset + length;
+  }
+
+  /**
+   * Prints a String to the log.
+   *
+   * @param buffer receiving byte buffer.
+   * @param offset offset into the receiving buffer.
+   * @param s the new string to be logged.
+   * @return the new offset into the byte buffer.
+   */
+  private int print(byte []buffer, int offset,
+                    char []cb, int cbOff, int length)
+  {
+    for (int i = length - 1; i >= 0; i--)
+      buffer[offset + i] = (byte) cb[cbOff + i];
+
+    return offset + length;
+  }
+
+  /**
+   * Prints an integer to the log.
+   *
+   * @param buffer receiving byte buffer.
+   * @param offset offset into the receiving buffer.
+   * @param v the new integer to be logged.
+   * @return the new offset into the byte buffer.
+   */
+  private int print(byte []buffer, int offset, int v)
+  {
+    if (v == 0) {
+      buffer[offset] = (byte) '0';
+      return offset + 1;
+    }
+
+    if (v < 0) {
+      buffer[offset++] = (byte) '-';
+      v = -v;
+    }
+
+    int length = 0;
+    int exp = 10;
+    
+    for (; v >= exp; length++)
+      exp = 10 * exp;
+
+    offset += length;
+    for (int i = 0; i <= length; i++) {
+      buffer[offset - i] = (byte) (v % 10 + '0');
+      v = v / 10;
+    }
+
+    return offset + 1;
+  }
+
+  /**
+   * Flushes the log.
+   *
+   * Flush may be called with a _streamLock.  It may not be called with
+   * a _bufferLock.
+   */
+  public void flush()
+    throws IOException
+  {
+    byte []writeBuffer;
+    int writeLength;
+    boolean isBufferA;
+
+    if (_os == null)
+      openLog();
+      
+    synchronized (_bufferLock) {
+      isBufferA = _isBufferA;
+	
+      if (_isBufferA) {
+	writeLength = _bufferALength;
+
+	if (writeLength == 0 ||
+	    writeLength < BUFFER_SIZE / 2 && _bufferBLength > 0)
+	  return;
+
+	writeBuffer = _bufferA;
+	_bufferALength = 0;
+	_isBufferA = false;
+      }
+      else {
+	writeLength = _bufferBLength;
+
+	if (writeLength == 0 ||
+	    writeLength < BUFFER_SIZE / 2 && _bufferALength > 0)
+	  return;
+
+	writeBuffer = _bufferB;
+	_bufferBLength = 0;
+	_isBufferA = true;
+      }
+    }
+
+    synchronized (_streamLock) {
+      WriteStream os = _os;
+
+      if (os != null) {
+	synchronized (writeBuffer) {
+	  os.write(writeBuffer, 0, writeLength);
+	  os.flush();
+	}
+      }
+    }
+  }
+
+  /**
+   * The alarm listener.
+   */
+  public void handleAlarm(Alarm alarm)
+  {
+    try {
+      flush();
+    } catch (IOException e) {
+      log.log(Level.WARNING, e.toString(), e);
+    } finally {
+      alarm = _alarm;
+      if (alarm != null)
+	alarm.queue(60000);
+    }
+  }
+
+  /**
+   * Closes the log, flushing the results.
+   */
+  public void destroy()
+    throws IOException
+  {
+    Alarm alarm = _alarm;;
+    _alarm = null;
+
+    if (alarm != null)
+      alarm.dequeue();
+
+    synchronized (_streamLock) {
+      flush();
+      WriteStream os = _os;
+      _os = null;
+      if (os != null)
+	os.close();
+    }
+  }
+
+  /**
+   * Fills the time buffer with the formatted time.
+   *
+   * @param date current time in milliseconds
+   */
+  private void fillTime(long date)
+    throws IOException
+  {
+    if (date / 1000 == _lastTime / 1000)
+      return;
+
+    synchronized (_timeBuffer) {
+      if (_timeFormatSecondOffset >= 0 && date / 60000 == _lastTime / 60000) {
+	byte []bBuf = _timeBuffer.getBuffer();
+	
+	int sec = (int) (date / 1000 % 60);
+
+	bBuf[_timeFormatSecondOffset + 0] = (byte) ('0' + sec / 10);
+	bBuf[_timeFormatSecondOffset + 1] = (byte) ('0' + sec % 10);
+
+	return;
+      }
+      
+      _timeCharBuffer.clear();
+      QDate.formatLocal(_timeCharBuffer, date, _timeFormat);
+
+      if (_timeFormatSecondOffset >= 0)
+	_timeFormatSecondOffset = _timeCharBuffer.lastIndexOf(':') + 1;
+      
+      char []cBuf = _timeCharBuffer.getBuffer();
+      int length = _timeCharBuffer.getLength();
+
+      _timeBuffer.setLength(length);
+      byte []bBuf = _timeBuffer.getBuffer();
+
+      for (int i = length - 1; i >= 0; i--)
+	bBuf[i] = (byte) cBuf[i];
+    }
+      
+    _lastTime = date;
+  }
+
+  /**
+   * Represents one portion of the access log.
+   */
+  static class Segment {
+    final static int TEXT = 0;
+    final static int CHAR = 1;
+    final static int SET_COOKIE = 2;
+    
+    int _code;
+    byte []_data;
+    byte _ch;
+    String _string;
+    AccessLog _log;
+
+    /**
+     * Creates a new log segment.
+     *
+     * @param log the owning log
+     * @param code the segment code, telling what kind of segment it is
+     * @param string the parameter for the segment code.
+     */
+    Segment(AccessLog log, int code, String string)
+    {
+      _log = log;
+      _code = code;
+      
+      _string = string;
+      if (string != null) {
+        if (code == 'o' && string.equalsIgnoreCase("Set-Cookie"))
+          _code = SET_COOKIE;
+          
+        _data = _string.getBytes();
+        if (code == TEXT && _string.length() == 1) {
+          _ch = (byte) _string.charAt(0);
+          _code = CHAR;
+        }
+      }
+    }
+  }
+}

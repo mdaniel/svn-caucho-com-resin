@@ -1,0 +1,68 @@
+<document>
+  <header>
+    <product>resin</product>
+    <resin-2.0>$resin/java_tut/xtp-page.xtp</resin-2.0>
+    <title>Link Rewriting</title>
+    <description>
+      <p>XTP can be used to rewrite links.  Rewriting links to encode
+        sessions is a tedious and error-prone task.  If you use URL-encoded
+        sessions, every &lt;a> link and every &lt;form> action needs a
+        rewritten link using <var/response.encodeURL()/>.  XTP can rewrite
+        those for you automatically.</p>
+    </description>
+  </header>
+
+  <body>
+    <summary/>
+
+<example title="stylesheet.xsl">
+&lt;xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+                version="1.0">
+
+  &lt;!-- make sure '&lt;' is not printed as '&amp;lt;' -->
+  &lt;xsl:output disable-output-escaping='true'/>
+
+  &lt;!-- copy input to output -->
+  &lt;xsl:template match='*|@*'>
+    &lt;xsl:copy>
+      &lt;xsl:apply-templates select='node()|@*'/>
+    &lt;/xsl:copy>
+  &lt;/xsl:template>
+
+  &lt;!-- rewrite &lt;a href> -->
+  &lt;xsl:template match="a[@href]">
+    &lt;a href='&lt;%= response.encodeURL("{@href}") %>'>
+      &lt;xsl:apply-templates select="node()|@*[name(.)!="href"]"/>
+    &lt;/a>
+  &lt;/xsl:template>
+&lt;/xsl:stylesheet>
+</example>
+
+<p>Your XTP page may look something like:</p>
+
+<example title='test.xtp'>
+&lt;?xml-stylesheet href='stylesheet.xsl'?>
+&lt;h1>My test&lt;/h1>
+
+Adding: 2 + 2 = &lt;%= 2 + 2 %>
+
+&lt;p>New? &lt;%= session.isNew() %>
+
+&lt;p>And &lt;a href='test.xtp'>linking&lt;/a>
+</example>
+
+<p>The transformed file will look like:</p>
+
+<results>
+&lt;?xml-stylesheet href='stylesheet.xsl'?>
+&lt;h1>My test&lt;/h1>
+
+Adding: 2 + 2 = &lt;%= 2 + 2 %>
+
+&lt;p>New? &lt;%= session.isNew() %>
+
+&lt;p>And &lt;a href='&lt;%= response.encodeURL("test.xtp") %>'>linking&lt;/a>
+</results>
+
+  </body>
+</document>

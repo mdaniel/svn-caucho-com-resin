@@ -1,0 +1,362 @@
+<document>
+<header>
+<product>resin</product>
+<type>tutorial</type>
+<title>EJB Message Bean</title>
+<tutorial-startpage>send-message</tutorial-startpage>
+
+<description>
+
+<p>EJB message beans are used to process message received through JMS.  The
+message-driven bean server processes messages as they become available.  The
+Resin-EE server calls the bean's <var/onMessage()/>
+method with each new message.</p>
+
+<p>In this example, a simple message-driven bean is created and deployed, and a
+simple servlet is used to send messages.</p>
+
+</description>
+
+</header>
+<body>
+
+<summary/>
+
+<section title="Files in this tutorial">
+<deftable>
+<tr><td><viewfile-link file="WEB-INF/web.xml"/>
+    <td>Configure JMS, the EJB server, and the simple message sending servlet
+<tr><td><viewfile-link file="WEB-INF/message.ejb"/>
+    <td>Configure the SimpleMessageBean
+<tr><td><viewfile-link file="WEB-INF/classes/example/SimpleMessageBean.java"/>
+    <td>The message bean
+<tr><td><viewfile-link file="WEB-INF/classes/example/MessageSenderServlet.java"/>
+    <td>A simple servlet that sends messages
+</deftable>
+</section>
+
+<section title="Configuring JMS">
+
+<p>EJB message beans use the facilities provided by JMS.
+JMS, the Java Messaging Service, is an elaborated queueing system.
+Clients add messages to the queues and servers remove the
+messages.</p>
+
+<p>There are two types of messaging supported by JMS.  A <var/Queue/> is used
+when there is one consumer of the message.  A sender sends the message, and the
+message remains in the queue until a consumer reads the message or the
+message times out. A <var/Topic/> is used when there may be more than one
+subscriber.  The server distributes the message to all of the registered
+subscribers.</p>
+
+<p>The server needs to have both a ConnectionFactory and a
+Destination.  Destinations are either Queue or Topic objects and
+ConnectionFactories are either
+QueueConnectionFactory or TopicConnectionFactory.</p>
+
+<p>Like other JNDI resources, JMS objects are configured with <var/resource/>
+directives.  In this example, the configuration is in <code/web.xml/>, which
+creates the JMS resources specifically for the web-app.  The JMS objecs could
+just as easily be created at the host or server level, and thus shared in
+common with many web applications.</p>
+
+<example file="WEB-INF/web.xml" re-start="JMS" re-end="!--">
+&lt;web-app xmlns="http://caucho.com/ns/resin"&gt;
+
+  ...
+
+  &lt;!-- 
+     - JMS  
+    --&gt;
+  &lt;resource jndi-name="jms/queue-connection-factory"
+    type='com.caucho.jms.JVMQueueConnectionFactory'/&gt;
+
+  &lt;resource jndi-name="jms/queue"
+    type='com.caucho.jms.memory.MemoryQueue'/&gt;
+
+  ...
+  
+</example>
+
+<p>Resin-EE's EJB message-bean implementation can use any
+JMS implementation which conforms to the specifications.  Resin-EE
+also includes a basic memory-based JMS
+implementation.</p>
+
+<p>The following are the factories for Resin-EE's JMS objects:</p>
+
+<deftable>
+<tr><th>Class<th>Description
+<tr><td>com.caucho.jms.JVMQueueConnectionFactory<td>The connection factory for queues.
+<tr><td>com.caucho.jms.memory.MemoryQueue<td>A memory-based queue.
+<tr><td>com.caucho.jms.JVMTopicConnectionFactory<td>The connection factory for topics.
+<tr><td>com.caucho.jms.memory.MemoryTopic<td>A memory-based topic.
+</deftable>
+
+</section>
+
+<section title="The message-driven bean class">
+
+<p>The message-driven bean server processes messages as they become
+available.  The Resin-EE server calls a message-driven bean's
+<var/onMessage()/> method with each new message.</p>
+
+<p>Unlike session and entity beans, EJB message-driven beans are implemented
+with a single class.  They do not have a separate interface, implementation
+class, and home class.</p>
+
+<example file="WEB-INF/classes/example/SimpleMessageBean.java">
+package example;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import javax.ejb.EJBException;
+import javax.ejb.MessageDrivenBean;
+import javax.ejb.MessageDrivenContext;
+
+import javax.jms.Message;
+import javax.jms.MessageListener;
+import javax.jms.TextMessage;
+
+public class SimpleMessageBean implements MessageDrivenBean, MessageListener {
+  static protected final Logger log = 
+    Logger.getLogger(SimpleMessageBean.class.getName());
+
+  public void ejbCreate()
+    throws EJBException
+  {
+    log.fine("ejbCreate()");
+  }
+
+  public void setMessageDrivenContext(MessageDrivenContext cxt)
+    throws EJBException
+  {
+    log.fine("setMessageDrivenContext()");
+  }
+
+  public void onMessage(Message msg)
+  {
+    // process the message
+    String text = null;
+
+    if (msg instanceof TextMessage) {
+      try {
+        text = ((TextMessage) msg).getText();
+      } catch (Exception ex) {
+        log.log(Level.WARNING,null,ex);
+      }
+    }
+    else {
+      text = msg.toString();
+    }
+
+    log.fine("onMessage(): " + text);
+  }
+
+  public void ejbRemove()
+    throws EJBException
+  {
+    log.fine("ejbRemove()");
+  }
+}
+</example>
+
+</section>
+
+<section title="Deployment descriptor for the bean">
+
+<p>The message bean is described in a deployment descriptor.  The Resin-EE ejb
+server will process an file in the <code/WEB-INF/> directory with the ".ejb"
+extension as an ejb deployment descriptor.</p>
+
+<p>In this case, the file <code>WEB-INF/message.ejb</code> is used to configure
+the message-driven bean <var/SimpleMessageBean/>.</p>
+
+<example file="WEB-INF/message.ejb" re-start="<message" re-end="</message">
+&lt;ejb-jar xmlns="http://caucho.com/ns/resin"&gt;
+&lt;enterprise-beans&gt;
+  &lt;message-driven&gt;
+    &lt;ejb-name&gt;SimpleMessageBean&lt;/ejb-name&gt;
+    &lt;ejb-class&gt;example.SimpleMessageBean&lt;/ejb-class&gt;
+    &lt;destination&gt;jms/queue&lt;/destination&gt;
+  &lt;/message-driven&gt;
+&lt;/enterprise-beans&gt;
+&lt;/ejb-jar&gt;
+</example>
+
+</section>
+
+
+<section title="Configure the EJB Server">
+
+<p>The Resin-EE ejb server is responsible for recognizing the
+<code>message.ejb</code> file and deploying the bean.</p>
+
+<example file="WEB-INF/web.xml" re-start="EJB" re-end="</ejb">
+&lt;web-app xmlns="http://caucho.com/ns/resin"&gt;
+
+  ...
+
+  &lt;ejb-server config-directory="WEB-INF"&gt;
+    &lt;jms-connection-factory&gt;jms/queue-connection-factory&lt;/jms-connection-factory&gt;
+  &lt;/ejb-server&gt;
+
+</example>
+
+</section>
+
+<section title="The client">
+<p>The client creates messages and sends them to a destination.</p>
+
+<p>A client needs to:</p>
+
+<ul>
+<li>Get a <code/Destination/> and <code/ConnectionFactory/>, usually with a lookup using JNDI
+<li>Create a Sender (or Publisher for Topics)
+<li>Create a message
+<li>Send the message
+</ul>
+
+<p>For this example, a simple servlet is used to perform the above steps,
+sending 5 messages.</p>
+
+<p>The JNDI lookup is done in the <code/init()/> method, and the resulting
+objects are stored as member variables:</p>
+
+<example file="WEB-INF/classes/example/MessageSenderServlet.java"
+         re-start="_queue;" re-end="^  }">
+  ...
+
+  Queue _queue;
+  QueueConnectionFactory _factory;
+  
+  public void init()
+    throws ServletException
+  {
+    super.init();
+
+    // look up the objects.
+    try {
+      Context env = (Context) new InitialContext().lookup("java:comp/env");
+      _queue = (Queue) env.lookup("jms/queue");
+      if (_queue == null)
+        throw new ServletException("`java:comp/env/jms/queue' lookup failed");
+
+      _factory = (QueueConnectionFactory) env.lookup("jms/queue-connection-factory");
+      if (_factory == null)
+        throw new ServletException("`java:comp/env/jms/queue-connection-factory' lookup failed");
+
+    } catch (NamingException ex) {
+      throw new ServletException(ex);
+    }
+  }
+
+  ...
+</example>
+
+<p>The 5 messages are sent in the <code>service()</code> method:</p>
+
+<example file="WEB-INF/classes/example/MessageSenderServlet.java"
+         re-start="init)" re-end="^  }">
+  ...
+
+  public void service(ServletRequest request, ServletResponse response)
+    throws ServletException, IOException
+  {
+    int count = 5;
+
+    try {
+      QueueConnection connection = _factory.createQueueConnection();
+      QueueSession jmsSession = connection.createQueueSession(false, 0);
+
+      QueueSender sender = jmsSession.createSender(_queue);
+
+      for (int i = 1; i <= count; i++) {
+        String text = "hello, world: message #" + String.valueOf(i);
+        sendMessage(jmsSession,sender,text);
+      }
+    } catch (JMSException ex) {
+      throw new ServletException(ex);
+    }
+
+    PrintWriter out = response.getWriter();
+    out.print("Sent " + String.valueOf(count) + " messages.");
+  }
+
+  protected void sendMessage(QueueSession jmsSession, QueueSender sender, String text)
+    throws JMSException
+  {
+    // create the message
+    Message message = jmsSession.createTextMessage(text);
+
+    // send the message
+    sender.send(message);
+
+    log.fine("Sent message: " + text);
+  }
+  ...
+</example>
+</section>
+
+<section title="Using Logging">
+
+<p>Logging is an extremely useful debugging aid when working with JMS.  In this
+case, logging is used in both the message-driven bean and the sender. </p>
+
+<p>The log configuration in <code>web.xml</code> is used to log both the class
+name and the message in the file <var>WEB-INF/debug.log</var>.</p>
+
+<example file="WEB-INF/web.xml" re-start="<log" re-end="/>">
+&lt;web-app xmlns="http://caucho.com/ns/resin"&gt;
+
+  &lt;log name="example" level="fine" path="WEB-INF/debug.log" timestamp="[%M:%S.%s] "
+    format="${'${'}log.loggerName} ${'${'}log.message}"/&gt;
+
+  ...
+&lt;/web-app&gt;
+</example>
+
+<p>The use of the JDK logging API is quite straightforward, here is an example
+from SimpleMessageBean:</p>
+
+<example file="WEB-INF/classes/example/SimpleMessageBean.java"
+         re-start="(log\.|Logger)" re-end="(log\.|Logger)">
+public class SimpleMessageBean implements MessageDrivenBean, MessageListener {
+  static protected final Logger log = 
+    Logger.getLogger(SimpleMessageBean.class.getName());
+
+  ...
+
+  public void onMessage(Message msg)
+  {
+    ...
+
+    log.fine("onMessage(): " + text);
+  }
+</example>
+</section>
+
+<section title="Results">
+
+<p>The WEB-INF/debug.xml log shows the results of using the MessageSenderServlet:</p>
+
+<results>
+<b>[41:41.618] example.SimpleMessageBean setMessageDrivenContext()</b>
+<b>[41:41.618] example.SimpleMessageBean ejbCreate()</b>
+<b>[41:41.638] example.SimpleMessageBean onMessage(): hello, world: message #1</b>
+[41:41.638] example.MessageSenderServlet Sent message: hello, world: message #1
+<b>[41:41.638] example.SimpleMessageBean onMessage(): hello, world: message #2</b>
+[41:41.638] example.MessageSenderServlet Sent message: hello, world: message #2
+<b>[41:41.638] example.SimpleMessageBean onMessage(): hello, world: message #3</b>
+[41:41.638] example.MessageSenderServlet Sent message: hello, world: message #3
+<b>[41:41.638] example.SimpleMessageBean onMessage(): hello, world: message #4</b>
+[41:41.638] example.MessageSenderServlet Sent message: hello, world: message #4
+<b>[41:41.638] example.SimpleMessageBean onMessage(): hello, world: message #5</b>
+[41:41.638] example.MessageSenderServlet Sent message: hello, world: message #5
+</results>
+</section>
+
+</body>
+</document>
+

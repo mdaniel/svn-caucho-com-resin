@@ -1,0 +1,507 @@
+default namespace local = ""
+namespace local = ""
+
+start = hibernate-mapping
+
+array = element array {
+  attribute name { string },
+  attribute table { string }?,
+  attribute schema { string }?,
+  attribute element-class { string }?,
+  attribute cascade { "none" | "all" | "save-update" | "delete" }?,
+  attribute where { string },
+
+  meta*,
+
+  jcs-cache?,
+
+  key,
+
+  index,
+
+  (h_element
+  | one-to-many
+  | many-to-many
+  | composite-element)
+}
+
+bag = element bag {
+  attribute name { string },
+  attribute table { string }?,
+  attribute schema { string }?,
+  attribute lazy { boolean }?,
+  attribute inverse { boolean }?,
+  attribute cascade { "none" | "all" | "save-update" | "delete" }?,
+  attribute order-by { string }?,
+  attribute where { string }?,
+
+  meta*,
+
+  jcs-cache?,
+
+  key,
+
+  (h_element
+  | one-to-many
+  | many-to-many
+  | composite-element)
+}
+
+boolean = "true" | "false"
+
+class = element class {
+  attribute name { string },
+  attribute abstract-schema { string }?,
+  attribute table { string }?,
+  attribute schema { string }?,
+  attribute proxy { string }?,
+  attribute descriminator-value { string }?,
+  attribute mutable { string }?,
+  attribute polymorphism { string }?,
+  attribute persister { string }?,
+  attribute dynamic-update { string }?,
+
+  meta*,
+
+  jcs-cache?,
+
+  (id | composite-id),
+
+  discriminator?,
+
+  (version|timestamp)?,
+
+  (property
+  | many-to-one
+  | one-to-one
+  | component
+  | dynabean
+  | map
+  | set
+  | list
+  | bag
+  | array
+  | primitive-array)*,
+
+  load-group*,
+
+  (subclass*
+  | joined-subclass*)
+}
+
+column = element column {
+  attribute name { string },
+  attribute length { string }?,
+  attribute not-null { boolean }?,
+  attribute unique { boolean }?,
+  attribute unique-key { string }?,
+  attribute sql-type { string }?,
+  attribute index { string }?
+}
+
+component = element component {
+  attribute name { string },
+  attribute class { string }?,
+
+  parent?,
+
+  (property
+  | many-to-one
+  | one-to-one
+  | component
+  | dynabean
+  | map
+  | set
+  | list
+  | bag
+  | array
+  | primitive-array)*
+}
+
+composite-element = element composite-element {
+  attribute class { string },
+
+  parent?,
+
+  (property
+  | many-to-one
+  | nested-composite-element)*
+}
+
+composite-id = element composite-id {
+  attribute class { string }?,
+  attribute name { string }?,
+  attribute unsaved-value { string }?,
+
+  (key-property
+  | key-many-to-one)+
+}
+
+composite-index = element composite-index {
+  attribute class { string },
+
+  (key-property
+  | key-many-to-one)+
+}
+
+discriminator = element discriminator {
+  attribute column { string }?,
+  attribute type { string }?,
+  attribute not-null { boolean }?,
+  attribute length { string }?,
+  attribute force { boolean }?,
+
+  column?
+}
+
+dynabean = element dynabean {
+  attribute name { string },
+  attribute dynaclass { string },
+
+  (property
+  | many-to-one
+  | one-to-one
+  | component
+  | dynabean
+  | map
+  | set
+  | list
+  | bag
+  | array
+  | primitive-array)*
+}
+
+h_element = element element {
+  attribute type { string },
+  attribute column { string }?,
+  attribute length { string }?,
+  attribute not-null { boolean }?,
+  attribute unique { boolean }?,
+
+  column*
+}
+
+generator = element generator {
+  attribute class { string },
+
+  param*
+}
+
+hibernate-mapping = element hibernate-mapping {
+  attribute schema { string }?,
+  attribute default-cascade { "none" | "save-update" | "all" }?,
+
+  meta*,
+
+  class*,
+
+  query*
+}
+
+id = element id {
+  attribute name { string }?,
+  attribute column { string }?,
+  attribute type { string }?,
+  attribute length { string }?,
+  attribute unsaved-value { string }?,
+
+  meta*,
+
+  column*,
+
+  generator?
+}
+
+index = element index {
+  attribute column { string }?,
+  attribute type { string }?,
+  attribute length { string }?,
+
+  column*
+}
+
+index-many-to-many = element index-many-to-many {
+  attribute class { string },
+  attribute column { string }?,
+
+  column*
+}
+
+jcs-cache = element jcs-cache {
+  attribute usage { "read-only" | "read-write" }
+}
+
+joined-subclass = element joined-subclass {
+  attribute name { string },
+  attribute proxy { string }?,
+  attribute table { string }?,
+  attribute schema { string }?,
+  attribute dynamic-update { boolean }?,
+
+  meta*,
+
+  key,
+
+  (property
+  | many-to-one
+  | one-to-one
+  | component
+  | map
+  | set
+  | list
+  | bag
+  | array
+  | primitive-array)*,
+
+  joined-subclass*
+}
+
+key = element key {
+  attribute column { string }?,
+
+  column*
+}
+
+key-many-to-one = element key-many-to-one {
+  attribute name { string },
+  attribute class { string }?,
+  attribute column { string }?,
+
+  column*
+}
+
+key-property = element key-property {
+  attribute name { string },
+  attribute type { string }?,
+  attribute column { string }?,
+  attribute length { string }?,
+
+  column*
+}
+
+list = element list {
+  attribute name { string },
+  attribute table { string }?,
+  attribute schema { string }?,
+  attribute lazy { boolean }?,
+  attribute inverse { boolean }?,
+  attribute cascade { "none" | "all" | "save-update" | "delete" }?,
+  attribute where { string }?,
+
+  meta*,
+
+  jcs-cache?,
+
+  key,
+
+  index,
+
+  (h_element
+  | one-to-many
+  | many-to-many
+  | composite-element)
+}
+
+load-group = element load-group {
+  (property
+  | many-to-one
+  | one-to-one
+  | component
+  | dynabean
+  | map
+  | set
+  | list
+  | bag
+  | array
+  | primitive-array)*
+}
+
+many-to-one = element many-to-one {
+  attribute name { string },
+  attribute class { string }?,
+  attribute column { string }?,
+  attribute not-null { boolean }?,
+  attribute unique { boolean }?,
+  attribute cascade { "none" | "all" | "save-update" | "delete" }?,
+  attribute outer-join { "true" | "false" | "auto" }?,
+  attribute update { boolean }?,
+  attribute insert { boolean }?,
+
+  meta*,
+
+  column*
+}
+
+many-to-many = element many-to-many {
+  attribute class { string },
+  attribute column { string }?,
+  attribute not-null { boolean }?,
+  attribute outer-join { "true" | "false" | "auto" }?,
+
+  meta*,
+
+  column*
+}
+
+map = element map {
+  attribute name { string },
+  attribute table { string }?,
+  attribute schema { string }?,
+  attribute lazy { boolean }?,
+  attribute inverse { boolean }?,
+  attribute sort { "unsorted" | "natural" | "comparator class" }?,
+  attribute cascade { "none" | "all" | "save-update" | "delete" }?,
+  attribute order-by { string }?,
+  attribute where { string }?,
+
+  meta*,
+
+  jcs-cache?,
+
+  key,
+
+  (index
+  | composite-index
+  | index-many-to-many),
+
+  (h_element
+  | one-to-many
+  | many-to-many
+  | composite-element)
+}
+
+meta = element meta {
+  attribute meta { string },
+
+  string
+}
+
+nested-composite-element = element nested-composite-element {
+  attribute name { string },
+  attribute class { string },
+
+  parent?,
+
+  (property
+  | many-to-one
+  | nested-composite-element)*
+}
+
+one-to-one = element one-to-one {
+  attribute name { string },
+  attribute class { string }?,
+  attribute cascade { "none" | "all" | "save-update" | "delete" }?,
+  attribute outer-join { "true" | "false" | "auto" }?,
+  attribute constrained { boolean }?,
+
+  meta*
+}
+
+one-to-many = element one-to-many {
+  attribute class { string }
+}
+
+param = element param {
+  attribute name { string },
+
+  string
+}
+
+parent = element parent {
+  attribute name { string }
+}
+
+primitive-array = element primitive-array {
+  attribute name { string },
+  attribute table { string }?,
+  attribute schema { string }?,
+  attribute where { string },
+
+  meta*,
+
+  jcs-cache?,
+
+  key,
+
+  index,
+
+  h_element
+}
+
+property = element property {
+  attribute name { string },
+  attribute type { string }?,
+  attribute column { string }?,
+  attribute length { string }?,
+  attribute not-null { boolean }?,
+  attribute unique { boolean }?,
+  attribute update { boolean }?,
+  attribute insert { boolean }?,
+
+  meta*,
+
+  column*
+}
+
+query = element query {
+  attribute name { string },
+
+  string
+}
+
+set = element set {
+  attribute name { string },
+  attribute table { string }?,
+  attribute schema { string }?,
+  attribute lazy { boolean }?,
+  attribute sort { "unsorted" | "natural" | "comparator class" }?,
+  attribute inverse { boolean }?,
+  attribute cascade { "none" | "all" | "save-update" | "delete" }?,
+  attribute order-by { string }?,
+  attribute where { string }?,
+
+  meta*,
+
+  jcs-cache?,
+
+  key,
+
+  (h_element
+  | one-to-many
+  | many-to-many
+  | composite-element)
+}
+
+subclass = element subclass {
+  attribute name { string },
+  attribute proxy { string }?,
+  attribute table { string }?,
+  attribute discriminator-value { string }?,
+  attribute dynamic-update { boolean }?,
+
+  meta*,
+
+  (property
+  | many-to-one
+  | one-to-one
+  | component
+  | map
+  | set
+  | list
+  | bag
+  | array
+  | primitive-array)*,
+
+  subclass*
+}
+
+timestamp = element timestamp {
+  attribute name { string },
+  attribute column { string }
+}
+
+version = element version {
+  attribute name { string },
+  attribute column { string },
+  attribute type { string }?
+}

@@ -1,0 +1,405 @@
+<document xmlns:ct="ct">
+  <header>
+    <product>resin</product>
+    <resin-2.0>$www/articles/jsp_templates.xtp</resin-2.0>
+    <type>article</type>
+    <title>JSP Templates</title>
+    <date>Aug 31, 1999</date>
+    <author>Scott Ferguson</author>
+    <description>
+      JSP templates encourage the clear and flexible
+      model-view-controller architecture.  It's an example of the old
+      JSP spec's "model 2."  This tutorial works through a simple
+      guest book example using JSP templates.
+    </description>
+  </header>
+  <body>
+
+<summary/>
+
+<section title='Introduction'>
+
+A powerful advantage of JSP is the ability to separate an application's
+business logic from its presentation.  Using Smalltalk object-oriented
+terminology, JSP encourages MVC (model-view-controller) web applications.
+JSP classes or beans are the model, JSP is the view, and a servlet is
+the controller.
+
+<p/>The example is a simple guest book.  Users log in and add
+comments.  
+
+    <TODO id="migrate demo to 'code library' section">
+    It is also available in the Resin demos.
+    </TODO>
+
+<deftable>
+<tr><th>Role<th>Implementation
+<tr><td>Model<td>A <code/GuestBook/> of <code/Guests/>.
+<tr><td>View<td>login.jsp for new users<br>add.jsp for logged-in users.
+<tr><td>Controller<td><code/GuestJsp/>, a servlet to manage the state.
+</deftable>
+
+</section>
+
+<section title='Template Skeleton: Hello, World'>
+
+The GuestJsp skeleton forwards a "Hello, World" string to a login.jsp
+page.  The skeleton establishes the architecture for the guest book.
+The details will be filled in below.
+
+<p/>When the example is compiled, browse
+<def>http://localhost:8080/servlet/jsp.GuestJsp</def>
+<p/>And you should see a page like:
+<border-box>
+<h1>Hello, world</h1>
+</border-box>
+
+<p/>JSP templates start with servlet processing and then forward the
+results to a JSP page for formatting.  
+
+<p/>Forwarding uses a Servlet 2.1 feature of the ServletContext,
+getRequestDispatcher().  The request dispatcher lets servlets forward
+and include any subrequests on the server.  It's a more flexible
+replacements for SSI includes.  The RequestDispatcher can include the
+results of any page, servlet, or JSP page in a servlet's page.
+GuestJsp will use dispatcher.forward() to pass control to the JSP page
+for formatting.
+
+<p/>
+<example title='GuestJsp.java: Skeleton'>
+package jsp.GuestJsp;
+
+import java.io.*;
+import java.util.*;
+
+import javax.servlet.*;
+import javax.servlet.http.*;
+
+<eg-em>/**
+ * GuestJsp is a servlet controlling user
+ * interaction with the guest book.
+ */</eg-em>
+public class GuestJsp extends HttpServlet {
+<eg-em>  /**
+   * doGet handles GET requests
+   */</eg-em>
+  public void doGet(HttpServletRequest req,
+                    HttpServletResponse res)
+    throws ServletException, IOException
+  {
+    <eg-em>// Save the message in the request for login.jsp</eg-em>
+    req.setAttribute("message", "Hello, world");
+
+    <eg-em>// get the application object</eg-em>
+    ServletContext app = getServletContext();
+
+    <eg-em>// select login.jsp as the template</eg-em>
+    RequestDispatcher disp;
+    disp = app.getRequestDispatcher("login.jsp");
+
+    <eg-em>// forward the request to the template</eg-em>
+    disp.forward(req, res);
+  }
+}
+</example>
+
+<p/>The servlet and the jsp page communicate with attributes in the
+HttpRequest object.  The skeleton stores "Hello, World" in the "message"
+attribute.  When login.jsp starts, it will grab the string and print it.
+
+<p/>Since Resin's JavaScript understands extended Bean patterns, it
+translates the <code/request.getAttribute("message")/> into the
+JavaScript equivalent <code/request.attribute.message/>.
+
+<example title='login.jsp: Skeleton'>
+<eg-em>&lt;%@ page language=javascript %></eg-em>
+
+&lt;head>
+&lt;title><eg-em>&lt%= request.attribute.message %></eg-em>&lt;/title>
+&lt;/head>
+
+&lt;body bgcolor='white'>
+&lt;h1><eg-em>&lt%= request.attribute.message %></eg-em>&lt;/h1>
+&lt;/body>
+</example>
+
+<subsection title='Servlet Review'>
+
+For those coming to JSP from an ASP or CGI background, Servlets replace
+CGI scripts taking advantage of Java's strength in dynamic class
+loading.  A servlet is just a Java class which extends Servlet or
+HttpServlet and placed in the proper directory. Resin will
+automatically load the servlet and execute it.
+
+<ul class=none>
+<li><ct:img src='folder.gif'/>&nbsp;doc
+<ul class=none>
+  <li><ct:img src='file.gif'/>&nbsp;index.html
+  <li><ct:img src='jsp.gif'/>&nbsp;login.jsp
+  <li><ct:img src='jsp.gif'/>&nbsp;add.jsp
+  <li><ct:img src='folder.gif'/>&nbsp;WEB-INF
+  <ul class=none>
+    <li><ct:img src='folder.gif'/>&nbsp;classes
+    <ul class=none>
+    <li><ct:img src='folder.gif'/>&nbsp;jsp
+      <ul class=none>
+      <li><ct:img src='bean.gif'/>&nbsp;GuestJsp.class
+      <li><ct:img src='bean.gif'/>&nbsp;GuestBook.class
+      <li><ct:img src='bean.gif'/>&nbsp;Guest.class
+      </ul>
+    </ul>
+  </ul>
+</ul>
+</ul>
+
+<p/>The url /servlet/<var>classname</var> forwards the request to the
+Servlet <em>Invoker</em>. The Invoker will dynamically load the Java class
+<var>classname</var> from doc/WEB-INF/classes and try to execute the
+Servlet's <code/service/> method.
+
+<p/>Resin checks the class file periodically to see if the class has
+changed.  If so, it will replace the old servlet with the new servlet.
+
+</subsection>
+
+</section>
+
+<section title='Displaying the Guest Book'>
+
+The next step, after getting the basic framework running, is to create
+the model.
+
+<subsection title='The GuestBook model'>
+
+The guest book is straightforward so I've just included the API here.
+It conforms to Bean patterns to simplify the JavaScript.  The same API
+will work for HashMap, file-based, and database implementations.
+
+<p/>JSP files only have access to public methods.  So a JSP file
+cannot create a new GuestBook and it can't add a new guest.  That's
+the responsibility of the GuestJsp servlet.
+
+<example title='jsp.Guest.java API'>
+package jsp;
+
+public class Guest {
+  Guest();
+  public String getName();
+  public String getComment();
+}
+</example>
+
+<p/>Resin's JavaScript recognizes Bean patterns.  So JSP pages using
+JavaScript can access <code/getName()/> and <code/getComment()/> as
+properties.  For example, you can simply use <code/guest.name/> and
+<code/guest.comment/>
+
+<example title='jsp.GuestBook.java API'>
+package jsp;
+
+public class GuestBook {
+  GuestBook();
+  void addGuest(String name, String comment);
+  public Iterator iterator();
+}
+</example>
+
+<p/>Resin's JavaScript also recognizes the iterator() call, so you can
+use a JavaScript <code/for ... each/> to get the guests:
+
+<example>
+for (var guest in guestBook) {
+  ...
+}
+</example>
+
+</subsection>
+
+<subsection title='GuestBook as application attribute'>
+
+To keep the example simple, GuestJsp stores the GuestBook in the
+application (ServletContext).  As an example, storing data in the
+application is acceptable but for full-fledged applications, it's
+better just to use the application to cache data stored elsewhere.
+
+<example title='jsp.GuestJsp.java'>
+<eg-em>// get the application object</eg-em>
+ServletContext app = getServletContext();
+
+GuestBook guestBook;
+
+<eg-em>// The guestBook is stored in the application</eg-em>
+synchronized (app) {
+  guestBook = (GuestBook) app.getAttribute("guest_book");
+
+  // If it doesn't exist, create it.
+  if (guestBook == null) {
+    guestBook = new GuestBook();
+    guestBook.addGuest("Harry Potter", "Griffindor rules");
+    guestBook.addGuest("Draco Malfoy", "Slytherin rules");
+    app.setAttribute("guest_book", guestBook);
+  }
+}
+
+RequestDispatcher disp;
+disp = app.getRequestDispatcher("login.jsp");
+
+<eg-em>// synchronize the Application so the JSP file 
+// doesn't need to worry about threading</eg-em>
+synchronized (app) {
+  disp.forward(req, res);
+}
+</example>
+
+<p/>The JSP file itself is simple.  It grabs the guest book from
+the application and displays the contents in a table.  Normally,
+application objects need to be synchronized because several clients
+may simultaneously browse the same page.  GuestJsp has taken care of
+synchronization before the JSP file gets called.
+
+<example name='login_display' title='login.jsp: Display Guest Book'>
+<eg-em>&lt;%@ page language=javascript %></eg-em>
+
+&lt;head>
+&lt;title>Hogwarts Guest Book&lt;/title>
+&lt;/head>
+
+&lt;body bgcolor='white'>
+
+&lt;h1>Hogwarts Guest Book&lt;/h1>
+&lt;table>
+&lt;tr>&lt;td width='25%'>&lt;em>Name&lt;/em>&lt;td>&lt;em>Comment&lt;/em>
+<eg-em>&lt;%
+var guestBook = application.attribute.guest_book
+
+for (var guest in guestBook) {
+  out.writeln("&lt;tr>&lt;td>" + guest.name + "&lt;td>" + guest.comment);
+}
+%></eg-em>
+&lt;/table>
+
+&lt;/body>
+</example>
+
+<border-box>
+<h1>Hogwarts Guest Book</h1>
+
+<table>
+<tr><td><em>Name</em><td><em>Comment</em>
+<tr><td>Harry Potter<td>Griffindor Rules
+<tr><td>Draco Malfoy<td>Slytherin Rules
+</table>
+</border-box>
+
+</subsection>
+
+</section>
+
+<section title='Guest book logic'>
+
+The guest book logic is simple.  If the user has not logged in, she
+sees comments and a form to log in.   After login, she'll see the
+comments and a form to add a comment.  login.jsp formats the login
+page and add.jsp formats the add comment page.
+
+<p/>GuestJsp stores login information in the session variable.
+
+<deftable>
+<tr><th>Form Variable<th>Meaning
+<tr><td>action<td>'login' to login or 'add' to add a comment
+<tr><td>name<td>user name
+<tr><td>password<td>user password
+<tr><td>comment<td>comment for the guest book
+</deftable>
+
+<example title='Guest book logic'>
+...
+
+<eg-em>// name from the session</eg-em>
+String sessionName = session.getValue("name");
+
+<eg-em>// action from the forms</eg-em>
+String action = request.getParameter("action");
+
+<eg-em>// name from the login.jsp form</eg-em>
+String userName = request.getParameter("name");
+
+<eg-em>// password from the login.jsp form</eg-em>
+String password = request.getParameter("password");
+
+<eg-em>// comment from the add.jsp form</eg-em>
+String comment = request.getParameter("comment");
+
+<eg-em>// login stores the user in the session</eg-em>
+if (action != null && action.equals("login") &&
+    userName != null &&
+    password != null && password.equals("quidditch")) {
+  session.putValue("name", userName);
+}
+
+<eg-em>// adds a new guest</eg-em>
+if (action != null && action.equals("add") &&
+    sessionName != null &&
+    comment != null) {
+  guestBook.addGuest(sessionName, comment);
+}
+
+String template;
+<eg-em>// if not logged in, use login.jsp</eg-em>
+if (session.getValue("name") == null)
+  template = "login.jsp";
+<eg-em>// if logged in, use add.jsp</eg-em>
+else
+  template = "add.jsp";
+
+RequestDispatcher disp;
+disp = app.getRequestDispatcher(template);
+
+...
+</example>
+
+<p/>login.jsp and add.jsp just append different forms to the display
+code in the previous section.
+
+<example title='login.jsp'>
+&lt;%@ page language=javascript %>
+&lt;head>
+&lt;title>Hogwarts Guest Book: Login&lt;/title>
+&lt;/head>
+&lt;body bgcolor='white'>
+
+&lt;h1>Hogwarts Guest Book&lt;/h1>
+&lt;table>
+&lt;tr>&lt;td width='25%'>&lt;em>Name&lt;/em>&lt;td>&lt;em>Comment&lt;/em>
+<eg-em>&lt;%
+var guestBook = application.attribute.guest_book
+
+for (var guest in guestBook) {
+  out.writeln("&lt;tr>&lt;td>" + guest.name + "&lt;td>" + guest.comment);
+}
+%></eg-em>
+&lt;/table>
+&lt;hr>
+
+&lt;form action='GuestJsp' method='post'>
+&lt;input type=hidden name='action' value='login'>
+&lt;table>
+&lt;tr>&lt;td>Name:&lt;td>&lt;input name='Name'>
+&lt;tr>&lt;td>Password:&lt;td>&lt;input name='Password' type='password'>
+&lt;tr>&lt;td>&lt;input type=submit value='Login'>
+&lt;/table>
+&lt;/form>
+&lt;/body>
+</example>
+
+</section>
+
+<section title='Conclusion'>
+The Resin demo shows a few ways to extend the guest book, including
+adding some intelligence to the form processing.  However, as forms
+get more intelligent, even JSP templates become complicated.  There is
+a solution: <a href='xtp|templates'>XTP templates</a>.
+</section>
+
+    </body>
+</document>

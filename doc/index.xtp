@@ -1,0 +1,25 @@
+<document>
+  <header>
+    <product>resin</product>
+    <title>Resin</title>
+    <type>contents</type>
+    <description>
+    </description>
+
+  </header>
+
+  <body>
+    <summary atoc="toplevel">
+      <atoc-control>
+        <item depth="1" description="brief"/>
+        <item depth="2" description="none"/>
+        <item depth="3" description="none">
+          <prune>scrapbook.xtp</prune>
+          <prune>faq.xtp</prune>
+          <prune>tutorial/</prune>
+        </item>
+      </atoc-control>
+    </summary>
+
+  </body>
+</document>

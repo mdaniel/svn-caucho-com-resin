@@ -1,0 +1,35 @@
+<web-app xmlns="http://caucho.com/ns/resin">
+
+  <!-- EJB Server configuration -->
+
+  <ejb-server config-directory="WEB-INF"/>
+    
+  <servlet servlet-name='hessian' servlet-class='com.caucho.hessian.EJBServlet'/>   
+  <servlet-mapping url-pattern='/hessian/*' servlet-name='hessian'/>
+
+  <!-- Configuration for the client.
+     -
+     - Normally, this would not be in the same web.xml as the server
+     - because the client and the server would be separate.  For the 
+     - purposes of this tutorial, both the client and the server are in the
+     - same web-app
+     -->
+
+  <!-- a client servlet that uses Hessian directly -->
+  <allow-servlet-el/>
+  <servlet servlet-name='hello' servlet-class='example.HelloServlet'>
+     <init-param java.naming.provider.url='${app.url}/hessian'/>
+  </servlet>
+  <servlet-mapping url-pattern='/hello/*' servlet-name='hello'/>
+
+  <!-- a alternative client servlet that uses JNDI -->
+  <servlet servlet-name='hello-jndi' servlet-class='example.HelloJndiServlet'/> 
+  <servlet-mapping url-pattern='/hello-jndi/*' servlet-name='hello-jndi'/>
+
+  <jndi-link jndi-name='java:comp/env/ejb'
+             factory='com.caucho.hessian.HessianContextFactory'>
+    <init-param java.naming.provider.url='${app.url}/hessian'/>
+  </jndi-link>
+
+</web-app>
+

@@ -1,0 +1,78 @@
+<project default="dist">
+  <property file="build.properties"/>
+  
+  <taskdef name="ejb-doclet" classname="com.caucho.xdoclet.ResinEjbDocletTask"/>
+  <taskdef name="resin-web-doclet" classname="com.caucho.xdoclet.ResinWebDocletTask"/>
+  
+  <target name="init">
+    <tstamp/>
+    <property name="classes" value="${dest.dir}/WEB-INF/classes"/>
+    <property name="src" value="../../../"/>
+    <property name="ejb-jar.xml" value="cmp-xdoclet.ejb"/>
+    <property name="resin-ejb-jar.xml" value="resin.ejb"/>
+    <property name="web.xml" value="web.xml"/>
+  </target>
+  
+  <target name="prepare" depends="init">
+    <mkdir dir="${classes}"/>
+  </target>
+  
+  <!-- Generates local home and component interfaces -->
+  <target name="ejbgen" depends="prepare">
+    <ejb-doclet ejbspec="2.0" ejbClassNameSuffix="Bean"
+      destdir="${classes}" sourcePath="${src}" mergedir="${src}"
+      classpath="${classpath}">
+      <fileset dir=".">
+        <include name="*Bean.java"/>
+      </fileset>
+      <localinterface/>
+      <localhomeinterface/>
+    </ejb-doclet>
+  </target>
+
+  <!-- Generates EJB deployment descriptor -->
+  <target name="ejbdd" depends="prepare">
+    <ejb-doclet ejbspec="2.0" ejbClassNameSuffix="Bean"
+      destdir="${dest.dir}/WEB-INF" sourcePath="${src}" mergedir="${src}"
+      classpath="${classpath}">
+      <fileset dir=".">
+        <include name="*Bean.java"/>
+      </fileset>
+      <deploymentdescriptor destinationFile="${ejb-jar.xml}"/>
+      <resinejb destinationFile="${resin-ejb-jar.xml}"/>
+    </ejb-doclet>
+  </target>
+  
+  <!-- Generates resin-specific web.xml -->
+  <target name="webdd">
+    <resin-web-doclet destdir="${dest.dir}/WEB-INF" sourcePath="${src}" mergedir="${src}"
+      classpath="${classpath}"
+      >
+      <fileset dir=".">
+        <include name="*.java"/>
+      </fileset>
+      <resinwebxml generateSourceComments="true" destinationFile="${web.xml}"/>
+    </resin-web-doclet>
+  </target>
+  
+  <!-- Copy example sources to WEB-INF/classes -->
+  <target name="copy" depends="prepare">
+    <copy todir="${classes}">
+      <fileset dir="${src}">
+        <include name="example/cmp/xdoclet/*.java"/>
+      </fileset>
+    </copy>
+  </target>
+  
+  <!--
+    ejbgen: Generate home/remote interfaces
+    ejbdd: Generate EJB deployment descriptor(s)
+    webdd: Generate web.xml
+    copy: Copy example sources to destination WEB-INF/classes
+  -->
+  <target name="dist" depends="ejbgen,ejbdd,webdd,copy"/>
+  
+  <target name="clean" depends="init">
+    <delete dir="${dest.dir}"/>
+  </target>
+</project>

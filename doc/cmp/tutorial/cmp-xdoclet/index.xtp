@@ -1,0 +1,628 @@
+<document>
+  <header>
+    <product>resin-ee</product>
+    <resin-2.0>$ee/ejb-tut/cmp-xdoclet.xtp</resin-2.0>
+    <title>XDoclet</title>
+    <description>
+      <p><a href="http://xdoclet.sourceforge.net">XDoclet</a> is a
+      freely-available tool that lets you specify all of the
+      information needed for your entity bean in just one place. You
+      specify all the remote/local home/component interface and
+      deployment details as Javadoc @tags in your bean implementation
+      class and run Ant tasks to generate the relevant files.</p>
+      
+      <p>Suppose you want to add a new business method to an entity
+      bean. First you add it to your bean implementation. Then you add
+      it to its local component interface. Then maybe you add it to
+      its remote component interface. Then you update the deployment
+      descriptor. Kind of a pain. Wouldn't it be nice if you could
+      keep all that information in one place?</p>
+      
+      <p>This example illustrates developing and deploying a pair of
+      CMP entities in an n-m relationship using XDoclet. XDoclet tasks
+      are run via <a
+      href="http://jakarta.apache.org/ant/index.html">Ant</a> and this
+      example assumes that you are familiar with the tool.</p>
+      
+    </description>
+  </header>
+
+  <body>
+    <summary/>
+
+
+<section title="Database Schema">
+
+<p>The example has 3 tables: courses, students, and a link table storing the relationship between them. A student can be enrolled in several courses and a course has many students (n-m relationship).</p>
+
+<example title="xdoclet.sql">
+CREATE TABLE xdoclet_courses (
+  id VARCHAR(250) NOT NULL,
+  instructor VARCHAR(250),
+
+  PRIMARY KEY(id)
+);
+
+CREATE TABLE xdoclet_students (
+  name VARCHAR(250) NOT NULL,
+
+  PRIMARY KEY(name)
+);
+
+CREATE TABLE xdoclet_enrollment (
+  student VARCHAR(250) NOT NULL,
+  course VARCHAR(250) NOT NULL
+);
+
+INSERT INTO xdoclet_courses VALUES('Defense Against the Dark Arts', 'Remus Lupin');
+INSERT INTO xdoclet_courses VALUES('Divination', 'Sybil Trelawney');
+
+INSERT INTO xdoclet_students VALUES('Harry Potter');
+INSERT INTO xdoclet_students VALUES('Ron Weasley');
+INSERT INTO xdoclet_students VALUES('Hermione Granger');
+
+INSERT INTO xdoclet_enrollment VALUES('Hermione Granger', 'Defense Against the Dark Arts');
+INSERT INTO xdoclet_enrollment VALUES('Harry Potter', 'Defense Against the Dark Arts');
+INSERT INTO xdoclet_enrollment VALUES('Ron Weasley', 'Defense Against the Dark Arts');
+
+INSERT INTO xdoclet_enrollment VALUES('Harry Potter', 'Divination');
+INSERT INTO xdoclet_enrollment VALUES('Ron Weasley', 'Divination');
+</example>
+
+</section>
+
+
+<section title="Client Servlet">
+
+<p>The example client loops through all courses and prints each enrolled student, then prints the set of all teachers in the <var/xdoclet_courses/> table. It then adds a student to a course and prints the new student list.</p>
+
+<p>As in previous tutorials, Resin-EJB stores the home interfaces
+in a JNDI context.  The student home is stored in
+<var/java:comp/env/cmp/xdoclet_StudentBean/>
+and the course home is stored at <var/java:comp/env/cmp/xdoclet_CourseBean/>.
+The <var/ejb-local/> is used since these are the local interfaces for the
+beans.</p>
+
+<section title="Servlet">
+
+<example title="Servlet Fragment">
+...
+
+/**
+ * A client to illustrate EJB managed relations in a many-to-many context.
+ *
+ * @web:servlet name="findServlet"
+ * @web:servlet-mapping url-pattern="/find"
+ */
+public class FindServlet extends HttpServlet
+{
+  StudentHome studentHome;
+  CourseHome courseHome;
+
+...
+
+  Course divination = courseHome.findByPrimaryKey("Divination");
+  Student hermione = studentHome.findByPrimaryKey("Hermione Granger");
+  Iterator i;
+  
+  out.println("&lt;h3>Students By Class&lt;/h3>");
+  // iterate over all courses
+  i = courseHome.findAll().iterator();
+  out.println("&lt;ul>");
+  while (i.hasNext()) {
+    Course course = (Course) i.next();
+    out.println("&lt;li>&lt;b>" + course.getName() + ":&lt;/b>");
+    
+    out.println("&lt;ul>");
+    // Students in the Course
+    Iterator students = course.getStudentList().iterator();
+    if (! students.hasNext())
+      out.println("&lt;li>No students&lt;/li>");
+    while (students.hasNext())
+      out.println("&lt;li>" + ((Student) students.next()).getName() + "&lt;/li>");
+    out.println("&lt;/ul>&lt;/li>");
+  }
+  out.println("&lt;/ul>");
+  
+  // add a student to Divination
+  out.println("Enrolling Hermione in Divination&lt;br>");
+  divination.addStudent(hermione);
+  out.println("&lt;h4>Divination's new student list:&lt;/h4>");
+  out.println("&lt;ul>");
+  i = divination.getStudentList().iterator();
+  while (i.hasNext())
+      out.println("&lt;li>" + ((Student) i.next()).getName() + "&lt;/li>");
+  out.println("&lt;/ul>");
+  divination.removeStudent(hermione);
+  
+  // list all instructors
+  i = courseHome.listAllInstructors().iterator();
+  out.println("&lt;h3>Teachers&lt;/h3>");
+  if (! i.hasNext())
+    out.println("No teachers&lt;br>");
+  while (i.hasNext())
+    out.println(((String) i.next()) + "&lt;br>");
+
+...
+</example>
+
+<results>
+&lt;h3>Students By Class&lt;/h3>
+&lt;ul>
+&lt;li>&lt;b>Defense Against the Dark Arts:&lt;/b>
+&lt;ul>
+&lt;li>Hermione Granger&lt;/li>
+&lt;li>Harry Potter&lt;/li>
+&lt;li>Ron Weasley&lt;/li>
+&lt;/ul>&lt;/li>
+&lt;li>&lt;b>Divination:&lt;/b>
+&lt;ul>
+&lt;li>Harry Potter&lt;/li>
+&lt;li>Ron Weasley&lt;/li>
+&lt;/ul>&lt;/li>
+&lt;/ul>
+
+Enrolling Hermione in Divination&lt;br>
+&lt;h4>Divination's new student list:&lt;/h4>
+&lt;ul>
+&lt;li>Harry Potter&lt;/li>
+&lt;li>Ron Weasley&lt;/li>
+&lt;li>Hermione Granger&lt;/li>
+&lt;/ul>
+
+&lt;h3>Teachers&lt;/h3>
+Remus Lupin&lt;br>
+Sybil Trelawney&lt;br>
+
+...
+</results>
+
+</section>
+
+<section title="Servlet Javadoc Tags">
+
+<p>The class-level tags are used in web-app deployment descriptor (web.xml) generation.</p>
+
+<p><var/@web:servlet/> declares a named servlet and <var/@web:servlet-mapping/> declares its mappings.</p>
+
+<results title="Sample Generated web.xml">
+&lt;web-app>
+...
+
+  &lt;servlet>
+    &lt;servlet-name>findServlet&lt;/servlet-name>
+    &lt;servlet-class>example.cmp.xdoclet.FindServlet&lt;/servlet-class>
+  &lt;/servlet>
+  
+  &lt;servlet-mapping>
+    &lt;servlet-name>findServlet&lt;/servlet-name>
+    &lt;url-pattern>/find&lt;/url-pattern>
+  &lt;/servlet-mapping>
+
+...
+
+&lt;/web-app>
+</results>
+
+</section>
+
+</section>
+
+
+<section title="Bean Implementations">
+
+<section title="Course Bean">
+
+<p>A Course is identified by name and is taught by an instructor (name). Courses can also list their Students, add a new Student, or drop an enrolled Student.</p>
+
+<p>A list of all Course instructor names will also be made available via its Home interface.</p>
+
+<example title="CourseBean.java">
+package example.cmp.xdoclet;
+
+import java.util.*;
+
+/**
+ * Implementation class for the Course bean.
+ *
+ * @ejb:bean name="xdoclet_CourseBean" view-type="local" type="CMP"
+ *  reentrant="False" schema="courses" primkey-field="name"
+ * @ejb:pk class="java.lang.String"
+ * @ejb:home generate="local" local-class="example.cmp.xdoclet.CourseHome"
+ * @ejb:interface generate="local" local-class="example.cmp.xdoclet.Course"
+ *
+ * @ejb:finder signature="java.util.Collection findByStudent(java.lang.String student)"
+ *  query="SELECT c FROM students student, IN(student.courseList) c WHERE student.name = ?1"
+ *
+ * @ejb:finder signature="java.util.Collection findAll()"
+ *  query="SELECT c FROM courses c ORDER BY c.name"
+ *
+ * @ejb:select signature="java.util.Collection ejbSelectAllInstructors()"
+ *  query="SELECT c.instructor FROM courses c 
+ *    WHERE c.instructor IS NOT NULL 
+ *    ORDER BY c.instructor"
+ *
+ * @resin-ejb:entity-bean sql-table="xdoclet_courses"
+ */
+abstract public class CourseBean extends com.caucho.ejb.AbstractEntityBean
+{
+  /**
+   * A Course is identified by its name.
+   *
+   * @ejb:interface-method
+   * @ejb:persistent-field
+   * @ejb:pk-field
+   *
+   * @resin-ejb:cmp-field sql-column="id"
+   */
+  abstract public String getName();
+
+  /**
+   * Returns the name of this Course's instructor.
+   *
+   * @ejb:interface-method
+   * @ejb:persistent-field
+   */
+  abstract public String getInstructor();
+
+  /**
+   * Returns a Collection of Students enrolled in this Course.
+   *
+   * @ejb:interface-method
+   * @ejb:relation name="xdoclet_enrollment" role-name="course"
+   *
+   * @resin-ejb:relation sql-table="xdoclet_enrollment" sql-column="course"
+   */
+  abstract public Collection getStudentList();
+
+  /**
+   * Enrolls a Student is this Course.
+   *
+   * @ejb:interface-method
+   */
+  public void addStudent( Student student )
+  {
+    getStudentList().add( student );
+  }
+
+  /**
+   * Drops a Student from this Course.
+   *
+   * @ejb:interface-method
+   */
+  public void removeStudent( Student student )
+  {
+    getStudentList().remove( student );
+  }
+  
+  /**
+   * Returns the names of all instructors in alphabetical order.
+   */
+  abstract public Collection ejbSelectAllInstructors()
+  throws javax.ejb.FinderException;
+  
+  /**
+   * Returns the names of all instructors in alphabetical order.
+   *
+   * @ejb:home-method view-type="local"
+   */
+  public Collection ejbHomeListAllInstructors()
+  throws javax.ejb.FinderException
+  {
+    return ejbSelectAllInstructors();
+  }
+}
+</example>
+
+</section>
+
+<section title="Student Bean">
+
+<p>A Student is also identified by name and is enrolled in a number of Courses.</p>
+
+<example title="StudentBean.java">
+package example.cmp.xdoclet;
+
+import java.util.*;
+
+/**
+ * Implementation class for the Student bean.
+ *
+ * @ejb:bean name="xdoclet_StudentBean" view-type="local" type="CMP"
+ *  reentrant="False" schema="students" primkey-field="name"
+ * @ejb:pk class="java.lang.String"
+ * @ejb:home generate="local" local-class="example.cmp.xdoclet.StudentHome"
+ * @ejb:interface generate="local" local-class="example.cmp.xdoclet.Student"
+ *
+ * @ejb:finder signature="java.util.Collection findAll()"
+ *  query="SELECT s FROM students s ORDER BY s.name"
+ * @ejb:finder signature="java.util.Collection findByCourse(java.lang.String course)"
+ *  query="SELECT s FROM courses course, IN(course.studentList) s WHERE course.name = ?1"
+ *
+ * @resin-ejb:entity-bean sql-table="xdoclet_students"
+ */
+abstract public class StudentBean extends com.caucho.ejb.AbstractEntityBean
+{
+  /**
+   * A Student is identified by name.
+   *
+   * @ejb:interface-method
+   * @ejb:persistent-field
+   * @ejb:pk-field
+   */
+  abstract public String getName();
+
+  /**
+   * Returns a Collection of Courses which this Student is taking.
+   *
+   * @ejb:interface-method
+   * @ejb:relation name="xdoclet_enrollment" role-name="student"
+   *
+   * @resin-ejb:relation sql-column="student"
+   */
+  abstract public Collection getCourseList();
+  
+  /**
+   * Enrolls this Student in a Course.
+   *
+   * @ejb:interface-method
+   */
+  public void addCourse(Course course)
+  {
+    getCourseList().add(course);
+  }
+  
+  /**
+   * Drops this Student from a Course.
+   *
+   * @ejb:interface-method
+   */
+  public void removeCourse(Course course)
+  {
+    getCourseList().remove(course);
+  }
+}
+</example>
+
+</section>
+
+<section title="Bean Javadoc Tags">
+
+<p>Entity find and select methods are declared via the class-level <var/@ejb:finder/> and <var/@ejb:select/> tags. <var/CourseBean/> exposes its <var/ejbSelectAllInstructors/> method to its Home interface via the <var/@ejb:home-method/> tag on its <var/ejbHomeListAllInstructors/> method.
+
+<p>The <var/sql-table/> parameter is used to specify the database table of a bean when different from its abstract schema name (ie: <var/courses/> vs. <var/xdoclet_courses/>) or the name of a link table in a n-m relationship. Likewise, the <var/sql-column/> maps persistent fields to database columns.</p>
+
+<p>The following table briefly explains the javadoc tags used. For a complete reference, consult the XDoclet <a href="http://xdoclet.sourceforge.net">documentation</a> and the Resin-specifc extension docs included in <var/resin-xdoclet.jar/>.</p>
+
+<deftable>
+<tr><th>Class Tag<th>Attribute<th>Meaning
+<tr><td>@ejb:bean<td>&nbsp;<td>Bean definition for class and deployment descriptor generation
+<tr><td>&nbsp;<td>name<td>Bean name in deployment descriptor
+<tr><td>&nbsp;<td>view-type<td>Local, remote, or both
+<tr><td>&nbsp;<td>reentrant<td>Entity reentrancy: True or False
+<tr><td>&nbsp;<td>type<td>CMP or BMP
+<tr><td>&nbsp;<td>schema<td>Abstract schema name used in EJB-QL
+<tr><td>&nbsp;<td>primkey-field<td>Primary key field name
+<tr><td>@ejb:pk<td>&nbsp;<td>Entity primary key definition
+<tr><td>&nbsp;<td>class<td>Primary key class name
+<tr><td>@ejb:home<td>&nbsp;<td>Home interface definition
+<tr><td>&nbsp;<td>generate<td>Generate remote home, local home, or both
+<tr><td>&nbsp;<td>local-class<td>Local home class name
+<tr><td>@ejb:interface<td>&nbsp;<td>Component interface definition
+<tr><td>&nbsp;<td>generate<td>Generate remote interface, local interface, or both
+<tr><td>&nbsp;<td>local-class<td>Local interface class name
+<tr><td>@ejb:finder<td>&nbsp;<td>Defines a (home) finder method
+<tr><td>&nbsp;<td>signature<td>Finder method signature, including return type
+<tr><td>&nbsp;<td>query<td>Finder EJB-QL
+<tr><td>@ejb:select<td>&nbsp;<td>Select method declaration
+<tr><td>&nbsp;<td>signature<td>Select method signature, including return type
+<tr><td>&nbsp;<td>query<td>Select EJB-QL
+
+<tr><td>@resin-ejb:entity-bean<td>&nbsp;<td>Resin-specific entity information
+<tr><td>&nbsp;<td>sql-table<td>Physical SQL table name corresponding to this entity's schema
+
+<tr><th>Method Tag<th>Attribute<th>Meaning
+<tr><td>@ejb:interface-method<td>&nbsp;<td>Declares this method a part of the bean's component interface
+<tr><td>@ejb:persistent-field<td>&nbsp;<td>Declares this method a CMP field
+<tr><td>@ejb:pk-field<td>&nbsp;<td>Declares this method a primary key field
+<tr><td>@ejb:relation<td>&nbsp;<td>Define a persistent relation
+<tr><td>&nbsp;<td>name<td>Relation name (must be the same on both sides for bi-directional)
+<tr><td>&nbsp;<td>role-name<td>Relationship role name
+<tr><td>@ejb:home-method<td>&nbsp;<td>Declares a Home method
+<tr><td>&nbsp;<td>view-type<td>Local or remote
+
+<tr><td>@resin-ejb:cmp-field<td>&nbsp;<td>Resin-specific CMP field definition
+<tr><td>&nbsp;<td>sql-column<td>Physical column name
+<tr><td>@resin-ejb:relation<td>&nbsp;<td>Resin-specific extension to @ejb:relation
+<tr><td>&nbsp;<td>sql-table<td>Physical link table name for n-m relations
+<tr><td>&nbsp;<td>sql-column<td>SQL column name of this CMR field
+</deftable>
+
+</section>
+
+</section>
+
+
+<section title="Ant Setup">
+
+<p>Download <a href="http://prdownloads.sourceforge.net/xdoclet/xdoclet-1.1.2.zip?download">XDoclet 1.1.2</a> and the Resin-XDoclet <a href="http://caucho.com/projects/xdoclet/resin-xdoclet.jar">mods</a>.</p>
+
+<section title="Classpath">
+
+<p>Copy xdoclet.jar, resin-xdoclet.jar, and <var/xdoclet-home/samples/lib/>/log4j.jar into <var/ant-home/lib/>.</p>
+
+<ul>
+  <li>
+    <var/ant-home/lib/>:
+    <ul>
+      <li>ant.jar</li>
+      <li>crimson.jar</li>
+      <li>jaxp.jar</li>
+      <li>log4j.jar</li>
+      <li>resin-xdoclet.jar</li>
+      <li>xdoclet.jar</li>
+    </ul>
+  </li>
+  <li>
+    <var/resin-home/lib/>:
+    <ul>
+      <li>ejb.jar</li>
+      <li>jsdk24.jar</li>
+      <li>resin-ejb.jar</li>
+    </ul>
+  </li>
+</ul>
+</section>
+
+<section title="Sample Buildfile">
+
+<p>The buildfile used in this example create a web-app directory structure with the appropriate classes and deployment descriptors. build.xml and build.properties and can be found with the example sources and is meant meant to be run from the package directory where they are located. Just set <var/resin.dir/>, <var/ant.lib/>, and <var/dest.dir/> in build.properties and the sample should be ready to run.</p>
+
+<example title="build.xml Shell">
+&lt;project default="dist">
+  &lt;property file="build.properties"/>
+  
+  &lt;taskdef name="ejb-doclet" classname="com.caucho.xdoclet.ResinEjbDocletTask"/>
+  &lt;taskdef name="resin-web-doclet" classname="com.caucho.xdoclet.ResinWebDocletTask"/>
+  
+  &lt;target name="init">
+    &lt;tstamp/>
+    &lt;property name="classes" value="${dest.dir}/WEB-INF/classes"/>
+    &lt;property name="src" value="../../../"/>
+    &lt;property name="ejb-jar.xml" value="cmp-xdoclet.ejb"/>
+    &lt;property name="resin-ejb-jar.xml" value="resin.ejb"/>
+    &lt;property name="web.xml" value="web.xml"/>
+  &lt;/target>
+  
+  &lt;target name="prepare" depends="init">
+    &lt;mkdir dir="${classes}"/>
+  &lt;/target>
+  
+...
+  
+  &lt;!-- Copy example sources to WEB-INF/classes -->
+  &lt;target name="copy" depends="prepare">
+    &lt;copy todir="${classes}">
+      &lt;fileset dir="${src}">
+        &lt;include name="example/cmp/xdoclet/*.java"/>
+      &lt;/fileset>
+    &lt;/copy>
+  &lt;/target>
+  
+  &lt;!--
+    ejbgen: Generate home/remote interfaces
+    ejbdd: Generate EJB deployment descriptor(s)
+    webdd: Generate web.xml
+    copy: Copy example sources to destination WEB-INF/classes
+  -->
+  &lt;target name="dist" depends="ejbgen,ejbdd,webdd,copy"/>
+  
+  &lt;target name="clean" depends="init">
+    &lt;delete dir="${dest.dir}"/>
+  &lt;/target>
+&lt;/project>
+</example>
+
+<note>The class names in the two task definitions are likely to change in the future (around XDoclet 1.2).</note>
+
+</section>
+
+<section title="Generate Home/Component Interfaces">
+
+<p>The first interesting target in the build file generates the home and local interfaces.</p>
+
+<example title="build.xml Class Generation Target">
+...
+
+  &lt;target name="ejbgen" depends="prepare">
+    &lt;ejbdoclet ejbspec="2.0" ejbClassNameSuffix="Bean"
+      destdir="${classes}" sourcePath="${src}" mergedir="${src}"
+      classpath="${classpath}">
+      &lt;fileset dir=".">
+        &lt;include name="*Bean.java"/>
+      &lt;/fileset>
+      &lt;localinterface/>
+      &lt;localhomeinterface/>
+    &lt;/ejbdoclet>
+  &lt;/target>
+
+...
+</example>
+
+<p>The <var/localinterface/> subtask generates the local component sources <var/Course.java/> and <var/Student.java/> and the <var/localhomeinterface/> subtask generates the Home sources <var/CourseHome.java/> and <var/StudentHome.java/>.</p>
+
+</section>
+
+<section title="Generate EJB Deployment Descriptors">
+
+<example title="build.xml EJB Deployment Descriptor Target">
+...
+
+  &lt;target name="ejbdd" depends="prepare">
+    &lt;ejbdoclet ejbspec="2.0" ejbClassNameSuffix="Bean"
+      destdir="${dest.dir}/WEB-INF" sourcePath="${src}" mergedir="${src}"
+      classpath="${classpath}">
+      &lt;fileset dir=".">
+        &lt;include name="*Bean.java"/>
+      &lt;/fileset>
+      &lt;deploymentdescriptor destinationFile="${ejb-jar.xml}"/>
+      &lt;resinejb destinationFile="${resin-ejb-jar.xml}"/>
+    &lt;/ejbdoclet>
+  &lt;/target>
+
+...
+</example>
+
+<p>The <var/deploymentdescriptor/> subtask generates a standard EJB 2.0 deployment descriptor, in this case named <var/cmp-xdoclet.ejb/>. The <var/resinejb/> subtask puts additional Resin CMP-specific information in <var/resin.ejb/>, as defined <a href="http://caucho.com/products/resin-ejb/ejb-ref/resin-ejb-config.xtp#Formal-Definition">here</a>.</p>
+
+</section>
+
+<section title="Generate Web App Deployment Descriptors">
+
+<example title="build.xml Web Deployment Descriptor Target">
+...
+
+  &lt;target name="webdd">
+    &lt;resinwebdoclet destdir="${dest.dir}/WEB-INF" sourcePath="${src}" mergedir="${src}"
+      classpath="${classpath}"
+      >
+      &lt;fileset dir=".">
+        &lt;include name="*.java"/>
+      &lt;/fileset>
+      &lt;resinwebxml generateSourceComments="true" destinationFile="${web.xml}"/>
+    &lt;/resinwebdoclet>
+  &lt;/target>
+
+...
+</example>
+
+<p>Unlike the EJB case, the <var/resinwebxml/> task generates a single web.xml, including Resin-specific information such as the <var/&lt;classpath&gt;/> element defined in the client servlet <var/@resin:classpath/> tag.</p>
+
+<p>The <var/generateSourceComments/> property generates debug comments in the web.xml which point back to the class containing the javadoc tags which generated a particular entry.</p>
+
+<results>
+...
+
+	&lt;!-- generated from example.cmp.xdoclet.FindServlet -->
+	&lt;servlet>
+		&lt;servlet-name>findServlet&lt;/servlet-name>
+		&lt;servlet-class>example.cmp.xdoclet.FindServlet&lt;/servlet-class>
+	&lt;/servlet>
+
+...
+</results>
+
+</section>
+
+</section>
+
+
+<section title="Conclusion">
+
+<p>XDoclet helps take some of the hassle out of bean development by letting you centralize information which would otherwise be scattered over several different files and removing some of the redundancy which could lead to mistakes (ie: typo in a peristent field name in the deployment descriptor).</p>
+
+<p>Some other XDoclet capabilities not covered here include taglib deployment descriptor generation, Entity primary key class generation, and more. For more information, check out the XDoclet <a href="http://xdoclet.sourceforge.net/">documentation</a> and mailing lists.</p>
+
+</section>
+  </body>
+</document>

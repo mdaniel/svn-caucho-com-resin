@@ -1,0 +1,87 @@
+<document>
+  <header>
+    <product>resin</product>
+    <title>Hibernate</title>
+  </header>
+
+  <body>
+    <summary/>
+
+<section title="Hibernate">
+
+<p><a href="http://hibernate.bluemars.net">Hibernate</a> now provides
+a JCA interface in its beta release.  To configure it, use the following:</p>
+
+<example title="web.xml">
+&lt;web-app xmlns="http://caucho.com/ns/resin">
+  &lt;resource jndi-name="java:comp/env/hibernate">
+    &lt;type>net.sf.hibernate.jca.ManagedConnectionFactoryImpl&lt;/type>
+    &lt;init>
+      &lt;dialect>net.sf.hibernate.sql.MySQLDialect&lt;/dialect>
+      &lt;driver-class>org.gjt.mm.mysql.Driver&lt;/driver-class>
+      &lt;connection-url>jdbc:mysql://localhost:3306/test&lt;/connection-url>
+    &lt;/init>
+  &lt;/resource>
+&lt;/web-app>
+</example>
+
+<p>Unfortunately, Hibernate's JCA interface does not yet allow
+configuration of a JDBC <code>DataSource</code>, so you can't yet
+take advantage of Resin's pooling.</p>
+
+<p>Using the Hibernate session factory uses a similar pattern to the JDBC
+<code>DataSource</code>.  Like JDBC Connections, you <b>must</b> close the
+Hibernate session in a finally block.</p>
+
+<example title="TestServlet">
+package example;
+
+import java.io.*;
+
+import net.sf.hibernate.SessionFactory;
+import net.sf.hibernate.Session;
+
+import javax.servlet.*;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletRequest;
+
+import javax.naming.Context;
+import javax.naming.InitialContext;
+
+public class TestServlet extends HttpServlet {
+  private SessionFactory _hibernateFactory;
+
+  /**
+   * Load and cache the hibernate factory at startup.
+   */
+  public void init()
+    throws ServletException
+  {
+    try {
+      Context ic = new InitialContext();
+      _hibernateFactory = ic.lookup("java:comp/env/hibernate");
+    } catch (Exception e) {
+      throw new ServletException(e);
+    }
+  }
+
+  public void service(...)
+    throws ServletException
+  {
+    net.sf.hibernate.Session hSession;
+
+   
+    try {
+      hSession = _hibernateFactory.openSession();
+  
+      ...
+    } finally {
+      hSession.close();
+    }
+  }
+}
+</example>
+
+    </section>
+  </body>
+</document>

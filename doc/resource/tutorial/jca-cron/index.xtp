@@ -1,0 +1,114 @@
+<document>
+<header>
+<product>resin</product>
+<type>tutorial</type>
+<title>CronResource</title>
+
+<description>
+<p>CronResource is a convenient resource which schedules application Work
+tasks at configurable intervals.</p>
+</description>
+ <tutorial-startpage>index.jsp</tutorial-startpage>
+
+</header>
+<body>
+
+
+<summary/>
+
+<section title="Files in this tutorial">
+<deftable>
+<tr><td><viewfile-link file="WEB-INF/web.xml"/>
+    <td>Configures the CronResource
+<tr><td><viewfile-link file="WEB-INF/classes/example/WorkTask.java"/>
+    <td>The work task executes the long task.
+<tr><td><viewfile-link file="index.jsp"/>
+    <td>The starting page for the tutorial
+</deftable>
+</section>
+
+<section title="CronResource">
+
+<p>Resin provides a convenience resource,
+<code>com.caucho.resources.CronResource</code> to
+execute <code>javax.resource.Work</code> tasks at configurable intervals.
+Essentially, it implements the Timer/Work resource combination described
+in the <a href="../jca-timer">timer tutorial</a>.</p>
+
+<p>The <code>Work</code> task follows the standard JCA API; no Resin-specific
+code is required.  The tutorial example stores a string in JNDI to be
+retrieved by the example JSP.</p>
+
+<p>The cron times follow the Unix crontab format.  The tutorial schedules
+the work task every 5 minutes, using the "*/5" pattern.  More details for
+the cron specificiations is available in the
+<a href="resource|resource-library#CronResource">CronResource
+documentation.</a></p>
+
+<example title="sample web.xml">
+&lt;resource type="com.caucho.resources.CronResource">
+  &lt;init>
+    &lt;cron>*/5&lt;/cron>
+
+    &lt;work resin:type="example.WorkTask">
+      &lt;value>Example&lt;/value>
+      &lt;jndi>java:comp/env/example&lt;/jndi>
+    &lt;/work>
+  &lt;/init>
+&lt;/resource>
+</example>
+
+</section>
+
+<section title="The work task">
+
+<p>For this example, the work task is trivial.  It just sets a
+string in JNDI.</p>
+
+<example title="WorkTask.java">
+public class WorkTask implements Work {
+  private String _value = "default";
+  private String _jndi = "java:comp/env/test";
+
+  public void setValue(String value)
+  {
+    _value = value;
+  }
+
+  public void setJNDI(String value)
+  {
+    _jndi = jndi;
+  }
+
+  public void run()
+  {
+    try {
+      new InitialContext().rebind(_jndi, _value + ": " + new Date());
+    } catch (Throwable e) {
+      e.printStackTrace();
+    }
+  }
+
+  public void release()
+  {
+  }
+}
+
+</example>
+
+</section>
+
+<section title="JSP">
+
+<p>The demo JSP is also trivial.  It looks up the resource through
+JNDI and prints it to the page.</p>
+
+<example title="index.jsp">
+&lt;%@ page import="javax.naming.*" %>
+&lt;%= new InitialContext().lookup("java:comp/env/example") %>
+</example>
+
+</section>
+
+</body>
+</document>

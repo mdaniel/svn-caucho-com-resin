@@ -1,0 +1,105 @@
+<document>
+  <header>
+    <product>resin</product>
+    <resin-2.0>$resin/ref/ide-kawa.xtp</resin-2.0>
+    <title>Kawa</title>
+  </header>
+
+  <body>
+    <summary/>
+<p/>Kevin Altis writes:
+
+<p/>For those people wanting to do source-level debugging of servlets under
+Windows with Resin and the Kawa Pro 5.0 IDE from Allaire (this should work
+with the Enterprise Edition as well) I've adapted the example of using Kawa
+with Tomcat at <a href="external|www.allaire.com|Handlers/index.cfm?ID=18611">Allaire</a>.
+
+<p/>Note that you can download Kawa and try it for free for 30 days if you are
+looking for a new IDE under Windows. It sure beats using jdb for debugging
+;D
+
+<p/>Select Project/New menu option and create a new project under
+doc\WEB-INF\classes directory of Resin. Please type the name for this
+project as HelloServlet. Kawa will create a new project and open it as the
+current project.
+
+<p/>Select Project/Add File... and select HelloServlet.java file to add
+to the newly created project.
+
+<p/>Since Kawa is not setup by default to work with Resin, add resin.jar,
+jsdk22.jar, jdk12.jar, jdbc2_0-stdext.jar, jta-spec1_0_1.jar, jndi.jar,
+dom.jar, sax.jar, jaxp.jar, and webutil.jar to the classpath by selecting
+Project/Classpath and click on File... button to add resin.jar, jsdk22.jar,
+jdk12.jar, jdbc2_0-stdext.jar, jta-spec1_0_1.jar, jndi.jar, dom.jar,
+sax.jar, jaxp.jar, and webutil.jar under the resin/lib directory to the
+classpath.
+
+<p/>Set the Compilation output directory to doc\WEB-INF\classes by
+selecting Project/Compiler Options and click on the ">>" to add it. For
+example, if you have installed Resin in your D:\ drive, then check the
+"Compilation output directory" and add the value
+"D:\resin\doc\WEB-INF\classes"
+
+<p/>Perform a rebuild all to compile all files in the project.
+
+<p/>Select Project/Interpreter options to set the Java class name to run.
+Set the "Java class name to run" to com.caucho.server.http.HttpServer
+and check the box. This will force the class name to run Startup when you
+select Build/Run.
+
+<p/>Select Project/Interpreter options to set the Working directory.
+Set the "Execute program in directory" to Resin install directory and
+check the box. For example, if you have installed Resin on your d:\ drive
+then set this option to "D:\resin". This will force the working directory to
+the Resin install directory when select Build/Run.
+
+<p/>If you are interested in debugging the servlet, then go to Project/Compiler
+Options and check the "Debugging Tables (-g)" option. This will display
+local variables during debugging of the servlet.
+
+<p/>Select Build/Run to start the Resin WebServer daemon. If all the settings
+were done correctly Kawa output window will display the following lines and
+the daemon is started successfully. [Note: in my case Resin is installed at
+c:\java\resin, I'm using Sun JDK 1.3 and I've turned off srun in my .conf
+file.]
+
+<example>
+Wait, Starting the Debugger...
+****** CONDITIONAL BREAKPOINTS NOT SUPPORTED WITH THIS DEBUGGER ******
+Working Directory - C:\java\resin\
+ClassPath -
+C:\java\resin\lib\resin.jar;C:\java\resin\lib\jdk12.jar;C:\java\resin\lib\we
+butil.jar;C:\java\resin\lib\jsdk22.jar;C:\java\resin\lib\dom.jar;C:\java\res
+in\lib\jaxp.jar;C:\java\resin\lib\jdbc2_0-stdext.jar;C:\java\resin\lib\jndi.
+jar;C:\java\resin\lib\jta-spec1_0_1.jar;C:\java\resin\lib\sax.jar;C:\java\re
+sin\doc\WEB-INF\classes;.;c:\jdk1.3\lib\tools.jar;c:\jdk1.3\jre\lib\rt.jar;c
+:\jdk1.3\jre\lib\i18n.jar;c:\Kawapro5.0\kawaclasses.zip
+Properties -   -Xbootclasspath:c:\jdk1.3\lib\tools.jar;c:\jdk1.3\jre\lib\rt.
+jar;c:\jdk1.3\jre\lib\i18n.jar;
+Debug Start...
+Resin 1.2.3 (built Thu Feb 15 11:31:58 PST 2001)
+Copyright(c) 1998-2001 Caucho Technology. All rights reserved.
+
+Starting Resin on Fri, 23 Feb 2001 22:14:06 -0800 (PST)
+http listening to *:8080
+</example>
+
+<p/>Now start up a browser and bring up the servlet by typing
+"http://localhost:8080/servlet/HelloServlet" If all of the above steps were
+done correctly, the servlet will print "Hello, world!" on the page.
+
+<p/>In order to start the debugger, set some breakpoints in HelloServlet.java
+file and press F5 to start the debugger. Once again go to a browser and open
+"http://localhost:8080/servlet/HelloServlet" At this time Kawa will hit the
+breakpoint and you can debug the servlet just like you would debug a
+non-servlet project. Please refer to debugger tutorial for more details on
+how to debug under Kawa.
+
+<p/>I'm using Kawa Pro 5.0 under Windows 2000 with Resin 1.2.3 and the Sun JDK
+1.3. HelloServlet.java isn't very interesting, but you should easily be able
+to adapt the above directions for your own servlet, just remember to set the
+paths correctly. Kawa can debug threads, but I haven't tried it yet with
+Resin.
+
+  </body>
+</document>

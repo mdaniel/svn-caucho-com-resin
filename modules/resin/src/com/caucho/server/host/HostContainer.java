@@ -1,0 +1,537 @@
+/*
+ * Copyright (c) 1998-2004 Caucho Technology -- all rights reserved
+ *
+ * This file is part of Resin(R) Open Source
+ *
+ * Each copy or derived work must preserve the copyright notice and this
+ * notice unmodified.
+ *
+ * Resin Open Source is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * Resin Open Source is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE, or any warranty
+ * of NON-INFRINGEMENT.  See the GNU General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Resin Open Source; if not, write to the
+ *
+ *   Free Software Foundation, Inc.
+ *   59 Temple Place, Suite 330
+ *   Boston, MA 02111-1307  USA
+ *
+ * @author Scott Ferguson
+ */
+
+package com.caucho.server.host;
+
+import java.io.*;
+import java.util.*;
+import java.util.regex.*;
+import java.util.logging.*;
+
+import javax.servlet.*;
+
+import javax.servlet.jsp.el.VariableResolver;
+
+import com.caucho.config.BuilderProgram;
+
+import com.caucho.config.types.PathBuilder;
+import com.caucho.config.types.StringTypeBuilder;
+
+import com.caucho.log.Log;
+
+import com.caucho.loader.EnvironmentClassLoader;
+
+import com.caucho.lifecycle.Lifecycle;
+
+import com.caucho.make.AlwaysModified;
+
+import com.caucho.server.dispatch.DispatchServer;
+import com.caucho.server.dispatch.DispatchBuilder;
+import com.caucho.server.dispatch.Invocation;
+import com.caucho.server.dispatch.ErrorFilterChain;
+
+import com.caucho.server.deploy.DeployContainer;
+
+import com.caucho.server.port.ProtocolDispatchServer;
+
+import com.caucho.util.L10N;
+import com.caucho.util.RandomUtil;
+import com.caucho.util.Alarm;
+
+import com.caucho.vfs.Path;
+import com.caucho.vfs.Vfs;
+import com.caucho.vfs.WriteStream;
+
+import com.caucho.server.webapp.WebAppConfig;
+import com.caucho.server.webapp.Application;
+
+/**
+ * Resin's host container implementation.
+ */
+public class HostContainer implements DispatchBuilder {
+  static final Logger log = Log.open(HostContainer.class);
+  static final L10N L = new L10N(HostContainer.class);
+
+  // The environment class loader
+  private EnvironmentClassLoader _classLoader;
+
+  private DispatchServer _dispatchServer;
+
+  private Application _errorApplication;
+
+  private String _url = "";
+  
+  // The root directory.
+  private Path _rootDir;
+  private boolean _isRootDirSet;
+
+  // List of default host configurations
+  private ArrayList<HostConfig> _hostDefaultList = new ArrayList<HostConfig>();
+
+  // The host deploy
+  private DeployContainer<HostController> _hostDeploy
+    = new DeployContainer<HostController>();
+  
+  // The configured host entries
+  private ArrayList<HostController> _hostList = new ArrayList<HostController>();
+  
+  // Cache of hosts
+  private HashMap<String,HostController> _hostMap = new HashMap<String,HostController>();
+  private HostController _defaultHost;
+
+  // Regexp host
+  private ArrayList<HostConfig> _hostRegexpList = new ArrayList<HostConfig>();
+
+  // List of default application configurations
+  private ArrayList<WebAppConfig> _webAppDefaultList
+  = new ArrayList<WebAppConfig>();
+
+  // The configure exception
+  private Throwable _configException;
+
+  // lifecycle
+  private final Lifecycle _lifecycle = new Lifecycle();
+
+  /**
+   * Creates the application with its environment loader.
+   */
+  public HostContainer()
+  {
+    _classLoader = new EnvironmentClassLoader();
+
+    _rootDir = Vfs.lookup();
+  }
+
+  /**
+   * Gets the environment class loader.
+   */
+  public ClassLoader getClassLoader()
+  {
+    return _classLoader;
+  }
+
+  /**
+   * Gets the environment class loader.
+   */
+  public void setClassLoader(EnvironmentClassLoader classLoader)
+  {
+    _classLoader = classLoader;
+  }
+
+  /**
+   * Sets the URL for the default server.
+   */
+  public void setURL(String url)
+  {
+    _url = url;
+  }
+
+  /**
+   * Gets the URL for the default server.
+   */
+  public String getURL()
+  {
+    return _url;
+  }
+
+  /**
+   * Sets the dispatch server.
+   */
+  public void setDispatchServer(DispatchServer server)
+  {
+    _dispatchServer = server;
+  }
+
+  /**
+   * Gets the dispatch server.
+   */
+  public DispatchServer getDispatchServer()
+  {
+    return _dispatchServer;
+  }
+
+  /**
+   * Gets the root directory.
+   */
+  public Path getRootDirectory()
+  {
+    return _rootDir;
+  }
+
+  /**
+   * Sets the root directory.
+   */
+  public void setRootDirectory(Path path)
+  {
+    _rootDir = path;
+    _isRootDirSet = true;
+  }
+
+  /**
+   * Sets the root directory (obsolete).
+   */
+  public void setRootDir(Path path)
+  {
+    setRootDirectory(path);
+  }
+
+  /**
+   * Adds a host default
+   */
+  public void addHostDefault(HostConfig init)
+  {
+    _hostDefaultList.add(init);
+  }
+
+  /**
+   * Returns the list of host defaults
+   */
+  public ArrayList<HostConfig> getHostDefaultList()
+  {
+    return _hostDefaultList;
+  }
+
+  /**
+   * Creates a host deploy
+   */
+  public HostExpandDeployGenerator createHostDeploy()
+  {
+    return new HostExpandDeployGenerator(_hostDeploy, this);
+  }
+
+  /**
+   * Adds a host deploy
+   */
+  public void addHostDeploy(HostExpandDeployGenerator hostDeploy)
+  {
+    _hostDeploy.add(hostDeploy);
+  }
+
+  /**
+   * Adds a host.
+   */
+  public void addHost(HostConfig hostConfig)
+    throws Exception
+  {
+    if (hostConfig.getRegexp() != null) {
+      _hostDeploy.add(new HostRegexpDeployGenerator(_hostDeploy, this, hostConfig));
+      return;
+    }
+
+    HostSingleDeployGenerator deploy;
+    deploy = new HostSingleDeployGenerator(_hostDeploy, this, hostConfig);
+    
+    _hostDeploy.add(deploy);
+
+    // createUniqueHost(entry);
+  }
+
+  /**
+   * Adds a web-app default
+   */
+  public void addWebAppDefault(WebAppConfig init)
+  {
+    _webAppDefaultList.add(init);
+  }
+
+  /**
+   * Returns the list of web-app defaults
+   */
+  public ArrayList<WebAppConfig> getWebAppDefaultList()
+  {
+    return _webAppDefaultList;
+  }
+
+  /**
+   * Clears the cache.
+   */
+  public void clearCache()
+  {
+    _dispatchServer.clearCache();
+  }
+
+  /**
+   * Creates the invocation.
+   */
+  public void buildInvocation(Invocation invocation)
+    throws Throwable
+  {
+    String rawHost = invocation.getHost();
+    int rawPort = invocation.getPort();
+
+    String hostName;
+
+    if (rawHost == null)
+      hostName = "";
+    else
+      hostName = DomainName.fromAscii(rawHost);
+
+    invocation.setHostName(hostName);
+
+    Host host = getHost(hostName, rawPort);
+
+    if (host != null) {
+      host.buildInvocation(invocation);
+    }
+    else {
+      FilterChain chain = new ErrorFilterChain(404);
+      invocation.setFilterChain(chain);
+      invocation.setApplication(getErrorApplication());
+      invocation.setDependency(AlwaysModified.create());
+    }
+  }
+
+  /**
+   * Returns the matching host.
+   */
+  public Host getHost(String hostName, int port)
+  {
+    try {
+      HostController controller = findHost(hostName, port);
+
+      if (controller != null)
+        return controller.request();
+      else
+        return null;
+    } catch (Throwable e) {
+      log.log(Level.WARNING, e.toString(), e);
+      
+      return null;
+    }
+  }
+
+  /**
+   * Finds the best matching host entry.
+   */
+  private HostController findHost(String rawHost, int rawPort)
+    throws Exception
+  {
+    if (rawHost == null)
+      rawHost = "";
+
+    int p = rawHost.indexOf(':');
+
+    String shortHost = rawHost;
+
+    if (p > 0)
+      shortHost = rawHost.substring(0, p);
+    
+    String fullHost = shortHost + ':' + rawPort;
+
+    HostController hostController = null;
+    
+    synchronized (_hostMap) {
+      hostController = _hostMap.get(fullHost);
+
+      if (hostController != null && ! hostController.isDestroyed())
+        return hostController;
+    }
+
+    if (hostController == null || hostController.isDestroyed())
+      hostController = _hostMap.get(shortHost);
+
+    if (hostController == null || hostController.isDestroyed())
+      hostController = findHostController(fullHost);
+
+    if (hostController == null || hostController.isDestroyed())
+      hostController = findHostController(shortHost);
+
+    if (hostController == null || hostController.isDestroyed())
+      hostController = findHostController("");
+
+    synchronized (_hostMap) {
+      if (hostController != null && ! hostController.isDestroyed())
+	_hostMap.put(fullHost, hostController);
+      else {
+	hostController = null;
+	_hostMap.remove(fullHost);
+      }
+    }
+
+    return hostController;
+  }
+
+  /**
+   * Returns the HostController based on a host name.  The canonical name
+   * and the host aliases are tested for the match.
+   *
+   * @param hostName name to match on
+   * @return the host entry or null if none are found.
+   */
+  private HostController findHostController(String hostName)
+    throws Exception
+  {
+    return _hostDeploy.findController(hostName);
+  }
+
+  /**
+   * Returns the canonical HostController for the specified host.  Because of
+   * regexps and aliases, the HostController in the find methods may not match
+   * the canonical host entry.
+   *
+   * @param host the matched host entry
+   *
+   * @return the canonical host
+   */
+  private HostController createUniqueHost(HostController host)
+    throws Exception
+  {
+    Thread thread = Thread.currentThread();
+    
+    ClassLoader oldLoader = thread.getContextClassLoader();
+    try {
+      thread.setContextClassLoader(getClassLoader());
+      // host.setParent(this);
+
+      VariableResolver env = host.getVariableResolver();
+    
+      HostConfig hostConfig = host.getHostConfig();
+
+      String rawHostName = hostConfig.getHostName();
+      if (rawHostName != null && ! rawHostName.equals(""))
+	host.setHostName(StringTypeBuilder.evalString(rawHostName, env));
+
+      ArrayList<String> rawAliases = hostConfig.getHostAliases();
+      for (int i = 0; i < rawAliases.size(); i++) {
+	String rawAlias = rawAliases.get(i);
+
+	host.addHostAlias(StringTypeBuilder.evalString(rawAlias, env));
+      }
+
+      synchronized (_hostList) {
+	// uniqueness guaranteed by the host name
+	int oldHostIndex = _hostList.indexOf(host);
+	if (oldHostIndex >= 0)
+	  return _hostList.get(oldHostIndex);
+    
+	String rootDir = hostConfig.getRootDirectory();
+
+	if (rootDir != null) {
+	  Path path = PathBuilder.lookupPath(rootDir, env);
+	  host.setCfgRootDirectory(path);
+
+	  if (hostConfig.getRegexp() != null && ! path.isDirectory())
+	    return null;
+	}
+
+	if (host.getHostName().equals(""))
+	  _defaultHost = host;
+
+	_hostList.add(host);
+
+	host.init();
+      }
+    } finally {
+      thread.setContextClassLoader(oldLoader);
+    }
+
+    return host;
+  }
+
+  /**
+   * Returns the error application during startup.
+   */
+  public Application getErrorApplication()
+  {
+    if (_errorApplication == null) {
+      Thread thread = Thread.currentThread();
+      ClassLoader loader = thread.getContextClassLoader();
+      try {
+	thread.setContextClassLoader(_classLoader);
+
+	_errorApplication = new Application();
+	_errorApplication.setAppDir(getRootDirectory());
+	com.caucho.server.dispatch.ServletMapping file;
+	file = _errorApplication.createServletMapping();
+	file.setURLPattern("/");
+	file.setServletName("resin-file");
+	file.setServletClass("com.caucho.servlets.FileServlet");
+	file.init();
+	_errorApplication.addServletMapping(file);
+	for (WebAppConfig config : _webAppDefaultList) {
+	  try {
+	    config.getBuilderProgram().configure(_errorApplication);
+	  } catch (Throwable e) {
+	    log.log(Level.WARNING, e.toString(), e);
+	  }
+	}
+	_errorApplication.init();
+      } catch (Throwable e) {
+	log.log(Level.WARNING, e.toString(), e);
+      } finally {
+	thread.setContextClassLoader(loader);
+      }
+    }
+
+    return _errorApplication;
+  }
+
+  /**
+   * Starts the container.
+   */
+  public void start()
+  {
+    if (! _lifecycle.toStarting())
+      return;
+
+    _classLoader.start();
+
+    _lifecycle.toActive();
+
+    _hostDeploy.start();
+  }
+
+  /**
+   * Stops the container.
+   */
+  public void stop()
+  {
+    if (! _lifecycle.toStop())
+      return;
+
+    _hostDeploy.stop();
+    
+    _classLoader.stop();
+  }
+
+  /**
+   * Closes the container.
+   */
+  public void destroy()
+  {
+    stop();
+
+    if (! _lifecycle.toDestroy())
+      return;
+
+    _hostDeploy.destroy();
+
+    _classLoader.destroy();
+  }
+}

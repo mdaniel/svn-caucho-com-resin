@@ -1,0 +1,79 @@
+<document>
+<header>
+<product>resin</product>
+<version>Resin 3.0</version>
+<type>tutorial</type>
+<title>Tag Files</title>
+<description>
+<p>JSP 2.0 introduces XML-based tag files.  Instead of having to write
+Java code for custom tags, applications can use XML or JSP syntax for
+their tags.  Tag files do not require .tld files,
+making development simpler.</p>
+</description>
+<tutorial-startpage>test.jsp</tutorial-startpage>
+</header>
+
+<body>
+<summary/>
+<section title="Files in this tutorial">
+<deftable>
+<tr><td><viewfile-link file="test.jsp"/>
+    <td>The jsp page that uses the tags
+<tr><td><viewfile-link file="WEB-INF/tags/test.tagx"/>
+    <td>The basic tag.
+</deftable>
+</section>
+
+<section title="The tag file">
+
+<p>Tag files in JSP 2.0 look and run like normal JSP files with some extra
+directives.  This example definine a tag attribute "a" which
+takes a <code>String</code> value.  It prints a simple message.</p>
+
+<example file="WEB-INF/tags/test.tagx">
+&lt;jsp:root xmlns:jsp="http://java.sun.com/JSP/Page">
+  &lt;jsp:directive.attribute name="a"
+                           type="java.lang.String"
+                           required="true"/>
+
+  &lt;jsp:text>A sample tag: ${'${'}a}&lt;/jsp:text>
+&lt;/jsp:root>
+</example>
+
+<p>The <var/.tagx/> extension identifies the tag as a JSP tag file
+using XML syntax.  The example could also have used <var/test.tag/> for
+a tag file in JSP syntax.  Tag files normally belong in WEB-INF/tags,
+although the location is configurable.</p>
+
+<p>The tag example uses the JSP 2.0 Expression Language as an example and
+as a way to avoid any Java in the tag file.  The <code>${"${"}a}</code>
+tells the tag to look in the <code>pageContext</code> for a local
+variable <code>a</code>.  The value of <code>a</code> is assigned by
+the tag attribute as defined in the attribute directive.</p>
+
+</section>
+
+<section title="Using the tag file">
+
+<p>Using tag files is similar to using normal JSP tags.  This example
+uses the XML syntax, although normal JSP syntax would work, too.
+The namespace prefix <var/urn:tagfiledir:/> tells JSP where to look
+for the tag.  In  this case it will look in WEB-INF/tags.</p>
+
+<example file="test.jsp">
+&lt;jsp:root xmlns:jsp="http://java.sun.com/JSP/Page"
+          xmlns:tags="urn:jsptagdir:/WEB-INF/tags">
+  &lt;tags:test a="Test 1"/>&lt;br/>
+  &lt;tags:test a="Test 2"/>
+&lt;/jsp:root>
+</example>
+
+<results>
+A sample tag: Test 1&lt;br>
+A sample tag: Test 2
+</results>
+
+</section>
+
+</body>
+</document>

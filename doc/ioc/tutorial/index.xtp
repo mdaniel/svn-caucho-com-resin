@@ -1,0 +1,12 @@
+<document>
+  <header>
+    <product>resin-ee</product>
+    <title>IoC/AOP Tutorials</title>
+    <type>contents</type>
+    <description>The AOP tutorials require JDK 1.5</description>
+  </header>
+
+  <body>
+    <summary/>
+  </body>
+</document>

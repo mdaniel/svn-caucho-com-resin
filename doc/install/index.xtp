@@ -1,0 +1,18 @@
+<document>
+  <header>
+    <product>resin</product>
+    <title>Installation</title>
+    <type>contents</type>
+    <description>
+      <p>Resin provides several configuration options.  We suggest you use the
+        <a href='install|httpd'>Resin standalone web server</a> option first.
+        If you need a specific feature of another web server,
+        you can later configure Resin to work with that web server.</p>
+    </description>
+
+  </header>
+
+  <body>
+    <summary/>
+  </body>
+</document>

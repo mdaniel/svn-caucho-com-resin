@@ -1,0 +1,100 @@
+<document>
+  <header>
+    <product>resin-ee</product>
+    <resin-2.0>$ee/ejb-ref/ejb-server.xtp</resin-2.0>
+    <title>EJBServer</title>
+    <description>
+      <p>The Resin-CMP EJB Server is implemented as a JNDI resource. Like any
+        other resource, it is to be set up in <var/resin.conf/> or <var/web.xml/>.</p>
+    </description>
+  </header>
+
+  <body>
+    <summary/>
+
+<section title="The EJBServer resource">
+
+<p>The following stripped-down <var/web.xml/> sets up Resin-CMP
+so local clients can use java:comp/env/cmp to find the home
+interfaces.
+
+<p>Because the EJB server is a JNDI resource, it can be placed in any
+JNDI resource context: &lt;web-app>, &lt;host>, or &lt;http-server>.
+An EJBServer in the &lt;host> context, for example, will be shared
+across all applications for that host.
+
+<p>The following is a sample web.xml configuration.  More
+details are available in:</p>
+
+<ul>
+<li><a href="db|index">Resin Database configuration</a>
+<li><a href="resource|index">Resin JNDI configuration</a>
+<!--
+<li><a href="ejb|jndi">EJB JNDI configuration</a>
+-->
+</ul>
+
+<p>EJBServer will automatically read the *.ejb files in WEB-INF and
+load their defined beans.</p>
+
+<example title='web.xml'>
+&lt;web-app>
+  &lt;!-- Database configuration -->
+  &lt;database>
+    &lt;jndi-name>jdbc/test&lt;/jndi-name>
+    &lt;driver type="org.gjt.mm.mysql.Driver">
+      &lt;url>jdbc:mysql://localhost:3306/test&lt;/url>
+    &lt;/driver>
+  &lt;/database>
+
+  &lt;!-- Resin-CMP server configuration -->
+  &lt;ejb-server>
+    &lt;jndi-name>java:comp/env/cmp&lt;/jndi-name>
+    &lt;data-source>java:comp/env/jdbc/test&lt;/data-source>
+  &lt;/ejb-server>
+&lt;/web-app>
+</example>
+
+<deftable title="EJBServer init-parameters">
+<tr><th>Parameter<th>Meaning<th>Default
+<tr><td>auto-compile<td>If true, automatically generate the persistence and EJB code<td>true
+<tr><td>create-database-schema<td>If the entity beans do not yet exist in the data-source, create the tables<td>false
+<tr><td>data-source<td>The database's JNDI name<td>java:comp/env/jdbc/test
+<tr><td>distributed<td>Set true for multiple parallel servers<td>false
+<tr><td>ejb-config-dir<td>Directory to search for *.ejb files<td>WEB-INF
+<tr><td>entity-cache-size<td>How many entity beans are cached<td>8192
+<tr><td>entity-cache-timeout<td>How long a loaded CMP bean can be cached before reloading<td>Infinity
+<tr><td>resin-isolation<td>Whether updates should use <var/row-locking/> (FOR UPDATE) or rely on the database's isolation <var/database/><td>database
+<tr><td>jdbc-isolation<td>Selects the JDBC isolation for an update transaction<td>the database's default
+<!--
+<tr><td>lock-factory<td>Sets the default lock factory for entity beans<td>com.caucho.ejb.ExclusiveLockFactory
+<tr><td>lock-timeout<td>How long a lock should wait before timing out (in milliseconds)<td>2000
+-->
+<tr><td>transaction-timeout<td>How long a transaction should wait before timing out (in seconds)<td>60
+<tr><td>queue-connection-factory<td>Sets the JNDI name for the QueueConnectionFactory<td>none
+<tr><td>topic-connection-factory<td>Sets the JNDI name for the TopicConnectionFactory<td>none
+</deftable>
+
+</section>
+
+<section title="Protocol Servlets">
+
+<p>External protocols are generally implemented as servlets.
+Only applications which expose an external interface will have
+protocol servlets.</p>
+
+<section title='Burlap'>
+
+<example>
+&lt;!-- Burlap protocol configuration -->
+&lt;servlet-mapping>
+  &lt;url-pattern id='/burlap/*'/>
+  &lt;servlet-name id='com.caucho.burlap.EJBServlet'/>
+&lt;/servlet-mapping>
+</example>
+
+</section>
+
+</section>
+  </body>
+</document>

@@ -1,0 +1,726 @@
+<document>
+  <header>
+    <product>resin</product>
+    <resin-2.0>$resin/ref/xsl.xtp</resin-2.0>
+    <title>XSLT Extensible Stylesheet Language</title>
+    <keywords>
+      <keyword>xslt</keyword>
+    </keywords>
+    <description>
+      <p>The extensible stylesheet language is a language for transforming XML
+        documents to new XML documents.  It's based on matching
+        elements in the XML tree and replacing the element with new
+        XML.  For example, replacing a 'definition' tag with an HTML
+        table with a silver background.</p>
+    </description>
+  </header>
+
+  <body>
+    <summary/>
+
+<section title='Introduction'>
+<p>XSLT processes the input document recursively from the top down,
+essentially a depth first traversal of the tree.  When it examines
+each node, it finds the best match from all the <a
+ref='#template'>templates</a>.  XSLT then follows the processing
+instructions for the matching template, usually adding text to the
+output.</p>
+
+<p>If XSLT cannot find a matching template, it applies default rules.
+Text gets copied to the output.  The children of elements are
+processed, but the elements themselves are not copied.  So a
+completely blank XSLT stylesheet will remove all the tags and just
+print out the text.</p>
+
+<p>When it's done with the current node, XSLT moves to the next one
+until the entire input tree is complete.</p>
+
+For example, it might process an HTML file in the following order:
+<ol>
+<li>HTML
+<li>HEAD
+<li>TITLE
+<li>META
+<li>BODY
+<li>P
+<li>TEXT
+<li>etc
+</ol>
+
+      <resin>Resin</resin>'s XSLT follows the 1.0 W3C specification.
+</section>
+
+
+<section name='xslt-core' title='XSLT core'>
+
+<defun name=template title='&lt;xsl:stylesheet&gt;'>
+<sum>The top-level element of an XSL stylesheet.</sum>
+</defun>
+
+<defun name=template title='&lt;xsl:template ... &gt; ...'>
+<sum>Establishes a pattern and replacement text.</sum>
+<code/xsl:template/> registers its pattern with the XSL processing
+engine.  When a node matches the pattern, XSL will process the
+contents of the template.
+
+<p>Pure XSL processes the contents slightly differently than XTP.  XSL
+expects all tags to be valid XML.  XTP is more forgiving.  If the tag is not
+one of those defined by XSL, it will treat the tag as raw text.</p>
+
+<deftable>
+<tr><th>attribute<th>meaning
+<tr><td>match<td>the XPath match pattern (required)
+<tr><td>mode<td>string grouping templates into a special mode
+<tr><td>name<td>Name for later use by xsl:call-template
+<tr><td>priority<td>conflict-resolving priority, an integer
+</deftable>
+
+<p>In the following example, the template matches any 'box' tag.  The
+contents of the box are placed in a centered table 80% of the current
+width.
+
+<p>This example is legal in XTP because the &lt;td&gt; and &lt;tr&gt;
+are treated as raw text.  The example is illegal in XSL because those
+tags are missing their close tags.</p>
+
+<example>
+<example>
+&lt;xsl:template match='box'&gt;
+<eg-em>  &lt;center&gt;
+  &lt;table width='80%'&gt;
+  &lt;tr&gt;&lt;td&gt;</eg-em>
+
+    &lt;xsl:apply-templates/&gt;
+
+<eg-em>  &lt;/td>&lt;/tr>
+  &lt;/table&gt;
+  &lt;/center&gt;</eg-em>
+
+&lt;/xsl:template&gt;
+</example>
+
+<example>
+&lt;p&gt;Here's a boxed quote,&lt;/p&gt;
+
+&lt;box&gt;
+To be or not to be...
+&lt;/box&gt;
+</example>
+
+<results>
+&lt;p&gt;Here's a boxed quote,&lt;/p&gt;
+
+&lt;center&gt;
+&lt;table width='80%'&gt;
+&lt;tr&gt;&lt;td&gt;
+
+  To be or not to be...
+
+&lt;/table&gt;
+&lt;/center&gt;
+</results>
+</example>
+
+</defun>
+
+<defun name=apply-templates title='&lt;xsl:apply-templates ... &gt; ...'>
+<sum>Evaluates the children of the current node.</sum>
+<code/xsl:apply-templates/> recursively processes the children.  If a
+template has no <code/xsl:apply-templates/>, then the children are
+ignored.
+
+<deftable>
+<tr><th>attribute<th>meaning
+<tr><td>select<td>An XPath select pattern selecting the nodes to
+evaluate next. (optional)
+<tr><td>mode<td>only selects templates with the given <var/mode/>
+</deftable>
+
+<p>The first example doubles the contents by calling
+<code/xsl:apply-templates/> twice.</p>
+
+<example>
+<example>
+&lt;xsl:template match='double'&gt;
+  &lt;xsl:apply-templates/&gt;
+  &lt;xsl:apply-templates/&gt;
+&lt;/xsl:template&gt;
+</example>
+
+<example>
+&lt;double&gt;
+Some &lt;foo/&gt; text.
+&lt;/double&gt;
+</example>
+
+<results>
+Some &lt;foo/&gt; text.
+Some &lt;foo/&gt; text.
+</results>
+</example>
+
+<p>The <code/select/> pattern can restrict the children to evaluate.
+Stylesheets can use it to select elements and to reorder them.
+
+<p>The following example writes the 'a' nodes followed by the 'b'
+nodes and ignores everything else.
+</p>
+
+
+<example>
+<example>
+&lt;xsl:template match='a-b-test'&gt;
+  &lt;xsl:apply-templates select='a'/&gt;
+  &lt;xsl:apply-templates select='b'/&gt;
+&lt;/xsl:template&gt;
+</example>
+
+<example>
+&lt;a-b-test&gt;
+  Junk Text.
+  &lt;b/&gt;
+  &lt;a&gt;
+    Good text.
+  &lt;/a&gt;
+  More Junk.
+  &lt;b&gt;
+    Some B text.
+  &lt;/b&gt;
+  &lt;a&gt;
+    More Good text.
+  &lt;/a&gt;
+&lt;/a-b-test&gt;
+</example>
+
+<results>
+&lt;a&gt;
+  Good text.
+&lt;/a&gt;
+&lt;a&gt;
+  More Good text.
+&lt;/a&gt;
+&lt;b/&gt;
+&lt;b&gt;
+  Some B text.
+&lt;b&gt;
+</results>
+</example>
+
+</defun>
+
+<defun name=text title='&lt;xsl:text&gt; ...'>
+<sum>Writes the contents to the output.</sum>  <code/xsl:text/> is
+useful when you need to force spacing or special text.  Usually,
+<resin/> will produce the text you expect.  <code/xsl:text/> is there
+for the strange cases when you need full control.
+</defun>
+
+<defun name=value-of title='&lt;xsl:value-of .../&gt;'>
+<sum>Writes a calculated value output.</sum>  
+
+<deftable>
+<tr><th>attribute<th>meaning
+<tr><td>select<td>An XPath expression to be printed.
+</deftable>
+
+<p/><code/value-of/> is particularly useful for extracting attribute
+values.  The following example creates a JSP tag which adds two
+numbers.
+
+<example>
+&lt;xsl:template match='ct:sum'>
+<eg-em>&lt;jsp:expression></eg-em>
+&lt;xsl:value-of select='@a'><eg-em> + </eg-em>&lt;xsl:value-of select='@b'>
+<eg-em>&lt;/jsp:expression></eg-em>
+&lt;/xsl:template>
+</example>
+</defun>
+
+<defun name=for-each title='&lt;xsl:for-each ...&gt; ...'>
+<sum>Loops over child select patterns.</sum>  <code/xsl:foreach/>
+gives stylesheets complete control over the actions for child nodes.
+
+<p>Usually, stylesheets will want to use the full pattern matching
+capability given by XSL.  Sometimes the specific structure is known,
+like sections in a chapter.  When generating a table of contents, it
+may be easier to scan over the sections.</p>
+
+<deftable>
+<tr><th>Attribute<th>Meaning
+<tr><td>select<td>XPath select pattern
+</deftable>
+
+<example>
+&lt;xsl:template match='contents'&gt;
+<eg-em>  &lt;ol&gt;</eg-em>
+  &lt;xsl:for-each select='section'&gt;
+    <eg-em>&lt;li&gt;</eg-em>&lt;xsl:value-of select='@title'/><eg-em>&lt;/li></eg-em>
+  &lt;/xsl:for-each&gt;
+<eg-em>  &lt;/ol&gt;</eg-em>
+&lt;/xsl:template&gt;
+</example>
+
+</defun>
+
+<defun name=if title='&lt;xsl:if ...&gt; ...'>
+<sum>Evaluates the containing content if an expression evaluates to
+true.</sum>
+
+<deftable>
+<tr><th>Attribute<th>Meaning
+<tr><td>test<td>XPath expression evaluating to a boolean.
+</deftable>
+</defun>
+
+<defun name=import title='&lt;xsl:import .../&gt;'>
+<sum>Imports a stylesheet.</sum>  <code/xsl:import/> lets stylesheets
+borrow from each other.
+
+<deftable>
+<tr><th>Attribute<th>Meaning
+<tr><td>href<td>Path to the imported stylesheet
+</deftable>
+
+</defun>
+
+<defun name=output title='&lt;xsl:output .../&gt;'>
+<sum>Control the output printing.</sum>
+
+<deftable>
+<tr><th>Attribute<th>Meaning
+<tr><td>method<td>xml or html or text.  Select printing method
+<tr><td>version<td>XML version
+<tr><td>encoding<td>character set to print the results
+<tr><td>omit-xml-declaration<td>skip the XML or HTML declaration
+<tr><td>indent<td>pretty-print or not
+<tr><td>media-type<td>mime-type
+<tr><td>disable-output-escaping<td>'&lt;' gets printed as '&lt;', not '&amp;lt;'
+</deftable>
+
+</defun>
+
+</section>
+
+<section name='xslt' title='XSLT'>
+
+<defun name=element title='&lt;xsl:element&gt;'>
+<sum>Creates a new element.</sum>  The name can be computed using
+an attribute value template.
+
+<deftable>
+<tr><th>Attribute<th>Meaning
+<tr><td>name<td>Name of the new element.
+</deftable>
+
+<example>
+<example>
+&lt;xsl:template match='a'>
+  &lt;xsl:element name='b{@id}'>
+    &lt;c/>
+  &lt;/xsl:element>
+&lt;/xsl:template>
+</example>
+<results>
+&lt;b3>&lt;c/>&lt;/b3>
+</results>
+</example>
+</defun>
+
+<defun name=attribute title='&lt;xsl:attribute&gt;'>
+<sum>Adds an attribute to the element.</sum>  The name can be computed
+using an attribute value template.
+
+<deftable>
+<tr><th>Attribute<th>Meaning
+<tr><td>name<td>Name of the new attribute.
+</deftable>
+
+<example>
+<example>
+&lt;xsl:template match='a'>
+  &lt;c>
+    &lt;xsl:attribute name='b{@id}'>
+    &lt;xsl:value-of select='c{@id}'/>
+    &lt;/xsl:attribute>
+  &lt;/c>
+&lt;/xsl:template>
+</example>
+<results>
+&lt;c b3='c3'/>
+</results>
+</example>
+</defun>
+
+<defun name=attribute-set title='&lt;xsl:attribute-set&gt;'>
+<sum>Defines a named attribute set.</sum>  The attributes in the set
+are defined by xsl:attribute elements.
+
+<deftable>
+<tr><th>Attribute<th>Meaning
+<tr><td>name<td>Name of the attribute set.
+</deftable>
+
+<example>
+<example>
+&lt;xsl:attribute-set name='font'>
+  &lt;xsl:attribute name='font-size'>12pt&lt;/xsl:attribute>
+  &lt;xsl:attribute name='font-weight'>bold&lt;/xsl:attribute>
+&lt;/xsl:attribute-set>
+
+&lt;xsl:template match='a'>
+  &lt;c xsl:use-attribute-sets='font'/>
+&lt;/xsl:template>
+</example>
+<results>
+&lt;c font-size='12pt' font-weight='bold'/>
+</results>
+</example>
+
+</defun>
+
+<defun name=pi title='&lt;xsl:processing-instruction&gt;'>
+<sum>Creates a new processing instruction.</sum>
+
+<deftable>
+<tr><th>Attribute<th>Meaning
+<tr><td>name<td>Processing instruction name.
+</deftable>
+
+<example>
+<example>
+&lt;xsl:template match='a'>
+  &lt;xsl:processing-instruction name='foo'>
+  &lt;xsl:text>Text for the PI&lt;/xsl:text>
+  &lt;/xsl:processing-instruction/>
+&lt;/xsl:template>
+</example>
+<results>
+&lt;?foo Text for the PI?>
+</results>
+</example>
+</defun>
+
+<defun name=comment title='&lt;xsl:comment&gt;'>
+<sum>Creates a new comment.</sum>  The contents of the xsl:comment element
+become the contents of the comment.
+
+<example>
+<example>
+&lt;xsl:template match='a'>
+  &lt;xsl:comment>
+  &lt;xsl:text>Text for the comment&lt;/xsl:text>
+  &lt;/xsl:processing-instruction/>
+&lt;/xsl:template>
+</example>
+<results>
+&lt;!--Text for the comment-->
+</results>
+</example>
+</defun>
+
+<defun name=copy title='&lt;xsl:copy&gt;'>
+<sum>Copies the current node, but not children or attributes, to the
+output.</sum> 
+
+<p>To copy an element, a stylesheet must copy the attributes as well.
+
+<p/>The following example is the identity stylesheet. It copies input
+to the output including the attributes.
+
+<example>
+<example>
+&lt;xsl:template match='@*|node()'>
+  &lt;xsl:copy>
+    &lt;xsl:apply-templates select='@*|node()'/>
+  &lt;/xsl:copy>
+&lt;/xsl:template>
+</example>
+</example>
+</defun>
+
+<defun name=copy-of title='&lt;xsl:copy-of .../&gt;'>
+<sum>Copies a sub-tree into the output.</sum>  <code/copy-of/> resembles
+<code/value-of/>.  <code/value-of/> always converts the value to a
+string.  <code/copy-of/> will copy subtrees. 
+
+<deftable>
+<tr><th>attribute<th>meaning
+<tr><td>select<td>An XPath expression to be copied.
+</deftable>
+</defun>
+
+<defun name=variable title='&lt;xsl:variable&gt;'>
+<sum>Assignes an XSL variable.</sum>  Variables can be retrieved using
+the XPath variable syntax.
+
+<deftable>
+<tr><th>Attribute<th>Meaning
+<tr><td>name<td>variable name
+<tr><td>select<td>variable value
+</deftable>
+
+<example>
+<example>
+&lt;xsl:variable name='foo' select='1+1'/>
+
+&lt;xsl:template match='a'>
+  &lt;xsl:value-of select='$foo'/>
+&lt;/xsl:template>
+</example>
+<results>
+2
+</results>
+</example>
+</defun>
+
+<defun name=call-template title='&lt;xsl:call-template&gt;'>
+<sum>Calls a named template with the current node.</sum>
+<code/xsl:call-template/> lets stylesheets reuse common code, like
+functions.  It works like <code/xsl:apply-templates select='.'/>
+except that it calls based on a template name.
+
+
+<deftable>
+<tr><th>Attribute<th>Meaning
+<tr><td>name<td>template name to call
+<tr><td>mode<td>template mode
+</deftable>
+</defun>
+
+<defun name=param title='&lt;xsl:param&gt;'>
+<sum>Declares an XSL parameter.</sum>  <code/xsl:param/>'s
+<code/select/> parameter as a default.  If the variable has been
+assigned, it uses the old value.
+
+<deftable>
+<tr><th>Attribute<th>Meaning
+<tr><td>name<td>variable name
+<tr><td>select<td>variable value
+</deftable>
+
+<example>
+<example>
+&lt;xsl:template name='fun'>
+  &lt;xsl:param name='foo' select='15'/>
+  &lt;xsl:value-of select='$foo'/>
+&lt;/xsl:template>
+
+&lt;xsl:template match='a'>
+  &lt;xsl:call-template name='foo'>
+    &lt;xsl:with-param name='foo' select='1+2'/>
+  &lt;/xsl:call-template>
+&lt;/xsl:template>
+</example>
+<results>
+3
+</results>
+</example>
+</defun>
+
+<defun name=apply-imports title='&lt;xsl:apply-imports&gt;'>
+<sum>Like Java's <code/super/>, calls the overridden template.</sum>
+</defun>
+
+<defun name=sort title='&lt;xsl:sort&gt;'>
+<sum>Sorts nodes in xsl:apply-templates or
+xsl:for-each.</sum>
+
+<deftable>
+<tr><th>Attribute<th>Meaning
+<tr><td>select<td>value to sort on (default = '.')
+<tr><td>order<td>ascending or descending  (default = ascending)
+<tr><td>data-type<td>text or number (default = text)
+</deftable>
+
+<note>case-order and lang attributes are not implemented</note>
+</defun>
+
+<defun name=choose title='&lt;xsl:choose ...&gt; ...'>
+<sum>Implements an if-elsif-else block.</sum>  The <code/xsl:when/>
+statements are tested in order.  The first matching one is executed.
+If none match, the <code/xsl:otherwise/> block is executed.
+
+<deftable>
+<tr><th>Attribute<th>Meaning
+<tr><td>test<td>XPath expression evaluating to a boolean.
+</deftable>
+
+<example>
+<example>
+&lt;xsl:template match='a'>
+  &lt;xsl:choose>
+  &lt;xsl:when test='@color="red"'>
+    &lt;xsl:text>stop&lt;/xsl:text>
+  &lt;/xsl:when>
+  &lt;xsl:when test='@color="green"'>
+    &lt;xsl:text>go&lt;/xsl:text>
+  &lt;/xsl:when>
+  &lt;xsl:otherwise>
+    &lt;xsl:text>yield&lt;/xsl:text>
+  &lt;/xsl:otherwise>
+  &lt;/xsl:choose>
+&lt;/xsl:template>
+</example>
+</example>
+
+</defun>
+</section>
+
+<section name='xsl' title='Resin extensions'>
+<!--
+<defun name=copy-element title='&lt;xtp:copy-element&gt;' version='resin1.0'>
+<sum>Copies the element to the output.</sum>
+
+<p><code/xtp:copy-element/> is extremely useful as a default rule.
+With <code/xtp:copy-element/> as the default, the input gets copied to
+the output.  Using the usual default, all tags get stripped.
+
+<p>The standard default rule produces the following,</p>
+
+<example>
+<example>
+&lt;a&gt;A text&lt;/a&gt;
+&lt;b&gt;B text&lt;/b&gt;
+</example>
+<results>
+A text
+B text
+</results>
+</example>
+
+<p>Using <code/xtp:copy-element/>, XSL stylesheets can copy elements
+it doesn't understand.</p>
+
+<example>
+<example>
+&lt;xsl:template match='*'&gt;
+  &lt;xtp:copy-element&gt;
+    &lt;xsl:apply-templates/&gt;
+  &lt;/xtp:copy-element&gt;
+&lt;/xsl:template&gt;
+</example>
+
+<example>
+&lt;a&gt;A text&lt;/a&gt;
+&lt;b&gt;B text&lt;/b&gt;
+</example>
+<results>
+&lt;a&gt;A text&lt;/a&gt;
+&lt;b&gt;B text&lt;/b&gt;
+</results>
+</example>
+
+
+</defun>
+-->
+<defun name=expression title='&lt;xtp:expression>expression ...'
+       version='resin1.0'>
+<sum>Executes <var/expression/> and prints it to the output.</sum>
+ Stylesheets can use any JavaScript expression.  The following
+variables are pre-defined in stylesheets.
+
+<deftable>
+<tr><th>Variable<th>Meaning
+<tr><td>node<td>The current org.w3c.dom.Node.
+<tr><td>out<td>The com.caucho.xsl.XslWriter.
+</deftable>
+
+In addition, the <var/out/> variable gives access to the servlet
+PageContext with the <var/page/> property.
+
+<example>
+&lt;xsl:template match='welcome-user'&gt;
+  &lt;xsl:text>Welcome back, &lt;/xsl:text>
+  &lt;xtp:expression>
+    out.page.session.value.user
+  &lt;xtp:expression>
+&lt;/xsl:template&gt;
+</example>
+</defun>
+<defun name=scriptlet title='&lt;xtp:scriptlet> statement_list'
+       version='resin1.0'>
+<sum>Executes the <var/statement_list/> scriptlet.</sum>  The
+JavaScript code can be any statement list.  The same implicit
+variables are allowed in scriptlets as in expressions.
+
+<p>The following example creates a number of stars:
+
+<example>
+<example>
+&lt;@# page language='javascript' #>
+&lt;xsl:template match='ct:stars'&gt;
+  &lt;xtp:scriptlet&gt;
+    for (var i = 0; i < node.attribute.count; i++)
+      out.write('*');
+  &lt;/xtp:scriptlet&gt;
+&lt;/xsl:template&gt;
+</example>
+
+<example>
+1 = &lt;ct:stars count='1'/>
+9 = &lt;ct:stars count='9'/>
+</example>
+<results>
+1 = *
+9 = *********
+</results>
+</example>
+
+</defun>
+
+<defun name=declaration title='&lt;xtp:declaration>'
+       index='declaration'>
+<sum>Adds declaration code, i.e. code outside of any function.</sum>
+
+<example>
+&lt;xtp:declaration>
+function dist(x1, y1, x2, y2)
+{
+  return Math.sqrt((x1 - x2) * (x1 - x2) +
+                   (y1 - y2) * (y1 - y2));
+}
+&lt;/xtp:declaration>
+
+</example>
+
+</defun>
+
+<defun name=page title='&lt;xtp:directive.page attributes />'>
+<sum>Sets page directives</sum>
+<deftable>
+<tr><th>name<th>meaning
+<tr><td>language<td>script language, default Java
+<tr><td>session<td>use sessions, default false
+<tr><td>errorPage<td>page to display for errors
+<tr><td>errorPage<td>page to display for errors
+<tr><td>import<td>imports Java packages 
+<tr><td>contentType<td>content-type of the generated page
+</deftable>
+
+</defun>
+<!--
+<defun name=cache title='&lt;xtp:directive.cache attributes/>'>
+
+<sum>Caches the generated JSP file by default.</sum>
+
+<p>Caching for XSL is more complicated than for JSP because only some
+templates may be used in a page.  Caching is based on the generated
+page, not simply on the stylesheet.
+
+<p/>A page that just uses static
+templates is automatically cached.  Pages that use scripts just for
+simple calculation can also be cached.  But pages that use scripts
+based on the request cannot be cached.
+
+<deftable>
+<tr><th>name<th>meaning
+<tr><td>file<td>the JSP file depends on <var/file/>.
+<tr><td>no-cache<td>do not cache the generated JSP.
+</deftable>
+
+</defun>
+-->
+
+</section>
+  </body>
+</document>

@@ -1,0 +1,503 @@
+/*
+ * Copyright (c) 1998-2004 Caucho Technology -- all rights reserved
+ *
+ * This file is part of Resin(R) Open Source
+ *
+ * Each copy or derived work must preserve the copyright notice and this
+ * notice unmodified.
+ *
+ * Resin Open Source is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * Resin Open Source is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE, or any warranty
+ * of NON-INFRINGEMENT.  See the GNU General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Resin Open Source; if not, write to the
+ *   Free SoftwareFoundation, Inc.
+ *   59 Temple Place, Suite 330
+ *   Boston, MA 02111-1307  USA
+ *
+ * @author Scott Ferguson
+ */
+
+package com.caucho.amber.query;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
+import com.caucho.jdbc.JdbcMetaData;
+
+import com.caucho.amber.AmberQuery;
+
+import com.caucho.amber.type.Type;
+import com.caucho.amber.type.StringType;
+import com.caucho.amber.type.ObjectType;
+import com.caucho.amber.type.ByteType;
+import com.caucho.amber.type.ShortType;
+import com.caucho.amber.type.IntegerType;
+import com.caucho.amber.type.LongType;
+import com.caucho.amber.type.DoubleType;
+import com.caucho.amber.type.SqlTimestampType;
+import com.caucho.amber.type.SqlDateType;
+
+import com.caucho.amber.connection.AmberConnectionImpl;
+
+/**
+ * Represents the application's view of the query.
+ */
+public class UserQuery implements AmberQuery {
+  private AmberConnectionImpl _aConn;
+  private AbstractQuery _query;
+  private ResultSetImpl _rs;
+
+  private QueryCacheKey _cacheKey;
+
+  private Type []_argTypes;
+  private Object []_argValues;
+  private int _argLength = 0;
+
+  private int _firstResult = 0;
+  private int _maxResults = -1;
+
+  private long _cacheMaxAge;
+
+  private boolean _copyOnLoad = true;
+  private boolean _loadOnQuery;
+
+  public UserQuery(AbstractQuery query)
+  {
+    _query = query;
+
+    ArgExpr []argList = query.getArgList();
+
+    _argTypes = new Type[argList.length];
+    _argValues = new Object[argList.length];
+
+    _argLength = argList.length;
+  }
+  
+  /**
+   * Returns the query string.
+   */
+  public String getQueryString()
+  {
+    return _query.getQueryString();
+  }
+
+  public void setSession(AmberConnectionImpl aConn)
+  {
+    _aConn = (AmberConnectionImpl) aConn;
+  }
+
+  public AmberConnectionImpl getSession()
+  {
+    return _aConn;
+  }
+
+  public AmberConnectionImpl getConnection()
+  {
+    return _aConn;
+  }
+
+  /**
+   * Sets true for load-on-query.
+   */
+  public void setLoadOnQuery(boolean loadOnQuery)
+  {
+    _loadOnQuery = loadOnQuery;
+  }
+
+  /**
+   * Returns the compiled query.
+   */
+  AbstractQuery getQuery()
+  {
+    return _query;
+  }
+
+  /**
+   * Returns the arg type array.
+   */
+  Type []getArgTypes()
+  {
+    return _argTypes;
+  }
+
+  /**
+   * Returns the arg values
+   */
+  Object []getArgValues()
+  {
+    return _argValues;
+  }
+
+  /**
+   * Returns the arg length
+   */
+  int getArgLength()
+  {
+    return _argLength;
+  }
+
+  /**
+   * Sets the argument with a string
+   */
+  public void setString(int index, String v)
+  {
+    _argTypes[index - 1] = StringType.create();
+    _argValues[index - 1] = v;
+    _argLength = index;
+  }
+
+  /**
+   * Sets the argument with a byte
+   */
+  public void setByte(int index, byte v)
+  {
+    _argTypes[index - 1] = ByteType.create();
+    _argValues[index - 1] = new Integer(v);
+    _argLength = index;
+  }
+
+  /**
+   * Sets the argument with a short
+   */
+  public void setShort(int index, short v)
+  {
+    _argTypes[index - 1] = ShortType.create();
+    _argValues[index - 1] = new Integer(v);
+    _argLength = index;
+  }
+
+  /**
+   * Sets the argument with an int
+   */
+  public void setInt(int index, int v)
+  {
+    _argTypes[index - 1] = IntegerType.create();
+    _argValues[index - 1] = new Integer(v);
+    _argLength = index;
+  }
+
+  /**
+   * Sets the argument with a string
+   */
+  public void setLong(int index, long v)
+  {
+    _argTypes[index - 1] = LongType.create();
+    _argValues[index - 1] = new Long(v);
+    _argLength = index;
+  }
+
+  /**
+   * Sets the argument with a double
+   */
+  public void setDouble(int index, double v)
+  {
+    _argTypes[index - 1] = DoubleType.create();
+    _argValues[index - 1] = new Double(v);
+    _argLength = index;
+  }
+
+  /**
+   * Sets the argument with a timestamp
+   */
+  public void setTimestamp(int index, java.sql.Timestamp v)
+  {
+    _argTypes[index - 1] = SqlTimestampType.create();
+    _argValues[index - 1] = v;
+    _argLength = index;
+  }
+
+  /**
+   * Sets the argument with a date
+   */
+  public void setDate(int index, java.sql.Date v)
+  {
+    _argTypes[index - 1] = SqlDateType.create();
+    _argValues[index - 1] = v;
+    _argLength = index;
+  }
+
+  /**
+   * Sets the argument with an object.
+   */
+  public void setObject(int index, Object v)
+  {
+    _argTypes[index - 1] = ObjectType.create();
+    _argValues[index - 1] = v;
+    _argLength = index;
+  }
+
+  /**
+   * Sets the argument with a null
+   */
+  public void setNull(int index, int v)
+  {
+    _argTypes[index - 1] = StringType.create();
+    _argValues[index - 1] = null;
+    _argLength = index;
+  }
+
+  /**
+   * Sets the first result.
+   */
+  public void setFirstResult(int index)
+  {
+    _firstResult = index;
+  }
+
+  /**
+   * Sets the maximum number of results.
+   */
+  public void setMaxResults(int index)
+  {
+    _maxResults = index;
+  }
+
+  /**
+   * Returns the max results.
+   */
+  public int getMaxResults()
+  {
+    return _maxResults;
+  }
+
+  /**
+   * Executes the query returning a result set.
+   */
+  public ResultSet executeQuery()
+    throws SQLException
+  {
+    _aConn.flush();
+    
+    if (_rs == null)
+      _rs = new ResultSetImpl();
+    
+    SelectQuery query = (SelectQuery) _query;
+
+    _rs.setQuery(query);
+    _rs.setSession(_aConn);
+    _rs.setFirstResult(_firstResult);
+    _rs.setMaxResults(_maxResults);
+
+    int chunkSize = _aConn.getCacheChunkSize();
+    boolean isCacheable;
+
+    if (chunkSize <= _firstResult)
+      isCacheable = false;
+    else if (_aConn.isInTransaction() && ! query.isTableReadOnly())
+      isCacheable = false;
+    else if (! query.isCacheable())
+      isCacheable = false;
+    else
+      isCacheable = true;
+
+    ResultSetCacheChunk cacheChunk = null;
+
+    if (isCacheable) {
+      int row = 0;
+      
+      cacheChunk = _aConn.getQueryCacheChunk(query.getSQL(), _argValues, row);
+
+      _rs.setCacheChunk(cacheChunk);
+      _rs.setUserQuery(this);
+    }
+
+    if (cacheChunk == null) {
+      ResultSet rs;
+
+      if (isCacheable) {
+	int limit = _maxResults;
+	if (limit > 0 && limit < 25)
+	  limit = 25;
+	
+	rs = executeQuery(0, limit);
+      }
+      else
+	rs = executeQuery(0, _maxResults);
+      
+      _rs.setResultSet(rs);
+
+      if (isCacheable) {
+	cacheChunk = new ResultSetCacheChunk();
+	cacheChunk.setQuery(query);
+
+	_rs.fillCacheChunk(cacheChunk);
+	
+	_rs.setCacheChunk(cacheChunk);
+	
+	_aConn.putQueryCacheChunk(query.getSQL(), _argValues, 0, cacheChunk);
+      }
+    }
+    
+    _rs.init();
+    
+    return _rs;
+  }
+
+  /**
+   * Executes the query.
+   */
+  ResultSet executeQuery(int row, int maxResults)
+    throws SQLException
+  {
+    String sql = _query.getSQL();
+
+    if (maxResults > 0) {
+      JdbcMetaData metaData = _aConn.getAmberManager().getMetaData();
+      
+      sql = metaData.limit(sql, maxResults);
+    }
+    
+    PreparedStatement pstmt = _aConn.prepareStatement(sql);
+    ArgExpr []args = _query.getArgList();
+    
+    if (args.length > 0)
+      pstmt.clearParameters();
+
+    for (int i = 0; i < args.length; i++)
+      args[i].setParameter(pstmt, i + 1, _argTypes, _argValues);
+
+    ResultSet rs = pstmt.executeQuery();
+
+    for (int i = 0; i < row && rs.next(); i++) {
+    }
+
+    return rs;
+  }
+
+  /**
+   * Executes the query returning a result set.
+   */
+  public int executeUpdate()
+    throws SQLException
+  {
+    _aConn.flush();
+    // XXX: sync
+    
+    PreparedStatement pstmt;
+
+    pstmt = _aConn.prepareStatement(_query.getSQL());
+    pstmt.clearParameters();
+
+    for (int i = 0; i < _argLength; i++) {
+      if (_argValues[i] != null)
+	_argTypes[i].setParameter(pstmt, i + 1, _argValues[i]);
+    }
+
+    _query.prepare(this, _aConn);
+    
+    int count = pstmt.executeUpdate();
+
+    if (count != 0)
+      _query.complete(this, _aConn);
+
+    return count;
+  }
+
+  /**
+   * Sets the cache max age for the query.
+   */
+  public void setCacheMaxAge(long ms)
+  {
+    _cacheMaxAge = ms;
+  }
+
+  /**
+   * Executes the query, returning a list.
+   */
+  public List<Object> list()
+    throws SQLException
+  {
+    ArrayList<Object> list = new ArrayList<Object>();
+
+    list(list);
+
+    return list;
+  }
+
+  /**
+   * Executes the query returning the single result.
+   */
+  public Object getSingleResult()
+    throws SQLException
+  {
+    SelectQuery query = (SelectQuery) _query;
+    ResultSet rs = null;
+
+    _aConn.pushDepth();
+    try {
+      rs = executeQuery();
+      if (rs.next())
+	return rs.getObject(1);
+
+      return null;
+    } catch (SQLException e) {
+      e.printStackTrace();
+
+      throw e;
+    } finally {
+      _aConn.popDepth();
+
+      if (rs != null)
+	rs.close();
+    }
+  }
+
+  /**
+   * Executes the query, filling the list.
+   */
+  public void list(List<Object> list)
+    throws SQLException
+  {
+    SelectQuery query = (SelectQuery) _query;
+    ResultSet rs = null;
+
+    _aConn.pushDepth();
+    try {
+      rs = executeQuery();
+      
+      int tupleCount = query.getResultCount();
+
+      while (rs.next()) {
+	if (tupleCount == 1) {
+	  Object value = rs.getObject(1);
+
+	  list.add(value);
+	}
+	else {
+	  Object []values = new Object[tupleCount];
+
+	  for (int i = 0; i < tupleCount; i++) {
+	    values[i] = rs.getObject(i + 1);
+	  }
+
+	  list.add(values);
+	}
+      }
+    } catch (SQLException e) {
+      throw e;
+    } finally {
+      _aConn.popDepth();
+
+      if (rs != null)
+	rs.close();
+    }
+  }
+
+  public String toString()
+  {
+    return "UserQuery[" + _query.getQueryString() + "]";
+  }
+}

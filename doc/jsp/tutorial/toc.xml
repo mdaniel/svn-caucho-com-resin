@@ -1,0 +1,27 @@
+<navigation threaded='true' section='Resin : JSP : Tutorials' comment='true'>
+  <item title='Tutorials' link="index.xtp">
+    <item title='JSP Page Creation'>
+      <item link="simple.xtp" title='JSP'/>
+      <item link="parse_error.xtp" title='parse error messages'/>
+      <item link="run_error.xtp" title='runtime error messages'/>
+    </item>
+    <item title='Request'>
+      <item link="req_url.xtp" title='URL components'/>
+      <item link="env/index.xtp" title="JSP environment"/>
+      <item link="form.xtp" title='Form parameters'/>
+      <item link="multipart.xtp" title="Multipart Forms"/>
+      <item link="req_headers.xtp" title="Headers"/>
+    </item>
+    <item title='Topics'>
+      <item link="mail_form.xtp" title="Mailing form results"/>
+      <item link="bean.xtp" title='Java beans'/>
+    </item>
+    <item title='Tag Libraries'>
+      <item link="taglib-reuse/index.xtp" title="Tag Reuse"/>
+      <item link="tag-hello.xtp" title="Hello Tag"/>
+      <item link="tag-attribute.xtp" title="Tag Attributes"/>
+      <item link="tag-mail.xtp" title="Mail Tag"/>
+      <item link="tagfile-basic/index.xtp" title="Tag Files"/>
+    </item>
+  </item>
+</navigation>

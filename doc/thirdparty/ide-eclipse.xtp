@@ -1,0 +1,74 @@
+<document>
+  <header>
+    <product>resin</product>
+    <title>Eclipse</title>
+  </header>
+
+  <body>
+    <summary/>
+<section title="Resin with Eclipse">
+
+<section title="Launching Resin">
+(thanks to E Hauser)
+
+<p>
+Here's how I debug Resin with Eclipse.  I launch the Resin start script
+with the arguments:
+</p>
+
+<example>
+-Xdebug -Xnoagent
+-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=12345
+</example>
+
+<p>
+Then in Eclipse, go to Run -> Debug -> Remote Application.  Click new
+and make sure the project is set to the application you want to debug.
+Connection type should be "Standard (Socket Attach)", and your
+connection host should be "localhost" with the port "12345".
+</p>
+
+<p>
+You can launch Resin internally from Eclipse by launching the main Resin
+class with the correct parameters, but socket attach has always worked
+fine for me.
+</p>
+
+</section>
+
+<section title="Eclipse plugin">
+        <!-- resinforeclipse@netcourrier.com
+             arnaud.peyre@cnedi06.cnafmail.fr -->
+
+        <p>Arnaud Peyre has developed a comprehensive <a
+        href="external|resinforeclipse|index">Resin plugin for
+        Eclipse.</a></p>
+
+<b>Resin For Eclipse plugin provides tools for developing web projects: </b>
+<UL>
+	<LI><B>Resin management :</B> a graphical user interface for
+	managing Resin servers within Eclipse. The interface allows
+	you to create servers, add web projects, edit classpath and
+	system properties, manage https, launch, debug and stop the
+	server. It should work with web projects created by any other
+	plugin (such as WSAD ones).</LI>
+
+	<LI><B>Web projects :</B> the plugin allows you to create
+	generic web projects (you don't need to install Resin) or
+	projects optimized for Resin. Web projects include
+	autodetection of jar files added to the
+	&quot;WEB-INF/lib&quot; directory.</LI>
+
+	<LI><B>War exporation :</B> a wizard to export web projects
+	into war files.</LI>
+
+</UL>
+<P><BR>
+<!--
+<a href="external|resinforeclipse|index">Resin for Eclipse Home page</a>
+-->
+<a href="http://www.improve-technologies.com/alpha/resin/">Resin for Eclipse Home page</a>
+</section>
+
+  </section>
+</document>

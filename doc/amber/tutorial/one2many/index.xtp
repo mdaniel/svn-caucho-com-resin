@@ -1,0 +1,180 @@
+<document>
+  <header>
+    <product>resin</product>
+    <title>Amber One-To-Many Relations</title>
+        <description>
+          <p>Introduces a one-to-many relation, i.e. a collection.</p>
+        </description>
+    <type>tutorial</type>
+    <tutorial-startpage>one2many</tutorial-startpage>
+  </header>
+
+<body>
+<summary/>
+
+<p>Amber manages tables in a relational database using a Java
+bean interface.</p>
+
+<section title="Files in this tutorial">
+<deftable>
+<tr><td><viewfile-link file="WEB-INF/classes/example/Student.java"/>
+    <td>The Student bean.
+<tr><td><viewfile-link file="WEB-INF/classes/example/Student.hbm.xml"/>
+    <td>The Student configuration file.
+<tr><td><viewfile-link file="WEB-INF/classes/example/House.java"/>
+    <td>The House bean.
+<tr><td><viewfile-link file="WEB-INF/classes/example/House.hbm.xml"/>
+    <td>The House configuration file.
+<tr><td><viewfile-link file="WEB-INF/classes/example/OneToManyServlet.java"/>
+    <td>The OneToMany test servlet.
+<tr><td><viewfile-link file="WEB-INF/web.xml"/>
+    <td>Configures the Amber resource and Database
+<tr><td><viewfile-link file="WEB-INF/classes/example/InitResource.java"/>
+    <td>A resource to initialize the database for the demo
+</deftable>
+</section>
+
+<section title="Database Schema">
+
+<example title="course.sql">
+CREATE TABLE amber_many2one_houses (
+  id INTEGER PRIMARY KEY,
+
+  name VARCHAR(250),
+);
+
+INSERT INTO amber_many2one_houses VALUES (1, 'Gryffindor')
+INSERT INTO amber_many2one_houses VALUES (2, 'Slytherin')
+INSERT INTO amber_many2one_houses VALUES (3, 'Hufflepuff')
+INSERT INTO amber_many2one_houses VALUES (4, 'Ravenclaw')
+	
+CREATE TABLE amber_many2one_students (
+  id INTEGER PRIMARY KEY,
+  name VARCHAR(250),
+  house INTEGER
+)
+
+INSERT INTO amber_many2one_students VALUES (1, 'Harry Potter', 1)
+INSERT INTO amber_many2one_students VALUES (2, 'Ron Weasley', 1)
+INSERT INTO amber_many2one_students VALUES (3, 'Hermione Granger', 1)
+	
+INSERT INTO amber_many2one_students VALUES (4, 'Draco Malfoy', 2)
+INSERT INTO amber_many2one_students VALUES (5, 'Millicent Bustrode', 2)
+	
+INSERT INTO amber_many2one_students VALUES (6, 'Justin Finch-Fletchly', 3)
+INSERT INTO amber_many2one_students VALUES (7, 'Cho Chang', 3)
+	
+INSERT INTO amber_many2one_students VALUES (8, 'Terry Boot', 4)
+INSERT INTO amber_many2one_students VALUES (9, 'Luna Lovegood', 4)
+</example>
+
+</section>
+
+<section title="Student Class">
+
+<example title="Student.java">
+package example;
+
+public class Course {
+  private int _id;
+  private String _name;
+  private House _house;
+
+  public int getId()
+  {
+    return _id;
+  }
+
+  public void setId(int id)
+  {
+    _id = id;
+  }
+
+  public String getName()
+  {
+    return _name;
+  }
+
+  public void setName(String name)
+  {
+    _name = name;
+  }
+
+  public House getHouse()
+  {
+    return _house;
+  }
+
+  public void setHouse(House house)
+  {
+    _house = house;
+  }
+}
+</example>
+
+</section>
+
+<section title="Configuration">
+
+<example title="example/Student.hbm.xml">
+&lt;hibernate-mapping>
+  &lt;class name="example.Student" table="amber_many2one_students">
+    &lt;id name="id"/>
+
+    &lt;property name="name"/>
+
+    &lt;many-to-one name="house"/>
+  &lt;/class>
+&lt;/hibernate-mapping>
+</example>
+
+<example title="example/House.hbm.xml">
+&lt;hibernate-mapping>
+  &lt;class name="example.House" table="amber_many2one_houses">
+    &lt;id name="id"/>
+
+    &lt;property name="name"/>
+  &lt;/class>
+&lt;/hibernate-mapping>
+</example>
+
+<deftable>
+<tr><th>Hibernate configuration<th>meaning<th>default
+<tr><td>hibernate-mapping<td>top-level xml node for the Hibernate syntax<td>required
+<tr><td>class<td>Configures a Java class as an entity<td>required
+<tr><td>name<td>name of the class or property<td>required
+<tr><td>table<td>name of the database table for the class<td>the class name
+<tr><td>id<td>configures a field as the table's primary key<td>
+<tr><td>property<td>configures a field as a property<td>
+<tr><td>many-to-one<td>configures a field as a many-to-one relationproperty<td>
+</deftable>
+
+</section>
+
+<section title="Client Servlet">
+
+<example title="Using the House from the Student">
+AmberConnection aConn = ...;
+
+Student student = (Student) aConn.load(Student.class, 1);
+
+out.println(student.getName() + ", " + student.getHouse().getName());
+</example>
+
+<example title="Using the house relation in a query">
+AmberConnection aConn = ...;
+
+String sql = ("SELECT o.name, o.house.name" +
+              " FROM example.Student AS o" +
+              " ORDER BY o.house.name, o.name");
+
+ResultSet rs = aConn.query(sql);
+while (rs.next()) {
+  out.print(rs.getString(1) + ", " + rs.getString(2));
+}
+</example>
+
+</section>
+
+</body>
+</document>

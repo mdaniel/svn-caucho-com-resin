@@ -1,0 +1,701 @@
+<document>
+<header>
+  <product>resin</product>
+  <title>Log</title>
+  <description>
+  <p>Resin can perform access logging, specify where JDK
+  logging interface messages go, and redirect the stderr and
+  stdout for your applications.</p>
+  </description>
+</header>
+
+<body>
+<summary objsummary='localtoc'/>
+
+<section title="Log Configuration Tags">
+
+<defun title="stdout-log">
+<parents>resin, server, host-default, web-app-default, web-app</parents>
+<default>use the JDK's destination for System.out</default>
+
+<p>Configure the destination for <var>System.out</var>.</p>
+
+<p>Usage of the <var/stdout-log/> overrides a previous usage.  For
+example, specifying <var/stdout-log/> as a child of a 
+<a config-tag='web-app'/> causes a redirection of <var/System.out/> for
+that web application only, and will override the <var/System.out/>
+location in the enclosing <a config-tag='host'/>.</p>
+
+<warn>The <var/path/> must not be the same as the path specified on the
+command line with <code>-stdout</code>.  If it is, there will be conflicts with
+which process owns the file.</warn>
+
+<deftable-childtags>
+<tr><td>path
+    <td>Output path for the stream, see <a href="#path">"Log Paths"</a>.  
+    <td>required
+<tr><td>timestamp
+    <td>a timestamp <a href="#timestamp">format string</a> 
+        to use at the beginning of each log line.
+    <td>no timestamp
+<tr><td>rollover-period
+    <td>how often to rollover the log.  Specify in days (15D), weeks (2W), 
+        months (1M), or hours (1h). See <a href="#rollover">Rollovers</a>. 
+    <td>none
+<tr><td>rollover-size
+    <td>maximum size of the file before a rollover occurs, in bytes (50000), 
+        kb (128kb), or megabytes (10mb).  
+        See <a href="#rollover">Rollovers</a>.
+    <td>1mb
+<tr><td>archive-format
+    <td>the format for the archive filename when a rollover occurs,
+        see <a href="#rollover">Rollovers</a>.
+    <td>see below
+</deftable-childtags>
+
+<p>The default archive format is
+<pre>
+  <var/path/> + ".%Y%m%d" or
+  <var/path/> + ".%Y%m%d.%H" if rollover-period &lt; 1 day.
+</pre>
+
+<p>The following example configures <var/System.out/> for a 
+<a config-tag='host'/>.  Unless a <a config-tag="web-app">web-app</a> overrides
+with it's own <code>stdout-log</code>, all web-apps in the host will write to
+the same output file.</p>
+
+<example>
+...
+&lt;host id='foo.com'>
+  &lt;stdout-log path='/var/log/foo/stdout.log'
+              rollover-period='1W'/>
+  ...
+&lt;/host>
+...
+  </example>
+
+</defun>
+
+<defun title="stderr-log">
+<parents>resin, server, host-default, web-app-default, web-app</parents>
+<default>use the JDK's destination for System.err</default>
+
+<p>Configure the destination for <var/System.err/>.</p>
+
+<p>Usage of the <var/stderr-log/> overrides a previous usage.  For
+example, specifying <var/stderr-log/> as a child of a 
+<a config-tag='web-app'/> causes a redirection of <var/System.err/> for
+that web application only, and will override the <var/System.err/>
+location in the enclosing <a config-tag='host'/>.</p>
+
+<warn>The <var/path/> must not be the same as the path specified on the
+command line with <code>-stderr</code>.  If it is, there will be conflicts with
+which process owns the file.</warn>
+
+<deftable-childtags>
+<tr><td>path
+    <td>Output path for the stream, see <a href="#path">"Log Paths"</a>.  
+    <td>required
+<tr><td>timestamp
+    <td>a timestamp <a href="#timestamp">format string</a> 
+        to use at the beginning of each log line.
+    <td>no timestamp
+<tr><td>rollover-period
+    <td>how often to rollover the log.  Specify in days (15D), weeks (2W), 
+        months (1M), or hours (1h). See <a href="#rollover">Rollovers</a>. 
+    <td>none
+<tr><td>rollover-size
+    <td>maximum size of the file before a rollover occurs, in bytes (50000), 
+        kb (128kb), or megabytes (10mb).  
+        See <a href="#rollover">Rollovers</a>.
+    <td>1mb
+<tr><td>archive-format
+    <td>the format for the archive filename when a rollover occurs,
+        see <a href="#rollover">Rollovers</a>.
+    <td>see below
+</deftable-childtags>
+
+<p>The default archive format is
+<pre>
+  <var/path/> + ".%Y%m%d" or
+  <var/path/> + ".%Y%m%d.%H" if rollover-period &lt; 1 day.
+</pre>
+
+<p>The following example configures <var/System.err/> for a 
+<a config-tag='host'/>.  Unless a <a config-tag="web-app">web-app</a> overrides
+with it's own <code>stderr-log</code>, all web-apps in the host will write to
+the same output file.</p>
+
+<example>
+...
+&lt;host id='foo.com'>
+  &lt;stderr-log path='/var/log/foo/stderr.log'
+              rollover-period='1W'/>
+  ...
+&lt;/host>
+...
+</example>
+
+</defun>
+
+<defun title="access-log" version="Resin 2.1">
+<parents>server, host-default, host, web-app-default, web-app</parents>
+<default><TODO/></default>
+
+<p>Specify the access log file.</p>
+
+<p>As a child of <a config-tag="web-app"/>, overrides the
+definition in the <a config-tag="host"/> that the web-app is
+deployed in. As a child of <a config-tag="host"/>, overrides the
+definition in the <a config-tag="server"/> that the host is
+in.</p>
+
+<deftable-childtags>
+<tr><td>path
+    <td>Output path for the log entries, see 
+        <a href="#path">"Log Paths"</a>.
+    <td>required
+<tr><td>format
+    <td>Access log format.
+    <td>see below
+<tr><td>rollover-period
+    <td>how often to rollover the log.  Specify in days (15D), weeks (2W), 
+        months (1M), or hours (1h). See <a href="#rollover">Rollovers</a>. 
+    <td>none
+<tr><td>rollover-size
+    <td>maximum size of the file before a rollover occurs, in bytes (50000), 
+        kb (128kb), or megabytes (10mb).  
+        See <a href="#rollover">Rollovers</a>.
+    <td>1mb
+<tr><td>archive-format
+    <td>the format for the archive filename when a rollover occurs,
+        see <a href="#rollover">Rollovers</a>.
+    <td>see below
+<tr><td>resin:type
+    <td>a class extending <a href="javadoc|com.caucho.server.log.AccessLog|"/>
+        for custom logging
+    <td>com.caucho.server.log.AccessLog
+<tr><td>init<td>bean-style initialization for the custom class<td>n/a
+</deftable-childtags>
+
+<p>The default archive format is
+<pre>
+  <var/path/> + ".%Y%m%d" or
+  <var/path/> + ".%Y%m%d.%H" if rollover-period < 1 day.
+</pre>
+
+<example>
+...
+&lt;host id=''>
+  &lt;access-log path='log/access.log'&gt;
+    &lt;rollover-period>2W&lt;/rollover-period>
+  &lt;/access-log>
+  ...
+&lt;/host&gt;
+...
+</example>
+
+<p>The access log formatting variables follow the Apache variables:</p>
+
+<deftable>
+<tr><td>%b<td>result content length
+<tr><td>%h<td>remote IP addr
+<tr><td>%{<var/xxx/>}i<td>request header <var/xxx/>
+<tr><td>%{<var/xxx/>}o<td>response header <var/xxx/>
+<tr><td>%{<var/xxx/>}c<td>cookie value <var/xxx/>
+<tr><td>%n<td>request attribute
+<tr><td>%r<td>request URL
+<tr><td>%s<td>status code
+<tr><td>%{<var/xxx/>}t<td>request date with optional time format string.
+<tr><td>%T<td>time of request in seconds
+<tr><td>%u<td>remote user
+<tr><td>%U<td>request URI
+</deftable>
+
+<p>The default format is:</p>
+
+<def> "%h %l %u %t \"%r\" %>s %b \"%{Referer}i\" \"%{User-Agent}i\"" </def>
+
+<p><var/resin:type/> allows for custom logging.  Applications can
+extend a custom class from <a href="javadoc|com.caucho.http.log.AbstractAccessLog|"/>.  
+<a href="doc|config|init">Bean-style initialization</a> can be used to set bean
+parameters in the custom class.</p>
+
+<TODO>better example</TODO>
+
+<example>
+...
+&lt;host id='foo.com'>
+  &lt;access-log resin:type='test.MyLog'>
+             href='$server-root/foo/error.log'
+             rollover-period='1W'
+    &lt;init&gt;
+      &lt;foo&gt;bar&lt;/foo&gt;
+    &lt;/init&gt;
+  &lt;/access-log>
+  ...
+&lt;/host>
+...
+</example>
+
+</defun>
+
+<defun title="log">
+<parents>resin, server, host-default, host, web-app-default, web-app</parents>
+<default><TODO/></default>
+   
+<p>Configure the amount and destination of debug logging for the JDK
+java.util.logging.* API.</p>
+
+<deftable-childtags>
+<tr><td>name
+    <td>A hierarchical name, typically aligned with the Java packaging names
+    <td>match all names
+<tr><td>level
+    <td>The <a href='#Log-Levels'>log level</a>
+    <td>info
+<tr><td>path
+    <td>Output path for the log messages, see 
+       <a href="#path">"Log Paths"</a>
+    <td>required
+
+<tr><td>timestamp
+    <td>a timestamp <a href="#timestamp">format string</a> 
+        to use at the beginning of each log line.
+    <td>"[%Y/%m/%d %H:%M:%S.%s] "
+<tr><td>format
+    <td>a <a href="#Format-String">format string</a> to control the 
+        output of each log message. Since Resin 3.0.5.
+    <td>${'${'}log.message}
+
+<tr><td>rollover-period
+    <td>how often to rollover the log.  Specify in days (15D), weeks (2W), 
+        months (1M), or hours (1h). See <a href="#rollover">Rollovers</a>. 
+    <td>none
+<tr><td>rollover-size
+    <td>maximum size of the file before a rollover occurs, in bytes (50000), 
+        kb (128kb), or megabytes (10mb).  
+        See <a href="#rollover">Rollovers</a>.
+    <td>1mb
+<tr><td>archive-format
+    <td>the format for the archive filename when a rollover occurs,
+        see <a href="#rollover">Rollovers</a>.
+    <td>see below
+
+<tr><td>handler
+    <td>add a custom Handler, the name of a class that extends 
+        <a href="javadoc|java.util.logging.Handler|"/>
+    <td>&nbsp;
+<tr><td>formatter
+    <td>set a custom Formatter, the name of a class that extends 
+        <a href="javadoc|java.util.logging.Formatter|"/>
+    <td>none, or <a href="javadoc|com.caucho.log.ELFormatter|"/> if 
+        <var/format/> is used.
+</deftable-childtags>
+
+<p>The default archive format is
+<pre>
+  <var/path/> + ".%Y%m%d" or
+  <var/path/> + ".%Y%m%d.%H" if rollover-period &lt; 1 day.
+</pre>
+
+<p>For example, to log everything to standard error use:</p>
+
+<example>
+&lt;resin&gt;
+  &lt;log name='' level='all' path='stderr:' timestamp="[%H:%M:%S.%s]"/>
+  ...
+&lt;/resin&gt;
+</example>
+
+<p>A useful technique is to enable full debug logging to track down a problem:
+
+<example title="debug logging">
+
+&lt;resin&gt;
+  ...
+  &lt;log name='' level='finer' path='log/debug.log'
+       timestamp="[%H:%M:%S.%s]"
+       rollover-period='1h' rollover-count='1'/&gt;
+  ...
+&lt;/resin&gt;
+</example>
+
+<p>More examples of debug logging are in the <a href="doc|troubleshoot|technique#debug-log">Troubleshooting</a> section.</p>
+
+<p>The class that corresponds to &lt;log&gt; is <a href="javadoc|com.caucho.log.LogConfig|"/>.</p>
+
+<section title="Log names">
+
+<p>The JDK logging api uses a hierarchical naming scheme.  Typically the name
+is aligned with a java class name.  When you specify a name, all logging
+requests that use a name that starts with the name you have specified are
+matched.  For example: <code>&lt;log name="example.hogwarts" ...&gt;</code>
+matches a logging request for both "example.hogwarts.System" and
+"example.hogwarts.gryffindor.System"</p>
+
+<p>Resin's logging is based on Resin's source class names.  The following are
+useful logs.</p>
+
+<deftable>
+<tr><th>log <var/name/> value<th>Meaning
+<tr><td>""<td>Debug everything
+<tr><td>com.caucho.jsp<td>Debug jsp
+<tr><td>com.caucho.java<td>Java compilation
+<tr><td>com.caucho.xsl<td>XSL debugging
+<tr><td>com.caucho.server.port<td>TCP port debugging and threading
+<tr><td>com.caucho.server.port.AcceptPool<td>port thread creation
+<tr><td>com.caucho.server.http<td>HTTP-related debugging
+<tr><td>com.caucho.server.webapp<td>web-app related debugging
+<tr><td>com.caucho.server.cache<td>Cache related debugging
+<tr><td>com.caucho.sql<td>Database pooling
+<tr><td>com.caucho.transaction<td>Transaction handling
+<tr><td>com.caucho.ejb<td>EJB handling
+</deftable>
+</section>
+
+
+<section title="Use logging in applications">
+
+<p>You can take advantage of the JDK's logging facility to add
+logging to your application.  It's a good idea to keep such log
+messages in your code, when your application goes into
+production you can set the log level to <var/warn/>; if
+problem's occur you can set it to <var/finest/> and still have
+all of the information you need to troubleshoot.</p>
+
+<example>
+import java.util.logging.Logger;
+import java.util.logging.Level;
+
+public class Foo {
+  static protected final Logger log = 
+    Logger.getLogger(Foo.class.getName());
+
+  ...
+  void doFoo(String bar)
+  {
+    // check for log level if your logging call does anything more
+    // than pass parameters
+    if (log.isLoggable(Level.FINER))
+        log.entering("Foo","doFoo()", new Object[] { bar });
+    ...
+
+    log.info(...);
+
+    try {
+        ...
+    } catch (ExpectedException ex) {
+      log.log(Level.FINE, "expected exception", ex);
+    }
+  }
+  ...
+}
+</example>
+</section>
+
+<section title="Log levels">
+<p>The <var/level/> for log tags matches the levels in the JDK 
+<a href="javadoc|java.util.logging.Level|"/>.</p>
+
+<deftable>
+<tr><th>Name<th>API<th>Meaning
+<tr><td>off<td>&nbsp;<td>turn off logging
+<tr><td>severe<td>log.severe("...")<td>a serious failure, likely to prevent normal program execution
+<tr><td>warning<td>log.warning("...")<td>a potential problem
+<tr><td>info<td>log.info("...")<td>informational messages
+<tr><td>config<td>log.config("...")<td>static configuration messages, meant to assist in debugging problems associated with particular configurations
+<tr><td>fine<td>log.fine("...")<td>tracing information
+<tr><td>finer<td>log.finer("...")<td>fairly detailed tracing message
+<tr><td>finest<td>log.finest("...")<td>highly detailed tracing message
+<tr><td>all<td>&nbsp;<td>all messages should be logged
+</deftable>
+
+</section>
+
+<section title="&lt;logger&gt; specifies multiple names for one destination">
+<p>&lt;log> can contain multiple &lt;logger> entries.</p>
+
+<example title="multiple log">
+&lt;resin&gt;
+  &lt;!-- log request and response info --&gt;
+  &lt;log path='stdout:' timestamp='[%H:%M:%S.%s] '&gt;
+    &lt;logger name="com.caucho.server.port.TcpConnection" level="fine"/&gt;
+    &lt;logger name="com.caucho.server.http.HttpRequest" level="fine"/&gt;
+    &lt;logger name="com.caucho.server.connection.AbstractHttpResponse" level="fine"/&gt;
+  &lt;/log&gt;
+
+  ...
+&lt;/resin&gt;
+</example>
+</section>
+
+<section name="Format-String" title="Log format string">
+
+<p>The <var/format/> for log tags is used to specify a format string for each
+log message.  <code/format/> recognizes EL-expressions. The EL variable
+<var/log/> is a 
+<a href="javadoc|com.caucho.log.ELFormatter.ELFormatterLogRecord|"/>
+ object.</p>
+
+<example title="log format string">
+
+&lt;log name='' level='all' path='stderr:' timestamp="[%H:%M:%S.%s]"
+     format=" ${'${'}log.level} ${'${'}log.loggerName} ${'${'}log.message}"/&gt;
+
+</example>
+
+<deftable title="log EL variable `log' is a LogRecord">
+<tr><th>Accessor<th>Value
+<tr><td>${'${'}log.level}<td>The level of the log record
+<tr><td>${'${'}log.name}<td>The source loggers name
+<tr><td>${'${'}log.message}<td>The message, with no formatting or localization
+<tr><td>${'${'}log.millis}<td>event time in milliseconds since 1970
+<tr><td>${'${'}log.sourceClassName}<td>Get the name of the class that issued the logging request (may not be available at runtime)
+<tr><td>${'${'}log.sourceMethodName}<td>Get the name of the method that issued the logging request (may not be available at runtime)
+<tr><td>${'${'}log.threadID}<td>Get an <var/int/> identifier of the thread where the logging request originated
+<tr><td>${'${'}log.thrown}<td>Get any <a href="javadoc|java.lang.Throwable|"/> associated with the logging request
+</deftable>
+
+<p>You can also use the <a href="el.xtp">Environment EL variables</a> in your format string:</p>
+
+<example title="log format string using an Environment EL variable.">
+&lt;host ...&gt;
+
+  &lt;web-app&gt;
+    &lt;log name='' level='all' path='log/debug.log' timestamp="[%H:%M:%S.%s]"
+         format=" [<b>${'${'}app.contextPath}</b>] ${'${'}log.message}"/&gt;
+
+    ...
+  &lt;/web-app&gt;
+
+  ...
+
+&lt;/host&gt;
+</example>
+<results>
+[14:55:10.189] [/foo] `null' returning JNDI java:
+       model for EnvironmentClassLoader[web-app:http://localhost:8080/foo]
+[14:55:10.189] [/foo] JNDI lookup `java:comp/env/caucho/auth'
+       exception javax.naming.NameNotFoundException: java:comp/env/caucho/auth
+[14:55:10.199] [/foo] Application[http://localhost:8080/foo] starting
+
+</results>
+
+<p>The <a href="doc|config|el#sprintf">fmt.sprintf()</a> function can
+space pad the values and make the results look a little nicer:</p>
+
+<example title="fmt.sprintf() in log format string">
+&lt;log name='' level='all' path='stderr:' timestamp="[%H:%M:%S.%s]"
+     format=" ${'${'}fmt.sprintf('%-7s %45s %s',log.level,log.loggerName,log.message)}"/&gt;
+</example>
+
+<results>
+[14:28:08.137] INFO com.caucho.vfs.QJniServerSocket Loaded Socket JNI library.
+[14:28:08.137] INFO com.caucho.server.port.Port http listening to *:8080
+[14:28:08.137] INFO com.caucho.server.resin.ServletServer ServletServer[] starting
+[14:28:08.307] INFO com.caucho.server.port.Port hmux listening to localhost:6802
+[14:28:08.437] INFO com.caucho.server.host.Host Host[] starting 
+</results>
+
+
+<p><a href="doc|config|el#sprintf">fmt.sprintf()</a> and <a href="doc|config|el#timestamp">fmt.timestamp()</a> can be used to produce CSV files:</p>
+
+<example title="CSV log files">
+&lt;log name='' level='all' path='log/debug.csv' timestamp=""
+     format="${'${'}fmt.sprintf('%vs,%d,%d,%vs,%vs',fmt.timestamp('%Y-%m-%d %H:%M:%S.%s'), 
+               log.threadID, log.level.intLevel(), log.loggerName, log.message)}"/&gt;
+</example>
+
+<results>
+"2003-11-17 14:46:14.529",10,800,"com.caucho.vfs.QJniServerSocket",
+            "Loaded Socket JNI library."
+"2003-11-17 14:46:14.549",10,800,"com.caucho.server.port.Port",
+            "http listening to *:8080"
+"2003-11-17 14:46:14.549",10,800,"com.caucho.server.resin.ServletServer",
+            "ServletServer[] starting"
+"2003-11-17 14:46:14.719",10,800,"com.caucho.server.port.Port",
+            "hmux listening to localhost:6802"
+"2003-11-17 14:46:14.850",10,800,"com.caucho.server.host.Host",
+            "Host[] starting"
+"2003-11-17 14:46:15.100",10,800,"com.caucho.server.webapp.Application",
+            "Application[http://localhost:8080/freelistbm] starting"
+</results>
+
+</section>
+
+
+<section title="com.caucho.log.SyslogHandler">
+
+<p>On Unix systems, the SyslogHandler lets you log messages to syslog.</p>
+
+<example>
+&lt;log name="" level="warning">
+  &lt;handler resin:type="com.caucho.log.SyslogHandler">
+    &lt;facility>daemon&lt;/facility>
+    &lt;severity>notice&lt;/severity>
+  &lt;/handler>
+&lt;/log>
+</example>
+
+<p>The possible values for <var/facility/> are user, mail, daemon, auth, lpr,
+news, uucp, cron, authpriv, ftp, local0, local1, local2, local3, local4,
+local5, local6, local7. The default is <i/daemon/>.</p>
+
+<p>The possible values for <var/severity/> are emerg, alert, crit, err,
+warning, notice, info, debug. The default is <i/info/>.</p>
+
+<p>See also `<code>man 3 syslog</code>' and `<code>man syslog.conf</code>'.
+</section>
+
+</defun> <!-- log  ...  -->
+</section> <!-- log ...  -->
+
+<section name="path" title="Log Paths">
+
+<p><var/path/> is used to configure a destination for the messages.  Typically,
+<code/access-log/>, <code/stdout-log/>, and <code/stderr-log/> are configured
+to go to files, and <code/log/> is configured to go to a file or to
+<var/stderr/> or <var/stdout/> so that they show up on the console screen.
+
+<deftable>
+<tr><th>Path<th>Result
+<tr><td><var/filesystem path/><td>output log entries to a file
+<tr><td>stdout:<td>output log entries to stdout
+<tr><td>stderr:<td>output log entries to stderr
+</deftable>
+
+<example title="Log messages to stdout">
+  &lt;log name="" level="all" path="stdout:"/&gt;
+</example>
+
+<p>You can use the <a href="doc|config|el">Environment EL variables</a> as part
+of your filesystem path:</p>
+
+<example title="Filesystem path using Environment EL variables">
+  &lt;log name="" level="all" 
+       path="log/debug-${'${'}server.name}.log"
+       rollover-period="1h" rollover-count="1"/&gt;
+</example>
+
+</section>
+
+<section name="rollover" title="Rollovers">
+<p>Log rollovers are a way to stop your log files from getting too large.  When
+a rollover is triggered, the existing log file is renamed and a new file is
+started.</p>
+
+<section title="Size based rollover">
+<p>A size based rollover is triggered when the size of the file reaches a
+certain amount.  The default Resin behaviour for log's is to rollover when the
+file size reaches 1mb.</p>
+
+<p><code/rollover-size/> is used to specify the maximum size, and can be in
+bytes (50000), kilobytes (128kb), or megabytes (10mb).  A value of <code/-1/>
+disables size based rollovers.</p>
+</section>
+
+<section title="Time based rollover">
+
+<p>A time based rollover is triggered when a certain period of time has passed
+since the last rollover.  The default Resin behaviour is to perform no time
+based rollover, unless rollover-size has been disabled with a value of -1 in
+which case the default time period is 1 month.</p>
+
+<p><code/rollover-period/> is used to specify the time period, and can be in
+days (15D), weeks (2W), months (1M), or hours (1h).</p>
+</section>
+
+<section title="Archive files">
+<p>When a rollover is triggered, the log file is renamed (archived) and a new
+log file is started.</p>
+
+<p><code/archive-format/> is used to specify the name of the archive file.  It
+can contain regular characters, <a href="doc|config|el">EL Environment
+variables</a>, and % codes that capture the current date and time.  The % codes
+are the same as the ones used for <code/timestamp/> 
+(see <a href="#timestamp">Timestamp format string)</a>.</p>
+
+<p>The default behaviour depends on the value of rollover-period.  If
+rollover-period is greater than one day, or is not being used because
+rollover-size has been specified, the archive filename is the original path
+with <code/.%Y%m%d/> appended.  If rollover-period is less than one day, the
+archive filename is the original path with <code/.%Y%m%d.%H/> appended.</p>
+
+<TODO>example</TODO>
+</section>
+
+<section title="Disabling rollovers">
+
+<p>To completely disable rollovers, set the <code/rollover-size/> to such a
+high number that it will never occur:</p>
+
+<example title="disable log rollovers">
+  &lt;stdout-log path="log//stdout.log" rollover-size="1024mb"/&gt;
+</example>
+
+</section>
+
+<section title="Compression">
+
+<p>Rollover log files can be compressed with gzip or zip.  The
+extension of the archive-format determines the compression.</p>
+
+<example>
+&lt;log name="" level="warning" path='log/error.log'
+     archive-format="%Y-%m-%d.error.log.gz"
+     rollover-period="1D"/>
+
+&lt;access-log path="log/access.log"
+            archive-format="access-%Y%m%d.log.gz"
+            rollover-period="1D"/>
+</example>
+
+</section>
+
+</section> <!-- rollovers -->
+
+<section name="timestamp" title="Timestamp format string">
+
+<p>The <var/timestamp/> for log tags is a format string which can contain
+percent codes which are substituted with time and date values.</p>
+
+<deftable>
+<tr><th>Code<th>Meaning
+<tr><td>%a<td>day of week (short)
+<tr><td>%A<td>day of week (verbose)
+<tr><td>%b<td>day of month (short)
+<tr><td>%B<td>day of month (verbose)
+<tr><td>%c<td>Java locale date
+<tr><td>%d<td>day of month (two-digit)
+<tr><td>%H<td>24-hour (two-digit)
+<tr><td>%I<td>12-hour (two-digit)
+<tr><td>%j<td>day of year (three-digit)
+<tr><td>%m<td>month (two-digit)
+<tr><td>%M<td>minutes
+<tr><td>%p<td>am/pm
+<tr><td>%S<td>seconds
+<tr><td>%s<td>milliseconds
+<tr><td>%W<td>week in year (three-digit)
+<tr><td>%w<td>day of week (one-digit)
+<tr><td>%y<td>year (two-digit)
+<tr><td>%Y<td>year (four-digit)
+<tr><td>%Z<td>time zone (name)
+<tr><td>%z<td>time zone (+/-0800)
+</deftable>
+
+
+<example title="typical timestamp for the log tag">
+    &lt;log name='' level='all' path='stderr:' timestamp="[%H:%M:%S.%s]"/&gt;
+</example>
+
+<results>
+[22:50:11.648] Application[/doc] starting
+[22:50:11.698] http listening to *:8080
+[22:50:11.828] hmux listening to *:6802
+</results>
+
+</section>
+
+</body>
+</document>

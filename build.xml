@@ -1,0 +1,623 @@
+<project name="resin" default="compile" basedir=".">
+
+  <property file="local.properties"/>
+
+  <property name="install" location="${basedir}/"/>
+
+  <property name="src" location="${basedir}/src"/>
+  <property name="ext" location="${basedir}/src/ext"/>
+
+  <property name="build" location="${install}/build"/>
+  <property name="lib" location="${install}/lib"/>
+  <property name="clientlib" location="${install}/clientlib"/>
+  <property name="dist" location="${install}/dist"/>
+
+
+  <property name="javac.verbose" value="no"/>
+  <property name="javac.debug" value="on"/>
+  <property name="javac.optimize" value="off"/>
+  <property name="javac.deprecation" value="off"/>
+  <property name="javac.nowarn" value="on"/>
+  <property name="javac.memoryMaximumSize" value="256m"/>
+
+  <property name="javac.source" value="1.4"/>
+
+  <property name="jar.compress" value="false"/>
+  <property name="jar.index" value="true"/>
+  <property name="jar.update" value="false"/>
+
+  <property name="shell" value="bash"/>
+
+  <target name="tstamp">
+    <tstamp/>
+    <tstamp>
+      <format property="date" pattern="EEE, dd MMM yyyy hh:mm:ss zzz"/>
+    </tstamp>
+    <tstamp>
+      <format property="vdate" pattern="yyyyMMdd'T'hhmmss"/>
+    </tstamp>
+    <tstamp>
+      <format property="snapshotdate" pattern="yyMMdd"/>
+    </tstamp>
+  </target>
+
+  <target name="init" depends="tstamp">
+    <property name="product" value="Resin"/>
+    <property name="shortproduct" value="resin"/>
+    <property name="version" value="3.0.s${snapshotdate}"/>
+    <property name="dist.name" value="${shortproduct}-${version}"/>
+
+    <mkdir dir="${build}"/>
+    <mkdir dir="${build}/webapps"/>
+    <mkdir dir="${build}/ext-webapp"/>
+
+    <condition property="unix">
+      <os family="unix"/>
+    </condition>
+
+  </target>
+
+  <target name="compile" 
+          depends="init, ejb, ejb30, j2eedeploy, jaxrpc, jca, jms, jmx, jsdk, jstl, jta, portlet, script, resin-jdk15, resin, webutil, deploy, conf, ext">
+  </target>
+
+  <target name="ejb" depends="init, jta">
+    <antcall target="module" inheritRefs="true">
+      <param name="module.name" value="ejb"/>
+      <param name="module.jar" value="ejb-20.jar"/>
+    </antcall>
+  </target>
+
+  <target name="ejb30" depends="init, ejb">
+    <antcall target="module" inheritRefs="true">
+      <param name="module.name" value="ejb30"/>
+      <param name="module.jar" value="ejb-30.jar"/>
+      <param name="javac.source" value="1.5"/>
+    </antcall>
+  </target>
+
+  <target name="j2eedeploy" depends="init">
+    <antcall target="module" inheritRefs="true">
+      <param name="module.name" value="j2eedeploy"/>
+      <param name="module.jar" value="j2eedeploy.jar"/>
+    </antcall>
+  </target>
+
+  <target name="jaxrpc" depends="init">
+    <antcall target="module" inheritRefs="true">
+      <param name="module.name" value="jaxrpc"/>
+      <param name="module.jar" value="jaxrpc.jar"/>
+    </antcall>
+  </target>
+
+  <target name="jca" depends="init">
+    <antcall target="module" inheritRefs="true">
+      <param name="module.name" value="jca"/>
+      <param name="module.jar" value="jca-15.jar"/>
+    </antcall>
+  </target>
+
+  <target name="resin-jdk15" depends="init">
+    <antcall target="module" inheritRefs="true">
+      <param name="module.name" value="resin-jdk15"/>
+      <param name="javac.source" value="1.5"/>
+    </antcall>
+  </target>
+
+  <target name="jms" depends="init">
+    <antcall target="module" inheritRefs="true">
+      <param name="module.name" value="jms"/>
+      <param name="module.jar" value="jms-11.jar"/>
+    </antcall>
+  </target>
+
+  <target name="jmx" depends="init">
+    <antcall target="module" inheritRefs="true">
+      <param name="module.name" value="jmx"/>
+      <param name="module.jar" value="jmx-12.jar"/>
+    </antcall>
+  </target>
+
+  <target name="jsdk" depends="init">
+    <antcall target="module" inheritRefs="true">
+      <param name="module.name" value="jsdk"/>
+      <param name="module.jar" value="jsdk-24.jar"/>
+    </antcall>
+  </target>
+
+  <target name="jstl" depends="init, jsdk">
+    <antcall target="module" inheritRefs="true">
+      <param name="module.name" value="jstl"/>
+      <param name="module.jar" value="jstl-11.jar"/>
+    </antcall>
+  </target>
+
+  <target name="jta" depends="init">
+    <antcall target="module" inheritRefs="true">
+      <param name="module.name" value="jta"/>
+      <param name="module.jar" value="jta-101.jar"/>
+    </antcall>
+  </target>
+  
+  <target name="portlet" depends="init">
+    <antcall target="module" inheritRefs="true">
+      <param name="module.name" value="portlet"/>
+      <param name="module.jar" value="portlet-10.jar"/>
+    </antcall>
+  </target>
+  
+  <target name="script" depends="init">
+    <antcall target="module" inheritRefs="true">
+      <param name="module.name" value="script"/>
+      <param name="module.jar" value="script-10.jar"/>
+    </antcall>
+  </target>
+
+  <target name="resin" depends="init, ejb, ejb30, jca, jms, jmx, jsdk, jstl, jta, j2eedeploy, jaxrpc, portlet, script, resin-jdk15">
+
+    <!-- filter to insert version -->
+
+    <copy file="${src}/resin/com/caucho/Version.tmpl"
+          tofile="${src}/resin/com/caucho/Version.java"
+          preservelastmodified="true"
+          overwrite="true">
+      <filterset>
+        <filter token="VERSION" value="${version}"/>
+        <filter token="DATE" value="${date}"/>
+        <filter token="VERSION_DATE" value="${vdate}"/>
+      </filterset>
+    </copy>
+
+    <copy file="${src}/c/common/version.h.in"
+          tofile="${src}/c/common/version.h"
+          preservelastmodified="true"
+          overwrite="true">
+      <filterset>
+        <filter token="VERSION" value="${version}"/>
+        <filter token="DATE" value="${date}"/>
+        <filter token="VERSION_DATE" value="${vdate}"/>
+      </filterset>
+    </copy>
+
+    <!-- build module -->
+
+    <antcall target="module" inheritRefs="true">
+      <param name="module.name" value="resin"/>
+      <param name="javac.source" value="1.5"/>
+    </antcall>
+  </target>
+
+  <target name="saaj" depends="init">
+    <antcall target="module" inheritRefs="true">
+      <param name="module.name" value="saaj"/>
+      <param name="module.jar" value="saaj.jar"/>
+    </antcall>
+  </target>
+
+  <target name="webutil" depends="init, resin">
+    <antcall target="module" inheritRefs="true">
+      <param name="module.name" value="webutil"/>
+      <param name="javac.source" value="1.5"/>
+    </antcall>
+  </target>
+
+  <target name="module">
+    <property name="module.src" value="${src}/${module.name}"/>
+    <property name="module.build" value="${build}/${module.name}"/>
+    <property name="module.dist" value="${lib}"/>
+    <property name="module.jar" value="${module.name}.jar"/>
+
+    <property file="${module.src}/module.properties"/>
+
+    <mkdir dir="${module.build}" />
+
+    <copy todir="${module.build}">
+      <fileset dir="${module.src}">
+        <include name="**/*.xml"/>
+        <include name="**/*.rnc"/>
+        <include name="**/*.tld"/>
+        <include name="**/*.properties"/>
+        <include name="META-INF/**"/>
+      </fileset>
+    </copy>
+
+    <javac srcdir="${module.src}" destdir="${module.build}"
+           excludes="**/CVS/**" 
+           fork="true" 
+           verbose="${javac.verbose}" 
+           debug="${javac.debug}" optimize="${javac.optimize}"
+           deprecation="${javac.deprecation}" nowarn="${javac.nowarn}"
+           source="${javac.source}"
+           memoryMaximumSize="${javac.memoryMaximumSize}">
+
+      <classpath>
+        <dirset dir="${build}">
+          <include name="*"/>
+       </dirset>
+        <fileset dir="${ext}">
+          <include name="**/*.jar"/>
+        </fileset>
+      </classpath>
+    </javac>
+
+    <mkdir dir="${module.dist}" />
+
+    <jar jarfile="${module.dist}/${module.jar}"
+         compress="${jar.compress}" index="${jar.index}" update="${jar.update}"
+         manifest="${module.src}/manifest">
+      <fileset dir="${module.build}">
+        <exclude name=".cvsignore"/>
+      </fileset>
+    </jar>
+  </target>
+
+  <target name="deploy" depends="init, resin">
+    <mkdir dir="${clientlib}"/>
+    <jar jarfile="${clientlib}/resin-deploy.jar"
+         compress="${jar.compress}" index="${jar.index}" update="${jar.update}"
+         manifest="${src}/deploy/manifest">
+
+      <fileset dir="${build}/resin">
+        <include name="com/caucho/hessian/**"/>
+        <include name="com/caucho/services/**"/>
+        <include name="com/caucho/j2ee/deployclient/**"/>
+      </fileset>
+    </jar>
+  </target>
+
+  <target name="win32" if="win32binaries">
+    <mkdir dir="${install}/win32"/>
+    <mkdir dir="${install}/win32/apache-1.3"/>
+    <mkdir dir="${install}/win32/apache-2.0"/>
+
+    <copy todir="${install}/win32/apache-1.3"
+          file="${win32binaries}/src/c/apache1/Apache136/mod_caucho.dll"/>
+    <copy todir="${install}/win32/apache-2.0"
+          file="${win32binaries}/src/c/apache2/Release/mod_caucho.dll"/>
+    <copy todir="${install}/win32"
+          file="${win32binaries}/src/c/isapi_srun/release/isapi_srun.dll"/>
+    <copy todir="${install}/win32"
+          file="${win32binaries}/src/c/resin_os/release/resin_os.dll"/>
+    <copy todir="${install}"
+          file="${win32binaries}/src/c/httpd/Release/httpd.exe"/>
+    <copy todir="${install}"
+          file="${win32binaries}/src/c/setup/Release/setup.exe"/>
+
+    <chmod perm="ugo+rx">
+      <fileset dir="${install}">
+        <include name="*.exe"/>
+        <include name="win32/*.dll"/>
+      </fileset>
+    </chmod>
+  </target>
+
+  <target name="conf" depends="init, resin">
+    <copy todir="${install}/conf" preservelastmodified="true">
+      <fileset dir="conf">
+      </fileset>
+    </copy>
+  </target>
+
+  <target name="ext" depends="init, resin">
+    <copy todir="${install}/lib" preservelastmodified="true">
+      <fileset dir="${ext}">
+        <exclude name="README"/>
+      </fileset>
+    </copy>
+  </target>
+
+  <target name="webapps" depends="init, doc, quercus">
+  </target>
+
+  <target name="doc" depends="init">
+    <mkdir dir="${install}/webapps"/>
+    <jar jarfile="${install}/webapps/resin-doc.war"
+         compress="true" index="${jar.index}" update="${jar.update}">
+
+      <fileset dir="doc">
+        <exclude name="**/WEB-INF/work/**"/>
+        <exclude name="**/WEB-INF/pre_work/**"/>
+        <exclude name="**/WEB-INF/db/**"/>
+        <exclude name="**/WEB-INF/classes/**/*.class"/>
+        <exclude name="**/WEB-INF/tmp/**"/>
+        <exclude name=".cvsignore"/>
+      </fileset>
+    </jar>
+  </target>
+
+  <target name="quercus" depends="init">
+    <!--
+      compile to ${build}/quercus
+      install ${install}/webapps/quercus.war
+      -->
+  </target>
+
+  <target name="javadoc" depends="init">
+    <!--
+      compile to ${build}/javadoc
+      install ${install}/dist/resin-javadoc.war
+      -->
+  </target>
+
+  <target name="jdk14-compat">
+    <java classname="com.caucho.bytecode.compat.Jdk15Compat">
+       <classpath>
+          <fileset dir="lib">
+            <include name="*.jar" />
+          </fileset>
+       </classpath>
+<!--
+       <arg line="${build}/resin/com/caucho/util/L10N.class"/>
+-->
+       <arg line="${build}/resin"/>
+    </java>
+
+    <jar jarfile="${lib}/resin.jar"
+         compress="${jar.compress}" index="${jar.index}"
+         manifest="src/resin/manifest">
+      <fileset dir="build/resin">
+        <exclude name=".cvsignore"/>
+      </fileset>
+    </jar>
+
+    <jar jarfile="${lib}/resinboot.jar"
+         compress="${jar.compress}" index="${jar.index}"
+         manifest="src/resin/boot-manifest">
+      <fileset dir="build/resin">
+        <exclude name=".cvsignore"/>
+        <include name="com/caucho/server/boot/*"/>
+      </fileset>
+    </jar>
+
+    <java classname="com.caucho.bytecode.compat.Jdk15Compat" fork="true">
+       <classpath>
+          <fileset dir="lib">
+            <include name="*.jar" />
+          </fileset>
+       </classpath>
+       <arg line="${build}/webutil"/>
+    </java>
+
+    <jar jarfile="${lib}/webutil.jar"
+         compress="${jar.compress}" index="${jar.index}">
+      <fileset dir="build/webutil">
+        <exclude name=".cvsignore"/>
+      </fileset>
+    </jar>
+  </target>
+
+  <target name="retroweaver">
+    <java classname="com.rc.retroweaver.Weaver" fork="true">
+       <classpath>
+          <fileset dir="${src}/ext">
+            <include name="**/*.jar" />
+          </fileset>
+       </classpath>
+       <arg line="-source ${build}/resin"/>
+    </java>
+
+    <jar jarfile="${lib}/resin.jar"
+         compress="${jar.compress}" index="${jar.index}"
+         manifest="src/resin/manifest">
+      <fileset dir="build/resin">
+        <exclude name=".cvsignore"/>
+      </fileset>
+    </jar>
+
+    <jar jarfile="${lib}/resinboot.jar"
+         compress="${jar.compress}" index="${jar.index}"
+         manifest="src/resin/boot-manifest">
+      <fileset dir="build/resin">
+        <exclude name=".cvsignore"/>
+        <include name="com/caucho/server/boot/*"/>
+      </fileset>
+    </jar>
+
+    <java classname="com.rc.retroweaver.Weaver" fork="true">
+       <classpath>
+          <fileset dir="${src}/ext">
+            <include name="**/*.jar" />
+          </fileset>
+       </classpath>
+       <arg line="-source ${build}/webutil"/>
+    </java>
+
+    <jar jarfile="${lib}/webutil.jar"
+         compress="${jar.compress}" index="${jar.index}">
+      <fileset dir="build/webutil">
+        <exclude name=".cvsignore"/>
+      </fileset>
+    </jar>
+  </target>
+
+  <target name="dist" depends="dist.build, dist.package"/>
+
+  <target name="dist.build" 
+          depends="compile, webapps, win32, javadoc, jdk14-compat">
+    <property name="dist.name" value="${shortproduct}-${version}"/>
+
+    <delete dir="${dist}/${dist.name}"/>
+    <mkdir dir="${dist}/${dist.name}"/>
+
+    <copy todir="${dist}/${dist.name}" preservelastmodified="true">
+      <fileset dir="${install}">
+        <exclude name="**/*~"/>
+        <exclude name="**/.cvsignore"/>
+        <exclude name="**/*.swp"/>
+        <exclude name="**/WEB-INF/work/**"/>
+        <exclude name="**/WEB-INF/tmp/**"/>
+        <exclude name="**/WEB-INF/db/**"/>
+        <exclude name="**/lib/Regex.jar"/>
+        <exclude name="**/lib/bcel*.jar"/>
+        <exclude name="**/lib/jace.jar"/>
+
+        <include name="automake/**"/>
+        <include name="conf/**"/>
+        <include name="contrib/**"/>
+        <include name="doc/**"/>
+        <include name="lib/**"/>
+        <include name="src/**"/>
+        <include name="win32/**"/>
+        <include name="bin/**"/>
+        <include name="automake/**"/>
+
+        <include name="webapps/resin-doc.war"/>
+        <include name="webapps/ROOT/index.jsp"/>
+
+        <include name="LICENSE"/>
+        <include name="README"/>
+        <include name="build.xml"/>
+        <include name="Makefile.in"/>
+        <include name="configure"/>
+        <include name="configure.in"/>
+        <include name="httpd.exe"/>
+        <include name="setup.exe"/>
+      </fileset>
+    </copy>
+
+    <chmod perm="ugo+rx">
+      <fileset dir="${dist}/${dist.name}">
+        <include name="configure"/>
+        <include name="bin/httpd.sh"/>
+        <include name="bin/wrapper.pl"/>
+      </fileset>
+    </chmod>
+
+    <mkdir dir="${dist}/${dist.name}/licenses"/>
+  </target>
+
+  <target name="dist.package" depends="init">
+    <patternset id="dist">
+      <include name="${dist.name}/lib/**"/>
+      <include name="${dist.name}/webapps/**"/>
+      <include name="${dist.name}/contrib/**"/>
+      <include name="${dist.name}/conf/**"/>
+      <include name="${dist.name}/automake/**"/>
+      <include name="${dist.name}/bin/wrapper.pl.in"/>
+
+      <include name="${dist.name}/src/c/common/**"/>
+      <include name="${dist.name}/src/c/apache1/**"/>
+      <include name="${dist.name}/src/c/apache2/**"/>
+      <include name="${dist.name}/src/c/resin_os/**"/>
+      <include name="${dist.name}/src/c/Makefile.in"/>
+
+      <include name="${dist.name}/LICENSE"/>
+      <include name="${dist.name}/README"/>
+      <include name="${dist.name}/Makefile.in"/>
+
+      <exclude name="**/Makefile"/>
+      <exclude name="**/*.so"/>
+    </patternset>
+
+    <patternset id="dist.bin">
+      <include name="${dist.name}/**/*.dll"/>
+      <include name="${dist.name}/**/*.exe"/>
+      <include name="${dist.name}/bin/*.sh"/>
+      <include name="${dist.name}/bin/*.pl"/>
+      <include name="${dist.name}/configure"/>
+    </patternset>
+
+    <patternset id="dist.src">
+      <include name="${dist.name}/**"/>
+
+      <exclude name="${dist.name}/webapps/*.war"/>
+      <exclude name="${dist.name}/lib/**"/>
+      <include name="**/.cvsignore"/>
+    </patternset>
+
+    <delete file="${dist}/${shortproduct}-${version}.zip"/>
+    <delete file="${dist}/${shortproduct}-${version}-src.zip"/>
+    <delete file="${dist}/${shortproduct}-${version}.tar.gz"/>
+    <delete file="${dist}/${shortproduct}-${version}-src.tar.gz"/>
+
+    <delete file="${dist}/hessian-${version}.jar"/>
+    <delete file="${dist}/hessian-${version}-src.jar"/>
+
+    <zip destfile="${dist}/${shortproduct}-${version}.zip">
+      <zipfileset dir="${dist}">
+        <patternset refid="dist"/>
+      </zipfileset>
+      <zipfileset dir="${dist}" filemode="775">
+        <patternset refid="dist.bin"/>
+      </zipfileset>
+    </zip>
+
+    <zip destfile="${dist}/${shortproduct}-${version}-src.zip"
+         basedir="${dist}">
+      <patternset refid="dist.src"/>
+    </zip>
+
+    <tar destfile="${dist}/${shortproduct}-${version}.tar.gz"
+         longfile="gnu" compression="gzip">
+      <tarfileset dir="${dist}">
+        <patternset refid="dist"/>
+      </tarfileset>
+      <tarfileset dir="${dist}" mode="775">
+        <patternset refid="dist.bin"/>
+      </tarfileset>
+    </tar>
+
+    <tar destfile="${dist}/${shortproduct}-${version}-src.tar.gz"
+         basedir="${dist}" longfile="gnu" compression="gzip">
+      <patternset refid="dist.src"/>
+    </tar>
+
+    <jar destfile="${dist}/hessian-${version}.jar">
+      <fileset dir="${build}/resin">
+        <exclude name=".cvsignore"/>
+        <exclude name="*~"/>
+        <exclude name="**/CVS/**"/>
+        <include name="com/caucho/util/CharBuffer.class"/>
+        <include name="com/caucho/hessian/**"/>
+        <include name="com/caucho/burlap/**/"/>
+        <include name="com/caucho/services/**"/>
+      </fileset>
+    </jar>
+
+    <jar destfile="${dist}/hessian-${version}-src.jar">
+      <fileset dir="${src}/resin">
+        <exclude name=".cvsignore"/>
+        <exclude name="*~"/>
+        <exclude name="**/CVS/**"/>
+        <include name="com/caucho/hessian/**"/>
+        <include name="com/caucho/burlap/**"/>
+        <include name="com/caucho/services/**"/>
+      </fileset>
+    </jar>
+
+    <copy tofile="${dist}/${shortproduct}-3_0-snap.zip"
+          file="${dist}/${shortproduct}-${version}.zip"/>
+
+    <copy tofile="${dist}/${shortproduct}-3_0-snap.tar.gz"
+          file="${dist}/${shortproduct}-${version}.tar.gz"/>
+
+    <copy tofile="${dist}/${shortproduct}-3_0-snap-src.zip"
+          file="${dist}/${shortproduct}-${version}-src.zip"/>
+
+    <copy tofile="${dist}/${shortproduct}-3_0-snap-src.tar.gz"
+          file="${dist}/${shortproduct}-${version}-src.tar.gz"/>
+  </target>
+
+  <target name="clean" depends="init">
+    <delete dir="${build}"/>
+    <delete dir="${dist}"/>
+  </target>
+
+  <target name="distclean" depends="init, clean, win32clean">
+    <delete dir="${install}/conf"/>
+    <delete dir="${lib}"/>
+    <delete dir="${clientlib}"/>
+    <delete dir="${install}/unix"/>
+
+    <delete dir="${install}/logs"/>
+    <delete dir="${install}/bin"/>
+    <delete dir="${install}/doc/WEB-INF"/>
+    <delete dir="${install}/cache"/>
+  </target>
+
+  <target name="win32clean" if="win32binaries">
+    <delete dir="${install}/win32"/>
+  </target>
+
+</project>
+

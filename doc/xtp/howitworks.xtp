@@ -1,0 +1,212 @@
+<document>
+  <header>
+    <product>resin</product>
+    <resin-2.0>$resin/ref/xtp-intro.xtp</resin-2.0>
+    <title>How XTP works</title>
+  </header>
+
+  <body>
+    <summary/>
+
+<p>XTP (XML Template Pages) creates web pages from XML using XSL
+stylesheets.
+
+<p>The documentation for the specific tags is in the <a
+href='|xslt|'>XSLT stylesheet</a> section.  This section describes how XTP works.
+
+<p>XTP lets web designers create active pages
+without changing the original text.  It uses a separate <a
+href='|xslt|'>XSLT</a> stylesheet to transform the original document
+into a fancy formatted document.  Because the active stylesheet is
+separate from the passive content, XTP gives designers a tighter
+focus.  When worrying about style, designers can concentrate on the
+stylesheet.  When concentrating on content, designers can focus on the
+text.
+
+<p>XTP makes the input file simpler: it can be plain old HTML.  It
+separates the content (*.xtp) from the style (*.xsl).  The tradeoff
+is that XSLT stylesheets are slightly more complicated than JSP active
+pages.  For JSP, scripts execute exactly where they're placed.
+XTP has to match HTML to script fragments using patterns.
+
+<p>XTP works by matching stylesheet patterns to the input HTML,
+creating the result HTML following the pattern actions.
+XTP analyzing the input HTML into a structured HTML tree
+using the XML document object model.  For
+each node, it finds the best pattern in the XSL and applies the
+action.  The action prints to the output HTML.
+
+<section name=blank title='Blank Stylesheet Example'>
+
+In this example, we're using a blank stylesheet.  Even with a blank
+stylesheet, <resin/> does something useful: it prints out all text,
+removing the tags.
+
+<example title='hello.xtp'>
+&lt;TITLE&gt;Hello, world&lt;/TITLE&gt;
+
+&lt;H1&gt;Hi, World!&lt;/H1&gt;
+
+&lt;P&gt;The hello, world example is simple.
+</example>
+
+<p><resin/> first reads in the XTP file, parsing it like an HTML
+file.  It adds optional tags, like &lt;html&gt; and &lt;/p&gt; and
+forces all HTML tags to be lower case.
+
+<example title='hello$9342.dom'>
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;title&gt;Hello, world&lt;/title&gt;
+  &lt;/head&gt;
+
+  &lt;body&gt;
+    &lt;h1&gt;Hi, World!&lt;/h1&gt;
+
+    &lt;p&gt;The hello, world example is simple.&lt;/p&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</example>
+
+<p>Next, <resin/> starts its matching process at the top.  Since the stylesheet
+is empty, it uses the default rules.  The default rules say: process
+an element's children and print a text node's data.
+
+<box class='green'>
+<ol>
+<li>#document, process children
+ <ol>
+ <li>&lt;html&gt;, process children
+  <ol>
+  <li>&lt;head&gt;, process children
+   <ol>
+   <li>&lt;title&gt;, process children
+    <ol>
+    <li>"Hello, world", print to output
+    </ol>
+   </ol>
+  <li>&lt;body&gt;, process children
+   <ol>
+   <li>&lt;h1&gt;, process children
+    <ol>
+    <li>"Hi, World!", print to output
+    </ol>
+   <li>&lt;p&gt;, process children
+    <ol>
+    <li>"The hello, ...", print to output
+    </ol>
+   </ol>
+  </ol>
+ </ol>
+</ol>
+</box>
+
+<example title='hello$9342.html'>
+Hello, world
+
+Hi, World!
+The hello, world example is simple.
+</example>
+
+</section>
+
+<section name=page title='Simple Page Template'>
+
+<resin/>'s XTP can create standard page layout: common backgrounds,
+navigation, headers and footers.  This is a common use for any of the
+active content creation tools.
+
+<p>This example adds two things to the default stylesheet.  All
+elements are copied instead of ignored, and the body of the HTML gets
+a background and a margin.
+
+<p>Copying elements is easy.  The copy template matches all elements
+<code/match='*'/>.  When <resin/> processes a node whose pattern
+matches nothing else, it will execute the copy action.  The action
+copies the element (<code/xsl:copy/>) and processes the
+children (<code/xsl:apply-templates/>).
+
+<example>
+&lt;xsl:template match='*|@*'&gt;
+  &lt;xsl:copy&gt;
+    &lt;xsl:apply-templates select='@*|*'/&gt;
+  &lt;/xsl:copy&gt;
+&lt;/xsl:template&gt;
+</example>
+
+<p>For the page template pattern, we use <code/match='/html/body'/>.
+<resin/> will execute the template in place of the body.
+
+<example>
+&lt;xsl:template match='/html/body'&gt;
+<eg-em>
+  &lt;!-- cyan background --&gt;
+  &lt;body bgcolor='cyan'&gt;
+
+  &lt;table width='100%'&gt;
+
+  &lt;!-- left margin --&gt;
+  &lt;tr&gt;&lt;td width='240'&gt;&lt;/td&gt;
+
+  &lt;!-- center column --&gt;
+  &lt;td width='80%'&gt;
+
+  &lt;!-- insert body contents --&gt;
+</eg-em>
+
+  &lt;xsl:apply-templates/&gt;
+
+<eg-em>
+  &lt;!-- copyright footer --&gt;
+  &lt;hr&gt;
+  Copyright &amp;copy; 1999 Caucho Technology
+
+  &lt;/td&gt;&lt;/tr&gt;
+  &lt;/table&gt;
+  &lt;/body&gt;
+</eg-em>
+&lt;/xsl:template&gt;
+</example>
+
+<p>The translation follows the same order as in the blank stylesheet
+example.  The body rule is used for the body and the copy rule
+is used for every other tag.
+
+<example>
+<example>
+&lt;TITLE&gt;Hello, world&lt;/TITLE&gt;
+
+&lt;H1&gt;Hi, World!&lt;/H1&gt;
+
+&lt;P&gt;The hello, world example is simple.
+</example>
+<results>
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;title&gt;Hello, world&lt;/title&gt;
+  &lt;/head&gt;
+
+  &lt;body bgcolor='cyan'&gt;
+
+  &lt;table width='100%'&gt;
+  &lt;tr&gt;&lt;td width='240'&gt;&lt;/td&gt;
+  &lt;td width='80%'&gt;
+
+    &lt;h1&gt;Hi, World!&lt;/h1&gt;
+
+   &lt;p&gt;The hello, world example is simple.
+   &lt;/p&gt;
+
+  &lt;hr&gt;
+  Copyright &amp;copy; 1999 Caucho Technology
+
+  &lt;/td&gt;&lt;/tr&gt;
+  &lt;/table&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</results>
+</example>
+
+</section>
+  </body>
+</document>

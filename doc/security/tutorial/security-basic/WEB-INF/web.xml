@@ -1,0 +1,117 @@
+<web-app>
+  <display-name>login-xml</display-name>
+
+  <welcome-file-list>
+    <welcome-file>index.jsp</welcome-file>
+    <welcome-file>index.html</welcome-file>
+  </welcome-file-list>
+
+  <!-- this is the jsp that a 'login' link uses -->
+  <security-constraint>
+    <web-resource-collection>
+      <web-resource-name>Home</web-resource-name>
+      <url-pattern>/home.jsp</url-pattern>
+    </web-resource-collection>
+    <auth-constraint>
+      <!-- 
+        '*' for a <role-name> means "authenticated user with any role"
+        The user must be logged in with some kind of role to access
+        the home page.  
+      -->
+      <role-name>*</role-name>
+    </auth-constraint>
+  </security-constraint>
+
+  <security-constraint>
+    <web-resource-collection>
+      <web-resource-name>Professors</web-resource-name>
+      <url-pattern>/professors/*</url-pattern>
+    </web-resource-collection>
+    <auth-constraint>
+      <role-name>professor</role-name>
+    </auth-constraint>
+  </security-constraint>
+
+  <security-constraint>
+    <web-resource-collection>
+      <web-resource-name>Students</web-resource-name>
+      <url-pattern>/students/*</url-pattern>
+    </web-resource-collection>
+    <auth-constraint>
+      <role-name>student</role-name>
+      <role-name>professor</role-name>
+    </auth-constraint>
+  </security-constraint>
+
+  <security-constraint>
+    <web-resource-collection>
+      <web-resource-name>Staff</web-resource-name>
+      <url-pattern>/staff/*</url-pattern>
+    </web-resource-collection>
+    <auth-constraint>
+      <role-name>staff</role-name>
+      <role-name>professor</role-name>
+    </auth-constraint>
+  </security-constraint>
+
+  <login-config>
+    <auth-method>form</auth-method>
+    <form-login-config>
+      <form-login-page>/login.jsp</form-login-page>
+      <form-error-page>/login.jsp?login_error=1</form-error-page>
+    </form-login-config>
+
+  </login-config>
+
+  <!-- Resin-specific XmlAuthenticator configuration -->
+  <authenticator>
+    <type>com.caucho.server.security.XmlAuthenticator</type>
+
+    <init>
+      <!-- Optionally put user information here.  -->
+      <user>pince:Txpd1jQc/xwhISIqodEjfw==:staff,website</user>
+      <user>filch:KmZIq2RKXAHV4BaoNHfupQ==:staff</user>
+
+      <!-- You can also use an external file --> 
+      <path>WEB-INF/password.xml</path>
+    </init>
+  </authenticator>
+  
+  <security-role>
+    <role-name>professor</role-name>
+  </security-role>
+
+  <security-role>
+    <role-name>student</role-name>
+  </security-role>
+
+  <security-role>
+    <role-name>staff</role-name>
+  </security-role>
+
+  <security-role>
+    <description>member of the slytherin house</description>
+    <role-name>slytherin</role-name>
+  </security-role>
+
+  <security-role>
+    <description>member of the gryffindor house</description>
+    <role-name>gryffindor</role-name>
+  </security-role>
+
+  <security-role>
+    <description>member of the ravenclaw house</description>
+    <role-name>ravenclaw</role-name>
+  </security-role>
+
+  <security-role>
+    <description>member of the hufflepuff house</description>
+    <role-name>hufflepuff</role-name>
+  </security-role>
+
+  <security-role>
+    <description>website administrator</description>
+    <role-name>website</role-name>
+  </security-role>
+
+</web-app>

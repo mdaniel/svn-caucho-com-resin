@@ -1,0 +1,435 @@
+<document>
+<header>
+  <product>resin</product>
+  <title>Authentication with Resin</title>
+  <description>
+  <p>Authentication provides a method for a username and password
+  combination to be provided by a user and then verified by the web
+  server.  By using Resin's Authenticator API for login support,
+  applications can add security without writing an entire
+  authentication library.</p>
+          
+  <p>Resin provides a predefined XML authenticator for user and
+  password lookup in an XML file and a database authenticator for
+  lookup in a database using JDBC. If the predefined
+  authentication methods are inadequate, Resin provides an API to
+  write custom authentication code.</p>
+  </description>
+</header>
+
+<body>
+<summary/>
+
+<section title="Quick Start">
+<p>The easiest authenticator to understand is the 
+<a href="#XmlAuthenticator">XmlAuthenticator</a>.
+It lets you put users and passwords directly in the configuration
+file.  The following example uses "Basic" authentication for login.
+Basic authentication asks the browser to pop open a window prompting
+for a username and password.  (Basic authentication is discouraged
+because it is not secure unless you use it with SSL, but it's the
+easiest example.)  The only user defined here is "Harry Potter" and
+he has the password "quidditch".  He also plays the
+"user" role.</p>
+
+<example title="Using the XmlAuthenticator">
+&lt;web-app xmlns="http://caucho.com/ns/resin">
+
+  ...
+
+  &lt;authenticator type="com.caucho.server.security.XmlAuthenticator">
+    &lt;init>
+      &lt;user>Harry Potter:quidditch:user&lt;/user>
+      &lt;password-digest>none&lt;/password-digest>
+    &lt;/init>
+  &lt;/authenticator>
+
+  &lt;login-config auth-method='basic'/>
+
+  &lt;security-constraint url-pattern='/users-only/*' role-name='user'/>
+
+  ...
+
+&lt;/web-app>
+</example>
+
+<p>In the above example, the &lt;security-constraint> checks
+for authorization.  Only users playing the "user" role can access
+the /users-only directory.</p>
+
+<p>Another often used authenticator is the 
+<a href="#JdbcAuthenticator">JdbcAuthenticator</a>, 
+which uses usernames, passwords, and roles stored in a database.</p>
+
+<example>
+&lt;web-app xmlns="http://caucho.com/ns/resin">
+
+  ...
+
+  &lt;!-- Resin-specific JdbcAuthenticator -->
+  &lt;authenticator type='com.caucho.server.security.JdbcAuthenticator'>
+    &lt;init>
+      &lt;data-source>test&lt;/data-source>
+      &lt;password-query>
+        SELECT password FROM LOGIN WHERE username=?
+      &lt;/password-query>
+      &lt;cookie-auth-query>
+        SELECT username FROM LOGIN WHERE cookie=?
+      &lt;/cookie-auth-query>
+      &lt;cookie-auth-update>
+        UPDATE LOGIN SET cookie=? WHERE username=?
+      &lt;/cookie-auth-update>
+      &lt;role-query>
+        SELECT role FROM LOGIN WHERE username=?
+      &lt;/role-query>
+    &lt;/init>
+  &lt;/authenticator>
+
+  &lt;login-config auth-method='basic'/>
+
+  &lt;security-constraint url-pattern='/users-only/*' role-name='user'/>
+
+  ...
+
+&lt;/web-app>
+</example>
+
+</section>
+
+<section title='Configuration'>
+
+<defun title='login-config'>
+
+<p>Configures the login class.  The <a
+href="config|webapp#login-config">web.xml configuration</a> describes the
+configuration in more detail.</p>
+
+<p>The login can be customized by selecting the <code>com.caucho.server.security.AbstractLogin</code>.  The <var/type/> attribute will select that
+class. More sophisticated applications may want to add their own custom
+AbstractLogin class to replace the predefined values.</p>
+
+<p>Typically a custom login would only be necessary if the application
+needed a custom way of extracting credentials from the request.</p>
+
+</defun>
+
+<defun title='auth-method'>
+<p>Selects the authentication method.</p>
+
+<deftable title="auth-method values">
+<tr><th>auth-method<th>Meaning
+<tr><td>basic<td>HTTP Basic authentication
+<tr><td>digest<td>HTTP Digest authentication
+<tr><td>form<td>Form-based authentication
+</deftable>
+
+</defun>
+
+<defun title='form-login-config'>
+<p>Configures authentication for forms.  The login form has
+specific parameters that the servlet engine's login form processing
+understands.  If the login succeeds, the user will see the original
+page.  If it fails, she will see the error page.</p>
+
+<deftable>
+<tr><td>form-login-page<td>The page to be used to prompt the user login<td>none
+<tr><td>form-error-page<td>The error page for unsuccessful login<td>none
+<tr><td>internal-forward<td>Use an internal redirect on success or a sendRedirect<td>false
+<tr><td>form-uri-priority<td>If true, the form's j_uri will override a stored URI<td>false
+</deftable>
+
+<p>The form itself must have the action <var/j_security_check/>.  It
+must also have the parameters <var/j_username/> and <var/j_password/>.
+Optionally, it can also have <var/j_uri/> and
+<var/j_use_cookie_auth/>.  <var/j_uri/> gives the next page to display
+when login succeeds.  <var/j_use_cookie_auth/> allows Resin to send a
+persistent cookie to the user to make following login easier.
+</p>
+
+<p><var/j_use_cookie_auth/> gives control to the user whether to generate
+a persistent cookie.  It lets you implement the "remember me" button.  By
+default, the authentication only lasts for a single session.
+</p>
+
+<deftable title="j_security_check Parameters">
+<tr><th>Parameter<th>Meaning)
+<tr><td>j_username<td>The user name
+<tr><td>j_password<td>The password
+<tr><td>j_uri<td>Resin extension for the successful display
+page (Optional).
+<tr><td>j_use_cookie_auth<td>Resin extension to allow cookie
+login (Optional).
+</deftable>
+
+<p>The following is an example of a servlet-standard login page:</p>
+
+<example>
+&lt;form action='j_security_check' method='POST'>
+&lt;table>
+&lt;tr>&lt;td>User:&lt;td>&lt;input name='j_username'>
+&lt;tr>&lt;td>Password:&lt;td>&lt;input name='j_password'>
+&lt;tr>&lt;td colspan=2>hint: the password is 'quidditch'
+&lt;tr>&lt;td>&lt;input type=submit>
+&lt;/table>
+&lt;/form>
+</example>
+
+</defun>
+
+<defun title='authenticator' version='Resin 1.1'>
+<p>Specifies a class to authenticate users.  This Resin-specific
+option lets you control your authentication.  You can either create your 
+own custom authenticator, or use Resin's JdbcAuthenticator.</p>
+
+<p>The authenticator is responsible for taking the username and
+password and returning a UserPrincipal if the username and password match.
+</p>
+
+<p>Users wanting to implement an authenticator should look at the JavaDoc
+for <a href="javadoc|com.caucho.server.security.ServletAuthenticator|"/>
+and <a href="javadoc|com.caucho.server.security.AbstractAuthenticator|"/>.
+To protect your application from API changes, you should extend
+AbstractAuthenticator rather than implementing Authenticator directly.
+</p>
+</defun>
+</section>
+
+<section title='XmlAuthenticator' version='Resin 2.0.4'>
+<p>The XmlAuthenticator (com.caucho.serer.security.XmlAuthenticator),
+stores the authentication in either an xml file or in the configuration
+itself.</p>
+
+<p>When configuring the XmlAuthenticator in the resin.conf
+(or web.xml), each <var/user/> adds a new configured
+user.  The value contains the username, password, and the
+roles the user plays.</p>
+
+<example title='XmlAuthenticator in resin.conf'>
+&lt;authenticator type="com.caucho.server.security.XmlAuthenticator">
+  &lt;init>
+    &lt;user>Harry Potter:quidditch:user,gryffindor&lt;/user>
+    &lt;user>Draco Malfoy:pureblood:user,slytherin&lt;/user>
+    &lt;password-digest>none&lt;/password-digest>
+  &lt;/init>
+&lt;/authenticator>
+</example>
+
+<p>Because the plain text passwords in the example
+above are a serious security issue, most sites will use
+the password-digest attribute described below to protect the
+passwords.</p>
+
+<deftable>
+<tr><th>attribute<th>meaning<th>default
+<tr><td>user<td>specifies an allowed user.  May be repeated.<td>none
+<tr><td>password-digest<td>selects the signature method to protect
+the password<td>md5-base64
+<tr><td>path<td>specifies a path to an XML file containing the users and passwords.<td>none
+<tr><td>logout-on-session-timeout<td>If true, the user will be logged out when the session times out<td>true
+</deftable>
+
+<p>The passwords can be specified in a separate *.xml file.  The password
+file looks like:</p>
+
+<example title='password.xml'>
+&lt;authenticator>
+  &lt;user name='Harry Potter' password='quidditch' role='gryffindor'/>
+  &lt;user name='Draco Malfoy' password='pureblood' role='slytherin'/>
+&lt;/authenticator>
+</example>
+
+<p>Sites should use password-digest to protect the passwords.</p>
+
+</section>
+
+<section title='JdbcAuthenticator' version='Resin 2.0'>
+<p>The JdbcAuthenticator (<a href="javadoc|com.caucho.server.security.JdbcAuthenticator|"/>)
+asks a backend database for the password matching the user's name.
+It uses the DataSource specified by the <var/pool-name/> option, or
+the JNDI <var/java:comp/env/jdbc/db-pool/> by default.
+<var/pool-name/> refers to a DataSource configured with
+<a href="doc|config|env#database">database</a>.</p>
+
+<p>The following are the attributes for the JdbcAuthenticator:</p>
+
+<deftable>
+<tr><th>attribute<th>meaning<th>default
+<tr><td>data-source<td>The database pool.  Looks in the application
+attributes first, then in the global database pools.<td>none
+<tr><td>password-query<td>A SQL query to get the user's password.  The
+default query is given below.<td>see below
+<tr><td>cookie-auth-query<td>A SQL query to authenticate the user by a
+persistent cookie.<td>none
+<tr><td>cookie-auth-update<td>A SQL update to match
+a persistent cookie to a user.<td>none
+<tr><td>role-query<td>A SQL query to determine the user's role.  By
+default, all users are in role "user", but no others.<td>none
+<tr><td>password-digest<td>Specifies the digest algorithm and format (Resin 2.0.4)<td>md5-base64
+<tr><td>logout-on-session-timeout<td>If true, the user will be logged out when the session times out (Resin 2.0.6)<td>true
+</deftable>
+
+<example>
+&lt;web-app xmlns="http://caucho.com/ns/resin">
+
+  ...
+
+  &lt;!-- Resin-specific JdbcAuthenticator -->
+  &lt;authenticator type='com.caucho.server.security.JdbcAuthenticator'>
+    &lt;init>
+      &lt;data-source>test&lt;/data-source>
+      &lt;password-query>
+        SELECT password FROM LOGIN WHERE username=?
+      &lt;/password-query>
+      &lt;cookie-auth-query>
+        SELECT username FROM LOGIN WHERE cookie=?
+      &lt;/cookie-auth-query>
+      &lt;cookie-auth-update>
+        UPDATE LOGIN SET cookie=? WHERE username=?
+      &lt;/cookie-auth-update>
+      &lt;role-query>
+        SELECT role FROM LOGIN WHERE username=?
+      &lt;/role-query>
+    &lt;/init>
+  &lt;/authenticator>
+
+  &lt;login-config auth-method='basic'/>
+
+  &lt;security-constraint url-pattern='/users-only/*' role-name='user'/>
+
+  ...
+
+&lt;/web-app>
+</example>
+
+</section>
+
+<section title='AuthenticationList' version='3.0.9'>
+<p>AuthenticatorList 
+(<a href="javadoc|com.caucho.server.security.AuthenticatorList|"/>)
+is used to configure more than one authenticator in a list, each
+authenticator is tried in turn and if the authentication fails the next
+authenticator in the list is attempted.
+
+<example>
+  &lt;authenticator type="com.caucho.server.security.AuthenticatorList"&gt;
+    &lt;init&gt;
+      &lt;authenticator resin:type="com.caucho.server.security.XmlAuthenticator"&gt;
+        &lt;user&gt;admin:NIHlOSafJN2H7emQCkOQ2w==:user,admin&lt;/user&gt;
+      &lt;/authenticator&gt;
+
+      &lt;authenticator resin:type='com.caucho.server.security.JdbcAuthenticator'&gt;
+        &lt;data-source&gt;jdbc/users&lt;/data-source&gt;
+        &lt;password-query&gt;
+          SELECT password FROM LOGIN WHERE username=?
+        &lt;/password-query&gt;
+        &lt;cookie-auth-query&gt;
+          SELECT username FROM LOGIN WHERE cookie=?
+        &lt;/cookie-auth-query&gt;
+        &lt;cookie-auth-update&gt;
+          UPDATE LOGIN SET cookie=? WHERE username=?
+        &lt;/cookie-auth-update&gt;
+        &lt;role-query&gt;
+          SELECT role FROM LOGIN WHERE username=?
+        &lt;/role-query&gt;
+      &lt;/authenticator&gt;
+    &lt;/init&gt;
+  &lt;/authenticator&gt;
+
+  &lt;login-config auth-method='basic'/&gt;
+
+  &lt;security-constraint url-pattern='/users/*' role-name='user'/&gt;
+  &lt;security-constraint url-pattern='/admin/*' role-name='admin'/&gt;
+</example>
+
+</section>
+
+<section title='PasswordDigest' version='Resin 2.0.4'>
+
+<p>Resin has the capability of storing the digest of
+a password instead of the password itself.  By using the password digest,
+the application can avoid storing the password in a form that someone
+can read.</p>
+
+<p>Setting <a config-tag="password-digest"/> of any authenticator
+extending <a href="javadoc|com.caucho.server.security.AbstractAuthenticator|"/> will create a digest of the password.
+The password-digest has two parts: the digest algorithm
+and the encoding format.  "MD5-base64" is a typical digest format, and is the default for the Resin authenticators..</p>
+
+<p>The use of a password digest is more completely described in <a href="security|digest">Digest Passwords</a>.
+</section>
+
+<section title='Single Signon' version='Resin 3.0.0'>
+
+<p>"Single signon" refers to allowing for a single login for more
+than one context, for example, logging in to all web-apps in a server at once.
+You can implement single signon by configuring the authenticator in
+the proper environment: web-app, host, or server.  The login will last for
+all the web-apps in that environment.</p>
+
+<p>The authenticator is a resource which is shared across its <a href="config|env">environment</a>.  For example, to configure the XML authenticator
+for all web-apps in foo.com, you might configure as follows:</p>
+
+<example title="Single Signon for foo.com">
+&lt;resin xmlns="http://caucho.com/ns/resin">
+  &lt;server>
+    &lt;http port="8080"/>
+
+    &lt;host id="foo.com">
+      &lt;document-directory>/opt/foo.com/doc&lt;/document-directory>
+
+      &lt;authenticator type="com.caucho.server.security.XmlAuthenticator">
+        &lt;init>
+          <!-- password: quidditch -->
+          &lt;user&gt;harry:uTOZTGaB6pooMDvqvl2LBu:user,gryffindor&lt;/user&gt;
+          &lt;!-- password: pureblood --&gt;
+          &lt;user&gt;dmalfoy:yI2uN1l97Rv5E6mdRnDFDB:user,slytherin&lt;/user&gt;
+        &lt;/init>
+      &lt;/authenticator>
+
+      &lt;web-app-deploy path="webapps"/>
+    &lt;/host>
+  &lt;/server>
+&lt;/resin>
+</example>
+
+<p>Any .war in the webapps directory will share the same signon for the
+host.  You will still need to implement a
+<a href="config|webapp#login-config">login-config</a> for each web-app.</p>
+
+</section>
+
+<section title="Custom Login">
+<p>The Login is primarily responsible for extracting the credentials
+from the request (typically username and password) and passing those
+to the ServletAuthenticator.</p>
+
+<p>The Servlet API calls the Login in two contexts: directly from
+<code>ServletRequest.getUserPrincipal()</code>, and during 
+security checking.   When called from the Servlet API, the login class
+can't change the response.  In other words, if an application
+calls getUserPrincipal(), the Login class can't return a forbidden
+error page.  When the servlet engine calls authenticate(), the login class
+can return an error page (or forward internally.)</p>
+
+<p>Normally, Login implementations will defer the actual authentication
+to a ServletAuthenticator class.  That way, both "basic" and "form" login
+can use the same JdbcAuthenticator.  Some applications, like SSL
+client certificate login, may want to combine the Login and authentication
+into one class.</p>
+
+ <p>Login instances are configured through bean introspection.  Adding
+ a public <code>setFoo(String foo)</code> method will be configured with
+ the following login-config:</p>
+
+<example>
+&lt;login-config type="test.CustomLogin"&gt;
+  &lt;init>
+    &lt;foo>bar&lt;/bar>
+  &lt;/init>
+&lt;/login-config>
+</example>
+
+</section>
+
+</body>
+</document>

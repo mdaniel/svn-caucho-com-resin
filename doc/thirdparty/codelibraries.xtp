@@ -1,0 +1,47 @@
+<document>
+<header>
+  <product>resin</product>
+  <title>Code Libraries</title>
+  <type>contents</type>
+  <description>
+    <p>Third-party libraries people sometimes use with Resin.</p>
+  </description>
+</header>
+
+<body>
+<summary/>
+
+<section title="Struts">
+<p>Struts is very commonly used with Resin, and should work
+fine.</p>
+</section>
+
+<section title="Java Web Services Developer Pack (JWSDP) 1.1">
+<p>(rep by Tony)</p>
+
+<p>We've downloaded the Sun jwsdp1.1.</p>
+
+<p>When we now want to run it in Resin, we receive a CompilingClassloader error
+on com.sun.xml.rpc.server.http.JAXRPCContextListener
+The reason is that in this class, sun casts to a "URLClassloader", but the Resin
+engine is just a base "ClassLoader".
+If we change this class (line 52 and 72) from sun to cast not longer to
+UrlClassLoader but to ClassLoader,
+everything works and the jaxrpc webservices work fine on
+Resin!</p>
+
+
+<p>This is not a bug in Resin, but I think it is useful to report it to put it
+as a FAQ on your website and report it to sun . In this way the
+webservices work fine on caucho!</p>
+
+</section>
+
+<section title="jspSmartUpload">
+<p>People have reported problems with this component.  One
+description was of the component hanging and using up all of the
+CPU resources.</p>
+</section>
+
+</body>
+</document>

@@ -1,0 +1,66 @@
+<section>
+  <header>
+    <product>resin</product>
+    <title>Mailing Forms</title>
+    <type>example</type>
+    <resin-2.0>$resin/java_tut/mail_form.xtp</resin-2.0>
+    <brief>
+      A convenient way of gathering form data is simply to mail the
+      form results to a mailbox
+    </brief>
+    <description>
+      A convenient way of gathering form data is simply to mail the
+      form results to a mailbox.  Resin supports sending mail with
+      it's Virtual File System.
+    </description>
+  </header>
+
+<p>A convenient way of gathering form data is simply to mail the form
+results to a mailbox.  Mail is the most effective push technology.</p>
+
+<p>Sending mail with Resin is just like writing to a file.  Resin
+recycles APIs to reduce information pollution.  Its VFS (virtual file
+system) extends and simplifies java.io.  Sending mail is just like
+writing to a file.  Resin's <code/Path/> class is like <code/File/> and
+its <code/WriteStream/> is a combination of <code/OutputStream/> and
+<code/PrintWriter/>. </p>
+
+<example>
+&lt;%@ page language=java %>
+&lt;%@ page import='com.caucho.vfs.*' %>
+&lt;%@ page import='java.util.*' %>
+
+&lt;%
+Path mail;
+mail = Vfs.lookup("mailto:survey?subject='Colors'");
+WriteStream os = mail.openWrite();
+
+Enumeration e = request.getParameterNames();
+while (e.hasMoreElements()) {
+  String key = (String) e.nextElement();
+  String value = request.getParameter(key);
+
+  os.println(key + ": " + value);
+}
+
+os.close();
+%&gt;
+
+&lt;h1&gt;Thank you for your response.&lt;/h1&gt;
+
+</example>
+<results>
+name: Kermit the Frog
+color: green
+</results>
+
+<p>The example mails results to a user named <var/survey/> on the web
+server.  The subject of the mail is <var/Colors/>.  Scripts can add
+their own mail headers, including <var/cc/>, <var/bcc/>, and even
+<var/from/>.  To add multiple headers, separate them by
+<var/&amp;/>.</p>
+
+<example>
+Vfs.lookup("mailto:you?subject=test&bcc=me");
+</example>
+</section>

@@ -1,0 +1,9 @@
+Main-Class: com.caucho.server.boot.ResinBoot
+Class-Path: jta-101.jar isorelax.jar jsdk-24.jar jmx-12.jar jca-15.jar jstl-11.jar
+Extension-Name: com.caucho.server.resin
+Implementation-Vendor: Caucho Technology, Inc.
+Implementation-Version: 3.0.1
+Extension-List: servlet
+servlet-Extension-Name: javax.servlet
+servlet-Specification-Version: 2.4
+

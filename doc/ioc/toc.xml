@@ -1,0 +1,7 @@
+<navigation threaded="true" section="Resin : Resin Configuration : " comment="true">
+  <item link="index.xtp" title="IoC">
+    <item link="bean-patterns.xtp" title="bean"/>
+    <item link="misc.xtp" title="misc"/>
+    <item title="Tutorials" link="tutorial/index.xtp" atoc-descend='1'/>
+  </item>
+</navigation>

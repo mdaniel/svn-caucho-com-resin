@@ -1,0 +1,50 @@
+<document>
+  <header>
+    <product>resin-ee</product>
+    <title>One-to-One Entity Relationship</title>
+    <description>
+      <p>Scenario: At Hogwarts every Professor teaches one
+      Course. The Headmaster keeps track with two 1-1-related CMP
+       beans</p> 
+      <p>This example focuses on:</p>
+      <ul>
+        <li>Establishing a one-to-one relationship between two entity beans</li>
+        <li>Setting up the database for a one-to-one relationship</li>
+      </ul>
+    </description>
+    <type>tutorial</type>
+    <tutorial-startpage>client</tutorial-startpage>
+  </header>
+
+  <body>
+    <summary/>
+
+<section title="Beans">
+
+<example title="CourseBean.java">
+package example;
+
+abstract public class CourseBean
+  extends com.caucho.ejb.AbstractEntityBean {
+
+  abstract public String getName();
+
+  abstract public Teacher getTeacher();
+}
+</example>
+
+<example title="TeacherBean.java">
+package example;
+
+abstract public class TeacherBean
+  extends com.caucho.ejb.AbstractEntityBean {
+
+  abstract public String getName();
+
+  abstract public Course getCourse();
+}
+</example>
+</section>
+
+  </body>
+</document>

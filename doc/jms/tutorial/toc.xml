@@ -1,0 +1,7 @@
+<navigation threaded="true" section="Resin : JMS : Tutorials" comment="true">
+  <item title="Tutorials" link="index.xtp">
+    <item link="ioc-listener/index.xtp" title="Simple Listener"/>
+
+    <item link="listener/index.xtp" title="JCA Listener"/>
+  </item>
+</navigation>

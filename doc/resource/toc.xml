@@ -1,0 +1,13 @@
+<navigation threaded="true" section="Resin : Resource : " comment="true">
+  <item title="Resource" link="index.xtp">
+    <item title="Library" link="resource-library.xtp">
+      <item title="CronResource" link="cron.xtp"/>
+      <item title="RMI" link="rmi.xtp"/>
+    </item>
+
+    <item title="Tutorials" link="tutorial/index.xtp" atoc-descend='2'/>
+
+    <item title="Resource FAQ" link="faq.xtp">
+    </item>
+  </item>
+</navigation>

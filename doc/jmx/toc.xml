@@ -1,0 +1,12 @@
+<navigation threaded="true" section="Resin : JMX : " comment="true">
+  <item title="JMX" link="index.xtp">
+    <item title="Servlet" link="servlet.xtp">
+    </item>
+    <item title="JMX Consoles" link="console.xtp">
+    </item>
+    <item title="Instrumenting" link="instrumenting.xtp">
+    </item>
+
+    <item title="Tutorials" link="tutorial/index.xtp" atoc-descend='2'/>
+  </item>
+</navigation>

@@ -1,0 +1,354 @@
+<document>
+  <header>
+    <product>resin</product>
+    <resin-2.0>$resin/ref/jsp-actions.xtp</resin-2.0>
+    <title>Actions</title>
+    <brief>
+      Actions are the core of JSP.  Actions range from printing a
+      script expression, to creating and storing a Java Bean.
+    </brief>
+  </header>
+
+  <body>
+<summary/>
+
+<section name='lex' title='JSP Lexical'>
+
+<defun name=jsp-escape title='escapes' index='escapes'>
+<p>The JSP actions can be escaped using <var/&lt;\%/>.</p>
+
+<example>
+&lt;\% verbatim text %>
+</example>
+<results>
+&lt;% verbatim text %>
+</results>
+
+</defun>
+
+<defun name=whitespace title='whitespace' index='whitespace' version='Resin 1.2'>
+<p>JSP whitespace is copied to the output directly, unless escaped.</p>
+
+<p>In Resin 1.2, if you place a backslash immediately after a JSP action and
+before a line end, Resin will omit the end of line.  In the following
+example, Resin keeps the whitespace after the <var/&lt;%@page ... %>/> and
+removes it after after the <var/&lt;%= 2 + 2 %>/>.</p>
+
+<example>
+&lt;% @page session="true" %>
+a
+&lt;%= 2 + 2 %>\
+c
+</example>
+<results>
+
+a
+4c
+</results>
+
+</defun>
+
+</section>
+
+<section name='jsp' title='JSP Actions'>
+
+<defun name=directive title='&lt;%@ name att1="v1"... %&gt;'
+       index='directive'>
+<p>Sets a JSP <a href='jsp|directives'>directive</a></p>
+
+</defun>
+
+<defun name=expr title='&lt;%= expression %&gt;'
+       index='expression'>
+<p>Prints the value of <var/expression/> evaluated the page's
+<a href='jsp|directives#language'>language</a>.</p>
+
+<p>The expression action is equivalent to the following:</p>
+<def>
+  out.print(<var/expression/>);
+</def>
+
+<p>It also has the following XML equivalent</p>
+<def>
+&lt;jsp:expression>
+  <var/expression/>
+&lt;/jsp:expression>
+</def>
+
+<p>The following simple example just prints the value of a form variable.
+</p>
+
+<example>
+Name: &lt;%= request.getParameter("name") %&gt;
+</example>
+<results>
+Name: George Washington
+</results>
+</defun>
+
+<defun name=scriptlet title='&lt;% scriptlet %&gt;'
+       index='scriptlets'>
+<p>Executes the statements in <var/scriptlet/> using the page's
+<a href='jsp|directives#language'>language</a>.</p>
+
+<p>The <var/scriptlet/> is any statement list in the language,
+e.g. Java.  The scriptlet can use any of the <a
+href='jsp|variables'>implicit variables</a>, such as the request
+object and the out writer.</p>
+
+<p>Scriptlets have the following XML equivalent</p>
+<def>
+&lt;jsp:scriptlet>
+  <var/scriptlet/>
+&lt;/jsp:scriptlet>
+</def>
+
+<example>
+&lt;h1&gt;Form results&lt;/h1&gt;
+
+&lt;pre&gt;
+&lt;%
+  Enumeration e = request.getParameterNames();
+  while (e.hasMoreElements()) {
+    String key = e.nextElement();
+    String value = request.getParameter(key);
+
+    out.println(key + ": " + value);
+  }
+%&gt;
+&lt;/pre&gt;
+</example>
+<results>
+&lt;h1&gt;Form results&lt;/h1&gt;
+
+&lt;pre&gt;
+  Name: George Washington
+  Rank: General
+&lt;/pre&gt;
+</results>
+</defun>
+
+<defun name=decl title='&lt;%! declaration %&gt;'
+       index='declaration'>
+<p>Adds <var/declaration/> code to the Servlet class</p>
+
+<p>JSP places the declaration code in the servlet class.  In contrast,
+scriptlet and expression code are in a service method.  So
+declarations can declare class variables and methods.</p>
+
+<note>Declarations are primarily useful for Java, but are allowed in
+JavaScript.</note>
+
+<p>Declarations have the following XML equivalent</p>
+<def>
+&lt;jsp:declaration>
+  <var/declaration/>
+&lt;/jsp:declaration>
+</def>
+
+<example>
+&lt;%= foo() %&gt;
+
+&lt;%!
+  private int foo() { return 1329; }
+%&gt;
+</example>
+</defun>
+
+<defun name=include title='&lt;jsp:include page="path"/&gt;'
+       index='include, runtime'>
+<p>Includes the contents of the local URL at <var/path/> during
+runtime.</p>
+
+<p>jsp:include is a runtime action.  It will call the included
+<var/path/> just as if <var/path/> its own HTTP request.  The result
+of that page will be included in the current page.</p>
+
+<p><var/path/> is relative to the current page.  Its root is the root
+of the application.</p>
+
+<p>For compile-time includes, use <a
+href='jsp|directives.xtp#include'>&lt;%@ include file='path'%&gt;</a></p>
+
+<example title='inc.jsp'>
+&lt;%= 2 + 2 %&gt;
+</example>
+
+<example title='test.jsp'>
+Header
+&lt;jsp:include page='inc.jsp'/&gt;
+Footer
+</example>
+<results>
+Header
+4
+Footer
+</results>
+
+</defun>
+
+<defun name=forward title='&lt;jsp:forward page="path" /&gt;'
+       index='forward; redirect'>
+<p>Forwards the request to another page, i.e. an internal redirect.</p>
+
+<p>If the page has already written some output, jsp:request will clear
+the output <a href='jsp|directives.xtp#buffer'>buffer</a>.</p>
+
+<p><var/path/> is relative to the current page.</p>
+
+<example title='fwd.jsp'>
+&lt;%= 2 + 2 %&gt;
+</example>
+
+<example title='test.jsp'>
+Header
+&lt;jsp:forward page='inc.jsp'/&gt;
+Footer
+</example>
+<results>
+4
+</results>
+</defun>
+
+<defun name=usebean title='&lt;jsp:useBean id="name" ...&gt;...'
+       index='bean, creation'>
+<p>Creates a new bean and variable for the page.</p>
+
+<deftable>
+<tr><th>Attribute<th>Value<th>Meaning
+<tr><td>id<td>&nbsp;<td>The variable name for the bean
+<tr><td>class<td>&nbsp;<td>The bean's Java class
+<tr><td>scope<td>&nbsp;<td>&nbsp;
+<tr><td>&nbsp;<td>page<td>Only active in the page, stored in pageContext
+<tr><td>&nbsp;<td>request<td>Active for the request, stored in request
+<tr><td>&nbsp;<td>session<td>Active for the session, stored in session
+<tr><td>&nbsp;<td>application<td>Active for the application, stored in application
+</deftable>
+
+<p>jsp:useBean enables a popular style JSP page creation where Java
+Beans calculate the content, and JSP formats the presentation.</p>
+
+<p>jsp:useBean creates an initializes a JSP bean for the page. The
+scope attribute determines the bean lifetime.  For example, a session
+bean will be created once in a session.</p>
+
+<p>jsp:useBean assigns the bean to the variable <var/name/>.  It will also
+store the bean in the appropriate scope variable.  For example, an
+application bean "foo" will be stored in the application variable.</p>
+
+<p>jsp:useBean can also initialize beans.  When jsp:useBean creates a
+new bean, it will execute the JSP in the jsp:useBean tag.</p>
+
+<p>Roughly, JSP makes the following translation:</p>
+
+<example>
+&lt;jsp:useBean id='foo' 
+                class='com.caucho.test.TestBean' 
+                scope='session'&gt;
+  &lt;% foo.myInitialization("test"); %gt;
+&lt;/jsp:useBean&gt;
+</example>
+<def>
+com.caucho.test.TestBean foo;
+foo = (com.caucho.test.TestBean) session.getValue("foo");
+if (foo == null) {
+  foo = new com.caucho.test.TestBean();
+  session.value.foo = foo;
+  foo.myInitialization("test");
+}
+</def>
+
+</defun>
+
+<defun name=getProperty title='&lt;jsp:getProperty name="name" ... /&gt;'
+       index='bean, display'>
+<p>Prints a bean property.</p>
+
+<deftable>
+<tr><th>Attribute<th>Meaning
+<tr><td>name<td>The variable name for the bean
+<tr><td>property<td>The property name to retrieve.
+</deftable>
+
+<p>jsp:getProperty converts property names following the bean
+standards.</p>
+
+<p>Roughly, jsp:getProperty makes the following conversion:</p>
+
+<example>
+&lt;jsp:getProperty name='foo' property='bar'/&gt;
+</example>
+<def>
+out.print(foo.getBar());
+</def>
+
+</defun>
+
+<defun name=setPropertyValue title='&lt;jsp:setProperty ... value="value"/&gt;'
+       index='bean, setting'>
+<p>Sets a bean property to <var/value/>.</p>
+
+<deftable>
+<tr><th>Attribute<th>Meaning
+<tr><td>name<td>The variable name for the bean
+<tr><td>property<td>The property name to set.
+<tr><td>value<td>The value to set.
+</deftable>
+
+<p>If value is a runtime attribute, the bean property gets the
+expression value.  If it's a static string, the value is first
+converted to the argument type and then set.</p>
+
+<example>
+&lt;jsp:setProperty name='foo' property='count' value='10'/&gt;
+</example>
+<results>
+foo.setCount(10);
+</results>
+<example>
+&lt;jsp:setProperty name='foo' property='string' value='10'/&gt;
+</example>
+<results>
+foo.setString("10");
+</results>
+<example>
+&lt;jsp:setProperty name='foo' property='count' value='&lt;%= 2 + 2 %>'/&gt;
+</example>
+<results>
+foo.setCount(2 + 2);
+</results>
+<example>
+&lt;jsp:setProperty name='foo' property='count' value='2 + 2'/&gt;
+</example>
+<results>
+error
+</results>
+<example>
+&lt;jsp:setProperty name='foo' property='char' value='10'/&gt;
+</example>
+<results>
+foo.setChar('1');
+</results>
+
+</defun>
+
+<defun name=setPropertyParam title='&lt;jsp:setProperty ... param="param"/&gt;'
+       index='bean, setting'>
+<p>Sets a bean property to a parameter value.</p>
+
+<deftable>
+<tr><th>Attribute<th>Value<th>Meaning
+<tr><td>name<td>&nbsp;<td>The variable name for the bean
+<tr><td>property<td><var/property/><td>The property name to set.
+<tr><td>&nbsp;<td>*<td>Set all properties
+<tr><td>param<td><var/param/><td>The form parameter to use as a value.
+<tr><td>&nbsp;<td><var/empty/><td>If missing, use <var/property/>
+</deftable>
+
+<p>The second form of jsp:setProperty lets scripts easily set Bean
+properties to form values.</p>
+</defun>
+</section>
+
+    </body>
+</document>

@@ -1,0 +1,95 @@
+<BODY>
+  Container Managed Relationships (CMR)
+
+  <p>In this example, the House CMP bean is related to the Student CMP bean.
+  Since a student can live in only one house, but one house can be the home of
+  several students, this is a one-to-many relation.
+
+  <p>We can have Resin-CMP manage this relationship for us so that we don't have
+  to use JDBC to find related entities.
+
+  Our two beans in this example will use the following tables:
+
+    <code><pre>
+    CREATE TABLE one2many_students (
+      name VARCHAR(250) NOT NULL,
+      house VARCHAR(250),
+
+      PRIMARY KEY(name)
+    );
+
+    CREATE TABLE one2many_houses (
+      name VARCHAR(250) NOT NULL,
+
+      PRIMARY KEY(name)
+    );
+    </pre></code>
+
+    <p><b>Setting up the deployment descriptor</b>
+
+    <p>All setup related to CMR is done in the &lt;relationships> section.
+    We set up our one2many relationship like this:
+
+    <p><code>
+    &nbsp&lt;relationships><BR>
+    &nbsp&nbsp&lt;ejb-relation><BR>
+    &nbsp&nbsp&nbsp <font color=purple>&lt;ejb-relationship-role></font><BR>
+    &nbsp&nbsp&nbsp&nbsp&lt;relationship-role-source><BR>
+    &nbsp&nbsp&nbsp&nbsp&nbsp<font color=green>&lt;ejb-name>one2many_StudentBean&lt;/ejb-name></font><BR>
+    &nbsp&nbsp&nbsp&nbsp&lt;/relationship-role-source><BR>
+    &nbsp&nbsp&nbsp&nbsp&lt;cmr-field><BR>
+    &nbsp&nbsp&nbsp&nbsp&nbsp&lt;cmr-field-name>house&lt;/cmr-field-name><BR>
+    &nbsp&nbsp&nbsp&nbsp&lt;/cmr-field><BR>
+    &nbsp&nbsp&nbsp <font color=purple>&lt;/ejb-relationship-role></font><BR>
+    &nbsp&nbsp&nbsp <font color=purple>&lt;ejb-relationship-role></font><BR>
+    &nbsp&nbsp&nbsp&nbsp&lt;relationship-role-source><BR>
+    &nbsp&nbsp&nbsp&nbsp<font color=green>&lt;ejb-name>one2many_HouseBean&lt;/ejb-name></font><BR>
+    &nbsp&nbsp&nbsp&nbsp&nbsp&lt;/relationship-role-source><BR>
+    &nbsp&nbsp&nbsp&nbsp&lt;cmr-field><BR>
+    &nbsp&nbsp&nbsp&nbsp&nbsp&lt;cmr-field-name>studentList&lt;/cmr-field-name><BR>
+    &nbsp&nbsp&nbsp&nbsp&lt;/cmr-field><BR>
+    &nbsp&nbsp&nbsp <font color=purple>&lt;/ejb-relationship-role></font><BR>
+    &nbsp&nbsp&lt;/ejb-relation><BR>
+    &nbsp&lt;/relationships><BR>
+    </code>
+
+    <p>Every &lt;ejb-relation> has two participating entity beans. Their role in the
+    relation is defined within a <font color=purple>&lt;ejb-relationship-role></font> section.
+    Use the <font color=green>&lt;ejb-name></font> tag to describe which entity the
+    <font color=purple>&lt;ejb-relationship-role></font> block belongs to.
+
+    <p>CMR fields are "virtual" fields in an Entity Bean that are being
+    maintained by the container.
+
+    <p><b>Writing code for the CMR fields</b>
+
+    <p>For the HouseBean, we have defined <code>studentList</code> as a CMR
+    field. We need to match this with a method declaration in HouseBean.java:
+
+    <pre><code>
+    abstract public Collection getStudentList();
+    </code></pre>
+
+    <p>which Resin-CMP will implement for us. For adding Students to the house,
+    instead of defining a set-method, we can simply add to the Collection:
+
+    <pre><code>
+      // adding a student to a house
+      house.getStudentList().add(student);
+    </code></pre>
+
+    <p>The case is a bit different for StudentBean because here the CMR field,
+    <code>house</code>, has a multiplicity of one. Our CMR accessor method
+    will not return a collection. Instead we define two methods:
+
+    <pre><code>
+    abstract public House getHouse();
+    abstract public void setHouse(House house);
+    </code></pre>
+
+    <p>In this example of a one2many relation, we need to make sure that
+    each student entity has as its <code>house</code> value a String that
+    can be matched to the primary key of one house entity. Otherwise, Resin-CMP
+    will not be able to associate house and student records in the database.
+
+</BODY>

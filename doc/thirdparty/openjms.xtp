@@ -1,0 +1,121 @@
+<document>
+  <header>
+    <product>resin</product>
+    <title>OpenJMS</title>
+  </header>
+
+  <body>
+    <summary/>
+
+<section title="OpenJMS">
+
+<p>The <a href="http://www.openjms.com">OpenJMS</a> client is configured
+by adding a <a href="config-index|jndi-link">jndi-link</a> to the web.xml
+or resin.conf.</p>
+
+<subsection title="Configured with OpenJMS tcp connectory">
+
+<example title="web.xml">
+&lt;web-app xmlns="http://caucho.com/ns/resin">
+  &lt;jndi-link jndi-name="jms"
+             factory="org.exolab.jms.jndi.InitialContextFactory">
+    &lt;init-param java.naming.provider.url="tcp://localhost:3035"/>
+  &lt;/jndi-link>
+&lt;/web-app>
+</example>
+
+<p>The OpenSSL server will need to be started as a separate process.</p>
+
+</subsection>
+
+<subsection title="Configured with OpenJMS embedded">
+
+<p>OpenJMS can also be embedded in Resin.  Because OpenJMS does not
+yet support JCA, it does not understand server restarts.  Therefore,
+it needs to be placed in the resin.conf, not the web.xml.</p>
+
+<example title="resin.conf">
+&lt;resin xmlns="http://caucho.com/ns/resin">
+  &lt;server>
+    &lt;system-property openjms.home="/usr/local/src/openjms-0.7.6-rc3"/>
+    &lt;resource type="org.exolab.jms.server.EmbeddedJmsServer">
+      &lt;arg>${server.rootDir}/jms/openjms.xml&lt;/arg>
+    &lt;/resource>
+
+    &lt;jndi-link jndi-name="jms"
+               factory="org.exolab.jms.jndi.InitialContextFactory">
+      &lt;init-param java.naming.provider.url="embedded"/>
+    &lt;/jndi-link>
+
+    ...
+&lt;/resin>
+</example>
+
+</subsection>
+
+<p>A sample servlet using the above OpenSSL configuration sends a
+text message to the queue.</p>
+
+<example title="SendServlet.java">
+package qa;
+
+import java.io.*;
+import javax.servlet.*;
+import javax.servlet.http.*;
+import javax.naming.*;
+import javax.jms.*;
+
+public class SendServlet extends HttpServlet {
+  private QueueConnectionFactory _queueFactory;
+  private Queue _queue;
+
+  public void init()
+    throws ServletException
+  {
+    try {
+      Context ic = new InitialContext();
+      Context jms = (Context) ic.lookup("java:comp/env/jms");
+
+      _queueFactory = (QueueConnectionFactory)
+        jms.lookup("JmsQueueConnectionFactory");
+
+      _queue = (Queue) jms.lookup("queue1");
+    } catch (Exception e) {
+      throw new ServletException(e);
+    }
+  }
+
+  public void service(HttpServletRequest req,
+                      HttpServletResponse res)
+    throws IOException, ServletException
+  {
+    PrintWriter out = res.getWriter();
+
+    QueueConnection conn = null;
+
+    try {
+      conn = queueFactory.createQueueConnection();
+      QueueSession queueSession =
+         conn.createQueueSession(false, Session.AUTO_ACKNOWLEDGE);
+      QueueSender queueSender = queueSession.createSender(queue);
+      TextMessage message = queueSession.createTextMessage();
+
+      message.setText("Test message");
+
+      out.println("Sending message: " + message.getText());
+      queueSender.send(message);
+    } catch (Exception e) {
+      throw new ServletException(e);
+    } finally {
+      try {
+        conn.close();
+      } catch (Exception e) {
+      }
+    }
+  }
+}
+</example>
+
+    </section>
+  </body>
+</document>

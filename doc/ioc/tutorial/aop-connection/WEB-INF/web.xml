@@ -1,0 +1,13 @@
+<web-app xmlns="http://caucho.com/ns/resin">
+  <class-loader>
+    <enhancer>
+      <method annotation="example.RequireConnection"
+              type="example.ConnectionInterceptor"
+              static="false"/>
+    </enhancer>
+  </class-loader>
+
+  <servlet servlet-name="sample" servlet-class="example.SampleServlet"/>
+
+  <servlet-mapping url-pattern="/aop" servlet-name="sample"/>
+</web-app>

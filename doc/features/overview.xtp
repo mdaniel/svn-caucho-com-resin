@@ -1,0 +1,379 @@
+<document>
+<header>
+<product>resin</product>
+<title>Features - Resin and Resin Professional</title>
+<description>
+An overview of the features and capabilities in Resin and Resin Professional.
+</description>
+</header>
+
+<body>
+
+<summary/>
+
+<section name="resinpro" title="Resin Professional">
+<p>
+Resin is provided in two versions, Resin Professional and Resin Open Source.
+Resin Professional adds features and enhancements commonly needed in a 
+production environment.  Resin Open Source is suitable for hobbyists,
+developers, and low traffic websites that do not need the performance and
+reliability enhancements of Resin Professional.
+</p>
+
+<section name="reliability" title="Reliability features">
+  
+<p>Resin Professional provides a number of reliability features,
+including automatic server restart, detection and restart of locked or
+stalled servers, and monitoring of JVM memory usage for applications
+with memory leaks.</p>
+
+<ul>
+<li>Resin configuration: <a config-tag="ping"/>
+<li>Resin configuration: <a config-tag="min-free-memory"/>
+</ul>
+
+</section>
+
+<section name="cluster" title="Clustering">
+<p>
+Clustering provides the ability for multiple servers to appear as one server
+to clients.  Clustering  provides enhanced reliability and allows sites to
+scale up as server demand increases,
+</p>
+<p>
+Clustering is supported with the standalone web server, Apache, and IIS.
+</p>
+
+<ul>
+<li>Resin documentation: <a href="doc|config|balance.xtp">Reliability and Load Balancing</a></li>
+</ul>
+</section>
+
+<section name="session" title="Persistent and Distributed sessions">
+<p>Persistent sessions guarantee that a server can restore the contents
+of the HttpSession object when it is restarted.
+Distributed sessions provide the ability for multiple
+servers in a cluster to share the values stored in the HttpSession.
+<ul>
+<li>Resin documentation: <a href="doc|config|sessions.xtp">Persistent and Distributed Sessions</a></li>
+</ul>
+</section>
+
+
+<section name="native" title="Performance enhancing native code">
+<p>
+Resin Professional includes a native code libary on both Windows and Unix
+platforms.  Native code is used to provide significant performance benefits
+in areas like socket connections, keepalive connections, and file system
+access.
+</p>
+</section>
+
+<section name="openssl" title="OpenSSL">
+<p>
+Resin Professional uses native code to link to the OpenSSL libraries,
+a much better and more efficient SSL solution than the Java facilities
+provided by JSSE.
+</p>
+
+<ul>
+<li>Resin documentation: <a href="security|ssl">OpenSSL</a>
+</ul>
+</section>
+
+<section name="caching" title="HTTP proxy caching">
+<p>
+Resin Professional provides a memory and disk based caching system for
+increased performance benefits.
+Server caching can speed dynamic pages to
+near-static speeds. Small but frequently accessed resources
+such as images and css files are cached in memory and served directly
+to the client, avoiding even a read from the disk.
+</p>
+
+<p>
+Many pages require expensive operations like database
+queries but change infrequently.
+Resin can cache the results and serve them like static pages.
+Resin's caching will work for any servlet, including JSP
+and XTP pages.
+</p>
+
+<ul>
+<li>Resin documentation: <a href="performance|caching">Caching</a>
+<li>Resin configuration: <a config-tag="cache"/>
+</ul>
+</section>
+
+<section name="gzip" title="Gzip filter">
+<p>
+Bandwidth costs are significant for many websites. The GzipFilter
+enables automatic compression of responses for browsers that support
+it.  Use of the GzipFilter reduces bandwidth usage
+and may provide significant cost savings.
+</p>
+<ul>
+<li>Resin documentation: <a href="filters|filter-library.xtp#GzipFilter">GzipFilter</a>
+</ul>
+</section>
+  
+</section> <!-- resinpro -->
+
+<section name="webserver" title="Web Server">
+<section title="Standalone">
+<ul>
+<li><a href="doc|install|httpd">Resin documentation: Standalone web server Unix and Windows</a>
+</ul>
+<section name="http" title="Hypertext Transfer Protocol (HTTP)">
+<ul>
+<li><a href="external|spec|http">External: HTTP specification (RFC 2616)</a>
+<li><a href="external|spec|http-authentication">External: HTTP Authentication specification (RFC 2617)</a>
+</ul>
+</section>
+
+<section name="ssl" title="Secure Socket Layter (SSL) 3.0">
+<ul>
+<li><a href="doc|security|ssl">Resin documentation</a>
+</ul>
+</section>
+
+</section> <!-- webserver -->
+
+
+<section title="Apache 1.3 and 2.0 integration">
+<ul>
+<li><a href="doc|install|cse-apache-unix.xtp">Resin documentation: Resin with Apache on Unix</a>
+<li><a href="doc|install|cse-apache-win.xtp">Resin documentation: Resin with Apache on Windows</a>
+</ul>
+</section>
+
+<section title="IIS 5 and IIS 6 integration">
+<ul>
+<li><a href="doc|install|cse-iis.xtp">Resin documentation: Resin with IIS</a>
+</ul>
+</section>
+
+</section>
+
+<section name="os" title="Operating Systems">
+
+<p>Resin and Resin-EE are tested and supported on the following operating
+systems:</p>
+
+<ul>
+<li>Linux
+<li>Solaris
+<li>Windows
+<li>Mac OS X
+</ul>
+
+<p>Resin is known to work on the following operating systems:</p>
+
+<ul>
+<li>AIX
+<li>HP-UX
+<li>Free-BSD
+</ul>
+
+<p>
+Resin is used on these operating systems, however there may or may not be
+difficulties with Apache integration, and the JNI code that Resin uses to
+increase performance may not be available.
+</p>
+
+</section> <!-- os -->
+
+
+<section name="db" title="Databases">
+<p>
+Resin provides a robust connection pool for any JDBC 1, JDBC 2, or JDBC 3
+database driver.  
+</p>
+
+<ul>
+<li><a href="doc|db|index">Resin documentation: Databases</a>
+<li><a href="doc|db|thirdparty">Resin documentation: Example database configurations</a>
+</ul>
+</section> <!-- db -->
+
+<section name="servlet" title="Java Servlet 2.4">
+<ul>
+<li><a href="doc|servlet|index">Resin documentation</a>
+<li><a href="external|spec|servlet24">External: specification 2.4 (JSR-154)</a>
+</ul>
+</section>
+
+<section name="jsp" title="Java Server Pages (JSP) 2.0">
+<ul>
+<li><a href="doc|jsp|index">Resin documentation</a>
+<li><a href="external|spec|jsp20">External: specification 2.0 (JSR-152)</a>
+</ul>
+</section>
+
+<section name="jstl" title="Java Server Pages Standard Template Library (JSTL) 1.0">
+<ul>
+<li><a href="doc|jsp|jstl">Resin documentation</a>
+<li><a href="external|spec|jstl10">External: specification (JSR-052)</a>
+</ul>
+</section>
+
+<section name="portlet" title="Portlet 1.0">
+<p>Status: BETA</p>
+
+<ul>
+<li><a href="doc|portlet|index">Resin documentation</a>
+<li><a href="external|spec|portlet">External: specification (JSR-162)</a>
+</ul>
+</section>
+
+<section name="xslt" title="XSLT 1.0">
+<ul>
+<li><a href="doc|xslt|index">Resin documentation</a>
+<li><a href="external|spec|xslt10">External: specification 1.0</a>
+</ul>
+</section>
+
+<section name="xpath" title="XPath 1.0">
+<ul>
+<li><a href="doc|xpath|index">Resin documentation</a>
+<li><a href="external|spec|xpath10">External: specification 1.0</a>
+</ul>
+</section>
+
+<section name="jaxp" title="JAXP 1.2">
+<ul>
+<li><a href="doc|xml|jaxp">Resin documentation</a>
+<li><a href="external|spec|jaxp12">External: specification 1.2 (JSR-063)</a>
+</ul>
+</section>
+
+<section name="jca" title="Java Connector Architecture (JCA) 1.5">
+<ul>
+<li><a href="doc|resource|index">Resin documentation</a>
+<li><a href="external|spec|jca15">External: specification 1.5 (JSR-112)</a>
+</ul>
+</section>
+
+<section name="jmx" title="Java Management Extensions (JMX) 1.2">
+<ul>
+<li><a href="doc|jmx|index">Resin documentation</a>
+<li><a href="external|spec|jmx12">External: specification 1.2 (JSR-003)</a>
+</ul>
+</section>
+
+<section name="jmx-remote" title="Remote JMX 1.0">
+<p>Status: in progress</p>
+<ul>
+<!--
+<li><a href="doc|jmx|remote">Resin documentation</a>
+-->
+<li><a href="external|spec|jmx-remote">External: specification 1.0 (JSR-160)</a>
+</ul>
+</section>
+
+<section name="jsr88" title="J2EE Deployment API (JSR 88) 1.0">
+<p>Status: in progress</p>
+<ul>
+<li><a href="external|spec|jsr88">External: specification final release (JSR-88)</a>
+</ul>
+</section>
+
+<section name="webdav" title="WebDAV">
+<ul>
+<li><a href="doc|servlet|webdav">Resin documentation</a>
+<li><a href="external|spec|webdav">External: specification (RFC 2518)</a>
+<li><a href="external|webdav|index">External: WebDAV home</a>
+</ul>
+</section>
+
+<section name="groovy" title="Groovy">
+<ul>
+<li><a href="doc|thirdparty|groovy">Resin documentation</a>
+</ul>
+</section>
+
+<section name="php" title="PHP">
+<ul>
+<li><a href="doc|thirdparty|php">Resin documentation</a>
+</ul>
+</section>
+
+<section name="cgi" title="CGI">
+<ul>
+<li><a href="doc|servlet|servlet-library#CGIServlet">Resin documentation</a>
+</ul>
+</section>
+
+<!-- ======== -->
+<!-- Resin EE -->
+<!-- ======== -->
+
+<section name="jta" title="Java Transaction API (JTA) 1.0.1b" product="resin-ee">
+<p>Included with Resin EE.</p>
+
+<ul>
+<li><a href="external|spec|jta101b">External: specification 1.0.1b</a>
+</ul>
+</section>
+
+<section name="jts" title="Java Transaction Service (JTS) 1.0" product="resin-ee">
+<p>Included with Resin EE.</p>
+<ul>
+<li><a href="external|spec|jts10">External: specification 1.0</a>
+</ul>
+</section>
+
+
+<section name="jms" title="Java Message Service (JMS) 1.1" product="resin-ee">
+<p>Included with Resin EE.</p>
+<ul>
+<li><a href="doc|jms|index">Resin documentation</a>
+<li><a href="external|spec|">External: specification 1.1 (JSR-914)</a>
+</ul>
+</section>
+
+<section name="ejb" title="Enterprise Java Beans (EJB) 2.0" product="resin-ee">
+<p>Included with Resin EE.</p>
+<ul>
+<li><a href="doc|ejb|index">Resin EJB documentation</a>
+<li><a href="doc|cmp|index">Resin CMP documentation</a>
+<li><a href="external|spec|ejb20">External: specification 2.0 (JSR-19)</a>
+</ul>
+</section>
+
+<section name="corba" title="CORBA/IDL" product="resin-ee">
+<p>Included with Resin EE.</p>
+<p>
+The J2EE specification requires that containers support CORBA.  Although Resin
+supports CORBA, CAucho does not recommend the use of CORBA.
+</p>
+
+<ul>
+<li><a href="doc|ejb|corba">Resin documentation</a>
+<li><a href="doc|protocols|hessian">Hessian documentation</a>
+</ul>
+</section>
+
+<!--
+<section name="j2ee" title="J2EE">
+</section>
+
+<section name="webservices" title="Web Services ">
+</section>
+
+<section name="jax-rpc" title="JAX-RPC">
+</section>
+
+<section name="jaxr" title="Java API for XML Registries (JAXR)">
+</section>
+
+<section name="javamail" title="JavaMail ">
+</section>
+
+<section name="jaf" title="JavaBeans Activation Framework">
+</section>
+-->
+
+
+</body>
+</document>

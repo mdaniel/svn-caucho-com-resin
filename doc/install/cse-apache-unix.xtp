@@ -1,0 +1,418 @@
+<document>
+  <header>
+    <product>resin</product>
+    <resin-2.0>$resin/ref/cse-apache-unix.xtp</resin-2.0>
+    <title>Resin with Apache on Unix</title>
+    <description>
+      <p>Resin provides a fast servlet runner for Apache, allowing Apache
+        to run servlets and JSP files.  The servlet runner needs
+        Apache 1.3.x or greater and DSO support.</p>
+
+      <p>
+        <figure src='apache_srun.gif'/>
+      </p>
+
+      <p>If you have not yet done so, we suggest you use the <a
+      href='install|httpd'>Resin standalone web server</a> option
+      first.</p>
+
+    </description>
+  </header>
+
+  <body>
+    <summary/>
+
+
+<section title='Installation'>
+
+<p>To configure Resin with Apache, you must follow the following steps:</p>
+<ol>
+<li>Compiling Apache
+<li>Compile mod_caucho.so
+<li>Configure Apache
+<li>Set up environment
+<li>Configure resin.conf
+<li>Restart Apache and start srun
+</ol>
+
+<section title='Compiling Apache'>
+
+<p>You need a version of Apache with DSO support enabled. Apache has
+full documentation at <a href="external|apache|dso">their website</a>.
+ To check if your apache has DSO support, you can check for
+ <var/mod_so.c/> in your your httpd
+
+<example title="checking apache httpd for mod_so.c">
+unix> /usr/local/apache/bin/httpd -l
+Compiled-in modules:
+  ...
+  mod_so.c
+  ...
+ </example>
+
+<p>Many distributions, e.g. Red Hat Linux, will have Apache preinstalled.
+However, because the standard distribution has files all over the
+place, some people prefer to recompile Apache from scratch.</p>
+
+<p>Once you untar Apache, build it like:</p>
+
+<example>
+unix> ./configure --prefix=/usr/local/apache \
+  --enable-module=so
+unix> make
+unix> make install
+</example>
+
+<p>Solaris versions of Apache may need additional flags, otherwise
+you'll get some linking errors when trying to load Resin.  You may need
+to refer to the Apache documentation if you get linking errors.  Here's an
+example configuration on Solaris:</p>
+
+<example>
+unix> ./configure --prefix=/usr/local/apache \
+                  --enable-rule=SHARED_CORE \
+                  --enable-rule=SHARED_CHAIN \
+                  --enable-module=so \
+                  --enable-module=most \
+                  --enable-shared=max
+</example>
+
+</section>
+
+<section title='Compiling mod_caucho.so'>
+
+<p>To compile and install <var/mod_caucho/> on Unix, you'll need to run
+Resin's <code/configure/> and then make.  This step will create 
+mod_caucho.so and put it in the Apache module directory.  Usually,
+mod_caucho.so will end up in /usr/local/apache/libexec/mod_caucho.so.</p>
+
+<p>If you know where your <var/apxs/> executable is, you can use --with-apxs.
+<var/apxs/> is a little Perl script that the Apache configuration
+makes.  It lets modules like Resin know how all the Apache directories
+are configured.  It is generally in /usr/local/apache/bin/apxs or
+/usr/sbin/apxs.  It's usually easiest to use --with-apxs so you don't
+need to worry where all the Apache directories are.</p>
+
+<example>
+unix> ./configure --with-apxs=/usr/local/apache/bin/apxs
+unix> make
+</example>
+
+<p>Even if you don't know where <var/apxs/> is, the configure script
+can often find it:</p>
+
+<example>
+unix> ./configure --with-apxs
+unix> make
+</example>
+
+<p>As an alternative to --with-apxs, if you've compiled Apache yourself,
+or if you have a simple configuration, you can generally just point to
+the Apache directory:</p>
+
+<example>
+unix> ./configure --with-apache=/usr/local/apache
+unix> make
+unix> make install
+</example>
+
+<p>The previous --with-apxs or --with-apache should cover most
+configurations.  For some unusual configurations, you can have finer control
+over each directory with the following arguments to ./configure.
+In general, you should use --with-apache or --with-apxs, but the other
+variables are there if you know what you're doing.</p>
+
+<deftable>
+<tr><td>--with-apache=dir<td>The Apache root directory.
+<tr><td>--with-apxs=apxs<td>Pointer to the Apache extension script
+<tr><td>--with-apache-include=dir<td>The Apache include directory
+<tr><td>--with-apache-libexec=dir<td>The Apache module directory
+<tr><td>--with-apache-conf=httpd.conf<td>The Apache config file
+</deftable>
+
+</section>
+
+<section title='Configure the Environment'>
+
+<p>If you don't already have Java installed, you'll need to download a
+JDK and set some environment variables.</p>
+
+<p>Here's a typical environment that you might put in ~/.profile or
+/etc/profile</p>
+
+<example>
+# Java Location
+JAVA_HOME=/&lt;installdir>/jdk1.4
+export JAVA_HOME
+
+# Resin location (optional).  Usually Resin can figure this out.
+RESIN_HOME=/&lt;installdir>/resin-3.0.2
+export RESIN_HOME
+
+# If you're using additional class libraries, you'll need to put them
+# in the classpath.
+CLASSPATH=
+</example>
+
+</section>
+
+<section title='Configuring resin.conf'>
+
+<p>The default resin.conf looks in
+<code>resin-3.0.x/webapps/ROOT</code> 
+for JSP files and
+<code>resin-3.0.x/webapps/ROOT/WEB-INF/classes</code>
+for servlets and java source files.  To tell Resin
+to use Apache's document area, you configure an explicit 
+<var/web-app/> with the appropriate document-directory:
+</p>
+
+<example title='resin.conf'>
+&lt;resin xmlns="http://caucho.com/ns/resin"&gt;
+  &lt;server&gt;
+    &lt;host id=""&gt;
+ 
+      &lt;web-app id='/' document-directory="/usr/local/apache/htdocs"/&gt;
+
+    &lt;/host&gt;
+  &lt;/server&gt;
+&lt;/resin&gt;
+</example>
+
+</section>
+
+<section title='Starting the Servlet Engine'>
+
+<p>Now you need to start the servlet engine.  Starting Resin is the same
+with Apache or standalone.  See the <a href="httpd.xtp#deploy">httpd</a> page
+for a detailed description.</p>
+
+<example>
+unix> resin-3.0.x/bin/httpd.sh
+Resin 3.0.2-beta (built Mon Aug  4 09:26:44 PDT 2003)
+Copyright(c) 1998-2003 Caucho Technology.  All rights reserved.
+ 
+Starting Resin on Mon, 04 Aug 2003 09:43:39 -0700 (PDT)
+[09:43:40.664] Loaded Socket JNI library.
+[09:43:40.664] http listening to *:8080
+[09:43:40.664] ServletServer[] starting
+[09:43:40.879] hmux listening to *:6802
+[09:43:41.073] Host[] starting
+[09:43:41.446] Application[http://localhost:8080/resin-doc] starting
+[09:43:41.496] Application[http://localhost:8080] starting
+</example>
+
+<p>Resin will print every port it's listening to.  In the above example,
+Resin is listening to port 8080 using HTTP and 6802 using its servlet
+runner protocol.  In other words, mod_caucho can connect to Resin
+with 6802 only on same host, but you can browse port 8080 from any host.</p>
+
+<p>The following snippet shows the <var/&lt;http>/> and <var/&lt;srun>/>
+configuration for the above example.</p>
+
+<example>
+&lt;resin xmlns="http://caucho.com/ns/resin">
+  &lt;server>
+    &lt;http id="" host="*" port="8080"/>
+
+    &lt;cluster>
+      &lt;srun id="" host="localhost" port="6802" index="1"/>
+    &lt;/cluster>
+
+    ...
+  &lt;/server>
+&lt;/resin>
+</example>
+
+</section>
+
+<section title='Testing the servlet engine'>
+
+<p>Create a test file '/usr/local/apache/htdocs/test.jsp'</p>
+
+<example>
+2 + 2 = &lt;%= 2 + 2 %>
+</example>
+
+<p>Browse http://localhost/test.jsp again.  You should now get</p>
+
+<results>
+2 + 2 = 4
+</results>
+
+</section>
+
+</section>
+
+<section title='Configuring Apache by hand'>
+
+<p>Making mod_caucho will automatically change your httpd.conf file.
+You can also configure Apache directly, instead of letting mod_caucho read
+the configuration from the resin.conf file. If you use this method, you
+need to make sure you match the Apache configuration with the Resin
+configuration.</p>
+
+<example title=httpd.conf>
+LoadModule caucho_module libexec/mod_caucho.so
+
+&lt;IfModule mod_caucho.c&gt;
+  ResinConfigServer localhost 6802
+  &lt;Location /caucho-status>
+    SetHandler caucho-status
+  &lt;/Location>
+&lt;/IfModule&gt;
+</example>
+
+<note>The caucho-status is optional and probably should be avoided in
+a production site.  It lets you ask the Caucho Apache module about the
+Caucho status, valuable for debugging.</note>
+
+<p>Restart Apache.  Now browse http://localhost/caucho-status.  It
+should return a table indicating that the servlet runner is stopped.</p>
+
+<p>Browse http://localhost/test.jsp.  It should return a message like:
+
+<results>
+Cannot connect to Servlet Runner.
+</results>
+
+<p>You can also dispatch to Resin directly from the httpd.conf.  The apache handler name is "caucho-request".</p>
+
+<deftable>
+<tr><th>Apache Handler<th>Meaning
+<tr><td>caucho-status<td>Handler to display /caucho-status
+<tr><td>caucho-request<td>Dispatch a request to Resin
+</deftable>
+
+<p>Requests dispatched directly from the Apache httpd.conf will not
+appear in /caucho-status.  You can use caucho-request as follows:</p>
+
+<example>
+&lt;Location /foo/*>
+  SetHandler caucho-request
+&lt;/Location>
+</example>
+
+<deftable>
+<tr><th>Apache Command<th>Meaning
+<tr><td>ResinConfigServer <var/host/> <var/port/><td>Specifies the Resin JVM at <var/host:port/> as a configuration server.
+<tr><td>CauchoStatus <var/true/false/><td>Enables/disables the /caucho-status management
+<tr><td>CauchoHost <var/host/> <var/port/><td>Alternative to <var/ResinConfigServer/>, adds the Resin JVM with an srun port at host:port as a servlet runner.
+<tr><td>CauchoBackup <var/host/> <var/port/><td>Alternative to <var/ResinConfigServer/>, adds the Resin JVM with an srun port at host:port as a backup servlet runner.
+</deftable>
+
+<section title="Virtual Hosts">
+
+<p>The <a href="doc|config|virtual-host">virtual host</a> topic describes virtual
+hosts in detail.  If you're using a single JVM, you only need to configure
+the resin.conf.  If you want a different JVM for each virtual host, your
+httpd.conf can load a different resin.conf for each JVM:</p>
+
+<example title='httpd.conf'>
+&lt;VirtualHost foo.com>
+ServerName foo.com
+ServerAlias www.foo.com
+ResinConfigServer 192.168.0.1 6802
+&lt;/VirtualHost>
+
+&lt;VirtualHost bar.com>
+ServerName bar.com
+ServerAlias www.bar.com
+ResinConfigServer 192.168.0.2 6802
+&lt;/VirtualHost>
+</example>
+
+<p>The foo.conf might look something like:</p>
+
+<example title='foo.conf'>
+&lt;resin xmlns="http://caucho.com/ns/resin">
+&lt;server>
+  &lt;cluster>
+    &lt;srun id="" host="192.168.0.2" port="6802"/>
+  &lt;/cluster>
+
+  &lt;host id='www.foo.com'>
+     ...
+  &lt;/host>
+&lt;/server>
+&lt;/resin>
+</example>
+
+</section>
+
+<section title="Dispatching">
+
+<p>mod_caucho queries the configuration server to distinguish the URLs
+going to Resin from the URLs handled by Apache.  The configuration
+server uses the &lt;servlet-mapping> directives to decide which URLs
+to send.  Also, any *.war file automatically gets all its URLs.  Other
+URLs stay with Apache.  There's a more complete discussion of the URL
+dispatching in the <a
+href="plugin-dispatch.xtp">plugin-dispatch</a> page.</p>
+
+</section>
+
+</section>
+
+<section name="balance" title="Load Balancing">
+
+<p>In Resin 3.0, you can distribute requests to multiple machines.  All
+requests in a session will go to the same host.  In addition, if one
+host goes down, Resin will send the request to the next available machine.</p>
+
+<p>In addition, you can specify backup machines.  The backup only will serve
+requests if all primaries are down.</p>
+
+<p>See the <a href="doc|config|resin">http config</a> section for more
+details.</p>
+
+<example title="resin.conf">
+&lt;resin xmlns="http://caucho.com/ns/resin">
+&lt;server>
+  &lt;cluster>
+    &lt;srun id="a" host="host1" port="6802" index="1"/>
+    &lt;srun id="b" host="host2" port="6802" index="2"/>
+    &lt;srun id="c" host="backup" port="6802" index="3" backup="true"/>
+  &lt;/cluster>
+  ...
+&lt;/server>
+&lt;/resin>
+</example>
+</section>
+
+<section title='Troubleshooting'>
+
+<ol>
+<li>First, check your configuration with the standalone httpd.sh.
+In other words, add a &lt;http port='8080'/> and check port 8080.
+<li>Check http://localhost/caucho-status.  That will tell if
+mod_caucho has properly connected to the configuration server.
+<li>Each srun host should be green and the mappings should
+match your resin.conf.
+<li>If caucho-status fails entirely, the problem is in the mod_caucho
+installation and the Apache httpd.conf.
+<li>If caucho-status shows the wrong mappings, there's something wrong
+with the resin.conf or the pointer to resin.conf in httpd.conf.
+<li>If caucho-status shows a red servlet runner, then httpd.sh hasn't
+properly started.
+<li>If you get a "cannot connect to servlet engine", caucho-status
+will show red, and httpd.sh hasn't started properly.
+<li>If httpd.sh doesn't start properly, you should look at the logs
+in resin-3.0.x/log.  You should start <var/httpd.sh -verbose/> to get
+more information.
+<li>If httpd.sh says "no servers defined", your resin.conf is missing a
+&lt;srun> or &lt;httpd> definition.
+<li>If httpd.sh never shows a "srun listening to *:6802" line,
+it's not paying attention to mod_caucho.  You'll need to add a &lt;srun>
+line.
+<li>If httpd.sh shows "srun listening to localhost:6802" line, only an
+Apache on the same host can connect to the srun.  If you need an Apache
+on a different host to connect to srun, you'll need to change the
+<var/host/> attribute in the srun configuration.
+<li>If you get Resin's "file not found", the Apache configuration
+is good but the resin.conf probably points to the wrong directories.
+</ol>
+
+</section>
+  </body>
+</document>

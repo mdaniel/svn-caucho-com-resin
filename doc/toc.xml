@@ -1,0 +1,39 @@
+<navigation threaded='true'>
+  <item link='index.xtp' title='Resin 3.0'>
+    <item link="orientation.xtp" title="Orientation" 
+          cond="file-exists('orientation.xtp')">
+      <title>Orientation</title>
+    </item>
+<!--
+    <item link='reorg/index.xtp' title='Reorg Notes' product="caucho-dev"/>
+-->
+    <item link='features/index.xtp' title='Features' atoc-descend="true"/>
+    <item link="install/index.xtp" title="Installation" atoc-descend="true"/>
+    <item link="config/index.xtp" title="Configuration" atoc-descend="true"/>
+    <item link="webapp/index.xtp" title="Web Applications" atoc-descend="true"/>
+    <item link="ioc/index.xtp" title="IOC/AOP" atoc-descend="true"/>
+    <item link="resource/index.xtp" title="Resources" atoc-descend="true"/>
+    <item link="jsp/index.xtp" title="JSP" atoc-descend="true"/>
+    <item link="servlet/index.xtp" title="Servlets and Filters" atoc-descend="true"/>
+    <item link="portlet/index.xtp" title="Portlets" atoc-descend="true"/>
+    <item link="db/index.xtp" title="Databases" atoc-descend="true"/>
+    <item link="jmx/index.xtp" title="Admin (JMX)" atoc-descend="true"/>
+<!--
+    <item link="amber/index.xtp" title="Amber" atoc-descend="true"/>
+-->
+    <item link='cmp/index.xtp' title='CMP' product="resin-ee" atoc-descend="true"/>
+    <item link='ejb/index.xtp' title='EJB' product="resin-ee" atoc-descend="true"/>
+    <item link="ejb3/index.xtp" title="EJB 3.0" product="resin-ee" atoc-descend="true"/>
+    <item link='security/index.xtp' title='Security' atoc-descend="true"/>
+    <item link='xml/index.xtp' title='XML and XSLT' atoc-descend="true"/>
+    <item link='xtp/index.xtp' title='XTP' atoc-descend="true"/>
+    <item link='jms/index.xtp' title='JMS' product="resin-ee" atoc-descend="true"/>
+    <item link='performance/index.xtp' title='Performance' atoc-descend="true"/>
+    <item link='protocols/index.xtp' title='Protocols' atoc-descend="true"/>
+    <item link='thirdparty/index.xtp' title='Third-party' atoc-descend="true"/>
+    <item link='troubleshoot/index.xtp' title='Troubleshooting/FAQ' atoc-descend="true"/>
+    <!--
+    <item link='' title='PDF Manuals' atoc-descend="true"/>
+    -->
+  </item>
+</navigation>

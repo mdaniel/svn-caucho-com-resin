@@ -1,0 +1,112 @@
+<document>
+  <header>
+    <product>resin</product>
+    <title>Hessian Service</title>
+    <description>
+      <p>Writing a Hessian service as a plain-old Java object (POJO)
+eliminates protocol dependencies and simplifies service testing.
+</p>
+    </description>
+    <type>tutorial</type>
+    <tutorial-startpage>demo.jsp</tutorial-startpage>
+  </header>
+
+  <body>
+    <summary/>
+
+<p>The <a href="../hessian-add/">addition example</a> built the Hessian
+service as an extension of HessianService for simplicity.  Most services
+will want to be independent of the Hessian protocol itself.</p>
+
+<section title="Files in this tutorial">
+<deftable>
+<tr><td><viewfile-link file="WEB-INF/classes/example/MathService.java"/>
+    <td>Interface for the math service.
+<tr><td><viewfile-link file="WEB-INF/classes/example/MathServiceImpl.java"/>
+    <td>The main service implementation.
+<tr><td><viewfile-link file="WEB-INF/web.xml"/>
+    <td>Configures the environment
+<tr><td><viewfile-link file="demo.jsp"/>
+    <td>Client JSP
+</deftable>
+</section>
+
+<section title="Service Implementation">
+
+<p>The MathService implementation is just a Java class that implements
+the MatchService API.</p>
+
+<example title="MathServiceImpl.java">
+package example;
+
+public class MathServiceImpl implements MathService {
+  public int add(int a, int b)
+  {
+    return a + b;
+  }
+}
+</example>
+
+</section>
+
+<section title="Remote Interface">
+
+<p>The Java interface describes the remote API.  This example has an
+addition method, <var/add()/>.</p>
+
+<p>Resin's proxy client implementation uses the remote interface to
+expose the API to the proxy stub.  Strictly speaking, though,
+the Java remote interface is not required for Hessian.  A non-Java client
+will not use the Java interface, except possibly as documentation.</p>
+
+<example title="MathService.java">
+package example;
+
+public interface MathService {
+  public int add(int a, int b);
+}
+</example>
+
+</section>
+
+<section title="Service configuration">
+
+<example title="web.xml">
+&lt;servlet servlet-name="hessian"
+         servlet-class="com.caucho.hessian.server.HessianServlet">
+  &lt;init-param service-class="example.MathServiceImpl"/>
+  &lt;init-param api-class="example.MathService"/>
+&lt;/servlet>
+</example>
+
+</section>
+
+<section title="Java Client">
+
+<p>The client is identical to the basic example.</p>
+
+<example title="client.jsp">
+&lt;%@ page import="com.caucho.hessian.client.HessianProxyFactory" %>
+&lt;%@ page import="example.MathService" %>
+&lt;%
+HessianProxyFactory factory = new HessianProxyFactory();
+
+// http://localhost:8080/resin-doc/protocols/tutorial/hessian-service/hessian/math
+
+String url = ("http://" +
+              request.getServerName() + ":" + request.getServerPort() +
+              request.getContextPath() + "/hessian/math");
+
+MathService math = (MathService) factory.create(MathService.class, url);
+
+out.println("3 + 2 = " + math.add(3, 2));
+%>
+</example>
+<results>
+3 + 2 = 5
+</results>
+
+</section>
+
+  </body>
+</document>

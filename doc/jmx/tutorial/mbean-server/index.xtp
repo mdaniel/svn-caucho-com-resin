@@ -1,0 +1,144 @@
+<document>
+  <header>
+    <product>resin</product>
+    <title>Using the JMX MBeanServer API</title>
+    <type>tutorial</type>
+    <description>Example showing JMX-managed resources using the MBeanServer API.</description>
+ <tutorial-startpage>index.jsp</tutorial-startpage>
+  </header>
+
+<body>
+
+<summary/>
+
+<section title="Files in this tutorial">
+<deftable>
+<tr><td><viewfile-link file="WEB-INF/web.xml"/>
+    <td>Configures the JMX-managed bean
+<tr><td><viewfile-link file="WEB-INF/classes/example/Test.java"/>
+    <td>The resource bean implementation.
+<tr><td><viewfile-link file="WEB-INF/classes/example/TestAdmin.java"/>
+    <td>The management interface for the bean.
+<tr><td><viewfile-link file="index.jsp"/>
+    <td>Using the managed bean.
+</deftable>
+</section>
+
+<section title="JMX Resource">
+
+<p>Any resource in Resin can be managed by JMX by implementing
+an MBean interface and by specifying an MBean name.  The interface
+exposes the resource's methods to be managed.</p>
+
+<subsection title="The Test resource">
+
+<p>The test resource is identical to the
+<a href="../basic/index.xtp">basic example</a> but implements
+<code>TestAdmin</code> instead of <code>TestMBean</code>.  Because
+the name <code>TestAdmin</code> does not conform to the MBean convention,
+the web.xml will need to specify the interface explicitly.</p>
+
+<example title="Test.java">
+package example;
+
+public class Test implements TestMBean {
+  private String _data = "default";
+
+  public void setData(String data)
+  {
+    _data = data;
+  }
+
+  public String getData()
+  {
+    return _data;
+  }
+}
+</example>
+
+</subsection>
+
+<section title="web.xml configuration">
+
+<p>The web.xml (or resin.conf) configures the resource with the
+&lt;resource> tag just as with
+<a href="doc|resource|index">other resources</a>.  The resources is
+registered as an MBean by specifying an <var/mbean-name/>.
+
+<example title="web.xml">
+&lt;web-app xmlns="http://caucho.com/ns/resin">
+  &lt;resource mbean-name="example:name=basic"
+            type="example.Test"
+            mbean-interface="example.TestAdmin>
+    &lt;init>
+      &lt;data>An Example Resource&lt;/data>
+    &lt;/init>
+  &lt;/resource>
+&lt;/web-app>
+</example>
+
+<deftable>
+<tr><th>tag<th>description
+<tr><td>resource<td>defines the resource
+<tr><td>mbean-name<td>the MBean name of the resource
+<tr><td>type<td>the class name of the resource bean
+<tr><td>mbean-interface<td>the class name to use as the managed interface
+<tr><td>init<td>Any bean-style configuration goes here
+<tr><td>data<td>The example bean's <code>setData</code> parameter.
+</deftable>
+
+</section>
+
+<section title="Using MBeanServer">
+
+<p>MBeanServer is the main JMX interface for managing resources.
+Although it is less convenient than Resin's proxy interface, it has the
+advantage of being part of the JMX standard.</p>
+
+<p>Resin stores the MBeanServer it uses for resources in JNDI under
+the name java:comp/env/jmx/MBeanServer.  Applications will use JNDI
+to get the MBeanServer.  This JNDI name is not specified in any standard,
+so applications might want to encapsulate getting the MBeanServer in
+a class that can be changed easily.</p>
+
+<p>All management of an MBean uses the MBeanServer and the MBean's
+ObjectName.  In this case, the ObjectName is "example:name=test".</p>
+
+<p>The MBeanServer has three primary management calls:
+<code>getAttribute</code>, <code>setAttribute</code>,
+and <code>invoke</code>.  This example just uses <code>getAttribute</code>.
+</p>
+
+<example title="index.jsp">
+&lt;%@ page import='javax.naming.*, javax.management.*, example.TestAdmin' %>
+&lt;%
+Context ic = new InitialContext();
+
+MBeanServer server = (MBeanServer) ic.lookup("java:comp/env/jmx/MBeanServer");
+
+ObjectName name = new ObjectName("example:name=test");
+
+out.println("data: " + server.getAttribute(name, "Data"));
+%>
+</example>
+<results>
+data: An example resource
+</results>
+
+</section>
+
+</section>
+
+<section title="Compatibility">
+
+<p>Using the MBeanServer interface is compatible with other
+JMX implementations.  The two Resin-dependencies are the configuration
+and how to obtain the Resin MBeanServer.  Different JMX implementations
+will use a different technique to get the MBeanServer, so it's a good
+idea to encapsulate getting the MBeanServer in a class that you can
+change for different implementations.</p>
+
+</section>
+
+  </body>
+</document>

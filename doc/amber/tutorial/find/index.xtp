@@ -1,0 +1,134 @@
+<document>
+  <header>
+    <product>resin</product>
+    <title>Finding Beans with Amber</title>
+    <description>
+      <p>Amber extends SQL to support relations, and queries the
+database uses the JDBC ResultSet API.</p>
+    </description>
+    <type>tutorial</type>
+    <tutorial-startpage>find</tutorial-startpage>
+  </header>
+
+  <body>
+    <summary/>
+
+<p>Most applications need to query the database to find entities with
+special properties.  Amber's query language currently follows Hibernate's
+query language (this may change in the future depending on JDO 2.0.).</p>
+
+<p>The query language resembles SQL resembles SQL with a few restrictions
+and extensions appropriate to handling entities beans.  For example,
+the QL extends SQL with direct support for relations.</p>
+
+<p>In the following example, the school's headmaster needs to know which
+courses are being taught and needs to find the course taught by a named
+teacher.</p>
+
+<section title="Files in this tutorial">
+<deftable>
+<tr><td><viewfile-link file="WEB-INF/web.xml"/>
+    <td>Configures the Amber resource and Database
+<tr><td><viewfile-link file="WEB-INF/classes/example/Course.java"/>
+    <td>The Course bean.
+<tr><td><viewfile-link file="WEB-INF/classes/example/Course.hbm.xml"/>
+    <td>The Course configuration file.
+<tr><td><viewfile-link file="WEB-INF/classes/example/FindServlet.java"/>
+    <td>The Find servlet.
+<tr><td><viewfile-link file="WEB-INF/classes/example/InitResource.java"/>
+    <td>A resource to initialize the database for the demo
+</deftable>
+</section>
+
+<section title="Database Schema">
+
+<p>The example uses the same database table as the previous basic example.</p>
+
+<example title="courses.sql">
+CREATE TABLE amber_find_courses (
+  id INTEGER PRIMARY KEY auto_increment,
+
+  name VARCHAR(250) NOT NULL,
+  instructor VARCHAR(250),
+);
+</example>
+
+</section>
+
+<section title="The query language">
+
+<p>The findAll query finds all the courses in the database.</p>
+
+<example>
+SELECT o FROM example.Course o
+</example>
+
+<p>The entity's class name replaces the usual SQL table.  The 
+mapping of entities to tables is saved in the configuration files
+(the Course.hbm.xml), to simply portability.</p>
+
+<p>The usual JDBC parameter syntax, '?', is allowed as well.</p>
+
+<example>
+SELECT o FROM example.Course o WHERE o.teacher = ?
+</example>
+
+</section>
+
+<section title="The query(sql) method">
+
+<p>The example servlet uses two AmberConnection methods,
+<code>query</code> and <code>prepareQuery</code>.  <code>query</code> returns
+a result set.  <code>prepareQuery</code> prepares a query
+like the JDBC PreparedStatement.</p>
+
+<example title="Finding all Courses">
+ResultSet rs = aConn.query("SELECT o FROM example.Course AS o");
+
+while (rs.next()) {
+  Course course = (Course) rs.getObject(1);
+
+  out.println(course.getName() + " is taught by " +
+              course.getInstructor() + "&lt;br>");
+}
+</example>
+<results>
+Potions is taught by Severus Snape
+Transfiguration is taught by Minerva McGonagall
+Defense Against the Dark Arts is taught by Remus Lupin
+</results>
+
+</section>
+
+<section title="Prepared Queries">
+
+<p><code/findByInstructor/> returns the course taught by an
+instructor.  Single-valued finder methods expect to return exactly
+one bean.  If there are no matching courses, <code/findByInstructor/> throws
+an <code/ObjectNotFoundException/>.  If more than one courses are taught
+by the instructor, it will throw a <code/FinderException/>.</p>
+
+<example title="Finding a Course by its Instructor">
+String hSQL = "SELECT o FROM example.Course AS o WHERE o.teacher = ?";
+      
+AmberQuery query = aConn.prepareQuery(hSQL);
+
+query.setString(1, teacher);
+
+ResultSet rs = query.executeQuery();
+
+if (rs.next()) {
+  course = (Course) rs.getObject(1);
+	
+  out.println(course.getName() + " is taught by " +
+              course.getTeacher() + "&lt;br>");
+}
+</example>
+<results>
+Potions is taught by Severus Snape
+</results>
+
+</section>
+
+  </body>
+</document>

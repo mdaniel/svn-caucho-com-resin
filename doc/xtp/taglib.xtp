@@ -1,0 +1,144 @@
+<document>
+  <header>
+    <product>resin</product>
+    <resin-2.0>$resin/ref/xtp-jsp.xtp</resin-2.0>
+    <title>Tag Libraries</title>
+    <keywords>
+      <keyword>tag</keyword>
+      <keyword>library</keyword>
+    </keywords>
+    <brief>
+      XTP Template Pages can be used to create JSP tag libraries.
+    </brief>
+    <description>
+      <p>XML Template Pages encourages web sites to create JSP tag libraries.
+      By putting the JSP creation in stylesheets, you can separate the
+      programming from the web pages.  The XTP pages can be simple XML or
+      HTML documents and simply add the custom tags as necessary.</p>
+
+      <p>The examples in this section use the full, verbose, XSLT and
+      JSP syntax.</p>
+    </description>
+  </header>
+
+  <body>
+    <summary/>
+
+
+<section name=mixing title="Creating JSP from XTP">
+
+<p><resin/> creates a JSP file from an XTP file.  XTP pages can
+separate the content (in XML) from the scripting (in XSLT).  The XSLT
+stylesheets now become a palette of JSP actions you can use just by
+adding tags.
+
+<ol>
+<li>Parse XTP file as HTML
+<li>Find and parse XSLT stylesheet
+<li>Applying the stylesheet to the XTP, creating a JSP file
+<li>Execute the JSP file
+</ol>
+
+<p>A trivial example is a named counter.  If the counter has an 'id'
+attribute, we'll use it at the value of the application variable.
+
+<p>XTP pages can use the counter just by adding the tag:</p>
+
+<example title='counter.xtp'>
+<eg-em>A counter example: </eg-em>&lt;ct:counter id='test'/&gt;
+</example>
+
+<p>Here the patterns to do it.  For efficiency, we've added the 
+<code/cache/> directive.  The cache directive tells XTP to execute the
+stylesheet only once and cache the generated JSP file.
+
+<example title='default.xsl'>
+&lt;xtp:directive.cache/&gt;
+
+&lt;xsl:template match='counter[@id]'&gt;
+  <eg-em>&lt;jsp:expression&gt;</eg-em>
+     &lt;xsl:text&gt;<eg-em>application.attribute["</eg-em>&lt;/xsl:text>
+     &lt;xsl:value-of select='@id'/>
+     &lt;xsl:text><eg-em>"]</eg-em>&lt;xsl:text>
+  <eg-em>&lt;/jsp:expression&gt;</eg-em>
+&lt;/xsl:template&gt;
+
+&lt;xsl:template match='counter'&gt;
+  <eg-em>&lt;jsp:expression&gt;</eg-em>
+     <eg-em>application.attribute.counter++</eg-em>
+  <eg-em>&lt;/jsp:expression&gt;</eg-em>
+&lt;/xsl:template&gt;
+
+</example>
+
+<p>The following JSP file is the result.  <resin/> will
+execute the generated JSP file to process HTTP requests.  Because
+default.xsl was marked as cached, on following requests <resin/> will
+merely reexecute 'gen438.jsp'.
+
+<results title='gen438.jsp'>
+A counter example: &lt;jsp:expression&gt;
+  application.attribute["test"]++ 
+&lt;jsp:expression&gt;
+</results>
+
+</section>
+
+<section name=flow title="Creating JSP flow control">
+
+XTP can also generate JSP control.  Many programmers like using tags
+for programming, like Cold Fusion.  Here's how to create a basic set
+of programming tags.
+
+<ul>
+<li>ct:get prints the value of a variable
+<li>ct:if generates an if statement
+<li>ct:iter loops
+</ul>
+
+An example use might print the HTTP headers.
+
+<example>
+<example>
+&lt;ct:iter expr='request.header'/&gt;
+  &lt;ct:get expr='i'/&gt; : &lt;ct:get expr='request.header[i]'/&gt;
+&lt;/ct:iter&gt;
+</example>
+<results>
+Accept : image/gif, image/png
+User-Agent : Mozilla/4.5
+Accept-Language : en
+Host : www.caucho.com
+</results>
+</example>
+
+Here is the stylesheet:
+
+<example title='definition of ct:get'>
+&lt;xsl:template match='ct:get'>
+  <eg-em>&lt;jsp:expression></eg-em>&lt;xsl:value-of select='@expr'/><eg-em>&lt;/jsp:expression></eg-em>
+&lt;/xsl:template>
+</example>
+
+<example title='definition of ct:if'>
+&lt;xsl:template match='ct:if'>
+  <eg-em>&lt;jsp:scriptlet>
+    if (</eg-em>&lt;xsl:value-of select='@expr'/><eg-em>) {
+  &lt;/jsp:scriptlet></eg-em>
+    &lt;xsl:apply-templates/>
+  <eg-em>&lt;jsp:scriptlet>}&lt;/jsp:scriptlet></eg-em>
+&lt;/xsl:template>
+</example>
+
+<example title='definition of ct:iter'>
+&lt;xsl:template match='ct:iter'>
+  <eg-em>&lt;jsp:scriptlet>
+    for (var i in </eg-em>&lt;xsl:value-of select='@expr'/><eg-em>) {
+  &lt;/jsp:scriptlet></eg-em>
+    &lt;xsl:apply-templates/>
+  <eg-em>&lt;jsp:scriptlet>}&lt;/jsp:scriptlet></eg-em>
+&lt;/xsl:template>
+</example>
+
+</section>  </body>
+</document>

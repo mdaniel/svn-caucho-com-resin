@@ -1,0 +1,32 @@
+<document>
+<header>
+<product>resin</product>
+<title>Caucho Portal HelloWorld</title>
+<type>tutorial</type>
+<tutorial-startpage>portal</tutorial-startpage>
+<description>
+<p>
+</p>
+</description>
+</header>
+
+<body>
+<summary/>
+
+<section title="Files in this tutorial">
+<deftable>
+<tr><td><viewfile-link file="WEB-INF/web.xml"/>
+    <td>web-app configuration
+<tr><td><viewfile-link file="WEB-INF/portlets.xml"/>
+    <td>portlet configuration
+<tr><td><viewfile-link file="WEB-INF/classes/example/HelloWorldPortlet.java"/>
+    <td>Portlet
+<tr><td><viewfile-link file="default.css"/>
+    <td>cascading stylesheet
+</deftable>
+</section>
+
+<section title="TODO">
+</section>
+
+</document>

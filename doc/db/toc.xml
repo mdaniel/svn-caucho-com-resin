@@ -1,0 +1,8 @@
+<navigation threaded="true" section="Resin : Databases : " comment="true">
+  <item title="Databases" link="index.xtp">
+    <item title="Configuration" link="config.xtp" product="resin"/>
+    <item title="Third-party" link="thirdparty.xtp" product="resin"/>
+    <item title="Tutorials" link="tutorial/index.xtp" product="resin" atoc-descend="2"/>
+    <item title="Scrapbook" link="scrapbook.xtp" atoc-descend="5"/>
+  </item>
+</navigation>

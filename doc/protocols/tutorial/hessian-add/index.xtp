@@ -1,0 +1,195 @@
+<document>
+  <header>
+    <product>resin</product>
+    <title>Hessian Addition</title>
+    <description>
+      <p>The addition example creates a Hessian web services
+with a servlet and uses that web service from a
+JSP client and a Python client.</p>
+    </description>
+    <type>tutorial</type>
+    <tutorial-startpage>demo.jsp</tutorial-startpage>
+  </header>
+
+  <body>
+    <summary/>
+
+<p>Hessian is a lightweight binary RPC protocol.  Transferring binary objects
+like files, images, or mp3s can avoid the protocol overhead
+that XML-based protocols require.  Since it's simple, its performance
+should be usable for almost all sites.  Hessian is designed to be
+self-describing, eliminating the requirement for external IDLs or WSDL files.
+Because it is as small as possible and language-independent,
+non-Java Hessian implementations are can easily develop comprehensive
+test suites.</p>
+
+<p>This tutorial only requires the open source Java implementation of
+the Hessian client and server.  It can be downloaded
+from <a href="http://caucho.com/hessian/">http://www.caucho.com/hessian/</a>
+for non-Resin clients and servers.</p>
+
+<p>Because Resin's EJB implementation uses Hessian as its primary
+remote procedure call protocol, EJB developers can easily expose
+services to clients from other languages.</p>
+
+<p>Because EJB clients and servers are written without knowledge of the
+underlying protocol, even if you intend to deploy with another protocol,
+like RMI/IIOP, you can develop using Resin's Hessian.</p>
+
+<p>The <a href="../../hessian-1.0-spec.xtp">Hessian 1.0 spec</a> describes
+the full Hessian protocol.</p>
+
+<section title="Files in this tutorial">
+<deftable>
+<tr><td><viewfile-link file="WEB-INF/classes/example/MathService.java"/>
+    <td>Interface for the math service.
+<tr><td><viewfile-link file="WEB-INF/classes/example/HessianMathService.java"/>
+    <td>The main service implementation.
+<tr><td><viewfile-link file="WEB-INF/web.xml"/>
+    <td>Configures the environment
+<tr><td><viewfile-link file="demo.jsp"/>
+    <td>Client JSP
+</deftable>
+</section>
+
+<section title="The Hessian Protocol">
+
+<p>A Hessian call is just an HTTP POST to a URL.  The arguments are
+serialized into the Hessian binary format and passed to the server.</p>
+
+<p>Most applications will never need to look at the Hessian
+protocol, but it's simple enough that a basic example can help show
+what's happening underneath the API.</p>
+
+<example title='Hessian call'>
+c x01 x00
+  m x00 x03 add
+  I x00 x00 x00 x02
+  I x00 x00 x00 x03
+z
+</example>
+
+<example title='Hessian reply'>
+r x01 x00
+  I x00 x00 x00 x05
+z
+</example>
+
+<p>The call does not need to specify the service name because the
+service is uniquely specified by the URL.</p>
+
+<p>The following Addition example shows how to create a basic
+server so you can test Hessian.</p>
+
+</section>
+
+<section title="A Hessian Example">
+<p>Using Hessian generally uses three components:</p>
+<ol>
+<li>A remote interface
+<li>The server implementation
+<li>The client (JSP or servlet)
+</ol>
+
+<p>The remote interface is used by the Hessian proxy
+factory to create a proxy stub implementing the service's interface.</p>
+
+</section>
+
+<section title="Service Implementation">
+
+<p>Resin's Hessian provides a simple way of creating a server.  Just extend
+<code/HessianServlet/> with your remote methods.  The Hessian call will just
+be a POST to that servlet.  HessianServlet will introspect the
+service and expose the methods.</p>
+
+<example title="HessianMathService.java">
+package example;
+
+import com.caucho.hessian.server.HessianServlet;
+
+public class HessianMathService extends HessianServlet {
+  public int add(int a, int b)
+  {
+    return a + b;
+  }
+}
+</example>
+
+</section>
+
+<section title="Remote Interface">
+
+<p>The Java interface describes the remote API.  This example has an
+addition method, <var/add()/>.</p>
+
+<p>Resin's proxy client implementation uses the remote interface to
+expose the API to the proxy stub.  Strictly speaking, though,
+the Java remote interface is not required for Hessian.  A non-Java client
+will not use the Java interface, except possibly as documentation.</p>
+
+<example title="MathService.java">
+package example;
+
+public interface MathService {
+  public int add(int a, int b);
+}
+</example>
+
+</section>
+
+<section title="Java Client">
+
+<p>RPC clients follow the following steps in using a remote object:</p>
+<ol>
+<li>Determine the URL of the remote object.
+<li>Obtain a proxy stub from a proxy factory.
+<li>Call methods on the proxy stub.
+</ol>
+
+<example title="client.jsp">
+&lt;%@ page import="com.caucho.hessian.client.HessianProxyFactory" %>
+&lt;%@ page import="example.MathService" %>
+&lt;%
+HessianProxyFactory factory = new HessianProxyFactory();
+
+// http://localhost:8080/resin-doc/protocols/tutorial/hessian-add/hessian/math
+
+String url = ("http://" +
+              request.getServerName() + ":" + request.getServerPort() +
+              request.getContextPath() + "/hessian/math");
+
+MathService math = (MathService) factory.create(MathService.class, url);
+
+out.println("3 + 2 = " + math.add(3, 2));
+%>
+</example>
+<results>
+3 + 2 = 5
+</results>
+
+</section>
+
+<section title="Python Client">
+
+<p>The <a href="http://www.caucho.com/hessian">Hessian site</a> has
+a basic Python library for Hessian.</p>
+
+<example title="client.py">
+from hessianlib import Hessian
+
+site = "http://localhost:8080/resin-doc/protocols/tutorial/hessian-add"
+url = site + "/hessian/math"
+
+proxy = Hessian(url);
+
+print "3 + 2 =", proxy.add(2, 3)
+</example>
+<results>
+3 + 2 = 5
+</results>
+
+</section>
+
+  </body>
+</document>

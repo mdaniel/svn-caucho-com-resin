@@ -1,0 +1,9 @@
+<navigation threaded="true" section="Resin : JMS : " comment="true">
+  <item title="JMS" link="index.xtp">
+    <item link="config.xtp" title="Config"/>
+
+    <item link="../thirdparty/swiftmq.xtp" title="SwiftMQ"/>
+
+    <item title="Tutorials" link="tutorial/index.xtp" atoc-descend="1"/>
+  </item>
+</navigation>

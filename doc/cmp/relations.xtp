@@ -1,0 +1,643 @@
+<document>
+  <header>
+    <product>resin-ee</product>
+    <resin-2.0>$ee/ejb-tut/cmp-relations.xtp</resin-2.0>
+    <title>CMP Relations Catalog</title>
+  </header>
+
+  <body>
+    <summary/>
+
+<p>This section lists several of the common relation patterns along with
+their configuration.</p>
+
+<section title="n-1 undirectional (Link)">
+
+<p>The easiest relation is the one-way link.  In this example, each
+student has a favorite Quidditch team (a wizard sport.)  The link
+is unidirectional because the teams don't keep track of all their
+student fans.</p>
+
+<example title="n-1 SQL schema">
+CREATE TABLE students (
+  id VARCHAR(250) NOT NULL,
+
+  quidditch_team VARCHAR(250),
+
+  PRIMARY KEY(id)
+);
+
+CREATE TABLE quidditch_team (
+  id VARCHAR(250) NOT NULL,
+
+  PRIMARY KEY(id)
+);
+</example>
+
+<example title="Student EJBLocalObject interface">
+public interface Student extends EJBLocalObject {
+  String getId();
+
+  QuidditchTeam getQuidditchTeam();
+
+  void setQuidditchTeam(QuidditchTeam team);
+}
+</example>
+
+<example title="QuidditchTeam EJBLocalObject interface">
+public interface QuidditchTeam extends EJBLocalObject {
+  String getId();
+}
+</example>
+
+<example title="n-1 EJB deployment descriptor">
+&lt;relationships>
+  &lt;ejb-relation>
+    &lt;ejb-relationship-role>
+      &lt;relationship-role-source>
+        &lt;ejb-name><var/students/>&lt;/ejb-name>
+      &lt;/relationship-role-source>
+
+      &lt;cmr-field>
+        &lt;cmr-field-name><var/quidditchTeam/>&lt;/cmr-field-name>
+      &lt;/cmr-field>
+
+      &lt;multiplicity>Many&lt;/multiplicity>
+    &lt;/ejb-relationship-role>
+
+    &lt;ejb-relationship-role>
+      &lt;relationship-role-source>
+         &lt;ejb-name><var/quidditch_teams/>&lt;/ejb-name>
+      &lt;/relationship-role-source>
+
+      &lt;multiplicity>One&lt;/multiplicity>
+    &lt;/ejb-relationship-role>
+  &lt;/ejb-relation>
+&lt;/relationships>
+</example>
+
+<example title="n-1 relation (short form)">
+&lt;ejb-relation>
+  &lt;source-ejb><var/students/>&lt;/source-ejb>
+  &lt;source-field><var/quidditchTeam/>&lt;/source-field>
+  &lt;source-multiplicity><var/Many/>&lt;/source-multiplicity>
+
+  &lt;target-ejb><var/quidditch_teams/>&lt;/target-ejb>
+  &lt;target-multiplicity><var/One/>&lt;/target-multiplicity>
+&lt;/ejb-relation>
+</example>
+
+</section>
+
+<section title="1-1 Bidirectional (Pair)">
+
+<example title="1-1 SQL schema">
+CREATE TABLE courses (
+  id VARCHAR(250) NOT NULL,
+
+  teacher VARCHAR(250),
+
+  PRIMARY KEY(id)
+);
+
+CREATE TABLE teachers (
+  id VARCHAR(250) NOT NULL,
+
+  PRIMARY KEY(id)
+);
+</example>
+
+<example title="Course EJBLocalObject interface">
+public interface Course extends EJBLocalObject {
+  String getId();
+
+  Teacher getTeacher();
+  void setTeacher(Teacher teacher);
+}
+</example>
+
+<example title="Teacher EJBLocalObject interface">
+public interface Teacher extends EJBLocalObject {
+  String getId();
+
+  Course getCourse();
+  void setCourse(Course course);
+}
+</example>
+
+<example title="1-1 deployment descriptor">
+&lt;relationships>
+  &lt;ejb-relation>
+    &lt;ejb-relationship-role>
+      &lt;relationship-role-source>
+        &lt;ejb-name><var/teachers/>&lt;/ejb-name>
+      &lt;/relationship-role-source>
+
+      &lt;cmr-field>
+        &lt;cmr-field-name><var/course/>&lt;/cmr-field-name>
+      &lt;/cmr-field>
+
+      &lt;multiplicity>One&lt;/multiplicity>
+    &lt;/ejb-relationship-role>
+
+    &lt;ejb-relationship-role>
+      &lt;relationship-role-source>
+         &lt;ejb-name><var/courses/>&lt;/ejb-name>
+      &lt;/relationship-role-source>
+
+      &lt;cmr-field>
+        &lt;cmr-field-name><var/teacher/>&lt;/cmr-field-name>
+      &lt;/cmr-field>
+
+      &lt;multiplicity>One&lt;/multiplicity>
+    &lt;/ejb-relationship-role>
+  &lt;/ejb-relation>
+&lt;/relationships>
+</example>
+
+<example title="1-1 relation (short form)">
+&lt;ejb-relation>
+  &lt;source-ejb><var/teachers/>&lt;/source-ejb>
+  &lt;source-field><var/course/>&lt;/source-field>
+  &lt;source-multiplicity><var/One/>&lt;/source-multiplicity>
+
+  &lt;target-ejb><var/courses/>&lt;/target-ejb>
+  &lt;target-field><var/teacher/>&lt;/target-field>
+  &lt;target-multiplicity><var/One/>&lt;/target-multiplicity>
+&lt;/ejb-relation>
+</example>
+
+</section>
+
+<section title="1-n Bidirectional (Container)">
+
+<p>The container relation is possibly the most common relation.  It's more
+fully described in the <a href="tutorial/cmp-one2many/index.xtp">one to many example</a>.</p>
+
+<p>In the example, students belong to a dorm.  The Student object can
+return the Dorm, and the Dorm object can return all the Students.</p>
+
+<p>In the database, the student's entry manages the link;
+it points to the dorm.  Resin-CMP generates the Dorm's student list
+with a database query.</p>
+
+<example title="1-n SQL schema">
+CREATE TABLE dorms (
+  id VARCHAR(250) NOT NULL,
+
+  PRIMARY KEY(id)
+);
+
+CREATE TABLE students (
+  id VARCHAR(250) NOT NULL,
+
+  dorm VARCHAR(250),
+
+  PRIMARY KEY(id)
+);
+</example>
+
+<example title="Dorm EJBLocalObject interface">
+public interface Dorm extends EJBLocalObject {
+  String getId();
+
+  Collection getStudents();
+}
+</example>
+
+<example title="Student EJBLocalObject interface">
+public interface Student extends EJBLocalObject {
+  String getId();
+
+  Dorm getDorm();
+  void setDorm(Dorm dorm);
+}
+</example>
+
+<example title="1-n deployment descriptor">
+&lt;relationships>
+  &lt;ejb-relation>
+    &lt;ejb-relationship-role>
+      &lt;relationship-role-source>
+        &lt;ejb-name><var/dorms/>&lt;/ejb-name>
+      &lt;/relationship-role-source>
+
+      &lt;cmr-field>
+        &lt;cmr-field-name><var/students/>&lt;/cmr-field-name>
+      &lt;/cmr-field>
+
+      &lt;multiplicity>One&lt;/multiplicity>
+    &lt;/ejb-relationship-role>
+
+    &lt;ejb-relationship-role>
+      &lt;relationship-role-source>
+         &lt;ejb-name><var/students/>&lt;/ejb-name>
+      &lt;/relationship-role-source>
+
+      &lt;cmr-field>
+        &lt;cmr-field-name><var/dorm/>&lt;/cmr-field-name>
+      &lt;/cmr-field>
+
+      &lt;multiplicity>Many&lt;/multiplicity>
+    &lt;/ejb-relationship-role>
+  &lt;/ejb-relation>
+&lt;/relationships>
+</example>
+
+<example title="1-n relation (short form)">
+&lt;ejb-relation>
+  &lt;source-ejb><var/dorms/>&lt;/source-ejb>
+  &lt;source-field><var/students/>&lt;/source-field>
+  &lt;source-multiplicity><var/One/>&lt;/source-multiplicity>
+
+  &lt;target-ejb><var/students/>&lt;/target-ejb>
+  &lt;target-field><var/dorm/>&lt;/target-field>
+  &lt;target-multiplicity><var/Many/>&lt;/target-multiplicity>
+&lt;/ejb-relation>
+</example>
+
+</section>
+
+<section title="1-n uni-directional (Container)">
+
+<example title="1-n database schema">
+CREATE TABLE dorms (
+  id VARCHAR(250) NOT NULL,
+
+  PRIMARY KEY(id)
+);
+
+CREATE TABLE students (
+  id VARCHAR(250) NOT NULL,
+
+  PRIMARY KEY(id)
+);
+
+CREATE TABLE student_dorm_map (
+  dorm VARCHAR(250) NOT NULL,
+  student VARCHAR(250) NOT NULL,
+);
+</example>
+
+<example title="Dorm EJBLocalObject interface">
+public interface Dorm extends EJBLocalObject {
+  String getId();
+
+  Collection getStudents();
+}
+</example>
+
+<example title="Student EJBLocalObject interface">
+public interface Student extends EJBLocalObject {
+  String getId();
+}
+</example>
+
+<example title="1-n deployment descriptor">
+&lt;relationships>
+  &lt;ejb-relation>
+    &lt;ejb-relationship-name>student_dorm_map&lt;/ejb-relationship-name>
+
+    &lt;ejb-relationship-role>
+      &lt;relationship-role-source>
+         &lt;ejb-name><var/dorms/>&lt;/ejb-name>
+      &lt;/relationship-role-source>
+
+      &lt;cmr-field>
+        &lt;cmr-field-name><var/students/>&lt;/cmr-field-name>
+      &lt;/cmr-field>
+
+      &lt;multiplicity>One&lt;/multiplicity>
+    &lt;/ejb-relationship-role>
+
+    &lt;ejb-relationship-role>
+      &lt;relationship-role-source>
+        &lt;ejb-name><var/students/>&lt;/ejb-name>
+      &lt;/relationship-role-source>
+
+      &lt;multiplicity>Many&lt;/multiplicity>
+    &lt;/ejb-relationship-role>
+  &lt;/ejb-relation>
+&lt;/relationships>
+</example>
+
+<example title="1-n relation (short form)">
+&lt;ejb-relation>
+  &lt;ejb-relationship-name><var/student_dorm_map/>&lt;/ejb-relationship-name>
+
+  &lt;source-ejb><var/dorms/>&lt;/source-ejb>
+  &lt;source-field><var/students/>&lt;/source-field>
+  &lt;source-multiplicity><var/One/>&lt;/source-multiplicity>
+
+  &lt;target-ejb><var/students/>&lt;/target-ejb>
+  &lt;target-multiplicity><var/Many/>&lt;/target-multiplicity>
+&lt;/ejb-relation>
+</example>
+
+</section>
+
+<section title="n-m bi-directional">
+
+<example>
+CREATE TABLE courses (
+  id VARCHAR(250) NOT NULL,
+
+  PRIMARY KEY(id)
+);
+
+CREATE TABLE students (
+  id VARCHAR(250) NOT NULL,
+
+  PRIMARY KEY(id)
+);
+
+CREATE TABLE student_course_map (
+  course VARCHAR(250) NOT NULL,
+  student VARCHAR(250) NOT NULL,
+);
+</example>
+
+<example>
+public interface Course extends EJBLocalObject {
+  String getId();
+
+  Collection getStudents();
+}
+</example>
+
+<example>
+public interface Student extends EJBLocalObject {
+  String getId();
+
+  Collection getCourses();
+}
+</example>
+
+<example title="ejb-relation (long form)">
+&lt;ejb-relation>
+  &lt;ejb-relationship-name>student_course_map&lt;/ejb-relationship-name>
+
+  &lt;ejb-relationship-role>
+    &lt;relationship-role-source>
+       &lt;ejb-name><var/courses/>&lt;/ejb-name>
+    &lt;/relationship-role-source>
+
+    &lt;cmr-field>
+      &lt;cmr-field-name><var/students/>&lt;/cmr-field-name>
+    &lt;/cmr-field>
+
+    &lt;multiplicity>Many&lt;/multiplicity>
+  &lt;/ejb-relationship-role>
+
+  &lt;ejb-relationship-role>
+    &lt;relationship-role-source>
+      &lt;ejb-name><var/students/>&lt;/ejb-name>
+    &lt;/relationship-role-source>
+
+    &lt;cmr-field>
+      &lt;cmr-field-name><var/courses/>&lt;/cmr-field-name>
+    &lt;/cmr-field>
+
+    &lt;multiplicity>Many&lt;/multiplicity>
+  &lt;/ejb-relationship-role>
+&lt;/ejb-relation>
+</example>
+
+<example title="ejb-relation (short form)">
+&lt;ejb-relation>
+  &lt;ejb-relationship-name><var/student_course_map/>&lt;/ejb-relationship-name>
+
+  &lt;source-ejb><var/courses/>&lt;/source-ejb>
+  &lt;source-field><var/students/>&lt;/source-field>
+  &lt;source-multiplicity><var/Many/>&lt;/source-multiplicity>
+
+  &lt;target-ejb><var/students/>&lt;/target-ejb>
+  &lt;target-field><var/courses/>&lt;/target-field>
+  &lt;target-multiplicity><var/Many/>&lt;/target-multiplicity>
+&lt;/ejb-relation>
+</example>
+
+</section>
+
+<section title="Identifying: 1-1 Bidirectional (Pair)">
+
+<p>A bean with an identifying relation has a primary key which is a
+reference to another bean.  In this case, a course bean may have a
+unique room bean.</p>
+
+<example>
+CREATE TABLE courses (
+  id VARCHAR(250) NOT NULL,
+
+  PRIMARY KEY(id)
+);
+
+CREATE TABLE course_rooms (
+  course VARCHAR(250) NOT NULL REFERENCES courses(id),
+
+  name VARCHAR(250),
+
+  PRIMARY KEY(course)
+);
+</example>
+
+<example title="Course local interface">
+public interface Course extends EJBLocalObject {
+  String getId();
+
+  Room getRoom();
+}
+</example>
+
+<example title="Room local interface">
+public interface Room extends EJBLocalObject {
+  Course getCourse();
+
+  String getName();
+  void setName(String name);
+}
+</example>
+
+<example title="Room entity definition">
+&lt;entity>
+  &lt;ejb-name>room&lt;/ejb-name>
+  &lt;local-home>qa.RoomLocalHome&lt;/local-home>
+  &lt;local>qa.Room&lt;/local>
+  &lt;ejb-class>qa.RoomBean&lt;/ejb-class>
+  &lt;prim-key-class>qa.Course&lt;/prim-key-class>
+  &lt;primkey-field>course&lt;/primkey-field>
+
+  &lt;persistence-type>Container&lt;/persistence-type>
+  &lt;reentrant>True&lt;/reentrant>
+
+  &lt;cmp-field>&lt;field-name>name&lt;/field-name>&lt;/cmp-field>
+
+  &lt;sql-table>course_rooms&lt;/sql-table>
+&lt;/entity>
+</example>
+
+<example title="ejb-relation (long form)">
+&lt;ejb-relation>
+  &lt;ejb-relationship-role>
+    &lt;relationship-role-source>
+      &lt;ejb-name><var/rooms/>&lt;/ejb-name>
+    &lt;/relationship-role-source>
+
+    &lt;cmr-field>
+      &lt;cmr-field-name><var/course/>&lt;/cmr-field-name>
+    &lt;/cmr-field>
+
+    &lt;multiplicity>One&lt;/multiplicity>
+  &lt;/ejb-relationship-role>
+
+  &lt;ejb-relationship-role>
+    &lt;relationship-role-source>
+       &lt;ejb-name><var/courses/>&lt;/ejb-name>
+    &lt;/relationship-role-source>
+
+    &lt;cmr-field>
+      &lt;cmr-field-name><var/room/>&lt;/cmr-field-name>
+    &lt;/cmr-field>
+
+    &lt;multiplicity>One&lt;/multiplicity>
+  &lt;/ejb-relationship-role>
+&lt;/ejb-relation>
+</example>
+
+<example title="ejb-relation (short form)">
+&lt;ejb-relation>
+  &lt;source-ejb><var/rooms/>&lt;/source-ejb>
+  &lt;source-field><var/course/>&lt;/source-field>
+  &lt;source-multiplicity><var/One/>&lt;/source-multiplicity>
+
+  &lt;target-ejb><var/courses/>&lt;/target-ejb>
+  &lt;target-field><var/room/>&lt;/target-field>
+  &lt;target-multiplicity><var/One/>&lt;/target-multiplicity>
+&lt;/ejb-relation>
+</example>
+
+</section>
+
+<section title="Identifying: n-1 Container (compound key)">
+
+<p>For many container relations, the item has a compound primary key
+pointing to the container and including an additional identifier.
+The item bean will have a compound key class where one of the keys
+points to the container.</p>
+
+<website>
+
+<ul>
+<li><a href="tutorial/cmp-map/index.xtp">n-1 compound key example</a>
+</ul>
+
+</website>
+
+<example>
+CREATE TABLE students (
+  id INTEGER NOT NULL,
+
+  name VARCHAR(250),
+
+  PRIMARY KEY(id)
+);
+
+CREATE TABLE demerits (
+  student INTEGER NOT NULL REFERENCES students(id),
+  id INTEGER NOT NULL,
+
+  points INTEGER,
+  reason VARCHAR(250),
+
+  PRIMARY KEY(student, id)
+);
+</example>
+
+<example title="Student local interface">
+public interface Student extends EJBLocalObject {
+  int getId();
+
+  String getName();
+
+  Collection getDemerits();
+}
+</example>
+
+<example title="Demerit local interface">
+public interface Demerit extends EJBLocalObject {
+  Student getStudent();
+  int getId();
+
+  int getPoints();
+  String getReason();
+}
+</example>
+
+<example title="DemeritKey">
+public class DemeritKey {
+  public int student;
+  public int id;
+}
+</example>
+
+<example title="Demerit entity definition">
+&lt;entity>
+  &lt;ejb-name>demerit&lt;/ejb-name>
+  &lt;local-home>qa.DemeritLocalHome&lt;/local-home>
+  &lt;local>qa.Demerit&lt;/local>
+  &lt;ejb-class>qa.DemeritBean&lt;/ejb-class>
+  &lt;prim-key-class>qa.DemeritKey&lt;/prim-key-class>
+
+  &lt;persistence-type>Container&lt;/persistence-type>
+  &lt;reentrant>True&lt;/reentrant>
+
+  &lt;cmp-field>&lt;field-name>points&lt;/field-name>&lt;/cmp-field>
+  &lt;cmp-field>&lt;field-name>reason&lt;/field-name>&lt;/cmp-field>
+
+  &lt;sql-table>demerits&lt;/sql-table>
+&lt;/entity>
+</example>
+
+<example title="ejb-relation (long form)">
+&lt;ejb-relation>
+  &lt;ejb-relationship-role>
+    &lt;relationship-role-source>
+      &lt;ejb-name><var/demerits/>&lt;/ejb-name>
+    &lt;/relationship-role-source>
+
+    &lt;cmr-field>
+      &lt;cmr-field-name><var/student/>&lt;/cmr-field-name>
+    &lt;/cmr-field>
+
+    &lt;multiplicity>Many&lt;/multiplicity>
+  &lt;/ejb-relationship-role>
+
+  &lt;ejb-relationship-role>
+    &lt;relationship-role-source>
+       &lt;ejb-name><var/students/>&lt;/ejb-name>
+    &lt;/relationship-role-source>
+
+    &lt;cmr-field>
+      &lt;cmr-field-name><var/demerits/>&lt;/cmr-field-name>
+    &lt;/cmr-field>
+
+    &lt;multiplicity>One&lt;/multiplicity>
+  &lt;/ejb-relationship-role>
+&lt;/ejb-relation>
+</example>
+
+<example title="ejb-relation (short form)">
+&lt;ejb-relation>
+  &lt;source-ejb><var/demerits/>&lt;/source-ejb>
+  &lt;source-field><var/student/>&lt;/source-field>
+  &lt;source-multiplicity><var/Many/>&lt;/source-multiplicity>
+
+  &lt;target-ejb><var/students/>&lt;/target-ejb>
+  &lt;target-field><var/demerits/>&lt;/target-field>
+  &lt;target-multiplicity><var/One/>&lt;/target-multiplicity>
+&lt;/ejb-relation>
+</example>
+
+</section>
+  </body>
+</document>

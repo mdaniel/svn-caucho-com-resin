@@ -1,0 +1,44 @@
+<document>
+  <header>
+    <product>resin</product>
+    <resin-2.0>$resin/ref/ejb-orion.xtp</resin-2.0>
+    <title>Orion EJB</title>
+  </header>
+
+  <body>
+    <summary/>
+
+From Luciano Montebove:
+
+<p/>To use Resin as an EJB client with Orion follow these steps:
+
+<ol>
+<li>Under Orion do nothing :)
+
+<li>In Resin add orion.jar, ejb.jar, mail.jar (from orion) in your app
+WEB-INF/classes dir
+
+<li>In Resin in your app web.xml add these lines:
+
+<def>
+&lt;classpath id='WEB-INF/classes/orion.jar'/>
+&lt;classpath id='WEB-INF/classes/mail.jar'/>
+&lt;classpath id='WEB-INF/classes/ejb.jar'/>
+&lt;jndi-link>
+  &lt;jndi-name>java:comp/env/ejb&lt;/jndi-name>
+  &lt;jndi-factory>com.evermind.server.rmi.RMIInitialContextFactory
+  &lt;/jndi-factory>
+  &lt;init-param java.naming.provider.url="ormi://myOrionHost/MyApp"/>
+  &lt;init-param java.naming.security.principal="admin"/>
+  &lt;init-param java.naming.security.credentials="xxx"/>
+&lt;/jndi-link>
+</def>
+
+<li>Write your servlet/JSP as you would in Orion so for example if you have a
+SessionBean called MyBean (in your ejb-jar.xml) your lookup should use this
+string ("java:comp/env/ejb/MyBean")
+
+<li>It's all
+</ol>
+  </body>
+</document>

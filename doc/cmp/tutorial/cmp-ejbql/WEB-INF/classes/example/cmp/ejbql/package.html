@@ -1,0 +1,86 @@
+<body>
+  Introducing advanced EJB-QL for Finder Methods.
+
+  <p>EJB-QL is the EJB 2.0 query language. It is similar to SQL, but has the
+  advantage that it can be applied to a variety of different backing
+  store types. For relational databases, Resin-CMP compiles EJB-QL to SQL
+  statements at deploytime.
+  <p>In addition to being backing-store independent, EJB-QL allows you to
+  reference your CMP and CMR fields inside queries. This means you're
+  writing queries at an object-oriented level.
+
+  <p>For our example, we have the following relationships:
+
+  <pre><code>
+    [COURSE](n)----(n)[STUDENT]
+      (1)                   (n)
+       |                      \
+       |                       \
+      (1)                      (1)
+    [TEACHER]                 [HOUSE]
+  </code></pre>
+
+
+  <p><b>Basics</b>
+  <p>An EJB-QL query is composed of, at most, three clauses:
+
+  <li>the <code>SELECT</code> clause</li>
+  <li>the <code>FROM</code> clause</li>
+  <li>the <code>WHERE</code> clause (optional)</li>
+
+  <p>The <code>FROM</code> clause defines the domain from which elements can be
+  chosen in the <code>SELECT</code> clause:
+
+  <pre><code>
+    SELECT house FROM ejbql_house AS house
+  </code></pre>
+
+  <p><code>ejbql_house</code> is the abstract schema type (that is, the table) that
+  stores our house entities. In the <code>FROM</code> clause, we assign this
+  abstract schema type the name <code>house</code> (<code>house</code> is an
+  identification variable). Now that we have declared the domain of the query,
+  we can select <code>house</code> with the <code>SELECT</code> clause. Note that
+  this query can evaluate to a Collection of Houses or just one House, depending
+  on the return type that you have assigned to your finder method.
+
+  <p><b>Navigating with CMR fields</b>
+  <p>Recall that CMR fields are virtual fields, and that they are implemented
+  by the container. CMR fields are defined in the &lt;relationships> section of the
+  deployment descriptor. For example, in our Student bean, we have defined
+  the CMR field <code>courseList</code> which resembles a Collection of all
+  courses taken by a student.
+  <p>We can use the <code>courseList</code> field in our query to obtain a Collection
+  of all the teachers that a Student is taking classes from:
+
+  <pre><code>
+    SELECT course.teacher
+    FROM ejbql_student student, IN(student.courseList) course
+    WHERE student.name=?1
+  </code></pre>
+
+  <p>In the <code>FROM</code> clause, we declare <code>student</code> to be
+  an identification variable for the <code>ejbql_student</code> table. From now
+  on, we can use "<code>student</code>" to mean "for each student".<BR>
+  Next, we use the the <code>IN</code> indentifier to obtain the courseList
+  for each student. Again we assign an indentification variable,
+  <code>course</code>, this time to denote "for each one of the student's
+  courses".<BR>
+  Now we use the <code>WHERE</code> clause to make sure we don't leave courses
+  in the domain that are taken by students other than the one we care about.
+  <p>Finally, we have collected all the student's courses. We can now return
+  the name of those teachers whose courses the student is taking. Because
+  the <code>Course</code> and <code>Teacher</code> entities are 1-1 related,
+  we can simply select a Course's teacher with the '.' operator. We could not do
+  this in the <code>FROM</code> clause, with <code>student.courseList</code>,
+  because courseList is a Collection.
+
+</body>
+
+
+
+
+
+
+
+
+

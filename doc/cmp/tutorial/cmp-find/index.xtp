@@ -1,0 +1,268 @@
+<document>
+  <header>
+    <product>resin-ee</product>
+    <resin-2.0>$ee/ejb-tut/cmp-find.xtp</resin-2.0>
+    <title>Finding Entity Beans with EJB-QL</title>
+    <description>
+      <p>Scenario: Headmaster Dumbledore needs to list all the courses and find the
+      Potions instructor.</p>
+
+      <p>This example:</p>
+      <ul>
+        <li>Creates a collection finder, findAll, to finds all Courses</li>
+        <li>Creates a single-entity finder, findByInstructor, to find a Course by its teacher.</li>
+      </ul>
+    </description>
+    <type>tutorial</type>
+    <tutorial-startpage>find</tutorial-startpage>
+  </header>
+
+  <body>
+    <summary/>
+
+<p>Most applications need to query the database to find entities with
+special properties.  With the query language EJB-QL, entity beans can
+define find methods in the home interface to look up beans with arbitrary
+properties.</p>
+
+<p>The container managed fields in the previous
+example is great if you already know which entity bean to use, but in
+most applications the database entries are not hardcoded.  Finding the
+right bean in the first place requires a query language.</p>
+
+<p>Adding a find method has two steps:</p>
+<ol>
+<li>Add a find method to the home interface.
+<li>Add the EJB-QL query to the deployment descriptor.
+</ol>
+
+<p>Resin-CMP uses the EJB-QL query language from the EJB 2.0 specification.
+EJB-QL resembles SQL with a few restrictions and extensions appropriate to
+handling entity beans.  For example, EJB-QL extends SQL with direct support
+for relations and for method arguments.</p>
+
+<p>In the following example, the school's headmaster needs to know which
+courses are being taught and needs to find the course taught by a named
+teacher.</p>
+
+<section title="Demo">
+
+<a href="find">Demo</a>
+
+</section>
+
+<section title="Database Schema">
+
+<p>The example uses the same database table as the previous basic example.</p>
+
+<example title="courses.sql">
+CREATE TABLE find_courses (
+  course_id VARCHAR(250) NOT NULL,
+  instructor VARCHAR(250),
+
+  PRIMARY KEY(course_id)
+);
+</example>
+
+</section>
+
+<section title="EJB-QL">
+
+<p>The <code/findAll/> and <code/findByInstructor/> methods use
+the EJB Query Language (EJB-QL) to select a teacher from the
+database.  EJB-QL resembles a restricted SQL, but adds direct support
+for relations and function arguments.</p>
+
+<p>The findAll method finds all the courses in the database.  The
+schema name <var/courses/> is from the abstract-schema-name.  The field
+<var/courseId/> is the cmp-field name.  These names are not necessarily
+the same as the SQL table and columns.  If the deployment changes the
+SQL table and columns, the EJB-QL still refers to the same abstract names.</p>
+
+<example>
+SELECT o FROM courses o
+</example>
+
+<p>findByInstructor uses the method's argument to select the course
+by the instructor.  Since the instructor is an argument, it needs to
+be specified in the query.  The EJB-QL syntax for a function argument
+is <var/?n/>,
+where <var/n/> is the argument number, starting at 1.
+</p>
+
+<example>
+SELECT o FROM courses o WHERE o.instructor = ?1
+</example>
+
+</section>
+<section title="Client Servlet">
+
+<p>The example servlet uses three finders: the usual <code/findByPrimaryKey/>,
+the collection-valued <code/findAll/>, and the
+single-argument <code/findByInstructor/>.  Find methods always return the
+local interface, either as a single value or a collection.  The pairing of
+the local object and its home interface matches the home interfaces's role
+as a factory pattern. (Remote home
+finders always return the remote interface or a collection of the
+remote interface.) If applications need to return other values,
+including other local beans, they need to use ejbSelect methods.
+</p>
+
+<p>The <code/findAll/> method returns all the courses in the database as a
+collection.  The client code just iterates through the courses.</p>
+
+<example title="Finding all Courses">
+...
+
+Collection c = home.findAll();
+Iterator iter = c.iterator();
+
+while (iter.hasNext()) {
+  Course course = (Course) iter.next();
+
+  out.println(course.getCourseId() + " is taught by " +
+              course.getInstructor() + "&lt;br>");
+}
+
+...
+</example>
+<results>
+Potions is taught by Severus Snape
+Transfiguration is taught by Minerva McGonagall
+Defense Against the Dark Arts is taught by Remus Lupin
+</results>
+
+<p><code/findByInstructor/> returns the course taught by an
+instructor.  Single-valued finder methods expect to return exactly
+one bean.  If there are no matching courses, <code/findByInstructor/> throws
+an <code/ObjectNotFoundException/>.  If more than one courses are taught
+by the instructor, it will throw a <code/FinderException/>.</p>
+
+<example title="Finding a Course by its Instructor">
+...
+
+Course course = home.findByInstructor(teacher);
+
+out.println(course.getCourseId() + " is taught by " +
+            course.getInstructor() + "&lt;br>");
+
+...
+</example>
+<results>
+Potions is taught by Severus Snape
+</results>
+
+</section>
+
+<section title="Entity Bean Classes">
+
+<p>The <code/CourseHome/> interface defines the <code/findAll/> and
+<code/findByInstructor/> methods.  As with <code/findByPrimaryKey/>, the
+implementation bean does not implement the method.  Resin-CMP will
+generate that code automatically.</p>
+
+<p>The other classes are included for completeness, but follow the same
+idea as in the <a href="../cmp-basic/index.xtp">persistent field</a> tutorial.</p>
+
+<example title="CourseHome.java">
+package example.cmp.find;
+
+import java.util.*;
+import javax.ejb.*;
+
+public interface CourseHome extends EJBLocalHome {
+  Course findByPrimaryKey(String name)
+    throws FinderException;
+
+  Collection findAll()
+    throws FinderException;
+
+  Course findByInstructor(String instructor)
+    throws FinderException;
+}
+</example>
+
+<example title="Course.java">
+package example.cmp.find;
+
+import javax.ejb.*;
+
+public interface Course extends EJBLocalObject {
+  String getCourseId();
+
+  String getInstructor();
+}
+</example>
+
+<example title="CourseBean.java">
+package example.cmp.find;
+
+abstract public class CourseBean
+  extends com.caucho.ejb.AbstractEntityBean {
+  abstract public String getCourseId();
+
+  abstract public String getInstructor();
+}
+</example>
+
+</section>
+
+<section title='Deployment Descriptor'>
+
+<p>The main new feature of the deployment descriptor is the
+<var/&lt;query>/> section.  Although we've specified the
+SQL mapping using the sql-table and sql-column elements, the queries use
+the abstract names. </p>
+
+<example title='WEB-INF/cmp-find.ejb'>
+&lt;ejb-jar>
+&lt;enterprise-beans>
+  &lt;entity>
+    &lt;ejb-name>find_CourseBean&lt;/ejb-name>
+    &lt;local-home>example.cmp.find.CourseHome&lt;/local-home>
+    &lt;local>example.cmp.find.Course&lt;/local>
+    &lt;ejb-class>example.cmp.find.CourseBean&lt;/ejb-class>
+    &lt;persistence-type>Container&lt;/persistence-type>
+    &lt;reentrant>True&lt;/reentrant>
+
+    &lt;abstract-schema-name>courses&lt;/abstract-schema-name>
+    &lt;sql-table>find_courses&lt;/sql-table>
+
+    &lt;primkey-field>name&lt;/primkey-field>
+    &lt;prim-key-class>String&lt;/prim-key-class>
+
+    &lt;cmp-field>&lt;field-name>courseId&lt;/field-name>&lt;/cmp-field>
+    &lt;cmp-field>
+      &lt;field-name>instructor&lt;/field-name>
+      &lt;sql-column>teacher&lt;/sql-column>
+    &lt;/cmp-field>
+
+    &lt;query>
+      &lt;query-method>
+        &lt;method-name>findAll&lt;/method-name>
+      &lt;/query-method>
+      &lt;ejb-ql>SELECT o FROM courses o&lt;/ejb-ql>
+    &lt;/query>
+
+    &lt;query>
+      &lt;query-method>
+        &lt;method-name>findByInstructor&lt;/method-name>
+      &lt;/query-method>
+      &lt;ejb-ql>SELECT o FROM courses o WHERE o.instructor=?1&lt;/ejb-ql>
+    &lt;/query>
+  &lt;/entity>
+&lt;/enterprise-beans>
+&lt;/ejb-jar>
+</example>
+
+<deftable>
+<tr><th>Tag<th>Meaning
+<tr><td>query<td>Contains the query information for a find method.
+<tr><td>query-method<td>The method descriptor
+<tr><td>method-name<td>The method name
+<tr><td>ejb-ql<td>The query for the find method.
+</deftable>
+
+</section>
+  </body>
+</document>

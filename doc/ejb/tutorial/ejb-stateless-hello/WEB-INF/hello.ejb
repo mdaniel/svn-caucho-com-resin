@@ -1,0 +1,12 @@
+<ejb-jar>
+<enterprise-beans>
+  <session>
+    <ejb-name>hello</ejb-name>
+    <home>example.HelloHome</home>
+    <remote>example.Hello</remote>
+    <ejb-class>example.HelloBean</ejb-class>
+    <session-type>Stateless</session-type>
+    <transaction-type>Bean</transaction-type>
+  </session>
+</enterprise-beans>  
+</ejb-jar>

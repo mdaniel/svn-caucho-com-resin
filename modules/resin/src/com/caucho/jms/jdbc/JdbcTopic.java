@@ -1,0 +1,194 @@
+/*
+ * Copyright (c) 1998-2004 Caucho Technology -- all rights reserved
+ *
+ * This file is part of Resin(R) Open Source
+ *
+ * Each copy or derived work must preserve the copyright notice and this
+ * notice unmodified.
+ *
+ * Resin Open Source is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * Resin Open Source is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE, or any warranty
+ * of NON-INFRINGEMENT.  See the GNU General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Resin Open Source; if not, write to the
+ *   Free SoftwareFoundation, Inc.
+ *   59 Temple Place, Suite 330
+ *   Boston, MA 02111-1307  USA
+ *
+ * @author Scott Ferguson
+ */
+
+package com.caucho.jms.jdbc;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Enumeration;
+
+import java.util.logging.Logger;
+import java.util.logging.Level;
+
+import java.sql.ResultSet;
+import java.sql.Statement;
+import java.sql.PreparedStatement;
+import java.sql.Connection;
+import java.sql.SQLException;
+
+import javax.jms.Message;
+import javax.jms.Topic;
+import javax.jms.TopicSubscriber;
+import javax.jms.JMSException;
+
+import javax.sql.DataSource;
+
+import com.caucho.util.L10N;
+import com.caucho.util.Alarm;
+import com.caucho.util.CharBuffer;
+
+import com.caucho.log.Log;
+
+import com.caucho.config.ConfigException;
+
+import com.caucho.vfs.TempStream;
+import com.caucho.vfs.WriteStream;
+import com.caucho.vfs.ByteToChar;
+
+import com.caucho.jms.AbstractDestination;
+import com.caucho.jms.JMSExceptionWrapper;
+
+import com.caucho.jms.selector.Selector;
+
+import com.caucho.jms.message.MessageImpl;
+import com.caucho.jms.message.TextMessageImpl;
+import com.caucho.jms.message.BytesMessageImpl;
+import com.caucho.jms.message.StreamMessageImpl;
+import com.caucho.jms.message.ObjectMessageImpl;
+import com.caucho.jms.message.MapMessageImpl;
+
+import com.caucho.jms.session.SessionImpl;
+import com.caucho.jms.session.MessageConsumerImpl;
+
+/**
+ * A jdbc topic.
+ */
+public class JdbcTopic extends JdbcDestination implements Topic {
+  static final Logger log = Log.open(JdbcTopic.class);
+  static final L10N L = new L10N(JdbcTopic.class);
+
+  private int _id;
+
+  public JdbcTopic()
+  {
+  }
+
+  /**
+   * Returns the topic's name.
+   */
+  public String getTopicName()
+  {
+    return getName();
+  }
+
+  /**
+   * Sets the topic's name.
+   */
+  public void setTopicName(String name)
+  {
+    setName(name);
+  }
+
+  /**
+   * Returns true for a topic.
+   */
+  public boolean isTopic()
+  {
+    return true;
+  }
+
+  /**
+   * Returns the JDBC id for the topic.
+   */
+  public int getId()
+  {
+    return _id;
+  }
+
+  /**
+   * Initializes the JdbcQueue
+   */
+  public void init()
+    throws ConfigException, SQLException
+  {
+    if (_jdbcManager.getDataSource() == null)
+      throw new ConfigException(L.l("JdbcTopic requires a <data-source> element."));
+    
+    if (getName() == null)
+      throw new ConfigException(L.l("JdbcTopic requires a <topic-name> element."));
+    
+    _jdbcManager.init();
+
+    _id = createDestination(getName(), true);
+  }
+
+  /**
+   * Creates a consumer.
+   */
+  public MessageConsumerImpl createConsumer(SessionImpl session,
+					    String selector,
+					    boolean noLocal)
+    throws JMSException
+  {
+    return new JdbcTopicConsumer(session, selector,
+				 _jdbcManager, this, noLocal);
+  }
+
+  /**
+   * Creates a durable subscriber.
+   */
+  public TopicSubscriber createDurableSubscriber(SessionImpl session,
+						 String selector,
+						 boolean noLocal,
+						 String name)
+    throws JMSException
+  {
+    return new JdbcTopicConsumer(session, selector,
+				 _jdbcManager, this, noLocal, name);
+  }
+
+  /**
+   * Sends the message to the queue.
+   */
+  public void send(Message message)
+    throws JMSException
+  {
+    long expireTime = message.getJMSExpiration();
+    if (expireTime <= 0)
+      expireTime = Long.MAX_VALUE / 2;
+
+    purgeExpiredMessages();
+    
+    try {
+      _jdbcManager.getJdbcMessage().send(message, _id, expireTime);
+    } catch (Exception e) {
+      throw new JMSExceptionWrapper(e);
+    }
+
+    messageAvailable();
+  }
+
+  /**
+   * Returns a printable view of the queue.
+   */
+  public String toString()
+  {
+    return "JdbcTopic[" + getName() + "]";
+  }
+}
+

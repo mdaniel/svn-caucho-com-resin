@@ -1,0 +1,155 @@
+<document>
+  <header>
+    <product>resin-ee</product>
+    <resin-2.0>$ee/ejb-tut/cmp-create.xtp</resin-2.0>
+    <title>Creating and Removing Entity Beans</title>
+    <description>
+      <p>Scenario: Headmaster Dumbledore adds two courses to the curriculum,
+        then changes his mind and removes them again</p>
+      <p>This example focuses on:</p>
+      <ul>
+      <li>Implementing and using create, ejbCreate, and ejbPostCreate methods</li>
+      <li>Using the remove() method for entity beans</li>
+      </ul>
+    </description>
+    <type>tutorial</type>
+    <tutorial-startpage>create</tutorial-startpage>
+  </header>
+
+  <body>
+    <summary/>
+
+<p>Almost all applications need to add and remove entities from the
+database.  Although most database accesses are reads, eventually we
+need to change the database.  With Resin-EE, you add a create method
+with the following steps:</p>
+
+<ol>
+<li>Add the <code/createXXX/> method to the local home interface.
+<li>Implement a corresponding <code/ejbCreateXXX/> method in the bean class, setting
+any database fields.
+<li>Implement a corresponding <code/ejbPostCreateXXX/> method in the bean
+class, setting any bean relations if necessary.
+</ol>
+
+<section title="Database Schema">
+
+<p>The example uses the same database table as the previous basic example.</p>
+
+<example title="create.sql">
+CREATE TABLE create_courses (
+  course_id VARCHAR(250) NOT NULL,
+  instructor VARCHAR(250),
+
+  PRIMARY KEY(course_id)
+);
+</example>
+
+</section>
+
+<section title="Client Servlet">
+
+<p>Clients simply call the create method from the CourseHome
+interface.  The following servlet fragment creates two new courses,
+prints all the courses, and then removes the new courses.</p>
+
+<p>The <code>remove()</code> method is generated automatically and is
+always part of the <code/EJBLocalObject/> interface.  All we need to do is
+call it.</p>
+
+<example title="Adding and Removing Courses">
+...
+
+divination = home.create("Divination", "Sybil Trelawney");
+creatures = home.create("Care of Magical Creatures", "Rubeus Hagrid");
+
+Collection c = home.findAll();
+Iterator iter = c.iterator();
+
+while (iter.hasNext()) {
+  Course course = (Course) iter.next();
+
+  out.println(course.getCourseId() + " is taught by " +
+              course.getInstructor() + "&lt;br>");
+}
+
+divination.remove();
+creatures.remove();
+...
+</example>
+
+</section>
+
+<section title="Adding Create to CourseHome">
+
+<p>The <code/CourseHome/> interface adds the <code/create/> method.
+Most than one create method is allowed, but all must start with create.
+<code/createWithInstructor/> or <code/createChild/> would be allowed.
+Any create method must throw <code/CreateException/>.</p>
+
+<example title="CourseHome.java">
+package example.cmp.create;
+
+import java.util.*;
+import javax.ejb.*;
+
+public interface CourseHome extends EJBLocalHome {
+  Course findByPrimaryKey(String name)
+    throws FinderException;
+
+  Course create(String courseId, String instructor)
+    throws CreateException;
+}
+</example>
+
+</section>
+
+<section title="ejbCreate and ejbPostCreate in CourseBean">
+
+<p>Creating a bean needs to methods in the bean class: <code/ejbCreate/> and
+<code/ejbPostCreate/>.  <code/ejbCreate/> saves cmp-fields before inserting
+into the database.  <code/ejbPostCreate/> links persistent relations.  In this
+example, the <code/ejbPostCreate/> method will be empty.  In the example of
+user comments to an article, the <code/ejbPostCreate/> method will link the
+new comment object to the owning article.</p>
+
+<ul>
+<li><code/ejbCreate/> sets the primary key and cmp-fields
+<li><code/ejbPostCreate/> sets the cmr-fields (relations to other beans)
+</ul>
+
+<p>The <code/ejbCreate/> method is the only method that may call the setter
+for the primary key.  Database tables which generate their own
+primary key (e.g. autoincrement ids), will have no setter for the
+primary key.</p>
+
+<example title="CourseBean.java">
+package example.cmp.find;
+
+abstract public class CourseBean
+  extends com.caucho.ejb.AbstractEntityBean {
+  abstract public String getCourseId();
+  abstract public void setCourseId(String id);
+
+  abstract public String getInstructor();
+  abstract public void setInstructor(String instructor);
+
+  public String ejbCreate(String course, String instructor)
+    throws CreateException
+  {
+    setCourseId(course);
+    setInstructor(instructor);
+
+    return course;
+  }
+
+  public void ejbPostCreate(String course, String instructor)
+  {
+    // since there are no relations, this is empty.
+  }
+}
+</example>
+
+</section>
+  </body>
+</document>

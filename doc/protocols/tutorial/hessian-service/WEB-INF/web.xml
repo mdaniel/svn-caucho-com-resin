@@ -1,0 +1,12 @@
+<!--
+   - web.xml configuration file for the Hessian addition example.
+  -->
+<web-app xmlns="http://caucho.com/ns/resin">
+  <servlet servlet-name="math"
+           servlet-class="com.caucho.hessian.server.HessianServlet">
+    <init-param service-class="example.MathServiceImpl"/>
+    <init-param api-class="example.MathService"/>
+  </servlet>
+
+  <servlet-mapping url-pattern="/hessian/math" servlet-name="math"/>
+</web-app>

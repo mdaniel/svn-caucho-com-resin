@@ -1,0 +1,438 @@
+<document>
+  <header>
+    <product>resin-ee</product>
+    <resin-2.0>$ee/ejb-tut/cmp-one2many.xtp</resin-2.0>
+    <title>Container Persistent Relations</title>
+  </header>
+
+  <body>
+    <summary/>
+
+<p>EJB 2.0 containers can manage relationships between entity beans.
+In this example, each boarding school house has a number of students.
+Each house and student has its own entity bean and each student belongs
+to a house.</p>
+
+<p>Resin-CMP generates the classes and SQL to maintain
+the relationships automatically.  If a student changes houses, Resin-CMP
+updates both the student and house records.  If a student is expelled,
+both the student and house records get update automatically.</p>
+
+<p>Relationships are updated using the local interface.  The second draft of
+the EJB 2.0 specification distinguishes local from remote interfaces.
+Local interfaces are useful when using EJB as a database interface or for
+fast calls within the same JVM.</p>
+
+<p>The tutorial focuses on the classes and configuration for a simple
+bean/bean relationship.  Additional details, like changing houses or
+creating and deleting students are deferred to another tutorial.</p>
+
+<section title="Database Schema">
+
+<p>The example has two tables: houses and students.  Each student belongs to
+a single house. It's an n-1 relation like a parent-children relationship.</p>
+
+<p>The database stores the student/house relationship using
+an field in the student record.  The student table points to
+the house with the house's primary key.  The generated code will create the
+query to list all students belonging to a house.</p>
+
+<example title="one2many.sql">
+CREATE TABLE students (
+  name VARCHAR(250) NOT NULL,
+  house VARCHAR(250),
+
+  PRIMARY KEY(name)
+);
+
+CREATE TABLE houses (
+  name VARCHAR(250) NOT NULL
+
+  PRIMARY KEY(name)
+);
+
+INSERT INTO houses VALUES('Gryffindor');
+INSERT INTO houses VALUES('Slytherin');
+
+INSERT INTO students VALUES('Harry Potter', 'Gryffindor');
+INSERT INTO students VALUES('Ron Weasley', 'Gryffindor');
+INSERT INTO students VALUES('Hermione Granger', 'Gryffindor');
+
+INSERT INTO students VALUES('Draco Malfoy', 'Slytherin');
+INSERT INTO students VALUES('Millicent Bulstrode', 'Slytherin');
+</example>
+
+</section>
+
+<section title="Client JSP">
+
+<p>The example client loops through the houses and prints each student
+from the house.  The student beans are returned in a collection.</p>
+
+<p>As in the previous tutorial, Resin-EJB stores the home interfaces
+in a JNDI context.  The student home is stored in
+<var/java:comp/env/cmp/students/>
+and the house home is stored at <var/java:comp/env/cmp/houses/>.
+The <var/ejb-local/> is used since these are the local interfaces for the
+beans.</p>
+
+<p>The list of students is passed using the JDK 1.2 <code>Collection</code>
+class and taking students out requires an <code/Iterator/>.
+Since we are using the local interface, the collection is live.
+The application could use <code/students.add(student)/> to add
+a new sutdent.</p>
+
+<example title="Servlet Fragment">
+...
+
+Collection houses = houseHome.findAll();
+
+// iterate through the Houses
+iter = houses.iterator();
+while (iter.hasNext()) {
+  House house = (House) iter.next();
+  out.println("&lt;h4>" + house.getName() + "&lt;/h4>");
+
+  students = (Collection) house.getStudentList();
+      
+  // iterate through the students for that House
+  Iterator studentIter = students.iterator();
+      
+  while (studentIter.hasNext()) {
+    Student student = (Student) studentIter.next();
+    out.println("&lt;li>" + student.getName());
+  }
+}
+
+..
+</example>
+<results>
+&lt;h4>Gryffindor&lt;/h4>
+
+&lt;li>Harry Potter
+&lt;li>Hermione Granger
+&lt;li>Ron Weasley
+
+&lt;h4>Slytherin&lt;/h4>
+
+&lt;li>Draco Malfoy
+&lt;li>Millicent Bulstrode
+</results>
+
+</section>
+
+<section title="Implementation Classes">
+
+<p>Both the house and students beans have the three EJB classes:
+local home interface, local interface, and implementation class.
+Although the client only sees the local home and local interfaces,
+most of the interesting work happens in the implementation class.
+With container managed persistence, most of the work is done
+automatically, so the classes themselves are short.</p>
+
+<section title="House Implementation">
+
+<p>The home interface for the house bean implements the minimal
+method, findByPrimaryKey.</p>
+
+<example title="HouseHome.java">
+package test.entity.students;
+
+import java.rmi.*;
+import javax.ejb.*;
+
+public interface HouseHome extends EJBLocalHome {
+  House findByPrimaryKey(String name)
+    throws FinderException;
+}
+</example>
+
+<p>The remote interface returns the name of the house and the
+collection of students.  <var/getStudents/> does not
+return the container-managed student collection directly.  The
+implementation must first store the managed collection into a
+concrete implementation.</p>
+
+<example title="House.java">
+package test.entity.students;
+
+import java.rmi.*;
+import javax.ejb.*;
+
+public interface House extends EJBLocalObject {
+  String getName();
+
+  Collection getStudentList();
+}
+</example>
+
+<p>The <code/getStudentList/> collection is active.  Calling the collection
+<code/add/> and <code/remove/> methods will add and remove students from
+the house.  Adding a student to a house will automatically remove it from
+any other house.  Resin-EJB keeps the relationship consistent.</p>
+
+<p>The house's student list gets contructed from the student
+records.  In the SQL schema, the houses table has no reference
+to students.  So <code/getStudentList/> needs to query the student records to
+find the students in a house.  In other words, <code/House/>'s <code/getStudentList/> is
+paired with <code/Student/>'s <code/getHouse/>.
+
+<p>The deployment descriptor connects the paired fields <code/getStudentList/>
+and <code/getHouse/>.   Resin-EJB can't determine the pairings of
+relation fields
+by introspection alone.  So you'll need to tell Resin-EJB in the
+<var/ejb-relationship/> elements.</p>
+
+<example title="HouseBean.java">
+package example.cmp.relations.one2many;
+
+abstract public class HouseBean
+  extends com.caucho.ejb.AbstractEntityBean {
+  /**
+   * Returns the primary key.
+   */
+  abstract public String getName();
+  /**
+   * Container-managed relationship can't return directly.
+   */
+  abstract public Collection getStudentList();
+}
+</example>
+
+</section>
+
+<section title="Student Implementation">
+
+<p>The student bean adds the <code/getHouse/> accessor to a basic bean.
+Since getHouse is paired with the house's <code/getStudentList/>,
+setting a house will automatically change the house's student list to match.</p>
+
+<example title="StudentHome.java">
+package example.cmp.relations.one2many;
+
+import java.rmi.*;
+import javax.ejb.*;
+
+/**
+ * Remote interface for the student home.
+ */
+public interface StudentHome extends EJBLocalHome {
+  /**
+   * Returns the named student.
+   */
+  Student findByPrimaryKey(String name)
+    throws FinderException;
+}
+</example>
+
+<p>The student interface returns the student's name and the remote
+interface of the house.  As always, beans never refer to the implementation
+classes, always the local interface.  The student interface must return
+<code/House/> and never <code/HouseBean/>.</p>
+
+<example title="Student.java">
+package example.cmp.relations.one2many;
+
+import java.rmi.*;
+import javax.ejb.*;
+
+public interface Student extends EJBLocalObject {
+  String getName();
+
+  House getHouse();
+}
+</example>
+
+<p>The <code/StudentBean/> implementation is simple since all the real code is
+created automatically.</p>
+
+<example title="StudentBean.java">
+package example.cmp.relations.one2many;
+
+abstract public class StudentBean
+  extends com.caucho.ejb.AbstractEntityBean {
+  abstract public String getName();
+
+  abstract public House getHouse();
+  abstract public void setHouse(House house);
+}
+</example>
+
+</section>
+
+<p>With Resin-EJB, all the Java source can be dropped in WEB-INF/classes.
+Resin will automatically compile any changes and regenerate the persistence
+classes, stubs and skeletons.</p>
+
+</section>
+
+<section title='Deployment Descriptor'>
+
+The deployment descriptor has three sections:
+<ul>
+<li>House definition
+<li>Student definition
+<li>The relationship between the house and student beans.
+</ul>
+
+<p>References to the bean in the relationships section
+use the <var/ejb-name/> definition.</p>
+
+<example title='WEB-INF/one2many.ejb -- overview'>
+&lt;ejb-jar>
+&lt;enterprise-beans>
+  &lt;entity>
+    &lt;ejb-name><var/houses/>&lt;/ejb-name>
+    ...
+  &lt;/entity>
+
+  &lt;entity>
+    &lt;ejb-name><var/students/>&lt;/ejb-name>
+    ...
+  &lt;/entity>
+&lt;/enterprise-beans>
+
+&lt;relationships>
+  &lt;ejb-relation>
+    ...
+  &lt;/ejb-relation>
+&lt;/relationships>
+&lt;/ejb-jar>
+</example>
+
+<p>The house definition is just like the simple entity bean in the
+previous house tutorial.   The main addition is the <var/cmr-field/>
+section.  The <var/houses/> definition needs to define the
+studentList field and can specify its return type.</p>
+
+<example title='WEB-INF/one2many.ejb -- houses'>
+...
+&lt;entity>
+  &lt;ejb-name><var/houses/>&lt;/ejb-name>
+
+  &lt;local-home><var/example.cmp.relations.one2many.HouseHome/>&lt;/local-home>
+  &lt;local><var/example.cmp.relations.one2many.House/>&lt;/local>
+  &lt;ejb-class><var/example.cmp.relations.one2many.HouseBean/>&lt;/ejb-class>
+
+  &lt;abstract-schema-name><var/houses/>&lt;/abstract-schema-name>
+
+  &lt;primkey-field><var/name/>&lt;/primkey-field>
+  &lt;prim-key-class><var/String/>&lt;/prim-key-class>
+
+  &lt;persistence-type><var/Container/>&lt;/persistence-type>
+  &lt;reentrant><var/True/>&lt;/reentrant>
+
+  &lt;cmp-field>&lt;field-name><var/name/>&lt;/field-name>&lt;/cmp-field>
+&lt;/entity>
+...
+</example>
+
+<p>The house definition is also like the simple entity bean in the
+previous house tutorial.   The main addition is the <var/cmr-field/>
+section.</p>
+
+<example title='WEB-INF/student.ejb -- students'>
+...
+&lt;entity>
+  &lt;ejb-name><var/students/>&lt;/ejb-name>
+
+  &lt;local-home><var/example.cmp.relations.one2many.StudentHome/>&lt;/local-home>
+  &lt;local><var/example.cmp.relations.one2many.Student/>&lt;/local>
+  &lt;ejb-class><var/example.cmp.relations.one2many.StudentBean/>&lt;/ejb-class>
+
+  &lt;abstract-schema-name><var/student/>&lt;/abstract-schema-name>
+
+  &lt;primkey-field><var/name/>&lt;/primkey-field>
+  &lt;prim-key-class><var/String/>&lt;/prim-key-class>
+
+  &lt;persistence-type><var/Container/>&lt;/persistence-type>
+  &lt;reentrant><var/True/>&lt;/reentrant>
+
+  &lt;cmp-field>&lt;field-name><var/name/>&lt;/field-name>&lt;/cmp-field>
+&lt;/entity>
+...
+</example>
+
+<deftable>
+<tr><th>Tag<th>Meaning
+<tr><td>ejb-jar<td>top-level containing element
+<tr><td>enterprise-beans<td>bean provider configuration
+<tr><td>entity<td>defines an entity bean
+<tr><td>ejb-name<td>The name of the ejb.  Used to tie ejbs together and
+used in contructing the url.
+<tr><td>local-home<td>class name of the local home interface
+<tr><td>local<td>class name of the local interface
+<tr><td>ejb-class<td>the bean's implementation class
+<tr><td>prim-key-class<td>class of the primary key
+<tr><td>persistence-type<td>container persistence in this example
+<tr><td>reentrant<td>the bean can call itself
+<tr><td>abstract-schema-name<td>maps to the SQL table name
+<tr><td>primkey-field<td>which field is the primary key
+<tr><td>cmp-field<td>all container managed persistence fields should be listed
+<tr><td>field-name<td>the name of a cmp-field
+<tr><td>cmr-field<td>defines a relationship field
+<tr><td>cmr-field-name<td>the name of the relationship field
+<tr><td>cmr-field-type<td>the name of the collection items
+</deftable>
+
+<p>The relationship connects the <var/studentList/> field of the <code/House/>
+to the <var/house/> field of the <code/Student/>.  Although the XML looks a bit
+forbidding, it's almost entirely boilerplate.  You can cut and paste a
+standard example, only filling in a few fields.  In this example, there are
+only four actual values, surrounded by the verbosity of XML.</p>
+
+<example title='WEB-INF/student.ejb -- relationships'>
+...
+&lt;relationships>
+  &lt;ejb-relation>
+    &lt;ejb-relationship-role>
+      &lt;relationship-role-source>
+         &lt;ejb-name><var/students/>&lt;/ejb-name>
+      &lt;/relationship-role-source>
+      &lt;cmr-field>
+        &lt;cmr-field-name><var/house/>&lt;/cmr-field-name>
+      &lt;/cmr-field>
+    &lt;/ejb-relationship-role>
+
+    &lt;ejb-relationship-role>
+      &lt;relationship-role-source>
+        &lt;ejb-name><var/houses/>&lt;/ejb-name>
+      &lt;/relationship-role-source>
+
+      &lt;cmr-field>
+        &lt;cmr-field-name><var/studentList/>&lt;/cmr-field-name>
+      &lt;/cmr-field>
+    &lt;/ejb-relationship-role>
+  &lt;/ejb-relation>
+&lt;/relationships>
+...
+</example>
+
+<deftable>
+<tr><th>Tag<th>Meaning
+<tr><td>relationships<td>contains all bean/bean relationships
+<tr><td>ejb-relation<td>a single relation
+<tr><td>ejb-relationship-role<td>one end of the relation
+<tr><td>relationship-role-source<td>specifying the bean
+<tr><td>ejb-name<td>the ejb-name of the bean
+<tr><td>cmr-field<td>specifying the bean's relation
+<tr><td>cmr-field-name<td>the relation's name
+</deftable>
+
+</section>
+
+<section title="Conclusion">
+
+<p>The student houses example just touches the simplest example of using
+container managed relations.  Even in this basic case, it's easy to
+see how the EJB 2.0 persistent model takes the drudgery out of
+accessing databases.</p>
+
+<p>But more important than saving a bit of work, the EJB 2.0
+persistence model makes code more flexible and less brittle.  Projects can
+explore data models and refactor code without worrying that the
+refactoring will break years-old SQL.</p>
+
+</section>
+  </body>
+</document>

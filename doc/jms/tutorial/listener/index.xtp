@@ -1,0 +1,197 @@
+<document>
+  <header>
+    <product>resin-ee</product>
+    <title>JMS Listener</title>
+        <description>
+          <p>Introduces the JMS message listener configured with JCA.</p>
+        </description>
+    <type>tutorial</type>
+    <tutorial-startpage>send</tutorial-startpage>
+  </header>
+
+<body>
+<summary/>
+
+<section title="Files in this tutorial">
+<deftable>
+<tr><td><viewfile-link file="WEB-INF/web.xml"/>
+    <td>Configures the Queue, MessageSender, MessageListener.
+<tr><td><viewfile-link file="WEB-INF/classes/example/MyListener.java"/>
+    <td>The message listener.
+<tr><td><viewfile-link file="WEB-INF/classes/example/MessageServlet.java"/>
+    <td>The message servlet
+</deftable>
+</section>
+
+<section title="Overview">
+
+<p>Messaging lets a servlet delegate processing to a batch process either
+on the same machine or on a separate machine.  The servlet creates a message
+and sends it to a queue.  The servlet immediately completes and when the
+batch process is ready, it processes the message.</p>
+
+<p>Messaging is therefore comprised of three main components:
+<ul>
+<li>A <var>Producer</var> creates messages and sends them to
+a <var>Queue</var>.  The Producer could be something like a Servlet.
+<li>A <var>Queue</var> stores the messages from the Produces and provides
+them to a Consumer when ready.  The Queue is implemented by the
+messaging provider.
+<li>A <var>Consumer</var> processes messages as they become
+available in the Queue.  The <var>Consumer</var> is typically a bean
+implementing the <code>MessageListener</code> interface.
+</ul>
+
+</section>
+
+<section title="Producer (MessageServlet)">
+
+<p>In this example, the Producer is a Servlet which sends a simple message.
+The Producer uses a <code>MessageSender</code> configured in the web.xml
+to send the message.</p>
+
+<example title="MessageServlet">
+String message = "sample message";
+
+MessageSender sender = ...; // JNDI lookup
+
+sender.send(null, message);
+</example>
+
+<p>In this configuration, the <code>MessageSender</code> is a
+<code>com.caucho.services.message.MessageSender</code>.  It's also possible
+to use the full JMS <code>MessageProducer</code> which is more verbose.
+The <code>MessageSender</code> is an interface available in the open
+source <a href="http://www.caucho.com/hessian">Hessian distribution</a>,
+so it can be used in other application servers as a convenient facade.</p>
+
+<p>The <code>send</code> method completes as soon as
+the message is stored in the queue.  Laster, when a thread is available, the
+Queue will send the message to the Consumer.</p>
+
+</section>
+
+<section title="Consumer (MyListener)">
+
+<p>The Queue delivers message to the Consumer one by one.  When the
+Consumer finishes processing a message the Queue will deliver the next
+available message.</p>
+
+<p>The Consumer implements <code>javax.jms.MessageListener</code>, and
+will therefore be identical code in any application server.  The
+Consumer might even be on a different server or use a different
+application server.</p>
+
+<p>In this example, the Consumer just logs the message.</p>
+
+<example title="MyListener">
+package example;
+
+import java.util.logging.Logger;
+import java.util.logging.Level;
+
+import javax.jms.Message;
+import javax.jms.TextMessage;
+import javax.jms.MessageListener;
+
+public class MyListener implements MessageListener {
+  private static final Logger log =
+    Logger.getLogger(MyListener.class.getName());
+
+  public void onMessage(Message message)
+  {
+    try {
+      TextMessage textMessage = (TextMessage) message;
+
+      log.info("received: " + textMessage.getText());
+
+      _lastMessage = textMessage.getText();
+    } catch (Throwable e) {
+      log.log(Level.WARNING, e.toString(), e);
+    }
+  }
+}
+</example>
+
+</section>
+
+<section title="Configuration">
+
+<p>The configuration is responsible for three things:</p>
+<ul>
+<li>Configuring the Queue
+<li>Configuring the MessageSender
+<li>Configuring the MessageListener
+</ul>
+
+<p>The JMS <code>Queue</code> and its <code>ConnectionFactory</code>
+are configured in the &lt;resource-adapter> section.  Any JMS 1.1
+implementation may be used for the &lt;connection-factory> and
+&lt;destination>.</p>
+
+<p>The &lt;connection-factory> configures the MessageSender and saves
+it in JNDI.</p>
+
+<p>The &lt;message-listener> and &lt;endpoint-factory> configures
+the MessageListener.</p>
+
+<example title="web.xml">
+&lt;web-app xmlns="http://caucho.com/ns/resin">
+  &lt;connector>
+    &lt;type>com.caucho.jms.jca.ResourceAdapterImpl&lt;/type>
+
+    &lt;resource-adapter>
+      &lt;init>
+        &lt;connection-factory resin:type="com.caucho.jms.ConnectionFactoryImpl"/>
+
+        &lt;destination resin:type="com.caucho.jms.memory.MemoryQueue"/>
+      &lt;/init>
+    &lt;/resource-adapter>
+
+    &lt;connection-factory jndi-name="jms/sender"
+                        type="com.caucho.jms.jca.MessageSenderManager"/>
+
+    &lt;message-listener type="com.caucho.jms.jca.MessageListenerSpec">
+      &lt;endpoint-factory type="com.caucho.jms.jca.ListenerEndpointFactory">
+        &lt;init>
+          &lt;listener resin:type="example.MyListener"/>
+        &lt;/init>
+      &lt;/endpoint-factory>
+    &lt;/message-listener>
+  &lt;/connector>
+&lt;/web-app>
+</example>
+
+<deftable>
+<tr><th>tag<th>meaning
+<tr><td>connector<td>top-level configuration for the JCA connector
+<tr><td>type<td>The type of the connector.
+<tr><td>resource-adapter<td>configures the connector/queue as a whole
+<tr><td>init<td>Bean-style initialization for each resource
+<tr><td>connection-factory<td>The JMS ConnectionFactory class
+<tr><td>resin:type<td>The class name
+<tr><td>destination<td>The JMS Queue or Topic
+<tr><td>connection-factory<td>Configures a Producer
+<tr><td>jndi-name<td>The JNDI name where the resource is stored
+<tr><td>message-listener<td>Configures a Consumer
+<tr><td>endpoint-factory<td>consumer-specific endpoint type
+<tr><td>listener<td>configures the user's listener
+</deftable>
+
+<deftable>
+<tr><th>class<th>meaning
+<tr><td>com.caucho.jms.jca.ResourceAdapterImpl<td>Resin's JCA adapter
+for the MessageSender and MessageListener
+<tr><td>com.caucho.jms.ConnectionFactoryImpl<td>Resin's JMS ConnectionFactory
+<tr><td>com.caucho.jms.memory.MemoryQueue<td>Resin's in-memory JMS Queue
+<tr><td>com.caucho.jms.jca.MessageListenerSpec<td>Configuration for
+the JCA adapter's Consumer
+<tr><td>com.caucho.jms.jca.ListenerEndpointFactory<td>Specifies the
+configuration for a MessageListener
+<tr><td>example.MyListener<td>Example application code
+</deftable>
+
+</section>
+
+</body>
+</document>

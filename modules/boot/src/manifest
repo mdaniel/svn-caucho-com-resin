@@ -1,0 +1,3 @@
+Main-Class: com.caucho.server.boot.ResinBoot
+Class-Path: resin.jar isorelax.jar
+

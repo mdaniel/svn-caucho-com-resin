@@ -1,0 +1,583 @@
+<document>
+<header>
+  <product>resin</product>
+  <title>Database Configuration</title>
+  <version>Resin 3.0</version>
+
+  <description>
+<p>
+Resin provides a robust and very well tested connection pool that is used to
+obtain connections to databases. 
+</p>
+
+  </description>
+</header>
+
+<summary objsummary='localtoc'/>
+
+<section title="Core Concepts">
+
+<section title="Connection">
+<glossary title="connection" type="inline">
+<p>An established channel of communication between a client and a server. The
+client and the server may be on separate machines, on the same machine, or even
+running in the same JVM.  Often the connection is established using TCP/IP as
+the transport of communication.</p>
+</glossary>
+
+<p>A database connection is used to allow the Java program, running in a JVM,
+to communicate with a database server.</p>
+</section>
+
+<section title="Connection Pool">
+<glossary title="connection pool" type="inline">
+<p>A set of connections maintained so that the connections can be reused when
+there is a future need for the conneciton. </p>
+</glossary>
+
+<p>
+Connection pools are used to reduce the overhead of using a database.
+Establishing a connection to the database is a costly operation.  A connection
+pool keeps a pool of open connections, each connection can be used for a time
+as needed, and then released back to the pool.  A connection that has been
+released back to the pool can then be reused.  </p>
+
+<p>Connection pooling is especially important in server applications.  The
+overhead of opening a new connection for each new client request is too costly.
+Instead, the database pool allows for a connection to be opened once and then
+reused for many requests.</p>
+</section>
+
+<section title="DataSource">
+<glossary title="DataSource" type="inline">
+<p>A JDBC term (and interface name) used for a factory that is used to obtain connections.</p>
+</glossary>
+
+<p>
+Resin provides an implementation of <code>DataSource</code>.  Resin's
+implementation  of <code>DataSource</code> is a connection pool.
+</p>
+</section>
+
+<section title="Driver">
+
+<glossary title="driver" type="inline">
+<p>An implemetation of a defined interface that hides the details of
+communication with a device or other resource, such as a database.</p>
+</glossary>
+
+<p>A Driver provides an interface and is responsible for the communication
+with the database. Every different database (i.e Oracle, MySQL) has their own
+means of enabling communication from the client (in this case Resin and you
+applications) and the database.  The Driver provides a common interface that
+hides the details of that communication.  </p>
+
+</section>
+
+<section title="Transaction">
+
+<glossary title="transaction" type="inline">
+<p>A transaction is used to mark a group of operations and provide a guarantee
+that all of the operations happen, or none of them happen.  Transactions
+protect the integrity of the database.</p>
+</glossary>
+
+<p>Transactions are especially important in server applications where many
+threads of processing may be interacting with the database at the same
+time.</p>
+
+<p>For a simple example, imagine a set of operations that reads a value,
+calculates a new value, and then updates the database.
+
+<example title="Simple set of database operations">
+read value A=1 
+calculate  A=A+1 
+update     A=2
+
+read value A=2 
+calculate  A=A+1 
+update     A=3
+</example>
+
+
+<p>Imagine if one thread is performing this operation, and in the middle of
+this read/calculate/update, another thread performs an update.  The data that
+the first thread obtained from the read and is using for the calculation and
+update is no longer valid.</p>
+
+<example title="2 Threads with a conflicting set of database operations">
+Thread 1                 Thread 2
+--------                 --------
+read value A=1           read value A=1
+calculate  A=A+1         calculate A=A+1
+                         update A=2
+update     A=2
+</example>
+
+<p>Placing the read/calculate/update operations in a transactions guarantees
+that only one thread can perform those operations at a time, if a second thread
+comes along and tries to perform the operation, it will have to wait for the
+first thread to finish before it can begin.</p>
+
+<example title="2 Threads and a database protected with transactions">
+
+Thread1                Thread 2
+-------                --------
+read value A=1         
+calculate  A=A+1       (tries to read A, but has to wait for thread 1)
+update     A=2
+                       read value A=2
+                       calculate A=A+1
+                       update A=3
+</example>
+
+</section>
+
+<section title="Distributed Transaction">
+
+<glossary title="distributed transaction" type="inline">
+<p>A distributed transaction is a transaction that involves more than one
+connection.</p>
+</glossary>
+
+<p>If the guarantees that transactions apply need to apply to operations that
+occur on two databases within the same transaction,
+distributed transactions are needed.</p>
+
+<p>If <code>A</code> and <code>B</code> in the following example are in two
+different databases, then a distributed transaction is needed:</p>
+
+<example title="Simple set of database operations">
+read value db1.A=1 
+read value db2.B=99
+calculate  A=A+1 
+calculate  B=B-A 
+update     db1.A=2
+update     db2.B=97
+</example>
+
+<p>Distributed transactions are rarely needed, and few databases really support
+them.</p>
+
+</section>
+
+</section>
+
+<section title="Core Configuration">
+
+<defun title="database" version="Resin 3.0">
+<parents>server, host-default, host, web-app-default, web-app</parents>
+
+<p>Configure a <var/database/> resource, which is a database pool that manages
+and provides connections to a database.</p>
+      
+<deftable-childtags>
+<tr><td>jndi-name<td>JNDI name to store the pool under.  Servlets, jsp, and
+other java code use this name.  The path is relative to
+<code>java:comp/env</code><td> 
+<tr><td>driver<td>Configure the database <a href="#driver">driver</a>.<td>
+
+<tr><td>max-connections<td><a href="#pooling">Pooling parameter</a> - maximum number of allowed connections<td>20
+<tr><td>max-idle-time<td><a href="#pooling">Pooling parameter</a> - maximum time an idle connection is kept in
+the pool<td>30 sec
+<tr><td>max-active-time<td><a href="#pooling">Pooling parameter</a> - maximum time a connection allowed to be active
+<td>6 hours
+<tr><td>max-pool-time<td><a href="#pooling">Pooling parameter</a> - maximum time a connection is kept in the pool<td>24 hours
+<tr><td>connection-wait-time<td><a href="#pooling">Pooling parameter</a> - how long to wait for an idle connection (Resin 1.2.3)<td>10 minutes
+<tr><td>max-overflow-connections<td><a href="#pooling">Pooling parameter</a> - how many "overflow" connection are allowed if the connection wait times out.<td>0
+
+<tr><td>ping-table<td><a href="#reliability">Reliability parameter</a> - The database table used to "ping", checking that the connection is still live.<td>n/a
+<tr><td>ping<td><a href="#reliability">Reliability parameter</a> - test for live connections before allocating them from the pool.<td>false
+<tr><td>ping-interval<td><a href="#reliability">Reliability parameter</a> - how often to ping for ping-on-idle<td>60s
+
+<tr><td>prepared-statement-cache-size<td>A cache that holds prepared statements, a reused prepared statement avoids the overhead of the driver making the prepared statement<td>0
+<tr><td>spy<td>A debugging aid, if true, generate <code/info/> level log events that reveal the SQL that is used with the connections.<td>false
+<!--
+<tr><td>xa<td><td>
+-->
+</deftable-childtags>
+
+<p>All times default to seconds, but can use longer time periods:</p>
+
+<deftable title="Time suffixes">
+<tr><td>s<td>seconds
+<tr><td>m<td>minutes
+<tr><td>h<td>hours
+<tr><td>D<td>days
+</deftable>
+
+<p>The class that corresponds to &lt;database&gt; is <a
+href="javadoc|com.caucho.sql.DBPool|"/></p>
+
+</defun>
+
+</section>
+
+
+<section name="driver-config" title="Driver Configuration">
+
+<defun title="driver" version="Resin 3.0">
+<parents>database</parents>
+
+<p>Configure a database <var/driver/>.  The driver is a class provided by the
+database vendor, it is responsible for the communication with the database.</p>
+
+<p>
+The jar file with the driver in it can be placed in <code>WEB-INF/lib</code>,
+although it is often best to place your datbase driver's jar file in
+<code>$RESIN_HOME/lib/local/</code>, which makes the driver available to all of
+your web applications.
+</p>
+
+<p>Examples of common driver configurations are in <a
+href="db|thirdparty">Third-party Database Configuration</a>.</p>
+
+<p>The class that corresponds to &lt;driver&gt; is <a
+href="javadoc|com.caucho.sql.DriverConfig|"/></p>
+
+<deftable-childtags>
+<tr><td>type<td>The Java class name of the database driver.<td> 
+<tr><td>url<td>The driver specific database url.<td> 
+<tr><td>user<td>The username to give the database driver.<td> 
+<tr><td>password<td>The password to give the database driver.<td> 
+<tr><td>init-param<td>Set <a href="#init-param">driver specific properties</a> not known to Resin.<td> 
+</deftable-childtags>
+
+</defun> <!-- driver -->
+
+
+<section name="choosing-driver" title="Choosing a driver class for &lt;type&gt;">
+
+<p>Database vendors usually provide many different classes that are potential
+candidates for <var/type/>.  The JDBC api has developed over time, and is now
+being replaced by the more general JCA architecture.  The driver you choose
+depends on the options the vendor offers, and whether or not you need
+distributed transactions.</p>
+
+<section title="JCA drivers">
+
+<p>JCA is replacing JDBC as the API for database drivers.  JCA is a much more
+flexible approach that defines an API that can be used for any kind of
+connection, not just a connection to a database.  If a database vendor provides
+a JCA interface, it is the best one to use.</p>
+
+<p>A JCA driver implements <code>ManagedConnectionFactory</code>.  When you
+specify such a class for <var/type/>, Resin will notice that it is a JCA driver
+and take advantage of the added functionality that the JCA interface
+provides.</p>
+
+<p>The same JCA driver is used for both non-distributed and distributed
+transactions</p>
+</section>
+
+<section title="JDBC 2.0 - ConnectionPoolDataSource">
+
+<p>JDBC 2.0 defined the interface <var/ConnectionPoolDataSource/>.  A
+<code>ConnectionPoolDataSource</code> is <i>not</i> a connection pool, but it
+does provide some extra information that helps Resin to pool the connection
+more effectively.</p>
+
+<p>A driver that implements <var/ConnectionPoolDataSource/> is better than a
+JDBC 1.0 driver that implements <var/Driver/>.  
+
+</section>
+
+<section title="JDBC 2.0 - XADataSource">
+
+<p>JDBC 2.0 defined the interface <var/XADataSource/> for connections that can
+participate in <var/distributed transactions/>. A distributed transaction is
+needed when transactions involve multiple connections.  For example, with two
+different database backends, if the guarantees that transactions apply need to
+apply to operations that occur on both databases within the same transaction,
+distributed transactions are needed.</p>
+
+<p>Distributed transactions are rarely needed, and few databases really support
+them.  Some vendors will provide <code>XADataSource</code> drivers even though
+the database does not really support distributed transactions.  Often,
+<code>XADataSource</code> drivers are slower than their
+<code>ConnectionPoolDataSource</code> counterparts.</p>
+
+<p><code>XADataSource</code> should only be used if distributed transactions
+are really needed, and can probably be safely ignored for most
+applications.</p>
+
+</section>
+
+<section title="JDBC 1.0 - Driver">
+
+<p>
+<var/Driver/> is the original JDBC interface, and is the least desirable kind
+of driver to use.  Resin can still pool database connections using these drivers, but it will not be as efficient as the newer drivers.
+</p>
+
+</section>
+</section> <!-- choosing-driver -->
+
+<section name="init-param" title="Set driver properties with init-param">
+
+<p><var/init-param/> is used to set properties of the database driver that are
+specific to the driver and are not generic enough for resin to provide a
+named configuration tag.</p>
+
+<p>For example, MySQL drivers accept the <code>useUnicode</code> parameter, if
+true the driver will use Unicode characeter encodings when handling
+strings.</p>
+
+<example>
+&lt;database&gt;
+  &lt;jndi-name&gt;jdbc/mysql&lt;/jndi-name&gt;
+  &lt;driver&gt;
+    &lt;type&gt;com.mysql.jdbc.jdbc2.optional.MysqlConnectionPoolDataSource&lt;/type&gt;
+    &lt;url&gt;jdbc:mysql://localhost:3306/dbname&lt;/url&gt;
+    &lt;user&gt;username&lt;/user&gt;
+    &lt;password&gt;password&lt;/password&gt;
+
+    <b>&lt;init-param useUnicode="true"/&gt;</b>
+  &lt;/driver&gt;
+  ...
+&lt;/database&gt;
+</example>
+
+</section> <!-- init-driver -->
+
+</section> <!-- driver-config -->
+
+<section name="pooling" title="Pooling Configuration">
+<TODO>verbose pooling explanation</TODO>
+</section> <!-- pooling -->
+
+<section name="reliability" title="Reliability Configuration">
+
+<p>Resin's database pool can test if the pooled database connection
+is still alive by configuring a <var/ping/> query.  The database connection
+may become stale if the database is restarted, possibly for maintenance.
+Normally when a database connection is returned to the pool it will wait
+there until the next request.  If the database goes down in the meantime,
+the connection will become stale.  The <var/ping/> configuration can test
+the database connection.</p>
+
+<p>When pinging, Resin's DBPool will test a table specified with the
+<var/ping-table/> parameter.  For a ping-table of my_table, Resin will
+use a query like the following:</p>
+
+<example>
+SELECT 1 FROM my_table
+</example>
+
+<p>There are three ping modes: ping-on-free, ping-on-idle, and
+ping-on-reuse.  ping-on-free tests the database when the connection is
+returned to the database pool, ping-on-idle tests the connection when
+it's in the idle pool, and ping-on-reuse tests the connection just
+before using the connection.</p>
+
+<TODO>example</TODO>
+<!--
+<p>If the database had a table <var/my_table/>, you could
+configure the pool to check idle connections as follows:</p>
+
+<example>
+&lt;resource-ref>
+  &lt;res-ref-name>jdbc/test&lt;/res-ref-name>
+  &lt;res-type>javax.sql.DataSource&lt;/res-type>
+  &lt;init-param driver-name="com.caucho.jdbc.mysql.Driver"/>
+  &lt;init-param url="jdbc:mysql-caucho://localhost:3306/test"/>
+  &lt;init-param ping-table="my_table"/>
+  &lt;init-param ping-on-idle="true"/>
+&lt;/resource-ref>
+</example>
+-->
+
+<p>You can test the database reliability using the following steps:
+</p>
+
+<ol>
+<li>Configure the database with ping-table and ping-on-idle.
+<li>Execute some servlet that queries the database.
+<li>Restart the database server.
+<li>Execute another servlet that queries the database.
+</ol>
+
+</section> <!-- reliability -->
+
+<section name="usage" title="Obtaining and using a database connection">
+
+<section name="usage/lookup" title='Getting the DataSource'>
+
+<p>The <code>DataSource</code> is a factory that is used to obtain
+a connection.  The <code>DataSource</code> is obtained using the <a
+config-tag="jndi-name"/> specified when configuring the database resource.  
+
+<p>Ideally, the JNDI lookup of <code/DataSource/> is done only once, the
+<code/DataSource/> obtained from the lookup can be stored in a member variable
+or other appropriate place.  The stored <code/DataSource/> can then be used
+each time a connection is needed.  If it is not stored, there will be an impact
+on performance from having to do the lookup each time you want to get a
+connection.</p>
+
+<example title="Obtaining a DataSource">
+public class .... {
+  private final static String DATASOURCE_NAME = "jdbc/test";
+  DataSource _pool;
+
+  ...
+
+  void init()
+  {
+    try {
+      Context env = (Context) new InitialContext().lookup("java:comp/env");
+
+      _pool = (DataSource) env.lookup(DATASOURCE_NAME);
+
+      if (_pool == null)
+        throw new ServletException("`" + DATASOURCE_NAME + "' is an unknown DataSource");
+    } catch (NamingException e) {
+      throw new ServletException(e);
+    }
+  }
+
+  ...
+}
+</example>
+</section> <!-- usage/lookup -->
+
+<section name="usage/get-connection" title='Getting a Connection'>
+
+<p>A connection is obtained from the <code/DataSource/>.  The
+connection is used as needed, and then released with a call to close() so that
+Resin knows it is available for a subsequent request.</p>
+
+<p>It is very important that the <code/close()/> is <i>always</i> called, even
+if there as an exception. Without the <code/close()/>, Resin's database pool
+can loose connections.  If you fail to close() a connection, Resin does not know
+that it is available for reuse, and cannot allocate it for another request.
+Eventually, Resin may run out of connections.  </p>
+
+<p class="warn">Always put a <code/close()/> in a finally block, to guarantee that it is called.</p>
+
+<p>The following example shows the use of a <code/finally/> block that contains
+the <code/close()/>.  Because the <code/close()/> is in a finally block, it
+will happen even if the code using the connection throws an exception.</p>
+
+<example title="Getting a connection from the DataSource">
+
+    Connection conn = null;
+    try {
+      conn = pool.getConnection();
+
+      Statement stmt = conn.createStatement();
+
+      ResultSet rs = stmt.executeQuery(" ... ");
+
+      ...
+
+      rs.close();
+      stmt.close();
+    } catch (SQLException e) {
+      throw new ServletException(e);
+    } finally {
+      try {
+        if (conn != null)
+          conn.close();
+      } catch (SQLException e) {
+      }
+    }
+</example>
+
+</section> <!-- usage/get-connection -->
+
+<section name="usage/servlet" title='Using Databases from a Servlet'>
+    
+<p>The following is a sample design pattern for getting new database
+connections from within a servlet..  The <var/try ... finally/> block is very
+important.  Without the close in the finally block, Resin's database pool can
+loose connections.
+</p>  
+
+<p>This is so importaant, it is worth repeating.  The <var/try
+... finally/> block is very important.  Without the close in the finally block,
+Resin's database pool can loose connections.  If you fail to close() a
+connection, Resin cannot know that it is not being used anymore, and cannot
+allocate it for another request.  Eventually, you may run out of connections.
+</p>
+
+<p>The <code>DataSource</code> is obtained using the <a
+config-tag="jndi-name"/> specified when configuring the database resource.  The
+JNDI lookup of <code/DataSource/> is done only once, the <code/DataSource/> is
+stored in the <code>_pool</code> member variable so that it can be used for
+each request. If it was not stored, there would be an impact on performance
+from having to do the lookup each time.</p>
+
+<example title="TestDatabase.java">
+package test;
+
+import java.io.*;
+
+import java.sql.*;
+import javax.servlet.*;
+import javax.servlet.http.*;
+import javax.naming.*;
+import javax.sql.*;
+
+public class TestDatabase extends HttpServlet {
+  private final static String DATASOURCE_NAME = "jdbc/test";
+
+  DataSource _pool;
+
+  public void init()
+    throws ServletException
+  {
+    try {
+      Context env = (Context) new InitialContext().lookup("java:comp/env");
+
+      _pool = (DataSource) env.lookup(DATASOURCE_NAME);
+
+      if (_pool == null)
+        throw new ServletException("`" + DATASOURCE_NAME + "' is an unknown DataSource");
+    } catch (NamingException e) {
+      throw new ServletException(e);
+    }
+  }
+
+  public void doGet(HttpServletRequest req,
+                    HttpServletResponse res)
+    throws IOException, ServletException
+  {
+    res.setContentType("text/html");
+    PrintWriter out = res.getWriter();
+
+    Connection conn = null;
+    try {
+      conn = _pool.getConnection();
+
+      Statement stmt = conn.createStatement();
+
+      ResultSet rs = stmt.executeQuery("select NAME, PRICE from BROOMS");
+
+      out.println("Brooms:&lt;br>");
+      while (rs.next()) {
+        out.print(rs.getString(1));
+        out.print(" ");
+        out.print(rs.getInt(2));
+        out.println("&lt;br>");
+      }
+
+      rs.close();
+      stmt.close();
+    } catch (SQLException e) {
+      throw new ServletException(e);
+    } finally {
+      try {
+        if (conn != null)
+          conn.close();
+      } catch (SQLException e) {
+      }
+    }
+  }
+}
+</example>
+
+</section> <!-- usage/servlet -->
+
+</section> <!-- usage -->
+
+</document>

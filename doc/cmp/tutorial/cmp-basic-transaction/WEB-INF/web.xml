@@ -1,0 +1,46 @@
+<web-app xmlns="http://caucho.com/ns/resin">
+  <!--
+     - Configures the EJB server resource, using the
+     - java:comp/env/jdbc/test data source.
+     -
+     - The ejb-server defaults to java:comp/env/cmp, although
+     - that can be changed with the 'name' attribute.
+     -
+     - ejb-server will pick up the WEB-INF/cmp-basic.ejb file
+     - automatically.
+    -->
+  <ejb-server jndi-name="cmp">
+    <data-source>jdbc/resin</data-source>
+    <config-directory>WEB-INF</config-directory>
+    <create-database-schema/>
+  </ejb-server>
+
+  <!--
+     - Configures the basic servlet.
+     -
+     - This example uses a Resin extension for bean-style servlet
+     - initialization.  Resin will call the setCourseHome method with
+     - the course's home interface found using the JNDI lookup.
+    -->
+  <servlet servlet-name="registration"
+	   servlet-class="example.cmp.transaction.RegistrationServlet">
+    <init>
+      <student-home>${jndi:lookup("cmp/transaction_student")}</student-home>
+      <course-home>${jndi:lookup("cmp/transaction_course")}</course-home>
+      <session-home>${jndi:lookup("cmp/transaction_registration_session")}</session-home>
+    </init>
+  </servlet>
+
+  <servlet-mapping url-pattern="/register" servlet-name="registration"/>
+
+  <!--
+     - Initialization servlet.
+    -->
+  <servlet servlet-name="init"
+	   servlet-class="example.InitServlet">
+    <init>
+      <data-source>jdbc/resin</data-source>
+    </init>
+    <load-on-startup/>
+  </servlet>
+</web-app>

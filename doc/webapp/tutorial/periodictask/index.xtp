@@ -1,0 +1,523 @@
+<document>
+<header>
+<product>resin</product>
+<title>PeriodicTask Tutorial</title>
+<type>tutorial</type>
+<tutorial-startpage>index.jsp</tutorial-startpage>
+<description>
+<p>
+This tutorial demonstrates the creation of a PeriodicTask that performs a task
+at intervals and collects statistics on it's performance.  An administration
+interface to the task is provided, and while the task is active the user is
+shown a "temporarily unavailable" page.  
+</p>
+
+<p>
+The code for this tutorial provides a full featured example that can be used
+as a cut-and-paste source for solving real problems. The PeriodicTask keeps
+detailed statistics, an administration interface is provided with a servlet,
+and the task can be executed either manually or automatically at timed
+intervals.
+</p>
+
+</description>
+</header>
+
+<body>
+<summary localtoc="2"/>
+
+<section title="Files in this tutorial">
+<deftable>
+<tr><td><viewfile-link file="WEB-INF/classes/example/PeriodicTask.java"/>
+    <td>The implementation of the class that performs the task
+<tr><td><viewfile-link file="WEB-INF/classes/example/PeriodicTaskMBean.java"/>
+    <td>The Jmx MBean interface to the class that performs the task
+<tr><td><viewfile-link file="WEB-INF/classes/example/PeriodicTaskServlet.java"/>
+    <td>An administrators view of the PeriodicTask.
+<tr><td><viewfile-link file="WEB-INF/classes/example/PeriodicTaskFilter.java"/>
+    <td>A filter that responds with a "temporarily unavailable" page when the
+        task is running.
+<tr><td><viewfile-link file="WEB-INF/web.xml"/>
+    <td>web-app configuration
+<tr><td><viewfile-link file="index.jsp"/>
+    <td>A page representative of any page in the application.
+<tr><td><viewfile-link file="unavailable.jsp"/>
+    <td>A page to show when the web application is unavailable because 
+        the task is active.
+</deftable>
+</section>
+
+
+<section title="Resource Configuration">
+
+<p>
+The <a config-tag="resource"/> tag is used to configure an instance of
+PeriodicTask, and store it with a JNDI name.
+</p>
+
+<p>
+PeriodicTask is implemented as a regular Java object that follows the
+JavaBeans convention for setters and getters. The configuration of the object  
+occurs in the web.xml, using Resin's <a href="doc|config|init.xtp">Bean-style
+initialization</a>.  
+</p>
+
+<example file="WEB-INF/web.xml" re-start="example.PeriodicTask" re-end="</resource">
+  &lt;resource type="example.PeriodicTask" jndi-name="PeriodicTask"&gt;
+    &lt;init&gt;
+      &lt;estimated-average-time&gt;5&lt;/estimated-average-time&gt;
+    &lt;/init&gt;
+  &lt;/resource&gt;
+</example>
+
+<p>
+If only this step were performed, the object would sit in the JVM memory,
+performing no function.  The rest of this tutorial details various ways that
+the PeriodicTask can be utilized.  
+</p>
+
+</section>
+
+<section title="Using PeriodicTask for real work">
+<p>
+This tutorial performs no real work in it's task, it sleeps for 10 seconds to
+imitate a task that takes ten seconds.  The code can be used without
+modification to perform real tasks for your web application.  All of the
+statistics gathering and other functionality is available for the derived
+class.
+</p>
+
+<section title="Extend PeriodicTask">
+
+<p>
+The following example extends PeriodicTask to create a task that
+vacuum's a postgress database.
+</p>
+
+<example title="WEB-INF/classes/example/VacuumTask.java">
+package example;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import java.sql.*;
+import javax.sql.*;
+
+public class VacuumTask extends PeriodicTask {
+  static protected final Logger log = 
+    Logger.getLogger(VacuumTask.class.getName());
+
+  private DataSource _dataSource;
+
+  public void setDataSource(DataSource dataSource)
+  { 
+    _dataSource = dataSource;
+  }
+
+  public void init()
+    throws Exception
+  {
+    if (_dataSource == null)
+      throw new Exception("`data-source' is required.");
+  }
+
+  protected void performTask()
+    throws Exception
+  {
+    Connection conn = null;
+    try {
+      conn = _dataSource.getConnection();
+
+      Statement stmt = conn.createStatement();
+      stmt.executeUpdate("VACUUM FULL ANALYZE;");
+      stmt.close();
+    } finally {
+      try {
+        if (conn != null)
+          conn.close();
+      } catch (SQLException ex) {
+        log.warning(ex.toString());
+      }
+    }
+  }
+}
+</example>
+
+<p>
+The VacuumTask is configured to run automatically every night at midnight.
+Since the database is integral to the application, the PeriodicTaskFilter is
+used to redirect users to an "unavailable" page while the task active.
+The PeriodicTaskServlet is used to provide an administration interface to the
+task at the url <code>/admin/example/vacuum</code>.  
+</p>
+
+<p>
+A <a config-tag="security-constraint"/> is used to limit access to the
+<code>/admin/</code> portion of the website.  An <a
+config-tag="authenticator"/> is used to specify the user names and passwords.
+</p>
+
+
+<example title="WEB-INF/web.xml">
+&lt;web-app xmlns="http://caucho.com/ns/resin"&gt;
+  &lt;resource type="example.VacuumTask" jndi-name="example/VacuumTask"&gt;
+    &lt;init&gt;
+      &lt;estimated-average-time&gt;30&lt;/estimated-average-time&gt;
+    &lt;/init&gt;
+  &lt;/resource&gt;
+
+  &lt;servlet-mapping url-pattern='/admin/example/vacuum'&gt;
+    &lt;servlet-class&gt;example.PeriodicTaskServlet&lt;/servlet-class&gt;
+    &lt;init&gt;
+      &lt;periodic-task&gt;${'${'}jndi:lookup("example/VacuumTask")}&lt;/periodic-task&gt;
+    &lt;/init&gt;
+  &lt;/servlet&gt;
+
+  &lt;resource type="com.caucho.resources.CronResource"&gt;
+    &lt;init&gt;
+      &lt;!-- run every day at 0215 local time --&gt;
+      &lt;cron&gt;15 2 *&lt;/cron&gt;
+      &lt;work&gt;${'${'}jndi:lookup("example/VacuumTask")}&lt;/work&gt;
+    &lt;/init&gt;
+  &lt;/resource&gt;
+
+  &lt;filter url-regexp="^(?!/admin)+"&gt;
+    &lt;filter-class&gt;example.PeriodicTaskFilter&lt;/filter-class&gt;
+    &lt;init&gt;
+      &lt;periodic-task&gt;${'${'}jndi:lookup("example/VacuumTask")}&lt;/periodic-task&gt;
+      &lt;url&gt;/unavailable.jsp&lt;/url&gt;
+    &lt;/init&gt;
+  &lt;/filter&gt;
+
+  &lt;!-- require 'admin' role --&gt;
+  &lt;security-constraint&gt;
+    &lt;web-resource-collection&gt;
+      &lt;web-resource-name&gt;Admin&lt;/web-resource-name&gt;
+      &lt;url-pattern&gt;/admin/*&lt;/url-pattern&gt;
+    &lt;/web-resource-collection&gt;
+    &lt;auth-constraint&gt;
+      &lt;role-name&gt;admin&lt;/role-name&gt;
+    &lt;/auth-constraint&gt;
+  &lt;/security-constraint&gt;
+
+ &lt;authenticator&gt;
+    &lt;type&gt;com.caucho.server.security.XmlAuthenticator&lt;/type&gt;
+
+    &lt;init&gt;
+      &lt;!-- user `admin' with password `excellent' is in admin role --&gt;
+      &lt;user&gt;admin:FKT/gZPYJ5TIA5uA434mgA==:admin&lt;/user&gt;
+    &lt;/init&gt;
+  &lt;/authenticator&gt;
+&lt;/web-app&gt;
+</example>
+</section>
+</section>
+
+<section title="Jmx: a management interface for the resource">
+<p>
+<a href="doc|jmx|index">Jmx</a> provides a mechanism for management of objects
+on servers.  The PeriodicTask implements the PeriodicTaskMBean interface, the 
+PeriodicTaskMBean interface is the Jmx agent's view of the resource.
+</p>
+
+<p>
+Jmx uses a naming scheme to store objects for later retrieval.  The Jmx name
+to store the object under is specified with the <a config-tag='mbean-name'/>
+child of <a config-tag="resource"/>.  
+</p>
+
+<example file="WEB-INF/web.xml" re-start="example.PeriodicTask" re-end="</resource">
+  &lt;resource type="example.PeriodicTask" jndi-name="PeriodicTask"
+            mbean-interface="example.PeriodicTaskMBean"
+            <b>mbean-name="type=PeriodicTask,name=PeriodicTask"&gt;</b>
+    &lt;init&gt;
+      &lt;estimated-average-time&gt;5&lt;/estimated-average-time&gt;
+    &lt;/init&gt;
+  &lt;/resource&gt;
+</example>
+
+<p>
+A simple Jmx lookup of all <code>type=PeriodicTask</code> objects is
+done in admin/mbean.jmx: 
+</p>
+
+<example file="admin/mbean.jsp">
+  ObjectName query = new ObjectName("resin:type=PeriodicTask,*");
+  pageContext.setAttribute("mbeans",Jmx.query(query));
+
+  ...
+
+&lt;c:forEach var="mbean" items="${'${'}mbeans}"&gt;
+
+  estimatedAverageTime ${'${'}mbean.estimatedAverageTime}
+  ...
+</example>
+
+</section>
+
+
+<section title="CronResource: timed execution of the PeriodicTask">
+<p>
+Depending on the nature of the PeriodicTask, it may be appropriate to configure
+the task to automatically run at a specified time, or at a specified interval.
+</p>
+
+<p>
+The <a href="doc|resource|cron">CronResource</a> is used to configure
+the timed execution of the PeriodicTask.
+</p>
+
+<example file="WEB-INF/web.xml"
+         re-start="CronResource" re-marker="&lt;/resource>">
+  &lt;resource type="com.caucho.resources.CronResource"&gt;
+    &lt;init&gt;
+      &lt;cron&gt;*&lt;/cron&gt;
+      &lt;work&gt;${'${'}jndi:lookup("PeriodicTask")}&lt;/work&gt;
+    &lt;/init&gt;
+  &lt;/resource&gt;
+</example>
+
+</section>
+
+<section title="Filter: redirecting users when the task is running">
+
+<p>
+Again depending on the nature of the PeriodicTask, it may be appropriate for
+access to the web application to be limited while the task is performed.  A
+filter is used to provide this functionality, the filter intercepts 
+requests and if the task is active, redirects to a page giving a "temporarily
+unavailable" message.
+</p>
+
+<example file="WEB-INF/web.xml"
+         re-start="filter>" re-end="</filter>">
+  &lt;filter&gt;
+    &lt;filter-name&gt;PeriodicTaskFilter&lt;/filter-name&gt;
+    &lt;filter-class&gt;example.PeriodicTaskFilter&lt;/filter-class&gt;
+    &lt;init&gt;
+      &lt;periodic-task&gt;${'${'}jndi:lookup("PeriodicTask")}&lt;/periodic-task&gt;
+      &lt;!-- optional url, if not specified a 503 response is sent. --&gt;
+      &lt;url&gt;/unavailable.jsp&lt;/url&gt;
+    &lt;/init&gt;
+  &lt;/filter&gt;
+
+  &lt;filter-mapping&gt;
+    &lt;!-- regexp to match all urls except /admin and /index.xtp--&gt;
+    &lt;url-regexp&gt;^(?!/admin|/index.xtp)+&lt;/url-regexp&gt;
+    &lt;filter-name&gt;PeriodicTaskFilter&lt;/filter-name&gt;
+  &lt;/filter-mapping&gt;
+</example>
+
+<example file="WEB-INF/classes/example/PeriodicTaskFilter.java"
+         re-start="setPeriodicTask" re-end="}">
+  public void setPeriodicTask(PeriodicTask periodicTask)
+  {
+    _periodicTask = periodicTask;
+  }
+</example>
+
+<example file="WEB-INF/classes/example/PeriodicTaskFilter.java"
+         re-start="doFilter\(" re-end="^  }">
+  public void doFilter(ServletRequest request,
+      ServletResponse response,
+      FilterChain chain)
+    throws ServletException, IOException
+  {
+    if (_periodicTask.isActive()) {
+      dispatch( (HttpServletRequest) request, (HttpServletResponse) response);
+    }
+    else {
+      chain.doFilter(request,response);
+    }
+  }
+</example>
+</section>
+
+<section title="PeriodicTaskServlet: an administration interface">
+<p>
+The PeriodicTaskServlet provides an html interface to the PeriodicTask.  It
+shows the current status of the task, and provides a button to "Run" the task.
+</p>
+
+<p>
+The PeriodicTaskServlet needs an instance of PeriodicTask to operate on.  
+The Servlet provides a setter:
+</p>
+
+<example file="WEB-INF/classes/example/PeriodicTaskServlet.java"
+         re-start="setPeriodicTask" re-end="}">
+  public void setPeriodicTask(PeriodicTask periodicTask)
+  {
+    _periodicTask = periodicTask;
+  }
+</example>
+
+<p>
+The configuration of the servlet in web.xml uses the <code>jndi:lookup</code>
+function to get a reference to the PeriodicTask resource previously stored in
+jndi with the <a config-tag="resource"/> configuration.  
+</p>
+
+<example file="WEB-INF/web.xml"
+         re-start="<periodic-task" re-marker="<servlet>">
+  &lt;servlet&gt;
+    &lt;servlet-name&gt;PeriodicTaskServlet&lt;/servlet-name&gt;
+    &lt;servlet-class&gt;example.PeriodicTaskServlet&lt;/servlet-class&gt;
+    &lt;init&gt;
+      &lt;periodic-task&gt;${'${'}jndi:lookup("PeriodicTask")}&lt;/periodic-task&gt;
+    &lt;/init&gt;
+  &lt;/servlet&gt;
+
+  &lt;servlet-mapping&gt;
+    &lt;url-pattern&gt;/admin/periodictask&lt;/url-pattern&gt;
+    &lt;servlet-name&gt;PeriodicTaskServlet&lt;/servlet-name&gt;
+  &lt;/servlet-mapping&gt;
+
+</example>
+ 
+</section>
+
+
+<section name="dependency-injection" title="Dependency Injection/Inversion of Control">
+
+<p>
+<i>Dependency injection</i> is a term used to describe a separation between the
+implementation of an object and the construction of an object it depends on, and
+the ability for a container (like Resin) to resolve the dependency.
+</p>
+ 
+<p>
+In this tutorial, many components including the administration servlet, the
+filter, and the CronResource, depend upon a <code>PeriodicTask</code>.
+Each of these components that depend upon the PeriodidicTask provide a setter:
+</p>
+
+<example title="setter">
+  PeriodicTask _periodTask;
+
+  public void setPeriodicTask(PeriodicTask periodicTask)
+  {
+    _periodicTask = periodicTask;
+  }
+</example>
+
+<p>The container (Resin), injects the object.</p>
+
+<example title="container injection">
+  &lt;init&gt;
+    &lt;periodic-task&gt;${'${'}jndi:lookup("PeriodicTask")}&lt;/periodic-task&gt;
+  &lt;/init&gt;
+</example>
+
+<p>
+The simplicity of the code shows immediate benefits.  There is no dependency
+on the environment (needing an <i>application</i> object for example), and no
+need for cumbersome or error prone code in each component.
+
+<p>
+There are other benefits as well.   Since the container instantiates and sets
+the object, there is more flexibility in the configuration.  The following
+example shows the use of two distinct periodic tasks.
+</p>
+
+<p>An example illustrates dome of the flexibility of dependency injection.
+</p>
+
+<p>
+The first task (Foo) is only run manually, it is not run at a timed interval so
+the CronResource is not used for it.  Neither task causes the application to
+become unavailable, so the PeriodicTaskFilter is not used.  
+</p>
+
+<example title="two distinct periodic tasks">
+<b>WEB-INF/classes/example/PeriodicTaskFoo.java</b>
+
+public class PeriodicTaskFoo extends PeriodicTask {
+  protected void performTask()
+    throws Exception
+  {
+   ...
+  }
+
+}
+
+<b>WEB-INF/classes/example/PeriodicTaskBar.java</b>
+
+public class PeriodicTaskBar extends PeriodicTask {
+  protected void performTask()
+    throws Exception
+  {
+   ...
+  }
+
+}
+
+<b>WEB-INF/web.xml</b>
+
+  &lt;!-- TASK FOO --&gt;
+
+  &lt;resource type="example.PeriodicTaskFoo" jndi-name="PeriodicTaskFoo"&gt;
+    &lt;init&gt;
+      &lt;estimated-average-time&gt;15&lt;/estimated-average-time&gt;
+    &lt;/init&gt;
+  &lt;/resource&gt;
+
+  &lt;servlet&gt;
+    &lt;servlet-name&gt;PeriodicTaskFooServlet&lt;/servlet-name&gt;
+    &lt;servlet-class&gt;example.PeriodicTaskServlet&lt;/servlet-class&gt;
+    &lt;init&gt;
+      &lt;periodic-task&gt;${'${'}jndi:lookup("PeriodicTaskFoo")}&lt;/periodic-task&gt;
+    &lt;/init&gt;
+  &lt;/servlet&gt;
+
+  &lt;servlet-mapping&gt;
+    &lt;url-pattern&gt;/admin/example/foo&lt;/url-pattern&gt;
+    &lt;servlet-name&gt;PeriodicTaskFooServlet&lt;/servlet-name&gt;
+  &lt;/servlet-mapping&gt;
+
+  &lt;!-- TASK BAR --&gt;
+
+  &lt;resource type="example.PeriodicTaskBar" jndi-name="PeriodicTaskBar"&gt;
+    &lt;init&gt;
+      &lt;estimated-average-time&gt;15&lt;/estimated-average-time&gt;
+    &lt;/init&gt;
+  &lt;/resource&gt;
+
+  &lt;resource type="example.PeriodicTaskBar" jndi-name="PeriodicTaskBar"&gt;
+    &lt;init&gt;
+      &lt;estimated-average-time&gt;15&lt;/estimated-average-time&gt;
+    &lt;/init&gt;
+  &lt;/resource&gt;
+
+  &lt;servlet&gt;
+    &lt;servlet-name&gt;PeriodicTaskBarServlet&lt;/servlet-name&gt;
+    &lt;servlet-class&gt;example.PeriodicTaskServlet&lt;/servlet-class&gt;
+    &lt;init&gt;
+      &lt;periodic-task&gt;${'${'}jndi:lookup("PeriodicTaskBar")}&lt;/periodic-task&gt;
+    &lt;/init&gt;
+  &lt;/servlet&gt;
+
+  &lt;servlet-mapping&gt;
+    &lt;url-pattern&gt;/admin/example/bar&lt;/url-pattern&gt;
+    &lt;servlet-name&gt;PeriodicTaskBarServlet&lt;/servlet-name&gt;
+  &lt;/servlet-mapping&gt;
+
+  &lt;!-- bar runs every minute --&gt;
+  &lt;resource type="com.caucho.resources.CronResource"&gt;
+    &lt;init&gt;
+      &lt;cron&gt;*&lt;/cron&gt;
+      &lt;work&gt;${'${'}jndi:lookup("PeriodicTaskBar")}&lt;/work&gt;
+    &lt;/init&gt;
+  &lt;/resource&gt;
+</example>
+
+</section> <!-- dependency-injection -->
+
+<section title="See Also">
+<dl>
+<dt><a href="doc|resource|cron.xtp">CronResource</a>
+<dd>Documentation for the usage of CronResource
+</dl>
+</section>
+
+</document>

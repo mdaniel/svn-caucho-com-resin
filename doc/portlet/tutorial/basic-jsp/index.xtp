@@ -1,0 +1,127 @@
+<document>
+<header>
+<product>resin</product>
+<title>Portlet JSP Tutorial</title>
+<type>tutorial</type>
+<tutorial-startpage>hello</tutorial-startpage>
+<description>
+<p>
+</p>
+</description>
+</header>
+
+<body>
+<summary/>
+
+<section title="Files in this tutorial">
+<deftable>
+<tr><td><viewfile-link file="WEB-INF/classes/example/HelloWorldPortlet.java"/>
+    <td>Portlet
+<tr><td><viewfile-link file="hello.jsp"/>
+    <td>JSP that renders the view for HelloWorldPortlet
+<tr><td><viewfile-link file="WEB-INF/web.xml"/>
+    <td>web-app configuration
+</deftable>
+</section>
+
+<section title="Dispatching to a JSP for the view">
+
+<p>
+JSP is often the most convenient way to construct the view for a portlet.  A
+portlet can dispatch to a jsp to provide the view in a fashion very similar to
+a servlet or a classic model-2 architecture like Struts.
+</p>
+
+<p>
+The <code>dispatch()</code> method of the HelloWorldPortlet use the Portlet API to dispatch to a view, and the <code>render()</code> method does the dispatch.
+</p>
+
+<example title="dispatch() and render()" 
+         file="WEB-INF/classes/example/HelloWorldPortlet.java">
+  /**
+   * Dispatch to a jsp or servlet.
+   */
+  protected void dispatch( RenderRequest request, 
+                           RenderResponse response, 
+                           String path )
+    throws PortletException, IOException
+  {
+    PortletContext ctx = getPortletContext();
+    PortletRequestDispatcher dispatcher = ctx.getRequestDispatcher(path);
+
+    dispatcher.include(request, response);
+  }
+
+  public void render(RenderRequest request, RenderResponse response)
+    throws PortletException, IOException
+  {
+    prepareObjects(request, response);
+    dispatch(request, response, _view);
+  }
+</example>
+
+</section>
+
+
+<section title="Functionality available in Portlet JSP's">
+
+<p>
+The standard JSP functionality, including JSTL and EL are
+available in a JSP that a portlet uses for the view.
+</p>
+
+<p>
+Portlet request attributes, set in the portlet with 
+<code>request.setAttribute( "name", value )</code>, are available in the JSP
+as request attributes <code>request.getAttribute("name")</code>
+and EL variables <code>${'${'}name}</code>.
+</p>
+
+<p>
+There is also a portlet JSP tag library that defines a small number 
+of portlet specific tags.
+The most useful of the portlet tags are those that are provided for creating render and action urls.
+</p>
+
+<example title="portlet JSP taglibrary" 
+         file="hello.jsp">
+
+&lt;%@ taglib uri="http://java.sun.com/portlet" prefix="portlet" %&gt;
+
+...
+
+&lt;portlet:actionUrl var="submitUrl" portletMode="edit"/&gt;
+
+...
+
+&lt;portlet:renderUrl var="editUrl" portletMode="edit"/&gt;
+
+</example>
+
+</section>
+
+<section title="Flexible configuration">
+
+<p>
+The HelloWorldPortlet is written so that it provides a default path for the jsp
+that can be overriden by an <var/init-param/>.  This is a flexible
+architecture, if a different jsp page is desired for the view it can be
+specified without modifying the source code.
+</p>
+
+<example title="configure the portlet to use a different jsp">
+  &lt;servlet servlet-name="hello" 
+           servlet-class="com.caucho.portal.generic.PortletServlet"&gt;
+    &lt;init&gt;
+      &lt;portlet resin:type="example.HelloWorldPortlet"&gt;
+        &lt;view&gt;/custom/hello.jsp&lt;/view&gt;
+      &lt;/portlet&gt;
+    &lt;/init&gt;
+
+  &lt;/servlet&gt;
+</example>
+
+</section>
+
+
+</document>

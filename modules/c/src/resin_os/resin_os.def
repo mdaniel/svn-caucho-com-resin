@@ -1,0 +1,9 @@
+; resin.def : Declares the module parameters for the DLL.
+
+LIBRARY      "resin_os"
+
+EXPORTS
+	Java_com_caucho_loader_ClassEntry_canReloadNative
+	Java_com_caucho_loader_ClassEntry_reloadNative
+	Java_com_caucho_server_boot_ResinBoot_execDaemon
+	

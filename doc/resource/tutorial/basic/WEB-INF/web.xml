@@ -1,0 +1,27 @@
+<web-app xmlns="http://caucho.com/ns/resin">
+  <!--
+     - Instantiates the resource.  The resource will have its
+     - setValue called for the value parameter.
+     -
+     - The resource will have its start(ctx) method called when
+     - the web-app starts and the stop() method called when the
+     - web-app stops.
+    -->
+  <resource jndi-name="test/basic" type="test.TestResource">
+    <init>
+      <value>Tutorial Example</value>
+    </init>
+  </resource>
+
+  <!--
+     - Configures the sample servlet.  Here we're using the bean-style
+     - init, although that's not necessary for the example.
+    -->
+  <servlet servlet-name="test" servlet-class="test.TestServlet">
+    <init>
+      <resource>${jndi:lookup("java:comp/env/test/basic")}</resource>
+    </init>
+  </servlet>
+
+  <servlet-mapping url-pattern="/test" servlet-name="test"/>
+</web-app>

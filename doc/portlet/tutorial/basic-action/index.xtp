@@ -1,0 +1,160 @@
+<document>
+<header>
+<product>resin</product>
+<title>Action Tutorial</title>
+<type>tutorial</type>
+<tutorial-startpage>hello</tutorial-startpage>
+<description>
+<p>
+An action request is a request for the portlet to do something before it is
+rendered.  An action request to a portlet invokes the
+<code>processAction</code> method before invoking the <code>render</code>
+method.
+</p>
+
+<p>
+This tutorial adds an HTML form to the hello world portlet.  The HTML form
+allows the user to set the "identity" and "color".  The submission of the form
+is an <i>action</i>, it is a request to do something.
+</p>
+</description>
+</header>
+
+<body>
+<summary/>
+
+<section title="Files in this tutorial">
+<deftable>
+<tr><td><viewfile-link file="WEB-INF/classes/example/HelloWorldPortlet.java"/>
+    <td>Portlet
+<tr><td><viewfile-link file="WEB-INF/web.xml"/>
+    <td>web-app configuration
+</deftable>
+</section>
+
+<section title="The form uses an Action URL">
+
+<p>
+An action URL is created with <code>response.createActionURL()</code>.  The
+resulting url indicates to the portal that it should invoke the
+<code>processAction()</code> method in the portlet before invoking the
+<code>render()</code> method.
+</p>
+
+<p>A form that uses an action parameter must always use the POST method.  
+The portal may encode some special parameters in the url, and the use of the
+GET method would overwrite those parameters.</p>
+
+<example title="Creating an action URL"
+         file="WEB-INF/classes/example/HelloWorldPortlet.java"
+         re-marker="void rende"
+         re-start="createActionURL"
+         re-end="}">
+
+    ...
+
+    PortletURL submitUrl = response.createActionURL();
+
+    out.println("&lt;form method='POST' action='" + submitUrl + "'&gt;");
+    out.println("Name:");
+    out.println("&lt;input type='text' name='identity' value='" + identity + "'&gt;");
+    out.println("&lt;br&gt;");
+    out.println("Color:");
+    out.println("&lt;input type='text' name='color' value='" + color + "'&gt;");
+    out.println("&lt;br&gt;");
+    out.println("&lt;input type='submit'");
+    out.println("&lt;/form&gt;");
+
+    ...
+
+</example>
+
+<results title="The resulting HTML form sent to the browser">
+&lt;form method='POST' action='/resin-doc/portlet/tutorial/basic-lifecycle/hello?____A='&gt;
+Name:
+&lt;input type='text' name='identity' value='World'&gt;
+&lt;br&gt;
+Color:
+&lt;input type='text' name='color' value='silver'&gt;
+&lt;br&gt;
+&lt;input type='submit'
+&lt;/form&gt;
+
+</results>
+
+<p>
+When the form submit button is pressed, the action
+url is used.  The action url indicates to the portal that it is an action
+request.  Responding to the action request, the portal invokes the
+processAction() method before invoking the render() method.
+</p>
+
+<p>
+The resulting HTML demonstrates how the portal might add parameters to the url.
+The url that is in the <code>action</code> attribute contains the
+<code>____A=</code> parameter.  The parameter has been added to mark the
+requet as an action request.
+</p>
+
+</section>
+
+<section title="Action parameters come from the browser">
+
+<p>
+The portlet's implentation of <code>processAction()</code> uses 
+<code>response.getParameter()</code> to get the submitted form parameters.  
+</p>
+
+<example title="Action parameters"
+         file="WEB-INF/classes/example/HelloWorldPortlet.java"
+         re-marker="processAction"
+         re-start="getParameter">
+
+  public void processAction(ActionRequest request, ActionResponse response) 
+    throws PortletException, IOException
+  {
+    // get the values submitted with the form
+
+    String identity = request.getParameter("identity");
+    String color = request.getParameter("color");
+
+    ...
+</example>
+
+<p>
+There is an important distinction here - during processAction() the parameters
+are the parameters submitted from a form, during render() the parameters are
+render parameters and the parameters submitted from a form are no longer
+available.
+</p>
+
+
+</section>
+
+<section title="Render parameters are reset">
+
+<p>
+If the portlet is invoked from an action url, all render parameters are reset.
+The implementation of the <code>processAction</code> must use
+<code>response.setRenderParameter()</code> to set render parameters for the
+susbsequent call to render().  
+</p>
+
+<example title="Action parameters"
+         file="WEB-INF/classes/example/HelloWorldPortlet.java"
+         re-marker="processAction"
+         re-start="setRenderParameter">
+
+  public void processAction(ActionRequest request, ActionResponse response) 
+    throws PortletException, IOException
+  {
+
+    ...
+
+    response.setRenderParameter("identity", identity); 
+    response.setRenderParameter("color", color); 
+  }
+</example>
+</section>
+
+</document>

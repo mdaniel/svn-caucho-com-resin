@@ -1,0 +1,145 @@
+<document>
+  <header>
+    <product>resin</product>
+    <resin-2.0>$resin/ref/xpath-fun.xtp</resin-2.0>
+    <title>XPath Functions</title>
+  </header>
+
+  <body>
+    <summary/>
+
+<section name='node-set' title='Node Set Functions'>
+
+<defun name=last title='last()'>
+<p>Returns the number of nodes matching the axis.</p>
+
+<deftable>
+<tr><td>chapter/verse[last()]</td>
+    <td>The last verse in each chapter.</td>
+
+<tr><td>ancestor::node()[last()]</td>
+    <td>The furthest ancestor from the current node.</td>
+</deftable>
+</defun>
+
+<defun name=count title='count(node-set)'>
+<p>Returns the number of nodes matching the <var/node-set/> pattern.</p>
+</defun>
+
+<defun name=local-part title='local-part(node)'>
+<p>Returns the local part of the node's name.
+In other words, the node name stripped of the namespace prefix.</p>
+</defun>
+
+<defun name=namespace title='namespace(node)'>
+<p>Returns the namespace URL the node's name.</p>
+</defun>
+
+<defun name=name title='name(node)'>
+<p>Returns the node's name.</p>
+</defun>
+
+<defun name=id title='id(idref)'>
+<p>Returns the node with the 'ID' attribute equals to idref.
+The ID attribute is assigned in the DTD.  The actual attribute name
+may, of course, vary.</p>
+</defun>
+
+</section>
+
+<section name='string-fun' title='String Functions'>
+
+<defun name=string title='string(obj)'>
+<p>Converts the object to a string.</p>
+</defun>
+
+<defun name='concat' title='concat(s1, s2, ...)'>
+<p>Concatenates strings.</p>
+</defun>
+
+<defun name='starts-with' title='starts-with(string, head)'>
+<p>True if <var/string/> starts with <var/head/>.</p>
+</defun>
+
+<defun name='contains' title='contains(string, substring)'>
+<p>True if <var/string/> contains <var/substring/>.</p>
+</defun>
+
+<defun name='substring-before' title='substring-before(string, substring)'>
+<p>Returns the substring of <var/string/> before matching
+<var/substring/>.</p>
+</defun>
+
+<defun name='substring-after' title='substring-after(string, substring)'>
+<p>Returns the substring of <var/string/> after the matching
+<var/substring/>.</p>
+</defun>
+
+<defun name='string-length' title='string-length(string)'>
+<p>Returns the string length of <var/string/>.</p>
+</defun>
+
+<defun name='normalize-space' title='normalize-space(string)'>
+<p>Normalizes whitespace.  Consecutive whitespace is converted
+into a single space.  Leading and trailing whitespace is trimmed.</p>
+</defun>
+
+<defun name='translate' title='translate(string, from, to)'>
+<p>Converts characters in a string, like the 'tr' command.</p>
+</defun>
+</section>
+
+<section name='boolean-fun' title='Boolean Functions'>
+<defun name='boolean' title='boolean(obj)'>
+<p>Converts <var/obj/> into a boolean.</p>
+</defun>
+
+<defun name='true' title='true()'>
+<p>Returns true.</p>
+</defun>
+
+<defun name='false' title='false()'>
+<p>Returns false.</p>
+</defun>
+
+<defun name='lang' title='lang(language)'>
+<p>Returns true if the context node has an xml:lang of <var/language/>.</p>
+</defun>
+
+</section>
+
+<section name='number' title='Number Functions'>
+
+<defun name='number' title='number(obj)'>
+<p>Converts <var/obj/> to a number (Java double).</p>
+</defun>
+
+<defun name='sum' title='sum(node-set)'>
+<p>Converts the node values of <var/node-set/> to numbers and adds
+them.</p>
+</defun>
+
+<defun name='floor' title='floor(number)'>
+<p>Returns the closest integer below <var/number/>.</p>
+</defun>
+
+<defun name='ceil' title='ceiling(number)'>
+<p>Returns the closest integer above <var/number/>.</p>
+</defun>
+
+<defun name='round' title='round(number)'>
+<p>Rounds <var/number/> to the nearest integer.</p>
+</defun>
+
+</section>
+
+<section name='extension' title='Resin Extensions'>
+
+<defun name='if' title='if(test,a,b)'>
+<p>Conditionally selects the value of <var/a/> or <var/b/>.
+If <var/test/> evaluates to true, return the value of <var/a/>.
+Otherwise, return the value of <var/b/>.</p>
+</defun>
+</section>
+  </body>
+</document>

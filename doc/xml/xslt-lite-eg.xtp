@@ -1,0 +1,77 @@
+<document>
+  <header>
+    <product>resin</product>
+    <resin-2.0>$resin/ref/xslt-lite-eg.xtp</resin-2.0>
+    <title>XSLT-lite examples</title>
+  </header>
+
+  <body>
+    <summary/>
+
+<section name=counter title="Counter">
+
+<p>XTP pages can use the counter just by adding the tag:</p>
+
+<example title='counter.xtp'>
+<eg-em>A counter example: </eg-em>&lt;ct:counter id='test'/&gt;
+</example>
+
+<p>Here the patterns to do it.  For efficiency, we've added the 
+<code/cache/> directive.  The cache directive tells XTP to execute the
+stylesheet only once and cache the generated JSP file.
+
+<example title='default.xsl'>
+&lt;#@ cache #&gt;
+
+counter[@id] &lt;&lt;
+<eg-em>&lt;%=
+application.attribute["</eg-em><{@id}><eg-em>"]</eg-em>
+<eg-em>%&gt;</eg-em>
+>>
+
+counter &lt;&lt;
+<eg-em>&lt;%= application.attribute.counter++ %></eg-em>
+>>
+
+</example>
+
+</section>
+<section name=flow title="JSP flow control">
+
+<ul>
+<li>ct:get prints the value of a variable
+<li>ct:if generates an if statement
+<li>ct:iter loops
+</ul>
+
+<example title='definition of ct:get'>
+
+ct:get &lt;&lt;
+<eg-em>&lt;%=</eg-em> &lt;{@expr}><eg-em> %></eg-em>
+>>
+</example>
+
+<example title='definition of ct:if'>
+ct:if &lt;&lt;
+<eg-em>&lt;% if (</eg-em>&lt;{@expr}><eg-em>) { %></eg-em>
+  &lt;xsl:apply-templates/>
+<eg-em>&lt;% } %></eg-em>
+>>
+</example>
+
+<example title='definition of ct:iter'>
+ct:iter[@index] &lt;&lt;
+<eg-em>&lt;% for (var </eg-em>&lt{@index}> <eg-em>in</eg-em> &lt;{@expr}><eg-em>) { %></eg-em>
+  &lt;xsl:apply-templates/>
+<eg-em>&lt;% } %></eg-em>
+>>
+
+ct:iter &lt;&lt;
+<eg-em>&lt;% for (var i in </eg-em>&lt;{@expr}><eg-em>) { %></eg-em>
+  &lt;xsl:apply-templates/>
+<eg-em>&lt;% } %></eg-em>
+>>
+</example>
+
+</section>  </body>
+</document>

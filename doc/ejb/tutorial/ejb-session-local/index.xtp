@@ -1,0 +1,242 @@
+<document>
+  <header>
+    <product>resin-ee</product>
+    <resin-2.0>$ee/ejb-tut/session-local.xtp</resin-2.0>
+    <title>Local Session Counter</title>
+    <description>
+      <p>This example creates a local counter using a session bean.
+        Session beans have a similar API to stateless session beans, but have
+        internal state.  In other words, they're like servlets sessions.</p>
+
+      <p>The EJB 2.0 spec introduced local interfaces.  Local interfaces
+        let you pass arguments by reference to your beans.  This gives a small
+        performance boost, but also adds a new use for EJB.  EJBs can now be
+        used to better structure web applications, even applications that have
+        no need for distributed objects.</p>
+      
+      <p>For example, almost every web application needs some sort of
+        database interface.  Because EJB 2.0 provides strong support for
+        container-managed-persistence, you can now use EJB for much of the
+        database work without dealing with distributed objects or worrying
+        about a performance.</p>
+    </description>
+  </header>
+
+  <body>
+    <summary/>
+
+<section title="Remote Interface">
+
+<p>The only exposed method in the local method is the <var/hit()/>
+method, used for the next count.  Notice that it does not throw
+RemoteException, unlike a remote interface and that it extends
+EJBLocalObject instead of EJBObject.</p>
+
+<example title="CounterLocal.java">
+package test;
+
+import javax.ejb.*;
+
+public interface CounterLocal extends EJBLocalObject {
+  int hit();
+}
+</example>
+
+</section>
+
+<section title="Local Home Interface">
+
+<p>The Home interface's sole responsibility is to create a
+new counter instance.  For session beans, only <var/create()/> methods
+belong in the home.</p>
+
+<example title="CounterLocalHome.java">
+package test;
+
+import javax.ejb.*;
+
+public interface CounterLocalHome extends EJBLocalHome {
+  CounterLocal create() throws CreateException;
+}
+</example>
+
+</section>
+
+<section title="Server Implementation">
+
+<p>Developers will generally create a com.foo.AbstractSessionBean class
+which provides default implementations for the SessionBean methods.
+This example uses Resin's abstract implementation of <var/AbstractSessionBean/>
+in com.caucho.ejb that provides stubs for the SessionBean methods.</p>
+
+<p>The session bean needs to create exactly one <var/ejbCreate/>
+method with no arguments to match the <var/create/> in
+SessionLocalHome.
+It must also define the business methods.</p>
+
+<example title="CounterBean.java">
+package test;
+
+import javax.ejb.*;
+
+import com.caucho.ejb.*;
+
+public class CounterBean extends AbstractSessionBean {
+  int count;
+
+  // no initialization needed
+  public void ejbCreate()
+  {
+  }
+
+  public int hit()
+  {
+    return ++count;
+  }
+}
+</example>
+
+</section>
+
+<section title="Servlet">
+
+<p>In general, EJB server configuration belongs in an <var/ejb-jar.xml/> file.
+In a jar, it belongs in <var/META-INF/ejb-jar.xml/>.</p>
+
+<p>This name, of course, only makes sense if the EJB is put into a jar.
+Jars are inconvenient during development, so Resin-EJB lets you rename
+the ejb-jar.xml file as *.ejb and put it in WEB-INF.  We'll name it
+<var/WEB-INF/hello.ejb/>.</p>
+
+<p>Local interfaces use <var/local-home/> and <var/local/>,
+corresponding to the familiar <var/home/> and <var/remote/>.  It's
+possible for a bean to have both local and remote interfaces.</p>
+
+<p>The ejb-jar is a deployment descriptor for the bean.  It's part of the
+EJB spec.  The ejb-jar for the stateless session example looks like the
+following:</p>
+
+<example title="counter.ejb">
+&lt;ejb-jar>
+&lt;enterprise-beans>
+  &lt;session>
+    &lt;ejb-name>counter&lt;/ejb-name>
+    &lt;local-home>test.CounterLocalHome&lt;/local-home>
+    &lt;local>test.CounterLocal&lt;/local>
+    &lt;ejb-class>test.CounterBean&lt;/ejb-class>
+    &lt;session-type>Stateful&lt;/session-type>
+    &lt;transaction-type>Bean&lt;/transaction-type>
+  &lt;/session>
+&lt;/enterprise-beans>  
+&lt;/ejb-jar>
+</example>
+
+<deftable>
+<tr><th>Tag<th>Meaning
+<tr><td>ejb-jar<td>containing XML tag for the whole ejb-jar
+<tr><td>enterprise-beans<td>another container for the beans
+<tr><td>session<td>define a session bean
+<tr><td>ejb-name<td>the bean's name.  <var/hello/> is part of the URL.
+<tr><td>local-home<td>the local home interface class
+<tr><td>local<td>the local interface class
+<tr><td>ejb-class<td>the implementation class
+<tr><td>session-type<td>Stateful is like a servlet with sessions
+<tr><td>transaction-type<td>Transactions.  For now, you can ignore this.
+</deftable>
+
+</section>
+
+<section title="Configuring with Resin">
+
+<p>Configuration for local beans is exactly the same as for remote
+beans.</p>
+
+<p>Since the ejb-jar is server-independent, it's still necessary to
+instantiate the bean in a server-dependent way.  Since Resin-EJB is
+JNDI resource-based configuring the bean involves configuring a resource-ref.</p>
+
+<example title="part of resin.conf">
+  &lt;ejb-server config-directory="WEB-INF"/&gt;
+</example>
+
+<p>The EJBServer automatically searches for all *.ejb files in
+WEB-INF.  So it will find our hello.ejb deploy the session servlet.</p>
+
+<p>The <var/url-prefix/> parameter tells the EJB servlet its own
+URL.  During initialization, servlets don't know their own URL, so
+we need to tell it.</p>
+
+<p>Finally, the servlet is a <var/load-on-startup/> servlet so it will be
+initialized on server startup.</p>
+
+</section>
+
+<section title="JNDI configuration">
+
+<p>The JNDI configuration needs to link the local-ejbs into the full JNDI
+namespace.  We'll put the EJB's at java:comp/env/local-ejb.</p>
+
+<example title="resin.conf for JNDI">
+&lt;jndi-link>
+  &lt;jndi-name>java:comp/env/local-ejb&lt;/jndi-name>
+  &lt;factory>com.caucho.ejb.LocalContextFactory&lt;/factory>
+  &lt;init-param java.naming.provider.url="http://localhost:8080/ejb"/>
+&lt;/jndi-link>
+</example>
+
+<deftable>
+<tr><th>tag<th>meaning
+<tr><td>jndi-link<td>links a foreign JNDI namespace into the
+application
+<tr><td>jndi-name<td>the "mount point" of the foreign namespace
+<tr><td>jndi-factory<td>the EJB's factory for looking up local
+contexts.
+<tr><td>init-param<td>Parameters to the factory
+</deftable>
+
+</section>
+
+<section title="Client">
+
+<p>EJB clients follow the following steps in using a local object:</p>
+<ol>
+<li>Lookup the <var/home/> stub using JNDI.
+<li>Create an local <var/stub/> from the home object.
+<li>Call business methods on the <var/stub/>.
+</ol>
+
+<p>Typically, an EJB client will get the home handle using JNDI.</p>
+
+<example title="counter.jsp">
+&lt;%@ page import="test.*, javax.ejb.*, javax.naming.*" %>
+&lt;%!
+CounterLocalHome home;
+
+// Get the home stub once and save it in home
+public void _jspInit()
+  throws ServletException
+{
+  try {
+    Context cmp = (Context) new InitialContext().lookup("java:comp/env/cmp");
+
+    home = (CounterLocalHome) env.lookup("counter");
+  } catch (NamingException e) {
+    e.printStackTrace();
+  }
+}
+%>&lt;%
+
+// create the remote object
+CounterLocal counter = home.create();
+%>
+hit: &lt;%= counter.hit() %>&lt;br/>
+hit: &lt;%= counter.hit() %>
+</example>
+<results>
+hit: 1
+hit: 2
+</results>
+
+</section>
+  </body>
+</document>

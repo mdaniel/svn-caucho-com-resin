@@ -1,0 +1,21 @@
+<document>
+<header>
+<title>All FAQ's</title>
+<type>contents</type>
+<description>
+<p>A collection of the FAQ from each section of the Resin documentation.</p>
+</description>
+</header>
+
+<body>
+<summary>
+<atoc-control>
+  <item depth="1" description="paragraph"/>
+  <item depth="2" description="paragraph"/>
+  <item depth="3" description="paragraph"/>
+  <item depth="4" description="paragraph"/>
+</atoc-control>
+</summary>
+
+</body>
+</document>

@@ -1,0 +1,11 @@
+
+- WidgetRenderer needs to specify isAction and isActionParameter
+
+- disabled similar to WidgetMode (both in widget and widgetState)
+
+- constraints??
+
+- WidgetProperties, on both a Widget and a Renderer.
+  Also settable per request.
+  Used for junk like onmousover etc.
+

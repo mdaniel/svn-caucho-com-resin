@@ -1,0 +1,39 @@
+<document>
+<header>
+  <product>resin</product>
+  <title>XML/XSLT FAQ</title>
+  <description>
+  </description>
+</header>
+
+<body>
+<summary objsummary='localtoc'/>
+
+<faq title="How do I configure Resin 3 to apply a server-side XSLT transformation?">
+<description>
+In 2.1.x I added a processing instruction and everything worked. In 2.1.x I did the following:
+<ol>
+<li>Set the content-type to application/xsl
+<li>Add a PI <code>&lt;?xml-stylesheet type="text/xsl" href="transform.xsl"?&gt;</code>
+</ol>
+</description>
+
+<p>You must now explicitly enable this functionality with the use of <a href="|filter|library#XsltFilter">XsltFilter</a>.
+
+</faq>
+
+<faq title="How do I indicate the stylesheet to use for the transformation?">
+
+<p>Resin's XsltFilter determines the stylesheet to apply from the first of:</p>
+<ol>
+<li>The request attribute <code>caucho.xsl.stylesheet</code>
+<li>The processing directive <code>&lt;?xml-stylesheet type="text/xsl" href="...."?&gt;</code> in the source document
+<li><code>default.xsl</code>
+</ol>
+
+<p>More information is provided in the documentation for <a href="|filter|library#XsltFilter">XsltFilter</a>.</p>
+
+</faq>
+
+</body>
+</document>

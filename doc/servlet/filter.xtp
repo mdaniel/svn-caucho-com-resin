@@ -1,0 +1,135 @@
+<document>
+  <header>
+    <product>resin</product>
+    <resin-2.0>$resin/ref/filter-config.xtp</resin-2.0>
+    <title>Filters</title>
+  </header>
+
+  <body>
+    <summary/>
+<p>Filter configuration follows the Servlet 2.3 deployment descriptors.
+Creating and using a filter has three steps:</p>
+
+<ol>
+<li>Create a filter class which extends javax.servlet.Filter
+<li>Use <a href="#filter">&lt;filter></a> in the web.xml to configure the filter.
+<li>Use <a href="#filter-mapping">&lt;filter-mapping></a> to select URLs and servlets for the filter.
+</ol>
+
+<website>
+<p>Some other pages which discuss filters include:</p>
+
+<ul>
+<li>Resin's <a href="filter-library.xtp">filter library</a>
+</ul>
+</website>
+
+
+<section title="Filter Configuration">
+
+<defun title='filter' version="Servlet 2.3">
+<p>Defines a filter alias for later mapping.</p>
+
+<deftable>
+<tr><th>Tag<th>Meaning
+<tr><td>filter-name<td>The filter's name (alias)
+<tr><td>filter-class<td>The filter's class (defaults to servlet-name)
+<tr><td>init-param<td>Initialization parameters
+</deftable>
+
+<p>The following example defines a filter alias 'image'</p>
+<example>
+&lt;web-app id='/'&gt;
+
+&lt;filter-mapping url-pattern='/images/*'
+                 filter-name='image'/&gt;
+
+&lt;filter filter-name='image'
+         filter-class='test.MyImage'&gt;
+  &lt;init-param title='Hello, World'/&gt;
+&lt;/filter&gt;
+
+&lt;/web-app&gt;
+</example>
+</defun>
+
+<defun title='filter-name' version="Servlet 2.3">
+<p>Alias of the filter.</p>
+</defun>
+
+<defun title='filter-class' version="Servlet 2.3">
+<p>Class of the filter.  The CLASSPATH for filters includes
+the WEB-INF/classes directory and all jars in the WEB-INF/lib directory.
+</p>
+</defun>
+
+<defun title='init-param' version="Servlet 2.3">
+<p>Initializes filter variables.  <code/filter-param/>
+defines initial values for <code/getFilterConfig().getInitParameter("foo")/>.
+</p>
+
+<p>The full Servlet 2.3 syntax for init-param is supported and
+allows a simple shortcut</p>
+<example>
+&lt;web-app id='/'&gt;
+
+&lt;filter filter-name='test.HelloWorld'&gt;
+  &lt;init-param foo='bar'/&gt;
+
+  &lt;init-param&gt;
+    &lt;param-name&gt;baz&lt;/param-name&gt;
+    &lt;param-value&gt;value&lt;/param-value&gt;
+  &lt;/init-param&gt;
+&lt;/filter&gt;
+
+&lt;/web-app>
+</example>
+</defun>
+
+<defun title="filter-mapping" version="Servlet 2.3">
+<p>Maps url patterns to filters.  <var/filter-mapping/> has two
+children, <var/url-pattern/> and <var/filter-name/>.
+<var/url-pattern/> selects the urls which should execute the filter.
+</p>
+
+<p><code/filter-name/> can either specify a servlet class directly or it
+can specify a servlet alias defined by <code/filter/>.
+</p>
+
+<deftable>
+<tr><th>Configuration<th>Description
+<tr><td>url-pattern<td>A pattern matching the url:
+<var//foo/*/>, <var//foo/>, or <var/*.foo/>
+<tr><td>url-regexp<td>A regular expression matching the url
+<tr><td>servlet-name<td>A servlet name to match.
+<tr><td>filter-name<td>The filter name
+<tr><td>filter-class<td>The filter class
+<tr><td>init-param<td>Initialization parameters
+</deftable>
+
+<example>
+&lt;caucho.com&gt;
+&lt;web-app id='/'&gt;
+
+&lt;servlet servlet-name='hello'
+         servlet-class='test.HelloWorld'/&gt;
+
+&lt;servlet-mapping url-pattern='/hello'
+                 servlet-name='hello'/&gt;
+
+&lt;filter filter-name='test-filter'
+        filter-class='test.MyFilter'/>
+
+&lt;filter-mapping url-pattern='/hello/*'
+                 filter-name='test-filter'/&gt;
+
+&lt;filter-mapping servlet-name='hello'
+                 filter-name='test.SecondFilter'/&gt;
+
+&lt;/web-app>
+</example>
+</defun>
+
+</section>
+  </body>
+</document>

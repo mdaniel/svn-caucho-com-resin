@@ -1,0 +1,12 @@
+<document>
+  <header>
+    <product>resin</product>
+    <resin-2.0>$resin/ref/ide.xtp</resin-2.0>
+    <type>contents</type>
+    <title>Using Resin with some IDEs</title>
+  </header>
+
+  <body>
+    <summary/>
+  </body>
+</document>

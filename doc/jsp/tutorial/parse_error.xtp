@@ -1,0 +1,60 @@
+<section>
+  <header>
+    <product>resin</product>
+    <title>Parse Errors</title>
+    <type>example</type>
+    <resin-2.0>$resin/java_tut/parse_error.xtp</resin-2.0>
+    <brief>JSP error reporting during parsing</brief>
+  </header>
+
+
+<p>Errors happen.  There's a reason the patron saint of programmers is
+St. Murphy.  Here we'll just explain Resin's error reporting to
+simplify tracking down errors.</p>
+
+<p>There are three types of bugs you'll find in JSP code: parse errors,
+runtime exceptions, and functional errors.</p>
+
+<p>Parse errors are easy,
+like grammatical errors.
+In the example, we've forgotten to add
+the second `2'.</p>
+
+<example title='buggy.jsp'>
+2 + 2 = &lt;%= 2 + %&gt;
+</example>
+
+<p>Resin reports the file of the error, the line, and
+briefly describes what's wrong.    It'll report the error directly to
+the browser, saving the pain of hunting for an error log.</p>
+
+<results width='80%' border=3>
+500 Servlet Exception
+
+/test/buggy.jsp:3: Missing term.
+out.print(( 2 + ));
+              ^
+1 error
+</results>
+
+<section title='Explanation'>
+
+<p>Behind the scenes, Resin converts the JSP file into a JavaScript
+program.  Each of the special tags gets its own JavaScript code.  The
+translation of buggy.jsp is actually something like:</p>
+
+<example title='buggy.java'>
+out.print("2 + 2 =");
+out.print((2 + ));
+out.println();
+</example>
+<p>So the `<code/2 +/>' is still on line 3, but the character after
+`<code/+/>' is `<code/)/>'.</p>
+
+<p>The generated *.java and the *.class files are created
+in the <var/work-dir/> configured in resin.conf.  By default, the
+<var/work-dir/> is <var//tmp/caucho/> on Unix and <var/\temp\caucho/>
+on Windows.</p>
+
+</section>
+</section>

@@ -1,0 +1,41 @@
+<web-app xmlns="http://caucho.com/ns/resin">
+
+  <!--
+     - Configures the movie finder with some movies.
+    -->
+  <resource jndi-name="movie-finder"
+            type="example.MovieFinderImpl">
+    <init>
+      <movie director="Jackson" title="LOTR: Fellowship of the Ring"/>
+      <movie director="Jackson" title="LOTR: The Two Towers"/>
+      <movie director="Jackson" title="LOTR: Return of the King"/>
+
+      <movie director="Lucas" title="Star Wars"/>
+
+      <movie director="Gilliam" title="Monty Python's Holy Grail"/>
+      <movie director="Gilliam" title="Brazil"/>
+    </init>
+  </resource>
+
+  <!--
+     - Configures the movie lister with the configured movie finder.
+    -->
+  <resource jndi-name="movie-lister"
+            type="example.MovieLister">
+    <init>
+      <finder>${jndi:lookup("movie-finder")}</finder>
+    </init>
+  </resource>
+
+  <!--
+     - Configures the movie servlet with the lister.
+    -->
+  <servlet servlet-name="movies"
+           servlet-class="example.MovieServlet">
+    <init>
+      <movie-lister>${jndi:lookup("movie-lister")}</movie-lister>
+    </init>
+  </servlet>
+
+  <servlet-mapping url-pattern="/movies" servlet-name="movies"/>
+</web-app>

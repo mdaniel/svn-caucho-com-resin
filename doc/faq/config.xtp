@@ -1,0 +1,267 @@
+<document>
+  <header>
+    <product>resin</product>
+    <resin-2.0>$resin/faq/config.xtp</resin-2.0>
+    <title>Configuration</title>
+  </header>
+
+  <body>
+    <summary/>
+
+<section title="How do I change the work directory?">
+
+<p><var/&lt;work-dir>/>.
+
+<p>By default, that's <var//tmp/caucho/> on Unix and <var/\temp\caucho/> on
+Windows.
+
+</section>
+
+<section title="How do I use multiple resin.conf files?">
+
+<p>This is especially important if you want to use a different
+workspace for development than deployment.  Just call the
+<code/httpd/> executable with the -conf flag.
+
+<example>
+unix> httpd.sh start -conf devel.conf -verbose
+</example>
+
+<example>
+d:\> httpd.exe -conf devel.conf -verbose
+</example>
+
+</section>
+
+<section title="How do I configure a default servlet?">
+
+<p>The following will a servlet to handle all unmatched URLs, just like
+the FileServlet does by default.</p>
+
+<example>
+&lt;servlet-mapping url-pattern='/' servlet-name='MyServlet'/>
+</example>
+
+<p>This has a different effect from <var/url-pattern='/*'/>.   <var//*/> will
+have priority over extension mappings like <var/*.jsp/>, while <var///> has
+the lowest priority.</p>
+
+</section>
+
+<section title="How do I change the 'cannot connect' message?">
+
+<p>In the resin.conf, add an <var/error-page/> directive using <var/connection/>
+for the exception type.  The location must be an absolute path understandable
+to your web server.  For example, since the web server will display this
+message, you can't forward to a jsp file.</p>
+
+<example>
+&lt;error-page exception-type='connection' location='/errorpage.html'/>
+</example>
+
+</section>
+
+<section title='How do I set a virtual directory?'>
+
+<p>Use the <var/&lt;path-mapping>/> directive.  For example, to grab images
+from /home/images/*, use:</p>
+
+<example>
+&lt;path-mapping url-pattern='/images/*' real-path='/home/images'/>
+</example>
+
+</section>
+
+<section title='What is a web-app?'>
+
+<p>The vast majority of sites can completely ignore web-apps.  If you're
+starting with Resin, use the default web-app and don't worry about it.
+</p>
+
+<p>You'll only want to use web-apps when you want separate projects using
+the same web server.  For example, on an ISP site, each user might get her
+own web-app.  She can treat the web-app as if she had control over
+the whole web server starting at a URL prefix like <var/~karen/>.
+</p>
+
+<p>A web-app is a generalization of a virtual host.  With virtual
+hosts, each host pretends that it controls its own server when it
+really is sharing the server with other virtual hosts.  A web-app
+extends this by creating virtual applications for a URL prefix.
+</p>
+
+<p>Each web-app gets its own sessions, servlets, beans and static
+pages.</p>
+
+</section>
+
+<section title="Why don't my URLs work in my web-app?">
+
+<p>Remember, the browser doesn't know about your web-apps.  It treats the
+web server as a single URL-space.  This may cause you troubles if you
+use a standard directory structure like putting images in '/images/*'.
+</p>
+
+<p>To see this problem, suppose you have a web-app called
+'/myproject'.  Suppose you have a JSP page in the web-app called
+<var/foo/bar.jsp/>.  The full URL will be
+<var//myproject/foo/bar.jsp/>.  Your image reference should look like
+one of the following:</p>
+
+<example>
+&lt;img src='../images/image1.gif'/><br>
+&lt;img src='&lt;%= application.getContextPath() %>/images/image1.gif'/>
+</example>
+
+<p>Using <var//images/image1.gif/> will fail because the browser will
+look for <var/http://myhost.com/images/image1.gif/> when you really
+want <var/http://myhost.com/myproject/images/image1.gif/>.
+</p>
+
+</section>
+
+<section title="How do I use virtual hosts with IIS?">
+
+<p>Jan Venema replies,</p>
+
+<p>This is my working config under IIS 4.0 end Resin1.1b6</p>
+
+<example>
+&lt;caucho.com>
+  &lt;http-server>
+    &lt;error-log id='log/default-error.log'/>
+
+    &lt;!--
+      -- Each virtual host has its own applications, sessions,
+      -- and servlets.  You must duplicate the configuration for
+      -- each host.  Each host ignores the configuration in
+      -- the outer block.
+      -->
+
+    &lt;host id='192.168.0.2'>
+      &lt;app-dir>d:\inetpub\wwwroot\inverko&lt;/app-dir>
+      &lt;error-log id='d:\inetpub\wwwroot\inverko\error.log'/>
+      &lt;servlet-mapping url-pattern='/servlet/*'
+                       servlet-name='invoker'/>
+      &lt;servlet-mapping url-pattern='*.jsp'
+                       servlet-name='com.caucho.jsp.JspServlet'/>
+    &lt;/host>
+
+    &lt;host id='192.168.0.3'>
+      &lt;app-dir>d:\inetpub\wwwroot\dmd&lt;/app-dir>
+      &lt;error-log id='d:\inetpub\wwwroot\dmd\error.log'/>
+      &lt;servlet-mapping url-pattern='/servlet/*'
+                       servlet-name='invoker'/>
+      &lt;servlet-mapping url-pattern='*.jsp'
+                       servlet-name='com.caucho.jsp.JspServlet'/>
+    &lt;/host>
+  &lt;/http-server>
+&lt;/caucho.com>
+</example>
+
+</section>
+
+<section title="How do I configure error pages in resin.conf?">
+
+<p>The basic command is <a href='../ref/app-config.xtp#error-page'>error-page</a>.
+There are three kinds of error pages</p>
+
+<ul>
+<li>Error code pages, e.g. 404
+<li>Exception, e.g. java.lang.NullPointerException
+<li>connection failures, "can't connect to srun"
+</ul>
+
+</section>
+
+<section title="Where do all the files go?">
+<p>The document root is set in resin.conf using the app-dir:</p>
+
+<example>
+&lt;http-server app-dir='/www/htdocs'>
+  ...
+&lt;/http-server>
+</example>
+
+<p>Each virtual host and each web-app will have its own app-dir.
+The app-dir configuration must be in resin.conf, 
+not the web.xml (otherwise Resin couldn't find web.xml):</p>
+
+<example>
+&lt;web-app id='myapp' app-dir='/www/myapp'>
+   ...
+&lt;/web-app>
+</example>
+
+<p>If you don't specify an app-dir, Resin will use <var/id/>
+looking in /www/htdocs/myapp in the above example.</p>
+
+<p>Optionally, you can put a web.xml in [app-dir]/WEB-INF/web.xml
+(again, following JSDK 2.2).  The web.xml can contain anything the
+<var/web-app/> in resin.conf can.</p>
+
+<p>Auto-reloaded classes belong in [app-dir]/WEB-INF by default,
+following JSDK 2.2:</p>
+
+<def>
+classes  -- auto-load/recompile Java servlet/bean/classes directory
+lib -- auto-loaded *.jar files
+</def>
+
+<p>In the web-app, you can add to the auto-reload classpath using:</p>
+
+<example>
+&lt;classpath id='myclasses' source='/home/work/proj/src' compile='true'/>
+</example>
+
+<p>The JSP/Java work directory is /tmp/caucho (or \temp\caucho).  You can
+change that with:</p>
+
+<example>
+&lt;java compiler='javac' work-dir='/path/to/my/work/dir'/>
+</example>
+
+<p>Finally, the startup scripts will look for jars in resin1.1/lib to add
+to the classpath before starting resin.</p>
+
+</section>
+
+<section title="How do I disable directory browsing?">
+
+<p>Setting <a
+href='../ref/app-config.xtp#directory-servlet'>directory-servlet</a> to
+"none" will disable directory browsing.</p>
+
+<example>
+&lt;web-app id='/'>
+  &lt;directory-servlet id='false'/>
+&lt;/web-app>
+</example>
+
+</section>
+
+<section title="Why do both virtual hosts use the same index.jsp file?">
+
+<p>As described in the <a href='../ref/virtual-host.xtp'>virtual host</a>
+reference, you must use &lt;host> and &lt;app-dir> in your resin.conf
+to configure virtual hosts.</p>
+
+<p>If you omit the &lt;host>, Resin will generate the same class name
+for both hosts.  So one host will see the JSP from the second host.
+By adding the &lt;host>, Resin will make the class names unique.</p>
+
+</section>
+
+<section title="How do I use a servlet as the welcome page?">
+
+<p>There's no <var/url-pattern/> that will only match '/'.  url-pattern='/'
+will set the servlet as the default servlet, replacing the file servlet.
+</p>
+
+<p>You'll need to use Resin's <var/url-regexp/>.  <var/url-regexp='^/$'/>
+will do the trick.
+</p>
+
+</section>
+  </body>
+</document>

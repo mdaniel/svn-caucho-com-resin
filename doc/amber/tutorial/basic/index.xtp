@@ -1,0 +1,247 @@
+<document>
+  <header>
+    <product>resin</product>
+    <title>Amber</title>
+        <description>
+          <p>Introduces Amber with a single-table bean, describing everything needed to configure and start Amber.</p>
+          <p>This example focuses on:</p>
+          <ul>
+            <li>Introduces Amber fundamental concepts</li>
+            <li>Configuring Amber as a Resin resource in JNDI</li>
+            <li>Developing the Bean classes</li>
+            <li>Developing a Servlet to lookup and use the bean</li>
+          </ul>
+        </description>
+    <type>tutorial</type>
+    <tutorial-startpage>basic</tutorial-startpage>
+  </header>
+
+<body>
+<summary/>
+
+<p>Amber manages tables in a relational database using a Java
+bean interface.</p>
+
+<section title="Files in this tutorial">
+<deftable>
+<tr><td><viewfile-link file="WEB-INF/web.xml"/>
+    <td>Configures the Amber resource and Database
+<tr><td><viewfile-link file="WEB-INF/classes/example/Course.java"/>
+    <td>The Course bean.
+<tr><td><viewfile-link file="WEB-INF/classes/example/Course.hbm.xml"/>
+    <td>The Course configuration file.
+<tr><td><viewfile-link file="WEB-INF/classes/example/CourseServlet.java"/>
+    <td>The Course servlet.
+<tr><td><viewfile-link file="WEB-INF/classes/example/InitResource.java"/>
+    <td>A resource to initialize the database for the demo
+</deftable>
+</section>
+
+<section title="Database Schema">
+
+<example title="course.sql">
+CREATE TABLE amber_basic_courses (
+  id INTEGER PRIMARY KEY,
+
+  name VARCHAR(250),
+  teacher VARCHAR(250)
+);
+
+INSERT INTO amber_basic_courses VALUES(1, 'Potions', 'Severus Snape');
+INSERT INTO amber_basic_courses VALUES(2, 'Transfiguration', 'Minerva McGonagall');
+</example>
+
+</section>
+
+<section title="Implementation Class">
+
+<example title="Course.java">
+package example;
+
+public class Course {
+  private int _id;
+  private String _name;
+  private String _teacher;
+
+  public int getId()
+  {
+    return _id;
+  }
+
+  public void setId(int id)
+  {
+    _id = id;
+  }
+
+  public String getName()
+  {
+    return _name;
+  }
+
+  public void setName(String name)
+  {
+    _name = name;
+  }
+
+  public String getTeacher()
+  {
+    return _teacher;
+  }
+
+  public void setTeacher(String teacher)
+  {
+    _teacher = teacher;
+  }
+}
+</example>
+
+<p>With Amber, all Java source or the Java classes can
+be dropped in WEB-INF/classes.  Resin will automatically compile the Java class if necessary.  Amber will enhance the class.</p>
+
+</section>
+
+<section title="Configuration">
+
+<p>Amber currently uses Hibernate's syntax to configure the beans.  The
+configuration has the same name and  directory as the class file, with
+a ".hbm.xml" extension instead of ".class".</p>
+
+<example title="example/Course.hbm.xml">
+&lt;hibernate-mapping>
+  &lt;class name="example.Course" table="amber_basic_courses">
+    &lt;id name="id"/>
+
+    &lt;property name="name"/>
+    &lt;property name="teacher"/>
+  &lt;/class>
+&lt;/hibernate-mapping>
+</example>
+
+<deftable>
+<tr><th>Hibernate configuration<th>meaning<th>default
+<tr><td>hibernate-mapping<td>top-level xml node for the Hibernate syntax<td>required
+<tr><td>class<td>Configures a Java class as an entity<td>required
+<tr><td>name<td>name of the class or property<td>required
+<tr><td>table<td>name of the database table for the class<td>the class name
+<tr><td>id<td>configures a field as the table's primary key<td>
+<tr><td>property<td>configures a field as a property<td>
+</deftable>
+
+</section>
+
+<section title="Resin Configuration">
+
+<p>Now that we've built the bean, we need to
+attach it to Resin.  The bean is deployed using
+the <code/AmberConnectionFactory/> resource.</p>
+
+<example title='WEB-INF/web.xml'>
+&lt;web-app>
+  &lt;database jndi-name="jdbc/resin">
+    &lt;driver type="com.caucho.db.jca.ConnectionFactory">
+      &lt;path>WEB-INF/db&lt;/path>
+    &lt;/driver>
+  &lt;/database>
+
+  &lt;resource jndi-name="amber/factory">
+    &lt;type>com.caucho.amber.jca.AmberConnectionFactory&lt;/type>
+    &lt;init>
+      &lt;data-source>java:comp/env/jdbc/resin&lt;/data-source>
+    &lt;/init>
+  &lt;/resource>
+&lt;/web-app>
+</example>
+
+<deftable>
+<tr><th>Amber configuration<th>meaning
+<tr><td>database<td>configures a database
+<tr><td>jndi-name<td>The JNDI name where the resource will be stored
+<tr><td>driver<td>The database driver
+<tr><td>type<td>The class name of the database driver
+<tr><td>resource<td>Configures a resource, in this case Amber
+<tr><td>data-source<td>Sets the database for Amber
+</deftable>
+
+</section>
+
+<section title="Client Servlet">
+
+<p>Now that we've defined the entity, we should go ahead and use it.</p>
+
+<example title="CourseServlet.java">
+package example;
+
+import java.io.*;
+import javax.servlet.*;
+import javax.servlet.http.*;
+import javax.naming.*;
+
+import com.caucho.amber.AmberFactory;
+import com.caucho.amber.AmberConnection;
+
+public class CourseServlet extends HttpServlet {
+  // Cache the amber factory so the JNDI lookup only happens once
+  private AmberFactory _factory = null;
+
+  public void init()
+    throws ServletException
+  {
+    try {
+      Context ic = new InitialContext();
+
+      _factory = (AmberFactory) ic.lookup("java:comp/env/amber/factory");
+    } catch (NamingException e) {
+      throw new ServletException(e);
+    }
+  }
+
+  public void doGet(HttpServletRequest req, HttpServletResponse res)
+    throws IOException, ServletException
+  {
+    PrintWriter out = res.getWriter();
+
+    res.setContentType("text/html");
+
+    out.println("&lt;h3>Course Details&lt;/h3>");
+
+    AmberConnection aConn = null;
+
+    try {
+      aConn  = _factory.getConnection();
+      for (int i = 1; i <= 2; i++) {
+        // Find the course using the home interface
+
+        Course course = (Course) aConn.load(Course.class, new Integer(i));
+
+        out.println("course: " + course.getName() + "&lt;br>");
+        out.println("teacher: " + course.getTeacher() + "&lt;br>");
+        out.println("&lt;br>");
+      }
+    } finally {
+      if (aConn != null)
+        aConn.close();
+    }
+  }
+}
+</example>
+<results>
+<h3>Course Details</h3>
+course: Potions
+teacher: Severus Snape
+
+course: Transfiguration
+teacher: Minerva McGonagall
+</results>
+
+</section>
+
+<section title="Conclusion">
+
+<p>The core of Amber's database management is its management of a
+single table.  Much of the work underlying the database management is
+hidden from the application.</p>
+
+</section>
+
+</body>
+</document>

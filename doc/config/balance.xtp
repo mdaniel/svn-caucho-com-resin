@@ -1,0 +1,496 @@
+<document>
+<header>
+<product>resin</product>
+<resin-2.0>$resin/ref/balance.xtp</resin-2.0>
+<title>Reliability and Load Balancing</title>
+<description>
+<p>As traffic increases, web sites need to add additional web
+servers and servlet engines.  Distributing the traffic across the
+servers and coping when a server restarts is the challenge of
+load balancing.</p>
+
+<ul>
+<li>What is balancing the load?
+<ul>
+  <li>Hardware load-balancer
+  <li>Resin web server using LoadBalanceServlet
+  <li>Web Server (Apache/IIS) with plugin
+</ul>
+<li>How is session consistency maintained?
+<ul>
+  <li>Sticky sessions
+  <li><a href="config|sessions">distributed sessions</a>
+</ul>
+</ul>
+
+<p>In general, the hardware load-balancer will have the best results
+while using the Resin or Apache/IIS is a low-cost alternative for
+medium sites.</p>
+
+</description>
+</header>
+
+<body>
+<summary/>
+
+
+<section title="Hardware Load Balancing">
+
+<p>Sites with a hardware load balancer will generally put one Resin JVM
+on each server and configure the load balancer to distribute the load
+across those JVMs.  Although it's possible to configure Resin with Apache/IIS
+in this configuration, it's not necessary and running Resin as the web
+server reduces the configuration complexity.</p>
+
+<p>The IP-based sticky sessions provided by
+hardware load balancers should be used to increase efficiency.  IP-based sticky
+sessions cause the hardware load balancer to use the same server for each
+request from a certain IP.  The IP-sessions will usually send the request to
+the right server, but there are clients behind firewalls and proxies which will
+have different IPs for each request even though the session is the same.
+IP-sessions are only mostly sticky.</p>
+
+<p>Sites using sessions will configure <a href="sessions.xtp">distributed
+sessions</a> to make sure the users see the same session values.</p>
+
+<p>A typical configuration will use the same resin.conf for all
+servers and use the -server flag to start the correct one on each machine:</p>
+
+<example title='resin.conf for all servers'>
+&lt;resin xmlns="http://caucho.com/ns/resin">
+&lt;server>
+  &lt;cluster>
+    &lt;srun id='a' host='192.168.0.1' port='6802' index='1'/>
+    &lt;srun id='b' host='192.168.0.2' port='6802' index='2'/>
+    &lt;srun id='c' host='192.168.0.3' port='6802' index='3'/>
+    &lt;srun id='d' host='192.168.0.4' port='6802' index='4'/>
+  &lt;/cluster>
+
+  &lt;persistent-store type="cluster">
+    &lt;init path="cluster"/>
+  &lt;/persistent-store>
+
+  &lt;http id='a' host='192.168.0.1' port='80'/>
+  &lt;http id='b' host='192.168.0.2' port='80'/>
+  &lt;http id='c' host='192.168.0.3' port='80'/>
+  &lt;http id='d' host='192.168.0.4' port='80'/>
+
+  &lt;web-app-default>
+    &lt;session-config>
+      &lt;use-persistent-store/>
+    &lt;/session-config>
+  &lt;/web-app-default>
+
+  ...
+&lt;/server>
+&lt;/resin>
+</example>
+
+<p>On Unix, the servers will generally be started using a
+<a href="doc|install|httpd#script">startup script</a>.  Each server will have
+a different value for -server and for -pid.</p>
+
+<example title="Starting each server on Unix">
+unix-192.168.0.1> bin/httpd.sh -server a -pid server-a.pid start
+unix-192.168.0.2> bin/httpd.sh -server b -pid server-b.pid start
+unix-192.168.0.3> bin/httpd.sh -server c -pid server-c.pid start
+unix-192.168.0.4> bin/httpd.sh -server d -pid server-d.pid start
+</example>
+
+<p>On Windows, each server is installed as a service.</p>
+
+<example title="Installing each server on Windows">
+win-192.168.0.1> bin/httpd -install-as resin-a -server a
+win-192.168.0.1> net start resin-a
+
+win-192.168.0.2> bin/httpd -install-as resin-b -server b
+win-192.168.0.2> net start resin-b
+
+win-192.168.0.3> bin/httpd -install-as resin-c -server c
+win-192.168.0.3> net start resin-c
+
+win-192.168.0.4> bin/httpd -install-as resin-d -server d
+win-192.168.0.4> net start resin-d
+</example>
+  
+</section>
+
+<section name="resin" title="Using Resin as the Load Balancer">
+
+<TODO>sensible example using multiple clusters.</TODO>
+
+<p>Resin includes a LoadBalanceServlet that can balance
+requests to backend servers.  Because it is implemented as a servlet,
+this configuration is the most flexible.  A site might use 192.168.0.1 as 
+the frontend load balancer, and send all requests for /foo to the backend host
+192.168.0.10  and all requests to /bar to the backend host 192.168.0.11.  Since
+Resin has an integrated HTTP proxy cache, the front-end machine can cache
+results for the backend servers.</p>
+
+<p>Using Resin as the load balancing web server requires a minimum
+of two configuration files: one for the load balancing server, and one
+for the backend servers.  The front configuration will dispatch
+to the backend servers, while the backend will actually serve the
+requests.</p>
+
+<section title="The frontend server does the load balancing">
+
+<p>In the following example, there are three servers and two conf files.  The
+first server (192.168.0.1), which uses front.conf, is the load balancer.  It
+has an &lt;http&gt; listener, it receives requests from browsers, and
+dispatches them to the backend servers (192.168.0.10 and 192.168.0.11).</p>
+
+<example title="front.conf - used on 192.168.0.1">
+&lt;resin xmlns="http://caucho.com/ns/resin">
+&lt;server>
+  &lt;http server-id="front" port='80'/>
+
+  &lt;cluster-definition id="a">
+    &lt;srun server-id='back1' host='192.168.0.10' port='6802' index='1'/>
+    &lt;srun server-id='back2' host='192.168.0.11' port='6802' index='2'/>
+  &lt;/cluster-definition>
+
+  &lt;host id=''&gt;
+    &lt;web-app id='/'&gt;
+      &lt;!-- balance all requests to the servers in cluster a --&gt;
+      &lt;servlet>
+        &lt;servlet-name>balance-a&lt;/servlet-name>
+        &lt;servlet-class>com.caucho.servlets.LoadBalanceServlet&lt;/servlet-class>
+        &lt;init cluster='a'/>
+      &lt;/servlet>
+
+      &lt;servlet-mapping url-pattern='/*' servlet-name='balance-a'/>
+    &lt;/web-app&gt;
+  &lt;/host&gt;
+&lt;/server>
+</example>
+
+<ul>
+<li>The &lt;http> and &lt;srun> must have different values for <var/server-id/>.
+<li>Since the &lt;http> configuration's has a <var/server-id/> of "front"
+it needs a <var/-server front/> argument when you start Resin.
+<li>The &lt;srun> must have an <var/server-id/> so they will not be
+started along with the &lt;http>.
+<li>The &lt;srun> must have a <var/host/> and a <var/port/> so that the LoadBalanceServlet knows where to find the backend servers.
+<li>The <var/index/> is important and must match the <var/index/>
+in the backend configuration.
+</ul>
+
+<p>The srun entries are included in <code/front.conf/> so that the
+LoadBalanceServlet knows where to find the backend servers.  The
+LoadBalanceServlet selects a backend server using a round-robin policy.
+Although the round-robin policy is simple, in practice it is as effective as
+complicated balancing policies.  In addition, because it's simple, round-robin
+is more robust and faster than adaptive policies.  </p>
+</section>
+
+<section title="The backend server respond to the requests">
+
+<p>A seperate conf file is used to configure all of the backend servers.
+In this case, there are two backend servers, both configured in the conf file
+<code/back.conf/>.</p>
+
+<p>Sites using sessions will configure <a href="sessions.xtp">distributed
+sessions</a> to make sure the users see the same session values.</p>
+
+<example title='back.conf for all backend servers'>
+&lt;resin xmlns="http://caucho.com/ns/resin">
+&lt;server>
+  &lt;cluster>
+    &lt;srun server-id='a' host='192.168.0.10' port='6802' index='1'/>
+    &lt;srun server-id='b' host='192.168.0.11' port='6802' index='2'/>
+  &lt;/cluster>
+
+  &lt;persistent-store type="cluster">
+    &lt;init path="cluster"/>
+  &lt;/persistent-store>
+
+  &lt;web-app-default>
+    &lt;session-config>
+      &lt;use-persistent-store/>
+    &lt;/session-config>
+  &lt;/web-app-default>
+
+  ...
+&lt;/server>
+&lt;/resin>
+</example>
+</section>
+
+
+<section title="Starting the servers">
+
+<example title="Starting each server on Unix">
+unix-192.168.0.1> bin/httpd.sh -conf conf/front.conf -pid front.pid start
+
+unix-192.168.0.10> bin/httpd.sh -conf conf/back.conf -server a -pid server-a.pid start
+unix-192.168.0.11> bin/httpd.sh -conf conf/back.conf -server b -pid server-b.pid start
+</example>
+
+<example title="Installing each server on Windows">
+win-192.168.0.1> bin/httpd -install-as resin-front -conf conf/front.conf 
+win-192.168.0.1> net start resin-front
+
+win-192.168.0.10> bin/httpd -install-as resin-a -server a
+win-192.168.0.10> net start resin-a
+win-192.168.0.11> bin/httpd -install-as resin-b -server b
+win-192.168.0.11> net start resin-b
+</example>
+</section>
+
+</section> <!-- resin -->
+
+<section title="Balancing with the Apache/IIS plugin">
+
+<p>When using Apache or IIS as the webserver, the plugin does the load
+balancing.  It performs the functions of the hardware load balancer or
+LoadBalanceServlet in the scenarios descriubed above. </p>
+
+
+<p>To understand how Resin's load balancing works with plugins, it's important
+to review how the plugin dispatches requests to the backend JVM.
+The following sequence describes a typical request:</p>
+
+<ol>
+<li>Request arrives at web server (i.e. Apache or IIS).
+<li>Plugin (mod_caucho, mod_isapi, etc) checks if it's a Resin request
+<li>Plugin selects a backend JVM, i.e. a &lt;srun>
+<ul>
+<li>If it's an old session, send it to the owner JVM. (sticky-sessions)
+<li>If it's a new request, send it to the next &lt;srun>, using a
+round-robin policy.
+</ul>
+<li>Plugin sends the request to the backend JVM with a TCP socket.
+<li>Plugin receives the response from the backend JVM with the same TCP socket.
+</ol>
+
+<p>The plugin needs to know which requests should go to Resin, i.e. the
+servlet-mappings and the jsp files.  And it needs to know the TCP host/port
+names of the backend machines, i.e. the &lt;srun> and &lt;srun-backup> tags.
+/caucho-status shows all that information in one table.  The plugin obtains
+this information from a running Resin server.</p>
+
+<p>The plugin controls the load balancing since it needs to decide
+which JVM to use.  Because the plugin is key in load-balancing, looking at
+the /caucho-status will tell you exactly how your system is configured.
+The JVMs are just passive, waiting for the next request.  From the
+JVM-perspective, a request from a plugin is identical to
+an HTTP request, except it uses a slightly different encoding.  In fact
+the same JVM can serve as an srun and as an httpd server listening to
+port 8080, for example.  The dual srun/http configuration can be
+useful for debugging.
+</p>
+
+</section>
+
+<section title='Backup JVM'>
+
+<p>Resin provides the ability to run a <var/backup/> JVM.  The backup JVM will
+sit, unused, until the primary server goes down.  Once the primary server goes
+down, the backup is used until the primary restarts.</p>
+
+<p>The cheapest backup strategy just uses a single machine for the web
+server and two JVMs.  One JVM is designated as primary and the other
+is a backup.  If the first fails for some reason, the second will take
+over.  Because the backup is normally not used, it doesn't really take
+up much system resources.</p>
+
+<figure src="backup.gif"/>
+
+<example title="resin.conf">
+&lt;resin xmlns="http://caucho.com/ns/resin">
+&lt;server>
+  &lt;cluster>  
+    &lt;srun id="a" host='localhost' port='6802' index='1'/>
+    &lt;srun backup="true" id="b" host='localhost' port='6803' index='2'/>
+  &lt;/cluster>
+
+  ...
+  
+&lt;/server>
+&lt;/resin>
+</example>
+
+<sidebar>Use <var//caucho-status/> to check your configuration</sidebar>
+
+<p>You will start the two srun processes separately.  Each srun needs to
+know which port to listen to.  The <var/-server/> argument to httpd.sh selects
+a srun block to start.  <var/-server a/> selects the first one, i.e.
+port 6802 and <var/-server b/> selects the second one.</p>
+
+<p>Here's how to start them on unix:</p>
+
+<example>
+unix> httpd.sh -pid srun1.pid -server a start
+unix> httpd.sh -pid srun2.pid -server b start
+</example>
+
+<p>On Unix, the <var/-pid/> is used to keep track of the live srun so
+a later <var/httpd.sh stop/> will work.  It just names a file that will
+contain the process id (pid) of the started process.</p>
+
+<p>Use the -install-as to install them on NT.</p>
+<note>The -install-as must occur before the -server</note>.
+
+<example>
+win> bin/httpd -install-as Resin-A -server a
+win> bin/httpd -install-as Resin-B -server b
+</example>
+
+<p>To make sure that your web server understands the configuration,
+look at <var/http://host/caucho-status/>.  caucho-status will
+show the current state of all the JVMs.</p>
+
+</section>
+
+<section title='What about sessions?'>
+
+<p>A session needs to stay on the same JVM that started it.
+Otherwise, each JVM would only see every second or third request and
+get confused.</p>
+
+<p>To make sure that sessions stay on the same JVM, Resin encodes the
+cookie with the host number.  In the previous example, the hosts would
+generate cookies like:</p>
+
+<deftable>
+<tr><th>index<th>cookie prefix
+<tr><td>1<td><var/a/>xxx
+<tr><td>2<td><var/b/>xxx
+<tr><td>3<td><var/c/>xxx
+</deftable>
+
+<p>On the web server, mod_caucho will decode the cookie and send it
+to the appropriate host.  So <var/bX8ZwooOz/> would go to host2.</p>
+
+<p>In the infrequent case that host2 fails, Resin will send the
+request to host3.  The user might lose the session but that's a minor
+problem compared to showing a connection failure error.  To save sessions,
+you'll need to use <a href="sessions.xtp">distributed sessions</a>.
+Also take a look at
+<a href="tcp-sessions.xtp">tcp sessions</a>.</p>
+
+<p>The following example is a typical configuration for a distributed
+server using an external hardware load-balancer, i.e. where each Resin is
+acting as the HTTP server.  Each server will be started
+as <var/-server a/> or <var/-server b/> to grab its specific configuration.</p>
+
+<p>In this example, sessions will only be stored when the server shuts down,
+either for maintenance or with a new version of the server.  This is the most
+lightweight configuration, and doesn't affect performance significantly.
+If the hardware or the JVM crashes, however, the sessions will be lost.
+(If you want to save sessions for hardware or JVM crashes,
+remove the &lt;save-only-on-shutdown/> flag.)</p>
+
+<example title="resin.conf">
+&lt;resin xmlns="http://caucho.com/ns/resin">
+&lt;server>
+  &lt;http id='a' port='80'/>
+
+  &lt;http id='b' port='80'/>
+
+  &lt;http id='c' port='80'/>
+
+  &lt;cluster>
+    &lt;srun id='a' port='6802' host='192.168.0.1' index='1'/>
+    &lt;srun id='b' port='6802' host='192.168.0.2' index='2'/>
+    &lt;srun id='c' port='6802' host='192.168.0.3' index='3'/>
+  &lt;/cluster>
+
+  &lt;persistent-store type="cluster">
+    &lt;init path="cluster"/>
+  &lt;/persistent-store>
+
+  &lt;web-app-default>
+    &lt;!-- enable tcp-store for all hosts/web-apps -->
+    &lt;session-config>
+      &lt;use-persistent-store/>
+      &lt;save-only-on-shutdown/>
+    &lt;/session-config>
+  &lt;/web-app-default>
+
+  ...
+&lt;/server>
+&lt;/resin>
+</example>
+
+</section>
+
+<section title='Multiple Web Servers'>
+
+<p>Many larger sites like to use multiple web servers with a JVM and a
+web server on each machine.  A router will distribute the load between
+the machines.</p>
+
+<p>In this configuration, the site needs to take control of its own
+sessions.  Because the router will distribute the load randomly, any
+persistent session state needs to be handled by a centralized server
+like a database or use Resin's TCP-ring storage.
+</p>
+
+<p>Even in this configuration, you can use Resin's load balancing to
+increase reliability.  Each web server should choose its own JVM
+first, but use another machine as a backup.
+</p>
+
+<p>In this case, you can use the trick that <var/localhost/> refers
+to the preferred host.  The configuration would look like:</p>
+
+<example>
+&lt;resin xmlns="http://caucho.com/ns/resin">
+&lt;server>
+  &lt;cluster>
+    &lt;srun id="a" host='localhost' port='6802' index='1'/>
+    &lt;srun backup="true" id="b" host='host1' port='6802' index='2'/>
+    &lt;srun backup="true" id="c" host='host2' port='6802' index='3'/>
+    &lt;srun backup="true" id="d" host='host3' port='6802' index='4'/>
+  &lt;/cluster>
+  ...
+  
+&lt;/server>
+&lt;/resin>
+</example>
+
+<p>Alternately, if you're using Apache, you could configure the sruns
+in the httpd.conf.</p>
+
+<example title='host1 httpd.conf'>
+ResinConfigServer host1 6802
+ResinConfigServer host2 6802
+</example>
+
+<example title='host2 httpd.conf'>
+ResinConfigServer host1 6802
+ResinConfigServer host2 6802
+</example>
+
+<p><b>The order must be consistent for all servers so sessions will always
+go to the correct machine.</b>  <var/bXXX/> must always go to host2.</p>
+
+</section>
+
+<section title='Multiple Web Servers, Single JVM'>
+
+<p>Multiple web servers can use the same JVM.  For example, a fast
+plain webserver and an SSL web server may only need a single JVM.
+(Although a backup would be good.)  Since the JVM doesn't care where
+the request comes from, it can treat each request identically.</p>
+
+<p>This simplifies SSL development.  A servlet just needs to check
+the <var/request.isSecure()/> method to see if the request is SSL or
+not.  Other than that, all requests are handled identically.</p>
+
+</section>
+
+<section title="See Also">
+
+<ul>
+<li><a href="config|sessions.xtp">Distributed Sessions</a>
+<li><a href="config|tcp-sessions.xtp">Distributed Sessions with Cluster Store</a>
+<li><a href="config|resin.xtp#persistent-store">&lt;persistent-store></a>
+</ul>
+
+</section>
+
+  </body>
+</document>

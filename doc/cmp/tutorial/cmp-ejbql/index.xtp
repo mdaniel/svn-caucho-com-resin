@@ -1,0 +1,14 @@
+<document>
+  <header>
+    <product>resin-ee</product>
+    <title>EJB-QL Tutorial</title>
+    <type>tutorial</type>
+    <tutorial-startpage>find</tutorial-startpage>
+  </header>
+
+  <body>
+    <summary/>
+
+     <TODO>javadoc only</TODO>
+  </body>
+</document>

@@ -1,0 +1,457 @@
+<document>
+  <header>
+    <product>resin</product>
+    <resin-2.0>$resin/faq/debug.xtp</resin-2.0>
+    <title>Debugging</title>
+  </header>
+
+  <body>
+    <summary/>
+
+<section title='How to get debugging information'>
+
+<p>Resin can write debugging information to standard output or to any
+file.  To add debugging information add a <var/log/> directive to the
+resin.conf file.</p>
+
+<example>
+&lt;caucho.com>
+  &lt;log id='/' href='stderr:'/>
+&lt;/caucho.com>
+</example>
+
+<p><var/href/> can be any path.  stderr: is perhaps the most useful.
+<var/id/> can select which portions of Resin to get logging
+information.  Here are some useful patterns:</p>
+
+<deftable>
+<tr><td>/<td>Debug everything
+<tr><td>/caucho.com/jsp<td>Debug jsp
+<tr><td>/caucho.com/jsp/java<td>See the JSP generated Java
+<tr><td>/caucho.com/jsp/js<td>See the JSP generated Java
+<tr><td>/caucho.com/xsl<td>XSL debugging
+<tr><td>/caucho.com/tcp-server
+    <td>See thread creation and deletion
+<tr><td>/caucho.com/http
+    <td>HTTP related information
+</deftable>
+
+</section>
+
+<section title="Exceptions don't have line numbers">
+
+<p>For debugging, it is crucial to get proper line numbers.
+Unfortunately, Java JITs (just-in-time compilers) remove the line
+numbers.</p>
+
+<p>For development we recommend you turn jit compiling off.  Start
+the server with the JIT compiler turned off.  On Unix you can use:</p>
+
+<example>
+unix> httpd.sh -nojit
+</example>
+
+</section>
+
+<section title="How do I keep the generated .java files?">
+
+<p>The generated .java files are put in <var/&lt;work-dir>/>.  By
+default, that's <var//tmp/caucho/> on Unix and <var/\temp\caucho/> on
+Windows.</p>
+
+</section>
+
+<section title="How do I run Resin with a debugger?">
+
+<p>Eric Hansen writes:</p>
+
+<p>A lot of people have been asking about a suitable debugging environment for
+resin.  I have been using JPadPro with the updated version of jdb.  (I found
+that the jdb.exe that ships with the JDKs 1.2.2 do not like all
+the classloading that happens in a servlet engine.)</p>
+
+<p>Instead, try using the JavaTM Platform Debugger Architecture (JPDA)
+http://www.javasoft.com/products/jpda/.</p>
+
+<p>Just unzip the executables, dlls, and docs files in some directory.  I chose
+c:\jdb.  My project class files are in: c:\local, my resin1.1 files are in:
+c:\resin1.1, and jdk1.2.2 files are in c:\jdk1.2.2.</p>
+
+<p>To start up the debugger issue the following command (you may need
+additional classfiles in the classpath, etc.):</p>
+
+<example>
+C:\jdb\bin\jdb.exe -classpath
+"C:\resin1.1\lib\jdk12.jar;C:\resin1.1\lib\jsdk.jar;
+C:\resin1.1\lib\jsdk22.jar;C:\resin1.1\lib\resin.jar;
+C:\jdk1.2.2\jre\lib\rt.jar;C:\jdk1.2.2\lib\tools.jar;
+C:\local" com.caucho.server.http.HttpServer -conf
+c:\resin1.1\conf\resin.conf
+> run
+</example>
+
+<p>You can access the webserver at: http://localhost/ or
+http://localhost:8080/, etc.  depending on the port number you picked.  You
+should be able to issue the usual jdb commands.  Check the list of commands
+by doing: help or ? at the jdb> prompt.</p>
+
+<p>I use jdb with JPadPro (http://www.modelworks.com).  It has some built-in
+scripts to work with jdb.  It is tailored to work with the jdb that ships
+with the JDK, which has a slightly different response syntax from the JPDA
+version of jdb.  Since all of JPadPro's commands are written in JavaScript,
+you can easily modify the commands to parse the different command/response
+syntax in JPDA.  Or you could even modify the jdb code to have it issue
+similar commands, since JPDA ships with source code for jdb.  However, it's
+probably easiest to modify the JavaScript.  (Check in
+Tools/Java/JDK/Debugger/*, including onBreakPointHit, setBreakPoint.)  I
+modified setBreakPoint, for example, to look like this:</p>
+
+<example>
+function BreakpointResult(data, breakpoint)
+{
+   var index = data.indexOf("Breakpoint set");
+    var index2 = data.indexOf("Set breakpoint request");
+
+    if ((index == -1) && (index2 == -1))
+   {
+      breakpoint.active = false;
+      gOutput.writeMessage(breakpoint.getPath(),
+                           breakpoint.getLineIndex(),
+         "Setting breakpoint to inactive - breakpoint is " +
+         "not positioned on a valid line");
+   }
+}
+</example>
+
+<p>This is because the old version of jdb issued the syntax: "Breakpoint
+set...", and the new one issues the command "Set breakpoint request...".
+You get the picture.</p>
+
+<p>A similar formula should bear fruit for Visual Cafe, although they have
+their own proprietary debugger.</p>
+
+<p>Hope that's useful.</p>
+<p>Eric</p>
+
+</section>
+
+<section title="I've got a cryptic ServletException.  How do I get the full trace?">
+
+<p>Eric Hansen writes:</p>
+
+<section title="PROBLEM:">
+ 
+<p>Have you ever received a cryptic Exception message like this in your error logging due to an error in a JSP page: ???</p>
+
+<results>
+javax.servlet.ServletException
+ at com.caucho.jsp.QPageContext.handlePageException(QPageContext.java:371)
+ at work.ProgramOverview__jsp._jspService(ProgramOverview__jsp.java:115)
+ at com.caucho.jsp.JavaPage.subservice(JavaPage.java, Compiled Code)
+ at com.caucho.jsp.Page.service(Page.java, Compiled Code)
+ at com.caucho.jsp.QServlet.service(QServlet.java, Compiled Code)
+ at com.caucho.server.http.AbstractRequest.service(AbstractRequest.java, Compiled Code)
+ at com.caucho.server.http.VirtualHost.service(VirtualHost.java, Compiled Code)
+ at com.caucho.server.http.QRequestDispatcher.forward(QRequestDispatcher.java, Compiled Code)
+ at com.caucho.server.http.QRequestDispatcher.forward(QRequestDispatcher.java, Compiled Code)
+ at javax.servlet.http.HttpServlet.service(HttpServlet.java:646)
+ at com.caucho.server.http.AbstractRequest.service(AbstractRequest.java, Compiled Code)
+ at com.caucho.server.http.VirtualHost.service(VirtualHost.java, Compiled Code)
+ at com.caucho.server.http.Request.dispatch(Request.java, Compiled Code)
+ at com.caucho.server.http.HttpRequest.handleRequest(HttpRequest.java, Compiled Code)
+ at com.caucho.server.http.HttpRequest.handleConnection(HttpRequest.java, Compiled Code)
+ at com.caucho.server.TcpConnection.run(TcpConnection.java, Compiled Code)
+ at java.lang.Thread.run(Thread.java:479)
+</results>
+
+</section>
+
+<section title="SOLUTION:">
+ 
+<p>You need to change your catch routine.  There is a method in ServletException called getRootCause().  This allows the developer of the servlet engine/JSP engine to embed a
+regular Exception inside a ServletException, which gets carried along for the ride.</p>
+
+<example>
+catch(Exception e)
+{
+  logMessage(e,"",-1);
+  if(e instanceof javax.servlet.ServletException)
+  {
+    Throwable et;
+    et = ((javax.servlet.ServletException)e).getRootCause();
+    if(et!=null&&et instanceof Exception)
+    {
+      logMessage(((Exception)et),"ROOT EXCEPTION",-1);
+    }
+  }
+}
+</example>
+ 
+<p>(logMessage is some logging routine you write to do logging...  Could also be System.err.println...)
+I was finding it quite difficult to debug JSP pages because I couldn't see what the underlying Exception was, just the ServletException which gets thrown from the JSP.  The
+above modification (or something similar) exposes it.  I figure other people might have the same problem.</p>
+ 
+<p>Hope that helps,</p>
+<p>Eric</p>
+
+</section>
+</section>
+
+<section title="Thread Dumps">
+
+<p>Java's thread dumps are a vital tool for server debugging.  Because servlets
+are intrinsically multithreaded, it's very possible to create deadlocks
+without realizing it.  That's especially true when you start adding
+third-part software like databases, EJB, and Corba ORBs.</p>
+
+<p>On Windows, you'll need to start Resin with bin/httpd.  Then
+ctrl-break will produce a thread dump.</p>
+
+<p>On Unix, "kill -QUIT" will produce a thread dump.  On the Linux IBM JDKs,
+you'll need to signal one of the child processes.  On the Linux Sun JDK, you'll
+need to kill the grandparent process of most of the threads:</p>
+
+<example>
+unix> ps -ef | grep java
+ferg     14243 10792  0 Jan13 pts/0    00:00:00 sh -c /usr/java/bin/java
+ferg     14244 14243  0 Jan13 pts/0    00:00:00 java -Dres
+ferg     14253 14244  0 Jan13 pts/0    00:00:01 java -Dres
+ferg     14254 14253  0 Jan13 pts/0    00:00:00 java -Dres
+ferg     14255 14253  0 Jan13 pts/0    00:00:00 java -Dres
+ferg     14256 14253  0 Jan13 pts/0    00:00:00 java -Dres
+ferg     14257 14253  0 Jan13 pts/0    00:00:00 java -Dres
+ferg     14258 14253  0 Jan13 pts/0    00:00:00 java -Dres
+unix> kill -QUIT 14244
+</example>
+
+<p>The Solaris 1.3 JDK has a single process, so it's easy.</p>
+
+<p>The Solaris 1.2 JDK has an extra quirk.  You need to run Resin in the
+foreground (i.e. not using "start".)  Then you'll need to answer some
+questions on the console.</p>
+
+<p>In any case, you'll eventually get a trace that looks something like the following (each JDK is slightly different):</p>
+
+<example>
+Full thread dump:
+
+"tcpConnection-8080-2" daemon waiting on monitor [0xbddff000..0xbddff8c4]
+        at java.lang.Object.wait(Native Method)
+        at com.caucho.server.TcpServer.accept(TcpServer.java:525)
+        at com.caucho.server.TcpConnection.accept(TcpConnection.java:190)
+        at com.caucho.server.TcpConnection.run(TcpConnection.java:136)
+        at java.lang.Thread.run(Thread.java:484)
+
+"tcpConnection-8080-1" daemon waiting on monitor [0xbdfff000..0xbdfff8c4]
+        at java.lang.Object.wait(Native Method)
+        at com.caucho.server.TcpServer.accept(TcpServer.java:525)
+        at com.caucho.server.TcpConnection.accept(TcpConnection.java:190)
+        at com.caucho.server.TcpConnection.run(TcpConnection.java:136)
+        at java.lang.Thread.run(Thread.java:484)
+
+"tcpConnection-8080-0" daemon waiting on monitor [0xbe1ff000..0xbe1ff8c4]
+        at java.lang.Object.wait(Native Method)
+        at com.caucho.server.TcpServer.accept(TcpServer.java:525)
+        at com.caucho.server.TcpConnection.accept(TcpConnection.java:190)
+        at com.caucho.server.TcpConnection.run(TcpConnection.java:136)
+        at java.lang.Thread.run(Thread.java:484)
+
+"tcp-accept-8080" runnable [0xbe7ff000..0xbe7ff8c4]
+        at java.net.PlainSocketImpl.socketAccept(Native Method)
+        at java.net.PlainSocketImpl.accept(PlainSocketImpl.java:413)
+        at java.net.ServerSocket.implAccept(ServerSocket.java:243)
+        at java.net.ServerSocket.accept(ServerSocket.java:222)
+        at com.caucho.server.TcpServer.run(TcpServer.java:415)
+        at java.lang.Thread.run(Thread.java:484)
+
+"resin-cron" daemon waiting on monitor [0xbe9ff000..0xbe9ff8c4]
+        at java.lang.Thread.sleep(Native Method)
+        at com.caucho.util.Cron$CronThread.run(Cron.java:195)
+
+"resin-alarm" daemon waiting on monitor [0xbebff000..0xbebff8c4]
+        at java.lang.Thread.sleep(Native Method)
+        at com.caucho.util.Alarm$AlarmThread.run(Alarm.java:268)
+
+"Signal Dispatcher" runnable [0..0]
+
+"Finalizer" daemon waiting on monitor [0xbf3ff000..0xbf3ff8c4]
+        at java.lang.Object.wait(Native Method)
+        at java.lang.ref.ReferenceQueue.remove(ReferenceQueue.java:108)
+        at java.lang.ref.ReferenceQueue.remove(ReferenceQueue.java:123)
+        at java.lang.ref.Finalizer$FinalizerThread.run(Finalizer.java:162)
+
+"Reference Handler" daemon waiting on monitor [0xbf5ff000..0xbf5ff8c4]
+        at java.lang.Object.wait(Native Method)
+        at java.lang.Object.wait(Object.java:420)
+        at java.lang.ref.Reference$ReferenceHandler.run(Reference.java:110)
+
+"main" waiting on monitor [0xbfffd000..0xbfffd210]
+        at java.lang.Thread.sleep(Native Method)
+        at com.caucho.server.http.ResinServer.waitForExit(ResinServer.java:674)
+        at com.caucho.server.http.ResinServer.main(ResinServer.java:821)
+        at com.caucho.server.http.HttpServer.main(HttpServer.java:95)
+</example>
+
+<p>Each thread is named.  Here are some of the common names:</p>
+
+<deftable>
+<tr><th>Thread Name<th>Description
+<tr><td>tcp-accept-8080<td>Resin thread listening for new connections
+on port 8080.
+<tr><td>tcpConnection-8080-3<td>Resin servlet thread handling 
+a connection from port 8080.
+<tr><td>tcp-cron<td>Resin's run-at thread
+<tr><td>tcp-alarm<td>Resin's alarm thread
+</deftable>
+
+<p>There should be one tcp-accept-xxx thread for each &lt;http> and
+&lt;srun> that Resin's listening for.  The tcp-accept-xxx thread should
+almost always be in socketAccept.</p>
+
+<p>There should be several tcpConnection-xxx-n threads.  Each of these
+is the servlet thread.  On a busy server, these can appear anywhere in
+your code.  If several appear in one location, you've likely got some sort
+of deadlock or at least a slow lock.  Idle threads are either in tcpAccept or
+httpRequest or runnerRequest (for keepalive threads.)</p>
+
+<p>For deadlocks, you'll want to look at the "waiting on monitor" threads
+and any case where lots of threads are stuck at the same location.</p>
+
+</section>
+
+<section title="Java profiling">
+
+<p>What you really need to do is get a good CPU and heap profile.
+The JDK 1.2 has a simple one (but not very 
+user-friendly), so you don't absolutely need to buy a profiler.</p>
+
+<p>It's a standard java argument, so "java -Xrunhprof:help" will tell you how to start it.  For example, you could 
+start Resin (unix or windows) as</p>
+
+<example>
+> httpd.sh -J-Xrunhprof:heap=sites,cpu=samples
+</example>
+
+<p>(On Unix, Resin's startup script has a -cpuprof-ascii argument that sets it for you automatically.)</p>
+
+<p>Run a load against it for a decent amount of time (you can even use something like Apache's "ab" for 10 
+minutes), and then stop the server nicely.  i.e. you can't just kill it with ctrl-C, but you need to make it do a 
+clean exit.</p>
+
+<p>That will dump a java.hprof.txt.  Skip to the bottom to get the trace.</p>
+
+<section title="java.hprof.txt heap">
+
+<p>Assuming you're being cheap, and using the JDK's heap profiling instead of
+buying a profiler, you'll need a bit of help interpreting it.</p>
+
+<p>The following is an example of a heap dump running Resin.  Here's what you
+might see skipping down to the "SITES BEGIN" section.  (I did mention this is
+the cheap way of doing things.)  As with most profiling, you only want
+to pay attention to the top 20.  Everything else is in the noise.  Ignore it.
+</p>
+
+<example>
+SITES BEGIN (ordered by live bytes) Tue Jan  9 17:44:33 2001
+          percent         live       alloc'ed  stack class
+ rank   self  accum    bytes objs   bytes objs trace name
+    1 11.87% 11.87%   983520  120 1393320  170  2553 [B
+    2  9.89% 21.76%   819600  100 1286772  157  4070 [B
+    3  9.09% 30.85%   753756   23 3539376  108  4970 [L&lt;Unknown>;
+    4  5.83% 36.68%   483564   59  778620   95  7180 [B
+    5  5.74% 42.42%   475368   58  745836   91  7178 [B
+    6  4.35% 46.77%   360624   44  696660   85  7182 [B
+    7  2.97% 49.74%   245880   30  450780   55  7176 [B
+    8  2.37% 52.11%   196704   24  352428   43  7254 [B
+    9  1.88% 53.99%   155724   19  262272   32  7174 [B
+   10  1.78% 55.77%   147528   18  245880   30  7137 [B
+   11  1.53% 57.30%   126988 1063 16973092 129113  3271 [C
+   12  1.34% 58.64%   110684 3953 20362832 727244  1213 sun/io/CharToByteISO8859_1
+   13  1.25% 59.88%   103320  738  141820 1013  5942 java/lang/Class
+   14  1.21% 61.10%   100548   49  221616  108  5003 [L&lt;Unknown>;
+   15  1.21% 62.31%   100548   49  221616  108  5005 [L&lt;Unknown>;
+   16  1.07% 63.38%    89080 1532 18393580 317347  1340 [B
+   17  0.79% 64.18%    65568    8   81960   10  8408 [B
+   18  0.79% 64.97%    65552    4   65552    4 27630 [C
+   19  0.70% 65.67%    58232   24 1110128  386  5038 [C
+   20  0.68% 66.35%    56200  450  116816  980  7186 [C
+</example>
+
+<p>There are two things to look for.  First, if any one class starts
+chewing up a large number in the "live objs" column, you'll need to
+take a look.  That might be a memory leak.</p>
+
+<p>Second, if some class has a huge number in the "alloc'ed objs" column,
+you may be wasting lots of garbage collection time that could be easily
+solved with some caching.</p>
+
+<p>The [C in the class name means a character array.
+To see what that really means, you'll need to look at the stack
+trace (3271):</p>
+
+<example>
+TRACE 3271:
+	java/lang/String.&lt;init>(String.java:244)
+	com/caucho/util/CharBuffer.close(CharBuffer.java:714)
+	com/caucho/vfs/FilesystemPath.normalizePath(FilesystemPath.java:162)
+	com/caucho/vfs/FilesystemPath.schemeWalk(FilesystemPath.java:127)
+</example>
+
+<p>That's part of Resin's VFS code.  Maybe in the future it'll make sense
+to try to reduce that.
+
+<p>You can get a longer trace using the "-prof-depth 10" argument to Resin.
+(Or the corresponding depth in -Xrunhprof.)  That will often give more
+information.</p>
+
+</section>
+
+<section title="java.hprof.txt CPU">
+
+<p>The CPU profiling is a little easier to read.  On some JDK's you'll need to
+run it with the JIT disabled.</p>
+
+<example>
+CPU SAMPLES BEGIN (total = 424614) Tue Jan  9 17:44:33 2001
+rank   self  accum   count trace method
+   1 21.36% 21.36%   90704  7266 com/caucho/server/http/VirtualHost.logAccess
+   2 10.84% 32.20%   46041  7269 java/net/SocketInputStream.socketRead
+   3  5.99% 38.19%   25428  1213 java/lang/Class.newInstance0
+   4  5.11% 43.31%   21715  7896 com/caucho/util/CharBuffer.toString
+   5  4.82% 48.13%   20463  1286 sun/io/CharToByteISO8859_1.convert
+   6  3.54% 51.66%   15018  1242 sun/io/CharToByteConverter.&lt;init>
+   7  2.68% 54.35%   11388  7241 java/io/PrintWriter.&lt;init>
+   8  2.47% 56.82%   10508  7748 com/caucho/server/http/Request.fillCookies
+   9  2.27% 59.09%    9650  1214 sun/io/ByteToCharConverter.&lt;init>
+  10  1.85% 60.94%    7857  5097 java/lang/String.&lt;init>
+  11  1.59% 62.53%    6754  1341 java/lang/String.substring
+  12  1.57% 64.10%    6650  1340 java/lang/String.getBytes
+  13  0.92% 65.02%    3907  7897 java/lang/String.&lt;init>
+  14  0.76% 65.78%    3227  3259 com/caucho/vfs/FilePath.fsWalk
+  15  0.75% 66.53%    3195  7895 com/caucho/server/http/Request.fillCookie
+  16  0.71% 67.25%    3031  7321 java/lang/String.getBytes
+  17  0.71% 67.95%    2996  3270 com/caucho/util/CharBuffer.close
+  18  0.68% 68.63%    2892  3271 java/lang/String.&lt;init>
+  19  0.66% 69.29%    2782  7318 com/caucho/vfs/FilePath.openWriteImpl
+  20  0.61% 69.90%    2604  7320 java/io/FileOutputStream.&lt;init>
+</example>
+
+<p>You should only pay attention to the top 20 or so.  You'll
+probably need to ignore a few of the top 10, because they're just waiting
+for a user response.  The SocketInputStream.socketRead is an example.
+
+<p>You can use the trace number to get a call trace:</p>
+
+<example>
+TRACE 7266:
+	com/caucho/server/http/VirtualHost.logAccess(VirtualHost.java:487)
+	com/caucho/server/http/Application.logAccess(Application.java:1846)
+	com/caucho/server/http/Response.finish(Response.java:1345)
+	com/caucho/server/http/Request.finish(Request.java:416)
+</example>
+
+</section>
+
+</section>
+  </body>
+</document>

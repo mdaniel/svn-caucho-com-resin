@@ -1,0 +1,163 @@
+/*
+ * Copyright (c) 1998-2004 Caucho Technology -- all rights reserved
+ *
+ * This file is part of Resin(R) Open Source
+ *
+ * Each copy or derived work must preserve the copyright notice and this
+ * notice unmodified.
+ *
+ * Resin Open Source is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * Resin Open Source is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE, or any warranty
+ * of NON-INFRINGEMENT.  See the GNU General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Resin Open Source; if not, write to the
+ *   Free SoftwareFoundation, Inc.
+ *   59 Temple Place, Suite 330
+ *   Boston, MA 02111-1307  USA
+ *
+ * @author Scott Ferguson
+ */
+
+package com.caucho.jca;
+
+import java.util.ArrayList;
+
+import java.util.logging.Logger;
+
+import java.io.InputStream;
+
+import javax.resource.spi.ResourceAdapter;
+
+import com.caucho.util.L10N;
+
+import com.caucho.log.Log;
+
+import com.caucho.vfs.Path;
+import com.caucho.vfs.Vfs;
+
+import com.caucho.config.ConfigException;
+import com.caucho.config.NodeBuilder;
+
+import com.caucho.jca.cfg.ConnectorConfig;
+import com.caucho.jca.cfg.ResourceAdapterConfig;
+
+/**
+ * Configuration for the resource manager.
+ */
+public class ResourceManagerConfig {
+  private static final L10N L = new L10N(ResourceManagerConfig.class);
+  private static final Logger log = Log.open(ResourceManagerConfig.class);
+
+  private ResourceManagerImpl _rm;
+
+  private Path _configDirectory;
+
+  private ArrayList<ConnectorConfig> _connList =
+    new ArrayList<ConnectorConfig>();
+  
+  public ResourceManagerConfig()
+    throws ConfigException
+  {
+    _rm = ResourceManagerImpl.createLocalManager();
+  }
+
+  /**
+   * Sets the configuration directory.
+   */
+  public void setConfigDirectory(Path path)
+  {
+    _configDirectory = path;
+  }
+
+  /**
+   * Returns the matching connector.
+   */
+  public ConnectorConfig getConnector(String adapterClass)
+  {
+    for (int i = 0; i < _connList.size(); i++) {
+      ConnectorConfig conn = _connList.get(i);
+      com.caucho.jca.cfg.ResourceAdapterConfig ra = conn.getResourceAdapter();
+
+      if (ra.getResourceadapterClass() != null &&
+	  adapterClass.equals(ra.getResourceadapterClass().getName()))
+	return conn;
+    }
+
+    return null;
+  }
+
+  public void init()
+    throws ConfigException
+  {
+    if (_configDirectory == null)
+      throw new ConfigException(L.l("resource-manager requires a config-directory"));
+    Thread thread = Thread.currentThread();
+    ClassLoader loader = thread.getContextClassLoader();
+
+    try {
+      Path path = _configDirectory;
+      String []list = path.list();
+
+      for (int i = 0; i < list.length; i++) {
+	String name = list[i];
+
+	if (! name.endsWith(".ra"))
+	  continue;
+
+	InputStream is = path.lookup(name).openRead();
+	try {
+	  ConnectorConfig conn = new ConnectorConfig();
+
+	  NodeBuilder builder = new NodeBuilder();
+	  builder.setCompactSchema("com/caucho/jca/jca.rnc");
+
+	  builder.configure(conn, is);
+
+	  _connList.add(conn);
+	} finally {
+	  is.close();
+	}
+      }
+    } catch (ConfigException e) {
+      throw e;
+    } catch (Throwable e) {
+      throw new ConfigException(e);
+    }
+
+    for (int i = 0; i < _connList.size(); i++) {
+      ConnectorConfig conn = _connList.get(i);
+
+      initResource(conn);
+    }
+  }
+
+  private void initResource(ConnectorConfig conn)
+    throws ConfigException
+  {
+    ResourceAdapterConfig raCfg = conn.getResourceAdapter();
+    
+    try {
+      Class raClass = raCfg.getResourceadapterClass();
+
+      ResourceAdapter ra = (ResourceAdapter) raClass.newInstance();
+
+      java.lang.reflect.Method init = raClass.getMethod("init", new Class[0]);
+
+      if (init != null)
+	init.invoke(ra, (Object []) null);
+
+      _rm.addResource(ra);
+    } catch (Exception e) {
+      throw new ConfigException(e);
+    }
+  }
+}
+

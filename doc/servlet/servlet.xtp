@@ -1,0 +1,419 @@
+<document>
+  <header>
+    <product>resin</product>
+    <resin-2.0>$resin/ref/servlet-config.xtp</resin-2.0>
+    <title>Servlets</title>
+    <description>
+      <p>Servlets are Java classes which service HTTP requests.  The only
+        requirement for writing a servlet is that it implements the
+        javax.servlet.Servlet interface.</p>
+
+      <p>Servlets are loaded from the classpath like all Java classes.
+        Normally, users put servlets in <var/WEB-INF/classes/> so Resin will
+          automatically reload them when they change.</p>
+      
+      <p><a href='jsp|index'>JSP</a> pages are implemented as
+        Servlets, and tend to be more efficient for pages with lots of text.</p>
+    </description>
+  </header>
+
+  <body>
+    <summary no-objsummary='1'/>
+
+<section title='Examples'>
+
+<section title='Configuring the web.xml'>
+
+<p>The following is a complete working web.xml to run this example.</p>
+
+<p>The <var/servlet-mapping/> tells Resin that the URL
+<var//hello/> should invoke the <var/hello-world/> servlet.</p>
+
+<p>The <var/servlet/> tells Resin that <var/hello-world/> uses the
+<var/test.HelloWorld/> class and that the value of the <var/greeting/>
+init parameter is <var/Hello World/>.</p>
+
+<example title='WEB-INF/web.xml'>
+&lt;web-app>
+  &lt;servlet-mapping url-pattern='/hello'
+                   servlet-name='hello-world'/>
+
+  &lt;servlet servlet-name='hello-world'
+           servlet-class='test.HelloWorld'>
+    &lt;init-param greeting='Hello, World'/>
+&lt;/web-app>
+</example>
+
+<p>The Java code, <var/HelloWorld.java/> belongs in</p>
+<def>
+$app-dir/WEB-INF/classes/test/HelloWorld.java
+</def>
+
+<p>Or, if you're compiling the servlet yourself, the class file belongs in</p>
+<def>
+$app-dir/WEB-INF/classes/test/HelloWorld.class
+</def>
+
+<p>Following is the actual servlet code.  It just prints a trivial
+HTML page filled with the greeting specified in the web.xml.</p>
+
+<p><var/init()/> and <var/destroy()/> are included mostly for
+illustration.  Resin will call <var/init()/> when it starts the servlet
+and <var/destroy/> before Resin destroys it.</p>
+
+<example>
+package test;
+
+import java.io.*;
+import javax.servlet.*;
+import javax.servlet.http.*;
+
+public class HelloWorld extends HttpServlet {
+  private String greeting;
+
+  public void init()
+    throws ServletException
+  {
+    greeting = getInitParameter("greeting");
+  }
+
+  public void doGet(HttpServletRequest request,
+                    HttpServletResponse response)
+    throws ServletException, IOException
+  {
+    PrintWriter out = response.getWriter();
+
+    out.println("&lt;title>" + greeting + "&lt;/title>");
+    out.println("&lt;h1>" + greeting + "&lt;/h1>");
+  }
+  
+  public void destroy()
+  {
+    // nothing to do
+  }
+}
+</example>
+
+</section>
+
+<section title='Servlet Example for JSP Programmers'>
+
+<p>Because Resin compiles JSP pages into servlets, programmers familiar
+with JSP can start writing servlets fairly easily.  The following template
+can be used to see how to write a servlet for someone familiar with JSP.
+</p>
+
+<example>
+package test;
+
+import java.io.*;
+import javax.servlet.*;
+import javax.servlet.http.*;
+
+public class HelloWorld extends HttpServlet {
+  public void service(HttpServletRequest request,
+                      HttpServletResponse response)
+    throws ServletException, IOException
+  {
+    PrintWriter out = response.getWriter();
+    ServletContext application = getServletContext();
+    HttpSession session = request.getSession();
+
+    try {
+      // <var/code goes here/>
+
+      // The equivalent of jsp:include:
+      // request.getRequestDispatcher("/inc.jsp").include(request, response);
+    } catch (ServletException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new ServletException(e);
+    }
+  }
+}
+</example>
+
+</section>
+
+<section title='Using Databases from a Servlet'>
+
+<p>The following is a sample design pattern for getting new database
+connections.  The <var/try ... finally/> block is very important.  Without
+the close in the finally block, Resin's database pool can loose connections.</p>
+
+<p>Configuring the database is described in the
+<a href="doc|db|index">database configuration</a> page.</p>
+
+<example title="TestDatabase.java">
+package test;
+
+import java.io.*;
+
+import java.sql.*;
+import javax.servlet.*;
+import javax.servlet.http.*;
+import javax.naming.*;
+import javax.sql.*;
+
+public class TestDatabase extends HttpServlet {
+  DataSource pool;
+
+  public void init()
+    throws ServletException
+  {
+    try {
+      Context env = (Context) new InitialContext().lookup("java:comp/env");
+
+      pool = (DataSource) env.lookup("jdbc/test");
+
+      if (pool == null)
+        throw new ServletException("`jdbc/test' is an unknown DataSource");
+    } catch (NamingException e) {
+      throw new ServletException(e);
+    }
+  }
+
+  public void doGet(HttpServletRequest request,
+                    HttpServletResponse response)
+    throws IOException, ServletException
+  {
+    response.setContentType("text/html");
+    PrintWriter out = response.getWriter();
+
+    Connection conn = null;
+    try {
+      conn = pool.getConnection();
+
+      // <var/code for the servlet using the database goes here/>
+
+      rs.close();
+      stmt.close();
+    } catch (SQLException e) {
+      throw new ServletException(e);
+    } finally {
+      try {
+        if (conn != null)
+          conn.close();
+      } catch (SQLException e) {
+      }
+    }
+  }
+}
+</example>
+
+</section>
+
+</section>
+
+
+<section title="Servlet Configuration">
+
+<defun title="init" version="Resin 2.1.3">
+<p>Configures servlets using bean-style initialization.
+Each entry in an &lt;init> tag will configure a <code/setFoo/>
+method in a Servlet. JSP EL expressions are allowed.</p>
+
+<p>The <code/init(config)/> method is called after
+all the bean setters are called.</p>
+
+<example title="Bean-style Configuration">
+&lt;servlet servlet-name='test.HelloWorld'&gt;
+  &lt;init&gt;
+    &lt;greeting&gt;Hello, ${host.url}&lt;/greeting>
+  &lt;/init&gt;
+&lt;/servlet&gt;
+</example>
+
+<example title="HelloWorld bean">
+public HelloWorld extends GenericServlet {
+  private String _greeting;
+
+  public void setGreeting(String greeting)
+  {
+    _greeting = greetin;
+  }
+
+  public void service(ServletRequest req,
+                      ServletResponse res)
+    throws IOException, ServletException
+  {
+    PrintWriter out = res.getWriter();
+
+    out.println("Greeting: " + _greeting);
+  }
+}
+</example>
+
+</defun>
+
+<defun title='init-param'>
+<p>Initializes servlet variables. <code/servlet-param/>
+defines initial values for <code/getServletConfig().getInitParameter("foo")/>.
+</p>
+
+<p>The full servlet 2.2 syntax is supported and allows a simple shortcut.</p>
+<example>
+&lt;web-app id='/'&gt;
+
+&lt;servlet servlet-name='test.HelloWorld'&gt;
+  &lt;init-param foo='bar'/&gt;
+
+  &lt;init-param&gt;
+    &lt;param-name&gt;baz&lt;/param-name&gt;
+    &lt;param-value&gt;value&lt;/param-value&gt;
+  &lt;/init-param&gt;
+&lt;/servlet&gt;
+
+&lt;/web-app>
+</example>
+</defun>
+
+<defun title="load-on-startup">
+<p>If present, starts the servlet when the server starts.</p>
+<example>
+&lt;web-app id='/'>
+
+&lt;servlet servlet-name='hello'
+         servlet-class='test.HelloWorld'&gt;
+  &lt;load-on-startup/&gt;
+&lt;/servlet&gt;
+
+&lt;/web-app&gt;
+</example>
+</defun>
+
+<defun title='run-at' version='Resin 1.1'>
+<p>If present, calls the servlet's <var/service()/> method
+at the specified times.
+&lt;run-at> lets servlet writers execute periodic tasks without worrying
+about creating a new Thread.</p>
+
+<p>The value is a list of 24-hour times when the
+servlet should be automatically executed.  To run the servlet every 6
+hours, you could use:</p>
+
+<example>
+&lt;servlet servlet-name='test.HelloWorld'&gt;
+  &lt;run-at&gt;0:00, 6:00, 12:00, 18:00&lt;/run-at&gt;
+&lt;/servlet&gt;
+</example>
+
+<p>If the hour is omitted, the servlet runs every hour at the
+specified minute.  To run the server every 15 minutes, you could use:
+</p>
+
+<example>
+&lt;servlet servlet-name='test.HelloWorld'&gt;
+  &lt;run-at&gt;:00, :15, :30, :45&lt;/run-at&gt;
+&lt;/servlet&gt;
+</example>
+</defun>
+
+<defun title='servlet'>
+<p>Defines a servlet alias for later mapping.</p>
+
+<deftable>
+<tr><th>Attribute<th>Description
+<tr><td>servlet-name<td>The servlet's name (alias)
+<tr><td>servlet-class<td>The servlet's class (defaults to servlet-name)
+<tr><td>init-param<td>Initialization parameters
+<tr><td>load-on-startup<td>Initializes the servlet when the server starts.
+<tr><td>run-at<td>Times to execute the servlet automatically
+</deftable>
+
+<p>The following example defines a servlet alias 'hello'</p>
+<example>
+&lt;web-app id='/'&gt;
+
+&lt;servlet-mapping url-pattern='/hello.html'
+                 servlet-name='hello'/&gt;
+
+&lt;servlet servlet-name='hello'
+         servlet-class='test.HelloWorld'&gt;
+  &lt;init-param title='Hello, World'/&gt;
+&lt;/servlet&gt;
+
+&lt;servlet servlet-name='cron'
+         servlet-class='test.DailyChores'&gt;
+  &lt;run-at&gt;3:00&lt;/run-at&gt;
+&lt;/servlet&gt;
+
+&lt;/web-app&gt;
+</example>
+</defun>
+
+<defun title='servlet-class'>
+<p>Class of the servlet.  The CLASSPATH for servlets includes
+the WEB-INF/classes directory and all jars in the WEB-INF/lib directory.
+</p>
+</defun>
+
+<defun title="servlet-name">
+<p>Alias of the servlet, uniquely naming a servlet configuration.
+Several &lt;servlet> configurations might configure the same
+servlet class with different &lt;init-param> values.  Each will
+have a separate servlet-name.</p>
+
+<example title="Multiple Servlets">
+&lt;web-app>
+  &lt;servlet servlet-name='foo-a'>
+    &lt;servlet-class>test.FooServlet&lt;/servlet-class>
+    &lt;init-param name='foo-a sample'/>
+  &lt;/servlet>
+
+  &lt;servlet servlet-name='foo-b'>
+    &lt;servlet-class>test.FooServlet&lt;/servlet-class>
+    &lt;init-param name='foo-b sample'/>
+  &lt;/servlet>
+&lt;/web-app>
+</example>
+
+</defun>
+
+<defun title="servlet-mapping">
+<p>Maps from a URL to the servlet to execute.  The servlet-mapping
+has a url-pattern to match the URL and a servlet-name to match the
+configured servlet.</p>
+
+<example title="typical servlet-mapping">
+&lt;servlet>
+  &lt;servlet-name>hello&lt;/servlet-name>
+  &lt;servlet-class>test.HelloServlet&lt;/servlet-class>
+&lt;/servlet>
+
+&lt;servlet-mapping>
+  &lt;url-pattern>/hello/*&lt;/url-pattern>
+  &lt;servlet-name>hello&lt;/servlet-name>
+&lt;/servlet-mapping>
+</example>
+
+<p>Resin allows for a shortcut combining the servlet and
+the servlet mapping:</p>
+
+<example title="shortcut servlet-mapping">
+&lt;servlet-mapping url-pattern="/hello/*"
+                 servlet-class="test.HelloServlet"/>
+</example>
+</defun>
+
+<defun title="url-pattern" version="Servlet 2.2">
+<p>Matches a set of URLs for servlet-mapping.</p>
+
+<deftable>
+<tr><th width='25%'>Pattern<th>Description
+<tr><td>/foo/bar.html<td>Matches exactly the /foo/bar.html URL.
+<tr><td>/foo/*<td>Matches /foo and any children
+<tr><td>*.foo<td>Matches any URL with a .foo extension
+<tr><td>/<td>Replaces the default servlet.
+</deftable>
+
+<p><var///> defines a default handler and <var//*/> defines a prefix handler.
+<var//*/> will override extension handlers like <var/*.foo/>. <var///>
+will only be used if no other pattern matches.</p>
+
+<p>No default.  Either url-pattern or url-regexp is required.</p>
+</defun>
+
+</section>
+  </body>
+</document>

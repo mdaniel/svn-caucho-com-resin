@@ -1,0 +1,130 @@
+<document>
+  <header>
+    <product>resin</product>
+    <title>Amber</title>
+
+    <description>
+Amber aims at relational database
+persistence with an application-oriented data model.
+    </description>
+  </header>
+
+  <body>
+
+    <summary/>
+<!--
+<p>Tools should not get in the way of the application model.</p>
+
+<p>Development complexity dominates application cost.</p>
+-->
+
+<section title="Goals">
+
+<ul>
+<li>Use Java beans for the application model.
+<li>Leverage JDBC APIs.
+<li>Make persistence connections and transactions explicit
+<li>Simplify configuration files
+</ul>
+
+<section title="Java beans as the application model">
+
+<p>The application's data model should drive the Java
+classes and architecture.  As much as possible, Amber
+stays out of the way and defers to the application's needs.
+At the same time, it must be clear how the objects map to the database.
+</p>
+
+<p>Persistent objects for Amber have bean-style
+properties (<code>getXXX</code> and <code>setXXX</code>) which correspond
+to columns in the database.  No additional classes or interfaces are
+required for Amber. In this respect, Amber is identical to Hibernate's
+persistence model.  Classes designed for Hibernate can be used for
+Amber without modification.<p>
+
+<p>Amber contrasts with J2EE CMP by eliminating the home
+and local interfaces and eliminating the special J2EE methods
+like <code>ejbCreate</code> and <code>ejbPostCreate</code>.  Applications
+using J2EE must twist their data model to fit the J2EE CMP rules, and must
+deal with the extra interfaces and methods.  By eliminating the J2EE
+complexity, can simplify application code, making it easier and cheaper
+to design and maintain.</p>
+
+<p>In contrast with JDO, Amber requires bean-style properties
+and commits to a relational database.  For Amber, the database design is
+primary and the Java model is just a view of the database.  JDO aims at
+making persistence invisible, hiding the existence of the database
+from the application and bytecode enhancing all field references.
+By hiding the database, JDO makes the persistence opaque, making the
+mental model of JDO more complicated.
+By committing to a relational model, Amber gains the power of
+the relational queries and keeps the persistence model concrete.</p>
+
+</section>
+
+<section title="Explicit Persistence">
+
+<p>Developers are familiar with obtaining a JDBC <code>Connection</code>
+from a <code>DataSource</code>, doing some work, and closing
+the <code>Connection</code> when work is done.  Amber's model maps
+directly to the JDBC model, avoiding a complicated mental model.</p>
+
+<p>The <code>AmberConnection</code> is based on an underlying
+JDBC <code>Connection</code>.  Beans used with the <code>AmberConnection</code>
+are enlisted with that connection.  The connection's close delists the
+beans.  Unregistered beans act like any normal Java object.  Only when the
+application explicitly enlists them with the <code>AmberConnection</code> will
+they become persistent.</p>
+
+<p>By making the persistence explicit, Amber works at making persistence
+transparent, not opaque or invisible.
+Persistence should be a clear box, not a black box.  It should be clear
+to a code reviewer how the application code is persisted without
+referring to external design documents.  With invisible or hidden persistence,
+it's not always clear how objects are reflected in the database.</p>
+
+<p>In contrast to Amber's explicit persistence connection, J2EE's CMP uses
+a hidden connection, invisible to the J2EE developer.  J2EE beans are enlisted
+and delisted automatically: magic occuring behind the J2EE stub. By hiding
+its connection and bean instance, J2EE requires a more complicated mental
+model for even the most simple beans.</p>
+
+<p>Amber's explicit model not only makes it easier to learn, but makes
+application code easier to debug and maintain.  Because the connection
+is explicit, it's visible in the code.  With an explicit connection a code
+review can follow the persistence just by inspecting the code.</p>
+
+</section>
+
+<section title="JDBC APIs">
+
+<p>Amber uses JDBC classes like ResultSet both to simplify the interfaces
+and to take advantage of database driver capability.  Since the
+ResultSet can already flexibly scan through results and return columns in
+their proper types, there's no need to invent a new API.</p>
+
+<p>To handle objects, Amber implements the
+<code>ResultSet.getObject</code> method to return the loaded object.</p>
+
+<example>
+AmberConnection conn = ...;
+
+ResultSet rs = conn.query("SELECT o FROM qa.Test o WHERE o.data='test-data'");
+
+while (rs.next()) {
+  ...
+}
+</example>
+
+</section>
+
+<section title="Configuration Files">
+
+<p>Amber currently follows the Hibernate configuration file.</p>
+
+</section>
+
+</section>
+
+  </body>
+</document>

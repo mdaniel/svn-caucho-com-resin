@@ -1,0 +1,10 @@
+<navigation threaded="true" section="Resin : Amber : Tutorials" comment="true">
+  <item title="Tutorials" link="index.xtp">
+    <item link="basic/index.xtp" title="Basic Amber"/>
+    <item link="create/index.xtp" title="Create/Destroy"/>
+    <item link="find/index.xtp" title="Find/Query"/>
+    <item link="many2one/index.xtp" title="Many-To-One"/>
+    <item link="one2many/index.xtp" title="One-To-Many"/>
+  </item>
+</navigation>
+

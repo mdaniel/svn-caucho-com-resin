@@ -1,0 +1,128 @@
+<document>
+  <header>
+    <product>resin</product>
+    <resin-2.0>$resin/java_tut/xtp-jsp.xtp</resin-2.0>
+    <title>JSP tag libraries with XSL</title>
+    <description>
+      <p>XML Template Pages encourages web sites to create JSP tag libraries.
+        By putting the JSP creation in stylesheets, you can separate the
+        programming from the web pages.  The XTP pages can be simple XML or
+        HTML documents and simply add the custom tags as necessary.</p>
+    </description>
+  </header>
+
+  <body>
+    <summary/>
+
+<section name=mixing title="Creating JSP from XTP">
+
+<p>Resin creates a JSP file from an XTP file.  XTP pages can
+separate the content (in XML) from the scripting (in XSL).  The XSL
+stylesheets now become a palette of JSP actions you can use just by
+adding tags.</p>
+
+<ol>
+<li>Parse XTP file as HTML
+<li>Find and parse XSL stylesheet
+<li>Applying the stylesheet to the XTP, creating a JSP file
+<li>Execute the JSP file
+</ol>
+
+<p>A trivial example is a named counter.  If the counter has an 'id'
+attribute, we'll use it at the value of the application variable.</p>
+
+<p>XTP pages can use the counter just by adding the tag:</p>
+
+<example title='counter.xtp'>
+<var>A counter example: </var>&lt;ct:counter id='test'/&gt;
+</example>
+
+<example title='default.xsl'>
+&lt;xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+                version="1.0">
+
+&lt;xsl:template match='counter[@id]'&gt;
+  <var>&lt;jsp:expression&gt;</var>
+     &lt;xsl:text&gt;<var>application.attribute["</var>&lt;/xsl:text>
+     &lt;xsl:value-of select='@id'/>
+     &lt;xsl:text><var>"]</var>&lt;/xsl:text>
+  <var>&lt;/jsp:expression&gt;</var>
+&lt;/xsl:template&gt;
+
+&lt;xsl:template match='counter'&gt;
+  <var>&lt;jsp:expression&gt;</var>
+     <var>application.attribute.counter++</var>
+  <var>&lt;/jsp:expression&gt;</var>
+&lt;/xsl:template&gt;
+
+&lt;/xsl:stylesheet>
+</example>
+
+<p>The following JSP file is the result.  Resin will
+execute the generated JSP file to process HTTP requests.
+
+<results title='gen438.jsp'>
+A counter example: &lt;jsp:expression&gt;
+  application.attribute["test"]++ 
+&lt;jsp:expression&gt;
+</results>
+
+</section>
+
+<section name=flow title="Creating JSP flow control">
+
+<p>XTP can also generate JSP control.  Many programmers like using tags
+for programming, like Cold Fusion.  Here's how to create a basic set
+of programming tags.</p>
+
+<ul>
+<li>ct:get prints the value of a variable
+<li>ct:if generates an if statement
+<li>ct:iter loops
+</ul>
+
+<p>An example use might print the HTTP headers.</p>
+
+<example>
+&lt;ct:iter expr='request.header'/&gt;
+  &lt;ct:get expr='i'/&gt; : &lt;ct:get expr='request.header[i]'/&gt;
+&lt;/ct:iter&gt;
+</example>
+<results>
+Accept : image/gif, image/png
+User-Agent : Mozilla/4.5
+Accept-Language : en
+Host : www.caucho.com
+</results>
+
+<p>Here is the stylesheet:</p>
+
+<example title='definition of ct:get'>
+&lt;xsl:template match='ct:get'>
+  <var>&lt;jsp:expression></var>&lt;xsl:value-of select='@expr'/><var>&lt;/jsp:expression></var>
+&lt;/xsl:template>
+</example>
+
+<example title='definition of ct:if'>
+&lt;xsl:template match='ct:if'>
+  <var>&lt;jsp:scriptlet>
+    if (</var>&lt;xsl:value-of select='@expr'/><var>) {
+  &lt;/jsp:scriptlet></var>
+    &lt;xsl:apply-templates/>
+  <var>&lt;jsp:scriptlet>}&lt;/jsp:scriptlet></var>
+&lt;/xsl:template>
+</example>
+
+<example title='definition of ct:iter'>
+&lt;xsl:template match='ct:iter'>
+  <var>&lt;jsp:scriptlet>
+    for (var i in </var>&lt;xsl:value-of select='@expr'/><var>) {
+  &lt;/jsp:scriptlet></var>
+    &lt;xsl:apply-templates/>
+  <var>&lt;jsp:scriptlet>}&lt;/jsp:scriptlet></var>
+&lt;/xsl:template>
+</example>
+
+</section>
+  </body>
+</document>

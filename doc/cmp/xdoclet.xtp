@@ -1,0 +1,39 @@
+<document>
+  <header>
+    <product>resin-ee</product>
+    <title>XDoclet tags</title>
+    <description>XDoclet tags</description>
+  </header>
+
+  <body>
+    <summary/>
+
+<deftable title="XDoclet tags">
+<tr><th>Tag<th>Attribute<th>Meaning
+<tr><td>@ejb.bean<td>&nbsp;<td>configuration applicable to the entire bean
+<tr><td>&nbsp;<td>name<td>The EJB and JNDI name for the bean
+<tr><td>&nbsp;<td>view-type<td>"local" for local CMP beans
+<tr><td>&nbsp;<td>type<td>"CMP" for CMP beans, "BMP" for BMP beans
+<tr><td>&nbsp;<td>schema<td>The abstract schema name for the bean, i.e. the
+<tr><td>&nbsp;<td>primkey-field<td>The primary key field for the bean
+<tr><td>@ejb.persistence<td>&nbsp;<td>persistence (SQL) configuration.  For methods, marks the method as persistent
+<tr><td>&nbsp;<td>table-name<td>The actual database table for the bean
+<tr><td>&nbsp;<td>column-name<td>The actual column for the field
+<tr><td>@ejb.pk<td>&nbsp;<td>configuration for the primary key
+<tr><td>&nbsp;<td>class<td>The class of the primary key
+<tr><td>@ejb.home<td>&nbsp;<td>configuration for the home interface
+<tr><td>&nbsp;<td>generate<td>Which interfaces to generate: "local,remote"
+<tr><td>&nbsp;<td>local-class<td>The class name of the local home interface
+<tr><td>@ejb.interface<td>&nbsp;<td>configuration for the object interface
+<tr><td>&nbsp;<td>generate<td>Which interfaces to generate: "local,remote"
+<tr><td>&nbsp;<td>local-class<td>The class name of the local object interface
+<tr><td>@ejb.interface-method<td>&nbsp;<td>exposes the method as an interface
+<tr><td>@ejb.pk-field<td>&nbsp;<td>marks the method as the primary key
+<tr><td>@resin-ejb.bean<td>&nbsp;<td>bean-wide Resin specific configuration
+<tr><td>&nbsp;<td>read-only<td>Marks an entity bean as read-only
+<tr><td>&nbsp;<td>cache-size<td>Specifies the entity cache size
+<tr><td>&nbsp;<td>cache-timeout<td>Specifies the entity cache timeout
+</deftable>
+
+  </body>
+</document>

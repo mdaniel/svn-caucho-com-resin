@@ -1,0 +1,263 @@
+/*
+ * Copyright (c) 1998-2004 Caucho Technology -- all rights reserved
+ *
+ * This file is part of Resin(R) Open Source
+ *
+ * Each copy or derived work must preserve the copyright notice and this
+ * notice unmodified.
+ *
+ * Resin Open Source is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * Resin Open Source is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE, or any warranty
+ * of NON-INFRINGEMENT.  See the GNU General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Resin Open Source; if not, write to the
+ *
+ *   Free Software Foundation, Inc.
+ *   59 Temple Place, Suite 330
+ *   Boston, MA 02111-1307  USA
+ *
+ * @author Scott Ferguson
+ */
+
+package com.caucho.server.cluster;
+
+import java.io.*;
+import java.net.*;
+import java.util.*;
+import java.util.logging.*;
+
+import com.caucho.util.*;
+import com.caucho.vfs.*;
+
+import com.caucho.log.Log;
+
+import com.caucho.config.types.Period;
+
+/**
+ * Defines a connection to one of the servers in a distribution group.
+ */
+public class ClusterClient {
+  static protected final Logger log = Log.open(ClusterClient.class);
+
+  private ClusterServer _server;
+
+  // XXX: the load balance and the tcp-session want different timeouts
+  private int _timeout = 2000;
+
+  private int _maxPoolSize = 16;
+  
+  private ClusterStream []_free = new ClusterStream[64];
+  private int _freeHead;
+  private int _freeTail;
+  private int _freeSize = 16;
+  
+  private long _lastFailTime;
+
+  private int _activeCount;
+
+  private boolean _isClosed;
+
+  public ClusterClient(ClusterServer server)
+  {
+    _server = server;
+    _timeout = (int) server.getReadTimeout();
+  }
+
+  /**
+   * Returns the cluster server.
+   */
+  public ClusterServer getServer()
+  {
+    return _server;
+  }
+
+  /**
+   * Returns the socket timeout when reading and writing to the
+   * target server.
+   */
+  public int getTimeout()
+  {
+    return _timeout;
+  }
+
+  /**
+   * Sets the socket timeout when reading and writing to the
+   * target server.
+   */
+  public void setTimeout(long timeout)
+  {
+    _timeout = (int) timeout;
+  }
+
+  /**
+   * Returns the number of active connections.
+   */
+  public int getActiveCount()
+  {
+    return _activeCount;
+  }
+
+  /**
+   * Sets the recycle pool size.
+   */
+  public void setMaxPoolSize(int size)
+  {
+    _maxPoolSize = size;
+  }
+
+  /**
+   * Returns true if the server is dead.
+   */
+  public boolean isDead()
+  {
+    long now = Alarm.getCurrentTime();
+    
+    return (now < _lastFailTime + _server.getDeadTime() || _isClosed);
+  }
+  
+
+  /**
+   * Open a read/write pair, trying to recycle.
+   *
+   * @return the socket's read/write pair.
+   */
+  public ClusterStream openRecycle()
+  {
+    if (_isClosed)
+      return null;
+    
+    long now = Alarm.getCurrentTime();
+    ClusterStream stream = null;
+
+    synchronized (this) {
+      if (_freeHead != _freeTail) {
+	stream = _free[_freeTail];
+	long freeTime = stream.getFreeTime();
+	
+	_free[_freeTail] = null;
+	_freeTail = (_freeTail + 1) % _free.length;
+
+	if (now < freeTime + _server.getLiveTime()) {
+	  _activeCount++;
+	  return stream;
+	}
+      }
+    }
+
+    if (stream != null)
+      stream.close();
+
+    return null;
+  }
+  
+  /**
+   * Open a read/write pair to the target srun connection.
+   *
+   * @return the socket's read/write pair.
+   */
+  public ClusterStream open()
+  {
+    long now = Alarm.getCurrentTime();
+    if (now < _lastFailTime + _server.getDeadTime() || _isClosed)
+      return null;
+
+    ClusterStream recycleStream = openRecycle();
+    if (recycleStream != null)
+      return recycleStream;
+
+    try {
+      ReadWritePair pair = _server.openTCPPair();
+      ReadStream rs = pair.getReadStream();
+      rs.setAttribute("timeout", new Integer((int) _server.getReadTimeout()));
+      
+      synchronized (this) {
+	_activeCount++;
+      }
+
+      return new ClusterStream(this, rs, pair.getWriteStream());
+    } catch (IOException e) {
+      _lastFailTime = now;
+      return null;
+    }
+  }
+
+  /**
+   * We now know that the server is live.
+   */
+  public void wake()
+  {
+    _lastFailTime = 0;
+  }
+
+  /**
+   * frees the read/write pair for reuse.
+   */
+  void free(ClusterStream stream)
+  {
+    synchronized (this) {
+      _activeCount--;
+
+      int size = (_freeHead - _freeTail + _free.length) % _free.length;
+
+      if (! _isClosed && size < _freeSize) {
+	_free[_freeHead] = stream;
+	_freeHead = (_freeHead + 1) % _free.length;
+
+	return;
+      }
+    }
+
+    stream.close();
+  }
+
+  /**
+   * closes the read/write pair for reuse.
+   */
+  public void close(ClusterStream stream)
+  {
+    synchronized (this) {
+      _activeCount--;
+    }
+
+    stream.close();
+  }
+
+  /**
+   * Close the connection.
+   */
+  public void close()
+  {
+    synchronized (this) {
+      if (_isClosed)
+	return;
+
+      _isClosed = true;
+      _freeHead = _freeTail = 0;
+    }
+
+    for (int i = 0; i < _free.length; i++) {
+      ClusterStream stream;
+
+      synchronized (this) {
+	stream = _free[i];
+	_free[i] = null;
+      }
+
+      if (stream != null)
+	stream.close();
+    }
+  }
+
+  public String toString()
+  {
+    return ("ClusterClient[" + _server + "]");
+  }
+}

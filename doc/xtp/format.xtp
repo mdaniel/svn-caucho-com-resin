@@ -1,0 +1,66 @@
+<document>
+  <header>
+    <product>resin</product>
+    <resin-2.0>$resin/java_tut/xtp-format.xtp</resin-2.0>
+    <title>Formatting</title>
+    <description>
+      <p>A major advantage of XTP is its separation of content from formatting.
+        Your source documents can use meaningful markup tags letting the stylesheet
+        format the output.</p>
+    </description>
+  </header>
+
+  <body>
+    <summary/>
+<p>The XTP source of this tutorial uses a few tags for basic formatting:
+<var/&lt;section>/>, <var/&lt;example>/>, and <var/&lt;var>/>.</p>
+
+<p>For example, the source for the tutorial index contains a section
+like:</p>
+
+    <TODO>new example</TODO>
+<example title="index.xtp">
+&lt;s1 title="XTP">
+&lt;ul>
+&lt;li>&lt;a href="xtp-copy.xtp">XTP copy&lt;/a> treats XTP pages exactly like JSP.
+&lt;li>&lt;a href="xtp-format.xtp">Format&lt;/a> sections, splitting style from content
+&lt;li>&lt;a href="xtp-page.xtp">Encode links&lt;/a> for sessions automatically
+&lt;li>&lt;a href="xtp-strict.xtp">Strict XSL&lt;/a> equivalent to StyleScript
+&lt;/ul>
+&lt;/s1>
+</example>
+
+<p>The stylesheet contains a new rule for <var/s1/>.  In this
+example, the rule only works when there is a <var/title/> attribute.  In the
+replacement code, <var/&lt;xsl:value-of select="@title"/>/> inserts the
+value of the <var/title/> attribute.</p>
+
+<example title="default.xsl">
+&lt;xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+                version="1.0">
+
+  &lt;!-- make sure '&lt;' is not printed as '&amp;lt;' -->
+  &lt;xsl:output disable-output-escaping='true'/>
+
+  &lt;!-- copy input to output -->
+  &lt;xsl:template match='*|@*'>
+    &lt;xsl:copy>
+      &lt;xsl:apply-templates select='node()|@*'/>
+    &lt;/xsl:copy>
+  &lt;/xsl:template>
+
+  &lt;!-- s1 format -->
+  &lt;xsl:template match="s1[@title]">
+    &lt;table width="100%" cellpadding="5" border="0">
+    &lt;tr bgcolor="#ccddff">&lt;td>
+      &lt;font size="+2">&lt;b>&lt;value-of select="@title"/>&lt;/b>&lt;/font>
+    &lt;/td>&lt;/tr>
+    &lt;/table>
+
+    &lt;xsl:apply-templates/>
+  &lt;/xsl:template>
+&lt;/xsl:stylesheet>
+</example>
+
+  </body>
+</document>

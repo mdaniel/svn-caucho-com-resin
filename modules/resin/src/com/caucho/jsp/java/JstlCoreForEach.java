@@ -1,0 +1,623 @@
+/*
+ * Copyright (c) 1998-2004 Caucho Technology -- all rights reserved
+ *
+ * This file is part of Resin(R) Open Source
+ *
+ * Each copy or derived work must preserve the copyright notice and this
+ * notice unmodified.
+ *
+ * Resin Open Source is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * Resin Open Source is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE, or any warranty
+ * of NON-INFRINGEMENT.  See the GNU General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Resin Open Source; if not, write to the
+ *   Free SoftwareFoundation, Inc.
+ *   59 Temple Place, Suite 330
+ *   Boston, MA 02111-1307  USA
+ *
+ * @author Scott Ferguson
+ */
+
+package com.caucho.jsp.java;
+
+import java.util.ArrayList;
+import java.io.*;
+
+import javax.servlet.jsp.*;
+
+import com.caucho.vfs.*;
+import com.caucho.util.*;
+import com.caucho.jsp.*;
+import com.caucho.jsp.el.*;
+import com.caucho.xml.QName;
+
+/**
+ * Special generator for a JSTL c:forEach tag.
+ */
+public class JstlCoreForEach extends JstlNode {
+  private static final QName VAR = new QName("var");
+  private static final QName VAR_STATUS = new QName("varStatus");
+  
+  private static final QName ITEMS = new QName("items");
+  private static final QName BEGIN = new QName("begin");
+  private static final QName END = new QName("end");
+  private static final QName STEP = new QName("step");
+  
+  private String _var;
+  private String _varStatus;
+
+  private String _items;
+  private JspAttribute _itemsAttr;
+
+  private String _begin;
+  private JspAttribute _beginAttr;
+
+  private String _end;
+  private JspAttribute _endAttr;
+
+  private String _step;
+  private JspAttribute _stepAttr;
+
+  private boolean _isInteger;
+  private int _depth;
+  private String _tagVar;
+
+  private TagInstance _tag;
+  
+  /**
+   * Adds an attribute.
+   */
+  public void addAttribute(QName name, String value)
+    throws JspParseException
+  {
+    if (VAR.equals(name))
+      _var = value;
+    else if (VAR_STATUS.equals(name))
+      _varStatus = value;
+    else if (ITEMS.equals(name))
+      _items = value;
+    else if (BEGIN.equals(name))
+      _begin = value;
+    else if (END.equals(name))
+      _end = value;
+    else if (STEP.equals(name))
+      _step = value;
+    else
+      throw error(L.l("`{0}' is an unknown attribute for <{1}>.",
+                      name.getName(), getTagName()));
+  }
+  
+  /**
+   * Adds an attribute.
+   */
+  public void addAttribute(QName name, JspAttribute value)
+    throws JspParseException
+  {
+    if (ITEMS.equals(name))
+      _itemsAttr = value;
+    else if (BEGIN.equals(name))
+      _beginAttr = value;
+    else if (END.equals(name))
+      _endAttr = value;
+    else if (STEP.equals(name))
+      _stepAttr = value;
+    else
+      throw error(L.l("`{0}' is an unknown jsp:attribute for <{1}>.",
+                      name.getName(), getTagName()));
+  }
+
+  /**
+   * Returns true if the tag has scripting values.
+   */
+  public boolean hasScripting()
+  {
+    return (super.hasScripting() ||
+	    hasScripting(_items) || hasScripting(_itemsAttr) ||
+	    hasScripting(_begin) || hasScripting(_beginAttr) ||
+	    hasScripting(_end) || hasScripting(_endAttr) ||
+	    hasScripting(_step) || hasScripting(_stepAttr));
+  }
+
+  /**
+   * Returns true for an integer forEach.
+   */
+  public boolean isInteger()
+  {
+    return _items == null && _itemsAttr == null;
+  }
+
+  public TagInstance getTag()
+  {
+    return _tag;
+  }
+
+  /**
+   * Returns the tag name for the current tag.
+   */
+  public String getCustomTagName()
+  {
+    if (! hasDeclaration())
+      return null;
+    
+    int depth = getDepth();
+
+    if (isInteger())
+      return "_jsp_int_loop_" + depth;
+    else
+      return "_jsp_iter_loop_" + depth;
+  }
+
+  /**
+   * Returns true for a simple tag.
+   */
+  public boolean isSimpleTag()
+  {
+    return false;
+  }
+
+  /**
+   * Generates the XML text representation for the tag validation.
+   *
+   * @param os write stream to the generated XML.
+   */
+  public void printXml(WriteStream os)
+    throws IOException
+  {
+    os.print("<c:forEach");
+      
+    if (_itemsAttr != null) {
+      os.print(" items=\"");
+      _itemsAttr.printXml(os);
+      os.print("\"");
+    }
+    else if (_items != null) {
+      os.print(" items=\"");
+      printXmlText(os, _items);
+      os.print("\"");
+    }
+      
+    if (_beginAttr != null) {
+      os.print(" begin=\"");
+      _beginAttr.printXml(os);
+      os.print("\"");
+    }
+    else if (_begin != null) {
+      os.print(" begin=\"");
+      printXmlText(os, _begin);
+      os.print("\"");
+    }
+      
+    if (_endAttr != null) {
+      os.print(" end=\"");
+      _endAttr.printXml(os);
+      os.print("\"");
+    }
+    else if (_end != null) {
+      os.print(" end=\"");
+      printXmlText(os, _end);
+      os.print("\"");
+    }
+      
+    if (_stepAttr != null) {
+      os.print(" step=\"");
+      _stepAttr.printXml(os);
+      os.print("\"");
+    }
+    else if (_step != null) {
+      os.print(" step=\"");
+      printXmlText(os, _step);
+      os.print("\"");
+    }
+
+    os.print(">");
+
+    printXmlChildren(os);
+
+    os.print("</c:forEach>");
+  }
+  
+  /**
+   * Generates the prologue for the c:forEach tag.
+   */
+  public void generatePrologue(JspJavaWriter out)
+    throws Exception
+  {
+    if (hasDeclaration()) {
+      int depth = getDepth();
+
+      if (isInteger())
+	_tagVar = "_jsp_int_loop_" + depth;
+      else
+	_tagVar = "_jsp_iter_loop_" + depth;
+
+      if (! isFirst()) {
+      }
+      else if (isInteger())
+	out.println("com.caucho.jsp.IntegerLoopSupportTag " + _tagVar + " = null;");
+      else
+	out.println("com.caucho.jsp.IteratorLoopSupportTag " + _tagVar + " = null;");
+    }
+
+    TagInstance parent = getParent().getTag();
+
+
+    _tag = parent.findTag(getQName(), _attributeNames);
+
+    if (_tag == null) {
+      _tag = parent.addTag(getQName(), null, null,
+			   _attributeNames, _attributeValues);
+    }
+
+    generatePrologueChildren(out);
+  }
+
+  private boolean hasDeclaration()
+  {
+    return (_varStatus != null || hasTag());
+  }
+
+  /**
+   * Returns the depth of the loop tags.
+   */
+  private int getDepth()
+  {
+    JspNode node = this;
+    int depth = 0;
+
+    for (; ! (node instanceof JspSegmentNode); node = node.getParent()) {
+      if (node instanceof JstlCoreForEach) {
+	JstlCoreForEach forEach = (JstlCoreForEach) node;
+
+	if (forEach.isInteger() == isInteger())
+	  depth++;
+      }
+    }
+
+    return depth;
+  }
+
+  /**
+   * Returns true if this is the first declaration for the forEach
+   */
+  private boolean isFirst()
+  {
+    JspNode node = this;
+    
+    for (; ! (node instanceof JspSegmentNode); node = node.getParent()) {
+    }
+    
+    return isFirst(node, getDepth()) == 1;
+  }
+
+  /**
+   * Returns true if this is the first declaration for the forEach
+   */
+  private int isFirst(JspNode node, int depth)
+  {
+    if (node == this)
+      return 1;
+    else if (node instanceof JstlCoreForEach) {
+      JstlCoreForEach forEach = (JstlCoreForEach) node;
+
+      if (forEach.isInteger() == isInteger() &&
+	  forEach.getDepth() == depth &&
+	  forEach.hasDeclaration())
+	return 0;
+    }
+    
+    if (node instanceof JspContainerNode) {
+      ArrayList<JspNode> children = ((JspContainerNode) node).getChildren();
+
+      if (children == null)
+	return -1;
+
+      for (int i = 0; i < children.size(); i++) {
+	JspNode child = children.get(i);
+
+	int result = isFirst(child, depth);
+
+	if (result >= 0)
+	  return result;
+      }
+    }
+    
+    return -1;
+  }
+  
+  /**
+   * Generates the code for the c:forEach tag.
+   */
+  public void generate(JspJavaWriter out)
+    throws Exception
+  {
+    if (_items == null && _itemsAttr == null)
+      generateIntegerForEach(out);
+    else
+      generateCollectionForEach(out);
+  }
+  
+  /**
+   * Generates the code for the c:forEach tag.
+   */
+  public void generateIntegerForEach(JspJavaWriter out)
+    throws Exception
+  {
+    if (_begin == null && _beginAttr == null)
+      throw error(L.l("required attribute `begin' missing from <{0}>",
+                      getTagName()));
+
+    if (_end == null && _endAttr == null)
+      throw error(L.l("required attribute `end' missing from <{0}>",
+                      getTagName()));
+
+    int uniqueId = _gen.uniqueId();
+
+    String oldVar = "_jsp_oldVar_" + uniqueId;
+    String oldStatusVar = "_jsp_status_" + uniqueId;
+    
+    if (_tagVar != null) {
+      out.println("if (" + _tagVar + " == null)");
+      out.println("  " + _tagVar + " = new com.caucho.jsp.IntegerLoopSupportTag();");
+
+      if (hasTag()) {
+	JspNode parentTagNode = getParent().getParentTagNode();
+
+	if (parentTagNode == null) {
+	  out.println(_tagVar + ".setParent((javax.servlet.jsp.tagext.Tag) null);");
+	}
+	else {
+	  out.println(_tagVar + ".setParent(" + parentTagNode.getCustomTagName() + ");");
+	}
+      }
+    }
+
+    String beginVar = "_jsp_begin_" + uniqueId;
+    String endVar = "_jsp_end_" + uniqueId;
+    String iVar = "_jsp_i_" + uniqueId;
+    
+    out.print("int " + beginVar + " = ");
+    if (_beginAttr != null)
+      out.print(_beginAttr.generateValue(int.class));
+    else
+      out.print(generateValue(int.class, _begin));
+    out.println(";");
+
+    out.print("int " + endVar + " = ");
+    if (_endAttr != null)
+      out.print(_endAttr.generateValue(int.class));
+    else
+      out.print(generateValue(int.class, _end));
+    out.println(";");
+    
+    String stepVar = null;
+    if (_step != null || _stepAttr != null) {
+      stepVar = "_jsp_step_" + uniqueId;
+      out.print("int " + stepVar + " = ");
+      
+      if (_stepAttr != null)
+	out.print(_stepAttr.generateValue(int.class));
+      else
+	out.print(generateValue(int.class, _step));
+      
+      out.println(";");
+    }
+    else
+      stepVar = "1";
+
+    if (_tagVar != null)
+      out.println(_tagVar + ".init(" + beginVar + ", " + endVar + ", " + stepVar + ");");
+
+    if (_varStatus != null) {
+      out.print("Object " + oldStatusVar + " = pageContext.putAttribute(\"");
+      out.print(escapeJavaString(_varStatus));
+      out.println("\", " + _tagVar + ");");
+    }
+
+    if (_var != null) {
+      out.print("Object " + oldVar + " = pageContext.getAttribute(\"");
+      out.print(escapeJavaString(_var));
+      out.println("\");");
+    }
+
+    out.print("for (int " + iVar + " = " + beginVar + "; ");
+    out.print(iVar + " <= " + endVar + "; ");
+    out.println(iVar + " += " + stepVar + ") {");
+    out.pushDepth();
+
+    if (_var != null) {
+      out.print("pageContext.setAttribute(\"" + escapeJavaString(_var) + "\"");
+      out.println(", new Integer(" +  iVar + "));");
+    }
+
+    if (_tagVar != null) {
+      out.println(_tagVar + ".setCurrent(" + iVar + ");");
+    }
+
+    generateChildren(out);
+    
+    out.popDepth();
+    out.println("}");
+
+    if (_var != null) {
+      out.print("pageContext.pageSetOrRemove(\"");
+      out.print(escapeJavaString(_var));
+      out.println("\", " + oldVar + ");");
+    }
+
+    if (_varStatus != null) {
+      out.print("pageContext.pageSetOrRemove(\"");
+      out.print(escapeJavaString(_varStatus));
+      out.println("\", " + oldStatusVar + ");");
+    }
+  }
+  
+  /**
+   * Generates the code for the c:forEach tag.
+   */
+  public void generateCollectionForEach(JspJavaWriter out)
+    throws Exception
+  {
+    int uniqueId = _gen.uniqueId();
+
+    String oldVar = "_jsp_oldVar_" + uniqueId;
+    String oldStatusVar = "_jsp_status_" + uniqueId;
+    
+    if (_tagVar != null) {
+      out.println("if (" + _tagVar + " == null)");
+      out.println("  " + _tagVar + " = new com.caucho.jsp.IteratorLoopSupportTag();");
+
+      if (hasTag()) {
+	JspNode parentTagNode = getParent().getParentTagNode();
+
+	if (parentTagNode == null) {
+	  out.println(_tagVar + ".setParent((javax.servlet.jsp.tagext.Tag) null);");
+	}
+	else {
+	  out.println(_tagVar + ".setParent(" + parentTagNode.getCustomTagName() + ");");
+	}
+      }
+    }
+
+    String iterVar = "_jsp_iter_" + uniqueId;
+    String iVar = "_jsp_i_" + uniqueId;
+    out.print("java.util.Iterator " + iterVar + " = com.caucho.jstl.el.ForEachTag.getIterator(");
+    if (_itemsAttr != null)
+      out.print(_itemsAttr.generateValue(Object.class));
+    else
+      out.print(generateValue(Object.class, _items));
+    out.println(");");
+
+    String beginVar = null;
+    if (_beginAttr != null || _begin != null) {
+      beginVar = "_jsp_begin_" + uniqueId;
+      out.print("int " + beginVar + " = ");
+      if (_beginAttr != null)
+	out.print(_beginAttr.generateValue(int.class));
+      else
+	out.print(generateValue(int.class, _begin));
+      out.println(";");
+    }
+
+    String intVar = "_jsp_int_" + uniqueId;
+    if (beginVar != null) {
+      out.print("for (int " + intVar + " = " + beginVar + ";");
+      out.println(intVar + " > 0; " + intVar + "--)");
+      out.println("  if (" + iterVar + ".hasNext()) " + iterVar + ".next();");
+    }
+
+    String endVar = null;
+    if (_endAttr != null || _end != null) {
+      endVar = "_jsp_end_" + uniqueId;
+      
+      out.print("int " + endVar + " = ");
+      if (_endAttr != null)
+	out.print(_endAttr.generateValue(int.class));
+      else
+	out.print(generateValue(int.class, _end));
+      out.println(";");
+    }
+    
+    String stepVar = null;
+    if (_step != null || _stepAttr != null) {
+      stepVar = "_jsp_step_" + uniqueId;
+      out.print("int " + stepVar + " = ");
+      
+      if (_stepAttr != null)
+	out.print(_stepAttr.generateValue(int.class));
+      else
+	out.print(generateValue(int.class, _step));
+      
+      out.println(";");
+    }
+    else
+      stepVar = "1";
+
+    if (_tagVar != null) {
+      out.print(_tagVar + ".init(");
+      if (beginVar != null)
+	out.print(beginVar + ", ");
+      else
+	out.print("0, ");
+      
+      if (endVar != null)
+	out.print(endVar + ", ");
+      else
+	out.print("Integer.MAX_VALUE, ");
+
+      out.println(stepVar + ");");
+    }
+
+    if (_varStatus != null) {
+      out.print("Object " + oldStatusVar + " = pageContext.putAttribute(\"");
+      out.print(escapeJavaString(_varStatus));
+      out.println("\", " + _tagVar + ");");
+    }
+
+    if (_var != null) {
+      out.print("Object " + oldVar + " = pageContext.getAttribute(\"");
+      out.print(escapeJavaString(_var));
+      out.println("\");");
+    }
+
+    if (endVar != null) {
+      String begin = beginVar == null ? "0" : beginVar;
+      
+      out.print("for (int " + intVar + " = " + begin + "; ");
+      out.print(intVar + " <= " + endVar);
+
+      out.print(" && " + iterVar + ".hasNext(); ");
+      
+      out.println(intVar + " += " + stepVar + ") {");
+    }
+    else
+      out.println("while (" + iterVar + ".hasNext()) {");
+    
+    out.pushDepth();
+
+    out.println("Object " + iVar + " = " + iterVar + ".next();");
+
+    if (_var != null) {
+      out.print("pageContext.setAttribute(\"" + escapeJavaString(_var) + "\"");
+      out.println(", " + iVar + ");");
+    }
+
+    if (_tagVar != null) {
+      out.println(_tagVar + ".setCurrent(" + iVar + ", " + iterVar + ".hasNext());");
+    }
+
+    generateChildren(out);
+
+    if (! stepVar.equals("1")) {
+      String stepI = "_jsp_si_" + uniqueId;
+
+      out.print("for (int " + stepI + " = " + stepVar + "; ");
+      out.println(stepI + " > 1; " + stepI + "--)");
+      out.println("  " + iterVar + ".next();");
+      out.println("if (! " + iterVar + ".hasNext())");
+      out.println("  break;");
+    }
+    
+    out.popDepth();
+    out.println("}");
+
+    if (_var != null) {
+      out.print("pageContext.pageSetOrRemove(\"");
+      out.print(escapeJavaString(_var));
+      out.println("\", " + oldVar + ");");
+    }
+
+    if (_varStatus != null) {
+      out.print("pageContext.pageSetOrRemove(\"");
+      out.print(escapeJavaString(_varStatus));
+      out.println("\", " + oldStatusVar + ");");
+    }
+  }
+}

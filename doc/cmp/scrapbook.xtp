@@ -1,0 +1,461 @@
+<document>
+  <header>
+    <product>resin</product>
+    <title>CMP Scrapbook</title>
+    <version>Resin 3.0</version>
+    <description>
+      <p>A repository of notes and comments that will
+        eventually make their way into the documentation.  Please
+        treat the information here with caution, it has often not been
+        verified.</p>
+    </description>
+  </header>
+
+  <body>
+    <summary objsummary='localtoc'/>
+    <section title="General">
+      <faq title="Is CMP capable enough for my project?">
+
+        <p>CMP/EJB is a good solution in many cases, but it's not always an ideal 
+          situation.  There are a number of limitations.  I'd suggest, as an 
+          exercise, to look at the most complicated bit of the planned app and see 
+          how it matches.  I've got some specific examples below.</p>
+        
+        <p>One of the comments from an experienced EJB/CMP user is that EJB/CMP is 
+          fantastic for relatively simple projects, but you can get stuck with 
+          complicated projects.  It's very possible, though, that a large project 
+          could be simple.</p>
+        
+        <p>Where CMP starts to get stuck is with "complicated" SQL queries.  A few 
+          examples:</p>
+
+        <ul>
+          <li> No sub-selects yet.  
+
+          <li> Support for stored procedures is pretty minimal (although
+          Resin does have an extension to add more known functions.)
+
+          <li> selects/collections with very large result sets is not
+          always handled efficiently (Resin does have an OFFSET/LIMIT
+          extension which can help here.)
+
+          <li> Dynamic queries aren't in the spec, i.e. you can't make
+          up a query on the fly.  This can be important if you want lots
+          of flexibility with sorting.  Currently, you must create a
+          separate method for each sort.
+
+        </ul>
+
+        <p>For most of these, you can typically use separate JDBC with CMP. 
+         Although it's conceivable you might run into caching issues within a 
+        transaction.</p>
+
+        <p>As a more minor issue, Resin's support of identifying relations is 
+        somewhat awkward.  (We'll be fixing that in the 3.0.x tree, but that's 
+        off in the future.)  For an identifying relation, you currently need to 
+        use the local interface as the primary key.</p>
+      </faq>
+
+      <faq title="How's the performance overall?">
+
+        <p>Depends on what you're doing and how well the cache is
+        working.  It's really hard to say, because many things are
+        almost as good as straight JDBC, and some others can be much
+        slower.  The slowness tends to show up when you're grabbing
+        large relations and Resin isn't able to properly select the
+        small subset that you're interested in, but grabs everything.
+        There's a good deal of places for improvement and adding new
+        caching.</p>
+
+        <p>There's also quite a lot of tweaking that you can do to help
+        the cache.  For example, Resin has a concept of "read-only"
+        methods.  Essentially, methods which don't need transaction
+        support since they're only reading from the database.  That data
+        can come from caches.  By default, though, Resin assumes any
+        business method is an update method.  Therefore, Resin needs to
+        read the data again from the database as part of the
+        transaction.</p>
+
+      </faq>
+
+      <faq title="Any issues with using Inheritence on the XYZBean classes in this CMP world?">
+
+        <description>
+          <p>We have a Member, which is the parent of a
+            Subscriber. Members know how to register; Subscribers know
+            how to subcribe but also need to register. It would be
+            easier if we could continue to split these classes when
+            using CMP. Will the container allow us to configure
+            this?</p>
+        </description>
+
+        <p>That depends.  I don't think there's an exact match with what
+          you want. Inheritence itself isn't well supported in EJB.</p>
+
+        <p>You can, of course, use "Subscriber extends Member", but
+          trying to configure separate entity beans for "subscriber" and
+          "member" and have them properly relate isn't really part of the
+          spec.  (It was something we were hoping for EJB 2.1, but I guess
+          they punted.)</p>
+      </faq>
+
+      <faq title="Does Resin CMP support BLOB and CLOB fields?">
+        <description>
+          <p>Oracle provides its own way (as usual) to manipulate
+          BLOB/CLOB columns, where casting to oracle types is
+          required, it's a three phase insert, where first statement
+          inserts simple data types and dummy data for LOBs and 2nd
+          statement selects and locks the row and only then LOBs are
+          editable. We're wondering whether Resin-EE CMP takes care of
+          this or we will have to use BMP and still do the row
+          locking, type casting, etc?</p>
+        </description>
+
+        <p>Currently, Resin's BLOB/CLOB support is pretty minimal.
+        Resin will use the getBytes() and setBytes() or getString()
+        and setString() methods to handle BLOBs.  The EJB spec itself
+        doesn't really handle blobs very well, so any Resin support
+        would need to be an extension.</p>
+
+        <p>In some cases, this minimal support will be sufficient.  In
+        most cases, though, it would just be better to use BMP.</p>
+      </faq>
+
+      <faq title="Can I store the home interface in a Servlet init()?">
+        <p>Yes.  That's our recommended solution.</p>
+
+        <p>The EJB server has a lifetime of the context where you put the 
+          &lt;resource-ref&gt;.  i.e. if it's in &lt;web-app&gt;, it will have the lifetime of 
+          the &lt;web-app&gt;.  The Home interface is actually always valid, even across 
+          server restarts (as long as you don't modify the classes.)  You can even 
+          serialize and deserialize it.</p>
+      </faq>
+
+    </section> <!-- general -->
+
+    <section title="CMP keys"> 
+
+      <faq title="Does Resin CMP support autogen keys for anything other than ints or longs?">
+        <description>
+          <p>SQL Server auto keys are not ints, it uses some funky
+            looking random string that includes alphanumeric
+            characters.</p>
+        </description>
+
+        <p>Resin CMP currently only supports integer keys.  It is
+          currently a feature request for Resin 3.0.</p>
+
+      </faq>
+      <faq title="Is it possible to change a primary key of a CMP object?">
+
+        <p>No.  That's explicitly forbidden by the EJB spec.  A
+          delete/recreate is the only solution.</p>
+
+      </faq>
+
+      <faq title="I see that CMP uses 'select max(ID) ...' to get the next id, ~nyway to disable it?">
+        <description>
+          <p>We already have sequences in place and the table is huge,
+          so we really don't want to run this type of id-gen
+          query. Also, we're going to be inserting in batches of 5-10
+          at a time, so it will be even worse! Perhaps, I can hide the
+          real PK from CMP and use a compound key on a couple of the
+          fields (pairs that need to be unique anyway).</p>
+
+        </description>
+
+        <p>You can also use a separate key generator bean.</p>
+
+        <p>If your driver supports the JDBC 3.0 stmt.getGeneratedKeys,
+          the generated code should use that first before falling back to
+          the select max.  The PersistentUtils.getGeneratedKey tries to
+          call the Statement.getGeneratedKeys call.</p>
+      </faq>
+
+    </section>
+
+    <section title="CMP and Transactions">
+
+      <faq title="Any dangers in running my own DB calls in a CMP bean?">
+        <description>
+          <p>Should I make a separate bean-managed EJB for this
+            purpose? In doing so, I assume I would be pulling the
+            connection from the same pool in use by the rest of the
+            container, right?</p>
+        </description>
+
+        <p>It's up to you.  If you need it to be in a transaction, you
+          can just use:</p>
+
+        <example>
+UserTransaction.begin(); 
+try {
+  ... 
+} finally {
+  UserTransaction.commit(); 
+}
+        </example>
+
+        <p>That's essentially what Resin does.</p>
+
+        <p>You do want to close() any connections before calling any
+          other JDBC or CMP methods.  It's not strictly necessary, but if
+          you don't close the connection, Resin can't reuse it and may be
+          forced to open a second connection.</p>
+
+      </faq>
+      <faq title="If I use Transaction type 'REQUIRED' on an CMP Entity Bean and I call several of its methods within a Session Bean that also has that type of transaction-level, will the actual db commit be deferred to the end of the Session method?">
+
+        <description>
+          <p>I was unsure because I saw con.close() in the CMP gen-ed code.</p>
+        </description>
+
+        <p>Yes.</p>
+
+        <p>The DBPool code is doing quite a bit of work to make sure the
+          next time you call db.getConnection() it will return the old
+          connection inside the same transaction.  If you enable the
+          /caucho.com/sql/pool/new log, you should see that work (you
+          might also want to look at the "spy" configuration).</p>
+      </faq>
+
+      <faq title="Support for Oracle sequence object?">
+        <description>
+          <p>Do you have some kind of primary key generator which uses Oracle sequence
+            object? e.g. Specify oracle sequence name against primary key field of an
+            entity bean in the bean descriptor.</p>
+        </description>
+
+        <p>Resin doesn't yet directly support Oracle's sequence.  (We're hoping on 
+          adding it sometime in 3.0.x)</p>
+
+        <p>For now, you would need to either create a trigger that
+        will fill in the key field or use JDBC directly to get the key
+        value.</p>
+      </faq>
+    </section>
+
+    <section title="CMP caching">
+      <faq title="In a distributes environemnt, should I change the cache-timeouts?">
+
+        <p>A distributed environment works automatically without messing with the 
+          cache timeouts.</p>
+
+        <p>Basically, Resin divides transactions into read-only and
+          read-write. (Currently, that's handled as "Supports" vs
+          "Required").  Any read-write transaction always loads entity
+          beans from the database within that transaction.  Therefore, the
+          update's transaction will be handled by the database's
+          transaction management.</p>
+
+        <p>Only read-only transactions (and read-only beans) use cached
+          values. Since the request is a read, it doesn't matter if it has
+          the exact up-to-date value from the database.  Even a
+          cache-timeout of 1s can be a big benefit since a request may
+          involve lots of read transactions within a single request.
+          There's no point of going to the db for each transaction.</p>
+
+        <p>Any time you have a transaction, e.g. if you use a
+          SessionBean for everything, then caching is automatically
+          disabled.</p>
+
+        <p>In other words, this should be already handled for you and
+          you should never need to disable the caching entirely.</p> 
+
+      </faq>
+      <faq title="Is the CMP cache (in Resin) shared among threads, such as for obtaining write locks?">
+        <p>No.</p>
+
+        <p>The cache doesn't work that way, so there isn't really a write lock.</p>
+        
+        <p>If you read a bean in a transaction (i.e. not a read-only transaction), 
+          then it's always read from the database within the context of that 
+          transaction.  So the database will be handling any locking.</p>
+        
+      </faq>
+
+      <faq title="Can a CMP loaded in one thread/session be used by another, by receiving it from the cache?">
+
+        <p>Yes and no.  Once the transaction is done, the next request can use the 
+          cached value (assuming it's a read-only request.)</p>
+        
+        <p>However, simultaneous use of that cached value is not allowed.  The 
+          second simultaneous request will be forced to load its own data.  It's 
+          basically like a check-out system.  Only one thread can check out the 
+          cached value.  Until it's checked back in, the other threads need to go 
+          to the database.</p>
+
+      </faq>
+
+      <faq title="So if all requests are in a transaction, such as if using the com.caucho.http.filter.TransactionFilter, the cached beans would never be used by more than one request?">
+
+        <p>It's more accurate to say that the cached values are never used and 
+          Resin always goes to the database.</p>
+
+      </faq>
+
+      <faq title="Can two session have two different copies of the same record, assuming a normal DataSource?">
+
+        <p>Well, it's probably important to separate the session issues from the 
+          thread/transaction issues.</p>
+
+        <p>A stateful session can certainly have a separate record.  If you put 
+          data from an entity bean into the session, complete the transaction, and 
+          later look at the session, then the stored value might have changed in 
+          the meantime.  So "session" is really not the right thing to be 
+          concerned about.</p>
+        
+        <p>Yes, it's possible for two simultaneous transactions to have copies of 
+          the same record.  That's basically mandated by the EJB spec.  It's even 
+          possible for the two transactions to have different values in the record 
+          or even for both to try updating the record with different values.</p>
+        
+        <p>That's not an issue, because any conflict like that will fail to commit, 
+          causing the database to rollback one of the transactions.  Since that 
+          kind of conflict is only really resolved at commit time, it's possible 
+          for one of the transactions to do a decent amount of work before 
+          realizing that it needs to roll back.</p>
+
+      </faq>
+      <faq title="How do I disable the cache?">
+
+        <p>cache-timeout=0s or -1 would be better.  It's still useful to
+          have a cache-size, because the entity bean instances can be
+          cached, even if the database values can't be cached in your
+          care.</p>
+
+      </faq>
+
+      <faq title="With cache disabled: What if a thread, inside a transaction, requests the same record twice?">
+        <description>
+          <p>Will it get two instances of the record, or two
+          references to the same instance? (These multiple copies are
+          a problem with our current solution).</p>
+        </description>
+
+        <p>It will get two references to the same instance.</p>
+
+        <p>The requirement that a transaction sees only a single instance
+          of the entity bean is part of the EJB spec.  In the Aug draft,
+          it's in the transaction section, 17.7, in the discussion of
+          transaction "diamonds."</p>
+      </faq>
+
+      <faq title="Concurrent transactions and cached beans">
+        <description>
+          <p>So if there is an update transaction that has:</p>
+          <example>
+setA()
+getX() // where getX() is a read-only transaction, 
+       // and X is a collection of read-only beans
+setB()
+          </example>
+
+          <p>and then after this transaction, there are two
+          simultaneous transactions calling <code>getX()</code>.  Does
+          one thread hit the cache and one hit the DB or do they both
+          utilize the cache since they are read-only beans.</p>
+        </description>
+
+        <p>The second concurrent transaction hits the DB.  That's just an 
+          implementation limitation.  Resin could add more instances to the pool, 
+          but for now it seems better to use the simpler implementation.</p>
+      </faq>
+
+      <faq title="Does reentrant tag allow simulataneous transactions to use the same instance?">
+        <description>
+          <p>Hmm. I thought that &lt;reentrant> tag was designed just to
+          control such behavior. E.g. for reentrant beans simultanious
+          transactions could use the same instance.</p>
+        </description>
+        
+        <p>No, &lt;reentrant> is a bit different.  If reentrant is false, then an 
+          entity bean cannot call itself through its local
+          interface.</p>
+
+          <p>To be honest, I've never understood why you would set
+            reentrant to false.</p>
+      </faq>
+
+      <faq title="Transaction types, cache, and read-only">
+        <description>
+          <p>As long as a transaction does not have setXXX, create,
+          and remove for a particular bean it will use its cache.
+          Cache will only be used if it did not timeout and its not
+          the second request in a thread.</p>
+        </description>
+
+        <p>Not quite.  (For terminology, you should probably use "transaction" 
+          instead of "thread", since a thread could have several sequential 
+          transactions.  The basic unit is a transaction.)</p>
+
+        <section title="(I) No read-only beans">
+
+          <p>Resin-CMP has two kinds of transaction: read-only and update. 
+            UserTransaction transactions are always update
+            transactions.</p>
+          
+          <p>read-only transactions occur in two cases:</p>
+          <ol>
+            <li>the method which creates the transaction has a read-only
+              attribute.</li>
+            <li>the method which creates the transaction is itself a getXXX or 
+              findXXX method (in other words, getXXX and findXXX always have read-only 
+              attributes.)</li>
+          </ol>
+          
+          <p>If a method marked by a read-only attribute is called in an update 
+            transaction, the transaction is still an update transaction.  In other 
+            words, the outer-most method always sets the transaction type.  It is 
+            illegal for a &lt;read-only&gt; method to call an update method.  (I'm not 
+            certain this is enforced, although it should throw an
+            exception.)</p>
+          
+          <p>Example:</p>
+          <example>
+  myUpdate() -- an update method, i.e. not read-only.
+  getFoo() -- automatically a read-only method since it's a cmp-field 
+getter.
+
+  String myUpdate()
+  {
+     return getFoo();
+  }
+
+<br><b>Client code (outside of any transaction)</b><br>
+
+  myBean.myUpdate();
+          </example>
+        
+          <p>In this case, this is an update transaction, since the call to 
+            myUpdate() creates an update transaction and the getFoo() method merely 
+            inherits that transaction.</p>
+          
+          <p>In a read-only transaction, each getXXX uses the cache value (unless the 
+            cache times out.)</p>
+          
+          <p>In an update transaction</p>
+          <ol>
+            <li>the first getXXX comes from the database (except for read-only beans).</li>
+            <li>The second getXXX for the same bean *always* uses the value obtained 
+              in the first getXXX.  (It's probably better not to call this a cached 
+              value.)</li>
+          </ol>
+        </section>
+          
+        <section title="(II) read-only beans">
+
+          <p>Everything is identical to case (I), except for (I.1), the first getXXX 
+            of a read-only bean.</p>
+
+          <p>In an update transaction:</p>
+          <ol>
+            <li>the first getXXX for a read-only bean comes from the cache, if 
+              available</li>
+          </ol>
+          
+        </section>
+      </faq>
+    </section>
+  </body>
+</document>

@@ -1,0 +1,17 @@
+<navigation threaded="true" section="Resin : EJB : " comment="true">
+  <item title="EJB" link="index.xtp">
+
+    <item title="Tutorials" link="tutorial/index.xtp" atoc-descend="1"/>
+
+    <item link="burlap-client.xtp" title="Burlap Clients"/>
+    <item link="hessian-client.xtp" title="Hessian Clients">
+      <title>Hessian Clients</title>
+    </item>
+
+    <item link="corba.xtp" title="CORBA/IIOP Server">
+      <item link="corba-client.xtp" title="CORBA/IIOP Client"/>
+    </item>
+
+    <item title="Scrapbook" link="scrapbook.xtp"/>
+  </item>
+</navigation>

@@ -1,0 +1,34 @@
+<navigation threaded="true" section="Resin : Resin Configuration : " comment="true">
+  <item title="Configuration" link="index.xtp">
+    <item link="index-tags.xtp" title="index"/>
+    <item link="howto.xtp" title="howto"/>
+    <item link="resin.xtp" title="resin.conf"/>
+    <item link="env.xtp" title="env"/>
+    <item link="webapp.xtp" title="web-app"/>
+    <item link="log.xtp" title="log"/>
+    <item link="control.xtp" title="el & control"/>
+    <item link="init.xtp" title="Bean Config"/>
+
+    <item title="Common Tasks" link="commontasks.xtp">
+      <item link="virtual-host.xtp" title="Virtual Hosting"/>
+      <item link="balance.xtp" title="Load Balancing"/>
+      <item link="sessions.xtp" title="Sessions"/>
+      <item link="tcp-sessions.xtp" title="Clustered Sessions"/>
+      <item link="tuning.xtp" title="Tuning"/>
+      <item link="isp.xtp" title="ISP"/>
+    </item>
+
+    <item title="Relax Schema" link="schema.xtp">
+      <item link="env-schema.xtp" title="Environment"/>
+      <item link="resin-j2ee-schema.xtp" title="Resin J2EE"/>
+      <item link="resin-web-xml-schema.xtp" title="Resin web.xml"/>
+      <item link="resin-schema.xtp" title="resin.conf"/>
+
+      <item link="j2ee-schema.xtp" title="J2EE Common"/>
+      <item link="j2ee-web-xml-schema.xtp" title="J2EE web.xml"/>
+    </item>
+
+    <item link="faq.xtp" title="Config FAQ" atoc-descend="1"/>
+    <item link="scrapbook.xtp" title="Scrapbook" atoc-descend="1"/>
+  </item>
+</navigation>

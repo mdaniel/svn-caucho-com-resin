@@ -1,0 +1,128 @@
+<document>
+<header>
+<product>resin</product>
+<title>JVM Tuning</title>
+<description>
+
+<p>
+Better performance in production servers is possible with proper configuration
+of JVM parameters, particularily those related to memory usage and garbage
+collection.
+</p>
+
+</description>
+</header>
+
+<body>
+<summary/>
+
+
+<section name="memory" title="Heap size">
+
+<p>The allocation of memory for the JVM is specified using -X options when
+starting Resin (the exact options may depend upon the JVM that you are using,
+the examples here are for the Sun JVM).</p>
+
+<deftable>
+<tr><th>JVM option passed to Resin<th>Meaning
+<tr><td>-Xms<td>initial java heap size
+<tr><td>-Xmx<td>maximum java heap size
+<tr><td>-Xmn<td>the size of the heap for the <i>young generation</i>
+</deftable>
+
+<example title="Resin startup with heap memory options">
+unix&gt; bin/httpd.sh -Xmn100M -Xms500M -Xmx500M
+win&gt; bin/httpd.exe -Xmn100M -Xms500M -Xmx500M
+install win service&gt; bin/httpd.exe -Xmn100M -Xms500M -Xmx500M -install
+</example>
+
+<p>It is good practice with server-side Java applications like Resin to set the
+minimum <var/-Xms/> and maximum <var/-Xmx/> heap sizes to the same value.</p>
+
+<p>For efficient <a href="#garbage-collection">garbage collection</a>, the
+<var/-Xmn/> value should be lower than the <var/-Xmx/> value.</p>
+
+<section title="Heap size does not determine the amount of memory your process uses">
+
+<p>If you monitor your java process with an OS tool like top or taskmanager,
+you may see the amount of memory you use exceed the amount you have specified
+for -Xmx.  -Xmx limits the java heap size, java will allocate memory for other
+things, including a stack for each thread. It is not unusual for the total
+memory consumption of the VM to exceed the value of -Xmx.</p>
+</section>
+
+</section> <!-- memory -->
+
+<section name="garbage-collection" title='Garbage collection'>
+
+
+<p>(thanks to Rob Lockstone for his comments)</p> 
+
+<p>
+There are essentially two GC threads running. One is a very lightweight
+thread which does "little" collections primarily on the Eden (a.k.a.
+Young) generation of the heap. The other is the Full GC thread which
+traverses the entire heap when there is not enough memory left to
+allocate space for objects which get promoted from the Eden to the
+older generation(s).
+</p>
+
+
+<p>
+If there is a memory leak or inadequate heap allocated, eventually the older
+generation will start to run out of room causing the Full GC thread to run
+(nearly) continuously. Since this process "stops the world", Resin won't be
+able to respond to requests and they'll start to back up.
+</p>
+
+
+<p>
+The amount allocated for the Eden generation is the value specified with
+<var/-Xmn/>.  The amount allocated for the older generation is the value of
+<var/-Xmx/> minus the <var/-Xmn/>.  Generally, you don't want the Eden to be
+too big or it will take too long for the GC to look through it for space that
+can be reclaimed.
+</p>
+
+
+<p>See also:</p>
+<ul>
+<li><a href="troubleshoot|technique#garbage-collector">Troubleshooting Technique: Garbage Collector</a>
+<li><a href="http://java.sun.com/docs/hotspot/gc1.4.2/">Sun documentation on garbage collection</a>
+</ul>
+</section> <!-- garbage-collection -->
+
+<section name="stack-size" title='Stack size'>
+
+<p>Each thread in the VM get's a stack.  The stack size will limit the number of
+threads that you can have, too big of a stack size and you will run out of
+memory as each thread is allocated more memory than it needs.</p>
+
+<deftable>
+<tr><th>JVM option passed to Resin<th>Meaning
+<tr><td>-Xss<td>the stack size for each thread
+</deftable>
+
+<p><code>-Xss</code> determines the size of the stack.  You may even be able to
+make this value as low as 1k: <code>-Xss1k</code>.  If the stack space is too
+small, eventually you will see an exception <a href="javadoc|java.lang.StackOverflowError|"/>.
+
+<p>Some people have reported that it is necessary to change stack size settings
+at the OS level for Linux.  A call to <code>ulimit</code> may be necessary, and
+is usually done with a command in /etc/profile:</p>
+
+<example title="Limit thread stack size on Linux">
+ulimit -s 2048
+</example>
+</section>
+
+<section name="monitor" title="Monitoring the JVM">
+
+<p>Sun provides the <a href="external|sun|jvmstat">jvmstat tools</a>, which are
+useful for monitoring the JVM.  They are particularily good for monitoring
+garbage collection, helping you gather the information you need to optimize
+your memory settings.</p>
+</section>
+
+</body>
+</document>

@@ -1,0 +1,255 @@
+<web-app xmlns="http://caucho.com/ns/resin"
+         xmlns:resin="http://caucho.com/ns/resin/core">
+  <class-loader>
+    <simple-loader path="WEB-INF/xsl"/>
+    <compiling-loader path="WEB-INF/classes" source="WEB-INF/src"/>
+  </class-loader>
+
+  <database jndi-name="jdbc/resin">
+    <driver type="com.caucho.db.jdbc.ConnectionPoolDataSourceImpl">
+      <path>WEB-INF/db</path>
+      <remove-on-error/>
+    </driver>
+  </database>
+
+      <servlet servlet-name="viewfile" 
+               servlet-class="com.caucho.doc.ViewFileServlet"/>
+      <servlet-mapping url-pattern="/viewfile/*" servlet-name="viewfile"/>
+
+  <web-app-deploy url-prefix="/jsp/tutorial"
+                  path="jsp/tutorial"
+                  lazy-init="true">
+    <web-app-default>
+      <servlet servlet-name="viewfile" 
+               servlet-class="com.caucho.doc.ViewFileServlet"/>
+      <servlet-mapping url-pattern="/viewfile/*" servlet-name="viewfile"/>
+      <inherit-session>true</inherit-session>
+    </web-app-default>
+  </web-app-deploy>
+
+  <web-app-deploy url-prefix="/servlet/tutorial"
+                  path="servlet/tutorial"
+                  lazy-init="true">
+    <web-app-default>
+      <servlet servlet-name="viewfile" 
+               servlet-class="com.caucho.doc.ViewFileServlet"/>
+      <servlet-mapping url-pattern="/viewfile/*" servlet-name="viewfile"/>
+      <inherit-session>true</inherit-session>
+    </web-app-default>
+  </web-app-deploy>
+
+  <web-app-deploy url-prefix="/webapp/tutorial"
+                  path="webapp/tutorial"
+                  lazy-init="true">
+    <web-app-default>
+      <servlet servlet-name="viewfile" 
+               servlet-class="com.caucho.doc.ViewFileServlet"/>
+      <servlet-mapping url-pattern="/viewfile/*" servlet-name="viewfile"/>
+      <inherit-session>true</inherit-session>
+    </web-app-default>
+  </web-app-deploy>
+
+
+  <web-app-deploy url-prefix="/portlet/tutorial"
+                  path="portlet/tutorial"
+                  lazy-init="true">
+    <web-app-default>
+      <servlet servlet-name="viewfile" 
+               servlet-class="com.caucho.doc.ViewFileServlet"/>
+      <servlet-mapping url-pattern="/viewfile/*" servlet-name="viewfile"/>
+      <inherit-session>true</inherit-session>
+    </web-app-default>
+  </web-app-deploy>
+
+  <web-app-deploy url-prefix="/ejb/tutorial"
+                  path="ejb/tutorial"
+                  lazy-init="true">
+    <web-app-default>
+      <servlet servlet-name="viewfile" 
+               servlet-class="com.caucho.doc.ViewFileServlet"/>
+      <servlet-mapping url-pattern="/viewfile/*" servlet-name="viewfile"/>
+      <inherit-session>true</inherit-session>
+    </web-app-default>
+  </web-app-deploy>
+
+  <web-app-deploy url-prefix="/ejb3/tutorial"
+                  path="ejb3/tutorial"
+                  lazy-init="true">
+    <web-app-default>
+      <servlet servlet-name="viewfile" 
+               servlet-class="com.caucho.doc.ViewFileServlet"/>
+      <servlet-mapping url-pattern="/viewfile/*" servlet-name="viewfile"/>
+      <inherit-session>true</inherit-session>
+    </web-app-default>
+  </web-app-deploy>
+
+  <web-app-deploy url-prefix="/ioc/tutorial"
+                  path="ioc/tutorial"
+                  lazy-init="true">
+    <web-app-default>
+      <servlet servlet-name="viewfile" 
+               servlet-class="com.caucho.doc.ViewFileServlet"/>
+      <servlet-mapping url-pattern="/viewfile/*" servlet-name="viewfile"/>
+      <inherit-session>true</inherit-session>
+    </web-app-default>
+  </web-app-deploy>
+
+  <web-app-deploy url-prefix="/jms/tutorial"
+                  path="jms/tutorial"
+                  lazy-init="true">
+    <web-app-default>
+      <servlet servlet-name="viewfile" 
+               servlet-class="com.caucho.doc.ViewFileServlet"/>
+      <servlet-mapping url-pattern="/viewfile/*" servlet-name="viewfile"/>
+      <inherit-session>true</inherit-session>
+    </web-app-default>
+  </web-app-deploy>
+
+  <web-app-deploy url-prefix="/cmp/tutorial"
+                  path="cmp/tutorial"
+                  lazy-init="true">
+    <web-app-default>
+      <servlet servlet-name="viewfile" 
+               servlet-class="com.caucho.doc.ViewFileServlet"/>
+      <servlet-mapping url-pattern="/viewfile/*" servlet-name="viewfile"/>
+      <inherit-session>true</inherit-session>
+    </web-app-default>
+  </web-app-deploy>
+
+  <web-app-deploy url-prefix="/security/tutorial"
+                  path="security/tutorial"
+                  lazy-init="true">
+    <web-app-default>
+      <servlet servlet-name="viewfile" 
+               servlet-class="com.caucho.doc.ViewFileServlet"/>
+      <servlet-mapping url-pattern="/viewfile/*" servlet-name="viewfile"/>
+      <inherit-session>true</inherit-session>
+    </web-app-default>
+  </web-app-deploy>
+
+  <web-app-deploy url-prefix="/resource/tutorial"
+                  path="resource/tutorial"
+                  lazy-init="true">
+    <web-app-default>
+      <servlet servlet-name="viewfile" 
+               servlet-class="com.caucho.doc.ViewFileServlet"/>
+      <servlet-mapping url-pattern="/viewfile/*" servlet-name="viewfile"/>
+      <inherit-session>true</inherit-session>
+    </web-app-default>
+  </web-app-deploy>
+
+  <web-app-deploy url-prefix="/db/tutorial"
+                  path="db/tutorial"
+                  lazy-init="true">
+<!--
+    <web-app-default>
+      <servlet servlet-name="viewfile" 
+               servlet-class="com.caucho.doc.ViewFileServlet"/>
+      <servlet-mapping url-pattern="/viewfile/*" servlet-name="viewfile"/>
+      <inherit-session>true</inherit-session>
+    </web-app-default>
+-->
+  </web-app-deploy>
+
+  <web-app-deploy url-prefix="/jmx/tutorial"
+                  path="jmx/tutorial"
+                  lazy-init="true">
+    <web-app-default>
+      <servlet servlet-name="viewfile" 
+               servlet-class="com.caucho.doc.ViewFileServlet"/>
+      <servlet-mapping url-pattern="/viewfile/*" servlet-name="viewfile"/>
+      <inherit-session>true</inherit-session>
+    </web-app-default>
+  </web-app-deploy>
+
+  <web-app-deploy url-prefix="/amber/tutorial"
+                  path="amber/tutorial"
+                  lazy-init="true">
+    <web-app-default>
+      <servlet servlet-name="viewfile" 
+               servlet-class="com.caucho.doc.ViewFileServlet"/>
+      <servlet-mapping url-pattern="/viewfile/*" servlet-name="viewfile"/>
+      <inherit-session>true</inherit-session>
+    </web-app-default>
+  </web-app-deploy>
+
+  <web-app-deploy url-prefix="/protocols/tutorial"
+                  path="protocols/tutorial"
+                  lazy-init="true">
+    <web-app-default>
+      <servlet servlet-name="viewfile" 
+               servlet-class="com.caucho.doc.ViewFileServlet"/>
+      <servlet-mapping url-pattern="/viewfile/*" servlet-name="viewfile"/>
+      <inherit-session>true</inherit-session>
+    </web-app-default>
+  </web-app-deploy>
+
+  <servlet servlet-name="javadoc" 
+           servlet-class="com.caucho.doc.JavadocRedirectServlet"/>
+
+  <servlet-mapping url-pattern="/javadoc/*" servlet-name="javadoc"/>
+<!--
+  <resource jndi-name="caucho/doc/ConfigTree" type="com.caucho.doc.config.ConfigTree">
+    <init>
+      <name>Configuration</name>
+
+      <element name="Configuration Files">
+        <schema name="resin.conf">
+          <root>true</root>
+          <path>com/caucho/server/resin/resin.rnc</path>
+        </schema>
+
+        <schema name="web.xml">
+          <root>true</root>
+          <path>com/caucho/server/webapp/resin-web-xml.rnc</path>
+        </schema>
+
+        <doc name="resin.conf">
+          <short-description>the main Resin configuration file</short-description>
+          <description>This is the main Resin configuration file</description>
+        </doc>
+
+      </element>
+
+    </init>
+  </resource>
+
+  <servlet servlet-name="config-explorer" 
+           servlet-class="com.caucho.portal.generic.GenericPortalServlet">
+    <init>
+      <portal resin:type="com.caucho.portal.generic.GenericPortal">
+        <buffer-factory resin:type="com.caucho.portal.generic.BufferFactoryImpl">
+          <buffer-size>256</buffer-size>
+        </buffer-factory>
+      </portal>
+
+      <layout>
+        <renderer resin:type="com.caucho.portal.alpharenderer.HtmlRenderer">
+          <page-title>Resin Configuration Explorer</page-title>
+          <stylesheet>portal.css</stylesheet>
+        </renderer>
+
+        <window namespace="explorer">
+          <renderer resin:type="com.caucho.portal.alpharenderer.HtmlRenderer"/>
+
+          <portlet resin:type="com.caucho.doc.config.TreePortlet">
+            <config-tree>${jndi:lookup('caucho/doc/ConfigTree')}</config-tree>
+          </portlet>
+        </window>
+
+        <window namespace="description">
+          <renderer resin:type="com.caucho.portal.alpharenderer.HtmlRenderer">
+            <always-write>false</always-write>
+          </renderer>
+
+          <portlet resin:type="com.caucho.doc.config.DescriptionPortlet">
+          </portlet>
+        </window>
+      </layout>
+    </init>
+  </servlet>
+  
+  <servlet-mapping url-pattern="/config/explorer" servlet-name="config-explorer"/>
+-->
+</web-app>
+

@@ -1,0 +1,336 @@
+<document>
+<header>
+  <product>resin</product>
+  <title>Authorization with Resin</title>
+  <description>
+    <p>Authorization is used to mark sections and resources of a web site
+    that have limited access.  <var/Constraints/> are used to indicate
+    the criteria for access, typically the constraint is based on a
+    user login, but it can also include such things as limiting access
+    to clients from a certain ip address and requiring that a secure
+    transport such as SSL is in use.</p>
+  </description>
+</header>
+
+<body>
+
+<summary objsummary='localtoc'/>
+
+<section title="Security Constraints">
+
+<defun title='security-constraint'>
+<parents>web-app</parents>
+
+<p>Selects protected areas of the web site.  Sites using
+authentication as an optional personalization feature will typically
+not use any security constraints.  Sites using authentication to limit
+access to certain sections of the website to certain users will use
+security constraints.</p>
+
+<p>Security constraints can also be custom classes.</p>
+
+<example title='Protecting all pages for logged-in users'>
+&lt;web-app&gt;
+  ...
+&lt;security-constraint>
+  &lt;web-resource-collection>
+    &lt;url-pattern>/*&lt;/url-pattern>
+  &lt;/web-resource-collection>
+  &lt;auth-constraint role-name='user'/>
+&lt;/security-constraint>
+  ...
+&lt;/web-app&gt;
+</example>
+</defun>
+
+<defun title='web-resource-collection'>
+<parents>security-constraint</parents>
+
+<p>Specifies a collection of areas of the web site.</p>
+
+<deftable-childtags>
+<tr><td>url-pattern<td>url patterns describing the resource
+<tr><td>http-method<td>HTTP methods to be restricted.
+</deftable-childtags>
+</defun>
+
+<defun title='auth-constraint'>
+<parents>security-constraint</parents>
+
+<p>Requires that authenticated users fill the specified role.
+In Resin's JdbcAuthenticator, normal users are in the "user" role.
+Think of a role as a group of users.</p>
+
+<deftable-childtags>
+<tr><td>role-name<td>Roles which are allowed to access the resource.
+</deftable-childtags>
+
+<example title='Protecting webdav for webdav users'>
+&lt;security-constraint>
+  &lt;auth-constraint role-name='webdav'/>
+
+  &lt;web-resource-collection>
+    &lt;url-pattern>/webdav/*&lt;/url-pattern>
+  &lt;/web-resource-collection>
+&lt;/security-constraint>
+</example>
+
+</defun>
+
+<defun title="ip-constraint" version="Resin 2.0.6">
+<parents>security-constraint</parents>
+
+<p>Allow or deny requests based on the ip address of the client.
+ip-constraint is very useful for protecting administration resources
+to an internal network.  It can also be useful for denying service to known
+problem ip's.</p>
+
+<example title='Admin pages allowed from 192.168.17.0/24'>
+&lt;security-constraint&gt;
+  &lt;ip-constraint&gt;
+    &lt;allow&gt;192.168.17.0/24&lt;/allow&gt;
+  &lt;/ip-constraint&gt;
+
+  &lt;web-resource-collection&gt;
+    &lt;url-pattern&gt;/admin/*&lt;/url-pattern&gt;
+  &lt;/web-resource-collection&gt;
+&lt;/security-constraint&gt;
+</example>
+
+<p>The <code>/24</code> in the ip <code>192.168.17.0/24</code> means that the
+first 24 bits of the ip are matched - any ip address that begins with
+<code>192.168.17.</code> will match.  The usage of <var>/bits</var> is
+optional.</p> 
+
+<example title='Block out known trouble makers'>
+&lt;security-constraint&gt;
+  &lt;ip-constraint&gt;
+    &lt;deny&gt;205.11.12.3&lt;/deny&gt;
+    &lt;deny&gt;213.43.62.45&lt;/deny&gt;
+    &lt;deny&gt;123.4.45.6&lt;/deny&gt;
+    &lt;deny&gt;233.15.25.35&lt;/deny&gt;
+    &lt;deny&gt;233.14.87.12&lt;/deny&gt;
+  &lt;/ip-constraint&gt;
+
+  &lt;web-resource-collection&gt;
+    &lt;url-pattern&gt;/*&lt;/url-pattern&gt;
+  &lt;/web-resource-collection&gt;
+&lt;/security-constraint&gt;
+</example>
+
+<p>Be careful with deny - some ISP's (like AOL) use proxies and the ip of many
+different users may appear to be the same ip to your server.</p>
+
+<deftable-childtags>
+<tr><td>allow<td>add an ip address to allow<td>default is to allow all ip addresses
+<tr><td>deny<td>add an ip address to deny<td>default is to deny no ip addresses
+<tr><td>error-code<td>error code to send if request is denied<td>403
+<tr><td>error-message<td>error message to send if request is denied<td>Forbidden IP Address
+<tr><td>cache-size<td>cache size, the result of applying rules for an ip is cached for subsequent requests<td>256
+</deftable-childtags>
+
+<p>If only <var/deny/> is used, then all ip's are allowed if they do not match
+a <code/deny/>.  If only <var/allow/> is used, then an ip is denied unless it
+matches an <code/allow/>. If both are used, then the ip must match both an
+<code>allow</code> and a <code>deny</code></p>
+
+</defun>
+
+<defun title='user-data-constraint'>
+<parents>security-constraint</parents>
+
+<p>Restricts access to secure transports, i.e. SSL.</p>
+
+<deftable-childtags>
+<tr><td>transport-guarantee<td>Required transport properties.  NONE,
+INTEGRAL, and CONFIDENTIAL are allowed values.
+</deftable-childtags>
+
+<example>
+&lt;security-constraint>
+  &lt;user-data-constraint>
+    &lt;transport-guarantee>CONFIDENTIAL&lt;/transport-guarantee>
+  &lt;/user-data-constraint>
+
+  &lt;web-resource-collection>
+    &lt;url-pattern>/*&lt;/url-pattern>
+  &lt;/web-resource-collection>
+&lt;/security-constraint>
+</example>
+
+</defun>
+
+<defun title='transport-guarantee'>
+<p>Restricts access to secure transports, i.e. SSL.</p>
+</defun>
+
+<defun title='constraint' version='Resin 2.0.1'>
+<parents>security-constraint</parents>
+
+<p>Defines a custom constraint.  The custom constraint specifies a <var/resin:type/> which extends <a href="javadoc|com.caucho.server.security.AbstractConstraint|"/>.  
+<a href="doc|config|init">Bean-style initialization</a> is used to
+initialize the constraint.</p>
+
+<example>
+...
+&lt;security-constraint>
+  &lt;constraint resin:type="example.CustomConstraint&gt;
+    &lt;init&gt;
+      &lt;policy&gt;strict&lt;/policy&gt;
+    &lt;/init&gt;
+  &lt;/constraint&gt;
+  &lt;web-resource-collection url-pattern='/*'/>
+&lt;/security-constraint>
+...
+</example>
+
+</defun>
+
+</section> <!-- Security-Constraints -->
+
+
+<section title='Custom Security Constraints'>
+
+<p>Any custom security constraint is checked after any authentication (login)
+but before any filters or servlets are applied.  The security constraint will
+return true if the request is allowed and false if it's forbidden.  If the
+request is forbidden, it's the constraint's responsibility to use response.sendError() or to return an error page.</p>
+
+<example>
+package example;
+
+import java.io.*;
+import javax.servlet.*;
+import javax.servlet.http.*;
+import com.caucho.server.security.*;
+
+public class CustomSecurity extends AbstractConstraint {
+  private String foo = "false";
+
+  public void setFoo(String foo)
+  {
+    this.foo = foo;
+  }
+
+  public boolean needsAuthentication()
+    return false;
+  }
+
+  public boolean isAuthorized(HttpServletRequest request,
+                              HttpServletResponse response,
+                              ServletContext application)
+    throws ServletException, IOException
+  {
+    if (foo.equals(request.getParameter("test")))
+      return true;
+
+    response.sendError(response.SC_FORBIDDEN);
+
+    return false;
+  }
+}
+</example>
+
+<p>The <code/needsAuthentication/> method tells Resin that it needs to
+log in the user before checking the authorization.  This would allow
+the custom authorizer to check user roles or the user principle for
+the proper permissions.</p>
+
+<example>
+&lt;constraint resin:type="example.CustomSecurity">
+  &lt;foo&gt;test-value&lt;/foo&gt;
+&lt;/constraint&gt;
+</example>
+
+</section>
+
+<section name='protectall' title='Protecting static files from viewing by anyone'>
+
+<p>Sometimes it is necessary to protect files from being viewed by
+anyone, such as configuration files used in your code but not meant to
+be served to a browser.</p>
+
+<section title="Place files in WEB-INF">
+<p>Place files in <var/WEB-INF/> or a subdirectory of <var/WEB-INF/>.  Any files in
+<var/WEB-INF/> or it's subdirectories will automatically be protected
+from viewing.</p>
+</section>
+
+<section title="Security constraint requiring role nobody">
+<p>Use a security constraint that requires a <var/role/> that nobody
+will ever have.</p>
+
+<example title="security-constraint to protect static files">
+&lt;web-app&gt;
+  ...
+  &lt;!-- protect all .properties files --&gt;
+  &lt;security-constraint&gt;
+    &lt;web-resource-collection&gt;
+      &lt;url-pattern&gt;*.properties&lt;/url-pattern&gt;
+    &lt;/web-resource-collection&gt;
+    &lt;auth-constraint role-name='nobody'/&gt;
+  &lt;/security-constraint&gt;
+
+  &lt;!-- protect the config/ subdirectory --&gt;
+  &lt;security-constraint&gt;
+    &lt;web-resource-collection&gt;
+      &lt;url-pattern&gt;/config/*&lt;/url-pattern&gt;
+    &lt;/web-resource-collection&gt;
+    &lt;auth-constraint role-name='nobody'/&gt;
+  &lt;/security-constraint&gt;
+  ...
+&lt;/web-app&gt;
+</example>
+</section>
+
+<section title="A servlet that returns a 403 error">
+<p>Use a simple servlet that returns a 403 error, which means
+"Forbidden".  Resin provides the servlet <a
+href="javadoc|com.caucho.servlets.ErrorStatusServlet|"/> which is useful for
+this:</p>
+
+<example title="Using ErrorStatusServlet to protect static files">
+&lt;web-app&gt;
+  ...
+  &lt;servlet&gt;
+    &lt;servlet-name&gt;forbidden&lt;/servlet-name&gt;
+    &lt;servlet-class&gt;com.caucho.servlets.ErrorStatusServlet&lt;/servlet-class&gt;
+    &lt;init&gt;
+      &lt;status-code&gt;403&lt;/status-code&gt;
+    &lt;/init&gt;
+  &lt;/servlet&gt;
+
+  &lt;servlet-mapping url-pattern="*.properties" servlet-name="forbidden"/&gt;
+  &lt;servlet-mapping url-pattern="/config/*" servlet-name="forbidden"/&gt;
+  ...
+&lt;/web-app&gt;
+</example>
+
+<p>Or you could implement your own servlet:</p>
+
+<example title="servlet to protect static files - WEB-INF/classes/example/servlets/Forbidden.java">
+package example.servlets;
+
+import javax.servlet.*;
+import javax.servlet.http.*;
+
+import java.io.IOException;
+
+/**
+ * Respond with a 403 error
+ */
+public class Forbidden extends GenericServlet {
+  public void service(ServletRequest request, ServletResponse response)
+    throws ServletException, IOException
+  {
+    HttpServletResponse res = (HttpServletResponse) response;
+    res.sendError(403);
+  }
+}
+</example>
+</section>
+
+</section>
+
+</body>
+</document>

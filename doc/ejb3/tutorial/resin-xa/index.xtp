@@ -1,0 +1,350 @@
+<document>
+  <header>
+    <title>Transaction Method Annotations</title>
+        <description>
+          <p>Transaction annotations make reliable database updates
+clear, straightforward and scalable. Transaction boundaries protect
+database consistency by enforcing an all-or-none policy and using
+the database's locking capabilities for scalability.</p>
+
+          <p>See also:</p>
+          <ul>
+            <li>The <a href="ejb3|bean-ann.xtp#@TransactionAttribute">@TransactionAttribute</a> reference.
+            <li>The <a href="../cmp-xa/index.xtp">CMP Transaction</a> example for the same example using session beans.
+          </ul>
+        </description>
+    <type>tutorial</type>
+    <tutorial-startpage>xa</tutorial-startpage>
+  </header>
+
+  <body>
+    <summary/>
+
+<section title="Files in this tutorial">
+<deftable>
+<tr><td><viewfile-link file="WEB-INF/web.xml"/>
+    <td>web.xml configuration
+<tr><td><viewfile-link file="WEB-INF/classes/example/Course.java"/>
+    <td>The course bean
+<tr><td><viewfile-link file="WEB-INF/classes/example/SwapServlet.java"/>
+    <td>The swap servlet
+</deftable>
+</section>
+
+<section title="Transactions">
+
+<p>Transactions are the common interface to a database's locking
+capability used to ensure consistent database updates.  Because
+transactional applications use centralized database locking instead of
+application-specific synchronized blocks they scale to
+multi-jvm and multi-server deployments without modification.</p>
+
+<p>The tutorial uses transactions to swap teachers for two courses safely.
+To maintain consistency, either the swap
+must complete or the database must remain unchanged.  Transactions avoid
+the inconsistent state.  The example's database has a single entity, Course.
+Each course has a course name and an assigned teacher.</p>
+
+<table border="1">
+<caption>Potential Results of Swap (multithreaded)</caption>
+<tr><td><b>Potions</b></td><td><b>Transfiguration</b></td><td><b>Description</b></td></tr>
+<tr><td>McGonnagal</td><td>Snape</td><td>Database successfully updated </td></tr>
+<tr><td>McGonnagal</td><td>McGonnagal</td><td><font color="red">Inconsistent state prevented by transaction</font></td></tr>
+<tr><td>Snape</td><td>Snape</td><td><font color="red">Inconsistent state prevented by transaction</font></td></tr>
+<tr><td>Snape</td><td>McGonnagal</td><td>Database unchanged (rollback)</td></tr>
+</table>
+
+<section title="JDBC commit - underlying database support">
+
+<p>The JDBC <code>commit()</code> is the foundation for transactions.  At
+the core, the database provides transactions as part of its locking
+strategy.  The Resin and EJB transactions are mainly programming wrappers
+around the core database transactions.</p>
+
+<example title="Basic JDBC transaction pattern">
+Connection conn = ...;
+
+conn.setAutoCommit(false);
+try {
+  ... // protected JDBC statements
+} finally {
+  conn.commit();
+}
+</example>
+
+<p>When a method is marked as requiring a transaction, the enhanced method
+essentially creates the above JDBC transaction pattern around the method.
+Any JDBC calls inside the method are protected by the database's
+transaction support, including entity bean calls.</p>
+
+</section>
+
+<section title="UserTransaction - generalizing from JDBC">
+
+<p>Although the JDBC commit forms the foundation of transactions,
+a more general solution is needed for transaction
+boundaries: javax.transaction.UserTransaction.  Application servers
+like Resin provide UserTransaction support for JDBC automatically
+as part of the connection pooling capability.</p>
+
+<p>JDBC commit is inappropriate for transaction boundaries for two reasons:
+it mixes two separate concepts in one API and is restricted to JDBC.  In
+particular, JDBC commit can't be directly used for persistent object
+updates like EJB3 or JDO.  To use JDBC commit, the method needs the Connection
+object that needs protection, but a transaction boundary does not have direct
+access to the Connection. Instead of calling <code>conn.commit()</code>
+directly, the transaction boundary uses
+<code>UserTransaction.commit()</code> to call the
+<code>conn.commit()</code> with some application server help.</p>
+
+<example title="Basic JDBC transaction pattern">
+UserTransaction uTrans = ...;
+
+uTrans.begin();
+try {
+  ... // protected JDBC statements
+} finally {
+  uTrans.commit();
+}
+</example>
+
+<p>Inside the try-finally block, the UserTransaction will automatically
+call the JDBC transaction methods as necessary and will call
+the <code>commit()</code> method during the <code>uTrans.commit()</code>.</p>
+
+<p>By wrapping the connection transaction support in a UserTransaction, the
+application server makes transaction control cleaner, and allows for
+method enhancement of transaction boundaries.</p>
+
+</section>
+
+<section title="Method Enhancement - avoiding duplicate code">
+
+<p>Because the UserTransaction pattern is the same for each
+transaction boundary, it's important to write it once to avoid bugs
+and clarify the code.  Now, the method is annotated as a transaction
+boundary and Resin generates the transaction boundary code.</p>
+
+<example title="Annotated transaction method">
+@TransactionAttribute
+private void swap(Course a, Course b)
+{
+  String teacher = a.getTeacher();
+  a.setTeacher(b.getTeacher());
+  b.setTeacher(teacher);
+}
+</example>
+
+<p>Internally, Resin compiles the annotation into the standard transaction
+boundary pattern.</p>
+
+<example title="Enhanced code">
+private void swap(Course a, Course b)
+{
+  javax.transaction.UserTransaction uTrans = ...;
+
+  uTrans.begin();
+  try {
+    String teacher = a.getTeacher();
+    a.setTeacher(b.getTeacher());
+    b.setTeacher(teacher);
+  } finally {
+    uTrans.commit();
+  }
+}
+</example>
+
+
+</section>
+
+</section>
+<section title="Entity Bean">
+
+<section title="Database Schema">
+
+<example title="course.sql">
+CREATE TABLE ejb3_xa_courses (
+  id INTEGER PRIMARY KEY auto_increment,
+
+  course VARCHAR(250),
+  teacher VARCHAR(250)
+);
+
+INSERT INTO basic_courses VALUES('Potions', 'Severus Snape');
+INSERT INTO basic_courses VALUES('Transfiguration', 'Minerva McGonagall');
+</example>
+
+</section>
+
+<section title="Course Entity Implementation">
+
+<p>The Course is identical to
+the <a href="../cmp-xa">CMP transaction bean</a>.  It uses
+FIELD enhancement to define the database columns.
+
+<example title="Course.java">
+@Entity(access=FIELD)
+@Table(name="ejb3_xa_courses")
+public class Course {
+
+  @Id(generate=AUTO)
+  @Column(name="id")
+  private int _id;
+
+  @Basic
+  @Column(name="course")
+  private String _course;
+
+  @Basic
+  @Column(name="teacher")
+  private String _teacher;
+}
+</example>
+
+</section>
+</section>
+
+<section title="Swap Servlet">
+
+<example title="SwapServlet.java">
+import javax.ejb.EntityManager;
+import javax.transaction.UserTransaction;
+
+public class CourseServlet extends HttpServlet {
+  @javax.ejb.Inject
+  private EntityManager _manager;
+
+  ...
+
+  private void doService(PrintWriter out)
+    throws Exception
+  {
+    CourseBean []course = new CourseBean[2];
+
+    course[0] = (CourseBean) _manager.find("CourseBean", new Integer(1));
+    course[1] = (CourseBean) _manager.find("CourseBean", new Integer(2));
+
+    // swap the courses
+    swap(course[0], course[1]);
+  }
+
+  @TransactionAttribute(REQUIRED)
+  private void swap(Course a, Course b)
+  {
+    String teacher = a.getTeacher();
+    a.setTeacher(b.getTeacher());
+    b.setTeacher(teacher);
+  }
+}
+</example>
+
+<section title="@TransactionAttribute">
+
+<p>The TransactionAttribute marks a method as needing bytecode enhancement
+to support transactions.  The two most common transaction are
+REQUIRED and SUPPORTS.  A REQUIRED method expects to modify the data
+and wants to ensure the update is consistent.  A SUPPORTS method
+will only read data, so it can avoid the overhead of a transaction.</p>
+
+<example>
+@TransactionAttribute(REQUIRED)
+private void swap(Course a, Course b)
+{
+  String teacher = a.getTeacher();
+  a.setTeacher(b.getTeacher());
+  b.setTeacher(teacher);
+}
+</example>
+
+<p>A transaction is the database equivalent of a <code>synchronized</code>
+lock.  Transactions are somewhat more complicated locks because they need to
+work with multiple machines and possibly multiple databases, but they're
+still just sophisticated locks.  The typical transaction patterns are similar
+to familiar lock patterns.</p>
+
+<p>A REQUIRED attribute tells Resin that the method must be protected
+by a transaction.  In this case, the swap needs protection from
+simultaneous threads trying to swap at the same time.</p>
+
+<p>A SUPPORTS attribute would tell Resin that the method doesn't need a
+transaction, but the method should join any transaction that already exists.</p>
+
+</section>
+
+<section title="swap">
+
+<p>The first swap in the tutorial switches the teachers using
+a stateless session bean.</p>
+
+<example>
+// swap the courses using the transactional swap method
+swap(course[0], course[1]);
+</example>
+
+<p>Because the <code>swap</code> method was marked as transaction REQUIRED,
+Resin will start a transaction if none already exists.  If the method exits cleanly, Resin will commit the transaction.  If the method throws a
+RuntimeException, Resin will roll the transaction back.</p>
+
+<p>The <code>swap</code> method will throw a runtime exception if the
+transaction fails to commit.  For example, the databse might detect a
+deadlock and roll the transaction back.</p>
+
+</section>
+
+<ul>
+<li>REQUIRED automatically rolls back on a RuntimeException
+<li>REQUIRED joins any existing transaction.  In contrast,
+UserTransaction throws an exception if called in a transaction.
+</ul>
+
+</section>
+
+<section title="Differences with Stateless Session beans">
+
+<p>The transaction annotation lets any Java class use the
+same transaction capability previously
+restricted to Session beans.  Other than working directly with
+Java classes, the transaction boundaries are identical to EJB's
+transaction boundaries.</p>
+
+<p>Stateless session beans have the additional complexities of:</p>
+
+<ul>
+<li>Requires interface and generated stubs.
+<li>Requires JNDI lookup
+<li>Pooled bean instances
+</ul>
+
+<p>Transaction annotation cuts to the core transaction boundary
+problem, eliminating the often-unneeded complexity of Session beans.
+Transaction-enhanced classes and methods are normal Java
+classes marked with a JDK 1.5 annotation to produce a transaction boundary.
+Resin provides the same transaction boundaries as Stateless session beans
+for any Java class.</p>
+
+<p>In contrast, Resin-enhanced classes are normal Java classes.
+This example enhances a normal servlet to illustrate the differences.</p>
+
+</section>
+
+<section title="web.xml">
+
+<p>The Resin enhancement currently needs some configuration in the web.xml.
+The annotation value is configurable.  If you want a different transaction
+attribute, use a different annotation name.  Resin provides
+a com.caucho.transaction.Transaction attribute for applications
+wishing to avoid confusion with EJB 3.0.</p>
+
+<example>
+&lt;class-loader>
+  &lt;enhancer>
+    &lt;method annotation="javax.ejb.TransactionAttribute">
+	       type="com.caucho.transaction.enhancer.TransactionEnhancer"/>
+  &lt;/enhancer>
+&lt;/class-loader>
+</example>
+
+</section>
+
+  </body>
+</document>

@@ -1,0 +1,16 @@
+<navigation threaded="true" section="Resin : Security : " comment="true">
+  <item title="Security" link="index.xtp">
+    <item title="Authentication" link="authentication.xtp"/>
+    <item title="Digest Passwords" link="digest.xtp"/>
+    <item title="Authorization" link="authorization.xtp"/>
+    <item title="SSL" link="ssl.xtp"/>
+    <item title="Security Manager" link="securitymanager.xtp"/>
+    <item title="Malicious Attacks" link="malicious.xtp"/>
+
+    <item title='Tutorials' link="tutorial/index.xtp" atoc-descend='1'/>
+    
+    <item title="FAQ" link="faq.xtp" atoc-descend='2'/>
+    <item title="Scrapbook" link="scrapbook.xtp" atoc-descend="1"/>
+
+  </item>
+</navigation>

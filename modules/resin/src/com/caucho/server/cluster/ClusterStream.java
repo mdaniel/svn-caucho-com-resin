@@ -1,0 +1,140 @@
+/*
+ * Copyright (c) 1998-2004 Caucho Technology -- all rights reserved
+ *
+ * This file is part of Resin(R) Open Source
+ *
+ * Each copy or derived work must preserve the copyright notice and this
+ * notice unmodified.
+ *
+ * Resin Open Source is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * Resin Open Source is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE, or any warranty
+ * of NON-INFRINGEMENT.  See the GNU General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Resin Open Source; if not, write to the
+ *
+ *   Free Software Foundation, Inc.
+ *   59 Temple Place, Suite 330
+ *   Boston, MA 02111-1307  USA
+ *
+ * @author Scott Ferguson
+ */
+
+package com.caucho.server.cluster;
+
+import java.util.logging.Logger;
+import java.util.logging.Level;
+
+import com.caucho.util.Alarm;
+
+import com.caucho.log.Log;
+
+import com.caucho.vfs.ReadStream;
+import com.caucho.vfs.WriteStream;
+
+/**
+ * Defines a connection to the client.
+ */
+public class ClusterStream {
+  static protected final Logger log = Log.open(ClusterStream.class);
+
+  private ClusterClient _srun;
+
+  private ReadStream _is;
+  private WriteStream _os;
+
+  private long _freeTime;
+
+  ClusterStream(ClusterClient srun, ReadStream is, WriteStream os)
+  {
+    _srun = srun;
+    _is = is;
+    _os = os;
+  }
+
+  /**
+   * Returns the cluster server.
+   */
+  public ClusterClient getServer()
+  {
+    return _srun;
+  }
+
+  /**
+   * Returns the input stream.
+   */
+  public ReadStream getReadStream()
+  {
+    return _is;
+  }
+
+  /**
+   * Returns the write stream.
+   */
+  public WriteStream getWriteStream()
+  {
+    return _os;
+  }
+
+  /**
+   * Returns the free time.
+   */
+  public long getFreeTime()
+  {
+    return _freeTime;
+  }
+
+  /**
+   * Sets the free time.
+   */
+  public void setFreeTime(long freeTime)
+  {
+    _freeTime = freeTime;
+  }
+
+  /**
+   * Recycles.
+   */
+  public void free()
+  {
+    _freeTime = Alarm.getCurrentTime();
+
+    _srun.free(this);
+  }
+
+  /**
+   * closes the stream.
+   */
+  public void close()
+  {
+    ReadStream is = _is;
+    _is = null;
+    
+    WriteStream os = _os;
+    _os = null;
+
+    if (is != null)
+      _srun.close(this);
+
+    try {
+      if (is != null)
+	is.close();
+    } catch (Throwable e) {
+      log.log(Level.FINER, e.toString(), e);
+    }
+
+    try {
+      if (os != null)
+	os.close();
+    } catch (Throwable e) {
+      log.log(Level.FINER, e.toString(), e);
+    }
+  }
+}

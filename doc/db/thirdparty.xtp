@@ -1,0 +1,202 @@
+<document>
+<header>
+  <product>resin</product>
+  <title>Third-party Database Configuration</title>
+  <description>
+  <p>A list of third party databases and example driver
+  configurations.</p>
+  </description>
+</header>
+
+<body>
+<summary description='none'/>
+
+<!--
+<section title="MySQL Caucho Driver">
+<p>This driver is included with Resin.</p>
+<example>
+&lt;database&gt;
+  &lt;jndi-name&gt;jdbc/mysql&lt;/name&gt;
+  &lt;driver-class&gt;com.caucho.jdbc.mysql.Driver&lt;/driver-class&gt;
+  &lt;driver-url&gt;jdbc:mysql_caucho://localhost:3306/<var/dbname/>&lt;/driver-url&gt;
+  &lt;user&gt;<var/username/>&lt;/user&gt;
+  &lt;password&gt;<var/password/>&lt;/password&gt;
+  ...
+&lt;/database&gt;
+</example>
+
+</section>
+-->
+
+<section title="MySQL Connector/J">
+<ul>
+<li><a href="http://www.mysql.com/products/connector-j/index.html">mysql.com Connector/J</a>
+</ul>
+<example title="MySQL Connector/J JDBC configuration">
+&lt;database&gt;
+  &lt;jndi-name&gt;jdbc/mysql&lt;/jndi-name&gt;
+  &lt;driver>
+    &lt;type&gt;com.mysql.jdbc.jdbc2.optional.MysqlConnectionPoolDataSource&lt;/type&gt;
+    &lt;url&gt;jdbc:mysql://localhost:3306/<var/dbname/>&lt;/url&gt;
+    &lt;user&gt;<var/username/>&lt;/user&gt;
+    &lt;password&gt;<var/password/>&lt;/password&gt;
+  &lt;/driver>
+  ...
+&lt;/database&gt;
+</example>
+<!--
+<example title="MySQL Connector/J XADataSource JDBC configuration">
+&lt;database&gt;
+  &lt;jndi-name&gt;jdbc/mysql-xa&lt;/jndi-name&gt;
+  &lt;xa&gt;true&lt;/xa&gt;
+  &lt;driver>
+    &lt;type&gt;com.mysql.jdbc.jdbc2.optional.MysqlXaDataSource&lt;/type&gt;
+    &lt;url&gt;jdbc:mysql://localhost:3306/<var/dbname/>&lt;/url&gt;
+    &lt;user&gt;<var/username/>&lt;/user&gt;
+    &lt;password&gt;<var/password/>&lt;/password&gt;
+  &lt;/driver>
+  ...
+&lt;/database&gt;
+</example>
+-->
+
+<section title="Not all MySQL table types support transactions">
+<TODO/>
+</section>
+
+</section>
+
+<section title="Oracle">
+<ul>
+<li><a href="http://otn.oracle.com/tech/java/sqlj_jdbc/htdocs/jdbc_faq.htm">Oracle JDBC Frequently Asked Questions</a>
+</ul>
+
+<example title="Oracle JDBC configuration">
+&lt;database&gt;
+  &lt;jndi-name&gt;jdbc/oracle&lt;/jndi-name&gt;
+  &lt;driver>
+    &lt;type&gt;oracle.jdbc.pool.OracleConnectionPoolDataSource&lt;/type&gt;
+    &lt;url&gt;jdbc:oracle:thin:@localhost:1521:<var/dbname/>&lt;/url&gt;
+    &lt;user&gt;<var/username/>&lt;/user&gt;
+    &lt;password&gt;<var/password/>&lt;/password&gt;
+  &lt;/driver>
+  ...
+&lt;/database&gt;
+</example>
+
+<p>Note, the XADataSource is only needed for distributed transactions.
+If your transactions only include the single data source, the
+OracleConnectionPoolDataSource will be more efficient.</p>
+
+<example title="Oracle XADataSource JDBC configuration">
+&lt;database&gt;
+  &lt;jndi-name&gt;jdbc/oracle-xa&lt;/jndi-name&gt;
+  &lt;xa&gt;true&lt;/xa&gt;
+  &lt;driver>
+    &lt;type&gt;oracle.jdbc.xa.client.OracleXADataSource&lt;/type&gt;
+    &lt;url&gt;jdbc:oracle:thin:@localhost:1521:<var/dbname/>&lt;/url&gt;
+    &lt;user&gt;<var/username/>&lt;/user&gt;
+    &lt;password&gt;<var/password/>&lt;/password&gt;
+  &lt;/driver>
+  ...
+&lt;/database&gt;
+</example>
+
+</section>
+
+<section title="Informix">
+
+<ul>
+<li><a href="http://www-3.ibm.com/software/data/informix/tools/jdbc/">IBM Informix drivers</a>
+</ul>
+
+<example title="Informix JDBC configuration">
+&lt;database&gt;
+  &lt;jndi-name&gt;jdbc/informix&lt;/jndi-name&gt;
+  &lt;driver>
+    &lt;type&gt;com.informix.jdbcx.IfxConnectionPoolDataSource&lt;/type&gt;
+    &lt;url&gt;jdbc:informix-sqli://123.45.67.89:1533/<var/dbname/>&lt;/url&gt;
+    &lt;init-param param-name="INFORMIXSERVER" param-value="myserver"/&gt;
+    &lt;user&gt;<var/username/>&lt;/user&gt;
+    &lt;password&gt;<var/password/>&lt;/password&gt;
+  &lt;/driver>
+  ...
+&lt;/database&gt;
+</example>
+
+<example title="Informix XADataSource JDBC configuration">
+&lt;database&gt;
+  &lt;jndi-name&gt;jdbc/informix-xa&lt;/jndi-name&gt;
+  &lt;xa&gt;true&lt;/xa&gt;
+  &lt;driver type="com.informix.jdbcx.IfxXADataSource">
+    &lt;url&gt;jdbc:informix-sqli://123.45.67.89:1533/<var/dbname/>&lt;/url&gt;
+    &lt;init-param param-name="INFORMIXSERVER" param-value="myserver"/&gt;
+    &lt;user&gt;<var/username/>&lt;/user&gt;
+    &lt;password&gt;<var/password/>&lt;/password&gt;
+  &lt;/driver>
+  ...
+&lt;/database&gt;
+</example>
+
+</section> <!-- Informix -->
+
+<section title="SQL Server">
+<example>
+&lt;database&gt;
+  &lt;jndi-name&gt;jdbc/sqlserver&lt;/jndi-name&gt;
+  &lt;driver type="com.microsoft.jdbcx.sqlserver.SQLServerDataSource"&gt;
+    &lt;serverName&gt;csdevsqla01.office.foo&lt;/serverName&gt;
+    &lt;databaseName&gt;Reports&lt;/databaseName&gt;
+    &lt;user&gt;XXX&lt;/user&gt;
+    &lt;password&gt;YYY&lt;/password&gt;
+    &lt;selectMethod&gt;cursor&lt;/selectMethod&gt;
+  &lt;/driver&gt;
+  &lt;xa&gt;true&lt;/xa&gt;
+&lt;/database&gt;
+</example>
+</section>
+
+<section title="DB2">
+<p>Contributions welcome!</p>
+</section>
+
+<section title="Interbase">
+<p>Contributions welcome!</p>
+</section>
+
+
+<section title="PostgreSQL">
+<ul>
+<li><a href="http://jdbc.postgresql.org/">PostgreSQL JDBC Drivers</a>
+</ul>
+
+<example>
+&lt;database&gt;
+  &lt;jndi-name&gt;jdbc/<var/name/>&lt;/jndi-name&gt;
+  &lt;driver>
+    &lt;type&gt;org.postgresql.Driver&lt;/type&gt;
+    &lt;url&gt;jdbc:postgresql://127.0.0.1:5432/<var/dbname/>&lt;/url&gt;
+    &lt;user&gt;<var/username/>&lt;/user&gt;
+    &lt;password&gt;<var/password/>&lt;/password&gt;
+  &lt;/driver>
+  ...
+&lt;/database&gt;
+</example>
+
+</section>
+
+<section title="hsqldb">
+<p>"hsqldb is a relational database engine written in Java.   It
+offers a small (less than 160k), fast database engine which
+offers both in memory and disk based tables."</p>
+
+<ul>
+<li><a href="http://hsqldb.sourceforge.net/">hsqldb homepage</a>
+</ul>
+
+<p>Contributions welcome!</p>
+</section>
+
+
+</body>
+</document>

@@ -1,0 +1,90 @@
+<section>
+  <header>
+    <product>resin</product>
+    <title>URLs</title>
+    <type>example</type>
+    <resin-2.0>$resin/java_tut/req_url.xtp</resin-2.0>
+    <brief>
+      The <var/request/> object breaks down the request URL into
+      components.
+    </brief>
+    <description>
+      The <var/request/> object breaks down the request URL into
+      components.  Servlets and JSP pages can use those components to
+      vary the response while using the same servlet or JSP page.
+    </description>
+  </header>
+
+
+<p><pull.description/></p>
+
+<p>Some reasons you may need to look at the URL information:</p>
+<ul>
+<li>form submission
+<li>selecting sections of a manual
+<li>displaying different stories on a news site
+<li>displaying comments on a discussion group
+<li>sort preferences for the discussion site
+<li>search results
+</ul>
+
+<section title="RequestURI">
+
+<p><var/getRequestURI()/> returns the full path, excluding any query string.
+</p>
+
+</section>
+
+<section title="ServletPath">
+
+<p><var/getServletPath()/> returns the URI prefix that matches the
+servlet.  In the case of a JSP, it will return everything up to the
+*.jsp.</p>
+
+<p>The servlet path is useful for servlets like JSP, XTP, or SSI that
+read and transform files.</p>
+
+</section>
+
+<section title="PathInfo">
+
+<p><var/getPathInfo()/> returns everything after the ServletPath.</p>
+
+<p>A discussion board servlet could use PathInfo to select stories
+and comments.</p>
+
+</section>
+
+<section title="QueryString">
+
+<p><var/getQueryString()/> returns the query string, everything after
+the '?'</p>
+
+<p>Often, query strings are the result of form submissions but it's
+also useful for database-driven sites.  For example, you might encode
+"story 15, comment 7" of a discussion as <var//comment.xtp?story=15&comment=7/>.</p>
+
+</section>
+
+<example>
+http://localhost:8080/test/env.jsp/tail?a=b
+</example>
+
+<example title='env.jsp'>
+&lt;table>
+&lt;tr>&lt;td>URI         &lt;td>&lt;%= request.getRequestURI() %>
+&lt;tr>&lt;td>ServletPath &lt;td>&lt;%= request.getServletPath() %>
+&lt;tr>&lt;td>PathInfo    &lt;td>&lt;%= request.getPathInfo() %>
+&lt;tr>&lt;td>QueryString &lt;td>&lt;%= request.getQueryString() %>
+&lt;tr>&lt;td>a           &lt;td>&lt;%= request.getParameter("a") %>
+&lt;/table>
+</example>
+<results>
+URI          /test/env.jsp/tail
+ServletPath  /test/env.jsp
+PathInfo     /tail
+QueryString  a=b
+a            b
+</results>
+
+</section>

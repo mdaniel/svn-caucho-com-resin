@@ -1,0 +1,71 @@
+<document>
+<header>
+  <product>resin</product>
+  <title>XML/XSLT Scrapbook</title>
+  <description>
+  <p>A repository of notes and comments that will
+  eventually make their way into the documentation.  Please
+  treat the information here with caution, it has often not been
+  verified.</p>
+  </description>
+</header>
+
+<body>
+<summary objsummary-in-localtoc='1'/>
+
+<section title="XSLT">
+<faq title="URIResolver">
+<p>With an URIResolver is that you can create a catalog or
+map configuration that matchs an ID with the actual URI. So you use the id
+xml:hoo in you document("xml:hoo") and you set the URIResolver to return the
+resource id'd in the catalog. You can also ensure that non-inhouse developed XSL
+are coming from a place that you specify.</p>
+
+<example>
+&lt;catalog&gt;
+  &lt;file id="xml:hoo" uri="http://hoo.com/boo/hoo.xml"/&gt;
+&lt;/catalog&gt;
+</example>
+
+you set the URIResolver like:
+
+<example>
+TransformerFactory factory = TransformerFactory.newInstance();
+factory.setURIResolver(new MyURIResolver(args));
+</example>
+
+here is a simple URIResolver:
+
+<example>
+import java.io.*;
+import java.util.*;
+
+import javax.xml.transform.*;
+import javax.xml.transform.stream.*;
+
+class MyURIResolver implements URIResolver {
+   private MyObj obj;
+
+   public MyURIResolver(MyObj obj) {
+      this.obj = obj;
+   }
+
+   public Source resolve(String href,String base) {
+System.out.println("href: " + href);
+System.out.println("base: " + base);
+    if (href.equals("xml:hoo")) {
+      return new StreamSource((File)this.obj.getResolvedFile(href));
+    }
+    return null;
+  }
+}
+
+</example>
+
+<p>(Thanks to Robert Koberg)</p>
+</faq>
+
+</section>
+
+</body>
+</document>

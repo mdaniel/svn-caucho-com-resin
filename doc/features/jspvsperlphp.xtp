@@ -1,0 +1,327 @@
+<document>
+  <header>
+    <product>resin</product>
+    <resin-2.0>$article/benchmark.xtp</resin-2.0>
+    <title>JSP vs mod_php and mod_perl</title>
+    <authors>
+      <person>Scott Ferguson</person>
+    </authors>
+    <description>
+      <p/>JSP and Servlets can outperform mod_perl and mod_php.
+      Java's outdated reputation for performance problems is no longer
+      deserved.  Fast servlet engines like Resin and fast JDK's like
+      IBM's 1.1.8 JDK now make Java the language of choice for web
+      applications.
+
+      <p/>Java has always been more maintainable than Perl or PHP
+      scripts. With JSP, Java also becomes easy for web page design.
+      Where Java has had trouble in the past is performance.  That
+      unfortunate perception is now obsolete.  Java servers can now
+      outperform the leading contenders for web site design.
+
+      <note>The benchmark has been rerun with an additional "Loop"
+      benchmark. Also, several reviewers have suggested ways to
+      improve the performance of Perl and PHP.</note>
+    </description>
+      
+  </header>
+
+  <body>
+    <summary/>
+
+<section title='New Benchmark Comparison'>
+
+All results are in operations per second.  The results are sorted by
+<var/Hello/> performance.
+
+<deftable title='Single Client'>
+<tr><th>Engine<th>File<th>Servlet<th>Hello<th>Loop<th>Big<th>DB<th>Cache
+<tr align=right>
+  <td align=left>Resin/IBM
+  <td>571<td>550<td>558<td>36<td>83<td>131/268<td>603
+  
+<tr align=right>
+  <td align=left>Resin/Apache/IBM
+  <td>505<td>373<td>386<td>36<td>65<td>122/202<td>382
+  
+<tr align=right>
+  <td align=left>Resin/IIS
+  <td>730<td>348<td>364<td>32<td>46<td>--<td>--
+  
+<tr align=right>
+  <td align=left>mod_perl/Apache
+  <td>497<td>n/a<td>322<td>11<td>74<td>98<td>--
+  
+<tr align=right>
+  <td align=left>ASP/IIS
+  <td>727<td>n/a<td>317<td>1.5<td>31<td>--<td>--
+  
+<tr align=right>
+  <td align=left>mod_php/Apache
+  <td>504<td>n/a<td>308<td>13<td>36<td>130<td>--
+  
+<tr align=right>
+  <td align=left>Resin JS/Apache/IBM
+  <td>484<td>n/a<td>254<td>16<td>61<td>33/118<td>376
+</deftable>
+
+<p/>The following table shows four HTTP clients and HTTP/1.1 keepalive.
+The fourth keepalive request closes the connection.
+
+<deftable title='Four Clients with Four Keepalive'>
+<tr><th>Engine<th>File<th>Servlet<th>Hello<th>Loop<th>Big<th>DB<th>Cache
+<tr align=right>
+  <td align=left>Resin/IBM
+  <td>1455<td>1187<td>1553<td>46<td>96<td>176/367<td>1561
+  
+<tr align=right>
+  <td align=left>Resin/Apache/IBM
+  <td>880<td>564<td>575<td>38<td>91<td>135/237<td>586
+  
+<tr align=right>
+  <td align=left>Resin/IIS
+  <td>1619<td>417<td>422<td>35<td>48<td>--<td>--
+  
+<tr align=right>
+  <td align=left>mod_perl/Apache
+  <td>801<td>n/a<td>385<td>11<td>97<td>93<td>--
+  
+<tr align=right>
+  <td align=left>ASP/IIS
+  <td>1654<td>n/a<td>385<td>1.4<td>80<td>--<td>--
+  
+<tr align=right>
+  <td align=left>mod_php/Apache
+  <td>869<td>n/a<td>342<td>13<td>44<td>141<td>--
+</deftable>
+
+</section>
+
+<section title='Benchmark Description'>
+
+Each engine was tested against seven benchmarks.
+
+<section title='File'>
+
+The file benchmark is just a small (311 byte) static file.  It tests
+the web server's maximum static page rate.  
+
+</section>
+
+<section title='Servlet'>
+
+The servlet benchmark is a trivial "Hello, World" servlet.  It measures the
+servlet engine overhead.  In other words, no matter how efficient you make your
+servlet code, you will never get better performance than this number.
+
+</section>
+
+<section title='Hello'>
+
+A trivial "Hello, World" page.  It measures the JSP (or Perl or PHP) overhead.
+No matter how efficient you make your servlet code, you will never get
+better performance than this number.
+
+</section>
+
+<section title='Loop'>
+
+Just prints lots of "Hello, World" in a loop.  The resulting output is
+about 64k.  The results, especially in comparison with "Big", give a very
+rough comparison of the execution performance.
+
+</section>
+
+<section title='Big'>
+
+Somewhat misnamed, this is just a large almost-static page.  It's about 64k.
+The page doesn't do much processing, so this just tests the ability to
+push bytes back to the client.
+
+</section>
+
+<section title='DB'>
+
+A simple database query.  The page prints the results from two small
+SQL selects.  It gives an indication of database performance.
+
+<p/>For the new Java benchmark, the first number uses the org.gjt MySql
+driver.  The second number uses an experimental Caucho driver, available on
+request.  So the two numbers gives a good idea of how important JDBC drivers
+are to the performance.
+
+</section>
+
+<section title='Cache'>
+
+Same as DB, but the page sets the <var/Expires/> header 15 seconds in
+the future.
+
+</section>
+
+</section>
+
+<section title='Old Data'>
+
+<p/>The new version of the benchmark is incomplete.  It leaves out
+several servlet engines.  FYI, here's the old data.
+
+All results are in operations per second.  The results are sorted by
+<var/Hello/> performance.
+
+<deftable title='Benchmark comparison'>
+<tr><th>Engine<th>File<th>Servlet<th>Hello<th>Big<th>DB<th>Cache
+<tr align=right>
+  <td align=left>Resin/IBM
+  <td>615<td>557<td>510<td>96<td>143<td>572
+
+<tr align=right>
+  <td align=left>Resin/JDK1.2
+  <td>451<td>400<td>426<td>66<td>75<td>420
+  
+<tr align=right>
+  <td align=left>Resin/Apache/IBM
+  <td>488<td>346<td>370<td>49<td>92<td>388
+
+<tr align=right>
+  <td align=left>Orion/JDK1.2
+  <td>433<td>165<td>319<td>61<td>78<td>64
+  
+<tr align=right>
+  <td align=left>mod_php/Apache
+  <td>497<td>n/a<td>258<td>46<td>104<td>104
+  
+<tr align=right>
+  <td align=left>mod_perl/Apache
+  <td>488<td>n/a<td>324<td>82<td>98<td>98
+  
+<tr align=right>
+  <td align=left>ServletExec/Apache/IBM
+  <td>475<td>87<td>91<td>--<td>52<td>52
+  
+<tr align=right>
+  <td align=left>Tomcat/IBM
+  <td>114<td>89<td>83<td>18<td>44<td>44
+  
+<tr align=right>
+  <td align=left>CGI perl/Apache
+  <td>488<td>n/a<td>59<td>25<td>6<td>6
+  
+<tr align=right>
+  <td align=left>JRun/Apache/JDK1.2
+  <td>471<td>61<td>33<td>--<td>22<td>22
+  
+<tr align=right>
+  <td align=left>Tomcat/JDK1.2
+  <td>33<td>55<td>33<td>11<td>21<td>21
+</deftable>
+</section>
+
+<section title='Web Content Engines'>
+
+<ul>
+<li>Resin 1.1 b2 (internal web server)
+<li>Orion 0.7.6b (internal web server)
+<li>Tomcat (internal web server)
+<li>Resin 1.1 b2/Apache 1.3.9
+<li>mod_php 4.0b2
+<li>mod_perl 1.21
+<li>JRun 2.3.3/Apache 1.3.9
+<li>ServletExec 2.2/Apache 1.3.9
+<li>CGI using Perl
+</ul>
+
+</section>
+
+<section title='Configuration'>
+
+<p/>The server is a 266 Mhz Pentium II running RedHat 6.0 with 64 meg of
+ram.  The client is a 300 Mhz Celeron also running RedHat 6.0 with 32 meg.
+The two machines are connected with a 100bT ethernet connection.
+
+<p/>The client is a simple C program
+<!--
+(<a href='benchmark.jar'>benchmark.jar</a> or
+<a href='benchmark.tgz'>benchmark.tgz</a>)
+-->
+acting as a browser.  It sends
+requests, including typical header fields, and retrieves the results.
+The results are hashed and compared to an expected value.
+
+<p/>Before each test, the client sends and discards a single request.
+This takes care of startup costs.  In the test, 1000 requests were
+sent sequentially; the client waited for the request to complete
+before sending another request.  Each test was repeated three times
+and the median result chosen.
+
+<p/>Apache configurations used Apache 1.3.9.  All modules were
+compiled with DSO support.
+
+<p/>Where possible, the benchmark used the IBM 1.1.8 JDK.  When the servlet
+engine didn't work with the IBM JDK, the Blackdown 1.2 was substituted
+instead.  For example, Orion needs JDK 1.2 and JRun spun using the IBM JDK.
+
+<p/>Database benchmarks used Mysql using the mm.mysql JDBC driver.
+
+</section>
+
+<section title='Discussion'>
+
+First, these benchmarks are 'toy' benchmarks.  To fully compare Resin to
+other servlet engines or Perl or PHP, you need to write your full application
+in both languages and compare the two.  These benchmarks are only a
+starting point and should be taken with a grain of skepticism.  
+
+<p/>This benchmark didn't include a full application for two reasons.
+First, we're somewhat crunched for time.  Second, what would be a
+representative benchmark?  The home page of slashdot?
+Also, should be application be written as most people would
+write it, or the most maintainable, or the fastest hacked up version the best
+programmers can come up with?  So a full application would raise more
+questions than it answered.
+
+<p/>For example, compare the "Big" numbers with the "Loop" numbers.  They both
+send the same amount of data back to the client, but the performance is
+difference is large.  Based on this information alone, an evil benchmarker
+could tweak the benchmark to the benefit of any engine.
+
+<p/>Based on this benchmark, the Perl and PHP database drivers are
+faster than the JDBC driver.  This appears to be a JDBC implementation issue,
+not anything intrinsic to Java.  The internal Caucho prototype JDBC driver
+gives much faster results, even faster than Perl and PHP.  Since real
+projects can't use internal JDBC prototypes, the DB performance difference
+may matter to some projects.
+
+<p/>Also, the 'Big' benchmark also gives the advantage to Perl.  It may be
+interesting to note that changing the benchmark slightly makes Resin
+faster than Perl.  If the benchmark is a simple for loop printing 1024 lines,
+with the same output size, Resin is faster than Perl.  The benchmarks will be
+updated in a few weeks including the new loop test.
+
+<p/>So is Resin or PHP or Perl faster?  It really depends on your
+application.  As a first cut, it's probably best to assume they have about
+the same performance unless you can benchmark your specific application.
+A difference of only 30% in a toy benchmark should be interpreted as having
+little or no difference.  
+
+<p/>These results are primarly important because previous
+servlet engines were much slower than PHP or Perl.  With Resin, servlet
+performance is now about the same.   Projects should use other considerations,
+like maintainability or ease of implementation to decide between the languages.
+
+</section>
+
+<section title='Conclusion'>
+
+JSP can approach static page performance.  A perception still exists that
+Java is a great programming environment but hobbled by performance.  The
+perception is no longer valid.
+
+<p/>The near-static performance means that many sites, who never
+considered JSP or servlets because of performance, can now take
+advantage of the Java platform's reliability and ease of programming
+benefits.
+
+</section>
+  </body>
+</document>

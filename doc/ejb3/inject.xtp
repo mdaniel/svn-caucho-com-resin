@@ -1,0 +1,151 @@
+<document>
+<header>
+  <product>resin-ee</product>
+  <title>EJB Dependency Injection</title>
+  <version>Resin 3.0</version>
+
+  <description>
+  <p>Session beans may be configured using dependency injection annotation.</p>
+
+  </description>
+</header>
+
+<note>These annotations will likle change package names to something
+other than javax.ejb as J2EE 1.5 drafts progress.</note>
+
+<summary objsummary='localtoc'/>
+
+<section title="See Also">
+
+<ul>
+<li>See <a href="tutorial/session/index.xtp">session tutorial
+</a> for an example.
+</ul>
+
+</section>
+
+<section title="Dependency Injection Annotations">
+
+<defun title="@EJB">
+
+<p>Configures an EJB values for a field or method.</p>
+
+<p>@EJB is essentially a @Resource where it's known that the
+result is an EJB interface.</p>
+
+<deftable-childtags>
+<tr><td>jndiName<td>The jndi name of the resource<td>The field name
+</deftable-childtags>
+
+<p>In the following exaple, Resin will call <code>setFoo</code>
+method with the bean in "java:comp/env/ejb/foo" before the
+session is started.</p>
+
+<example>
+@EJB
+void setFoo(example.Test test)
+{
+  _test = test;
+}
+</example>
+
+<def title="javax.ejb.EJB">
+@Target({TYPE, METHOD, FIELD, PARAMETER})
+@Retention(RUNTIME)
+public @interface EJB {
+  String name() default "";
+  String businessInterface() default "";
+  String jndiName() default "";
+}
+</def>
+
+</defun>
+
+<defun title="@Inject">
+
+<p>Configures a JNDI values for a field or method.</p>
+
+<p>Inject relies heavily on defaults from the field or method name
+and type.  If more information is required, use @Resource, @EJB, or @EJBHome.
+
+<deftable-childtags>
+<tr><td>jndiName<td>The jndi name of the resource<td>The field name
+</deftable-childtags>
+
+<p>In the following exaple, Resin will call <code>setDataSource</code>
+method with the data source in "java:comp/env/jdbc/test" before the
+session is started.</p>
+
+<example>
+@Inject(jndi-name="java:comp/env/jdbc/test")
+void setDataSource(javax.sql.DataSource dataSource)
+{
+  _dataSource = dataSource;
+}
+</example>
+
+<def title="javax.ejb.Inject">
+@Target({METHOD, FIELD})
+@Retention(RUNTIME)
+public @interface Inject {
+  String jndiName() default "";
+}
+</def>
+
+</defun>
+
+<defun title="@Resource">
+
+<p>Configures a JNDI values for a field or method.  @Resource
+is essentially the same as @Inject but provides more configurable
+options.  @Resource can also be used at the Class level to
+declare a dependency in cases where the session bean loads the
+JNDI value by itself.</p>
+
+<deftable-childtags>
+<tr><td>name<td>The name of the resource<td>The field name
+<tr><td>resourceType<td>The resource typed<td>The field type
+<tr><td>authenticationType<td>Whether the container or the application is responsible for authentication<td>CONTAINER
+<tr><td>shareable<td>True if the bean follows JCA shareability requirements.<td>true
+<tr><td>jndiName<td>The jndi name of the resource<td>The field name
+</deftable-childtags>
+
+<p>In the following exaple, Resin will call <code>setDataSource</code>
+method with the data source in "java:comp/env/jdbc/test" before the
+session is started.  The "java:comp/env/jdbc" full name
+is inferred from the DataSource type.</p>
+
+<deftable title="default JNDI names">
+<tr><td>javax.sql.DataSource<td>java:comp/env/jdbc
+<tr><td>javax.mail.*<td>java:comp/env/mail
+<tr><td>javax.ejb.EntityManager<td>java:comp/EntityManager
+<tr><td>javax.transaction.UserTransaction<td>java:comp/UserTransaction
+<tr><td>javax.ejb.EJBHome<td>java:comp/env/ejb
+<tr><td>javax.jms.*<td>java:comp/env/jms
+</deftable>
+
+<example>
+@Resource(name="test")
+void setDataSource(javax.sql.DataSource dataSource)
+{
+  _dataSource = dataSource;
+}
+</example>
+
+<def title="javax.ejb.Resource">
+@Target({TYPE, METHOD, FIELD, PARAMETER})
+@Retention(RetentionPolicy.RUNTIME)
+public @interface Resource {
+  String name() default "";
+  String resourceType() default "";
+  AuthenticationType authenticationType() CONTAINER;
+  boolean shareable() default true;
+  String jndiName() default "";
+}
+</def>
+
+</defun>
+
+</section>
+
+</document>

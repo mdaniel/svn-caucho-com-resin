@@ -1,0 +1,76 @@
+<document>
+  <header>
+    <product>resin</product>
+    <resin-2.0>$resin/java_tut/xtp-copy.xtp</resin-2.0>
+    <title>XTP Copy</title>
+    <description>
+      <p>For most XTP pages, the default XSLT transormation you want is to
+      copy the input into the output. Your XTP pages can be almost identical to
+      JSP pages and just use XSLT to eliminate repetitious error-prone patterns.</p>
+      
+      <p>XTP transforms XML or HTML documents into a XML or HTML output.  In
+        other words, it's an XML transformation.  So each XTP page has four parts:</p>
+      <ol>
+        <li>The input XML (the XTP file)
+        <li>The transformation stylesheet (the XSL file)
+        <li>The generated JSP
+        <li>The generated output (the result of executing the JSP)
+      </ol>
+
+      <p>The easiest transformation is the identity transformation.
+      The following stylesheet copies the input into the output.</p>
+
+    </description>
+  </header>
+
+  <body>
+    <summary/>
+
+<example title="default.xsl">
+&lt;xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+                version="1.0">
+
+  &lt;!-- make sure '&lt;' is not printed as '&amp;lt;' -->
+  &lt;xsl:output disable-output-escaping='true'/>
+
+  &lt;!-- copy input to output -->
+  &lt;xsl:template match='*|@*'>
+    &lt;xsl:copy>
+      &lt;xsl:apply-templates select='node()|@*'/>
+    &lt;/xsl:copy>
+  &lt;/xsl:template>
+
+&lt;/xsl:stylesheet>
+</example>
+
+<p>Each <var/template/> contains a <var/match/> pattern and a
+<var/replacement tree/>.  The match pattern is an <var/XPath/> expression.
+In the above example, the match pattern <var/*|@*/> matches any element
+and any attribute.  The replacement <var/xsl:copy/> copies the current
+node and calls <var/xsl:apply-templates/> to recursively evaluate
+any children of the current node.</p>
+
+<p>You can put <var/default.xsl/> in the same directory as the xtp
+file, or you can put in WEB-INF/xsl, or you can put it in the
+classpath like WEB-INF/classes.  The last option is useful if you want
+to create a jar of useful stylesheets and beans. </p>
+
+<p>Your XTP page may look something like:</p>
+
+<example title='test.xtp'>
+&lt;h1>My test&lt;/h1>
+
+Adding: 2 + 2 = &lt;%= 2 + 2 %>
+</example>
+
+<p>The generated JSP is identical to the input, and the generated HTML
+just executes the JSP.</p>
+
+<results>
+&lt;h1>My test&lt;/h1>
+
+Adding: 2 + 2 = 4
+</results>
+
+  </body>
+</document>

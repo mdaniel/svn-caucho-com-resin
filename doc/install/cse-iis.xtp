@@ -1,0 +1,475 @@
+<document>
+  <header>
+    <product>resin</product>
+    <resin-2.0>$resin/ref/cse-iis.xtp</resin-2.0>
+    <title>Resin with IIS</title>
+
+    <description>
+      <p>Resin provides a fast servlet runner for IIS and PWS, allowing IIS
+        to run servlets and JSP files.</p>
+
+      <p>
+        <figure src='iis_srun.gif'/>
+      </p>
+
+      <p>If you have not yet done so, we suggest you use the <a
+      href='install|httpd'>Resin standalone web server</a> option
+      first.</p>
+
+    </description>
+  </header>
+
+  <body>
+    <summary/>
+
+
+<section title='Prerequisites and Environment Variables'>
+
+<p>Resin requires a 1.4 JDK.  You can download one from Sun and install it.</p>
+ 
+<p>The Control Panel is used to configure two environment variables:</p>
+<example>
+JAVA_HOME=C:\j2sdk1.4.2
+RESIN_HOME=C:\resin-3.0
+</example>
+</section>
+
+<section title='Configuring IIS/PWS'>
+
+<p>To configure Resin with IIS, you must follow the following steps:</p>
+<ol>
+<li>Configure IIS/PWS
+<li>Configure resin.conf
+<li>Start httpd
+</ol>
+
+
+<section title='ISAPI Filter'>
+
+<p>You should run <code>RESIN_HOME/bin/setup.exe</code> to setup your
+configuration.  If setup.exe is not used, or it fails, the steps in <a href="#Manual-Configuration">Manual Configuration</a> are necessary.</p>
+
+</section>
+
+<section title='ISAPI Filter Priority'>
+
+<p>isapi_srun.dll installs itself as the default priority.  Some users may need
+to set the priority to a higher level, e.g. to override IIS's DAV support.
+</p>
+
+<example title="resin.ini">
+ResinConfigServer localhost 6802
+CauchoStatus yes
+IISPriority high
+</example>
+
+</section>
+
+<section title='Configuring resin.conf'>
+
+<p>resin.conf should mirror the configuration of IIS.  In other words, you 
+need to configure the document root and any directory aliases.</p>
+
+<p>For many users, the only need to change needed in Resin is to change the
+<a config-tag="document-directory"/> attribute from 'doc' to something like
+'d:/inetpub/wwwroot'.  The mapping of url paths from the browser to real files
+on the disk must be the same for Resin as they are for IIS. For more
+complicated configurations that use mappings in IIS, you'll need to add <a
+href="doc|config|webapp">path-mapping</a> attributes
+to match.</p>
+
+<example title='resin.conf'>
+    &lt;!-- configures the default host, matching any host name --&gt;
+    &lt;host id=''&gt;
+      <b>&lt;document-directory&gt;d:/inetpub/wwwroot&lt;/document-directory&gt;</b>
+
+      &lt;!-- configures the root web-app --&gt;
+      &lt;web-app id='/'&gt;
+        &lt;!-- adds xsl to the search path --&gt;
+        &lt;class-loader&gt;
+          &lt;simple-loader path="$host-root/xsl"/&gt;
+        &lt;/class-loader&gt;
+      &lt;/web-app&gt;
+    &lt;/host&gt;
+
+</example>
+
+</section>
+
+<section title='Testing the servlet engine'>
+
+<p>From a <code/cmd/> shell run <code/RESIN_HOME/bin/httpd.exe/> to start the
+servlet runner.</p>
+
+<example title="Run httpd.exe">
+C:\> cd %RESIN_HOME%
+C:\resin-3.0> cd bin
+C:\resin-3.0> httpd.exe
+</example>
+
+<p>Now browse http://localhost/test.jsp.  You should get a 'file not
+found' message.</p>
+
+<p>Create a test file 'd:\inetpub\wwwroot\test.jsp'</p>
+
+<example>
+2 + 2 = &lt;%= 2 + 2 %>
+</example>
+
+<p>Browse http://localhost/test.jsp again.  You should now get</p>
+
+<results>
+2 + 2 = 4
+</results>
+</section>
+
+</section>
+
+<section title='Command line arguments'>
+
+<p>The following configuration line arguments are recognized by httpd.exe.
+When command line arguments are used along with <code>-install</code> to
+install as a service, the arguments are used each time the service starts.</p>
+
+<deftable>
+<tr><th>Argument<th>Meaning
+<tr><td>-verbose<td>Write more verbose information to the log file
+<tr><td>-resin_home &lt;path><td>Sets the location of Resin
+<tr><td>-java_home &lt;path><td>Specify the JDK location
+<tr><td>-msjava<td>Use Microsoft's JVM
+<tr><td>-nojit<td>Disable JIT compilation to help debugging
+<tr><td>-classpath &lt;cp><td>Add to the classpath
+<tr><td>-J&lt;arg><td>Set a Java command line argument, e.g. -J-nojit.
+<tr><td>-X&lt;arg><td>Set a Java -X command line argument, e.g. -Xms128m.
+<tr><td>-D&lt;foo=bar><td>Set a Java variable, e.g. -Dresin.home=here.
+<tr><td>-install<td>Install as an NT service
+<tr><td>-install-as &lt;name><td>Install as an NT service with the specific name.
+<tr><td>-remove<td>Remove as an NT service
+<tr><td>-remove-as &lt;name><td>Remove as an NT service with the specific name.
+</deftable>
+
+<section title='Memory Configuration'>
+
+<p>Memory configuration is part of the JVM's arguments.  For most JVMs,
+you can find the full list by starting "java -X".</p>
+
+<deftable title='Memory Configuration'>
+<tr><th>Argument<th>Meaning
+<tr><td>-Xms&lt;size><td>Initial Java heap size, e.g. -Xms32m
+<tr><td>-Xmx&lt;size><td>Maximum Java heap size, e.g. -Xmx128m
+<tr><td>-Xms&lt;size><td>the size of the heap for the young generation
+</deftable>
+
+<p>See <a href="performance|jvm-tuning#memory">Performance : JVM Tuning : Memory</a> for more information on JVM memory usage.</p>
+
+</section>
+
+</section>
+
+<section title='Deploying as an NT Service'>
+
+<p>Once you're comfortable with using Resin with IIS, you can install it
+as an NT service.  As a service, Resin will automatically start when
+NT reboots.  The service will also automatically restart Resin if it
+unexpectedly exits.</p>
+
+<p>To install the service, use</p>
+
+<example>
+win> resin-3.0.x/bin/httpd -install
+</example>
+
+<p>To remove the service, use</p>
+
+<example>
+win> resin-3.0.x/bin/httpd -remove
+</example>
+
+<p>You will either need to reboot the machine or start the service
+from the Control&nbsp;Panel/Services panel to start the server.  On a
+machine reboot, NT will automatically start the servlet runner.<p/>
+
+<note>There is a bug in many JDKs which cause the JDK to exit when the
+administrator logs out.  JDK 1.4 and later can avoid that bug if the
+JDK is started with -Xrs. </note>
+
+<example>
+win> resin-3.0.x/bin/httpd -install -Xrs
+</example>
+
+</section>
+
+<section name="balance" title="Load Balancing">
+
+<p>With Resin, you can distribute requests to multiple machines.  All
+requests with the same session will go to the same host.  In addition, if one
+host goes down, the IIS filter will send the request to the next
+available machine.</p>
+
+<p>In addition, you can specify backup machines.  The backup only will serve
+requests if all primaries are down.</p>
+
+<p>See the <a href="doc|config|resin">Resin config</a> section for more
+details.</p>
+
+<example title=resin.conf>
+&lt;resin xmlns="http://caucho.com/ns/resin">
+&lt;server>
+  &lt;cluster>
+    &lt;srun id="a" host="host1" port="6802" index="1"/>
+    &lt;srun id="b" host="host2" port="6802" index="2"/>
+    &lt;srun id="c" host="backup" port="6802" index="3" backup="true"/>
+  ...
+&lt;/server>
+&lt;/resin>
+</example>
+<example title="installing multiple servlet runners as services">
+win> resin-3.0.x/bin/httpd -install-as "Resin-A" -server a -Xrs
+win> resin-3.0.x/bin/httpd -install-as "Resin-B" -server b -Xrs
+win> resin-3.0.x/bin/httpd -install-as "Resin-C" -server c -Xrs
+</example>
+</section>
+
+<section title='Manual Configuration'>
+
+<p>Experts may want to configure Resin/IIS by hand instead
+of using the setup program.  The steps involved are:</p>
+
+<ol>
+<li>Make sure httpd.exe works
+<li>Copy isapi_srun.dll to the IIS scripts directory, <var/d:\inetpub\scripts/>.
+You may need to run <var/net stop w3svc/> to get permission to overwrite the file.
+<li>If you have a virtual site (virtual hosts), you must configure IIS to have
+the virtual directory <var//scripts/> point to <var/d:\inetpub\scripts/> for
+each virtual site.
+
+<li>(optional) Create a resin.ini in <var/d:\inetpub\scripts/> pointing to the ResinConfigServer
+<li>(optional) Add a "CauchoStatus yes" line to the resin.ini for debugging
+<li>Configure IIS to load isapi_srun.dll as an ISAPI filter.
+<li>Restart IIS (control panel/services) or <var/net stop w3svc/> followed
+by <var/net start w3svc/>.
+<li>Browse /servlet/Hello and /foo.jsp.
+You should see a "cannot connect" error.
+<li>Start httpd.exe
+<li>Browse /servlet/Hello and /foo.jsp.  You should now see the servlet.
+</ol>
+
+<p>Copying isapi_srun.dll to <var/inetpub/scripts/> directory is relatively
+straightforward.  If you're upgrading to a new version of Resin, you
+may need to stop IIS (control panel/services) to get permission to
+overwrite isapi_srun.dll.</p>
+
+<p>The resin.ini is an optional file in <var/inetpub/scripts/> to
+override the automatic registry $RESIN_HOME/conf/resin.conf configuration
+file.  If you only have one Resin server, you should not create a resin.ini
+and let isapi_srun.dll use the registry value set by the setup.exe program.</p>
+
+<p>resin.ini is only needed if you have multiple Resin configuration
+files for different IIS virtual hosts.</p>
+
+<p>The resin.ini should contain the following line:</p>
+<example>
+ResinConfigServer localhost 6802
+</example>
+
+<p>You can change the host from <var/localhost/> to a backend server.
+You can also add multiple <var/ResinConfigServer/> items to cluster the
+configuration.</p>
+
+<p>For debugging, you can add a "CauchoStatus yes" line to the resin.ini:</p>
+
+<example>
+ResinConfigServer localhost 6802
+CauchoStatus yes
+</example>
+
+<p>For security purposes, the default value of CauchoStatus is "no" when
+you have a resin.ini.</p>
+
+<p>Adding an ISAPI filter is accomplished in the IIS manager.</p>
+
+<section title="IIS and Resin on different machines">
+
+<p>When Resin and IIS are on different machines, you'll change
+the ResinConfigServer from "localhost" to the IP address of the
+Resin server.</p>
+
+<example>
+ResinConfigServer 192.168.0.10 6802
+CauchoStatus yes
+</example>
+
+</section>
+
+<section name="iis6" title="IIS 6">
+<p>
+IIS 6/Windows 2003 users may need to perform additional steps.
+</p>
+
+<ul>
+
+<li>Make sure that the System account has suffiicient privleges to
+read the <code>C:\InetPub</code> and <code>C:\InetPub\Scripts</code> directory
+and the <code>isapi_srun.dll</code>.
+
+<li>Check the `Web Service Extensions' listed in the `Internet Service Manager'
+to make sure that Resin is listed as a Web Service Extension and has a status
+of "enabled".
+
+<li>Check that the user specified as the
+"application pool identity" for Resin has read/write
+permission to the Resin installation directory.
+In the Internet Service Manager, open the Properties dialog for
+"Application Pools".  Find the User on the "Identity" tab, it may
+be the user named "Network Service" in the drop-down list associated
+with the radio button labeled "predefined".
+Then check physical file permissions on the Resin installation
+directory and all its subdirectories and subfiles, to ensure that
+that user has read/write permission status is "Enabled".
+
+</ul>
+
+</section>
+</section>
+
+<section title="Virtual Sites (Virtual Hosts)">
+
+<p>If IIS is managing multiple virtual sites (everyone else calls them virtual
+hosts), then you need to configure IIS to use the isapi_srun.dll filter for
+each virtual site.  Configure IIS to have the virtual directory <var//scripts/>
+for each virtual site point to <var/d:\inetpub\scripts/>, so that each virtual site uses the isapiu_srun.dll.</p>
+
+<p>Resin is configured to recognize virtual hosts with the <var/id/> attribute
+of <a config-tag="host"/>. </p>
+
+<example title="resin.conf with virtual hosts">
+&lt;resin xmlns="http://caucho.com/ns/resin">
+  ...
+  &lt;server>
+    ...
+
+    &lt;host id="foo.com"&gt;
+      ...
+    &lt;/host&gt;
+
+    &lt;host id="bar.com"&gt;
+      ...
+    &lt;/host&gt;
+
+    &lt;host id="baz.com"&gt;
+      ...
+    &lt;/host&gt;
+
+  &lt;/server>
+&lt;/resin>
+</example>
+
+<p>Resin recognizes which host to use by examing the url.  With the above
+example, a url of <code>http://foo.com/some/path</code> will use host
+<code>id="foo.com"</code> and a url of <code>http://bar.com/some/path</code>
+will use host <code>id="bar.com"</code>.</p>
+
+</section>
+
+<section title="Virtual Sites with different JVM's">
+
+<p>If a seperate JVM for each virtual site is desired, a seperate
+<code/resin.ini/> is used for each virtual site.  The resin.ini file is placed
+in the <code/scripts/> directory.</p>
+
+<example title='resin-foo.conf'>
+<!-- for foo.com jvm -->
+&lt;resin xmlns="http://caucho.com/ns/resin">
+&lt;server>
+  &lt;cluster>
+    &lt;srun port="6802"/>
+  &lt;/cluster>
+  ...
+  &lt;host id="*"&gt;
+    ...
+  &lt;/host&gt;
+&lt;/server>
+&lt;/resin>
+</example>
+
+<example title='resin-bar.conf'>
+<!-- for bar.com jvm -->
+&lt;resin xmlns="http://caucho.com/ns/resin">
+&lt;server>
+  &lt;cluster>
+    &lt;srun port="6803"/>
+  &lt;/cluster>
+  ...
+  &lt;host id="*"&gt;
+    ...
+  &lt;/host&gt;
+&lt;/server>
+&lt;/resin>
+</example>
+
+<example title="installing a servlet runner for each virtual site">
+win> resin-3.0.x/bin/httpd -install-as "Resin-foo" -conf resin-foo.conf -Xrs
+win> resin-3.0.x/bin/httpd -install-as "Resin-bar" -conf resin-bar.conf -Xrs
+</example>
+
+<example title="resin.ini for IIS virtual site foo.com">
+ResinConfigServer localhost 6802
+</example>
+
+<example title="resin.ini for IIS virtual site bar.com">
+ResinConfigServer localhost 6803
+</example>
+
+<p>The ResinConfigServer tells the isapi_srun.dll the port number to use to
+connect to the Resin instance.  You can change the host from <var/localhost/>
+to a backend server.  You can also add multiple <var/ResinConfigServer/> items
+to cluster the configuration.</p>
+
+<p>resin-foo.conf and resin-bar.conf contain a &lt;host id="*">, you do not
+need to specify the host name because each conf/JVM is only going to
+receive requests from a particular virtual site (because of the unique
+resin.ini files).</p>
+
+</section>
+
+<section title='Troubleshooting'>
+
+<ol>
+<li>Check your configuration with the standalone bin/httpd.
+In other words, add a &lt;http port='8080'/> block and
+browse http://localhost:8080.
+<li>Check <var/http://localhost/caucho-status/>.  That will tell if
+the ISAPI filter/extension is properly installed. 
+<li>Each srun host should be green and the mappings should
+match your resin.conf.
+<li>If caucho-status fails entirely, the problem is in the <var/isapi_srun/>
+installation.  Try
+<var/http://localhost/scripts/isapi_srun.dll/caucho-status/> directly
+(bypassing the filter).  If this fails, IIS can't find isapi_srun.dll.
+<ul>
+<li>Check that isapi_srun.dll is in <var/c:\inetpub\scripts./>
+<li>Make sure that both IIS and the underlying NTFS file system have permissions set appropriately for isapi_srun.dll.
+<li>Make sure that your IIS host has a mapping from <var//scripts/>
+to <var/c:\inetpub\scripts/> and that the <var//scripts/> has execute
+permissions.
+<li>IIS 6 users may need to take <a href="#iis6">additional steps</a>.
+</ul>
+<li>If you've created a new
+IIS web site, you need to create a virtual directory <var//scripts/> pointing
+to the <var/d:\inetpub\scripts/> directory.
+<li>If caucho-status shows the wrong mappings, there's something wrong
+with the resin.conf.
+<li>If caucho-status shows a red servlet runner, then httpd.exe hasn't
+properly started.
+<li>If you get a "cannot connect to servlet engine", caucho-status
+will show red, and httpd.exe hasn't started properly.
+<li>If httpd.exe doesn't start properly, you should look at the logs
+in resin3.0/log.  You should start <var/httpd.exe -verbose/> to get
+more information.
+<li>If you get Resin's file not found, the IIS configuration
+is good but the resin.conf probably points to the wrong directories.
+</ol>
+
+</section>
+  </body>
+</document>

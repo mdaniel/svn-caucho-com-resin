@@ -1,0 +1,254 @@
+<document>
+  <header>
+    <product>resin</product>
+    <resin-2.0>$resin/ref/xtp.xtp</resin-2.0>
+    <title>XTP (XML Template Pages) Introduction</title>
+    <description>
+      <p>XTP (XML Template Pages) enhances JSP pages with stylesheets.
+        Sophisticated projects can split page formatting from the
+        JSP-generated content.  Splitting the graphic design from the
+        JSP programming helps a web site in several ways:
+      </p>
+
+        <ul>
+          <li>Stylesheets automatically reformat the entire site, so the
+            web site becomes more flexible.
+          <li>Repetitive HTML formatting patterns are defined once, reducing
+            formatting errors.
+          <li>Multiple stylesheets can reformat the same content, displaying
+            views for browsers, handheld devices, and syndication.
+          <li>XTP pages are compiled to JSP, so they have the same performance
+            as JSP.
+        </ul>
+
+      <p>XTP uses XSLT to transform HTML into new
+        HTML.  XTP treats unknown tags as raw text.  Pure XML requires XSLT
+        stylesheets to be valid XML.  XTP can be configured to follow strict
+        XSLT syntax, by setting the servlet init-param 'xsl-strict' to true.</p>
+
+
+      <p>Since XTP is standards-based, developers benefit from widely-available
+        public documentation, tutorials and support.  Stylesheets are written
+        in the W3C standard <a href="xslt|index">XSLT</a> (XML Stylesheet
+        Language) and produce <a href="jsp|index">JSP</a> (Java Server Pages).</p>
+    </description>
+  </header>
+
+  <body>
+    <summary/>
+
+<section name=blank title="Style Example">
+
+<p>The following shows a simple example of formatting JSP using
+stylesheets.  The stylesheet formats a custom tag,
+<var/&lt;exclamation>/>.  The exclamation translates
+into the HTML <var/&lt;h1>/> and can be easily changed
+to any desired format.</p>
+
+<p>Except for the formatting tags, the *.xtp file is a normal *.jsp
+file describing an HTML page.  Unlike JSP which copies its content as
+raw text, XTP parses the HTML contents into an internal tree (the XML
+DOM).  A more aggressive *.xtp could use XML but most will
+use XML only where useful.  Expressions, scriptlets, and
+declarations work just as JSP pages.</p>
+
+<example title='hello.xtp'>
+&lt;?xml-stylesheet href="hello.xsl"?>
+&lt;head>
+&lt;title&gt;Hello, world&lt;/title&gt;
+
+&lt;% int count; %>
+&lt;/head>
+
+&lt;exclamation&gt;Hi, World!&lt;/exclamation&gt;
+
+Count: &lt;%= count++ %>
+</example>
+
+<p>For everything but <var/exclamation/>, the stylesheet copies its
+input directly to the output.  Using this technique, you can add tags
+as you develop them.  So a project can incrementally benefit from
+XTP; you don't need to entirely redesign your site.</p>
+
+<example title='hello.xsl'>
+&lt;xsl:output disable-output-escaping="true"/>
+
+&lt;!-- copy everything not matching to the output -->
+&lt;xsl:template match="*|@*">
+  &lt;xsl:copy>
+    &lt;xsl:apply-templates select="node()|@*"/>
+  &lt;/xsl:copy>
+&lt;/xsl:template>
+
+&lt;!-- format the exclamation -->
+&lt;xsl:template match="exclamation">
+  &lt;h1>
+    &lt;xsl:apply-templates select="node()|@*"/>
+  &lt;/h1>
+&lt;/xsl:template>
+</example>
+
+<p>The XTP engine produces a standard JSP file as an
+intermediate form.  The generated JSP will process the request.
+Since it's standard JSP, you can use any JSP or Servlet feature,
+including using custom JSP tags (although XSL tags are generally
+more efficient.)</p>
+
+<p>Unless the XTP source or the stylesheet changes, the XTP engine
+will continue to use the compiled JSP page without additional
+stylesheet processing.  So the XTP has the same performance of a JSP
+page, with the flexibility of the stylesheet.</p>
+
+<example title='_jsp/_hello.jsp'>
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;title&gt;Hello, world&lt;/title&gt;
+
+    &lt;% int count; %>
+  &lt;/head&gt;
+
+  &lt;body&gt;
+    &lt;h1&gt;Hi, World!&lt;/h1&gt;
+
+    Count: &lt;%= count++ %>
+  &lt;/body&gt;
+&lt;/html&gt;
+</example>
+
+</section>
+
+<section title="XTP Syntax">
+
+<p>By default, XTP pages are read in as HTML.  Non-HTML tags are treated
+as XML, i.e. they're expected to have an end tag for every begin tag.
+By allowing HTML as a primary input format, XTP pages provide a smooth
+transition path.  Sites don't need to transform every page to XML to
+take advantage of XTP's formatting.</p>
+
+<p>Pages can also be written in strict XML.   If the page begins
+with <var/&lt;?xml ... ?>/>, it will be read as strict XML.  New sites
+may choose to design using a strict XML base.</p>
+
+</section>
+
+<section title="Stylesheets">
+
+<p>XTP Stylesheets can either use the XSLT or <a
+href="doc|xtp|stylescript">XSLT-lite</a> syntax.  Both have the same
+capabilities.  XSLT-lite is more maintainable and readable, but XSLT
+is a W3C standard.</p>
+
+<section title="Selecting in the XTP file">
+
+<p>XTP pages generally select their stylesheet using the standard
+<var/xml-stylesheet/> processing instruction.  If no stylesheet is
+selected, the XTP page will use <var/default.xsl/>.</p>
+
+<example>
+&lt;?xml version="1.0">
+&lt;?xml-stylesheet href="sample.xsl"?>
+&lt;top>
+  &lt;a/>
+  &lt;b/>
+&lt;/top>
+</example>
+
+</section>
+
+<section title="Stylesheet Search Path">
+
+<ol>
+<li>The directory of the XTP file.
+<li>The application root.
+<li>WEB-INF/xsl.
+<li>The Java classpath.
+</ol>
+
+<p>When building libraries of stylesheets, using the Java classpath
+has several advantages.  It's naturally arranged in a path, it's familiar,
+and it is well supported by the servlet engines.</p>
+
+</section>
+
+<section title="Dynamic Stylesheets">
+
+<p>The request parameter <var/caucho.xsl.stylesheet/> selects the
+stylesheet for the XTP page.  If set, it overrides the value specified
+in the XTP page.  A filter servlet can set <var/caucho.xsl.stylesheet/>
+to process the same page with different styles.  For example, a User-Agent
+filter could select a different stylesheet for a Palm client or for a
+printable version of the page.</p>
+
+<example>
+public void service(HttpServletRequest req,
+                    HttpServletResponse res)
+  throws IOException, ServletException
+{
+  String style = req.getParameter("style");
+
+  if (style != null && style.equals("print"))
+    request.setAttribute("caucho.xsl.stylesheet", "print.xsl");
+
+  RequestDispatcher disp;
+  disp = getServletContext().getNamedDispatcher("xtp");
+
+  disp.forward(req, res);
+}
+</example>
+
+</section>
+
+</section>
+
+<section title="Servlet Parameters">
+
+<p>The XTP engine can set <var/xsl:param/> variables taken from the
+servlet request.  Stylesheets can use these variables,
+like <var/xtp:path_info/>, to create several web pages out of a single
+source XTP.  A section, for example, might only be displayed if it
+matches the <var/request.getPathInfo()/>.</p>
+
+<p>Stylesheets must use <var/xsl:param/> to use servlet parameters.
+Unless the stylesheet declares its parameters, XTP will not pass the
+values to the stylesheet.</p>
+
+<deftable>
+<tr><th>xsl:param<th>Servlet Value
+<tr><td>xtp:context_path<td>request.getContextPath()
+<tr><td>xtp:servlet_path<td>request.getServletPath()
+<tr><td>xtp:path_info<td>request.getPathInfo()
+<tr><td><var/name/><td>request.getParameter("<var/name/>")
+</deftable>
+
+<example>
+&lt;xsl:param name="xtp:path_info"/>
+
+&lt;!-- by default, section is not displayed -->
+&lt;xsl:template match="section"/>
+
+&lt;xsl:template match="section[$xtp:path_info=@name]">
+  &lt;h1>&lt;xsl:value-of select="@title">&lt;/h1>
+  &lt;xsl:apply-templates/>
+&lt;/xsl:template>
+</example>
+
+<p>A sample XTP file might look like:</p>
+
+<example>
+&lt;body>
+&lt;section title="Introduction">
+
+This is the introduction.
+
+&lt;/section>
+&lt;section title="Conclusion">
+
+This is the conclusion.
+
+&lt;/section>
+&lt;/body>
+</example>
+
+</section>
+  </body>
+</document>
