@@ -2475,10 +2475,7 @@ public class Application extends ServletContextImpl
       }
 
       if (_accessLog != null) {
-        try {
-          _accessLog.flush();
-        } catch (IOException e) {
-        }
+	_accessLog.flush();
       }
     } finally {
       thread.setContextClassLoader(oldLoader);

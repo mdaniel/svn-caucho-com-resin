@@ -1,8 +1,6 @@
 <navigation threaded="true" section="Resin : Features : " comment="true">
   <item title="Features" link="index.xtp">
 
-    <item link="migrate.xtp" title="Migrate from 2.1"/>
-
     <item link="overview.xtp" title="Feature Overview"/>
 
     <item link="release-notes.xtp" title="Release Notes">
@@ -24,9 +22,12 @@
 
     <item link="change-logs.xtp" title="Change Logs">
       <item link="changes.xtp" title="Resin Changes"/>
-      <item link="changes-ee.xtp" title="Resin-EE Changes" product="resin-ee"/>
+      <item link="changes-2.xtp" title="Resin-2.1 Changes"/>
+      <item link="changes-ee.xtp" title="Resin-EE Changes"/>
       <item link="changes-1.xtp" title="Old Changes"/>
     </item>
+
+    <item link="migrate.xtp" title="Migrate from 2.1"/>
 
     <item link="benchmarks.xtp" title="Benchmarks">
       <item link="jsp-benchmark.xtp" title="JSP Benchmark"/>

@@ -68,6 +68,11 @@ public class DriverConfig {
   protected static final Logger log = Log.open(DriverConfig.class);
   private static final L10N L = new L10N(DriverConfig.class);
   
+  private static final int TYPE_UNKNOWN = 0;
+  private static final int TYPE_DRIVER = 1;
+  private static final int TYPE_POOL = 2;
+  private static final int TYPE_XA = 3;
+  
   /**
    * The beginning of the URL used to connect to a database with
    * this pooled connection driver.
@@ -97,7 +102,8 @@ public class DriverConfig {
   private Properties _info;
   
   private BuilderProgramContainer _init = new BuilderProgramContainer();
-  
+
+  private int _driverType;
   private Object _driverObject;
   
   private ConnectionPoolDataSource _poolDataSource;
@@ -129,13 +135,36 @@ public class DriverConfig {
   /**
    * Sets the driver as data source.
    */
+  public void setDriverType(String type)
+    throws ConfigException
+  {
+    if ("ConnectionPoolDataSource".equals(type)) {
+      _driverType = TYPE_POOL;
+    }
+    else if ("XADataSource".equals(type)) {
+      _driverType = TYPE_XA;
+    }
+    else if ("Driver".equals(type)) {
+      _driverType = TYPE_DRIVER;
+    }
+    else
+      throw new ConfigException(L.l("'{0}' is an unknown driver type. Valid types are 'ConnectionPoolDataSource', 'XADataSource' and 'Driver'"));
+  }
+
+  /**
+   * Sets the driver as data source.
+   */
   public void setDataSource(Object dataSource)
     throws ConfigException
   {
     if (dataSource instanceof String)
       dataSource = Jndi.lookup((String) dataSource);
-    
-    if (dataSource instanceof XADataSource)
+
+    if (_driverType == TYPE_XA)
+      _xaDataSource = (XADataSource) dataSource;
+    else if (_driverType == TYPE_POOL)
+      _poolDataSource = (ConnectionPoolDataSource) dataSource;
+    else if (dataSource instanceof XADataSource)
       _xaDataSource = (XADataSource) dataSource;
     else if (dataSource instanceof ConnectionPoolDataSource)
       _poolDataSource = (ConnectionPoolDataSource) dataSource;
@@ -343,19 +372,6 @@ public class DriverConfig {
 
     _isStarted = true;
 
-    /*
-    try {
-      if (_isTransactional && _tm == null) {
-        Object obj = new InitialContext().lookup("java:comp/TransactionManager");
-
-        if (obj instanceof TransactionManager)
-          _tm = (TransactionManager) obj;
-      }
-    } catch (NamingException e) {
-      throw new SQLExceptionWrapper(e);
-    }
-    */
-
     if (_xaDataSource == null && _poolDataSource == null) {
       initDriver();
       
@@ -365,8 +381,14 @@ public class DriverConfig {
         throw new SQLExceptionWrapper(L.l("driver `{0}' has not been configured for pool {1}.  <database> needs a <driver type='...'>.",
                                           _driverClass, getDBPool().getName()));
       }
-    
-      if (driverObject instanceof XADataSource)
+
+      if (_driverType == TYPE_XA)
+	_xaDataSource = (XADataSource) _driverObject;
+      else if (_driverType == TYPE_POOL)
+	_poolDataSource = (ConnectionPoolDataSource) _driverObject;
+      else if (_driverType == TYPE_DRIVER)
+	_driver = (Driver) _driverObject;
+      else if (driverObject instanceof XADataSource)
 	_xaDataSource = (XADataSource) _driverObject;
       else if (_driverObject instanceof ConnectionPoolDataSource)
 	_poolDataSource = (ConnectionPoolDataSource) _driverObject;

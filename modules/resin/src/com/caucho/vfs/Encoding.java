@@ -203,7 +203,9 @@ public class Encoding {
       }
     }
 
-    return factory.create(factory.getJavaEncoding());
+    // return factory.create(factory.getJavaEncoding());
+    // charset uses the original encoding, not the java encoding
+    return factory.create(encoding);
   }
 
   /**

@@ -119,7 +119,7 @@ import com.caucho.sql.spy.SpyConnectionPoolDataSource;
 public class DBPoolImpl implements AlarmListener, EnvironmentListener {
   protected static final Logger log = Log.open(DBPoolImpl.class);
   private static final L10N L = new L10N(DBPoolImpl.class);
-  
+
   /**
    * The beginning of the URL used to connect to a database with
    * this pooled connection driver.
@@ -142,11 +142,14 @@ public class DBPoolImpl implements AlarmListener, EnvironmentListener {
   
   private String _name;
 
-  private ArrayList<DriverConfig> _driverList =
-    new ArrayList<DriverConfig>();
+  private ArrayList<DriverConfig> _driverList
+    = new ArrayList<DriverConfig>();
 
-  private ArrayList<DriverConfig> _backupDriverList =
-    new ArrayList<DriverConfig>();
+  private ArrayList<DriverConfig> _backupDriverList
+    = new ArrayList<DriverConfig>();
+
+  private ConnectionConfig _connectionConfig
+    = new ConnectionConfig();
 
   private ManagedFactoryImpl _mcf;
 
@@ -287,6 +290,22 @@ public class DBPoolImpl implements AlarmListener, EnvironmentListener {
       driver = createDriver();
 
     driver.setDriver(jdbcDriver);
+  }
+
+  /**
+   * Creates the connection config.
+   */
+  public ConnectionConfig createConnection()
+  {
+    return _connectionConfig;
+  }
+
+  /**
+   * Returns the connection config.
+   */
+  public ConnectionConfig getConnectionConfig()
+  {
+    return _connectionConfig;
   }
 
   /**
@@ -864,256 +883,6 @@ public class DBPoolImpl implements AlarmListener, EnvironmentListener {
   }
 
   /**
-   * Returns a new or pooled connection.
-   */
-  /*
-  public Connection getConnection() throws SQLException
-  {
-    return getConnection(null, null);
-  }
-  */
-  
-  /**
-   * Return a connection.  The connection will only be pooled if
-   * user and password match the configuration.  In general, applications
-   * should use the null-argument getConnection().
-   *
-   * @param user database user
-   * @param password database password
-   * @return a database connection
-   */
-  /*
-  public Connection getConnection(String user, String password)
-    throws SQLException
-  {
-    boolean isPooled = false;
-    PoolItem poolItem = null;
-    int count = 25;
-
-    while (poolItem == null && count-- >= 0) {
-      if (user != null && ! user.equals(_driver.getUser()))
-	poolItem = createConnection(user, password);
-      else if (password != null && ! password.equals(_driver.getPassword()))
-	poolItem = createConnection(user, password);
-      else
-	poolItem = getPooledConnection();
-
-      // If the connection is transactional, enlist it.
-      try {
-	if (_isTransactional && poolItem.getXid() == null) {
-	  Transaction trans = _tm.getTransaction();
-
-	  if (trans != null)
-	    trans.enlistResource(poolItem);
-	}
-      } catch (Throwable e) {
-	log.log(Level.WARNING, e.toString(), e);
-
-	try {
-	  poolItem.connectionErrorOccurred(null);
-	  poolItem.connectionClosed(null);
-	} catch (Throwable e1) {
-	  log.log(Level.FINE, e1.toString(), e1);
-	}
-
-	poolItem = null;
-      }
-    }
-
-    try {
-      return poolItem.getConnection();
-    } catch (Throwable e) {
-      poolItem.close();
-      
-      throw SQLExceptionWrapper.create(e);
-    }
-  }
-  */
-
-  /**
-   * Returns a pooled connection.  It will be returned to the pool when
-   * the close method is called.
-   *
-   * <p>If <code>getMaxConnection</code> connections are already active,
-   * <code>getPooledConnection</code> will block waiting for an available
-   * connection.  The wait is timed.  If connection-wait-time passes
-   * and there is still no connection, <code>getPooledConnection</code>
-   * create a new connection anyway.
-   *
-   * @return a pooled database connection.
-   */
-  /*
-  private PoolItem getPooledConnection() throws SQLException
-  {
-    PoolItem poolItem = null;
-    ArrayList<PoolItem> connections = _connections;
-
-    if (_connections == null)
-      throw new SQLException(L.l("can't get connection from closed pool `{0}'", _name));
-
-    boolean createConnection = false;
-
-    synchronized (connections) {
-      for (int i = 0; ! _isClosed && i < _connectionWaitCount; i++) {
-        // If we're in a transaction, try to reuse one of the
-        // connections in the transaction that's closed but
-        // not committed.
-        if (_isTransactional) {
-          try {
-            TransactionImpl trans = (TransactionImpl) _tm.getTransaction();
-            Xid xid = trans == null ? null : trans.getXid();
-
-            if (xid != null) {
-              for (int j = connections.size() - 1; j >= 0; j--) {
-                poolItem = (PoolItem) connections.get(j);
-
-                if (poolItem.isDead()) {
-                  connections.remove(j);
-                  continue;
-                }
-
-                if (! poolItem.allocateXA(xid))
-                  continue;
-
-                if (isValid(poolItem)) {
-                  if (log.isLoggable(Level.FINER))
-                    log.finer("reusing connection " + poolItem);
-                  
-                  return poolItem;
-                }
-                else if (poolItem.isDead())
-                  connections.remove(j);
-              }
-            }
-          } catch (Exception e) {
-            try {
-              if (poolItem != null)
-                poolItem.close();
-            } catch (Throwable e1) {
-            }
-            
-            log.log(Level.FINE, e.toString(), e);
-          }
-        }
-        
-        for (int j = connections.size() - 1; j >= 0; j--) {
-          poolItem = (PoolItem) connections.get(j);
-
-          if (poolItem.isDead()) {
-            connections.remove(j);
-            continue;
-          }
-          
-          if (! poolItem.allocate())
-            continue;
-
-          if (isValid(poolItem))
-            return poolItem;
-          else if (poolItem.isDead())
-            connections.remove(j);
-        }
-
-        // If we can create a connection, break to do so
-        if (connections.size() < _maxConnections)
-          break;
-        
-        // If no connections in pool and can't create, then sleep
-        try {
-          if (log.isLoggable(Level.FINE))
-            log.fine("wait for connection (" +
-                     getActiveConnections() + ", " +
-                     getTotalConnections() + ")");
-            
-          // wait for a freed connection
-          connections.wait(1000);
-        } catch (InterruptedException e) {
-          log.log(Level.FINER, e.toString(), e);
-        }
-      }
-
-      if (connections.size() < _maxConnections + _maxOverflowConnections) {
-        if (_maxConnections <= connections.size()) {
-          log.info("creating an overflow connection [active:" +
-                   getActiveConnections() + ", total:" +
-                   getTotalConnections() +
-                   "] url=" + _driver.getURL() + " user=" + _driver.getUser());
-        }
-
-        createConnection = true;
-      }
-    }
-
-    if (createConnection)
-      return createConnection(_driver.getUser(), _driver.getPassword());
-    
-    log.warning("can't connect with full pool [active:" +
-                getActiveConnections() + ", total:" + getTotalConnections() +
-                "] url=" + _driver.getURL() + " user=" + _driver.getUser());
-
-    throw new SQLException(L.l("Can't open connection with full database pool ({0})", String.valueOf(getTotalConnections())));
-  }
-  */
-
-  /**
-   * Returns true if the pool item is still okay to use.
-   */
-  /*
-  private boolean isValid(PoolItem poolItem)
-  {
-    try {
-      if (! poolItem.isValid())
-        return false;
-      
-      if (! _pingOnReuse || ping(poolItem.getConnection())) {
-        // If the connection is still valid, use it
-
-        return true;
-      }
-    } catch (Throwable e) {
-      log.log(Level.FINE, e.toString(), e);
-    }
-          
-    if (log.isLoggable(Level.FINE))
-      log.fine("connection died in pool " +
-               poolItem.getId() + ":" + getName() + " [total:" +
-               getTotalConnections() + "]");
-            
-    // If the connection died in the pool, kill it
-    try {
-      poolItem.close();
-    } catch (SQLException e) {
-      log.log(Level.FINE, e.toString(), e);
-    }
-
-    return false;
-  }
-  */
-
-  /**
-   * Create a new connection
-   *
-   * @param user the user's database name for the user
-   * @param password the user's database password
-   */
-  /*
-  private PoolItem createConnection(String user, String password)
-    throws SQLException
-  {
-    PooledConnection conn = null;
-
-    if (_isClosed)
-      throw new SQLException(L.l("can't create connection from closed pool"));
-
-    if (! _isStarted)
-      initDataSource();
-
-    conn = _driver.createConnection(user, password);
-
-    return createPoolItem(conn);
-  }
-  */
-
-  /**
    * Initialize the pool's data source
    *
    * <ul>
@@ -1147,54 +916,6 @@ public class DBPoolImpl implements AlarmListener, EnvironmentListener {
       throw new SQLExceptionWrapper(e);
     }
   }
-
-  /**
-   * Creates a new database pool item.
-   *
-   * @param conn the underlying pooled connection.
-   */
-  /*
-  private PoolItem createPoolItem(PooledConnection conn)
-  {
-    PoolItem poolItem = new PoolItem(this, conn);
-
-    if (! poolItem.allocate())
-      throw new IllegalStateException();
-    
-    synchronized (_connections) {
-      _connections.add(poolItem);
-    }
-
-    if (log.isLoggable(Level.FINE)) {
-      log.fine("create " + poolItem.getId() + ":" + getName() +
-               " [active:" + getActiveConnections() +
-               ", total:" + getTotalConnections() + "]");
-    }
-
-    return poolItem;
-  }
-  */
-
-  /**
-   * Removes an item from the pool.
-   */
-  /*
-  void removeItem(PoolItem item)
-  {
-    synchronized (_connections) {
-      _connections.remove(item);
-      
-      if (_connections.size() + 1 >= _maxConnections)
-        _connections.notifyAll();
-    }
-    
-    if (log.isLoggable(Level.FINE)) {
-      log.fine("close-on-error " + item.getId() + ":" + getName() +
-               " [active:" + getActiveConnections() +
-               ", total:" + getTotalConnections() + "]");
-    }
-  }
-  */
 
   /**
    * At the alarm, close all connections which have been sitting in

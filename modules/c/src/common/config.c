@@ -369,8 +369,8 @@ cse_log_config(config_t *config)
 }
 
 static int
-read_config(stream_t *s, resin_host_t *host, unsigned int now,
-	    int *p_is_change)
+read_config(stream_t *s, config_t *config, resin_host_t *host,
+	    unsigned int now, int *p_is_change)
 {
   web_app_t *web_app = 0;
   int code;
@@ -384,7 +384,7 @@ read_config(stream_t *s, resin_host_t *host, unsigned int now,
   int dead_time = -1;
   
   memset(&cluster, 0, sizeof(cluster));
-  cluster.config = host->config;
+  cluster.config = config;
   cluster.round_robin_index = -1;
 
   *p_is_change = is_change;
@@ -403,7 +403,7 @@ read_config(stream_t *s, resin_host_t *host, unsigned int now,
 
 	if (strcmp(buffer, host->name)) {
 	  resin_host_t *canonical;
-	  canonical = cse_match_host(host->config, buffer, 0, now);
+	  canonical = cse_match_host(config, buffer, 0, now);
 	  host->canonical = canonical;
 	}
       }
@@ -451,15 +451,15 @@ read_config(stream_t *s, resin_host_t *host, unsigned int now,
       hmux_read_string(s, buffer, sizeof(buffer));
 
       ch = cse_read_byte(s);
-      if (ch != HMUX_STRING)
-	return 0;
       hmux_read_string(s, value, sizeof(value));
       LOG(("hmux header %s: %s\n", buffer, value));
-
-      if (! strcmp(buffer, "live-time"))
-	live_time = atoi(value);
-      else if (! strcmp(buffer, "dead-time"))
-	dead_time = atoi(value);
+      
+      if (ch == HMUX_STRING) {
+	if (! strcmp(buffer, "live-time"))
+	  live_time = atoi(value);
+	else if (! strcmp(buffer, "dead-time"))
+	  dead_time = atoi(value);
+      }
       break;
 	
     case HMUX_CLUSTER:
@@ -498,7 +498,7 @@ read_config(stream_t *s, resin_host_t *host, unsigned int now,
 	  if (srun->srun && live_time > 0)
 	    srun->srun->live_time = live_time;
 	  if (srun->srun && dead_time > 0)
-	    srun->srun->dead_time = live_time;
+	    srun->srun->dead_time = dead_time;
 	}
       }
       break;
@@ -551,6 +551,25 @@ write_config(config_t *config)
   memset(&s, 0, sizeof(s));
   s.socket = fd;
 
+  sprintf(buffer, "%d", config->dependency_check_interval);
+  hmux_write_string(&s, HMUX_HEADER, "check-interval");
+  hmux_write_string(&s, HMUX_STRING, buffer);
+
+  if (config->session_cookie) {
+    hmux_write_string(&s, HMUX_HEADER, "cookie");
+    hmux_write_string(&s, HMUX_STRING, config->session_cookie);
+  }
+
+  if (config->session_url_prefix) {
+    hmux_write_string(&s, HMUX_HEADER, "session-url-prefix");
+    hmux_write_string(&s, HMUX_STRING, config->session_url_prefix);
+  }
+
+  if (config->alt_session_prefix) {
+    hmux_write_string(&s, HMUX_HEADER, "alt-session-url-prefix");
+    hmux_write_string(&s, HMUX_STRING, config->alt_session_prefix);
+  }
+
   for (host = config->hosts; host; host = host->next) {
     web_app_t *web_app;
     int i;
@@ -583,19 +602,34 @@ write_config(config_t *config)
       }
     }
 
+    cse_write_string(&s, HMUX_CLUSTER, "");
+    
     for (i = 0; i < host->cluster.srun_size; i++) {
       cluster_srun_t *srun;
+      int code;
 
       srun = &host->cluster.srun_list[i];
 
-      if (! srun || ! srun->srun || ! srun->srun->hostname) {
-      }
-      else if (srun->srun->port) {
+      if (! srun || ! srun->srun || ! srun->srun->hostname)
+	continue;
+
+      sprintf(buffer, "%d", srun->srun->live_time);
+      hmux_write_string(&s, HMUX_HEADER, "live-time");
+      hmux_write_string(&s, HMUX_STRING, buffer);
+
+      sprintf(buffer, "%d", srun->srun->dead_time);
+      hmux_write_string(&s, HMUX_HEADER, "dead-time");
+      hmux_write_string(&s, HMUX_STRING, buffer);
+
+      code = srun->is_backup ? HMUX_SRUN_BACKUP : HMUX_SRUN;
+
+      if (srun->srun->port) {
 	sprintf(buffer, "%s:%d", srun->srun->hostname, srun->srun->port);
-	hmux_write_string(&s, HMUX_SRUN, buffer);
+	
+	hmux_write_string(&s, code, buffer);
       }
       else {
-	hmux_write_string(&s, HMUX_SRUN, srun->srun->hostname);
+	hmux_write_string(&s, code, srun->srun->hostname);
       }
     }
 
@@ -617,9 +651,12 @@ read_all_config(config_t *config)
   resin_host_t *host;
   int fd;
   char buffer[1024];
+  char value[1024];
   int code;
+  int  ch;
   unsigned int now = 0;
   char *work_dir = config->work_dir;
+  int is_change = 1;
 
   if (! config->config_path)
     return 0;
@@ -632,22 +669,30 @@ read_all_config(config_t *config)
   memset(&s, 0, sizeof(s));
   s.socket = fd;
 
-  while ((code = cse_read_byte(&s)) == HMUX_DISPATCH_HOST) {
-    int port = 0;
-    char *p;
-    int is_change= 0;
-    
-    hmux_read_string(&s, buffer, sizeof(buffer));
+  while ((code = cse_read_byte(&s)) >= 0) {
+    switch (code) {
+    case HMUX_DISPATCH_HOST:
+      hmux_read_string(&s, buffer, sizeof(buffer));
+      
+      host = cse_match_host(config, buffer, 0, now);
+      read_config(&s, config, host, 0, &is_change);
+      break;
 
-    p = strchr(buffer, ':');
-    if (p) {
-      *p = 0;
-      port = atoi(p + 1);
+    case HMUX_HEADER:
+      hmux_read_string(&s, buffer, sizeof(buffer));
+
+      ch = cse_read_byte(&s);
+      hmux_read_string(&s, value, sizeof(value));
+      if (ch == HMUX_STRING) {
+	LOG(("hmux header %s: %s\n", buffer, value));
+      }
+      break;
+
+    default:
+      hmux_read_string(&s, value, sizeof(value));
+      LOG(("hmux value %c: %s\n", code, buffer));
+      break;
     }
-
-    host = cse_add_host_config(config, buffer, port, now);
-
-    read_config(&s, host, now, &is_change);
   }
 
   close(fd);
@@ -683,7 +728,7 @@ cse_update_host_from_resin(resin_host_t *host, unsigned int now)
     
     len = hmux_read_len(&s);
 
-    if (read_config(&s, host, now, &is_change))
+    if (read_config(&s, host->config, host, now, &is_change))
       cse_recycle(&s, time(0));
     else
       cse_close(&s, "close");

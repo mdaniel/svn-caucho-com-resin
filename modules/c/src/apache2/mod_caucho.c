@@ -55,6 +55,11 @@ module AP_MODULE_DECLARE_DATA caucho_module;
 #define BUF_LENGTH 8192
 #define DEFAULT_PORT 6802
 
+#define REQ_CONTINUE 1
+#define REQ_QUIT     2
+#define REQ_EXIT     3
+#define REQ_BUSY     4
+
 void
 cse_log(char *fmt, ...)
 {
@@ -744,7 +749,7 @@ write_request(stream_t *s, request_rec *r, config_t *config,
 	send_length = 0;
 	cse_write_byte(s, HMUX_YIELD);
         code = send_data(s, r, CSE_ACK, keepalive);
-        if (code <= 0 || code == HMUX_QUIT || code == HMUX_EXIT)
+        if (code != REQ_CONTINUE)
           break;
       }
     }
@@ -755,12 +760,18 @@ write_request(stream_t *s, request_rec *r, config_t *config,
   code = send_data(s, r, HMUX_QUIT, keepalive);
   write_length = s->write_length;
 
-  if (code == HMUX_QUIT)
+  if (code == REQ_QUIT) {
+    cse_recycle(s, now);
     return OK;
-  else if (code >= 0 || s->sent_data)
+  }
+  else if (code >= 0 || s->sent_data) {
+    cse_close(s, "closed");
     return -1;
-
-  return HTTP_SERVICE_UNAVAILABLE;
+  }
+  else {
+    cse_close(s, "closed");
+    return HTTP_SERVICE_UNAVAILABLE;
+  }
 }
 
 /**
@@ -778,6 +789,8 @@ caucho_request(request_rec *r, config_t *config, resin_host_t *host,
   int backup_index = 0;
   char *ip;
   srun_t *srun;
+  int i;
+  int retry_count = 1;
 
   if ((retval = ap_setup_client_block(r, REQUEST_CHUNKED_DECHUNK)))
     return retval;
@@ -797,35 +810,45 @@ caucho_request(request_rec *r, config_t *config, resin_host_t *host,
 			  now);
   }
 
-  LOG(("session index: %d\n", session_index));
-  if (! host || ! cse_open_connection(&s, &host->cluster,
-				      session_index, backup_index,
-				      now, r->pool)) {
-    return HTTP_SERVICE_UNAVAILABLE;
+  if (host->cluster.srun_size > 1) {
+    retry_count = 2;
   }
 
-  srun = s.cluster_srun->srun;
+  while (retry_count-- > 0) {
+    LOG(("session index: %d\n", session_index));
+    if (! host || ! cse_open_connection(&s, &host->cluster,
+					session_index, backup_index,
+					now, r->pool)) {
+      return HTTP_SERVICE_UNAVAILABLE;
+    }
 
-  apr_thread_mutex_lock(srun->lock);
-  srun->active_sockets++;
-  apr_thread_mutex_unlock(srun->lock);
+    srun = s.cluster_srun->srun;
+
+    apr_thread_mutex_lock(srun->lock);
+    srun->active_sockets++;
+    apr_thread_mutex_unlock(srun->lock);
   
-  reuse = write_request(&s, r, config, &keepalive,
+    reuse = write_request(&s, r, config, &keepalive,
 			session_index, backup_index);
 
-  apr_thread_mutex_lock(srun->lock);
-  srun->active_sockets--;
-  apr_thread_mutex_unlock(srun->lock);
+    apr_thread_mutex_lock(srun->lock);
+    srun->active_sockets--;
+    apr_thread_mutex_unlock(srun->lock);
   
-  if (reuse == OK)
-    cse_recycle(&s, now);
-  else
-    cse_close(&s, "no reuse");
+    if (reuse == OK) {
+      cse_recycle(&s, now);
+      return OK;
+    }
+    else if (reuse == HTTP_SERVICE_UNAVAILABLE) {
+      cse_close(&s, "no reuse");
+    }
+    else {
+      cse_close(&s, "no reuse");
+      return OK;
+    }
+  }
 
-  if (reuse == HTTP_SERVICE_UNAVAILABLE)
-    return reuse;
-  else
-    return OK;
+  return HTTP_SERVICE_UNAVAILABLE;
 }
 
 /**

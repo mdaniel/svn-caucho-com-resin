@@ -303,8 +303,18 @@ class ResponseStream extends ToByteResponseStream {
 	
 	return _next.nextBuffer(offset);
       }
+    } catch (ClientDisconnectException e) {
+      _response.killCache();
+
+      if (_response.isIgnoreClientDisconnect()) {
+        _isDisconnected = true;
+	return _next.getBuffer();
+      }
+      else
+        throw e;
     } catch (IOException e) {
       _response.killCache();
+      
       throw e;
     }
   }

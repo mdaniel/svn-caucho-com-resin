@@ -353,6 +353,12 @@ public class Cluster implements EnvironmentListener, ClusterMBean {
       _clusterLocal.set(this);
     }
 
+    if (getClientReadTimeout() < getClientLiveTime()) {
+      throw new ConfigException(L.l("client-live-time '{0}s' must be less than the read-timeout '{1}s'.",
+				    getClientLiveTime() / 1000L,
+				    getClientReadTimeout() / 1000L));
+    }
+
     try {
       String name = _id;
       

@@ -108,19 +108,35 @@ public class EntityManagerProxy implements EntityManager {
   }
 
   /**
+   * Creates a query.
+   */
+  public Query createNativeQuery(String sql)
+  {
+    return getCurrent().createNativeQuery(sql);
+  }
+
+  /**
+   * Creates a query.
+   */
+  public Query createNativeQuery(String sql, String map)
+  {
+    return getCurrent().createNativeQuery(sql, map);
+  }
+
+  /**
+   * Creates a query.
+   */
+  public Query createNativeQuery(String sql, Class retType)
+  {
+    return getCurrent().createNativeQuery(sql, retType);
+  }
+
+  /**
    * Refresh the state of the instance from the database.
    */
   public void refresh(Object entity)
   {
     getCurrent().refresh(entity);
-  }
-
-  /**
-   * Make the instance non-persistent
-   */
-  public void evict(Object entity)
-  {
-    getCurrent().evict(entity);
   }
 
   /**

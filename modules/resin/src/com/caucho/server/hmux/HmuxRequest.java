@@ -193,6 +193,8 @@ public class HmuxRequest extends AbstractHttpRequest
   static final int HTTP_0_9 = 0x0009;
   static final int HTTP_1_0 = 0x0100;
   static final int HTTP_1_1 = 0x0101;
+
+  private static final int HEADER_CAPACITY = 256;
   
   static final CharBuffer _getCb = new CharBuffer("GET");
   static final CharBuffer _headCb = new CharBuffer("HEAD");
@@ -282,8 +284,8 @@ public class HmuxRequest extends AbstractHttpRequest
     _host = new CharBuffer();
     _protocol = new CharBuffer();
 
-    _headerKeys = new CharBuffer[64];
-    _headerValues = new CharBuffer[64];
+    _headerKeys = new CharBuffer[HEADER_CAPACITY];
+    _headerValues = new CharBuffer[_headerKeys.length];
     for (int i = 0; i < _headerKeys.length; i++) {
       _headerKeys[i] = new CharBuffer();
       _headerValues[i] = new CharBuffer();
@@ -389,16 +391,15 @@ public class HmuxRequest extends AbstractHttpRequest
       } catch (ClientDisconnectException e) {
         throw e;
       } catch (Throwable e) {
-
         try {
           _errorManager.sendServletError(e, this, _response);
         } catch (ClientDisconnectException e1) {
           throw e1;
         } catch (Exception e1) {
           log.log(Level.FINE, e1.toString(), e1);
-
-          return false;
         }
+
+	return false;
       }
     } finally {
       if (! hasRequest)

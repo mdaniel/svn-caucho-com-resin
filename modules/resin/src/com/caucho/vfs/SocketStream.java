@@ -206,7 +206,7 @@ public class SocketStream extends StreamImpl {
         close();
       } catch (IOException e1) {
       }
-      
+
       throw ClientDisconnectException.create(e);
     }
   }

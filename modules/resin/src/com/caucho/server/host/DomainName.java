@@ -76,7 +76,7 @@ public class DomainName {
 	    source.charAt(index + 1) == 'n' &&
 	    source.charAt(index + 2) == '-' &&
 	    source.charAt(index + 3) == '-') {
-	  int p = source.indexOf('.');
+	  int p = source.indexOf('.', index);
 	  String seq;
 	
 	  if (p < 0)

@@ -63,6 +63,7 @@ public class ClusterClient {
 
   private int _activeCount;
 
+  private boolean _isActive = true;
   private boolean _isClosed;
 
   public ClusterClient(ClusterServer server)
@@ -120,10 +121,34 @@ public class ClusterClient {
   {
     long now = Alarm.getCurrentTime();
     
-    return (now < _lastFailTime + _server.getDeadTime() || _isClosed);
+    return (now < _lastFailTime + _server.getDeadTime() || ! _isActive);
   }
-  
 
+  /**
+   * Return true if active.
+   */
+  public boolean isActive()
+  {
+    return _isActive;
+  }
+
+  /**
+   * Enable the client.
+   */
+  public void enable()
+  {
+    if (! _isClosed)
+      _isActive = true;
+  }
+
+  /**
+   * Enable the client.
+   */
+  public void disable()
+  {
+    _isActive = false;
+  }
+    
   /**
    * Open a read/write pair, trying to recycle.
    *
@@ -131,7 +156,7 @@ public class ClusterClient {
    */
   public ClusterStream openRecycle()
   {
-    if (_isClosed)
+    if (! _isActive)
       return null;
     
     long now = Alarm.getCurrentTime();
@@ -165,8 +190,7 @@ public class ClusterClient {
    */
   public ClusterStream open()
   {
-    long now = Alarm.getCurrentTime();
-    if (now < _lastFailTime + _server.getDeadTime() || _isClosed)
+    if (isDead())
       return null;
 
     ClusterStream recycleStream = openRecycle();
@@ -184,7 +208,7 @@ public class ClusterClient {
 
       return new ClusterStream(this, rs, pair.getWriteStream());
     } catch (IOException e) {
-      _lastFailTime = now;
+      _lastFailTime = Alarm.getCurrentTime();
       return null;
     }
   }
@@ -240,6 +264,7 @@ public class ClusterClient {
 	return;
 
       _isClosed = true;
+      _isActive = false;
       _freeHead = _freeTail = 0;
     }
 

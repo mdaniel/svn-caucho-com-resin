@@ -8,6 +8,86 @@
 
 <summary objsummary='localtoc'/>
 
+<section title="Connection configuration">
+
+<p>The &lt;database> configuration can now configure the created
+connections with &lt;connection>.  Currently the &lt;transaction-isolation>,
+&lt;read-only>, and &lt;catalog> are configurable.</p>
+
+<example>
+&lt;database jndi-name="jdbc/example">
+  &lt;driver>
+    ...
+  &lt;/driver>
+  &lt;connection>
+    &lt;transaction-isolation>read-committed&lt;/transaction-isolation>
+  &lt;/connection>
+&lt;/database>
+</example>
+
+</section>
+
+<section title="Load balancer cluster client control">
+
+<p>Individual load balancer clients can now be disabled through JMX.</p>
+
+<p>Given the following cluster</p>
+
+<example>
+&lt;cluster-definition id="a">
+  &lt;srun host="localhost" port="6802"/>
+&lt;/cluster-definition>
+</example>
+
+<p>The name of a cluster client is:
+</p>
+<example>
+resin:Server=Default,
+      type=ClusterClient,
+      Cluster=a,
+      host=localhost,
+      port=6802
+</example>
+
+<p>The MBean interface is in com.caucho.server.cluster.mbean.ClusterClientMBean.  The appropriate methods are <code>enable()</code>,
+<code>disable()</code>, and <code>isActive()</code>.</p>
+
+
+</section>
+
+<section title="503 failover with HmuxLoadBalanceServlet">
+
+<p>The 503 failover has been improved with HmuxLoadBalanceServlet.</p>
+
+<p>In addition, the web-app busy/inactive reporting has changed.  Now,
+you can disable a single backend web-app
+and the load balancer will failover the web-app requests
+to the following server.</p>
+
+</section>
+
+<section title="driver-type">
+
+<p>The &lt;database> driver now has optional driver-type.</p>
+
+<example>
+&lt;database>
+  &lt;jndi-name>test&lt;/jndi-name>
+  &lt;driver type="test.jdbc.TestDriver"
+          driver-type="ConnectionPoolDataSource">
+    &lt;url>jdbc:test:foo&lt;/url>
+  &lt;/driver>
+&lt;/database>
+</example>
+
+</section>
+
+<section title="server.rootDir">
+
+<p>Added server.rootDir to the tree-loader for shared jars.</p>
+
+</section>
+
 <section title="access-log path-format">
 
 <p>The &lt;access-log> can have a path-format attribute which

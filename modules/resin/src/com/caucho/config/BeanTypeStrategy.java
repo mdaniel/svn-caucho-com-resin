@@ -41,6 +41,7 @@ import com.caucho.util.L10N;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.NotImplementedException;
 import com.caucho.xml.QName;
+import com.caucho.xml.QNode;
 import org.w3c.dom.Node;
 
 public class BeanTypeStrategy extends TypeStrategy {
@@ -52,6 +53,8 @@ public class BeanTypeStrategy extends TypeStrategy {
   private final Class _type;
 
   private final Method _setParent;
+  private final Method _setLocation;
+  private final Method _setNode;
   private final Method _init;
   private final Method _replaceObject;
 
@@ -65,20 +68,19 @@ public class BeanTypeStrategy extends TypeStrategy {
 
     _setParent = setParent;
 
-    Method init = null;
+    _init = findMethod("init", new Class[0]);
 
-    try {
-      init = type.getMethod("init", new Class[0]);
-    } catch (NoSuchMethodException e) {
-    }
+    _replaceObject = findMethod("replaceObject", new Class[0]);
 
-    _init = init;
+    _setLocation = findMethod("setConfigLocation",
+	   	              new Class[] { String.class, int.class });
 
-    Method replaceObject = null;
+    /*
+    _setSystemId = findMethod("setConfigSystemId",
+                              new Class[0] { String.class });
+    */
 
-    replaceObject = findMethod("replaceObject", new Class[0]);
-
-    _replaceObject = replaceObject;
+    _setNode = findMethod("setConfigNode", new Class[] { Node.class });
   }
 
   /**
@@ -172,15 +174,34 @@ public class BeanTypeStrategy extends TypeStrategy {
   public Object configure(NodeBuilder builder, Node node, Object parent)
     throws Exception
   {
-
-    /* XXX: line #
-    builder.setLocation(bean, qelt.getBaseURI(),
-                        qelt.getFilename(), qelt.getLine());
-    builder.setNode(bean, qelt);
-    */
-    // XXX: DependencyBean
-
     return builder.configureChildImpl(this, node, parent);
+  }
+
+  public void configureBean(NodeBuilder builder, Object bean, Node node)
+         throws Exception
+  {
+    Thread thread = Thread.currentThread();
+    ClassLoader oldLoader = thread.getContextClassLoader();
+
+    try {
+      if (_setNode != null && node instanceof QNode) {
+	QNode qNode = (QNode) node;
+      
+	_setNode.invoke(bean, qNode);
+      }
+    
+      if (_setLocation != null && node instanceof QNode) {
+	QNode qNode = (QNode) node;
+      
+	_setLocation.invoke(bean, qNode.getFilename(), qNode.getLine());
+      }
+    
+      // XXX: DependencyBean
+
+      super.configureBean(builder, bean, node);
+    } finally {
+      thread.setContextClassLoader(oldLoader);
+    }
   }
 
   /**

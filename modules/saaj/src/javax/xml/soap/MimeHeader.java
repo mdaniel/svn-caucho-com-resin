@@ -35,8 +35,8 @@ import java.util.HashMap;
  * Implements the mime headers.
  */
 public class MimeHeader {
-  private String _name;
-  private String _value;
+  private final String _name;
+  private final String _value;
 
   public MimeHeader(String name, String value)
   {

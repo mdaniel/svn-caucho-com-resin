@@ -33,6 +33,8 @@ import java.util.Iterator;
 import java.io.OutputStream;
 import java.io.IOException;
 
+import javax.activation.DataHandler;
+
 /**
  * Implements the full SOAP message.
  */
@@ -106,8 +108,10 @@ public abstract class SOAPMessage {
   /**
    * Creates a new attachment.
    */
-  // public AttachmentPart createAttachmentPart(javax.activation.DataHandler handler)
-  // { throw new UnsupportedOperationException(); }
+  public AttachmentPart createAttachmentPart(DataHandler handler)
+  {
+    throw new UnsupportedOperationException();
+  }
 
   /**
    * Returns the mime headers.

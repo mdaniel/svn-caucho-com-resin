@@ -143,11 +143,10 @@ public class AmberBean extends EntityBean {
     public void generate(JavaWriter out)
       throws IOException
     {
-      out.println("protected void __caucho_flushUpdate(long mask, com.caucho.amber.type.EntityType home)");
+      out.println("protected void __caucho_flush_callback()");
       out.println("  throws java.sql.SQLException");
       out.println("{");
       out.println("  ejbStore();");
-      out.println("  super.__caucho_flushUpdate(mask, home);");
       out.println("}");
     }
   }

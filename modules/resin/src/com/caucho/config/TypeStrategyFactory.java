@@ -259,12 +259,12 @@ public class TypeStrategyFactory {
     public Object configure(NodeBuilder builder, Node node, Object parent)
       throws Exception
     {
-      String value = builder.configureString(node);
+      String value = builder.configureRawString(node);
 
       if (value == null || value.equals(""))
-	return Boolean.TRUE;
+	return Boolean.TRUE; // empty flag tags are true
       else
-	return Expr.toBoolean(value, null) ? Boolean.TRUE : Boolean.FALSE;
+	return builder.evalBoolean(value) ? Boolean.TRUE : Boolean.FALSE;
     }
   }
 
@@ -281,7 +281,7 @@ public class TypeStrategyFactory {
     {
       String value = builder.configureString(node);
 
-      if (value == null)
+      if (value == null || value.equals(""))
 	return new Byte((byte) 0);
       else
 	return new Byte(value);
@@ -301,7 +301,7 @@ public class TypeStrategyFactory {
     {
       String value = builder.configureString(node);
 
-      if (value == null)
+      if (value == null || value.equals(""))
 	return new Short((short) 0);
       else
 	return new Short(value);
@@ -321,7 +321,7 @@ public class TypeStrategyFactory {
     {
       String value = builder.configureString(node);
 
-      if (value == null)
+      if (value == null || value.equals(""))
 	return new Integer(0);
       else
 	return new Integer(value);
@@ -341,7 +341,7 @@ public class TypeStrategyFactory {
     {
       String value = builder.configureString(node);
 
-      if (value == null)
+      if (value == null || value.equals(""))
 	return new Long(0);
       else
 	return new Long(value);
@@ -361,7 +361,7 @@ public class TypeStrategyFactory {
     {
       String value = builder.configureString(node);
 
-      if (value == null)
+      if (value == null || value.equals(""))
 	return new Float(0);
       else
 	return new Float(value);
@@ -381,7 +381,7 @@ public class TypeStrategyFactory {
     {
       String value = builder.configureString(node);
 
-      if (value == null)
+      if (value == null || value.equals(""))
 	return new Double(0);
       else
 	return new Double(value);
@@ -422,12 +422,12 @@ public class TypeStrategyFactory {
     public Object configure(NodeBuilder builder, Node node, Object parent)
       throws Exception
     {
-      String value = builder.configureString(node);
+      String value = builder.configureRawString(node);
 
-      if (value == null)
+      if (value == null || value.equals(""))
 	return null;
       else
-	return Expr.toBoolean(value, null) ? Boolean.TRUE : Boolean.FALSE;
+	return builder.evalBoolean(value) ? Boolean.TRUE : Boolean.FALSE;
     }
   }
 
@@ -444,7 +444,7 @@ public class TypeStrategyFactory {
     {
       String value = builder.configureString(node);
 
-      if (value == null)
+      if (value == null || value.equals(""))
 	return null;
       else
 	return new Byte(value);
@@ -464,7 +464,7 @@ public class TypeStrategyFactory {
     {
       String value = builder.configureString(node);
 
-      if (value == null)
+      if (value == null || value.equals(""))
 	return null;
       else
 	return new Short(value);
@@ -484,7 +484,7 @@ public class TypeStrategyFactory {
     {
       String value = builder.configureString(node);
 
-      if (value == null)
+      if (value == null || value.equals(""))
 	return null;
       else
 	return new Integer(value);
@@ -504,7 +504,7 @@ public class TypeStrategyFactory {
     {
       String value = builder.configureString(node);
 
-      if (value == null)
+      if (value == null || value.equals(""))
 	return null;
       else
 	return new Long(value);
@@ -524,7 +524,7 @@ public class TypeStrategyFactory {
     {
       String value = builder.configureString(node);
 
-      if (value == null)
+      if (value == null || value.equals(""))
 	return null;
       else
 	return new Float(value);
@@ -544,7 +544,7 @@ public class TypeStrategyFactory {
     {
       String value = builder.configureString(node);
 
-      if (value == null)
+      if (value == null || value.equals(""))
 	return null;
       else
 	return new Double(value);

@@ -429,7 +429,7 @@ PACKAGE_VERSION=
 PACKAGE_STRING=
 PACKAGE_BUGREPORT=
 
-ac_unique_file="src/c/apache2/mod_caucho.c"
+ac_unique_file="modules/c/src/apache2/mod_caucho.c"
 ac_default_prefix=`pwd`
 # Factoring default headers for most tests.
 ac_includes_default="\
@@ -8008,9 +8008,9 @@ fi
 echo "using Apache source in ${apache_src}"
 
 mkdir ${apache_src}/modules/caucho 2> /dev/null
-cp src/c/common/*.c ${apache_src}/modules/caucho
-cp src/c/common/*.h ${apache_src}/modules/caucho
-cp src/c/apache/*.c ${apache_src}/modules/caucho
+cp modules/c/src/common/*.c ${apache_src}/modules/caucho
+cp modules/c/src/common/*.h ${apache_src}/modules/caucho
+cp modules/c/src/apache/*.c ${apache_src}/modules/caucho
 
 cat > ${apache_src}/modules/caucho/Makefile.tmpl <<'END'
 LIB=libcaucho.a
@@ -8615,8 +8615,6 @@ if test -z "${LD_SHLIB}"; then
         else
 	    LDFLAGS_SHLIB="-G"
 	fi
-
-
 	;;
 
     darwin*)
@@ -8692,8 +8690,12 @@ fi
 # OS which can handle the Resin launcher
 #
 resin_pro_plugin=
-if test -r "src/c/resin/Makefile.in"; then
-   resin_pro_plugin="resin resinssl"
+if test -r "modules/src/c/resin/Makefile.in"; then
+   resin_pro_plugin="resin"
+fi
+
+if test -r "modules/src/c/resinssl/Makefile.in"; then
+   resin_pro_plugin="resinssl"
 fi
 
 resin_plugin=
@@ -8729,7 +8731,7 @@ case "$target_os" in
         PROXY_LIBS='-lpthread'
 	;;
 
-  solaris*)
+  *solaris*)
 	jni_os=solaris
 	CFLAGS="$CFLAGS -D__SOLARIS__"
 	PROXY_LIBS='-lnsl -lsocket -lthread'
@@ -9004,6 +9006,12 @@ else
       CFLAGS="$CFLAGS -DOPENSSL"
       echo "Enabling ssl for mod_caucho"
     fi
+  elif test -x "${apache_dir}/bin/httpd2"; then
+    apache_ssl=`${apache_dir}/bin/httpd2 -l 2>&1 | grep ssl`
+    if test -n "$apache_ssl"; then
+      CFLAGS="$CFLAGS -DOPENSSL"
+      echo "Enabling ssl for mod_caucho"
+    fi
   fi
 
   if test -r "${OPENSSL_INCLUDE}/openssl/engine.h"; then
@@ -9045,7 +9053,7 @@ int main(int argc, char **argv)
 }
 _ACEOF
 
-${CC} -o conftest ${CFLAGS_OPENSSL} ${CFLAGS} ${INCLUDES} conftest.$ac_ext -L${OPENSSL_LIB} ${SSL_LIBS}
+${CC} -o conftest ${CFLAGS_OPENSSL} ${CFLAGS} ${INCLUDES} conftest.$ac_ext -L${OPENSSL_LIB} ${SSL_LIBS} ${PROXY_LIBS}
 
 if test "$?" != 0; then
   { { echo "$as_me:$LINENO: error: Can't compile SSL.  Check compilation flags: ${CFLAGS_OPENSSL} ${CFLAGS} ${INCLUDES} -L${OPENSSL_LIB} ${SSL_LIBS}" >&5
@@ -9107,7 +9115,7 @@ if test "$debug" = true; then
   HARDCORE_CFLAGS="$HARDCORE_CFLAGS -DDEBUG"
 fi
 
-                                                                                ac_config_files="$ac_config_files Makefile bin/wrapper.pl src/c/Makefile src/c/common/Makefile src/c/apache1/Makefile src/c/apache2/Makefile src/c/resin_os/Makefile contrib/init.resin"
+                                                                                ac_config_files="$ac_config_files Makefile bin/wrapper.pl modules/c/src/Makefile modules/c/src/common/Makefile modules/c/src/apache1/Makefile modules/c/src/apache2/Makefile modules/c/src/resin_os/Makefile contrib/init.resin"
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
 # tests run on this system so they can be shared between configure
@@ -9677,11 +9685,11 @@ do
   # Handling of arguments.
   "Makefile" ) CONFIG_FILES="$CONFIG_FILES Makefile" ;;
   "bin/wrapper.pl" ) CONFIG_FILES="$CONFIG_FILES bin/wrapper.pl" ;;
-  "src/c/Makefile" ) CONFIG_FILES="$CONFIG_FILES src/c/Makefile" ;;
-  "src/c/common/Makefile" ) CONFIG_FILES="$CONFIG_FILES src/c/common/Makefile" ;;
-  "src/c/apache1/Makefile" ) CONFIG_FILES="$CONFIG_FILES src/c/apache1/Makefile" ;;
-  "src/c/apache2/Makefile" ) CONFIG_FILES="$CONFIG_FILES src/c/apache2/Makefile" ;;
-  "src/c/resin_os/Makefile" ) CONFIG_FILES="$CONFIG_FILES src/c/resin_os/Makefile" ;;
+  "modules/c/src/Makefile" ) CONFIG_FILES="$CONFIG_FILES modules/c/src/Makefile" ;;
+  "modules/c/src/common/Makefile" ) CONFIG_FILES="$CONFIG_FILES modules/c/src/common/Makefile" ;;
+  "modules/c/src/apache1/Makefile" ) CONFIG_FILES="$CONFIG_FILES modules/c/src/apache1/Makefile" ;;
+  "modules/c/src/apache2/Makefile" ) CONFIG_FILES="$CONFIG_FILES modules/c/src/apache2/Makefile" ;;
+  "modules/c/src/resin_os/Makefile" ) CONFIG_FILES="$CONFIG_FILES modules/c/src/resin_os/Makefile" ;;
   "contrib/init.resin" ) CONFIG_FILES="$CONFIG_FILES contrib/init.resin" ;;
   "depfiles" ) CONFIG_COMMANDS="$CONFIG_COMMANDS depfiles" ;;
   *) { { echo "$as_me:$LINENO: error: invalid argument: $ac_config_target" >&5
@@ -10238,7 +10246,7 @@ fi
 
 
 if test -n "${resin_pro_plugin}"; then
-                      ac_config_files="$ac_config_files src/c/resin/Makefile src/c/resinssl/Makefile"
+                      ac_config_files="$ac_config_files modules/c/src/resin/Makefile modules/c/src/resinssl/Makefile"
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
 # tests run on this system so they can be shared between configure
@@ -10808,14 +10816,14 @@ do
   # Handling of arguments.
   "Makefile" ) CONFIG_FILES="$CONFIG_FILES Makefile" ;;
   "bin/wrapper.pl" ) CONFIG_FILES="$CONFIG_FILES bin/wrapper.pl" ;;
-  "src/c/Makefile" ) CONFIG_FILES="$CONFIG_FILES src/c/Makefile" ;;
-  "src/c/common/Makefile" ) CONFIG_FILES="$CONFIG_FILES src/c/common/Makefile" ;;
-  "src/c/apache1/Makefile" ) CONFIG_FILES="$CONFIG_FILES src/c/apache1/Makefile" ;;
-  "src/c/apache2/Makefile" ) CONFIG_FILES="$CONFIG_FILES src/c/apache2/Makefile" ;;
-  "src/c/resin_os/Makefile" ) CONFIG_FILES="$CONFIG_FILES src/c/resin_os/Makefile" ;;
+  "modules/c/src/Makefile" ) CONFIG_FILES="$CONFIG_FILES modules/c/src/Makefile" ;;
+  "modules/c/src/common/Makefile" ) CONFIG_FILES="$CONFIG_FILES modules/c/src/common/Makefile" ;;
+  "modules/c/src/apache1/Makefile" ) CONFIG_FILES="$CONFIG_FILES modules/c/src/apache1/Makefile" ;;
+  "modules/c/src/apache2/Makefile" ) CONFIG_FILES="$CONFIG_FILES modules/c/src/apache2/Makefile" ;;
+  "modules/c/src/resin_os/Makefile" ) CONFIG_FILES="$CONFIG_FILES modules/c/src/resin_os/Makefile" ;;
   "contrib/init.resin" ) CONFIG_FILES="$CONFIG_FILES contrib/init.resin" ;;
-  "src/c/resin/Makefile" ) CONFIG_FILES="$CONFIG_FILES src/c/resin/Makefile" ;;
-  "src/c/resinssl/Makefile" ) CONFIG_FILES="$CONFIG_FILES src/c/resinssl/Makefile" ;;
+  "modules/c/src/resin/Makefile" ) CONFIG_FILES="$CONFIG_FILES modules/c/src/resin/Makefile" ;;
+  "modules/c/src/resinssl/Makefile" ) CONFIG_FILES="$CONFIG_FILES modules/c/src/resinssl/Makefile" ;;
   "depfiles" ) CONFIG_COMMANDS="$CONFIG_COMMANDS depfiles" ;;
   *) { { echo "$as_me:$LINENO: error: invalid argument: $ac_config_target" >&5
 echo "$as_me: error: invalid argument: $ac_config_target" >&2;}

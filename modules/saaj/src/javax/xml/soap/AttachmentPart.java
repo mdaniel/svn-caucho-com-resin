@@ -34,6 +34,8 @@ import java.util.Iterator;
 import java.io.OutputStream;
 import java.io.IOException;
 
+import javax.activation.DataHandler;
+
 /**
  * Implements an attachment.
  */
@@ -47,8 +49,7 @@ public abstract class AttachmentPart {
   /**
    * Gets the content.
    */
-  abstract public Object clearContent()
-    throws SOAPException;
+  abstract public Object clearContent();
   
   /**
    * Sets the content.
@@ -58,14 +59,13 @@ public abstract class AttachmentPart {
   /**
    * Gets the DataHandler.
    */
-  //abstract public javax.activation.DataHandler getDataHandler()
-  //throws SOAPException;
+  abstract public DataHandler getDataHandler()
+    throws SOAPException;
   
   /**
    * Sets the DataHandler.
    */
-  //abstract public void setDataHandler(javax.activation.DataHandler handler)
-  //throws SOAPException;
+  abstract public void setDataHandler(DataHandler handler);
 
   /**
    * Returns the contentId header.

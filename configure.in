@@ -1,4 +1,4 @@
-AC_INIT(src/c/apache2/mod_caucho.c)
+AC_INIT(modules/c/src/apache2/mod_caucho.c)
 AC_PREFIX_DEFAULT(`pwd`)
 AC_CONFIG_AUX_DIR(automake)	
 
@@ -72,9 +72,9 @@ fi
 echo "using Apache source in ${apache_src}"
 
 mkdir ${apache_src}/modules/caucho 2> /dev/null
-cp src/c/common/*.c ${apache_src}/modules/caucho
-cp src/c/common/*.h ${apache_src}/modules/caucho
-cp src/c/apache/*.c ${apache_src}/modules/caucho
+cp modules/c/src/common/*.c ${apache_src}/modules/caucho
+cp modules/c/src/common/*.h ${apache_src}/modules/caucho
+cp modules/c/src/apache/*.c ${apache_src}/modules/caucho
 
 cat > ${apache_src}/modules/caucho/Makefile.tmpl <<'END'
 LIB=libcaucho.a
@@ -694,8 +694,13 @@ fi
 # OS which can handle the Resin launcher
 #
 resin_pro_plugin=
-if test -r "src/c/resin/Makefile.in"; then
-   resin_pro_plugin="resin resinssl"
+if test -r "modules/src/c/resin/Makefile.in"; then
+   resin_pro_plugin="resin"
+fi
+	
+resin_ssl_plugin=
+if test -r "modules/src/c/resinssl/Makefile.in"; then
+   resin_ssl_plugin="resinssl"
 fi
 
 resin_plugin=
@@ -703,7 +708,7 @@ resin_plugin=
 case "$target_cpu" in
   i?86)
 	CPU=i386
-	resin_plugin=$resin_pro_plugin
+	resin_plugin="$resin_pro_plugin $resin_ssl_plugin"
 	;;
 
   sparc*)
@@ -712,12 +717,12 @@ case "$target_cpu" in
 	else
   	  CPU=sparc
 	fi
-	resin_plugin=$resin_pro_plugin
+	resin_plugin="$resin_pro_plugin $resin_ssl_plusin"
 	;;
 
   x86_64)
 	CPU=$target_cpu
-	resin_plugin=$resin_pro_plugin
+	resin_plugin="$resin_pro_plugin $resin_ssl_plugin"
 	;;
 	
   *)
@@ -745,7 +750,7 @@ case "$target_os" in
   *darwin*)
 	LD=gcc
 	SO=jnilib
-	resin_plugin=$resin_pro_plugin
+	resin_plugin="$resin_pro_plugin $resin_ssl_plugin"
 	;;
 
   *hpux*)
@@ -1020,18 +1025,17 @@ int main(int argc, char **argv)
 }
 _ACEOF
 
-${CC} -o conftest ${CFLAGS_OPENSSL} ${CFLAGS} ${INCLUDES} conftest.$ac_ext -L${OPENSSL_LIB} ${SSL_LIBS} ${PROXY_LIBS}
+${CC} -o conftest ${CFLAGS_OPENSSL} ${CFLAGS} ${INCLUDES} conftest.$ac_ext -L${OPENSSL_LIB} ${SSL_LIBS} ${PROXY_LIBS} 1>/dev/null 2>/dev/null
 
 if test "$?" != 0; then
-  AC_MSG_ERROR(Can't compile SSL.  Check compilation flags: ${CFLAGS_OPENSSL} ${CFLAGS} ${INCLUDES} -L${OPENSSL_LIB} ${SSL_LIBS})
-  exit;
-fi  
+  AC_MSG_ERROR(Can't compile SSL.  Check compilation flags: ${CC} ${CFLAGS_OPENSSL} ${CFLAGS} ${INCLUDES} -L${OPENSSL_LIB} ${SSL_LIBS} ${PROXY_LIBS})
+  resin_ssl_plugin=""
+else
+  ./conftest
 
-./conftest
-
-if test "$?" != 0; then
-  AC_MSG_ERROR(Can't execute SSL.  Check that load version in the library path: ${LD_LIBRARY_PATH} matches the expected version. })
-  exit;
+  if test "$?" != 0; then
+    AC_MSG_ERROR(Can't execute SSL.  Check that load version in the library path: ${LD_LIBRARY_PATH} matches the expected version. })
+  fi
 fi  
 	
 rm -f conftest conftest.$ac_ext
@@ -1072,18 +1076,18 @@ fi
 AC_OUTPUT([
 Makefile
 bin/wrapper.pl
-src/c/Makefile
-src/c/common/Makefile
-src/c/apache1/Makefile
-src/c/apache2/Makefile
-src/c/resin_os/Makefile
+modules/c/src/Makefile
+modules/c/src/common/Makefile
+modules/c/src/apache1/Makefile
+modules/c/src/apache2/Makefile
+modules/c/src/resin_os/Makefile
 contrib/init.resin
 ], [])
 
 if test -n "${resin_pro_plugin}"; then
   AC_OUTPUT([
-    src/c/resin/Makefile
-    src/c/resinssl/Makefile
+    modules/c/src/resin/Makefile
+    modules/c/src/resinssl/Makefile
   ])
 fi
 	

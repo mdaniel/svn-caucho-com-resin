@@ -563,6 +563,12 @@ public class EntityComponent extends ClassComponent {
     throws IOException
   {
     out.println();
+    out.println("protected void __caucho_flush_callback()");
+    out.println("  throws java.sql.SQLException");
+    out.println("{");
+    out.println("}");
+    
+    out.println();
     out.println("public boolean __caucho_flush()");
     out.println("  throws java.sql.SQLException");
     out.println("{");
@@ -589,6 +595,8 @@ public class EntityComponent extends ClassComponent {
 
     out.println("if (! isDirty)");
     out.println("  return true;");
+    out.println();
+    out.println("__caucho_flush_callback();");
     out.println();
     out.println("com.caucho.util.CharBuffer cb = new com.caucho.util.CharBuffer();");
     out.println("__caucho_home.generateUpdateSQLPrefix(cb);");

@@ -410,7 +410,7 @@ public class EnvironmentClassLoader extends DynamicClassLoader {
   /**
    * Initializes the environment
    */
-  private static synchronized void initializeEnvironment()
+  public static synchronized void initializeEnvironment()
   {
     if (_isStaticInit)
       return;

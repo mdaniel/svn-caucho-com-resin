@@ -36,7 +36,7 @@ import java.util.ArrayList;
  * Implements the mime headers.
  */
 public class MimeHeaders {
-  private ArrayList _headers = new ArrayList();
+  private final ArrayList _headers = new ArrayList();
 
   /**
    * Returns the values matching the string.

@@ -13,7 +13,7 @@ resin_libexec=/usr/local/apache2/modules
 resin_home=/home/ferg/test/resin-pro
 JNI_INCLUDE=-I/usr/java/include -I/usr/java/include/linux
 INCLUDES =  -I/usr/include -I/usr/kerberos/include $(JNI_INCLUDE) -I../common
-CFLAGS = -g -O2 -DPOLL -DHAS_JVMTI -DRESIN_HOME=\"$(resin_home)\" $(INCLUDES) -DCPU=\"$(CPU)\" -DOS=$(OS)
+CFLAGS = -g -O2 -DPOLL -DHAS_JVMTI -DDEBUG -Wall -DRESIN_HOME=\"$(resin_home)\" $(INCLUDES) -DCPU=\"$(CPU)\" -DOS=$(OS)
 OBJ= jni_os.o
 
 all	: libresin_os.$(SO)

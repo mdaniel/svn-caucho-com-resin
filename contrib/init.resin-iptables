@@ -1,0 +1,41 @@
+#!/bin/sh
+#
+# Linux mapping of port 80 and 443 to 8080 and 8443
+#
+# chkconfig: 345 84 16
+# description: Linux mapping of port 80 and 443 to 8080 and 8443
+# processname: wrapper.pl
+#
+# To install, configure this file as needed and copy init.resin-iptables
+# to /etc/rc.d/init.d as resin-iptables.
+# Then use "/sbin/chkconfig resin-iptables reset"
+#
+#
+# Sets the commandline arguments.
+#
+
+case "$1" in
+  start)
+	echo -n "mapping port 80 and 443 to 8080 and 8443: "
+	/sbin/iptables -t nat -A PREROUTING -i eth+ -i lo -p tcp \
+                      --dport 80 -j REDIRECT --to-port 8080
+	/sbin/iptables -t nat -A PREROUTING -i eth+ -i lo -p tcp \
+                      --dport 443 -j REDIRECT --to-port 8443
+	echo
+	;;
+  stop)
+	echo -n "unmapping port 80 and 443 "
+	/sbin/iptables -t nat -D PREROUTING -i eth+ -p tcp \
+                      --dport 80 -j REDIRECT --to-port 8080
+	/sbin/iptables -t nat -D PREROUTING -i eth+ -p tcp \
+                      --dport 443 -j REDIRECT --to-port 8443
+	echo
+	;;
+  restart)
+	;;
+  *)
+	echo "Usage: $0 {start|stop|restart}"
+	exit 1
+esac
+
+exit 0

@@ -215,6 +215,15 @@ public class DBPool implements DataSource {
   }
 
   /**
+   * Configure the initial connection
+   */
+  public ConnectionConfig createConnection()
+    throws ConfigException
+  {
+    return getPool().createConnection();
+  }
+
+  /**
    * Sets the jdbc-driver config.
    */
   public void setPoolDataSource(ConnectionPoolDataSource poolDataSource)

@@ -169,7 +169,8 @@ public class NodeBuilder {
     return _currentBuilder.get();
   }
 
-  private static void setCurrentBuilder(NodeBuilder builder)
+  // s/b private?
+  static void setCurrentBuilder(NodeBuilder builder)
   {
     _currentBuilder.set(builder);
   }
@@ -626,7 +627,7 @@ public class NodeBuilder {
     String value = configureRawString(child);
 
     if (value == null)
-      return null;
+      return "";
     else if (value.indexOf("${") >= 0)
       return evalString(value);
     else
@@ -719,8 +720,12 @@ public class NodeBuilder {
     Node ptr;
 
     NamedNodeMap attrList = node.getAttributes();
-    if (attrList != null && attrList.getLength() > 0)
-      return true;
+    if (attrList != null) {
+      for (int i = 0; i < attrList.getLength(); i++) {
+	if (! attrList.item(i).getNodeName().startsWith("xml"))
+	  return true;
+      }
+    }
 
     for (ptr = node.getFirstChild(); ptr != null; ptr = ptr.getNextSibling()) {
       if (ptr instanceof Element)
@@ -763,7 +768,7 @@ public class NodeBuilder {
       String value = XmlUtil.textValue(node);
 
       if (value.equals(""))
-	return null;
+	return "";
       else if (node instanceof Element) {
 	String space = ((Element) node).getAttribute("xml:space");
 
@@ -778,7 +783,7 @@ public class NodeBuilder {
   /**
    * Evaluate as a string.
    */
-  public static String evalString(String exprString)
+  public String evalString(String exprString)
     throws ELException
   {
     if (exprString.indexOf("${") >= 0) {
@@ -786,16 +791,16 @@ public class NodeBuilder {
       parser.setCheckEscape(true);
       Expr expr = parser.parse();
 
-      return expr.evalString(Config.getEnvironment());
+      return expr.evalString(getConfigVariableResolver());
     }
     else
       return exprString;
   }
 
   /**
-   * Evaluate as an object
+   * Evaluate as a string.
    */
-  public static Object evalObject(String exprString)
+  public boolean evalBoolean(String exprString)
     throws ELException
   {
     if (exprString.indexOf("${") >= 0) {
@@ -803,7 +808,24 @@ public class NodeBuilder {
       parser.setCheckEscape(true);
       Expr expr = parser.parse();
 
-      return expr.evalObject(Config.getEnvironment());
+      return expr.evalBoolean(getConfigVariableResolver());
+    }
+    else
+      return Expr.toBoolean(exprString, null);
+  }
+
+  /**
+   * Evaluate as an object
+   */
+  public Object evalObject(String exprString)
+    throws ELException
+  {
+    if (exprString.indexOf("${") >= 0) {
+      ELParser parser = new ELParser(exprString);
+      parser.setCheckEscape(true);
+      Expr expr = parser.parse();
+
+      return expr.evalObject(getConfigVariableResolver());
     }
     else
       return exprString;

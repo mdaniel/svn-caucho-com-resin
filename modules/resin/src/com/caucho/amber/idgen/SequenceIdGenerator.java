@@ -116,14 +116,16 @@ public class SequenceIdGenerator extends IdGenerator {
 
       _selectSQL = metaData.selectSequenceSQL(_name);
 
-      String sql = metaData.createSequenceSQL(_name, getGroupSize());
+      if (amberManager.getCreateDatabaseTables()) {
+	String sql = metaData.createSequenceSQL(_name, getGroupSize());
 
-      try {
-	Statement stmt = conn.createStatement();
-	stmt.executeUpdate(sql);
-	stmt.close();
-      } catch (Exception e) {
-	log.log(Level.FINER, e.toString(), e);
+	try {
+	  Statement stmt = conn.createStatement();
+	  stmt.executeUpdate(sql);
+	  stmt.close();
+	} catch (Exception e) {
+	  log.log(Level.FINER, e.toString(), e);
+	}
       }
     } finally {
       conn.close();

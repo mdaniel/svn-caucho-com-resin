@@ -37,7 +37,8 @@ public interface Detail extends SOAPFaultElement {
   /**
    * Creates the DetailEntry.
    */
-  public DetailEntry addDetailEntry(Name name);
+  public DetailEntry addDetailEntry(Name name)
+    throws SOAPException;
   
   /**
    * Returns the details.

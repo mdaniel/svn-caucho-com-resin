@@ -229,7 +229,7 @@ public class VerifierHandlerImpl extends DefaultHandler
   {
     _startKey.init(item, name);
 
-    Item newItem = _programCache.get(_startKey);
+    Item newItem = null;//_programCache.get(_startKey);
 
     if (newItem != null) {
       return newItem;
@@ -237,8 +237,10 @@ public class VerifierHandlerImpl extends DefaultHandler
     
     newItem = _item.startElement(name);
 
+    /*
     if (newItem != null)
       _programCache.put(new StartKey(item, name), newItem);
+    */
 
     return newItem;
   }
@@ -321,7 +323,7 @@ public class VerifierHandlerImpl extends DefaultHandler
   {
     _endElementKey.init(item);
 
-    Item newItem = _programCache.get(_endElementKey);
+    Item newItem = null;//_programCache.get(_endElementKey);
 
     if (newItem != null) {
       return newItem;
@@ -329,8 +331,10 @@ public class VerifierHandlerImpl extends DefaultHandler
     
     newItem = _item.endElement();
 
+    /*
     if (newItem != null)
       _programCache.put(new EndElementKey(item), newItem);
+    */
 
     return newItem;
   }

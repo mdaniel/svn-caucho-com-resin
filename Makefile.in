@@ -1,13 +1,13 @@
 PREFIX=@prefix@
 
 all	: 
-	(cd src/c; $(MAKE))
+	(cd modules/c/src; $(MAKE))
 
 clean	:
-	(cd src/c; $(MAKE) clean)
+	(cd modules/c/src; $(MAKE) clean)
 
 install	:
-	(cd src/c; $(MAKE) install)
+	(cd modules/c/src; $(MAKE) install)
 	if test $(PREFIX) != `pwd`; then \
 	  mkdir -p $(PREFIX)/lib; \
 	  mkdir -p $(PREFIX)/libexec; \

@@ -57,6 +57,8 @@ import com.caucho.vfs.Depend;
 import com.caucho.vfs.MergePath;
 import com.caucho.vfs.IOExceptionWrapper;
 
+import com.caucho.xml.QName;
+
 import com.caucho.config.types.ResinType;
 
 /**
@@ -98,17 +100,15 @@ public class MapBuilder {
 				 boolean doInit)
     throws ConfigException
   {
-    /*
     NodeBuilder oldBuilder = NodeBuilder.getCurrentBuilder();
-    ClassLoader oldConfigLoader = null;
+
     try {
       if (oldBuilder == null)
-      TypeBuilderFactory factory = TypeBuilderFactory.createFactory();
-      oldConfigLoader = factory.getConfigVariableResolver().getConfigLoader();
+	NodeBuilder.setCurrentBuilder(new NodeBuilder());
+      
+      TypeStrategy type = TypeStrategyFactory.getTypeStrategy(bean.getClass());
 
-      TypeBuilder builder = factory.getTypeBuilder(bean.getClass());
-
-      return configure(builder, bean, map, doInit);
+      return configure(type, bean, map, doInit);
     } catch (ConfigException e) {
       throw e;
     } catch (RuntimeException e) {
@@ -116,62 +116,46 @@ public class MapBuilder {
     } catch (Throwable e) {
       throw new ConfigException(e);
     } finally {
-      TypeBuilderFactory.getConfigVariableResolver().setConfigLoader(oldConfigLoader);
-
-      TypeBuilderFactory.setFactory(oldFactory);
+      NodeBuilder.setCurrentBuilder(oldBuilder);
     }
-    */
-    throw new UnsupportedOperationException();
   }
 
-  public static Object configure(TypeStrategy builder,
+  private static Object configure(TypeStrategy typeStrategy,
 				 Object bean,
 				 Map<String,Object> map,
 				 boolean doInit)
     throws Throwable
   {
     /*
-    Thread thread = Thread.currentThread();
-    ClassLoader oldLoader = thread.getContextClassLoader();
-    TypeBuilderFactory oldFactory = TypeBuilderFactory.getFactory();
+    // XXX: make common
+    if (bean instanceof EnvironmentBean) {
+      EnvironmentBean envBean = (EnvironmentBean) bean;
 
-    ClassLoader oldConfigLoader = null;
+      ClassLoader beanLoader = envBean.getClassLoader();
 
-    try {
-      TypeBuilderFactory factory = TypeBuilderFactory.createFactory();
-      oldConfigLoader = factory.getConfigVariableResolver().getConfigLoader();
-
-      // XXX: make common
-      if (bean instanceof EnvironmentBean) {
-	EnvironmentBean envBean = (EnvironmentBean) bean;
-
-        ClassLoader beanLoader = envBean.getClassLoader();
-
-        if (beanLoader != null) {
-          thread.setContextClassLoader(beanLoader);
-	  factory.getConfigVariableResolver().setConfigLoader(beanLoader);
-	}
+      if (beanLoader != null) {
+        thread.setContextClassLoader(beanLoader);
+	factory.getConfigVariableResolver().setConfigLoader(beanLoader);
       }
-
-      for (String key : map.keySet()) {
-	builder.setValue(bean, key, map.get(key));
-      }
-
-      if (doInit) {
-        builder.init(bean);
-
-        return builder.replaceObject(bean);
-      }
-      else
-        return bean;
-    } finally {
-      thread.setContextClassLoader(oldLoader);
-
-      TypeBuilderFactory.getConfigVariableResolver().setConfigLoader(oldConfigLoader);
-      TypeBuilderFactory.setFactory(oldFactory);
     }
     */
 
-    throw new UnsupportedOperationException();
+    for (String key : map.keySet()) {
+      QName attrName = new QName(key);
+      
+      AttributeStrategy attrStrategy
+	= typeStrategy.getAttributeStrategy(attrName);
+
+      if (attrStrategy != null)
+	attrStrategy.setAttribute(bean, attrName, map.get(key));
+    }
+
+    if (doInit) {
+      typeStrategy.init(bean);
+
+      return typeStrategy.replaceObject(bean);
+    }
+    else
+      return bean;
   }
 }

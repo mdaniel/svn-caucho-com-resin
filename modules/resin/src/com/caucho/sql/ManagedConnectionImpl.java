@@ -82,6 +82,7 @@ public class ManagedConnectionImpl
 
   private ManagedFactoryImpl _factory;
   private DriverConfig _driver;
+  private ConnectionConfig _connConfig;
 
   private Credential _credentials;
 
@@ -121,11 +122,13 @@ public class ManagedConnectionImpl
 
   ManagedConnectionImpl(ManagedFactoryImpl factory,
 			DriverConfig driver,
+			ConnectionConfig connConfig,
 			Credential credentials)
     throws SQLException
   {
     _factory = factory;
     _driver = driver;
+    _connConfig = connConfig;
     _credentials = credentials;
 
     _connClosedEvent = new ConnectionEvent(this,
@@ -255,6 +258,16 @@ public class ManagedConnectionImpl
     if (dbPool.isSpy())
       _driverConnection = new SpyConnection(_driverConnection,
 					    dbPool.newSpyId());
+
+    int isolation = _connConfig.getTransactionIsolation();
+    if (isolation >= 0)
+      _driverConnection.setTransactionIsolation(isolation);
+
+    if (_connConfig.isReadOnly())
+      _driverConnection.setReadOnly(true);
+
+    if (_connConfig.getCatalog() != null)
+      _driverConnection.setCatalog(_connConfig.getCatalog());
   }
 
   /**

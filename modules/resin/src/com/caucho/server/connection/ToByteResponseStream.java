@@ -127,8 +127,11 @@ public abstract class ToByteResponseStream extends AbstractResponseStream {
     else {
       _toByte = Encoding.getWriteEncoding(encoding);
       
-      if (_toByte == null)
+      if (_toByte == null) {
+	_toByte = Encoding.getLatin1Writer();
+	
 	throw new UnsupportedEncodingException(encoding);
+      }
     }
   }
 

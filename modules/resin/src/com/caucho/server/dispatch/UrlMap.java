@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -110,7 +111,7 @@ public class UrlMap<E> {
     }
 
     else if (pattern.equals("/*")) {
-      addRegexp(1, "", flags, value, true);
+      addRegexp(1, "/*", "", flags, value, true);
       return;
     }
 
@@ -322,11 +323,12 @@ public class UrlMap<E> {
    * @param value the value for matching the pattern
    * @param isShort if true, this regexp expects to be shorter than others
    */
-  public void addRegexp(int prefixLength, String regexp, String flags,
-                        E value, boolean isShort)
+  public void addRegexp(int prefixLength, String regexp,
+			String flags, E value, boolean isShort)
     throws PatternSyntaxException
   {
-    RegexpEntry<E> entry = new RegexpEntry<E>(prefixLength, regexp, flags, value);
+    RegexpEntry<E> entry
+      = new RegexpEntry<E>(prefixLength, regexp, flags, value);
     
     for (int i = 0; i < _regexps.size(); i++) {
       RegexpEntry<E> re = _regexps.get(i);
@@ -358,8 +360,8 @@ public class UrlMap<E> {
                         E value, boolean isShort)
     throws PatternSyntaxException
   {
-    RegexpEntry<E> entry = new RegexpEntry<E>(prefixLength, pattern, regexp,
-                                              flags, value);
+    RegexpEntry<E> entry
+      = new RegexpEntry<E>(prefixLength, pattern, regexp, flags, value);
     
     for (int i = _regexps.size() - 1; i >= 0; i--) {
       RegexpEntry<E> re = _regexps.get(i);

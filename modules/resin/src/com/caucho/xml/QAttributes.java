@@ -116,8 +116,12 @@ class QAttributes implements Attributes {
   public String getValue(String uri, String localName)
   {
     for (int i = 0; i < size; i++) {
-      if (uri.equals(names[i].getNamespaceURI()) &&
-          localName.equals(names[i].getLocalName()))
+      String testURI = names[i].getNamespaceURI();
+
+      if (testURI == null)
+	testURI = "";
+      
+      if (uri.equals(testURI) && localName.equals(names[i].getLocalName()))
         return values[i];
     }
 

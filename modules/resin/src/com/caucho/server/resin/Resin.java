@@ -237,6 +237,7 @@ public class Resin implements ResinServerListener {
       try {
 	license.validate(1);
 
+	isResinProfessional = true;
 	System.setProperty("isResinProfessional", "true");
 
 	SchemeMap.initJNI();
