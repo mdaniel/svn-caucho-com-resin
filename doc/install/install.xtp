@@ -56,43 +56,18 @@ JDK</a>.</p>
 
 </section>
 
-<section title="Configuration overview">
+<section title='Resin Web Server'>
 
-<p>Resin has a number of major configuration options, each with a separate
-page:</p>
-
-<ul>
-<li><a href="httpd.xtp">Standalone web server</a> (recommended)</li>
-<li><a href="cse-apache-unix.xtp">Unix Apache</a></li>
-<li><a href="cse-apache-win.xtp">Windows Apache</a></li>
-<li><a href="cse-iis.xtp">Windows IIS</a></li>
-<!--
-<li><a href="cse-netscape.xtp">Netscape iPlanet</a></li>
--->
-</ul>
-
-<p>
-The <var/httpd/> executable starts Resin for all configurations.
-</p>
-
-<p>If you have any trouble starting Resin, check the FAQ at <a
-href='http://www.caucho.com/quercus/faq'>http://www.caucho.com/quercus/faq</a>.</p>
-
-</section>
-
-<section title='Standalone Web Server'>
-
-<p>The easiest and fastest Resin configuration uses the
-<a href='httpd.xtp'>Resin httpd</a>.  This configuration provides a
-Java HTTP server. We recommend you start with this
-before trying any other configuration.</p>
+<p>The easiest and fastest Resin configuration uses the Resin as the primary or
+only web server.  This configuration provides a Java HTTP server. We recommend
+you start with this before trying any other configuration.</p>
 
 <figure src='httpd.gif'/>
 
 <p>The server listens at port 8080 in the default configuration and
 can be changed to the HTTP port 80 during deployment.</p>
 
-<section title="On Windows:">
+<section title="Windows">
 
 <ol>
 <li>Install JDK 1.4 or later.</li>
@@ -100,12 +75,12 @@ can be changed to the HTTP port 80 during deployment.</p>
 <li>Unzip resin-3.0.0.zip</li>
 <li>Define the environment variable RESIN_HOME to the location of
 Resin, for example "c:\resin-3.0.0"</li>
-<li>Execute resin-3.0.0/bin/httpd</li>
+<li>Execute resin-3.0.0/httpd.exe</li>
 <li>Browse http://localhost:8080</li>
 </ol>
 </section>
 
-<section title="On Unix (including Linux and MacOS-X):">
+<section title="Unix (including MacOS-X)">
 
 <ol>
 <li>Install JDK 1.4 or later and link /usr/java to the Java home or define the environment variable JAVA_HOME.</li>
@@ -127,12 +102,9 @@ configuration page.</p>
 
 <section title='Resin with Apache'>
 
-<p>If you are already using Apache for your web server, you
-can use Resin with Apache on <a
-href='cse-apache-unix.xtp'>Unix</a> or <a
-href='cse-apache-win.xtp'>Win32</a>.  This configuration uses Apache
-to serve html, images, PHP, or Perl, and Resin to
-serve JSPs and Servlets.</p>
+<p>If you are already using Apache for your web server, you can use Resin with
+Apache.  This configuration uses Apache to serve html, images, PHP, or Perl,
+and Resin to serve JSPs and Servlets.</p>
 
 <p>The Apache configuration uses two pieces: a C program extending
 Apache (<var/mod_caucho/>) and Java program supporting servlets and
@@ -147,12 +119,12 @@ configuration is identical to Resin's httpd configuration.  The Apache
 configuration tells Apache how to find Resin.</p>
 
 <ol>
-<li>Compile mod_caucho.so using <code>./configure --with-apache; make</code></li>
-<li>Any needed Apache httpd.conf changes</li>
-<li>Any needed Resin resin.conf changes</li>
+<li>On Unix only, compile mod_caucho.so using <code>./configure --with-apache; make</code></li>
+<li>Make any needed Apache httpd.conf changes</li>
+<li>Make any needed Resin resin.conf changes</li>
 <li>Restart Apache</li>
 <li>Start Resin with <code>resin-3.0.0/bin/httpd.sh</code> on Unix or
-<code>resin-3.0.0/bin/httpd</code> on Windows.</li>
+<code>resin-3.0.0/httpd.exe</code> on Windows.</li>
 </ol>
 
 <p>On Unix, you'll run configure using <code>--with-apache</code> and then <code>make</code>:
@@ -163,34 +135,15 @@ unix> ./configure --with-apache=/usr/local/apache
 unix> make
 unix> make install
 </example>
-</section>
 
-<!--
-<section title='Resin with Netscape'>
-
-<p>On unix, Resin can also be configured to
-<a href='cse-netscape.xtp'>run with Netscape</a>.  The idea is
-the same as for Apache.</p>
-
-<p>On Unix, you'll run configure using <code>--with-netscape</code> and
-then <code>make</code>.
-The argument to <code>--with-netscape</code> is the directory containing the netscape
-start and stop scripts, i.e. the parent of the config directory.</p>
-
-<example>
-unix> ./configure --with-netscape=/usr/local/netscape/https-your-hostname
-unix> make
-</example>
-
-<p>On Windows, the setup program should configure Netscape's obj.conf
-correctly.</p>
+<p>For more details, see the <a href="cse-apache.xtp">Resin with Apache</a>
+configuration page.</p>
 
 </section>
--->
 
 <section title='Resin with IIS'>
 
-<p>You can also combine <a href='cse-iis.xtp'>IIS and Resin</a>.  IIS
+<p>You can also combine IIS and Resin.  IIS
 serves static content like html and images and Resin serves JSPs and
 Servlets.   The IIS configuration requires two pieces:
 <var/isapi_srun.dll/>, an ISAPI extension which lets IIS talk to
@@ -207,27 +160,13 @@ configuration tells IIS how to find Resin.
 <li>Setup the registry and IIS using resin-3.0.0/bin/setup</li>
 <li>Any needed Resin resin.conf changes</li>
 <li>Restart IIS</li>
-<li>Start Resin with resin-3.0.0/bin/httpd.</li>
+<li>Start Resin with resin-3.0.0/httpd.exe.</li>
 </ol>
 
-</section>
-
-<!--
-<section title="Resin with O'Reilly WebSite">
-
-<p>You can also combine <a href='cse-oreilly-website.xtp'>WebSite and Resin</a>.
-WebSite serves static content like html and images and Resin serves JSPs and
-Servlets.   The WebSite configuration requires two pieces:
-<var/isapi_srun.dll/>, an ISAPI extension which lets IIS talk to
-Resin, and <var/srun/>, Resin's Java support.
-</p>
-
-<figure src='iis_srun.gif'/>
-
-<p>Configuration is identical to the IIS configuration.</p>
+<p>For more details and troubleshooting steps, see the
+<a href="cse-iis.xtp">Resin with IIS</a> configuration page.</p>
 
 </section>
--->
 
-  </body>
+</body>
 </document>

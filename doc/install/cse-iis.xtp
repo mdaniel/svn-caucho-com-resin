@@ -98,7 +98,7 @@ to match.</p>
 
 <section title='Testing the servlet engine'>
 
-<p>From a <code/cmd/> shell run <code/RESIN_HOME/bin/httpd.exe/> to start the
+<p>From a <code/cmd/> shell run <code/RESIN_HOME/httpd.exe/> to start the
 servlet runner.</p>
 
 <example title="Run httpd.exe">
@@ -176,13 +176,13 @@ unexpectedly exits.</p>
 <p>To install the service, use</p>
 
 <example>
-win> resin-3.0.x/bin/httpd -install
+win> resin-3.0.x/httpd -install
 </example>
 
 <p>To remove the service, use</p>
 
 <example>
-win> resin-3.0.x/bin/httpd -remove
+win> resin-3.0.x/httpd -remove
 </example>
 
 <p>You will either need to reboot the machine or start the service
@@ -194,7 +194,7 @@ administrator logs out.  JDK 1.4 and later can avoid that bug if the
 JDK is started with -Xrs. </note>
 
 <example>
-win> resin-3.0.x/bin/httpd -install -Xrs
+win> resin-3.0.x/httpd -install -Xrs
 </example>
 
 </section>
@@ -224,9 +224,9 @@ details.</p>
 &lt;/resin>
 </example>
 <example title="installing multiple servlet runners as services">
-win> resin-3.0.x/bin/httpd -install-as "Resin-A" -server a -Xrs
-win> resin-3.0.x/bin/httpd -install-as "Resin-B" -server b -Xrs
-win> resin-3.0.x/bin/httpd -install-as "Resin-C" -server c -Xrs
+win> resin-3.0.x/httpd -install-as "Resin-A" -server a -Xrs
+win> resin-3.0.x/httpd -install-as "Resin-B" -server b -Xrs
+win> resin-3.0.x/httpd -install-as "Resin-C" -server c -Xrs
 </example>
 </section>
 
@@ -408,8 +408,8 @@ in the <code/scripts/> directory.</p>
 </example>
 
 <example title="installing a servlet runner for each virtual site">
-win> resin-3.0.x/bin/httpd -install-as "Resin-foo" -conf resin-foo.conf -Xrs
-win> resin-3.0.x/bin/httpd -install-as "Resin-bar" -conf resin-bar.conf -Xrs
+win> resin-3.0.x/httpd -install-as "Resin-foo" -conf resin-foo.conf -Xrs
+win> resin-3.0.x/httpd -install-as "Resin-bar" -conf resin-bar.conf -Xrs
 </example>
 
 <example title="resin.ini for IIS virtual site foo.com">
@@ -435,7 +435,7 @@ resin.ini files).</p>
 <section title='Troubleshooting'>
 
 <ol>
-<li>Check your configuration with the standalone bin/httpd.
+<li>Check your configuration with the standalone web server.
 In other words, add a &lt;http port='8080'/> block and
 browse http://localhost:8080.
 <li>Check <var/http://localhost/caucho-status/>.  That will tell if

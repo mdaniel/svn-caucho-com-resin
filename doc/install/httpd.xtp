@@ -3,7 +3,7 @@
     <product>resin</product>
     <resin-2.0>$resin/ref/httpd.xtp</resin-2.0>
     <version>Resin 3.0</version>
-    <title>Resin Web Server on Unix or Windows</title>
+    <title>Resin Web Server</title>
     <description>
       <p>Resin provides a fast standalone web server.
         In our benchmarks, it serves static pages faster than Apache!
@@ -91,8 +91,8 @@ when the machine reboots.</li>
 <section title="bin/httpd.sh">
 
 <p>bin/httpd.sh uses a perl script, resin-3.0.0/bin/wrapper.pl,
-to control the Java process.  (bin/httpd.sh is a tiny shell script
-that calls wrapper.pl.)  You can modify bin/httpd.sh</p>
+to control the Java process (bin/httpd.sh is a tiny shell script
+that calls wrapper.pl).  You can modify bin/httpd.sh.</p>
 
 <p>If you need to stop Resin with <var/kill/>, you'll need to kill
 the wrapper.pl process to make sure it doesn't restart Resin.  ("httpd.sh stop"
@@ -167,7 +167,7 @@ you might use -server and -pid.</p>
 <li>Install JDK 1.4 or later.</li>
 <li>Make sure the JDK installation set the environment variable JAVA_HOME correctly</li>
 <li>Unzip resin-3.0.0.zip</li>
-<li>Execute resin-3.0.0/bin/httpd</li>
+<li>Execute resin-3.0.0/httpd.exe</li>
 <li>Browse http://localhost:8080</li>
 </ol>
 
@@ -235,7 +235,7 @@ administrator logs out.  You can avoid that bug if the
 JDK is started with -Xrs. </note>
 
 <example>
-C:\> resin3.0.0/bin/httpd -install -Xrs
+C:\> resin3.0.0/httpd.exe -install -Xrs
 </example>
 
 </section>

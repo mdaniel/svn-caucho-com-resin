@@ -31,9 +31,9 @@
 <p>mod_caucho discovers its configuration by contacting
 the ResinConfigServer specified in the httpd.conf or resin.ini.
 The ResinConfigServer can be any Resin server.  When a user requests a URL,
-mod_caucho asks the ResinConfigServer whether Resin or Apache
-should handle the request. That decision is based on the configuration
-in the ResinConfigServer's resin.conf.</p>
+mod_caucho uses the configuration it has determined from the ResinConfigServer
+to determine whether Resin or Apache should handle the request. That decision
+is based on the configuration in the ResinConfigServer's resin.conf.</p>
 
 </section>
 
