@@ -40,8 +40,8 @@ import com.caucho.util.L10N;
 public class EntityManagerProxy implements EntityManager {
   private static final L10N L = new L10N(EntityManagerImpl.class);
   
-  private static final ThreadLocal<EntityManagerImpl> _localManager =
-    new ThreadLocal<EntityManagerImpl>();
+  private static final ThreadLocal<EntityManagerImpl> _localManager
+    = new ThreadLocal<EntityManagerImpl>();
   
   /**
    * Makes the instance managed.
@@ -152,6 +152,8 @@ public class EntityManagerProxy implements EntityManager {
    */
   private EntityManagerImpl getCurrent()
   {
+    // XXX: reset at the end, for GC
+    
     EntityManagerImpl manager = _localManager.get();
 
     if (manager == null) {

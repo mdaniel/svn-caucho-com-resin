@@ -597,23 +597,38 @@ public class HmuxRequest extends AbstractHttpRequest
                      (is.read() << 8) +
                      (is.read()));
 
+	boolean isKeepalive = false;
         if (value == HMUX_CLUSTER_PROTOCOL) {
           if (isLoggable)
             log.fine(dbgId() + (char) code + ": cluster protocol");
           _filter.setClientClosed(true);
 	  
-          return _clusterRequest.handleRequest(is, _rawWrite);
+          isKeepalive = _clusterRequest.handleRequest(is, _rawWrite);
         }
         else if (value == HMUX_DISPATCH_PROTOCOL) {
           if (isLoggable)
             log.fine(dbgId() + (char) code + ": dispatch protocol");
           _filter.setClientClosed(true);
-          return _dispatchRequest.handleRequest(is, _rawWrite);
+          isKeepalive = _dispatchRequest.handleRequest(is, _rawWrite);
         }
+	else {
+	  log.fine(dbgId() + (char) code + ": unknown protocol (" + value + ")");
+	  isKeepalive = false;
+	}
+
+	if (! allowKeepalive())
+	  isKeepalive = false;
 	
-        log.fine(dbgId() + (char) code + ": unknown protocol (" + value + ")");
-	
-        return false;
+        if (isKeepalive) {
+          _rawWrite.write(HMUX_QUIT);
+	  _rawWrite.flush();
+	}
+	else {
+          _rawWrite.write(HMUX_EXIT);
+	  _rawWrite.close();
+	}
+
+	return isKeepalive;
 
       case HMUX_URI:
         hasURI = true;
@@ -1121,6 +1136,18 @@ public class HmuxRequest extends AbstractHttpRequest
   public void getRemoteAddr(CharBuffer cb)
   {
     cb.append(_remoteAddr);
+  }
+
+  public int printRemoteAddr(byte []buffer, int offset)
+    throws IOException
+  {
+    char []buf = _remoteAddr.getBuffer();
+    int len = _remoteAddr.getLength();
+
+    for (int i = 0; i < len; i++)
+      buffer[offset + len] = (byte) buf[i];
+
+    return offset + len;
   }
 
   public String getRemoteHost()

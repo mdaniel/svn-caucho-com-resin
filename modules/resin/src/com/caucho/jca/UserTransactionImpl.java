@@ -61,8 +61,8 @@ public class UserTransactionImpl implements UserTransaction {
 
   private ArrayList<UserPoolItem> _resources = new ArrayList<UserPoolItem>();
   private ArrayList<PoolItem> _poolItems = new ArrayList<PoolItem>();
-  private ArrayList<CloseResource> _closeResources =
-    new ArrayList<CloseResource>();
+  private ArrayList<CloseResource> _closeResources
+    = new ArrayList<CloseResource>();
 
   private int _xaDepth;
   

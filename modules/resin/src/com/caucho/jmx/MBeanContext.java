@@ -371,7 +371,7 @@ public class MBeanContext {
     sendRegisterNotification(name);
 
     MBeanContext context = this;
-    while (true) {
+    while (context._loader != null) {
       ClassLoader parentLoader = context._loader.getParent();
       
       MBeanContext parentContext = _mbeanServer.getContext(parentLoader);

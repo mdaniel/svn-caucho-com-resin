@@ -30,6 +30,7 @@
 package com.caucho.config;
 
 import java.io.InputStream;
+import java.io.IOException;
 
 import java.util.Map;
 
@@ -38,13 +39,36 @@ import java.util.logging.Logger;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Constructor;
 
+import java.lang.ref.SoftReference;
+
 import javax.servlet.jsp.el.VariableResolver;
 import javax.servlet.jsp.el.ELException;
+
+import org.iso_relax.verifier.VerifierFactory;
+import org.iso_relax.verifier.Schema;
+import org.iso_relax.verifier.Verifier;
+import org.iso_relax.verifier.VerifierFilter;
+import org.iso_relax.verifier.VerifierConfigurationException;
+
+import org.xml.sax.ContentHandler;
+import org.xml.sax.InputSource;
+
+import com.caucho.relaxng.CompactVerifierFactoryImpl;
+
 import com.caucho.util.L10N;
 import com.caucho.util.Log;
+import com.caucho.util.LruCache;
 
 import com.caucho.vfs.Path;
+import com.caucho.vfs.MergePath;
+import com.caucho.vfs.ReadStream;
+import com.caucho.vfs.IOExceptionWrapper;
+
 import com.caucho.xml.QName;
+import com.caucho.xml.DOMBuilder;
+import com.caucho.xml.QDocument;
+import com.caucho.xml.Xml;
+
 import com.caucho.el.EL;
 
 /**
@@ -53,6 +77,215 @@ import com.caucho.el.EL;
 public class Config {
   private static final L10N L = new L10N(Config.class);
   private static final Logger log = Log.open(Config.class);
+
+  private static LruCache<Path,SoftReference<QDocument>> _parseCache =
+    new LruCache<Path,SoftReference<QDocument>>(32);
+
+  /**
+   * Configures a bean with a configuration file.
+   */
+  public static Object configure(Object obj, Path path)
+    throws Exception
+  {
+    NodeBuilder builder = new NodeBuilder();
+
+    QDocument doc = parseDocument(path, null);
+
+    return builder.configure(obj, doc.getDocumentElement());
+  }
+
+  /**
+   * Configures a bean with a configuration file.
+   */
+  public static Object configure(Object obj, InputStream is)
+    throws Exception
+  {
+    QDocument doc = parseDocument(is, null);
+    
+    return new NodeBuilder().configure(obj, doc.getDocumentElement());
+  }
+
+  /**
+   * Configures a bean with a configuration file and schema.
+   */
+  public static Object configure(Object obj, Path path, String schemaLocation)
+    throws Exception
+  {
+    NodeBuilder builder = new NodeBuilder();
+
+    Schema schema = findCompactSchema(schemaLocation);
+
+    QDocument doc = parseDocument(path, schema);
+
+    return builder.configure(obj, doc.getDocumentElement());
+  }
+
+  /**
+   * Configures a bean with a configuration file and schema.
+   */
+  public static void configureBean(Object obj,
+				   Path path,
+				   String schemaLocation)
+    throws Exception
+  {
+    NodeBuilder builder = new NodeBuilder();
+
+    Schema schema = findCompactSchema(schemaLocation);
+
+    QDocument doc = parseDocument(path, schema);
+
+    builder.configureBean(obj, doc.getDocumentElement());
+  }
+
+  /**
+   * Configures a bean with a configuration file and schema.
+   */
+  public static void configureBean(Object obj,
+				   Path path,
+				   Schema schema)
+    throws Exception
+  {
+    NodeBuilder builder = new NodeBuilder();
+
+    QDocument doc = parseDocument(path, schema);
+
+    builder.configureBean(obj, doc.getDocumentElement());
+  }
+
+  /**
+   * Configures a bean with a configuration file.
+   */
+  public static Object configure(Object obj,
+				 InputStream is,
+				 String schemaLocation)
+    throws Exception
+  {
+    NodeBuilder builder = new NodeBuilder();
+
+    Schema schema = findCompactSchema(schemaLocation);
+
+    QDocument doc = parseDocument(is, schema);
+
+    return builder.configure(obj, doc.getDocumentElement());
+  }
+  
+  /**
+   * Configures the bean from a path
+   */
+  private static QDocument parseDocument(Path path, Schema schema)
+    throws LineConfigException, IOException, org.xml.sax.SAXException
+  {
+    SoftReference<QDocument> docRef = _parseCache.get(path);
+    QDocument doc;
+
+    if (docRef != null) {
+      doc = docRef.get();
+
+      if (doc != null && ! doc.isModified())
+	return doc;
+    }
+    
+    ReadStream is = path.openRead();
+
+    try {
+      doc = parseDocument(is, schema);
+
+      _parseCache.put(path, new SoftReference<QDocument>(doc));
+
+      return doc;
+    } finally {
+      is.close();
+    }
+  }
+  
+  /**
+   * Configures the bean from an input stream.
+   */
+  private static QDocument parseDocument(InputStream is, Schema schema)
+    throws LineConfigException,
+	   IOException,
+	   org.xml.sax.SAXException
+  {
+    // Node node = Registry.parse(is, _schema).getTop();
+
+    try {
+      QDocument doc = new QDocument();
+      DOMBuilder builder = new DOMBuilder();
+
+      builder.init(doc);
+      String systemId = null;
+      if (is instanceof ReadStream) {
+	systemId = ((ReadStream) is).getPath().getUserPath();
+      }
+
+      doc.setSystemId(systemId);
+      builder.setSystemId(systemId);
+      builder.setSkipWhitespace(true);
+
+      InputSource in = new InputSource();
+      in.setByteStream(is);
+      in.setSystemId(systemId);
+
+      Xml xml = new Xml();
+      xml.setOwner(doc);
+
+      if (schema != null) {
+	Verifier verifier = schema.newVerifier();
+	VerifierFilter filter = verifier.getVerifierFilter();
+
+	filter.setParent(xml);
+	filter.setContentHandler(builder);
+	filter.setErrorHandler(builder);
+
+	filter.parse(in);
+      }
+      else {
+	xml.setContentHandler(builder);
+	xml.parse(in);
+      }
+
+      return doc;
+    } catch (VerifierConfigurationException e) {
+      throw new IOExceptionWrapper(e);
+    }
+  }
+  
+  private static Schema findCompactSchema(String location)
+    throws IOException, ConfigException
+  {
+    try {
+      if (location == null)
+	return null;
+      
+      MergePath schemaPath = new MergePath();
+      schemaPath.addClassPath();
+      
+      Path path = schemaPath.lookup(location);
+      if (path.canRead()) {
+	// VerifierFactory factory = VerifierFactory.newInstance("http://caucho.com/ns/compact-relax-ng/1.0");
+          
+	CompactVerifierFactoryImpl factory;
+	factory = new CompactVerifierFactoryImpl();
+
+	return factory.compileSchema(path);
+      }
+      else
+	return null;
+    } catch (IOException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new ConfigException(e);
+    }
+  }
+
+  /**
+   * Configures a bean with a configuration map.
+   */
+  public static Object configure(Object obj, Map<String,Object> map)
+    throws Exception
+  {
+    return new MapBuilder().configure(obj, map);
+  }
   
   /**
    * Returns true if the class can be instantiated.
@@ -127,59 +360,6 @@ public class Config {
     TypeStrategy strategy = TypeStrategyFactory.getTypeStrategy(bean.getClass());
 
     return strategy.replaceObject(bean);
-  }
-
-  /**
-   * Configures a bean with a configuration file.
-   */
-  public static Object configure(Object obj, Path path)
-    throws Exception
-  {
-    return new NodeBuilder().configure(obj, path);
-  }
-
-  /**
-   * Configures a bean with a configuration file.
-   */
-  public static Object configure(Object obj, InputStream is)
-    throws Exception
-  {
-    return new NodeBuilder().configure(obj, is);
-  }
-
-  /**
-   * Configures a bean with a configuration file and schema.
-   */
-  public static Object configure(Object obj, Path path, String schema)
-    throws Exception
-  {
-    NodeBuilder builder = new NodeBuilder();
-
-    builder.setCompactSchema(schema);
-
-    return builder.configure(obj, path);
-  }
-
-  /**
-   * Configures a bean with a configuration file.
-   */
-  public static Object configure(Object obj, InputStream is, String schema)
-    throws Exception
-  {
-    NodeBuilder builder = new NodeBuilder();
-
-    builder.setCompactSchema(schema);
-
-    return builder.configure(obj, is);
-  }
-
-  /**
-   * Configures a bean with a configuration map.
-   */
-  public static Object configure(Object obj, Map<String,Object> map)
-    throws Exception
-  {
-    return new MapBuilder().configure(obj, map);
   }
 
   /**

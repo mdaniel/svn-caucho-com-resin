@@ -67,12 +67,12 @@ public class TransactionManagerImpl
   private AbstractXALogManager _xaLogManager;
 
   // thread local is dependent on the transaction manager
-  private ThreadLocal<TransactionImpl> _threadTransaction =
-    new ThreadLocal<TransactionImpl>();
+  private ThreadLocal<TransactionImpl> _threadTransaction
+    = new ThreadLocal<TransactionImpl>();
 
   // listeners for transaction begin
-  private ArrayList<TransactionListener> _transactionListeners =
-    new ArrayList<TransactionListener>();
+  private ArrayList<TransactionListener> _transactionListeners
+    = new ArrayList<TransactionListener>();
 
   private long _timeout = -1;
 

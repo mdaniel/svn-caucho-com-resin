@@ -19,6 +19,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
+ *
  *   Free SoftwareFoundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
@@ -54,8 +55,8 @@ public class ConnectionContext {
 
   private static InitialContext _initialContext;
 
-  private static ThreadLocal<HashMap<String,ConnectionContext>> _localConn =
-    new ThreadLocal<HashMap<String,ConnectionContext>>();
+  private static ThreadLocal<HashMap<String,ConnectionContext>> _localConn
+    = new ThreadLocal<HashMap<String,ConnectionContext>>();
 
   private int _depth;
   private Connection _conn;

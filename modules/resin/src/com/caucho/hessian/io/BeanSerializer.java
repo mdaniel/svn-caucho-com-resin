@@ -66,10 +66,7 @@ public class BeanSerializer extends AbstractSerializer {
   
   public BeanSerializer(Class cl)
   {
-    try {
-      _writeReplace = cl.getMethod("writeReplace", new Class[0]);
-    } catch (Exception e) {
-    }
+    _writeReplace = getWriteReplace(cl);
 
     ArrayList primitiveMethods = new ArrayList();
     ArrayList compoundMethods = new ArrayList();
@@ -136,6 +133,26 @@ public class BeanSerializer extends AbstractSerializer {
 
       _names[i] = name;
     }
+  }
+
+  /**
+   * Returns the writeReplace method
+   */
+  protected Method getWriteReplace(Class cl)
+  {
+    for (; cl != null; cl = cl.getSuperclass()) {
+      Method []methods = cl.getDeclaredMethods();
+      
+      for (int i = 0; i < methods.length; i++) {
+	Method method = methods[i];
+
+	if (method.getName().equals("writeReplace") &&
+	    method.getParameterTypes().length == 0)
+	  return method;
+      }
+    }
+
+    return null;
   }
   
   public void writeObject(Object obj, AbstractHessianOutput out)

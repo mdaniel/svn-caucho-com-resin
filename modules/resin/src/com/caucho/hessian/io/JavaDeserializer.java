@@ -66,9 +66,11 @@ public class JavaDeserializer extends AbstractMapDeserializer {
   {
     _type = cl;
     _fieldMap = getFieldMap(cl);
-    try {
-      _readResolve = cl.getMethod("readResolve", new Class[0]);
-    } catch (Exception e) {
+
+    _readResolve = getReadResolve(cl);
+
+    if (_readResolve != null) {
+      _readResolve.setAccessible(true);
     }
 
     Constructor []constructors = cl.getDeclaredConstructors();
@@ -111,6 +113,26 @@ public class JavaDeserializer extends AbstractMapDeserializer {
       e.printStackTrace();
       throw new IOException(String.valueOf(e));
     }
+  }
+
+  /**
+   * Returns the readResolve method
+   */
+  protected Method getReadResolve(Class cl)
+  {
+    for (; cl != null; cl = cl.getSuperclass()) {
+      Method []methods = cl.getDeclaredMethods();
+      
+      for (int i = 0; i < methods.length; i++) {
+	Method method = methods[i];
+
+	if (method.getName().equals("readResolve") &&
+	    method.getParameterTypes().length == 0)
+	  return method;
+      }
+    }
+
+    return null;
   }
     
   public Object readMap(AbstractHessianInput in, Object obj)

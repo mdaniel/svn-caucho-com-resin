@@ -140,8 +140,11 @@ public class CollectionField extends AbstractField {
 			     String index)
     throws IOException
   {
+    String maskVar = mask + "_" + (getIndex() / 64);
+    long maskValue = (1L << (getIndex() % 64));
+    
     out.println();
-    out.println("if ((" + mask + " & " + (1L << getIndex()) + "L) != 0) {");
+    out.println("if ((" + maskVar + " & " + maskValue + "L) != 0) {");
     out.pushDepth();
 
     generateSet(out, pstmt, index);

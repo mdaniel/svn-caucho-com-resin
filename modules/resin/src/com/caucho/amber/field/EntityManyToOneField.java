@@ -356,7 +356,11 @@ public class EntityManyToOneField extends AbstractField {
     out.println(generateSuperSetter(proxy) + ";");
     */
     out.println(generateSuperSetter("null") + ";");
-    out.println("__caucho_loadMask &= ~" + (1L << _targetLoadIndex) + "L;");
+
+    int group = _targetLoadIndex / 64;
+    long mask = (1L << (_targetLoadIndex % 64));
+    
+    out.println("__caucho_loadMask_" + group + " &= ~" + mask + "L;");
 
     // return index + 1;
     return index;
@@ -375,13 +379,17 @@ public class EntityManyToOneField extends AbstractField {
     out.println("{");
     out.pushDepth();
 
+    int group = _targetLoadIndex / 64;
+    long mask = (1L << (_targetLoadIndex % 64));
+    String loadVar = "__caucho_loadMask_" + group;
+    
     out.print("if (__caucho_session != null && ");
-    out.println("(__caucho_loadMask & " + (1L << _targetLoadIndex) + "L) == 0) {");
+    out.println("(" + loadVar + " & " + mask + "L) == 0) {");
     out.pushDepth();
     
     if (_aliasField == null) {
       out.println("__caucho_load_" + getLoadGroupIndex() + "(__caucho_session);");
-      out.println("__caucho_loadMask |= " + (1L << _targetLoadIndex) + "L;");
+      out.println(loadVar + " |= " + mask + "L;");
       out.print(javaType + " v = (" + javaType + ") __caucho_session.loadProxy(\"" + getEntityType().getName() + "\", ");
     
       out.println("__caucho_" + getName() + ");");
@@ -389,7 +397,7 @@ public class EntityManyToOneField extends AbstractField {
       out.println("return v;");
     }
     else {
-      out.println("__caucho_loadMask |= " + (1L << _targetLoadIndex) + "L;");
+      out.println(loadVar + " |= " + mask + "L;");
       out.print(javaType + " v = (" + javaType + ") __caucho_session.loadProxy(\"" + getEntityType().getName() + "\", ");
     
       out.println(_aliasField.generateGet("super") + ");");
@@ -477,8 +485,12 @@ public class EntityManyToOneField extends AbstractField {
     out.println("{");
     out.pushDepth();
 
+    int group = getLoadGroupIndex() / 64;
+    long loadMask = (1L << (getLoadGroupIndex() % 64));
+    String loadVar = "__caucho_loadMask_" + group;
+
     if (_aliasField == null) {
-      out.println("if ((__caucho_loadMask & " + (1L << getLoadGroupIndex()) + "L) == 0 && __caucho_session != null) {");
+      out.println("if ((" + loadVar + " & " + loadMask + "L) == 0 && __caucho_session != null) {");
       out.println("  __caucho_load_0(__caucho_session);");
       out.println("}");
 
@@ -526,8 +538,12 @@ public class EntityManyToOneField extends AbstractField {
       out.println();
       out.println("if (__caucho_session != null) {");
       out.pushDepth();
-      out.println("__caucho_dirtyMask |= " + (1L << getIndex()) + "L;");
-      out.println("__caucho_loadMask |= " + (1L << _targetLoadIndex) + "L;");
+
+      String dirtyVar = "__caucho_dirtyMask_" + (getIndex() / 64);
+      long dirtyMask = (1L << (getIndex() % 64));
+      
+      out.println(dirtyVar + " |= " + dirtyMask + "L;");
+      out.println(loadVar + " |= " + loadMask + "L;");
       out.println("__caucho_session.update(this);");
 
       out.println("__caucho_session.addCompletion(__caucho_home.createManyToOneCompletion(\"" + getName() + "\", this, v));");
@@ -616,7 +632,10 @@ public class EntityManyToOneField extends AbstractField {
   {
     out.println("if (\"" + _targetType.getTable().getName() + "\".equals(table)) {");
     out.pushDepth();
-    out.println("__caucho_loadMask = 0L;");
+
+    String loadVar = "__caucho_loadMask_" + (_targetLoadIndex / 64);
+    
+    out.println(loadVar + " = 0L;");
     out.popDepth();
     out.println("}");
   }

@@ -397,6 +397,7 @@ abstract public class AbstractField implements AmberField {
   {
     int group = getIndex() / 64;
     long mask = 1L << getIndex() % 64;
+
     out.println();
     out.println("if ((" + maskVar + "_" + group + " & " + mask + "L) != 0) {");
     out.pushDepth();
@@ -435,8 +436,11 @@ abstract public class AbstractField implements AmberField {
       return;
     
     String getter = getGetterName();
+
+    String loadVar = "__caucho_loadMask_" + (getLoadGroupIndex() / 64);
+    long loadMask = (1L << getLoadGroupIndex());
     
-    out.println("if ((__caucho_loadMask & " + (1L << getLoadGroupIndex()) + "L) != 0)");
+    out.println("if ((" + loadVar + " & " + loadMask + "L) != 0)");
     out.print("  ");
 
     out.println("  " + generateSuperSetter(generateGet(obj)) + ";");

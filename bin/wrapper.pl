@@ -459,6 +459,7 @@ if (-d "$RESIN_HOME/classes") {
 #$CLASSPATH="$CLASSPATH:$RESIN_HOME/lib/jmx-12.jar";
 #$CLASSPATH="$CLASSPATH:$RESIN_HOME/lib/portlet-10.jar";
 #$CLASSPATH="$CLASSPATH:$RESIN_HOME/lib/resin.jar";
+#$CLASSPATH="$CLASSPATH:$RESIN_HOME/lib/pro.jar";
 #$CLASSPATH="$CLASSPATH:$RESIN_HOME/lib/license.jar";
 
 opendir(RESINLIB, "$RESIN_HOME/lib");

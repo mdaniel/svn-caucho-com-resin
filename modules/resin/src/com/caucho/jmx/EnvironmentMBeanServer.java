@@ -99,9 +99,6 @@ public class EnvironmentMBeanServer extends AbstractMBeanServer {
    */
   protected MBeanContext getContext(ClassLoader loader)
   {
-    if (loader == null)
-      return _localContext.get(ClassLoader.getSystemClassLoader());
-    
     synchronized (_localContext) {
       MBeanContext context = _localContext.getLevel(loader);
 
@@ -111,7 +108,10 @@ public class EnvironmentMBeanServer extends AbstractMBeanServer {
 
 	context = new MBeanContext(this, loader, delegate);
 
-	MBeanContext parent = getContext(loader.getParent());
+	MBeanContext parent = null;
+
+	if (loader != null)
+	  parent = getContext(loader.getParent());
 
 	if (parent != null)
 	  context.setProperties(parent.copyProperties());

@@ -55,11 +55,11 @@ public class UserTransactionProxy implements UserTransaction {
   private static final EnvironmentLocal<UserTransactionProxy> _localUT =
     new EnvironmentLocal<UserTransactionProxy>();
   */
-  private static final UserTransactionProxy _proxy =
-    new UserTransactionProxy();
+  private static final UserTransactionProxy _proxy
+    = new UserTransactionProxy();
 
-  private static final ThreadLocal<UserTransactionImpl> _threadTransaction =
-    new ThreadLocal<UserTransactionImpl>();
+  private static final ThreadLocal<UserTransactionImpl> _threadTransaction
+    = new ThreadLocal<UserTransactionImpl>();
 
   /**
    * Creates the proxy.

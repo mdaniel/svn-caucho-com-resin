@@ -1200,9 +1200,4 @@ public class Store {
   {
     return "Store[" + _id + "]";
   }
-
-  protected void finalize()
-  {
-    close();
-  }
 }

@@ -55,7 +55,7 @@ import com.caucho.loader.EnvironmentLocal;
 
 import com.caucho.relaxng.CompactVerifierFactoryImpl;
 
-import com.caucho.config.NodeBuilder;
+import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
 
 import com.caucho.config.types.FileSetType;
@@ -137,30 +137,9 @@ public class TldManager {
     _application = application;
   }
 
-  public Schema getSchema()
+  public String getSchema()
   {
-    String schemaName = "com/caucho/jsp/cfg/jsp-tld.rnc";
-
-    SoftReference<Schema> ref = _schemaRef;
-    Schema schema;
-
-    if (ref != null) {
-      schema = ref.get();
-      if (schema != null)
-	return schema;
-    }
-
-    try {
-      schema = CompactVerifierFactoryImpl.compileFromResource(schemaName);
-
-      _schemaRef = new SoftReference<Schema>(schema);
-
-      return schema;
-    } catch (Throwable e) {
-      log.log(Level.FINER, e.toString(), e);
-
-      return null;
-    }
+    return "com/caucho/jsp/cfg/jsp-tld.rnc";
   }
     
   public void setTldDir(String tldDir)
@@ -607,21 +586,21 @@ public class TldManager {
       path.setUserPath(path.getURL());
     }
       
-    NodeBuilder builder = new NodeBuilder();
+    String schema = null;
 
     if (_application.getJsp() == null ||
 	_application.getJsp().isValidateTaglibSchema()) {
-      builder.setSchema(getSchema());
+      schema = getSchema();
     }
 
     try {
-      builder.configure(taglib, is);
+      Config.configure(taglib, is, schema);
     } catch (ConfigException e) {
       log.warning(e.toString());
       log.log(Level.FINER, e.toString(), e);
 
       taglib.setConfigException(e);
-    } catch (org.xml.sax.SAXException e) {
+    } catch (Exception e) {
       log.warning(e.toString());
       log.log(Level.FINER, e.toString(), e);
 
@@ -681,22 +660,22 @@ public class TldManager {
       path.setUserPath(path.getURL());
     }
       
-    NodeBuilder builder = new NodeBuilder();
+    String schema = null;
 
     if (_application.getJsp() == null ||
 	_application.getJsp().isValidateTaglibSchema()) {
-      builder.setSchema(getSchema());
+      schema = getSchema();
     }
 
     TldPreload taglib = new TldPreload();
     try {
-      builder.configure(taglib, is);
+      Config.configure(taglib, is, schema);
     } catch (ConfigException e) {
       log.warning(e.toString());
       log.log(Level.FINER, e.toString(), e);
 
       taglib.setConfigException(e);
-    } catch (org.xml.sax.SAXException e) {
+    } catch (Exception e) {
       log.warning(e.toString());
       log.log(Level.FINER, e.toString(), e);
 

@@ -46,15 +46,6 @@ import org.w3c.dom.CharacterData;
 import org.w3c.dom.Comment;
 import org.w3c.dom.ProcessingInstruction;
 
-import org.iso_relax.verifier.VerifierFactory;
-import org.iso_relax.verifier.Schema;
-import org.iso_relax.verifier.Verifier;
-import org.iso_relax.verifier.VerifierFilter;
-import org.iso_relax.verifier.VerifierConfigurationException;
-
-import org.xml.sax.ContentHandler;
-import org.xml.sax.InputSource;
-
 import com.caucho.util.L10N;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.RegistryNode;
@@ -63,8 +54,6 @@ import com.caucho.util.CompileException;
 import com.caucho.util.LineCompileException;
 
 import com.caucho.log.Log;
-
-import com.caucho.relaxng.CompactVerifierFactoryImpl;
 
 import com.caucho.make.Dependency;
 
@@ -108,61 +97,10 @@ public class NodeBuilder {
   private final static QName RESIN_TYPE_NS =
     new QName("resin:type", "http://caucho.com/ns/resin/core");
 
-  private static HashMap<Path,SoftReference<QDocument>> _parseCache =
-    new HashMap<Path,SoftReference<QDocument>>();
-
   private static ThreadLocal<NodeBuilder> _currentBuilder =
           new ThreadLocal<NodeBuilder>();
 
-  private Schema _schema;
-
   private ConfigVariableResolver _varResolver = new ConfigVariableResolver();
-
-  /**
-   * Sets the validator schema.
-   */
-  public void setCompactSchema(Path path)
-    throws ConfigurationException, IOException
-  {
-    try {
-      // VerifierFactory factory = VerifierFactory.newInstance("http://caucho.com/ns/compact-relax-ng/1.0");
-      _schema = CompactVerifierFactoryImpl.compileFromPath(path);
-    } catch (Exception e) {
-      e.printStackTrace();
-      throw new ConfigurationException(e);
-    }
-  }
-  
-  public void setCompactSchema(String location)
-    throws IOException, ConfigException
-  {
-    try {
-      MergePath schemaPath = new MergePath();
-      schemaPath.addClassPath();
-      
-      Path path = schemaPath.lookup(location);
-      if (path.canRead()) {
-	// VerifierFactory factory = VerifierFactory.newInstance("http://caucho.com/ns/compact-relax-ng/1.0");
-          
-	CompactVerifierFactoryImpl factory;
-	factory = new CompactVerifierFactoryImpl();
-
-	_schema = factory.compileSchema(path);
-      }
-    } catch (IOException e) {
-      throw e;
-    } catch (Exception e) {
-      throw new ConfigException(e);
-    }
-  }
-  
-  /**
-   * Sets the validator schema.
-   */
-  public void setSchema(Schema schema)
-  {
-    _schema = schema;
-  }
 
   public static NodeBuilder getCurrentBuilder()
   {
@@ -173,157 +111,6 @@ public class NodeBuilder {
   static void setCurrentBuilder(NodeBuilder builder)
   {
     _currentBuilder.set(builder);
-  }
-
-  /**
-   * Configures the bean from a path
-   */
-  public Object configure(Object bean, Path path)
-    throws LineConfigException, IOException, org.xml.sax.SAXException
-  {
-    return configure(bean, path, true);
-  }
-  
-  /**
-   * Configures the bean from a path
-   */
-  public Object configureNoInit(Object bean, Path path)
-    throws LineConfigException, IOException, org.xml.sax.SAXException
-  {
-    return configure(bean, path, false);
-  }
-  
-  /**
-   * Configures the bean from an input stream.
-   */
-  public Object configure(Object bean, InputStream is)
-    throws LineConfigException, IOException, org.xml.sax.SAXException
-  {
-    return configure(bean, is, true);
-  }
-  
-  /**
-   * Configures the bean from an input stream.
-   */
-  public Object configureNoInit(Object bean, InputStream is)
-    throws LineConfigException, IOException, org.xml.sax.SAXException
-  {
-    return configure(bean, is, false);
-  }
-  
-  /**
-   * Configures the bean from a path
-   */
-  public Object configure(Object bean, Path path, boolean isInit)
-    throws LineConfigException, IOException, org.xml.sax.SAXException
-  {
-    QDocument doc = parseDocument(path);
-
-    if (isInit)
-      return configure(bean, doc.getDocumentElement());
-    else {
-      configureBean(bean, doc.getDocumentElement());
-
-      return bean;
-    }
-  }
-  
-  /**
-   * Configures the bean from a path
-   */
-  public Object configure(Object bean, InputStream is, boolean isInit)
-    throws LineConfigException, IOException, org.xml.sax.SAXException
-  {
-    QDocument doc = parseDocument(is);
-
-    if (isInit)
-      return configure(bean, doc.getDocumentElement());
-    else {
-      configureBean(bean, doc.getDocumentElement());
-
-      return bean;
-    }
-  }
-  
-  /**
-   * Configures the bean from a path
-   */
-  public QDocument parseDocument(Path path)
-    throws LineConfigException, IOException, org.xml.sax.SAXException
-  {
-    SoftReference<QDocument> docRef = _parseCache.get(path);
-    QDocument doc;
-
-    if (docRef != null) {
-      doc = docRef.get();
-
-      if (doc != null && ! doc.isModified())
-	return doc;
-    }
-    
-    ReadStream is = path.openRead();
-
-    try {
-      doc = parseDocument(is);
-
-      _parseCache.put(path, new SoftReference<QDocument>(doc));
-
-      return doc;
-    } finally {
-      is.close();
-    }
-  }
-  
-  /**
-   * Configures the bean from an input stream.
-   */
-  private QDocument parseDocument(InputStream is)
-    throws LineConfigException,
-	   IOException,
-	   org.xml.sax.SAXException
-  {
-    // Node node = Registry.parse(is, _schema).getTop();
-
-    try {
-      QDocument doc = new QDocument();
-      DOMBuilder builder = new DOMBuilder();
-
-      builder.init(doc);
-      String systemId = null;
-      if (is instanceof ReadStream) {
-	systemId = ((ReadStream) is).getPath().getUserPath();
-      }
-
-      doc.setSystemId(systemId);
-      builder.setSystemId(systemId);
-      builder.setSkipWhitespace(true);
-
-      InputSource in = new InputSource();
-      in.setByteStream(is);
-      in.setSystemId(systemId);
-
-      Xml xml = new Xml();
-      xml.setOwner(doc);
-
-      if (_schema != null) {
-	Verifier verifier = _schema.newVerifier();
-	VerifierFilter filter = verifier.getVerifierFilter();
-
-	filter.setParent(xml);
-	filter.setContentHandler(builder);
-	filter.setErrorHandler(builder);
-
-	filter.parse(in);
-      }
-      else {
-	xml.setContentHandler(builder);
-	xml.parse(in);
-      }
-
-      return doc;
-    } catch (VerifierConfigurationException e) {
-      throw new IOExceptionWrapper(e);
-    }
   }
 
   /**

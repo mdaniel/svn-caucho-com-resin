@@ -99,8 +99,7 @@ public class ResultSetImpl extends AbstractResultSet {
     if (_rowNumber < 0)
       throw new SQLException("can't call getMetaData() after close()");
     
-    // return new TestResultSetMetaData();
-    return null;
+    return new ResultSetMetaDataImpl(_rs);
   }
 
   public boolean wasNull()

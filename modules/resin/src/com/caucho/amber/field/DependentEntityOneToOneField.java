@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -213,7 +214,11 @@ public class DependentEntityOneToOneField extends AbstractField {
     throws IOException
   {
     out.println(generateSuperSetter("null") + ";");
-    out.println("__caucho_loadMask &= ~" + (1L << _targetLoadIndex) + "L;");
+
+    String loadVar = "__caucho_loadMask_" + (_targetLoadIndex / 64);
+    long loadMask = (1L << _targetLoadIndex);
+    
+    out.println(loadVar + " &= ~" + loadMask + "L;");
 
     // return index + 1;
     return index;
@@ -225,6 +230,9 @@ public class DependentEntityOneToOneField extends AbstractField {
   public void generateGetProperty(JavaWriter out)
     throws IOException
   {
+    String loadVar = "__caucho_loadMask_" + (_targetLoadIndex / 64);
+    long loadMask = (_targetLoadIndex % 64);
+    
     String javaType = getJavaTypeName();
     
     out.println();
@@ -233,10 +241,10 @@ public class DependentEntityOneToOneField extends AbstractField {
     out.pushDepth();
     
     out.print("if (__caucho_session != null && ");
-    out.println("(__caucho_loadMask & " + (1L << _targetLoadIndex) + "L) == 0) {");
+    out.println("(" + loadVar + " & " + loadMask + "L) == 0) {");
     out.pushDepth();
     out.println("__caucho_load_" + getLoadGroupIndex() + "(__caucho_session);");
-    out.println("__caucho_loadMask |= " + (1L << _targetLoadIndex) + "L;");
+    out.println(loadVar + " |= " + loadMask + "L;");
 
     out.println(javaType + " v = null;");
     
@@ -334,7 +342,11 @@ public class DependentEntityOneToOneField extends AbstractField {
     out.println(generateSuperSetter("v") + ";");
     out.println("if (__caucho_session != null) {");
     out.pushDepth();
-    out.println("__caucho_updateMask |= " + (1L << _targetLoadIndex) + "L;");
+
+    String updateVar = "__caucho_updateMask_" + (_targetLoadIndex / 64);
+    long updateMask = (1L << _targetLoadIndex);
+    
+    out.println(updateVar + " |= " + updateMask + "L;");
     out.println("__caucho_session.update(this);");
     out.popDepth();
     out.println("}");

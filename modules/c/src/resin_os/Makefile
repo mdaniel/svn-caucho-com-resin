@@ -7,13 +7,13 @@ CPU=i386
 LDFLAGS=
 LDFLAGS_SHLIB=-shared -L/usr/lib
 PROXY_LIBS=-lpthread
-APACHE_INC=-I/usr/local/apache2/include  -I/usr/local/apache2/include 
-resin_conf=/usr/local/apache2/conf/httpd.conf
-resin_libexec=/usr/local/apache2/modules
-resin_home=/home/ferg/test/resin-pro
+APACHE_INC=-I/usr/include/httpd
+resin_conf=/etc/httpd/conf/httpd.conf
+resin_libexec=/usr/lib/httpd/modules
+resin_home=/home/ferg/ws/resin
 JNI_INCLUDE=-I/usr/java/include -I/usr/java/include/linux
 INCLUDES =  -I/usr/include -I/usr/kerberos/include $(JNI_INCLUDE) -I../common
-CFLAGS = -g -O2 -DPOLL -DHAS_JVMTI -DDEBUG -Wall -DRESIN_HOME=\"$(resin_home)\" $(INCLUDES) -DCPU=\"$(CPU)\" -DOS=$(OS)
+CFLAGS = -g -O2 -DPOLL -DHAS_JVMTI -DRESIN_HOME=\"$(resin_home)\" $(INCLUDES) -DCPU=\"$(CPU)\" -DOS=$(OS)
 OBJ= jni_os.o
 
 all	: libresin_os.$(SO)

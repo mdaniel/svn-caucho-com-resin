@@ -50,6 +50,8 @@ import com.caucho.transaction.TransactionManagerImpl;
 
 import com.caucho.jca.UserTransactionProxy;
 
+import com.caucho.util.ThreadPool;
+
 import com.caucho.jmx.Jmx;
 
 import com.caucho.security.PolicyImpl;
@@ -94,7 +96,7 @@ public class EnvironmentClassLoader extends DynamicClassLoader {
   {
     super(Thread.currentThread().getContextClassLoader());
 
-    initializeEnvironment();
+    // initializeEnvironment();
 
     initListeners();
   }
@@ -106,7 +108,9 @@ public class EnvironmentClassLoader extends DynamicClassLoader {
   {
     super(parent);
     
-    initializeEnvironment();
+    // initializeEnvironment();
+    
+    initListeners();
   }
 
   /**
@@ -396,6 +400,8 @@ public class EnvironmentClassLoader extends DynamicClassLoader {
       _owner = null;
       _attributes = null;
       _listeners = null;
+
+      ThreadPool.reset(); // drain the thread pool for GC
     }
   }
 
@@ -421,7 +427,7 @@ public class EnvironmentClassLoader extends DynamicClassLoader {
     ClassLoader oldLoader = thread.getContextClassLoader();
     try {
       thread.setContextClassLoader(ClassLoader.getSystemClassLoader());
-      
+
       PolicyImpl.init();
       
       EnvironmentStream.setStdout(System.out);
@@ -436,6 +442,11 @@ public class EnvironmentClassLoader extends DynamicClassLoader {
         System.setProperty("org.xml.sax.driver", "com.caucho.xml.Xml");
 
       Properties props = System.getProperties();
+
+      if (props.get("java.util.logging.manager") == null) {
+        props.put("java.util.logging.manager",
+                  "com.caucho.log.LogManagerImpl");
+      }
 
       if (props.get("java.naming.factory.initial") == null) {
         props.put("java.naming.factory.initial",
@@ -479,7 +490,6 @@ public class EnvironmentClassLoader extends DynamicClassLoader {
 		    Jmx.getContextMBeanServer());
       Jndi.bindDeep("java:comp/env/jmx/GlobalMBeanServer",
 		    Jmx.getGlobalMBeanServer());
-      
     } catch (Throwable e) {
       e.printStackTrace();
     } finally {

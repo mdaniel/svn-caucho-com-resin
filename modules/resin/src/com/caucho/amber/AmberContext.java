@@ -38,8 +38,8 @@ import com.caucho.util.L10N;
 public class AmberContext {
   private static final L10N L = new L10N(AmberContext.class);
   
-  private static final ThreadLocal<AmberContext> _localContext =
-    new ThreadLocal<AmberContext>();
+  private static final ThreadLocal<AmberContext> _localContext
+    = new ThreadLocal<AmberContext>();
 
   private AmberFactory _factory;
   private int _depth;

@@ -1503,14 +1503,6 @@ public class DynamicClassLoader extends java.net.URLClassLoader
       return "DynamicClassLoader" + _loaders;
   }
 
-  /**
-   * Closes the dependent listeners.
-   */
-  protected void finalize()
-  {
-    destroy();
-  }
-
   private static L10N L()
   {
     if (_L == null)
@@ -1526,6 +1518,14 @@ public class DynamicClassLoader extends java.net.URLClassLoader
     
     return _log;
   }
+
+  // XXX: GC issues
+  /*
+  protected void finalize()
+  {
+    destroy();
+  }
+  */
 
   static {
     URL url = null;

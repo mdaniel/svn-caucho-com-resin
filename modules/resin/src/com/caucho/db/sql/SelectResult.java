@@ -187,6 +187,14 @@ public class SelectResult {
   }
 
   /**
+   * Returns the expressions.
+   */
+  public Expr []getExprs()
+  {
+    return _exprs;
+  }
+
+  /**
    * Returns the column index with the given name.
    */
   public int findColumnIndex(String name)

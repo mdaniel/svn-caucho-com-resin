@@ -8690,12 +8690,13 @@ fi
 # OS which can handle the Resin launcher
 #
 resin_pro_plugin=
-if test -r "modules/src/c/resin/Makefile.in"; then
+if test -r "modules/c/src/resin/Makefile.in"; then
    resin_pro_plugin="resin"
 fi
 
-if test -r "modules/src/c/resinssl/Makefile.in"; then
-   resin_pro_plugin="resinssl"
+resin_ssl_plugin=
+if test -r "modules/c/src/resinssl/Makefile.in"; then
+   resin_ssl_plugin="resinssl"
 fi
 
 resin_plugin=
@@ -8703,7 +8704,7 @@ resin_plugin=
 case "$target_cpu" in
   i?86)
 	CPU=i386
-	resin_plugin=$resin_pro_plugin
+	resin_plugin="$resin_pro_plugin $resin_ssl_plugin"
 	;;
 
   sparc*)
@@ -8712,12 +8713,12 @@ case "$target_cpu" in
 	else
   	  CPU=sparc
 	fi
-	resin_plugin=$resin_pro_plugin
+	resin_plugin="$resin_pro_plugin $resin_ssl_plusin"
 	;;
 
   x86_64)
 	CPU=$target_cpu
-	resin_plugin=$resin_pro_plugin
+	resin_plugin="$resin_pro_plugin $resin_ssl_plugin"
 	;;
 
   *)
@@ -8745,7 +8746,7 @@ case "$target_os" in
   *darwin*)
 	LD=gcc
 	SO=jnilib
-	resin_plugin=$resin_pro_plugin
+	resin_plugin="$resin_pro_plugin $resin_ssl_plugin"
 	;;
 
   *hpux*)
@@ -9053,22 +9054,21 @@ int main(int argc, char **argv)
 }
 _ACEOF
 
-${CC} -o conftest ${CFLAGS_OPENSSL} ${CFLAGS} ${INCLUDES} conftest.$ac_ext -L${OPENSSL_LIB} ${SSL_LIBS} ${PROXY_LIBS}
+${CC} -o conftest ${CFLAGS_OPENSSL} ${CFLAGS} ${INCLUDES} conftest.$ac_ext -L${OPENSSL_LIB} ${SSL_LIBS} ${PROXY_LIBS} 1>/dev/null 2>/dev/null
 
 if test "$?" != 0; then
-  { { echo "$as_me:$LINENO: error: Can't compile SSL.  Check compilation flags: ${CFLAGS_OPENSSL} ${CFLAGS} ${INCLUDES} -L${OPENSSL_LIB} ${SSL_LIBS}" >&5
-echo "$as_me: error: Can't compile SSL.  Check compilation flags: ${CFLAGS_OPENSSL} ${CFLAGS} ${INCLUDES} -L${OPENSSL_LIB} ${SSL_LIBS}" >&2;}
+  { { echo "$as_me:$LINENO: error: Can't compile SSL.  Check compilation flags: ${CC} ${CFLAGS_OPENSSL} ${CFLAGS} ${INCLUDES} -L${OPENSSL_LIB} ${SSL_LIBS} ${PROXY_LIBS}" >&5
+echo "$as_me: error: Can't compile SSL.  Check compilation flags: ${CC} ${CFLAGS_OPENSSL} ${CFLAGS} ${INCLUDES} -L${OPENSSL_LIB} ${SSL_LIBS} ${PROXY_LIBS}" >&2;}
    { (exit 1); exit 1; }; }
-  exit;
-fi
+  resin_ssl_plugin=""
+else
+  ./conftest
 
-./conftest
-
-if test "$?" != 0; then
-  { { echo "$as_me:$LINENO: error: Can't execute SSL.  Check that load version in the library path: ${LD_LIBRARY_PATH} matches the expected version. }" >&5
+  if test "$?" != 0; then
+    { { echo "$as_me:$LINENO: error: Can't execute SSL.  Check that load version in the library path: ${LD_LIBRARY_PATH} matches the expected version. }" >&5
 echo "$as_me: error: Can't execute SSL.  Check that load version in the library path: ${LD_LIBRARY_PATH} matches the expected version. }" >&2;}
    { (exit 1); exit 1; }; }
-  exit;
+  fi
 fi
 
 rm -f conftest conftest.$ac_ext

@@ -26,7 +26,7 @@
  * @author Scott Ferguson
  */
 
-package javax.xml.rpc;
+package javax.xml.rpc.encoding;
 
 /**
  * context for deserialization

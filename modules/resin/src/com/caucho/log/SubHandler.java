@@ -51,7 +51,7 @@ import com.caucho.loader.EnvironmentLocal;
  * logging levels.
  */
 public class SubHandler extends Handler {
-  private static L10N L = new L10N(SubHandler.class);
+  private static final L10N L = new L10N(SubHandler.class);
   
   private Handler _handler;
 
@@ -68,7 +68,8 @@ public class SubHandler extends Handler {
     if (record.getLevel().intValue() < getLevel().intValue())
       return;
 
-    _handler.publish(record);
+    if (_handler != null)
+      _handler.publish(record);
   }
 
   /**
@@ -76,7 +77,8 @@ public class SubHandler extends Handler {
    */
   public void flush()
   {
-    _handler.flush();
+    if (_handler != null)
+      _handler.flush();
   }
 
   /**
@@ -85,6 +87,8 @@ public class SubHandler extends Handler {
   public void close()
   {
     _handler.close();
+
+    _handle = null;
   }
 
   /**

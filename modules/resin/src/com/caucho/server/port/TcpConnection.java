@@ -489,6 +489,7 @@ public class TcpConnection extends PortConnection implements ThreadTask {
       return "TcpConnection[id=" + _id + ",socket=" + _socket + ",port=" + getPort() + "]";
   }
 
+  // XXX: is this necessary?
   public void finalize()
   {
     closeImpl();

@@ -54,6 +54,8 @@ public class ThreadPool implements Runnable {
   
   private static int _minSpareThreads = 5;
 
+  private static long _resetCount;
+
   private final static ThreadPool []_idleRing = new ThreadPool[RING_SIZE];
 
   private final static ArrayList<ThreadPool> _threads =
@@ -86,6 +88,8 @@ public class ThreadPool implements Runnable {
 
   private Thread _thread;
   private Thread _queueThread;
+
+  private long _threadResetCount;
   
   private Runnable _task;
   private ClassLoader _classLoader;
@@ -157,6 +161,15 @@ public class ThreadPool implements Runnable {
   public static int getFreeThreadCount()
   {
     return _maxThreads - _threadCount;
+  }
+
+  /**
+   * Resets the thread pool, letting old threads drain.
+   */
+  public static void reset()
+  {
+    // XXX: not reliable
+    _resetCount++;
   }
 
   /**
@@ -414,11 +427,19 @@ public class ThreadPool implements Runnable {
 
 	_threads.remove(this);
       }
+
+      if (_threadCount < _minSpareThreads) {
+	synchronized (_launcher) {
+	  _launcher.notify();
+	}
+      }
     }
   }
 
   private void runTasks()
   {
+    _threadResetCount = _resetCount;
+    
     Thread thread = Thread.currentThread();
     ClassLoader systemClassLoader = ClassLoader.getSystemClassLoader();
     boolean isIdle = false;
@@ -480,8 +501,9 @@ public class ThreadPool implements Runnable {
 	  synchronized (_idleRing) {
 	    int idleCount = (_idleHead - _idleTail) & RING_MASK;
 
-	    if (_minSpareThreads + SPARE_GAP < idleCount &&
-		_idleRing[_idleTail] == this) {
+	    if (_idleRing[_idleTail] == this &&
+		(_minSpareThreads + SPARE_GAP < idleCount ||
+		 _resetCount != _threadResetCount)) {
 	      isDead = true;
 	      _idleRing[_idleTail] = null;
 	      _idleTail = (_idleTail + 1) % RING_MASK;

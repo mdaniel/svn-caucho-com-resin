@@ -274,6 +274,7 @@ public class LogConfig extends RotateLog implements LogMBean {
       os.setDisableClose(true);
     }
 
+    boolean hasCloseListener = false;
     for (int i = 0; i < _subLoggers.size(); i++) {
       SubLogger subLogger = _subLoggers.get(i);
       Logger logger = subLogger.getLogger();
@@ -289,6 +290,12 @@ public class LogConfig extends RotateLog implements LogMBean {
       for (int j = 0; j < _handlers.size(); j++) {
 	SubHandler subHandler = new SubHandler(_handlers.get(j));
 	subHandler.setLevel(subLogger.getLevel());
+
+	if (! (logger instanceof EnvironmentLogger)) {
+	  CloseListener listener = new CloseListener(subHandler);
+	  
+	  Environment.addClassLoaderListener(listener);
+	}
 	
 	logger.addHandler(subHandler);
       }

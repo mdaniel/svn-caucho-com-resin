@@ -84,7 +84,7 @@
     </antcall>
   </target>
 
-  <target name="jaxrpc" depends="init">
+  <target name="jaxrpc" depends="init,saaj,jsdk">
     <antcall target="module" inheritRefs="true">
       <param name="module.name" value="jaxrpc"/>
       <param name="module.jar" value="jaxrpc.jar"/>
@@ -540,6 +540,7 @@
         <exclude name="**/CVS/**"/>
         <exclude name="**/.svn/**"/>
         <include name="com/caucho/util/CharBuffer.class"/>
+        <include name="com/caucho/util/CharBuffer$CBInputStream.class"/>
         <include name="com/caucho/util/CharSegment.class"/>
         <include name="com/caucho/hessian/**"/>
         <include name="com/caucho/burlap/**/"/>

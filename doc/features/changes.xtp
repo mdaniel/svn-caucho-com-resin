@@ -1,9 +1,15 @@
 <s1 title="Resin Change Log">
 
-<a href='changes-2.xtp'>JDK 1.2 changes</a>
+<a href='changes-2.xtp'>Resin 2.1 changes</a>
 
-<s2 title='3.0.snap - Feb 28, 2005'>
+<s2 title='3.0.snap - March 21, 2005'>
 <ul>
+<li>Hessian readResolve/writeReplace were requiring public (rep by Josh Helmer)
+<li>(2005-03-21) AccessLog for hmux was printing remote IP for local machine, not client (rep by Markus Ken Moriyama)
+<li>Cluster communication issues with keepalive
+<li>removed DynamicClassLoader finalizer to help GC
+<li>Thread threads on web-app restart to avoid ThreadLocal issues (rep by Bill Au)
+<li>Adding missing jaxrpc API methods (rep by Fiaz Hossain)
 <li>Adding missing saaj API methods
 <li>added &lt;connection> config to &lt;database>
 <li>relaxng performance cleanup

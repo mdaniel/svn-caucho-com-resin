@@ -37,6 +37,7 @@ import java.util.ArrayList;
 import java.util.logging.Logger;
 import java.util.logging.Level;
 
+import java.sql.Types;
 import java.sql.SQLException;
 
 import com.caucho.util.L10N;
@@ -128,6 +129,14 @@ abstract public class Expr {
   public String getName()
   {
     return "";
+  }
+
+  /**
+   * Returns the column type.
+   */
+  public int getSQLType()
+  {
+    return Types.VARCHAR;
   }
 
   /**

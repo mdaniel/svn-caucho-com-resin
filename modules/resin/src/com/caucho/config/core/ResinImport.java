@@ -43,6 +43,7 @@ import com.caucho.vfs.Depend;
 
 import com.caucho.loader.Environment;
 
+import com.caucho.config.Config;
 import com.caucho.config.NodeBuilder;
 import com.caucho.config.SchemaBean;
 import com.caucho.config.ConfigException;
@@ -106,13 +107,10 @@ public class ResinImport extends ResinControl {
     
     Object object = getObject();
 
-    NodeBuilder builder = new NodeBuilder();
-
+    Schema schema = null;
     // Use the relax schema for beans with schema.
     if (object instanceof SchemaBean) {
-      Schema schema = ((SchemaBean) object).getSchema();
-
-      builder.setSchema(schema);
+      schema = ((SchemaBean) object).getSchema();
     }
 
     ArrayList<Path> paths;
@@ -131,7 +129,7 @@ public class ResinImport extends ResinControl {
 
       Environment.addDependency(new Depend(path));
 
-      builder.configure(object, path, false);
+      Config.configureBean(object, path, schema);
     }
   }
 }
