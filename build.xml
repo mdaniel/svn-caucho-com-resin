@@ -4,8 +4,9 @@
 
   <property name="install" location="${basedir}/"/>
 
+  <property name="modules" location="${basedir}/modules"/>
   <property name="src" location="${basedir}/src"/>
-  <property name="ext" location="${basedir}/src/ext"/>
+  <property name="ext" location="${basedir}/modules/ext"/>
 
   <property name="build" location="${install}/build"/>
   <property name="lib" location="${install}/lib"/>
@@ -157,8 +158,8 @@
 
     <!-- filter to insert version -->
 
-    <copy file="${src}/resin/com/caucho/Version.tmpl"
-          tofile="${src}/resin/com/caucho/Version.java"
+    <copy file="${modules}/resin/src/com/caucho/Version.tmpl"
+          tofile="${modules}/resin/src/com/caucho/Version.java"
           preservelastmodified="true"
           overwrite="true">
       <filterset>
@@ -168,8 +169,8 @@
       </filterset>
     </copy>
 
-    <copy file="${src}/c/common/version.h.in"
-          tofile="${src}/c/common/version.h"
+    <copy file="${modules}/c/src/common/version.h.in"
+          tofile="${modules}/c/src/common/version.h"
           preservelastmodified="true"
           overwrite="true">
       <filterset>
@@ -202,8 +203,8 @@
   </target>
 
   <target name="module">
-    <property name="module.src" value="${src}/${module.name}"/>
-    <property name="module.build" value="${build}/${module.name}"/>
+    <property name="module.src" value="${modules}/${module.name}/src"/>
+    <property name="module.build" value="${modules}/${module.name}/classes"/>
     <property name="module.dist" value="${lib}"/>
     <property name="module.jar" value="${module.name}.jar"/>
 
@@ -231,8 +232,8 @@
            memoryMaximumSize="${javac.memoryMaximumSize}">
 
       <classpath>
-        <dirset dir="${build}">
-          <include name="*"/>
+        <dirset dir="${modules}">
+          <include name="*/classes"/>
        </dirset>
         <fileset dir="${ext}">
           <include name="**/*.jar"/>
@@ -601,6 +602,14 @@
   <target name="clean" depends="init">
     <delete dir="${build}"/>
     <delete dir="${dist}"/>
+    <delete>
+      <fileset dir=".">
+        <include name="**/*.class"/>
+      </fileset>
+      <dirset dir="modules">
+        <include name="*/classes"/>
+      </dirset>
+    </delete>
   </target>
 
   <target name="distclean" depends="init, clean, win32clean">
