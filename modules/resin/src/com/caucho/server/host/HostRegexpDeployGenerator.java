@@ -135,48 +135,48 @@ public class HostRegexpDeployGenerator extends DeployGenerator<HostController> {
 
       varMap.put("regexp", vars);
 
-      HostController entry = new HostController(_container, _config);
-      entry.addVariableMap(varMap);
+      HostController controller = new HostController(_container, _config);
+      controller.getVariableMap().putAll(varMap);
 
-      entry.setRegexpName(name);
+      controller.setRegexpName(name);
 
       // XXX: not dynamic-deploy in the sense that the mappings are known
-      //entry.setDynamicDeploy(true);
-      //entry.setRegexpValues(vars);
-      //entry.setHostConfig(_config);
-      // _entry.setJarPath(_archivePath);
+      //controller.setDynamicDeploy(true);
+      //controller.setRegexpValues(vars);
+      //controller.setHostConfig(_config);
+      // _controller.setJarPath(_archivePath);
 
       for (int i = 0; i < _hostDefaults.size(); i++)
-	entry.addHostDefault(_hostDefaults.get(i));
+	controller.addConfigDefault(_hostDefaults.get(i));
 
-      entry.init();
+      controller.init();
     
-      Path rootDir = entry.getRootDirectory();
+      Path rootDir = controller.getRootDirectory();
 
       if (rootDir == null || ! rootDir.canRead())
 	return null;
     
       synchronized (_entries) {
 	for (int i = 0; i < _entries.size(); i++) {
-	  HostController oldEntry = _entries.get(i);
+	  HostController oldController = _entries.get(i);
 
-	  if (rootDir.equals(oldEntry.getRootDirectory()))
-	    return oldEntry;
+	  if (rootDir.equals(oldController.getRootDirectory()))
+	    return oldController;
 	}
       
-	_entries.add(entry);
+	_entries.add(controller);
       }
 
       // registers mbean
       /*
       try {
-	entry.deployHost();
+	controller.deployHost();
       } catch (Exception e) {
 	log.log(Level.WARNING, e.toString(), e);
       }
       */
 
-      return entry;
+      return controller;
     } finally {
       thread.setContextClassLoader(oldLoader);
     }

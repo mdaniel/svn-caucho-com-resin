@@ -19,46 +19,44 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *
- *   Free Software Foundation, Inc.
+ *   Free SoftwareFoundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Scott Ferguson
+ * @author Scott Ferguson;
  */
 
-package com.caucho.make;
+package com.caucho.config;
 
-/**
- * Interface representing a resource that always changes.
- */
-public class AlwaysModified implements PersistentDependency {
-  private static AlwaysModified ALWAYS_MODIFIED = new AlwaysModified();
+import com.caucho.util.L10N;
 
-  private AlwaysModified()
+public class ObjectAttributeProgram extends BuilderProgram {
+  private final static L10N L = new L10N(ObjectAttributeProgram.class);
+
+  private String _key;
+  private Object _value;
+
+  public ObjectAttributeProgram(String key, Object value)
   {
-  }
-
-  public static AlwaysModified create()
-  {
-    return ALWAYS_MODIFIED;
+    _key = key;
+    _value = value;
   }
   
   /**
-   * Returns true if the underlying resource has changed.
+   * Configures the object.
    */
-  public boolean isModified()
+  protected void configureImpl(NodeBuilder builder, Object bean)
+    throws Throwable
   {
-    return true;
+    if (bean == null)
+      return;
+
+    Config.setAttribute(bean, _key, _value);
   }
 
-  public String getJavaCreateString()
+  public Object configure(Class cl)
+    throws Exception
   {
-    return "com.caucho.make.AlwaysModified.create()";
-  }
-
-  public String toString()
-  {
-    return "AlwaysModified[]";
+    throw new UnsupportedOperationException();
   }
 }

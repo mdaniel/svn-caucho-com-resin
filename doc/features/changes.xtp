@@ -4,7 +4,10 @@
 
 <s2 title='3.0.snap - March 21, 2005'>
 <ul>
-<li>Add round-robin strategy to HmuxLoadBalanceServlet (rep by Dan Schwalbe)
+<li>ClusterStream wasn't tracking connections accurately (rep by Scott Nelson)
+<li>Add HmuxLoadBalanceServlet logging (rep by Scott Nelson)
+<li>Reworked DeployController to make JMX common
+<li>(2005-04-02) Add round-robin strategy to HmuxLoadBalanceServlet (rep by Dan Schwalbe)
 <li>clustered store wasn't properly invalidating remote
 <li>clustered session id problem with overflow of 64 (rep by Dan Schwalbe)
 <li>Added config: scheme and RemoteFilesystemServlet

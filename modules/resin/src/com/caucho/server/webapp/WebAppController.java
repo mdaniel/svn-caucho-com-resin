@@ -40,6 +40,8 @@ import java.util.regex.Matcher;
 import java.io.IOException;
 
 import javax.management.ObjectName;
+import javax.management.JMException;
+import javax.management.MalformedObjectNameException;
 
 import javax.servlet.jsp.el.VariableResolver;
 import javax.servlet.jsp.el.ELException;
@@ -68,22 +70,18 @@ import com.caucho.loader.EnvironmentListener;
 import com.caucho.jmx.Jmx;
 import com.caucho.jmx.IntrospectionMBean;
 
-import com.caucho.server.session.SessionManager;
-
-import com.caucho.server.deploy.ExpandDeployController;
+import com.caucho.server.deploy.EnvironmentDeployController;
 
 import com.caucho.server.webapp.mbean.WebAppMBean;
 
 /**
  * A configuration entry for a web-app.
  */
-public class WebAppController extends ExpandDeployController<Application>
-  implements EnvironmentListener {
+public class WebAppController
+  extends EnvironmentDeployController<Application,WebAppConfig> {
   private static final L10N L = new L10N(WebAppController.class);
   private static final Logger log = Log.open(WebAppController.class);
 
-  private static Schema _webXmlSchema;
-  
   private ApplicationContainer _container;
 
   private WebAppController _parent;
@@ -93,44 +91,21 @@ public class WebAppController extends ExpandDeployController<Application>
   
   // The context path is the URL prefix for the web-app
   private String _contextPath;
-  
-  // The JMX identity
-  private LinkedHashMap<String,String> _jmxContext;
-
-  private Object _mbean;
-
-  private ObjectName _mbeanName;
-
-  // The default configurations
-  private ArrayList<WebAppConfig> _webAppDefaults =
-    new ArrayList<WebAppConfig>();
-  
-  // The configuration
-  private WebAppConfig _config;
-
-  private BuilderProgram _initProgram;
-
-  private VariableResolver _variableResolver;
-
-  // The variable mapping
-  private HashMap<String,Object> _variableMap = new HashMap<String,Object>();
 
   // regexp values
   private ArrayList<String> _regexpValues;
   
-  private Application _app;
   private boolean _isInheritSession;
   private boolean _isDynamicDeploy;
   
   private ArrayList<Path> _dependPathList = new ArrayList<Path>();
 
-  private boolean _isInit;
-
   private String _sourceType = "unknown";
-  private Throwable _configException;
 
   public WebAppController(ApplicationContainer container, String contextPath)
   {
+    super(contextPath);
+
     _container = container;
 
     setId(contextPath);
@@ -155,15 +130,8 @@ public class WebAppController extends ExpandDeployController<Application>
         setId("ROOT");
     }
 
-    VariableResolver parentResolver = EL.getEnvironment(getParentClassLoader());
-    _variableResolver = new MapVariableResolver(_variableMap, parentResolver);
-
-    _jmxContext = Jmx.copyContextProperties(getParentClassLoader());
-
-    /*
-    if (_jmxContext.get("J2EEApplication") == null)
-      _jmxContext.put("J2EEApplication", "null");
-    */
+    for (WebAppConfig config : container.getWebAppDefaultList())
+      addConfigDefault(config);
   }
 
   /**
@@ -209,10 +177,10 @@ public class WebAppController extends ExpandDeployController<Application>
    */
   public String getContextPath(String uri)
   {
-    if (_config == null || _config.getURLRegexp() == null)
-      return _contextPath;
+    if (getConfig() == null || getConfig().getURLRegexp() == null)
+      return getContextPath();
 
-    Pattern regexp = _config.getURLRegexp();
+    Pattern regexp = getConfig().getURLRegexp();
     Matcher matcher = regexp.matcher(uri);
 
     int tail = 0;
@@ -248,7 +216,7 @@ public class WebAppController extends ExpandDeployController<Application>
   }
 
   /**
-   * Returns the parent entry.
+   * Returns the parent controller.
    */
   public WebAppController getParent()
   {
@@ -256,7 +224,7 @@ public class WebAppController extends ExpandDeployController<Application>
   }
 
   /**
-   * Sets the parent entry.
+   * Sets the parent controller.
    */
   public void setParentWebApp(WebAppController parent)
   {
@@ -277,50 +245,6 @@ public class WebAppController extends ExpandDeployController<Application>
   public void setSourceType(String type)
   {
     _sourceType = type;
-  }
-
-  /**
-   * Sets the WebAppConfig
-   */
-  public void setWebAppConfig(WebAppConfig config)
-  {
-    _config = config;
-    
-    if (config != null) {
-      addWebAppDefault(config);
-    }
-  }
-
-  /**
-   * Gets the WebAppConfig
-   */
-  public WebAppConfig getWebAppConfig()
-  {
-    return _config;
-  }
-
-  /**
-   * Adds a WebAppDefault.
-   */
-  public void addWebAppDefault(WebAppConfig config)
-  {
-    if (! _webAppDefaults.contains(config)) {
-      _webAppDefaults.add(config);
-
-      if (config.getStartupMode() != null)
-	setStartupMode(config.getStartupMode());
-
-      if (config.getRedeployMode() != null)
-	setRedeployMode(config.getRedeployMode());
-    }
-  }
-
-  /**
-   * Returns the path variable map.
-   */
-  public HashMap<String,Object> getVariableMap()
-  {
-    return _variableMap;
   }
 
   /**
@@ -346,29 +270,13 @@ public class WebAppController extends ExpandDeployController<Application>
   {
     _isInheritSession = inheritSession;
   }
-  
-  /**
-   * Returns the application's resin.conf configuration node.
-   */
-  public BuilderProgram getInitProgram()
-  {
-    return _initProgram;
-  }
-
-  /**
-   * Sets the application's init program
-   */
-  public void setInitProgram(BuilderProgram initProgram)
-  {
-    _initProgram = initProgram;
-  }
 
   /**
    * Returns the application object.
    */
   public Application getApplication()
   {
-    return _app;
+    return getDeployInstance();
   }
 
   /**
@@ -388,65 +296,37 @@ public class WebAppController extends ExpandDeployController<Application>
   }
 
   /**
-   * Returns the mbean.
+   * Creates the object name.  The default is to use getId() as
+   * the 'name' property, and the classname as the 'type' property.
    */
-  Object getMBean()
+  protected ObjectName createObjectName(Map<String,String> properties)
+    throws MalformedObjectNameException
   {
-    return _mbean;
-  }
+    String name = _contextPath;
+    if (_contextPath.equals(""))
+      name = "/";
 
-  /**
-   * Sets the config exception (e.g. from a .ear)
-   */
-  public void setConfigException(Throwable e)
-  {
-    _configException = e;
-  }
+    properties.put("type", "WebApp");
+    properties.put("name", name);
 
-  /**
-   * Initialize the entry.
-   */
-  public boolean init()
-  {
-    if (! super.init())
-      return false;
-    
-    try {
-      if (_mbeanName == null) {
-	LinkedHashMap<String,String> properties;
 
-	properties = Jmx.copyContextProperties(_container.getClassLoader());
-
-	/*
-	if (_jmxContext.get("J2EEServer") != null)
-	  properties.put("J2EEServer", _jmxContext.get("J2EEServer"));
-	if (_jmxContext.get("J2EEApplication") != null)
-	  properties.put("J2EEApplication", _jmxContext.get("J2EEApplication"));
-	properties.put("j2eeType", "WebModule");
-	*/
-
-	String name = _contextPath;
-	if (_contextPath.equals(""))
-	  name = "/";
-
-	properties.put("type", "WebApp");
-	properties.put("name", name);
-
-	_mbean = new IntrospectionMBean(new Admin(), WebAppMBean.class);
-
-	_mbeanName = Jmx.getObjectName("resin", properties);
+    properties.put("type", "WebApp");
+    properties.put("name", name);
       
-	Jmx.register(_mbean, _mbeanName);
-      }
-    } catch (Exception e) {
-      log.log(Level.WARNING, e.toString(), e);
-    }
-
-    return true;
+    return Jmx.getObjectName("resin", properties);
   }
 
   /**
-   * Returns true if the entry matches.
+   * Creates the managed object.
+   */
+  protected Object createMBean()
+    throws JMException
+  {
+    return new IntrospectionMBean(new WebAppAdmin(this), WebAppMBean.class);
+  }
+
+  /**
+   * Returns true if the controller matches.
    */
   public boolean isNameMatch(String url)
   {
@@ -459,12 +339,12 @@ public class WebAppController extends ExpandDeployController<Application>
   /**
    * Merges two entries.
    */
-  protected WebAppController merge(WebAppController newEntry)
+  protected WebAppController merge(WebAppController newController)
   {
-    if (_config != null && _config.getURLRegexp() != null)
-      return newEntry;
-    else if (newEntry._config != null &&
-	     newEntry._config.getURLRegexp() != null)
+    if (getConfig() != null && getConfig().getURLRegexp() != null)
+      return newController;
+    else if (newController.getConfig() != null &&
+	     newController.getConfig().getURLRegexp() != null)
       return this;
     else {
       Thread thread = Thread.currentThread();
@@ -473,31 +353,14 @@ public class WebAppController extends ExpandDeployController<Application>
       try {
 	thread.setContextClassLoader(getParentClassLoader());
 
-	WebAppController mergedEntry = new WebAppController(_container, _contextPath);
+	WebAppController mergedController = new WebAppController(_container, _contextPath);
 
-	mergedEntry.setRootDirectory(getRootDirectory());
-      
-	mergedEntry._webAppDefaults.addAll(_webAppDefaults);
-	mergedEntry._webAppDefaults.addAll(newEntry._webAppDefaults);
-	if (newEntry._config != null)
-	  mergedEntry._webAppDefaults.add(newEntry._config);
-	mergedEntry._config = _config;
-	if (newEntry._config != null)
-	  _config = newEntry._config;
+	mergedController.setRootDirectory(getRootDirectory());
 
-	if (getArchivePath() != null)
-	  mergedEntry.setArchivePath(getArchivePath());
-      
-	if (newEntry.getArchivePath() != null)
-	  mergedEntry.setArchivePath(newEntry.getArchivePath());
+	mergedController.mergeController(this);
+	mergedController.mergeController(newController);
 
-	mergedEntry.setStartupMode(getStartupMode());
-	mergedEntry.mergeStartupMode(newEntry.getStartupMode());
-
-	mergedEntry.setRedeployMode(getRedeployMode());
-	mergedEntry.mergeRedeployMode(newEntry.getRedeployMode());
-
-	return mergedEntry;
+	return mergedController;
       } finally {
 	thread.setContextClassLoader(oldLoader);
       }
@@ -512,40 +375,8 @@ public class WebAppController extends ExpandDeployController<Application>
     if (! super.destroy())
       return false;
     
-    Environment.removeEnvironmentListener(this, getParentClassLoader());
-
     _container.removeWebApp(this);
-
-    Thread thread = Thread.currentThread();
-    ClassLoader oldLoader = thread.getContextClassLoader();
-
-    try {
-      thread.setContextClassLoader(getParentClassLoader());
     
-      try {
-	ObjectName mbeanName = _mbeanName;
-	_mbeanName = null;
-
-	if (mbeanName != null)
-	  Jmx.unregister(mbeanName);
-      } catch (Exception e) {
-	log.log(Level.FINER, e.toString(), e);
-      }
-    
-      synchronized (this) {
-	Application app = _app;
-
-	if (_isInit && app != null) {
-	  _app = null;
-	  _isInit = false;
-
-	  app.destroy();
-	}
-      }
-    } finally {
-      thread.setContextClassLoader(oldLoader);
-    }
-
     return true;
   }
 
@@ -567,14 +398,6 @@ public class WebAppController extends ExpandDeployController<Application>
   protected void addDependencies()
     throws Exception
   {
-  }
-  
-  /**
-   * Sets the application object.
-   */
-  public void setApplication(Application application)
-  {
-    _app = application;
   }
 
   /**
@@ -599,92 +422,16 @@ public class WebAppController extends ExpandDeployController<Application>
   protected void configureInstance(Application app)
     throws Throwable
   {
-    Thread thread = Thread.currentThread();
-    ClassLoader oldLoader = thread.getContextClassLoader();
+    app.setRegexp(_regexpValues);
+    app.setDynamicDeploy(isDynamicDeploy());
+    
+    Map<String,Object> varMap = app.getVariableMap();
+    varMap.put("app-dir", app.getAppDir());
 
-    Path appDir = null;
-    try {
-      thread.setContextClassLoader(app.getClassLoader());
-
-      log.fine(app + " initializing");
-
-      // set from external error, like .ear
-      app.setConfigException(_configException);
-      
-      Map<String,Object> varMap = app.getVariableMap();
-      varMap.putAll(_variableMap);
-      app.setRegexp(_regexpValues);
-      _app = app;
-      
-      app.setDynamicDeploy(isDynamicDeploy());
-
-      appDir = getAppDir();
-
-      if (appDir == null)
-	throw new NullPointerException("Null app dir");
-
-      if (! appDir.isFile()) {
-      }
-      else if (appDir.getPath().endsWith(".jar") ||
-	       appDir.getPath().endsWith(".war")) {
-	throw new ConfigException(L.l("document-directory `{0}' must specify a directory.  It may not be a .jar or .war.",
-				      appDir.getPath()));
-      }
-      else
-	throw new ConfigException(L.l("app-dir `{0}' may not be a file.  app-dir must specify a directory.",
-				      appDir.getPath()));
-
-      app.setAppDir(appDir);
-      varMap.put("app-dir", appDir);
-
-      ArrayList<WebAppConfig> initList = new ArrayList<WebAppConfig>();
-      
-      if (_container != null) {
-	ArrayList<WebAppConfig> defaultList;
-	defaultList = _container.getWebAppDefaultList();
-
-	for (int i = 0; i < defaultList.size(); i++) {
-	  WebAppConfig init = defaultList.get(i);
-
-	  initList.add(init);
-	}
-      }
-
-      for (int i = 0; i < _webAppDefaults.size(); i++) {
-	WebAppConfig init = _webAppDefaults.get(i);
-
-	initList.add(init);
-      }
-
-      thread.setContextClassLoader(app.getClassLoader());
-      Vfs.setPwd(appDir);
-
-      for (int i = 0; i < _dependPathList.size(); i++) {
-	Path path = _dependPathList.get(i);
-
-	Environment.addDependency(path);
-      }
-
-      if (getArchivePath() != null)
-	Environment.addDependency(getArchivePath());
-	
-      addDependencies();
-
-      for (int i = 0; i < initList.size(); i++) {
-	WebAppConfig config = initList.get(i);
-	BuilderProgram program = config.getBuilderProgram();
-
-	if (program != null)
-	  program.configure(app);
-      }
-
-      app.init();
-    } finally {
-      thread.setContextClassLoader(oldLoader);
-    }
+    super.configureInstance(app);
   }
 
-  protected Path getAppDir()
+  protected Path calculateRootDirectory()
     throws ELException
   {
     Path appDir = null;
@@ -692,11 +439,11 @@ public class WebAppController extends ExpandDeployController<Application>
     if (appDir == null)
       appDir = getRootDirectory();
     
-    if (appDir == null && _config != null) {
-      String path = _config.getAppDir();
+    if (appDir == null && getConfig() != null) {
+      String path = getConfig().getRootDirectory();
       
       if (path != null)
-        appDir = PathBuilder.lookupPath(path, _variableResolver);
+        appDir = PathBuilder.lookupPath(path, getVariableResolver());
     }
 
     /*
@@ -707,34 +454,10 @@ public class WebAppController extends ExpandDeployController<Application>
     if (appDir == null && _container != null)
       appDir = _container.getDocumentDirectory().lookup("./" + _contextPath);
 
-    if (appDir == null && _app != null)
-      appDir = _app.getAppDir();
+    if (appDir == null && getDeployInstance() != null)
+      appDir = getDeployInstance().getAppDir();
 
     return appDir;
-  }
-
-  public Path getArchivePath()
-  {
-    Path path = super.getArchivePath();
-
-    if (path != null)
-      return path;
-    
-    if (_config != null) {
-      String pathString = _config.getArchivePath();
-      
-      if (pathString != null) {
-	try {
-	  path = PathBuilder.lookupPath(pathString, _variableResolver);
-	} catch (ELException e) {
-	  throw new RuntimeException(e);
-	}
-      }
-
-      setArchivePath(path);
-    }
-
-    return path;
   }
 
   /**
@@ -748,56 +471,6 @@ public class WebAppController extends ExpandDeployController<Application>
 
     super.removeExpandFile(path, relPath);
   }
-
-  protected Schema getWebXmlSchema()
-  {
-    if (_webXmlSchema == null) {
-      try {
-        MergePath schemaPath = new MergePath();
-        schemaPath.addClassPath();
-      
-        Path path = schemaPath.lookup("com/caucho/server/webapp/resin-web-xml.rnc");
-        if (path.canRead()) {
-          ReadStream is = path.openRead();
-
-          try {
-            // VerifierFactory factory = VerifierFactory.newInstance("http://caucho.com/ns/compact-relax-ng/1.0");
-          
-            CompactVerifierFactoryImpl factory;
-            factory = new CompactVerifierFactoryImpl();
-
-            _webXmlSchema = factory.compileSchema(is);
-          } finally {
-            is.close();
-          }
-        }
-      } catch (Exception e) {
-        log.log(Level.WARNING, e.toString(), e);
-      }
-    }
-
-    return _webXmlSchema;
-  }
-
-  /**
-   * Handles the case where the environment is starting (after init).
-   */
-  public void environmentStart(EnvironmentClassLoader loader)
-  {
-    try {
-      start();
-    } catch (Throwable e) {
-      log.log(Level.WARNING, e.toString(), e);
-    }
-  }
-  
-  /**
-   * Handles the case where the environment is stopping
-   */
-  public void environmentStop(EnvironmentClassLoader loader)
-  {
-    stop();
-  }
   
   /**
    * Returns a printable view.
@@ -805,94 +478,5 @@ public class WebAppController extends ExpandDeployController<Application>
   public String toString()
   {
     return "WebAppController$" + System.identityHashCode(this) + "[" + _contextPath + "]";
-  }
-
-  public class Admin implements WebAppMBean {
-    /**
-     * Returns the web-app directory.
-     */
-    public String getRootDirectory()
-    {
-      try {
-	Path path = getAppDir();
-
-	if (path != null)
-	  return path.getNativePath();
-	else
-	  return null;
-      } catch (Exception e) {
-	log.log(Level.WARNING, e.toString(), e);
-
-	return null;
-      }
-    }
-
-    /**
-     * Returns the context path
-     */
-    public String getContextPath()
-    {
-      return _contextPath;
-    }
-
-    /**
-     * Returns the controller state.
-     */
-    public String getState()
-    {
-      return WebAppController.this.getState();
-    }
-
-    /**
-     * Returns the active sessions.
-     */
-    public int getActiveSessionCount()
-    {
-      Application app = getApplication();
-
-      if (app == null)
-	return 0;
-
-      SessionManager manager = app.getSessionManager();
-      if (manager == null)
-	return 0;
-
-      return manager.getActiveSessionCount();
-    }
-  
-    /**
-     * Returns the time of the last start
-     */
-    public Date getStartTime()
-    {
-      return new Date(WebAppController.this.getStartTime());
-    }
-
-    /**
-     * Stops the server.
-     */
-    public void stop()
-      throws Exception
-    {
-      WebAppController.this.stop();
-    }
-
-    /**
-     * Starts the server.
-     */
-    public void start()
-      throws Exception
-    {
-      WebAppController.this.start();
-    }
-
-    /**
-     * Restarts the server.
-     */
-    public void update()
-      throws Exception
-    {
-      WebAppController.this.update();
-    }
   }
 }

@@ -179,11 +179,11 @@ public class WebAppRegexpDeployGenerator extends DeployGenerator<WebAppControlle
 	//entry.setDynamicDeploy(true);
 	entry.getVariableMap().putAll(varMap);
 	entry.setRegexpValues(vars);
-	entry.setWebAppConfig(_config);
+	entry.setConfig(_config);
 	// _entry.setJarPath(_archivePath);
 
 	for (int i = 0; i < _webAppDefaults.size(); i++)
-	  entry.addWebAppDefault(_webAppDefaults.get(i));
+	  entry.addConfigDefault(_webAppDefaults.get(i));
       
 	_entries.add(entry);
       }

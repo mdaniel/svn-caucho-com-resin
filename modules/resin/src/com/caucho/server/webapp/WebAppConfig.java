@@ -47,54 +47,21 @@ import com.caucho.config.ConfigException;
 
 import com.caucho.config.types.RawString;
 
+import com.caucho.server.deploy.DeployConfig;
 import com.caucho.server.deploy.DeployController;
 
 /**
  * The configuration for a web.app in the resin.conf
  */
-public class WebAppConfig {
+public class WebAppConfig extends DeployConfig {
   static final L10N L = new L10N(WebAppConfig.class);
   static final Logger log = Log.open(WebAppConfig.class);
-
-  // The id
-  private String _id;
 
   // Any regexp
   private Pattern _urlRegexp;
 
   // The context path
   private String _contextPath;
-
-  // The app dir
-  private String _appDir;
-
-  // The archive path;
-  private String _archivePath;
-
-  // startup mode
-  private String _startupMode;
-
-  // redeploy mode
-  private String _redeployMode;
-  
-  // The configuration program
-  private BuilderProgramContainer _program = new BuilderProgramContainer();
-
-  /**
-   * Sets the id.
-   */
-  public void setId(String id)
-  {
-    _id = id;
-  }
-
-  /**
-   * Gets the id.
-   */
-  public String getId()
-  {
-    return _id;
-  }
 
   /**
    * Gets the context path
@@ -157,14 +124,7 @@ public class WebAppConfig {
    */
   public void setAppDir(RawString appDir)
   {
-    /*
-    if (appDir.endsWith(".jar") || appDir.endsWith(".war")) {
-      throw new ConfigException(L.l("app-dir `{0}' may not be a .jar or .war.  app-dir must specify a directory.",
-                                    appDir));
-    }
-    */
-    
-    _appDir = appDir.getValue();
+    setRootDirectory(appDir);
   }
 
   /**
@@ -172,7 +132,7 @@ public class WebAppConfig {
    */
   public String getAppDir()
   {
-    return _appDir;
+    return getRootDirectory();
   }
 
   /**
@@ -192,39 +152,6 @@ public class WebAppConfig {
   }
 
   /**
-   * Sets the archive-path
-   */
-  public void setArchivePath(RawString path)
-  {
-    _archivePath = path.getValue();
-  }
-
-  /**
-   * Gets the archive-path
-   */
-  public String getArchivePath()
-  {
-    return _archivePath;
-  }
-
-  /**
-   * Sets the startup-mode
-   */
-  public void setStartupMode(String mode)
-    throws ConfigException
-  {
-    _startupMode = DeployController.toStartupCode(mode);
-  }
-
-  /**
-   * Gets the startup mode.
-   */
-  public String getStartupMode()
-  {
-    return _startupMode;
-  }
-
-  /**
    * Sets the startup-mode
    */
   public void setLazyInit(boolean isLazy)
@@ -233,64 +160,8 @@ public class WebAppConfig {
     log.config(L.l("lazy-init is deprecated.  Use <startup-mode>lazy</startup-mode> instead."));
 
     if (isLazy)
-      setStartupMode(DeployController.STARTUP_LAZY);
+      setStartupMode("lazy");
     else
-      setStartupMode(DeployController.STARTUP_AUTOMATIC);
+      setStartupMode("automatic");
   }
-
-  /**
-   * Sets the redeploy-mode
-   */
-  public void setRedeployMode(String mode)
-    throws ConfigException
-  {
-    _redeployMode = DeployController.toRedeployCode(mode);
-  }
-
-  /**
-   * Gets the redeploy mode.
-   */
-  public String getRedeployMode()
-  {
-    return _redeployMode;
-  }
-
-  /**
-   * Adds to the builder program.
-   */
-  public void addBuilderProgram(BuilderProgram program)
-  {
-    _program.addProgram(program);
-  }
-
-  /**
-   * Returns the program.
-   */
-  public BuilderProgram getBuilderProgram()
-  {
-    return _program;
-  }
-
-  /**
-   * Initialization checks.
-   */
-  public void init()
-    throws ConfigException
-  {
-    if (_urlRegexp != null && (_appDir == null || _appDir.indexOf("$") < 0)) {
-      log.config(L.l("<web-app> with url-regexp expects a <document-directory>  with replacement variables (e.g. $1)."));
-    }
-  }
-
-  /*
-  public boolean equals(Object o)
-  {
-    if (o == null || ! getClass().equals(o.getClass()))
-      return false;
-
-    WebAppConfig config = (WebAppConfig) o;
-
-    return _id.equals(config._id);
-  }
-  */
 }

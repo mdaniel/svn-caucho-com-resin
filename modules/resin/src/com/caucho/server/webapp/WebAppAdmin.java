@@ -27,38 +27,55 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.make;
+package com.caucho.server.webapp;
+
+import com.caucho.server.deploy.EnvironmentDeployController;
+import com.caucho.server.deploy.DeployControllerAdmin;
+
+import com.caucho.server.session.SessionManager;
+
+import com.caucho.server.webapp.mbean.WebAppMBean;
 
 /**
- * Interface representing a resource that always changes.
+ * The admin implementation for a web-app.
  */
-public class AlwaysModified implements PersistentDependency {
-  private static AlwaysModified ALWAYS_MODIFIED = new AlwaysModified();
-
-  private AlwaysModified()
+public class WebAppAdmin extends DeployControllerAdmin<WebAppController>
+  implements WebAppMBean {
+  public WebAppAdmin(WebAppController controller)
   {
-  }
-
-  public static AlwaysModified create()
-  {
-    return ALWAYS_MODIFIED;
+    super(controller);
   }
   
   /**
-   * Returns true if the underlying resource has changed.
+   * Returns the context path
    */
-  public boolean isModified()
+  public String getContextPath()
   {
-    return true;
+    return getController().getContextPath();
   }
 
-  public String getJavaCreateString()
+  /**
+   * Returns the active sessions.
+   */
+  public int getActiveSessionCount()
   {
-    return "com.caucho.make.AlwaysModified.create()";
+    Application app = getApplication();
+
+    if (app == null)
+      return 0;
+
+    SessionManager manager = app.getSessionManager();
+    if (manager == null)
+      return 0;
+
+    return manager.getActiveSessionCount();
   }
 
-  public String toString()
+  /**
+   * Returns the active application.
+   */
+  protected Application getApplication()
   {
-    return "AlwaysModified[]";
+    return getController().getApplication();
   }
 }

@@ -138,7 +138,7 @@ abstract public class DeployController<I extends DeployInstance>
    */
   public void mergeStartupMode(String mode)
   {
-    if (STARTUP_DEFAULT.equals(mode))
+    if (mode == null || STARTUP_DEFAULT.equals(mode))
       return;
 
     _startupMode = mode;
@@ -164,9 +164,10 @@ abstract public class DeployController<I extends DeployInstance>
       return STARTUP_LAZY;
     else if ("manual".equals(mode))
       return STARTUP_MANUAL;
-    else
+    else {
       throw new ConfigException(L.l("'{0}' is an unknown startup-mode.  'automatic', 'lazy', and 'manual' are the acceptable values.",
 				    mode));
+    }
   }
 
   /**
@@ -186,7 +187,7 @@ abstract public class DeployController<I extends DeployInstance>
    */
   public void mergeRedeployMode(String mode)
   {
-    if (REDEPLOY_DEFAULT.equals(mode))
+    if (mode == null || REDEPLOY_DEFAULT.equals(mode))
       return;
 
     _redeployMode = mode;
@@ -236,45 +237,57 @@ abstract public class DeployController<I extends DeployInstance>
   /**
    * Initialize the entry.
    */
-  public boolean init()
+  public final boolean init()
   {
     _lifecycle.setName(toString());
+    
+    if (! _lifecycle.toInitializing())
+      return false;
 
-    if (_parentLoader != Thread.currentThread().getContextClassLoader())
-      throw new IllegalStateException(L.l("init must be called from parent class loader"));
+    Thread thread = Thread.currentThread();
+    ClassLoader oldLoader = thread.getContextClassLoader();
 
-    if (_redeployMode == REDEPLOY_MANUAL) {
-      if (_startupMode == STARTUP_MANUAL)
-        _strategy = StartManualRedeployManualStrategy.create();
-      else if (_startupMode == STARTUP_LAZY)
-        _strategy = StartLazyRedeployManualStrategy.create();
-      else
-        _strategy = StartAutoRedeployManualStrategy.create();
+    try {
+      thread.setContextClassLoader(getParentClassLoader());
+
+      initBegin();
+
+      if (_redeployMode == REDEPLOY_MANUAL) {
+	if (_startupMode == STARTUP_MANUAL)
+	  _strategy = StartManualRedeployManualStrategy.create();
+	else if (_startupMode == STARTUP_LAZY)
+	  _strategy = StartLazyRedeployManualStrategy.create();
+	else
+	  _strategy = StartAutoRedeployManualStrategy.create();
+      }
+      else {
+	if (_startupMode == STARTUP_LAZY)
+	  _strategy = StartLazyRedeployAutomaticStrategy.create();
+	else if (_startupMode == STARTUP_MANUAL)
+	  throw new IllegalStateException(L.l("startup='manual' and redeploy='automatic' is an unsupported combination."));
+	else
+	  _strategy = StartAutoRedeployAutoStrategy.create();
+      }
+
+      initEnd();
+
+      return _lifecycle.toInit();
+    } finally {
+      thread.setContextClassLoader(oldLoader);
     }
-    else {
-      if (_startupMode == STARTUP_LAZY)
-        _strategy = StartLazyRedeployAutomaticStrategy.create();
-      else if (_startupMode == STARTUP_MANUAL)
-	throw new IllegalStateException(L.l("startup='manual' and redeploy='automatic' is an unsupported combination."));
-      else
-        _strategy = StartAutoRedeployAutoStrategy.create();
-    }
-
-    return _lifecycle.toInit();
   }
 
   /**
-   * Deploys the entry, e.g. archive expansion.
+   * Initial calls for init.
    */
-  protected void deploy()
-    throws Exception
+  protected void initBegin()
   {
   }
 
   /**
-   * Deploys the entry, e.g. for JMX registration..
+   * Final calls for init.
    */
-  protected void deployEntry()
+  protected void initEnd()
   {
   }
 
@@ -406,7 +419,7 @@ abstract public class DeployController<I extends DeployInstance>
   /**
    * Stops the controller from an admin command.
    */
-  protected final void stop()
+  public final void stop()
   {
     _strategy.stop(this);
   }
@@ -414,7 +427,7 @@ abstract public class DeployController<I extends DeployInstance>
   /**
    * Update the controller from an admin command.
    */
-  protected final void update()
+  public final void update()
   {
     _strategy.update(this);
   }
@@ -473,7 +486,7 @@ abstract public class DeployController<I extends DeployInstance>
     try {
       thread.setContextClassLoader(getParentClassLoader());
       
-      deploy();
+      expandArchive();
     
       deployInstance = instantiateDeployInstance();
       _deployInstance = deployInstance;
@@ -490,8 +503,9 @@ abstract public class DeployController<I extends DeployInstance>
       _startTime = Alarm.getCurrentTime();
     } catch (Throwable e) {
       log.log(Level.WARNING, e.toString(), e.toString());
-      
-      deployInstance.setConfigException(e);
+
+      if (deployInstance != null)
+	deployInstance.setConfigException(e);
     } finally {
       _lifecycle.toActive();
 
@@ -501,6 +515,14 @@ abstract public class DeployController<I extends DeployInstance>
     }
 
     return deployInstance;
+  }
+
+  /**
+   * Deploys the entry, e.g. archive expansion.
+   */
+  protected void expandArchive()
+    throws Exception
+  {
   }
 
   /**

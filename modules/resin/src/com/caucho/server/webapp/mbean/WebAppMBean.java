@@ -28,52 +28,19 @@
 
 package com.caucho.server.webapp.mbean;
 
-import java.util.Date;
+import com.caucho.server.deploy.mbean.DeployControllerMBean;
 
 /**
  * MBean API for the WebApp.
  */
-public interface WebAppMBean {
-  /**
-   * Returns the application's root directory
-   */
-  public String getRootDirectory();
-  
+public interface WebAppMBean extends DeployControllerMBean {
   /**
    * Returns the application's context path.
    */
   public String getContextPath();
   
   /**
-   * Returns the application's state.
-   */
-  public String getState();
-  
-  /**
-   * Returns the time the web-app was last started
-   */
-  public Date getStartTime();
-  
-  /**
    * Returns the count of active sessions.
    */
   public int getActiveSessionCount();
-
-  /**
-   * Starts the web-app
-   */
-  public void start()
-    throws Exception;
-
-  /**
-   * Stops the web-app
-   */
-  public void stop()
-    throws Exception;
-
-  /**
-   * Restarts the web-app.
-   */
-  public void update()
-    throws Exception;
 }

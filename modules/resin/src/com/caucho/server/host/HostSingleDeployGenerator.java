@@ -137,8 +137,9 @@ public class HostSingleDeployGenerator extends DeployGenerator<HostController> {
 
     if (_archivePath != null)
       _entry.addDepend(_archivePath);
-    
-    _entry.setStartupMode(_config.getStartupMode());
+
+    if (_config.getStartupMode() != null)
+      _entry.setStartupMode(_config.getStartupMode());
 
     _entry.init();
     

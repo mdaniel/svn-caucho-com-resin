@@ -1,6 +1,10 @@
 <server xmlns="http://caucho.com/ns/resin"
         xmlns:resin="http://caucho.com/ns/resin/core">
 
+<ear-default>
+  <resin:import path="META-INF/application.xml"/>
+</ear-default>
+
 <web-app-default>
   <!-- configures the default class loader -->
   <class-loader>

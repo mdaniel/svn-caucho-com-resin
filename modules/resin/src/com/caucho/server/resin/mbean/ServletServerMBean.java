@@ -33,12 +33,14 @@ import javax.management.ObjectName;
 
 import com.caucho.server.port.mbean.PortMBean;
 
+import com.caucho.server.deploy.mbean.DeployControllerMBean;
+
 import com.caucho.server.resin.ServletServer;
 
 /**
  * Management interface for the server.
  */
-public interface ServletServerMBean {
+public interface ServletServerMBean extends DeployControllerMBean {
   /**
    * Returns the array of ports.
    */

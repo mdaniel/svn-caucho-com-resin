@@ -27,75 +27,79 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.server.host.mbean;
+package com.caucho.server.deploy;
 
 import java.util.Date;
+
+import java.util.logging.Logger;
+import java.util.logging.Level;
+
+import java.io.IOException;
 
 import javax.management.ObjectName;
 
 import com.caucho.server.deploy.mbean.DeployControllerMBean;
 
 /**
- * Management interface for the host.
+ * A deploy controller for an environment.
  */
-public interface HostMBean extends DeployControllerMBean {
+public class DeployControllerAdmin<C extends DeployController>
+  implements DeployControllerMBean {
+  private C _controller;
+
+  public DeployControllerAdmin(C controller)
+  {
+    _controller = controller;
+  }
+
   /**
-   * Returns the host's JMX name.
+   * Returns the controller.
    */
-  public ObjectName getObjectName();
+  protected C getController()
+  {
+    return _controller;
+  }
+
+  /**
+   * Returns the controller state.
+   */
+  public String getState()
+  {
+    return getController().getState();
+  }
   
   /**
-   * Returns the host name.
+   * Returns the time of the last start
    */
-  public String getHostName();
-  
-  /**
-   * Returns the URL
-   */
-  public String getURL();
+  public Date getStartTime()
+  {
+    return new Date(getController().getStartTime());
+  }
 
   /**
-   * Returns the root directory.
+   * Stops the server.
    */
-  public String getRootDirectory();
+  public void stop()
+    throws Exception
+  {
+    getController().stop();
+  }
 
   /**
-   * Returns the document directory.
+   * Starts the server.
    */
-  public String getDocumentDirectory();
+  public void start()
+    throws Exception
+  {
+    getController().start();
+  }
 
   /**
-   * Returns the primary war directory.
+   * Restarts the server.
    */
-  public String getWarDirectory();
-
-  /**
-   * Returns the primary war expand directory.
-   */
-  public String getWarExpandDirectory();
-
-  /**
-   * Returns the host start time.
-   */
-  public Date getStartTime();
-
-  /**
-   * Updates a web-app entry from the deployment directories.
-   */
-  public void updateWebAppDeploy(String name);
-
-  /**
-   * Updates an ear entry from the deployment directories.
-   */
-  public void updateEarDeploy(String name);
-
-  /**
-   * Expand an ear entry from the deployment directories.
-   */
-  public void expandEarDeploy(String name);
-
-  /**
-   * Start an ear entry from the deployment directories.
-   */
-  public void startEarDeploy(String name);
+  public void update()
+    throws Exception
+  {
+    getController().update();
+  }
 }

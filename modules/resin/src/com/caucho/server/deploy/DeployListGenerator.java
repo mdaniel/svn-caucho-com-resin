@@ -97,11 +97,13 @@ public class DeployListGenerator<E extends DeployController> extends DeployGener
 
   /**
    * Redeploy if the deployment is modified.
+   *
+   * XXX:
    */
-  public void redeployIfModified()
+  public void request()
   {
     for (int i = _deployList.size() - 1; i >= 0; i--) {
-      _deployList.get(i).redeployIfModified();
+      _deployList.get(i).request();
     }
   }
 
@@ -125,22 +127,22 @@ public class DeployListGenerator<E extends DeployController> extends DeployGener
   }
 
   /**
-   * Generates the entry matching the key string.
+   * Generates the controller matching the key string.
    */
   protected E generateController(String key)
   {
     for (int i = 0; i < _deployList.size(); i++) {
-      E entry = _deployList.get(i).generateController(key);
+      E controller = _deployList.get(i).generateController(key);
 
-      if (entry != null) {
+      if (controller != null) {
 	// merge with the rest of the entries
 	for (i++; i < _deployList.size(); i++) {
-	  DeployGenerator<E> deploy = _deployList.get(i);
+	  DeployGenerator<E> generator = _deployList.get(i);
 
-	  entry = deploy.mergeEntry(entry, key);
+	  controller = generator.mergeController(controller, key);
 	}
 	
-	return entry;
+	return controller;
       }
     }
 
@@ -150,13 +152,13 @@ public class DeployListGenerator<E extends DeployController> extends DeployGener
   /**
    * Merges with other matching entries.
    */
-  protected E mergeEntry(E entry, String key)
+  protected E mergeController(E controller, String key)
   {
     for (int i = 0; i < _deployList.size(); i++) {
-      entry = _deployList.get(i).mergeEntry(entry, key);
+      controller = _deployList.get(i).mergeController(controller, key);
     }
 
-    return entry;
+    return controller;
   }
   
   /**

@@ -80,11 +80,14 @@ abstract public class ExpandDeployController<I extends DeployInstance>
 
   protected ExpandDeployController()
   {
+    this(Thread.currentThread().getContextClassLoader());
   }
 
   protected ExpandDeployController(ClassLoader loader)
   {
     super(loader);
+
+    _rootDirectory = Vfs.getPwd(loader);
   }
   
   /**
@@ -141,15 +144,6 @@ abstract public class ExpandDeployController<I extends DeployInstance>
   public void setExpandCleanupFileSet(FileSetType fileSet)
   {
     _expandCleanupFileSet = fileSet;
-  }
-
-  /**
-   * Deploys the entry.
-   */
-  protected void deploy()
-    throws IOException
-  {
-    expandArchive();
   }
 
   /**

@@ -43,6 +43,7 @@ import com.caucho.server.deploy.DeployGenerator;
 import com.caucho.server.deploy.DeployContainer;
 
 import com.caucho.server.e_app.EarDeployGenerator;
+import com.caucho.server.e_app.EarDeployController;
 
 /**
  * The generator for the ear deploy
@@ -55,23 +56,17 @@ public class WebAppEarDeployGenerator extends DeployGenerator<WebAppController> 
   private String _urlPrefix = "";
 
   private ClassLoader _parentLoader;
+  
+  private DeployContainer<EarDeployController> _earContainer;
 
   private EarDeployGenerator _earDeploy;
-
-  /**
-   * Creates the new ear deploy.
-   */
-  public WebAppEarDeployGenerator(DeployContainer<WebAppController> deployContainer)
-  {
-    super(deployContainer);
-  }
 
   /**
    * Creates the new host deploy.
    */
   public WebAppEarDeployGenerator(DeployContainer<WebAppController> deployContainer,
-			 ApplicationContainer container,
-			 EarDeployGenerator earDeploy)
+				  ApplicationContainer container,
+				  EarDeployGenerator earDeploy)
     throws Exception
   {
     super(deployContainer);
@@ -79,6 +74,7 @@ public class WebAppEarDeployGenerator extends DeployGenerator<WebAppController> 
     setContainer(container);
 
     _earDeploy = earDeploy;
+    _earContainer = earDeploy.getDeployContainer();
   }
 
   /**
@@ -137,19 +133,29 @@ public class WebAppEarDeployGenerator extends DeployGenerator<WebAppController> 
   }
 
   /**
+   * Starts the deployment.
+   */
+  public void start()
+  {
+    super.start();
+
+    _earContainer.start();
+  }
+
+  /**
    * Return true if modified.
    */
   public boolean isModified()
   {
-    return _earDeploy.isModified();
+    return _earContainer.isModified();
   }
 
   /**
-   * Redeploys is modified.
+   * Redeploys if modified.
    */
-  public void redeployIfModified()
+  public void update()
   {
-    _earDeploy.redeployIfModified();
+    _earContainer.update();
   }
   
   /**
@@ -157,19 +163,26 @@ public class WebAppEarDeployGenerator extends DeployGenerator<WebAppController> 
    */
   public WebAppController generateController(String name)
   {
-    return _earDeploy.findWebAppEntry(name);
-  }
+    for (EarDeployController earController : _earContainer.getControllers()) {
+      WebAppController webAppController;
 
-  /**
-   * Initialize the deployment.
-   */
-  public void deploy()
-  {
-    try {
-      _earDeploy.deploy();
-    } catch (Throwable e) {
-      log.log(Level.WARNING, e.toString(), e);
+      webAppController = earController.findWebAppController(name);
+
+      if (webAppController != null)
+	return webAppController;
     }
+
+    return null;
+  }
+  
+  /**
+   * Destroy the deployment.
+   */
+  public void stop()
+  {
+    super.stop();
+
+    _earContainer.stop();
   }
   
   /**

@@ -128,33 +128,43 @@ public class HostExpandDeployGenerator extends ExpandDeployGenerator<HostControl
   /**
    * Returns the current array of application entries.
    */
-  public HostController createEntry(String name)
-    throws Exception
+  public HostController createController(String name)
   {
     Path rootDirectory = getExpandDirectory().lookup(name);
 
-    HostController entry = new HostController(_container, null);
+    HostController controller = new HostController(_container, null);
 
-    entry.setName(name);
-    entry.setRootDirectory(rootDirectory);
-    entry.setStartupMode(getStartupMode());
+    try {
+      controller.setName(name);
+      controller.setRootDirectory(rootDirectory);
+      controller.setStartupMode(getStartupMode());
 
-    Path jarPath = getArchiveDirectory().lookup(name + ".jar");
-    entry.setArchivePath(jarPath);
+      Path jarPath = getArchiveDirectory().lookup(name + ".jar");
+      controller.setArchivePath(jarPath);
 
-    entry.addDepend(jarPath);
+      controller.addDepend(jarPath);
 
-    String hostName = getHostName();
+      String hostName = getHostName();
 
-    if (hostName != null)
-      entry.setHostName(EL.evalString(hostName, entry.getVariableResolver()));
-    else
-      entry.setHostName(name);
+      if (hostName != null)
+	controller.setHostName(EL.evalString(hostName, controller.getVariableResolver()));
+      else
+	controller.setHostName(name);
 
-    for (int i = 0; i < _hostDefaults.size(); i++)
-      entry.addHostDefault(_hostDefaults.get(i));
+      for (int i = 0; i < _hostDefaults.size(); i++)
+	controller.addConfigDefault(_hostDefaults.get(i));
+    } catch (ConfigException e) {
+      controller.setConfigException(e);
+      
+      log.warning(e.toString());
+      log.log(Level.FINER, e.toString(), e);
+    } catch (Throwable e) {
+      controller.setConfigException(e);
+      
+      log.log(Level.WARNING, e.toString(), e);
+    }
 
-    return entry;
+    return controller;
   }
 
   public boolean equals(Object o)

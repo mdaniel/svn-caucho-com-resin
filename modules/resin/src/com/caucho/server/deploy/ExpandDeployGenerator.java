@@ -74,11 +74,9 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController> ex
   private String _expandPrefix = "";
   private ArrayList<String> _requireFiles = new ArrayList<String>();
 
-  private TreeSet<String> _entryNames = new TreeSet<String>();
+  private TreeSet<String> _controllerNames = new TreeSet<String>();
 
   private FileSetType _expandCleanupFileSet;
-
-  private ArrayList<E> _entries = new ArrayList<E>();
 
   private Alarm _alarm;
   private long _cronInterval = 60000L;
@@ -95,7 +93,7 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController> ex
   /**
    * Creates the deploy.
    */
-  public ExpandDeployGenerator(DeployContainer container)
+  public ExpandDeployGenerator(DeployContainer<E> container)
   {
     super(container);
 
@@ -243,8 +241,9 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController> ex
     synchronized (this) {
       long now = Alarm.getCurrentTime();
       
-      if (now < _lastCheckTime + _checkInterval || _isChecking)
+      if (now < _lastCheckTime + _checkInterval || _isChecking) {
 	return _isModified;
+      }
 
       _isChecking = true;
       _lastCheckTime = Alarm.getCurrentTime();
@@ -263,14 +262,6 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController> ex
     } finally {
       _isChecking = false;
     }
-  }
-
-  /**
-   * Returns the current entries.
-   */
-  public ArrayList<E> getEntries()
-  {
-    return _entries;
   }
 
   /**
@@ -309,74 +300,6 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController> ex
   }
 
   /**
-   * Deploys the objects.
-   */
-  public void deploy()
-    throws Exception
-  {
-    ArrayList<E> newEntries = null;
-    ArrayList<E> oldEntries = null;
-    ArrayList<E> entries = null;
-    boolean isDeploying = false;
-    
-    log.finer(this + " redeploy " + _isDeploying);
-
-    try {
-      synchronized (this) {
-	if (_isDeploying)
-	  return;
-	else {
-	  _isDeploying = true;
-	  isDeploying = true;
-	}
-	  
-	TreeSet<String> entryNames = findEntryNames();
-
-	_digest = getDigest();
-
-	if (! _entryNames.equals(entryNames)) {
-	  _entryNames = entryNames;
-
-	  oldEntries = new ArrayList<E>();
-	  newEntries = new ArrayList<E>();
-
-	  updateEntries(entryNames, oldEntries, newEntries);
-	}
-      
-	entries = new ArrayList<E>();
-	entries.addAll(_entries);
-      }
-
-      for (int i = 0; oldEntries != null && i < oldEntries.size(); i++) {
-	E entry = oldEntries.get(i);
-
-	getDeployContainer().update(entry.getName());
-      }
-
-      for (int i = 0; newEntries != null && i < newEntries.size(); i++) {
-	E entry = newEntries.get(i);
-
-	getDeployContainer().update(entry.getName());
-      }
-
-      /*
-      for (int i = 0; entries != null && i < entries.size(); i++) {
-	E entry = entries.get(i);
-
-	if (entry.isModified()) {
-	  getDeployContainer().update(entry.getName());
-	}
-      }
-      */
-    } finally {
-      if (isDeploying) {
-	_isModified = false;
-	_isDeploying = false;
-      }
-    }
-  }
-
-  /**
    * Returns the deployed keys.
    */
   protected void fillDeployedKeys(Set<String> keys)
@@ -389,10 +312,7 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController> ex
       }
     }
 
-    Iterator<String> names = _entryNames.iterator();
-    while (names.hasNext()) {
-      String name = names.next();
-
+    for (String name : _controllerNames) {
       keys.add(name);
     }
   }
@@ -405,20 +325,75 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController> ex
     // force modify check
     _lastCheckTime = 0;
 
-    redeployIfModified();
+    request();
   }
   
 
   /**
    * Redeploys if modified.
    */
-  public void redeployIfModified()
+  public void request()
   {
     if (isModified()) {
       try {
 	deploy();
       } catch (Throwable e) {
 	log.log(Level.WARNING, e.toString(), e);
+      }
+    }
+  }
+
+  /**
+   * Deploys the objects.
+   */
+  private void deploy()
+    throws Exception
+  {
+    boolean isDeploying = false;
+    
+    log.finer(this + " redeploy " + _isDeploying);
+
+    try {
+      ArrayList<String> updatedNames = null;
+
+      synchronized (this) {
+	if (_isDeploying)
+	  return;
+	else {
+	  _isDeploying = true;
+	  isDeploying = true;
+	}
+	  
+	TreeSet<String> entryNames = findEntryNames();
+
+	_digest = getDigest();
+
+	if (! _controllerNames.equals(entryNames)) {
+	  updatedNames = new ArrayList<String>();
+	  
+	  for (String name : _controllerNames) {
+	    if (! entryNames.contains(name))
+	      updatedNames.add(name);
+	  }
+
+	  for (String name : entryNames) {
+	    if (! _controllerNames.contains(name))
+	      updatedNames.add(name);
+	  }
+
+	  _controllerNames = entryNames;
+	}
+      }
+
+      for (int i = 0; updatedNames != null && i < updatedNames.size(); i++) {
+	String name = updatedNames.get(i);
+
+	getDeployContainer().update(name);
+      }
+    } finally {
+      if (isDeploying) {
+	_isModified = false;
+	_isDeploying = false;
       }
     }
   }
@@ -428,23 +403,25 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController> ex
    */
   public E generateController(String name)
   {
-    if (isModified()) {
-      try {
-	deploy();
-      } catch (Throwable e) {
-	log.log(Level.WARNING, e.toString(), e);
-      }
+    request();
+
+    if (! _controllerNames.contains(name))
+      return null;
+
+    Thread thread = Thread.currentThread();
+    ClassLoader oldLoader = thread.getContextClassLoader();
+    try {
+      thread.setContextClassLoader(getParentClassLoader());
+	
+      E controller = createController(name);
+
+      if (controller != null)
+	controller.setExpandCleanupFileSet(_expandCleanupFileSet);
+
+      return controller;
+    } finally {
+      thread.setContextClassLoader(oldLoader);
     }
-
-    ArrayList<E> entries = _entries;
-    for (int i = 0; entries != null && i < entries.size(); i++) {
-      E entry = entries.get(i);
-
-      if (entry.isNameMatch(name))
-	return entry;
-    }
-
-    return null;
   }
 
   /**
@@ -582,70 +559,9 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController> ex
   }
 
   /**
-   * Returns a list of the entry entries.
-   */
-  private void updateEntries(TreeSet<String> entryNames,
-			     ArrayList<E> oldEntries,
-			     ArrayList<E> newEntries)
-    throws Exception
-  {
-    ArrayList<E> entries = new ArrayList<E>();
-
-    for (int i = _entries.size() - 1; i >= 0; i--) {
-      E entry = _entries.get(i);
-      
-      if (! entryNames.contains(entry.getName())) {
-	oldEntries.add(entry);
-	_entries.remove(i);
-      }
-    }
-
-    Thread thread = Thread.currentThread();
-    ClassLoader oldLoader = thread.getContextClassLoader();
-    
-    Iterator<String> iter = entryNames.iterator();
-    while (iter.hasNext()) {
-      String name = iter.next();
-
-      E entry = getEntry(_entries, name);
-
-      if (entry != null)
-	continue;
-
-      try {
-	thread.setContextClassLoader(getParentClassLoader());
-	
-	entry = createEntry(name);
-	entry.setExpandCleanupFileSet(_expandCleanupFileSet);
-      } finally {
-	thread.setContextClassLoader(oldLoader);
-      }
-
-      newEntries.add(entry);
-      _entries.add(entry);
-    }
-  }
-
-  /**
-   * Returns the entry with the maching name.
-   */
-  private E getEntry(ArrayList<E> entries, String name)
-  {
-    for (int i = 0; i < entries.size(); i++) {
-      E entry = entries.get(i);
-
-      if (entry.isNameMatch(name))
-	return entry;
-    }
-
-    return null;
-  }
-
-  /**
    * Creates a new entry.
    */
-  abstract protected E createEntry(String name)
-    throws Exception;
+  abstract protected E createController(String name);
 
   /**
    * Checks for updates.
@@ -656,9 +572,7 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController> ex
       return;
     
     try {
-      if (isModified()) {
-	deploy();
-      }
+      request();
     } catch (Exception e) {
       log.log(Level.WARNING, e.toString(), e);
     } finally {
@@ -686,17 +600,6 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController> ex
     if (! _lifecycle.toDestroy())
       return;
     
-    ArrayList<E> entries = new ArrayList<E>(_entries);
-    _entries = null;
-
-    for (int i = 0; i < entries.size(); i++) {
-      try {
-	entries.get(i).destroy();
-      } catch (Throwable e) {
-	log.log(Level.FINER, e.toString(), e);
-      }
-    }
-
     _lifecycle.toDestroy();
   }
 

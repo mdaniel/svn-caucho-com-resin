@@ -114,7 +114,8 @@ public class ResinServer
 
   private HashMap<String,Object> _variableMap = new HashMap<String,Object>();
   
-  private ArrayList<ServletServer> _servers = new ArrayList<ServletServer>();
+  private ArrayList<ServerController> _servers
+    = new ArrayList<ServerController>();
 
   private ArrayList<ResinServerListener> _listeners =
     new ArrayList<ResinServerListener>();
@@ -255,27 +256,38 @@ public class ResinServer
   /**
    * Creates the server.
    */
-  public ServletServer createServer()
+  public void addServer(ServerConfig config)
     throws Exception
   {
-    if (Alarm.isTest() && _servers.size() == 1)
-      return _servers.get(0);
+    if (Alarm.isTest() && _servers.size() == 1) {
+      _servers.get(0).addConfigDefault(config);
+    }
+    else {
+      String id = config.getId();
+
+      if (id != null && ! id.equals("")) {
+      }
+      else
+	id = String.valueOf(_servers.size());
+      
+      ServerController controller = new ServerController(id);
+
     
-    ServletServer server = new ServletServer();
+      _servers.add(controller);
 
-    server.setServerId(_serverId);
-    
-    _servers.add(server);
+      // XXX: controller.addServerListener(this);
 
-    server.addServerListener(this);
+      controller.setServerId(_serverId);
+      controller.setConfig(config);
 
-    return server;
+      controller.init();
+    }
   }
 
   /**
    * Returns the servers.
    */
-  public ArrayList<ServletServer> getServerList()
+  public ArrayList<ServerController> getServerList()
   {
     return _servers;
   }
@@ -371,10 +383,10 @@ public class ResinServer
   /**
    * Adds a new server (backwards compatibility).
    */
-  public ServletServer createHttpServer()
+  public void addHttpServer(ServerConfig config)
     throws Exception
   {
-    return createServer();
+    addServer(config);
   }
 
   /**
@@ -443,13 +455,8 @@ public class ResinServer
   public void bindPorts()
     throws Exception
   {
-    ArrayList<ServletServer> servers = _servers;
-
-    for (int i = 0; i < servers.size(); i++) {
-      ServletServer server = servers.get(i);
-
-      if (! server.isBindPortsAfterStart())
-	server.bindPorts();
+    for (ServerController server : _servers) {
+      server.bindPortsBeforeStart();
     }
   }
 
@@ -470,10 +477,10 @@ public class ResinServer
 	log.info(L.l("Running as {0}(uid={1})", _userName, "" + uid));
     }
     
-    ArrayList<ServletServer> servers = _servers;
+    ArrayList<ServerController> servers = _servers;
 
     for (int i = 0; i < servers.size(); i++) {
-      ServletServer server = servers.get(i);
+      ServerController server = servers.get(i);
 
       server.start();
     }
@@ -528,11 +535,7 @@ public class ResinServer
     }
 
     try {
-      ArrayList<ServletServer> servers = _servers;
-    
-      for (int i = 0; i < servers.size(); i++) {
-	ServletServer server = servers.get(i);
-
+      for (ServerController server : _servers) {
 	server.destroy();
       }
 

@@ -47,7 +47,7 @@ abstract public class DeployGenerator<E extends DeployController>
   private static final Logger log = Log.open(DeployGenerator.class);
   private static final L10N L = new L10N(DeployGenerator.class);
 
-  // The owning deployment contslasainer
+  // The owning deployment container
   private DeployContainer<E> _container;
 
   private ClassLoader _parentClassLoader;
@@ -59,8 +59,8 @@ abstract public class DeployGenerator<E extends DeployController>
    */
   public DeployGenerator(DeployContainer<E> container)
   {
-    _container = container;
     _parentClassLoader = Thread.currentThread().getContextClassLoader();
+    _container = container;
   }
 
   /**
@@ -114,17 +114,16 @@ abstract public class DeployGenerator<E extends DeployController>
   }
 
   /**
-   * Forces an update.
+   * lazy-start
    */
-  public void update()
+  public void request()
   {
-    redeployIfModified();
   }
 
   /**
-   * Redeploys if modified.
+   * Forces an update.
    */
-  public void redeployIfModified()
+  public void update()
   {
   }
 
@@ -147,9 +146,9 @@ abstract public class DeployGenerator<E extends DeployController>
    * Merges the entry with other matching entries, returning the
    * new entry.
    */
-  protected E mergeEntry(E entry, String key)
+  protected E mergeController(E controller, String key)
   {
-    return entry;
+    return controller;
   }
 
   /**
@@ -181,7 +180,6 @@ abstract public class DeployGenerator<E extends DeployController>
   public void environmentStart(EnvironmentClassLoader loader)
   {
     start();
-    redeployIfModified();
   }
   
   /**

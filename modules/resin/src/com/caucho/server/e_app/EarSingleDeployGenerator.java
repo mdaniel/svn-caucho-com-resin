@@ -70,7 +70,7 @@ public class EarSingleDeployGenerator extends DeployGenerator<EarDeployControlle
     
     _parentContainer = parentContainer;
 
-    _entry = new EarDeployController(parentContainer, config);
+    _entry = new EarDeployController("", parentContainer, config);
   }
 
   /**

@@ -42,6 +42,8 @@ import javax.servlet.jsp.el.VariableResolver;
 import javax.servlet.jsp.el.ELException;
 
 import javax.management.ObjectName;
+import javax.management.MalformedObjectNameException;
+import javax.management.JMException;
 
 import com.caucho.util.L10N;
 import com.caucho.util.Alarm;
@@ -76,14 +78,16 @@ import com.caucho.lifecycle.Lifecycle;
 
 import com.caucho.server.webapp.WebAppConfig;
 
-import com.caucho.server.deploy.ExpandDeployController;
+import com.caucho.server.e_app.EarConfig;
+
+import com.caucho.server.deploy.EnvironmentDeployController;
 
 import com.caucho.server.host.mbean.HostMBean;
 
 /**
  * A configuration entry for a host
  */
-class HostController extends ExpandDeployController<Host> {
+class HostController extends EnvironmentDeployController<Host,HostConfig> {
   private static final Logger log = Log.open(HostController.class);
   private static final L10N L = new L10N(HostController.class);
   
@@ -102,22 +106,6 @@ class HostController extends ExpandDeployController<Host> {
   
   private ArrayList<String> _hostAliases = new ArrayList<String>();
 
-  // The configuration
-  private HostConfig _config;
-
-  private ArrayList<HostConfig> _hostDefaults = new ArrayList<HostConfig>();
-
-  private boolean _isInit;
-  private BuilderProgram _initProgram;
-
-  private ObjectName _mbeanName;
-  private Object _mbean;
-
-  private VariableResolver _variableResolver;
-
-  // The variable mapping
-  private HashMap<String,Object> _variableMap = new HashMap<String,Object>();
-
   // The host variables.
   private Var _hostVar = new Var();
 
@@ -129,22 +117,20 @@ class HostController extends ExpandDeployController<Host> {
   // private Host _host;
   private ArrayList<Dependency> _dependList = new ArrayList<Dependency>();
 
-  private long _startTime;
-
   HostController(HostContainer container, HostConfig config)
   {
-    super(container != null ? container.getClassLoader() : null);
+    super("");
     
     _container = container;
-    _config = config;
-    
-    if (config != null)
-      setStartupMode(config.getStartupMode());
 
-    VariableResolver parentResolver = Config.getEnvironment();
-    _variableResolver = new MapVariableResolver(_variableMap, parentResolver);
+    setConfig(config);
 
-    _variableMap.put("host", _hostVar);
+    if (_container != null) {
+      for (HostConfig defaultConfig : _container.getHostDefaultList())
+	addConfigDefault(defaultConfig);
+    }
+	
+    getVariableMap().put("host", _hostVar);
   }
 
   /**
@@ -167,7 +153,7 @@ class HostController extends ExpandDeployController<Host> {
   {
     name = name.toLowerCase();
     
-    _variableMap.put("name", name);
+    getVariableMap().put("name", name);
 
     super.setName(name);
   }
@@ -241,70 +227,6 @@ class HostController extends ExpandDeployController<Host> {
   }
 
   /**
-   * Gets the HostConfig
-   */
-  public HostConfig getHostConfig()
-  {
-    return _config;
-  }
-
-  /**
-   * Returns the path variable map.
-   */
-  public HashMap<String,Object> getVariableMap()
-  {
-    return _variableMap;
-  }
-
-  /**
-   * Adds to the var map
-   */
-  public void addVariableMap(HashMap<String,Object> map)
-  {
-    _variableMap.putAll(map);
-  }
-
-  /**
-   * Returns the path variable map.
-   */
-  public VariableResolver getVariableResolver()
-  {
-    return _variableResolver;
-  }
-
-  /**
-   * Returns the host's resin.conf configuration node.
-   */
-  public BuilderProgram getInitProgram()
-  {
-    return _initProgram;
-  }
-
-  /**
-   * Sets the host's init program
-   */
-  public void setInitProgram(BuilderProgram initProgram)
-  {
-    _initProgram = initProgram;
-  }
-
-  /**
-   * Returns the mbean object.
-   */
-  public Object getMBean()
-  {
-    return _mbean;
-  }
-
-  /**
-   * Adds host defaults.
-   */
-  public void addHostDefault(HostConfig config)
-  {
-    _hostDefaults.add(config);
-  }
-  
-  /**
    * Returns the host directory set by the resin.conf.
    */
   public Path getCfgRootDirectory()
@@ -348,17 +270,15 @@ class HostController extends ExpandDeployController<Host> {
   /**
    * Initialize the entry.
    */
-  public boolean init()
+  protected void initBegin()
   {
-    if (! super.init())
-      return false;
-    
     try {
       try {
-	if (_config == null || getHostName() != null) {
+	if (getConfig() == null || getHostName() != null) {
 	}
-	else if (_config.getHostName() != null)
-	  setHostName(EL.evalString(_config.getHostName(), _variableResolver));
+	else if (getConfig().getHostName() != null)
+	  setHostName(EL.evalString(getConfig().getHostName(),
+				    getVariableResolver()));
       } catch (Exception e) {
 	log.log(Level.WARNING, e.toString(), e);
       }
@@ -374,16 +294,16 @@ class HostController extends ExpandDeployController<Host> {
 
       ArrayList<String> aliases = null;
 
-      if (_config != null) {
-	aliases = _config.getHostAliases();
+      if (getConfig() != null) {
+	aliases = getConfig().getHostAliases();
 
-	_entryHostAliasRegexps.addAll(_config.getHostAliasRegexps());
+	_entryHostAliasRegexps.addAll(getConfig().getHostAliasRegexps());
       }
       
       for (int i = 0; aliases != null && i < aliases.size(); i++) {
 	String alias = aliases.get(i);
 
-	alias = EL.evalString(alias, _variableResolver);
+	alias = EL.evalString(alias, getVariableResolver());
 	
 	addHostAlias(alias);
       }
@@ -393,40 +313,39 @@ class HostController extends ExpandDeployController<Host> {
       log.log(Level.WARNING, e.toString(), e);
     }
 
-    return true;
+    super.initBegin();
   }
 
   /**
-   * Deploys the DeployController after any merging.  Does not deploy the instance.
+   * Creates the object name.  The default is to use getId() as
+   * the 'name' property, and the classname as the 'type' property.
    */
-  protected void deployEntry()
+  protected ObjectName createObjectName(Map<String,String> properties)
+    throws MalformedObjectNameException
   {
-    try {
-      LinkedHashMap<String,String> properties = Jmx.copyContextProperties();
-      properties.put("type", "Host");
+    String name = _hostName;
+    if (name == null)
+      name = "";
+    else if (name.indexOf(':') >= 0)
+      name = name.replace(':', '-');
 
-      String name = _hostName;
-      if (name == null)
-	name = "";
-      else if (name.indexOf(':') >= 0)
-	name = name.replace(':', '-');
+    if (name.equals(""))
+      properties.put("name", "default");
+    else
+      properties.put("name", name);
 
-      if (name.equals(""))
-	properties.put("name", "default");
-      else
-	properties.put("name", name);
+    properties.put("type", "Host");
+      
+    return Jmx.getObjectName("resin", properties);
+  }
 
-      _mbeanName = Jmx.getObjectName("resin", properties);
-
-      _mbean = new IntrospectionMBean(new Admin(), HostMBean.class);
-
-      // Must wait for actual registration because regexp creates
-      // host entry before checking for duplicates.
-      if (_regexpName == null)
-	Jmx.register(_mbean, _mbeanName);
-    } catch (Exception e) {
-      log.log(Level.WARNING, e.toString(), e);
-    }
+  /**
+   * Creates the managed object.
+   */
+  protected Object createMBean()
+    throws JMException
+  {
+    return new IntrospectionMBean(new HostAdmin(this), HostMBean.class);
   }
 
   /**
@@ -457,9 +376,9 @@ class HostController extends ExpandDeployController<Host> {
    */
   protected HostController merge(HostController newEntry)
   {
-    if (_config.getRegexp() != null)
+    if (getConfig().getRegexp() != null)
       return newEntry;
-    else if (newEntry._config.getRegexp() != null)
+    else if (newEntry.getConfig().getRegexp() != null)
       return this;
     else {
       // XXX: not quite correct.
@@ -483,83 +402,19 @@ class HostController extends ExpandDeployController<Host> {
   {
     _hostAliases.clear();
     _hostAliases.addAll(_entryHostAliases);
-    
-    Thread thread = Thread.currentThread();
-    ClassLoader oldLoader = thread.getContextClassLoader();
 
-    Path rootDir = null;
-    try {
-      if (_container != null) {
-        thread.setContextClassLoader(_container.getClassLoader());
-      }
+    Map<String,Object> varMap = host.getVariableMap();
+    varMap.put("host-root", getRootDirectory());
+
+    if (_container != null) {
+      for (EarConfig config : _container.getEarDefaultList())
+	host.addEarDefault(config);
       
-      Map<String,Object> varMap = host.getVariableMap();
-      varMap.putAll(_variableMap);
-
-      rootDir = calculateRootDirectory();
-      if (rootDir == null)
-	throw new NullPointerException("Null root-directory");
-
-      /*
-        if (! rootDir.isDirectory()) {
-	throw new ConfigException(L.l("root-directory `{0}' must specify a directory.",
-	rootDir.getPath()));
-        }
-      */
-
-      host.setRootDirectory(rootDir);
-      varMap.put("host-root", rootDir);
-
-      ArrayList<HostConfig> initList = new ArrayList<HostConfig>();
-      
-      if (_container != null) {
-	initList.addAll(_container.getHostDefaultList());
-	  
-	ArrayList<WebAppConfig> appDefaults;
-	appDefaults = _container.getWebAppDefaultList();
-
-	for (int i = 0; i < appDefaults.size(); i++) {
-	  WebAppConfig init = appDefaults.get(i);
-
-	  host.addWebAppDefault(init);
-	}
-      }
-
-      // deployHost();
-      /*
-	if (_initProgram != null)
-	_initProgram.configure(host);
-      */
-        
-      MergePath schemaPath = new MergePath();
-      schemaPath.addClassPath();
-
-      initList.addAll(_hostDefaults);
-
-      if (_config != null)
-	initList.add(_config);
-
-      thread.setContextClassLoader(host.getClassLoader());
-      Vfs.setPwd(rootDir);
-
-      for (int i = 0; i < _dependList.size(); i++) {
-	Dependency depend = _dependList.get(i);
-
-	Environment.addDependency(depend);
-      }
-
-      for (int i = 0; i < initList.size(); i++) {
-	HostConfig config = initList.get(i);
-	BuilderProgram program = config.getBuilderProgram();
-
-	if (program != null)
-	  program.configure(host);
-      }
-
-      host.init();
-    } finally {
-      thread.setContextClassLoader(oldLoader);
+      for (WebAppConfig config : _container.getWebAppDefaultList())
+	host.addWebAppDefault(config);
     }
+
+    super.configureInstance(host);
   }
   
   protected Path calculateRootDirectory()
@@ -573,11 +428,11 @@ class HostController extends ExpandDeployController<Host> {
       
       Path rootDir = getRootDirectory();
  
-      if (rootDir == null && _config != null) {
-	String path = _config.getRootDirectory();
+      if (rootDir == null && getConfig() != null) {
+	String path = getConfig().getRootDirectory();
 
 	if (path != null)
-	  rootDir = PathBuilder.lookupPath(path, _variableResolver);
+	  rootDir = PathBuilder.lookupPath(path, getVariableResolver());
       }
      
       if (rootDir == null)
@@ -649,7 +504,7 @@ class HostController extends ExpandDeployController<Host> {
 
     public ArrayList getRegexp()
     {
-      return (ArrayList) _variableMap.get("regexp");
+      return (ArrayList) getVariableMap().get("regexp");
     }
     
     public Path getRootDirectory()
@@ -715,164 +570,6 @@ class HostController extends ExpandDeployController<Host> {
     public String toString()
     {
       return "Host[" + getName() + "]";
-    }
-  }
-
-  /**
-   * Return the mbean info.
-   */
-  public class Admin implements HostMBean {
-    public String getName()
-    {
-      return HostController.this.getName();
-    }
-    
-    public String getHostName()
-    {
-      return HostController.this.getHostName();
-    }
-
-    /**
-     * Returns the mbean object.
-     */
-    public ObjectName getObjectName()
-    {
-      return HostController.this._mbeanName;
-    }
-    
-    public String getURL()
-    {
-      Host host = getDeployInstance();
-      
-      if (host != null)
-	return host.getURL();
-      else
-	return null;
-    }
-    
-    public Date getStartTime()
-    {
-      return new Date(HostController.this.getStartTime());
-    }
-    
-    public String getRootDirectory()
-    {
-      Path path;
-      
-      Host host = getDeployInstance();
-      
-      if (host != null)
-	path = host.getRootDirectory();
-      else
-	path = HostController.this.getRootDirectory();
-
-      if (path != null)
-	return path.getNativePath();
-      else
-	return null;
-    }
-
-    /**
-     * Returns the host's document directory.
-     */
-    public String getDocumentDirectory()
-    {
-      Path path = null;
-      
-      Host host = getDeployInstance();
-      
-      if (host != null)
-	path = host.getDocumentDirectory();
-
-      if (path != null)
-	return path.getNativePath();
-      else
-	return null;
-    }
-
-    /**
-     * Returns the host's war directory.
-     */
-    public String getWarDirectory()
-    {
-      Path path = null;
-      
-      Host host = getDeployInstance();
-      
-      if (host != null)
-	path = host.getWarDir();
-
-      if (path != null)
-	return path.getNativePath();
-      else
-	return null;
-    }
-    
-    public String getWarExpandDirectory()
-    {
-      Path path = null;
-      
-      Host host = getDeployInstance();
-      
-      if (host != null)
-	path = host.getWarExpandDir();
-
-      if (path != null)
-	return path.getNativePath();
-      else
-	return null;
-    }
-
-    /**
-     * Updates a .war deployment.
-     */
-    public void updateWebAppDeploy(String name)
-    {
-      Host host = getDeployInstance();
-      
-      if (host != null)
-	host.updateWebAppDeploy(name);
-    }
-
-    /**
-     * Updates a .ear deployment.
-     */
-    public void updateEarDeploy(String name)
-    {
-      Host host = getDeployInstance();
-      
-      if (host != null)
-	host.updateEarDeploy(name);
-    }
-
-    /**
-     * Expand a .ear deployment.
-     */
-    public void expandEarDeploy(String name)
-    {
-      Host host = getDeployInstance();
-      
-      if (host != null)
-	host.expandEarDeploy(name);
-    }
-
-    /**
-     * Start a .ear deployment.
-     */
-    public void startEarDeploy(String name)
-    {
-      Host host = getDeployInstance();
-      
-      if (host != null)
-	host.startEarDeploy(name);
-    }
-
-    /**
-     * Returns a string view.
-     */
-    public String toString()
-    {
-      return "MBean[" + HostController.this.toString() + "]";
     }
   }
 }

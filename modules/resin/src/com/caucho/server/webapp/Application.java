@@ -104,7 +104,7 @@ import com.caucho.server.dispatch.InvocationDecoder;
 import com.caucho.server.dispatch.UrlMap;
 
 import com.caucho.server.deploy.DeployGenerator;
-import com.caucho.server.deploy.DeployInstance;
+import com.caucho.server.deploy.EnvironmentDeployInstance;
 import com.caucho.server.deploy.DeployContainer;
 
 import com.caucho.server.resin.ResinServer;
@@ -144,7 +144,7 @@ import com.caucho.jsp.cfg.JspConfig;
  */
 public class Application extends ServletContextImpl
   implements Dependency, EnvironmentBean, SchemaBean, DispatchBuilder,
-	     DeployInstance {
+	     EnvironmentDeployInstance {
   static final L10N L = new L10N(Application.class);
   static final Logger log = Log.open(Application.class);
 
@@ -364,7 +364,10 @@ public class Application extends ServletContextImpl
 			   new MBeanServerProxy(_classLoader));
       */
 
-      _appDir = Vfs.lookup();
+      if (controller != null)
+	_appDir = controller.getRootDirectory();
+      else
+	_appDir = Vfs.lookup();
 
       _servletManager = new ServletManager();
       _servletMapper = new ServletMapper();
@@ -630,6 +633,14 @@ public class Application extends ServletContextImpl
    * Sets the document directory (app-dir).
    */
   public void setDocumentDirectory(Path appDir)
+  {
+    setAppDir(appDir);
+  }
+
+  /**
+   * Sets the root directory (app-dir).
+   */
+  public void setRootDirectory(Path appDir)
   {
     setAppDir(appDir);
   }
@@ -1370,7 +1381,7 @@ public class Application extends ServletContextImpl
     // _parent.addWebAppDeploy(gen);
 
     deploy.setParentClassLoader(getClassLoader());
-    deploy.deploy();
+    // deploy.deploy();
     _parent.addWebAppDeploy(deploy);
 
     Environment.addEnvironmentListener(deploy, getClassLoader());

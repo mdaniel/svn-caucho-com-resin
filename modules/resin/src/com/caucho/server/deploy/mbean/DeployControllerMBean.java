@@ -27,38 +27,39 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.make;
+package com.caucho.server.deploy.mbean;
+
+import java.util.Date;
 
 /**
- * Interface representing a resource that always changes.
+ * Management interface for the deploy controller.
  */
-public class AlwaysModified implements PersistentDependency {
-  private static AlwaysModified ALWAYS_MODIFIED = new AlwaysModified();
-
-  private AlwaysModified()
-  {
-  }
-
-  public static AlwaysModified create()
-  {
-    return ALWAYS_MODIFIED;
-  }
+public interface DeployControllerMBean {
+  /**
+   * Returns the controller's state.
+   */
+  public String getState();
   
   /**
-   * Returns true if the underlying resource has changed.
+   * Returns the time the controller was last started
    */
-  public boolean isModified()
-  {
-    return true;
-  }
+  public Date getStartTime();
 
-  public String getJavaCreateString()
-  {
-    return "com.caucho.make.AlwaysModified.create()";
-  }
+  /**
+   * Starts the instance.
+   */
+  public void start()
+    throws Exception;
 
-  public String toString()
-  {
-    return "AlwaysModified[]";
-  }
+  /**
+   * Stops the instance.
+   */
+  public void stop()
+    throws Exception;
+
+  /**
+   * Restarts the instance.
+   */
+  public void update()
+    throws Exception;
 }

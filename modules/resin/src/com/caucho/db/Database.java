@@ -334,4 +334,9 @@ public class Database {
       }
     }
   }
+
+  public String toString()
+  {
+    return "Database[" + _dir + "]";
+  }
 }

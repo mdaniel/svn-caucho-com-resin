@@ -103,6 +103,8 @@ import com.caucho.server.dispatch.InvocationDecoder;
 import com.caucho.server.dispatch.InvocationMatcher;
 import com.caucho.server.dispatch.ErrorFilterChain;
 
+import com.caucho.server.e_app.EarConfig;
+
 import com.caucho.server.webapp.WebAppConfig;
 import com.caucho.server.webapp.Application;
 import com.caucho.server.webapp.ErrorPage;
@@ -133,10 +135,11 @@ import com.caucho.server.cluster.ClusterPort;
 
 import com.caucho.server.cache.AbstractCache;
 
+import com.caucho.server.deploy.EnvironmentDeployInstance;
+
 import com.caucho.transaction.TransactionManagerImpl;
 
 import com.caucho.lifecycle.Lifecycle;
-
 
 import com.caucho.jmx.Jmx;
 
@@ -144,7 +147,7 @@ import com.caucho.server.resin.mbean.ServletServerMBean;
 
 public class ServletServer extends ProtocolDispatchServer
   implements EnvironmentBean, SchemaBean, AlarmListener,
-	     ClassLoaderListener, ServletServerMBean {
+	     ClassLoaderListener, EnvironmentDeployInstance {
   private static final L10N L = new L10N(ServletServer.class);
   private static final Logger log = Log.open(ServletServer.class);
 
@@ -155,12 +158,16 @@ public class ServletServer extends ProtocolDispatchServer
   private static final EnvironmentLocal<String> _serverIdLocal =
     new EnvironmentLocal<String>("caucho.server-id");
 
+  private ServerController _controller;
+
   private EnvironmentClassLoader _classLoader;
   
   private HashMap<String,Object> _variableMap = new HashMap<String,Object>();
   private VariableResolver _varResolver;
 
   private LinkedHashMap<String,String> _jmxContext;
+
+  private Throwable _configException;
 
   private HostContainer _hostContainer;
 
@@ -194,83 +201,82 @@ public class ServletServer extends ProtocolDispatchServer
   /**
    * Creates a new servlet server.
    */
-  public ServletServer()
-    throws Exception
+  public ServletServer(ServerController controller)
   {
-    this(Thread.currentThread().getContextClassLoader());
-  }
-  
-  /**
-   * Creates a new servlet server.
-   */
-  public ServletServer(ClassLoader parentLoader)
-    throws Exception
-  {
-    _classLoader = new EnvironmentClassLoader(parentLoader);
-
-    Environment.addClassLoaderListener(this, _classLoader);
-
-    /*
-    try {
-      Jndi.rebindDeepShort("jmx/MBeanServer",
-			   new MBeanServerProxy(_classLoader));
-    } catch (Exception e) {
-      log.log(Level.WARNING, e.toString(), e);
-    }
-    */
-    
-    _jmxContext = Jmx.copyContextProperties();
-    
-    VariableResolver parentResolver = EL.getEnvironment();
-    _varResolver = new MapVariableResolver(_variableMap, parentResolver);
-    EL.setEnvironment(_varResolver, _classLoader);
-    EL.setVariableMap(_variableMap, _classLoader);
+    _controller = controller;
     
     try {
-      Method method = Jndi.class.getMethod("lookup",
-                                           new Class[] { String.class });
-      _variableMap.put("jndi:lookup", method);
-    } catch (Throwable e) {
-    }
-    _variableMap.put("server", new Var());
+      _classLoader = new EnvironmentClassLoader(controller.getParentClassLoader());
 
-    PermissionManager permissionManager = new PermissionManager();
-    PermissionManager.setPermissionManager(permissionManager);
+      Environment.addClassLoaderListener(this, _classLoader);
+
+      /*
+	try {
+	Jndi.rebindDeepShort("jmx/MBeanServer",
+	new MBeanServerProxy(_classLoader));
+	} catch (Exception e) {
+	log.log(Level.WARNING, e.toString(), e);
+	}
+      */
     
-    String serverId = _serverIdLocal.get();
-    if (serverId == null)
-      serverId = "";
-
-    setServerId(serverId);
-
-    Thread thread = Thread.currentThread();
-    ClassLoader oldLoader = thread.getContextClassLoader();
-
-    try {
-      thread.setContextClassLoader(_classLoader);
-
-      LinkedHashMap<String,String> props = Jmx.copyContextProperties();
-      props.put("Server", "default");
+      _jmxContext = Jmx.copyContextProperties();
     
-      Jmx.setContextProperties(props);
+      VariableResolver parentResolver = EL.getEnvironment();
+      _varResolver = new MapVariableResolver(_variableMap, parentResolver);
+      EL.setEnvironment(_varResolver, _classLoader);
+      EL.setVariableMap(_variableMap, _classLoader);
+    
+      try {
+	Method method = Jndi.class.getMethod("lookup",
+					     new Class[] { String.class });
+	_variableMap.put("jndi:lookup", method);
+      } catch (Throwable e) {
+      }
+      _variableMap.put("server", new Var());
+
+      PermissionManager permissionManager = new PermissionManager();
+      PermissionManager.setPermissionManager(permissionManager);
+    
+      String serverId = controller.getServerId();
+      if (serverId == null)
+	serverId = "";
+
+      setServerId(serverId);
+
+      Thread thread = Thread.currentThread();
+      ClassLoader oldLoader = thread.getContextClassLoader();
+
+      try {
+	thread.setContextClassLoader(_classLoader);
+
+	LinkedHashMap<String,String> props = Jmx.copyContextProperties();
+	props.put("Server", "default");
+    
+	Jmx.setContextProperties(props);
       
-      _hostContainer = new HostContainer();
-      _hostContainer.setClassLoader(_classLoader);
-      _hostContainer.setDispatchServer(this);
-    } finally {
-      thread.setContextClassLoader(oldLoader);
-    }
+	_hostContainer = new HostContainer();
+	_hostContainer.setClassLoader(_classLoader);
+	_hostContainer.setDispatchServer(this);
+      } finally {
+	thread.setContextClassLoader(oldLoader);
+      }
 
-    try {
-      Class cl = Class.forName("com.caucho.server.port.JniSelectManager");
-      Method method = cl.getMethod("create", new Class[0]);
+      try {
+	Class cl = Class.forName("com.caucho.server.port.JniSelectManager");
+	Method method = cl.getMethod("create", new Class[0]);
 
-      setSelectManager((AbstractSelectManager) method.invoke(null, null));
-    } catch (Throwable e) {
-      log.log(Level.FINER, e.toString());
-    }
+	setSelectManager((AbstractSelectManager) method.invoke(null, null));
+      } catch (Throwable e) {
+	log.log(Level.FINER, e.toString());
+      }
     
-    _lifecycle = new Lifecycle(log, toString(), Level.INFO);
+    } catch (Throwable e) {
+      log.log(Level.WARNING, e.toString(), e);
+      
+      _configException = e;
+    } finally {
+      _lifecycle = new Lifecycle(log, toString(), Level.INFO);
+    }
   }
 
   /**
@@ -282,12 +288,43 @@ public class ServletServer extends ProtocolDispatchServer
   }
 
   /**
-   * Sets the classLoader
+   * Returns the configuration exception
    */
-  public void setEnvironmentClassLoader(EnvironmentClassLoader loader)
+  public Throwable getConfigException()
   {
-    _classLoader = loader;
-    _classLoader.setOwner(this);
+    return _configException;
+  }
+
+  /**
+   * Returns the configuration instance.
+   */
+  public void setConfigException(Throwable exn)
+  {
+    _configException = exn;
+  }
+
+  /**
+   * Return true if idle.
+   */
+  public boolean isDeployIdle()
+  {
+    return false;
+  }
+
+  /**
+   * Return true if idle.
+   */
+  public boolean isDeployError()
+  {
+    return _configException != null;
+  }
+
+  /**
+   * Returns the variable map.
+   */
+  public Map<String,Object> getVariableMap()
+  {
+    return _variableMap;
   }
 
   /**
@@ -409,6 +446,14 @@ public class ServletServer extends ProtocolDispatchServer
   public void addWebAppDefault(WebAppConfig init)
   {
     _hostContainer.addWebAppDefault(init);
+  }
+
+  /**
+   * Adds an EarDefault
+   */
+  public void addEarDefault(EarConfig config)
+  {
+    _hostContainer.addEarDefault(config);
   }
 
   /**
@@ -838,8 +883,8 @@ public class ServletServer extends ProtocolDispatchServer
   public void classLoaderInit(DynamicClassLoader loader)
   {
     try {
-      Jmx.register(this, "resin:type=Server,name=default");
-
+      Jmx.register(_controller.getMBean(), "resin:name=default,type=Server");
+      
       //ObjectName name = new ObjectName("resin:type=ThreadPool");
       ThreadPoolAdmin threadPoolAdmin = new ThreadPoolAdmin();
       
@@ -876,7 +921,6 @@ public class ServletServer extends ProtocolDispatchServer
    * Start the server.
    */
   public void start()
-    throws Throwable
   {
     init();
     
@@ -937,6 +981,10 @@ public class ServletServer extends ProtocolDispatchServer
       startPorts();
 
       _alarm.queue(ALARM_INTERVAL);
+    } catch (Throwable e) {
+      log.log(Level.WARNING, e.toString(), e);
+
+      _configException = e;
     } finally {
       thread.setContextClassLoader(oldLoader);
     }
@@ -1038,6 +1086,19 @@ public class ServletServer extends ProtocolDispatchServer
   public boolean isModified()
   {
     boolean isModified = _classLoader.isModified();
+
+    if (isModified)
+      log.fine("servlet server is modified");
+
+    return isModified;
+  }
+
+  /**
+   * Returns true if the server has been modified and needs restarting.
+   */
+  public boolean isModifiedNow()
+  {
+    boolean isModified = _classLoader.isModifiedNow();
 
     if (isModified)
       log.fine("servlet server is modified");

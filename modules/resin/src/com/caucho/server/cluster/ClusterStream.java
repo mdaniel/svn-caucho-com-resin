@@ -52,11 +52,16 @@ public class ClusterStream {
 
   private long _freeTime;
 
-  ClusterStream(ClusterClient srun, ReadStream is, WriteStream os)
+  private String _debugId;
+
+  ClusterStream(int count, ClusterClient client,
+		ReadStream is, WriteStream os)
   {
-    _srun = srun;
+    _srun = client;
     _is = is;
     _os = os;
+
+    _debugId = "[" + client.getDebugId() + ":" + count + "]";
   }
 
   /**
@@ -100,6 +105,14 @@ public class ClusterStream {
   }
 
   /**
+   * Returns the debug id.
+   */
+  public String getDebugId()
+  {
+    return _debugId;
+  }
+
+  /**
    * Recycles.
    */
   public void free()
@@ -109,20 +122,25 @@ public class ClusterStream {
     _srun.free(this);
   }
 
+  public void close()
+  {
+    if (_is != null)
+      _srun.close(this);
+
+    closeImpl();
+  }
+  
   /**
    * closes the stream.
    */
-  public void close()
+  void closeImpl()
   {
     ReadStream is = _is;
     _is = null;
     
     WriteStream os = _os;
     _os = null;
-
-    if (is != null)
-      _srun.close(this);
-
+    
     try {
       if (is != null)
 	is.close();

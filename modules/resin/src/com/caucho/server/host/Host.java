@@ -70,7 +70,7 @@ import com.caucho.naming.Jndi;
 
 import com.caucho.lifecycle.Lifecycle;
 
-import com.caucho.server.deploy.DeployInstance;
+import com.caucho.server.deploy.EnvironmentDeployInstance;
 
 import com.caucho.server.dispatch.Invocation;
 import com.caucho.server.dispatch.ExceptionFilterChain;
@@ -83,7 +83,8 @@ import com.caucho.server.webapp.ApplicationContainer;
  * Resin's virtual host implementation.
  */
 public class Host extends ApplicationContainer
-  implements EnvironmentBean, Dependency, SchemaBean, DeployInstance {
+  implements EnvironmentBean, Dependency, SchemaBean,
+	     EnvironmentDeployInstance {
   static final Logger log = Log.open(Host.class);
   static final L10N L = new L10N(Host.class);
 
@@ -159,16 +160,6 @@ public class Host extends ApplicationContainer
       ClassLoader oldLoader = thread.getContextClassLoader();
       try {
 	thread.setContextClassLoader(classLoader);
-
-	/*
-	MBeanServer server = Jmx.findMBeanServer(classLoader);
-	try {
-	  Jndi.rebindDeepShort("jmx/MBeanServer",
-			       new MBeanServerProxy(classLoader));
-	} catch (Exception e) {
-	  log.log(Level.WARNING, e.toString(), e);
-	}
-	*/
     
 	_jmxContext = Jmx.copyContextProperties();
 	if (hostName.equals(""))
@@ -430,8 +421,11 @@ public class Host extends ApplicationContainer
    */
   public void setConfigException(Throwable e)
   {
-    _configException = e;
-    getEnvironmentClassLoader().addDependency(AlwaysModified.create());
+    if (e != null) {
+      // XXX:
+      _configException = e;
+      getEnvironmentClassLoader().addDependency(AlwaysModified.create());
+    }
   }
 
   /**

@@ -31,12 +31,17 @@ package com.caucho.server.embed;
 
 import java.util.logging.Logger;
 
-import com.caucho.loader.EnvironmentBean;
 import com.caucho.loader.EnvironmentClassLoader;
 
 import com.caucho.server.port.Port;
 
+import com.caucho.server.resin.ServerController;
+import com.caucho.server.resin.ServerConfig;
 import com.caucho.server.resin.ServletServer;
+
+import com.caucho.config.Config;
+
+import com.caucho.config.types.InitProgram;
 
 import com.caucho.util.Log;
 import com.caucho.util.L10N;
@@ -47,11 +52,12 @@ import com.caucho.vfs.Vfs;
 /**
  * Main facade for embedding Resin in an application.
  */
-public class EmbedResinServer implements EnvironmentBean {
+public class EmbedResinServer {
   private static final Logger log = Log.open(EmbedResinServer.class);
   private static final L10N L = new L10N(EmbedResinServer.class);
 
-  private ServletServer _server;
+  private ServerController _server;
+  private ServerConfig _config;
 
   /**
    * Creates a new resin server.
@@ -59,15 +65,32 @@ public class EmbedResinServer implements EnvironmentBean {
   public EmbedResinServer()
     throws Exception
   {
-    _server = new ServletServer();
+    _server = new ServerController();
   }
 
   /**
-   * Returns the environment class loader.
+   * Creates a new resin server.
    */
-  public ClassLoader getClassLoader()
+  public EmbedResinServer(String id)
+    throws Exception
   {
-    return _server.getClassLoader();
+    _server = new ServerController(id);
+  }
+
+  /**
+   * Sets the cluster server id.
+   */
+  public void setServerId(String id)
+  {
+    _server.setServerId(id);
+  }
+
+  /**
+   * Sets the root directory.
+   */
+  public void setRootDirectory(Path path)
+  {
+    _server.setRootDirectory(path);
   }
 
   /**
@@ -80,7 +103,15 @@ public class EmbedResinServer implements EnvironmentBean {
     httpPort.setHost(host);
     httpPort.setPort(port);
 
-    _server.addHttp(httpPort);
+    setProperty("http", httpPort);
+  }
+
+  /**
+   * Sets the exported server header.
+   */
+  public void setServerHeader(String serverString)
+  {
+    setProperty("server-header", serverString);
   }
 
   /**
@@ -88,11 +119,40 @@ public class EmbedResinServer implements EnvironmentBean {
    */
   public EmbedWebApp addWebApp(String contextPath, String rootDirectory)
   {
-    Path pwd = Vfs.getPwd(getClassLoader());
+    Path pwd = Vfs.getPwd();
     
     EmbedWebApp webApp = new EmbedWebApp();
 
     return webApp;
+  }
+
+  /**
+   * Add config file.
+   */
+  public void addConfigFile(Path path)
+    throws Throwable
+  {
+    ServerConfig config = new ServerConfig();
+
+    Config.configure(config, path, getSchema());
+
+    addConfig(config);
+  }
+
+  /**
+   * Returns the server schema.
+   */
+  protected String getSchema()
+  {
+    return "com/caucho/server/resin/server.rnc";
+  }
+
+  /**
+   * Returns true for the destroyed state.
+   */
+  public boolean isDestroyed()
+  {
+    return _server == null || _server.isDestroyed();
   }
 
   /**
@@ -103,6 +163,13 @@ public class EmbedResinServer implements EnvironmentBean {
   {
     if (_server == null)
       throw new IllegalStateException(L.l("tried to start destroyed server"));
+
+    _server.init();
+
+    if (_config != null) {
+      _server.setConfig(_config);
+      _config = null;
+    }
     
     _server.start();
   }
@@ -124,10 +191,57 @@ public class EmbedResinServer implements EnvironmentBean {
    */
   public void destroy()
   {
-    ServletServer server = _server;
+    ServerController server = _server;
     _server = null;
 
     if (server != null)
       server.destroy();
+  }
+
+  /**
+   * Returns the deployed instance.
+   */
+  public ServletServer getDeployInstance()
+  {
+    if (_server != null)
+      return _server.getDeployInstance();
+    else
+      return null;
+  }
+
+  /**
+   * Adds a configuration
+   */
+  public void addConfig(ServerConfig config)
+  {
+    if (_config != null) {
+      _server.setConfig(_config);
+      _config = null;
+    }
+
+    _server.setConfig(config);
+  }
+
+  /**
+   * Adds a program
+   */
+  public void setConfigProgram(InitProgram program)
+    throws Throwable
+  {
+    if (_config == null)
+      _config = new ServerConfig();
+
+    program.configure(_config);
+  }
+
+  /**
+   * Adds a property.
+   */
+  protected void setProperty(String name, Object value)
+  {
+    if (_config == null)
+      _config = new ServerConfig();
+
+    _config.addPropertyProgram(name, value);
   }
 }

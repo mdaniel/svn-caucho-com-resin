@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -64,106 +65,44 @@ import com.caucho.server.webapp.WebAppConfig;
 import com.caucho.server.webapp.WebAppController;
 import com.caucho.server.webapp.ApplicationContainer;
 
-import com.caucho.server.deploy.ExpandDeployController;
+import com.caucho.server.deploy.EnvironmentDeployController;
 import com.caucho.server.deploy.DeployContainer;
 
 /**
  * A configuration entry for an Enterprise Application
  */
-public class EarDeployController extends ExpandDeployController<EnterpriseApplication> {
+public class EarDeployController
+  extends EnvironmentDeployController<EnterpriseApplication,EarConfig> {
   private static final Logger log = Log.open(EarDeployController.class);
   private static final L10N L = new L10N(EarDeployController.class);
   
   private ApplicationContainer _container;
-
-  // The ear name
-  private String _name = "";
-
-  // The configuration
-  private EarConfig _config;
-
-  private BuilderProgram _initProgram;
-
-  private VariableResolver _variableResolver;
-
-  // The variable mapping
-  private HashMap<String,Object> _variableMap = new HashMap<String,Object>();
 
   // private Var _hostVar = new Var();
 
   // root-dir as set by the resin.conf
   private Path _earRootDir;
 
-  private boolean _isInit;
-
   private ArrayList<EarConfig> _eAppDefaults = new ArrayList<EarConfig>();
 
-  EarDeployController(ApplicationContainer container, EarConfig config)
+  EarDeployController(String name,
+		      ApplicationContainer container, EarConfig config)
   {
+    super(name);
+    
     _container = container;
-    _config = config;
 
-    VariableResolver parentResolver = EL.getEnvironment(getParentClassLoader());
-    _variableResolver = new MapVariableResolver(_variableMap, parentResolver);
+    setConfig(config);
   }
 
   /**
    * Sets the Resin host name.
    */
-  public void setName(String name)
+  public void setId(String name)
   {
-    _variableMap.put("name", name);
+    getVariableMap().put("name", name);
 
-    super.setName(name);
-  }
-
-  /**
-   * Gets the EarConfig
-   */
-  public EarConfig getEarConfig()
-  {
-    return _config;
-  }
-
-  /**
-   * Returns the path variable map.
-   */
-  public HashMap<String,Object> getVariableMap()
-  {
-    return _variableMap;
-  }
-
-  /**
-   * Returns the path variable map.
-   */
-  public VariableResolver getVariableResolver()
-  {
-    return _variableResolver;
-  }
-
-  /**
-   * Adds the ear default.
-   */
-  public void addEarDefault(EarConfig earDefault)
-  {
-    if (earDefault != null)
-      _eAppDefaults.add(earDefault);
-  }
-
-  /**
-   * Returns the host's resin.conf configuration node.
-   */
-  public BuilderProgram getInitProgram()
-  {
-    return _initProgram;
-  }
-
-  /**
-   * Sets the host's init program
-   */
-  public void setInitProgram(BuilderProgram initProgram)
-  {
-    _initProgram = initProgram;
+    // XXX: super.setId(name);
   }
   
   /**
@@ -206,73 +145,7 @@ public class EarDeployController extends ExpandDeployController<EnterpriseApplic
    */
   protected EnterpriseApplication instantiateDeployInstance()
   {
-    return new EnterpriseApplication(_container, this, getName());
-  }
-
-  /**
-   * Creates the application.
-   */
-  protected void configureInstance(EnterpriseApplication eApp)
-    throws Throwable
-  {
-    Thread thread = Thread.currentThread();
-    ClassLoader oldLoader = thread.getContextClassLoader();
-
-    Path rootDir = null;
-    try {
-      thread.setContextClassLoader(getParentClassLoader());
-
-      Map<String,Object> varMap = eApp.getVariableMap();
-      varMap.putAll(_variableMap);
-
-      eApp.setEarPath(getArchivePath());
-
-      rootDir = calculateRootDirectory();
-      if (rootDir == null)
-	throw new NullPointerException("Null root-directory");
-
-      /*
-        if (! rootDir.isDirectory()) {
-	throw new ConfigException(L.l("root-directory `{0}' must specify a directory.",
-	rootDir.getPath()));
-        }
-      */
-
-      eApp.setRootDirectory(rootDir);
-
-      ArrayList<EarConfig> initList = new ArrayList<EarConfig>();
-
-      if (_container != null) {
-	initList.addAll(_container.getEarDefaultList());
-      }
-
-      initList.addAll(_eAppDefaults);
-	
-      /*
-	if (_initProgram != null)
-	_initProgram.configure(host);
-      */
-
-      if (_config != null)
-	initList.add(_config);
-	
-      thread.setContextClassLoader(eApp.getClassLoader());
-      Vfs.setPwd(rootDir);
-
-      addManifestClassPath();
-
-      for (int i = 0; i < initList.size(); i++) {
-	EarConfig config = initList.get(i);
-	BuilderProgram program = config.getBuilderProgram();
-
-	if (program != null)
-	  program.configure(eApp);
-      }
-
-      eApp.init();
-    } finally {
-      thread.setContextClassLoader(oldLoader);
-    }
+    return new EnterpriseApplication(_container, this, getId());
   }
   
   protected Path calculateRootDirectory()
@@ -297,7 +170,7 @@ public class EarDeployController extends ExpandDeployController<EnterpriseApplic
 
     EarDeployController entry = (EarDeployController) o;
 
-    return getName().equals(entry.getName());
+    return getId().equals(entry.getId());
   }
 
   /**
@@ -305,6 +178,6 @@ public class EarDeployController extends ExpandDeployController<EnterpriseApplic
    */
   public String toString()
   {
-    return "EarDeployController[" + getName() + "]";
+    return "EarDeployController[" + getId() + "]";
   }
 }

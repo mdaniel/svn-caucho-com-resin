@@ -47,11 +47,12 @@ import com.caucho.config.BuilderProgramContainer;
 import com.caucho.config.types.RawString;
 
 import com.caucho.server.deploy.DeployController;
+import com.caucho.server.deploy.DeployConfig;
 
 /**
  * The configuration for a host in the resin.conf
  */
-public class HostConfig {
+public class HostConfig extends DeployConfig {
   static final L10N L = new L10N(HostConfig.class);
   static final Logger log = Log.open(HostConfig.class);
 
@@ -69,12 +70,6 @@ public class HostConfig {
 
   // The root dir
   private String _rootDir;
-
-  // The startup mode
-  private String _startupMode = DeployController.STARTUP_AUTOMATIC;
-  
-  // The configuration program
-  private BuilderProgramContainer _program = new BuilderProgramContainer();
 
   /**
    * Sets the host name.
@@ -214,44 +209,12 @@ public class HostConfig {
    * Sets the lazy-init property
    */
   public void setLazyInit(boolean lazyInit)
-  {
-    if (lazyInit)
-      _startupMode = DeployController.STARTUP_LAZY;
-    else
-      _startupMode = DeployController.STARTUP_AUTOMATIC;
-  }
-
-  /**
-   * Sets the startup mode property
-   */
-  public void setStartupMode(String mode)
     throws ConfigException
   {
-    _startupMode = DeployController.toStartupCode(mode);
-  }
-
-  /**
-   * Gets the startup mode property
-   */
-  public String getStartupMode()
-  {
-    return _startupMode;
-  }
-
-  /**
-   * Adds to the builder program.
-   */
-  public void addBuilderProgram(BuilderProgram program)
-  {
-    _program.addProgram(program);
-  }
-
-  /**
-   * Returns the program.
-   */
-  public BuilderProgram getBuilderProgram()
-  {
-    return _program;
+    if (lazyInit)
+      setStartupMode("lazy");
+    else
+      setStartupMode("automatic");
   }
 
   /**

@@ -49,6 +49,9 @@ public class ClusterClient {
 
   private ClusterServer _server;
 
+  private String _debugId;
+  private int _streamCount;
+
   // XXX: the load balance and the tcp-session want different timeouts
   private int _timeout = 2000;
 
@@ -70,6 +73,21 @@ public class ClusterClient {
   {
     _server = server;
     _timeout = (int) server.getReadTimeout();
+
+    Cluster cluster = Cluster.getLocal();
+
+    String selfId = null;
+    if (cluster != null)
+      selfId = cluster.getId();
+
+    if (selfId == null || selfId.equals(""))
+      selfId = "default";
+
+    String targetId = server.getId();
+    if (targetId == null || targetId.equals(""))
+      targetId = String.valueOf(server.getIndex());
+
+    _debugId = selfId + "->" + targetId;
   }
 
   /**
@@ -112,6 +130,14 @@ public class ClusterClient {
   public void setMaxPoolSize(int size)
   {
     _maxPoolSize = size;
+  }
+
+  /**
+   * Returns the debug id.
+   */
+  public String getDebugId()
+  {
+    return _debugId;
   }
 
   /**
@@ -178,7 +204,7 @@ public class ClusterClient {
     }
 
     if (stream != null)
-      stream.close();
+      stream.closeImpl();
 
     return null;
   }
@@ -206,7 +232,8 @@ public class ClusterClient {
 	_activeCount++;
       }
 
-      return new ClusterStream(this, rs, pair.getWriteStream());
+      return new ClusterStream(_streamCount++, this,
+			       rs, pair.getWriteStream());
     } catch (IOException e) {
       _lastFailTime = Alarm.getCurrentTime();
       return null;
@@ -222,16 +249,17 @@ public class ClusterClient {
   }
 
   /**
-   * frees the read/write pair for reuse.
+   * Frees the read/write pair for reuse.  Called only from
+   * ClusterStream.free()
    */
   void free(ClusterStream stream)
   {
     synchronized (this) {
-      _activeCount--;
-
       int size = (_freeHead - _freeTail + _free.length) % _free.length;
 
       if (! _isClosed && size < _freeSize) {
+	_activeCount--;
+
 	_free[_freeHead] = stream;
 	_freeHead = (_freeHead + 1) % _free.length;
 
@@ -239,19 +267,18 @@ public class ClusterClient {
       }
     }
 
-    stream.close();
+    stream.closeImpl();
   }
 
   /**
-   * closes the read/write pair for reuse.
+   * Closes the read/write pair for reuse.  Called only
+   * from ClusterStream.close().
    */
-  public void close(ClusterStream stream)
+  void close(ClusterStream stream)
   {
     synchronized (this) {
       _activeCount--;
     }
-
-    stream.close();
   }
 
   /**
@@ -277,7 +304,7 @@ public class ClusterClient {
       }
 
       if (stream != null)
-	stream.close();
+	stream.closeImpl();
     }
   }
 

@@ -204,8 +204,7 @@ public class WebAppExpandDeployGenerator extends ExpandDeployGenerator<WebAppCon
   /**
    * Returns the current array of application entries.
    */
-  protected WebAppController createEntry(String name)
-    throws Exception
+  protected WebAppController createController(String name)
   {
     if (! name.startsWith(_urlPrefix))
       return null;
@@ -234,31 +233,42 @@ public class WebAppExpandDeployGenerator extends ExpandDeployGenerator<WebAppCon
     if (cfg != null && cfg.getContextPath() != null)
       name = cfg.getContextPath();
 
-    WebAppController entry = new WebAppController(_container, name);
+    WebAppController controller = new WebAppController(_container, name);
 
-    entry.setName(name);
-    entry.setId(segmentName.substring(1));
-    entry.setRootDirectory(rootDirectory);
-    entry.setStartupMode(getStartupMode());
-    // entry.setRedeployMode(getRedeployMode());
+    try {
+      controller.setName(name);
+      controller.setId(segmentName.substring(1));
+      controller.setRootDirectory(rootDirectory);
+      controller.setStartupMode(getStartupMode());
+      // controller.setRedeployMode(getRedeployMode());
 
-    entry.setParentWebApp(_parent);
+      controller.setParentWebApp(_parent);
 
-    if (jarPath != null) {
-      entry.setArchivePath(jarPath);
-      entry.addDepend(jarPath);
+      if (jarPath != null) {
+	controller.setArchivePath(jarPath);
+	controller.addDepend(jarPath);
+      }
+
+      controller.setDynamicDeploy(true);
+      controller.setSourceType("expand");
+
+      for (int i = 0; i < _webAppDefaults.size(); i++)
+	controller.addConfigDefault(_webAppDefaults.get(i));
+
+      if (cfg != null)
+	controller.addConfigDefault(cfg);
+    } catch (ConfigException e) {
+      controller.setConfigException(e);
+
+      log.log(Level.FINER, e.toString(), e);
+      log.warning(e.toString());
+    } catch (Throwable e) {
+      controller.setConfigException(e);
+
+      log.log(Level.WARNING, e.toString(), e);
     }
 
-    entry.setDynamicDeploy(true);
-    entry.setSourceType("expand");
-
-    for (int i = 0; i < _webAppDefaults.size(); i++)
-      entry.addWebAppDefault(_webAppDefaults.get(i));
-
-    if (cfg != null)
-      entry.addWebAppDefault(cfg);
-
-    return entry;
+    return controller;
   }
 
   /**

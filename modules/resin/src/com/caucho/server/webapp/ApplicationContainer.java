@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -499,9 +500,9 @@ public class ApplicationContainer
   /**
    * Adds an ear default
    */
-  public void addEarDefault(EarConfig init)
+  public void addEarDefault(EarConfig config)
   {
-    _earDefaultList.add(init);
+    _earDefaultList.add(config);
   }
 
   /**
@@ -518,7 +519,10 @@ public class ApplicationContainer
   public EarDeployGenerator createEarDeploy()
     throws Exception
   {
-    return new EarDeployGenerator(_earDeploy, this);
+    DeployContainer<EarDeployController> container
+      = new DeployContainer<EarDeployController>();
+      
+    return new EarDeployGenerator(container, this);
   }
 
   /**
@@ -527,12 +531,15 @@ public class ApplicationContainer
   public void addEarDeploy(EarDeployGenerator earDeploy)
     throws Exception
   {
+    earDeploy.getDeployContainer().add(earDeploy);
+    
     // server/26cc - _appDeploy must be added first, because the
     // _earDeploy addition will automaticall register itself
     _appDeploy.add(new WebAppEarDeployGenerator(_appDeploy, this, earDeploy));
-    
-    _earDeploy.add(earDeploy);
 
+    /*
+    _earDeploy.add(earDeploy);
+    */
   }
 
   /**
@@ -612,12 +619,14 @@ public class ApplicationContainer
   {
     if (! _lifecycle.toActive())
       return;
-    
+
+    /*
     try {
       _earDeploy.start();
     } catch (Throwable e) {
       log.log(Level.WARNING, e.toString(), e);
     }
+    */
     
     try {
       _appDeploy.start();
@@ -678,7 +687,7 @@ public class ApplicationContainer
     if (app != null)
       app.buildInvocation(invocation);
     else {
-      int code = HttpServletResponse.SC_SERVICE_UNAVAILABLE;
+      int code = HttpServletResponse.SC_NOT_FOUND;
       FilterChain chain = new ErrorFilterChain(code);
       ContextFilterChain contextChain = new ContextFilterChain(chain);
       contextChain.setErrorPageManager(_errorPageManager);

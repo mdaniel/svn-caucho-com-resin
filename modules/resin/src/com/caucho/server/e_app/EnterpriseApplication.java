@@ -90,7 +90,7 @@ import com.caucho.el.MapVariableResolver;
 
 import com.caucho.lifecycle.Lifecycle;
 
-import com.caucho.server.deploy.DeployInstance;
+import com.caucho.server.deploy.EnvironmentDeployInstance;
 
 import com.caucho.server.webapp.ApplicationContainer;
 import com.caucho.server.webapp.WebAppController;
@@ -101,14 +101,12 @@ import com.caucho.ejb.EJBServerInterface;
  * An enterprise application (ear)
  */
 public class EnterpriseApplication
-  implements EnvironmentBean, DeployInstance {
+  implements EnvironmentBean, EnvironmentDeployInstance {
   static final L10N L = new L10N(EnterpriseApplication.class);
   static final Logger log = Log.open(EnterpriseApplication.class);
   
   protected static EnvironmentLocal<EJBServerInterface> _localServer =
     new EnvironmentLocal<EJBServerInterface>("caucho.ejb-server");
-
-  private static Schema _earXmlSchema;
 
   private EnvironmentClassLoader _loader;
 
@@ -120,7 +118,7 @@ public class EnterpriseApplication
 
   private String _prefix = "";
 
-  private EarDeployController _entry;
+  private EarDeployController _controller;
 
   private Path _webappsPath;
 
@@ -128,8 +126,6 @@ public class EnterpriseApplication
 
   private ApplicationContainer _container;
 
-  private EarConfig _earConfig;
-  
   // The EL variable map
   private HashMap<String,Object> _variableMap = new HashMap<String,Object>();
 
@@ -151,11 +147,11 @@ public class EnterpriseApplication
    * Creates the application.
    */
   EnterpriseApplication(ApplicationContainer container,
-			EarDeployController entry, String name)
+			EarDeployController controller, String name)
   {
     _container = container;
     
-    _entry = entry;
+    _controller = controller;
     _name = name;
 
     ClassLoader parentLoader = Thread.currentThread().getContextClassLoader();
@@ -170,8 +166,10 @@ public class EnterpriseApplication
 
     EL.setEnvironment(_variableResolver, _loader);
 
-    Vfs.setPwd(_entry.getRootDirectory(), _loader);
-    WorkDir.setLocalWorkDir(_entry.getRootDirectory().lookup("META-INF/work"),
+    Vfs.setPwd(_controller.getRootDirectory(), _loader);
+
+    _webappsPath = _controller.getRootDirectory().lookup("webapps");
+    WorkDir.setLocalWorkDir(_controller.getRootDirectory().lookup("META-INF/work"),
 			    _loader);
 
     _jmxContext = Jmx.copyContextProperties();
@@ -181,8 +179,8 @@ public class EnterpriseApplication
     
     _lifecycle = new Lifecycle(log, toString(), Level.INFO);
 
-    if (entry.getArchivePath() != null)
-      Environment.addDependency(new Depend(entry.getArchivePath()), _loader);
+    if (controller.getArchivePath() != null)
+      Environment.addDependency(new Depend(controller.getArchivePath()), _loader);
   }
 
   /**
@@ -243,19 +241,76 @@ public class EnterpriseApplication
   }
 
   /**
+   * Sets the path to the expanded webapps
+   */
+  public void setWebapps(Path webappsPath)
+  {
+    _webappsPath = webappsPath;
+  }
+
+  /**
    * Sets the prefix URL for web applications.
    */
   public void setPrefix(String prefix)
   {
     _prefix = prefix;
   }
+  
+  /**
+   * Sets the id
+   */
+  public void setId(String id)
+  {
+  }
+  
+  /**
+   * Sets the application version.
+   */
+  public void setVersion(String version)
+  {
+  }
+  
+  /**
+   * Sets the schema location
+   */
+  public void setSchemaLocation(String schema)
+  {
+  }
 
   /**
-   * Adds the ear config.
+   * Sets the display name.
    */
-  public void addEarConfig(EarConfig earConfig)
+  public void setDisplayName(String name)
   {
-    _earConfig = earConfig;
+  }
+
+  /**
+   * Sets the description.
+   */
+  public void setDescription(String description)
+  {
+  }
+
+  /**
+   * Sets the icon.
+   */
+  public void setIcon(Icon icon)
+  {
+  }
+  
+  /**
+   * Adds a module.
+   */
+  public Module createModule()
+  {
+    return new Module();
+  }
+
+  /**
+   * Adds a security role.
+   */
+  public void addSecurityRole(SecurityRole role)
+  {
   }
 
   /**
@@ -326,7 +381,6 @@ public class EnterpriseApplication
    * Configures the application.
    */
   public void init()
-    throws Throwable
   {
     Thread thread = Thread.currentThread();
     ClassLoader oldLoader = thread.getContextClassLoader();
@@ -341,101 +395,35 @@ public class EnterpriseApplication
       
       Vfs.setPwd(_rootDir, _loader);
 
-      if (_webappsPath == null)
-	_webappsPath = _rootDir.lookup("webapps");
-
-      Path appXml = _rootDir.lookup("META-INF/application.xml");
-
-      if (! appXml.canRead())
-	throw new ConfigException(L.l("missing application.xml for ear {0}.  .ear files require a META-INF/application.xml file.",
-				      _earPath));
-
-      Depend depend = new Depend(appXml);
-      Environment.addDependency(depend, _loader);
-
-      _config = parseApplicationConfig(_rootDir, appXml);
-
-      ArrayList<Path> ejbModules = _config.getEjbModules();
-
-      Throwable configException = null;
+      Throwable configException = _configException;
 
       try {
-	configureEJB(ejbModules);
+	EJBServerInterface ejbServer = _localServer.getLevel();
+
+	if (ejbServer != null)
+	  ejbServer.initEJBs();
       } catch (ConfigException e) {
 	configException = e;
 
+	log.log(Level.FINER, e.toString(), e);
 	log.warning(e.getMessage());
       } catch (Throwable e) {
 	configException = e;
 	
 	log.log(Level.WARNING, e.toString(), e);
       }
-      
-      ArrayList<WebModule> webModules = _config.getWebModules();
 
-      for (int i = 0; i < webModules.size(); i++) {
-	WebModule web = webModules.get(i);
-
-	String webUri = web.getWebURI();
-	String contextUrl = web.getContextRoot();
-	Path path = _rootDir.lookup(webUri);
-
-	if (contextUrl == null)
-	  contextUrl = webUri;
-
-	WebAppController controller = null;
-	if (webUri.endsWith(".war")) {
-	  String name = webUri.substring(0, webUri.length() - 4);
-	  int p = name.lastIndexOf('/');
-	  if (p > 0)
-	    name = name.substring(p + 1);
-
-	  Path expandPath = _webappsPath;
-	  expandPath.mkdirs();
-
-	  controller = new WebAppController(_container, contextUrl);
-	  controller.setRootDirectory(expandPath.lookup(name));
-	  controller.setArchivePath(path);
-	} else {
-	  controller = new WebAppController(_container, contextUrl);
-	  controller.setRootDirectory(path);
-	}
-
-	controller.setDynamicDeploy(true);
-	controller.setConfigException(configException);
-
-	controller.setManifestClassLoader(_loader);
-
-	_webApps.add(controller);
-
-	controller.init();
+      for (WebAppController controller : _webApps) {
+	if (configException != null)
+	  controller.setConfigException(configException);
 
 	_container.getApplicationGenerator().update(controller.getName());
-
-	if (configException != null)
-	  throw configException;
       }
-    } catch (ConfigException e) {
-      _configException = e;
-      
-      throw e;
     } catch (Throwable e) {
       _configException = e;
-      
-      throw e;
     } finally {
       thread.setContextClassLoader(oldLoader);
     }
-  }
-
-  static ApplicationConfig parseApplicationConfig(Path rootDir, Path appXml)
-    throws Exception
-  {
-    ApplicationConfig config = new ApplicationConfig();
-
-    Config.configure(config, appXml, "com/caucho/server/e_app/ear.rnc");
-
-    return config;
   }
 
   /**
@@ -493,53 +481,6 @@ public class EnterpriseApplication
   }
 
   /**
-   * Configures the EJB server.
-   */
-  private void configureEJB(ArrayList<Path> ejbModules)
-    throws Exception
-  {
-    if (ejbModules.size() == 0)
-      return;
-
-    _loader.init();
-    
-    Thread thread = Thread.currentThread();
-    ClassLoader oldLoader = thread.getContextClassLoader();
-
-    try {
-      thread.setContextClassLoader(_loader);
-
-      EJBServerInterface ejbServer = _localServer.getLevel();
-
-      if (ejbServer == null) {
-	throw new ConfigException(L.l("<ear-deploy> needs a configured <ejb-server>"));
-      }
-	
-      for (int i = 0; i < ejbModules.size(); i++) {
-	Path path = ejbModules.get(i);
-
-	_loader.addJar(path);
-	// ejb/0853
-	_loader.addJarManifestClassPath(path);
-      }
-
-      for (int i = 0; i < ejbModules.size(); i++) {
-	Path path = ejbModules.get(i);
-
-	ejbServer.addEJBJar(path);
-      }
-
-      ejbServer.initEJBs();
-    } catch (ConfigException e) {
-      e.printStackTrace();
-      
-      throw e;
-    } finally {
-      thread.setContextClassLoader(oldLoader);
-    }
-  }
-
-  /**
    * Returns the webapps for the enterprise-application.
    */
   public ArrayList<WebAppController> getApplications()
@@ -591,16 +532,7 @@ public class EnterpriseApplication
 
       log.fine(this + " destroying");
 
-      ArrayList<WebAppController> webApps = new ArrayList<WebAppController>(_webApps);
-      _webApps.clear();
-      
-      for (int i = 0; i < webApps.size(); i++) {
-	WebAppController controller = webApps.get(i);
-
-	// _parentContainer.undeployWebApp(controller);
-	
-	controller.destroy();
-      }
+      _webApps = null;
     } finally {
       thread.setContextClassLoader(oldLoader);
 
@@ -610,38 +542,101 @@ public class EnterpriseApplication
     }
   }
 
-  protected Schema getEarXmlSchema()
-  {
-    if (_earXmlSchema == null) {
-      try {
-        MergePath schemaPath = new MergePath();
-        schemaPath.addClassPath();
-      
-        Path path = schemaPath.lookup("com/caucho/server/e_app/resin-ear-xml.rnc");
-        if (path.canRead()) {
-          ReadStream is = path.openRead();
-
-          try {
-            // VerifierFactory factory = VerifierFactory.newInstance("http://caucho.com/ns/compact-relax-ng/1.0");
-          
-            CompactVerifierFactoryImpl factory;
-            factory = new CompactVerifierFactoryImpl();
-
-            _earXmlSchema = factory.compileSchema(is);
-          } finally {
-            is.close();
-          }
-        }
-      } catch (Exception e) {
-        log.log(Level.WARNING, e.toString(), e);
-      }
-    }
-
-    return _earXmlSchema;
-  }
-
   public String toString()
   {
     return "EnterpriseApplication[" + getName() + "]";
+  }
+
+  public class Module {
+    /**
+     * Sets the module id.
+     */
+    public void setId(String id)
+    {
+    }
+    
+    /**
+     * Creates a new web module.
+     */
+    public void addWeb(WebModule web)
+      throws Exception
+    {
+      String webUri = web.getWebURI();
+      String contextUrl = web.getContextRoot();
+      Path path = _rootDir.lookup(webUri);
+
+      if (contextUrl == null)
+	contextUrl = webUri;
+
+      WebAppController controller = null;
+      if (webUri.endsWith(".war")) {
+	String name = webUri.substring(0, webUri.length() - 4);
+	int p = name.lastIndexOf('/');
+	if (p > 0)
+	  name = name.substring(p + 1);
+
+	Path expandPath = _webappsPath;
+	expandPath.mkdirs();
+
+	controller = new WebAppController(_container, contextUrl);
+	controller.setRootDirectory(expandPath.lookup(name));
+	controller.setArchivePath(path);
+      } else {
+	controller = new WebAppController(_container, contextUrl);
+	controller.setRootDirectory(path);
+      }
+
+      controller.setDynamicDeploy(true);
+      if (_configException != null)
+	controller.setConfigException(_configException);
+
+      controller.setManifestClassLoader(_loader);
+
+      _webApps.add(controller);
+    }
+    
+    /**
+     * Adds a new ejb module.
+     */
+    public void addEjb(Path path)
+      throws Exception
+    {
+      EJBServerInterface ejbServer = _localServer.getLevel();
+
+      if (ejbServer == null) {
+	throw new ConfigException(L.l("<ejb> module needs a configured <ejb-server>"));
+      }
+      
+      _loader.addJar(path);
+      // ejb/0853
+      _loader.addJarManifestClassPath(path);
+
+      ejbServer.addEJBJar(path);
+    }
+    
+    /**
+     * Adds a new java module.
+     */
+    public void addJava(Path path)
+      throws ConfigException
+    {
+      if (! path.canRead())
+	throw new ConfigException(L.l("<java> module {0} must be a valid path.",
+				      path));
+    }
+    
+    /**
+     * Adds a new connector
+     */
+    public void addConnector(String path)
+    {
+    }
+    
+    /**
+     * Adds a new alt-dd module.
+     */
+    public void addAltDD(String path)
+    {
+    }
   }
 }

@@ -68,7 +68,7 @@ public class WebAppSingleDeployGenerator extends DeployGenerator<WebAppControlle
 
   private ClassLoader _parentLoader;
 
-  private WebAppController _entry;
+  private WebAppController _controller;
 
   /**
    * Creates the new host deploy.
@@ -174,12 +174,12 @@ public class WebAppSingleDeployGenerator extends DeployGenerator<WebAppControlle
   }
 
   /**
-   * Initializes the entry.
+   * Initializes the controller.
    */
   public void init()
     throws Exception
   {
-    if (_entry != null)
+    if (_controller != null)
       return;
 
     String appDir = _config.getDocumentDirectory();
@@ -192,21 +192,21 @@ public class WebAppSingleDeployGenerator extends DeployGenerator<WebAppControlle
 					      _container.getDocumentDirectory());
     }
     
-    _entry = new WebAppController(_container, _urlPrefix);
+    _controller = new WebAppController(_container, _urlPrefix);
 
-    _entry.setName(_urlPrefix);
-    _entry.setRootDirectory(_rootDirectory);
+    _controller.setName(_urlPrefix);
+    _controller.setRootDirectory(_rootDirectory);
 
-    _entry.setArchivePath(_archivePath);
+    _controller.setArchivePath(_archivePath);
 
     if (_archivePath != null)
-      _entry.addDepend(_archivePath);
+      _controller.addDepend(_archivePath);
     
-    _entry.setParentWebApp(_parentWebApp);
+    _controller.setParentWebApp(_parentWebApp);
     
-    _entry.setWebAppConfig(_config);
+    _controller.setConfig(_config);
 
-    _entry.setSourceType("single");
+    _controller.setSourceType("single");
 
     Environment.addEnvironmentListener(this, _parentLoader);
   }
@@ -216,7 +216,7 @@ public class WebAppSingleDeployGenerator extends DeployGenerator<WebAppControlle
    */
   protected void fillDeployedKeys(Set<String> keys)
   {
-    keys.add(_entry.getName());
+    keys.add(_controller.getName());
   }
   
   /**
@@ -224,8 +224,8 @@ public class WebAppSingleDeployGenerator extends DeployGenerator<WebAppControlle
    */
   public WebAppController generateController(String name)
   {
-    if (_entry.isNameMatch(name))
-      return _entry;
+    if (_controller.isNameMatch(name))
+      return _controller;
     else
       return null;
   }
@@ -233,17 +233,17 @@ public class WebAppSingleDeployGenerator extends DeployGenerator<WebAppControlle
   /**
    * Merges the entries.
    */
-  public WebAppController mergeEntry(WebAppController entry, String name)
+  public WebAppController mergeEntry(WebAppController controller, String name)
   {
     // if directory matches, merge them
-    if (entry.getRootDirectory().equals(_entry.getRootDirectory()))
-      return entry.merge(_entry);
-    // else if the names don't match, return the new entry
-    else if (! _entry.isNameMatch(name))
-      return entry;
+    if (controller.getRootDirectory().equals(_controller.getRootDirectory()))
+      return controller.merge(_controller);
+    // else if the names don't match, return the new controller
+    else if (! _controller.isNameMatch(name))
+      return controller;
     // otherwise, the single deploy overrides
     else
-      return _entry;
+      return _controller;
   }
 
   /**

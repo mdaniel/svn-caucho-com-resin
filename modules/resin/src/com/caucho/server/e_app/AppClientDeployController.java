@@ -208,9 +208,12 @@ public class AppClientDeployController extends ExpandDeployController<EntAppClie
     
     Path xml = rootDir.lookup("META-INF/application.xml");
     
-    ApplicationConfig config;
+    ApplicationConfig config = null;
 
+    /*
+     * XXX:
     config = EnterpriseApplication.parseApplicationConfig(rootDir, xml);
+    */
       
     ArrayList<Path> ejbModules = config.getEjbModules();
     /*

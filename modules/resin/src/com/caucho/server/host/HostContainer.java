@@ -68,6 +68,8 @@ import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
 import com.caucho.vfs.WriteStream;
 
+import com.caucho.server.e_app.EarConfig;
+
 import com.caucho.server.webapp.WebAppConfig;
 import com.caucho.server.webapp.Application;
 
@@ -99,10 +101,12 @@ public class HostContainer implements DispatchBuilder {
     = new DeployContainer<HostController>();
   
   // The configured host entries
-  private ArrayList<HostController> _hostList = new ArrayList<HostController>();
+  private ArrayList<HostController> _hostList
+    = new ArrayList<HostController>();
   
   // Cache of hosts
-  private HashMap<String,HostController> _hostMap = new HashMap<String,HostController>();
+  private HashMap<String,HostController> _hostMap
+    = new HashMap<String,HostController>();
   private HostController _defaultHost;
 
   // Regexp host
@@ -110,7 +114,11 @@ public class HostContainer implements DispatchBuilder {
 
   // List of default application configurations
   private ArrayList<WebAppConfig> _webAppDefaultList
-  = new ArrayList<WebAppConfig>();
+    = new ArrayList<WebAppConfig>();
+  
+  // List of default ear configurations
+  private ArrayList<EarConfig> _earDefaultList
+    = new ArrayList<EarConfig>();
 
   // The configure exception
   private Throwable _configException;
@@ -269,6 +277,22 @@ public class HostContainer implements DispatchBuilder {
   }
 
   /**
+   * Adds an ear default
+   */
+  public void addEarDefault(EarConfig init)
+  {
+    _earDefaultList.add(init);
+  }
+
+  /**
+   * Returns the list of ear defaults
+   */
+  public ArrayList<EarConfig> getEarDefaultList()
+  {
+    return _earDefaultList;
+  }
+
+  /**
    * Clears the cache.
    */
   public void clearCache()
@@ -411,7 +435,7 @@ public class HostContainer implements DispatchBuilder {
 
       VariableResolver env = host.getVariableResolver();
     
-      HostConfig hostConfig = host.getHostConfig();
+      HostConfig hostConfig = host.getConfig();
 
       String rawHostName = hostConfig.getHostName();
       if (rawHostName != null && ! rawHostName.equals(""))
@@ -474,6 +498,7 @@ public class HostContainer implements DispatchBuilder {
 	file.setServletClass("com.caucho.servlets.FileServlet");
 	file.init();
 	_errorApplication.addServletMapping(file);
+	
 	for (WebAppConfig config : _webAppDefaultList) {
 	  try {
 	    config.getBuilderProgram().configure(_errorApplication);
@@ -481,6 +506,7 @@ public class HostContainer implements DispatchBuilder {
 	    log.log(Level.WARNING, e.toString(), e);
 	  }
 	}
+	
 	_errorApplication.init();
       } catch (Throwable e) {
 	log.log(Level.WARNING, e.toString(), e);
