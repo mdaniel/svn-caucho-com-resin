@@ -304,6 +304,8 @@ public class PathJndiContext implements Context {
   public Object addToEnvironment(String prop, Object value)
     throws NamingException
   {
+    throw new UnsupportedOperationException();
+    /*
     try {
       Object old = _path.getAttribute(prop);
       _path.setAttribute(prop, value);
@@ -311,11 +313,14 @@ public class PathJndiContext implements Context {
     } catch (IOException e) {
       throw new NamingException(e.toString());
     }
+    */
   }
 
   public Object removeFromEnvironment(String prop)
     throws NamingException
   {
+    throw new UnsupportedOperationException();
+    /*
     try {
       Object old = _path.getAttribute(prop);
       _path.removeAttribute(prop);
@@ -323,6 +328,7 @@ public class PathJndiContext implements Context {
     } catch (IOException e) {
       throw new NamingException(e.toString());
     }
+    */
   }
 
   public Hashtable getEnvironment()

@@ -41,13 +41,13 @@ public class CreateServlet extends HttpServlet {
 
     if (course == null) {
       course = new Course("Potions", "Severus Snape");
-      _entityManager.create(course);
+      _entityManager.persist(course);
 	
       course = new Course("Transfiguration", "Minerva McGonagall");
-      _entityManager.create(course);
+      _entityManager.persist(course);
 	
       course = new Course("Defense Against the Dark Arts", "Remus Lupin");
-      _entityManager.create(course);
+      _entityManager.persist(course);
     }
   }
 
@@ -71,12 +71,12 @@ public class CreateServlet extends HttpServlet {
       divination = new Course("Divination", "Sybil Trelawney");
 
       // creates the divination course
-      _entityManager.create(divination);
+      _entityManager.persist(divination);
     
       creatures = new Course("Care of Magical Creatures", "Rubeus Hagrid");
 
       // creates the creatures course
-      _entityManager.create(creatures);
+      _entityManager.persist(creatures);
 
       out.println("<h3>Adding some classes</h3>");
       displayCourses(out, courseQuery);

@@ -59,7 +59,10 @@ abstract public class JAnnotationObject {
    */
   public JAnnotation getAnnotation(Class cl)
   {
-    return getAnnotation(cl.getName());
+    if (cl != null)
+      return getAnnotation(cl.getName());
+    else
+      return null;
   }
 
   /**

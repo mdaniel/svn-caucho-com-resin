@@ -322,14 +322,19 @@ public class HessianOutput extends AbstractHessianOutput {
     throws IOException
   {
     os.write('V');
-    os.write('t');
-    printLenString(type);
-    
-    os.write('l');
-    os.write(length >> 24);
-    os.write(length >> 16);
-    os.write(length >> 8);
-    os.write(length);
+
+    if (type != null) {
+      os.write('t');
+      printLenString(type);
+    }
+
+    if (length >= 0) {
+      os.write('l');
+      os.write(length >> 24);
+      os.write(length >> 16);
+      os.write(length >> 8);
+      os.write(length);
+    }
   }
 
   /**

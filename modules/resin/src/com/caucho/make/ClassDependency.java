@@ -115,9 +115,9 @@ public class ClassDependency implements PersistentDependency {
 
       digest = addDigest(digest, _cl.getModifiers());
 
-      Class cl = _cl.getSuperclass();
-      if (cl != null)
-        digest = addDigest(digest, cl.getName());
+      Class superClass = _cl.getSuperclass();
+      if (superClass != null)
+        digest = addDigest(digest, superClass.getName());
 
       Class []interfaces = _cl.getInterfaces();
       Arrays.sort(interfaces, new ClassComparator());
@@ -130,11 +130,11 @@ public class ClassDependency implements PersistentDependency {
 
       if (_checkFields) {
         for (int i = 0; i < fields.length; i++) {
-          if (Modifier.isPrivate(fields[i].getModifiers()) &&
-              ! _checkPrivate)
+	  int modifiers = fields[i].getModifiers();
+	  
+          if (Modifier.isPrivate(modifiers) && ! _checkPrivate)
             continue;
-          if (Modifier.isProtected(fields[i].getModifiers()) &&
-              ! _checkProtected)
+          if (Modifier.isProtected(modifiers) && ! _checkProtected)
             continue;
           
           digest = addDigest(digest, fields[i].getName());
@@ -148,12 +148,13 @@ public class ClassDependency implements PersistentDependency {
       
       for (int i = 0; i < methods.length; i++) {
         Method method = methods[i];
+	int modifiers = method.getModifiers();
 
-        if (Modifier.isPrivate(method.getModifiers()) && ! _checkPrivate)
+        if (Modifier.isPrivate(modifiers) && ! _checkPrivate)
           continue;
-        if (Modifier.isProtected(method.getModifiers()) && ! _checkProtected)
+        if (Modifier.isProtected(modifiers) && ! _checkProtected)
           continue;
-        if (Modifier.isStatic(method.getModifiers()) && ! _checkStatic)
+        if (Modifier.isStatic(modifiers) && ! _checkStatic)
           continue;
           
         digest = addDigest(digest, method.getName());
@@ -167,6 +168,7 @@ public class ClassDependency implements PersistentDependency {
         digest = addDigest(digest, method.getReturnType().getName());
 
         Class []exn = method.getExceptionTypes();
+	Arrays.sort(exn, new ClassComparator());
         for (int j = 0; j < exn.length; j++)
           digest = addDigest(digest, exn[j].getName());
       }
@@ -212,7 +214,12 @@ public class ClassDependency implements PersistentDependency {
     return Crc64.generate(digest, string);
   }
 
-  public boolean isEqual(Object o)
+  public int hashCode()
+  {
+    return _cl.hashCode();
+  }
+
+  public boolean equals(Object o)
   {
     if (o == this)
       return true;

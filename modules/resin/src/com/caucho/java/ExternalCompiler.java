@@ -45,6 +45,8 @@ public class ExternalCompiler extends AbstractJavaCompiler {
   
   Process _process;
   String _userPrefix;
+  InputStream _errorStream;
+  InputStream _inputStream;
   
   boolean _isDead;
   
@@ -64,8 +66,8 @@ public class ExternalCompiler extends AbstractJavaCompiler {
   {
     MemoryStream tempStream = new MemoryStream();
     WriteStream error = new WriteStream(tempStream);
-    InputStream inputStream = null;
-    InputStream errorStream = null;
+    _inputStream = null;
+    _errorStream = null;
     boolean chdir = CauchoSystem.isUnix();
 
     _process = null;
@@ -145,8 +147,8 @@ public class ExternalCompiler extends AbstractJavaCompiler {
 
       _process = executeCompiler(argList, envList, chdir);
       if (_process != null) {
-        inputStream = _process.getInputStream();
-        errorStream = _process.getErrorStream();
+        _inputStream = _process.getInputStream();
+        _errorStream = _process.getErrorStream();
       }
 
       /*
@@ -159,7 +161,7 @@ public class ExternalCompiler extends AbstractJavaCompiler {
       int status = 666;
 
       try {
-        waitForErrors(error, inputStream, errorStream);
+        waitForErrors(error, _inputStream, _errorStream);
         
         if (_process != null) {
           status = _process.waitFor();
@@ -181,12 +183,6 @@ public class ExternalCompiler extends AbstractJavaCompiler {
 
       if (_process != null) {
         status = 666;
-        
-        try {
-          _process.destroy();
-        } catch (Throwable e) {
-          log.log(Level.FINE, e.toString(), e);
-        }
       }
 
       error.close();
@@ -263,10 +259,28 @@ public class ExternalCompiler extends AbstractJavaCompiler {
 
       throw new JavaCompileException(errors);
     } finally {
-      if (inputStream != null)
-	inputStream.close();
-      if (errorStream != null)
-	errorStream.close();
+      if (_inputStream != null) {
+	try {
+	  _inputStream.close();
+	} catch (Throwable e) {
+	}
+      }
+      
+      if (_errorStream != null) {
+	try {
+	  _errorStream.close();
+	} catch (Throwable e) {
+	}
+      }
+
+      if (_process != null) {
+        try {
+          _process.destroy();
+        } catch (Throwable e) {
+          log.log(Level.FINE, e.toString(), e);
+        }
+      }
+      
       tempStream.destroy();
     }
   }
@@ -329,11 +343,33 @@ public class ExternalCompiler extends AbstractJavaCompiler {
   public void handleAlarm(Alarm alarm)
   {
     _isDead = true;
+    abort();
+  }
+
+  /**
+   * Aborts the compilation.
+   */
+  public void abort()
+  {
+    if (_inputStream != null) {
+      try {
+	_inputStream.close();
+      } catch (Throwable e) {
+      }
+    }
+      
+    if (_errorStream != null) {
+      try {
+	_errorStream.close();
+      } catch (Throwable e) {
+      }
+    }
+
     if (_process != null) {
       try {
-        _process.destroy();
+	_process.destroy();
       } catch (Throwable e) {
-        log.log(Level.WARNING, e.toString(), e);
+	log.log(Level.FINE, e.toString(), e);
       }
     }
   }

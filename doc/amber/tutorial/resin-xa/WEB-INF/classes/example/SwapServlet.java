@@ -40,13 +40,13 @@ public class SwapServlet extends HttpServlet {
     potions.setCourse("Potions");
     potions.setTeacher("Severus Snape");
 
-    _manager.create(potions);
+    _manager.persist(potions);
 
     Course xfig = new Course();
     xfig.setCourse("Transfiguration");
     xfig.setTeacher("Minerva McGonagall");
 
-    _manager.create(xfig);
+    _manager.persist(xfig);
   }
 
   /**

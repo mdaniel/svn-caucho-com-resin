@@ -78,7 +78,7 @@ import com.caucho.log.Log;
 
 import com.caucho.relaxng.CompactVerifierFactoryImpl;
 
-import com.caucho.config.NodeBuilder;
+import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
 import com.caucho.config.BuilderProgram;
 import com.caucho.config.types.PathBuilder;
@@ -429,14 +429,11 @@ public class EnterpriseApplication
   }
 
   static ApplicationConfig parseApplicationConfig(Path rootDir, Path appXml)
-    throws IOException, ConfigException, SAXException
+    throws Exception
   {
     ApplicationConfig config = new ApplicationConfig();
 
-    NodeBuilder builder = new NodeBuilder();
-    builder.setCompactSchema("com/caucho/server/e_app/ear.rnc");
-
-    builder.configure(config, appXml);
+    Config.configure(config, appXml, "com/caucho/server/e_app/ear.rnc");
 
     return config;
   }

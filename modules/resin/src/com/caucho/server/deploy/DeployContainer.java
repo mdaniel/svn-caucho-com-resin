@@ -118,14 +118,6 @@ public class DeployContainer<E extends DeployController>
   }
 
   /**
-   * Redeploys modified deployments.
-   */
-  public void redeployIfModified()
-  {
-    _deployList.redeployIfModified();
-  }
-
-  /**
    * Initialize the container.
    */
   public void init()
@@ -147,9 +139,9 @@ public class DeployContainer<E extends DeployController>
     _deployList.start();
 
     for (int i = 0; i < _controllerList.size(); i++) {
-      E entry = _controllerList.get(i);
+      E controller = _controllerList.get(i);
 
-      entry.startOnInit();
+      controller.startOnInit();
     }
   }
 
@@ -171,7 +163,7 @@ public class DeployContainer<E extends DeployController>
   /**
    * Returns the deployed entries.
    */
-  public ArrayList<E> getEntries()
+  public ArrayList<E> getControllers()
   {
     ArrayList<E> list = new ArrayList<E>();
 
@@ -240,7 +232,6 @@ public class DeployContainer<E extends DeployController>
 
     // server/102u
     if (newEntry != null && ! _controllerList.contains(newEntry)) {
-      newEntry.setDeployContainer(this);
       _controllerList.add(newEntry);
 
       init(newEntry);
@@ -284,7 +275,6 @@ public class DeployContainer<E extends DeployController>
       if (entry != null)
 	return entry;
 
-      newEntry.setDeployContainer(this);
       _controllerList.add(newEntry);
     }
 

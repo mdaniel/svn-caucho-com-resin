@@ -197,8 +197,16 @@ public class ServletServer extends ProtocolDispatchServer
   public ServletServer()
     throws Exception
   {
-    _classLoader = new EnhancingClassLoader();
-    _classLoader.setOwner(this);
+    this(Thread.currentThread().getContextClassLoader());
+  }
+  
+  /**
+   * Creates a new servlet server.
+   */
+  public ServletServer(ClassLoader parentLoader)
+    throws Exception
+  {
+    _classLoader = new EnvironmentClassLoader(parentLoader);
 
     Environment.addClassLoaderListener(this, _classLoader);
 
@@ -747,6 +755,8 @@ public class ServletServer extends ProtocolDispatchServer
   public void addHttp(Port port)
     throws Exception
   {
+    port.setServer(this);
+    
     if (_url.equals("") && _serverId.equals(port.getServerId())) {
       if (port.getHost() == null || port.getHost().equals("") ||
           port.getHost().equals("*"))
@@ -868,6 +878,8 @@ public class ServletServer extends ProtocolDispatchServer
   public void start()
     throws Throwable
   {
+    init();
+    
     Thread thread = Thread.currentThread();
     ClassLoader oldLoader = thread.getContextClassLoader();
     try {

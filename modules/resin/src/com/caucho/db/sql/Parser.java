@@ -736,7 +736,8 @@ public class Parser {
     else if (type.equalsIgnoreCase("integer") ||
 	     type.equalsIgnoreCase("int") ||
 	     type.equalsIgnoreCase("smallint") ||
-	     type.equalsIgnoreCase("tinyint")) {
+	     type.equalsIgnoreCase("tinyint") ||
+	     type.equalsIgnoreCase("bit")) {
       factory.addInteger(name);
     }
     else if (type.equalsIgnoreCase("bigint")) {

@@ -4,6 +4,16 @@
 
 <s2 title='3.0.snap - March 21, 2005'>
 <ul>
+<li>clustered store wasn't properly invalidating remote
+<li>clustered session id problem with overflow of 64 (rep by Dan Schwalbe)
+<li>Added config: scheme and RemoteFilesystemServlet
+<li>ClassDependency needs to sort Exception
+<li>Allow resin:type in openssl password (rep by John Didion)
+<li>Added multipart form upload check for full disk (rep by Paul Nakada)
+<li>JMX wasn't registering the JMX delegate properly (rep by Jason Chaffee)
+<li>JDK 1.4 compat must remove LocalVariableTypeTable and fix LocalVariableTable for jikes 1.22 (rep by Joel Firehammer)
+<li>Caching db.Store needs to close RandomAccessFile, since RandomAccessFile doesn't seem to have a finalizer
+<li>Added static com.caucho.server.resin.Resin.shutdown() (rep by 
 <li>Hessian readResolve/writeReplace were requiring public (rep by Josh Helmer)
 <li>(2005-03-21) AccessLog for hmux was printing remote IP for local machine, not client (rep by Markus Ken Moriyama)
 <li>Cluster communication issues with keepalive

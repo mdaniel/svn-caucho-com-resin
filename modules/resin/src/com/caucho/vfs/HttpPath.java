@@ -98,7 +98,7 @@ public class HttpPath extends FilesystemPath {
    *
    * @return the final path.
    */
-  public Path lookup(String userPath, Map<String,Object> newAttributes)
+  public Path lookupImpl(String userPath, Map<String,Object> newAttributes)
   {
     String newPath;
 

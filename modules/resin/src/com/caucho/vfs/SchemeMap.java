@@ -235,6 +235,8 @@ public class SchemeMap {
     VfsStream nullStream = new VfsStream(null, null);
     DEFAULT_SCHEME_MAP.put("null", new ConstPath(null, nullStream));
     DEFAULT_SCHEME_MAP.put("jndi", new JndiPath());
+    
+    DEFAULT_SCHEME_MAP.put("config", new ConfigPath());
 
     _localSchemeMap.setGlobal(DEFAULT_SCHEME_MAP);
   }

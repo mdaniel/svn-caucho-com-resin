@@ -19,10 +19,10 @@
     <item link="db/index.xtp" title="Databases" atoc-descend="true"/>
     <item link="jmx/index.xtp" title="Admin (JMX)" atoc-descend="true"/>
 <!--
-    <item link="amber/index.xtp" title="Amber" atoc-descend="true"/>
 -->
     <item link='cmp/index.xtp' title='CMP' product="resin-ee" atoc-descend="true"/>
     <item link='ejb/index.xtp' title='EJB' product="resin-ee" atoc-descend="true"/>
+    <item link="amber/index.xtp" title="Amber" atoc-descend="true"/>
     <item link="ejb3/index.xtp" title="EJB 3.0" product="resin-ee" atoc-descend="true"/>
     <item link='security/index.xtp' title='Security' atoc-descend="true"/>
     <item link='xml/index.xtp' title='XML and XSLT' atoc-descend="true"/>

@@ -954,7 +954,7 @@ public class ApplicationContainer
    */
   public ArrayList<WebAppController> getApplicationList()
   {
-    return _appDeploy.getEntries();
+    return _appDeploy.getControllers();
   }
 
   /**
@@ -962,7 +962,7 @@ public class ApplicationContainer
    */
   public ArrayList<EarDeployController> getEntAppList()
   {
-    return _earDeploy.getEntries();
+    return _earDeploy.getControllers();
   }
 
   /**

@@ -8,6 +8,55 @@
 
 <summary objsummary='localtoc'/>
 
+<section title="clustered configuration and deployment">
+
+<p>Resin Pro can now be configured and deployed based on a master
+configuration server.  Configuration files and .wars placed on the
+master will be propagated to the cluster.</p>
+
+<p>The clustered files use the special "config:" scheme in the configuration
+file, e.g. in archive-directory.  The scheme is read-only and backed
+up on a client-side database to provide reliability when the master
+is taken down.</p>
+
+<example title="master configuration">
+&lt;servlet-mapping url-pattern="/config">
+  &lt;servlet-class>com.caucho.vfs.remote.RemoteFilesystemServlet&lt;/servlet-class>
+  &lt;init>
+    &lt;root>${resin.rootDir}&lt;/root>
+  &lt;/init>
+&lt;/servlet-mapping>
+</example>
+
+<p>On a config client, "config:" reads from the master.
+On the master or a non-clustered server, "config:" acts as a normal
+relative path.</p>
+
+<example title="webapps configuration">
+&lt;web-app-deploy>
+  &lt;archive-directory>config:webapps&lt;archive-directory>
+  &lt;expand-directory>webapps&lt;/expand-directory>
+&lt;web-app-deploy>
+</example>
+
+<p>The config clients are started with the "-config-server"
+command-line argument, pointing to the configuration server.</p>
+
+<example>
+unix> bin/httpd.sh -config-server http://config:8081/config \
+                   -conf config:conf/resin.conf \
+                   -server a
+</example>
+
+</section>
+
+<section title="resin:type">
+
+<p>resin:type is now allowed in more places in the configuration file,
+in particular in the openssl &lt;password> element.</p>
+
+</section>
+
 <section title="Connection configuration">
 
 <p>The &lt;database> configuration can now configure the created

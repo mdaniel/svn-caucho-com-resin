@@ -224,6 +224,11 @@ public class Port implements EnvironmentListener, PortMBean, Runnable {
   public void setProtocol(Protocol protocol)
     throws ConfigException
   {
+    /* server/0170
+    if (_server == null)
+      throw new IllegalStateException(L.l("Server is not set."));
+    */
+    
     _protocol = protocol;
     _protocol.setServer(_server);
   }

@@ -42,7 +42,7 @@ import com.caucho.log.Log;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
 
-import com.caucho.config.NodeBuilder;
+import com.caucho.config.Config;
 import com.caucho.config.SchemaBean;
 import com.caucho.config.ConfigException;
 
@@ -109,22 +109,16 @@ public class ResinInclude extends ResinControl {
     
     Object object = getObject();
 
-    NodeBuilder builder = new NodeBuilder();
+    Schema schema = null;
 
     // Use the relax schema for beans with schema.
     if (object instanceof SchemaBean) {
-      Schema schema = ((SchemaBean) object).getSchema();
-
-      builder.setSchema(schema);
+      schema = ((SchemaBean) object).getSchema();
     }
 
     log.config(L.l("resin:include '{0}'", _path.getNativePath()));
 
-    LooseXml xml = new LooseXml();
-
-    Document doc = xml.parseDocument(_path);
-
-    builder.configure(object, doc);
+    Config.configure(object, _path, schema);
   }
 }
 

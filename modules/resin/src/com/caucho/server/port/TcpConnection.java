@@ -490,8 +490,10 @@ public class TcpConnection extends PortConnection implements ThreadTask {
   }
 
   // XXX: is this necessary?
+  /*
   public void finalize()
   {
     closeImpl();
   }
+  */
 }

@@ -49,6 +49,7 @@ import com.caucho.db.Database;
 import com.caucho.db.store.Transaction;
 
 import com.caucho.db.sql.Query;
+import com.caucho.db.sql.SelectQuery;
 import com.caucho.db.sql.QueryContext;
 
 /**
@@ -115,6 +116,12 @@ public class StatementImpl implements java.sql.Statement {
     
     Query query = _db.parseQuery(sql);
 
+    return executeQuery(query);
+  }
+  
+  private java.sql.ResultSet executeQuery(Query query)
+    throws SQLException
+  {
     query.execute(_queryContext, _conn.getTransaction());
     
     _rs = new ResultSetImpl(this, _queryContext.getResult());
@@ -207,7 +214,18 @@ public class StatementImpl implements java.sql.Statement {
   public boolean execute(String sql)
     throws SQLException
   {
-    return false;
+    Query query = _db.parseQuery(sql);
+
+    if (query instanceof SelectQuery) {
+      executeQuery(query);
+
+      return true;
+    }
+    else {
+      executeUpdate(query);
+
+      return false;
+    }
   }
 
   public int[]executeBatch()

@@ -408,9 +408,9 @@ public class EnvironmentClassLoader extends DynamicClassLoader {
   public String toString()
   {
     if (getId() != null)
-      return "EnvironmentClassLoader[" + getId() + "]";
+      return "EnvironmentClassLoader$" + System.identityHashCode(this) + "[" + getId() + "]";
     else
-      return "EnvironmentClassLoader" + getLoaders();
+      return "EnvironmentClassLoader$" + System.identityHashCode(this) + getLoaders();
   }
   
   /**

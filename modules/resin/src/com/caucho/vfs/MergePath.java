@@ -584,32 +584,6 @@ public class MergePath extends FilesystemPath {
   }
 
   /**
-   * Returns the relative path.
-   */
-  /*
-  public String getRelativePath()
-  {
-    ArrayList pathList = ((MergePath) _root).pathList;
-    for (int i = 0; i < pathList.size(); i++) {
-      Path path = (Path) pathList.get(i);
-
-      String subPath = path.getPath();
-      
-      if (pathname.startsWith(subPath)) {
-        String newPath = pathname.substring(subPath.length());
-
-        if (newPath.equals(""))
-          return ".";
-        else
-          return newPath;
-      }
-    }
-
-    return pathname;
-  }
-  */
-
-  /**
    * Returns the first matching path.
    */
   public Path getWritePath()
@@ -671,7 +645,7 @@ public class MergePath extends FilesystemPath {
 
     return new NotFoundPath(_userPath);
   }
-
+  
   /**
    * Returns a name for the path
    */

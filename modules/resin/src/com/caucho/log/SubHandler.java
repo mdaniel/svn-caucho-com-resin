@@ -45,6 +45,7 @@ import com.caucho.config.ConfigException;
 
 import com.caucho.loader.Environment;
 import com.caucho.loader.EnvironmentLocal;
+import com.caucho.loader.CloseListener;
 
 /**
  * Proxy for an underlying handler, e.g. to handle different
@@ -86,9 +87,10 @@ public class SubHandler extends Handler {
    */
   public void close()
   {
-    _handler.close();
+    if (_handler != null)
+      _handler.close();
 
-    _handle = null;
+    _handler = null;
   }
 
   /**

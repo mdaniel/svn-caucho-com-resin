@@ -43,8 +43,8 @@ import com.caucho.log.Log;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
 
+import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
-import com.caucho.config.NodeBuilder;
 
 import com.caucho.jca.cfg.ConnectorConfig;
 import com.caucho.jca.cfg.ResourceAdapterConfig;
@@ -116,10 +116,7 @@ public class ResourceManagerConfig {
 	try {
 	  ConnectorConfig conn = new ConnectorConfig();
 
-	  NodeBuilder builder = new NodeBuilder();
-	  builder.setCompactSchema("com/caucho/jca/jca.rnc");
-
-	  builder.configure(conn, is);
+	  Config.configure(conn, is, "com/caucho/jca/jca.rnc");
 
 	  _connList.add(conn);
 	} finally {

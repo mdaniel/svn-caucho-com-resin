@@ -30,25 +30,26 @@
 package com.caucho.server.deploy;
 
 /**
- * The start-mode="lazy", redeploy-model="automatic" controller strategy.
+ * The start-mode="lazy", redeploy-model="manual" controller strategy.
+ *
+ * initial state = stop
  *
  * <table>
  * <tr><th>input  <th>stopped  <th>active  <th>modified   <th>error
- * <tr><td>request<td>startImpl<td>-       <td>restartImpl<td>restartImpl
- * <tr><td>include<td>startImpl<td>-       <td>-          <td>-
  * <tr><td>start  <td>startImpl<td>-       <td>restartImpl<td>restartImpl
- * <tr><td>restart<td>startImpl<td>-       <td>restartImpl<td>restartImpl
+ * <tr><td>update <td>startImpl<td>-       <td>restartImpl<td>restartImpl
  * <tr><td>stop   <td>-        <td>stopImpl<td>stopImpl   <td>stopImpl
- * <tr><td>alarm  <td>-        <td>-       <td>stopImpl   <td>stopImpl
+ * <tr><td>request<td>-        <td>-       <td>-          <td>-
+ * <tr><td>include<td>-        <td>-       <td>-          <td>-
+ * <tr><td>alarm  <td>-        <td>-       <td>-          <td>-
  * </table>
  */
-public class StartLazyRedeployAutomaticStrategy
-  extends AbstractDeployControllerStrategy {
-  private final static StartLazyRedeployAutomaticStrategy STRATEGY =
-          new StartLazyRedeployAutomaticStrategy();
+public class StartLazyRedeployManualStrategy
+  extends StartManualRedeployManualStrategy {
+  private final static StartLazyRedeployManualStrategy STRATEGY =
+          new StartLazyRedeployManualStrategy();
 
-
-  private StartLazyRedeployAutomaticStrategy()
+  private StartLazyRedeployManualStrategy()
   {
   }
 
@@ -61,7 +62,7 @@ public class StartLazyRedeployAutomaticStrategy
   {
     return STRATEGY;
   }
-
+  
   /**
    * Called at initialization time for automatic start.
    *
@@ -71,38 +72,6 @@ public class StartLazyRedeployAutomaticStrategy
     void startOnInit(DeployController<I> controller)
   {
     controller.stopLazyImpl();
-  }
-
-
-  /**
-   * Checks for updates from an admin command.  The target state will be the
-   * initial state, i.e. update will not start a lazy instance.
-   *
-   * @param controller the owning controller
-   */
-  public<I extends DeployInstance>
-    void update(DeployController<I> controller)
-  {
-    if (controller.isStopped()) {
-      // server/1d05
-      controller.stopLazyImpl();
-    }
-    else if (controller.isStoppedLazy()) {
-      // server/1d08
-    }
-    else if (controller.isModifiedNow()) {
-      // 1d0n, 1d0o
-      controller.stopLazyImpl();
-    }
-    else if (controller.isError()) {
-      controller.stopLazyImpl();
-    }
-    else if (controller.isActiveIdle()) {
-      controller.stopLazyImpl();
-    }
-    else { /* active */
-      // server/1d0h
-    }
   }
 
   /**
@@ -115,19 +84,12 @@ public class StartLazyRedeployAutomaticStrategy
           I request(DeployController<I> controller)
   {
     if (controller.isStopped()) {
-      // server/1d00
       return controller.getDeployInstance();
     }
     else if (controller.isStoppedLazy()) {
-      // server/1d06
       return controller.startImpl();
     }
-    else if (controller.isModified()) {
-      // server/1d0i
-      return controller.restartImpl();
-    }
-    else { /* active */
-      // server/1d0c
+    else {
       return controller.getDeployInstance();
     }
   }
@@ -142,45 +104,14 @@ public class StartLazyRedeployAutomaticStrategy
           I subrequest(DeployController<I> controller)
   {
     if (controller.isStopped()) {
-      // server/1d01
       return controller.getDeployInstance();
     }
     else if (controller.isStoppedLazy()) {
-      // server/1d07
       return controller.startImpl();
-    }
-    else if (controller.isModified()) {
-      // server/1d0j
-      return controller.getDeployInstance();
     }
     else { /* active */
       // server/1d0d
       return controller.getDeployInstance();
-    }
-  }
-
-  /**
-   * Redeployment on a timeout alarm.
-   *
-   * @param controller the owning controller
-   */
-  public <I extends DeployInstance>
-          void alarm(DeployController<I> controller)
-  {
-    if (controller.isStopped()) {
-      // server/1d02
-    }
-    else if (controller.isStoppedLazy()) {
-      // server/1d08
-    }
-    else if (controller.isModified()) {
-      // server/1d0k
-      controller.stopLazyImpl();
-    }
-    else if (controller.isActiveIdle()) {
-      controller.stopImpl();
-    }
-    else { /* active */
     }
   }
 }

@@ -221,9 +221,13 @@ public class Jdk15Compat {
     ArrayList<Attribute> attrList = jCode.getAttributes();
     for (int i = attrList.size() - 1; i >= 0; i--) {
       Attribute attr = attrList.get(i);
-      
-      if (attr.getName().equals("LocalVariableTypeTable")) {
-	convertVariableTypeTable((OpaqueAttribute) attr);
+
+      if (attr.getName().equals("LocalVariableTable")) {
+	convertLocalVariableTable((OpaqueAttribute) attr);
+      }
+      else if (attr.getName().equals("LocalVariableTypeTable")) {
+	attrList.remove(i);
+	// convertVariableTypeTable((OpaqueAttribute) attr);
       }
     }
     jCode.setAttributes(attrList);
@@ -247,6 +251,30 @@ public class Jdk15Compat {
   }
 
   private void convertVariableTypeTable(OpaqueAttribute attr)
+    throws Exception
+  {
+    byte []data = attr.getValue();
+
+    int offset = 0;
+    int len = readShort(data, offset);
+    offset += 2;
+
+    for (int i = 0; i < len; i++) {
+      int index = readShort(data, offset + 6);
+
+      String descriptor = _jPool.getUtf8AsString(index);
+
+      String newValue = convertDescriptor(descriptor);
+      
+      Utf8Constant newDescriptor = _jPool.addUTF8(newValue);
+
+      writeShort(data, offset + 6, newDescriptor.getIndex());
+
+      offset += 10;
+    }
+  }
+
+  private void convertLocalVariableTable(OpaqueAttribute attr)
     throws Exception
   {
     byte []data = attr.getValue();

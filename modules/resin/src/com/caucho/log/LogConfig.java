@@ -49,6 +49,7 @@ import com.caucho.loader.Environment;
 import com.caucho.loader.EnvironmentLocal;
 import com.caucho.loader.ClassLoaderListener;
 import com.caucho.loader.DynamicClassLoader;
+import com.caucho.loader.CloseListener;
 
 import com.caucho.log.mbean.LogMBean;
 

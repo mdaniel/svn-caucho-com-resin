@@ -103,8 +103,8 @@ class MBeanServerImpl extends AbstractMBeanServer {
     _context = new MBeanContext(this, loader, delegate);
 
     try {
-      StandardMBean mbean;
-      mbean = new StandardMBean(delegate, MBeanServerDelegateMBean.class);
+      IntrospectionMBean mbean;
+      mbean = new IntrospectionMBean(delegate, MBeanServerDelegateMBean.class);
 
       registerMBean(mbean, SERVER_DELEGATE_NAME);
     } catch (Exception e) {

@@ -89,7 +89,7 @@ class NotFoundPath extends Path {
   /**
    * Dummy return.
    */
-  public Path lookup(String userPath, Map<String,Object> newAttributes)
+  public Path lookupImpl(String userPath, Map<String,Object> newAttributes)
   {
     return this;
   }

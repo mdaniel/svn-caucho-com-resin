@@ -798,18 +798,26 @@ public class DynamicClassLoader extends java.net.URLClassLoader
    */
   public final boolean isModified(boolean enable)
   {
-    if (_lifecycle.isDestroyed())
+    if (_lifecycle.isDestroyed()) {
       return true;
+    }
 
     DependencyContainer dependencies = _dependencies;
 
-    if (dependencies == null)
+    if (dependencies == null) {
       return true;
+    }
 
-    if (enable)
-      return dependencies.isModified();
-    else
-      return isModified(getParent());
+    if (enable) {
+      boolean isModified = dependencies.isModified();
+      
+      return isModified;
+    }
+    else {
+      boolean isModified = isModified(getParent());
+
+      return isModified;
+    }
   }
 
   /**
@@ -1520,7 +1528,7 @@ public class DynamicClassLoader extends java.net.URLClassLoader
   }
 
   // XXX: GC issues
-  /*
+  /*n
   protected void finalize()
   {
     destroy();

@@ -67,7 +67,6 @@ abstract public class DeployController<I extends DeployInstance>
   public static final String REDEPLOY_LAZY = "lazy";
   public static final String REDEPLOY_MANUAL = "manual";
 
-  private DeployContainer _deployContainer;
   private ClassLoader _parentLoader;
   
   private String _name;
@@ -96,14 +95,6 @@ abstract public class DeployController<I extends DeployInstance>
       parentLoader = Thread.currentThread().getContextClassLoader();
     
     _parentLoader = parentLoader;
-  }
-
-  /**
-   * Sets the deploy container.
-   */
-  public void setDeployContainer(DeployContainer deploy)
-  {
-    _deployContainer = deploy;
   }
 
   /**
@@ -179,31 +170,6 @@ abstract public class DeployController<I extends DeployInstance>
   }
 
   /**
-   * Returns true for automatic startup.
-   */
-  public boolean isStartupAutomatic()
-  {
-    return (_startupMode == STARTUP_AUTOMATIC ||
-	    _startupMode == STARTUP_DEFAULT);
-  }
-
-  /**
-   * Returns true for lazy startup.
-   */
-  public boolean isStartupLazy()
-  {
-    return _startupMode == STARTUP_LAZY;
-  }
-
-  /**
-   * Returns true for manual startup.
-   */
-  public boolean isStartupManual()
-  {
-    return _startupMode == STARTUP_MANUAL;
-  }
-
-  /**
    * Sets the redeploy mode.
    */
   public void setRedeployMode(String mode)
@@ -252,32 +218,6 @@ abstract public class DeployController<I extends DeployInstance>
   }
 
   /**
-   * Returns true for automatic redeploy.
-   */
-  public boolean isRedeployAutomatic()
-  {
-    return (_redeployMode == REDEPLOY_AUTOMATIC ||
-	    _redeployMode == REDEPLOY_DEFAULT);
-  }
-
-  /**
-   * Returns true for lazy redeploy.
-   */
-  public boolean isRedeployLazy()
-  {
-    return _redeployMode == REDEPLOY_LAZY;
-  }
-
-  /**
-   * Returns true for manual redeploy.
-   */
-  public boolean isRedeployManual()
-  {
-    return (_redeployMode == REDEPLOY_MANUAL ||
-	    _startupMode == STARTUP_MANUAL);
-  }
-
-  /**
    * Returns true if the entry matches.
    */
   public boolean isNameMatch(String name)
@@ -303,11 +243,19 @@ abstract public class DeployController<I extends DeployInstance>
     if (_parentLoader != Thread.currentThread().getContextClassLoader())
       throw new IllegalStateException(L.l("init must be called from parent class loader"));
 
-    if (_redeployMode == REDEPLOY_MANUAL)
-      _strategy = StartManualRedeployManualStrategy.create();
+    if (_redeployMode == REDEPLOY_MANUAL) {
+      if (_startupMode == STARTUP_MANUAL)
+        _strategy = StartManualRedeployManualStrategy.create();
+      else if (_startupMode == STARTUP_LAZY)
+        _strategy = StartLazyRedeployManualStrategy.create();
+      else
+        _strategy = StartAutoRedeployManualStrategy.create();
+    }
     else {
       if (_startupMode == STARTUP_LAZY)
         _strategy = StartLazyRedeployAutomaticStrategy.create();
+      else if (_startupMode == STARTUP_MANUAL)
+	throw new IllegalStateException(L.l("startup='manual' and redeploy='automatic' is an unsupported combination."));
       else
         _strategy = StartAutoRedeployAutoStrategy.create();
     }
@@ -490,73 +438,6 @@ abstract public class DeployController<I extends DeployInstance>
     return _strategy.subrequest(this);
   }
 
-  /**
-   * Redeploys the entry if it's modified.
-   */
-  public final void redeployIfModified()
-  {
-    redeployIfModifiedImpl(false, true);
-  }
-    
-  /**
-   * Redeploys the entry if it's modified.
-   */
-  protected I redeployIfModifiedImpl(boolean lazyRequest,
-				     boolean enableRedeploy)
-  {
-    Thread.dumpStack();
-    I oldInstance = _deployInstance;
-
-    if (_startupMode == STARTUP_MANUAL)
-      return oldInstance;
-    else if (oldInstance == null) {
-      if (! lazyRequest && _startupMode != STARTUP_AUTOMATIC)
-	return null;
-    }
-    else if (_redeployMode == REDEPLOY_MANUAL || ! enableRedeploy)
-      return oldInstance;
-    else if ((_startupMode != STARTUP_LAZY || lazyRequest) &&
-	     ! oldInstance.isModified() &&
-	     ! oldInstance.isDeployError())
-      return oldInstance;
-    else if (_startupMode == STARTUP_LAZY && ! lazyRequest &&
-	     ! oldInstance.isModified() &&
-	     ! oldInstance.isDeployIdle())
-      return oldInstance;
-    else if (! _lifecycle.toStopping())
-      return oldInstance;
-
-    _deployInstance = null;
-
-    if (oldInstance != null) {
-      try {
-	oldInstance.destroy();
-      } finally {
-	_lifecycle.toStop();
-      }
-    }
-
-    // automatically undeploy idle lazy webapps
-    if (_startupMode == STARTUP_LAZY && ! lazyRequest &&
-	(oldInstance == null ||
-	 oldInstance.isDeployError() ||
-	 oldInstance.isDeployIdle())) {
-      _deployContainer.update(_name);
-
-      return null;
-    }
-
-    /*
-    if (_deploy != null) {
-      DeployController<I> newEntry = _deploy.update(_name);
-
-      if (newEntry != this)
-	return newEntry.startImpl();
-    }
-    */
-
-    return startImpl();
-  }
   /**
    * Restarts the instance
    *

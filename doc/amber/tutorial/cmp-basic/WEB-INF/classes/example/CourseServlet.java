@@ -43,13 +43,13 @@ public class CourseServlet extends HttpServlet {
     potions.setCourse("Potions");
     potions.setTeacher("Severus Snape");
 
-    _manager.create(potions);
+    _manager.persist(potions);
 
     CourseBean xfig = new CourseBean();
     xfig.setCourse("Transfiguration");
     xfig.setTeacher("Minerva McGonagall");
 
-    _manager.create(xfig);
+    _manager.persist(xfig);
   }
 
   /**

@@ -86,6 +86,7 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController> ex
   private volatile long _lastCheckTime;
   private volatile boolean _isChecking;
   private long _checkInterval = 1000L;
+  private long _digest;
   private volatile boolean _isModified;
   private volatile boolean _isDeploying;
 
@@ -250,11 +251,11 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController> ex
     }
 
     try {
-      synchronized (_entryNames) {
-	_isModified = ! _entryNames.equals(findEntryNames());
+      long digest = getDigest();
 
-	return _isModified;
-      }
+      _isModified = _digest != digest;
+
+      return _isModified;
     } catch (Exception e) {
       log.log(Level.FINE, e.toString(), e);
       
@@ -330,6 +331,8 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController> ex
 	}
 	  
 	TreeSet<String> entryNames = findEntryNames();
+
+	_digest = getDigest();
 
 	if (! _entryNames.equals(entryNames)) {
 	  _entryNames = entryNames;
@@ -418,14 +421,6 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController> ex
 	log.log(Level.WARNING, e.toString(), e);
       }
     }
-
-    /*
-    for (int i = 0; i < _entries.size(); i++) {
-      E entry = _entries.get(i);
-
-      entry.redeployIfModified();
-    }
-    */
   }
 
   /**
@@ -452,6 +447,26 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController> ex
     return null;
   }
 
+  /**
+   * Returns the digest of the expand and archive directories.
+   */
+  private long getDigest()
+  {
+    long archiveDigest = 0;
+    
+    Path archiveDirectory = getArchiveDirectory();
+    if (archiveDirectory != null)
+      archiveDigest = archiveDirectory.getCrc64();
+    
+    long expandDigest = 0;
+    
+    Path expandDirectory = getExpandDirectory();
+    if (expandDirectory != null)
+      expandDigest = expandDirectory.getCrc64();
+
+    return archiveDigest * 65521 + expandDigest;
+  }
+  
   /**
    * Return the entry names for all deployed objects.
    */

@@ -43,8 +43,8 @@ public class CourseServlet extends HttpServlet {
     } catch (Exception e) {
     }
 
-    _manager.create(new Course("Potions", "Severus Snape"));
-    _manager.create(new Course("Transfiguration", "Minerva McGonagall"));
+    _manager.persist(new Course("Potions", "Severus Snape"));
+    _manager.persist(new Course("Transfiguration", "Minerva McGonagall"));
   }
 
   /**

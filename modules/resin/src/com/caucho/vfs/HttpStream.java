@@ -227,17 +227,9 @@ class HttpStream extends StreamImpl {
     } catch (Exception e) {
       throw new ConnectException(path.getURL() + ": " + e.toString());
     }
-    
-    Object timeoutObj = path.getAttribute("socket-timeout");
-    int socketTimeout = -1;
-    if (timeoutObj instanceof Integer) {
-      socketTimeout = ((Integer) timeoutObj).intValue();
-    }
-    
-    if (socketTimeout <= 0) {
-      socketTimeout = 300 * 1000;
-    }
-    
+
+    int socketTimeout = 300 * 1000;
+
     try {
       s.setSoTimeout(socketTimeout);
     } catch (Exception e) {
@@ -346,6 +338,20 @@ class HttpStream extends StreamImpl {
   {
     if (name.equals("method"))
       setMethod((String) value);
+    else if (name.equals("socket-timeout")) {
+      if (value instanceof Integer) {
+        int socketTimeout = ((Integer) value).intValue();
+
+        if (socketTimeout > 0) {
+          try {
+            if (_s != null)
+              _s.setSoTimeout(socketTimeout);
+          } catch (Exception e) {
+
+          }
+        }
+      }
+    }
     else
       _attributes.put(name.toLowerCase(), value);
   }

@@ -128,6 +128,10 @@ and the operating system is instructed to execute the program or script.  The
 usual CGI environment variables are set, and the current directory is 
 the value of <code>$RESIN_HOME</code></p>
 
+<deftable-parameters>
+<tr><td>executable<td>Path to the script program<td>default exec
+</deftable-parameters>
+
 <example>
 &lt;web-app&gt;
   &lt;servlet&gt;
@@ -162,6 +166,24 @@ echo "&lt;pre&gt;"
 env
 echo "&lt;/pre&gt;"
 
+</example>
+
+</section>
+
+<section title="DirectoryServlet">
+
+<p>The directory servlet provides the basic directory browsing.
+Sites will normally disable it.</p>
+
+<deftable-parameters>
+<tr><td>enable<td>Enable or disable the servlet<td>true
+</deftable-parameters>
+
+<example>
+&lt;servlet servlet-name="directory"
+         servlet-class="com.caucho.servlets.DirectoryServlet">
+  &lt;init enable="false"/>
+&lt;/servlet>
 </example>
 
 </section>

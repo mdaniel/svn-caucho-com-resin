@@ -72,7 +72,6 @@ public class StartAutoRedeployAutoStrategy
     controller.startImpl();
   }
 
-
   /**
    * Checks for updates from an admin command.  The target state is
    * the started state.

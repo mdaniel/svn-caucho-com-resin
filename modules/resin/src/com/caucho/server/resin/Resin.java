@@ -34,6 +34,8 @@ import java.net.*;
 import java.util.*;
 import java.util.logging.*;
 
+import java.lang.reflect.Constructor;
+
 import java.security.AllPermission;
 
 import com.caucho.vfs.*;
@@ -53,7 +55,7 @@ import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.loader.TreeLoader;
 import com.caucho.loader.SimpleLoader;
 
-import com.caucho.config.NodeBuilder;
+import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
 
 import com.caucho.license.LicenseCheck;
@@ -61,8 +63,11 @@ import com.caucho.license.LicenseCheck;
 public class Resin implements ResinServerListener {
   private static final L10N L = new L10N(Resin.class);
   private static final Logger log = Log.open(Resin.class);
+
+  private static Resin _resin;
   
   private String _resinConf = "conf/resin.conf";
+  private String _configServer;
 
   private String _serverId = "";
 
@@ -159,6 +164,10 @@ public class Resin implements ResinServerListener {
       else if (argv[i].equals("-version")) {
 	System.out.println(com.caucho.Version.FULL_VERSION);
 	System.exit(66);
+      }
+      else if (argv[i].equals("-config-server")) {
+	_configServer = argv[i + 1];
+	i += 2;
       }
       else if (argv[i].equals("-socketwait") ||
 	       argv[i].equals("-pingwait")) {
@@ -280,6 +289,20 @@ public class Resin implements ResinServerListener {
     if (_classLoader != null)
       _mainThread.setContextClassLoader(_classLoader);
 
+    if (isResinProfessional && _configServer != null) {
+      Path dbDir = Vfs.lookup("work/config");
+	
+      Class cl = Class.forName("com.caucho.vfs.remote.RemotePath");
+      Constructor ctor = cl.getConstructor(new Class[] { String.class,
+							 Path.class,
+							  String.class });
+
+      Path path = (Path) ctor.newInstance(_configServer, dbDir, _serverId);
+	
+      ConfigPath.setRemote(path);
+      log.info("Using configuration from " + _configServer);
+    }
+
     ResinServer server = new ResinServer();
 
     Path resinConf = Vfs.lookup(_resinConf);
@@ -290,13 +313,9 @@ public class Resin implements ResinServerListener {
     server.addListener(this);
     server.setResinProfessional(isResinProfessional);
 
-    NodeBuilder builder = new NodeBuilder();
-
-    builder.setSchema(server.getSchema());
-
     _mainThread.setContextClassLoader(_systemClassLoader);
 
-    builder.configure(server, Vfs.lookup(_resinConf));
+    Config.configure(server, Vfs.lookup(_resinConf), server.getSchema());
     
     _server = server;
     server.start();
@@ -541,6 +560,21 @@ public class Resin implements ResinServerListener {
   }
 
   /**
+   * Shuts the server down.
+   */
+  public static void shutdown()
+  {
+    Resin resin = _resin;
+
+    if (resin != null) {
+      ResinServer server = resin.getServer();
+
+      if (server != null)
+	server.destroy();
+    }
+  }
+
+  /**
    * The main start of the web server.
    *
    * <pre>
@@ -555,6 +589,8 @@ public class Resin implements ResinServerListener {
 
       Resin resin = new Resin(argv);
 
+      _resin = resin;
+
       resin.init();
 
       resin.waitForExit();
@@ -567,7 +603,7 @@ public class Resin implements ResinServerListener {
 	public void run()
 	{
 	  setName("resin-destroy");
-	  
+
 	  if (server != null)
 	    server.destroy();
 	}

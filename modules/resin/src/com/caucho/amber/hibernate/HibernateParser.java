@@ -38,7 +38,7 @@ import com.caucho.vfs.Path;
 import com.caucho.vfs.Depend;
 
 import com.caucho.config.ConfigException;
-import com.caucho.config.NodeBuilder;
+import com.caucho.config.Config;
 
 import com.caucho.amber.AmberManager;
 
@@ -53,11 +53,9 @@ public class HibernateParser {
 
       mapping.setDependency(new Depend(path));
 
-      NodeBuilder builder = new NodeBuilder();
-      builder.setCompactSchema("com/caucho/amber/hibernate/hibernate-mapping.rnc");
-
-      builder.configure(mapping, path);
-    } catch (SAXException e) {
+      Config.configure(mapping, path,
+		       "com/caucho/amber/hibernate/hibernate-mapping.rnc");
+    } catch (Exception e) {
       if (e.getCause() instanceof ConfigException)
 	throw (ConfigException) e.getCause();
       else

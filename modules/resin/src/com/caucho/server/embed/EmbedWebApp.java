@@ -19,55 +19,25 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
  * @author Scott Ferguson
  */
 
-package com.caucho.vfs;
+package com.caucho.server.embed;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
+import java.util.logging.Logger;
 
-import com.caucho.util.*;
+import com.caucho.util.Log;
+import com.caucho.util.L10N;
 
-public class NullPath extends Path {
-  private String _url;
-
-  public NullPath(String url)
-  {
-    super(null);
-
-    _url = url;
-    _schemeMap = SchemeMap.getNullSchemeMap();
-  }
-
-  public Path schemeWalk(String userPath, Map<String,Object> attributes,
-                         String path, int offset)
-  {
-    return this;
-  }
-
-  public String getURL()
-  {
-    return "null:";
-  }
-
-  public String getScheme()
-  {
-    return "null";
-  }
-
-  public String getPath()
-  {
-    return _url;
-  }
-
-  public Path lookupImpl(String userPath, Map<String,Object> newAttributes)
-  {
-    return this;
-  }
+/**
+ * Main facade a web-app in an embedded Resin.
+ */
+public class EmbedWebApp {
+  private static final Logger log = Log.open(EmbedWebApp.class);
+  private static final L10N L = new L10N(EmbedWebApp.class);
 }

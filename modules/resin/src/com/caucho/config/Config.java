@@ -123,33 +123,14 @@ public class Config {
   /**
    * Configures a bean with a configuration file and schema.
    */
-  public static void configureBean(Object obj,
-				   Path path,
-				   String schemaLocation)
-    throws Exception
-  {
-    NodeBuilder builder = new NodeBuilder();
-
-    Schema schema = findCompactSchema(schemaLocation);
-
-    QDocument doc = parseDocument(path, schema);
-
-    builder.configureBean(obj, doc.getDocumentElement());
-  }
-
-  /**
-   * Configures a bean with a configuration file and schema.
-   */
-  public static void configureBean(Object obj,
-				   Path path,
-				   Schema schema)
+  public static Object configure(Object obj, Path path, Schema schema)
     throws Exception
   {
     NodeBuilder builder = new NodeBuilder();
 
     QDocument doc = parseDocument(path, schema);
 
-    builder.configureBean(obj, doc.getDocumentElement());
+    return builder.configure(obj, doc.getDocumentElement());
   }
 
   /**
@@ -168,6 +149,66 @@ public class Config {
 
     return builder.configure(obj, doc.getDocumentElement());
   }
+
+  /**
+   * Configures a bean with a configuration file.
+   */
+  public static Object configure(Object obj,
+				 InputStream is,
+				 Schema schema)
+    throws Exception
+  {
+    NodeBuilder builder = new NodeBuilder();
+
+    QDocument doc = parseDocument(is, schema);
+
+    return builder.configure(obj, doc.getDocumentElement());
+  }
+
+  /**
+   * Configures a bean with a configuration file and schema.
+   */
+  public static void configureBean(Object obj,
+				   Path path,
+				   String schemaLocation)
+    throws Exception
+  {
+    NodeBuilder builder = new NodeBuilder();
+
+    Schema schema = findCompactSchema(schemaLocation);
+
+    QDocument doc = parseDocument(path, schema);
+
+    builder.configureBean(obj, doc.getDocumentElement());
+  }
+
+  /**
+   * Configures a bean with a configuration file and schema.
+   */
+  public static void configureBean(Object obj, Path path)
+    throws Exception
+  {
+    NodeBuilder builder = new NodeBuilder();
+
+    QDocument doc = parseDocument(path, null);
+
+    builder.configureBean(obj, doc.getDocumentElement());
+  }
+
+  /**
+   * Configures a bean with a configuration file and schema.
+   */
+  public static void configureBean(Object obj,
+				   Path path,
+				   Schema schema)
+    throws Exception
+  {
+    NodeBuilder builder = new NodeBuilder();
+
+    QDocument doc = parseDocument(path, schema);
+
+    builder.configureBean(obj, doc.getDocumentElement());
+  }
   
   /**
    * Configures the bean from a path
@@ -175,7 +216,8 @@ public class Config {
   private static QDocument parseDocument(Path path, Schema schema)
     throws LineConfigException, IOException, org.xml.sax.SAXException
   {
-    SoftReference<QDocument> docRef = _parseCache.get(path);
+    // server/2d33
+    SoftReference<QDocument> docRef = null;//_parseCache.get(path);
     QDocument doc;
 
     if (docRef != null) {
@@ -190,7 +232,7 @@ public class Config {
     try {
       doc = parseDocument(is, schema);
 
-      _parseCache.put(path, new SoftReference<QDocument>(doc));
+      // _parseCache.put(path, new SoftReference<QDocument>(doc));
 
       return doc;
     } finally {

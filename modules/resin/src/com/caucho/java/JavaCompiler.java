@@ -564,7 +564,10 @@ public class JavaCompiler {
     compiler.setPath(path);
     compiler.setLineMap(lineMap);
 
-    ThreadPool.start(compiler);
+    // the compiler may not be well-behaved enough to use the ThreadPool
+    Thread thread = new Thread(compiler);
+
+    thread.start();
 
     synchronized (compiler) {
       long endTime = System.currentTimeMillis() + _maxCompileTime;
@@ -581,7 +584,8 @@ public class JavaCompiler {
 
     if (! compiler.isDone()) {
       log.warning("compilation timed out");
-      // thread.interrupt();
+      thread.interrupt();
+      compiler.abort();
     }
 
     Throwable exn = compiler.getException();

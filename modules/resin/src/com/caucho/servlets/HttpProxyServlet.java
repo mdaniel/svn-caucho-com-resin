@@ -145,14 +145,6 @@ public class HttpProxyServlet extends GenericServlet {
 
     path = path.lookup(uri);
 
-    Enumeration e = req.getHeaderNames();
-    while (e.hasMoreElements()) {
-      String name = (String) e.nextElement();
-      String value = req.getHeader(name);
-
-      path.setAttribute(name, value);
-    }
-
     ReadWritePair pair = path.openReadWrite();
 
     ReadStream rs = pair.getReadStream();
@@ -160,7 +152,15 @@ public class HttpProxyServlet extends GenericServlet {
 
     ws.setAttribute("method", req.getMethod());
 
-    try {
+    Enumeration e = req.getHeaderNames();
+    while (e.hasMoreElements()) {
+      String name = (String) e.nextElement();
+      String value = req.getHeader(name);
+
+      ws.setAttribute(name, value);
+    }
+
+     try {
       InputStream is = req.getInputStream();
       ws.writeStream(is);
 

@@ -158,6 +158,17 @@ public class Environment {
 
     _globalLoaderListeners.add(listener);
   }
+  
+  /**
+   * Add close listener.
+   *
+   * @param listener object to listen for environment create/destroy
+   * @param loader the context class loader
+   */
+  public static void addCloseListener(Object obj)
+  {
+    addClassLoaderListener(new CloseListener(obj));
+  }
 
   /**
    * Starts the current environment.

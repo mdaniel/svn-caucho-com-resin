@@ -104,8 +104,6 @@ public class TcpPath extends Path {
 
   public String getURL()
   {
-    int port = getPort();
-
     return (getScheme() + "://" + getHost() + ":" + getPort());
   }
 
@@ -124,6 +122,7 @@ public class TcpPath extends Path {
     return _port;
   }
 
+  /*
   public void setAttribute(String attr, Object value)
     throws IOException
   {
@@ -134,6 +133,7 @@ public class TcpPath extends Path {
     else
       super.setAttribute(attr, value);
   }
+  */
 
   public StreamImpl openReadImpl() throws IOException
   {

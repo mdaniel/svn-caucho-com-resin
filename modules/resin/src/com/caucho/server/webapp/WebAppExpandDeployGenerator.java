@@ -218,7 +218,7 @@ public class WebAppExpandDeployGenerator extends ExpandDeployGenerator<WebAppCon
     String expandName = getExpandPrefix() + segmentName.substring(1);
 
     String archiveName = segmentName + ".war";
-    Path jarPath = getPath().lookup("." + archiveName);
+    Path jarPath = getArchiveDirectory().lookup("." + archiveName);
 
     Path rootDirectory;
 

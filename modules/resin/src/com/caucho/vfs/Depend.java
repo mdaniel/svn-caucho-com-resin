@@ -102,7 +102,7 @@ public class Depend implements PersistentDependency {
   {
     _source = source;
 
-    long newDigest = getDigest();
+    long newDigest = source.getCrc64();
 
     _requireSource = requireSource;
 
@@ -209,42 +209,13 @@ public class Depend implements PersistentDependency {
   }
 
   /**
-   * Calculates the CRC64 digest of the file.
+   * Returns the digest.
    */
   public long getDigest()
   {
-    ReadStream is = null;
-    
-    try {
-      if (! _source.canRead()) {
-        return -1;
-      }
-
-      long digest = 0;
-
-      is = _source.openRead();
-
-      int ch;
-
-      while ((ch = is.read()) >= 0) {
-        digest = Crc64.generate(digest, (byte) ch);
-      }
-
-      return digest;
-    } catch (Exception e) {
-      log.log(Level.FINER, e.toString(), e);
-
-      return -1;
-    } finally {
-      if (is != null) {
-        try {
-          is.close();
-        } catch (Exception e) {
-        }
-      }
-    }
+    return _source.getCrc64();
   }
-
+  
   /**
    * Returns true if the test Dependency has the same source path as
    * this dependency.
@@ -265,7 +236,7 @@ public class Depend implements PersistentDependency {
   public String getJavaCreateString()
   {
     return ("new com.caucho.vfs.Depend(com.caucho.vfs.Vfs.lookup(\"" +
-            _source.getPath() + "\"), " + getDigest() + "L)");
+            _source.getPath() + "\"), " + _source.getCrc64() + "L)");
   }
 
   /**

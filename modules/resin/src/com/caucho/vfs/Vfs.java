@@ -104,6 +104,14 @@ public final class Vfs {
   }
 
   /**
+   * Returns a path for the current directory.
+   */
+  public static Path getPwd(ClassLoader loader)
+  {
+    return ENV_PWD.get(loader);
+  }
+
+  /**
    * Sets a path for the current directory in the current environment.
    */
   public static void setPwd(Path pwd)

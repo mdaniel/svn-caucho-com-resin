@@ -420,6 +420,11 @@
         <exclude name="**/lib/bcel*.jar"/>
         <exclude name="**/lib/jace.jar"/>
 
+        <!-- excluded since incomplete -->
+        <exclude name="**/lib/jar.jar"/>
+        <exclude name="**/lib/saaj.jar"/>
+        <exclude name="**/lib/jaxrpc.jar"/>
+
         <include name="automake/**"/>
         <include name="conf/**"/>
         <include name="contrib/**"/>

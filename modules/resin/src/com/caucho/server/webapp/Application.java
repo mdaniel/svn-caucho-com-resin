@@ -331,7 +331,7 @@ public class Application extends ServletContextImpl
    * Creates the application with its environment loader.
    */
   public Application(ApplicationContainer parent,
-		     WebAppController entry,
+		     WebAppController controller,
 		     String contextPath)
   {
     try {
@@ -343,7 +343,7 @@ public class Application extends ServletContextImpl
       _classLoader = new EnhancingClassLoader(_parentClassLoader);
       _classLoader.setOwner(this);
 
-      _applicationEntry = entry;
+      _applicationEntry = controller;
 
       _classLoader.addParentPriorityPackages(_classLoaderHackPackages);
 
@@ -399,9 +399,6 @@ public class Application extends ServletContextImpl
       _invocationDependency = new DependencyContainer();
       _invocationDependency.add(this);
 
-      if (entry != null && entry.isRedeployManual())
-	_classLoader.setEnableDependencyCheck(false);
-
       setParent(parent);
       if (contextPath != null)
 	setContextPathId(contextPath);
@@ -409,12 +406,12 @@ public class Application extends ServletContextImpl
       Thread thread = Thread.currentThread();
       ClassLoader loader = thread.getContextClassLoader();
 
-      if (entry != null) {
+      if (controller != null) {
 	try {
 	  thread.setContextClassLoader(_classLoader);
-      
+
 	  Jmx.setContextProperties(_jmxContext);
-	
+
 	  ObjectName name = new ObjectName("resin:type=CurrentWebApp");
 	  Jmx.register(_applicationEntry.getMBean(), name);
 	} catch (Throwable e) {

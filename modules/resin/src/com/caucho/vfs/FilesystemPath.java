@@ -151,9 +151,9 @@ abstract public class FilesystemPath extends Path {
                                         int offset,
                                         char separatorChar)
   {
-    CharBuffer cb = CharBuffer.allocate();
+    CharBuffer cb = new CharBuffer();
     normalizePath(cb, oldPath, newPath, offset, separatorChar);
-    return cb.close();
+    return cb.toString();
   }
 
   /**

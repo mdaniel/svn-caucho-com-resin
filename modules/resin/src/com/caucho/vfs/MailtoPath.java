@@ -206,27 +206,11 @@ public class MailtoPath extends Path {
   }
 
   /**
-   * Sets one of the RFC822 message headers.
-   */
-  public void setAttribute(String name, Object value)
-  {
-    _attributes.put(name, String.valueOf(value));
-  }
-
-  /**
    * Gets the value of the RFC822 message headers.
    */
   public Object getAttribute(String name)
   {
     return _attributes.get(name);
-  }
-
-  /**
-   * Remove the named attribute.
-   */
-  public void removeAttribute(String name)
-  {
-    _attributes.remove(name);
   }
 
   /**

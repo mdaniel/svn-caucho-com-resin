@@ -53,6 +53,7 @@ import com.caucho.util.L10N;
 import com.caucho.util.Alarm;
 import com.caucho.util.AlarmListener;
 
+import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
 
 import com.caucho.config.types.EjbRef;
@@ -363,10 +364,9 @@ public class EntAppClient implements DeployInstance, EnvironmentBean {
     
     AppClientBinding binding = new AppClientBinding(this);
 
-    NodeBuilder builder = new NodeBuilder();
     // builder.setCompactSchema("com/caucho/server/e_app/app-client-14.rnc");
 
-    builder.configure(binding, xml);
+    Config.configure(binding, xml);
   }
 
   /**

@@ -47,7 +47,7 @@ import com.caucho.log.Log;
 
 import com.caucho.loader.Environment;
 
-import com.caucho.config.NodeBuilder;
+import com.caucho.config.Config;
 import com.caucho.config.BuilderProgram;
 import com.caucho.config.ConfigException;
 import com.caucho.config.types.PathBuilder;
@@ -263,10 +263,8 @@ public class AppClientDeployController extends ExpandDeployController<EntAppClie
     if (! xml.canRead())
       return;
     
-    NodeBuilder builder = new NodeBuilder();
-    builder.setCompactSchema("com/caucho/server/e_app/app-client-14.rnc");
-
-    builder.configure(appClient, xml);
+    Config.configure(appClient, xml,
+		     "com/caucho/server/e_app/app-client-14.rnc");
   }
 
   private void configClientConfig(EntAppClient appClient, Path xml)
@@ -275,9 +273,7 @@ public class AppClientDeployController extends ExpandDeployController<EntAppClie
     if (! xml.canRead())
       return;
     
-    NodeBuilder builder = new NodeBuilder();
-
-    builder.configure(appClient, xml);
+    Config.configure(appClient, xml);
   }
 
   /**

@@ -16,17 +16,10 @@ shows the configuration, classes, and client code for a single-table entity. </p
 
 <section title="Overview">
 
-<p>EJB 3.0 provides a Java model for a relational database, focusing
-on solving that single, specific problem.
-Earlier EJB versions overgeneralized, trying to
-support non-relational data, and lost focus and clarity.  Other
-persistent object specifications, like JDO, tried to provide
-transparent persistence for Java objects and tried to support both
-object and relational databases.  By restricting to relational database
-mapping, EJB 3.0 can provide powerful Java models and still simplify
-the specification and its use.</p>
+<p>Amber provides a Java model for a relational database,
+following the EJB 3.0 persistence standard.</p>
 
-<p>A typical project using EJB 3.0 starts planning with the
+<p>A typical project starts planning with the
 relational database schema and matching the Java model to that schema.
 This data-driven approach contrasts with a transparent persistent
 object approach which starts with Java classes and then tries to
@@ -36,42 +29,16 @@ may be appropriate for some applications, EJB 3.0 wisely leaves
 transparent persistence to other products and specifications, and
 concentrates on the relational database model.</p>
 
-<p>In a way, EJB 3.0 simply provides an extension
+<p>In a way, Amber simply provides an extension
 to SQL queries, returning fully-populated Java objects instead of
 just returning primitive values like Strings.  That somewhat
-understates EJB's capabilities since the Java objects are live,
+understates Amber's capabilities since the Java objects are live,
 updating the database in a object-oriented fashion, and also provides
-caching.  Still, viewing EJB 3.0 as a SQL extension supporting
+caching.  Still, viewing Amber as a SQL extension supporting
 relations and objects is a good starting model.</p> 
 
-<p>The tutorial uses "entity" to mean a persistent object.  In EJB 3.0, an
-entity is a Java class instance.</p>
-
-<section title="Differences with EJB 2.1">
-
-<p>The EJB 3.0 draft is primarily a process of removing
-features superfluous to supporting persistent objects.</p>
-
-<ul>
-<li>No home interfaces
-<li>No local interfaces
-<li>No instance pooling
-<li>No special create or remove methods
-<li>No special find or select methods
-<li>Deployment descriptor is optional
-</ul>
-
-<p>EJB 3.0 relies on JDK 1.5 annotations to configure entities in
-a maintainable, self-documenting way.</p>
-
-<ul>
-<li>Only one Java class needed per table (no interface needed)
-<li>Annotation per field
-<li>Annotation directly in Java class
-<li>Direct java instance (no proxy or stub needed)
-</ul>
-
-</section>
+<p>The tutorial uses "entity" to mean a persistent object.
+Amber's entities are far simpler than the "EntityBean" of EJB 2.1.</p>
 
 </section>
 
@@ -114,9 +81,9 @@ table's columns.</p>
 package example;
 
 public class Course {
-  private int _id;
-  private String _course;
-  private String _teacher;
+  private int id;
+  private String course;
+  private String teacher;
 }
 </example>
 

@@ -55,7 +55,7 @@ import com.caucho.db.store.Transaction;
 
 import com.caucho.db.table.TableIterator;
 
-class SelectQuery extends Query {
+public class SelectQuery extends Query {
   private static final Logger log = Log.open(SelectQuery.class);
 
   private Expr []_results;

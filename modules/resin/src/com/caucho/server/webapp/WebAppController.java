@@ -332,26 +332,6 @@ public class WebAppController extends ExpandDeployController<Application>
   }
 
   /**
-   * Returns the application's web name
-   */
-  /*
-  public String getWebName()
-  {
-    return getName();
-  }
-  */
-
-  /**
-   * Sets the application's web name
-   */
-  /*
-  public void setWebName(String webName)
-  {
-    setName(webName);
-  }
-  */
-
-  /**
    * True for inherit-session applications.
    */
   public boolean isInheritSession()
@@ -676,16 +656,6 @@ public class WebAppController extends ExpandDeployController<Application>
 	initList.add(init);
       }
 
-      /*
-	if (_config != null)
-	initList.add(_config);
-      */
-
-      /*
-      deployApplication();
-	if (_initProgram != null)
-	_initProgram.configure(app);
-      */
       thread.setContextClassLoader(app.getClassLoader());
       Vfs.setPwd(appDir);
 

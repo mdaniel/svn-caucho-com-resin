@@ -111,6 +111,13 @@ abstract public class AbstractJavaCompiler implements Runnable {
   }
 
   /**
+   * Quit the compilation.
+   */
+  public void abort()
+  {
+  }
+
+  /**
    * Compile the configured file.
    *
    * @param path the path to the java source.

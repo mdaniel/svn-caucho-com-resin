@@ -1217,7 +1217,7 @@ public class HessianInput extends AbstractHessianInput {
     int code = read();
 
     if (code != 'z')
-      throw error("unknown code:" + (char) code);
+      throw error("expected end of map ('z') at '" + (char) code + "'");
   }
 
   /**
@@ -1229,7 +1229,7 @@ public class HessianInput extends AbstractHessianInput {
     int code = read();
 
     if (code != 'z')
-      throw error("unknown code:" + (char) code);
+      throw error("expected end of list ('z') at '" + (char) code + "'");
   }
 
   /**

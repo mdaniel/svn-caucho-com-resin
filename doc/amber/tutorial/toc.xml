@@ -1,10 +1,20 @@
 <navigation threaded="true" section="Resin : Amber : Tutorials" comment="true">
   <item title="Tutorials" link="index.xtp">
-    <item link="basic/index.xtp" title="Basic Amber"/>
-    <item link="create/index.xtp" title="Create/Destroy"/>
-    <item link="find/index.xtp" title="Find/Query"/>
-    <item link="many2one/index.xtp" title="Many-To-One"/>
-    <item link="one2many/index.xtp" title="One-To-Many"/>
+    <item link="cmp-basic-field/index.xtp" title="CMP Field"/>
+<!--
+    <item link="resin-xa/index.xtp" title="Transactions"/>
+-->
+    <item link="cmp-basic/index.xtp" title="CMP Basic"/>
+    <item link="cmp-create/index.xtp" title="CMP Create"/>
+<!--
+    <item link="cmp-xa/index.xtp" title="CMP Transactions"/>
+-->
+    <item link="resin-xa/index.xtp" title="Transactions"/>
+    <item link="cmp-query/index.xtp" title="CMP Query"/>
+    <item link="cmp-many2one/index.xtp" title="CMP Many-to-One"/>
+    <item link="cmp-one2many/index.xtp" title="CMP One-to-Many"/>
+    <item link="cmp-many2many/index.xtp" title="CMP Many-to-Many"/>
+    <item link="cmp-inherit/index.xtp" title="CMP Inherit"/>
   </item>
 </navigation>
 

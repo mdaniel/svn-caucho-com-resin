@@ -42,7 +42,7 @@ import com.caucho.vfs.*;
 import com.caucho.java.*;
 import com.caucho.jsp.cfg.*;
 
-import com.caucho.config.NodeBuilder;
+import com.caucho.config.Config;
 
 import com.caucho.log.Log;
 
@@ -50,6 +50,7 @@ import com.caucho.loader.SimpleLoader;
 import com.caucho.loader.CompilingLoader;
 import com.caucho.loader.DirectoryLoader;
 import com.caucho.loader.DynamicClassLoader;
+import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.loader.EnvironmentBean;
 
 import com.caucho.java.JavaCompiler;
@@ -62,6 +63,8 @@ import com.caucho.server.webapp.Application;
 public class JspCompiler implements EnvironmentBean {
   private static Logger log = Log.open(JspCompiler.class);
 
+  private ClassLoader _loader;
+  
   private Application _app;
   
   private Path _classDir;
@@ -71,7 +74,7 @@ public class JspCompiler implements EnvironmentBean {
   private TaglibManager _taglibManager;
   private TagFileManager _tagFileManager;
 
-  private JspConfig _jspConfig;
+  private JspPropertyGroup _jspPropertyGroup;
 
   private boolean _isXml;
   private ArrayList<String> _preludeList = new ArrayList<String>();
@@ -83,12 +86,17 @@ public class JspCompiler implements EnvironmentBean {
   private ArrayList<JspCompilerInstance> _pending =
     new ArrayList<JspCompilerInstance>();
 
+  public JspCompiler()
+  {
+    _loader = new EnvironmentClassLoader();
+  }
+  
   /**
    * Returns the classloader for configuration.
    */
   public ClassLoader getClassLoader()
   {
-    return ClassLoader.getSystemClassLoader();
+    return _loader;
   }
 
   /**
@@ -170,14 +178,6 @@ public class JspCompiler implements EnvironmentBean {
   {
     return _isXml;
   }
-
-  /**
-   * Returns the JSP config.
-   */
-  public JspConfig getJspConfig()
-  {
-    return _jspConfig;
-  }
   
   /**
    * Sets the resource manager.
@@ -225,6 +225,25 @@ public class JspCompiler implements EnvironmentBean {
   public TagFileManager getTagFileManager()
   {
     return _tagFileManager;
+  }
+
+  /**
+   * Sets the JspPropertyGroup
+   */
+  public JspPropertyGroup createJsp()
+  {
+    if (_jspPropertyGroup == null)
+      _jspPropertyGroup = new JspPropertyGroup();
+
+    return _jspPropertyGroup;
+  }
+
+  /**
+   * Sets the JspPropertyGroup
+   */
+  public JspPropertyGroup getJspPropertyGroup()
+  {
+    return _jspPropertyGroup;
   }
 
   /**
@@ -491,76 +510,84 @@ public class JspCompiler implements EnvironmentBean {
       System.exit(1);
     }
 
-    JspCompiler compiler = new JspCompiler();
-      
-    int i = 0;
-    boolean hasConf = false;
-
-    while (i < args.length) {
-      if (args[i].equals("-app-dir")) {
-	Path appDir = Vfs.lookup(args[i + 1]);
-	
-        Application app	= compiler.createApplication();
-	app.setDocumentDirectory(appDir);
-
-	compiler.setApplication(app);
-	
-        i += 2;
-      }
-      else if (args[i].equals("-class-dir") || args[i].equals("-d")) {
-        compiler.setClassDirectory(Vfs.lookup(args[i + 1]));
-        i += 2;
-      }
-      else if (args[i].equals("-conf")) {
-	Path path = Vfs.lookup(args[i + 1]);
-
-	new NodeBuilder().configureNoInit(compiler, path);
-	hasConf = true;
-
-        i += 2;
-      }
-      else
-        break;
-    }
-
-    Application app = compiler.getApplication();
-    if (app != null && ! hasConf) {
-      Path appDir = app.getAppDir();
-
-      DynamicClassLoader loader = app.getEnvironmentClassLoader();
-      loader.addLoader(new CompilingLoader(appDir.lookup("WEB-INF/classes")));
-      loader.addLoader(new DirectoryLoader(appDir.lookup("WEB-INF/lib")));
-      
-      Path webXml = appDir.lookup("WEB-INF/web.xml");
-
-      if (webXml.canRead())
-	new NodeBuilder().configureNoInit(app, webXml);
-    }
-
-    Path appDir = null;
-    ClassLoader loader = Thread.currentThread().getContextClassLoader();
-
-    if (app == null && compiler.getAppDir() != null) {
-      app = compiler.createApplication();
-
-      app.setDocumentDirectory(compiler.getAppDir());
-      compiler.setApplication(app);
-    }
-
-    if (app != null) {
-      app.init();
-      
-      appDir = compiler.getApplication().getAppDir();
-      loader = compiler.getApplication().getClassLoader();
-    }
-
-    if (appDir == null)
-      appDir = Vfs.lookup();
-
-    ClassLoader oldLoader = Thread.currentThread().getContextClassLoader();
-    Thread.currentThread().setContextClassLoader(loader);
-
+    // needed at minimum to handle the qa jsp/1933
+    Thread thread = Thread.currentThread();
+    ClassLoader oldLoader = thread.getContextClassLoader();
     try {
+      JspCompiler compiler = new JspCompiler();
+
+      ClassLoader loader = compiler.getClassLoader();
+      
+      thread.setContextClassLoader(loader);
+
+      JspPropertyGroup jsp = compiler.createJsp();
+      jsp.setRequireSource(false);
+
+      int i = 0;
+      boolean hasConf = false;
+
+      while (i < args.length) {
+	if (args[i].equals("-app-dir")) {
+	  Path appDir = Vfs.lookup(args[i + 1]);
+	
+	  Application app	= compiler.createApplication();
+	  app.setDocumentDirectory(appDir);
+
+	  compiler.setApplication(app);
+	
+	  i += 2;
+	}
+	else if (args[i].equals("-class-dir") || args[i].equals("-d")) {
+	  compiler.setClassDirectory(Vfs.lookup(args[i + 1]));
+	  i += 2;
+	}
+	else if (args[i].equals("-conf")) {
+	  Path path = Vfs.lookup(args[i + 1]);
+
+	  Config.configureBean(compiler, path);
+	  hasConf = true;
+
+	  i += 2;
+	}
+	else
+	  break;
+      }
+
+      Application app = compiler.getApplication();
+      if (app != null && ! hasConf) {
+	Path appDir = app.getAppDir();
+
+	DynamicClassLoader dynLoader = app.getEnvironmentClassLoader();
+	dynLoader.addLoader(new CompilingLoader(appDir.lookup("WEB-INF/classes")));
+	dynLoader.addLoader(new DirectoryLoader(appDir.lookup("WEB-INF/lib")));
+      
+	Path webXml = appDir.lookup("WEB-INF/web.xml");
+
+	if (webXml.canRead())
+	  Config.configureBean(app, webXml);
+      }
+
+      Path appDir = null;
+
+      if (app == null && compiler.getAppDir() != null) {
+	app = compiler.createApplication();
+
+	app.setDocumentDirectory(compiler.getAppDir());
+	compiler.setApplication(app);
+      }
+
+      if (app != null) {
+	app.init();
+      
+	appDir = compiler.getApplication().getAppDir();
+	loader = compiler.getApplication().getClassLoader();
+      }
+
+      if (appDir == null)
+	appDir = Vfs.lookup();
+
+      thread.setContextClassLoader(loader);
+
       ArrayList<String> pendingClasses = new ArrayList<String>();
 
       for (; i < args.length; i++) {

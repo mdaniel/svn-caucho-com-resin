@@ -311,26 +311,6 @@ public class SessionManager implements ObjectManager, AlarmListener {
   }
 
   /**
-   * Returns the session factory.
-   */
-  /*
-  public SessionFactory getSessionFactory()
-  {
-    return _sessionFactory;
-  }
-  */
-
-  /**
-   * Sets the session factory.
-   */
-  /*
-  public void setSessionFactory(SessionFactory factory)
-  {
-    _sessionFactory = factory;
-  }
-  */
-
-  /**
    * Sets the persistent store.
    */
   public void setPersistentStore(JndiBuilder store)
@@ -562,6 +542,14 @@ public class SessionManager implements ObjectManager, AlarmListener {
   int getSrunIndex()
   {
     return _srunIndex;
+  }
+  
+  /**
+   * Returns the number of sruns in the cluster
+   */
+  int getSrunLength()
+  {
+    return _srunLength;
   }
 
   /**
@@ -941,6 +929,10 @@ public class SessionManager implements ObjectManager, AlarmListener {
       random = random >> 6;
 
       digit = (digit - digit % _srunLength) + index;
+
+      // server/01l3 - check for overflow 
+      if (digit >= 64)
+	digit = index;
       
       cb.append(convert(digit));
 

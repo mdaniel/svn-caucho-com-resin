@@ -53,7 +53,7 @@ import com.caucho.log.Log;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.MergePath;
 
-import com.caucho.config.NodeBuilder;
+import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
 import com.caucho.config.LineConfigException;
 
@@ -139,11 +139,8 @@ public class EjbConfig {
 
     EjbJar ejbJar = new EjbJar(this);
 
-    NodeBuilder builder = new NodeBuilder();
-    builder.setSchema(getSchema());
-
     try {
-      builder.configure(ejbJar, path);
+      Config.configure(ejbJar, path, getSchema());
     } catch (ConfigException e) {
       throw e;
     } catch (Exception e) {

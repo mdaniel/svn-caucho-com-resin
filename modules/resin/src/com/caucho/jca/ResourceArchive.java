@@ -47,8 +47,8 @@ import com.caucho.vfs.Jar;
 
 import com.caucho.log.Log;
 
+import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
-import com.caucho.config.NodeBuilder;
 
 import com.caucho.loader.DynamicClassLoader;
 
@@ -197,12 +197,9 @@ public class ResourceArchive {
 	throw new ConfigException(L.l("missing ra.xml for rar {0}.  .rar files require a META-INF/ra.xml file.",
 				      _rarPath));
 
-      NodeBuilder builder = new NodeBuilder();
-      builder.setCompactSchema("com/caucho/jca/jca.rnc");
-
       _config = new ConnectorConfig();
 
-      builder.configure(_config, raXml);
+      Config.configure(_config, raXml, "com/caucho/jca/jca.rnc");
     } catch (ConfigException e) {
       throw e;
     } catch (Exception e) {

@@ -63,7 +63,8 @@ import com.caucho.vfs.WriteStream;
 /**
  * A deployment entry that expands from an archive (Jar/Zip) file.
  */
-abstract public class ExpandDeployController<I extends DeployInstance> extends DeployController<I> {
+abstract public class ExpandDeployController<I extends DeployInstance>
+  extends DeployController<I> {
   private static final Logger log = Log.open(ExpandDeployController.class);
 
   private Object _archiveExpandLock = new Object();
@@ -202,7 +203,12 @@ abstract public class ExpandDeployController<I extends DeployInstance> extends D
     
     String classPath = main.getValue("Class-Path");
 
-    Path pwd = getArchivePath().getParent();
+    Path pwd = null;
+
+    if (getArchivePath() != null)
+      pwd = getArchivePath().getParent();
+    else
+      pwd = getRootDirectory();
 
     if (classPath == null) {
     }

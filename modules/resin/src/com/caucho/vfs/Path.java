@@ -57,7 +57,12 @@ import com.caucho.util.*;
 public abstract class Path {
   protected final static L10N L = new L10N(Path.class);
   
-  static private final Integer LOCK = new Integer(0);
+  private static final Integer LOCK = new Integer(0);
+
+  private static final LruCache<PathKey,Path> _pathLookupCache
+    = new LruCache<PathKey,Path>(1024);
+
+  private static final PathKey _key = new PathKey();
 
   protected SchemeMap _schemeMap;
 
@@ -86,6 +91,41 @@ public abstract class Path {
   }
 
   /**
+    * Returns a new path relative to the current one.
+    *
+    * <p>Path only handles scheme:xxx.  Subclasses of Path will specialize
+    * the xxx.
+    *
+    * @param userPath relative or absolute path, essentially any url.
+    * @param newAttributes attributes for the new path.
+    *
+    * @return the new path or null if the scheme doesn't exist
+    */
+   public Path lookup(String userPath, Map<String,Object> newAttributes)
+   {
+     if (newAttributes != null)
+       return lookupImpl(userPath, newAttributes);
+
+     /*
+     synchronized (_key) {
+       _key.init(this, userPath);
+
+       // server/2d33
+       Path path = null; //  _pathLookupCache.get(_key);
+
+       if (path != null)
+         return path;
+     }
+     */
+
+     Path path = lookupImpl(userPath, newAttributes);
+
+     // _pathLookupCache.putIfNew(new PathKey(this, userPath), path);
+
+     return path;
+   }
+
+  /**
    * Returns a new path relative to the current one.
    *
    * <p>Path only handles scheme:xxx.  Subclasses of Path will specialize
@@ -96,10 +136,10 @@ public abstract class Path {
    *
    * @return the new path or null if the scheme doesn't exist
    */
-  public Path lookup(String userPath, Map<String,Object> newAttributes)
+  public Path lookupImpl(String userPath, Map<String,Object> newAttributes)
   {
     if (userPath == null)
-      return lookup(getPath(), newAttributes);
+      return lookupImpl(getPath(), newAttributes);
     
     String scheme = scanScheme(userPath);
 
@@ -592,20 +632,6 @@ public abstract class Path {
   }
 
   /**
-   * Sets an attribute of the path.
-   */
-  public void setAttribute(String name, Object value) throws IOException
-  {
-  }
-
-  /**
-   * Remove an attribute.
-   */
-  public void removeAttribute(String name) throws IOException
-  {
-  }
-
-  /**
    * Returns a iterator of all attribute names set for this object.
    * @return null if path has no attributes.
    */
@@ -787,6 +813,51 @@ public abstract class Path {
   }
 
   /**
+   * Returns the crc64 code.
+   */
+  public long getCrc64()
+  {
+    try {
+      if (isDirectory()) {
+	String []list = list();
+
+	long digest = 0;
+
+	for (int i = 0; i < list.length; i++) {
+	  digest = Crc64.generate(digest, list[i]);
+	}
+
+	return digest;
+      }
+      else if (canRead()) {
+	ReadStream is = openRead();
+
+	try {
+	  long digest = 0;
+
+	  int ch;
+
+	  while ((ch = is.read()) >= 0) {
+	    digest = Crc64.next(digest, ch);
+	  }
+
+	  return digest;
+	} finally {
+	  is.close();
+	}
+      }
+      else {
+	return -1; // Depend requires -1
+      }
+    } catch (IOException e) {
+      // XXX: log
+      e.printStackTrace();
+      
+      return -1;
+    }
+  }
+
+  /**
    * Returns the object at this path.  Normally, only paths like JNDI
    * will support this.
    */
@@ -806,9 +877,16 @@ public abstract class Path {
     throw new UnsupportedOperationException(getScheme() + ": doesn't support setObject");
   }
 
+  public int hashCode()
+  {
+    return toString().hashCode();
+  }
+
   public boolean equals(Object o)
   {
-    if (! (o instanceof Path))
+    if (this == o)
+      return true;
+    else if (! (o instanceof Path))
       return false;
     else
       return getPath().equals(((Path) o).getPath());
@@ -889,6 +967,42 @@ public abstract class Path {
     {
       this.list = list;
       index = 0;
+    }
+  }
+
+  static class PathKey {
+    private Path _parent;
+    private String _lookup;
+
+    PathKey()
+    {
+    }
+
+    PathKey(Path parent, String lookup)
+    {
+      _parent = parent;
+      _lookup = lookup;
+    }
+
+    void init(Path parent, String lookup)
+    {
+      _parent = parent;
+      _lookup = lookup;
+    }
+
+    public int hashCode()
+    {
+      return System.identityHashCode(_parent) * 65521 + _lookup.hashCode();
+    }
+
+    public boolean equals(Object test)
+    {
+      if (! (test instanceof PathKey))
+        return false;
+
+      PathKey key = (PathKey) test;
+
+      return (_parent == key._parent && _lookup.equals(key._lookup));
     }
   }
 }

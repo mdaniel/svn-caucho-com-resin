@@ -41,36 +41,36 @@ public class OneToManyServlet extends HttpServlet {
 
     if (house == null) {
       House gryffindor = new House("Gryffindor");
-      _entityManager.create(gryffindor);
+      _entityManager.persist(gryffindor);
 	
       House slytherin = new House("Slytherin");
-      _entityManager.create(slytherin);
+      _entityManager.persist(slytherin);
 	
       House ravenclaw = new House("Ravenclaw");
-      _entityManager.create(ravenclaw);
+      _entityManager.persist(ravenclaw);
 	
       House hufflepuff = new House("Hufflepuff");
-      _entityManager.create(hufflepuff);
+      _entityManager.persist(hufflepuff);
 
       Student student;
 
       student = new Student("Harry Potter", "M", gryffindor);
-      _entityManager.create(student);
+      _entityManager.persist(student);
 
       student = new Student("Ron Weasley", "M", gryffindor);
-      _entityManager.create(student);
+      _entityManager.persist(student);
 
       student = new Student("Hermione Granger", "F", gryffindor);
-      _entityManager.create(student);
+      _entityManager.persist(student);
 
       student = new Student("Draco Malfoy", "M", slytherin);
-      _entityManager.create(student);
+      _entityManager.persist(student);
 
       student = new Student("Millicent Bulstrode", "F", slytherin);
-      _entityManager.create(student);
+      _entityManager.persist(student);
 
       student = new Student("Penelope Clearwater", "F", ravenclaw);
-      _entityManager.create(student);
+      _entityManager.persist(student);
     }
   }
 

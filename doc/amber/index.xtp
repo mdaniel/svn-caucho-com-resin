@@ -4,22 +4,15 @@
     <title>Amber</title>
     <type>contents</type>
 
-    <description>Amber is Resin's new persistence engine
-using Java beans as the application model.
+    <description>Amber is Resin's implementation of the
+EJB 3.0 persistence specification, using plain Java beans as
+the application model.
     </description>
   </header>
 
 <body>
 
     <summary/>
-
-<note>Amber is currently in development.
-Anything or everything may change.</note>
-
-<note>We hope JDO 2.0 will provide a suitable API, configuration,
-and query language by the time Amber is ready for production.  In the
-meantime, Amber uses the Hibernate configuration files and a
-variation of the Hibernate API as its native API.</note>
 
   </body>
 </document>

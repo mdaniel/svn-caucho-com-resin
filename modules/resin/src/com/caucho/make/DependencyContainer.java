@@ -134,6 +134,7 @@ public class DependencyContainer implements Dependency {
   {
     _isModified = isModified;
     _lastCheckTime = 0;
+    System.out.println("SET-MODIFIED: " + isModified + " " + this + " " + _dependencyList);
   }
       
   /**

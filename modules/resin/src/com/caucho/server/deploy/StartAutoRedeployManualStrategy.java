@@ -30,7 +30,7 @@
 package com.caucho.server.deploy;
 
 /**
- * The start-mode="manual", redeploy-model="manual" controller strategy.
+ * The start-mode="auto", redeploy-model="manual" controller strategy.
  *
  * initial state = stop
  *
@@ -44,12 +44,12 @@ package com.caucho.server.deploy;
  * <tr><td>alarm  <td>-        <td>-       <td>-          <td>-
  * </table>
  */
-public class StartManualRedeployManualStrategy
-  extends AbstractDeployControllerStrategy {
-  private final static StartManualRedeployManualStrategy STRATEGY =
-          new StartManualRedeployManualStrategy();
+public class StartAutoRedeployManualStrategy
+  extends StartManualRedeployManualStrategy {
+  private final static StartAutoRedeployManualStrategy STRATEGY =
+          new StartAutoRedeployManualStrategy();
 
-  protected StartManualRedeployManualStrategy()
+  private StartAutoRedeployManualStrategy()
   {
   }
 
@@ -71,69 +71,6 @@ public class StartManualRedeployManualStrategy
   public<I extends DeployInstance>
     void startOnInit(DeployController<I> controller)
   {
-    controller.stopImpl();
-  }
-
-  /**
-   * Checks for updates from an admin command.  The target state will be the
-   * initial state, i.e. update will not start a lazy instance.
-   *
-   * @param controller the owning controller
-   */
-  public<I extends DeployInstance>
-    void update(DeployController<I> controller)
-  {
-    if (controller.isStopped()) {
-      controller.startImpl();
-    }
-    else if (controller.isModifiedNow()) {
-      controller.restartImpl();
-    }
-    else if (controller.isError()) {
-      controller.restartImpl();
-    }
-    else { /* active */
-    }
-  }
-
-
-  /**
-   * Returns the current instance.  This strategy does not lazily restart
-   * the instance.
-   *
-   * @param controller the owning controller
-   * @return the current deploy instance
-   */
-  /* XXX: should request always return an instance? */
-  public <I extends DeployInstance>
-          I request(DeployController<I> controller)
-  {
-    return controller.getDeployInstance();
-  }
-
-  /**
-   * Returns the current instance.  This strategy does not lazily restart
-   * the instance.
-   *
-   * @param controller the owning controller
-   * @return the current deploy instance
-   */
-  /* XXX: should request always return an instance? */
-  public <I extends DeployInstance>
-          I subrequest(DeployController<I> controller)
-  {
-    return controller.getDeployInstance();
-  }
-
-  /**
-   * Returns the current instance.  This strategy does not lazily restart
-   * the instance.
-   *
-   * @param controller the owning controller
-   */
-  /* XXX: should request always return an instance? */
-  public <I extends DeployInstance>
-          void alarm(DeployController<I> controller)
-  {
+    controller.startImpl();
   }
 }

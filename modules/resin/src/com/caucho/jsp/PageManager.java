@@ -64,7 +64,7 @@ import com.caucho.jsp.cfg.JspPropertyGroup;
  */
 abstract public class PageManager {
   private final static Logger log = Log.open(PageManager.class);
-
+  
   static final long ACCESS_INTERVAL = 60000L;
 
   protected Application _application;

@@ -238,19 +238,25 @@ public class JspCompilerInstance {
     if (appDir == null && app != null)
       appDir = app.getAppDir();
 
-    JspConfig jspConfig = _jspCompiler.getJspConfig();
+    JspConfig jspConfig = null;
 
     if (jspConfig == null && app != null)
       jspConfig = (JspConfig) app.getExtension("jsp-config");
 
     _jspPropertyGroup = null;
 
-    if (jspConfig != null)
+    if (_jspPropertyGroup == null)
+      _jspPropertyGroup = _jspCompiler.getJspPropertyGroup();
+    
+    if (_jspPropertyGroup != null && jspConfig != null)
       _jspPropertyGroup = jspConfig.findJspPropertyGroup(_uri);
 
     if (_jspPropertyGroup == null && app != null)
       _jspPropertyGroup = app.getJsp();
 
+    if (_jspPropertyGroup == null)
+      _jspPropertyGroup = _jspCompiler.getJspPropertyGroup();
+    
     JspResourceManager resourceManager = _jspCompiler.getResourceManager();
     if (resourceManager != null) {
     }

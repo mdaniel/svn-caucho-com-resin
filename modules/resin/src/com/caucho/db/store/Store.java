@@ -153,7 +153,7 @@ public class Store {
   // the total used bytes in the clock (s/b free?)
   private long _fragmentClockUsed;
 
-  private SoftReference<RandomAccessFile> _cachedRowFile;
+  private SoftReference<RandomAccessWrapper> _cachedRowFile;
   
   private Lock _tableLock;
   private final Lifecycle _lifecycle = new Lifecycle();
@@ -343,9 +343,11 @@ public class Store {
     
     log.finer(this + " init");
 
-    RandomAccessFile file = openRowFile();
+    RandomAccessWrapper wrapper = openRowFile();
 
     try {
+      RandomAccessFile file = wrapper.getFile();
+      
       _fileSize = file.length();
       _blockCount = ((_fileSize + BLOCK_SIZE - 1) / BLOCK_SIZE);
 
@@ -364,7 +366,7 @@ public class Store {
 	readBlock(i * 4L * BLOCK_SIZE, _allocationTable, i, len);
       }
     } finally {
-      file.close();
+      wrapper.close();
     }
   }
 
@@ -1016,7 +1018,8 @@ public class Store {
   public void readBlock(long blockId, byte []buffer, int offset, int length)
     throws IOException
   {
-    RandomAccessFile is = openRowFile();
+    RandomAccessWrapper wrapper = openRowFile();
+    RandomAccessFile is = wrapper.getFile();
 
     long blockAddress = blockId & BLOCK_MASK;
 
@@ -1030,11 +1033,11 @@ public class Store {
 	  buffer[i] = 0;
       }
       
-      freeRowFile(is);
-      is = null;
+      freeRowFile(wrapper);
+      wrapper = null;
     } finally {
-      if (is != null)
-	is.close();
+      if (wrapper != null)
+	wrapper.close();
     }
   }
 
@@ -1045,60 +1048,67 @@ public class Store {
 			 byte []buffer, int offset, int length)
     throws IOException
   {
-    RandomAccessFile os = openRowFile();
+    RandomAccessWrapper wrapper = openRowFile();
+    RandomAccessFile os = wrapper.getFile();
     
     try {
       os.seek(blockAddress);
       os.write(buffer, offset, length);
-      freeRowFile(os);
+      
+      freeRowFile(wrapper);
+      wrapper = null;
       
       if (_fileSize < blockAddress + length) {
 	_fileSize = blockAddress + length;
       }
       
-      os = null;
     } finally {
-      if (os != null)
-	os.close();
+      if (wrapper != null)
+	wrapper.close();
     }
   }
 
   /**
    * Opens the underlying file to the database.
    */
-  private RandomAccessFile openRowFile()
+  private RandomAccessWrapper openRowFile()
     throws IOException
   {
     RandomAccessFile file = null;
+    RandomAccessWrapper wrapper = null;
     
     synchronized (this) {
-      SoftReference<RandomAccessFile> ref = _cachedRowFile;
+      SoftReference<RandomAccessWrapper> ref = _cachedRowFile;
       _cachedRowFile = null;
       
       if (ref != null) {
-	file = ref.get();
+	wrapper = ref.get();
       }
     }
 
-    if (file != null)
-      return file;
+    if (wrapper != null)
+      file = wrapper.getFile();
 
-    file = new RandomAccessFile(_path.getNativePath(), "rw");
+    if (file == null) {
+      file = new RandomAccessFile(_path.getNativePath(), "rw");
 
-    return file;
+      wrapper = new RandomAccessWrapper(file);
+    }
+
+    return wrapper;
   }
 
-  private void freeRowFile(RandomAccessFile file)
+  private void freeRowFile(RandomAccessWrapper wrapper)
     throws IOException
   {
     synchronized (this) {
       if (_cachedRowFile == null) {
-	_cachedRowFile = new SoftReference<RandomAccessFile>(file);
+	_cachedRowFile = new SoftReference<RandomAccessWrapper>(wrapper);
 	return;
       }
     }
 
-    file.close();
+    wrapper.close();
   }
 
   /**
@@ -1159,17 +1169,17 @@ public class Store {
 
     _path = null;
     
-    RandomAccessFile file = null;
+    RandomAccessWrapper wrapper = null;
     
-    SoftReference<RandomAccessFile> ref = _cachedRowFile;
+    SoftReference<RandomAccessWrapper> ref = _cachedRowFile;
     _cachedRowFile = null;
       
     if (ref != null)
-      file = ref.get();
+      wrapper = ref.get();
 
-    if (file != null) {
+    if (wrapper != null) {
       try {
-	file.close();
+	wrapper.close();
       } catch (Throwable e) {
       }
     }
@@ -1199,5 +1209,37 @@ public class Store {
   public String toString()
   {
     return "Store[" + _id + "]";
+  }
+
+  static class RandomAccessWrapper {
+    private RandomAccessFile _file;
+
+    RandomAccessWrapper(RandomAccessFile file)
+    {
+      _file = file;
+    }
+
+    RandomAccessFile getFile()
+    {
+      return _file;
+    }
+
+    void close()
+      throws IOException
+    {
+      RandomAccessFile file = _file;
+      _file = null;
+
+      if (file != null)
+	file.close();
+    }
+
+    protected void finalize()
+      throws Throwable
+    {
+      super.finalize();
+      
+      close();
+    }
   }
 }

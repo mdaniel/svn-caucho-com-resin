@@ -62,8 +62,8 @@ public class IntrospectionMBean implements DynamicMBean {
   private static final Logger log = Logger.getLogger(IntrospectionMBean.class.getName());
   private static final Class[] NULL_ARG = new Class[0];
 
-  private static WeakHashMap<Class,SoftReference<MBeanInfo>> _cachedInfo =
-    new WeakHashMap<Class,SoftReference<MBeanInfo>>();
+  private static final WeakHashMap<Class,SoftReference<MBeanInfo>> _cachedInfo
+    = new WeakHashMap<Class,SoftReference<MBeanInfo>>();
   
   private Object _impl;
   private Class _mbeanInterface;
@@ -381,9 +381,9 @@ public class IntrospectionMBean implements DynamicMBean {
       constructors.toArray(conArray);
       MBeanOperationInfo []opArray = new MBeanOperationInfo[operations.size()];
       operations.toArray(opArray);
-      
 
-      info = new MBeanInfo(className, description,
+      info = new MBeanInfo(className,
+			   description,
 			   attrArray,
 			   conArray,
 			   opArray,

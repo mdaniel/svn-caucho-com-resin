@@ -87,10 +87,22 @@ class MultipartForm {
 
         WriteStream os = tempFile.openWrite();
 
+	TempBuffer tempBuffer = TempBuffer.allocate();
+	byte []buf = tempBuffer.getBuffer();
+
+	int totalLength = 0;
+
         try {
-          os.writeStream(is);
+	  int len;
+	  
+	  while ((len = is.read(buf, 0, buf.length)) > 0) {
+	    os.write(buf, 0, len);
+	    totalLength += len;
+	  }
         } finally {
           os.close();
+
+	  TempBuffer.free(tempBuffer);
         }
 
         if (uploadMax > 0 && uploadMax < tempFile.getLength()) {
@@ -104,6 +116,17 @@ class MultipartForm {
           
           throw new IOException(msg);
         }
+	else if (tempFile.getLength() != totalLength) {
+          String msg = L.l("multipart form upload failed (possibly due to full disk).");
+	  
+          request.setAttribute("caucho.multipart.form.error", msg);
+          request.setAttribute("caucho.multipart.form.error.size",
+			       new Long(tempFile.getLength()));
+          
+          tempFile.remove();
+          
+          throw new IOException(msg);
+	}
 
         addTable(table, name, tempFile.getNativePath());
         addTable(table, name + ".file", tempFile.getNativePath());

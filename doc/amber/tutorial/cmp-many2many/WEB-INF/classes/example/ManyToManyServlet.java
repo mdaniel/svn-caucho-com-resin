@@ -43,45 +43,45 @@ public class ManyToManyServlet extends HttpServlet {
 
     if (student == null) {
       Student harry = new Student("Harry Potter");
-      _entityManager.create(harry);
+      _entityManager.persist(harry);
 	
       Student ron = new Student("Ron Weasley");
-      _entityManager.create(ron);
+      _entityManager.persist(ron);
 	
       Student hermione = new Student("Hermione Granger");
-      _entityManager.create(hermione);
+      _entityManager.persist(hermione);
 	
       Course darkArts = new Course("Defense Against the Dark Arts");
-      _entityManager.create(darkArts);
+      _entityManager.persist(darkArts);
 	
       Course potions = new Course("Potions");
-      _entityManager.create(potions);
+      _entityManager.persist(potions);
 	
       Course divination = new Course("Divination");
-      _entityManager.create(divination);
+      _entityManager.persist(divination);
 	
       Course arithmancy = new Course("Arithmancy");
-      _entityManager.create(arithmancy);
+      _entityManager.persist(arithmancy);
 	
       Course transfiguration = new Course("Transfiguration");
-      _entityManager.create(transfiguration);
+      _entityManager.persist(transfiguration);
 	
       Grade grade;
 
-      _entityManager.create(new Grade(harry, darkArts, "A"));
-      _entityManager.create(new Grade(harry, potions, "C-"));
-      _entityManager.create(new Grade(harry, transfiguration, "B+"));
-      _entityManager.create(new Grade(harry, divination, "B"));
+      _entityManager.persist(new Grade(harry, darkArts, "A"));
+      _entityManager.persist(new Grade(harry, potions, "C-"));
+      _entityManager.persist(new Grade(harry, transfiguration, "B+"));
+      _entityManager.persist(new Grade(harry, divination, "B"));
 
-      _entityManager.create(new Grade(ron, darkArts, "A-"));
-      _entityManager.create(new Grade(ron, potions, "C+"));
-      _entityManager.create(new Grade(ron, transfiguration, "B"));
-      _entityManager.create(new Grade(ron, divination, "B+"));
+      _entityManager.persist(new Grade(ron, darkArts, "A-"));
+      _entityManager.persist(new Grade(ron, potions, "C+"));
+      _entityManager.persist(new Grade(ron, transfiguration, "B"));
+      _entityManager.persist(new Grade(ron, divination, "B+"));
 
-      _entityManager.create(new Grade(hermione, darkArts, "A+"));
-      _entityManager.create(new Grade(hermione, potions, "A-"));
-      _entityManager.create(new Grade(hermione, transfiguration, "A+"));
-      _entityManager.create(new Grade(hermione, arithmancy, "A+"));
+      _entityManager.persist(new Grade(hermione, darkArts, "A+"));
+      _entityManager.persist(new Grade(hermione, potions, "A-"));
+      _entityManager.persist(new Grade(hermione, transfiguration, "A+"));
+      _entityManager.persist(new Grade(hermione, arithmancy, "A+"));
     }
   }
 

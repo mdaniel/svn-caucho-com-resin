@@ -249,9 +249,11 @@ abstract public class StoreManager
 
       if (_selfServer != null)
 	_selfServerIndex = _selfServer.getIndex();
-      else if (_cluster.getServerList().length > 1)
-	throw new ConfigException(L.l("cluster-store for '{0}' needs an <srun> configuration for it.",
-				      _serverId));
+      else if (_cluster.getServerList().length > 1) {
+	// XXX: error?
+	log.warning(L.l("cluster-store for '{0}' needs an <srun> configuration for it.",
+			_serverId));
+      }
       
     }
     
@@ -576,7 +578,10 @@ abstract public class StoreManager
    */
   protected ClusterServer []getServerList()
   {
-    return _cluster.getServerList();
+    if (_cluster != null)
+      return _cluster.getServerList();
+    else
+      return new ClusterServer[0];
   }
 
   /**
