@@ -1,9 +1,0 @@
-<hibernate-mapping>
-  <class name="example.Student" table="amber_one2many_students">
-    <id name="id"/>
-
-    <property name="name"/>
-
-    <many-to-one name="house"/>
-  </class>
-</hibernate-mapping>
