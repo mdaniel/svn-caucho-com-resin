@@ -162,13 +162,13 @@ found' message.<p/>
 <p>To install the service, use</p>
 
 <example>
-unix> resin-3.0.x/bin/httpd -install
+unix> resin-3.0.x/bin/httpd.sh -install
 </example>
 
 <p>To remove the service, use</p>
 
 <example>
-unix> resin-3.0.x/bin/httpd -remove
+unix> resin-3.0.x/bin/httpd.sh -remove
 </example>
 
 <p>You will either need to reboot the machine or start the service

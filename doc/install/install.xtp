@@ -22,7 +22,7 @@ link /usr/java to the java home.  On Windows, check to make sure the
 JDK installation set JAVA_HOME correctly.
 <li>unzip/untar the Resin download
 <li>On Unix, execute use ./configure; make; make install
-<li>Start <var/resin-3.0.0/bin/httpd.sh/> on Unix or <var/resin-3.0.0/bin/httpd.exe/> on Win32
+<li>Start <var/resin-3.0.0/bin/httpd.sh/> on Unix or <var/resin-3.0.0/httpd.exe/> on Win32
 <li>Browse <code>http://localhost:8080</code>
 <li>Add JSP files like <var/resin-3.0.0/doc/hello.jsp/>.  The URL in your
 browser will be <code>http://localhost:8080/hello.jsp</code>
