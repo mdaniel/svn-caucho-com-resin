@@ -28,19 +28,16 @@
 
 package com.caucho.config.core;
 
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import com.caucho.util.L10N;
 import com.caucho.util.CharBuffer;
+import com.caucho.util.L10N;
 
-import com.caucho.config.ConfigException;
+import java.util.logging.Logger;
 
 /**
  * Logs an EL value.
  */
 public class ResinLog {
-  private static L10N L = new L10N(ResinSet.class);
+  private static L10N L = new L10N(ResinLog.class);
 
   private String _name = "com.caucho.config.core.ResinLog";
   private CharBuffer _text = new CharBuffer();
@@ -52,7 +49,7 @@ public class ResinLog {
   {
     _name = name;
   }
-  
+
   /**
    * The value to be logged.
    */
