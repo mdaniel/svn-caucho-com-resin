@@ -7,17 +7,19 @@
       <item link="resin-3.0.13.xtp" title="Resin 3.0.13"/>
       <item link="resin-3.0.12.xtp" title="Resin 3.0.12"/>
       <item link="resin-3.0.11.xtp" title="Resin 3.0.11"/>
-      <item link="resin-3.0.10.xtp" title="Resin 3.0.10"/>
-      <item link="resin-3.0.9.xtp" title="Resin 3.0.9"/>
-      <item link="resin-3.0.8.xtp" title="Resin 3.0.8"/>
-      <item link="resin-3.0.7.xtp" title="Resin 3.0.7"/>
-      <item link="resin-3.0.6.xtp" title="Resin 3.0.6"/>
-      <item link="resin-3.0.5.xtp" title="Resin 3.0.5"/>
-      <item link="resin-3.0.4.xtp" title="Resin 3.0.4"/>
-      <item link="resin-3.0.3.xtp" title="Resin 3.0.3"/>
-      <item link="resin-3.0.2.xtp" title="Resin 3.0.2"/>
-      <item link="resin-3.0.1.xtp" title="Resin 3.0.1"/>
-      <item link="resin-3.0.0.xtp" title="Resin 3.0.0"/>
+      <item link="release-notes-archive.xtp" title="Archive">
+        <item link="resin-3.0.10.xtp" title="Resin 3.0.10"/>
+        <item link="resin-3.0.9.xtp" title="Resin 3.0.9"/>
+        <item link="resin-3.0.8.xtp" title="Resin 3.0.8"/>
+        <item link="resin-3.0.7.xtp" title="Resin 3.0.7"/>
+        <item link="resin-3.0.6.xtp" title="Resin 3.0.6"/>
+        <item link="resin-3.0.5.xtp" title="Resin 3.0.5"/>
+        <item link="resin-3.0.4.xtp" title="Resin 3.0.4"/>
+        <item link="resin-3.0.3.xtp" title="Resin 3.0.3"/>
+        <item link="resin-3.0.2.xtp" title="Resin 3.0.2"/>
+        <item link="resin-3.0.1.xtp" title="Resin 3.0.1"/>
+        <item link="resin-3.0.0.xtp" title="Resin 3.0.0"/>
+      </item>
     </item>
 
     <item link="change-logs.xtp" title="Change Logs">
