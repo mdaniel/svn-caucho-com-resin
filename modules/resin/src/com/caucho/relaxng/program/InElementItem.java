@@ -50,16 +50,15 @@ import com.caucho.relaxng.RelaxException;
 public class InElementItem extends Item {
   protected final static L10N L = new L10N(InElementItem.class);
 
-  private Item _eltItem;
-  private Item _contItem;
+  private final Item _eltItem;
+  private final Item _contItem;
+
+  private int _hashCode;
 
   private InElementItem(Item eltItem, Item contItem)
   {
     _eltItem = eltItem;
-    _eltItem.setParentIfNew(this);
-    
     _contItem = contItem;
-    _contItem.setParentIfNew(this);
   }
 
   public static InElementItem create(Item eltItem, Item contItem)
@@ -296,6 +295,17 @@ public class InElementItem extends Item {
    */
   public int hashCode()
   {
+    if (_hashCode == 0)
+      _hashCode = calculateHashCode();
+    
+    return _hashCode;
+  }
+
+  /**
+   * Returns the hash code for the empty item.
+   */
+  private int calculateHashCode()
+  {
     return _eltItem.hashCode() * 65521 + _contItem.hashCode();
   }
 
@@ -311,8 +321,6 @@ public class InElementItem extends Item {
       return false;
 
     InElementItem seq = (InElementItem) o;
-
-    boolean eq = _eltItem.equals(seq._eltItem) && _contItem.equals(seq._contItem);
 
     return _eltItem.equals(seq._eltItem) && _contItem.equals(seq._contItem);
   }

@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -47,19 +48,21 @@ public class NsNamePattern extends NameClassPattern {
 
   private NameClassPattern _except;
 
-  /**
-   * Creates a new element pattern.
-   */
-  public NsNamePattern(String ns)
-  {
-    _ns = ns;
-  }
+  private NsNameItem _item;
   
   /**
    * Creates a new element pattern.
    */
   public NsNamePattern()
   {
+  }
+
+  /**
+   * Creates a new element pattern.
+   */
+  public NsNamePattern(String ns)
+  {
+    _ns = ns;
   }
 
   /**
@@ -98,12 +101,16 @@ public class NsNamePattern extends NameClassPattern {
   public NameClassItem createNameItem()
     throws RelaxException
   {
-    NsNameItem item = new NsNameItem(_ns);
+    if (_item == null) {
+      NsNameItem item = new NsNameItem(_ns);
 
-    if (_except != null)
-      item.setExcept(_except.createNameItem());
+      if (_except != null)
+	item.setExcept(_except.createNameItem());
+
+      _item = item;
+    }
     
-    return item;
+    return _item;
   }
 
   /**

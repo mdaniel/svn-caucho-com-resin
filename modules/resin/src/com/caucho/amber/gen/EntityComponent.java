@@ -54,6 +54,8 @@ import com.caucho.amber.field.StubMethod;
 import com.caucho.amber.table.Table;
 import com.caucho.amber.table.Column;
 
+import com.caucho.bytecode.JMethod;
+
 /**
  * Generates the Java code for the wrapped object.
  */
@@ -831,12 +833,9 @@ public class EntityComponent extends ClassComponent {
       out.println("__caucho_dirtyMask_" + i + " = 0L;");
     }
 
-    /* XXX:
-    if (Lifecycle.class.isAssignableFrom(_entityType.getBeanClass())) {
-      println("if (beforeSave(session))");
-      println("  return true;");
+    for (JMethod method : _entityType.getPrePersistCallbacks()) {
+      out.println(method.getName() + "();");
     }
-    */
 
     Table table = _entityType.getTable();
 
@@ -911,6 +910,10 @@ public class EntityComponent extends ClassComponent {
     out.println();
     out.println("if (__caucho_log.isLoggable(java.util.logging.Level.FINE))");
     out.println("  __caucho_log.fine(\"amber create \" + this);");
+
+    for (JMethod method : _entityType.getPostPersistCallbacks()) {
+      out.println(method.getName() + "();");
+    }
 
     out.println();
     out.println("return false;");

@@ -373,6 +373,10 @@ public final class CharBuffer extends CharSegment {
    */
   public CharBuffer append(long i)
   {
+    if (i == 0x8000000000000000L) {
+      return append("-9223372036854775808");
+    }
+    
     int length = _length;
     
     if (_buffer.length < length + 32)

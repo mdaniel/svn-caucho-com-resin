@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -47,6 +48,8 @@ abstract public class AbstractAccessLog {
 
   protected Path _path;
 
+  protected String _pathFormat;
+
   /**
    * Returns the access-log's path.
    */
@@ -61,6 +64,22 @@ abstract public class AbstractAccessLog {
   public void setPath(Path path)
   {
     _path = path;
+  }
+
+  /**
+   * Returns the formatted path
+   */
+  public String getPathFormat()
+  {
+    return _pathFormat;
+  }
+
+  /**
+   * Sets the formatted path.
+   */
+  public void setPathFormat(String pathFormat)
+  {
+    _pathFormat = pathFormat;
   }
 
   /**

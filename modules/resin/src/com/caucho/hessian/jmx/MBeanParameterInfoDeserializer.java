@@ -50,61 +50,50 @@ package com.caucho.hessian.jmx;
 
 import java.io.IOException;
 
-import javax.management.MBeanInfo;
-import javax.management.MBeanAttributeInfo;
-import javax.management.MBeanConstructorInfo;
-import javax.management.MBeanOperationInfo;
-import javax.management.MBeanNotificationInfo;
+import javax.management.MBeanParameterInfo;
 
 import com.caucho.hessian.io.AbstractDeserializer;
 import com.caucho.hessian.io.AbstractHessianInput;
 
 /**
- * Deserializing an MBeanInfo valued object
+ * Deserializing an MBeanParameterInfo valued object
  */
-public class MBeanInfoDeserializer extends AbstractDeserializer {
+public class MBeanParameterInfoDeserializer extends AbstractDeserializer {
   public Class getType()
   {
-    return MBeanInfo.class;
+    return MBeanParameterInfo.class;
   }
   
   public Object readMap(AbstractHessianInput in)
     throws IOException
   {
-    String className = null;
+    String name = null;
+    String type = null;
     String description = null;
-    MBeanAttributeInfo []attributes = null;
-    MBeanConstructorInfo []constructors = null;
-    MBeanOperationInfo []operations = null;
-    MBeanNotificationInfo []notifications = null;
+    boolean isRead = false;
+    boolean isWrite = false;
+    boolean isIs = false;
     
     while (! in.isEnd()) {
       String key = in.readString();
 
-      if ("className".equals(key))
-	className = in.readString();
+      if ("name".equals(key))
+	name = in.readString();
+      else if ("type".equals(key))
+	type = in.readString();
       else if ("description".equals(key))
 	description = in.readString();
-      else if ("attributes".equals(key)) {
-	attributes = (MBeanAttributeInfo []) in.readObject(MBeanAttributeInfo[].class);
-      }
-      /*
-      else if ("isWrite".equals(key))
-	isWrite = in.readBoolean();
-      else if ("isIs".equals(key))
-	isIs = in.readBoolean();
-      */
-      else
+      else {
 	in.readObject();
+      }
     }
 
     in.readMapEnd();
 
     try {
-      MBeanInfo info;
-      
-      info = new MBeanInfo(className, description, attributes,
-			   constructors, operations, notifications);
+      MBeanParameterInfo info;
+
+      info = new MBeanParameterInfo(name, type, description);
 
       return info;
     } catch (Exception e) {

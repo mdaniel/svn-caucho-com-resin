@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -45,7 +46,10 @@ import com.caucho.relaxng.program.NameClassItem;
  * Relax element pattern
  */
 public class ChoiceNamePattern extends NameClassPattern {
-  private ArrayList<NameClassPattern> _patterns = new ArrayList<NameClassPattern>();
+  private ArrayList<NameClassPattern> _patterns
+    = new ArrayList<NameClassPattern>();
+
+  private NameClassItem _item;
 
   /**
    * Creates a new choice pattern.
@@ -103,13 +107,17 @@ public class ChoiceNamePattern extends NameClassPattern {
   public NameClassItem createNameItem()
     throws RelaxException
   {
-    ChoiceNameItem item = new ChoiceNameItem();
+    if (_item == null) {
+      ChoiceNameItem item = new ChoiceNameItem();
 
-    for (int i = 0; i < _patterns.size(); i++) {
-      item.addItem(_patterns.get(i).createNameItem());
+      for (int i = 0; i < _patterns.size(); i++) {
+	item.addItem(_patterns.get(i).createNameItem());
+      }
+
+      _item = item.getMin();
     }
 
-    return item.getMin();
+    return _item;
   }
 
   /**

@@ -108,8 +108,9 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener {
   // How often the rolloverSize should be checked
   private long _rolloverCheckTime = ROLLOVER_CHECK_TIME;
 
-  // The time of the next rollover
-  private long _nextTime = -1;
+  // The time of the next period-based rollover
+  private long _nextPeriodEnd = -1;
+  private long _nextRolloverCheckTime = -1;
 
   private final byte []_bufferA = new byte[BUFFER_SIZE];
   private int _bufferALength;
@@ -203,36 +204,35 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener {
   {
     Environment.addClassLoaderListener(new CloseListener(this));
     
-    if (_path == null)
+    if (getPath() == null && getPathFormat() == null)
       throw new ServletConfigException(L.l("access-log needs a path"));
     
-    _path.getParent().mkdirs();
-    
-    _rolloverPrefix = _path.getTail();
-
     long now = Alarm.getCurrentTime();
     
-    long lastModified = _path.getLastModified();
-    if (lastModified <= 0)
-      lastModified = now;
+    _nextRolloverCheckTime = now + _rolloverCheckTime;
+
+    if (getPath() != null) {
+      _path.getParent().mkdirs();
     
-    _calendar.setGMTTime(lastModified);
-    long zone = _calendar.getZoneOffset();
+      _rolloverPrefix = _path.getTail();
 
-    if (_rolloverPeriod < 0) {
-      _nextTime = now + _rolloverCheckTime;
-    }
-    else {
-      _nextTime = Period.periodEnd(lastModified, _rolloverPeriod);
-      
-      if (log.isLoggable(Level.FINE))
-        log.fine(_path + ": next rollover at " + QDate.formatLocal(_nextTime));
-      
-      if (_nextTime <= now) 
-        rolloverLog(now);
-    }
+      long lastModified = _path.getLastModified();
+      if (lastModified <= 0)
+	lastModified = now;
+    
+      _calendar.setGMTTime(lastModified);
+      long zone = _calendar.getZoneOffset();
 
-    openLog();
+      if (_rolloverPeriod > 0)
+	_nextPeriodEnd = Period.periodEnd(lastModified, _rolloverPeriod);
+    }
+    else
+      _nextPeriodEnd = Period.periodEnd(now, _rolloverPeriod);
+
+    if (_nextPeriodEnd < _nextRolloverCheckTime && _nextPeriodEnd > 0)
+      _nextRolloverCheckTime = _nextPeriodEnd;
+
+    rolloverLog(now);
     
     if (_format == null)
       _format = "%h %l %u %t \"%r\" %>s %b \"%{Referer}i\" \"%{User-Agent}i\"";
@@ -339,7 +339,7 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener {
 
     long now = Alarm.getCurrentTime();
 
-    if (_nextTime < now) 
+    if (_nextRolloverCheckTime < now) 
       rolloverLog(now);
 
     byte []writeBuffer = null;
@@ -552,72 +552,36 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener {
    */
   private void rolloverLog(long now)
   {
+    flush();
+    
     synchronized (_streamLock) {
-      String savedName = null;
-
-      if (_rolloverPeriod > 0)
-	savedName = getArchiveName(_nextTime - 1);
-      else if (_rolloverPeriod < 0 && _rolloverSize <= _path.getLength())
-	savedName = getArchiveName(_nextTime - 1);
-
-      if (_rolloverPeriod > 0) {
-	_nextTime = Period.periodEnd(now, _rolloverPeriod);
+      _nextRolloverCheckTime = now + _rolloverCheckTime;
+      
+      if (_nextPeriodEnd > 0 && _nextPeriodEnd < now) {
+	if (getPathFormat() == null) {
+	  String savedName = getArchiveName(_nextPeriodEnd - 1);
+	  movePathToArchive(savedName);
+	}
+	
+	_nextPeriodEnd = Period.periodEnd(now, _rolloverPeriod);
       
 	if (log.isLoggable(Level.FINE))
-	  log.fine(_path + ": next rollover at " + QDate.formatLocal(_nextTime));
+	  log.fine(_path + ": next rollover at " +
+		   QDate.formatLocal(_nextPeriodEnd));
       }
-      else
-	_nextTime = now + _rolloverCheckTime;
-
-      if (savedName != null) {
-	try {
-	  if (_os != null) {
-	    flush();
-	  }
-	  _os = null;
-	  String tail = _path.getTail();
-	  Path newPath = _path.getParent().lookup(savedName);
-        
-	  try {
-	    newPath.getParent().mkdirs();
-	  } catch (Throwable e) {
-	    log.log(Level.WARNING, e.toString(), e);
-	  }
-        
-	  try {
-	    WriteStream os = newPath.openWrite();
-	    OutputStream out;
-
-	    if (savedName.endsWith(".gz"))
-	      out = new GZIPOutputStream(os);
-	    else if (savedName.endsWith(".zip")) 
-	      out = new ZipOutputStream(os);
-	    else
-	      out = os;
-
-	    try {
-	      _path.writeToStream(out);
-	    } finally {
-	      try {
-		out.close();
-	      } catch (Throwable e) {
-		log.log(Level.WARNING, e.toString(), e);
-	      }
-	    
-	      os.close();
-	    }
-	  
-	    _path.remove();
-	  } catch (Throwable e) {
-	    log.log(Level.WARNING, e.toString(), e);
-	  }
-	} catch (IOException e) {
-	  log.log(Level.INFO, e.toString(), e);
+      else if (_path != null && _rolloverSize <= _path.getLength()) {
+	if (getPathFormat() == null) {
+	  String savedName = getArchiveName(_nextRolloverCheckTime - 1);
+	  movePathToArchive(savedName);
 	}
-
-	openLog();
       }
+
+      long nextPeriodEnd = _nextPeriodEnd;
+      if (_nextPeriodEnd < _nextRolloverCheckTime && _nextPeriodEnd > 0)
+	_nextRolloverCheckTime = _nextPeriodEnd;
     }
+    
+    openLog();
   }
 
   /**
@@ -626,8 +590,26 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener {
   private void openLog()
   {
     try {
-      if (! _path.getParent().isDirectory())
-	_path.getParent().mkdirs();
+      synchronized (_streamLock) {
+	WriteStream os = _os;
+	_os = null;
+
+	if (os != null)
+	  os.close();
+      }
+    } catch (Throwable e) {
+      log.log(Level.FINER, e.toString(), e);
+    }
+      
+    Path path = getPath();
+
+    if (path == null) {
+      path = getPath(Alarm.getCurrentTime());
+    }
+    
+    try {
+      if (! path.getParent().isDirectory())
+	path.getParent().mkdirs();
     } catch (Throwable e) {
       log.log(Level.FINER, e.toString(), e);
     }
@@ -635,7 +617,7 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener {
     synchronized (_streamLock) {
       for (int i = 0; i < 3 && _os == null; i++) {
 	try {
-	  _os = _path.openAppend();
+	  _os = path.openAppend();
 	} catch (IOException e) {
 	  log.log(Level.INFO, e.toString(), e);
 	}
@@ -647,6 +629,74 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener {
     }
   }
 
+  private void movePathToArchive(String savedName)
+  {
+    synchronized (_streamLock) {
+      try {
+	WriteStream os = _os;
+	_os = null;
+	if (os != null)
+	  os.close();
+      } catch (IOException e) {
+	log.log(Level.FINE, e.toString(), e);
+      }
+	
+      String tail = _path.getTail();
+      Path newPath = _path.getParent().lookup(savedName);
+        
+      try {
+	newPath.getParent().mkdirs();
+      } catch (Throwable e) {
+	log.log(Level.WARNING, e.toString(), e);
+      }
+        
+      try {
+	WriteStream os = newPath.openWrite();
+	OutputStream out;
+
+	if (savedName.endsWith(".gz"))
+	  out = new GZIPOutputStream(os);
+	else if (savedName.endsWith(".zip")) 
+	  out = new ZipOutputStream(os);
+	else
+	  out = os;
+
+	try {
+	  _path.writeToStream(out);
+	} finally {
+	  try {
+	    out.close();
+	  } catch (Throwable e) {
+	    log.log(Level.WARNING, e.toString(), e);
+	  }
+	    
+	  os.close();
+	}
+	  
+	_path.remove();
+      } catch (Throwable e) {
+	log.log(Level.WARNING, e.toString(), e);
+      }
+    }
+  }
+
+  /**
+   * Returns the path of the format file
+   *
+   * @param time the archive date
+   */
+  protected Path getPath(long time)
+  {
+    String formatString = getPathFormat();
+
+    if (formatString == null)
+      throw new IllegalStateException(L.l("getPath requires a format path"));
+    
+    String pathString = getFormatName(formatString, time);
+
+    return Vfs.lookup().lookup(pathString);
+  }
+
   /**
    * Returns the name of the archived file
    *
@@ -654,13 +704,21 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener {
    */
   protected String getArchiveName(long time)
   {
-    String date;
+    return getFormatName(_archiveFormat, time);
+  }
 
+  /**
+   * Returns the name of the archived file
+   *
+   * @param time the archive date
+   */
+  protected String getFormatName(String format, long time)
+  {
     if (time <= 0)
       time = Alarm.getCurrentTime();
     
-    if (_archiveFormat != null)
-      return _calendar.formatLocal(time, _archiveFormat);
+    if (format != null)
+      return _calendar.formatLocal(time, format);
     else if (_rolloverPeriod % (24 * 3600 * 1000L) == 0)
       return _rolloverPrefix + "." + _calendar.formatLocal(time, "%Y%m%d");
     else
@@ -773,14 +831,10 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener {
    * a _bufferLock.
    */
   public void flush()
-    throws IOException
   {
     byte []writeBuffer;
     int writeLength;
     boolean isBufferA;
-
-    if (_os == null)
-      openLog();
       
     synchronized (_bufferLock) {
       isBufferA = _isBufferA;
@@ -809,15 +863,22 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener {
       }
     }
 
-    synchronized (_streamLock) {
-      WriteStream os = _os;
+    if (_os == null)
+      openLog();
 
-      if (os != null) {
-	synchronized (writeBuffer) {
-	  os.write(writeBuffer, 0, writeLength);
-	  os.flush();
+    try {
+      synchronized (_streamLock) {
+	WriteStream os = _os;
+
+	if (os != null) {
+	  synchronized (writeBuffer) {
+	    os.write(writeBuffer, 0, writeLength);
+	    os.flush();
+	  }
 	}
       }
+    } catch (IOException e) {
+      log.log(Level.FINE, e.toString(), e);
     }
   }
 
@@ -828,8 +889,6 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener {
   {
     try {
       flush();
-    } catch (IOException e) {
-      log.log(Level.WARNING, e.toString(), e);
     } finally {
       alarm = _alarm;
       if (alarm != null)

@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -41,6 +42,8 @@ import com.caucho.relaxng.program.NameClassItem;
  */
 public class AnyNamePattern extends NameClassPattern {
   private NameClassPattern _except;
+
+  private AnyNameItem _item;
   
   /**
    * Creates a new element pattern.
@@ -71,12 +74,16 @@ public class AnyNamePattern extends NameClassPattern {
   public NameClassItem createNameItem()
     throws RelaxException
   {
-    AnyNameItem item = new AnyNameItem();
+    if (_item == null) {
+      AnyNameItem item = new AnyNameItem();
 
-    if (_except != null)
-      item.setExcept(_except.createNameItem());
+      if (_except != null)
+	item.setExcept(_except.createNameItem());
+
+      _item = item;
+    }
     
-    return item;
+    return _item;
   }
 
   /**

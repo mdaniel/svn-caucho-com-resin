@@ -39,6 +39,7 @@ import java.lang.reflect.InvocationTargetException;
 import com.caucho.util.L10N;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.CauchoSystem;
+import com.caucho.util.ThreadPool;
 import com.caucho.vfs.*;
 import com.caucho.make.Make;
 
@@ -563,8 +564,7 @@ public class JavaCompiler {
     compiler.setPath(path);
     compiler.setLineMap(lineMap);
 
-    Thread thread = new Thread(compiler);
-    thread.start();
+    ThreadPool.start(compiler);
 
     synchronized (compiler) {
       long endTime = System.currentTimeMillis() + _maxCompileTime;

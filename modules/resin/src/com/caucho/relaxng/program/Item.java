@@ -19,6 +19,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
+ *
  *   Free SoftwareFoundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
@@ -49,61 +50,7 @@ abstract public class Item {
   protected final static L10N L = new L10N(Item.class);
   protected final static Logger log = Log.open(Item.class);
 
-  private static final Iterator<Item> EMPTY_ITEM_ITERATOR = 
-    new Iterator<Item>() {
-      public boolean hasNext()
-      {
-        return false;
-      }
-
-      public Item next()
-      {
-        throw new NoSuchElementException();
-      }
-
-      public void remove()
-      {
-        throw new UnsupportedOperationException();
-      }
-    };
-
-  private Item _parent;
-  
-  /**
-   * Sets the parent Item.
-   */
-  protected void setParent(Item parent)
-  {
-    _parent = parent;
-  }
-  
-  /**
-   * Sets the parent Item if unset.
-   */
-  protected void setParentIfNew(Item parent)
-  {
-    if (_parent == null)
-      _parent = parent;
-  }
-  
-  /**
-   * Returns the parent Item.
-   */
-  public Item getParent()
-  {
-    return _parent;
-  }
-  
-  /**
-   * Returns the top parent item.
-   */
-  public Item getTopParent()
-  {
-    if (_parent == null)
-      return this;
-    else
-      return _parent.getTopParent();
-  }
+  private static final Iterator<Item> EMPTY_ITEM_ITERATOR;
   
   /**
    * Adds to the first set the set of element names possible.
@@ -319,6 +266,26 @@ abstract public class Item {
   protected RelaxException error(String msg)
   {
     return new RelaxException(msg);
+  }
+
+  static {
+    EMPTY_ITEM_ITERATOR = 
+      new Iterator<Item>() {
+	public boolean hasNext()
+	{
+	  return false;
+	}
+
+	public Item next()
+	{
+	  throw new NoSuchElementException();
+	}
+
+	public void remove()
+	{
+	  throw new UnsupportedOperationException();
+	}
+      };
   }
 }
 

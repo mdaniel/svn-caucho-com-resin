@@ -66,8 +66,12 @@ public class RotateStream extends StreamImpl {
   
   private static HashMap<Path,SoftReference<RotateStream>> _streams
     = new HashMap<Path,SoftReference<RotateStream>>();
+  
+  private static HashMap<String,SoftReference<RotateStream>> _formatStreams
+    = new HashMap<String,SoftReference<RotateStream>>();
 
   private Path _path;
+  private String _formatPath;
   
   private String _archiveFormat;
 
@@ -88,19 +92,33 @@ public class RotateStream extends StreamImpl {
   private QDate _calendar = new QDate(true);
     
   // When the log will next be rolled over for the period check
-  private long _nextPeriod = -1;
+  private long _nextPeriodEnd = -1;
+  private long _nextCheckTime = -1;
+  
   private long _lastTime = -1; // time of the last check
 
   private volatile boolean _isInit;
 
   /**
-   * Create listener.
+   * Create rotate stream.
    *
    * @param path underlying log path
    */
   private RotateStream(Path path)
   {
     _path = path;
+    _rolloverSize = ROLLOVER_SIZE;
+    _maxRolloverCount = 100;
+  }
+
+  /**
+   * Create rotate stream.
+   *
+   * @param path underlying log path
+   */
+  private RotateStream(String formatPath)
+  {
+    _formatPath = formatPath;
     _rolloverSize = ROLLOVER_SIZE;
     _maxRolloverCount = 100;
   }
@@ -125,12 +143,35 @@ public class RotateStream extends StreamImpl {
   }
 
   /**
+   * Returns the rotate stream corresponding to this path
+   */
+  public static RotateStream create(String path)
+  {
+    synchronized (_formatStreams) {
+      SoftReference<RotateStream> ref = _formatStreams.get(path);
+      RotateStream stream = ref != null ? ref.get() : null;
+
+      if (stream == null) {
+        stream = new RotateStream(path);
+
+        _formatStreams.put(path, new SoftReference<RotateStream>(stream));
+      }
+
+      return stream;
+    }
+  }
+
+  /**
    * Clears the streams.
    */
   public static void clear()
   {
     synchronized (_streams) {
       _streams.clear();
+    }
+    
+    synchronized (_formatStreams) {
+      _formatStreams.clear();
     }
   }
 
@@ -201,15 +242,18 @@ public class RotateStream extends StreamImpl {
 
     if (_rolloverSize <= 0)
       _rolloverSize = Long.MAX_VALUE / 2;
-    
-    if (_archiveFormat != null) {
+
+    if (_formatPath != null) {
+    }
+    else if (_archiveFormat != null) {
     }
     else if (_rolloverPeriod % DAY != 0)
       _archiveFormat = _path.getTail() + ".%Y%m%d.%H";
     else
       _archiveFormat = _path.getTail() + ".%Y%m%d";
 
-    handleCron();
+    handleAlarm();
+    
     new RotateAlarm(this);
   }
 
@@ -269,7 +313,7 @@ public class RotateStream extends StreamImpl {
     return new WriteStream(this);
   }    
 
-  void handleCron()
+  void handleAlarm()
   {
     synchronized (this) {
       rotateLog();
@@ -287,8 +331,10 @@ public class RotateStream extends StreamImpl {
     long lastTime = _lastTime;
     _lastTime = Alarm.getCurrentTime();
     
-    if (now < _nextPeriod && _path.getLength() < _rolloverSize)
+    if (now < _nextCheckTime)
       return;
+
+    _nextCheckTime = now + _updateInterval;
 
     closeImpl();
 
@@ -304,31 +350,38 @@ public class RotateStream extends StreamImpl {
 	  lastTime = Alarm.getCurrentTime();
       }
 
-      if (_nextPeriod < 0 && _rolloverPeriod > 0) {
+      boolean isOverflow = _rolloverSize < _path.getLength();
+
+      if (_nextPeriodEnd < 0 && _rolloverPeriod > 0) {
 	long modifiedTime = _path.getLastModified() ;
 
 	if (modifiedTime <= 0) {
-	  _nextPeriod = Period.periodEnd(now, _rolloverPeriod);
-	  return;
+	  _nextPeriodEnd = Period.periodEnd(now, _rolloverPeriod);
+	  lastTime = now;
+	}
+	else {
+	  _nextPeriodEnd = Period.periodEnd(modifiedTime, _rolloverPeriod);
+	  lastTime = _nextPeriodEnd - 1;
 	}
 
-	_nextPeriod = Period.periodEnd(modifiedTime, _rolloverPeriod);
+	if (_nextPeriodEnd < _nextCheckTime)
+	  _nextCheckTime = _nextPeriodEnd;
 
-	if (now < _nextPeriod && _path.getLength() < _rolloverSize)
+	if (now < _nextPeriodEnd && ! isOverflow)
 	  return;
       }
 
       Path parent = _path.getParent();
 
-      if (_rolloverPeriod > 0) {
-	lastTime = _nextPeriod - 1;
-	_nextPeriod = Period.periodEnd(now, _rolloverPeriod);
+      if (_rolloverPeriod > 0 && _nextPeriodEnd < now) {
+	lastTime = _nextPeriodEnd - 1;
+	_nextPeriodEnd = Period.periodEnd(now, _rolloverPeriod);
       }
-      else if (_path.getLength() < _rolloverSize) {
+      else if (! isOverflow) {
 	return;
       }
 
-      if (_rolloverSize <= _path.getLength())
+      if (isOverflow)
 	lastTime = Alarm.getCurrentTime();
 
       String date = _calendar.formatLocal(lastTime, _archiveFormat);
@@ -446,7 +499,7 @@ public class RotateStream extends StreamImpl {
 
       if (stream != null) {
 	try {
-	  stream.handleCron();
+	  stream.handleAlarm();
 	} finally {
 	  long now = Alarm.getCurrentTime();
 	  long nextTime = now + HOUR;

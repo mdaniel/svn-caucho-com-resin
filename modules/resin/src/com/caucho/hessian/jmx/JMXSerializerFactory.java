@@ -52,6 +52,7 @@ import javax.management.ObjectName;
 import javax.management.ObjectInstance;
 import javax.management.MBeanAttributeInfo;
 import javax.management.MBeanOperationInfo;
+import javax.management.MBeanParameterInfo;
 import javax.management.MBeanConstructorInfo;
 import javax.management.MBeanNotificationInfo;
 import javax.management.MBeanInfo;
@@ -108,6 +109,9 @@ public class JMXSerializerFactory extends AbstractSerializerFactory {
     }
     else if (MBeanOperationInfo.class.isAssignableFrom(cl)) {
       return new MBeanOperationInfoDeserializer();
+    }
+    else if (MBeanParameterInfo.class.isAssignableFrom(cl)) {
+      return new MBeanParameterInfoDeserializer();
     }
     else if (MBeanNotificationInfo.class.isAssignableFrom(cl)) {
       return new MBeanNotificationInfoDeserializer();

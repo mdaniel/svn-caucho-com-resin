@@ -224,6 +224,8 @@ public class Resin implements ResinServerListener {
     System.out.println(com.caucho.Version.FULL_VERSION);
     System.out.println(com.caucho.Version.COPYRIGHT);
     System.out.println();
+    
+    boolean isResinProfessional = false;
 
     try {
       Class cl = Class.forName("com.caucho.license.LicenseCheckImpl",
@@ -237,12 +239,11 @@ public class Resin implements ResinServerListener {
 
 	System.setProperty("isResinProfessional", "true");
 
-        _server.setResinProfessional(true);
-
 	SchemeMap.initJNI();
       
 	license.doLogging(1);
       } catch (Throwable e) {
+	e.printStackTrace();
 	log.log(Level.FINE, e.toString(), e);
       
 	String msg = L.l("  No valid Resin(R) Professional license found.\n" +
@@ -286,6 +287,7 @@ public class Resin implements ResinServerListener {
     server.setConfigFile(resinConf.getNativePath());
     server.setServerId(_serverId);
     server.addListener(this);
+    server.setResinProfessional(isResinProfessional);
 
     NodeBuilder builder = new NodeBuilder();
 

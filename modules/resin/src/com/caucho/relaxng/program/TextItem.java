@@ -48,7 +48,11 @@ import com.caucho.relaxng.pattern.AttributePattern;
 public class TextItem extends Item {
   protected final static L10N L = new L10N(TextItem.class);
 
-  public TextItem()
+  private final static QName TEXT_NAME = new QName("#text", "");
+  
+  public final static TextItem TEXT = new TextItem();
+
+  private TextItem()
   {
   }
 
@@ -57,7 +61,7 @@ public class TextItem extends Item {
    */
   public void firstSet(HashSet<QName> set)
   {
-    set.add(new QName("#text", ""));
+    set.add(TEXT_NAME);
   }
   
   /**

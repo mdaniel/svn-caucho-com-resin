@@ -66,7 +66,7 @@ public class EntityManagerImpl implements EntityManager, CloseResource {
   /**
    * Makes the instance managed.
    */
-  public void create(Object entity)
+  public void persist(Object entity)
   {
     try {
       AmberConnectionImpl aConn = getAmberConnection();
@@ -178,16 +178,33 @@ public class EntityManagerImpl implements EntityManager, CloseResource {
   }
 
   /**
-   * Refresh the state of the instance from the database.
+   * Creates an instance of the named query
    */
-  public void refresh(Object entity)
+  public Query createNativeQuery(String sql)
   {
+    throw new UnsupportedOperationException();
   }
 
   /**
-   * Make the instance non-persistent
+   * Creates an instance of the named query
    */
-  public void evict(Object entity)
+  public Query createNativeQuery(String sql, String map)
+  {
+    throw new UnsupportedOperationException();
+  }
+
+  /**
+   * Creates an instance of the named query
+   */
+  public Query createNativeQuery(String sql, Class type)
+  {
+    throw new UnsupportedOperationException();
+  }
+
+  /**
+   * Refresh the state of the instance from the database.
+   */
+  public void refresh(Object entity)
   {
   }
 
@@ -196,7 +213,15 @@ public class EntityManagerImpl implements EntityManager, CloseResource {
    */
   public boolean contains(Object entity)
   {
-    return false;
+    try {
+      AmberConnectionImpl aConn = getAmberConnection();
+    
+      return aConn.contains(entity);
+    } catch (RuntimeException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new EJBExceptionWrapper(e);
+    }
   }
 
   /**

@@ -86,8 +86,8 @@ import com.caucho.config.types.Period;
  */
 public class DynamicClassLoader extends java.net.URLClassLoader
   implements Dependency, Make, DynamicClassLoaderMBean {
-  private final static L10N L = new L10N(DynamicClassLoader.class);
-  protected static final Logger log = Log.open(DynamicClassLoader.class);
+  private static L10N _L;
+  private static Logger _log;
 
   private final static URL NULL_URL;
   private final static URL []NULL_URL_ARRAY = new URL[0];
@@ -262,7 +262,7 @@ public class DynamicClassLoader extends java.net.URLClassLoader
   public void addLoader(Loader loader, int offset)
   {
     if (_lifecycle.isDestroyed())
-      throw new IllegalStateException(L.l("can't add loaders after initialization"));
+      throw new IllegalStateException(L().l("can't add loaders after initialization"));
 
     _loaders.add(offset, loader);
 
@@ -308,7 +308,7 @@ public class DynamicClassLoader extends java.net.URLClassLoader
 
 	addManifestClassPath(classPath, path.getParent());
       } catch (IOException e) {
-	log.log(Level.WARNING, e.toString(), e);
+	log().log(Level.WARNING, e.toString(), e);
 
 	return;
       } finally {
@@ -345,7 +345,7 @@ public class DynamicClassLoader extends java.net.URLClassLoader
   public void addJar(Path jar)
   {
     if (_lifecycle.isDestroyed())
-      throw new IllegalStateException(L.l("can't add jars after closing"));
+      throw new IllegalStateException(L().l("can't add jars after closing"));
 
     if (jar.isDirectory()) {
       SimpleLoader loader = new SimpleLoader();
@@ -390,7 +390,7 @@ public class DynamicClassLoader extends java.net.URLClassLoader
 
       addURL(new URL(path.getURL()));
     } catch (Exception e) {
-      log.log(Level.WARNING, e.toString(), e);
+      log().log(Level.WARNING, e.toString(), e);
     }
   }
 
@@ -522,9 +522,9 @@ public class DynamicClassLoader extends java.net.URLClassLoader
   public final void addListener(ClassLoaderListener listener)
   {
     if (_lifecycle.isDestroyed()) {
-      IllegalStateException e = new IllegalStateException(L.l("attempted to add listener to a closed classloader {0}", this));
+      IllegalStateException e = new IllegalStateException(L().l("attempted to add listener to a closed classloader {0}", this));
       
-      log.log(Level.WARNING, e.toString(), e);
+      log().log(Level.WARNING, e.toString(), e);
 
       return;
     }
@@ -927,7 +927,7 @@ public class DynamicClassLoader extends java.net.URLClassLoader
 	}
       }
     } catch (Throwable e) {
-      log.log(Level.WARNING, e.toString(), e);
+      log().log(Level.WARNING, e.toString(), e);
     }
   }
 
@@ -969,7 +969,7 @@ public class DynamicClassLoader extends java.net.URLClassLoader
     }
 	
     if (_lifecycle.isDestroyed()) {
-      log.fine(L.l("Loading class {0} when class loader {1} has been closed.",
+      log().fine(L().l("Loading class {0} when class loader {1} has been closed.",
 		   name, this));
       
       return super.loadClass(name, resolve);
@@ -1020,7 +1020,7 @@ public class DynamicClassLoader extends java.net.URLClassLoader
     throws ClassNotFoundException
   {
     if (_lifecycle.isDestroyed()) {
-      log.fine("Class loader has been closed.");
+      log().fine("Class loader has been closed.");
       return super.findClass(name);
     }
 
@@ -1064,7 +1064,7 @@ public class DynamicClassLoader extends java.net.URLClassLoader
     } catch (ClassNotFoundException e) {
       throw e;
     } catch (Exception e) {
-      log.log(Level.FINE, e.toString(), e);
+      log().log(Level.FINE, e.toString(), e);
 
       throw new ClassNotFoundException(name + " [" + e + "]", e);
     }
@@ -1150,15 +1150,19 @@ public class DynamicClassLoader extends java.net.URLClassLoader
 	    bBuf = enhancedBuffer;
 	    bLen = enhancedBuffer.length;
 	  }
+	} catch (RuntimeException e) {
+	  throw e;
+	} catch (Error e) {
+	  throw e;
 	} catch (Throwable e) {
-	  log.log(Level.WARNING, e.toString(), e);
+	  log().log(Level.WARNING, e.toString(), e);
 	}
       }
 
       try {
 	cl = defineClass(entry.getName(), bBuf, 0, bLen, entry.getCodeSource());
       } catch (Throwable e) {
-	log.log(Level.FINE, e.toString(), e);
+	log().log(Level.FINE, e.toString(), e);
 
         ClassNotFoundException exn;
 	exn = new ClassNotFoundException(entry.getName() + " [" + e + "]", e);
@@ -1203,7 +1207,11 @@ public class DynamicClassLoader extends java.net.URLClassLoader
     ClassLoader parent = getParent();
     
     if (isNormalJdkOrder) {
-      url = getSystemResource(name);
+      ClassLoader systemLoader = ClassLoader.getSystemClassLoader();
+
+      if (this != systemLoader)
+	url = getSystemResource(name);
+      
       if (url != null) {
 	_resourceCache.put(name, url);
 	
@@ -1233,7 +1241,11 @@ public class DynamicClassLoader extends java.net.URLClassLoader
     }
 
     if (! isNormalJdkOrder) {
-      url = getSystemResource(name);
+      ClassLoader systemLoader = ClassLoader.getSystemClassLoader();
+
+      if (this != systemLoader)
+	url = getSystemResource(name);
+      
       if (url != null) {
 	_resourceCache.put(name, url);
 	
@@ -1270,7 +1282,7 @@ public class DynamicClassLoader extends java.net.URLClassLoader
       try {
 	return Vfs.lookup(url.toString()).openRead();
       } catch (IOException e) {
-	log.log(Level.FINE, e.toString(), e);
+	log().log(Level.FINE, e.toString(), e);
       }
     }
 
@@ -1396,7 +1408,7 @@ public class DynamicClassLoader extends java.net.URLClassLoader
 
 	    listener.classLoaderDestroy(this);
 	  } catch (Throwable e) {
-	    log.log(Level.WARNING, e.toString(), e);
+	    log().log(Level.WARNING, e.toString(), e);
 	  }
 	}
       } finally {
@@ -1409,7 +1421,7 @@ public class DynamicClassLoader extends java.net.URLClassLoader
 	try {
 	  loader.destroy();
 	} catch (Throwable e) {
-	  log.log(Level.WARNING, e.toString(), e);
+	  log().log(Level.WARNING, e.toString(), e);
 	}
       }
     } finally {
@@ -1497,6 +1509,22 @@ public class DynamicClassLoader extends java.net.URLClassLoader
   protected void finalize()
   {
     destroy();
+  }
+
+  private static L10N L()
+  {
+    if (_L == null)
+      _L = new L10N(DynamicClassLoader.class);
+    
+    return _L;
+  }
+
+  protected static Logger log()
+  {
+    if (_log == null)
+      _log = Logger.getLogger(DynamicClassLoader.class.getName());
+    
+    return _log;
   }
 
   static {

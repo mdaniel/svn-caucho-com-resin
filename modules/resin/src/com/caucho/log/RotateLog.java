@@ -51,6 +51,8 @@ public class RotateLog {
   private static final long ROLLOVER_SIZE = 100 * 1024 * 1024;
   
   private Path _path;
+  private String _formatPath;
+  
   private RotateStream _rotateStream;
   private long _rolloverPeriod = -1;
   private long _rolloverSize = ROLLOVER_SIZE;
@@ -72,6 +74,22 @@ public class RotateLog {
   public void setPath(Path path)
   {
     _path = path;
+  }
+
+  /**
+   * Gets the output path.
+   */
+  public String getFormatPath()
+  {
+    return _formatPath;
+  }
+
+  /**
+   * Sets the output path.
+   */
+  public void setFormatPath(String path)
+  {
+    _formatPath = path;
   }
 
   /**
@@ -186,9 +204,12 @@ public class RotateLog {
   public void init()
     throws ConfigException
   {
-    if (_path == null)
+    if (_path != null)
+      _rotateStream = RotateStream.create(_path);
+    else if (_formatPath != null)
+      _rotateStream = RotateStream.create(_formatPath);
+    else
       throw new ConfigException(L.l("`path' is a required attribute of <{0}>.  Each <{0}> must configure the destination stream.", getTagName()));
-    _rotateStream = RotateStream.create(_path);
 
     _rotateStream.setRolloverPeriod(_rolloverPeriod);
     _rotateStream.setRolloverSize(_rolloverSize);

@@ -123,11 +123,17 @@ public class EntityType extends Type {
 
   protected boolean _hasLoadCallback;
 
-  private HashMap<String,IdGenerator> _idGenMap =
-    new HashMap<String,IdGenerator>();
+  private HashMap<String,IdGenerator> _idGenMap
+    = new HashMap<String,IdGenerator>();
 
-  private ArrayList<PersistentDependency> _dependencies =
-    new ArrayList<PersistentDependency>();
+  private ArrayList<PersistentDependency> _dependencies
+    = new ArrayList<PersistentDependency>();
+
+  private ArrayList<JMethod> _prePersistCallbacks
+    = new ArrayList<JMethod>();
+
+  private ArrayList<JMethod> _postPersistCallbacks
+    = new ArrayList<JMethod>();
 
   private final Lifecycle _lifecycle = new Lifecycle();
 
@@ -618,6 +624,38 @@ public class EntityType extends Type {
       return subType;
     else
       return this;
+  }
+
+  /**
+   * Adds a pre-persist callback.
+   */
+  public void addPrePersistCallback(JMethod callback)
+  {
+    _prePersistCallbacks.add(callback);
+  }
+
+  /**
+   * Gets the pre-persist callback.
+   */
+  public ArrayList<JMethod> getPrePersistCallbacks()
+  {
+    return _prePersistCallbacks;
+  }
+
+  /**
+   * Adds a post-persist callback.
+   */
+  public void addPostPersistCallback(JMethod callback)
+  {
+    _postPersistCallbacks.add(callback);
+  }
+
+  /**
+   * Gets the post-persist callback.
+   */
+  public ArrayList<JMethod> getPostPersistCallbacks()
+  {
+    return _postPersistCallbacks;
   }
 
   /**

@@ -244,6 +244,8 @@ public class EnhancerManager implements ByteCodeEnhancer, ByteCodeClassMatcher {
 	JavaClass jClass = parser.parse(is);
 
 	return enhance(jClass);
+      } catch (RuntimeException e) {
+	throw e;
       } catch (Exception e) {
 	throw new RuntimeException(e);
       }
@@ -256,6 +258,7 @@ public class EnhancerManager implements ByteCodeEnhancer, ByteCodeClassMatcher {
    * Enhances the given class.
    */
   public byte []enhance(JClass jClass)
+    throws ClassNotFoundException
   {
     String className = jClass.getName().replace('/', '.');
     String extClassName = className + "__ResinExt";
@@ -275,7 +278,8 @@ public class EnhancerManager implements ByteCodeEnhancer, ByteCodeClassMatcher {
       prepare.renameClass(className, className);
     } catch (Exception e) {
       log.log(Level.FINE, e.toString(), e);
-      return null;
+
+      throw new ClassNotFoundException(e.toString());
     }
 
     boolean hasEnhancer = false;
@@ -345,11 +349,15 @@ public class EnhancerManager implements ByteCodeEnhancer, ByteCodeClassMatcher {
       }
 
       return buffer;
+    } catch (RuntimeException e) {
+      throw e;
     } catch (Exception e) {
       log.log(Level.FINE, e.toString(), e);
+      
+      throw new ClassNotFoundException(e.getMessage());
     }
 
-    return null;
+    // return null;
   }
 
   /**

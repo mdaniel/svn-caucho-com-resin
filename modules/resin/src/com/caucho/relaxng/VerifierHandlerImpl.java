@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -470,7 +471,7 @@ public class VerifierHandlerImpl extends DefaultHandler
     Item topParent = null;
     for (Item parent = item;
 	 parent != null;
-	 parent = parent.getParent()) {
+	 parent = null) { // parent.getParent()) {
       if (qName != null && parent.allowsElement(qName)) {
 	msg = " Check for duplicate and out-of-order tags.";
 
@@ -690,7 +691,7 @@ public class VerifierHandlerImpl extends DefaultHandler
 
     public int hashCode()
     {
-      return _name.hashCode() + 137 * _item.hashCode();
+      return _name.hashCode() + 137 * System.identityHashCode(_item);
     }
 
     public boolean equals(Object o)
@@ -703,7 +704,7 @@ public class VerifierHandlerImpl extends DefaultHandler
 
       StartKey key = (StartKey) o;
 
-      return _name.equals(key._name) && _item.equals(key._item);
+      return _name.equals(key._name) && _item == key._item;
     }
   }
 

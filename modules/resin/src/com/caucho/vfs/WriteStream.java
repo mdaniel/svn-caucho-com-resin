@@ -702,6 +702,7 @@ public class WriteStream extends OutputStreamWithBuffer {
       print("-9223372036854775808");
       return;
     }
+    
     if (_bytes == null)
       _bytes = new byte[32];
 

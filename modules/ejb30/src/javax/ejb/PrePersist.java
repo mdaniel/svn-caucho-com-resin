@@ -26,58 +26,18 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.relaxng.pattern;
+package javax.ejb;
 
-import com.caucho.xml.QName;
-
-
-import com.caucho.relaxng.RelaxException;
-
-import com.caucho.relaxng.program.Item;
-import com.caucho.relaxng.program.TextItem;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+import java.lang.annotation.ElementType;
 
 /**
- * Relax empty pattern
+ * The Transient annotation.
  */
-public class TextPattern extends Pattern {
-  /**
-   * Creates a new empty pattern.
-   */
-  public TextPattern()
-  {
-  }
-
-  /**
-   * Creates the program (somewhat bogus)
-   */
-  public Item createItem(GrammarPattern grammar)
-    throws RelaxException
-  {
-    return TextItem.TEXT;
-  }
-
-  /**
-   * Returns a string for the production.
-   */
-  public String toProduction()
-  {
-    return "text";
-  }
-
-  public boolean equals(Object o)
-  {
-    if (this == o)
-      return true;
-
-    return o instanceof TextPattern;
-  }
-
-  /**
-   * Debugging.
-   */
-  public String toString()
-  {
-    return "TextPattern[]";
-  }
+@Target(ElementType.METHOD)
+@Retention(RetentionPolicy.RUNTIME)
+public @interface PrePersist {
+  
 }
-

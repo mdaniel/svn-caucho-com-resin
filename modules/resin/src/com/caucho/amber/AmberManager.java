@@ -38,6 +38,7 @@ import java.util.Iterator;
 import java.util.ArrayList;
 
 import java.util.logging.Logger;
+import java.util.logging.Level;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -473,8 +474,12 @@ public class AmberManager {
 					  entityType));
 
 	  entityType.setGenerated(true);
-	  
-	  _generator.generateJava(javaGen, entityType);
+
+	  try {
+	    _generator.generateJava(javaGen, entityType);
+	  } catch (Throwable e) {
+	    log.log(Level.FINER, e.toString(), e);
+	  }
 	}
       }
       

@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -42,7 +43,7 @@ import com.caucho.relaxng.RelaxException;
  * Matches names.
  */
 public class NameItem extends NameClassItem {
-  private QName _name;
+  private final QName _name;
 
   public NameItem(QName name)
   {

@@ -108,6 +108,14 @@ public class JClassArray extends JClass {
   }
 
   /**
+   * Returns the constructors
+   */
+  public JMethod []getConstructors()
+  {
+    return new JMethod[0];
+  }
+
+  /**
    * Returns true for an array class.
    */
   public boolean isArray()

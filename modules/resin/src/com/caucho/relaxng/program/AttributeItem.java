@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -48,7 +49,7 @@ import com.caucho.relaxng.pattern.AttributePattern;
 public class AttributeItem extends Item {
   protected final static L10N L = new L10N(AttributeItem.class);
 
-  private NameClassItem _name;
+  private final NameClassItem _name;
 
   public AttributeItem(NameClassItem name)
   {

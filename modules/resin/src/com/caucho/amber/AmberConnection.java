@@ -60,6 +60,11 @@ public interface AmberConnection {
    */
   public void create(Object obj)
     throws SQLException;
+  
+  /**
+   * Returns true if the entitiy is managed.
+   */
+  public boolean contains(Object entity);
 
   /**
    * Deletes the specified entry.

@@ -118,7 +118,7 @@ public class ChoiceNameItem extends NameClassItem {
    */
   public String toSyntaxDescription(String prefix)
   {
-    CharBuffer cb = CharBuffer.allocate();
+    CharBuffer cb = new CharBuffer();
 
     cb.append("(");
     
@@ -131,7 +131,7 @@ public class ChoiceNameItem extends NameClassItem {
 
     cb.append(")");
 
-    return cb.close();
+    return cb.toString();
   }
 
   /**

@@ -31,6 +31,7 @@ package com.caucho.ejb.entity2;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -51,6 +52,8 @@ import javax.ejb.ManyToOne;
 import javax.ejb.ManyToMany;
 import javax.ejb.OneToMany;
 import javax.ejb.OneToOne;
+import javax.ejb.PrePersist;
+import javax.ejb.PostPersist;
 import javax.ejb.SecondaryTable;
 
 import com.caucho.bytecode.JAccessibleObject;
@@ -104,6 +107,9 @@ import com.caucho.ejb.EjbServerManager;
 public class EntityIntrospector {
   private static final L10N L = new L10N(EntityIntrospector.class);
 
+  private static HashSet<String> _propertyAnnotations
+    = new HashSet<String>();
+  
   private EjbServerManager _ejbManager;
 
   private HashMap<String,EntityType> _entityMap =
@@ -218,6 +224,10 @@ public class EntityIntrospector {
       introspectFields(amberManager, entityType, parentType, type);
     else
       introspectMethods(amberManager, entityType, parentType, type);
+
+    for (JMethod method : type.getMethods()) {
+      introspectCallbacks(entityType, method);
+    }
     
     if (secondaryTableAnn != null) {
       Object []join = (Object []) secondaryTableAnn.get("join");
@@ -230,6 +240,23 @@ public class EntityIntrospector {
     }
 
     return entityType;
+  }
+
+  /**
+   * Introspects the callbacks.
+   */
+  public void introspectCallbacks(EntityType type, JMethod method)
+    throws ConfigException
+  {
+    JClass []param = method.getParameterTypes();
+
+    if (method.getAnnotation(PrePersist.class) != null) {
+      type.addPrePersistCallback(method);
+    }
+    
+    if (method.getAnnotation(PostPersist.class) != null) {
+      type.addPostPersistCallback(method);
+    }
   }
 
   /**
@@ -270,6 +297,20 @@ public class EntityIntrospector {
 
     throw new ConfigException(L.l("'{0}' needs a public, no-arg constructor.",
 				  type.getName()));
+  }
+
+  /**
+   * Validates a non-getter method.
+   */
+  public void validateNonGetter(JMethod method)
+    throws ConfigException
+  {
+    for (JAnnotation ann : method.getDeclaredAnnotations()) {
+      if (_propertyAnnotations.contains(ann.getType())) {
+	throw new ConfigException(L.l("'{0}' is not a valid annotation for {1}.  Only persistent property getters and fields may have property annotations.",
+				      ann.getType(), method.getFullName()));
+      }
+    }
   }
 
   /**
@@ -401,9 +442,9 @@ public class EntityIntrospector {
       String methodName = method.getName();
       JClass []paramTypes = method.getParameterTypes();
 
-      if (! methodName.startsWith("get") ||
-	  paramTypes.length != 0)
+      if (! methodName.startsWith("get") || paramTypes.length != 0) {
 	continue;
+      }
 
       String fieldName = toFieldName(methodName.substring(3));
 
@@ -671,15 +712,39 @@ public class EntityIntrospector {
       String methodName = method.getName();
       JClass []paramTypes = method.getParameterTypes();
 
-      if (! methodName.startsWith("get") ||
-	  paramTypes.length != 0)
-	continue;
+      introspectCallbacks(entityType, method);
 
-      if (type.getMethod("set" + methodName.substring(3),
-			 new JClass[] { method.getReturnType() }) == null)
-	continue;
+      String propName;
 
-      String fieldName = toFieldName(methodName.substring(3));
+      if (paramTypes.length != 0) {
+	validateNonGetter(method);
+	continue;
+      }
+      else if (methodName.startsWith("get")) {
+	propName = methodName.substring(3);
+      }
+      else if (methodName.startsWith("is") &&
+	       (method.getReturnType().getName().equals("boolean") ||
+		method.getReturnType().getName().equals("java.lang.Boolean"))) {
+	propName = methodName.substring(2);
+      }
+      else {
+	validateNonGetter(method);
+	continue;
+      }
+
+      if (type.getMethod("set" + propName,
+			 new JClass[] { method.getReturnType() }) == null) {
+	validateNonGetter(method);
+	continue;
+      }
+
+      if (method.isStatic() || ! method.isPublic()) {
+	validateNonGetter(method);
+	continue;
+      }
+
+      String fieldName = toFieldName(propName);
 
       if (parentType != null && parentType.getField(fieldName) != null)
 	continue;
@@ -1303,6 +1368,18 @@ public class EntityIntrospector {
     {
       addManyToOne(_entityType, _field, _fieldName, _fieldType);
     }
+  }
+
+  static {
+    _propertyAnnotations.add("javax.ejb.Basic");
+    _propertyAnnotations.add("javax.ejb.Column");
+    _propertyAnnotations.add("javax.ejb.Id");
+    _propertyAnnotations.add("javax.ejb.Transient");
+    _propertyAnnotations.add("javax.ejb.OneToOne");
+    _propertyAnnotations.add("javax.ejb.ManyToOne");
+    _propertyAnnotations.add("javax.ejb.OneToMany");
+    _propertyAnnotations.add("javax.ejb.ManyToMany");
+    _propertyAnnotations.add("javax.ejb.JoinColumn");
   }
 }
 

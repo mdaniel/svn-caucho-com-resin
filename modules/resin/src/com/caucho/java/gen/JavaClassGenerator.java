@@ -34,6 +34,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 
 import java.util.logging.Logger;
+import java.util.logging.Level;
 
 import java.io.IOException;
 
@@ -229,6 +230,8 @@ public class JavaClassGenerator {
     try {
       return loadClass(fullClassName, true);
     } catch (ClassNotFoundException e) {
+      log.log(Level.FINEST, e.toString(), e);
+      
       return null;
     }
   }

@@ -454,6 +454,20 @@ public class AmberConnectionImpl {
   }
 
   /**
+   * Loads the object based on itself.
+   */
+  public boolean contains(Object obj)
+    throws SQLException
+  {
+    if (! (obj instanceof Entity))
+      return false;
+    
+    Entity entity = (Entity) obj;
+
+    return _entities.contains(entity);
+  }
+
+  /**
    * Starts a transaction.
    */
   public void beginTransaction()

@@ -343,7 +343,6 @@ public class NodeBuilder {
       TypeStrategy typeStrategy;
       typeStrategy = TypeStrategyFactory.getTypeStrategy(bean.getClass());
 
-
       return configureImpl(typeStrategy, bean, top);
     } catch (LineConfigException e) {
       throw e;
@@ -490,7 +489,8 @@ public class NodeBuilder {
   void configureBeanImpl(TypeStrategy typeStrategy, Object bean, Node top)
     throws Exception
   {
-    if (top instanceof Attr) {
+    // XXX: need test for the CharacterData (<dependency-check-interval>)
+    if (top instanceof Attr || top instanceof CharacterData) {
       QName qName = new QName("#text");
 
       AttributeStrategy attrStrategy = typeStrategy.getAttributeStrategy(qName);

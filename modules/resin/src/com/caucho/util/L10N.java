@@ -42,9 +42,10 @@ import com.caucho.log.Log;
  * Localization
  */
 public class L10N {
-  static final Logger log = Log.open(L10N.class);
-  static HashMap<String,HashMap<String,String>> l10nMap =
-  new HashMap<String,HashMap<String,String>>();
+  private static Logger _log;
+  
+  static HashMap<String,HashMap<String,String>> l10nMap
+    = new HashMap<String,HashMap<String,String>>();
   
   HashMap<String,String> messages;
   
@@ -113,7 +114,7 @@ public class L10N {
         }
       }
     } catch (Exception e) {
-      log.log(Level.FINE, e.toString(), e);
+      log().log(Level.FINE, e.toString(), e);
     }
   }
   
@@ -392,5 +393,13 @@ public class L10N {
     }
     else
       return translated;
+  }
+
+  private Logger log()
+  {
+    if (_log == null)
+      _log = Log.open(L10N.class);
+
+    return _log;
   }
 }

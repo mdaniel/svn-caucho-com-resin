@@ -55,13 +55,6 @@ public class EmptyItem extends Item {
   }
 
   /**
-   * Can't set the parent.
-   */
-  public void setParent(Item item)
-  {
-  }
-  
-  /**
    * Adds to the first set, the set of element names possible.
    */
   public void firstSet(HashSet<QName> set)

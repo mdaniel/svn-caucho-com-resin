@@ -105,7 +105,7 @@ public class EnvironmentClassLoader extends DynamicClassLoader {
   public EnvironmentClassLoader(ClassLoader parent)
   {
     super(parent);
-
+    
     initializeEnvironment();
   }
 
@@ -131,6 +131,16 @@ public class EnvironmentClassLoader extends DynamicClassLoader {
   public boolean isActive()
   {
     return _isActive;
+  }
+
+  /**
+   * Initialize the environment.
+   */
+  public void init()
+  {
+    initializeEnvironment();
+
+    super.init();
   }
 
   /**
@@ -295,7 +305,7 @@ public class EnvironmentClassLoader extends DynamicClassLoader {
 	listener.environmentStart(this);
       }
     } catch (Throwable e) {
-      log.log(Level.WARNING, e.toString(), e);
+      log().log(Level.WARNING, e.toString(), e);
     }
     
     _isActive = true;
@@ -332,7 +342,7 @@ public class EnvironmentClassLoader extends DynamicClassLoader {
 	    listener.environmentStop(this);
 	  } catch (Throwable e) {
 	    e.printStackTrace();
-	    log.log(Level.WARNING, e.toString(), e);
+	    log().log(Level.WARNING, e.toString(), e);
 	  }
 	}
       }
@@ -400,7 +410,7 @@ public class EnvironmentClassLoader extends DynamicClassLoader {
   /**
    * Initializes the environment
    */
-  public static synchronized void initializeEnvironment()
+  private static synchronized void initializeEnvironment()
   {
     if (_isStaticInit)
       return;
@@ -472,7 +482,6 @@ public class EnvironmentClassLoader extends DynamicClassLoader {
       
     } catch (Throwable e) {
       e.printStackTrace();
-      log.log(Level.WARNING, e.toString(), e);
     } finally {
       thread.setContextClassLoader(oldLoader);
     }

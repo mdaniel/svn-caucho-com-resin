@@ -37,7 +37,7 @@ public interface EntityManager {
   /**
    * Makes the instance managed.
    */
-  public void create(Object entity);
+  public void persist(Object entity);
   
   /**
    * Merges the state of the entity into the current context.
@@ -75,14 +75,24 @@ public interface EntityManager {
   public Query createNamedQuery(String sql);
 
   /**
+   * Creates an instance of the native query
+   */
+  public Query createNativeQuery(String sql);
+
+  /**
+   * Creates an instance of the native query
+   */
+  public Query createNativeQuery(String sql, Class resultType);
+
+  /**
+   * Creates an instance of the native query
+   */
+  public Query createNativeQuery(String sql, String resultSetMapping);
+
+  /**
    * Refresh the state of the instance from the database.
    */
   public void refresh(Object entity);
-
-  /**
-   * Make the instance non-persistent
-   */
-  public void evict(Object entity);
 
   /**
    * Returns true if the entity belongs to the current context.

@@ -47,6 +47,8 @@ public class ThreadPool implements Runnable {
   private static final int RING_MASK = RING_SIZE - 1;
   
   private static final long MAX_EXPIRE = Long.MAX_VALUE / 2;
+
+  private static final int SPARE_GAP = 5;
   
   private static int _maxThreads = 128;
   
@@ -478,7 +480,8 @@ public class ThreadPool implements Runnable {
 	  synchronized (_idleRing) {
 	    int idleCount = (_idleHead - _idleTail) & RING_MASK;
 
-	    if (_minSpareThreads < idleCount && _idleRing[_idleTail] == this) {
+	    if (_minSpareThreads + SPARE_GAP < idleCount &&
+		_idleRing[_idleTail] == this) {
 	      isDead = true;
 	      _idleRing[_idleTail] = null;
 	      _idleTail = (_idleTail + 1) % RING_MASK;

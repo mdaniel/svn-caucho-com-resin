@@ -119,6 +119,11 @@ abstract public class AbstractField implements AmberField {
 
       _getterMethod = EntityType.getGetter(getBeanClass(), getter);
 
+      if (_getterMethod == null) {
+	getter = "is" + name;
+	_getterMethod = EntityType.getGetter(getBeanClass(), getter);
+      }
+
       if (_getterMethod == null)
 	throw new ConfigException(L.l("{0}: {1} has no matching getter.",
 				      getBeanClass().getName(), name));

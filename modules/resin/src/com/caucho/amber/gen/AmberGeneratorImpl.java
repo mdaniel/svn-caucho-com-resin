@@ -131,7 +131,7 @@ public class AmberGeneratorImpl implements AmberGenerator {
     Class cl;
     
     if (type.isEnhanced())
-      cl = javaGen.preload(type.getBeanClass().getName());
+      cl = javaGen.loadClass(type.getBeanClass().getName());
     else
       cl = javaGen.preload(type.getInstanceClassName());
 

@@ -256,7 +256,7 @@
     <mkdir dir="${clientlib}"/>
     <jar jarfile="${clientlib}/resin-deploy.jar"
          compress="${jar.compress}" index="${jar.index}" update="${jar.update}"
-         manifest="${src}/deploy/manifest">
+         manifest="${modules}/deploy/src/manifest">
 
       <fileset dir="${modules}/resin/classes">
         <include name="com/caucho/hessian/**"/>
@@ -355,7 +355,7 @@
 
     <jar jarfile="${lib}/resin.jar"
          compress="${jar.compress}" index="${jar.index}"
-         manifest="src/resin/manifest">
+         manifest="${modules}/resin/src/manifest">
       <fileset dir="build/resin">
         <exclude name=".cvsignore"/>
       </fileset>
@@ -363,7 +363,7 @@
 
     <jar jarfile="${lib}/resinboot.jar"
          compress="${jar.compress}" index="${jar.index}"
-         manifest="src/resin/boot-manifest">
+         manifest="${modules}/resin/src/boot-manifest">
       <fileset dir="build/resin">
         <exclude name=".cvsignore"/>
         <include name="com/caucho/server/boot/*"/>
@@ -381,7 +381,7 @@
 
     <jar jarfile="${lib}/webutil.jar"
          compress="${jar.compress}" index="${jar.index}">
-      <fileset dir="build/webutil">
+      <fileset dir="${modules}/webutil/classes">
         <exclude name=".cvsignore"/>
       </fileset>
     </jar>
@@ -399,7 +399,7 @@
 
     <jar jarfile="${lib}/resin.jar"
          compress="${jar.compress}" index="${jar.index}"
-         manifest="src/resin/manifest">
+         manifest="${modules}/resin/src/manifest">
       <fileset dir="build/resin">
         <exclude name=".cvsignore"/>
       </fileset>
@@ -407,7 +407,7 @@
 
     <jar jarfile="${lib}/resinboot.jar"
          compress="${jar.compress}" index="${jar.index}"
-         manifest="src/resin/boot-manifest">
+         manifest="${modules}/resin/src/boot-manifest">
       <fileset dir="build/resin">
         <exclude name=".cvsignore"/>
         <include name="com/caucho/server/boot/*"/>

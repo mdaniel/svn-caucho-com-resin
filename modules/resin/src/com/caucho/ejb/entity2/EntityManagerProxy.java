@@ -46,9 +46,9 @@ public class EntityManagerProxy implements EntityManager {
   /**
    * Makes the instance managed.
    */
-  public void create(Object entity)
+  public void persist(Object entity)
   {
-    getCurrent().create(entity);
+    getCurrent().persist(entity);
   }
   
   /**

@@ -8,6 +8,14 @@
 
 <summary objsummary='localtoc'/>
 
+<section title="access-log path-format">
+
+<p>The &lt;access-log> can have a path-format attribute which
+specifies the path by date.  Unlike the archive-path, the log is
+created the formatted name directly.</p>
+
+</section>
+
 <section title="archive-path">
 
 <p>Added archive-path to web-app.</p>

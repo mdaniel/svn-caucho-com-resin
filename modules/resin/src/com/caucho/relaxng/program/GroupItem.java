@@ -52,9 +52,7 @@ public class GroupItem extends Item {
   private GroupItem(Item first, Item second)
   {
     _first = first;
-    _first.setParentIfNew(this);
     _second = second;
-    _second.setParentIfNew(this);
   }
 
   public static Item create(Item first, Item second)

@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -43,7 +44,7 @@ import com.caucho.loader.DynamicClassLoader;
  * Contains a set of dependencies.
  */
 public class DependencyContainer implements Dependency {
-  private static final Logger log = Log.open(DependencyContainer.class);
+  private static Logger _log;
   
   private ArrayList<Dependency> _dependencyList = new ArrayList<Dependency>();
 
@@ -177,7 +178,7 @@ public class DependencyContainer implements Dependency {
 	Dependency dependency = _dependencyList.get(i);
 
 	if (dependency.isModified()) {
-	  log.fine(dependency + " is modified");
+	  log().fine(dependency + " is modified");
 
 	  _isModified = true;
         
@@ -203,6 +204,14 @@ public class DependencyContainer implements Dependency {
     return isModified();
   }
 
+  private Logger log()
+  {
+    if (_log == null)
+      _log = Log.open(DependencyContainer.class);
+
+    return _log;
+  }
+  
   public String toString()
   {
     return "DependencyContainer" + _dependencyList;
