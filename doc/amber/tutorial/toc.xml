@@ -15,6 +15,7 @@
     <item link="cmp-one2many/index.xtp" title="CMP One-to-Many"/>
     <item link="cmp-many2many/index.xtp" title="CMP Many-to-Many"/>
     <item link="cmp-inherit/index.xtp" title="CMP Inherit"/>
+    <item link="cmp-session/index.xtp" title="Sessions"/>
   </item>
 </navigation>
 

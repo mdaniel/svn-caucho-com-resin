@@ -1,0 +1,27 @@
+<document>
+  <header>
+    <title>Persistent Sessions with Amber</title>
+        <description>
+HttpSessions combined with Amber improve the flexibility and performance
+of persistent sessions.
+        </description>
+    <type>tutorial</type>
+    <tutorial-startpage>session</tutorial-startpage>
+  </header>
+
+  <body>
+    <summary/>
+
+<section title="Files in this tutorial">
+<deftable>
+<tr><td><viewfile-link file="WEB-INF/web.xml"/>
+    <td>web.xml configuration
+<tr><td><viewfile-link file="WEB-INF/classes/example/User.java"/>
+    <td>The user bean
+<tr><td><viewfile-link file="WEB-INF/classes/example/SessionServlet.java"/>
+    <td>The session servlet
+</deftable>
+</section>
+
+  </body>
+</document>

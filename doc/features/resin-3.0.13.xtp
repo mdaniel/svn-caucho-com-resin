@@ -8,6 +8,21 @@
 
 <summary objsummary='localtoc'/>
 
+<section title="round-robin policy">
+
+<p>HmuxLoadBalanceServlet can now use a strict round-robin balance strategy.</p>
+
+<example>
+&lt;servlet servlet-class="com.caucho.servlets.HmuxLoadBalanceServlet">
+  &lt;init>
+    &lt;cluster>a&lt;/cluster>
+    &lt;strategy>load-balance&lt;/strategy>
+  &lt;/init>
+&lt;/servlet>
+</example>
+
+</section>
+
 <section title="clustered configuration and deployment">
 
 <p>Resin Pro can now be configured and deployed based on a master
@@ -32,7 +47,7 @@ is taken down.</p>
 On the master or a non-clustered server, "config:" acts as a normal
 relative path.</p>
 
-<example title="webapps configuration">
+ <example title="webapps configuration">
 &lt;web-app-deploy>
   &lt;archive-directory>config:webapps&lt;archive-directory>
   &lt;expand-directory>webapps&lt;/expand-directory>
@@ -80,6 +95,7 @@ connections with &lt;connection>.  Currently the &lt;transaction-isolation>,
 
 <p>Individual load balancer clients can now be disabled through JMX.</p>
 
+ <init> 
 <p>Given the following cluster</p>
 
 <example>
@@ -126,7 +142,7 @@ to the following server.</p>
           driver-type="ConnectionPoolDataSource">
     &lt;url>jdbc:test:foo&lt;/url>
   &lt;/driver>
-&lt;/database>
+ &lt;/database>
 </example>
 
 </section>
@@ -173,7 +189,7 @@ the complexity of EJB.</p>
      &lt;destination>\${queue}&lt;/destination>
 
      &lt;listener type="example.MyListener"/>
-  &lt;/init>
+ &lt;/init>
 &lt;/resource>
 </example>
 
