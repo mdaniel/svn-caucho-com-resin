@@ -325,7 +325,7 @@ useful formatting methods</p>.
 
 <p>Format a timestamp string.</p>
 
-<example>timestamp(format[,date])</example>
+<example>fmt.timestamp(format[,date])</example>
 
 <deftable-parameters>
 <tr><td>format<td>the format string (see below)<td>required
@@ -333,8 +333,8 @@ useful formatting methods</p>.
 </deftable-parameters>
 
 <example>
-msg="The current date and time is ${'${'}timestamp('%Y/%m/%d %H:%M:%S.%s')}"
-msg="time=${'${'}timestamp('[%Y/%m/%d %H:%M:%S.%s]')}"
+msg="The current date and time is ${'${'}fmt.timestamp('%Y/%m/%d %H:%M:%S.%s')}"
+msg="time=${'${'}fmt.timestamp('[%Y/%m/%d %H:%M:%S.%s]')}"
 </example>
 
 <p><code>format</code> contains regular characters, which are just copied to
@@ -370,7 +370,7 @@ values.</p>
 <defun title="fmt.sprintf()">
 <p>Format a string using a sprintf-like format string.</p>
 
-<def>sprintf(format[,arg1, arg2 ... argN])</def>
+<def>fmt.sprintf(format[,arg1, arg2 ... argN])</def>
 
 <deftable-parameters>
 <tr><td>format<td>the format string (see below)<td>required
