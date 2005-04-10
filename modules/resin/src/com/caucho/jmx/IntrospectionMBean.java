@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -59,7 +60,8 @@ import javax.management.ReflectionException;
  * Resin implementation of StandardMBean.
  */
 public class IntrospectionMBean implements DynamicMBean {
-  private static final Logger log = Logger.getLogger(IntrospectionMBean.class.getName());
+  private static final Logger log
+    = Logger.getLogger(IntrospectionMBean.class.getName());
   private static final Class[] NULL_ARG = new Class[0];
 
   private static final WeakHashMap<Class,SoftReference<MBeanInfo>> _cachedInfo
@@ -278,8 +280,13 @@ public class IntrospectionMBean implements DynamicMBean {
 	if (isMatch)
 	  return methods[i].invoke(_impl, params);
       }
-    
-      return null;
+
+      if (actionName.equals("hashCode") && signature.length == 0)
+	return _impl.hashCode();
+      else if (actionName.equals("toString") && signature.length == 0)
+	return _impl.toString();
+      else
+	return null;
     } catch (IllegalAccessException e) {
       throw new MBeanException(e);
     } catch (InvocationTargetException e) {

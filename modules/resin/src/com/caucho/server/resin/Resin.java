@@ -315,7 +315,7 @@ public class Resin implements ResinServerListener {
 
     _mainThread.setContextClassLoader(_systemClassLoader);
 
-    Config.configure(server, Vfs.lookup(_resinConf), server.getSchema());
+    new Config().configure(server, Vfs.lookup(_resinConf), server.getSchema());
     
     _server = server;
     server.start();

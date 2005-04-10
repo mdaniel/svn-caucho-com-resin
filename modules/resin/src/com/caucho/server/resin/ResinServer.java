@@ -44,8 +44,6 @@ import javax.management.MBeanServer;
 
 import javax.servlet.jsp.el.VariableResolver;
 
-import org.iso_relax.verifier.Schema;
-
 import com.caucho.config.SchemaBean;
 import com.caucho.config.types.InitProgram;
 import com.caucho.config.ConfigException;
@@ -88,8 +86,6 @@ public class ResinServer
 	     ServerListener, ResinServerMBean {
   private static final Logger log = Log.open(ResinServer.class);
   private static final L10N L = new L10N(ResinServer.class);
-
-  private static SoftReference<Schema> _schemaRef;
 
   private static ResinServer _resinServer;
 
@@ -192,24 +188,9 @@ public class ResinServer
   /**
    * Returns the relax schema.
    */
-  public Schema getSchema()
+  public String getSchema()
   {
-    Schema schema = null;
-    
-    if (_schemaRef == null || (schema = _schemaRef.get()) == null) {
-      String schemaName = "com/caucho/server/resin/resin.rnc";
-
-      try {
-	schema = CompactVerifierFactoryImpl.compileFromResource(schemaName);
-      } catch (Exception e) {
-	log.log(Level.FINER, e.toString(), e);
-	log.warning(e.toString());
-      }
-
-      _schemaRef = new SoftReference<Schema>(schema);
-    }
-
-    return schema;
+    return "com/caucho/server/resin/resin.rnc";
   }
 
   /**
@@ -270,8 +251,7 @@ public class ResinServer
       else
 	id = String.valueOf(_servers.size());
       
-      ServerController controller = new ServerController(id);
-
+      ServerController controller = new ServerController(config);
     
       _servers.add(controller);
 

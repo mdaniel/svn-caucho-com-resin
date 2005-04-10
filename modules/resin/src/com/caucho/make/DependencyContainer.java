@@ -84,7 +84,8 @@ public class DependencyContainer implements Dependency {
     if (! _dependencyList.contains(dependency))
       _dependencyList.add(dependency);
 
-    _lastCheckTime = 0;
+    // server/1d0w
+    // XXX: _lastCheckTime = 0;
 
     return this;
   }
@@ -134,11 +135,10 @@ public class DependencyContainer implements Dependency {
   {
     _isModified = isModified;
     _lastCheckTime = 0;
-    System.out.println("SET-MODIFIED: " + isModified + " " + this + " " + _dependencyList);
   }
       
   /**
-   * Returns true if the underlying dependencies have changed.
+   * Resets the check interval.
    */
   public void resetDependencyCheckInterval()
   {

@@ -172,7 +172,7 @@ public class DeployServlet extends GenericServlet {
 	  DeploymentPlan plan = new DeploymentPlan();
 	  InputStream planIs = in.readInputStream();
 	  try {
-	    Config.configure(plan, planIs);
+	    new Config().configure(plan, planIs);
 	  } finally {
 	    planIs.close();
 	  }

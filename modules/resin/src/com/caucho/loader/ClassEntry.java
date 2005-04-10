@@ -415,7 +415,9 @@ public class ClassEntry implements Dependency {
       else
 	log.config("In-place class redefinition (HotSwap) is not available.  In-place class reloading during development requires a compatible JDK and -Xdebug.");
     } catch (Throwable e) {
-      log.log(Level.FINE, e.toString(), e);
+      log.fine(e.toString());
+      
+      log.log(Level.FINEST, e.toString(), e);
       // log.config("In-place class redefinition (HotSwap) is not available.\n" + e);
     }
   }

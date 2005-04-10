@@ -38,14 +38,16 @@ import java.io.IOException;
 
 import javax.management.ObjectName;
 
+import com.caucho.jmx.MBeanHandle;
+
 import com.caucho.server.deploy.mbean.DeployControllerMBean;
 
 /**
  * A deploy controller for an environment.
  */
-public class DeployControllerAdmin<C extends DeployController>
-  implements DeployControllerMBean {
-  private C _controller;
+public class DeployControllerAdmin<C extends EnvironmentDeployController>
+  implements DeployControllerMBean, java.io.Serializable {
+  private transient C _controller;
 
   public DeployControllerAdmin(C controller)
   {
@@ -58,6 +60,14 @@ public class DeployControllerAdmin<C extends DeployController>
   protected C getController()
   {
     return _controller;
+  }
+
+  /**
+   * Returns the object name.
+   */
+  public ObjectName getObjectName()
+  {
+    return _controller.getObjectName();
   }
 
   /**
@@ -97,9 +107,27 @@ public class DeployControllerAdmin<C extends DeployController>
   /**
    * Restarts the server.
    */
+  public void restart()
+    throws Exception
+  {
+    getController().stop();
+    getController().start();
+  }
+
+  /**
+   * Restarts the server if changes are detected.
+   */
   public void update()
     throws Exception
   {
     getController().update();
+  }
+
+  /**
+   * Returns the handle for serialization.
+   */
+  public Object writeReplace()
+  {
+    return new MBeanHandle(getController().getObjectName());
   }
 }

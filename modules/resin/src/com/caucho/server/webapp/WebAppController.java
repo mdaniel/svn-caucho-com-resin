@@ -43,7 +43,6 @@ import javax.management.ObjectName;
 import javax.management.JMException;
 import javax.management.MalformedObjectNameException;
 
-import javax.servlet.jsp.el.VariableResolver;
 import javax.servlet.jsp.el.ELException;
 
 import org.iso_relax.verifier.Schema;
@@ -61,7 +60,6 @@ import com.caucho.config.ConfigException;
 import com.caucho.config.types.PathBuilder;
 
 import com.caucho.el.EL;
-import com.caucho.el.MapVariableResolver;
 
 import com.caucho.relaxng.CompactVerifierFactoryImpl;
 
@@ -86,9 +84,6 @@ public class WebAppController
 
   private WebAppController _parent;
 
-  // The entry id
-  private String _id;
-  
   // The context path is the URL prefix for the web-app
   private String _contextPath;
 
@@ -102,52 +97,29 @@ public class WebAppController
 
   private String _sourceType = "unknown";
 
-  public WebAppController(ApplicationContainer container, String contextPath)
+  private WebAppAdmin _admin = new WebAppAdmin(this);
+
+  public WebAppController()
   {
-    super(contextPath);
+    this("/", null, null);
+  }
+  
+  public WebAppController(String contextPath,
+			  Path rootDirectory,
+			  ApplicationContainer container)
+  {
+    super(contextPath, rootDirectory);
 
     _container = container;
-
-    setId(contextPath);
-    
-    if (contextPath.length() > 0 && ! contextPath.startsWith("/"))
-      contextPath = '/' + contextPath;
-    
-    setName(contextPath);
-
-    if (contextPath.equals("/ROOT") ||
-        CauchoSystem.isCaseInsensitive() &&
-        contextPath.equalsIgnoreCase("/root") ||
-        contextPath.equals("/"))
-      contextPath = "";
       
     setContextPath(contextPath);
 
-    if (contextPath.equals("")) {
-      if (CauchoSystem.isCaseInsensitive())
-        setId("root");
-      else
-        setId("ROOT");
+    if (container != null) {
+      for (WebAppConfig config : container.getWebAppDefaultList())
+	addConfigDefault(config);
     }
 
-    for (WebAppConfig config : container.getWebAppDefaultList())
-      addConfigDefault(config);
-  }
-
-  /**
-   * Sets the id.
-   */
-  public void setId(String id)
-  {
-    _id = id;
-  }
-
-  /**
-   * Gets the id.
-   */
-  public String getId()
-  {
-    return _id;
+    getVariableMap().put("app", new Var());
   }
 
   /**
@@ -209,8 +181,8 @@ public class WebAppController
    */
   public String getURL()
   {
-    if (_parent != null)
-      return _parent.getURL() + _contextPath;
+    if (_container != null)
+      return _container.getURL() + _contextPath;
     else
       return _contextPath;
   }
@@ -223,6 +195,14 @@ public class WebAppController
     return _parent;
   }
 
+  /**
+   * Returns the web-app container.
+   */
+  public ApplicationContainer getContainer()
+  {
+    return _container;
+  }
+  
   /**
    * Sets the parent controller.
    */
@@ -295,25 +275,18 @@ public class WebAppController
     return _isDynamicDeploy;
   }
 
-  /**
-   * Creates the object name.  The default is to use getId() as
-   * the 'name' property, and the classname as the 'type' property.
-   */
-  protected ObjectName createObjectName(Map<String,String> properties)
-    throws MalformedObjectNameException
+  protected String getMBeanTypeName()
+  {
+    return "WebApp";
+  }
+
+  protected String getMBeanId()
   {
     String name = _contextPath;
     if (_contextPath.equals(""))
       name = "/";
 
-    properties.put("type", "WebApp");
-    properties.put("name", name);
-
-
-    properties.put("type", "WebApp");
-    properties.put("name", name);
-      
-    return Jmx.getObjectName("resin", properties);
+    return name;
   }
 
   /**
@@ -322,7 +295,16 @@ public class WebAppController
   protected Object createMBean()
     throws JMException
   {
-    return new IntrospectionMBean(new WebAppAdmin(this), WebAppMBean.class);
+    return new IntrospectionMBean(_admin, WebAppMBean.class);
+  }
+
+  /**
+   * Returns the admin.
+   */
+  public WebAppMBean getAdmin()
+  {
+    // XXX: possibly return the proxy?
+    return _admin;
   }
 
   /**
@@ -353,12 +335,11 @@ public class WebAppController
       try {
 	thread.setContextClassLoader(getParentClassLoader());
 
-	WebAppController mergedController = new WebAppController(_container, _contextPath);
+	WebAppController mergedController
+	  = new WebAppController(_contextPath, getRootDirectory(), _container);
 
-	mergedController.setRootDirectory(getRootDirectory());
-
-	mergedController.mergeController(this);
 	mergedController.mergeController(newController);
+	mergedController.mergeController(this);
 
 	return mergedController;
       } finally {
@@ -374,8 +355,9 @@ public class WebAppController
   {
     if (! super.destroy())
       return false;
-    
-    _container.removeWebApp(this);
+
+    if (_container != null)
+      _container.removeWebApp(this);
     
     return true;
   }
@@ -413,22 +395,21 @@ public class WebAppController
    */
   protected Application instantiateDeployInstance()
   {
-    return new Application(_container, this, _contextPath);
+    return new Application(this);
   }
 
   /**
    * Creates the application.
    */
-  protected void configureInstance(Application app)
+  protected void configureInstanceVariables(Application app)
     throws Throwable
   {
     app.setRegexp(_regexpValues);
     app.setDynamicDeploy(isDynamicDeploy());
-    
-    Map<String,Object> varMap = app.getVariableMap();
-    varMap.put("app-dir", app.getAppDir());
 
-    super.configureInstance(app);
+    super.configureInstanceVariables(app);
+
+    getVariableMap().put("app-dir", app.getAppDir());
   }
 
   protected Path calculateRootDirectory()
@@ -436,20 +417,12 @@ public class WebAppController
   {
     Path appDir = null;
 
-    if (appDir == null)
-      appDir = getRootDirectory();
-    
     if (appDir == null && getConfig() != null) {
       String path = getConfig().getRootDirectory();
-      
-      if (path != null)
-        appDir = PathBuilder.lookupPath(path, getVariableResolver());
-    }
 
-    /*
-    if (appDir == null)
-      appDir = _cfgAppDir;
-    */
+      if (path != null)
+        appDir = PathBuilder.lookupPath(path);
+    }
 
     if (appDir == null && _container != null)
       appDir = _container.getDocumentDirectory().lookup("./" + _contextPath);
@@ -477,6 +450,56 @@ public class WebAppController
    */
   public String toString()
   {
-    return "WebAppController$" + System.identityHashCode(this) + "[" + _contextPath + "]";
+    return "WebAppController$" + System.identityHashCode(this) + "[" + getId() + "]";
+  }
+
+  /**
+   * EL variables for the app.
+   */
+  public class Var {
+    public String getURL()
+    {
+      return WebAppController.this.getURL();
+    }
+
+    public String getId()
+    {
+      return getName();
+    }
+
+    public String getName()
+    {
+      String id = WebAppController.this.getId();
+      
+      if (id != null)
+	return id;
+      
+      return WebAppController.this.getContextPath();
+    }
+
+    public Path getAppDir()
+    {
+      return WebAppController.this.getRootDirectory();
+    }
+
+    public Path getDocDir()
+    {
+      return WebAppController.this.getRootDirectory();
+    }
+
+    public String getContextPath()
+    {
+      return WebAppController.this.getContextPath();
+    }
+
+    public ArrayList<String> getRegexp()
+    {
+      return _regexpValues;
+    }
+
+    public String toString()
+    {
+      return "WebApp[" + getURL() + "]";
+    }
   }
 }

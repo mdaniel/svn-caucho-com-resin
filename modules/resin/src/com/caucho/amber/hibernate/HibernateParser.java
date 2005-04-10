@@ -53,8 +53,8 @@ public class HibernateParser {
 
       mapping.setDependency(new Depend(path));
 
-      Config.configure(mapping, path,
-		       "com/caucho/amber/hibernate/hibernate-mapping.rnc");
+      new Config().configure(mapping, path,
+			     "com/caucho/amber/hibernate/hibernate-mapping.rnc");
     } catch (Exception e) {
       if (e.getCause() instanceof ConfigException)
 	throw (ConfigException) e.getCause();

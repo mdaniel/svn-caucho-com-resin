@@ -78,16 +78,21 @@ abstract public class ExpandDeployController<I extends DeployInstance>
   private DynamicClassLoader _manifestLoader;
   private Manifest _manifest;
 
-  protected ExpandDeployController()
+  protected ExpandDeployController(String id)
   {
-    this(Thread.currentThread().getContextClassLoader());
+    this(id, null, null);
   }
 
-  protected ExpandDeployController(ClassLoader loader)
+  protected ExpandDeployController(String id,
+				   ClassLoader loader,
+				   Path rootDirectory)
   {
-    super(loader);
+    super(id, loader);
 
-    _rootDirectory = Vfs.getPwd(loader);
+    if (rootDirectory == null)
+      rootDirectory = Vfs.getPwd(getParentClassLoader());
+
+    _rootDirectory = rootDirectory;
   }
   
   /**
@@ -96,14 +101,6 @@ abstract public class ExpandDeployController<I extends DeployInstance>
   public Path getRootDirectory()
   {
     return _rootDirectory;
-  }
-
-  /**
-   * Sets the root directory
-   */
-  public void setRootDirectory(Path rootDirectory)
-  {
-    _rootDirectory = rootDirectory;
   }
 
   /**
@@ -346,7 +343,7 @@ abstract public class ExpandDeployController<I extends DeployInstance>
    * Recursively remove all files in a directory.  Used for wars when
    * they change.
    *
-   * @param dir root directory to start removal
+   * @param path root directory to start removal
    */
   protected void removeExpandDirectory(Path path)
   {
@@ -396,7 +393,7 @@ abstract public class ExpandDeployController<I extends DeployInstance>
    */
   public int hashCode()
   {
-    return getName().hashCode();
+    return getId().hashCode();
   }
 
   /**
@@ -408,8 +405,9 @@ abstract public class ExpandDeployController<I extends DeployInstance>
     if (o == null || ! getClass().equals(o.getClass()))
       return false;
 
-    DeployController entry = (DeployController) o;
+    DeployController controller = (DeployController) o;
 
-    return getName().equals(entry.getName());
+    // XXX: s/b getRootDirectory?
+    return getId().equals(controller.getId());
   }
 }

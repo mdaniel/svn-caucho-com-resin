@@ -33,6 +33,7 @@ import java.io.IOException;
 
 import java.util.ArrayList;
 import java.util.TreeSet;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.Iterator;
 
@@ -86,7 +87,8 @@ public class DeployContainer<E extends DeployController>
 
     _deployList.add(generator);
 
-    update(names);
+    if (_lifecycle.isActive())
+      update(names);
   }
   
   /**
@@ -99,7 +101,8 @@ public class DeployContainer<E extends DeployController>
 
     _deployList.remove(generator);
 
-    update(names);
+    if (_lifecycle.isActive())
+      update(names);
   }
 
   /**
@@ -138,6 +141,14 @@ public class DeployContainer<E extends DeployController>
       return;
 
     _deployList.start();
+
+    HashSet<String> keys = new HashSet<String>();
+
+    _deployList.fillDeployedKeys(keys);
+
+    for (String key : keys) {
+      startImpl(key);
+    }
 
     for (int i = 0; i < _controllerList.size(); i++) {
       E controller = _controllerList.get(i);
@@ -222,11 +233,22 @@ public class DeployContainer<E extends DeployController>
       oldController = findDeployedController(name);
     }
 
+    /*
+    if (oldController == null) {
+    }
+    else if (oldController.isModifiedNow()) {
+      _controllerList.remove(oldController);
+      
+      oldController.destroy();
+    }
+    else
+      return oldController;
+    */
+      
     E newController = _deployList.generateController(name);
-
-    if (oldController != null && oldController != newController) {
-      if (oldController != null)
-	_controllerList.remove(oldController);
+    
+    if (oldController != null) {
+      _controllerList.remove(oldController);
       
       oldController.destroy();
     }
@@ -234,9 +256,41 @@ public class DeployContainer<E extends DeployController>
     // server/102u
     if (newController != null && ! _controllerList.contains(newController)) {
       _controllerList.add(newController);
-
-      init(newController);
     }
+    else
+      newController = null;
+
+    if (newController != null)
+      init(newController);
+
+    return newController;
+  }
+
+  /**
+   * Starts a particular controller.
+   */
+  private E startImpl(String name)
+  {
+    E oldController = null;
+
+    synchronized (_controllerList) {
+      oldController = findDeployedController(name);
+    }
+
+    if (oldController != null)
+      return oldController;
+      
+    E newController = _deployList.generateController(name);
+
+    // server/102u
+    if (newController != null && ! _controllerList.contains(newController)) {
+      _controllerList.add(newController);
+    }
+    else
+      newController = null;
+
+    if (newController != null)
+      init(newController);
 
     return newController;
   }
@@ -264,6 +318,9 @@ public class DeployContainer<E extends DeployController>
    */
   private E generateController(String name)
   {
+    if (! _lifecycle.isActive())
+      return null;
+    
     E newController = _deployList.generateController(name);
 
     if (newController == null)

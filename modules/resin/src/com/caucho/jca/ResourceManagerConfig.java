@@ -116,7 +116,7 @@ public class ResourceManagerConfig {
 	try {
 	  ConnectorConfig conn = new ConnectorConfig();
 
-	  Config.configure(conn, is, "com/caucho/jca/jca.rnc");
+	  new Config().configure(conn, is, "com/caucho/jca/jca.rnc");
 
 	  _connList.add(conn);
 	} finally {

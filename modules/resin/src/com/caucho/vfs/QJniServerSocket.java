@@ -139,6 +139,10 @@ public class QJniServerSocket {
       }
     } catch (IOException e) {
       throw e;
+    } catch (ClassNotFoundException e) {
+      log.fine(e.toString());
+      
+      throw new IOException(L.l("JNI Socket support requires Resin Professional."));
     } catch (Throwable e) {
       log.log(Level.FINE, e.toString(), e);
       

@@ -49,7 +49,8 @@ import com.caucho.server.deploy.DeployContainer;
 /**
  * The generator for the web-app deploy
  */
-public class WebAppRegexpDeployGenerator extends DeployGenerator<WebAppController> {
+public class WebAppRegexpDeployGenerator
+  extends DeployGenerator<WebAppController> {
   private static final Logger log = Log.open(WebAppSingleDeployGenerator.class);
 
   private ApplicationContainer _container;
@@ -155,7 +156,7 @@ public class WebAppRegexpDeployGenerator extends DeployGenerator<WebAppControlle
       return null;
     }
 
-    WebAppController entry = null;
+    WebAppController controller = null;
     
     Thread thread = Thread.currentThread();
     ClassLoader oldLoader = thread.getContextClassLoader();
@@ -165,37 +166,35 @@ public class WebAppRegexpDeployGenerator extends DeployGenerator<WebAppControlle
       
       synchronized (_entries) {
 	for (int i = 0; i < _entries.size(); i++) {
-	  entry = _entries.get(i);
+	  controller = _entries.get(i);
 
-	  if (appDir.equals(entry.getRootDirectory()))
-	    return entry;
+	  if (appDir.equals(controller.getRootDirectory()))
+	    return controller;
 	}
 
-	entry = new WebAppController(_container, name);
-
-	entry.setRootDirectory(appDir);
+	controller = new WebAppController(name, appDir, _container);
 
 	// XXX: not dynamic-deploy in the sense that the mappings are known
-	//entry.setDynamicDeploy(true);
-	entry.getVariableMap().putAll(varMap);
-	entry.setRegexpValues(vars);
-	entry.setConfig(_config);
-	// _entry.setJarPath(_archivePath);
+	//controller.setDynamicDeploy(true);
+	controller.getVariableMap().putAll(varMap);
+	controller.setRegexpValues(vars);
+	controller.setConfig(_config);
+	// _controller.setJarPath(_archivePath);
 
 	for (int i = 0; i < _webAppDefaults.size(); i++)
-	  entry.addConfigDefault(_webAppDefaults.get(i));
+	  controller.addConfigDefault(_webAppDefaults.get(i));
       
-	_entries.add(entry);
+	_entries.add(controller);
       }
     } finally {
       thread.setContextClassLoader(oldLoader);
     }
 
-    entry.setSourceType("regexp");
+    controller.setSourceType("regexp");
     
-    //entry.deploy();
+    //controller.deploy();
 
-    return entry;
+    return controller;
   }
 
   /**

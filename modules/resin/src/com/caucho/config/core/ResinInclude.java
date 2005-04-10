@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -109,16 +110,16 @@ public class ResinInclude extends ResinControl {
     
     Object object = getObject();
 
-    Schema schema = null;
+    String schema = null;
 
     // Use the relax schema for beans with schema.
     if (object instanceof SchemaBean) {
       schema = ((SchemaBean) object).getSchema();
     }
 
-    log.config(L.l("resin:include '{0}'", _path.getNativePath()));
+    log.config(L.l("resin:include '{0}'.\nresin:include is deprecated.  Please use resin:import instead.", _path.getNativePath()));
 
-    Config.configure(object, _path, schema);
+    new Config().configure(object, _path); // , schema);
   }
 }
 

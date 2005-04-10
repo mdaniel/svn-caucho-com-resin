@@ -71,10 +71,10 @@ public class EmbedResinServer {
   /**
    * Creates a new resin server.
    */
-  public EmbedResinServer(String id)
+  public EmbedResinServer(String id, Path rootDirectory)
     throws Exception
   {
-    _server = new ServerController(id);
+    _server = new ServerController(id, rootDirectory);
   }
 
   /**
@@ -83,14 +83,6 @@ public class EmbedResinServer {
   public void setServerId(String id)
   {
     _server.setServerId(id);
-  }
-
-  /**
-   * Sets the root directory.
-   */
-  public void setRootDirectory(Path path)
-  {
-    _server.setRootDirectory(path);
   }
 
   /**
@@ -134,7 +126,7 @@ public class EmbedResinServer {
   {
     ServerConfig config = new ServerConfig();
 
-    Config.configure(config, path, getSchema());
+    new Config().configure(config, path, getSchema());
 
     addConfig(config);
   }

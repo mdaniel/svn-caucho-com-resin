@@ -83,12 +83,12 @@ public class StartLazyRedeployAutomaticStrategy
   public<I extends DeployInstance>
     void update(DeployController<I> controller)
   {
-    if (controller.isStopped()) {
+    if (controller.isStoppedLazy()) {
+      // server/1d08
+    }
+    else if (controller.isStopped()) {
       // server/1d05
       controller.stopLazyImpl();
-    }
-    else if (controller.isStoppedLazy()) {
-      // server/1d08
     }
     else if (controller.isModifiedNow()) {
       // 1d0n, 1d0o
@@ -114,13 +114,13 @@ public class StartLazyRedeployAutomaticStrategy
   public <I extends DeployInstance>
           I request(DeployController<I> controller)
   {
-    if (controller.isStopped()) {
-      // server/1d00
-      return controller.getDeployInstance();
-    }
-    else if (controller.isStoppedLazy()) {
+    if (controller.isStoppedLazy()) {
       // server/1d06
       return controller.startImpl();
+    }
+    else if (controller.isStopped()) {
+      // server/1d00
+      return controller.getDeployInstance();
     }
     else if (controller.isModified()) {
       // server/1d0i
@@ -141,13 +141,17 @@ public class StartLazyRedeployAutomaticStrategy
   public <I extends DeployInstance>
           I subrequest(DeployController<I> controller)
   {
-    if (controller.isStopped()) {
+    if (controller.isStoppedLazy()) {
+      // server/1d07
+      return controller.startImpl();
+    }
+    else if (controller.isStopped()) {
       // server/1d01
       return controller.getDeployInstance();
     }
-    else if (controller.isStoppedLazy()) {
-      // server/1d07
-      return controller.startImpl();
+    else if (controller.isError() && controller.isModified()) {
+      // server/1d0x
+      return controller.restartImpl();
     }
     else if (controller.isModified()) {
       // server/1d0j
@@ -167,11 +171,14 @@ public class StartLazyRedeployAutomaticStrategy
   public <I extends DeployInstance>
           void alarm(DeployController<I> controller)
   {
-    if (controller.isStopped()) {
+    if (controller.isStoppedLazy()) {
+      // server/1d08
+    }
+    else if (controller.isStopped()) {
       // server/1d02
     }
-    else if (controller.isStoppedLazy()) {
-      // server/1d08
+    else if (controller.isError()) {
+      // server/1d0w
     }
     else if (controller.isModified()) {
       // server/1d0k

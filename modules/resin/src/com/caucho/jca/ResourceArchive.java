@@ -199,7 +199,7 @@ public class ResourceArchive {
 
       _config = new ConnectorConfig();
 
-      Config.configure(_config, raXml, "com/caucho/jca/jca.rnc");
+      new Config().configure(_config, raXml, "com/caucho/jca/jca.rnc");
     } catch (ConfigException e) {
       throw e;
     } catch (Exception e) {

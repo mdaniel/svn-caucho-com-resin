@@ -72,6 +72,8 @@ import com.caucho.make.AlwaysModified;
 
 import com.caucho.lifecycle.Lifecycle;
 
+import com.caucho.java.CompileClassNotFound;
+
 import com.caucho.loader.enhancer.ByteCodeEnhancer;
 
 import com.caucho.config.types.Period;

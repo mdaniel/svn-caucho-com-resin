@@ -76,8 +76,6 @@ public class AppClientDeployController extends ExpandDeployController<EntAppClie
   // The ear name
   private String _name = "";
 
-  private ClassLoader _parentClassLoader;
-
   // private Var _hostVar = new Var();
 
   private JarPath _clientJar;
@@ -88,15 +86,7 @@ public class AppClientDeployController extends ExpandDeployController<EntAppClie
 
   public AppClientDeployController()
   {
-    _parentClassLoader = Thread.currentThread().getContextClassLoader();
-  }
-
-  /**
-   * Returns the parent class loader.
-   */
-  public ClassLoader getParentClassLoader()
-  {
-    return _parentClassLoader;
+    super("client");
   }
 
   /**
@@ -151,7 +141,7 @@ public class AppClientDeployController extends ExpandDeployController<EntAppClie
    */
   protected EntAppClient instantiateDeployInstance()
   {
-    return new EntAppClient(this, getName());
+    return new EntAppClient(this, getId());
   }
 
   /**
@@ -266,8 +256,8 @@ public class AppClientDeployController extends ExpandDeployController<EntAppClie
     if (! xml.canRead())
       return;
     
-    Config.configure(appClient, xml,
-		     "com/caucho/server/e_app/app-client-14.rnc");
+    new Config().configure(appClient, xml,
+			   "com/caucho/server/e_app/app-client-14.rnc");
   }
 
   private void configClientConfig(EntAppClient appClient, Path xml)
@@ -276,7 +266,7 @@ public class AppClientDeployController extends ExpandDeployController<EntAppClie
     if (! xml.canRead())
       return;
     
-    Config.configure(appClient, xml);
+    new Config().configure(appClient, xml);
   }
 
   /**
@@ -287,9 +277,9 @@ public class AppClientDeployController extends ExpandDeployController<EntAppClie
     if (! (o instanceof AppClientDeployController))
       return false;
 
-    AppClientDeployController entry = (AppClientDeployController) o;
+    AppClientDeployController controller = (AppClientDeployController) o;
 
-    return getName().equals(entry.getName());
+    return getId().equals(controller.getId());
   }
 
   /**
@@ -297,6 +287,6 @@ public class AppClientDeployController extends ExpandDeployController<EntAppClie
    */
   public String toString()
   {
-    return "AppClientDeployController[" + getName() + "]";
+    return "AppClientDeployController[" + getId() + "]";
   }
 }

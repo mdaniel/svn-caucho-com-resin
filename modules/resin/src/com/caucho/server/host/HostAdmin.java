@@ -29,6 +29,8 @@
 
 package com.caucho.server.host;
 
+import java.util.ArrayList;
+
 import javax.management.ObjectName;
 
 import com.caucho.vfs.Path;
@@ -37,6 +39,9 @@ import com.caucho.server.deploy.EnvironmentDeployController;
 import com.caucho.server.deploy.DeployControllerAdmin;
 
 import com.caucho.server.host.mbean.HostMBean;
+
+import com.caucho.server.webapp.WebAppController;
+import com.caucho.server.webapp.mbean.WebAppMBean;
 
 /**
  * The admin implementation for a host.
@@ -190,6 +195,52 @@ public class HostAdmin extends DeployControllerAdmin<HostController>
       
     if (host != null)
       host.startEarDeploy(name);
+  }
+
+  /**
+   * Returns the web-app names.
+   */
+  public ObjectName []getWebAppNames()
+  {
+    Host host = getHost();
+
+    if (host == null)
+      return new ObjectName[0];
+
+    ArrayList<WebAppController> webappList = host.getApplicationList();
+
+    ObjectName []names = new ObjectName[webappList.size()];
+
+    for (int i = 0; i < names.length; i++) {
+      WebAppController controller = webappList.get(i);
+      
+      names[i] = controller.getObjectName();
+    }
+
+    return names;
+  }
+
+  /**
+   * Returns the webapps.
+   */
+  public WebAppMBean []getWebApps()
+  {
+    Host host = getHost();
+
+    if (host == null)
+      return new WebAppMBean[0];
+
+    ArrayList<WebAppController> webappList = host.getApplicationList();
+
+    WebAppMBean []webapps = new WebAppMBean[webappList.size()];
+
+    for (int i = 0; i < webapps.length; i++) {
+      WebAppController controller = webappList.get(i);
+      
+      webapps[i] = controller.getAdmin();
+    }
+
+    return webapps;
   }
 
   /**

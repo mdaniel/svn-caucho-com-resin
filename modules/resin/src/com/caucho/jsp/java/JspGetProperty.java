@@ -110,7 +110,9 @@ public class JspGetProperty extends JspContainerNode {
       throw error(L.l("`{0}' has no get method for `{1}'",
                       _name, _property));
 
-    out.print("  out.print(((" + beanClass.getName() + ") ");
+    out.print("  out.print(((");
+    out.printClass(beanClass);
+    out.print(") ");
     out.print("pageContext.findAttribute(\"" + _name + "\"))");
     out.println("." + reader.getName() + "());");
   }

@@ -51,7 +51,8 @@ import com.caucho.server.deploy.DeployContainer;
 /**
  * The generator for the web-app deploy
  */
-public class WebAppSingleDeployGenerator extends DeployGenerator<WebAppController>
+public class WebAppSingleDeployGenerator
+  extends DeployGenerator<WebAppController>
   implements EnvironmentListener {
   private static final Logger log = Log.open(WebAppSingleDeployGenerator.class);
 
@@ -192,10 +193,7 @@ public class WebAppSingleDeployGenerator extends DeployGenerator<WebAppControlle
 					      _container.getDocumentDirectory());
     }
     
-    _controller = new WebAppController(_container, _urlPrefix);
-
-    _controller.setName(_urlPrefix);
-    _controller.setRootDirectory(_rootDirectory);
+    _controller = new WebAppController(_urlPrefix, _rootDirectory, _container);
 
     _controller.setArchivePath(_archivePath);
 
@@ -216,7 +214,7 @@ public class WebAppSingleDeployGenerator extends DeployGenerator<WebAppControlle
    */
   protected void fillDeployedKeys(Set<String> keys)
   {
-    keys.add(_controller.getName());
+    keys.add(_controller.getContextPath());
   }
   
   /**
@@ -224,16 +222,17 @@ public class WebAppSingleDeployGenerator extends DeployGenerator<WebAppControlle
    */
   public WebAppController generateController(String name)
   {
-    if (_controller.isNameMatch(name))
+    if (name.equals(_controller.getContextPath()))
       return _controller;
     else
       return null;
   }
   
   /**
-   * Merges the entries.
+   * Merges the controllers.
    */
-  public WebAppController mergeEntry(WebAppController controller, String name)
+  public WebAppController mergeController(WebAppController controller,
+					  String name)
   {
     // if directory matches, merge them
     if (controller.getRootDirectory().equals(_controller.getRootDirectory()))

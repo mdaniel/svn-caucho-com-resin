@@ -87,29 +87,16 @@ public class Host extends ApplicationContainer
 	     EnvironmentDeployInstance {
   static final Logger log = Log.open(Host.class);
   static final L10N L = new L10N(Host.class);
-
-  // the host validation schema
-  private static SoftReference<Schema> _schemaRef;
   
   private HostContainer _parent;
 
   // The Host entry
   private HostController _hostEntry;
-  
-  // The EL variable map
-  private HashMap<String,Object> _variableMap = new HashMap<String,Object>();
-  
-  // The JMX context properties
-  private LinkedHashMap<String,String> _jmxContext;
-
-  private VariableResolver _variableResolver;
 
   // The canonical host name.  The host name may include the port.
   private String _hostName = "";
   // The canonical URL
   private String _url;
-  // The MBeanName
-  private ObjectName _objectName;
 
   private String _serverName = "";
   private int _serverPort = 0;
@@ -127,65 +114,27 @@ public class Host extends ApplicationContainer
   private boolean _isRootDirSet;
   private boolean _isDocDirSet;
 
-  private String _configETag = null;
-  
-  // lifecycle
   private final Lifecycle _lifecycle;
 
+  private String _configETag = null;
+  
   /**
    * Creates the application with its environment loader.
    */
   public Host(HostContainer parent, HostController hostEntry, String hostName)
   {
-    super(new EnhancingClassLoader());
-    
+    super(new EnvironmentClassLoader());
+
     try {
       _hostEntry = hostEntry;
 
-      EnvironmentClassLoader classLoader = getEnvironmentClassLoader();
-
-      _variableMap.putAll(_hostEntry.getVariableMap());
-			
-      VariableResolver parentResolver = EL.getEnvironment();
-      _variableResolver = new MapVariableResolver(_variableMap,
-						  parentResolver);
-
-      EL.setEnvironment(_variableResolver, classLoader);
-      EL.setVariableMap(_variableMap, classLoader);
-
       setParent(parent);
       setHostName(hostName);
-
-      Thread thread = Thread.currentThread();
-      ClassLoader oldLoader = thread.getContextClassLoader();
-      try {
-	thread.setContextClassLoader(classLoader);
-    
-	_jmxContext = Jmx.copyContextProperties();
-	if (hostName.equals(""))
-	  _jmxContext.put("Host", "default");
-	else if (hostName.indexOf(':') >= 0)
-	  _jmxContext.put("Host", hostName.replace(':', '-'));
-	else
-	  _jmxContext.put("Host", hostName);
-	  
-	Jmx.setContextProperties(_jmxContext, getEnvironmentClassLoader());
-
-	try {
-	  Jmx.register(hostEntry.getMBean(),
-		       new ObjectName("resin:type=CurrentHost"),
-		       getEnvironmentClassLoader());
-	} catch (Exception e) {
-	  log.log(Level.FINER, e.toString(), e);
-	}
-      } finally {
-	thread.setContextClassLoader(oldLoader);
-      }
     } catch (Throwable e) {
       _configException = e;
+    } finally {
+      _lifecycle = new Lifecycle(log, toString(), Level.INFO);
     }
-    
-    _lifecycle = new Lifecycle(log, toString(), Level.INFO);
   }
 
   /**
@@ -250,14 +199,6 @@ public class Host extends ApplicationContainer
   }
 
   /**
-   * Returns the JMX ObjectName.
-   */
-  public ObjectName getObjectName()
-  {
-    return _objectName;
-  }
-
-  /**
    * Returns the secure host name.  Used for redirects.
    */
   public String getSecureHostName()
@@ -274,35 +215,11 @@ public class Host extends ApplicationContainer
   }
 
   /**
-   * sets the class loader.
-   */
-  public void setEnvironmentClassLoader(EnvironmentClassLoader loader)
-  {
-    super.setEnvironmentClassLoader(loader);
-    loader.setOwner(this);
-  }
-
-  /**
    * Returns the relax schema.
    */
-  public Schema getSchema()
+  public String getSchema()
   {
-    Schema schema = null;
-    
-    if (_schemaRef == null || (schema = _schemaRef.get()) == null) {
-      String schemaName = "com/caucho/server/host/host.rnc";
-
-      try {
-	schema = CompactVerifierFactoryImpl.compileFromResource(schemaName);
-      } catch (Exception e) {
-	log.log(Level.FINER, e.toString(), e);
-	log.warning(e.toString());
-      }
-
-      _schemaRef = new SoftReference<Schema>(schema);
-    }
-
-    return schema;
+    return "com/caucho/server/host/host.rnc";
   }
   
   /**
@@ -312,7 +229,7 @@ public class Host extends ApplicationContainer
   {
     if (_url != null)
       return _url;
-    else if (_hostName.equals(""))
+    else if (_hostName == null || _hostName.equals(""))
       return "";
     else if (_hostName.startsWith("http:") ||
              _hostName.startsWith("https:"))
@@ -375,22 +292,6 @@ public class Host extends ApplicationContainer
   public EnvironmentClassLoader getEnvironmentClassLoader()
   {
     return (EnvironmentClassLoader) getClassLoader();
-  }
-
-  /**
-   * Returns the EL variable map.
-   */
-  public HashMap<String,Object> getVariableMap()
-  {
-    return _variableMap;
-  }
-
-  /**
-   * Returns the variable resolver.
-   */
-  public VariableResolver getVariableResolver()
-  {
-    return _variableResolver;
   }
 
   /**
@@ -465,6 +366,9 @@ public class Host extends ApplicationContainer
    */
   public void start()
   {
+    if (! _lifecycle.toStarting())
+      return;
+    
     if (getURL().equals("") && _parent != null) {
       _url = _parent.getURL();
     }
@@ -480,15 +384,12 @@ public class Host extends ApplicationContainer
     try {
       thread.setContextClassLoader(loader);
       
-      if (! _lifecycle.toStarting())
-	return;
-    
       super.start();
       
       loader.start();
-
-      _lifecycle.toActive();
     } finally {
+      _lifecycle.toActive();
+      
       thread.setContextClassLoader(oldLoader);
     }
   }
@@ -561,9 +462,8 @@ public class Host extends ApplicationContainer
 
     try {
       EnvironmentClassLoader envLoader = getEnvironmentClassLoader();
-      
       thread.setContextClassLoader(envLoader);
-      
+
       if (! _lifecycle.toStopping())
 	return false;
       
@@ -573,9 +473,9 @@ public class Host extends ApplicationContainer
 
       return true;
     } finally {
-      thread.setContextClassLoader(oldLoader);
-      
       _lifecycle.toStop();
+      
+      thread.setContextClassLoader(oldLoader);
     }
   }
   

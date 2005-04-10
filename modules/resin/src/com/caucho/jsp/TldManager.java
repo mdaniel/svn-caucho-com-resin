@@ -75,20 +75,22 @@ public class TldManager {
   private static ArrayList<TldPreload> _globalTaglibs;
   private static ArrayList<Path> _globalPaths;
   
-  private static EnvironmentLocal<TldManager> _localManager =
-    new EnvironmentLocal<TldManager>();
+  private static EnvironmentLocal<TldManager> _localManager
+    = new EnvironmentLocal<TldManager>();
   
   private JspResourceManager _resourceManager;
   private Application _application;
   
-  private HashMap<Path,SoftReference<TldTaglib>> _tldMap =
-    new HashMap<Path,SoftReference<TldTaglib>>();
+  private HashMap<Path,SoftReference<TldTaglib>> _tldMap
+    = new HashMap<Path,SoftReference<TldTaglib>>();
   
   private JspParseException _loadAllTldException;
   private String _tldDir;
   private FileSetType _tldFileSet;
 
   private volatile boolean _isInit;
+
+  private Config _config = new Config();
   private ArrayList<TldPreload> _preloadTaglibs;
 
   private TldManager(JspResourceManager resourceManager,
@@ -594,7 +596,7 @@ public class TldManager {
     }
 
     try {
-      Config.configure(taglib, is, schema);
+      new Config().configure(taglib, is, schema);
     } catch (ConfigException e) {
       log.warning(e.toString());
       log.log(Level.FINER, e.toString(), e);
@@ -669,7 +671,7 @@ public class TldManager {
 
     TldPreload taglib = new TldPreload();
     try {
-      Config.configure(taglib, is, schema);
+      _config.configure(taglib, is, schema);
     } catch (ConfigException e) {
       log.warning(e.toString());
       log.log(Level.FINER, e.toString(), e);

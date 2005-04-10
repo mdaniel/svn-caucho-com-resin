@@ -69,14 +69,14 @@ abstract public class DeployController<I extends DeployInstance>
 
   private ClassLoader _parentLoader;
   
-  private String _name;
+  private String _id;
 
-  private String _startupMode = STARTUP_AUTOMATIC;
-  private String _redeployMode = REDEPLOY_AUTOMATIC;
+  private String _startupMode = STARTUP_DEFAULT;
+  private String _redeployMode = REDEPLOY_DEFAULT;
 
   private DeployControllerStrategy _strategy;
 
-  protected final Lifecycle _lifecycle = new Lifecycle(getLog());
+  protected final Lifecycle _lifecycle;
 
   private Alarm _alarm = new WeakAlarm(this);
   private long _redeployCheckInterval = 60000L;
@@ -84,17 +84,29 @@ abstract public class DeployController<I extends DeployInstance>
   private long _startTime;
   private I _deployInstance;
 
-  protected DeployController()
+  protected DeployController(String id)
   {
-    this(Thread.currentThread().getContextClassLoader());
+    this(id, null);
   }
 
-  protected DeployController(ClassLoader parentLoader)
+  protected DeployController(String id, ClassLoader parentLoader)
   {
+    _id = id;
+    
     if (parentLoader == null)
       parentLoader = Thread.currentThread().getContextClassLoader();
     
     _parentLoader = parentLoader;
+
+    _lifecycle = new Lifecycle(getLog(), toString());
+  }
+
+  /**
+   * Returns the controller's id.
+   */
+  public final String getId()
+  {
+    return _id;
   }
 
   /**
@@ -103,22 +115,6 @@ abstract public class DeployController<I extends DeployInstance>
   public ClassLoader getParentClassLoader()
   {
     return _parentLoader;
-  }
-
-  /**
-   * Returns the entry's canonical name.
-   */
-  public String getName()
-  {
-    return _name;
-  }
-
-  /**
-   * Sets the entry's canonical name.
-   */
-  public void setName(String name)
-  {
-    _name = name;
   }
 
   /**
@@ -223,7 +219,7 @@ abstract public class DeployController<I extends DeployInstance>
    */
   public boolean isNameMatch(String name)
   {
-    return name.equals(_name);
+    return getId().equals(name);
   }
 
   /**
@@ -239,8 +235,6 @@ abstract public class DeployController<I extends DeployInstance>
    */
   public final boolean init()
   {
-    _lifecycle.setName(toString());
-    
     if (! _lifecycle.toInitializing())
       return false;
 
@@ -252,19 +246,22 @@ abstract public class DeployController<I extends DeployInstance>
 
       initBegin();
 
-      if (_redeployMode == REDEPLOY_MANUAL) {
-	if (_startupMode == STARTUP_MANUAL)
+      if (_startupMode == STARTUP_MANUAL) {
+	if (_redeployMode == REDEPLOY_AUTOMATIC) {
+	  throw new IllegalStateException(L.l("startup='manual' and redeploy='automatic' is an unsupported combination."));
+	}
+	else
 	  _strategy = StartManualRedeployManualStrategy.create();
-	else if (_startupMode == STARTUP_LAZY)
+      }
+      else if (_startupMode == STARTUP_LAZY) {
+	if (_redeployMode == REDEPLOY_MANUAL)
 	  _strategy = StartLazyRedeployManualStrategy.create();
 	else
-	  _strategy = StartAutoRedeployManualStrategy.create();
+	  _strategy = StartLazyRedeployAutomaticStrategy.create();
       }
       else {
-	if (_startupMode == STARTUP_LAZY)
-	  _strategy = StartLazyRedeployAutomaticStrategy.create();
-	else if (_startupMode == STARTUP_MANUAL)
-	  throw new IllegalStateException(L.l("startup='manual' and redeploy='automatic' is an unsupported combination."));
+	if (_redeployMode == STARTUP_MANUAL)
+	  _strategy = StartAutoRedeployManualStrategy.create();
 	else
 	  _strategy = StartAutoRedeployAutoStrategy.create();
       }
@@ -291,6 +288,25 @@ abstract public class DeployController<I extends DeployInstance>
   {
   }
 
+  protected String getMBeanTypeName()
+  {
+    String className = getDeployInstance().getClass().getName();
+    int p = className.lastIndexOf('.');
+    if (p > 0)
+      className = className.substring(p + 1);
+
+    return className;
+  }
+
+  protected String getMBeanId()
+  {
+    String name = getId();
+    if (name == null || name.equals(""))
+      name = "default";
+
+    return name;
+  }
+
   /**
    * Returns the state name.
    */
@@ -298,10 +314,10 @@ abstract public class DeployController<I extends DeployInstance>
   {
     if (isDestroyed())
       return "destroyed";
-    else if (isStopped())
-      return "stopped";
     else if (isStoppedLazy())
       return "stopped-lazy";
+    else if (isStopped())
+      return "stopped";
     else if (isError())
       return "error";
     else if (isModified())
@@ -317,7 +333,7 @@ abstract public class DeployController<I extends DeployInstance>
    */
   public boolean isStopped()
   {
-    return _lifecycle.isStopped();
+    return _lifecycle.isStopped() || _lifecycle.isInit();
   }
 
   /**
@@ -325,7 +341,7 @@ abstract public class DeployController<I extends DeployInstance>
    */
   public boolean isStoppedLazy()
   {
-    return _deployInstance == null;
+    return _lifecycle.isInit();
   }
 
   /**
@@ -335,9 +351,14 @@ abstract public class DeployController<I extends DeployInstance>
    */
   public boolean isActiveIdle()
   {
-    DeployInstance instance = _deployInstance;
+    DeployInstance instance = getDeployInstance();
 
-    return instance != null && instance.isDeployIdle();
+    if (! _lifecycle.isActive())
+      return false;
+    else if (instance == null)
+      return false;
+    else
+      return instance.isDeployIdle();
   }
 
   /**
@@ -347,7 +368,10 @@ abstract public class DeployController<I extends DeployInstance>
    */
   public boolean isError()
   {
-    DeployInstance instance = _deployInstance;
+    if (_lifecycle.isError())
+      return true;
+
+    DeployInstance instance = getDeployInstance();
 
     return (instance != null &&
             instance.getConfigException() != null);
@@ -358,7 +382,10 @@ abstract public class DeployController<I extends DeployInstance>
    */
   public boolean isErrorNow()
   {
-    DeployInstance instance = _deployInstance;
+    if (_lifecycle.isError())
+      return true;
+    
+    DeployInstance instance = getDeployInstance();
 
     return (instance != null &&
             instance.getConfigException() != null);
@@ -369,8 +396,8 @@ abstract public class DeployController<I extends DeployInstance>
    */
   public boolean isModified()
   {
-    DeployInstance instance = _deployInstance;
-    
+    DeployInstance instance = getDeployInstance();
+
     return instance == null || instance.isModified();
   }
 
@@ -379,20 +406,22 @@ abstract public class DeployController<I extends DeployInstance>
    */
   public boolean isModifiedNow()
   {
-    DeployInstance instance = _deployInstance;
+    DeployInstance instance = getDeployInstance();
 
     return instance == null || instance.isModifiedNow();
   }
 
   /**
-   * Returns the current instance, returning null if no active instance
-   * exists.
+   * Returns the current instance.
    */
   public I getDeployInstance()
   {
-    // Can't wait for active because of init dependencies.
+    synchronized (this) {
+      if (_deployInstance == null)
+	_deployInstance = instantiateDeployInstance();
 
-    return _deployInstance;
+      return _deployInstance;
+    }
   }
 
   /**
@@ -405,7 +434,6 @@ abstract public class DeployController<I extends DeployInstance>
                                           _lifecycle.getStateName()));
 
     _strategy.startOnInit(this);
-
   }
 
   /**
@@ -438,7 +466,10 @@ abstract public class DeployController<I extends DeployInstance>
    */
   public I request()
   {
-    return _strategy.request(this);
+    if (_strategy != null)
+      return _strategy.request(this);
+    else
+      return null;
   }
 
   /**
@@ -448,7 +479,10 @@ abstract public class DeployController<I extends DeployInstance>
    */
   public I subrequest()
   {
-    return _strategy.subrequest(this);
+    if (_strategy != null)
+      return _strategy.subrequest(this);
+    else
+      return null;
   }
 
   /**
@@ -458,7 +492,8 @@ abstract public class DeployController<I extends DeployInstance>
    */
   I restartImpl()
   {
-    stopImpl();
+    if (! _lifecycle.isStopped() && ! _lifecycle.isInit())
+      stopImpl();
 
     return startImpl();
   }
@@ -475,25 +510,21 @@ abstract public class DeployController<I extends DeployInstance>
       return null;
     }
 
-    if (! _lifecycle.toStarting())
-      return _deployInstance;
-
-    I deployInstance = null;
+    I deployInstance = getDeployInstance();
     
     Thread thread = Thread.currentThread();
     ClassLoader oldLoader = thread.getContextClassLoader();
+    ClassLoader loader = null;
 
     try {
-      thread.setContextClassLoader(getParentClassLoader());
-      
-      expandArchive();
-    
-      deployInstance = instantiateDeployInstance();
-      _deployInstance = deployInstance;
-
-      ClassLoader loader = deployInstance.getClassLoader();
+      loader = deployInstance.getClassLoader();
       thread.setContextClassLoader(loader);
 
+      if (! _lifecycle.toStarting())
+	return deployInstance;
+
+      expandArchive();
+    
       addManifestClassPath();
       
       configureInstance(deployInstance);
@@ -502,14 +533,21 @@ abstract public class DeployController<I extends DeployInstance>
 
       _startTime = Alarm.getCurrentTime();
     } catch (Throwable e) {
-      log.log(Level.WARNING, e.toString(), e.toString());
+      log.log(Level.WARNING, e.toString(), e);
+
+      _lifecycle.toError();
 
       if (deployInstance != null)
 	deployInstance.setConfigException(e);
     } finally {
       _lifecycle.toActive();
 
-      _alarm.queue(_redeployCheckInterval); // XXX: strategy-controlled
+      // server/
+      if (loader instanceof DynamicClassLoader)
+	((DynamicClassLoader) loader).clearModified();
+
+      if (_alarm != null)
+	_alarm.queue(_redeployCheckInterval); // XXX: strategy-controlled
 
       thread.setContextClassLoader(oldLoader);
     }
@@ -543,11 +581,17 @@ abstract public class DeployController<I extends DeployInstance>
    */
   void stopImpl()
   {
-    if (! _lifecycle.toStopping())
-      return;
+    Thread thread = Thread.currentThread();
+    ClassLoader oldLoader = thread.getContextClassLoader();
 
     try {
-      DeployInstance oldInstance = null;
+      DeployInstance oldInstance = _deployInstance;
+
+      if (oldInstance != null)
+	thread.setContextClassLoader(oldInstance.getClassLoader());
+      
+      if (! _lifecycle.toStopping())
+	return;
 
       synchronized (this) {
         oldInstance = _deployInstance;
@@ -555,10 +599,12 @@ abstract public class DeployController<I extends DeployInstance>
       }
 
       if (oldInstance != null) {
-          oldInstance.destroy();
+	oldInstance.destroy();
       }
     } finally  {
       _lifecycle.toStop();
+      
+      thread.setContextClassLoader(oldLoader);
     }
 
     return;
@@ -611,7 +657,8 @@ abstract public class DeployController<I extends DeployInstance>
    */
   protected boolean destroy()
   {
-    stop();
+    if (_lifecycle.isAfterInit())
+      stop();
 
     if (! _lifecycle.toDestroy())
       return false;
@@ -642,6 +689,6 @@ abstract public class DeployController<I extends DeployInstance>
     String className = getClass().getName();
     int p = className.lastIndexOf('.');
 
-    return className.substring(p + 1) + "[" + _name + "]";
+    return className.substring(p + 1) + "[" + getId() + "]";
   }
 }

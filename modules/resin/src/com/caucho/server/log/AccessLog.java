@@ -72,8 +72,8 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener {
   protected static final L10N L = new L10N(AccessLog.class);
   protected static final Logger log = Log.open(AccessLog.class);
   
-  // Default maximum log size.
-  private static final long ROLLOVER_SIZE = 32L * 1024L * 1024L;
+  // Default maximum log size = 1G
+  private static final long ROLLOVER_SIZE = 1024L * 1024L * 1024L;
   // Milliseconds in a day
   private static final long DAY = 24L * 3600L * 1000L;
   // How often to check size

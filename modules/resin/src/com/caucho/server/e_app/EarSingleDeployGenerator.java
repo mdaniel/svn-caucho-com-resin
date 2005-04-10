@@ -64,7 +64,6 @@ public class EarSingleDeployGenerator extends DeployGenerator<EarDeployControlle
   public EarSingleDeployGenerator(DeployContainer<EarDeployController> deployContainer,
 			 ApplicationContainer parentContainer,
 			 EarConfig config)
-			 
   {
     super(deployContainer);
     

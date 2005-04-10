@@ -107,7 +107,7 @@ public class ResinImport extends ResinControl {
     
     Object object = getObject();
 
-    Schema schema = null;
+    String schema = null;
     // Use the relax schema for beans with schema.
     if (object instanceof SchemaBean) {
       schema = ((SchemaBean) object).getSchema();
@@ -129,7 +129,7 @@ public class ResinImport extends ResinControl {
 
       Environment.addDependency(new Depend(path));
 
-      Config.configureBean(object, path, schema);
+      new Config().configureBean(object, path, schema);
     }
   }
 }

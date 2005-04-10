@@ -83,8 +83,8 @@ public class FileBacking {
   private static final L10N L = new L10N(FileBacking.class);
   private static final Logger log = Log.open(FileBacking.class);
   
-  private FreeList<ClusterConnection> _freeConn =
-    new FreeList<ClusterConnection>(32);
+  private FreeList<ClusterConnection> _freeConn
+    = new FreeList<ClusterConnection>(32);
   
   private String _name;
   
@@ -174,6 +174,14 @@ public class FileBacking {
   }
 
   /**
+   * Returns the data source.
+   */
+  public DataSource getDataSource()
+  {
+    return _dataSource;
+  }
+
+  /**
    * Create the database, initializing if necessary.
    */
   private void initDatabase()
@@ -222,7 +230,7 @@ public class FileBacking {
     }
   }
 
-  public boolean start()
+  public long start()
     throws Exception
   {
     long delta = - Alarm.getCurrentTime();
@@ -244,7 +252,7 @@ public class FileBacking {
 	conn.close();
     }
 
-    return true;
+    return delta;
   }
 
   /**
@@ -303,14 +311,14 @@ public class FileBacking {
         InputStream is = rs.getBinaryStream(1);
 
         if (log.isLoggable(Level.FINE))
-          log.fine("load cluster: " + uniqueId);
+          log.fine("load local object: " + uniqueId);
       
         validLoad = clusterObj.load(is, obj);
 
         is.close();
       }
       else if (log.isLoggable(Level.FINE))
-        log.fine("no session loaded for " + uniqueId);
+        log.fine("no local object loaded for " + uniqueId);
 
       rs.close();
 
@@ -353,22 +361,19 @@ public class FileBacking {
   /**
    * Removes the named object from the store.
    */
-  public void remove(ClusterObject obj)
+  public void remove(String uniqueId)
     throws Exception
   {
     ClusterConnection conn = getConnection();
     
     try {
-      String objectId = obj.getObjectId();
-      String uniqueId = obj.getUniqueId();
-
       PreparedStatement pstmt = conn.prepareInvalidate();
       pstmt.setString(1, uniqueId);
 
       int count = pstmt.executeUpdate();
       
       if (log.isLoggable(Level.FINE))
-        log.fine("invalidate jdbc: " + objectId);
+        log.fine("invalidate: " + uniqueId);
     } finally {
       conn.close();
     }
@@ -417,10 +422,10 @@ public class FileBacking {
   public void storeSelf(String uniqueId,
 			ReadStream is, int length,
 			long expireInterval,
-			int owner, int  backup)
+			int owner, int backup)
   {
     ClusterConnection conn = null;
-    
+
     try {
       conn = getConnection();
       // Try to update first, and insert if fail.
@@ -516,12 +521,31 @@ public class FileBacking {
     return false;
   }
 
-  private String serverNameToTableName(String serverName)
+  public void destroy()
+  {
+    _dataSource = null;
+    _freeConn = null;
+  }
+
+  private ClusterConnection getConnection()
+    throws SQLException
+  {
+    ClusterConnection cConn = _freeConn.allocate();
+
+    if (cConn == null) {
+      Connection conn = _dataSource.getConnection();
+      cConn = new ClusterConnection(conn);
+    }
+
+    return cConn;
+  }
+
+  public String serverNameToTableName(String serverName)
   {
     if (serverName == null)
       return "srun";
     
-    CharBuffer cb = new CharBuffer();
+    StringBuilder cb = new StringBuilder();
     cb.append("srun_");
     
     for (int i = 0; i < serverName.length(); i++) {
@@ -544,25 +568,6 @@ public class FileBacking {
     }
 
     return cb.toString();
-  }
-
-  public void destroy()
-  {
-    _dataSource = null;
-    _freeConn = null;
-  }
-
-  private ClusterConnection getConnection()
-    throws SQLException
-  {
-    ClusterConnection cConn = _freeConn.allocate();
-
-    if (cConn == null) {
-      Connection conn = _dataSource.getConnection();
-      cConn = new ClusterConnection(conn);
-    }
-
-    return cConn;
   }
 
   public String toString()

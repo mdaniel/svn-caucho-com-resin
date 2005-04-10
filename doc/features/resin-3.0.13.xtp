@@ -8,6 +8,13 @@
 
 <summary objsummary='localtoc'/>
 
+<section title="Manual web-app restart cookbook">
+
+A <a href="jmx|cookbook/restart.xtp">Restart cookbook</a> is available for
+creating an admin servlet to stop, start, or update a web-app.</p>
+
+</section>
+
 <section title="round-robin policy">
 
 <p>HmuxLoadBalanceServlet can now use a strict round-robin balance strategy.</p>

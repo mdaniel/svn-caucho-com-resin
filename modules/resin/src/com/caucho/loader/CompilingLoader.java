@@ -52,6 +52,7 @@ import com.caucho.util.CauchoSystem;
 import com.caucho.log.Log;
 
 import com.caucho.make.Make;
+import com.caucho.make.AlwaysModified;
 
 import com.caucho.config.ConfigException;
 
@@ -745,7 +746,7 @@ public class CompilingLoader extends Loader implements Make {
           
       compiler.compileBatch(files);
     } catch (Exception e) {
-      // getLoader().addDependency(new Depend(javaSource));
+      getLoader().addDependency(AlwaysModified.create());
 
       // Compile errors are wrapped in a special ClassNotFound class
       // so the server can give a nice error message

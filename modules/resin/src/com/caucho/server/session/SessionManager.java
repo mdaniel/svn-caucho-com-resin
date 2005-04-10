@@ -928,7 +928,8 @@ public class SessionManager implements ObjectManager, AlarmListener {
       int digit = (int) (random & 0x3f);
       random = random >> 6;
 
-      digit = (digit - digit % _srunLength) + index;
+      if (_srunLength > 0)
+	digit = (digit - digit % _srunLength) + index;
 
       // server/01l3 - check for overflow 
       if (digit >= 64)

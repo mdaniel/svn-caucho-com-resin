@@ -195,7 +195,6 @@ public class MBeanContext {
       properties = new LinkedHashMap<String,String>();
 
       properties.putAll(_properties);
-
       Jmx.parseProperties(properties, name);
 
       return Jmx.getObjectName(_domain, properties);
@@ -215,7 +214,7 @@ public class MBeanContext {
   /**
    * Registers an MBean with the server.
    *
-   * @param object the object to be registered as an MBean
+   * @param mbean the object to be registered as an MBean
    * @param name the name of the mbean.
    *
    * @return the instantiated object.
@@ -247,8 +246,6 @@ public class MBeanContext {
     }
 
     addMBean(name, mbean);
-
-    log.finer("registered " + name);
 
     try {
       if (registration != null)
@@ -361,7 +358,7 @@ public class MBeanContext {
       return;
     }
     
-    log.fine(L.l("'{0}' registered in {1}", name, this));
+    log.fine(L.l("{0} registered in {1}", getDebugName(name, mbean), this));
       
     _mbeans.put(name, mbean);
 
@@ -461,7 +458,7 @@ public class MBeanContext {
   /**
    * Removes a listener to a registered MBean
    *
-   * @param name the name of the mbean
+   * @param mbean the name of the mbean
    * @param listener the listener object
    */
   public void removeNotificationListener(ObjectName mbean,
@@ -480,7 +477,7 @@ public class MBeanContext {
   /**
    * Removes a listener to a registered MBean
    *
-   * @param name the name of the mbean
+   * @param mbean the name of the mbean
    * @param listener the listener object
    * @param filter filters events the listener is interested in
    * @param handback context to be returned to the listener
@@ -573,6 +570,24 @@ public class MBeanContext {
     _mbeans = null;
     _view = null;
     _globalView = null;
+  }
+
+  /**
+   * Returns the debug name for a registered mbean.
+   *
+   * @param name the name of the mbean
+   * @param mbean the mbean instance
+   * @return
+   */
+  private String getDebugName(ObjectName name, MBeanWrapper mbean)
+  {
+    String className = mbean.getMBeanInfo().getClassName();
+
+    int p = className.lastIndexOf('.');
+    if (p > 0)
+      className = className.substring(p + 1);
+
+    return className + "[" + name + "]";
   }
 
   /**

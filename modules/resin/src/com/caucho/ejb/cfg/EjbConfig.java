@@ -62,7 +62,7 @@ import com.caucho.config.types.FileSetType;
 import com.caucho.loader.Environment;
 import com.caucho.loader.SimpleLoader;
 
-import com.caucho.loader.enhancer.EnhancingClassLoader;
+import com.caucho.loader.EnvironmentClassLoader;
 
 import com.caucho.java.WorkDir;
 
@@ -140,7 +140,7 @@ public class EjbConfig {
     EjbJar ejbJar = new EjbJar(this);
 
     try {
-      Config.configure(ejbJar, path, getSchema());
+      new Config().configure(ejbJar, path, getSchema());
     } catch (ConfigException e) {
       throw e;
     } catch (Exception e) {
@@ -372,7 +372,7 @@ public class EjbConfig {
 
       _deployingBeans.addAll(beanConfig);
 
-      EnhancingClassLoader parentLoader = _ejbManager.getClassLoader();
+      EnvironmentClassLoader parentLoader = _ejbManager.getClassLoader();
       
       Path workPath = _ejbManager.getWorkPath();
 

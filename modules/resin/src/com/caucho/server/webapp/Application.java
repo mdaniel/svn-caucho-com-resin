@@ -65,8 +65,6 @@ import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.loader.EnvironmentLocal;
 import com.caucho.loader.EnvironmentBean;
 
-import com.caucho.loader.enhancer.EnhancingClassLoader;
-
 import com.caucho.util.L10N;
 import com.caucho.util.Alarm;
 import com.caucho.util.LruCache;
@@ -148,38 +146,30 @@ public class Application extends ServletContextImpl
   static final L10N L = new L10N(Application.class);
   static final Logger log = Log.open(Application.class);
 
-  private static EnvironmentLocal<AccessLog> _accessLogLocal =
-    new EnvironmentLocal<AccessLog>("caucho.server.access-log");
+  private static EnvironmentLocal<AccessLog> _accessLogLocal
+    = new EnvironmentLocal<AccessLog>("caucho.server.access-log");
 
-  private static EnvironmentLocal<Application> _appLocal =
-    new EnvironmentLocal<Application>("caucho.application");
-
-  private static SoftReference<Schema> _schemaRef;
+  private static EnvironmentLocal<Application> _appLocal
+    = new EnvironmentLocal<Application>("caucho.application");
 
   static String []_classLoaderHackPackages;
 
   private ClassLoader _parentClassLoader;
 
   // The environment class loader
-  private EnhancingClassLoader _classLoader;
+  private EnvironmentClassLoader _classLoader;
 
   // The parent
   private ApplicationContainer _parent;
   
   // The application entry
-  private WebAppController _applicationEntry;
+  private WebAppController _controller;
 
   // The context path
   private String _contextPath = "";
 
   // A description
   private String _description = "";
-
-  // The JMX identity
-  private LinkedHashMap<String,String> _jmxContext;
-
-  // The EL variable map
-  private MapVariableResolver _varResolver;
 
   private String _servletVersion = "2.4";
   
@@ -189,7 +179,8 @@ public class Application extends ServletContextImpl
   private boolean _isDynamicDeploy;
 
   // Any war-generators.
-  private ArrayList<DeployGenerator> _appGenerators = new ArrayList<DeployGenerator>();
+  private ArrayList<DeployGenerator> _appGenerators
+    = new ArrayList<DeployGenerator>();
 
   // The servlet manager
   private ServletManager _servletManager;
@@ -226,8 +217,8 @@ public class Application extends ServletContextImpl
   // The cache
   private AbstractCache _cache;
 
-  private LruCache<String,FilterChainEntry> _filterChainCache =
-    new LruCache<String,FilterChainEntry>(256);
+  private LruCache<String,FilterChainEntry> _filterChainCache
+    = new LruCache<String,FilterChainEntry>(256);
 					  
   private UrlMap<CacheMapping> _cacheMappingMap = new UrlMap<CacheMapping>();
 
@@ -259,36 +250,36 @@ public class Application extends ServletContextImpl
   // mime mapping
   private HashMap<String,String> _mimeMapping = new HashMap<String,String>();
   // locale mapping
-  private HashMap<String,String> _localeMapping =
-    new HashMap<String,String>();
+  private HashMap<String,String> _localeMapping
+    = new HashMap<String,String>();
 
   // List of all the listeners.
   private ArrayList<Object> _listeners = new ArrayList<Object>();
   
   // List of the ServletContextListeners from the configuration file
-  private ArrayList<ServletContextListener> _applicationListeners =
-    new ArrayList<ServletContextListener>();
+  private ArrayList<ServletContextListener> _applicationListeners
+    = new ArrayList<ServletContextListener>();
   
   // List of the ServletContextAttributeListeners from the configuration file
-  private ArrayList<ServletContextAttributeListener> _attributeListeners =
-    new ArrayList<ServletContextAttributeListener>();
+  private ArrayList<ServletContextAttributeListener> _attributeListeners
+    = new ArrayList<ServletContextAttributeListener>();
   
   // List of the ServletRequestListeners from the configuration file
-  private ArrayList<ServletRequestListener> _requestListeners =
-    new ArrayList<ServletRequestListener>();
+  private ArrayList<ServletRequestListener> _requestListeners
+    = new ArrayList<ServletRequestListener>();
   
-  private ServletRequestListener []_requestListenerArray =
-    new ServletRequestListener[0];
+  private ServletRequestListener []_requestListenerArray
+    = new ServletRequestListener[0];
   
   // List of the ServletRequestAttributeListeners from the configuration file
-  private ArrayList<ServletRequestAttributeListener> _requestAttributeListeners =
-    new ArrayList<ServletRequestAttributeListener>();
+  private ArrayList<ServletRequestAttributeListener> _requestAttributeListeners
+    = new ArrayList<ServletRequestAttributeListener>();
   
-  private ServletRequestAttributeListener []_requestAttributeListenerArray =
-    new ServletRequestAttributeListener[0];
+  private ServletRequestAttributeListener []_requestAttributeListenerArray
+    = new ServletRequestAttributeListener[0];
 
-  private ArrayList<Validator> _resourceValidators =
-    new ArrayList<Validator>();
+  private ArrayList<Validator> _resourceValidators
+    = new ArrayList<Validator>();
 
   private DependencyContainer _invocationDependency;
 
@@ -303,7 +294,6 @@ public class Application extends ServletContextImpl
   private HashMap<String,Object> _extensions = new HashMap<String,Object>();
   private MultipartForm _multipartForm;
   
-  private Var _appVar = new Var();
   private ArrayList<String> _regexp;
 
   private long _shutdownWaitTime = 15000L;
@@ -312,62 +302,42 @@ public class Application extends ServletContextImpl
   private long _idleTime = 2 * 3600 * 1000L;
 
   private final Object _countLock = new Object();
+  private final Lifecycle _lifecycle;
   
   private int _requestCount;
   private long _lastRequestTime = Alarm.getCurrentTime();
 
-  // lifecycle
-  private final Lifecycle _lifecycle;
-
   /**
-   * Zero-arg constructor
+   * Creates the application with its environment loader.
    */
   public Application()
   {
-    this(null, null, "/");
+    this(new WebAppController("/", null, null));
   }
 
   /**
    * Creates the application with its environment loader.
    */
-  public Application(ApplicationContainer parent,
-		     WebAppController controller,
-		     String contextPath)
+  Application(WebAppController controller)
   {
     try {
+      _classLoader = new EnvironmentClassLoader(controller.getParentClassLoader());
+
       // the JSP servlet needs to initialize the JspFactory
       JspServlet.initStatic();
 
-      _parentClassLoader = Thread.currentThread().getContextClassLoader();
-
-      _classLoader = new EnhancingClassLoader(_parentClassLoader);
-      _classLoader.setOwner(this);
-
-      _applicationEntry = controller;
+      String contextPath = controller.getContextPath();
+      setContextPathId(contextPath);
+  
+      _controller = controller;
 
       _classLoader.addParentPriorityPackages(_classLoaderHackPackages);
 
       _appLocal.set(this, _classLoader);
 
-      VariableResolver parentResolver = EL.getEnvironment(_parentClassLoader);
-      HashMap<String,Object> map = new HashMap<String,Object>();
-      _varResolver = new MapVariableResolver(map, parentResolver);
-      EL.setVariableMap(map, _classLoader);
-      EL.setEnvironment(_varResolver, _classLoader);
+      // map.put("app", _appVar);
 
-      map.put("app", _appVar);
-    
-      _jmxContext = Jmx.copyContextProperties();
-      _jmxContext.put("WebApp", contextPath);
-      /*
-      Jndi.rebindDeepShort("jmx/MBeanServer",
-			   new MBeanServerProxy(_classLoader));
-      */
-
-      if (controller != null)
-	_appDir = controller.getRootDirectory();
-      else
-	_appDir = Vfs.lookup();
+      _appDir = controller.getRootDirectory();
 
       _servletManager = new ServletManager();
       _servletMapper = new ServletMapper();
@@ -399,30 +369,10 @@ public class Application extends ServletContextImpl
       _errorPageManager = new ErrorPageManager();
       _errorPageManager.setApplication(this);
 
+      setParent(controller.getContainer());
+      
       _invocationDependency = new DependencyContainer();
       _invocationDependency.add(this);
-
-      setParent(parent);
-      if (contextPath != null)
-	setContextPathId(contextPath);
-
-      Thread thread = Thread.currentThread();
-      ClassLoader loader = thread.getContextClassLoader();
-
-      if (controller != null) {
-	try {
-	  thread.setContextClassLoader(_classLoader);
-
-	  Jmx.setContextProperties(_jmxContext);
-
-	  ObjectName name = new ObjectName("resin:type=CurrentWebApp");
-	  Jmx.register(_applicationEntry.getMBean(), name);
-	} catch (Throwable e) {
-	  log.log(Level.FINER, e.toString(), e);
-	} finally {
-	  thread.setContextClassLoader(loader);
-	}
-      }
     } catch (Throwable e) {
       log.log(Level.WARNING, e.toString(), e);
       setConfigException(e);
@@ -546,31 +496,9 @@ public class Application extends ServletContextImpl
   /**
    * Returns the relax schema.
    */
-  public Schema getSchema()
+  public String getSchema()
   {
-    String schemaName = "com/caucho/server/webapp/resin-web-xml.rnc";
-
-    SoftReference<Schema> ref = _schemaRef;
-    Schema schema;
-
-    if (ref != null) {
-      schema = ref.get();
-      if (schema != null)
-	return schema;
-    }
-    
-    try {
-      schema = CompactVerifierFactoryImpl.compileFromResource(schemaName);
-
-      _schemaRef = new SoftReference<Schema>(schema);
-
-      return schema;
-    } catch (Exception e) {
-      log.log(Level.FINER, e.toString(), e);
-      log.warning(e.toString());
-
-      return null;
-    }
+    return "com/caucho/server/webapp/resin-web-xml.rnc";
   }
 
   /**
@@ -587,30 +515,6 @@ public class Application extends ServletContextImpl
   public DependencyContainer getInvocationDependency()
   {
     return _invocationDependency;
-  }
-
-  /**
-   * Returns the variable map.
-   */
-  public Map<String,Object> getVariableMap()
-  {
-    return _varResolver.getMap();
-  }
-
-  /**
-   * Sets the variable map.
-   */
-  public void setVariableMap(HashMap<String,Object> map)
-  {
-    _varResolver.setMap(map);
-  }
-
-  /**
-   * Returns the variable resolver.
-   */
-  public VariableResolver getVariableResolver()
-  {
-    return _varResolver;
   }
 
   /**
@@ -677,17 +581,6 @@ public class Application extends ServletContextImpl
     if (getServletContextName() == null)
       setDisplayName(contextPath);
 
-    String jmxName = contextPath;
-    if (jmxName.equals(""))
-      jmxName = "/";
-
-    /*
-    if (_jmxContext.get("J2EEApplication") == null)
-      _jmxContext.put("J2EEApplication", "null");
-    
-    _jmxContext.put("WebModule", jmxName);
-    */
-    _jmxContext.put("WebApp", jmxName);
     _classLoader.setId("web-app:" + getURL());
   }
 
@@ -1374,7 +1267,7 @@ public class Application extends ServletContextImpl
     String prefix = deploy.getURLPrefix();
 
     deploy.setURLPrefix(contextPath + prefix);
-    deploy.setParent(_applicationEntry);
+    deploy.setParent(_controller);
     deploy.setContainer(_parent);
     
     // XXX: The parent is added in the init()
@@ -1410,12 +1303,12 @@ public class Application extends ServletContextImpl
 						       container, config);
     
     deploy.setURLPrefix(contextPath + prefix);
-    // deploy.setParent(_applicationEntry);
+    // deploy.setParent(_controller);
     
     // XXX: The parent is added in the init()
     // _parent.addWebAppDeploy(gen);
 
-    deploy.setParentWebApp(_applicationEntry);
+    deploy.setParentWebApp(_controller);
     deploy.setParentClassLoader(getClassLoader());
     deploy.setContainer(container);
     
@@ -1620,8 +1513,8 @@ public class Application extends ServletContextImpl
     }
 
     WebAppController parent = null;
-    if (_applicationEntry != null)
-      parent = _applicationEntry.getParent();
+    if (_controller != null)
+      parent = _controller.getParent();
     if (_isInheritSession && parent != null &&
 	_sessionManager != parent.getApplication().getSessionManager()) {
       SessionManager sessionManager = _sessionManager;
@@ -1716,7 +1609,7 @@ public class Application extends ServletContextImpl
       isOkay = true;
     } finally {
       if (! isOkay)
-	_lifecycle.toFailed();
+	_lifecycle.toError();
       
       thread.setContextClassLoader(oldLoader);
     }
@@ -1970,6 +1863,12 @@ public class Application extends ServletContextImpl
       */
       if (_configException != null) {
         chain = new ExceptionFilterChain(_configException);
+	invocation.setDependency(AlwaysModified.create());
+      }
+      else if (! _lifecycle.waitForActive(_activeWaitTime)) {
+	Exception exn = new UnavailableException(L.l("'{0}' is not currently available.",
+						     getContextPath()));
+        chain = new ExceptionFilterChain(exn);
 	invocation.setDependency(AlwaysModified.create());
       }
       else {
@@ -2468,7 +2367,7 @@ public class Application extends ServletContextImpl
       _sessionManager = null;
       
       if (sessionManager != null &&
-	  (! _isInheritSession || _applicationEntry.getParent() == null))
+	  (! _isInheritSession || _controller.getParent() == null))
 	sessionManager.close();
 
       // server/10g8 -- application listeners after session
@@ -2494,57 +2393,7 @@ public class Application extends ServletContextImpl
 
   public String toString()
   {
-    return "Application[" + getURL() + "]";
-  }
-
-  /**
-   * EL variables for the app.
-   */
-  public class Var {
-    public String getURL()
-    {
-      return Application.this.getURL();
-    }
-
-    public String getId()
-    {
-      return getName();
-    }
-
-    public String getName()
-    {
-      String id = _applicationEntry.getId();
-      
-      if (id != null)
-	return id;
-      
-      return Application.this.getContextPath();
-    }
-
-    public Path getAppDir()
-    {
-      return Application.this.getAppDir();
-    }
-
-    public Path getDocDir()
-    {
-      return Application.this.getAppDir();
-    }
-
-    public String getContextPath()
-    {
-      return Application.this.getContextPath();
-    }
-
-    public ArrayList<String> getRegexp()
-    {
-      return Application.this.getRegexp();
-    }
-
-    public String toString()
-    {
-      return Application.this.toString();
-    }
+    return "WebApp[" + getURL() + "]";
   }
 
   static class FilterChainEntry {

@@ -153,19 +153,12 @@ public class ServletServer extends ProtocolDispatchServer
 
   private static final long ALARM_INTERVAL = 60000;
 
-  private static SoftReference<Schema> _schemaRef;
-  
-  private static final EnvironmentLocal<String> _serverIdLocal =
-    new EnvironmentLocal<String>("caucho.server-id");
+  private static final EnvironmentLocal<String> _serverIdLocal
+    = new EnvironmentLocal<String>("caucho.server-id");
 
   private ServerController _controller;
 
   private EnvironmentClassLoader _classLoader;
-  
-  private HashMap<String,Object> _variableMap = new HashMap<String,Object>();
-  private VariableResolver _varResolver;
-
-  private LinkedHashMap<String,String> _jmxContext;
 
   private Throwable _configException;
 
@@ -211,28 +204,13 @@ public class ServletServer extends ProtocolDispatchServer
       Environment.addClassLoaderListener(this, _classLoader);
 
       /*
-	try {
-	Jndi.rebindDeepShort("jmx/MBeanServer",
-	new MBeanServerProxy(_classLoader));
-	} catch (Exception e) {
-	log.log(Level.WARNING, e.toString(), e);
-	}
-      */
-    
-      _jmxContext = Jmx.copyContextProperties();
-    
-      VariableResolver parentResolver = EL.getEnvironment();
-      _varResolver = new MapVariableResolver(_variableMap, parentResolver);
-      EL.setEnvironment(_varResolver, _classLoader);
-      EL.setVariableMap(_variableMap, _classLoader);
-    
       try {
 	Method method = Jndi.class.getMethod("lookup",
 					     new Class[] { String.class });
 	_variableMap.put("jndi:lookup", method);
       } catch (Throwable e) {
       }
-      _variableMap.put("server", new Var());
+      */
 
       PermissionManager permissionManager = new PermissionManager();
       PermissionManager.setPermissionManager(permissionManager);
@@ -248,11 +226,6 @@ public class ServletServer extends ProtocolDispatchServer
 
       try {
 	thread.setContextClassLoader(_classLoader);
-
-	LinkedHashMap<String,String> props = Jmx.copyContextProperties();
-	props.put("Server", "default");
-    
-	Jmx.setContextProperties(props);
       
 	_hostContainer = new HostContainer();
 	_hostContainer.setClassLoader(_classLoader);
@@ -320,34 +293,11 @@ public class ServletServer extends ProtocolDispatchServer
   }
 
   /**
-   * Returns the variable map.
-   */
-  public Map<String,Object> getVariableMap()
-  {
-    return _variableMap;
-  }
-
-  /**
    * Returns the relax schema.
    */
-  public Schema getSchema()
+  public String getSchema()
   {
-    Schema schema = null;
-    
-    if (_schemaRef == null || (schema = _schemaRef.get()) == null) {
-      String schemaName = "com/caucho/server/resin/server.rnc";
-
-      try {
-	schema = CompactVerifierFactoryImpl.compileFromResource(schemaName);
-      } catch (Exception e) {
-	log.log(Level.FINER, e.toString(), e);
-	log.warning(e.toString());
-      }
-
-      _schemaRef = new SoftReference<Schema>(schema);
-    }
-
-    return schema;
+    return "com/caucho/server/resin/server.rnc";
   }
 
   /**
@@ -359,14 +309,6 @@ public class ServletServer extends ProtocolDispatchServer
       id = "";
 
     _id = id;
-
-    LinkedHashMap<String,String> props = Jmx.copyContextProperties();
-    if (_id.equals(""))
-      props.put("Server", "default-server");
-    else
-      props.put("Server", _id);
-    
-    Jmx.setContextProperties(props);
   }
 
   /**
@@ -381,7 +323,6 @@ public class ServletServer extends ProtocolDispatchServer
     _serverId = serverId;
 
     _classLoader.setId("servlet-server:" + serverId);
-    _variableMap.put("serverId", serverId);
 
     if (_lifecycle != null)
       _lifecycle.setName(toString());
@@ -404,8 +345,10 @@ public class ServletServer extends ProtocolDispatchServer
 
     Vfs.setPwd(path, _classLoader);
 
+    /*
     _variableMap.put("root-dir", path);
     _variableMap.put("server-root", path);
+    */
   }
 
   /**
@@ -1304,8 +1247,6 @@ public class ServletServer extends ProtocolDispatchServer
     
       _hostContainer = null;
       _ports = null;
-      _variableMap = null;
-      _varResolver = null;
       _accessLog = null;
       _cache = null;
     } finally {
@@ -1315,31 +1256,6 @@ public class ServletServer extends ProtocolDispatchServer
 
   public String toString()
   {
-    return "ServletServer[" + _serverId + "]";
-  }
-
-  /**
-   * EL variables for the server.
-   */
-  public class Var {
-    public String getId()
-    {
-      return _serverId;
-    }
-    
-    public Path getRootDir()
-    {
-      return _hostContainer.getRootDirectory();
-    }
-    
-    public Path getRootDirectory()
-    {
-      return _hostContainer.getRootDirectory();
-    }
-    
-    public String toString()
-    {
-      return ServletServer.this.toString();
-    }
+    return "Server[" + _serverId + "]";
   }
 }

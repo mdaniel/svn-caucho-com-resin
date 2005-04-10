@@ -148,7 +148,7 @@ public class WebAppConfig extends DeployConfig {
    */
   public void setDocumentDirectory(RawString dir)
   {
-    setAppDir(dir);
+    setRootDirectory(dir);
   }
 
   /**

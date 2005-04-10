@@ -35,6 +35,8 @@ import javax.management.ObjectName;
 
 import com.caucho.server.deploy.mbean.DeployControllerMBean;
 
+import com.caucho.server.webapp.mbean.WebAppMBean;
+
 /**
  * Management interface for the host.
  */
@@ -78,6 +80,17 @@ public interface HostMBean extends DeployControllerMBean {
    * Returns the host start time.
    */
   public Date getStartTime();
+
+  /**
+   * Returns an array of the webapp namess.
+   */
+  public ObjectName []getWebAppNames();
+
+  /**
+   * Returns an array of the webapps.
+   */
+  // XXX: issues with jconsole?
+  public WebAppMBean []getWebApps();
 
   /**
    * Updates a web-app entry from the deployment directories.

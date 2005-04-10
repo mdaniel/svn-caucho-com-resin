@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -233,12 +234,10 @@ public class WebAppExpandDeployGenerator extends ExpandDeployGenerator<WebAppCon
     if (cfg != null && cfg.getContextPath() != null)
       name = cfg.getContextPath();
 
-    WebAppController controller = new WebAppController(_container, name);
+    WebAppController controller
+      = new WebAppController(name, rootDirectory, _container);
 
     try {
-      controller.setName(name);
-      controller.setId(segmentName.substring(1));
-      controller.setRootDirectory(rootDirectory);
       controller.setStartupMode(getStartupMode());
       // controller.setRedeployMode(getRedeployMode());
 

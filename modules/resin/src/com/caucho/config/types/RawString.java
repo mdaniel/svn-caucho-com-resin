@@ -53,5 +53,10 @@ public class RawString {
   {
     return _value;
   }
+
+  public String toString()
+  {
+    return "RawString[" + _value + "]";
+  }
 }
 

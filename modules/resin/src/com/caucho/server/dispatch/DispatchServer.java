@@ -31,10 +31,6 @@ package com.caucho.server.dispatch;
 
 import java.util.*;
 
-import javax.servlet.ServletException;
-
-import com.caucho.config.types.Bytes;
-
 import com.caucho.lifecycle.Lifecycle;
 
 import com.caucho.make.Dependency;
@@ -164,7 +160,13 @@ public class DispatchServer implements Dependency {
    */
   public final Invocation getInvocation(Object protocolKey)
   {
-    Invocation invocation = _invocationCache.get(protocolKey);
+    Invocation invocation = null;
+
+    // XXX: see if can remove this
+    LruCache<Object,Invocation> invocationCache = _invocationCache;
+
+    if (invocationCache != null)
+      invocation = invocationCache.get(protocolKey);
 
     if (invocation == null)
       return null;
@@ -195,15 +197,20 @@ public class DispatchServer implements Dependency {
   {
     buildInvocation(invocation);
 
-    synchronized (_invocationCache) {
-      Invocation oldInvocation;
-      oldInvocation = _invocationCache.get(protocolKey);
+    // XXX: see if can remove this, and rely on the invocation cache existing
+    LruCache<Object,Invocation> invocationCache = _invocationCache;
 
-      if (oldInvocation != null)
-        return oldInvocation;
+    if (invocationCache != null) {
+      synchronized (invocationCache) {
+	Invocation oldInvocation;
+	oldInvocation = invocationCache.get(protocolKey);
 
-      if (invocation.getURLLength() < _maxURLLength) {
-	_invocationCache.put(protocolKey, invocation);
+	if (oldInvocation != null)
+	  return oldInvocation;
+
+	if (invocation.getURLLength() < _maxURLLength) {
+	  invocationCache.put(protocolKey, invocation);
+	}
       }
     }
 
@@ -224,9 +231,12 @@ public class DispatchServer implements Dependency {
    */
   public void clearCache()
   {
-    if (_invocationCache != null) {
-      synchronized (_invocationCache) {
-	_invocationCache.clear();
+    // XXX: see if can remove this, and rely on the invocation cache existing
+    LruCache<Object,Invocation> invocationCache = _invocationCache;
+    
+    if (invocationCache != null) {
+      synchronized (invocationCache) {
+	invocationCache.clear();
       }
     }
   }
@@ -236,10 +246,13 @@ public class DispatchServer implements Dependency {
    */
   protected void invalidateMatchingInvocations(InvocationMatcher matcher)
   {
-    if (_invocationCache != null) {
-      synchronized (_invocationCache) {
+    // XXX: see if can remove this, and rely on the invocation cache existing
+    LruCache<Object,Invocation> invocationCache = _invocationCache;
+    
+    if (invocationCache != null) {
+      synchronized (invocationCache) {
 	Iterator<LruCache.Entry<Object,Invocation>> iter;
-	iter = _invocationCache.iterator();
+	iter = invocationCache.iterator();
 
 	while (iter.hasNext()) {
 	  LruCache.Entry<Object,Invocation> entry = iter.next();
@@ -364,5 +377,7 @@ public class DispatchServer implements Dependency {
 
       listener.closeEvent(this);
     }
+
+    _invocationCache = null;
   }
 }

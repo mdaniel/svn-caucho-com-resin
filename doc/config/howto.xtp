@@ -43,6 +43,10 @@ to set the canonical host and port name to the external address.</p>
 &lt;/host>
 </example>
 
+<faq title="Reload .war files manually">
+
+<p>See the <a href="jmx|cookbook/restart.xtp">JMX restart</a> example.</p>
+
 </faq>
 
   </body>

@@ -366,7 +366,7 @@ public class EntAppClient implements DeployInstance, EnvironmentBean {
 
     // builder.setCompactSchema("com/caucho/server/e_app/app-client-14.rnc");
 
-    Config.configure(binding, xml);
+    new Config().configure(binding, xml);
   }
 
   /**

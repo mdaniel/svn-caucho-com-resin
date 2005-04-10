@@ -256,8 +256,6 @@ public class HostContainer implements DispatchBuilder {
     deploy = new HostSingleDeployGenerator(_hostDeploy, this, hostConfig);
     
     _hostDeploy.add(deploy);
-
-    // createUniqueHost(entry);
   }
 
   /**
@@ -412,70 +410,6 @@ public class HostContainer implements DispatchBuilder {
     throws Exception
   {
     return _hostDeploy.findController(hostName);
-  }
-
-  /**
-   * Returns the canonical HostController for the specified host.  Because of
-   * regexps and aliases, the HostController in the find methods may not match
-   * the canonical host entry.
-   *
-   * @param host the matched host entry
-   *
-   * @return the canonical host
-   */
-  private HostController createUniqueHost(HostController host)
-    throws Exception
-  {
-    Thread thread = Thread.currentThread();
-    
-    ClassLoader oldLoader = thread.getContextClassLoader();
-    try {
-      thread.setContextClassLoader(getClassLoader());
-      // host.setParent(this);
-
-      VariableResolver env = host.getVariableResolver();
-    
-      HostConfig hostConfig = host.getConfig();
-
-      String rawHostName = hostConfig.getHostName();
-      if (rawHostName != null && ! rawHostName.equals(""))
-	host.setHostName(StringTypeBuilder.evalString(rawHostName, env));
-
-      ArrayList<String> rawAliases = hostConfig.getHostAliases();
-      for (int i = 0; i < rawAliases.size(); i++) {
-	String rawAlias = rawAliases.get(i);
-
-	host.addHostAlias(StringTypeBuilder.evalString(rawAlias, env));
-      }
-
-      synchronized (_hostList) {
-	// uniqueness guaranteed by the host name
-	int oldHostIndex = _hostList.indexOf(host);
-	if (oldHostIndex >= 0)
-	  return _hostList.get(oldHostIndex);
-    
-	String rootDir = hostConfig.getRootDirectory();
-
-	if (rootDir != null) {
-	  Path path = PathBuilder.lookupPath(rootDir, env);
-	  host.setCfgRootDirectory(path);
-
-	  if (hostConfig.getRegexp() != null && ! path.isDirectory())
-	    return null;
-	}
-
-	if (host.getHostName().equals(""))
-	  _defaultHost = host;
-
-	_hostList.add(host);
-
-	host.init();
-      }
-    } finally {
-      thread.setContextClassLoader(oldLoader);
-    }
-
-    return host;
   }
 
   /**

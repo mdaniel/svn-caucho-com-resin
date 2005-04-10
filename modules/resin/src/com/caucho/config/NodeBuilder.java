@@ -94,11 +94,11 @@ public class NodeBuilder {
   private final static Logger log = Log.open(NodeBuilder.class);
 
   private final static QName RESIN_TYPE = new QName("resin:type");
-  private final static QName RESIN_TYPE_NS =
-    new QName("resin:type", "http://caucho.com/ns/resin/core");
+  private final static QName RESIN_TYPE_NS
+    = new QName("resin:type", "http://caucho.com/ns/resin/core");
 
-  private static ThreadLocal<NodeBuilder> _currentBuilder =
-          new ThreadLocal<NodeBuilder>();
+  private static ThreadLocal<NodeBuilder> _currentBuilder
+    = new ThreadLocal<NodeBuilder>();
 
   private ConfigVariableResolver _varResolver = new ConfigVariableResolver();
 

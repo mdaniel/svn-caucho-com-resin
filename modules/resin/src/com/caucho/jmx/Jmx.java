@@ -472,13 +472,28 @@ public class Jmx {
 					 Map<String,String> properties)
     throws MalformedObjectNameException
   {
-    CharBuffer cb = new CharBuffer();
+    StringBuilder cb = new StringBuilder();
     cb.append(domain);
     cb.append(':');
 
     boolean isFirst = true;
 
+    // sort type first
+
+    String type = properties.get("type");
+    if (type != null) {
+      cb.append("type=");
+      if (type.matches("[,=:\"*?]"))
+	type = ObjectName.quote(type);
+      cb.append(type);
+
+      isFirst = false;
+    }
+
     for (String key : properties.keySet()) {
+      if (key.equals("type"))
+	continue;
+      
       if (! isFirst)
 	cb.append(',');
       isFirst = false;

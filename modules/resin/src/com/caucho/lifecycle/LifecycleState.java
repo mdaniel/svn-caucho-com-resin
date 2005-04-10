@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -37,7 +38,7 @@ public interface LifecycleState {
   public static final int IS_INIT = 2;
   public static final int IS_STARTING = 3;
   public static final int IS_ACTIVE = 4;
-  public static final int IS_FAILED = 5;
+  public static final int IS_ERROR = 5;
   public static final int IS_STOPPING = 6;
   public static final int IS_STOPPED = 7;
   public static final int IS_DESTROYING = 8;

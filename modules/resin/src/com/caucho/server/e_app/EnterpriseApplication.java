@@ -105,8 +105,8 @@ public class EnterpriseApplication
   static final L10N L = new L10N(EnterpriseApplication.class);
   static final Logger log = Log.open(EnterpriseApplication.class);
   
-  protected static EnvironmentLocal<EJBServerInterface> _localServer =
-    new EnvironmentLocal<EJBServerInterface>("caucho.ejb-server");
+  protected static EnvironmentLocal<EJBServerInterface> _localServer
+    = new EnvironmentLocal<EJBServerInterface>("caucho.ejb-server");
 
   private EnvironmentClassLoader _loader;
 
@@ -126,18 +126,10 @@ public class EnterpriseApplication
 
   private ApplicationContainer _container;
 
-  // The EL variable map
-  private HashMap<String,Object> _variableMap = new HashMap<String,Object>();
-
-  private VariableResolver _variableResolver;
-
-  // The JMX context properties
-  private LinkedHashMap<String,String> _jmxContext;
-
   // private WarDirApplicationGenerator _warDeploy;
   
-  private ArrayList<WebAppController> _webApps =
-    new ArrayList<WebAppController>();
+  private ArrayList<WebAppController> _webApps
+    = new ArrayList<WebAppController>();
 
   private Throwable _configException;
 
@@ -156,26 +148,12 @@ public class EnterpriseApplication
 
     ClassLoader parentLoader = Thread.currentThread().getContextClassLoader();
     
-    _loader = new EnhancingClassLoader(container.getClassLoader());
-    _loader.setOwner(this);
+    _loader = new EnvironmentClassLoader(container.getClassLoader());
     _loader.setId("EnterpriseApplication[" + name + "]");
-
-    VariableResolver parentResolver = EL.getEnvironment();
-    _variableResolver = new MapVariableResolver(_variableMap,
-						parentResolver);
-
-    EL.setEnvironment(_variableResolver, _loader);
-
-    Vfs.setPwd(_controller.getRootDirectory(), _loader);
 
     _webappsPath = _controller.getRootDirectory().lookup("webapps");
     WorkDir.setLocalWorkDir(_controller.getRootDirectory().lookup("META-INF/work"),
 			    _loader);
-
-    _jmxContext = Jmx.copyContextProperties();
-    _jmxContext.put("EApp", name);
-
-    Jmx.setContextProperties(_jmxContext, _loader);
     
     _lifecycle = new Lifecycle(log, toString(), Level.INFO);
 
@@ -314,22 +292,6 @@ public class EnterpriseApplication
   }
 
   /**
-   * Returns the variable resolver.
-   */
-  public VariableResolver getVariableResolver()
-  {
-    return _variableResolver;
-  }
-
-  /**
-   * Returns the map.
-   */
-  public Map<String,Object> getVariableMap()
-  {
-    return _variableMap;
-  }
-
-  /**
    * Returns true if it's modified.
    */
   public boolean isModified()
@@ -417,7 +379,7 @@ public class EnterpriseApplication
 	if (configException != null)
 	  controller.setConfigException(configException);
 
-	_container.getApplicationGenerator().update(controller.getName());
+	_container.getApplicationGenerator().update(controller.getId());
       }
     } catch (Throwable e) {
       _configException = e;
@@ -578,12 +540,13 @@ public class EnterpriseApplication
 	Path expandPath = _webappsPath;
 	expandPath.mkdirs();
 
-	controller = new WebAppController(_container, contextUrl);
-	controller.setRootDirectory(expandPath.lookup(name));
+	controller = new WebAppController(contextUrl,
+					  expandPath.lookup(name),
+					  _container);
+
 	controller.setArchivePath(path);
       } else {
-	controller = new WebAppController(_container, contextUrl);
-	controller.setRootDirectory(path);
+	controller = new WebAppController(contextUrl, path, _container);
       }
 
       controller.setDynamicDeploy(true);

@@ -85,8 +85,8 @@ abstract public class StoreManager
   protected boolean _isAlwaysSave;
   
   protected HashMap<String,Store> _storeMap;
-  protected LruCache<String,ClusterObject> _clusterObjects =
-    new LruCache<String,ClusterObject>(4096);
+  protected LruCache<String,ClusterObject> _clusterObjects
+    =  new LruCache<String,ClusterObject>(4096);
 
   private final Lifecycle _lifecycle = new Lifecycle(log, toString());
 

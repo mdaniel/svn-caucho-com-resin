@@ -268,13 +268,15 @@ r_root-directory =
   | element root-directory { string }
 
 r_server = element server {
+  attribute id { string }?,
+
   r_root-directory?,
 
   r_server-Content
 }
 
 ## <server> basic contents
-r_server-Basis = 
+r_server-Basis =
   r_env-Basis
 
   & r_access-log?

@@ -2,9 +2,16 @@
 
 <a href='changes-2.xtp'>Resin 2.1 changes</a>
 
-<s2 title='3.0.snap - March 21, 2005'>
+<s2 title='3.0.snap - April 4, 2005'>
 <ul>
-<li>ClusterStream wasn't tracking connections accurately (rep by Scott Nelson)
+<li>Fixes to backup index calculation for '-' and '_'
+<li>JMX toString() and hashCode() need to allow invocation (rep by Jason Chaffee)
+<li>Refactored file and cluster persistent store to share common persistent backing
+<li>Moved common JMX/Environment handling code to EnvironmentDeployController
+<li>Changed default access log rollover size to 1G.
+<li>Reordered ObjectName so type is always first
+<li>Added MBeanHandle to allow proxies as return values of MBeans
+<li>(2005-04-04) ClusterStream wasn't tracking connections accurately (rep by Scott Nelson)
 <li>Add HmuxLoadBalanceServlet logging (rep by Scott Nelson)
 <li>Reworked DeployController to make JMX common
 <li>(2005-04-02) Add round-robin strategy to HmuxLoadBalanceServlet (rep by Dan Schwalbe)

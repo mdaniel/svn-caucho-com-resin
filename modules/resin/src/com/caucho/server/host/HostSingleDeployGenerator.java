@@ -52,12 +52,9 @@ public class HostSingleDeployGenerator extends DeployGenerator<HostController> {
 
   private HostContainer _container;
 
-  private Path _archivePath;
-  private Path _rootDirectory;
-
   private HostConfig _config;
 
-  private HostController _entry;
+  private HostController _controller;
 
   /**
    * Creates the new host deploy.
@@ -77,16 +74,6 @@ public class HostSingleDeployGenerator extends DeployGenerator<HostController> {
     super(container);
     
     _container = hostContainer;
-
-    _config = config;
-
-    Path serverRoot = hostContainer.getRootDirectory();
-    String rootDir = config.getRootDirectory();
-
-    if (rootDir == null)
-      _rootDirectory = serverRoot;
-    else
-      _rootDirectory = PathBuilder.lookupPath(rootDir, null, serverRoot);
 
     _config = config;
 
@@ -110,14 +97,6 @@ public class HostSingleDeployGenerator extends DeployGenerator<HostController> {
   }
 
   /**
-   * Sets the root directory.
-   */
-  public void setRootDirectory(Path rootDirectory)
-  {
-    _rootDirectory = rootDirectory;
-  }
-
-  /**
    * Returns the log.
    */
   protected Logger getLog()
@@ -129,21 +108,11 @@ public class HostSingleDeployGenerator extends DeployGenerator<HostController> {
    * Initializes the entry.
    */
   public void init()
+    throws Exception
   {
-    _entry = new HostController(_container, _config);
+    _controller = new HostController(_config, _container);
 
-    _entry.setCfgRootDirectory(_rootDirectory);
-    _entry.setArchivePath(_archivePath);
-
-    if (_archivePath != null)
-      _entry.addDepend(_archivePath);
-
-    if (_config.getStartupMode() != null)
-      _entry.setStartupMode(_config.getStartupMode());
-
-    _entry.init();
-    
-    // _entry.initAdmin();
+    _controller.init();
   }
 
   /**
@@ -151,7 +120,7 @@ public class HostSingleDeployGenerator extends DeployGenerator<HostController> {
    */
   protected void fillDeployedKeys(Set<String> keys)
   {
-    keys.add(_entry.getName());
+    keys.add(_controller.getName());
   }
   
   /**
@@ -159,8 +128,8 @@ public class HostSingleDeployGenerator extends DeployGenerator<HostController> {
    */
   public HostController generateController(String name)
   {
-    if (_entry.isNameMatch(name))
-      return _entry;
+    if (_controller.isNameMatch(name))
+      return _controller;
     else
       return null;
   }
@@ -170,25 +139,10 @@ public class HostSingleDeployGenerator extends DeployGenerator<HostController> {
    */
   public HostController mergeEntry(HostController entry, String name)
   {
-    if (! _entry.isNameMatch(name))
+    if (! _controller.isNameMatch(name))
       return entry;
     else
-      return entry.merge(_entry);
-  }
-
-  /**
-   * Initialize the deployment.
-   */
-  public void deploy()
-  {
-    // _entry.deploy();
-  }
-  
-  /**
-   * Destroy the deployment.
-   */
-  public void destroy()
-  {
+      return entry.merge(_controller);
   }
 
   public String toString()

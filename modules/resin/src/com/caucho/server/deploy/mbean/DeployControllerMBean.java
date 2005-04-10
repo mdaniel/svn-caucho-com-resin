@@ -31,10 +31,17 @@ package com.caucho.server.deploy.mbean;
 
 import java.util.Date;
 
+import javax.management.ObjectName;
+
 /**
  * Management interface for the deploy controller.
  */
 public interface DeployControllerMBean {
+  /**
+   * Returns the ObjectName.
+   */
+  public ObjectName getObjectName();
+  
   /**
    * Returns the controller's state.
    */
@@ -59,6 +66,12 @@ public interface DeployControllerMBean {
 
   /**
    * Restarts the instance.
+   */
+  public void restart()
+    throws Exception;
+
+  /**
+   * Restarts the instance if any changes are detected.
    */
   public void update()
     throws Exception;

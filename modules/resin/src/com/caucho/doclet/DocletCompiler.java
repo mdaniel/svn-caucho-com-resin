@@ -184,7 +184,7 @@ public class DocletCompiler {
 
       if (log.isLoggable(Level.FINER)) {
 	ReadStream rs = ts.openRead();
-	CharBuffer cb = new CharBuffer();
+	StringBuilder cb = new StringBuilder();
 	int ch;
 	while ((ch = rs.read()) >= 0)
 	  cb.append((char) ch);
@@ -194,7 +194,7 @@ public class DocletCompiler {
 
       RootDocImpl rootDoc = new RootDocImpl();
 
-      Config.configure(rootDoc, docletPath);
+      new Config().configure(rootDoc, docletPath);
 
       return rootDoc;
     } catch (Exception e) {

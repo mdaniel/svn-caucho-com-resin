@@ -271,6 +271,8 @@ public class HmuxRequest extends AbstractHttpRequest
 	_clusterRequest = (AbstractClusterRequest) cl.newInstance();
 	_clusterRequest.setRequest(this);
 	_clusterRequest.setCluster(_cluster);
+      } catch (ClassNotFoundException e) {
+	log.finer(e.toString());
       } catch (Throwable e) {
 	log.log(Level.FINER, e.toString(), e);
       }

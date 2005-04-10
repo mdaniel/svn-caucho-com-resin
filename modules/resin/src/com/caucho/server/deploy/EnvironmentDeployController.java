@@ -86,9 +86,6 @@ abstract public class
   private static final L10N L = new L10N(EnvironmentDeployController.class);
   private static final Logger log
     = Log.open(EnvironmentDeployController.class);
-
-  // The controller id
-  private String _id;
   
   // The JMX identity
   private LinkedHashMap<String,String> _jmxContext;
@@ -104,7 +101,7 @@ abstract public class
   private C _config;
 
   // The configuration variable resolver
-  private VariableResolver _variableResolver;
+  private VariableResolver _parentVariableResolver;
 
   // The variable mapping
   private HashMap<String,Object> _variableMap = new HashMap<String,Object>();
@@ -114,33 +111,23 @@ abstract public class
 
   public EnvironmentDeployController()
   {
-    this("");
+    this("", null);
   }
 
-  public EnvironmentDeployController(String id)
+  public EnvironmentDeployController(C config)
   {
-    setId(id);
+    this(config.getId(), config.calculateRootDirectory());
+
+    setConfig(config);
+  }
+
+  public EnvironmentDeployController(String id, Path rootDirectory)
+  {
+    super(id, null, rootDirectory);
     
-    VariableResolver parentResolver = EL.getEnvironment(getParentClassLoader());
-    _variableResolver = new MapVariableResolver(_variableMap, parentResolver);
+    _parentVariableResolver = EL.getEnvironment(getParentClassLoader());
 
     _jmxContext = Jmx.copyContextProperties(getParentClassLoader());
-  }
-
-  /**
-   * Sets the id.
-   */
-  private void setId(String id)
-  {
-    _id = id;
-  }
-
-  /**
-   * Gets the id.
-   */
-  public String getId()
-  {
-    return _id;
   }
 
   /**
@@ -185,14 +172,6 @@ abstract public class
   public HashMap<String,Object> getVariableMap()
   {
     return _variableMap;
-  }
-
-  /**
-   * Returns the variable resolver.
-   */
-  public VariableResolver getVariableResolver()
-  {
-    return _variableResolver;
   }
 
   /**
@@ -251,17 +230,10 @@ abstract public class
   protected ObjectName createObjectName(Map<String,String> properties)
     throws MalformedObjectNameException
   {
-    String type = getClass().getName();
+    String type = getMBeanTypeName();
 
-    if (type.lastIndexOf('.') > 0)
-      type = type.substring(type.lastIndexOf('.') + 1);
-    
-    String name = getId();
-    if (name.equals(""))
-      name = "default";
-
-    properties.put("type", type);
-    properties.put("name", name);
+    properties.put("type", getMBeanTypeName());
+    properties.put("name", getMBeanId());
       
     return Jmx.getObjectName("resin", properties);
   }
@@ -291,9 +263,6 @@ abstract public class
   {
     // setId(oldController.getId());
 
-    if (newController.getRootDirectory() != null)
-      setRootDirectory(newController.getRootDirectory());
-      
     _configDefaults.addAll(newController._configDefaults);
 
     if (newController.getConfig() != null)
@@ -348,42 +317,47 @@ abstract public class
     Thread thread = Thread.currentThread();
     ClassLoader oldLoader = thread.getContextClassLoader();
 
-    Path rootDirectory = null;
     try {
-      thread.setContextClassLoader(instance.getClassLoader());
+      ClassLoader classLoader = instance.getClassLoader();
+      
+      thread.setContextClassLoader(classLoader);
 
       log.fine(instance + " initializing");
 
       // set from external error, like .ear
       instance.setConfigException(_configException);
       
-      Map<String,Object> varMap = instance.getVariableMap();
+      HashMap<String,Object> varMap = new HashMap<String,Object>();
       varMap.putAll(_variableMap);
 
-      rootDirectory = calculateRootDirectory();
+      VariableResolver variableResolver
+	= new MapVariableResolver(varMap, _parentVariableResolver);
 
-      if (rootDirectory == null)
-	throw new NullPointerException("Null root directory");
+      EL.setVariableMap(varMap, classLoader);
+      EL.setEnvironment(variableResolver, classLoader);
 
-      if (! rootDirectory.isFile()) {
+      configureInstanceVariables(instance);
+
+      _jmxContext.put(getMBeanTypeName(), getMBeanId());
+	  
+      Jmx.setContextProperties(_jmxContext, classLoader);
+
+      try {
+	String typeName = "Current" + getMBeanTypeName();
+	
+	Jmx.register(getMBean(),
+		     new ObjectName("resin:type=" + typeName),
+		     classLoader);
+      } catch (Exception e) {
+	log.log(Level.FINER, e.toString(), e);
       }
-      else if (rootDirectory.getPath().endsWith(".jar") ||
-	       rootDirectory.getPath().endsWith(".war")) {
-	throw new ConfigException(L.l("root-directory `{0}' must specify a directory.  It may not be a .jar or .war.",
-				      rootDirectory.getPath()));
-      }
-      else
-	throw new ConfigException(L.l("root-directory `{0}' may not be a file.  root-directory must specify a directory.",
-				      rootDirectory.getPath()));
-
-      instance.setRootDirectory(rootDirectory);
 
       ArrayList<DeployConfig> initList = new ArrayList<DeployConfig>();
 
       initList.addAll(_configDefaults);
 
       thread.setContextClassLoader(instance.getClassLoader());
-      Vfs.setPwd(rootDirectory);
+      Vfs.setPwd(getRootDirectory());
 
       if (getArchivePath() != null)
 	Environment.addDependency(getArchivePath());
@@ -401,22 +375,30 @@ abstract public class
     }
   }
 
-  protected Path calculateRootDirectory()
-    throws ELException
+  protected void configureInstanceVariables(I instance)
+    throws Throwable
   {
-    Path rootDir = null;
-
-    if (rootDir == null)
-      rootDir = super.getRootDirectory();
+    Path rootDirectory = getRootDirectory();
     
-    if (rootDir == null && _config != null) {
-      String path = _config.getRootDirectory();
-      
-      if (path != null)
-        rootDir = PathBuilder.lookupPath(path, _variableResolver);
-    }
+    if (rootDirectory == null)
+      throw new NullPointerException("Null root directory");
 
-    return rootDir;
+    if (! rootDirectory.isFile()) {
+    }
+    else if (rootDirectory.getPath().endsWith(".jar") ||
+	     rootDirectory.getPath().endsWith(".war")) {
+      throw new ConfigException(L.l("root-directory `{0}' must specify a directory.  It may not be a .jar or .war.",
+				    rootDirectory.getPath()));
+    }
+    else
+      throw new ConfigException(L.l("root-directory `{0}' may not be a file.  root-directory must specify a directory.",
+				    rootDirectory.getPath()));
+    Vfs.setPwd(rootDirectory);
+
+    if (log.isLoggable(Level.FINE))
+      log.fine(instance + " root-directory=" + rootDirectory);
+
+    instance.setRootDirectory(rootDirectory);
   }
 
   public Path getArchivePath()
@@ -431,7 +413,7 @@ abstract public class
       
       if (pathString != null) {
 	try {
-	  path = PathBuilder.lookupPath(pathString, _variableResolver);
+	  path = PathBuilder.lookupPath(pathString);
 	} catch (ELException e) {
 	  throw new RuntimeException(e);
 	}

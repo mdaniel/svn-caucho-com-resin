@@ -1354,7 +1354,7 @@ public class Wrapper {
       print("[]");
     }
     else {
-      print(cl.getName());
+      print(cl.getName().replace('$', '.'));
     }
   }
 

@@ -1,0 +1,16 @@
+<document>
+  <header>
+    <product>resin</product>
+    <resin-2.0>$resin/ref/jmx.xtp</resin-2.0>
+    <title>JMX Cookbooks</title>
+    <type>contents</type>
+    <description>
+      <p>
+      </p>
+    </description>
+  </header>
+
+  <body>
+    <summary/>
+  </body>
+</document>

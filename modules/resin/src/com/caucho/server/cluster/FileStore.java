@@ -46,7 +46,7 @@ import com.caucho.vfs.TempStream;
  * Class storing distributed objects based on the filesystem.
  */
 public class FileStore extends StoreManager {
-  protected Path _path;
+  protected FileBacking _backing = new FileBacking();
 
   /**
    * Create a new file-based persistent session store.
@@ -63,17 +63,51 @@ public class FileStore extends StoreManager {
    */
   public void setPath(Path path)
   {
-    _path = path;
+    _backing.setPath(path);
   }
 
   public void addText(String value)
   {
-    _path = Vfs.lookup(value.trim());
+    _backing.setPath(Vfs.lookup(value.trim()));
   }
 
   public Path getPath()
   {
-    return _path;
+    return _backing.getPath();
+  }
+
+  /**
+   * Initialize.
+   */
+  public boolean init()
+    throws Exception
+  {
+    if (! super.init())
+      return false;
+    
+    String serverId = Cluster.getLocal().getServerId();
+    
+    String tableName = _backing.serverNameToTableName(serverId);
+    
+    _backing.setTableName(tableName);
+
+    _backing.init(1);
+
+    return true;
+  }
+
+  /**
+   * Start
+   */
+  public boolean start()
+    throws Exception
+  {
+    if (! super.start())
+      return false;
+    
+    _backing.start();
+
+    return true;
   }
 
   /**
@@ -81,33 +115,9 @@ public class FileStore extends StoreManager {
    */
   public void clearOldObjects()
   {
-    clearOldObjects(getPath(), Alarm.getCurrentTime());
-  }
-
-  /**
-   * Clears the files which are too old.
-   */
-  public void clearOldObjects(Path dir, long now)
-  {
     try {
-      String []list = dir.list();
-      
-      for (int i = 0; list != null && i < list.length; i++) {
-        Path path = dir.lookup(list[i]);
-
-        if (path.isFile() && path.canRead()) {
-          long lastModified = path.getLastModified();
-
-          if (lastModified + _maxIdleTime < now) {
-	    log.finer("timeout file: " + path);
-            
-            path.remove();
-          }
-        }
-	else if (path.isDirectory())
-	  clearOldObjects(path, now);
-      }
-    } catch (IOException e) {
+      _backing.clearOldObjects(getMaxIdleTime());
+    } catch (Exception e) {
       log.log(Level.WARNING, e.toString(), e);
     }
   }
@@ -117,72 +127,43 @@ public class FileStore extends StoreManager {
    */
   ClusterObject create(Store store, String id)
   {
-    return new SharedFileObject(this, store, id, getPath());
+    return new ClusterObject(this, store, id);
   }
 
   /**
    * Loads the session from the filesystem.
    *
-   * @param session the session to fill
+   * @param clusterObj the object to fill
    */
   public boolean load(ClusterObject clusterObj, Object obj)
     throws Exception
   {
-    FileObject fileObj = (FileObject) clusterObj;
-    
-    ReadStream is = null;
-    try {
-      is = fileObj.openRead();
-      
-      if (log.isLoggable(Level.FINE))
-	log.fine("load file: " + fileObj.getPath());
-      
-      return clusterObj.load(is, obj);
-    } catch (IOException e) {
-      log.fine("no saved object: " + e);
-    } finally {
-      if (is != null)
-        is.close();
-    }
-
-    return false;
+    return _backing.loadSelf(clusterObj, obj);
   }
 
   /**
    * Saves the session to the filesystem.
    *
-   * @param session the session to save
+   * @param obj the object to save
+   * @param tempStream stream to the serialized object
+   * @param crc digest of the serialized stream
+   * @param updateCount how many times the object has been updated
    */
-  public void store(ClusterObject obj, TempStream is, long crc, int updateCount)
+  public void store(ClusterObject obj,
+		    TempStream tempStream,
+		    long crc,
+		    int updateCount)
     throws Exception
   {
-    FileObject fileObj = (FileObject) obj;
+    if (crc == 0 && updateCount == 0)
+      return;
     
-    WriteStream os = null;
-    
+    ReadStream is = tempStream.openRead(true);
     try {
-      os = fileObj.openWrite();
-
-      ReadStream rs = is.openRead();
-      os.writeStream(rs);
-
-      if (log.isLoggable(Level.FINE))
-        log.fine("store file: " + fileObj.getPath());
-    } catch (Exception e) {
-      log.log(Level.FINE, e.toString(), e);
-      
-      if (os != null) {
-        try {
-          os.close();
-        } catch (IOException e2) {}
-          
-        os = null;
-      }
-        
-      // fileObj.remove();
+      _backing.storeSelf(obj.getUniqueId(), is, tempStream.getLength(),
+			 obj.getExpireInterval(), 0, 0);
     } finally {
-      if (os != null)
-        os.close();
+      is.close();
     }
   }
   
@@ -194,6 +175,7 @@ public class FileStore extends StoreManager {
   public void accessImpl(String uniqueId)
     throws Exception
   {
+    _backing.updateAccess(uniqueId);
   }
 
   /**
@@ -204,9 +186,6 @@ public class FileStore extends StoreManager {
   {
     removeClusterObject(obj.getStoreId(), obj.getObjectId());
 
-    obj.removeImpl();
-
-    if (log.isLoggable(Level.FINE))
-      log.fine("remove file-store session: " + obj);
+    _backing.remove(obj.getUniqueId());
   }
 }

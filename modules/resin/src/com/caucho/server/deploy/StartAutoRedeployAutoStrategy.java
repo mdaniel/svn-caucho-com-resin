@@ -81,12 +81,12 @@ public class StartAutoRedeployAutoStrategy
   public<I extends DeployInstance>
     void update(DeployController<I> controller)
   {
-    if (controller.isStopped()) {
+    if (controller.isStoppedLazy()) {
+      // server/1d18
+    }
+    else if (controller.isStopped()) {
       // server/1d15
       controller.startImpl();
-    }
-    else if (controller.isStoppedLazy()) {
-      // server/1d18
     }
     else if (controller.isModifiedNow()) {
       // 1d1n, 1d1o
@@ -112,13 +112,13 @@ public class StartAutoRedeployAutoStrategy
   public <I extends DeployInstance>
           I request(DeployController<I> controller)
   {
-    if (controller.isStopped()) {
-      // server/1d10
-      return controller.getDeployInstance();
-    }
-    else if (controller.isStoppedLazy()) {
+    if (controller.isStoppedLazy()) {
       // server/1d16
       return controller.startImpl();
+    }
+    else if (controller.isStopped()) {
+      // server/1d10
+      return controller.getDeployInstance();
     }
     else if (controller.isModified()) {
       // server/1d1i
@@ -139,13 +139,13 @@ public class StartAutoRedeployAutoStrategy
   public <I extends DeployInstance>
           I subrequest(DeployController<I> controller)
   {
-    if (controller.isStopped()) {
-      // server/1d11
-      return controller.getDeployInstance();
-    }
-    else if (controller.isStoppedLazy()) {
+    if (controller.isStoppedLazy()) {
       // server/1d17
       return controller.startImpl();
+    }
+    else if (controller.isStopped()) {
+      // server/1d11
+      return controller.getDeployInstance();
     }
     else if (controller.isModified()) {
       // server/1d1j

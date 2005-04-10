@@ -499,13 +499,15 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
       setContentType("text/html");
       ServletOutputStream s = getOutputStream();
 
+      s.println("<html>");
       if (! isCommitted()) {
-        s.print("<title>");
+        s.print("<head><title>");
         s.print(code);
         s.print(" ");
         s.print(_statusMessage);
-        s.println("</title>");
+        s.println("</title></head>");
       }
+      s.println("<body>");
 
       s.print("<h1>");
       s.print(code);
@@ -527,6 +529,7 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
 	s.println(com.caucho.Version.FULL_VERSION);
 	s.println("</small>");
       }
+      s.println("</body></html>");
     } catch (Exception e) {
       log.log(Level.FINE, e.toString(), e);
     }

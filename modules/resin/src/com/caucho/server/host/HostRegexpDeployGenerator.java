@@ -38,6 +38,8 @@ import java.util.logging.Level;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 
+import com.caucho.config.ConfigException;
+
 import com.caucho.log.Log;
 
 import com.caucho.vfs.Path;
@@ -120,13 +122,11 @@ public class HostRegexpDeployGenerator extends DeployGenerator<HostController> {
       
       int length = matcher.end() - matcher.start();
 
-      String contextPath = matcher.group();
+      String hostName = matcher.group();
         
       ArrayList<String> vars = new ArrayList<String>();
 
-      //HostDeployControlleryController entry = new HostDeployControlleryController(this, contextPath);
       HashMap<String,Object> varMap = new HashMap<String,Object>();
-      // entry.getVariableMap();
         
       for (int j = 0; j <= matcher.groupCount(); j++) {
 	vars.add(matcher.group(j));
@@ -135,7 +135,7 @@ public class HostRegexpDeployGenerator extends DeployGenerator<HostController> {
 
       varMap.put("regexp", vars);
 
-      HostController controller = new HostController(_container, _config);
+      HostController controller = new HostController(_config, _container);
       controller.getVariableMap().putAll(varMap);
 
       controller.setRegexpName(name);

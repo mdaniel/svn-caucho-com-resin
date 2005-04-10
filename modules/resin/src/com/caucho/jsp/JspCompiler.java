@@ -56,6 +56,7 @@ import com.caucho.loader.EnvironmentBean;
 import com.caucho.java.JavaCompiler;
 
 import com.caucho.server.webapp.Application;
+import com.caucho.server.webapp.WebAppController;
 
 /**
  * Compilation interface for JSP pages.
@@ -253,8 +254,10 @@ public class JspCompiler implements EnvironmentBean {
   public Application createApplication()
   {
     if (_app == null) {
-      _app = new Application();
-      _app.setDocumentDirectory(getAppDir());
+      WebAppController controller =
+	new WebAppController("",  getAppDir(), null);
+
+      _app = controller.getDeployInstance();
     }
 
     return _app;
@@ -544,7 +547,7 @@ public class JspCompiler implements EnvironmentBean {
 	else if (args[i].equals("-conf")) {
 	  Path path = Vfs.lookup(args[i + 1]);
 
-	  Config.configureBean(compiler, path);
+	  new Config().configureBean(compiler, path);
 	  hasConf = true;
 
 	  i += 2;
@@ -564,7 +567,7 @@ public class JspCompiler implements EnvironmentBean {
 	Path webXml = appDir.lookup("WEB-INF/web.xml");
 
 	if (webXml.canRead())
-	  Config.configureBean(app, webXml);
+	  new Config().configureBean(app, webXml);
       }
 
       Path appDir = null;

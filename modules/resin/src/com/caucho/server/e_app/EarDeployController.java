@@ -88,11 +88,25 @@ public class EarDeployController
   EarDeployController(String name,
 		      ApplicationContainer container, EarConfig config)
   {
-    super(name);
+    super(config);
+
+    _container = container;
+    
+    if (container != null) {
+      _eAppDefaults.addAll(container.getEarDefaultList());
+    }
+  }
+
+  EarDeployController(String name, Path rootDirectory,
+		      ApplicationContainer container)
+  {
+    super(name, rootDirectory);
     
     _container = container;
 
-    setConfig(config);
+    if (container != null) {
+      _eAppDefaults.addAll(container.getEarDefaultList());
+    }
   }
 
   /**
@@ -146,6 +160,11 @@ public class EarDeployController
   protected EnterpriseApplication instantiateDeployInstance()
   {
     return new EnterpriseApplication(_container, this, getId());
+  }
+
+  protected String getMBeanTypeName()
+  {
+    return "EApp";
   }
   
   protected Path calculateRootDirectory()

@@ -29,6 +29,11 @@
 
 package com.caucho.server.deploy;
 
+import java.util.logging.Logger;
+import java.util.logging.Level;
+
+import javax.servlet.jsp.el.ELException;
+
 import com.caucho.vfs.Path;
 
 import com.caucho.config.BuilderProgram;
@@ -38,6 +43,7 @@ import com.caucho.config.BuilderProgramContainer;
 import com.caucho.config.ConfigException;
 
 import com.caucho.config.types.RawString;
+import com.caucho.config.types.PathBuilder;
 
 import com.caucho.server.deploy.DeployController;
 
@@ -45,6 +51,9 @@ import com.caucho.server.deploy.DeployController;
  * The configuration for a deployable instance.
  */
 public class DeployConfig {
+  private final static Logger log
+    = Logger.getLogger(DeployConfig.class.getName());
+  
   // The deploy id
   private String _id;
   
@@ -167,5 +176,28 @@ public class DeployConfig {
   public void addPropertyProgram(String name, Object value)
   {
     _program.addProgram(new ObjectAttributeProgram(name, value));
+  }
+
+  /**
+   * Calculates the root directory for the config.
+   */
+  public Path calculateRootDirectory()
+  {
+    try {
+      String rawPath = getRootDirectory();
+      Path rootDir = null;
+
+      if (rawPath != null)
+	rootDir = PathBuilder.lookupPath(rawPath);
+
+      if (rootDir != null)
+	return rootDir;
+    
+      return null;
+    } catch (Exception e) {
+      log.log(Level.WARNING, e.toString(), e);
+
+      return null;
+    }
   }
 }

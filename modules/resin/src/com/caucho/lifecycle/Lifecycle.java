@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -132,8 +133,8 @@ public final class Lifecycle implements LifecycleState {
       return "init";
     case IS_STARTING:
       return "starting";
-    case IS_FAILED:
-      return "failed";
+    case IS_ERROR:
+      return "error";
     case IS_ACTIVE:
       return "active";
     case IS_STOPPING:
@@ -245,9 +246,9 @@ public final class Lifecycle implements LifecycleState {
   /**
    * Returns true for the failed state.
    */
-  public boolean isFailed()
+  public boolean isError()
   {
-    return _state == IS_FAILED;
+    return _state == IS_ERROR;
   }
 
   /**
@@ -360,17 +361,18 @@ public final class Lifecycle implements LifecycleState {
   }
   
   /**
-   * Changes to the active state.
+   * Changes to the error state.
    *
    * @return true if the transition is allowed
    */
-  public synchronized boolean toFailed()
+  public synchronized boolean toError()
   {
-    if (_state != IS_DESTROYED && _state != IS_FAILED) {
-      _state = IS_FAILED;
+    Thread.dumpStack();
+    if (_state < IS_DESTROYING && _state != IS_ERROR) {
+      _state = IS_ERROR;
 
       if (_log != null && _log.isLoggable(_level))
-	_log.log(_level, _name + " failed");
+	_log.log(_level, _name + " error");
 
       notifyAll();
 

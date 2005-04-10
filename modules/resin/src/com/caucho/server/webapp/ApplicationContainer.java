@@ -122,8 +122,8 @@ public class ApplicationContainer
   private boolean _hasWarGenerator;
 
   // LRU cache for the application lookup
-  private LruCache<String,WebAppController> _uriToAppCache =
-    new LruCache<String,WebAppController>(8192);
+  private LruCache<String,WebAppController> _uriToAppCache
+    = new LruCache<String,WebAppController>(8192);
 
   // include dispatch cache
   /*
@@ -138,8 +138,8 @@ public class ApplicationContainer
   // url-regexp apps
   //private ArrayList<WebAppConfig> _regexpApps = new ArrayList<WebAppConfig>();
   
-  private HashMap<String,WebAppConfig> _configAppMap =
-    new HashMap<String,WebAppConfig>();
+  private HashMap<String,WebAppConfig> _configAppMap
+    =  new HashMap<String,WebAppConfig>();
 
   private AccessLog _accessLog;
   private ErrorPageManager _errorPageManager;
@@ -170,9 +170,11 @@ public class ApplicationContainer
     _classLoader = loader;
     _errorPageManager = new ErrorPageManager();
     _errorPageManager.setApplicationContainer(this);
-    
+
+    /*
     Environment.addEnvironmentListener(this, loader);
     Environment.addClassLoaderListener(this, loader);
+    */
 
     Thread thread = Thread.currentThread();
     ClassLoader oldLoader = thread.getContextClassLoader();

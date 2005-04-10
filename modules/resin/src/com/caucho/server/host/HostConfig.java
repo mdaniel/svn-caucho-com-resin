@@ -36,17 +36,12 @@ import java.util.regex.Pattern;
 
 import com.caucho.util.L10N;
 
-import com.caucho.vfs.Path;
-
 import com.caucho.log.Log;
 
 import com.caucho.config.ConfigException;
-import com.caucho.config.BuilderProgram;
-import com.caucho.config.BuilderProgramContainer;
 
 import com.caucho.config.types.RawString;
 
-import com.caucho.server.deploy.DeployController;
 import com.caucho.server.deploy.DeployConfig;
 
 /**
@@ -55,9 +50,6 @@ import com.caucho.server.deploy.DeployConfig;
 public class HostConfig extends DeployConfig {
   static final L10N L = new L10N(HostConfig.class);
   static final Logger log = Log.open(HostConfig.class);
-
-  // The host name
-  private String _hostName;
 
   // The raw host aliases
   private ArrayList<String> _hostAliases = new ArrayList<String>();
@@ -68,27 +60,26 @@ public class HostConfig extends DeployConfig {
   // The regexp pattern
   private Pattern _regexp;
 
-  // The root dir
-  private String _rootDir;
-
   /**
    * Sets the host name.
    */
   public void setHostName(RawString name)
     throws ConfigException
   {
-    _hostName = name.getValue();
+    String hostName = name.getValue();
 
-    if (_hostName.indexOf("${") < 0) {
-      for (int i = 0; i < _hostName.length(); i++) {
-	char ch = _hostName.charAt(i);
+    if (hostName.indexOf("${") < 0) {
+      for (int i = 0; i < hostName.length(); i++) {
+	char ch = hostName.charAt(i);
 
 	if (ch == ' ' || ch == '\t' || ch == ',') {
 	  throw new ConfigException(L.l("Host name `{0}' must not contain multiple names.  Use <host-alias> to specify aliases for a host.",
-					_hostName));
+					hostName));
 	}
       }
     }
+
+    setId(hostName);
   }
   
   /**
@@ -96,7 +87,7 @@ public class HostConfig extends DeployConfig {
    */
   public String getHostName()
   {
-    return _hostName;
+    return getId();
   }
 
   /**
@@ -182,27 +173,11 @@ public class HostConfig extends DeployConfig {
   }
 
   /**
-   * Sets the root-dir.
-   */
-  public void setRootDirectory(RawString rootDir)
-  {
-    _rootDir = rootDir.getValue();
-  }
-
-  /**
    * Sets the root-dir (obsolete).
    */
   public void setRootDir(RawString rootDir)
   {
     setRootDirectory(rootDir);
-  }
-
-  /**
-   * Gets the root-dir.
-   */
-  public String getRootDirectory()
-  {
-    return _rootDir;
   }
 
   /**
@@ -222,7 +197,7 @@ public class HostConfig extends DeployConfig {
    */
   public void init()
   {
-    if (_regexp != null && _hostName == null)
+    if (_regexp != null && getId() == null)
       log.config(L.l("<host regexp=\"{0}\"> should include a <host-name> tag.",
 		     _regexp.pattern()));
   }

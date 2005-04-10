@@ -147,7 +147,7 @@ public class TypeStrategyFactory {
  
       InputStream is = url.openStream();
       try {
-        Config.configure(this, is);
+        new Config(loader).configure(this, is);
       } catch (Throwable e) {
         e.printStackTrace(); // XXX:
       } finally {

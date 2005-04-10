@@ -53,6 +53,8 @@ import org.iso_relax.verifier.VerifierConfigurationException;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.InputSource;
 
+import org.w3c.dom.Node;
+
 import com.caucho.relaxng.CompactVerifierFactoryImpl;
 
 import com.caucho.util.L10N;
@@ -81,139 +83,176 @@ public class Config {
   private static LruCache<Path,SoftReference<QDocument>> _parseCache =
     new LruCache<Path,SoftReference<QDocument>>(32);
 
-  /**
-   * Configures a bean with a configuration file.
-   */
-  public static Object configure(Object obj, Path path)
-    throws Exception
+  // the context class loader of the config
+  private ClassLoader _classLoader;
+
+  public Config()
   {
-    NodeBuilder builder = new NodeBuilder();
+    this(Thread.currentThread().getContextClassLoader());
+  }
 
-    QDocument doc = parseDocument(path, null);
-
-    return builder.configure(obj, doc.getDocumentElement());
+  /**
+   * @param loader the class loader environment to use.
+   */
+  public Config(ClassLoader loader)
+  {
+    _classLoader = loader;
   }
 
   /**
    * Configures a bean with a configuration file.
    */
-  public static Object configure(Object obj, InputStream is)
+  public Object configure(Object obj, Path path)
+    throws Exception
+  {
+    QDocument doc = parseDocument(path, null);
+
+    return configure(obj, doc.getDocumentElement());
+  }
+
+  /**
+   * Configures a bean with a configuration file.
+   */
+  public Object configure(Object obj, InputStream is)
     throws Exception
   {
     QDocument doc = parseDocument(is, null);
     
-    return new NodeBuilder().configure(obj, doc.getDocumentElement());
+    return configure(obj, doc.getDocumentElement());
   }
 
   /**
    * Configures a bean with a configuration file and schema.
    */
-  public static Object configure(Object obj, Path path, String schemaLocation)
+  public Object configure(Object obj, Path path, String schemaLocation)
     throws Exception
   {
-    NodeBuilder builder = new NodeBuilder();
-
     Schema schema = findCompactSchema(schemaLocation);
 
     QDocument doc = parseDocument(path, schema);
 
-    return builder.configure(obj, doc.getDocumentElement());
+    return configure(obj, doc.getDocumentElement());
   }
 
   /**
    * Configures a bean with a configuration file and schema.
    */
-  public static Object configure(Object obj, Path path, Schema schema)
+  public Object configure(Object obj, Path path, Schema schema)
     throws Exception
   {
-    NodeBuilder builder = new NodeBuilder();
-
     QDocument doc = parseDocument(path, schema);
 
-    return builder.configure(obj, doc.getDocumentElement());
+    return configure(obj, doc.getDocumentElement());
   }
 
   /**
    * Configures a bean with a configuration file.
    */
-  public static Object configure(Object obj,
-				 InputStream is,
-				 String schemaLocation)
+  public Object configure(Object obj,
+			  InputStream is,
+			  String schemaLocation)
     throws Exception
   {
-    NodeBuilder builder = new NodeBuilder();
-
     Schema schema = findCompactSchema(schemaLocation);
 
     QDocument doc = parseDocument(is, schema);
 
-    return builder.configure(obj, doc.getDocumentElement());
+    return configure(obj, doc.getDocumentElement());
   }
 
   /**
    * Configures a bean with a configuration file.
    */
-  public static Object configure(Object obj,
-				 InputStream is,
-				 Schema schema)
+  public Object configure(Object obj,
+			  InputStream is,
+			  Schema schema)
     throws Exception
   {
-    NodeBuilder builder = new NodeBuilder();
-
     QDocument doc = parseDocument(is, schema);
 
-    return builder.configure(obj, doc.getDocumentElement());
+    return configure(obj, doc.getDocumentElement());
+  }
+
+  /**
+   * Configures a bean with a DOM.
+   */
+  public Object configure(Object obj, Node topNode)
+    throws Exception
+  {
+    Thread thread = Thread.currentThread();
+    ClassLoader oldLoader = thread.getContextClassLoader();
+
+    try {
+      thread.setContextClassLoader(_classLoader);
+
+      return new NodeBuilder().configure(obj, topNode);
+    } finally {
+      thread.setContextClassLoader(oldLoader);
+    }
   }
 
   /**
    * Configures a bean with a configuration file and schema.
    */
-  public static void configureBean(Object obj,
-				   Path path,
-				   String schemaLocation)
+  public void configureBean(Object obj,
+			    Path path,
+			    String schemaLocation)
     throws Exception
   {
-    NodeBuilder builder = new NodeBuilder();
-
     Schema schema = findCompactSchema(schemaLocation);
 
     QDocument doc = parseDocument(path, schema);
 
-    builder.configureBean(obj, doc.getDocumentElement());
+    configureBean(obj, doc.getDocumentElement());
   }
 
   /**
    * Configures a bean with a configuration file and schema.
    */
-  public static void configureBean(Object obj, Path path)
+  public void configureBean(Object obj, Path path)
     throws Exception
   {
-    NodeBuilder builder = new NodeBuilder();
-
     QDocument doc = parseDocument(path, null);
 
-    builder.configureBean(obj, doc.getDocumentElement());
+    configureBean(obj, doc.getDocumentElement());
+  }
+
+  /**
+   * Configures a bean with a DOM.  configureBean does not
+   * apply init() or replaceObject().
+   */
+  public void configureBean(Object obj, Node topNode)
+    throws Exception
+  {
+    Thread thread = Thread.currentThread();
+    ClassLoader oldLoader = thread.getContextClassLoader();
+
+    try {
+      thread.setContextClassLoader(_classLoader);
+
+      new NodeBuilder().configureBean(obj, topNode);
+    } finally {
+      thread.setContextClassLoader(oldLoader);
+    }
   }
 
   /**
    * Configures a bean with a configuration file and schema.
    */
-  public static void configureBean(Object obj,
-				   Path path,
-				   Schema schema)
+  public void configureBean(Object obj,
+			    Path path,
+			    Schema schema)
     throws Exception
   {
-    NodeBuilder builder = new NodeBuilder();
-
     QDocument doc = parseDocument(path, schema);
 
-    builder.configureBean(obj, doc.getDocumentElement());
+    configureBean(obj, doc.getDocumentElement());
   }
   
   /**
    * Configures the bean from a path
    */
-  private static QDocument parseDocument(Path path, Schema schema)
+  private QDocument parseDocument(Path path, Schema schema)
     throws LineConfigException, IOException, org.xml.sax.SAXException
   {
     // server/2d33
@@ -243,7 +282,7 @@ public class Config {
   /**
    * Configures the bean from an input stream.
    */
-  private static QDocument parseDocument(InputStream is, Schema schema)
+  private QDocument parseDocument(InputStream is, Schema schema)
     throws LineConfigException,
 	   IOException,
 	   org.xml.sax.SAXException
@@ -292,7 +331,7 @@ public class Config {
     }
   }
   
-  private static Schema findCompactSchema(String location)
+  private Schema findCompactSchema(String location)
     throws IOException, ConfigException
   {
     try {
@@ -323,7 +362,7 @@ public class Config {
   /**
    * Configures a bean with a configuration map.
    */
-  public static Object configure(Object obj, Map<String,Object> map)
+  public Object configure(Object obj, Map<String,Object> map)
     throws Exception
   {
     return new MapBuilder().configure(obj, map);

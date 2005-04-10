@@ -56,25 +56,12 @@ import com.caucho.vfs.Depend;
 
 import com.caucho.log.Log;
 
-import com.caucho.loader.Environment;
-import com.caucho.loader.EnvironmentListener;
-import com.caucho.loader.EnvironmentClassLoader;
-
-import com.caucho.config.NodeBuilder;
-import com.caucho.config.BuilderProgram;
-import com.caucho.config.ConfigException;
-import com.caucho.config.Config;
-import com.caucho.config.types.PathBuilder;
-
 import com.caucho.make.Dependency;
 
 import com.caucho.jmx.Jmx;
 import com.caucho.jmx.IntrospectionMBean;
 
 import com.caucho.el.EL;
-import com.caucho.el.MapVariableResolver;
-
-import com.caucho.lifecycle.Lifecycle;
 
 import com.caucho.server.webapp.WebAppConfig;
 
@@ -109,28 +96,38 @@ class HostController extends EnvironmentDeployController<Host,HostConfig> {
   // The host variables.
   private Var _hostVar = new Var();
 
-  // root-dir as set by the resin.conf
-  private Path _cfgRootDir;
-  // root-dir as set by the resin.conf
-  private Path _jarRootDir;
-    
-  // private Host _host;
   private ArrayList<Dependency> _dependList = new ArrayList<Dependency>();
 
-  HostController(HostContainer container, HostConfig config)
+  HostController(HostConfig config, HostContainer container)
   {
-    super("");
+    super(config);
+
+    setHostName(config.getHostName());
     
+    getVariableMap().put("host", _hostVar);
+
+    setContainer(container);
+  }
+
+  HostController(String id, Path rootDirectory, HostContainer container)
+  {
+    super(id, rootDirectory);
+
     _container = container;
 
-    setConfig(config);
+    setHostName(id);
 
+    getVariableMap().put("host", _hostVar);
+  }
+
+  public void setContainer(HostContainer container)
+  {
+    _container = container;
+    
     if (_container != null) {
       for (HostConfig defaultConfig : _container.getHostDefaultList())
 	addConfigDefault(defaultConfig);
     }
-	
-    getVariableMap().put("host", _hostVar);
   }
 
   /**
@@ -138,24 +135,12 @@ class HostController extends EnvironmentDeployController<Host,HostConfig> {
    */
   public String getName()
   {
-    String name = super.getName();
+    String name = super.getId();
     
     if (name != null)
       return name;
     else
       return getHostName();
-  }
-
-  /**
-   * Sets the Resin host name.
-   */
-  public void setName(String name)
-  {
-    name = name.toLowerCase();
-    
-    getVariableMap().put("name", name);
-
-    super.setName(name);
   }
 
   /**
@@ -226,37 +211,6 @@ class HostController extends EnvironmentDeployController<Host,HostConfig> {
     return _hostAliases;
   }
 
-  /**
-   * Returns the host directory set by the resin.conf.
-   */
-  public Path getCfgRootDirectory()
-  {
-    return _cfgRootDir;
-  }
-
-  /**
-   * Sets the host directory by the resin.conf
-   */
-  public void setCfgRootDirectory(Path rootDir)
-  {
-    _cfgRootDir = rootDir;
-  }
-
-  /**
-   * Returns the host directory set by the hosts-directory.
-   */
-  public Path getJarRootDir()
-  {
-    return _jarRootDir;
-  }
-
-  /**
-   * Sets the host directory by the resin.conf
-   */
-  public void setJarRootDir(Path rootDir)
-  {
-    _jarRootDir = rootDir;
-  }
 
   /**
    * Adds a dependent file.
@@ -278,7 +232,7 @@ class HostController extends EnvironmentDeployController<Host,HostConfig> {
 	}
 	else if (getConfig().getHostName() != null)
 	  setHostName(EL.evalString(getConfig().getHostName(),
-				    getVariableResolver()));
+				    EL.getEnvironment()));
       } catch (Exception e) {
 	log.log(Level.WARNING, e.toString(), e);
       }
@@ -288,9 +242,6 @@ class HostController extends EnvironmentDeployController<Host,HostConfig> {
 
       if (_hostName == null)
 	_hostName = "";
-
-      if (super.getName() == null)
-	setName(getHostName());
 
       ArrayList<String> aliases = null;
 
@@ -303,12 +254,10 @@ class HostController extends EnvironmentDeployController<Host,HostConfig> {
       for (int i = 0; aliases != null && i < aliases.size(); i++) {
 	String alias = aliases.get(i);
 
-	alias = EL.evalString(alias, getVariableResolver());
+	alias = EL.evalString(alias, EL.getEnvironment());
 	
 	addHostAlias(alias);
       }
-      
-      setRootDirectory(calculateRootDirectory());
     } catch (Exception e) {
       log.log(Level.WARNING, e.toString(), e);
     }
@@ -317,26 +266,21 @@ class HostController extends EnvironmentDeployController<Host,HostConfig> {
   }
 
   /**
-   * Creates the object name.  The default is to use getId() as
-   * the 'name' property, and the classname as the 'type' property.
+   * Returns the "name" property.
    */
-  protected ObjectName createObjectName(Map<String,String> properties)
-    throws MalformedObjectNameException
+  protected String getMBeanId()
   {
     String name = _hostName;
+    
     if (name == null)
       name = "";
     else if (name.indexOf(':') >= 0)
       name = name.replace(':', '-');
 
     if (name.equals(""))
-      properties.put("name", "default");
+      return "default";
     else
-      properties.put("name", name);
-
-    properties.put("type", "Host");
-      
-    return Jmx.getObjectName("resin", properties);
+      return name;
   }
 
   /**
@@ -403,8 +347,7 @@ class HostController extends EnvironmentDeployController<Host,HostConfig> {
     _hostAliases.clear();
     _hostAliases.addAll(_entryHostAliases);
 
-    Map<String,Object> varMap = host.getVariableMap();
-    varMap.put("host-root", getRootDirectory());
+    getVariableMap().put("host-root", getRootDirectory());
 
     if (_container != null) {
       for (EarConfig config : _container.getEarDefaultList())
@@ -415,41 +358,6 @@ class HostController extends EnvironmentDeployController<Host,HostConfig> {
     }
 
     super.configureInstance(host);
-  }
-  
-  protected Path calculateRootDirectory()
-    throws ELException
-  {
-    Thread thread = Thread.currentThread();
-    ClassLoader loader = thread.getContextClassLoader();
-
-    try {
-      thread.setContextClassLoader(_container.getClassLoader());
-      
-      Path rootDir = getRootDirectory();
- 
-      if (rootDir == null && getConfig() != null) {
-	String path = getConfig().getRootDirectory();
-
-	if (path != null)
-	  rootDir = PathBuilder.lookupPath(path, getVariableResolver());
-      }
-     
-      if (rootDir == null)
-	rootDir = _cfgRootDir;
- 
-      Host host = getDeployInstance();
-      
-      if (rootDir == null && host != null)
-	rootDir = host.getRootDirectory();
-
-      if (rootDir == null)
-	rootDir = Vfs.lookup();
-
-      return rootDir;
-    } finally {
-      thread.setContextClassLoader(loader);
-    }
   }
 
   /**
@@ -569,7 +477,7 @@ class HostController extends EnvironmentDeployController<Host,HostConfig> {
     
     public String toString()
     {
-      return "Host[" + getName() + "]";
+      return "Host[" + getId() + "]";
     }
   }
 }

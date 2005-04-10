@@ -233,7 +233,6 @@ public class JspCompilerInstance {
       _className = JavaCompiler.mangleName("jsp/" + _uri);
     
     Application app = _jspCompiler.getApplication();
-
     Path appDir = _jspCompiler.getAppDir();
     if (appDir == null && app != null)
       appDir = app.getAppDir();
@@ -248,7 +247,7 @@ public class JspCompilerInstance {
     if (_jspPropertyGroup == null)
       _jspPropertyGroup = _jspCompiler.getJspPropertyGroup();
     
-    if (_jspPropertyGroup != null && jspConfig != null)
+    if (_jspPropertyGroup == null && jspConfig != null)
       _jspPropertyGroup = jspConfig.findJspPropertyGroup(_uri);
 
     if (_jspPropertyGroup == null && app != null)

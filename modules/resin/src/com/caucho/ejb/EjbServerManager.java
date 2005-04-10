@@ -105,7 +105,7 @@ public class EjbServerManager implements EJBServerInterface, EnvironmentListener
   private static EnvironmentLocal<EjbServerManager> _localServerManager =
     new EnvironmentLocal<EjbServerManager>("caucho.ejb-server");
 
-  private EnhancingClassLoader _classLoader;
+  private EnvironmentClassLoader _classLoader;
 
   private Path _workPath;
   private boolean _autoCompile = true;
@@ -161,7 +161,7 @@ public class EjbServerManager implements EJBServerInterface, EnvironmentListener
       _amberManager.initLoaders();
       _amberManager.setTableCacheTimeout(_entityCacheTimeout);
 
-      _classLoader = (EnhancingClassLoader) Thread.currentThread().getContextClassLoader();
+      _classLoader = (EnvironmentClassLoader) Thread.currentThread().getContextClassLoader();
       _workPath = WorkDir.getLocalWorkDir(_classLoader).lookup("ejb");
       _classLoader.addLoader(new SimpleLoader(_workPath));
 
@@ -217,7 +217,7 @@ public class EjbServerManager implements EJBServerInterface, EnvironmentListener
   /**
    * Returns the loader.
    */
-  public EnhancingClassLoader getClassLoader()
+  public EnvironmentClassLoader getClassLoader()
   {
     return _classLoader;
   }

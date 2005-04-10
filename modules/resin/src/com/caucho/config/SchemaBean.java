@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -28,12 +29,10 @@
 
 package com.caucho.config;
 
-import org.iso_relax.verifier.Schema;
-
 /**
  * A bean which has its own relax schema.
  */
 public interface SchemaBean {
-  public Schema getSchema();
+  public String getSchema();
 }
 

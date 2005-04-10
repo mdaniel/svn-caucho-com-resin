@@ -12,13 +12,13 @@
     </driver>
   </database>
 
-      <servlet servlet-name="viewfile" 
-               servlet-class="com.caucho.doc.ViewFileServlet"/>
-      <servlet-mapping url-pattern="/viewfile/*" servlet-name="viewfile"/>
+  <servlet servlet-name="viewfile" 
+           servlet-class="com.caucho.doc.ViewFileServlet"/>
+  <servlet-mapping url-pattern="/viewfile/*" servlet-name="viewfile"/>
 
   <web-app-deploy url-prefix="/jsp/tutorial"
                   path="jsp/tutorial"
-                  lazy-init="true">
+                  startup="lazy">
     <web-app-default>
       <servlet servlet-name="viewfile" 
                servlet-class="com.caucho.doc.ViewFileServlet"/>
@@ -29,7 +29,7 @@
 
   <web-app-deploy url-prefix="/servlet/tutorial"
                   path="servlet/tutorial"
-                  lazy-init="true">
+                  startup="lazy">
     <web-app-default>
       <servlet servlet-name="viewfile" 
                servlet-class="com.caucho.doc.ViewFileServlet"/>
@@ -40,7 +40,7 @@
 
   <web-app-deploy url-prefix="/webapp/tutorial"
                   path="webapp/tutorial"
-                  lazy-init="true">
+                  startup="lazy">
     <web-app-default>
       <servlet servlet-name="viewfile" 
                servlet-class="com.caucho.doc.ViewFileServlet"/>
@@ -52,7 +52,7 @@
 
   <web-app-deploy url-prefix="/portlet/tutorial"
                   path="portlet/tutorial"
-                  lazy-init="true">
+                  startup="lazy">
     <web-app-default>
       <servlet servlet-name="viewfile" 
                servlet-class="com.caucho.doc.ViewFileServlet"/>
@@ -63,7 +63,7 @@
 
   <web-app-deploy url-prefix="/ejb/tutorial"
                   path="ejb/tutorial"
-                  lazy-init="true">
+                  startup="lazy">
     <web-app-default>
       <servlet servlet-name="viewfile" 
                servlet-class="com.caucho.doc.ViewFileServlet"/>
@@ -74,7 +74,7 @@
 
   <web-app-deploy url-prefix="/ejb3/tutorial"
                   path="ejb3/tutorial"
-                  lazy-init="true">
+                  startup="lazy">
     <web-app-default>
       <servlet servlet-name="viewfile" 
                servlet-class="com.caucho.doc.ViewFileServlet"/>
@@ -85,7 +85,7 @@
 
   <web-app-deploy url-prefix="/ioc/tutorial"
                   path="ioc/tutorial"
-                  lazy-init="true">
+                  startup="lazy">
     <web-app-default>
       <servlet servlet-name="viewfile" 
                servlet-class="com.caucho.doc.ViewFileServlet"/>
@@ -96,7 +96,7 @@
 
   <web-app-deploy url-prefix="/jms/tutorial"
                   path="jms/tutorial"
-                  lazy-init="true">
+                  startup="lazy">
     <web-app-default>
       <servlet servlet-name="viewfile" 
                servlet-class="com.caucho.doc.ViewFileServlet"/>
@@ -107,7 +107,7 @@
 
   <web-app-deploy url-prefix="/cmp/tutorial"
                   path="cmp/tutorial"
-                  lazy-init="true">
+                  startup="lazy">
     <web-app-default>
       <servlet servlet-name="viewfile" 
                servlet-class="com.caucho.doc.ViewFileServlet"/>
@@ -118,7 +118,7 @@
 
   <web-app-deploy url-prefix="/security/tutorial"
                   path="security/tutorial"
-                  lazy-init="true">
+                  startup="lazy">
     <web-app-default>
       <servlet servlet-name="viewfile" 
                servlet-class="com.caucho.doc.ViewFileServlet"/>
@@ -129,7 +129,7 @@
 
   <web-app-deploy url-prefix="/resource/tutorial"
                   path="resource/tutorial"
-                  lazy-init="true">
+                  startup="lazy">
     <web-app-default>
       <servlet servlet-name="viewfile" 
                servlet-class="com.caucho.doc.ViewFileServlet"/>
@@ -140,7 +140,7 @@
 
   <web-app-deploy url-prefix="/db/tutorial"
                   path="db/tutorial"
-                  lazy-init="true">
+                  startup="lazy">
 <!--
     <web-app-default>
       <servlet servlet-name="viewfile" 
@@ -153,7 +153,7 @@
 
   <web-app-deploy url-prefix="/jmx/tutorial"
                   path="jmx/tutorial"
-                  lazy-init="true">
+                  startup="lazy">
     <web-app-default>
       <servlet servlet-name="viewfile" 
                servlet-class="com.caucho.doc.ViewFileServlet"/>
@@ -164,7 +164,7 @@
 
   <web-app-deploy url-prefix="/amber/tutorial"
                   path="amber/tutorial"
-                  lazy-init="true">
+                  startup="lazy">
     <web-app-default>
       <servlet servlet-name="viewfile" 
                servlet-class="com.caucho.doc.ViewFileServlet"/>
@@ -175,7 +175,7 @@
 
   <web-app-deploy url-prefix="/protocols/tutorial"
                   path="protocols/tutorial"
-                  lazy-init="true">
+                  startup="lazy">
     <web-app-default>
       <servlet servlet-name="viewfile" 
                servlet-class="com.caucho.doc.ViewFileServlet"/>
