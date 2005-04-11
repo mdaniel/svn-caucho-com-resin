@@ -34,6 +34,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.TreeSet;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.Iterator;
 
@@ -142,7 +143,7 @@ public class DeployContainer<E extends DeployController>
 
     _deployList.start();
 
-    HashSet<String> keys = new HashSet<String>();
+    HashSet<String> keys = new LinkedHashSet<String>();
 
     _deployList.fillDeployedKeys(keys);
 

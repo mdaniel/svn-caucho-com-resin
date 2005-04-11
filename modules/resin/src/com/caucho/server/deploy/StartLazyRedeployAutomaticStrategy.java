@@ -185,7 +185,7 @@ public class StartLazyRedeployAutomaticStrategy
       controller.stopLazyImpl();
     }
     else if (controller.isActiveIdle()) {
-      controller.stopImpl();
+      controller.stopLazyImpl();
     }
     else { /* active */
     }

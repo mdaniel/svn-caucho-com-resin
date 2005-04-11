@@ -78,6 +78,15 @@ public class EmbedResinServer {
   }
 
   /**
+   * Creates a new resin server.
+   */
+  public EmbedResinServer(ServerConfig config)
+    throws Exception
+  {
+    _server = new ServerController(config);
+  }
+
+  /**
    * Sets the cluster server id.
    */
   public void setServerId(String id)

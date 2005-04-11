@@ -367,7 +367,6 @@ public final class Lifecycle implements LifecycleState {
    */
   public synchronized boolean toError()
   {
-    Thread.dumpStack();
     if (_state < IS_DESTROYING && _state != IS_ERROR) {
       _state = IS_ERROR;
 
