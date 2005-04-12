@@ -54,7 +54,7 @@ public class QDate {
   static final long MS_PER_DAY = 24 * 60 * 60 * 1000L;
   static final long MS_PER_EON = MS_PER_DAY * (365 * 400 + 100 - 3);
 
-  static final int []DAYS_IN_MONTH = { 
+  static final int []DAYS_IN_MONTH = {
     31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31
   };
 
@@ -62,7 +62,7 @@ public class QDate {
     "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"
   };
   static final String []MONTH_NAMES = {
-    "Jan", "Feb", "Mar", "Apr", "May", "Jun", 
+    "Jan", "Feb", "Mar", "Apr", "May", "Jun",
     "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
   };
 
@@ -85,12 +85,12 @@ public class QDate {
   private static TimeZone _localTimeZone = TimeZone.getDefault();
   private static TimeZone _gmtTimeZone = TimeZone.getTimeZone("UTC");
 
-  private static String _localDstName = 
+  private static String _localDstName =
   _localTimeZone.getDisplayName(true, TimeZone.SHORT);
   private static String _localStdName =
   _localTimeZone.getDisplayName(false, TimeZone.SHORT);
 
-  private static String _gmtDstName = 
+  private static String _gmtDstName =
   _gmtTimeZone.getDisplayName(true, TimeZone.SHORT);
   private static String _gmtStdName =
   _gmtTimeZone.getDisplayName(false, TimeZone.SHORT);
@@ -98,18 +98,18 @@ public class QDate {
   // static dates for the static formatting
   private static QDate _gmtDate = new QDate(false);
   private static QDate _localDate = new QDate(true);
-  
+
   private TimeZone _timeZone;
-  
+
   private String _dstName;
   private String _stdName;
 
   private DateFormat _dateFormat;
   private Date _date = new Date();
 
-  // All times are local 
+  // All times are local
   private long _localTimeOfEpoch;
-  
+
   private long _dayOfEpoch;
   private long _year;
   private int _dayOfYear;
@@ -121,7 +121,7 @@ public class QDate {
   private long _ms;
   private boolean _isLeapYear;
   private long _timeOfDay;
-  
+
   private boolean _isDaylightTime;
   private long _zoneOffset;
   private String _zoneName;
@@ -175,7 +175,7 @@ public class QDate {
   {
     return new QDate(true);
   }
-  
+
   /**
    * Sets the time in milliseconds since the epoch and calculate
    * the internal variables.
@@ -190,7 +190,7 @@ public class QDate {
     else {
       calculateSplit(time - _localTimeZone.getRawOffset());
 
-      long offset = _localTimeZone.getOffset(GregorianCalendar.AD, 
+      long offset = _localTimeZone.getOffset(GregorianCalendar.AD,
                                              (int) _year,
                                              (int) _month,
                                              (int) _dayOfMonth + 1,
@@ -212,7 +212,7 @@ public class QDate {
     }
     // If this is a GMT date, convert from local to GMT
     else {
-      long offset = _localTimeZone.getOffset(GregorianCalendar.AD, 
+      long offset = _localTimeZone.getOffset(GregorianCalendar.AD,
                                              (int) _year,
                                              (int) _month,
                                              (int) _dayOfMonth + 1,
@@ -222,7 +222,7 @@ public class QDate {
       return _localTimeOfEpoch + offset;
     }
   }
-  
+
   /**
    * Sets the time in milliseconds since the epoch and calculate
    * the internal variables.
@@ -255,9 +255,9 @@ public class QDate {
   /**
    * Returns the year.
    */
-  public long getYear()
+  public int getYear()
   {
-    return _year;
+    return (int) _year;
   }
 
   /**
@@ -329,7 +329,7 @@ public class QDate {
   public void setHour(int hour)
   {
     _hour = hour;
-    
+
     calculateJoin();
     calculateSplit(_localTimeOfEpoch);
   }
@@ -348,7 +348,7 @@ public class QDate {
   public void setMinute(int minute)
   {
     _minute = minute;
-    
+
     calculateJoin();
     calculateSplit(_localTimeOfEpoch);
   }
@@ -367,7 +367,7 @@ public class QDate {
   public void setSecond(int second)
   {
     _second = second;
-    
+
     calculateJoin();
     calculateSplit(_localTimeOfEpoch);
   }
@@ -386,7 +386,7 @@ public class QDate {
   public void setMillisecond(long millisecond)
   {
     _ms = millisecond;
-    
+
     calculateJoin();
     calculateSplit(_localTimeOfEpoch);
   }
@@ -413,34 +413,34 @@ public class QDate {
   public long get(int field)
   {
     switch (field) {
-    case TIME: 
+    case TIME:
       return getLocalTime();
 
-    case YEAR: 
+    case YEAR:
       return getYear();
 
-    case MONTH: 
+    case MONTH:
       return getMonth();
 
-    case DAY_OF_MONTH: 
+    case DAY_OF_MONTH:
       return getDayOfMonth();
 
-    case DAY: 
+    case DAY:
       return getDayOfWeek();
 
-    case DAY_OF_WEEK: 
+    case DAY_OF_WEEK:
       return getDayOfWeek();
 
-    case HOUR: 
+    case HOUR:
       return getHour();
 
-    case MINUTE: 
+    case MINUTE:
       return getMinute();
 
-    case SECOND: 
+    case SECOND:
       return getSecond();
 
-    case MILLISECOND: 
+    case MILLISECOND:
       return getMillisecond();
 
     case TIME_ZONE:
@@ -457,31 +457,31 @@ public class QDate {
   public long set(int field, long value)
   {
     switch (field) {
-    case YEAR: 
+    case YEAR:
       setYear((int) value);
       break;
 
-    case MONTH: 
+    case MONTH:
       setMonth((int) value);
       break;
 
-    case DAY_OF_MONTH: 
+    case DAY_OF_MONTH:
       setDayOfMonth((int) value);
       break;
 
-    case HOUR: 
+    case HOUR:
       setHour((int) value);
       break;
 
-    case MINUTE: 
+    case MINUTE:
       setMinute((int) value);
       break;
 
-    case SECOND: 
+    case SECOND:
       setSecond((int) value);
       break;
 
-    case MILLISECOND: 
+    case MILLISECOND:
       setMillisecond(value);
       break;
 
@@ -499,14 +499,14 @@ public class QDate {
   {
     if (_lastDate != null && _lastTime == _localTimeOfEpoch)
       return _lastDate;
-    
+
     CharBuffer cb = CharBuffer.allocate();
 
     printDate(cb);
 
     _lastDate = cb.close();
     _lastTime = _localTimeOfEpoch;
-    
+
     return _lastDate;
   }
 
@@ -539,7 +539,7 @@ public class QDate {
     }
 
     long offset = _zoneOffset;
-    
+
     if (offset < 0) {
       cb.append(" -");
       offset = - offset;
@@ -587,7 +587,7 @@ public class QDate {
     }
 
     long offset = _zoneOffset;
-    
+
     if (offset < 0) {
       os.write(' ');
       os.write('-');
@@ -614,7 +614,7 @@ public class QDate {
   public String printISO8601()
   {
     CharBuffer cb = new CharBuffer();
-    
+
     if (_year > 0) {
       cb.append((_year / 1000) % 10);
       cb.append((_year / 100) % 10);
@@ -629,7 +629,7 @@ public class QDate {
     if (_timeOfDay != 0 || _year <= 0) {
       long time = _timeOfDay / 1000;
       long ms = _timeOfDay % 1000;
-      
+
       cb.append("T");
       cb.append((time / 36000) % 10);
       cb.append((time / 3600) % 10);
@@ -657,7 +657,7 @@ public class QDate {
 
     /*
     long offset = zoneOffset;
-    
+
     if (offset < 0) {
       cb.append("-");
       offset = - offset;
@@ -679,7 +679,7 @@ public class QDate {
   public String printISO8601Date()
   {
     CharBuffer cb = new CharBuffer();
-    
+
     if (_year > 0) {
       cb.append((_year / 1000) % 10);
       cb.append((_year / 100) % 10);
@@ -765,9 +765,9 @@ public class QDate {
   {
     if (_gmtDate == null)
       _gmtDate = new QDate();
-    
+
     _gmtDate.setGMTTime(gmtTime);
-    
+
     return _gmtDate.printISO8601();
   }
 
@@ -788,7 +788,7 @@ public class QDate {
 
     return format(cb, format).close();
   }
-  
+
   /**
    * Format the date using % escapes:
    *
@@ -935,7 +935,7 @@ public class QDate {
 
       case 'z':
         long offset = _zoneOffset;
-    
+
         if (offset < 0) {
           cb.append("-");
           offset = - offset;
@@ -965,7 +965,7 @@ public class QDate {
     _date.setTime(_localTimeOfEpoch);
 
     // SimpleDateFormat sdf = new SimpleDateFormat();
-    // System.out.println("" + sdf.toPattern()); 
+    // System.out.println("" + sdf.toPattern());
 
     if (_dateFormat == null)
       _dateFormat = DateFormat.getInstance();
@@ -1002,7 +1002,7 @@ public class QDate {
 
       int ch = string.charAt(i);
       if (ch >= '0' && ch <= '9' ||
-	  ch == 'T' && 
+	  ch == 'T' &&
 	  string.charAt(i + 1) >= '0' && string.charAt(i + 1) <= '9')
 	return parseISO8601Date(string, i);
 
@@ -1029,7 +1029,7 @@ public class QDate {
 	year += 2000;
       else if (cb.length() < 3 && year < 100)
 	year += 1900;
-      
+
       i = scan(string, i, cb, false);
       long timeOfDay = parseInt(cb) * 3600000;
 
@@ -1043,13 +1043,13 @@ public class QDate {
       if (year <= 1600)
 	dayOfMonth--;
 
-      long time = (MS_PER_DAY * (yearToDayOfEpoch(year) + 
-				 monthToDayOfYear(month, isLeapYear(year)) + 
+      long time = (MS_PER_DAY * (yearToDayOfEpoch(year) +
+				 monthToDayOfYear(month, isLeapYear(year)) +
 				 dayOfMonth - 1) +
 		   timeOfDay);
-      
+
       try {
-	i = scan(string, i, cb, false);	
+	i = scan(string, i, cb, false);
 	for (int j = 0; j < cb.length(); j++) {
 	  if ((ch = cb.charAt(j)) == ';' || ch == ' ')
 	    cb.setLength(j);
@@ -1119,7 +1119,7 @@ public class QDate {
     int second = 0;
     if (pos < length && string.charAt(pos) == 'T') {
       pos++;
-      
+
       if (pos < length && '0' <= (ch = string.charAt(pos)) && ch <= '9') {
 	hour = scanISOInt(string, pos, length, 2);
 	pos += 2;
@@ -1148,11 +1148,11 @@ public class QDate {
     if (year <= 1600)
       day--;
 
-    long time = (MS_PER_DAY * (yearToDayOfEpoch(year) + 
-			       monthToDayOfYear(month, isLeapYear(year)) + 
+    long time = (MS_PER_DAY * (yearToDayOfEpoch(year) +
+			       monthToDayOfYear(month, isLeapYear(year)) +
 			       day) +
 		 timeOfDay);
-    
+
     if (pos >= length) {
       setLocalTime(time);
       return _localTimeOfEpoch;
@@ -1208,7 +1208,7 @@ public class QDate {
     } else {
       year = 2000 - year;
 
-      return ((2000 - 1970) * 365 + (2000 - 1970) / 4 - 
+      return ((2000 - 1970) * 365 + (2000 - 1970) / 4 -
 	      (365 * year + year / 4 - year / 100 + year / 400));
     }
   }
@@ -1257,8 +1257,8 @@ public class QDate {
   private int skipWhitespace(String string, int i)
   {
     char ch;
-    for (; i < string.length() && 
-	   ((ch = string.charAt(i)) == ' ' || ch == '\t' || 
+    for (; i < string.length() &&
+	   ((ch = string.charAt(i)) == ' ' || ch == '\t' ||
 	    ch == '\n' || ch == '\r');
 	 i++) {
     }
@@ -1277,13 +1277,13 @@ public class QDate {
     cb.setLength(0);
 
     for (; i < string.length(); i++) {
-      if (! Character.isWhitespace(ch = string.charAt(i)) && 
+      if (! Character.isWhitespace(ch = string.charAt(i)) &&
 	  (ch != ':' && (! dash || ch != '-')))
 	break;
     }
 
     for (; i < string.length(); i++) {
-      if (! Character.isWhitespace(ch = string.charAt(i)) && 
+      if (! Character.isWhitespace(ch = string.charAt(i)) &&
 	  (ch != ':' && (! dash || ch != '-')))
 	cb.append((char) ch);
       else
@@ -1319,7 +1319,7 @@ public class QDate {
   /**
    * Sets date in the local time.
    *
-   * @param year 
+   * @param year
    * @param month where January = 0
    * @param day day of month where the 1st = 1
    */
@@ -1375,7 +1375,7 @@ public class QDate {
       _zoneName = _stdName;
     }
     else {
-      _zoneOffset = _timeZone.getOffset(GregorianCalendar.AD, 
+      _zoneOffset = _timeZone.getOffset(GregorianCalendar.AD,
 					(int) _year,
 					(int) _month,
 					(int) _dayOfMonth + 1,
@@ -1458,7 +1458,7 @@ public class QDate {
     _year += divFloor(_month, 12);
     _month -= 12 * divFloor(_month, 12);
 
-    _localTimeOfEpoch = MS_PER_DAY * (yearToDayOfEpoch(_year) + 
+    _localTimeOfEpoch = MS_PER_DAY * (yearToDayOfEpoch(_year) +
                                     monthToDayOfYear(_month, isLeapYear(_year)) +
                                     _dayOfMonth);
 
