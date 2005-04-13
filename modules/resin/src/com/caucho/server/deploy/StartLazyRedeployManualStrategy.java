@@ -83,11 +83,11 @@ public class StartLazyRedeployManualStrategy
   public <I extends DeployInstance>
           I request(DeployController<I> controller)
   {
-    if (controller.isStopped()) {
-      return controller.getDeployInstance();
-    }
-    else if (controller.isStoppedLazy()) {
+    if (controller.isStoppedLazy()) {
       return controller.startImpl();
+    }
+    else if (controller.isStopped()) {
+      return controller.getDeployInstance();
     }
     else {
       return controller.getDeployInstance();
@@ -103,11 +103,11 @@ public class StartLazyRedeployManualStrategy
   public <I extends DeployInstance>
           I subrequest(DeployController<I> controller)
   {
-    if (controller.isStopped()) {
-      return controller.getDeployInstance();
-    }
-    else if (controller.isStoppedLazy()) {
+    if (controller.isStoppedLazy()) {
       return controller.startImpl();
+    }
+    else if (controller.isStopped()) {
+      return controller.getDeployInstance();
     }
     else { /* active */
       // server/1d0d

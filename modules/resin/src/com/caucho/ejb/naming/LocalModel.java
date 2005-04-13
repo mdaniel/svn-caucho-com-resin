@@ -39,7 +39,7 @@ import com.caucho.vfs.*;
 
 import com.caucho.naming.*;
 
-import com.caucho.ejb.EjbServerManager;
+import com.caucho.ejb.EnvServerManager;
 import com.caucho.ejb.AbstractContext;
 import com.caucho.ejb.AbstractServer;
 
@@ -88,7 +88,7 @@ public class LocalModel extends AbstractModel {
     return new LocalModel(_protocolManager, _prefix);
   }
 
-  public EjbServerManager getServerContainer()
+  public EnvServerManager getServerContainer()
   {
     return _protocolManager.getServerManager();
   }

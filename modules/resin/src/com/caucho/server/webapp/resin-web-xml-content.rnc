@@ -647,6 +647,12 @@ r_web-app-deploy = element web-app-deploy {
   & (attribute require-file { string }
      | element require-file { string })*
 
+  & (attribute startup-mode { string }
+     | element startup-mode { string })?
+
+  & (attribute restart-mode { string }
+     | element restart-mode { string })?
+
   & r_web-app-default*
 
   & element web-app {

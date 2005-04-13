@@ -29,6 +29,8 @@
 
 package com.caucho.server.deploy;
 
+import java.util.Map;
+
 import java.util.logging.Logger;
 import java.util.logging.Level;
 
@@ -183,12 +185,20 @@ public class DeployConfig {
    */
   public Path calculateRootDirectory()
   {
+    return calculateRootDirectory(null);
+  }
+
+  /**
+   * Calculates the root directory for the config.
+   */
+  public Path calculateRootDirectory(Map<String,Object> varMap)
+  {
     try {
       String rawPath = getRootDirectory();
       Path rootDir = null;
 
       if (rawPath != null)
-	rootDir = PathBuilder.lookupPath(rawPath);
+	rootDir = PathBuilder.lookupPath(rawPath, varMap);
 
       if (rootDir != null)
 	return rootDir;

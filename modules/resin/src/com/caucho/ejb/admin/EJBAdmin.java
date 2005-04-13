@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -33,7 +34,7 @@ import java.util.logging.Logger;
 import com.caucho.util.L10N;
 import com.caucho.util.Log;
 
-import com.caucho.ejb.EjbServerManager;
+import com.caucho.ejb.EnvServerManager;
 
 /**
  * Administration for EJB.  EJBAdmin is available in the ServletContext
@@ -50,12 +51,12 @@ public class EJBAdmin {
   protected static final L10N L = new L10N(EJBAdmin.class);
   protected static final Logger log = Log.open(EJBAdmin.class);
   
-  private EjbServerManager _ejbManager;
+  private EnvServerManager _ejbManager;
 
   /**
    * Creates the new administration.
    */
-  public EJBAdmin(EjbServerManager ejbManager)
+  public EJBAdmin(EnvServerManager ejbManager)
   {
     _ejbManager = ejbManager;
   }

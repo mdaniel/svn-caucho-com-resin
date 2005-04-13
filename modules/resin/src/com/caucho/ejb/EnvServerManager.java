@@ -68,17 +68,11 @@ import com.caucho.loader.enhancer.EnhancingClassLoader;
 
 import com.caucho.config.ConfigException;
 
-import com.caucho.config.types.FileSetType;
-
-import com.caucho.relaxng.CompactVerifierFactoryImpl;
-
 import com.caucho.amber.AmberManager;
 
 import com.caucho.amber.entity.AmberEntityHome;
 
 import com.caucho.lifecycle.Lifecycle;
-
-import com.caucho.ejb.cfg.EjbConfig;
 
 import com.caucho.ejb.protocol.EjbProtocolManager;
 import com.caucho.ejb.protocol.ProtocolContainer;
@@ -96,39 +90,42 @@ import com.caucho.ejb.enhancer.EjbEnhancer;
 import com.caucho.ejb.entity2.EntityManagerProxy;
 
 /**
- * Manages the EJBs.
+ * Manages the beans in an environment.
  */
-public class EjbServerManager implements EJBServerInterface, EnvironmentListener {
-  private static final L10N L = new L10N(EjbServerManager.class);
-  protected static final Logger log = Log.open(EjbServerManager.class);
+public class EnvServerManager implements EnvironmentListener {
+  private static final L10N L = new L10N(EnvServerManager.class);
+  protected static final Logger log = Log.open(EnvServerManager.class);
   
-  private static EnvironmentLocal<EjbServerManager> _localServerManager
-    = new EnvironmentLocal<EjbServerManager>("caucho.ejb-server");
+  private static EnvironmentLocal<EnvServerManager> _localServerManager
+    = new EnvironmentLocal<EnvServerManager>("caucho.env-server");
 
   private EnvironmentClassLoader _classLoader;
 
-  private EnvServerManager _envServerManager;
+  private Path _workPath;
 
-  private boolean _autoCompile = true;
-
-  private boolean _entityLoadLazyOnTransaction = true;
-
-  protected boolean _allowJVMCall = true;
-  protected boolean _allowReferenceCall = true;
-
-  protected boolean _createDatabaseSchema;
-  protected boolean _validateDatabaseSchema;
-
-  private boolean _hasInitJdbc;
-  private ConfigException _initException;
-
-  private EjbConfig _ejbConfig;
+  private int _entityCacheSize = 32 * 1024;
+  private long _entityCacheTimeout = 5000L;
   
+  private ConfigException _initException;
+  
+  private EJBAdmin _ejbAdmin;
+
   private AmberManager _amberManager;
+  
+  private EjbTransactionManager _ejbTransactionManager;
+  
+  private EjbProtocolManager _protocolManager;
 
-  protected ConnectionFactory _jmsConnectionFactory;
-  private int _messageConsumerMax = 5;
+  private Hashtable<String,AbstractServer> _serverMap
+    = new Hashtable<String,AbstractServer>();
 
+  // handles remote stuff
+  protected ProtocolContainer _protocolContainer;
+  protected HashMap<String,ProtocolContainer> _protocolMap
+    = new HashMap<String,ProtocolContainer>();
+
+  private LruCache<EntityKey,QEntityContext> _entityCache;
+  
   private EntityKey _entityKey = new EntityKey();
 
   private final Lifecycle _lifecycle = new Lifecycle(log, "ejb-manager");
@@ -136,25 +133,45 @@ public class EjbServerManager implements EJBServerInterface, EnvironmentListener
   /**
    * Create a server with the given prefix name.
    */
-  private EjbServerManager()
+  private EnvServerManager()
   {
     try {
-      _envServerManager = EnvServerManager.createLocal();
+      _amberManager = new AmberManager();
+      _amberManager.initLoaders();
+      _amberManager.setTableCacheTimeout(_entityCacheTimeout);
+      
+      _classLoader = (EnvironmentClassLoader) Thread.currentThread().getContextClassLoader();
+      _workPath = WorkDir.getLocalWorkDir(_classLoader).lookup("ejb");
+      _classLoader.addLoader(new SimpleLoader(_workPath));
 
-      _amberManager = _envServerManager.getAmberManager();
+      _ejbTransactionManager = new EjbTransactionManager(this);
+    
+      _ejbAdmin = new EJBAdmin(this);
 
-      _ejbConfig = new EjbConfig(this);
+      _protocolManager = new EjbProtocolManager();
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
       throw new RuntimeException(e);
+    }
+
+    try {
+      Class entityManagerClass = Class.forName("com.caucho.ejb.entity2.EntityManagerProxy");
+      
+      Object entityProxy = entityManagerClass.newInstance();
+
+      // XXX: pass self as argument
+
+      new InitialContext().rebind("java:comp/EntityManager", entityProxy);
+    } catch (Throwable e) {
+      log.log(Level.FINER, e.toString(), e);
     }
   }
 
   /**
    * Gets the local server.
    */
-  public static EjbServerManager getLocal()
+  public static EnvServerManager getLocal()
   {
     return _localServerManager.get();
   }
@@ -162,13 +179,13 @@ public class EjbServerManager implements EJBServerInterface, EnvironmentListener
   /**
    * Creates the local server.
    */
-  public static EjbServerManager createLocal()
+  public static EnvServerManager createLocal()
   {
-    synchronized (EjbServerManager.class) {
-      EjbServerManager serverManager = _localServerManager.getLevel();
+    synchronized (EnvServerManager.class) {
+      EnvServerManager serverManager = _localServerManager.getLevel();
 
       if (serverManager == null) {
-	serverManager = new EjbServerManager();
+	serverManager = new EnvServerManager();
 	_localServerManager.set(serverManager);
       }
 
@@ -181,7 +198,7 @@ public class EjbServerManager implements EJBServerInterface, EnvironmentListener
    */
   public EnvironmentClassLoader getClassLoader()
   {
-    return _envServerManager.getClassLoader();
+    return _classLoader;
   }
 
   /**
@@ -189,7 +206,7 @@ public class EjbServerManager implements EJBServerInterface, EnvironmentListener
    */
   public EjbProtocolManager getProtocolManager()
   {
-    return _envServerManager.getProtocolManager();
+    return _protocolManager;
   }
 
   /**
@@ -197,23 +214,7 @@ public class EjbServerManager implements EJBServerInterface, EnvironmentListener
    */
   public EjbTransactionManager getTransactionManager()
   {
-    return _envServerManager.getTransactionManager();
-  }
-
-  /**
-   * Sets the data source for the container.
-   */
-  public void setDataSource(DataSource dataSource)
-  {
-    _amberManager.setDataSource(dataSource);
-  }
-
-  /**
-   * Sets the data source for the container.
-   */
-  public DataSource getDataSource()
-  {
-    return _amberManager.getDataSource();
+    return _ejbTransactionManager;
   }
 
   /**
@@ -221,7 +222,7 @@ public class EjbServerManager implements EJBServerInterface, EnvironmentListener
    */
   public void setResinIsolation(int resinIsolation)
   {
-    getTransactionManager().setResinIsolation(resinIsolation);
+    _ejbTransactionManager.setResinIsolation(resinIsolation);
   }
 
   /**
@@ -229,7 +230,7 @@ public class EjbServerManager implements EJBServerInterface, EnvironmentListener
    */
   public int getResinIsolation()
   {
-    return getTransactionManager().getResinIsolation();
+    return _ejbTransactionManager.getResinIsolation();
   }
 
   /**
@@ -237,7 +238,7 @@ public class EjbServerManager implements EJBServerInterface, EnvironmentListener
    */
   public void setJDBCIsolation(int jdbcIsolation)
   {
-    getTransactionManager().setJDBCIsolation(jdbcIsolation);
+    _ejbTransactionManager.setJDBCIsolation(jdbcIsolation);
   }
 
   /**
@@ -245,7 +246,7 @@ public class EjbServerManager implements EJBServerInterface, EnvironmentListener
    */
   public int getJDBCIsolation()
   {
-    return getTransactionManager().getJDBCIsolation();
+    return _ejbTransactionManager.getJDBCIsolation();
   }
 
   /**
@@ -253,7 +254,7 @@ public class EjbServerManager implements EJBServerInterface, EnvironmentListener
    */
   public long getTransactionTimeout()
   {
-    return getTransactionManager().getTransactionTimeout();
+    return _ejbTransactionManager.getTransactionTimeout();
   }
 
   /**
@@ -261,55 +262,7 @@ public class EjbServerManager implements EJBServerInterface, EnvironmentListener
    */
   public void setTransactionTimeout(long transactionTimeout)
   {
-    getTransactionManager().setTransactionTimeout(transactionTimeout);
-  }
-
-  /**
-   * Gets the lazy-load on transaction
-   */
-  public boolean isEntityLoadLazyOnTransaction()
-  {
-    return _entityLoadLazyOnTransaction;
-  }
-
-  /**
-   * Sets the lazy-load on transaction
-   */
-  public void setEntityLoadLazyOnTransaction(boolean isLazy)
-  {
-    _entityLoadLazyOnTransaction = isLazy;
-  }
-
-  /**
-   * Sets the queue connection factory for the container.
-   */
-  public void setJMSConnectionFactory(ConnectionFactory factory)
-  {
-    _jmsConnectionFactory = factory;
-  }
-
-  /**
-   * Sets the consumer maximum for the container.
-   */
-  public void setMessageConsumerMax(int consumerMax)
-  {
-    _messageConsumerMax = consumerMax;
-  }
-
-  /**
-   * Sets the consumer maximum for the container.
-   */
-  public int getMessageConsumerMax()
-  {
-    return _messageConsumerMax;
-  }
-
-  /**
-   * Gets the queue connection factory for the container.
-   */
-  public ConnectionFactory getConnectionFactory()
-  {
-    return _jmsConnectionFactory;
+    _ejbTransactionManager.setTransactionTimeout(transactionTimeout);
   }
 
   /**
@@ -317,7 +270,7 @@ public class EjbServerManager implements EJBServerInterface, EnvironmentListener
    */
   public Path getWorkPath()
   {
-    return _envServerManager.getWorkPath();
+    return _workPath;
   }
 
   /**
@@ -329,96 +282,11 @@ public class EjbServerManager implements EJBServerInterface, EnvironmentListener
   }
 
   /**
-   * Returns true if the server should auto-compile.
-   */
-  public boolean isAutoCompile()
-  {
-    return _autoCompile;
-  }
-
-  /**
-   * Sets true if should auto-compile
-   */
-  public void setAutoCompile(boolean autoCompile)
-  {
-    _autoCompile = autoCompile;
-  }
-
-  /**
-   * Returns true if the server should allow POJO beans.
-   */
-  public boolean isAllowPOJO()
-  {
-    return _ejbConfig.isAllowPOJO();
-  }
-
-  /**
-   * Sets true if should allow POJO beans
-   */
-  public void setAllowPOJO(boolean allowPOJO)
-  {
-    _ejbConfig.setAllowPOJO(allowPOJO);
-  }
-
-  /**
-   * Sets whether clients in the same JVM can use a fast in-memory call.
-   */
-  public void setAllowJVMCall(boolean allowJVMCall)
-  {
-    _allowJVMCall = allowJVMCall;
-  }
-
-  /**
-   * Sets whether clients in the same class loader call can pass arguments
-   * by reference.
-   */
-  public void setAllowReferenceCall(boolean allowReferenceCall)
-  {
-    _allowReferenceCall = allowReferenceCall;
-  }
-
-  /**
-   * Sets true if database schema should be generated automatically.
-   */
-  public void setCreateDatabaseSchema(boolean create)
-  {
-    _createDatabaseSchema = create;
-
-    _amberManager.setCreateDatabaseTables(create);
-  }
-
-  /**
-   * True if database schema should be generated automatically.
-   */
-  public boolean getCreateDatabaseSchema()
-  {
-    return _createDatabaseSchema;
-  }
-
-  /**
-   * Sets true if database schema should be generated automatically.
-   */
-  public void setValidateDatabaseSchema(boolean validate)
-  {
-    _validateDatabaseSchema = validate;
-    
-    _amberManager.setValidateDatabaseTables(validate);
-  }
-
-  /**
-   * True if database schema should be generated automatically.
-   */
-  public boolean getValidateDatabaseSchema()
-  {
-    return _validateDatabaseSchema;
-  }
-
-  /**
    * Gets the cache timeout.
    */
   public long getCacheTimeout()
   {
-    return _envServerManager.getCacheTimeout();
+    return _entityCacheTimeout;
   }
 
   /**
@@ -426,7 +294,8 @@ public class EjbServerManager implements EJBServerInterface, EnvironmentListener
    */
   public void setCacheTimeout(long cacheTimeout)
   {
-    _envServerManager.setCacheTimeout(cacheTimeout);
+    _entityCacheTimeout = cacheTimeout;
+    // _amberManager.setTableCacheTimeout(cacheTimeout);
   }
 
   /**
@@ -434,7 +303,7 @@ public class EjbServerManager implements EJBServerInterface, EnvironmentListener
    */
   public int getCacheSize()
   {
-    return _envServerManager.getCacheSize();
+    return _entityCacheSize;
   }
 
   /**
@@ -442,7 +311,7 @@ public class EjbServerManager implements EJBServerInterface, EnvironmentListener
    */
   public void setCacheSize(int cacheSize)
   {
-    _envServerManager.setCacheSize(cacheSize);
+    _entityCacheSize = cacheSize;
   }
 
   /**
@@ -450,73 +319,7 @@ public class EjbServerManager implements EJBServerInterface, EnvironmentListener
    */
   public EJBAdmin getAdmin()
   {
-    return _envServerManager.getAdmin();
-  }
-
-  /**
-   * Returns the ejb config.
-   */
-  public EjbConfig getConfig()
-  {
-    return _ejbConfig;
-  }
-
-  /**
-   * Adds a file-set.
-   */
-  public void addConfigFiles(FileSetType fileSet)
-  {
-    _ejbConfig.addFileSet(fileSet);
-  }
-      
-  /**
-   * Adds an EJB jar.
-   */
-  public void addEJBJar(Path path)
-    throws Exception
-  {
-    JarPath jar = JarPath.create(path);
-    
-    Path descriptorPath = jar.lookup("META-INF/ejb-jar.xml");
-
-    if (descriptorPath.exists())
-      addEJBPath(descriptorPath);
-    
-    descriptorPath = jar.lookup("META-INF/resin-ejb-jar.xml");
-
-    if (descriptorPath.exists())
-      addEJBPath(descriptorPath);
-
-    Path metaInf = jar.lookup("META-INF");
-    if (metaInf.isDirectory()) {
-      String []metaList = metaInf.list();
-      for (int j = 0; j < metaList.length; j++) {
-	String metaName = metaList[j];
-	if (metaName.endsWith(".ejb")) {
-	  Path metaPath = metaInf.lookup(metaName);
-	
-	  addEJBPath(metaPath);
-	}
-      }
-    }
-  }
-
-  /**
-   * Adds an EJB configuration file.
-   */
-  public void addEJBPath(Path path)
-    throws ConfigException
-  {
-    _ejbConfig.addEJBPath(path);
-  }
-
-  /**
-   * interface callback.
-   */
-  public void initEJBs()
-    throws Exception
-  {
-    init();
+    return _ejbAdmin;
   }
 
   /**
@@ -525,8 +328,6 @@ public class EjbServerManager implements EJBServerInterface, EnvironmentListener
   public void init()
     throws Exception
   {
-    _envServerManager.init();
-    
     build();
 
     Environment.addEnvironmentListener(this);
@@ -539,13 +340,11 @@ public class EjbServerManager implements EJBServerInterface, EnvironmentListener
     throws ConfigException
   {
     try {
-      _amberManager.init();
+      // _amberManager.init();
+      
+      _entityCache = new LruCache<EntityKey,QEntityContext>(_entityCacheSize);
 
-      _ejbConfig.configure();
-
-      // initJdbc();
-    } catch (ConfigException e) {
-      throw e;
+      _protocolManager.init();
     } catch (Exception e) {
       throw new ConfigException(e);
     }
@@ -554,7 +353,22 @@ public class EjbServerManager implements EJBServerInterface, EnvironmentListener
   public void start()
     throws Exception
   {
-    _ejbConfig.deploy();
+    // _ejbConfig.deploy();
+
+    Thread thread = Thread.currentThread();
+    ClassLoader oldLoader = thread.getContextClassLoader();
+    
+    for (AbstractServer server : _serverMap.values()) {
+      try {
+	thread.setContextClassLoader(server.getClassLoader());
+
+	log.fine(server + " starting");
+	
+	server.start();
+      } finally {
+	thread.setContextClassLoader(oldLoader);
+      }
+    }
   }
 
   public AmberEntityHome getAmberEntityHome(String name)
@@ -584,7 +398,13 @@ public class EjbServerManager implements EJBServerInterface, EnvironmentListener
    */
   public void addServer(AbstractServer server)
   {
-    _envServerManager.addServer(server);
+    _serverMap.put(server.getEJBName(), server);
+
+    try {
+      _protocolManager.addServer(server);
+    } catch (Throwable e) {
+      log.log(Level.WARNING, e.toString(), e);
+    }
   }
 
   /**
@@ -592,7 +412,10 @@ public class EjbServerManager implements EJBServerInterface, EnvironmentListener
    */
   public AbstractServer getServer(String serverId)
   {
-    return _envServerManager.getServer(serverId);
+    if (serverId.startsWith("/"))
+      return _serverMap.get(serverId);
+    else
+      return _serverMap.get("/" + serverId);
   }
   
   /**
@@ -600,7 +423,10 @@ public class EjbServerManager implements EJBServerInterface, EnvironmentListener
    */
   public AbstractServer getServerByEJBName(String ejbName)
   {
-    return _envServerManager.getServerByEJBName(ejbName);
+    if (! ejbName.startsWith("/"))
+      ejbName = "/" + ejbName;
+    
+    return _serverMap.get(ejbName);
   }
 
   /**
@@ -608,7 +434,11 @@ public class EjbServerManager implements EJBServerInterface, EnvironmentListener
    */
   public QEntityContext getEntity(EntityServer server, Object key)
   {
-    return _envServerManager.getEntity(server, key);
+    synchronized (_entityKey) {
+      _entityKey.init(server, key);
+      
+      return _entityCache.get(_entityKey);
+    }
   }
 
   /**
@@ -617,7 +447,7 @@ public class EjbServerManager implements EJBServerInterface, EnvironmentListener
   public QEntityContext putEntityIfNew(EntityServer server, Object key,
 				       QEntityContext context)
   {
-    return _envServerManager.putEntityIfNew(server, key, context);
+    return _entityCache.putIfNew(new EntityKey(server, key), context);
   }
 
   /**
@@ -625,7 +455,10 @@ public class EjbServerManager implements EJBServerInterface, EnvironmentListener
    */
   public void removeEntity(EntityServer server, Object key)
   {
-    _envServerManager.removeEntity(server, key);
+    synchronized (_entityKey) {
+      _entityKey.init(server, key);
+      _entityCache.remove(_entityKey);
+    }
   }
 
   /**
@@ -633,7 +466,19 @@ public class EjbServerManager implements EJBServerInterface, EnvironmentListener
    */
   public void removeBeans(ArrayList<QEntityContext> beans, EntityServer server)
   {
-    _envServerManager.removeBeans(beans, server);
+    synchronized (_entityCache) {
+      Iterator<LruCache.Entry<EntityKey,QEntityContext>> iter;
+
+      iter = _entityCache.iterator();
+
+      while (iter.hasNext()) {
+	LruCache.Entry<EntityKey,QEntityContext> entry = iter.next();
+
+	beans.add(entry.getValue());
+
+	iter.remove();
+      }
+    }
   }
 
   /**
@@ -663,11 +508,42 @@ public class EjbServerManager implements EJBServerInterface, EnvironmentListener
     if (! _lifecycle.toDestroy())
       return;
 
-    _envServerManager.destroy();
-
     try {
-      _ejbConfig = null;
-      _envServerManager = null;
+      ArrayList<AbstractServer> servers;
+      servers = new ArrayList<AbstractServer>(_serverMap.values());
+      _serverMap.clear();
+
+      /*
+	for (int i = 0; i < _serverNames.size(); i++)
+	_staticServerMap.remove(_serverNames.get(i));
+      */
+    
+      // only purpose of the sort is to make the qa order consistent
+      Collections.sort(servers, new ServerCmp());
+
+      for (AbstractServer server : servers) {
+	try {
+	  _protocolManager.removeServer(server);
+	} catch (Throwable e) {
+	  log.log(Level.WARNING, e.toString(), e);
+	}
+      }
+
+      for (AbstractServer server : servers) {
+	try {
+	  server.destroy();
+	} catch (Throwable e) {
+	  log.log(Level.WARNING, e.toString(), e);
+	}
+      }
+
+      _serverMap = null;
+      _protocolManager.destroy();
+      _protocolManager = null;
+      _ejbTransactionManager.destroy();
+      _ejbTransactionManager = null;
+      _amberManager.destroy();
+      _amberManager = null;
     } catch (Throwable e) {
       log.log(Level.WARNING, e.toString(), e);
     }

@@ -53,7 +53,7 @@ import com.caucho.transaction.TransactionManagerImpl;
 
 import com.caucho.amber.connection.AmberConnectionImpl;
 
-import com.caucho.ejb.EjbServerManager;
+import com.caucho.ejb.EnvServerManager;
 import com.caucho.ejb.EJBExceptionWrapper;
 
 /**
@@ -72,13 +72,13 @@ public class EjbTransactionManager {
   protected static final ThreadLocal<TransactionContext> _threadTransaction
     = new ThreadLocal<TransactionContext>();
 
-  private FreeList<TransactionContext> _freeTransactions =
-    new FreeList<TransactionContext>(64);
+  private FreeList<TransactionContext> _freeTransactions
+    = new FreeList<TransactionContext>(64);
 
   private Hashtable<Transaction,TransactionContext> _transactionMap
     = new Hashtable<Transaction,TransactionContext>();
   
-  private EjbServerManager _ejbManager;
+  private EnvServerManager _ejbManager;
 
   protected TransactionManager _transactionManager;
   protected UserTransaction _userTransaction;
@@ -93,17 +93,18 @@ public class EjbTransactionManager {
   /**
    * Create a server with the given prefix name.
    */
-  public EjbTransactionManager(EjbServerManager ejbManager)
+  public EjbTransactionManager(EnvServerManager ejbManager)
     throws ConfigException
   {
-    _ejbManager = ejbManager;
-    
     try {
+      _ejbManager = ejbManager;
       InitialContext ic = new InitialContext();
-      _userTransaction =
-        (UserTransaction) ic.lookup("java:comp/UserTransaction");
-      _transactionManager =
-        (TransactionManager) ic.lookup("java:comp/TransactionManager");
+      
+      _userTransaction
+	= (UserTransaction) ic.lookup("java:comp/UserTransaction");
+      
+      _transactionManager
+	= (TransactionManager) ic.lookup("java:comp/TransactionManager");
     } catch (NamingException e) {
       log.log(Level.WARNING, e.toString(), e);
     }
@@ -113,12 +114,13 @@ public class EjbTransactionManager {
   }
 
   /**
-   * Returns the EJB manager.
+   * Returns the manager.
    */
-  public EjbServerManager getEJBManager()
+  public EnvServerManager getEJBManager()
   {
     return _ejbManager;
   }
+  
 
   /**
    * Sets the Resin isolation.

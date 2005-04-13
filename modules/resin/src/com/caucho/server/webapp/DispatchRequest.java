@@ -190,7 +190,10 @@ class DispatchRequest extends RequestAdapter {
    */
   public String getContextPath()
   {
-    return _application.getContextPath();
+    if (_application != null)
+      return _application.getContextPath();
+    else
+      return "/";
   }
 
   /**

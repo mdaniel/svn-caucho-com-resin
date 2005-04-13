@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -50,7 +51,7 @@ import com.caucho.log.Log;
 import com.caucho.naming.AbstractModel;
 import com.caucho.naming.MemoryModel;
 
-import com.caucho.ejb.EjbServerManager;
+import com.caucho.ejb.EnvServerManager;
 import com.caucho.ejb.AbstractServer;
 
 
@@ -63,38 +64,47 @@ public class EjbProtocolManager {
   private static final L10N L = new L10N(EjbProtocolManager.class);
   protected static final Logger log = Log.open(EjbProtocolManager.class);
 
-  private static ThreadLocal<String> _protocolLocal = new ThreadLocal<String>();
+  private static ThreadLocal<String> _protocolLocal
+    = new ThreadLocal<String>();
 
-  private static Hashtable<String,WeakReference<AbstractServer>> _staticServerMap =
-    new Hashtable<String,WeakReference<AbstractServer>>();
-    
-  private EjbServerManager _ejbManager;
+  private static Hashtable<String,WeakReference<AbstractServer>> _staticServerMap
+    = new Hashtable<String,WeakReference<AbstractServer>>();
 
+  private EnvServerManager _ejbServer;
+  
   private AbstractModel _namingRoot;
   private String _cmpJndiName = "java:comp/env/cmp";
   
-  private HashMap<String,AbstractServer> _serverMap =
-    new HashMap<String,AbstractServer>();
+  private HashMap<String,AbstractServer> _serverMap
+    = new HashMap<String,AbstractServer>();
 
   // handles remote stuff
   protected ProtocolContainer _protocolContainer;
-  protected HashMap<String,ProtocolContainer> _protocolMap =
-    new HashMap<String,ProtocolContainer>();
+  protected HashMap<String,ProtocolContainer> _protocolMap
+    = new HashMap<String,ProtocolContainer>();
 
   /**
    * Create a server with the given prefix name.
    */
-  public EjbProtocolManager(EjbServerManager ejbManager)
+  public EjbProtocolManager(EnvServerManager ejbServer)
     throws ConfigException
   {
-    _ejbManager = ejbManager;
-
+    _ejbServer = ejbServer;
+    
     _namingRoot = new MemoryModel();
 
     ProtocolContainer iiop = IiopProtocolContainer.createProtocolContainer();
 
     if (iiop != null)
       _protocolMap.put("iiop", iiop);
+  }
+
+  /**
+   * Returns the EJB server.
+   */
+  public EnvServerManager getServerManager()
+  {
+    return _ejbServer;
   }
 
   /**
@@ -111,14 +121,6 @@ public class EjbProtocolManager {
   public void init()
     throws NamingException
   {
-  }
-  
-  /**
-   * Returns the server manager.
-   */
-  public EjbServerManager getServerManager()
-  {
-    return _ejbManager;
   }
 
   /**

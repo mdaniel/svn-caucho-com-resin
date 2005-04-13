@@ -113,6 +113,14 @@ public class ClusterStream {
   }
 
   /**
+   * Clears the recycled connections.
+   */
+  public void clearRecycle()
+  {
+    _srun.clearRecycle();
+  }
+
+  /**
    * Recycles.
    */
   public void free()

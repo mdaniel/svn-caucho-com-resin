@@ -76,8 +76,8 @@ public class Port implements EnvironmentListener, PortMBean, Runnable {
 
   // started at 128, but that seems wasteful since the active threads
   // themselves are buffering the free connections
-  private FreeList<TcpConnection> _freeConn =
-    new FreeList<TcpConnection>(32);
+  private FreeList<TcpConnection> _freeConn
+    = new FreeList<TcpConnection>(32);
   
   // The owning server
   private ProtocolDispatchServer _server;

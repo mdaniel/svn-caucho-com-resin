@@ -136,7 +136,6 @@ public class HmuxDispatchRequest {
       case HmuxRequest.HMUX_QUIT:
         if (isLoggable)
           log.fine(dbgId() + (char) code + ": end of request");
-        
         return true;
 
       case HmuxRequest.HMUX_EXIT:

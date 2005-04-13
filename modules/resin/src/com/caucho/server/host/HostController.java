@@ -113,11 +113,11 @@ class HostController extends EnvironmentDeployController<Host,HostConfig> {
   {
     super(id, rootDirectory);
 
-    _container = container;
-
     setHostName(id);
 
     getVariableMap().put("host", _hostVar);
+    
+    setContainer(container);
   }
 
   public void setContainer(HostContainer container)
@@ -352,7 +352,7 @@ class HostController extends EnvironmentDeployController<Host,HostConfig> {
     if (_container != null) {
       for (EarConfig config : _container.getEarDefaultList())
 	host.addEarDefault(config);
-      
+
       for (WebAppConfig config : _container.getWebAppDefaultList())
 	host.addWebAppDefault(config);
     }

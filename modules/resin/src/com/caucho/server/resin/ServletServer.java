@@ -180,7 +180,7 @@ public class ServletServer extends ProtocolDispatchServer
 
   private long _waitForActiveTime = 10000L;
 
-  private int _keepaliveMax = -1;
+  private int _keepaliveMax = 256;
   private ArrayList<Port> _ports = new ArrayList<Port>();
 
   private Alarm _alarm = new Alarm(this);

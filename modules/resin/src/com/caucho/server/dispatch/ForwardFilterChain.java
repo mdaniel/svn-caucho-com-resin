@@ -39,10 +39,21 @@ import javax.servlet.http.*;
  */
 public class ForwardFilterChain implements FilterChain {
   // servlet
+  private String _url;
   private RequestDispatcher _disp;
 
   /**
-   * Create the redirect filter chain servlet.
+   * Create the forward filter chain servlet.
+   *
+   * @param url the request dispatcher to forward to.
+   */
+  public ForwardFilterChain(String url)
+  {
+    _url = url;
+  }
+
+  /**
+   * Create the forward filter chain servlet.
    *
    * @param disp the request dispatcher to forward to.
    */
@@ -61,6 +72,14 @@ public class ForwardFilterChain implements FilterChain {
                        ServletResponse response)
     throws ServletException, IOException
   {
-    _disp.forward(request, response);
+    if (_disp != null)
+      _disp.forward(request, response);
+    else {
+      HttpServletRequest req = (HttpServletRequest) request;
+
+      RequestDispatcher disp = req.getRequestDispatcher(_url);
+
+      disp.forward(request, response);
+    }
   }
 }

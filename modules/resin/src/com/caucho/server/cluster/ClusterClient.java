@@ -235,6 +235,8 @@ public class ClusterClient {
       return new ClusterStream(_streamCount++, this,
 			       rs, pair.getWriteStream());
     } catch (IOException e) {
+      log.log(Level.FINER, e.toString(), e);
+      
       _lastFailTime = Alarm.getCurrentTime();
       return null;
     }
@@ -278,6 +280,39 @@ public class ClusterClient {
   {
     synchronized (this) {
       _activeCount--;
+    }
+  }
+
+  /**
+   * Clears the recycled connections, e.g. on detection of backend
+   * server going down..
+   */
+  public void clearRecycle()
+  {
+    ArrayList<ClusterStream> recycleList = null;
+    
+    synchronized (this) {
+      _freeHead = _freeTail = 0;
+
+      for (int i = 0; i < _free.length; i++) {
+	ClusterStream stream;
+
+	stream = _free[i];
+	_free[i] = null;
+
+	if (stream != null) {
+	  if (recycleList == null)
+	    recycleList = new ArrayList<ClusterStream>();
+	  
+	  recycleList.add(stream);
+	}
+      }
+    }
+
+    if (recycleList != null) {
+      for (ClusterStream stream : recycleList) {
+	stream.closeImpl();
+      }
     }
   }
 

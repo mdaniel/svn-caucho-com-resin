@@ -127,6 +127,9 @@ public class EnterpriseApplication
   private ApplicationContainer _container;
 
   // private WarDirApplicationGenerator _warDeploy;
+
+  private ArrayList<Path> _ejbPaths
+    = new ArrayList<Path>();
   
   private ArrayList<WebAppController> _webApps
     = new ArrayList<WebAppController>();
@@ -329,6 +332,10 @@ public class EnterpriseApplication
   public void setConfigException(Throwable e)
   {
     _configException = e;
+
+    for (WebAppController controller : _webApps) {
+      controller.setConfigException(e);
+    }
   }
 
   /**
@@ -343,48 +350,25 @@ public class EnterpriseApplication
    * Configures the application.
    */
   public void init()
+    throws Exception
   {
-    Thread thread = Thread.currentThread();
-    ClassLoader oldLoader = thread.getContextClassLoader();
-    
-    try {
-      thread.setContextClassLoader(_loader);
+    if (! _lifecycle.toInit())
+      return;
       
-      if (! _lifecycle.toInit())
-	return;
+    log.fine(this + " initializing");
       
-      log.fine(this + " initializing");
-      
-      Vfs.setPwd(_rootDir, _loader);
+    Vfs.setPwd(_rootDir, _loader);
 
-      Throwable configException = _configException;
+    EJBServerInterface ejbServer = _localServer.getLevel();
 
-      try {
-	EJBServerInterface ejbServer = _localServer.getLevel();
+    if (ejbServer == null && _ejbPaths.size() != 0)
+      throw new ConfigException(L.l("<ejb> module needs a configured <ejb-server>"));
 
-	if (ejbServer != null)
-	  ejbServer.initEJBs();
-      } catch (ConfigException e) {
-	configException = e;
+    if (ejbServer != null) {
+      for (Path path : _ejbPaths)
+	ejbServer.addEJBJar(path);
 
-	log.log(Level.FINER, e.toString(), e);
-	log.warning(e.getMessage());
-      } catch (Throwable e) {
-	configException = e;
-	
-	log.log(Level.WARNING, e.toString(), e);
-      }
-
-      for (WebAppController controller : _webApps) {
-	if (configException != null)
-	  controller.setConfigException(configException);
-
-	_container.getApplicationGenerator().update(controller.getId());
-      }
-    } catch (Throwable e) {
-      _configException = e;
-    } finally {
-      thread.setContextClassLoader(oldLoader);
+      ejbServer.initEJBs();
     }
   }
 
@@ -564,17 +548,11 @@ public class EnterpriseApplication
     public void addEjb(Path path)
       throws Exception
     {
-      EJBServerInterface ejbServer = _localServer.getLevel();
-
-      if (ejbServer == null) {
-	throw new ConfigException(L.l("<ejb> module needs a configured <ejb-server>"));
-      }
+      _ejbPaths.add(path);
       
       _loader.addJar(path);
       // ejb/0853
       _loader.addJarManifestClassPath(path);
-
-      ejbServer.addEJBJar(path);
     }
     
     /**

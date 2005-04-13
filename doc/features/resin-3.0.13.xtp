@@ -8,6 +8,18 @@
 
 <summary objsummary='localtoc'/>
 
+<section title="forward target in rewrite">
+
+<example title="web.xml">
+&lt;web-app>
+  &lt;rewrite-dispatch>
+    &lt;forward regexp='^/foo' target='/bar'/>
+  &lt;/rewrite-dispatch>
+&lt;/web-app>
+</example>
+
+</section>
+
 <section title="Manual web-app restart cookbook">
 
 A <a href="jmx|cookbook/restart.xtp">Restart cookbook</a> is available for

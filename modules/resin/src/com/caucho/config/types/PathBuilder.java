@@ -89,7 +89,7 @@ public class PathBuilder {
     return lookupPath(string, map);
   }
 
-  public static Path lookupPath(String string, HashMap<String,Object> map)
+  public static Path lookupPath(String string, Map<String,Object> map)
     throws ELException
   {
     VariableResolver parent = Config.getEnvironment();

@@ -319,6 +319,10 @@ public class HmuxRequest extends AbstractHttpRequest
   public boolean handleRequest()
     throws IOException
   {
+    // XXX: should be moved to TcpConnection
+    Thread thread = Thread.currentThread();
+    thread.setContextClassLoader(_server.getClassLoader());
+    
     if (log.isLoggable(Level.FINE))
       log.fine(dbgId() + "start request");
 

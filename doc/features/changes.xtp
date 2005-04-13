@@ -4,7 +4,8 @@
 
 <s2 title='3.0.snap - April 4, 2005'>
 <ul>
-<li>Fixes to backup index calculation for '-' and '_'
+<li>HmuxLoadBalanceServlet needs to retry timed out (rep by Scott Nelson)
+<li>(2005-04-10) Fixes to backup index calculation for '-' and '_'
 <li>JMX toString() and hashCode() need to allow invocation (rep by Jason Chaffee)
 <li>Refactored file and cluster persistent store to share common persistent backing
 <li>Moved common JMX/Environment handling code to EnvironmentDeployController

@@ -45,6 +45,7 @@ import com.caucho.config.ConfigException;
 
 import com.caucho.server.dispatch.Invocation;
 import com.caucho.server.dispatch.RedirectFilterChain;
+import com.caucho.server.dispatch.ForwardFilterChain;
 import com.caucho.server.dispatch.ErrorFilterChain;
 
 import com.caucho.util.L10N;
@@ -72,6 +73,14 @@ public class RewriteInvocation {
   public void addRedirect(Redirect redirect)
   {
     _programList.add(redirect);
+  }
+
+  /**
+   * Adds a forward.
+   */
+  public void addForward(Forward forward)
+  {
+    _programList.add(forward);
   }
 
   /**
@@ -216,6 +225,47 @@ public class RewriteInvocation {
 	uri = matcher.replaceAll(_target);
 
 	return new RedirectFilterChain(uri);
+      }
+      else
+	return null;
+    }
+
+    public void init()
+      throws ConfigException
+    {
+      if (_regexp == null)
+	throw new ConfigException(L.l("redirect needs 'regexp' attribute."));
+      if (_target == null)
+	throw new ConfigException(L.l("redirect needs 'target' attribute."));
+    }
+  }
+
+  public static class Forward extends Program {
+    private String _target;
+    private Pattern _regexp;
+
+    /**
+     * Sets the regular expression.
+     */
+    public void setRegexp(String regexp)
+    {
+      _regexp = Pattern.compile(regexp);
+    }
+
+    public void setTarget(String target)
+    {
+      _target = target;
+    }
+
+    public FilterChain dispatch(String uri)
+    {
+      Matcher matcher = _regexp.matcher(uri);
+
+      if (matcher.find()) {
+	matcher.reset();
+	uri = matcher.replaceAll(_target);
+
+	return new ForwardFilterChain(uri);
       }
       else
 	return null;

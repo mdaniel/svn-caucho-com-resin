@@ -124,6 +124,14 @@ public class DeployControllerAdmin<C extends EnvironmentDeployController>
   }
 
   /**
+   * Returns the root directory
+   */
+  public String getRootDirectory()
+  {
+    return _controller.getRootDirectory().getNativePath();
+  }
+
+  /**
    * Returns the handle for serialization.
    */
   public Object writeReplace()

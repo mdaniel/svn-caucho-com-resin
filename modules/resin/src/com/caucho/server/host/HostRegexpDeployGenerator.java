@@ -135,8 +135,12 @@ public class HostRegexpDeployGenerator extends DeployGenerator<HostController> {
 
       varMap.put("regexp", vars);
 
-      HostController controller = new HostController(_config, _container);
+      HostController controller
+	= new HostController(hostName,
+			     _config.calculateRootDirectory(varMap),
+			     _container);
       controller.getVariableMap().putAll(varMap);
+      controller.setConfig(_config);
 
       controller.setRegexpName(name);
 
