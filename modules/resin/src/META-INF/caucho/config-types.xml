@@ -11,6 +11,10 @@
      name="javax.sql.DataSource"
      type="com.caucho.config.types.JndiTypeStrategy"/>
 
+  <type-strategy
+     name="com.caucho.util.QDate"
+     type="com.caucho.config.types.QDateTypeStrategy"/>
+
   <environment-attribute>
     <authenticator>com.caucho.config.types.Authenticator</authenticator>
 
