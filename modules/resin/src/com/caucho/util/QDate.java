@@ -169,6 +169,17 @@ public class QDate {
   }
 
   /**
+   * Creates the date for the local time zone.
+   *
+   * @see #setDate(long, long, long)
+   */
+  public QDate(long year, long month, long dayOfMonth)
+  {
+    this(_localTimeZone);
+    setDate(year, month, dayOfMonth);
+  }
+
+  /**
    * Creates a local calendar.
    */
   public static QDate createLocal()
