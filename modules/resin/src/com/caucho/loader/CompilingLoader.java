@@ -540,7 +540,7 @@ public class CompilingLoader extends Loader implements Make {
     Path classFile = _classDir.lookup(name.replace('.', '/') + ".class");
     String javaName = name.replace('.', '/') + _sourceExt;
     Path javaFile = _sourceDir.lookup(javaName);
-    
+
     String tail = javaFile.getTail();
 
     for (int i = 0; i < INNER_CLASS_SEPARATORS.length; i++) {

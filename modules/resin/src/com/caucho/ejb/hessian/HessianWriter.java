@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -37,6 +38,9 @@ import javax.ejb.*;
 import com.caucho.vfs.*;
 import com.caucho.util.*;
 import com.caucho.hessian.io.*;
+
+import com.caucho.transaction.TransactionManagerImpl;
+import com.caucho.transaction.TransactionImpl;
 
 public class HessianWriter extends HessianSerializerOutput {
   private InputStream _is;
@@ -116,6 +120,22 @@ public class HessianWriter extends HessianSerializerOutput {
     in.init(_is);
 
     in.startReply();
+
+    String header;
+
+    while ((header = in.readHeader()) != null) {
+      Object value = in.readObject();
+
+      if (header.equals("xa-resource")) {
+	TransactionImpl xa = (TransactionImpl) TransactionManagerImpl.getLocal().getTransaction();
+
+	if (xa != null) {
+	  HessianXAResource xaRes = new HessianXAResource((String) value);
+
+	  xa.enlistResource(xaRes);
+	}
+      }
+    }
 
     return in;
   }

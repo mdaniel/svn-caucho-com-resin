@@ -42,6 +42,7 @@ import javax.ejb.SessionSynchronization;
 import javax.ejb.EJBException;
 
 import com.caucho.util.L10N;
+import com.caucho.util.Alarm;
 
 import com.caucho.log.Log;
 
@@ -78,6 +79,8 @@ public class TransactionContext implements Synchronization {
   TransactionContext _old;
   // the previous Transaction when this one completes
   Transaction _oldTrans;
+
+  private long _startTime;
   
   private TransactionObject []_objects = new TransactionObject[16];
   private int _objectTop;
@@ -119,6 +122,7 @@ public class TransactionContext implements Synchronization {
     _isUserTransaction = false;
     _isAlive = true;
     _isRowLocking = false;
+    _startTime = Alarm.getCurrentTime();
   }
 
   public void setTransaction(Transaction transaction)
@@ -370,6 +374,21 @@ public class TransactionContext implements Synchronization {
     } catch (Exception e) {
       throw setRollbackOnly(e);
     }
+  }
+
+  /**
+   * Returns true if the transaction isn't used.
+   */
+  public boolean isEmpty()
+  {
+    if (! _isAlive)
+      return true;
+    else if (_transaction == null)
+      return true;
+    else if (! (_transaction instanceof TransactionImpl))
+      return false;
+    else
+      return ((TransactionImpl) _transaction).isEmpty();
   }
 
   /**

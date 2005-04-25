@@ -1257,9 +1257,11 @@ public class SessionManager implements ObjectManager, AlarmListener {
 	while (_sessionIter.hasNext()) {
 	  SessionImpl session = _sessionIter.next();
 
+	  long maxIdleTime = session._maxInactiveInterval;
+
 	  if (session.inUse())
 	    liveSessions++;
-	  else if (session._accessTime + session._maxInactiveInterval < now)
+	  else if (session._accessTime + maxIdleTime < now)
 	    _sessionList.add(session);
 	  else
 	    liveSessions++;
@@ -1270,6 +1272,8 @@ public class SessionManager implements ObjectManager, AlarmListener {
 	SessionImpl session = _sessionList.get(i);
 
 	try {
+	  long maxIdleTime = session._maxInactiveInterval;
+
 	  if (_storeManager == null) {
 	    // if no persistent store then invalidate
 	    session.invalidate(true);
@@ -1279,7 +1283,7 @@ public class SessionManager implements ObjectManager, AlarmListener {
 	    _sessions.remove(session.getId());
 	  }
 	  else if ((session._accessTime
-		    + _storeManager.getMaxIdleTime()
+		    + maxIdleTime
 		    + _storeManager.getAccessWindowTime())
 		   < now) {
 	    // if idle timed out, then invalidate

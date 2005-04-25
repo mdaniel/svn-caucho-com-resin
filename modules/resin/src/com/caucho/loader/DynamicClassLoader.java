@@ -254,8 +254,19 @@ public class DynamicClassLoader extends java.net.URLClassLoader
    */
   public void addLoader(Loader loader)
   {
-    if (! _loaders.contains(loader))
+    int p = _loaders.indexOf(loader);
+
+    // overriding loaders are inserted before the loader they override
+    // server/10ih
+    if (p >= 0) {
+      Loader oldLoader = _loaders.get(p);
+
+      if (oldLoader != loader)
+	addLoader(loader, p);
+    }
+    else
       addLoader(loader, _loaders.size());
+
   }
 
   /**

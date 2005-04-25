@@ -397,7 +397,7 @@ public class FilePath extends FilesystemPath {
 
   public int hashCode()
   {
-    return getFile().hashCode();
+    return getFullPath().hashCode();
   }
 
   public boolean equals(Object b)

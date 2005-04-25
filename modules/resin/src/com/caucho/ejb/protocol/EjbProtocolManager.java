@@ -172,6 +172,13 @@ public class EjbProtocolManager {
 
     addProtocolServers(protocol);
   }
+
+  public ProtocolContainer getProtocol(String name)
+  {
+    synchronized (_protocolMap) {
+      return _protocolMap.get(name);
+    }
+  }
   
   private void addProtocolServers(ProtocolContainer protocol)
   {

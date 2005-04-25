@@ -36,13 +36,17 @@ import java.util.Iterator;
 import java.util.logging.Logger;
 import java.util.logging.Level;
 
+import javax.servlet.jsp.el.VariableResolver;
+
 import com.caucho.log.Log;
 
 import com.caucho.vfs.Path;
 
 import com.caucho.el.EL;
+import com.caucho.el.MapVariableResolver;
 
 import com.caucho.config.ConfigException;
+import com.caucho.config.Config;
 
 import com.caucho.config.types.RawString;
 
@@ -131,24 +135,29 @@ public class HostExpandDeployGenerator extends ExpandDeployGenerator<HostControl
   public HostController createController(String name)
   {
     Path rootDirectory = getExpandDirectory().lookup(name);
-
+    
     HostController controller
       = new HostController(name, rootDirectory, _container);
 
     try {
+      String hostName = getHostName();
+
+      if (hostName != null) {
+	VariableResolver parent = Config.getEnvironment();
+	VariableResolver resolver
+	  = new MapVariableResolver(controller.getVariableMap(), parent);
+	
+	controller.setHostName(EL.evalString(hostName, resolver));
+      }
+      else
+	controller.setHostName(name);
+      
       controller.setStartupMode(getStartupMode());
 
       Path jarPath = getArchiveDirectory().lookup(name + ".jar");
       controller.setArchivePath(jarPath);
 
       controller.addDepend(jarPath);
-
-      String hostName = getHostName();
-
-      if (hostName != null)
-	controller.setHostName(EL.evalString(hostName, EL.getEnvironment()));
-      else
-	controller.setHostName(name);
 
       for (int i = 0; i < _hostDefaults.size(); i++)
 	controller.addConfigDefault(_hostDefaults.get(i));

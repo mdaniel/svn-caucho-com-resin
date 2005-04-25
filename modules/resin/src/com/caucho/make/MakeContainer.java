@@ -43,8 +43,18 @@ public class MakeContainer implements Make {
   {
     if (make == this)
       throw new IllegalArgumentException("Can't add self as a dependency.");
-    
-    if (! _makeList.contains(make))
+
+    int p = _makeList.indexOf(make);
+
+    // matching make overrides old ones
+    // server/10ik
+    if (p >= 0) {
+      Make oldMake = _makeList.get(p);
+
+      if (oldMake != make)
+	_makeList.add(p, make);
+    }
+    else
       _makeList.add(make);
   }
       

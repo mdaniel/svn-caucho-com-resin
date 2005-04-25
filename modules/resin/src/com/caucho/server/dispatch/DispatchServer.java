@@ -366,6 +366,22 @@ public class DispatchServer implements Dependency {
   /**
    * Closes the server.
    */
+  public void update()
+  {
+    destroy();
+  }
+
+  /**
+   * Closes the server.
+   */
+  public void restart()
+  {
+    destroy();
+  }
+
+  /**
+   * Closes the server.
+   */
   public void destroy()
   {
     ArrayList<ServerListener> listeners;

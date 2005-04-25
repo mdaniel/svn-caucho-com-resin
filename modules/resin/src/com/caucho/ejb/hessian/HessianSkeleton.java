@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -43,6 +44,8 @@ import com.caucho.ejb.*;
 import com.caucho.ejb.protocol.EjbProtocolManager;
 import com.caucho.ejb.protocol.Skeleton;
 
+import com.caucho.ejb.xa.TransactionContext;
+
 import com.caucho.hessian.io.*;
 
 /**
@@ -59,9 +62,16 @@ abstract public class HessianSkeleton extends Skeleton {
   private AbstractServer _server;
   private HessianRemoteResolver _resolver;
 
+  private boolean _isDebug;
+
   void _setServer(AbstractServer server)
   {
     _server = server;
+  }
+
+  public void setDebug(boolean isDebug)
+  {
+    _isDebug = isDebug;
   }
   
   /**
@@ -77,20 +87,43 @@ abstract public class HessianSkeleton extends Skeleton {
   public void _service(InputStream is, OutputStream os)
     throws Exception
   {
+    java.io.StringWriter debugWriter = null;
+
+    if (_isDebug) {
+      debugWriter = new java.io.StringWriter();
+      is = new HessianDebugInputStream(is, new PrintWriter(debugWriter));
+    }
+    
     HessianInput in = new HessianReader(is);
     HessianOutput out = new HessianWriter(os);
 
     in.setRemoteResolver(_resolver);
-    in.startCall();
+    in.readCall();
 
-    String method = in.getMethod();
+    String xid = null;
+    String header;
+    while ((header = in.readHeader()) != null) {
+      Object value = in.readObject();
+
+      if ("xid".equals(header)) {
+	xid = (String) value;
+      }
+    }
+
+    String method = in.readMethod();
+
     CharBuffer cb = new CharBuffer();
     cb.append(method);
-
+    
     String oldProtocol = EjbProtocolManager.setThreadProtocol("hessian");
     
     try {
-      _execute(cb, in, out);
+      TransactionContext xa = null;
+      
+      if (xid != null)
+	xa = _server.getTransactionManager().startTransaction(xid);
+	
+      _execute(cb, in, out, xa);
     } catch (HessianProtocolException e) {
       throw e;
     } catch (Throwable e) {
@@ -101,12 +134,35 @@ abstract public class HessianSkeleton extends Skeleton {
       out.completeReply();
     } finally {
       EjbProtocolManager.setThreadProtocol(oldProtocol);
+
+      if (debugWriter != null)
+	log.fine(debugWriter.toString());
+      
+      if (xid != null)
+	_server.getTransactionManager().finishTransaction(xid);
+    }
+  }
+
+  protected void startReply(HessianOutput out, TransactionContext xa)
+    throws IOException
+  {
+    out.startReply();
+
+    if (xa != null && ! xa.isEmpty()) {
+      EjbProtocolManager pm = _server.getServerManager().getProtocolManager();
+      HessianProtocol hessian = (HessianProtocol) pm.getProtocol("hessian");
+
+      if (hessian != null) {
+	out.writeHeader("xa-resource");
+	out.writeString(hessian.calculateURL("/_ejb_xa_resource"));
+      }
     }
   }
 
   abstract protected void _execute(CharBuffer method,
                                    HessianInput in,
-                                   HessianOutput out)
+                                   HessianOutput out,
+				   TransactionContext xa)
     throws Throwable;
   
   protected void _executeUnknown(CharBuffer method,

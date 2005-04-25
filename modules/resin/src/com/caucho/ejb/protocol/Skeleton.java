@@ -46,6 +46,10 @@ import com.caucho.log.Log;
 abstract public class Skeleton {
   protected static final Logger log = Log.open(Skeleton.class);
 
+  public void setDebug(boolean isDebug)
+  {
+  }
+
   /**
    * Services the request.
    *

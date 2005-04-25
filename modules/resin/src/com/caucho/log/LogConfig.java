@@ -59,10 +59,9 @@ import com.caucho.util.L10N;
  * Environment-specific configuration.
  */
 public class LogConfig extends RotateLog implements LogMBean {
-  private static L10N L = new L10N(LogConfig.class);
+  private static final L10N L = new L10N(LogConfig.class);
   
   private ArrayList<Handler> _handlers;
-  private Handler _handler;
   private Formatter _formatter;
   private String _timestamp;
 
@@ -242,7 +241,7 @@ public class LogConfig extends RotateLog implements LogMBean {
     throws ConfigException
   {
     _isInit = true;
-    
+
     if (_handlers == null)
       super.init();
     
@@ -263,7 +262,7 @@ public class LogConfig extends RotateLog implements LogMBean {
 
     WriteStream os = null;
     
-    if (_handler == null && _handlers == null) {
+    if (_handlers == null) {
       os = getRotateStream().getStream();
 
       if (_timestamp != null) {
@@ -287,7 +286,7 @@ public class LogConfig extends RotateLog implements LogMBean {
 	_handlers = new ArrayList<Handler>();
 	_handlers.add(handler);
       }
-	
+
       for (int j = 0; j < _handlers.size(); j++) {
 	SubHandler subHandler = new SubHandler(_handlers.get(j));
 	subHandler.setLevel(subLogger.getLevel());
@@ -356,6 +355,8 @@ public class LogConfig extends RotateLog implements LogMBean {
       _logger = Logger.getLogger(_name);
 
       _logger.setUseParentHandlers(useParentHandlers);
+
+      _useParentHandlers = useParentHandlers;
     }
 
     /**

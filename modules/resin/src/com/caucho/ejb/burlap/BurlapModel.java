@@ -31,6 +31,9 @@ package com.caucho.ejb.burlap;
 import java.io.*;
 import java.util.*;
 
+import java.util.logging.Logger;
+import java.util.logging.Level;
+
 import javax.naming.*;
 import javax.ejb.*;
 
@@ -46,7 +49,9 @@ import com.caucho.services.name.NameServerRemote;
  * <p>For now, only allow single level calls to the EJB.
  */
 public class BurlapModel extends AbstractModel {
-  private static L10N L = new L10N(BurlapModel.class);
+  private static final L10N L = new L10N(BurlapModel.class);
+  private static final Logger log
+    = Logger.getLogger(BurlapModel.class.getName());
   
   private String _urlPrefix;
   private String _namePrefix;
@@ -109,6 +114,14 @@ public class BurlapModel extends AbstractModel {
   }
 
   /**
+   * Returns the full name.
+   */
+  String getURL()
+  {
+    return getURLPrefix() + _namePrefix;
+  }
+
+  /**
    * Looks up the named bean.  Since we're assuming only a single level,
    * just try to look it up directly.
    *
@@ -145,6 +158,9 @@ public class BurlapModel extends AbstractModel {
         obj = model;
         _root._cache.put(name, obj);
       }
+
+      if (log.isLoggable(Level.FINE))
+	log.fine(this + " lookup(" + name + ")->" + obj);
 
       return obj;
     } catch (Exception e) {

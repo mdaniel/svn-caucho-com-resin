@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -29,9 +30,17 @@
 package com.caucho.ejb.hessian;
 
 import java.io.*;
-import java.beans.*;
+
 import java.lang.reflect.*;
+
 import java.rmi.*;
+
+import java.util.logging.Logger;
+import java.util.logging.Level;
+
+import javax.transaction.Transaction;
+
+import javax.transaction.xa.Xid;
 
 import javax.ejb.*;
 
@@ -40,12 +49,18 @@ import com.caucho.java.*;
 import com.caucho.util.*;
 import com.caucho.ejb.*;
 
+import com.caucho.transaction.TransactionManagerImpl;
+import com.caucho.transaction.TransactionImpl;
+import com.caucho.transaction.XidImpl;
+
 import com.caucho.hessian.io.*;
 
 /**
  * Base class for generated object stubs.
  */
 public abstract class HessianStub implements HessianRemoteObject {
+  private static final Logger log
+    = Logger.getLogger(HessianStub.class.getName());
   protected String _url;
   
   protected transient Path _urlPath;
@@ -112,9 +127,50 @@ public abstract class HessianStub implements HessianRemoteObject {
     }
   }
 
+  protected void _hessian_writeHeaders(HessianWriter out)
+    throws IOException
+  {
+    try {
+      TransactionImpl xa = (TransactionImpl) TransactionManagerImpl.getLocal().getTransaction();
+
+      if (xa != null) {
+	Xid xid = xa.getXid();
+
+	String s = xidToString(xid.getGlobalTransactionId());
+
+	out.writeHeader("xid");
+	out.writeString(s);
+      }
+    } catch (Throwable e) {
+      log.log(Level.FINE, e.toString(), e);
+    }
+  }
+
   protected void _hessian_freeWriter(HessianWriter out)
     throws IOException
   {
     out.close();
+  }
+
+  private static String xidToString(byte []id)
+  {
+    StringBuilder sb = new StringBuilder();
+
+    for (int i = 0; i < id.length; i++) {
+      byte b = id[i];
+
+      sb.append(toHex((b >> 4) & 0xf));
+      sb.append(toHex(b & 0xf));
+    }
+
+    return sb.toString();
+  }
+
+  private static char toHex(int d)
+  {
+    if (d < 10)
+      return (char) ('0' + d);
+    else
+      return (char) ('a' + d - 10);
   }
 }

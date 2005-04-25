@@ -70,6 +70,13 @@ public class CmpRelationRole {
   }
 
   /**
+   * Sets the description.
+   */
+  public void setDescription(String description)
+  {
+  }
+
+  /**
    * Gets the owning relation.
    */
   public CmpRelation getRelation()

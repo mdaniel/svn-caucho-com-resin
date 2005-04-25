@@ -119,7 +119,12 @@ public class ResinInclude extends ResinControl {
 
     log.config(L.l("resin:include '{0}'.\nresin:include is deprecated.  Please use resin:import instead.", _path.getNativePath()));
 
-    new Config().configure(object, _path); // , schema);
+
+    LooseXml xml = new LooseXml();
+
+    Document doc = xml.parseDocument(_path);
+
+    new Config().configure(object, doc); // , schema);
   }
 }
 

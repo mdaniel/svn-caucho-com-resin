@@ -95,6 +95,11 @@ public class RequestDispatcherImpl implements RequestDispatcher {
     _isLogin = isLogin;
   }
 
+  public boolean isModified()
+  {
+    return _includeInvocation.isModified();
+  }
+
   public void forward(ServletRequest request, ServletResponse response)
     throws ServletException, IOException
   {

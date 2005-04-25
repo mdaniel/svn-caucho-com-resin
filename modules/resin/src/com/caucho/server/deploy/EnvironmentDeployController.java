@@ -111,12 +111,19 @@ abstract public class
 
   public EnvironmentDeployController()
   {
-    this("", null);
+    this("", (Path) null);
   }
 
   public EnvironmentDeployController(C config)
   {
     this(config.getId(), config.calculateRootDirectory());
+
+    setConfig(config);
+  }
+
+  public EnvironmentDeployController(String id, C config)
+  {
+    this(id, config.calculateRootDirectory());
 
     setConfig(config);
   }
@@ -135,11 +142,21 @@ abstract public class
    */
   public void setConfig(C config)
   {
-    _config = config;
+    if (config == null)
+      return;
+
+    if (_config != null && ! _configDefaults.contains(_config))
+      addConfigDefault(_config);
     
+    addConfigMode(config);
+    
+    _config = config;
+
+    /* XXX: config is at the end
     if (config != null) {
       addConfigDefault(config);
     }
+    */
   }
 
   /**
@@ -158,12 +175,17 @@ abstract public class
     if (! _configDefaults.contains(config)) {
       _configDefaults.add(config);
 
-      if (config.getStartupMode() != null)
-	setStartupMode(config.getStartupMode());
-
-      if (config.getRedeployMode() != null)
-	setRedeployMode(config.getRedeployMode());
+      addConfigMode(config);
     }
+  }
+
+  private void addConfigMode(C config)
+  {
+    if (config.getStartupMode() != null)
+      setStartupMode(config.getStartupMode());
+
+    if (config.getRedeployMode() != null)
+      setRedeployMode(config.getRedeployMode());
   }
 
   /**
@@ -265,8 +287,13 @@ abstract public class
 
     _configDefaults.addAll(newController._configDefaults);
 
-    if (newController.getConfig() != null)
+    if (getConfig() == null)
       setConfig(newController.getConfig());
+    else if (newController.getConfig() != null) {
+      _configDefaults.add(getConfig());
+      
+      setConfig(newController.getConfig());
+    }
 
     if (newController.getArchivePath() != null)
       setArchivePath(newController.getArchivePath());
@@ -354,7 +381,7 @@ abstract public class
 
       ArrayList<DeployConfig> initList = new ArrayList<DeployConfig>();
 
-      initList.addAll(_configDefaults);
+      fillInitList(initList);
 
       thread.setContextClassLoader(instance.getClassLoader());
       Vfs.setPwd(getRootDirectory());
@@ -373,6 +400,14 @@ abstract public class
     } finally {
       thread.setContextClassLoader(oldLoader);
     }
+  }
+
+  protected void fillInitList(ArrayList<DeployConfig> initList)
+  {
+    initList.addAll(_configDefaults);
+
+    if (_config != null && ! initList.contains(_config))
+      initList.add(_config);
   }
 
   protected void configureInstanceVariables(I instance)

@@ -937,8 +937,9 @@ public class ApplicationContainer
   {
     WebAppController controller = _uriToAppCache.get(subURI);
 
-    if (controller != null)
+    if (controller != null) {
       return controller;
+    }
     
     controller = _appDeploy.findController(subURI);
 

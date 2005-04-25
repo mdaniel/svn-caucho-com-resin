@@ -54,6 +54,7 @@ public class BeanTypeStrategy extends TypeStrategy {
 
   private final Method _setParent;
   private final Method _setLocation;
+  private final Method _setSystemId;
   private final Method _setNode;
   private final Method _init;
   private final Method _replaceObject;
@@ -74,6 +75,9 @@ public class BeanTypeStrategy extends TypeStrategy {
 
     _setLocation = findMethod("setConfigLocation",
 	   	              new Class[] { String.class, int.class });
+
+    _setSystemId = findMethod("setConfigSystemId",
+	   	              new Class[] { String.class  });
 
     /*
     _setSystemId = findMethod("setConfigSystemId",
@@ -195,6 +199,9 @@ public class BeanTypeStrategy extends TypeStrategy {
       
 	_setLocation.invoke(bean, qNode.getFilename(), qNode.getLine());
       }
+      
+      if (_setSystemId != null)
+	_setSystemId.invoke(bean, node.getBaseURI());
     
       // XXX: DependencyBean
 

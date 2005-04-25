@@ -148,7 +148,7 @@ public class EnvServerManager implements EnvironmentListener {
     
       _ejbAdmin = new EJBAdmin(this);
 
-      _protocolManager = new EjbProtocolManager();
+      _protocolManager = new EjbProtocolManager(this);
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {

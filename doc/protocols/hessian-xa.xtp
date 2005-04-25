@@ -1,0 +1,39 @@
+<document>
+  <header>
+    <product>resin</product>
+    <title>Hessian Transactions</title>
+    <description>
+    </description>
+  </header>
+
+  <body>
+    <summary/>
+
+<section title="XA">
+
+<example>
+public interface TransactionService {
+  public static final int VOTE_READ_ONLY = 0;
+  public static final int VOTE_ROLLBACK = 1;
+  public static final int VOTE_COMMIT = 2;
+
+  public int prepare(String xid);
+  public void commit(String xid);
+
+  public void rollback(String xid);
+}
+
+</example>
+
+</section>
+
+<example>
+&lt;header>transaction-id&Lt;/header>&lt;string>0239431123&lt;/string>
+</example>
+
+<example>
+&lt;header>transaction-endpoint&Lt;/header>&lt;string>http://localhost:8080/hessian/_hessian_xa&lt;/string>
+</example>
+
+  </body>
+</document>

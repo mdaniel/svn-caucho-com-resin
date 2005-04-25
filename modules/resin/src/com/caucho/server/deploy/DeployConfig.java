@@ -37,6 +37,7 @@ import java.util.logging.Level;
 import javax.servlet.jsp.el.ELException;
 
 import com.caucho.vfs.Path;
+import com.caucho.vfs.Vfs;
 
 import com.caucho.config.BuilderProgram;
 import com.caucho.config.ConfigException;
@@ -203,7 +204,7 @@ public class DeployConfig {
       if (rootDir != null)
 	return rootDir;
     
-      return null;
+      return Vfs.lookup();
     } catch (Exception e) {
       log.log(Level.WARNING, e.toString(), e);
 

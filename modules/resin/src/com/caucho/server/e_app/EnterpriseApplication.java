@@ -370,6 +370,10 @@ public class EnterpriseApplication
 
       ejbServer.initEJBs();
     }
+
+    // updates the invocation caches
+    if (_container != null)
+      _container.clearCache();
   }
 
   /**
@@ -399,6 +403,10 @@ public class EnterpriseApplication
 	}
       }
       */
+
+      for (WebAppController webApp : _webApps) {
+	_container.getApplicationGenerator().update(webApp.getContextPath());
+      }
     } finally {
       _lifecycle.toActive();
       
@@ -478,7 +486,14 @@ public class EnterpriseApplication
 
       log.fine(this + " destroying");
 
+      ArrayList<WebAppController> webApps = _webApps;
       _webApps = null;
+
+      if (webApps != null) {
+	for (WebAppController webApp : webApps) {
+	  _container.getApplicationGenerator().update(webApp.getContextPath());
+	}
+      }
     } finally {
       thread.setContextClassLoader(oldLoader);
 

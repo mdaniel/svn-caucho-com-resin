@@ -102,6 +102,7 @@ import com.caucho.server.dispatch.Invocation;
 import com.caucho.server.dispatch.InvocationDecoder;
 import com.caucho.server.dispatch.InvocationMatcher;
 import com.caucho.server.dispatch.ErrorFilterChain;
+import com.caucho.server.dispatch.ExceptionFilterChain;
 
 import com.caucho.server.e_app.EarConfig;
 
@@ -632,7 +633,13 @@ public class ServletServer extends ProtocolDispatchServer
   public void buildInvocation(Invocation invocation)
     throws Throwable
   {
-    if (_lifecycle.waitForActive(_waitForActiveTime)) {
+    if (_configException != null) {
+      invocation.setFilterChain(new ExceptionFilterChain(_configException));
+      invocation.setApplication(getErrorApplication());
+      invocation.setDependency(AlwaysModified.create());
+      return;
+    }
+    else if (_lifecycle.waitForActive(_waitForActiveTime)) {
       _hostContainer.buildInvocation(invocation);
     }
     else {
@@ -842,12 +849,14 @@ public class ServletServer extends ProtocolDispatchServer
    */
   public void classLoaderDestroy(DynamicClassLoader loader)
   {
+    /*
     try {
       Jmx.unregister("resin:name=default,type=Server");
       Jmx.unregister("resin:type=ThreadPool");
     } catch (Throwable e) {
       log.log(Level.FINEST, e.toString(), e);
     }
+    */
   }
 
   /**
@@ -998,9 +1007,9 @@ public class ServletServer extends ProtocolDispatchServer
       if (isModified()) {
 	// XXX: message slightly wrong
 	log.info("Resin restarting due to configuration change");
-      
-	stop();
-	destroy();
+
+	//destroy();
+	_controller.restart();
 	return;
       }
 
@@ -1010,12 +1019,14 @@ public class ServletServer extends ProtocolDispatchServer
 
 	  if (port.isClosed()) {
 	    log.info("Resin restarting due to closed port: " + port);
-	    destroy();
+	    // destroy();
+	    _controller.restart();
 	  }
 	}
       } catch (Throwable e) {
 	log.log(Level.WARNING, e.toString(), e);
-	destroy();
+	// destroy();
+	_controller.restart();
 	return;
       }
     } finally {
@@ -1163,7 +1174,7 @@ public class ServletServer extends ProtocolDispatchServer
 
     try {
       thread.setContextClassLoader(_classLoader);
-      
+
       if (! _lifecycle.toStopping())
 	return;
 
@@ -1215,6 +1226,22 @@ public class ServletServer extends ProtocolDispatchServer
     } finally {
       thread.setContextClassLoader(oldLoader);
     }
+  }
+
+  /**
+   * Restarts the server.
+   */
+  public void restart()
+  {
+    _controller.restart();
+  }
+
+  /**
+   * Updates the server.
+   */
+  public void update()
+  {
+    _controller.update();
   }
 
   /**

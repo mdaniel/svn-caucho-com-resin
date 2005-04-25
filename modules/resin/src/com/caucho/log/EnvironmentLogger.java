@@ -173,7 +173,6 @@ class EnvironmentLogger extends Logger implements ClassLoaderListener {
       }
     }
 
-    
     Handler []newHandlers = new Handler[handlers.size()];
     handlers.toArray(newHandlers);
 
@@ -235,8 +234,9 @@ class EnvironmentLogger extends Logger implements ClassLoaderListener {
   {
     Boolean value = _useParentHandlers.get();
 
-    if (value == null)
+    if (value == null) {
       return super.getUseParentHandlers();
+    }
     else
       return Boolean.TRUE.equals(value);
   }

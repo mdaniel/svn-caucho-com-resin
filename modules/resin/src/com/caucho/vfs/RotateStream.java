@@ -70,7 +70,6 @@ public class RotateStream extends StreamImpl {
   private static HashMap<String,SoftReference<RotateStream>> _formatStreams
     = new HashMap<String,SoftReference<RotateStream>>();
 
-  private Path _path;
   private String _formatPath;
   
   private String _archiveFormat;
@@ -255,6 +254,17 @@ public class RotateStream extends StreamImpl {
     handleAlarm();
     
     new RotateAlarm(this);
+  }
+
+  /**
+   * Returns the Path associated with the stream.
+   */
+  public Path getPath()
+  {
+    if (_source != null)
+      return _source.getPath();
+    else
+      return super.getPath();
   }
 
   /**

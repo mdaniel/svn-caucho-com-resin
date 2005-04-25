@@ -33,6 +33,7 @@ import java.io.InputStream;
 import java.io.IOException;
 
 import java.util.Map;
+import java.util.HashMap;
 
 import java.util.logging.Logger;
 
@@ -72,6 +73,7 @@ import com.caucho.xml.QDocument;
 import com.caucho.xml.Xml;
 
 import com.caucho.el.EL;
+import com.caucho.el.MapVariableResolver;
 
 /**
  * Facade for Resin's configuration builder.
@@ -498,6 +500,25 @@ public class Config {
          throws ELException
   {
     return AttributeStrategy.evalString(str);
+  }
+
+  /**
+   * Evaluates an EL string in the context.
+   */
+  public static String evalString(String str, HashMap<String,Object> varMap)
+         throws ELException
+  {
+    return EL.evalString(str, getEnvironment(varMap));
+  }
+
+  public static VariableResolver getEnvironment(HashMap<String,Object> varMap)
+  {
+    VariableResolver parent = Config.getEnvironment();
+
+    if (varMap != null)
+      return new MapVariableResolver(varMap, parent);
+    else
+      return parent;
   }
 }
 

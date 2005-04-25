@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -90,6 +91,11 @@ public class HessianProtocol extends ProtocolContainer {
                                     primaryKeyClass);
   }
 
+  String calculateURL(String ejbName)
+  {
+    return getURLPrefix() + ejbName;
+  }
+
   /**
    * Returns the skeleton
    */
@@ -108,6 +114,9 @@ public class HessianProtocol extends ProtocolContainer {
       else
 	objectId = queryString;
     }
+
+    if (serverId.equals("/_ejb_xa_resource"))
+      return new XAResourceSkeleton(getProtocolManager().getServerManager().getTransactionManager());
 
     AbstractServer server = getProtocolManager().getServerByEJBName(serverId);
 

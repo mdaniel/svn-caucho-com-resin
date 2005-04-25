@@ -102,6 +102,14 @@ abstract public class ExpandDeployController<I extends DeployInstance>
   {
     return _rootDirectory;
   }
+  
+  /**
+   * Sets the root directory
+   */
+  protected void setRootDirectory(Path rootDirectory)
+  {
+    _rootDirectory = rootDirectory;
+  }
 
   /**
    * Gets the archive path.

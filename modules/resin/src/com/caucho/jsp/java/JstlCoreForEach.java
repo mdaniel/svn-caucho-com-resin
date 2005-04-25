@@ -83,8 +83,11 @@ public class JstlCoreForEach extends JstlNode {
       _var = value;
     else if (VAR_STATUS.equals(name))
       _varStatus = value;
-    else if (ITEMS.equals(name))
+    else if (ITEMS.equals(name)) {
       _items = value;
+      _attributeNames.add(name);
+      _attributeValues.add(value);
+    }
     else if (BEGIN.equals(name))
       _begin = value;
     else if (END.equals(name))
@@ -145,15 +148,10 @@ public class JstlCoreForEach extends JstlNode {
    */
   public String getCustomTagName()
   {
-    if (! hasDeclaration())
+    if (_tag == null)
       return null;
-    
-    int depth = getDepth();
-
-    if (isInteger())
-      return "_jsp_int_loop_" + depth;
     else
-      return "_jsp_iter_loop_" + depth;
+      return _tag.getId();
   }
 
   /**
@@ -231,30 +229,27 @@ public class JstlCoreForEach extends JstlNode {
   public void generatePrologue(JspJavaWriter out)
     throws Exception
   {
-    if (hasDeclaration()) {
-      int depth = getDepth();
-
-      if (isInteger())
-	_tagVar = "_jsp_int_loop_" + depth;
-      else
-	_tagVar = "_jsp_iter_loop_" + depth;
-
-      if (! isFirst()) {
-      }
-      else if (isInteger())
-	out.println("com.caucho.jsp.IntegerLoopSupportTag " + _tagVar + " = null;");
-      else
-	out.println("com.caucho.jsp.IteratorLoopSupportTag " + _tagVar + " = null;");
-    }
-
     TagInstance parent = getParent().getTag();
-
 
     _tag = parent.findTag(getQName(), _attributeNames);
 
-    if (_tag == null) {
+    if (_tag != null) {
+      _tagVar = _tag.getId();
+    }
+    else {
+      String id = "_jsp_loop_" + _gen.uniqueId();
+      
       _tag = parent.addTag(getQName(), null, null,
 			   _attributeNames, _attributeValues);
+
+      _tag.setId(id);
+      
+      _tagVar = _tag.getId();
+
+      if (isInteger())
+	out.println("com.caucho.jsp.IntegerLoopSupportTag " + _tagVar + " = null;");
+      else
+	out.println("com.caucho.jsp.IteratorLoopSupportTag " + _tagVar + " = null;");
     }
 
     generatePrologueChildren(out);

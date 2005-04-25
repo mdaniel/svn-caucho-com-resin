@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -72,10 +73,12 @@ public class EJBServlet extends GenericServlet {
   private String _containerId;
   private String _servletId;
   private String _localId;
+
+  private boolean _isDebug;
   
   // URL to bean map
   private Hashtable<CharSequence,Skeleton> _beanMap
-  = new Hashtable<CharSequence,Skeleton>();
+    = new Hashtable<CharSequence,Skeleton>();
 
   private EjbServerManager _ejbManager;
   private ProtocolContainer _protocolContainer;
@@ -87,6 +90,14 @@ public class EJBServlet extends GenericServlet {
   protected String getDefaultProtocolContainer()
   {
     return "com.caucho.hessian.HessianProtocol";
+  }
+
+  /**
+   * Set true for a debug.
+   */
+  public void setDebug(boolean debug)
+  {
+    _isDebug = debug;
   }
 
   /**
@@ -165,11 +176,16 @@ public class EJBServlet extends GenericServlet {
       String pathInfo = req.getPathInfo();
       String queryString = req.getQueryString();
       
-      CharBuffer cb = CharBuffer.allocate();
+      CharBuffer cb = new CharBuffer();
       cb.append(pathInfo);
       cb.append('?');
       cb.append(queryString);
       
+      InputStream is = req.getInputStream();
+
+      if (_isDebug) {
+      }
+
       Skeleton skeleton  = (Skeleton) _beanMap.get(cb);
 
       if (skeleton == null) {
@@ -198,8 +214,10 @@ public class EJBServlet extends GenericServlet {
           throw new ServletException(L.l("Can't load skeleton for `{0}?{1}'",
                                          pathInfo, queryString));
 
-        if (skeleton != null)
+        if (skeleton != null) {
+	  skeleton.setDebug(_isDebug);
           _beanMap.put(cb, skeleton);
+	}
       }
 
       skeleton._service(req.getInputStream(), res.getOutputStream());

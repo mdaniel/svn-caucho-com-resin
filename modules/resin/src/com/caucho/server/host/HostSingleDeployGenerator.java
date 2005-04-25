@@ -110,7 +110,7 @@ public class HostSingleDeployGenerator extends DeployGenerator<HostController> {
   public void init()
     throws Exception
   {
-    _controller = new HostController(_config, _container);
+    _controller = new HostController(_config.getId(), _config, _container, null);
 
     _controller.init();
   }
@@ -137,12 +137,12 @@ public class HostSingleDeployGenerator extends DeployGenerator<HostController> {
   /**
    * Merges the entries.
    */
-  public HostController mergeEntry(HostController entry, String name)
+  public HostController mergeController(HostController controller, String name)
   {
     if (! _controller.isNameMatch(name))
-      return entry;
+      return controller;
     else
-      return entry.merge(_controller);
+      return controller.merge(_controller);
   }
 
   public String toString()

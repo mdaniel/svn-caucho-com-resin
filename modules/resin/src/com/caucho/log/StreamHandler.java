@@ -161,7 +161,9 @@ public class StreamHandler extends Handler {
    */
   public boolean equals(Object o)
   {
-    if (! (o instanceof StreamHandler))
+    if (this == o)
+      return true;
+    else if (getClass() != o.getClass())
       return false;
 
     StreamHandler handler = (StreamHandler) o;
@@ -169,6 +171,15 @@ public class StreamHandler extends Handler {
     if (_os == null || handler._os == null)
       return false;
     else
-      return _os.getPath().equals(handler._os.getPath());
+      return _os.getSource() == handler._os.getSource();
+  }
+
+  public String toString()
+  {
+    if (_os == null)
+      return "StreamHandler@" + System.identityHashCode(this) + "[]";
+    else
+      return ("StreamHandler@" + System.identityHashCode(this)
+	      + "[" + _os.getPath() + "]");
   }
 }

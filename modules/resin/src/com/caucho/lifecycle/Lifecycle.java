@@ -264,7 +264,7 @@ public final class Lifecycle implements LifecycleState {
    */
   public boolean isDestroyed()
   {
-    return IS_DESTROYED <= _state;
+    return IS_DESTROYING <= _state;
   }
   
   /**

@@ -264,7 +264,7 @@ public class DOMBuilder implements XMLWriter, ContentHandler, ErrorHandler {
     _prefixValues.clear();
 
     int length = attributes.getLength();
-    for (int i = length - 1; i >= 0; i--) {
+    for (int i = 0; i < length; i++) {
       QName attrName = attributes.getName(i);
       String value = attributes.getValue(i);
 

@@ -2249,7 +2249,7 @@ public abstract class AbstractHttpRequest
 
     res.sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
 
-    _server.destroy();
+    _server.update();
   }
   
   /**

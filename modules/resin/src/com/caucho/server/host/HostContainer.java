@@ -442,6 +442,7 @@ public class HostContainer implements DispatchBuilder {
 	}
 	
 	_errorApplication.init();
+	_errorApplication.start();
       } catch (Throwable e) {
 	log.log(Level.WARNING, e.toString(), e);
       } finally {

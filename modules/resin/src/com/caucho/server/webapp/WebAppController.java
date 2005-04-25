@@ -69,6 +69,7 @@ import com.caucho.jmx.Jmx;
 import com.caucho.jmx.IntrospectionMBean;
 
 import com.caucho.server.deploy.EnvironmentDeployController;
+import com.caucho.server.deploy.DeployConfig;
 
 import com.caucho.server.webapp.mbean.WebAppMBean;
 
@@ -86,6 +87,8 @@ public class WebAppController
 
   // The context path is the URL prefix for the web-app
   private String _contextPath;
+
+  private String _warName;
 
   // regexp values
   private ArrayList<String> _regexpValues;
@@ -113,11 +116,6 @@ public class WebAppController
     _container = container;
       
     setContextPath(contextPath);
-
-    if (container != null) {
-      for (WebAppConfig config : container.getWebAppDefaultList())
-	addConfigDefault(config);
-    }
 
     getVariableMap().put("app", new Var());
   }
@@ -174,6 +172,22 @@ public class WebAppController
     }
 
     return _contextPath;
+  }
+
+  /**
+   * Sets the war name prefix.
+   */
+  public void setWarName(String warName)
+  {
+    _warName = warName;
+  }
+
+  /**
+   * Gets the war name prefix.
+   */
+  public String getWarName()
+  {
+    return _warName;
   }
   
   /**
@@ -391,6 +405,26 @@ public class WebAppController
   }
 
   /**
+   * Initialize the controller.
+   */
+  protected void initBegin()
+  {
+    getVariableMap().put("app-dir", getRootDirectory());
+    
+    super.initBegin();
+  }
+
+  protected void fillInitList(ArrayList<DeployConfig> initList)
+  {
+    if (_container != null) {
+      for (WebAppConfig config : _container.getWebAppDefaultList())
+	initList.add(config);
+    }
+
+    super.fillInitList(initList);
+  }
+
+  /**
    * Instantiate the application.
    */
   protected Application instantiateDeployInstance()
@@ -408,8 +442,6 @@ public class WebAppController
     app.setDynamicDeploy(isDynamicDeploy());
 
     super.configureInstanceVariables(app);
-
-    getVariableMap().put("app-dir", app.getAppDir());
   }
 
   protected Path calculateRootDirectory()
@@ -464,17 +496,20 @@ public class WebAppController
 
     public String getId()
     {
-      return getName();
-    }
-
-    public String getName()
-    {
       String id = WebAppController.this.getId();
       
       if (id != null)
 	return id;
-      
-      return WebAppController.this.getContextPath();
+      else
+	return WebAppController.this.getContextPath();
+    }
+
+    public String getName()
+    {
+      if (getWarName() != null)
+	return getWarName();
+      else
+	return getId();
     }
 
     public Path getAppDir()

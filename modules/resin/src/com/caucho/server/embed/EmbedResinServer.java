@@ -149,6 +149,14 @@ public class EmbedResinServer {
   }
 
   /**
+   * Returns true for the active state.
+   */
+  public boolean isActive()
+  {
+    return _server != null && _server.isActive();
+  }
+
+  /**
    * Returns true for the destroyed state.
    */
   public boolean isDestroyed()

@@ -98,15 +98,23 @@ class HostController extends EnvironmentDeployController<Host,HostConfig> {
 
   private ArrayList<Dependency> _dependList = new ArrayList<Dependency>();
 
-  HostController(HostConfig config, HostContainer container)
+  HostController(String id,
+		 HostConfig config,
+		 HostContainer container,
+		 Map<String,Object> varMap)
   {
-    super(config);
+    super(id, config);
 
-    setHostName(config.getHostName());
+    setHostName(id);
+
+    if (varMap != null)
+      getVariableMap().putAll(varMap);
     
     getVariableMap().put("host", _hostVar);
 
     setContainer(container);
+    
+    setRootDirectory(config.calculateRootDirectory(getVariableMap()));
   }
 
   HostController(String id, Path rootDirectory, HostContainer container)
@@ -115,6 +123,7 @@ class HostController extends EnvironmentDeployController<Host,HostConfig> {
 
     setHostName(id);
 
+    getVariableMap().put("name", id);
     getVariableMap().put("host", _hostVar);
     
     setContainer(container);

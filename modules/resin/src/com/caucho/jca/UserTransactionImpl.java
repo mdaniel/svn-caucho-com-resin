@@ -364,8 +364,10 @@ public class UserTransactionImpl implements UserTransaction {
 	   HeuristicRollbackException, SecurityException, SystemException
   {
     try {
+      /* XXX: interaction with hessian XA
       if (_xaDepth == 0)
 	throw new IllegalStateException("Can't commit outside of a transaction.  Either the UserTransaction.begin() is missing or the transaction has already been committed or rolled back.");
+      */
       
       _transactionManager.commit();
     } finally {

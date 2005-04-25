@@ -327,6 +327,14 @@ abstract public class DeployController<I extends DeployInstance>
   }
 
   /**
+   * Returns true if the instance is in the active state.
+   */
+  public boolean isActive()
+  {
+    return _lifecycle.isActive();
+  }
+
+  /**
    * Returns true if the instance is in the stopped state.
    *
    * @return true on stopped state
@@ -453,6 +461,15 @@ abstract public class DeployController<I extends DeployInstance>
   }
 
   /**
+   * Force an instance restart from an admin command.
+   */
+  public final void restart()
+  {
+    _strategy.stop(this);
+    _strategy.start(this);
+  }
+
+  /**
    * Update the controller from an admin command.
    */
   public final void update()
@@ -466,7 +483,9 @@ abstract public class DeployController<I extends DeployInstance>
    */
   public I request()
   {
-    if (_strategy != null)
+    if (_lifecycle.isDestroyed())
+      return null;
+    else if (_strategy != null)
       return _strategy.request(this);
     else
       return null;
@@ -479,7 +498,9 @@ abstract public class DeployController<I extends DeployInstance>
    */
   public I subrequest()
   {
-    if (_strategy != null)
+    if (_lifecycle.isDestroyed())
+      return null;
+    else if (_strategy != null)
       return _strategy.subrequest(this);
     else
       return null;

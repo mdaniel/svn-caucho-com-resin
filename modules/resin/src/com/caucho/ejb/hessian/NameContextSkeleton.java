@@ -112,8 +112,11 @@ public class NameContextSkeleton extends Skeleton {
       EJBHome home = server.getEJBHome();
       
       out.startReply();
-      
-      out.writeObject(home);
+
+      if (home != null)
+	out.writeObject(home);
+      else // if (server instanceof 
+	out.writeObject(server.getRemoteObject());
 
       out.completeReply();
     }

@@ -209,7 +209,9 @@ class StubGenerator extends MarshalGenerator {
 
     String mangleName = mangleMethodName(method.getName(), method, false);
     
-    println("out.startCall(\"" + mangleName + "\");");
+    println("out.startCall();");
+    println("_hessian_writeHeaders(out);");
+    println("out.writeMethod(\"" + mangleName + "\");");
 
     for (int i = 0; i < params.length; i++)
       printMarshalType(params[i], "_arg" + i);

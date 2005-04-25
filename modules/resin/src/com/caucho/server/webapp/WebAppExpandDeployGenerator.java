@@ -70,11 +70,11 @@ public class WebAppExpandDeployGenerator extends ExpandDeployGenerator<WebAppCon
 
   private String _urlPrefix = "";
 
-  private ArrayList<WebAppConfig> _webAppDefaults =
-    new ArrayList<WebAppConfig>();
+  private ArrayList<WebAppConfig> _webAppDefaults
+    = new ArrayList<WebAppConfig>();
 
-  private HashMap<Path,WebAppConfig> _webAppConfigMap =
-    new HashMap<Path,WebAppConfig>();
+  private HashMap<Path,WebAppConfig> _webAppConfigMap
+    = new HashMap<Path,WebAppConfig>();
 
   private ClassLoader _parentLoader;
 
@@ -238,6 +238,8 @@ public class WebAppExpandDeployGenerator extends ExpandDeployGenerator<WebAppCon
       = new WebAppController(name, rootDirectory, _container);
 
     try {
+      controller.setWarName(segmentName.substring(1));
+      
       controller.setStartupMode(getStartupMode());
       // controller.setRedeployMode(getRedeployMode());
 

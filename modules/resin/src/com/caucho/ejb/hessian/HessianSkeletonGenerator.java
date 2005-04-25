@@ -158,7 +158,7 @@ class HessianSkeletonGenerator extends MarshalGenerator {
     IntMap map = new IntMap();
     
     println();
-    print("protected void _execute(CharBuffer method, HessianInput in, HessianOutput out)");
+    print("protected void _execute(CharBuffer method, HessianInput in, HessianOutput out, com.caucho.ejb.xa.TransactionContext xa)");
     println("  throws Throwable");
     println("{");
     pushDepth();
@@ -229,7 +229,7 @@ class HessianSkeletonGenerator extends MarshalGenerator {
 
     printCall("obj", methodName, param);
 
-    println("out.startReply();");
+    println("startReply(out, xa);");
 
     if (! retType.equals(void.class))
       printMarshalType(retType, "_ret");

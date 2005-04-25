@@ -222,7 +222,7 @@ public class Application extends ServletContextImpl
 					  
   private UrlMap<CacheMapping> _cacheMappingMap = new UrlMap<CacheMapping>();
 
-  private LruCache<String,RequestDispatcher> _dispatcherCache;
+  private LruCache<String,RequestDispatcherImpl> _dispatcherCache;
   
   // The login manager
   private AbstractLogin _loginManager;
@@ -1270,12 +1270,13 @@ public class Application extends ServletContextImpl
     deploy.setParent(_controller);
     deploy.setContainer(_parent);
     
-    // XXX: The parent is added in the init()
     // _parent.addWebAppDeploy(gen);
 
     deploy.setParentClassLoader(getClassLoader());
     // deploy.deploy();
-    _parent.addWebAppDeploy(deploy);
+    // XXX: The parent is added in the init()
+    // server/10t3
+    // _parent.addWebAppDeploy(deploy);
 
     Environment.addEnvironmentListener(deploy, getClassLoader());
 
@@ -1337,12 +1338,14 @@ public class Application extends ServletContextImpl
   {
     if (_configException == null)
       _configException = e;
-    /*
-    if (e != null && _invocationDependency != null) {
-      _invocationDependency.add(AlwaysModified.create());
-      _invocationDependency.clearModified();
+
+    // server/13l8
+    if (e != null) { // && _invocationDependency != null) {
+      // _invocationDependency.add
+      // _invocationDependency.clearModified();
+
+      _classLoader.addDependency(AlwaysModified.create());
     }
-    */
   }
 
   /**
@@ -1901,9 +1904,9 @@ public class Application extends ServletContextImpl
     else if (! url.startsWith("/"))
       throw new IllegalArgumentException(L.l("request dispatcher url `{0}' must be absolute", url));
 
-    RequestDispatcher disp = getDispatcherCache().get(url);
+    RequestDispatcherImpl disp = getDispatcherCache().get(url);
 
-    if (disp != null)
+    if (disp != null && ! disp.isModified())
       return disp;
     
     Invocation includeInvocation = new Invocation();
@@ -1952,15 +1955,15 @@ public class Application extends ServletContextImpl
     }
   }
 
-  private LruCache<String,RequestDispatcher> getDispatcherCache()
+  private LruCache<String,RequestDispatcherImpl> getDispatcherCache()
   {
-    LruCache<String,RequestDispatcher> cache = _dispatcherCache;
+    LruCache<String,RequestDispatcherImpl> cache = _dispatcherCache;
 
     if (cache != null)
       return cache;
-
+    
     synchronized (this) {
-      cache = new LruCache<String,RequestDispatcher>(1024);
+      cache = new LruCache<String,RequestDispatcherImpl>(1024);
       _dispatcherCache = cache;
       return cache;
     }
@@ -2335,7 +2338,7 @@ public class Application extends ServletContextImpl
   public void destroy()
   {
     stop();
-    
+
     if (! _lifecycle.toDestroy())
       return;
 

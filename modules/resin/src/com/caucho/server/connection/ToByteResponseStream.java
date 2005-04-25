@@ -71,7 +71,7 @@ public abstract class ToByteResponseStream extends AbstractResponseStream {
   private boolean _isClosed;
   protected boolean _isFinished;
 
-  private EncodingWriter _toByte;
+  private EncodingWriter _toByte = Encoding.getLatin1Writer();
 
   protected ToByteResponseStream()
   {
@@ -122,16 +122,19 @@ public abstract class ToByteResponseStream extends AbstractResponseStream {
   public void setEncoding(String encoding)
     throws UnsupportedEncodingException
   {
+    EncodingWriter toByte;
+    
     if (encoding == null)
-      _toByte = Encoding.getLatin1Writer();
+      toByte = Encoding.getLatin1Writer();
+    else
+      toByte = Encoding.getWriteEncoding(encoding);
+
+    if (toByte != null)
+      _toByte = toByte;
     else {
-      _toByte = Encoding.getWriteEncoding(encoding);
-      
-      if (_toByte == null) {
-	_toByte = Encoding.getLatin1Writer();
+      _toByte = Encoding.getLatin1Writer();
 	
-	throw new UnsupportedEncodingException(encoding);
-      }
+      throw new UnsupportedEncodingException(encoding);
     }
   }
 

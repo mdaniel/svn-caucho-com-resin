@@ -77,6 +77,9 @@ public class EjbTransactionManager {
 
   private Hashtable<Transaction,TransactionContext> _transactionMap
     = new Hashtable<Transaction,TransactionContext>();
+
+  private Hashtable<String,TransactionContext> _foreignTransactionMap
+    = new Hashtable<String,TransactionContext>();
   
   private EnvServerManager _ejbManager;
 
@@ -587,6 +590,90 @@ public class EjbTransactionManager {
     trans.init(false);
 
     return trans;
+  }
+
+  /**
+   * Creates a transaction from an external xid.
+   */
+  public TransactionContext startTransaction(String xid)
+  {
+    try {
+      TransactionContext xa = _foreignTransactionMap.get(xid);
+
+      if (xa != null) {
+	resume(xa, xa.getTransaction(), null);
+	return xa;
+      }
+
+      xa = beginRequiresNew();
+
+      _foreignTransactionMap.put(xid, xa);
+
+      return xa;
+    } catch (Throwable e) {
+      log.log(Level.FINE, e.toString(), e);
+
+      _foreignTransactionMap.remove(xid);
+
+      return null;
+    }
+  }
+
+  /**
+   * Creates a transaction from an external xid.
+   */
+  public void finishTransaction(String xid)
+  {
+    try {
+      TransactionContext xa = _foreignTransactionMap.get(xid);
+
+      if (xa == null) {
+      }
+      else if (xa.isEmpty()) {
+	_foreignTransactionMap.remove(xid);
+	xa.commit();
+      }
+      else {
+	suspend();
+	//
+      }
+    } catch (Exception e) {
+      log.log(Level.FINE, e.toString(), e);
+    }
+  }
+
+  /**
+   * Commits a transaction from an external xid.
+   */
+  public void commitTransaction(String xid)
+  {
+    try {
+      TransactionContext xa = _foreignTransactionMap.remove(xid);
+
+      if (xa != null) {
+	resume(xa, xa.getTransaction(), null);
+	xa.commit();
+      }
+    } catch (Throwable e) {
+      log.log(Level.FINE, e.toString(), e);
+    }
+  }
+
+  /**
+   * Rolls-back a transaction from an external xid.
+   */
+  public void rollbackTransaction(String xid)
+  {
+    try {
+      TransactionContext xa = _foreignTransactionMap.remove(xid);
+
+      if (xa != null) {
+	resume(xa, xa.getTransaction(), null);
+	xa.rollback();
+      }
+    } catch (Throwable e) {
+      log.log(Level.FINE, e.toString(), e);
+    }
   }
 
   /**

@@ -150,6 +150,22 @@ public class TransactionImpl implements Transaction, AlarmListener {
   }
 
   /**
+   * Return true if the transaction has no resources.
+   */
+  public boolean isEmpty()
+  {
+    if (_isDead)
+      return true;
+    else if (_resourceCount > 0)
+      return false;
+    // XXX: ejb/3692 because TransactionContext adds itself
+    else if (_syncList != null && _syncList.size() > 1)
+      return false;
+    else
+      return true;
+  }
+
+  /**
    * Start a transaction.
    */
   void begin()
