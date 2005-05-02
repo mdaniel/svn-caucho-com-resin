@@ -1,0 +1,5 @@
+<navigation threaded="true" section="Resin : JMX : Cookbook" comment="true">
+  <item title="Cookbook" link="index.xtp">
+    <item link="servlet.xtp" title="Servlet"/>
+  </item>
+</navigation>
