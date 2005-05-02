@@ -134,7 +134,7 @@ sharing distributed sessions.</p>
 </defun>
 
 <defun title="document-directory" version="Resin 3.0">
-<parents>host, web-app</parents>
+<parents>web-app</parents>
 
 <p>Configures the directory where web pages will be placed when
 using webserver-style deployment instead of war-based deployment.</p>
@@ -163,7 +163,6 @@ configured explicitly.</p>
 <tr><td>host-alias<td>Aliases matching the same host<td>none
 <tr><td>secure-host-name<td>Host to use for a redirect to SSL<td>none
 <tr><td>root-directory<td>Root directory for host files<td>parent directory
-<tr><td>document-directory<td>Document directory root<td>root-directory
 <tr><td>startup-mode<td>`automatic', `lazy', or `manual', see <a href="doc|config|resin#startup-mode">Startup and Redeploy Mode</a><td>automatic
 </deftable-childtags>
 
@@ -174,6 +173,9 @@ configured explicitly.</p>
 
   &lt;root-directory>/opt/www/www.foo.com&lt;/root-directory>
 
+  <web-app id="/" document-directory="webapps/ROOT">
+    
+  </web-app>
   ...
 &lt;/host>
 </example>

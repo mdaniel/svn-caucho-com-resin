@@ -10,7 +10,7 @@
   </resource>
 
   <!--
-     - Configures the JMS connection factory
+     - Configures the JMS connectionAbstract factory
     -->
   <resource var="jmsFactory" type="com.caucho.jms.ConnectionFactoryImpl">
   </resource>

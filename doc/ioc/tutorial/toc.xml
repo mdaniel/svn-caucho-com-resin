@@ -1,5 +1,5 @@
 <navigation threaded="true" section="Resin : IoC/AOP : Tutorials" comment="true">
   <item title="Tutorials" link="index.xtp">
-    <item link="aop-connection/index.xtp" title="AOP Conn"/>
+    <item link="aop-connectionAbstract/index.xtp" title="AOP Conn"/>
   </item>
 </navigation>

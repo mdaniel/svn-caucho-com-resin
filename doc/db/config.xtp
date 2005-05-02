@@ -322,7 +322,7 @@ specific to the driver and are not generic enough for resin to provide a
 named configuration tag.</p>
 
 <p>For example, MySQL drivers accept the <code>useUnicode</code> parameter, if
-true the driver will use Unicode characeter encodings when handling
+true the driver will use Unicode character encodings when handling
 strings.</p>
 
 <example>
@@ -344,18 +344,40 @@ strings.</p>
 
 </section> <!-- driver-config -->
 
+<section name="pooling" title="Pooling Configuration">
+
+<p>
+Pooling configuration controls the behaviour of Resin's pooling of database
+connections.  For most applications and databases the only needed change is to
+increase the max-connections value to meet high demand.  Other pooling
+parameters have defaults that are based on our years of experience with many
+different databases in many different applications.  Changes from the defaults
+should only be done in response to specific problems, and with a good
+understanding of how pooling works.
+</p>
+
+</section>
+
+
 <section name="reliability" title="Reliability Configuration">
 
 <p>Resin's database pool can test if the pooled database connection
-is still alive by configuring a <var/ping/> query.  The database connection
-may become stale if the database is restarted, possibly for maintenance.
-Normally when a database connection is returned to the pool it will wait
-there until the next request.  If the database goes down in the meantime,
-the connection will become stale.  The <var/ping/> configuration can test
-the database connection.</p>
+is still alive by configuring a <var/ping/> query.  This is typically only
+necessary if the <a href="#pooling">pooling</a> parameters are changed from
+their default values.
+
+<p>If the pool is configured with a long max-idle-time the database connection
+may become stale if the database is restarted, or if the database is configured
+with a shorter connection timeout value than the configuration of the Resin
+pool.  Normally when a database connection is returned to the pool it will wait
+there until the next request or the idle-time expires.  If the database goes
+down in the meantime or closes the connection, the connection will become
+stale.  The <var/ping/> configuration can test the database connection.</p>
 
 <p>When pinging, Resin's DBPool will test a table specified with the
-<var/ping-table/> parameter.  For a ping-table of my_table, Resin will
+<var/ping-table/> parameter before returning the connection to the application.
+If the ping fails, the connection is assumed to be no good and a different
+connection from the pool is returned.  For a ping-table of my_table, Resin will
 use a query like the following:</p>
 
 <example>
@@ -476,98 +498,6 @@ will happen even if the code using the connection throws an exception.</p>
 
 </section> <!-- usage/get-connection -->
 
-<section name="usage/servlet" title='Using Databases from a Servlet'>
-    
-<p>The following is a sample design pattern for getting new database
-connections from within a servlet..  The <var/try ... finally/> block is very
-important.  Without the close in the finally block, Resin's database pool can
-loose connections.
-</p>  
-
-<p>This is so importaant, it is worth repeating.  The <var/try
-... finally/> block is very important.  Without the close in the finally block,
-Resin's database pool can loose connections.  If you fail to close() a
-connection, Resin cannot know that it is not being used anymore, and cannot
-allocate it for another request.  Eventually, you may run out of connections.
-</p>
-
-<p>The <code>DataSource</code> is obtained using the <a
-config-tag="jndi-name"/> specified when configuring the database resource.  The
-JNDI lookup of <code/DataSource/> is done only once, the <code/DataSource/> is
-stored in the <code>_pool</code> member variable so that it can be used for
-each request. If it was not stored, there would be an impact on performance
-from having to do the lookup each time.</p>
-
-<example title="TestDatabase.java">
-package test;
-
-import java.io.*;
-
-import java.sql.*;
-import javax.servlet.*;
-import javax.servlet.http.*;
-import javax.naming.*;
-import javax.sql.*;
-
-public class TestDatabase extends HttpServlet {
-  private final static String DATASOURCE_NAME = "jdbc/test";
-
-  DataSource _pool;
-
-  public void init()
-    throws ServletException
-  {
-    try {
-      Context env = (Context) new InitialContext().lookup("java:comp/env");
-
-      _pool = (DataSource) env.lookup(DATASOURCE_NAME);
-
-      if (_pool == null)
-        throw new ServletException("`" + DATASOURCE_NAME + "' is an unknown DataSource");
-    } catch (NamingException e) {
-      throw new ServletException(e);
-    }
-  }
-
-  public void doGet(HttpServletRequest req,
-                    HttpServletResponse res)
-    throws IOException, ServletException
-  {
-    res.setContentType("text/html");
-    PrintWriter out = res.getWriter();
-
-    Connection conn = null;
-    try {
-      conn = _pool.getConnection();
-
-      Statement stmt = conn.createStatement();
-
-      ResultSet rs = stmt.executeQuery("select NAME, PRICE from BROOMS");
-
-      out.println("Brooms:&lt;br>");
-      while (rs.next()) {
-        out.print(rs.getString(1));
-        out.print(" ");
-        out.print(rs.getInt(2));
-        out.println("&lt;br>");
-      }
-
-      rs.close();
-      stmt.close();
-    } catch (SQLException e) {
-      throw new ServletException(e);
-    } finally {
-      try {
-        if (conn != null)
-          conn.close();
-      } catch (SQLException e) {
-      }
-    }
-  }
-}
-</example>
-
-</section> <!-- usage/servlet -->
 
 </section> <!-- usage -->
 

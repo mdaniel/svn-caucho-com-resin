@@ -247,7 +247,7 @@ handling, and for host-wide behavior.</p>
 <tr><td>id<td>The url prefix selecting this application.<td>n/a
 <tr><td>url-regexp<td>A regexp to select this application.<td>n/a
 <tr><td>document-directory<td>The document directory for
-the application, corresponding to a url of <var>/<i>id</i>/</var>. <TODO>(confirm:) Relative to the <a config-tag='host'/> document-directory</TODO>.  Can use regexp replacement variables.<td>Same as id or the regexp match
+the application, corresponding to a url of <var>/<i>id</i>/</var>. A relative path is relative to the <a config-tag="root-directory"/> of the containing <a config-tag="host"/>.  Can use regexp replacement variables.<td>A relative path constricted with the id or the regexp match
 <tr><td>startup-mode<td>`automatic', `lazy', or `manual', see <a href="doc|config|resin#startup-mode">Startup and Redeploy Mode</a><td>automatic
 <tr><td>redeploy-mode<td>`automatic' or `manual', see <a href="doc|config|resin#startup-mode">Startup and Redeploy Mode</a><td>automatic
 
@@ -271,18 +271,11 @@ using the Apache htdocs directory to serve pages.</p>
 &lt;/host&gt;
 </example>
 
-<p>The following example sets the root application to the IIS
-root directory.  The host and web-app will use the
-<TODO>(confirm:) server root-directory</TODO> as a default.</p>
+<p>The following example sets the root web-app to the IIS
+root directory. </p>
 
 <example>
-&lt;resin&gt;
-  &lt;server document-directory='c:\inetpub\wwwroot'&gt;
-
-    ...
-
-  &lt;/server&gt;
-&lt;/resin&gt;
+  &lt;web-app id='/' document-directory='C:/inetpub/wwwroot'&gt;
 </example>
 
 <p>When the <var/web-app/> is specified with a <var/url-regexp/>,
@@ -838,27 +831,6 @@ was not found.
 <tr><td>javax.servlet.error.exception_type<td>java.lang.Class
 </deftable>
 
-</section>
-
-
-<section title="Plugin connection error page">
-
-<p>The following is a special case for the mod_caucho or isapi_srun
-plugin to redirect to another page if it can't connect to srun.
-Unlike the other two forms, this must be in <a config-tag="server"/> as
-below.  It can't be in a specific web-app.
-</p>
-
-<example title="Special can't connect to srun">
-&lt;resin xmlns="http://caucho.com/ns/resin">
-&lt;server>
-
-&lt;error-page exception-type='connection'
-              location='/missing_file.html'/>
-	      
-&lt;/server&gt;
-&lt;/resin&gt;
-</example>
 </section>
 
 </defun>

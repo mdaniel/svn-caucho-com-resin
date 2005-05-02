@@ -22,9 +22,12 @@ functions.  The EL Environment is inherited, the objects available in
 <example title="host regexp">
 &lt;host regexp="www.([^.]+).com"&gt;
   &lt;root-directory&gt;/opt/www/${'${'}host.regexp[1]}&lt;/root-directory&gt;
-  &lt;document-directory&gt;${'${'}host.rootDir}/doc&lt;/document-directory&gt;
 
   &lt;context-param server-id="${'${'}server.name}"/&gt;
+
+  &lt;web-app id="/"&gt;
+    &lt;document-directory&gt;webapps/ROOT&lt;/document-directory&gt;
+  &lt;/web-app&gt;
 &lt;/host&gt;
 </example>
 

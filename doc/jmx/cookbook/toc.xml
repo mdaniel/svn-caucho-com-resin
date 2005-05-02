@@ -1,5 +1,5 @@
 <navigation threaded="true" section="Resin : JMX : Cookbook" comment="true">
-  <item title="Cookbooks" link="index.xtp">
+  <item title="Cookbook" link="index.xtp">
     <item link="restart.xtp" title="Restart JMX"/>
   </item>
 </navigation>

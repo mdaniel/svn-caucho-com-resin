@@ -3,24 +3,24 @@
   <log name="example" level="fine" path="WEB-INF/debug.log" timestamp="[%M:%S.%s] "
     format="${log.loggerName} ${log.message}"/>
 
-  <!-- 
-     - JMS  
+  <!--
+     - JMS
     -->
-  <resource jndi-name="jms/queue-connection-factory"
+  <resource jndi-name="jms/queue-connectionAbstract-factory"
     type='com.caucho.jms.JVMQueueConnectionFactory'/>
 
   <resource jndi-name="jms/queue"
     type='com.caucho.jms.memory.MemoryQueue'/>
-  
-  <!-- 
+
+  <!--
      - EJB SERVER
      - see also message.ejb
     -->
   <ejb-server config-directory="WEB-INF">
-    <jms-connection-factory>jms/queue-connection-factory</jms-connection-factory>
+    <jms-connection-factory>jms/queue-connectionAbstract-factory</jms-connection-factory>
   </ejb-server>
 
-  <!-- 
+  <!--
      - CLIENT
     -->
 

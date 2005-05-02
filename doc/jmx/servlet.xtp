@@ -1,13 +1,13 @@
 <document>
   <header>
     <product>resin</product>
-    <title>Administration Servlet</title>
+    <title>Information Servlet /resin-status </title>
     <type>contents</type>
     <description>
       <p>Resin provides a primitive status servlet
-      <var>/admin/resin-status</var>.  It's disabled by default to
-      avoid any security issues.  The servlet must be enabled
-      explicitly.</p>
+      /resin-status.  It's disabled by default to
+      avoid any security issues.
+      </p>
     </description>
   </header>
 
@@ -15,30 +15,55 @@
     <summary/>
 
 
-<example>
-&lt;web-app id='/admin'>
-  &lt;servlet servlet-name='status'
-              servlet-class='com.caucho.servlets.ResinStatusServlet'>
-    &lt;init>
-      &lt;enable>read&lt;/enable>
-    &lt;/init>
-  &lt;/servlet>
+<section title="Configure the /resin-status servlet">
 
-  &lt;servlet-mapping url-pattern='/resin-status' servlet-name='status'/>
+<example title="resin.conf /resin-status configuration">
+&lt;resin xmlns="http://caucho.com/ns/resin"
+       xmlns:resin="http://caucho.com/ns/resin/core">
 
-  &lt;!-- only allow the localhost to use the admin --> 
-  &lt;security-constraint>
-    &lt;web-resource-collection>
-      &lt;url-pattern>/*&lt;/url-pattern>
-    &lt;/web-resource-collection>
+...
 
-    &lt;ip-constraint>
-      &lt;allow&gt;127.0.0.1/32&lt;/allow&gt;
-    &lt;/ip-constraint>
+&lt;web-app-default>
 
-  &lt;/security-constraint>
-&lt;/web-app>
+      &lt;servlet-mapping servlet-class='com.caucho.servlets.ResinStatusServlet'&gt;
+        &lt;url-pattern&gt;/resin-status&lt;/url-pattern&gt;
+        &lt;init enable="read"/&gt;
+      &lt;/servlet-mapping&gt;
+
+      &lt;security-constraint&gt;
+        &lt;web-resource-collection url-pattern="/resin-status/*"/&gt;
+        &lt;ip-constraint&gt;
+          &lt;allow&gt;127.0.0.1/32&lt;/allow&gt;
+        &lt;/ip-constraint&gt;
+      &lt;/security-constraint&gt;
+
+&lt;/web-app-default>
+
+...
+
 </example>
+</section>
 
+<section title="Interpreting the proxy cache hit ratio">
+
+<p>
+The proxy cache is Resin's internal proxy cache (in Resin Pro).
+The hit ratio marks what percentage of requests are served out of the
+cache, i.e. quickly, and which percentage are taking the full time.
+</p>
+
+<p>
+The proxy cache hit ratio is useful for seeing if you can improve your
+application's performance with better caching.  For example, if you had
+a news site like www.cnn.com, you should have a high hit rate to make
+sure you're not overtaxing the database.
+</p>
+
+<p>
+If you have a low value, you might want to look at your heavily used
+pages to see if you can cache more.
+</p>
+
+</section>
 </body>
 </document>

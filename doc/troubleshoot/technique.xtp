@@ -87,6 +87,40 @@ consume resources and cause OutOfMemory exceptions.  That's
 especially true when you start adding third-party software like
 databases, EJB, and Corba ORBs.</p>
 
+<section title="Thread dump using JDK 5 tools">
+<p>
+<var/jps/> and <var/jstack/> are useful tools included in JDK 5, providing a
+quick command line method for obtaining stack traces of all current threads.
+</p>
+
+<example title="jps and jstack">
+<b># jps</b>
+12903 Jps
+20087 Resin
+<b># jstack 20087</b>
+Attaching to process ID 20087, please wait...
+Debugger attached successfully.
+Client compiler detected.
+JVM version is 1.5.0-beta2-b51
+Thread 12691: (state = BLOCKED)
+ - java.lang.Object.wait(long) (Compiled frame; information may be imprecise)
+ - com.caucho.util.ThreadPool.runTasks() @bci=111, line=474 (Compiled frame)
+ - com.caucho.util.ThreadPool.run() @bci=85, line=423 (Interpreted frame)
+ - java.lang.Thread.run() @bci=11, line=595 (Interpreted frame)
+
+
+Thread 12689: (state = BLOCKED)
+ - java.lang.Object.wait(long) (Compiled frame; information may be imprecise)
+ - com.caucho.util.ThreadPool.runTasks() @bci=111, line=474 (Compiled frame)
+ - com.caucho.util.ThreadPool.run() @bci=85, line=423 (Interpreted frame)
+ - java.lang.Thread.run() @bci=11, line=595 (Interpreted frame)
+
+...
+
+</example>
+
+</section>
+
 <section title="Thread dump by sending a signal">
 
 <p>On Windows, ctrl-break may produce a thread dump.</p>
@@ -312,8 +346,9 @@ before any production launch.
 memory leaks.
 <li>Common application errors include:
 <ul>
+<li>ThreadLocal variables that are not properly cleared at the end of each request.
 <li>Singleton or static hash maps and caches, esp check for clearing web-app restarts.
-<li>Launched threads which aren't stopped on web-app restart.
+<li>Spawned threads which are not stopped on web-app restart.
 <li>web-app variables (like the "application" variable), stored in a static variable.
 </ul>
 <li>If the heap is clean, i.e. -verbosegc shows a steady heap, you'll need to

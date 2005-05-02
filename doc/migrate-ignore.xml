@@ -5,7 +5,7 @@
 
   <!-- outdated, use jstl -->
   <resin-2.0>$java_tut/tag-xsl.xtp</resin-2.0>
-  <resin-2.0>$java_tut/tag-connection.xtp</resin-2.0>
+  <resin-2.0>$java_tut/tag-connectionAbstract.xtp</resin-2.0>
 
   <!-- deemphasize xslt-lite -->
   <resin-2.0>xtp-jsp-stylescript.xtp</resin-2.0>
@@ -70,7 +70,7 @@
   <resin-2.0>$article/resin_overview.xtp</resin-2.0> <!-- old -->
 
   <redir id="config/balance.xtp">$article/balance.xtp</redir>
-  <redir id="ejb/tutorial/ejb-session-hello/doc.xtp">$resin-ee/ejb-tut/ejb-hello-client.xtp</redir> 
+  <redir id="ejb/tutorial/ejb-session-hello/doc.xtp">$resin-ee/ejb-tut/ejb-hello-client.xtp</redir>
   <redir id="ejb/tutorial/ejb-session-hello/doc.xtp">$resin-ee/ejb-tut/ejb-hello-config.xtp</redir>
 
   <redir id="protocols/tutorial/burlap-hello/doc.xtp">$resin-ee/ejb-tut/burlap-hello.xtp</redir>

@@ -242,7 +242,6 @@ parameters in the custom class.</p>
 
 <defun title="log">
 <parents>resin, server, host-default, host, web-app-default, web-app</parents>
-<default><TODO/></default>
    
 <p>Configure the amount and destination of debug logging for the JDK
 java.util.logging.* API.</p>
@@ -281,6 +280,10 @@ java.util.logging.* API.</p>
     <td>the format for the archive filename when a rollover occurs,
         see <a href="#rollover">Rollovers</a>.
     <td>see below
+
+<tr><td>mbean-name
+    <td>an mbean name, see <a href="#mbean">MBean control</a>.
+    <td>no mbean name, no mbean registration
 
 <tr><td>handler
     <td>add a custom Handler, the name of a class that extends 
@@ -449,6 +452,7 @@ log message.  <code/format/> recognizes EL-expressions. The EL variable
 <tr><th>Accessor<th>Value
 <tr><td>${'${'}log.level}<td>The level of the log record
 <tr><td>${'${'}log.name}<td>The source loggers name
+<tr><td>${'${'}log.shortName}<td>A shorter version of the source loggers name, "Foo" instead of "com.hogwarts.Foo"
 <tr><td>${'${'}log.message}<td>The message, with no formatting or localization
 <tr><td>${'${'}log.millis}<td>event time in milliseconds since 1970
 <tr><td>${'${'}log.sourceClassName}<td>Get the name of the class that issued the logging request (may not be available at runtime)
@@ -522,7 +526,7 @@ space pad the values and make the results look a little nicer:</p>
             "Application[http://localhost:8080/freelistbm] starting"
 </results>
 
-</section>
+</section> <!-- Format-String -->
 
 
 <section title="com.caucho.log.SyslogHandler">

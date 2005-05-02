@@ -12,7 +12,7 @@
   <xtp:directive.page import='java.util.*'/>
   <xtp:directive.page import='java.net.*'/>
   <xtp:directive.page import='com.caucho.server.webapp.*'/>
-  <xtp:directive.page import='com.caucho.server.connection.*'/>
+  <xtp:directive.page import='com.caucho.server.connectionAbstract.*'/>
 
 <xsl:include href='caucho/defaultcopy.xsl'/>
 <xsl:include href='caucho/nodeinfo.xsl'/>

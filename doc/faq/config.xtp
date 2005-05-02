@@ -48,19 +48,6 @@ the lowest priority.</p>
 
 </section>
 
-<section title="How do I change the 'cannot connect' message?">
-
-<p>In the resin.conf, add an <var/error-page/> directive using <var/connection/>
-for the exception type.  The location must be an absolute path understandable
-to your web server.  For example, since the web server will display this
-message, you can't forward to a jsp file.</p>
-
-<example>
-&lt;error-page exception-type='connection' location='/errorpage.html'/>
-</example>
-
-</section>
-
 <section title='How do I set a virtual directory?'>
 
 <p>Use the <var/&lt;path-mapping>/> directive.  For example, to grab images

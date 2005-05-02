@@ -13,37 +13,7 @@
   <body>
     <summary objsummary-in-localtoc='1'/>
 
-<faq title="Where can I learn more about SSL?">
-<ul>
-<li><a href="http://httpd.apache.org/docs-2.0/ssl/ssl_intro.html">Apache documentation</a>
-</ul>
-</faq>
-
-<faq title="Converting a JSSE Keystore to OpenSSL">
-<ul>
-<li><a href="http://httpd.apache.org/docs-2.0/ssl/ssl_intro.html">Apache documentation</a>
-</ul>
-<a href="http://www.thauvin.net/blog/stories.jsp?id=42">link</a>
-</faq>
-
-<!--
-<faq title="How do I use DIGEST with my custom Authenticator?">
-<description>
-<p>I have a custom Authenticator that accesses passwords stored in my
-backend server using a custom method.  How can I take advantage of the extra
-protection that is provided with digest passwords?</p>
-</description>
-
-<p>The best method is to store the digested password in the backend server
-instead of the plaintext password.
-
-<p>Instead of implementing AbstractAuthenticator.loginImpl, you'll
-implement getDigestPassword or better yet getDigestSecret().</p>
-
-    </faq>
--->
-
-<faq title="How do I handle port 80 and root issues on Linux?">
+<faq name="port80" title="How do I handle port 80 and root issues on Linux?">
 
 <p>When using the 2.6 Linux kernel or RedHat 9.0, you can use
 the standard user-name configuration.  On older Linux versions,
@@ -66,5 +36,149 @@ iptables -t nat -A PREROUTING -d your hostname -p tcp --dport 80 -j REDIRECT --t
 <p>ipchains (for Linux 2.2. kernels) should work similar - it might also be possible to map the port directly inside your firewall.</p>
 </faq>
 
-  </body>
+<faq name="sslresources" title="Where can I learn more about SSL?">
+<ul>
+<li><a href="http://httpd.apache.org/docs-2.0/ssl/ssl_intro.html">Apache documentation</a>
+</ul>
+</faq>
+
+<faq name="convertjsse" title="Converting a JSSE Keystore to OpenSSL">
+<ul>
+<li><a href="http://www.thauvin.net/blog/stories.jsp?id=42">Erik's Weblog - Converting a JSSE Keystore to OpenSSL</a>
+</ul>
+</faq>
+
+<faq name="ssl-vhosts" title="How can I handle SSL for virtual hosts if I have a separate IP for each host?">
+<description>
+<p>
+I have different IP's, but am trying to avoid using them in the config
+files as we have a
+develepment, staging and production environment each of which would have
+different IP's.  Is it possible to specify multiple IP's for it to try binding
+to?
+</p>
+</description>
+
+<p>
+The basic way to configure ssl for multiple virtual hosts is to bind an https
+listener to the ip address (interface) for the corresponding virtual host:
+</p>
+
+<example>
+&lt;http host="*" port="80"/&gt;
+
+&lt;http host="199.199.0.10" port="443" virtual-host="gryffindor.com"&gt;
+  &lt;openssl&gt;
+    &lt;certificate-file&gt;keys/gryffindor.crt&lt;/certificate-file&gt;
+    &lt;certificate-key-file&gt;keys/gryffindor.key&lt;/certificate-key-file&gt;
+    &lt;password&gt;test123&lt;/password&gt;
+  &lt;/openssl&gt;
+&lt;/http&gt;
+
+&lt;http host="199.199.0.11" port="443" virtual-host="slytherin.com"&gt;
+  &lt;openssl&gt;
+    &lt;certificate-file&gt;keys/slytherin.crt&lt;/certificate-file&gt;
+    &lt;certificate-key-file&gt;keys/slytherin.key&lt;/certificate-key-file&gt;
+    &lt;password&gt;test123&lt;/password&gt;
+  &lt;/openssl&gt;
+&lt;/http&gt;
+
+...
+
+&lt;host id="gryffindor.com"&gt;
+  &lt;host-alias&gt;www.gryffindor.com&lt;/host-alias&gt;
+
+  ...
+
+&lt;/host&gt;
+
+&lt;host id="slytherin.com"&gt;
+  &lt;host-alias&gt;www.slytherin.com&lt;/host-alias&gt;
+
+  ...
+&lt;/host&gt;
+
+...
+</example>
+
+<p>
+If you want to keep one .conf file for different environments,
+you can use the configuration
+<a href="doc|config|control">control statements</a>.
+</p>
+
+<example>
+&lt;resin:choose&gt;
+
+&lt;resin:when test="${'${'}sslmode == 'production'}"&gt;
+  &lt;resin:log&gt;Production mode https listeners&lt;/resin:log&gt;
+
+  &lt;http host="199.199.0.10" port="443"&gt;
+    &lt;openssl&gt;
+      &lt;certificate-file&gt;keys/gryffindor.crt&lt;/certificate-file&gt;
+      &lt;certificate-key-file&gt;keys/gryffindor.key&lt;/certificate-key-file&gt;
+      &lt;password&gt;test123&lt;/password&gt;
+    &lt;/openssl&gt;
+  &lt;/http&gt;
+
+  &lt;http host="199.199.0.11" port="443"&gt;
+    &lt;openssl&gt;
+      &lt;certificate-file&gt;keys/slytherin.crt&lt;/certificate-file&gt;
+      &lt;certificate-key-file&gt;keys/slytherin.key&lt;/certificate-key-file&gt;
+      &lt;password&gt;test123&lt;/password&gt;
+    &lt;/openssl&gt;
+  &lt;/http&gt;
+&lt;/resin:when&gt;
+
+&lt;resin:when test="${'${'}sslmode == 'staging'}"&gt;
+  &lt;resin:log&gt;Staging mode https listeners&lt;/resin:log&gt;
+
+  &lt;http host="198.168.0.5" port="443"&gt;
+    &lt;openssl&gt;
+      &lt;certificate-file&gt;keys/gryffindor.crt&lt;/certificate-file&gt;
+      &lt;certificate-key-file&gt;keys/gryffindor.key&lt;/certificate-key-file&gt;
+      &lt;password&gt;test123&lt;/password&gt;
+    &lt;/openssl&gt;
+  &lt;/http&gt;
+
+  &lt;http host="198.168.0.6" port="443"&gt;
+    &lt;openssl&gt;
+      &lt;certificate-file&gt;keys/slytherin.crt&lt;/certificate-file&gt;
+      &lt;certificate-key-file&gt;keys/slytherin.key&lt;/certificate-key-file&gt;
+      &lt;password&gt;test123&lt;/password&gt;
+    &lt;/openssl&gt;
+  &lt;/http&gt;
+&lt;/resin:when&gt;
+
+&lt;resin:otherwise&gt;
+  &lt;resin:log&gt;Development mode https listeners&lt;/resin:log&gt;
+
+  &lt;http host="*" port="443"&gt;
+    &lt;openssl&gt;
+      &lt;certificate-file&gt;keys/test.crt&lt;/certificate-file&gt;
+      &lt;certificate-key-file&gt;keys/test.key&lt;/certificate-key-file&gt;
+      &lt;password&gt;test123&lt;/password&gt;
+    &lt;/openssl&gt;
+  &lt;/http&gt;
+&lt;/resin:otherwise&gt;
+
+&lt;/resin:choose&gt;
+</example>
+
+Then start Resin with a -Dsslmode={production|staging|development}.
+
+<example>
+unix&gt; bin/httpd.sh -Dsslmode=production ...
+win&gt; httpd.exe -Dsslmode=production ...
+
+unix&gt; bin/httpd.sh -Dsslmode=staging ....
+win&gt; httpd.exe -Dsslmode=staging ....
+
+unix&gt; bin/httpd.sh -Dsslmode=development ...
+win&gt;$ httpd.exe -Dsslmode=development ...
+</example>
+
+</faq>
+
+</body>
 </document>

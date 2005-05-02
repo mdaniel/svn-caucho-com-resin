@@ -98,14 +98,20 @@ can be reclaimed.
 threads that you can have, too big of a stack size and you will run out of
 memory as each thread is allocated more memory than it needs.</p>
 
+<p>
+The Resin startup scripts (httpd.exe on Windows, wrapper.pl on Unix) will set
+the stack size to 2048k, unless it is specified explicity.  2048k is an
+appropriate value for most situations.
+ </p>
+
 <deftable>
 <tr><th>JVM option passed to Resin<th>Meaning
 <tr><td>-Xss<td>the stack size for each thread
 </deftable>
 
-<p><code>-Xss</code> determines the size of the stack.  You may even be able to
-make this value as low as 1k: <code>-Xss1k</code>.  If the stack space is too
-small, eventually you will see an exception <a href="javadoc|java.lang.StackOverflowError|"/>.
+<p><code>-Xss</code> determines the size of the stack: <code>-Xss1024k</code>.
+If the stack space is too small, eventually you will see an exception <a
+href="javadoc|java.lang.StackOverflowError|"/>.
 
 <p>Some people have reported that it is necessary to change stack size settings
 at the OS level for Linux.  A call to <code>ulimit</code> may be necessary, and
@@ -118,10 +124,66 @@ ulimit -s 2048
 
 <section name="monitor" title="Monitoring the JVM">
 
-<p>Sun provides the <a href="external|sun|jvmstat">jvmstat tools</a>, which are
-useful for monitoring the JVM.  They are particularily good for monitoring
-garbage collection, helping you gather the information you need to optimize
-your memory settings.</p>
+<p>
+JDK 5 includes a number of tools that are useful for monitoring the JVM.
+Documentation for these tools is available from the
+<a href="http://java.sun.com/j2se/1.5.0/docs/tooldocs/index.html#manage">Sun
+website</a>.  For JDK's prior to 5, Sun provides the
+<a href="external|sun|jvmstat">jvmstat tools</a>.
+</p>
+
+<p>
+The most useful tool is <var/jconsole/>.  Details on using jconsole are
+provided in the <a href="doc|jmx|console">Administration</a> section of the
+Resin documentation.
+</p>
+
+<example title="jconsole">
+win> ./httpd.exe -Dcom.sun.management.jmxremote
+unix> bin/httpd.sh -Dcom.sun.management.jmxremote
+
+<i> ... in another shell window ... </i>
+
+win> jconsole.exe
+unix> jconsole
+
+<i>Choose Resin's JVM from the "Local" list.</i>
+</example>
+
+<p>
+<var/jps/> and <var/jstack/> are also useful, providing a quick command line
+method for obtaining stack traces of all current threads.
+Details on obtaining and interpreting stack traces is in the
+<a href="doc|troubleshoot|technique#thread-dump">Troubleshooting</a>
+section of the Resin documentation.
+</p>
+
+<example title="jps and jstack">
+<b># jps</b>
+12903 Jps
+20087 Resin
+<b># jstack 20087</b>
+Attaching to process ID 20087, please wait...
+Debugger attached successfully.
+Client compiler detected.
+JVM version is 1.5.0-beta2-b51
+Thread 12691: (state = BLOCKED)
+ - java.lang.Object.wait(long) (Compiled frame; information may be imprecise)
+ - com.caucho.util.ThreadPool.runTasks() @bci=111, line=474 (Compiled frame)
+ - com.caucho.util.ThreadPool.run() @bci=85, line=423 (Interpreted frame)
+ - java.lang.Thread.run() @bci=11, line=595 (Interpreted frame)
+
+
+Thread 12689: (state = BLOCKED)
+ - java.lang.Object.wait(long) (Compiled frame; information may be imprecise)
+ - com.caucho.util.ThreadPool.runTasks() @bci=111, line=474 (Compiled frame)
+ - com.caucho.util.ThreadPool.run() @bci=85, line=423 (Interpreted frame)
+ - java.lang.Thread.run() @bci=11, line=595 (Interpreted frame)
+
+...
+
+</example>
+
 </section>
 
 </body>

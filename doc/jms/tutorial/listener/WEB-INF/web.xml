@@ -8,7 +8,7 @@
 
     <!--
        - Configures the Listener with the Resin ConnectionFactory and Queue.
-       - Other JMS 1.1 implementations can replace the connection-factory
+       - Other JMS 1.1 implementations can replace the connectionAbstract-factory
        - and destination.
       -->
     <resource-adapter>

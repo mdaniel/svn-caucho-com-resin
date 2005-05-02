@@ -75,8 +75,10 @@ it's a good idea to test configuring with Resin standalone.</p>
 
 <p>Each virtual host has its own <a
 href='resin.xtp#host'>host</a> block.  At the very least, each host
-will define the <var/id/> specifying the host name and an
-<var/document-directory/> to specify the document root.</p>
+will define the <var/id/> specifying the host name and a root web-app.
+A <a config-tag="root-directory"/> is often used to provide a host specific
+root for logfiles.
+</p>
 
 <p>The following sample configuration defines two virtual hosts,
 gryffindor and slytherin, each with its own document directory.</p>
@@ -85,22 +87,33 @@ gryffindor and slytherin, each with its own document directory.</p>
 &lt;server>
   ...
 
-&lt;host id='gryffindor.caucho.com'>
-  &lt;document-directory>/home/www/gryffindor/docs&lt;/document-directory>
-  ...		    
-&lt;/host>
+&lt;host id='gryffindor.caucho.com'&gt;
 
-&lt;host id='slytherin.caucho.com'>
-  &lt;document-directory>/home/www/slytherin/docs&lt;/document-directory>
+  &lt;root-directory&gt;/home/www/gryffindor&lt;/root-directory&gt;
+
+  &lt;web-app id="/"&gt;
+    &lt;document-directory&gt;webapps/ROOT&lt;/document-directory&gt;
+  &lt;/web-app&gt;
   ...		    
-&lt;/host>
+&lt;/host&gt;
+
+&lt;host id='slytherin.caucho.com'&gt;
+
+  &lt;root-directory&gt;/home/www/slytherin&lt;/root-directory&gt;
+
+  &lt;web-app id="/"&gt;
+    &lt;document-directory&gt;webapps/ROOT&lt;/document-directory&gt;
+  &lt;/web-app&gt;
+  ...		    
+&lt;/host&gt;
+
 </example>
 
 <p>Browsing http://gryffindor.caucho.com/test.jsp will look for
-/home/www/gryffindor/docs/test.jsp.</p>
+/home/www/gryffindor/webapps/ROOT/test.jsp.</p>
 
 <p>Browsing http://slytherin.caucho.com/test.jsp will look for
-/home/www/slytherin/docs/test.jsp.</p>
+/home/www/slytherin/webapps/ROOT/test.jsp.</p>
 
 </section>
 
@@ -230,10 +243,17 @@ the appropriate back-end JVM.</p>
   &lt;/cluster>
 
   &lt;host id='www.gryffindor.com'>
-    &lt;document-directory>/home/www/gryffindor/htdocs&lt;/document-directory>
+  
+    &lt;root-directory>/home/www/gryffindor&lt;/root-directory>
+
+    &lt;web-app id="/"&gt;
+      &lt;document-directory&gt;webapps/ROOT&lt;/document-directory&gt;
+    &lt;/web-app&gt;
 
     &lt;resin:include href='host-common.conf'/>
+
   &lt;/host>
+
 &lt;/server>
 &lt;/resin>
 </example>
@@ -246,10 +266,17 @@ the appropriate back-end JVM.</p>
   &lt;/cluster>
 
   &lt;host id='www.slytherin.com'>
-    &lt;document-directory>/home/www/slytherin/htdocs&lt;/document-directory>
+
+    &lt;root-directory>/home/www/gryffindor&lt;/root-directory>
+
+    &lt;web-app id="/"&gt;
+      &lt;document-directory&gt;webapps/ROOT&lt;/document-directory&gt;
+    &lt;/web-app&gt;
 
     &lt;resin:include href='host-common.conf'/>
+
   &lt;/host>
+
 &lt;/server>
 &lt;/resin>
 </example>

@@ -186,6 +186,31 @@ private Class classForName(String classname)
 
 </faq>
 
+<faq title="package-required" title="Why do I have to put my classes in a package?">
+<description>
+If I make a class that is not in a package, Resin does not recognize it and 
+does not load it.
+</description>
+
+<p>
+Starting with Java 1.4 the use of classes that are not in a package (sometimes
+called the "default" package") is deprecated.  Java classes should always be in
+a package.  In some version of Java, packageless classes are not going to be
+supported at all.
+</p>
+
+<p>
+The solution is to put all of your classes in a package.
+</p>
+
+<p>
+See
+<a href="http://java.sun.com/j2se/1.4/compatibility.html">http://java.sun.com/j2se/1.4/compatibility.html</a>, 
+point #8, second bullet point.
+</p>
+
+</faq>
+
 <faq title="How do I specify the default file encoding?">
 
 <description>

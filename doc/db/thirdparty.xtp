@@ -11,23 +11,6 @@
 <body>
 <summary description='none'/>
 
-<!--
-<section title="MySQL Caucho Driver">
-<p>This driver is included with Resin.</p>
-<example>
-&lt;database&gt;
-  &lt;jndi-name&gt;jdbc/mysql&lt;/name&gt;
-  &lt;driver-class&gt;com.caucho.jdbc.mysql.Driver&lt;/driver-class&gt;
-  &lt;driver-url&gt;jdbc:mysql_caucho://localhost:3306/<var/dbname/>&lt;/driver-url&gt;
-  &lt;user&gt;<var/username/>&lt;/user&gt;
-  &lt;password&gt;<var/password/>&lt;/password&gt;
-  ...
-&lt;/database&gt;
-</example>
-
-</section>
--->
-
 <section title="MySQL Connector/J">
 <ul>
 <li><a href="http://www.mysql.com/products/connector-j/index.html">mysql.com Connector/J</a>

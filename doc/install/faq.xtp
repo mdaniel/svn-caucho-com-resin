@@ -156,5 +156,73 @@ initialization steps take up most of the CPU.
 </p>
 </faq>
 
+<faq name="exception-type-connection" title="What happened to exception-type='connection'?">
+<description>
+
+<p>
+In Resin 2.1 I used an <code>exception-type='connection'</code>
+with <a config-tag="error-page"/> to specify the page to show when IIS or
+Apache could not reach the backend Resin server, but that does not work any
+more.
+</p>
+
+</description>
+
+<p>
+Resin 3.0 no longer uses the "connection" exception-type.
+The isapi_srun or mod_caucho plugin, if it cannot contact the backend Resin
+server, propogates a 503 error to IIS or Apache.  So you should be able to use
+IIS or Apache to define custom error pages, and those will be used for your
+error display.
+</p>
+
+<p>
+The reason for this change is due to a change in the way plugins
+work.  In versions prior to 3.0 the plugin reads  and parses the resin.conf
+file.  In version 3.0, the plugin obtains configuration information from
+the backend Resin server and no longer reads the resin.conf file.
+So if the backend server is not available, the plugin cannot forward to an
+error page specified in resin.conf because it does not read resin.conf.
+</p>
+
+<p>
+You can use IIS or Apache to define the location of
+custom error pages for the case where the backend server is down.
+</p>
+
+<example title="Specifying a 503 page with Apache - httpd.conf">
+ErrorDocument 503 /error/serverDownError.shtml
+</example>
+</faq>
+
+<faq name="iis-exe" title="IIS 6 will not serve .exe files">
+
+<description>
+<p>
+Everything seems to work, except that for every file with a <code>.exe</code>
+extension I get "HTTP 404 - File not found".
+</p>
+</description>
+
+<p>(thanks to W Hall)</p>
+
+<p>
+When used with IIS, the isapi_srun.dll plugin will dispatch urls to Resin for
+jsp's and servlets, but will leave static files for IIS.  So this is really an
+IIS issue, Resin is not even trying to handle the url and IIS is failing to
+serve the *.exe file.
+ </p>
+
+<p>
+There is a setting in IIS that prevents .exe files from being
+downloaded/launched. 
+In  IIS (6.0) the setting is found in 
+IIS | Default Website | Properties | Home Directory (tab) | Execute
+Permissions (drop down) | 
+Change from "Scripts and Executables" to "Scripts Only"
+</p>
+
+</faq>
+
 </body>
 </document>

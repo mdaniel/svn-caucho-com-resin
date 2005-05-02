@@ -71,9 +71,9 @@ IISPriority high
 need to configure the document root and any directory aliases.</p>
 
 <p>For many users, the only need to change needed in Resin is to change the
-<a config-tag="document-directory"/> attribute from 'doc' to something like
-'d:/inetpub/wwwroot'.  The mapping of url paths from the browser to real files
-on the disk must be the same for Resin as they are for IIS. For more
+<a config-tag="document-directory"/> attribute from 'webapps/ROOT' to something
+like 'C:/inetpub/wwwroot'.  The mapping of url paths from the browser to real
+files on the disk must be the same for Resin as they are for IIS. For more
 complicated configurations that use mappings in IIS, you'll need to add <a
 href="doc|config|webapp">path-mapping</a> attributes
 to match.</p>
@@ -81,10 +81,10 @@ to match.</p>
 <example title='resin.conf'>
     &lt;!-- configures the default host, matching any host name --&gt;
     &lt;host id=''&gt;
-      <b>&lt;document-directory&gt;d:/inetpub/wwwroot&lt;/document-directory&gt;</b>
 
       &lt;!-- configures the root web-app --&gt;
       &lt;web-app id='/'&gt;
+        <b>&lt;document-directory&gt;C:/inetpub/wwwroot&lt;/document-directory&gt;</b>
         &lt;!-- adds xsl to the search path --&gt;
         &lt;class-loader&gt;
           &lt;simple-loader path="$host-root/xsl"/&gt;
@@ -301,35 +301,6 @@ CauchoStatus yes
 
 </section>
 
-<section name="iis6" title="IIS 6">
-<p>
-IIS 6/Windows 2003 users may need to perform additional steps.
-</p>
-
-<ul>
-
-<li>Make sure that the System account has suffiicient privleges to
-read the <code>C:\InetPub</code> and <code>C:\InetPub\Scripts</code> directory
-and the <code>isapi_srun.dll</code>.
-
-<li>Check the `Web Service Extensions' listed in the `Internet Service Manager'
-to make sure that Resin is listed as a Web Service Extension and has a status
-of "enabled".
-
-<li>Check that the user specified as the
-"application pool identity" for Resin has read/write
-permission to the Resin installation directory.
-In the Internet Service Manager, open the Properties dialog for
-"Application Pools".  Find the User on the "Identity" tab, it may
-be the user named "Network Service" in the drop-down list associated
-with the radio button labeled "predefined".
-Then check physical file permissions on the Resin installation
-directory and all its subdirectories and subfiles, to ensure that
-that user has read/write permission status is "Enabled".
-
-</ul>
-
-</section>
 </section>
 
 <section title="Virtual Sites (Virtual Hosts)">
@@ -470,6 +441,39 @@ more information.
 is good but the resin.conf probably points to the wrong directories.
 </ol>
 
+<section name="iis6" title="Troubleshooting IIS 6">
+<p>
+IIS 6/Windows 2003 users may need to perform additional steps.
+</p>
+
+<ul>
+
+<li>Make sure that the System account has suffiicient privleges to
+read the <code>C:\InetPub</code> and <code>C:\InetPub\Scripts</code> directory
+and the <code>isapi_srun.dll</code>.
+
+<li>Check the `Web Service Extensions' listed in the `Internet Service Manager'
+to make sure that Resin is listed as a Web Service Extension and has a status
+of "enabled". You may need to click "add a new web service extension...", 
+under Extension name add .jsp or whatever your file extension is, 
+click Add and browse to the isapi_srun.dll, check the "Set extension status
+to allowed box", click OK.
+
+
+<li>Check that the user specified as the
+"application pool identity" for Resin has read/write
+permission to the Resin installation directory.
+In the Internet Service Manager, open the Properties dialog for
+"Application Pools".  Find the User on the "Identity" tab, it may
+be the user named "Network Service" in the drop-down list associated
+with the radio button labeled "predefined".
+Then check physical file permissions on the Resin installation
+directory and all its subdirectories and subfiles, to ensure that
+that user has read/write permission status is "Enabled".
+
+</ul>
+
 </section>
-  </body>
+</section>
+</body>
 </document>
