@@ -4,7 +4,7 @@ CC=gcc
 CP=/bin/cp
 CFLAGS=-g -O2 -DPOLL -DHAS_JVMTI -O2 -g -pipe -march=i386 -mcpu=i686 -I/usr/kerberos/include
 CFLAGS_SHLIB=-fpic
-LIBTOOL=/home/ferg/ws/resin/libtool --silent
+LIBTOOL=/home/ferg/test/resin-pro/libtool --silent
 LD=/usr/bin/ld
 LD_SHLIB=gcc
 LIBS_SHLIB=
@@ -14,7 +14,7 @@ APACHE_INC=-I/usr/include/httpd
 apache_conf=/etc/httpd/conf/httpd.conf
 apache_dir=/etc/httpd
 apache_libexec=/usr/lib/httpd/modules
-resin_home=/home/ferg/ws/resin
+resin_home=/home/ferg/test/resin-pro
 INCLUDES = $(APACHE_INC) -DRESIN_HOME=\"$(resin_home)\" -I../common
 C=../common
 COMMON_OBJ=$C/stream.lo $C/config.lo $C/memory.lo

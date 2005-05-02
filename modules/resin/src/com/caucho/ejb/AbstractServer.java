@@ -130,7 +130,7 @@ abstract public class AbstractServer implements EnvironmentBean {
     _ejbManager = manager;
     
     ClassLoader parentLoader = Thread.currentThread().getContextClassLoader();
-    
+
     EnvironmentClassLoader loader;
 
     loader = new EnvironmentClassLoader(parentLoader);

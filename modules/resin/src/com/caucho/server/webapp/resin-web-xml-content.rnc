@@ -672,6 +672,9 @@ r_web-app-Basis =
 
   & r_access-log*
 
+  & (attribute active-wait-time { r_period }
+     | element active-wait-time { r_period })?
+
   & r_allow-servlet-el*
 
   & r_archive-path?

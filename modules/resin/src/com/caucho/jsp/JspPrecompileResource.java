@@ -105,10 +105,7 @@ public class JspPrecompileResource {
     }
 
     if (_application == null) {
-      Object owner = Environment.getOwner();
-
-      if (owner instanceof Application)
-	_application = (Application) owner;
+      _application = Application.getLocal();
     }
 
     if (_application == null)

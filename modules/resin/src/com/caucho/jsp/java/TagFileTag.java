@@ -50,6 +50,7 @@ public class TagFileTag extends GenericTag {
   private boolean _oldScriptingInvalid;
   private JspBody _body;
   private int _maxFragmentIndex;
+  private String _contextVarName;
 
   /**
    * Called when the attributes end.
@@ -164,7 +165,7 @@ public class TagFileTag extends GenericTag {
 
     out.print(name + ".doTag(pageContext, " + childContext + ", out, ");
     if (_body != null)
-      generateFragment(out, _body);
+      generateFragment(out, _body, "pageContext");
     else
       out.print("null");
     
@@ -177,7 +178,9 @@ public class TagFileTag extends GenericTag {
   public String fillTagFileAttributes(JspJavaWriter out, String tagName)
     throws Exception
   {
-    String name = "_jsp_context" + _gen.uniqueId();
+    _contextVarName = "_jsp_context" + _gen.uniqueId();
+
+    String name = _contextVarName;
 
     out.println("com.caucho.jsp.PageContextWrapper " + name + " = com.caucho.jsp.PageContextWrapper.create(pageContext);");
 
@@ -246,7 +249,7 @@ public class TagFileTag extends GenericTag {
 
 	if (attribute != null && 
 	    attribute.getTypeName().equals(JspFragment.class.getName())) {
-	  out.println(generateFragment(frag) + ");");
+	  out.println(generateFragment(frag, "pageContext") + ");");
 	}
 	else
 	  out.println(frag.generateValue() + ");");

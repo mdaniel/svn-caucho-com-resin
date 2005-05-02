@@ -96,7 +96,10 @@ public class CmpProperty {
    */
   public String getLocation()
   {
-    return _location;
+    if (_location != null)
+      return _location;
+    else
+      return _entity.getLocation();
   }
 
   /**

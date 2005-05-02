@@ -75,6 +75,7 @@ import com.caucho.lifecycle.Lifecycle;
 import com.caucho.java.CompileClassNotFound;
 
 import com.caucho.loader.enhancer.ByteCodeEnhancer;
+import com.caucho.loader.enhancer.EnhancerRuntimeException;
 
 import com.caucho.config.types.Period;
 
@@ -958,8 +959,13 @@ public class DynamicClassLoader extends java.net.URLClassLoader
   public void validate()
     throws ConfigException
   {
-    for (int i = 0; i < _loaders.size(); i++)
-      _loaders.get(i).validate();
+    ArrayList<Loader> loaders = _loaders;
+
+    if (loaders == null)
+      throw new IllegalStateException(_L.l("Class loader {0} is closed during initialization.", this));
+    
+    for (int i = 0; i < loaders.size(); i++)
+      loaders.get(i).validate();
   }
 
   /**
@@ -1171,9 +1177,13 @@ public class DynamicClassLoader extends java.net.URLClassLoader
 	    bBuf = enhancedBuffer;
 	    bLen = enhancedBuffer.length;
 	  }
+	  /* RSN-109
 	} catch (RuntimeException e) {
 	  throw e;
 	} catch (Error e) {
+	  throw e;
+	  */
+	} catch (EnhancerRuntimeException e) {
 	  throw e;
 	} catch (Throwable e) {
 	  log().log(Level.WARNING, e.toString(), e);

@@ -578,8 +578,10 @@ abstract public class StoreManager
    */
   protected ClusterServer []getServerList()
   {
-    if (_cluster != null)
-      return _cluster.getServerList();
+    Cluster cluster = _cluster;
+    
+    if (cluster != null)
+      return cluster.getServerList();
     else
       return new ClusterServer[0];
   }

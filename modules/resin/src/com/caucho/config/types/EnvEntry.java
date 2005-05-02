@@ -19,6 +19,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
+ *
  *   Free SoftwareFoundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
@@ -28,9 +29,16 @@
 
 package com.caucho.config.types;
 
+import java.util.logging.Logger;
+import java.util.logging.Level;
+
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
+
 import com.caucho.util.L10N;
 
-import com.caucho.config.BeanBuilderException;
+import com.caucho.config.ConfigException;
+import com.caucho.config.LineConfigException;
 
 import com.caucho.el.Expr;
 
@@ -39,20 +47,35 @@ import com.caucho.naming.Jndi;
 /**
  * Configuration for the env-entry pattern.
  */
-public class EnvEntry {
-  private static L10N L = new L10N(EnvEntry.class);
+public class EnvEntry implements Validator {
+  private static final L10N L = new L10N(EnvEntry.class);
+  private static final Logger log = Logger.getLogger(EnvEntry.class.getName());
 
+  private String _location = "";
+  
   private String _name;
   private Class _type;
   private String _value;
   private String _description;
 
+  public void setId(String id)
+  {
+  }
+  
   /**
    * Sets the description.
    */
   public void setDescription(String description)
   {
     _description = description;
+  }
+
+  /**
+   * Sets the configuration location.
+   */
+  public void setConfigLocation(String filename, int line)
+  {
+    _location = filename + ":" + line + " ";
   }
 
   /**
@@ -110,11 +133,18 @@ public class EnvEntry {
     throws Exception
   {
     if (_name == null)
-      throw new BeanBuilderException(L.l("env-entry needs `env-entry-name' attribute"));
+      throw new ConfigException(L.l("env-entry needs `env-entry-name' attribute"));
     if (_type == null)
-      throw new BeanBuilderException(L.l("env-entry needs `env-entry-type' attribute"));
+      throw new ConfigException(L.l("env-entry needs `env-entry-type' attribute"));
+
+    /*
     if (_value == null)
       throw new BeanBuilderException(L.l("env-entry needs `env-entry-value' attribute"));
+    */
+
+    // actually, should register for validation
+    if (_value == null)
+      return;
 
     Object value = _value;
 
@@ -139,6 +169,34 @@ public class EnvEntry {
       Jndi.bindDeep(_name, value);
     else
       Jndi.bindDeep("java:comp/env/" + _name, value);
+  }
+
+  /**
+   * Validates the resource-ref, i.e. checking that it exists in
+   * JNDI.
+   */
+  public void validate()
+    throws ConfigException
+  {
+    Object obj = null;
+    
+    try {
+      obj = new InitialContext().lookup("java:comp/env/" + _name);
+    } catch (NamingException e) {
+      log.log(Level.FINER, e.toString(), e);
+    }
+
+    if (obj == null)
+      throw error(L.l("env-entry '{0}' was not configured.  All resources defined by <env-entry> tags must be defined in a configuration file.",
+		      _name));
+  }
+
+  public ConfigException error(String msg)
+  {
+    if (_location != null)
+      return new LineConfigException(_location + msg);
+    else
+      return new ConfigException(msg);
   }
 
   public String toString()

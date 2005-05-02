@@ -41,6 +41,7 @@ import com.caucho.util.L10N;
 import com.caucho.util.CharBuffer;
 
 import com.caucho.config.ConfigException;
+import com.caucho.config.LineConfigException;
 
 import com.caucho.java.JavaWriter;
 
@@ -57,6 +58,8 @@ public class Column {
   private Table _table;
   
   private String _name;
+
+  private String _configLocation;
 
   private Type _type;
 
@@ -108,6 +111,14 @@ public class Column {
   public String getName()
   {
     return _name;
+  }
+
+  /**
+   * Sets the config location.
+   */
+  public void setConfigLocation(String location)
+  {
+    _configLocation = location;
   }
 
   /**
@@ -267,12 +278,12 @@ public class Column {
 	  rs.close();
 	  return;
 	} catch (SQLException e) {
-	  throw new ConfigException(L.l("'{0}' is not a valid database column in table '{1}'.  Either the table needs to be created or the create-database-tables attribute must be set.\n\n  {2}\n\n{3}",
-					getName(),
-					getTable().getName(),
-					sql,
-					e.toString()),
-				    e);
+	  throw error(L.l("'{0}' is not a valid database column in table '{1}'.  Either the table needs to be created or the create-database-tables attribute must be set.\n\n  {2}\n\n{3}",
+			  getName(),
+			  getTable().getName(),
+			  sql,
+			  e.toString()),
+		      e);
 	}
       } finally {
 	conn.close();
@@ -412,6 +423,16 @@ public class Column {
   public Object toObjectKey(long value)
   {
     return getType().toObject(value);
+  }
+
+  protected ConfigException error(String msg, Throwable e)
+  {
+    if (_configLocation != null)
+      return new LineConfigException(_configLocation + msg, e);
+    else if (_table.getLocation() != null)
+      return new LineConfigException(_table.getLocation() + msg, e);
+    else
+      return new ConfigException(msg, e);
   }
 
   /**

@@ -3,8 +3,6 @@ default namespace r = "http://caucho.com/ns/resin"
 include "resin-content.rnc"
 
 start = element server {
-  r_class-loader-Group?,
-
   r_server-Content
 }
 

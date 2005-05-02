@@ -433,7 +433,8 @@ abstract public class GenericTag extends JspContainerNode {
     boolean isDynamic = DynamicAttributes.class.isAssignableFrom(_tagClass);
     
     if (method != null) {
-      generateSetParameter(out, name, value, method, allowRtexpr);
+      generateSetParameter(out, name, value, method,
+			   allowRtexpr, "pageContext");
     }
     else if (! isDynamic) {
       throw error(L.l("attribute `{0}' in tag `{1}' has no corresponding set method in tag class `{2}'",

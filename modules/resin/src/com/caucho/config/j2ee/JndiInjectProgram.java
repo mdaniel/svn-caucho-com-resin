@@ -36,6 +36,7 @@ import javax.naming.InitialContext;
 import com.caucho.util.L10N;
 
 import com.caucho.config.BuilderProgram;
+import com.caucho.config.NodeBuilder;
 
 public class JndiInjectProgram extends BuilderProgram {
   private static final L10N L = new L10N(JndiInjectProgram.class);
@@ -49,7 +50,7 @@ public class JndiInjectProgram extends BuilderProgram {
     _method = method;
   }
 
-  public void configure(Object bean)
+  public void configureImpl(NodeBuilder builder, Object bean)
     throws Throwable
   {
     Object value = new InitialContext().lookup(_jndiName);
@@ -61,9 +62,9 @@ public class JndiInjectProgram extends BuilderProgram {
     }
   }
 
-  public Object configure(Class type)
+  public Object configureImpl(NodeBuilder builder, Class type)
     throws Exception
   {
-    throw new UnsupportedOperationException();
+    throw new UnsupportedOperationException(getClass().getName());
   }
 }

@@ -214,8 +214,15 @@ public class EnvironmentClassLoader extends DynamicClassLoader {
       _listeners.add(listener);
     }
 
-    if (_isStarted)
-      listener.environmentStart(this);
+    if (_isStarted) {
+      try {
+	listener.environmentStart(this);
+      } catch (RuntimeException e) {
+	throw e;
+      } catch (Throwable e) {
+	throw new StartRuntimeException(e);
+      }
+    }
   }
 
   /**
@@ -308,11 +315,15 @@ public class EnvironmentClassLoader extends DynamicClassLoader {
 
 	listener.environmentStart(this);
       }
+    } catch (RuntimeException e) {
+      throw e;
+    } catch (Error e) {
+      throw e;
     } catch (Throwable e) {
-      log().log(Level.WARNING, e.toString(), e);
+      throw new StartRuntimeException(e);
+    } finally {
+      _isActive = true;
     }
-    
-    _isActive = true;
   }
 
   /**

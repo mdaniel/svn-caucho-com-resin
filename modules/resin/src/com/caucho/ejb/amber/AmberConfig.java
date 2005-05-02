@@ -141,6 +141,8 @@ public class AmberConfig {
       sqlTable = bean.getSQLTable();
 
     Table table = _manager.createTable(sqlTable);
+    table.setConfigLocation(bean.getLocation());
+			    
     type.setTable(table);
 
     type.setReadOnly(bean.isReadOnly());
@@ -197,6 +199,8 @@ public class AmberConfig {
 
     Type amberType = _manager.createType(dataType);
     Column column = type.getTable().createColumn(sqlName, amberType);
+
+    column.setConfigLocation(cmpField.getLocation());
       
     PropertyField field = new PropertyField(type, fieldName);
     field.setColumn(column);

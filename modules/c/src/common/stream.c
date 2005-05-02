@@ -961,7 +961,7 @@ cse_add_cluster_server(cluster_t *cluster,
 static void
 cse_reuse(stream_t *s, cluster_t *cluster, cluster_srun_t *srun,
           int socket, void *ssl,
-	  int request_time, void *web_pool)
+	  time_t request_time, void *web_pool)
 {
   config_t *config = cluster->config;
   
@@ -990,7 +990,7 @@ cse_reuse(stream_t *s, cluster_t *cluster, cluster_srun_t *srun,
  * Must be called from within a lock.
  */
 static void
-cse_close_idle(srun_t *srun, unsigned int now)
+cse_close_idle(srun_t *srun, time_t now)
 {
   int tail;
   int next_tail;
@@ -1066,7 +1066,7 @@ cse_recycle(stream_t *s, unsigned int now)
 }
 
 void
-close_srun(srun_t *srun, unsigned int now)
+close_srun(srun_t *srun, time_t now)
 {
   int tail;
 
@@ -1089,7 +1089,7 @@ close_srun(srun_t *srun, unsigned int now)
  */
 static int
 cse_reuse_socket(stream_t *s, cluster_t *cluster, cluster_srun_t *cluster_srun,
-		 unsigned int now, void *web_pool)
+		 time_t now, void *web_pool)
 {
   int head;
   int next_head;
@@ -1202,7 +1202,7 @@ cse_close_all()
 }
 
 static int
-select_host(cluster_t *cluster, unsigned int now)
+select_host(cluster_t *cluster, time_t now)
 {
   int size;
   int round_robin;
@@ -1281,7 +1281,7 @@ select_host(cluster_t *cluster, unsigned int now)
 static int
 open_connection_group(stream_t *s, cluster_t *cluster,
                       cluster_srun_t *owner_item, int offset,
-                      unsigned int now, void *web_pool,
+                      time_t now, void *web_pool,
                       int ignore_dead)
 {
   cluster_srun_t *cluster_srun = 0;
@@ -1327,7 +1327,7 @@ open_connection_group(stream_t *s, cluster_t *cluster,
 
 static int
 open_connection_any_host(stream_t *s, cluster_t *cluster, int host,
-                         unsigned int now, void *web_pool, int ignore_dead)
+                         time_t now, void *web_pool, int ignore_dead)
 {
   int i;
 
@@ -1367,7 +1367,7 @@ open_connection_any_host(stream_t *s, cluster_t *cluster, int host,
 static int
 open_session_host(stream_t *s, cluster_t *cluster,
                   int session_index, int backup_index,
-                  unsigned int now, void *web_pool)
+                  time_t now, void *web_pool)
 {
   int host;
   int size = cluster->srun_size;
@@ -1408,7 +1408,7 @@ open_session_host(stream_t *s, cluster_t *cluster,
 static int
 open_connection(stream_t *s, cluster_t *cluster,
                 int session_index, int backup_index,
-                unsigned int now, void *web_pool)
+                time_t now, void *web_pool)
 {
   int size;
   int host;
@@ -1438,7 +1438,7 @@ open_connection(stream_t *s, cluster_t *cluster,
 int
 cse_open_connection(stream_t *s, cluster_t *cluster,
                     int session_index, int backup_index,
-                    unsigned int now, void *web_pool)
+                    time_t now, void *web_pool)
 {
   config_t *config = cluster->config;
   
@@ -1466,7 +1466,7 @@ cse_open_connection(stream_t *s, cluster_t *cluster,
 }
 
 int
-cse_open_any_connection(stream_t *s, cluster_t *cluster, unsigned int now)
+cse_open_any_connection(stream_t *s, cluster_t *cluster, time_t now)
 {
   return cse_open_connection(s, cluster, -1, -1, now,
 			     cluster->config->web_pool);

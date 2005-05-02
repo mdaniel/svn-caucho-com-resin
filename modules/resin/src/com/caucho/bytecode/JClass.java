@@ -159,6 +159,30 @@ abstract public class JClass extends JAnnotationObject implements JType {
   abstract public JMethod []getConstructors();
 
   /**
+   * Returns a matching constructor.
+   */
+  public JMethod getConstructor(JClass []param)
+  {
+    JMethod []ctors = getConstructors();
+
+    loop:
+    for (int i = 0; i < ctors.length; i++) {
+      JClass []args = ctors[i].getParameterTypes();
+
+      if (args.length != param.length)
+	continue loop;
+
+      for (int j = 0; j < args.length; j++)
+	if (! args[i].equals(param[j]))
+	  continue loop;
+
+      return ctors[i];
+    }
+
+    return null;
+  }
+
+  /**
    * Returns the matching method.
    */
   abstract public JMethod getMethod(String name, JClass []param);

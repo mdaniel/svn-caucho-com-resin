@@ -43,6 +43,7 @@ import com.caucho.util.L10N;
 import com.caucho.util.CharBuffer;
 
 import com.caucho.config.ConfigException;
+import com.caucho.config.LineConfigException;
 
 import com.caucho.amber.AmberManager;
 import com.caucho.amber.AmberRuntimeException;
@@ -64,6 +65,8 @@ public class Table {
   private static final L10N L = new L10N(Table.class);
 
   private String _name;
+
+  private String _configLocation;
 
   // The entity type is used to generate primary keys for cascade deletes
   private EntityType _type;
@@ -95,6 +98,22 @@ public class Table {
   public String getName()
   {
     return _name;
+  }
+
+  /**
+   * Sets the config location.
+   */
+  public void setConfigLocation(String location)
+  {
+    _configLocation = location;
+  }
+
+  /**
+   * Returns the location.
+   */
+  public String getLocation()
+  {
+    return _configLocation;
   }
 
   /**
@@ -368,7 +387,7 @@ public class Table {
 	  ResultSet rs = stmt.executeQuery(sql);
 	  rs.close();
 	} catch (SQLException e) {
-	  throw new ConfigException(L.l("'{0}' is not a valid database table.  Either the table needs to be created or the create-database-tables attribute must be set.\n\n{1}",
+	  throw error(L.l("'{0}' is not a valid database table.  Either the table needs to be created or the create-database-tables attribute must be set.\n\n{1}",
 					getName(), e.toString()), e);
 	}
       } finally {
@@ -478,6 +497,14 @@ public class Table {
     } catch (Exception e) {
       throw new AmberRuntimeException(e);
     }
+  }
+
+  protected ConfigException error(String msg, Throwable e)
+  {
+    if (_configLocation != null)
+      return new LineConfigException(_configLocation + msg, e);
+    else
+      return new ConfigException(msg, e);
   }
 
   /**

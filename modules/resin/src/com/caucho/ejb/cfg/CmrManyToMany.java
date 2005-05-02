@@ -207,6 +207,8 @@ public class CmrManyToMany extends CmrRelation {
 
     Table map = manager.createTable(getSQLTable());
 
+    map.setConfigLocation(getLocation());
+
     EntityManyToManyField manyToMany;
 
     manyToMany = new EntityManyToManyField(type, getName());

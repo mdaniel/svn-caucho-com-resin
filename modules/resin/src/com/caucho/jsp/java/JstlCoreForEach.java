@@ -596,7 +596,7 @@ public class JstlCoreForEach extends JstlNode {
 
       out.print("for (int " + stepI + " = " + stepVar + "; ");
       out.println(stepI + " > 1; " + stepI + "--)");
-      out.println("  " + iterVar + ".next();");
+      out.println("  if (" + iterVar + ".hasNext()) " + iterVar + ".next();");
       out.println("if (! " + iterVar + ".hasNext())");
       out.println("  break;");
     }

@@ -46,6 +46,7 @@
 #include <netdb.h>
 #include <dirent.h>
 #include <fcntl.h>
+#include <unistd.h>
 #endif
 #include <stdio.h>
 #include <stdlib.h>
@@ -53,6 +54,7 @@
 #include <ctype.h>
 #include <time.h>
 #include <sys/stat.h>
+#include <errno.h>
 #include "cse.h"
 
 #define CACHE_SIZE 16384
@@ -77,7 +79,7 @@ typedef struct hash_t {
 } hash_t;
 
 static int g_update_count;
-static int g_last_update;
+static time_t g_last_update;
 static hash_t g_url_cache[CACHE_SIZE];
 
 static location_t *
@@ -285,7 +287,8 @@ cse_add_match_pattern(mem_pool_t *pool, web_app_t *app, char *pattern)
  * Adds the host.
  */
 static resin_host_t *
-cse_add_host_config(config_t *config, const char *host_name, int port, int now)
+cse_add_host_config(config_t *config, const char *host_name,
+		    int port, time_t now)
 {
   resin_host_t *host;
 
@@ -302,7 +305,7 @@ cse_add_host_config(config_t *config, const char *host_name, int port, int now)
   host->port = port;
   host->next = config->hosts;
   config->hosts = host;
-  LOG(("new host %s\n", host_name));
+  LOG(("cse_add_host_config %s\n", host_name));
 
   return host;
 }
@@ -370,7 +373,7 @@ cse_log_config(config_t *config)
 
 static int
 read_config(stream_t *s, config_t *config, resin_host_t *host,
-	    unsigned int now, int *p_is_change)
+	    time_t now, int *p_is_change)
 {
   web_app_t *web_app = 0;
   int code;
@@ -538,7 +541,6 @@ write_config(config_t *config)
   resin_host_t *host;
   int fd;
   char buffer[1024];
-  char *work_dir = config->work_dir;
 
   if (! config->config_path)
     return;
@@ -644,7 +646,7 @@ write_config(config_t *config)
   close(fd);
 }
 
-static int
+static void
 read_all_config(config_t *config)
 {
   stream_t s;
@@ -654,17 +656,16 @@ read_all_config(config_t *config)
   char value[1024];
   int code;
   int  ch;
-  unsigned int now = 0;
-  char *work_dir = config->work_dir;
+  time_t now = 0;
   int is_change = 1;
 
   if (! config->config_path)
-    return 0;
+    return;
   
   fd = open(config->config_path, O_RDONLY);
 
   if (fd < 0)
-    return 0;
+    return;
 
   memset(&s, 0, sizeof(s));
   s.socket = fd;
@@ -699,7 +700,7 @@ read_all_config(config_t *config)
 }
 
 static int
-cse_update_host_from_resin(resin_host_t *host, unsigned int now)
+cse_update_host_from_resin(resin_host_t *host, time_t now)
 {
   stream_t s;
   char *uri = "";
@@ -723,7 +724,7 @@ cse_update_host_from_resin(resin_host_t *host, unsigned int now)
     code = cse_read_byte(&s);
     if (code != HMUX_CHANNEL) {
       cse_close(&s, "protocol");
-      return;
+      return 0;
     }
     
     len = hmux_read_len(&s);
@@ -740,9 +741,9 @@ cse_update_host_from_resin(resin_host_t *host, unsigned int now)
   }
   else {
     LOG(("can't open any connections\n"));
-
-    return 0;
   }
+
+  return 0;
 }
 
 /**
@@ -826,7 +827,7 @@ cse_add_config_server(config_t *config, const char *host, int port)
  */
 static resin_host_t *
 cse_update_host(config_t *config, resin_host_t *host,
-		const char *host_name, int port, int now)
+		const char *host_name, int port, time_t now)
 {
   if (! host) {
     host = (resin_host_t *) cse_alloc(config->p, sizeof(resin_host_t));
@@ -838,10 +839,10 @@ cse_update_host(config_t *config, resin_host_t *host,
     host->next = config->hosts;
     host->cluster.config = config;
     config->hosts = host;
-    LOG(("new host %s\n", host_name));
+    LOG(("cse_update_host %s\n", host_name));
   }
   else {
-    LOG(("cse update host %s etag:%s\n", host_name, host->etag));
+    LOG(("cse_update_host %s etag:%s\n", host_name, host->etag));
   }
   
   if (now < host->last_update + config->update_time)
@@ -857,7 +858,7 @@ cse_update_host(config_t *config, resin_host_t *host,
  * Matches the host information in the config
  */
 resin_host_t *
-cse_match_host(config_t *config, const char *host_name, int port, int now)
+cse_match_host(config_t *config, const char *host_name, int port, time_t now)
 {
   resin_host_t *host;
   resin_host_t *default_host = 0;
@@ -919,7 +920,6 @@ cse_match_suffix(const char *full, const char *suffix)
 
   do {
     char *match = strstr(full, suffix);
-    char ch;
     
     if (! match)
       return 0;
@@ -927,12 +927,15 @@ cse_match_suffix(const char *full, const char *suffix)
     if (! match[len] || match[len] == '/')
       return 1;
 #ifdef WIN32
-    if ((ch = match[len]) == '.' || ch == ' ') {
-      for (; (ch = match[len]) == '.' || ch == ' '; len++) {
-      }
+    {
+      char ch;
+      if ((ch = match[len]) == '.' || ch == ' ') {
+	for (; (ch = match[len]) == '.' || ch == ' '; len++) {
+	}
 
-      if (! match[len] || match[len] == '/')
-     	return 1;
+	if (! match[len] || match[len] == '/')
+	  return 1;
+      }
     }
 #endif
 
@@ -1025,7 +1028,7 @@ normalize_uri(config_t *config, const char *raw_uri,
 static resin_host_t *
 cse_is_match(config_t *config,
              const char *raw_host, int port, const char *raw_uri,
-             int unescape, int now)
+             int unescape, time_t now)
 {
   char uri[16 * 1024];
   char host_name[1024];
@@ -1132,7 +1135,7 @@ cse_is_match(config_t *config,
 
 resin_host_t *
 cse_match_request(config_t *config, const char *host, int port,
-                  const char *uri, int unescape, int now)
+                  const char *uri, int unescape, time_t now)
 {
   int hash = port;
   int i;
@@ -1202,7 +1205,7 @@ cse_match_request(config_t *config, const char *host, int port,
     entry->host = 0;
   }
 
-  LOG(("entry %s %s match:%s\n", host, uri, (match_host != 0) ? "yes" : "no"));
+  LOG(("cse_match_request entry %s %s match:%s\n", host, uri, (match_host != 0) ? "yes" : "no"));
   
   entry->host = strdup(host ? host : "");
   entry->uri = strdup(uri);

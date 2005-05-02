@@ -144,6 +144,8 @@ public class EjbServerManager implements EJBServerInterface, EnvironmentListener
       _amberManager = _envServerManager.getAmberManager();
 
       _ejbConfig = new EjbConfig(this);
+
+      _envServerManager.addEjbConfig(_ejbConfig);
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
@@ -325,6 +327,7 @@ public class EjbServerManager implements EJBServerInterface, EnvironmentListener
    */
   public void setWorkPath(Path workPath)
   {
+    _envServerManager.setWorkPath(workPath);
     // _workPath = workPath;
   }
 
@@ -528,8 +531,6 @@ public class EjbServerManager implements EJBServerInterface, EnvironmentListener
     _envServerManager.init();
     
     build();
-
-    Environment.addEnvironmentListener(this);
   }
   
   /**
@@ -554,7 +555,7 @@ public class EjbServerManager implements EJBServerInterface, EnvironmentListener
   public void start()
     throws Exception
   {
-    _ejbConfig.deploy();
+    _envServerManager.start();
   }
 
   public AmberEntityHome getAmberEntityHome(String name)
@@ -640,12 +641,9 @@ public class EjbServerManager implements EJBServerInterface, EnvironmentListener
    * Handles the case where the environment is starting (after init).
    */
   public void environmentStart(EnvironmentClassLoader loader)
+    throws Throwable
   {
-    try {
-      start();
-    } catch (Exception e) {
-      log.log(Level.WARNING, e.toString(), e);
-    }
+    start();
   }
   
   /**

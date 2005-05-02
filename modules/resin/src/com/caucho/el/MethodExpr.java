@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -164,6 +165,16 @@ public class MethodExpr extends Expr {
       return new Double((double) expr.evalDouble(env));
     else if (Double.class.equals(cl))
       return new Double((double) expr.evalDouble(env));
+    else if (char.class.equals(cl) || Character.class.equals(cl)) {
+      String s = expr.evalString(env);
+
+      if (s == null || s.length() == 0)
+	return null;
+      else
+	return new Character(s.charAt(0));
+    }
+    else if (Boolean.class.equals(cl))
+      return new Boolean((boolean) expr.evalBoolean(env));
     else
       return expr.evalObject(env);
   }

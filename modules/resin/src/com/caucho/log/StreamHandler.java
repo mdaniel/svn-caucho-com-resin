@@ -88,8 +88,10 @@ public class StreamHandler extends Handler {
 
     try {
       if (record == null) {
-	_os.println("no record");
-	_os.flush();
+	synchronized (_os) {
+	  _os.println("no record");
+	  _os.flush();
+	}
 	return;
       }
 
@@ -123,9 +125,8 @@ public class StreamHandler extends Handler {
 	else {
 	  _os.println(record.getMessage());
 	}
+	_os.flush();
       }
-      
-      _os.flush();
     } catch (Throwable e) {
       e.printStackTrace();
     }

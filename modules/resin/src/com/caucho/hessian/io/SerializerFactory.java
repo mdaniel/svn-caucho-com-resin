@@ -328,14 +328,17 @@ public class SerializerFactory extends AbstractSerializerFactory {
 
     Deserializer deserializer;
     
-    if (_cachedTypeDeserializerMap != null)
+    if (_cachedTypeDeserializerMap != null) {
       deserializer = (Deserializer) _cachedTypeDeserializerMap.get(type);
+
+      if (deserializer != null)
+	return deserializer;
+    }
 
 
     deserializer = (Deserializer) _typeMap.get(type);
-    if (deserializer != null) {
+    if (deserializer != null)
       return deserializer;
-    }
 
     if (type.startsWith("[")) {
       Deserializer subDeserializer = getDeserializer(type.substring(1));

@@ -144,7 +144,7 @@ public class DependentEntityOneToOneField extends AbstractField {
     throws ConfigException
   {
     super.init();
-    
+
     _targetLoadIndex = getSourceType().nextLoadGroupIndex();
   }
 
@@ -231,7 +231,7 @@ public class DependentEntityOneToOneField extends AbstractField {
     throws IOException
   {
     String loadVar = "__caucho_loadMask_" + (_targetLoadIndex / 64);
-    long loadMask = (_targetLoadIndex % 64);
+    long loadMask = 1L << (_targetLoadIndex % 64);
     
     String javaType = getJavaTypeName();
     
@@ -379,7 +379,8 @@ public class DependentEntityOneToOneField extends AbstractField {
   {
     out.println("if (\"" + getEntityType().getTable().getName() + "\".equals(table)) {");
     out.pushDepth();
-    out.println("__caucho_loadMask = 0;");
+    String loadVar = "__caucho_loadMask_" + (_targetLoadIndex / 64);
+    out.println(loadVar + " = 0;");
     out.popDepth();
     out.println("}");
   }

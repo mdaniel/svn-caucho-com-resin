@@ -119,6 +119,8 @@ public class HessianProxyFactory implements ServiceProxyFactory, ObjectFactory {
 
   private boolean _isOverloadEnabled = false;
 
+  private long _readTimeout = -1;
+
   /**
    * Creates the new proxy factory.
    */
@@ -162,6 +164,22 @@ public class HessianProxyFactory implements ServiceProxyFactory, ObjectFactory {
   }
 
   /**
+   * The socket timeout on requests in milliseconds.
+   */
+  public long getReadTimeout()
+  {
+    return _readTimeout;
+  }
+
+  /**
+   * The socket timeout on requests in milliseconds.
+   */
+  public void setReadTimeout(long timeout)
+  {
+    _readTimeout = timeout;
+  }
+
+  /**
    * Returns the remote resolver.
    */
   public HessianRemoteResolver getRemoteResolver()
@@ -197,6 +215,17 @@ public class HessianProxyFactory implements ServiceProxyFactory, ObjectFactory {
     URLConnection conn = url.openConnection();
 
     conn.setDoOutput(true);
+
+    if (_readTimeout > 0) {
+      try {
+	// only available for JDK 1.5
+	Method method = conn.getClass().getMethod("setReadTimeout", new Class[] { int.class });
+
+	if (method != null)
+	  method.invoke(conn, new Object[] { new Integer((int) _readTimeout) });
+      } catch (Throwable e) {
+      }
+    }
 
     if (_basicAuth != null)
       conn.setRequestProperty("Authorization", _basicAuth);

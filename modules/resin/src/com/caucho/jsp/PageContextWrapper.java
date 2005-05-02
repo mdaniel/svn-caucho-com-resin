@@ -193,6 +193,74 @@ public class PageContextWrapper extends PageContextImpl {
   }
 
   /**
+   * Returns the current out.
+   */
+  public JspWriter getOut()
+  {
+    return _parent.getOut();
+  }
+
+  /**
+   * Pushes the page body.
+   */
+  public BodyContent pushBody()
+  {
+    return _parent.pushBody();
+  }
+
+  /**
+   * Pushes the page body.
+   */
+  public JspWriter pushBody(Writer out)
+  {
+    return _parent.pushBody(out);
+  }
+
+  /**
+   * Pops the BodyContent from the JspWriter stack.
+   *
+   * @return the enclosing writer
+   */
+  public JspWriter popAndReleaseBody()
+    throws IOException
+  {
+    return _parent.popAndReleaseBody();
+  }
+
+  /**
+   * Pops the page body.
+   */
+  public JspWriter popBody()
+  {
+    return _parent.popBody();
+  }
+
+  public void releaseBody(BodyContentImpl out)
+    throws IOException
+  {
+    _parent.releaseBody(out);
+  }
+
+  /**
+   * Pops the BodyContent from the JspWriter stack.
+   *
+   * @param oldWriter the old writer
+   */
+  public JspWriter setWriter(JspWriter oldWriter)
+  {
+    return _parent.setWriter(oldWriter);
+  }
+
+  /**
+   * Returns the top writer.
+   */
+  public PrintWriter getTopWriter()
+    throws IOException
+  {
+    return _parent.getTopWriter();
+  }
+
+  /**
    * Returns the expression evaluator
    */
   public ExpressionEvaluator getExpressionEvaluator()

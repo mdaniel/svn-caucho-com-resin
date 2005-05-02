@@ -37,12 +37,17 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import javax.servlet.jsp.el.VariableResolver;
+
+import org.w3c.dom.Node;
+
 import com.caucho.util.L10N;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.NotImplementedException;
+
+import com.caucho.config.types.Validator;
+
 import com.caucho.xml.QName;
 import com.caucho.xml.QNode;
-import org.w3c.dom.Node;
 
 public class BeanTypeStrategy extends TypeStrategy {
   protected static final L10N L = new L10N(BeanTypeStrategy.class);
@@ -206,6 +211,9 @@ public class BeanTypeStrategy extends TypeStrategy {
       // XXX: DependencyBean
 
       super.configureBean(builder, bean, node);
+
+      if (bean instanceof Validator)
+	builder.addValidator((Validator) bean);
     } finally {
       thread.setContextClassLoader(oldLoader);
     }

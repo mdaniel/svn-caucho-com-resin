@@ -244,10 +244,8 @@ public class EnhancerManager implements ByteCodeEnhancer, ByteCodeClassMatcher {
 	JavaClass jClass = parser.parse(is);
 
 	return enhance(jClass);
-      } catch (RuntimeException e) {
-	throw e;
-      } catch (Exception e) {
-	throw new RuntimeException(e);
+      } catch (Throwable e) {
+	throw new EnhancerRuntimeException(e);
       }
     }
 

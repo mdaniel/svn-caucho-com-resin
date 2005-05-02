@@ -114,8 +114,9 @@ public class EJBCompiler {
       container.setValidateDatabaseSchema(false);
       if (_classDir == null)
 	container.setWorkPath(Vfs.lookup("."));
-      else
+      else {
 	container.setWorkPath(_classDir);
+      }
 
       MergePath mergePath = new MergePath();
       mergePath.addClassPath(loader);

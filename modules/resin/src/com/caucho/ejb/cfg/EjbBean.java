@@ -305,10 +305,10 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
     if (_ejbClass.isInterface())
       throw error(L.l("`{0}' must not be an interface.  Bean implementations must be classes.", ejbClass.getName()));
 
-    Constructor constructor = null;
-    /*
+    // ejb/02e5
+    JMethod constructor = null;
     try {
-      constructor = ejbClass.getConstructor(new Class[0]);
+      constructor = ejbClass.getConstructor(new JClass[0]);
     } catch (Throwable e) {
       log.log(Level.FINE, e.toString(), e);
     }
@@ -316,14 +316,12 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
     if (constructor == null)
       throw error(L.l("`{0}' needs a public zero-arg constructor.  Bean implementations need a public zero-argument constructor.", ejbClass.getName()));
 
-    Class []exn = constructor.getExceptionTypes();
+    JClass []exn = constructor.getExceptionTypes();
     for (int i = 0; i < exn.length; i++) {
-      if (! RuntimeException.class.isAssignableFrom(exn[i])) {
+      if (! exn[i].isAssignableTo(RuntimeException.class)) {
         throw error(L.l("{0}: constructor must not throw `{1}'.  Bean constructors must not throw checked exceptions.", ejbClass.getName(), exn[i].getName()));
       }
     }
-    */
-
 
     JMethod method = ejbClass.getMethod("finalize", new JClass[0]);
 

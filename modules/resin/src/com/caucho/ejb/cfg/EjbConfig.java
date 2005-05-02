@@ -472,6 +472,8 @@ public class EjbConfig {
       _ejbManager.getAmberManager().initEntityHomes();
 
       for (EjbBean bean : beanConfig) {
+	thread.setContextClassLoader(_ejbManager.getClassLoader());
+	
 	AbstractServer server = bean.deployServer(_ejbManager, javaGen);
 
 	thread.setContextClassLoader(server.getClassLoader());

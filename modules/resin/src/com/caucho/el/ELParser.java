@@ -73,12 +73,15 @@ public class ELParser {
   {
     ELParser parser = new ELParser(string);
 
-    parser.copy(this);
+    copyTo(parser);
 
     return parser;
   }
 
-  protected void copy(ELParser parser)
+  /**
+   * Copy to the dest parser.
+   */
+  protected void copyTo(ELParser parser)
   {
     parser._staticFunctionMap = _staticFunctionMap;
     parser._functionMapper = _functionMapper;

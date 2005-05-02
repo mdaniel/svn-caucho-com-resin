@@ -121,6 +121,15 @@ public class JdbcMessage {
     _messageTable = _jdbcManager.getMessageTable();
     _dataSource = _jdbcManager.getDataSource();
 
+    JdbcMetaData metaData = _jdbcManager.getMetaData();
+      
+    String identity = "";
+
+    if (metaData.supportsIdentity())
+      identity = " auto_increment";
+    else
+      _messageSequence = _messageTable + "_cseq";
+
     Connection conn = _dataSource.getConnection();
     try {
       Statement stmt = conn.createStatement();
@@ -141,15 +150,6 @@ public class JdbcMessage {
       String longType = _jdbcManager.getLongType();
 							   
       log.info(L.l("creating JMS message table {0}", _messageTable));
-
-      JdbcMetaData metaData = _jdbcManager.getMetaData();
-      
-      String identity = "";
-
-      if (metaData.supportsIdentity())
-	identity = " auto_increment";
-      else
-	_messageSequence = _messageTable + "_cseq";
       
       sql = ("CREATE TABLE " + _messageTable + " (" +
 	     "  m_id " + longType + " PRIMARY KEY" + identity + "," +

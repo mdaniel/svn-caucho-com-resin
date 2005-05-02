@@ -76,6 +76,8 @@ import com.caucho.xml.XmlUtil;
 import com.caucho.xml.DOMBuilder;
 
 import com.caucho.config.types.ResinType;
+import com.caucho.config.types.Validator;
+
 import com.caucho.el.ELParser;
 import com.caucho.el.Expr;
 import com.caucho.el.EL;
@@ -99,6 +101,9 @@ public class NodeBuilder {
 
   private static ThreadLocal<NodeBuilder> _currentBuilder
     = new ThreadLocal<NodeBuilder>();
+
+  private ArrayList<ValidatorEntry> _validators
+    = new ArrayList<ValidatorEntry>();
 
   private ConfigVariableResolver _varResolver = new ConfigVariableResolver();
 
@@ -502,6 +507,11 @@ public class NodeBuilder {
     return _varResolver.get(name);
   }
 
+  void addValidator(Validator validator)
+  {
+    _validators.add(new ValidatorEntry(validator));
+  }
+
   static boolean hasChildren(Node node)
   {
     Node ptr;
@@ -677,6 +687,33 @@ public class NodeBuilder {
       
       String msg = filename + ":" + line + ": " + e;
       return new LineConfigException(msg, e);
+    }
+  }
+
+  static class ValidatorEntry {
+    private Validator _validator;
+    private ClassLoader _loader;
+
+    ValidatorEntry(Validator validator)
+    {
+      _validator = validator;
+
+      _loader = Thread.currentThread().getContextClassLoader();
+    }
+
+    void validate()
+      throws ConfigException
+    {
+      Thread thread = Thread.currentThread();
+      ClassLoader oldLoader = thread.getContextClassLoader();
+
+      try {
+	thread.setContextClassLoader(_loader);
+
+	_validator.validate();
+      } finally {
+	thread.setContextClassLoader(oldLoader);
+      }
     }
   }
 }

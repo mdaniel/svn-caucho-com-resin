@@ -566,13 +566,14 @@ public abstract class JspNode {
     
   void generateSetParameter(JspJavaWriter out,
                             String obj, Object objValue, Method method,
-                            boolean allowRtexpr)
+                            boolean allowRtexpr, String contextVar)
     throws Exception
   {
     Class type = method.getParameterTypes()[0];
 
     if (JspFragment.class.equals(type)) {
-      generateFragmentParameter(out, obj, objValue, method, allowRtexpr);
+      generateFragmentParameter(out, obj, objValue, method,
+				allowRtexpr, contextVar);
       return;
     }
 
@@ -623,12 +624,12 @@ public abstract class JspNode {
   
   void generateFragmentParameter(JspJavaWriter out,
                                  Object obj, Object objValue, Method method,
-                                 boolean allowRtexpr)
+                                 boolean allowRtexpr, String contextVar)
     throws Exception
   {
     out.print(obj + "." + method.getName() + "(");
     if (objValue instanceof JspFragmentNode)
-      generateFragment(out, (JspFragmentNode) objValue);
+      generateFragment(out, (JspFragmentNode) objValue, contextVar);
     else if (objValue instanceof String) {
       String string = (String) objValue;
 
@@ -664,10 +665,11 @@ public abstract class JspNode {
       return null;
   }
 
-  void generateFragment(JspJavaWriter out, JspFragmentNode frag)
+  void generateFragment(JspJavaWriter out, JspFragmentNode frag,
+			String contextVar)
     throws Exception
   {
-    out.print(generateFragment(frag));
+    out.print(generateFragment(frag, contextVar));
   }
 
   void generateParentTag(JspJavaWriter out, TagInstance parent)
@@ -710,28 +712,28 @@ public abstract class JspNode {
   /**
    * Generates the code for a fragment.
    */
-  protected String generateFragment(JspFragmentNode frag)
+  protected String generateFragment(JspFragmentNode frag, String contextVar)
     throws Exception
   {
     int index = _gen.addFragment(frag);
     
-    CharBuffer cb = CharBuffer.allocate();
+    StringBuffer cb = new StringBuffer();
 
     if (frag.isStatic()) {
       String fragmentVar = frag.getFragmentName();
 
-      cb.append(fragmentVar + " = com.caucho.jsp.StaticJspFragmentSupport.create(" + fragmentVar + ", pageContext, \"");
+      cb.append(fragmentVar + " = com.caucho.jsp.StaticJspFragmentSupport.create(" + fragmentVar + ", " + contextVar + ", \"");
 
       cb.append(escapeJavaString(frag.getStaticText()));
       cb.append("\")");
 
-      return cb.close();
+      return cb.toString();
     }
 
     String fragmentVar = frag.getFragmentName();
 
     cb.append(fragmentVar + " = _CauchoFragment.create(" + fragmentVar + ", " +
-	      index + ", pageContext, ");
+	      index + ", " + contextVar + ", ");
 
     JspNode parentTag = getParentTagNode();
 
@@ -749,7 +751,7 @@ public abstract class JspNode {
       
     cb.append(")");
 
-    return cb.close();
+    return cb.toString();
   }
 
   /**

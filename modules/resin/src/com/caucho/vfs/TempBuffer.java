@@ -101,6 +101,9 @@ public class TempBuffer {
     return _length;
   }
 
+  /**
+   * Sets the number of bytes used in the buffer.
+   */
   public final void setLength(int length)
   {
     _length = length;

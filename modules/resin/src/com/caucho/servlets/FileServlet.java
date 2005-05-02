@@ -259,7 +259,28 @@ public class FileServlet extends GenericServlet {
     if (ifMatch == null) {
       String ifModified = req.getHeader("If-Modified-Since");
 
-      if (ifModified != null && ifModified.equals(lastModified)) {
+      boolean isModified = true;
+
+      if (ifModified == null) {
+      }
+      else if (ifModified.equals(lastModified)) {
+	isModified = false;
+      }
+      else {
+	long ifModifiedTime;
+
+	synchronized (_calendar) {
+	  try {
+	    ifModifiedTime = _calendar.parseDate(ifModified);
+	  } catch (Throwable e) {
+	    ifModifiedTime = 0;
+	  }
+	}
+
+	isModified = ifModifiedTime != cache.getLastModified();
+      }
+
+      if (! isModified) {
 	if (etag != null)
 	  res.addHeader("ETag", etag);
 	res.sendError(res.SC_NOT_MODIFIED);
@@ -524,6 +545,11 @@ public class FileServlet extends GenericServlet {
     String getEtag()
     {
       return _etag;
+    }
+
+    long getLastModified()
+    {
+      return _lastModified;
     }
 
     String getLastModifiedString()

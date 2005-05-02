@@ -532,18 +532,21 @@ abstract public class DeployController<I extends DeployInstance>
     }
 
     I deployInstance = getDeployInstance();
-    
+
     Thread thread = Thread.currentThread();
     ClassLoader oldLoader = thread.getContextClassLoader();
     ClassLoader loader = null;
+    boolean isStarting = false;
 
     try {
       loader = deployInstance.getClassLoader();
       thread.setContextClassLoader(loader);
 
-      if (! _lifecycle.toStarting())
+      isStarting = _lifecycle.toStarting();
+      
+      if (! isStarting)
 	return deployInstance;
-
+      
       expandArchive();
     
       addManifestClassPath();
@@ -569,7 +572,8 @@ abstract public class DeployController<I extends DeployInstance>
       if (deployInstance != null)
 	deployInstance.setConfigException(e);
     } finally {
-      _lifecycle.toActive();
+      if (isStarting)
+	_lifecycle.toActive();
 
       // server/
       if (loader instanceof DynamicClassLoader)
@@ -612,14 +616,17 @@ abstract public class DeployController<I extends DeployInstance>
   {
     Thread thread = Thread.currentThread();
     ClassLoader oldLoader = thread.getContextClassLoader();
+    
+    DeployInstance oldInstance = _deployInstance;
+    boolean isStopping = false;
+
+    if (oldInstance != null)
+      thread.setContextClassLoader(oldInstance.getClassLoader());
 
     try {
-      DeployInstance oldInstance = _deployInstance;
-
-      if (oldInstance != null)
-	thread.setContextClassLoader(oldInstance.getClassLoader());
+      isStopping = _lifecycle.toStopping();
       
-      if (! _lifecycle.toStopping())
+      if (! isStopping)
 	return;
 
       synchronized (this) {
@@ -631,7 +638,8 @@ abstract public class DeployController<I extends DeployInstance>
 	oldInstance.destroy();
       }
     } finally  {
-      _lifecycle.toStop();
+      if (isStopping)
+	_lifecycle.toStop();
       
       thread.setContextClassLoader(oldLoader);
     }

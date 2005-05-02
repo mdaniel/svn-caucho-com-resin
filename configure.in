@@ -601,7 +601,7 @@ if test -z "${LD_SHLIB}"; then
    	fi
 	;;
 	
-    solaris*)
+    *solaris*)
 	if test -n "$is_gcc"; then
 	    CFLAGS_SHLIB="-fPIC"
 	    

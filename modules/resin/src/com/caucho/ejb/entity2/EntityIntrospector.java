@@ -305,12 +305,27 @@ public class EntityIntrospector {
   public void validateNonGetter(JMethod method)
     throws ConfigException
   {
+    JAnnotation ann = isAnnotatedMethod(method);
+    
+    if (ann != null) {
+      throw new ConfigException(L.l("'{0}' is not a valid annotation for {1}.  Only public getters and fields may have property annotations.",
+				    ann.getType(), method.getFullName()));
+    }
+  }
+
+  /**
+   * Validates a non-getter method.
+   */
+  private JAnnotation isAnnotatedMethod(JMethod method)
+    throws ConfigException
+  {
     for (JAnnotation ann : method.getDeclaredAnnotations()) {
       if (_propertyAnnotations.contains(ann.getType())) {
-	throw new ConfigException(L.l("'{0}' is not a valid annotation for {1}.  Only persistent property getters and fields may have property annotations.",
-				      ann.getType(), method.getFullName()));
+	return ann;
       }
     }
+
+    return null;
   }
 
   /**
@@ -735,7 +750,13 @@ public class EntityIntrospector {
 
       if (type.getMethod("set" + propName,
 			 new JClass[] { method.getReturnType() }) == null) {
-	validateNonGetter(method);
+	JAnnotation ann = isAnnotatedMethod(method);
+    
+	if (ann != null) {
+	  throw new ConfigException(L.l("'{0}' is not a valid annotation for {1}.  Only public persistent property getters with matching setters may have property annotations.",
+					ann.getType(), method.getFullName()));
+	}
+
 	continue;
       }
 

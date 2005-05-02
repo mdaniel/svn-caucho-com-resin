@@ -789,10 +789,18 @@ public class ServletServer extends ProtocolDispatchServer
    */
   public ObjectName []getPortObjectNames()
   {
-    ObjectName []portNames = new ObjectName[_ports.size()];
+    ArrayList<ObjectName> portNameList = new ArrayList<ObjectName>();
+    
+    for (int i = 0; i < _ports.size(); i++) {
+      ObjectName name = _ports.get(i).getObjectName();
 
-    for (int i = 0; i < _ports.size(); i++)
-      portNames[i] = _ports.get(i).getObjectName();
+      if (name != null)
+	portNameList.add(name);
+    }
+
+    ObjectName []portNames = new ObjectName[portNameList.size()];
+
+    portNameList.toArray(portNames);
 
     return portNames;
   }

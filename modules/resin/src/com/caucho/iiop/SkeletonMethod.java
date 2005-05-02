@@ -79,8 +79,6 @@ public class SkeletonMethod {
 
       writer.startReplyOk(reader.getRequestId());
 
-      System.out.println("MARSH: " + _marshallReturn + " " + result);
-      
       _marshallReturn.marshall(result, writer);
     } catch (InvocationTargetException e) {
       throw e.getCause();

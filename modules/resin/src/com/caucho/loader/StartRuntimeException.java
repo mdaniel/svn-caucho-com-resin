@@ -28,22 +28,27 @@
 
 package com.caucho.loader;
 
-import java.util.EventListener;
-
 /**
- * Interface for receiving environment events.
+ * Wrapper for start exceptions
  */
-public interface EnvironmentListener {
-  /**
-   * Handles the case where the environment is starting (after init).
-   */
-  public void environmentStart(EnvironmentClassLoader loader)
-    throws Throwable;
+public class StartRuntimeException extends RuntimeException {
+  public StartRuntimeException()
+  {
+  }
   
-  /**
-   * Handles the case where the environment is stopping
-   */
-  public void environmentStop(EnvironmentClassLoader loader);
+  public StartRuntimeException(Throwable cause)
+  {
+    super(cause);
+  }
+  
+  public StartRuntimeException(String message, Throwable cause)
+  {
+    super(message, cause);
+  }
+  
+  public StartRuntimeException(String message)
+  {
+    super(message);
+  }
 }
-
 

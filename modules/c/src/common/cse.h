@@ -34,6 +34,12 @@
 #define PTR jint
 #endif
 
+#ifdef WIN32
+typedef time_t unsigned int;
+#else
+#include <time.h>
+#endif
+
 typedef struct mem_pool_t mem_pool_t;
 
 #define CONN_POOL_SIZE 128
@@ -66,7 +72,7 @@ typedef struct srun_t {
   void *lock;                /* lock specific to the srun            */
   
   int is_dead;               /* true if the connect() failed         */
-  unsigned int fail_time;    /* when the last connect() failed       */
+  time_t fail_time;    /* when the last connect() failed       */
 
   void *ssl;                 /* ssl context                          */
   int (*open) (stream_t *);
@@ -203,8 +209,8 @@ typedef struct config_t {
   /* for direct dispatching */
   resin_host_t *manual_host;
 
-  int last_update;
-  int update_time;
+  time_t last_update;
+  time_t update_time;
   int update_count;
 } config_t;
 
@@ -323,14 +329,14 @@ void cse_print_registry(registry_t *registry);
 
 void cse_init_config(config_t *config);
 /*
-void cse_update_config(config_t *config, int now);
+void cse_update_config(config_t *config, time_t now);
 */
 
 resin_host_t *cse_match_request(config_t *config, const char *host, int port,
-				const char *url, int should_escape, int now);
+				const char *url, int should_escape, time_t now);
 resin_host_t *cse_match_host(config_t *config,
 			     const char *host, int port,
-			     int now);
+			     time_t now);
 
 cluster_srun_t *
 cse_add_cluster_server(cluster_t *cluster,
@@ -351,7 +357,7 @@ int cse_open(stream_t *s, cluster_t *cluster, cluster_srun_t *srun,
 void cse_close(stream_t *s, char *msg);
 void cse_close_stream(stream_t *s);
 void cse_close_sockets(config_t *config);
-void cse_recycle(stream_t *s, unsigned int now);
+void cse_recycle(stream_t *s, time_t now);
 int cse_flush(stream_t *s);
 int cse_fill_buffer(stream_t *s);
 int cse_read_byte(stream_t *s);
@@ -370,10 +376,10 @@ void cse_set_socket_cleanup(int socket, void *pool);
 int
 cse_open_connection(stream_t *s, cluster_t *cluster,
 		    int session_index, int backup_offset,
-                    unsigned int request_time, void *pool);
+                    time_t request_time, void *pool);
 int cse_open_any_connection(stream_t *s, cluster_t *cluster,
-			    unsigned int now);
-void close_srun(srun_t *srun, unsigned int now);
+			    time_t now);
+void close_srun(srun_t *srun, time_t now);
 
 void *cse_create_lock(config_t *config);
 void cse_free_lock(config_t *config, void *lock);

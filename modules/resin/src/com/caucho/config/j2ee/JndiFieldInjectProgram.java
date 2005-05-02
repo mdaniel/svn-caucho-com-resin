@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -36,6 +37,7 @@ import javax.naming.InitialContext;
 import com.caucho.util.L10N;
 
 import com.caucho.config.BuilderProgram;
+import com.caucho.config.NodeBuilder;
 
 public class JndiFieldInjectProgram extends BuilderProgram {
   private static final L10N L = new L10N(JndiFieldInjectProgram.class);
@@ -49,7 +51,7 @@ public class JndiFieldInjectProgram extends BuilderProgram {
     _field = field;
   }
 
-  public void configure(Object bean)
+  public void configureImpl(NodeBuilder builder, Object bean)
     throws Throwable
   {
     Object value = new InitialContext().lookup(_jndiName);
@@ -58,9 +60,9 @@ public class JndiFieldInjectProgram extends BuilderProgram {
     _field.set(bean, value);
   }
 
-  public Object configure(Class type)
+  public Object configure(NodeBuilder builder, Class type)
     throws Exception
   {
-    throw new UnsupportedOperationException();
+    throw new UnsupportedOperationException(getClass().getName());
   }
 }

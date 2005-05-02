@@ -631,6 +631,8 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener {
 
   private void movePathToArchive(String savedName)
   {
+    log.info(L.l("Archiving access log to {0}.", savedName));
+	     
     synchronized (_streamLock) {
       try {
 	WriteStream os = _os;

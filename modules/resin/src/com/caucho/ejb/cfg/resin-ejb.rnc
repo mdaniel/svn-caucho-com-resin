@@ -311,7 +311,7 @@ r_entity = element entity {
 r_env-entry = element env-entry {
   (attribute env-entry-name { string } | element env-entry-name { string }),
   (attribute env-entry-type { string } | element env-entry-type { string }),
-  (attribute env-entry-value { string } | element env-entry-value { string })
+  (attribute env-entry-value { string } | element env-entry-value { string })?
 }
 
 r_exclude-list = element exclude-list {

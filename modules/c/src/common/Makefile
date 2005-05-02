@@ -3,7 +3,7 @@
 CC=gcc
 CFLAGS=-g -O2 -DPOLL -DHAS_JVMTI
 CFLAGS_SHLIB=-fpic
-LIBTOOL=/home/ferg/ws/resin/libtool --silent
+LIBTOOL=/home/ferg/test/resin-pro/libtool --silent
 LD=/usr/bin/ld
 LD_SHLIB=gcc
 LDFLAGS=

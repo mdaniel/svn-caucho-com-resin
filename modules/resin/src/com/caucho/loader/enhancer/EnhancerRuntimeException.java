@@ -26,24 +26,11 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.loader;
+package com.caucho.loader.enhancer;
 
-import java.util.EventListener;
-
-/**
- * Interface for receiving environment events.
- */
-public interface EnvironmentListener {
-  /**
-   * Handles the case where the environment is starting (after init).
-   */
-  public void environmentStart(EnvironmentClassLoader loader)
-    throws Throwable;
-  
-  /**
-   * Handles the case where the environment is stopping
-   */
-  public void environmentStop(EnvironmentClassLoader loader);
+public class EnhancerRuntimeException extends RuntimeException {
+  public EnhancerRuntimeException(Throwable e)
+  {
+    super(e);
+  }
 }
-
-

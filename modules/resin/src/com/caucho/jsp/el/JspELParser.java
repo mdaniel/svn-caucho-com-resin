@@ -52,7 +52,7 @@ public class JspELParser extends ELParser {
   {
     ELParser parser = new JspELParser(string);
 
-    copy(parser);
+    copyTo(parser);
 
     return parser;
   }

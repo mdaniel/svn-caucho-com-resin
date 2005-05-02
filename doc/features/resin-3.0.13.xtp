@@ -8,6 +8,21 @@
 
 <summary objsummary='localtoc'/>
 
+<section title="HessianProxyFactory.setReadTimeout(long)">
+
+<p>Added a setReadTimeout to the HessianProxyFactory.  This capability
+is only supported by JDK 1.5.</p>
+
+</section>
+
+<section title="active-wait-time">
+
+<p>An active-wait-time parameter is now available for the web-app.  This
+specifies the time Resin will wait during a restart for the new web-app.
+If the time expires, Resin will return a 503.  The default is 15s.</p>
+
+</section>
+
 <section title="forward target in rewrite">
 
 <example title="web.xml">
@@ -114,7 +129,6 @@ connections with &lt;connection>.  Currently the &lt;transaction-isolation>,
 
 <p>Individual load balancer clients can now be disabled through JMX.</p>
 
- <init> 
 <p>Given the following cluster</p>
 
 <example>
@@ -250,6 +264,19 @@ a "var" attribute, storing the resource in EL for later use.</p>
 
 <p>The deploy and config code has been refactored.  Neither change should
 be user-visible.</p>
+
+</section>
+
+<section title="Special Thanks">
+
+<p>Thanks to Mircea Crisan for tracking down the JdbcMessage
+init order issue with Postgres.</p>
+
+<p>Thanks to John Didion for finding the missing
+Hessian deserializer cache.</p>
+
+<p>Thanks to Andy Nahapetian for finding and fixing
+the Hessian reference serialization bug.</p>
 
 </section>
 

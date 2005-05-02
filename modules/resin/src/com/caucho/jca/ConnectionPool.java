@@ -127,12 +127,12 @@ public class ConnectionPool
 
   private final ArrayList<PoolItem> _pool = new ArrayList<PoolItem>();
 
-  private final LinkedHashSet<ManagedConnection> _idlePool =
-    new LinkedHashSet<ManagedConnection>();
+  private final LinkedHashSet<ManagedConnection> _idlePool
+    = new LinkedHashSet<ManagedConnection>();
 
   // temporary connection list for the alarm callback
-  private final ArrayList<PoolItem> _alarmConnections =
-    new ArrayList<PoolItem>();
+  private final ArrayList<PoolItem> _alarmConnections
+    = new ArrayList<PoolItem>();
 
   private Alarm _alarm;
 

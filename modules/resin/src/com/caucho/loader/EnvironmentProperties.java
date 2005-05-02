@@ -154,7 +154,7 @@ public class EnvironmentProperties extends Properties {
 
   public Object put(Object key, Object value)
   {
-    return (String) getPutEnvironmentProperties().put(key, value);
+    return getPutEnvironmentProperties().put(key, value);
   }
 
   public String remove(Object key)

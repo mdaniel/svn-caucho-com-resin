@@ -253,7 +253,12 @@ public class JdbcQueueConsumer extends MessageConsumerImpl
 		      " ORDER BY m_id");
 
 	PreparedStatement selectStmt = conn.prepareStatement(sql);
-	selectStmt.setFetchSize(1);
+
+	try {
+	  selectStmt.setFetchSize(1);
+	} catch (Throwable e) {
+	  log.log(Level.FINER, e.toString(), e);
+	}
 
 	if (_autoAck)
 	  sql = ("DELETE FROM " + messageTable +

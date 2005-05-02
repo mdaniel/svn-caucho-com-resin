@@ -81,6 +81,8 @@ import com.caucho.ejb.xa.EjbTransactionManager;
 
 import com.caucho.ejb.admin.EJBAdmin;
 
+import com.caucho.ejb.cfg.EjbConfig;
+
 import com.caucho.ejb.entity.EntityServer;
 import com.caucho.ejb.entity.QEntityContext;
 import com.caucho.ejb.entity.EntityKey;
@@ -115,6 +117,8 @@ public class EnvServerManager implements EnvironmentListener {
   private EjbTransactionManager _ejbTransactionManager;
   
   private EjbProtocolManager _protocolManager;
+
+  private ArrayList<EjbConfig> _ejbConfigList = new ArrayList<EjbConfig>();
 
   private Hashtable<String,AbstractServer> _serverMap
     = new Hashtable<String,AbstractServer>();
@@ -278,7 +282,7 @@ public class EnvServerManager implements EnvironmentListener {
    */
   public void setWorkPath(Path workPath)
   {
-    // _workPath = workPath;
+    _workPath = workPath;
   }
 
   /**
@@ -323,6 +327,14 @@ public class EnvServerManager implements EnvironmentListener {
   }
 
   /**
+   * Adds an ejb-config.
+   */
+  void addEjbConfig(EjbConfig ejbConfig)
+  {
+    _ejbConfigList.add(ejbConfig);
+  }
+
+  /**
    * interface callback.
    */
   public void init()
@@ -340,8 +352,13 @@ public class EnvServerManager implements EnvironmentListener {
     throws ConfigException
   {
     try {
-      // _amberManager.init();
-      
+      _amberManager.init();
+
+      /*
+      for (EjbConfig cfg : _ejbConfigList)
+	cfg.configure();
+      */
+
       _entityCache = new LruCache<EntityKey,QEntityContext>(_entityCacheSize);
 
       _protocolManager.init();
@@ -353,7 +370,8 @@ public class EnvServerManager implements EnvironmentListener {
   public void start()
     throws Exception
   {
-    // _ejbConfig.deploy();
+    for (EjbConfig cfg : _ejbConfigList)
+      cfg.deploy();
 
     Thread thread = Thread.currentThread();
     ClassLoader oldLoader = thread.getContextClassLoader();

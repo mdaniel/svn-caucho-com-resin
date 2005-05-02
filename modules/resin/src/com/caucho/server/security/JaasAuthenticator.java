@@ -100,7 +100,7 @@ public class JaasAuthenticator extends AbstractAuthenticator {
     super.init();
     
     if (_loginModuleClass == null)
-      throw new ServletException(L.l("JaasAuthenticator requires login-module-class"));
+      throw new ServletException(L.l("JaasAuthenticator requires login-module"));
   }
   
   /**

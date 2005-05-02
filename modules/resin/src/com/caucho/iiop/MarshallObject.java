@@ -329,8 +329,6 @@ public class MarshallObject {
 	String url = server.getEJBName() + "?" + local;
 	String typeName = "RMI:" + objClass.getName() + ":0";
 
-	System.out.println("TYPE: " + typeName);
-	
 	IOR ior = new IOR(typeName, writer.getHost(), writer.getPort(), url);
 	//writer.write_boolean(true);
 	writer.write_Object(new DummyObjectImpl(ior));
@@ -362,7 +360,6 @@ public class MarshallObject {
       break;
       */
     case EJB_HOME:
-	System.out.println("HOME: " + writer.getHost() + ":" + writer.getPort());
       Util.writeRemoteObject(writer, obj);
       break;
     case CORBA_OBJECT:

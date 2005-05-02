@@ -42,9 +42,9 @@ public class QueryServlet extends HttpServlet {
     } catch (Exception e) {
     }
 
-    _manager.create(new Student("Harry Potter"));
-    _manager.create(new Prefect("Ron Weasley"));
-    _manager.create(new Prefect("Hermione Granger"));
+    _manager.persist(new Student("Harry Potter"));
+    _manager.persist(new Prefect("Ron Weasley"));
+    _manager.persist(new Prefect("Hermione Granger"));
   }
 
   /**

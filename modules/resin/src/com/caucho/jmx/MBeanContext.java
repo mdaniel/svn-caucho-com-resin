@@ -412,7 +412,7 @@ public class MBeanContext {
     while (true) {
       ClassLoader parentLoader = context._loader.getParent();
       
-      MBeanContext parentContext = _mbeanServer.getContext(parentLoader);
+      MBeanContext parentContext = _mbeanServer.getExistingContext(parentLoader);
 
       if (parentContext == null || parentContext == context) {
 	break;

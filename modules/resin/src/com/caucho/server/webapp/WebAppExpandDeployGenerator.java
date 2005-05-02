@@ -43,6 +43,7 @@ import com.caucho.util.Alarm;
 import com.caucho.log.Log;
 
 import com.caucho.vfs.Path;
+import com.caucho.vfs.CaseInsensitive;
 
 import com.caucho.loader.Environment;
 import com.caucho.loader.EnvironmentListener;
@@ -212,8 +213,12 @@ public class WebAppExpandDeployGenerator extends ExpandDeployGenerator<WebAppCon
 
     String segmentName = name.substring(_urlPrefix.length());
 
-    if (segmentName.equals(""))
-      segmentName = "/ROOT";
+    if (segmentName.equals("")) {
+      if (CaseInsensitive.isCaseInsensitive())
+	segmentName = "/root";
+      else
+	segmentName = "/ROOT";
+    }
 
     String expandName = getExpandPrefix() + segmentName.substring(1);
 
@@ -281,6 +286,24 @@ public class WebAppExpandDeployGenerator extends ExpandDeployGenerator<WebAppCon
 
     if (entryName == null)
       return null;
+
+    if (CaseInsensitive.isCaseInsensitive()) {
+      try {
+	String []list = getExpandDirectory().list();
+
+	String matchName = null;
+
+	for (int i = 0; i < list.length; i++) {
+	  if (list[i].equalsIgnoreCase(entryName))
+	    matchName = list[i];
+	}
+
+	if (matchName == null)
+	  matchName = entryName.toLowerCase();
+      } catch (Exception e) {
+	entryName = entryName.toLowerCase();
+      }
+    }
 
     if (entryName.equalsIgnoreCase("root"))
       return _urlPrefix;

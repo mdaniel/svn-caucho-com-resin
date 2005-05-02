@@ -1408,6 +1408,14 @@ public class Application extends ServletContextImpl
   }
 
   /**
+   * Sets the delay time waiting for a restart
+   */
+  public void setActiveWaitTime(Period wait)
+  {
+    _activeWaitTime = wait.getPeriod();
+  }
+
+  /**
    * Sets the delay time waiting for requests to end.
    */
   public void setIdleTime(Period idle)
@@ -1480,66 +1488,68 @@ public class Application extends ServletContextImpl
     if (! _lifecycle.toInitializing())
       return;
 
-    _classLoader.setId("web-app:" + getURL());
-
-    _invocationDependency.setCheckInterval(getEnvironmentClassLoader().getDependencyCheckInterval());
-    
-    if (_tempDir == null)
-      _tempDir = (Path) Environment.getLevelAttribute("caucho.temp-dir");
-
-    if (_tempDir == null)
-      _tempDir = getAppDir().lookup("WEB-INF/tmp");
-    
-    _tempDir.mkdirs();
-    setAttribute("javax.servlet.context.tempdir", new File(_tempDir.getNativePath()));
-
-    FilterChainBuilder securityBuilder = _constraintManager.getFilterBuilder();
-
-    if (securityBuilder != null)
-      _filterMapper.addTopFilter(securityBuilder);
-
-    _cache = (AbstractCache) Environment.getAttribute("caucho.server.cache");
-
-    for (int i = 0; i < _appGenerators.size(); i++)
-      _parent.addDeploy(_appGenerators.get(i));
-
-    _classLoader.setId("web-app:" + getURL());
-
     try {
-      InitialContext ic = new InitialContext();
-      ServletAuthenticator auth;
-      auth = (ServletAuthenticator) ic.lookup("java:comp/env/caucho/auth");
+      _classLoader.setId("web-app:" + getURL());
 
-      setAttribute("caucho.authenticator", auth);
-    } catch (Exception e) {
-      log.finest(e.toString());
-    }
+      _invocationDependency.setCheckInterval(getEnvironmentClassLoader().getDependencyCheckInterval());
+    
+      if (_tempDir == null)
+	_tempDir = (Path) Environment.getLevelAttribute("caucho.temp-dir");
 
-    WebAppController parent = null;
-    if (_controller != null)
-      parent = _controller.getParent();
-    if (_isInheritSession && parent != null &&
-	_sessionManager != parent.getApplication().getSessionManager()) {
-      SessionManager sessionManager = _sessionManager;
-      _sessionManager = parent.getApplication().getSessionManager();
+      if (_tempDir == null)
+	_tempDir = getAppDir().lookup("WEB-INF/tmp");
+    
+      _tempDir.mkdirs();
+      setAttribute("javax.servlet.context.tempdir", new File(_tempDir.getNativePath()));
+
+      FilterChainBuilder securityBuilder = _constraintManager.getFilterBuilder();
+
+      if (securityBuilder != null)
+	_filterMapper.addTopFilter(securityBuilder);
+
+      _cache = (AbstractCache) Environment.getAttribute("caucho.server.cache");
+
+      for (int i = 0; i < _appGenerators.size(); i++)
+	_parent.addDeploy(_appGenerators.get(i));
+
+      _classLoader.setId("web-app:" + getURL());
+
+      try {
+	InitialContext ic = new InitialContext();
+	ServletAuthenticator auth;
+	auth = (ServletAuthenticator) ic.lookup("java:comp/env/caucho/auth");
+
+	setAttribute("caucho.authenticator", auth);
+      } catch (Exception e) {
+	log.finest(e.toString());
+      }
+
+      WebAppController parent = null;
+      if (_controller != null)
+	parent = _controller.getParent();
+      if (_isInheritSession && parent != null &&
+	  _sessionManager != parent.getApplication().getSessionManager()) {
+	SessionManager sessionManager = _sessionManager;
+	_sessionManager = parent.getApplication().getSessionManager();
       
-      if (sessionManager != null)
-	sessionManager.close();
+	if (sessionManager != null)
+	  sessionManager.close();
+      }
+
+      for (int i = 0; i < _resourceValidators.size(); i++) {
+	Validator validator = _resourceValidators.get(i);
+
+	validator.validate();
+      }
+    } finally {
+      _lifecycle.toInit();
     }
-
-    for (int i = 0; i < _resourceValidators.size(); i++) {
-      Validator validator = _resourceValidators.get(i);
-
-      validator.validate();
-    }
-
-    _lifecycle.toInit();
   }
 
   public void start()
   {
-    if (! _lifecycle.isInit())
-      throw new IllegalStateException(L.l("application must be initialized before starting"));
+    if (! _lifecycle.isAfterInit())
+      throw new IllegalStateException(L.l("application must be initialized before starting.  Currently in state {0}.", _lifecycle.getStateName()));
 
     Thread thread = Thread.currentThread();
     ClassLoader oldLoader = thread.getContextClassLoader();
