@@ -1021,7 +1021,7 @@ cse_close_idle(srun_t *srun, time_t now)
  * Try to recycle the socket so the next request can reuse it.
  */
 void
-cse_recycle(stream_t *s, unsigned int now)
+cse_recycle(stream_t *s, time_t now)
 {
   int socket = s->socket;
   cluster_srun_t *cluster_srun = s->cluster_srun;

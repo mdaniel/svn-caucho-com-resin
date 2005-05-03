@@ -1151,7 +1151,7 @@ public class HmuxRequest extends AbstractHttpRequest
     int len = _remoteAddr.getLength();
 
     for (int i = 0; i < len; i++)
-      buffer[offset + len] = (byte) buf[i];
+      buffer[offset + i] = (byte) buf[i];
 
     return offset + len;
   }
