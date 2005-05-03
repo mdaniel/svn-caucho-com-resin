@@ -201,6 +201,7 @@ public class Environment {
    * Starts the current environment.
    */
   public static void start()
+    throws Throwable
   {
     start(Thread.currentThread().getContextClassLoader());
   }
@@ -209,6 +210,7 @@ public class Environment {
    * Starts the current environment.
    */
   public static void start(ClassLoader loader)
+    throws Throwable
   {
     for (; loader != null; loader = loader.getParent()) {
       if (loader instanceof EnvironmentClassLoader) {
