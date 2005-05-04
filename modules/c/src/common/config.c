@@ -81,7 +81,9 @@ typedef struct hash_t {
 static int g_update_count;
 static time_t g_last_update;
 static hash_t g_url_cache[CACHE_SIZE];
-
+static resin_host_t *
+cse_match_host_impl(config_t *config, const char *host_name,
+		    int port, time_t now);
 static location_t *
 cse_add_unique_location(mem_pool_t *pool, web_app_t *app, char *prefix,
                         char *suffix, int is_exact, int ignore)

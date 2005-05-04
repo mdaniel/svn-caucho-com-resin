@@ -33,12 +33,14 @@
 #else
 #define PTR jint
 #endif
-
+/*
 #ifdef WIN32
 typedef time_t unsigned int;
 #else
 #include <time.h>
 #endif
+*/
+#include <time.h>
 
 typedef struct mem_pool_t mem_pool_t;
 

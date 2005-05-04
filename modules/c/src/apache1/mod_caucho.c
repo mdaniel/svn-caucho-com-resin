@@ -45,8 +45,8 @@
 #define EAPI 1
 #endif
 
-#include "cse.h"
-#include "version.h"
+#include "../common/cse.h"
+#include "../common/version.h"
 
 /*
  * Apache magic module declaration.
