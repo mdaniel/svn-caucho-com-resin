@@ -1069,6 +1069,10 @@ public class HttpRequest extends AbstractHttpRequest
   {
     int contentLength = getContentLength();
 
+    // needed to avoid auto-flush on read conflicting with partially
+    // generated response
+    rawRead.setSibling(null);
+
     String te;
     if (contentLength < 0 && HTTP_1_1 <= getVersion() &&
 	(te = getHeader("Transfer-Encoding")) != null) {

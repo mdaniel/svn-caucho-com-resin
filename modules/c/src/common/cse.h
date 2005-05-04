@@ -178,6 +178,7 @@ typedef struct config_t {
   int has_config; /* true if there's config information, i.e. not defalt */
   
   void *lock;
+  void *config_lock;
   char *error;
   
   int dependency_check_interval;

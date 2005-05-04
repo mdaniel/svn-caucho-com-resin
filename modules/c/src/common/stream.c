@@ -188,7 +188,7 @@ cse_close(stream_t *s, char *msg)
   
   if (socket >= 0) {
     LOG(("close %d %s\n", socket, msg));
-    
+
     cse_kill_socket_cleanup(socket, s->web_pool);
 
     /* config read/save has no cluster_srun */

@@ -55,9 +55,9 @@ module AP_MODULE_DECLARE_DATA caucho_module;
 #define BUF_LENGTH 8192
 #define DEFAULT_PORT 6802
 
-#define REQ_CONTINUE 1
-#define REQ_QUIT     2
-#define REQ_EXIT     3
+#define REQ_CONTINUE HMUX_ACK
+#define REQ_QUIT     HMUX_QUIT
+#define REQ_EXIT     HMUX_EXIT
 #define REQ_BUSY     4
 
 void
@@ -656,7 +656,6 @@ send_data(stream_t *s, request_rec *r, int ack, int *keepalive)
       channel = hmux_read_len(s);
       LOG(("ack %d\n", channel));
       break;
-
       
     case HMUX_STATUS:
       len = hmux_read_len(s);
@@ -760,16 +759,18 @@ write_request(stream_t *s, request_rec *r, config_t *config,
   code = send_data(s, r, HMUX_QUIT, keepalive);
   write_length = s->write_length;
 
+  LOG(("return code %c\n", code));
+  
   if (code == REQ_QUIT) {
-    cse_recycle(s, now);
+    /* cse_recycle(s, now); */
     return OK;
   }
   else if (code >= 0 || s->sent_data) {
-    cse_close(s, "closed");
+    /* cse_close(s, "closed"); */
     return -1;
   }
   else {
-    cse_close(s, "closed");
+    /* cse_close(s, "closed"); */
     return HTTP_SERVICE_UNAVAILABLE;
   }
 }

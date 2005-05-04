@@ -406,7 +406,7 @@ read_config(stream_t *s, config_t *config, resin_host_t *host,
 
 	if (strcmp(buffer, host->name)) {
 	  resin_host_t *canonical;
-	  canonical = cse_match_host(config, buffer, 0, now);
+	  canonical = cse_match_host_impl(config, buffer, 0, now);
 	  host->canonical = canonical;
 	}
       }
@@ -675,7 +675,7 @@ read_all_config(config_t *config)
     case HMUX_DISPATCH_HOST:
       hmux_read_string(&s, buffer, sizeof(buffer));
       
-      host = cse_match_host(config, buffer, 0, now);
+      host = cse_match_host_impl(config, buffer, 0, now);
       read_config(&s, config, host, 0, &is_change);
       break;
 
@@ -801,6 +801,7 @@ cse_init_config(config_t *config)
   if (! config->lock) {
     config->lock = cse_create_lock(config);
     LOG(("config lock %p\n", config->lock));
+    config->config_lock = cse_create_lock(config);
   }
 
   read_all_config(config);
@@ -849,7 +850,7 @@ cse_update_host(config_t *config, resin_host_t *host,
     return host->canonical;
 
   if (! cse_update_host_from_resin(host, now) && *host_name)
-    host->canonical = cse_match_host(config, "", 0, now);
+    host->canonical = cse_match_host_impl(config, "", 0, now);
 
   return host->canonical;
 }
@@ -857,8 +858,9 @@ cse_update_host(config_t *config, resin_host_t *host,
 /**
  * Matches the host information in the config
  */
-resin_host_t *
-cse_match_host(config_t *config, const char *host_name, int port, time_t now)
+static resin_host_t *
+cse_match_host_impl(config_t *config, const char *host_name,
+		    int port, time_t now)
 {
   resin_host_t *host;
   resin_host_t *default_host = 0;
@@ -874,6 +876,25 @@ cse_match_host(config_t *config, const char *host_name, int port, time_t now)
   }
   
   return cse_update_host(config, default_host, host_name, port, now);
+}
+
+/**
+ * Matches the host information in the config
+ */
+resin_host_t *
+cse_match_host(config_t *config, const char *host_name, int port, time_t now)
+{
+  resin_host_t *host;
+
+  if (config)
+    cse_lock(config->config_lock);
+
+  host = cse_match_host_impl(config, host_name, port, now);
+  
+  if (config)
+    cse_unlock(config->config_lock);
+  
+  return host;
 }
 
 /**

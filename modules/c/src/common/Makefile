@@ -2,7 +2,7 @@
 
 CC=gcc
 CFLAGS=-g -O2 -DPOLL -DHAS_JVMTI
-CFLAGS_SHLIB=-fpic
+CFLAGS_SHLIB=-fpic -DSHARED_MODULE
 LIBTOOL=/home/ferg/test/resin-pro/libtool --silent
 LD=/usr/bin/ld
 LD_SHLIB=gcc

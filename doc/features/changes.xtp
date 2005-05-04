@@ -4,7 +4,8 @@
 
 <s2 title='3.0.snap - May 2, 2005'>
 <ul>
-<li>IP logging for hmux wasn't setting proper IP (rep by Allen Firstenberg)
+<li>Response flushing could occur early on echo
+<li>(2005-05-03) IP logging for hmux wasn't setting proper IP (rep by Allen Firstenberg)
 <li>(2005-05-02) EJB initialization wasn't properly setting parent class loaders for servers (rep by Patrick Burleson)
 <li>ELParser wasn't consistent in the copy order (rep by Caleb Richardson)
 <li>Improve EJB error message with missing setter

@@ -140,7 +140,7 @@ cse_set_socket_cleanup(int socket, void *pool)
 {
   LOG(("set cleanup %d\n", socket));
 
-  if (socket > 0)
+  if (socket > 0 && pool)
     ap_note_cleanups_for_socket(pool, socket);
 }
 
@@ -149,7 +149,7 @@ cse_kill_socket_cleanup(int socket, void *pool)
 {
   LOG(("kill cleanup %d\n", socket));
 
-  if (socket > 0)
+  if (socket > 0 && pool)
     ap_kill_cleanups_for_socket(pool, socket);
 }
 
