@@ -2,8 +2,9 @@
 
 <a href='changes-2.xtp'>Resin 2.1 changes</a>
 
-<s2 title='3.0.snap - May 2, 2005'>
+<s2 title='3.0.snap - May 4, 2005'>
 <ul>
+<li>(2005-05-04) missing lock on mod_caucho configuration read
 <li>Response flushing could occur early on echo
 <li>(2005-05-03) IP logging for hmux wasn't setting proper IP (rep by Allen Firstenberg)
 <li>(2005-05-02) EJB initialization wasn't properly setting parent class loaders for servers (rep by Patrick Burleson)

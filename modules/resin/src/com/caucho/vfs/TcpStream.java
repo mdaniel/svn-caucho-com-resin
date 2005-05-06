@@ -97,7 +97,10 @@ class TcpStream extends StreamImpl {
   {
     if (name.equals("timeout")) {
       try {
-        _s.setSoTimeout(Integer.parseInt(String.valueOf(value)));
+	if (value instanceof Number)
+	  _s.setSoTimeout(((Number) value).intValue());
+	else
+	  _s.setSoTimeout(Integer.parseInt(String.valueOf(value)));
       } catch (SocketException e) {
       }
     }
