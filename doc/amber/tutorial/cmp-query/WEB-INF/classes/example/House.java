@@ -81,4 +81,12 @@ public class House {
   {
     return _studentList;
   }
+
+  /**
+   * returns a <code>Collection</code> of all Students living in this House.
+   */
+  public Collection setStudentList()
+  {
+    return _studentList;
+  }
 }

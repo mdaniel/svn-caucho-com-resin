@@ -37,7 +37,7 @@ If the time expires, Resin will return a 503.  The default is 15s.</p>
 
 <section title="Manual web-app restart cookbook">
 
-A <a href="jmx|cookbook/restart.xtp">Restart cookbook</a> is available for
+<p>A <a href="jmx|cookbook/restart.xtp">Restart cookbook</a> is available for
 creating an admin servlet to stop, start, or update a web-app.</p>
 
 </section>
@@ -252,11 +252,11 @@ a "var" attribute, storing the resource in EL for later use.</p>
 
 <p>New configuration EL variables:</p>
 
-<childtable>
+<table>
 <tr><td>$\{resin.home}<td>Same as $\{resinHome}
 <tr><td>$\{resin.rootDir}<td>Same as $\{serverRoot}
 <tr><td>$\{resin.resinProfessional}<td>Same as $\{isResinProfessional}
-</childtable>
+</table>
 
 </section>
 
