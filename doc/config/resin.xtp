@@ -105,6 +105,7 @@ in the <a href="doc|performance|caching">caching documentation.</a></p>
 <tr><td>entries<td>max number of entries allowed in the cache<td>1024
 <tr><td>memory-size<td>max size of the cache saved in memory<td>1M
 <tr><td>disk-size<td>max size of the cache saved on disk<td>64M
+<tr><td>enable-range<td>enables HTTP Range requests<td>true
 </deftable-childtags>
 
 </defun>
