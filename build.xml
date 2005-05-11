@@ -1,4 +1,5 @@
 <project name="resin" default="compile" basedir=".">
+  <property environment="env"/>
 
   <property file="local.properties"/>
 
@@ -7,6 +8,7 @@
   <property name="modules" location="${basedir}/modules"/>
   <property name="src" location="${basedir}/src"/>
   <property name="ext" location="${basedir}/modules/ext"/>
+  <property name="doc" location="${basedir}/doc"/>
 
   <property name="build" location="${install}/build"/>
   <property name="lib" location="${install}/lib"/>
@@ -26,6 +28,8 @@
   <property name="jar.compress" value="false"/>
   <property name="jar.index" value="true"/>
   <property name="jar.update" value="false"/>
+
+  <property name="fop.home" location="${env.FOP_HOME}"/>
 
   <property name="shell" value="bash"/>
 
@@ -346,6 +350,77 @@
       compile to ${build}/javadoc
       install ${install}/dist/resin-javadoc.war
       -->
+  </target>
+
+  <macrodef name="generate-pdf">
+    <attribute name="name"/>
+
+    <sequential>
+
+    <java classname="com.caucho.xsl.Xsl" fork="true">
+      <arg value="-lite"/>
+      <arg value="-xsl"/>
+      <arg file="${doc}/pdf/xml2pdf.xsl"/>
+      <arg value="-o"/>
+      <arg file="${build}/pdf/@{name}.fo.tmpl"/>
+      <arg file="${doc}/pdf/@{name}.xml"/>
+      <classpath>
+        <pathelement location="${java.home}/../lib/tools.jar"/>
+        <dirset dir="${modules}">
+          <include name="*/classes"/>
+        </dirset>
+        <fileset dir="${modules}/ext">
+          <include name="**/*.jar"/>
+        </fileset>
+      </classpath>
+    </java>
+
+    <copy file="${build}/pdf/@{name}.fo.tmpl"
+          tofile="${build}/pdf/@{name}.fo"
+          preservelastmodified="true"
+          overwrite="true">
+      <filterset>
+        <filter token="VERSION" value="${version}"/>
+        <filter token="DATE" value="${date}"/>
+        <filter token="VERSION_DATE" value="${vdate}"/>
+      </filterset>
+    </copy>
+
+    <fop format="application/pdf" 
+         fofile="${build}/pdf/@{name}.fo"
+         outfile="${dist}/@{name}-${version}.pdf"
+         basedir="${doc}"
+         messagelevel="warn"/>
+
+    </sequential>
+  </macrodef>
+
+
+  <target name="pdf" depends="init">
+    <!-- jimi is needed by fop to handle png:
+
+         url: http://java.sun.com/products/jimi/
+
+         $ unzip jimi1_0.zip
+         $ cd Jimi
+         $ cp JimiProClasses.zip $FOP_HOME/lib/JimiProClasses.jar
+      -->
+    <mkdir dir="${build}/pdf"/>
+
+    <taskdef name="fop" classname="org.apache.fop.tools.anttasks.Fop">
+      <classpath>
+        <fileset dir="${fop.home}/build">
+          <include name="**/*.jar"/>
+        </fileset>
+        <fileset dir="${fop.home}/lib">
+          <include name="**/*.jar"/>
+        </fileset>
+      </classpath>
+    </taskdef>
+
+    <generate-pdf name="resin-install"/>
+    <generate-pdf name="resin-reference"/>
+
   </target>
 
   <target name="jdk14-compat">
