@@ -70,6 +70,7 @@ equally busy, the selection uses a round-robin to distribute the load.
 <deftable-parameters>
 <tr><td>cluster-id<td>the cluster that gets the matching requests<td>required
 <tr><td>sticky-sessions<td>whether or not sessions should be sticky<td>true
+<tr><td>strategy<td>the load balancing strategy, `round-robin' or `least-connection'<td>least-connection
 </deftable-parameters>
 
 <p>The usual case balances all requests to backend servers.  The front-end Resin
@@ -115,6 +116,16 @@ instance of Resin used for the server.</p>
 
 <p>LoadBalanceServlet is also used to allow a separate JVM for a web-app or a
 host.</p>
+
+<p>
+The <var/strategy/> determines the strategy to use for choosing a backend
+server for a request that does not have a sticky-session.  The
+`least-connection' strategy chooses the backend server that has the least
+number of connections at the time the decision is made.  This is a good general
+purpose strategy, and compensates for differences in a backend server's ability
+to service connections.  The `round-robin' strategy does a straight round
+robin, choosing the backend server that follows the last backend server chosen.
+</p>
 
 <TODO>link to load balancing configuration documentation</TODO>
 
