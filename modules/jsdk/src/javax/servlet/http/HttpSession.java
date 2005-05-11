@@ -30,9 +30,8 @@
 
 package javax.servlet.http;
 
-import java.util.*;
-import java.security.*;
-import javax.servlet.*;
+import javax.servlet.ServletContext;
+import java.util.Enumeration;
 
 /**
  * Sessions are a convenient way to connect users to web pages.  Because
@@ -57,7 +56,7 @@ import javax.servlet.*;
  *
  * <h4>Load balancing</h4>
  *
- * When using load balancing with Apache, sessions will always go to the 
+ * When using load balancing with Apache, sessions will always go to the
  * same JVM.  The session id encodes the JVM which first created the session.
  */
 public interface HttpSession {
@@ -103,7 +102,7 @@ public interface HttpSession {
    */
   public Enumeration getAttributeNames();
   /**
-   * Sets an attribute value.  Because servlets are multithreaded, 
+   * Sets an attribute value.  Because servlets are multithreaded,
    * setting HttpSession attributes will generally need synchronization.
    * Remember, users may open multiple browsers to the same page.
    *
@@ -127,7 +126,7 @@ public interface HttpSession {
   /**
    * Removes an attribute.  If the attribute value implements
    * HttpSessionBindingListener, it will receive a notice when
-   * it is removed. Because servlets are multithreaded, 
+   * it is removed. Because servlets are multithreaded,
    * removing ServletContext attributes will generally need synchronization.
    *
    * @param name of the attribute.
@@ -165,7 +164,7 @@ public interface HttpSession {
    * @deprecated
    */
   public void removeValue(String name);
-  
+
   /**
    * logs the user out and invalidates the sessions.
    */

@@ -29,44 +29,26 @@
 
 package com.caucho.sql;
 
-import java.io.PrintWriter;
-
-import java.util.Map;
-import java.util.Iterator;
-
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.Statement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-
-import javax.sql.PooledConnection;
-import javax.sql.XAConnection;
-
-import javax.security.auth.Subject;
-
-import javax.resource.ResourceException;
-import javax.resource.NotSupportedException;
-
-import javax.resource.spi.ManagedConnection;
-import javax.resource.spi.ManagedConnectionMetaData;
-import javax.resource.spi.LocalTransaction;
-import javax.resource.spi.ConnectionEventListener;
-import javax.resource.spi.ConnectionEvent;
-import javax.resource.spi.ConnectionRequestInfo;
-
-import javax.transaction.xa.XAResource;
-
-import com.caucho.util.L10N;
+import com.caucho.log.Log;
+import com.caucho.sql.spy.SpyConnection;
 import com.caucho.util.Alarm;
+import com.caucho.util.L10N;
 import com.caucho.util.LruCache;
 
-import com.caucho.log.Log;
-
-import com.caucho.sql.spy.SpyConnection;
+import javax.resource.NotSupportedException;
+import javax.resource.ResourceException;
+import javax.resource.spi.*;
+import javax.security.auth.Subject;
+import javax.sql.PooledConnection;
+import javax.sql.XAConnection;
+import javax.transaction.xa.XAResource;
+import java.io.PrintWriter;
+import java.lang.IllegalStateException;
+import java.sql.*;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Represents a single pooled connection.  For the most part, it just
@@ -162,7 +144,7 @@ public class ManagedConnectionImpl
   {
     return _credentials;
   }
-  
+
   /**
    * Returns the underlying connection.
    */
@@ -175,7 +157,7 @@ public class ManagedConnectionImpl
 
     ping();
     _lastEventTime = Alarm.getCurrentTime();
-    
+
     return new UserConnection(this);
   }
 
@@ -186,7 +168,7 @@ public class ManagedConnectionImpl
     throws ResourceException
   {
     _lastEventTime = Alarm.getCurrentTime();
-    
+
     UserConnection uConn = (UserConnection) connection;
 
     uConn.associate(this);
@@ -228,12 +210,12 @@ public class ManagedConnectionImpl
       user = _credentials.getUserName();
       password = _credentials.getPassword();
     }
-      
+
     _pooledConnection = _driver.createPooledConnection(user, password);
 
     if (_pooledConnection != null) {
       _pooledConnection.addConnectionEventListener(this);
-      
+
       _driverConnection = _pooledConnection.getConnection();
     }
     else
@@ -290,7 +272,7 @@ public class ManagedConnectionImpl
     } catch (SQLException e) {
       throw new ResourceException(e);
     }
-    
+
     throw new NotSupportedException();
   }
 
@@ -303,7 +285,7 @@ public class ManagedConnectionImpl
     if (_pooledConnection instanceof XAConnection &&
 	_pooledConnection.getClass().getName().startsWith("oracle"))
       throw new NotSupportedException(L.l("Oracle does not allow local transactions"));
-    
+
     if (_localTransaction == null)
       _localTransaction = new LocalTransactionImpl();
 
@@ -366,7 +348,7 @@ public class ManagedConnectionImpl
     }
 
     boolean hasItem = false;
-    
+
     synchronized (key) {
       key.init(sql, resultType);
 
@@ -374,10 +356,10 @@ public class ManagedConnectionImpl
 
       if (item != null) {
 	UserPreparedStatement upStmt = item.toActive(uConn);
-	
+
 	if (upStmt != null)
 	  return upStmt;
-	
+
 	hasItem = ! item.isRemoved();
       }
     }
@@ -392,10 +374,10 @@ public class ManagedConnectionImpl
       return pStmt;
 
     key = new PreparedStatementKey(sql, resultType);
-    
+
     PreparedStatementCacheItem item;
     item = new PreparedStatementCacheItem(key, pStmt, this);
-    
+
     UserPreparedStatement upStmt = item.toActive(uConn);
 
     if (upStmt == null)
@@ -413,7 +395,7 @@ public class ManagedConnectionImpl
   {
     _preparedStatementCache.remove(key);
   }
-  
+
   public void connectionClosed(javax.sql.ConnectionEvent event)
   {
     sendFatalEvent(new SQLException(L.l("unexpected close event from pool")));
@@ -424,7 +406,7 @@ public class ManagedConnectionImpl
   {
     sendFatalEvent(event.getSQLException());
   }
-  
+
   /**
    * Sends the close event.
    */
@@ -445,13 +427,13 @@ public class ManagedConnectionImpl
 	evt = new ConnectionEvent(this, ConnectionEvent.CONNECTION_CLOSED);
 
       evt.setConnectionHandle(userConn);
-      
+
       _listener.connectionClosed(evt);
 
       evt.setConnectionHandle(null);
 
       _connClosedEvent = evt;
-      
+
       _lastEventTime = Alarm.getCurrentTime();
     }
   }
@@ -532,14 +514,14 @@ public class ManagedConnectionImpl
     try {
       if (_catalog == null)
         _catalog = _driverConnection.getCatalog();
-    
+
       _driverConnection.setCatalog(catalog);
     } catch (SQLException e) {
       fatalEvent();
       throw e;
     }
   }
-  
+
   /**
    * Sets the connection's type map.
    */
@@ -549,14 +531,14 @@ public class ManagedConnectionImpl
     try {
       if (_typeMap == null)
         _typeMap = _driverConnection.getTypeMap();
-    
+
       _driverConnection.setTypeMap(map);
     } catch (SQLException e) {
       throw e;
     }
   }
 
-  
+
   /**
    * Sets the connection's isolation.
    */
@@ -566,7 +548,7 @@ public class ManagedConnectionImpl
     try {
       _oldIsolation = _driverConnection.getTransactionIsolation();
       _isolation = isolation;
-	
+
       _driverConnection.setTransactionIsolation(isolation);
     } catch (SQLException e) {
       throw e;
@@ -580,7 +562,7 @@ public class ManagedConnectionImpl
     throws ResourceException
   {
     Connection conn = _driverConnection;
-    
+
     if (conn == null)
       return;
 
@@ -634,7 +616,7 @@ public class ManagedConnectionImpl
       return true;
     } catch (Throwable e) {
       log.log(Level.FINE, e.toString(), e);
-      
+
       return false;
     }
   }
@@ -651,7 +633,7 @@ public class ManagedConnectionImpl
 
     if (now < _lastEventTime + 1000)
       return;
-    
+
     if (! dbPool.isPing())
       return;
 
@@ -688,10 +670,10 @@ public class ManagedConnectionImpl
     throws ResourceException
   {
     log.finer("destroy " + this);
-    
+
     PooledConnection poolConn = _pooledConnection;
     _pooledConnection = null;
-    
+
     Connection driverConn = _driverConnection;
     _driverConnection = null;
 
@@ -726,13 +708,13 @@ public class ManagedConnectionImpl
 
   class LocalTransactionImpl implements LocalTransaction {
     private boolean _oldAutoCommit;
-    
+
     public void begin()
       throws ResourceException
     {
       try {
 	_oldAutoCommit = _autoCommit;
-	
+
 	setAutoCommit(false);
       } catch (SQLException e) {
 	throw new ResourceException(e) ;
@@ -743,10 +725,10 @@ public class ManagedConnectionImpl
       throws ResourceException
     {
       Connection conn = _driverConnection;
-      
+
       if (conn == null)
 	throw new ResourceException(L.l("connection is closed"));
-      
+
       try {
 	conn.commit();
       } catch (SQLException e) {
@@ -767,7 +749,7 @@ public class ManagedConnectionImpl
 
       if (conn == null)
 	throw new ResourceException(L.l("connection is closed"));
-      
+
       try {
 	conn.rollback();
       } catch (SQLException e) {

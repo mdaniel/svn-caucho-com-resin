@@ -23,14 +23,13 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Sam 
+ * @author Sam
  */
 
 
 package javax.portlet;
 
-import java.io.*;
-import java.util.*;
+
 
 public interface PortletResponse
 {
@@ -55,8 +54,8 @@ public interface PortletResponse
    *
    * @return an absolute URL
    *
-   * @see javax.portlet.PortletResponse#encodeURL 
-   */ 
+   * @see javax.portlet.PortletResponse#encodeURL
+   */
   public String encodeURL(String path);
 
 }

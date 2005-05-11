@@ -28,28 +28,31 @@
 
 package com.caucho.server.webapp;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
-import java.util.logging.*;
-import javax.servlet.*;
-import javax.servlet.http.*;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-
 import com.caucho.i18n.CharacterEncoding;
-
 import com.caucho.log.Log;
-
-import com.caucho.server.connection.RequestAdapter;
-import com.caucho.server.connection.CauchoRequest;
-import com.caucho.server.connection.CauchoResponse;
-import com.caucho.server.connection.ServletInputStreamImpl;
-import com.caucho.server.connection.Form;
-
-import com.caucho.server.session.SessionManager;
+import com.caucho.server.connection.*;
 import com.caucho.server.session.SessionImpl;
+import com.caucho.server.session.SessionManager;
+import com.caucho.util.Alarm;
+import com.caucho.util.CharBuffer;
+import com.caucho.util.FreeList;
+import com.caucho.util.HashMapImpl;
+import com.caucho.vfs.BufferedReaderAdapter;
+import com.caucho.vfs.Encoding;
+import com.caucho.vfs.ReadStream;
+
+import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletException;
+import javax.servlet.ServletInputStream;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.Map;
+import java.util.logging.Logger;
 /**
  * sub-request for a include() page
  */
@@ -58,7 +61,7 @@ class DispatchRequest extends RequestAdapter {
 
   private static final FreeList<DispatchRequest> _freeList =
     new FreeList<DispatchRequest>(32);
-  
+
   private Application _application;
   private Application _oldApplication;
   private Form _formParser;
@@ -80,7 +83,7 @@ class DispatchRequest extends RequestAdapter {
   private String _pageServletPath;
   private String _pagePathInfo;
   private String _pageQueryString;
-  
+
   protected DispatchRequest()
   {
   }
@@ -112,12 +115,12 @@ class DispatchRequest extends RequestAdapter {
     _oldApplication = oldApplication;
 
     _form = null;
-    
+
     _readStream = null;
     _is = null;
 
     _bufferedReader = null;
-    
+
     _method = method;
     _uri = uri;
     _servletPath = servletPath;
@@ -143,22 +146,22 @@ class DispatchRequest extends RequestAdapter {
   {
     return _application;
   }
-  
-  public String getMethod() 
-  { 
+
+  public String getMethod()
+  {
     return _method;
   }
 
-  public String getRequestURI() 
-  { 
+  public String getRequestURI()
+  {
     return _uri;
   }
 
   /**
    * Returns the URL for the request
    */
-  public StringBuffer getRequestURL() 
-  { 
+  public StringBuffer getRequestURL()
+  {
     StringBuffer sb = new StringBuffer();
 
     sb.append(getScheme());
@@ -261,10 +264,10 @@ class DispatchRequest extends RequestAdapter {
   {
     if (_form == null)
       _form = parseQuery();
-    
+
     return _form;
   }
-  
+
   public Enumeration getParameterNames()
   {
     if (_form == null)
@@ -314,7 +317,7 @@ class DispatchRequest extends RequestAdapter {
       String key = (String) en.nextElement();
       String []oldValues = (String []) super.getParameterValues(key);
       String []newValues = (String []) table.get(key);
-      
+
       if (newValues == null)
 	table.put(key, oldValues);
       else {
@@ -334,8 +337,8 @@ class DispatchRequest extends RequestAdapter {
     return _application.getRealPath(path);
   }
 
-  public String getPathTranslated() 
-  { 
+  public String getPathTranslated()
+  {
     if (_pathInfo != null)
       return getRealPath(_pathInfo);
     else
@@ -360,7 +363,7 @@ class DispatchRequest extends RequestAdapter {
     String pathInfo = getPagePathInfo();
     if (pathInfo != null)
       cb.append(pathInfo);
-      
+
     int p = cb.lastIndexOf('/');
     if (p >= 0)
       cb.setLength(p);
@@ -383,29 +386,29 @@ class DispatchRequest extends RequestAdapter {
   {
     if (_readStream == null)
       return super.getInputStream();
-    
+
     if (_is == null)
       _is = new ServletInputStreamImpl();
     _is.init(_readStream);
-    
+
     return _is;
   }
-  
+
   public BufferedReader getReader()
     throws IOException
   {
     if (_readStream == null)
       return super.getReader();
-    
+
     if (_bufferedReader == null)
       _bufferedReader = new BufferedReaderAdapter(getStream());
-    
+
     // bufferedReader is just an adapter to get the signature right.
     _bufferedReader.init(getStream());
 
     return _bufferedReader;
   }
-  
+
   /**
    * Returns the current session.
    *
@@ -418,10 +421,10 @@ class DispatchRequest extends RequestAdapter {
     SessionManager manager = _application.getSessionManager();
 
     setVaryCookie(manager.getCookieName());
-    
+
     if (_session != null && _session.isValid()) {
       setHasCookie();
-    
+
       return _session;
     }
 
@@ -442,7 +445,7 @@ class DispatchRequest extends RequestAdapter {
 
     if (_session != null)
       setHasCookie();
-    
+
     return _session;
   }
 
@@ -464,7 +467,7 @@ class DispatchRequest extends RequestAdapter {
     long now = Alarm.getCurrentTime();
 
     SessionImpl session;
-    
+
     if (id != null && id.length() > 6) {
       session = manager.getSession(id, now, create,
 				   isRequestedSessionIdFromCookie());
@@ -479,7 +482,7 @@ class DispatchRequest extends RequestAdapter {
 	  if (response instanceof CauchoResponse)
 	    ((CauchoResponse) getResponse()).setSessionId(session.getId());
 	}
-        
+
         return session;
       }
     }
@@ -500,7 +503,7 @@ class DispatchRequest extends RequestAdapter {
 
     if (session != null)
       setHasCookie();
-      
+
     if (session.getId().equals(id))
       return session;
 
@@ -522,7 +525,7 @@ class DispatchRequest extends RequestAdapter {
     else
       return ((CauchoRequest) getRequest()).authenticate();
   }
-  
+
   /**
    * Cleans up at the end of the request
    */

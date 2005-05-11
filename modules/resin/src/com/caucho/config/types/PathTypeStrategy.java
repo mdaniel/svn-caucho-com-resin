@@ -29,17 +29,18 @@
 
 package com.caucho.config.types;
 
-import javax.servlet.jsp.el.VariableResolver;
-import javax.servlet.jsp.el.ELException;
+import com.caucho.config.Config;
+import com.caucho.config.NodeBuilder;
+import com.caucho.config.TypeStrategy;
+import com.caucho.el.ELParser;
+import com.caucho.el.Expr;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
-import com.caucho.config.NodeBuilder;
-import com.caucho.config.TypeStrategy;
-import com.caucho.config.Config;
-import com.caucho.el.Expr;
-import com.caucho.el.ELParser;
 import org.w3c.dom.Node;
+
+import javax.servlet.jsp.el.ELException;
+import javax.servlet.jsp.el.VariableResolver;
 
 public class PathTypeStrategy extends TypeStrategy {
   protected static final L10N L = new L10N(PathTypeStrategy.class);
@@ -78,7 +79,7 @@ public class PathTypeStrategy extends TypeStrategy {
   {
     if (env == null)
       env = Config.getEnvironment();
-    
+
     string = rewritePathString(string);
 
     Expr expr = new ELParser(string).parse();
@@ -89,13 +90,13 @@ public class PathTypeStrategy extends TypeStrategy {
       return (Path) obj;
 
     String value = Expr.toString(obj, env);
-    
+
     if (pwd != null)
       return pwd.lookup(value);
     else
       return Vfs.lookup(value);
   }
-  
+
   /**
    * Rewrites the path string into proper JSP EL.
    *
@@ -116,14 +117,14 @@ public class PathTypeStrategy extends TypeStrategy {
         cb.append(ch);
         continue;
       }
-      
+
       if (i + 1 == length) {
         cb.append('$');
         continue;
       }
 
       ch = pathName.charAt(i + 1);
-      
+
       if ('0' <= ch && ch <= '9') {
         int value = 0;
 
@@ -141,7 +142,7 @@ public class PathTypeStrategy extends TypeStrategy {
         int tail = i + 1;
         for (; tail < length; tail++) {
           ch = pathName.charAt(tail);
-        
+
           if (ch == '/' || ch == '\\' || ch == '$')
             break;
         }
@@ -152,7 +153,7 @@ public class PathTypeStrategy extends TypeStrategy {
       else
         cb.append('$');
     }
-    
+
     return cb.toString();
   }
 }

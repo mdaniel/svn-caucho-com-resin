@@ -29,77 +29,28 @@
 
 package com.caucho.ejb.entity2;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-
-import java.sql.Connection;
-import java.sql.SQLException;
-
-import javax.ejb.AssociationTable;
-import javax.ejb.Entity;
-import javax.ejb.AccessType;
-import javax.ejb.FetchType;
-import javax.ejb.DiscriminatorColumn;
-import javax.ejb.DiscriminatorType;
-import javax.ejb.GeneratorType;
-import javax.ejb.Inheritance;
-import javax.ejb.InheritanceType;
-import javax.ejb.InheritanceJoinColumn;
-import javax.ejb.JoinColumn;
-import javax.ejb.JoinColumns;
-import javax.ejb.ManyToOne;
-import javax.ejb.ManyToMany;
-import javax.ejb.OneToMany;
-import javax.ejb.OneToOne;
-import javax.ejb.PrePersist;
-import javax.ejb.PostPersist;
-import javax.ejb.SecondaryTable;
-
-import com.caucho.bytecode.JAccessibleObject;
-import com.caucho.bytecode.JAnnotation;
-import com.caucho.bytecode.JClass;
-import com.caucho.bytecode.JField;
-import com.caucho.bytecode.JMethod;
-import com.caucho.bytecode.JType;
-
-import com.caucho.util.L10N;
-import com.caucho.util.CharBuffer;
-
-import com.caucho.config.ConfigException;
-
-import com.caucho.jdbc.JdbcMetaData;
-
 import com.caucho.amber.AmberManager;
-
-import com.caucho.amber.field.AmberField;
-import com.caucho.amber.field.CompositeId;
-import com.caucho.amber.field.EntityManyToOneField;
-import com.caucho.amber.field.EntityOneToManyField;
-import com.caucho.amber.field.EntityManyToManyField;
-import com.caucho.amber.field.DependentEntityOneToOneField;
+import com.caucho.amber.field.*;
 import com.caucho.amber.field.Id;
-import com.caucho.amber.field.SubId;
-import com.caucho.amber.field.IdField;
-import com.caucho.amber.field.KeyPropertyField;
-import com.caucho.amber.field.PropertyField;
-
-import com.caucho.amber.table.Table;
+import com.caucho.amber.idgen.IdGenerator;
 import com.caucho.amber.table.Column;
 import com.caucho.amber.table.ForeignColumn;
 import com.caucho.amber.table.LinkColumns;
-
+import com.caucho.amber.table.Table;
 import com.caucho.amber.type.EntityType;
-import com.caucho.amber.type.GeneratorTableType;
-import com.caucho.amber.type.PrimitiveIntType;
-import com.caucho.amber.type.PrimitiveCharType;
-import com.caucho.amber.type.StringType;
-import com.caucho.amber.type.SubEntityType;
-import com.caucho.amber.type.Type;
-
-import com.caucho.amber.idgen.IdGenerator;
-
+import com.caucho.amber.type.*;
+import com.caucho.bytecode.*;
+import com.caucho.config.ConfigException;
 import com.caucho.ejb.EjbServerManager;
+import com.caucho.jdbc.JdbcMetaData;
+import com.caucho.util.CharBuffer;
+import com.caucho.util.L10N;
+
+import javax.ejb.*;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 
 /**
  * Configuration for an entity bean
@@ -109,7 +60,7 @@ public class EntityIntrospector {
 
   private static HashSet<String> _propertyAnnotations
     = new HashSet<String>();
-  
+
   private EjbServerManager _ejbManager;
 
   private HashMap<String,EntityType> _entityMap =
@@ -117,7 +68,7 @@ public class EntityIntrospector {
 
   private ArrayList<Completion> _linkCompletions = new ArrayList<Completion>();
   private ArrayList<Completion> _depCompletions = new ArrayList<Completion>();
-  
+
   /**
    * Creates the introspector.
    */
@@ -125,7 +76,7 @@ public class EntityIntrospector {
   {
     _ejbManager = manager;
   }
-  
+
   /**
    * Introspects.
    */
@@ -187,7 +138,7 @@ public class EntityIntrospector {
     String tableName = null;
     if (tableAnn != null)
       tableName = (String) tableAnn.get("name");
-    
+
     if (tableName == null || tableName.equals(""))
       tableName = entityName;
 
@@ -201,15 +152,15 @@ public class EntityIntrospector {
     JAnnotation secondaryTableAnn = type.getAnnotation(SecondaryTable.class);
 
     Table secondaryTable = null;
-    
+
     if (inheritanceAnn != null)
       introspectInheritance(amberManager, entityType, type);
 
     if (secondaryTableAnn != null) {
       String secondaryName = (String) secondaryTableAnn.get("name");
-      
+
       secondaryTable = amberManager.createTable(secondaryName);
-      
+
       entityType.addSecondaryTable(secondaryTable);
     }
 
@@ -228,12 +179,12 @@ public class EntityIntrospector {
     for (JMethod method : type.getMethods()) {
       introspectCallbacks(entityType, method);
     }
-    
+
     if (secondaryTableAnn != null) {
       Object []join = (Object []) secondaryTableAnn.get("join");
       JAnnotation []joinAnn = new JAnnotation[join.length];
       System.arraycopy(join, 0, joinAnn, 0, join.length);
-    
+
       linkSecondaryTable(entityType.getTable(),
 			 secondaryTable,
 			 joinAnn);
@@ -253,7 +204,7 @@ public class EntityIntrospector {
     if (method.getAnnotation(PrePersist.class) != null) {
       type.addPrePersistCallback(method);
     }
-    
+
     if (method.getAnnotation(PostPersist.class) != null) {
       type.addPostPersistCallback(method);
     }
@@ -268,11 +219,11 @@ public class EntityIntrospector {
     if (type.isFinal())
       throw new ConfigException(L.l("'{0}' must not be final.  Entity beans may not be final.",
 				    type.getName()));
-    
+
     if (type.isAbstract())
       throw new ConfigException(L.l("'{0}' must not be abstract.  Entity beans may not be abstract.",
 				    type.getName()));
-    
+
     validateConstructor(type);
 
     for (JMethod method : type.getMethods()) {
@@ -395,7 +346,7 @@ public class EntityIntrospector {
       entityType.setJoinedSubClass(true);
       break;
     }
-    
+
     JAnnotation discriminatorAnn =
       type.getAnnotation(DiscriminatorColumn.class);
 
@@ -533,11 +484,11 @@ public class EntityIntrospector {
   {
     JAnnotation id = field.getAnnotation(javax.ejb.Id.class);
     JAnnotation column = field.getAnnotation(javax.ejb.Column.class);
-    
+
     Type amberType = manager.createType(fieldType);
 
     Column keyColumn = createColumn(entityType, "ID", column, amberType);
-    
+
     KeyPropertyField idField;
     idField = new KeyPropertyField(entityType, fieldName, keyColumn);
 
@@ -547,7 +498,7 @@ public class EntityIntrospector {
       if (! metaData.supportsIdentity())
 	throw new ConfigException(L.l("'{0}' does not support identity.",
 				      metaData.getDatabaseName()));
-	
+
       keyColumn.setGeneratorType("identity");
       idField.setGenerator("identity");
     }
@@ -555,7 +506,7 @@ public class EntityIntrospector {
       if (! metaData.supportsSequences())
 	throw new ConfigException(L.l("'{0}' does not support sequence.",
 				      metaData.getDatabaseName()));
-	
+
       addSequenceIdGenerator(manager, idField, id);
     }
     else if (GeneratorType.TABLE.equals(id.get("generate"))) {
@@ -575,7 +526,7 @@ public class EntityIntrospector {
 
     return idField;
   }
-  
+
   private void addSequenceIdGenerator(AmberManager manager,
 				      KeyPropertyField idField,
 				      JAnnotation idAnn)
@@ -592,7 +543,7 @@ public class EntityIntrospector {
 
     idField.getSourceType().setGenerator(idField.getName(), gen);
   }
-  
+
   private void addTableIdGenerator(AmberManager manager,
 				   KeyPropertyField idField,
 				   JAnnotation idAnn)
@@ -609,7 +560,7 @@ public class EntityIntrospector {
 
     if (gen == null) {
       String genName = "GEN_TABLE";
-      
+
       GeneratorTableType genTable = manager.createGeneratorTable(genName);
 
       gen = genTable.createGenerator(name);
@@ -619,7 +570,7 @@ public class EntityIntrospector {
 
     idField.getSourceType().setGenerator(idField.getName(), gen);
   }
-  
+
   /**
    * Links a secondary table.
    */
@@ -647,7 +598,7 @@ public class EntityIntrospector {
 
       linkColumns.add(linkColumn);
     }
-    
+
     LinkColumns link = new LinkColumns(secondaryTable,
 				       primaryTable,
 				       linkColumns);
@@ -656,7 +607,7 @@ public class EntityIntrospector {
 
     secondaryTable.setDependentIdLink(link);
   }
-  
+
   /**
    * Links a secondary table.
    */
@@ -672,7 +623,7 @@ public class EntityIntrospector {
       linkInheritanceTable(primaryTable, secondaryTable,
 			   (JAnnotation []) null);
   }
-  
+
   /**
    * Links a secondary table.
    */
@@ -701,7 +652,7 @@ public class EntityIntrospector {
 
       linkColumns.add(linkColumn);
     }
-    
+
     LinkColumns link = new LinkColumns(secondaryTable,
 				       primaryTable,
 				       linkColumns);
@@ -722,7 +673,7 @@ public class EntityIntrospector {
   {
     if (entityType.getId() == null)
       throw new IllegalStateException(L.l("{0} has no key", entityType));
-    
+
     for (JMethod method : type.getMethods()) {
       String methodName = method.getName();
       JClass []paramTypes = method.getParameterTypes();
@@ -789,10 +740,10 @@ public class EntityIntrospector {
   {
     if (entityType.getId() == null)
       throw new IllegalStateException(L.l("{0} has no key", entityType));
-    
+
     for (JField field : type.getDeclaredFields()) {
       String fieldName = field.getName();
-      
+
       if (parentType != null && parentType.getField(fieldName) != null)
 	continue;
 
@@ -858,12 +809,12 @@ public class EntityIntrospector {
 
     JAnnotation basicAnn = field.getAnnotation(javax.ejb.Basic.class);
     JAnnotation columnAnn = field.getAnnotation(javax.ejb.Column.class);
-    
+
     Type amberType = manager.createType(fieldType);
-	
+
     Column fieldColumn = createColumn(sourceType, fieldName,
 				      columnAnn, amberType);
-    
+
     PropertyField property = new PropertyField(sourceType, fieldName);
     property.setColumn(fieldColumn);
 
@@ -874,7 +825,7 @@ public class EntityIntrospector {
       field.setInsertable(insertable);
       field.setUpdateable(updateable);
     */
-	
+
     sourceType.addField(property);
   }
 
@@ -888,7 +839,7 @@ public class EntityIntrospector {
       name = (String) columnAnn.get("name");
 
     Column column;
-    
+
     if (columnAnn != null && ! columnAnn.get("secondaryTable").equals("")) {
       String tableName = columnAnn.getString("secondaryTable");
       Table table;
@@ -898,7 +849,7 @@ public class EntityIntrospector {
       if (table == null)
 	throw new ConfigException(L.l("'{0}' is an unknown secondary table.",
 				      tableName));
-      
+
       column = table.createColumn(name, amberType);
     }
     else
@@ -925,16 +876,16 @@ public class EntityIntrospector {
     throws ConfigException
   {
     AmberManager manager = sourceType.getAmberManager();
-    
+
     JAnnotation manyToOneAnn = field.getAnnotation(ManyToOne.class);
 
     JAnnotation joinColumns = field.getAnnotation(JoinColumns.class);
     JAnnotation []joinColumnsAnn = null;
-    
+
     if (joinColumns != null)
       joinColumnsAnn = (JAnnotation []) joinColumns.get("value");
     JAnnotation joinColumnAnn = field.getAnnotation(JoinColumn.class);
-    
+
     String targetName = manyToOneAnn.getString("targetEntity");
 
     if (targetName == null || targetName.equals(""))
@@ -942,11 +893,11 @@ public class EntityIntrospector {
 
     EntityManyToOneField manyToOneField;
     manyToOneField = new EntityManyToOneField(sourceType, fieldName);
-    
+
     EntityType targetType = manager.createEntity(targetName, fieldType);
-	
+
     manyToOneField.setType(targetType);
-    
+
     manyToOneField.setLazy(manyToOneAnn.get("fetch") == FetchType.LAZY);
 
     sourceType.addField(manyToOneField);
@@ -962,7 +913,7 @@ public class EntityIntrospector {
       String columnName = keyColumn.getName();
       if (joinAnn != null)
 	columnName = joinAnn.getString("name");
-      
+
       ForeignColumn foreignColumn;
 
       foreignColumn = sourceTable.createForeignColumn(columnName, keyColumn);
@@ -973,12 +924,12 @@ public class EntityIntrospector {
     LinkColumns linkColumns = new LinkColumns(sourceType.getTable(),
 					      targetType.getTable(),
 					      foreignColumns);
-    
+
     manyToOneField.setLinkColumns(linkColumns);
 
     manyToOneField.init();
   }
-  
+
   private JAnnotation getJoinColumn(JAnnotation joinColumns, String keyName)
   {
     if (joinColumns == null)
@@ -986,7 +937,7 @@ public class EntityIntrospector {
 
     return getJoinColumn((JAnnotation []) joinColumns.get("value"), keyName);
   }
-  
+
   private JAnnotation getJoinColumn(JAnnotation []columnsAnn, String keyName)
   {
     if (columnsAnn == null || columnsAnn.length == 0)
@@ -994,7 +945,7 @@ public class EntityIntrospector {
 
     for (int i = 0; i < columnsAnn.length; i++) {
       String ref = columnsAnn[i].getString("referencedColumnName");
-      
+
       if (ref.equals("") || ref.equals(keyName))
 	return columnsAnn[i];
     }
@@ -1010,7 +961,7 @@ public class EntityIntrospector {
 
     for (int i = 0; i < columns.length; i++) {
       String ref = columns[i].getString("referencedColumnName");
-      
+
       if (ref.equals("") || ref.equals(keyName))
 	return columns[i];
     }
@@ -1026,7 +977,7 @@ public class EntityIntrospector {
     throws ConfigException
   {
     JAnnotation manyToManyAnn = field.getAnnotation(ManyToMany.class);
-    
+
     AmberManager manager = sourceType.getAmberManager();
 
       JType retType;
@@ -1037,7 +988,7 @@ public class EntityIntrospector {
 	retType = ((JMethod) field).getGenericReturnType();
 
       JType []typeArgs = retType.getActualTypeArguments();
-	
+
       String targetName;
 
       targetName = manyToManyAnn.getString("targetEntity");
@@ -1062,10 +1013,10 @@ public class EntityIntrospector {
     String sqlTable = sourceType.getTable().getName() + "_" + targetType.getTable().getName();
 
     Table mapTable = null;
-    
+
     ArrayList<ForeignColumn> sourceColumns = null;
     ArrayList<ForeignColumn> targetColumns = null;
-      
+
     if (associationTableAnn != null) {
       JAnnotation table = associationTableAnn.getAnnotation("table");
 
@@ -1089,7 +1040,7 @@ public class EntityIntrospector {
 
       targetColumns = calculateColumns(mapTable, targetType);
     }
-    
+
     manyToManyField.setAssociationTable(mapTable);
     manyToManyField.setTable(sqlTable);
 
@@ -1100,10 +1051,10 @@ public class EntityIntrospector {
     manyToManyField.setTargetLink(new LinkColumns(mapTable,
 						  targetType.getTable(),
 						  targetColumns));
-      
+
     sourceType.addField(manyToManyField);
   }
-  
+
   static String toFieldName(String name)
   {
     if (Character.isLowerCase(name.charAt(0)))
@@ -1206,12 +1157,12 @@ public class EntityIntrospector {
       _fieldName = fieldName;
       _fieldType = fieldType;
     }
-    
+
     void complete()
       throws ConfigException
     {
       JAnnotation oneToManyAnn = _field.getAnnotation(OneToMany.class);
-      
+
       AmberManager manager = _entityType.getAmberManager();
 
       JType retType;
@@ -1222,7 +1173,7 @@ public class EntityIntrospector {
 	retType = ((JMethod) _field).getGenericReturnType();
 
       JType []typeArgs = retType.getActualTypeArguments();
-	
+
       String targetName;
 
       targetName = oneToManyAnn.getString("targetEntity");
@@ -1290,14 +1241,14 @@ public class EntityIntrospector {
       _fieldName = fieldName;
       _fieldType = fieldType;
     }
-    
+
     void complete()
       throws ConfigException
     {
       JAnnotation oneToOneAnn = _field.getAnnotation(OneToOne.class);
-      
+
       AmberManager manager = _entityType.getAmberManager();
-	
+
       String targetName = oneToOneAnn.getString("targetEntity");
 
       if (targetName == null || targetName.equals(""))
@@ -1358,7 +1309,7 @@ public class EntityIntrospector {
       _fieldName = fieldName;
       _fieldType = fieldType;
     }
-    
+
     void complete()
       throws ConfigException
     {
@@ -1385,7 +1336,7 @@ public class EntityIntrospector {
       _fieldName = fieldName;
       _fieldType = fieldType;
     }
-    
+
     void complete()
       throws ConfigException
     {

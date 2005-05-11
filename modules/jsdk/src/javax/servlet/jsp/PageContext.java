@@ -28,11 +28,11 @@
 
 package javax.servlet.jsp;
 
-import java.io.*;
-import java.util.*;
-import javax.servlet.http.*;
 import javax.servlet.*;
-import javax.servlet.jsp.tagext.*;
+import javax.servlet.http.HttpSession;
+import javax.servlet.jsp.tagext.BodyContent;
+import java.io.IOException;
+import java.util.Enumeration;
 
 public abstract class PageContext extends JspContext {
   public final static int PAGE_SCOPE = 1;
@@ -109,7 +109,7 @@ public abstract class PageContext extends JspContext {
    */
   public abstract void forward(String relativeUrl)
     throws ServletException, IOException;
-  
+
   /**
    * Includes the a page relative to the current URL.
    */
@@ -118,7 +118,7 @@ public abstract class PageContext extends JspContext {
   {
     include(relativeUrl, true);
   }
-  
+
   /**
    * Includes the a page relative to the current URL.
    */
@@ -135,7 +135,7 @@ public abstract class PageContext extends JspContext {
 				  int bufferSize,
 				  boolean autoFlush)
     throws IOException, IllegalStateException, IllegalArgumentException;
-  
+
   /**
    * Internal routine to support BodyTags.  Pushes the new bodyContent
    * to become the value of getOut().
@@ -144,7 +144,7 @@ public abstract class PageContext extends JspContext {
   {
     return null;
   }
-  
+
   /**
    * Internal routine to support errorPages.  Kept for backward
    * compatibility.

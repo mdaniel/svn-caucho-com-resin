@@ -28,13 +28,10 @@
 
 package javax.resource.spi;
 
-import java.util.Set;
-
-import java.io.PrintWriter;
-
-import javax.security.auth.Subject;
-
 import javax.resource.ResourceException;
+import javax.security.auth.Subject;
+import java.io.PrintWriter;
+import java.util.Set;
 
 /**
  * Interface for the resource adapter's connection factory.
@@ -46,7 +43,7 @@ public interface ManagedConnectionFactory extends java.io.Serializable {
    */
   public Object createConnectionFactory(ConnectionManager manager)
     throws ResourceException;
-  
+
   /**
    * Creates a Connection Factory instance, using a default
    * ConnectionManager from the resource adapter.
@@ -54,14 +51,14 @@ public interface ManagedConnectionFactory extends java.io.Serializable {
    */
   public Object createConnectionFactory()
     throws ResourceException;
-  
+
   /**
    * Creates physical connection to the EIS resource manager.
    */
   public ManagedConnection createManagedConnection(Subject subject,
 						   ConnectionRequestInfo info)
     throws ResourceException;
-  
+
   /**
    * Returns a matched connection.
    */

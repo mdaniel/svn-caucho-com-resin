@@ -29,17 +29,12 @@
 
 package com.caucho.server.dispatch;
 
-import java.util.logging.*;
-
+import com.caucho.log.Log;
+import com.caucho.make.Dependency;
+import com.caucho.server.webapp.Application;
 import com.caucho.util.L10N;
 
-import com.caucho.log.Log;
-
-import com.caucho.vfs.*;
-
-import com.caucho.server.webapp.Application;
-
-import com.caucho.make.Dependency;
+import java.util.logging.Logger;
 
 /**
  * A repository for request information gleaned from the uri.
@@ -47,20 +42,20 @@ import com.caucho.make.Dependency;
 public class Invocation extends ServletInvocation implements Dependency {
   static final L10N L = new L10N(Invocation.class);
   static final Logger log = Log.open(Invocation.class);
-  
+
   private String _rawHost;
 
   // canonical host and port
   private String _hostName;
   private int _port;
-  
+
   private String _rawURI;
-  
+
   private String _uri;
   private String _sessionId;
 
   private Application _application;
-  
+
   private Dependency _dependency;
 
   /**
@@ -221,10 +216,10 @@ public class Invocation extends ServletInvocation implements Dependency {
   public void copyFrom(Invocation invocation)
   {
     super.copyFrom(invocation);
-    
+
     _rawHost = invocation._rawHost;
     _rawURI = invocation._rawURI;
-    
+
     _hostName = invocation._hostName;
     _port = invocation._port;
     _uri = invocation._uri;
@@ -242,7 +237,7 @@ public class Invocation extends ServletInvocation implements Dependency {
 
     if (_rawHost != null)
       hash = hash * 65521 + _rawHost.hashCode();
-    
+
     hash = hash * 65521 + _port;
 
     return hash;
@@ -276,7 +271,7 @@ public class Invocation extends ServletInvocation implements Dependency {
 
     String aQuery = getQueryString();
     String bQuery = inv.getQueryString();
-    
+
     if (aQuery != bQuery &&
 	(aQuery == null || ! aQuery.equals(bQuery)))
       return false;

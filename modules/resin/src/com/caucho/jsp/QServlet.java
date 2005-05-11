@@ -29,31 +29,25 @@
 
 package com.caucho.jsp;
 
-import java.io.*;
-import java.util.*;
-import java.util.logging.*;
-
-import javax.servlet.http.*;
-import javax.servlet.*;
-
-import org.w3c.dom.*;
-
-import com.caucho.Version;
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-import com.caucho.java.*;
-import com.caucho.xml.*;
-
 import com.caucho.log.Log;
-
-import com.caucho.server.webapp.Application;
-
-//import com.caucho.server.http.CauchoRequestDispatcher;
-
 import com.caucho.server.connection.CauchoRequest;
 import com.caucho.server.connection.CauchoResponse;
 import com.caucho.server.connection.RequestAdapter;
 import com.caucho.server.connection.ResponseAdapter;
+import com.caucho.server.webapp.Application;
+import com.caucho.util.L10N;
+import com.caucho.vfs.ClientDisconnectException;
+import com.caucho.vfs.JarPath;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.Vfs;
+
+import javax.servlet.*;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Base servlet for both JSP and XTP.  It's primarily responsible for
@@ -77,7 +71,7 @@ abstract public class QServlet implements Servlet {
   private PageManager _manager;
 
   private ServletConfig _config;
-  
+
   /**
    * Initialize the servlet.  If necessary, convert the ServletContext
    * to a CauchoApplication.  Also, read the configuration Registry
@@ -89,7 +83,7 @@ abstract public class QServlet implements Servlet {
     _application = (Application) cxt;
 
     _config = config;
-    
+
     log.finer(config.getServletName() + " init");
   }
 
@@ -100,7 +94,7 @@ abstract public class QServlet implements Servlet {
   {
     _manager = manager;
   }
-  
+
   protected PageManager getManager()
   {
     return _manager;
@@ -164,7 +158,7 @@ abstract public class QServlet implements Servlet {
         response.sendError(HttpServletResponse.SC_NOT_FOUND);
         return;
       }
-      
+
       page.service(request, response);
     }
     catch (JspParseException e) {
@@ -223,7 +217,7 @@ abstract public class QServlet implements Servlet {
           forwardErrorPage(request, response, e.getCause(), e.getErrorPage());
         else
           forwardErrorPage(request, response, e, e.getErrorPage());
-	
+
         return null;
       }
       else
@@ -248,17 +242,17 @@ abstract public class QServlet implements Servlet {
     if (! _application.isActive())
       throw new UnavailableException("JSP compilation unavailable during restart", 10);
     */
-    
+
     if (req instanceof CauchoRequest)
       cauchoRequest = (CauchoRequest) req;
-    
+
     String servletPath;
 
     if (cauchoRequest != null)
       servletPath = cauchoRequest.getPageServletPath();
     else
       servletPath = RequestAdapter.getPageServletPath(req);
-    
+
     if (servletPath == null)
       servletPath = "/";
 
@@ -271,18 +265,18 @@ abstract public class QServlet implements Servlet {
       uri = RequestAdapter.getPageURI(req);
 
     Path appDir = _application.getAppDir();
-      
+
     String realPath;
     Path subcontext;
 
     Page page;
-      
+
     String jspPath = (String) req.getAttribute("caucho.jsp.jsp-file");
     if (jspPath != null) {
       req.removeAttribute("caucho.jsp.jsp-file");
 
       subcontext = getPagePath(jspPath);
-      
+
       return _manager.getPage(uri, jspPath, subcontext);
     }
 
@@ -316,7 +310,7 @@ abstract public class QServlet implements Servlet {
 					  uri));
       // return null;
     }
-    
+
     subcontext = getPagePath(pathInfo);
     if (subcontext != null)
       return _manager.getPage(pathInfo, subcontext);
@@ -344,7 +338,7 @@ abstract public class QServlet implements Servlet {
     Path appDir = _application.getAppDir();
     String realPath = _application.getRealPath(pathName);
     Path path = appDir.lookupNative(realPath);
-    
+
     if (path.isFile() && path.canRead())
       return path;
 
@@ -360,7 +354,7 @@ abstract public class QServlet implements Servlet {
         path = JarPath.create(Vfs.lookup(url.toString())).lookup(pathName);
       else if (url != null)
         path = Vfs.lookup(url.toString());
-      
+
       if (path != null && path.isFile() && path.canRead())
         return path;
     }
@@ -415,10 +409,10 @@ abstract public class QServlet implements Servlet {
     }
 
     RequestDispatcher rd = req.getRequestDispatcher(errorPage);
-    
+
     if (rd == null)
       return false;
-    
+
     rd.forward(req, res);
 
     return true;

@@ -29,12 +29,12 @@
 
 package com.caucho.config.types;
 
-import java.util.HashMap;
-
-import com.caucho.util.L10N;
-import com.caucho.config.TypeStrategy;
 import com.caucho.config.NodeBuilder;
+import com.caucho.config.TypeStrategy;
+import com.caucho.util.L10N;
 import org.w3c.dom.Node;
+
+import java.util.HashMap;
 
 public class ClassTypeStrategy extends TypeStrategy {
   protected static final L10N L = new L10N(ClassTypeStrategy.class);
@@ -78,7 +78,7 @@ public class ClassTypeStrategy extends TypeStrategy {
     _primitiveTypes.put("long", long.class);
     _primitiveTypes.put("float", float.class);
     _primitiveTypes.put("double", double.class);
-    
+
     _primitiveTypes.put("Boolean", Boolean.class);
     _primitiveTypes.put("Character", Character.class);
     _primitiveTypes.put("Byte", Byte.class);

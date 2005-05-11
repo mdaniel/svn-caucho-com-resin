@@ -28,12 +28,10 @@
 
 package javax.ejb;
 
-import java.util.Properties;
-
-import java.security.Principal;
-import java.security.Identity;
-
 import javax.transaction.UserTransaction;
+import java.security.Identity;
+import java.security.Principal;
+import java.util.Properties;
 
 /**
  * The main ejb context.

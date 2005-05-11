@@ -29,68 +29,44 @@
 
 package com.caucho.amber;
 
+import com.caucho.amber.connection.AmberConnectionImpl;
+import com.caucho.amber.connection.CacheConnectionImpl;
+import com.caucho.amber.entity.AmberCompletion;
+import com.caucho.amber.entity.AmberEntityHome;
+import com.caucho.amber.entity.EntityItem;
+import com.caucho.amber.entity.EntityKey;
+import com.caucho.amber.gen.AmberEnhancer;
+import com.caucho.amber.gen.AmberGenerator;
+import com.caucho.amber.gen.AmberGeneratorImpl;
+import com.caucho.amber.idgen.IdGenerator;
+import com.caucho.amber.idgen.SequenceIdGenerator;
+import com.caucho.amber.query.QueryCacheKey;
+import com.caucho.amber.query.ResultSetCacheChunk;
+import com.caucho.amber.table.Table;
+import com.caucho.amber.type.*;
+import com.caucho.bytecode.JClass;
+import com.caucho.bytecode.JClassLoader;
+import com.caucho.config.ConfigException;
+import com.caucho.java.gen.JavaClassGenerator;
+import com.caucho.jdbc.JdbcMetaData;
+import com.caucho.loader.DynamicClassLoader;
+import com.caucho.loader.enhancer.EnhancerManager;
+import com.caucho.loader.enhancer.EnhancingClassLoader;
+import com.caucho.log.Log;
+import com.caucho.util.L10N;
+import com.caucho.util.LruCache;
+
+import javax.sql.DataSource;
 import java.io.IOException;
-
 import java.lang.ref.SoftReference;
-
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.ArrayList;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
-
-import javax.sql.DataSource;
-
-import com.caucho.bytecode.JClass;
-import com.caucho.bytecode.JClassLoader;
-
-import com.caucho.loader.DynamicClassLoader;
-
-import com.caucho.loader.enhancer.EnhancerManager;
-
-import com.caucho.jdbc.JdbcMetaData;
-
-import com.caucho.amber.connection.AmberConnectionImpl;
-import com.caucho.amber.connection.CacheConnectionImpl;
-
-import com.caucho.amber.entity.AmberEntityHome;
-import com.caucho.amber.entity.EntityKey;
-import com.caucho.amber.entity.EntityItem;
-import com.caucho.amber.entity.AmberCompletion;
-
-import com.caucho.amber.gen.AmberGenerator;
-import com.caucho.amber.gen.AmberGeneratorImpl;
-import com.caucho.amber.gen.AmberEnhancer;
-
-import com.caucho.amber.query.QueryCacheKey;
-import com.caucho.amber.query.ResultSetCacheChunk;
-
-import com.caucho.amber.table.Table;
-
-import com.caucho.amber.type.Type;
-import com.caucho.amber.type.EntityType;
-import com.caucho.amber.type.GeneratorTableType;
-import com.caucho.amber.type.SubEntityType;
-import com.caucho.amber.type.TypeManager;
-
-import com.caucho.amber.idgen.IdGenerator;
-import com.caucho.amber.idgen.SequenceIdGenerator;
-
-import com.caucho.config.ConfigException;
-
-import com.caucho.java.gen.JavaClassGenerator;
-
-import com.caucho.loader.enhancer.EnhancingClassLoader;
-
-import com.caucho.log.Log;
-
-import com.caucho.util.LruCache;
-import com.caucho.util.L10N;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Main interface between Resin and the connector.  It's the
@@ -107,10 +83,10 @@ public class AmberManager {
   private EnhancingClassLoader _enhancedLoader;
 
   private AmberEnhancer _enhancer;
-  
+
   private DataSource _dataSource;
   private JdbcMetaData _jdbcMetaData;
-  
+
   private boolean _createDatabaseTables;
   private boolean _validateDatabaseTables = true;
 
@@ -145,7 +121,7 @@ public class AmberManager {
   private ArrayList<AmberEntityHome> _lazyHomeInit =
     new ArrayList<AmberEntityHome>();
   private ArrayList<Table> _lazyTable = new ArrayList<Table>();
-    
+
   private AmberGenerator _generator;
 
   private CacheConnectionImpl _cacheConn;
@@ -291,7 +267,7 @@ public class AmberManager {
     if (table == null) {
       table = new Table(tableName);
       table.setCacheTimeout(getTableCacheTimeout());
-      
+
       _tableMap.put(tableName, table);
 
       _lazyTable.add(table);
@@ -299,7 +275,7 @@ public class AmberManager {
 
     return table;
   }
-  
+
   /**
    * Adds an entity.
    */
@@ -307,7 +283,7 @@ public class AmberManager {
   {
     return createEntity(beanClass.getName(), beanClass);
   }
-  
+
   /**
    * Adds an entity.
    */
@@ -320,10 +296,10 @@ public class AmberManager {
 
     // ejb/0al2
     // entityType = (EntityType) _typeManager.get(beanClass.getName());
-    
+
     if (entityType == null) {
       EntityType parentType = null;
-      
+
       for (JClass parentClass = beanClass.getSuperClass();
 	   parentType == null && parentClass != null;
 	   parentClass = parentClass.getSuperClass()) {
@@ -335,13 +311,13 @@ public class AmberManager {
       else
 	entityType = new EntityType(this);
     }
-    
+
     // _typeManager.put(name, entityType);
     _typeManager.put(name, entityType);
     // XXX: some confusion about the double entry
     if (_typeManager.get(beanClass.getName()) == null)
       _typeManager.put(beanClass.getName(), entityType);
-    
+
     entityType.setName(name);
     entityType.setBeanClass(beanClass);
 
@@ -363,7 +339,7 @@ public class AmberManager {
 
     return entityType;
   }
-  
+
   /**
    * Returns a table generator.
    */
@@ -371,7 +347,7 @@ public class AmberManager {
   {
     return _tableGenMap.get(name);
   }
-  
+
   /**
    * Sets a table generator.
    */
@@ -388,7 +364,7 @@ public class AmberManager {
       }
     }
   }
-  
+
   /**
    * Adds a generator table.
    */
@@ -411,7 +387,7 @@ public class AmberManager {
 
     return genType;
   }
-  
+
   /**
    * Returns a sequence generator.
    */
@@ -438,7 +414,7 @@ public class AmberManager {
     throws Exception
   {
     configure();
-    
+
     while (_lazyGenerate.size() > 0) {
       EntityType type = _lazyGenerate.remove(0);
 
@@ -459,7 +435,7 @@ public class AmberManager {
     throws Exception
   {
     configure();
-    
+
     while (_lazyGenerate.size() > 0) {
       EntityType type = _lazyGenerate.remove(0);
 
@@ -482,10 +458,10 @@ public class AmberManager {
 	  }
 	}
       }
-      
+
       configure();
     }
-    
+
     for (SequenceIdGenerator gen : _sequenceGenMap.values())
       gen.init(this);
   }
@@ -507,7 +483,7 @@ public class AmberManager {
 	_lazyGenerate.add(type);
     }
   }
-  
+
   /**
    * Adds an entity.
    */
@@ -523,7 +499,7 @@ public class AmberManager {
     entityType.setBeanClass(beanClass);
 
     _typeManager.put(entityType.getName(), entityType);
-    
+
     _entityHomeMap.put(entityType.getName(), parent.getHome());
 
     return entityType;
@@ -543,7 +519,7 @@ public class AmberManager {
 	throw new AmberRuntimeException(e);
       }
     }
-    
+
     return _entityHomeMap.get(name);
   }
 
@@ -593,7 +569,7 @@ public class AmberManager {
     throws ConfigException
   {
     Type type = _typeManager.get(typeName);
-    
+
     if (type != null)
       return type;
 
@@ -662,7 +638,7 @@ public class AmberManager {
       if (envLoader.getOwner() == null)
 	return;
       */
-      
+
       _enhancer = new AmberEnhancer();
       _enhancer.setAmberManager(this);
 
@@ -684,7 +660,7 @@ public class AmberManager {
 
     if (_dataSource == null)
       return;
-    
+
     try {
       Connection conn = _dataSource.getConnection();
 
@@ -716,7 +692,7 @@ public class AmberManager {
 
     while (_lazyHomeInit.size() > 0) {
       AmberEntityHome home = _lazyHomeInit.remove(0);
-      
+
       home.init();
     }
   }
@@ -747,7 +723,7 @@ public class AmberManager {
   public CacheConnectionImpl getCacheConnection()
   {
     CacheConnectionImpl conn;
-    
+
     synchronized (this) {
       conn = _cacheConn;
       _cacheConn = null;
@@ -848,7 +824,7 @@ public class AmberManager {
   {
     SoftReference<EntityItem> ref = new SoftReference<EntityItem>(entity);
     EntityKey entityKey = new EntityKey(rootType, key);
-    
+
     ref = _entityCache.putIfNew(entityKey, ref);
 
     return ref.get();

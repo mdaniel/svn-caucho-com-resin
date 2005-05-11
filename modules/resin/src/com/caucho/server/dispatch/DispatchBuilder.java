@@ -28,7 +28,7 @@
 
 package com.caucho.server.dispatch;
 
-import javax.servlet.ServletException;
+
 
 /**
  * Builds the dispatch for an invocation.

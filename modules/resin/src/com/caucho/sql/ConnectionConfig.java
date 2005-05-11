@@ -29,18 +29,17 @@
 
 package com.caucho.sql;
 
-import java.sql.Connection;
-
 import com.caucho.config.ConfigException;
-
 import com.caucho.util.L10N;
+
+import java.sql.Connection;
 
 /**
  * Configures the connection
  */
 public class ConnectionConfig {
   private static final L10N L = new L10N(ConnectionConfig.class);
-  
+
   private int _isolation = -1;
   private boolean _readOnly;
   private String _catalog;

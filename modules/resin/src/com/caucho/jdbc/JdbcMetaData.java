@@ -29,19 +29,13 @@
 
 package com.caucho.jdbc;
 
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import java.sql.Connection;
-import java.sql.Types;
-import java.sql.DatabaseMetaData;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import com.caucho.util.L10N;
+import com.caucho.util.Log;
 
 import javax.sql.DataSource;
-
-import com.caucho.util.Log;
-import com.caucho.util.L10N;
+import java.sql.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Abstract way of grabbing data from the JDBC connection.
@@ -51,7 +45,7 @@ public class JdbcMetaData {
   private static final Logger log = Log.open(JdbcMetaData.class);
 
   private DataSource _ds;
-  
+
   /**
    * Create a new JDBC backing store.
    */
@@ -66,10 +60,10 @@ public class JdbcMetaData {
   public static JdbcMetaData create(DataSource ds)
   {
     Connection conn = null;
-    
+
     try {
       conn = ds.getConnection();
-      
+
       DatabaseMetaData md = conn.getMetaData();
 
       String name = md.getDatabaseProductName();
@@ -132,10 +126,10 @@ public class JdbcMetaData {
   public String getBlobType()
   {
     Connection conn = null;
-    
+
     try {
       conn = getConnection();
-      
+
       DatabaseMetaData md = conn.getMetaData();
       ResultSet rs;
 
@@ -173,7 +167,7 @@ public class JdbcMetaData {
       } finally {
         rs.close();
       }
-      
+
       rs = md.getTypeInfo();
       try {
 	while (rs.next()) {
@@ -203,10 +197,10 @@ public class JdbcMetaData {
   public String getLongType()
   {
     Connection conn = null;
-    
+
     try {
       conn = getConnection();
-      
+
       DatabaseMetaData md = conn.getMetaData();
       ResultSet rs;
 
@@ -286,15 +280,15 @@ public class JdbcMetaData {
   public String limit(String sql, int max)
   {
     return sql;
-  }    
-  
+  }
+
   /**
    * Returns the SQL for the table with the given SQL type.
    */
   public String getCreateTableSQL(int sqlType, int length)
   {
     String type = null;
-    
+
     switch (sqlType) {
     case Types.BOOLEAN:
       type = getCreateColumnSQL(sqlType, length);
@@ -322,17 +316,17 @@ public class JdbcMetaData {
 
     return type;
   }
-  
+
   /**
    * Returns the SQL for the table with the given SQL type.
    */
   protected String getCreateColumnSQL(int sqlType, int length)
   {
     Connection conn = null;
-    
+
     try {
       conn = getConnection();
-      
+
       DatabaseMetaData md = conn.getMetaData();
       ResultSet rs;
 
@@ -373,7 +367,7 @@ public class JdbcMetaData {
 		if (isConstant)
 		  return typeName + "(" + value + ")";
 	      }
-	    
+
 	      return typeName;
 	    }
 	    else {
@@ -396,7 +390,7 @@ public class JdbcMetaData {
 
     return getDefaultCreateTableSQL(sqlType, length);
   }
-  
+
   protected String getDefaultCreateTableSQL(int sqlType, int length)
   {
     switch (sqlType) {

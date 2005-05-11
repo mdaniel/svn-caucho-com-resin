@@ -28,32 +28,26 @@
 
 package com.caucho.server.connection;
 
-import java.util.logging.Logger;
-import java.util.logging.Level;
+import com.caucho.log.Log;
+import com.caucho.util.FreeList;
+import com.caucho.vfs.FlushBuffer;
 
-import java.io.PrintWriter;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-
-import javax.servlet.ServletResponse;
 import javax.servlet.ServletOutputStream;
-
+import javax.servlet.ServletResponse;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
-
-import com.caucho.util.FreeList;
-
-import com.caucho.log.Log;
-
-import com.caucho.vfs.FlushBuffer;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
+import java.util.logging.Logger;
 
 public class ResponseAdapter extends ResponseWrapper
   implements CauchoResponse {
   private static final Logger log = Log.open(ResponseAdapter.class);
-  
+
   private static final FreeList<ResponseAdapter> _freeList =
     new FreeList<ResponseAdapter>(32);
-  
+
   protected RequestAdapter _request;
 
   protected FlushBuffer _flushBuffer;
@@ -63,20 +57,20 @@ public class ResponseAdapter extends ResponseWrapper
 
   private ServletOutputStreamImpl _os;
   private ResponseWriter _writer;
-  
+
   private boolean _hasOutputStream;
   private boolean _hasError;
 
   private ResponseAdapter()
   {
   }
-  
+
   protected ResponseAdapter(HttpServletResponse response)
   {
     setResponse(response);
 
     _originalResponseStream = createWrapperResponseStream();
-    
+
     _os = new ServletOutputStreamImpl();
     _writer = new ResponseWriter();
   }
@@ -107,7 +101,7 @@ public class ResponseAdapter extends ResponseWrapper
   {
     return new WrapperResponseStream();
   }
-  
+
   public void init(HttpServletResponse response)
   {
     setResponse(response);
@@ -118,12 +112,12 @@ public class ResponseAdapter extends ResponseWrapper
       WrapperResponseStream wrapper = (WrapperResponseStream) _originalResponseStream;
       wrapper.init(response);
     }
-    
+
     _originalResponseStream.start();
-    
+
     _os.init(_originalResponseStream);
     _writer.init(_originalResponseStream);
-  } 
+  }
 
   public AbstractResponseStream getResponseStream()
   {
@@ -147,14 +141,14 @@ public class ResponseAdapter extends ResponseWrapper
   {
     return false;
   }
-  
+
   public void resetBuffer()
   {
     super.resetBuffer();
 
     _responseStream.clearBuffer();
   }
-  
+
   public void sendRedirect(String url)
     throws IOException
   {
@@ -183,7 +177,7 @@ public class ResponseAdapter extends ResponseWrapper
   {
     return _flushBuffer;
   }
-  
+
   public PrintWriter getWriter() throws IOException
   {
     return _writer;
@@ -203,7 +197,7 @@ public class ResponseAdapter extends ResponseWrapper
   {
     if (_request != null)
       _request.setHasCookie();
-    
+
     super.addCookie(cookie);
   }
 
@@ -286,7 +280,7 @@ public class ResponseAdapter extends ResponseWrapper
     if (getResponse() instanceof CauchoResponse)
       ((CauchoResponse) getResponse()).setNoCache(isPrivate);
   }
-  
+
   public void setSessionId(String id)
   {
     if (getResponse() instanceof CauchoResponse)
@@ -298,7 +292,7 @@ public class ResponseAdapter extends ResponseWrapper
   {
     if (_responseStream != null)
       _responseStream.flushBuffer();
-    
+
     _responseStream = _originalResponseStream;
   }
 
@@ -315,9 +309,9 @@ public class ResponseAdapter extends ResponseWrapper
 
     if (_originalResponseStream != responseStream)
       _originalResponseStream.close();
-    
+
     _responseStream = _originalResponseStream;
-    
+
     if (response instanceof CauchoResponse) {
       ((CauchoResponse) response).close();
     }
@@ -328,7 +322,7 @@ public class ResponseAdapter extends ResponseWrapper
 	writer.close();
       } catch (Throwable e) {
       }
-      
+
       try {
 	OutputStream os = response.getOutputStream();
 	os.close();
@@ -352,7 +346,7 @@ public class ResponseAdapter extends ResponseWrapper
   {
     _request = null;
     _responseStream = null;
-    
+
     setResponse(null);
   }
 }

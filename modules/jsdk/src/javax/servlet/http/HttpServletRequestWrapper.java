@@ -30,9 +30,10 @@
 
 package javax.servlet.http;
 
-import java.util.*;
-import java.security.*;
-import javax.servlet.*;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletRequestWrapper;
+import java.security.Principal;
+import java.util.Enumeration;
 
 /**
  * Wraps a servlet request in another request.  Filters may
@@ -54,10 +55,10 @@ public class HttpServletRequestWrapper extends ServletRequestWrapper
   public HttpServletRequestWrapper(HttpServletRequest request)
   {
     super(request);
-    
+
     this.request = request;
   }
-  
+
   /**
    * Sets the request object for the wrapper.
    *
@@ -100,7 +101,7 @@ public class HttpServletRequestWrapper extends ServletRequestWrapper
    * (ServletContexts).
    *
    * <p><code>getContextPath()</code> is /myapp for the uri
-   * /myapp/servlet/Hello, 
+   * /myapp/servlet/Hello,
    */
   public String getContextPath()
   {

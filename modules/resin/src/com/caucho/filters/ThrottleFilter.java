@@ -54,7 +54,7 @@ import com.caucho.log.Log;
 public class ThrottleFilter implements Filter {
   private static final L10N L = new L10N(ThrottleFilter.class);
   private static final Logger log = Log.open(ThrottleFilter.class);
-  
+
   private IntMap _throttleCache = new IntMap();
 
   private int _maxConcurrentRequests = 2;
@@ -66,20 +66,12 @@ public class ThrottleFilter implements Filter {
   {
     _maxConcurrentRequests = max;
   }
-  
-  /**
-   * Lookup java:comp/UserTransaction and cache the results.
-   */
+
   public void init(FilterConfig config)
     throws ServletException
   {
   }
-  
-  /**
-   * Wrap the request in a transaction.  If the request returns normally,
-   * the transaction will commit.  If an exception is thrown it will
-   * rollback.
-   */
+
   public void doFilter(ServletRequest request, ServletResponse response,
                        FilterChain nextFilter)
     throws ServletException, IOException
@@ -104,7 +96,7 @@ public class ThrottleFilter implements Filter {
     if (isOverflow) {
       log.info(L.l("'{0}' has too many concurrent requests -- throttling.",
 		   ip));
-      
+
       if (response instanceof HttpServletResponse)
 	((HttpServletResponse) response).sendError(503);
       return;
@@ -123,7 +115,7 @@ public class ThrottleFilter implements Filter {
       }
     }
   }
-  
+
   /**
    * Any cleanup for the filter.
    */

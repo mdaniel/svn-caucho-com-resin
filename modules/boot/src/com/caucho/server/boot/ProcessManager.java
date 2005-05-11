@@ -29,14 +29,13 @@
 
 package com.caucho.server.boot;
 
-import java.io.InputStream;
-import java.io.IOException;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
 import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.Vfs;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Thread for managing the child process.
@@ -44,21 +43,21 @@ import com.caucho.vfs.Vfs;
 public class ProcessManager {
   private static final Logger log =
     Logger.getLogger(ProcessManager.class.getName());
-  
+
   private volatile Process _process;
-  
+
   void start()
     throws IOException
   {
     Runtime runtime = Runtime.getRuntime();
-    
+
     _process = runtime.exec(new String[] {"java", "com.caucho.server.resin.Resin" },
 			    new String[] {"CLASSPATH=lib/resin.jar"});
 
     try {
       new ReadThread(_process.getInputStream()).start();
       new ReadThread(_process.getErrorStream()).start();
-      
+
       int status = waitForStatus();
 
       System.out.println("STATUS:" + status);
@@ -86,7 +85,7 @@ public class ProcessManager {
     {
       _is = Vfs.openRead(is);
     }
-    
+
     public void run()
     {
       while (_process != null) {

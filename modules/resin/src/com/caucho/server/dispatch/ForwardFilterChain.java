@@ -28,11 +28,9 @@
 
 package com.caucho.server.dispatch;
 
-import java.util.*;
-import java.io.*;
-
 import javax.servlet.*;
-import javax.servlet.http.*;
+import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
 
 /**
  * Represents the final servlet in a filter chain.
@@ -61,7 +59,7 @@ public class ForwardFilterChain implements FilterChain {
   {
     _disp = disp;
   }
-  
+
   /**
    * Forwards to the dispatch
    *

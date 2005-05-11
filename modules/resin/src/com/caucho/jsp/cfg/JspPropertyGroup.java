@@ -28,24 +28,21 @@
 
 package com.caucho.jsp.cfg;
 
-import java.util.ArrayList;
-import java.util.regex.Pattern;
-
+import com.caucho.config.ConfigException;
+import com.caucho.config.types.FileSetType;
+import com.caucho.config.types.Period;
+import com.caucho.server.dispatch.UrlMap;
 import com.caucho.util.L10N;
 
-import com.caucho.config.ConfigException;
-
-import com.caucho.config.types.Period;
-import com.caucho.config.types.FileSetType;
-
-import com.caucho.server.dispatch.UrlMap;
+import java.util.ArrayList;
+import java.util.regex.Pattern;
 
 /**
  * Configuration for the jsp-property-group.
  */
 public class JspPropertyGroup {
   private static final L10N L = new L10N(JspPropertyGroup.class);
-  
+
   private String _id;
   private ArrayList<String> _urlPatterns = new ArrayList<String>();
   private String _pageEncoding;
@@ -227,7 +224,7 @@ public class JspPropertyGroup {
   }
 
   // Resin config
-  
+
   /**
    * Set if precompilation is allowed.
    */
@@ -251,7 +248,7 @@ public class JspPropertyGroup {
   {
     return _autoCompile;
   }
-  
+
   /**
    * Set if auto-compile is allowed.
    */
@@ -259,7 +256,7 @@ public class JspPropertyGroup {
   {
     _autoCompile = compile;
   }
-  
+
   /**
    * Set if the *.jsp source is required.
    */
@@ -267,7 +264,7 @@ public class JspPropertyGroup {
   {
     _requireSource = requireSource;
   }
-  
+
   /**
    * Set if the *.jsp source is required.
    */
@@ -275,7 +272,7 @@ public class JspPropertyGroup {
   {
     return _requireSource;
   }
-  
+
   /**
    * Set true if EL exceptions should be ignored.
    */
@@ -283,7 +280,7 @@ public class JspPropertyGroup {
   {
     return _ignoreELException;
   }
-  
+
   /**
    * Set true if EL exceptions should be ignored.
    */
@@ -291,7 +288,7 @@ public class JspPropertyGroup {
   {
     _ignoreELException = ignore;
   }
-  
+
   /**
    * Set if fast jstl is allowed.
    */
@@ -307,7 +304,7 @@ public class JspPropertyGroup {
   {
     return _fastJstl;
   }
-  
+
   /**
    * Set if velocity-style syntax is allowed.
    */
@@ -323,7 +320,7 @@ public class JspPropertyGroup {
   {
     return _velocity;
   }
-  
+
   /**
    * Set if sessions are enabled by default
    */
@@ -339,7 +336,7 @@ public class JspPropertyGroup {
   {
     return _session;
   }
-  
+
   /**
    * Set if static encoding is enabled.
    */
@@ -355,7 +352,7 @@ public class JspPropertyGroup {
   {
     return _staticEncoding;
   }
-  
+
   /**
    * Set if recycle tags is enabled.
    */
@@ -496,7 +493,7 @@ public class JspPropertyGroup {
   {
     if (_urlPatterns.size() == 0)
       return true;
-    
+
     for (int i = 0; i < _urlPatterns.size(); i++) {
       String urlPattern = _urlPatterns.get(i);
       String regexpPattern = UrlMap.urlPatternToRegexpPattern(urlPattern);

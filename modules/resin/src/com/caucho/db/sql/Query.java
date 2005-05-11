@@ -28,54 +28,45 @@
 
 package com.caucho.db.sql;
 
-import java.io.InputStream;
-import java.io.IOException;
-
-import java.util.ArrayList;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import java.sql.SQLException;
-
-import com.caucho.util.L10N;
-import com.caucho.util.CharBuffer;
-
-import com.caucho.log.Log;
-
-import com.caucho.sql.SQLExceptionWrapper;
-
 import com.caucho.db.Database;
-import com.caucho.db.ResultSetImpl;
-
 import com.caucho.db.store.Transaction;
-
-import com.caucho.db.table.TableIterator;
-import com.caucho.db.table.Table;
 import com.caucho.db.table.Column;
+import com.caucho.db.table.Table;
+import com.caucho.db.table.TableIterator;
+import com.caucho.log.Log;
+import com.caucho.sql.SQLExceptionWrapper;
+import com.caucho.util.CharBuffer;
+import com.caucho.util.L10N;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 abstract public class Query {
   private static final Logger log = Log.open(Query.class);
   private static final L10N L = new L10N(Query.class);
 
   private Database _db;
-  
+
   private String _sql;
-  
+
   private FromItem []_fromItems;
   private ParamExpr []_params;
-  
+
   private boolean _isGroup;
   private int _dataFieldCount;
 
   private Query _parent;
   private SubSelectExpr _parentSubSelect;
-  
+
   private Expr []_whereExprs;
   protected Expr _whereExpr;
-  
+
   private RowIterateExpr []_indexExprs;
-  
+
   private ArrayList<SubSelectParamExpr> _paramExprs =
     new ArrayList<SubSelectParamExpr>();
 
@@ -99,7 +90,7 @@ abstract public class Query {
   {
     return _db;
   }
-  
+
   /**
    * Sets the parent query
    */
@@ -318,13 +309,13 @@ abstract public class Query {
 
       int bestIndex = -1;
       long bestCost;
-      
+
       do {
 	bestCost = Long.MAX_VALUE;
 
 	for (int j = andProduct.size() - 1; j >= 0; j--) {
 	  Expr subExpr = andProduct.get(j);
-	
+
 	  long cost = subExpr.cost(costItems);
 
 	  if (Integer.MAX_VALUE <= cost && i != 0) {
@@ -373,11 +364,11 @@ abstract public class Query {
 
     if (log.isLoggable(Level.FINE)) {
       log.fine("where-" + (whereExprs.length - 1) +  ": static " + whereExprs[whereExprs.length - 1]);
-      
+
       for (int i = whereExprs.length - 2; i >= 0; i--) {
 	if (_indexExprs[i] != null)
 	  log.fine("index-" + i + ": " + _fromItems[i] + " " + _indexExprs[i]);
-	
+
 	log.fine("where-" + i + ": " + _fromItems[i] + " " + whereExprs[i]);
       }
     }
@@ -417,12 +408,12 @@ abstract public class Query {
 	  Expr expr = andProduct.get(k);
 
 	  long subCost = expr.cost(costItems);
-	  
+
 	  if (Expr.COST_INVALID <= subCost) {
 	    costItems.remove(costItems.size() - 1);
 	    continue loop;
 	  }
-	    
+
 	  if (subCost < cost)
 	    cost = subCost;
 	}
@@ -444,7 +435,7 @@ abstract public class Query {
 	Expr expr = andProduct.get(k);
 
 	long subCost = expr.cost(costItems);
-	  
+
 	if (subCost < Expr.COST_NO_TABLE) {
 	  andProduct.remove(k);
 	}
@@ -466,7 +457,7 @@ abstract public class Query {
     }
 
     cb.append("]");
-    
+
     return cb.close();
   }
 
@@ -481,7 +472,7 @@ abstract public class Query {
     if (tableName == null) {
       if ("resin_oid".equals(columnName))
 	return new OidExpr(fromItems[0].getTable(), 0);
-      
+
       for (int i = 0; i < fromItems.length; i++) {
 	Table table = fromItems[i].getTable();
 
@@ -498,24 +489,24 @@ abstract public class Query {
       if (expr != null) {
 	return expr;
       }
-      
+
       throw new SQLException(L.l("`{0}' is an unknown column.", columnName));
     }
     else {
       for (int i = 0; i < fromItems.length; i++) {
 	if (tableName.equals(fromItems[i].getName())) {
 	  Table table = fromItems[i].getTable();
-	  
+
 	  if ("resin_oid".equals(columnName))
 	    return new OidExpr(table, i);
-      
+
 	  int columnIndex = table.getColumnIndex(columnName);
-	  
+
 	  if (columnIndex < 0) {
 	    Expr expr = bindParent(tableName, columnName);
 	    if (expr != null)
 	      return expr;
-	    
+
 	    throw new SQLException(L.l("`{0}' is an unknown column in \n  {1}.",
 				       columnName, _sql));
 	  }
@@ -525,12 +516,12 @@ abstract public class Query {
 	  return new IdExpr(fromItems[i], column);
 	}
       }
-      
+
       Expr expr = bindParent(tableName, columnName);
       if (expr != null)
 	return expr;
-	    
-      
+
+
       throw new SQLException(L.l("`{0}' is an unknown table.\n{1}",
 				 tableName, getSQL()));
     }
@@ -550,14 +541,14 @@ abstract public class Query {
 
 	paramExpr = new SubSelectParamExpr(this, expr, _paramExprs.size());
 	_paramExprs.add(paramExpr);
-      
+
 	return paramExpr;
       }
     }
-    
+
     return null;
   }
-  
+
   /**
    * Clears the paramters.
    */
@@ -566,7 +557,7 @@ abstract public class Query {
     for (int i = 0; i < _params.length; i++)
       _params[i].clear();
   }
-  
+
   /**
    * Sets the indexed parameter as a boolean.
    */
@@ -574,7 +565,7 @@ abstract public class Query {
   {
     _params[index - 1].setBoolean(value);
   }
-  
+
   /**
    * Sets the indexed parameter as a string.
    */
@@ -668,14 +659,14 @@ abstract public class Query {
     try {
       if (rowLength == 0)
 	return false;
-      
+
       RowIterateExpr []indexExprs = _indexExprs;
       Expr []whereExprs = _whereExprs;
 
       for (int i = 0; i < rowLength; i++) {
 	TableIterator table = rows[i];
 	RowIterateExpr indexExpr = indexExprs[i];
-	
+
 	Expr whereExpr = whereExprs == null ? null : whereExprs[i];
 
 	while (indexExpr.nextRow(queryContext, table)) {
@@ -704,7 +695,7 @@ abstract public class Query {
   {
     TableIterator rowIter = rows[i];
     RowIterateExpr iterExpr = _indexExprs[i];
-    
+
     while (true) {
       if (i > 0 && nextBlock(i - 1, rows, rowLength, queryContext)) {
 	return true;
@@ -721,7 +712,7 @@ abstract public class Query {
 	if (! iterExpr.init(queryContext, rows[j]))
 	  return false;
       }
-      
+
       if (initBlockRow(rowLength - 1, rows, queryContext))
 	return true;
     }
@@ -745,7 +736,7 @@ abstract public class Query {
     if (! iterExpr.initRow(queryContext, rowIter)) {
       return false;
     }
-	    
+
     while (expr != null && ! expr.isSelect(queryContext) ||
 	   i > 0 && ! initBlockRow(i - 1, rows, queryContext)) {
       if (! iterExpr.nextRow(queryContext, rowIter)) {

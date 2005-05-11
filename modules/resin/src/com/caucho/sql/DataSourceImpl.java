@@ -28,20 +28,16 @@
 
 package com.caucho.sql;
 
-import java.io.PrintWriter;
-
-import java.util.logging.Logger;
-
-import java.sql.Connection;
-import java.sql.SQLException;
-
-import javax.sql.DataSource;
-
-import javax.resource.spi.ConnectionManager;
-import javax.resource.ResourceException;
-
 import com.caucho.log.Log;
 import com.caucho.util.L10N;
+
+import javax.resource.ResourceException;
+import javax.resource.spi.ConnectionManager;
+import javax.sql.DataSource;
+import java.io.PrintWriter;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.logging.Logger;
 
 /**
  * The wrapped data source.
@@ -75,7 +71,7 @@ public class DataSourceImpl implements DataSource {
 	if (cause instanceof SQLException)
 	  throw (SQLException) cause;
       }
-      
+
       throw new SQLExceptionWrapper(e);
     }
   }
@@ -88,7 +84,7 @@ public class DataSourceImpl implements DataSource {
   {
     try {
       Credential credential = null;
-    
+
       if (username != null && password != null)
 	credential = new Credential(username, password);
 
@@ -101,7 +97,7 @@ public class DataSourceImpl implements DataSource {
 	if (cause instanceof SQLException)
 	  throw (SQLException) cause;
       }
-      
+
       throw new SQLExceptionWrapper(e);
     }
   }

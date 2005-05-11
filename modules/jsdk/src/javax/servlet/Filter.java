@@ -30,8 +30,7 @@
 
 package javax.servlet;
 
-import java.util.*;
-import java.io.*;
+import java.io.IOException;
 
 /**
  * Filters the request or response to a servlet.  Filters will
@@ -46,7 +45,7 @@ public interface Filter {
    */
   public void init(FilterConfig filterConfig)
     throws ServletException;
-  
+
   /**
    * doFilter performs the actual work of a filter, either modifying
    * the request or the response.  It will typically call the
@@ -60,7 +59,7 @@ public interface Filter {
                        ServletResponse response,
                        FilterChain chain)
     throws ServletException, IOException;
-  
+
   /**
    * Cleanup the filter.
    */

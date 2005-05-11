@@ -29,20 +29,16 @@
 
 package javax.script;
 
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.BufferedReader;
 import java.io.IOException;
-
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.URL;
-
-import java.util.Enumeration;
-import java.util.HashSet;
-import java.util.HashMap;
 import java.util.ArrayList;
-
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.logging.Logger;
-import java.util.logging.Level;
 
 /**
  * A manager for script engines.
@@ -52,7 +48,7 @@ public class ScriptEngineManager {
     Logger.getLogger(ScriptEngineManager.class.getName());
 
   private ArrayList _engineFactories = new ArrayList();
-  
+
   protected HashSet engineSpis = new HashSet();
   protected HashMap extensionAssociations = new HashMap();
   protected Namespace globalScope;
@@ -147,7 +143,7 @@ public class ScriptEngineManager {
     factories = new ScriptEngineFactory[_engineFactories.size()];
 
     _engineFactories.toArray(factories);
-    
+
     return factories;
   }
 
@@ -231,7 +227,7 @@ public class ScriptEngineManager {
     try {
       Thread thread = Thread.currentThread();
       ClassLoader loader = thread.getContextClassLoader();
-      
+
       Class cl = Class.forName(className, false, loader);
 
       ScriptEngineFactory factory = (ScriptEngineFactory) cl.newInstance();

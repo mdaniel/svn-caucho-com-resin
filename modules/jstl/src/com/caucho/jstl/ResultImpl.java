@@ -28,14 +28,13 @@
 
 package com.caucho.jstl;
 
-import java.io.*;
-import java.util.*;
-import java.sql.*;
-
-import javax.servlet.jsp.*;
-import javax.servlet.jsp.tagext.*;
-
 import javax.servlet.jsp.jstl.sql.Result;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 /**
  * Returns the result of a SQL query.
@@ -72,7 +71,7 @@ public class ResultImpl implements Result {
     if (maxRows == 0)
       _isLimitedByMaxRows = true;
   }
-  
+
   public SortedMap[] getRows()
   {
     if (_sortedRows == null) {
@@ -90,27 +89,27 @@ public class ResultImpl implements Result {
 
     return _sortedRows;
   }
-  
+
   public Object[][] getRowsByIndex()
   {
     if (_objectRows == null) {
       _objectRows = new Object[_rows.size()][];
       _rows.toArray(_objectRows);
     }
-    
+
     return _objectRows;
   }
-  
+
   public String []getColumnNames()
   {
     return _columnNames;
   }
-    
+
   public int getRowCount()
   {
     return _rows.size();
   }
-    
+
   public boolean isLimitedByMaxRows()
   {
     return _isLimitedByMaxRows;

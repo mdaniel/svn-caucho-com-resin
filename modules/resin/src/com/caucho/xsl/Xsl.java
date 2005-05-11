@@ -29,24 +29,24 @@
 
 package com.caucho.xsl;
 
-import java.util.*;
-import java.util.logging.*;
-import java.io.*;
-
-import javax.xml.transform.*;
-import javax.xml.transform.stream.*;
-import javax.xml.transform.dom.*;
-import javax.xml.transform.sax.*;
-
-import org.w3c.dom.*;
-import org.xml.sax.*;
-
 import com.caucho.log.Log;
-
-import com.caucho.util.*;
+import com.caucho.util.CauchoSystem;
+import com.caucho.util.ExceptionWrapper;
+import com.caucho.util.Registry;
 import com.caucho.vfs.*;
-import com.caucho.xml.*;
-import com.caucho.java.*;
+import com.caucho.xml.Html;
+import com.caucho.xml.Xml;
+import com.caucho.xml.XmlParser;
+import org.w3c.dom.Document;
+import org.xml.sax.SAXException;
+
+import javax.xml.transform.Templates;
+import javax.xml.transform.TransformerConfigurationException;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Properties;
+import java.util.logging.Logger;
 
 /**
  * Public facade for creating stylesheets.  The Xsl factory
@@ -136,7 +136,7 @@ public class Xsl extends AbstractStylesheetFactory {
         int p = v.indexOf('=');
         String key;
         String value;
-        
+
         if (p >= 0) {
           key = v.substring(0, p);
           value = v.substring(p + 1);
@@ -148,7 +148,7 @@ public class Xsl extends AbstractStylesheetFactory {
 
         keyList.add(key);
         valueList.add(value);
-        
+
 	i += 1;
       }
       else if (args[i].equals("-conf")) {
@@ -189,7 +189,7 @@ public class Xsl extends AbstractStylesheetFactory {
       stylePath.addMergePath(Vfs.lookup());
       stylePath.addMergePath(CauchoSystem.getResinHome().lookup("xsl"));
       stylePath.addClassPath(Thread.currentThread().getContextClassLoader());
-      
+
       /*
         Path []stylePath = new Path[] {
         Pwd.lookup(xslName).getParent(),
@@ -209,14 +209,14 @@ public class Xsl extends AbstractStylesheetFactory {
       }
 
       AbstractStylesheetFactory xsl;
-      
+
       if (isStrict)
         xsl = new Xsl();
       else
         xsl = new StyleScript();
-      
+
       xsl.setStylePath(stylePath);
-      
+
       Templates stylesheet;
 
       stylesheet = xsl.newTemplates(xslName);
@@ -293,7 +293,7 @@ public class Xsl extends AbstractStylesheetFactory {
 
         try {
           Properties output = stylesheet.getOutputProperties();
-          
+
           String encoding = (String) output.get("encoding");
           String mimeType = (String) output.get("mime-type");
           String method = (String) output.get("method");
@@ -306,16 +306,16 @@ public class Xsl extends AbstractStylesheetFactory {
 
           if (encoding != null)
             os.setEncoding(encoding);
-              
+
           transformer.setProperty("caucho.pwd", Vfs.lookup());
 
           for (int j = 0; j < keyList.size(); j++) {
             String key = (String) keyList.get(j);
             String value = (String) valueList.get(j);
-            
+
             transformer.setParameter(key, value);
           }
-      
+
           transformer.transform(doc, os);
         } finally {
           os.close();
@@ -325,7 +325,7 @@ public class Xsl extends AbstractStylesheetFactory {
       while ((e instanceof ExceptionWrapper) &&
              ((ExceptionWrapper) e).getRootCause() != null)
         e = ((ExceptionWrapper) e).getRootCause();
-        
+
       e.printStackTrace();
     } finally {
       System.exit(0);

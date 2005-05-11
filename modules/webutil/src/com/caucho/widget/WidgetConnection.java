@@ -31,27 +31,24 @@ package com.caucho.widget;
 
 import com.caucho.util.L10N;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
+import java.io.IOException;
 import java.util.Enumeration;
 import java.util.Locale;
 import java.util.Map;
-
-import java.io.IOException;
+import java.util.logging.Logger;
 
 abstract public class WidgetConnection
 {
   private static L10N L = new L10N( WidgetConnection.class );
 
-  static protected final Logger log = 
+  static protected final Logger log =
     Logger.getLogger( WidgetConnection.class.getName() );
 
   public <S extends WidgetState> S prepare( Widget<S> top )
     throws WidgetException
   {
     if ( top == null )
-      throw new IllegalArgumentException( 
+      throw new IllegalArgumentException(
           L.l( "`{0}' cannot be null", "top" ) );
 
     String attributeName = "com.caucho.widget." + System.identityHashCode(top);
@@ -124,7 +121,7 @@ abstract public class WidgetConnection
    * location of css files).
    *
    * @return an absolute URL
-   */ 
+   */
   abstract public String resolveURL( String path );
 
   abstract public WidgetWriter getWriter()

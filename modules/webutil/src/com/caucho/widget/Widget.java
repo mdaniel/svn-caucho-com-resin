@@ -29,20 +29,13 @@
 
 package com.caucho.widget;
 
+import com.caucho.lifecycle.Lifecycle;
 import com.caucho.util.L10N;
 
+import java.io.IOException;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import java.util.Collections;
-import java.util.Map;
-import java.util.AbstractMap;
-import java.util.Set;
-import java.util.HashSet;
-
-import com.caucho.lifecycle.Lifecycle;
-
-import java.io.IOException;
 
 /**
  * A Widget stores request specific state (S).
@@ -52,7 +45,7 @@ abstract public class Widget<S extends WidgetState>
 {
   private static L10N L = new L10N( Widget.class );
 
-  static protected final Logger log = 
+  static protected final Logger log =
     Logger.getLogger( Widget.class.getName() );
 
   private String _id;
@@ -191,7 +184,7 @@ abstract public class Widget<S extends WidgetState>
   /**
    * Set a css class for renders that use it, the default is
    * to use the value of "<code>getId()</code> <code>shortClassName</code>"
-   * where <i>shortClassName</i> is the classname portion (no package) of the 
+   * where <i>shortClassName</i> is the classname portion (no package) of the
    * widget's class.
    *
    * If the passed string starts with "+", for example "+clear",
@@ -201,7 +194,7 @@ abstract public class Widget<S extends WidgetState>
    * then the string is removed from the current cssClass.
    *
    * For example, a TextWidget with id "phoneNumber" and clientId
-   * "form.phoneNumber" will have a default cssClass of 
+   * "form.phoneNumber" will have a default cssClass of
    * "textWidget * phoneNumber".
    */
   public void setCssClass( String cssClass )
@@ -285,7 +278,7 @@ abstract public class Widget<S extends WidgetState>
 
       int i = shortName.lastIndexOf( '.' ) + 1;
 
-      for ( ; i < shortName.length(); i++ ) 
+      for ( ; i < shortName.length(); i++ )
         buf.append( shortName.charAt( i ) );
 
       buf.append(' ');
@@ -342,7 +335,7 @@ abstract public class Widget<S extends WidgetState>
   }
 
   /**
-   * Return a preference value. 
+   * Return a preference value.
    */
   public String getPreferenceValue( WidgetConnection connection, String key )
   {
@@ -357,17 +350,17 @@ abstract public class Widget<S extends WidgetState>
   }
 
   /**
-   * Return preference values. 
+   * Return preference values.
    */
   public String[] getPreferenceValues( WidgetConnection connection, String key )
   {
     WidgetPreference widgetPreference = getWidgetPreference( key );
 
-    boolean isReadOnly = widgetPreference != null 
+    boolean isReadOnly = widgetPreference != null
                          && !widgetPreference.isReadOnly();
 
     String[] values = null;
-    
+
     if ( widgetPreference != null )
         values = widgetPreference.getValues();
 
@@ -429,7 +422,7 @@ abstract public class Widget<S extends WidgetState>
   private void initAll()
     throws WidgetException
   {
-    if ( !_lifecycle.toInitializing() ) 
+    if ( !_lifecycle.toInitializing() )
       return;
 
     if ( _id == null && _parent != null )
@@ -448,7 +441,7 @@ abstract public class Widget<S extends WidgetState>
     return (Set<Map.Entry<String,Widget>>) Collections.EMPTY_SET;
   }
 
-  public Widget put( String id, Widget value ) 
+  public Widget put( String id, Widget value )
   {
     throw new UnsupportedOperationException();
   }
@@ -469,14 +462,14 @@ abstract public class Widget<S extends WidgetState>
     String parameterName = getParameterName();
 
     if ( parameterName == null && getParent() != null )
-      throw new IllegalStateException( 
+      throw new IllegalStateException(
           L.l("`{0}' cannot be null", "parameter-name" ) );
 
     if ( parameterName != null ) {
       String[] data = connection.getParameterValues( getParameterName() );
 
       if ( log.isLoggable( Level.FINEST ) )
-        log.finest( L.l( "data from parameter {0} is {1}",  
+        log.finest( L.l( "data from parameter {0} is {1}",
                          getParameterName(), data ) );
 
       state.decode( data );
@@ -487,7 +480,7 @@ abstract public class Widget<S extends WidgetState>
     return state;
   }
 
-  protected void decodeChildren( WidgetConnection connection, 
+  protected void decodeChildren( WidgetConnection connection,
                                  WidgetState state )
     throws WidgetException
   {
@@ -514,17 +507,17 @@ abstract public class Widget<S extends WidgetState>
   abstract protected S createState( WidgetConnection connection )
     throws WidgetException;
 
-  private void encodeTree( WidgetURL url, 
-                           WidgetState state, 
+  private void encodeTree( WidgetURL url,
+                           WidgetState state,
                            Widget target )
     throws WidgetException
   {
     encodeTree( url, state, target, false, false );
   }
 
-  private void encodeTree( WidgetURL url, 
-                           WidgetState state, 
-                           Widget target, 
+  private void encodeTree( WidgetURL url,
+                           WidgetState state,
+                           Widget target,
                            boolean isAction,
                            boolean sawTarget )
     throws WidgetException
@@ -541,8 +534,8 @@ abstract public class Widget<S extends WidgetState>
         WidgetState childState = state.get( child.getId() );
 
         if ( childState == null ) {
-          throw new IllegalStateException( 
-              L.l( "no state for `{0}', missing decode()?", 
+          throw new IllegalStateException(
+              L.l( "no state for `{0}', missing decode()?",
                    child.getLogId() ) );
         }
 
@@ -551,8 +544,8 @@ abstract public class Widget<S extends WidgetState>
     }
   }
 
-  protected void encode( WidgetURL url, 
-                         WidgetState state, 
+  protected void encode( WidgetURL url,
+                         WidgetState state,
                          boolean isAction )
     throws WidgetException
   {
@@ -562,7 +555,7 @@ abstract public class Widget<S extends WidgetState>
     WidgetMode widgetMode = state._widgetMode;
 
     if ( widgetMode != null ) {
-      if ( widgetMode == WidgetMode.VIEW 
+      if ( widgetMode == WidgetMode.VIEW
           || widgetMode.equals( WidgetMode.VIEW ) )
       {
         if ( state.getParent() != null )
@@ -640,15 +633,15 @@ abstract public class Widget<S extends WidgetState>
     if ( ! _lifecycle.isActive() )
       initAll();
 
-    WidgetRenderer<S> widgetRenderer 
+    WidgetRenderer<S> widgetRenderer
       = _rendererCache.getRenderer( connection, this, widgetState );
 
     widgetRenderer.render( connection, widgetState );
   }
-  
+
   public void destroy()
   {
-    if ( !_lifecycle.toDestroying() ) 
+    if ( !_lifecycle.toDestroying() )
       return;
 
     _lifecycle.toDestroy();

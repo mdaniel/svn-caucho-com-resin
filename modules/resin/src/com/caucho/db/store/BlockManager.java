@@ -29,18 +29,15 @@
 
 package com.caucho.db.store;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import java.io.IOException;
-
+import com.caucho.log.Log;
 import com.caucho.util.L10N;
 import com.caucho.util.LongKeyLruCache;
 
-import com.caucho.log.Log;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Manages the block cache
@@ -117,12 +114,12 @@ public class BlockManager {
 
       while (values.hasNext()) {
 	Block block = values.next();
-      
+
 	if (block != null && block.getStore() == store) {
 	  if (block.isDirty()) {
 	    if (dirtyBlocks == null)
 	      dirtyBlocks = new ArrayList<Block>();
-	  
+
 	    dirtyBlocks.add(block);
 	  }
 	}
@@ -131,10 +128,10 @@ public class BlockManager {
 
     for (int i = 0; dirtyBlocks != null && i < dirtyBlocks.size(); i++) {
       Block block = dirtyBlocks.get(i);
-      
+
       try {
 	synchronized (block) {
-	  if (block.isDirty()) 
+	  if (block.isDirty())
 	    block.write();
 	}
       } catch (IOException e) {
@@ -152,10 +149,10 @@ public class BlockManager {
 
     synchronized (this) {
       Iterator<Block> iter = _blockCache.values();
-      
+
       while (iter.hasNext()) {
 	Block block = iter.next();
-	
+
 	if (block != null && block.getStore() == store)
 	  removeBlocks.add(block);
       }
@@ -173,7 +170,7 @@ public class BlockManager {
   {
     if (storeId <= 0)
       throw new IllegalArgumentException(String.valueOf(storeId));
-    
+
     _storeMask[storeId / 8] &= ~(1 << storeId % 8);
   }
 
@@ -183,7 +180,7 @@ public class BlockManager {
   synchronized Block getBlock(Store store, long blockId)
   {
     Block block = _blockCache.get(blockId);
-    
+
     if (block == null) {
     }
     else if (block.allocate())

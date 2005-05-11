@@ -29,34 +29,27 @@
 
 package com.caucho.jsp;
 
-import java.io.*;
-import java.util.*;
-import java.util.logging.*;
-
-import javax.servlet.*;
-import javax.servlet.jsp.*;
-import javax.servlet.http.*;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-import com.caucho.java.*;
-import com.caucho.jsp.cfg.*;
-
 import com.caucho.config.Config;
-
-import com.caucho.log.Log;
-
-import com.caucho.loader.SimpleLoader;
-import com.caucho.loader.CompilingLoader;
-import com.caucho.loader.DirectoryLoader;
-import com.caucho.loader.DynamicClassLoader;
-import com.caucho.loader.EnvironmentClassLoader;
-import com.caucho.loader.EnvironmentBean;
-
 import com.caucho.java.JavaCompiler;
-
+import com.caucho.java.LineMap;
+import com.caucho.jsp.cfg.JspPropertyGroup;
+import com.caucho.loader.*;
+import com.caucho.log.Log;
 import com.caucho.server.webapp.Application;
 import com.caucho.server.webapp.WebAppController;
+import com.caucho.util.CauchoSystem;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.Vfs;
+
+import javax.servlet.SingleThreadModel;
+import javax.servlet.jsp.HttpJspPage;
+import javax.servlet.jsp.JspPage;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Compilation interface for JSP pages.
@@ -65,9 +58,9 @@ public class JspCompiler implements EnvironmentBean {
   private static Logger log = Log.open(JspCompiler.class);
 
   private ClassLoader _loader;
-  
+
   private Application _app;
-  
+
   private Path _classDir;
   private Path _appDir;
 
@@ -91,7 +84,7 @@ public class JspCompiler implements EnvironmentBean {
   {
     _loader = new EnvironmentClassLoader();
   }
-  
+
   /**
    * Returns the classloader for configuration.
    */
@@ -179,7 +172,7 @@ public class JspCompiler implements EnvironmentBean {
   {
     return _isXml;
   }
-  
+
   /**
    * Sets the resource manager.
    */
@@ -187,7 +180,7 @@ public class JspCompiler implements EnvironmentBean {
   {
     _resourceManager = manager;
   }
-  
+
   /**
    * Gets the resource manager.
    */
@@ -330,7 +323,7 @@ public class JspCompiler implements EnvironmentBean {
   {
     if (_pending.size() == 0)
       return;
-    
+
     ArrayList<JspCompilerInstance> pendingList;
     pendingList = new ArrayList<JspCompilerInstance>(_pending);
 
@@ -385,7 +378,7 @@ public class JspCompiler implements EnvironmentBean {
 
     return instance;
   }
-  
+
   private void compileJava(Path path, String className,
                            LineMap lineMap, String charEncoding)
     throws Exception
@@ -396,7 +389,7 @@ public class JspCompiler implements EnvironmentBean {
     compiler.setClassDir(getClassDir());
     compiler.setEncoding(charEncoding);
     String fileName = className.replace('.', '/') + ".java";
-      
+
     boolean remove = true;
 
     try {
@@ -520,7 +513,7 @@ public class JspCompiler implements EnvironmentBean {
       JspCompiler compiler = new JspCompiler();
 
       ClassLoader loader = compiler.getClassLoader();
-      
+
       thread.setContextClassLoader(loader);
 
       JspPropertyGroup jsp = compiler.createJsp();
@@ -532,12 +525,12 @@ public class JspCompiler implements EnvironmentBean {
       while (i < args.length) {
 	if (args[i].equals("-app-dir")) {
 	  Path appDir = Vfs.lookup(args[i + 1]);
-	
+
 	  Application app	= compiler.createApplication();
 	  app.setDocumentDirectory(appDir);
 
 	  compiler.setApplication(app);
-	
+
 	  i += 2;
 	}
 	else if (args[i].equals("-class-dir") || args[i].equals("-d")) {
@@ -563,7 +556,7 @@ public class JspCompiler implements EnvironmentBean {
 	DynamicClassLoader dynLoader = app.getEnvironmentClassLoader();
 	dynLoader.addLoader(new CompilingLoader(appDir.lookup("WEB-INF/classes")));
 	dynLoader.addLoader(new DirectoryLoader(appDir.lookup("WEB-INF/lib")));
-      
+
 	Path webXml = appDir.lookup("WEB-INF/web.xml");
 
 	if (webXml.canRead())
@@ -581,7 +574,7 @@ public class JspCompiler implements EnvironmentBean {
 
       if (app != null) {
 	app.init();
-      
+
 	appDir = compiler.getApplication().getAppDir();
 	loader = compiler.getApplication().getClassLoader();
       }
@@ -646,7 +639,7 @@ public class JspCompiler implements EnvironmentBean {
     throws Exception
   {
     String uri;
-    
+
     uri = path.getPath().substring(appDir.getPath().length());
 
     String className = JspCompiler.urlToClassName(uri);

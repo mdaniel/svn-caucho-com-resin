@@ -29,24 +29,20 @@
 
 package com.caucho.server.cluster;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import com.caucho.util.*;
+import com.caucho.log.Log;
+import com.caucho.util.Alarm;
 import com.caucho.vfs.*;
 
-import com.caucho.log.Log;
+import java.io.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Data for the cluster's object.
  */
 public class ClusterObject {
   private static final Logger log = Log.open(ClusterObject.class);
-  
+
   private final StoreManager _storeManager;
   private final Store _store;
   private final String _storeId;
@@ -75,7 +71,7 @@ public class ClusterObject {
     _objectManager = store.getObjectManager();
     _store = store;
     _maxIdleTime = _objectManager.getMaxIdleTime();
-    
+
     _storeId = store.getId();
     _objectId = objectId;
     _uniqueId = _storeId + ';' + objectId;
@@ -90,9 +86,9 @@ public class ClusterObject {
     _storeManager = storeManager;
     _objectManager = null;
     _store = null;
-    
+
     _maxIdleTime = _storeManager.getMaxIdleTime();
-    
+
     _storeId = storeId;
     _objectId = objectId;
     _uniqueId = _storeId + ';' + objectId;
@@ -126,7 +122,7 @@ public class ClusterObject {
   {
     return _storeManager;
   }
-  
+
   /**
    * Returns the store id.
    */
@@ -134,7 +130,7 @@ public class ClusterObject {
   {
     return _storeId;
   }
-  
+
   /**
    * Returns the object id.
    */
@@ -142,7 +138,7 @@ public class ClusterObject {
   {
     return _objectId;
   }
-  
+
   /**
    * Returns the unique id.
    */
@@ -203,7 +199,7 @@ public class ClusterObject {
   {
     return _crc;
   }
-  
+
   /**
    * Sets the object's saved CRC value.
    */
@@ -219,7 +215,7 @@ public class ClusterObject {
   {
     return _updateCount;
   }
-  
+
   /**
    * Sets the object's saved update count
    */
@@ -238,10 +234,10 @@ public class ClusterObject {
   {
     if (! _isSerializable)
       return true;
-    
+
     if (_isDead)
       throw new IllegalStateException();
-    
+
     if (_isPrimary && _updateCount >= 0)
       return true;
 
@@ -268,13 +264,13 @@ public class ClusterObject {
     throws IOException
   {
     VfsStream streamImpl = new VfsStream(is, null);
-    
+
     Crc64Stream crcStream = new Crc64Stream(streamImpl);
 
     ReadStream crcIs = new ReadStream(crcStream);
 
     ObjectInputStream in = new DistributedObjectInputStream(crcIs);
-    
+
     _objectManager.load(in, obj);
 
     _crc = crcStream.getCRC();
@@ -303,10 +299,10 @@ public class ClusterObject {
   {
     if (! _isChanged)
       _updateCount++;
-    
+
     _isChanged = true;
   }
-  
+
   /**
    * Marks the object as accessed.
    */
@@ -320,11 +316,11 @@ public class ClusterObject {
       } catch (Exception e) {
 	log.log(Level.WARNING, e.toString(), e);
       }
-      
+
       _accessTime = now;
     }
   }
-  
+
   /**
    * Sets the access time.
    */
@@ -332,7 +328,7 @@ public class ClusterObject {
   {
     _accessTime = accessTime;
   }
-  
+
   /**
    * Saves the object to the cluster.
    */
@@ -341,9 +337,9 @@ public class ClusterObject {
   {
     if (! _isSerializable)
       return;
-    
+
     int updateCount = _updateCount;
-    
+
     if (! _isPrimary)
       _updateCount = -1;
 
@@ -351,13 +347,13 @@ public class ClusterObject {
       return;
 
     _isChanged = false;
-    
+
     TempStream tempStream = new TempStream(null);
     Crc64Stream crcStream = new Crc64Stream(tempStream);
-    
+
     try {
       WriteStream os = new WriteStream(crcStream);
-      
+
       ObjectOutputStream out = new ObjectOutputStream(os);
 
       _objectManager.store(out, obj);
@@ -380,7 +376,7 @@ public class ClusterObject {
 
       if (_isPrimary)
 	_updateCount = updateCount;
-    
+
       _accessTime = Alarm.getCurrentTime();
     } catch (NotSerializableException e) {
       log.warning(e.toString());
@@ -388,13 +384,13 @@ public class ClusterObject {
     } catch (Throwable e) {
       log.warning(e.toString());
       log.log(Level.FINE, e.toString(), e);
-      
+
       _updateCount = -1;
     } finally {
       tempStream.destroy();
     }
   }
-  
+
   /**
    * Writes updated values
    */
@@ -402,7 +398,7 @@ public class ClusterObject {
     throws IOException
   {
   }
-  
+
   /**
    * Reads the current value
    */
@@ -421,7 +417,7 @@ public class ClusterObject {
       if (_isDead)
 	return;
       _isDead = true;
-      
+
       _storeManager.remove(this);
     } catch (Throwable e) {
       log.log(Level.WARNING, e.toString(), e);

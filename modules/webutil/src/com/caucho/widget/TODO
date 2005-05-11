@@ -1,7 +1,7 @@
 
 - WidgetRenderer needs to specify isAction and isActionParameter
 
-- disabled similar to WidgetMode (both in widget and widgetState)
+- disabled similar to WidgetMode (both in widget and abstractWidgetStategetState)
 
 - constraints??
 

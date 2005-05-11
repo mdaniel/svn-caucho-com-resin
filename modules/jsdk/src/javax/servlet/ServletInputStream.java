@@ -30,8 +30,8 @@
 
 package javax.servlet;
 
-import java.util.*;
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * Servlets generally read POSTed data with ServletInputStream.
@@ -58,7 +58,7 @@ public abstract class ServletInputStream extends InputStream {
 	return i == 0 ? -1 : i;
 
       buffer[offset + i] = (byte) ch;
-      
+
       if (ch == '\n')
 	return i + 1;
     }

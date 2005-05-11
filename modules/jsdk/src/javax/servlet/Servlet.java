@@ -4,7 +4,7 @@
  * Caucho Technology forbids redistribution of any part of this software
  * in any form, including derived works and generated binaries.
  *
- * This Software is provided "AS IS," without a warranty of any kind. 
+ * This Software is provided "AS IS," without a warranty of any kind.
  * ALL EXPRESS OR IMPLIED REPRESENTATIONS AND WARRANTIES, INCLUDING ANY
  * IMPLIED WARRANTY OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE
  * OR NON-INFRINGEMENT, ARE HEREBY EXCLUDED.
@@ -16,15 +16,14 @@
  * CONSEQUENTIAL, INCIDENTAL OR PUNITIVE DAMAGES, HOWEVER CAUSED AND
  * REGARDLESS OF THE THEORY OF LIABILITY, ARISING OUT OF THE USE OF OR
  * INABILITY TO USE SOFTWARE, EVEN IF HE HAS BEEN ADVISED OF THE POSSIBILITY
- * OF SUCH DAMAGES.      
+ * OF SUCH DAMAGES.
  *
  * $Id: Servlet.java,v 1.1.1.1 2004/09/11 05:06:14 cvs Exp $
  */
 
 package javax.servlet;
 
-import java.util.*;
-import java.io.*;
+import java.io.IOException;
 
 /**
  * A servlet is any Java class with a null-arg constructor that
@@ -112,15 +111,15 @@ public interface Servlet {
    * @param config information from the configuration file.
    */
   public void init(ServletConfig config) throws ServletException;
-  
+
   /**
    * Returns the servlet configuration, usually the same value as passed
    * to the init routine.
    */
   public ServletConfig getServletConfig();
-  
+
   /**
-   * Service a request.  Since the servlet engine is multithreaded, 
+   * Service a request.  Since the servlet engine is multithreaded,
    * many threads may execute <code>service</code> simultaneously.  Normally,
    * <code>req</code> and <code>res</code> will actually be
    * <code>HttpServletRequest</code> and <code>HttpServletResponse</code>
@@ -133,7 +132,7 @@ public interface Servlet {
    */
   public void service(ServletRequest req, ServletResponse res)
     throws IOException, ServletException;
-  
+
   /**
    * Called when the servlet shuts down.  Servlets can use this to close
    * database connections, etc.  Servlets generally only shutdown when

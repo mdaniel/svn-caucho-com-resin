@@ -29,28 +29,18 @@
 
 package com.caucho.sql;
 
-import java.util.Set;
-import java.util.HashSet;
-import java.util.Iterator;
-
-import java.util.logging.Logger;
-
-import java.io.PrintWriter;
-
-import java.sql.SQLException;
-
-import javax.security.auth.Subject;
-
-import javax.resource.spi.ManagedConnectionFactory;
-import javax.resource.spi.ManagedConnection;
-import javax.resource.spi.ResourceAdapter;
-import javax.resource.spi.ConnectionRequestInfo;
-import javax.resource.spi.ConnectionManager;
-import javax.resource.spi.ValidatingManagedConnectionFactory;
-import javax.resource.ResourceException;
-
 import com.caucho.log.Log;
 import com.caucho.util.L10N;
+
+import javax.resource.ResourceException;
+import javax.resource.spi.*;
+import javax.security.auth.Subject;
+import java.io.PrintWriter;
+import java.sql.SQLException;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
+import java.util.logging.Logger;
 
 /**
  * The managed factory implementation.
@@ -63,7 +53,7 @@ public class ManagedFactoryImpl
   private DBPoolImpl _dbPool;
   private DriverConfig []_drivers;
   private DriverConfig []_backupDrivers;
-  
+
   private long _roundRobin;
 
   ManagedFactoryImpl(DBPoolImpl dbPool,
@@ -90,7 +80,7 @@ public class ManagedFactoryImpl
   {
     return _dbPool.getConnectionConfig();
   }
-  
+
   /**
    * Creates the data source the user sees.
    */
@@ -121,10 +111,10 @@ public class ManagedFactoryImpl
     Credential credential = (Credential) requestInfo;
 
     SQLException exn = null;
-    
+
     for (int i = 0; i < _drivers.length; i++) {
       int index = (int) (_roundRobin++ % _drivers.length);
-      
+
       DriverConfig driver = _drivers[index];
 
       try {
@@ -136,10 +126,10 @@ public class ManagedFactoryImpl
 	exn = e;
       }
     }
-    
+
     for (int i = 0; i < _backupDrivers.length; i++) {
       int index = (int) (_roundRobin++ % _backupDrivers.length);
-      
+
       DriverConfig driver = _backupDrivers[index];
 
       try {
@@ -176,7 +166,7 @@ public class ManagedFactoryImpl
 	  requestInfo != null && requestInfo.equals(mConn.getCredentials()))
 	return mConn;
     }
-    
+
     return null;
   }
 
@@ -199,7 +189,7 @@ public class ManagedFactoryImpl
 	invalidSet.add(mConn);
       }
     }
-    
+
     return invalidSet;
   }
 

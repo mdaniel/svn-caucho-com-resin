@@ -29,37 +29,29 @@
 
 package com.caucho.jsp;
 
-import java.io.*;
-import java.util.*;
-import java.util.logging.*;
-
-import javax.servlet.*;
-import javax.servlet.jsp.*;
-import javax.servlet.jsp.tagext.TagInfo;
-import javax.servlet.jsp.tagext.TagLibraryInfo;
-import javax.servlet.http.*;
-
-import org.xml.sax.SAXException;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-import com.caucho.java.*;
-
-import com.caucho.jsp.cfg.*;
+import com.caucho.java.JavaCompiler;
+import com.caucho.java.LineMap;
+import com.caucho.jsp.cfg.JspConfig;
+import com.caucho.jsp.cfg.JspPropertyGroup;
+import com.caucho.jsp.cfg.JspTaglib;
 import com.caucho.jsp.java.JspTagSupport;
 import com.caucho.jsp.java.TagTaglib;
-
 import com.caucho.log.Log;
-
 import com.caucho.make.PersistentDependency;
-import com.caucho.make.Dependency;
-
-import com.caucho.loader.SimpleLoader;
-import com.caucho.loader.DirectoryLoader;
-
-import com.caucho.xml.Xml;
-
 import com.caucho.server.webapp.Application;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.Vfs;
+import com.caucho.xml.Xml;
+import org.xml.sax.SAXException;
+
+import javax.servlet.jsp.tagext.TagInfo;
+import javax.servlet.jsp.tagext.TagLibraryInfo;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Compilation interface for JSP pages.
@@ -75,10 +67,10 @@ public class JspCompilerInstance {
 
   // The JSP uri (user-name)
   private String _uri;
-  
+
   // The JSP class name
   private String _className;
-  
+
   private JspPropertyGroup _jspPropertyGroup;
 
   // The builder
@@ -92,19 +84,19 @@ public class JspCompilerInstance {
 
   // true for generated source (like XTP)
   private boolean _isGeneratedSource;
-  
+
   // The parse state
   private ParseState _parseState;
 
   // The tag manager
   private ParseTagManager _tagManager;
-  
+
   // The parser
   private JspParser _parser;
 
   // The compiled page
   private Page _page;
-  
+
   // The generator
   private JspGenerator _generator;
 
@@ -231,7 +223,7 @@ public class JspCompilerInstance {
 
     if (_className == null)
       _className = JavaCompiler.mangleName("jsp/" + _uri);
-    
+
     Application app = _jspCompiler.getApplication();
     Path appDir = _jspCompiler.getAppDir();
     if (appDir == null && app != null)
@@ -246,7 +238,7 @@ public class JspCompilerInstance {
 
     if (_jspPropertyGroup == null)
       _jspPropertyGroup = _jspCompiler.getJspPropertyGroup();
-    
+
     if (_jspPropertyGroup == null && jspConfig != null)
       _jspPropertyGroup = jspConfig.findJspPropertyGroup(_uri);
 
@@ -255,7 +247,7 @@ public class JspCompilerInstance {
 
     if (_jspPropertyGroup == null)
       _jspPropertyGroup = _jspCompiler.getJspPropertyGroup();
-    
+
     JspResourceManager resourceManager = _jspCompiler.getResourceManager();
     if (resourceManager != null) {
     }
@@ -267,11 +259,11 @@ public class JspCompilerInstance {
     }
 
     TaglibManager taglibManager = _jspCompiler.getTaglibManager();
-    
+
     if (taglibManager == null) {
       taglibManager = new TaglibManager(resourceManager, app);
       taglibManager.setApplication(app);
-      
+
       if (jspConfig != null) {
         ArrayList<JspTaglib> tldMapList = jspConfig.getTaglibList();
         for (int i = 0; i < tldMapList.size(); i++) {
@@ -301,7 +293,7 @@ public class JspCompilerInstance {
         String prelude = preludeList.get(i);
         _preludeList.add(prelude);
       }
-      
+
       ArrayList<String> codaList = _jspPropertyGroup.getIncludeCodaList();
       for (int i = 0; codaList != null && i < codaList.size(); i++) {
         String coda = codaList.get(i);
@@ -314,14 +306,14 @@ public class JspCompilerInstance {
       _parseState.setELIgnored(_jspPropertyGroup.isELIgnored());
       _parseState.setVelocityEnabled(_jspPropertyGroup.isVelocityEnabled());
       _parseState.setPageEncoding(_jspPropertyGroup.getPageEncoding());
-      
+
       pageConfig.setStaticEncoding(_jspPropertyGroup.isStaticEncoding());
 
       _parseState.setRecycleTags(_jspPropertyGroup.isRecycleTags());
 
       if (_jspPropertyGroup.getTldDir() != null)
         taglibManager.setTldDir(_jspPropertyGroup.getTldDir());
-      
+
       if (_jspPropertyGroup.getTldFileSet() != null)
         taglibManager.setTldFileSet(_jspPropertyGroup.getTldFileSet());
     }
@@ -334,7 +326,7 @@ public class JspCompilerInstance {
     _tagManager = new ParseTagManager(resourceManager,
                                       taglibManager,
                                       tagFileManager);
-    
+
     _jspBuilder = new com.caucho.jsp.java.JavaJspBuilder();
     _jspBuilder.setParseState(_parseState);
     _jspBuilder.setJspCompiler(_jspCompiler);
@@ -347,7 +339,7 @@ public class JspCompilerInstance {
     _parser.setJspBuilder(_jspBuilder);
     _parser.setParseState(_parseState);
     _parser.setTagManager(_tagManager);
-      
+
     _jspBuilder.setJspParser(_parser);
 
     for (int i = 0; i < _preludeList.size(); i++)
@@ -363,10 +355,10 @@ public class JspCompilerInstance {
     LineMap lineMap = null;
     if (_page != null)
       throw new IllegalStateException("JspCompilerInstance cannot be reused");
-    
+
     try {
       JspGenerator generator = generate();
-      
+
       lineMap = generator.getLineMap();
 
       String encoding = _parseState.getCharEncoding();
@@ -436,7 +428,7 @@ public class JspCompilerInstance {
     boolean isXml = _isXml;
     if (_jspPropertyGroup != null && ! isXml)
       isXml = _jspPropertyGroup.isXml();
-    
+
     try {
       if (isXml) {
 	Xml xml = new Xml();
@@ -514,7 +506,7 @@ public class JspCompilerInstance {
       return null;
     }
   }
-    
+
   private TagInfo generateTag(TagLibraryInfo taglib)
     throws Exception
   {
@@ -531,7 +523,7 @@ public class JspCompilerInstance {
 	_isPrototype = true;
 	_jspBuilder.setPrototype(true);
       }
-    
+
       _parseState.setTag(true);
       if (isXml) {
 	Xml xml = new Xml();
@@ -553,7 +545,7 @@ public class JspCompilerInstance {
 
       if (_jspCompiler.hasRecursiveCompile()) {
 	_jspCompiler.addPending(this);
-	
+
 	return _generator.generateTagInfo(_className, taglib);
       }
 
@@ -614,7 +606,7 @@ public class JspCompilerInstance {
       throw exn;
     }
   }
-  
+
   private void compileJava(Path path, String className,
                            LineMap lineMap, String charEncoding)
     throws Exception
@@ -623,7 +615,7 @@ public class JspCompilerInstance {
     compiler.setClassDir(_jspCompiler.getClassDir());
     // compiler.setEncoding(charEncoding);
     String fileName = className.replace('.', '/') + ".java";
-      
+
     boolean remove = true;
 
     try {

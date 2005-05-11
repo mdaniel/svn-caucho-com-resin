@@ -28,24 +28,13 @@
 
 package com.caucho.config.types;
 
-import java.util.*;
-
-import javax.servlet.jsp.el.VariableResolver;
-import javax.servlet.jsp.el.ELException;
-
-import com.caucho.util.CauchoSystem;
-import com.caucho.util.L10N;
-import com.caucho.util.CharBuffer;
-
-import com.caucho.vfs.Path;
-import com.caucho.vfs.Vfs;
-
-import com.caucho.el.MapVariableResolver;
+import com.caucho.el.EL;
 import com.caucho.el.ELParser;
 import com.caucho.el.Expr;
-import com.caucho.el.EL;
+import com.caucho.util.L10N;
 
-import com.caucho.config.BeanBuilderException;
+import javax.servlet.jsp.el.ELException;
+import javax.servlet.jsp.el.VariableResolver;
 
 /**
  * Class-loading TypeBuilder

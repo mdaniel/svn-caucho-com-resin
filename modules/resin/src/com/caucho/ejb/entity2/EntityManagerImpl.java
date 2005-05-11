@@ -28,24 +28,17 @@
  */
 package com.caucho.ejb.entity2;
 
-import java.sql.Connection;
+import com.caucho.amber.AmberManager;
+import com.caucho.amber.connection.AmberConnectionImpl;
+import com.caucho.amber.query.AbstractQuery;
+import com.caucho.ejb.EJBExceptionWrapper;
+import com.caucho.ejb.EjbServerManager;
+import com.caucho.jca.CloseResource;
+import com.caucho.jca.UserTransactionProxy;
+import com.caucho.util.L10N;
 
 import javax.ejb.EntityManager;
 import javax.ejb.Query;
-
-import com.caucho.amber.AmberManager;
-
-import com.caucho.amber.connection.AmberConnectionImpl;
-
-import com.caucho.amber.query.AbstractQuery;
-
-import com.caucho.ejb.EjbServerManager;
-import com.caucho.ejb.EJBExceptionWrapper;
-
-import com.caucho.jca.UserTransactionProxy;
-import com.caucho.jca.CloseResource;
-
-import com.caucho.util.L10N;
 
 /**
  * The Entity manager
@@ -62,7 +55,7 @@ public class EntityManagerImpl implements EntityManager, CloseResource {
   EntityManagerImpl()
   {
   }
-  
+
   /**
    * Makes the instance managed.
    */
@@ -70,7 +63,7 @@ public class EntityManagerImpl implements EntityManager, CloseResource {
   {
     try {
       AmberConnectionImpl aConn = getAmberConnection();
-    
+
       aConn.create(entity);
     } catch (RuntimeException e) {
       throw e;
@@ -78,7 +71,7 @@ public class EntityManagerImpl implements EntityManager, CloseResource {
       throw new EJBExceptionWrapper(e);
     }
   }
-  
+
   /**
    * Merges the state of the entity into the current context.
    */
@@ -86,7 +79,7 @@ public class EntityManagerImpl implements EntityManager, CloseResource {
   {
     throw new UnsupportedOperationException();
   }
-  
+
   /**
    * Remove the instance.
    */
@@ -94,7 +87,7 @@ public class EntityManagerImpl implements EntityManager, CloseResource {
   {
     try {
       AmberConnectionImpl aConn = getAmberConnection();
-    
+
       aConn.delete(entity);
     } catch (RuntimeException e) {
       throw e;
@@ -102,7 +95,7 @@ public class EntityManagerImpl implements EntityManager, CloseResource {
       throw new EJBExceptionWrapper(e);
     }
   }
-  
+
   /**
    * Find by the primary key.
    */
@@ -110,7 +103,7 @@ public class EntityManagerImpl implements EntityManager, CloseResource {
   {
     try {
       AmberConnectionImpl aConn = getAmberConnection();
-    
+
       return aConn.load(entityName, primaryKey);
     } catch (RuntimeException e) {
       throw e;
@@ -118,7 +111,7 @@ public class EntityManagerImpl implements EntityManager, CloseResource {
       throw new EJBExceptionWrapper(e);
     }
   }
-  
+
   /**
    * Find by the primary key.
    */
@@ -126,7 +119,7 @@ public class EntityManagerImpl implements EntityManager, CloseResource {
   {
     try {
       AmberConnectionImpl aConn = getAmberConnection();
-    
+
       return (T) aConn.load(entityClass, primaryKey);
     } catch (RuntimeException e) {
       throw e;
@@ -142,7 +135,7 @@ public class EntityManagerImpl implements EntityManager, CloseResource {
   {
     try {
       AmberConnectionImpl aConn = getAmberConnection();
-    
+
       aConn.flush();
     } catch (RuntimeException e) {
       throw e;
@@ -160,7 +153,7 @@ public class EntityManagerImpl implements EntityManager, CloseResource {
       AmberConnectionImpl aConn = getAmberConnection();
 
       AbstractQuery queryProgram = aConn.parseQuery(sql, false);
-      
+
       return new EJBQueryImpl(queryProgram, aConn);
     } catch (RuntimeException e) {
       throw e;
@@ -215,7 +208,7 @@ public class EntityManagerImpl implements EntityManager, CloseResource {
   {
     try {
       AmberConnectionImpl aConn = getAmberConnection();
-    
+
       return aConn.contains(entity);
     } catch (RuntimeException e) {
       throw e;
@@ -234,7 +227,7 @@ public class EntityManagerImpl implements EntityManager, CloseResource {
       if (_depth == 0)
 	throw new IllegalStateException(L.l("EntityContext required when using Entity beans."));
       */
-      
+
       EjbServerManager serverManager = EjbServerManager.getLocal();
 
       AmberManager amberManager = serverManager.getAmberManager();

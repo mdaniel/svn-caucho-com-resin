@@ -31,15 +31,12 @@ package com.caucho.widget;
 
 import com.caucho.util.L10N;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import java.util.Collection;
-import java.util.Map;
-import java.util.LinkedHashMap;
-import java.util.Set;
-
 import java.io.IOException;
+import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Set;
+import java.util.logging.Logger;
 
 /**
  * A Widget that contains other widgets.
@@ -52,7 +49,7 @@ public class WidgetContainer
 {
   private static L10N L = new L10N( WidgetContainer.class );
 
-  static protected final Logger log = 
+  static protected final Logger log =
     Logger.getLogger( WidgetContainer.class.getName() );
 
   private String _attributePrefix;
@@ -99,7 +96,7 @@ public class WidgetContainer
     return _childMap == null ? true :  _childMap.isEmpty();
   }
 
-  public Widget put( String id, Widget value ) 
+  public Widget put( String id, Widget value )
   {
     if ( _childMap == null )
       _childMap = new LinkedHashMap<String,Widget>();
@@ -114,7 +111,7 @@ public class WidgetContainer
     return _childMap.put( id, value );
   }
 
-  public Widget remove( String id ) 
+  public Widget remove( String id )
   {
     if ( _childMap == null )
       return null;
@@ -135,7 +132,7 @@ public class WidgetContainer
   {
     WidgetContainerState state =  (WidgetContainerState) thisState;
 
-    WidgetState childState 
+    WidgetState childState
       = super.decodeChild( connection, state, child );
 
     String childId = child.getId();
@@ -150,7 +147,7 @@ public class WidgetContainer
     return childState;
   }
 
-  public void render( String contentType, 
+  public void render( String contentType,
                       WidgetConnection connection,
                       WidgetContainerState widgetState )
     throws WidgetException, IOException
@@ -158,7 +155,7 @@ public class WidgetContainer
     renderChildren( connection, widgetState );
   }
 
-  public void renderChildren( WidgetConnection connection, 
+  public void renderChildren( WidgetConnection connection,
                               WidgetContainerState widgetState )
     throws WidgetException, IOException
   {

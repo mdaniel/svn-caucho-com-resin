@@ -29,21 +29,10 @@
 
 package com.caucho.db.store;
 
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import java.io.IOException;
-
-import com.caucho.util.L10N;
-import com.caucho.util.ClockCacheItem;
-import com.caucho.util.CacheListener;
-import com.caucho.util.FreeList;
-
-import com.caucho.vfs.TempBuffer;
-
 import com.caucho.log.Log;
+import com.caucho.util.L10N;
 
-import com.caucho.db.table.Table;
+import java.util.logging.Logger;
 
 /**
  * Represents a versioned row
@@ -62,7 +51,7 @@ public class ReadBlock extends Block {
     if (_buffer == null)
       _buffer = new byte[Store.BLOCK_SIZE];
   }
-  
+
   /**
    * Returns the block's buffer.
    */
@@ -79,7 +68,7 @@ public class ReadBlock extends Block {
     synchronized (this) {
       byte []buffer = _buffer;
       _buffer = null;
-    
+
       if (buffer != null)
 	_freeBuffers.free(buffer);
     }

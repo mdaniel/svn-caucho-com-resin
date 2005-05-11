@@ -29,38 +29,24 @@
 
 package com.caucho.db.sql;
 
-import java.io.IOException;
-
-import java.util.ArrayList;
-import java.util.Iterator;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import java.sql.SQLException;
-
+import com.caucho.db.Database;
+import com.caucho.db.store.Transaction;
+import com.caucho.db.table.TableIterator;
+import com.caucho.log.Log;
+import com.caucho.sql.SQLExceptionWrapper;
 import com.caucho.util.CharBuffer;
 
-import com.caucho.vfs.WriteStream;
-import com.caucho.vfs.TempStream;
-
-import com.caucho.log.Log;
-
-import com.caucho.sql.SQLExceptionWrapper;
-
-import com.caucho.db.Database;
-import com.caucho.db.ResultSetImpl;
-
-import com.caucho.db.store.Transaction;
-
-import com.caucho.db.table.TableIterator;
+import java.io.IOException;
+import java.sql.SQLException;
+import java.util.Iterator;
+import java.util.logging.Logger;
 
 public class SelectQuery extends Query {
   private static final Logger log = Log.open(SelectQuery.class);
 
   private Expr []_results;
   private String []_resultNames;
-  
+
   private boolean []_groupFields;
 
   private Order _order;
@@ -109,7 +95,7 @@ public class SelectQuery extends Query {
     throws SQLException
   {
     super.bind();
-    
+
     for (int i = 0; i < _results.length; i++) {
       _results[i] = _results[i].bind(this);
     }
@@ -120,11 +106,11 @@ public class SelectQuery extends Query {
 	  _results[i] = new GroupResultExpr(i, _results[i]);
       }
     }
-    
+
     for (int i = 0; i < _results.length; i++) {
       _results[i] = _results[i].bind(this);
     }
-    
+
     _resultNames = new String[_results.length];
 
     for (int i = 0; i < _resultNames.length; i++)
@@ -166,7 +152,7 @@ public class SelectQuery extends Query {
     TableIterator []rows = null;
 
     int lockIndex = 0;
-      
+
 
     try {
       if (xa.isAutoCommit()) {
@@ -174,7 +160,7 @@ public class SelectQuery extends Query {
 	  xa.lockAutoCommitRead(fromItems[lockIndex].getTable().getLock());
 	}
       }
-      
+
       rows = result.initRows(fromItems);
       context.init(xa, rows);
 
@@ -182,7 +168,7 @@ public class SelectQuery extends Query {
 	executeGroup(result, rows, context, xa);
       else
 	execute(result, rows, context, xa);
-      
+
       result.initRead();
 
       context.setResult(result);
@@ -199,7 +185,7 @@ public class SelectQuery extends Query {
       }
     }
   }
-  
+
   /**
    * Executes the query.
    */
@@ -213,7 +199,7 @@ public class SelectQuery extends Query {
 
     FromItem []fromItems = getFromItems();
     int rowLength = fromItems.length;
-    
+
     if (start(rows, rowLength, context, xa)) {
       do {
 	result.startRow();
@@ -246,18 +232,18 @@ public class SelectQuery extends Query {
 
     boolean []groupByFields = _groupFields;
     int groupByLength = _groupFields.length;
-    
+
     if (start(rows, rowLength, context, transaction)) {
       do {
 	context.initGroup(getDataFields(), _groupFields);
-	
+
 	for (int i = 0; i < groupByLength; i++) {
 	  if (groupByFields[i])
 	    results[i].evalGroup(context);
 	}
 
 	context.selectGroup();
-	
+
 	for (int i = 0; i < resultsLength; i++) {
 	  if (! (i < groupByLength && groupByFields[i]))
 	    results[i].evalGroup(context);
@@ -271,7 +257,7 @@ public class SelectQuery extends Query {
       GroupItem item = groupIter.next();
 
       context.setGroupItem(item);
-      
+
       result.startRow();
       for (int i = 0; i < results.length; i++) {
 	results[i].evalToResult(context, result);
@@ -290,7 +276,7 @@ public class SelectQuery extends Query {
       cb.append(_results[i]);
     }
     cb.append(" FROM ");
-    
+
     FromItem []fromItems = getFromItems();
     for (int i = 0; i < fromItems.length; i++) {
       if (i != 0)
@@ -302,7 +288,7 @@ public class SelectQuery extends Query {
       cb.append(" WHERE " + _whereExpr);
     }
     cb.append("]");
-    
+
     return cb.close();
   }
 }

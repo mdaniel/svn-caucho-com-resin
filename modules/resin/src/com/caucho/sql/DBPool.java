@@ -29,44 +29,34 @@
 
 package com.caucho.sql;
 
-import java.io.*;
-import java.sql.*;
-import java.util.*;
-import java.util.logging.*;
-
-import javax.sql.*;
-import javax.naming.*;
-import javax.transaction.*;
-import javax.transaction.xa.*;
-
-import javax.resource.spi.ManagedConnectionFactory;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-import com.caucho.transaction.*;
-
-import com.caucho.loader.EnvironmentLocal;
-import com.caucho.loader.Environment;
-import com.caucho.loader.ClassLoaderListener;
-import com.caucho.loader.DynamicClassLoader;
-
-import com.caucho.naming.Jndi;
-
-import com.caucho.log.Log;
-
-import com.caucho.config.types.InitProgram;
+import com.caucho.config.ConfigException;
 import com.caucho.config.types.InitParam;
 import com.caucho.config.types.Period;
-import com.caucho.config.ConfigException;
-
-import com.caucho.jca.ResourceManagerImpl;
 import com.caucho.jca.ConnectionPool;
+import com.caucho.jca.ResourceManagerImpl;
+import com.caucho.loader.EnvironmentLocal;
+import com.caucho.log.Log;
+import com.caucho.naming.Jndi;
+import com.caucho.transaction.TransactionManagerImpl;
+import com.caucho.util.L10N;
+
+import javax.resource.spi.ManagedConnectionFactory;
+import javax.sql.ConnectionPoolDataSource;
+import javax.sql.DataSource;
+import javax.sql.XADataSource;
+import javax.transaction.TransactionManager;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.sql.Connection;
+import java.sql.Driver;
+import java.sql.SQLException;
+import java.util.logging.Logger;
 
 /**
  * Manages a pool of database connections.  In addition, DBPool configures
  * the database connection from a configuration file.
  *
- * <p>Like JDBC 2.0 pooling, DBPool returns a wrapped Connection.  
+ * <p>Like JDBC 2.0 pooling, DBPool returns a wrapped Connection.
  * Applications can use that connection just like an unpooled connection.
  * It is more important than ever to <code>close()</code> the connection,
  * because the close returns the connection to the connection pool.
@@ -122,7 +112,7 @@ public class DBPool implements DataSource {
 
   private ResourceManagerImpl _resourceManager;
   private ConnectionPool _connectionPool;
-  
+
   private DBPoolImpl _poolImpl;
   private DataSourceImpl _dataSource;
 
@@ -133,7 +123,7 @@ public class DBPool implements DataSource {
   public DBPool()
   {
     _poolImpl = new DBPoolImpl();
-    
+
     _resourceManager = ResourceManagerImpl.createLocalManager();
     _connectionPool = _resourceManager.createConnectionPool();
   }
@@ -196,7 +186,7 @@ public class DBPool implements DataSource {
   {
     return getPool().createBackupDriver();
   }
-  
+
   /**
    * Sets a driver parameter (compat).
    */
@@ -249,7 +239,7 @@ public class DBPool implements DataSource {
   {
     getPool().setURL(url);
   }
-  
+
   /**
    * Returns the connection's user (compat).
    */
@@ -257,7 +247,7 @@ public class DBPool implements DataSource {
   {
     return getPool().getUser();
   }
-  
+
   /**
    * Sets the connection's user.
    */
@@ -265,7 +255,7 @@ public class DBPool implements DataSource {
   {
     getPool().setUser(user);
   }
-  
+
   /**
    * Returns the connection's password
    */
@@ -273,7 +263,7 @@ public class DBPool implements DataSource {
   {
     return getPool().getPassword();
   }
-  
+
   /**
    * Sets the connection's password
    */
@@ -281,7 +271,7 @@ public class DBPool implements DataSource {
   {
     getPool().setPassword(password);
   }
-  
+
   /**
    * Get the maximum number of pooled connections.
    */
@@ -289,7 +279,7 @@ public class DBPool implements DataSource {
   {
     return _connectionPool.getMaxConnections();
   }
-  
+
   /**
    * Sets the maximum number of pooled connections.
    */
@@ -298,7 +288,7 @@ public class DBPool implements DataSource {
   {
     _connectionPool.setMaxConnections(maxConnections);
   }
-  
+
   /**
    * Get the total number of connections
    */
@@ -306,7 +296,7 @@ public class DBPool implements DataSource {
   {
     return _connectionPool.getConnectionCount();
   }
-  
+
   /**
    * Sets the time to wait for a connection when all are used.
    */
@@ -314,7 +304,7 @@ public class DBPool implements DataSource {
   {
     _connectionPool.setConnectionWaitTime(waitTime);
   }
-  
+
   /**
    * Gets the time to wait for a connection when all are used.
    */
@@ -322,7 +312,7 @@ public class DBPool implements DataSource {
   {
     return _connectionPool.getConnectionWaitTime();
   }
-  
+
   /**
    * The number of connections to overflow if the connection pool fills
    * and there's a timeout.
@@ -331,7 +321,7 @@ public class DBPool implements DataSource {
   {
     _connectionPool.setMaxOverflowConnections(maxOverflowConnections);
   }
-  
+
   /**
    * Set true if the stack trace should be saved on allocation.
    */
@@ -339,7 +329,7 @@ public class DBPool implements DataSource {
   {
     _connectionPool.setSaveAllocationStackTrace(save);
   }
-  
+
   /**
    * The number of connections to overflow if the connection pool fills
    * and there's a timeout.
@@ -348,7 +338,7 @@ public class DBPool implements DataSource {
   {
     return _connectionPool.getMaxOverflowConnections();
   }
-  
+
   /**
    * Get the total number of connections in use by the program.
    */
@@ -356,7 +346,7 @@ public class DBPool implements DataSource {
   {
     return _connectionPool.getActiveConnectionCount();
   }
-  
+
   /**
    * Get the time in milliseconds a connection will remain in the pool before
    * being closed.
@@ -365,7 +355,7 @@ public class DBPool implements DataSource {
   {
     return _connectionPool.getMaxIdleTime();
   }
-  
+
   /**
    * Set the time in milliseconds a connection will remain in the pool before
    * being closed.
@@ -374,7 +364,7 @@ public class DBPool implements DataSource {
   {
     _connectionPool.setMaxIdleTime(idleTime.getPeriod());
   }
-  
+
   /**
    * Get the time in milliseconds a connection will remain in the pool before
    * being closed.
@@ -383,7 +373,7 @@ public class DBPool implements DataSource {
   {
     return _connectionPool.getMaxPoolTime();
   }
-  
+
   /**
    * Set the time in milliseconds a connection will remain in the pool before
    * being closed.
@@ -392,7 +382,7 @@ public class DBPool implements DataSource {
   {
     _connectionPool.setMaxPoolTime(maxPoolTime.getPeriod());
   }
-  
+
   /**
    * Get the time in milliseconds a connection can remain active.
    */
@@ -400,7 +390,7 @@ public class DBPool implements DataSource {
   {
     return _connectionPool.getMaxActiveTime();
   }
-  
+
   /**
    * Set the time in milliseconds a connection can remain active.
    */
@@ -466,7 +456,7 @@ public class DBPool implements DataSource {
   {
     getPool().setPing(ping);
   }
-  
+
   /**
    * Sets the time to ping for ping-on-idle
    */
@@ -474,7 +464,7 @@ public class DBPool implements DataSource {
   {
     getPool().setPingInterval(interval);
   }
-  
+
   /**
    * Gets how often the ping for ping-on-idle
    */
@@ -568,7 +558,7 @@ public class DBPool implements DataSource {
 
     _dataSource = (DataSourceImpl) _connectionPool.init(mcf);
     _connectionPool.start();
-    
+
     _localDataSourceImpl = new EnvironmentLocal<DataSourceImpl>("caucho.data-source." + getName());
     _localDataSourceImpl.set(_dataSource);
 
@@ -590,7 +580,7 @@ public class DBPool implements DataSource {
   {
     return getDataSource().getConnection();
   }
-  
+
   /**
    * Return a connection.  The connection will only be pooled if
    * user and password match the configuration.  In general, applications
@@ -650,7 +640,7 @@ public class DBPool implements DataSource {
         throw new IllegalStateException(L.l("DBPool `{0}' no longer exists.",
                                             getName()));
     }
-    
+
     return _poolImpl;
   }
 
@@ -666,7 +656,7 @@ public class DBPool implements DataSource {
         throw new IllegalStateException(L.l("DBPool `{0}' no longer exists.",
                                             getName()));
     }
-    
+
     return _dataSource;
   }
 

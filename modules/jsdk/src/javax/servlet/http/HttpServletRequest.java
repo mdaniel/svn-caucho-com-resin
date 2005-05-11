@@ -31,9 +31,9 @@
 
 package javax.servlet.http;
 
-import java.util.*;
-import java.security.*;
-import javax.servlet.*;
+import javax.servlet.ServletRequest;
+import java.security.Principal;
+import java.util.Enumeration;
 
 /**
  * HttpServletRequest encapsulates client request data.
@@ -123,7 +123,7 @@ public interface HttpServletRequest extends ServletRequest {
    * (ServletContexts).
    *
    * <p><code>getContextPath()</code> is /myapp for the uri
-   * /myapp/servlet/Hello, 
+   * /myapp/servlet/Hello,
    */
   public String getContextPath();
   /**

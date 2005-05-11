@@ -30,8 +30,7 @@
 
 package javax.servlet;
 
-import java.util.*;
-import java.io.*;
+import java.io.IOException;
 
 /**
  * Represents the next filter in a filter chain.  The final filter will

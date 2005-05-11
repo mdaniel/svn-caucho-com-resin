@@ -29,39 +29,26 @@
 
 package com.caucho.db;
 
-import java.io.IOException;
-
-import java.util.HashMap;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import java.sql.SQLException;
-
-import com.caucho.util.CharBuffer;
-import com.caucho.util.L10N;
-import com.caucho.util.LruCache;
-
-import com.caucho.loader.Environment;
-import com.caucho.loader.CloseListener;
-
-import com.caucho.log.Log;
-
-import com.caucho.lifecycle.Lifecycle;
-
-import com.caucho.vfs.Path;
-
-import com.caucho.sql.SQLExceptionWrapper;
-
-import com.caucho.db.store.Lock;
-import com.caucho.db.store.BlockManager;
-import com.caucho.db.store.Transaction;
-
-import com.caucho.db.table.Table;
-import com.caucho.db.table.TableFactory;
-
 import com.caucho.db.sql.Parser;
 import com.caucho.db.sql.Query;
+import com.caucho.db.store.BlockManager;
+import com.caucho.db.store.Lock;
+import com.caucho.db.table.Table;
+import com.caucho.db.table.TableFactory;
+import com.caucho.lifecycle.Lifecycle;
+import com.caucho.loader.CloseListener;
+import com.caucho.loader.Environment;
+import com.caucho.log.Log;
+import com.caucho.sql.SQLExceptionWrapper;
+import com.caucho.util.L10N;
+import com.caucho.util.LruCache;
+import com.caucho.vfs.Path;
+
+import java.io.IOException;
+import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Manager for a basic Java-based database.
@@ -69,7 +56,7 @@ import com.caucho.db.sql.Query;
 public class Database {
   private static final Logger log = Log.open(Database.class);
   private static final L10N L = new L10N(Database.class);
-  
+
   private Path _dir;
 
   private BlockManager _blockManager = BlockManager.create(128);
@@ -80,7 +67,7 @@ public class Database {
   private Lock _databaseLock = new Lock(0);
 
   private boolean _removeOnError;
-  
+
   private long _timeout = 1000L;
 
   private final Lifecycle _lifecycle = new Lifecycle(log, null, Level.FINER);
@@ -131,7 +118,7 @@ public class Database {
   {
     if (! _lifecycle.toActive())
       return;
-    
+
     Path dir = _dir;
 
     if (dir != null) {
@@ -145,7 +132,7 @@ public class Database {
 
       for (int i = 0; i < list.length; i++) {
 	String name = list[i];
-	
+
 	if (! name.endsWith(".db"))
 	  continue;
 
@@ -163,7 +150,7 @@ public class Database {
 	      log.log(Level.FINER, e.toString(), e);
 	    else
 	      log.warning(e.toString());
-	  
+
 	    try {
 	      dir.lookup(name + ".db").remove();
 	    } catch (IOException e1) {
@@ -217,7 +204,7 @@ public class Database {
     log.fine("adding table " + table.getName());
 
     table.init();
-    
+
     _tables.put(table.getName(), table);
   }
 
@@ -325,7 +312,7 @@ public class Database {
   {
     if (! _lifecycle.toDestroy())
       return;
-    
+
     for (Table table : _tables.values()) {
       try {
 	table.close();

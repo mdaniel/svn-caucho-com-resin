@@ -28,20 +28,19 @@
 
 package com.caucho.filters;
 
-import java.io.*;
-import java.util.*;
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import java.util.regex.*;
+import com.caucho.log.Log;
+import com.caucho.util.CharBuffer;
+import com.caucho.util.L10N;
 
 import javax.servlet.*;
-import javax.servlet.http.*;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-import com.caucho.log.Log;
-import com.caucho.server.connection.CauchoResponse;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Rewrites URL patterns.
@@ -52,11 +51,11 @@ public class RewriteFilter implements Filter
 {
   private static final Logger log = Log.open(RewriteFilter.class);
   private static final L10N L = new L10N(RewriteFilter.class);
-  
+
   private ServletContext _app;
 
   private ArrayList<RewriteEntry> _entries = new ArrayList<RewriteEntry>();
-  
+
   /**
    * Adds a rewrite entry.
    */
@@ -64,13 +63,13 @@ public class RewriteFilter implements Filter
   {
     _entries.add(rewrite);
   }
-  
+
   public void init(FilterConfig config)
     throws ServletException
   {
     _app = config.getServletContext();
   }
-  
+
   /**
    * Creates a wrapper to compress the output.
    */
@@ -85,7 +84,7 @@ public class RewriteFilter implements Filter
 
     for (int i = 0; i < _entries.size(); i++) {
       RewriteEntry entry = _entries.get(i);
-      
+
       Pattern pattern = entry.getRegexp();
       Matcher matcher = pattern.matcher(url);
 
@@ -127,7 +126,7 @@ public class RewriteFilter implements Filter
 
     for (int i = 0; i < target.length(); i++) {
       char ch = target.charAt(i);
-      
+
       if (ch != '$' || i == target.length() - 1)
         cb.append(ch);
       else {
@@ -147,9 +146,9 @@ public class RewriteFilter implements Filter
     }
 
     return cb.toString();
-    
+
   }
-  
+
   /**
    * Any cleanup for the filter.
    */

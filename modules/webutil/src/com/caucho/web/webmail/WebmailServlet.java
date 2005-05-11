@@ -28,18 +28,19 @@
 
 package com.caucho.web.webmail;
 
-import java.io.*;
-import java.util.*;
-import java.sql.*;
+import com.caucho.util.CharBuffer;
+import com.caucho.util.IntMap;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.ReadStream;
+import com.caucho.vfs.Vfs;
+import com.caucho.vfs.WriteStream;
 
-import javax.servlet.http.*;
-import javax.servlet.*;
-import javax.naming.*;
-import javax.sql.*;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-import com.caucho.sql.*;
+import javax.servlet.GenericServlet;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import java.io.IOException;
+import java.io.PrintWriter;
 
 public class WebmailServlet extends GenericServlet {
   private boolean parseMail(ReadStream is, Path dst)
@@ -77,7 +78,7 @@ public class WebmailServlet extends GenericServlet {
           ws.close();
           ws = null;
         }
-        
+
 
         String date = null;
         String subject = null;
@@ -93,7 +94,7 @@ public class WebmailServlet extends GenericServlet {
             break;
 
           String lower = line.toString().toLowerCase();
-          
+
           if (lower.startsWith("subject: ")) {
             subject = line.substring("subject: ".length()).trim();
 
@@ -116,7 +117,7 @@ public class WebmailServlet extends GenericServlet {
         else {
           if (subject != null && ! subject.equals(""))
             messages.put(subject, count);
-          
+
           ws = dst.lookup("" + count++ + ".xtp").openWrite();
           ws.println("<title>" + subject + "</title>");
         }
@@ -129,7 +130,7 @@ public class WebmailServlet extends GenericServlet {
         ws.close();
     }
   }
-  
+
   public void service(ServletRequest request, ServletResponse response)
     throws ServletException, IOException
   {
@@ -138,7 +139,7 @@ public class WebmailServlet extends GenericServlet {
     Path path = Vfs.lookup("/home/ferg/majordomo/archive/resin-interest.0006");
     Path dst = Vfs.lookup("/tmp/dst");
     dst.mkdirs();
-    
+
     ReadStream is = path.openRead();
     try {
       parseMail(is, dst);

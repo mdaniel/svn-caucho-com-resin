@@ -29,50 +29,37 @@
 
 package com.caucho.sql;
 
-import java.io.*;
-import java.sql.*;
-import java.util.*;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import java.lang.reflect.Method;
-
-import javax.sql.*;
-import javax.naming.*;
-import javax.transaction.*;
-import javax.transaction.xa.*;
-
-import javax.resource.spi.ManagedConnectionFactory;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-import com.caucho.transaction.*;
-
-import com.caucho.loader.EnvironmentLocal;
-import com.caucho.loader.Environment;
-import com.caucho.loader.EnvironmentListener;
-import com.caucho.loader.EnvironmentClassLoader;
-
-import com.caucho.naming.Jndi;
-
-import com.caucho.log.Log;
-
-import com.caucho.config.types.InitProgram;
+import com.caucho.config.ConfigException;
 import com.caucho.config.types.InitParam;
 import com.caucho.config.types.Period;
-import com.caucho.config.ConfigException;
-import com.caucho.config.Config;
+import com.caucho.loader.Environment;
+import com.caucho.loader.EnvironmentClassLoader;
+import com.caucho.loader.EnvironmentListener;
+import com.caucho.log.Log;
+import com.caucho.util.Alarm;
+import com.caucho.util.AlarmListener;
+import com.caucho.util.L10N;
 
-import com.caucho.sql.spy.SpyDriver;
-import com.caucho.sql.spy.SpyXADataSource;
-import com.caucho.sql.spy.SpyConnectionPoolDataSource;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
+import javax.resource.spi.ManagedConnectionFactory;
+import javax.sql.ConnectionPoolDataSource;
+import javax.sql.XADataSource;
+import javax.transaction.TransactionManager;
+import java.io.PrintWriter;
+import java.sql.Driver;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Manages a pool of database connections.  In addition, DBPool configures
  * the database connection from a configuration file.
  *
- * <p>Like JDBC 2.0 pooling, DBPool returns a wrapped Connection.  
+ * <p>Like JDBC 2.0 pooling, DBPool returns a wrapped Connection.
  * Applications can use that connection just like an unpooled connection.
  * It is more important than ever to <code>close()</code> the connection,
  * because the close returns the connection to the connection pool.
@@ -139,7 +126,7 @@ public class DBPoolImpl implements AlarmListener, EnvironmentListener {
 
   // How long an unused connection can remain in the pool
   private static final long MAX_IDLE_TIME = 30000;
-  
+
   private String _name;
 
   private ArrayList<DriverConfig> _driverList
@@ -244,7 +231,7 @@ public class DBPoolImpl implements AlarmListener, EnvironmentListener {
     DriverConfig driver = new DriverConfig(this);
 
     _driverList.add(driver);
-    
+
     return driver;
   }
 
@@ -256,7 +243,7 @@ public class DBPoolImpl implements AlarmListener, EnvironmentListener {
     DriverConfig driver = new DriverConfig(this);
 
     _backupDriverList.add(driver);
-    
+
     return driver;
   }
 
@@ -266,7 +253,7 @@ public class DBPoolImpl implements AlarmListener, EnvironmentListener {
   public void setInitParam(InitParam init)
   {
     DriverConfig driver = _driverList.get(0);
-    
+
     HashMap<String,String> params = init.getParameters();
 
     Iterator<String> iter = params.keySet().iterator();
@@ -283,7 +270,7 @@ public class DBPoolImpl implements AlarmListener, EnvironmentListener {
     throws SQLException
   {
     DriverConfig driver;
-    
+
     if (_driverList.size() > 0)
       driver = _driverList.get(0);
     else
@@ -315,7 +302,7 @@ public class DBPoolImpl implements AlarmListener, EnvironmentListener {
     throws SQLException
   {
     DriverConfig driver;
-    
+
     if (_driverList.size() > 0)
       driver = _driverList.get(0);
     else
@@ -331,7 +318,7 @@ public class DBPoolImpl implements AlarmListener, EnvironmentListener {
     throws SQLException
   {
     DriverConfig driver;
-    
+
     if (_driverList.size() > 0)
       driver = _driverList.get(0);
     else
@@ -347,7 +334,7 @@ public class DBPoolImpl implements AlarmListener, EnvironmentListener {
     throws ConfigException
   {
     DriverConfig driver;
-    
+
     if (_driverList.size() > 0)
       driver = _driverList.get(0);
     else
@@ -355,7 +342,7 @@ public class DBPoolImpl implements AlarmListener, EnvironmentListener {
 
     driver.setURL(url);
   }
-  
+
   /**
    * Returns the connection's user.
    */
@@ -363,7 +350,7 @@ public class DBPoolImpl implements AlarmListener, EnvironmentListener {
   {
     return _user;
   }
-  
+
   /**
    * Sets the connection's user.
    */
@@ -371,7 +358,7 @@ public class DBPoolImpl implements AlarmListener, EnvironmentListener {
   {
     _user = user;
   }
-  
+
   /**
    * Returns the connection's password
    */
@@ -379,7 +366,7 @@ public class DBPoolImpl implements AlarmListener, EnvironmentListener {
   {
     return _password;
   }
-  
+
   /**
    * Sets the connection's password
    */
@@ -387,7 +374,7 @@ public class DBPoolImpl implements AlarmListener, EnvironmentListener {
   {
     _password = password;
   }
-  
+
   /**
    * Get the maximum number of pooled connections.
    */
@@ -395,7 +382,7 @@ public class DBPoolImpl implements AlarmListener, EnvironmentListener {
   {
     return _maxConnections;
   }
-  
+
   /**
    * Sets the maximum number of pooled connections.
    */
@@ -403,7 +390,7 @@ public class DBPoolImpl implements AlarmListener, EnvironmentListener {
   {
     _maxConnections = maxConnections;
   }
-  
+
   /**
    * Get the total number of connections
    */
@@ -412,26 +399,26 @@ public class DBPoolImpl implements AlarmListener, EnvironmentListener {
     // return _connections.size();
     return 0;
   }
-  
+
   /**
    * Sets the time to wait for a connection when all are used.
    */
   public void setConnectionWaitTime(Period waitTime)
   {
     long period = waitTime.getPeriod();
-    
+
     _connectionWaitTime = period;
-    
+
     if (period < 0)
       _connectionWaitCount = 3600; // wait for an hour == infinity
     else {
       _connectionWaitCount = (int) ((period + 999) / 1000);
-      
+
       if (_connectionWaitCount <= 0)
         _connectionWaitCount = 1;
     }
   }
-  
+
   /**
    * Gets the time to wait for a connection when all are used.
    */
@@ -439,7 +426,7 @@ public class DBPoolImpl implements AlarmListener, EnvironmentListener {
   {
     return _connectionWaitTime;
   }
-  
+
   /**
    * The number of connections to overflow if the connection pool fills
    * and there's a timeout.
@@ -448,7 +435,7 @@ public class DBPoolImpl implements AlarmListener, EnvironmentListener {
   {
     _maxOverflowConnections = maxOverflowConnections;
   }
-  
+
   /**
    * The number of connections to overflow if the connection pool fills
    * and there's a timeout.
@@ -505,7 +492,7 @@ public class DBPoolImpl implements AlarmListener, EnvironmentListener {
   {
     _preparedStatementCacheSize = size;
   }
-  
+
   /**
    * Get the time in milliseconds a connection will remain in the pool before
    * being closed.
@@ -517,7 +504,7 @@ public class DBPoolImpl implements AlarmListener, EnvironmentListener {
     else
       return _maxIdleTime;
   }
-  
+
   /**
    * Set the time in milliseconds a connection will remain in the pool before
    * being closed.
@@ -525,7 +512,7 @@ public class DBPoolImpl implements AlarmListener, EnvironmentListener {
   public void setMaxIdleTime(Period idleTime)
   {
     long period = idleTime.getPeriod();
-    
+
     if (period < 0)
       _maxIdleTime = Long.MAX_VALUE / 2;
     else if (period < 1000L)
@@ -533,7 +520,7 @@ public class DBPoolImpl implements AlarmListener, EnvironmentListener {
     else
       _maxIdleTime = period;
   }
-  
+
   /**
    * Get the time in milliseconds a connection will remain in the pool before
    * being closed.
@@ -545,7 +532,7 @@ public class DBPoolImpl implements AlarmListener, EnvironmentListener {
     else
       return _maxPoolTime;
   }
-  
+
   /**
    * Set the time in milliseconds a connection will remain in the pool before
    * being closed.
@@ -553,7 +540,7 @@ public class DBPoolImpl implements AlarmListener, EnvironmentListener {
   public void setMaxPoolTime(Period maxPoolTime)
   {
     long period = maxPoolTime.getPeriod();
-    
+
     if (period < 0)
       _maxPoolTime = Long.MAX_VALUE / 2;
     else if (period == 0)
@@ -561,7 +548,7 @@ public class DBPoolImpl implements AlarmListener, EnvironmentListener {
     else
       _maxPoolTime = period;
   }
-  
+
   /**
    * Get the time in milliseconds a connection can remain active.
    */
@@ -572,14 +559,14 @@ public class DBPoolImpl implements AlarmListener, EnvironmentListener {
     else
       return _maxActiveTime;
   }
-  
+
   /**
    * Set the time in milliseconds a connection can remain active.
    */
   public void setMaxActiveTime(Period maxActiveTime)
   {
     long period = maxActiveTime.getPeriod();
-    
+
     if (period < 0)
       _maxActiveTime = Long.MAX_VALUE / 2;
     else if (period == 0)
@@ -604,7 +591,7 @@ public class DBPoolImpl implements AlarmListener, EnvironmentListener {
   public void setPingTable(String pingTable)
   {
     _pingTable = pingTable;
-    
+
     if (pingTable != null)
       _pingQuery = "select 1 from " + pingTable + " where 1=0";
     else
@@ -666,20 +653,20 @@ public class DBPoolImpl implements AlarmListener, EnvironmentListener {
   {
     return _isPing;
   }
-  
+
   /**
    * Sets the time to ping for ping-on-idle
    */
   public void setPingInterval(Period interval)
   {
     _pingInterval = interval.getPeriod();
-    
+
     if (_pingInterval < 0)
       _pingInterval = Long.MAX_VALUE / 2;
     else if (_pingInterval < 1000)
       _pingInterval = 1000;
   }
-  
+
   /**
    * Gets how often the ping for ping-on-idle
    */
@@ -763,7 +750,7 @@ public class DBPoolImpl implements AlarmListener, EnvironmentListener {
   public void setLoginTimeout(int seconds) throws SQLException
   {
   }
-  
+
   /**
    * Gets the timeout for a database login.
    */
@@ -777,7 +764,7 @@ public class DBPoolImpl implements AlarmListener, EnvironmentListener {
   public void setLogWriter(PrintWriter out) throws SQLException
   {
   }
-  
+
   /**
    * Sets the debugging log for the connection.
    */
@@ -793,7 +780,7 @@ public class DBPoolImpl implements AlarmListener, EnvironmentListener {
     throws Exception
   {
     Environment.addEnvironmentListener(this);
-    
+
     // _alarm = new Alarm("db-pool", this, 60000);
 
     /*
@@ -828,7 +815,7 @@ public class DBPoolImpl implements AlarmListener, EnvironmentListener {
 	driver.setUser(_user);
       if (driver.getPassword() == null)
 	driver.setPassword(_password);
-      
+
       driver.initDriver();
       driver.initDataSource(_isTransactional, _isSpy);
 
@@ -846,7 +833,7 @@ public class DBPoolImpl implements AlarmListener, EnvironmentListener {
 	driver.setUser(_user);
       if (driver.getPassword() == null)
 	driver.setPassword(_password);
-      
+
       driver.initDriver();
       driver.initDataSource(_isTransactional, _isSpy);
 
@@ -858,7 +845,7 @@ public class DBPoolImpl implements AlarmListener, EnvironmentListener {
     _backupDriverList.toArray(backupDrivers);
 
     _mcf = new ManagedFactoryImpl(this, drivers, backupDrivers);
-    
+
     if (_name != null) {
       String name = _name;
       if (! name.startsWith("java:"))
@@ -901,7 +888,7 @@ public class DBPoolImpl implements AlarmListener, EnvironmentListener {
 
     for (int i = 0; i < _driverList.size(); i++) {
       DriverConfig driver = _driverList.get(i);
-      
+
       driver.initDataSource(_isTransactional, _isSpy);
     }
 
@@ -951,7 +938,7 @@ public class DBPoolImpl implements AlarmListener, EnvironmentListener {
   {
     return _isClosed;
   }
-  
+
   /**
    * Close the pool, closing the connections.
    */

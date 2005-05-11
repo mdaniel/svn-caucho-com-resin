@@ -30,10 +30,12 @@
 
 package javax.servlet.http;
 
-import javax.servlet.*;
-
-import java.util.*;
-import java.io.*;
+import javax.servlet.GenericServlet;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import java.io.IOException;
+import java.io.Serializable;
 
 /**
  * HttpServlet is a convenient abstract class for creating servlets.
@@ -61,7 +63,7 @@ import java.io.*;
  * import java.io.*;
  * import javax.servlet.*;
  * import javax.servlet.http.*;
- * 
+ *
  * public class Hello extends HttpServlet {
  *   public void doGet(HttpServletRequest request,
  *   		       HttpServletResponse response)
@@ -86,7 +88,7 @@ public abstract class HttpServlet extends GenericServlet
   {
     HttpServletRequest req = (HttpServletRequest) request;
     HttpServletResponse res = (HttpServletResponse) response;
-	
+
     service(req, res);
   }
 
@@ -119,7 +121,7 @@ public abstract class HttpServlet extends GenericServlet
       if (etag != null) {
         newETag = generateETag(lastModified);
         int len = etag.length();
-        
+
         if (len == newETag.length) {
           for (len--; len >= 0; len--) {
             if (etag.charAt(len) != newETag[len])
@@ -132,7 +134,7 @@ public abstract class HttpServlet extends GenericServlet
           return;
         }
       }
-      
+
       long requestLastModified = req.getDateHeader("If-Modified-Since");
       if ((lastModified / 1000) == (requestLastModified / 1000)) {
 	res.sendError(res.SC_NOT_MODIFIED);
@@ -177,12 +179,12 @@ public abstract class HttpServlet extends GenericServlet
     buf[2] = encodeBase64(data >> 54);
     buf[3] = encodeBase64(data >> 48);
     buf[4] = encodeBase64(data >> 42);
-    
+
     buf[5] = encodeBase64(data >> 36);
     buf[6] = encodeBase64(data >> 30);
     buf[7] = encodeBase64(data >> 24);
     buf[8] = encodeBase64(data >> 18);
-    
+
     buf[9] = encodeBase64(data >> 12);
     buf[10] = encodeBase64(data >> 6);
     buf[11] = encodeBase64(data);

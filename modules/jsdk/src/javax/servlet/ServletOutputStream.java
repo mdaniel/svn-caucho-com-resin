@@ -30,8 +30,8 @@
 
 package javax.servlet;
 
-import java.util.*;
-import java.io.*;
+import java.io.IOException;
+import java.io.OutputStream;
 
 /**
  * Servlets can use ServletOutputStream to write binary data to

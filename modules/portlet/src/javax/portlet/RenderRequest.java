@@ -23,14 +23,13 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Sam 
+ * @author Sam
  */
 
 
 package javax.portlet;
 
-import java.io.*;
-import java.util.*;
+
 
 public interface RenderRequest extends PortletRequest
 {

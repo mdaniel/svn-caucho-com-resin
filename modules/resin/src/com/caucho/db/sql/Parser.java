@@ -28,29 +28,24 @@
 
 package com.caucho.db.sql;
 
-import java.util.ArrayList;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import java.sql.SQLException;
-
-import com.caucho.util.L10N;
+import com.caucho.db.Database;
+import com.caucho.db.table.Column;
+import com.caucho.db.table.Table;
+import com.caucho.db.table.TableFactory;
+import com.caucho.log.Log;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.IntMap;
+import com.caucho.util.L10N;
 
-import com.caucho.log.Log;
-
-import com.caucho.db.Database;
-
-import com.caucho.db.table.Table;
-import com.caucho.db.table.Column;
-import com.caucho.db.table.TableFactory;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class Parser {
   private static final Logger log = Log.open(Parser.class);
   private static final L10N L = new L10N(Parser.class);
-  
+
   final static int IDENTIFIER = 128;
   final static int INTEGER = IDENTIFIER + 1;
   final static int LONG = INTEGER + 1;
@@ -61,7 +56,7 @@ public class Parser {
   final static int UNKNOWN = FALSE + 1;
   final static int NULL = UNKNOWN + 1;
   final static int EXISTS = NULL + 1;
-  
+
   final static int FROM = EXISTS + 1;
   final static int IN = FROM + 1;
   final static int SELECT = IN + 1;
@@ -75,24 +70,24 @@ public class Parser {
   final static int DESC = ASC + 1;
   final static int LIMIT = DESC + 1;
   final static int OFFSET = LIMIT + 1;
-  
+
   final static int BETWEEN = OFFSET + 1;
   final static int LIKE = BETWEEN + 1;
   final static int ESCAPE = LIKE + 1;
   final static int IS = ESCAPE + 1;
   final static int CONCAT = IS + 1;
-  
+
   final static int EQ = CONCAT + 1;
   final static int NE = EQ + 1;
   final static int LT = NE + 1;
   final static int LE = LT + 1;
   final static int GT = LE + 1;
   final static int GE = GT + 1;
-  
+
   final static int AND = GE + 1;
   final static int OR = AND + 1;
   final static int NOT = OR + 1;
-  
+
   final static int ARG = NOT + 1;
 
   final static int CREATE = ARG + 1;
@@ -104,23 +99,23 @@ public class Parser {
   final static int UPDATE = DROP + 1;
   final static int SET = UPDATE + 1;
   final static int DELETE = SET + 1;
-  
+
   final static int CONSTRAINT = DELETE + 1;
   final static int UNIQUE = CONSTRAINT + 1;
   final static int PRIMARY = UNIQUE + 1;
   final static int CHECK = PRIMARY + 1;
   final static int FOREIGN = CHECK + 1;
-  
+
   private final static IntMap _reserved;
-  
+
   private Database _database;
-  
+
   private final String _sql;
   private final char []_sqlChars;
   private final int _sqlLength;
 
   private int _parseIndex;
-  
+
   private final CharBuffer _cb = new CharBuffer();
 
   private String _lexeme;
@@ -158,7 +153,7 @@ public class Parser {
     Parser parser = new Parser(database, sql);
 
     Expr expr = parser.parseExpr();
-    
+
     return expr.bind(null);
   }
 
@@ -173,22 +168,22 @@ public class Parser {
     switch (token) {
     case SELECT:
       return parseSelect();
-      
+
     case CREATE:
       return parseCreate();
-      
+
     case INSERT:
       return parseInsert();
-      
+
     case DELETE:
       return parseDelete();
-      
+
     case DROP:
       return parseDrop();
-      
+
     case UPDATE:
       return parseUpdate();
-      
+
     default:
       throw new SQLParseException(L.l("unknown query at `{0}'",
 				      tokenName(token)));
@@ -218,7 +213,7 @@ public class Parser {
       distinct = true;
     else
       _token = token;
-    
+
     ArrayList<Expr> resultItems = new ArrayList<Expr>();
 
     int startToken = scanToken();
@@ -242,7 +237,7 @@ public class Parser {
     query.setFromItems(fromItems);
 
     token = scanToken();
-    
+
     int tailToken = token;
     int tailOffset = _parseIndex;
 
@@ -264,7 +259,7 @@ public class Parser {
     _parseIndex = tailOffset;
 
     token = scanToken();
-    
+
     if (token == WHERE)
       _andExpr.add(parseExpr());
     else
@@ -296,7 +291,7 @@ public class Parser {
 
       if (token != BY)
 	throw error(L.l("expected BY at `{0}'", tokenName(token)));
-      
+
       groupItems = parseGroup(query);
     }
     else
@@ -308,7 +303,7 @@ public class Parser {
 
       if (token != BY)
 	throw error(L.l("expected BY at `{0}'", tokenName(token)));
-      
+
       Order order = parseOrder(query, resultItems);
     }
     else
@@ -322,7 +317,7 @@ public class Parser {
       Expr []resultList = query.getResults();
 
       bindGroup(query, groupItems);
-      
+
       for (int i = 0; i < resultList.length; i++) {
 	Expr subExpr = resultList[i];
 
@@ -348,7 +343,7 @@ public class Parser {
     throws SQLException
   {
     ArrayList<FromItem> fromItems = new ArrayList<FromItem>();
-    
+
     FromItem fromItem = parseFromItem();
 
     if (fromItem != null)
@@ -401,7 +396,7 @@ public class Parser {
 
 	isRight = true;
 	isOuter = true;
-	  
+
 	throw error(L.l("right outer joins are not supported"));
       }
       else if ("natural".equalsIgnoreCase(_lexeme)) {
@@ -414,7 +409,7 @@ public class Parser {
 
 	  if ("outer".equalsIgnoreCase(name))
 	    name = parseIdentifier();
-	  
+
 	  isOuter = true;
 	}
 	else if ("right".equalsIgnoreCase(name)) {
@@ -422,10 +417,10 @@ public class Parser {
 
 	  if ("outer".equalsIgnoreCase(name))
 	    name = parseIdentifier();
-	  
+
 	  isRight = true;
 	  isOuter = true;
-	  
+
 	  throw error(L.l("right outer joins are not supported"));
 	}
 
@@ -441,7 +436,7 @@ public class Parser {
       fromItems.add(fromItem);
 
       _query.setFromItems(fromItems);
-      
+
       token = scanToken();
       if (token == IDENTIFIER && "on".equalsIgnoreCase(_lexeme)) {
 	Expr onExpr = parseExpr();
@@ -449,12 +444,12 @@ public class Parser {
 	if (isOuter) {
 	  FromItem leftItem = fromItems.get(fromItems.size() - 2);
 	  FromItem rightItem = fromItems.get(fromItems.size() - 1);
-	  
+
 	  onExpr = new LeftOuterJoinExpr(rightItem, onExpr);
 
 	  rightItem.setDependTable(leftItem);
 	}
-	
+
 	_andExpr.add(onExpr);
       }
       else
@@ -520,7 +515,7 @@ public class Parser {
     int token;
 
     Order order = null;
-    
+
     do {
       Expr expr = parseExpr();
 
@@ -549,7 +544,7 @@ public class Parser {
 
       Order tailOrder = expr.createOrder(index);
       tailOrder.setAscending(isAsc);
-      
+
       order = Order.append(order, tailOrder);
 
       // ascList.add(isAsc ? Boolean.TRUE : Boolean.FALSE);
@@ -572,7 +567,7 @@ public class Parser {
     int token;
 
     ArrayList<Expr> groupList = new ArrayList<Expr>();
-    
+
     do {
       groupList.add(parseExpr());
     } while ((token = scanToken()) == ',');
@@ -591,7 +586,7 @@ public class Parser {
     query.setGroup(true);
 
     Expr []resultList = query.getResults();
-    
+
     for (int i = 0; i < groupList.size(); i++) {
       Expr expr = groupList.get(i);
 
@@ -603,7 +598,7 @@ public class Parser {
 
 	if (expr.equals(resultExpr)) {
 	  resultList[index] = new GroupResultExpr(index, resultExpr);
-	    
+
 	  break;
 	}
       }
@@ -626,15 +621,15 @@ public class Parser {
     int token;
 
     TableFactory factory = _database.createTableFactory();
-    
+
     if ((token = scanToken()) != TABLE)
       throw error(L.l("expected TABLE at `{0}'", tokenName(token)));
-    
+
     if ((token = scanToken()) != IDENTIFIER)
       throw error(L.l("expected identifier at `{0}'", tokenName(token)));
 
     factory.startTable(_lexeme);
-    
+
     if ((token = scanToken()) != '(')
       throw error(L.l("expected '(' at `{0}'", tokenName(token)));
 
@@ -649,7 +644,7 @@ public class Parser {
       case UNIQUE:
 	factory.addUnique(parseColumnNames());
 	break;
-	
+
       case PRIMARY:
 	String key = parseIdentifier();
 	if (! key.equalsIgnoreCase("key"))
@@ -657,17 +652,17 @@ public class Parser {
 
 	factory.addPrimaryKey(parseColumnNames());
 	break;
-	
+
       case CHECK:
 	if ((token = scanToken()) != '(')
 	  throw error(L.l("Expected '(' at '{0}'", tokenName(token)));
 
 	parseExpr();
-	  
+
 	if ((token = scanToken()) != ')')
 	  throw error(L.l("Expected ')' at '{0}'", tokenName(token)));
 	break;
-	
+
       default:
 	throw error(L.l("unexpected token `{0}'", tokenName(token)));
       }
@@ -677,7 +672,7 @@ public class Parser {
 
     if (token != ')')
       throw error(L.l("expected ')' at `{0}'", tokenName(token)));
-    
+
     return new CreateQuery(_database, _sql, factory);
   }
 
@@ -688,7 +683,7 @@ public class Parser {
     throws SQLException
   {
     int token;
-    
+
     if ((token = scanToken()) != IDENTIFIER)
       throw error(L.l("expected column type at `{0}'", tokenName(token)));
 
@@ -772,13 +767,13 @@ public class Parser {
       token = scanToken();
 
       // XXX: stuff like NOT NULL
-      
+
       switch (token) {
       case ')':
       case ',':
 	_token = token;
 	return;
-	
+
       case UNIQUE:
 	factory.setUnique(name);
 	break;
@@ -796,7 +791,7 @@ public class Parser {
 	  throw error(L.l("Expected '(' at '{0}'", tokenName(token)));
 
 	parseExpr();
-	  
+
 	if ((token = scanToken()) != ')')
 	  throw error(L.l("Expected ')' at '{0}'", tokenName(token)));
 	break;
@@ -817,17 +812,17 @@ public class Parser {
 	else
 	  throw error(L.l("unexpected token '{0}'", tokenName(token)));
 	break;
-	
+
       case NULL:
 	break;
-	
+
       case NOT:
 	if ((token = scanToken()) == NULL)
 	  factory.setNotNull(name);
 	else
 	  throw error(L.l("unexpected token '{0}'", tokenName(token)));
 	break;
-	
+
       default:
 	throw error(L.l("unexpected token '{0}'", tokenName(token)));
       }
@@ -845,7 +840,7 @@ public class Parser {
     int token = scanToken();
 
     ArrayList<String> foreignColumns = new ArrayList<String>();
-    
+
     if (token == '(') {
       _token = token;
 
@@ -895,7 +890,7 @@ public class Parser {
 
     if ((token = scanToken()) != INTO)
       throw error(L.l("expected INTO at `{0}'", tokenName(token)));
-    
+
     if ((token = scanToken()) != IDENTIFIER)
       throw error(L.l("expected identifier at `{0}'", tokenName(token)));
 
@@ -908,7 +903,7 @@ public class Parser {
     FromItem[] fromList = new FromItem[] { fromItem };
 
     ArrayList<Column> columns = new ArrayList<Column>();
-    
+
     if ((token = scanToken()) == '(') {
       do {
 	String columnName = parseIdentifier();
@@ -932,7 +927,7 @@ public class Parser {
       for (int i = 0; i < columnArray.length; i++)
 	columns.add(columnArray[i]);
     }
-    
+
     if (token != VALUES)
       throw error(L.l("expected VALUES at `{0}'", tokenName(token)));
 
@@ -943,7 +938,7 @@ public class Parser {
 
     InsertQuery query = new InsertQuery(_database, _sql, table, columns);
     _query = query;
-    
+
     int i = 0;
     do {
       Expr expr = parseExpr();
@@ -980,7 +975,7 @@ public class Parser {
 
     if ((token = scanToken()) != FROM)
       throw error(L.l("expected FROM at `{0}'", tokenName(token)));
-    
+
     if ((token = scanToken()) != IDENTIFIER)
       throw error(L.l("expected identifier at `{0}'", tokenName(token)));
 
@@ -1004,7 +999,7 @@ public class Parser {
 
     query.setParams(params);
     query.setWhereExpr(whereExpr);
-    
+
     return query;
   }
 
@@ -1018,12 +1013,12 @@ public class Parser {
 
     if ((token = scanToken()) != TABLE)
       throw error(L.l("expected TABLE at `{0}'", tokenName(token)));
-    
+
     if ((token = scanToken()) != IDENTIFIER)
       throw error(L.l("expected identifier at `{0}'", tokenName(token)));
 
     String table = _lexeme;
-    
+
     if ((token = scanToken()) >= 0)
       throw error(L.l("expected end of query at `{0}'", tokenName(token)));
 
@@ -1037,7 +1032,7 @@ public class Parser {
     throws SQLException
   {
     int token;
-    
+
     if ((token = scanToken()) != IDENTIFIER)
       throw error(L.l("expected identifier at `{0}'", tokenName(token)));
 
@@ -1069,13 +1064,13 @@ public class Parser {
 
     SetItem []setItems = new SetItem[setItemList.size()];
     setItemList.toArray(setItems);
-    
+
     ParamExpr []params = _params.toArray(new ParamExpr[_params.size()]);
 
     query.setSetItems(setItems);
     query.setParams(params);
     query.setWhereExpr(whereExpr);
-    
+
     return query;
   }
 
@@ -1086,7 +1081,7 @@ public class Parser {
     throws SQLException
   {
     int token;
-    
+
     if ((token = scanToken()) != IDENTIFIER)
       throw error(L.l("expected identifier at `{0}'", tokenName(token)));
 
@@ -1111,7 +1106,7 @@ public class Parser {
     throws SQLException
   {
     int token = scanToken();
-    
+
     if (token == SELECT)
       return parseSubSelect();
     else {
@@ -1161,7 +1156,7 @@ public class Parser {
       case OR:
 	left = new OrExpr(left, parseAndExpr());
 	break;
-	
+
       default:
 	_token = token;
 	return left;
@@ -1178,7 +1173,7 @@ public class Parser {
     AndExpr oldAndExpr = _andExpr;
     AndExpr andExpr = new AndExpr();
     _andExpr = andExpr;
-    
+
     andExpr.add(parseNotExpr());
 
     while (true) {
@@ -1188,12 +1183,12 @@ public class Parser {
       case AND:
 	andExpr.add(parseNotExpr());
 	break;
-	
+
       default:
 	_token = token;
 
 	_andExpr = oldAndExpr;
-	
+
 	return andExpr.getSingleExpr();
       }
     }
@@ -1257,7 +1252,7 @@ public class Parser {
 	  throw error(L.l("expected AND at '{0}'", tokenName(token)));
 
 	Expr max = parseConcatExpr();
-	
+
 	return new BetweenExpr(left, min, max, isNot);
       }
 
@@ -1275,7 +1270,7 @@ public class Parser {
 	else
 	  throw error(L.l("expected NULL at '{0}'", tokenName(token)));
       }
-	
+
     default:
       _token = token;
       return left;
@@ -1297,7 +1292,7 @@ public class Parser {
       case CONCAT:
 	left = new ConcatExpr(left, parseAddExpr());
 	break;
-	
+
       default:
 	_token = token;
 	return left;
@@ -1321,7 +1316,7 @@ public class Parser {
       case '-':
 	left = new BinaryExpr(left, parseMulExpr(), token);
 	break;
-	
+
       default:
 	_token = token;
 	return left;
@@ -1346,7 +1341,7 @@ public class Parser {
       case '%':
 	left = new BinaryExpr(left, parseTerm(), token);
 	break;
-	
+
       default:
 	_token = token;
 	return left;
@@ -1422,23 +1417,23 @@ public class Parser {
 	  }
 	  else if (name.equalsIgnoreCase("exists")) {
 	    token = scanToken();
-	    
+
 	    if (token != SELECT)
 	      throw error(L.l("exists requires SELECT at '{0}'",
 			      tokenName(token)));
 
 	    ExistsQuery query = new ExistsQuery(_database, _sql);
-	    
+
 	    parseSelect(query);
 
 	    ExistsExpr expr = new ExistsExpr(query);
 
 	    query.setSubSelect(expr);
-	    
+
 	    _andExpr.add(new ExistsEvalExpr(expr));
 
 	    token = scanToken();
-	    
+
 	    if (token != ')')
 	      throw error(L.l("exists requires ')' at '{0}'",
 			      tokenName(token)));
@@ -1468,7 +1463,7 @@ public class Parser {
 	  token = scanToken();
 	  while (token > 0 && token != ')') {
 	    _token = token;
-	    
+
 	    Expr arg = parseExpr();
 
 	    fun.addArg(arg);
@@ -1508,7 +1503,7 @@ public class Parser {
       ParamExpr param = new ParamExpr(_params.size());
       _params.add(param);
       return param;
-      
+
     default:
       throw error(L.l("unexpected term {0}", tokenName(token)));
     }
@@ -1527,7 +1522,7 @@ public class Parser {
 
     return _lexeme;
   }
-  
+
   /**
    * Scan the next token.  If the lexeme is a string, its string
    * representation is in "lexeme".
@@ -1560,7 +1555,7 @@ public class Parser {
     case ',':
     case '?':
       return ch;
-      
+
     case '+':
       if ((ch = read()) >= '0' && ch <= '9')
         break;
@@ -1568,7 +1563,7 @@ public class Parser {
         unread(ch);
         return '+';
       }
-        
+
     case '-':
       if ((ch = read()) >= '0' && ch <= '9') {
         sign = -1;
@@ -1578,7 +1573,7 @@ public class Parser {
         unread(ch);
         return '-';
       }
-      
+
     case '=':
       return EQ;
 
@@ -1599,7 +1594,7 @@ public class Parser {
         unread(ch);
         return GT;
       }
-      
+
     case '|':
       if ((ch = read()) == '|')
         return CONCAT;
@@ -1631,14 +1626,14 @@ public class Parser {
       if (token > 0)
         return token;
       else
-        return IDENTIFIER; 
+        return IDENTIFIER;
     }
     else if (ch >= '0' && ch <= '9') {
       CharBuffer cb = _cb;
       cb.clear();
 
       int type = INTEGER;
-      
+
       if (sign < 0)
         cb.append('-');
 
@@ -1647,7 +1642,7 @@ public class Parser {
 
       if (ch == '.') {
         type = DOUBLE;
-        
+
         cb.append('.');
         for (ch = read(); ch >= '0' && ch <= '9'; ch = read())
           cb.append((char) ch);
@@ -1661,11 +1656,11 @@ public class Parser {
           cb.append((char) ch);
           ch = read();
         }
-        
+
         if (! (ch >= '0' && ch <= '9'))
           throw error(L.l("exponent needs digits at {0}",
                           charName(ch)));
-          
+
         for (; ch >= '0' && ch <= '9'; ch = read())
           cb.append((char) ch);
       }
@@ -1737,7 +1732,7 @@ public class Parser {
     else
       return String.valueOf((char) ch);
   }
-  
+
   /**
    * Returns the name of a token
    */
@@ -1766,7 +1761,7 @@ public class Parser {
 
     case -1:
       return L.l("end of query");
-      
+
     default:
       if (token < 128)
         return "'" + String.valueOf((char) token) + "'";
@@ -1795,21 +1790,21 @@ public class Parser {
     _reserved.put("desc", DESC);
     _reserved.put("limit", LIMIT);
     _reserved.put("offset", OFFSET);
-    
+
     _reserved.put("or", OR);
     _reserved.put("and", AND);
     _reserved.put("not", NOT);
-    
+
     _reserved.put("between", BETWEEN);
     _reserved.put("like", LIKE);
     _reserved.put("escape", ESCAPE);
     _reserved.put("is", IS);
-    
+
     _reserved.put("true", TRUE);
     _reserved.put("false", FALSE);
     _reserved.put("unknown", UNKNOWN);
     _reserved.put("null", NULL);
-    
+
     _reserved.put("create", CREATE);
     _reserved.put("table", TABLE);
     _reserved.put("insert", INSERT);
@@ -1819,7 +1814,7 @@ public class Parser {
     _reserved.put("update", UPDATE);
     _reserved.put("set", SET);
     _reserved.put("delete", DELETE);
-    
+
     _reserved.put("constraint", CONSTRAINT);
     _reserved.put("unique", UNIQUE);
     _reserved.put("check", CHECK);

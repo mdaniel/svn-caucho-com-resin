@@ -29,13 +29,13 @@
 
 package com.caucho.server.dispatch;
 
-import java.util.*;
-
 import com.caucho.lifecycle.Lifecycle;
-
 import com.caucho.make.Dependency;
-
 import com.caucho.util.LruCache;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 
 /**
  * The dispatch server is responsible for building Invocations,
@@ -45,10 +45,10 @@ public class DispatchServer implements Dependency {
   private String _serverId = "";
 
   private DispatchBuilder _dispatchBuilder;
-  
+
   // Cache of uri -> invocation maps
   private LruCache<Object,Invocation> _invocationCache;
-  
+
   private InvocationDecoder _invocationDecoder;
 
   private HashMap<String,Object> _attributeMap = new HashMap<String,Object>();
@@ -143,7 +143,7 @@ public class DispatchServer implements Dependency {
   {
     if (_invocationDecoder == null)
       _invocationDecoder = new InvocationDecoder();
-    
+
     return _invocationDecoder;
   }
 
@@ -154,7 +154,7 @@ public class DispatchServer implements Dependency {
   {
     return getInvocationDecoder();
   }
-  
+
   /**
    * Returns the cached invocation.
    */
@@ -233,7 +233,7 @@ public class DispatchServer implements Dependency {
   {
     // XXX: see if can remove this, and rely on the invocation cache existing
     LruCache<Object,Invocation> invocationCache = _invocationCache;
-    
+
     if (invocationCache != null) {
       synchronized (invocationCache) {
 	invocationCache.clear();
@@ -248,7 +248,7 @@ public class DispatchServer implements Dependency {
   {
     // XXX: see if can remove this, and rely on the invocation cache existing
     LruCache<Object,Invocation> invocationCache = _invocationCache;
-    
+
     if (invocationCache != null) {
       synchronized (invocationCache) {
 	Iterator<LruCache.Entry<Object,Invocation>> iter;
@@ -387,7 +387,7 @@ public class DispatchServer implements Dependency {
     ArrayList<ServerListener> listeners;
     listeners = new ArrayList<ServerListener>(_listeners);
     _listeners.clear();
-    
+
     for (int i = 0; i < listeners.size(); i++) {
       ServerListener listener = listeners.get(i);
 

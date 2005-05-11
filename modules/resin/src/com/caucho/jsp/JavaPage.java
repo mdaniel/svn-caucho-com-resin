@@ -29,27 +29,24 @@
 
 package com.caucho.jsp;
 
-import java.io.*;
-import java.util.*;
-
-import javax.servlet.http.*;
-import javax.servlet.jsp.*;
-import javax.servlet.*;
-
-import org.w3c.dom.*;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-import com.caucho.server.http.*;
 import com.caucho.make.PersistentDependency;
-import com.caucho.java.*;
+
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.jsp.HttpJspPage;
+import java.io.IOException;
+import java.util.ArrayList;
 
 public abstract class JavaPage extends Page implements HttpJspPage {
   public void init(ServletConfig config)
     throws ServletException
   {
     super.init(config);
-    
+
     jspInit();
   }
 
@@ -80,7 +77,7 @@ public abstract class JavaPage extends Page implements HttpJspPage {
   {
     ArrayList<PersistentDependency> pList;
     pList = (ArrayList<PersistentDependency>) list;
-    
+
     pList.add(depend);
   }
 
@@ -89,12 +86,12 @@ public abstract class JavaPage extends Page implements HttpJspPage {
     if (isDead()) {
       return;
     }
-    
+
     try {
       jspDestroy();
     } catch (Throwable e) {
     }
-    
+
     super.destroy();
   }
 

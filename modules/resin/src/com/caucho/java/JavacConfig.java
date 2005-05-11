@@ -28,18 +28,17 @@
 
 package com.caucho.java;
 
-import com.caucho.loader.Environment;
 import com.caucho.loader.EnvironmentLocal;
 
 public class JavacConfig {
   private static final EnvironmentLocal<JavacConfig> _localJavac =
   new EnvironmentLocal<JavacConfig>();
-  
+
   private String _compiler = "internal";
   private String _args;
   private String _encoding;
   private int _maxBatch = 64;
-  
+
   /**
    * Returns the environment configuration.
    */

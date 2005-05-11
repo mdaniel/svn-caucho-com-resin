@@ -45,10 +45,10 @@ Resin to notify the task when the resource should shut down.</p>
 The <code>run</code> method has the main loop.</p>
 
 <p>The only complexity in the task implements the <code>release()</code>
-capability.  The <code>_isClosed</code> flag indicates whether the
-server is still alive.  It is important that <code>_isClosed</code> is
+capability.  The <code>_isActive</code> flag indicates whether the
+server is still alive.  It is important that <code>_isActive</code> is
 set before the work task is submitted to avoid timing issues.  In
-other words, it would be a mistake to set <code>_isClosed = false</code>
+other words, it would be a mistake to set <code>_isActive = true</code>
 in the <code>run()</code> method since Resin could call
 <code>release()</code> before the run thread started.</p>
 
@@ -109,13 +109,13 @@ to simplify the example.</p>
 
 <example title="WorkResource.java">
 
-public class WorkResource extends com.caucho.jca.AbstractResourceAdapter {
-  private WorkTask _workTask;
+import com.caucho.jca.AbstractResourceAdapter;
 
+public class WorkResource extends AbstractResourceAdapter {
   public void start(BootstrapContext ctx)
     throws ResourceAdapterInternalException
   {
-    _workTask = new WorkTask();
+    WorkTask work = new WorkTask();
 
     WorkManager workManager = ctx.getWorkManager();
     

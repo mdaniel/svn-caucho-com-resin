@@ -28,17 +28,14 @@
 
 package com.caucho.amber.type;
 
-import java.io.IOException;
-
-import java.sql.ResultSet;
-import java.sql.Types;
-import java.sql.SQLException;
-
+import com.caucho.amber.AmberManager;
+import com.caucho.java.JavaWriter;
 import com.caucho.util.L10N;
 
-import com.caucho.java.JavaWriter;
-
-import com.caucho.amber.AmberManager;
+import java.io.IOException;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Types;
 
 /**
  * The type of a property.
@@ -132,7 +129,7 @@ public class BooleanType extends Type {
     throws SQLException
   {
     boolean value = rs.getBoolean(index);
-    
+
     return rs.wasNull() ? null : (value ? Boolean.TRUE : Boolean.FALSE);
   }
 }
