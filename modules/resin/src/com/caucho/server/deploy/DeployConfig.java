@@ -29,26 +29,18 @@
 
 package com.caucho.server.deploy;
 
-import java.util.Map;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import javax.servlet.jsp.el.ELException;
-
+import com.caucho.config.BuilderProgram;
+import com.caucho.config.BuilderProgramContainer;
+import com.caucho.config.ConfigException;
+import com.caucho.config.ObjectAttributeProgram;
+import com.caucho.config.types.PathBuilder;
+import com.caucho.config.types.RawString;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
 
-import com.caucho.config.BuilderProgram;
-import com.caucho.config.ConfigException;
-import com.caucho.config.ObjectAttributeProgram;
-import com.caucho.config.BuilderProgramContainer;
-import com.caucho.config.ConfigException;
-
-import com.caucho.config.types.RawString;
-import com.caucho.config.types.PathBuilder;
-
-import com.caucho.server.deploy.DeployController;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * The configuration for a deployable instance.
@@ -56,10 +48,10 @@ import com.caucho.server.deploy.DeployController;
 public class DeployConfig {
   private final static Logger log
     = Logger.getLogger(DeployConfig.class.getName());
-  
+
   // The deploy id
   private String _id;
-  
+
   // The root directory
   private String _rootDirectory;
 
@@ -71,7 +63,7 @@ public class DeployConfig {
 
   // redeploy mode
   private String _redeployMode;
-  
+
   // The configuration program
   private BuilderProgramContainer _program = new BuilderProgramContainer();
 
@@ -203,7 +195,7 @@ public class DeployConfig {
 
       if (rootDir != null)
 	return rootDir;
-    
+
       return Vfs.lookup();
     } catch (Exception e) {
       log.log(Level.WARNING, e.toString(), e);

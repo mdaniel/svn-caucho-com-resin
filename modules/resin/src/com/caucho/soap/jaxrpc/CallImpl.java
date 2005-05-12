@@ -28,34 +28,26 @@
 
 package com.caucho.soap.jaxrpc;
 
-import java.util.Map;
-import java.util.List;
-import java.util.Iterator;
-import java.util.ArrayList;
-
-import java.util.logging.Logger;
-
-import java.io.OutputStream;
-import java.io.IOException;
-
-import javax.xml.namespace.QName;
-
-import javax.xml.rpc.Call;
-import javax.xml.rpc.ParameterMode;
-import javax.xml.rpc.JAXRPCException;
-
+import com.caucho.log.Log;
+import com.caucho.soap.wsdl.WSDLMessage;
+import com.caucho.soap.wsdl.WSDLOperation;
+import com.caucho.soap.wsdl.WSDLPort;
+import com.caucho.util.L10N;
+import com.caucho.xml.XMLWriter;
+import com.caucho.xml.XmlPrinter;
 import org.xml.sax.SAXException;
 
-import com.caucho.util.L10N;
-
-import com.caucho.log.Log;
-
-import com.caucho.soap.wsdl.WSDLPort;
-import com.caucho.soap.wsdl.WSDLOperation;
-import com.caucho.soap.wsdl.WSDLMessage;
-
-import com.caucho.xml.XmlPrinter;
-import com.caucho.xml.XMLWriter;
+import javax.xml.namespace.QName;
+import javax.xml.rpc.Call;
+import javax.xml.rpc.JAXRPCException;
+import javax.xml.rpc.ParameterMode;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.logging.Logger;
 
 /**
  * Service
@@ -86,7 +78,7 @@ public class CallImpl implements Call {
     _op = op;
   }
 
-  
+
   /**
    * Returns true if the parameter and return type should be invoked.
    */
@@ -290,7 +282,7 @@ public class CallImpl implements Call {
   {
     if (_op.getInput() == null)
       throw new IllegalStateException(L.l("writing call with no input"));
-    
+
     OutputStream os = null;
 
     try {
@@ -319,10 +311,10 @@ public class CallImpl implements Call {
 
     WSDLOperation op = _op;
     QName opName = op.getName();
-      
+
     writer.startPrefixMapping("env", SOAP_ENVELOPE);
     writer.startPrefixMapping("m", opName.getNamespaceURI());
-      
+
     writer.startElement(SOAP_ENVELOPE, "Envelope", "env:Envelope");
     writer.attribute(XMLNS, "env", "xmlns:env", SOAP_ENVELOPE);
     writer.attribute(XMLNS, "m", "xmlns:m", opName.getNamespaceURI());
@@ -334,7 +326,7 @@ public class CallImpl implements Call {
     writer.attribute(SOAP_ENVELOPE, "encodingStyle", "env:encodingStyle",
 		     "ook");
     */
-      
+
     writer.endElement(SOAP_ENVELOPE, "Header", "env:Header");
 
     writer.startElement(SOAP_ENVELOPE, "Body", "env:Body");
@@ -350,12 +342,12 @@ public class CallImpl implements Call {
 
     writer.endElement(opName.getNamespaceURI(), opName.getLocalPart(),
 		      "m:" + opName.getLocalPart());
-      
+
     writer.endElement(SOAP_ENVELOPE, "Body", "env:Body");
-      
+
     writer.endElement(SOAP_ENVELOPE, "env", "Envelope");
     writer.endPrefixMapping("env");
-      
+
     writer.endDocument();
   }
 

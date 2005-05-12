@@ -49,61 +49,86 @@ public interface ServletRequest {
    * Returns the prococol, e.g. "HTTP/1.1"
    */
   public String getProtocol();
-  
+
   /**
    * Returns the request scheme, e.g. "http"
    */
   public String getScheme();
-  
+
   /**
    * Returns the server name handling the request.  When using virtual hosts,
    * this returns the virtual host name, e.g. "vhost1.caucho.com".
+   *
+   * This call returns the host name as the client sees it, which means that
+   * if ipchains or proxying is involved this call returns the correct call for
+   * forming urls, but may not contain the host that Resin is actually listeing
+   * on.
    */
   public String getServerName();
-  
+
   /**
-   * Returns the server port handling the request, e.g. 80.
+   * Returns the server port used by the client, e.g. 80.
+   *
+   * This call returns the port number as the client sees it, which means that
+   * if ipchains or proxying is involved this call returns the correct call for
+   * forming urls, but may not return the actual port that Resin is listening on.
+   *
+   * This call should not be used to test for an ssl connection
+   * (getServerPort() == 443), {@link #isSecure()} is provided for that purpose.
    */
   public int getServerPort();
-  
+
   /**
    * Returns the IP address of the remote host, i.e. the client browser.
    */
   public String getRemoteAddr();
-  
+
   /**
    * Returns the DNS hostname of the remote host, i.e. the client browser.
    */
   public String getRemoteHost();
-  
+
   /**
-   * Returns the port of the remote host, i.e. the server
+   * Returns the port of the remote host, i.e. the client browser.
    *
    * @since 2.4
    */
   public int getRemotePort();
-  
+
   /**
-   * Returns the IP address of the local host, i.e. the server browser.
+   * This call returns the ip of the host actually used to connect to the Resin
+   * server,  which means that if ipchains or proxying is involved this call
+   * <i>does not</i> return the correct host for forming urls.
    *
    * @since 2.4
    */
   public String getLocalAddr();
-  
+
   /**
-   * Returns the IP address of the local host, i.e. the server
+   * Returns the IP address of the local host, i.e. the server.
+   *
+   * This call returns the name of the host actaully used to connect to the Resin
+   * server,  which means that if ipchains or proxying is involved this call
+   * <i>does not</i> return the correct host for forming urls.
    *
    * @since 2.4
    */
   public String getLocalName();
-  
+
   /**
-   * Returns the port of the local host, i.e. the server
+   * Returns the port of the local host.
+   *
+   * This call returns the port number actually used to connect to the Resin
+   * server,  which means that if ipchains or proxying is involved this call
+   * <i>does not</i> return the correct port for forming urls.
+   *
+   * This call should not be used to test for an ssl connection
+   * (getServerPort() == 443), {@link #isSecure()} is provided for that purpose.
    *
    * @since 2.4
    */
   public int getLocalPort();
-  
+
   /**
    * Overrides the character encoding specified in the request.
    * <code>setCharacterEncoding</code> must be called before calling
@@ -111,7 +136,7 @@ public interface ServletRequest {
    */
   public void setCharacterEncoding(String encoding)
     throws java.io.UnsupportedEncodingException;
-  
+
   /**
    * Returns a form parameter.  When the form contains several parameters
    * of the same name, <code>getParameter</code> returns the first.
@@ -123,7 +148,7 @@ public interface ServletRequest {
    * @return the form value or null if none matches.
    */
   public String getParameter(String name);
-  
+
   /**
    * Returns all values of a form parameter.
    *
@@ -135,7 +160,7 @@ public interface ServletRequest {
    * @return an array of matching form values or null if none matches.
    */
   public String []getParameterValues(String name);
-  
+
   /**
    * Returns an enumeration of all form parameter names.
    *
@@ -148,7 +173,7 @@ public interface ServletRequest {
    * </pre></code>
    */
   public Enumeration getParameterNames();
-  
+
   /**
    * Returns a Map of the form parameters.  The map is immutable.
    * The keys are the form keys as returned by <code>getParameterNames</code>
@@ -156,7 +181,7 @@ public interface ServletRequest {
    * <code>getParameterValues</code>.
    */
   public Map getParameterMap();
-  
+
   /**
    * Returns an InputStream to retrieve POST data from the request.
    * The stream will automatically end when the end of the POST data
@@ -164,7 +189,7 @@ public interface ServletRequest {
    */
   public ServletInputStream getInputStream()
     throws IOException;
-  
+
   /**
    * Returns a reader to read POSTed data.  Character encoding is
    * based on the request data and is the same as
@@ -172,44 +197,44 @@ public interface ServletRequest {
    */
   public BufferedReader getReader()
     throws IOException, IllegalStateException;
-  
+
   /**
    * Returns the character encoding of the POSTed data.
    */
   public String getCharacterEncoding();
-  
+
   /**
    * Returns the content length of the data.  This value may differ from
-   * the actual length of the data.  For newer browsers, i.e.
-   * those supporting HTTP/1.1, can support "chunked" encoding which does
+   * the actual length of the data.  Newer browsers
+   * supporting HTTP/1.1 may use "chunked" encoding which does
    * not make the content length available.
    *
    * <p>The upshot is, rely on the input stream to end when the data
    * completes.
    */
   public int getContentLength();
-  
+
   /**
    * Returns the request's mime-type.
    */
   public String getContentType();
-  
+
   /**
    * Returns the request's preferred locale, based on the Accept-Language
    * header.  If unspecified, returns the server's default locale.
    */
   public Locale getLocale();
-  
+
   /**
    * Returns an enumeration of all locales acceptable by the client.
    */
   public Enumeration getLocales();
-  
+
   /**
    * Returns true if the connection is secure, e.g. it uses SSL.
    */
   public boolean isSecure();
-  
+
   /**
    * Returns an attribute value.
    *
@@ -217,7 +242,7 @@ public interface ServletRequest {
    * @return the attribute value
    */
   public Object getAttribute(String name);
-  
+
   /**
    * Sets an attribute value.
    *
@@ -225,26 +250,26 @@ public interface ServletRequest {
    * @param o the attribute value
    */
   public void setAttribute(String name, Object o);
-  
+
   /**
    * Enumerates all attribute names in the request.
    */
   public Enumeration getAttributeNames();
-  
+
   /**
    * Removes the given attribute.
    *
    * @param name the attribute name
    */
-  public void removeAttribute(String uri);
-  
+  public void removeAttribute(String name);
+
   /**
    * Returns a request dispatcher for later inclusion or forwarding.  This
    * is the servlet API equivalent to SSI includes.  <code>uri</code>
    * is relative to the request URI.  Absolute URIs are relative to
    * the application prefix (<code>getContextPath()</code>).
    *
-   * <p>If <code>getRequestURI()</code> is /myapp/dir/test.jsp and the 
+   * <p>If <code>getRequestURI()</code> is /myapp/dir/test.jsp and the
    * <code>uri</code> is "inc.jsp", the resulting page is
    * /myapp/dir/inc.jsp.
 
@@ -259,7 +284,7 @@ public interface ServletRequest {
    * @return RequestDispatcher for later inclusion or forwarding.
    */
   public RequestDispatcher getRequestDispatcher(String uri);
-  
+
   /**
    * Returns the path of the URI.
    */

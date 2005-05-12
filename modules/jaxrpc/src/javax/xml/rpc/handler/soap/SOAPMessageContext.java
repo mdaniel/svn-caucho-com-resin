@@ -29,8 +29,6 @@
 
 package javax.xml.rpc.handler.soap;
 
-import java.util.Iterator;
-
 import javax.xml.soap.SOAPMessage;
 
 /**
@@ -41,12 +39,12 @@ public interface SOAPMessageContext {
    * Gets the message.
    */
   public SOAPMessage getMessage();
-  
+
   /**
    * Sets the message.
    */
   public void setMessage(SOAPMessage message);
-  
+
   /**
    * Gets the roles.
    */

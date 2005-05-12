@@ -29,26 +29,15 @@
 
 package com.caucho.server.webapp;
 
-import java.util.regex.Pattern;
+import com.caucho.config.ConfigException;
+import com.caucho.config.types.RawString;
+import com.caucho.log.Log;
+import com.caucho.server.deploy.DeployConfig;
+import com.caucho.util.CauchoSystem;
+import com.caucho.util.L10N;
 
 import java.util.logging.Logger;
-
-import com.caucho.util.L10N;
-import com.caucho.util.CauchoSystem;
-
-import com.caucho.log.Log;
-
-import com.caucho.vfs.Path;
-
-import com.caucho.config.BuilderProgram;
-import com.caucho.config.ConfigException;
-import com.caucho.config.BuilderProgramContainer;
-import com.caucho.config.ConfigException;
-
-import com.caucho.config.types.RawString;
-
-import com.caucho.server.deploy.DeployConfig;
-import com.caucho.server.deploy.DeployController;
+import java.util.regex.Pattern;
 
 /**
  * The configuration for a web.app in the resin.conf

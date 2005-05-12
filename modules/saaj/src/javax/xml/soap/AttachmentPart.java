@@ -29,12 +29,8 @@
 
 package javax.xml.soap;
 
-import java.util.Iterator;
-
-import java.io.OutputStream;
-import java.io.IOException;
-
 import javax.activation.DataHandler;
+import java.util.Iterator;
 
 /**
  * Implements an attachment.
@@ -45,23 +41,23 @@ public abstract class AttachmentPart {
    */
   abstract public int getSize()
     throws SOAPException;
-  
+
   /**
    * Gets the content.
    */
   abstract public Object clearContent();
-  
+
   /**
    * Sets the content.
    */
   abstract public void setContent(Object object, String contentType);
-  
+
   /**
    * Gets the DataHandler.
    */
   abstract public DataHandler getDataHandler()
     throws SOAPException;
-  
+
   /**
    * Sets the DataHandler.
    */
@@ -71,7 +67,7 @@ public abstract class AttachmentPart {
    * Returns the contentId header.
    */
   abstract public String getContentId();
-  
+
   /**
    * Returns the content location header.
    */
