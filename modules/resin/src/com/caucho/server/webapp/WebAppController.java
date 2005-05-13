@@ -29,49 +29,23 @@
 
 package com.caucho.server.webapp;
 
-import java.util.*;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import java.util.regex.Pattern;
-import java.util.regex.Matcher;
-
-import java.io.IOException;
-
-import javax.management.ObjectName;
-import javax.management.JMException;
-import javax.management.MalformedObjectNameException;
-
-import javax.servlet.jsp.el.ELException;
-
-import org.iso_relax.verifier.Schema;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-
-import com.caucho.log.Log;
-
-import com.caucho.loader.Environment;
-import com.caucho.loader.EnvironmentClassLoader;
-
-import com.caucho.config.BuilderProgram;
-import com.caucho.config.ConfigException;
 import com.caucho.config.types.PathBuilder;
-
-import com.caucho.el.EL;
-
-import com.caucho.relaxng.CompactVerifierFactoryImpl;
-
-import com.caucho.loader.EnvironmentListener;
-
-import com.caucho.jmx.Jmx;
 import com.caucho.jmx.IntrospectionMBean;
-
-import com.caucho.server.deploy.EnvironmentDeployController;
+import com.caucho.log.Log;
 import com.caucho.server.deploy.DeployConfig;
-
+import com.caucho.server.deploy.EnvironmentDeployController;
 import com.caucho.server.webapp.mbean.WebAppMBean;
+import com.caucho.util.CauchoSystem;
+import com.caucho.util.L10N;
+import com.caucho.vfs.Path;
+
+import javax.management.JMException;
+import javax.servlet.jsp.el.ELException;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * A configuration entry for a web-app.
@@ -92,10 +66,10 @@ public class WebAppController
 
   // regexp values
   private ArrayList<String> _regexpValues;
-  
+
   private boolean _isInheritSession;
   private boolean _isDynamicDeploy;
-  
+
   private ArrayList<Path> _dependPathList = new ArrayList<Path>();
 
   private String _sourceType = "unknown";
@@ -106,7 +80,7 @@ public class WebAppController
   {
     this("/", null, null);
   }
-  
+
   public WebAppController(String contextPath,
 			  Path rootDirectory,
 			  ApplicationContainer container)
@@ -114,7 +88,7 @@ public class WebAppController
     super(contextPath, rootDirectory);
 
     _container = container;
-      
+
     setContextPath(contextPath);
 
     getVariableMap().put("app", new Var());
@@ -138,7 +112,7 @@ public class WebAppController
 
     if (contextPath.endsWith("/"))
       contextPath = contextPath.substring(0, contextPath.length() - 1);
-    
+
     _contextPath = contextPath;
   }
 
@@ -158,7 +132,7 @@ public class WebAppController
       String prefix = uri.substring(0, tail);
 
       matcher.reset(prefix);
-      
+
       if (matcher.find() && matcher.start() == 0)
 	return matcher.group();
 
@@ -189,7 +163,7 @@ public class WebAppController
   {
     return _warName;
   }
-  
+
   /**
    * Gets the URL
    */
@@ -216,7 +190,7 @@ public class WebAppController
   {
     return _container;
   }
-  
+
   /**
    * Sets the parent controller.
    */
@@ -361,7 +335,7 @@ public class WebAppController
       }
     }
   }
-  
+
   /**
    * Returns the application object.
    */
@@ -372,7 +346,7 @@ public class WebAppController
 
     if (_container != null)
       _container.removeWebApp(this);
-    
+
     return true;
   }
 
@@ -410,7 +384,7 @@ public class WebAppController
   protected void initBegin()
   {
     getVariableMap().put("app-dir", getRootDirectory());
-    
+
     super.initBegin();
   }
 
@@ -476,7 +450,7 @@ public class WebAppController
 
     super.removeExpandFile(path, relPath);
   }
-  
+
   /**
    * Returns a printable view.
    */
@@ -497,7 +471,7 @@ public class WebAppController
     public String getId()
     {
       String id = WebAppController.this.getId();
-      
+
       if (id != null)
 	return id;
       else

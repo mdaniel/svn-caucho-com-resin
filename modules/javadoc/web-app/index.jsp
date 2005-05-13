@@ -30,6 +30,7 @@ ${jsputil.sendHttpCacheHeaders()}
 
 <c:choose>
 <c:when test="${empty param.noframes}">
+
 <FRAMESET cols="20%,80%">
 <FRAME src="${searchUrl}" name="packageListFrame" title="Search">
 <FRAME src="${jsputil.store.startPage}" name="classFrame" title="Overview">

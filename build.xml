@@ -31,6 +31,7 @@
 
   <property name="fop.home" location="${env.FOP_HOME}"/>
 
+  <property name="promodules" location="${basedir}/../pro/modules"/>
   <property name="jdkapi.href" value="http://java.sun.com/j2se/1.5.0/docs/api"/>
 
   <property name="shell" value="bash"/>
@@ -350,7 +351,6 @@
 
   <target name="javadoc" depends="init">
     <delete quiet="true" file="${dist}/resin-javadoc-${version}.war"/>
-    <delete quiet="true" file="${dist}/resin-javadoc-cauchowebsite.war"/>
 
     <delete quiet="true" dir="${build}/javadoc"/>
 
@@ -418,6 +418,7 @@
       <packageset dir="${modules}/script/src"/>
       <packageset dir="${modules}/unix/src"/>
       <packageset dir="${modules}/webutil/src"/>
+      <packageset dir="${promodules}/pro/src"/>
 
     <!-- For any linked documents here, the href="xxx" must be matched
        - by an <api id="xxx"/> in web.xml
@@ -428,12 +429,11 @@
     <mkdir dir="${dist}"/>
 
     <jar 
-      jarfile="${dist}/resin-javadoc.war"
+      jarfile="${dist}/resin-javadoc-${version}.war"
       basedir="${build}/javadoc/web-app"
       compress="true"
       index="false">
       <exclude name="**/timestamp"/>
-      <exclude name="**/web.xml-cauchowebsite"/>
       <exclude name="**/WEB-INF/lib"/>
 
       <exclude name="**/work"/>
@@ -441,30 +441,6 @@
       <exclude name="**/.*"/>
       <exclude name="**/.svn"/>
       <exclude name="**/debug.log"/>
-    </jar>
-
-    <!-- the caucho website jar get's slightly different contents -->
-
-    <copy file="${dist}/resin-javadoc.war"
-      tofile="${dist}/caucho-website/resin-javadoc.war"
-      preservelastmodified="true"/>
-
-    <mkdir dir="${build}/caucho-website/WEB-INF"/>
-
-    <copy file="${build}/javadoc/web-app/WEB-INF/web.xml-cauchowebsite"
-      tofile="${build}/caucho-website/WEB-INF/web.xml">
-      <filterset>
-        <filter token="VERSION" value="${version}"/>
-        <filter token="JDKAPI.HREF" value="${jdkapi.href}"/>
-      </filterset>
-    </copy>
-
-    <jar 
-      jarfile="${dist}/caucho-website/resin-javadoc.war"
-      update="true"
-      basedir="${build}/caucho-website"
-      compress="true"
-      index="false">
     </jar>
 
   </target>

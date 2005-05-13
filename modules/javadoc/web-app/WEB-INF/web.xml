@@ -10,7 +10,8 @@
    - 2) (optional) Add local api's to the list of api's to index and provide
    -    search functionality.  Look below for example <api> elements.
    -->
-<web-app xmlns="http://caucho.com/ns/resin">
+<web-app xmlns="http://caucho.com/ns/resin"
+         xmlns:resin="http://caucho.com/ns/resin/core">
 
   <class-loader>
     <compiling-loader path="WEB-INF/classes" source="WEB-INF/src"/>
@@ -31,16 +32,16 @@
     <init>
       <data-source>jdbc/resin-javadoc</data-source>
 
-      <!-- optionally change table names to use
-      <table-name-file>file</table-name-file>
-      <table-name-item>item</table-name-item>
-      -->
-
       <api id="resin">
         <name>Resin @VERSION@</name>
         <location>resin</location>
         <index>index-files/index-#.html</index>
       </api>
+
+      <!--
+         - configuration for the local deployment can be made here,
+         - or in the optional local-config.xml file.
+        -->
 
       <!-- jdk - an example of an api on a remote website -->
 
@@ -79,6 +80,14 @@
 
       <!-- true/false show a help message about adding more api's -->
       <show-add-help>true</show-add-help>
+
+      <!-- optionally change table names to use
+      <table-name-file>file</table-name-file>
+      <table-name-item>item</table-name-item>
+      -->
+
+      <resin:import path="WEB-INF/local-config.xml" optional="true"/>
+      <resin:import path="../resin-javadoc-config.xml" optional="true"/>
     </init>
   </resource>
 

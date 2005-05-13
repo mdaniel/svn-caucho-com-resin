@@ -30,6 +30,7 @@ package com.caucho.doc;
 
 import com.caucho.log.Log;
 import com.caucho.server.webapp.Application;
+import com.caucho.server.webapp.WebAppController;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.L10N;
 import com.caucho.util.URLUtil;
@@ -39,6 +40,8 @@ import java.io.PrintWriter;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import java.util.ArrayList;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
@@ -70,9 +73,22 @@ public class JavadocRedirectServlet extends HttpServlet {
 
     // see if the resin-javadoc web-app is available
     Application app = (Application) getServletContext();
-    Application japp = (Application) app.getContext("/resin-javadoc");
-    if (japp.getContextPath().length() == 0)
-      japp = null;
+
+    Application japp = null;
+
+    ArrayList appControllers = app.getParent().getApplicationList();
+
+    for (int i = 0; i < appControllers.size(); i++)
+    {
+      WebAppController appController = (WebAppController) appControllers.get(i);
+
+      String contextPath = appController.getContextPath();
+
+      if (contextPath.startsWith("/resin-javadoc")) {
+        japp = appController.getApplication();
+        break;
+      }
+    }
 
     if (japp != null) {
       String href = japp.getContextPath() + "?query=" + query;

@@ -29,113 +29,55 @@
 
 package com.caucho.server.webapp;
 
-import java.lang.ref.SoftReference;
-
-import java.io.*;
-import java.util.*;
-import java.util.logging.*;
-import java.net.URL;
-
-import javax.servlet.*;
-import javax.servlet.http.*;
-import javax.servlet.jsp.el.VariableResolver;
-
-import javax.naming.*;
-import javax.management.*;
-
-import org.iso_relax.verifier.Schema;
-
-import com.caucho.el.EL;
-import com.caucho.el.MapVariableResolver;
-
-import com.caucho.config.SchemaBean;
 import com.caucho.config.ConfigException;
-
-import com.caucho.config.types.InitParam;
-import com.caucho.config.types.InitProgram;
-import com.caucho.config.types.Period;
-import com.caucho.config.types.PathBuilder;
-import com.caucho.config.types.ResourceRef;
-import com.caucho.config.types.Validator;
-
+import com.caucho.config.SchemaBean;
+import com.caucho.config.types.*;
 import com.caucho.java.WorkDir;
-
-import com.caucho.loader.Environment;
-import com.caucho.loader.EnvironmentClassLoader;
-import com.caucho.loader.EnvironmentLocal;
-import com.caucho.loader.EnvironmentBean;
-
-import com.caucho.util.L10N;
-import com.caucho.util.Alarm;
-import com.caucho.util.LruCache;
-import com.caucho.util.Log;
-
-import com.caucho.vfs.Path;
-import com.caucho.vfs.Vfs;
-import com.caucho.vfs.Encoding;
-
-import com.caucho.relaxng.CompactVerifierFactoryImpl;
-
-import com.caucho.make.Dependency;
-import com.caucho.make.DependencyContainer;
-import com.caucho.make.AlwaysModified;
-
-import com.caucho.server.dispatch.DispatchBuilder;
-import com.caucho.server.dispatch.DispatchServer;
-import com.caucho.server.dispatch.ServletManager;
-import com.caucho.server.dispatch.ServletMapper;
-import com.caucho.server.dispatch.ServletConfigImpl;
-import com.caucho.server.dispatch.ServletMapping;
-import com.caucho.server.dispatch.ServletRegexp;
-import com.caucho.server.dispatch.FilterManager;
-import com.caucho.server.dispatch.FilterMapper;
-import com.caucho.server.dispatch.FilterConfigImpl;
-import com.caucho.server.dispatch.FilterMapping;
-import com.caucho.server.dispatch.ExceptionFilterChain;
-import com.caucho.server.dispatch.ErrorFilterChain;
-import com.caucho.server.dispatch.ClassLoaderFilterChain;
-import com.caucho.server.dispatch.FilterChainBuilder;
-import com.caucho.server.dispatch.ServletFilterChain;
-import com.caucho.server.dispatch.ServletInvocation;
-import com.caucho.server.dispatch.Invocation;
-import com.caucho.server.dispatch.InvocationDecoder;
-import com.caucho.server.dispatch.UrlMap;
-
-import com.caucho.server.deploy.DeployGenerator;
-import com.caucho.server.deploy.EnvironmentDeployInstance;
-import com.caucho.server.deploy.DeployContainer;
-
-import com.caucho.server.resin.ResinServer;
-
-import com.caucho.server.security.AbstractLogin;
-import com.caucho.server.security.ServletAuthenticator;
-import com.caucho.server.security.SecurityConstraint;
-import com.caucho.server.security.AbstractConstraint;
-import com.caucho.server.security.TransportConstraint;
-import com.caucho.server.security.ConstraintManager;
-import com.caucho.server.security.LoginConfig;
-
-import com.caucho.server.session.SessionManager;
-
-import com.caucho.server.cluster.Cluster;
-
-import com.caucho.server.cache.AbstractCache;
-
-import com.caucho.server.log.AccessLog;
-
-import com.caucho.server.host.Host;
-
-import com.caucho.lifecycle.Lifecycle;
-
-import com.caucho.transaction.TransactionManagerImpl;
-
-import com.caucho.jmx.Jmx;
-
 import com.caucho.jsp.JspServlet;
-
+import com.caucho.jsp.cfg.JspConfig;
 import com.caucho.jsp.cfg.JspPropertyGroup;
 import com.caucho.jsp.cfg.JspTaglib;
-import com.caucho.jsp.cfg.JspConfig;
+import com.caucho.lifecycle.Lifecycle;
+import com.caucho.loader.Environment;
+import com.caucho.loader.EnvironmentBean;
+import com.caucho.loader.EnvironmentClassLoader;
+import com.caucho.loader.EnvironmentLocal;
+import com.caucho.make.AlwaysModified;
+import com.caucho.make.Dependency;
+import com.caucho.make.DependencyContainer;
+import com.caucho.server.cache.AbstractCache;
+import com.caucho.server.cluster.Cluster;
+import com.caucho.server.deploy.DeployContainer;
+import com.caucho.server.deploy.DeployGenerator;
+import com.caucho.server.deploy.EnvironmentDeployInstance;
+import com.caucho.server.dispatch.*;
+import com.caucho.server.host.Host;
+import com.caucho.server.log.AccessLog;
+import com.caucho.server.resin.ResinServer;
+import com.caucho.server.security.*;
+import com.caucho.server.session.SessionManager;
+import com.caucho.transaction.TransactionManagerImpl;
+import com.caucho.util.Alarm;
+import com.caucho.util.L10N;
+import com.caucho.util.Log;
+import com.caucho.util.LruCache;
+import com.caucho.vfs.Encoding;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.Vfs;
+
+import javax.naming.InitialContext;
+import javax.servlet.*;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSessionActivationListener;
+import javax.servlet.http.HttpSessionAttributeListener;
+import javax.servlet.http.HttpSessionListener;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Locale;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Resin's application implementation.
@@ -161,7 +103,7 @@ public class Application extends ServletContextImpl
 
   // The parent
   private ApplicationContainer _parent;
-  
+
   // The application entry
   private WebAppController _controller;
 
@@ -172,7 +114,7 @@ public class Application extends ServletContextImpl
   private String _description = "";
 
   private String _servletVersion = "2.4";
-  
+
   // The application directory.
   private Path _appDir;
   private boolean _isAppDirSet;
@@ -205,7 +147,7 @@ public class Application extends ServletContextImpl
   private FilterMapper _errorFilterMapper;
   // True if includes are allowed to wrap a filter (forbidden by servlet spec)
   private boolean _dispatchWrapsFilters;
-  
+
   // Transaction manager
   private TransactionManagerImpl _tm;
 
@@ -219,11 +161,11 @@ public class Application extends ServletContextImpl
 
   private LruCache<String,FilterChainEntry> _filterChainCache
     = new LruCache<String,FilterChainEntry>(256);
-					  
+
   private UrlMap<CacheMapping> _cacheMappingMap = new UrlMap<CacheMapping>();
 
   private LruCache<String,RequestDispatcherImpl> _dispatcherCache;
-  
+
   // The login manager
   private AbstractLogin _loginManager;
 
@@ -246,7 +188,7 @@ public class Application extends ServletContextImpl
     new LruCache<String,String>(1024);
   // real-path mapping
   private RewriteRealPath _rewriteRealPath;
-  
+
   // mime mapping
   private HashMap<String,String> _mimeMapping = new HashMap<String,String>();
   // locale mapping
@@ -255,26 +197,26 @@ public class Application extends ServletContextImpl
 
   // List of all the listeners.
   private ArrayList<Object> _listeners = new ArrayList<Object>();
-  
+
   // List of the ServletContextListeners from the configuration file
   private ArrayList<ServletContextListener> _applicationListeners
     = new ArrayList<ServletContextListener>();
-  
+
   // List of the ServletContextAttributeListeners from the configuration file
   private ArrayList<ServletContextAttributeListener> _attributeListeners
     = new ArrayList<ServletContextAttributeListener>();
-  
+
   // List of the ServletRequestListeners from the configuration file
   private ArrayList<ServletRequestListener> _requestListeners
     = new ArrayList<ServletRequestListener>();
-  
+
   private ServletRequestListener []_requestListenerArray
     = new ServletRequestListener[0];
-  
+
   // List of the ServletRequestAttributeListeners from the configuration file
   private ArrayList<ServletRequestAttributeListener> _requestAttributeListeners
     = new ArrayList<ServletRequestAttributeListener>();
-  
+
   private ServletRequestAttributeListener []_requestAttributeListenerArray
     = new ServletRequestAttributeListener[0];
 
@@ -293,7 +235,7 @@ public class Application extends ServletContextImpl
   private ArrayList<JspTaglib> _taglibList;
   private HashMap<String,Object> _extensions = new HashMap<String,Object>();
   private MultipartForm _multipartForm;
-  
+
   private ArrayList<String> _regexp;
 
   private long _shutdownWaitTime = 15000L;
@@ -303,7 +245,7 @@ public class Application extends ServletContextImpl
 
   private final Object _countLock = new Object();
   private final Lifecycle _lifecycle;
-  
+
   private int _requestCount;
   private long _lastRequestTime = Alarm.getCurrentTime();
 
@@ -328,7 +270,7 @@ public class Application extends ServletContextImpl
 
       String contextPath = controller.getContextPath();
       setContextPathId(contextPath);
-  
+
       _controller = controller;
 
       _classLoader.addParentPriorityPackages(_classLoaderHackPackages);
@@ -343,34 +285,34 @@ public class Application extends ServletContextImpl
       _servletMapper = new ServletMapper();
       _servletMapper.setServletContext(this);
       _servletMapper.setServletManager(_servletManager);
-    
+
       _filterManager = new FilterManager();
       _filterMapper = new FilterMapper();
       _filterMapper.setServletContext(this);
       _filterMapper.setFilterManager(_filterManager);
-    
+
       _loginFilterMapper = new FilterMapper();
       _loginFilterMapper.setServletContext(this);
       _loginFilterMapper.setFilterManager(_filterManager);
-    
+
       _includeFilterMapper = new FilterMapper();
       _includeFilterMapper.setServletContext(this);
       _includeFilterMapper.setFilterManager(_filterManager);
-    
+
       _forwardFilterMapper = new FilterMapper();
       _forwardFilterMapper.setServletContext(this);
       _forwardFilterMapper.setFilterManager(_filterManager);
-    
+
       _errorFilterMapper = new FilterMapper();
       _errorFilterMapper.setServletContext(this);
       _errorFilterMapper.setFilterManager(_filterManager);
-    
+
       _constraintManager = new ConstraintManager();
       _errorPageManager = new ErrorPageManager();
       _errorPageManager.setApplication(this);
 
       setParent(controller.getContainer());
-      
+
       _invocationDependency = new DependencyContainer();
       _invocationDependency.add(this);
     } catch (Throwable e) {
@@ -390,7 +332,7 @@ public class Application extends ServletContextImpl
 
     if (parent == null)
       return;
-    
+
     if (! _isAppDirSet) {
       setAppDir(parent.getDocumentDirectory());
       Vfs.setPwd(parent.getDocumentDirectory(), _classLoader);
@@ -457,10 +399,10 @@ public class Application extends ServletContextImpl
   {
     if (! id.equals("") && ! id.startsWith("/"))
       id = "/" + id;
-    
+
     if (id.endsWith("/"))
       id = id.substring(0, id.length() - 1);
-    
+
     setContextPath(id);
 
     if (! _isAppDirSet && _parent != null) {
@@ -558,7 +500,7 @@ public class Application extends ServletContextImpl
     _isAppDirSet = true;
 
     WorkDir.setLocalWorkDir(appDir.lookup("WEB-INF/work"), getClassLoader());
-    
+
     // XXX:
     // _classLoader.setAttribute("caucho.vfs.pwd", appDir);
   }
@@ -598,7 +540,7 @@ public class Application extends ServletContextImpl
   public void setSchemaLocation(String location)
   {
   }
-  
+
   /**
    * Gets the URL
    */
@@ -609,7 +551,7 @@ public class Application extends ServletContextImpl
     else
       return _contextPath;
   }
-  
+
   /**
    * Gets the URL
    */
@@ -672,7 +614,7 @@ public class Application extends ServletContextImpl
     throws ServletException
   {
     config.setServletContext(this);
-    
+
     _servletManager.addServlet(config);
   }
 
@@ -718,7 +660,7 @@ public class Application extends ServletContextImpl
 
       addServlet(servletMapping);
     }
-    
+
     _servletMapper.addServletMapping(servletMapping);
   }
 
@@ -734,7 +676,7 @@ public class Application extends ServletContextImpl
     mapping.setServletClass(servletRegexp.getServletClass());
     mapping.setServletContext(this);
     mapping.setInit(new InitProgram(servletRegexp.getBuilderProgram()));
-    
+
     _servletMapper.addServletRegexp(mapping);
   }
 
@@ -744,7 +686,7 @@ public class Application extends ServletContextImpl
   public void addFilter(FilterConfigImpl config)
   {
     config.setServletContext(this);
-    
+
     _filterManager.addFilter(config);
   }
 
@@ -760,13 +702,13 @@ public class Application extends ServletContextImpl
       _filterMapper.addFilterMapping(filterMapping);
       _loginFilterMapper.addFilterMapping(filterMapping);
     }
-    
+
     if (filterMapping.isInclude())
       _includeFilterMapper.addFilterMapping(filterMapping);
-    
+
     if (filterMapping.isForward())
       _forwardFilterMapper.addFilterMapping(filterMapping);
-    
+
     if (filterMapping.isError())
       _errorFilterMapper.addFilterMapping(filterMapping);
   }
@@ -845,7 +787,7 @@ public class Application extends ServletContextImpl
   {
     if (_isInheritSession)
       return new SessionManager(this);
-    
+
     return getSessionManager();
   }
 
@@ -918,10 +860,10 @@ public class Application extends ServletContextImpl
   public void setAccessLog(AccessLog log)
   {
     _accessLog = log;
-    
+
     _accessLogLocal.set(log);
   }
-  
+
   /**
    * Adds a mime-mapping
    */
@@ -930,7 +872,7 @@ public class Application extends ServletContextImpl
     _mimeMapping.put(mimeMapping.getExtension(),
                      mimeMapping.getMimeType());
   }
-  
+
   /**
    * Adds a locale-mapping
    */
@@ -989,7 +931,7 @@ public class Application extends ServletContextImpl
 
     return _rewriteRealPath;
   }
-  
+
   /**
    * Adds a path-mapping
    */
@@ -1007,7 +949,7 @@ public class Application extends ServletContextImpl
     else
       throw new NullPointerException();
   }
-  
+
   /**
    * Sets the login
    */
@@ -1016,7 +958,7 @@ public class Application extends ServletContextImpl
   {
     _loginManager = loginConfig.getLogin();
   }
-  
+
   /**
    * Adds a security constraint
    */
@@ -1024,7 +966,7 @@ public class Application extends ServletContextImpl
   {
     _constraintManager.addConstraint(constraint);
   }
-  
+
   /**
    * Adds a security role
    */
@@ -1045,7 +987,7 @@ public class Application extends ServletContextImpl
       SecurityConstraint constraint = new SecurityConstraint();
       constraint.setURLPattern("/*");
       constraint.addConstraint(transConstraint);
-    
+
       _constraintManager.addConstraint(constraint);
     }
   }
@@ -1078,7 +1020,7 @@ public class Application extends ServletContextImpl
   {
     if (! _listeners.contains(listenerObj))
       _listeners.add(listenerObj);
-    
+
     if (listenerObj instanceof ServletContextListener) {
       ServletContextListener scListener = (ServletContextListener) listenerObj;
       _applicationListeners.add(scListener);
@@ -1093,30 +1035,30 @@ public class Application extends ServletContextImpl
 	}
       }
     }
-    
+
     if (listenerObj instanceof ServletContextAttributeListener)
       addAttributeListener((ServletContextAttributeListener) listenerObj);
-    
+
     if (listenerObj instanceof ServletRequestListener) {
       _requestListeners.add((ServletRequestListener) listenerObj);
 
       _requestListenerArray = new ServletRequestListener[_requestListeners.size()];
       _requestListeners.toArray(_requestListenerArray);
     }
-    
+
     if (listenerObj instanceof ServletRequestAttributeListener) {
       _requestAttributeListeners.add((ServletRequestAttributeListener) listenerObj);
 
       _requestAttributeListenerArray = new ServletRequestAttributeListener[_requestAttributeListeners.size()];
       _requestAttributeListeners.toArray(_requestAttributeListenerArray);
     }
-    
+
     if (listenerObj instanceof HttpSessionListener)
       getSessionManager().addListener((HttpSessionListener) listenerObj);
-    
+
     if (listenerObj instanceof HttpSessionAttributeListener)
       getSessionManager().addAttributeListener((HttpSessionAttributeListener) listenerObj);
-    
+
     if (listenerObj instanceof HttpSessionActivationListener)
       getSessionManager().addActivationListener((HttpSessionActivationListener) listenerObj);
   }
@@ -1192,7 +1134,7 @@ public class Application extends ServletContextImpl
   {
     _tempDir = path;
   }
-  
+
   /**
    * jsp configuration
    */
@@ -1269,7 +1211,7 @@ public class Application extends ServletContextImpl
     deploy.setURLPrefix(contextPath + prefix);
     deploy.setParent(_controller);
     deploy.setContainer(_parent);
-    
+
     // _parent.addWebAppDeploy(gen);
 
     deploy.setParentClassLoader(getClassLoader());
@@ -1299,20 +1241,20 @@ public class Application extends ServletContextImpl
     ApplicationContainer container = _parent;
     DeployContainer<WebAppController> appGenerator;
     appGenerator = _parent.getApplicationGenerator();
-    
+
     WebAppSingleDeployGenerator deploy = new WebAppSingleDeployGenerator(appGenerator,
 						       container, config);
-    
+
     deploy.setURLPrefix(contextPath + prefix);
     // deploy.setParent(_controller);
-    
+
     // XXX: The parent is added in the init()
     // _parent.addWebAppDeploy(gen);
 
     deploy.setParentWebApp(_controller);
     deploy.setParentClassLoader(getClassLoader());
     deploy.setContainer(container);
-    
+
     String appDir = config.getDocumentDirectory();
 
     if (appDir == null)
@@ -1478,7 +1420,7 @@ public class Application extends ServletContextImpl
   {
     return _lifecycle.isDestroyed();
   }
-  
+
   /**
    * Initializes.
    */
@@ -1492,13 +1434,13 @@ public class Application extends ServletContextImpl
       _classLoader.setId("web-app:" + getURL());
 
       _invocationDependency.setCheckInterval(getEnvironmentClassLoader().getDependencyCheckInterval());
-    
+
       if (_tempDir == null)
 	_tempDir = (Path) Environment.getLevelAttribute("caucho.temp-dir");
 
       if (_tempDir == null)
 	_tempDir = getAppDir().lookup("WEB-INF/tmp");
-    
+
       _tempDir.mkdirs();
       setAttribute("javax.servlet.context.tempdir", new File(_tempDir.getNativePath()));
 
@@ -1531,7 +1473,7 @@ public class Application extends ServletContextImpl
 	  _sessionManager != parent.getApplication().getSessionManager()) {
 	SessionManager sessionManager = _sessionManager;
 	_sessionManager = parent.getApplication().getSessionManager();
-      
+
 	if (sessionManager != null)
 	  sessionManager.close();
       }
@@ -1554,10 +1496,10 @@ public class Application extends ServletContextImpl
     Thread thread = Thread.currentThread();
     ClassLoader oldLoader = thread.getContextClassLoader();
     boolean isOkay = true;
-    
+
     try {
       thread.setContextClassLoader(_classLoader);
-    
+
       if (! _lifecycle.toStarting())
 	return;
 
@@ -1618,12 +1560,12 @@ public class Application extends ServletContextImpl
 
       if (_parent != null)
 	_parent.clearCache();
-      
+
       isOkay = true;
     } finally {
       if (! isOkay)
 	_lifecycle.toError();
-      
+
       thread.setContextClassLoader(oldLoader);
     }
   }
@@ -1642,7 +1584,7 @@ public class Application extends ServletContextImpl
     else if (_classLoader.isModified())
       return true;
     else
-      return false; 
+      return false;
   }
 
   /**
@@ -1675,7 +1617,7 @@ public class Application extends ServletContextImpl
     else
       return _lastRequestTime + _idleTime < Alarm.getCurrentTime();
   }
-  
+
   /**
    * Returns the servlet context for the URI.
    */
@@ -1685,13 +1627,13 @@ public class Application extends ServletContextImpl
       throw new IllegalArgumentException(L.l("getContext URI must not be null."));
     else if (uri.startsWith("/")) {
     }
-    
+
     else if (uri.equals(""))
       uri = "/";
-    
+
     else
       throw new IllegalArgumentException(L.l("getContext URI `{0}' must be absolute.", uri));
-      
+
     try {
       if (_parent != null)
         return _parent.findSubApplicationByURI(uri);
@@ -1699,7 +1641,7 @@ public class Application extends ServletContextImpl
         return this;
     } catch (Exception e) {
       log.log(Level.WARNING, e.toString(), e);
-      
+
       return null;
     }
   }
@@ -1776,7 +1718,7 @@ public class Application extends ServletContextImpl
 
 	  if (chain == null) {
 	    chain = _servletMapper.mapServlet(invocation);
-      
+
 	    _filterMapper.buildDispatchChain(invocation, chain);
 
 	    chain = invocation.getFilterChain();
@@ -1792,7 +1734,7 @@ public class Application extends ServletContextImpl
 	// the cache must be outside of the WebAppFilterChain because
 	// the CacheListener in ServletInvocation needs the top to
 	// be a CacheListener.  Otherwise, the cache won't get lru.
-	
+
         // top-level filter elements
         if (_cache != null)
           chain = _cache.createFilterChain(chain, this);
@@ -1848,7 +1790,7 @@ public class Application extends ServletContextImpl
   {
     buildDispatchInvocation(invocation, _loginFilterMapper);
   }
-  
+
   /**
    * Fills the invocation for subrequests.
    */
@@ -1857,7 +1799,7 @@ public class Application extends ServletContextImpl
     throws ServletException
   {
     invocation.setApplication(this);
-    
+
     Thread thread = Thread.currentThread();
     ClassLoader oldLoader = thread.getContextClassLoader();
 
@@ -1897,7 +1839,7 @@ public class Application extends ServletContextImpl
 	  chain = _cache.createFilterChain(chain, this);
 	}
       }
-      
+
       invocation.setFilterChain(chain);
     } finally {
       thread.setContextClassLoader(oldLoader);
@@ -1918,7 +1860,7 @@ public class Application extends ServletContextImpl
 
     if (disp != null && ! disp.isModified())
       return disp;
-    
+
     Invocation includeInvocation = new Invocation();
     Invocation forwardInvocation = new Invocation();
     Invocation errorInvocation = new Invocation();
@@ -1940,11 +1882,11 @@ public class Application extends ServletContextImpl
         FilterChain chain = _servletMapper.mapServlet(includeInvocation);
         _includeFilterMapper.buildDispatchChain(includeInvocation, chain);
 	includeInvocation.setApplication(this);
-        
+
         chain = _servletMapper.mapServlet(forwardInvocation);
         _forwardFilterMapper.buildDispatchChain(forwardInvocation, chain);
 	forwardInvocation.setApplication(this);
-	
+
         chain = _servletMapper.mapServlet(errorInvocation);
         _errorFilterMapper.buildDispatchChain(errorInvocation, chain);
 	errorInvocation.setApplication(this);
@@ -1971,7 +1913,7 @@ public class Application extends ServletContextImpl
 
     if (cache != null)
       return cache;
-    
+
     synchronized (this) {
       cache = new LruCache<String,RequestDispatcherImpl>(1024);
       _dispatcherCache = cache;
@@ -1982,7 +1924,7 @@ public class Application extends ServletContextImpl
   private String escapeURL(String url)
   {
     return url;
-    
+
     /* jsp/15dx
     CharBuffer cb = CharBuffer.allocate();
 
@@ -2016,7 +1958,7 @@ public class Application extends ServletContextImpl
       throw new IllegalArgumentException(L.l("request dispatcher url can't be null."));
     else if (! url.startsWith("/"))
       throw new IllegalArgumentException(L.l("request dispatcher url `{0}' must be absolute", url));
-    
+
     Invocation loginInvocation = new Invocation();
     Invocation errorInvocation = new Invocation();
     InvocationDecoder decoder = new InvocationDecoder();
@@ -2034,7 +1976,7 @@ public class Application extends ServletContextImpl
       else {
         FilterChain chain = _servletMapper.mapServlet(loginInvocation);
         _filterMapper.buildDispatchChain(loginInvocation, chain);
-	
+
         chain = _servletMapper.mapServlet(errorInvocation);
         _errorFilterMapper.buildDispatchChain(errorInvocation, chain);
       }
@@ -2060,12 +2002,12 @@ public class Application extends ServletContextImpl
   public RequestDispatcher getNamedDispatcher(String servletName)
   {
     FilterChain chain;
-    
+
     try {
       chain = _servletManager.createServletChain(servletName);
     } catch (Exception e) {
       log.log(Level.FINEST, e.toString(), e);
-      
+
       return null;
     }
 
@@ -2081,7 +2023,7 @@ public class Application extends ServletContextImpl
 
     if (realPath != null)
       return realPath;
-    
+
     String fullURI = getContextPath() + "/" + uri;
 
     try {
@@ -2089,12 +2031,12 @@ public class Application extends ServletContextImpl
     } catch (Exception e) {
       log.log(Level.WARNING, e.toString(), e);
     }
-    
+
     Application app = (Application) getContext(fullURI);
-    
+
     if (app == null)
       return null;
-    
+
     String cp = app.getContextPath();
     String tail = fullURI.substring(cp.length());
 
@@ -2104,7 +2046,7 @@ public class Application extends ServletContextImpl
       log.finest("real-path " + uri + " -> " + realPath);
 
     _realPathCache.put(uri, realPath);
-    
+
     return realPath;
   }
 
@@ -2123,7 +2065,7 @@ public class Application extends ServletContextImpl
   {
     if (uri == null)
       return null;
-    
+
     String fullURI = getContextPath() + "/" + uri;
 
     try {
@@ -2131,7 +2073,7 @@ public class Application extends ServletContextImpl
     } catch (Exception e) {
       log.log(Level.WARNING, e.toString(), e);
     }
-    
+
     Application app = (Application) getContext(fullURI);
 
     if (app == null)
@@ -2187,7 +2129,7 @@ public class Application extends ServletContextImpl
     else
       return null;
   }
-  
+
   /**
    * Gets the session manager.
    */
@@ -2226,7 +2168,7 @@ public class Application extends ServletContextImpl
       _requestCount++;
       _lastRequestTime = Alarm.getCurrentTime();
     }
-    
+
     return _lifecycle.isActive();
   }
 
@@ -2341,7 +2283,7 @@ public class Application extends ServletContextImpl
       _lifecycle.toStop();
     }
   }
-  
+
   /**
    * Closes the application.
    */
@@ -2370,15 +2312,15 @@ public class Application extends ServletContextImpl
           log.log(Level.WARNING, e.toString(), e);
         }
       }
-    
+
       ServletContextEvent event = new ServletContextEvent(this);
-    
+
       _servletManager.destroy();
       _filterManager.destroy();
 
       SessionManager sessionManager = _sessionManager;
       _sessionManager = null;
-      
+
       if (sessionManager != null &&
 	  (! _isInheritSession || _controller.getParent() == null))
 	sessionManager.close();

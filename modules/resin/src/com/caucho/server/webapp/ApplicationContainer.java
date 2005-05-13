@@ -29,61 +29,37 @@
 
 package com.caucho.server.webapp;
 
-import java.io.*;
-import java.util.*;
-import java.util.regex.*;
-import java.util.logging.*;
-
-import javax.servlet.*;
-import javax.servlet.http.HttpServletResponse;
-
+import com.caucho.config.ConfigException;
+import com.caucho.lifecycle.Lifecycle;
+import com.caucho.loader.*;
 import com.caucho.log.Log;
-
+import com.caucho.make.AlwaysModified;
+import com.caucho.server.deploy.DeployContainer;
+import com.caucho.server.deploy.DeployGenerator;
+import com.caucho.server.dispatch.*;
+import com.caucho.server.e_app.EarConfig;
+import com.caucho.server.e_app.EarDeployController;
+import com.caucho.server.e_app.EarDeployGenerator;
+import com.caucho.server.e_app.EarSingleDeployGenerator;
+import com.caucho.server.log.AccessLog;
+import com.caucho.server.resin.ServletServer;
+import com.caucho.server.session.SessionManager;
+import com.caucho.util.CauchoSystem;
 import com.caucho.util.L10N;
 import com.caucho.util.LruCache;
-import com.caucho.util.CauchoSystem;
-
-import com.caucho.vfs.WriteStream;
-import com.caucho.vfs.LogStream;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
 
-import com.caucho.loader.DynamicClassLoader;
-import com.caucho.loader.EnvironmentClassLoader;
-import com.caucho.loader.Environment;
-import com.caucho.loader.EnvironmentListener;
-import com.caucho.loader.ClassLoaderListener;
-
-import com.caucho.config.BuilderProgram;
-import com.caucho.config.ConfigException;
-
-import com.caucho.make.Dependency;
-import com.caucho.make.AlwaysModified;
-
-import com.caucho.transaction.TransactionManagerImpl;
-
-import com.caucho.server.log.AccessLog;
-
-import com.caucho.server.dispatch.Invocation;
-import com.caucho.server.dispatch.InvocationDecoder;
-import com.caucho.server.dispatch.DispatchServer;
-import com.caucho.server.dispatch.DispatchBuilder;
-import com.caucho.server.dispatch.ErrorFilterChain;
-import com.caucho.server.dispatch.ExceptionFilterChain;
-
-import com.caucho.server.deploy.DeployGenerator;
-import com.caucho.server.deploy.DeployContainer;
-
-import com.caucho.server.resin.ServletServer;
-
-import com.caucho.server.session.SessionManager;
-
-import com.caucho.lifecycle.Lifecycle;
-
-import com.caucho.server.e_app.EarConfig;
-import com.caucho.server.e_app.EarDeployGenerator;
-import com.caucho.server.e_app.EarDeployController;
-import com.caucho.server.e_app.EarSingleDeployGenerator;
+import javax.servlet.FilterChain;
+import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletException;
+import javax.servlet.UnavailableException;
+import javax.servlet.http.HttpServletResponse;
+import java.io.FileNotFoundException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Resin's application implementation.
@@ -114,11 +90,11 @@ public class ApplicationContainer
 
   // List of ear-deploy
   //private ArrayList<EarDeployGeneratorGenerator> _earDeployList = new ArrayList<EarDeployGeneratorGenerator>();
-  
+
   private DeployContainer<EarDeployController> _earDeploy;
   private DeployContainer<WebAppController> _appDeploy;
   private WebAppExpandDeployGenerator _warGenerator;
-  
+
   private boolean _hasWarGenerator;
 
   // LRU cache for the application lookup
@@ -134,10 +110,10 @@ public class ApplicationContainer
   // List of default application configurations
   private ArrayList<WebAppConfig> _webAppDefaultList
     = new ArrayList<WebAppConfig>();
-  
+
   // url-regexp apps
   //private ArrayList<WebAppConfig> _regexpApps = new ArrayList<WebAppConfig>();
-  
+
   private HashMap<String,WebAppConfig> _configAppMap
     =  new HashMap<String,WebAppConfig>();
 
@@ -145,7 +121,7 @@ public class ApplicationContainer
   private ErrorPageManager _errorPageManager;
 
   private long _startWaitTime = 10000L;
-  
+
   private Throwable _configException;
 
   // lifecycle
@@ -184,7 +160,7 @@ public class ApplicationContainer
       // These need to be in the proper class loader so they can
       // register themselves with the environment
       _earDeploy = new DeployContainer<EarDeployController>();
-      
+
       _appDeploy = new DeployContainer<WebAppController>();
 
       _warGenerator = new WebAppExpandDeployGenerator(_appDeploy);
@@ -193,7 +169,7 @@ public class ApplicationContainer
       thread.setContextClassLoader(oldLoader);
     }
   }
-  
+
   /**
    * Sets the dispatch server.
    */
@@ -274,7 +250,7 @@ public class ApplicationContainer
   public void setAccessLog(AccessLog log)
   {
     _accessLog = log;
-    
+
     Environment.setAttribute("caucho.server.access-log", log);
   }
 
@@ -442,7 +418,7 @@ public class ApplicationContainer
   public void updateWebAppDeploy(String name)
   {
     clearCache();
-    
+
     _appDeploy.update();
     _appDeploy.update(name);
   }
@@ -456,42 +432,42 @@ public class ApplicationContainer
 
     _earDeploy.add(deploy);
   }
-     
+
   /**
    * Updates an ear deploy
    */
   public void updateEarDeploy(String name)
   {
     clearCache();
-    
+
     _earDeploy.update();
     EarDeployController entry = _earDeploy.update(name);
 
     if (entry != null)
       entry.start();
   }
-     
+
   /**
    * Updates an ear deploy
    */
   public void expandEarDeploy(String name)
   {
     clearCache();
-    
+
     _earDeploy.update();
     EarDeployController entry = _earDeploy.update(name);
 
     if (entry != null)
       entry.start();
   }
-     
+
   /**
    * Start an ear
    */
   public void startEarDeploy(String name)
   {
     clearCache();
-    
+
     _earDeploy.update();
     EarDeployController entry = _earDeploy.update(name);
 
@@ -523,7 +499,7 @@ public class ApplicationContainer
   {
     DeployContainer<EarDeployController> container
       = new DeployContainer<EarDeployController>();
-      
+
     return new EarDeployGenerator(container, this);
   }
 
@@ -534,7 +510,7 @@ public class ApplicationContainer
     throws Exception
   {
     earDeploy.getDeployContainer().add(earDeploy);
-    
+
     // server/26cc - _appDeploy must be added first, because the
     // _earDeploy addition will automaticall register itself
     _appDeploy.add(new WebAppEarDeployGenerator(_appDeploy, this, earDeploy));
@@ -561,7 +537,7 @@ public class ApplicationContainer
   }
 
   // backwards compatibility
-  
+
   /**
    * Sets the war-dir for backwards compatibility.
    */
@@ -608,7 +584,7 @@ public class ApplicationContainer
   {
     if (! _lifecycle.toInitializing())
       return;
-    
+
     log.fine(this + " initializing");
 
     _lifecycle.toInit();
@@ -629,7 +605,7 @@ public class ApplicationContainer
       log.log(Level.WARNING, e.toString(), e);
     }
     */
-    
+
     try {
       _appDeploy.start();
     } catch (Throwable e) {
@@ -704,7 +680,7 @@ public class ApplicationContainer
   public RequestDispatcher getRequestDispatcher(String url)
   {
     // Currently no caching since this is only used for the error-page directive at the host level
-    
+
     if (url == null)
       throw new IllegalArgumentException(L.l("request dispatcher url can't be null."));
     else if (! url.startsWith("/"))
@@ -725,7 +701,7 @@ public class ApplicationContainer
       buildIncludeInvocation(includeInvocation);
       buildForwardInvocation(forwardInvocation);
       buildErrorInvocation(errorInvocation);
-      
+
       RequestDispatcher disp = new RequestDispatcherImpl(includeInvocation,
 							 forwardInvocation,
 							 errorInvocation,
@@ -770,7 +746,7 @@ public class ApplicationContainer
     throws ServletException
   {
     Application app = buildSubInvocation(invocation);
-    
+
     if (app != null)
       app.buildErrorInvocation(invocation);
   }
@@ -940,12 +916,12 @@ public class ApplicationContainer
     if (controller != null) {
       return controller;
     }
-    
+
     controller = _appDeploy.findController(subURI);
 
     if (controller != null) {
       _uriToAppCache.put(subURI, controller);
-      
+
       return controller;
     }
 
@@ -1013,7 +989,7 @@ public class ApplicationContainer
   public void destroy()
   {
     stop();
-    
+
     if (! _lifecycle.toDestroy())
       return;
 
@@ -1027,7 +1003,7 @@ public class ApplicationContainer
   public void classLoaderInit(DynamicClassLoader loader)
   {
   }
-  
+
   /**
    * Handles the case where a class loader is dropped.
    */
@@ -1042,7 +1018,7 @@ public class ApplicationContainer
   public void environmentStart(EnvironmentClassLoader loader)
   {
   }
-  
+
   /**
    * Handles the case where the environment is stopping
    */
