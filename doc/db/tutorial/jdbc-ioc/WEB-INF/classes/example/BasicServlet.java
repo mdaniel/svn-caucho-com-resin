@@ -24,7 +24,7 @@ import javax.servlet.http.HttpServletResponse;
 /**
  * The BasicServlet executes a simple JDBC query.
  *
- * The DataSource saved on initialization to save the JNDI lookup
+ * The DataSource is saved on initialization to save the JNDI lookup
  * time.
  */
 public class BasicServlet extends HttpServlet {
@@ -54,9 +54,9 @@ public class BasicServlet extends HttpServlet {
       assemble();
   }
 
-
   /**
-   * Assembles the servlet by looking up the DataSource from JNDI.
+   * Assembles the DataSource dependency when the container does
+   * not support servlet dependency injection.
    */
   private void assemble()
     throws ServletException

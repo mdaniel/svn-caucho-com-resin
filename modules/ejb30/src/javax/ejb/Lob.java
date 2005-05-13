@@ -19,8 +19,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *
- *   Free Software Foundation, Inc.
+ *   Free SoftwareFoundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -35,14 +34,11 @@ import java.lang.annotation.Target;
 import java.lang.annotation.ElementType;
 
 /**
- * The Table annotation specifies the primary table.
+ * The @Lob annotation.
  */
-@Target(ElementType.TYPE)
+@Target({ElementType.METHOD,ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface Table {
-  String name() default "";
-  String catalog() default "";
-  String schema() default "";
-  UniqueConstraint []uniqueConstraints() default {};
-  boolean specified() default true;
+public @interface Lob {
+  FetchType fetch() default FetchType.LAZY;
+  LobType type() default LobType.BLOB;
 }

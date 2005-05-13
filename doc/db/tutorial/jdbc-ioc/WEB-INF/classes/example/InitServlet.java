@@ -9,10 +9,6 @@ import java.sql.SQLException;
 
 import javax.sql.DataSource;
 
-import javax.naming.InitialContext;
-import javax.naming.Context;
-import javax.naming.NamingException;
-
 import javax.servlet.ServletException;
 
 import javax.servlet.http.HttpServlet;
@@ -46,7 +42,7 @@ public class InitServlet extends HttpServlet {
   {
     try {
       if (_ds == null)
-	assemble();
+	throw new ServletException("data-source must be specified");
 
       Connection conn = _ds.getConnection();
 
@@ -87,30 +83,6 @@ public class InitServlet extends HttpServlet {
 	conn.close();
       }
     } catch (SQLException e) {
-      throw new ServletException(e);
-    }
-  }
-
-  /**
-   * Assembles the DataSource dependency when the container does
-   * not support servlet dependency injection.
-   */
-  private void assemble()
-    throws ServletException
-  {
-    try {
-      String dataSourceName = getInitParameter("data-source");
-
-      if (dataSourceName == null)
-	dataSourceName = "jdbc/basic";
-
-      Context ic = new InitialContext();
-	
-      _ds = (DataSource) ic.lookup("java:comp/env/" + dataSourceName);
-
-      if (_ds == null)
-	throw new ServletException(dataSourceName + " is an unknown data-source.");
-    } catch (NamingException e) {
       throw new ServletException(e);
     }
   }

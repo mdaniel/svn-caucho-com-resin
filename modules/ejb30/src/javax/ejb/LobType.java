@@ -35,14 +35,9 @@ import java.lang.annotation.Target;
 import java.lang.annotation.ElementType;
 
 /**
- * The Table annotation specifies the primary table.
+ * The LobType enumeration
  */
-@Target(ElementType.TYPE)
-@Retention(RetentionPolicy.RUNTIME)
-public @interface Table {
-  String name() default "";
-  String catalog() default "";
-  String schema() default "";
-  UniqueConstraint []uniqueConstraints() default {};
-  boolean specified() default true;
+public enum LobType {
+  BLOB,
+  CLOB
 }

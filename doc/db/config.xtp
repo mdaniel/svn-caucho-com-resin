@@ -6,7 +6,7 @@
 
   <description>
 <p>
-Resin provides a robust and very well tested connection pool that is used to
+Resin provides a robust and tested connection pool that is used to
 obtain connections to databases. 
 </p>
 
@@ -14,6 +14,40 @@ obtain connections to databases.
 </header>
 
 <summary objsummary='localtoc'/>
+
+<section title="Basic Configuration">
+
+<p>A basic &lt;database> configuration specifies the following:
+<ul>
+<li>The JNDI name where the configured DataSource will be stored
+<li>The database driver's main class
+<li>The driver-specific url for the database.
+<li>Any user and password information.
+</ul>
+
+<example>
+&lt;database jndi-name='jdbc/test_mysql'>
+  &lt;driver type="com.mysql.jdbc.jdbc2.optional.MysqlConnectionPoolDataSource">
+    &lt;url>jdbc:mysql://localhost:3306/test&lt;/url>
+    &lt;user>&lt;/user>
+    &lt;password>&lt;/password>
+  &lt;/driver>
+&lt;/database>
+</example>
+
+<p>This &lt;database> will configure a javax.sql.DataSource and
+store it in JNDI at java:comp/env/jdbc/test_mysql.  To use the data
+source, follow the database use pattern in the
+<a href="tutorial/jdbc-basic/index.xtp">DataSource tutorial.</a></p>
+
+<p>Sample &lt;database> configurations
+are available in the <a href="thirdparty.xtp">thirdparty driver page.</a>
+
+<p>Although some deployments will specify driver and
+connection pool parameters, the default values will be fine for most
+applications.</p>
+
+</section>
 
 <section title="Core Concepts">
 
@@ -500,5 +534,15 @@ will happen even if the code using the connection throws an exception.</p>
 
 
 </section> <!-- usage -->
+
+<section title="See also">
+
+<ul>
+<li><a href="db|thirdparty">Sample configurations</a> for several database drivers
+<li><a href="doc|db|tutorial/jdbc-basic/index.xtp">Basic JNDI/JDBC usage tutorial</a>
+<li>Using <a href="doc|db|tutorial/jdbc-ioc/index.xtp">Dependency Injection for Databases</a>
+</ul>
+
+</section>
 
 </document>

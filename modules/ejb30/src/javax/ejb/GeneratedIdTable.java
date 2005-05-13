@@ -35,14 +35,13 @@ import java.lang.annotation.Target;
 import java.lang.annotation.ElementType;
 
 /**
- * The Table annotation specifies the primary table.
+ * The Embedded annotation.
  */
-@Target(ElementType.TYPE)
+@Target({ElementType.PACKAGE,ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface Table {
+public @interface GeneratedIdTable {
   String name() default "";
-  String catalog() default "";
-  String schema() default "";
-  UniqueConstraint []uniqueConstraints() default {};
-  boolean specified() default true;
+  Table table() default @Table(specified=false);
+  String pkColumnName() default "";
+  String valueColumnName() default "";
 }

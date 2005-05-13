@@ -1,0 +1,29 @@
+<document>
+  <header>
+    <product>resin</product>
+    <title>Resin 3.0.14 Release Notes</title>
+  </header>
+
+<body>
+
+<summary objsummary='localtoc'/>
+
+<section title="cache/enable-range">
+
+<p>Added an enable-range attribute to the &lt;cache>, defaulting to true.
+Makes it possible to disable the range support if necessary.</p>
+</section>
+
+<section title="ejb-server/read-data-source">
+
+<p>Added read-data-source and xa-data-source to &lt;ejb-server>.
+In some cases, deployments may use a different &lt;database> configuration
+for read-only requests, e.g. a &lt;database> with multiple
+load-balanced &lt;driver> blocks, but use a different &lt;database> for
+the writes and transactions.
+</p>
+
+</section>
+
+</body>
+</document>

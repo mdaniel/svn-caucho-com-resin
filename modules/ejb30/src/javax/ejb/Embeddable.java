@@ -35,14 +35,10 @@ import java.lang.annotation.Target;
 import java.lang.annotation.ElementType;
 
 /**
- * The Table annotation specifies the primary table.
+ * The Embeddedable annotation.
  */
-@Target(ElementType.TYPE)
+@Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface Table {
-  String name() default "";
-  String catalog() default "";
-  String schema() default "";
-  UniqueConstraint []uniqueConstraints() default {};
-  boolean specified() default true;
+public @interface Embeddable {
+  AccessType access() default AccessType.PROPERTY;
 }

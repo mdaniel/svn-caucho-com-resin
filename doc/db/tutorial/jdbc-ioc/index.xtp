@@ -3,10 +3,10 @@
     <product>resin</product>
     <type>tutorial</type>
     <tutorial-startpage>basic</tutorial-startpage>
-    <title>Basic JDBC Database Pattern</title>
+    <title>Using Dependency-Injection with JDBC Databases</title>
     <description>
     <p>This tutorial describes the standard pattern
-for using a database in Resin.</p>
+for using a database in Resin, following the Dependency-Injection/Inversion-of-Control pattern.</p>
     </description>
   </header>
 
@@ -24,8 +24,7 @@ to execute the SQL.
 </ul>
 
 <p>JDBC database access is based around the Factory pattern.
-With JDBC, <code>javax.sql.DataSource</code> is the Factory object
-and <code>java.sql.Connection</code> is the factory's generated object.
+With JDBC, <code>javax.sql.DataSource</code> is the Factory object.
 The &lt;database> configures the <code>DataSource</code> and stores it
 in the JNDI resource map.  The servlet will retrieve the
 <code>DataSource</code> and use it as a factory to obtain
@@ -120,8 +119,16 @@ intended for examples and testing.</p>
 
 <section title="Servlet Initialization">
 
-<p>The servlet needs to locate the <code>DataSource</code> to
-use JDBC.  The servlet needs to lookup the database pool's DataSource
+<p>The servlet is configured with a <code>DataSource</code> to
+access JDBC.  Resin allows two styles of configuration: Dependency Injection
+using bean-style setters and standard
+servlet &lt;init-param> configuration.  The Dependency Injection style is
+simpler, while the &lt;init-param> style will work on
+all servlet engines. By creating a separate <code>assemble()</code> method,
+a servlet can take advantage of Resin's Dependency Injection and still
+be fully compatible with other servlet engines.</p>
+
+<p>The servlet needs to lookup the database pool's DataSource
 using JNDI.  In the configuration above, the name "jdbc/basic" is
 shorthand for "java:comp/env/jdbc/basic".  "java:comp/env" is a
 context containing configured resources.  For example,
@@ -130,7 +137,7 @@ context containing configured resources.  For example,
 <p>Because the servlet only needs to look up the
 <code>DataSource</code> once, it will generally look it up in the
 <code>init()</code> method and store it as an instance variable.
-The <code>DataSource</code> is thread-safe, so it
+Because the <code>DataSource</code> is designed to be thread-safe, it
 can be used simultaneously by any of the requesting threads.</p>
 
 <example>
@@ -166,9 +173,45 @@ public class BasicServlet extends HttpServlet {
 }
 </example>
 
-<p>The servlet checks see if the DataSource is
+<p>When the servlet initializes, it checks to see if the DataSource is
 already configured.  If not, the <code>assemble()</code> method
-configures the DataSource itself using JNDI.</p>
+configures the DataSource itself using
+JNDI.  The <code>assemble()</code> method performs the Assembler function
+in the <a href="doc|resource|tutorial/injection/index.xtp">Dependency Injection</a> (Assembly Line) pattern.</p>
+
+<p>If you are using Resin's Dependency Injection capability, the
+<code>assemble()</code> method is not needed.  You can eliminate the
+JNDI code and rely on the <code>setDataSource</code>.
+You'll need the <code>assemble()</code> method if you're porting
+your servlet to
+a different servlet engine.</p>
+
+<section title="Dependency Injection configuration">
+
+<p>Using dependency injection to configure servlets has some advantages
+over the init-param method:</p>
+
+<ol>
+<li>The servlet initialization code is simpler.
+The servlet doesn't need JNDI code.
+<li>The configured values can be more complicated than the string-limitation of &lt;init-param>.
+<li>The DataSource itself isn't tied to JNDI, although JNDI will certainly
+remain the primary registry.
+</ol>
+
+<p>Enabling the Dependency Injection pattern is trivial: just
+add a <code>setDataSource</code> method as in the example above.</p>
+
+<example title="web.xml">
+&lt;servlet servlet-name="my-servlet"
+         servlet-class="example.BasicServlet">
+  &lt;init>
+    &lt;data-source>\${jndi:lookup("jdbc/basic")}&lt;/data-source>
+  &lt;/init>
+&lt;/servlet>
+</example>
+
+</section>
 
 <section title="Standard configuration">
 

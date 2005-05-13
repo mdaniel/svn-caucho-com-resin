@@ -1028,13 +1028,15 @@ _ACEOF
 ${CC} -o conftest ${CFLAGS_OPENSSL} ${CFLAGS} ${INCLUDES} conftest.$ac_ext -L${OPENSSL_LIB} ${SSL_LIBS} ${PROXY_LIBS} 1>/dev/null 2>/dev/null
 
 if test "$?" != 0; then
-  AC_MSG_ERROR(Can't compile SSL.  Check compilation flags: ${CC} ${CFLAGS_OPENSSL} ${CFLAGS} ${INCLUDES} -L${OPENSSL_LIB} ${SSL_LIBS} ${PROXY_LIBS})
+  ${CC} -o conftest ${CFLAGS_OPENSSL} ${CFLAGS} ${INCLUDES} conftest.$ac_ext -L${OPENSSL_LIB} ${SSL_LIBS} ${PROXY_LIBS}
+
+  AC_MSG_WARNING(Can't compile SSL.  Check compilation flags: ${CC} ${CFLAGS_OPENSSL} ${CFLAGS} ${INCLUDES} -L${OPENSSL_LIB} ${SSL_LIBS} ${PROXY_LIBS})
   resin_ssl_plugin=""
 else
   ./conftest
 
   if test "$?" != 0; then
-    AC_MSG_ERROR(Can't execute SSL.  Check that load version in the library path: ${LD_LIBRARY_PATH} matches the expected version. })
+    AC_MSG_WARNING(Can't execute SSL.  Check that load version in the library path: ${LD_LIBRARY_PATH} matches the expected version. })
   fi
 fi  
 	

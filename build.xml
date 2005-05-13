@@ -587,6 +587,19 @@
         <exclude name="**/lib/Regex.jar"/>
         <exclude name="**/lib/bcel*.jar"/>
         <exclude name="**/lib/jace.jar"/>
+        <exclude name="**/*.o"/>
+        <exclude name="**/*.so"/>
+        <exclude name="**/*.lo"/>
+        <exclude name="**/*.svnignore"/>
+        <exclude name="**/*.svn"/>
+        <exclude name="**/.*/**"/>
+        <exclude name="**/.cvsignore"/>
+        <exclude name="**/*.swp"/>
+        <exclude name="**/WEB-INF/work/**"/>
+        <exclude name="**/WEB-INF/pre_work/**"/>
+        <exclude name="**/WEB-INF/tmp/**"/>
+        <exclude name="**/WEB-INF/db/**"/>
+        <exclude name="**/*~"/>
 
         <!-- excluded since incomplete -->
         <exclude name="**/lib/jaf.jar"/>
@@ -598,7 +611,7 @@
         <include name="contrib/**"/>
         <include name="doc/**"/>
         <include name="lib/**"/>
-        <include name="modules/c/src/**"/>
+        <include name="modules/**/src/**"/>
         <include name="win32/**"/>
         <include name="bin/**"/>
         <include name="automake/**"/>
@@ -630,6 +643,21 @@
 
   <target name="dist.package" depends="init">
     <patternset id="dist">
+      <exclude name="**/Makefile"/>
+      <exclude name="**/*.o"/>
+      <exclude name="**/*.so"/>
+      <exclude name="**/*.lo"/>
+      <exclude name="**/*.svnignore"/>
+      <exclude name="**/*.svn"/>
+      <exclude name="**/.*/**"/>
+      <exclude name="**/.cvsignore"/>
+      <exclude name="**/*.swp"/>
+      <exclude name="**/WEB-INF/work/**"/>
+      <exclude name="**/WEB-INF/pre_work/**"/>
+      <exclude name="**/WEB-INF/tmp/**"/>
+      <exclude name="**/WEB-INF/db/**"/>
+      <exclude name="**/*~"/>
+
       <include name="${dist.name}/lib/**"/>
       <include name="${dist.name}/webapps/**"/>
       <include name="${dist.name}/contrib/**"/>
@@ -637,18 +665,11 @@
       <include name="${dist.name}/automake/**"/>
       <include name="${dist.name}/bin/wrapper.pl.in"/>
 
-      <include name="${dist.name}/modules/c/src/common/**"/>
-      <include name="${dist.name}/modules/c/src/apache1/**"/>
-      <include name="${dist.name}/modules/c/src/apache2/**"/>
-      <include name="${dist.name}/modules/c/src/resin_os/**"/>
-      <include name="${dist.name}/modules/c/src/Makefile.in"/>
-
       <include name="${dist.name}/LICENSE"/>
       <include name="${dist.name}/README"/>
       <include name="${dist.name}/Makefile.in"/>
 
-      <exclude name="**/Makefile"/>
-      <exclude name="**/*.so"/>
+      <include name="modules/**/src/**"/>
     </patternset>
 
     <patternset id="dist.bin">
@@ -657,6 +678,12 @@
       <include name="${dist.name}/bin/*.sh"/>
       <include name="${dist.name}/bin/*.pl"/>
       <include name="${dist.name}/configure"/>
+
+      <include name="${dist.name}/modules/c/src/common/**"/>
+      <include name="${dist.name}/modules/c/src/apache1/**"/>
+      <include name="${dist.name}/modules/c/src/apache2/**"/>
+      <include name="${dist.name}/modules/c/src/resin_os/**"/>
+      <include name="${dist.name}/modules/c/src/Makefile.in"/>
     </patternset>
 
     <patternset id="dist.src">
@@ -664,8 +691,9 @@
 
       <exclude name="${dist.name}/webapps/*.war"/>
       <exclude name="${dist.name}/lib/**"/>
-      <include name="**/.cvsignore"/>
-      <include name="**/.svnignore"/>
+      <exclude name="**/*.lo"/>
+      <exclude name="**/*.o"/>
+      <exclude name="**/*.so"/>
     </patternset>
 
     <delete file="${dist}/${shortproduct}-${version}.zip"/>

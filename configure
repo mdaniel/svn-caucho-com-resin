@@ -8595,7 +8595,7 @@ if test -z "${LD_SHLIB}"; then
    	fi
 	;;
 
-    solaris*)
+    *solaris*)
 	if test -n "$is_gcc"; then
 	    CFLAGS_SHLIB="-fPIC"
 
@@ -9057,6 +9057,8 @@ _ACEOF
 ${CC} -o conftest ${CFLAGS_OPENSSL} ${CFLAGS} ${INCLUDES} conftest.$ac_ext -L${OPENSSL_LIB} ${SSL_LIBS} ${PROXY_LIBS} 1>/dev/null 2>/dev/null
 
 if test "$?" != 0; then
+  ${CC} -o conftest ${CFLAGS_OPENSSL} ${CFLAGS} ${INCLUDES} conftest.$ac_ext -L${OPENSSL_LIB} ${SSL_LIBS} ${PROXY_LIBS}
+
   { { echo "$as_me:$LINENO: error: Can't compile SSL.  Check compilation flags: ${CC} ${CFLAGS_OPENSSL} ${CFLAGS} ${INCLUDES} -L${OPENSSL_LIB} ${SSL_LIBS} ${PROXY_LIBS}" >&5
 echo "$as_me: error: Can't compile SSL.  Check compilation flags: ${CC} ${CFLAGS_OPENSSL} ${CFLAGS} ${INCLUDES} -L${OPENSSL_LIB} ${SSL_LIBS} ${PROXY_LIBS}" >&2;}
    { (exit 1); exit 1; }; }

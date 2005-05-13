@@ -2,7 +2,27 @@
 
 <a href='changes-2.xtp'>Resin 2.1 changes</a>
 
-<s2 title='3.0.snap - May 4, 2005'>
+<s2 title='3.0.snap - May 6, 2005'>
+<ul>
+<li>UserPoolItem used IllegalStateException(Throwable) which isn't available on JDK 1.4 (rep by Patrick Burleson)
+<li>Added read-data-source and xa-data-source to ejb-server
+<li>refactor amber to handle multiple ejb-server blocks (rep by Francois Bertrand)
+<li>mod_caucho.c compilation problems with solaris (rep by 
+<li>ByteCodeClassScanner needs to swallow .class parse exceptions and log the error
+<li>Amber boolean fields now allowed as booleans in queries
+<li>PingMailer wasn't allowed as resin:type to ping (rep by T Moorer)
+<li>resin:type must override createXXX method
+<li>Add LIKE support to internal database
+<li>persist() should ignores duplicate entities
+<li>Allow reverse ordering of CMP 2.1 map (rep by H Grace)
+<li>@ManyToOne JoinColumn was ignoring nullable and unique (rep by Igor A Tarasov)
+<li>Check for nullpointer in Jmx.copyContextProperties (rep by D Becker)
+<li>JSP not properly handling backslash in rtexprvalue (rep by Klaus Friedel)
+<li>Changed default keepalive timeout to 60s
+</ul>
+</s2>
+
+<s2 title='3.0.13 - May 6, 2005'>
 <ul>
 <li>(2005-05-04) missing lock on mod_caucho configuration read
 <li>Response flushing could occur early on echo

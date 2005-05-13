@@ -69,6 +69,13 @@ on cache-mapping to set the expires times for static pages.</p>
 <tr><td>D<td>days
 </deftable>
 
+<ul>
+<li>cache-mapping requires an enabled &lt;cache>.  If the cache is disabled,
+cache-mapping will be ignored.
+<li>cache-mapping does not automatically make a page cacheable.  Only
+cacheable pages are affected by cache-mapping, i.e. pages with an ETag or Last-Modified.
+</ul>
+
 <example title="cache-mapping">
 &lt;web-app id='/'&gt;
 

@@ -12,9 +12,25 @@
 
 <summary/>
 
+<faq title="Configure and use a database connection">
+
+<p>See
+the <a href="db|config">database configuration page</a> for the full
+configuration documentation.
+
+<p>See the <a href="db|thirdparty">thirdparty driver configuration page</a> for
+sample configurations for several database drivers.</p>
+
+<p>See the
+<a href="db|tutorial/jdbc-basic/index">JNDI DataSource tutorial</a>
+and the <a href="db|tutorial/jdbc-ioc/index">DataSource
+inversion-of-control tutorial</a> for sample JDBC usage patterns.</p>
+
+</faq>
+
 <faq title="Bind to port 80/443 without running as root">
 
-<p>Unix needs root priviledges to bind to port 80 and 443, but Resin should
+<p>Unix needs root privileges to bind to port 80 and 443, but Resin should
 avoid running as root for security.  It's best to use a port mapper
 or firewall to map the protected port to an unprotected port
 like 8080 to avoid running as root entirely.</p>
@@ -42,6 +58,8 @@ to set the canonical host and port name to the external address.</p>
   ...
 &lt;/host>
 </example>
+
+</faq>
 
 <faq title="Reload .war files manually">
 
