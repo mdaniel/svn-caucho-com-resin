@@ -93,9 +93,6 @@ public class EJBServer
   
   protected static EnvironmentLocal<String> _localURL =
     new EnvironmentLocal<String>("caucho.url");
-  
-  protected static EnvironmentLocal<EjbServerManager> _localServer =
-    new EnvironmentLocal<EjbServerManager>("caucho.ejb-server");
 
   private String _jndiName = "java:comp/env/cmp";
 
@@ -142,8 +139,7 @@ public class EJBServer
   public EJBServer()
     throws ConfigException
   {
-    _ejbManager = EjbServerManager.createLocal();
-    _localServer.set(_ejbManager);
+    _ejbManager = new EjbServerManager();
     _rootModel = _ejbManager.getProtocolManager().getNamingRoot();
 
     _urlPrefix = _localURL.get();
@@ -158,9 +154,9 @@ public class EJBServer
   /**
    * Returns the local EJB server.
    */
-  public static EjbServerManager getLocalManager()
+  public static EnvServerManager getLocalManager()
   {
-    return _localServer.get();
+    return EnvServerManager.getLocal();
   }
 
   /**
@@ -297,6 +293,24 @@ public class EJBServer
       throw new ConfigException(L.l("<ejb-server> data-source must be a valid DataSource."));
 
     _ejbManager.setDataSource(_dataSource);
+  }
+
+  /**
+   * Sets the data-source
+   */
+  public void setReadDataSource(DataSource dataSource)
+    throws ConfigException
+  {
+    _ejbManager.setReadDataSource(dataSource);
+  }
+
+  /**
+   * Sets the xa data-source
+   */
+  public void setXADataSource(DataSource dataSource)
+    throws ConfigException
+  {
+    _ejbManager.setXADataSource(dataSource);
   }
 
   /**
@@ -532,7 +546,8 @@ public class EJBServer
       ProtocolContainer protocol = new ProtocolContainer();
       if (_urlPrefix != null)
         protocol.setURLPrefix(_urlPrefix);
-      protocol.setServerManager(_ejbManager);
+      
+      protocol.setServerManager(_ejbManager.getEnvServerManager());
     
       _ejbManager.getProtocolManager().setProtocolContainer(protocol);
 

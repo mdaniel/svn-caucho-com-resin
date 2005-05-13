@@ -80,10 +80,10 @@ public class EJBEnhancer extends AmberEnhancer {
   public EJBEnhancer(EjbServerManager ejbManager,
 		     EntityIntrospector introspector)
   {
+    super(ejbManager.getAmberManager().getEnvManager());
+    
     _ejbManager = ejbManager;
     _introspector = introspector;
-    
-    setAmberManager(ejbManager.getAmberManager());
   }
 }
 

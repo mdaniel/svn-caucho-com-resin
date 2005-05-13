@@ -918,6 +918,11 @@ public class EntityIntrospector {
 
       foreignColumn = sourceTable.createForeignColumn(columnName, keyColumn);
 
+      if (joinAnn != null) {
+	foreignColumn.setNotNull(! joinAnn.getBoolean("nullable"));
+	foreignColumn.setUnique(joinAnn.getBoolean("unique"));
+      }
+
       foreignColumns.add(foreignColumn);
     }
 

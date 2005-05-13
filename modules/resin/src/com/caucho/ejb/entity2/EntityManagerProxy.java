@@ -42,6 +42,13 @@ public class EntityManagerProxy implements EntityManager {
   
   private static final ThreadLocal<EntityManagerImpl> _localManager
     = new ThreadLocal<EntityManagerImpl>();
+
+  public EntityManagerProxy()
+  {
+    Thread.dumpStack();
+    
+    throw new IllegalStateException();
+  }
   
   /**
    * Makes the instance managed.
@@ -153,7 +160,8 @@ public class EntityManagerProxy implements EntityManager {
   private EntityManagerImpl getCurrent()
   {
     // XXX: reset at the end, for GC
-    
+
+    /*
     EntityManagerImpl manager = _localManager.get();
 
     if (manager == null) {
@@ -165,5 +173,7 @@ public class EntityManagerProxy implements EntityManager {
     manager.register();
 
     return manager;
+    */
+    return null;
   }
 }

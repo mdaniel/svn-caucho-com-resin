@@ -110,7 +110,7 @@ public class EJBCompiler {
     Thread.currentThread().setContextClassLoader(loader);
 
     try {
-      EjbServerManager container = EjbServerManager.createLocal();
+      EjbServerManager container = new EjbServerManager();
       container.setValidateDatabaseSchema(false);
       if (_classDir == null)
 	container.setWorkPath(Vfs.lookup("."));

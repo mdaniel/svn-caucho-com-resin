@@ -29,6 +29,8 @@
 package com.caucho.ejb.entity2;
 
 import com.caucho.amber.AmberManager;
+import com.caucho.amber.EnvAmberManager;
+
 import com.caucho.amber.connection.AmberConnectionImpl;
 import com.caucho.amber.query.AbstractQuery;
 import com.caucho.ejb.EJBExceptionWrapper;
@@ -46,14 +48,17 @@ import javax.ejb.Query;
 public class EntityManagerImpl implements EntityManager, CloseResource {
   private static final L10N L = new L10N(EntityManagerImpl.class);
 
+  private EnvAmberManager _amberManager;
+
   private boolean _isRegistered;
   private AmberConnectionImpl _aConn;
 
   /**
    * Creates a manager instance.
    */
-  EntityManagerImpl()
+  public EntityManagerImpl(EnvAmberManager amberManager)
   {
+    _amberManager = amberManager;
   }
 
   /**
@@ -228,11 +233,7 @@ public class EntityManagerImpl implements EntityManager, CloseResource {
 	throw new IllegalStateException(L.l("EntityContext required when using Entity beans."));
       */
 
-      EjbServerManager serverManager = EjbServerManager.getLocal();
-
-      AmberManager amberManager = serverManager.getAmberManager();
-
-      _aConn = amberManager.createAmberConnection();
+      _aConn = _amberManager.createAmberConnection();
     }
 
     return _aConn;

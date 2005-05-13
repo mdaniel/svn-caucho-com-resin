@@ -101,9 +101,6 @@ import com.caucho.ejb.entity2.EntityManagerProxy;
 public class EjbServerManager implements EJBServerInterface, EnvironmentListener {
   private static final L10N L = new L10N(EjbServerManager.class);
   protected static final Logger log = Log.open(EjbServerManager.class);
-  
-  private static EnvironmentLocal<EjbServerManager> _localServerManager
-    = new EnvironmentLocal<EjbServerManager>("caucho.ejb-server");
 
   private EnvironmentClassLoader _classLoader;
 
@@ -136,12 +133,12 @@ public class EjbServerManager implements EJBServerInterface, EnvironmentListener
   /**
    * Create a server with the given prefix name.
    */
-  private EjbServerManager()
+  EjbServerManager()
   {
     try {
       _envServerManager = EnvServerManager.createLocal();
 
-      _amberManager = _envServerManager.getAmberManager();
+      _amberManager = new AmberManager();
 
       _ejbConfig = new EjbConfig(this);
 
@@ -154,36 +151,19 @@ public class EjbServerManager implements EJBServerInterface, EnvironmentListener
   }
 
   /**
-   * Gets the local server.
-   */
-  public static EjbServerManager getLocal()
-  {
-    return _localServerManager.get();
-  }
-
-  /**
-   * Creates the local server.
-   */
-  public static EjbServerManager createLocal()
-  {
-    synchronized (EjbServerManager.class) {
-      EjbServerManager serverManager = _localServerManager.getLevel();
-
-      if (serverManager == null) {
-	serverManager = new EjbServerManager();
-	_localServerManager.set(serverManager);
-      }
-
-      return serverManager;
-    }
-  }
-
-  /**
    * Returns the loader.
    */
   public EnvironmentClassLoader getClassLoader()
   {
     return _envServerManager.getClassLoader();
+  }
+
+  /**
+   * Returns the environment server manager.
+   */
+  public EnvServerManager getEnvServerManager()
+  {
+    return _envServerManager;
   }
 
   /**
@@ -216,6 +196,38 @@ public class EjbServerManager implements EJBServerInterface, EnvironmentListener
   public DataSource getDataSource()
   {
     return _amberManager.getDataSource();
+  }
+
+  /**
+   * The read-only data source for the container.
+   */
+  public void setReadDataSource(DataSource dataSource)
+  {
+    _amberManager.setReadDataSource(dataSource);
+  }
+
+  /**
+   * The read-only data source for the container.
+   */
+  public DataSource getReadDataSource()
+  {
+    return _amberManager.getReadDataSource();
+  }
+
+  /**
+   * The xa data source for the container.
+   */
+  public void setXADataSource(DataSource dataSource)
+  {
+    _amberManager.setXADataSource(dataSource);
+  }
+
+  /**
+   * The read-only data source for the container.
+   */
+  public DataSource getXADataSource()
+  {
+    return _amberManager.getXADataSource();
   }
 
   /**

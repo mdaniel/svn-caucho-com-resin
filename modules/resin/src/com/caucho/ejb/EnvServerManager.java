@@ -68,7 +68,7 @@ import com.caucho.loader.enhancer.EnhancingClassLoader;
 
 import com.caucho.config.ConfigException;
 
-import com.caucho.amber.AmberManager;
+import com.caucho.amber.EnvAmberManager;
 
 import com.caucho.amber.entity.AmberEntityHome;
 
@@ -90,6 +90,7 @@ import com.caucho.ejb.entity.EntityKey;
 import com.caucho.ejb.enhancer.EjbEnhancer;
 
 import com.caucho.ejb.entity2.EntityManagerProxy;
+import com.caucho.ejb.entity2.EntityManagerImpl;
 
 /**
  * Manages the beans in an environment.
@@ -112,7 +113,7 @@ public class EnvServerManager implements EnvironmentListener {
   
   private EJBAdmin _ejbAdmin;
 
-  private AmberManager _amberManager;
+  private EnvAmberManager _envAmberManager;
   
   private EjbTransactionManager _ejbTransactionManager;
   
@@ -140,9 +141,9 @@ public class EnvServerManager implements EnvironmentListener {
   private EnvServerManager()
   {
     try {
-      _amberManager = new AmberManager();
-      _amberManager.initLoaders();
-      _amberManager.setTableCacheTimeout(_entityCacheTimeout);
+      _envAmberManager = EnvAmberManager.createLocal();
+      _envAmberManager.initLoaders();
+      _envAmberManager.setTableCacheTimeout(_entityCacheTimeout);
       
       _classLoader = (EnvironmentClassLoader) Thread.currentThread().getContextClassLoader();
       _workPath = WorkDir.getLocalWorkDir(_classLoader).lookup("ejb");
@@ -160,9 +161,7 @@ public class EnvServerManager implements EnvironmentListener {
     }
 
     try {
-      Class entityManagerClass = Class.forName("com.caucho.ejb.entity2.EntityManagerProxy");
-      
-      Object entityProxy = entityManagerClass.newInstance();
+      Object entityProxy = new EntityManagerImpl(_envAmberManager);
 
       // XXX: pass self as argument
 
@@ -352,7 +351,7 @@ public class EnvServerManager implements EnvironmentListener {
     throws ConfigException
   {
     try {
-      _amberManager.init();
+      _envAmberManager.init();
 
       /*
       for (EjbConfig cfg : _ejbConfigList)
@@ -391,12 +390,12 @@ public class EnvServerManager implements EnvironmentListener {
 
   public AmberEntityHome getAmberEntityHome(String name)
   {
-    return _amberManager.getEntityHome(name);
+    return _envAmberManager.getEntityHome(name);
   }
 
-  public AmberManager getAmberManager()
+  public EnvAmberManager getAmberManager()
   {
-    return _amberManager;
+    return _envAmberManager;
   }
 
   public JClassLoader getJClassLoader()
@@ -503,12 +502,9 @@ public class EnvServerManager implements EnvironmentListener {
    * Handles the case where the environment is starting (after init).
    */
   public void environmentStart(EnvironmentClassLoader loader)
+    throws Exception
   {
-    try {
-      start();
-    } catch (Exception e) {
-      log.log(Level.WARNING, e.toString(), e);
-    }
+    start();
   }
   
   /**
@@ -560,8 +556,7 @@ public class EnvServerManager implements EnvironmentListener {
       _protocolManager = null;
       _ejbTransactionManager.destroy();
       _ejbTransactionManager = null;
-      _amberManager.destroy();
-      _amberManager = null;
+      _envAmberManager = null;
     } catch (Throwable e) {
       log.log(Level.WARNING, e.toString(), e);
     }

@@ -579,7 +579,8 @@ public class EjbConfig {
 	  targetManyToOne = true;
 
 	if (sourceMap) {
-	  throw new UnsupportedOperationException("source map");
+	  createMap(targetEntity, targetField, targetRole,
+		    sourceEntity, sourceField, sourceRole, sourceMapMethod);
 	}
 	else if (targetMap) {
 	  createMap(sourceEntity, sourceField, sourceRole,

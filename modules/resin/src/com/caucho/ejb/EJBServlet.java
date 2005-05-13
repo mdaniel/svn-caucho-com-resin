@@ -80,7 +80,7 @@ public class EJBServlet extends GenericServlet {
   private Hashtable<CharSequence,Skeleton> _beanMap
     = new Hashtable<CharSequence,Skeleton>();
 
-  private EjbServerManager _ejbManager;
+  private EnvServerManager _ejbManager;
   private ProtocolContainer _protocolContainer;
 
   private ServletException _exception;
@@ -106,7 +106,8 @@ public class EJBServlet extends GenericServlet {
   public void init()
     throws ServletException
   {
-    _ejbManager = EJBServer.getLocalManager();
+    // XXX: just to make compilation work
+    _ejbManager = EnvServerManager.getLocal();
 
     if (_ejbManager == null) {
       throw new ServletException(L.l("No <ejb-server> detected.  '{0}' requires a configured <ejb-server>",
