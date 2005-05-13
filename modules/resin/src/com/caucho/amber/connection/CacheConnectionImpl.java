@@ -38,6 +38,8 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import javax.sql.DataSource;
+
 import com.caucho.log.Log;
 
 import com.caucho.util.L10N;
@@ -295,12 +297,17 @@ public class CacheConnectionImpl extends AmberConnectionImpl {
   public Connection getConnection()
     throws SQLException
   {
+    DataSource dataSource = _amberManager.getReadDataSource();
+
+    if (dataSource == null)
+      _amberManager.getDataSource();
+      
     if (_conn == null) {
-      _conn = _amberManager.getDataSource().getConnection();
+      _conn = dataSource.getConnection();
     }
     else if (_conn.isClosed()) {
       closeConnection();
-      _conn = _amberManager.getDataSource().getConnection();
+      _conn = dataSource.getConnection();
     }
 
     return _conn;

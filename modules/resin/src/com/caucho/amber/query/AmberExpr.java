@@ -92,6 +92,12 @@ public interface AmberExpr {
   void generateSelect(CharBuffer cb);
 
   /**
+   * Converts to a boolean expression.
+   */
+  public AmberExpr createBoolean()
+    throws QueryParseException;
+
+  /**
    * Returns the object for the expr.
    */
   public Object getObject(AmberConnectionImpl aConn, ResultSet rs, int index)

@@ -42,25 +42,28 @@ public class AndExpr extends AbstractAmberExpr {
    * Creates the and.
    */
   public static AmberExpr create(AmberExpr left, AmberExpr right)
+    throws QueryParseException
   {
-    if (left == null)
-      return right;
+    if (left == null && right == null)
+      return null;
+    else if (left == null)
+      return right.createBoolean();
     else if (right == null)
-      return left;
+      return left.createBoolean();
     else if (left instanceof AndExpr) {
       AndExpr and = (AndExpr) left;
-      and.add(right);
+      and.add(right.createBoolean());
       return and;
     }
     else if (right instanceof AndExpr) {
       AndExpr and = (AndExpr) right;
-      and.add(left);
+      and.add(left.createBoolean());
       return and;
     }
     else {
       AndExpr and = new AndExpr();
-      and.add(left);
-      and.add(right);
+      and.add(left.createBoolean());
+      and.add(right.createBoolean());
 
       return and;
     }

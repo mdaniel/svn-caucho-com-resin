@@ -59,6 +59,14 @@ abstract public class Type {
   abstract public String getName();
 
   /**
+   * Returns true for a boolean type.
+   */
+  public boolean isBoolean()
+  {
+    return false;
+  }
+
+  /**
    * Returns the java type.
    */
   public String getJavaTypeName()

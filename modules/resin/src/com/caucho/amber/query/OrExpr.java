@@ -50,8 +50,9 @@ public class OrExpr extends AbstractAmberExpr {
    * Adds a new component.
    */
   void add(AmberExpr expr)
+    throws QueryParseException
   {
-    _components.add(expr);
+    _components.add(expr.createBoolean());
   }
 
   /**

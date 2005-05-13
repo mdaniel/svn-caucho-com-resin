@@ -46,10 +46,13 @@ import java.sql.SQLException;
 
 import javax.sql.DataSource;
 
+import javax.naming.InitialContext;
+
 import com.caucho.bytecode.JClass;
 import com.caucho.bytecode.JClassLoader;
 
 import com.caucho.loader.DynamicClassLoader;
+import com.caucho.loader.EnvironmentLocal;
 
 import com.caucho.loader.enhancer.EnhancerManager;
 
@@ -81,6 +84,8 @@ import com.caucho.amber.type.TypeManager;
 import com.caucho.amber.idgen.IdGenerator;
 import com.caucho.amber.idgen.SequenceIdGenerator;
 
+import com.caucho.amber.ejb3.EntityManagerProxy;
+
 import com.caucho.config.ConfigException;
 
 import com.caucho.java.gen.JavaClassGenerator;
@@ -103,7 +108,12 @@ public class EnvAmberManager {
   private static final Logger log = Log.open(AmberManager.class);
   private static final L10N L = new L10N(AmberManager.class);
 
+  private static EnvironmentLocal<EnvAmberManager> _localManager
+    = new EnvironmentLocal<EnvAmberManager>();
+
   private ClassLoader _parentLoader;
+
+  private ArrayList<AmberManager> _managerList = new ArrayList<AmberManager>();
 
   private AmberEnhancer _enhancer;
 
@@ -111,18 +121,8 @@ public class EnvAmberManager {
 
   private JClassLoader _jClassLoader;
 
-  private TypeManager _typeManager = new TypeManager();
-
-  private HashMap<String,Table> _tableMap = new HashMap<String,Table>();
-
   private HashMap<String,AmberEntityHome> _entityHomeMap
     = new HashMap<String,AmberEntityHome>();
-
-  private HashMap<String,IdGenerator> _tableGenMap
-    = new HashMap<String,IdGenerator>();
-
-  private HashMap<String,SequenceIdGenerator> _sequenceGenMap
-    =  new HashMap<String,SequenceIdGenerator>();
 
   private LruCache<QueryCacheKey,SoftReference<ResultSetCacheChunk>> _queryCache
     = new LruCache<QueryCacheKey,SoftReference<ResultSetCacheChunk>>(1024);
@@ -132,15 +132,13 @@ public class EnvAmberManager {
 
   private EntityKey _entityKey = new EntityKey();
 
-  private AmberGenerator _generator;
+  private long _xid;
 
-  private CacheConnectionImpl _cacheConn;
+  private AmberGenerator _generator;
 
   private volatile boolean _isInit;
 
-  private long _xid = 1;
-
-  public EnvAmberManager()
+  private EnvAmberManager()
   {
     _parentLoader = Thread.currentThread().getContextClassLoader();
     _jClassLoader = EnhancerManager.create(_parentLoader).getJavaClassLoader();
@@ -153,6 +151,38 @@ public class EnvAmberManager {
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
+
+    _enhancer = new AmberEnhancer(this);
+
+    EnhancerManager.create().addClassEnhancer(_enhancer);
+
+    EntityManagerProxy userManager = new EntityManagerProxy(this);
+
+    try {
+      new InitialContext().rebind("java:comp/EntityManager", userManager);
+    } catch (Throwable e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  public static EnvAmberManager createLocal()
+  {
+    EnvAmberManager manager = _localManager.get();
+
+    if (manager == null) {
+      manager = new EnvAmberManager();
+      _localManager.set(manager);
+    }
+
+    return manager;
+  }
+
+  /**
+   * Adds an amber manager.
+   */
+  public void addAmberManager(AmberManager manager)
+  {
+    _managerList.add(manager);
   }
 
   /**
@@ -198,180 +228,11 @@ public class EnvAmberManager {
   }
 
   /**
-   * Creates a table.
+   * Adds the entity home.
    */
-  public Table createTable(String tableName)
+  public void addEntityHome(String name, AmberEntityHome home)
   {
-    Table table = _tableMap.get(tableName);
-
-    if (table == null) {
-      table = new Table(tableName);
-      table.setCacheTimeout(getTableCacheTimeout());
-      
-      _tableMap.put(tableName, table);
-
-      // XXX: _lazyTable.add(table);
-    }
-
-    return table;
-  }
-  
-  /**
-   * Adds an entity.
-   */
-  public EntityType createEntity(JClass beanClass, AmberManager manager)
-  {
-    return createEntity(beanClass.getName(), beanClass, manager);
-  }
-  
-  /**
-   * Adds an entity.
-   */
-  public EntityType createEntity(String name,
-				 JClass beanClass,
-				 AmberManager manager)
-  {
-    EntityType entityType = (EntityType) _typeManager.get(name);
-
-    if (entityType != null)
-      return entityType;
-
-    // ejb/0al2
-    // entityType = (EntityType) _typeManager.get(beanClass.getName());
-    
-    if (entityType == null) {
-      EntityType parentType = null;
-      
-      for (JClass parentClass = beanClass.getSuperClass();
-	   parentType == null && parentClass != null;
-	   parentClass = parentClass.getSuperClass()) {
-	parentType = (EntityType) _typeManager.get(parentClass.getName());
-      }
-
-      if (parentType != null)
-	entityType = new SubEntityType(manager, parentType);
-      else
-	entityType = new EntityType(manager);
-    }
-    
-    // _typeManager.put(name, entityType);
-    _typeManager.put(name, entityType);
-    // XXX: some confusion about the double entry
-    if (_typeManager.get(beanClass.getName()) == null)
-      _typeManager.put(beanClass.getName(), entityType);
-    
-    entityType.setName(name);
-    entityType.setBeanClass(beanClass);
-
-    // XXX: _lazyConfigure.add(entityType);
-
-    AmberEntityHome entityHome = _entityHomeMap.get(beanClass.getName());
-
-    if (entityHome == null) {
-      entityHome = new AmberEntityHome(manager, entityType);
-      // XXX: _lazyHomeInit.add(entityHome);
-      _isInit = false;
-    }
-
-    _entityHomeMap.put(name, entityHome);
-    // XXX: some confusion about the double entry, related to the EJB 3.0
-    // confuction of named instances.
-    _entityHomeMap.put(beanClass.getName(), entityHome);
-
-    return entityType;
-  }
-  
-  /**
-   * Returns a table generator.
-   */
-  public IdGenerator getTableGenerator(String name)
-  {
-    return _tableGenMap.get(name);
-  }
-  
-  /**
-   * Sets a table generator.
-   */
-  public IdGenerator putTableGenerator(String name, IdGenerator gen)
-  {
-    synchronized (_tableGenMap) {
-      IdGenerator oldGen = _tableGenMap.get(name);
-
-      if (oldGen != null)
-	return oldGen;
-      else {
-	_tableGenMap.put(name, gen);
-	return gen;
-      }
-    }
-  }
-  
-  /**
-   * Adds a generator table.
-   */
-  public GeneratorTableType createGeneratorTable(String name,
-						 AmberManager manager)
-  {
-    Type type = _typeManager.get(name);
-
-    if (type instanceof GeneratorTableType)
-      return (GeneratorTableType) type;
-
-    if (type != null)
-      throw new RuntimeException(L.l("'{0}' is a duplicate generator table.",
-				     type));
-
-    GeneratorTableType genType = new GeneratorTableType(manager, name);
-
-    _typeManager.put(name, genType);
-
-    // _lazyGenerate.add(genType);
-
-    return genType;
-  }
-  
-  /**
-   * Returns a sequence generator.
-   */
-  public SequenceIdGenerator createSequenceGenerator(String name,
-						     int size,
-						     AmberManager manager)
-    throws ConfigException
-  {
-    synchronized (_sequenceGenMap) {
-      SequenceIdGenerator gen = _sequenceGenMap.get(name);
-
-      if (gen == null) {
-	gen = new SequenceIdGenerator(manager, name, size);
-
-	_sequenceGenMap.put(name, gen);
-      }
-
-      return gen;
-    }
-  }
-  
-  /**
-   * Adds an entity.
-   */
-  public SubEntityType createSubEntity(JClass beanClass,
-				       EntityType parent,
-				       AmberManager manager)
-  {
-    SubEntityType entityType;
-    entityType = (SubEntityType) _typeManager.get(beanClass.getName());
-
-    if (entityType != null)
-      return entityType;
-
-    entityType = new SubEntityType(manager, parent);
-    entityType.setBeanClass(beanClass);
-
-    _typeManager.put(entityType.getName(), entityType);
-    
-    _entityHomeMap.put(entityType.getName(), parent.getHome());
-
-    return entityType;
+    _entityHomeMap.put(name, home);
   }
 
   /**
@@ -395,32 +256,14 @@ public class EnvAmberManager {
   }
 
   /**
-   * Returns the entity home by the schema name.
-   */
-  public AmberEntityHome getHomeBySchema(String name, AmberManager manager)
-  {
-    for (AmberEntityHome home : _entityHomeMap.values()) {
-      if (name.equals(home.getEntityType().getName()))
-	return home;
-    }
-
-    try {
-      createType(name, manager);
-    } catch (Throwable e) {
-    }
-
-    return _entityHomeMap.get(name);
-  }
-
-  /**
    * Returns a matching entity.
    */
   public EntityType getEntity(String className)
   {
-    Type type = _typeManager.get(className);
+    AmberEntityHome home = _entityHomeMap.get(className);
 
-    if (type instanceof EntityType)
-      return (EntityType) type;
+    if (home != null)
+      return home.getEntityType();
     else
       return null;
   }
@@ -430,40 +273,7 @@ public class EnvAmberManager {
    */
   public EntityType getEntityByInstanceClass(String className)
   {
-    return _typeManager.getEntityByInstanceClass(className);
-  }
-
-  /**
-   * Creates a type.
-   */
-  public Type createType(String typeName, AmberManager manager)
-    throws ConfigException
-  {
-    Type type = _typeManager.get(typeName);
-    
-    if (type != null)
-      return type;
-
-    JClass cl = _jClassLoader.forName(typeName);
-
-    if (cl == null)
-      throw new ConfigException(L.l("'{0}' is an unknown type", typeName));
-
-    return createType(cl, manager);
-  }
-
-  /**
-   * Creates a type.
-   */
-  public Type createType(JClass javaType, AmberManager manager)
-    throws ConfigException
-  {
-    Type type = _typeManager.create(javaType);
-
-    if (type != null)
-      return type;
-
-    return createEntity(javaType, manager);
+    throw new UnsupportedOperationException();
   }
 
   /**
@@ -479,12 +289,15 @@ public class EnvAmberManager {
    */
   public AmberGenerator getGenerator()
   {
-    if (_generator == null) {
-      _generator = new AmberGeneratorImpl();
-      // XXX: _generator.setAmberManager(this);
-    }
+    if (_generator != null)
+      return _generator;
+    else if (_enhancer != null)
+      return _enhancer;
+    else {
+      _generator = new AmberGeneratorImpl(this);
 
-    return _generator;
+      return _generator;
+    }
   }
 
   /**
@@ -493,20 +306,25 @@ public class EnvAmberManager {
   public void initLoaders()
     throws ConfigException, IOException
   {
-    ClassLoader loader = Thread.currentThread().getContextClassLoader();
+  }
 
-    if (_enhancer == null) {
-      // ejb/0880
-      /*
-      if (envLoader.getOwner() == null)
-	return;
-      */
-      
-      _enhancer = new AmberEnhancer();
-      // XXX: _enhancer.setAmberManager(this);
+  /**
+   * Returns the cache connection.
+   */
+  public AmberConnectionImpl createAmberConnection()
+  {
+    // XXX: needs to be an EnvAmberConnection
+    return _managerList.get(0).createAmberConnection();
+  }
 
-      EnhancerManager.create().addClassEnhancer(_enhancer);
-    }
+  /**
+   * Initialize the home interfaces.
+   */
+  public void initEntityHomes()
+    throws Exception
+  {
+    for (AmberManager manager : _managerList)
+      manager.initEntityHomes();
   }
 
   /**
@@ -516,8 +334,6 @@ public class EnvAmberManager {
     throws ConfigException, IOException
   {
     initLoaders();
-
-    // XXX: getGenerator().setAmberManager(this);
   }
 
   /**
@@ -679,7 +495,6 @@ public class EnvAmberManager {
    */
   public void destroy()
   {
-    _typeManager = null;
     _queryCache = null;
     _entityCache = null;
     _parentLoader = null;

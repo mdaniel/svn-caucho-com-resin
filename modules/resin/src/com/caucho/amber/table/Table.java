@@ -68,6 +68,8 @@ public class Table {
 
   private String _configLocation;
 
+  private AmberManager _manager;
+  
   // The entity type is used to generate primary keys for cascade deletes
   private EntityType _type;
 
@@ -82,13 +84,14 @@ public class Table {
   private boolean _isReadOnly;
   private long _cacheTimeout = 250;
 
-  private ArrayList<EntityListener> _entityListeners =
-    new ArrayList<EntityListener>();
+  private ArrayList<EntityListener> _entityListeners
+    = new ArrayList<EntityListener>();
 
   private TableInvalidateCompletion _invalidateCompletion;
   
-  public Table(String name)
+  public Table(AmberManager manager, String name)
   {
+    _manager = manager;
     _name = name;
   }
 
@@ -114,6 +117,14 @@ public class Table {
   public String getLocation()
   {
     return _configLocation;
+  }
+
+  /**
+   * Returns the amber manager.
+   */
+  public AmberManager getAmberManager()
+  {
+    return _manager;
   }
 
   /**

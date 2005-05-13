@@ -34,10 +34,14 @@ import com.caucho.util.CharBuffer;
 import com.caucho.amber.table.Column;
 import com.caucho.amber.table.LinkColumns;
 
+import com.caucho.amber.AmberManager;
+
+import com.caucho.jdbc.JdbcMetaData;
+
 /**
- * Bound identifier expression.
+ * Column expression returning a boolean
  */
-public class ColumnExpr extends AbstractAmberExpr {
+public class BooleanColumnExpr extends AbstractAmberExpr {
   protected PathExpr _parent;
   // identifier name value
   private Column _column;
@@ -47,7 +51,7 @@ public class ColumnExpr extends AbstractAmberExpr {
   /**
    * Creates a new unbound id expression.
    */
-  public ColumnExpr(PathExpr parent, Column column)
+  public BooleanColumnExpr(PathExpr parent, Column column)
   {
     _parent = parent;
     _column = column;
@@ -70,15 +74,11 @@ public class ColumnExpr extends AbstractAmberExpr {
   }
 
   /**
-   * Returns a boolean expression.
+   * Returns true for a boolean.
    */
-  public AmberExpr createBoolean()
-    throws QueryParseException
+  public boolean isBoolean()
   {
-    if (getColumn().getType().isBoolean())
-      return new BooleanColumnExpr(_parent, _column);
-    else
-      return super.createBoolean();
+    return true;
   }
 
   /**
@@ -128,16 +128,24 @@ public class ColumnExpr extends AbstractAmberExpr {
    */
   public void generateWhere(CharBuffer cb)
   {
+    CharBuffer term = new CharBuffer();
+    
     if (_fromItem != null) {
-      cb.append(_fromItem.getName());
-      cb.append('.');
-      cb.append(_column.getName());
+      term.append(_fromItem.getName());
+      term.append('.');
+      term.append(_column.getName());
     }
     else {
-      cb.append(_parent.getChildFromItem().getName());
-      cb.append('.');
-      cb.append(_column.getName());
+      term.append(_parent.getChildFromItem().getName());
+      term.append('.');
+      term.append(_column.getName());
     }
+
+    AmberManager manager = _column.getTable().getAmberManager();
+
+    JdbcMetaData metaData = manager.getMetaData();
+
+    cb.append(metaData.generateBoolean(term.toString()));
   }
 
   public String toString()

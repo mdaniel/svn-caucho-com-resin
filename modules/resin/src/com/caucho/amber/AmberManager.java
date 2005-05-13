@@ -82,9 +82,19 @@ public class AmberManager {
   private ClassLoader _parentLoader;
   private EnhancingClassLoader _enhancedLoader;
 
+  private EnvAmberManager _envAmberManager;
+
   private AmberEnhancer _enhancer;
 
+  // basic data source
   private DataSource _dataSource;
+  
+  // data source for read-only requests
+  private DataSource _readDataSource;
+  
+  // data source for requests in a transaction
+  private DataSource _xaDataSource;
+  
   private JdbcMetaData _jdbcMetaData;
 
   private boolean _createDatabaseTables;
@@ -117,6 +127,7 @@ public class AmberManager {
   private EntityKey _entityKey = new EntityKey();
 
   private ArrayList<EntityType> _lazyConfigure = new ArrayList<EntityType>();
+  
   private ArrayList<EntityType> _lazyGenerate = new ArrayList<EntityType>();
   private ArrayList<AmberEntityHome> _lazyHomeInit =
     new ArrayList<AmberEntityHome>();
@@ -137,6 +148,10 @@ public class AmberManager {
     _parentLoader = Thread.currentThread().getContextClassLoader();
     _jClassLoader = EnhancerManager.create(_parentLoader).getJavaClassLoader();
 
+    _envAmberManager = EnvAmberManager.createLocal();
+
+    _envAmberManager.addAmberManager(this);
+
     try {
       if (_parentLoader instanceof DynamicClassLoader)
 	((DynamicClassLoader) _parentLoader).make();
@@ -145,6 +160,14 @@ public class AmberManager {
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
+  }
+
+  /**
+   * Returns the env amber manager.
+   */
+  public EnvAmberManager getEnvManager()
+  {
+    return _envAmberManager;
   }
 
   /**
@@ -161,6 +184,38 @@ public class AmberManager {
   public DataSource getDataSource()
   {
     return _dataSource;
+  }
+
+  /**
+   * Sets the read data source.
+   */
+  public void setReadDataSource(DataSource dataSource)
+  {
+    _readDataSource = dataSource;
+  }
+
+  /**
+   * Gets the read data source.
+   */
+  public DataSource getReadDataSource()
+  {
+    return _readDataSource;
+  }
+
+  /**
+   * Sets the XA data source.
+   */
+  public void setXADataSource(DataSource dataSource)
+  {
+    _xaDataSource = dataSource;
+  }
+
+  /**
+   * Gets the xa data source.
+   */
+  public DataSource getXADataSource()
+  {
+    return _xaDataSource;
   }
 
   /**
@@ -265,7 +320,7 @@ public class AmberManager {
     Table table = _tableMap.get(tableName);
 
     if (table == null) {
-      table = new Table(tableName);
+      table = new Table(this, tableName);
       table.setCacheTimeout(getTableCacheTimeout());
 
       _tableMap.put(tableName, table);
@@ -322,7 +377,7 @@ public class AmberManager {
     entityType.setBeanClass(beanClass);
 
     _lazyConfigure.add(entityType);
-    // Thread.dumpStack();
+    // getEnvManager().addLazyConfigure(entityType);
 
     AmberEntityHome entityHome = _entityHomeMap.get(beanClass.getName());
 
@@ -332,14 +387,23 @@ public class AmberManager {
       _isInit = false;
     }
 
-    _entityHomeMap.put(name, entityHome);
+    addEntityHome(name, entityHome);
     // XXX: some confusion about the double entry, related to the EJB 3.0
     // confuction of named instances.
-    _entityHomeMap.put(beanClass.getName(), entityHome);
+    addEntityHome(beanClass.getName(), entityHome);
 
     return entityType;
   }
 
+  /**
+   * Adds a new home bean.
+   */
+  private void addEntityHome(String name, AmberEntityHome home)
+  {
+    _entityHomeMap.put(name, home);
+    getEnvManager().addEntityHome(name, home);
+  }
+  
   /**
    * Returns a table generator.
    */
@@ -452,7 +516,7 @@ public class AmberManager {
 	  entityType.setGenerated(true);
 
 	  try {
-	    _generator.generateJava(javaGen, entityType);
+	    getEnvManager().getGenerator().generateJava(javaGen, entityType);
 	  } catch (Throwable e) {
 	    log.log(Level.FINER, e.toString(), e);
 	  }
@@ -476,7 +540,7 @@ public class AmberManager {
       EntityType type = _lazyConfigure.remove(0);
 
       if (type.startConfigure()) {
-	_generator.configure(type);
+	getEnvManager().getGenerator().configure(type);
       }
 
       if (! _lazyGenerate.contains(type))
@@ -500,7 +564,7 @@ public class AmberManager {
 
     _typeManager.put(entityType.getName(), entityType);
 
-    _entityHomeMap.put(entityType.getName(), parent.getHome());
+    addEntityHome(entityType.getName(), parent.getHome());
 
     return entityType;
   }
@@ -609,8 +673,7 @@ public class AmberManager {
   public AmberGenerator getGenerator()
   {
     if (_generator == null) {
-      _generator = new AmberGeneratorImpl();
-      _generator.setAmberManager(this);
+      _generator = new AmberGeneratorImpl(getEnvManager());
     }
 
     return _generator;
@@ -630,22 +693,7 @@ public class AmberManager {
   public void initLoaders()
     throws ConfigException, IOException
   {
-    ClassLoader loader = Thread.currentThread().getContextClassLoader();
-
-    if (_enhancer == null) {
-      // ejb/0880
-      /*
-      if (envLoader.getOwner() == null)
-	return;
-      */
-
-      _enhancer = new AmberEnhancer();
-      _enhancer.setAmberManager(this);
-
-      EnhancerManager.create().addClassEnhancer(_enhancer);
-
-      // _enhancedLoader.addLoader(new AmberLoader(this));
-    }
+    getEnvManager().initLoaders();
   }
 
   /**
@@ -655,8 +703,6 @@ public class AmberManager {
     throws ConfigException, IOException
   {
     initLoaders();
-
-    getGenerator().setAmberManager(this);
 
     if (_dataSource == null)
       return;

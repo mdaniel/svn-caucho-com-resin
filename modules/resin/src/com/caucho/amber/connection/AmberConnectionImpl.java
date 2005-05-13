@@ -42,6 +42,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import javax.sql.DataSource;
+
 import com.caucho.log.Log;
 
 import com.caucho.util.L10N;
@@ -89,21 +91,23 @@ public class AmberConnectionImpl {
   
   private ArrayList<Entity> _txEntities = new ArrayList<Entity>();
   
-  private ArrayList<AmberCompletion> _completionList =
-    new ArrayList<AmberCompletion>();
+  private ArrayList<AmberCompletion> _completionList
+    = new ArrayList<AmberCompletion>();
   
-  private ArrayList<AmberCollection> _queries =
-    new ArrayList<AmberCollection>();
+  private ArrayList<AmberCollection> _queries
+    = new ArrayList<AmberCollection>();
 
   private long _xid;
   private boolean _isInTransaction;
   private boolean _isXA;
 
   private Connection _conn;
+  private Connection _readConn;
+  
   private boolean _isAutoCommit = true;
 
-  private LruCache<String,PreparedStatement> _preparedStatementMap =
-    new LruCache<String,PreparedStatement>(32);
+  private LruCache<String,PreparedStatement> _preparedStatementMap
+    = new LruCache<String,PreparedStatement>(32);
   
   private ArrayList<Statement> _statements = new ArrayList<Statement>();
 
@@ -443,14 +447,18 @@ public class AmberConnectionImpl {
   /**
    * Adds an entity.
    */
-  public void addEntity(Entity entity)
+  public boolean addEntity(Entity entity)
   {
     if (! _entities.contains(entity)) {
       _entities.add(entity);
 
       if (_isInTransaction)
 	_txEntities.add(entity);
+
+      return true;
     }
+    else
+      return false;
   }
 
   /**
@@ -464,7 +472,8 @@ public class AmberConnectionImpl {
     
     Entity entity = (Entity) obj;
 
-    return _entities.contains(entity);
+    return getEntity(entity.getClass().getName(),
+		     entity.__caucho_getPrimaryKey()) != null;
   }
 
   /**
@@ -498,7 +507,6 @@ public class AmberConnectionImpl {
   public void commit()
     throws SQLException
   {
-    System.out.println("COMMIT:");
     try {
       flush();
 
@@ -640,6 +648,21 @@ public class AmberConnectionImpl {
   public Connection getConnection()
     throws SQLException
   {
+    DataSource readDataSource = _amberManager.getReadDataSource();
+
+    System.out.println("XA: " + _isXA + " " + _isInTransaction);
+    if (! _isXA && ! _isInTransaction && readDataSource != null) {
+      if (_readConn == null) {
+	_readConn = readDataSource.getConnection();
+      }
+      else if (_readConn.isClosed()) {
+	closeConnectionImpl();
+	_readConn = _amberManager.getDataSource().getConnection();
+      }
+
+      return _readConn;
+    }
+    
     if (_conn == null) {
       _conn = _amberManager.getDataSource().getConnection();
       _isAutoCommit = true;
@@ -827,9 +850,14 @@ public class AmberConnectionImpl {
   public void create(AmberEntityHome home, Object obj)
     throws SQLException
   {
-    home.save(this, (Entity) obj);
+    if (contains(obj))
+      return;
 
-    _txEntities.add((Entity) obj);
+    Entity entity = (Entity) obj;
+	
+    home.save(this, entity);
+
+    addEntity(entity);
 
     Table table = home.getEntityType().getTable();
     addCompletion(new TableInvalidateCompletion(table.getName()));
@@ -1140,6 +1168,9 @@ public class AmberConnectionImpl {
     Connection conn = _conn;
     _conn = null;
 
+    Connection readConn = _readConn;
+    _readConn = null;
+
     boolean isAutoCommit = _isAutoCommit;
     _isAutoCommit = true;
 
@@ -1155,6 +1186,9 @@ public class AmberConnectionImpl {
       
       if (conn != null)
 	conn.close();
+      
+      if (readConn != null)
+	readConn.close();
     } catch (Exception e) {
       log.log(Level.WARNING, e.toString(), e);
     }

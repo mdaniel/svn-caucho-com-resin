@@ -31,7 +31,7 @@ package com.caucho.amber.gen;
 
 import com.caucho.java.gen.JavaClassGenerator;
 
-import com.caucho.amber.AmberManager;
+import com.caucho.amber.EnvAmberManager;
 
 import com.caucho.amber.type.EntityType;
 
@@ -42,7 +42,8 @@ public interface AmberGenerator {
   /**
    * Sets the amber manager.
    */
-  public void setAmberManager(AmberManager manager);
+  
+  // public void setAmberManager(EnvAmberManager manager);
   
   /**
    * Configures the type.

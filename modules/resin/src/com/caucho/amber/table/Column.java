@@ -336,55 +336,7 @@ public class Column {
   public void generatePrologue(JavaWriter out)
     throws IOException
   {
-    /*
-    if (_getter == null || _setter == null) {
-      out.print("public " + _type.getJavaTypeName() + " " + getFieldName() + ";");
-    }
-    */
   }
-
-  /**
-   * Generates the field getter.
-   *
-   * @param value the non-null value
-   */
-  /*
-  public String generateGet(String obj)
-  {
-    Thread.dumpStack();
-    if (obj == null)
-      return _type.generateNull();
-
-    if (_getter == null || _setter == null) {
-      if (obj.equals("super"))
-	return getFieldName();
-      else
-	return obj + "." + getFieldName();
-    }
-    else
-      return obj + "." + _getter.getName() + "()";
-  }
-  */
-
-  /**
-   * Generates the field setter.
-   *
-   * @param value the non-null value
-   */
-  /*
-  public String generateSet(String obj, String value)
-  {
-    if (_getter == null || _setter == null) {
-      if (obj.equals("super"))
-	return getFieldName() + " = " + value;
-      else
-	return obj + "." + getFieldName() + " = " + value;
-    }
-    else {
-      return obj + "." + _setter.getName() + "(" + value + ")";
-    }
-  }
-  */
 
   /**
    * Returns the field name.

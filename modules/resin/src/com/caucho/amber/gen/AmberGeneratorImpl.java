@@ -44,6 +44,7 @@ import com.caucho.java.gen.GenClass;
 import com.caucho.java.gen.DependencyComponent;
 
 import com.caucho.amber.AmberManager;
+import com.caucho.amber.EnvAmberManager;
 import com.caucho.amber.type.EntityType;
 
 import com.caucho.amber.entity.Entity;
@@ -55,19 +56,12 @@ public class AmberGeneratorImpl implements AmberGenerator {
   private static final L10N L = new L10N(AmberGeneratorImpl.class);
   private static final Logger log = Log.open(AmberGeneratorImpl.class);
 
-  private AmberManager _amberManager;
+  private EnvAmberManager _amberManager;
 
   private ArrayList<String> _pendingClassNames =
     new ArrayList<String>();
   
-  public AmberGeneratorImpl()
-  {
-  }
-
-  /**
-   * Sets the amber manager.
-   */
-  public void setAmberManager(AmberManager manager)
+  public AmberGeneratorImpl(EnvAmberManager manager)
   {
     _amberManager = manager;
   }

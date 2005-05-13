@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -32,6 +33,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import com.caucho.util.CharBuffer;
+import com.caucho.util.L10N;
 
 import com.caucho.amber.type.Type;
 import com.caucho.amber.type.StringType;
@@ -44,6 +46,8 @@ import com.caucho.amber.connection.AmberConnectionImpl;
  * Represents an Amber query expression
  */
 abstract public class AbstractAmberExpr implements AmberExpr {
+  private static final L10N L = new L10N(AbstractAmberExpr.class);
+  
   /**
    * Returns true for a boolean expression.
    */
@@ -58,6 +62,19 @@ abstract public class AbstractAmberExpr implements AmberExpr {
   public Type getType()
   {
     return StringType.create();
+  }
+
+  /**
+   * Converts to a boolean expression.
+   */
+  public AmberExpr createBoolean()
+    throws QueryParseException
+  {
+    if (isBoolean())
+      return this;
+    else
+      throw new QueryParseException(L.l("'{0}' can't be used as a boolean",
+				   this));
   }
 
   /**

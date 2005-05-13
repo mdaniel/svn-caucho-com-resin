@@ -60,7 +60,7 @@ import com.caucho.java.gen.JavaClassGenerator;
 import com.caucho.java.gen.DependencyComponent;
 import com.caucho.java.gen.GenClass;
 
-import com.caucho.amber.AmberManager;
+import com.caucho.amber.EnvAmberManager;
 import com.caucho.amber.AmberRuntimeException;
 
 import com.caucho.amber.type.EntityType;
@@ -88,10 +88,15 @@ public class AmberEnhancer implements AmberGenerator, ClassEnhancer {
   private Path _configDirectory;
   private boolean _useHibernateFiles;
 
-  private AmberManager _amberManager;
+  private EnvAmberManager _amberManager;
 
   private ArrayList<String> _pendingClassNames = new ArrayList<String>();
 
+  public AmberEnhancer(EnvAmberManager manager)
+  {
+    _amberManager = manager;
+  }
+  
   /**
    * Sets the config directory.
    */
@@ -106,14 +111,6 @@ public class AmberEnhancer implements AmberGenerator, ClassEnhancer {
   public void setUseHibernateFiles(boolean useHibernateFiles)
   {
     _useHibernateFiles = useHibernateFiles;
-  }
-
-  /**
-   * Sets the amber manager.
-   */
-  public void setAmberManager(AmberManager manager)
-  {
-    _amberManager = manager;
   }
 
   /**
@@ -135,7 +132,7 @@ public class AmberEnhancer implements AmberGenerator, ClassEnhancer {
 	parseHibernateMapping(path);
       }
 
-      _amberManager.generate();
+      // XXX: _amberManager.generate();
 
       compile();
 
@@ -309,7 +306,7 @@ public class AmberEnhancer implements AmberGenerator, ClassEnhancer {
     if (type != null) {
       log.info("Amber enhancing class " + className);
 
-      _amberManager.configure();
+      // XXX: _amberManager.configure();
 
       type.init();
 
@@ -350,25 +347,6 @@ public class AmberEnhancer implements AmberGenerator, ClassEnhancer {
     _pendingClassNames.add(type.getInstanceClassName());
     
     generateJava(javaGen, type);
-    /*
-    // XXX: publicize type.getBeanClass().getName()
-    
-    EntityGenerator gen = new EntityGenerator();
-    gen.setSearchPath(_configDirectory);
-    gen.setClassDir(getPath());
-    gen.setEntityType(type);
-    gen.setBaseClassName(type.getBeanClass().getName());
-
-    String extClassName = gen.getBaseClassName() + "__ResinExt";
-    type.setInstanceClassName(extClassName);
-    
-    gen.setExtClassName(extClassName);
-    */
-    /*
-    gen.generate();
-
-    type.setInstanceClassName(gen.getBaseClassName());
-    */
   }
   
   /**
@@ -533,7 +511,7 @@ public class AmberEnhancer implements AmberGenerator, ClassEnhancer {
       // XXX:
       // thread.setContextClassLoader(getRawLoader());
 
-      HibernateParser.parse(_amberManager, path);
+      // HibernateParser.parse(_amberManager, path);
     } finally {
       thread.setContextClassLoader(oldLoader);
     }

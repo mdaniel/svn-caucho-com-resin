@@ -77,6 +77,14 @@ public class PrimitiveBooleanType extends PrimitiveType {
   }
 
   /**
+   * Returns true for a boolean type.
+   */
+  public boolean isBoolean()
+  {
+    return true;
+  }
+
+  /**
    * Generates the type for the table.
    */
   public String generateCreateTableSQL(AmberManager manager, int length)
