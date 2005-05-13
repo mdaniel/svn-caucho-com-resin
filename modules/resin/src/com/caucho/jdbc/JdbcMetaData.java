@@ -275,6 +275,14 @@ public class JdbcMetaData {
   }
 
   /**
+   * Returns the code to test for a boolean value for a term.
+   */
+  public String generateBoolean(String term)
+  {
+    return term;
+  }
+
+  /**
    * Returns a limit.
    */
   public String limit(String sql, int max)
@@ -333,8 +341,6 @@ public class JdbcMetaData {
       rs = md.getTypeInfo();
       try {
 	while (rs.next()) {
-	  // System.out.println("T: " + sqlType + " " + rs.getShort("DATA_TYPE") + " " + rs.getString("TYPE_NAME") + " " + rs.getString("CREATE_PARAMS"));
-
 	  if (rs.getShort("DATA_TYPE") == sqlType) {
 	    String typeName = rs.getString("TYPE_NAME");
 	    String params = rs.getString("CREATE_PARAMS");

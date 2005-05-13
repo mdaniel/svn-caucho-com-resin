@@ -129,7 +129,12 @@ public class Jmx {
   public static LinkedHashMap<String,String>
     copyContextProperties(ClassLoader loader)
   {
-    return getMBeanServer().getContext(loader).copyProperties();
+    AbstractMBeanServer mbeanServer = getMBeanServer();
+
+    if (mbeanServer != null)
+      return mbeanServer.getContext(loader).copyProperties();
+    else
+      return new LinkedHashMap<String,String>();
   }
 
   /**
@@ -137,7 +142,10 @@ public class Jmx {
    */
   public static void setContextProperties(Map<String,String> properties)
   {
-    getMBeanServer().getContext().setProperties(properties);
+    AbstractMBeanServer mbeanServer = getMBeanServer();
+
+    if (mbeanServer != null)
+      mbeanServer.getContext().setProperties(properties);
   }
 
   /**
@@ -146,7 +154,10 @@ public class Jmx {
   public static void setContextProperties(Map<String,String> properties,
 					  ClassLoader loader)
   {
-    getMBeanServer().getContext(loader).setProperties(properties);
+    AbstractMBeanServer mbeanServer = getMBeanServer();
+
+    if (mbeanServer != null)
+      mbeanServer.getContext(loader).setProperties(properties);
   }
   
   /**

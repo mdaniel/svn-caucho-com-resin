@@ -36,5 +36,6 @@ public interface ByteCodeEnhancer {
   /**
    * Returns the enhanced .class or null if no enhancement.
    */
-  public byte[] enhance(byte []buffer, int offset, int length);
+  public byte[] enhance(String className,
+			byte []buffer, int offset, int length);
 }

@@ -1393,6 +1393,7 @@ public class JspParser {
         case '\\':
         case '\'':
         case '\"':
+	  _value.append('\\');
           _value.append((char) ch);
           ch = read();
           break;

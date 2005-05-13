@@ -21,6 +21,9 @@ r_cache = element cache {
   & (attribute enable { r_boolean-Type }
      | element enable { r_boolean-Type })?
 
+  & (attribute enable-range { r_boolean-Type }
+     | element enable-range { r_boolean-Type })?
+
   & (attribute entries { r_int } | element entries { r_int })?
 
   & (attribute memory-size { r_int } | element memory-size { r_int })?

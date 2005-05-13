@@ -86,4 +86,12 @@ public class PostgresMetaData extends JdbcMetaData {
   {
     return "SELECT Currval('" + name + "')";
   }
+
+  /**
+   * Returns the code to test for a boolean value for a term.
+   */
+  public String generateBoolean(String term)
+  {
+    return term + "= 't'";
+  }
 }

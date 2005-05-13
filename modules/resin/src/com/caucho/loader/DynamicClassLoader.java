@@ -1171,7 +1171,8 @@ public class DynamicClassLoader extends java.net.URLClassLoader
 
       if (_byteCodeEnhancer != null) {
 	try {
-	  byte []enhancedBuffer = _byteCodeEnhancer.enhance(bBuf, 0, bLen);
+	  byte []enhancedBuffer = _byteCodeEnhancer.enhance(name,
+							    bBuf, 0, bLen);
 
 	  if (enhancedBuffer != null) {
 	    bBuf = enhancedBuffer;

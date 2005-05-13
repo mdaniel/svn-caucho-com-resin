@@ -74,7 +74,11 @@ public class CreateAttributeStrategy extends AttributeStrategy {
                         Node node)
           throws Exception
   {
-    Object child = _createMethod.invoke(bean);
+    // server/23j0
+    Object child = builder.createResinType(node);
+
+    if (child == null)
+      child = _createMethod.invoke(bean);
 
     TypeStrategy childStrategy;
 

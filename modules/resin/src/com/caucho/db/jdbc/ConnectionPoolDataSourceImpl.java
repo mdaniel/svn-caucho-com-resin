@@ -40,6 +40,7 @@ import javax.sql.*;
 import com.caucho.util.L10N;
 
 import com.caucho.vfs.Path;
+import com.caucho.vfs.Vfs;
 
 import com.caucho.log.Log;
 
@@ -71,6 +72,17 @@ public class ConnectionPoolDataSourceImpl implements ConnectionPoolDataSource {
   public void setPath(Path path)
   {
     _database.setPath(path);
+  }
+
+  /**
+   * Sets the url to the database.
+   */
+  public void setURL(String url)
+  {
+    if (url.startsWith("resin:"))
+      url = url.substring(6);
+    
+    _database.setPath(Vfs.lookup(url));
   }
 
   /**

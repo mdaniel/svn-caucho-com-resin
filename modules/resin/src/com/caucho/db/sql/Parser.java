@@ -1228,7 +1228,7 @@ public class Parser {
 
       token = scanToken();
 
-      if (token != BETWEEN)
+      if (token != BETWEEN && token != LIKE)
 	throw error(L.l("NOT is not allowed here"));
     }
 
@@ -1269,6 +1269,16 @@ public class Parser {
 	  return new IsNullExpr(left, isNot);
 	else
 	  throw error(L.l("expected NULL at '{0}'", tokenName(token)));
+      }
+
+    case LIKE:
+      {
+	token = scanToken();
+
+	if (token == STRING)
+	  return new LikeExpr(left, _lexeme, isNot);
+	else
+	  throw error(L.l("expected string at '{0}'", tokenName(token)));
       }
 
     default:

@@ -48,6 +48,8 @@ public class ByteCodeClassScanner {
   static private final Logger log = Log.open(ByteCodeClassScanner.class);
   static private final L10N L = new L10N(ByteCodeClassScanner.class);
 
+  private final String _className;
+
   private final byte []_buffer;
   private final int _length;
 
@@ -58,9 +60,12 @@ public class ByteCodeClassScanner {
 
   private CharBuffer _cb = new CharBuffer();
 
-  public ByteCodeClassScanner(byte []buffer, int offset, int length,
+  public ByteCodeClassScanner(String className,
+			      byte []buffer, int offset, int length,
 			      ByteCodeClassMatcher matcher)
   {
+    _className = className;
+    
     _buffer = buffer;
     _index = offset;
     _length = length;
@@ -70,50 +75,57 @@ public class ByteCodeClassScanner {
 
   public boolean scan()
   {
-    int magic = readInt();
+    try {
+      int magic = readInt();
 
-    if (magic != JavaClass.MAGIC)
-      throw error(L.l("bad magic number in class file"));
+      if (magic != JavaClass.MAGIC)
+	throw error(L.l("bad magic number in class file"));
 
-    int minor = readShort();
-    int major = readShort();
+      int minor = readShort();
+      int major = readShort();
 
-    parseConstantPool();
+      parseConstantPool();
 
-    int accessFlags = readShort();
-    int thisClassIndex = readShort();
+      int accessFlags = readShort();
+      int thisClassIndex = readShort();
 
-    String thisName = parseClass(thisClassIndex).toString();
+      String thisName = parseClass(thisClassIndex).toString();
 
-    if (_matcher.isClassMatch(thisName))
-      return true;
+      if (_matcher.isClassMatch(thisName))
+	return true;
     
-    int superClassIndex = readShort();
+      int superClassIndex = readShort();
 
-    int interfaceCount = readShort();
-    for (int i = 0; i < interfaceCount; i++) {
-      int classIndex = readShort();
+      int interfaceCount = readShort();
+      for (int i = 0; i < interfaceCount; i++) {
+	int classIndex = readShort();
+      }
+
+      int fieldCount = readShort();
+      for (int i = 0; i < fieldCount; i++) {
+	if (parseField())
+	  return true;
+      }
+
+      int methodCount = readShort();
+      for (int i = 0; i < methodCount; i++) {
+	if (parseMethod())
+	  return true;
+      }
+
+      int attrCount = readShort();
+      for (int i = 0; i < attrCount; i++) {
+	if (parseAttribute())
+	  return true;
+      }
+
+      return false;
+    } catch (Throwable e) {
+      log.warning("failed scanning class " + _className);
+      log.log(Level.WARNING, e.toString(), e);
+
+      return false;
     }
-
-    int fieldCount = readShort();
-    for (int i = 0; i < fieldCount; i++) {
-      if (parseField())
-	return true;
-    }
-
-    int methodCount = readShort();
-    for (int i = 0; i < methodCount; i++) {
-      if (parseMethod())
-	return true;
-    }
-
-    int attrCount = readShort();
-    for (int i = 0; i < attrCount; i++) {
-      if (parseAttribute())
-	return true;
-    }
-
-    return false;
   }
 
   /**

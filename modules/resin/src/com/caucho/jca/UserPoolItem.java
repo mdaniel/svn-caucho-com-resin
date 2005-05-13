@@ -302,14 +302,14 @@ class UserPoolItem {
 	
 	poolItem.toIdle();
 	
-	throw new IllegalStateException(e);
+	throw new RuntimeException(e);
       } catch (Throwable e) {
 	removeFromShareList();
 
 	poolItem.setConnectionError();
 	poolItem.toIdle();
 	
-	throw new IllegalStateException(e);
+	throw new RuntimeException(e);
       }
     }
   }

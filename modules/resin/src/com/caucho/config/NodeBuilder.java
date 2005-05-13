@@ -449,10 +449,11 @@ public class NodeBuilder {
   /**
    * Create a custom resin:type value.
    */
-  private Object createResinType(Node child)
+  Object createResinType(Node child)
     throws Exception
   {
     String type = getValue(RESIN_TYPE, child, null);
+
     type = getValue(RESIN_TYPE_NS, child, type);
 
     if (type == null)

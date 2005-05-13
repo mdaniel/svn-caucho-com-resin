@@ -226,12 +226,13 @@ public class EnhancerManager implements ByteCodeEnhancer, ByteCodeClassMatcher {
   /**
    * Returns the enhanced .class or null if no enhancement.
    */
-  public byte[] enhance(byte []buffer, int offset, int length)
+  public byte[] enhance(String className,
+			byte []buffer, int offset, int length)
   {
     ByteCodeClassScanner scanner;
 
     // XXX: temp
-    scanner = new ByteCodeClassScanner(buffer, offset, length, this);
+    scanner = new ByteCodeClassScanner(className, buffer, offset, length, this);
 
     if (scanner.scan()) {
       try {

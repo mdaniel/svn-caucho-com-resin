@@ -1218,4 +1218,9 @@ class DatabaseMetaDataImpl implements DatabaseMetaData {
   {
     return null;
   }
+
+  public String toString()
+  {
+    return "DatabaseMetaDataImpl[]";
+  }
 }
