@@ -1127,7 +1127,7 @@ caucho_status(request_rec *r)
   ap_rputs("<h1>Status : Caucho Servlet Engine</h1>\n", r);
 
   if (config->error) {
-    char buf[8192];
+    char buf[BUF_LENGTH];
     escape_html(buf, config->error);
     ap_rprintf(r, "<h2 color='red'>Error : %s</h2>\n", buf);
   }

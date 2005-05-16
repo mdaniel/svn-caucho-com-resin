@@ -79,6 +79,9 @@ public class StderrStream extends StreamImpl {
   public void write(byte []buf, int offset, int length, boolean isEnd)
     throws IOException
   {
-    System.err.write(buf, offset, length);
+    WriteStream err = EnvironmentStream.getOriginalSystemErr();
+    
+    err.write(buf, offset, length);
+    err.flush();
   }
 }

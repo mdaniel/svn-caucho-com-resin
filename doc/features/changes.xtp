@@ -2,9 +2,13 @@
 
 <a href='changes-2.xtp'>Resin 2.1 changes</a>
 
-<s2 title='3.0.snap - May 6, 2005'>
+<s2 title='3.0.snap - May 16, 2005'>
 <ul>
-<li>UserPoolItem used IllegalStateException(Throwable) which isn't available on JDK 1.4 (rep by Patrick Burleson)
+<li>GzipFilter now accepts deflate as well as gzip (rep by Anupam Bagchi)
+<li>Added TaskResource
+<li>__FILE__ is available in the config file for the current file (rep by Glen)
+<li>stdout: and stderr: use the original system.out.  They are no longer affected by &lt;stdout> and &lt;stderr> (rep by David Becker)
+<li>(2006-05-16) UserPoolItem used IllegalStateException(Throwable) which isn't available on JDK 1.4 (rep by Patrick Burleson)
 <li>Added read-data-source and xa-data-source to ejb-server
 <li>refactor amber to handle multiple ejb-server blocks (rep by Francois Bertrand)
 <li>mod_caucho.c compilation problems with solaris (rep by 

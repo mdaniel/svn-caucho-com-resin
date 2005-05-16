@@ -133,6 +133,8 @@ public class NodeBuilder {
     try {
       _currentBuilder.set(this);
 
+      _varResolver.put("__FILE__", top.getBaseURI());
+
       TypeStrategy typeStrategy;
       typeStrategy = TypeStrategyFactory.getTypeStrategy(bean.getClass());
 
@@ -158,6 +160,8 @@ public class NodeBuilder {
     NodeBuilder oldBuilder = _currentBuilder.get();
     try {
       _currentBuilder.set(this);
+
+      _varResolver.put("__FILE__", top.getBaseURI());
 
       TypeStrategy typeStrategy;
       typeStrategy = TypeStrategyFactory.getTypeStrategy(bean.getClass());
@@ -311,7 +315,7 @@ public class NodeBuilder {
   }
 
   /**
-   * ConfigureChildProperty is the main workhorse of the configuration.
+   * ConfigureAttributeImpl is the main workhorse of the configuration.
    */
   void configureAttributeImpl(TypeStrategy typeStrategy,
 		              Object bean,

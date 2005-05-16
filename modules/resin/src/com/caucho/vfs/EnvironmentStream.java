@@ -42,6 +42,11 @@ import com.caucho.loader.EnvironmentLocal;
  * A stream that varies depending on the environment class loader.
  */
 public class EnvironmentStream extends StreamImpl {
+  // original stdout stream
+  private final static WriteStream _origSystemOut = Vfs.openWrite(System.out);
+  // original stderr stream
+  private final static WriteStream _origSystemErr = Vfs.openWrite(System.err);
+  
   // static stdout stream
   private static PrintStream _systemOut;
   // static stderr stream
@@ -220,6 +225,14 @@ public class EnvironmentStream extends StreamImpl {
   }
 
   /**
+   * Returns the original System.out writer
+   */
+  public static WriteStream getOriginalSystemOut()
+  {
+    return _origSystemOut;
+  }
+
+  /**
    * Sets path as the backing stream for System.err
    */
   public static void setStderr(OutputStream os)
@@ -258,5 +271,18 @@ public class EnvironmentStream extends StreamImpl {
   public static EnvironmentStream getStderr()
   {
     return _stderrStream;
+  }
+
+  /**
+   * Returns the original System.out writer
+   */
+  public static WriteStream getOriginalSystemErr()
+  {
+    return _origSystemErr;
+  }
+
+  static {
+    _origSystemOut.setFlushOnNewline(true);
+    _origSystemErr.setFlushOnNewline(true);
   }
 }

@@ -8,6 +8,43 @@
 
 <summary objsummary='localtoc'/>
 
+<section title="GzipFilter">
+
+<p>GzipFilter now understands "deflate" as well as "gzip".  "gzip" has
+priority, currently.</p>
+
+</section>
+
+<section title="TaskResource">
+
+<p>There is now a task resource for launching a thread for
+long-running initialization objects.  The work task just needs
+to implement java.lang.Runnable.</p>
+
+<example>
+&lt;resource type="com.caucho.resources.TaskResource">
+  &lt;init>
+    &lt;work resin:type="qa.TestWork"/>
+  &lt;/init>
+&lt;/resource>
+</example>
+
+</section>
+
+<section title="__FILE__">
+
+<p>The EL variable $\{__FILE__} is now available, referring to the
+current configuration file.</p>
+
+</section>
+
+<section title="stdout: and stderr:">
+
+<p>The stdout: and stderr: VFS schemes now use the original values of
+System.out and System.err.  They are no longer affected by the &lt;stdout> and &lt;stderr> items.</p>
+
+</section>
+
 <section title="cache/enable-range">
 
 <p>Added an enable-range attribute to the &lt;cache>, defaulting to true.

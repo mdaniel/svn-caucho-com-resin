@@ -52,7 +52,6 @@
  */
 module AP_MODULE_DECLARE_DATA caucho_module;
 
-#define BUF_LENGTH 8192
 #define DEFAULT_PORT 6802
 
 #define REQ_CONTINUE HMUX_ACK

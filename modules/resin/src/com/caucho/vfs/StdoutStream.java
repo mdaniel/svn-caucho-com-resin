@@ -82,6 +82,9 @@ public class StdoutStream extends StreamImpl {
   public void write(byte []buf, int offset, int length, boolean isEnd)
     throws IOException
   {
-    System.out.write(buf, offset, length);
+    WriteStream out = EnvironmentStream.getOriginalSystemOut();
+    
+    out.write(buf, offset, length);
+    out.flush();
   }
 }

@@ -255,7 +255,7 @@ cse_error(config_t *config, EXTENSION_CONTROL_BLOCK *r)
 static void
 write_var(stream_t *s, EXTENSION_CONTROL_BLOCK *r, char *name, int code)
 {
-	char buf[8192];
+	char buf[BUF_LENGTH];
         char *ptr;
 	unsigned long size = sizeof(buf);
 
@@ -273,7 +273,7 @@ write_var(stream_t *s, EXTENSION_CONTROL_BLOCK *r, char *name, int code)
 static void
 write_header(stream_t *s, EXTENSION_CONTROL_BLOCK *r, char *name)
 {
-  char buf[8192];
+  char buf[BUF_LENGTH];
   unsigned long size = sizeof(buf);
   char *ptr = buf;
 
@@ -296,7 +296,7 @@ write_header(stream_t *s, EXTENSION_CONTROL_BLOCK *r, char *name)
 static void
 write_ssl(stream_t *s, EXTENSION_CONTROL_BLOCK *r)
 {
-  char buf[8192];
+  char buf[BUF_LENGTH];
   unsigned long size = sizeof(buf);
 
 	if (! r->GetServerVariable(r->ConnID, "SERVER_PORT_SECURE", buf, &size) ||
@@ -320,7 +320,7 @@ write_ssl(stream_t *s, EXTENSION_CONTROL_BLOCK *r)
 		return;
 
 	// There is a client certificate
-    char cert_buf[8192]={0};
+    char cert_buf[BUF_LENGTH]={0};
     CERT_CONTEXT_EX cert;
     cert.cbAllocated = sizeof(cert_buf);
     cert.CertContext.pbCertEncoded = (BYTE*) cert_buf;
@@ -354,8 +354,8 @@ write_env(stream_t *s, EXTENSION_CONTROL_BLOCK *r)
 {
 	int isHttp11 = 0;
 
-	char protocol[8192];
-	char rawUri[8192];
+	char protocol[BUF_LENGTH];
+	char rawUri[BUF_LENGTH];
 	char *uri = rawUri;
 	unsigned long size = sizeof(protocol);
 
@@ -482,7 +482,7 @@ static int
 send_data(stream_t *s, EXTENSION_CONTROL_BLOCK *r, config_t *config, int ack)
 {
 	char headers[32 * 1024];
-	char status[8192];
+	char status[BUF_LENGTH];
 	char *status_ptr = status;
     char *header_ptr = headers;
     char *header_end = header_ptr + sizeof(headers) - 256;
@@ -573,7 +573,7 @@ send_data(stream_t *s, EXTENSION_CONTROL_BLOCK *r, config_t *config, int ack)
 		  return code;
 
 		default:
-			if (code < 0 || read_len < 0 || read_len > 8192) {
+			if (code < 0 || read_len < 0 || read_len > BUF_LENGTH) {
 				code = -1;
 				break;
 			}
@@ -872,7 +872,7 @@ cse_handle_request(config_t *config, EXTENSION_CONTROL_BLOCK *r)
 	char host[1024];
 	char port_buf[80];
 	int port = 0;
-	char url[8192];
+	char url[BUF_LENGTH];
 	char *ptr = url;
 	unsigned long size;
 
