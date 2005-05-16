@@ -300,7 +300,7 @@ public class CacheConnectionImpl extends AmberConnectionImpl {
     DataSource dataSource = _amberManager.getReadDataSource();
 
     if (dataSource == null)
-      _amberManager.getDataSource();
+      dataSource = _amberManager.getDataSource();
       
     if (_conn == null) {
       _conn = dataSource.getConnection();

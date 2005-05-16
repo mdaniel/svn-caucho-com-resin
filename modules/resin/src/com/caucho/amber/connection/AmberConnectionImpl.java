@@ -650,7 +650,6 @@ public class AmberConnectionImpl {
   {
     DataSource readDataSource = _amberManager.getReadDataSource();
 
-    System.out.println("XA: " + _isXA + " " + _isInTransaction);
     if (! _isXA && ! _isInTransaction && readDataSource != null) {
       if (_readConn == null) {
 	_readConn = readDataSource.getConnection();

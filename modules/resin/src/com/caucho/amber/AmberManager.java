@@ -516,7 +516,7 @@ public class AmberManager {
 	  entityType.setGenerated(true);
 
 	  try {
-	    getEnvManager().getGenerator().generateJava(javaGen, entityType);
+	    getGenerator().generateJava(javaGen, entityType);
 	  } catch (Throwable e) {
 	    log.log(Level.FINER, e.toString(), e);
 	  }
