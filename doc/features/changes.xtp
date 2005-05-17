@@ -4,6 +4,10 @@
 
 <s2 title='3.0.snap - May 16, 2005'>
 <ul>
+<li>Added cookie-module-cluster to session-config defaulting to false (rep by Anupam Bagchi)
+<li>session timeout must match persistent timeout (rep by Forrest Girouard)
+<li>filter-class validation was using old BeanUtil instead of Config (rep by Zhenlei Cai)
+<li>isapi_srun.dll issues with flushing (rep by Jason Fotinatos and Clark Archer)
 <li>GzipFilter now accepts deflate as well as gzip (rep by Anupam Bagchi)
 <li>Added TaskResource
 <li>__FILE__ is available in the config file for the current file (rep by Glen)

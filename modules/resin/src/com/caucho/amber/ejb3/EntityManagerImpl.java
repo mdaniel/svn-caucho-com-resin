@@ -114,6 +114,8 @@ public class EntityManagerImpl implements EntityManager, CloseResource {
     try {
       AmberConnectionImpl aConn = getAmberConnection();
 
+      System.out.println("ACON:: " + aConn);
+
       return aConn.load(entityName, primaryKey);
     } catch (RuntimeException e) {
       throw e;

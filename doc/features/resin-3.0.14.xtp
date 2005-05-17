@@ -8,6 +8,26 @@
 
 <summary objsummary='localtoc'/>
 
+<section title="cookie-modulo-cluster">
+
+<p>The cluster encoding in the session cookie is now controllable by
+cookie-module-cluster, defaulting to false.</p>
+
+<p>If true, session cookie values
+can start with modulo values of the index.  So a two server cluster
+could generate 'a', 'c', 'e', g', etc. for the index='1' server.</p>
+
+<p>If false, the session cookie value matches the cluster index.
+So the two server cluster would only generate the 'a' prefix.</p>
+
+</section>
+
+<section title="isapi_srun.dll">
+
+<p>Important flusing/buffering issues with isapi_srun.dll fixed.</p>
+
+</section>
+
 <section title="GzipFilter">
 
 <p>GzipFilter now understands "deflate" as well as "gzip".  "gzip" has

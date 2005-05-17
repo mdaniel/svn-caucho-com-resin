@@ -36,6 +36,9 @@ import javax.servlet.http.*;
 
 import com.caucho.util.*;
 
+import com.caucho.config.Config;
+import com.caucho.config.ConfigException;
+
 import com.caucho.config.types.InitParam;
 import com.caucho.config.types.InitProgram;
 
@@ -43,7 +46,7 @@ import com.caucho.config.types.InitProgram;
  * Configuration for a filter.
  */
 public class FilterConfigImpl implements FilterConfig {
-  static L10N L = new L10N(FilterConfigImpl.class);
+  private static final L10N L = new L10N(FilterConfigImpl.class);
   
   private String _filterName;
   private String _filterClassName;
@@ -82,13 +85,13 @@ public class FilterConfigImpl implements FilterConfig {
    * Sets the filter class.
    */
   public void setFilterClass(String filterClassName)
-    throws RegistryException, ClassNotFoundException
+    throws ConfigException, ClassNotFoundException
   {
     _filterClassName = filterClassName;
     
     _filterClass = CauchoSystem.loadClass(filterClassName);
 
-    BeanUtil.validateClass(_filterClass, Filter.class);
+    Config.validate(_filterClass, Filter.class);
   }
 
   /**

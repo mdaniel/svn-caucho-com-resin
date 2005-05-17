@@ -58,6 +58,8 @@ public class EntityManagerImpl implements EntityManager, CloseResource {
    */
   public EntityManagerImpl(EnvAmberManager amberManager)
   {
+    Thread.dumpStack();
+    
     _amberManager = amberManager;
   }
 

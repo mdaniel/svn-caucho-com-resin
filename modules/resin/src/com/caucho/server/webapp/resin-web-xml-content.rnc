@@ -517,6 +517,9 @@ r_session-config = element session-config {
   & (attribute cookie-max-age { r_period }
      | element cookie-max-age { r_period })?
 
+  & (attribute cookie-modulo-cluster { r_boolean-Type }
+     | element cookie-modulo-cluster { r_boolean-Type })?
+
   & (attribute cookie-secure { r_boolean-Type }
      | element cookie-secure { r_boolean-Type })?
 

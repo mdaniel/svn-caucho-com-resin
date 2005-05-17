@@ -317,7 +317,7 @@ public class AmberConnectionImpl {
   {
     try {
       AmberEntityHome home = _amberManager.getEntityHome(name);
-      
+
       if (home == null)
 	throw new RuntimeException(L.l("no matching home for {0}", name));
 
@@ -404,7 +404,7 @@ public class AmberConnectionImpl {
     throws AmberException
   {
     AmberEntityHome entityHome = _amberManager.getEntityHome(cl.getName());
-    
+
     if (entityHome == null)
       return null;
 

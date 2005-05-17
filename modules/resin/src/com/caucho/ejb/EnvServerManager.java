@@ -160,6 +160,7 @@ public class EnvServerManager implements EnvironmentListener {
       throw new RuntimeException(e);
     }
 
+    /* XXX: handled by amber
     try {
       Object entityProxy = new EntityManagerImpl(_envAmberManager);
 
@@ -169,6 +170,7 @@ public class EnvServerManager implements EnvironmentListener {
     } catch (Throwable e) {
       log.log(Level.FINER, e.toString(), e);
     }
+    */
   }
 
   /**

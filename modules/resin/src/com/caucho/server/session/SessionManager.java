@@ -105,6 +105,8 @@ public class SessionManager implements ObjectManager, AlarmListener {
   private boolean _enableSessionCookies = true;
   // allow session rewriting
   private boolean _enableSessionUrls = true;
+
+  private boolean _isModuloSessionId = false;
   
   // invalidate the session after the listeners have been called
   private boolean _isInvalidateAfterListener;
@@ -824,6 +826,14 @@ public class SessionManager implements ObjectManager, AlarmListener {
     _cookieLength = cookieLength;
   }
 
+  /**
+   * Sets module session id generation.
+   */
+  public void setCookieModuloCluster(boolean isModulo)
+  {
+    _isModuloSessionId = isModulo;
+  }
+
   public void start()
     throws Exception
   {
@@ -928,8 +938,12 @@ public class SessionManager implements ObjectManager, AlarmListener {
       int digit = (int) (random & 0x3f);
       random = random >> 6;
 
-      if (_srunLength > 0)
+      if (_srunLength <= 0) {
+      }
+      else if (_isModuloSessionId)
 	digit = (digit - digit % _srunLength) + index;
+      else
+	digit = index;
 
       // server/01l3 - check for overflow 
       if (digit >= 64)
@@ -1252,12 +1266,14 @@ public class SessionManager implements ObjectManager, AlarmListener {
 	return;
 
       long now = Alarm.getCurrentTime();
+      long accessWindow = _storeManager.getAccessWindowTime();
+      
       synchronized (_sessions) {
 	_sessionIter = _sessions.values(_sessionIter);
 	while (_sessionIter.hasNext()) {
 	  SessionImpl session = _sessionIter.next();
 
-	  long maxIdleTime = session._maxInactiveInterval;
+	  long maxIdleTime = session._maxInactiveInterval + accessWindow;
 
 	  if (session.inUse())
 	    liveSessions++;
@@ -1282,17 +1298,8 @@ public class SessionManager implements ObjectManager, AlarmListener {
 	    // if not the owner, then just remove
 	    _sessions.remove(session.getId());
 	  }
-	  else if ((session._accessTime
-		    + maxIdleTime
-		    + _storeManager.getAccessWindowTime())
-		   < now) {
-	    // if idle timed out, then invalidate
-	    // server/12cg
-	    session.invalidate(true);
-	  }
 	  else {
-	    // just remove because there's a persistent copy
-	    _sessions.remove(session.getId());
+	    session.invalidate(true);
 	  }
 	} catch (Throwable e) {
 	  log.log(Level.FINER, e.toString(), e);
