@@ -1,5 +1,5 @@
 CC=gcc
-CFLAGS_SHLIB=-fpic -DSHARED_MODULE
+CFLAGS_SHLIB=-fpic
 LD=/usr/bin/ld
 OS=
 SO=so
@@ -7,10 +7,10 @@ CPU=i386
 LDFLAGS=
 LDFLAGS_SHLIB=-shared -L/usr/lib
 PROXY_LIBS=-lpthread
-APACHE_INC=-I/usr/local/apache1/include
-resin_conf=/usr/local/apache1/conf/httpd.conf
-resin_libexec=/usr/local/apache1/libexec
-resin_home=/home/ferg/test/resin-pro
+APACHE_INC=-I/usr/include/httpd
+resin_conf=/etc/httpd/conf/httpd.conf
+resin_libexec=/usr/lib/httpd/modules
+resin_home=/home/ferg/ws/resin
 JNI_INCLUDE=-I/usr/java/include -I/usr/java/include/linux
 INCLUDES =  -I/usr/include -I/usr/kerberos/include $(JNI_INCLUDE) -I../common
 CFLAGS = -g -O2 -DPOLL -DHAS_JVMTI -DRESIN_HOME=\"$(resin_home)\" $(INCLUDES) -DCPU=\"$(CPU)\" -DOS=$(OS)

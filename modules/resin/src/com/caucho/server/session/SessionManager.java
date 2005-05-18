@@ -1266,7 +1266,10 @@ public class SessionManager implements ObjectManager, AlarmListener {
 	return;
 
       long now = Alarm.getCurrentTime();
-      long accessWindow = _storeManager.getAccessWindowTime();
+      long accessWindow = 0;
+
+      if (_storeManager != null)
+	accessWindow = _storeManager.getAccessWindowTime();
       
       synchronized (_sessions) {
 	_sessionIter = _sessions.values(_sessionIter);

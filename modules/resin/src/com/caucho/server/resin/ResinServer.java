@@ -558,7 +558,7 @@ public class ResinServer
     /**
      * Returns true for Resin professional.
      */
-    public boolean isResinProfessional()
+    public boolean isProfessional()
     {
       return _isResinProfessional;
     }

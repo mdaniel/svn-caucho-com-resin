@@ -8919,28 +8919,28 @@ if test "${ENABLE_SSL}" = false; then
 elif test -n "${OPENSSL_LIB}"; then
   foo=bar
 
-elif test -n "${b64}" -a -r /lib64/libcrypt.so; then
+elif test -n "${b64}" -a -r /lib64/libcrypto.so; then
   OPENSSL_LIB=/lib64
-elif test -n "${b64}" -a -r /usr/lib64/libcrypt.so; then
+elif test -n "${b64}" -a -r /usr/lib64/libcrypto.so; then
   OPENSSL_LIB=/usr/lib64
 
-elif test -r /lib/libcrypt.so; then
+elif test -r /lib/libcrypto.so; then
   OPENSSL_LIB=/lib
-elif test -r /lib/libcrypt.dylib; then
+elif test -r /lib/libcrypto.dylib; then
   OPENSSL_LIB=/lib
 
-elif test -r /usr/lib/libcrypt.so; then
+elif test -r /usr/lib/libcrypto.so; then
   OPENSSL_LIB=/usr/lib
-elif test -r /usr/lib/libcrypt.dylib; then
+elif test -r /usr/lib/libcrypto.dylib; then
   OPENSSL_LIB=/usr/lib
 
-elif test -r /usr/local/ssl/lib/libcrypt.so; then
+elif test -r /usr/local/ssl/lib/libcrypto.so; then
   OPENSSL_LIB=/usr/local/ssl/lib
-elif test -r /usr/local/ssl/lib/libcrypt.dylib; then
+elif test -r /usr/local/ssl/lib/libcrypto.dylib; then
   OPENSSL_LIB=/usr/local/ssl/lib
-elif test -r ${OPENSSL}/lib/libcrypt.a; then
+elif test -r ${OPENSSL}/lib/libcrypto.a; then
   OPENSSL_LIB=${OPENSSL}/lib
-elif test -r /usr/local/ssl/lib/libcrypt.a; then
+elif test -r /usr/local/ssl/lib/libcrypto.a; then
   OPENSSL_LIB=/usr/local/ssl/lib
 elif test -r /usr/local/lib/libssl.a; then
   OPENSSL_LIB=/usr/local/lib
@@ -8950,15 +8950,15 @@ fi
 
 if test -z "${OPENSSL_LIB}"; then
   foo=bar
-elif test -r "${OPENSSL_LIB}/libcrypt.so"; then
-  SSL_LIBS="${SSL_LIBS} -lcrypt"
-elif test -r "${OPENSSL_LIB}/libcrypt.dylib"; then
-  SSL_LIBS="${SSL_LIBS} -lcrypt"
-elif test -r "${OPENSSL_LIB}/libcrypt.a"; then
-  SSL_LIBS="${SSL_LIBS} ${OPENSSL_LIB}/libcrypt.a"
+elif test -r "${OPENSSL_LIB}/libcrypto.so"; then
+  SSL_LIBS="${SSL_LIBS} -lcrypto"
+elif test -r "${OPENSSL_LIB}/libcrypto.dylib"; then
+  SSL_LIBS="${SSL_LIBS} -lcrypto"
+elif test -r "${OPENSSL_LIB}/libcrypto.a"; then
+  SSL_LIBS="${SSL_LIBS} ${OPENSSL_LIB}/libcrypto.a"
 else
   # probably an error
-  SSL_LIBS="${SSL_LIBS} -lcrypt"
+  SSL_LIBS="${SSL_LIBS} -lcrypto"
 fi
 
 if test -z "${OPENSSL_LIB}"; then
@@ -8986,9 +8986,9 @@ if test "${ENABLE_SSL}" = false; then
   foo=bar
 elif test -z "${OPENSSL_LIB}"; then
   foo=bar
-elif test ! -r "${OPENSSL_LIB}/libcrypt.so" -a \
-          ! -r "${OPENSSL_LIB}/libcrypt.dylib" -a \
-          ! -r "${OPENSSL_LIB}/libcrypt.a" ; then
+elif test ! -r "${OPENSSL_LIB}/libcrypto.so" -a \
+          ! -r "${OPENSSL_LIB}/libcrypto.dylib" -a \
+          ! -r "${OPENSSL_LIB}/libcrypto.a" ; then
   { { echo "$as_me:$LINENO: error: Can't find valid OpenSSL library in ${OPENSSL_LIB}" >&5
 echo "$as_me: error: Can't find valid OpenSSL library in ${OPENSSL_LIB}" >&2;}
    { (exit 1); exit 1; }; }
@@ -9024,7 +9024,7 @@ else
   fi
   SSL_OBJ=ssl.o
   LDFLAGS_SHLIB="${LDFLAGS_SHLIB} -L${OPENSSL_LIB}"
-  # PROXY_LIBS="$PROXY_LIBS ${OPENSSL_LIB}/libssl.a ${OPENSSL_LIB}/libcrypt.a"
+  # PROXY_LIBS="$PROXY_LIBS ${OPENSSL_LIB}/libssl.a ${OPENSSL_LIB}/libcrypto.a"
 fi
 
 if test -d /usr/kerberos/include; then
@@ -9059,17 +9059,16 @@ ${CC} -o conftest ${CFLAGS_OPENSSL} ${CFLAGS} ${INCLUDES} conftest.$ac_ext -L${O
 if test "$?" != 0; then
   ${CC} -o conftest ${CFLAGS_OPENSSL} ${CFLAGS} ${INCLUDES} conftest.$ac_ext -L${OPENSSL_LIB} ${SSL_LIBS} ${PROXY_LIBS}
 
-  { { echo "$as_me:$LINENO: error: Can't compile SSL.  Check compilation flags: ${CC} ${CFLAGS_OPENSSL} ${CFLAGS} ${INCLUDES} -L${OPENSSL_LIB} ${SSL_LIBS} ${PROXY_LIBS}" >&5
-echo "$as_me: error: Can't compile SSL.  Check compilation flags: ${CC} ${CFLAGS_OPENSSL} ${CFLAGS} ${INCLUDES} -L${OPENSSL_LIB} ${SSL_LIBS} ${PROXY_LIBS}" >&2;}
-   { (exit 1); exit 1; }; }
+  { echo "$as_me:$LINENO: WARNING: Can't compile SSL.  Check compilation flags: ${CC} ${CFLAGS_OPENSSL} ${CFLAGS} ${INCLUDES} -L${OPENSSL_LIB} ${SSL_LIBS} ${PROXY_LIBS}" >&5
+echo "$as_me: WARNING: Can't compile SSL.  Check compilation flags: ${CC} ${CFLAGS_OPENSSL} ${CFLAGS} ${INCLUDES} -L${OPENSSL_LIB} ${SSL_LIBS} ${PROXY_LIBS}" >&2;}
+
   resin_ssl_plugin=""
 else
   ./conftest
 
   if test "$?" != 0; then
-    { { echo "$as_me:$LINENO: error: Can't execute SSL.  Check that load version in the library path: ${LD_LIBRARY_PATH} matches the expected version. }" >&5
-echo "$as_me: error: Can't execute SSL.  Check that load version in the library path: ${LD_LIBRARY_PATH} matches the expected version. }" >&2;}
-   { (exit 1); exit 1; }; }
+    { echo "$as_me:$LINENO: WARNING: Can't execute SSL.  Check that load version in the library path: ${LD_LIBRARY_PATH} matches the expected version." >&5
+echo "$as_me: WARNING: Can't execute SSL.  Check that load version in the library path: ${LD_LIBRARY_PATH} matches the expected version." >&2;}
   fi
 fi
 

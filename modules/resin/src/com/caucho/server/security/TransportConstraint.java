@@ -90,7 +90,7 @@ public class TransportConstraint extends AbstractConstraint {
       if (request.getPathInfo() != null)
 	url += request.getPathInfo();
       if (request.getQueryString() != null)
-	url += request.getQueryString();
+	url += "?" + request.getQueryString();
 
       response.sendRedirect(url);
       return false;

@@ -558,7 +558,15 @@ sub handler {
     exit(1);
 }
 
-$JAVA_ARGS .= " -Dresin.home=$SERVER_ROOT $EXTRA_JAVA_ARGS";
+if ($RESIN_HOME) {
+  $JAVA_ARGS .= " -Dresin.home=$RESIN_HOME";
+}
+
+if ($SERVER_ROOT) {
+  $JAVA_ARGS .= " -Dserver.root=$SERVER_ROOT";
+}
+
+$JAVA_ARGS .= " $EXTRA_JAVA_ARGS";
 
 if ($cmd eq "start" || $cmd eq "restart") {
   mkdir("$SERVER_ROOT/log", 0755);

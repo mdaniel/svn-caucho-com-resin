@@ -157,7 +157,7 @@ public class Inode {
 
       if (sublen == 0) {
 	buffer = os.nextBuffer(writeOffset);
-	writeOffset = 0;
+	writeOffset = os.getBufferOffset();
 	sublen = writeLength;
       }
 

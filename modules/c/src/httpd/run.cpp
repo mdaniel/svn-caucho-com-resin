@@ -274,7 +274,8 @@ set_jdk_args(char *exe, char *cp, char *server_root, int jit, char *main, int ar
         buf[k++] = '\"';
         buf[k++] = 0;
 	args[i++] = strdup(buf);
-	args[i++] = strdup(rsprintf(buf, "-Dresin.home=\"%s\"", server_root));
+	args[i++] = strdup(rsprintf(buf, "-Dresin.home=\"%s\"", resin_home));
+	args[i++] = strdup(rsprintf(buf, "-Dserver.home=\"%s\"", server_root));
 	if (! jit) {
 		//args[i++] = "-nojit";
 		args[i++] = strdup(rsprintf(buf, "-Djava.compiler=NONE"));
