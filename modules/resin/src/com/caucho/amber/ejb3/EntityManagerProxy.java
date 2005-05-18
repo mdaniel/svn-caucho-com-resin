@@ -30,6 +30,9 @@ package com.caucho.amber.ejb3;
 
 import java.sql.Connection;
 
+import java.util.logging.Logger;
+import java.util.logging.Level;
+
 import javax.ejb.EntityManager;
 import javax.ejb.Query;
 
@@ -42,9 +45,8 @@ import com.caucho.amber.EnvAmberManager;
  */
 public class EntityManagerProxy implements EntityManager {
   private static final L10N L = new L10N(EntityManagerImpl.class);
-  private static final Logger L = new L10N(EntityManagerImpl.class);
-
-  private UserTransactionImpl _userTransaction;
+  private static final Logger log
+    = Logger.getLogger(EntityManagerImpl.class.getName());
   
   private final ThreadLocal<EntityManagerImpl> _localManager
     = new ThreadLocal<EntityManagerImpl>();
@@ -54,15 +56,6 @@ public class EntityManagerProxy implements EntityManager {
   public EntityManagerProxy(EnvAmberManager amberManager)
   {
     _amberManager = amberManager;
-
-    try {
-      Context ic = new InitialContext();
-      
-      _userTransaction
-	= (UserTransactionImpl) ic.lookup("java:comp/UserTransaction");
-    } catch (Throwable e) {
-      log.log(Level.WARING, e.toString(), e);
-    }
   }
   
   /**
@@ -179,7 +172,7 @@ public class EntityManagerProxy implements EntityManager {
     EntityManagerImpl manager = _localManager.get();
 
     if (manager == null) {
-      manager = new EntityManagerImpl(_amberManager);
+      manager = new EntityManagerImpl(_amberManager, this);
       
       _localManager.set(manager);
     }
@@ -187,5 +180,10 @@ public class EntityManagerProxy implements EntityManager {
     manager.register();
 
     return manager;
+  }
+
+  void unset(EntityManagerImpl manager)
+  {
+    _localManager.set(null);
   }
 }

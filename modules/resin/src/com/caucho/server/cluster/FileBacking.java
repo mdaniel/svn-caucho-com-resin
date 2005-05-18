@@ -264,6 +264,8 @@ public class FileBacking {
     Connection conn = null;
 
     try {
+      System.out.println("CLEAR: " + maxIdleTime);
+      
       if (maxIdleTime > 0) {
 	conn = _dataSource.getConnection();
 

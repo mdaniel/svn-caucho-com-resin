@@ -95,6 +95,8 @@ public class Table extends Store {
   
   public final static int INLINE_BLOB_SIZE = 120;
   
+  public final static long ROW_CLOCK_MIN = 1024;
+  
   private final Row _row;
 
   private final int _rowLength;
@@ -107,7 +109,9 @@ public class Table extends Store {
 
   private long _entries;
 
-  private long _clockAddr;
+  private long _rowClockAddr;
+  private long _rowClockTotal;
+  private long _rowClockUsed;
 
   private long _autoIncrementValue = -1;
 
@@ -122,7 +126,7 @@ public class Table extends Store {
     _rowsPerBlock = BLOCK_SIZE / _rowLength;
     _rowEnd = _rowLength * _rowsPerBlock;
 
-    _clockAddr = 0;
+    _rowClockAddr = 0;
     
     Column []columns = _row.getColumns();
     Column autoIncrementColumn = null;
@@ -531,45 +535,62 @@ public class Table extends Store {
     queryContext.init(xa, iterSet);
     iter.init(queryContext);
 
+    boolean isLoop = false;
+
     while (true) {
       Block block = null;
 
       try {
-	long blockId = firstRow(_clockAddr);
+	long blockId = firstRow(_rowClockAddr);
 
 	int rowOffset;
 
 	if (blockId < 0) {
-	  // if no free row is available, allocate a new one
-	  block = xa.allocateRow(this);
+	  // go around loop if there are sufficient entries
+	  if (! isLoop &&
+	      ROW_CLOCK_MIN < _rowClockTotal &&
+	      2 * _rowClockUsed < _rowClockTotal) {
+	    isLoop = true;
+	    _rowClockAddr = 0;
+	    _rowClockUsed = 0;
+	    _rowClockTotal = 0;
+	    continue;
+	  }
+	  else {
+	    // if no free row is available, allocate a new one
+	    block = xa.allocateRow(this);
 
-	  blockId = block.getBlockId();
+	    blockId = block.getBlockId();
 
-	  _clockAddr = blockIdToAddress(blockId);
+	    _rowClockAddr = blockIdToAddress(blockId);
 
-	  rowOffset = 0;
+	    rowOffset = 0;
+	  }
 	}
-	else if (blockId == addressToBlockId(_clockAddr)) {
-	  rowOffset = (int) (_clockAddr & BLOCK_INDEX_MASK);
+	else if (blockId == addressToBlockId(_rowClockAddr)) {
+	  rowOffset = (int) (_rowClockAddr & BLOCK_INDEX_MASK);
 	}
 	else {
 	  rowOffset = 0;
-	  _clockAddr = blockIdToAddress(blockId);
+	  _rowClockAddr = blockIdToAddress(blockId);
 	}
 
-	long addr = _clockAddr;
+	long addr = _rowClockAddr;
 	long nextRowOffset = rowOffset + _rowLength;
       
 	if (_rowEnd <= nextRowOffset)
 	  nextRowOffset = BLOCK_SIZE;
 
-	_clockAddr = blockIdToAddress(blockId) + nextRowOffset;
-
+	_rowClockAddr = blockIdToAddress(blockId) + nextRowOffset;
+	_rowClockTotal++;
+	
 	if (block == null)
 	  block = xa.readBlock(this, blockId);
 
-	if ((block.getBuffer()[rowOffset] & 0x01) == 1)
+	if ((block.getBuffer()[rowOffset] & 0x01) == 1) {
+	  _rowClockUsed++;
 	  continue;
+	}
 
 	WriteBlock writeBlock = xa.createWriteBlock(block);
 	block = writeBlock;

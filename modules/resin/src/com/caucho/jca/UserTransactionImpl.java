@@ -158,7 +158,7 @@ public class UserTransactionImpl implements UserTransaction {
   /**
    * Enlist a resource automatically closed when the context ends.
    */
-  void enlistCloseResource(CloseResource resource)
+  public void enlistCloseResource(CloseResource resource)
   {
     _closeResources.add(resource);
   }

@@ -53,6 +53,8 @@ import com.caucho.util.L10N;
 public class EntityManagerImpl implements EntityManager, CloseResource {
   private static final L10N L = new L10N(EntityManagerImpl.class);
 
+  private EntityManagerProxy _entityManagerProxy;
+  
   private EnvAmberManager _amberManager;
 
   private boolean _isRegistered;
@@ -61,9 +63,10 @@ public class EntityManagerImpl implements EntityManager, CloseResource {
   /**
    * Creates a manager instance.
    */
-  EntityManagerImpl(EnvAmberManager amberManager)
+  EntityManagerImpl(EnvAmberManager amberManager, EntityManagerProxy proxy)
   {
     _amberManager = amberManager;
+    _entityManagerProxy = proxy;
   }
   
   /**
@@ -113,8 +116,6 @@ public class EntityManagerImpl implements EntityManager, CloseResource {
   {
     try {
       AmberConnectionImpl aConn = getAmberConnection();
-
-      System.out.println("ACON:: " + aConn);
 
       return aConn.load(entityName, primaryKey);
     } catch (RuntimeException e) {
@@ -253,6 +254,7 @@ public class EntityManagerImpl implements EntityManager, CloseResource {
   {
     if (! _isRegistered)
       UserTransactionProxy.getInstance().enlistCloseResource(this);
+    
     _isRegistered = true;
   }
 
@@ -267,5 +269,7 @@ public class EntityManagerImpl implements EntityManager, CloseResource {
 
     if (aConn != null)
       aConn.cleanup();
+
+    _entityManagerProxy.unset(this);
   }
 }

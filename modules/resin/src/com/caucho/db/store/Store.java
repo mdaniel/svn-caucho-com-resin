@@ -546,6 +546,9 @@ public class Store {
       // mark USED before actual code so it's properly initialized
       setAllocation(blockIndex, ALLOC_USED);
 
+      if (log.isLoggable(Level.FINE))
+	log.fine(this + " allocating block " + blockIndex);
+
       if (_blockCount <= blockIndex)
 	_blockCount = blockIndex + 1;
     }
