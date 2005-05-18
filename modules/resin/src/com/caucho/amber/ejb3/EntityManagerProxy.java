@@ -42,8 +42,11 @@ import com.caucho.amber.EnvAmberManager;
  */
 public class EntityManagerProxy implements EntityManager {
   private static final L10N L = new L10N(EntityManagerImpl.class);
+  private static final Logger L = new L10N(EntityManagerImpl.class);
+
+  private UserTransactionImpl _userTransaction;
   
-  private static final ThreadLocal<EntityManagerImpl> _localManager
+  private final ThreadLocal<EntityManagerImpl> _localManager
     = new ThreadLocal<EntityManagerImpl>();
 
   private EnvAmberManager _amberManager;
@@ -51,6 +54,15 @@ public class EntityManagerProxy implements EntityManager {
   public EntityManagerProxy(EnvAmberManager amberManager)
   {
     _amberManager = amberManager;
+
+    try {
+      Context ic = new InitialContext();
+      
+      _userTransaction
+	= (UserTransactionImpl) ic.lookup("java:comp/UserTransaction");
+    } catch (Throwable e) {
+      log.log(Level.WARING, e.toString(), e);
+    }
   }
   
   /**

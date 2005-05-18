@@ -925,7 +925,7 @@ public class SessionManager implements ObjectManager, AlarmListener {
     String id;
 
     do {
-      CharBuffer cb = CharBuffer.allocate();
+      StringBuffer cb = new StringBuffer();
       // this section is the host specific session index
       // the most random bit is the high bit
       int index = _srunIndex;
@@ -940,7 +940,7 @@ public class SessionManager implements ObjectManager, AlarmListener {
 
       if (_srunLength <= 0) {
       }
-      else if (_isModuloSessionId)
+      else if (_srunLength == 1 || _isModuloSessionId)
 	digit = (digit - digit % _srunLength) + index;
       else
 	digit = index;
@@ -974,7 +974,7 @@ public class SessionManager implements ObjectManager, AlarmListener {
 	}
       }
 
-      id = cb.close();
+      id = cb.toString();
     } while (create && getSession(id, 0, create, true) != null);
 
     if (id == null || id.equals(""))
