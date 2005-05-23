@@ -848,12 +848,13 @@ public class SessionManager implements ObjectManager, AlarmListener {
     else if (_storeManager != null) {
       _storeManager.setAlwaysLoad(_alwaysLoadSession);
       _storeManager.setAlwaysSave(_alwaysSaveSession);
-      _storeManager.setMaxIdleTime(new Period(_sessionTimeout));
       _storeManager.init();
-    }
 
-    if (_storeManager != null)
       _sessionStore = _storeManager.createStore(_distributionId, this);
+      _sessionStore.setMaxIdleTime(_sessionTimeout);
+
+      _storeManager.updateIdleCheckInterval(_sessionTimeout);
+    }
 
     _alarm.queue(60000);
   }

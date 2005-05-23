@@ -70,7 +70,7 @@ public class ClusterObject {
     _storeManager = storeManager;
     _objectManager = store.getObjectManager();
     _store = store;
-    _maxIdleTime = _objectManager.getMaxIdleTime();
+    _maxIdleTime = _store.getMaxIdleTime();
 
     _storeId = store.getId();
     _objectId = objectId;

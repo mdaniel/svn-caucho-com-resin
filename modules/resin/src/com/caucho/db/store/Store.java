@@ -143,6 +143,7 @@ public class Store {
 
   private Object _allocationLock = new Object();
   private byte []_allocationTable;
+  
   private long _clockAddr;
 
   // the current address of the fragment clock
@@ -835,7 +836,6 @@ public class Store {
 
       if (spaceUsed == 0) {
 	spaceUsed = 4;
-	_fragmentClockUsed += spaceUsed;
 	writeShort(blockBuffer, 0, spaceUsed);
 	// no fragments used
 	writeShort(blockBuffer, 2, 0);
@@ -877,7 +877,6 @@ public class Store {
 	  groupLength = 0;
 
 	  spaceUsed += 2;
-	  _fragmentClockUsed += 2;
 	}
 	else {
 	  groupLength = readShort(blockBuffer, groupOffset);
@@ -891,7 +890,6 @@ public class Store {
 	writeShort(blockBuffer, groupOffset, groupLength + length + 2);
       
 	spaceUsed += length + 2;
-	_fragmentClockUsed += length + 2;
       }
       else {
 	System.arraycopy(blockBuffer, fragmentOffset + 2,
@@ -908,7 +906,6 @@ public class Store {
 	writeShort(blockBuffer, groupOffset, groupLength + length);
 
 	spaceUsed += length;
-	_fragmentClockUsed += length;
       }
       
       writeShort(blockBuffer, 0, spaceUsed);
@@ -1003,10 +1000,6 @@ public class Store {
 	int groupLen = readShort(blockBuffer, groupOffset);
 	writeShort(blockBuffer, groupOffset, groupLen - fragLen);
 	writeShort(blockBuffer, fragOffset - 2, 0);
-
-	if (fragmentAddress < _fragmentClockAddr + BLOCK_SIZE) {
-	  _fragmentClockUsed -= fragLen;
-	}
       }
 
       writeBlock(block);

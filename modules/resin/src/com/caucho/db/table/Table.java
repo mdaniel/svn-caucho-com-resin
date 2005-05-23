@@ -235,14 +235,17 @@ public class Table extends Store {
     try {
       is.skip(BLOCK_SIZE + ROOT_DATA_END);
 
-      CharBuffer cb = CharBuffer.allocate();
+      CharBuffer cb = new CharBuffer();
 
       int ch;
       while ((ch = is.read()) > 0) {
 	cb.append((char) ch);
       }
 
-      String sql = cb.close();
+      String sql = cb.toString();
+
+      if (log.isLoggable(Level.FINER))
+	log.finer("Table[" + name + "] " + sql);
 
       try {
 	CreateQuery query = (CreateQuery) Parser.parse(db, sql);
@@ -541,15 +544,18 @@ public class Table extends Store {
       Block block = null;
 
       try {
-	long blockId = firstRow(_rowClockAddr);
+	long addr = _rowClockAddr;
+	
+	long blockId = firstRow(addr);
 
 	int rowOffset;
 
 	if (blockId < 0) {
-	  // go around loop if there are sufficient entries
+	  // go around loop if there are sufficient entries, i.e. over
+	  // ROW_CLOCK_MIN and at least 1/4 free entries.
 	  if (! isLoop &&
 	      ROW_CLOCK_MIN < _rowClockTotal &&
-	      2 * _rowClockUsed < _rowClockTotal) {
+	      4 * _rowClockUsed < 3 * _rowClockTotal) {
 	    isLoop = true;
 	    _rowClockAddr = 0;
 	    _rowClockUsed = 0;
@@ -562,26 +568,30 @@ public class Table extends Store {
 
 	    blockId = block.getBlockId();
 
-	    _rowClockAddr = blockIdToAddress(blockId);
+	    addr = blockIdToAddress(blockId);
 
+	    _rowClockAddr = 0;
+	    _rowClockUsed = 0;
+	    _rowClockTotal = 0;
+	    
 	    rowOffset = 0;
 	  }
 	}
-	else if (blockId == addressToBlockId(_rowClockAddr)) {
-	  rowOffset = (int) (_rowClockAddr & BLOCK_INDEX_MASK);
+	else if (blockId == addressToBlockId(addr)) {
+	  rowOffset = (int) (addr & BLOCK_INDEX_MASK);
 	}
 	else {
 	  rowOffset = 0;
 	  _rowClockAddr = blockIdToAddress(blockId);
+	  addr = _rowClockAddr;
 	}
 
-	long addr = _rowClockAddr;
 	long nextRowOffset = rowOffset + _rowLength;
       
 	if (_rowEnd <= nextRowOffset)
 	  nextRowOffset = BLOCK_SIZE;
 
-	_rowClockAddr = blockIdToAddress(blockId) + nextRowOffset;
+	_rowClockAddr = (_rowClockAddr & ~BLOCK_INDEX_MASK) + nextRowOffset;
 	_rowClockTotal++;
 	
 	if (block == null)

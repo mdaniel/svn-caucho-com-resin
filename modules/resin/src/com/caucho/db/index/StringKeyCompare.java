@@ -66,4 +66,25 @@ public class StringKeyCompare extends KeyCompare {
     else
       return 0;
   }
+
+  public String toString(byte []buffer, int offset, int length)
+  {
+    StringBuilder sb = new StringBuilder();
+    
+    int keyLen = buffer[offset];
+
+    for (int j = 0; j < keyLen; j++) {
+      int ch1 = buffer[offset + 1 + 2 * j] & 0xff;
+      int ch2 = buffer[offset + 1 + 2 * j + 1] & 0xff;
+
+      int ch = (ch1 << 8) + ch2;
+
+      if (ch == 0)
+	break;
+      
+      sb.append((char) ch);
+    }
+
+    return sb.toString();
+  }
 }

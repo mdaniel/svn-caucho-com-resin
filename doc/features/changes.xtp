@@ -4,6 +4,10 @@
 
 <s2 title='3.0.snap - May 18, 2005'>
 <ul>
+<li>Table row allocation clock not properly reset 
+<li>BTree methods not properly synchronized
+<li>BTree remove wasn't properly creating WriteBlocks and saving changes
+<li>BTree remove logic wasn't merging blocks
 <li>(2005-05-18) cache, range, and chunked bug - pdf issues (rep by Chanan Braunstein)
 <li>Updated wrapper.pl and httpd.exe to set -Dresin.home and -Dserver.home to RESIN_HOME and SERVER_HOME (rep by Suresh Sastry)
 <li>./configure script was using libcrypt instead of libcrypto (rep by Forrest Girouard)

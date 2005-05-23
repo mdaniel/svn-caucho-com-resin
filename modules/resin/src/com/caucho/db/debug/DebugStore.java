@@ -101,7 +101,7 @@ public class DebugStore {
     for (int i = 0; i < count; i++) {
       int v = allocTable[i / 4];
 
-      int code = (v >> 2 * i) & 0x3;
+      int code = (v >> (2 * (i % 4))) & 0x3;
 
       switch (code) {
       case Store.ALLOC_FREE:
@@ -116,6 +116,8 @@ public class DebugStore {
       case Store.ALLOC_FRAGMENT:
 	out.print('f');
 	break;
+      default:
+	out.print('?');
       }
       
       if (i % 64 == 63)
@@ -137,7 +139,7 @@ public class DebugStore {
     for (int i = 0; i < count; i++) {
       int v = allocTable[i / 4];
 
-      int code = (v >> 2 * i) & 0x3;
+      int code = (v >> (2 * (i % 4))) & 0x3;
 
       if (code == Store.ALLOC_FRAGMENT) {
 	readBlock(block, i);

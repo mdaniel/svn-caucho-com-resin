@@ -80,6 +80,7 @@ abstract public class StoreManager
   
   // protected long _maxIdleTime = 24 * 3600 * 1000L;
   protected long _maxIdleTime = 3 * 3600 * 1000L;
+  protected long _idleCheckInterval = 15 * 60 * 1000L;
 
   protected boolean _isAlwaysLoad;
   protected boolean _isAlwaysSave;
@@ -163,6 +164,32 @@ abstract public class StoreManager
   public void setMaxIdleTime(Period maxIdleTime)
   {
     _maxIdleTime = maxIdleTime.getPeriod();
+  }
+
+  /**
+   * Sets the idle check interval for the alarm.
+   */
+  public void updateIdleCheckInterval(long idleCheckInterval)
+  {
+    if (_idleCheckInterval > 0 && idleCheckInterval > 0 &&
+	idleCheckInterval < _idleCheckInterval) {
+      _idleCheckInterval = idleCheckInterval;
+      _alarm.queue(idleCheckInterval);
+    }
+
+    if (_idleCheckInterval >= 0 && _idleCheckInterval < 1000)
+      _idleCheckInterval = 1000;
+  }
+
+  /**
+   * Sets the idle check interval for the alarm.
+   */
+  public long getIdleCheckTime()
+  {
+    if (_idleCheckInterval > 0)
+      return _idleCheckInterval;
+    else
+      return _maxIdleTime;
   }
 
   /**
@@ -522,7 +549,7 @@ abstract public class StoreManager
     } catch (Throwable e) {
       log.log(Level.WARNING, e.toString(), e);
     } finally {
-      _alarm.queue(_maxIdleTime);
+      _alarm.queue(getIdleCheckTime());
     }
   }
 

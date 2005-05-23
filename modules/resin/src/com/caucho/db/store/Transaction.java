@@ -78,6 +78,9 @@ public class Transaction {
   
   // inodes that need to be deleted on a rollback
   private ArrayList<Inode> _addInodes = new ArrayList<Inode>();
+  
+  // blocks that need deallocating on a commit
+  private ArrayList<Block> _deallocateBlocks = new ArrayList<Block>();
 
   private boolean _isRollbackOnly;
 
@@ -334,6 +337,18 @@ public class Transaction {
   /**
    * Returns a modified block.
    */
+  public void deallocateBlock(Block block)
+    throws IOException
+  {
+    if (isAutoCommit())
+      block.getStore().freeBlock(block.getBlockId());
+    else
+      _deallocateBlocks.add(block);
+  }
+
+  /**
+   * Returns a modified block.
+   */
   public WriteBlock createWriteBlock(Store store, long blockAddress)
     throws IOException
   {
@@ -444,6 +459,16 @@ public class Transaction {
 
 	inode.remove();
       }
+
+      for (int i = 0; i < _deallocateBlocks.size(); i++) {
+	Block block = _deallocateBlocks.get(i);
+
+	try {
+	  block.getStore().freeBlock(block.getBlockId());
+	} catch (IOException e) {
+	  throw new SQLExceptionWrapper(e);
+	}
+      }
     } finally {
       releaseLocks();
 
@@ -535,6 +560,7 @@ public class Transaction {
       // writeBlocks.clear();
     }
 
+    _deallocateBlocks.clear();
     _deleteInodes.clear();
     _addInodes.clear();
     _isRollbackOnly = false;

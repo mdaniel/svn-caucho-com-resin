@@ -50,4 +50,20 @@ public class KeyCompare {
 
     return 0;
   }
+
+  public String toString(byte []buffer, int offset, int length)
+  {
+    StringBuilder sb = new StringBuilder();
+
+    for (int j = 0; j < length; j++) {
+      int ch = buffer[offset + j];
+
+      if (ch == 0)
+	break;
+      
+      sb.append((char) ch);
+    }
+
+    return sb.toString();
+  }
 }

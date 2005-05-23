@@ -147,18 +147,20 @@ class StringColumn extends Column {
     int startOffset = rowOffset + _columnOffset;
     int len = block[startOffset] & 0xff;
 
-    CharBuffer cb = CharBuffer.allocate();
+    char []cBuf = new char[len];
+    StringBuffer cb = new StringBuffer();
 
     int offset = startOffset + 1;
     int endOffset = offset + 2 * len;
+    int i = 0;
     while (offset < endOffset) {
       int ch1 = block[offset++] & 0xff;
       int ch2 = block[offset++] & 0xff;
 
-      cb.append((char) ((ch1 << 8) + ch2));
+      cBuf[i++] = (char) ((ch1 << 8) + ch2);
     }
 
-    return cb.close();
+    return new String(cBuf, 0, cBuf.length);
   }
   
   /**
@@ -338,8 +340,7 @@ class StringColumn extends Column {
   {
     BTree index = getIndex();
 
-    if (index != null)
-      index.remove(block, rowOffset + _columnOffset, getLength(), xa);
+    index.remove(block, rowOffset + _columnOffset, getLength(), xa);
   }
 
   public String toString()

@@ -48,6 +48,7 @@ public class Store {
   private StoreManager _storeManager;
   private ObjectManager _objectManager;
   private String _storeId;
+  private long _maxIdleTime;
 
   /**
    * Creates the new application view of the store.
@@ -60,6 +61,8 @@ public class Store {
   {
     _storeId = mangleId(storeId);
     _storeManager = storeManager;
+
+    _maxIdleTime = storeManager.getMaxIdleTime();
   }
 
   /**
@@ -68,6 +71,24 @@ public class Store {
   public String getId()
   {
     return _storeId;
+  }
+
+  /**
+   * Returns the max idle time.
+   */
+  public long getMaxIdleTime()
+  {
+    return _maxIdleTime;
+  }
+
+  /**
+   * Sets the max idle time.
+   */
+  public void setMaxIdleTime(long maxIdleTime)
+  {
+    _maxIdleTime = maxIdleTime;
+
+    _storeManager.updateIdleCheckInterval(maxIdleTime);
   }
 
   /**
@@ -133,7 +154,7 @@ public class Store {
    */
   static private String mangleId(String id)
   {
-    CharBuffer cb = CharBuffer.allocate();
+    StringBuilder cb = new StringBuilder();
 
     for (int i = 0; i < id.length(); i++) {
       char ch = id.charAt(i);
@@ -148,6 +169,6 @@ public class Store {
 	cb.append(ch);
     }
 
-    return cb.close();
+    return cb.toString();
   }
 }

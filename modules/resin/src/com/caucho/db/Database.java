@@ -29,12 +29,20 @@
 
 package com.caucho.db;
 
+import java.io.IOException;
+import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import com.caucho.db.sql.Parser;
 import com.caucho.db.sql.Query;
+import com.caucho.db.store.Store;
 import com.caucho.db.store.BlockManager;
 import com.caucho.db.store.Lock;
 import com.caucho.db.table.Table;
 import com.caucho.db.table.TableFactory;
+
 import com.caucho.lifecycle.Lifecycle;
 import com.caucho.loader.CloseListener;
 import com.caucho.loader.Environment;
@@ -43,12 +51,6 @@ import com.caucho.sql.SQLExceptionWrapper;
 import com.caucho.util.L10N;
 import com.caucho.util.LruCache;
 import com.caucho.vfs.Path;
-
-import java.io.IOException;
-import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Manager for a basic Java-based database.
@@ -59,7 +61,7 @@ public class Database {
 
   private Path _dir;
 
-  private BlockManager _blockManager = BlockManager.create(128);
+  private BlockManager _blockManager;
   private HashMap<String,Table> _tables = new HashMap<String,Table>();
 
   private LruCache<String,Query> _cachedQueries = new LruCache<String,Query>(128);
@@ -91,6 +93,15 @@ public class Database {
 
     if (dir != null)
       setPath(dir);
+
+    long minSize = 8 * 1024 * 1024;
+
+    long memorySize = Runtime.getRuntime().maxMemory() / 8;
+
+    if (minSize < memorySize)
+      minSize = memorySize;
+
+    _blockManager = BlockManager.create((int) (minSize / Store.BLOCK_SIZE));
   }
 
   /**

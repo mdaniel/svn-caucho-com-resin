@@ -813,7 +813,7 @@ public class SelectResult {
     int rOffset = rLength & SIZE_MASK;
     int rBlockId = rLength >> SIZE_BITS;
     
-    if (rOffset == 0) {
+    if (_buffers[rBlockId] == null) {
       TempBuffer tempBuffer = TempBuffer.allocate();
       _tempBuffers[rBlockId] = tempBuffer;
       _buffers[rBlockId] = tempBuffer.getBuffer();
