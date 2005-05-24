@@ -4,6 +4,10 @@
 
 <s2 title='3.0.snap - May 18, 2005'>
 <ul>
+<li>Cache expansion issue in LongKeyLruCache not observing powers of 2
+<li>mod_caucho wasn't reading length properly from the no-change response
+<li>Avoid SetByteArrayRegion entirely (rep by J Tullett)
+<li>JMS MemoryQueue issues with QueueBrowser (rep by Thomas Gennaro)
 <li>Table row allocation clock not properly reset 
 <li>BTree methods not properly synchronized
 <li>BTree remove wasn't properly creating WriteBlocks and saving changes

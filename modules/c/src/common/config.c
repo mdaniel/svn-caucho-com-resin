@@ -450,6 +450,8 @@ read_config(stream_t *s, config_t *config, resin_host_t *host,
       break;
 
     case HMUX_DISPATCH_NO_CHANGE:
+      cse_skip(s, hmux_read_len(s));
+      
       LOG(("hmux no-change %s\n", host->etag));
       *p_is_change = is_change;
       break;
@@ -530,6 +532,8 @@ read_config(stream_t *s, config_t *config, resin_host_t *host,
       return code == HMUX_QUIT;
 
     default:
+      LOG(("hmux unknown %d\n", code));
+      
       if (pool)
 	cse_free_pool(pool);
 	
@@ -557,7 +561,7 @@ write_config(config_t *config)
   memset(&s, 0, sizeof(s));
   s.socket = fd;
 
-  sprintf(buffer, "%d", config->dependency_check_interval);
+  sprintf(buffer, "%d", config->update_interval);
   hmux_write_string(&s, HMUX_HEADER, "check-interval");
   hmux_write_string(&s, HMUX_STRING, buffer);
 
@@ -650,8 +654,8 @@ write_config(config_t *config)
   close(fd);
 }
 
-static void
-read_all_config(config_t *config)
+static int
+read_all_config_impl(config_t *config)
 {
   stream_t s;
   resin_host_t *host;
@@ -664,12 +668,12 @@ read_all_config(config_t *config)
   int is_change = 1;
 
   if (! config->config_path)
-    return;
+    return 0;
   
   fd = open(config->config_path, O_RDONLY);
 
   if (fd < 0)
-    return;
+    return 0;
 
   memset(&s, 0, sizeof(s));
   s.socket = fd;
@@ -701,6 +705,29 @@ read_all_config(config_t *config)
   }
 
   close(fd);
+
+  return 1;
+}
+
+static void
+read_all_config(config_t *config)
+{
+  if (! read_all_config_impl(config)) {
+    /* match all to ensure will not show source if can't connect. */
+    resin_host_t *host = 0;
+    mem_pool_t *pool = 0;
+    web_app_t *web_app = 0;
+    time_t now = 0;
+    
+    host = cse_match_host_impl(config, "", 0, now);
+    pool = cse_create_pool(config);
+    
+    web_app = cse_add_application(pool, host, 0, "");
+    host->applications = web_app;
+    host->pool = pool;
+	
+    cse_add_match_pattern(pool, web_app, "/*");
+  }
 }
 
 static int
@@ -783,7 +810,7 @@ cse_init_config(config_t *config)
   config->enable_caucho_status = 0;
   */
   config->disable_session_failover = 0;
-  config->update_time = 15;
+  config->update_interval = 15;
   config->session_url_prefix = ";jsessionid=";
   config->session_cookie = "JSESSIONID";
 
@@ -850,7 +877,7 @@ cse_update_host(config_t *config, resin_host_t *host,
     LOG(("cse_update_host %s etag:%s\n", host_name, host->etag));
   }
   
-  if (now < host->last_update + config->update_time)
+  if (now < host->last_update + config->update_interval)
     return host->canonical;
 
   if (! cse_update_host_from_resin(host, now) && *host_name)
@@ -872,11 +899,6 @@ cse_match_host_impl(config_t *config, const char *host_name,
   for (host = config->hosts; host; host = host->next) {
     if (! strcmp(host_name, host->name) && host->port == port)
       return cse_update_host(config, host, host_name, port, now);
-    /*
-    else if (! *host->name) {
-      default_host = host;
-    }
-    */
   }
   
   return cse_update_host(config, default_host, host_name, port, now);
@@ -1091,6 +1113,7 @@ cse_is_match(config_t *config,
   has_host = 0;
   best_len = 0;
   app = 0;
+
   for (app_ptr = host->applications; app_ptr; app_ptr = app_ptr->next) {
     /**
      * The uri prefix must match.
@@ -1178,7 +1201,7 @@ cse_match_request(config_t *config, const char *host, int port,
     host = "";
   if (! uri)
     uri = "";
-
+  
   for (i = 0; host[i]; i++)
     hash = 65531 * hash + host[i];
 
@@ -1208,13 +1231,14 @@ cse_match_request(config_t *config, const char *host, int port,
   else if (test_port && test_port != port) {
   }
   else if (! test_match_host &&
-	   g_last_update + config->dependency_check_interval < now) {
+	   g_last_update + config->update_interval < now) {
   }
   else if (test_match_host &&
-	   test_match_host->last_update + config->dependency_check_interval < now) {
+	   test_match_host->last_update + config->update_interval < now) {
   }
-  else
+  else {
     return test_match_host;
+  }
 
   match_host = cse_is_match(config, host, port, uri, unescape, now);
 

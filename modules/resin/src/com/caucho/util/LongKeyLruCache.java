@@ -118,7 +118,9 @@ public class LongKeyLruCache<V> {
     synchronized (this) {
       int capacity;
 
-      for (capacity = _capacity; capacity < 4 * newCapacity; capacity *= 2) {
+      for (capacity = _entries.length;
+	   capacity < 4 * newCapacity;
+	   capacity *= 2) {
       }
 
       if (capacity == _capacity)

@@ -175,51 +175,11 @@ public class JdbcQueue extends JdbcDestination implements Queue {
   }
 
   /**
-   * Returns an enumeration of the matching messages.
-   */
-  public Enumeration getEnumeration(Selector selector)
-  {
-    // return new BrowserEnumeration(this, selector);
-    return null;
-  }
-
-  /**
    * Returns a printable view of the queue.
    */
   public String toString()
   {
     return "JdbcQueue[" + getName() + "]";
   }
-
-  /*
-  static class BrowserEnumeration implements Enumeration {
-    private JdbcQueue _queue;
-    private Selector _selector;
-
-    BrowserEnumeration(JdbcQueue queue, Selector selector)
-    {
-      _queue = queue;
-      _selector = selector;
-    }
-
-    public boolean hasMoreElements()
-    {
-      try {
-	return _queue.hasMessage(_selector);
-      } catch (Exception e) {
-	throw new RuntimeException(e);
-      }
-    }
-
-    public Object nextElement()
-    {
-      try {
-	return _queue.receive(_selector);
-      } catch (Exception e) {
-	throw new RuntimeException(e);
-      }
-    }
-  }
-  */
 }
 

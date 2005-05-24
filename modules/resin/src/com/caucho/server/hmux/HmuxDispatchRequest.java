@@ -317,7 +317,7 @@ public class HmuxDispatchRequest {
 	}
       }
 
-      CharBuffer cb = CharBuffer.allocate();
+      CharBuffer cb = new CharBuffer();
       Base64.encode(cb, crc64);
       String newETag = cb.close();
       host.setConfigETag(newETag);

@@ -213,7 +213,7 @@ typedef struct config_t {
   resin_host_t *manual_host;
 
   time_t last_update;
-  time_t update_time;
+  int update_interval;
   int update_count;
 } config_t;
 

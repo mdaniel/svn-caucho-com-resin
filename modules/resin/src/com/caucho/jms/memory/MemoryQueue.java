@@ -65,6 +65,8 @@ public class MemoryQueue extends AbstractDestination
   private String _queueName;
   private Selector _selector;
 
+  private long _queueId;
+
   private int _consumerId;
 
   public MemoryQueue()
@@ -98,6 +100,14 @@ public class MemoryQueue extends AbstractDestination
   }
 
   /**
+   * Generates the next queue id.
+   */
+  public long generateQueueId()
+  {
+    return ++_queueId;
+  }
+
+  /**
    * Generates the next consumer id.
    */
   public int generateConsumerId()
@@ -117,7 +127,7 @@ public class MemoryQueue extends AbstractDestination
       log.fine("MemoryQueue[" + _queueName + "] send " + sequenceId);
 
     synchronized (_queue) {
-      _queue.add(new Item((MessageImpl) message));
+      _queue.add(new Item(generateQueueId(), (MessageImpl) message));
       _queue.notify();
     }
 
@@ -250,6 +260,64 @@ public class MemoryQueue extends AbstractDestination
   }
 
   /**
+   * Returns the id of the first message matching the selector.
+   */
+  private long nextId(Selector selector, long id)
+    throws JMSException
+  {
+    synchronized (_queue) {
+      int i;
+      int size = _queue.size();
+
+      for (i = 0; i < size; i++) {
+	Item item = _queue.get(i);
+	
+	if (item.getConsumerId() >= 0)
+	  continue;
+
+	else if (item.getId() < id)
+	  continue;
+
+	Message message = item.getMessage();
+
+	if (selector == null || selector.isMatch(message))
+	  return item.getId();
+      }
+    }
+
+    return Long.MAX_VALUE;
+  }
+
+  /**
+   * Returns the id of the first message matching the selector.
+   */
+  private Message nextValue(Selector selector, long id)
+    throws JMSException
+  {
+    synchronized (_queue) {
+      int i;
+      int size = _queue.size();
+
+      for (i = 0; i < size; i++) {
+	Item item = _queue.get(i);
+
+	if (item.getConsumerId() >= 0)
+	  continue;
+
+	else if (item.getId() < id)
+	  continue;
+
+	Message message = item.getMessage();
+
+	if (selector == null || selector.isMatch(message))
+	  return message;
+      }
+    }
+
+    return null;
+  }
+
+  /**
    * Returns a printable view of the queue.
    */
   public String toString()
@@ -260,6 +328,7 @@ public class MemoryQueue extends AbstractDestination
   static class BrowserEnumeration implements Enumeration {
     private MemoryQueue _queue;
     private Selector _selector;
+    private long _id = -1;
 
     BrowserEnumeration(MemoryQueue queue, Selector selector)
     {
@@ -270,7 +339,10 @@ public class MemoryQueue extends AbstractDestination
     public boolean hasMoreElements()
     {
       try {
-	return _queue.hasMessage(_selector);
+	if (_id < 0)
+	  _id = _queue.nextId(_selector, _id);
+	
+	return (_id < Long.MAX_VALUE);
       } catch (Exception e) {
 	throw new RuntimeException(e);
       }
@@ -280,7 +352,14 @@ public class MemoryQueue extends AbstractDestination
     {
       try {
 	// ejb/6110
-	return _queue.receive(_selector, -1, true);
+	if (_id < 0)
+	  _id = _queue.nextId(_selector, _id);
+
+	Object value = _queue.nextValue(_selector, _id);
+
+	_id = _queue.nextId(_selector, _id + 1);
+	
+	return value;
       } catch (Exception e) {
 	throw new RuntimeException(e);
       }
@@ -289,17 +368,25 @@ public class MemoryQueue extends AbstractDestination
 
   static class Item {
     private MessageImpl _msg;
+    private long _id;
     private long _consumerId = -1;
     private boolean _delivered;
 
-    Item(MessageImpl msg)
+    Item(long id, MessageImpl msg)
     {
+      _id = id;
+      
       _msg = msg;
     }
 
     MessageImpl getMessage()
     {
       return _msg;
+    }
+
+    long getId()
+    {
+      return _id;
     }
 
     long getConsumerId()
