@@ -39,6 +39,8 @@ import com.caucho.log.Log;
 
 import com.caucho.vfs.Path;
 
+import com.caucho.config.Config;
+
 import com.caucho.config.types.PathBuilder;
 
 import com.caucho.server.deploy.DeployGenerator;
@@ -110,7 +112,11 @@ public class HostSingleDeployGenerator extends DeployGenerator<HostController> {
   public void init()
     throws Exception
   {
-    _controller = new HostController(_config.getId(), _config, _container, null);
+    String rawHostName = _config.getId();
+
+    String hostName = Config.evalString(rawHostName);
+    
+    _controller = new HostController(hostName, _config, _container, null);
 
     _controller.init();
   }

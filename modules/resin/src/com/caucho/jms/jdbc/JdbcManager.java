@@ -324,8 +324,8 @@ public class JdbcManager {
 	     "  client VARCHAR(255)," +
 	     "  name VARCHAR(255)," +
 	     "  expire " + longType + "," +
-	     "  read " + longType + "," +
-	     "  ack " + longType +
+	     "  read_id " + longType + "," +
+	     "  ack_id " + longType +
 	     ")");
 
       stmt.executeUpdate(sql);

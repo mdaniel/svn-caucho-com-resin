@@ -334,7 +334,12 @@ public class HessianServlet extends GenericServlet {
 
       HessianInput in = new HessianInput(is);
       HessianOutput out = new HessianOutput();
-      out.setSerializerFactory(getSerializerFactory());
+
+      SerializerFactory serializerFactory = getSerializerFactory();
+      
+      in.setSerializerFactory(serializerFactory);
+      out.setSerializerFactory(serializerFactory);
+      
       out.init(os);
 
       if (objectId != null)

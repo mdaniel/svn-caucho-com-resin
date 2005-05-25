@@ -127,6 +127,9 @@ public class BytesMessageImpl extends MessageImpl implements BytesMessage  {
   {
     ReadStream is = getReadStream();
 
+    if (is == null)
+      return -1;
+
     try {
       return is.read();
     } catch (IOException e) {
@@ -336,9 +339,11 @@ public class BytesMessageImpl extends MessageImpl implements BytesMessage  {
     throws JMSException
   {
     checkBodyReadable();
-    
+
+    /* ejb/6a87
     if (_rs == null)
       throw new MessageEOFException(L.l("bytes message may not be read"));
+    */
       
     return _rs;
   }

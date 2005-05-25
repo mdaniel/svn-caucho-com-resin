@@ -4,6 +4,11 @@
 
 <s2 title='3.0.snap - May 18, 2005'>
 <ul>
+<li>JMS null pointers for empty bodies (rep by Thomas Gennaro)
+<li>JMS null pointer when headers null (fixed! by Thomas Gennaro)
+<li>HessianServlet wasn't calling in.setSerializerFactory (rep by John Didion)
+<li>host-name can now accept EL values (rep by David Becker)
+<li>JMS mysql had invalid column type (rep by Kapil)
 <li>Cache expansion issue in LongKeyLruCache not observing powers of 2
 <li>mod_caucho wasn't reading length properly from the no-change response
 <li>Avoid SetByteArrayRegion entirely (rep by J Tullett)

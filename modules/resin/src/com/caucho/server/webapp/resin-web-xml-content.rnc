@@ -653,8 +653,8 @@ r_web-app-deploy = element web-app-deploy {
   & (attribute startup-mode { string }
      | element startup-mode { string })?
 
-  & (attribute restart-mode { string }
-     | element restart-mode { string })?
+  & (attribute redeploy-mode { string }
+     | element redeploy-mode { string })?
 
   & r_web-app-default*
 

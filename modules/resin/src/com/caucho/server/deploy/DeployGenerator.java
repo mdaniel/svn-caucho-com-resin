@@ -54,6 +54,7 @@ abstract public class DeployGenerator<E extends DeployController>
   private ClassLoader _parentClassLoader;
 
   private String _startupMode = DeployController.STARTUP_AUTOMATIC;
+  private String _redeployMode = DeployController.REDEPLOY_AUTOMATIC;
 
   /**
    * Creates the deploy.
@@ -96,6 +97,24 @@ abstract public class DeployGenerator<E extends DeployController>
     throws ConfigException
   {
     return _startupMode;
+  }
+
+  /**
+   * Sets the redeploy mode.
+   */
+  public void setRedeployMode(String mode)
+    throws ConfigException
+  {
+    _redeployMode = DeployController.toRedeployCode(mode);
+  }
+
+  /**
+   * Gets the redeploy mode.
+   */
+  public String getRedeployMode()
+    throws ConfigException
+  {
+    return _redeployMode;
   }
 
   /**

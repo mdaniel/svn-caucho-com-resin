@@ -265,7 +265,12 @@ public class JdbcMessage {
 	pstmt.setInt(i++, queue);
 	pstmt.setInt(i++, type);
 	pstmt.setLong(i++, expireTime);
-	pstmt.setBinaryStream(i++, header.openRead(), header.getLength());
+
+	if (header.getLength() > 0) {
+	  pstmt.setBinaryStream(i++, header.openRead(), header.getLength());
+	}
+	else
+	  pstmt.setNull(i++, Types.VARCHAR);
 	
 	if (body != null) 
 	  pstmt.setBinaryStream(i++, body.openRead(), body.getLength());
@@ -431,7 +436,8 @@ public class JdbcMessage {
 	try {
 	  msg = readTextMessage(is);
 	} finally {
-	  is.close();
+	  if (is != null)
+	    is.close();
 	}
 	break;
       }
@@ -443,7 +449,8 @@ public class JdbcMessage {
 	try {
 	  msg = readBytesMessage(is);
 	} finally {
-	  is.close();
+	  if (is != null)
+	    is.close();
 	}
 	break;
       }
@@ -455,7 +462,8 @@ public class JdbcMessage {
 	try {
 	  msg = readStreamMessage(is);
 	} finally {
-	  is.close();
+	  if (is != null)
+	    is.close();
 	}
 	break;
       }
@@ -467,7 +475,8 @@ public class JdbcMessage {
 	try {
 	  msg = readObjectMessage(is);
 	} finally {
-	  is.close();
+	  if (is != null)
+	    is.close();
 	}
 	break;
       }
@@ -479,7 +488,8 @@ public class JdbcMessage {
 	try {
 	  msg = readMapMessage(is);
 	} finally {
-	  is.close();
+	  if (is != null)
+	    is.close();
 	}
 	break;
       }
@@ -493,10 +503,13 @@ public class JdbcMessage {
     }
 	  
     InputStream is = rs.getBinaryStream(5);
-    try {
-      readMessageHeader(is, msg);
-    } finally {
-      is.close();
+    
+    if (is != null) {
+      try {
+	readMessageHeader(is, msg);
+      } finally {
+	is.close();
+      }
     }
 
     msg.setJMSRedelivered(redelivered);
@@ -676,6 +689,10 @@ public class JdbcMessage {
     throws IOException, JMSException
   {
     TextMessageImpl text = new TextMessageImpl();
+
+    if (is == null)
+      return text;
+
     ByteToChar byteToChar = ByteToChar.create();
 
     int ch;
@@ -698,6 +715,12 @@ public class JdbcMessage {
   {
     BytesMessageImpl bytes = new BytesMessageImpl();
 
+    if (is == null) {
+      bytes.reset();
+      
+      return bytes;
+    }
+
     int data;
 
     while ((data = is.read()) >= 0) {
@@ -716,6 +739,9 @@ public class JdbcMessage {
     throws IOException, JMSException
   {
     StreamMessageImpl stream = new StreamMessageImpl();
+
+    if (is == null)
+      return stream;
 
     ObjectInputStream in = new ContextLoaderObjectInputStream(is);
 
@@ -745,6 +771,9 @@ public class JdbcMessage {
   {
     MapMessageImpl map = new MapMessageImpl();
 
+    if (is == null)
+      return map;
+
     ObjectInputStream in = new ContextLoaderObjectInputStream(is);
 
     try {
@@ -771,6 +800,9 @@ public class JdbcMessage {
     throws IOException, JMSException
   {
     ObjectMessageImpl msg = new ObjectMessageImpl();
+
+    if (is == null)
+      return msg;
 
     ObjectInputStream in = new ContextLoaderObjectInputStream(is);
 

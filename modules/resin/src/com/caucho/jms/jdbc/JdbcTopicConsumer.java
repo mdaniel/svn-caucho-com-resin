@@ -161,7 +161,7 @@ public class JdbcTopicConsumer extends MessageConsumerImpl
 	rs.close();
 	
 	sql = ("INSERT INTO " + consumerTable +
-	       " (queue, expire, read, ack) VALUES (?,?,?,?)");
+	       " (queue, expire, read_id, ack_id) VALUES (?,?,?,?)");
 
 	pstmt = conn.prepareStatement(sql,
 				      PreparedStatement.RETURN_GENERATED_KEYS);
@@ -285,7 +285,7 @@ public class JdbcTopicConsumer extends MessageConsumerImpl
 	  pstmt.close();
 	  
 	  sql = ("INSERT INTO " + consumerTable +
-		 " (s_id, queue, client, name, expire, read, ack) VALUES (?,?,?,?,?,?,?)");
+		 " (s_id, queue, client, name, expire, read_id, ack_id) VALUES (?,?,?,?,?,?,?)");
 
 	  pstmt = conn.prepareStatement(sql);
 
@@ -301,7 +301,7 @@ public class JdbcTopicConsumer extends MessageConsumerImpl
 	}
 	else {
 	  sql = ("INSERT INTO " + consumerTable +
-		 " (queue, client, name, expire, read, ack) VALUES (?,?,?,?,?,?)");
+		 " (queue, client, name, expire, read_id, ack_id) VALUES (?,?,?,?,?,?)");
 
 	  pstmt = conn.prepareStatement(sql,
 					PreparedStatement.RETURN_GENERATED_KEYS);
@@ -354,7 +354,7 @@ public class JdbcTopicConsumer extends MessageConsumerImpl
 	String sql = ("SELECT m_id, msg_type, delivered, body, header" +
 		      " FROM " + messageTable + " m," +
 		      "      " + consumerTable + " s" +
-		      " WHERE s_id=? AND m.queue=s.queue AND s.read<m_id" +
+		      " WHERE s_id=? AND m.queue=s.queue AND s.read_id<m_id" +
 		      "   AND ?<m.expire" +
 		      " ORDER BY m_id");
 
@@ -392,7 +392,7 @@ public class JdbcTopicConsumer extends MessageConsumerImpl
 	  return null;
 
 	sql = ("UPDATE " + consumerTable +
-	       " SET read=?" +
+	       " SET read_id=?" +
 	       " WHERE s_id=?");
       
 	PreparedStatement updateStmt = conn.prepareStatement(sql);
@@ -428,7 +428,7 @@ public class JdbcTopicConsumer extends MessageConsumerImpl
 
       try {
 	String sql = ("UPDATE " +  consumerTable +
-		      " SET ack=read " +
+		      " SET ack_id=read_id " +
 		      " WHERE s_id=?");
       
 	PreparedStatement pstmt;
@@ -467,7 +467,7 @@ public class JdbcTopicConsumer extends MessageConsumerImpl
 	sql = ("DELETE FROM " + messageTable +
 	       " WHERE queue=? AND NOT EXISTS(" + 
                "   SELECT * FROM " + consumerTable +
-	       "   WHERE queue=? AND ack < m_id)");
+	       "   WHERE queue=? AND ack_id < m_id)");
       
 	PreparedStatement pstmt;
 	pstmt = conn.prepareStatement(sql);
@@ -496,7 +496,7 @@ public class JdbcTopicConsumer extends MessageConsumerImpl
 
       try {
 	String sql = ("UPDATE " +  consumerTable +
-		      " SET read=ack " +
+		      " SET read_id=ack_id " +
 		      " WHERE s_id=?");
       
 	PreparedStatement pstmt;
