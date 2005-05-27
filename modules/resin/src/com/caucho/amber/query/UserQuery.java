@@ -366,8 +366,9 @@ public class UserQuery implements AmberQuery {
     if (args.length > 0)
       pstmt.clearParameters();
 
-    for (int i = 0; i < args.length; i++)
+    for (int i = 0; i < args.length; i++) {
       args[i].setParameter(pstmt, i + 1, _argTypes, _argValues);
+    }
 
     ResultSet rs = pstmt.executeQuery();
 

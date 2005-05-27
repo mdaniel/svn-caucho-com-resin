@@ -65,7 +65,14 @@ public class Jndi {
     Name parsedName = parser.parse(name);
 
     if (parsedName.size() == 1) {
-      if (context.lookup(name) != null) {
+      Object value = null;
+
+      try {
+	value = context.lookup(name);
+      } catch (NameNotFoundException e) {
+      }
+      
+      if (value != null) {
         log.warning(L.l("`{0}' is a conflicting JNDI resource for `{1}'",
                         fullName, obj));
       }
@@ -74,7 +81,12 @@ public class Jndi {
       return;
     }
 
-    Object sub = context.lookup(parsedName.get(0));
+    Object sub = null;
+
+    try {
+      sub = context.lookup(parsedName.get(0));
+    } catch (NameNotFoundException e) {
+    }
 
     if (sub == null)
       sub = context.createSubcontext(parsedName.get(0));

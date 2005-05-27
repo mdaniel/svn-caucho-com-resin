@@ -164,7 +164,14 @@ public class ContextImpl implements Context {
       }
     }
 
-    return lookupImpl(name);
+    Object value = lookupImpl(name);
+
+    // RSN-229
+    if (value == null) {
+      throw new NameNotFoundException(getFullPath(name));
+    }
+
+    return value;
   }
 
   /**

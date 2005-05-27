@@ -208,6 +208,7 @@ public class EjbConfig {
       _pendingBeans.add(bean);
     
     _cfgBeans.put(name, bean);
+    System.out.println("CFG: " + name + " " + _cfgBeans);
   }
 
   /**
@@ -509,6 +510,7 @@ public class EjbConfig {
 
 	String sourceEJB = sourceRole.getEJBName();
 	EjbEntityBean sourceEntity = (EjbEntityBean) _cfgBeans.get(sourceEJB);
+	System.out.println("SE: " + sourceEJB + " " + _cfgBeans + " " + sourceEntity);
 
 	if (sourceEntity == null)
 	  throw new ConfigException(L.l("'{0}' is an unknown EJB bean.",
@@ -533,7 +535,7 @@ public class EjbConfig {
 
 	if (targetEntity == null)
 	  throw new ConfigException(L.l("'{0}' is an unknown EJB bean.",
-					sourceEJB));
+					targetEJB));
       
 	String targetField = targetRole.getFieldName();
 	JMethod targetMethod = targetEntity.getFieldGetter(targetField);
@@ -899,10 +901,15 @@ public class EjbConfig {
       if (a == b)
 	return 0;
 
-      if (! (a instanceof EjbEntityBean))
-	return -1;
-      else if (! (b instanceof EjbEntityBean))
+      EjbBean beanA = (EjbBean) a;
+      EjbBean beanB = (EjbBean) b;
+
+      if (! (a instanceof EjbEntityBean) && ! (b instanceof EjbEntityBean))
+	return beanA.getEJBName().compareTo(beanB.getEJBName());
+      else if (! (a instanceof EjbEntityBean))
 	return 1;
+      else if (! (b instanceof EjbEntityBean))
+	return -1;
 
       EjbEntityBean entityA = (EjbEntityBean) a;
       EjbEntityBean entityB = (EjbEntityBean) b;
@@ -912,7 +919,7 @@ public class EjbConfig {
       else if (entityA.dependsOn(entityB))
 	return 1;
       else
-	return 0;
+	return entityA.getEJBName().compareTo(entityB.getEJBName());
     }
   }
 }

@@ -496,6 +496,9 @@ public class ErrorPageManager {
     if (request.getRequestDepth(0) > 16)
       return false;
 
+    else if (request.getAttribute(AbstractHttpRequest.ERROR_URI) != null)
+      return false;
+
     response.killCache();
     
     String location = getErrorPage(code);

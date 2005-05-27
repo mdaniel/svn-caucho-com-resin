@@ -210,4 +210,17 @@ public class QueryImpl implements Query {
   {
     return this;
   }
+
+  //
+  // extensions
+
+  /**
+   * Sets an indexed parameter.
+   */
+  public Query setDouble(int index, double value)
+  {
+    _userQuery.setDouble(index, value);
+    
+    return this;
+  }
 }

@@ -2,9 +2,21 @@
 
 <a href='changes-2.xtp'>Resin 2.1 changes</a>
 
-<s2 title='3.0.snap - May 18, 2005'>
+<s2 title='3.0.snap - May 25, 2005'>
 <ul>
-<li>JMS null pointers for empty bodies (rep by Thomas Gennaro)
+<li>EJBCompiler should be able to work even through transactions aren't available (rep by Kirk Rasmussen)
+<li>sendError from inside error page must not go through ErrorManager (rep by Massimo Mirabito)
+<li>Amber DoubleType.setParameter wasn't handling the double type property (rep by Mieke Mocke)
+<li>--with-openssl wasn't properly setting SSL_INCLUDE and SSL_LIB (rep by Forrest Girouard)
+<li>Jar wasn't properly catching and retrying for changed .jar files (rep by Shane Cruz)
+<li>EjbConfig.BeanComparator.compareTo needs to be a total order for sort() to work (rep by Kirk Rasmussen)
+<li>Context.lookup needs to throw NameNotFoundException (rep by Kapil)
+<li>error page with sendError or rethrow causes error page trouble (rep by Amit Jain)
+<li>JspCompiler needs to check for valid -app-dir and report a message (rep by Kapil)
+<li>Encoding needs to return KOI8-R instead of KOI8_R for CharSet.forName (rep by Boris Kovalenko)
+<li>rewrite-dispatch was missing from web-app schema (rep by Anoop Achuthan)
+<li>Node.getBaseURI() isn't available in JDK 1.4 (rep by Bin Sun)
+<li>(2005-05-25) JMS null pointers for empty bodies (rep by Thomas Gennaro)
 <li>JMS null pointer when headers null (fixed! by Thomas Gennaro)
 <li>HessianServlet wasn't calling in.setSerializerFactory (rep by John Didion)
 <li>host-name can now accept EL values (rep by David Becker)

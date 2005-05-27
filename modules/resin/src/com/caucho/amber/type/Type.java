@@ -162,7 +162,7 @@ abstract public class Type {
   public void setParameter(PreparedStatement pstmt, int index, Object value)
     throws SQLException
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    pstmt.setObject(index, value);
   }
 
   /**
@@ -171,7 +171,7 @@ abstract public class Type {
   public Object getObject(ResultSet rs, int index)
     throws SQLException
   {
-    throw new UnsupportedOperationException();
+    return rs.getObject(index);
   }
 
   /**

@@ -71,6 +71,7 @@ import com.caucho.xml.QDocument;
 import com.caucho.xml.QElement;
 import com.caucho.xml.QAbstractNode;
 import com.caucho.xml.QName;
+import com.caucho.xml.QNode;
 import com.caucho.xml.Xml;
 import com.caucho.xml.XmlUtil;
 import com.caucho.xml.DOMBuilder;
@@ -133,7 +134,9 @@ public class NodeBuilder {
     try {
       _currentBuilder.set(this);
 
-      _varResolver.put("__FILE__", top.getBaseURI());
+      if (top instanceof QNode) {
+	_varResolver.put("__FILE__", ((QNode) top).getBaseURI());
+      }
 
       TypeStrategy typeStrategy;
       typeStrategy = TypeStrategyFactory.getTypeStrategy(bean.getClass());
@@ -161,7 +164,8 @@ public class NodeBuilder {
     try {
       _currentBuilder.set(this);
 
-      _varResolver.put("__FILE__", top.getBaseURI());
+      if (top instanceof QNode)
+	_varResolver.put("__FILE__", ((QNode) top).getBaseURI());
 
       TypeStrategy typeStrategy;
       typeStrategy = TypeStrategyFactory.getTypeStrategy(bean.getClass());

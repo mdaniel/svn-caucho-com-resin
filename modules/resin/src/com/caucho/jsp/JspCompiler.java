@@ -37,7 +37,10 @@ import com.caucho.loader.*;
 import com.caucho.log.Log;
 import com.caucho.server.webapp.Application;
 import com.caucho.server.webapp.WebAppController;
+
 import com.caucho.util.CauchoSystem;
+import com.caucho.util.L10N;
+
 import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
 
@@ -55,7 +58,8 @@ import java.util.logging.Logger;
  * Compilation interface for JSP pages.
  */
 public class JspCompiler implements EnvironmentBean {
-  private static Logger log = Log.open(JspCompiler.class);
+  private static final L10N L = new L10N(JspCompiler.class);
+  private static final Logger log = Log.open(JspCompiler.class);
 
   private ClassLoader _loader;
 
@@ -526,10 +530,11 @@ public class JspCompiler implements EnvironmentBean {
 	if (args[i].equals("-app-dir")) {
 	  Path appDir = Vfs.lookup(args[i + 1]);
 
-	  Application app	= compiler.createApplication();
+	  Application app = compiler.createApplication();
 	  app.setDocumentDirectory(appDir);
 
 	  compiler.setApplication(app);
+	  compiler.setAppDir(appDir);
 
 	  i += 2;
 	}
@@ -579,8 +584,14 @@ public class JspCompiler implements EnvironmentBean {
 	loader = compiler.getApplication().getClassLoader();
       }
 
-      if (appDir == null)
+      if (appDir == null) {
 	appDir = Vfs.lookup();
+
+	if (compiler.getAppDir() == null && compiler.getApplication() == null) {
+	  System.err.println(L.l("-app-dir must be specified for JspCompiler"));
+	  return;
+	}
+      }
 
       thread.setContextClassLoader(loader);
 

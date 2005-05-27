@@ -36,9 +36,28 @@ import com.caucho.vfs.*;
 /**
  * Resolves resources and looks up *.tld
  */
-abstract public class JspResourceManager {
+public class AppDirResourceManager extends JspResourceManager {
+  private final Path _appDir;
+
+  /**
+   * Sets the application directory.
+   */
+  public AppDirResourceManager(Path appDir)
+  {
+    _appDir = appDir;
+
+    if (appDir == null)
+      throw new NullPointerException();
+  }
+  
   /**
    * Resolves a path.
    */
-  abstract public Path resolvePath(String uri);
+  public Path resolvePath(String uri)
+  {
+    if (uri.startsWith("file:"))
+      return _appDir.lookup(uri);
+    else
+      return _appDir.lookup("./" + uri);
+  }
 }

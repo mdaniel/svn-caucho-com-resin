@@ -464,7 +464,7 @@ public class Encoding {
     _mimeName.put("KOI8-R", "KOI8-R");
     _mimeName.put("KOI-8-R", "KOI8-R");
     _mimeName.put("KOI8-R", "KOI8-R");
-    _javaName.put("KOI8-R", "KOI8_R");
+    _javaName.put("KOI8-R", "KOI8-R");
     
     _mimeName.put("MS950", "ms950");
     _javaName.put("ms950", "MS950");

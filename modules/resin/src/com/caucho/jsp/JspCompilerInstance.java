@@ -254,8 +254,7 @@ public class JspCompilerInstance {
     else if (app != null)
       resourceManager = new AppResourceManager(app);
     else {
-      resourceManager = new JspResourceManager();
-      resourceManager.setAppDir(appDir);
+      resourceManager = new AppDirResourceManager(appDir);
     }
 
     TaglibManager taglibManager = _jspCompiler.getTaglibManager();

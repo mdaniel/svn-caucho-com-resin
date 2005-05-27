@@ -31,6 +31,7 @@ package com.caucho.amber.type;
 
 import java.io.IOException;
 
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Types;
 import java.sql.SQLException;
@@ -125,6 +126,19 @@ public class DoubleType extends Type {
     else
       return new Double(value);
   }
+
+  /**
+   * Sets the value.
+   */
+  public void setParameter(PreparedStatement pstmt, int index, Object value)
+    throws SQLException
+  {
+    if (value == null)
+      pstmt.setNull(index, Types.DOUBLE);
+    else
+      pstmt.setDouble(index, ((Double) value).doubleValue());
+  }
+
 
   /**
    * Gets the value.

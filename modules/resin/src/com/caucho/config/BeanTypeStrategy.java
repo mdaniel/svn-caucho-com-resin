@@ -205,8 +205,8 @@ public class BeanTypeStrategy extends TypeStrategy {
 	_setLocation.invoke(bean, qNode.getFilename(), qNode.getLine());
       }
       
-      if (_setSystemId != null)
-	_setSystemId.invoke(bean, node.getBaseURI());
+      if (_setSystemId != null && node instanceof QNode)
+	_setSystemId.invoke(bean, ((QNode) node).getBaseURI());
     
       // XXX: DependencyBean
 

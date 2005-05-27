@@ -739,6 +739,8 @@ r_web-app-Basis =
 
   & r_resource-env-ref*
 
+  & r_rewrite-dispatch*
+
   & r_rewrite-real-path*
 
   & r_secure?

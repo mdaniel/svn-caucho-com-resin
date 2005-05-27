@@ -245,6 +245,13 @@ which ports the server should listen to.</p>
 <tr><td>jsse-ssl<td>configures the port to use JSSE for SSL<td>none
 </deftable-childtags>
 
+<p>The @virtual-host attribute overrides the browser's Host directive,
+specifying the explicit host and port for
+<code>request.getServerName()</code> and <code>getServerPort()</code>.
+It is not used in most virtual host configurations.
+Only IP-based virtual hosts which wish to ignore the browser's Host
+will use @virtual-host.</p>
+
 </defun>
 
 <defun title="min-free-memory" version="Resin 3.0">
@@ -633,6 +640,16 @@ thread pool.</p>
 
 </section>
 </defun> <!-- server -->
+
+<defun title="shutdown-wait-max" version="Resin 3.0">
+<parents>resin</parents>
+
+<p>Configures the maximum time Resin will wait for the server to
+shutdown gracefully before forcing an exit.</p>
+
+<default>60s</default>
+
+</defun>
 
 <defun title="srun" version="Resin 3.0">
 <parents>cluster</parents>

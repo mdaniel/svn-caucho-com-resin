@@ -8,6 +8,13 @@
 
 <summary objsummary='localtoc'/>
 
+<section title="Context.lookup">
+
+<p>The JNDI lookup() method now throws a NameNotFoundException if the
+name does not exist.</p>
+
+</sectino>
+
 <section title="cookie-modulo-cluster">
 
 <p>The cluster encoding in the session cookie is now controllable by

@@ -845,6 +845,8 @@ AC_ARG_WITH(openssl,
 [  --with-openssl=DIR  Openssl directory
 ], [
 OPENSSL=${withval}
+OPENSSL_INCLUDE=${OPENSSL}/include	
+OPENSSL_LIB=${OPENSSL}/lib	
 ])
 
 #
@@ -891,6 +893,7 @@ fi
 
 if test "${ENABLE_SSL}" = false; then	
   foo=bar
+  
 elif test -n "${OPENSSL_LIB}"; then
   foo=bar
   

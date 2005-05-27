@@ -149,7 +149,13 @@ public class EnvServerManager implements EnvironmentListener {
       _workPath = WorkDir.getLocalWorkDir(_classLoader).lookup("ejb");
       _classLoader.addLoader(new SimpleLoader(_workPath));
 
-      _ejbTransactionManager = new EjbTransactionManager(this);
+      try {
+	_ejbTransactionManager = new EjbTransactionManager(this);
+      } catch (Throwable e) {
+	log.info("transactions are not available to EJB server");
+	
+	log.log(Level.FINE, e.toString(), e);
+      }
     
       _ejbAdmin = new EJBAdmin(this);
 

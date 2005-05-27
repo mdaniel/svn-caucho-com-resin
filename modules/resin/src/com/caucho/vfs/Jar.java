@@ -525,10 +525,21 @@ public class Jar implements CacheListener {
   {
     try {
       return getJarEntry(path);
-    } catch (IOException e) {
-      log.log(Level.FINER, e.toString(), e);
+    } catch (Throwable e) {
+      _jarLastModified = 0;
+
+      try {
+	closeJarFile();
+      } catch (Throwable e1) {
+      }
       
-      return null;
+      try {
+	return getJarEntry(path);
+      } catch (Throwable e1) {
+	log.log(Level.INFO, e1.toString(), e1);
+      
+	return null;
+      }
     }
   }
 
