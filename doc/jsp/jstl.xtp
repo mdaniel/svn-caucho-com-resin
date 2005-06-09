@@ -29,7 +29,7 @@
 
       <example title="Using c:out and c:if">
 &lt;%@ taglib prefix='c' uri='http://java.sun.com/jstl/core' %&gt;
-&lt;c:if test="${'${'}param.test='a'}"&gt;
+&lt;c:if test="${'${'}param.test == 'a'}"&gt;
   &lt;c:out value="The parameter is ${'${'}param.test}"/&gt;
 &lt;/c:if&gt;
       </example>
