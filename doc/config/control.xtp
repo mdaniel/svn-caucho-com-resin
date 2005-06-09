@@ -36,15 +36,13 @@ functions.  The EL Environment is inherited, the objects available in
 <tr><td>Var<td>&nbsp;<td>System properties, e.g. ${'${'}Var["resin.home"]}
 
 <tr><td>server<td>&nbsp;<td>Server properties
-<tr><td>&nbsp;<td>name<td>The server id, as specified in -server id
-<tr><td>&nbsp;<td>rootDir<td>The server root directory, $SERVER_ROOT
-<tr><td>&nbsp;<td>docDir<td>The server document directory
+<tr><td>&nbsp;<td>id<td>The server id, as specified in -server id
+<tr><td>&nbsp;<td>rootDir<td>The server root directory
 
 <tr><td>host<td>&nbsp;<td>Virtual host properties
 <tr><td>&nbsp;<td>url<td>The host's canonical URL
 <tr><td>&nbsp;<td>name<td>The host name
 <tr><td>&nbsp;<td>rootDir<td>The host's root directory
-<tr><td>&nbsp;<td>docDir<td>The host's document directory
 <tr><td>&nbsp;<td>warDir<td>The host's war directory
 <tr><td>&nbsp;<td>warExpandDir<td>The host's war expansion directory
 <tr><td>&nbsp;<td>regexp<td>Regular expression values for host regexp matches
