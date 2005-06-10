@@ -99,13 +99,13 @@ class DatabaseMetaDataImpl implements DatabaseMetaData {
     dummy.addRow("BIGINT:-5:20::::1:0:1:1:0:1:BIGINT:0:0:8::10");
 
     // float
-    dummy.addRow("FLOAT:6:10:::(M,D) ZEROFILL:1:0:0:1:0:1:FLOAT:3:3:4::10");
+    dummy.addRow("FLOAT:6:10:::(M,D) ZEROFILL:1:0:0:1:0:1:FLOAT:3:3:8::10");
 
     // real
-    dummy.addRow("FLOAT:7:10:::(M,D) ZEROFILL:1:0:0:1:0:1:FLOAT:3:3:4::10");
+    dummy.addRow("FLOAT:7:10:::(M,D) ZEROFILL:1:0:0:1:0:1:FLOAT:3:3:8::10");
     
     // double
-    dummy.addRow("DOUBLE:8:10:::(M,D)] ZEROFILL:1:0:0:1:0:1:FLOAT:3:3:4::10");
+    dummy.addRow("DOUBLE:8:10:::(M,D) ZEROFILL:1:0:0:1:0:1:FLOAT:3:3:8::10");
     
     // char
     dummy.addRow("CHAR:1:255:':':(M) BINARY:1:1:1:1:0:0:CHAR:0:0:254::10");
@@ -121,6 +121,10 @@ class DatabaseMetaDataImpl implements DatabaseMetaData {
     
     // time
     dummy.addRow("DATETIME:92:0:':'::1:1:1:1:0:0:DATETIME:0:0:253::10");
+    
+    // numeric
+    dummy.addRow("NUMERIC:2:10:::(M,D) ZEROFILL:1:0:0:0:1:0:NUMERIC:0:20:3::10");
+    dummy.addRow("NUMERIC:3:10:::(M,D) ZEROFILL:1:0:0:0:1:0:NUMERIC:0:20:3::10");
 
     return dummy;
   }

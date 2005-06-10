@@ -58,6 +58,7 @@ abstract public class Column {
   public final static int DOUBLE = 4;
   public final static int DATE = 5;
   public final static int BLOB = 6;
+  public final static int NUMERIC = 7;
   
   private final Row _row;
   private final String _name;

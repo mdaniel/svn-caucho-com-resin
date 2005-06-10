@@ -145,8 +145,9 @@ public class TcpConnection extends PortConnection implements ThreadTask {
     if (socket != null) {
       int freeCount = ThreadPool.getFreeThreadCount();
 
-      if (freeCount < 20)
+      if (freeCount < 20) {
 	return false;
+      }
       
       int freeKeepalive = port.getFreeKeepalive();
 
@@ -201,6 +202,28 @@ public class TcpConnection extends PortConnection implements ThreadTask {
   public boolean isActive()
   {
     return _isActive;
+  }
+
+  /**
+   * Sets the keepalive state.  Called only by the SelectManager and Port.
+   */
+  public void setKeepalive()
+  {
+    if (_isKeepalive)
+      log.warning("illegal state: setting keepalive with active keepalive: " + this);
+    
+    _isKeepalive = true;
+  }
+
+  /**
+   * Sets the keepalive state.  Called only by the SelectManager and Port.
+   */
+  public void clearKeepalive()
+  {
+    if (! _isKeepalive)
+      log.warning("illegal state: clearing keepalive with inactive keepalive: " + this);
+    
+    _isKeepalive = false;
   }
 
   /**
@@ -275,7 +298,7 @@ public class TcpConnection extends PortConnection implements ThreadTask {
   /**
    * Adds the connection for keepalive.
    */
-  public void keepalive()
+  private void keepalive()
   {
     Port port = getPort();
 
@@ -320,7 +343,6 @@ public class TcpConnection extends PortConnection implements ThreadTask {
     try {
       while (! _isDead) {
 	if (isKeepalive) {
-	  //  port.fromKeepalive(this);
 	}
 	else if (! port.accept(this, isFirst)) {
 	  return;
@@ -370,10 +392,8 @@ public class TcpConnection extends PortConnection implements ThreadTask {
     } finally {
       port.threadEnd(this);
 
-      if (isKeepalive) {
-	_isKeepalive = true;
+      if (isKeepalive)
 	keepalive();
-      }
       else
 	free();
 
@@ -488,12 +508,4 @@ public class TcpConnection extends PortConnection implements ThreadTask {
     else
       return "TcpConnection[id=" + _id + ",socket=" + _socket + ",port=" + getPort() + "]";
   }
-
-  // XXX: is this necessary?
-  /*
-  public void finalize()
-  {
-    closeImpl();
-  }
-  */
 }

@@ -75,8 +75,10 @@ abstract public class AbstractSelectManager {
    * Adds a keepalive connection.
    *
    * @param conn the connection to register as keepalive
+   *
+   * @return true if the keepalive was successful
    */
-  abstract public void keepalive(TcpConnection conn);
+  abstract public boolean keepalive(TcpConnection conn);
 
   /**
    * Returns the select count.

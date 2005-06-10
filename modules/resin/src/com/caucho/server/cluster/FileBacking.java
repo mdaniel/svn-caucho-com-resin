@@ -149,7 +149,9 @@ public class FileBacking {
     _updateQuery = "UPDATE " + _tableName + " SET data=?, mod_time=?, access_time=? WHERE id=?";
     _accessQuery = "UPDATE " + _tableName + " SET access_time=? WHERE id=?";
     _invalidateQuery = "DELETE FROM " + _tableName + " WHERE id=?";
-    _timeoutQuery = "DELETE FROM " + _tableName + " WHERE access_time + expire_interval < ?";
+
+    // access window is 1/4 the expire interval
+    _timeoutQuery = "DELETE FROM " + _tableName + " WHERE access_time + 5 * expire_interval / 4 < ?";
 
     _dumpQuery = ("SELECT id, expire_interval, data FROM " + _tableName +
 		  " WHERE ? <= mod_time AND " +

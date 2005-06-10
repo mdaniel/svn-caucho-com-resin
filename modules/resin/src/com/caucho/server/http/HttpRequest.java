@@ -285,10 +285,10 @@ public class HttpRequest extends AbstractHttpRequest
 
     if (log.isLoggable(Level.FINE)) {
       log.fine(dbgId() +
-               (allowKeepalive() ? "keepalive" : "no-keepalive"));
+               (isKeepalive() ? "keepalive" : "no-keepalive"));
     }
 
-    return allowKeepalive();
+    return isKeepalive();
   }
 
   /**

@@ -2,9 +2,17 @@
 
 <a href='changes-2.xtp'>Resin 2.1 changes</a>
 
-<s2 title='3.0.snap - May 25, 2005'>
+<s2 title='3.0.snap - May 26, 2005'>
 <ul>
-<li>EJBCompiler should be able to work even through transactions aren't available (rep by Kirk Rasmussen)
+<li>Added numeric support to internal database
+<li>backed out Context.lookup exception changes to minimize 3.0.14 disruption
+<li>Changed x-anonymous caching so the external headers are always no-cache (rep by Kirk Rasmussen)
+<li>session timeout was using incorrect access-window from persistent-store instead of session-config (rep by B Davis)
+<li>jni_vfs.c pthread_lock #define needs to change to pthread_mutex_lock (rep by Tom Hintz)
+<li>session store not properly configured in SessionManager
+<li>reversed stdout: change, continues to work as before (rep by Keith Fetterman)
+<li>keepalive timing issue keeping track of keepalive threads (rep by Malte Muenke)
+<li>(2005-05-26) EJBCompiler should be able to work even through transactions aren't available (rep by Kirk Rasmussen)
 <li>sendError from inside error page must not go through ErrorManager (rep by Massimo Mirabito)
 <li>Amber DoubleType.setParameter wasn't handling the double type property (rep by Mieke Mocke)
 <li>--with-openssl wasn't properly setting SSL_INCLUDE and SSL_LIB (rep by Forrest Girouard)

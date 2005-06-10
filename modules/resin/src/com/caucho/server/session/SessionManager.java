@@ -130,7 +130,7 @@ public class SessionManager implements ObjectManager, AlarmListener {
   private boolean _cookieSecure;
   private String _cookiePort;
   private int _reuseSessionId = COOKIE;
-  private int _cookieLength = 16;
+  private int _cookieLength = 18;
 
   private int _distributedPort;
 
@@ -225,8 +225,6 @@ public class SessionManager implements ObjectManager, AlarmListener {
 	ClusterServer selfServer = null;
 	if (_cluster != null) {
 	  _srunLength = _cluster.getServerList().length;
-	  if (_srunLength < 1)
-	    _srunLength = 1;
 	  
 	  selfServer = _cluster.getSelfServer();
 	  if (selfServer != null) {
@@ -850,10 +848,12 @@ public class SessionManager implements ObjectManager, AlarmListener {
       _storeManager.setAlwaysSave(_alwaysSaveSession);
       _storeManager.init();
 
+      _storeManager.updateIdleCheckInterval(_sessionTimeout);
+    }
+
+    if (_storeManager != null) {
       _sessionStore = _storeManager.createStore(_distributionId, this);
       _sessionStore.setMaxIdleTime(_sessionTimeout);
-
-      _storeManager.updateIdleCheckInterval(_sessionTimeout);
     }
 
     _alarm.queue(60000);
@@ -936,25 +936,30 @@ public class SessionManager implements ObjectManager, AlarmListener {
 
       long random = RandomUtil.getRandomLong();
 
-      int digit = (int) (random & 0x3f);
-      random = random >> 6;
+      int digit;
 
-      if (_srunLength <= 0) {
-      }
-      else if (_srunLength == 1 || _isModuloSessionId)
+      if (_srunLength <= 0)
+	digit = 0;
+      else if (_isModuloSessionId) {
+	digit = RandomUtil.nextInt(64);
+	
 	digit = (digit - digit % _srunLength) + index;
+      }
       else
 	digit = index;
 
       // server/01l3 - check for overflow 
       if (digit >= 64)
 	digit = index;
-      
-      cb.append(convert(digit));
 
-      int length = _cookieLength - 1;
+      int length = _cookieLength;
 
-      for (int i = 0; i < 10 && length-- > 0; i++) {
+      if (_srunLength > 0) {
+	cb.append(convert(digit));
+	length--;
+      }
+
+      for (int i = 0; i < 11 && length-- > 0; i++) {
         cb.append(convert(random));
         random = random >> 6;
       }
@@ -1269,8 +1274,8 @@ public class SessionManager implements ObjectManager, AlarmListener {
       long now = Alarm.getCurrentTime();
       long accessWindow = 0;
 
-      if (_storeManager != null)
-	accessWindow = _storeManager.getAccessWindowTime();
+      if (_sessionStore != null)
+	accessWindow = _sessionStore.getAccessWindowTime();
       
       synchronized (_sessions) {
 	_sessionIter = _sessions.values(_sessionIter);

@@ -2221,7 +2221,23 @@ public abstract class AbstractHttpRequest
   }
 
   /**
+   * Returns true if the keepalive is active.
+   */
+  protected boolean isKeepalive()
+  {
+    return _keepalive;
+  }
+
+  /**
    * Returns true if keepalives are allowed.
+   *
+   * This method should only be called once, when the response is
+   * deciding whether to send the Connection: close (or 'Q' vs 'X'),
+   * after that, the calling routines should call isKeepalive() to
+   * see what the decision was.
+   *
+   * Otherwise, the browser might see a keepalive when the final decision
+   * is to close the connection.
    */
   public boolean allowKeepalive()
   {
@@ -2235,8 +2251,12 @@ public abstract class AbstractHttpRequest
     TcpConnection tcpConn = (TcpConnection) conn;
     Port port = tcpConn.getPort();
 
-    // the 16 is spare space for threading
-    return port.getFreeKeepalive() > 16;
+    // the 16 is spare space for threading, since the keepalive connection
+    // isn't actually allocated here
+    if (port.getFreeKeepalive() < 16)
+      _keepalive = false;
+
+    return _keepalive;
   }
 
   /**

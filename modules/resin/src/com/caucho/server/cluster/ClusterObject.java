@@ -310,7 +310,7 @@ public class ClusterObject {
   {
     long now = Alarm.getCurrentTime();
 
-    if (_storeManager.getAccessWindowTime() <= now - _accessTime) {
+    if (getAccessWindow() <= now - _accessTime) {
       try {
 	_storeManager.accessImpl(getUniqueId());
       } catch (Exception e) {

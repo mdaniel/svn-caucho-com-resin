@@ -108,7 +108,7 @@ public class Port implements EnvironmentListener, PortMBean, Runnable {
   private int _connectionMax = 512;
   private int _minSpareConnection = 16;
 
-  private int _keepaliveMax = 256;
+  private int _keepaliveMax = -1;
   private long _keepaliveTimeout = 120000L;
     
   private int _minSpareListen = 5;
@@ -170,9 +170,6 @@ public class Port implements EnvironmentListener, PortMBean, Runnable {
   public void setServer(ProtocolDispatchServer server)
   {
     _server = server;
-
-    if (server.getKeepaliveMax() < _keepaliveMax)
-      _keepaliveMax = server.getKeepaliveMax();
 
     if (_protocol != null)
       _protocol.setServer(server);
@@ -679,6 +676,12 @@ public class Port implements EnvironmentListener, PortMBean, Runnable {
 	}
       }
 
+      if (_keepaliveMax < 0)
+	_keepaliveMax = _server.getKeepaliveMax();
+
+      if (_keepaliveMax < 0)
+	_keepaliveMax = 256;
+
       String name = "resin-port-" + _serverSocket.getLocalPort();
       _thread = new Thread(this, name);
       _thread.setDaemon(true);
@@ -813,16 +816,22 @@ public class Port implements EnvironmentListener, PortMBean, Runnable {
   }
 
   /**
-   * Returns the accept pool.
+   * Tries to mark the connection as a keepalive connection
    */
-  public void keepalive(TcpConnection conn)
+  void keepalive(TcpConnection conn)
   {
-    if (! keepaliveBegin(conn))
+    if (! keepaliveBegin(conn)) {
       conn.free();
-    else if (_selectManager != null)
-      _selectManager.keepalive(conn);
-    else
+    }
+    else if (_selectManager != null) {
+      if (! _selectManager.keepalive(conn)) {
+	keepaliveEnd(conn);
+      }
+    }
+    else {
+      conn.setKeepalive();
       ThreadPool.schedule(conn);
+    }
   }
 
   /**
@@ -849,6 +858,11 @@ public class Port implements EnvironmentListener, PortMBean, Runnable {
   {
     synchronized (_keepaliveCountLock) {
       _keepaliveCount--;
+
+      if (_keepaliveCount < 0) {
+	log.warning("internal error: negative keepalive count " + _keepaliveCount + " in Port.keepaliveEnd().");
+	_keepaliveCount = 0;
+      }
     }
   }
 

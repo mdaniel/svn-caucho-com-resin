@@ -1393,7 +1393,8 @@ public class JspParser {
         case '\\':
         case '\'':
         case '\"':
-	  _value.append('\\');
+	  // jsp/1505 vs jsp/184s
+	  // _value.append('\\');
           _value.append((char) ch);
           ch = read();
           break;

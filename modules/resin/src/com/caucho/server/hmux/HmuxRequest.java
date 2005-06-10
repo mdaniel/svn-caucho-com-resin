@@ -445,7 +445,7 @@ public class HmuxRequest extends AbstractHttpRequest
       }
     }
 
-    boolean allowKeepalive = allowKeepalive();
+    boolean allowKeepalive = isKeepalive();
     
     if (log.isLoggable(Level.FINE)) {
       if (allowKeepalive)

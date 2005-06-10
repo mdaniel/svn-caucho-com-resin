@@ -92,6 +92,20 @@ public class Store {
   }
 
   /**
+   * Returns the length of time an idle object can remain in the store before
+   * being cleaned.
+   */
+  public long getAccessWindowTime()
+  {
+    long window = _maxIdleTime / 4;
+
+    if (window < 60000L)
+      return 60000L;
+    else
+      return window;
+  }
+
+  /**
    * Returns the object manager.
    */
   public ObjectManager getObjectManager()

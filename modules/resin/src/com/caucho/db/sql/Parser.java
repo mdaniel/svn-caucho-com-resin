@@ -689,6 +689,7 @@ public class Parser {
 
     String type = _lexeme;
     int length = -1;
+    int scale = -1;
 
     if (type.equalsIgnoreCase("double")) {
       if ((token = scanToken()) == IDENTIFIER) {
@@ -707,7 +708,16 @@ public class Parser {
 
       length = Integer.parseInt(_lexeme);
 
-      if ((token = scanToken()) != ')')
+      if ((token = scanToken()) == ',') {
+	if ((token = scanToken()) != INTEGER)
+	  throw error(L.l("expected column scale at `{0}'", tokenName(token)));
+
+	scale = Integer.parseInt(_lexeme);
+
+	token = scanToken();
+      }
+
+      if (token != ')')
 	throw error(L.l("expected ')' at '{0}'", tokenName(token)));
     }
     else
@@ -750,6 +760,10 @@ public class Parser {
     else if (type.equalsIgnoreCase("text") ||
 	     type.equalsIgnoreCase("clob")) {
       factory.addVarchar(name, 255);
+    }
+    else if (type.equalsIgnoreCase("decimal") ||
+	     type.equalsIgnoreCase("numeric")) {
+      factory.addNumeric(name, length, scale);
     }
     else
       throw error(L.l("Unknown type {0}", type));

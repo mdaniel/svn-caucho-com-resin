@@ -147,6 +147,16 @@ public class TableFactory {
   }
 
   /**
+   * Adds a numeric
+   */
+  public Column addNumeric(String name, int precision, int scale)
+  {
+    _row.allocateColumn();
+    
+    return _row.addColumn(new NumericColumn(_row, name, precision, scale));
+  }
+
+  /**
    * Sets the named column as a primary key constraint.
    */
   public void setPrimaryKey(String name)

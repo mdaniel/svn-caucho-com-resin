@@ -218,6 +218,15 @@ public class ResultSetImpl extends AbstractResultSet {
   }
 
   /**
+   * Returns the big-decimal value for the column.
+   */
+  public BigDecimal getBigDecimal(int columnIndex)
+    throws SQLException
+  {
+    return new BigDecimal(_rs.getString(columnIndex - 1));
+  }
+
+  /**
    * Returns the blob value for the column.
    */
   public Blob getBlob(int columnIndex)

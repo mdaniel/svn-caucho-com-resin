@@ -444,6 +444,13 @@ public class Table extends Store {
       case Column.BLOB:
 	os.print("BLOB");
 	break;
+      case Column.NUMERIC:
+	{
+	  NumericColumn numeric = (NumericColumn) column;
+	  
+	  os.print("NUMERIC(" + numeric.getPrecision() + "," + numeric.getScale() + ")");
+	  break;
+	}
       default:
 	throw new UnsupportedOperationException();
       }

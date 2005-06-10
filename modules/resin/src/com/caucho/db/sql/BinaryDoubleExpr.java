@@ -40,42 +40,32 @@ import com.caucho.log.Log;
 
 import com.caucho.db.table.TableIterator;
 
-class BinaryExpr extends Expr {
-  private static final Logger log = Log.open(BinaryExpr.class);
+class BinaryDoubleExpr extends Expr {
+  private static final Logger log = Log.open(BinaryDoubleExpr.class);
 
   private Expr _left;
   private Expr _right;
   private int _op;
 
-  BinaryExpr(Expr left, Expr right, int op)
+  BinaryDoubleExpr(Expr left, Expr right, int op)
   {
     _left = left;
     _right = right;
     _op = op;
   }
 
-  /**
-   * Binds the expression to the actual tables.
-   */
-  protected Expr bind(Query query)
+  protected Expr bind(FromItem []fromItems)
     throws SQLException
   {
-    Expr newLeft = _left.bind(query);
-    Expr newRight = _right.bind(query);
+    throw new UnsupportedOperationException();
+  }
 
-    switch (_op) {
-    case '+':
-    case '-':
-    case '*':
-    case '/':
-    case '%':
-      if (newLeft.isLong() && newRight.isLong())
-	return new BinaryLongExpr(newLeft, newRight, _op);
-      else
-	return new BinaryDoubleExpr(newLeft, newRight, _op);
-    }
-
-    throw new SQLException("can't cope: " + newLeft + " " + newLeft.getType() + " " + newRight);
+  /**
+   * Returns the type of the expression.
+   */
+  public Class getType()
+  {
+    return double.class;
   }
 
   /**
@@ -87,11 +77,60 @@ class BinaryExpr extends Expr {
   }
 
   /**
-   * Returns the type of the expression.
+   * Evaluates the expression as a double.
+   *
+   * @param rows the current tuple being evaluated
+   *
+   * @return the double value
    */
-  public Class getType()
+  public double evalDouble(QueryContext context)
+    throws SQLException
   {
-    return Object.class;
+    switch (_op) {
+    case '+':
+      return _left.evalDouble(context) + _right.evalDouble(context);
+
+    case '-':
+      return _left.evalDouble(context) - _right.evalDouble(context);
+
+    case '*':
+      return _left.evalDouble(context) * _right.evalDouble(context);
+
+    case '/':
+      return _left.evalDouble(context) / _right.evalDouble(context);
+
+    case '%':
+      return _left.evalDouble(context) % _right.evalDouble(context);
+
+    default:
+      throw new IllegalStateException();
+    }
+  }
+
+  /**
+   * Evaluates the expression as a double.
+   *
+   * @param rows the current tuple being evaluated
+   *
+   * @return the double value
+   */
+  public long evalLong(QueryContext context)
+    throws SQLException
+  {
+    return (long) evalDouble(context);
+  }
+
+  /**
+   * Evaluates the expression as a string.
+   *
+   * @param rows the current tuple being evaluated
+   *
+   * @return the string value
+   */
+  public String evalString(QueryContext context)
+    throws SQLException
+  {
+    return String.valueOf(evalDouble(context));
   }
 
   /**
@@ -104,6 +143,18 @@ class BinaryExpr extends Expr {
   {
     _left.evalGroup(context);
     _right.evalGroup(context);
+  }
+
+  public boolean equals(Object o)
+  {
+    if (o == null || ! BinaryDoubleExpr.class.equals(o.getClass()))
+      return false;
+
+    BinaryDoubleExpr expr = (BinaryDoubleExpr) o;
+
+    return (_op == expr._op &&
+	    _left.equals(expr._left) &&
+	    _right.equals(expr._right));
   }
 
   public String toString()
@@ -125,7 +176,7 @@ class BinaryExpr extends Expr {
       return "(" + _left + " % " + _right + ")";
 
     default:
-      throw new IllegalStateException("can't compare");
+      throw new IllegalStateException();
     }
   }
 }

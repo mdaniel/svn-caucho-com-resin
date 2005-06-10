@@ -157,13 +157,15 @@ abstract public class AbstractResultSet implements java.sql.ResultSet {
   }
 
   public BigDecimal getBigDecimal(int columnIndex)
+    throws SQLException
   {
     return null;
   }
 
   public BigDecimal getBigDecimal(int columnIndex, int scale)
+    throws SQLException
   {
-    return getBigDecimal(columnIndex);
+    return getBigDecimal(columnIndex).setScale(scale);
   }
 
   public BigDecimal getBigDecimal(String columnName)

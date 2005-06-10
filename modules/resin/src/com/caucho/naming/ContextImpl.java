@@ -167,9 +167,11 @@ public class ContextImpl implements Context {
     Object value = lookupImpl(name);
 
     // RSN-229
+    /* XXX: temporarily backed out
     if (value == null) {
       throw new NameNotFoundException(getFullPath(name));
     }
+    */
 
     return value;
   }

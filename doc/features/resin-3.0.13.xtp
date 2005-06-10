@@ -83,7 +83,7 @@ relative path.</p>
 
  <example title="webapps configuration">
 &lt;web-app-deploy>
-  &lt;archive-directory>config:webapps&lt;archive-directory>
+  &lt;archive-directory>config:webapps&lt;/archive-directory>
   &lt;expand-directory>webapps&lt;/expand-directory>
 &lt;web-app-deploy>
 </example>
