@@ -97,6 +97,7 @@ public class JDKWriter extends EncodingWriter {
 
   static class OutputStreamEncodingWriter extends EncodingWriter {
     private Charset _charset;
+    private String _encoding;
     private OutputStreamWriter _writer;
     private OutputStreamWithBuffer _os;
 
@@ -104,7 +105,10 @@ public class JDKWriter extends EncodingWriter {
       throws UnsupportedEncodingException
     {
       try {
-	_charset = Charset.forName(javaEncoding);
+	_encoding = javaEncoding;
+	
+	if (Charset.isSupported(javaEncoding))
+	  _charset = Charset.forName(javaEncoding);
       } catch (java.nio.charset.UnsupportedCharsetException e) {
 	throw new UnsupportedEncodingException(e.getMessage());
       }
@@ -117,7 +121,11 @@ public class JDKWriter extends EncodingWriter {
       throws IOException
     {
       if (_os != os) {
-	_writer = new OutputStreamWriter(os, _charset);
+	if (_charset != null)
+	  _writer = new OutputStreamWriter(os, _charset);
+	else
+	  _writer = new OutputStreamWriter(os, _encoding);
+
 	_os = os;
       }
       
@@ -133,7 +141,11 @@ public class JDKWriter extends EncodingWriter {
       throws IOException
     {
       if (_os != os) {
-	_writer = new OutputStreamWriter(os, _charset);
+	if (_charset != null)
+	  _writer = new OutputStreamWriter(os, _charset);
+	else
+	  _writer = new OutputStreamWriter(os, _encoding);
+
 	_os = os;
       }
       

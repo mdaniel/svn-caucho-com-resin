@@ -58,9 +58,15 @@ public class JDKReader extends EncodingReader {
   public Reader create(InputStream is, String javaEncoding)
     throws UnsupportedEncodingException
   {
-    Charset charset = Charset.forName(javaEncoding);
+    if (Charset.isSupported(javaEncoding)) {
+      Charset charset = Charset.forName(javaEncoding);
     
-    return new InputStreamReader(is, charset);
+      return new InputStreamReader(is, charset);
+    }
+    else {
+      // RSN-274, Charset doesn't support all java.io encoding
+      return new InputStreamReader(is, javaEncoding);
+    }
   }
 
   /**

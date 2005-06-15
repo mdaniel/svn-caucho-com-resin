@@ -91,6 +91,9 @@ public class EJBServer
   static final L10N L = new L10N(EJBServer.class);
   protected static final Logger log = Log.open(EJBServer.class);
   
+  protected static EnvironmentLocal<EJBServerInterface> _localServer
+    = new EnvironmentLocal<EJBServerInterface>("caucho.ejb-server");
+  
   protected static EnvironmentLocal<String> _localURL =
     new EnvironmentLocal<String>("caucho.url");
 
@@ -528,6 +531,11 @@ public class EJBServer
       log.log(Level.FINER, e.toString(), e);
     }
 
+    if (_localServer.getLevel() == null ||
+	name.equals("java:comp/env/cmp")) {
+      _localServer.set(this);
+    }
+
     if ("manual".equals(_startupMode))
       return;
 
@@ -626,12 +634,6 @@ public class EJBServer
     throws Exception
   {
     manualInit();
-
-    /*
-    addEJBJars();
-
-    _ejbManager.initJars();
-    */
   }
   
   /**
@@ -641,18 +643,6 @@ public class EJBServer
   private void initAllEjbs()
     throws Exception
   {
-    /*
-    MergePath mergePath = new MergePath();
-    
-    if (_ejbConfigDir != null)
-      mergePath.addMergePath(_ejbConfigDir);
-    mergePath.addClassPath();
-    mergePath.addMergePath(CauchoSystem.getWorkPath());
-    */
-
-    //_ejbManager.setSearchPath(mergePath);
-    //_ejbManager.setWorkPath(CauchoSystem.getWorkPath());
-
     addEJBJars();
     
     if (_descriptors != null) {
@@ -663,33 +653,6 @@ public class EJBServer
         _ejbManager.addEJBPath(path);
       }
     }
-
-    /*
-    if (_ejbConfigDir != null) {
-      Path dir = _ejbConfigDir;
-      String userPath = dir.getUserPath();
-      if (! userPath.endsWith("/") && ! userPath.equals(""))
-	userPath = userPath + "/";
-
-      String []list = dir.list();
-      for (int j = 0; j < list.length; j++) {
-        String name = list[j];
-
-	System.out.println("N: " + name);
-
-        if (name.endsWith(".ejb")) {
-          Path path = dir.lookup(name);
-	  
-          path.setUserPath(userPath + name);
-
-          if (path.exists()) {
-            // XXX: app.addDepend(path);
-            _ejbManager.addEJBPath(path);
-          }
-        }
-      }
-    }
-    */
   }
 
   private void addEJBJars()
@@ -703,30 +666,6 @@ public class EJBServer
       JarPath jar = JarPath.create(path);
 
       _ejbManager.addEJBJar(jar);
-      /*
-      Path descriptorPath = jar.lookup("META-INF/ejb-jar.xml");
-
-      if (descriptorPath.exists())
-	_ejbManager.addEJBPath(descriptorPath);
-
-      descriptorPath = jar.lookup("META-INF/resin-ejb-jar.xml");
-
-      if (descriptorPath.exists())
-	_ejbManager.addEJBPath(descriptorPath);
-
-      Path metaInf = jar.lookup("META-INF");
-      if (! metaInf.isDirectory())
-	continue;
-	  
-      String []metaList = metaInf.list();
-      for (int j = 0; j < metaList.length; j++) {
-	String metaName = metaList[j];
-	if (metaName.endsWith(".ejb")) {
-	  Path metaPath = metaInf.lookup(metaName);
-	  _ejbManager.addEJBPath(metaPath);
-	}
-      }
-      */
     }
   }
 

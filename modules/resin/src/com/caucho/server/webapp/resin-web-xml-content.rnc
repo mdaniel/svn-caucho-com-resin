@@ -138,7 +138,7 @@ r_filter = element filter {
    (attribute filter-class { r_class-Type }
     | element filter-class { r_class-Type }),
 
-   (r_init | r_init-param*)
+   (r_init | r_init-param)*
 }
 
 r_filter-mapping = element filter-mapping {
@@ -456,7 +456,7 @@ r_servlet = element servlet {
 }
 
 r_servlet-Content =
-  ((r_init | r_init-param*)?,
+  ((r_init | r_init-param)*,
 
    (attribute load-on-startup { string }
     | element load-on-startup { string })?,

@@ -10,6 +10,16 @@
 
   <body>
     <summary/>
+
+<section title="Files in this tutorial">
+<deftable>
+<tr><td><viewfile-link file="WEB-INF/resin-web.xml"/>
+    <td>resin-web.xml configuration
+<tr><td><viewfile-link file="WEB-INF/classes/test/HelloServlet.java"/>
+    <td>The Hello, World servlet.
+</deftable>
+</section>
+
 <p>Servlets are the pure Java solution to handle web requests.  Many
 application will use servlets instead of JSP and others will use servlets
 in conjunction with JSP.  Experienced JSP programmers use servlets
@@ -78,7 +88,9 @@ the <var>/hello</var> URL invokes the servlet.  Because the tutorial
 the servlet is the combination of the two.</p>
 
 <example title="WEB-INF/web.xml">
-&lt;web-app xmlns="http://caucho.com/ns/resin">
+&lt;web-app xmlns="http://java.sun.com/xml/ns/j2ee" version="2.4"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http:/java.sun.com/dtd/web-app_2_3.dtd">
   &lt;servlet>
     &lt;servlet-name>hello&lt;/servlet-name>
     &lt;servlet-class>test.HelloServlet&lt;/servlet-class>
@@ -93,10 +105,10 @@ the servlet is the combination of the two.</p>
 
 <p>Resin allows a short cut for the XML configuration in the example above;
 you can use XML attributes in place of elements.  The
-Servlet 2.3 standard uses only elements.  So the servlet-mapping
-configuration following the Servlet 2.3 standard would look like:</p>
+Servlet 2.4 standard uses only elements.  So the servlet-mapping
+configuration following the Servlet 2.4 standard would look like:</p>
 
-<example title="WEB-INF/web.xml">
+<example title="WEB-INF/resin-web.xml">
 &lt;web-app xmlns="http://caucho.com/ns/resin">
    &lt;servlet servlet-name="hello"
             servlet-class="test.HelloServlet"/>

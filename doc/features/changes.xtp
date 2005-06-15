@@ -2,9 +2,12 @@
 
 <a href='changes-2.xtp'>Resin 2.1 changes</a>
 
-<s2 title='3.0.snap - May 26, 2005'>
+<s2 title='3.0.snap - Jun 10, 2005'>
 <ul>
-<li>Added numeric support to internal database
+<li>run.cpp set_jdk_args was missing resin_home parameter (fixed! by Patrick Burleson)
+<li>&lt;servlet> needs to allow both &lt;init> and &lt;init-param> (rep by Kirk Rasmussen)
+<li>Update JDKReader to support java.io encodings if Charset doesn't support (rep by T Fukuda)
+<li>(2005-06-10) Added numeric support to internal database
 <li>backed out Context.lookup exception changes to minimize 3.0.14 disruption
 <li>Changed x-anonymous caching so the external headers are always no-cache (rep by Kirk Rasmussen)
 <li>session timeout was using incorrect access-window from persistent-store instead of session-config (rep by B Davis)

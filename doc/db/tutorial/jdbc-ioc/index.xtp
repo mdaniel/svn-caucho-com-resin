@@ -16,7 +16,7 @@ for using a database in Resin, following the Dependency-Injection/Inversion-of-C
 <p>Using a JDBC database is a three step process:</p>
 
 <ul>
-<li>Configuring the &lt;database> in the web.xml or resin.conf
+<li>Configuring the &lt;database> in the resin-web.xml or resin.conf
 <li>Retrieving the <code>DataSource</code> from the global JNDI
 resource map.
 <li>Using a <code>Connection</code> from the <code>DataSource</code>
@@ -32,8 +32,8 @@ in the JNDI resource map.  The servlet will retrieve the
 
 <section title="Files in this tutorial">
 <deftable>
-<tr><td><viewfile-link file="WEB-INF/web.xml"/>
-    <td>web.xml configuration
+<tr><td><viewfile-link file="WEB-INF/resin-web.xml"/>
+    <td>resin-web.xml configuration
 <tr><td><viewfile-link file="WEB-INF/classes/example/BasicServlet.java"/>
     <td>The JDBC query servlet.
 <tr><td><viewfile-link file="WEB-INF/classes/example/InitServlet.java"/>
@@ -202,7 +202,7 @@ remain the primary registry.
 <p>Enabling the Dependency Injection pattern is trivial: just
 add a <code>setDataSource</code> method as in the example above.</p>
 
-<example title="web.xml">
+<example title="resin-web.xml">
 &lt;servlet servlet-name="my-servlet"
          servlet-class="example.BasicServlet">
   &lt;init>
@@ -216,10 +216,12 @@ add a <code>setDataSource</code> method as in the example above.</p>
 <section title="Standard configuration">
 
 <example title="web.xml">
+...
 &lt;servlet servlet-name="my-servlet"
          servlet-class="example.BasicServlet">
   &lt;init-param data-source="java:comp/env/jdbc/basic"/>
 &lt;/servlet>
+...
 </example>
 
 </section>

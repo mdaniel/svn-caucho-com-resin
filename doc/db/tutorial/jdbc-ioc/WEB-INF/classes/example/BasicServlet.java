@@ -28,15 +28,14 @@ import javax.servlet.http.HttpServletResponse;
  * time.
  */
 public class BasicServlet extends HttpServlet {
-  private String _dataSourceName;
-  
   /**
    * The saved DataSource for the database
    */
   private DataSource _ds = null;
 
   /**
-   * Sets the data source.
+   * Sets the data source.  The &lt;init data-source="jdbc/test"/> will
+   * call this method at configuration time.
    */
   public void setDataSource(DataSource ds)
   {
@@ -44,37 +43,15 @@ public class BasicServlet extends HttpServlet {
   }
 
   /**
-   * Initializes the reference to the DataSource and caches it in
-   * the servlet.
+   * The init() method checks if the DataSource has been properly configured.
    */
   public void init()
     throws ServletException
   {
-    if (_ds == null)
-      assemble();
-  }
-
-  /**
-   * Assembles the DataSource dependency when the container does
-   * not support servlet dependency injection.
-   */
-  private void assemble()
-    throws ServletException
-  {
-    try {
-      String dataSourceName = getInitParameter("data-source");
-
-      if (dataSourceName == null)
-	throw new ServletException("data-source must be specified");
-
-      Context ic = new InitialContext();
-	
-      _ds = (DataSource) ic.lookup("java:comp/env/" + dataSourceName);
-
-      if (_ds == null)
-	throw new ServletException(dataSourceName + " is an unknown data-source.");
-    } catch (NamingException e) {
-      throw new ServletException(e);
+    if (_ds == null) {
+      // servlets can also create an assemble() method as in the jdbc-basic
+      // tutorial to support the init-param configuration.
+      throw new ServletException("data-source must be configured in an init tag.");
     }
   }
 

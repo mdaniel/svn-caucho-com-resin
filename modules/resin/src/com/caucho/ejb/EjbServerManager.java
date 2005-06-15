@@ -490,8 +490,13 @@ public class EjbServerManager implements EJBServerInterface, EnvironmentListener
   public void addEJBJar(Path path)
     throws Exception
   {
-    JarPath jar = JarPath.create(path);
-    
+    JarPath jar;
+
+    if (path instanceof JarPath)
+      jar = (JarPath) path;
+    else
+      jar = JarPath.create(path);
+
     Path descriptorPath = jar.lookup("META-INF/ejb-jar.xml");
 
     if (descriptorPath.exists())
@@ -522,6 +527,7 @@ public class EjbServerManager implements EJBServerInterface, EnvironmentListener
   public void addEJBPath(Path path)
     throws ConfigException
   {
+    
     _ejbConfig.addEJBPath(path);
   }
 
@@ -555,6 +561,7 @@ public class EjbServerManager implements EJBServerInterface, EnvironmentListener
       _amberManager.init();
 
       _ejbConfig.configure();
+      
 
       // initJdbc();
     } catch (ConfigException e) {

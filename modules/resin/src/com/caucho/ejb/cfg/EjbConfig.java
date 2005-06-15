@@ -208,7 +208,6 @@ public class EjbConfig {
       _pendingBeans.add(bean);
     
     _cfgBeans.put(name, bean);
-    System.out.println("CFG: " + name + " " + _cfgBeans);
   }
 
   /**
@@ -510,7 +509,6 @@ public class EjbConfig {
 
 	String sourceEJB = sourceRole.getEJBName();
 	EjbEntityBean sourceEntity = (EjbEntityBean) _cfgBeans.get(sourceEJB);
-	System.out.println("SE: " + sourceEJB + " " + _cfgBeans + " " + sourceEntity);
 
 	if (sourceEntity == null)
 	  throw new ConfigException(L.l("'{0}' is an unknown EJB bean.",
