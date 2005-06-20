@@ -69,7 +69,7 @@ import com.caucho.server.dispatch.ServletConfigException;
  * Represents an log of every top-level request to the server.
  */
 public class AccessLogBuffer {
-  private final byte []_buffer = new byte[BUFFER_SIZE];
+  private final byte []_buffer = new byte[AccessLog.BUFFER_SIZE];
   private int _length;
 
   public byte []getBuffer()

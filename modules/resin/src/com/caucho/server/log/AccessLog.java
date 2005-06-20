@@ -79,14 +79,14 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener {
   // How often to check size
   private static final long ROLLOVER_CHECK_TIME = 600L * 1000L;
 
-  private static final int BUFFER_SIZE = 65536;
+  public static final int BUFFER_SIZE = 65536;
   private static final int BUFFER_GAP = 8 * 1024;
   
   private QDate _calendar = QDate.createLocal();
   private String _timeFormat;
   private int _timeFormatSecondOffset = -1;
 
-  private final AccessLogWriter _logWriter = new AccessLogWriter();
+  private final AccessLogWriter _logWriter;
   
   // AccessStream
   private Object _streamLock = new Object();
@@ -124,6 +124,11 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener {
   private Alarm _alarm = new Alarm(this);
   private boolean _isActive;
 
+  public AccessLog()
+  {
+    _logWriter = new AccessLogWriter(this);
+  }
+  
   /**
    * Sets the access log format.
    */

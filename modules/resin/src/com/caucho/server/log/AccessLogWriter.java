@@ -85,9 +85,12 @@ public class AccessLogWriter implements Runnable {
   private static final FreeList<AccessLogBuffer> _freeBuffers
     = new FreeList<AccessLogBuffer>(4);
 
-  private final AccessLog _log;
+  private QDate _calendar = QDate.createLocal();
   
+  private final AccessLog _log;
+ 
   // AccessStream
+  private Path _path;
   private WriteStream _os;
   private Object _streamLock = new Object();
 
@@ -122,6 +125,16 @@ public class AccessLogWriter implements Runnable {
   AccessLogWriter(AccessLog log)
   {
     _log = log;
+  }
+
+  public String getPathFormat()
+  {
+    return _log.getPathFormat();
+  }
+
+  public Path getPath()
+  {
+    return _path;
   }
   
   /**
@@ -162,6 +175,31 @@ public class AccessLogWriter implements Runnable {
     new Thread(this).start();
   }
 
+  boolean isRollover()
+  {
+    return false;
+  }
+
+  AccessLogBuffer getLogBuffer()
+  {
+    AccessLogBuffer buffer = _freeBuffers.allocate();
+
+    if (buffer == null)
+      buffer = new AccessLogBuffer();
+
+    return buffer;
+  }
+
+  AccessLogBuffer write(AccessLogBuffer logBuffer)
+  {
+    AccessLogBuffer buffer = _freeBuffers.allocate();
+
+    if (buffer == null)
+      buffer = new AccessLogBuffer();
+
+    return buffer;
+  }
+
   /**
    * Check to see if we need to rollover the log.
    *
@@ -169,8 +207,6 @@ public class AccessLogWriter implements Runnable {
    */
   private void rolloverLog(long now)
   {
-    flush();
-    
     synchronized (_streamLock) {
       _nextRolloverCheckTime = now + _rolloverCheckTime;
       
@@ -350,155 +386,12 @@ public class AccessLogWriter implements Runnable {
   }
 
   /**
-   * Prints a CharSegment to the log.
-   *
-   * @param buffer receiving byte buffer.
-   * @param offset offset into the receiving buffer.
-   * @param cb the new char segment to be logged.
-   * @return the new offset into the byte buffer.
-   */
-  private int print(byte []buffer, int offset, CharSegment cb)
-  {
-    char []charBuffer = cb.getBuffer();
-    int cbOffset = cb.getOffset();
-    int length = cb.getLength();
-
-    // truncate for hacker attacks
-    if (buffer.length - offset - 256 < length)
-      length =  buffer.length - offset - 256;
-
-    for (int i = length - 1; i >= 0; i--)
-      buffer[offset + i] = (byte) charBuffer[cbOffset + i];
-
-    return offset + length;
-  }
-
-  /**
-   * Prints a String to the log.
-   *
-   * @param buffer receiving byte buffer.
-   * @param offset offset into the receiving buffer.
-   * @param s the new string to be logged.
-   * @return the new offset into the byte buffer.
-   */
-  private int print(byte []buffer, int offset, String s)
-  {
-    int length = s.length();
-
-    _cb.ensureCapacity(length);
-    char []cBuf = _cb.getBuffer();
-
-    s.getChars(0, length, cBuf, 0);
-
-    for (int i = length - 1; i >= 0; i--)
-      buffer[offset + i] = (byte) cBuf[i];
-
-    return offset + length;
-  }
-
-  /**
-   * Prints a String to the log.
-   *
-   * @param buffer receiving byte buffer.
-   * @param offset offset into the receiving buffer.
-   * @param s the new string to be logged.
-   * @return the new offset into the byte buffer.
-   */
-  private int print(byte []buffer, int offset,
-                    char []cb, int cbOff, int length)
-  {
-    for (int i = length - 1; i >= 0; i--)
-      buffer[offset + i] = (byte) cb[cbOff + i];
-
-    return offset + length;
-  }
-
-  /**
-   * Prints an integer to the log.
-   *
-   * @param buffer receiving byte buffer.
-   * @param offset offset into the receiving buffer.
-   * @param v the new integer to be logged.
-   * @return the new offset into the byte buffer.
-   */
-  private int print(byte []buffer, int offset, int v)
-  {
-    if (v == 0) {
-      buffer[offset] = (byte) '0';
-      return offset + 1;
-    }
-
-    if (v < 0) {
-      buffer[offset++] = (byte) '-';
-      v = -v;
-    }
-
-    int length = 0;
-    int exp = 10;
-    
-    for (; v >= exp; length++)
-      exp = 10 * exp;
-
-    offset += length;
-    for (int i = 0; i <= length; i++) {
-      buffer[offset - i] = (byte) (v % 10 + '0');
-      v = v / 10;
-    }
-
-    return offset + 1;
-  }
-
-  /**
-   * Flushes the log.
-   */
-  public void flush()
-  {
-    synchronized (_bufferLock) {
-      if (_length == 0)
-	return;
-
-      flushImpl();
-    }
-  }
-
-  /**
-   * Flushes the log.
-   *
-   * Called with a _bufferLock
-   */
-  private void flushImpl()
-  {
-    if (_os == null)
-      openLog();
-      
-    try {
-      synchronized (_streamLock) {
-	WriteStream os = _os;
-
-	if (os != null) {
-	  os.write(_buffer, 0, _length);
-	  _length = 0;
-	  os.flush();
-	}
-      }
-    } catch (IOException e) {
-      log.log(Level.FINE, e.toString(), e);
-    }
-  }
-
-  /**
    * Closes the log, flushing the results.
    */
   public void destroy()
     throws IOException
   {
     _isActive = false;
-    
-    Alarm alarm = _alarm;;
-    _alarm = null;
-
-    if (alarm != null)
-      alarm.dequeue();
 
     /*
     synchronized (_streamLock) {
@@ -513,11 +406,13 @@ public class AccessLogWriter implements Runnable {
 
   public void run()
   {
+    /*
     do {
       try {
 	Thread.wait(_bufferList);
       } catch (Throwable e) {
       }
     } while (_isActive);
+    */
   }
 }
