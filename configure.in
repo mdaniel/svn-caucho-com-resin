@@ -464,8 +464,10 @@ AC_SUBST(resin_home)
 # 64bit heuristics
 #
 echo -n "checking if Java is 64-bit... "
-     	
-$JAVA_HOME/bin/java -version 2> /tmp/java.out
+
+$tmpname = /tmp/java$$.out
+                	
+$JAVA_HOME/bin/java -version 2> $tmpname
 grep "64-Bit" /tmp/java.out 1> /dev/null
      
 if test "$?" = "0"; then
@@ -473,7 +475,9 @@ if test "$?" = "0"; then
    echo "yes"
 else   
    echo "no"
-fi   
+fi
+
+rm -f $tmpname	
 		    	  	
 #
 # --enable-64bit

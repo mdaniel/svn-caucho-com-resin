@@ -16,6 +16,8 @@ compression, and leaves the output unchanged if the browser does not support
 compression.  A browser indicates to the server that it supports gzip
 compression by including "gzip" in the "Accept-Encoding" request header.</p>
 
+<p>GzipFilter is available in Resin-Professional.</p>
+
 <deftable-parameters>
 <tr><td>use-vary<td>Set the standard HTTP "Vary" response header to "Accept-Encoding". This indicates to the browser and any intervening cache that the response from this url might be different depending on the Accept-Encoding provided by the browser.<td>true
 <tr><td>no-cache<td>Forbid the browser and any intervening cache from caching the results of this request. Sets the "Cache-Control" response header to "no-cache".  If use-vary is false then this is always true.<td>false
@@ -31,7 +33,7 @@ compression by including "gzip" in the "Accept-Encoding" request header.</p>
 &lt;/web-app>
 </example>
 
-See <a href="javadoc|com.caucho.servlets.GzipFilter|"></a>.
+See <a href="javadoc|com.caucho.filters.GzipFilter|"></a>.
 </section>
 
 <section title='XsltFilter'>

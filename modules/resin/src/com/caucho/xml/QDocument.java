@@ -307,7 +307,7 @@ public class QDocument extends QDocumentFragment implements CauchoDocument {
     if (! deep)
       return newFrag;
 
-    for (Node node = getFirstChild();
+    for (Node node = elt.getFirstChild();
 	 node != null;
 	 node = node.getNextSibling()) {
       newFrag.appendChild(importNode(node, true));

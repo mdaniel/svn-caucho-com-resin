@@ -111,76 +111,90 @@ public class ClassDependency implements PersistentDependency {
 
       long digest = 37;
 
-      digest = addDigest(digest, _cl.getName());
-
-      digest = addDigest(digest, _cl.getModifiers());
-
-      Class superClass = _cl.getSuperclass();
-      if (superClass != null)
-        digest = addDigest(digest, superClass.getName());
-
-      Class []interfaces = _cl.getInterfaces();
-      Arrays.sort(interfaces, new ClassComparator());
-      for (int i = 0; i < interfaces.length; i++)
-        digest = addDigest(digest, interfaces[i].getName());
-
-      Field []fields = _cl.getFields();
-
-      Arrays.sort(fields, new FieldComparator());
-
-      if (_checkFields) {
-        for (int i = 0; i < fields.length; i++) {
-	  int modifiers = fields[i].getModifiers();
-	  
-          if (Modifier.isPrivate(modifiers) && ! _checkPrivate)
-            continue;
-          if (Modifier.isProtected(modifiers) && ! _checkProtected)
-            continue;
-          
-          digest = addDigest(digest, fields[i].getName());
-          digest = addDigest(digest, fields[i].getModifiers());
-          digest = addDigest(digest, fields[i].getType().getName());
-        }
-      }
-
-      Method []methods = _cl.getMethods();
-      Arrays.sort(methods, new MethodComparator());
-      
-      for (int i = 0; i < methods.length; i++) {
-        Method method = methods[i];
-	int modifiers = method.getModifiers();
-
-        if (Modifier.isPrivate(modifiers) && ! _checkPrivate)
-          continue;
-        if (Modifier.isProtected(modifiers) && ! _checkProtected)
-          continue;
-        if (Modifier.isStatic(modifiers) && ! _checkStatic)
-          continue;
-          
-        digest = addDigest(digest, method.getName());
-        digest = addDigest(digest, method.getModifiers());
-        digest = addDigest(digest, method.getName());
-
-        Class []param = method.getParameterTypes();
-        for (int j = 0; j < param.length; j++)
-          digest = addDigest(digest, param[j].getName());
-
-        digest = addDigest(digest, method.getReturnType().getName());
-
-        Class []exn = method.getExceptionTypes();
-	Arrays.sort(exn, new ClassComparator());
-        for (int j = 0; j < exn.length; j++)
-          digest = addDigest(digest, exn[j].getName());
-      }
+      digest = addDigest(digest, _cl);
       
       _newDigest = digest;
-    } catch (Exception e) {
+    } catch (Throwable e) {
       log.log(Level.FINER, e.toString(), e);
 
       _newDigest = -1;
     }
 
     return _newDigest;
+  }
+
+  /**
+   * Calculates a MD5 digest of the class.
+   */
+  private long addDigest(long digest, Class cl)
+    throws Exception
+  {
+    if (_cl == null)
+      return digest;
+
+    digest = addDigest(digest, cl.getName());
+
+    digest = addDigest(digest, cl.getModifiers());
+
+    Class superClass = cl.getSuperclass();
+    if (superClass != null)
+      digest = addDigest(digest, superClass);
+
+    Class []interfaces = cl.getInterfaces();
+    Arrays.sort(interfaces, new ClassComparator());
+    for (int i = 0; i < interfaces.length; i++)
+      digest = addDigest(digest, interfaces[i].getName());
+
+    if (_checkFields) {
+      Field []fields = cl.getDeclaredFields();
+
+      Arrays.sort(fields, new FieldComparator());
+
+      for (int i = 0; i < fields.length; i++) {
+	int modifiers = fields[i].getModifiers();
+	  
+	if (Modifier.isPrivate(modifiers) && ! _checkPrivate)
+	  continue;
+	if (Modifier.isProtected(modifiers) && ! _checkProtected)
+	  continue;
+          
+	digest = addDigest(digest, fields[i].getName());
+	digest = addDigest(digest, fields[i].getModifiers());
+	digest = addDigest(digest, fields[i].getType().getName());
+      }
+    }
+
+    Method []methods = cl.getDeclaredMethods();
+    Arrays.sort(methods, new MethodComparator());
+      
+    for (int i = 0; i < methods.length; i++) {
+      Method method = methods[i];
+      int modifiers = method.getModifiers();
+
+      if (Modifier.isPrivate(modifiers) && ! _checkPrivate)
+	continue;
+      if (Modifier.isProtected(modifiers) && ! _checkProtected)
+	continue;
+      if (Modifier.isStatic(modifiers) && ! _checkStatic)
+	continue;
+          
+      digest = addDigest(digest, method.getName());
+      digest = addDigest(digest, method.getModifiers());
+      digest = addDigest(digest, method.getName());
+
+      Class []param = method.getParameterTypes();
+      for (int j = 0; j < param.length; j++)
+	digest = addDigest(digest, param[j].getName());
+
+      digest = addDigest(digest, method.getReturnType().getName());
+
+      Class []exn = method.getExceptionTypes();
+      Arrays.sort(exn, new ClassComparator());
+      for (int j = 0; j < exn.length; j++)
+	digest = addDigest(digest, exn[j].getName());
+    }
+
+    return digest;
   }
 
   /**

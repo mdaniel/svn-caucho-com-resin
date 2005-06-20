@@ -2,8 +2,15 @@
 
 <a href='changes-2.xtp'>Resin 2.1 changes</a>
 
-<s2 title='3.0.snap - Jun 10, 2005'>
+<s2 title='3.0.snap - Jun 15, 2005'>
 <ul>
+<li>RemoteFilesystem needs to validate .war digest at end of transmission to avoid sending data partial .war files (rep by Patrick Burleson, RSN-290)
+<li>QDocument importFragment of DocumentFragment wasn't looking at proper node to copy (rep by James Howe, RSN-259)
+<li>Updated AccessLog flushing to avoid buffer corruption (rep by studdugie)
+<li>mod_caucho.c needs to check for null headers[i].val (fixed! by Klas Lindfors)
+<li>Updated configure script to properly create and remove temp file (rep by Mark Abbott)
+<li>Update ClassDependency to use getDeclaredXXX and to recursively check parent classes
+<li>(2005-06-15) resin:include wasn't properly enabled (rep by Greg Schroeder)
 <li>run.cpp set_jdk_args was missing resin_home parameter (fixed! by Patrick Burleson)
 <li>&lt;servlet> needs to allow both &lt;init> and &lt;init-param> (rep by Kirk Rasmussen)
 <li>Update JDKReader to support java.io encodings if Charset doesn't support (rep by T Fukuda)

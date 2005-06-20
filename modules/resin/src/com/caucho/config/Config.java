@@ -88,6 +88,8 @@ public class Config {
   // the context class loader of the config
   private ClassLoader _classLoader;
 
+  private boolean _allowResinInclude;
+
   public Config()
   {
     this(Thread.currentThread().getContextClassLoader());
@@ -99,6 +101,14 @@ public class Config {
   public Config(ClassLoader loader)
   {
     _classLoader = loader;
+  }
+
+  /**
+   * Set true if resin:include should be allowed.
+   */
+  public void setResinInclude(boolean useResinInclude)
+  {
+    _allowResinInclude = useResinInclude;
   }
 
   /**
@@ -289,8 +299,6 @@ public class Config {
 	   IOException,
 	   org.xml.sax.SAXException
   {
-    // Node node = Registry.parse(is, _schema).getTop();
-
     try {
       QDocument doc = new QDocument();
       DOMBuilder builder = new DOMBuilder();
@@ -311,6 +319,7 @@ public class Config {
 
       Xml xml = new Xml();
       xml.setOwner(doc);
+      xml.setResinInclude(_allowResinInclude);
 
       if (schema != null) {
 	Verifier verifier = schema.newVerifier();

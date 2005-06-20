@@ -129,7 +129,11 @@ public class ResinImport extends ResinControl {
 
       Environment.addDependency(new Depend(path));
 
-      new Config().configureBean(object, path, schema);
+      Config config = new Config();
+      // server/10hc
+      // config.setResinInclude(true);
+
+      config.configureBean(object, path, schema);
     }
   }
 }

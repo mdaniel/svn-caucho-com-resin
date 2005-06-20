@@ -561,7 +561,7 @@ get_server_args(char *name, char *full_name, char *main, int argc, char **argv)
 	if (java_home) {
 		if (! java_exe)
 			java_exe = get_java_exe(java_home);
-		args = set_jdk_args(java_exe, cp, resin_Home, server_root, jit, main, resin_argc, resin_argv, java_argv);
+		args = set_jdk_args(java_exe, cp, resin_home, server_root, jit, main, resin_argc, resin_argv, java_argv);
 	}
 	else {
 		if (! java_exe)

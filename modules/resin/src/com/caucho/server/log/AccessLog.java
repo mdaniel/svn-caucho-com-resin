@@ -85,9 +85,10 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener {
   private QDate _calendar = QDate.createLocal();
   private String _timeFormat;
   private int _timeFormatSecondOffset = -1;
+
+  private final AccessLogWriter _logWriter = new AccessLogWriter();
   
   // AccessStream
-  private WriteStream _os;
   private Object _streamLock = new Object();
 
   private String _format;
@@ -108,17 +109,10 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener {
   // How often the rolloverSize should be checked
   private long _rolloverCheckTime = ROLLOVER_CHECK_TIME;
 
-  // The time of the next period-based rollover
-  private long _nextPeriodEnd = -1;
-  private long _nextRolloverCheckTime = -1;
+  private AccessLogBuffer _logBuffer;
+  private byte []_buffer;
+  private int _length;
 
-  private final byte []_bufferA = new byte[BUFFER_SIZE];
-  private int _bufferALength;
-
-  private final byte []_bufferB = new byte[BUFFER_SIZE];
-  private int _bufferBLength;
-
-  private boolean _isBufferA;
   private Object _bufferLock = new Object();
 
   private final CharBuffer _cb = new CharBuffer();
@@ -128,6 +122,7 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener {
   private long _lastTime;
 
   private Alarm _alarm = new Alarm(this);
+  private boolean _isActive;
 
   /**
    * Sets the access log format.
@@ -159,7 +154,7 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener {
       _rolloverPeriod -= _rolloverPeriod % 3600000L;
     }
     else
-      _rolloverPeriod = -1;
+      _rolloverPeriod = Long.MAX_VALUE / 2;
   }
 
   /**
@@ -202,37 +197,12 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener {
   public void init()
     throws ServletException, IOException
   {
+    _isActive = true;
+    
     Environment.addClassLoaderListener(new CloseListener(this));
     
     if (getPath() == null && getPathFormat() == null)
       throw new ServletConfigException(L.l("access-log needs a path"));
-    
-    long now = Alarm.getCurrentTime();
-    
-    _nextRolloverCheckTime = now + _rolloverCheckTime;
-
-    if (getPath() != null) {
-      _path.getParent().mkdirs();
-    
-      _rolloverPrefix = _path.getTail();
-
-      long lastModified = _path.getLastModified();
-      if (lastModified <= 0)
-	lastModified = now;
-    
-      _calendar.setGMTTime(lastModified);
-      long zone = _calendar.getZoneOffset();
-
-      if (_rolloverPeriod > 0)
-	_nextPeriodEnd = Period.periodEnd(lastModified, _rolloverPeriod);
-    }
-    else
-      _nextPeriodEnd = Period.periodEnd(now, _rolloverPeriod);
-
-    if (_nextPeriodEnd < _nextRolloverCheckTime && _nextPeriodEnd > 0)
-      _nextRolloverCheckTime = _nextPeriodEnd;
-
-    rolloverLog(now);
     
     if (_format == null)
       _format = "%h %l %u %t \"%r\" %>s %b \"%{Referer}i\" \"%{User-Agent}i\"";
@@ -246,6 +216,12 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener {
       _timeFormat = "[%d/%b/%Y:%H:%M:%S %z]";
       _timeFormatSecondOffset = 0;
     }
+
+    _logWriter.init();
+
+    _logBuffer = _logWriter.getLogBuffer();
+    _buffer = _logBuffer.getBuffer();
+    _length = 0;
 
     _alarm.queue(60000);
   }
@@ -331,49 +307,14 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener {
     AbstractHttpRequest request = (AbstractHttpRequest) req;
     AbstractHttpResponse response = (AbstractHttpResponse) res;
 
-    /*
-    WriteStream os = _os;
-    if (os == null)
-      return;
-    */
-
-    long now = Alarm.getCurrentTime();
-
-    if (_nextRolloverCheckTime < now) 
-      rolloverLog(now);
-
-    byte []writeBuffer = null;
-    int writeLength = 0;
-
-    while (true) {
-      synchronized (_bufferLock) {
-	if (_isBufferA) {
-	  byte []bufferA = _bufferA;
-	  int lengthA = _bufferALength;
-	  
-	  if (lengthA + BUFFER_GAP <= BUFFER_SIZE) {
-	    synchronized (bufferA) {
-	      lengthA = log(request, response, bufferA, lengthA, BUFFER_SIZE);
-	      _bufferALength = lengthA;
-	    }
-	    return;
-	  }
-	}
-	else {
-	  byte []bufferB = _bufferB;
-	  int lengthB = _bufferBLength;
-	  
-	  if (lengthB + BUFFER_GAP <= BUFFER_SIZE) {
-	    synchronized (bufferB) {
-	      lengthB = log(request, response, bufferB, lengthB, BUFFER_SIZE);
-	      _bufferBLength = lengthB;
-	    }
-	    return;
-	  }
-	}
-      }
-
+    if (_logWriter.isRollover())
       flush();
+
+    synchronized (_bufferLock) {
+      if (BUFFER_SIZE <= _length + BUFFER_GAP)
+	flush();
+      
+      _length = log(request, response, _buffer, _length, BUFFER_SIZE);
     }
   }
   
@@ -546,188 +487,6 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener {
   }
 
   /**
-   * Check to see if we need to rollover the log.
-   *
-   * @param now current time in milliseconds.
-   */
-  private void rolloverLog(long now)
-  {
-    flush();
-    
-    synchronized (_streamLock) {
-      _nextRolloverCheckTime = now + _rolloverCheckTime;
-      
-      if (_nextPeriodEnd > 0 && _nextPeriodEnd < now) {
-	if (getPathFormat() == null) {
-	  String savedName = getArchiveName(_nextPeriodEnd - 1);
-	  movePathToArchive(savedName);
-	}
-	
-	_nextPeriodEnd = Period.periodEnd(now, _rolloverPeriod);
-      
-	if (log.isLoggable(Level.FINE))
-	  log.fine(_path + ": next rollover at " +
-		   QDate.formatLocal(_nextPeriodEnd));
-      }
-      else if (_path != null && _rolloverSize <= _path.getLength()) {
-	if (getPathFormat() == null) {
-	  String savedName = getArchiveName(_nextRolloverCheckTime - 1);
-	  movePathToArchive(savedName);
-	}
-      }
-
-      long nextPeriodEnd = _nextPeriodEnd;
-      if (_nextPeriodEnd < _nextRolloverCheckTime && _nextPeriodEnd > 0)
-	_nextRolloverCheckTime = _nextPeriodEnd;
-    }
-    
-    openLog();
-  }
-
-  /**
-   * Tries to open the log.
-   */
-  private void openLog()
-  {
-    try {
-      synchronized (_streamLock) {
-	WriteStream os = _os;
-	_os = null;
-
-	if (os != null)
-	  os.close();
-      }
-    } catch (Throwable e) {
-      log.log(Level.FINER, e.toString(), e);
-    }
-      
-    Path path = getPath();
-
-    if (path == null) {
-      path = getPath(Alarm.getCurrentTime());
-    }
-    
-    try {
-      if (! path.getParent().isDirectory())
-	path.getParent().mkdirs();
-    } catch (Throwable e) {
-      log.log(Level.FINER, e.toString(), e);
-    }
-    
-    synchronized (_streamLock) {
-      for (int i = 0; i < 3 && _os == null; i++) {
-	try {
-	  _os = path.openAppend();
-	} catch (IOException e) {
-	  log.log(Level.INFO, e.toString(), e);
-	}
-      }
-
-      if (_os == null)
-	log.warning(L.l("Can't open access log file '{0}'.",
-			_path));
-    }
-  }
-
-  private void movePathToArchive(String savedName)
-  {
-    log.info(L.l("Archiving access log to {0}.", savedName));
-	     
-    synchronized (_streamLock) {
-      try {
-	WriteStream os = _os;
-	_os = null;
-	if (os != null)
-	  os.close();
-      } catch (IOException e) {
-	log.log(Level.FINE, e.toString(), e);
-      }
-	
-      String tail = _path.getTail();
-      Path newPath = _path.getParent().lookup(savedName);
-        
-      try {
-	newPath.getParent().mkdirs();
-      } catch (Throwable e) {
-	log.log(Level.WARNING, e.toString(), e);
-      }
-        
-      try {
-	WriteStream os = newPath.openWrite();
-	OutputStream out;
-
-	if (savedName.endsWith(".gz"))
-	  out = new GZIPOutputStream(os);
-	else if (savedName.endsWith(".zip")) 
-	  out = new ZipOutputStream(os);
-	else
-	  out = os;
-
-	try {
-	  _path.writeToStream(out);
-	} finally {
-	  try {
-	    out.close();
-	  } catch (Throwable e) {
-	    log.log(Level.WARNING, e.toString(), e);
-	  }
-	    
-	  os.close();
-	}
-	  
-	_path.remove();
-      } catch (Throwable e) {
-	log.log(Level.WARNING, e.toString(), e);
-      }
-    }
-  }
-
-  /**
-   * Returns the path of the format file
-   *
-   * @param time the archive date
-   */
-  protected Path getPath(long time)
-  {
-    String formatString = getPathFormat();
-
-    if (formatString == null)
-      throw new IllegalStateException(L.l("getPath requires a format path"));
-    
-    String pathString = getFormatName(formatString, time);
-
-    return Vfs.lookup().lookup(pathString);
-  }
-
-  /**
-   * Returns the name of the archived file
-   *
-   * @param time the archive date
-   */
-  protected String getArchiveName(long time)
-  {
-    return getFormatName(_archiveFormat, time);
-  }
-
-  /**
-   * Returns the name of the archived file
-   *
-   * @param time the archive date
-   */
-  protected String getFormatName(String format, long time)
-  {
-    if (time <= 0)
-      time = Alarm.getCurrentTime();
-    
-    if (format != null)
-      return _calendar.formatLocal(time, format);
-    else if (_rolloverPeriod % (24 * 3600 * 1000L) == 0)
-      return _rolloverPrefix + "." + _calendar.formatLocal(time, "%Y%m%d");
-    else
-      return _rolloverPrefix + "." + _calendar.formatLocal(time, "%Y%m%d.%H");
-  }
-
-  /**
    * Prints a CharSegment to the log.
    *
    * @param buffer receiving byte buffer.
@@ -828,59 +587,23 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener {
 
   /**
    * Flushes the log.
-   *
-   * Flush may be called with a _streamLock.  It may not be called with
-   * a _bufferLock.
    */
   public void flush()
   {
-    byte []writeBuffer;
-    int writeLength;
-    boolean isBufferA;
-      
+    // XXX: check locking vs log()
     synchronized (_bufferLock) {
-      isBufferA = _isBufferA;
-	
-      if (_isBufferA) {
-	writeLength = _bufferALength;
+      if (_length == 0)
+	return;
 
-	if (writeLength == 0 ||
-	    writeLength < BUFFER_SIZE / 2 && _bufferBLength > 0)
-	  return;
+      AccessLogBuffer logBuffer = _logBuffer;
 
-	writeBuffer = _bufferA;
-	_bufferALength = 0;
-	_isBufferA = false;
-      }
-      else {
-	writeLength = _bufferBLength;
+      logBuffer.setLength(_length);
 
-	if (writeLength == 0 ||
-	    writeLength < BUFFER_SIZE / 2 && _bufferALength > 0)
-	  return;
+      logBuffer = _logWriter.write(logBuffer);
 
-	writeBuffer = _bufferB;
-	_bufferBLength = 0;
-	_isBufferA = true;
-      }
-    }
-
-    if (_os == null)
-      openLog();
-
-    try {
-      synchronized (_streamLock) {
-	WriteStream os = _os;
-
-	if (os != null) {
-	  synchronized (writeBuffer) {
-	    os.write(writeBuffer, 0, writeLength);
-	    os.flush();
-	  }
-	}
-      }
-    } catch (IOException e) {
-      log.log(Level.FINE, e.toString(), e);
+      _logBuffer = logBuffer;
+      _buffer = _logBuffer.getBuffer();
+      _length = 0;
     }
   }
 
@@ -904,19 +627,13 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener {
   public void destroy()
     throws IOException
   {
+    _isActive = false;
+    
     Alarm alarm = _alarm;;
     _alarm = null;
 
     if (alarm != null)
       alarm.dequeue();
-
-    synchronized (_streamLock) {
-      flush();
-      WriteStream os = _os;
-      _os = null;
-      if (os != null)
-	os.close();
-    }
   }
 
   /**

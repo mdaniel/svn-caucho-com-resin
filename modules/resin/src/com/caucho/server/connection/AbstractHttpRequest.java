@@ -179,7 +179,7 @@ public abstract class AbstractHttpRequest
   private final CharBuffer _cbName = new CharBuffer();
   private final CharBuffer _cbValue = new CharBuffer();
   protected final CharBuffer _cb = new CharBuffer();
-  private final ArrayList<CharSegment> _arrayList = new ArrayList<CharSegment>();
+  // private final ArrayList<CharSegment> _arrayList = new ArrayList<CharSegment>();
 
   private byte []_address = new byte[256];
 

@@ -529,7 +529,7 @@ write_headers(stream_t *s, request_rec *r)
   int i;
 
   for (i = 0; i < header->nelts; ++i) {
-    if (! headers[i].key)
+    if (! headers[i].key || ! headers[i].val)
       continue;
 
     /*
@@ -556,7 +556,7 @@ write_added_headers(stream_t *s, request_rec *r)
   int i;
 
   for (i = 0; i < header->nelts; ++i) {
-    if (! headers[i].key)
+    if (! headers[i].key || ! headers[i].val)
       continue;
 
     if (! strcmp(headers[i].key, "HTTPS") &&
