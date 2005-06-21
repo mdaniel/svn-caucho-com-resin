@@ -89,27 +89,17 @@ public class AccessLogWriter implements Runnable {
   
   private final AccessLog _log;
  
-  // AccessStream
-  private Path _path;
+  // the write queue
+  private int _maxQueueLength = 32;
+  private final ArrayList<AccessLogBuffer> _writeQueue
+    = new ArrayList<AccessLogBuffer>();
+  
   private WriteStream _os;
-  private Object _streamLock = new Object();
 
   private String _format;
 
   // prefix for the rollover
   private String _rolloverPrefix;
-
-  // template for the archived files
-  private String _archiveFormat;
-  
-  // How often the logs are rolled over.
-  private long _rolloverPeriod = -1;
-
-  // Maximum size of the log.
-  private long _rolloverSize = ROLLOVER_SIZE;
-
-  // How often the rolloverSize should be checked
-  private long _rolloverCheckTime = ROLLOVER_CHECK_TIME;
 
   // The time of the next period-based rollover
   private long _nextPeriodEnd = -1;
@@ -117,8 +107,6 @@ public class AccessLogWriter implements Runnable {
 
   private final byte []_buffer = new byte[BUFFER_SIZE];
   private int _length;
-
-  private Object _bufferLock = new Object();
 
   private boolean _isActive;
 
@@ -132,9 +120,29 @@ public class AccessLogWriter implements Runnable {
     return _log.getPathFormat();
   }
 
+  public String getArchiveFormat()
+  {
+    return _log.getArchiveFormat();
+  }
+
   public Path getPath()
   {
-    return _path;
+    return _log.getPath();
+  }
+
+  public long getRolloverSize()
+  {
+    return _log.getRolloverSize();
+  }
+
+  public long getRolloverPeriod()
+  {
+    return _log.getRolloverPeriod();
+  }
+
+  public long getRolloverCheckTime()
+  {
+    return _log.getRolloverCheckTime();
   }
   
   /**
@@ -147,25 +155,26 @@ public class AccessLogWriter implements Runnable {
     
     long now = Alarm.getCurrentTime();
     
-    _nextRolloverCheckTime = now + _rolloverCheckTime;
+    _nextRolloverCheckTime = now + getRolloverCheckTime();
 
-    if (getPath() != null) {
-      _path.getParent().mkdirs();
+    Path path = getPath();
+
+    if (path != null) {
+      path.getParent().mkdirs();
     
-      _rolloverPrefix = _path.getTail();
+      _rolloverPrefix = path.getTail();
 
-      long lastModified = _path.getLastModified();
+      long lastModified = path.getLastModified();
       if (lastModified <= 0)
 	lastModified = now;
     
       _calendar.setGMTTime(lastModified);
       long zone = _calendar.getZoneOffset();
 
-      if (_rolloverPeriod > 0)
-	_nextPeriodEnd = Period.periodEnd(lastModified, _rolloverPeriod);
+      _nextPeriodEnd = Period.periodEnd(lastModified, getRolloverPeriod());
     }
     else
-      _nextPeriodEnd = Period.periodEnd(now, _rolloverPeriod);
+      _nextPeriodEnd = Period.periodEnd(now, getRolloverPeriod());
 
     if (_nextPeriodEnd < _nextRolloverCheckTime && _nextPeriodEnd > 0)
       _nextRolloverCheckTime = _nextPeriodEnd;
@@ -192,6 +201,30 @@ public class AccessLogWriter implements Runnable {
 
   AccessLogBuffer write(AccessLogBuffer logBuffer)
   {
+    while (true) {
+      synchronized (_writeQueue) {
+	if (_writeQueue.size() > 0)
+	  System.out.println("WRITE: " + _writeQueue.size());
+	
+	if (_writeQueue.size() < _maxQueueLength) {
+	  _writeQueue.add(logBuffer);
+	  _writeQueue.notifyAll();
+	  break;
+	}
+	else {
+	  try {
+	    System.out.println("FULL-QUEUE:");
+	    long start = System.currentTimeMillis();
+	    _writeQueue.wait();
+	    long end = System.currentTimeMillis();
+	    System.out.println("FULL-QUEUE:" + (end - start));
+	  } catch (Throwable e) {
+	    log.log(Level.WARNING, e.toString(), e);
+	  }
+	}
+      }
+    }
+    
     AccessLogBuffer buffer = _freeBuffers.allocate();
 
     if (buffer == null)
@@ -201,40 +234,59 @@ public class AccessLogWriter implements Runnable {
   }
 
   /**
+   * Writes the buffer data to the output stream.
+   */
+  private void writeBuffer(AccessLogBuffer buffer)
+    throws IOException
+  {
+    long now = Alarm.getCurrentTime();
+
+    rolloverLog(now);
+
+    if (_os != null) {
+      _os.write(buffer.getBuffer(), 0, buffer.getLength());
+      _os.flush();
+    }
+
+    _freeBuffers.free(buffer);
+  }
+
+  /**
    * Check to see if we need to rollover the log.
    *
    * @param now current time in milliseconds.
    */
   private void rolloverLog(long now)
   {
-    synchronized (_streamLock) {
-      _nextRolloverCheckTime = now + _rolloverCheckTime;
-      
-      if (_nextPeriodEnd > 0 && _nextPeriodEnd < now) {
-	if (getPathFormat() == null) {
-	  String savedName = getArchiveName(_nextPeriodEnd - 1);
-	  movePathToArchive(savedName);
-	}
-	
-	_nextPeriodEnd = Period.periodEnd(now, _rolloverPeriod);
-      
-	if (log.isLoggable(Level.FINE))
-	  log.fine(_path + ": next rollover at " +
-		   QDate.formatLocal(_nextPeriodEnd));
-      }
-      else if (_path != null && _rolloverSize <= _path.getLength()) {
-	if (getPathFormat() == null) {
-	  String savedName = getArchiveName(_nextRolloverCheckTime - 1);
-	  movePathToArchive(savedName);
-	}
-      }
+    _nextRolloverCheckTime = now + getRolloverCheckTime();
 
-      long nextPeriodEnd = _nextPeriodEnd;
-      if (_nextPeriodEnd < _nextRolloverCheckTime && _nextPeriodEnd > 0)
-	_nextRolloverCheckTime = _nextPeriodEnd;
+    Path path = getPath();
+      
+    if (_nextPeriodEnd < now) {
+      if (getPathFormat() == null) {
+	String savedName = getArchiveName(_nextPeriodEnd - 1);
+	movePathToArchive(savedName);
+      }
+	
+      _nextPeriodEnd = Period.periodEnd(now, getRolloverPeriod());
+      
+      if (log.isLoggable(Level.FINE))
+	log.fine(getPath() + ": next rollover at " +
+		 QDate.formatLocal(_nextPeriodEnd));
     }
-    
-    openLog();
+    else if (path != null && getRolloverSize() <= path.getLength()) {
+      if (getPathFormat() == null) {
+	String savedName = getArchiveName(_nextRolloverCheckTime - 1);
+	movePathToArchive(savedName);
+      }
+    }
+
+    long nextPeriodEnd = _nextPeriodEnd;
+    if (_nextPeriodEnd < _nextRolloverCheckTime && _nextPeriodEnd > 0)
+      _nextRolloverCheckTime = _nextPeriodEnd;
+
+    if (_os == null)
+      openLog();
   }
 
   /**
@@ -243,13 +295,11 @@ public class AccessLogWriter implements Runnable {
   private void openLog()
   {
     try {
-      synchronized (_streamLock) {
-	WriteStream os = _os;
-	_os = null;
+      WriteStream os = _os;
+      _os = null;
 
-	if (os != null)
-	  os.close();
-      }
+      if (os != null)
+	os.close();
     } catch (Throwable e) {
       log.log(Level.FINER, e.toString(), e);
     }
@@ -267,76 +317,73 @@ public class AccessLogWriter implements Runnable {
       log.log(Level.FINER, e.toString(), e);
     }
     
-    synchronized (_streamLock) {
-      for (int i = 0; i < 3 && _os == null; i++) {
-	try {
-	  _os = path.openAppend();
-	} catch (IOException e) {
-	  log.log(Level.INFO, e.toString(), e);
-	}
+    for (int i = 0; i < 3 && _os == null; i++) {
+      try {
+	_os = path.openAppend();
+      } catch (IOException e) {
+	log.log(Level.INFO, e.toString(), e);
       }
-
-      if (_os == null)
-	log.warning(L.l("Can't open access log file '{0}'.",
-			_path));
     }
+
+    if (_os == null)
+      log.warning(L.l("Can't open access log file '{0}'.",
+		      getPath()));
   }
 
   private void movePathToArchive(String savedName)
   {
     log.info(L.l("Archiving access log to {0}.", savedName));
 	     
-    synchronized (_streamLock) {
-      try {
-	WriteStream os = _os;
-	_os = null;
-	if (os != null)
-	  os.close();
-      } catch (IOException e) {
-	log.log(Level.FINE, e.toString(), e);
-      }
-	
-      String tail = _path.getTail();
-      Path newPath = _path.getParent().lookup(savedName);
-        
-      try {
-	newPath.getParent().mkdirs();
-      } catch (Throwable e) {
-	log.log(Level.WARNING, e.toString(), e);
-      }
-        
-      try {
-	WriteStream os = newPath.openWrite();
-	OutputStream out;
+    try {
+      WriteStream os = _os;
+      _os = null;
+      if (os != null)
+	os.close();
+    } catch (IOException e) {
+      log.log(Level.FINE, e.toString(), e);
+    }
 
-	if (savedName.endsWith(".gz"))
-	  out = new GZIPOutputStream(os);
-	else if (savedName.endsWith(".zip")) 
-	  out = new ZipOutputStream(os);
-	else
-	  out = os;
+    Path path = getPath();
+    String tail = path.getTail();
+    Path newPath = path.getParent().lookup(savedName);
+        
+    try {
+      newPath.getParent().mkdirs();
+    } catch (Throwable e) {
+      log.log(Level.WARNING, e.toString(), e);
+    }
+        
+    try {
+      WriteStream os = newPath.openWrite();
+      OutputStream out;
+
+      if (savedName.endsWith(".gz"))
+	out = new GZIPOutputStream(os);
+      else if (savedName.endsWith(".zip")) 
+	out = new ZipOutputStream(os);
+      else
+	out = os;
+
+      try {
+	path.writeToStream(out);
+      } finally {
+	try {
+	  out.close();
+	} catch (Throwable e) {
+	  log.log(Level.WARNING, e.toString(), e);
+	}
 
 	try {
-	  _path.writeToStream(out);
-	} finally {
-	  try {
-	    out.close();
-	  } catch (Throwable e) {
-	    log.log(Level.WARNING, e.toString(), e);
-	  }
-
-	  try {
-	    if (out != os)
-	      os.close();
-	  } catch (Throwable e) {
-	    log.log(Level.WARNING, e.toString(), e);
-	  }
-	  
-	  _path.remove();
+	  if (out != os)
+	    os.close();
+	} catch (Throwable e) {
+	  log.log(Level.WARNING, e.toString(), e);
 	}
-      } catch (Throwable e) {
-	log.log(Level.WARNING, e.toString(), e);
+	  
+	path.remove();
       }
+    } catch (Throwable e) {
+      log.log(Level.WARNING, e.toString(), e);
     }
   }
 
@@ -364,7 +411,7 @@ public class AccessLogWriter implements Runnable {
    */
   protected String getArchiveName(long time)
   {
-    return getFormatName(_archiveFormat, time);
+    return getFormatName(getArchiveFormat(), time);
   }
 
   /**
@@ -379,7 +426,7 @@ public class AccessLogWriter implements Runnable {
     
     if (format != null)
       return _calendar.formatLocal(time, format);
-    else if (_rolloverPeriod % (24 * 3600 * 1000L) == 0)
+    else if (getRolloverPeriod() % (24 * 3600 * 1000L) == 0)
       return _rolloverPrefix + "." + _calendar.formatLocal(time, "%Y%m%d");
     else
       return _rolloverPrefix + "." + _calendar.formatLocal(time, "%Y%m%d.%H");
@@ -392,27 +439,43 @@ public class AccessLogWriter implements Runnable {
     throws IOException
   {
     _isActive = false;
-
-    /*
-    synchronized (_streamLock) {
-      flush();
-      WriteStream os = _os;
-      _os = null;
-      if (os != null)
-	os.close();
-    }
-    */
   }
 
   public void run()
   {
-    /*
-    do {
+    while (true) {
       try {
-	Thread.wait(_bufferList);
+	AccessLogBuffer buffer = null;
+	
+	synchronized (_writeQueue) {
+	  if (_writeQueue.size() > 0) {
+	    buffer = _writeQueue.remove(0);
+	    _writeQueue.notifyAll();
+	  }
+	  else if (! _isActive) {
+	    break;
+	  }
+	  else {
+	    // timeout so _isActive will always be called eventually
+	    _writeQueue.wait(15000);
+	  }
+	}
+
+	if (buffer != null) {
+	  writeBuffer(buffer);
+	}
       } catch (Throwable e) {
+	log.log(Level.WARNING, e.toString(), e);
       }
-    } while (_isActive);
-    */
+    }
+
+    try {
+      WriteStream os = _os;
+      _os = null;
+      if (os != null)
+	os.close();
+    } catch (Throwable e) {
+      log.log(Level.WARNING, e.toString(), e);
+    }
   }
 }

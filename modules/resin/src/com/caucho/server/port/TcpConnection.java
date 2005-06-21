@@ -363,8 +363,9 @@ public class TcpConnection extends PortConnection implements ThreadTask {
 	      isKeepalive = request.handleRequest();
 	  } while (isKeepalive && readNonBlock() && ! port.isClosed());
 
-	  if (isKeepalive)
+	  if (isKeepalive) {
 	    return;
+	  }
 	}
 	catch (ClientDisconnectException e) {
 	  isKeepalive = false;

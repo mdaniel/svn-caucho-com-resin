@@ -43,6 +43,7 @@ import javax.management.ObjectName;
 import com.caucho.util.L10N;
 import com.caucho.util.FreeList;
 import com.caucho.util.ThreadPool;
+import com.caucho.util.Alarm;
 
 import com.caucho.log.Log;
 
@@ -73,6 +74,8 @@ public class Port implements EnvironmentListener, PortMBean, Runnable {
   private static final L10N L = new L10N(Port.class);
   
   private static final Logger log = Log.open(Port.class);
+
+  private static final long CLOSE_INTERVAL = 1000L;
 
   // started at 128, but that seems wasteful since the active threads
   // themselves are buffering the free connections
@@ -137,6 +140,8 @@ public class Port implements EnvironmentListener, PortMBean, Runnable {
   
   private volatile int _idleThreadCount;
   private volatile int _startThreadCount;
+
+  private volatile long _lastThreadTime;
   
   private volatile int _connectionCount;
   
@@ -749,8 +754,9 @@ public class Port implements EnvironmentListener, PortMBean, Runnable {
 	  }
 	}
 	
-	if (_maxSpareListen < _idleThreadCount)
+	if (_maxSpareListen < _idleThreadCount) {
 	  return false;
+	}
       }
 
       while (_lifecycle.isActive()) {
@@ -763,8 +769,9 @@ public class Port implements EnvironmentListener, PortMBean, Runnable {
 	  return true;
 	}
 	else {
-	  if (_maxSpareListen < _idleThreadCount)
+	  if (_maxSpareListen < _idleThreadCount) {
 	    return false;
+	  }
 	}
       }
     } catch (Throwable e) {
@@ -803,6 +810,8 @@ public class Port implements EnvironmentListener, PortMBean, Runnable {
     synchronized (_threadCountLock) {
       _threadCount++;
     }
+    
+    log.fine(conn + " begin threads:" + _threadCount);
   }
 
   /**
@@ -813,6 +822,8 @@ public class Port implements EnvironmentListener, PortMBean, Runnable {
     synchronized (_threadCountLock) {
       _threadCount--;
     }
+    
+    log.fine(conn + " end threads:" + _threadCount);
   }
 
   /**
@@ -883,6 +894,11 @@ public class Port implements EnvironmentListener, PortMBean, Runnable {
       boolean isStart = false;
 
       try {
+	// need delay to avoid spawing too many threads over a short time,
+	// when the load doesn't justify it
+	Thread.yield();
+	Thread.sleep(10);
+	  
 	synchronized (this) {
 	  isStart = _startThreadCount + _idleThreadCount < _minSpareListen;
 	  if (_connectionMax <= _connectionCount)
@@ -891,10 +907,6 @@ public class Port implements EnvironmentListener, PortMBean, Runnable {
 	  if (! isStart) {
 	    Thread.interrupted();
 	    wait(60000);
-	  
-	    isStart = _startThreadCount + _idleThreadCount < _minSpareListen;
-	    if (_connectionMax <= _connectionCount)
-	      isStart = false;
 	  }
 
 	  if (isStart) {
@@ -911,8 +923,6 @@ public class Port implements EnvironmentListener, PortMBean, Runnable {
 	  }
 
 	  ThreadPool.schedule(conn);
-
-	  // Thread.yield();
 	}
       } catch (Throwable e) {
 	e.printStackTrace();

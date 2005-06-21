@@ -85,8 +85,13 @@ public class Config {
   private static LruCache<Path,SoftReference<QDocument>> _parseCache =
     new LruCache<Path,SoftReference<QDocument>>(32);
 
+  private HashMap<String,Object> _vars
+    = new HashMap<String,Object>();
+  
   // the context class loader of the config
   private ClassLoader _classLoader;
+
+  private ConfigLibrary _configLibrary;
 
   private boolean _allowResinInclude;
 
@@ -101,6 +106,8 @@ public class Config {
   public Config(ClassLoader loader)
   {
     _classLoader = loader;
+
+    _configLibrary = ConfigLibrary.getLocal(_classLoader);
   }
 
   /**
@@ -197,7 +204,12 @@ public class Config {
     try {
       thread.setContextClassLoader(_classLoader);
 
-      return new NodeBuilder().configure(obj, topNode);
+      NodeBuilder builder = new NodeBuilder();
+
+      for (String var : _vars.keySet())
+	builder.putVar(var, _vars.get(var));
+
+      return builder.configure(obj, topNode);
     } finally {
       thread.setContextClassLoader(oldLoader);
     }
@@ -242,7 +254,12 @@ public class Config {
     try {
       thread.setContextClassLoader(_classLoader);
 
-      new NodeBuilder().configureBean(obj, topNode);
+      NodeBuilder builder = new NodeBuilder();
+
+      for (String var : _vars.keySet())
+	builder.putVar(var, _vars.get(var));
+
+      builder.configureBean(obj, topNode);
     } finally {
       thread.setContextClassLoader(oldLoader);
     }
@@ -485,7 +502,17 @@ public class Config {
   /**
    * Sets an EL configuration variable.
    */
-  public static void setVar(String var, Object value)
+  public void setVar(String var, Object value)
+  {
+    setCurrentVar(var, value);
+
+    _vars.put(var, value);
+  }
+
+  /**
+   * Sets an EL configuration variable.
+   */
+  public static void setCurrentVar(String var, Object value)
   {
     NodeBuilder builder = NodeBuilder.getCurrentBuilder();
 

@@ -399,7 +399,7 @@ public class Resource {
       Jndi.bindDeepShort(_jndiName, jndiObject);
 
     if (_var != null)
-      Config.setVar(_var, jndiObject);
+      Config.setCurrentVar(_var, jndiObject);
 
     if (isStart) {
     }

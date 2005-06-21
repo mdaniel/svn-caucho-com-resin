@@ -72,8 +72,8 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener {
   protected static final L10N L = new L10N(AccessLog.class);
   protected static final Logger log = Log.open(AccessLog.class);
   
-  // Default maximum log size = 1G
-  private static final long ROLLOVER_SIZE = 1024L * 1024L * 1024L;
+  // Default maximum log size = 128M
+  private static final long ROLLOVER_SIZE = 128L * 1024L * 1024L;
   // Milliseconds in a day
   private static final long DAY = 24L * 3600L * 1000L;
   // How often to check size
@@ -146,6 +146,14 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener {
   }
 
   /**
+   * Sets the archive name format
+   */
+  public String getArchiveFormat()
+  {
+    return _archiveFormat;
+  }
+
+  /**
    * Sets the log rollover period, rounded up to the nearest hour.
    *
    * @param period the new rollover period in milliseconds.
@@ -160,6 +168,16 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener {
     }
     else
       _rolloverPeriod = Long.MAX_VALUE / 2;
+  }
+
+  /**
+   * Sets the log rollover period, rounded up to the nearest hour.
+   *
+   * @param period the new rollover period in milliseconds.
+   */
+  public long getRolloverPeriod()
+  {
+    return _rolloverPeriod;
   }
 
   /**
@@ -178,6 +196,16 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener {
   }
 
   /**
+   * Sets the log rollover size, rounded up to the megabyte.
+   *
+   * @param size maximum size of the log file
+   */
+  public long getRolloverSize()
+  {
+    return _rolloverSize;
+  }
+
+  /**
    * Sets how often the log rollover will be checked.
    *
    * @param period how often the log rollover will be checked.
@@ -188,6 +216,16 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener {
       _rolloverCheckTime = period;
     else if (period > 0)
       _rolloverCheckTime = 1000;
+  }
+
+  /**
+   * Sets how often the log rollover will be checked.
+   *
+   * @param period how often the log rollover will be checked.
+   */
+  public long getRolloverCheckTime()
+  {
+    return _rolloverCheckTime;
   }
 
   public void addInit(InitProgram init)

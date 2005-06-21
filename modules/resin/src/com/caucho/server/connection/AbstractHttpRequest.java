@@ -183,6 +183,8 @@ public abstract class AbstractHttpRequest
 
   private byte []_address = new byte[256];
 
+  private byte []_logBuffer = new byte[8 * 1024];
+
   private ServletRequestAttributeListener []_attributeListeners;
   
   /**
@@ -2180,6 +2182,14 @@ public abstract class AbstractHttpRequest
       return _invocation.getApplication();
     else
       return null;
+  }
+
+  /**
+   * Returns the log buffer.
+   */
+  public byte []getLogBuffer()
+  {
+    return _logBuffer;
   }
 
   /**

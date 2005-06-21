@@ -89,7 +89,7 @@ public class ResinSet {
    */
   public void setAttribute(String name, Object value)
   {
-    Config.setVar(name, value);
+    Config.setCurrentVar(name, value);
   }
 
   public void init()
@@ -100,9 +100,9 @@ public class ResinSet {
     
     if (_var != null) {
       if (_hasValue)
-	Config.setVar(_var, _value);
+	Config.setCurrentVar(_var, _value);
       else if (_default != null && Config.getVar(_var) == null)
-	Config.setVar(_var, _default);
+	Config.setCurrentVar(_var, _default);
     }
   }
 }

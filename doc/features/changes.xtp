@@ -4,6 +4,7 @@
 
 <s2 title='3.0.snap - Jun 15, 2005'>
 <ul>
+<li>Updated AccessLog flushing to avoid threading/locking hotspot
 <li>RemoteFilesystem needs to validate .war digest at end of transmission to avoid sending data partial .war files (rep by Patrick Burleson, RSN-290)
 <li>QDocument importFragment of DocumentFragment wasn't looking at proper node to copy (rep by James Howe, RSN-259)
 <li>Updated AccessLog flushing to avoid buffer corruption (rep by studdugie)
@@ -40,6 +41,7 @@
 <li>host-name can now accept EL values (rep by David Becker)
 <li>JMS mysql had invalid column type (rep by Kapil)
 <li>Cache expansion issue in LongKeyLruCache not observing powers of 2
+<li>mod_caucho fixes for 404 issues reading backend map
 <li>mod_caucho wasn't reading length properly from the no-change response
 <li>Avoid SetByteArrayRegion entirely (rep by J Tullett)
 <li>JMS MemoryQueue issues with QueueBrowser (rep by Thomas Gennaro)
@@ -63,7 +65,7 @@
 <li>(2006-05-16) UserPoolItem used IllegalStateException(Throwable) which isn't available on JDK 1.4 (rep by Patrick Burleson)
 <li>Added read-data-source and xa-data-source to ejb-server
 <li>refactor amber to handle multiple ejb-server blocks (rep by Francois Bertrand)
-<li>mod_caucho.c compilation problems with solaris (rep by 
+<li>mod_caucho.c compilation problems with solaris
 <li>ByteCodeClassScanner needs to swallow .class parse exceptions and log the error
 <li>Amber boolean fields now allowed as booleans in queries
 <li>PingMailer wasn't allowed as resin:type to ping (rep by T Moorer)
