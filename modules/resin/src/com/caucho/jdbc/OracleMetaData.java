@@ -56,7 +56,7 @@ public class OracleMetaData extends JdbcMetaData {
   /**
    * Returns the SQL for the table with the given SQL type.
    */
-  public String getCreateTableSQL(int sqlType, int length)
+  public String getCreateTableSQL(int sqlType, int length, int precision, int scale)
   {
     // the oracle metadata doesn't return a proper value for data/time
     switch (sqlType) {
@@ -67,7 +67,7 @@ public class OracleMetaData extends JdbcMetaData {
       return "DOUBLE PRECISION";
     }
 
-    return super.getCreateTableSQL(sqlType, length);
+    return super.getCreateTableSQL(sqlType, length, precision, scale);
   }
 
   /**

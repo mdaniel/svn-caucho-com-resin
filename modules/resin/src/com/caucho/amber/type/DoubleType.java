@@ -73,9 +73,9 @@ public class DoubleType extends Type {
   /**
    * Generates the type for the table.
    */
-  public String generateCreateTableSQL(AmberManager manager, int length)
+  public String generateCreateTableSQL(AmberManager manager, int length, int precision, int scale)
   {
-    return manager.getCreateTableSQL(Types.DOUBLE, length);
+    return manager.getCreateTableSQL(Types.DOUBLE, length, precision , scale);
   }
 
   /**

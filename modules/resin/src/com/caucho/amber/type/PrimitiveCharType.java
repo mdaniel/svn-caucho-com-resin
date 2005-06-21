@@ -77,9 +77,9 @@ public class PrimitiveCharType extends PrimitiveType {
   /**
    * Generates the type for the table.
    */
-  public String generateCreateTableSQL(AmberManager manager, int length)
+  public String generateCreateTableSQL(AmberManager manager, int length, int precision, int scale)
   {
-    return manager.getCreateTableSQL(Types.CHAR, 0);
+    return manager.getCreateTableSQL(Types.CHAR, 0, precision, scale);
   }
 
   /**

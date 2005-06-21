@@ -72,7 +72,7 @@ public class StringType extends Type {
   /**
    * Generates the type for the table.
    */
-  public String generateCreateTableSQL(AmberManager manager, int length)
+  public String generateCreateTableSQL(AmberManager manager, int length, int precision, int scale)
   {
     if (length == 0)
       length = 255;

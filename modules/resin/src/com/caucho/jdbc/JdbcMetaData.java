@@ -289,38 +289,47 @@ public class JdbcMetaData {
   {
     return sql;
   }
-
   /**
-   * Returns the SQL for the table with the given SQL type.
+   * New version to Return SQL for the table with the given
+   * SQL type.  Takes, length, precision and scale.
    */
-  public String getCreateTableSQL(int sqlType, int length)
-  {
-    String type = null;
+  public String getCreateTableSQL(int sqlType, int length, int precision, int scale) {
+       String type = null;
 
     switch (sqlType) {
     case Types.BOOLEAN:
-      type = getCreateColumnSQL(sqlType, length);
+      type = getCreateColumnSQL(sqlType, length, precision, scale);
+      if (type == null)
+        type = getCreateColumnSQL(Types.BIT, length, precision, scale);
       break;
 
     case Types.DATE:
-      type = getCreateColumnSQL(sqlType, length);
+      type = getCreateColumnSQL(sqlType, length, precision, scale);
       if (type == null)
-	type = getCreateColumnSQL(Types.TIMESTAMP, length);
+	type = getCreateColumnSQL(Types.TIMESTAMP, length, precision, scale);
       break;
 
     case Types.TIME:
-      type = getCreateColumnSQL(sqlType, length);
+      type = getCreateColumnSQL(sqlType, length, precision, scale);
       if (type == null)
-	type = getCreateColumnSQL(Types.TIMESTAMP, length);
+	type = getCreateColumnSQL(Types.TIMESTAMP, length, precision, scale);
       break;
 
+    case Types.DOUBLE:
+      type = getCreateColumnSQL(Types.DOUBLE, length, precision, scale);
+      break;
+
+    case Types.NUMERIC:
+        type = getCreateColumnSQL(Types.NUMERIC, length, precision, scale);
+        break;
+
     default:
-      type = getCreateColumnSQL(sqlType, length);
+      type = getCreateColumnSQL(sqlType, length, precision, scale);
       break;
     }
 
     if (type == null)
-      type = getDefaultCreateTableSQL(sqlType, length);
+      type = getDefaultCreateTableSQL(sqlType, length, precision, scale);
 
     return type;
   }
@@ -328,7 +337,7 @@ public class JdbcMetaData {
   /**
    * Returns the SQL for the table with the given SQL type.
    */
-  protected String getCreateColumnSQL(int sqlType, int length)
+  protected String getCreateColumnSQL(int sqlType, int length, int precision, int scale)
   {
     Connection conn = null;
 
@@ -339,6 +348,7 @@ public class JdbcMetaData {
       ResultSet rs;
 
       rs = md.getTypeInfo();
+
       try {
 	while (rs.next()) {
 	  if (rs.getShort("DATA_TYPE") == sqlType) {
@@ -353,7 +363,14 @@ public class JdbcMetaData {
 	      else
 		return typeName;
 	    }
-	    else if (params.startsWith("(M,D)")) {
+	    else if (params.startsWith("(M,D)") || params.equals("precision,scale")) {
+              if (precision > 0) {
+                typeName += "(" + precision;
+                if (scale > 0) {
+                  typeName += "," + scale;
+                }
+                typeName += ")";
+              }
 	      return typeName;
 	    }
 	    else if (params.startsWith("(")) {
@@ -394,10 +411,10 @@ public class JdbcMetaData {
       }
     }
 
-    return getDefaultCreateTableSQL(sqlType, length);
+    return null;
   }
 
-  protected String getDefaultCreateTableSQL(int sqlType, int length)
+  protected String getDefaultCreateTableSQL(int sqlType, int length, int precision, int scale)
   {
     switch (sqlType) {
     case java.sql.Types.BOOLEAN:
@@ -408,11 +425,26 @@ public class JdbcMetaData {
     case java.sql.Types.INTEGER:
     case java.sql.Types.BIGINT:
       return "INTEGER";
+    case java.sql.Types.NUMERIC:
+    case java.sql.Types.DECIMAL:
+      String typeString = "NUMERIC";
+      if (precision > 0) {
+        typeString += "(" + precision;
+        if (scale > 0) {
+          typeString += "," + scale;
+        }
+        typeString += ")";
+      }
+      return typeString;
     case java.sql.Types.DOUBLE:
     case java.sql.Types.FLOAT:
       return "DOUBLE";
     case java.sql.Types.CHAR:
       return "CHAR";
+    case java.sql.Types.DATE:
+    case java.sql.Types.TIME:
+    case java.sql.Types.TIMESTAMP:
+        return "TIMESTAMP";
     default:
       return "VARCHAR(" + length + ")";
     }

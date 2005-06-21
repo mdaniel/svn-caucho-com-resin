@@ -70,12 +70,15 @@ public class Column {
   private boolean _isNotNull;
   private boolean _isUnique;
   private int _length;
+  private int _precision;
+  private int _scale;
 
   private String _generatorType;
   private String _generator;
 
   // getter/setter stuff
   private String _fieldName;
+
 
   Column(Table table, String name)
   {
@@ -210,6 +213,34 @@ public class Column {
   }
 
   /**
+  * Set the precision property.
+  */
+  public void setPrecision(int precision) {
+    _precision = precision;
+  }
+
+  /**
+  * Gets the precision property.
+  */
+  public int getPrecision() {
+    return _precision;
+  }
+
+  /**
+   * Set the scale property
+   */
+  public void setScale(int scale) {
+    _scale = scale;
+  }
+
+  /**
+   * Get the scale property
+   */
+  public int getScale() {
+    return _scale;
+  }
+
+  /**
    * Sets the unique property.
    */
   public void setUnique(boolean isUnique)
@@ -231,23 +262,23 @@ public class Column {
   String generateCreateTableSQL(AmberManager manager)
   {
     CharBuffer cb = new CharBuffer();
-
     cb.append(_name + " ");
-
     String sqlType = _sqlType;
+
     if (_sqlType != null)
       sqlType = _sqlType;
-    else
-      sqlType = _type.generateCreateTableSQL(manager, _length);
+    else {
+      sqlType = _type.generateCreateTableSQL(manager, _length, _precision, _scale);
+    }
 
-    if ("identity".equals(_generatorType))
+    if ("identity".equals(_generatorType)) {
       cb.append(manager.getMetaData().createIdentitySQL(sqlType));
-    else
+    }else{
       cb.append(sqlType);
-
-    if (isPrimaryKey())
+    }
+    if (isPrimaryKey()) {
       cb.append(" PRIMARY KEY");
-    else if (! "identity".equals(_generatorType)) {
+    } else if (! "identity".equals(_generatorType)) {
       if (isNotNull())
 	cb.append(" NOT NULL");
       if (isUnique())

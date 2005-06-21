@@ -374,6 +374,7 @@ public class EntityIntrospector {
       throw new IllegalStateException();
     }
 
+    System.out.println("XXX Entity Introspector 377");
     Column column = entityType.getTable().createColumn(columnName,
 						       columnType);
 
@@ -864,6 +865,24 @@ public class EntityIntrospector {
       if (! "".equals(columnAnn.getString("columnDefinition")))
 	column.setSQLType(columnAnn.getString("columnDefinition"));
       column.setLength(columnAnn.getInt("length"));
+      int precision = columnAnn.getInt("precision");
+      if (precision < 0) {
+        throw new ConfigException(L.l("precision cannot be less than 0."));
+      }
+      int scale = columnAnn.getInt("scale");
+      if (scale < 0) {
+        throw new ConfigException(L.l("scale cannot be less than 0."));
+      }
+      // this test implicitly works for case where
+      // precision is not set explicitly (ie: set to 0 by default)
+      // and scale is set
+      if (scale > precision) {
+        throw new ConfigException(L.l("Scale cannot be greater than precision. Must set precision to a non-zero value before setting scale."));
+      }
+      if (precision > 0){
+        column.setPrecision(precision);
+        column.setScale(scale);
+      }
     }
 
     return column;

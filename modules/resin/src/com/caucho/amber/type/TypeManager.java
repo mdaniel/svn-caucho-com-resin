@@ -62,6 +62,9 @@ public class TypeManager {
     throws ConfigException
   {
     Type type = _typeMap.get(name);
+    //System.out.println("\nXXX TypeManager.create(name)");
+    //System.out.println("type: " + type);
+    //System.out.println("name: " + name);
 
     if (type != null)
       return type;
@@ -167,7 +170,8 @@ public class TypeManager {
     
     _builtinTypes.put("java.util.Date", UtilDateType.create());
     _builtinTypes.put("java.util.Calendar", CalendarType.create());
-    
+
+    //XXX Need test case for timestamp
     _builtinTypes.put("timestamp", BigDecimalType.create());
     _builtinTypes.put("java.math.BigDecimal", BigDecimalType.create());
     

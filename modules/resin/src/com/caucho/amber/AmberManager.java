@@ -962,11 +962,12 @@ public class AmberManager {
   }
 
   /**
-   * Returns the SQL for the table with the given SQL type.
+   * New Version of getCreateTableSQL which returns
+   * the SQL for the table with the given SQL type
+   * but takes sqlType, length, precision, and scale.
    */
-  public String getCreateTableSQL(int sqlType, int length)
-  {
-    return getMetaData().getCreateTableSQL(sqlType, length);
+  public String getCreateTableSQL(int sqlType, int length, int precision, int scale) {
+    return getMetaData().getCreateTableSQL(sqlType, length, precision, scale);
   }
 
   public String toString()

@@ -35,10 +35,12 @@ import java.io.IOException;
 import com.caucho.util.L10N;
 
 import com.caucho.java.JavaWriter;
+import com.caucho.amber.AmberManager;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Types;
 
 /**
  * The type of a property.
@@ -109,5 +111,10 @@ public class BigDecimalType extends Type {
     throws SQLException
   {
     return rs.getBigDecimal(index);
+  }
+
+  public String generateCreateTableSQL(AmberManager manager, int length, int precision, int scale)
+  {
+    return manager.getCreateTableSQL(Types.NUMERIC, length, precision, scale);
   }
 }

@@ -87,9 +87,9 @@ public class PrimitiveBooleanType extends PrimitiveType {
   /**
    * Generates the type for the table.
    */
-  public String generateCreateTableSQL(AmberManager manager, int length)
+  public String generateCreateTableSQL(AmberManager manager, int length, int precision, int scale)
   {
-    return manager.getCreateTableSQL(Types.BOOLEAN, length);
+    return manager.getCreateTableSQL(Types.BOOLEAN, length, precision, scale);
   }
 
   /**

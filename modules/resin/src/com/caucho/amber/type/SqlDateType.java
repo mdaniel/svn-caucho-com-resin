@@ -73,9 +73,9 @@ public class SqlDateType extends Type {
   /**
    * Generates the type for the table.
    */
-  public String generateCreateTableSQL(AmberManager manager, int length)
+  public String generateCreateTableSQL(AmberManager manager, int length, int precision, int scale)
   {
-    return manager.getCreateTableSQL(Types.DATE, length);
+    return manager.getCreateTableSQL(Types.DATE, length, precision, scale);
   }
 
   /**
