@@ -37,6 +37,7 @@ import java.util.HashMap;
 
 import java.util.logging.Logger;
 
+import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Constructor;
 
@@ -204,10 +205,7 @@ public class Config {
     try {
       thread.setContextClassLoader(_classLoader);
 
-      NodeBuilder builder = new NodeBuilder();
-
-      for (String var : _vars.keySet())
-	builder.putVar(var, _vars.get(var));
+      NodeBuilder builder = createBuilder();
 
       return builder.configure(obj, topNode);
     } finally {
@@ -254,15 +252,29 @@ public class Config {
     try {
       thread.setContextClassLoader(_classLoader);
 
-      NodeBuilder builder = new NodeBuilder();
-
-      for (String var : _vars.keySet())
-	builder.putVar(var, _vars.get(var));
+      NodeBuilder builder = createBuilder();
 
       builder.configureBean(obj, topNode);
     } finally {
       thread.setContextClassLoader(oldLoader);
     }
+  }
+
+  private NodeBuilder createBuilder()
+  {
+    NodeBuilder builder = new NodeBuilder();
+
+    for (String var : _vars.keySet())
+      builder.putVar(var, _vars.get(var));
+
+    ConfigLibrary lib = ConfigLibrary.getLocal();
+
+    HashMap<String,Method> methodMap = lib.getMethodMap();
+    for (String var : methodMap.keySet()) {
+      builder.putVar(var, methodMap.get(var));
+    }
+
+    return builder;
   }
 
   /**

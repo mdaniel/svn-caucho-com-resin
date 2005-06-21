@@ -613,7 +613,7 @@ public class NodeBuilder {
       ELParser parser = new ELParser(exprString);
       parser.setCheckEscape(true);
       Expr expr = parser.parse();
-
+      
       return expr.evalBoolean(getConfigVariableResolver());
     }
     else
