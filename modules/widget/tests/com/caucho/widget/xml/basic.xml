@@ -1,0 +1,7 @@
+<widget>
+  <scripts>
+    <response>
+      print("hello, world");
+    </response>
+  </scripts>
+</widget>

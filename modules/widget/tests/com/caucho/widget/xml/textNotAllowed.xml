@@ -1,0 +1,4 @@
+<widget xmlns="http://caucho.com/ns/widget">
+   contains text
+  <label value="hello, world"/>
+</widget>

@@ -1,0 +1,30 @@
+<widget>
+  <scripts>
+    <init>
+      test.addState("init");
+    </init>
+
+    <invocation>
+      test.addState("invocation");
+    </invocation>
+
+    <request>
+      test.addState("request");
+    </request>
+
+    <response>
+      test.addState("response");
+      var url = response.url;
+      var urlString = url.toString();
+    </response>
+
+    <url>
+      test.addState("url");
+    </url>
+
+    <destroy>
+      test.addState("destroy");
+    </destroy>
+  </scripts>
+
+</widget>

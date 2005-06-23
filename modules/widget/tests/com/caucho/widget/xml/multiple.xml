@@ -1,0 +1,10 @@
+<widget>
+  <scripts>
+    <response>
+      print("hello");
+    </response>
+    <response>
+      print("goodbye");
+    </response>
+  </scripts>
+</widget>
