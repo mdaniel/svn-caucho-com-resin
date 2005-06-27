@@ -130,6 +130,13 @@ abstract public class DeployController<I extends DeployInstance>
   }
 
   /**
+   * Merges with the old controller.
+   */
+  protected void mergeController(DeployController<I> newController)
+  {
+  }
+
+  /**
    * Merge the startup mode.
    */
   public void mergeStartupMode(String mode)

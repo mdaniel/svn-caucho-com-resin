@@ -925,7 +925,7 @@ public class ServletServer extends ProtocolDispatchServer
 	  }
 	}
       }
-      
+
       if (! _isBindPortsAtEnd)
 	bindPorts();
       

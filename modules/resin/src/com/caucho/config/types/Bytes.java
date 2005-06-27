@@ -46,7 +46,9 @@ import com.caucho.config.ConfigException;
  * </pre>
  */
 public class Bytes {
-  static final L10N L = new L10N(Bytes.class);
+  private static final L10N L = new L10N(Bytes.class);
+  
+  public static final long INFINITE = Long.MAX_VALUE / 2;
 
   private long _bytes;
   

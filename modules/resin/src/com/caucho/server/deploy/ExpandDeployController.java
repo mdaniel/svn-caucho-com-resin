@@ -152,6 +152,15 @@ abstract public class ExpandDeployController<I extends DeployInstance>
   }
 
   /**
+   * Merges with the old controller.
+   */
+  protected void mergeController(ExpandDeployController<I> newController)
+  {
+    if (newController._expandCleanupFileSet != null)
+      _expandCleanupFileSet = newController._expandCleanupFileSet;
+  }
+
+  /**
    * Expand an archive file.  The _archiveExpandLock must be obtained
    * before the expansion.
    */

@@ -810,8 +810,6 @@ public class Port implements EnvironmentListener, PortMBean, Runnable {
     synchronized (_threadCountLock) {
       _threadCount++;
     }
-    
-    log.fine(conn + " begin threads:" + _threadCount);
   }
 
   /**
@@ -822,8 +820,6 @@ public class Port implements EnvironmentListener, PortMBean, Runnable {
     synchronized (_threadCountLock) {
       _threadCount--;
     }
-    
-    log.fine(conn + " end threads:" + _threadCount);
   }
 
   /**

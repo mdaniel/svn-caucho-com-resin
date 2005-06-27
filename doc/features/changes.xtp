@@ -4,6 +4,7 @@
 
 <s2 title='3.0.snap - Jun 15, 2005'>
 <ul>
+<li>expand-cleanup-fileset needs to merge with explicit &lt;web-app> (rep by Bill Au)
 <li>Updated AccessLog flushing to avoid threading/locking hotspot
 <li>RemoteFilesystem needs to validate .war digest at end of transmission to avoid sending data partial .war files (rep by Patrick Burleson, RSN-290)
 <li>QDocument importFragment of DocumentFragment wasn't looking at proper node to copy (rep by James Howe, RSN-259)

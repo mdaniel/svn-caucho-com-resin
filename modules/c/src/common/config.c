@@ -375,6 +375,34 @@ cse_log_config(config_t *config)
   }
 }
 
+/**
+ * Matches the host information in the config
+ */
+static resin_host_t *
+cse_create_host(config_t *config, const char *host_name, int port)
+{
+  resin_host_t *host;
+  resin_host_t *default_host = 0;
+
+  for (host = config->hosts; host; host = host->next) {
+    if (! strcmp(host_name, host->name) && host->port == port)
+      return host;
+  }
+
+  host = (resin_host_t *) cse_alloc(config->p, sizeof(resin_host_t));
+  
+  memset(host, 0, sizeof(resin_host_t));
+  host->config = config;
+  host->canonical = host;
+  host->name = cse_strdup(config->p, host_name);
+  host->port = port;
+  host->next = config->hosts;
+  host->cluster.config = config;
+  config->hosts = host;
+
+  return host;
+}
+
 static int
 read_config(stream_t *s, config_t *config, resin_host_t *host,
 	    time_t now, int *p_is_change)
@@ -389,29 +417,50 @@ read_config(stream_t *s, config_t *config, resin_host_t *host,
   cluster_t cluster;
   int live_time = -1;
   int dead_time = -1;
+  resin_host_t *old_canonical = host->canonical;
   
   memset(&cluster, 0, sizeof(cluster));
   cluster.config = config;
   cluster.round_robin_index = -1;
 
+  host->canonical = host;
   *p_is_change = is_change;
 
+  LOG(("hmux config %s:%d\n", host->name, host->port));
+  
   while (1) {
     code = cse_read_byte(s);
 
     switch (code) {
     case HMUX_DISPATCH_HOST:
       if (hmux_read_string(s, buffer, sizeof(buffer)) >= 0) {
+	int p;
+	int port = 0;
+	int ch;
+	
 	LOG(("hmux host %s\n", buffer));
 
+	for (p = 0; (ch = buffer[p]); p++) {
+	  if (ch == ':') {
+	    port = atoi(buffer + p + 1);
+	    buffer[p] = 0;
+	    break;
+	  }
+	}
+	
 	if (is_change < 0)
 	  is_change = 1;
 	*p_is_change = is_change;
 
-	if (strcmp(buffer, host->name)) {
+	if (strcmp(buffer, host->name) || host->port != port) {
 	  resin_host_t *canonical;
-	  canonical = cse_match_host_impl(config, buffer, 0, now);
+	  
+	  canonical = cse_create_host(config, buffer, port);
+	  
 	  host->canonical = canonical;
+	  LOG(("hmux set canonical %s:%d -> %s:%d\n",
+	       host->name, host->port,
+	       host->canonical->name, host->canonical->port));
 	}
       }
       break;
@@ -450,6 +499,7 @@ read_config(stream_t *s, config_t *config, resin_host_t *host,
       break;
 
     case HMUX_DISPATCH_NO_CHANGE:
+      host->canonical = old_canonical;
       cse_skip(s, hmux_read_len(s));
       
       LOG(("hmux no-change %s\n", host->etag));
@@ -468,6 +518,12 @@ read_config(stream_t *s, config_t *config, resin_host_t *host,
 	  live_time = atoi(value);
 	else if (! strcmp(buffer, "dead-time"))
 	  dead_time = atoi(value);
+	else if (! strcmp(buffer, "check-interval")) {
+	  config->dependency_check_interval = atoi(value);
+	  if (config->dependency_check_interval < 5)
+	    config->dependency_check_interval = 5;
+	  config->update_interval = atoi(value);
+	}
       }
       break;
 	
@@ -586,8 +642,13 @@ write_config(config_t *config)
     
     hmux_write_string(&s, HMUX_DISPATCH_HOST, host->name);
 
-    if (host->canonical) {
-      hmux_write_string(&s, HMUX_DISPATCH_HOST, host->canonical->name);
+    if (host->canonical && host->canonical != host) {
+      if (host->canonical->port) {
+	sprintf(buffer, "%s:%d", host->canonical->name, host->canonical->port);
+	hmux_write_string(&s, HMUX_DISPATCH_HOST, buffer);
+      }
+      else
+	hmux_write_string(&s, HMUX_DISPATCH_HOST, host->canonical->name);
     }
 
     for (web_app = host->applications; web_app; web_app = web_app->next) {
@@ -681,10 +742,25 @@ read_all_config_impl(config_t *config)
   while ((code = cse_read_byte(&s)) >= 0) {
     switch (code) {
     case HMUX_DISPATCH_HOST:
-      hmux_read_string(&s, buffer, sizeof(buffer));
+      {
+	hmux_read_string(&s, buffer, sizeof(buffer));
+	int p;
+	int port = 0;
+	int ch;
+	
+	LOG(("hmux host %s\n", buffer));
+
+	for (p = 0; (ch = buffer[p]); p++) {
+	  if (ch == ':') {
+	    port = atoi(buffer + p + 1);
+	    buffer[p] = 0;
+	    break;
+	  }
+	}
       
-      host = cse_match_host_impl(config, buffer, 0, now);
-      read_config(&s, config, host, 0, &is_change);
+	host = cse_create_host(config, buffer, port);
+	read_config(&s, config, host, 0, &is_change);
+      }
       break;
 
     case HMUX_HEADER:
@@ -750,7 +826,7 @@ cse_update_host_from_resin(resin_host_t *host, time_t now)
       hmux_write_string(&s, HMUX_DISPATCH_ETAG, host->etag);
     hmux_write_string(&s, HMUX_DISPATCH_HOST, host->name);
     hmux_write_string(&s, HMUX_DISPATCH_QUERY, uri);
-    hmux_write_close(&s);
+    hmux_write_exit(&s);
 
     code = cse_read_byte(&s);
     if (code != HMUX_CHANNEL) {
@@ -858,32 +934,15 @@ cse_add_config_server(config_t *config, const char *host, int port)
  * Matches the host information in the config
  */
 static resin_host_t *
-cse_update_host(config_t *config, resin_host_t *host,
-		const char *host_name, int port, time_t now)
+cse_update_host(config_t *config, resin_host_t *host, time_t now)
 {
-  if (! host) {
-    host = (resin_host_t *) cse_alloc(config->p, sizeof(resin_host_t));
-    memset(host, 0, sizeof(resin_host_t));
-    host->config = config;
-    host->canonical = host;
-    host->name = cse_strdup(config->p, host_name);
-    host->port = port;
-    host->next = config->hosts;
-    host->cluster.config = config;
-    config->hosts = host;
-    LOG(("cse_update_host %s\n", host_name));
-  }
-  else {
-    LOG(("cse_update_host %s etag:%s\n", host_name, host->etag));
-  }
+  const char *host_name = host->name;
+  int port = host->port;
   
   if (now < host->last_update + config->update_interval)
-    return host->canonical;
+    return;
 
-  if (! cse_update_host_from_resin(host, now) && *host_name)
-    host->canonical = cse_match_host_impl(config, "", 0, now);
-
-  return host->canonical;
+  cse_update_host_from_resin(host, now);
 }
 
 /**
@@ -893,15 +952,14 @@ static resin_host_t *
 cse_match_host_impl(config_t *config, const char *host_name,
 		    int port, time_t now)
 {
-  resin_host_t *host;
-  resin_host_t *default_host = 0;
+  resin_host_t *host = cse_create_host(config, host_name, port);
 
-  for (host = config->hosts; host; host = host->next) {
-    if (! strcmp(host_name, host->name) && host->port == port)
-      return cse_update_host(config, host, host_name, port, now);
-  }
-  
-  return cse_update_host(config, default_host, host_name, port, now);
+  cse_update_host(config, host, now);
+
+  if (host != host->canonical)
+    cse_update_host(config, host->canonical, now);
+
+  return host->canonical;
 }
 
 /**
@@ -1220,6 +1278,7 @@ cse_match_request(config_t *config, const char *host, int port,
   test_port = entry->port;
   test_match_host = entry->match_host;
 
+  cse_lock(config->lock);
   if (g_update_count != entry->update_count) {
   }
   else if (test_count != entry->count) {
@@ -1237,8 +1296,11 @@ cse_match_request(config_t *config, const char *host, int port,
 	   test_match_host->last_update + config->update_interval < now) {
   }
   else {
+    cse_unlock(config->lock);
+    
     return test_match_host;
   }
+  cse_unlock(config->lock);
 
   match_host = cse_is_match(config, host, port, uri, unescape, now);
 

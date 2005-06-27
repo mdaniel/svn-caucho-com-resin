@@ -16,7 +16,7 @@ install	:
 	  mkdir -p $(PREFIX)/bin; \
 	  cp bin/* $(PREFIX)/bin; \
 	  mkdir -p $(PREFIX)/webapps; \
-	  cp webapps/* $(PREFIX)/webapps; \
+	  cp -r webapps/* $(PREFIX)/webapps; \
 	  mkdir -p $(PREFIX)/conf; \
 	  cp conf/resin.conf $(PREFIX)/conf/resin.conf.orig; \
 	  cp conf/app-default.xml $(PREFIX)/conf/app-default.xml.orig; \

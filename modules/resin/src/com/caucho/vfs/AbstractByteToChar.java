@@ -56,6 +56,7 @@ abstract public class AbstractByteToChar extends InputStream {
   private int _specialEncoding;
 
   private final byte []_byteBuffer = new byte[256];
+  private final char []_charBuffer = new char[1];
   private int _byteHead;
   private int _byteTail;
 
@@ -72,8 +73,14 @@ abstract public class AbstractByteToChar extends InputStream {
   public void setEncoding(String encoding)
     throws UnsupportedEncodingException
   {
-    _readEncoding = Encoding.getReadEncoding(this, encoding);
-    _readEncodingName = Encoding.getMimeName(encoding);
+    if (encoding != null) {
+      _readEncoding = Encoding.getReadEncoding(this, encoding);
+      _readEncodingName = Encoding.getMimeName(encoding);
+    }
+    else {
+      _readEncoding = null;
+      _readEncodingName = null;
+    }
   }
 
   /**
@@ -140,10 +147,16 @@ abstract public class AbstractByteToChar extends InputStream {
   private int readChar()
     throws IOException
   {
-    if (_readEncoding == null)
+    Reader readEncoding = _readEncoding;
+    
+    if (readEncoding == null)
       return read();
-    else
-      return _readEncoding.read();
+    else {
+      if (readEncoding.read(_charBuffer, 0, 1) < 0)
+	return -1;
+      else
+	return _charBuffer[0];
+    }
   }
 
   /**

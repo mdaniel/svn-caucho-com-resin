@@ -177,7 +177,6 @@ public class ServerController
    */
   public void bindPortsBeforeStart()
   {
-    // XXX:
   }
 
   protected String getMBeanTypeName()

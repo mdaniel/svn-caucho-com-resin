@@ -60,9 +60,6 @@
 #define LIVE_TIME 10
 #define CONNECT_TIMEOUT 2
 
-static srun_t *g_srun_list[4096];
-static int g_srun_count;
-
 /**
  * Opening method for non-ssl.
  */
@@ -607,7 +604,7 @@ cse_read_limit(stream_t *s, char *buf, int buflen, int readlen)
 {
   int result;
   
-  if (buflen >= readlen) {
+  if (readlen <= buflen) {
     result = cse_read_all(s, buf, readlen);
     buf[readlen] = 0;
   }
@@ -706,6 +703,12 @@ void
 hmux_write_close(stream_t *s)
 {
   cse_write_byte(s, HMUX_QUIT);
+}
+
+void
+hmux_write_exit(stream_t *s)
+{
+  cse_write_byte(s, HMUX_EXIT);
 }
 
 int
@@ -809,40 +812,17 @@ cse_add_srun(cluster_t *cluster, const char *hostname, int port, int ssl)
   struct hostent *hostent = 0;
   srun_t *srun = 0;
   config_t *config = cluster->config;
+  int i;
 
   LOG(("adding host %s:%d\n", hostname, port));
-
-  /*
-  for (i = 0; i < g_srun_count; i++) {
-    srun_t *srun = g_srun_list[i];
-
-    if (srun && ! strcmp(srun->hostname, hostname) && srun->port == port) {
-      LOG(("old host %d %x\n", i, srun));
-      return srun;
-    }
-  }
-
-  if (g_srun_count >= 4096) {
-    ERR(("too many hosts\n"));
-    return 0;
-  }
-
-  srun = g_srun_list[g_srun_count];
-  */
   
-  if (! srun) {
-    srun = cse_alloc(config->p, sizeof(srun_t));
-    memset(srun, 0, sizeof(srun_t));
-    /*
-    g_srun_list[g_srun_count] = srun;
-    */
-  }
+  srun = malloc(sizeof(srun_t));
+  memset(srun, 0, sizeof(srun_t));
 
   hostent = gethostbyname(hostname);
   if (hostent && hostent->h_addr) {
-    srun->hostname = cse_strdup(config->p, hostname);
-    srun->host = (struct in_addr *) cse_alloc(config->p,
-					      sizeof (struct in_addr));
+    srun->hostname = strdup(hostname);
+    srun->host = (struct in_addr *) malloc(sizeof (struct in_addr));
     memcpy(srun->host, hostent->h_addr, sizeof(struct in_addr));
     srun->port = port;
     srun->conn_head = 0;
@@ -883,10 +863,7 @@ cse_add_srun(cluster_t *cluster, const char *hostname, int port, int ssl)
 
     srun->lock = cse_create_lock(config);
     LOG(("srun lock %x\n", srun->lock));
-
-    g_srun_count++;
     
-    LOG(("new host %d %x\n", g_srun_count, srun));
     return srun;
   }
 
@@ -1158,6 +1135,7 @@ cse_close_sockets(config_t *config)
          tail = (tail + 1) % CONN_POOL_SIZE) {
       struct conn_t *conn = &srun->conn_pool[tail];
       int socket = conn->socket;
+      conn->socket = -1;
       if (socket >= 0)
         srun->close(socket, conn->ssl);
     }
@@ -1174,31 +1152,6 @@ cse_close_sockets(config_t *config)
 void
 cse_close_all()
 {
-  int i;
-  
-  for (i = 0; i < g_srun_count; i++) {
-    srun_t *srun = g_srun_list[i];
-    int tail;
-
-    if (! srun)
-      continue;
-
-    cse_lock(srun->lock);
-
-    for (tail = srun->conn_tail;
-         tail != srun->conn_head;
-         tail = (tail + 1) % CONN_POOL_SIZE) {
-      struct conn_t *conn = &srun->conn_pool[tail];
-      int socket = conn->socket;
-      if (socket >= 0)
-        srun->close(socket, conn->ssl);
-    }
-
-    srun->conn_head = 0;
-    srun->conn_tail = 0;
-    
-    cse_unlock(srun->lock);
-  }
 }
 
 static int
@@ -1441,17 +1394,14 @@ cse_open_connection(stream_t *s, cluster_t *cluster,
                     time_t now, void *web_pool)
 {
   config_t *config = cluster->config;
+
+  memset(s, 0, sizeof(stream_t));
   
   s->config = config;
   s->socket = -1;
   s->update_count = config->update_count;
   s->pool = s->config->p;
   s->web_pool = web_pool;
-  s->write_length = 0;
-  s->read_length = 0;
-  s->read_offset = 0;
-  s->cluster_srun = 0;
-  s->sent_data = 0;
 
   if (config->disable_sticky_sessions)
     session_index = -1;

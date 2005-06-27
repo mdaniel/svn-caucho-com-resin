@@ -48,7 +48,8 @@ public class Period {
   public static final long MONTH = DAY * 30L;
   /** 365 days */
   public static final long YEAR = DAY * 365L;
-  public static final long FOREVER = (Long.MAX_VALUE / 2 / 1000) * 1000;
+  public static final long INFINITE = (Long.MAX_VALUE / 2 / 1000) * 1000;
+  public static final long FOREVER = INFINITE;
 
   private static final QDate _localCalendar = QDate.createLocal();
   private long _period;

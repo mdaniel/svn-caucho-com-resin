@@ -48,13 +48,13 @@ import com.caucho.config.types.Bytes;
 public class RotateLog {
   private final static L10N L = new L10N(RotateLog.class);
   
-  private static final long ROLLOVER_SIZE = 100 * 1024 * 1024;
+  private static final long ROLLOVER_SIZE = Long.MAX_VALUE / 2;
   
   private Path _path;
   private String _formatPath;
   
   private RotateStream _rotateStream;
-  private long _rolloverPeriod = -1;
+  private long _rolloverPeriod = Long.MAX_VALUE / 2;
   private long _rolloverSize = ROLLOVER_SIZE;
   private int _rolloverCount = 10;
   private String _timestamp;

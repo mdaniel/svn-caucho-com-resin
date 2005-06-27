@@ -85,8 +85,7 @@ cse_create_lock(config_t *config)
 {
   apr_thread_mutex_t *lock = 0;
 
-  apr_thread_mutex_create(&lock, APR_THREAD_MUTEX_DEFAULT,
-                          config->web_pool);
+  apr_thread_mutex_create(&lock, APR_THREAD_MUTEX_DEFAULT, config->web_pool);
 
   return lock;
 }
@@ -135,9 +134,9 @@ cse_error(config_t *config, char *format, ...)
 void
 cse_set_socket_cleanup(int socket, void *pool)
 {
+  /* XXX:
   LOG(("set cleanup %d\n", socket));
 
-  /* XXX:
   if (socket > 0)
     apr_note_cleanups_for_socket(pool, socket);
   */
@@ -227,7 +226,6 @@ static config_t *
 cse_get_module_config(request_rec *r)
 {
   config_t *config;
-  server_rec *s = r->server;
 
   if (r->per_dir_config) {
     config = (config_t *) ap_get_module_config(r->per_dir_config,
@@ -612,9 +610,9 @@ cse_write_response(stream_t *s, int len, request_rec *r)
  * Copy data from the JVM to the browser.
  */
 static int
-send_data(stream_t *s, request_rec *r, int ack, int *keepalive)
+send_data(stream_t *s, request_rec *r)
 {
-  int code = HMUX_QUIT;
+  int code = -1;
   char buf[8193];
   char key[8193];
   char value[8193];
@@ -623,28 +621,13 @@ send_data(stream_t *s, request_rec *r, int ack, int *keepalive)
     
   if (cse_fill_buffer(s) < 0)
     return -1;
-
-  /*
-  code = cse_read_byte(s);
-  if (code != HMUX_CHANNEL) {
-    r->status = 500;
-    r->status_line = "Protocol error";
-
-    cse_close(s, "bad protocol");
-    return -1;
-  }
-  channel = hmux_read_len(s);
-  */
     
-  do {
+  while (1) {
     int len;
 
     code = cse_read_byte(s);
 
     LOG(("code %c\n", code));
-    if (s->socket < 0)
-      return -1;
-
     switch (code) {
     case HMUX_CHANNEL:
       channel = hmux_read_len(s);
@@ -654,7 +637,7 @@ send_data(stream_t *s, request_rec *r, int ack, int *keepalive)
     case HMUX_ACK:
       channel = hmux_read_len(s);
       LOG(("ack %d\n", channel));
-      break;
+      return code;
       
     case HMUX_STATUS:
       len = hmux_read_len(s);
@@ -688,30 +671,23 @@ send_data(stream_t *s, request_rec *r, int ack, int *keepalive)
       ap_rflush(r);
       break;
 
-    case CSE_KEEPALIVE:
-      len = hmux_read_len(s);
-      *keepalive = 1;
-      break;
-
     case CSE_SEND_HEADER:
       len = hmux_read_len(s);
       break;
-
-    case -1:
-      return -1;
 
     case HMUX_QUIT:
     case HMUX_EXIT:
       return code;
 
     default:
+      if (code < 0)
+	return code;
+      
       len = hmux_read_len(s);
       cse_skip(s, len);
       break;
     }
-  } while (code > 0 && code != HMUX_QUIT && code != HMUX_EXIT && code != ack);
-
-  return code;
+  }
 }
 
 /**
@@ -719,12 +695,11 @@ send_data(stream_t *s, request_rec *r, int ack, int *keepalive)
  */
 static int
 write_request(stream_t *s, request_rec *r, config_t *config,
-              int *keepalive, int session_index, int backup_index)
+	      int session_index, int backup_index)
 {
   int len;
-  int code;
+  int code = -1;
   unsigned int now = (unsigned int) (r->request_time / 1000000);
-  int write_length;
   time_t new_time;
 
   hmux_start_channel(s, 1);
@@ -746,8 +721,8 @@ write_request(stream_t *s, request_rec *r, config_t *config,
       if (ack_size <= send_length) {
 	send_length = 0;
 	cse_write_byte(s, HMUX_YIELD);
-        code = send_data(s, r, CSE_ACK, keepalive);
-        if (code != REQ_CONTINUE)
+        code = send_data(s, r);
+        if (code != HMUX_ACK)
           break;
       }
     }
@@ -755,23 +730,11 @@ write_request(stream_t *s, request_rec *r, config_t *config,
 
   cse_write_byte(s, HMUX_QUIT);
 
-  code = send_data(s, r, HMUX_QUIT, keepalive);
-  write_length = s->write_length;
+  code = send_data(s, r);
 
   LOG(("return code %c\n", code));
-  
-  if (code == REQ_QUIT) {
-    /* cse_recycle(s, now); */
-    return OK;
-  }
-  else if (code >= 0 || s->sent_data) {
-    /* cse_close(s, "closed"); */
-    return -1;
-  }
-  else {
-    /* cse_close(s, "closed"); */
-    return HTTP_SERVICE_UNAVAILABLE;
-  }
+
+  return code;
 }
 
 /**
@@ -783,14 +746,11 @@ caucho_request(request_rec *r, config_t *config, resin_host_t *host,
 {
   stream_t s;
   int retval;
-  int keepalive = 0;
-  int reuse;
+  int code = -1;
   int session_index;
   int backup_index = 0;
   char *ip;
   srun_t *srun;
-  int i;
-  int retry_count = 1;
 
   if ((retval = ap_setup_client_block(r, REQUEST_CHUNKED_DECHUNK)))
     return retval;
@@ -809,46 +769,40 @@ caucho_request(request_rec *r, config_t *config, resin_host_t *host,
 			  ap_get_server_port(r),
 			  now);
   }
-
-  if (host->cluster.srun_size > 1) {
-    retry_count = 2;
+    
+  LOG(("session index: %d\n", session_index));
+  if (! host)
+    return HTTP_SERVICE_UNAVAILABLE;
+  else if (! cse_open_connection(&s, &host->cluster,
+				 session_index, backup_index,
+				 now, r->pool)) {
+    return HTTP_SERVICE_UNAVAILABLE;
   }
 
-  while (retry_count-- > 0) {
-    LOG(("session index: %d\n", session_index));
-    if (! host || ! cse_open_connection(&s, &host->cluster,
-					session_index, backup_index,
-					now, r->pool)) {
-      return HTTP_SERVICE_UNAVAILABLE;
-    }
+  srun = s.cluster_srun->srun;
 
-    srun = s.cluster_srun->srun;
-
-    apr_thread_mutex_lock(srun->lock);
-    srun->active_sockets++;
-    apr_thread_mutex_unlock(srun->lock);
+  apr_thread_mutex_lock(srun->lock);
+  srun->active_sockets++;
+  apr_thread_mutex_unlock(srun->lock);
   
-    reuse = write_request(&s, r, config, &keepalive,
-			session_index, backup_index);
+  code = write_request(&s, r, config, session_index, backup_index);
 
-    apr_thread_mutex_lock(srun->lock);
-    srun->active_sockets--;
-    apr_thread_mutex_unlock(srun->lock);
+  apr_thread_mutex_lock(srun->lock);
+  srun->active_sockets--;
+  apr_thread_mutex_unlock(srun->lock);
   
-    if (reuse == OK) {
-      cse_recycle(&s, now);
-      return OK;
-    }
-    else if (reuse == HTTP_SERVICE_UNAVAILABLE) {
-      cse_close(&s, "no reuse");
-    }
-    else {
-      cse_close(&s, "no reuse");
-      return OK;
-    }
-  }
+  /* on failure, do not failover but simply fail */
+  if (code == REQ_QUIT)
+    cse_recycle(&s, now);
+  else
+    cse_close(&s, "no reuse");
 
-  return HTTP_SERVICE_UNAVAILABLE;
+  if (code != HMUX_QUIT && code != HMUX_EXIT)
+    return HTTP_SERVICE_UNAVAILABLE;
+  else if (r->status == HTTP_SERVICE_UNAVAILABLE)
+    return HTTP_SERVICE_UNAVAILABLE;
+  else
+    return OK;
 }
 
 /**
@@ -996,8 +950,9 @@ caucho_status(request_rec *r)
   
   host = config ? config->hosts : 0;
   for (; host; host = host->next) {
-    if (host != host->canonical)
+    if (host != host->canonical) {
       continue;
+    }
 
     caucho_host_status(r, config, host);
   }
@@ -1075,15 +1030,11 @@ cse_dispatch(request_rec *r)
     return DECLINED;
  
   LOG(("[%d] host %s\n", getpid(), host_name ? host_name : "null"));
-
-    /*
-  cse_update_config(config, request_time);
-  */
   
   /* Check for exact virtual host match */
   host = cse_match_request(config, host_name, port, uri, 0, now);
   
-  if (host || r->handler && ! strcmp(r->handler, "caucho-request")) {
+  if (host || (r->handler && ! strcmp(r->handler, "caucho-request"))) {
     LOG(("[%d] match %s:%s\n", getpid(), host_name ? host_name : "null", uri));
 
     return caucho_request(r, config, host, now);

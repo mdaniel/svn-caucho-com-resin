@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.server.log;
+package com.caucho.vfs;
 
 import java.util.ArrayList;
 
@@ -43,14 +43,10 @@ import java.io.IOException;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-
-import com.caucho.log.Log;
+import com.caucho.util.Log;
+import com.caucho.util.L10N;
+import com.caucho.util.Alarm;
+import com.caucho.util.QDate;
 
 import com.caucho.loader.Environment;
 import com.caucho.loader.CloseListener;
@@ -60,87 +56,172 @@ import com.caucho.config.types.Bytes;
 import com.caucho.config.types.InitProgram;
 import com.caucho.config.ConfigException;
 
-import com.caucho.server.connection.AbstractHttpRequest;
-import com.caucho.server.connection.AbstractHttpResponse;
-
-import com.caucho.server.dispatch.ServletConfigException;
 
 /**
- * Represents an log of every top-level request to the server.
+ * Abstract class for a log that rolls over based on size or period.
  */
-public class AccessLogWriter implements Runnable {
-  protected static final L10N L = new L10N(AccessLogWriter.class);
-  protected static final Logger log = Log.open(AccessLogWriter.class);
+abstract public class AbstractRolloverLog {
+  protected static final L10N L = new L10N(AbstractRolloverLog.class);
+  protected static final Logger log = Log.open(AbstractRolloverLog.class);
 
   // Milliseconds in a day
   private static final long DAY = 24L * 3600L * 1000L;
+  
+  // Default maximum log size = 1G
+  private static final long DEFAULT_ROLLOVER_SIZE = 1024L * 1024L * 1024L;
   // How often to check size
-  private static final long ROLLOVER_CHECK_TIME = 600L * 1000L;
-
-  private static final int BUFFER_SIZE = 65536;
-  private static final int BUFFER_GAP = 8 * 1024;
-
-  private static final FreeList<AccessLogBuffer> _freeBuffers
-    = new FreeList<AccessLogBuffer>(4);
-
-  private QDate _calendar = QDate.createLocal();
-  
-  private final AccessLog _log;
- 
-  // the write queue
-  private int _maxQueueLength = 32;
-  private final ArrayList<AccessLogBuffer> _writeQueue
-    = new ArrayList<AccessLogBuffer>();
-  
-  private WriteStream _os;
-
-  private String _format;
+  private static final long DEFAULT_ROLLOVER_CHECK_PERIOD = 600L * 1000L;
 
   // prefix for the rollover
   private String _rolloverPrefix;
+
+  // template for the archived files
+  private String _archiveFormat;
+  
+  // How often the logs are rolled over.
+  private long _rolloverPeriod = Period.INFINITE;
+
+  // Maximum size of the log.
+  private long _rolloverSize = DEFAULT_ROLLOVER_SIZE;
+
+  // How often the rolloverSize should be checked
+  private long _rolloverCheckPeriod = DEFAULT_ROLLOVER_CHECK_PERIOD;
+
+  private QDate _calendar = QDate.createLocal();
+
+  protected Path _path;
+
+  protected String _pathFormat;
+
+  private String _format;
 
   // The time of the next period-based rollover
   private long _nextPeriodEnd = -1;
   private long _nextRolloverCheckTime = -1;
 
-  private final byte []_buffer = new byte[BUFFER_SIZE];
-  private int _length;
+  private WriteStream _os;
 
-  private boolean _isActive;
-
-  AccessLogWriter(AccessLog log)
-  {
-    _log = log;
-  }
-
-  public String getPathFormat()
-  {
-    return _log.getPathFormat();
-  }
-
-  public String getArchiveFormat()
-  {
-    return _log.getArchiveFormat();
-  }
-
+  /**
+   * Returns the access-log's path.
+   */
   public Path getPath()
   {
-    return _log.getPath();
+    return _path;
   }
 
-  public long getRolloverSize()
+  /**
+   * Sets the access-log's path.
+   */
+  public void setPath(Path path)
   {
-    return _log.getRolloverSize();
+    _path = path;
   }
 
+  /**
+   * Returns the formatted path
+   */
+  public String getPathFormat()
+  {
+    return _pathFormat;
+  }
+
+  /**
+   * Sets the formatted path.
+   */
+  public void setPathFormat(String pathFormat)
+  {
+    _pathFormat = pathFormat;
+  }
+
+  /**
+   * Sets the archive name format
+   */
+  public void setArchiveFormat(String format)
+  {
+    _archiveFormat = format;
+  }
+
+  /**
+   * Sets the archive name format
+   */
+  public String getArchiveFormat()
+  {
+    return _archiveFormat;
+  }
+
+  /**
+   * Sets the log rollover period, rounded up to the nearest hour.
+   *
+   * @param period the new rollover period in milliseconds.
+   */
+  public void setRolloverPeriod(Period period)
+  {
+    _rolloverPeriod = period.getPeriod();
+    
+    if (_rolloverPeriod > 0) {
+      _rolloverPeriod += 3600000L - 1;
+      _rolloverPeriod -= _rolloverPeriod % 3600000L;
+    }
+    else
+      _rolloverPeriod = Period.INFINITE;
+  }
+
+  /**
+   * Sets the log rollover period, rounded up to the nearest hour.
+   *
+   * @param period the new rollover period in milliseconds.
+   */
   public long getRolloverPeriod()
   {
-    return _log.getRolloverPeriod();
+    return _rolloverPeriod;
   }
 
-  public long getRolloverCheckTime()
+  /**
+   * Sets the log rollover size, rounded up to the megabyte.
+   *
+   * @param size maximum size of the log file
+   */
+  public void setRolloverSize(Bytes bytes)
   {
-    return _log.getRolloverCheckTime();
+    long size = bytes.getBytes();
+    
+    if (size < 0)
+      _rolloverSize = Bytes.INFINITE;
+    else
+      _rolloverSize = size;
+  }
+
+  /**
+   * Sets the log rollover size, rounded up to the megabyte.
+   *
+   * @param size maximum size of the log file
+   */
+  public long getRolloverSize()
+  {
+    return _rolloverSize;
+  }
+
+  /**
+   * Sets how often the log rollover will be checked.
+   *
+   * @param period how often the log rollover will be checked.
+   */
+  public void setRolloverCheckPeriod(long period)
+  {
+    if (period > 1000)
+      _rolloverCheckPeriod = period;
+    else if (period > 0)
+      _rolloverCheckPeriod = 1000;
+  }
+
+  /**
+   * Sets how often the log rollover will be checked.
+   *
+   * @param period how often the log rollover will be checked.
+   */
+  public long getRolloverCheckPeriod()
+  {
+    return _rolloverCheckPeriod;
   }
   
   /**
@@ -149,11 +230,9 @@ public class AccessLogWriter implements Runnable {
   public void init()
     throws ServletException, IOException
   {
-    _isActive = true;
-    
     long now = Alarm.getCurrentTime();
     
-    _nextRolloverCheckTime = now + getRolloverCheckTime();
+    _nextRolloverCheckTime = now + _rolloverCheckPeriod;
 
     Path path = getPath();
 
@@ -178,68 +257,11 @@ public class AccessLogWriter implements Runnable {
       _nextRolloverCheckTime = _nextPeriodEnd;
 
     rolloverLog(now);
-
-    new Thread(this).start();
   }
 
-  boolean isRollover()
+  public boolean isRollover()
   {
     return false;
-  }
-
-  AccessLogBuffer getLogBuffer()
-  {
-    AccessLogBuffer buffer = _freeBuffers.allocate();
-
-    if (buffer == null)
-      buffer = new AccessLogBuffer();
-
-    return buffer;
-  }
-
-  AccessLogBuffer write(AccessLogBuffer logBuffer)
-  {
-    while (true) {
-      synchronized (_writeQueue) {
-	if (_writeQueue.size() < _maxQueueLength) {
-	  _writeQueue.add(logBuffer);
-	  _writeQueue.notifyAll();
-	  break;
-	}
-	else {
-	  try {
-	    _writeQueue.wait();
-	  } catch (Throwable e) {
-	    log.log(Level.WARNING, e.toString(), e);
-	  }
-	}
-      }
-    }
-    
-    AccessLogBuffer buffer = _freeBuffers.allocate();
-
-    if (buffer == null)
-      buffer = new AccessLogBuffer();
-
-    return buffer;
-  }
-
-  /**
-   * Writes the buffer data to the output stream.
-   */
-  private void writeBuffer(AccessLogBuffer buffer)
-    throws IOException
-  {
-    long now = Alarm.getCurrentTime();
-
-    if (_os != null) {
-      _os.write(buffer.getBuffer(), 0, buffer.getLength());
-      _os.flush();
-    }
-
-    _freeBuffers.free(buffer);
-    
-    rolloverLog(now);
   }
 
   /**
@@ -249,7 +271,7 @@ public class AccessLogWriter implements Runnable {
    */
   private void rolloverLog(long now)
   {
-    _nextRolloverCheckTime = now + getRolloverCheckTime();
+    _nextRolloverCheckTime = now + _rolloverCheckPeriod;
 
     Path path = getPath();
       
@@ -450,44 +472,5 @@ public class AccessLogWriter implements Runnable {
   public void destroy()
     throws IOException
   {
-    _isActive = false;
-  }
-
-  public void run()
-  {
-    while (true) {
-      try {
-	AccessLogBuffer buffer = null;
-	
-	synchronized (_writeQueue) {
-	  if (_writeQueue.size() > 0) {
-	    buffer = _writeQueue.remove(0);
-	    _writeQueue.notifyAll();
-	  }
-	  else if (! _isActive) {
-	    break;
-	  }
-	  else {
-	    // timeout so _isActive will always be called eventually
-	    _writeQueue.wait(15000);
-	  }
-	}
-
-	if (buffer != null) {
-	  writeBuffer(buffer);
-	}
-      } catch (Throwable e) {
-	log.log(Level.WARNING, e.toString(), e);
-      }
-    }
-
-    try {
-      WriteStream os = _os;
-      _os = null;
-      if (os != null)
-	os.close();
-    } catch (Throwable e) {
-      log.log(Level.WARNING, e.toString(), e);
-    }
   }
 }

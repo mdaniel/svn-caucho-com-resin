@@ -283,6 +283,8 @@ abstract public class
    */
   protected void mergeController(EnvironmentDeployController<I,C> newController)
   {
+    super.mergeController(newController);
+    
     // setId(oldController.getId());
 
     _configDefaults.addAll(newController._configDefaults);
