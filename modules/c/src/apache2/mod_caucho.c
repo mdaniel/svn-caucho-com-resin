@@ -771,11 +771,14 @@ caucho_request(request_rec *r, config_t *config, resin_host_t *host,
   }
     
   LOG(("session index: %d\n", session_index));
-  if (! host)
+  if (! host) {
+    LOG(("no host: %p\n", host));
     return HTTP_SERVICE_UNAVAILABLE;
+  }
   else if (! cse_open_connection(&s, &host->cluster,
 				 session_index, backup_index,
 				 now, r->pool)) {
+    LOG(("no connection: %p\n", host));
     return HTTP_SERVICE_UNAVAILABLE;
   }
 
@@ -1031,6 +1034,17 @@ cse_dispatch(request_rec *r)
  
   LOG(("[%d] host %s\n", getpid(), host_name ? host_name : "null"));
   
+
+  len = strlen(uri);
+
+  /* move back below host */
+  if (config->enable_caucho_status &&
+      len >= sizeof("/caucho-status") - 1 &&
+      ! strcmp(uri + len - sizeof("/caucho-status") + 1, "/caucho-status")) {
+    r->handler = "caucho-status";
+    return caucho_status(r);
+  }
+  
   /* Check for exact virtual host match */
   host = cse_match_request(config, host_name, port, uri, 0, now);
   
@@ -1040,15 +1054,6 @@ cse_dispatch(request_rec *r)
     return caucho_request(r, config, host, now);
   }
   else if (r->handler && ! strcmp(r->handler, "caucho-status")) {
-    return caucho_status(r);
-  }
-
-  len = strlen(uri);
-
-  if (config->enable_caucho_status &&
-      len >= sizeof("/caucho-status") - 1 &&
-      ! strcmp(uri + len - sizeof("/caucho-status") + 1, "/caucho-status")) {
-    r->handler = "caucho-status";
     return caucho_status(r);
   }
   

@@ -395,6 +395,16 @@ public class Host extends ApplicationContainer
   }
 
   /**
+   * Clears the cache
+   */
+  public void clearCache()
+  {
+    super.clearCache();
+
+    setConfigETag(null);
+  }
+
+  /**
    * Builds the invocation for the host.
    */
   public void buildInvocation(Invocation invocation)

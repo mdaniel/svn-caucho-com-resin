@@ -265,11 +265,34 @@ abstract public class AbstractRolloverLog {
   }
 
   /**
+   * Writes to the underlying log.
+   */
+  protected void write(byte []buffer, int offset, int length)
+    throws IOException
+  {
+    if (_os == null)
+      openLog();
+
+    if (_os != null)
+      _os.write(buffer, offset, length);
+  }
+
+  /**
+   * Writes to the underlying log.
+   */
+  protected void flush()
+    throws IOException
+  {
+    if (_os != null)
+      _os.flush();
+  }
+
+  /**
    * Check to see if we need to rollover the log.
    *
    * @param now current time in milliseconds.
    */
-  private void rolloverLog(long now)
+  protected void rolloverLog(long now)
   {
     _nextRolloverCheckTime = now + _rolloverCheckPeriod;
 
@@ -469,8 +492,14 @@ abstract public class AbstractRolloverLog {
   /**
    * Closes the log, flushing the results.
    */
-  public void destroy()
+  public void close()
     throws IOException
   {
+    if (_os != null) {
+      WriteStream os = _os;
+      _os = null;
+      
+      os.close();
+    }
   }
 }

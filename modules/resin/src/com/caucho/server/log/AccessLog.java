@@ -86,7 +86,7 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener {
   private String _timeFormat;
   private int _timeFormatSecondOffset = -1;
 
-  private final AccessLogWriter _logWriter;
+  private final AccessLogWriter _logWriter = new AccessLogWriter(this);
   
   // AccessStream
   private Object _streamLock = new Object();
@@ -123,11 +123,6 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener {
 
   private Alarm _alarm = new Alarm(this);
   private boolean _isActive;
-
-  public AccessLog()
-  {
-    _logWriter = new AccessLogWriter(this);
-  }
   
   /**
    * Sets the access log format.
@@ -138,19 +133,21 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener {
   }
 
   /**
-   * Sets the archive name format
+   * Sets the log path
    */
-  public void setArchiveFormat(String format)
+  public void setPath(Path path)
   {
-    _archiveFormat = format;
+    super.setPath(path);
+    
+    _logWriter.setPath(path);
   }
 
   /**
    * Sets the archive name format
    */
-  public String getArchiveFormat()
+  public void setArchiveFormat(String format)
   {
-    return _archiveFormat;
+    _logWriter.setArchiveFormat(format);
   }
 
   /**
@@ -160,24 +157,7 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener {
    */
   public void setRolloverPeriod(Period period)
   {
-    _rolloverPeriod = period.getPeriod();
-    
-    if (_rolloverPeriod > 0) {
-      _rolloverPeriod += 3600000L - 1;
-      _rolloverPeriod -= _rolloverPeriod % 3600000L;
-    }
-    else
-      _rolloverPeriod = Long.MAX_VALUE / 2;
-  }
-
-  /**
-   * Sets the log rollover period, rounded up to the nearest hour.
-   *
-   * @param period the new rollover period in milliseconds.
-   */
-  public long getRolloverPeriod()
-  {
-    return _rolloverPeriod;
+    _logWriter.setRolloverPeriod(period);
   }
 
   /**
@@ -187,22 +167,7 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener {
    */
   public void setRolloverSize(Bytes bytes)
   {
-    long size = bytes.getBytes();
-    
-    if (size < 0)
-      _rolloverSize = Integer.MAX_VALUE / 2;
-    else
-      _rolloverSize = size;
-  }
-
-  /**
-   * Sets the log rollover size, rounded up to the megabyte.
-   *
-   * @param size maximum size of the log file
-   */
-  public long getRolloverSize()
-  {
-    return _rolloverSize;
+    _logWriter.setRolloverSize(bytes);
   }
 
   /**
@@ -212,20 +177,7 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener {
    */
   public void setRolloverCheckTime(long period)
   {
-    if (period > 1000)
-      _rolloverCheckTime = period;
-    else if (period > 0)
-      _rolloverCheckTime = 1000;
-  }
-
-  /**
-   * Sets how often the log rollover will be checked.
-   *
-   * @param period how often the log rollover will be checked.
-   */
-  public long getRolloverCheckTime()
-  {
-    return _rolloverCheckTime;
+    _logWriter.setRolloverCheckPeriod(period);
   }
 
   public void addInit(InitProgram init)
@@ -243,9 +195,6 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener {
     _isActive = true;
     
     Environment.addClassLoaderListener(new CloseListener(this));
-    
-    if (getPath() == null && getPathFormat() == null)
-      throw new ServletConfigException(L.l("access-log needs a path"));
     
     if (_format == null)
       _format = "%h %l %u %t \"%r\" %>s %b \"%{Referer}i\" \"%{User-Agent}i\"";
@@ -677,6 +626,8 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener {
 
     if (alarm != null)
       alarm.dequeue();
+
+    _logWriter.close();
   }
 
   /**

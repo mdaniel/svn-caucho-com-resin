@@ -79,7 +79,6 @@ typedef struct hash_t {
 } hash_t;
 
 static int g_update_count;
-static time_t g_last_update;
 static hash_t g_url_cache[CACHE_SIZE];
 
 static resin_host_t *
@@ -417,11 +416,15 @@ read_config(stream_t *s, config_t *config, resin_host_t *host,
   cluster_t cluster;
   int live_time = -1;
   int dead_time = -1;
+  char etag[sizeof(host->etag)];
   resin_host_t *old_canonical = host->canonical;
   
   memset(&cluster, 0, sizeof(cluster));
   cluster.config = config;
   cluster.round_robin_index = -1;
+
+  strncpy(etag, host->etag, sizeof(etag));
+  etag[sizeof(etag) - 1] = 0;
 
   host->canonical = host;
   *p_is_change = is_change;
@@ -460,7 +463,7 @@ read_config(stream_t *s, config_t *config, resin_host_t *host,
 	  host->canonical = canonical;
 	  LOG(("hmux set canonical %s:%d -> %s:%d\n",
 	       host->name, host->port,
-	       host->canonical->name, host->canonical->port));
+	       buffer, port));
 	}
       }
       break;
@@ -494,8 +497,8 @@ read_config(stream_t *s, config_t *config, resin_host_t *host,
       break;
 
     case HMUX_DISPATCH_ETAG:
-      hmux_read_string(s, host->etag, sizeof(host->etag));
-      LOG(("hmux etag %s\n", host->etag));
+      hmux_read_string(s, etag, sizeof(etag));
+      LOG(("hmux etag %s\n", etag));
       break;
 
     case HMUX_DISPATCH_NO_CHANGE:
@@ -579,7 +582,8 @@ read_config(stream_t *s, config_t *config, resin_host_t *host,
 
 	if (old_pool)
 	  cse_free_pool(old_pool);
-	  
+
+	strncpy(host->etag, etag, sizeof(etag));
 	host->has_data = 1;
       }
       else if (pool)
@@ -1290,7 +1294,7 @@ cse_match_request(config_t *config, const char *host, int port,
   else if (test_port && test_port != port) {
   }
   else if (! test_match_host &&
-	   g_last_update + config->update_interval < now) {
+	   config->last_update + config->update_interval < now) {
   }
   else if (test_match_host &&
 	   test_match_host->last_update + config->update_interval < now) {
@@ -1322,7 +1326,7 @@ cse_match_request(config_t *config, const char *host, int port,
   entry->uri = strdup(uri);
   entry->port = port;
   entry->count++;
-  g_last_update = now;
+  config->last_update = now;
   cse_unlock(config->lock);
 
   return match_host;
