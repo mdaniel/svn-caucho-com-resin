@@ -23,7 +23,7 @@
   <resource jndi-name="movie-lister"
             type="example.MovieLister">
     <init>
-      <finder>${jndi:lookup("movie-finder")}</finder>
+      <finder>${jndi("movie-finder")}</finder>
     </init>
   </resource>
 
@@ -33,7 +33,7 @@
   <servlet servlet-name="movies"
            servlet-class="example.MovieServlet">
     <init>
-      <movie-lister>${jndi:lookup("movie-lister")}</movie-lister>
+      <movie-lister>${jndi("movie-lister")}</movie-lister>
     </init>
   </servlet>
 
