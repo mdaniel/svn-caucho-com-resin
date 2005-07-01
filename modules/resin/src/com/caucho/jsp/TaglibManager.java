@@ -39,9 +39,6 @@ import java.beans.*;
 import javax.servlet.*;
 import javax.servlet.jsp.tagext.*;
 
-import org.iso_relax.verifier.VerifierFactory;
-import org.iso_relax.verifier.Schema;
-
 import com.caucho.util.*;
 import com.caucho.vfs.*;
 import com.caucho.log.Log;
@@ -67,7 +64,6 @@ public class TaglibManager {
 
   private static ArrayList<TldTaglib> _cauchoTaglibs;
   
-  private Schema _schema;
   private JspResourceManager _resourceManager;
   private Application _application;
 
@@ -96,19 +92,6 @@ public class TaglibManager {
     _application = application;
 
     _tldManager = TldManager.create(resourceManager, application);
-
-    try {
-      MergePath mergePath = new MergePath();
-      mergePath.addClassPath();
-      Path schemaPath = mergePath.lookup("com/caucho/jsp/cfg/jsp-tld.rnc");
-
-      if (schemaPath.canRead())
-        setCompactSchema(schemaPath);
-    } catch (Exception e) {
-      log.log(Level.WARNING, e.toString(), e);
-
-      throw new JspParseException(e);
-    }
   }
 
   /**
@@ -118,24 +101,6 @@ public class TaglibManager {
   {
     _application = application;
   }
-
-  public void setCompactSchema(Path path)
-    throws JspParseException, IOException
-  {
-    ReadStream is = path.openRead();
-
-    try {
-      // VerifierFactory factory = VerifierFactory.newInstance("http://caucho.com/ns/compact-relax-ng/1.0");
-      VerifierFactory factory = new CompactVerifierFactoryImpl();
-
-      _schema = factory.compileSchema(is);
-    } catch (Exception e) {
-      throw new JspParseException(e);
-    } finally {
-      is.close();
-    }
-  }
-    
 
   public void setTldDir(String tldDir)
   {

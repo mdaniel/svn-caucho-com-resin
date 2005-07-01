@@ -234,7 +234,7 @@ public class SchemeMap {
     DEFAULT_SCHEME_MAP.put("https", new HttpsPath("127.0.0.1", 0));
     DEFAULT_SCHEME_MAP.put("tcp", new TcpPath(null, null, null, "127.0.0.1", 0));
     DEFAULT_SCHEME_MAP.put("tcps", new TcpsPath(null, null, null, "127.0.0.1", 0));
-    DEFAULT_SCHEME_MAP.put("log", new LogPath(null, "/", null, "/"));
+    // DEFAULT_SCHEME_MAP.put("log", new LogPath(null, "/", null, "/"));
     DEFAULT_SCHEME_MAP.put("merge", new MergePath());
 
     StreamImpl stdout = StdoutStream.create();

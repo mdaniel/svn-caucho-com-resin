@@ -38,7 +38,6 @@ import com.caucho.log.Log;
 import com.caucho.util.L10N;
 
 import com.caucho.vfs.WriteStream;
-import com.caucho.vfs.LogStream;
 
 /**
  * Configuration for the login-config.

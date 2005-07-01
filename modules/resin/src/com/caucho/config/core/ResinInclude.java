@@ -31,8 +31,6 @@ package com.caucho.config.core;
 
 import java.util.logging.Logger;
 
-import org.iso_relax.verifier.Schema;
-
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 

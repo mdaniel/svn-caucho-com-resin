@@ -33,10 +33,6 @@ import java.io.*;
 
 import org.xml.sax.*;
 
-import org.iso_relax.verifier.VerifierFactory;
-import org.iso_relax.verifier.Schema;
-import org.iso_relax.verifier.VerifierConfigurationException;
-
 import com.caucho.util.*;
 import com.caucho.vfs.*;
 import com.caucho.xml.Xml;
@@ -44,12 +40,12 @@ import com.caucho.xml.Xml;
 /**
  * JARV Verifier factory.
  */
-public class VerifierFactoryImpl extends VerifierFactory {
+public class VerifierFactoryImpl implements VerifierFactory {
   /**
    * Compile a schema.
    */
   public Schema compileSchema(InputSource is)
-    throws VerifierConfigurationException, SAXException, IOException
+    throws SAXException, IOException
   {
     try {
       RelaxBuilder builder = new RelaxBuilder();
@@ -62,7 +58,7 @@ public class VerifierFactoryImpl extends VerifierFactory {
 
       return new SchemaImpl(builder.getGrammar());
     } catch (RelaxException e) {
-      throw new VerifierConfigurationException(e);
+      throw new SAXException(e);
     }
   }
 }

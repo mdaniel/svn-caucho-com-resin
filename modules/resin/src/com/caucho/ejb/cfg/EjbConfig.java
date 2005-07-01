@@ -40,9 +40,6 @@ import java.util.Comparator;
 import java.util.logging.Logger;
 import java.util.logging.Level;
 
-import org.iso_relax.verifier.VerifierFactory;
-import org.iso_relax.verifier.Schema;
-
 import com.caucho.bytecode.JMethod;
 import com.caucho.bytecode.JClass;
 
@@ -147,6 +144,15 @@ public class EjbConfig {
       throw new ConfigException(e);
     }
   }
+
+  /**
+   * Returns the schema name.
+   */
+  public String getSchema()
+  {
+    return "com/caucho/ejb/cfg/resin-ejb.rnc";
+  }
+  
 
   /**
    * Returns the EJB manager.
@@ -878,19 +884,6 @@ public class EjbConfig {
     }
 
     return null;
-  }
-
-  private Schema getSchema()
-  {
-    try {
-      String name = "com/caucho/ejb/cfg/resin-ejb.rnc";
-
-      return CompactVerifierFactoryImpl.compileFromResource(name);
-    } catch (Exception e) {
-      log.log(Level.WARNING, e.toString(), e);
-
-      return null;
-    }
   }
 
   static class BeanComparator implements Comparator {

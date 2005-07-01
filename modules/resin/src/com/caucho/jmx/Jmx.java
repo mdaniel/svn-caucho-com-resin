@@ -56,7 +56,6 @@ import com.caucho.loader.EnvironmentLocal;
 import com.caucho.loader.EnvironmentClassLoader;
 
 import com.caucho.vfs.WriteStream;
-import com.caucho.vfs.LogStream;
 
 /**
  * Static convenience methods.

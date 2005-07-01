@@ -127,7 +127,7 @@ public class Resin {
       }
 
       Path conf = Vfs.lookup(resinConf);
-      Registry.setDefault(Registry.parse(conf));
+      // Registry.setDefault(Registry.parse(conf));
 
       String []args;
       if (argv.length > shift)

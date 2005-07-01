@@ -41,9 +41,6 @@ import java.beans.*;
 import javax.servlet.*;
 import javax.servlet.jsp.tagext.*;
 
-import org.iso_relax.verifier.VerifierFactory;
-import org.iso_relax.verifier.Schema;
-
 import com.caucho.util.*;
 import com.caucho.vfs.*;
 import com.caucho.log.Log;
@@ -68,8 +65,6 @@ import com.caucho.server.webapp.Application;
 public class TldManager {
   static final L10N L = new L10N(TldManager.class);
   private static final Logger log = Log.open(TldManager.class);
-
-  private static SoftReference<Schema> _schemaRef;
 
   private static ArrayList<TldPreload> _cauchoTaglibs;
   private static ArrayList<TldPreload> _globalTaglibs;

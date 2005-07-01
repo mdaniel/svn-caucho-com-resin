@@ -43,7 +43,6 @@ import com.caucho.util.CauchoSystem;
 import com.caucho.log.Log;
 
 import com.caucho.vfs.WriteStream;
-import com.caucho.vfs.LogStream;
 
 import com.caucho.jsp.QServlet;
 

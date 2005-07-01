@@ -26,31 +26,30 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.jmx;
+package com.caucho.relaxng;
 
 import java.util.*;
-import java.util.logging.*;
 import java.io.*;
 
-import java.security.*;
-import javax.management.*;
+import org.xml.sax.*;
 
-import com.caucho.log.Log;
+import com.caucho.util.*;
+import com.caucho.util.LruCache;
+import com.caucho.vfs.*;
 
-import com.caucho.loader.Environment;
-import com.caucho.loader.EnvironmentLocal;
+import com.caucho.config.BeanConfigException;
 
-import com.caucho.vfs.WriteStream;
+import com.caucho.relaxng.pattern.GrammarPattern;
+
+import com.caucho.relaxng.program.Item;
 
 /**
- * Static convenience methods.
+ * JARV Schema implementation
  */
-public class MBeanPermission extends BasicPermission {
-  private final static Logger log = Log.open(MBeanPermission.class);
-
-  public MBeanPermission()
-  {
-    super("mbean");
-  }
+public interface Schema {
+  /**
+   * Creates a verifier from the schema.
+   */
+  public Verifier newVerifier()
+    throws SAXException;
 }
-

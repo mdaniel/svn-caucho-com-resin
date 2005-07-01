@@ -52,9 +52,9 @@ public class CauchoSystem {
   
   static char separatorChar = File.separatorChar;
   static char pathSeparatorChar = File.pathSeparatorChar;
-  static String localHost;
+  static String _localHost;
   static String _userDir;
-  static String userName;
+  static String _userName;
   static Path _resinHome;
   static Path _serverRoot;
   static boolean _isTesting;
@@ -304,33 +304,25 @@ public class CauchoSystem {
 
   public static String getLocalHost()
   {
-    if (localHost != null)
-      return localHost;
-
-    localHost = Registry.getString("/caucho.com/local.host", null);
-    if (localHost != null)
-      return localHost;
+    if (_localHost != null)
+      return _localHost;
 
     try {
       InetAddress addr = InetAddress.getLocalHost();
-      localHost = addr.getHostName();
+      _localHost = addr.getHostName();
     } catch (Exception e) {
-      localHost = "127.0.0.1";
+      _localHost = "127.0.0.1";
     }
 
-    return localHost;
+    return _localHost;
   }
 
   public static String getUserName()
   {
-    if (userName != null)
-      return userName;
+    if (_userName == null)
+      _userName = System.getProperty("user.name");
 
-    userName = Registry.getString("/caucho.com/user.name", null);
-    if (userName == null)
-      userName = System.getProperty("user.name");
-
-    return userName;
+    return _userName;
   }
 
   public static CpuUsage getCpuUsage()

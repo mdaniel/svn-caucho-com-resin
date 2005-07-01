@@ -29,7 +29,6 @@
 package com.caucho.config;
 
 import com.caucho.util.L10N;
-import com.caucho.util.RegistryNode;
 
 public class StringAttributeProgram extends BuilderProgram {
   static L10N L = new L10N(StringAttributeProgram.class);

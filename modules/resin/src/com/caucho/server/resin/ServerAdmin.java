@@ -41,8 +41,6 @@ import javax.management.ObjectName;
 import javax.servlet.jsp.el.VariableResolver;
 import javax.servlet.jsp.el.ELException;
 
-import org.iso_relax.verifier.Schema;
-
 import com.caucho.util.*;
 import com.caucho.vfs.*;
 

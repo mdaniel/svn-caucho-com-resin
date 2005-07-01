@@ -39,7 +39,6 @@ import com.caucho.util.L10N;
 import com.caucho.log.Log;
 
 import com.caucho.vfs.WriteStream;
-import com.caucho.vfs.LogStream;
 
 import com.caucho.config.ConfigException;
 

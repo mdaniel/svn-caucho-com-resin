@@ -37,7 +37,6 @@ import com.caucho.util.*;
 
 import com.caucho.vfs.Path;
 import com.caucho.vfs.WriteStream;
-import com.caucho.vfs.LogStream;
 import com.caucho.vfs.JarPath;
 
 import com.caucho.log.Log;

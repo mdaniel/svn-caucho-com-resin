@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -33,30 +34,33 @@ import java.io.*;
 
 import org.xml.sax.*;
 
-import org.iso_relax.verifier.Verifier;
-import org.iso_relax.verifier.VerifierHandler;
-import org.iso_relax.verifier.VerifierConfigurationException;
-
 import com.caucho.util.*;
 import com.caucho.vfs.*;
 
 /**
  * JARV verifier implementation
  */
-public class VerifierImpl extends org.iso_relax.verifier.impl.VerifierImpl {
+public class VerifierImpl extends Verifier {
   private SchemaImpl _schema;
+  private ErrorHandler _errorHandler;
   
   VerifierImpl(SchemaImpl schema)
-    throws VerifierConfigurationException
   {
     _schema = schema;
+  }
+
+  /**
+   * Set the error handler.
+   */
+  public void setErrorHandler(ErrorHandler handler)
+  {
+    _errorHandler = handler;
   }
 
   /**
    * Creates a verifier handler from the verifier.
    */
   public VerifierHandler getVerifierHandler()
-    throws SAXException
   {
     return new VerifierHandlerImpl(_schema, this);
   }
@@ -67,7 +71,7 @@ public class VerifierImpl extends org.iso_relax.verifier.impl.VerifierImpl {
   public void error(SAXParseException e)
     throws SAXException
   {
-    ErrorHandler handler = this.errorHandler;
+    ErrorHandler handler = _errorHandler;
     
     if (handler != null)
       handler.error(e);

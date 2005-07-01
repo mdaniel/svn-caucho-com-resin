@@ -32,8 +32,6 @@ import java.util.ArrayList;
 
 import java.util.logging.Logger;
 
-import org.iso_relax.verifier.Schema;
-
 import com.caucho.util.L10N;
 
 import com.caucho.log.Log;

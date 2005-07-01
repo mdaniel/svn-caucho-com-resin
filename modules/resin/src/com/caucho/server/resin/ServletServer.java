@@ -59,8 +59,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import javax.servlet.jsp.el.VariableResolver;
 
-import org.iso_relax.verifier.Schema;
-
 import com.caucho.vfs.*;
 
 import com.caucho.util.Alarm;

@@ -58,8 +58,6 @@ import com.caucho.config.ConfigException;
 
 import com.caucho.config.types.EjbRef;
 
-import org.iso_relax.verifier.Schema;
-
 import com.caucho.vfs.Vfs;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.JarPath;

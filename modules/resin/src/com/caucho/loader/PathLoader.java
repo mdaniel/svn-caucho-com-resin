@@ -45,7 +45,6 @@ import com.caucho.util.CharBuffer;
 
 import com.caucho.vfs.Path;
 import com.caucho.vfs.WriteStream;
-import com.caucho.vfs.LogStream;
 import com.caucho.vfs.JarPath;
 import com.caucho.vfs.Depend;
 

@@ -30,9 +30,10 @@
 package com.caucho.xsl;
 
 import com.caucho.log.Log;
+
 import com.caucho.util.CauchoSystem;
 import com.caucho.util.ExceptionWrapper;
-import com.caucho.util.Registry;
+
 import com.caucho.vfs.*;
 import com.caucho.xml.Html;
 import com.caucho.xml.Xml;
@@ -162,6 +163,7 @@ public class Xsl extends AbstractStylesheetFactory {
 	break;
     }
 
+    /*
     Path cfg = CauchoSystem.getResinHome().lookup(conf);
     if (cfg.exists()) {
       try {
@@ -170,6 +172,7 @@ public class Xsl extends AbstractStylesheetFactory {
       } catch (SAXException e) {
       }
     }
+    */
 
     Path destDir = null;
     if (dest != null)

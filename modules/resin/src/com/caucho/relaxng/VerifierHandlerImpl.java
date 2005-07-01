@@ -36,9 +36,6 @@ import java.util.logging.*;
 import org.xml.sax.*;
 import org.xml.sax.helpers.*;
 
-import org.iso_relax.verifier.VerifierHandler;
-import org.iso_relax.verifier.VerifierConfigurationException;
-
 import com.caucho.util.*;
 import com.caucho.vfs.*;
 

@@ -19,38 +19,56 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
  * @author Scott Ferguson
  */
 
-package com.caucho.jmx;
+package com.caucho.relaxng;
 
 import java.util.*;
 import java.util.logging.*;
 import java.io.*;
 
-import java.security.*;
-import javax.management.*;
+import org.xml.sax.*;
 
-import com.caucho.log.Log;
-
-import com.caucho.loader.Environment;
-import com.caucho.loader.EnvironmentLocal;
-
-import com.caucho.vfs.WriteStream;
+import com.caucho.util.*;
+import com.caucho.vfs.*;
 
 /**
- * Static convenience methods.
+ * JARV verifier implementation
  */
-public class MBeanPermission extends BasicPermission {
-  private final static Logger log = Log.open(MBeanPermission.class);
+abstract public class Verifier {
+  private static final Logger log = Log.open(Verifier.class);
+  
+  /**
+   * Set the error handler.
+   */
+  abstract public void setErrorHandler(ErrorHandler handler);
 
-  public MBeanPermission()
+  /**
+   * Creates a verifier handler from the verifier.
+   */
+  abstract public VerifierHandler getVerifierHandler();
+    
+
+  /**
+   * Returns a verifier filter.
+   */
+  public VerifierFilter getVerifierFilter()
   {
-    super("mbean");
+    return new VerifierFilter(this);
+  }
+
+  /**
+   * Sends an error.
+   */
+  public void error(SAXParseException e)
+    throws SAXException
+  {
+    log.log(Level.FINE, e.toString(), e);
   }
 }
-

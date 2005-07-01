@@ -52,7 +52,6 @@ import com.caucho.util.LineCompileException;
 import com.caucho.util.HTTPUtil;
 
 import com.caucho.vfs.ClientDisconnectException;
-import com.caucho.vfs.LogStream;
 import com.caucho.vfs.WriteStream;
 import com.caucho.vfs.Encoding;
 

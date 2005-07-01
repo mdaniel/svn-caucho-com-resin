@@ -225,7 +225,9 @@ class SmtpStream extends MemoryStream {
     if (_from != null)
       return _from;
     else
-      return Registry.getString("/caucho.com/smtp.vfs/sender", null);
+      return null;
+    
+    // return Registry.getString("/caucho.com/smtp.vfs/sender", null);
   }
 
   /**
@@ -236,7 +238,9 @@ class SmtpStream extends MemoryStream {
     if (_sender != null)
       return _sender;
     else
-      return Registry.getString("/caucho.com/smtp.vfs/sender", null);
+      return null;
+    
+    // return Registry.getString("/caucho.com/smtp.vfs/sender", null);
   }
 
   /**
@@ -451,8 +455,8 @@ class SmtpStream extends MemoryStream {
 
     _isClosed = true;
 
-    String host = Registry.getString("/caucho.com/smtp.vfs/host", "localhost");
-    int port = Registry.getInt("/caucho.com/smtp.vfs/port", 25);
+    String host = "localhost";
+    int port = 25;
 
     Socket sock = new Socket(host, port);
     CharBuffer msg = new CharBuffer();

@@ -33,10 +33,6 @@ import java.io.*;
 
 import org.xml.sax.*;
 
-import org.iso_relax.verifier.Schema;
-import org.iso_relax.verifier.Verifier;
-import org.iso_relax.verifier.VerifierConfigurationException;
-
 import com.caucho.util.*;
 import com.caucho.util.LruCache;
 import com.caucho.vfs.*;
@@ -95,7 +91,6 @@ public class SchemaImpl implements Schema {
    * Creates a verifier from the schema.
    */
   public Verifier newVerifier()
-    throws VerifierConfigurationException
   {
     return new VerifierImpl(this);
   }

@@ -39,8 +39,6 @@ import javax.management.MBeanServer;
 
 import javax.servlet.jsp.el.VariableResolver;
 
-import org.iso_relax.verifier.Schema;
-
 import com.caucho.util.L10N;
 
 import com.caucho.vfs.Path;

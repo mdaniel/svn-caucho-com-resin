@@ -39,7 +39,6 @@ import com.caucho.util.Alarm;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
 import com.caucho.vfs.WriteStream;
-import com.caucho.vfs.LogStream;
 
 import com.caucho.loader.EnvironmentLocal;
 

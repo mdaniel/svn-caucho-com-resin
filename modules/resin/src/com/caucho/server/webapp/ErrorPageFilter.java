@@ -46,7 +46,6 @@ import com.caucho.util.CauchoSystem;
 import com.caucho.util.CompileException;
 
 import com.caucho.vfs.ClientDisconnectException;
-import com.caucho.vfs.LogStream;
 import com.caucho.vfs.WriteStream;
 import com.caucho.vfs.Encoding;
 

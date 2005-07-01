@@ -54,8 +54,6 @@ import com.caucho.util.L10N;
 import com.caucho.util.Alarm;
 import com.caucho.util.AlarmListener;
 
-import org.iso_relax.verifier.Schema;
-
 import com.caucho.vfs.Vfs;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.ReadStream;

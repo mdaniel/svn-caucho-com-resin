@@ -37,10 +37,6 @@ import java.io.IOException;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
-import org.iso_relax.verifier.VerifierFactory;
-import org.iso_relax.verifier.Schema;
-import org.iso_relax.verifier.VerifierConfigurationException;
-
 import com.caucho.util.*;
 import com.caucho.vfs.*;
 
@@ -51,7 +47,7 @@ import com.caucho.config.BeanConfigException;
 /**
  * JARV Verifier factory.
  */
-public class CompactVerifierFactoryImpl extends VerifierFactory {
+public class CompactVerifierFactoryImpl implements VerifierFactory {
   private static HashMap<String,SoftReference<Schema>> _schemaMap =
     new HashMap<String,SoftReference<Schema>>();
 			 
@@ -59,7 +55,7 @@ public class CompactVerifierFactoryImpl extends VerifierFactory {
    * Reads the schema from the classpath.
    */
   public static Schema compileFromResource(String schemaName)
-    throws VerifierConfigurationException, SAXException, IOException
+    throws SAXException, IOException
   {
     CompactVerifierFactoryImpl factory = new CompactVerifierFactoryImpl();
 
@@ -73,7 +69,7 @@ public class CompactVerifierFactoryImpl extends VerifierFactory {
    * Compile a schema.
    */
   public static Schema compileFromPath(Path path)
-    throws VerifierConfigurationException, SAXException, IOException
+    throws SAXException, IOException
   {
     return new CompactVerifierFactoryImpl().compileSchema(path);
   }
@@ -82,7 +78,7 @@ public class CompactVerifierFactoryImpl extends VerifierFactory {
    * Compile a schema.
    */
   public Schema compileSchema(Path path)
-    throws VerifierConfigurationException, SAXException, IOException
+    throws SAXException, IOException
   {
     String nativePath = path.getNativePath();
     
@@ -115,7 +111,7 @@ public class CompactVerifierFactoryImpl extends VerifierFactory {
    * Compile a schema.
    */
   public Schema compileSchema(InputSource is)
-    throws VerifierConfigurationException, SAXException, IOException
+    throws SAXException, IOException
   {
     try {
       CompactParser parser = new CompactParser();
@@ -128,7 +124,7 @@ public class CompactVerifierFactoryImpl extends VerifierFactory {
 
       return schema;
     } catch (Exception e) {
-      throw new VerifierConfigurationException(e);
+      throw new SAXException(e);
     }
   }
 }

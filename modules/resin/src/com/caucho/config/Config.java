@@ -46,18 +46,16 @@ import java.lang.ref.SoftReference;
 import javax.servlet.jsp.el.VariableResolver;
 import javax.servlet.jsp.el.ELException;
 
-import org.iso_relax.verifier.VerifierFactory;
-import org.iso_relax.verifier.Schema;
-import org.iso_relax.verifier.Verifier;
-import org.iso_relax.verifier.VerifierFilter;
-import org.iso_relax.verifier.VerifierConfigurationException;
-
 import org.xml.sax.ContentHandler;
 import org.xml.sax.InputSource;
 
 import org.w3c.dom.Node;
 
 import com.caucho.relaxng.CompactVerifierFactoryImpl;
+import com.caucho.relaxng.VerifierFactory;
+import com.caucho.relaxng.Schema;
+import com.caucho.relaxng.Verifier;
+import com.caucho.relaxng.VerifierFilter;
 
 import com.caucho.util.L10N;
 import com.caucho.util.Log;
@@ -328,47 +326,43 @@ public class Config {
 	   IOException,
 	   org.xml.sax.SAXException
   {
-    try {
-      QDocument doc = new QDocument();
-      DOMBuilder builder = new DOMBuilder();
+    QDocument doc = new QDocument();
+    DOMBuilder builder = new DOMBuilder();
 
-      builder.init(doc);
-      String systemId = null;
-      if (is instanceof ReadStream) {
-	systemId = ((ReadStream) is).getPath().getUserPath();
-      }
-
-      doc.setSystemId(systemId);
-      builder.setSystemId(systemId);
-      builder.setSkipWhitespace(true);
-
-      InputSource in = new InputSource();
-      in.setByteStream(is);
-      in.setSystemId(systemId);
-
-      Xml xml = new Xml();
-      xml.setOwner(doc);
-      xml.setResinInclude(_allowResinInclude);
-
-      if (schema != null) {
-	Verifier verifier = schema.newVerifier();
-	VerifierFilter filter = verifier.getVerifierFilter();
-
-	filter.setParent(xml);
-	filter.setContentHandler(builder);
-	filter.setErrorHandler(builder);
-
-	filter.parse(in);
-      }
-      else {
-	xml.setContentHandler(builder);
-	xml.parse(in);
-      }
-
-      return doc;
-    } catch (VerifierConfigurationException e) {
-      throw new IOExceptionWrapper(e);
+    builder.init(doc);
+    String systemId = null;
+    if (is instanceof ReadStream) {
+      systemId = ((ReadStream) is).getPath().getUserPath();
     }
+
+    doc.setSystemId(systemId);
+    builder.setSystemId(systemId);
+    builder.setSkipWhitespace(true);
+
+    InputSource in = new InputSource();
+    in.setByteStream(is);
+    in.setSystemId(systemId);
+
+    Xml xml = new Xml();
+    xml.setOwner(doc);
+    xml.setResinInclude(_allowResinInclude);
+
+    if (schema != null) {
+      Verifier verifier = schema.newVerifier();
+      VerifierFilter filter = verifier.getVerifierFilter();
+
+      filter.setParent(xml);
+      filter.setContentHandler(builder);
+      filter.setErrorHandler(builder);
+
+      filter.parse(in);
+    }
+    else {
+      xml.setContentHandler(builder);
+      xml.parse(in);
+    }
+
+    return doc;
   }
   
   private Schema findCompactSchema(String location)
@@ -457,7 +451,11 @@ public class Config {
   }
 
   /**
-   * Sets a  attribute with a value.
+   * Sets an attribute with a value.
+   *
+   * @param obj the bean to be set
+   * @param attr the attribute name
+   * @param value the attribute value
    */
   public static void setAttribute(Object obj, String attr, Object value)
     throws Exception

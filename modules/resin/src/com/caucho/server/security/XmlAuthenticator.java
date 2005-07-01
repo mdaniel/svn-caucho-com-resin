@@ -37,6 +37,7 @@ import javax.servlet.*;
 
 import com.caucho.util.*;
 import com.caucho.vfs.*;
+import com.caucho.config.Config;
 import com.caucho.server.http.*;
 
 import com.caucho.security.BasicPrincipal;
@@ -112,42 +113,7 @@ public class XmlAuthenticator extends AbstractAuthenticator {
       return;
     
     try {
-      Registry root = Registry.parse(_path);
-      RegistryNode registry = root.getTop();
-
-      registry = registry.lookup("authenticator");
-      if (registry == null)
-        throw new ServletException("missing auth");
-      
-      Iterator iter = registry.select("user");
-      while (iter.hasNext()) {
-        RegistryNode node = (RegistryNode) iter.next();
-
-        String name = node.getString("name", null);
-
-	if (name == null &&
-	    node.getValue() != null && ! node.getValue().equals("")) {
-	  User user = new User();
-	  user.addText(node.getValue());
-	  addUser(user);
-	  continue;
-	}
-	
-        String password = node.getString("password", null);
-
-        User user = new User(name, password, new BasicPrincipal(name));
-
-        Iterator<RegistryNode> roleIter = node.select("role");
-        while (roleIter.hasNext()) {
-          RegistryNode roleNode = roleIter.next();
-
-          String role = roleNode.getValue();
-          if (role != null && ! role.equals(""))
-            user.addRoles(role);
-        }
-
-        _userMap.put(name, user);
-      }
+      new Config().configure(this, _path);
 
       _lastCheck = Alarm.getCurrentTime();
       _lastModified = _path.getLastModified();

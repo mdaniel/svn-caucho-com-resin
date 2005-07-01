@@ -29,6 +29,7 @@
 package com.caucho.jms.hessian;
 
 import java.util.*;
+import java.util.logging.*;
 import java.io.*;
 import java.net.*;
 
@@ -51,7 +52,7 @@ import com.caucho.services.message.MessageServiceException;
  */
 public class HessianQueue extends com.caucho.jms.AbstractQueue
   implements MessageSender {
-  static WriteStream dbg = LogStream.open("/caucho.com/jms/queue/hessian");
+  private final static Logger log = Log.open(HessianQueue.class);
   static L10N L = new L10N(HessianQueue.class);
 
   private String queueName;

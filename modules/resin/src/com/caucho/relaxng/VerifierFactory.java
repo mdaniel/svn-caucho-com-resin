@@ -26,31 +26,31 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.jmx;
+package com.caucho.relaxng;
 
-import java.util.*;
-import java.util.logging.*;
-import java.io.*;
+import java.lang.ref.SoftReference;
 
-import java.security.*;
-import javax.management.*;
+import java.util.HashMap;
 
-import com.caucho.log.Log;
+import java.io.IOException;
 
-import com.caucho.loader.Environment;
-import com.caucho.loader.EnvironmentLocal;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
-import com.caucho.vfs.WriteStream;
+import com.caucho.util.*;
+import com.caucho.vfs.*;
+
+import com.caucho.xml.Xml;
+
+import com.caucho.config.BeanConfigException;
 
 /**
- * Static convenience methods.
+ * JARV Verifier factory.
  */
-public class MBeanPermission extends BasicPermission {
-  private final static Logger log = Log.open(MBeanPermission.class);
-
-  public MBeanPermission()
-  {
-    super("mbean");
-  }
+public interface VerifierFactory {
+  /**
+   * Compile a schema.
+   */
+  public Schema compileSchema(InputSource is)
+    throws SAXException, IOException;
 }
-

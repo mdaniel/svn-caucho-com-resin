@@ -81,6 +81,7 @@ public class L10N {
 
       String xmlName = path + "_" + language + ".xml";
 
+      /* XXX: punt for now
       is = getClass().getResourceAsStream(xmlName);
       
       if (is != null) {
@@ -113,6 +114,7 @@ public class L10N {
             messages.put(key, value);
         }
       }
+      */
     } catch (Exception e) {
       log().log(Level.FINE, e.toString(), e);
     }

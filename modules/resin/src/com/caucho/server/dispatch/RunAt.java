@@ -86,7 +86,7 @@ public class RunAt {
     long zone = _cal.getZoneOffset();
     
     if (_period > 0)
-      return RegistryNode.periodEnd(now + zone, _period) - zone;
+      return Period.periodEnd(now + zone, _period) - zone;
 
     now = now - now % 60000;
 

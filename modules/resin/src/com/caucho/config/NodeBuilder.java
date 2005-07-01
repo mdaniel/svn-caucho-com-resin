@@ -48,8 +48,6 @@ import org.w3c.dom.ProcessingInstruction;
 
 import com.caucho.util.L10N;
 import com.caucho.util.CharBuffer;
-import com.caucho.util.RegistryNode;
-import com.caucho.util.Registry;
 import com.caucho.util.CompileException;
 import com.caucho.util.LineCompileException;
 

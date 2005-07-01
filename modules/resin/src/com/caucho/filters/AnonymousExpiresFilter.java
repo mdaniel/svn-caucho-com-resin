@@ -103,7 +103,7 @@ public class AnonymousExpiresFilter implements Filter {
 
     if (time != null) {
       try {
-        _cacheTime = RegistryNode.calculatePeriod(time);
+        _cacheTime = Period.toPeriod(time);
       } catch (Exception e) {
         throw new ServletException(e);
       }

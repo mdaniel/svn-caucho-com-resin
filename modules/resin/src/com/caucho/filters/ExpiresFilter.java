@@ -35,6 +35,7 @@ import javax.servlet.http.*;
 import javax.servlet.*;
 
 import com.caucho.util.*;
+import com.caucho.config.types.Period;
 
 /**
  * Caches the servlet output.  ExpiresFilter sets the Expires header
@@ -82,7 +83,7 @@ public class ExpiresFilter implements Filter {
 
     if (time != null) {
       try {
-        cacheTime = RegistryNode.calculatePeriod(time);
+        cacheTime = Period.toPeriod(time);
       } catch (Exception e) {
         throw new ServletException(e);
       }
