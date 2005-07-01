@@ -37,10 +37,6 @@ import org.w3c.dom.*;
 import org.xml.sax.*;
 import org.xml.sax.helpers.*;
 
-import org.iso_relax.verifier.Schema;
-import org.iso_relax.verifier.Verifier;
-import org.iso_relax.verifier.VerifierFilter;
-
 import com.caucho.log.Log;
 
 import com.caucho.xml.*;
@@ -286,6 +282,9 @@ public final class Registry {
   static RegistryNode parse(ReadStream is, RegistryNode top, Schema schema)
     throws IOException, SAXException
   {
+    throw new UnsupportedOperationException();
+    
+    /*
     try {
       XmlParser xmlParser = new Xml();
 
@@ -329,6 +328,7 @@ public final class Registry {
       
       throw e1;
     }
+    */
   }
 
   /**
