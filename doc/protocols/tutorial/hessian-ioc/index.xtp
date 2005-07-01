@@ -22,7 +22,7 @@ the service, protocol, and client.</p>
     <td>Interface for the greeting service.
 <tr><td><viewfile-link file="WEB-INF/classes/example/GreetingImpl.java"/>
     <td>The service implementation as a Java object
-<tr><td><viewfile-link file="WEB-INF/web.xml"/>
+<tr><td><viewfile-link file="WEB-INF/resin-web.xml"/>
     <td>Configures the environment
 <tr><td><viewfile-link file="WEB-INF/classes/example/GreetingClientServlet.java"/>
     <td>Client Servlet
@@ -72,7 +72,7 @@ public class GreetingImpl implements GreetingAPI {
 
 <section title="Configuration using Dependency Injection">
 
-<example title="web.xml">
+<example title="resin-web.xml">
 &lt;resource jndi-name="service/greeting"
           type="example.GreetingImpl">
   &lt;init>
@@ -83,7 +83,7 @@ public class GreetingImpl implements GreetingAPI {
 &lt;servlet url-pattern="/hessian/greeting"
          servlet-class="com.caucho.hessian.server.HessianServlet">
   &lt;init>
-    &lt;home>\${jndi:lookup("service/greeting")}&lt;/home>
+    &lt;home>\${jndi("service/greeting")}&lt;/home>
     &lt;home-api>example.GreetingAPI&lt;/home-api>
   &lt;/init>
 &lt;/servlet>
@@ -143,7 +143,7 @@ public class GreetingClientServlet extends GenericServlet {
 to the Hessian proxy in JNDI for the service.  The servlet configuration
 looks up the Hessian proxy in JNDI.</p> 
 
-<example title="web.xml">
+<example title="resin-web.xml">
 &lt;reference jndi-name="client/greeting"
            factory="com.caucho.hessian.client.HessianProxyFactory">
   &lt;init-param url="\${app.getURL()}/hessian/greeting"/>
@@ -154,7 +154,7 @@ looks up the Hessian proxy in JNDI.</p>
                  servlet-class="example.GreetingClientServlet">
   &lt;init>
     &lt;name>Hessian Client&lt;/name>
-    &lt;greeting>\${jndi:lookup("client/greeting")}&lt;/greeting>
+    &lt;greeting>\${jndi("client/greeting")}&lt;/greeting>
   &lt;/init>
 &lt;/servlet-mapping>
 </example>
@@ -168,7 +168,7 @@ the Dependency Injection pattern.  With no changes to either the
 Greeting service or its client, the Greeting service can change to
 a JMX bean used by and the client to use a JMX proxy.</p>
 
-<example title="web.xml">
+<example title="resin-web.xml">
 &lt;resource mbean-name="type=Greeting"
           mbean-interface="example.GreetingAPI"
           type="example.GreetingImpl">
@@ -181,7 +181,7 @@ a JMX bean used by and the client to use a JMX proxy.</p>
                  servlet-class="example.GreetingClientServlet">
   &lt;init>
     &lt;name>JMX Client&lt;/name>
-    &lt;greeting>\${jndi:lookup("mbean:type=Greeting")}&lt;/greeting>
+    &lt;greeting>\${jndi("mbean:type=Greeting")}&lt;/greeting>
   &lt;/init>
 &lt;/servlet-mapping>
 </example>

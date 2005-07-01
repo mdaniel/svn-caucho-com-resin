@@ -143,6 +143,16 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener {
   }
 
   /**
+   * Sets the formatted path.
+   */
+  public void setPathFormat(String pathFormat)
+  {
+    super.setPathFormat(pathFormat);
+    
+    _logWriter.setPathFormat(pathFormat);
+  }
+
+  /**
    * Sets the archive name format
    */
   public void setArchiveFormat(String format)

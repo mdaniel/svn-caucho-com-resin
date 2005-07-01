@@ -261,7 +261,9 @@ abstract public class AbstractRolloverLog {
 
   public boolean isRollover()
   {
-    return false;
+    long now = Alarm.getCurrentTime();
+    
+    return _nextPeriodEnd <= now || _nextRolloverCheckTime <= now;
   }
 
   /**
@@ -299,6 +301,8 @@ abstract public class AbstractRolloverLog {
     Path path = getPath();
       
     if (_nextPeriodEnd < now) {
+      closeLogStream();
+      
       if (getPathFormat() == null) {
 	Path savedPath = getArchivePath(_nextPeriodEnd - 1);
 	movePathToArchive(savedPath);
@@ -311,6 +315,8 @@ abstract public class AbstractRolloverLog {
 		 QDate.formatLocal(_nextPeriodEnd));
     }
     else if (path != null && getRolloverSize() <= path.getLength()) {
+      closeLogStream();
+      
       if (getPathFormat() == null) {
 	Path savedPath = getArchivePath(_nextRolloverCheckTime - 1);
 	movePathToArchive(savedPath);
@@ -330,6 +336,8 @@ abstract public class AbstractRolloverLog {
    */
   private void openLog()
   {
+    closeLogStream();
+    
     try {
       WriteStream os = _os;
       _os = null;
@@ -364,6 +372,22 @@ abstract public class AbstractRolloverLog {
     if (_os == null)
       log.warning(L.l("Can't open access log file '{0}'.",
 		      getPath()));
+  }
+
+  /**
+   * Tries to open the log.
+   */
+  private void closeLogStream()
+  {
+    try {
+      WriteStream os = _os;
+      _os = null;
+
+      if (os != null)
+	os.close();
+    } catch (Throwable e) {
+      log.log(Level.FINER, e.toString(), e);
+    }
   }
 
   private void movePathToArchive(Path savedPath)

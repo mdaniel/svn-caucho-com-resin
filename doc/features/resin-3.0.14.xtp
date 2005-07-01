@@ -8,12 +8,31 @@
 
 <summary objsummary='localtoc'/>
 
+<section title="Wiki">
+
+<p>Resin now has a <a href="http://www.caucho.com/wiki">wiki</a>.</p>
+
+</section>
+
+<section title="Configuration functions">
+
+<p>The configuration file EL can now support a library of
+predefined functions.  The new functions are:</p>
+
+<ul>
+<li>class_exists(name) - returns true if the class is loadable
+<li>jndi(name) - equivalent to jndi:lookup
+<li>jndi_lookup(name) - equivalent to jndi
+</ul>
+
+</section>
+
 <section title="Context.lookup">
 
 <p>The JNDI lookup() method now throws a NameNotFoundException if the
 name does not exist.</p>
 
-</sectino>
+</section>
 
 <section title="cookie-modulo-cluster">
 

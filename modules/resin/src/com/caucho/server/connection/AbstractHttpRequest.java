@@ -265,8 +265,7 @@ public abstract class AbstractHttpRequest
     _hasInputStream = false;
 
     _filledForm = null;
-    if (_locales.size() > 0)
-      _locales.clear();
+    _locales.clear();
 
     _readEncoding = null;
 

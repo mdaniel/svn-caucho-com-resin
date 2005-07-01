@@ -28,6 +28,8 @@
 
 package com.caucho.license;
 
+import java.io.IOException;
+
 import java.util.logging.Logger;
 import java.util.logging.Level;
 
@@ -46,7 +48,7 @@ public interface LicenseCheck {
    * Validates the number of servers.
    */
   public void validate(int serverCount)
-    throws ConfigException;
+    throws ConfigException, IOException;
 
   /**
    * Write log messages based on the licenses and the number of servers that

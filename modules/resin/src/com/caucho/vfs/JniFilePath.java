@@ -53,9 +53,13 @@ public class JniFilePath {
 
       Method isEnabled = pathClass.getMethod("isEnabled", new Class[0]);
       
-      if (Boolean.TRUE.equals(isEnabled.invoke(null)))
+      Object result = isEnabled.invoke(null);
+
+      if (Boolean.TRUE.equals(result))
 	return (FilesystemPath) pathClass.newInstance();
+    } catch (ClassNotFoundException e) {
     } catch (Throwable e) {
+      e.printStackTrace();
     }
     
     return null;

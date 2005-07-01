@@ -165,18 +165,6 @@ public class EnvServerManager implements EnvironmentListener {
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
-
-    /* XXX: handled by amber
-    try {
-      Object entityProxy = new EntityManagerImpl(_envAmberManager);
-
-      // XXX: pass self as argument
-
-      new InitialContext().rebind("java:comp/EntityManager", entityProxy);
-    } catch (Throwable e) {
-      log.log(Level.FINER, e.toString(), e);
-    }
-    */
   }
 
   /**

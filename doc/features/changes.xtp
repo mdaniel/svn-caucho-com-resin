@@ -4,6 +4,8 @@
 
 <s2 title='3.0.snap - Jun 15, 2005'>
 <ul>
+<li>package version check needs to allow more recent versions (rep by Jan Kriesten, RSN-327)
+<li>Fixed EntityManager compatibility issue with JDK 1.4 (rep by Christian Amott, RSN-321)
 <li>mod_caucho host->etag must only be set when configuration is properly updated
 <li>expand-cleanup-fileset needs to merge with explicit &lt;web-app> (rep by Bill Au)
 <li>Updated AccessLog flushing to avoid threading/locking hotspot

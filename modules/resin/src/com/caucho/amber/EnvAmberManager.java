@@ -156,13 +156,19 @@ public class EnvAmberManager {
 
     EnhancerManager.create().addClassEnhancer(_enhancer);
 
+    try {
+      bindProxy();
+    } catch (Throwable e) {
+      log.log(Level.FINE, e.toString(), e);
+    }
+  }
+
+  private void bindProxy()
+    throws Throwable
+  {
     EntityManagerProxy userManager = new EntityManagerProxy(this);
 
-    try {
-      new InitialContext().rebind("java:comp/EntityManager", userManager);
-    } catch (Throwable e) {
-      throw new RuntimeException(e);
-    }
+    new InitialContext().rebind("java:comp/EntityManager", userManager);
   }
 
   public static EnvAmberManager createLocal()

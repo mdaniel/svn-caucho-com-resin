@@ -103,9 +103,9 @@ public class BundleManager {
   {
     LocalizationContext cachedValue = _bundleCache.get(cacheKey);
 
-    if (cachedValue != null && cachedValue != NULL_BUNDLE)
-      return cachedValue;
-    
+    if (cachedValue != null)
+      return cachedValue == NULL_BUNDLE ? null : cachedValue;
+
     while (locales.hasMoreElements()) {
       Locale locale = locales.nextElement();
 

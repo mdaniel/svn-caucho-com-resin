@@ -53,7 +53,7 @@ public class NullPath extends Path {
 
   public String getURL()
   {
-    return "null:";
+    return _url;
   }
 
   public String getScheme()

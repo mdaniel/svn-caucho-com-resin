@@ -29,6 +29,7 @@
 
 package com.caucho.config.lib;
 
+import com.caucho.naming.Jndi;
 /**
  * Library of static config functions.
  */
@@ -46,5 +47,15 @@ public class ResinConfigLibrary {
     }
 
     return false;
+  }
+  
+  public static Object jndi(String jndiName)
+  {
+    return jndi_lookup(jndiName);
+  }
+  
+  public static Object jndi_lookup(String jndiName)
+  {
+    return Jndi.lookup(jndiName);
   }
 }

@@ -96,17 +96,17 @@ public class User {
   }
 
   /**
-   * When serializing, replace with the SerializedUser instead.
+   * When serializing, replace with the UserHandle instead.
    */
   private Object writeReplace()
   {
-    return new SerializedUser(_id);
+    return new UserHandle(_id);
   }
 
-  static class SerializedUser {
+  static class UserHandle {
     private int _id;
 
-    SerializedUser(int id)
+    UserHandle(int id)
     {
       _id = id;
     }

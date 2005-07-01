@@ -244,6 +244,10 @@ public class Resin implements ResinServerListener {
       LicenseCheck license = (LicenseCheck) cl.newInstance();
 
       try {
+	license.validate(0);
+	
+	license.doLogging(1);
+	
 	license.validate(1);
 
 	isResinProfessional = true;
@@ -251,16 +255,26 @@ public class Resin implements ResinServerListener {
 
 	SchemeMap.initJNI();
       
-	license.doLogging(1);
+	// license.doLogging(1);
       } catch (Throwable e) {
-	e.printStackTrace();
+	String msg;
+	
+	if (e instanceof ConfigException)
+	  msg = e.getMessage() + "\n";
+	else {
+	  e.printStackTrace();
+	  
+	  msg = e.toString() + "\n";
+	  
+	  log.log(Level.WARNING, e.toString(), e);
+	}
+	  
 	log.log(Level.FINE, e.toString(), e);
       
-	String msg = L.l("  No valid Resin(R) Professional license found.\n" +
-			 "\n" +
-			 "Using Resin Open Source under the GNU Public License (GPL).\n" +
-		       "\n" +
-		       "  See http://www.caucho.com for information on Resin Professional.\n");
+	msg += L.l("\n" +
+		   "Using Resin Open Source under the GNU Public License (GPL).\n" +
+		   "\n" +
+		   "  See http://www.caucho.com for information on Resin Professional.\n");
     
 	log.warning(msg);
 	System.err.println(msg);
@@ -675,7 +689,7 @@ public class Resin implements ResinServerListener {
 
     validatePackage("javax.servlet.Servlet", new String[] {"2.4", "1.4"});
     validatePackage("javax.servlet.jsp.jstl.core.Config", new String[] {"1.1"});
-    validatePackage("javax.management.MBeanServer", new String[] {"1.2", "1.4"});
+    validatePackage("javax.management.MBeanServer", new String[] {"1.2" });
     validatePackage("javax.resource.spi.ResourceAdapter", new String[] {"1.5", "1.4"});
   }
 
@@ -707,7 +721,7 @@ public class Resin implements ResinServerListener {
 				    versions[0]));
 
     for (int i = 0; i < versions.length; i++) {
-      if (versions[i].equals(pkg.getSpecificationVersion()))
+      if (versions[i].compareTo(pkg.getSpecificationVersion()) <= 0)
 	return;
     }
       

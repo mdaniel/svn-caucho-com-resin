@@ -1165,17 +1165,21 @@ public class PageContextImpl extends PageContext
     }
     else if (localeObj instanceof String) {
       Locale locale = getLocale((String) localeObj, null);
-    
+
       bundle = manager.getBundle(name, locale);
     }
     else {
-      String cacheKey = name + getCauchoRequest().getHeader("Accept-Language");
-      bundle = manager.getBundle(name, cacheKey, getCauchoRequest().getLocales());
+      String acceptLanguage = getCauchoRequest().getHeader("Accept-Language");
+
+      if (acceptLanguage != null) {
+	String cacheKey = name + acceptLanguage; 
+	bundle = manager.getBundle(name, cacheKey, getCauchoRequest().getLocales());
+      }
     }
 
     if (bundle != null)
       return bundle;
-    
+
     Object fallback = Config.find(this, Config.FMT_FALLBACK_LOCALE);
 
     if (fallback instanceof Locale) {

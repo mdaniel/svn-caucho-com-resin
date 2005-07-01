@@ -124,11 +124,11 @@ other resources like databases and application components.</p>
 <p>Resin uses JNDI to store the intermediate resources, e.g. storing
 a database in java:comp/env/jdbc/test.  The configuration file
 specifies the JNDI resource using the JSP expression language and
-jndi:lookup.</p>
+jndi.</p>
 
 <example title="Configuration for Setter Injection">
 &lt;init>
-  &lt;data-source>\${jndi:lookup("jdbc/test")}&lt;data-source>
+  &lt;data-source>\${jndi("jdbc/test")}&lt;data-source>
 &lt;/init>
 </example>
 

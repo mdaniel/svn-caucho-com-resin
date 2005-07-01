@@ -22,7 +22,7 @@ resource dependencies.</p>
 
 <section title="Files in this tutorial">
 <deftable>
-<tr><td><viewfile-link file="WEB-INF/web.xml"/>
+<tr><td><viewfile-link file="WEB-INF/resin-web.xml"/>
     <td>Configures the movie application
 <tr><td><viewfile-link file="WEB-INF/classes/example/Movie.java"/>
     <td>The movie bean.
@@ -158,7 +158,7 @@ public class MovieListener {
 &lt;resource jndi-name="movie-lister"
           type="example.MovieLister">
   &lt;init>
-    &lt;movie-finder>\${jndi:lookup("movie-finder")}&lt;/movie-finder>
+    &lt;movie-finder>\${jndi("movie-finder")}&lt;/movie-finder>
   &lt;/init>
 &lt;/resource>
 </example>
@@ -169,7 +169,7 @@ public class MovieListener {
 
 <p>Resin can use JMX as the registry instead of JNDI. In this example,
 only the configuration needs to be changed.  JMX uses the mbean-name
-instead of the jndi-name, and the jndi:lookup uses the "mbean:" schema.
+instead of the jndi-name, and the jndi uses the "mbean:" schema.
 </p>
 
 <example title="Configuring the MovieFinder">
@@ -187,7 +187,7 @@ instead of the jndi-name, and the jndi:lookup uses the "mbean:" schema.
 &lt;resource jndi-name="movie-lister"
           type="example.MovieLister">
   &lt;init>
-    &lt;movie-finder>\${jndi:lookup("mbean:example:type=MovieFinder")}&lt;/movie-finder>
+    &lt;movie-finder>\${jndi("mbean:example:type=MovieFinder")}&lt;/movie-finder>
   &lt;/init>
 &lt;/resource>
 </example>
@@ -204,7 +204,7 @@ This limits the kinds of structures you can use easily with JMX.</p>
 
 <p>The Dependency Injection pattern is just as useful for servlet
 configuration as it is for resources.  This example makes the
-MovieLister a parameter of the servlet.  The web.xml will configure
+MovieLister a parameter of the servlet.  The resin-web.xml will configure
 the servlet with the appropriate MovieLister</p>
 
 <p>The advantages of using dependency injection for the servlet are
@@ -221,7 +221,7 @@ versions of the MovieListener.
 &lt;servlet servlet-name="movies"
          type="example.MovieServlet">
   &lt;init>
-    &lt;movie-lister>\${jndi:lookup("movie-lister")}&lt;/movie-lister>
+    &lt;movie-lister>\${jndi("movie-lister")}&lt;/movie-lister>
   &lt;/init>
 &lt;/resource>
 </example>
@@ -242,7 +242,7 @@ from the &lt;init-param> values to assemble the dependencies.</p>
 
 <ul>
 <li><a href="doc|config|init">Bean-style init</a>
-<li><a href="db|tutorial/jdbc-basic/index.xtp#Dependency-Injection-configuration">Servlet DataSource Configuration</a>
+<li><a href="db|tutorial/jdbc-ioc/index.xtp">Servlet DataSource Configuration</a>
 <li><a href="protocols|tutorial/hessian-ioc/index.xtp">Hessian
 with Dependency Injection</a>
 </ul>

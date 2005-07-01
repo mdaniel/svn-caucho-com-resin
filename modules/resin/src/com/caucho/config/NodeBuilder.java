@@ -264,8 +264,7 @@ public class NodeBuilder {
       if (value != null && value.startsWith("${") && value.endsWith("}")) {
         bean = evalObject(value);
 
-        if (bean != null)
-          return bean;
+	return bean;
       }
     }
 

@@ -128,18 +128,6 @@ all servlet engines. By creating a separate <code>assemble()</code> method,
 a servlet can take advantage of Resin's Dependency Injection and still
 be fully compatible with other servlet engines.</p>
 
-<p>The servlet needs to lookup the database pool's DataSource
-using JNDI.  In the configuration above, the name "jdbc/basic" is
-shorthand for "java:comp/env/jdbc/basic".  "java:comp/env" is a
-context containing configured resources.  For example,
-"java:comp/env/jdbc/basic" is a JDBC resource in that context.</p>
-
-<p>Because the servlet only needs to look up the
-<code>DataSource</code> once, it will generally look it up in the
-<code>init()</code> method and store it as an instance variable.
-Because the <code>DataSource</code> is designed to be thread-safe, it
-can be used simultaneously by any of the requesting threads.</p>
-
 <example>
 public class BasicServlet extends HttpServlet {
   private DataSource _ds;
@@ -152,39 +140,16 @@ public class BasicServlet extends HttpServlet {
   public void init()
     throws IOException, ServletException
   {
-    if (_ds == null)
-      assemble();
-  }
-
-  private void assemble()
-    throws ServletException
-  {
-    try {
-      String name = getInitParameter("data-source");
-
-      Context ic = new InitialContext();
-
-      _ds = (DataSource) ic.lookup("java:comp/env/" + name);
-    } catch (Exception e) {
-      throw new ServletException(e);
+    if (_ds == null) {
+      // the servlet could also create an assemble() method as
+      // in the jdbc-basic tutorial
+      throw new ServletException("data-source must be assigned");
     }
+  }
 
   ...
 }
 </example>
-
-<p>When the servlet initializes, it checks to see if the DataSource is
-already configured.  If not, the <code>assemble()</code> method
-configures the DataSource itself using
-JNDI.  The <code>assemble()</code> method performs the Assembler function
-in the <a href="doc|resource|tutorial/injection/index.xtp">Dependency Injection</a> (Assembly Line) pattern.</p>
-
-<p>If you are using Resin's Dependency Injection capability, the
-<code>assemble()</code> method is not needed.  You can eliminate the
-JNDI code and rely on the <code>setDataSource</code>.
-You'll need the <code>assemble()</code> method if you're porting
-your servlet to
-a different servlet engine.</p>
 
 <section title="Dependency Injection configuration">
 
@@ -206,7 +171,7 @@ add a <code>setDataSource</code> method as in the example above.</p>
 &lt;servlet servlet-name="my-servlet"
          servlet-class="example.BasicServlet">
   &lt;init>
-    &lt;data-source>\${jndi:lookup("jdbc/basic")}&lt;/data-source>
+    &lt;data-source>\${jndi("jdbc/basic")}&lt;/data-source>
   &lt;/init>
 &lt;/servlet>
 </example>
