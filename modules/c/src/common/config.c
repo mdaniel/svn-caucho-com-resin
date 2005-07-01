@@ -747,11 +747,11 @@ read_all_config_impl(config_t *config)
     switch (code) {
     case HMUX_DISPATCH_HOST:
       {
-	hmux_read_string(&s, buffer, sizeof(buffer));
 	int p;
 	int port = 0;
 	int ch;
 	
+	hmux_read_string(&s, buffer, sizeof(buffer));
 	LOG(("hmux host %s\n", buffer));
 
 	for (p = 0; (ch = buffer[p]); p++) {

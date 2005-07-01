@@ -558,7 +558,6 @@ send_data(stream_t *s, EXTENSION_CONTROL_BLOCK *r, config_t *config, int ack)
 				info.cchHeader = header_ptr - headers;
 				info.pszHeader = headers;
 				info.pszStatus = status;
-				info.fKeepConn = statusCode < 400 || statusCode == 404;
 				/*
 			r->dwHttpStatusCode = atoi(status_ptr);
 			r->ServerSupportFunction(r->ConnID, HSE_REQ_SEND_RESPONSE_HEADER, status, &size, (unsigned long *) headers);
