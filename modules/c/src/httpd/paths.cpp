@@ -350,6 +350,18 @@ get_java_home(char *resin_home, char *java_home)
 			} while (FindNextFile(hSearch, &dir));
 		}
 
+		hSearch = FindFirstFile("\\program files\\java\\jdk*", &dir);
+		if (hSearch != INVALID_HANDLE_VALUE) {
+			do {
+				if (! stat(rsprintf(buf, "\\%s\\bin\\java.exe", dir.cFileName), &info)) {
+					char *test_dir = concat("\\", dir.cFileName);
+
+					if (! java_home || strcmp(java_home, test_dir) < 0)
+						java_home = test_dir;
+				}
+			} while (FindNextFile(hSearch, &dir));
+		}
+
 	}
 
 	if (! java_home) {
