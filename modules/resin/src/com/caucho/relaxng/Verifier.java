@@ -37,6 +37,7 @@ import org.xml.sax.*;
 
 import com.caucho.util.*;
 import com.caucho.vfs.*;
+import com.caucho.xml.*;
 
 /**
  * JARV verifier implementation
@@ -61,6 +62,31 @@ abstract public class Verifier {
   public VerifierFilter getVerifierFilter()
   {
     return new VerifierFilter(this);
+  }
+
+  /**
+   * Verifies a file.
+   */
+  public boolean verify(String url)
+    throws IOException, SAXException
+  {
+    Path path = Vfs.lookup(url);
+
+    ReadStream is = path.openRead();
+    
+    try {
+      Xml xml = new Xml();
+
+      VerifierHandler handler = getVerifierHandler();
+
+      xml.setContentHandler(handler);
+
+      xml.parse(is);
+
+      return handler.isValid();
+    } finally {
+      is.close();
+    }
   }
 
   /**

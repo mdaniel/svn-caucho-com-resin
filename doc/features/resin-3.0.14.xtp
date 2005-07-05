@@ -27,12 +27,14 @@ predefined functions.  The new functions are:</p>
 
 </section>
 
+<!-- feature reverted
 <section title="Context.lookup">
 
 <p>The JNDI lookup() method now throws a NameNotFoundException if the
 name does not exist.</p>
 
 </section>
+-->
 
 <section title="cookie-modulo-cluster">
 
@@ -79,10 +81,12 @@ to implement java.lang.Runnable.</p>
 
 <section title="__FILE__">
 
-<p>The EL variable $\{__FILE__} is now available, referring to the
+<p>The EL variable \${__FILE__} is now available, referring to the
 current configuration file.</p>
 
 </section>
+
+<!-- feature reverted
 
 <section title="stdout: and stderr:">
 
@@ -90,6 +94,8 @@ current configuration file.</p>
 System.out and System.err.  They are no longer affected by the &lt;stdout> and &lt;stderr> items.</p>
 
 </section>
+
+-->
 
 <section title="cache/enable-range">
 

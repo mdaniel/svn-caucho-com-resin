@@ -44,6 +44,26 @@ public class VerifierFactoryImpl implements VerifierFactory {
   /**
    * Compile a schema.
    */
+  public Schema compileSchema(String url)
+    throws SAXException, IOException
+  {
+    Path path = Vfs.lookup(url);
+
+    ReadStream is = path.openRead();
+    try {
+      InputSource source = new InputSource(is);
+      source.setSystemId(url);
+
+      return compileSchema(source);
+    } finally {
+      is.close();
+    }
+  }
+
+    
+  /**
+   * Compile a schema.
+   */
   public Schema compileSchema(InputSource is)
     throws SAXException, IOException
   {

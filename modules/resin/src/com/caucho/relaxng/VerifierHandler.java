@@ -49,5 +49,6 @@ import com.caucho.relaxng.program.EmptyItem;
 /**
  * JARV verifier implementation
  */
-public interface VerifierHandler extends ContentHandler {
+public interface VerifierHandler extends ContentHandler, ErrorHandler {
+  public boolean isValid();
 }

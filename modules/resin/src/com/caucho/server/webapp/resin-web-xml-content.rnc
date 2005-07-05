@@ -520,14 +520,14 @@ r_session-config = element session-config {
   & (attribute cookie-modulo-cluster { r_boolean-Type }
      | element cookie-modulo-cluster { r_boolean-Type })?
 
+  & (attribute cookie-port { string }
+     | element cookie-port { string })?
+
   & (attribute cookie-secure { r_boolean-Type }
      | element cookie-secure { r_boolean-Type })?
 
   & (attribute cookie-version { r_int }
      | element cookie-version { r_int })?
-
-  & (attribute cookie-port { string }
-     | element cookie-port { string })?
 
   & (attribute enable-cookies { r_boolean-Type }
      | element enable-cookies { r_boolean-Type })?

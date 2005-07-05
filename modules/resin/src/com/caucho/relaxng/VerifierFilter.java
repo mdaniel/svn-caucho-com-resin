@@ -70,6 +70,8 @@ public class VerifierFilter extends DefaultHandler {
   public void setErrorHandler(ErrorHandler handler)
   {
     _errorHandler = handler;
+
+    _verifier.setErrorHandler(handler);
   }
 
 
@@ -178,5 +180,32 @@ public class VerifierFilter extends DefaultHandler {
 
     if (_contentHandler != null)
       _contentHandler.skippedEntity(name);
+  }
+
+  public void error(SAXParseException e)
+    throws SAXException
+  {
+    if (_errorHandler != null)
+      _errorHandler.error(e);
+    else
+      _verifierHandler.error(e);
+  }
+
+  public void fatalError(SAXParseException e)
+    throws SAXException
+  {
+    if (_errorHandler != null)
+      _errorHandler.fatalError(e);
+    else
+      _verifierHandler.fatalError(e);
+  }
+
+  public void warning(SAXParseException e)
+    throws SAXException
+  {
+    if (_errorHandler != null)
+      _errorHandler.warning(e);
+    else
+      _verifierHandler.warning(e);
   }
 }

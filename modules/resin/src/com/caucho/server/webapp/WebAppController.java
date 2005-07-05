@@ -496,6 +496,11 @@ public class WebAppController
       return WebAppController.this.getRootDirectory();
     }
 
+    public Path getRootDir()
+    {
+      return WebAppController.this.getRootDirectory();
+    }
+
     public String getContextPath()
     {
       return WebAppController.this.getContextPath();

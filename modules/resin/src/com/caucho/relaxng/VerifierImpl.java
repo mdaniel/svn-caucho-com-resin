@@ -72,8 +72,10 @@ public class VerifierImpl extends Verifier {
     throws SAXException
   {
     ErrorHandler handler = _errorHandler;
-    
+
     if (handler != null)
       handler.error(e);
+    else
+      throw e;
   }
 }
