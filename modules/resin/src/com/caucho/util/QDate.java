@@ -319,11 +319,30 @@ public class QDate {
   }
 
   /**
+   * Returns the day of the month, based on 1 for the first of the month.
+   */
+  public int getDaysInMonth()
+  {
+    if (_month == 1)
+      return _isLeapYear ? 29 : 28;
+    else
+      return DAYS_IN_MONTH[(int) _month];
+  }
+
+  /**
    * Returns the day of the week.
    */
   public int getDayOfWeek()
   {
     return (int) ((_dayOfEpoch % 7) + 11) % 7 + 1;
+  }
+
+  /**
+   * Returns the day of the year, based on 0 for January 1.
+   */
+  public int getDayOfYear()
+  {
+    return (int) _dayOfYear;
   }
 
   /**
@@ -411,11 +430,33 @@ public class QDate {
   }
 
   /**
+   * Returns true for DST
+   */
+  public boolean isDST()
+  {
+    return _isDaylightTime;
+  }
+
+  /**
    * Returns the current time zone.
    */
   public TimeZone getLocalTimeZone()
   {
     return _localTimeZone;
+  }
+
+  /**
+   * Returns the week in the year.
+   */
+  public int getWeek()
+  {
+    int newYears = (int) ((_dayOfEpoch - _dayOfYear) % 7 + 11) % 7;
+    int normDay = (_dayOfYear - (7 - newYears) % 7);
+    int week = normDay < 0 ? -1 : normDay / 7;
+    if (newYears <= 3)
+      week++;
+
+    return week;
   }
 
   /**
@@ -912,11 +953,7 @@ public class QDate {
 	break;
 
       case 'W':
-	int newYears = (int) ((_dayOfEpoch - _dayOfYear) % 7 + 11) % 7;
-	int normDay = (_dayOfYear - (7 - newYears) % 7);
-	int week = normDay < 0 ? -1 : normDay / 7;
-	if (newYears <= 3)
-	  week++;
+	int week = getWeek();
 	cb.append((week + 1) / 10);
 	cb.append((week + 1) % 10);
 	break;
@@ -1436,6 +1473,11 @@ public class QDate {
     _dayOfYear = (int) (days - 365 * n1);
 
     _isLeapYear = isLeapYear(_year);
+  }
+
+  public boolean isLeapYear()
+  {
+    return _isLeapYear;
   }
 
   /**

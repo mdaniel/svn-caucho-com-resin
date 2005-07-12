@@ -138,7 +138,7 @@ public class HessianSerializerOutput extends HessianOutput {
       }
       writeMapEnd();
     } catch (IllegalAccessException e) {
-      throw new IOException(String.valueOf(e));
+      throw new IOExceptionWrapper(e);
     }
   }
 }

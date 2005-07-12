@@ -35,6 +35,7 @@ import java.util.logging.*;
 
 import com.caucho.vfs.Path;
 import com.caucho.vfs.RotateStream;
+import com.caucho.vfs.AbstractRolloverLog;
 
 import com.caucho.util.L10N;
 
@@ -54,8 +55,8 @@ public class RotateLog {
   private String _formatPath;
   
   private RotateStream _rotateStream;
-  private long _rolloverPeriod = Long.MAX_VALUE / 2;
-  private long _rolloverSize = ROLLOVER_SIZE;
+  private Period _rolloverPeriod;
+  private Bytes _rolloverSize;
   private int _rolloverCount = 10;
   private String _timestamp;
   private String _archiveFormat;
@@ -101,35 +102,19 @@ public class RotateLog {
   }
 
   /**
-   * Sets the rollover period
-   */
-  public long getRolloverPeriod()
-  {
-    return _rolloverPeriod;
-  }
-
-  /**
    * Sets the rollover period.
    */
   public void setRolloverPeriod(Period period)
   {
-    _rolloverPeriod = period.getPeriod();
-  }
-
-  /**
-   * Sets the rollover size
-   */
-  public long getRolloverSize()
-  {
-    return _rolloverSize;
+    _rolloverPeriod = period;
   }
 
   /**
    * Sets the rollover size.
    */
-  public void setRolloverSize(Bytes bytes)
+  public void setRolloverSize(Bytes size)
   {
-    _rolloverSize = bytes.getBytes();
+    _rolloverSize = size;
   }
 
   /**
@@ -202,7 +187,7 @@ public class RotateLog {
    * Initialize the log.
    */
   public void init()
-    throws ConfigException
+    throws ConfigException, IOException
   {
     if (_path != null)
       _rotateStream = RotateStream.create(_path);
@@ -211,11 +196,16 @@ public class RotateLog {
     else
       throw new ConfigException(L.l("`path' is a required attribute of <{0}>.  Each <{0}> must configure the destination stream.", getTagName()));
 
-    _rotateStream.setRolloverPeriod(_rolloverPeriod);
-    _rotateStream.setRolloverSize(_rolloverSize);
-    _rotateStream.setMaxRolloverCount(_rolloverCount);
+    AbstractRolloverLog rolloverLog = _rotateStream.getRolloverLog();
+
+    if (_rolloverPeriod != null)
+      rolloverLog.setRolloverPeriod(_rolloverPeriod);
+
+    if (_rolloverSize != null)
+      rolloverLog.setRolloverSize(_rolloverSize);
+    //_rotateStream.setMaxRolloverCount(_rolloverCount);
     if (_archiveFormat != null)
-      _rotateStream.setArchiveFormat(_archiveFormat);
+      rolloverLog.setArchiveFormat(_archiveFormat);
 
     _rotateStream.init();
   }

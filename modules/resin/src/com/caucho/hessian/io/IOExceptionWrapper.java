@@ -49,49 +49,29 @@
 package com.caucho.hessian.io;
 
 import java.io.*;
-import java.util.*;
-import java.lang.reflect.*;
 
 /**
- * Deserializing a JDK 1.2 Class.
+ * Exception wrapper for IO.
  */
-public class ClassDeserializer extends AbstractDeserializer {
-  public ClassDeserializer()
+public class IOExceptionWrapper extends IOException {
+  private Throwable _cause;
+  
+  public IOExceptionWrapper(Throwable cause)
   {
+    super(cause.toString());
+
+    _cause = cause;
   }
   
-  public Class getType()
+  public IOExceptionWrapper(String msg, Throwable cause)
   {
-    return Class.class;
+    super(msg);
+
+    _cause = cause;
   }
-  
-  public Object readMap(AbstractHessianInput in)
-    throws IOException
+
+  public Throwable getCause()
   {
-    String name = null;
-    
-    while (! in.isEnd()) {
-      String key = in.readString();
-      String value = in.readString();
-
-      if (key.equals("name"))
-        name = value;
-    }
-
-    in.readMapEnd();
-    
-    if (name == null)
-      throw new IOException("Serialized Class expects name.");
-
-    ClassLoader loader = Thread.currentThread().getContextClassLoader();
-
-    try {
-      if (loader != null)
-        return Class.forName(name, false, loader);
-      else
-        return Class.forName(name);
-    } catch (Exception e) {
-      throw new IOExceptionWrapper(e);
-    }
+    return _cause;
   }
 }

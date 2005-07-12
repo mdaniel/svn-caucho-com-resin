@@ -328,7 +328,20 @@ public class SelectQuery extends AbstractQuery {
       }
     }
 
-    return _where != null && _where.usesFrom(item, type);
+    if (_where != null && _where.usesFrom(item, type))
+      return true;
+
+    if (_orderList != null) {
+      for (int j = 0; j < _orderList.size(); j++) {
+	AmberExpr order = _orderList.get(j);
+
+	if (order.usesFrom(item, type)) {
+	  return true;
+	}
+      }
+    }
+
+    return false;
   }
 
   void replaceJoin(JoinExpr join)
@@ -341,6 +354,14 @@ public class SelectQuery extends AbstractQuery {
 
     if (_where != null) {
       _where = _where.replaceJoin(join);
+    }
+
+    if (_orderList != null) {
+      for (int i = 0; i < _orderList.size(); i++) {
+	AmberExpr order = _orderList.get(i);
+
+	_orderList.set(i, order.replaceJoin(join));
+      }
     }
   }
   

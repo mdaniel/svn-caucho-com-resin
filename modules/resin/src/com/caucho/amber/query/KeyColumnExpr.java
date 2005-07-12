@@ -58,10 +58,10 @@ public class KeyColumnExpr extends ColumnExpr {
   public boolean usesFrom(FromItem from, int type, boolean isNot)
   {
     FromItem fromItem = _parent.getChildFromItem();
-    
-    // ejb/0j00 vs ejb/0h13
+
+    // ejb/0j00 vs ejb/0h13 vs ejb/0t00
     if (type == IS_INNER_JOIN)
-      return (from == _fromItem);
+      return (from == fromItem);
     else
       return false;
   }

@@ -190,9 +190,9 @@ public class BeanSerializer extends AbstractSerializer {
       
       out.writeMapEnd();
     } catch (IllegalAccessException e) {
-      throw new IOException(String.valueOf(e));
+      throw new IOExceptionWrapper(e);
     } catch (InvocationTargetException e) {
-      throw new IOException(String.valueOf(e));
+      throw new IOExceptionWrapper(e);
     }
   }
 

@@ -556,6 +556,8 @@ public class JavaCompiler {
 
     if (_compiler.equals("internal"))
       compiler = new InternalCompiler(this);
+    else if (_compiler.equals("eclipse"))
+      compiler = new EclipseCompiler(this);
     else if (_compiler.equals("groovyc"))
       compiler = new GroovyCompiler(this);
     else

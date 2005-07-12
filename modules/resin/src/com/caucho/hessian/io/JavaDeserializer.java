@@ -110,8 +110,7 @@ public class JavaDeserializer extends AbstractMapDeserializer {
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
-      e.printStackTrace();
-      throw new IOException(String.valueOf(e));
+      throw new IOExceptionWrapper(e);
     }
   }
 
@@ -175,8 +174,7 @@ public class JavaDeserializer extends AbstractMapDeserializer {
     } catch (IOException e) {
       throw e;
     } catch (Exception e) {
-      e.printStackTrace();
-      throw new IOException(String.valueOf(e));
+      throw new IOExceptionWrapper(e);
     }
   }
 

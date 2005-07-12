@@ -558,13 +558,51 @@ public final class ReadStream extends InputStream {
   }
 
   /**
+   * Reads a line from the stream, returning a string.
+   */
+  public final String readln() throws IOException
+  {
+    return readLine();
+  }
+
+  /**
+   * Reads a line, returning a string.
+   */
+  public String readLine() throws IOException
+  {
+    CharBuffer cb = new CharBuffer();
+
+    if (readLine(cb, true))
+      return cb.toString();
+    else if (cb.length() == 0)
+      return null;
+    else
+      return cb.toString();
+  }
+
+  /**
+   * Reads a line, returning a string.
+   */
+  public String readLineNoChop() throws IOException
+  {
+    CharBuffer cb = new CharBuffer();
+
+    if (readLine(cb, false))
+      return cb.toString();
+    else if (cb.length() == 0)
+      return null;
+    else
+      return cb.toString();
+  }
+
+  /**
    * Fills the buffer with the next line from the input stream.
    *
    * @return true on success, false on end of file.
    */
   public final boolean readln(CharBuffer cb) throws IOException
   {
-    return readLine(cb);
+    return readLine(cb, true);
   }
   
   /**
@@ -573,10 +611,11 @@ public final class ReadStream extends InputStream {
    * @param buf character buffer to fill
    * @return false on end of file
    */
-  public final boolean readLine(CharBuffer cb) throws IOException
+  public final boolean readLine(CharBuffer cb, boolean isChop)
+    throws IOException
   {
     if (_readEncoding != null)
-      return readlnEncoded(cb);
+      return readlnEncoded(cb, isChop);
 
     int capacity = cb.getCapacity();
     int offset = cb.getLength();
@@ -594,7 +633,10 @@ public final class ReadStream extends InputStream {
       for (; sublen > 0; sublen--) {
         int ch = readBuffer[readOffset++] & 0xff;
 
-        if (ch == '\n') {
+	if (ch != '\n') {
+	  buf[offset++] = (char) ch;
+	}
+        else if (isChop) {
           if (offset > 0 && buf[offset - 1] == '\r')
             cb.setLength(offset - 1);
           else
@@ -604,8 +646,15 @@ public final class ReadStream extends InputStream {
 
           return true;
         }
+	else {
+	  buf[offset++] = (char) '\n';
 
-        buf[offset++] = (char) ch;
+	  cb.setLength(offset);
+
+	  _readOffset = readOffset;
+
+	  return true;
+	}
       }
 
       _readOffset = readOffset;
@@ -636,6 +685,20 @@ public final class ReadStream extends InputStream {
   public final int readLine(char []buf, int length)
     throws IOException
   {
+    return readLine(buf, length, true);
+  }
+  
+  /**
+   * Reads a line into the character buffer.  \r\n is converted to \n.
+   *
+   * @param buf character buffer to fill.
+   * @param length number of characters to fill.
+   *
+   * @return -1 on end of file or the number of characters read.
+   */
+  public final int readLine(char []buf, int length, boolean isChop)
+    throws IOException
+  {
     byte []readBuffer = _readBuffer;
 
     int offset = 0;
@@ -650,13 +713,22 @@ public final class ReadStream extends InputStream {
       for (; sublen > 0; sublen--) {
         int ch = readBuffer[readOffset++] & 0xff;
 
-        if (ch == '\n') {
+	if (ch != '\n') {
+	}
+        else if (isChop) {
           _readOffset = readOffset;
           
           if (offset > 0 && buf[offset - 1] == '\r')
             return offset - 1;
           else
             return offset;
+        }
+        else {
+	  buf[offset++] = (char) ch;
+	  
+          _readOffset = readOffset;
+	  
+	  return offset + 1;
         }
 
         buf[offset++] = (char) ch;
@@ -674,7 +746,8 @@ public final class ReadStream extends InputStream {
     }
   }
   
-  private boolean readlnEncoded(CharBuffer cb) throws IOException
+  private boolean readlnEncoded(CharBuffer cb, boolean isChop)
+    throws IOException
   {
     while (true) {
       int ch = readChar();
@@ -682,38 +755,22 @@ public final class ReadStream extends InputStream {
       if (ch < 0)
 	return cb.length() > 0;
 
-      if (ch == '\n') {
+      if (ch != '\n') {
+      }
+      else if (isChop) {
 	if (cb.length() > 0 && cb.getLastChar() == '\r')
 	  cb.setLength(cb.getLength() - 1);
+
+	return true;
+      }
+      else {
+	cb.append('\n');
 
 	return true;
       }
 
       cb.append((char) ch);
     }
-  }
-
-  /**
-   * Reads a line from the stream, returning a string.
-   */
-  public final String readln() throws IOException
-  {
-    return readLine();
-  }
-
-  /**
-   * Reads a line, returning a string.
-   */
-  public String readLine() throws IOException
-  {
-    CharBuffer cb = new CharBuffer();
-
-    if (readln(cb))
-      return cb.toString();
-    else if (cb.length() == 0)
-      return null;
-    else
-      return cb.toString();
   }
 
   /**

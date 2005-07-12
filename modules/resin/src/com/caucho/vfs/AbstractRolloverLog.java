@@ -40,9 +40,6 @@ import java.util.zip.GZIPOutputStream;
 import java.io.OutputStream;
 import java.io.IOException;
 
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-
 import com.caucho.util.Log;
 import com.caucho.util.L10N;
 import com.caucho.util.Alarm;
@@ -60,9 +57,9 @@ import com.caucho.config.ConfigException;
 /**
  * Abstract class for a log that rolls over based on size or period.
  */
-abstract public class AbstractRolloverLog {
-  protected static final L10N L = new L10N(AbstractRolloverLog.class);
+public class AbstractRolloverLog {
   protected static final Logger log = Log.open(AbstractRolloverLog.class);
+  protected static final L10N L = new L10N(AbstractRolloverLog.class);
 
   // Milliseconds in a day
   private static final long DAY = 24L * 3600L * 1000L;
@@ -228,7 +225,7 @@ abstract public class AbstractRolloverLog {
    * Initialize the log.
    */
   public void init()
-    throws ServletException, IOException
+    throws IOException
   {
     long now = Alarm.getCurrentTime();
     
@@ -259,11 +256,31 @@ abstract public class AbstractRolloverLog {
     rolloverLog(now);
   }
 
+  public long getNextRolloverCheckTime()
+  {
+    if (_nextPeriodEnd < _nextRolloverCheckTime)
+      return _nextPeriodEnd;
+    else
+      return _nextRolloverCheckTime;
+  }
+
   public boolean isRollover()
   {
     long now = Alarm.getCurrentTime();
     
     return _nextPeriodEnd <= now || _nextRolloverCheckTime <= now;
+  }
+
+  public boolean rollover()
+  {
+    long now = Alarm.getCurrentTime();
+    
+    if (_nextPeriodEnd <= now || _nextRolloverCheckTime <= now) {
+      rolloverLog(now);
+      return true;
+    }
+    else
+      return false;
   }
 
   /**
@@ -298,21 +315,24 @@ abstract public class AbstractRolloverLog {
   {
     _nextRolloverCheckTime = now + _rolloverCheckPeriod;
 
+    long lastPeriodEnd = _nextPeriodEnd;
+    _nextPeriodEnd = Period.periodEnd(now, getRolloverPeriod());
+
     Path path = getPath();
       
     if (_nextPeriodEnd < now) {
       closeLogStream();
       
       if (getPathFormat() == null) {
-	Path savedPath = getArchivePath(_nextPeriodEnd - 1);
+	Path savedPath = getArchivePath(lastPeriodEnd);
 	movePathToArchive(savedPath);
       }
-	
-      _nextPeriodEnd = Period.periodEnd(now, getRolloverPeriod());
-      
+
+      /*
       if (log.isLoggable(Level.FINE))
 	log.fine(getPath() + ": next rollover at " +
 		 QDate.formatLocal(_nextPeriodEnd));
+      */
     }
     else if (path != null && getRolloverSize() <= path.getLength()) {
       closeLogStream();

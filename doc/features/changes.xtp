@@ -2,9 +2,17 @@
 
 <a href='changes-2.xtp'>Resin 2.1 changes</a>
 
-<s2 title='3.0.snap - Jun 30, 2005'>
+<s2 title='3.0.snap - July 5, 2005'>
 <ul>
-<li>(2005-06-30) package version check needs to allow more recent versions (rep by Jan Kriesten, RSN-327)
+<li>Added IOExceptionWrapper to catch Hessian errors (rep by Patrick Lightbody)
+<li>Added support for Amber ORDER BY with many-to-one relations (rep by A Barton, RSN-86)
+<li>Added compiler="eclipse" to &lt;javac>
+</ul>
+</s2>
+
+<s2 title='3.0.14 - July 5, 2005'>
+<ul>
+<li>(2005-05-30) package version check needs to allow more recent versions (rep by Jan Kriesten, RSN-327)
 <li>Fixed EntityManager compatibility issue with JDK 1.4 (rep by Christian Amott, RSN-321)
 <li>mod_caucho host->etag must only be set when configuration is properly updated
 <li>expand-cleanup-fileset needs to merge with explicit &lt;web-app> (rep by Bill Au)

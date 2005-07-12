@@ -93,7 +93,7 @@ public class SqlDateDeserializer extends AbstractDeserializer {
     try {
       return _constructor.newInstance(new Object[] { new Long(initValue) });
     } catch (Exception e) {
-      throw new IOException(String.valueOf(e));
+      throw new IOExceptionWrapper(e);
     }
   }
 }

@@ -95,7 +95,7 @@ public class StringValueDeserializer extends AbstractDeserializer {
     try {
       return _constructor.newInstance(new Object[] { initValue });
     } catch (Exception e) {
-      throw new IOException(String.valueOf(e));
+      throw new IOExceptionWrapper(e);
     }
   }
 }

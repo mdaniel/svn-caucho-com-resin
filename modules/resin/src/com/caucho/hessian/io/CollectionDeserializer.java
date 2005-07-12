@@ -96,7 +96,7 @@ public class CollectionDeserializer extends AbstractListDeserializer {
       try {
         list = (Collection) _type.newInstance();
       } catch (Exception e) {
-        throw new IOException(String.valueOf(e));
+        throw new IOExceptionWrapper(e);
       }
     }
 

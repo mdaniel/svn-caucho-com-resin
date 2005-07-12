@@ -54,15 +54,8 @@ import com.caucho.config.types.Period;
  * Automatically-rotating streams.  Normally, clients will call
  * getStream instead of using the StreamImpl interface.
  */
-public class RotateStream extends StreamImpl {
+public class RotateStream extends StreamImpl implements AlarmListener {
   private static final Logger log = Log.open(RotateStream.class);
-  
-  // Milliseconds in an hour
-  private static final long HOUR = 3600L * 1000L;
-  // Milliseconds in a day
-  private static final long DAY = 24L * HOUR;
-  
-  private static final long ROLLOVER_SIZE = 100 * 1024 * 1024;
   
   private static HashMap<Path,SoftReference<RotateStream>> _streams
     = new HashMap<Path,SoftReference<RotateStream>>();
@@ -70,33 +63,15 @@ public class RotateStream extends StreamImpl {
   private static HashMap<String,SoftReference<RotateStream>> _formatStreams
     = new HashMap<String,SoftReference<RotateStream>>();
 
-  private String _formatPath;
-  
-  private String _archiveFormat;
+  private final AbstractRolloverLog _rolloverLog = new AbstractRolloverLog();
 
-  // How often the logs are rolled over.
-  private long _rolloverPeriod = -1;
-
-  // Maximum size of the log.
-  private long _rolloverSize = ROLLOVER_SIZE;
-  
-  private long _updateInterval = HOUR;
-  
-  private int _maxRolloverCount;
-
-  // currently open stream
-  private StreamImpl _source;
+  private final Alarm _alarm = new Alarm(this);
 
   // calendar using the local timezone
   private QDate _calendar = new QDate(true);
-    
-  // When the log will next be rolled over for the period check
-  private long _nextPeriodEnd = -1;
-  private long _nextCheckTime = -1;
-  
-  private long _lastTime = -1; // time of the last check
 
   private volatile boolean _isInit;
+  private volatile boolean _isClosed;
 
   /**
    * Create rotate stream.
@@ -105,9 +80,7 @@ public class RotateStream extends StreamImpl {
    */
   private RotateStream(Path path)
   {
-    _path = path;
-    _rolloverSize = ROLLOVER_SIZE;
-    _maxRolloverCount = 100;
+    _rolloverLog.setPath(path);
   }
 
   /**
@@ -117,9 +90,7 @@ public class RotateStream extends StreamImpl {
    */
   private RotateStream(String formatPath)
   {
-    _formatPath = formatPath;
-    _rolloverSize = ROLLOVER_SIZE;
-    _maxRolloverCount = 100;
+    _rolloverLog.setPathFormat(formatPath);
   }
 
   /**
@@ -166,12 +137,40 @@ public class RotateStream extends StreamImpl {
   public static void clear()
   {
     synchronized (_streams) {
+      for (SoftReference<RotateStream> streamRef : _streams.values()) {
+	try {
+	  RotateStream stream = streamRef.get();
+
+	  if (stream != null)
+	    stream.closeImpl();
+	} catch (Throwable e) {
+	}
+      }
+      
       _streams.clear();
     }
     
     synchronized (_formatStreams) {
+      for (SoftReference<RotateStream> streamRef : _formatStreams.values()) {
+	try {
+	  RotateStream stream = streamRef.get();
+
+	  if (stream != null)
+	    stream.closeImpl();
+	} catch (Throwable e) {
+	}
+      }
+      
       _formatStreams.clear();
     }
+  }
+
+  /**
+   * Returns the rollover log.
+   */
+  public AbstractRolloverLog getRolloverLog()
+  {
+    return _rolloverLog;
   }
 
   /**
@@ -179,10 +178,7 @@ public class RotateStream extends StreamImpl {
    */
   public void setMaxRolloverCount(int count)
   {
-    if (count < 0)
-      count = 1;
-
-    _maxRolloverCount = count;
+    log.warning("max-rollover-count is no longer suported.");
   }
 
   /**
@@ -192,13 +188,7 @@ public class RotateStream extends StreamImpl {
    */
   public void setRolloverPeriod(long period)
   {
-    if (period > 0) {
-      _rolloverPeriod = period;
-      _rolloverPeriod += 3600000L - 1;
-      _rolloverPeriod -= _rolloverPeriod % 3600000L;
-    }
-    else
-      _rolloverPeriod = Long.MAX_VALUE / 2;
+    _rolloverLog.setRolloverPeriod(new Period(period));
   }
 
   /**
@@ -208,20 +198,7 @@ public class RotateStream extends StreamImpl {
    */
   public void setArchiveFormat(String format)
   {
-    if (format == null)
-      throw new NullPointerException();
-    
-    _archiveFormat = format;
-  }
-
-  /**
-   * Sets the log rollover size, rounded up to the megabyte.
-   *
-   * @param size maximum size of the log file, rolled up to the nearest meg.
-   */
-  public void setRolloverSize(long size)
-  {
-    _rolloverSize = size;
+    _rolloverLog.setArchiveFormat(format);
   }
 
   /**
@@ -229,6 +206,7 @@ public class RotateStream extends StreamImpl {
    * as necessary.
    */
   public void init()
+    throws IOException
   {
     synchronized (this) {
       if (_isInit)
@@ -236,24 +214,11 @@ public class RotateStream extends StreamImpl {
       _isInit = true;
     }
 
-    if (_rolloverPeriod < 0 && _rolloverSize < 0)
-      _rolloverPeriod = 30L * DAY;
+    _rolloverLog.init();
 
-    if (_rolloverSize <= 0)
-      _rolloverSize = Long.MAX_VALUE / 2;
-
-    if (_formatPath != null) {
-    }
-    else if (_archiveFormat != null) {
-    }
-    else if (_rolloverPeriod % DAY != 0)
-      _archiveFormat = _path.getTail() + ".%Y%m%d.%H";
-    else
-      _archiveFormat = _path.getTail() + ".%Y%m%d";
-
-    handleAlarm();
+    long now = Alarm.getCurrentTime();
     
-    new RotateAlarm(this);
+    _alarm.queue(_rolloverLog.getNextRolloverCheckTime() - now);
   }
 
   /**
@@ -261,32 +226,7 @@ public class RotateStream extends StreamImpl {
    */
   public Path getPath()
   {
-    if (_source != null)
-      return _source.getPath();
-    else
-      return super.getPath();
-  }
-
-  /**
-   * Initialize the stream, setting any logStream, System.out and System.err
-   * as necessary.
-   */
-  private void open()
-  {
-    if (_source != null)
-      return;
-    
-    try {
-      _path.getParent().mkdirs();
-    } catch (IOException e) {
-      // e.printStackTrace();
-    }
-    
-    try {
-      _source = _path.openAppendImpl();
-    } catch (IOException e) {
-      // e.printStackTrace();
-    }
+    return _rolloverLog.getPath();
   }
 
   /**
@@ -294,7 +234,7 @@ public class RotateStream extends StreamImpl {
    */
   public boolean canWrite()
   {
-    return _path != null;
+    return true;
   }
 
   /**
@@ -303,16 +243,11 @@ public class RotateStream extends StreamImpl {
   public void write(byte []buffer, int offset, int length, boolean isEnd)
     throws IOException
   {
-    synchronized (this) {
-      if (_source == null) {
-	init();
-	open();
-      }
+    _rolloverLog.rollover();
+    _rolloverLog.write(buffer, offset, length);
 
-      if (_source != null) {
-	_source.write(buffer, offset, length, isEnd);
-      }
-    }
+    // _alarm.queue(1000);
+    _rolloverLog.rollover();
   }
 
   /**
@@ -323,149 +258,41 @@ public class RotateStream extends StreamImpl {
     return new WriteStream(this);
   }    
 
-  void handleAlarm()
-  {
-    synchronized (this) {
-      rotateLog();
-    }
-  }
-
   /**
-   * Rotate the logs.  If the file is too big, close the stream and
-   * save the file to the rotated log.
-   */
-  private void rotateLog()
-  {
-    long now = Alarm.getCurrentTime();
-    
-    long lastTime = _lastTime;
-    _lastTime = Alarm.getCurrentTime();
-    
-    if (now < _nextCheckTime)
-      return;
-
-    _nextCheckTime = now + _updateInterval;
-
-    closeImpl();
-
-    try {
-      Path savedPath = null;
-
-      _calendar.setGMTTime(now);
-
-      if (lastTime < 0) {
-	lastTime = _path.getLastModified();
-
-	if (lastTime < 0)
-	  lastTime = Alarm.getCurrentTime();
-      }
-
-      boolean isOverflow = _rolloverSize < _path.getLength();
-
-      if (_nextPeriodEnd < 0 && _rolloverPeriod > 0) {
-	long modifiedTime = _path.getLastModified() ;
-
-	if (modifiedTime <= 0) {
-	  _nextPeriodEnd = Period.periodEnd(now, _rolloverPeriod);
-	  lastTime = now;
-	}
-	else {
-	  _nextPeriodEnd = Period.periodEnd(modifiedTime, _rolloverPeriod);
-	  lastTime = _nextPeriodEnd - 1;
-	}
-
-	if (_nextPeriodEnd < _nextCheckTime)
-	  _nextCheckTime = _nextPeriodEnd;
-
-	if (now < _nextPeriodEnd && ! isOverflow)
-	  return;
-      }
-
-      Path parent = _path.getParent();
-
-      if (_rolloverPeriod > 0 && _nextPeriodEnd < now) {
-	lastTime = _nextPeriodEnd - 1;
-	_nextPeriodEnd = Period.periodEnd(now, _rolloverPeriod);
-      }
-      else if (! isOverflow) {
-	return;
-      }
-
-      if (isOverflow)
-	lastTime = Alarm.getCurrentTime();
-
-      String date = _calendar.formatLocal(lastTime, _archiveFormat);
-      savedPath = parent.lookup(date);
-
-      if (savedPath.exists()) {
-	String extArchive = _archiveFormat;
-	if (extArchive.indexOf("%H") < 0)
-	  extArchive += ".%H";
-
-	date = _calendar.formatLocal(lastTime, extArchive);
-	savedPath = parent.lookup(date);
-
-	if (savedPath.exists()) {
-	  for (int i = 1; i < _maxRolloverCount; i++) {
-	    savedPath = parent.lookup(date + '-' + i);
-	    if (! savedPath.exists())
-	      break;
-	  }
-	}
-      }
-        
-      try {
-	String savedName = savedPath.getTail();
-
-	try {
-	  savedPath.getParent().mkdirs();
-	} catch (Throwable e) {
-	  log.log(Level.FINER, e.toString(), e);
-	}
-	
-	WriteStream os = savedPath.openWrite();
-	OutputStream out;
-
-	if (savedName.endsWith(".gz"))
-	  out = new GZIPOutputStream(os);
-	else if (savedName.endsWith(".zip")) 
-	  out = new ZipOutputStream(os);
-	else
-	  out = os;
-
-	try {
-	  _path.writeToStream(out);
-	} finally {
-	  try {
-	    out.close();
-	  } catch (Throwable e) {
-	    log.log(Level.WARNING, e.toString(), e);
-	  }
-	    
-	  os.close();
-	}
-	  
-	_path.remove();
-      } catch (Throwable e) {
-	log.log(Level.WARNING, e.toString(), e);
-      }
-    } finally {
-      init();
-      open();
-    }
-  }
-
-  /**
-   * Closes the underlying stream.
+   * Flushes the underlying stream.
    */
   public void flush()
+    throws IOException
   {
-    StreamImpl source = _source;
+    _rolloverLog.flush();
+    _rolloverLog.rollover();
 
+    long now = Alarm.getCurrentTime();
+
+    _alarm.queue(_rolloverLog.getNextRolloverCheckTime() - now);
+  }
+
+  /**
+   * The close call does nothing since the rotate stream is shared for
+   * many logs.
+   */
+  public void close()
+  {
+  }
+
+  public void handleAlarm(Alarm alarm)
+  {
     try {
-      if (source != null)
-	source.flush();
-    } catch (IOException e) {
+      _rolloverLog.flush();
+      _rolloverLog.rollover();
+    } catch (Throwable e) {
+      log.log(Level.FINE, e.toString(), e);
+    } finally {
+      if (! _isClosed) {
+	long now = Alarm.getCurrentTime();
+    
+	_alarm.queue(_rolloverLog.getNextRolloverCheckTime() - now);
+      }
     }
   }
 
@@ -475,13 +302,10 @@ public class RotateStream extends StreamImpl {
   private void closeImpl()
   {
     try {
-      StreamImpl source = _source;
-      _source = null;
-
-      if (source != null)
-	source.close();
+      _isClosed = true;
+      _rolloverLog.close();
     } catch (Throwable e) {
-      e.printStackTrace();
+      log.log(Level.FINE, e.toString(), e);
     }
   }
 
@@ -491,34 +315,5 @@ public class RotateStream extends StreamImpl {
   public void finalize()
   {
     closeImpl();
-  }
-
-  static class RotateAlarm implements AlarmListener {
-    SoftReference<RotateStream> _ref;
-
-    RotateAlarm(RotateStream stream)
-    {
-      _ref = new SoftReference<RotateStream>(stream);
-
-      handleAlarm(new Alarm("rotate-alarm", this));
-    }
-
-    public void handleAlarm(Alarm alarm)
-    {
-      RotateStream stream = _ref.get();
-
-      if (stream != null) {
-	try {
-	  stream.handleAlarm();
-	} finally {
-	  long now = Alarm.getCurrentTime();
-	  long nextTime = now + HOUR;
-
-	  nextTime = nextTime - nextTime % HOUR + 1000L;
-	  
-	  alarm.queue(nextTime - now);
-	}
-      }
-    }
   }
 }

@@ -147,7 +147,7 @@ public class HessianSerializerInput extends HessianInput {
     } catch (IOException e) {
       throw e;
     } catch (Exception e) {
-      throw new IOException(String.valueOf(e));
+      throw new IOExceptionWrapper(e);
     }
   }
 

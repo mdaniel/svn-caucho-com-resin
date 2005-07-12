@@ -453,6 +453,26 @@ public abstract class Path {
   }
 
   /**
+   * Returns the last access time of the file.
+   *
+   * @return 0 for non-files.
+   */
+  public long getLastAccessTime()
+  {
+    return getLastModified();
+  }
+
+  /**
+   * Returns the create time of the file.
+   *
+   * @return 0 for non-files.
+   */
+  public long getCreateTime()
+  {
+    return getLastModified();
+  }
+
+  /**
    * Tests if the file can be read.
    */
   public boolean canRead()

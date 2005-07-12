@@ -86,7 +86,7 @@ public class MapDeserializer extends AbstractMapDeserializer {
       try {
         map = (Map) type.newInstance();
       } catch (Exception e) {
-        throw new IOException(String.valueOf(e));
+        throw new IOExceptionWrapper(e);
       }
     }
 

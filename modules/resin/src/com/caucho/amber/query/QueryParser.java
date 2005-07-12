@@ -51,7 +51,7 @@ import com.caucho.amber.table.Table;
 import com.caucho.amber.table.LinkColumns;
 
 /**
- * Contains the parser for Hibernate-style queries and stores
+ * Contains the parser for EJB 3.0 style queries and stores
  * the parsed expressions.
  */
 public class QueryParser {
@@ -347,7 +347,10 @@ public class QueryParser {
       ArrayList<Boolean> ascList = new ArrayList<Boolean>();
 
       while (true) {
-	orderList.add(parseExpr());
+	AmberExpr expr = parseExpr();
+	expr = expr.bindSelect(this);
+	
+	orderList.add(expr);
 
 	if (peekToken() == DESC) {
 	  scanToken();
