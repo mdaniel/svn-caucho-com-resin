@@ -94,15 +94,6 @@ public class AccessLogWriter extends AbstractRolloverLog implements Runnable {
     _log = log;
   }
   
-  /**
-   * Initialize the log.
-   */
-  public void init()
-    throws ServletException, IOException
-  {
-    super.init();
-  }
-  
   AccessLogBuffer getLogBuffer()
   {
     AccessLogBuffer buffer = _freeBuffers.allocate();

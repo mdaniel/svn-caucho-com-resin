@@ -77,7 +77,7 @@ public class StdoutLog extends RotateLog {
    * Initialize the log.
    */
   public void init()
-    throws ConfigException
+    throws ConfigException, IOException
   {
     super.init();
 

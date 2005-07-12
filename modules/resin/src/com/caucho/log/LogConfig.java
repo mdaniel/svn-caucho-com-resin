@@ -36,6 +36,8 @@ import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Formatter;
 
+import java.io.IOException;
+
 import com.caucho.vfs.Path;
 import com.caucho.vfs.WriteStream;
 import com.caucho.vfs.TimestampFilter;
@@ -238,7 +240,7 @@ public class LogConfig extends RotateLog implements LogMBean {
    * Initialize the log.
    */
   public void init()
-    throws ConfigException
+    throws ConfigException, java.io.IOException
   {
     _isInit = true;
 

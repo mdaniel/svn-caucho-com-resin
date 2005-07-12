@@ -611,6 +611,18 @@ public final class ReadStream extends InputStream {
    * @param buf character buffer to fill
    * @return false on end of file
    */
+  public final boolean readLine(CharBuffer cb)
+    throws IOException
+  {
+    return readLine(cb, true);
+  }
+  
+  /**
+   * Reads a line into the character buffer.  \r\n is converted to \n.
+   *
+   * @param buf character buffer to fill
+   * @return false on end of file
+   */
   public final boolean readLine(CharBuffer cb, boolean isChop)
     throws IOException
   {
