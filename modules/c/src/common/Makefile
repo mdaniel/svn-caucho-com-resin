@@ -2,15 +2,15 @@
 
 CC=gcc
 CFLAGS=-g -O2 -DPOLL -DHAS_JVMTI
-CFLAGS_SHLIB=-fpic
-LIBTOOL=/home/ferg/test/resin-pro/libtool --silent
-LD=/usr/bin/ld
-LD_SHLIB=gcc
+CFLAGS_SHLIB=-DSHARED_MODULE
+LIBTOOL=/Users/ferg/ws/resin/libtool --silent
+LD=gcc
+LD_SHLIB=cc
 LDFLAGS=
-LDFLAGS_SHLIB=-shared -L/usr/lib
+LDFLAGS_SHLIB=-bundle -undefined suppress -flat_namespace -Wl,-bind_at_load -L/usr/lib
 OBJ=stream.o config.o memory.o
 OBJ_PICS=stream.lo config.lo memory.lo
-INCLUDES= -I/usr/include -I/usr/kerberos/include
+INCLUDES= -I/usr/include
 
 all	: common.o $(OBJ_PICS)
 

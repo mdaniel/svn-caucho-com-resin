@@ -204,6 +204,7 @@ public class FileServlet extends GenericServlet {
             lower.endsWith("::$data") ||
             lower.endsWith("/con") || lower.endsWith("/con/") ||
             lower.endsWith("/aux") || lower.endsWith("/aux/") ||
+            lower.endsWith("/prn") || lower.endsWith("/prn/") ||
             lower.endsWith("/nul") || lower.endsWith("/nul/")) {
           // Windows security hole with trailing '.'
           res.sendError(res.SC_NOT_FOUND);

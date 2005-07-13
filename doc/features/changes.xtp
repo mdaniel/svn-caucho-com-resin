@@ -4,6 +4,7 @@
 
 <s2 title='3.0.snap - July 5, 2005'>
 <ul>
+<li>pro Makefile.in was missing resin_os (rep by Bill Au)
 <li>Added IOExceptionWrapper to catch Hessian errors (rep by Patrick Lightbody)
 <li>Added support for Amber ORDER BY with many-to-one relations (rep by A Barton, RSN-86)
 <li>Added compiler="eclipse" to &lt;javac>

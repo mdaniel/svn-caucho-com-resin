@@ -105,6 +105,7 @@ public class Parser {
   final static int PRIMARY = UNIQUE + 1;
   final static int CHECK = PRIMARY + 1;
   final static int FOREIGN = CHECK + 1;
+  final static int KEY = FOREIGN + 1;
 
   private final static IntMap _reserved;
 
@@ -646,11 +647,17 @@ public class Parser {
 	break;
 
       case PRIMARY:
-	String key = parseIdentifier();
-	if (! key.equalsIgnoreCase("key"))
-	  throw error(L.l("expected 'key' at `{0}'", key));
+	token = scanToken();
+	if (token != KEY)
+	  throw error(L.l("expected 'key' at {0}", tokenName(token)));
 
 	factory.addPrimaryKey(parseColumnNames());
+	break;
+
+      case KEY:
+	String key = parseIdentifier();
+
+	parseColumnNames(); // factory.addPrimaryKey(parseColumnNames());
 	break;
 
       case CHECK:
@@ -685,7 +692,7 @@ public class Parser {
     int token;
 
     if ((token = scanToken()) != IDENTIFIER)
-      throw error(L.l("expected column type at `{0}'", tokenName(token)));
+      throw error(L.l("expected column type at {0}", tokenName(token)));
 
     String type = _lexeme;
     int length = -1;
@@ -742,6 +749,7 @@ public class Parser {
 	     type.equalsIgnoreCase("int") ||
 	     type.equalsIgnoreCase("smallint") ||
 	     type.equalsIgnoreCase("tinyint") ||
+	     type.equalsIgnoreCase("mediumint") ||
 	     type.equalsIgnoreCase("bit")) {
       factory.addInteger(name);
     }
@@ -793,9 +801,9 @@ public class Parser {
 	break;
 
       case PRIMARY:
-	String key = parseIdentifier();
-	if (! key.equalsIgnoreCase("key"))
-	  throw error(L.l("expected key at `{0}'", key));
+	token = scanToken();
+	if (token != KEY)
+	  throw error(L.l("expected key at {0}", tokenName(token)));
 
 	factory.setPrimaryKey(name);
 	break;
@@ -823,6 +831,10 @@ public class Parser {
 	else if (id.equalsIgnoreCase("auto_increment")) {
 	  factory.setAutoIncrement(name, 1);
 	}
+	else if (id.equalsIgnoreCase("unsigned")) {
+	}
+	else if (id.equalsIgnoreCase("binary")) {
+	}
 	else
 	  throw error(L.l("unexpected token '{0}'", tokenName(token)));
 	break;
@@ -841,6 +853,27 @@ public class Parser {
 	throw error(L.l("unexpected token '{0}'", tokenName(token)));
       }
     }
+  }
+  
+  /**
+   * Parses a key constraint declaration.
+   */
+  private void parseKeyConstraint(TableFactory factory)
+    throws SQLException
+  {
+    String key = parseIdentifier();
+
+    int token = scanToken();
+
+    if (token == '(') {
+      parseIdentifier();
+
+      token = scanToken();
+      if (token != ')')
+	throw error("expected ')'");
+    }
+    else
+      _token = token;
   }
 
   /**
@@ -1242,8 +1275,11 @@ public class Parser {
 
       token = scanToken();
 
-      if (token != BETWEEN && token != LIKE)
-	throw error(L.l("NOT is not allowed here"));
+      if (token != BETWEEN && token != LIKE) {
+	_token = token;
+	
+	return left;
+      }
     }
 
     switch (token) {
@@ -1714,6 +1750,12 @@ public class Parser {
 	    break;
 	  }
 	}
+	else if (ch == '\\') {
+	  ch = read();
+
+	  if (ch >= 0)
+	    cb.append(ch);
+	}
 	else
 	  cb.append((char) ch);
       }
@@ -1722,8 +1764,17 @@ public class Parser {
 
       return STRING;
     }
+    else if (ch == '#') {
+      // skip comment
+      while ((ch = read()) >= 0 && ch != '\n' && ch != '\r') {
+      }
 
-    throw error(L.l("unexpected char at {0}", "" + (char) ch));
+      // XXX: cleanup to avoid recursion
+      return scanToken();
+    }
+
+    throw error(L.l("unexpected char at {0} ({1})", "" + (char) ch,
+		    String.valueOf(ch)));
   }
 
   /**
@@ -1843,6 +1894,7 @@ public class Parser {
     _reserved.put("unique", UNIQUE);
     _reserved.put("check", CHECK);
     _reserved.put("primary", PRIMARY);
+    _reserved.put("key", KEY);
     _reserved.put("foreign", FOREIGN);
   }
 }

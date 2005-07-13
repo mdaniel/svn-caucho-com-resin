@@ -63,16 +63,29 @@
 /* probably system-dependent */
 #include <jni.h>
 
-#ifdef HAS_JVMTI
-#include <jvmti.h>
-#else
-#include <jvmdi.h>
-#endif
+jboolean jvmdi_can_reload_native(JNIEnv *env, jobject obj);
+jboolean jvmti_can_reload_native(JNIEnv *env, jobject obj);
 
+jint
+jvmti_reload_native(JNIEnv *env,
+		    jobject obj,
+		    jclass cl,
+		    jbyteArray buf,
+		    jint offset,
+		    jint length);
 
-static int
-set_byte_array_region(JNIEnv *env, jbyteArray buf, jint offset, jint sublen,
-		      char *buffer)
+jint
+jvmdi_reload_native(JNIEnv *env,
+		    jobject obj,
+		    jclass cl,
+		    jbyteArray buf,
+		    jint offset,
+		    jint length);
+
+int
+resin_set_byte_array_region(JNIEnv *env,
+			    jbyteArray buf, jint offset, jint sublen,
+			    char *buffer)
 {
   jbyte *cBuf;
   
@@ -91,9 +104,10 @@ set_byte_array_region(JNIEnv *env, jbyteArray buf, jint offset, jint sublen,
   return 0;
 }
 
-static int
-get_byte_array_region(JNIEnv *env, jbyteArray buf, jint offset, jint sublen,
-		      char *buffer)
+int
+resin_get_byte_array_region(JNIEnv *env,
+			    jbyteArray buf, jint offset, jint sublen,
+			    char *buffer)
 {
   jbyte *cBuf = (*env)->GetPrimitiveArrayCritical(env, buf, 0);
 
@@ -133,36 +147,12 @@ resin_printf_exception(JNIEnv *env, const char *cl, const char *fmt, ...)
   fprintf(stderr, "%s\n", buf);
 }
 
-#ifdef HAS_JVMTI
-
 jboolean
 Java_com_caucho_loader_ClassEntry_canReloadNative(JNIEnv *env,
 					          jobject obj)
 {
-  JavaVM *jvm = 0;
-  jvmtiEnv *jvmti = 0;
-  jvmtiCapabilities capabilities;
-  jvmtiCapabilities set_capabilities;
-  int res;
-
-  res = (*env)->GetJavaVM(env, &jvm);
-  if (res < 0)
-    return 0;
-  
-  res = (*jvm)->GetEnv(jvm, (void **)&jvmti, JVMTI_VERSION_1_0);
-
-  if (res < 0 || jvmti == 0)
-    return 0;
-
-  memset(&set_capabilities, 0, sizeof(capabilities));
-  set_capabilities.can_redefine_classes = 1;
-  (*jvmti)->AddCapabilities(jvmti, &set_capabilities);
-  
-  (*jvmti)->GetCapabilities(jvmti, &capabilities);
-
-  (*jvmti)->RelinquishCapabilities(jvmti, &set_capabilities);
-  
-  return capabilities.can_redefine_classes;
+  return (jvmti_can_reload_native(env, obj) ||
+	  jvmdi_can_reload_native(env, obj));
 }
 
 jint
@@ -173,112 +163,13 @@ Java_com_caucho_loader_ClassEntry_reloadNative(JNIEnv *env,
 					       jint offset,
 					       jint length)
 {
-  JavaVM *jvm = 0;
-  jvmtiEnv *jvmti = 0;
-  int res;
-  jvmtiClassDefinition defs[1];
-  char *class_def;
-  jvmtiCapabilities capabilities;
+  int res = jvmti_reload_native(env, obj, cl, buf, offset, length);
 
-  if (cl == 0 || buf == 0)
-    return 0;
+  if (res > 0)
+    return res;
 
-  res = (*env)->GetJavaVM(env, &jvm);
-  if (res < 0)
-    return -1;
-  
-  res = (*jvm)->GetEnv(jvm, (void **)&jvmti, JVMTI_VERSION_1_0);
-
-  if (res < 0 || jvmti == 0)
-    return 0;
-
-  memset(&capabilities, 0, sizeof(capabilities));
-  capabilities.can_redefine_classes = 1;
-  (*jvmti)->AddCapabilities(jvmti, &capabilities);
-  
-  defs[0].klass = cl;
-  defs[0].class_byte_count = length;
-  class_def = (*env)->GetByteArrayElements(env, buf, 0);
-  defs[0].class_bytes = class_def + offset;
-
-  if (defs[0].class_bytes) {
-    res = (*jvmti)->RedefineClasses(jvmti, 1, defs);
-
-    (*env)->ReleaseByteArrayElements(env, buf, class_def, 0);
-  }
-  
-  (*jvmti)->RelinquishCapabilities(jvmti, &capabilities);
-  
-  return res;
+  return jvmdi_reload_native(env, obj, cl, buf, offset, length);
 }
-
-#else
-
-jboolean
-Java_com_caucho_loader_ClassEntry_canReloadNative(JNIEnv *env,
-					          jobject obj)
-{
-  JavaVM *jvm = 0;
-  JVMDI_Interface_1 *jvmdi = 0;
-  JVMDI_capabilities capabilities;
-  int res;
-
-  res = (*env)->GetJavaVM(env, &jvm);
-  if (res < 0) {
-    return 0;
-  }
-  
-  res = (*jvm)->GetEnv(jvm, (void **)&jvmdi, JVMDI_VERSION_1);
-
-  if (res < 0 || jvmdi == 0)
-    return 0;
-
-  (jvmdi)->GetCapabilities(&capabilities);
-
-  return capabilities.can_redefine_classes;
-}
-
-jint
-Java_com_caucho_loader_ClassEntry_reloadNative(JNIEnv *env,
-					       jobject obj,
-					       jclass cl,
-					       jbyteArray buf,
-					       jint offset,
-					       jint length)
-{
-  JavaVM *jvm = 0;
-  JVMDI_Interface_1 *jvmdi = 0;
-  int res;
-  JVMDI_class_definition defs[1];
-  char *class_def;
-
-  if (cl == 0 || buf == 0)
-    return 0;
-
-  res = (*env)->GetJavaVM(env, &jvm);
-  if (res < 0)
-    return -1;
-  
-  res = (*jvm)->GetEnv(jvm, (void **)&jvmdi, JVMDI_VERSION_1);
-  
-  if (res < 0 || jvmdi == 0)
-    return -1;
-
-  defs[0].clazz = cl;
-  defs[0].class_byte_count = length;
-  class_def = (*env)->GetByteArrayElements(env, buf, 0);
-  defs[0].class_bytes = class_def + offset;
-
-  if (defs[0].class_bytes) {
-    res = jvmdi->RedefineClasses(1, defs);
-
-    (*env)->ReleaseByteArrayElements(env, buf, class_def, 0);
-  }
-  
-  return res;
-}
-						 
-#endif
 
 static char *
 get_utf8(JNIEnv *env, jstring jaddr, char *buf, int buflen)
