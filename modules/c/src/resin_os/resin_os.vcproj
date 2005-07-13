@@ -23,8 +23,8 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="c:\jdk1.3.1\include,c:\jdk1.3.1\include\win32,c:\local\ssl\include"
-				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_USRDLL"
+				AdditionalIncludeDirectories="c:\program files\java\jdk1.5.0\include,c:\program files\java\jdk1.5.0\include\win32,c:\local\ssl\include"
+				PreprocessorDefinitions="WIN32;HAS_JVMTI;_DEBUG;_WINDOWS;_USRDLL"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
 				PrecompiledHeaderFile=".\Debug/resin_os.pch"
@@ -90,8 +90,8 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				InlineFunctionExpansion="1"
-				AdditionalIncludeDirectories="c:\j2sdk1.4.2\include,c:\j2sdk1.4.2\include\win32,..\common,c:\local\ssl\include"
-				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL"
+				AdditionalIncludeDirectories="c:\program files\java\jdk1.5.0\include,c:\program files\java\jdk1.5.0\include\win32,..\common,c:\local\ssl\include"
+				PreprocessorDefinitions="WIN32;HAS_JVMTI;NDEBUG;_WINDOWS;_USRDLL"
 				StringPooling="TRUE"
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="TRUE"
@@ -151,6 +151,12 @@
 		<Filter
 			Name="Source Files"
 			Filter="cpp;c;cxx;rc;def;r;odl;idl;hpj;bat">
+			<File
+				RelativePath=".\jni_jvmdi.c">
+			</File>
+			<File
+				RelativePath=".\jni_jvmti.c">
+			</File>
 			<File
 				RelativePath=".\jni_os.c">
 			</File>

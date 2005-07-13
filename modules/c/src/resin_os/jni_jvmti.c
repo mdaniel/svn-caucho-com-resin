@@ -79,22 +79,23 @@ jvmti_can_reload_native(JNIEnv *env, jobject obj)
   int res;
 
   res = (*env)->GetJavaVM(env, &jvm);
-  if (res < 0)
+  if (res < 0 || jvm == 0)
     return 0;
   
   res = (*jvm)->GetEnv(jvm, (void **)&jvmti, JVMTI_VERSION_1_0);
 
-  if (res < 0 || jvmti == 0)
+  if (res != JNI_OK || jvmti == 0)
     return 0;
 
   memset(&set_capabilities, 0, sizeof(capabilities));
   set_capabilities.can_redefine_classes = 1;
+
   (*jvmti)->AddCapabilities(jvmti, &set_capabilities);
   
   (*jvmti)->GetCapabilities(jvmti, &capabilities);
 
   (*jvmti)->RelinquishCapabilities(jvmti, &set_capabilities);
-  
+
   return capabilities.can_redefine_classes;
 }
 
@@ -113,16 +114,16 @@ jvmti_reload_native(JNIEnv *env,
   jbyte *class_def;
   jvmtiCapabilities capabilities;
 
-  if (cl == 0 || buf == 0)
+  if (cl == 0 || buf == 0 || env == 0)
     return 0;
 
   res = (*env)->GetJavaVM(env, &jvm);
-  if (res < 0)
+  if (res < 0 || jvm == 0)
     return 0;
   
   res = (*jvm)->GetEnv(jvm, (void **)&jvmti, JVMTI_VERSION_1_0);
 
-  if (res < 0 || jvmti == 0)
+  if (res != JNI_OK || jvmti == 0)
     return 0;
 
   memset(&capabilities, 0, sizeof(capabilities));
