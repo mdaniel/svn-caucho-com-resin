@@ -677,7 +677,7 @@ public class Port implements EnvironmentListener, PortMBean, Runnable {
 	_selectManager = _server.getSelectManager();
 
 	if (_selectManager == null) {
-	  throw new IllegalStateException();
+	  throw new IllegalStateException(L.l("Cannot load select manager"));
 	}
       }
 

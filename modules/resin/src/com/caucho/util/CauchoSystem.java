@@ -359,7 +359,7 @@ public class CauchoSystem {
     if (loader == null)
       loader = Thread.currentThread().getContextClassLoader();
 
-    if (loader == null || loader.equals(CauchoSystem.class))
+    if (loader == null || loader.equals(CauchoSystem.class.getClassLoader()))
       return Class.forName(name);
     else
       return Class.forName(name, init, loader);

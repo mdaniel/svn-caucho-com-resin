@@ -3,7 +3,7 @@
 CC=gcc
 CFLAGS=-g -O2 -DPOLL -DHAS_JVMTI
 CFLAGS_SHLIB=-DSHARED_MODULE
-LIBTOOL=/Users/ferg/ws/resin/libtool --silent
+LIBTOOL=/Users/ferg/ws/test-resin/libtool --silent
 LD=gcc
 LD_SHLIB=cc
 LDFLAGS=

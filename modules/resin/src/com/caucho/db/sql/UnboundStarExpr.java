@@ -46,11 +46,22 @@ class UnboundStarExpr extends Expr {
   private static final L10N L = new L10N(UnboundStarExpr.class);
   private static final Logger log = Log.open(UnboundStarExpr.class);
 
+  private final String _table;
+
   /**
    * Creates an unbound identifier with just a column name.
    */
   UnboundStarExpr()
   {
+    _table =  null;
+  }
+
+  /**
+   * Creates an unbound identifier with just a column name.
+   */
+  UnboundStarExpr(String tableName)
+  {
+    _table =  tableName;
   }
 
   protected Expr bind(Query query)
@@ -73,6 +84,9 @@ class UnboundStarExpr extends Expr {
     for (int i = 0; i < fromItems.length; i++) {
       Table table = fromItems[i].getTable();
       Column []columns = table.getColumns();
+
+      if (_table != null && ! fromItems[i].getName().equals(_table))
+	continue;
 
       for (int j = 0; j < columns.length; j++) {
 	exprs.add(new UnboundIdentifierExpr(fromItems[i].getName(),

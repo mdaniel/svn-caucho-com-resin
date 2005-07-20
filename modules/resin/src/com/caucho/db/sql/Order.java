@@ -114,7 +114,10 @@ abstract class Order {
 	}
       }
 
-      if (head + 1 < offset + length) {
+      if (head == offset) {
+	sort(result, rows, offset + 1, length - 1);
+      }
+      else if (head + 1 < offset + length) {
 	sort(result, rows, offset, head - offset);
 	sort(result, rows, head, offset + length - head);
       }

@@ -159,8 +159,8 @@ public class ErrorPageManager {
                                ServletResponse res)
     throws IOException
   {
-    if (log.isLoggable(Level.FINER))
-      log.log(Level.FINER, e.toString(), e);
+    if (log.isLoggable(Level.FINE))
+      log.log(Level.FINE, e.toString(), e);
 
     HttpServletResponse response = (HttpServletResponse) res;
     HttpServletRequest request = (HttpServletRequest) req;
@@ -355,7 +355,7 @@ public class ErrorPageManager {
           return;
         }
       } catch (Throwable e1) {
-        log.log(Level.FINE, e1.toString(), e1);
+        log.log(Level.INFO, e1.toString(), e1);
         rootExn = e1;
       }
     }

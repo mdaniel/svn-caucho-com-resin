@@ -28,19 +28,24 @@
 
 package com.caucho.db.sql;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import java.sql.SQLException;
+
 import com.caucho.db.Database;
 import com.caucho.db.table.Column;
 import com.caucho.db.table.Table;
 import com.caucho.db.table.TableFactory;
+
 import com.caucho.log.Log;
+
 import com.caucho.util.CharBuffer;
 import com.caucho.util.IntMap;
 import com.caucho.util.L10N;
-
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class Parser {
   private static final Logger log = Log.open(Parser.class);
@@ -345,13 +350,20 @@ public class Parser {
   {
     ArrayList<FromItem> fromItems = new ArrayList<FromItem>();
 
+    int token;
+
+    // XXX: somewhat hacked syntax
+    while ((token = scanToken()) == '(') {
+    }
+    _token = token;
+    
     FromItem fromItem = parseFromItem();
 
     if (fromItem != null)
       fromItems.add(fromItem);
 
     while (true) {
-      int token = scanToken();
+      token = scanToken();
 
       boolean isNatural = false;
       boolean isOuter = false;
@@ -363,6 +375,8 @@ public class Parser {
 	fromItems.add(fromItem);
 	continue;
       }
+      else if (token == '(' || token == ')')
+	continue;
       else if (token != IDENTIFIER) {
 	_token = token;
 	break;
@@ -1275,7 +1289,7 @@ public class Parser {
 
       token = scanToken();
 
-      if (token != BETWEEN && token != LIKE) {
+      if (token != BETWEEN && token != LIKE && token != IN) {
 	_token = token;
 	
 	return left;
@@ -1331,10 +1345,47 @@ public class Parser {
 	  throw error(L.l("expected string at '{0}'", tokenName(token)));
       }
 
+    case IN:
+      {
+	HashSet<String> values = parseInValues();
+
+	return new InExpr(left, values, isNot);
+      }
+
     default:
       _token = token;
       return left;
     }
+  }
+
+  /**
+   * Parses the IN values.
+   */
+  private HashSet<String> parseInValues()
+    throws SQLException
+  {
+    int token = scanToken();
+
+    if (token != '(')
+      throw error(L.l("Expected '('"));
+
+    HashSet<String> values = new HashSet<String>();
+
+    while ((token = scanToken()) != ')') {
+      if (token == STRING) {
+	values.add(_lexeme);
+      }
+      else
+	throw error(L.l("expected STRING at {0}", tokenName(token)));
+	
+      if ((token = scanToken()) != ',')
+	break;
+    }
+
+    if (token != ')')
+	throw error(L.l("expected ')' at {0}", tokenName(token)));
+
+    return values;
   }
 
   /**
@@ -1452,8 +1503,17 @@ public class Parser {
 
 	token = scanToken();
 	if (token == '.') {
-	  String column = parseIdentifier();
-	  return _query.bind(name, column);
+	  token = scanToken();
+
+	  if (token == IDENTIFIER) {
+	    String column = _lexeme;
+	    return _query.bind(name, column);
+	  }
+	  else if (token == '*') {
+	    return new UnboundStarExpr(name);
+	  }
+	  else
+	    throw error("expected IDENTIFIER");
 	}
 	else if (token == '(') {
 	  FunExpr fun = null;

@@ -147,7 +147,7 @@ resin_printf_exception(JNIEnv *env, const char *cl, const char *fmt, ...)
   fprintf(stderr, "%s\n", buf);
 }
 
-jboolean
+JNIEXPORT jboolean JNICALL
 Java_com_caucho_loader_ClassEntry_canReloadNative(JNIEnv *env,
 					          jobject obj)
 {
@@ -155,7 +155,7 @@ Java_com_caucho_loader_ClassEntry_canReloadNative(JNIEnv *env,
 	  jvmdi_can_reload_native(env, obj));
 }
 
-jint
+JNIEXPORT jint JNICALL
 Java_com_caucho_loader_ClassEntry_reloadNative(JNIEnv *env,
 					       jobject obj,
 					       jclass cl,
@@ -188,7 +188,7 @@ get_utf8(JNIEnv *env, jstring jaddr, char *buf, int buflen)
   return buf;
 }
 
-jint
+JNIEXPORT jint JNICALL
 Java_com_caucho_server_boot_ResinBoot_execDaemon(JNIEnv *env,
 						 jobject obj,
 						 jobjectArray j_argv,

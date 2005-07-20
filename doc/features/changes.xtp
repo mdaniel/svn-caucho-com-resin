@@ -4,6 +4,8 @@
 
 <s2 title='3.0.snap - July 5, 2005'>
 <ul>
+<li>Fixed pthread_mutex_lock define in Solaris to mutex_lock (Joe Dane, RSN-343)
+<li>JNI calls require JNICALL and JNIEXPORT - RSN-341 (rep by Chanan J Braunstein)
 <li>pro Makefile.in was missing resin_os (rep by Bill Au)
 <li>Added IOExceptionWrapper to catch Hessian errors (rep by Patrick Lightbody)
 <li>Added support for Amber ORDER BY with many-to-one relations (rep by A Barton, RSN-86)
