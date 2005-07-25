@@ -1,0 +1,78 @@
+<mbean>
+  <!-- resin:type=ResinServer -->
+  <description>
+    An instance of Resin running in a JVM.
+  </description>
+
+  <children>
+    <ref-list title="Servers">
+      <name-pattern>resin:type=Server,*</name-pattern>
+      <description>
+        The servers that are active within this JVM.
+      </description>
+    </ref-list>
+
+    <ref title="ThreadPool">
+      <object-name>resin:type=ThreadPool</object-name>
+
+      <description>
+        The ThreadPool manages all threads used by Resin.
+      </description>
+    </ref>
+  </children>
+
+
+  <attribute name="ServerId">
+    <category>configuration</category>
+    <description>
+      The server id used when starting this version of Resin, the value of
+      `-server id'.
+    </description>
+  </attribute>
+
+  <attribute name="ResinHome">
+    <category>configuration</category>
+    <description>
+      The Resin home directory used when starting this instance of Resin.
+      This is the location of the Resin program files.
+    </description>
+  </attribute>
+
+  <attribute name="ServerRoot">
+    <category>configuration</category>
+    <description>
+     The server root directory used when starting this instance of Resin.
+     This is the root directory of the web server files.
+    </description>
+  </attribute>
+
+  <attribute name="ConfigFile">
+    <category>configuration</category>
+    <description>
+      The configuration file used when starting this instance of Resin, the
+      value of `-config file'.
+    </description>
+  </attribute>
+
+  <attribute name="State">
+    <category>statistic</category>
+    <description>
+      The current lifecycle state.
+    </description>
+  </attribute>
+
+  <attribute name="InitialStartTime">
+    <category>statistic</category>
+    <description>
+      The time that this instance was first started.
+    </description>
+  </attribute>
+
+  <attribute name="StartTime">
+    <category>statistic</category>
+    <description>
+      The time that this instance was last started or restarted.
+    </description>
+  </attribute>
+
+</mbean>

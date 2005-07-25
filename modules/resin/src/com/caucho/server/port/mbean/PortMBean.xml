@@ -1,0 +1,90 @@
+<mbean>
+  <title>Port ${this.attributes["Port"].value}</title>
+  <description>
+  </description>
+
+  <attribute name="ProtocolName">
+    <category>configuration</category>
+    <description>
+    </description>
+  </attribute>
+
+  <attribute name="Port">
+    <category>configuration</category>
+    <description>
+    </description>
+  </attribute>
+
+  <attribute name="Host">
+    <category>configuration</category>
+    <description>
+    </description>
+  </attribute>
+
+  <!-- XXX: s/b State -->
+  <attribute name="Active">
+    <category>statistic</category>
+    <description>
+    </description>
+  </attribute>
+
+  <attribute name="ConnectionMax">
+    <category>statistic</category>
+    <description>
+    </description>
+  </attribute>
+
+  <attribute name="KeepaliveMax">
+    <category>statistic</category>
+    <description>
+    </description>
+  </attribute>
+
+  <attribute name="TotalConnectionCount">
+    <category>statistic</category>
+    <description>
+    </description>
+  </attribute>
+
+  <attribute name="ActiveConnectionCount">
+    <category>statistic</category>
+    <description>
+    </description>
+  </attribute>
+
+  <attribute name="KeepaliveConnectionCount">
+    <category>statistic</category>
+    <description>
+    </description>
+  </attribute>
+
+  <attribute name="SelectConnectionCount">
+    <category>statistic</category>
+    <description>
+    </description>
+  </attribute>
+
+  <attribute name="ThreadCount">
+    <category>statistic</category>
+    <description>
+    </description>
+  </attribute>
+
+  <attribute name="IdleThreadCount">
+    <category>statistic</category>
+    <description>
+    </description>
+  </attribute>
+
+  <attribute name="ActiveThreadCount">
+    <category>statistic</category>
+    <description>
+    </description>
+  </attribute>
+
+  <attribute name="KeepaliveCount">
+    <category>statistic</category>
+    <description>
+    </description>
+  </attribute>
+</mbean>
