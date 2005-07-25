@@ -229,6 +229,7 @@
     <copy todir="${module.build}">
       <fileset dir="${module.src}">
         <include name="**/*.xml"/>
+        <include name="**/*.xsll"/>
         <include name="**/*.rnc"/>
         <include name="**/*.tld"/>
         <include name="**/*.properties"/>
