@@ -1,7 +1,0 @@
-<mbean>
-  <description>
-  </description>
-
-  <attribute ignore="true" name="ObjectName"/>
-  <attribute ignore="true" name="ClientObjectNames"/>
-</mbean>
