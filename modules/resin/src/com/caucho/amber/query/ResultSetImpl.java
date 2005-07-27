@@ -63,6 +63,8 @@ import com.caucho.amber.connection.AmberConnectionImpl;
 public class ResultSetImpl implements ResultSet {
   private static final L10N L = new L10N(ResultSetImpl.class);
 
+  public static final int CACHE_CHUNK_SIZE = 64;
+
   private UserQuery _userQuery; 
   private ResultSet _rs;
   private ArrayList<FromItem> _fromList;
@@ -148,11 +150,24 @@ public class ResultSetImpl implements ResultSet {
   public void fillCacheChunk(ResultSetCacheChunk cacheChunk)
     throws SQLException
   {
-    int size = 25;
+    int size = CACHE_CHUNK_SIZE;
+    int maxSize = Integer.MAX_VALUE / 2;
+    int i = 0;
 
-    for (int i = 0; i < size; i++) {
+    ResultSetCacheChunk tail = cacheChunk;
+
+    // max length of the cached value
+    for (; maxSize-- > 0; i++) {
       if (_rs.next()) {
-	cacheChunk.newRow();
+	if (size <= i) {
+	  i = 0;
+	  
+	  ResultSetCacheChunk next = new ResultSetCacheChunk(tail);
+	  tail.setNext(next);
+	  tail = next;
+	}
+
+	tail.newRow();
 
 	int len = _resultList.size();
 	for (int j = 0; j < len; j++) {
@@ -160,18 +175,20 @@ public class ResultSetImpl implements ResultSet {
 	  
 	  AmberExpr expr = _resultList.get(j);
 	  
-	  cacheChunk.setValue(i, j, expr.getCacheObject(_session, _rs, index));
+	  tail.setValue(i, j, expr.getCacheObject(_session, _rs, index));
 	}
       }
       else {
-	cacheChunk.setLast(true);
+	tail.setLast(true);
 	return;
       }
     }
 
+    /*
     if (! _rs.next()) {
-      cacheChunk.setLast(true);
+      tail.setLast(true);
     }
+    */
   }
 
   /**
@@ -338,6 +355,13 @@ public class ResultSetImpl implements ResultSet {
       return true;
     }
     else {
+      ResultSetCacheChunk next = cacheChunk.getNext();
+
+      if (next != null) {
+	_cacheChunk = next;
+	return true;
+      }
+      
       _isCache = false;
       _cacheChunk = null;
       

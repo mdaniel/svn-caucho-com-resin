@@ -35,11 +35,14 @@ import javax.servlet.jsp.*;
 import javax.servlet.jsp.*;
 import javax.servlet.jsp.tagext.*;
 
+import org.xml.sax.*;
+
 import com.caucho.vfs.*;
 import com.caucho.util.*;
 import com.caucho.jsp.*;
 import com.caucho.xml.QName;
 import com.caucho.xml.XmlChar;
+import com.caucho.xml.Xml;
 
 public class JspDirectiveInclude extends JspNode {
   static L10N L = new L10N(JspDirectiveInclude.class);
@@ -76,7 +79,21 @@ public class JspDirectiveInclude extends JspNode {
                       getTagName()));
 
     try {
-      _gen.getJspParser().pushInclude(_file);
+      ParseState parseState = _gen.getParseState();
+      
+      if (parseState.isXml()) {
+	Xml xml = new Xml();
+	xml.setContentHandler(new JspContentHandler(parseState.getBuilder()));
+	Path path = parseState.resolvePath(_file);
+	
+	path.setUserPath(_file);
+	xml.setNamespaceAware(true);
+	xml.parse(path);
+      }
+      else
+	_gen.getJspParser().pushInclude(_file);
+    } catch (SAXException e) {
+      throw error(e);
     } catch (IOException e) {
       throw error(e);
     }

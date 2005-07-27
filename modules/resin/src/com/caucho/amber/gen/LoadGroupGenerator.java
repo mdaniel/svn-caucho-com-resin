@@ -77,29 +77,33 @@ public class LoadGroupGenerator extends ClassComponent {
     int group = _index / 64;
     long mask = (1L << (_index % 64));
 
-    out.println("if (aConn.isInTransaction()) {");
-    out.println("  if (com.caucho.amber.entity.Entity.P_DELETING <= __caucho_state) {");
-    out.println("    return;");
-    out.println("  }");
-    out.println("  else if (__caucho_state < com.caucho.amber.entity.Entity.P_TRANSACTIONAL) {");
-    out.println("    __caucho_state = com.caucho.amber.entity.Entity.P_TRANSACTIONAL;");
+    // non-read-only entities must be reread in a transaction
+    if (! _entityType.isReadOnly()) {
+      out.println("if (aConn.isInTransaction()) {");
+      out.println("  if (com.caucho.amber.entity.Entity.P_DELETING <= __caucho_state) {");
+      out.println("    return;");
+      out.println("  }");
+      out.println("  else if (__caucho_state < com.caucho.amber.entity.Entity.P_TRANSACTIONAL) {");
+      out.println("    __caucho_state = com.caucho.amber.entity.Entity.P_TRANSACTIONAL;");
 
-    int loadCount = _entityType.getLoadGroupIndex();
-    for (int i = 0; i <= loadCount / 64; i++) {
-      out.println("    __caucho_loadMask_" + i + " = 0;");
-    }
-    int dirtyCount = _entityType.getDirtyIndex();
-    for (int i = 0; i <= dirtyCount / 64; i++) {
-      out.println("    __caucho_dirtyMask_" + i + " = 0;");
+      int loadCount = _entityType.getLoadGroupIndex();
+      for (int i = 0; i <= loadCount / 64; i++) {
+	out.println("    __caucho_loadMask_" + i + " = 0;");
+      }
+      int dirtyCount = _entityType.getDirtyIndex();
+      for (int i = 0; i <= dirtyCount / 64; i++) {
+	out.println("    __caucho_dirtyMask_" + i + " = 0;");
+      }
+    
+      out.println("    aConn.makeTransactional(this);");
+      out.println("  }");
+      out.println("  else if ((__caucho_loadMask_" + group + " & " + mask + "L) != 0)");
+      out.println("    return;");
+      out.println("}");
+      out.print("else ");
     }
     
-    out.println("    aConn.makeTransactional(this);");
-    out.println("  }");
-    out.println("  else if ((__caucho_loadMask_" + group + " & " + mask + "L) != 0)");
-    out.println("    return;");
-    out.println("}");
-    
-    out.println("else if ((__caucho_loadMask_" + group + " & " + mask + "L) != 0)");
+    out.println("if ((__caucho_loadMask_" + group + " & " + mask + "L) != 0)");
     out.println("  return;");
 
     // XXX: the load doesn't cover other load groups

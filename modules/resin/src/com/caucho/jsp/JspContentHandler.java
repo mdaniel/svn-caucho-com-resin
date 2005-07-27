@@ -42,11 +42,11 @@ import com.caucho.jsp.cfg.JspPropertyGroup;
 /**
  * Generates the nodes for JSP code.
  */
-class JspContentHandler extends DefaultHandler {
+public class JspContentHandler extends DefaultHandler {
   private JspBuilder _builder;
   private Locator _locator;
 
-  JspContentHandler(JspBuilder builder)
+  public JspContentHandler(JspBuilder builder)
   {
     _builder = builder;
   }
@@ -213,6 +213,7 @@ class JspContentHandler extends DefaultHandler {
     throws SAXException
   {
     try {
+      System.out.println("SE: " + qName);
       setLocation();
       _builder.startElement(new QName(qName, uri));
 

@@ -30,6 +30,7 @@
 package com.caucho.ejb.entity2;
 
 import com.caucho.amber.AmberManager;
+import com.caucho.amber.AmberTableCache;
 import com.caucho.amber.field.*;
 import com.caucho.amber.field.Id;
 import com.caucho.amber.idgen.IdGenerator;
@@ -41,6 +42,7 @@ import com.caucho.amber.type.EntityType;
 import com.caucho.amber.type.*;
 import com.caucho.bytecode.*;
 import com.caucho.config.ConfigException;
+import com.caucho.config.types.Period;
 import com.caucho.ejb.EjbServerManager;
 import com.caucho.jdbc.JdbcMetaData;
 import com.caucho.util.CharBuffer;
@@ -149,6 +151,14 @@ public class EntityIntrospector {
     else
       entityType.setTable(parentType.getTable());
 
+    JAnnotation tableCache = type.getAnnotation(AmberTableCache.class);
+    if (tableCache != null) {
+      entityType.getTable().setReadOnly(tableCache.getBoolean("readOnly"));
+
+      long cacheTimeout = Period.toPeriod(tableCache.getString("timeout"));
+      entityType.getTable().setCacheTimeout(cacheTimeout);
+    }
+      
     JAnnotation secondaryTableAnn = type.getAnnotation(SecondaryTable.class);
 
     Table secondaryTable = null;
@@ -374,7 +384,6 @@ public class EntityIntrospector {
       throw new IllegalStateException();
     }
 
-    System.out.println("XXX Entity Introspector 377");
     Column column = entityType.getTable().createColumn(columnName,
 						       columnType);
 

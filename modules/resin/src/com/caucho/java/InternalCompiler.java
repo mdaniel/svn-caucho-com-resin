@@ -180,7 +180,7 @@ public class InternalCompiler extends AbstractJavaCompiler {
       }
 
       ReadStream read = tempStream.openRead();
-      JavacErrorParser parser = new JavacErrorParser();
+      JavacErrorParser parser = new JavacErrorParser(_compiler.getEncoding());
 
       String errors = parser.parseErrors((InputStream) read, lineMap);
       read.close();

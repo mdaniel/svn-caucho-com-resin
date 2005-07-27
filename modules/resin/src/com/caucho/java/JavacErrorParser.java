@@ -45,7 +45,16 @@ class JavacErrorParser extends ErrorParser {
   public JavacErrorParser()
     throws UnsupportedEncodingException
   {
-    _lineBuf.setEncoding(System.getProperty("file.encoding"));
+    this(null);
+  }
+
+  public JavacErrorParser(String encoding)
+    throws UnsupportedEncodingException
+  {
+    if (encoding == null)
+      encoding = System.getProperty("file.encoding");
+  
+    _lineBuf.setEncoding(encoding);
   }
 
   String parseErrors(InputStream is, LineMap lineMap)

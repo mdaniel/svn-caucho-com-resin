@@ -317,16 +317,7 @@ public class UserQuery implements AmberQuery {
     if (cacheChunk == null) {
       ResultSet rs;
 
-      if (isCacheable) {
-	int limit = _maxResults;
-	if (limit > 0 && limit < 25)
-	  limit = 25;
-	
-	rs = executeQuery(0, limit);
-      }
-      else
-	rs = executeQuery(0, _maxResults);
-      
+      rs = executeQuery(0, _maxResults);
       _rs.setResultSet(rs);
 
       if (isCacheable) {
@@ -356,7 +347,7 @@ public class UserQuery implements AmberQuery {
 
     if (maxResults > 0) {
       JdbcMetaData metaData = _aConn.getAmberManager().getMetaData();
-      
+
       sql = metaData.limit(sql, maxResults);
     }
     

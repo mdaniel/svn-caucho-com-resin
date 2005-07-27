@@ -30,6 +30,8 @@ package com.caucho.amber.query;
 
 import java.util.ArrayList;
 
+import java.lang.ref.SoftReference;
+
 import java.sql.SQLException;
 
 import com.caucho.util.Alarm;
@@ -38,6 +40,8 @@ import com.caucho.util.Alarm;
  * The JDBC statement implementation.
  */
 public class ResultSetCacheChunk {
+  public static final int CACHE_CHUNK_SIZE = 64;
+  
   private SelectQuery _query;
   
   private ArrayList<FromItem> _fromList;
@@ -46,12 +50,24 @@ public class ResultSetCacheChunk {
   private int _startRow;
 
   private final ArrayList<Object[]> _results = new ArrayList<Object[]>();
+
+  private SoftReference<ResultSetCacheChunk> _next;
   private boolean _isLast;
 
   private long _expireTime;
 
   public ResultSetCacheChunk()
   {
+  }
+
+  public ResultSetCacheChunk(ResultSetCacheChunk prev)
+  {
+    _startRow = prev._startRow + CACHE_CHUNK_SIZE;
+    _query = prev._query;
+    _fromList = prev._fromList;
+    _resultList = prev._resultList;
+
+    _expireTime = prev._expireTime;
   }
 
   /**
@@ -97,6 +113,7 @@ public class ResultSetCacheChunk {
   public void invalidate()
   {
     _expireTime = 0;
+    _next = null;
   }
 
   /**
@@ -105,7 +122,8 @@ public class ResultSetCacheChunk {
   public boolean invalidate(String table, Object key)
   {
     if (getQuery().invalidateTable(table)) {
-      _expireTime = 0;
+      invalidate();
+
       return true;
     }
     else
@@ -117,7 +135,7 @@ public class ResultSetCacheChunk {
    */
   public int getRowCount()
   {
-    return _results.size();
+    return _startRow + _results.size();
   }
 
   /**
@@ -133,7 +151,28 @@ public class ResultSetCacheChunk {
    */
   public void setValue(int row, int column, Object value)
   {
-    _results.get(row)[column] = value;
+    _results.get(row % CACHE_CHUNK_SIZE)[column] = value;
+  }
+
+  /**
+   * Gets the next chunk
+   */
+  public ResultSetCacheChunk getNext()
+  {
+    SoftReference<ResultSetCacheChunk> nextRef = _next;
+
+    if (nextRef != null)
+      return nextRef.get();
+    else
+      return null;
+  }
+
+  /**
+   * Gets the next chunk
+   */
+  public void setNext(ResultSetCacheChunk next)
+  {
+    _next = new SoftReference<ResultSetCacheChunk>(next);
   }
 
   /**
@@ -258,6 +297,6 @@ public class ResultSetCacheChunk {
    */
   public final Object getObject(int row, int column)
   {
-    return _results.get(row)[column];
+    return _results.get(row % CACHE_CHUNK_SIZE)[column];
   }
 }

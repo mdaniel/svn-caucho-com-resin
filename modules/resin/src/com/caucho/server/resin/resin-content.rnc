@@ -52,9 +52,11 @@ r_host = element host {
 
   & r_lazy-init?
 
-  & r_startup-mode?
+  & r_redeploy-mode?
 
   & r_root-directory?
+
+  & r_startup-mode?
 
   & r_host-Group
 }
@@ -230,8 +232,6 @@ r_resin-Basis =
 
   & r_boot?
 
-  & (attribute user-name { string } | element user-name { string })?
-
   & (attribute group-name { string } | element group-name { string })?
 
   & r_min-free-memory?
@@ -250,6 +250,8 @@ r_resin-Basis =
   & r_thread-pool?
 
   & r_transaction-manager?
+
+  & (attribute user-name { string } | element user-name { string })?
 
 ## <resin> flow control
 r_resin-Flow =

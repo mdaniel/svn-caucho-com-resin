@@ -148,6 +148,10 @@ public class JavaJspBuilder extends JspBuilder {
     throws JspParseException
   {
     try {
+      // jsp/031a
+      if (_rootNode != null)
+	return;
+      
       if (_parseState.isTag())
         _gen = new JavaTagGenerator(_tagManager);
       else
@@ -364,10 +368,12 @@ public class JavaJspBuilder extends JspBuilder {
     }
 
     try {
-      _currentNode.endElement();
-      _currentNode.setEndLocation(_filename, _line);
-
-      _currentNode = _currentNode.getParent();
+      JspNode node = _currentNode;
+      
+      _currentNode = node.getParent();
+      
+      node.setEndLocation(_filename, _line);
+      node.endElement();
     } catch (JspLineParseException e) {
       throw e;
     } catch (JspParseException e) {

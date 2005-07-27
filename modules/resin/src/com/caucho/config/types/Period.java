@@ -52,6 +52,7 @@ public class Period {
   public static final long FOREVER = INFINITE;
 
   private static final QDate _localCalendar = QDate.createLocal();
+  
   private long _period;
 
   public Period()
@@ -62,6 +63,14 @@ public class Period {
   {
     _period = period;
   }
+
+  /**
+   * Returns the default units (default is 1000)
+   */
+  public long getDefaultUnits()
+  {
+    return 1000;
+  }
   
   /**
    * Sets the text.
@@ -69,7 +78,7 @@ public class Period {
   public void addText(String text)
     throws ConfigException
   {
-    _period = toPeriod(text);
+    _period = toPeriod(text, getDefaultUnits());
   }
 
   /**
@@ -97,6 +106,26 @@ public class Period {
   public static long toPeriod(String value)
     throws ConfigException
   {
+    return toPeriod(value, 1000);
+  }
+
+  /**
+   * Converts a period string to a time.
+   *
+   * <table>
+   * <tr><td>ms<td>milliseconds
+   * <tr><td>s<td>seconds
+   * <tr><td>m<td>minutes
+   * <tr><td>h<td>hours
+   * <tr><td>D<td>days
+   * <tr><td>W<td>weeks
+   * <tr><td>M<td>months
+   * <tr><td>Y<td>years
+   * </table>
+   */
+  public static long toPeriod(String value, long defaultUnits)
+    throws ConfigException
+  {
     if (value == null)
       return 0;
     
@@ -119,7 +148,7 @@ public class Period {
 	delta = 10 * delta + ch - '0';
 
       if (length <= i)
-	period += 1000 * delta;
+	period += defaultUnits * delta;
       else {
         ch = value.charAt(i++);
 	switch (ch) {
@@ -155,7 +184,6 @@ public class Period {
 	case 'Y':
 	  period += 365L * DAY * delta;
 	  break;
-
 
         default:
           throw new ConfigException(L.l("Unknown unit `{0}' in period `{1}'. Valid units are:\n  '10ms' milliseconds\n  '10s' seconds\n  '10m' minutes\n  '10h' hours\n  '10D' days\n  '10W' weeks\n  '10M' months\n  '10Y' years",

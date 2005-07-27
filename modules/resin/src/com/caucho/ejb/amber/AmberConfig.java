@@ -146,6 +146,7 @@ public class AmberConfig {
     type.setTable(table);
 
     type.setReadOnly(bean.isReadOnly());
+    table.setReadOnly(bean.isReadOnly());
     type.setCacheTimeout(bean.getCacheTimeout());
 
     if (hasMethod(bean.getEJBClassWrapper(), "ejbLoad", new JClass[0])) {

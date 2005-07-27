@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -325,7 +326,7 @@ public class JdbcMessage {
       PreparedStatement selectStmt = conn.prepareStatement(sql);
 
       
-      sql = ("UPDATE " + _messageTable + " SET consumer=? " +
+      sql = ("UPDATE " + _messageTable + " SET consumer=?, delivered=1 " +
 	     "WHERE m_id=? AND consumer IS NULL");
       
       PreparedStatement updateStmt = conn.prepareStatement(sql);
@@ -360,6 +361,9 @@ public class JdbcMessage {
 	
 	if (updateCount == 1)
 	  return msg;
+	else if (log.isLoggable(Level.FINE)) {
+	  log.fine("JdbcMessageQueue[" + queue + "] can't update received message " + id + " for session " + session +".");
+	}
       }
     } finally {
       conn.close();
@@ -377,32 +381,6 @@ public class JdbcMessage {
     try {
       String sql = ("DELETE FROM " +  _messageTable + " " +
 		    "WHERE consumer=?");
-      
-      PreparedStatement pstmt;
-      pstmt = conn.prepareStatement(sql);
-
-      pstmt.setInt(1, session);
-
-      pstmt.executeUpdate();
-
-      pstmt.close();
-    } finally {
-      conn.close();
-    }
-  }
-
-  /**
-   * Rollback all received messages from the session.
-   */
-  void rollback(int session)
-    throws SQLException
-  {
-    Connection conn = _dataSource.getConnection();
-
-    try {
-      String sql = ("UPDATE " +  _messageTable +
-		    " SET reader=NULL " +
-		    " WHERE reader=?");
       
       PreparedStatement pstmt;
       pstmt = conn.prepareStatement(sql);

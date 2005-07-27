@@ -26,9 +26,6 @@ r_access-log = element access-log {
   & (attribute format { string }
      | element format { string })?
 
-  & (attribute archive-format { string }
-     | element archive-format { string })?
-
   & r_init?
 }
 

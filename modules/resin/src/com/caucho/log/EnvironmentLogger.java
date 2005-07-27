@@ -182,6 +182,67 @@ class EnvironmentLogger extends Logger implements ClassLoaderListener {
       doSetLevel(handler.getLevel());
   }
 
+  /**
+   * Removes a handler.
+   */
+  public synchronized void removeHandler(Handler handler)
+  {
+    ClassLoader loader = Thread.currentThread().getContextClassLoader();
+
+    boolean hasLoader = false;
+    for (int i = _loaders.size() - 1; i >= 0; i--) {
+      SoftReference<ClassLoader> ref = _loaders.get(i);
+      ClassLoader refLoader = ref.get();
+
+      if (refLoader == null)
+        _loaders.remove(i);
+
+      if (isParentLoader(loader, refLoader))
+        removeHandler(handler, refLoader);
+    }
+
+    HandlerEntry ownHandlers = _ownHandlers.get();
+    if (ownHandlers != null)
+      ownHandlers.removeHandler(handler);
+  }
+
+  private void removeHandler(Handler handler, ClassLoader loader)
+  {
+    ArrayList<Handler> handlers = new ArrayList<Handler>();
+
+    for (ClassLoader ptr = loader; ptr != null; ptr = ptr.getParent()) {
+      Handler []localHandlers = _localHandlers.getLevel(ptr);
+
+      if (localHandlers != null) {
+        for (int i = 0; i < localHandlers.length; i++) {
+	  if (! localHandlers[i].equals(handler)) {
+	    int p = handlers.indexOf(localHandlers[i]);
+
+	    if (p < 0) {
+	      handlers.add(localHandlers[i]);
+	    }
+	    else {
+	      Handler oldHandler = handlers.get(p);
+
+	      if (localHandlers[i].getLevel().intValue()
+		  < oldHandler.getLevel().intValue()) {
+		handlers.set(p, localHandlers[i]);
+	      }
+	    }
+	  }
+        }
+      }
+    }
+
+    Handler []newHandlers = new Handler[handlers.size()];
+    handlers.toArray(newHandlers);
+
+    _localHandlers.set(newHandlers);
+
+    if (handler.getLevel().intValue() < _level)
+      doSetLevel(handler.getLevel());
+  }
+
   private boolean isParentLoader(ClassLoader parent, ClassLoader child)
   {
     for (; child != null; child = child.getParent()) {

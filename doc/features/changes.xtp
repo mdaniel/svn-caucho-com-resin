@@ -4,6 +4,17 @@
 
 <s2 title='3.0.snap - July 5, 2005'>
 <ul>
+<li>Amber query cache should not be limited to first 25 items (rep by christian amott, RSN-328)
+<li>read-only Entity beans should not be reloaded in a transaction (rep by christian amott, RSN-330)
+<li>JavacErrorParser now uses the javac enconding instead of file.encoding (rep by T Fukuda, RSN-332)
+<li>jsp:directive.include wasn't working with jspx (rep by Dmitry Savenko)
+<li>Updated default log rollover size to 2G (rep by Bill Au)
+<li>Fixed race condition in ResinServer.close (fixed! by Fiaz Hossain)
+<li>Added setRestartOnClose to ResinServer (rep by Fiaz Hossain, RSN-350)
+<li>Added EnvironmentLogger.removeHandler (rep by Fiaz Hossain, RSN-351)
+<li>Need to change MDB and session shutdown order to properly close response (rep by Guenther Wieser, RSN-365)
+<li>Added %D to access-log format to allow for millisecond timing (rep by Bert Ano)
+<li>Added override of resolveProxyClass in ContextLoaderObjectInputStream (rep by Gunther Wieser, RSN-345)
 <li>Fixed pthread_mutex_lock define in Solaris to mutex_lock (Joe Dane, RSN-343)
 <li>JNI calls require JNICALL and JNIEXPORT - RSN-341 (rep by Chanan J Braunstein)
 <li>pro Makefile.in was missing resin_os (rep by Bill Au)

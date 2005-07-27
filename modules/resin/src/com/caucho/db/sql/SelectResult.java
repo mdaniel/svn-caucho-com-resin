@@ -666,8 +666,7 @@ public class SelectResult {
   private String readBlobString()
     throws SQLException
   {
-    for (int i = 0; i < 128; i++)
-      _blob[i] = (byte) read();
+    read(_blob, 0, 128);
 
     CharBuffer cb = _cb;
     cb.clear();
@@ -957,6 +956,34 @@ public class SelectResult {
     byte []buf = _buffers[offset >> SIZE_BITS];
 
     return buf[offset & SIZE_MASK] & 0xff;
+  }
+
+  /**
+   * Reads the next byte.
+   */
+  private int read(byte []buffer, int bufOffset, int bufLength)
+  {
+    int offset = _offset;
+    int length = _length;
+    byte [][]buffers = _buffers;
+
+    for (int i = bufLength; i > 0; i--) {
+      if (length <= offset) {
+	_offset = offset;
+	return -1;
+      }
+
+      byte []buf = buffers[offset >> SIZE_BITS];
+
+      buffer[bufOffset] = buf[offset & SIZE_MASK];
+      
+      offset++;
+      bufOffset++;
+    }
+
+    _offset = offset;
+
+    return bufLength;
   }
 
   /**

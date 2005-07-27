@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -84,6 +85,8 @@ import com.caucho.jms.memory.MemoryTopic;
 public class SessionImpl implements Session, ThreadTask {
   protected static final Logger log = Log.open(SessionImpl.class);
   protected static final L10N L = new L10N(SessionImpl.class);
+
+  private static final long SHUTDOWN_WAIT_TIME = 10000;
 
   private boolean _isTransacted;
   private int _acknowledgeMode;
@@ -542,10 +545,10 @@ public class SessionImpl implements Session, ThreadTask {
     synchronized (_consumers) {
       _consumers.notifyAll();
 
-      long timeout = Alarm.getCurrentTime() + 60000L;
+      long timeout = Alarm.getCurrentTime() + SHUTDOWN_WAIT_TIME;
       while (_isRunning && Alarm.getCurrentTime() < timeout) {
 	try {
-	  _consumers.wait(60000);
+	  _consumers.wait(SHUTDOWN_WAIT_TIME);
 	
 	  if (Alarm.isTest()) {
 	    return;
@@ -657,6 +660,12 @@ public class SessionImpl implements Session, ThreadTask {
   {
     if (_isClosed)
       return;
+
+    try {
+      stop();
+    } catch (Throwable e) {
+      log.log(Level.WARNING, e.toString(), e);
+    }
 
     for (int i = 0; i < _consumers.size(); i++) {
       MessageConsumerImpl consumer = _consumers.get(i);

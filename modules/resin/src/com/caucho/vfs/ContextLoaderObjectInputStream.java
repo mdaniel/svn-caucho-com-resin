@@ -33,6 +33,8 @@ import java.io.ObjectStreamClass;
 import java.io.InputStream;
 import java.io.IOException;
 
+import java.lang.reflect.Proxy;
+
 /**
  * Object input stream which loads based on the context class loader.
  */
@@ -55,5 +57,20 @@ public class ContextLoaderObjectInputStream extends ObjectInputStream {
     ClassLoader loader = thread.getContextClassLoader();
 
     return Class.forName(name, false, loader);
+  }
+
+  protected Class resolveProxyClass(String []interfaceNames)
+    throws IOException, ClassNotFoundException
+  {
+    Thread thread = Thread.currentThread();
+    ClassLoader loader = thread.getContextClassLoader();
+    
+    Class []clArray = new Class[interfaceNames.length];
+
+    for (int i = 0; i < interfaceNames.length; i++) {
+      clArray[i] = Class.forName(interfaceNames[i], false, loader);
+    }
+
+    return Proxy.getProxyClass(loader, clArray);
   }
 }

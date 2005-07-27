@@ -78,6 +78,7 @@ public class Resin implements ResinServerListener {
   private EnvironmentClassLoader _classLoader;
 
   private long _startTime;
+  
   private volatile boolean _isClosed;
   private volatile boolean _isRestarting;
 
@@ -326,6 +327,7 @@ public class Resin implements ResinServerListener {
     server.setServerId(_serverId);
     server.addListener(this);
     server.setResinProfessional(isResinProfessional);
+    server.setRestartOnClose(_waitIn == null);
 
     _mainThread.setContextClassLoader(_systemClassLoader);
 
@@ -373,7 +375,7 @@ public class Resin implements ResinServerListener {
   public void closeEvent(ResinServer server)
   {
     try {
-      if (_waitIn == null) {
+      if (_server != null && _server.isRestartOnClose()) {
 	_isRestarting = true;
 	_server = null;
 

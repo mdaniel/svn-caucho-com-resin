@@ -208,6 +208,7 @@ in.</p>
 <tr><td>%s<td>status code
 <tr><td>%{<var/xxx/>}t<td>request date with optional time format string.
 <tr><td>%T<td>time of request in seconds
+<tr><td>%D<td>time of request in microseconds (3.0.16)
 <tr><td>%u<td>remote user
 <tr><td>%U<td>request URI
 </deftable>

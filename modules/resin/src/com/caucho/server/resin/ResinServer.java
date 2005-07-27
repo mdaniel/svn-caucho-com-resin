@@ -108,6 +108,8 @@ public class ResinServer
   private long _minFreeMemory = 2 * 1024L * 1024L;
   private long _shutdownWaitMax = 60000L;
 
+  private boolean _isRestartOnClose;
+
   private HashMap<String,Object> _variableMap = new HashMap<String,Object>();
   
   private ArrayList<ServerController> _servers
@@ -232,6 +234,24 @@ public class ResinServer
   void setResinProfessional(boolean isPro)
   {
     _isResinProfessional = isPro;
+  }
+
+  /**
+   * Set true if the server should restart rather than exit when
+   * the instance shuts down.
+   */
+  public boolean isRestartOnClose()
+  {
+    return _isRestartOnClose;
+  }
+
+  /**
+   * Set true if the server should restart rather than exit when
+   * the instance shuts down.
+   */
+  public void setRestartOnClose(boolean isRestartOnClose)
+  {
+    _isRestartOnClose = isRestartOnClose;
   }
 
   /**
@@ -519,17 +539,17 @@ public class ResinServer
 	server.destroy();
       }
 
+      ArrayList<ResinServerListener> listeners = _listeners;
+    
+      for (int i = 0; i < listeners.size(); i++) {
+	ResinServerListener listener = listeners.get(i);
+
+	listener.closeEvent(this);
+      }
+
       Environment.closeGlobal();
     } finally {
       _isClosed = true;
-    }
-
-    ArrayList<ResinServerListener> listeners = _listeners;
-    
-    for (int i = 0; i < listeners.size(); i++) {
-      ResinServerListener listener = listeners.get(i);
-
-      listener.closeEvent(this);
     }
   }
 

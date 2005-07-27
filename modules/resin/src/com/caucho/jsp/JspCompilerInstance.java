@@ -429,6 +429,9 @@ public class JspCompilerInstance {
       isXml = _jspPropertyGroup.isXml();
 
     try {
+      _parser.getParseState().setBuilder(_jspBuilder);
+      _parser.getParseState().setXml(isXml);
+      
       if (isXml) {
 	Xml xml = new Xml();
 	xml.setContentHandler(new JspContentHandler(_jspBuilder));

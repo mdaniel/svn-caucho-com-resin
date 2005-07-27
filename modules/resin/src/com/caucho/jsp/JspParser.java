@@ -175,6 +175,14 @@ public class JspParser {
   }
 
   /**
+   * Sets the parse state, which stores state information for the parsing.
+   */
+  ParseState getParseState()
+  {
+    return _parseState;
+  }
+
+  /**
    * Sets the tag manager
    */
   void setTagManager(ParseTagManager manager)

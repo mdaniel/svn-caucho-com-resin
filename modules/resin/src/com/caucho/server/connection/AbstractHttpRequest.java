@@ -2153,7 +2153,7 @@ public abstract class AbstractHttpRequest
    */
   protected final void setStartTime()
   {
-    _startTime = Alarm.getCurrentTime();
+    _startTime = Alarm.getExactTime();
   }
   
   /**

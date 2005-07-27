@@ -64,11 +64,11 @@ public class Cluster implements EnvironmentListener, ClusterMBean {
   static protected final L10N L = new L10N(ClusterGroup.class);
   static protected final Logger log = Log.open(Cluster.class);
 
-  static protected final EnvironmentLocal<String> _serverIdLocal =
-  new EnvironmentLocal<String>("caucho.server-id");
+  static protected final EnvironmentLocal<String> _serverIdLocal
+    = new EnvironmentLocal<String>("caucho.server-id");
   
-  static protected final EnvironmentLocal<Cluster> _clusterLocal =
-  new EnvironmentLocal<Cluster>("caucho.cluster");
+  static protected final EnvironmentLocal<Cluster> _clusterLocal
+    = new EnvironmentLocal<Cluster>("caucho.cluster");
 
   private String _id = "";
   

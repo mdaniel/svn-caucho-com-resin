@@ -76,6 +76,7 @@ public class InterleaveItem extends Item {
       return;
     }
 
+    /* XXX: remove for perf?
     for (int i = 0; i < _items.size(); i++) {
       Item subItem = _items.get(i);
 
@@ -109,6 +110,7 @@ public class InterleaveItem extends Item {
         }
       }
     }
+    */
 
     _items.add(item);
   }

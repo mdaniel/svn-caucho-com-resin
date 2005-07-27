@@ -265,7 +265,7 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener {
       case 'b': case 'c':
       case 'h': case 'i': case 'l': case 'n':
       case 'r': case 's':
-      case 'T': case 'o':
+      case 'T': case 'D': case 'o':
       case 'u': case 'U':
 	if (cb.length() > 0)
 	  segments.add(new Segment(this, Segment.TEXT, cb.toString()));
@@ -459,11 +459,22 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener {
 	break;
 
       case 'T':
-        long startTime = request.getStartTime();
-        long now = Alarm.getCurrentTime();
+	{
+	  long startTime = request.getStartTime();
+	  long endTime = Alarm.getExactTime();
 
-	offset = print(buffer, offset, (int) ((now - startTime + 500) / 1000));
-	break;
+	  offset = print(buffer, offset, (int) ((endTime - startTime + 500) / 1000));
+	  break;
+	}
+
+      case 'D':
+	{
+	  long startTime = request.getStartTime();
+	  long endTime = Alarm.getExactTime();
+
+	  offset = print(buffer, offset, (int) ((endTime - startTime) * 1000));
+	  break;
+	}
 
       case 'u':
 	value = request.getRemoteUser(false);

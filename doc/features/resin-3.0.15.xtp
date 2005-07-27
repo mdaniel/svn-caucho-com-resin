@@ -8,9 +8,34 @@
 
 <summary objsummary='localtoc'/>
 
+<section title="access-log time in microseconds">
+
+<p>The access log format string now supports '%D' to measure the time
+taken in microseconds (actual accuracy is milliseconds).</p>
+
+</section>
+
 <section title="Eclipse compiler">
 
 <p>&lt;javac compiler="eclipse"/> is now supported.</p>
+
+</section>
+
+<section title="EnvironmentLogger.removeHandle">
+
+<p>Environment-specific logging handles can now be removed.</p>
+
+</section>
+
+<section title="AmberTableCache">
+
+<p>An amber bean now allows an @AmberTableCache annotation to specify
+the read-only and cache timeout attributes.</p>
+
+<section title="Special Thanks">
+
+<p>Special thanks to Fiaz Hossain for suggesting a fix for the
+EnvironmentLogger.removeHandle functionality.</p>
 
 </section>
 

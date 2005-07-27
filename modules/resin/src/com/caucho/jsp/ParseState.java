@@ -73,6 +73,7 @@ public class ParseState {
   private boolean _isThreadSafe = true;
 
   private boolean _isTag = false;
+  private boolean _isXml = false;
 
   private int _buffer = 8192;
 
@@ -84,8 +85,10 @@ public class ParseState {
   private Class _extends;
 
   private boolean _recycleTags = true;
-  
+
   private JspResourceManager _resourceManager;
+
+  private JspBuilder _jspBuilder;
 
   private ArrayList<String> _importList = new ArrayList<String>();
 
@@ -367,6 +370,22 @@ public class ParseState {
   {
     _isTag = isTag;
   }
+
+  /**
+   * Returns true if parsing is XML
+   */
+  public boolean isXml()
+  {
+    return _isXml;
+  }
+
+  /**
+   * Set if parsing is xml
+   */
+  public void setXml(boolean isXml)
+  {
+    _isXml = isXml;
+  }
   
   /**
    * Gets the resource manager.
@@ -382,6 +401,22 @@ public class ParseState {
   public void setResourceManager(JspResourceManager resourceManager)
   {
     _resourceManager = resourceManager;
+  }
+  
+  /**
+   * Gets the builder
+   */
+  public JspBuilder getBuilder()
+  {
+    return _jspBuilder;
+  }
+  
+  /**
+   * Sets the builder
+   */
+  public void setBuilder(JspBuilder jspBuilder)
+  {
+    _jspBuilder = jspBuilder;
   }
 
   private static CharScanner COMMA_DELIM_SCANNER = new CharScanner(" \t\n\r,");

@@ -170,15 +170,15 @@ public class MessageServer extends AbstractServer {
   public void destroy()
   {
     try {
-      if (_connection != null)
-        _connection.close();
-
       ArrayList<Consumer> consumers = new ArrayList<Consumer>(_consumers);
       _consumers = null;
       
       for (Consumer consumer : consumers) {
 	consumer.destroy();
       }
+      
+      if (_connection != null)
+        _connection.close();
     } catch (Exception e) {
       log.log(Level.WARNING, e.toString(), e);
     }
@@ -254,14 +254,14 @@ public class MessageServer extends AbstractServer {
       _session = null;
 
       try {
+	if (session != null)
+	  session.close();
+      } finally {
 	if (_listener instanceof MessageDrivenBean) {
 	  MessageDrivenBean bean = (MessageDrivenBean) _listener;
 	  _listener = null;
 	  bean.ejbRemove();
 	}
-      } finally {
-	if (session != null)
-	  session.close();
       }
     }
   }

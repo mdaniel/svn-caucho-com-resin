@@ -64,8 +64,8 @@ public class AbstractRolloverLog {
   // Milliseconds in a day
   private static final long DAY = 24L * 3600L * 1000L;
   
-  // Default maximum log size = 1G
-  private static final long DEFAULT_ROLLOVER_SIZE = 1024L * 1024L * 1024L;
+  // Default maximum log size = 2G
+  private static final long DEFAULT_ROLLOVER_SIZE = 2 * 1024L * 1024L * 1024L;
   // How often to check size
   private static final long DEFAULT_ROLLOVER_CHECK_PERIOD = 600L * 1000L;
 

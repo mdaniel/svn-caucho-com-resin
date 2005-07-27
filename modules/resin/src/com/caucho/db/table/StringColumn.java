@@ -322,10 +322,8 @@ class StringColumn extends Column {
   {
     BTree index = getIndex();
 
-    if (index == null)
-      return;
-
-    index.insert(block, rowOffset + _columnOffset, getLength(), rowAddr, xa);
+    if (index != null)
+      index.insert(block, rowOffset + _columnOffset, getLength(), rowAddr, xa);
   }
   
   /**
@@ -340,7 +338,8 @@ class StringColumn extends Column {
   {
     BTree index = getIndex();
 
-    index.remove(block, rowOffset + _columnOffset, getLength(), xa);
+    if (index != null)
+      index.remove(block, rowOffset + _columnOffset, getLength(), xa);
   }
 
   public String toString()
