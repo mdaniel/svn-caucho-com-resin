@@ -29,61 +29,41 @@
 
 package com.caucho.server.resin;
 
-import java.lang.ref.SoftReference;
-
-import java.util.*;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import java.security.Security;
-import java.security.Provider;
-
-import javax.management.ObjectName;
-import javax.management.MBeanServer;
-
-import javax.servlet.jsp.el.VariableResolver;
-
-import com.caucho.config.SchemaBean;
-import com.caucho.config.types.InitProgram;
 import com.caucho.config.ConfigException;
-
+import com.caucho.config.SchemaBean;
 import com.caucho.config.types.Bytes;
+import com.caucho.config.types.InitProgram;
 import com.caucho.config.types.Period;
-
+import com.caucho.el.EL;
+import com.caucho.el.MapVariableResolver;
+import com.caucho.el.SystemPropertiesResolver;
 import com.caucho.jmx.Jmx;
-
+import com.caucho.jsp.cfg.JspPropertyGroup;
 import com.caucho.loader.Environment;
+import com.caucho.loader.EnvironmentBean;
 import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.loader.EnvironmentLocal;
-import com.caucho.loader.EnvironmentBean;
-
-import com.caucho.relaxng.CompactVerifierFactoryImpl;
-
-import com.caucho.el.EL;
-import com.caucho.el.SystemPropertiesResolver;
-import com.caucho.el.MapVariableResolver;
-
-import com.caucho.server.dispatch.ServerListener;
 import com.caucho.server.dispatch.DispatchServer;
-
-import com.caucho.jsp.cfg.JspPropertyGroup;
-
-import com.caucho.server.resin.mbean.ResinServerMBean;
-
+import com.caucho.server.dispatch.ServerListener;
 import com.caucho.transaction.cfg.TransactionManagerConfig;
-
+import com.caucho.util.Alarm;
 import com.caucho.util.CauchoSystem;
 import com.caucho.util.L10N;
-import com.caucho.util.Alarm;
 import com.caucho.util.Log;
-
-import com.caucho.vfs.Vfs;
 import com.caucho.vfs.Path;
+import com.caucho.vfs.Vfs;
+
+import javax.servlet.jsp.el.VariableResolver;
+import java.security.Provider;
+import java.security.Security;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.logging.Logger;
 
 public class ResinServer
   implements EnvironmentBean, SchemaBean,
-	     ServerListener, ResinServerMBean {
+	     ServerListener {
   private static final Logger log = Log.open(ResinServer.class);
   private static final L10N L = new L10N(ResinServer.class);
 
@@ -94,7 +74,7 @@ public class ResinServer
   
   private ClassLoader _classLoader;
 
-  private ObjectName _objectName;
+  private final ResinServerAdmin _resinServerAdmin;
 
   private String _serverId;
   private String _configFile;
@@ -130,7 +110,7 @@ public class ResinServer
   public ResinServer()
   {
     _resinServer = this;
-    
+
     _classLoader = Thread.currentThread().getContextClassLoader();
 
     if (_classLoader == null)
@@ -155,9 +135,11 @@ public class ResinServer
     EL.setEnvironment(varResolver);
     EL.setVariableMap(_variableMap, _classLoader);
     _variableMap.put("fmt", new com.caucho.config.functions.FmtFunctions());
-    
+
+    _resinServerAdmin = new ResinServerAdmin(this);
+
     try {
-      Jmx.register(this, "resin:type=ResinServer");
+      Jmx.register(_resinServerAdmin, "resin:type=ResinServer");
     } catch (Exception e) {
       e.printStackTrace();
     }
