@@ -28,6 +28,8 @@
 
 package com.caucho.widget;
 
+import com.caucho.vfs.XmlWriter;
+
 import javax.servlet.http.Cookie;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -136,7 +138,7 @@ public interface WidgetResponse
   /**
    * @see javax.servlet.http.HttpServletResponse#getWriter()
    */
-  public WidgetWriter getWriter()
+  public XmlWriter getWriter()
     throws IOException;
 
   /**

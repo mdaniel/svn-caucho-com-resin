@@ -31,6 +31,7 @@ package com.caucho.widget.impl;
 import com.caucho.widget.*;
 import com.caucho.util.L10N;
 import com.caucho.util.Log;
+import com.caucho.vfs.XmlWriter;
 
 import javax.servlet.http.Cookie;
 import java.io.*;
@@ -61,7 +62,7 @@ public class ActiveState
 
   protected Widget _widget;
   protected ActiveState _parentState;
-  protected WidgetWriter _writer;
+  protected XmlWriter _writer;
   protected OutputStream _outputStream;
   protected PrefixMap _namespaceParameterMap;
   protected PrefixMap _localParameterMap;
@@ -627,7 +628,7 @@ public class ActiveState
     getParentState().addCookie(cookie);
   }
 
-  public WidgetWriter getWriter()
+  public XmlWriter getWriter()
     throws IOException
   {
     if (_writer == null)
@@ -1163,7 +1164,7 @@ public class ActiveState
       return getState().getOutputStream();
     }
 
-    public WidgetWriter getWriter()
+    public XmlWriter getWriter()
       throws IOException
     {
       return getState().getWriter();

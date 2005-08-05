@@ -28,6 +28,8 @@
 
 package com.caucho.widget;
 
+import com.caucho.vfs.XmlWriter;
+
 import javax.servlet.http.Cookie;
 import java.io.*;
 import java.net.MalformedURLException;
@@ -46,7 +48,7 @@ public class MockExternalConnection
   private ByteArrayOutputStream _out
     = new ByteArrayOutputStream();
 
-  private WidgetWriter _widgetWriter;
+  private XmlWriter _widgetWriter;
   private String _charset = "utf-8"; // XXX: should be like servlet?
 
   private Map<String, String[]> _parameterMap;
@@ -388,12 +390,12 @@ public class MockExternalConnection
     throw new UnsupportedOperationException();
   }
 
-  public WidgetWriter getWriter()
+  public XmlWriter getWriter()
     throws IOException
   {
     if (_widgetWriter == null) {
       Writer writer = new OutputStreamWriter(_out, _charset);
-      _widgetWriter = new WidgetWriter(writer);
+      _widgetWriter = new XmlWriter(writer);
     }
 
     return _widgetWriter;

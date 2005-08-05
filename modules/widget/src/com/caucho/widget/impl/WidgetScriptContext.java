@@ -29,6 +29,7 @@
 package com.caucho.widget.impl;
 
 import com.caucho.widget.*;
+import com.caucho.vfs.XmlWriter;
 
 import javax.script.GenericScriptContext;
 import javax.script.Namespace;
@@ -198,7 +199,7 @@ public class WidgetScriptContext
       initContext("response", response);
 
       try {
-        WidgetWriter out = response.getWriter();
+        XmlWriter out = response.getWriter();
         _namespace.put("out", out);
 
         setWriter(out);

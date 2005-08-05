@@ -28,6 +28,8 @@
 
 package com.caucho.widget;
 
+import com.caucho.vfs.XmlWriter;
+
 import java.io.IOException;
 
 public class TextboxWidget
@@ -270,7 +272,7 @@ public class TextboxWidget
   public void response(WidgetResponse response)
     throws WidgetException, IOException
   {
-    WidgetWriter out = response.getWriter();
+    XmlWriter out = response.getWriter();
 
     String id = getId();
     String cssClass = getCssClass(response);

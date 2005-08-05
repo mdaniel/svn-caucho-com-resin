@@ -31,9 +31,6 @@ package com.caucho.widget;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.ServletException;
-import javax.portlet.PortletRequest;
-import javax.portlet.PortletResponse;
-import javax.portlet.PortletException;
 import java.io.IOException;
 
 public interface WidgetContext

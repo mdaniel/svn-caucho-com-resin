@@ -28,7 +28,7 @@
 
 package com.caucho.widget.impl;
 
-import com.caucho.widget.WidgetWriter;
+import com.caucho.vfs.XmlWriter;
 import com.caucho.widget.ExternalConnection;
 
 import javax.servlet.ServletContext;
@@ -47,7 +47,7 @@ public class HttpExternalConnection
   private ServletContext _servletContext;
   private HttpServletRequest _request;
   private HttpServletResponse _response;
-  private WidgetWriter _widgetWriter;
+  private XmlWriter _widgetWriter;
   private OutputStream _outputStream;
 
   public void start(ServletContext servletContext,
@@ -297,11 +297,11 @@ public class HttpExternalConnection
     _response.setCharacterEncoding(charset);
   }
 
-  public WidgetWriter getWriter()
+  public XmlWriter getWriter()
     throws IOException
   {
     if (_widgetWriter == null)
-      _widgetWriter = new WidgetWriter(_response.getWriter());
+      _widgetWriter = new XmlWriter(_response.getWriter());
 
     return _widgetWriter;
   }

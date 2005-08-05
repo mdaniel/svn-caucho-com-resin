@@ -567,7 +567,6 @@ abstract public class Widget<S extends WidgetState>
     }
 
     if ( isAction && isActionParameter( state ) ) {
-      log.info(">> url.setAction( true )" );
       url.setAction( true );
     }
     else {

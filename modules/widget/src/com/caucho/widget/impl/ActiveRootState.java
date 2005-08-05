@@ -30,6 +30,7 @@ package com.caucho.widget.impl;
 
 import com.caucho.widget.*;
 import com.caucho.util.L10N;
+import com.caucho.vfs.XmlWriter;
 
 import javax.servlet.http.Cookie;
 import java.io.*;
@@ -345,7 +346,7 @@ public class ActiveRootState
     getExternalConnection().addCookie(cookie);
   }
 
-  public WidgetWriter getWriter()
+  public XmlWriter getWriter()
     throws IOException
   {
 

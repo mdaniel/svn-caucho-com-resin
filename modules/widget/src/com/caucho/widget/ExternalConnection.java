@@ -28,6 +28,8 @@
 
 package com.caucho.widget;
 
+import com.caucho.vfs.XmlWriter;
+
 import javax.servlet.http.Cookie;
 import java.io.*;
 import java.security.Principal;
@@ -127,7 +129,7 @@ public interface ExternalConnection
 
    public void addCookie(Cookie cookie);
 
-   public WidgetWriter getWriter()
+   public XmlWriter getWriter()
     throws IOException;
 
    public OutputStream getOutputStream()

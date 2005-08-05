@@ -29,6 +29,7 @@
 package com.caucho.widget;
 
 import com.caucho.util.L10N;
+import com.caucho.vfs.XmlWriter;
 
 import java.io.IOException;
 
@@ -97,7 +98,7 @@ public class BoxWidget
     String id = getId();
     String cssClass = getCssClass(response);
 
-    WidgetWriter out = response.getWriter();
+    XmlWriter out = response.getWriter();
 
     out.startElement("div");
     out.writeAttribute("id", id);

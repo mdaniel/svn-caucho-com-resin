@@ -39,7 +39,7 @@ import java.io.IOException;
  *
  * - TextboxWidget has no url()?
  *
- * - WidgetWriter <div class='ffo'><span class='Bar'/><span class='Bar'/></div>
+ * - XmlWriter <div class='ffo'><span class='Bar'/><span class='Bar'/></div>
  * - WidgetContext implements VarContext
  *
  * - still some createXXXURL methods, should be getXXX

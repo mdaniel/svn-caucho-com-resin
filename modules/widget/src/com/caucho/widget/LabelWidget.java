@@ -29,6 +29,7 @@
 package com.caucho.widget;
 
 import com.caucho.util.L10N;
+import com.caucho.vfs.XmlWriter;
 
 import java.io.IOException;
 
@@ -165,7 +166,7 @@ public class LabelWidget
     String cssClass = getCssClass(response);
     boolean isDisabled = isDisabled(response);
 
-    WidgetWriter out = response.getWriter();
+    XmlWriter out = response.getWriter();
 
     out.startElement("span");
     out.writeAttribute("id", id);
