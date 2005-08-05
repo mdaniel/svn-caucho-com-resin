@@ -34,17 +34,40 @@ import com.caucho.server.resin.ResinServer;
 
 /**
  * Management interface for the server.
+ * There is one ResinServer global for the entire JVM.
  */
 public interface ResinServerMBean {
+  /**
+   * Returns the ip address of the machine that is running this ResinServer.
+   */
+  public String getLocalHost();
+
   /**
    * Returns the server id, the value of "-server id"
    */
   public String getServerId();
-  
+
+  /**
+   * The Resin home directory used when starting this instance of Resin.
+   * This is the location of the Resin program files.
+   */
+  public String getResinHome();
+
+  /**
+   * The server root directory used when starting this instance of Resin.
+   * This is the root directory of the web server files.
+   */
+  public String getServerRoot();
+
   /**
    * Returns the config file, the value of "-conf foo.conf"
    */
   public String getConfigFile();
+
+  /**
+   * The current lifecycle state.
+   */
+  public String getState();
 
   /**
    * Returns the initial start time.
@@ -55,4 +78,9 @@ public interface ResinServerMBean {
    * Returns the last restart time.
    */
   public Date getStartTime();
+
+  /**
+   * Restart this Resin server.
+   */
+  public void restart();
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2000 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2005 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -23,22 +23,12 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Scott Ferguson
+ * @author Sam
  */
 
-package com.caucho;
+package com.caucho.lifecycle;
 
-final public class Version {
-  public static final String COPYRIGHT =
-    "Copyright(c) 1998-2004 Caucho Technology.  All rights reserved.";
-
-  public static String FULL_VERSION = "Resin-3.0.s050726 (built Tue, 26 Jul 2005 06:14:49 EDT)";
-  public static String VERSION = "3.0.s050726";
-  public static String VERSION_DATE = "20050726T061449";
-
-  public static void main(String []argv)
-  {
-    System.out.println(FULL_VERSION);
-    System.out.println(COPYRIGHT);
-  }
+public interface LifecycleListener
+{
+  public void lifecycleEvent(int oldState, int newState);
 }

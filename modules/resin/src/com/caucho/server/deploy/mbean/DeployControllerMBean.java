@@ -32,21 +32,23 @@ package com.caucho.server.deploy.mbean;
 import java.util.Date;
 
 import javax.management.ObjectName;
+import javax.management.NotificationBroadcaster;
 
 /**
  * Management interface for the deploy controller.
  */
-public interface DeployControllerMBean {
+public interface DeployControllerMBean
+{
   /**
    * Returns the ObjectName.
    */
   public ObjectName getObjectName();
-  
+
   /**
    * Returns the controller's state.
    */
   public String getState();
-  
+
   /**
    * Returns the time the controller was last started
    */

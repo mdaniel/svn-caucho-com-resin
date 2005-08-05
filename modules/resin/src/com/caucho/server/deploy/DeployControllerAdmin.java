@@ -37,21 +37,39 @@ import java.util.logging.Level;
 import java.io.IOException;
 
 import javax.management.ObjectName;
+import javax.management.NotificationBroadcasterSupport;
+import javax.management.NotificationListener;
+import javax.management.NotificationFilter;
+import javax.management.ListenerNotFoundException;
+import javax.management.MBeanNotificationInfo;
+import javax.management.AttributeChangeNotification;
+import javax.management.NotificationEmitter;
 
 import com.caucho.jmx.MBeanHandle;
 
 import com.caucho.server.deploy.mbean.DeployControllerMBean;
+import com.caucho.lifecycle.LifecycleListener;
+import com.caucho.lifecycle.Lifecycle;
+import com.caucho.util.Alarm;
 
 /**
  * A deploy controller for an environment.
  */
 public class DeployControllerAdmin<C extends EnvironmentDeployController>
-  implements DeployControllerMBean, java.io.Serializable {
-  private transient C _controller;
+  implements DeployControllerMBean, NotificationEmitter, LifecycleListener, java.io.Serializable
+{
+  private transient final C _controller;
+
+  // XXX: why transient?
+  private transient final NotificationBroadcasterSupport _broadcaster;
+
+  private long _sequence = 0;
 
   public DeployControllerAdmin(C controller)
   {
     _controller = controller;
+    _broadcaster  = new NotificationBroadcasterSupport();
+    controller.addLifecycleListener(this);
   }
 
   /**
@@ -77,7 +95,7 @@ public class DeployControllerAdmin<C extends EnvironmentDeployController>
   {
     return getController().getState();
   }
-  
+
   /**
    * Returns the time of the last start
    */
@@ -138,4 +156,69 @@ public class DeployControllerAdmin<C extends EnvironmentDeployController>
   {
     return new MBeanHandle(getController().getObjectName());
   }
+
+  public void addNotificationListener(NotificationListener listener,
+                                      NotificationFilter filter,
+                                      Object handback)
+    throws IllegalArgumentException
+  {
+    _broadcaster.addNotificationListener(listener, filter, handback);
+  }
+
+  public void removeNotificationListener(NotificationListener listener)
+    throws ListenerNotFoundException
+  {
+    _broadcaster.removeNotificationListener(listener);
+  }
+
+  public void removeNotificationListener(NotificationListener listener,
+                                         NotificationFilter filter,
+                                         Object handback)
+    throws ListenerNotFoundException
+  {
+    _broadcaster.removeNotificationListener(listener, filter, handback);
+  }
+
+  public MBeanNotificationInfo[] getNotificationInfo()
+  {
+    // XXX: temporary hack
+    MBeanNotificationInfo status = new MBeanNotificationInfo(new String[] { "jmx.attribute.change" }, "status", "status attribute changes");
+
+    return new MBeanNotificationInfo[] { status };
+  }
+
+  synchronized public void lifecycleEvent(int oldState, int newState)
+  {
+    Logger log = _controller.getLog();
+
+    long timestamp = Alarm.getCurrentTime();
+    long sequence;
+
+    String oldValue = Lifecycle.getStateName(oldState);
+    String newValue = Lifecycle.getStateName(newState);
+    String message = newValue;
+
+    sequence = _sequence++;
+
+    if (log.isLoggable(Level.FINEST))
+      log.log(Level.FINEST,  toString() + " lifecycleEvent `" + newValue  + "'");
+
+    AttributeChangeNotification notification
+      = new AttributeChangeNotification(this, sequence, timestamp, message, "State", "java.lang.String", oldValue, newValue);
+
+    _broadcaster.sendNotification(notification);
+  }
+
+  public String toString()
+  {
+    String name =  getClass().getName();
+
+    int i = name.lastIndexOf('.') + 1;
+
+    if (i > 0 && i < name.length())
+      name = name.substring(i);
+
+    return name + "[" + getObjectName() + "]";
+  }
+
 }

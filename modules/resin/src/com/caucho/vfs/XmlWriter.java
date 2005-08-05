@@ -50,6 +50,7 @@ public class XmlWriter
   private int _indent = 0;
 
   private boolean _isElementOpen;
+  private boolean _isElementOpenNeedsNewline;
   private String _openElementName;
 
   private Strategy _strategy = XML;
@@ -115,7 +116,13 @@ public class XmlWriter
   {
     if (_isElementOpen) {
       _isElementOpen = false;
+
       _strategy.closeElement(this, _openElementName, isEnd);
+
+      if (_isElementOpenNeedsNewline) {
+        _isElementOpenNeedsNewline = false;
+        softPrintln();
+      }
 
       return true;
     }
@@ -123,27 +130,88 @@ public class XmlWriter
     return false;
   }
 
-  public void startElement(String name)
+  private void startElement(String name,  boolean isLineBefore, boolean isLineAfter)
   {
     closeElementIfNeeded(false);
+
+    if (isLineBefore)
+      softPrintln();
 
     _openElementName = name;
 
     _strategy.openElement(this, name);
     _isElementOpen = true;
+    _isElementOpenNeedsNewline = isLineAfter;
 
     if (_isIndenting)
       _indent++;
   }
 
-  public void endElement(String name)
+  private void endElement(String name, boolean isLineBefore, boolean isLineAfter)
   {
     if (_isIndenting)
       _indent--;
 
     if (!closeElementIfNeeded(true)) {
+      if (isLineBefore)
+        softPrintln();
+
       _strategy.endElement(this, name);
     }
+
+    if (isLineAfter)
+      softPrintln();
+  }
+
+  /**
+   * Start an element.
+   */
+  public void startElement(String name)
+  {
+    startElement(name, false, false);
+  }
+
+  /**
+   * End an element.
+   */
+  public void endElement(String name)
+  {
+    endElement(name, false, false);
+  }
+  /**
+   * Start an element where the opening tag is on it's own line, the content
+   * is on it's own line, and the closing tag is on it's own line.
+   */
+  public void startBlockElement(String name)
+  {
+    startElement(name, true, true);
+  }
+
+  /**
+   * End an element where the opening tag is on it's own line, the content
+   * is on it's own line, and the closing tag is on it's own line.
+   */
+  public void endBlockElement(String name)
+  {
+    endElement(name, true, true);
+  }
+
+  /**
+   * Start an element where the opening tag, content, and closing tags are on
+   * a single line of their own.
+   */
+  public void startLineElement(String name)
+  {
+    startElement(name, true, false);
+  }
+
+  /**
+   * End an element where the opening tag, content, and closing tags are on
+   * a single line of their own.
+   */
+  public void endLineElement(String name)
+  {
+    endElement(name, false, true);
   }
 
   /**
@@ -154,6 +222,59 @@ public class XmlWriter
   {
     startElement(name);
     endElement(name);
+  }
+
+  /**
+   * Convenience method, same as doing a startLineElement() and then immediately
+   * doing an endLineElement().
+   */
+  public void writeLineElement(String name)
+  {
+    startLineElement(name);
+    endLineElement(name);
+  }
+
+  /**
+   * Convenience method, same as doing a startBlockElement() and then immediately
+   * doing an endBlockElement().
+   */
+  public void writeBlockElement(String name)
+  {
+    startBlockElement(name);
+    endBlockElement(name);
+  }
+
+  /**
+   * Convenience method, same as doing a startElement(), writeText(text),
+   * endElement().
+   */
+  public void writeElement(String name, Object text)
+  {
+    startElement(name);
+    writeText(text);
+    endElement(name);
+  }
+
+  /**
+   * Convenience method, same as doing a startLineElement(), writeText(text),
+   * endLineElement().
+   */
+  public void writeLineElement(String name, Object text)
+  {
+    startLineElement(name);
+    writeText(text);
+    endLineElement(name);
+  }
+
+  /**
+   * Convenience method, same as doing a startBlockElement(), writeText(text),
+   * endBlockElement().
+   */
+  public void writeBlockElement(String name, Object text)
+  {
+    startBlockElement(name);
+    writeText(text);
+    endBlockElement(name);
   }
 
   /**
@@ -428,7 +549,7 @@ public class XmlWriter
 
     public void writeTextObject(XmlWriter writer, Object obj)
     {
-      String string = obj.toString();
+      String string = String.valueOf(obj);
       int len = string.length();
 
       for (int i = 0; i < len; i++) {
