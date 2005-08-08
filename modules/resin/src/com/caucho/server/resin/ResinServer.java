@@ -29,6 +29,18 @@
 
 package com.caucho.server.resin;
 
+import java.security.Provider;
+import java.security.Security;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+
+import java.util.logging.Logger;
+import java.util.logging.Level;
+
+import javax.servlet.jsp.el.VariableResolver;
+
 import com.caucho.config.ConfigException;
 import com.caucho.config.SchemaBean;
 import com.caucho.config.types.Bytes;
@@ -54,14 +66,6 @@ import com.caucho.util.L10N;
 import com.caucho.util.Log;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
-
-import javax.servlet.jsp.el.VariableResolver;
-import java.security.Provider;
-import java.security.Security;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.logging.Logger;
 
 public class ResinServer
   implements EnvironmentBean, SchemaBean,
