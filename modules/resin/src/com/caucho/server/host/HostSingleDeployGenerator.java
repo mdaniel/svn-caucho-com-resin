@@ -49,7 +49,8 @@ import com.caucho.server.deploy.DeployContainer;
 /**
  * The generator for the host deploy
  */
-public class HostSingleDeployGenerator extends DeployGenerator<HostController> {
+public class HostSingleDeployGenerator
+  extends DeployGenerator<HostController> {
   private static final Logger log = Log.open(HostSingleDeployGenerator.class);
 
   private HostContainer _container;
@@ -141,14 +142,20 @@ public class HostSingleDeployGenerator extends DeployGenerator<HostController> {
   }
   
   /**
-   * Merges the entries.
+   * Merges the controllers.
    */
-  public HostController mergeController(HostController controller, String name)
+  public HostController mergeController(HostController controller,
+					String name)
   {
-    if (! _controller.isNameMatch(name))
-      return controller;
-    else
+    // if directory matches, merge them
+    if (controller.getRootDirectory().equals(_controller.getRootDirectory()))
       return controller.merge(_controller);
+    // else if the names don't match, return the new controller
+    else if (! _controller.isNameMatch(name))
+      return controller;
+    // otherwise, the single deploy overrides
+    else
+      return _controller;
   }
 
   public String toString()

@@ -63,6 +63,8 @@ public class ServerController
   private static final L10N L = new L10N(ServerController.class);
   private static final Logger log = Log.open(ServerController.class);
 
+  private ResinServer _resinServer;
+
   // The cluster server id
   private String _serverId = "";
 
@@ -94,6 +96,14 @@ public class ServerController
   }
 
   /**
+   * Sets the resin server.
+   */
+  public void setResinServer(ResinServer resinServer)
+  {
+    _resinServer = resinServer;
+  }
+
+  /**
    * Sets the cluster server id.
    */
   public void setServerId(String serverId)
@@ -109,6 +119,16 @@ public class ServerController
   public String getServerId()
   {
     return _serverId;
+  }
+
+  /**
+   * Returns true if there's a listening port.
+   */
+  public boolean hasListeningPort()
+  {
+    ServletServer server = getDeployInstance();
+    
+    return server != null && server.hasListeningPort();
   }
 
   /**
@@ -173,10 +193,12 @@ public class ServerController
   }
 
   /**
-   * Called to bind the ports.
+   * Changes the configured user.
    */
-  public void bindPortsBeforeStart()
+  public void setuid()
   {
+    if (_resinServer != null)
+      _resinServer.setuid();
   }
 
   protected String getMBeanTypeName()

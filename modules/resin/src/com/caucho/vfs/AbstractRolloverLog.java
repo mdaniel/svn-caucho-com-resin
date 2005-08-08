@@ -65,7 +65,7 @@ public class AbstractRolloverLog {
   private static final long DAY = 24L * 3600L * 1000L;
   
   // Default maximum log size = 2G
-  private static final long DEFAULT_ROLLOVER_SIZE = 2 * 1024L * 1024L * 1024L;
+  private static final long DEFAULT_ROLLOVER_SIZE = Bytes.INFINITE;
   // How often to check size
   private static final long DEFAULT_ROLLOVER_CHECK_PERIOD = 600L * 1000L;
 

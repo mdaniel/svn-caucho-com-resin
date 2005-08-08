@@ -281,28 +281,28 @@ abstract public class
   /**
    * Merges with the old controller.
    */
-  protected void mergeController(EnvironmentDeployController<I,C> newController)
+  protected void mergeController(EnvironmentDeployController<I,C> oldController)
   {
-    super.mergeController(newController);
+    super.mergeController(oldController);
     
     // setId(oldController.getId());
 
-    _configDefaults.addAll(newController._configDefaults);
+    _configDefaults.addAll(oldController._configDefaults);
 
     if (getConfig() == null)
-      setConfig(newController.getConfig());
-    else if (newController.getConfig() != null) {
+      setConfig(oldController.getConfig());
+    else if (oldController.getConfig() != null) {
       _configDefaults.add(getConfig());
       
-      setConfig(newController.getConfig());
+      setConfig(oldController.getConfig());
     }
 
-    if (newController.getArchivePath() != null)
-      setArchivePath(newController.getArchivePath());
+    if (oldController.getArchivePath() != null)
+      setArchivePath(oldController.getArchivePath());
 
-    mergeStartupMode(newController.getStartupMode());
+    mergeStartupMode(oldController.getStartupMode());
 
-    mergeRedeployMode(newController.getRedeployMode());
+    mergeRedeployMode(oldController.getRedeployMode());
   }
   
   /**

@@ -758,6 +758,12 @@ if ($cmd eq "start" || $cmd eq "restart") {
 
   print("Server died unexpectedly.\n");
   print("Check $stdout_log and $stderr_log.\n");
+
+  if (! $JAVA_HOME) {
+    print("\$JAVA_HOME is not set.\n");
+  }
+  print("Make sure $JAVA_EXE is executable and reachable using PATH=$PATH.\n");
+
   exit(1);
 }
 

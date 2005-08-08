@@ -258,7 +258,7 @@ j2ee_web-app = element web-app {
 
   attribute version { "2.4" },
 
-  attribute xsi:schemaLocation { string },
+  attribute xsi:schemaLocation { string }?,
 
   j2ee_web-app-Content
 }

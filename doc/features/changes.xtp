@@ -4,6 +4,22 @@
 
 <s2 title='3.0.snap - July 5, 2005'>
 <ul>
+<li>Improved error message in wrapper.pl.in when JAVA_HOME isn't set and PATH doesn't contain java (rep by Ryan Fields, RSN-367)
+<li>Use Lifecycle in ResinServer
+<li>&lt;host> and &lt;host-deploy> are properly merged (rep by Ivan Jouikov, RSN-360)
+<li>Explicit &lt;web-app> can override the webapps context-path (rep by Abhijit Naiksatam, RSN-364)
+<li>FastCGIServer must parse "200 OK" as setStatus(200) (rep by Jason Foreman, RSN-366)
+<li>JNI memory allocation was using incorrect size on 64-bit servers (rep by Tom Hintz and Stephen Henrie, RSN-250, RSN-374)
+<li>JniServerSocketImpl _fd must be assigned inside a synchronization (rep by Tom Hintz, RSN-250)
+<li>DynamicClassLoader.loadClass must be synchronized (rep by Joseph Toth, RSN-373)
+<li>RunnerRequest was not properly clearing the isSecure flag on each request (rep by David Rice, RSN-137)
+<li>Use dependency-check-interval for webapps update checking (rep by Vincent Massol, RSN-186)
+<li>xsi:schemaLocation should be optional (rep by Vojtech Habarta, RSN-358)
+<li>xsl:template needs to allow override (rep by C Yttesen, RSN-310)
+<li>setuid order changed to appear after ports (rep by Mark Abbott, RSN-306)
+<li>Amber-managed entity beans weren't properly cache timing out (rep by christian amott, RSN-313)
+<li>RotateStream default period and size must be infinite (rep by Bill Au, RSN-315)
+<li>Period of "-1" turns into infinite (rep by Bill Au, RSN-315)
 <li>Amber query cache should not be limited to first 25 items (rep by christian amott, RSN-328)
 <li>read-only Entity beans should not be reloaded in a transaction (rep by christian amott, RSN-330)
 <li>JavacErrorParser now uses the javac enconding instead of file.encoding (rep by T Fukuda, RSN-332)
@@ -16,7 +32,7 @@
 <li>Added %D to access-log format to allow for millisecond timing (rep by Bert Ano)
 <li>Added override of resolveProxyClass in ContextLoaderObjectInputStream (rep by Gunther Wieser, RSN-345)
 <li>Fixed pthread_mutex_lock define in Solaris to mutex_lock (Joe Dane, RSN-343)
-<li>JNI calls require JNICALL and JNIEXPORT - RSN-341 (rep by Chanan J Braunstein)
+<li>JNI calls require JNICALL and JNIEXPORT (rep by Chanan J Braunstein, RSN-341)
 <li>pro Makefile.in was missing resin_os (rep by Bill Au)
 <li>Added IOExceptionWrapper to catch Hessian errors (rep by Patrick Lightbody)
 <li>Added support for Amber ORDER BY with many-to-one relations (rep by A Barton, RSN-86)

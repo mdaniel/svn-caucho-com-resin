@@ -44,6 +44,8 @@ public class XslTemplate extends XslNode implements XslTopNode {
   private double _priority = 0.0/0.0;
   private String _as;
 
+  private String _macroName;
+
   /**
    * Adds an attribute.
    */
@@ -74,7 +76,10 @@ public class XslTemplate extends XslNode implements XslTopNode {
       throw error(L.l("xsl:template needs a 'match' or a 'name' attribute."));
 
     if (_name != null) {
-      _gen.addMacro(_name, "_xsl_macro_" + _gen.toJavaIdentifier(_name));
+      _macroName = ("_xsl_macro_" + _gen.toJavaIdentifier(_name) + "__" +
+		    _gen.uniqueId());
+      
+      _gen.addMacro(_name, _macroName);
     }
   }
 
@@ -153,7 +158,7 @@ public class XslTemplate extends XslNode implements XslTopNode {
     }
 
     if (_name != null) {
-      out.println("void " + _gen.getMacroName(_name) +
+      out.println("void " + _macroName +
 	      "(XslWriter out, Node inputNode, Env env)");
       out.println("  throws Exception");
       out.println("{");

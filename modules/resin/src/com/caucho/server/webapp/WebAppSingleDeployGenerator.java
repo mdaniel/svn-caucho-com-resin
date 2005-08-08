@@ -236,7 +236,7 @@ public class WebAppSingleDeployGenerator
   {
     // if directory matches, merge them
     if (controller.getRootDirectory().equals(_controller.getRootDirectory()))
-      return controller.merge(_controller);
+      return _controller.merge(controller);
     // else if the names don't match, return the new controller
     else if (! _controller.isNameMatch(name))
       return controller;

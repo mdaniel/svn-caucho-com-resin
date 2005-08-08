@@ -48,9 +48,12 @@ import com.caucho.log.Log;
 
 import com.caucho.vfs.Path;
 
+import com.caucho.loader.Environment;
+
 import com.caucho.config.ConfigException;
 
 import com.caucho.config.types.FileSetType;
+import com.caucho.config.types.Period;
 
 import com.caucho.make.Dependency;
 
@@ -63,6 +66,8 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController> ex
   implements AlarmListener {
   private static final Logger log = Log.open(ExpandDeployGenerator.class);
   private static final L10N L = new L10N(ExpandDeployGenerator.class);
+
+  private static final long MIN_CRON_INTERVAL = 5000L;
 
   private Path _path; // default path
   
@@ -79,7 +84,7 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController> ex
   private FileSetType _expandCleanupFileSet;
 
   private Alarm _alarm;
-  private long _cronInterval = 60000L;
+  private long _cronInterval;
 
   private volatile long _lastCheckTime;
   private volatile boolean _isChecking;
@@ -98,6 +103,10 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController> ex
     super(container);
 
     _alarm = new WeakAlarm(this);
+
+    _cronInterval = Environment.getDependencyCheckInterval();
+    if (_cronInterval < MIN_CRON_INTERVAL)
+      _cronInterval = MIN_CRON_INTERVAL;
   }
 
   /**
@@ -162,6 +171,19 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController> ex
       return _archiveDirectory;
     else
       return _path;
+  }
+
+  /**
+   * Sets the dependency check interval.
+   */
+  public void setDependencyCheckInterval(Period period)
+  {
+    _cronInterval = period.getPeriod();
+
+    if (_cronInterval < 0)
+      _cronInterval = Period.INFINITE;
+    else if (_cronInterval < MIN_CRON_INTERVAL)
+      _cronInterval = MIN_CRON_INTERVAL;
   }
 
   /**

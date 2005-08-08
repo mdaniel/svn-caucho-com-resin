@@ -126,6 +126,7 @@ abstract class Generator {
   HashMap<String,String> _names = new HashMap<String,String>();
   int _loopDepth;
   Path _workPath;
+  int _uniqueId;
 
   protected HashMap<String,String> _preserve = new HashMap<String,String>();
   protected HashMap<String,String> _strip = new HashMap<String,String>();
@@ -275,6 +276,14 @@ abstract class Generator {
   public void addLocale(String name, DecimalFormatSymbols format)
   {
     _formatNumberFun.addLocale(name, format);
+  }
+
+  /**
+   * Generates a uniqueId
+   */
+  public int uniqueId()
+  {
+    return _uniqueId++;
   }
 
   /**

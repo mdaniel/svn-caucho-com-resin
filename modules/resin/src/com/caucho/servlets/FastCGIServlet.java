@@ -380,7 +380,19 @@ public class FastCGIServlet extends GenericServlet {
 	  log.fine("fastcgi:" + key + ": " + value);
 	
       if (key.equalsIgnoreCase("status")) {
-	res.setStatus(Integer.parseInt(value.toString()));
+	int status = 0;
+	int len = value.length();
+
+	for (int i = 0; i < len; i++) {
+	  char digit = value.charAt(i);
+
+	  if ('0' <= digit && digit <= '9')
+	    status = 10 * status + digit - '0';
+	  else
+	    break;
+	}
+	
+	res.setStatus(status);
       }
       else if (key.startsWith("http") || key.startsWith("HTTP")) {
       }

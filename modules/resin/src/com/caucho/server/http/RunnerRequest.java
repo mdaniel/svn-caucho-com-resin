@@ -479,6 +479,8 @@ public class RunnerRequest extends AbstractHttpRequest
     _host.clear();
     _port = 0;
 
+    _isSecure = false;
+
     _headerSize = 0;
 
     _remoteHost.clear();

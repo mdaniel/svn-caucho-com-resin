@@ -328,6 +328,9 @@ public class AmberEntityHome {
 	item = new CacheableEntityItem(this, cacheEntity);
 	item = _manager.putEntity(getRootType(), key, item);
       }
+      else if (isLoad) {
+	item.loadEntity(0);
+      }
 
       return item;
     } catch (Exception e) {

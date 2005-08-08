@@ -324,10 +324,12 @@ public class WebAppController
 	thread.setContextClassLoader(getParentClassLoader());
 
 	WebAppController mergedController
-	  = new WebAppController(_contextPath, getRootDirectory(), _container);
+	  = new WebAppController(newController.getContextPath(),
+				 getRootDirectory(),
+				 _container);
 
-	mergedController.mergeController(newController);
 	mergedController.mergeController(this);
+	mergedController.mergeController(newController);
 
 	return mergedController;
       } finally {

@@ -844,7 +844,7 @@ public class AmberManager {
   }
 
   /**
-   * Returns the query result.
+   * Returns the entity with the given key.
    */
   public EntityItem getEntity(EntityType rootType, Object key)
   {

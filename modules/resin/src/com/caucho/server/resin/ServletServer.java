@@ -924,8 +924,12 @@ public class ServletServer extends ProtocolDispatchServer
 	}
       }
 
-      if (! _isBindPortsAtEnd)
+      if (! _isBindPortsAtEnd) {
 	bindPorts();
+
+	if (_controller != null)
+	  _controller.setuid();
+      }
       
       _lifecycle.toActive();
 
@@ -934,7 +938,12 @@ public class ServletServer extends ProtocolDispatchServer
       _hostContainer.start();
 
       // will only occur if bind-ports-at-end is true
-      bindPorts();
+      if (_isBindPortsAtEnd) {
+	bindPorts();
+
+	if (_controller != null)
+	  _controller.setuid();
+      }
 
       startPorts();
 
@@ -975,6 +984,21 @@ public class ServletServer extends ProtocolDispatchServer
     } finally {
       thread.setContextClassLoader(oldLoader);
     }
+  }
+
+  /**
+   * Returns true if there's a listening port.
+   */
+  public boolean hasListeningPort()
+  {
+    for (int i = 0; i < _ports.size(); i++) {
+      Port port = _ports.get(i);
+	
+      if (_serverId.equals(port.getServerId()))
+	return true;
+    }
+
+    return false;
   }
 
   /**

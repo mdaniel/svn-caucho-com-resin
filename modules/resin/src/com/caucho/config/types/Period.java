@@ -192,7 +192,12 @@ public class Period {
       }
     }
 
-    return sign * period;
+    period = sign * period;
+    
+    if (period < 0)
+      return INFINITE;
+    else
+      return period;
   }
 
   /**

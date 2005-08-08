@@ -132,7 +132,6 @@ public class Resin implements ResinServerListener {
         Path path = Vfs.lookup(argv[i + 1]);
 
         RotateStream stream = RotateStream.create(path);
-	stream.setRolloverPeriod(7 * 24 * 3600 * 1000L);
 	WriteStream out = stream.getStream();
 	out.setDisableClose(true);
 
@@ -146,7 +145,6 @@ public class Resin implements ResinServerListener {
         Path path = Vfs.lookup(argv[i + 1]);
 
         RotateStream stream = RotateStream.create(path);
-	stream.setRolloverPeriod(7 * 24 * 3600 * 1000L);
 	WriteStream out = stream.getStream();
 	out.setDisableClose(true);
 

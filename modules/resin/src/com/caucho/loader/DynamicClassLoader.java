@@ -976,7 +976,8 @@ public class DynamicClassLoader extends java.net.URLClassLoader
    *
    * @return the loaded classes
    */
-  protected Class loadClass(String name, boolean resolve) 
+  // XXX: added synchronized for RSN-373
+  protected synchronized Class loadClass(String name, boolean resolve) 
     throws ClassNotFoundException
   {
     /*

@@ -39,6 +39,8 @@ import com.caucho.el.MapVariableResolver;
 import com.caucho.el.SystemPropertiesResolver;
 import com.caucho.jmx.Jmx;
 import com.caucho.jsp.cfg.JspPropertyGroup;
+import com.caucho.lifecycle.Lifecycle;
+
 import com.caucho.loader.Environment;
 import com.caucho.loader.EnvironmentBean;
 import com.caucho.loader.EnvironmentClassLoader;
@@ -97,9 +99,8 @@ public class ResinServer
 
   private ArrayList<ResinServerListener> _listeners =
     new ArrayList<ResinServerListener>();
-  
-  private boolean _isClosing;
-  private boolean _isClosed;
+
+  private final Lifecycle _lifecycle = new Lifecycle(log, "Resin[]");
 
   private long _initialStartTime;
   private long _startTime;
@@ -261,6 +262,7 @@ public class ResinServer
 
       controller.setServerId(_serverId);
       controller.setConfig(config);
+      controller.setResinServer(this);
 
       controller.init();
     }
@@ -429,16 +431,22 @@ public class ResinServer
    */
   public void init()
   {
+    _lifecycle.toInit();
   }
 
   /**
-   * Bind the ports.
+   * Sets the user id.
    */
-  public void bindPorts()
-    throws Exception
+  public void setuid()
   {
-    for (ServerController server : _servers) {
-      server.bindPortsBeforeStart();
+    if (_userName != null) {
+      try {
+	int uid = CauchoSystem.setUser(_userName, _groupName);
+	if (uid >= 0)
+	  log.info(L.l("Running as {0}(uid={1})", _userName, "" + uid));
+      } catch (Exception e) {
+	log.log(Level.WARNING, e.toString(), e);
+      }
     }
   }
 
@@ -448,17 +456,12 @@ public class ResinServer
   public void start()
     throws Throwable
   {
+    if (! _lifecycle.toActive())
+      return;
+    
     // force a GC on start
     System.gc();
 
-    bindPorts();
-
-    if (_userName != null) {
-      int uid = CauchoSystem.setUser(_userName, _groupName);
-      if (uid >= 0)
-	log.info(L.l("Running as {0}(uid={1})", _userName, "" + uid));
-    }
-    
     ArrayList<ServerController> servers = _servers;
 
     for (int i = 0; i < servers.size(); i++) {
@@ -468,8 +471,28 @@ public class ResinServer
     }
     
     Environment.start(getClassLoader());
+
+    if (! hasListeningPort()) {
+      log.warning(L.l("-server \"{0}\" has no matching http or srun ports.  Check the resin.conf and -server values.",
+		      _serverId));
+    }
   }
 
+  /**
+   * Returns true for a listening port.
+   */
+  private boolean hasListeningPort()
+  {
+    for (int i = 0; i < _servers.size(); i++) {
+      ServerController server = _servers.get(i);
+
+      if (server.hasListeningPort())
+	return true;
+    }
+
+    return false;
+  }
+    
   /**
    * Adds a listener.
    */
@@ -493,7 +516,7 @@ public class ResinServer
    */
   public boolean isClosing()
   {
-    return _isClosing;
+    return _lifecycle.isDestroyed();
   }
 
   /**
@@ -501,7 +524,7 @@ public class ResinServer
    */
   public boolean isClosed()
   {
-    return _isClosed;
+    return _lifecycle.isDestroyed();
   }
 
   /**
@@ -509,12 +532,8 @@ public class ResinServer
    */
   public void destroy()
   {
-    synchronized (this) {
-      if (_isClosing)
-        return;
-
-      _isClosing = true;
-    }
+    if (! _lifecycle.toDestroying())
+      return;
 
     try {
       for (ServerController server : _servers) {
@@ -531,7 +550,7 @@ public class ResinServer
 
       Environment.closeGlobal();
     } finally {
-      _isClosed = true;
+      _lifecycle.toDestroy();
     }
   }
 
@@ -539,6 +558,14 @@ public class ResinServer
    * EL variables
    */
   public class Var {
+    /**
+     * Returns the resin.id
+     */
+    public String getId()
+    {
+      return _serverId;
+    }
+    
     /**
      * Returns the resin home.
      */
@@ -553,6 +580,16 @@ public class ResinServer
      * @return resin.home
      */
     public Path getRootDir()
+    {
+      return getRootDirectory();
+    }
+
+    /**
+     * Returns the root directory.
+     *
+     * @return resin.home
+     */
+    public Path getRootDirectory()
     {
       return CauchoSystem.getServerRoot();
     }

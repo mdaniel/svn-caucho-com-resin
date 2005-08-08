@@ -170,7 +170,13 @@ public class DeployContainer<E extends DeployController>
 
     controller = generateController(name);
 
-    return controller;
+    if (controller == null)
+      return null;
+    // server/10tm
+    else if (controller.isNameMatch(name))
+      return controller;
+    else
+      return null;
   }
 
   /**

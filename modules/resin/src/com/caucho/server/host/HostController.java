@@ -327,16 +327,48 @@ class HostController extends EnvironmentDeployController<Host,HostConfig> {
   /**
    * Merges two entries.
    */
-  protected HostController merge(HostController newEntry)
+  protected HostController merge(HostController newController)
   {
-    if (getConfig().getRegexp() != null)
-      return newEntry;
-    else if (newEntry.getConfig().getRegexp() != null)
+    if (getConfig() != null && getConfig().getRegexp() != null)
+      return newController;
+    else if (newController.getConfig() != null &&
+	     newController.getConfig().getRegexp() != null)
       return this;
     else {
-      // XXX: not quite correct.
-      return newEntry;
+      Thread thread = Thread.currentThread();
+      ClassLoader oldLoader = thread.getContextClassLoader();
+
+      try {
+	thread.setContextClassLoader(getParentClassLoader());
+
+	HostController mergedController
+	  = new HostController(newController.getHostName(),
+			       getRootDirectory(),
+			       _container);
+
+	mergedController.mergeController(this);
+	mergedController.mergeController(newController);
+
+	return mergedController;
+      } catch (Throwable e) {
+	e.printStackTrace();
+	return null;
+      } finally {
+	thread.setContextClassLoader(oldLoader);
+      }
     }
+  }
+
+  /**
+   * Merges with the old controller.
+   */
+  protected void mergeController(HostController oldController)
+  {
+    super.mergeController(oldController);
+
+    _entryHostAliases.addAll(oldController._entryHostAliases);
+    _entryHostAliasRegexps.addAll(oldController._entryHostAliasRegexps);
+    _hostAliases.addAll(oldController._hostAliases);
   }
 
   /**
