@@ -193,7 +193,7 @@ CLASSPATH=
 
 <section name="windows" title='Windows Installation'>
 <p>
-The <code>setup.exe</code> program attempts to install the mod_caucho.dll
+The <code>setup.exe</code> program installs the mod_caucho.dll
 plugin for any Apache it finds, and modifies the Apache httpd.conf file.
 </p>
 
@@ -202,7 +202,7 @@ The httpd.conf file is also easily modified manually:
 </p>
 
 <example title=httpd.conf>
-LoadModule caucho_module &lt;installdir>/resin-3.0.x/libexec/apache-2.0/mod_caucho.dll
+LoadModule caucho_module &lt;installdir>/resin-3.0.x/win32/apache-2.0/mod_caucho.dll
 
 ResinConfigServer localhost 6802
 &lt;Location /caucho-status>
