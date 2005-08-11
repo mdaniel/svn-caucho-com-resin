@@ -344,6 +344,9 @@ class StringColumn extends Column {
 
   public String toString()
   {
-    return "StringColumn[" + getName() + "]";
+    if (getIndex() != null)
+      return "StringColumn[" + getName() + ",index]";
+    else
+      return "StringColumn[" + getName() + "]";
   }
 }

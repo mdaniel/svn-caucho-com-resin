@@ -242,12 +242,10 @@ public class BTree {
 				isLeaf);
 	  }
 	  else {
-	    Block writeBlock;
+	    block.setFlushDirtyOnCommit(false);
+	    block.setDirty(0, Store.BLOCK_SIZE);
 	    
-	    writeBlock = xa.createWriteBlock(block);
-	    block = writeBlock;
-	    
-	    insertLeafBlock(index, writeBlock.getBuffer(),
+	    insertLeafBlock(index, block.getBuffer(),
 			    keyBuffer, keyOffset, keyLength,
 			    value);
 
@@ -355,16 +353,24 @@ public class BTree {
 
     try {
       parentBlock = xa.createWriteBlock(_store, parentIndex);
+      parentBlock.setFlushDirtyOnCommit(false);
+      parentBlock.setDirty(0, Store.BLOCK_SIZE);
     
       byte []parentBuffer = parentBlock.getBuffer();
       int parentLength = getInt(parentBuffer, LENGTH_OFFSET);
     
       rightBlock = xa.createWriteBlock(_store, index);
+      rightBlock.setFlushDirtyOnCommit(false);
+      rightBlock.setDirty(0, Store.BLOCK_SIZE);
+
 
       byte []rightBuffer = rightBlock.getBuffer();
       long rightBlockId = rightBlock.getBlockId();
     
-      leftBlock = xa.createWriteBlock(_store.allocate());
+      leftBlock = xa.createWriteBlock(_store.allocateIndex());
+      leftBlock.setFlushDirtyOnCommit(false);
+      leftBlock.setDirty(0, Store.BLOCK_SIZE);
+      
       byte []leftBuffer = leftBlock.getBuffer();
       long leftBlockId = leftBlock.getBlockId();
 
@@ -418,15 +424,23 @@ public class BTree {
 
     try {
       parentBlock = xa.createWriteBlock(_store, index);
+      parentBlock.setFlushDirtyOnCommit(false);
+      parentBlock.setDirty(0, Store.BLOCK_SIZE);
 
       byte []parentBuffer = parentBlock.getBuffer();
 
       int parentFlags = getInt(parentBuffer, FLAGS_OFFSET);
 
-      leftBlock = xa.createWriteBlock(_store.allocate());
+      leftBlock = xa.createWriteBlock(_store.allocateIndex());
+      leftBlock.setFlushDirtyOnCommit(false);
+      leftBlock.setDirty(0, Store.BLOCK_SIZE);
+      
       long leftBlockId = leftBlock.getBlockId();
     
-      rightBlock = xa.createWriteBlock(_store.allocate());
+      rightBlock = xa.createWriteBlock(_store.allocateIndex());
+      rightBlock.setFlushDirtyOnCommit(false);
+      rightBlock.setDirty(0, Store.BLOCK_SIZE);
+      
       long rightBlockId = rightBlock.getBlockId();
 
       int length = getInt(parentBuffer, LENGTH_OFFSET);
@@ -520,6 +534,8 @@ public class BTree {
       
       if (isLeaf) {
 	block = xa.createWriteBlock(block);
+	block.setFlushDirtyOnCommit(false);
+	block.setDirty(0, Store.BLOCK_SIZE);
 
 	removeLeafBlock(index, block.getBuffer(),
 			keyBuffer, keyOffset, keyLength);
@@ -586,7 +602,12 @@ public class BTree {
 
 	  if (_minN < leftLength) {
 	    parent = xa.createWriteBlock(parent);
+	    parent.setFlushDirtyOnCommit(false);
+	    parent.setDirty(0, Store.BLOCK_SIZE);
+	    
 	    leftBlock = xa.createWriteBlock(leftBlock);
+	    leftBlock.setFlushDirtyOnCommit(false);
+	    leftBlock.setDirty(0, Store.BLOCK_SIZE);
 	  
 	    moveFromLeft(parent.getBuffer(),
 			 leftBlock.getBuffer(),
@@ -609,7 +630,12 @@ public class BTree {
 	  
 	  if (_minN < rightLength) {
 	    parent = xa.createWriteBlock(parent);
+	    parent.setFlushDirtyOnCommit(false);
+	    parent.setDirty(0, Store.BLOCK_SIZE);
+	    
 	    rightBlock = xa.createWriteBlock(rightBlock);
+	    rightBlock.setFlushDirtyOnCommit(false);
+	    rightBlock.setDirty(0, Store.BLOCK_SIZE);
 
 	    moveFromRight(parent.getBuffer(),
 			  rightBlock.getBuffer(),
@@ -630,7 +656,12 @@ public class BTree {
       
 	try {
 	  parent = xa.createWriteBlock(parent);
+	  parent.setFlushDirtyOnCommit(false);
+	  parent.setDirty(0, Store.BLOCK_SIZE);
+	  
 	  leftBlock = xa.createWriteBlock(leftBlock);
+	  leftBlock.setFlushDirtyOnCommit(false);
+	  leftBlock.setDirty(0, Store.BLOCK_SIZE);
       
 	  mergeLeft(parent.getBuffer(), leftBlock.getBuffer(), buffer, index);
 
@@ -645,9 +676,15 @@ public class BTree {
 
 	try {
 	  rightBlock = xa.createWriteBlock(rightBlock);
+	  rightBlock.setFlushDirtyOnCommit(false);
+	  rightBlock.setDirty(0, Store.BLOCK_SIZE);
+	  
 	  parent = xa.createWriteBlock(parent);
-	
-	  mergeRight(parent.getBuffer(), rightBlock.getBuffer(), buffer, index);
+	  parent.setFlushDirtyOnCommit(false);
+	  parent.setDirty(0, Store.BLOCK_SIZE);
+	  
+	  mergeRight(parent.getBuffer(), rightBlock.getBuffer(),
+		     buffer, index);
 	
 	  return true;
 	} finally {
@@ -1205,7 +1242,7 @@ public class BTree {
   {
     long blockId = _store.addressToBlockId(blockIndex * BLOCK_SIZE);
 
-    if (_store.getAllocation(blockIndex) != Store.ALLOC_USED)
+    if (_store.getAllocation(blockIndex) != Store.ALLOC_INDEX)
       return null;
     
     Block block = _store.readBlock(blockId);
@@ -1239,7 +1276,7 @@ public class BTree {
     Store store = new Store(db, "test", null);
     store.create();
 
-    Block block = store.allocate();
+    Block block = store.allocateIndex();
     long blockId = block.getBlockId();
     block.free();
 
@@ -1251,7 +1288,7 @@ public class BTree {
   {
     Store store = Store.create(path);
 
-    Block block = store.allocate();
+    Block block = store.allocateIndex();
     long blockId = block.getBlockId();
     block.free();
 

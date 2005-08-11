@@ -246,6 +246,7 @@ public class SchemeMap {
     DEFAULT_SCHEME_MAP.put("jndi", new JndiPath());
     
     DEFAULT_SCHEME_MAP.put("config", new ConfigPath());
+    DEFAULT_SCHEME_MAP.put("spy", new SpyScheme()); 
 
     _localSchemeMap.setGlobal(DEFAULT_SCHEME_MAP);
   }

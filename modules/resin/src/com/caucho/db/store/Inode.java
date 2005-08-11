@@ -65,24 +65,25 @@ public class Inode {
   private static final L10N L = new L10N(Inode.class);
   private static final Logger log = Log.open(Inode.class);
   
+  public static final int INODE_SIZE = 128;
   public static final int INLINE_BLOB_SIZE = 120;
-  public static final int INODE_BLOCK_SIZE = 16 * 1024;
+  public static final int INODE_BLOCK_SIZE = Store.FRAGMENT_SIZE;
 
-  // direct addresses are stored in the inode itself (224k of data).
+  // direct addresses are stored in the inode itself (56k of data).
   public static final int DIRECT_BLOCKS = 14;
-  // single indirect addresses are stored in the indirect block (64M data)
+  // single indirect addresses are stored in the indirect block (13M data)
   public static final int SINGLE_INDIRECT_BLOCKS = 4096;
-  // double indirect addresses (2^38 = 256G data)
+  // double indirect addresses (2^36 = 64G data)
   public static final int DOUBLE_INDIRECT_BLOCKS = 2048;
-  // triple indirect addresses (2^50 = 1P data)
+  // triple indirect addresses (2^48 = 256T data)
   public static final int TRIPLE_INDIRECT_BLOCKS = 1024;
-  // quad indirect addresses (2^63 = 8E data)
+  // quad indirect addresses (2^61 = 2E data)
   public static final int QUAD_INDIRECT_BLOCKS = 1024;
   
-  private static final byte []NULL_BYTES = new byte[128];
+  private static final byte []NULL_BYTES = new byte[INODE_SIZE];
   
   private Store _store;
-  private byte []_bytes = new byte[128];
+  private byte []_bytes = new byte[INODE_SIZE];
 
   public Inode()
   {
@@ -335,6 +336,7 @@ public class Inode {
 				Store store)
     throws IOException
   {
+    // XXX: not sure if correct, needs XA?
     if ((fragAddr & Store.BLOCK_MASK) == 0) {
       String msg = store + ": inode block " + fragCount + " writing 0 fragment";
       throw stateError(msg);
@@ -359,13 +361,13 @@ public class Inode {
 	  block = store.readBlock(blockId);
 	}
 
-	synchronized (block) {
+	synchronized (block.getBuffer()) {
 	  int blockOffset = 8 * (fragCount - DIRECT_BLOCKS);
 
 	  writeLong(block.getBuffer(), blockOffset, fragAddr);
 	}
 
-	store.writeBlock(block);
+	block.setDirty(offset, offset + INODE_SIZE);
       } finally {
 	if (block != null)
 	  block.free();

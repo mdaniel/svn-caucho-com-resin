@@ -724,6 +724,14 @@ public abstract class Path {
   }
 
   /**
+   * Opens a random-access stream.
+   */
+  public RandomAccessStream openRandomAccess() throws IOException
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  /**
    * Creates the file named by this Path and returns true if the
    * file is new.
    */

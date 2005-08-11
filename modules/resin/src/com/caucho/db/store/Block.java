@@ -60,8 +60,11 @@ abstract public class Block implements ClockCacheItem, CacheListener {
 
   private int _useCount;
 
+  private boolean _isFlushDirtyOnCommit;
   private boolean _isValid;
-  private boolean _isDirty;
+  
+  private int _dirtyMin = Store.BLOCK_SIZE;
+  private int _dirtyMax;
 
   Block(Store store, long blockId)
   {
@@ -77,8 +80,26 @@ abstract public class Block implements ClockCacheItem, CacheListener {
     _store = store;
     _blockId = blockId;
 
+    _isFlushDirtyOnCommit = _store.isFlushDirtyBlocksOnCommit();
+
     if (log.isLoggable(Level.FINER))
       log.finer(this + " create");
+  }
+
+  /**
+   * Returns true if the block should be flushed on a commit.
+   */
+  public boolean isFlushDirtyOnCommit()
+  {
+    return _isFlushDirtyOnCommit;
+  }
+
+  /**
+   * True if the block should be flushed on a commit.
+   */
+  public void setFlushDirtyOnCommit(boolean isFlush)
+  {
+    _isFlushDirtyOnCommit = isFlush;
   }
 
   /**
@@ -135,22 +156,53 @@ abstract public class Block implements ClockCacheItem, CacheListener {
 	_store.readBlock(_blockId & Store.BLOCK_MASK,
 			 getBuffer(), 0, Store.BLOCK_SIZE);
 	_isValid = true;
-	_isDirty = false;
+
+	_dirtyMin = Store.BLOCK_SIZE;
+	_dirtyMax = 0;
       }
     }
   }
 
+  /**
+   * Handle any database writes necessary at commit time.  If
+   * isFlushDirtyOnCommit() is true, this will write the data to
+   * the backing file.
+   */
+  public void commit()
+    throws IOException
+  {
+    if (! _isFlushDirtyOnCommit)
+      return;
+    else
+      write();
+  }
+
+  /**
+   * Forces a write of the data (should be private?)
+   */
   public void write()
     throws IOException
   {
     synchronized (this) {
-      if (log.isLoggable(Level.FINER))
-	log.finer("write db-block " + this);
+      int dirtyMin = _dirtyMin;
+      _dirtyMin = Store.BLOCK_SIZE;
+
+      int dirtyMax = _dirtyMax;
+      _dirtyMax = 0;
+
+      if (dirtyMin < dirtyMax) {
+	if (log.isLoggable(Level.FINER))
+	  log.finer("write db-block " + this + " [" + dirtyMin + ", " + dirtyMax + "]");
+
+	_store.writeBlock((_blockId & Store.BLOCK_MASK) + dirtyMin,
+			  getBuffer(), dirtyMin, dirtyMax - dirtyMin);
+      }
+      else {
+	if (log.isLoggable(Level.FINER))
+	  log.finer("not-dirty db-block " + this);
+      }
       
-      _store.writeBlock(_blockId & Store.BLOCK_MASK,
-			getBuffer(), 0, Store.BLOCK_SIZE);
       _isValid = true;
-      _isDirty = false;
     }
   }
 
@@ -159,11 +211,12 @@ abstract public class Block implements ClockCacheItem, CacheListener {
    */
   public void invalidate()
   {
-    if (_isDirty)
+    if (_dirtyMin < _dirtyMax)
       throw new IllegalStateException();
     
     _isValid = false;
-    _isDirty = false;
+    _dirtyMin = Store.BLOCK_SIZE;
+    _dirtyMax = 0;
   }
 
   /**
@@ -177,18 +230,23 @@ abstract public class Block implements ClockCacheItem, CacheListener {
   /**
    * Marks the block's data as dirty
    */
-  public void setDirty()
+  public void setDirty(int min, int max)
   {
     _isValid = true;
-    _isDirty = true;
+
+    if (min < _dirtyMin)
+      _dirtyMin = min;
+    
+    if (_dirtyMax < max)
+      _dirtyMax = max;
   }
 
   /**
-   * Marks the block's data as invalid.
+   * Returns true if the block needs writing
    */
   public boolean isDirty()
   {
-    return _isDirty;
+    return _dirtyMin < _dirtyMax;
   }
 
   /**
@@ -253,8 +311,7 @@ abstract public class Block implements ClockCacheItem, CacheListener {
   public void close()
   {
     synchronized (this) {
-      if (_isDirty) {
-	_isDirty = false;
+      if (_dirtyMin < _dirtyMax) {
 	try {
 	  write();
 	} catch (Throwable e) {

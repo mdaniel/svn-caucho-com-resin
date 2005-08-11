@@ -197,8 +197,8 @@ public class BlobOutputStream extends OutputStream {
 
 	if (Inode.INODE_BLOCK_SIZE < sublen)
 	  sublen = Inode.INODE_BLOCK_SIZE;
-	
-	long fragAddr = _store.writeFragment(_buffer, offset, sublen);
+
+	long fragAddr = _store.writeFragment(_xa, _buffer, offset, sublen);
 
 	writeFragmentAddr(_blockCount++, fragAddr);
 

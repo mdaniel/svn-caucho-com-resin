@@ -302,15 +302,35 @@ public class Transaction {
     if (block instanceof WriteBlock)
       return (WriteBlock) block;
 
+    WriteBlock writeBlock;
+    
     if (isAutoCommit())
-      return new AutoCommitWriteBlock(block);
-
-    // XXX: locking too
-    WriteBlock writeBlock = new XAWriteBlock(block);
+      writeBlock = new AutoCommitWriteBlock(block);
+    else {
+      // XXX: locking
+      writeBlock = new XAWriteBlock(block);
+    }
 
     setBlock(writeBlock);
 
     return writeBlock;
+  }
+
+  /**
+   * Returns a modified block.
+   */
+  public WriteBlock createAutoCommitWriteBlock(Block block)
+    throws IOException
+  {
+    if (block instanceof WriteBlock)
+      return (WriteBlock) block;
+    else {
+      WriteBlock writeBlock = new AutoCommitWriteBlock(block);
+      
+      setBlock(writeBlock);
+
+      return writeBlock;
+    }
   }
 
   /**
@@ -325,11 +345,10 @@ public class Transaction {
 
     if (isAutoCommit())
       writeBlock = new AutoCommitWriteBlock(block);
-    else {
+    else
       writeBlock = new XAWriteBlock(block);
 
-      setBlock(writeBlock);
-    }
+    setBlock(writeBlock);
 
     return writeBlock;
   }
@@ -357,11 +376,14 @@ public class Transaction {
     if (block instanceof WriteBlock)
       return (WriteBlock) block;
 
-    if (isAutoCommit())
-      return new AutoCommitWriteBlock(block);
+    WriteBlock writeBlock;
     
-    // XXX: locking too
-    WriteBlock writeBlock = new XAWriteBlock(block);
+    if (isAutoCommit())
+      writeBlock = new AutoCommitWriteBlock(block);
+    else {
+      // XXX: locking too
+      writeBlock = new XAWriteBlock(block);
+    }
 
     setBlock(writeBlock);
 
@@ -440,6 +462,13 @@ public class Transaction {
 	}
       }
 
+      for (int i = 0; i < _deleteInodes.size(); i++) {
+	Inode inode = _deleteInodes.get(i);
+
+	// XXX: should be allocating based on auto-commit
+	inode.remove();
+      }
+
       if (writeBlocks != null) {
 	try {
 	  Iterator<WriteBlock> blockIter = writeBlocks.valueIterator();
@@ -447,17 +476,11 @@ public class Transaction {
 	  while (blockIter.hasNext()) {
 	    WriteBlock block = blockIter.next();
 
-	    block.write();
+	    block.commit();
 	  }
 	} catch (IOException e) {
 	  throw new SQLExceptionWrapper(e);
 	}
-      }
-
-      for (int i = 0; i < _deleteInodes.size(); i++) {
-	Inode inode = _deleteInodes.get(i);
-
-	inode.remove();
       }
 
       for (int i = 0; i < _deallocateBlocks.size(); i++) {

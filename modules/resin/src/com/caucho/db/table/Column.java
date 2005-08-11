@@ -525,4 +525,12 @@ abstract public class Column {
     throws SQLException
   {
   }
+
+  public String toString()
+  {
+    if (getIndex() != null)
+      return getClass().getName() + "[" + _name + ",index]";
+    else
+      return getClass().getName() + "[" + _name + "]";
+  }
 }

@@ -4,6 +4,7 @@
 
 <s2 title='3.0.snap - July 5, 2005'>
 <ul>
+<li>Significant changes to session and cache persistence store
 <li>Improved error message in wrapper.pl.in when JAVA_HOME isn't set and PATH doesn't contain java (rep by Ryan Fields, RSN-367)
 <li>Use Lifecycle in ResinServer
 <li>&lt;host> and &lt;host-deploy> are properly merged (rep by Ivan Jouikov, RSN-360)

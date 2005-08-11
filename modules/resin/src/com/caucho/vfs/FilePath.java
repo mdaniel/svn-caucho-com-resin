@@ -395,6 +395,17 @@ public class FilePath extends FilesystemPath {
     return os;
   }
 
+  /**
+   * Returns the stream implementation for a random-access stream.
+   */
+  public RandomAccessStream openRandomAccess() throws IOException
+  {
+    if (_separatorChar == '\\' && isAux())
+      throw new FileNotFoundException(_file.toString());
+
+    return new FileRandomAccessStream(new RandomAccessFile(getFile(), "rw"));
+  }
+
   public int hashCode()
   {
     return getFullPath().hashCode();

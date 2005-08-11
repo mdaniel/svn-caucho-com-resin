@@ -56,8 +56,8 @@ files can be used without modification.
 1) On Unix, you'll want to build the JNI libraries:
 
    resin-3.0.x> ./configure
-   resin-3.0.x> ./make
-   resin-3.0.x> ./make install
+   resin-3.0.x> make
+   resin-3.0.x> make install
 
 2) To start the server:
 

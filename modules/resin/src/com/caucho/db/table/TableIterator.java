@@ -171,6 +171,14 @@ public class TableIterator {
   public void init(QueryContext queryContext)
     throws SQLException
   {
+    init(queryContext.getTransaction());
+
+    _queryContext = queryContext;
+  }
+
+  public void init(Transaction xa)
+    throws SQLException
+  {
     Block block = _block;
     _block = null;
     _buffer = null;
@@ -180,8 +188,8 @@ public class TableIterator {
     
     _blockId = 0;
     _rowOffset = Integer.MAX_VALUE / 2;
-    _queryContext = queryContext;
-    _transaction = queryContext.getTransaction();
+    _queryContext = null;
+    _transaction = xa;
 
     // XXX:
     if (! _transaction.isAutoCommit())
@@ -463,6 +471,8 @@ public class TableIterator {
 
       _block = writeBlock;
       _buffer = _block.getBuffer();
+
+      writeBlock.setDirty(getRowOffset(), getRowOffset() + _rowLength);
     } catch (IOException e) {
       throw new SQLExceptionWrapper(e);
     }

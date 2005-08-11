@@ -27,65 +27,38 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.db.store;
+package com.caucho.vfs;
 
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import java.io.IOException;
-
-import com.caucho.util.L10N;
-import com.caucho.util.ClockCacheItem;
-
-import com.caucho.vfs.TempBuffer;
-
-import com.caucho.log.Log;
+import java.io.*;
 
 /**
- * Represents a write (dirty) block.
+ * Reads from a file in a random-access fashion.
  */
-abstract public class WriteBlock extends Block {
-  private static final Logger log = Log.open(WriteBlock.class);
-  private static final L10N L = new L10N(WriteBlock.class);
-
-  protected Block _block;
-
-  public WriteBlock(Block block)
-    throws IOException
-  {
-    super(block.getStore(), block.getBlockId());
-
-    _block = block;
-  }
-
-  /* XXX: need this?
-  public void setDirty(int min, int max)
-  {
-  }
-  */
+abstract public class RandomAccessStream {
+  /**
+   * Returns the length.
+   */
+  abstract public long getLength()
+    throws IOException;
+  
+  /**
+   * Reads a block from a given location.
+   */
+  abstract public int read(long fileOffset,
+			   byte []buffer, int offset, int length)
+    throws IOException;
 
   /**
-   * Frees a block from a query.
+   * Writes a block from a given location.
    */
-  public void free()
-  {
-  }
+  abstract public void write(long fileOffset,
+			     byte []buffer, int offset, int length)
+    throws IOException;
 
   /**
-   * Closes the write block.
+   * Closes the stream.
    */
-  void destroy()
+  public void close() throws IOException
   {
-    Block block = _block;
-    _block = block;
-
-    block.free();
-
-    close();
-  }
-
-  public String toString()
-  {
-    return "WriteBlock[" + getStore() + "," + getBlockId() / Store.BLOCK_SIZE + "]";
   }
 }

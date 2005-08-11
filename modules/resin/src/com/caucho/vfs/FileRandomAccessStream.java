@@ -27,65 +27,61 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.db.store;
+package com.caucho.vfs;
 
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import java.io.IOException;
-
-import com.caucho.util.L10N;
-import com.caucho.util.ClockCacheItem;
-
-import com.caucho.vfs.TempBuffer;
-
-import com.caucho.log.Log;
+import java.io.*;
 
 /**
- * Represents a write (dirty) block.
+ * Reads from a file in a random-access fashion.
  */
-abstract public class WriteBlock extends Block {
-  private static final Logger log = Log.open(WriteBlock.class);
-  private static final L10N L = new L10N(WriteBlock.class);
+public class FileRandomAccessStream extends RandomAccessStream {
+  private RandomAccessFile _file;
 
-  protected Block _block;
-
-  public WriteBlock(Block block)
+  public FileRandomAccessStream(RandomAccessFile file)
+  {
+    _file = file;
+  }
+  
+  /**
+   * Returns the length.
+   */
+  public long getLength()
     throws IOException
   {
-    super(block.getStore(), block.getBlockId());
-
-    _block = block;
+    return _file.length();
   }
-
-  /* XXX: need this?
-  public void setDirty(int min, int max)
-  {
-  }
-  */
-
+  
   /**
-   * Frees a block from a query.
+   * Reads a block from a given location.
    */
-  public void free()
+  public int read(long fileOffset, byte []buffer, int offset, int length)
+    throws IOException
   {
+    _file.seek(fileOffset);
+    
+    return _file.read(buffer, offset, length);
   }
 
   /**
-   * Closes the write block.
+   * Writes a block from a given location.
    */
-  void destroy()
+  public void write(long fileOffset, byte []buffer, int offset, int length)
+    throws IOException
   {
-    Block block = _block;
-    _block = block;
-
-    block.free();
-
-    close();
+    _file.seek(fileOffset);
+    
+    _file.write(buffer, offset, length);
   }
 
-  public String toString()
+  /**
+   * Closes the stream.
+   */
+  public void close() throws IOException
   {
-    return "WriteBlock[" + getStore() + "," + getBlockId() / Store.BLOCK_SIZE + "]";
+    RandomAccessFile file = _file;
+    _file = null;
+
+    if (file != null)
+      file.close();
   }
 }

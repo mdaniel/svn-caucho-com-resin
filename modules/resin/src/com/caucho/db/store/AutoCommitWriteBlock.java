@@ -43,6 +43,8 @@ import com.caucho.log.Log;
 
 /**
  * Represents a write (dirty) block.
+ *
+ * The AutoCommitWriteBlock 
  */
 public class AutoCommitWriteBlock extends WriteBlock {
   private static final Logger log = Log.open(AutoCommitWriteBlock.class);
@@ -53,6 +55,7 @@ public class AutoCommitWriteBlock extends WriteBlock {
   {
     super(block);
 
+    block.allocate();
     block.read();
   }
 
@@ -64,14 +67,20 @@ public class AutoCommitWriteBlock extends WriteBlock {
     return _block.getBuffer();
   }
 
-  public void setDirty(boolean isDirty)
+  public void setDirty(int minDirty, int maxDirty)
   {
+    _block.setDirty(minDirty, maxDirty);
   }
 
-  public void write()
+  public void setFlushDirtyOnCommit(boolean flushOnCommit)
+  {
+    _block.setFlushDirtyOnCommit(flushOnCommit);
+  }
+
+  public void commit()
     throws IOException
   {
-    // _block.write();
+    _block.commit();
   }
 
   /**
@@ -94,7 +103,7 @@ public class AutoCommitWriteBlock extends WriteBlock {
 
     if (block != null) {
       try {
-	block.write();
+	block.commit();
       } catch (Throwable e) {
 	log.log(Level.FINE, e.toString(), e);
       }

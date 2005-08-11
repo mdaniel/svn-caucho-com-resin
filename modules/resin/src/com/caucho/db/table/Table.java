@@ -265,6 +265,8 @@ public class Table extends Store {
       
 	return table;
       } catch (Throwable e) {
+	log.log(Level.FINE, e.toString(), e);
+	
 	log.warning(e.toString());
 
 	throw new SQLException(L.l("can't load table {0} in {1}.\n{2}",
@@ -352,12 +354,13 @@ public class Table extends Store {
   private void initIndexes()
     throws IOException, SQLException
   {
+    int indexCount = 0;
+    
     Block block = readBlock(addressToBlockId(BLOCK_SIZE));
 
     try {
       byte []buffer = block.getBuffer();
 
-      int indexCount = 0;
       Column []columns = _row.getColumns();
       for (int i = 0; i < columns.length; i++) {
 	Column column = columns[i];
@@ -386,12 +389,89 @@ public class Table extends Store {
     } finally {
       block.free();
     }
+
+    if (indexCount > 0) {
+      clearIndexes();
+    
+      rebuildIndexes();
+    }
+  }
+  
+  /**
+   * Clears the indexes
+   */
+  private void clearIndexes()
+    throws IOException
+  {
+    Column []columns = _row.getColumns();
+
+    for (int i = 0; i < columns.length; i++) {
+      BTree index = columns[i].getIndex();
+
+      if (index == null)
+	continue;
+
+      long rootAddr = index.getIndexRoot();
+
+      Block block = readBlock(addressToBlockId(rootAddr));
+
+      byte []blockBuffer = block.getBuffer();
+
+      synchronized (blockBuffer) {
+	for (int j = 0; j < blockBuffer.length; j++) {
+	  blockBuffer[j] = 0;
+	}
+
+	block.setDirty(0, BLOCK_SIZE);
+      }
+    }
+
+    long blockAddr = 0;
+    
+    while ((blockAddr = firstBlock(blockAddr + BLOCK_SIZE, ALLOC_INDEX)) > 0) {
+      freeBlock(blockAddr);
+    }
+  }
+  
+  /**
+   * Rebuilds the indexes
+   */
+  private void rebuildIndexes()
+    throws IOException, SQLException
+  {
+    Transaction xa = Transaction.create();
+    xa.setAutoCommit(true);
+
+    TableIterator iter = createTableIterator();
+
+    iter.init(xa);
+
+    Column []columns = _row.getColumns();
+    
+    while (iter.next()) {
+      iter.prevRow();
+
+      byte []blockBuffer = iter.getBuffer();
+      
+      while (iter.nextRow()) {
+	long rowAddress = iter.getRowAddress();
+	int rowOffset = iter.getRowOffset();
+	  
+	for (int i = 0; i < columns.length; i++) {
+	  Column column = columns[i];
+
+	  column.setIndex(xa, blockBuffer, rowOffset, rowAddress, null);
+	}
+      }
+    }
+
+    xa.commit();
   }
 
   private void writeTableHeader(WriteStream os)
     throws IOException
   {
-    os.print("Resin-DB 03.11.02");
+    os.print("Resin-DB 03.14.02");
     os.write(0);
 
     while (os.getBufferOffset() < INDEX_ROOT_OFFSET)
@@ -593,7 +673,7 @@ public class Table extends Store {
 	  addr = _rowClockAddr;
 	}
 
-	long nextRowOffset = rowOffset + _rowLength;
+	int nextRowOffset = rowOffset + _rowLength;
       
 	if (_rowEnd <= nextRowOffset)
 	  nextRowOffset = BLOCK_SIZE;
@@ -626,6 +706,8 @@ public class Table extends Store {
 
 	    column.setExpr(xa, buffer, rowOffset, value, queryContext);
 	  }
+
+	  writeBlock.setDirty(rowOffset, nextRowOffset);
     
 	  buffer[rowOffset] |= 1;
       

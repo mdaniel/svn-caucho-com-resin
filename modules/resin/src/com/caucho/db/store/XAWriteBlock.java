@@ -72,9 +72,11 @@ public class XAWriteBlock extends WriteBlock {
     return _buffer;
   }
 
-  public void setDirty(boolean isDirty)
+  /*
+  public void setDirty(int boolean isDirty)
   {
   }
+  */
 
   public void write()
     throws IOException
