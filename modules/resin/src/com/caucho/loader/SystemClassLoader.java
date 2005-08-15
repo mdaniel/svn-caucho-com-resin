@@ -57,16 +57,15 @@ import com.caucho.jmx.Jmx;
 import com.caucho.security.PolicyImpl;
 
 /**
- * Class loader which checks for changes in class files and automatically
- * picks up new jars.
- *
- * <p>DynamicClassLoaders can be chained creating one virtual class loader.
- * From the perspective of the JDK, it's all one classloader.  Internally,
- * the class loader chain searches like a classpath.
+ * ClassLoader that initalizes the Resin environment, and allows byte code
+ * enhancement of classes in the system classpath.
+ * <pre>
+ * java -Djava.system.class.loader=com.caucho.loader.SystemClassLoader ...
+ * </pre>
  */
 public class SystemClassLoader extends EnvironmentClassLoader {
   /**
-   * Creates a new environment class loader.
+   * Creates a new SystemClassLoader.
    */
   public SystemClassLoader(ClassLoader parent)
   {
