@@ -21,11 +21,6 @@ Each web application is part of the web server.  It has a unique name or
 path that identifies it within the server.
 </p>
 
-<TODO>
-Things todo in this document: 
-convert to more jstl examples, more javadoc links, more cross-linking, "Debugging Web Applications" (talk about logging), XTP, better doc on errors
-</TODO>
-
 <p>
 Each web application has a corresponding url. The url begins with the part
 needed to identify the server, followed by the webapp path:
@@ -410,10 +405,6 @@ Since this value is part of a directive, a given page will always
 provide the same content type. It is also possible to dynamically
 indicate the content type using the <code>response</code> object, which is
 discussed later.
-</p>
-
-<p>
-A registry of content types names is kept by IANA<TODO/>.
 </p>
 
 </section>

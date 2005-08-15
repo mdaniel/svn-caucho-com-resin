@@ -673,7 +673,7 @@ reserved ports as root.</d>
     </ix>
     <ix h="webapp.xtp#cache-mapping" id="url-regexp">
       <d><i>As a child of <a config-tag="cache-mapping"></a></i>.
-                <TODO>confirm gone for 3.0</TODO> A regular expression matching the url</d>
+                 A regular expression matching the url</d>
     </ix>
     <ix h="webapp.xtp#cache-mapping" id="expires">
       <d><i>As a child of <a config-tag="cache-mapping"></a></i>.
@@ -780,7 +780,7 @@ PATH_INFO.</d>
       <d><i>As a child of <a config-tag="web-app"></a></i>.
         The document directory for
 the application, corresponding to a url of <var>/<i>id</i>/</var>. 
-        <TODO>(confirm:) Relative to the <a config-tag="host"></a> document-directory</TODO>.  Can use regexp replacement variables.</d>
+        Can use regexp replacement variables.</d>
     </ix>
     <ix h="webapp.xtp#web-app-deploy" id="web-app-deploy">
       <d>Specifies war expansion.</d>
@@ -853,7 +853,6 @@ the application, corresponding to a url of <var>/<i>id</i>/</var>.
     </ix>
     <ix h="webapp.xtp#filter-mapping" id="dispatcher">
       <d><i>As a child of <a config-tag="filter-mapping"></a></i>.
-                <TODO></TODO>
       </d>
     </ix>
     <ix h="webapp.xtp#filter-mapping" id="url-regexp">
@@ -865,7 +864,7 @@ the application, corresponding to a url of <var>/<i>id</i>/</var>.
       <d><i>As a child of <a config-tag="filter-mapping"></a></i>.
         The filter name can use replacement vars
 from url-regexp like <var>$1</var>.  
-        <TODO>3.0?:</TODO> It can also specify a
+         It can also specify a
 class name directly like <var>test.HelloWorld</var>
       </d>
     </ix>
@@ -898,7 +897,7 @@ class name directly like <var>test.HelloWorld</var>
     <ix h="webapp.xtp#servlet" id="run-at">
       <d><i>As a child of <a config-tag="servlet"></a></i>.
         Times to execute the servlet automatically,
-        <TODO>verify: seperated by comma's</TODO>.  A Resin extension.
+        A Resin extension.
       </d>
     </ix>
     <ix h="webapp.xtp#servlet-mapping" id="servlet-mapping">
@@ -922,7 +921,7 @@ class name directly like <var>test.HelloWorld</var>
       <d><i>As a child of <a config-tag="servlet-mapping"></a></i>.
         The servlet name can use replacement vars
 from url-regexp like <var>$1</var>.  
-        <TODO>3.0?:</TODO> It can also specify a
+        It can also specify a
 class name directly like <var>test.HelloWorld</var>
       </d>
     </ix>
@@ -963,7 +962,7 @@ class name directly like <var>test.HelloWorld</var>
     <ix h="webapp.xtp#session-config" id="cookie-length">
       <d><i>As a child of <a config-tag="session-config"></a></i>.
         Maximum length of the cookie. 
-        <TODO># bits?</TODO>(resin 2.1.1)</d>
+        (resin 2.1.1)</d>
     </ix>
     <ix h="webapp.xtp#session-config" id="file-store">
       <d><i>As a child of <a config-tag="session-config"></a></i>.
@@ -971,7 +970,7 @@ class name directly like <var>test.HelloWorld</var>
     </ix>
     <ix h="webapp.xtp#session-config" id="persistent-path">
       <d><i>As a child of <a config-tag="session-config"></a></i>.
-                <TODO></TODO>. (resin 3.0)</d>
+                (resin 3.0)</d>
     </ix>
     <ix h="webapp.xtp#session-config" id="jdbc-store">
       <d><i>As a child of <a config-tag="session-config"></a></i>.
@@ -1003,7 +1002,7 @@ class name directly like <var>test.HelloWorld</var>
     </ix>
     <ix h="webapp.xtp#session-config" id="invalidate-after-listener">
       <d><i>As a child of <a config-tag="session-config"></a></i>.
-                <TODO></TODO>. (resin 3.0)</d>
+                (resin 3.0)</d>
     </ix>
     <ix h="webapp.xtp#mime-mapping" id="mime-mapping">
       <d>Maps url patterns to mime-types.</d>
@@ -1069,7 +1068,7 @@ exceptions and a simple 404 File Not Found for error pages.</d>
     </ix>
     <ix h="webapp.xtp#web-resource-collection" id="description">
       <d><i>As a child of <a config-tag="web-resource-collection"></a></i>.
-                <TODO></TODO>
+                
       </d>
     </ix>
     <ix h="webapp.xtp#web-resource-collection" id="url-pattern">
@@ -1084,7 +1083,7 @@ exceptions and a simple 404 File Not Found for error pages.</d>
     </ix>
     <ix h="webapp.xtp#web-resource-collection" id="method">
       <d><i>As a child of <a config-tag="web-resource-collection"></a></i>.
-                <TODO>why two? HTTP methods to be restricted.</TODO>
+                
       </d>
     </ix>
     <ix h="webapp.xtp#auth-constraint" id="auth-constraint">

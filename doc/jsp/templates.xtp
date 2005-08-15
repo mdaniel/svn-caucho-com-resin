@@ -28,10 +28,6 @@ the controller.
 <p/>The example is a simple guest book.  Users log in and add
 comments.  
 
-    <TODO id="migrate demo to 'code library' section">
-    It is also available in the Resin demos.
-    </TODO>
-
 <deftable>
 <tr><th>Role<th>Implementation
 <tr><td>Model<td>A <code/GuestBook/> of <code/Guests/>.

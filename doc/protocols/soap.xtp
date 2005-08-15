@@ -13,7 +13,7 @@
 <section title="Prerequisites">
 
 <p>Resin uses the Apache Axis library to provide support for SOAP.  You can
-download the axis distribution from <a href="TODO">TODO</a>.
+download the axis distribution.
 To make the axis libraries available to the application, the necessary jar
 files are installed in the directory <code>WEB-INF/lib</code>:
 
@@ -102,8 +102,6 @@ http://localhost:8080/testsoap/soap/String/1.0?WSDL
 <p>More advanced requirements for providing soap services may require the use
 of the <var/SoapDeployerServlet/>.  The <code/SoapDeployerServlet/> allows the
 usage of any java class to provide the service.</p>
-
-<TODO>deploy two services here</TODO>
 
 <example title="Provide a SOAP Service using the SoapDeployerService">
 package example;
@@ -255,7 +253,6 @@ use the <var/soap-style/> configuration option.</p>
 </section> <!-- Configuration -->
 
 <section title="Type Mapping">
-<TODO>elaborate on this</TODO>
 <deftable title="Java/SOAP type mappings">
 <tr><th>Java type<th>SOAP type
 <tr><td>byte[]<td>xsd:base64Binary

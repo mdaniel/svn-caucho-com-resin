@@ -117,8 +117,6 @@ win-192.168.0.4> net start resin-d
 
 <section name="resin" title="Using Resin as the Load Balancer">
 
-<TODO>sensible example using multiple clusters.</TODO>
-
 <p>Resin includes a LoadBalanceServlet that can balance
 requests to backend servers.  Because it is implemented as a servlet,
 this configuration is the most flexible.  A site might use 192.168.0.1 as 

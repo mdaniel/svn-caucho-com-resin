@@ -31,11 +31,9 @@
         <p>Defines a virtual host.  If no hosts are specified, or if a
          request doesn't match a host, the configuration in <a
          config-tag='host-default'/> will be used instead.</p>
-        <TODO>is that true?</TODO>
 
          <p>The <a config-tag="id"/> may contain a list of hosts, seperated by comma's.  Any host
          in the list will match.</p>
-        <TODO>that true?</TODO>
 
         <p>If the <a config-tag='id'/> for a host is null or '*', the
         <var type='config-tag'>host</var> is a default host that is
@@ -45,8 +43,6 @@
         <p>Hosts can use <var/regexp/> instead of <var/id/> to dynamically create
         new hosts.</p>
 
-        <TODO>inherit resources</TODO>
-        <TODO>example of testing by changing hosts file directly</TODO>
       </description>
     </header>
     <body>

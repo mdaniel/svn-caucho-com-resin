@@ -156,7 +156,6 @@ you can specify the openssl location directly:</p>
 <example>
 resin> ./configure --with-openssl=/usr/local/ssl
 </example>
-<TODO>update for 3.0 re: how ssl libraries are used, </TODO>
 </section>
 
 <section title="Obtaining the OpenSSL Libraries on Windows">
@@ -323,7 +322,7 @@ browser and the client is encrypted.</p>
 SSLCertificateFile and SSLCertificateKeyFile.  So you can use the same
 certificates (and documentation) from mod_ssl for Resin.</p>
 
-<p>The full set of parameters is in the <TODO>port configuration</TODO>.</p> 
+<p>The full set of parameters is in the port configuration.</p> 
 
 <example>
 ...

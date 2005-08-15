@@ -148,7 +148,6 @@ WebDAV Servlet</a>).  You configure an object with the JNDI name
 configure a custom class that extends <a
 href="javadoc|com.caucho.servlets.webdav.AbstractPath|"/></p>
 
-<TODO>confirm example once resource syntax is finalized</TODO>
 <example title="WebDAV with a custom source">
 &lt;resource jndi-name='resin/webdav'&gt;
   &lt;type&gt;test.foo.MyDataSource&lt;/type&gt;
@@ -168,10 +167,6 @@ href="javadoc|com.caucho.servlets.webdav.AbstractPath|"/></p>
 
 &lt;servlet-mapping url-pattern='/webdav/*' servlet-name='webdav'/&gt;
 </example>
-
-<TODO>example of implementation of test.foo.MyDataSource</TODO>
-
-
 
 <p>You can completely customize your WebDav backend, 
 linking it to databases or some EJB-based data source or whatever.</p>

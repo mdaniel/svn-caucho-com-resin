@@ -55,7 +55,7 @@ on cache-mapping to set the expires times for static pages.</p>
 <deftable-childtags>
 <tr><td>url-pattern<td>A pattern matching the url:
 <var>/foo/*</var>, <var>/foo</var>, or <var>*.foo</var><td>
-<tr><td>url-regexp<td><TODO>confirm gone for 3.0</TODO> A regular expression matching the url<td>
+<tr><td>url-regexp<td>A regular expression matching the url<td>
 <tr><td>expires<td>A time interval.<td>
 </deftable-childtags>
 
@@ -439,13 +439,13 @@ can specify a servlet alias defined by <code/filter/>.
 <deftable-childtags title="Servlet 2.4 definition for filter-mapping">
 <tr><td>filter-name<td>The filter name
 <tr><td>url-pattern<td>A pattern matching the url: <var>/foo/*</var>, <var>/foo</var>, or <var/*.foo/>
-<tr><td>dispatcher<td><TODO/>
+<tr><td>dispatcher<td>
 </deftable-childtags>
 
 <deftable-childtags title="Resin extensions to filter-mapping">
 <tr><td>url-regexp<td>A regular expression matching the url
 <tr><td>filter-name<td>The filter name can use replacement vars
-from url-regexp like <var/$1/>.  <TODO>3.0?:</TODO> It can also specify a
+from url-regexp like <var/$1/>.  It can also specify a
 class name directly like <var/test.HelloWorld/><td>n/a
 </deftable-childtags>
 
@@ -577,7 +577,7 @@ children, <var/url-pattern/> and <var/servlet-name/>.
 <deftable-childtags title="Resin extensions to servlet-mapping">
 <tr><td>url-regexp<td>A regular expression matching the url<td>n/a
 <tr><td>servlet-name<td>The servlet name can use replacement vars
-from url-regexp like <var/$1/>.  <TODO>3.0?:</TODO> It can also specify a
+from url-regexp like <var/$1/>.  It can also specify a
 class name directly like <var/test.HelloWorld/><td>n/a
 </deftable-childtags>
 
@@ -668,7 +668,7 @@ to define a sub-url the web server should handle, not Resin. (Resin 1.2.2)
 <tr><td>cookie-version<td>Version of the cookie spec for sessions. (resin 1.2)<td>1.0
 <tr><td>cookie-domain<td>Domain for session cookies. (resin 1.2)<td>none
 <tr><td>cookie-max-age<td>Max age for persistent session cookies. (resin 2.0)<td>none
-<tr><td>cookie-length<td>Maximum length of the cookie. <TODO># bits?</TODO>(resin 2.1.1)<td>Integer.MAX_VALUE
+<tr><td>cookie-length<td>Maximum length of the cookie. (resin 2.1.1)<td>Integer.MAX_VALUE
 <tr><td>file-store<td>Persistent sessions using a file store. (resin 1.2)<td>none
 <tr><td>use-persistent-store<td>Uses the current <a href="resin.xtp#persistent-store">persistent-store</a> to save sessions. (resin 3.0.8)<td>none
 <tr><td>always-load-session<td>Reload data from the store on every request. (resin 1.2)<td>false
@@ -676,7 +676,7 @@ to define a sub-url the web server should handle, not Resin. (Resin 1.2.2)
 <tr><td>save-only-on-shutdown<td>Only save session when the application shuts down. (resin 1.2.3)<td>false
 <tr><td>reuse-session-id<td>Reuse the session id even if the session has timed out. (resin 2.0.4)<td>true
 <tr><td>ignore-serialization-errors<td>When persisting a session, ignore any values which don't implement java.io.Serializable<td>false
-<tr><td>invalidate-after-listener<td><TODO/>. (resin 3.0)<td><TODO/>
+<tr><td>invalidate-after-listener<td>. (resin 3.0)<td>
 </deftable-childtags>
 
 <p>By default, both <code/enable-cookies/> and
@@ -884,10 +884,10 @@ not use any security constraints.</p>
 
 <deftable-childtags>
 <tr><td>web-resource-name<td>a name for a web resource collection
-<tr><td>description<td><TODO/>
+<tr><td>description<td>
 <tr><td>url-pattern<td>url patterns describing the resource
 <tr><td>http-method<td>HTTP methods to be restricted.
-<tr><td>method<td><TODO>why two? HTTP methods to be restricted.</TODO>
+<tr><td>method<td>
 </deftable-childtags>
 </defun>
 
@@ -926,7 +926,6 @@ Defines a custom constraint.
 <tr><td>init<td>initialization parameters, set in the object using Bean-style setters and getters
 </deftable-childtags>
 
-<TODO>example</TODO>
 </defun>
 
 <defun title='login-config' version="Servlet 2.2">
@@ -950,8 +949,6 @@ href="external|spec|http-authentication">HTTP Authentication: Basic and
 Digest</a>.</p> 
 
 <p>HTTP digest authentication is discussed in <a href="security|digest">Digest Passwords</a>.
-
-<TODO>verbose description, examples, etc</TODO>
 
 </defun>
 
@@ -1009,11 +1006,9 @@ default, the authentication only lasts for a single session.</p>
 </defun>
 
 <defun title='security-role' version='Servlet'>
-<TODO>in servlet spec, not in resin rnc</TODO>
 </defun>
 
 <defun title='env-entry' version='Servlet'>
-<TODO>link to env</TODO>
 </defun>
 
 <defun title='ejb-ref' version='Servlet'>
@@ -1025,11 +1020,9 @@ default, the authentication only lasts for a single session.</p>
 </defun>
 
 <defun title='message-destination' version='Servlet'>
-<TODO>in servlet spec, not in resin rnc</TODO>
 </defun>
 
 <defun title='locale-encoding-mapping-list' version='Servlet'>
-<TODO>in servlet spec, not in resin rnc</TODO>
 </defun>
 </section>
 

@@ -18,7 +18,6 @@
 <p>For example, the source for the tutorial index contains a section
 like:</p>
 
-    <TODO>new example</TODO>
 <example title="index.xtp">
 &lt;s1 title="XTP">
 &lt;ul>

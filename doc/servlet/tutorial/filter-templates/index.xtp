@@ -27,7 +27,6 @@ anything useful, but you can use them as a basis for development.</p>
 <tr><td><viewfile-link file="index.jsp"/>
     <td>A jsp that show's the result of using <code/example.filters.ExampleResponseHeadersFilter/>
 </deftable>
-<TODO>An example of intercepting the output stream in a response wrapper</TODO>
 </section>
 
 </body>

@@ -127,8 +127,6 @@ to service connections.  The `round-robin' strategy does a straight round
 robin, choosing the backend server that follows the last backend server chosen.
 </p>
 
-<TODO>link to load balancing configuration documentation</TODO>
-
 See <a href="javadoc|com.caucho.servlets.LoadBalanceServlet|"></a>.
 </section>
 

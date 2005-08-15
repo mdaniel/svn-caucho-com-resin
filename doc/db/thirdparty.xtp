@@ -27,25 +27,6 @@
   ...
 &lt;/database&gt;
 </example>
-<!--
-<example title="MySQL Connector/J XADataSource JDBC configuration">
-&lt;database&gt;
-  &lt;jndi-name&gt;jdbc/mysql-xa&lt;/jndi-name&gt;
-  &lt;xa&gt;true&lt;/xa&gt;
-  &lt;driver>
-    &lt;type&gt;com.mysql.jdbc.jdbc2.optional.MysqlXaDataSource&lt;/type&gt;
-    &lt;url&gt;jdbc:mysql://localhost:3306/<var/dbname/>&lt;/url&gt;
-    &lt;user&gt;<var/username/>&lt;/user&gt;
-    &lt;password&gt;<var/password/>&lt;/password&gt;
-  &lt;/driver>
-  ...
-&lt;/database&gt;
-</example>
--->
-
-<section title="Not all MySQL table types support transactions">
-<TODO/>
-</section>
 
 </section>
 

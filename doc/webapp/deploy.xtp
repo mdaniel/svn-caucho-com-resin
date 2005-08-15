@@ -42,12 +42,10 @@ the user will be using the new version of the application.
 <li>deploy new war to backup server(s)
 </ol>
 
-<TODO>links to load balancing, backup server</TODO>
 </section>
 
 <section name="precompile-jsp" title="JSP Precompilation">
 
-<TODO>migrated to doc|jsp|compile</TODO>
 See <a href="doc|jsp|compile">JSP/Compilation.</a>
 </section>
 

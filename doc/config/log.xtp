@@ -140,7 +140,6 @@ the same output file.</p>
 
 <defun title="access-log" version="Resin 2.1">
 <parents>server, host-default, host, web-app-default, web-app</parents>
-<default><TODO/></default>
 
 <p>Specify the access log file.</p>
 
@@ -221,8 +220,6 @@ in.</p>
 extend a custom class from <a href="javadoc|com.caucho.http.log.AbstractAccessLog|"/>.  
 <a href="doc|config|init">Bean-style initialization</a> can be used to set bean
 parameters in the custom class.</p>
-
-<TODO>better example</TODO>
 
 <example>
 ...
@@ -627,7 +624,6 @@ rollover-size has been specified, the archive filename is the original path
 with <code/.%Y%m%d/> appended.  If rollover-period is less than one day, the
 archive filename is the original path with <code/.%Y%m%d.%H/> appended.</p>
 
-<TODO>example</TODO>
 </section>
 
 <section title="Disabling rollovers">
