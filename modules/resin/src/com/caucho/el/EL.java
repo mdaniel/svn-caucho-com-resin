@@ -73,7 +73,7 @@ public class EL {
       VariableResolver parent = new SystemPropertiesResolver();
       
       resolver = new EnvironmentResolver(loader, parent);
-      _elEnvironment.set(resolver);
+      _elEnvironment.set(resolver, loader);
     }
 
     return resolver;

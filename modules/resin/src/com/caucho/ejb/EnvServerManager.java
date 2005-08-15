@@ -68,7 +68,7 @@ import com.caucho.loader.enhancer.EnhancingClassLoader;
 
 import com.caucho.config.ConfigException;
 
-import com.caucho.amber.EnvAmberManager;
+import com.caucho.amber.AmberManager;
 
 import com.caucho.amber.entity.AmberEntityHome;
 
@@ -98,9 +98,11 @@ import com.caucho.ejb.entity2.EntityManagerImpl;
 public class EnvServerManager implements EnvironmentListener {
   private static final L10N L = new L10N(EnvServerManager.class);
   protected static final Logger log = Log.open(EnvServerManager.class);
-  
+
+  /*
   private static EnvironmentLocal<EnvServerManager> _localServerManager
     = new EnvironmentLocal<EnvServerManager>("caucho.env-server");
+  */
 
   private EnvironmentClassLoader _classLoader;
 
@@ -113,7 +115,7 @@ public class EnvServerManager implements EnvironmentListener {
   
   private EJBAdmin _ejbAdmin;
 
-  private EnvAmberManager _envAmberManager;
+  private AmberManager _amberManager;
   
   private EjbTransactionManager _ejbTransactionManager;
   
@@ -138,12 +140,12 @@ public class EnvServerManager implements EnvironmentListener {
   /**
    * Create a server with the given prefix name.
    */
-  private EnvServerManager()
+  EnvServerManager(AmberManager amberManager)
   {
     try {
-      _envAmberManager = EnvAmberManager.createLocal();
-      _envAmberManager.initLoaders();
-      _envAmberManager.setTableCacheTimeout(_entityCacheTimeout);
+      _amberManager = amberManager;
+      _amberManager.initLoaders();
+      _amberManager.setTableCacheTimeout(_entityCacheTimeout);
       
       _classLoader = (EnvironmentClassLoader) Thread.currentThread().getContextClassLoader();
       _workPath = WorkDir.getLocalWorkDir(_classLoader).lookup("ejb");
@@ -170,14 +172,17 @@ public class EnvServerManager implements EnvironmentListener {
   /**
    * Gets the local server.
    */
+  /*
   public static EnvServerManager getLocal()
   {
     return _localServerManager.get();
   }
+  */
 
   /**
    * Creates the local server.
    */
+  /*
   public static EnvServerManager createLocal()
   {
     synchronized (EnvServerManager.class) {
@@ -191,6 +196,7 @@ public class EnvServerManager implements EnvironmentListener {
       return serverManager;
     }
   }
+  */
 
   /**
    * Returns the loader.
@@ -347,7 +353,7 @@ public class EnvServerManager implements EnvironmentListener {
     throws ConfigException
   {
     try {
-      _envAmberManager.init();
+      _amberManager.init();
 
       /*
       for (EjbConfig cfg : _ejbConfigList)
@@ -386,12 +392,12 @@ public class EnvServerManager implements EnvironmentListener {
 
   public AmberEntityHome getAmberEntityHome(String name)
   {
-    return _envAmberManager.getEntityHome(name);
+    return _amberManager.getEntityHome(name);
   }
 
-  public EnvAmberManager getAmberManager()
+  public AmberManager getAmberManager()
   {
-    return _envAmberManager;
+    return _amberManager;
   }
 
   public JClassLoader getJClassLoader()
@@ -552,7 +558,7 @@ public class EnvServerManager implements EnvironmentListener {
       _protocolManager = null;
       _ejbTransactionManager.destroy();
       _ejbTransactionManager = null;
-      _envAmberManager = null;
+      _amberManager = null;
     } catch (Throwable e) {
       log.log(Level.WARNING, e.toString(), e);
     }

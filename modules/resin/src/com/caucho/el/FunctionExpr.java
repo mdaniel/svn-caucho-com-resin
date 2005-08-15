@@ -67,6 +67,9 @@ public class FunctionExpr extends Expr {
   public Object evalObject(VariableResolver env)
     throws ELException
   {
+    if (_expr instanceof StaticMethodExpr)
+      return ((StaticMethodExpr) _expr).evalMethod(_args, env);
+    
     Object aObj = _expr.evalObject(env);
 
     Method method = null;

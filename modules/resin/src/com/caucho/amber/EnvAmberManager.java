@@ -152,7 +152,7 @@ public class EnvAmberManager {
       throw new RuntimeException(e);
     }
 
-    _enhancer = new AmberEnhancer(this);
+    // _enhancer = new AmberEnhancer(this);
 
     EnhancerManager.create().addClassEnhancer(_enhancer);
 
@@ -166,7 +166,7 @@ public class EnvAmberManager {
   private void bindProxy()
     throws Throwable
   {
-    EntityManagerProxy userManager = new EntityManagerProxy(this);
+    EntityManagerProxy userManager = null;//new EntityManagerProxy(this);
 
     new InitialContext().rebind("java:comp/EntityManager", userManager);
   }
@@ -300,7 +300,7 @@ public class EnvAmberManager {
     else if (_enhancer != null)
       return _enhancer;
     else {
-      _generator = new AmberGeneratorImpl(this);
+      // _generator = new AmberGeneratorImpl(this);
 
       return _generator;
     }

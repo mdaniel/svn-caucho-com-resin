@@ -82,7 +82,10 @@ r_ear-Content =
 
   (r_env-Content
 
-   & r_config-file*)
+   & r_config-file*
+
+   & (attribute ejb-server-jndi-name { string }
+      | element ejb-server-jndi-name { string })?)
 
 r_ear-default = element ear-default {
   r_ear-Content

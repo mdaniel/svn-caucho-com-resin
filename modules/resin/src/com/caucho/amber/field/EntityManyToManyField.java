@@ -31,6 +31,8 @@ package com.caucho.amber.field;
 
 import java.io.IOException;
 
+import java.util.ArrayList;
+
 import java.util.logging.Logger;
 
 import com.caucho.util.L10N;
@@ -70,6 +72,9 @@ public class EntityManyToManyField extends AssociationField {
 
   private LinkColumns _sourceLink;
   private LinkColumns _targetLink;
+
+  private ArrayList<String> _orderByFields;
+  private ArrayList<Boolean> _orderByAscending;
 
   public EntityManyToManyField(EntityType entityType, String name)
     throws ConfigException
@@ -146,6 +151,16 @@ public class EntityManyToManyField extends AssociationField {
   public LinkColumns getTargetLink()
   {
     return _targetLink;
+  }
+
+  /**
+   * Sets the order by.
+   */
+  public void setOrderBy(ArrayList<String> orderByFields,
+			 ArrayList<Boolean> orderByAscending)
+  {
+    _orderByFields = orderByFields;
+    _orderByAscending = orderByAscending;
   }
 
   /**
@@ -265,10 +280,24 @@ public class EntityManyToManyField extends AssociationField {
     
     out.print("String sql=\"");
     
-    out.print("SELECT o." + getName());
-    out.print(" FROM " + getSourceType().getName() + " o");
+    out.print("SELECT c");
+    out.print(" FROM " + getSourceType().getName() + " o,");
+    out.print("  IN(o." + getName() + ") c");
     out.print(" WHERE ");
     out.print(getSourceType().getId().generateRawWhere("o"));
+
+    if (_orderByFields != null) {
+      out.print(" ORDER BY ");
+
+      for (int i = 0; i < _orderByFields.size(); i++) {
+	if (i != 0)
+	  out.print(", ");
+	
+	out.print("c." + _orderByFields.get(i));
+	if (Boolean.FALSE.equals(_orderByAscending.get(i)))
+	  out.print(" DESC");
+      }
+    }
     
     out.println("\";");
     out.println("com.caucho.amber.AmberQuery query;");

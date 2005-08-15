@@ -38,7 +38,7 @@ import javax.ejb.Query;
 
 import com.caucho.util.L10N;
 
-import com.caucho.amber.EnvAmberManager;
+import com.caucho.amber.AmberManager;
 
 /**
  * The Entity manager
@@ -51,9 +51,9 @@ public class EntityManagerProxy implements EntityManager {
   private final ThreadLocal<EntityManagerImpl> _localManager
     = new ThreadLocal<EntityManagerImpl>();
 
-  private EnvAmberManager _amberManager;
+  private AmberManager _amberManager;
 
-  public EntityManagerProxy(EnvAmberManager amberManager)
+  public EntityManagerProxy(AmberManager amberManager)
   {
     _amberManager = amberManager;
   }

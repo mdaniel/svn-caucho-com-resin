@@ -312,6 +312,7 @@ public class EntityType extends Type {
    */
   public void setEnhanced(boolean isEnhanced)
   {
+    Thread.dumpStack();
     _isEnhanced = isEnhanced;
   }
 

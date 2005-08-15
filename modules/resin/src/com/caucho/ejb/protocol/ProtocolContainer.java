@@ -59,7 +59,7 @@ public class ProtocolContainer {
   protected String _urlPrefix;
   private Path _workPath;
 
-  public void setServerManager(EnvServerManager manager)
+  public void setServerManager(EjbServerManager manager)
   {
     _manager = manager.getProtocolManager();
   }

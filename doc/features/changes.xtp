@@ -2,9 +2,13 @@
 
 <a href='changes-2.xtp'>Resin 2.1 changes</a>
 
-<s2 title='3.0.snap - July 5, 2005'>
+<s2 title='3.0.snap - Aug 11, 2005'>
 <ul>
-<li>Significant changes to session and cache persistence store
+<li>PageContext wasn't properly restoring stream from SimpleTag (rep by Sergey Zubtcovskii, RSN-375)
+<li>EL expressions weren't marshalling to String properly (rep by Alex Grief, RSN-370)
+<li>EJB/Amber ManyToMany wasn't properly supporting order-by (rep by Christian Amott, RSN-311)
+<li>EnvAmberManager needs to be separate per ejb-server (rep by Christian Amott, RSN-308)
+<li>(Aug 11, 2005) Significant changes to session and cache persistence store
 <li>Improved error message in wrapper.pl.in when JAVA_HOME isn't set and PATH doesn't contain java (rep by Ryan Fields, RSN-367)
 <li>Use Lifecycle in ResinServer
 <li>&lt;host> and &lt;host-deploy> are properly merged (rep by Ivan Jouikov, RSN-360)

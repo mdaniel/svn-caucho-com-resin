@@ -60,7 +60,7 @@ import com.caucho.java.gen.JavaClassGenerator;
 import com.caucho.java.gen.DependencyComponent;
 import com.caucho.java.gen.GenClass;
 
-import com.caucho.amber.EnvAmberManager;
+import com.caucho.amber.AmberManager;
 import com.caucho.amber.AmberRuntimeException;
 
 import com.caucho.amber.type.EntityType;
@@ -88,11 +88,11 @@ public class AmberEnhancer implements AmberGenerator, ClassEnhancer {
   private Path _configDirectory;
   private boolean _useHibernateFiles;
 
-  private EnvAmberManager _amberManager;
+  private AmberManager _amberManager;
 
   private ArrayList<String> _pendingClassNames = new ArrayList<String>();
 
-  public AmberEnhancer(EnvAmberManager manager)
+  public AmberEnhancer(AmberManager manager)
   {
     _amberManager = manager;
   }

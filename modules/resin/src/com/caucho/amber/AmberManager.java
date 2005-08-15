@@ -29,44 +29,63 @@
 
 package com.caucho.amber;
 
+import java.io.IOException;
+
+import java.lang.ref.SoftReference;
+
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.SQLException;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import javax.ejb.EntityManager;
+
+import javax.sql.DataSource;
+
 import com.caucho.amber.connection.AmberConnectionImpl;
 import com.caucho.amber.connection.CacheConnectionImpl;
+
+import com.caucho.amber.ejb3.EntityManagerProxy;
+
 import com.caucho.amber.entity.AmberCompletion;
 import com.caucho.amber.entity.AmberEntityHome;
 import com.caucho.amber.entity.EntityItem;
 import com.caucho.amber.entity.EntityKey;
+
 import com.caucho.amber.gen.AmberEnhancer;
 import com.caucho.amber.gen.AmberGenerator;
 import com.caucho.amber.gen.AmberGeneratorImpl;
+
 import com.caucho.amber.idgen.IdGenerator;
 import com.caucho.amber.idgen.SequenceIdGenerator;
+
 import com.caucho.amber.query.QueryCacheKey;
 import com.caucho.amber.query.ResultSetCacheChunk;
+
 import com.caucho.amber.table.Table;
+
 import com.caucho.amber.type.*;
+
 import com.caucho.bytecode.JClass;
 import com.caucho.bytecode.JClassLoader;
+
 import com.caucho.config.ConfigException;
+
 import com.caucho.java.gen.JavaClassGenerator;
+
 import com.caucho.jdbc.JdbcMetaData;
+
 import com.caucho.loader.DynamicClassLoader;
 import com.caucho.loader.enhancer.EnhancerManager;
 import com.caucho.loader.enhancer.EnhancingClassLoader;
 import com.caucho.log.Log;
 import com.caucho.util.L10N;
 import com.caucho.util.LruCache;
-
-import javax.sql.DataSource;
-import java.io.IOException;
-import java.lang.ref.SoftReference;
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Main interface between Resin and the connector.  It's the
@@ -82,9 +101,10 @@ public class AmberManager {
   private ClassLoader _parentLoader;
   private EnhancingClassLoader _enhancedLoader;
 
-  private EnvAmberManager _envAmberManager;
+  // private EnvAmberManager _envAmberManager;
 
   private AmberEnhancer _enhancer;
+  private EntityManagerProxy _entityManagerProxy;
 
   // basic data source
   private DataSource _dataSource;
@@ -148,9 +168,15 @@ public class AmberManager {
     _parentLoader = Thread.currentThread().getContextClassLoader();
     _jClassLoader = EnhancerManager.create(_parentLoader).getJavaClassLoader();
 
+    /*
     _envAmberManager = EnvAmberManager.createLocal();
 
     _envAmberManager.addAmberManager(this);
+    */
+
+    _enhancer = new AmberEnhancer(this);
+
+    EnhancerManager.create().addClassEnhancer(_enhancer);
 
     try {
       if (_parentLoader instanceof DynamicClassLoader)
@@ -160,15 +186,31 @@ public class AmberManager {
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
+
+    _entityManagerProxy = new EntityManagerProxy(this);
+    /*
+    try {
+      bindProxy();
+    } catch (Throwable e) {
+      log.log(Level.FINE, e.toString(), e);
+    }
+    */
+  }
+
+  public EntityManager getEntityManager()
+  {
+    return _entityManagerProxy;
   }
 
   /**
    * Returns the env amber manager.
    */
+  /*
   public EnvAmberManager getEnvManager()
   {
     return _envAmberManager;
   }
+  */
 
   /**
    * Sets the data source.
@@ -401,7 +443,8 @@ public class AmberManager {
   private void addEntityHome(String name, AmberEntityHome home)
   {
     _entityHomeMap.put(name, home);
-    getEnvManager().addEntityHome(name, home);
+    
+    // getEnvManager().addEntityHome(name, home);
   }
   
   /**
@@ -540,7 +583,8 @@ public class AmberManager {
       EntityType type = _lazyConfigure.remove(0);
 
       if (type.startConfigure()) {
-	getEnvManager().getGenerator().configure(type);
+	// getEnvManager().getGenerator().configure(type);
+	
       }
 
       if (! _lazyGenerate.contains(type))
@@ -662,21 +706,19 @@ public class AmberManager {
   /**
    * Sets the generator.
    */
-  public void setGenerator(AmberGenerator generator)
-  {
-    _generator = generator;
-  }
-
-  /**
-   * Sets the generator.
-   */
   public AmberGenerator getGenerator()
   {
-    if (_generator == null) {
-      _generator = new AmberGeneratorImpl(getEnvManager());
-    }
+    if (_generator != null)
+      return _generator;
+    /*
+    else if (_enhancer != null)
+      return _enhancer;
+    */
+    else {
+      _generator = new AmberGeneratorImpl(this);
 
-    return _generator;
+      return _generator;
+    }
   }
 
   /**
@@ -685,15 +727,6 @@ public class AmberManager {
   public boolean hasReturnGeneratedKeys()
   {
     return _supportsGetGeneratedKeys;
-  }
-
-  /**
-   * Initialize the resource.
-   */
-  public void initLoaders()
-    throws ConfigException, IOException
-  {
-    getEnvManager().initLoaders();
   }
 
   /**
@@ -723,6 +756,15 @@ public class AmberManager {
     } catch (SQLException e) {
       throw new ConfigException(e);
     }
+  }
+
+  /**
+   * Initialize the resource.
+   */
+  public void initLoaders()
+    throws ConfigException, IOException
+  {
+    // getEnvManager().initLoaders();
   }
 
   public void initEntityHomes()

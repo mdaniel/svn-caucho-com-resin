@@ -46,6 +46,7 @@ import com.caucho.config.types.Signature;
  */
 public class StaticMethodExpr extends Expr {
   private Method _method;
+  private Marshall []_marshall;
 
   /**
    * Creates a new method expression.
@@ -56,6 +57,8 @@ public class StaticMethodExpr extends Expr {
   public StaticMethodExpr(Method method)
   {
     _method = method;
+
+    initMethod();
   }
 
   /**
@@ -74,6 +77,22 @@ public class StaticMethodExpr extends Expr {
     } catch (Exception e) {
       log.log(Level.FINE, e.toString(), e);
     }
+    
+    initMethod();
+  }
+
+  /**
+   * Initialize the marshall arguments.
+   */
+  private void initMethod()
+  {
+    Class []param = _method.getParameterTypes();
+
+    _marshall = new Marshall[param.length];
+
+    for (int i = 0; i < _marshall.length; i++) {
+      _marshall[i] = Marshall.create(param[i]);
+    }
   }
   
   /**
@@ -85,6 +104,32 @@ public class StaticMethodExpr extends Expr {
     throws ELException
   {
     return _method;
+  }
+  
+  /**
+   * Evaluate the expression as an object.
+   *
+   * @param env the variable environment
+   */
+  public Object evalMethod(Expr []args,
+			   VariableResolver env)
+    throws ELException
+  {
+    if (_marshall.length != args.length)
+      return null;
+
+    try {
+      Object []objs = new Object[args.length];
+      
+      for (int i = 0; i < _marshall.length; i++)
+        objs[i] = _marshall[i].marshall(args[i], env);
+
+      return _method.invoke(null, objs);
+    } catch (ELException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new ELException(e);
+    }
   }
 
   /**

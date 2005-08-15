@@ -608,6 +608,24 @@ public class PageContextImpl extends PageContext
     
     _out = oldWriter;
 
+    // jsp/18eg
+    if (_out instanceof StreamJspWriter) {
+      StreamJspWriter writer = (StreamJspWriter) _out;
+
+      _bodyResponseStream.setWriter(writer.getWriter());
+    }
+    else if (_out instanceof JspWriterAdapter) {
+      if (getCauchoResponse() != null) {
+	getCauchoResponse().setResponseStream(_responseStream);
+	getCauchoResponse().setForbidForward(false);
+      }
+    }
+    else if (_out instanceof BodyContentImpl) {
+      BodyContentImpl body = (BodyContentImpl) _out;
+      
+      _bodyResponseStream.setWriter(body.getWriter());
+    }
+
     return oldWriter;
 
     // getCauchoResponse().setWriter(_os);

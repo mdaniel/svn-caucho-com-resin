@@ -52,6 +52,8 @@ import com.caucho.amber.table.ForeignColumn;
 import com.caucho.amber.table.Column;
 import com.caucho.amber.table.LinkColumns;
 
+import com.caucho.ejb.ql.QLParser;
+
 /**
  * many-to-many relation
  */
@@ -65,6 +67,9 @@ public class CmrManyToMany extends CmrRelation {
 
   // true if the target is only in a single instance
   private boolean _isTargetUnique;
+
+  private ArrayList<String> _orderByFields;
+  private ArrayList<Boolean> _orderByAscending;
   
   private SqlRelation []_keySQLColumns;
   private SqlRelation []_dstSQLColumns;
@@ -170,6 +175,24 @@ public class CmrManyToMany extends CmrRelation {
   }
 
   /**
+   * Sets the order by.
+   */
+  public void setOrderBy(String orderBySQL)
+    throws ConfigException
+  {
+    System.out.println("CMR SOB: " + orderBySQL);
+    if (orderBySQL != null) {
+      ArrayList<String> fields = new ArrayList<String>();
+      ArrayList<Boolean> asc = new ArrayList<Boolean>();
+
+      QLParser.parseOrderBy(_targetBean, orderBySQL, fields, asc);
+      
+      _orderByFields = fields;
+      _orderByAscending = asc;
+    }
+  }
+
+  /**
    * The OneToMany is a collection.
    */
   public boolean isCollection()
@@ -236,7 +259,9 @@ public class CmrManyToMany extends CmrRelation {
     manyToMany.setSourceLink(new LinkColumns(map,
 					     sourceType.getTable(),
 					     sourceColumns));
-    
+
+    manyToMany.setOrderBy(_orderByFields, _orderByAscending);
+      
     manyToMany.init();
 
     return manyToMany;

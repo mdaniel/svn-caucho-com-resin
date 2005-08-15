@@ -431,7 +431,7 @@ public class NodeBuilder {
       return value;
   }
 
-  String configureRawString(Node child)
+  public String configureRawString(Node child)
     throws Exception
   {
     Object resinTypeValue = createResinType(child);

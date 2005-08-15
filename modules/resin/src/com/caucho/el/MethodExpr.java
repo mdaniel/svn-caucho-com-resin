@@ -135,48 +135,11 @@ public class MethodExpr extends Expr {
   }
   
   static Object evalArg(Class cl, Expr expr, VariableResolver env)
-  throws ELException
+    throws ELException
   {
-    if (boolean.class.equals(cl))
-      return new Boolean((boolean) expr.evalBoolean(env));
-    else if (Boolean.class.equals(cl))
-      return new Boolean((boolean) expr.evalBoolean(env));
-    else if (byte.class.equals(cl))
-      return new Byte((byte) expr.evalLong(env));
-    else if (Byte.class.equals(cl))
-      return new Byte((byte) expr.evalLong(env));
-    else if (short.class.equals(cl))
-      return new Short((short) expr.evalLong(env));
-    else if (Short.class.equals(cl))
-      return new Short((short) expr.evalLong(env));
-    else if (int.class.equals(cl))
-      return new Integer((int) expr.evalLong(env));
-    else if (Integer.class.equals(cl))
-      return new Integer((int) expr.evalLong(env));
-    else if (long.class.equals(cl))
-      return new Long((long) expr.evalLong(env));
-    else if (Long.class.equals(cl))
-      return new Long((long) expr.evalLong(env));
-    else if (float.class.equals(cl))
-      return new Float((float) expr.evalDouble(env));
-    else if (Float.class.equals(cl))
-      return new Float((float) expr.evalDouble(env));
-    else if (double.class.equals(cl))
-      return new Double((double) expr.evalDouble(env));
-    else if (Double.class.equals(cl))
-      return new Double((double) expr.evalDouble(env));
-    else if (char.class.equals(cl) || Character.class.equals(cl)) {
-      String s = expr.evalString(env);
+    Marshall marshall = Marshall.create(cl);
 
-      if (s == null || s.length() == 0)
-	return null;
-      else
-	return new Character(s.charAt(0));
-    }
-    else if (Boolean.class.equals(cl))
-      return new Boolean((boolean) expr.evalBoolean(env));
-    else
-      return expr.evalObject(env);
+    return marshall.marshall(expr, env);
   }
   
   /**

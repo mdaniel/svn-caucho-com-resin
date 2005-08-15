@@ -136,9 +136,9 @@ public class EjbServerManager implements EJBServerInterface, EnvironmentListener
   EjbServerManager()
   {
     try {
-      _envServerManager = EnvServerManager.createLocal();
-
       _amberManager = new AmberManager();
+
+      _envServerManager = new EnvServerManager(_amberManager);
 
       _ejbConfig = new EjbConfig(this);
 

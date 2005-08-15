@@ -55,7 +55,7 @@ public class EntityManagerImpl implements EntityManager, CloseResource {
 
   private EntityManagerProxy _entityManagerProxy;
   
-  private EnvAmberManager _amberManager;
+  private AmberManager _amberManager;
 
   private boolean _isRegistered;
   private AmberConnectionImpl _aConn;
@@ -63,7 +63,7 @@ public class EntityManagerImpl implements EntityManager, CloseResource {
   /**
    * Creates a manager instance.
    */
-  EntityManagerImpl(EnvAmberManager amberManager, EntityManagerProxy proxy)
+  EntityManagerImpl(AmberManager amberManager, EntityManagerProxy proxy)
   {
     _amberManager = amberManager;
     _entityManagerProxy = proxy;

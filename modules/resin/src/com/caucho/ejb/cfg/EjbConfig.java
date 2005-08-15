@@ -625,7 +625,7 @@ public class EjbConfig {
 
 	  srcRel.setRelationName(relation.getName());
 	  srcRel.setSQLTable(relation.getSQLTable());
-	  // srcRel.setOrderBy(sourceRole.getOrderBy());
+	  srcRel.setOrderBy(sourceRole.getOrderBy());
 
 	  srcRel.setKeySQLColumns(sourceRole.getSQLColumns());
 	  srcRel.setDstSQLColumns(targetRole.getSQLColumns());
@@ -639,7 +639,7 @@ public class EjbConfig {
 
 	  dstRel.setRelationName(relation.getName());
 	  dstRel.setSQLTable(relation.getSQLTable());
-	  // dstRel.setOrderBy(targetRole.getOrderBy());
+	  dstRel.setOrderBy(targetRole.getOrderBy());
 
 	  dstRel.setKeySQLColumns(targetRole.getSQLColumns());
 	  dstRel.setDstSQLColumns(sourceRole.getSQLColumns());
@@ -688,7 +688,8 @@ public class EjbConfig {
 	    srcRel.setSQLTable(relation.getSQLTable());
 	  else
 	    srcRel.setSQLTable(sourceField);
-	  // srcRel.setOrderBy(sourceRole.getOrderBy());
+	  
+	  srcRel.setOrderBy(sourceRole.getOrderBy());
 
 	  srcRel.setKeySQLColumns(sourceRole.getSQLColumns());
 	  srcRel.setDstSQLColumns(targetRole.getSQLColumns());

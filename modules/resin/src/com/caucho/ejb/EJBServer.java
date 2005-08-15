@@ -98,6 +98,8 @@ public class EJBServer
     new EnvironmentLocal<String>("caucho.url");
 
   private String _jndiName = "java:comp/env/cmp";
+  
+  private String _entityManagerJndiName = "java:comp/EntityManager";
 
   private EjbServerManager _ejbManager;
   private AbstractModel _rootModel;
@@ -145,6 +147,13 @@ public class EJBServer
     _ejbManager = new EjbServerManager();
     _rootModel = _ejbManager.getProtocolManager().getNamingRoot();
 
+    // XXX: somewhat incorrect for multiple servers
+    try {
+      _rootModel.bind("resin-ejb-server", _ejbManager);
+    } catch (Exception e) {
+      log.log(Level.WARNING, e.toString(), e);
+    }
+
     _urlPrefix = _localURL.get();
 
     _mergePath = new MergePath();
@@ -157,10 +166,12 @@ public class EJBServer
   /**
    * Returns the local EJB server.
    */
+  /*
   public static EnvServerManager getLocalManager()
   {
     return EnvServerManager.getLocal();
   }
+  */
 
   /**
    * Gets the environment class loader.
@@ -199,6 +210,22 @@ public class EJBServer
   public String getJndiName()
   {
     return _jndiName;
+  }
+
+  /**
+   * Sets the EntityManager JNDI name.
+   */
+  public void setEntityManagerJndiName(String name)
+  {
+    _entityManagerJndiName = name;
+  }
+
+  /**
+   * Gets the EntityManager JNDI name.
+   */
+  public String getEntityManagerJndiName()
+  {
+    return _entityManagerJndiName;
   }
 
   /**
@@ -521,19 +548,25 @@ public class EJBServer
   public void init()
     throws Exception
   {
-    String name = _jndiName;
-    if (! name.startsWith("java:"))
-      name = "java:comp/env/" + name;
-    
     try {
-      Jndi.rebindDeep(name, this);
+      if (_jndiName != null)
+	Jndi.rebindDeepShort(_jndiName, this);
     } catch (NamingException e) {
       log.log(Level.FINER, e.toString(), e);
     }
 
     if (_localServer.getLevel() == null ||
-	name.equals("java:comp/env/cmp")) {
+	_jndiName.equals("java:comp/env/cmp")) {
       _localServer.set(this);
+    }
+
+    try {
+      if (_entityManagerJndiName != null) {
+	Jndi.rebindDeepShort(_entityManagerJndiName,
+			     _ejbManager.getAmberManager().getEntityManager());
+      }
+    } catch (NamingException e) {
+      log.log(Level.FINER, e.toString(), e);
     }
 
     if ("manual".equals(_startupMode))
@@ -555,7 +588,7 @@ public class EJBServer
       if (_urlPrefix != null)
         protocol.setURLPrefix(_urlPrefix);
       
-      protocol.setServerManager(_ejbManager.getEnvServerManager());
+      protocol.setServerManager(_ejbManager); // .getEnvServerManager());
     
       _ejbManager.getProtocolManager().setProtocolContainer(protocol);
 

@@ -8,6 +8,21 @@
 
 <summary objsummary='localtoc'/>
 
+<section title="ejb-server">
+
+<p>ejb-server has been changed to allow multiple ejb-server instances.
+In the case of Amber/EJB3, the EntityManager name is assignable with
+entity-manager-jndi-name.</p>
+
+<p>See <a href="http://caucho.com/wiki/display/RESIN/ejb-server">ejb-server</a> on
+the wiki.</p>
+
+<p>The &lt;ear-default> tag and the resin-application.xml now
+supports a &lt;ejb-server-jndi-name> to specify an
+alternate &lt;ejb-server> for the .ear file.</p>
+
+</section>
+
 <section title="access-log time in microseconds">
 
 <p>The access log format string now supports '%D' to measure the time

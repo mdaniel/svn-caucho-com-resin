@@ -55,7 +55,7 @@ public class PathTypeStrategy extends TypeStrategy {
   public Object configure(NodeBuilder builder, Node node, Object parent)
     throws Exception
   {
-    String userPath = builder.configureString(node);
+    String userPath = builder.configureRawString(node);
 
     return lookupPath(userPath);
   }
@@ -107,6 +107,9 @@ public class PathTypeStrategy extends TypeStrategy {
    */
   public static String rewritePathString(String pathName)
   {
+    if (pathName == null)
+      return ".";
+    
     StringBuilder cb = new StringBuilder();
 
     int length = pathName.length();

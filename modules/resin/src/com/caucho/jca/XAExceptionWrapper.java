@@ -38,7 +38,7 @@ public class XAExceptionWrapper extends XAException {
 
   public XAExceptionWrapper(Throwable cause)
   {
-    super(cause.getMessage());
+    super(cause != null ? cause.getMessage() : null);
 
     _cause = cause;
   }

@@ -74,6 +74,8 @@ import com.caucho.loader.enhancer.EnhancingClassLoader;
 
 import com.caucho.log.Log;
 
+import com.caucho.naming.Jndi;
+
 import com.caucho.relaxng.CompactVerifierFactoryImpl;
 
 import com.caucho.config.Config;
@@ -102,13 +104,17 @@ public class EnterpriseApplication
   implements EnvironmentBean, EnvironmentDeployInstance {
   static final L10N L = new L10N(EnterpriseApplication.class);
   static final Logger log = Log.open(EnterpriseApplication.class);
-  
+
+  /*
   protected static EnvironmentLocal<EJBServerInterface> _localServer
     = new EnvironmentLocal<EJBServerInterface>("caucho.ejb-server");
+  */
 
   private EnvironmentClassLoader _loader;
 
   private String _name;
+
+  private String _ejbServerJndiName = "java:comp/env/cmp";
   
   private Path _rootDir;
 
@@ -177,6 +183,14 @@ public class EnterpriseApplication
   public String getName()
   {
     return _name;
+  }
+
+  /**
+   * Sets the ejb-server jndi name.
+   */
+  public void setEjbServerJndiName(String name)
+  {
+    _ejbServerJndiName = name;
   }
 
   /**
@@ -357,7 +371,9 @@ public class EnterpriseApplication
       
     Vfs.setPwd(_rootDir, _loader);
 
-    EJBServerInterface ejbServer = _localServer.getLevel();
+    EJBServerInterface ejbServer = null;
+
+    ejbServer = (EJBServerInterface) Jndi.lookup(_ejbServerJndiName);
 
     if (ejbServer == null && _ejbPaths.size() != 0)
       throw new ConfigException(L.l("<ejb> module needs a configured <ejb-server>"));

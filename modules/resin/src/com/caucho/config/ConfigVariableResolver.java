@@ -60,8 +60,8 @@ public class ConfigVariableResolver extends AbstractVariableResolver {
    */
   public ConfigVariableResolver(ClassLoader loader)
   {
-    super(EL.getEnvironment());
-    
+    super(EL.getEnvironment(loader));
+
     _originalLoader = loader;
   }
 
@@ -125,8 +125,9 @@ public class ConfigVariableResolver extends AbstractVariableResolver {
       return null;
     else if (value != null)
       return value;
-    else
+    else {
       return super.resolveVariable(var);
+    }
   }
   
   /**
