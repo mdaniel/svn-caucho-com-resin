@@ -32,11 +32,13 @@
 
     <item link="migrate.xtp" title="Migrate from 2.1"/>
 
+    <!--
     <item link="benchmarks.xtp" title="Benchmarks">
       <item link="jsp-benchmark.xtp" title="JSP Benchmark"/>
       <item link="xslt-benchmark.xtp" title="XSLT Benchmark"/>
       <item link="jspvsperlphp.xtp" title="JSP vs mod_php and mod_perl"/>
     </item>
+    -->
 
     <item link="faq.xtp" title="Features FAQ" atoc-descend='1'/>
 
