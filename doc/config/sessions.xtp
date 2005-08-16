@@ -200,7 +200,8 @@ tag in the session-config.</p>
 CREATE TABLE persistent_session (
   id VARCHAR(64) NOT NULL,
   data BLOB,
-  mod_time TIMESTAMP,
+  access_time TIMESTAMP,
+  expire_interval int(11),
   PRIMARY KEY(id)
 )
 </example>
