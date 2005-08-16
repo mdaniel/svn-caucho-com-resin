@@ -127,19 +127,26 @@ public class JstlCoreIf extends JstlNode {
       ifExpr = _testAttr.generateValue(boolean.class);
     else
       ifExpr = generateValue(boolean.class, _test);
+    
+    out.println("if (" + ifExpr + ") {");
+    out.pushDepth();
 
-    if (_var == null) {
-      out.println("if (" + ifExpr + ") {");
+    if (_var != null)
+      generateSetNotNull(out, _var, _scope, "Boolean.TRUE");
+    
+    generateChildren(out);
+    
+    out.popDepth();
+    out.println("}");
+
+    if (_var != null) {
+      out.println("else {");
       out.pushDepth();
-    
-      generateChildren(out);
-    
+      
+      generateSetNotNull(out, _var, _scope, "Boolean.FALSE");
+      
       out.popDepth();
       out.println("}");
-    }
-    else {
-      generateSetNotNull(out, _var, _scope,
-			 "(" + ifExpr + ") ? Boolean.TRUE : Boolean.FALSE");
     }
   }
 }

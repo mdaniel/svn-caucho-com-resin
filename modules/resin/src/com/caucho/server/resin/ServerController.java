@@ -223,14 +223,19 @@ public class ServerController
       return ServerController.this.getServerId();
     }
     
+    public Path getRoot()
+    {
+      return ServerController.this.getRootDirectory();
+    }
+    
     public Path getRootDir()
     {
-      return getRootDirectory();
+      return getRoot();
     }
     
     public Path getRootDirectory()
     {
-      return ServerController.this.getRootDirectory();
+      return getRoot();
     }
     
     public String toString()

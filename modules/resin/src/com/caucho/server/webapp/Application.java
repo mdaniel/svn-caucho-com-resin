@@ -61,6 +61,7 @@ import com.caucho.util.Alarm;
 import com.caucho.util.L10N;
 import com.caucho.util.Log;
 import com.caucho.util.LruCache;
+import com.caucho.util.CauchoSystem;
 import com.caucho.vfs.Encoding;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
@@ -280,6 +281,9 @@ public class Application extends ServletContextImpl
       // map.put("app", _appVar);
 
       _appDir = controller.getRootDirectory();
+
+      if (_appDir.equals(CauchoSystem.getResinHome()))
+	log.warning(L.l("web-app root directory should not be the same as resin.home\n{0}", _appDir));
 
       _servletManager = new ServletManager();
       _servletMapper = new ServletMapper();

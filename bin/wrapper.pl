@@ -89,8 +89,8 @@ sub usage {
     print "  -help           : this usage message\n";
     print "  -verbose        : echo variables and argument before execution\n";
     print "  -java_home dir  : set JAVA_HOME\n";
-    print "  -resin-home dir : set RESIN_HOME\n";
-    print "  -server-root dir : set SERVER_ROOT\n";
+    print "  -resin-home dir : set resin.home\n";
+    print "  -server-root dir : set server.root\n";
     print "  -conf <resin.conf> : changes the configuration file\n";
     print "  -classpath cp   : set CLASSPATH\n";
     print "  -native         : force native threads\n";

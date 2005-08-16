@@ -570,7 +570,7 @@ abstract public class DeployController<I extends DeployInstance>
 
       _startTime = Alarm.getCurrentTime();
     } catch (ConfigException e) {
-      log.warning(e.toString());
+      log.severe(e.toString());
       log.log(Level.FINE, e.toString(), e);
 
       _lifecycle.toError();
@@ -578,7 +578,7 @@ abstract public class DeployController<I extends DeployInstance>
       if (deployInstance != null)
 	deployInstance.setConfigException(e);
     } catch (Throwable e) {
-      log.log(Level.WARNING, e.toString(), e);
+      log.log(Level.SEVERE, e.toString(), e);
 
       _lifecycle.toError();
 

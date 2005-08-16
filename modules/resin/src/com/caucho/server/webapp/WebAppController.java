@@ -498,6 +498,11 @@ public class WebAppController
       return WebAppController.this.getRootDirectory();
     }
 
+    public Path getRoot()
+    {
+      return WebAppController.this.getRootDirectory();
+    }
+
     public Path getRootDir()
     {
       return WebAppController.this.getRootDirectory();

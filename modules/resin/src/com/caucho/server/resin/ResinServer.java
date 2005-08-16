@@ -581,11 +581,21 @@ public class ResinServer
     /**
      * Returns the root directory.
      *
+     * @return server-root
+     */
+    public Path getRoot()
+    {
+      return CauchoSystem.getServerRoot();
+    }
+
+    /**
+     * Returns the root directory.
+     *
      * @return resin.home
      */
     public Path getRootDir()
     {
-      return getRootDirectory();
+      return getRoot();
     }
 
     /**
@@ -595,7 +605,7 @@ public class ResinServer
      */
     public Path getRootDirectory()
     {
-      return CauchoSystem.getServerRoot();
+      return getRoot();
     }
 
     /**

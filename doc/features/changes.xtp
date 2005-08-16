@@ -4,6 +4,10 @@
 
 <s2 title='3.0.snap - Aug 11, 2005'>
 <ul>
+<li>Configuration errors now send severe errors instead of warnings (rep by Bill Au, RSN-336)
+<li>Add warning if a web-app's directory is the same as resin.home (RSN-393)
+<li>$\{server.root} and $\{host.root} are now prefered variable names
+<li>c:if wasn't handling var parameter properly (rep by Ralph Schaer, RSN-392)
 <li>PageContext wasn't properly restoring stream from SimpleTag (rep by Sergey Zubtcovskii, RSN-375)
 <li>EL expressions weren't marshalling to String properly (rep by Alex Grief, RSN-370)
 <li>EJB/Amber ManyToMany wasn't properly supporting order-by (rep by Christian Amott, RSN-311)

@@ -456,7 +456,7 @@ class HostController extends EnvironmentDeployController<Host,HostConfig> {
       return (ArrayList) getVariableMap().get("regexp");
     }
     
-    public Path getRootDirectory()
+    public Path getRoot()
     {
       Host host = getDeployInstance();
       
@@ -466,9 +466,20 @@ class HostController extends EnvironmentDeployController<Host,HostConfig> {
 	return HostController.this.getRootDirectory();
     }
     
+    /**
+     * @deprecated
+     */
     public Path getRootDir()
     {
-      return getRootDirectory();
+      return getRoot();
+    }
+
+    /**
+     * @deprecated
+     */
+    public Path getRootDirectory()
+    {
+      return getRoot();
     }
     
     public Path getDocumentDirectory()

@@ -8,6 +8,12 @@
 
 <summary objsummary='localtoc'/>
 
+<section title="server.root">
+
+<p>server.root is now the preferred variable name for the server root.</p>
+
+</section>
+
 <section title="ejb-server">
 
 <p>ejb-server has been changed to allow multiple ejb-server instances.

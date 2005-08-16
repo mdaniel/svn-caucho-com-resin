@@ -830,7 +830,7 @@ cse_update_host_from_resin(resin_host_t *host, time_t now)
       hmux_write_string(&s, HMUX_DISPATCH_ETAG, host->etag);
     hmux_write_string(&s, HMUX_DISPATCH_HOST, host->name);
     hmux_write_string(&s, HMUX_DISPATCH_QUERY, uri);
-    hmux_write_exit(&s);
+    hmux_write_quit(&s);
 
     code = cse_read_byte(&s);
     if (code != HMUX_CHANNEL) {
