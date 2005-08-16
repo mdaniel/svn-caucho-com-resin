@@ -233,8 +233,8 @@ file looks like:</p>
 
 <example title='password.xml'>
 &lt;authenticator>
-  &lt;user name='Harry Potter' password='quidditch' role='gryffindor'/>
-  &lt;user name='Draco Malfoy' password='pureblood' role='slytherin'/>
+  &lt;user name='Harry Potter' password='quidditch' roles='gryffindor'/>
+  &lt;user name='Draco Malfoy' password='pureblood' roles='slytherin'/>
 &lt;/authenticator>
 </example>
 

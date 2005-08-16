@@ -329,15 +329,15 @@ configuration, or in an xml file, or both.</p>
 &lt;!-- password.xml --&gt;
 &lt;authenticator&gt;
   &lt;!-- professors --&gt;
-  &lt;user name='snape' password='I7HdZr7CTM6hZLlSd2o+CA==' role='professor,slytherin'/&gt;
-  &lt;user name='mcgonagall' password='4slsTREVeTo0sv5hGkZWag==' role='professor,gryffindor'/&gt;
+  &lt;user name='snape' password='I7HdZr7CTM6hZLlSd2o+CA==' roles='professor,slytherin'/&gt;
+  &lt;user name='mcgonagall' password='4slsTREVeTo0sv5hGkZWag==' roles='professor,gryffindor'/&gt;
 
   &lt;!-- students --&gt;
-  &lt;user name='harry' password='uTOZTGaB6pooMDvqvl2Lbg==' role='student,gryffindor'/&gt;
-  &lt;user name='dmalfoy' password='yI2uN1l97Rv5E6mdRnDFwQ==' role='student,slytherin'/&gt;
+  &lt;user name='harry' password='uTOZTGaB6pooMDvqvl2Lbg==' roles='student,gryffindor'/&gt;
+  &lt;user name='dmalfoy' password='yI2uN1l97Rv5E6mdRnDFwQ==' roles='student,slytherin'/&gt;
 
   &lt;!-- alumni --&gt;
-  &lt;user name='lmalfoy' password='sj/yhtU1h4LZPw7/Uy9IVA==' role='alumni,gryffindor'/&gt;
+  &lt;user name='lmalfoy' password='sj/yhtU1h4LZPw7/Uy9IVA==' roles='alumni,gryffindor'/&gt;
 &lt;/authenticator&gt;
 </example>
 </section>
