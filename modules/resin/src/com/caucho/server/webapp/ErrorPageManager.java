@@ -51,6 +51,8 @@ import com.caucho.util.CompileException;
 import com.caucho.util.LineCompileException;
 import com.caucho.util.HTTPUtil;
 
+import com.caucho.i18n.CharacterEncoding;
+
 import com.caucho.vfs.ClientDisconnectException;
 import com.caucho.vfs.WriteStream;
 import com.caucho.vfs.Encoding;
@@ -361,9 +363,16 @@ public class ErrorPageManager {
     }
 
     response.setContentType("text/html");
-    Locale locale = Locale.getDefault();
-    if (! "ISO-8859-1".equals(Encoding.getMimeName(locale)))
-      response.setLocale(Locale.getDefault());
+
+    String encoding = CharacterEncoding.getLocalEncoding();
+
+    if (encoding != null)
+      response.setCharacterEncoding(encoding);
+    else {
+      Locale locale = Locale.getDefault();
+      if (! "ISO-8859-1".equals(Encoding.getMimeName(locale)))
+	response.setLocale(Locale.getDefault());
+    }
 
     PrintWriter out = response.getWriter();
 

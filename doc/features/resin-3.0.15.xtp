@@ -8,6 +8,18 @@
 
 <summary objsummary='localtoc'/>
 
+<section title="FileServlet">
+
+<p>Added character-encoding init-param for a default character encoding.</p>
+
+</section>
+
+<section title="pid file">
+
+<p>The default name of the pid file now uses the -server argument.</p>
+
+</section>
+
 <section title="server.root">
 
 <p>server.root is now the preferred variable name for the server root.</p>
@@ -57,6 +69,9 @@ the read-only and cache timeout attributes.</p>
 
 <p>Special thanks to Fiaz Hossain for suggesting a fix for the
 EnvironmentLogger.removeHandle functionality.</p>
+
+<p>Special thanks to Branko Granar for significant enhancements to
+the mod_caucho debugging.</p>
 
 </section>
 

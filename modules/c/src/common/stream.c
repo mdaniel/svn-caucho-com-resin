@@ -115,7 +115,7 @@ ssl_open(stream_t *stream)
   if (! ssl) {
     close(stream->socket);
     stream->socket = -1;
-    LOG(("can't allocate ssl\n"));
+    ERR(("%s:%d:ssl_open(): can't allocate ssl\n", __FILE__, __LINE__));
     return 0;
   }
   
@@ -125,11 +125,12 @@ ssl_open(stream_t *stream)
     closesocket(stream->socket);
     stream->socket = -1;
     SSL_free(ssl);
-    LOG(("can't connect with ssl\n"));
+    ERR(("%s:%d:ssl_open(): can't connect with ssl\n", __FILE__, __LINE__));
     return 0;
   }
 
-  LOG(("Connect with ssl %d\n", stream->socket));
+  LOG(("%s:%d:ssl_open(): connect with ssl %d\n",
+       __FILE__, __LINE__, stream->socket));
   
   stream->ssl = ssl;
   
@@ -207,7 +208,8 @@ cse_connect(struct sockaddr_in *sin, srun_t *srun)
   sock = socket(AF_INET, SOCK_STREAM, 0);
 
   if (sock == INVALID_SOCKET) {
-    LOG(("mod_caucho can't create socket.\n"));
+    ERR(("%s:%d:cse_connect(): mod_caucho can't create socket.\n",
+	 __FILE__, __LINE__));
     return -1; /* bad socket */
   }
 
@@ -255,7 +257,8 @@ cse_connect(struct sockaddr_in *sin, srun_t *srun)
   sock = socket(AF_INET, SOCK_STREAM, 0);
 
   if (sock < 0) {
-    LOG(("mod_caucho can't create socket.\n"));
+    ERR(("%s:%d:cse_connect(): mod_caucho can't create socket.\n",
+	 __FILE__, __LINE__));
     return -1; /* bad socket */
   }
 
@@ -273,7 +276,9 @@ cse_connect(struct sockaddr_in *sin, srun_t *srun)
     return sock;
   }
   else if (errno != EWOULDBLOCK && errno != EINPROGRESS) {
-    LOG(("connect quickfailed %x %d %d\n", sin->sin_addr.s_addr,
+    ERR(("%s:%d:cse_connect(): connect quickfailed %x %d %d\n",
+	 __FILE__, __LINE__,
+	 sin->sin_addr.s_addr,
 	 ntohs(sin->sin_port), errno));
     
     close(sock);
@@ -281,7 +286,9 @@ cse_connect(struct sockaddr_in *sin, srun_t *srun)
     return -1;
   }
   else if (select(sock + 1, 0, &write_fds, 0, &timeout) <= 0) {
-    LOG(("timeout %x %d %d\n", sin->sin_addr.s_addr,
+    ERR(("%s:%d:cse_connect(): timeout %x %d %d\n",
+	 __FILE__, __LINE__,
+	 sin->sin_addr.s_addr,
 	 ntohs(sin->sin_port), errno));
 
     fcntl(sock, F_SETFL, flags);
@@ -293,7 +300,9 @@ cse_connect(struct sockaddr_in *sin, srun_t *srun)
   else if (! FD_ISSET(sock, &write_fds) ||
            getsockopt(sock, SOL_SOCKET, SO_ERROR, &error, &len) < 0 ||
            error) {
-    LOG(("connect failed %x %d %d\n", sin->sin_addr.s_addr,
+    ERR(("%s:%d:cse_connect(): connect failed %x %d %d\n",
+	 __FILE__, __LINE__,
+	 sin->sin_addr.s_addr,
 	 ntohs(sin->sin_port), errno));
     close(sock);
 
@@ -302,7 +311,8 @@ cse_connect(struct sockaddr_in *sin, srun_t *srun)
   else {
     fcntl(sock, F_SETFL, flags);
 
-    LOG(("connect %x:%d -> %d\n",
+    LOG(("%s:%d:cse_connect(): connect %x:%d -> %d\n",
+	 __FILE__, __LINE__,
          sin->sin_addr.s_addr, ntohs(sin->sin_port), sock));
          
     return sock;
@@ -319,7 +329,8 @@ cse_connect_wait(struct sockaddr_in *sin)
   sock = socket(AF_INET, SOCK_STREAM, 0);
 
   if (sock < 0) {
-    LOG(("mod_caucho can't create socket.\n"));
+    ERR(("%s:%d:cse_connect_wait(): mod_caucho can't create socket.\n",
+	 __FILE__, __LINE__));
     return -1; /* bad socket */
   }
   
@@ -327,7 +338,9 @@ cse_connect_wait(struct sockaddr_in *sin)
     return sock;
   }
   
-  LOG(("cse_connect_wait can't connect %x %d %d\n", sin->sin_addr.s_addr,
+  LOG(("%s:%d:cse_connect_wait(): can't connect %x %d %d\n",
+       __FILE__, __LINE__,
+       sin->sin_addr.s_addr,
        ntohs(sin->sin_port), errno));
 
   closesocket(sock);
@@ -374,7 +387,8 @@ cse_open(stream_t *s, cluster_t *cluster, cluster_srun_t *cluster_srun,
     s->socket = cse_connect(&sin, srun);
 
   if (s->socket < 0) {
-    LOG(("open new failed %x:%d\n",
+    ERR(("%s:%d:cse_open(): open new failed %x:%d\n",
+	 __FILE__, __LINE__,
 	 s->socket, *srun->host, srun->port));
     return 0;
   }
@@ -394,10 +408,15 @@ cse_open(stream_t *s, cluster_t *cluster, cluster_srun_t *cluster_srun,
 #else
     srun->send_buffer_size = 16 * 1024;
 #endif
-    LOG(("send buffer size %d\n", srun->send_buffer_size));
+    
+    LOG(("%s:%d:cse_open(): send buffer size %d\n",
+	 __FILE__, __LINE__,
+	 srun->send_buffer_size));
   }
   
-  LOG(("open new connection %d %x:%d\n", s->socket, *srun->host, srun->port));
+  LOG(("%s:%d:cse_open(): open new connection %d %x:%d\n",
+       __FILE__, __LINE__,
+       s->socket, *srun->host, srun->port));
 
   return srun->open(s);
 }
@@ -452,7 +471,8 @@ cse_fill_buffer(stream_t *s)
 
   /* flush the buffer */
   if (s->write_length > 0) {
-    LOG(("write %d %d\n", s->socket, s->write_length));
+    LOG(("%s:%d:cse_fill_buffer(): write %d %d\n",
+	 __FILE__, __LINE__, s->socket, s->write_length));
 
     /* config read/save has no cluster_srun */
     if (s->cluster_srun)
@@ -812,7 +832,6 @@ cse_add_srun(cluster_t *cluster, const char *hostname, int port, int ssl)
   struct hostent *hostent = 0;
   srun_t *srun = 0;
   config_t *config = cluster->config;
-  int i;
 
   LOG(("adding host %s:%d\n", hostname, port));
   
@@ -856,13 +875,15 @@ cse_add_srun(cluster_t *cluster, const char *hostname, int port, int ssl)
         srun->close = ssl_close;
       }
       else {
-        ERR(("can't initialize ssl"));
+        ERR(("%s:%d:cse_add_srun(): can't initialize ssl",
+	     __FILE__, __LINE__));
       }
     }
 #endif
 
     srun->lock = cse_create_lock(config);
-    LOG(("srun lock %x\n", srun->lock));
+    LOG(("%s:%d:cse_add_srun(): srun lock %x\n",
+	 __FILE__, __LINE__, srun->lock));
     
     return srun;
   }
@@ -958,7 +979,7 @@ cse_reuse(stream_t *s, cluster_t *cluster, cluster_srun_t *srun,
   
   srun->srun->is_dead = 0;
   
-  LOG(("reopen %d\n", s->socket));
+  LOG(("%s:%d:cse_reuse(): reopen %d\n", __FILE__, __LINE__, s->socket));
 }
 
 /**
@@ -989,7 +1010,8 @@ cse_close_idle(srun_t *srun, time_t now)
       return;
     
     srun->conn_tail = next_tail;
-    LOG(("closing idle socket:%d\n", conn->socket));
+    LOG(("%s:%d:cse_close_idle(): closing idle socket:%d\n",
+	 __FILE__, __LINE__, conn->socket));
     srun->close(conn->socket, conn->ssl);
   }
 }
@@ -1026,7 +1048,7 @@ cse_recycle(stream_t *s, time_t now)
       srun->conn_pool[head].last_time = now;
       srun->conn_head = next_head;
       cse_unlock(srun->lock);
-      LOG(("recycle %d\n", socket));
+      LOG(("%s:%d:cse_recycle(): recycle %d\n", __FILE__, __LINE__, socket));
       return;
     }
   }
@@ -1034,7 +1056,8 @@ cse_recycle(stream_t *s, time_t now)
   cse_unlock(srun->lock);
   
   if (socket >= 0) {
-    LOG(("close2 %d update1:%d update2:%d max-sock:%d\n",
+    LOG(("%s:%d:cse_recycle(): close2 %d update1:%d update2:%d max-sock:%d\n",
+	 __FILE__, __LINE__,
          socket, s->config->update_count, s->update_count,
          srun ? srun->max_sockets : -1));
     
@@ -1054,7 +1077,8 @@ close_srun(srun_t *srun, time_t now)
        tail = (tail + 1) % CONN_POOL_SIZE) {
     struct conn_t *conn = &srun->conn_pool[tail];
     srun->close(conn->socket, conn->ssl);
-    LOG(("close timeout %d\n", srun->conn_pool[tail]));;
+    LOG(("%s:%d:close_srun(): close timeout %d\n",
+	 __FILE__, __LINE__, srun->conn_pool[tail]));;
   }
   srun->conn_head = srun->conn_tail = 0;
   
@@ -1072,7 +1096,8 @@ cse_reuse_socket(stream_t *s, cluster_t *cluster, cluster_srun_t *cluster_srun,
   int next_head;
   srun_t *srun = cluster_srun->srun;
 
-  LOG(("reuse head:%d tail:%d\n", srun->conn_head, srun->conn_tail));
+  LOG(("%s:%d:cse_reuse_socket(): reuse head:%d tail:%d\n",
+       __FILE__, __LINE__, srun->conn_head, srun->conn_tail));
 
   if (! srun || srun->conn_head == srun->conn_tail)
     return 0;
@@ -1088,7 +1113,8 @@ cse_reuse_socket(stream_t *s, cluster_t *cluster, cluster_srun_t *cluster_srun,
     conn = &srun->conn_pool[next_head];
     
     if (conn->last_time + srun->live_time < now) {
-      LOG(("closing idle socket:%d\n", conn->socket));
+      LOG(("%s:%d:cse_reuse_socket(): closing idle socket:%d\n",
+	   __FILE__, __LINE__, conn->socket));
       srun->close(conn->socket, conn->ssl);
     }
     else {

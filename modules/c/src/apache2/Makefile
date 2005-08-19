@@ -4,7 +4,7 @@ CC=gcc
 CP=/bin/cp
 CFLAGS=-g -O2 -DPOLL -DHAS_JVMTI -DDARWIN -DUSE_HSREGEX -DUSE_EXPAT -I../lib/expat-lite -g -Os -pipe -DHARD_SERVER_LIMIT=2048 -DEAPI
 CFLAGS_SHLIB=-DSHARED_MODULE
-LIBTOOL=/Users/ferg/ws/test-resin/libtool --silent
+LIBTOOL=/Users/ferg/ws/resin/libtool --silent
 LD=gcc
 LD_SHLIB=cc
 LIBS_SHLIB=
@@ -14,7 +14,7 @@ APACHE_INC=-I/usr/include/httpd
 apache_conf=/private/etc/httpd/httpd.conf
 apache_dir=/usr
 apache_libexec=/usr/libexec/httpd
-resin_home=/Users/ferg/ws/test-resin
+resin_home=/Users/ferg/ws/resin
 INCLUDES = $(APACHE_INC) -DRESIN_HOME=\"$(resin_home)\" -I../common
 C=../common
 COMMON_OBJ=$C/stream.lo $C/config.lo $C/memory.lo

@@ -44,6 +44,7 @@ import java.util.zip.GZIPOutputStream;
 
 import com.caucho.util.AlarmListener;
 import com.caucho.util.Alarm;
+import com.caucho.util.WeakAlarm;
 import com.caucho.util.QDate;
 
 import com.caucho.log.Log;
@@ -65,7 +66,7 @@ public class RotateStream extends StreamImpl implements AlarmListener {
 
   private final AbstractRolloverLog _rolloverLog = new AbstractRolloverLog();
 
-  private final Alarm _alarm = new Alarm(this);
+  private final Alarm _alarm = new WeakAlarm(this);
 
   // calendar using the local timezone
   private QDate _calendar = new QDate(true);
@@ -290,7 +291,7 @@ public class RotateStream extends StreamImpl implements AlarmListener {
     } finally {
       if (! _isClosed) {
 	long now = Alarm.getCurrentTime();
-    
+
 	_alarm.queue(_rolloverLog.getNextRolloverCheckTime() - now);
       }
     }

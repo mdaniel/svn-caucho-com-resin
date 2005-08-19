@@ -57,6 +57,7 @@ public class FileServlet extends GenericServlet {
   private QDate _calendar = new QDate();
   private boolean _isCaseInsensitive;
   private boolean _isEnableRange = true;
+  private String _characterEncoding;
 
   public FileServlet()
   {
@@ -69,6 +70,14 @@ public class FileServlet extends GenericServlet {
   public void setEnableRange(boolean isEnable)
   {
     _isEnableRange = isEnable;
+  }
+
+  /**
+   * Sets the character encoding.
+   */
+  public void setCharacterEncoding(String encoding)
+  {
+    _characterEncoding = encoding;
   }
   
   public void init(ServletConfig conf)
@@ -137,7 +146,7 @@ public class FileServlet extends GenericServlet {
     String filename = null;
 
     if (cache == null) {
-      CharBuffer cb = CharBuffer.allocate();
+      CharBuffer cb = new CharBuffer();
       String servletPath;
 
       if (cauchoReq != null)
@@ -161,7 +170,7 @@ public class FileServlet extends GenericServlet {
       if (pathInfo != null)
         cb.append(pathInfo);
 
-      String relPath = cb.close();
+      String relPath = cb.toString();
 
       if (_isCaseInsensitive)
         relPath = relPath.toLowerCase();
@@ -294,6 +303,9 @@ public class FileServlet extends GenericServlet {
     if (_isEnableRange && cauchoReq != null && cauchoReq.isTop())
       res.addHeader("Accept-Ranges", "bytes");
     
+    if (_characterEncoding != null)
+      res.setCharacterEncoding(_characterEncoding);
+    
     String mime = cache.getMimeType();
     if (mime != null)
       res.setContentType(mime);
@@ -315,13 +327,13 @@ public class FileServlet extends GenericServlet {
 	  return;
       }
     }
-    
+
     res.setContentLength((int) cache.getLength());
 
     if (res instanceof CauchoResponse) {
       CauchoResponse cRes = (CauchoResponse) res;
-      
-      cache.getPath().writeToStream(cRes.getResponseStream());
+
+      cRes.getResponseStream.sendFile(cache.getPath(), cache.getLength());
     }
     else {
       OutputStream os = res.getOutputStream();

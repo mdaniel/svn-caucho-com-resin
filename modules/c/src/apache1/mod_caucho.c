@@ -127,10 +127,10 @@ cse_error(config_t *config, char *format, ...)
   va_list args;
 
   va_start(args, format);
-  vsprintf(buf, format, args);
+  vsnprintf(buf, sizeof(buf), format, args);
   va_end(args);
 
-  LOG(("%s\n", buf));
+  LOG(("ERROR: %s\n", buf));
 
   config->error = cse_strdup(config->p, buf);
 }
@@ -733,7 +733,7 @@ cse_write_response(stream_t *s, int len, request_rec *r)
     int writelen;
     int sentlen;
 
-    if (s->read_offset >= s->read_length && cse_fill_buffer(s) < 0)
+    if (s->read_length <= s->read_offset && cse_fill_buffer(s) < 0)
       return -1;
 
     writelen = s->read_length - s->read_offset;

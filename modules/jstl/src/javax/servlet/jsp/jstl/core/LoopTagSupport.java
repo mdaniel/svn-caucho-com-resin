@@ -146,7 +146,7 @@ abstract public class LoopTagSupport extends TagSupport
 
     prepare();
 
-    if (_status == null)
+    if (getLoopStatus() == null)
       _status = new Status();
 
     while (_index < begin && hasNext()) {
@@ -163,7 +163,7 @@ abstract public class LoopTagSupport extends TagSupport
         pageContext.setAttribute(itemId, _current);
 
       if (statusId != null)
-        pageContext.setAttribute(statusId, _status);
+        pageContext.setAttribute(statusId, getLoopStatus());
 
       return EVAL_BODY_INCLUDE;
     }
@@ -195,7 +195,7 @@ abstract public class LoopTagSupport extends TagSupport
         pageContext.setAttribute(itemId, _current);
 
       if (statusId != null)
-        pageContext.setAttribute(statusId, _status);
+        pageContext.setAttribute(statusId, getLoopStatus());
       
       return EVAL_BODY_AGAIN;
     }

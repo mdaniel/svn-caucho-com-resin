@@ -57,8 +57,11 @@ cse_create_pool(config_t *config)
   memset(pool, 0, sizeof(mem_pool_t));
   pool->config = config;
   pool->lock = cse_create_lock(config);
-  LOG(("memory lock %p\n", pool->lock));
-  LOG(("create pool %p\n", pool));
+  
+  LOG(("%s:%d:cse_create_pool(): memory lock %p\n",
+       __FILE__, __LINE__, pool->lock));
+  LOG(("%s:%d:cse_create_pool(): create pool %p\n",
+       __FILE__, __LINE__, pool));
 
   return pool;
 }
@@ -113,7 +116,7 @@ cse_free_pool(mem_pool_t *pool)
   pool_block_t *ptr;
   pool_block_t *next;
 
-  LOG(("free pool %p\n", pool));
+  LOG(("%s:%d:cse_free_pool(): free pool %p\n", __FILE__, __LINE__, pool));
 
   cse_lock(pool->lock);
 

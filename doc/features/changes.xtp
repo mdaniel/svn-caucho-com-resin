@@ -4,6 +4,16 @@
 
 <s2 title='3.0.snap - Aug 11, 2005'>
 <ul>
+<li>Added character-encoding init value to FileServlet (rep by E Bowman, RSN-387)
+<li>LoopTagSupport should use getLoopStatus() in implementation (rep by Erik Boye, RSN-401)
+<li>Added &lt;restart-mode> to &lt;server> (RSN-396)
+<li>dependency tag was using wrong implementation class (rep by Will Jaynes, RSN-403)
+<li>MessageDrivenBeans not properly freeing received messages (rep by T Gennaro, RSN-380)
+<li>Enhanced mod_caucho debugging (rep by Branko Granar, RSN-381)
+<li>Call setURL on java.sql.Driver when available (rep by Kirk Rasmussen, RSN-293)
+<li>The default .pid file now uses the value from the -server argument (RSN-50)
+<li>path-format issues with stdout-log and stderr-log (RSN-334)
+<li>mod_caucho configuration updates need to recycle sockets (rep by Michael McDonald, RSN-378)
 <li>Configuration errors now send severe errors instead of warnings (rep by Bill Au, RSN-336)
 <li>Add warning if a web-app's directory is the same as resin.home (RSN-393)
 <li>$\{server.root} and $\{host.root} are now prefered variable names

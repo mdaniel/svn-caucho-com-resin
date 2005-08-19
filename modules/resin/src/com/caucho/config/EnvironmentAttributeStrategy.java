@@ -49,7 +49,8 @@ public class EnvironmentAttributeStrategy extends AttributeStrategy {
     _typeStrategy = typeStrategy;
   }
 
-  public void configure(NodeBuilder builder, Object bean, QName name, Node node)
+  public void configure(NodeBuilder builder, Object bean,
+			QName name, Node node)
           throws Exception
   {   
     builder.configureChildImpl(_typeStrategy, node, bean);

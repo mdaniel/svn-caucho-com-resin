@@ -216,8 +216,11 @@ public class MessageServer extends AbstractServer {
 	create.invoke(_listener, new Object[0]);
       } catch (NoSuchMethodException e) {
       }
+      
+      // XXX: ejb/090c
+      // XXX: doesn't seem to be properly handling the sessions
+      boolean transacted = false; 
 
-      boolean transacted = true;
       _session = _connection.createSession(transacted, _acknowledgeMode);
 
       if (_subscriptionName != null) {

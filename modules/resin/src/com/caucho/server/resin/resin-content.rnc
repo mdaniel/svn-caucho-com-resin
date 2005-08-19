@@ -321,6 +321,8 @@ r_server-Basis =
 
   & r_port*
 
+  & r_redeploy-mode?
+
   & (attribute server-header { string }
      | element server-header { string })?
 

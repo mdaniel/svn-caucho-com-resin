@@ -365,22 +365,6 @@ public class CustomTag extends GenericTag {
       out.println(var + ".setParent((javax.servlet.jsp.tagext.Tag) " + parentName + ");");
     }
 
-    /*
-    if (! parent.isTop()) {
-      if (parent.isSimpleTag()) {
-        out.println("if (" + parent.getId() + "_adapter == null)");
-        out.println("  " + parent.getId() + "_adapter = new javax.servlet.jsp.tagext.TagAdapter(" + parent.getId() + ");");
-        out.println(var + ".setParent(" + parent.getId() + "_adapter);");
-      }
-      else
-        out.println(var + ".setParent(" + parent.getId() + ");");
-    }
-    else if (isInFragment())
-      out.println(var + ".setParent((javax.servlet.jsp.tagext.Tag) _jsp_parent_tag);");
-    else
-      out.println(var + ".setParent((javax.servlet.jsp.tagext.Tag) null);");
-    */
-
     ArrayList<QName> names = _tag.getAttributeNames();
     for (int i = 0; i < names.size(); i++) {
       QName name = names.get(i);

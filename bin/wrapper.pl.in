@@ -288,6 +288,11 @@ while ( $#ARGV >= 0) {
 	$chdir = 1;
 	shift(@ARGV);
     }
+    elsif ($ARGV[0] eq "-server") {
+	$server = $ARGV[1];
+	$RESIN_ARGS .= " '" . $ARGV[0] . "'";
+	shift(@ARGV);
+    }
     elsif (! $class && ($ARGV[0] !~ "-.*")) {
 	$class=$ARGV[0];
 	shift(@ARGV);
@@ -406,7 +411,12 @@ if (! $JAVA_HOME) {
 }
 
 if (! $pid_file) {
-    $pid_file = "$SERVER_ROOT/${name}.pid";
+    if ($server) {
+      $pid_file = "$SERVER_ROOT/${name}-${server}.pid";
+    }
+    else {
+      $pid_file = "$SERVER_ROOT/${name}.pid";
+    }
 }
 
 if ($pid_file =~ "^[^/]") {
@@ -701,10 +711,9 @@ if ($cmd eq "start" || $cmd eq "restart") {
       # create a keepalive socket
       # when the wrapper dies, the httpd class will detect that and
       # close gracefully
-      $addr = pack("S n a4 x8", AF_INET, 0, "\0\0\0");
       ($protoname, $aliases, $proto) = getprotobyname('tcp');
       socket(S, AF_INET, SOCK_STREAM, $proto) || die "socket: $!";
-      bind(S, $addr) || die "bind: $!";
+      bind(S, sockaddr_in(0, INADDR_ANY)) || die "bind: $!";
       $myaddr = getsockname(S);
       ($fam, $port, $addr) = unpack("S n a4 x8", $myaddr);
       listen(S, 5) || die "connect: $!";

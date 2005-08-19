@@ -29,6 +29,9 @@
 
 package com.caucho.db.store;
 
+import java.util.logging.Logger;
+import java.util.logging.Level;
+
 import java.io.IOException;
 import java.io.OutputStream;
 
@@ -41,6 +44,9 @@ import com.caucho.util.CharBuffer;
 import com.caucho.db.sql.Expr;
 
 public class BlobOutputStream extends OutputStream {
+  private static final Logger log
+    = Logger.getLogger(BlobOutputStream.class.getName());
+  
   private Store _store;
 
   private Transaction _xa;
@@ -77,7 +83,9 @@ public class BlobOutputStream extends OutputStream {
    */
   BlobOutputStream(Inode inode)
   {
-    init(null, inode.getStore(), inode.getBuffer(), 0);
+    Transaction xa = Transaction.create();
+    
+    init(xa, inode.getStore(), inode.getBuffer(), 0);
 
     _inode = inode;
   }
@@ -156,7 +164,15 @@ public class BlobOutputStream extends OutputStream {
       flushBlock();
       
       writeLong(_inodeBuffer, _inodeOffset, _length);
+
+      try {
+	_xa.commit();
+      } catch (Throwable e) {
+	log.log(Level.FINE, e.toString(), e);
+      }
     } finally {
+      _xa.close();
+      
       Inode inode = _inode;
       _inode = null;
       

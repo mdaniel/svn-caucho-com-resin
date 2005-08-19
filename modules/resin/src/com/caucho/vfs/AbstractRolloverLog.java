@@ -86,6 +86,8 @@ public class AbstractRolloverLog {
 
   private QDate _calendar = QDate.createLocal();
 
+  private Path _pwd = Vfs.lookup();
+  
   protected Path _path;
 
   protected String _pathFormat;
@@ -112,6 +114,14 @@ public class AbstractRolloverLog {
   public void setPath(Path path)
   {
     _path = path;
+  }
+
+  /**
+   * Returns the pwd for the rollover log
+   */
+  public Path getPwd()
+  {
+    return _pwd;
   }
 
   /**
@@ -274,7 +284,7 @@ public class AbstractRolloverLog {
   public boolean rollover()
   {
     long now = Alarm.getCurrentTime();
-    
+
     if (_nextPeriodEnd <= now || _nextRolloverCheckTime <= now) {
       rolloverLog(now);
       return true;
@@ -320,7 +330,7 @@ public class AbstractRolloverLog {
 
     Path path = getPath();
       
-    if (_nextPeriodEnd < now) {
+    if (lastPeriodEnd < now) {
       closeLogStream();
       
       if (getPathFormat() == null) {
@@ -481,7 +491,7 @@ public class AbstractRolloverLog {
     
     String pathString = getFormatName(formatString, time);
 
-    return Vfs.lookup().lookup(pathString);
+    return getPwd().lookup(pathString);
   }
 
   /**

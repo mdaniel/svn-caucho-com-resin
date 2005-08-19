@@ -38,7 +38,7 @@
 
     <database>com.caucho.sql.DBPool</database>
 
-    <dependency>com.caucho.make.Dependency</dependency>
+    <dependency>com.caucho.make.DependencyConfig</dependency>
 
     <dependency-check-interval>com.caucho.loader.DependencyCheckInterval</dependency-check-interval>
 

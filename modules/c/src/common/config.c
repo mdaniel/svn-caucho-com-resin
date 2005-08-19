@@ -119,7 +119,8 @@ cse_add_unique_location(mem_pool_t *pool, web_app_t *app, char *prefix,
   loc->is_exact = is_exact;
   loc->ignore = ignore;
 
-  LOG(("loc %s %s %x %s\n", 
+  LOG(("%s:%d:cse_add_unique_location(): loc %s %s %x %s\n",
+       __FILE__, __LINE__,
        loc->prefix ? loc->prefix : "(null)",
        loc->suffix ? loc->suffix : "(null)",
        loc->next,
@@ -156,7 +157,8 @@ cse_add_web_app(mem_pool_t *pool, resin_host_t *host,
 
   app->context_path = cse_strdup(pool, context_path);
 
-  LOG(("new web-app host:%s path:%s\n", host->name, app->context_path));
+  LOG(("%s:%d:cse_add_web_app(): new web-app host:%s path:%s\n",
+       __FILE__, __LINE__, host->name, app->context_path));
 
   return applications;
 }
@@ -308,7 +310,8 @@ cse_add_host_config(config_t *config, const char *host_name,
   host->port = port;
   host->next = config->hosts;
   config->hosts = host;
-  LOG(("cse_add_host_config %s\n", host_name));
+  
+  LOG(("%s:%d:cse_add_host_config() %s\n", __FILE__, __LINE__, host_name));
 
   return host;
 }
@@ -363,7 +366,8 @@ cse_log_config(config_t *config)
       location_t *loc = app->locations;
     
       for (; loc; loc = loc->next) {
-	LOG(("cfg host:%s%s prefix:%s suffix:%s next:%x\n", 
+	LOG(("%s:%d:cse_log_config(): cfg host:%s%s prefix:%s suffix:%s next:%x\n",
+	     __FILE__, __LINE__,
 	     host->name,
 	     app->context_path ? app->context_path : "/",
 	     loc->prefix ? loc->prefix : "null",
@@ -381,7 +385,6 @@ static resin_host_t *
 cse_create_host(config_t *config, const char *host_name, int port)
 {
   resin_host_t *host;
-  resin_host_t *default_host = 0;
 
   for (host = config->hosts; host; host = host->next) {
     if (! strcmp(host_name, host->name) && host->port == port)
@@ -429,7 +432,8 @@ read_config(stream_t *s, config_t *config, resin_host_t *host,
   host->canonical = host;
   *p_is_change = is_change;
 
-  LOG(("hmux config %s:%d\n", host->name, host->port));
+  LOG(("%s:%d:read_config(); hmux config %s:%d\n",
+       __FILE__, __LINE__, host->name, host->port));
   
   while (1) {
     code = cse_read_byte(s);
@@ -461,7 +465,8 @@ read_config(stream_t *s, config_t *config, resin_host_t *host,
 	  canonical = cse_create_host(config, buffer, port);
 	  
 	  host->canonical = canonical;
-	  LOG(("hmux set canonical %s:%d -> %s:%d\n",
+	  LOG(("%s:%d:read_config(); hmux set canonical %s:%d -> %s:%d\n",
+	       __FILE__, __LINE__,
 	       host->name, host->port,
 	       buffer, port));
 	}
@@ -474,7 +479,8 @@ read_config(stream_t *s, config_t *config, resin_host_t *host,
       }
 	
       if (hmux_read_string(s, buffer, sizeof(buffer)) >= 0) {
-	LOG(("hmux web-app %s\n", buffer));
+	LOG(("%s:%d:read_config(): hmux web-app %s\n",
+	     __FILE__, __LINE__, buffer));
 	web_app = cse_add_application(pool, host, web_app, buffer);
 	
 	cse_add_match_pattern(pool, web_app, "/WEB-INF/*");
@@ -484,28 +490,31 @@ read_config(stream_t *s, config_t *config, resin_host_t *host,
 	
     case HMUX_DISPATCH_MATCH:
       if (hmux_read_string(s, buffer, sizeof(buffer)) > 0) {
-	LOG(("hmux match %s\n", buffer));
+	LOG(("%s:%d:read_config(): hmux match %s\n",
+	     __FILE__, __LINE__, buffer));
 	cse_add_match_pattern(pool, web_app, buffer);
       }
       break;
 	
     case HMUX_DISPATCH_IGNORE:
       if (hmux_read_string(s, buffer, sizeof(buffer)) > 0) {
-	LOG(("hmux ignore %s\n", buffer));
+	LOG(("%s:%d:read_config(): hmux ignore %s\n",
+	     __FILE__, __LINE__, buffer));
 	cse_add_ignore_pattern(pool, web_app, buffer);
       }
       break;
 
     case HMUX_DISPATCH_ETAG:
       hmux_read_string(s, etag, sizeof(etag));
-      LOG(("hmux etag %s\n", etag));
+      LOG(("%s:%d:read_config(): hmux etag %s\n", __FILE__, __LINE__, etag));
       break;
 
     case HMUX_DISPATCH_NO_CHANGE:
       host->canonical = old_canonical;
       cse_skip(s, hmux_read_len(s));
       
-      LOG(("hmux no-change %s\n", host->etag));
+      LOG(("%s:%d:read_config(); hmux no-change %s\n",
+	   __FILE__, __LINE__, host->etag));
       *p_is_change = is_change;
       break;
 	
@@ -514,7 +523,8 @@ read_config(stream_t *s, config_t *config, resin_host_t *host,
 
       ch = cse_read_byte(s);
       hmux_read_string(s, value, sizeof(value));
-      LOG(("hmux header %s: %s\n", buffer, value));
+      LOG(("%s:%d:read_config(): hmux header %s: %s\n",
+	   __FILE__, __LINE__, buffer, value));
       
       if (ch == HMUX_STRING) {
 	if (! strcmp(buffer, "live-time"))
@@ -533,7 +543,8 @@ read_config(stream_t *s, config_t *config, resin_host_t *host,
     case HMUX_CLUSTER:
       hmux_read_string(s, buffer, sizeof(buffer));
 	
-      LOG(("hmux cluster %s\n", buffer));
+      LOG(("%s:%d:read_config(): hmux cluster %s\n",
+	   __FILE__, __LINE__, buffer));
       break;
 	
     case HMUX_SRUN:
@@ -543,7 +554,8 @@ read_config(stream_t *s, config_t *config, resin_host_t *host,
 
 	hmux_read_string(s, buffer, sizeof(buffer));
 	
-	LOG(("hmux srun %s\n", buffer));
+	LOG(("%s:%d:read_config(): hmux srun %s\n",
+	     __FILE__, __LINE__, buffer));
 
 	p = strchr(buffer, ':');
 	if (p) {
@@ -592,7 +604,8 @@ read_config(stream_t *s, config_t *config, resin_host_t *host,
       return code == HMUX_QUIT;
 
     default:
-      LOG(("hmux unknown %d\n", code));
+      LOG(("%s:%d:read_config(): hmux unknown %d\n",
+	   __FILE__, __LINE__, code));
       
       if (pool)
 	cse_free_pool(pool);
@@ -729,7 +742,6 @@ read_all_config_impl(config_t *config)
   char value[1024];
   int code;
   int  ch;
-  time_t now = 0;
   int is_change = 1;
 
   if (! config->config_path)
@@ -752,7 +764,8 @@ read_all_config_impl(config_t *config)
 	int ch;
 	
 	hmux_read_string(&s, buffer, sizeof(buffer));
-	LOG(("hmux host %s\n", buffer));
+	LOG(("%s:%d:read_all_config_impl(): hmux host %s\n",
+	     __FILE__, __LINE__, buffer));
 
 	for (p = 0; (ch = buffer[p]); p++) {
 	  if (ch == ':') {
@@ -773,13 +786,15 @@ read_all_config_impl(config_t *config)
       ch = cse_read_byte(&s);
       hmux_read_string(&s, value, sizeof(value));
       if (ch == HMUX_STRING) {
-	LOG(("hmux header %s: %s\n", buffer, value));
+	LOG(("%s:%d:read_all_config_impl(): hmux header %s: %s\n",
+	     __FILE__, __LINE__, buffer, value));
       }
       break;
 
     default:
       hmux_read_string(&s, value, sizeof(value));
-      LOG(("hmux value %c: %s\n", code, buffer));
+      LOG(("%s:%d:read_all_config_impl(): hmux value %c: %s\n",
+	   __FILE__, __LINE__, code, buffer));
       break;
     }
   }
@@ -851,7 +866,8 @@ cse_update_host_from_resin(resin_host_t *host, time_t now)
     return 1;
   }
   else {
-    LOG(("can't open any connections\n"));
+    ERR(("%s:%d:cse_update_host_from_resin(): can't open any connections\n",
+	 __FILE__, __LINE__));
   }
 
   return 0;
@@ -863,7 +879,7 @@ cse_update_host_from_resin(resin_host_t *host, time_t now)
 void
 cse_init_config(config_t *config)
 {
-  LOG(("initializing\n"));
+  LOG(("%s:%d:cse_init_config(): initializing\n", __FILE__, __LINE__));
 
   if (! config->p)
     config->p = cse_create_pool(config);
@@ -911,7 +927,8 @@ cse_init_config(config_t *config)
 
   if (! config->lock) {
     config->lock = cse_create_lock(config);
-    LOG(("config lock %p\n", config->lock));
+    LOG(("%s:%d:cse_init_config(): config lock %p\n",
+	 __FILE__, __LINE__, config->lock));
     config->config_lock = cse_create_lock(config);
   }
 
@@ -937,12 +954,9 @@ cse_add_config_server(config_t *config, const char *host, int port)
 /**
  * Matches the host information in the config
  */
-static resin_host_t *
+static void
 cse_update_host(config_t *config, resin_host_t *host, time_t now)
 {
-  const char *host_name = host->name;
-  int port = host->port;
-  
   if (now < host->last_update + config->update_interval)
     return;
 
@@ -1186,7 +1200,8 @@ cse_is_match(config_t *config,
     if (strlen(app_ptr->context_path) < best_len)
       continue;
 
-    LOG(("app-match host:%s%s with host:%s uri:%s\n",
+    LOG(("%s:%d:cse_is_match(): app-match host:%s%s with host:%s uri:%s\n",
+	 __FILE__, __LINE__,
          host->name,
          app_ptr->context_path ? app_ptr->context_path : "",
          host_name, uri));
@@ -1202,7 +1217,8 @@ cse_is_match(config_t *config,
 
   is_match = 0;
   for (loc = app->locations; loc; loc = loc->next) {
-    LOG(("match host:%s%s prefix:%s suffix:%s with host:%s uri:%s next:%x ignore:%d exact:%d\n", 
+    LOG(("%s:%d:cse_is_match(): match host:%s%s prefix:%s suffix:%s with host:%s uri:%s next:%x ignore:%d exact:%d\n",
+	 __FILE__, __LINE__,
          host->name,
          app->context_path ? app->context_path : "null",
          loc->prefix ? loc->prefix : "null",
@@ -1320,7 +1336,8 @@ cse_match_request(config_t *config, const char *host, int port,
     entry->host = 0;
   }
 
-  LOG(("cse_match_request entry %s %s match:%s\n", host, uri, (match_host != 0) ? "yes" : "no"));
+  LOG(("%s:%d:cse_match_request(): entry %s %s match:%s\n",
+       __FILE__, __LINE__, host, uri, (match_host != 0) ? "yes" : "no"));
   
   entry->host = strdup(host ? host : "");
   entry->uri = strdup(uri);

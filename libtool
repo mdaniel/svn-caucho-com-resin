@@ -57,7 +57,7 @@ fast_install=needless
 
 # The host system.
 host_alias=
-host=powerpc-apple-darwin8.0.0
+host=powerpc-apple-darwin8.2.0
 
 # An echo program that does not interpret backslashes.
 echo="echo"

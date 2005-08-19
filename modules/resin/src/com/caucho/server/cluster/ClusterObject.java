@@ -99,6 +99,10 @@ public class ClusterObject {
   private boolean isPrimary(String id)
   {
     Cluster cluster = Cluster.getLocal();
+
+    if (cluster == null)
+      return ! _storeManager.isAlwaysLoad();
+      
     ClusterServer selfServer = cluster.getSelfServer();
 
     if (selfServer == null)

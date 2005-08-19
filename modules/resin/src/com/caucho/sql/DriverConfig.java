@@ -527,36 +527,43 @@ public class DriverConfig {
     }
 
     try {
-      if (_driverURL != null && ! (driverObject instanceof Driver)) {
+      // server/14g1
+      if (_driverURL != null) { // && ! (driverObject instanceof Driver)) {
 	StringAttributeProgram program;
 	program = new StringAttributeProgram("url", _driverURL);
 	program.configure(driverObject);
       }
     } catch (Throwable e) {
-      log.log(Level.FINE, e.toString(), e);
-      throw new SQLExceptionWrapper(e);
+      if (driverObject instanceof Driver)
+	log.log(Level.FINEST, e.toString(), e);
+      else
+	throw new SQLExceptionWrapper(e);
     }
 
     try {
-      if (_user != null && ! (driverObject instanceof Driver)) {
+      if (_user != null) { // && ! (driverObject instanceof Driver)) {
 	StringAttributeProgram program;
 	program = new StringAttributeProgram("user", _user);
 	program.configure(driverObject);
       }
     } catch (Throwable e) {
       log.log(Level.FINEST, e.toString(), e);
-      throw new SQLExceptionWrapper(e);
+      
+      if (! (driverObject instanceof Driver))
+	throw new SQLExceptionWrapper(e);
     }
 
     try {
-      if (_password != null && ! (driverObject instanceof Driver)) {
+      if (_password != null) { // && ! (driverObject instanceof Driver)) {
 	StringAttributeProgram program;
 	program = new StringAttributeProgram("password", _password);
 	program.configure(driverObject);
       }
     } catch (Throwable e) {
       log.log(Level.FINEST, e.toString(), e);
-      throw new SQLExceptionWrapper(e);
+      
+      if (! (driverObject instanceof Driver))
+	throw new SQLExceptionWrapper(e);
     }
 
     try {

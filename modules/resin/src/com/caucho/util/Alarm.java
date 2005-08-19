@@ -92,7 +92,7 @@ public class Alarm implements ThreadTask {
    */
   public Alarm(AlarmListener listener) 
   {
-    this("alarm", listener);
+    this("alarm[" + listener + "]", listener);
   }
     
   /**

@@ -37,6 +37,12 @@
 #include <stdlib.h>
 #include <errno.h>
 
+#ifdef DEBUG
+#include <sys/types.h>
+#include <unistd.h>
+#include <time.h>
+#endif
+
 #include "cse.h"
 #include "version.h"
 
@@ -64,19 +70,32 @@ cse_log(char *fmt, ...)
 {
 #ifdef DEBUG
   va_list args;
+  char timestamp[32];
+  char buffer[8192];
+  time_t t;
+  int pid;
 
-  FILE *file = fopen("/tmp/log", "a+");
+  pid = (int) getpid();
 
-  if (file) {  
-    va_start(args, fmt);
-    vfprintf(file, fmt, args);
-    va_end(args);
-    fclose(file);
-  }
+  time(&t);
+  strftime(timestamp, sizeof(timestamp), "[%m/%b/%Y:%H:%M:%S %z]",
+	   localtime(&t));
 
-  va_start(args,fmt);
-  vfprintf(stderr, fmt, args);
-  va_end(args);
+#if APR_HAS_THREADS
+  snprintf(buffer, sizeof(buffer), "%s %d_%ld: ",
+	   timestamp, pid, (long int) apr_os_thread_current());
+#else   
+  snprintf(buffer, sizeof(buffer), "%s %d: ", timestamp, pid);
+#endif
+  
+   va_start(args, fmt);
+   snprintf(buffer + strlen(buffer), sizeof(buffer) - strlen(buffer),
+	    fmt, args);
+   va_end(args);
+
+   fputs(buffer, stderr);
+
+   fflush(stderr);
 #endif
 }
 
@@ -123,10 +142,10 @@ cse_error(config_t *config, char *format, ...)
   va_list args;
 
   va_start(args, format);
-  vsprintf(buf, format, args);
+  vsnprintf(buf, sizeof(buf), format, args);
   va_end(args);
 
-  LOG(("%s\n", buf));
+  LOG(("ERROR: %s\n", buf));
 
   config->error = cse_strdup(config->p, buf);
 }
@@ -225,7 +244,7 @@ cse_merge_dir_config(apr_pool_t *p, void *basev, void *overridesv)
 static config_t *
 cse_get_module_config(request_rec *r)
 {
-  config_t *config;
+  config_t *config = 0;
 
   if (r->per_dir_config) {
     config = (config_t *) ap_get_module_config(r->per_dir_config,
@@ -627,16 +646,17 @@ send_data(stream_t *s, request_rec *r)
 
     code = cse_read_byte(s);
 
-    LOG(("code %c\n", code));
+    LOG(("%s:%d:send_data(): code %c\n", __FILE__, __LINE__, code));
+    
     switch (code) {
     case HMUX_CHANNEL:
       channel = hmux_read_len(s);
-      LOG(("channel %d\n", channel));
+      LOG(("%s:%d:send_data(): channel %d\n", __FILE__, __LINE__, channel));
       break;
       
     case HMUX_ACK:
       channel = hmux_read_len(s);
-      LOG(("ack %d\n", channel));
+      LOG(("%s:%d:send_data(): ack %d\n", __FILE__, __LINE__, channel));
       return code;
       
     case HMUX_STATUS:
@@ -732,7 +752,7 @@ write_request(stream_t *s, request_rec *r, config_t *config,
 
   code = send_data(s, r);
 
-  LOG(("return code %c\n", code));
+  LOG(("%s:%d:write_request(): return code %c\n", __FILE__, __LINE__, code));
 
   return code;
 }
@@ -770,15 +790,20 @@ caucho_request(request_rec *r, config_t *config, resin_host_t *host,
 			  now);
   }
     
-  LOG(("session index: %d\n", session_index));
+  LOG(("%s:%d:caucho_request(): session index: %d\n",
+       __FILE__, __LINE__, session_index));
+  
   if (! host) {
-    LOG(("no host: %p\n", host));
+    ERR(("%s:%d:caucho_request(): no host: %p\n",
+	 __FILE__, __LINE__, host));
+    
     return HTTP_SERVICE_UNAVAILABLE;
   }
   else if (! cse_open_connection(&s, &host->cluster,
 				 session_index, backup_index,
 				 now, r->pool)) {
-    LOG(("no connection: %p\n", host));
+    ERR(("%s:%d:caucho_request(): no connection: %p\n",
+	 __FILE__, __LINE__, host));
     return HTTP_SERVICE_UNAVAILABLE;
   }
 
@@ -857,7 +882,7 @@ jvm_status(cluster_t *cluster, request_rec *r)
 
       /* This needs to be close, because cse_open doesn't use recycle. */
       cse_close(&s, "caucho-status");
-      LOG(("close\n"));
+      LOG(("%s:%d:jvm_status(): close\n", __FILE__, __LINE__));
 
       ap_rprintf(r, "<td align=right>%d</td><td align=right>%d</td>",
 		 srun->active_sockets, pool_count);
@@ -869,7 +894,7 @@ jvm_status(cluster_t *cluster, request_rec *r)
   ap_rputs("</table></center>\n", r);
 }
 
-static int
+static void
 caucho_host_status(request_rec *r, config_t *config, resin_host_t *host)
 {
   web_app_t *app;
@@ -922,9 +947,6 @@ caucho_status(request_rec *r)
 {
   config_t *config;
   resin_host_t *host;
-  web_app_t *app;
-  location_t *loc;
-  unsigned int now = (unsigned int) (r->request_time / 1000000);
  
   if (! r->handler || strcmp(r->handler, "caucho-status"))
     return DECLINED;
@@ -1024,7 +1046,6 @@ cse_dispatch(request_rec *r)
   const char *host_name = ap_get_server_name(r);
   int port = ap_get_server_port(r);
   const char *uri = r->uri;
-  char *url_rewrite;
   resin_host_t *host;
   unsigned int now = (unsigned int) (r->request_time / 1000000);
   int len;
@@ -1032,7 +1053,8 @@ cse_dispatch(request_rec *r)
   if (config == NULL || ! uri)
     return DECLINED;
  
-  LOG(("[%d] host %s\n", getpid(), host_name ? host_name : "null"));
+  LOG(("%s:%d:cse_dispatch(): [%d] host %s\n",
+       __FILE__, __LINE__, getpid(), host_name ? host_name : "null"));
   
 
   len = strlen(uri);
@@ -1049,7 +1071,8 @@ cse_dispatch(request_rec *r)
   host = cse_match_request(config, host_name, port, uri, 0, now);
   
   if (host || (r->handler && ! strcmp(r->handler, "caucho-request"))) {
-    LOG(("[%d] match %s:%s\n", getpid(), host_name ? host_name : "null", uri));
+    LOG(("%s:%d:cse_dispatch(): [%d] match %s:%s\n",
+	 __FILE__, __LINE__, getpid(), host_name ? host_name : "null", uri));
 
     return caucho_request(r, config, host, now);
   }
