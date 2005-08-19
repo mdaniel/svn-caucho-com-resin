@@ -39,6 +39,7 @@ import javax.servlet.http.*;
 import com.caucho.log.Log;
 import com.caucho.util.*;
 import com.caucho.vfs.*;
+import com.caucho.config.types.Period;
 import com.caucho.server.webapp.Application;
 
 /**
@@ -74,6 +75,16 @@ public class FastCGIServlet extends GenericServlet {
   private static final int FCGI_VERSION = 1;
   
   private static final int FCGI_KEEP_CONN = 1;
+  
+  private static final int FCGI_REQUEST_COMPLETE = 0;
+  private static final int FCGI_CANT_MPX_CONN = 1;
+  private static final int FCGI_OVERLOADED = 2;
+  private static final int FCGI_UNKNOWN_ROLE = 3;
+
+  private static final ArrayList<Integer> _fcgiServlets
+    = new ArrayList<Integer>();
+
+  private int _servletId;
 
   private FreeList<FastCGISocket> _freeSockets =
     new FreeList<FastCGISocket>(8);
@@ -83,8 +94,12 @@ public class FastCGIServlet extends GenericServlet {
   private int _hostPort;
   protected QDate _calendar = new QDate();
   private Application _app;
+  private long _readTimeout = 120000;
 
   private int _maxKeepaliveCount = 250;
+  private long _keepaliveTimeout = 15000;
+
+  private int _idCount = 0;
 
   /**
    * Sets the host address.
@@ -106,11 +121,51 @@ public class FastCGIServlet extends GenericServlet {
   }
 
   /**
+   * Sets the keepalive max.
+   */
+  public void setMaxKeepalive(int max)
+  {
+    _maxKeepaliveCount = max;
+  }
+
+  /**
+   * Sets the keepalive timeout.
+   */
+  public void setKeepaliveTimeout(Period period)
+  {
+    _keepaliveTimeout = period.getPeriod();
+  }
+
+  /**
+   * Sets the socket timeout.
+   */
+  public void setReadTimeout(Period timeout)
+  {
+    _readTimeout = timeout.getPeriod();
+  }
+
+  /**
    * Initialize the servlet with the server's sruns.
    */
   public void init()
     throws ServletException
   {
+    int id = -1;
+    
+    for (int i = 0; i < 0x10000; i += 1024) {
+      if (! _fcgiServlets.contains(new Integer(i))) {
+	id = i;
+	break;
+      }
+    }
+
+    if (id < 0)
+      throw new ServletException("Can't open FastCGI servlet");
+
+    _fcgiServlets.add(new Integer(id));
+
+    _servletId = id;
+
     _app = (Application) getServletContext();
 
     String serverAddress = getInitParameter("server-address");
@@ -135,46 +190,79 @@ public class FastCGIServlet extends GenericServlet {
     FastCGISocket fcgiSocket = null;
 
     do {
+      if (fcgiSocket != null)
+	fcgiSocket.close();
+      
       fcgiSocket = _freeSockets.allocate();
     } while (fcgiSocket != null && ! fcgiSocket.isValid());
 
-    if (fcgiSocket == null) {
-      Socket socket = new Socket(_hostAddr, _hostPort);
+    if (fcgiSocket != null && fcgiSocket.isValid()) {
+      log.finer(fcgiSocket + ": reuse()");
+    }
+    else {
+      if (fcgiSocket != null)
+	fcgiSocket.close();
+      
+      try {
+	Socket socket = new Socket(_hostAddr, _hostPort);
 
-      fcgiSocket = new FastCGISocket(socket, _maxKeepaliveCount);
+	if (_readTimeout > 0)
+	  socket.setSoTimeout((int) _readTimeout);
+
+	fcgiSocket = new FastCGISocket(nextId(), socket, _maxKeepaliveCount);
+      } catch (IOException e) {
+	log.log(Level.FINE, e.toString(), e);
+
+	throw new ServletException(L.l("Can't connect to FastCGI {0}:{1}.  Check that the FastCGI service has started.", _hostAddr, _hostPort));
+      }
     }
 
-    WriteStream ws = new WriteStream(fcgiSocket.getSocketStream());
-    ws.setDisableClose(true);
-    ReadStream rs = new ReadStream(fcgiSocket.getSocketStream(), ws);
-    rs.setDisableClose(true);
     boolean isOkay = false;
 
     try {
-      if (handleRequest(req, res, rs, ws, out,
-			fcgiSocket.allocateKeepalive()) &&
-	  _freeSockets.free(fcgiSocket)) {
-	fcgiSocket = null;
+      fcgiSocket.setExpire(Alarm.getCurrentTime() + _keepaliveTimeout);
+	
+      if (handleRequest(req, res, fcgiSocket, out,
+			fcgiSocket.allocateKeepalive())) {
+	if (_freeSockets.free(fcgiSocket)) {
+	  log.finer(fcgiSocket + ": keepalive()");
+	  
+	  fcgiSocket = null;
+	}
       }
     } catch (Exception e) {
       log.log(Level.WARNING, e.toString(), e);
-      
+    } finally {
       if (fcgiSocket != null)
         fcgiSocket.close();
-    } finally {
-      ws.close();
-      rs.close();
+    }
+  }
+
+  private int nextId()
+  {
+    synchronized (this) {
+      int id = _idCount++;
+
+      if (id <= 0 || 1024 < id) {
+	_idCount = 2;
+	id = 1;
+      }
+
+      return id + _servletId;
     }
   }
 
   private boolean handleRequest(HttpServletRequest req,
 				HttpServletResponse res,
-				ReadStream rs, WriteStream ws,
+				FastCGISocket fcgiSocket,
 				OutputStream out,
 				boolean keepalive)
     throws ServletException, IOException
   {
-    writeHeader(ws, FCGI_BEGIN_REQUEST, 8);
+    ReadStream rs = fcgiSocket.getReadStream();
+    WriteStream ws = fcgiSocket.getWriteStream();
+    
+    writeHeader(fcgiSocket, ws, FCGI_BEGIN_REQUEST, 8);
 
     int role = FCGI_RESPONDER;
     
@@ -184,7 +272,7 @@ public class FastCGIServlet extends GenericServlet {
     for (int i = 0; i < 5; i++)
       ws.write(0);
 
-    setEnvironment(ws, req);
+    setEnvironment(fcgiSocket, ws, req);
 
     InputStream in = req.getInputStream();
     TempBuffer tempBuf = TempBuffer.allocate();
@@ -192,21 +280,21 @@ public class FastCGIServlet extends GenericServlet {
     int len = buf.length;
     int sublen;
 
-    writeHeader(ws, FCGI_PARAMS, 0);
+    writeHeader(fcgiSocket, ws, FCGI_PARAMS, 0);
     
     boolean hasStdin = false;
     while ((sublen = in.read(buf, 0, len)) > 0) {
       hasStdin = true;
-      writeHeader(ws, FCGI_STDIN, sublen);
+      writeHeader(fcgiSocket, ws, FCGI_STDIN, sublen);
       ws.write(buf, 0, sublen);
     }
 
     TempBuffer.free(tempBuf);
 
     if (hasStdin)
-      writeHeader(ws, FCGI_STDIN, 0);
+      writeHeader(fcgiSocket, ws, FCGI_STDIN, 0);
 
-    FastCGIInputStream is = new FastCGIInputStream(rs);
+    FastCGIInputStream is = new FastCGIInputStream(fcgiSocket);
 
     int ch = parseHeaders(res, is);
 
@@ -219,35 +307,36 @@ public class FastCGIServlet extends GenericServlet {
     return ! is.isDead() && keepalive;
   }
 
-  private void setEnvironment(WriteStream ws, HttpServletRequest req)
+  private void setEnvironment(FastCGISocket fcgi,
+			      WriteStream ws, HttpServletRequest req)
     throws IOException
   {
-    addHeader(ws, "REQUEST_URI", req.getRequestURI());
-    addHeader(ws, "REQUEST_METHOD", req.getMethod());
+    addHeader(fcgi, ws, "REQUEST_URI", req.getRequestURI());
+    addHeader(fcgi, ws, "REQUEST_METHOD", req.getMethod());
     
-    addHeader(ws, "SERVER_SOFTWARE", "Resin/" + com.caucho.Version.VERSION);
+    addHeader(fcgi, ws, "SERVER_SOFTWARE", "Resin/" + com.caucho.Version.VERSION);
     
-    addHeader(ws, "SERVER_NAME", req.getServerName());
-    //addHeader(ws, "SERVER_ADDR=" + req.getServerAddr());
-    addHeader(ws, "SERVER_PORT", String.valueOf(req.getServerPort()));
+    addHeader(fcgi, ws, "SERVER_NAME", req.getServerName());
+    //addHeader(fcgi, ws, "SERVER_ADDR=" + req.getServerAddr());
+    addHeader(fcgi, ws, "SERVER_PORT", String.valueOf(req.getServerPort()));
     
-    addHeader(ws, "REMOTE_ADDR", req.getRemoteAddr());
-    addHeader(ws, "REMOTE_HOST", req.getRemoteAddr());
-    // addHeader(ws, "REMOTE_PORT=" + req.getRemotePort());
+    addHeader(fcgi, ws, "REMOTE_ADDR", req.getRemoteAddr());
+    addHeader(fcgi, ws, "REMOTE_HOST", req.getRemoteAddr());
+    // addHeader(fcgi, ws, "REMOTE_PORT=" + req.getRemotePort());
 
     if (req.getRemoteUser() != null)
-      addHeader(ws, "REMOTE_USER", req.getRemoteUser());
+      addHeader(fcgi, ws, "REMOTE_USER", req.getRemoteUser());
     else
-      addHeader(ws, "REMOTE_USER", "");
+      addHeader(fcgi, ws, "REMOTE_USER", "");
     if (req.getAuthType() != null)
-      addHeader(ws, "AUTH_TYPE", req.getAuthType());
+      addHeader(fcgi, ws, "AUTH_TYPE", req.getAuthType());
     
-    addHeader(ws, "GATEWAY_INTERFACE", "CGI/1.1");
-    addHeader(ws, "SERVER_PROTOCOL", req.getProtocol());
+    addHeader(fcgi, ws, "GATEWAY_INTERFACE", "CGI/1.1");
+    addHeader(fcgi, ws, "SERVER_PROTOCOL", req.getProtocol());
     if (req.getQueryString() != null)
-      addHeader(ws, "QUERY_STRING", req.getQueryString());
+      addHeader(fcgi, ws, "QUERY_STRING", req.getQueryString());
     else
-      addHeader(ws, "QUERY_STRING", "");
+      addHeader(fcgi, ws, "QUERY_STRING", "");
 
     String scriptPath = req.getServletPath();
     String pathInfo = req.getPathInfo();
@@ -264,30 +353,30 @@ public class FastCGIServlet extends GenericServlet {
      */
     log.finer("FCGI file: " + _app.getRealPath(scriptPath));
 
-    addHeader(ws, "PATH_INFO", req.getContextPath() + scriptPath);
-    addHeader(ws, "PATH_TRANSLATED", _app.getRealPath(scriptPath));
+    addHeader(fcgi, ws, "PATH_INFO", req.getContextPath() + scriptPath);
+    addHeader(fcgi, ws, "PATH_TRANSLATED", _app.getRealPath(scriptPath));
     
     /* These are the values which would be sent to CGI.
-    addHeader(ws, "SCRIPT_NAME", req.getContextPath() + scriptPath);
-    addHeader(ws, "SCRIPT_FILENAME", app.getRealPath(scriptPath));
+    addHeader(fcgi, ws, "SCRIPT_NAME", req.getContextPath() + scriptPath);
+    addHeader(fcgi, ws, "SCRIPT_FILENAME", app.getRealPath(scriptPath));
     
     if (pathInfo != null) {
-      addHeader(ws, "PATH_INFO", pathInfo);
-      addHeader(ws, "PATH_TRANSLATED", req.getRealPath(pathInfo));
+      addHeader(fcgi, ws, "PATH_INFO", pathInfo);
+      addHeader(fcgi, ws, "PATH_TRANSLATED", req.getRealPath(pathInfo));
     }
     else {
-      addHeader(ws, "PATH_INFO", "");
-      addHeader(ws, "PATH_TRANSLATED", "");
+      addHeader(fcgi, ws, "PATH_INFO", "");
+      addHeader(fcgi, ws, "PATH_TRANSLATED", "");
     }
     */
 
     int contentLength = req.getContentLength();
     if (contentLength < 0)
-      addHeader(ws, "CONTENT_LENGTH", "0");
+      addHeader(fcgi, ws, "CONTENT_LENGTH", "0");
     else
-      addHeader(ws, "CONTENT_LENGTH", String.valueOf(contentLength));
+      addHeader(fcgi, ws, "CONTENT_LENGTH", String.valueOf(contentLength));
 
-    addHeader(ws, "DOCUMENT_ROOT", _app.getContext("/").getRealPath("/"));
+    addHeader(fcgi, ws, "DOCUMENT_ROOT", _app.getContext("/").getRealPath("/"));
 
     CharBuffer cb = new CharBuffer();
     
@@ -297,9 +386,9 @@ public class FastCGIServlet extends GenericServlet {
       String value = req.getHeader(key);
 
       if (key.equalsIgnoreCase("content-length"))
-        addHeader(ws, "CONTENT_LENGTH", value);
+        addHeader(fcgi, ws, "CONTENT_LENGTH", value);
       else if (key.equalsIgnoreCase("content-type"))
-        addHeader(ws, "CONTENT_TYPE", value);
+        addHeader(fcgi, ws, "CONTENT_TYPE", value);
       else if (key.equalsIgnoreCase("if-modified-since")) {
       }
       else if (key.equalsIgnoreCase("if-none-match")) {
@@ -309,7 +398,7 @@ public class FastCGIServlet extends GenericServlet {
       else if (key.equalsIgnoreCase("proxy-authorization")) {
       }
       else
-        addHeader(ws, convertHeader(cb, key), value);
+        addHeader(fcgi, ws, convertHeader(cb, key), value);
     }
   }
 
@@ -335,8 +424,8 @@ public class FastCGIServlet extends GenericServlet {
   private int parseHeaders(HttpServletResponse res, InputStream is)
     throws IOException
   {
-    CharBuffer key = CharBuffer.allocate();
-    CharBuffer value = CharBuffer.allocate();
+    CharBuffer key = new CharBuffer();
+    CharBuffer value = new CharBuffer();
 
     int ch = is.read();
 
@@ -376,8 +465,8 @@ public class FastCGIServlet extends GenericServlet {
       if (key.length() == 0)
         return ch;
 
-	if (log.isLoggable(Level.FINE))
-	  log.fine("fastcgi:" + key + ": " + value);
+      if (log.isLoggable(Level.FINE))
+	log.fine("fastcgi:" + key + ": " + value);
 	
       if (key.equalsIgnoreCase("status")) {
 	int status = 0;
@@ -406,7 +495,8 @@ public class FastCGIServlet extends GenericServlet {
     return ch;
   }
 
-  private void addHeader(WriteStream ws, String key, String value)
+  private void addHeader(FastCGISocket fcgiSocket, WriteStream ws,
+			 String key, String value)
     throws IOException
   {
     int keyLen = key.length();
@@ -424,7 +514,7 @@ public class FastCGIServlet extends GenericServlet {
     else
       len += 4;
 
-    writeHeader(ws, FCGI_PARAMS, len);
+    writeHeader(fcgiSocket, ws, FCGI_PARAMS, len);
     
     if (keyLen < 0x80)
       ws.write(keyLen);
@@ -448,7 +538,8 @@ public class FastCGIServlet extends GenericServlet {
     ws.print(value);
   }
 
-  private void addHeader(WriteStream ws, CharBuffer key, String value)
+  private void addHeader(FastCGISocket fcgiSocket, WriteStream ws,
+			 CharBuffer key, String value)
     throws IOException
   {
     int keyLen = key.getLength();
@@ -466,7 +557,7 @@ public class FastCGIServlet extends GenericServlet {
     else
       len += 4;
 
-    writeHeader(ws, FCGI_PARAMS, len);
+    writeHeader(fcgiSocket, ws, FCGI_PARAMS, len);
     
     if (keyLen < 0x80)
       ws.write(keyLen);
@@ -490,7 +581,8 @@ public class FastCGIServlet extends GenericServlet {
     ws.print(value);
   }
 
-  private void writeHeader(WriteStream ws, int type, int length)
+  private void writeHeader(FastCGISocket fcgiSocket,
+			   WriteStream ws, int type, int length)
     throws IOException
   {
     int id = 1;
@@ -506,7 +598,23 @@ public class FastCGIServlet extends GenericServlet {
     ws.write(0);
   }
 
+  public void destroy()
+  {
+    FastCGISocket socket;
+    
+    while ((socket = _freeSockets.allocate()) != null) {
+      try {
+	socket.close();
+      } catch (Throwable e) {
+      }
+    }
+	   
+    _fcgiServlets.remove(new Integer(_servletId));
+  }
+
   static class FastCGIInputStream extends InputStream {
+    private FastCGISocket _fcgiSocket;
+    
     private InputStream _is;
     private int _chunkLength;
     private int _padLength;
@@ -516,14 +624,16 @@ public class FastCGIServlet extends GenericServlet {
     {
     }
 
-    public FastCGIInputStream(InputStream is)
+    public FastCGIInputStream(FastCGISocket fcgiSocket)
     {
-      init(is);
+      init(fcgiSocket);
     }
 
-    public void init(InputStream is)
+    public void init(FastCGISocket fcgiSocket)
     {
-      _is = is;
+      _fcgiSocket = fcgiSocket;
+      
+      _is = fcgiSocket.getReadStream();
       _chunkLength = 0;
       _isDead = false;
     }
@@ -536,16 +646,14 @@ public class FastCGIServlet extends GenericServlet {
     public int read()
       throws IOException
     {
-      if (_chunkLength > 0) {
-        _chunkLength--;
-        return _is.read();
-      }
+      do {
+	if (_chunkLength > 0) {
+	  _chunkLength--;
+	  return _is.read();
+	}
+      } while (readNext());
 
-      if (! readNext())
-        return -1;
-
-      _chunkLength--;
-      return _is.read();
+      return -1;
     }
 
     private boolean readNext()
@@ -566,8 +674,8 @@ public class FastCGIServlet extends GenericServlet {
         int id = (_is.read() << 8) + _is.read();
         int length = (_is.read() << 8) + _is.read();
         int padding = _is.read();
-        _is.skip(1);
-
+        _is.read();
+	
         switch (type) {
         case FCGI_END_REQUEST:
         {
@@ -577,8 +685,15 @@ public class FastCGIServlet extends GenericServlet {
                            (_is.read()));
           int pStatus = _is.read();
 
+	  if (log.isLoggable(Level.FINER)) {
+	    log.finer(_fcgiSocket + ": FCGI_END_REQUEST(appStatus:" + appStatus + ", pStatus:" + pStatus + ")");
+	  }
+	  
           if (appStatus != 0)
             _isDead = true;
+
+	  if (pStatus != FCGI_REQUEST_COMPLETE)
+	    _isDead = true;
           
           _is.skip(3);
           _is = null;
@@ -586,8 +701,16 @@ public class FastCGIServlet extends GenericServlet {
         }
 
         case FCGI_STDOUT:
-          if (length == 0)
+	  if (log.isLoggable(Level.FINER)) {
+	    log.finer(_fcgiSocket + ": FCGI_STDOUT(length:" + length + ", padding:" + padding + ")");
+	  }
+	  
+          if (length == 0) {
+	    if (padding > 0)
+	      _is.skip(padding);
+	    
             break;
+	  }
           else {
             _chunkLength = length;
             _padLength = padding;
@@ -595,12 +718,22 @@ public class FastCGIServlet extends GenericServlet {
           }
 
         case FCGI_STDERR:
+	  if (log.isLoggable(Level.FINER)) {
+	    log.finer(_fcgiSocket + ": FCGI_STDERR(length:" + length + ", padding:" + padding + ")");
+	  }
+	  
           byte []buf = new byte[length];
           _is.read(buf, 0, length);
           log.warning(new String(buf, 0, length));
+
+	  if (padding > 0)
+	    _is.skip(padding);
           break;
 
         default:
+	  log.warning(_fcgiSocket + ": Unknown Protocol(" + type + ")");
+
+	  _isDead = true;
           _is.skip(length + padding);
           break;
         }
@@ -613,31 +746,62 @@ public class FastCGIServlet extends GenericServlet {
   }
 
   static class FastCGISocket {
+    private int _id;
     private int _keepaliveCount;
+    private long _expireTime;
     private Socket _socket;
     private SocketStream _socketStream;
+    private ReadStream _rs;
+    private WriteStream _ws;
 
-    FastCGISocket(Socket socket, int maxKeepaliveCount)
+    FastCGISocket(int id, Socket socket, int maxKeepaliveCount)
     {
+      _id = id;
       _socket = socket;
       _keepaliveCount = maxKeepaliveCount;
 
       _socketStream = new SocketStream(_socket);
+
+      _ws = new WriteStream(_socketStream);
+      _ws.setDisableClose(true);
+      
+      _rs = new ReadStream(_socketStream, _ws);
+      _rs.setDisableClose(true);
+      
+      log.fine(this + ": open()");
     }
 
-    SocketStream getSocketStream()
+    int getId()
     {
-      return _socketStream;
+      return _id;
+    }
+
+    void setExpire(long expireTime)
+    {
+      _expireTime = expireTime;
+    }
+
+    ReadStream getReadStream()
+    {
+      return _rs;
+    }
+
+    WriteStream getWriteStream()
+    {
+      return _ws;
     }
 
     boolean isValid()
     {
-      return _socket != null; // XXX: check for timeout
+      return _socket != null && Alarm.getCurrentTime() < _expireTime;
     }
 
     boolean allocateKeepalive()
     {
-      return --_keepaliveCount > 0;
+      if (! isValid())
+	return false;
+      else
+	return --_keepaliveCount > 0;
     }
 
     boolean isKeepalive()
@@ -648,6 +812,8 @@ public class FastCGIServlet extends GenericServlet {
     void close()
     {
       try {
+	log.fine(this + ": close()");
+	
 	Socket socket = _socket;
 	_socket = null;
 
@@ -655,9 +821,17 @@ public class FastCGIServlet extends GenericServlet {
 
 	if (socket != null)
 	  socket.close();
+      
+	_ws.close();
+	_rs.close();
       } catch (Throwable e) {
 	log.log(Level.FINER, e.toString(), e);
       }
+    }
+
+    public String toString()
+    {
+      return "FastCGISocket[" + _id + "," + _socket + "]";
     }
   }
 }

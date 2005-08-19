@@ -4,6 +4,7 @@
 
 <s2 title='3.0.snap - Aug 11, 2005'>
 <ul>
+<li>Cleaned up FastCGIServlet for socket reuse (rep by A Achuthan, RSN-363)
 <li>Added character-encoding init value to FileServlet (rep by E Bowman, RSN-387)
 <li>LoopTagSupport should use getLoopStatus() in implementation (rep by Erik Boye, RSN-401)
 <li>Added &lt;restart-mode> to &lt;server> (RSN-396)

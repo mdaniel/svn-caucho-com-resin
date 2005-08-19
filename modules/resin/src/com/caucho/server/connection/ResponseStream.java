@@ -478,18 +478,6 @@ class ResponseStream extends ToByteResponseStream {
       }
     }
   }
-
-  /**
-   * Sends a file.
-   *
-   * @param path the path to the file
-   * @param length the length of the file (-1 if unknown)
-   */
-  public void sendFile(Path path, long length)
-    throws IOException
-  {
-    path.writeToStream(this);
-  }
   
   private boolean lengthException(byte []buf, int offset, int length,
 				  long contentLengthHeader)

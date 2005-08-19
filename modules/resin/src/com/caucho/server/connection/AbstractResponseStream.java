@@ -41,6 +41,7 @@ import com.caucho.log.Log;
 
 import com.caucho.util.L10N;
 
+import com.caucho.vfs.Path;
 import com.caucho.vfs.WriteStream;
 import com.caucho.vfs.OutputStreamWithBuffer;
 
@@ -216,6 +217,18 @@ public abstract class AbstractResponseStream extends OutputStreamWithBuffer {
     throws IOException
   {
     flushBuffer();
+  }
+
+  /**
+   * Sends a file.
+   *
+   * @param path the path to the file
+   * @param length the length of the file (-1 if unknown)
+   */
+  public void sendFile(Path path, long length)
+    throws IOException
+  {
+    path.writeToStream(this);
   }
 
   /**

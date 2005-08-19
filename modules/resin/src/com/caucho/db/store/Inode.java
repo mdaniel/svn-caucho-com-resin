@@ -196,10 +196,10 @@ public class Inode {
       if (length <= offset)
 	return -1;
 
-      if (length <= Inode.INLINE_BLOB_SIZE) {
-	if (length - offset < bufferLength)
-	  bufferLength = (int) (length - offset);
+      if (length - offset < bufferLength)
+	bufferLength = (int) (length - offset);
 
+      if (length <= Inode.INLINE_BLOB_SIZE) {
 	System.arraycopy(inode, inodeOffset + 8 + (int) offset,
 			 buffer, bufferOffset, bufferLength);
 
