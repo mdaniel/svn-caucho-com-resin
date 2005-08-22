@@ -84,8 +84,8 @@ cse_log(char *fmt, ...)
 #endif
   
    va_start(args, fmt);
-   snprintf(buffer + strlen(buffer), sizeof(buffer) - strlen(buffer),
-	    fmt, args);
+   vsnprintf(buffer + strlen(buffer), sizeof(buffer) - strlen(buffer),
+	     fmt, args);
    va_end(args);
 
    fputs(buffer, stderr);
