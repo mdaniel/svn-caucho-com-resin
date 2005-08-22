@@ -860,7 +860,7 @@ cse_update_host_from_resin(resin_host_t *host, time_t now)
     
     len = hmux_read_len(&s);
 
-    if (read_config(&s, host->config, host, now, &is_change) > 0)
+    if (read_config(&s, host->config, host, now, &is_change) == HMUX_QUIT)
       cse_recycle(&s, time(0));
     else
       cse_close(&s, "close");
