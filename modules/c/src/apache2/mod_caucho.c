@@ -60,11 +60,6 @@ module AP_MODULE_DECLARE_DATA caucho_module;
 
 #define DEFAULT_PORT 6802
 
-#define REQ_CONTINUE HMUX_ACK
-#define REQ_QUIT     HMUX_QUIT
-#define REQ_EXIT     HMUX_EXIT
-#define REQ_BUSY     4
-
 void
 cse_log(char *fmt, ...)
 {
@@ -820,13 +815,17 @@ caucho_request(request_rec *r, config_t *config, resin_host_t *host,
   apr_thread_mutex_unlock(srun->lock);
   
   /* on failure, do not failover but simply fail */
-  if (code == REQ_QUIT)
+  if (code == HMUX_QUIT)
     cse_recycle(&s, now);
   else
     cse_close(&s, "no reuse");
 
-  if (code != HMUX_QUIT && code != HMUX_EXIT)
+  if (code != HMUX_QUIT && code != HMUX_EXIT) {
+    ERR(("%s:%d:caucho_request(): protocol failure code:%d\n",
+	 __FILE__, __LINE__, code));
+
     return HTTP_SERVICE_UNAVAILABLE;
+  }
   else if (r->status == HTTP_SERVICE_UNAVAILABLE)
     return HTTP_SERVICE_UNAVAILABLE;
   else

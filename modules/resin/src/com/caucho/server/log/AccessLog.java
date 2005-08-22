@@ -189,12 +189,6 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener {
   {
     _logWriter.setRolloverCheckPeriod(period);
   }
-
-  public void addInit(InitProgram init)
-    throws Throwable
-  {
-    init.init(this);
-  }
   
   /**
    * Initialize the log.

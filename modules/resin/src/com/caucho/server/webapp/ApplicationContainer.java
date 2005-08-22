@@ -41,6 +41,7 @@ import com.caucho.server.e_app.EarConfig;
 import com.caucho.server.e_app.EarDeployController;
 import com.caucho.server.e_app.EarDeployGenerator;
 import com.caucho.server.e_app.EarSingleDeployGenerator;
+import com.caucho.server.log.AbstractAccessLog;
 import com.caucho.server.log.AccessLog;
 import com.caucho.server.resin.ServletServer;
 import com.caucho.server.session.SessionManager;
@@ -117,7 +118,7 @@ public class ApplicationContainer
   private HashMap<String,WebAppConfig> _configAppMap
     =  new HashMap<String,WebAppConfig>();
 
-  private AccessLog _accessLog;
+  private AbstractAccessLog _accessLog;
   private ErrorPageManager _errorPageManager;
 
   private long _startWaitTime = 10000L;
@@ -247,7 +248,15 @@ public class ApplicationContainer
   /**
    * Sets the access log.
    */
-  public void setAccessLog(AccessLog log)
+  public AbstractAccessLog createAccessLog()
+  {
+    return new AccessLog();
+  }
+
+  /**
+   * Sets the access log.
+   */
+  public void setAccessLog(AbstractAccessLog log)
   {
     _accessLog = log;
 

@@ -50,7 +50,7 @@ import com.caucho.log.Log;
 import com.caucho.server.connection.AbstractHttpRequest;
 import com.caucho.server.connection.AbstractHttpResponse;
 
-import com.caucho.server.log.AccessLog;
+import com.caucho.server.log.AbstractAccessLog;
 
 import com.caucho.loader.Environment;
 
@@ -80,7 +80,7 @@ public class WebAppFilterChain implements FilterChain {
 
   private ServletRequestListener []_requestListeners;
 
-  private AccessLog _accessLog;
+  private AbstractAccessLog _accessLog;
 
   // true it's the top
   private boolean _isTop = true;

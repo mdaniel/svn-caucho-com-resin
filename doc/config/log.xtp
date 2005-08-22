@@ -217,7 +217,7 @@ in.</p>
 <def> "%h %l %u %t \"%r\" %>s %b \"%{Referer}i\" \"%{User-Agent}i\"" </def>
 
 <p><var/resin:type/> allows for custom logging.  Applications can
-extend a custom class from <a href="javadoc|com.caucho.http.log.AbstractAccessLog|"/>.  
+extend a custom class from <a href="javadoc|com.caucho.http.log.AccessLog|"/>.  
 <a href="doc|config|init">Bean-style initialization</a> can be used to set bean
 parameters in the custom class.</p>
 
@@ -225,8 +225,8 @@ parameters in the custom class.</p>
 ...
 &lt;host id='foo.com'>
   &lt;access-log resin:type='test.MyLog'>
-             href='$server-root/foo/error.log'
-             rollover-period='1W'
+             path='$server-root/foo/error.log'
+             rollover-period='1W'>
     &lt;init&gt;
       &lt;foo&gt;bar&lt;/foo&gt;
     &lt;/init&gt;

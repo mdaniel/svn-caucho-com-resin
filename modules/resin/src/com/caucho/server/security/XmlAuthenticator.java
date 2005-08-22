@@ -291,7 +291,7 @@ public class XmlAuthenticator extends AbstractAuthenticator {
       }
     }
     
-    void addRole(String role)
+    public void addRole(String role)
     {
       String []newRoles = new String[_roles.length + 1];
       System.arraycopy(_roles, 0, newRoles, 0, _roles.length);

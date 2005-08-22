@@ -52,6 +52,7 @@ import com.caucho.server.deploy.DeployGenerator;
 import com.caucho.server.deploy.EnvironmentDeployInstance;
 import com.caucho.server.dispatch.*;
 import com.caucho.server.host.Host;
+import com.caucho.server.log.AbstractAccessLog;
 import com.caucho.server.log.AccessLog;
 import com.caucho.server.resin.ResinServer;
 import com.caucho.server.security.*;
@@ -89,8 +90,8 @@ public class Application extends ServletContextImpl
   static final L10N L = new L10N(Application.class);
   static final Logger log = Log.open(Application.class);
 
-  private static EnvironmentLocal<AccessLog> _accessLogLocal
-    = new EnvironmentLocal<AccessLog>("caucho.server.access-log");
+  private static EnvironmentLocal<AbstractAccessLog> _accessLogLocal
+    = new EnvironmentLocal<AbstractAccessLog>("caucho.server.access-log");
 
   private static EnvironmentLocal<Application> _appLocal
     = new EnvironmentLocal<Application>("caucho.application");
@@ -226,7 +227,7 @@ public class Application extends ServletContextImpl
 
   private DependencyContainer _invocationDependency;
 
-  private AccessLog _accessLog;
+  private AbstractAccessLog _accessLog;
   private Path _tempDir;
 
   private boolean _cookieHttpOnly;
@@ -861,7 +862,15 @@ public class Application extends ServletContextImpl
   /**
    * Sets the access log.
    */
-  public void setAccessLog(AccessLog log)
+  public AccessLog createAccessLog()
+  {
+    return new AccessLog();
+  }
+
+  /**
+   * Sets the access log.
+   */
+  public void setAccessLog(AbstractAccessLog log)
   {
     _accessLog = log;
 
@@ -1126,7 +1135,7 @@ public class Application extends ServletContextImpl
   /**
    * Returns the access log
    */
-  public AccessLog getAccessLog()
+  public AbstractAccessLog getAccessLog()
   {
     return _accessLog;
   }

@@ -414,7 +414,7 @@ read_config(stream_t *s, config_t *config, resin_host_t *host,
   int ch;
   char buffer[1024];
   char value[1024];
-  int is_change = -1;
+  int is_change = 1;
   mem_pool_t *pool = 0;
   cluster_t cluster;
   int live_time = -1;
@@ -430,9 +430,8 @@ read_config(stream_t *s, config_t *config, resin_host_t *host,
   etag[sizeof(etag) - 1] = 0;
 
   host->canonical = host;
-  *p_is_change = is_change;
 
-  LOG(("%s:%d:read_config(); hmux config %s:%d\n",
+  LOG(("%s:%d:read_config(): hmux config %s:%d\n",
        __FILE__, __LINE__, host->name, host->port));
   
   while (1) {
@@ -445,7 +444,8 @@ read_config(stream_t *s, config_t *config, resin_host_t *host,
 	int port = 0;
 	int ch;
 	
-	LOG(("hmux host %s\n", buffer));
+	LOG(("%s:%d:read_config(): hmux host %s\n",
+	     __FILE__, __LINE__, buffer));
 
 	for (p = 0; (ch = buffer[p]); p++) {
 	  if (ch == ':') {
@@ -455,10 +455,6 @@ read_config(stream_t *s, config_t *config, resin_host_t *host,
 	  }
 	}
 	
-	if (is_change < 0)
-	  is_change = 1;
-	*p_is_change = is_change;
-
 	if (strcmp(buffer, host->name) || host->port != port) {
 	  resin_host_t *canonical;
 	  
@@ -510,12 +506,11 @@ read_config(stream_t *s, config_t *config, resin_host_t *host,
       break;
 
     case HMUX_DISPATCH_NO_CHANGE:
-      host->canonical = old_canonical;
       cse_skip(s, hmux_read_len(s));
       
       LOG(("%s:%d:read_config(); hmux no-change %s\n",
 	   __FILE__, __LINE__, host->etag));
-      *p_is_change = is_change;
+      is_change = 0;
       break;
 	
     case HMUX_HEADER:
@@ -532,10 +527,9 @@ read_config(stream_t *s, config_t *config, resin_host_t *host,
 	else if (! strcmp(buffer, "dead-time"))
 	  dead_time = atoi(value);
 	else if (! strcmp(buffer, "check-interval")) {
-	  config->dependency_check_interval = atoi(value);
-	  if (config->dependency_check_interval < 5)
-	    config->dependency_check_interval = 5;
 	  config->update_interval = atoi(value);
+	  if (config->update_interval < 5)
+	    config->update_interval = 5;
 	}
       }
       break;
@@ -598,19 +592,30 @@ read_config(stream_t *s, config_t *config, resin_host_t *host,
 	strncpy(host->etag, etag, sizeof(etag));
 	host->has_data = 1;
       }
-      else if (pool)
-	cse_free_pool(pool);
+      else {
+	host->canonical = old_canonical;
 
-      return code == HMUX_QUIT;
+	if (pool)
+	  cse_free_pool(pool);
+      }
+
+      *p_is_change = is_change;
+
+      return code;
 
     default:
-      LOG(("%s:%d:read_config(): hmux unknown %d\n",
+      ERR(("%s:%d:read_config(): hmux unknown %d\n",
 	   __FILE__, __LINE__, code));
+      
+      host->canonical = old_canonical;
       
       if (pool)
 	cse_free_pool(pool);
 	
-      return 0;
+      is_change = 0;
+      *p_is_change = is_change;
+      
+      return -1;
     }
   }
 }
@@ -855,7 +860,7 @@ cse_update_host_from_resin(resin_host_t *host, time_t now)
     
     len = hmux_read_len(&s);
 
-    if (read_config(&s, host->config, host, now, &is_change))
+    if (read_config(&s, host->config, host, now, &is_change) > 0)
       cse_recycle(&s, time(0));
     else
       cse_close(&s, "close");

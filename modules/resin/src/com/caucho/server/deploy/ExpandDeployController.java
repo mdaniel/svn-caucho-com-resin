@@ -52,6 +52,7 @@ import com.caucho.loader.DynamicClassLoader;
 import com.caucho.loader.Environment;
 
 import com.caucho.util.Log;
+import com.caucho.util.L10N;
 
 import com.caucho.vfs.Vfs;
 import com.caucho.vfs.Jar;
@@ -65,6 +66,7 @@ import com.caucho.vfs.WriteStream;
  */
 abstract public class ExpandDeployController<I extends DeployInstance>
   extends DeployController<I> {
+  private static final L10N L = new L10N(ExpandDeployController.class);
   private static final Logger log = Log.open(ExpandDeployController.class);
 
   private Object _archiveExpandLock = new Object();
@@ -184,6 +186,11 @@ abstract public class ExpandDeployController<I extends DeployInstance>
 	ReadStream is = path.openRead();
 	try {
 	  _manifest = new Manifest(is);
+	} catch (IOException e) {
+	  log.warning(L.l("Manifest file cannot be read for '{0}'.\n{1}",
+			  getRootDirectory(), e));
+
+	  log.log(Level.FINE, e.toString(), e);
 	} finally {
 	  is.close();
 	}

@@ -4,6 +4,9 @@
 
 <s2 title='3.0.snap - Aug 11, 2005'>
 <ul>
+<li>Update issues with mod_caucho (rep by Keith Fetterman) 
+<li>XmlAuthenticator.addRole must be public (rep by A Puthiyavettle, RSN-405)
+<li>Allow AbstractAccessLog overriding (rep by Serge Knystautas, RSN-400)
 <li>Cleaned up FastCGIServlet for socket reuse (rep by A Achuthan, RSN-363)
 <li>Added character-encoding init value to FileServlet (rep by E Bowman, RSN-387)
 <li>LoopTagSupport should use getLoopStatus() in implementation (rep by Erik Boye, RSN-401)

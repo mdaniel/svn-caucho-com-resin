@@ -632,12 +632,15 @@ public class UserConnection implements java.sql.Connection {
     } catch (Throwable e) {
       mConn.fatalEvent();
 
+      log.log(Level.WARNING, e.toString(), e);
+      /*
       if (e instanceof SQLException)
         throw (SQLException) e;
       else if (e instanceof RuntimeException)
         throw (RuntimeException) e;
       else
         throw new SQLExceptionWrapper(e);
+      */
     } finally {
       mConn.closeEvent(this);
     }

@@ -8,6 +8,12 @@
 
 <summary objsummary='localtoc'/>
 
+<section title="Custom AccessLog">
+
+<p>Custom access logs can now extend AbstractAccessLog.</p>
+
+</section>
+
 <section title="FileServlet">
 
 <p>Added character-encoding init-param for a default character encoding.</p>

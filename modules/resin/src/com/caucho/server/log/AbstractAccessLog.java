@@ -38,6 +38,7 @@ import javax.servlet.*;
 
 import com.caucho.util.*;
 import com.caucho.log.Log;
+import com.caucho.config.types.InitProgram;
 import com.caucho.vfs.*;
 
 /**
@@ -90,6 +91,12 @@ abstract public class AbstractAccessLog {
     setPath(path);
   }
 
+  public void addInit(InitProgram init)
+    throws Throwable
+  {
+    init.init(this);
+  }
+
   /**
    * Initialize the log.
    */
@@ -108,6 +115,13 @@ abstract public class AbstractAccessLog {
                            HttpServletResponse response,
                            ServletContext application)
     throws IOException;
+
+  /**
+   * Flushes the log.
+   */
+  public void flush()
+  {
+  }
 
   /**
    * Cleanup the log.

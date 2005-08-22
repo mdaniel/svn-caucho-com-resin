@@ -104,6 +104,13 @@ public class SetterAttributeStrategy extends AttributeStrategy {
   public void setAttribute(Object bean, QName name, Object value)
          throws Exception
   {
-    _setter.invoke(bean, value);
+    try {
+      _setter.invoke(bean, value);
+    } catch (IllegalArgumentException e) {
+      log.log(Level.FINE, e.toString(), e);
+
+      throw new ConfigException(L.l("Can't assign {0} ({1}) to a {2}.",
+				    value, value.getClass(), _setter.getParameterTypes()[0]));
+    }
   }
 }

@@ -183,8 +183,6 @@ typedef struct config_t {
   void *config_lock;
   char *error;
   
-  int dependency_check_interval;
-  
   int enable_caucho_status;
   int disable_sticky_sessions;
   int disable_session_failover;
@@ -212,8 +210,9 @@ typedef struct config_t {
   /* for direct dispatching */
   resin_host_t *manual_host;
 
-  time_t last_update;
+  /* how often to check for updates */
   int update_interval;
+  time_t last_update;
   int update_count;
 } config_t;
 
