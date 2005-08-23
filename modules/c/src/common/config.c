@@ -289,34 +289,6 @@ cse_add_match_pattern(mem_pool_t *pool, web_app_t *app, char *pattern)
 }
 
 /**
- * Adds the host.
- */
-static resin_host_t *
-cse_add_host_config(config_t *config, const char *host_name,
-		    int port, time_t now)
-{
-  resin_host_t *host;
-
-  for (host = config->hosts; host; host = host->next) {
-    if (! strcmp(host_name, host->name) && host->port == port)
-      return host;
-  }
-
-  host = (resin_host_t *) cse_alloc(config->p, sizeof(resin_host_t));
-  memset(host, 0, sizeof(resin_host_t));
-  host->config = config;
-  host->canonical = host;
-  host->name = cse_strdup(config->p, host_name);
-  host->port = port;
-  host->next = config->hosts;
-  config->hosts = host;
-  
-  LOG(("%s:%d:cse_add_host_config() %s\n", __FILE__, __LINE__, host_name));
-
-  return host;
-}
-
-/**
  * Add a url-pattern to the list of matching locations.
  *
  * @param app the containing application
@@ -385,6 +357,8 @@ static resin_host_t *
 cse_create_host(config_t *config, const char *host_name, int port)
 {
   resin_host_t *host;
+  web_app_t *web_app = 0;
+  mem_pool_t *pool = 0;
 
   for (host = config->hosts; host; host = host->next) {
     if (! strcmp(host_name, host->name) && host->port == port)
@@ -401,6 +375,12 @@ cse_create_host(config_t *config, const char *host_name, int port)
   host->next = config->hosts;
   host->cluster.config = config;
   config->hosts = host;
+  
+  pool = cse_create_pool(config);
+    
+  web_app = cse_add_application(pool, host, 0, "");
+  host->applications = web_app;
+  host->pool = pool;
 
   return host;
 }
@@ -820,11 +800,6 @@ read_all_config(config_t *config)
     time_t now = 0;
     
     host = cse_match_host_impl(config, "", 0, now);
-    pool = cse_create_pool(config);
-    
-    web_app = cse_add_application(pool, host, 0, "");
-    host->applications = web_app;
-    host->pool = pool;
 	
     cse_add_match_pattern(pool, web_app, "/*");
   }
