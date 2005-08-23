@@ -227,6 +227,9 @@ public class HmuxDispatchRequest {
       return;
     }
 
+    if (host.getConfigETag() == null)
+      sendQuery(null, host, hostName, url);
+
     if (etag == null) {
     }
     else if (etag.equals(host.getConfigETag())) {
@@ -240,7 +243,19 @@ public class HmuxDispatchRequest {
       if (isLoggable)
 	log.fine(dbgId() + "host '" + host + "' changed");
     }
+    
+    sendQuery(os, host, hostName, url);
+  }
 
+  /**
+   * Writes the host data, returning the crc
+   */
+  private void sendQuery(WriteStream os, Host host,
+			 String hostName, String url)
+    throws IOException
+  {
+    boolean isLoggable = log.isLoggable(Level.FINE);
+    
     long crc64 = 0;
     
     queryServer(os);
@@ -402,6 +417,9 @@ public class HmuxDispatchRequest {
   void writeString(WriteStream os, int code, String value)
     throws IOException
   {
+    if (os == null)
+      return;
+    
     if (value == null)
       value = "";
     
@@ -419,6 +437,9 @@ public class HmuxDispatchRequest {
   void writeString(WriteStream os, int code, CharBuffer value)
     throws IOException
   {
+    if (os == null)
+      return;
+    
     int len = value.length();
 
     os.write(code);

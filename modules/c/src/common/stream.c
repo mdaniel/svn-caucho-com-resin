@@ -185,7 +185,7 @@ cse_close(stream_t *s, char *msg)
   s->socket = -1;
   
   if (socket >= 0) {
-    LOG(("close %d %s\n", socket, msg));
+    LOG(("%s:%d:cse_close(): close %d %s\n", __FILE__, __LINE__, socket, msg));
 
     cse_kill_socket_cleanup(socket, s->web_pool);
 
@@ -237,7 +237,7 @@ cse_connect(struct sockaddr_in *sin, srun_t *srun)
 
   is_nonblock = 0;
   ioctlsocket(sock, FIONBIO, &is_nonblock);
-  LOG(("connect %d\n", sock));
+  LOG(("%s:%d:cse_connect(): connect %d\n", __FILE__, __LINE__, sock));
 
   return sock;
 }
@@ -833,7 +833,8 @@ cse_add_srun(cluster_t *cluster, const char *hostname, int port, int ssl)
   srun_t *srun = 0;
   config_t *config = cluster->config;
 
-  LOG(("adding host %s:%d\n", hostname, port));
+  LOG(("%s:%d:cse_add_srun(): adding host %s:%d\n",
+       __FILE__, __LINE__, hostname, port));
   
   srun = malloc(sizeof(srun_t));
   memset(srun, 0, sizeof(srun_t));

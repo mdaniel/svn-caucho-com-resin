@@ -377,11 +377,14 @@ cse_create_host(config_t *config, const char *host_name, int port)
   config->hosts = host;
   
   pool = cse_create_pool(config);
-    
+
+  /* add default match for fail-safe */
   web_app = cse_add_application(pool, host, 0, "");
   host->applications = web_app;
   host->pool = pool;
 
+  cse_add_match_pattern(pool, web_app, "/*");
+  
   return host;
 }
 
@@ -606,12 +609,16 @@ write_config(config_t *config)
   stream_t s;
   resin_host_t *host;
   int fd;
+  char temp[1024];
   char buffer[1024];
 
   if (! config->config_path)
     return;
 
-  fd = creat(config->config_path, 0664);
+  if (! tmpnam(temp))
+    return;
+
+  fd = creat(temp, 0664);
 
   if (fd < 0)
     return;
@@ -641,8 +648,13 @@ write_config(config_t *config)
   for (host = config->hosts; host; host = host->next) {
     web_app_t *web_app;
     int i;
-    
-    hmux_write_string(&s, HMUX_DISPATCH_HOST, host->name);
+
+    if (host->port) {
+      sprintf(buffer, "%s:%d", host->name, host->port);
+      hmux_write_string(&s, HMUX_DISPATCH_HOST, buffer);
+    }
+    else
+      hmux_write_string(&s, HMUX_DISPATCH_HOST, host->name);
 
     if (host->canonical && host->canonical != host) {
       if (host->canonical->port) {
@@ -715,6 +727,9 @@ write_config(config_t *config)
   cse_flush(&s);
 
   close(fd);
+
+  rename(temp, config->config_path);
+  unlink(temp);
 }
 
 static int
@@ -800,8 +815,6 @@ read_all_config(config_t *config)
     time_t now = 0;
     
     host = cse_match_host_impl(config, "", 0, now);
-	
-    cse_add_match_pattern(pool, web_app, "/*");
   }
 }
 
