@@ -4,6 +4,7 @@
 
 <s2 title='3.0.snap - Aug 11, 2005'>
 <ul>
+<li>Host ETag needs to be set even on initial call (rep by Keith Fetterman)
 <li>Update issues with mod_caucho (rep by Keith Fetterman) 
 <li>XmlAuthenticator.addRole must be public (rep by A Puthiyavettle, RSN-405)
 <li>Allow AbstractAccessLog overriding (rep by Serge Knystautas, RSN-400)

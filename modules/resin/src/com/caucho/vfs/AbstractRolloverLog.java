@@ -334,7 +334,8 @@ public class AbstractRolloverLog {
       closeLogStream();
       
       if (getPathFormat() == null) {
-	Path savedPath = getArchivePath(lastPeriodEnd);
+	Path savedPath = getArchivePath(lastPeriodEnd - 1);
+
 	movePathToArchive(savedPath);
       }
 
