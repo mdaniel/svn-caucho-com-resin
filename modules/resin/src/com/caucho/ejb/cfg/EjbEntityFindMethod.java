@@ -46,6 +46,7 @@ import com.caucho.java.gen.CallChain;
 import com.caucho.ejb.gen.BeanAssembler;
 import com.caucho.ejb.gen.ViewClass;
 import com.caucho.ejb.gen.AmberFindMethod;
+import com.caucho.ejb.gen.CMP10FindMethod;
 import com.caucho.ejb.gen.EntityFindMethod;
 import com.caucho.ejb.gen.EntityFindCollectionMethod;
 import com.caucho.ejb.gen.EntityHomeSync;
@@ -92,6 +93,13 @@ public class EjbEntityFindMethod extends EjbMethod {
 	(getImplMethod() == null ||
 	 getImplMethod().isAbstract())) {
       return new AmberFindMethod(getApiMethod(),
+				 fullClassName,
+				 getViewPrefix());
+    }
+    else if (((EjbEntityBean) getView().getBean()).isCMP1() &&
+	     (getImplMethod() == null ||
+	      getImplMethod().isAbstract())) {
+      return new CMP10FindMethod(getApiMethod(),
 				 fullClassName,
 				 getViewPrefix());
     }

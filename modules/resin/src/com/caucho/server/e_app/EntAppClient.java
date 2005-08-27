@@ -47,7 +47,11 @@ import java.io.IOException;
 import javax.naming.InitialContext;
 import javax.naming.Context;
 
+import javax.ejb.EJBHome;
+import javax.ejb.EJBMetaData;
+
 import javax.rmi.PortableRemoteObject;
+import javax.rmi.CORBA.Stub;
 
 import com.caucho.util.L10N;
 import com.caucho.util.Alarm;
@@ -126,7 +130,14 @@ public class EntAppClient implements DeployInstance, EnvironmentBean {
   private AbstractStubLoader _stubLoader;
 
   private ApplicationConfig _config;
+
+  private JarPath _clientJar;
+  
+  private EJBClientInterface _ejbClient;
+  
   private AppClientConfig _appClientConfig;
+
+  private ArrayList<EjbLink> _links = new ArrayList<EjbLink>();
 
   private HashMap<String,EjbRef> _ejbRefMap = new HashMap<String,EjbRef>();
 
@@ -175,6 +186,23 @@ public class EntAppClient implements DeployInstance, EnvironmentBean {
   }
 
   /**
+   * Returns the ejb client.
+   */
+  public EJBClientInterface getEJBClient()
+    throws ClassNotFoundException,
+	   InstantiationException,
+	   IllegalAccessException
+  {
+    if (_ejbClient == null) {
+      Class cl = Class.forName("com.caucho.iiop.IiopClient");
+      _ejbClient = (EJBClientInterface) cl.newInstance();
+    }
+
+    return _ejbClient;
+  }
+
+
+  /**
    * Sets the root directory.
    */
   public void setRootDirectory(Path rootDir)
@@ -211,6 +239,14 @@ public class EntAppClient implements DeployInstance, EnvironmentBean {
   public void setDisplayName(String displayName)
   {
   }
+  
+  /**
+   * Adds a module.
+   */
+  public Module createModule()
+  {
+    return new Module();
+  }
 
   /**
    * Adds an ejb-reference.
@@ -238,6 +274,8 @@ public class EntAppClient implements DeployInstance, EnvironmentBean {
 
       _stubLoader.addStubClass(stubClass.getName());
     } catch (Throwable e) {
+      e.printStackTrace();
+      
       log.info(e.toString());
     }
   }
@@ -246,11 +284,12 @@ public class EntAppClient implements DeployInstance, EnvironmentBean {
    * Gets an ejb home.
    */
   Class getEjbHome(String ejbName)
+    throws ConfigException
   {
-    EjbRef ejbRef = _ejbRefMap.get(ejbName);
-
-    if (ejbRef != null)
-      return ejbRef.getHome();
+    EjbRef ref = _ejbRefMap.get(ejbName);
+    
+    if (ref != null)
+      return ref.getHome();
     else
       return null;
   }
@@ -300,7 +339,11 @@ public class EntAppClient implements DeployInstance, EnvironmentBean {
    */
   public EjbLink createEjbLink()
   {
-    return new EjbLink();
+    EjbLink link = new EjbLink();
+
+    _links.add(link);
+
+    return link;
   }
   
   /**
@@ -322,6 +365,7 @@ public class EntAppClient implements DeployInstance, EnvironmentBean {
    */
   public void init()
   {
+    System.out.println("INIT: " + _links);
     if (! _lifecycle.toInit())
       return;
 
@@ -338,6 +382,10 @@ public class EntAppClient implements DeployInstance, EnvironmentBean {
       _loader.addJar(workDir);
 
       WorkDir.setLocalWorkDir(workDir);
+
+      for (EjbLink link : _links) {
+	link.deploy();
+      }
 
       // configApplication();
     } catch (Throwable e) {
@@ -360,11 +408,11 @@ public class EntAppClient implements DeployInstance, EnvironmentBean {
     if (! xml.canRead())
       return;
     
-    AppClientBinding binding = new AppClientBinding(this);
+    // AppClientBinding binding = new AppClientBinding(this);
 
     // builder.setCompactSchema("com/caucho/server/e_app/app-client-14.rnc");
 
-    new Config().configure(binding, xml);
+    new Config().configure(this, xml);
   }
 
   /**
@@ -430,6 +478,9 @@ public class EntAppClient implements DeployInstance, EnvironmentBean {
   {
     start();
 
+    System.out.println("MAIN: " + mainClassName);
+    System.out.println("C: " + System.getProperty("java.class.path"));
+
     if (_configException != null)
       throw _configException;
     
@@ -445,8 +496,16 @@ public class EntAppClient implements DeployInstance, EnvironmentBean {
 
       Class mainClass = Class.forName(mainClassName, false, _loader);
 
+      System.out.println("MAIN:");
       Method main = mainClass.getMethod("main",
 					new Class[] { String[].class });
+
+      try {
+	Class cl = Class.forName("com.sun.ts.lib.implementation.sun.common.SunRIURL", false, _loader);
+	System.out.println("CL: " + cl);
+      } catch (Throwable e) {
+	e.printStackTrace();
+      }
 
       main.invoke(null, new Object[] { args});
     } finally {
@@ -477,11 +536,6 @@ public class EntAppClient implements DeployInstance, EnvironmentBean {
       throws ConfigException
     {
       _ejbName = ejbName;
-      _api = getEjbHome(_ejbName);
-
-      if (_api == null)
-	throw new ConfigException(L.l("'{0}' is an unknown ejb name.",
-				      ejbName));
     }
 
     public void setJndiName(String jndiName)
@@ -489,10 +543,10 @@ public class EntAppClient implements DeployInstance, EnvironmentBean {
       _jndiName = jndiName;
     }
 
-    public void init()
+    public void deploy()
       throws Exception
     {
-      System.out.println("LINK: " + _jndiName + " " + _ejbName + " " + _api);
+      System.out.println("LINK: " + _jndiName + " " + _ejbName);
       String orbHost = System.getProperty("org.omg.CORBA.ORBInitialHost");
       String orbPort = System.getProperty("org.omg.CORBA.ORBInitialPort");
       
@@ -503,10 +557,87 @@ public class EntAppClient implements DeployInstance, EnvironmentBean {
       javax.naming.Context ic = new InitialContext(env);
 
       Object ior = ic.lookup(_jndiName);
+      
+      _api = getEjbHome(_ejbName);
+
+      if (_api == null)
+	throw new ConfigException(L.l("'{0}' is an unknown ejb name.",
+				      _ejbName));
+      
       Object value = PortableRemoteObject.narrow(ior, _api);
 
       System.out.println("VALUE: " + value + " " + value.getClass() + " " + _api);
       Jndi.rebindDeepShort(_ejbName, value);
+    }
+  }
+
+  public class Module {
+    /**
+     * Sets the module id.
+     */
+    public void setId(String id)
+    {
+    }
+    
+    /**
+     * Creates a new web module.
+     */
+    public void addWeb(WebModule web)
+      throws Exception
+    {
+    }
+    
+    /**
+     * Adds a new ejb module.
+     */
+    public void addEjb(Path path)
+      throws Exception
+    {
+      getClassLoader().addJar(path);
+
+      getEJBClient().addEJBJar(path);
+
+      getEJBClient().initEJBs();
+    }
+    
+    /**
+     * Adds a new java module.
+     */
+    public void addJava(Path path)
+      throws Exception
+    {
+      if (! path.canRead())
+	throw new ConfigException(L.l("<java> module {0} must be a valid path.",
+				      path));
+
+      
+      getClassLoader().addJar(path);
+	
+      _clientJar = JarPath.create(path);
+
+      Manifest manifest = _clientJar.getManifest();
+      String mainClass = manifest.getMainAttributes().getValue("Main-Class");
+
+      setMainClass(mainClass);
+
+      Path appClient = _clientJar.lookup("META-INF/application-client.xml");
+
+      if (appClient.canRead())
+	new Config().configureBean(EntAppClient.this, appClient);
+    }
+    
+    /**
+     * Adds a new connector
+     */
+    public void addConnector(String path)
+    {
+    }
+    
+    /**
+     * Adds a new alt-dd module.
+     */
+    public void addAltDD(String path)
+    {
     }
   }
 }

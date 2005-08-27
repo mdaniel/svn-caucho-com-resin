@@ -71,7 +71,14 @@ public class ServletFilterChain implements FilterChain {
   {
     return _config.getServletName();
   }
-  
+
+  /**
+   * Returns the role map.
+   */
+  public HashMap<String,String> getRoleMap()
+  {
+    return _config.getRoleMap();
+  }  
   
   /**
    * Invokes the final servlet at the end of the chain.

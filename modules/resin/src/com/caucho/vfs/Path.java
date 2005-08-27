@@ -496,10 +496,47 @@ public abstract class Path {
   }
 
   /**
+   * Changes the group
+   */
+  public void changeGroup(int gid)
+    throws IOException
+  {
+    // XXX: "safe_mode" check with current owner
+  }
+
+  /**
+   * Changes the group
+   */
+  public void changeGroup(String groupName)
+    throws IOException
+  {
+    // XXX: "safe_mode" check with current owner
+  }
+
+  /**
    * Changes the permissions
    */
   public void chmod(int value)
   {
+    // XXX: "safe_mode" check with current owner
+  }
+
+  /**
+   * Changes the owner
+   */
+  public void changeOwner(int uid)
+    throws IOException
+  {
+    // XXX: "safe_mode" check with current owner
+  }
+
+  /**
+   * Changes the owner
+   */
+  public void changeOwner(String ownerName)
+    throws IOException
+  {
+    // XXX: "safe_mode" check with current owner
   }
 
   /**
@@ -763,11 +800,9 @@ public abstract class Path {
     if (suffix == null)
       suffix = ".tmp";
 
-    Random random = new Random();
-
     synchronized (LOCK) {
       for (int i = 0; i < 32768; i++) {
-        int r = Math.abs(random.nextInt());
+        int r = Math.abs((int) RandomUtil.getRandomLong());
         Path file = lookup(prefix + r + suffix);
 
         if (file.createNewFile())

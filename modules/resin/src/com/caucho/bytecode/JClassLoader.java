@@ -45,8 +45,7 @@ abstract public class JClassLoader {
   protected static final Logger log =
     Logger.getLogger(JClassLoader.class.getName());
   
-  private static final JClassLoaderWrapper _staticClassLoader =
-    JClassLoaderWrapper.create(ClassLoader.getSystemClassLoader());
+  private static JClassLoaderWrapper _staticClassLoader;
 
   private static final HashMap<String,JClass> _staticClassMap =
     new HashMap<String,JClass>();
@@ -94,14 +93,17 @@ abstract public class JClassLoader {
    */
   public static JClass systemForName(String name)
   {
-    return _staticClassLoader.forName(name);
+    return getSystemClassLoader().forName(name);
   }
 
   /**
-   * Returns the matching JClass.
+   * Returns the wrapped system class loader.
    */
-  public static JClassLoader getSystemClassLoader()
+  private static JClassLoader getSystemClassLoader()
   {
+    if (_staticClassLoader == null)
+      _staticClassLoader = JClassLoaderWrapper.create(ClassLoader.getSystemClassLoader());
+
     return _staticClassLoader;
   }
 

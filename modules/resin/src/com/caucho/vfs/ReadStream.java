@@ -60,6 +60,7 @@ public final class ReadStream extends InputStream {
   private WriteStream _sibling;
 
   private StreamImpl _source;
+  private long _position;
 
   private Reader _readEncoding;
   private String _readEncodingName;
@@ -190,6 +191,23 @@ public final class ReadStream extends InputStream {
   }
 
   /**
+   * Returns the read position.
+   */
+  public long getPosition()
+  {
+    return _position - (_readLength - _readOffset);
+  }
+  
+  /**
+   * Returns the sets current read position.
+   *
+   * <p>Note: currently unavailable
+   */
+  public void setPosition(long pos)
+  {
+  }
+
+  /**
    * Returns true if the stream allows reading.
    */
   public boolean canRead()
@@ -236,26 +254,6 @@ public final class ReadStream extends InputStream {
   public int available() throws IOException
   {
     return getAvailable();
-  }
-  /**
-   * Returns the current read position.
-   */
-  public long getPosition()
-  {
-    long pos = _source.getReadPosition();
-
-    if (pos < 0)
-      return -1;
-    else
-      return pos - (_readLength - _readOffset);
-  }
-  /**
-   * Returns the sets current read position.
-   *
-   * <p>Note: currently unavailable
-   */
-  public void setPosition(int pos)
-  {
   }
 
   /**
@@ -346,7 +344,12 @@ public final class ReadStream extends InputStream {
         if (_sibling != null)
           _sibling.flush();
 
-        return _source.read(buf, offset, length);
+        int len = _source.read(buf, offset, length);
+
+	if (len > 0)
+	  _position += len;
+
+	return len;
       }
         
       if (! readBuffer())
@@ -873,8 +876,10 @@ public final class ReadStream extends InputStream {
     _readLength = _source.readNonBlock(_readBuffer, 0, _readBuffer.length);
     
     // Setting to 0 is needed to avoid int to long conversion errors with AIX
-    if (_readLength > 0)
+    if (_readLength > 0) {
+      _position += _readLength;
       return true;
+    }
     else {
       _readLength = 0;
       return false;
@@ -902,8 +907,10 @@ public final class ReadStream extends InputStream {
     _readLength = _source.read(_readBuffer, 0, _readBuffer.length);
     
     // Setting to 0 is needed to avoid int to long conversion errors with AIX
-    if (_readLength > 0)
+    if (_readLength > 0) {
+      _position += _readLength;
       return true;
+    }
     else {
       _readLength = 0;
       return false;
@@ -923,8 +930,10 @@ public final class ReadStream extends InputStream {
     _readLength = _source.read(_readBuffer, off, _readBuffer.length - off);
 
     // Setting to 0 is needed to avoid int to long conversion errors with AIX
-    if (_readLength > 0)
+    if (_readLength > 0) {
+      _position += _readLength;
       return true;
+    }
     else {
       _readLength = 0;
       return false;

@@ -28,6 +28,8 @@
 
 package com.caucho.server.webapp;
 
+import java.util.HashMap;
+
 import java.util.logging.Logger;
 import java.util.logging.Level;
 
@@ -80,6 +82,8 @@ public class WebAppFilterChain implements FilterChain {
 
   private ServletRequestListener []_requestListeners;
 
+  private HashMap<String,String> _securityRoleMap;
+
   private AbstractAccessLog _accessLog;
 
   // true it's the top
@@ -123,6 +127,14 @@ public class WebAppFilterChain implements FilterChain {
       log.log(Level.WARNING, e.toString(), e);
     }
   }
+
+  /**
+   * Sets the security map.
+   */
+  public void setSecurityRoleMap(HashMap<String,String> map)
+  {
+    _securityRoleMap = map;
+  }
   
   /**
    * Invokes the next filter in the chain or the final servlet at
@@ -153,6 +165,10 @@ public class WebAppFilterChain implements FilterChain {
 	
 	return;
       }
+
+      System.out.println("EEK: " + _securityRoleMap);
+      if (_securityRoleMap != null && request instanceof AbstractHttpRequest)
+	((AbstractHttpRequest) request).setRoleMap(_securityRoleMap);
 
       for (int i = 0; i < _requestListeners.length; i++) {
 	ServletRequestEvent event = new ServletRequestEvent(_app, request);

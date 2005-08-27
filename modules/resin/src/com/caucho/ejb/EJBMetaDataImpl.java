@@ -37,7 +37,7 @@ import com.caucho.java.*;
 import com.caucho.util.*;
 
 public class EJBMetaDataImpl implements EJBMetaData, Serializable {
-  private EJBHome home;
+  private transient EJBHome home;
   
   private Class homeInterfaceClass;
   private Class remoteInterfaceClass;

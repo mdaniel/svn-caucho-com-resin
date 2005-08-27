@@ -224,6 +224,7 @@ public class DeployServlet extends GenericServlet {
       return null;
 
     Path path = _deployPath.lookup(plan.getArchiveName());
+
     WriteStream os = path.openWrite();
 
     try {
@@ -239,6 +240,7 @@ public class DeployServlet extends GenericServlet {
 
     ArrayList<DeploymentPlan.ExtFile> _extFileList;
     _extFileList = plan.getExtFileList();
+    System.out.println("EXT: " + _extFileList);
 
     for (int i = 0; i < _extFileList.size(); i++) {
       DeploymentPlan.ExtFile extFile = _extFileList.get(i);

@@ -46,6 +46,8 @@ import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.io.ObjectInputStream;
 
+import javax.naming.Context;
+
 import javax.servlet.jsp.el.VariableResolver;
 
 import org.xml.sax.SAXException;
@@ -371,18 +373,30 @@ public class EnterpriseApplication
       
     Vfs.setPwd(_rootDir, _loader);
 
-    EJBServerInterface ejbServer = null;
+    if (_ejbPaths.size() != 0) {
+      Object obj = Jndi.lookup(_ejbServerJndiName);
 
-    ejbServer = (EJBServerInterface) Jndi.lookup(_ejbServerJndiName);
+      if (! (obj instanceof Context))
+	throw new ConfigException(L.l("Expected <ejb-server> configured at '{0}'",
+				      _ejbServerJndiName));
 
-    if (ejbServer == null && _ejbPaths.size() != 0)
-      throw new ConfigException(L.l("<ejb> module needs a configured <ejb-server>"));
+      obj = ((Context) obj).lookup("resin-ejb-server");
 
-    if (ejbServer != null) {
-      for (Path path : _ejbPaths)
-	ejbServer.addEJBJar(path);
+      if (! (obj instanceof EJBServerInterface))
+	throw new ConfigException(L.l("Expected <ejb-server> configured at '{0}'",
+				      _ejbServerJndiName + "/resin-ejb-server"));
+      
+      EJBServerInterface ejbServer = (EJBServerInterface) obj;
 
-      ejbServer.initEJBs();
+      if (ejbServer == null && _ejbPaths.size() != 0)
+	throw new ConfigException(L.l("<ejb> module needs a configured <ejb-server>"));
+
+      if (ejbServer != null) {
+	for (Path path : _ejbPaths)
+	  ejbServer.addEJBJar(path);
+
+	ejbServer.initEJBs();
+      }
     }
 
     // updates the invocation caches
@@ -545,10 +559,16 @@ public class EnterpriseApplication
 
       WebAppController controller = null;
       if (webUri.endsWith(".war")) {
+	// server/2a16
+	
 	String name = webUri.substring(0, webUri.length() - 4);
 	int p = name.lastIndexOf('/');
 	if (p > 0)
 	  name = name.substring(p + 1);
+
+	// XXX:
+	if (contextUrl.equals(""))
+	  contextUrl = "/" + name;
 
 	Path expandPath = _webappsPath;
 	expandPath.mkdirs();
@@ -559,6 +579,15 @@ public class EnterpriseApplication
 
 	controller.setArchivePath(path);
       } else {
+	// server/2a15
+	if (contextUrl.equals("")) {
+	  String name = webUri;
+	  int p = name.lastIndexOf('/');
+	  if (p > 0)
+	    name = name.substring(p + 1);
+	  contextUrl = "/" + name;
+	}
+	
 	controller = new WebAppController(contextUrl, path, _container);
       }
 

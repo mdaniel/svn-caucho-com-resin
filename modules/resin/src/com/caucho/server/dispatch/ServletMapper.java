@@ -313,6 +313,10 @@ public class ServletMapper {
     if (log.isLoggable(Level.FINE))
       log.fine("invoke (uri:" + contextURI + " -> " + servletName + ")");
 
+    ServletConfigImpl config = _servletManager.getServlet(servletName);
+
+    invocation.setSecurityRoleMap(config.getRoleMap());
+
     FilterChain chain = _servletManager.createServletChain(servletName);
 
     if (chain instanceof PageFilterChain) {

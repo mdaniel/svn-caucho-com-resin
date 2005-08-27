@@ -177,7 +177,7 @@ j2ee_servlet = element servlet {
 
   element run-as { string }?,
 
-  element security-role-ref { string }*
+  j2ee_security-role-ref*
 }
 
 j2ee_servlet-name = element servlet-name {

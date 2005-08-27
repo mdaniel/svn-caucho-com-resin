@@ -243,7 +243,7 @@ public class EjbEntityBean extends EjbBean {
    */
   public boolean isCMP()
   {
-    return _isCMP;
+    return _isCMP && "2.x".equals(_cmpVersion);
   }
 
   /**
@@ -252,6 +252,14 @@ public class EjbEntityBean extends EjbBean {
   public void setCMP(boolean isCMP)
   {
     _isCMP = isCMP;
+  }
+
+  /**
+   * Returns true if the entity bean is a CMP.
+   */
+  public boolean isCMP1()
+  {
+    return _isCMP && "1.x".equals(_cmpVersion);
   }
 
   /**
@@ -275,8 +283,8 @@ public class EjbEntityBean extends EjbBean {
   {
     _cmpVersion = version;
 
-    if (! version.equals("2.x"))
-      throw error(L.l("CMP version `{0}' is not currently supported.  Only CMP version 2.x is supported.", version));
+    if (! version.equals("1.x") && ! version.equals("2.x"))
+      throw error(L.l("CMP version `{0}' is not currently supported.  Only CMP version 1.x and 2.x are supported.", version));
   }
 
   /**
@@ -1316,7 +1324,8 @@ public class EjbEntityBean extends EjbBean {
         }
         
         String findName = "ejbF" + name.substring(1);
-        if (! isCMP() || getMethod(beanClass, findName, param) != null) {
+        if (! isCMP() && ! isCMP1()
+	    || getMethod(beanClass, findName, param) != null) {
           JMethod impl = validateNonFinalMethod(findName, param, isAllowPOJO());
 
 	  if (impl != null)

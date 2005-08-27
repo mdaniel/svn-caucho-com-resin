@@ -59,6 +59,21 @@ public class IiopClient implements EJBClientInterface {
     if (path.canRead())
       _ejbConfig.addEJBPath(path);
   }
+
+  /**
+   * Returns the home interface.
+   */
+  public Class getEJBHome(String ejbName)
+    throws ConfigException
+  {
+    EjbBean bean = _ejbConfig.getBeanConfig(ejbName);
+    System.out.println("B: " + bean);
+
+    if (bean == null)
+      return null;
+    else
+      return bean.getRemoteHomeClass();
+  }
   
   /**
    * Initialize the client.

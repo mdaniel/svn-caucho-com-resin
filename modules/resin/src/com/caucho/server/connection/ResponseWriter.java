@@ -202,16 +202,14 @@ public class ResponseWriter extends AbstractPrintWriter {
   public void close()
   {
     _hasError = false;
-    
+
     // server/0200
     // server/1720
-    /*
     try {
       _out.close();
     } catch (IOException e) {
       log.log(Level.FINE, e.toString(), e);
     }
-    */
 
     /*
     try {

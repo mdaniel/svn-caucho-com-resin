@@ -210,6 +210,7 @@ abstract public class IiopWriter extends org.omg.CORBA_2_3.portable.OutputStream
    */
   public void writeIOR(IOR ior)
   {
+    System.out.println("WRITE-IOR: " + ior);
     byte []bytes = ior.getByteArray();
 
     _out.align(4);

@@ -43,6 +43,12 @@ public interface EJBClientInterface {
     throws ConfigException;
   
   /**
+   * Returns the home interface.
+   */
+  public Class getEJBHome(String name)
+    throws ConfigException;
+  
+  /**
    * Initialize the client.
    */
   public void initEJBs()

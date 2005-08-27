@@ -116,6 +116,8 @@ public class IiopStubLoader extends AbstractStubLoader {
    */
   public void addStubClass(String className)
   {
+    System.out.println("PATH: " + getPath());
+    
     int p = className.lastIndexOf('.');
 
     if (p > 0) {
@@ -150,6 +152,8 @@ public class IiopStubLoader extends AbstractStubLoader {
       return null;
 
     Path stubClassPath = getPath().lookup(name);
+
+    System.out.println("PATH: " + stubClassPath.getNativePath());
 
     if (stubClassPath.canRead())
       return stubClassPath;

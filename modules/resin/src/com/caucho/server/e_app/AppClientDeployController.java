@@ -56,6 +56,8 @@ import com.caucho.make.Dependency;
 
 import com.caucho.lifecycle.Lifecycle;
 
+import com.caucho.ejb.EJBClientInterface;
+
 import com.caucho.el.EL;
 import com.caucho.el.MapVariableResolver;
 
@@ -90,6 +92,14 @@ public class AppClientDeployController extends ExpandDeployController<EntAppClie
   }
 
   /**
+   * Sets the root.
+   */
+  public void setRootDirectory(Path path)
+  {
+    super.setRootDirectory(path);
+  }
+
+  /**
    * Adds a config file.
    */
   public void addConfig(Path path)
@@ -98,11 +108,28 @@ public class AppClientDeployController extends ExpandDeployController<EntAppClie
   }
 
   /**
+   * Adds a config file.
+   */
+  public void addEar(Path path)
+  {
+    JarPath jar = JarPath.create(path);
+
+    Path app = jar.lookup("META-INF/application.xml");
+
+    System.out.println("APP: " + app + " " + app.exists());
+
+    if (app.exists())
+      addConfig(app);
+  }
+
+  /**
    * Executes the main.
    */
   public void main(String []args)
     throws Throwable
   {
+    System.out.println("MAIN()");
+    init();
     start();
 
     EntAppClient appClient = request();
@@ -116,9 +143,12 @@ public class AppClientDeployController extends ExpandDeployController<EntAppClie
   public void main(String mainClass, String []args)
     throws Throwable
   {
+    System.out.println("MAIN: " + mainClass);
+    init();
     start();
 
     EntAppClient appClient = request();
+    System.out.println("MAIN: " + appClient + " " + mainClass);
     if (appClient != null)
       appClient.main(mainClass, args);
   }
@@ -126,6 +156,7 @@ public class AppClientDeployController extends ExpandDeployController<EntAppClie
   // XXX: temp
   public ClassLoader getLoader()
   {
+    init();
     start();
 
     EntAppClient appClient = request();
@@ -197,16 +228,16 @@ public class AppClientDeployController extends ExpandDeployController<EntAppClie
     Path rootDir = getRootDirectory();
     
     Path xml = rootDir.lookup("META-INF/application.xml");
-    
-    ApplicationConfig config = null;
+
+    new Config().configureBean(appClient, xml);
 
     /*
      * XXX:
     config = EnterpriseApplication.parseApplicationConfig(rootDir, xml);
     */
       
-    ArrayList<Path> ejbModules = config.getEjbModules();
     /*
+    ArrayList<Path> ejbModules = config.getEjbModules();
     EJBClientInterface ejbClient = null;
 
     if (ejbModules.size() > 0) {
@@ -227,7 +258,6 @@ public class AppClientDeployController extends ExpandDeployController<EntAppClie
 
     if (ejbClient != null)
       ejbClient.initEJBs();
-    */
 
     ArrayList<Path> javaModules = config.getJavaModules();
 
@@ -243,6 +273,7 @@ public class AppClientDeployController extends ExpandDeployController<EntAppClie
 
       appClient.setMainClass(mainClass);
     }
+    */
   }
 
   private void configClientApplication(EntAppClient appClient)
@@ -256,7 +287,7 @@ public class AppClientDeployController extends ExpandDeployController<EntAppClie
     if (! xml.canRead())
       return;
     
-    new Config().configure(appClient, xml,
+    new Config().configureBean(appClient, xml,
 			   "com/caucho/server/e_app/app-client-14.rnc");
   }
 
@@ -266,7 +297,7 @@ public class AppClientDeployController extends ExpandDeployController<EntAppClie
     if (! xml.canRead())
       return;
     
-    new Config().configure(appClient, xml);
+    new Config().configureBean(appClient, xml);
   }
 
   /**

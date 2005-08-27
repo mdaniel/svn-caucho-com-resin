@@ -164,6 +164,14 @@ class ResponseStream extends ToByteResponseStream {
     return _contentLength;
   }
 
+  public void setBufferSize(int size)
+  {
+    if (isCommitted())
+      throw new IllegalStateException(L.l("Buffer size cannot be set after commit"));
+
+    super.setBufferSize(size);
+  }
+
   public boolean isCommitted()
   {
     // return _response.isHeaderWritten() || _isClosed;

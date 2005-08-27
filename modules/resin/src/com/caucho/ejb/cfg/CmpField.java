@@ -163,6 +163,9 @@ public class CmpField extends CmpProperty {
   public void init()
     throws ConfigException
   {
+    if (getEntity().isCMP1())
+      return;
+    
     String name = getName();
 
     String getterName = ("get" +

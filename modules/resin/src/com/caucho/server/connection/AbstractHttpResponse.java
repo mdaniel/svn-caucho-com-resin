@@ -1391,6 +1391,9 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
     
     _charEncoding = null;
     _locale = null;
+
+    _hasOutputStream = false;
+    _hasWriter = false;
     try {
       _responseStream.setLocale(null);
       _responseStream.setEncoding(null);

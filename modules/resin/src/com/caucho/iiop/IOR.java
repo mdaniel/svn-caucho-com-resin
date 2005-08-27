@@ -36,6 +36,8 @@ import com.caucho.util.*;
 import com.caucho.vfs.*;
 
 public class IOR {
+  private static final String RMI_VERSION = ":0000000000000000";
+  
   public static final int TAG_INTERNET_IOP = 0;
   public static final int TAG_MULTIPLE_COMPONENTS = 1;
 
@@ -59,10 +61,10 @@ public class IOR {
   public static final int CS_ISO8859_1 = 0x10020;
   public static final int CS_UTF16 = 0x10100; // ucs-16 level 1
   
-  String typeId;
+  String _typeId;
   int major;
   int minor;
-  String host;
+  String _host;
   int port;
   byte []oid;
   String uri;
@@ -81,7 +83,7 @@ public class IOR {
    */
   public IOR(Class type, String host, int port, String uri)
   {
-    this(type.getName(), host, port, uri);
+    this("RMI:" + type.getName() + RMI_VERSION, host, port, uri);
   }
   
   /**
@@ -90,10 +92,10 @@ public class IOR {
   public IOR(String typeId, String host, int port, String uri)
   {
     try {
-      this.typeId = typeId;
+      _typeId = typeId;
       this.major = 1;
       this.minor = 2;
-      this.host = host;
+      _host = host;
       this.port = port;
       this.uri = uri;
 
@@ -107,7 +109,7 @@ public class IOR {
    */
   public String getTypeId()
   {
-    return typeId;
+    return _typeId;
   }
 
   /**
@@ -136,7 +138,7 @@ public class IOR {
    */
   public String getHost()
   {
-    return host;
+    return _host;
   }
 
   /**
@@ -179,7 +181,7 @@ public class IOR {
   IOR read(IiopReader is)
     throws IOException
   {
-    typeId = is.readString();
+    _typeId = is.readString();
     int count = is.readInt();
 
     for (int i = 0; i < count; i++) {
@@ -194,7 +196,7 @@ public class IOR {
       major = is.read();
       minor = is.read();
 
-      host = is.readString();
+      _host = is.readString();
       port = is.read_short() & 0xffff;
 
       oid = is.readBytes();
@@ -242,7 +244,7 @@ public class IOR {
     int strlen = getInt(buf, offset + i);
     i += 4;
     
-    typeId = getString(buf, offset + i, strlen);
+    _typeId = getString(buf, offset + i, strlen);
     i += strlen;
     
     i += (4 - i % 4) % 4;
@@ -268,7 +270,7 @@ public class IOR {
       strlen = getInt(buf, offset + i);
       i += 4;
 
-      host = getString(buf, offset + i, strlen);
+      _host = getString(buf, offset + i, strlen);
       i += strlen;
       
       i += i & 1;
@@ -332,7 +334,7 @@ public class IOR {
 
     ByteBuffer bb = new ByteBuffer();
 
-    writeString(bb, typeId);
+    writeString(bb, _typeId);
     
     align4(bb);
     bb.addInt(1);
@@ -345,7 +347,7 @@ public class IOR {
     bb.add(major);
     bb.add(minor);
 
-    writeString(bb, host);
+    writeString(bb, _host);
 
     if ((bb.size() & 0x1) == 1)
       bb.add(0);
@@ -398,7 +400,7 @@ public class IOR {
    */
   public String toString()
   {
-    return "IOR:" + typeId + "//" + host + ":" + port + "/" + bytesToHex(oid);
+    return "IOR:" + _typeId + "//" + _host + ":" + port + "/" + bytesToHex(oid);
   }
 
   private static String toHex(int v)

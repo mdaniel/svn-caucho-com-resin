@@ -1752,9 +1752,11 @@ public class Application extends ServletContextImpl
         if (_cache != null)
           chain = _cache.createFilterChain(chain, this);
 
-	chain = new WebAppFilterChain(chain, this);
+	WebAppFilterChain webAppChain = new WebAppFilterChain(chain, this);
 
-	invocation.setFilterChain(chain);
+	webAppChain.setSecurityRoleMap(invocation.getSecurityRoleMap());
+
+	invocation.setFilterChain(webAppChain);
 	invocation.setPathInfo(entry.getPathInfo());
 	invocation.setServletPath(entry.getServletPath());
       }
@@ -2368,6 +2370,7 @@ public class Application extends ServletContextImpl
     FilterChain _filterChain;
     String _pathInfo;
     String _servletPath;
+    HashMap<String,String> _securityRoleMap;
 
     FilterChainEntry(FilterChain filterChain, Invocation invocation)
     {
@@ -2379,6 +2382,16 @@ public class Application extends ServletContextImpl
     FilterChain getFilterChain()
     {
       return _filterChain;
+    }
+
+    HashMap<String,String> getSecurityRoleMap()
+    {
+      return _securityRoleMap;
+    }
+
+    void setSecurityRoleMap(HashMap<String,String> roleMap)
+    {
+      _securityRoleMap = roleMap;
     }
 
     String getPathInfo()

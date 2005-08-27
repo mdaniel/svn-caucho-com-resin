@@ -186,7 +186,8 @@ public class XmlAuthenticator extends AbstractAuthenticator {
     String []roles = user.getRoles();
 
     for (int i = roles.length - 1; i >= 0; i--)
-      if (roles[i].equals(role))
+      // server/12h2
+      if (roles[i].equalsIgnoreCase(role))
         return true;
     
     return false;

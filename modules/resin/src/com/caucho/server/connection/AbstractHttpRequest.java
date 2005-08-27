@@ -1620,6 +1620,7 @@ public abstract class AbstractHttpRequest
    */
   public boolean isUserInRole(String role)
   {
+    System.out.println("IS-USER_IN_ROLE: " + role + " " + _securityRoleRefMap);
     if (_securityRoleRefMap != null) {
       String mapRole = _securityRoleRefMap.get(role);
       

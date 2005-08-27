@@ -90,6 +90,7 @@ public class CosServer {
         String type = n[i].kind;
 
         value = _model.lookup(name);
+	System.out.println("RESOLVE: " + name + " " + value);
 
         if (value != null)
           continue;

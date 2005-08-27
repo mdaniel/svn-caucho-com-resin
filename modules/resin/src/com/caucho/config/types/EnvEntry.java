@@ -164,6 +164,14 @@ public class EnvEntry implements Validator {
       value = new Float((float) Expr.toDouble(_value, null));
     else if (_type.equals(Double.class))
       value = new Double(Expr.toDouble(_value, null));
+    else if (_type.equals(Character.class)) {
+      String v = Expr.toString(_value, null);
+
+      if (v == null || v.length() == 0)
+	value = null;
+      else
+	value = new Character(v.charAt(0));
+    }
 
     if (_name.startsWith("java:comp"))
       Jndi.bindDeep(_name, value);

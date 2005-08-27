@@ -30,6 +30,9 @@
 package com.caucho.server.dispatch;
 
 import java.io.*;
+
+import java.util.HashMap;
+
 import java.util.logging.*;
 
 import javax.servlet.*;
@@ -59,6 +62,8 @@ public class ServletInvocation {
   
   private String _servletName;
   private FilterChain _filterChain;
+
+  private HashMap<String,String> _securityRoleMap;
 
   /**
    * Creates a new invocation
@@ -194,6 +199,22 @@ public class ServletInvocation {
   public FilterChain getFilterChain()
   {
     return _filterChain;
+  }
+
+  /**
+   * Gets the security role map.
+   */
+  public HashMap<String,String> getSecurityRoleMap()
+  {
+    return _securityRoleMap;
+  }
+
+  /**
+   * Sets the security role map.
+   */
+  public void setSecurityRoleMap(HashMap<String,String> roleMap)
+  {
+    _securityRoleMap = roleMap;
   }
 
   /**
