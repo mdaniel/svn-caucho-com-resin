@@ -83,4 +83,9 @@ public class IdExpr extends Expr {
 
     return _id.equals(expr._id);
   }
+
+  public String toString()
+  {
+    return _id;
+  }
 }

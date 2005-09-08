@@ -70,6 +70,9 @@ public class JspOutput extends JspNode {
   public void addAttribute(QName name, String value)
     throws JspParseException
   {
+    if (! _gen.isXml())
+      throw error(L.l("jsp:output is only allowed in jspx files."));
+    
     if (OMIT_XML_DECLARATION.equals(name)) {
       _gen.setOmitXmlDeclaration(attributeToBoolean(name.getName(), value));
     }

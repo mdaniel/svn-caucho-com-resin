@@ -168,6 +168,22 @@ abstract public class
   }
 
   /**
+   * Returns the configure exception.
+   */
+  public Throwable getConfigException()
+  {
+    if (_configException != null)
+      return _configException;
+
+    DeployInstance deploy = getDeployInstance();
+
+    if (deploy != null)
+      return deploy.getConfigException();
+    else
+      return null;
+  }
+
+  /**
    * Adds a default config.
    */
   public void addConfigDefault(C config)

@@ -149,6 +149,13 @@ public class TaglibManager {
                                        String location)
     throws JspParseException
   {
+    if (JspParser.JSP_NS.equals(uri))
+      return null;
+    else if (prefix != null && prefix.startsWith("jsp")) {
+      throw new JspParseException(L.l("tag prefix '{0}' may not start with 'jsp'.",
+				      prefix));
+    }
+      
     try {
       init();
     } catch (IOException e) {

@@ -32,6 +32,7 @@ package com.caucho.j2ee.deployserver;
 import java.util.ArrayList;
 
 import java.util.logging.Logger;
+import java.util.logging.Level;
 
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -55,6 +56,8 @@ import org.w3c.dom.Node;
 import com.caucho.util.L10N;
 import com.caucho.util.IntMap;
 
+import com.caucho.config.ConfigException;
+
 import com.caucho.log.Log;
 
 import com.caucho.vfs.Path;
@@ -74,6 +77,7 @@ import com.caucho.hessian.io.HessianOutput;
 
 import com.caucho.j2ee.deployclient.TargetImpl;
 import com.caucho.j2ee.deployclient.TargetModuleIDImpl;
+import com.caucho.j2ee.deployclient.DeploymentStatusImpl;
 import com.caucho.j2ee.deployclient.ProgressObjectImpl;
 
 /**
@@ -183,6 +187,9 @@ public class DeployServlet extends GenericServlet {
 	  
 	  in.completeCall();
 	  out.startReply();
+
+	  System.out.println("STATUS: " + po.getDeploymentStatus().isFailed());
+	  
 	  out.writeObject(po);
 	  out.completeReply();
 	  break;
@@ -256,8 +263,20 @@ public class DeployServlet extends GenericServlet {
 
     log.info("deploying: " + plan.getName());
     
-    _hostMBean.startEarDeploy(plan.getName());
-    _hostMBean.updateWebAppDeploy(plan.getName());
+    Throwable configException = null;
+
+    try {
+      _hostMBean.startEarDeploy(plan.getName());
+      // XXX: would need to get the specific wars in the ear
+      _hostMBean.updateWebAppDeploy("/" + plan.getName());
+    } catch (Throwable e) {
+      configException = e;
+      
+      log.log(Level.FINE, e.toString(), e);
+      
+      System.out.println("--- Exception: " + e);
+    }
+    
 
     TargetModuleIDImpl id = new TargetModuleIDImpl(targets[0],
 						   plan.getArchiveName());
@@ -270,7 +289,23 @@ public class DeployServlet extends GenericServlet {
     }
     */
 
-    return new ProgressObjectImpl(new TargetModuleID[] { id });
+    ProgressObjectImpl progress
+      = new ProgressObjectImpl(new TargetModuleID[] { id });
+
+    DeploymentStatusImpl status = new DeploymentStatusImpl();
+    progress.setDeploymentStatus(status);
+
+    System.out.println("CONFIG-EXCEPTION: " + configException);
+    if (configException != null) {
+      status.setFailed(true);
+      
+      if (configException instanceof ConfigException)
+	status.setMessage(configException.getMessage());
+      else
+	status.setMessage(configException.toString());
+    }
+
+    return progress;
   }
 
   private TargetModuleID []getAvailableModules(String type)
@@ -354,7 +389,15 @@ public class DeployServlet extends GenericServlet {
 	_deployPath.lookup(name).removeAll();
       }
 
-      _hostMBean.updateWebAppDeploy(name);
+      Throwable configException = null;
+      
+      try {
+	_hostMBean.updateWebAppDeploy(name);
+      } catch (Throwable e) {
+	log.log(Level.FINE, e.toString(), e);
+	
+	configException = e;
+      }
     }
     
     return new ProgressObjectImpl(ids);

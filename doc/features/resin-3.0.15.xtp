@@ -8,6 +8,13 @@
 
 <summary objsummary='localtoc'/>
 
+<section title="JSP with older web.xml">
+
+<p>When a pre-servlet 2.4 web.xml is used, JSP files will not
+use EL expressions by default.</p>
+
+</section>
+
 <section title="Custom AccessLog">
 
 <p>Custom access logs can now extend AbstractAccessLog.</p>

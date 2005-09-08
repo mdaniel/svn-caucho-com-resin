@@ -67,15 +67,22 @@ public class ParseState {
 
   private boolean _isSession = true;
   private boolean _isOptionalSession = false;
+  private boolean _isSessionSet = false;
+  
   private boolean _isErrorPage = false;
+  private boolean _isErrorPageSet = false;
   
   private boolean _isAutoFlush = true;
+  private boolean _isAutoFlushSet = false;
+  
   private boolean _isThreadSafe = true;
+  private boolean _isThreadSafeSet = false;
 
   private boolean _isTag = false;
   private boolean _isXml = false;
 
   private int _buffer = 8192;
+  private boolean _isBufferSet = false;
 
   private String _info;
   private String _errorPage;
@@ -171,15 +178,6 @@ public class ParseState {
   }
 
   /**
-   * Set if the session is enabled.
-   */
-  public void setSession(boolean session)
-  {
-    _isSession = session;
-    _isOptionalSession = session;
-  }
-
-  /**
    * Returns true if the session is enabled.
    */
   public boolean isSession()
@@ -194,13 +192,26 @@ public class ParseState {
   {
     return _isOptionalSession;
   }
+  
+  /**
+   * Set if the session is enabled.
+   */
+  public boolean setSession(boolean session)
+  {
+    boolean isSession = _isSession;
+    
+    _isSession = session;
+    _isOptionalSession = session;
+
+    return (session == isSession || ! _isSessionSet);
+  }
 
   /**
-   * Set if the autoFlush is enabled.
+   * Mark the thread safe attribute as set.
    */
-  public void setAutoFlush(boolean autoFlush)
+  public void markSessionSet()
   {
-    _isAutoFlush = autoFlush;
+    _isSessionSet = true;
   }
 
   /**
@@ -210,13 +221,25 @@ public class ParseState {
   {
     return _isAutoFlush;
   }
+  
+  /**
+   * Set if the autoFlush is enabled.
+   */
+  public boolean setAutoFlush(boolean autoFlush)
+  {
+    boolean isAutoFlush = _isAutoFlush;
+    
+    _isAutoFlush = autoFlush;
+
+    return (autoFlush == isAutoFlush || ! _isAutoFlushSet);
+  }
 
   /**
-   * Set if the threadSafe is enabled.
+   * Mark the thread safe attribute as set.
    */
-  public void setThreadSafe(boolean threadSafe)
+  public void markAutoFlushSet()
   {
-    _isThreadSafe = threadSafe;
+    _isAutoFlushSet = true;
   }
 
   /**
@@ -228,11 +251,35 @@ public class ParseState {
   }
 
   /**
+   * Set if the threadSafe is enabled.
+   */
+  public boolean setThreadSafe(boolean threadSafe)
+  {
+    boolean isThreadSafe = _isThreadSafe;
+    
+    _isThreadSafe = threadSafe;
+
+    return (threadSafe == isThreadSafe || ! _isThreadSafeSet);
+  }
+
+  /**
+   * Mark the thread safe attribute as set.
+   */
+  public void markThreadSafeSet()
+  {
+    _isThreadSafeSet = true;
+  }
+
+  /**
    * Set if the errorPage is enabled.
    */
-  public void setErrorPage(boolean errorPage)
+  public boolean setErrorPage(boolean errorPage)
   {
+    boolean isErrorPage = _isErrorPage;
+    
     _isErrorPage = errorPage;
+
+    return (errorPage == isErrorPage || ! _isErrorPageSet);
   }
 
   /**
@@ -244,11 +291,11 @@ public class ParseState {
   }
 
   /**
-   * Set the buffer size in bytes.
+   * Mark the error page attribute as set.
    */
-  public void setBuffer(int buffer)
+  public void markErrorPage()
   {
-    _buffer = buffer;
+    _isErrorPageSet = true;
   }
 
   /**
@@ -257,6 +304,26 @@ public class ParseState {
   public int getBuffer()
   {
     return _buffer;
+  }
+  
+  /**
+   * Set the buffer size.
+   */
+  public boolean setBuffer(int buffer)
+  {
+    int oldBuffer = _buffer;
+    
+    _buffer = buffer;
+
+    return (buffer == oldBuffer || ! _isBufferSet);
+  }
+
+  /**
+   * Mark the buffer attribute as set.
+   */
+  public void markBufferSet()
+  {
+    _isBufferSet = true;
   }
 
   /**

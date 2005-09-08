@@ -173,7 +173,6 @@ public class TagFileTag extends GenericTag {
 
     printVarDeclaration(out, VariableInfo.AT_END);
   }
-
   
   public String fillTagFileAttributes(JspJavaWriter out, String tagName)
     throws Exception

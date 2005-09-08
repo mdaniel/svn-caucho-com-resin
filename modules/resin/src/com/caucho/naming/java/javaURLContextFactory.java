@@ -77,9 +77,13 @@ public class javaURLContextFactory implements ObjectFactory {
     AbstractModel model = _javaModel.getLevel();
 
     if (model == null) {
-      if (dbg.isLoggable(Level.FINEST))
-        dbg.finest(L.l("`{0}' creating JNDI java: model for {1}",
-		       name, Thread.currentThread().getContextClassLoader()));
+      if (dbg.isLoggable(Level.FINER)) {
+	ClassLoader loader = Thread.currentThread().getContextClassLoader();
+	
+        dbg.finer(L.l("creating JNDI java: model for {0} parent:{1}",
+		      loader,
+		      (loader != null ? loader.getParent() : null)));
+      }
         
       model = _javaModel.get();
 

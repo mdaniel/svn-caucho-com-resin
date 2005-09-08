@@ -157,6 +157,7 @@ public class HostAdmin extends DeployControllerAdmin<HostController>
    * Updates a .war deployment.
    */
   public void updateWebAppDeploy(String name)
+    throws Throwable
   {
     Host host = getHost();
       
@@ -168,6 +169,7 @@ public class HostAdmin extends DeployControllerAdmin<HostController>
    * Updates a .ear deployment.
    */
   public void updateEarDeploy(String name)
+    throws Throwable
   {
     Host host = getHost();
       

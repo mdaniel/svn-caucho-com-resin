@@ -383,7 +383,7 @@ public class CauchoSystem {
     
     String []path = pattern.split(cp);
 
-    CharBuffer cb = CharBuffer.allocate();
+    CharBuffer cb = new CharBuffer();
 
     for (int i = 0; i < path.length; i++) {
       Path subpath = Vfs.lookup(path[i]);

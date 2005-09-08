@@ -292,11 +292,14 @@ public class TagInstance {
   public TagInstance addTag(QName tagName, TagInfo tagInfo,
                             Class cl,
                             ArrayList<QName> names,
-                            ArrayList<Object> values)
+                            ArrayList<Object> values,
+			    boolean hasBodyContent)
   {
     TagInstance child = null;//findTag(tagName, names);
     if (child == null)
       child = new TagInstance(this, tagInfo, tagName, cl);
+
+    child.setBodyContent(hasBodyContent);
 
     for (int i = 0; i < names.size(); i++) {
       QName name = names.get(i);
@@ -324,12 +327,16 @@ public class TagInstance {
    * Adds a new tag.  Always create a new tag.
    */
   public TagInstance addNewTag(QName tagName, TagInfo tagInfo,
-                               Class cl, ArrayList<QName> names,
-                               ArrayList<String> values)
+                               Class cl,
+			       ArrayList<QName> names,
+                               ArrayList<String> values,
+			       boolean hasBodyContent)
   {
     TagInstance child = null;
     if (child == null)
       child = new TagInstance(this, tagInfo, tagName, cl);
+
+    child.setBodyContent(hasBodyContent);
 
     for (int i = 0; i < names.size(); i++) {
       QName name = names.get(i);
@@ -396,12 +403,14 @@ public class TagInstance {
   /**
    * Finds the matching tag.
    */
-  public TagInstance findTag(QName tagName, ArrayList<QName> names)
+  public TagInstance findTag(QName tagName,
+			     ArrayList<QName> names,
+			     boolean hasBodyContent)
   {
     for (int i = 0; i < _children.size(); i++) {
       TagInstance child = _children.get(i);
 
-      if (child.match(tagName, names))
+      if (child.match(tagName, names, hasBodyContent))
         return child;
     }
 
@@ -411,12 +420,15 @@ public class TagInstance {
   /**
    * Returns true for matching instances.
    */
-  boolean match(QName tagName, ArrayList<QName> names)
+  boolean match(QName tagName, ArrayList<QName> names, boolean hasBodyContent)
   {
     if (! _qname.equals(tagName))
       return false;
 
     if (_attributeNames.size() != names.size())
+      return false;
+
+    if (_hasBodyContent != hasBodyContent)
       return false;
     
     for (int i = 0; i < _attributeNames.size(); i++) {

@@ -652,6 +652,7 @@ public class ELParser {
    * Creates the implicit object for the name.
    */
   protected Method getStaticMethod(String name)
+    throws ELParseException
   {
     Method method = null;
     

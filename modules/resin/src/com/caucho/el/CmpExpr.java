@@ -80,6 +80,11 @@ public class CmpExpr extends AbstractBooleanExpr {
     if (aObj == bObj)
       return _op == LE || _op == GE;
 
+    if (aObj == null || bObj == null) {
+      // jsp/1b3d
+      return false;
+    }
+
     if (aObj instanceof Double || aObj instanceof Float ||
         bObj instanceof Double || bObj instanceof Float) {
       double a = toDouble(aObj, env);

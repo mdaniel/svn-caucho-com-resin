@@ -52,6 +52,10 @@ abstract public class JspFragmentNode extends JspContainerNode
 
   private boolean _isValueFragment;
   private boolean _isJspFragment;
+
+  public JspFragmentNode()
+  {
+  }
   
   /**
    * Called after all the attributes from the tag.
@@ -164,6 +168,9 @@ abstract public class JspFragmentNode extends JspContainerNode
   public void generate(JspJavaWriter out)
     throws Exception
   {
+    if (hasScripting() && isJspFragment())
+      throw error(L.l("fragment may not contain scripting elements"));
+    
     generateChildren(out);
   }
 
@@ -178,11 +185,14 @@ abstract public class JspFragmentNode extends JspContainerNode
     
     _isValueFragment = true;
 
+    if (hasScripting() && isJspFragment())
+      throw error(L.l("fragment may not contain scripting elements"));
+
     _gen.addFragment(this);
     
     TagInstance parent = getParent().getTag();
 
-    CharBuffer cb = CharBuffer.allocate();
+    CharBuffer cb = new CharBuffer();
 
     cb.append("_CauchoFragment." + _fragmentName + "(pageContext, ");
 
@@ -218,6 +228,9 @@ abstract public class JspFragmentNode extends JspContainerNode
   void generateValueMethod(JspJavaWriter out)
     throws Exception
   {
+    if (hasScripting() && isJspFragment())
+      throw error(L.l("fragment may not contain scripting elements"));
+    
     out.println();
     out.println("static String " + _fragmentName + "(");
     out.println("  com.caucho.jsp.PageContextImpl pageContext,");
@@ -237,10 +250,14 @@ abstract public class JspFragmentNode extends JspContainerNode
     generate(out);
 
     out.print("return ((com.caucho.jsp.BodyContentImpl) out)");
+    /*
     if (isTrim())
       out.println(".getTrimString();");
     else
       out.println(".getString();");
+    */
+    // jsp/18do
+    out.println(".getString();");
 
     out.popDepth();
     out.println("} finally {");

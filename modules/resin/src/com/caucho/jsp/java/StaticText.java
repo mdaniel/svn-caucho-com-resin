@@ -115,7 +115,10 @@ public class StaticText extends JspNode {
   public void printXml(WriteStream os)
     throws IOException
   {
-    os.print("<jsp:text>");
+    os.print("<jsp:text");
+    printJspId(os);
+    os.print(">");
+    
     printXmlText(os, _text);
     os.print("</jsp:text>");
   }

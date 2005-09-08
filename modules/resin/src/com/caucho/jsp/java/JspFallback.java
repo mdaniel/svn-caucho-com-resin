@@ -74,6 +74,18 @@ public class JspFallback extends JspContainerNode {
   public void generate(JspJavaWriter out)
     throws Exception
   {
+    throw error(L.l("jsp:fallback is not allowed as a child of {0}",
+		    getParent().getTagName()));
+  }
+  
+  /**
+   * Generates the code for the scriptlet
+   *
+   * @param out the output writer for the generated java.
+   */
+  public void generateFallback(JspJavaWriter out)
+    throws Exception
+  {
     generateChildren(out);
   }
 }

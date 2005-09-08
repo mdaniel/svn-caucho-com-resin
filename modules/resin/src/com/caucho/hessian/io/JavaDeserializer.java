@@ -110,7 +110,7 @@ public class JavaDeserializer extends AbstractMapDeserializer {
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
-      throw new IOExceptionWrapper(e);
+      throw new IOExceptionWrapper(_type.getName() + ":" + e.getMessage(), e);
     }
   }
 
@@ -179,12 +179,15 @@ public class JavaDeserializer extends AbstractMapDeserializer {
   }
 
   private Object resolve(Object obj)
+    throws Exception
   {
     // if there's a readResolve method, call it
     try {
       if (_readResolve != null)
         return _readResolve.invoke(obj, new Object[0]);
-    } catch (Exception e) {
+    } catch (InvocationTargetException e) {
+      if (e.getTargetException() != null)
+	throw e;
     }
 
     return obj;

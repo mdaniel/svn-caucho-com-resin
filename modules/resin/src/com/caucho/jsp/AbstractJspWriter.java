@@ -60,6 +60,19 @@ abstract class AbstractJspWriter extends BodyContent implements FlushBuffer {
   AbstractJspWriter()
   {
     super(null);
+
+    this.autoFlush = true;
+  }
+
+  /**
+   * Creates a new QJspWriter
+   */
+  AbstractJspWriter(int bufferSize, boolean isAutoFlush)
+  {
+    super(null);
+
+    this.bufferSize = bufferSize;
+    this.autoFlush = isAutoFlush;
   }
 
   /**

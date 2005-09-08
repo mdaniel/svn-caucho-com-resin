@@ -166,7 +166,6 @@ public class WebAppFilterChain implements FilterChain {
 	return;
       }
 
-      System.out.println("EEK: " + _securityRoleMap);
       if (_securityRoleMap != null && request instanceof AbstractHttpRequest)
 	((AbstractHttpRequest) request).setRoleMap(_securityRoleMap);
 

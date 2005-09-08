@@ -61,6 +61,8 @@ public class JspDirectivePage extends JspNode {
   private static final QName AUTO_FLUSH = new QName("autoFlush");
   private static final QName IS_THREAD_SAFE = new QName("isThreadSafe");
   private static final QName EXTENDS = new QName("extends");
+
+  private Boolean _isElIgnored;
   
   /**
    * Adds an attribute.
@@ -71,8 +73,16 @@ public class JspDirectivePage extends JspNode {
   public void addAttribute(QName name, String value)
     throws JspParseException
   {
-    if (IS_EL_IGNORED.equals(name))
-      _parseState.setELIgnored(value.equals("true"));
+    if (IS_EL_IGNORED.equals(name)) {
+      boolean isIgnored = value.equals("true");
+
+      _parseState.setELIgnored(isIgnored);
+      
+      if (_isElIgnored != null && _isElIgnored.booleanValue() != isIgnored)
+	throw error(L.l("isELIgnored values conflict"));
+
+      _isElIgnored = new Boolean(isIgnored);
+    }
     /*
     else if (name.equals("isScriptingInvalid"))
       _parseState.setScriptingInvalid(value.equals("true"));
@@ -100,10 +110,14 @@ public class JspDirectivePage extends JspNode {
     else if (PAGE_ENCODING.equals(name)) {
       String oldEncoding = _parseState.getPageEncoding();
 
-      /* jsp/01f0
-      if (oldEncoding != null && ! value.equals(oldEncoding))
-        throw error(L.l("pageEncoding `{0}' conflicts with previous value of pageEncoding `{1}'.  Check the .jsp and any included .jsp files for conflicts.", value, oldEncoding));
-      */
+      // jsp/01f1
+      if (oldEncoding != null) {
+	String oldCanonical = Encoding.getMimeName(oldEncoding);
+	String newCanonical = Encoding.getMimeName(value);
+
+	if (! newCanonical.equals(oldCanonical))
+	  throw error(L.l("pageEncoding `{0}' conflicts with previous value of pageEncoding `{1}'.  Check the .jsp and any included .jsp files for conflicts.", value, oldEncoding));
+      }
       
       _parseState.setPageEncoding(value);
     }
@@ -116,48 +130,91 @@ public class JspDirectivePage extends JspNode {
       _parseState.addImport(value);
     }
     else if (SESSION.equals(name)) {
+      boolean isValid = false;
+      
       if (value.equals("true"))
-        _parseState.setSession(true);
+        isValid = _parseState.setSession(true);
       else if (value.equals("false"))
-        _parseState.setSession(false);
+        isValid = _parseState.setSession(false);
       else
         throw error(L.l("session expects `true' or `false' at `{0}'",
                         value));
+
+      if (! isValid)
+        throw error(L.l("session is assigned different values."));
     }
     else if (BUFFER.equals(name)) {
-      _parseState.setBuffer(processBufferSize(value));
+      boolean isValid = _parseState.setBuffer(processBufferSize(value));
+
+      _parseState.markBufferSet();
+      
+      if (! isValid)
+        throw error(L.l("buffer is assigned different values."));
+
+      if (_parseState.getBuffer() == 0 && ! _parseState.isAutoFlush())
+        throw error(L.l("buffer must be non-zero when autoFlush is false."));
     }
     else if (ERROR_PAGE.equals(name)) {
-      String newErrorPage = getRelativeUrl(value);
+      String errorPage = _parseState.getErrorPage();
       
-      _parseState.setErrorPage(value);
+      String newErrorPage = getRelativeUrl(value);
+
+      _parseState.setErrorPage(newErrorPage);
+
+      if (errorPage != null && ! errorPage.equals(newErrorPage)) {
+	_parseState.setErrorPage(null);
+        throw error(L.l("errorPage is assigned different value '{0}'.",
+			newErrorPage));
+      }
     }
     else if (IS_ERROR_PAGE.equals(name)) {
+      boolean isValid = false;
+      
       if (value.equals("true"))
-        _parseState.setErrorPage(true);
+        isValid = _parseState.setErrorPage(true);
       else if (value.equals("false"))
-        _parseState.setErrorPage(false);
+        isValid = _parseState.setErrorPage(false);
       else
         throw error(L.l("isErrorPage expects `true' or `false' at `{0}'",
                         value));
+
+      _parseState.markErrorPage();
+
+      if (! isValid)
+        throw error(L.l("isErrorPage is assigned different values."));
     }
     else if (AUTO_FLUSH.equals(name)) {
+      boolean isValid = false;
+      
       if (value.equals("true"))
-        _parseState.setAutoFlush(true);
+        isValid = _parseState.setAutoFlush(true);
       else if (value.equals("false"))
-        _parseState.setAutoFlush(false);
+        isValid = _parseState.setAutoFlush(false);
       else
         throw error(L.l("autoFlush expects `true' or `false' at `{0}'",
                         value));
+
+      if (! isValid)
+        throw error(L.l("autoFlush is assigned different values."));
+      
+      if (_parseState.getBuffer() == 0 && ! _parseState.isAutoFlush())
+        throw error(L.l("buffer must be non-zero when autoFlush is false."));
     }
     else if (IS_THREAD_SAFE.equals(name)) {
+      boolean isValid = false;
+      
       if (value.equals("true"))
-        _parseState.setThreadSafe(true);
+        isValid = _parseState.setThreadSafe(true);
       else if (value.equals("false"))
-        _parseState.setThreadSafe(false);
+        isValid = _parseState.setThreadSafe(false);
       else
         throw error(L.l("isThreadSafe expects `true' or `false' at `{0}'",
                         value));
+
+      _parseState.markThreadSafeSet();
+
+      if (! isValid)
+        throw error(L.l("isThreadSafe is assigned different values."));
     }
     else if (EXTENDS.equals(name)) {
       Class cl = null;
@@ -173,7 +230,7 @@ public class JspDirectivePage extends JspNode {
       
       Class oldExtends = _parseState.getExtends();
       
-      if (oldExtends != null && ! value.equals(oldExtends))
+      if (oldExtends != null && ! cl.equals(oldExtends))
         throw error(L.l("extends `{0}' conflicts with previous value of extends `{1}'.  Check the .jsp and any included .jsp files for conflicts.", value, oldExtends.getName()));
       
       _parseState.setExtends(cl);
@@ -263,6 +320,16 @@ public class JspDirectivePage extends JspNode {
   }
   
   /**
+   * Called when the tag ends.
+   */
+  public void endAttributes()
+    throws JspParseException
+  {
+    if (_gen.isTag())
+      throw error(L.l("page directives are forbidden in tags."));
+  }
+  
+  /**
    * Return true if the node only has static text.
    */
   public boolean isStatic()
@@ -279,12 +346,29 @@ public class JspDirectivePage extends JspNode {
     throws IOException
   {
     os.print("<jsp:directive.page");
+    printJspId(os);
     if (! _parseState.isELIgnored())
       os.print(" el-ignored='false'");
     /*
     if (! _parseState.isScriptingEnabled())
       os.print(" scripting-enabled='false'");
     */
+    if (_parseState.getContentType() != null)
+      os.print(" content-type='" + _parseState.getContentType() + "'");
+
+    ArrayList<String> imports = _parseState.getImportList();
+
+    if (imports != null && imports.size() != 0) {
+      os.print(" import='");
+      for (int i = 0; i < imports.size(); i++) {
+	if (i != 0)
+	  os.print(',');
+	os.print(imports.get(i));
+      }
+      os.print("'");
+    }
+    
+    
     os.print("/>");
   }
 

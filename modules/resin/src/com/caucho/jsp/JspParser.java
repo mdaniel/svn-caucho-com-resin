@@ -411,6 +411,9 @@ public class JspParser {
 	{
 	  switch ((ch = read())) {
 	  case '%':
+	    if (_isXml)
+	      throw error(L.l("'<%' syntax is not allowed in JSP/XML syntax."));
+	    
 	    parseScriptlet();
 	    _startText = _charCount;
 
@@ -1048,8 +1051,16 @@ public class JspParser {
           _jspBuilder.endElement(eltName.getName());
 	  return;
 	}
-
-	addText('%');
+	else if (ch == '\\') {
+	  ch = read();
+	  if (ch == '>') {
+	    addText("%");
+	  }
+	  else
+	    addText("%\\");
+	}
+	else
+	  addText('%');
 	break;
 
       default:
@@ -1139,7 +1150,7 @@ public class JspParser {
         try {
           _stream.setEncoding(contentEncoding);
         } catch (Exception e) {
-	  e.printStackTrace();
+	  log.log(Level.FINER, e.toString(), e);
 	  
           throw error(L.l("unknown content encoding `{0}'", contentEncoding),
 		      e);

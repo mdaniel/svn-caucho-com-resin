@@ -154,7 +154,8 @@ public class ContextImpl implements Context {
       try {
         Object value = lookupImpl(name);
 
-        dbg.finest(L.l("JNDI lookup `{0}' -> {1}", name, value));
+        dbg.finest(L.l("JNDI lookup `{0}' -> {1}",
+		       name, value));
 
         return value;
       } catch (NamingException e) {

@@ -158,6 +158,13 @@ public class AbstractAuthenticator implements ServletAuthenticator {
   }
 
   /**
+   * Adds a role mapping.
+   */
+  public void addRoleMapping(Principal principal, String role)
+  {
+  }
+
+  /**
    * Initialize the authenticator with the application.
    */
   public void init()

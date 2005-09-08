@@ -67,7 +67,8 @@ public class CustomSimpleTag extends GenericTag {
     super.endAttributes();
     
     _oldScriptingInvalid = _parseState.isScriptingInvalid();
-    _parseState.setScriptingInvalid(true);
+    // jsp/18dj
+    // _parseState.setScriptingInvalid(true);
   }
   
   /**
@@ -80,7 +81,7 @@ public class CustomSimpleTag extends GenericTag {
     
     _parseState.setScriptingInvalid(_oldScriptingInvalid);
     
-    if (_children == null || _children.size() == 0)
+    if (isEmpty())
       return;
 
     for (int i = 0; i < _children.size(); i++) {

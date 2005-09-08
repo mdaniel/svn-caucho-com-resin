@@ -54,8 +54,13 @@ public class JspParam extends JspNode {
   public void addAttribute(QName name, String value)
     throws JspParseException
   {
-    if (NAME.equals(name))
+    if (NAME.equals(name)) {
       _name = value;
+
+      if (hasRuntimeAttribute(value) || hasELAttribute(value))
+	throw error(L.l("'name' attribute may not have a runtime value at {0}",
+			value));
+    }
     else if (VALUE.equals(name))
       _value = value;
     else
@@ -77,6 +82,19 @@ public class JspParam extends JspNode {
   public String getValue()
   {
     return _value;
+  }
+  
+  /**
+   * Called when the tag closes.
+   */
+  public void endElement()
+    throws Exception
+  {
+    if (_name == null)
+      throw error(L.l("jsp:param requires a 'name' attribute"));
+    
+    if (_value == null)
+      throw error(L.l("jsp:param requires a 'value' attribute"));
   }
 
   /**
@@ -109,6 +127,17 @@ public class JspParam extends JspNode {
    * @param out the output writer for the generated java.
    */
   public void generate(JspJavaWriter out)
+    throws Exception
+  {
+    throw error(L.l("<jsp:param> does not generate code directly."));
+  }
+
+  /**
+   * Generates the code for the scriptlet
+   *
+   * @param out the output writer for the generated java.
+   */
+  public void generateEmpty()
     throws Exception
   {
     throw error(L.l("<jsp:param> does not generate code directly."));

@@ -36,6 +36,7 @@ import javax.servlet.http.*;
 
 import com.caucho.jsp.*;
 import com.caucho.util.*;
+import com.caucho.config.ConfigException;
 import com.caucho.util.Log;
 
 import com.caucho.make.AlwaysModified;
@@ -75,7 +76,9 @@ public class PrecompilePageFilterChain implements FilterChain {
 
     String tail = query.substring(p + "jsp_precompile".length());
 
-    if (tail.startsWith("=\"true\"") || ! tail.startsWith("=")) {
+    if (tail.startsWith("=\"true\"") ||
+	tail.startsWith("=true") ||
+	! tail.startsWith("=")) {
       if (invocation instanceof Invocation) {
 	Invocation inv = (Invocation) invocation;
 
@@ -85,7 +88,7 @@ public class PrecompilePageFilterChain implements FilterChain {
       return new PrecompilePageFilterChain(pageChain.getServlet());
     }
     else
-      return pageChain;
+      return new ExceptionFilterChain(new ConfigException("jsp_precompile requires a true or false value at '" + tail + "'."));
   }
 
   /**

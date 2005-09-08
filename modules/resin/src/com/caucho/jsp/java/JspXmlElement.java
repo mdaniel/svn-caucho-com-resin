@@ -55,6 +55,16 @@ public class JspXmlElement extends JspContainerNode {
   }
 
   /**
+   * Adds an attribute.
+   */
+  public void addAttribute(QName name, JspAttribute value)
+    throws JspParseException
+  {
+    throw error(L.l("jsp:attribute '{0}' is not allowed as a child of an XML element.",
+		    name.getName()));
+  }
+
+  /**
    * Returns true if the namespace decl has been printed.
    */
   public boolean hasNamespace(String prefix, String uri)

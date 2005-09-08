@@ -374,6 +374,8 @@ public class JavaJspBuilder extends JspBuilder {
       
       node.setEndLocation(_filename, _line);
       node.endElement();
+
+      _currentNode.addChildEnd(node);
     } catch (JspLineParseException e) {
       throw e;
     } catch (JspParseException e) {

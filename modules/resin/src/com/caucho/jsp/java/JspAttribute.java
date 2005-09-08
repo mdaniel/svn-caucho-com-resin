@@ -60,6 +60,10 @@ public class JspAttribute extends JspFragmentNode {
 
   private boolean _oldScriptingInvalid;
 
+  public JspAttribute()
+  {
+  }
+		      
   /**
    * Returns the attribute name.
    */
@@ -97,10 +101,11 @@ public class JspAttribute extends JspFragmentNode {
   public void endAttributes()
     throws JspParseException
   {
-    super.endAttributes();
-    
     _oldScriptingInvalid = _parseState.isScriptingInvalid();
-    _parseState.setScriptingInvalid(true);
+    // jsp/18di
+    // _parseState.setScriptingInvalid(true);
+    
+    super.endAttributes();
   }
   
   /**
@@ -211,7 +216,7 @@ public class JspAttribute extends JspFragmentNode {
     throws Exception
   {
     JspNode parent = getParent();
-    
+
     if (! isJspFragment()) {
       generatePrologueChildren(out);
       return;

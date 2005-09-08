@@ -52,6 +52,9 @@ public class JspPlugin extends JspNode {
   private static final QName NSPLUGINURL = new QName("nspluginurl");
   private static final QName WIDTH = new QName("width");
   private static final QName HEIGHT = new QName("height");
+  private static final QName ALIGN = new QName("align");
+  private static final QName VSPACE = new QName("vspace");
+  private static final QName HSPACE = new QName("hspace");
   private static final QName ARCHIVE = new QName("archive");
   
   static final String IE_CLSID = "clsid:8AD9C840-044E-11D1-B3E9-00805F499D93";
@@ -83,25 +86,54 @@ public class JspPlugin extends JspNode {
   public void addAttribute(QName name, String value)
     throws JspParseException
   {
-    if (NAME.equals(name))
+    if (NAME.equals(name)) {
       _name = value;
-    else if (TYPE.equals(name))
+      
+      checkForbidExpression("name", value);
+    }
+    else if (TYPE.equals(name)) {
       _type = value;
-    else if (CODE.equals(name))
+
+      checkForbidExpression("type", value);
+    }
+    else if (CODE.equals(name)) {
       _code = value;
-    else if (IEPLUGINURL.equals(name))
+
+      checkForbidExpression("code", value);
+    }
+    else if (IEPLUGINURL.equals(name)) {
       _iepluginurl = value;
-    else if (JREVERSION.equals(name))
+      
+      checkForbidExpression("ispluginurl", value);
+    }
+    else if (JREVERSION.equals(name)) {
       _jreversion = value;
-    else if (NSPLUGINURL.equals(name))
+    
+      checkForbidExpression("jreversion", value);
+    }
+    else if (NSPLUGINURL.equals(name)) {
       _nspluginurl = value;
+    
+      checkForbidExpression("nspluginurl", value);
+    }
     else if (WIDTH.equals(name)) {
     }
     else if (HEIGHT.equals(name)) {
     }
+    else if (ALIGN.equals(name)) {
+      checkForbidExpression("align", value);
+    }
+    else if (VSPACE.equals(name)) {
+      checkForbidExpression("vspace", value);
+    }
+    else if (HSPACE.equals(name)) {
+      checkForbidExpression("hspace", value);
+    }
     else if (ARCHIVE.equals(name)) {
+      checkForbidExpression("archive", value);
     }
     else if (CODEBASE.equals(name)) {
+      checkForbidExpression("codebase", value);
     }
     else
       super.addAttribute(name, value);
@@ -110,10 +142,56 @@ public class JspPlugin extends JspNode {
     _attrValues.add(value);
   }
 
+  private void checkForbidExpression(String attribute, String  value)
+    throws JspParseException
+  {
+    if (hasELAttribute(value))
+      throw error(L.l("'{0}' may not have EL expression '{1}'",
+		      attribute, value));
+    else if (hasRuntimeAttribute(value))
+      throw error(L.l("'{0}' may not have RT expression '{1}'",
+		      attribute, value));
+  }
+
+  /**
+   * Adds a child.
+   */
+  public void addChild(JspNode node)
+    throws JspParseException
+  {
+    if (node instanceof JspParams) {
+      _params = (JspParams) node;
+    }
+    else if (node instanceof JspFallback) {
+      _fallback = (JspFallback) node;
+    }
+    else if (node instanceof JspBody) {
+    }
+    else {
+      super.addChild(node);
+    }
+  }
+
+  /**
+   * Adds a child.
+   */
+  public void addChildEnd(JspNode node)
+    throws JspParseException
+  {
+    if (node instanceof JspBody) {
+      JspBody body = (JspBody) node;
+
+      for (JspNode child : body.getChildren())
+	addChild(child);
+    }
+    else
+      super.addChildEnd(node);
+  }
+
   /**
    * Called after the attributes complete.
    */
-  public void endAttributes()
+  public void endElement()
     throws JspParseException
   {
     if (_code == null)
@@ -129,22 +207,6 @@ public class JspPlugin extends JspNode {
     
     if (_nspluginurl == null)
       _nspluginurl = NS_URL;
-  }
-
-  /**
-   * Adds a child.
-   */
-  public void addChild(JspNode node)
-    throws JspParseException
-  {
-    if (node instanceof JspParams) {
-      _params = (JspParams) node;
-    }
-    else if (node instanceof JspFallback) {
-      _fallback = (JspFallback) node;
-    }
-    else
-      super.addChild(node);
   }
 
   /**
@@ -192,7 +254,7 @@ public class JspPlugin extends JspNode {
     printText(out, ">\n<noembed></comment>");
 
     if (_fallback != null)
-      _fallback.generate(out);
+      _fallback.generateFallback(out);
 
     printText(out, "</noembed></embed></object>\n");
   }
@@ -213,7 +275,11 @@ public class JspPlugin extends JspNode {
           name.equals("codebase") || name.equals("object"))
         continue;
 
-      printText(out, " " + name + "=\"" + value + "\"");
+      printText(out, " " + name + "=\"");
+
+      out.println("out.print(" + generateValue(String.class, value) + ");");
+      
+      printText(out, "\"");
     }
     
     if (! isEmbed)
@@ -234,10 +300,26 @@ public class JspPlugin extends JspNode {
       else
         continue;
 
-      if (isEmbed)
-        printText(out, " " + name + "=\"" + value + "\"");
-      else
-        printText(out, "<param name=\"" + name + "\" value=\"" + value + "\">\n");
+      if (isEmbed) {
+        printText(out, " " + name + "=\"");
+	
+	if (hasRuntimeAttribute(value))
+	  out.println("out.print(" + getRuntimeAttribute(value) + ");");
+	else
+	  printText(out, value);
+
+	printText(out, "\"");
+      }
+      else {
+        printText(out, "<param name=\"" + name + "\" value=\"");
+	
+	if (hasRuntimeAttribute(value))
+	  out.println("out.print(" + getRuntimeAttribute(value) + ");");
+	else
+	  printText(out, value);
+
+	printText(out, "\">\n");
+      }
     }
 
     if (_params == null)

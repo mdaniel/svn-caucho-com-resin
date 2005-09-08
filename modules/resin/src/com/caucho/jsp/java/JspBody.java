@@ -106,6 +106,26 @@ public class JspBody extends JspFragmentNode {
   }
 
   /**
+   * Called after all the attributes from the tag.
+   */
+  public void endAttributes()
+    throws JspParseException
+  {
+    super.endAttributes();
+    
+    JspNode parent = getParent();
+
+    if (parent == null ||
+	parent instanceof JspRoot ||
+	parent instanceof JspTop ||
+	parent instanceof JspBody ||
+	parent instanceof JspAttribute) {
+      throw error(L.l("jsp:body is not allowed in <{0}>",
+		      parent.getTagName()));
+    }
+  }
+
+  /**
    * Generates the XML text representation for the tag validation.
    *
    * @param os write stream to the generated XML.
@@ -165,4 +185,15 @@ public class JspBody extends JspFragmentNode {
       tag.printVarDeclaration(out, VariableInfo.NESTED);
     }
   }
+
+  /**
+   * Direct generation of the body is forbidden.
+   */
+  /*
+  public void generate(JspJavaWriter out)
+    throws Exception
+  {
+    throw error(L.l("jsp:body must be contained in a valid tag."));
+  }
+  */
 }

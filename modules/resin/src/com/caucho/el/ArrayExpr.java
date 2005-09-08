@@ -105,7 +105,7 @@ public class ArrayExpr extends Expr {
     }
     
     if (aObj instanceof List) {
-      int ref = (int) toLong(fieldObj, env);
+      int ref = (int) toLong(fieldObj, null);
 
       try {
 	List list = (List) aObj;
@@ -123,7 +123,7 @@ public class ArrayExpr extends Expr {
     Class aClass = aObj.getClass();
     
     if (aClass.isArray()) {
-      int ref = (int) toLong(fieldObj, env);
+      int ref = (int) toLong(fieldObj, null);
 
       try {
         return Array.get(aObj, ref);

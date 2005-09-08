@@ -78,7 +78,10 @@ public class JspExpression extends JspNode {
   public void printXml(WriteStream os)
     throws IOException
   {
-    os.print("<jsp:expression>");
+    os.print("<jsp:expression");
+    printJspId(os);
+    os.print(">");
+    
     printXmlText(os, _text);
     os.print("</jsp:expression>");
   }

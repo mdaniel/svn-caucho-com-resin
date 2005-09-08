@@ -91,6 +91,21 @@ public abstract class AbstractResponseStream extends OutputStreamWithBuffer {
   abstract public int getBufferSize();
 
   /**
+   * Sets the auto-flush
+   */
+  public void setAutoFlush(boolean isAutoFlush)
+  {
+  }
+
+  /**
+   * Return the auto-flush.
+   */
+  public boolean isAutoFlush()
+  {
+    return true;
+  }
+
+  /**
    * Returns the remaining buffer entries.
    */
   abstract public int getRemaining();
@@ -189,6 +204,14 @@ public abstract class AbstractResponseStream extends OutputStreamWithBuffer {
    */
   abstract public void print(char []buffer, int offset, int length)
     throws IOException;
+
+  /**
+   * Clears the output buffer, including headers if possible.
+   */
+  public void clear()
+  {
+    clearBuffer();
+  }
 
   /**
    * Clears the output buffer.

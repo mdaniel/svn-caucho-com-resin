@@ -434,8 +434,10 @@ public final class ReadStream extends InputStream {
    */
   public final int readChar() throws IOException
   {
-    if (_readEncoding != null)
-      return _readEncoding.read();
+    if (_readEncoding != null) {
+      int ch = _readEncoding.read();
+      return ch;
+    }
 
     if (_readLength <= _readOffset) {
       if (! readBuffer())

@@ -96,6 +96,13 @@ public class TldTag {
   }
 
   /**
+   * Sets the icon.
+   */
+  public void setIcon(com.caucho.config.types.Icon icon)
+  {
+  }
+
+  /**
    * Sets the tag class
    */
   public void setTagClass(String tagClassName)
@@ -381,7 +388,8 @@ public class TldTag {
     attrInfo = new TagAttributeInfo(attribute.getName(),
                                     attribute.getRequired(),
                                     type == null ? null : type.getName(),
-                                    attribute.getRtexprvalue());
+                                    attribute.getRtexprvalue(),
+				    attribute.isFragment());
     
     _attributeList.add(attrInfo);
   }

@@ -31,6 +31,9 @@ package com.caucho.el;
 import java.io.*;
 import java.util.logging.*;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
+
 import javax.servlet.jsp.el.VariableResolver;
 import javax.servlet.jsp.el.ELException;
 
@@ -77,10 +80,75 @@ public class BinaryExpr extends Expr {
     throws ELException
   {
     Object aObj = _left.evalObject(env);
+    Object bObj = _right.evalObject(env);
 
-    if (aObj instanceof Float || aObj instanceof Double) {
-      double a = ((Number) aObj).doubleValue();
-      double b = _right.evalDouble(env);
+    if (aObj instanceof BigDecimal || bObj instanceof BigDecimal) {
+      BigDecimal a = toBigDecimal(aObj, env);
+      BigDecimal b = toBigDecimal(bObj, env);
+      
+      switch (_op) {
+      case ADD:
+        return a.add(b);
+      case SUB:
+        return a.subtract(b);
+      case MUL:
+        return a.multiply(b);
+      case DIV:
+        return a.divide(b, BigDecimal.ROUND_HALF_UP);
+      case MOD:
+	{
+	  double da = toDouble(aObj, env);
+	  double db = toDouble(bObj, env);
+	  
+	  return new Double(da % db);
+	}
+      default:
+	throw new IllegalStateException();
+      }
+    }
+    else if (aObj instanceof BigInteger || bObj instanceof BigInteger) {
+      BigInteger a = toBigInteger(aObj, env);
+      BigInteger b = toBigInteger(bObj, env);
+      
+      switch (_op) {
+      case ADD:
+        return a.add(b);
+      case SUB:
+        return a.subtract(b);
+      case MUL:
+        return a.multiply(b);
+      case DIV:
+	{
+	  BigDecimal da = toBigDecimal(aObj, env);
+	  BigDecimal db = toBigDecimal(bObj, env);
+	  
+	  return da.divide(db, BigDecimal.ROUND_HALF_UP);
+	}
+      case MOD:
+	{
+	  if (aObj instanceof Float ||
+	      aObj instanceof Double ||
+	      bObj instanceof Float ||
+	      bObj instanceof Double) {
+	    double da = toDouble(aObj, env);
+	    double db = toDouble(bObj, env);
+
+	    return new Double(da % db);
+	  }
+	  else
+	    return a.remainder(b);
+	}
+      default:
+	throw new IllegalStateException();
+      }
+    }
+      
+    else if (aObj instanceof Float ||
+	     aObj instanceof Double ||
+	     bObj instanceof Float ||
+	     bObj instanceof Double) {
+      double a = toDouble(aObj, env);
+      double b = toDouble(bObj, env);
       double dValue = 0;
 
       switch (_op) {
@@ -103,8 +171,6 @@ public class BinaryExpr extends Expr {
       
       return Double.isNaN(dValue) ? new Double(0) : new Double(dValue);
     }
-    
-    Object bObj = _right.evalObject(env);
     
     if (aObj == null && bObj == null)
       return new Integer(0);

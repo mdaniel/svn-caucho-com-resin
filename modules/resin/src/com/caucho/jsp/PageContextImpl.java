@@ -111,7 +111,7 @@ public class PageContextImpl extends PageContext
   private JspWriter _topOut;
   private JspWriter _out;
   private String _errorPage;
-  private boolean isFilled;
+  protected boolean _isFilled;
   
   private AbstractResponseStream _responseStream;
 
@@ -189,9 +189,16 @@ public class PageContextImpl extends PageContext
     
     _responseStream = _response.getResponseStream();
     _topOut = _jspAdapter;
+    _responseStream.setAutoFlush(autoFlush);
     _jspAdapter.init(null, _responseStream);
 
-    _responseStream.setBufferSize(bufferSize);
+    if (bufferSize != TempCharBuffer.SIZE) {
+      try {
+	_responseStream.setBufferSize(bufferSize);
+      } catch (Throwable e) {
+	log.log(Level.FINE, e.toString(), e);
+      }
+    }
     
     // needed for includes from static pages
 
@@ -217,7 +224,7 @@ public class PageContextImpl extends PageContext
     _hasException = false;
     //if (_attributes.size() > 0)
     //  _attributes.clear();
-    isFilled = false;
+    _isFilled = false;
     _bundleManager = null;
     _varResolver = null;
     _nodeEnv = null;
@@ -233,27 +240,64 @@ public class PageContextImpl extends PageContext
     _attributes.clear();
   }
 
+  /**
+   * Returns the page attribute with the given name.
+   *
+   * @param name the attribute name.
+   *
+   * @return the attribute's value.
+   */
   public Object getAttribute(String name)
   {
+    if (name == null)
+      throw new NullPointerException(L.l("getAttribute must have a non-null name"));
+    
     Object value = _attributes.get(name);
-    if (value == null && ! isFilled) {
+    if (value != null)
+      return value;
+    else if (! _isFilled) {
       fillAttribute();
       value = _attributes.get(name);
+    }
+
+    if (value != null) {
+    }
+    else if (name.equals(OUT)) {
+      // jsp/162d
+      return _out;
     }
 
     return value;
   }
 
+  /**
+   * Sets the page attribute with the given name.
+   *
+   * @param name the attribute name.
+   * @param value the new value
+   */
   public void setAttribute(String name, Object attribute)
   {
+    if (name == null)
+      throw new NullPointerException(L.l("setAttribute must have a non-null name"));
+    
     if (attribute != null)
       _attributes.put(name, attribute);
     else
       _attributes.remove(name);
   }
 
+  /**
+   * Sets the page attribute with the given name.
+   *
+   * @param name the attribute name.
+   * @param value the new value
+   */
   public Object putAttribute(String name, Object attribute)
   {
+    if (name == null)
+      throw new NullPointerException(L.l("putAttribute must have a non-null name"));
+    
     if (attribute != null)
       return _attributes.put(name, attribute);
     else
@@ -262,15 +306,27 @@ public class PageContextImpl extends PageContext
 
   /**
    * Removes a named attribute from the page context.
+   *
+   * @param name the name of the attribute to remove
    */
   public void removeAttribute(String name)
   {
+    if (name == null)
+      throw new NullPointerException(L.l("getAttribute must have a non-null name"));
+    
     _attributes.remove(name);
+    // jsp/162b
+    if (_request != null)
+      _request.removeAttribute(name);
+    if (_session != null)
+      _session.removeAttribute(name);
+    if (_application != null)
+      _application.removeAttribute(name);
   }
 
   public Enumeration<String> getAttributeNames()
   {
-    if (! isFilled)
+    if (! _isFilled)
       fillAttribute();
 
     return Collections.enumeration(_attributes.keySet());
@@ -279,9 +335,9 @@ public class PageContextImpl extends PageContext
   /**
    * Fills the predefined page content _attributes with their values.
    */
-  private void fillAttribute()
+  protected void fillAttribute()
   {
-    isFilled = true;
+    _isFilled = true;
     _attributes.put(PAGE, _servlet);
     _attributes.put(PAGECONTEXT, this);
     _attributes.put(REQUEST, getCauchoRequest());
@@ -290,7 +346,6 @@ public class PageContextImpl extends PageContext
       _attributes.put(CONFIG, _servlet.getServletConfig());
     if (getSession() != null)
       _attributes.put(SESSION, getSession());
-    _attributes.put(OUT, _out);
     _attributes.put(APPLICATION, getApplication());
   }
 
@@ -706,6 +761,21 @@ public class PageContextImpl extends PageContext
   {
     if (_session == null)
       _session = getCauchoRequest().getSession(false);
+    
+    return _session;
+  }
+
+  /**
+   * Returns the session, throwing an IllegalStateException if it's
+   * not available.
+   */
+  public HttpSession getSessionScope()
+  {
+    if (_session == null)
+      _session = getCauchoRequest().getSession(false);
+
+    if (_session == null)
+      throw new IllegalStateException(L.l("session is not available"));
     
     return _session;
   }

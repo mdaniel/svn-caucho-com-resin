@@ -546,7 +546,9 @@ public class Port implements EnvironmentListener, PortMBean, Runnable {
    */
   public int getKeepaliveCount()
   {
-    return _keepaliveCount;
+    synchronized (_keepaliveCountLock) {
+      return _keepaliveCount;
+    }
   }
 
   /**
@@ -722,7 +724,7 @@ public class Port implements EnvironmentListener, PortMBean, Runnable {
    */
   public int getKeepaliveConnectionCount()
   {
-    return _keepaliveCount;
+    return getKeepaliveCount();
   }
 
   /**
@@ -867,8 +869,10 @@ public class Port implements EnvironmentListener, PortMBean, Runnable {
       _keepaliveCount--;
 
       if (_keepaliveCount < 0) {
-	log.warning("internal error: negative keepalive count " + _keepaliveCount + " in Port.keepaliveEnd().");
+	int count = _keepaliveCount;
 	_keepaliveCount = 0;
+	
+	log.warning("internal error: negative keepalive count " + count);
       }
     }
   }

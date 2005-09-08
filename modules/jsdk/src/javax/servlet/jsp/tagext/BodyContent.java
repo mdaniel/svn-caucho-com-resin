@@ -63,7 +63,7 @@ abstract public class BodyContent extends JspWriter {
   protected BodyContent(JspWriter prevOut)
   {
     super(UNBOUNDED_BUFFER, false);
-    
+
     this.prevOut = prevOut;
   }
 

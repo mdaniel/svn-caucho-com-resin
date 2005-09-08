@@ -49,6 +49,8 @@ import com.caucho.jsp.*;
  * Represents a custom tag.
  */
 abstract public class GenericTag extends JspContainerNode {
+  private static final String DEFAULT_VAR_TYPE = "java.lang.String";
+  
   protected TagInstance _tag;
   protected TagInfo _tagInfo;
   protected Class _tagClass;
@@ -115,8 +117,9 @@ abstract public class GenericTag extends JspContainerNode {
   {
     if (! "empty".equals(getBodyContent()))
       super.addChild(node);
-    else if (node instanceof JspAttribute)
+    else if (node instanceof JspAttribute) {
       super.addChild(node);
+    }
     else if (node instanceof StaticText &&
              ((StaticText) node).isWhitespace()) {
     }
@@ -139,25 +142,48 @@ abstract public class GenericTag extends JspContainerNode {
 
     for (int i = 0; i < _attributeNames.size(); i++) {
       QName qName = _attributeNames.get(i);
-      String name = qName.getName();
       Object value = _attributeValues.get(i);
+      String name = qName.getName();
 
-      if (value instanceof String && hasRuntimeAttribute((String) value))
+      if (value instanceof JspAttribute) {
+	JspAttribute attr = (JspAttribute) value;
+
+	if (attr.isStatic())
+	  tags.put(name, attr.getStaticText());
+	else
+	  tags.put(name, TagData.REQUEST_TIME_VALUE);
+      }
+      else if (value instanceof String && hasRuntimeAttribute((String) value))
         tags.put(name, TagData.REQUEST_TIME_VALUE);
       else
         tags.put(name, value);
 
       TagAttributeInfo attrInfo = getAttributeInfo(qName);
-      String typeName = null;
-      
-      Method method = getAttributeMethod(qName);
-      if (attrInfo != null)
-	typeName = attrInfo.getTypeName();
-      else if (method != null)
-	typeName = method.getParameterTypes()[0].getName();
 
-      if (JspFragment.class.getName().equals(typeName) &&
-	  value instanceof JspAttribute) {
+      String typeName = null;
+
+      boolean isFragment = false;
+      Method method = getAttributeMethod(qName);
+      
+      Class type = null;
+
+      if (method != null)
+	type = method.getParameterTypes()[0];
+
+      if (attrInfo != null) {
+	typeName = attrInfo.getTypeName();
+	isFragment = attrInfo.isFragment();
+
+	if (isFragment &&
+	    type != null && type.isAssignableFrom(JspFragment.class))
+	  typeName = JspFragment.class.getName();
+      }
+      else if (method != null)
+	typeName = type.getName();
+
+      if (! isFragment && ! JspFragment.class.getName().equals(typeName)) {
+      }
+      else if (value instanceof JspAttribute) {
 	JspAttribute jspAttr = (JspAttribute) value;
 
 	jspAttr.setJspFragment(true);
@@ -229,6 +255,9 @@ abstract public class GenericTag extends JspContainerNode {
 
       boolean isFragment = false;
 
+      if (attribute != null && attribute.isFragment())
+	isFragment = true;
+
       String fragmentClass = JspFragment.class.getName();
       
       if (attribute != null && fragmentClass.equals(attribute.getTypeName()))
@@ -248,11 +277,17 @@ abstract public class GenericTag extends JspContainerNode {
       
     TagInstance parent = getParent().getTag();
 
-    _tag = parent.findTag(getQName(), _attributeNames);
+    boolean isBodyTag = BodyTag.class.isAssignableFrom(_tagClass);
+    boolean isEmpty = isEmpty();
+    boolean hasBodyContent = isBodyTag && ! isEmpty;
+    
+    _tag = parent.findTag(getQName(), _attributeNames,
+			  hasBodyContent);
 
     if (_tag == null || ! _parseState.isRecycleTags()) {
       _tag = parent.addTag(getQName(), _tagInfo, _tagClass,
-			   _attributeNames, _attributeValues);
+			   _attributeNames, _attributeValues,
+			   hasBodyContent);
 
       if (! JspTagFileSupport.class.isAssignableFrom(_tagClass)) {
 	out.printClass(_tagClass);
@@ -274,9 +309,11 @@ abstract public class GenericTag extends JspContainerNode {
 
     if (_tag == null)
       throw new NullPointerException();
-    
-    if (_children != null && _children.size() > 0)
+
+    /* already taken care of
+    if (! isEmpty())
       _tag.setBodyContent(true);
+    */
       
     // Any AT_END variables
     for (int i = 0; _varInfo != null && i < _varInfo.length; i++) {
@@ -290,7 +327,12 @@ abstract public class GenericTag extends JspContainerNode {
                 || var.getScope() == VariableInfo.AT_BEGIN)
                && var.getDeclare()
                && ! _gen.isDeclared(var.getVarName())) {
-        out.print(var.getClassName() + " " + var.getVarName() + " = ");
+	String className = var.getClassName();
+
+	if (className == null)
+	  className = DEFAULT_VAR_TYPE;
+	
+        out.print(className + " " + var.getVarName() + " = ");
 
         _gen.addDeclared(var.getVarName());
         
@@ -325,13 +367,27 @@ abstract public class GenericTag extends JspContainerNode {
     String name = tag.getTagLibrary().getPrefixString() + ':' + tag.getTagName();
 
     os.print("<" + name);
+    
+    printJspId(os);
 
     for (int i = 0; i < _attributeNames.size(); i++) {
       QName attrName = _attributeNames.get(i);
       Object value = _attributeValues.get(i);
 
       if (value instanceof String) {
-	os.print(" " + attrName.getName() + "=\"" + xmlText((String) value) + "\"");
+	String string = (String) value;
+	
+	os.print(" " + attrName.getName() + "=\"");
+
+	if (string.startsWith("<%=") && string.endsWith("%>")) {
+	  os.print("%=");
+	  os.print(xmlAttrText(string.substring(3, string.length() - 2)));
+	  os.print("%");
+	}
+	else
+	  os.print(xmlAttrText(string));
+	
+	os.print("\"");
       }
     }
 
@@ -382,10 +438,20 @@ abstract public class GenericTag extends JspContainerNode {
       if (_tag.getAttribute(attrName) != null)
         continue;
 
+      boolean isFragment = false;
+
+      if (attribute != null) {
+	isFragment = (attribute.isFragment() || 
+		      attribute.getTypeName().equals(JspFragment.class.getName()));
+      }
+
+      if (value instanceof JspAttribute &&
+	  ((JspAttribute) value).isJspFragment())
+	isFragment = true;
+
       generateSetAttribute(out, name, attrName, value,
                            attribute == null || attribute.canBeRequestTime(),
-			   attribute != null &&
-			   attribute.getTypeName().equals(JspFragment.class.getName()));
+			   isFragment);
     }
   }
 
@@ -395,9 +461,8 @@ abstract public class GenericTag extends JspContainerNode {
 
     int j = 0;
     for (j = 0; attrs != null && j < attrs.length; j++) {
-      if (attrs[j].getName().equals(attrName.getName())) {
+      if (isNameMatch(attrs[j].getName(), attrName))
 	return attrs[j];
-      }
     }
 
     return null;
@@ -408,11 +473,24 @@ abstract public class GenericTag extends JspContainerNode {
     for (int i = 0; i < _attributeNames.size(); i++) {
       QName attrName = _attributeNames.get(i);
 
-      if (attrName.getName().equals(name))
+      if (isNameMatch(name, attrName))
 	return i;
     }
 
     return -1;
+  }
+
+  private boolean isNameMatch(String defName, QName attrName)
+  {
+    if (defName.equals(attrName.getName())) {
+      return true;
+    }
+    else if (defName.equals(attrName.getLocalName()) &&
+	     attrName.getPrefix().equals(getQName().getPrefix())) {
+      return true;
+    }
+    else
+      return false;
   }
 
   /**
@@ -433,8 +511,13 @@ abstract public class GenericTag extends JspContainerNode {
     boolean isDynamic = DynamicAttributes.class.isAssignableFrom(_tagClass);
     
     if (method != null) {
+      // jsp/18cq
+      if (Modifier.isStatic(method.getModifiers()))
+	throw error(L.l("attribute '{0}' may not be a static method.",
+			method.getName()));
+
       generateSetParameter(out, name, value, method,
-			   allowRtexpr, "pageContext");
+			   allowRtexpr, "pageContext", isFragment);
     }
     else if (! isDynamic) {
       throw error(L.l("attribute `{0}' in tag `{1}' has no corresponding set method in tag class `{2}'",
@@ -638,7 +721,7 @@ abstract public class GenericTag extends JspContainerNode {
       String className = var.getClassName();
 
       if (className == null)
-	className = "java.lang.Object";
+	className = DEFAULT_VAR_TYPE;
       /*
       if (var.getClassName() == null)
         throw error(L.l("tag variable `{0}' expects a classname",
@@ -673,8 +756,9 @@ abstract public class GenericTag extends JspContainerNode {
 
       String className = var.getClassName();
 
-      if (className == null)
-	className = "java.lang.Object";
+      if (className == null || className.equals("null"))
+	className = DEFAULT_VAR_TYPE;
+      
       /*
       if (var.getClassName() == null)
         throw error(L.l("tag variable `{0}' expects a classname",

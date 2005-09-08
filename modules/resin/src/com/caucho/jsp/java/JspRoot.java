@@ -52,7 +52,17 @@ public class JspRoot extends JspContainerNode {
 
   static final private QName VERSION = new QName("version");
 
+  private String _version;
+
   private HashMap<String,String> _namespaceMap = new HashMap<String,String>();
+
+  /**
+   * Sets the versino.
+   */
+  public void setVersion(String version)
+  {
+    _version = version;
+  }
   
   /**
    * Adds an attribute.
@@ -64,6 +74,11 @@ public class JspRoot extends JspContainerNode {
     throws JspParseException
   {
     if (VERSION.equals(name)) {
+      if (! value.equals("2.0"))
+	throw error(L.l("'{0}' is an supported jsp:root version.",
+			value));
+
+      _version = value;
     }
     else {
       throw error(L.l("`{0}' is an unknown jsp:root attribute.  'version' is the only allowed JSP root value.",
@@ -97,6 +112,12 @@ public class JspRoot extends JspContainerNode {
     throws JspParseException
   {
     _gen.setOmitXmlDeclaration(true);
+
+    if (getParent() != null && ! (getParent() instanceof JspTop))
+      throw error(L.l("jsp:root must be the root JSP element."));
+
+    if (_version == null)
+      throw error(L.l("'version' is a required attribute of jsp:root"));
   }
 
   /**
@@ -135,6 +156,10 @@ public class JspRoot extends JspContainerNode {
     for (Map.Entry entry : _namespaceMap.entrySet()) {
       os.print(" xmlns:" + entry.getKey() + "=\"" + entry.getValue() + "\"");
     }
+    
+    printJspId(os);
+    os.print(" version=\"2.0\"");
+    
     os.print(">");
     printXmlChildren(os);
     os.print("</jsp:root>");
@@ -148,6 +173,35 @@ public class JspRoot extends JspContainerNode {
   public void generate(JspJavaWriter out)
     throws Exception
   {
+    if (! _gen.isOmitXmlDeclaration()) {
+      String encoding = _gen.getCharacterEncoding();
+
+      if (encoding == null)
+	encoding = "UTF-8";
+
+      out.addText("<?xml version=\"1.0\" encoding=\"" + encoding + "\"?>\n");
+    }
+
+    if (_gen.getDoctypeSystem() != null) {
+      out.addText("<!DOCTYPE ");
+      out.addText(_gen.getDoctypeRootElement());
+
+      if (_gen.getDoctypePublic() != null) {
+	out.addText(" PUBLIC \"");
+	out.addText(_gen.getDoctypePublic());
+	out.addText("\" \"");
+	out.addText(_gen.getDoctypeSystem());
+	out.addText("\"");
+      }
+      else {
+	out.addText(" SYSTEM \"");
+	out.addText(_gen.getDoctypeSystem());
+	out.addText("\"");
+      }
+      
+      out.addText(">\n");
+    }
+    
     generateChildren(out);
   }
 }

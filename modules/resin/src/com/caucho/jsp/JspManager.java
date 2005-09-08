@@ -334,7 +334,6 @@ public class JspManager extends PageManager {
 
       return page;
     } catch (Throwable e) {
-      e.printStackTrace();
       log.log(Level.FINER, e.toString(), e);
     }
 

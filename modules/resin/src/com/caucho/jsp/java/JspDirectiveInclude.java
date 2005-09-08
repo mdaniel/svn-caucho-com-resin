@@ -107,7 +107,8 @@ public class JspDirectiveInclude extends JspNode {
   public void printXml(WriteStream os)
     throws IOException
   {
-    os.print("<jsp:directive.include file=\"" + _file + "\"/>");
+    // jsp/0354
+    // os.print("<jsp:directive.include file=\"" + _file + "\"/>");
   }
 
   /**

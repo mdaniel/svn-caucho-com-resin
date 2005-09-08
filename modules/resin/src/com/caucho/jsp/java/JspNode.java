@@ -33,10 +33,12 @@ import java.io.*;
 import java.util.*;
 
 import java.util.logging.Logger;
+import java.util.logging.Level;
 
 import java.lang.reflect.Method;
 
 import java.beans.*;
+import java.math.*;
 
 import javax.servlet.jsp.*;
 import javax.servlet.jsp.*;
@@ -338,6 +340,23 @@ public abstract class JspNode {
   }
 
   /**
+   * Adds a JspAttribute attribute.
+   *
+   * @param name the name of the attribute.
+   * @param value the value of the attribute.
+   */
+  public void addAttribute(QName name, JspAttribute value)
+    throws JspParseException
+  {
+    if (value.isStatic()) {
+      addAttribute(name, value.getStaticText().trim());
+    }
+    else
+      throw error(L.l("attribute `{0}' is not allowed in <{1}>.",
+		      name.getName(), getTagName()));
+  }
+
+  /**
    * Called after all the attributes from the tag.
    */
   public void endAttributes()
@@ -368,10 +387,34 @@ public abstract class JspNode {
   public void addChild(JspNode node)
     throws JspParseException
   {
-    throw node.error(L.l("<{0}> does not allow any child elements at {1}",
-                         getTagName(), node.getTagName()));
+    node.setParent(this);
+    
+    if (node instanceof JspAttribute) {
+    }
+    else if (node instanceof StaticText &&
+	     ((StaticText) node).isWhitespace()) {
+    }
+    else
+      throw node.error(L.l("<{0}> does not allow any child elements at {1}",
+			   getTagName(), node.getTagName()));
   }
 
+
+  /**
+   * Adds a child node after its completely initialized..
+   */
+  public void addChildEnd(JspNode node)
+    throws JspParseException
+  {
+    if (node instanceof JspAttribute) {
+      JspAttribute attr = (JspAttribute) node;
+
+      QName name = attr.getName();
+
+      addAttribute(name, attr);
+    }
+  }
+  
   /**
    * Called when the tag closes.
    */
@@ -410,6 +453,15 @@ public abstract class JspNode {
     throws IOException;
 
   /**
+   * Prints the jsp:id
+   */
+  public void printJspId(WriteStream os)
+    throws IOException
+  {
+    os.print(" jsp:id=\"" + _gen.generateJspId() + "\"");
+  }
+
+  /**
    * Generates the XML text representation for the tag validation.
    *
    * @param os write stream to the generated XML.
@@ -440,6 +492,35 @@ public abstract class JspNode {
       case '>':
 	cb.append("&gt;");
 	break;
+      case '&':
+	cb.append("&amp;");
+	break;
+      case '"':
+	cb.append("&quot;");
+	break;
+      default:
+	cb.append(ch);
+	break;
+      }
+    }
+
+    return cb.toString();
+  }
+
+  /**
+   * Generates the XML text.
+   */
+  public String xmlAttrText(String text)
+  {
+    if (text == null)
+      return "";
+    
+    CharBuffer cb = new CharBuffer();
+    
+    for (int i = 0; i < text.length(); i++) {
+      char ch = text.charAt(i);
+
+      switch (ch) {
       case '&':
 	cb.append("&amp;");
 	break;
@@ -537,6 +618,27 @@ public abstract class JspNode {
   }
 
   /**
+   * Generates the code for the tag
+   *
+   * @param out the output writer for the generated java.
+   */
+  public void generateEmpty()
+    throws Exception
+  {
+    generateChildrenEmpty();
+  }
+
+  /**
+   * Generates the code for the children.
+   *
+   * @param out the output writer for the generated java.
+   */
+  public void generateChildrenEmpty()
+    throws Exception
+  {
+  }
+
+  /**
    * Converts the string to a boolean.
    */
   protected boolean attributeToBoolean(String attr, String value)
@@ -566,12 +668,13 @@ public abstract class JspNode {
     
   void generateSetParameter(JspJavaWriter out,
                             String obj, Object objValue, Method method,
-                            boolean allowRtexpr, String contextVar)
+                            boolean allowRtexpr, String contextVar,
+			    boolean isFragment)
     throws Exception
   {
     Class type = method.getParameterTypes()[0];
 
-    if (JspFragment.class.equals(type)) {
+    if (isFragment || JspFragment.class.equals(type)) {
       generateFragmentParameter(out, obj, objValue, method,
 				allowRtexpr, contextVar);
       return;
@@ -927,51 +1030,109 @@ public abstract class JspNode {
     Expr expr = _gen.genExpr(value);
 
     if (expr.isConstant()) {
-      if (Object.class.isAssignableFrom(type) &&
-          expr.evalObject(null) == null)
-        return "null";
+      try {
+	if (expr.evalObject(null) != null) {
+	}
+	else if (Character.class.isAssignableFrom(type)) {
+	  // jsp/18s0
+	  return "new Character((char) 0)";
+	}
+	else if (Boolean.class.isAssignableFrom(type)) {
+	  // jsp/18s1
+	  return "Boolean.FALSE";
+	}
+	else if (String.class.isAssignableFrom(type)) {
+	  // jsp/18s2
+	  return "\"\"";
+	}
+	else if (BigInteger.class.isAssignableFrom(type)) {
+	  return "BigInteger.ZERO";
+	}
+	else if (BigDecimal.class.isAssignableFrom(type)) {
+	  return "BigDecimal.ZERO";
+	}
+	else if (Number.class.isAssignableFrom(type)) {
+	  // jsp/18s6
+	  return "new " + type.getName() + "((byte) 0)";
+	}
+	else if (Object.class.isAssignableFrom(type))
+	  return "null";
       
-      if (boolean.class.equals(type))
-        return expr.evalBoolean(null) ? "true" : "false";
-      else if (Boolean.class.equals(type))
-        return expr.evalBoolean(null) ? "java.lang.Boolean.TRUE" : "java.lang.Boolean.FALSE";
-      else if (byte.class.equals(type))
-        return "(byte) " + expr.evalLong(null);
-      else if (Byte.class.equals(type))
-        return "new java.lang.Byte((byte) " + expr.evalLong(null) + "L)";
-      else if (short.class.equals(type))
-        return "(short) " + expr.evalLong(null);
-      else if (Short.class.equals(type))
-        return "new java.lang.Short((short) " + expr.evalLong(null) + "L)";
-      else if (int.class.equals(type))
-        return "(int) " + expr.evalLong(null);
-      else if (Integer.class.equals(type))
-        return "new java.lang.Integer((int) " + expr.evalLong(null) + "L)";
-      else if (long.class.equals(type))
-        return "" + expr.evalLong(null) + "L";
-      else if (Long.class.equals(type))
-        return "new java.lang.Long(" + expr.evalLong(null) + "L)";
-      else if (float.class.equals(type))
-        return "(float) " + expr.evalDouble(null);
-      else if (Float.class.equals(type))
-        return "new java.lang.Float((float) " + expr.evalDouble(null) + ")";
-      else if (double.class.equals(type))
-        return "" + expr.evalDouble(null);
-      else if (Double.class.equals(type))
-        return "new java.lang.Double(" + expr.evalDouble(null) + ")";
-      else if (char.class.equals(type))
-        return "\"" + escapeJavaString(expr.evalString(null)) + "\".charAt(0)";
-      else if (Character.class.equals(type))
-        return "new Character(" +  "\"" + escapeJavaString(expr.evalString(null)) + "\".charAt(0))";
-      else if (String.class.equals(type))
-        return "\"" + escapeJavaString(expr.evalString(null)) + "\"";
-      else if (Object.class.equals(type)) {
-        Object cValue = expr.evalObject(null);
+	if (boolean.class.equals(type))
+	  return expr.evalBoolean(null) ? "true" : "false";
+	else if (Boolean.class.equals(type))
+	  return expr.evalBoolean(null) ? "java.lang.Boolean.TRUE" : "java.lang.Boolean.FALSE";
+	else if (byte.class.equals(type))
+	  return "(byte) " + expr.evalLong(null);
+	else if (Byte.class.equals(type))
+	  return "new java.lang.Byte((byte) " + expr.evalLong(null) + "L)";
+	else if (short.class.equals(type))
+	  return "(short) " + expr.evalLong(null);
+	else if (Short.class.equals(type))
+	  return "new java.lang.Short((short) " + expr.evalLong(null) + "L)";
+	else if (int.class.equals(type))
+	  return "(int) " + expr.evalLong(null);
+	else if (Integer.class.equals(type))
+	  return "new java.lang.Integer((int) " + expr.evalLong(null) + "L)";
+	else if (long.class.equals(type))
+	  return "" + expr.evalLong(null) + "L";
+	else if (Long.class.equals(type))
+	  return "new java.lang.Long(" + expr.evalLong(null) + "L)";
+	else if (float.class.equals(type))
+	  return "(float) " + expr.evalDouble(null);
+	else if (Float.class.equals(type))
+	  return "new java.lang.Float((float) " + expr.evalDouble(null) + ")";
+	else if (double.class.equals(type))
+	  return "" + expr.evalDouble(null);
+	else if (Double.class.equals(type))
+	  return "new java.lang.Double(" + expr.evalDouble(null) + ")";
+	else if (char.class.equals(type))
+	  return "((char) " + (int) expr.evalCharacter(null) + ")";
+	else if (Character.class.equals(type)) {
+	  // jsp/18s0
+	  return "new Character((char) " + (int) expr.evalCharacter(null) + ")";
+	}
+	else if (String.class.equals(type))
+	  return "\"" + escapeJavaString(expr.evalStringNonNull(null)) + "\"";
+	else if (BigInteger.class.equals(type)) {
+	  String v = expr.evalBigInteger(null).toString();
 
-        String result = generateObject(cValue);
+	  // 18s3
+	  if (v.equals("") || v.equals("0"))
+	    return "java.math.BigInteger.ZERO";
+	  else
+	    return "new java.math.BigInteger(\"" + v + "\")";
+	}
+	else if (BigDecimal.class.equals(type)) {
+	  String v = expr.evalBigDecimal(null).toString();
 
-        if (result != null)
-          return result;
+	  // 18s4
+	  if (v.equals("") || v.equals("0.0"))
+	    return "java.math.BigDecimal.ZERO";
+	  else
+	    return "new java.math.BigDecimal(\"" + v + "\")";
+	}
+	else if (Object.class.equals(type)) {
+	  Object cValue = expr.evalObject(null);
+
+	  String result = generateObject(cValue);
+
+	  if (result != null)
+	    return result;
+	}
+	else {
+	  Object cValue = expr.evalObject(null);
+
+	  // jsp/184t
+	  if ("".equals(cValue))
+	    return "null";
+	}
+      } catch (Throwable e) {
+	// jsp/18co
+	// exceptions are caught at runtime
+	log.log(Level.FINER, e.toString(), e);
+	
+	log.fine(e.getMessage());
       }
     }
     
@@ -1007,13 +1168,19 @@ public abstract class JspNode {
     else if (Double.class.equals(type))
       return "new java.lang.Double(" + var + ".evalDouble(pageContext))";
     else if (java.math.BigDecimal.class.equals(type))
-      return "new java.math.BigDecimal(" + var + ".evalString(pageContext))";
+      return "" + var + ".evalBigDecimal(pageContext)";
+    else if (java.math.BigInteger.class.equals(type))
+      return "" + var + ".evalBigInteger(pageContext)";
     else if (char.class.equals(type))
-      return var + ".evalString(pageContext).charAt(0)";
+      return var + ".evalCharacter(pageContext)";
     else if (Character.class.equals(type))
-      return "new Character(" + var + ".evalString(pageContext).charAt(0))";
+      return "new Character(" + var + ".evalCharacter(pageContext))";
     else if (String.class.equals(type))
-      return var + ".evalString(pageContext)";
+      return var + ".evalStringNonNull(pageContext)";
+    else if (BigInteger.class.equals(type))
+      return var + ".evalBigInteger(pageContext)";
+    else if (BigDecimal.class.equals(type))
+      return var + ".evalBigDecimal(pageContext)";
     else if (Object.class.equals(type))
       return var + ".evalObject(pageContext)";
     else
@@ -1047,7 +1214,7 @@ public abstract class JspNode {
    * Returns true if the value is a runtime attribute.
    */
   public boolean hasRuntimeAttribute(String value)
-    throws Exception
+    throws JspParseException
   {
     if (_parseState.isScriptingInvalid()) {
       // && value.indexOf("<%=") >= 0) {
@@ -1093,7 +1260,6 @@ public abstract class JspNode {
    * Returns true if the value is a runtime attribute.
    */
   public boolean hasELAttribute(String value)
-    throws Exception
   {
     return ! _parseState.isELIgnored() && value.indexOf("${") >= 0;
   }

@@ -127,7 +127,8 @@ public class JspSetProperty extends JspContainerNode {
       throw error(L.l("bean `{0}' has no set property `{1}'",
                       _name, _property));
     
-    generateSetParameter(out, _name, value, setMethod, true, "pageContext");
+    generateSetParameter(out, _name, value, setMethod, true,
+			 "pageContext", false);
   }
 
   private void generateSetParamProperty(JspJavaWriter out,

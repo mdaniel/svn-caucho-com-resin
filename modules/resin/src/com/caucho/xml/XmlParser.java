@@ -1376,8 +1376,8 @@ public class XmlParser extends AbstractParser {
   private int parseXMLDeclaration(XmlReader oldReader)
     throws IOException, SAXException
   {
-    boolean isDefaultReader = true;
-
+    int startOffset = _is.getOffset();
+    boolean isEBCDIC = false;
     int ch = _is.read();
 
     XmlReader reader = null;
@@ -1389,7 +1389,6 @@ public class XmlParser extends AbstractParser {
 	_owner.setAttribute("encoding", "UTF-16");
 	_is.setEncoding("utf-16");
 
-        isDefaultReader = false;
         reader = new Utf16Reader(this, _is);
         
         ch = reader.read();
@@ -1402,7 +1401,6 @@ public class XmlParser extends AbstractParser {
 	_owner.setAttribute("encoding", "UTF-16");
 	_is.setEncoding("utf-16");
 
-        isDefaultReader = false;
         reader = new Utf16Reader(this, _is);
         ((Utf16Reader) reader).setReverse(true);
         
@@ -1415,7 +1413,6 @@ public class XmlParser extends AbstractParser {
       _owner.setAttribute("encoding", "UTF-16");
       _is.setEncoding("utf-16");
       
-      isDefaultReader = false;
       reader = new Utf16Reader(this, _is);
     }
     // utf-8 BOM is \xef \xbb \xbf
@@ -1430,10 +1427,35 @@ public class XmlParser extends AbstractParser {
           _owner.setAttribute("encoding", "UTF-8");
           _is.setEncoding("utf-8");
       
-          isDefaultReader = false;
           reader = new Utf8Reader(this, _is);
         }
       }
+    }
+    else if (ch == 0x4c) {
+      // ebcdic
+      // xml/00l1
+      _is.unread();
+      // _is.setEncoding("cp037");
+      _is.setEncoding("cp500");
+
+      isEBCDIC = true;
+
+      reader = new XmlReader(this, _is);
+
+      ch = reader.read();
+    }
+    else {
+      int ch2 = _is.read();
+
+      if (ch2 == 0x00) {
+	_owner.setAttribute("encoding", "UTF-16LE");
+	_is.setEncoding("utf-16le");
+
+        reader = new Utf16Reader(this, _is);
+        ((Utf16Reader) reader).setReverse(true);
+      }
+      else
+	_is.unread();
     }
 
     if (reader != null && reader != oldReader) {
@@ -1459,8 +1481,6 @@ public class XmlParser extends AbstractParser {
 
     _reader = reader;
 
-    
-
     /* XXX: this might be too strict. */
     /*
     if (! strictXml) {
@@ -1472,11 +1492,28 @@ public class XmlParser extends AbstractParser {
     if (ch != '<')
       return ch;
 
-    ch = reader.read();
+    if (parseXMLDecl(_reader) && isEBCDIC) {
+      // EBCDIC requires a re-read
+      _is.setOffset(startOffset);
+
+      ch = _reader.read();
+      if (ch != '<')
+	throw new IllegalStateException();
+      
+      parseXMLDecl(_reader);
+    }
+
+    return _reader.read();    
+  }
+
+  private boolean parseXMLDecl(XmlReader reader)
+    throws IOException, SAXException
+  {
+    int ch = reader.read();
     if (ch != '?') {
       unread((char) ch);
       unread('<');
-      return _reader.read();
+      return false;
     }
 
     ch = _reader.read();
@@ -1485,14 +1522,22 @@ public class XmlParser extends AbstractParser {
     ch = _reader.parseName(_text, ch);
 
     String piName = _text.toString();
-    if (! piName.equals("xml"))
-      return parsePITail(piName, ch);
+    if (! piName.equals("xml")) {
+      ch = parsePITail(piName, ch);
+      unread(ch);
+      return false;
+    }
           
     if (_switchToXml && _activeNode == DOC_NAME && ! _inDtd) {
       _policy = new XmlPolicy();
     }
 
     ch = parseAttributes(ch, false);
+      
+    if (ch != '?')
+      throw error(L.l("expected `?' at {0}.  Processing instructions end with `?>' like <?foo ... ?>", badChar(ch)));
+    if ((ch = _reader.read()) != '>')
+      throw error(L.l("expected `>' at {0}.  Processing instructions end with `?>' like <?foo ... ?>", ">", badChar(ch)));
 
     for (int i = 0; i < _attributes.getLength(); i++) {
       QName name = _attributes.getName(i);
@@ -1503,28 +1548,27 @@ public class XmlParser extends AbstractParser {
 
       if (name.getName().equals("encoding") && ! _inDtd) {
         String encoding = value;
-          
+
         if (! _isStaticEncoding &&
             ! encoding.equalsIgnoreCase("UTF-8") &&
             ! encoding.equalsIgnoreCase("UTF-16") &&
             ! (_is.getSource() instanceof ReaderWriterStream)) {
-          _reader = new XmlReader(this, _is);
-          _reader.setNext(oldReader);
-          if (oldReader != null)
-            _reader.setLine(oldReader.getLine());
-          _is.setEncoding(encoding);
+	  _is.setEncoding(encoding);
+
+	  XmlReader oldReader = _reader;
+	  
+	  _reader = new XmlReader(this, _is);
+	  // _reader.setNext(oldReader);
+	  
+	  _reader.setLine(oldReader.getLine());
+
           _reader.setSystemId(_filename);
           _reader.setPublicId(null);
         }
       }
     }
-      
-    if (ch != '?')
-      throw error(L.l("expected `?' at {0}.  Processing instructions end with `?>' like <?foo ... ?>", badChar(ch)));
-    if (_reader.read() != '>')
-      throw error(L.l("expected `>' at {0}.  Processing instructions end with `?>' like <?foo ... ?>", ">", badChar(ch)));
 
-    return _reader.read();    
+    return true;
   }
 
   private int parsePI()

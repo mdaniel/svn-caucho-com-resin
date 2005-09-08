@@ -86,6 +86,8 @@ abstract public class JspGenerator {
   
   abstract protected void setParseState(ParseState parseState);
   
+  abstract protected ParseState getParseState();
+  
   public void setJspParser(JspParser parser)
   {
     _jspParser = parser;
@@ -103,7 +105,7 @@ abstract public class JspGenerator {
 
   public boolean isELIgnore()
   {
-    return false;
+    return getParseState().isELIgnored();
   }
 
   public void addDepend(PersistentDependency depend)

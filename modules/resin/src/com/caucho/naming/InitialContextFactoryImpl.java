@@ -30,6 +30,9 @@ package com.caucho.naming;
 
 import java.util.*;
 
+import java.util.logging.Logger;
+import java.util.logging.Level;
+
 import javax.naming.*;
 import javax.naming.spi.*;
 
@@ -42,6 +45,8 @@ import com.caucho.loader.EnvironmentLocal;
  * actual JNDI context is stored in the contextClassLoader.
  */
 public class InitialContextFactoryImpl implements InitialContextFactory  {
+  private static Logger log =
+    Logger.getLogger(InitialContextFactoryImpl.class.getName());
   private static L10N L = new L10N(InitialContextFactoryImpl.class);
 
   private static EnvironmentLocal<AbstractModel> _rootModel =

@@ -87,8 +87,10 @@ import java.util.logging.Logger;
 public class Application extends ServletContextImpl
   implements Dependency, EnvironmentBean, SchemaBean, DispatchBuilder,
 	     EnvironmentDeployInstance {
-  static final L10N L = new L10N(Application.class);
-  static final Logger log = Log.open(Application.class);
+  private static final String DEFAULT_VERSION = "2.4";
+  
+  private static final L10N L = new L10N(Application.class);
+  private static final Logger log = Log.open(Application.class);
 
   private static EnvironmentLocal<AbstractAccessLog> _accessLogLocal
     = new EnvironmentLocal<AbstractAccessLog>("caucho.server.access-log");
@@ -115,7 +117,7 @@ public class Application extends ServletContextImpl
   // A description
   private String _description = "";
 
-  private String _servletVersion = "2.4";
+  private String _servletVersion;
 
   // The application directory.
   private Path _appDir;
@@ -537,6 +539,14 @@ public class Application extends ServletContextImpl
   public void setVersion(String version)
   {
     _servletVersion = version;
+  }
+
+  /**
+   * Returns the servlet version.
+   */
+  public String getVersion()
+  {
+    return _servletVersion;
   }
 
   /**

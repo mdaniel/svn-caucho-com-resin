@@ -143,6 +143,7 @@ public class JavaJspGenerator extends JspGenerator {
   private String _sourceName;
   protected String _pkg;
   private int _uniqueId = 0;
+  private int _jspId = 1;
 
   private boolean _hasReleaseTag;
   private boolean _hasBundle = false;
@@ -1731,6 +1732,11 @@ public class JavaJspGenerator extends JspGenerator {
   public int uniqueId()
   {
     return _uniqueId++;
+  }
+  
+  public int generateJspId()
+  {
+    return _jspId++;
   }
 
   protected void addImport(String name)

@@ -48,9 +48,9 @@ import com.caucho.jsp.cfg.TldVariable;
  * jsp:invoke invokes a fragment
  */
 public class JspInvoke extends JspNode {
-  private static final QName NAME = new QName("name");
   private static final QName FRAGMENT = new QName("fragment");
   private static final QName VAR = new QName("var");
+  private static final QName SCOPE = new QName("scope");
   private static final QName VAR_READER = new QName("varReader");
   
   private String _name;
@@ -64,14 +64,14 @@ public class JspInvoke extends JspNode {
   public void addAttribute(QName name, String value)
     throws JspParseException
   {
-    if (NAME.equals(name))
-      _name = value;
-    else if (FRAGMENT.equals(name))
+    if (FRAGMENT.equals(name))
       _name = value;
     else if (VAR.equals(name))
       _var = value;
     else if (VAR_READER.equals(name))
       _varReader = value;
+    else if (SCOPE.equals(name))
+      _scope = value;
     else
       throw error(L.l("`{0}' is an unknown attribute for jsp:invoke.",
                       name.getName()));
@@ -86,9 +86,22 @@ public class JspInvoke extends JspNode {
     if (! _gen.getParseState().isTag())
       throw error(L.l("`{0}' is only allowed in .tag files.  Attribute directives are not allowed in normal JSP files.",
                       getTagName()));
+  }
 
+  /**
+   * Called when the body ends.
+   */
+  public void endElement()
+    throws JspParseException
+  {
     if (_name == null)
-      throw error(L.l("`name' is a required attribute of <jsp:invoke>."));
+      throw error(L.l("'fragment' is a required attribute of <jsp:invoke>."));
+
+    if (_scope != null && _var == null && _varReader == null)
+      throw error(L.l("'scope' requires a 'var' or a 'varReader' attribute for <jsp:invoke>."));
+
+    if (_var != null && _varReader != null)
+      throw error(L.l("jsp:invoke may not have both 'var' and 'varReader'"));
   }
 
   /**
@@ -158,50 +171,31 @@ public class JspInvoke extends JspNode {
       out.pushDepth();
     }
     */
+    
+    String context = null;
+    if (_scope == null || _scope.equals("page"))
+      context = "pageContext";
+    else if (_scope.equals("request"))
+      context = "pageContext.getRequest()";
+    else if (_scope.equals("session"))
+      context = "pageContext.getSessionScope()";
+    else if (_scope.equals("application"))
+      context = "pageContext.getApplication()";
+    else
+      throw error(L.l("Unknown scope `{0}' in <jsp:invoke>.  Scope must be `page', `request', `session', or `application'.", _scope));
+
 
     if (_var != null) {
-      out.print("pageContext.setAttribute(\"" + _var + "\", ");
+      out.print(context + ".setAttribute(\"" + _var + "\", ");
       out.println("pageContext.invoke(" + name + "));");
     }
     else if (_varReader != null) {
-      out.print("pageContext.setAttribute(\"" + _var + "\", ");
+      out.print(context + ".setAttribute(\"" + _varReader + "\", ");
       out.println("pageContext.invokeReader(" + name + "));");
     }
     else {
       out.println(name + ".invoke(null);");
     }
-
-    /*
-    if (vars.size() > 0) {
-      out.popDepth();
-      out.println("} finally {");
-      out.pushDepth();
-    }
-
-    for (int i = 0; i < vars.size(); i++) {
-      TldVariable var = vars.get(i);
-
-      if (var.getScope().equals("AT_END"))
-	continue;
-      
-      String srcName = var.getNameGiven();
-      String dstName = srcName;
-      
-      if (srcName == null) {
-	srcName = var.getAlias();
-	dstName = "_jsp_var_from_attribute_" + i;
-      }
-      else
-	dstName = "\"" + dstName + "\"";
-
-      out.println("pageContext.setAttribute(\"" + srcName + "\", _jsp_parentContext.getAttribute(" + dstName + "));");
-    }
-
-    if (vars.size() > 0) {
-      out.popDepth();
-      out.println("}");
-    }
-    */
     
     out.popDepth();
     out.println("}");

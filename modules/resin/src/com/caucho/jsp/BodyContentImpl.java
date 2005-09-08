@@ -148,6 +148,8 @@ public class BodyContentImpl extends AbstractBodyContent {
 
   final public void flush() throws IOException
   {
+    // jsp/18kg
+    throw new IOException(L.l("flush() may not be called in a body"));
   }
 
   final public void close() throws IOException

@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -81,7 +82,7 @@ public class JspElement extends JspContainerNode {
   public void addAttribute(QName name, JspAttribute value)
     throws JspParseException
   {
-    if (NAME.equals(name)) {
+    if (_name == null && NAME.equals(name)) {
       _attrName = value;
     }
     else {
@@ -143,6 +144,13 @@ public class JspElement extends JspContainerNode {
       
       out.println("String " + var + " = _caucho_expr_" + index + ".evalString(pageContext);");
     }
+    else if (hasRuntimeAttribute(_name)) {
+      // jsp/0408
+      
+      var = "_caucho_var" + _gen.uniqueId();
+      
+      out.println("String " + var + " = " + getRuntimeAttribute(_name) + ";");
+    }
 
     if (var != null) {
       out.addText("<");
@@ -176,6 +184,6 @@ public class JspElement extends JspContainerNode {
       out.println("out.print(\">\");");
     }
     else
-      out.println("out.print(\"</" + _name + ">\");");
+      out.addText("</" + _name + ">");
   }
 }

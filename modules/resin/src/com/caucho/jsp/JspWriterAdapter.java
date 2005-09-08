@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -38,11 +39,14 @@ import javax.servlet.jsp.JspWriter;
 
 import com.caucho.server.connection.AbstractResponseStream;
 
+import com.caucho.util.L10N;
 
 /**
  * A buffered JSP writer encapsulating a Writer.
  */
 public class JspWriterAdapter extends AbstractBodyContent {
+  private static final L10N L = new L10N(JspWriterAdapter.class);
+  
   // the parent writer
   private JspWriter _parent;
   
@@ -96,7 +100,7 @@ public class JspWriterAdapter extends AbstractBodyContent {
     throws IOException
   {
     if (_isClosed)
-      return;
+      throw new IOException(L.l("write() forbidden after writer is closed"));
 
     _out.print(buf, offset, length);
   }
@@ -108,10 +112,26 @@ public class JspWriterAdapter extends AbstractBodyContent {
    */
   final public void write(int ch) throws IOException
   {
-    if (_isClosed)
-      return;
+    if (_isClosed) {
+      if (Character.isWhitespace(ch))
+	return;
+      
+      throw new IOException(L.l("write() forbidden after writer is closed"));
+    }
 
     _out.print(ch);
+  }
+
+  /**
+   * Prints the newline.
+   */
+  final public void println() throws IOException
+  {
+    if (_isClosed) {
+      throw new IOException(L.l("write() forbidden after writer is closed"));
+    }
+
+    _out.print('\n');
   }
 
   /**
@@ -120,6 +140,9 @@ public class JspWriterAdapter extends AbstractBodyContent {
   final public void write(String s, int off, int len)
     throws IOException
   {
+    if (_isClosed)
+      throw new IOException(L.l("write() forbidden after writer is closed"));
+
     char []writeBuffer = _out.getCharBuffer();
     int size = writeBuffer.length;
     int writeLength = _out.getCharOffset();
@@ -169,9 +192,16 @@ public class JspWriterAdapter extends AbstractBodyContent {
   public void clear() throws IOException
   {
     if (_isClosed)
-      return;
+      throw new IOException(L.l("clear() forbidden after writer is closed"));
+    /*
+    else if (_out.isCommitted()) {
+      // jsp/0502
+      throw new IOException(L.l("clear() forbidden after data is committed"));
+    }
+    */
 
-    clearBuffer();
+    _out.clear();
+    // clearBuffer();
   }
 
   public void clearBuffer() throws IOException
@@ -186,7 +216,7 @@ public class JspWriterAdapter extends AbstractBodyContent {
     throws IOException
   {
     if (_isClosed)
-      return;
+      throw new IOException(L.l("flushBuffer() forbidden after writer is closed"));
   }
 
   /**
@@ -195,7 +225,7 @@ public class JspWriterAdapter extends AbstractBodyContent {
   public void flush() throws IOException
   {
     if (_isClosed)
-      return;
+      throw new IOException(L.l("flush() forbidden after writer is closed"));
 
     _out.flushChar();
   }

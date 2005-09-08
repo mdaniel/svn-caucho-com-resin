@@ -211,7 +211,7 @@ public class MergePath extends FilesystemPath {
     if (loader instanceof DynamicClassLoader)
       classpath = ((DynamicClassLoader) loader).getClassPath();
     else
-      classpath = System.getProperty("java.class.path");
+      classpath = CauchoSystem.getClassPath();
 
     addClassPath(classpath);
   }

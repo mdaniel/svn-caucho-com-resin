@@ -238,7 +238,7 @@ public class JspCompilerInstance {
 
     if (_jspPropertyGroup == null)
       _jspPropertyGroup = _jspCompiler.getJspPropertyGroup();
-
+    
     if (_jspPropertyGroup == null && jspConfig != null)
       _jspPropertyGroup = jspConfig.findJspPropertyGroup(_uri);
 
@@ -315,6 +315,8 @@ public class JspCompilerInstance {
 
       if (_jspPropertyGroup.getTldFileSet() != null)
         taglibManager.setTldFileSet(_jspPropertyGroup.getTldFileSet());
+    }
+    else {
     }
 
     _parseState.setResourceManager(resourceManager);
@@ -439,8 +441,15 @@ public class JspCompilerInstance {
 	xml.setNamespaceAware(true);
 	xml.parse(_jspPath);
       }
-      else
+      else {
+	Application app = _jspCompiler.getApplication();
+	
+	if (_jspPropertyGroup == null &&
+	    app != null && app.getVersion() == null)
+	  _parseState.setELIgnored(true);
+	
 	_parser.parse(_jspPath, _uri);
+      }
 
       JspGenerator generator = _jspBuilder.getGenerator();
       generator.setJspCompilerInstance(this);
@@ -521,12 +530,16 @@ public class JspCompilerInstance {
       if (_jspPropertyGroup != null && ! isXml)
 	isXml = _jspPropertyGroup.isXml();
 
+      _parseState.setXml(isXml);
+      
       if (_jspCompiler.addTag(_className)) {
 	_isPrototype = true;
 	_jspBuilder.setPrototype(true);
       }
 
       _parseState.setTag(true);
+      _isXml = isXml;
+      
       if (isXml) {
 	Xml xml = new Xml();
 	xml.setContentHandler(new JspContentHandler(_jspBuilder));

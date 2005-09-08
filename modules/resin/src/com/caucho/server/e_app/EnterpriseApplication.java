@@ -560,7 +560,6 @@ public class EnterpriseApplication
       WebAppController controller = null;
       if (webUri.endsWith(".war")) {
 	// server/2a16
-	
 	String name = webUri.substring(0, webUri.length() - 4);
 	int p = name.lastIndexOf('/');
 	if (p > 0)
@@ -569,6 +568,9 @@ public class EnterpriseApplication
 	// XXX:
 	if (contextUrl.equals(""))
 	  contextUrl = "/" + name;
+
+	if (contextUrl.endsWith(".war"))
+	  contextUrl = contextUrl.substring(0, contextUrl.length() - 4);
 
 	Path expandPath = _webappsPath;
 	expandPath.mkdirs();
@@ -587,6 +589,10 @@ public class EnterpriseApplication
 	    name = name.substring(p + 1);
 	  contextUrl = "/" + name;
 	}
+
+	// server/2a17
+	if (contextUrl.endsWith(".war"))
+	  contextUrl = contextUrl.substring(0, contextUrl.length() - 4);
 	
 	controller = new WebAppController(contextUrl, path, _container);
       }

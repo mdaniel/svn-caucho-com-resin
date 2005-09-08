@@ -86,13 +86,15 @@ public class Wrapper {
 
     // technically, need to resort to dynamic.  This is a cheat.
     if (! destClass.exists() && cl.getInterfaces().length > 0) {
+      System.out.println("DEST: " + destClass + " " + destClass.exists());
+
       cl = cl.getInterfaces()[0];
       name = cl.getName().replace('/', '.');
     }
     
     javaClassName = toJavaClassName(name);
 
-    CharBuffer cb = CharBuffer.allocate();
+    CharBuffer cb = new CharBuffer();
     for (int i = 0; i < name.length(); i++) {
       char ch = name.charAt(i);
 
@@ -104,7 +106,7 @@ public class Wrapper {
         cb.append(ch);
     }
       
-    name = "_jsbean." + cb.close() + "_es";
+    name = "_jsbean." + cb + "_es";
 
     this.cl = cl;
 

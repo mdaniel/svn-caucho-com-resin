@@ -110,12 +110,18 @@ public class QJspFactory extends JspFactory {
 			       buffer, autoFlush);
   }
 
+  /**
+   * Frees a page context after the JSP page is done with it.
+   *
+   * @param pc the PageContext to free
+   */
   public void releasePageContext(PageContext pc)
   {
     if (pc != null) {
       pc.release();
 
-      _freePages.free((PageContextImpl) pc);
+      if (pc instanceof PageContextImpl)
+	_freePages.free((PageContextImpl) pc);
     }
   }
 
@@ -124,7 +130,8 @@ public class QJspFactory extends JspFactory {
     if (pc != null) {
       pc.release();
 
-      _freePages.free((PageContextImpl) pc);
+      if (pc instanceof PageContextImpl)
+	_freePages.free((PageContextImpl) pc);
     }
   }
 

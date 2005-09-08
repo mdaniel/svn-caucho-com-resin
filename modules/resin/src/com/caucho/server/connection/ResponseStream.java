@@ -143,6 +143,11 @@ class ResponseStream extends ToByteResponseStream {
     _allowFlush = flush;
   }
 
+  public void setAutoFlush(boolean isAutoFlush)
+  {
+    setDisableAutoFlush(! isAutoFlush);
+  }
+
   void setDisableAutoFlush(boolean disable)
   {
     _disableAutoFlush = disable;
@@ -175,14 +180,14 @@ class ResponseStream extends ToByteResponseStream {
   public boolean isCommitted()
   {
     // return _response.isHeaderWritten() || _isClosed;
-    return _isCommitted || _isClosed;
+    return _response.isHeaderWritten() || _isCommitted || _isClosed;
   }
 
-  void clear()
+  public void clear()
   {
     clearBuffer();
     
-    if (_response.isHeaderWritten())
+    if (_isCommitted)
       throw new IllegalStateException(L.l("can't clear response after writing headers"));
   }
   
@@ -190,12 +195,14 @@ class ResponseStream extends ToByteResponseStream {
   {
     super.clearBuffer();
 
-    _next.setBufferOffset(0);
-
     if (! _isCommitted) {
+      // jsp/15la
       _isFirst = true;
+      _bufferStartOffset = 0;
       _response.setHeaderWritten(false);
     }
+
+    _next.setBufferOffset(_bufferStartOffset);
   }
 
   /**
@@ -376,7 +383,10 @@ class ResponseStream extends ToByteResponseStream {
     try {
       if (_isClosed)
 	return;
-	
+
+      if (_disableAutoFlush && ! isFinished)
+	throw new IOException(L.l("auto-flushing has been disabled"));
+      
       boolean isFirst = _isFirst;
       _isFirst = false;
 
@@ -550,6 +560,7 @@ class ResponseStream extends ToByteResponseStream {
     throws IOException
   {
     try {
+      _disableAutoFlush = false;
       _isCommitted = true;
       
       if (_allowFlush && ! _isClosed) {
@@ -607,21 +618,9 @@ class ResponseStream extends ToByteResponseStream {
     throws IOException
   {
     super.flushBuffer();
-    /*
-    try {
-      if (_allowFlush && ! _isClosed && ! _response.isTop()) {
-        flushBuffer(false);
 
-        if (_next != null) 
-          _next.flushBuffer();
-      }
-    } catch (ClientDisconnectException e) {
-      if (_response.isIgnoreClientDisconnect())
-        _isDisconnected = true;
-      else
-        throw e;
-    }
-    */
+    // jsp/15la
+    // _isCommitted = true;
   }
   
   /**
@@ -636,6 +635,8 @@ class ResponseStream extends ToByteResponseStream {
       _isClosed = true;
       return;
     }
+
+    _disableAutoFlush = false;
 
     flushCharBuffer();
 

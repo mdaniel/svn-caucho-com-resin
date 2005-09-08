@@ -115,8 +115,10 @@ public class StaticMethodExpr extends Expr {
 			   VariableResolver env)
     throws ELException
   {
-    if (_marshall.length != args.length)
-      return null;
+    if (_marshall.length != args.length) {
+      // jsp/18i8
+      throw new ELParseException(L.l("Arguments to '{0}' do not match expected length {1}.", _method.getName(), _marshall.length));
+    }
 
     try {
       Object []objs = new Object[args.length];

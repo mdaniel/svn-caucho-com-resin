@@ -183,6 +183,43 @@ public abstract class JspContainerNode extends JspNode {
       _children.add(node);
     }
   }
+  
+  /**
+   * Adds a child node after its done initializing.
+   */
+  public void addChildEnd(JspNode node)
+    throws JspParseException
+  {
+  }
+
+  /**
+   * Returns true if the node is empty
+   */
+  public boolean isEmpty()
+  {
+    if (_children == null || _children.size() == 0)
+      return true;
+
+    for (int i = 0; i < _children.size(); i++) {
+      JspNode child = _children.get(i);
+
+      if (child instanceof JspBody) {
+	JspBody body = (JspBody) child;
+
+	return body.isEmpty();
+      }
+      else if (child instanceof StaticText) {
+	StaticText text = (StaticText) child;
+
+	if (! text.isWhitespace())
+	  return false;
+      }
+      else
+	return false;
+    }
+
+    return false;
+  }
 
   /**
    * Returns the static text.
@@ -301,7 +338,7 @@ public abstract class JspContainerNode extends JspNode {
    */
   public boolean hasChildren()
   {
-    return _children != null && _children.size() > 0;
+    return ! isEmpty();
   }
   
   /**
@@ -407,6 +444,24 @@ public abstract class JspContainerNode extends JspNode {
           throw child.error(e);
       }
       child.generateEndLocation(out);
+    }
+  }
+
+  /**
+   * Generates the code for the children.
+   *
+   * @param out the output writer for the generated java.
+   */
+  public void generateChildrenEmpty()
+    throws Exception
+  {
+    if (_children == null)
+      return;
+
+    for (int i = 0; i < _children.size(); i++) {
+      JspNode child = _children.get(i);
+
+      child.generateEmpty();
     }
   }
 

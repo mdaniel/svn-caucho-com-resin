@@ -205,11 +205,13 @@ public class ResponseWriter extends AbstractPrintWriter {
 
     // server/0200
     // server/1720
+    /*
     try {
       _out.close();
     } catch (IOException e) {
       log.log(Level.FINE, e.toString(), e);
     }
+    */
 
     /*
     try {

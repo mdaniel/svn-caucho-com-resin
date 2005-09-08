@@ -40,6 +40,7 @@ import javax.enterprise.deploy.spi.exceptions.OperationUnsupportedException;
  */
 public class ProgressObjectImpl implements ProgressObject {
   private TargetModuleID []_targetModuleIDs;
+  private DeploymentStatus _status;
 
   ProgressObjectImpl()
   {
@@ -55,7 +56,18 @@ public class ProgressObjectImpl implements ProgressObject {
    */
   public DeploymentStatus getDeploymentStatus()
   {
-    return new DeploymentStatusImpl();
+    if (_status != null)
+      return _status;
+    else
+      return new DeploymentStatusImpl();
+  }
+  
+  /**
+   * Sets the status.
+   */
+  public void setDeploymentStatus(DeploymentStatus status)
+  {
+    _status = status;
   }
   
   /**

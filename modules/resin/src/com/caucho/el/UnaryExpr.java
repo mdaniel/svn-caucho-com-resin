@@ -88,6 +88,14 @@ public class UnaryExpr extends Expr {
         return new Double(- ((Number) obj).doubleValue());
       else if (obj instanceof Number)
         return new Long(- ((Number) obj).longValue());
+      else if (obj instanceof String) {
+	String s = (String) obj;
+
+	if (s.indexOf('.') < 0)
+	  return new Long(- toLong(obj, env));
+	else
+	  return new Double(- toDouble(obj, env));
+      }
       else
         return new Double(- toDouble(obj, env));
     }

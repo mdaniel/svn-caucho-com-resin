@@ -99,7 +99,7 @@ abstract public class JClassLoader {
   /**
    * Returns the wrapped system class loader.
    */
-  private static JClassLoader getSystemClassLoader()
+  static JClassLoader getSystemClassLoader()
   {
     if (_staticClassLoader == null)
       _staticClassLoader = JClassLoaderWrapper.create(ClassLoader.getSystemClassLoader());

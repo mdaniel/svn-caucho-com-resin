@@ -480,6 +480,8 @@ public class Encoding {
     
     _mimeName.put("KS_C_5601-1987", "ks_c_5601-1987");
     _javaName.put("ks_c_5601-1987", "Cp949");
+    
+    _javaName.put("IBM500", "Cp500");
 
     String []cp = new String[] {
       "037", "1006", "1025", "1026", "1046", "1097",

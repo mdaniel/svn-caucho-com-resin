@@ -33,6 +33,9 @@ import java.util.*;
 import java.util.logging.*;
 import java.lang.reflect.*;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
+
 import javax.servlet.jsp.JspWriter;
 
 import javax.servlet.jsp.el.VariableResolver;
@@ -49,6 +52,10 @@ import com.caucho.config.types.Period;
 public abstract class Expr {
   protected static final Logger log = Log.open(Expr.class);
   protected static final L10N L = new L10N(Expr.class);
+
+  private static final Character NULL_CHAR =
+    new Character((char) 0);
+  
   private static final long DAY = 24L * 3600L * 1000L;
 
   // lexeme codes
@@ -206,6 +213,19 @@ public abstract class Expr {
   }
 
   /**
+   * Evaluate the expression, knowing the value should be a string
+   *
+   * @param env the variable environment
+   *
+   * @return the value of the expression as a string
+   */
+  public char evalCharacter(VariableResolver env)
+    throws ELException
+  {
+    return toCharacter(evalObject(env), env);
+  }
+
+  /**
    * Evaluate the expression, knowing the value should be a period
    *
    * @param env the variable environment
@@ -226,6 +246,32 @@ public abstract class Expr {
       throw new ELException(e.getMessage());
     }
                         
+  }
+
+  /**
+   * Evaluate the expression, knowing the value should be a BigInteger.
+   *
+   * @param env the variable environment
+   *
+   * @return the value of the expression as a BigInteger
+   */
+  public BigInteger evalBigInteger(VariableResolver env)
+    throws ELException
+  {
+    return toBigInteger(evalObject(env), env);
+  }
+
+  /**
+   * Evaluate the expression, knowing the value should be a BigDecimal.
+   *
+   * @param env the variable environment
+   *
+   * @return the value of the expression as a BigDecimal
+   */
+  public BigDecimal evalBigDecimal(VariableResolver env)
+    throws ELException
+  {
+    return toBigDecimal(evalObject(env), env);
   }
 
   /**
@@ -378,6 +424,47 @@ public abstract class Expr {
   }
 
   /**
+   * Converts some unknown value to a string.
+   *
+   * @param value the value to be converted.
+   *
+   * @return the string-converted value.
+   */
+  public static char toCharacter(Object value, VariableResolver env)
+    throws ELException
+  {
+    if (value == null)
+      return (char) 0;
+    else if (value instanceof Number) {
+      Number number = (Number) value;
+
+      return (char) number.intValue();
+    }
+    else if (value instanceof Character) {
+      return ((Character) value).charValue();
+    }
+    else if (value instanceof String) {
+      String s = toString(value, env);
+
+      if (s == null || s.length() == 0)
+	return (char) 0;
+      else
+	return s.charAt(0);
+    }
+    else {
+      ELException e = new ELException(L.l("can't convert {0} to character.",
+                                          value.getClass().getName()));
+
+      throw e;
+      /*
+      error(e, env);
+
+      return (char) 0;
+      */
+    }
+  }
+
+  /**
    * Converts some unknown value to a boolean.
    *
    * @param value the value to be converted.
@@ -396,10 +483,14 @@ public abstract class Expr {
     else {
       ELException e = new ELException(L.l("can't convert {0} to boolean.",
                                           value.getClass().getName()));
-      
+
+      // jsp/18s1
+      throw e;
+      /*
       error(e, env);
 
       return false;
+      */
     }
   }
 
@@ -433,13 +524,92 @@ public abstract class Expr {
       else
         return dValue;
     }
+    else if (value instanceof Character) {
+      // jsp/18s7
+      return ((Character) value).charValue();
+    }
     else {
       ELException e = new ELException(L.l("can't convert {0} to double.",
                                           value.getClass().getName()));
       
+      // error(e, env);
+
+      // return 0;
+
+      throw e;
+    }
+  }
+
+  /**
+   * Converts some unknown value to a big decimal
+   *
+   * @param value the value to be converted.
+   *
+   * @return the BigDecimal-converted value.
+   */
+  public static BigDecimal toBigDecimal(Object value, VariableResolver env)
+    throws ELException
+  {
+    if (value == null)
+      return BigDecimal.ZERO;
+    else if  (value instanceof BigDecimal)
+      return (BigDecimal) value;
+    else if (value instanceof Number) {
+      double dValue = ((Number) value).doubleValue();
+
+      return new BigDecimal(dValue);
+    }
+    else if (value.equals(""))
+      return BigDecimal.ZERO;
+    else if (value instanceof String) {
+      return new BigDecimal((String) value);
+    }
+    else if (value instanceof Character) {
+      return new BigDecimal(((Character) value).charValue());
+    }
+    else {
+      ELException e = new ELException(L.l("can't convert {0} to BigDecimal.",
+                                          value.getClass().getName()));
+      
       error(e, env);
 
-      return 0;
+      return BigDecimal.ZERO;
+    }
+  }
+
+  /**
+   * Converts some unknown value to a big integer
+   *
+   * @param value the value to be converted.
+   *
+   * @return the BigInteger-converted value.
+   */
+  public static BigInteger toBigInteger(Object value, VariableResolver env)
+    throws ELException
+  {
+    if (value == null)
+      return BigInteger.ZERO;
+    else if  (value instanceof BigInteger)
+      return (BigInteger) value;
+    else if (value instanceof Number) {
+      // return new BigInteger(value.toString());
+      return new BigDecimal(value.toString()).toBigInteger();
+    }
+    else if (value.equals(""))
+      return BigInteger.ZERO;
+    else if (value instanceof String) {
+      return new BigInteger((String) value);
+    }
+    else if (value instanceof Character) {
+      return new BigInteger(String.valueOf((int) ((Character) value).charValue()));
+    }
+    else {
+      ELException e = new ELException(L.l("can't convert {0} to BigInteger.",
+                                          value.getClass().getName()));
+      
+      error(e, env);
+
+      return BigInteger.ZERO;
     }
   }
 
@@ -496,18 +666,26 @@ public abstract class Expr {
         ELException e = new ELException(L.l("can't convert '{0}' to long.",
 					    string));
       
-        error(e, env);
+        // error(e, env);
+
+	throw e;
       }
       
       return sign * intValue;
+    }
+    else if (value instanceof Character) {
+      // jsp/18s6
+      return ((Character) value).charValue();
     }
     else {
       ELException e = new ELException(L.l("can't convert {0} to long.",
                                           value.getClass().getName()));
       
-      error(e, env);
+      // error(e, env);
 
-      return 0;
+      // return 0;
+
+      throw e;
     }
   }
 
@@ -881,7 +1059,11 @@ public abstract class Expr {
   public static Object error(Throwable e, VariableResolver env)
     throws ELException
   {
-    if (env instanceof ExprEnv && ! ((ExprEnv) env).isIgnoreException()) {
+    if (env == null) {
+      // jsp/1b56
+      throw ELExceptionImpl.create(e);
+    }
+    else if (env instanceof ExprEnv && ! ((ExprEnv) env).isIgnoreException()) {
       throw ELExceptionImpl.create(e);
     }
     else {

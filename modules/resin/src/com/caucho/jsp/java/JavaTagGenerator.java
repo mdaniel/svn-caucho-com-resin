@@ -80,16 +80,27 @@ public class JavaTagGenerator extends JavaJspGenerator {
   public JavaTagGenerator(ParseTagManager tagManager)
   {
     super(tagManager);
+
+    setOmitXmlDeclaration(true);
+  }
+
+  public void init()
+  {
+    super.init();
+    
+    setOmitXmlDeclaration(true);
   }
 
   /**
    * Returns true if the XML declaration should be ignored.
    */
+  /*
   boolean isOmitXmlDeclaration()
   {
     // tags always omit the declaration
     return true;
   }
+  */
 
   /**
    * Sets the body content.
@@ -158,6 +169,14 @@ public class JavaTagGenerator extends JavaJspGenerator {
   public boolean isTag()
   {
     return true;
+  }
+
+  /**
+   * Returns true for XML.
+   */
+  boolean isXml()
+  {
+    return _parseState.isXml();
   }
 
   /**
@@ -327,6 +346,8 @@ public class JavaTagGenerator extends JavaJspGenerator {
 
     out.println("javax.servlet.jsp.JspContext _jsp_parentContext = getJspContext();");
     out.println("com.caucho.jsp.PageContextWrapper pageContext = com.caucho.jsp.PageContextWrapper.create(_jsp_parentContext);");
+    // jsp/1056
+    out.println("setJspContext(pageContext);");
 
     if (hasScripting()) {
       out.println("javax.servlet.http.HttpServletRequest request = (javax.servlet.http.HttpServletRequest) pageContext.getRequest();");
@@ -365,6 +386,7 @@ public class JavaTagGenerator extends JavaJspGenerator {
       
       generateTagVariablesAtEnd(out);
       
+      out.println("setJspContext(_jsp_parentContext);");
       out.println("com.caucho.jsp.PageContextWrapper.free(pageContext);");
       
       out.popDepth();
@@ -402,6 +424,12 @@ public class JavaTagGenerator extends JavaJspGenerator {
       out.println("if (" + isSetName + ")");
       out.println("  pageContext.setAttribute(\"" + name + "\", " +
                   JspNode.toELObject(name, cl) + ");");
+    }
+
+    // jsp/10a1
+    if (_dynamicAttributes != null) {
+      out.println("pageContext.setAttribute(\"" + _dynamicAttributes + "\"," +
+		  "this." + _dynamicAttributes + ");");
     }
   }
 

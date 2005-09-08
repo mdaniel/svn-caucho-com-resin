@@ -86,14 +86,17 @@ public class FunctionExpr extends Expr {
       method = methods[_args.length];
     }
 
-    if (method == null)
-      return null;
-
+    if (method == null) {
+      // jsp/18i7
+      throw new ELParseException(L.l("'{0}' is an unknown function.", _expr));
+    }
 
     Class []params = method.getParameterTypes();
-
-    if (params.length != _args.length)
-      return null;
+    
+    if (params.length != _args.length) {
+      // jsp/18i8
+      throw new ELParseException(L.l("arguments '{0}' do not match expected length {1}.", _expr, params.length));
+    }
 
     try {
       Object []objs = new Object[_args.length];

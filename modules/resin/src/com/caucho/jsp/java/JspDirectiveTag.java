@@ -60,6 +60,8 @@ public class JspDirectiveTag extends JspNode {
   private static final QName BODY_CONTENT = new QName("body-content");
   
   static final L10N L = new L10N(JspDirectiveTag.class);
+
+  private Boolean _isElIgnored;
   
   /**
    * Adds an attribute.
@@ -70,8 +72,16 @@ public class JspDirectiveTag extends JspNode {
   public void addAttribute(QName name, String value)
     throws JspParseException
   {
-    if (IS_EL_IGNORED.equals(name))
-      _parseState.setELIgnored(value.equals("true"));
+    if (IS_EL_IGNORED.equals(name)) {
+      boolean isIgnored = value.equals("true");
+
+      _parseState.setELIgnored(isIgnored);
+      
+      if (_isElIgnored != null && _isElIgnored.booleanValue() != isIgnored)
+	throw error(L.l("isELIgnored values conflict"));
+
+      _isElIgnored = new Boolean(isIgnored);
+    }
     /*
     else if (name.equals("isScriptingInvalid"))
       _parseState.setScriptingInvalid(value.equals("true"));
@@ -178,6 +188,16 @@ public class JspDirectiveTag extends JspNode {
   }
   
   /**
+   * Called when the tag ends.
+   */
+  public void endAttributes()
+    throws JspParseException
+  {
+    if (! _gen.isTag())
+      throw error(L.l("tag directive is only allowed in tag files."));
+  }
+  
+  /**
    * Return true if the node only has static text.
    */
   public boolean isStatic()
@@ -193,6 +213,8 @@ public class JspDirectiveTag extends JspNode {
   public void printXml(WriteStream os)
     throws IOException
   {
+    JavaTagGenerator gen = (JavaTagGenerator) _gen;
+    
     os.print("<jsp:directive.tag");
     if (! _parseState.isELIgnored())
       os.print(" el-ignored='false'");
@@ -200,6 +222,10 @@ public class JspDirectiveTag extends JspNode {
     if (! _parseState.isScriptingEnabled())
       os.print(" scripting-enabled='false'");
     */
+    String dynAttr = gen.getDynamicAttributes();
+    if (dynAttr != null)
+      os.print("dynamic-attributes='" + dynAttr + "'");
+
     os.print("/>");
   }
 

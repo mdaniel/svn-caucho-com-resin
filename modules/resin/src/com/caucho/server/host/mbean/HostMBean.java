@@ -95,12 +95,14 @@ public interface HostMBean extends DeployControllerMBean {
   /**
    * Updates a web-app entry from the deployment directories.
    */
-  public void updateWebAppDeploy(String name);
+  public void updateWebAppDeploy(String name)
+    throws Throwable;
 
   /**
    * Updates an ear entry from the deployment directories.
    */
-  public void updateEarDeploy(String name);
+  public void updateEarDeploy(String name)
+    throws Throwable;
 
   /**
    * Expand an ear entry from the deployment directories.

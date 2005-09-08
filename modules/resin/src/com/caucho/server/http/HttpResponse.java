@@ -246,11 +246,12 @@ public class HttpResponse extends AbstractHttpResponse {
       int cookieVersion = cookie.getVersion();
 
       CharBuffer cb = _cb;
-      fillCookie(cb, cookie, now, 0);
+      // XXX:
+      fillCookie(cb, cookie, now, cookieVersion, false);
       os.print("\r\nSet-Cookie: ");
       os.print(cb.getBuffer(), 0, cb.getLength());
       if (cookieVersion > 0) {
-        fillCookie(cb, cookie, now, cookieVersion);
+        fillCookie(cb, cookie, now, cookieVersion, true);
         os.print("\r\nSet-Cookie2: ");
         os.print(cb.getBuffer(), 0, cb.getLength());
       }

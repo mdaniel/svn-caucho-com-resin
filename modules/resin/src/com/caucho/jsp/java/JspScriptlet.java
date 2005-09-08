@@ -81,7 +81,10 @@ public class JspScriptlet extends JspNode {
   public void printXml(WriteStream os)
     throws IOException
   {
-    os.print("<jsp:scriptlet>");
+    os.print("<jsp:scriptlet");
+    printJspId(os);
+    os.print(">");
+    
     printXmlText(os, _text);
     os.print("</jsp:scriptlet>");
   }

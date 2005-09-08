@@ -425,11 +425,23 @@ public class ApplicationContainer
    * Updates a WebApp deploy
    */
   public void updateWebAppDeploy(String name)
+    throws Throwable
   {
     clearCache();
 
+    System.out.println("UPDATE: " + name);
     _appDeploy.update();
-    _appDeploy.update(name);
+    WebAppController controller = _appDeploy.update(name);
+
+    System.out.println("CONTROLLER: " + controller);
+
+    if (controller != null) {
+      Throwable configException = controller.getConfigException();
+      System.out.println("CE: " + configException);
+
+      if (configException != null)
+	throw configException;
+    }
   }
 
   /**
@@ -446,14 +458,21 @@ public class ApplicationContainer
    * Updates an ear deploy
    */
   public void updateEarDeploy(String name)
+    throws Throwable
   {
     clearCache();
 
     _earDeploy.update();
     EarDeployController entry = _earDeploy.update(name);
 
-    if (entry != null)
+    if (entry != null) {
       entry.start();
+
+      Throwable configException = entry.getConfigException();
+
+      if (configException != null)
+	throw configException;
+    }
   }
 
   /**

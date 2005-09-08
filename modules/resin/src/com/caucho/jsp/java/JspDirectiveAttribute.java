@@ -60,9 +60,9 @@ public class JspDirectiveAttribute extends JspNode {
   private String _type;
   private boolean _isRequired;
   private boolean _isFragment;
-  private boolean _isRtexprvalue = true;
+  private Boolean _isRtexprvalue;
   private String _description;
-  
+
   
   /**
    * Adds an attribute.
@@ -121,7 +121,13 @@ public class JspDirectiveAttribute extends JspNode {
     }
 
     attr.setRequired(_isRequired);
-    attr.setRtexprvalue(_isRtexprvalue);
+    
+    if (_isFragment && _isRtexprvalue != null)
+      throw error(L.l("rtexprvalue cannot be set when fragment is true."));
+
+    if (_isRtexprvalue == null || Boolean.TRUE.equals(_isRtexprvalue))
+      attr.setRtexprvalue(Boolean.TRUE);
+    
     if (_isFragment)
       attr.setType(JspFragment.class);
 

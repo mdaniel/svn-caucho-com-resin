@@ -457,6 +457,9 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
   public void sendError(int code, String value)
     throws IOException
   {
+    if (isCommitted())
+      throw new IllegalStateException(L.l("sendError() forbidden after buffer has been committed."));
+      
     if (code == SC_NOT_MODIFIED && _cacheEntry != null) {
       setStatus(code, value);
       if (handleNotModified(_isTopCache))
@@ -550,15 +553,15 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
   {
     if (url == null)
       throw new NullPointerException();
+    
+    if (_originalResponseStream.isCommitted())
+      throw new IllegalStateException(L.l("Can't sendRedirect() after data has committed to the client."));
 
     _responseStream.clearBuffer();
     _originalResponseStream.clearBuffer();
     
     _responseStream = _originalResponseStream;
     resetBuffer();
-    
-    if (_originalResponseStream.isCommitted())
-      throw new IllegalStateException(L.l("Can't sendRedirect() after data has committed to the client."));
     
     setStatus(SC_MOVED_TEMPORARILY);
     String path = getAbsolutePath(url);
@@ -1369,14 +1372,14 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
    */
   void reset(boolean force)
   {
+    if (! force && _originalResponseStream.isCommitted())
+      throw new IllegalStateException(L.l("response cannot be reset() after committed"));
+    
     _responseStream.clearBuffer();
     /*
     if (_currentWriter instanceof JspPrintWriter)
       ((JspPrintWriter) _currentWriter).clear();
     */
-    
-    if (! force && _originalResponseStream.isCommitted())
-      throw new IllegalStateException(L.l("response cannot be reset() after committed"));
     _statusCode = 200;
     _statusMessage = "OK";
 
@@ -1799,14 +1802,15 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
    * @param version the cookies version
    */
   public boolean fillCookie(CharBuffer cb, Cookie cookie,
-                            long date, int version)
+                            long date, int version,
+			    boolean isCookie2)
   {
     // How to deal with quoted values?  Old browsers can't deal with
     // the quotes.
     
     cb.clear();
     cb.append(cookie.getName());
-    if (version > 0) {
+    if (isCookie2) {
       cb.append("=\"");
       cb.append(cookie.getValue());
       cb.append("\"");
@@ -1818,7 +1822,7 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
 
     String domain = cookie.getDomain();
     if (domain != null && ! domain.equals("")) {
-      if (version > 0) {
+      if (isCookie2) {
         cb.append("; Domain=");
       
         cb.append('"');
@@ -1833,7 +1837,7 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
 
     String path = cookie.getPath();
     if (path != null && ! path.equals("")) {
-      if (version > 0) {
+      if (isCookie2) {
         cb.append("; Path=");
       
         cb.append('"');
@@ -1841,7 +1845,11 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
         cb.append('"');
       }
       else {
-        cb.append("; path=");
+	// Caps from TCK test
+	if (version > 0)
+	  cb.append("; Path=");
+	else
+	  cb.append("; path=");
         cb.append(path);
       }
     }

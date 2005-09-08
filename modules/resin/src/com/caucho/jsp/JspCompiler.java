@@ -230,8 +230,9 @@ public class JspCompiler implements EnvironmentBean {
    */
   public JspPropertyGroup createJsp()
   {
-    if (_jspPropertyGroup == null)
+    if (_jspPropertyGroup == null) {
       _jspPropertyGroup = new JspPropertyGroup();
+    }
 
     return _jspPropertyGroup;
   }

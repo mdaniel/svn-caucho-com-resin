@@ -35,6 +35,7 @@ import java.io.IOException;
  * Char reader based on an underlying buffer.
  */
 public class TempCharReader extends Reader {
+  private TempCharBuffer _top;
   private TempCharBuffer _head;
   private char []_buffer;
   private int _offset;
@@ -69,6 +70,7 @@ public class TempCharReader extends Reader {
    */
   public void init(TempCharBuffer head)
   {
+    _top = head;
     _head = head;
 
     if (head != null) {
@@ -79,6 +81,14 @@ public class TempCharReader extends Reader {
       _length = 0;
 
     _offset = 0;
+  }
+
+  /**
+   * Resets the reader
+   */
+  public void reset()
+  {
+    init(_top);
   }
 
   /**

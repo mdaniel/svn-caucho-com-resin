@@ -498,7 +498,7 @@ public class JspPropertyGroup {
       String urlPattern = _urlPatterns.get(i);
       String regexpPattern = UrlMap.urlPatternToRegexpPattern(urlPattern);
 
-      if (Pattern.matches(regexpPattern, url)) {
+      if (Pattern.compile(regexpPattern).matcher(url).find()) {
 	return true;
       }
     }

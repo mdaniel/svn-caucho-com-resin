@@ -163,12 +163,20 @@ public class JspTop extends JspContainerNode implements JspSegmentNode {
   public void printXml(WriteStream os)
     throws IOException
   {
+    if (_hasRoot) {
+      printXmlChildren(os);
+      return;
+    }
+    
     /*
     os.print("<jsp:root xmlns:jsp=\"http://java.sun.com/JSP/Page\">");
     printXmlChildren(os);
     os.print("</jsp:root>");
     */
-    os.print("<jsp:root xmlns:jsp=\"http://java.sun.com/JSP/Page\"");
+    os.print("<jsp:root");
+    printJspId(os);
+    os.print(" version=\"2.0\"");
+    os.print(" xmlns:jsp=\"http://java.sun.com/JSP/Page\"");
 
     for (Map.Entry entry : _namespaceMap.entrySet()) {
       os.print(" xmlns:" + entry.getKey() + "=\"" + entry.getValue() + "\"");
@@ -197,7 +205,7 @@ public class JspTop extends JspContainerNode implements JspSegmentNode {
   public void generate(JspJavaWriter out)
     throws Exception
   {
-    if (! _gen.isOmitXmlDeclaration()) {
+    if (! _hasRoot && ! _gen.isOmitXmlDeclaration()) {
       String encoding = _gen.getCharacterEncoding();
 
       if (encoding == null)

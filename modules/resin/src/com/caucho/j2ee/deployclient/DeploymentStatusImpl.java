@@ -28,6 +28,8 @@
 
 package com.caucho.j2ee.deployclient;
 
+import java.io.Serializable;
+
 import javax.enterprise.deploy.spi.status.DeploymentStatus;
 
 import javax.enterprise.deploy.shared.ActionType;
@@ -37,13 +39,15 @@ import javax.enterprise.deploy.shared.StateType;
 /**
  * Represents the status of a deployed module.
  */
-public class DeploymentStatusImpl implements DeploymentStatus {
+public class DeploymentStatusImpl implements DeploymentStatus, Serializable {
+  private String _message;
+  private boolean _isFailed;
+  
   /**
    * Returns the StateType value.
    */
   public StateType getState()
   {
-    System.out.println("STATE");
     return StateType.RUNNING;
   }
   
@@ -70,7 +74,15 @@ public class DeploymentStatusImpl implements DeploymentStatus {
    */
   public String getMessage()
   {
-    return "test";
+    return _message;
+  }
+
+  /**
+   * Sets the message.
+   */
+  public void setMessage(String message)
+  {
+    _message = message;
   }
   
   /**
@@ -86,7 +98,15 @@ public class DeploymentStatusImpl implements DeploymentStatus {
    */
   public boolean isFailed()
   {
-    return false;
+    return _isFailed;
+  }
+
+  /**
+   * Set true if the deployment failed.
+   */
+  public void setFailed(boolean isFailed)
+  {
+    _isFailed = isFailed;
   }
   
   /**
@@ -94,7 +114,7 @@ public class DeploymentStatusImpl implements DeploymentStatus {
    */
   public boolean isRunning()
   {
-    return true;
+    return ! _isFailed;
   }
 }
 

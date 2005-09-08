@@ -70,7 +70,7 @@ public class CustomTag extends GenericTag {
     boolean isBodyTag = BodyTag.class.isAssignableFrom(cl);
     boolean isCatch = TryCatchFinally.class.isAssignableFrom(cl);
 
-    boolean isEmpty = _children == null || _children.size() == 0;
+    boolean isEmpty = isEmpty();
     boolean usesTagBody = isBodyTag && ! isEmpty &&
       analyzedTag.getStartReturnsBuffered();
     boolean hasEndTag = analyzedTag.getDoEnd();
@@ -126,10 +126,15 @@ public class CustomTag extends GenericTag {
     if (analyzedTag.getStartReturnsSkip() &&
 	! analyzedTag.getStartReturnsInclude() &&
 	! analyzedTag.getStartReturnsBuffered()) {
+      // jsp/18cp
+      generateChildrenEmpty();
     }
     else if (isEmpty) {
+      // jsp/18kc
+      /*
       if (isBodyTag)
 	out.println("  " + name + ".setBodyContent((javax.servlet.jsp.tagext.BodyContent) null);");
+      */
     }
     else {
       if (startCount > 1 && analyzedTag.getStartReturnsSkip()) {
@@ -170,10 +175,13 @@ public class CustomTag extends GenericTag {
           out.popDepth();
           out.println("}");
 
+	  // jsp/18kf - req by JSP TCK
+	  /*
 	  if (_tag.getBodyContent()) {
 	    out.println("else");
 	    out.println("  " + name + ".setBodyContent((javax.servlet.jsp.tagext.BodyContent) null);");
 	  }
+	  */
         }
       }
       else if (isBodyTag && _tag.getBodyContent())

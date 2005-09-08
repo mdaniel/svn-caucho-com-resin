@@ -56,8 +56,28 @@ public class JspParams extends JspNode {
   {
     if (node instanceof JspParam)
       _params.add((JspParam) node);
+    else if (node instanceof JspBody) {
+    }
     else
       super.addChild(node);
+  }
+
+  /**
+   * Adds a child after initialization.
+   */
+  public void addChildEnd(JspNode node)
+    throws JspParseException
+  {
+    if (node instanceof JspBody) {
+      JspBody body = (JspBody) node;
+
+      for (JspNode child : body.getChildren()) {
+	if (child instanceof JspParam)
+	  _params.add((JspParam) child);
+	else
+	  super.addChild(child);
+      }
+    }
   }
 
   /**

@@ -106,8 +106,20 @@ public class DeploymentManagerImpl implements DeploymentManager {
     ClassLoader oldLoader = thread.getContextClassLoader();
     try {
       thread.setContextClassLoader(getClass().getClassLoader());
+
+      System.out.println("PRE-TARGETS:");
       
-      return _proxy.getTargets();
+      Target []targets = _proxy.getTargets();
+
+      System.out.println("TARGETS: " + targets);
+
+      if (targets == null)
+	return new Target[0];
+      
+      return targets;
+    } catch (Throwable e) {
+      e.printStackTrace();
+      return new Target[0];
     } finally {
       thread.setContextClassLoader(oldLoader);
     }
@@ -178,11 +190,17 @@ public class DeploymentManagerImpl implements DeploymentManager {
     InputStream archiveIn = null;
     InputStream ddIn = null;
 
+    System.out.println("PRE-DIST:");
+
     try {
       archiveIn = new FileInputStream(archive);
       ddIn = new FileInputStream(deploymentPlan);
 
-      return distribute(targetList, archiveIn, ddIn);
+      ProgressObject progress = distribute(targetList, archiveIn, ddIn);
+
+      System.out.println("POST-DIST:" + progress + " " + progress.getDeploymentStatus().isFailed() + " " + progress.getDeploymentStatus().getMessage());
+    
+      return progress;
     } catch (Exception e) {
       throw new RuntimeException(e);
     } finally {
@@ -216,8 +234,15 @@ public class DeploymentManagerImpl implements DeploymentManager {
     ClassLoader oldLoader = thread.getContextClassLoader();
     try {
       thread.setContextClassLoader(getClass().getClassLoader());
+
+      System.out.println("PRE-DIST");
       
-      return _proxy.distribute(targetList, deploymentPlan, archive);
+      ProgressObject progress
+	= _proxy.distribute(targetList, deploymentPlan, archive);
+
+      System.out.println("POST-DIST:" + progress + " " + progress.getDeploymentStatus().isFailed() + " " + progress.getDeploymentStatus().getMessage());
+
+      return progress;
     } finally {
       thread.setContextClassLoader(oldLoader);
     }

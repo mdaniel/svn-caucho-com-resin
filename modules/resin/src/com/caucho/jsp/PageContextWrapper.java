@@ -73,6 +73,7 @@ public class PageContextWrapper extends PageContextImpl {
     _parent = parent;
     clearAttributes();
     setOut(parent.getOut());
+    _isFilled = true;
   }
 
   public static PageContextWrapper create(JspContext parent)

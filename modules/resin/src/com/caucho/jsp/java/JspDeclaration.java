@@ -69,6 +69,14 @@ public class JspDeclaration extends JspNode {
   }
 
   /**
+   * Returns true for a scripting element.
+   */
+  public boolean hasScripting()
+  {
+    return true;
+  }
+
+  /**
    * Generates the XML text representation for the tag validation.
    *
    * @param os write stream to the generated XML.
@@ -76,7 +84,10 @@ public class JspDeclaration extends JspNode {
   public void printXml(WriteStream os)
     throws IOException
   {
-    os.print("<jsp:declaration>");
+    os.print("<jsp:declaration");
+    printJspId(os);
+    os.print(">");
+    
     printXmlText(os, _text);
     os.print("</jsp:declaration>");
   }
