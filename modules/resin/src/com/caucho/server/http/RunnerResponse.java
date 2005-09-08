@@ -121,10 +121,10 @@ public class RunnerResponse extends AbstractHttpResponse {
       Cookie cookie = (Cookie) _cookiesOut.get(i);
       int cookieVersion = cookie.getVersion();
 
-      fillCookie(cb, cookie, now, 0);
+      fillCookie(cb, cookie, now, 0, false);
       _req.writeHeader("Set-Cookie", cb);
       if (cookieVersion > 0) {
-        fillCookie(cb, cookie, now, cookieVersion);
+        fillCookie(cb, cookie, now, cookieVersion, true);
         _req.writeHeader("Set-Cookie2", cb);
       }
     }

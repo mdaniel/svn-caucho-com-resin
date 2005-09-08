@@ -374,7 +374,7 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener {
           buffer[offset++] = (byte) '-';
         else {
           _cb.clear();
-          response.fillCookie(_cb, (Cookie) cookies.get(0), 0, 0);
+          response.fillCookie(_cb, (Cookie) cookies.get(0), 0, 0, false);
 
           offset = print(buffer, offset, _cb.getBuffer(), 0, _cb.getLength());
         }

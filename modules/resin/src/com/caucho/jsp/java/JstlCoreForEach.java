@@ -231,7 +231,7 @@ public class JstlCoreForEach extends JstlNode {
   {
     TagInstance parent = getParent().getTag();
 
-    _tag = parent.findTag(getQName(), _attributeNames);
+    _tag = parent.findTag(getQName(), _attributeNames, false);
 
     if (_tag != null) {
       _tagVar = _tag.getId();
@@ -240,7 +240,7 @@ public class JstlCoreForEach extends JstlNode {
       String id = "_jsp_loop_" + _gen.uniqueId();
       
       _tag = parent.addTag(getQName(), null, null,
-			   _attributeNames, _attributeValues);
+			   _attributeNames, _attributeValues, false);
 
       _tag.setId(id);
       

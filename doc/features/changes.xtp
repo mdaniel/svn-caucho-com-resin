@@ -4,6 +4,7 @@
 
 <s2 title='3.0.snap - Aug 11, 2005'>
 <ul>
+<li>Remove deadlock in AccessLogWriter (rep by studdugie, RSN-421)
 <li>sendError after flush is an illegal state
 <li>Set-Cookie for version 1 needs to set max-age and path
 <li>Host ETag needs to be set even on initial call (rep by Keith Fetterman)

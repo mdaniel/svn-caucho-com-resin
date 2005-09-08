@@ -120,7 +120,12 @@ public class AccessLogWriter extends AbstractRolloverLog implements Runnable {
 	}
 	else {
 	  try {
-	    _writeQueue.wait();
+	    // If the queue is full, call the flush code directly
+	    // since the thread pool may be out of threads for
+	    // a schedule
+	    log.fine("AccessLogWriter flushing log directly.");
+	      
+	    run();
 	  } catch (Throwable e) {
 	    log.log(Level.WARNING, e.toString(), e);
 	  }
