@@ -35,27 +35,33 @@ import java.util.logging.Level;
 import java.io.IOException;
 
 import javax.management.ObjectName;
+import javax.management.MBeanOperationInfo;
 
 import com.caucho.log.Log;
 
 import com.caucho.jmx.Jmx;
+import com.caucho.jmx.IntrospectionAttributeDescriptor;
+import com.caucho.jmx.IntrospectionOperationDescriptor;
+import com.caucho.jmx.IntrospectionClosure;
+import com.caucho.jmx.AdminAttributeCategory;
+import com.caucho.jmx.IntrospectionMBeanDescriptor;
 
 import com.caucho.vfs.Vfs;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.ReadWritePair;
 
-import com.caucho.config.types.Period;
-
 import com.caucho.server.cluster.mbean.ClusterClientMBean;
+import com.caucho.util.L10N;
 
 /**
  * Defines a connection to one of the servers in a distribution group.
  */
 public class ClusterServer implements ClusterClientMBean {
-  static protected final Logger log = Log.open(ClusterServer.class);
+  private static final Logger log = Log.open(ClusterServer.class);
+  private static final L10N L = new L10N(ClusterServer.class);
 
   private ObjectName _objectName;
-  
+
   private Cluster _cluster;
   private ClusterGroup _group;
 
@@ -68,6 +74,11 @@ public class ClusterServer implements ClusterClientMBean {
 
   public ClusterServer()
   {
+  }
+
+  public void describe(IntrospectionMBeanDescriptor descriptor)
+  {
+    descriptor.setTitle(L.l("ClusterClient {0}:{1}", getHost(), getPort()));
   }
 
   /**
@@ -92,6 +103,11 @@ public class ClusterServer implements ClusterClientMBean {
   public ObjectName getObjectName()
   {
     return _objectName;
+  }
+
+  public void describeObjectName(IntrospectionAttributeDescriptor descriptor)
+  {
+    descriptor.setIgnored(true);
   }
 
   /**
@@ -125,7 +141,7 @@ public class ClusterServer implements ClusterClientMBean {
   {
     return _port;
   }
-  
+
   /**
    * Returns the user-readable id of the target server.
    */
@@ -133,7 +149,7 @@ public class ClusterServer implements ClusterClientMBean {
   {
     return _port.getServerId();
   }
-  
+
   /**
    * Returns the index of this connection in the connection group.
    */
@@ -233,6 +249,12 @@ public class ClusterServer implements ClusterClientMBean {
     return _client.getActiveCount();
   }
 
+  public void describeActiveCount(IntrospectionAttributeDescriptor descriptor)
+  {
+    descriptor.setCategory(AdminAttributeCategory.STATISTIC);
+    descriptor.setSortOrder(200);
+  }
+
   /**
    * Initialize
    */
@@ -240,7 +262,7 @@ public class ClusterServer implements ClusterClientMBean {
     throws Exception
   {
     String host = getHost();
-    
+
     if (host == null)
       host = "localhost";
 
@@ -254,12 +276,12 @@ public class ClusterServer implements ClusterClientMBean {
     try {
       String clusterName = _cluster.getId();
       if (clusterName == null || clusterName.equals(""))
-	clusterName = "default";
-      
+        clusterName = "default";
+
       _objectName = Jmx.getObjectName("type=ClusterClient," +
-				      "Cluster=" + clusterName + 
-				      ",host=" + host +
-				      ",port=" + getPort());
+                                      "Cluster=" + clusterName +
+                                      ",host=" + host +
+                                      ",port=" + getPort());
 
       Jmx.register(this, _objectName);
     } catch (Throwable e) {
@@ -283,12 +305,31 @@ public class ClusterServer implements ClusterClientMBean {
     return _client.isActive();
   }
 
+  public void describeActive(IntrospectionAttributeDescriptor descriptor)
+  {
+    descriptor.setCategory(AdminAttributeCategory.CONFIGURATION);
+    descriptor.setSortOrder(100);
+  }
+
   /**
    * Enable the client
    */
   public void enable()
   {
     _client.enable();
+  }
+
+  public void describeEnable(IntrospectionOperationDescriptor descriptor)
+  {
+    descriptor.setImpact(MBeanOperationInfo.ACTION);
+    descriptor.setSortOrder(400);
+    descriptor.setEnabled(new IntrospectionClosure() {
+      public Object call()
+        throws Exception
+      {
+        return !isActive();
+      }
+    });
   }
 
   /**
@@ -299,6 +340,21 @@ public class ClusterServer implements ClusterClientMBean {
     _client.disable();
   }
 
+  public void describeDisable(IntrospectionOperationDescriptor descriptor)
+  {
+    descriptor.setImpact(MBeanOperationInfo.ACTION);
+
+    descriptor.setSortOrder(500);
+
+    descriptor.setEnabled(new IntrospectionClosure() {
+      public Object call()
+        throws Exception
+      {
+        return isActive();
+      }
+    });
+  }
+
   /**
    * Returns the client.
    */
@@ -306,7 +362,7 @@ public class ClusterServer implements ClusterClientMBean {
   {
     return _client;
   }
-  
+
   /**
    * Open a read/write pair to the target srun connection.
    *
@@ -337,9 +393,9 @@ public class ClusterServer implements ClusterClientMBean {
       ClusterStream stream = _client.open();
 
       if (stream != null) {
-	stream.close();
+        stream.close();
 
-	return true;
+        return true;
       }
 
       return false;
@@ -348,6 +404,12 @@ public class ClusterServer implements ClusterClientMBean {
 
       return false;
     }
+  }
+
+  public void describeCanConnect(IntrospectionOperationDescriptor descriptor)
+  {
+    descriptor.setImpact(MBeanOperationInfo.INFO);
+    descriptor.setSortOrder(300);
   }
 
   /**

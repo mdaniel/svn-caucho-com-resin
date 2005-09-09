@@ -89,6 +89,11 @@ public class XmlWriter
       _strategy = XML;
   }
 
+  public void setStrategy(Strategy strategy)
+  {
+    _strategy = strategy;
+  }
+
   public void setIndenting(boolean isIndenting)
   {
     _isIndenting = isIndenting;

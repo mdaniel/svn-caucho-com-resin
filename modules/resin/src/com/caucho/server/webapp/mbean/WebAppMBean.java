@@ -39,14 +39,15 @@ public interface WebAppMBean extends DeployControllerMBean {
    * Returns the root directory.
    */
   public String getRootDirectory();
-  
+
   /**
    * Returns the application's context path.
    */
   public String getContextPath();
-  
+
   /**
    * Returns the count of active sessions.
    */
   public int getActiveSessionCount();
+
 }

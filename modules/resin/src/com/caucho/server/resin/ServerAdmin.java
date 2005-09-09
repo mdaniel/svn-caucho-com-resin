@@ -62,6 +62,9 @@ import com.caucho.loader.EnvironmentListener;
 
 import com.caucho.jmx.Jmx;
 import com.caucho.jmx.IntrospectionMBean;
+import com.caucho.jmx.IntrospectionAttributeDescriptor;
+import com.caucho.jmx.AdminAttributeCategory;
+import com.caucho.jmx.IntrospectionMBeanDescriptor;
 
 import com.caucho.server.session.SessionManager;
 
@@ -71,13 +74,29 @@ import com.caucho.server.deploy.ExpandDeployController;
 import com.caucho.server.resin.mbean.ServletServerMBean;
 
 public class ServerAdmin extends DeployControllerAdmin<ServerController>
-  implements ServletServerMBean {
+  implements ServletServerMBean
+{
+  private static final L10N L = new L10N(ServerAdmin.class);
 
   ServerAdmin(ServerController controller)
   {
     super(controller);
   }
   
+  public void describe(IntrospectionMBeanDescriptor descriptor)
+  {
+    String title;
+
+    String id = getId();
+
+    if (id == null || id.length() == 0)
+      title = L.l("Server");
+    else
+      title = L.l("Server {0}", id);
+
+    descriptor.setTitle(title);
+  }
+
   /**
    * Returns the server directory.
    */
@@ -112,6 +131,12 @@ public class ServerAdmin extends DeployControllerAdmin<ServerController>
       return new ObjectName[0];
   }
   
+  public void describePortObjectNames(IntrospectionAttributeDescriptor descriptor)
+  {
+    descriptor.setCategory(AdminAttributeCategory.CHILD);
+    descriptor.setSortOrder(210);
+  }
+
   /**
    * Returns the array of cluster.
    */
@@ -125,6 +150,12 @@ public class ServerAdmin extends DeployControllerAdmin<ServerController>
       return new ObjectName[0];
   }
   
+  public void describeClusterObjectNames(IntrospectionAttributeDescriptor descriptor)
+  {
+    descriptor.setCategory(AdminAttributeCategory.CHILD);
+    descriptor.setSortOrder(220);
+  }
+
   /**
    * Clears the cache.
    */
@@ -163,6 +194,12 @@ public class ServerAdmin extends DeployControllerAdmin<ServerController>
       return -1;
   }
 
+  public void describeInvocationCacheHitCount(IntrospectionAttributeDescriptor descriptor)
+  {
+    descriptor.setCategory(AdminAttributeCategory.STATISTIC);
+    descriptor.setSortOrder(2000);
+  }
+
   /**
    * Returns the invocation cache miss count.
    */
@@ -174,6 +211,12 @@ public class ServerAdmin extends DeployControllerAdmin<ServerController>
       return server.getInvocationCacheMissCount();
     else
       return -1;
+  }
+
+  public void describeInvocationCacheMissCount(IntrospectionAttributeDescriptor descriptor)
+  {
+    descriptor.setCategory(AdminAttributeCategory.STATISTIC);
+    descriptor.setSortOrder(2010);
   }
 
   /**
@@ -189,6 +232,11 @@ public class ServerAdmin extends DeployControllerAdmin<ServerController>
       return -1;
   }
 
+  public void describeProxyCacheHitCount(IntrospectionAttributeDescriptor descriptor)
+  {
+    descriptor.setIgnored(true);
+  }
+
   /**
    * Returns the proxy cache miss count.
    */
@@ -200,6 +248,11 @@ public class ServerAdmin extends DeployControllerAdmin<ServerController>
       return server.getProxyCacheMissCount();
     else
       return -1;
+  }
+
+  public void describeProxyCacheMissCount(IntrospectionAttributeDescriptor descriptor)
+  {
+    descriptor.setIgnored(true);
   }
 
   protected ServletServer getDeployInstance()

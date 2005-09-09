@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2004 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2005 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -19,49 +19,31 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *
- *   Free Software Foundation, Inc.
+ *   Free SoftwareFoundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Scott Ferguson
+ * @author Sam
  */
 
-package com.caucho.server.cluster.mbean;
+package com.caucho.jmx;
 
-import javax.management.ObjectName;
-
-/**
- * Admin for a cluster.
- */
-public interface ClusterClientMBean {
-  /**
-   * Returns the cluster client's object name.
-   */
-  public ObjectName getObjectName();
-  
-  /**
-   * Returns true if active.
-   */
-  public boolean isActive();
+public class IntrospectionAttributeDescriptor
+  extends IntrospectionFeatureDescriptor
+{
+  public IntrospectionAttributeDescriptor()
+  {
+    setCategory(AdminAttributeCategory.GENERAL);
+  }
 
   /**
-   * Returns the active count.
+   * Set a logical category that this attribute belongs to, default is
+   * {@link AdminAttributeCategory#GENERAL}.
+   *
+   * <p>Set's the descriptor field "com.caucho.admin.category"</p>
    */
-  public int getActiveCount();
-  
-  /**
-   * Check if can connect.
-   */
-  public boolean canConnect();
-
-  /**
-   * enable the client
-   */
-  public void enable();
-
-  /**
-   * disable the client
-   */
-  public void disable();
+  public void setCategory(AdminAttributeCategory category)
+  {
+    setField("com.caucho.admin.category", category.toString());
+  }
 }

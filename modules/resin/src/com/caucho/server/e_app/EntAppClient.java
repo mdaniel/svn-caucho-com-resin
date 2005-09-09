@@ -109,14 +109,14 @@ import com.caucho.ejb.EJBClientInterface;
  */
 public class EntAppClient implements DeployInstance, EnvironmentBean {
   /* implements EnvironmentBean, EnvironmentListener, AlarmListener */
-  
+
   static final L10N L = new L10N(EntAppClient.class);
   static final Logger log = Log.open(EntAppClient.class);
 
   private EnvironmentClassLoader _loader;
 
   private String _name;
-  
+
   private Path _rootDir;
 
   private Path _archivePath;
@@ -155,11 +155,11 @@ public class EntAppClient implements DeployInstance, EnvironmentBean {
     _name = name;
 
     ClassLoader parentLoader = Thread.currentThread().getContextClassLoader();
-    
+
     _loader = new EnvironmentClassLoader(parentLoader);
     //_loader.setOwner(this);
     _loader.setId("EntAppClient[" + name + "]");
-    
+
     _lifecycle = new Lifecycle(log, toString(), Level.INFO);
 
     if (entry.getArchivePath() != null)
@@ -263,7 +263,7 @@ public class EntAppClient implements DeployInstance, EnvironmentBean {
   {
     if (stubClass == null)
       return;
-    
+
     try {
       if (_stubLoader == null) {
 	Class iiopClass = Class.forName("com.caucho.iiop.IiopStubLoader");
@@ -345,14 +345,14 @@ public class EntAppClient implements DeployInstance, EnvironmentBean {
 
     return link;
   }
-  
+
   /**
    * Stub for the xsi:schemaLocation tag.
    */
   public void setSchemaLocation(String s)
   {
   }
-  
+
   /**
    * Stub for the version tag.
    */
@@ -371,10 +371,10 @@ public class EntAppClient implements DeployInstance, EnvironmentBean {
 
     Thread thread = Thread.currentThread();
     ClassLoader oldLoader = thread.getContextClassLoader();
-    
+
     try {
       thread.setContextClassLoader(_loader);
-      
+
       Path rootDir = getRootDirectory();
       Vfs.setPwd(rootDir);
 
@@ -391,7 +391,7 @@ public class EntAppClient implements DeployInstance, EnvironmentBean {
     } catch (Throwable e) {
       e.printStackTrace();
       log.log(Level.WARNING, e.toString(), e);
-      
+
       _configException = e;
     } finally {
       thread.setContextClassLoader(oldLoader);
@@ -402,12 +402,12 @@ public class EntAppClient implements DeployInstance, EnvironmentBean {
     throws Exception
   {
     Path rootDir = getRootDirectory();
-    
+
     Path xml = rootDir.lookup("META-INF/resin-client.xml");
 
     if (! xml.canRead())
       return;
-    
+
     // AppClientBinding binding = new AppClientBinding(this);
 
     // builder.setCompactSchema("com/caucho/server/e_app/app-client-14.rnc");
@@ -453,7 +453,7 @@ public class EntAppClient implements DeployInstance, EnvironmentBean {
   public void start()
   {
     init();
-    
+
     if (! _lifecycle.toActive())
       return;
   }
@@ -483,14 +483,14 @@ public class EntAppClient implements DeployInstance, EnvironmentBean {
 
     if (_configException != null)
       throw _configException;
-    
+
     if (! _lifecycle.isActive())
       throw new IllegalStateException(L.l("{0} is not active.",
 					  this));
 
     Thread thread = Thread.currentThread();
     ClassLoader oldLoader = thread.getContextClassLoader();
-    
+
     try {
       thread.setContextClassLoader(_loader);
 
@@ -549,7 +549,7 @@ public class EntAppClient implements DeployInstance, EnvironmentBean {
       System.out.println("LINK: " + _jndiName + " " + _ejbName);
       String orbHost = System.getProperty("org.omg.CORBA.ORBInitialHost");
       String orbPort = System.getProperty("org.omg.CORBA.ORBInitialPort");
-      
+
       Hashtable env = new Hashtable();
       env.put("java.naming.factory.initial",
 	      "com.sun.jndi.cosnaming.CNCtxFactory");

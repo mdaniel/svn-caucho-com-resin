@@ -48,11 +48,6 @@ public interface PortMBean {
   public int getPort();
   
   /**
-   * Returns true for an active port.
-   */
-  public boolean isActive();
-
-  /**
    * Returns the maximum connections.
    */
   public int getConnectionMax();
@@ -61,6 +56,26 @@ public interface PortMBean {
    * Returns the maximum keepalive connections.
    */
   public int getKeepaliveMax();
+
+  /**
+   * Returns true for an active port.
+   */
+  public boolean isActive();
+
+  /**
+   * Returns the thread count.
+   */
+  public int getThreadCount();
+
+  /**
+   * Returns the active thread count.
+   */
+  public int getActiveThreadCount();
+
+  /**
+   * Returns the idle thread count.
+   */
+  public int getIdleThreadCount();
 
   /**
    * Returns the total connections.
@@ -83,22 +98,8 @@ public interface PortMBean {
   public int getSelectConnectionCount();
 
   /**
-   * Returns the thread count.
-   */
-  public int getThreadCount();
-
-  /**
-   * Returns the idle thread count.
-   */
-  public int getIdleThreadCount();
-
-  /**
-   * Returns the active thread count.
-   */
-  public int getActiveThreadCount();
-
-  /**
    * Returns the keepalive connection count.
    */
   public int getKeepaliveCount();
+
 }

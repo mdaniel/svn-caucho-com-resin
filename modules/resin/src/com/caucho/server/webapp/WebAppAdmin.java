@@ -29,29 +29,54 @@
 
 package com.caucho.server.webapp;
 
-import com.caucho.server.deploy.EnvironmentDeployController;
 import com.caucho.server.deploy.DeployControllerAdmin;
 
 import com.caucho.server.session.SessionManager;
 
 import com.caucho.server.webapp.mbean.WebAppMBean;
+import com.caucho.jmx.IntrospectionMBeanDescriptor;
+import com.caucho.jmx.AdminAttributeCategory;
+import com.caucho.jmx.IntrospectionAttributeDescriptor;
+import com.caucho.util.L10N;
 
 /**
  * The admin implementation for a web-app.
  */
 public class WebAppAdmin extends DeployControllerAdmin<WebAppController>
-  implements WebAppMBean {
+  implements WebAppMBean
+{
+  private static L10N L = new L10N(WebAppAdmin.class);
+
   public WebAppAdmin(WebAppController controller)
   {
     super(controller);
   }
-  
+
+  public void describe(IntrospectionMBeanDescriptor descriptor)
+  {
+    super.describe(descriptor);
+
+    String contextPath = getContextPath();
+
+    if (contextPath == null || contextPath.length() == 0)
+      contextPath = "/";
+
+    descriptor.setTitle(L.l("WebApp {0}", contextPath));
+
+    descriptor.setDescription(L.l("A web application is a self-contained subtree of the web site."));
+  }
+
   /**
    * Returns the context path
    */
   public String getContextPath()
   {
     return getController().getContextPath();
+  }
+
+  public void describeContextPath(IntrospectionAttributeDescriptor descriptor)
+  {
+    descriptor.setCategory(AdminAttributeCategory.CONFIGURATION);
   }
 
   /**
@@ -71,6 +96,11 @@ public class WebAppAdmin extends DeployControllerAdmin<WebAppController>
     return manager.getActiveSessionCount();
   }
 
+  public void describeActiveSessionCount(IntrospectionAttributeDescriptor descriptor)
+  {
+    descriptor.setCategory(AdminAttributeCategory.STATISTIC);
+  }
+
   /**
    * Returns the active application.
    */
@@ -78,4 +108,5 @@ public class WebAppAdmin extends DeployControllerAdmin<WebAppController>
   {
     return getController().getApplication();
   }
+
 }

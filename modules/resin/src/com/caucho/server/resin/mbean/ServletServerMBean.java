@@ -42,6 +42,26 @@ import com.caucho.server.resin.ServletServer;
  */
 public interface ServletServerMBean extends DeployControllerMBean {
   /**
+   * Returns the invocation cache hit count.
+   */
+  public long getInvocationCacheHitCount();
+
+  /**
+   * Returns the invocation cache miss count.
+   */
+  public long getInvocationCacheMissCount();
+
+  /**
+   * Returns the proxy cache hit count.
+   */
+  public long getProxyCacheHitCount();
+
+  /**
+   * Returns the proxy cache miss count.
+   */
+  public long getProxyCacheMissCount();
+
+  /**
    * Returns the array of ports.
    */
   public ObjectName []getPortObjectNames();
@@ -64,23 +84,4 @@ public interface ServletServerMBean extends DeployControllerMBean {
    */
   public void clearCacheByPattern(String hostRegexp, String urlRegexp);
 
-  /**
-   * Returns the invocation cache hit count.
-   */
-  public long getInvocationCacheHitCount();
-
-  /**
-   * Returns the invocation cache miss count.
-   */
-  public long getInvocationCacheMissCount();
-
-  /**
-   * Returns the proxy cache hit count.
-   */
-  public long getProxyCacheHitCount();
-
-  /**
-   * Returns the proxy cache miss count.
-   */
-  public long getProxyCacheMissCount();
 }

@@ -40,17 +40,18 @@ import com.caucho.server.webapp.mbean.WebAppMBean;
 /**
  * Management interface for the host.
  */
+
 public interface HostMBean extends DeployControllerMBean {
   /**
    * Returns the host's JMX name.
    */
   public ObjectName getObjectName();
-  
+
   /**
    * Returns the host name.
    */
   public String getHostName();
-  
+
   /**
    * Returns the URL
    */

@@ -32,7 +32,6 @@ package com.caucho.server.deploy.mbean;
 import java.util.Date;
 
 import javax.management.ObjectName;
-import javax.management.NotificationBroadcaster;
 
 /**
  * Management interface for the deploy controller.

@@ -35,19 +35,27 @@ import javax.management.ObjectName;
 
 import com.caucho.vfs.Path;
 
-import com.caucho.server.deploy.EnvironmentDeployController;
 import com.caucho.server.deploy.DeployControllerAdmin;
 
 import com.caucho.server.host.mbean.HostMBean;
 
 import com.caucho.server.webapp.WebAppController;
 import com.caucho.server.webapp.mbean.WebAppMBean;
+import com.caucho.jmx.AdminAttributeCategory;
+import com.caucho.jmx.IntrospectionAttributeDescriptor;
+import com.caucho.jmx.IntrospectionOperationDescriptor;
+import com.caucho.jmx.IntrospectionMBeanDescriptor;
+import com.caucho.jmx.IntrospectionClosure;
+import com.caucho.util.L10N;
 
 /**
  * The admin implementation for a host.
  */
 public class HostAdmin extends DeployControllerAdmin<HostController>
-  implements HostMBean {
+  implements HostMBean
+{
+  private static final L10N L = new L10N(HostAdmin.class);
+
   /**
    * Creates the admin.
    */
@@ -56,14 +64,30 @@ public class HostAdmin extends DeployControllerAdmin<HostController>
     super(controller);
   }
 
+  public void describe(IntrospectionMBeanDescriptor descriptor)
+  {
+    String hostName = getHostName();
+
+    if (hostName == null || hostName.length() == 0)
+      hostName = "*";
+
+    descriptor.setTitle(L.l("Host {0}", hostName));
+  }
+
   public String getName()
   {
     return getController().getName();
   }
-    
+
   public String getHostName()
   {
     return getController().getHostName();
+  }
+
+  public void describeHostName(IntrospectionAttributeDescriptor descriptor)
+  {
+    descriptor.setCategory(AdminAttributeCategory.CONFIGURATION);
+    descriptor.setSortOrder(200);
   }
 
   /**
@@ -73,15 +97,26 @@ public class HostAdmin extends DeployControllerAdmin<HostController>
   {
     return getController().getObjectName();
   }
-    
+
+  public void describeObjectName(IntrospectionAttributeDescriptor descriptor)
+  {
+    descriptor.setIgnored(true);
+  }
+
   public String getURL()
   {
     Host host = getHost();
-      
+
     if (host != null)
       return host.getURL();
     else
       return null;
+  }
+
+  public void describeURL(IntrospectionAttributeDescriptor descriptor)
+  {
+    descriptor.setCategory(AdminAttributeCategory.CONFIGURATION);
+    descriptor.setSortOrder(210);
   }
 
   /**
@@ -90,9 +125,9 @@ public class HostAdmin extends DeployControllerAdmin<HostController>
   public String getRootDirectory()
   {
     Path path = null;
-      
+
     Host host = getHost();
-      
+
     if (host != null)
       path = host.getRootDirectory();
 
@@ -102,15 +137,21 @@ public class HostAdmin extends DeployControllerAdmin<HostController>
       return null;
   }
 
+  public void describeRootDirectory(IntrospectionAttributeDescriptor descriptor)
+  {
+    descriptor.setCategory(AdminAttributeCategory.CONFIGURATION);
+    descriptor.setSortOrder(220);
+  }
+
   /**
    * Returns the host's document directory.
    */
   public String getDocumentDirectory()
   {
     Path path = null;
-      
+
     Host host = getHost();
-      
+
     if (host != null)
       path = host.getDocumentDirectory();
 
@@ -120,15 +161,26 @@ public class HostAdmin extends DeployControllerAdmin<HostController>
       return null;
   }
 
+  public void describeDocumentDirectory(IntrospectionAttributeDescriptor descriptor)
+  {
+    descriptor.setCategory(AdminAttributeCategory.CONFIGURATION);
+
+    descriptor.setSortOrder(230);
+
+    boolean isIgnored = getDocumentDirectory().equals(getRootDirectory());
+
+    descriptor.setIgnored(isIgnored);
+  }
+
   /**
    * Returns the host's war directory.
    */
   public String getWarDirectory()
   {
     Path path = null;
-      
+
     Host host = getHost();
-      
+
     if (host != null)
       path = host.getWarDir();
 
@@ -137,13 +189,18 @@ public class HostAdmin extends DeployControllerAdmin<HostController>
     else
       return null;
   }
-    
+
+  public void describeWarDirectory(IntrospectionAttributeDescriptor descriptor)
+  {
+    descriptor.setIgnored(true);
+  }
+
   public String getWarExpandDirectory()
   {
     Path path = null;
-      
+
     Host host = getHost();
-      
+
     if (host != null)
       path = host.getWarExpandDir();
 
@@ -153,6 +210,11 @@ public class HostAdmin extends DeployControllerAdmin<HostController>
       return null;
   }
 
+  public void describeWarExpandDirectory(IntrospectionAttributeDescriptor descriptor)
+  {
+    descriptor.setIgnored(true);
+  }
+
   /**
    * Updates a .war deployment.
    */
@@ -160,9 +222,14 @@ public class HostAdmin extends DeployControllerAdmin<HostController>
     throws Throwable
   {
     Host host = getHost();
-      
+
     if (host != null)
       host.updateWebAppDeploy(name);
+  }
+
+  public void describeUpdateWebAppDeploy(IntrospectionOperationDescriptor descriptor)
+  {
+    descriptor.setIgnored(true);
   }
 
   /**
@@ -172,9 +239,14 @@ public class HostAdmin extends DeployControllerAdmin<HostController>
     throws Throwable
   {
     Host host = getHost();
-      
+
     if (host != null)
       host.updateEarDeploy(name);
+  }
+
+  public void describeUpdateEarDeploy(IntrospectionOperationDescriptor descriptor)
+  {
+    descriptor.setIgnored(true);
   }
 
   /**
@@ -183,9 +255,14 @@ public class HostAdmin extends DeployControllerAdmin<HostController>
   public void expandEarDeploy(String name)
   {
     Host host = getHost();
-      
+
     if (host != null)
       host.expandEarDeploy(name);
+  }
+
+  public void describeExpandEarDeploy(IntrospectionOperationDescriptor descriptor)
+  {
+    descriptor.setIgnored(true);
   }
 
   /**
@@ -194,9 +271,14 @@ public class HostAdmin extends DeployControllerAdmin<HostController>
   public void startEarDeploy(String name)
   {
     Host host = getHost();
-      
+
     if (host != null)
       host.startEarDeploy(name);
+  }
+
+  public void describeStartEarDeploy(IntrospectionOperationDescriptor descriptor)
+  {
+    descriptor.setIgnored(true);
   }
 
   /**
@@ -215,11 +297,16 @@ public class HostAdmin extends DeployControllerAdmin<HostController>
 
     for (int i = 0; i < names.length; i++) {
       WebAppController controller = webappList.get(i);
-      
+
       names[i] = controller.getObjectName();
     }
 
     return names;
+  }
+
+  public void describeWebAppNames(IntrospectionAttributeDescriptor descriptor)
+  {
+    descriptor.setCategory(AdminAttributeCategory.CHILD);
   }
 
   /**
@@ -238,11 +325,16 @@ public class HostAdmin extends DeployControllerAdmin<HostController>
 
     for (int i = 0; i < webapps.length; i++) {
       WebAppController controller = webappList.get(i);
-      
+
       webapps[i] = controller.getAdmin();
     }
 
     return webapps;
+  }
+
+  public void describeWebApps(IntrospectionAttributeDescriptor descriptor)
+  {
+    descriptor.setDeprecated("3.0.15 Use WebAppNames");
   }
 
   /**

@@ -34,8 +34,6 @@ import java.util.Date;
 import java.util.logging.Logger;
 import java.util.logging.Level;
 
-import java.io.IOException;
-
 import javax.management.ObjectName;
 import javax.management.NotificationBroadcasterSupport;
 import javax.management.NotificationListener;
@@ -44,8 +42,14 @@ import javax.management.ListenerNotFoundException;
 import javax.management.MBeanNotificationInfo;
 import javax.management.AttributeChangeNotification;
 import javax.management.NotificationEmitter;
+import javax.management.MBeanOperationInfo;
 
 import com.caucho.jmx.MBeanHandle;
+import com.caucho.jmx.IntrospectionMBeanDescriptor;
+import com.caucho.jmx.IntrospectionAttributeDescriptor;
+import com.caucho.jmx.AdminAttributeCategory;
+import com.caucho.jmx.IntrospectionOperationDescriptor;
+import com.caucho.jmx.IntrospectionClosure;
 
 import com.caucho.server.deploy.mbean.DeployControllerMBean;
 import com.caucho.lifecycle.LifecycleListener;
@@ -72,6 +76,10 @@ public class DeployControllerAdmin<C extends EnvironmentDeployController>
     controller.addLifecycleListener(this);
   }
 
+  public void describe(IntrospectionMBeanDescriptor descriptor)
+  {
+  }
+
   /**
    * Returns the controller.
    */
@@ -88,6 +96,11 @@ public class DeployControllerAdmin<C extends EnvironmentDeployController>
     return _controller.getObjectName();
   }
 
+  public void describeObjectName(IntrospectionAttributeDescriptor descriptor)
+  {
+    descriptor.setIgnored(true);
+  }
+
   /**
    * Returns the controller state.
    */
@@ -96,12 +109,48 @@ public class DeployControllerAdmin<C extends EnvironmentDeployController>
     return getController().getState();
   }
 
+  public void describeState(IntrospectionAttributeDescriptor descriptor)
+  {
+    descriptor.setCategory(AdminAttributeCategory.STATISTIC);
+    descriptor.setSortOrder(1000);
+  }
+
   /**
    * Returns the time of the last start
    */
   public Date getStartTime()
   {
     return new Date(getController().getStartTime());
+  }
+
+  public void describeStartTime(IntrospectionAttributeDescriptor descriptor)
+  {
+    descriptor.setCategory(AdminAttributeCategory.STATISTIC);
+    descriptor.setSortOrder(1010);
+  }
+
+  /**
+   * Starts the server.
+   */
+  public void start()
+    throws Exception
+  {
+    getController().start();
+  }
+
+  public void describeStart(IntrospectionOperationDescriptor descriptor)
+  {
+    descriptor.setImpact(MBeanOperationInfo.ACTION);
+
+    descriptor.setSortOrder(10000);
+
+    descriptor.setEnabled(new IntrospectionClosure() {
+      public Object call()
+        throws Exception
+      {
+        return getController().isStopped();
+      }
+    });
   }
 
   /**
@@ -113,13 +162,19 @@ public class DeployControllerAdmin<C extends EnvironmentDeployController>
     getController().stop();
   }
 
-  /**
-   * Starts the server.
-   */
-  public void start()
-    throws Exception
+  public void describeStop(IntrospectionOperationDescriptor descriptor)
   {
-    getController().start();
+    descriptor.setImpact(MBeanOperationInfo.ACTION);
+
+    descriptor.setSortOrder(10010);
+
+    descriptor.setEnabled(new IntrospectionClosure() {
+      public Object call()
+        throws Exception
+      {
+        return getController().isActive();
+      }
+    });
   }
 
   /**
@@ -132,6 +187,21 @@ public class DeployControllerAdmin<C extends EnvironmentDeployController>
     getController().start();
   }
 
+  public void describeRestart(IntrospectionOperationDescriptor descriptor)
+  {
+    descriptor.setImpact(MBeanOperationInfo.ACTION);
+
+    descriptor.setSortOrder(10020);
+
+    descriptor.setEnabled(new IntrospectionClosure() {
+      public Object call()
+        throws Exception
+      {
+        return getController().isActive();
+      }
+    });
+  }
+
   /**
    * Restarts the server if changes are detected.
    */
@@ -141,12 +211,25 @@ public class DeployControllerAdmin<C extends EnvironmentDeployController>
     getController().update();
   }
 
+  public void describeUpdate(IntrospectionOperationDescriptor descriptor)
+  {
+    descriptor.setImpact(MBeanOperationInfo.ACTION);
+
+    descriptor.setSortOrder(10030);
+  }
+
   /**
    * Returns the root directory
    */
   public String getRootDirectory()
   {
     return _controller.getRootDirectory().getNativePath();
+  }
+
+  public void describeRootDirectory(IntrospectionAttributeDescriptor descriptor)
+  {
+    descriptor.setCategory(AdminAttributeCategory.CONFIGURATION);
+    descriptor.setSortOrder(100);
   }
 
   /**

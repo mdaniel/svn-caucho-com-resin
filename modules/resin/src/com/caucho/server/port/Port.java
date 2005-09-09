@@ -64,6 +64,9 @@ import com.caucho.config.types.Period;
 import com.caucho.lifecycle.Lifecycle;
 
 import com.caucho.jmx.Jmx;
+import com.caucho.jmx.AdminAttributeCategory;
+import com.caucho.jmx.IntrospectionAttributeDescriptor;
+import com.caucho.jmx.IntrospectionMBeanDescriptor;
 
 import com.caucho.server.port.mbean.PortMBean;
 
@@ -161,6 +164,16 @@ public class Port implements EnvironmentListener, PortMBean, Runnable {
   {
   }
   
+  public void describe(IntrospectionMBeanDescriptor descriptor)
+  {
+    String host = getHost();
+
+    if (host == null || host.length() == 0)
+      host = "*";
+
+    descriptor.setTitle(L.l("Port {0}:{1}", host, getPort()));
+  }
+
   /**
    * Sets the containing server.
    */
@@ -254,6 +267,12 @@ public class Port implements EnvironmentListener, PortMBean, Runnable {
       return null;
   }
 
+  public void describeProtocolName(IntrospectionAttributeDescriptor descriptor)
+  {
+    descriptor.setCategory(AdminAttributeCategory.CONFIGURATION);
+    descriptor.setSortOrder(100);
+  }
+
   /**
    * Sets the host.
    */
@@ -276,6 +295,12 @@ public class Port implements EnvironmentListener, PortMBean, Runnable {
     return _host;
   }
 
+  public void describeHost(IntrospectionAttributeDescriptor descriptor)
+  {
+    descriptor.setCategory(AdminAttributeCategory.CONFIGURATION);
+    descriptor.setSortOrder(200);
+  }
+
   /**
    * Sets the port.
    */
@@ -290,6 +315,12 @@ public class Port implements EnvironmentListener, PortMBean, Runnable {
   public int getPort()
   {
     return _port;
+  }
+
+  public void describePort(IntrospectionAttributeDescriptor descriptor)
+  {
+    descriptor.setCategory(AdminAttributeCategory.CONFIGURATION);
+    descriptor.setSortOrder(300);
   }
 
   /**
@@ -440,6 +471,12 @@ public class Port implements EnvironmentListener, PortMBean, Runnable {
     return _threadCount;
   }
 
+  public void describeThreadCount(IntrospectionAttributeDescriptor descriptor)
+  {
+    descriptor.setCategory(AdminAttributeCategory.STATISTIC);
+    descriptor.setSortOrder(1100);
+  }
+
   /**
    * Sets the default read/write timeout for the accepted sockets.
    */
@@ -488,12 +525,24 @@ public class Port implements EnvironmentListener, PortMBean, Runnable {
     return _threadCount - _idleThreadCount;
   }
 
+  public void describeActiveThreadCount(IntrospectionAttributeDescriptor descriptor)
+  {
+    descriptor.setCategory(AdminAttributeCategory.STATISTIC);
+    descriptor.setSortOrder(1200);
+  }
+
   /**
    * Returns the count of idle threads.
    */
   public int getIdleThreadCount()
   {
     return _idleThreadCount;
+  }
+
+  public void describeIdleThreadCount(IntrospectionAttributeDescriptor descriptor)
+  {
+    descriptor.setCategory(AdminAttributeCategory.STATISTIC);
+    descriptor.setSortOrder(1400);
   }
 
   /**
@@ -510,6 +559,12 @@ public class Port implements EnvironmentListener, PortMBean, Runnable {
   public int getConnectionMax()
   {
     return _connectionMax;
+  }
+
+  public void describeConnectionMax(IntrospectionAttributeDescriptor descriptor)
+  {
+    descriptor.setCategory(AdminAttributeCategory.CONFIGURATION);
+    descriptor.setSortOrder(400);
   }
 
   /**
@@ -541,6 +596,12 @@ public class Port implements EnvironmentListener, PortMBean, Runnable {
     return _keepaliveMax;
   }
 
+  public void describeKeepaliveMax(IntrospectionAttributeDescriptor descriptor)
+  {
+    descriptor.setCategory(AdminAttributeCategory.CONFIGURATION);
+    descriptor.setSortOrder(500);
+  }
+
   /**
    * Returns the number of keepalive connections
    */
@@ -551,6 +612,11 @@ public class Port implements EnvironmentListener, PortMBean, Runnable {
     }
   }
 
+  public void describeKeepaliveCount(IntrospectionAttributeDescriptor descriptor)
+  {
+    descriptor.setIgnored(true);
+  }
+
   /**
    * Returns true if the port is active.
    */
@@ -558,6 +624,13 @@ public class Port implements EnvironmentListener, PortMBean, Runnable {
   {
     return _lifecycle.isActive();
   }
+
+  public void describeActive(IntrospectionAttributeDescriptor descriptor)
+  {
+    descriptor.setCategory(AdminAttributeCategory.STATISTIC);
+    descriptor.setSortOrder(1000);
+  }
+
   /**
    * Returns the accept pool.
    */
@@ -711,6 +784,12 @@ public class Port implements EnvironmentListener, PortMBean, Runnable {
     return _connectionCount;
   }
 
+  public void describeTotalConnectionCount(IntrospectionAttributeDescriptor descriptor)
+  {
+    descriptor.setCategory(AdminAttributeCategory.STATISTIC);
+    descriptor.setSortOrder(1500);
+  }
+
   /**
    * Returns the active connections.
    */
@@ -719,12 +798,24 @@ public class Port implements EnvironmentListener, PortMBean, Runnable {
     return _threadCount - _idleThreadCount;
   }
 
+  public void describeActiveConnectionCount(IntrospectionAttributeDescriptor descriptor)
+  {
+    descriptor.setCategory(AdminAttributeCategory.STATISTIC);
+    descriptor.setSortOrder(1600);
+  }
+
   /**
    * Returns the keepalive connections.
    */
   public int getKeepaliveConnectionCount()
   {
     return getKeepaliveCount();
+  }
+
+  public void describeKeepaliveConnectionCount(IntrospectionAttributeDescriptor descriptor)
+  {
+    descriptor.setCategory(AdminAttributeCategory.STATISTIC);
+    descriptor.setSortOrder(1700);
   }
 
   /**
@@ -736,6 +827,12 @@ public class Port implements EnvironmentListener, PortMBean, Runnable {
       return _selectManager.getSelectCount();
     else
       return -1;
+  }
+
+  public void describeSelectConnectionCount(IntrospectionAttributeDescriptor descriptor)
+  {
+    descriptor.setCategory(AdminAttributeCategory.STATISTIC);
+    descriptor.setSortOrder(1800);
   }
 
   /**

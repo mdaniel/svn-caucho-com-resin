@@ -32,6 +32,8 @@ import java.util.Date;
 
 import com.caucho.server.resin.ResinServer;
 
+import javax.management.ObjectName;
+
 /**
  * Management interface for the server.
  * There is one ResinServer global for the entire JVM.
@@ -83,4 +85,10 @@ public interface ResinServerMBean {
    * Restart this Resin server.
    */
   public void restart();
+
+
+  public ObjectName[] getServerObjectNames();
+
+
+  public ObjectName getThreadPoolObjectName();
 }

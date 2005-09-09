@@ -56,12 +56,12 @@ public class ClusterClient {
   private int _timeout = 2000;
 
   private int _maxPoolSize = 16;
-  
+
   private ClusterStream []_free = new ClusterStream[64];
   private int _freeHead;
   private int _freeTail;
   private int _freeSize = 16;
-  
+
   private long _lastFailTime;
 
   private int _activeCount;
@@ -146,7 +146,7 @@ public class ClusterClient {
   public boolean isDead()
   {
     long now = Alarm.getCurrentTime();
-    
+
     return (now < _lastFailTime + _server.getDeadTime() || ! _isActive);
   }
 
@@ -174,7 +174,7 @@ public class ClusterClient {
   {
     _isActive = false;
   }
-    
+
   /**
    * Open a read/write pair, trying to recycle.
    *
@@ -184,22 +184,22 @@ public class ClusterClient {
   {
     if (! _isActive)
       return null;
-    
+
     long now = Alarm.getCurrentTime();
     ClusterStream stream = null;
 
     synchronized (this) {
       if (_freeHead != _freeTail) {
-	stream = _free[_freeTail];
-	long freeTime = stream.getFreeTime();
-	
-	_free[_freeTail] = null;
-	_freeTail = (_freeTail + 1) % _free.length;
+        stream = _free[_freeTail];
+        long freeTime = stream.getFreeTime();
 
-	if (now < freeTime + _server.getLiveTime()) {
-	  _activeCount++;
-	  return stream;
-	}
+        _free[_freeTail] = null;
+        _freeTail = (_freeTail + 1) % _free.length;
+
+        if (now < freeTime + _server.getLiveTime()) {
+          _activeCount++;
+          return stream;
+        }
       }
     }
 
@@ -208,7 +208,7 @@ public class ClusterClient {
 
     return null;
   }
-  
+
   /**
    * Open a read/write pair to the target srun connection.
    *
@@ -227,16 +227,16 @@ public class ClusterClient {
       ReadWritePair pair = _server.openTCPPair();
       ReadStream rs = pair.getReadStream();
       rs.setAttribute("timeout", new Integer((int) _server.getReadTimeout()));
-      
+
       synchronized (this) {
-	_activeCount++;
+        _activeCount++;
       }
 
       return new ClusterStream(_streamCount++, this,
-			       rs, pair.getWriteStream());
+                               rs, pair.getWriteStream());
     } catch (IOException e) {
       log.log(Level.FINER, e.toString(), e);
-      
+
       _lastFailTime = Alarm.getCurrentTime();
       return null;
     }
@@ -260,12 +260,12 @@ public class ClusterClient {
       int size = (_freeHead - _freeTail + _free.length) % _free.length;
 
       if (! _isClosed && size < _freeSize) {
-	_activeCount--;
+        _activeCount--;
 
-	_free[_freeHead] = stream;
-	_freeHead = (_freeHead + 1) % _free.length;
+        _free[_freeHead] = stream;
+        _freeHead = (_freeHead + 1) % _free.length;
 
-	return;
+        return;
       }
     }
 
@@ -290,28 +290,28 @@ public class ClusterClient {
   public void clearRecycle()
   {
     ArrayList<ClusterStream> recycleList = null;
-    
+
     synchronized (this) {
       _freeHead = _freeTail = 0;
 
       for (int i = 0; i < _free.length; i++) {
-	ClusterStream stream;
+        ClusterStream stream;
 
-	stream = _free[i];
-	_free[i] = null;
+        stream = _free[i];
+        _free[i] = null;
 
-	if (stream != null) {
-	  if (recycleList == null)
-	    recycleList = new ArrayList<ClusterStream>();
-	  
-	  recycleList.add(stream);
-	}
+        if (stream != null) {
+          if (recycleList == null)
+            recycleList = new ArrayList<ClusterStream>();
+
+          recycleList.add(stream);
+        }
       }
     }
 
     if (recycleList != null) {
       for (ClusterStream stream : recycleList) {
-	stream.closeImpl();
+        stream.closeImpl();
       }
     }
   }
@@ -323,7 +323,7 @@ public class ClusterClient {
   {
     synchronized (this) {
       if (_isClosed)
-	return;
+        return;
 
       _isClosed = true;
       _isActive = false;
@@ -334,12 +334,12 @@ public class ClusterClient {
       ClusterStream stream;
 
       synchronized (this) {
-	stream = _free[i];
-	_free[i] = null;
+        stream = _free[i];
+        _free[i] = null;
       }
 
       if (stream != null)
-	stream.closeImpl();
+        stream.closeImpl();
     }
   }
 
