@@ -487,6 +487,24 @@ restarted.</p>
 </section>
 </defun>
 
+<defun title="port" version="Resin 3.0">
+<parents>server</parents>
+
+<p>The port tag allows for custom protocols using Resin's thread
+and connection management.</p>
+
+<p>The custom protocol will extend from com.caucho.server.port.Protocol.</p>
+
+<example>
+&lt;server>
+  &lt;port id="" host="localhost" port="8888">
+    &lt;protocol resin:type="example.Magic8BallProtocol"/>
+  &lt;/port>
+&lt;/server>
+</example>
+
+</defun>
+
 <defun title="resin" version="Resin 3.0">
       
 <p>Top-level configuration for the resin.conf file.  The &lt;resin>

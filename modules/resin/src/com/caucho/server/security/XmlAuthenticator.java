@@ -113,7 +113,7 @@ public class XmlAuthenticator extends AbstractAuthenticator {
       return;
     
     try {
-      new Config().configure(this, _path);
+      new Config().configureBean(this, _path);
 
       _lastCheck = Alarm.getCurrentTime();
       _lastModified = _path.getLastModified();
