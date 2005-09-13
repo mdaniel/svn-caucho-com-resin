@@ -213,7 +213,6 @@ public class JspContentHandler extends DefaultHandler {
     throws SAXException
   {
     try {
-      System.out.println("SE: " + qName);
       setLocation();
       _builder.startElement(new QName(qName, uri));
 

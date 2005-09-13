@@ -1881,7 +1881,7 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
 	CookieImpl extCookie = (CookieImpl) cookie;
 	String port = extCookie.getPort();
 
-	if (port != null) {
+	if (port != null && isCookie2) {
 	  cb.append("; Port=\"");
 	  cb.append(port);
 	  cb.append("\"");

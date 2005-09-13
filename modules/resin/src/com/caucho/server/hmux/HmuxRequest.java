@@ -361,6 +361,11 @@ public class HmuxRequest extends AbstractHttpRequest
       hasRequest = true;
       // setStartDate();
 
+      if (_server == null || _server.isDestroyed()) {
+	log.fine(dbgId() + "server is closed");
+	return false;
+      }
+
       _filter.setPending(_pendingData);
 
       try {
@@ -609,12 +614,21 @@ public class HmuxRequest extends AbstractHttpRequest
             log.fine(dbgId() + (char) code + ": cluster protocol");
           _filter.setClientClosed(true);
 	  
+	  if (_server == null || _server.isDestroyed()) {
+	    return false;
+	  }
+	  
           isKeepalive = _clusterRequest.handleRequest(is, _rawWrite);
         }
         else if (value == HMUX_DISPATCH_PROTOCOL) {
           if (isLoggable)
             log.fine(dbgId() + (char) code + ": dispatch protocol");
           _filter.setClientClosed(true);
+	  
+	  if (_server == null || _server.isDestroyed()) {
+	    return false;
+	  }
+	  
           isKeepalive = _dispatchRequest.handleRequest(is, _rawWrite);
         }
 	else {

@@ -88,9 +88,8 @@ public class AutoCommitWriteBlock extends WriteBlock {
    */
   public void free()
   {
-    super.free();
-
-    destroy();
+    // Does not free the actual block, since the transaction is responsible
+    // The block will be freed with the destroy
   }
 
   /**

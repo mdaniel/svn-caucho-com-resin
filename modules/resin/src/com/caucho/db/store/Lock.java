@@ -85,7 +85,7 @@ public class Lock implements ClockCacheItem {
   {
     if (log.isLoggable(Level.FINEST))
       log.finest("LockRead$" + System.identityHashCode(this) + "[" + _id + "] read:" + _readCount +
-		" upgrade:" + _upgradeCount);
+		 " upgrade:" + _upgradeCount);
 
     if (_upgradeCount == 0)
       _readCount++;

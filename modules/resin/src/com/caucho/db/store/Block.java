@@ -112,6 +112,9 @@ abstract public class Block implements ClockCacheItem, CacheListener {
 	return false;
       
       _useCount++;
+      
+      if (log.isLoggable(Level.FINEST))
+	log.finest(this + " allocate");
 
       if (_useCount > 32 && log.isLoggable(Level.FINE)) {
 	log.fine("using " + this + " " + _useCount + " times");
@@ -263,6 +266,9 @@ abstract public class Block implements ClockCacheItem, CacheListener {
   public void free()
   {
     synchronized (this) {
+      if (log.isLoggable(Level.FINEST))
+	log.finest(this + " free");
+
       _useCount--;
       
       if (_useCount < 0) {

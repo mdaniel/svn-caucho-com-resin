@@ -69,6 +69,8 @@ abstract public class WriteBlock extends Block {
    */
   public void free()
   {
+    // Does not free the actual block, since the transaction is responsible
+    // The block will be freed with the destroy
   }
 
   /**
@@ -77,7 +79,7 @@ abstract public class WriteBlock extends Block {
   void destroy()
   {
     Block block = _block;
-    _block = block;
+    _block = null;
 
     block.free();
 

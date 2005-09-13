@@ -48,7 +48,7 @@ import javax.resource.spi.BootstrapContext;
 import javax.resource.spi.ResourceAdapterInternalException;
 
 /** 
- * An RMI registry and it's services.  This resource is used to register
+ * An RMI registry and its services.  This resource is used to register
  * services with an RMI Registry.  The Registry is either on localhost, in
  * which case it is created in the local JVM unless it already exists, or the
  * Registry is on a remote server, in which case it is assumed that the
@@ -114,21 +114,14 @@ public class RmiRegistry extends AbstractResourceAdapter
     if (System.getSecurityManager() == null)
       throw new ConfigException("RMI requires a SecurityManager - add a <security-manager/> element to <resin>");
 
-    CharBuffer cb = CharBuffer.allocate();
-
-    cb.append("//");
-    cb.append(_server);
-    cb.append(':');
-    cb.append(_port);
-    cb.append('/');
-
-    _namePrefix = cb.close();
-
+    _namePrefix =("//" + _server + ':' + _port + '/');
   }
 
   public void start(BootstrapContext ctx)
     throws ResourceAdapterInternalException
   {
+    System.out.println("START:");
+    
     if (_server.equals("localhost"))
         startRegistry();
     else {
@@ -149,10 +142,7 @@ public class RmiRegistry extends AbstractResourceAdapter
    */ 
   String makeFullName(String serviceName)
   {
-    CharBuffer cb = CharBuffer.allocate();
-    cb.append(_namePrefix);
-    cb.append(serviceName);
-    return cb.close();
+    return _namePrefix + serviceName;
   }
 
   /**
@@ -176,13 +166,14 @@ public class RmiRegistry extends AbstractResourceAdapter
         Registry reg = LocateRegistry.getRegistry(_port);
         reg.list();  // Verify it's alive and well
         if (log.isLoggable(Level.CONFIG))
-          log.config(L.l("found RMI Registry on port `{0}'",String.valueOf(_port)));
+          log.config(L.l("found RMI Registry on port `{0}'",
+			 _port));
       }
-      catch (Exception e) 
-      {
+      catch (Exception e) {
         // couldn't find a valid registry so create one
         if (log.isLoggable(Level.CONFIG))
-          log.config(L.l("creating RMI Registry on port `{0}'",String.valueOf(_port)));
+          log.config(L.l("creating RMI Registry on port `{0}'", _port));
+	    
         LocateRegistry.createRegistry(_port);
       }
     } catch (Exception ex)  {

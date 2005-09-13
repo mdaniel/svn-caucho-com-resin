@@ -51,8 +51,8 @@ import com.caucho.loader.EnvironmentClassLoader;
  * Defines the policy for the current security context.
  */
 public class PolicyImpl extends Policy {
-  static Logger _log;
-  static L10N _L;
+  private static Logger _log;
+  private static L10N _L;
 
   private static final PolicyImpl _policy = new PolicyImpl();
 

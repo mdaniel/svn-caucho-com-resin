@@ -358,6 +358,10 @@ public class Cluster implements EnvironmentListener, ClusterMBean {
 
     for (int i = 0; i < _serverList.length; i++) {
       ClusterServer server = _serverList[i];
+
+      if (server == null)
+	continue;
+      
       ClusterPort port = server.getClusterPort();
       
       if (port.getReadTimeout() < getClientLiveTime()) {
