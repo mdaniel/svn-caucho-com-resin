@@ -29,120 +29,61 @@
 
 package com.caucho.server.resin;
 
-import java.lang.ref.SoftReference;
-
-import java.lang.reflect.Method;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import java.util.regex.Pattern;
-import java.util.regex.Matcher;
-
-import java.io.InputStream;
-import java.io.IOException;
-
-import java.net.*;
-import java.util.*;
-import java.util.LinkedHashMap;
-
-import javax.naming.*;
-
-import javax.management.ObjectName;
-import javax.management.MBeanServer;
-
-import javax.resource.spi.ResourceAdapter;
-
-import javax.servlet.*;
-
-import javax.servlet.http.HttpServletResponse;
-
-import javax.servlet.jsp.el.VariableResolver;
-
-import com.caucho.vfs.*;
-
+import com.caucho.config.ConfigException;
+import com.caucho.config.SchemaBean;
+import com.caucho.config.types.Period;
+import com.caucho.jca.ResourceManagerImpl;
+import com.caucho.jmx.Jmx;
+import com.caucho.lifecycle.Lifecycle;
+import com.caucho.loader.ClassLoaderListener;
+import com.caucho.loader.DynamicClassLoader;
+import com.caucho.loader.Environment;
+import com.caucho.loader.EnvironmentBean;
+import com.caucho.loader.EnvironmentClassLoader;
+import com.caucho.loader.EnvironmentLocal;
+import com.caucho.log.Log;
+import com.caucho.make.AlwaysModified;
+import com.caucho.security.PermissionManager;
+import com.caucho.server.cache.AbstractCache;
+import com.caucho.server.cluster.Cluster;
+import com.caucho.server.cluster.ClusterContainer;
+import com.caucho.server.cluster.ClusterDef;
+import com.caucho.server.cluster.ClusterPort;
+import com.caucho.server.deploy.EnvironmentDeployInstance;
+import com.caucho.server.dispatch.ErrorFilterChain;
+import com.caucho.server.dispatch.ExceptionFilterChain;
+import com.caucho.server.dispatch.Invocation;
+import com.caucho.server.dispatch.InvocationMatcher;
+import com.caucho.server.e_app.EarConfig;
+import com.caucho.server.host.Host;
+import com.caucho.server.host.HostConfig;
+import com.caucho.server.host.HostContainer;
+import com.caucho.server.host.HostController;
+import com.caucho.server.host.HostExpandDeployGenerator;
+import com.caucho.server.http.HttpProtocol;
+import com.caucho.server.log.AccessLog;
+import com.caucho.server.port.AbstractSelectManager;
+import com.caucho.server.port.Port;
+import com.caucho.server.port.ProtocolDispatchServer;
+import com.caucho.server.webapp.Application;
+import com.caucho.server.webapp.ErrorPage;
+import com.caucho.server.webapp.WebAppConfig;
 import com.caucho.util.Alarm;
 import com.caucho.util.AlarmListener;
 import com.caucho.util.L10N;
 import com.caucho.util.ThreadPool;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.Vfs;
 
-import com.caucho.log.Log;
-
-import com.caucho.loader.EnvironmentClassLoader;
-import com.caucho.loader.EnvironmentLocal;
-import com.caucho.loader.Environment;
-import com.caucho.loader.ClassLoaderListener;
-import com.caucho.loader.DynamicClassLoader;
-import com.caucho.loader.EnvironmentBean;
-
-import com.caucho.loader.enhancer.EnhancingClassLoader;
-
-import com.caucho.jca.ResourceManagerImpl;
-
-import com.caucho.config.SchemaBean;
-import com.caucho.config.BuilderProgram;
-import com.caucho.config.ConfigException;
-
-import com.caucho.config.types.Period;
-
-import com.caucho.el.EL;
-import com.caucho.el.MapVariableResolver;
-
-import com.caucho.make.AlwaysModified;
-
-import com.caucho.naming.Jndi;
-
-import com.caucho.relaxng.CompactVerifierFactoryImpl;
-
-import com.caucho.security.PermissionManager;
-
-import com.caucho.server.dispatch.Invocation;
-import com.caucho.server.dispatch.InvocationDecoder;
-import com.caucho.server.dispatch.InvocationMatcher;
-import com.caucho.server.dispatch.ErrorFilterChain;
-import com.caucho.server.dispatch.ExceptionFilterChain;
-
-import com.caucho.server.e_app.EarConfig;
-
-import com.caucho.server.webapp.WebAppConfig;
-import com.caucho.server.webapp.Application;
-import com.caucho.server.webapp.ErrorPage;
-
-import com.caucho.server.host.Host;
-import com.caucho.server.host.HostExpandDeployGenerator;
-import com.caucho.server.host.HostContainer;
-import com.caucho.server.host.HostConfig;
-
-import com.caucho.server.port.ProtocolDispatchServer;
-import com.caucho.server.port.Port;
-import com.caucho.server.port.AbstractSelectManager;
-import com.caucho.server.port.AbstractSelectManager;
-
-import com.caucho.server.port.mbean.PortMBean;
-
-import com.caucho.server.log.AccessLog;
-
-import com.caucho.server.http.HttpProtocol;
-import com.caucho.server.http.SrunProtocol;
-
-import com.caucho.server.hmux.HmuxProtocol;
-
-import com.caucho.server.cluster.Cluster;
-import com.caucho.server.cluster.ClusterDef;
-import com.caucho.server.cluster.ClusterContainer;
-import com.caucho.server.cluster.ClusterPort;
-
-import com.caucho.server.cache.AbstractCache;
-
-import com.caucho.server.deploy.EnvironmentDeployInstance;
-
-import com.caucho.transaction.TransactionManagerImpl;
-
-import com.caucho.lifecycle.Lifecycle;
-
-import com.caucho.jmx.Jmx;
-
-import com.caucho.server.resin.mbean.ServletServerMBean;
+import javax.management.ObjectName;
+import javax.resource.spi.ResourceAdapter;
+import javax.servlet.http.HttpServletResponse;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class ServletServer extends ProtocolDispatchServer
   implements EnvironmentBean, SchemaBean, AlarmListener,
@@ -710,6 +651,36 @@ public class ServletServer extends ProtocolDispatchServer
       return hostContainer.getErrorApplication();
     else
       return null;
+  }
+
+  /**
+   * Returns the hosts
+   */
+  public ObjectName []getHostObjectNames()
+  {
+    HostContainer hostContainer = _hostContainer;
+
+    if (hostContainer == null)
+      return new ObjectName[] {};
+
+    ArrayList<HostController> hostList = hostContainer.getHostList();
+
+    int size = hostList.size();
+
+    ArrayList<ObjectName> hostNameList = new ArrayList<ObjectName>(size);
+
+    for (int i = 0; i < size; i++) {
+      ObjectName name = hostList.get(i).getObjectName();
+
+      if (name != null)
+        hostNameList.add(name);
+    }
+
+    ObjectName[] hostNames = new ObjectName[hostNameList.size()];
+
+    hostNames = hostNameList.toArray(hostNames);
+
+    return hostNames;
   }
 
   /**

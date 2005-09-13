@@ -157,6 +157,25 @@ public class ServerAdmin extends DeployControllerAdmin<ServerController>
   }
 
   /**
+   * Returns the array of hosts
+   */
+  public ObjectName []getHostObjectNames()
+  {
+    ServletServer server = getDeployInstance();
+
+    if (server != null)
+      return server.getHostObjectNames();
+    else
+      return new ObjectName[0];
+  }
+
+  public void describeHostObjectNames(IntrospectionAttributeDescriptor descriptor)
+  {
+    descriptor.setCategory(AdminAttributeCategory.CHILD);
+    descriptor.setSortOrder(225);
+  }
+
+  /**
    * Clears the cache.
    */
   public void clearCache()

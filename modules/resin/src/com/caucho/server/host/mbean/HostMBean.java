@@ -83,15 +83,16 @@ public interface HostMBean extends DeployControllerMBean {
   public Date getStartTime();
 
   /**
-   * Returns an array of the webapp namess.
+   * Returns an array of the webapp names.
+   */
+  public ObjectName []getWebAppObjectNames();
+
+  /**
+   * Returns an array of the webapp names
+   * (obsolete, use {@link #getWebAppObjectNames()}.
    */
   public ObjectName []getWebAppNames();
 
-  /**
-   * Returns an array of the webapps.
-   */
-  // XXX: issues with jconsole?
-  public WebAppMBean []getWebApps();
 
   /**
    * Updates a web-app entry from the deployment directories.

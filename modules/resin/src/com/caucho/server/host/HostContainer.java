@@ -91,7 +91,6 @@ public class HostContainer implements DispatchBuilder {
   
   // The root directory.
   private Path _rootDir;
-  private boolean _isRootDirSet;
 
   // List of default host configurations
   private ArrayList<HostConfig> _hostDefaultList = new ArrayList<HostConfig>();
@@ -100,14 +99,9 @@ public class HostContainer implements DispatchBuilder {
   private DeployContainer<HostController> _hostDeploy
     = new DeployContainer<HostController>();
   
-  // The configured host entries
-  private ArrayList<HostController> _hostList
-    = new ArrayList<HostController>();
-  
   // Cache of hosts
   private HashMap<String,HostController> _hostMap
     = new HashMap<String,HostController>();
-  private HostController _defaultHost;
 
   // Regexp host
   private ArrayList<HostConfig> _hostRegexpList = new ArrayList<HostConfig>();
@@ -198,11 +192,11 @@ public class HostContainer implements DispatchBuilder {
   public void setRootDirectory(Path path)
   {
     _rootDir = path;
-    _isRootDirSet = true;
   }
 
   /**
    * Sets the root directory (obsolete).
+   * @deprecated
    */
   public void setRootDir(Path path)
   {
@@ -327,6 +321,11 @@ public class HostContainer implements DispatchBuilder {
       invocation.setApplication(getErrorApplication());
       invocation.setDependency(AlwaysModified.create());
     }
+  }
+
+  public ArrayList<HostController> getHostList()
+  {
+    return _hostDeploy.getControllers();
   }
 
   /**

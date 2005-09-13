@@ -284,7 +284,7 @@ public class HostAdmin extends DeployControllerAdmin<HostController>
   /**
    * Returns the web-app names.
    */
-  public ObjectName []getWebAppNames()
+  public ObjectName []getWebAppObjectNames()
   {
     Host host = getHost();
 
@@ -293,19 +293,37 @@ public class HostAdmin extends DeployControllerAdmin<HostController>
 
     ArrayList<WebAppController> webappList = host.getApplicationList();
 
-    ObjectName []names = new ObjectName[webappList.size()];
+    int size = webappList.size();
 
-    for (int i = 0; i < names.length; i++) {
-      WebAppController controller = webappList.get(i);
+    ArrayList<ObjectName> webappNameList = new ArrayList<ObjectName>(size);
 
-      names[i] = controller.getObjectName();
+    for (int i = 0; i < size; i++) {
+      ObjectName name = webappList.get(i).getObjectName();
+
+      if (name != null)
+        webappNameList.add(name);
     }
 
-    return names;
+    ObjectName[] webappNames = new ObjectName[webappNameList.size()];
+
+    webappNames = webappNameList.toArray(webappNames);
+
+    return webappNames;
+  }
+
+  public void describeWebAppObjectNames(IntrospectionAttributeDescriptor descriptor)
+  {
+    descriptor.setCategory(AdminAttributeCategory.CHILD);
+  }
+
+  final public ObjectName []getWebAppNames()
+  {
+    return getWebAppObjectNames();
   }
 
   public void describeWebAppNames(IntrospectionAttributeDescriptor descriptor)
   {
+    descriptor.setDeprecated("3.0.15 Use WebAppObjectNames");
     descriptor.setCategory(AdminAttributeCategory.CHILD);
   }
 

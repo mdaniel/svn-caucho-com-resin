@@ -74,7 +74,7 @@ import com.caucho.server.host.mbean.HostMBean;
 /**
  * A configuration entry for a host
  */
-class HostController extends EnvironmentDeployController<Host,HostConfig> {
+public class HostController extends EnvironmentDeployController<Host,HostConfig> {
   private static final Logger log = Log.open(HostController.class);
   private static final L10N L = new L10N(HostController.class);
   

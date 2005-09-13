@@ -72,6 +72,11 @@ public interface ServletServerMBean extends DeployControllerMBean {
   public ObjectName []getClusterObjectNames();
   
   /**
+   * Returns the array of hosts.
+   */
+  public ObjectName []getHostObjectNames();
+
+  /**
    * Clears the cache.
    */
   public void clearCache();
