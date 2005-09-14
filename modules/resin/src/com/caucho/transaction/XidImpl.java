@@ -137,7 +137,7 @@ public class XidImpl implements Xid {
 
   public int getFormatId()
   {
-    return 0;
+    return 1234;
   }
 
   public byte []getBranchQualifier()

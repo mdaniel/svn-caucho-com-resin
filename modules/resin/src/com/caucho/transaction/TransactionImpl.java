@@ -277,7 +277,8 @@ public class TransactionImpl implements Transaction, AlarmListener {
       }
 	
       try {
-	if (_resources[i].isSameRM(resource)) {
+        if (false && _resources[i].isSameRM(resource)) {
+	    // if (_resources[i] == resource) {
 	  flags = XAResource.TMJOIN;
 	  xid = _resourceXid[i];
           
@@ -289,17 +290,17 @@ public class TransactionImpl implements Transaction, AlarmListener {
       
 	  break;
 	}
-      } catch (XAException e) {
+      } catch (Exception e) {
 	log.log(Level.FINE, e.toString(), e);
       }
     }
 
-    /*
     if (_resourceCount > 0 && flags != XAResource.TMJOIN)
+      xid = new XidImpl(_xid, _resourceCount + 1);
+    /*
+    if (_resourceCount > 0)
       xid = new XidImpl(_xid, _resourceCount + 1);
     */
-    if (_resourceCount > 0 && flags != XAResource.TMJOIN)
-      xid = new XidImpl(_xid, _resourceCount + 1);
       
     try {
       if (_timeout > 0)
@@ -600,15 +601,25 @@ public class TransactionImpl implements Transaction, AlarmListener {
         for (int i = _resourceCount - 1; i >= 0; i--) {
           XAResource resource = (XAResource) _resources[i];
 
-	  if (i == 0 && (xaLog == null || ! hasPrepare)) {
+	  if (false && i == 0 && (xaLog == null || ! hasPrepare)) {
 	    allowSinglePhase = true;
 	    break;
 	  }
 
           if ((_resourceState[i] & RES_SHARED_RM) == 0) {
             try {
-              if (resource.prepare(_resourceXid[i]) != XAResource.XA_RDONLY)
+              int prepare = resource.prepare(_resourceXid[i]);
+
+	      if (prepare == XAResource.XA_RDONLY) {
+	      }
+	      else if (prepare == XAResource.XA_OK) {
 		hasPrepare = true;
+		_resourceState[i] |= RES_COMMIT;
+	      }
+	      else {
+		  log.finer("unexpected prepare result " + prepare);
+		  rollbackInt();
+	      }
             } catch (XAException e) {
               heuristicExn = heuristicException(heuristicExn, e);
 	      rollbackInt();
@@ -630,7 +641,8 @@ public class TransactionImpl implements Transaction, AlarmListener {
 	  try {
 	    XAResource resource = (XAResource) _resources[0];
 
-	    resource.commit(_xid, true);
+	    if ((_resourceState[0] & RES_COMMIT) != 0)
+		resource.commit(_xid, true);
 
 	    if (_timeout > 0)
 	      resource.setTransactionTimeout(0);
@@ -649,6 +661,8 @@ public class TransactionImpl implements Transaction, AlarmListener {
 	  
           if ((_resourceState[i] & RES_SHARED_RM) != 0)
             continue;
+          if ((_resourceState[i] & RES_COMMIT) == 0)
+            continue;
 
           if (heuristicExn == null) {
             try {
@@ -657,6 +671,8 @@ public class TransactionImpl implements Transaction, AlarmListener {
 	      if (_timeout > 0)
 		resource.setTransactionTimeout(0);
             } catch (XAException e) {
+		System.out.println("EXN: " + e + " " + e.errorCode);
+		
               heuristicExn = e;
               log.log(Level.FINE, e.toString(), e);
             }
