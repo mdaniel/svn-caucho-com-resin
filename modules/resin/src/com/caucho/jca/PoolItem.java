@@ -484,7 +484,8 @@ class PoolItem implements ConnectionEventListener, XAResource {
    */
   boolean supportsTransaction()
   {
-    return true;
+    // server/164j
+    return _xaResource != null || _localTransaction != null;
   }
 
   /**

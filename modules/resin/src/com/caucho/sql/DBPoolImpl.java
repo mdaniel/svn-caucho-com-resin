@@ -176,7 +176,9 @@ public class DBPoolImpl implements AlarmListener, EnvironmentListener {
   private long _pingInterval;
 
   // True if the pool is transactional
-  private boolean _isTransactional = false;
+  private boolean _isTransactional = true;
+  // True if the pool should never allow isSameRM
+  private boolean _isXAForbidSameRM = false;
   // The transaction manager if the pool participates in transactions.
   private TransactionManager _tm;
   // how long before the transaction times out
@@ -686,10 +688,12 @@ public class DBPoolImpl implements AlarmListener, EnvironmentListener {
   /**
    * Returns the transaction manager.
    */
+  /*
   public TransactionManager getTransactionManager()
   {
     return _tm;
   }
+  */
 
   /**
    * Returns true if this is transactional.
@@ -705,6 +709,22 @@ public class DBPoolImpl implements AlarmListener, EnvironmentListener {
   public void setXA(boolean isTransactional)
   {
     _isTransactional = isTransactional;
+  }
+
+  /**
+   * Returns true if transactions should force isSameRM to be false.
+   */
+  public boolean isXAForbidSameRM()
+  {
+    return _isXAForbidSameRM;
+  }
+
+  /**
+   * Returns true if transactions should force isSameRM to be false.
+   */
+  public void setXAForbidSameRM(boolean isXAForbidSameRM)
+  {
+    _isXAForbidSameRM = isXAForbidSameRM;
   }
 
   /**
@@ -737,6 +757,40 @@ public class DBPoolImpl implements AlarmListener, EnvironmentListener {
   public boolean isTransactional()
   {
     return _isTransactional;
+  }
+
+  /**
+   * Returns true if there is a valid XAResource associated
+   * with the database.
+   */
+  public boolean isXATransaction()
+  {
+    if (_connectionConfig.isReadOnly())
+      return false;
+    else if (_driverList.size() > 0) {
+      DriverConfig driver = _driverList.get(0);
+
+      return driver.isXATransaction();
+    }
+    else
+      return false;
+  }
+
+  /**
+   * Returns true if there is a valid local transactino associated
+   * with the database.
+   */
+  public boolean isLocalTransaction()
+  {
+    if (_connectionConfig.isReadOnly())
+      return false;
+    else if (_driverList.size() > 0) {
+      DriverConfig driver = _driverList.get(0);
+
+      return driver.isLocalTransaction();
+    }
+    else
+      return false;
   }
 
   int createPoolId()
@@ -805,8 +859,10 @@ public class DBPoolImpl implements AlarmListener, EnvironmentListener {
       log.log(Level.FINE, e.toString(), e);
     }
 
-    if (_isTransactional && _tm == null)
+    /*
+    if (isXA() && _tm == null)
       throw new ConfigException(L.l("Can't find TransactionManager in java:comp/TransactionManager for transaction-enabled DBPool."));
+    */
 
     for (int i = 0; i < _driverList.size(); i++) {
       DriverConfig driver = _driverList.get(i);
@@ -819,8 +875,10 @@ public class DBPoolImpl implements AlarmListener, EnvironmentListener {
       driver.initDriver();
       driver.initDataSource(_isTransactional, _isSpy);
 
+      /*
       if (driver.getXADataSource() == null)
 	_isTransactional = false;
+      */
     }
 
     DriverConfig []drivers = new DriverConfig[_driverList.size()];
@@ -837,8 +895,10 @@ public class DBPoolImpl implements AlarmListener, EnvironmentListener {
       driver.initDriver();
       driver.initDataSource(_isTransactional, _isSpy);
 
+      /*
       if (driver.getXADataSource() == null)
 	_isTransactional = false;
+      */
     }
 
     DriverConfig []backupDrivers = new DriverConfig[_backupDriverList.size()];

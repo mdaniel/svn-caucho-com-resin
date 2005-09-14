@@ -116,6 +116,10 @@ public class UserTransactionImpl implements UserTransaction {
   {
     if (poolItem == null)
       return;
+    else if (! poolItem.supportsTransaction()) {
+      // server/164j
+      return;
+    }
     
     // XXX: new
     if (_poolItems.contains(poolItem))

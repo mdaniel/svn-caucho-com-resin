@@ -29,11 +29,13 @@
 
 package com.caucho.sql;
 
-import com.caucho.log.Log;
-import com.caucho.sql.spy.SpyConnection;
-import com.caucho.util.Alarm;
-import com.caucho.util.L10N;
-import com.caucho.util.LruCache;
+import java.io.PrintWriter;
+import java.lang.IllegalStateException;
+import java.sql.*;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.resource.NotSupportedException;
 import javax.resource.ResourceException;
@@ -42,13 +44,15 @@ import javax.security.auth.Subject;
 import javax.sql.PooledConnection;
 import javax.sql.XAConnection;
 import javax.transaction.xa.XAResource;
-import java.io.PrintWriter;
-import java.lang.IllegalStateException;
-import java.sql.*;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
+import com.caucho.log.Log;
+
+import com.caucho.sql.spy.SpyConnection;
+import com.caucho.sql.spy.SpyXAResource;
+
+import com.caucho.util.Alarm;
+import com.caucho.util.L10N;
+import com.caucho.util.LruCache;
 
 /**
  * Represents a single pooled connection.  For the most part, it just
@@ -62,7 +66,12 @@ public class ManagedConnectionImpl
   protected static final Logger log = Log.open(ManagedConnectionImpl.class);
   protected static L10N L = new L10N(ManagedConnectionImpl.class);
 
+  // Identifier for spy, etc.
+  private int _id;
+
   private ManagedFactoryImpl _factory;
+  private DBPoolImpl _dbPool;
+  
   private DriverConfig _driver;
   private ConnectionConfig _connConfig;
 
@@ -109,6 +118,8 @@ public class ManagedConnectionImpl
     throws SQLException
   {
     _factory = factory;
+    _dbPool = factory.getDBPool();
+      
     _driver = driver;
     _connConfig = connConfig;
     _credentials = credentials;
@@ -120,8 +131,9 @@ public class ManagedConnectionImpl
 
     _lastEventTime = Alarm.getCurrentTime();
 
-    DBPoolImpl dbPool = factory.getDBPool();
-    int preparedStatementCacheSize = dbPool.getPreparedStatementCacheSize();
+    _id = _dbPool.newSpyId();
+    
+    int preparedStatementCacheSize = _dbPool.getPreparedStatementCacheSize();
 
     if (preparedStatementCacheSize > 0) {
       _preparedStatementCache = new LruCache<PreparedStatementKey,PreparedStatementCacheItem>(preparedStatementCacheSize);
@@ -134,7 +146,7 @@ public class ManagedConnectionImpl
    */
   DBPoolImpl getDBPool()
   {
-    return _factory.getDBPool();
+    return _dbPool;
   }
 
   /**
@@ -224,22 +236,40 @@ public class ManagedConnectionImpl
     if (_driverConnection == null)
       throw new SQLException(L.l("Failed to create driver connection."));
 
-    DBPoolImpl dbPool = _factory.getDBPool();
+    DBPoolImpl dbPool = getDBPool();
 
     long transactionTimeout = dbPool.getTransactionTimeout();
-    if (transactionTimeout > 0 &&
-	_pooledConnection instanceof XAConnection) {
-      try {
-	XAResource xaResource = ((XAConnection) _pooledConnection).getXAResource();
-	xaResource.setTransactionTimeout((int) (transactionTimeout / 1000));
-      } catch (Throwable e) {
-	log.log(Level.FINER, e.toString(), e);
+    if (dbPool.isXA() && ! _connConfig.isReadOnly()) {
+      if (_pooledConnection instanceof XAConnection) {
+	try {
+	  _xaResource = ((XAConnection) _pooledConnection).getXAResource();
+	} catch (SQLException e) {
+	  log.log(Level.FINE, e.toString(), e);
+	}
       }
+      
+      if (transactionTimeout > 0 && _xaResource != null) {
+	try {
+	  _xaResource.setTransactionTimeout((int) (transactionTimeout / 1000));
+	} catch (Throwable e) {
+	  log.log(Level.FINER, e.toString(), e);
+	}
+      }
+      
+      if (_pooledConnection instanceof XAConnection &&
+	  _pooledConnection.getClass().getName().startsWith("oracle")) {
+	// Oracle does not allow local transactions
+      }
+      else
+	_localTransaction = new LocalTransactionImpl();
     }
 
-    if (dbPool.isSpy())
-      _driverConnection = new SpyConnection(_driverConnection,
-					    dbPool.newSpyId());
+    if (dbPool.isSpy()) {
+      _driverConnection = new SpyConnection(_driverConnection, _id);
+
+      if (_xaResource != null)
+	_xaResource = new SpyXAResource(_id, _xaResource);
+    }
 
     int isolation = _connConfig.getTransactionIsolation();
     if (isolation >= 0)
@@ -266,12 +296,8 @@ public class ManagedConnectionImpl
   public XAResource getXAResource()
     throws ResourceException
   {
-    try {
-      if (_pooledConnection instanceof XAConnection)
-	return ((XAConnection) _pooledConnection).getXAResource();
-    } catch (SQLException e) {
-      throw new ResourceException(e);
-    }
+    if (_xaResource != null)
+      return _xaResource;
 
     throw new NotSupportedException();
   }
@@ -282,13 +308,6 @@ public class ManagedConnectionImpl
   public LocalTransaction getLocalTransaction()
     throws ResourceException
   {
-    if (_pooledConnection instanceof XAConnection &&
-	_pooledConnection.getClass().getName().startsWith("oracle"))
-      throw new NotSupportedException(L.l("Oracle does not allow local transactions"));
-
-    if (_localTransaction == null)
-      _localTransaction = new LocalTransactionImpl();
-
     return _localTransaction;
   }
 

@@ -42,7 +42,7 @@ import com.caucho.util.*;
 public class XidImpl implements Xid {
   private static L10N L = new L10N(XidImpl.class);
 
-  static final int GLOBAL_LENGTH = 28;
+  private static final int GLOBAL_LENGTH = 28;
 
   private byte []_global;
   private byte []_local;

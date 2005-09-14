@@ -34,7 +34,7 @@ import java.io.*;
  * CharBuffer is an unsynchronized version of StringBuffer.
  */
 public final class CharBuffer extends CharSegment {
-  private static final int MIN_CAPACITY = 16;
+  private static final int MIN_CAPACITY = 64;
 
   /**
    * Constructs a char buffer with no characters.

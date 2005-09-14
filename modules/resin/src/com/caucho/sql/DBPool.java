@@ -500,10 +500,12 @@ public class DBPool implements DataSource {
   /**
    * Returns the transaction manager.
    */
+  /*
   public TransactionManager getTransactionManager()
   {
     return getPool().getTransactionManager();
   }
+  */
 
   /**
    * Sets the transaction timeout.
@@ -530,6 +532,14 @@ public class DBPool implements DataSource {
   }
 
   /**
+   * Returns true if this is transactional.
+   */
+  public void setXAForbidSameRM(boolean isXAForbidSameRM)
+  {
+    getPool().setXAForbidSameRM(isXAForbidSameRM);
+  }
+
+  /**
    * Set the output for spying.
    */
   public void setSpy(boolean isSpy)
@@ -552,10 +562,12 @@ public class DBPool implements DataSource {
     _connectionPool.setName(getName());
 
     _connectionPool.setShareable(true);
-    _connectionPool.setXATransaction(getPool().isXA());
+    _connectionPool.setXATransaction(_poolImpl.isXATransaction());
+    _connectionPool.setLocalTransaction(_poolImpl.isLocalTransaction());
 
     ManagedConnectionFactory mcf = _poolImpl.getManagedConnectionFactory();
-
+    
+    
     _dataSource = (DataSourceImpl) _connectionPool.init(mcf);
     _connectionPool.start();
 

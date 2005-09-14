@@ -92,8 +92,6 @@ public class DriverConfig {
 
   private DBPoolImpl _dbPool;
 
-  private ManagedConnectionFactory _mcf;
-  
   private Class _driverClass;
 
   private String _driverURL;
@@ -356,6 +354,23 @@ public class DriverConfig {
   }
 
   /**
+   * Returns true if the driver is XA enabled.
+   */
+  public boolean isXATransaction()
+  {
+    return _xaDataSource != null && _dbPool.isXA();
+  }
+
+  /**
+   * Returns true if the driver is XA enabled.
+   */
+  public boolean isLocalTransaction()
+  {
+    return _dbPool.isXA();
+  }
+  
+
+  /**
    * Initialize the pool's data source
    *
    * <ul>
@@ -397,11 +412,13 @@ public class DriverConfig {
       else
         throw new SQLExceptionWrapper(L.l("driver `{0}' has not been configured for pool {1}.  <database> needs a <driver type='...'>.",
                                           _driverClass, getDBPool().getName()));
-    
+
+      /*
       if (! isTransactional && _xaDataSource != null) {
 	throw new SQLExceptionWrapper(L.l("XADataSource `{0}' must be configured as transactional.  Either configure it with <xa>true</xa> or use the database's ConnectionPoolDataSource driver or the old java.sql.Driver driver.",
 					  _xaDataSource));
       }
+      */
     }
   }
 
@@ -579,21 +596,11 @@ public class DriverConfig {
     }
   }
 
-  ManagedConnectionFactory getManagedConnectionFactory()
-  {
-    /*
-    if (_mcf == null)
-      _mcf = new ManagedFactoryImpl(this);
-    */
-    
-    return _mcf;
-  }
-
   /**
    * Returns a string description of the pool.
    */
   public String toString()
   {
-    return "Driver[" + _driverClass + "]";
+    return "Driver[" + _driverURL + "]";
   }
 }
