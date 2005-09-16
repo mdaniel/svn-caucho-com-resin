@@ -33,6 +33,7 @@ import com.caucho.config.types.FileSetType;
 import com.caucho.config.types.Period;
 import com.caucho.server.dispatch.UrlMap;
 import com.caucho.util.L10N;
+import com.caucho.vfs.Path;
 
 import java.util.ArrayList;
 import java.util.regex.Pattern;
@@ -64,7 +65,7 @@ public class JspPropertyGroup {
   private boolean _requireSource = false;
   private boolean _ignoreELException = true;
   private boolean _isValidateTaglibSchema = true;
-  private String _tldDir;
+
   private int _jspMax = 1024;
   private boolean _disableLog = true;
   private long _dependencyCheckInterval = Long.MIN_VALUE;
@@ -370,22 +371,6 @@ public class JspPropertyGroup {
   }
 
   /**
-   * Sets a restriction of the tld dir.
-   */
-  public void setTldDir(String tldDir)
-  {
-    _tldDir = tldDir;
-  }
-
-  /**
-   * Gets a restriction of the tld dir.
-   */
-  public String getTldDir()
-  {
-    return _tldDir;
-  }
-
-  /**
    * Sets true for the ide-hack
    */
   public void setIdeHack(boolean ideHack)
@@ -468,6 +453,15 @@ public class JspPropertyGroup {
   public FileSetType getTldFileSet()
   {
     return _tldFileSet;
+  }
+
+  /**
+   * Sets a restriction of the tld dir.
+   */
+  public void setTldDir(Path tldDir)
+  {
+    _tldFileSet = new FileSetType();
+    _tldFileSet.setDir(tldDir);
   }
 
   /**

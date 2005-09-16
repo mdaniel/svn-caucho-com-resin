@@ -322,8 +322,10 @@ public class Transaction {
   public WriteBlock createAutoCommitWriteBlock(Block block)
     throws IOException
   {
-    if (block instanceof WriteBlock)
+    if (block instanceof WriteBlock) {
+      block.allocate();
       return (WriteBlock) block;
+    }
     else {
       WriteBlock writeBlock = new AutoCommitWriteBlock(block);
       

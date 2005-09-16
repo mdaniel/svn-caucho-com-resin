@@ -145,11 +145,32 @@ public class Cluster implements EnvironmentListener, ClusterMBean {
   }
 
   /**
+   * Finds the first server with the given server-id.
+   */
+  public ClusterServer findServer(String id)
+  {
+    for (int i = 0; i < _serverList.length; i++) {
+      ClusterServer server = _serverList[i];
+
+      if (server != null && server.getId().equals(id))
+	return server;
+    }
+
+    return null;
+  }
+
+  /**
    * Adds a new server to the cluster.
    */
   void addServer(ClusterServer server)
     throws ConfigException
   {
+    ClusterServer oldServer = findServer(server.getId());
+
+    if (oldServer != null)
+      log.warning(L.l("duplicate <srun> with server-id='{0}'",
+		      server.getId()));
+
     if (_serverList.length <= server.getIndex()) {
       int newLength = server.getIndex() + 1;
       ClusterServer []newList = new ClusterServer[newLength];
@@ -341,21 +362,6 @@ public class Cluster implements EnvironmentListener, ClusterMBean {
   {
     ClusterContainer container = ClusterContainer.create();
 
-    if (_ref != null) {
-      Cluster cluster = container.findCluster(_ref);
-
-      if (cluster == null)
-	throw new ConfigException(L.l("'{0}' is an unknown cluster-ref.",
-				      _ref));
-
-      _clusterLocal.set(cluster);
-    }
-    else {
-      container.addCluster(this);
-
-      _clusterLocal.set(this);
-    }
-
     for (int i = 0; i < _serverList.length; i++) {
       ClusterServer server = _serverList[i];
 
@@ -369,6 +375,29 @@ public class Cluster implements EnvironmentListener, ClusterMBean {
 				      getClientLiveTime() / 1000L,
 				      port.getReadTimeout() / 1000L));
       }
+    }
+
+    String serverId = _serverIdLocal.get();
+
+    if (serverId == null)
+      serverId = "";
+
+    if (_ref != null) {
+      Cluster cluster = container.findCluster(_ref);
+
+      if (cluster == null)
+	throw new ConfigException(L.l("'{0}' is an unknown cluster-ref.",
+				      _ref));
+
+      _clusterLocal.set(cluster);
+    }
+    else {
+      container.addCluster(this);
+
+      ClusterServer self = findServer(serverId);
+
+      if (self != null)
+	_clusterLocal.set(this);
     }
 
     try {

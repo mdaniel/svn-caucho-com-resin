@@ -8,6 +8,37 @@
 
 <summary objsummary='localtoc'/>
 
+<section title="cluster changes">
+
+<p>The active cluster is now selected implicitly with a matching
+server-id.  This will allow some configurations with multiple
+&lt;cluster> items to avoid multiple resin.conf file..</p>
+
+<example>
+...
+&lt;server>
+  &lt;cluster>
+    &lt;srun server-id="a" host="192.168.0.10" port="6802"/>
+    &lt;srun server-id="b" host="192.168.0.11" port="6802"/>
+  &lt;/cluster>
+
+  &lt;cluster>
+    &lt;srun server-id="c" host="192.168.0.20" port="6802"/>
+    &lt;srun server-id="d" host="192.168.0.21" port="6802"/>
+  &lt;/cluster>
+&lt;/server>
+...
+</example>
+
+</section>
+
+<section title="xa-forbid-same-rm">
+
+<p>New attribute to the &lt;database> to workaround issues with Oracle
+drivers and distributed transactions.</p>
+
+</section>
+
 <section title="JSP with older web.xml">
 
 <p>When a pre-servlet 2.4 web.xml is used, JSP files will not

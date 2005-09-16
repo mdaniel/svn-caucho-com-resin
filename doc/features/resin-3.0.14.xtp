@@ -8,13 +8,6 @@
 
 <summary objsummary='localtoc'/>
 
-<section title="xa-forbid-same-rm">
-
-<p>New attribute to the &lt;database> to workaround issues with Oracle
-drivers and distributed transactions.</p>
-
-</section>
-
 <section title="Wiki">
 
 <p>Resin now has a <a href="http://www.caucho.com/wiki">wiki</a>.</p>

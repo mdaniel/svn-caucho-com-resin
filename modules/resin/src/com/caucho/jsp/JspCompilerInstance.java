@@ -310,9 +310,6 @@ public class JspCompilerInstance {
 
       _parseState.setRecycleTags(_jspPropertyGroup.isRecycleTags());
 
-      if (_jspPropertyGroup.getTldDir() != null)
-        taglibManager.setTldDir(_jspPropertyGroup.getTldDir());
-
       if (_jspPropertyGroup.getTldFileSet() != null)
         taglibManager.setTldFileSet(_jspPropertyGroup.getTldFileSet());
     }

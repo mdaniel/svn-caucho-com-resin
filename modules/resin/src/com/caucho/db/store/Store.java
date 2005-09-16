@@ -149,6 +149,10 @@ public class Store {
   // the total used bytes in the clock (s/b free?)
   private long _fragmentClockUsed;
 
+  private final Object _statLock = new Object();
+  // number of fragments currently used
+  private long _fragmentUseCount;
+
   private SoftReference<RandomAccessWrapper> _cachedRowFile;
   
   private Lock _tableLock;
@@ -305,6 +309,14 @@ public class Store {
   public static long blockIdToAddress(long blockId, int offset)
   {
     return (blockId & BLOCK_MASK) + offset;
+  }
+
+  /**
+   * Returns the current number of fragments used.
+   */
+  public long getTotalFragmentSize()
+  {
+    return _fragmentUseCount * FRAGMENT_SIZE;
   }
 
   /**
@@ -736,13 +748,14 @@ public class Store {
 	  block = readBlock(freeBlockId);
 
 	  if (freeBlockId != _fragmentClockLastAddr) {
-	    _fragmentClockTotal += BLOCK_SIZE;
-	    _fragmentClockUsed += readShort(block.getBuffer(), 0);
+	    _fragmentClockTotal += FRAGMENT_PER_BLOCK * FRAGMENT_SIZE;
 	  }
 	}
 	else if (! isLoop &&
 		 FRAGMENT_CLOCK_MIN < _fragmentClockTotal &&
 		 2 * _fragmentClockUsed < _fragmentClockTotal) {
+	  System.out.println("USED: " + _fragmentClockUsed / 1024 + " TOTAL:" + _fragmentClockTotal / 1024);
+	  
 	  _fragmentClockAddr = 0;
 	  _fragmentClockLastAddr = 0;
 	  _fragmentClockUsed = 0;
@@ -752,17 +765,24 @@ public class Store {
 	}
 	else {
 	  block = allocateFragment();
-	  _fragmentClockTotal += BLOCK_SIZE;
+	  
+	  _fragmentClockTotal += FRAGMENT_PER_BLOCK * FRAGMENT_SIZE;
 	}
       
 	_fragmentClockAddr = block.getBlockId();
 	_fragmentClockLastAddr = _fragmentClockAddr;
 	
 	WriteBlock writeBlock = xa.createAutoCommitWriteBlock(block);
+	block = writeBlock;
 
 	long fragAddr = writeFragmentBlock(writeBlock, buffer, offset, length);
 	
 	if (fragAddr != 0) {
+	  synchronized (_statLock) {
+	    // XXX: issue with transaction and rollback
+	    _fragmentUseCount++;
+	  }
+	  
 	  return fragAddr;
 	}
 	else {
@@ -800,6 +820,8 @@ public class Store {
 
 	  return (block.getBlockId() & BLOCK_MASK) + i;
 	}
+	else
+	  _fragmentClockUsed += FRAGMENT_SIZE;
       }
     }
 
@@ -828,6 +850,11 @@ public class Store {
       block.commit(); // XXX: shouldn't commit here
     } finally {
       block.free();
+    }
+
+    synchronized (_statLock) {
+      // XXX: issue with transaction and rollback
+      _fragmentUseCount--;
     }
   }
 

@@ -291,6 +291,8 @@ r_server-Basis =
 
   & r_cache?
 
+  & r_cluster*
+
   & r_ear-default*
 
   & r_error-page*

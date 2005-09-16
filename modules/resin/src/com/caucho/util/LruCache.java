@@ -349,9 +349,33 @@ public class LruCache<K,V> {
     CacheItem<K,V> tail;
 
     if (_capacity1 <= _size1)
-      tail = _tail1;
+      tail = _tail1 != null ? _tail1 : _tail2;
     else
-      tail = _tail2;
+      tail = _tail2 != null ? _tail2 : _tail1;
+
+    if (tail == null)
+      return false;
+      
+    remove(tail._key);
+    
+    return true;
+  }
+
+  /**
+   * Remove the last item in the LRU.  In this case, remove from the
+   * list with the longest length.
+   *
+   * For functions like Cache disk space, this is a better solution
+   * than the struct LRU removal.
+   */
+  public boolean removeLongestTail()
+  {
+    CacheItem<K,V> tail;
+
+    if (_size1 <= _size2)
+      tail = _tail2 != null ? _tail2 : _tail1;
+    else
+      tail = _tail1 != null ? _tail1 : _tail2;
 
     if (tail == null)
       return false;

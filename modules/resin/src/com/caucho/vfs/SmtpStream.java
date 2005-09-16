@@ -455,8 +455,15 @@ class SmtpStream extends MemoryStream {
 
     _isClosed = true;
 
-    String host = "localhost";
+    String host = System.getProperty("mail.smtp.host");
+    if (host == null)
+      host = "127.0.0.1";
+    
+    String portName = System.getProperty("mail.smtp.port");
+    
     int port = 25;
+    if (portName != null)
+      port = Integer.parseInt(portName);
 
     Socket sock = new Socket(host, port);
     CharBuffer msg = new CharBuffer();

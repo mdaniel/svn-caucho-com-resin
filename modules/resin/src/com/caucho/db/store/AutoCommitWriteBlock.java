@@ -55,7 +55,8 @@ public class AutoCommitWriteBlock extends WriteBlock {
   {
     super(block);
 
-    block.allocate();
+    // The block should already be allocated
+    // block.allocate();
     block.read();
   }
 
@@ -108,9 +109,9 @@ public class AutoCommitWriteBlock extends WriteBlock {
       }
       
       block.free();
-    }
 
-    close();
+      close();
+    }
   }
 
   public String toString()

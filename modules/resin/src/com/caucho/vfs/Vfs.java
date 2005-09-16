@@ -59,7 +59,8 @@ import com.caucho.util.CharBuffer;
 public final class Vfs {
   static FilesystemPath PWD;
   
-  static EnvironmentLocal<Path> ENV_PWD = new EnvironmentLocal<Path>("caucho.vfs.pwd");
+  static final EnvironmentLocal<Path> ENV_PWD
+    = new EnvironmentLocal<Path>("caucho.vfs.pwd");
 
   private Vfs() {}
   

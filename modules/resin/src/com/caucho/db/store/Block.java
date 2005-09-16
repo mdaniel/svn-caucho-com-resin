@@ -117,6 +117,7 @@ abstract public class Block implements ClockCacheItem, CacheListener {
 	log.finest(this + " allocate");
 
       if (_useCount > 32 && log.isLoggable(Level.FINE)) {
+	Thread.dumpStack();
 	log.fine("using " + this + " " + _useCount + " times");
       }
     }
