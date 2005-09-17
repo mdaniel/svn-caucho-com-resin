@@ -83,6 +83,7 @@ public class AccessLogWriter extends AbstractRolloverLog implements Runnable {
   private final AccessLog _log;
 
   private boolean _hasThread;
+  private boolean _isFlushing;
  
   // the write queue
   private int _maxQueueLength = 32;
@@ -118,8 +119,9 @@ public class AccessLogWriter extends AbstractRolloverLog implements Runnable {
 
 	  break;
 	}
-	else {
+	else if (! _isFlushing) {
 	  try {
+	    _isFlushing = true;
 	    // If the queue is full, call the flush code directly
 	    // since the thread pool may be out of threads for
 	    // a schedule
@@ -128,6 +130,8 @@ public class AccessLogWriter extends AbstractRolloverLog implements Runnable {
 	    run();
 	  } catch (Throwable e) {
 	    log.log(Level.WARNING, e.toString(), e);
+	  } finally {
+	    _isFlushing = false;
 	  }
 	}
       }

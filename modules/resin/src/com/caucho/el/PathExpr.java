@@ -29,25 +29,37 @@
 package com.caucho.el;
 
 import java.io.*;
+import java.util.*;
+import java.util.logging.*;
+import java.beans.*;
+import java.lang.reflect.*;
 
 import javax.servlet.jsp.el.VariableResolver;
 import javax.servlet.jsp.el.ELException;
 
 import com.caucho.vfs.*;
+import com.caucho.util.*;
 
 /**
- * Identifier expression.
+ * Represents a field reference that may also be a dotted property,
+ * e.g. smtp.mail.host.
+ * </pre>
  */
-public class IdExpr extends Expr {
-  // The identifier name
-  private String _id;
+public class PathExpr extends Expr {
+  private Expr _expr;
+
+  private String _path;
 
   /**
-   * Creates the identifier
+   * Creates a new path expression.
+   *
+   * @param expr the underlying expression
+   * @param path the property name to use if null
    */
-  public IdExpr(String id)
+  public PathExpr(Expr expr, String path)
   {
-    _id = id;
+    _expr = expr;
+    _path = path;
   }
 
   /**
@@ -57,47 +69,62 @@ public class IdExpr extends Expr {
    */
   public Expr createField(String field)
   {
-    Expr arrayExpr = createField(new StringLiteral(field));
+    Expr arrayExpr = _expr.createField(new StringLiteral(field));
 
-    return new PathExpr(arrayExpr, _id + '.' + field);
+    return new PathExpr(arrayExpr, _path + '.' + field);
   }
-
+  
   /**
-   * Evaluate the expr as an object.
+   * Evaluate the expression as an object.
    *
    * @param env the variable environment
    *
-   * @return the value as an object
+   * @return the evaluated object
    */
   public Object evalObject(VariableResolver env)
     throws ELException
   {
-    return env.resolveVariable(_id);
+    Object value = _expr.evalObject(env);
+
+    if (value != null)
+      return value;
+
+    return env.resolveVariable(_path);
   }
 
   /**
-   * Prints the code to create an IdExpr.
+   * Prints the code to create an LongLiteral.
+   *
+   * @param os stream to the generated *.java code
    */
   public void printCreate(WriteStream os)
     throws IOException
   {
-    os.print("new com.caucho.el.IdExpr(\"");
-    printEscapedString(os, _id);
+    os.print("new com.caucho.el.PathExpr(");
+    _expr.printCreate(os);
+    os.print(", \"");
+    os.print(_path);
     os.print("\")");
   }
 
+  /**
+   * Returns true for equal strings.
+   */
   public boolean equals(Object o)
   {
-    if (o == null || ! o.getClass().equals(IdExpr.class))
+    if (! (o instanceof PathExpr))
       return false;
 
-    IdExpr expr = (IdExpr) o;
+    PathExpr expr = (PathExpr) o;
 
-    return _id.equals(expr._id);
+    return (_expr.equals(expr._expr) && _path.equals(expr._path));
   }
 
+  /**
+   * Returns a readable representation of the expr.
+   */
   public String toString()
   {
-    return _id;
+    return String.valueOf(_expr);
   }
 }

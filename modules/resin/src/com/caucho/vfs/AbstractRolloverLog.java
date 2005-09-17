@@ -396,12 +396,13 @@ public class AbstractRolloverLog {
       try {
 	_os = path.openAppend();
       } catch (IOException e) {
-	log.log(Level.INFO, e.toString(), e);
+	log.fine(L.l("Can't open log '{0}'.\n{1}",
+		     getPath(), e.toString()));
       }
     }
 
     if (_os == null)
-      log.warning(L.l("Can't open access log file '{0}'.",
+      log.warning(L.l("Can't open log file '{0}'.",
 		      getPath()));
   }
 

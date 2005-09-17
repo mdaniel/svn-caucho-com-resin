@@ -4,6 +4,10 @@
 
 <s2 title='3.0.snap - Aug 11, 2005'>
 <ul>
+<li>Single-signon timeout was affecting other sessions (rep by K Wimmer, RSN-404)
+<li>Allow EL expression \${foo.bar} to refer to system property "foo.bar"
+<li>100-continue response needs to be flushed (rep by T Fukuda, RSN-414)
+<li>Caching updated to obey disk-size attribute (rep by Craig Lurey, RSN-412)
 <li>bug in LruCache.removeTail preventing true LRU removal
 <li>use mail.smtp.host and mail.smtp.port for mailto: (rep by A Sharaz, RSN-409);
 <li>jsp tld-dir wasn't picked up properly (rep by J Benton, RSN-425)

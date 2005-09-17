@@ -1503,8 +1503,10 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
   final void writeContinue()
     throws IOException
   {
-    if (! _isHeaderWritten)
+    if (! _isHeaderWritten) {
       writeContinueInt(_rawWrite);
+      _rawWrite.flush();
+    }
   }
   
   /**

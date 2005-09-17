@@ -193,8 +193,11 @@ public interface ServletAuthenticator {
    * Logs the user out from the given request.
    *
    * <p>Called via the session.logout() method.
+   *
+   * @param session for timeout, the session timing out. null if force logout
    */
   public void logout(ServletContext application,
+		     HttpSession session,
                      String sessionId,
                      Principal user)
     throws ServletException;

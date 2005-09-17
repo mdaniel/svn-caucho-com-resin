@@ -1261,8 +1261,10 @@ public class DynamicClassLoader extends java.net.URLClassLoader
       }
     }
 
-    for (int i = 0; i < _loaders.size(); i++) {
-      Loader loader = _loaders.get(i);
+    ArrayList<Loader> loaders = _loaders;
+
+    for (int i = 0; loaders != null && i < loaders.size(); i++) {
+      Loader loader = loaders.get(i);
 
       url = loader.getResource(name);
 

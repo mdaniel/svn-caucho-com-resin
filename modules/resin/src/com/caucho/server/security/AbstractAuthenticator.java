@@ -149,8 +149,7 @@ public class AbstractAuthenticator implements ServletAuthenticator {
   }
 
   /**
-   * Sets the password digest.  The password digest of the form:
-   * "algorithm-format", e.g. "MD5-base64".
+   * Sets true if the principal should logout when the session times out.
    */
   public void setLogoutOnSessionTimeout(boolean logout)
   {
@@ -222,6 +221,8 @@ public class AbstractAuthenticator implements ServletAuthenticator {
 	entry.addSession(session);
 	
         _principalCache.put(session.getId(), entry);
+
+	System.out.println("PC-ADD: " + session.getId());
       }
     }
 
@@ -603,23 +604,43 @@ public class AbstractAuthenticator implements ServletAuthenticator {
    * Logs the user out from the session.
    *
    * @param application the application
+   * @param timeoutSession the session timing out, null if not a timeout logout
    * @param user the logged in user
    */
   public void logout(ServletContext application,
+		     HttpSession timeoutSession,
                      String sessionId,
                      Principal user)
     throws ServletException
   {
+    if (timeoutSession == null)
+      Thread.dumpStack();
+    
+    System.out.println("LOGOUT-2: " + sessionId + " " + timeoutSession);
+    
     log.fine("logout " + user);
 
     if (sessionId != null) {
-      PrincipalEntry entry = null;
+      System.out.println("PE: " + _principalCache);
+      if (_principalCache == null) {
+      }
+      else if (timeoutSession != null) {
+	PrincipalEntry entry =  _principalCache.get(sessionId);
+	
+	System.out.println("ENTRY: " + entry);
 
-      if (_principalCache != null)
-	entry = _principalCache.remove(sessionId);
+	if (entry != null && entry.logout(timeoutSession)) {
+	  System.out.println("REMOVE: " + sessionId);
+	  
+	  _principalCache.remove(sessionId);
+	}
+      }
+      else {
+	PrincipalEntry entry =  _principalCache.remove(sessionId);
 
-      if (entry != null)
-	entry.logout();
+	if (entry != null)
+	  entry.logout();
+      }
 
       Application app = (Application) application;
       SessionManager manager = app.getSessionManager();
@@ -647,12 +668,11 @@ public class AbstractAuthenticator implements ServletAuthenticator {
                      Principal user)
     throws ServletException
   {
-    logout(application, request.getRequestedSessionId(), user);
+    logout(application, null, request.getRequestedSessionId(), user);
   }
 
   static class PrincipalEntry {
     private Principal _principal;
-    private SessionImpl _session;
     private ArrayList<SoftReference<SessionImpl>> _sessions;
 
     PrincipalEntry(Principal principal)
@@ -667,34 +687,54 @@ public class AbstractAuthenticator implements ServletAuthenticator {
 
     void addSession(SessionImpl session)
     {
-      if (_session == null || _session == session)
-	_session = session;
-      else {
-	if (_sessions == null)
-	  _sessions = new ArrayList<SoftReference<SessionImpl>>();
+      if (_sessions == null)
+	_sessions = new ArrayList<SoftReference<SessionImpl>>();
       
-	_sessions.add(new SoftReference<SessionImpl>(session));
-      }
+      _sessions.add(new SoftReference<SessionImpl>(session));
     }
 
+    /**
+     * Logout only the given session, returning true if it's the
+     * last session to logout.
+     */
+    boolean logout(HttpSession timeoutSession)
+    {
+      ArrayList<SoftReference<SessionImpl>> sessions = _sessions;
+      System.out.println("PE: " + timeoutSession + " " + sessions);
+
+      if (sessions == null)
+	return true;
+
+      boolean isEmpty = true;
+      for (int i = sessions.size() - 1; i >= 0; i--) {
+	SoftReference<SessionImpl> ref = sessions.get(i);
+	SessionImpl session = ref.get();
+
+	try {
+	  if (session == timeoutSession) {
+	    sessions.remove(i);
+	    session.logout();
+	  }
+	  else if (session != null)
+	    isEmpty = false;
+	  else
+	    sessions.remove(i);
+	} catch (Throwable e) {
+	  log.log(Level.WARNING, e.toString(), e);
+	}
+      }
+
+      return isEmpty;
+    }
+      
     void logout()
     {
-      SessionImpl session = _session;
-      _session = null;
-
       ArrayList<SoftReference<SessionImpl>> sessions = _sessions;
       _sessions = null;
-
-      try {
-	if (session != null)
-	  session.logout();
-      } catch (Throwable e) {
-	log.log(Level.WARNING, e.toString(), e);
-      }
       
       for (int i = 0; sessions != null && i < sessions.size(); i++) {
 	SoftReference<SessionImpl> ref = sessions.get(i);
-	session = ref.get();
+	SessionImpl session = ref.get();
 
 	try {
 	  if (session != null)

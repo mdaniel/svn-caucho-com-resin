@@ -521,7 +521,8 @@ public class SessionImpl implements HttpSession, CacheListener {
     if (! isLRU
 	|| ! (auth instanceof AbstractAuthenticator)
 	|| ((AbstractAuthenticator) auth).getLogoutOnSessionTimeout()) {
-      logout();
+      // server/12i1
+      logout(isLRU ? this : null);
     }
 
 
@@ -555,6 +556,16 @@ public class SessionImpl implements HttpSession, CacheListener {
    */
   public void logout()
   {
+    logout(this);
+  }
+
+  /**
+   * Logs out the user
+   *
+   * @param session the session in case of timeout and single-signon
+   */
+  public void logout(SessionImpl session)
+  {
     if (_user != null) {
       if (_isValid)
         removeAttribute(LOGIN);
@@ -565,7 +576,7 @@ public class SessionImpl implements HttpSession, CacheListener {
 	ServletAuthenticator auth = getAuthenticator();
 
 	if (auth != null)
-	  auth.logout(_manager.getApplication(), _id, user);
+	  auth.logout(_manager.getApplication(), session, _id, user);
       } catch (Exception e) {
         log.log(Level.WARNING, e.toString(), e);
       }

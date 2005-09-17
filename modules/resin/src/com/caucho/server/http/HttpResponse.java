@@ -127,12 +127,15 @@ public class HttpResponse extends AbstractHttpResponse {
     if (! containsHeader("Server"))
       os.write(_resinServerBytes, 0, _resinServerBytes.length);
 
+    os.print("\r\nContent-Length: 0");
+
     long now = Alarm.getCurrentTime();
     if (_lastDate + 1000 < now) {
       fillDate(now);
     }
     
     os.write(_dateBuffer, 0, _dateBufferLength);
+    os.flush();
   }
 
   /**

@@ -8,6 +8,13 @@
 
 <summary objsummary='localtoc'/>
 
+<section title="EL field expression">
+
+<p>In configuration files, EL field expressions like \${smtp.mail.host}
+now directly refer to the system property.</p>
+
+</section>
+
 <section title="cluster changes">
 
 <p>The active cluster is now selected implicitly with a matching
@@ -29,6 +36,14 @@ server-id.  This will allow some configurations with multiple
 &lt;/server>
 ...
 </example>
+
+</section>
+
+<section title="xa">
+
+<p>The &lt;xa> tag now defaults to true.  If true, connections automatically
+participate in distributed transactions.  If false, the database connections
+do not participate in distributed transactions.</p>
 
 </section>
 
