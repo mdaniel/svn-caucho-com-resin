@@ -1,0 +1,32 @@
+<server xmlns="http://caucho.com/ns/resin"
+        xmlns:resin="http://caucho.com/ns/resin/core">
+
+
+  <resource var="admin" type="com.caucho.admin.server.AdminManager">
+    <init>
+    </init>
+  </resource>
+
+
+  <host-default>
+    <web-app id="/resin-admin">
+      <servlet-mapping url-pattern="/*">
+        <servlet-class>com.caucho.admin.AdminServlet</servlet-class>
+
+        <init>
+          <admin-manager>${admin}</admin-manager>
+        </init>
+      </servlet-mapping>
+
+      <login-config auth-method="BASIC"/>
+
+      <authenticator type="com.caucho.server.security.XmlAuthenticator">
+        <init>
+          <user>resin-admin:2d8FTxj0FVpE7y/zZRwZMg==:resin-admin</user>
+          <user>resin-monitor:6qCgDEsvkjTw77JI72Se/Q==:resin-monitor</user>
+        </init>
+      </authenticator>
+    </web-app>
+  </host-default>
+
+</server>
