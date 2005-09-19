@@ -36,6 +36,7 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 /**
  * The AuthenticatorList is used to configure more than one authenticators in a
@@ -186,14 +187,16 @@ public class AuthenticatorList implements ServletAuthenticator {
   }
   
   public void logout(ServletContext application,
+		     HttpSession timeoutSession,
                      String sessionId,
                      Principal user)
     throws ServletException
   {
     for (ServletAuthenticator authenticator : _authenticators) {
-      authenticator.logout( application,
-                            sessionId,
-                            user );
+      authenticator.logout(application,
+			   timeoutSession,
+			   sessionId,
+			   user );
     }
   }
 }

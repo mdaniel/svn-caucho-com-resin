@@ -209,6 +209,7 @@ public abstract class AbstractLogin {
    * in the ServletContext attribute "caucho.login".
    */
   public void logout(HttpServletRequest request,
+		     HttpSession timeoutSession,
                      HttpServletResponse response,
                      ServletContext application)
     throws ServletException
@@ -216,7 +217,9 @@ public abstract class AbstractLogin {
     Principal principal = getUserPrincipal(request, response, application);
 
     if (principal != null)
-      getAuthenticator().logout(application, request.getRequestedSessionId(),
+      getAuthenticator().logout(application,
+				timeoutSession,
+				request.getRequestedSessionId(),
                                 principal);
   }
 }
