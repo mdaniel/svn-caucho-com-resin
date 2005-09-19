@@ -616,8 +616,6 @@ public class AbstractAuthenticator implements ServletAuthenticator {
     if (timeoutSession == null)
       Thread.dumpStack();
     
-    System.out.println("LOGOUT-2: " + sessionId + " " + timeoutSession);
-    
     log.fine("logout " + user);
 
     if (sessionId != null) {
@@ -627,11 +625,7 @@ public class AbstractAuthenticator implements ServletAuthenticator {
       else if (timeoutSession != null) {
 	PrincipalEntry entry =  _principalCache.get(sessionId);
 	
-	System.out.println("ENTRY: " + entry);
-
 	if (entry != null && entry.logout(timeoutSession)) {
-	  System.out.println("REMOVE: " + sessionId);
-	  
 	  _principalCache.remove(sessionId);
 	}
       }
@@ -669,6 +663,20 @@ public class AbstractAuthenticator implements ServletAuthenticator {
     throws ServletException
   {
     logout(application, null, request.getRequestedSessionId(), user);
+  }
+
+  /**
+   * Logs the user out from the session.
+   *
+   * @param request the servlet request
+   * @deprecated
+   */
+  public void logout(ServletContext application,
+		     String sessionId,
+                     Principal user)
+    throws ServletException
+  {
+    logout(application, null, sessionId, user);
   }
 
   static class PrincipalEntry {
