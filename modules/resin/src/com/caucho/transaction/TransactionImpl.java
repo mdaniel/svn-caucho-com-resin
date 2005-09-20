@@ -277,8 +277,7 @@ public class TransactionImpl implements Transaction, AlarmListener {
       }
 	
       try {
-        if (false && _resources[i].isSameRM(resource)) {
-	    // if (_resources[i] == resource) {
+        if (_resources[i].isSameRM(resource)) {
 	  flags = XAResource.TMJOIN;
 	  xid = _resourceXid[i];
           
@@ -601,7 +600,10 @@ public class TransactionImpl implements Transaction, AlarmListener {
         for (int i = _resourceCount - 1; i >= 0; i--) {
           XAResource resource = (XAResource) _resources[i];
 
-	  if (false && i == 0 && (xaLog == null || ! hasPrepare)) {
+	  if (i == 0 && (xaLog == null || ! hasPrepare)) {
+	    // server/1601
+	    _resourceState[0] |= RES_COMMIT;
+							
 	    allowSinglePhase = true;
 	    break;
 	  }
@@ -617,8 +619,8 @@ public class TransactionImpl implements Transaction, AlarmListener {
 		_resourceState[i] |= RES_COMMIT;
 	      }
 	      else {
-		  log.finer("unexpected prepare result " + prepare);
-		  rollbackInt();
+		log.finer("unexpected prepare result " + prepare);
+		rollbackInt();
 	      }
             } catch (XAException e) {
               heuristicExn = heuristicException(heuristicExn, e);
@@ -642,7 +644,7 @@ public class TransactionImpl implements Transaction, AlarmListener {
 	    XAResource resource = (XAResource) _resources[0];
 
 	    if ((_resourceState[0] & RES_COMMIT) != 0)
-		resource.commit(_xid, true);
+	      resource.commit(_xid, true);
 
 	    if (_timeout > 0)
 	      resource.setTransactionTimeout(0);
@@ -671,8 +673,6 @@ public class TransactionImpl implements Transaction, AlarmListener {
 	      if (_timeout > 0)
 		resource.setTransactionTimeout(0);
             } catch (XAException e) {
-		System.out.println("EXN: " + e + " " + e.errorCode);
-		
               heuristicExn = e;
               log.log(Level.FINE, e.toString(), e);
             }

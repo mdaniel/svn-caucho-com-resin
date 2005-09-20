@@ -702,7 +702,6 @@ public class AbstractAuthenticator implements ServletAuthenticator {
     boolean logout(HttpSession timeoutSession)
     {
       ArrayList<SoftReference<SessionImpl>> sessions = _sessions;
-      System.out.println("PE: " + timeoutSession + " " + sessions);
 
       if (sessions == null)
 	return true;
