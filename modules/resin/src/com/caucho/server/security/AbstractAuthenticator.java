@@ -221,8 +221,6 @@ public class AbstractAuthenticator implements ServletAuthenticator {
 	entry.addSession(session);
 	
         _principalCache.put(session.getId(), entry);
-
-	System.out.println("PC-ADD: " + session.getId());
       }
     }
 
@@ -613,13 +611,9 @@ public class AbstractAuthenticator implements ServletAuthenticator {
                      Principal user)
     throws ServletException
   {
-    if (timeoutSession == null)
-      Thread.dumpStack();
-    
     log.fine("logout " + user);
 
     if (sessionId != null) {
-      System.out.println("PE: " + _principalCache);
       if (_principalCache == null) {
       }
       else if (timeoutSession != null) {

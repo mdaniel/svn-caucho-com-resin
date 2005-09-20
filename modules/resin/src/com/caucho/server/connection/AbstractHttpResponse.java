@@ -1890,6 +1890,9 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
 	}
       }
     }
+
+    if (isCookie2) {
+    }
     else if (maxAge == 0) {
       cb.append("; expires=Thu, 01-Dec-1994 16:00:00 GMT");
     }

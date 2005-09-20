@@ -398,6 +398,10 @@ public class Cluster implements EnvironmentListener, ClusterMBean {
 
       if (self != null)
 	_clusterLocal.set(this);
+      else if (_clusterLocal.get() == null && _serverList.length == 0) {
+	// if it's the empty cluster, add it
+	_clusterLocal.set(this);
+      }
     }
 
     try {
