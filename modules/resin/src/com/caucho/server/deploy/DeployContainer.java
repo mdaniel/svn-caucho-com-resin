@@ -57,16 +57,16 @@ import com.caucho.lifecycle.Lifecycle;
 /**
  * A container of deploy objects.
  */
-public class DeployContainer<E extends DeployController>
+public class DeployContainer<C extends DeployController>
   extends CachedDependency
   implements Dependency {
   private static final Logger log = Log.open(DeployContainer.class);
   private static final L10N L = new L10N(DeployContainer.class);
 
-  private DeployListGenerator<E> _deployList
-    = new DeployListGenerator<E>(this);
+  private DeployListGenerator<C> _deployList
+    = new DeployListGenerator<C>(this);
 
-  private ArrayList<E> _controllerList = new ArrayList<E>();
+  private ArrayList<C> _controllerList = new ArrayList<C>();
 
   private final Lifecycle _lifecycle = new Lifecycle();
 
@@ -81,7 +81,7 @@ public class DeployContainer<E extends DeployController>
   /**
    * Adds a deploy generator.
    */
-  public void add(DeployGenerator<E> generator)
+  public void add(DeployGenerator<C> generator)
   {
     Set<String> names = new TreeSet<String>();
     generator.fillDeployedKeys(names);
@@ -95,7 +95,7 @@ public class DeployContainer<E extends DeployController>
   /**
    * Removes a deploy.
    */
-  public void remove(DeployGenerator<E> generator)
+  public void remove(DeployGenerator<C> generator)
   {
     Set<String> names = new TreeSet<String>();
     generator.fillDeployedKeys(names);
@@ -152,7 +152,7 @@ public class DeployContainer<E extends DeployController>
     }
 
     for (int i = 0; i < _controllerList.size(); i++) {
-      E controller = _controllerList.get(i);
+      C controller = _controllerList.get(i);
 
       controller.startOnInit();
     }
@@ -161,9 +161,9 @@ public class DeployContainer<E extends DeployController>
   /**
    * Returns the matching entry.
    */
-  public E findController(String name)
+  public C findController(String name)
   {
-    E controller = findDeployedController(name);
+    C controller = findDeployedController(name);
 
     if (controller != null)
       return controller;
@@ -173,18 +173,20 @@ public class DeployContainer<E extends DeployController>
     if (controller == null)
       return null;
     // server/10tm
-    else if (controller.isNameMatch(name))
+    else if (controller.isNameMatch(name)) {
       return controller;
-    else
+    }
+    else {
       return null;
+    }
   }
 
   /**
    * Returns the deployed entries.
    */
-  public ArrayList<E> getControllers()
+  public ArrayList<C> getControllers()
   {
-    ArrayList<E> list = new ArrayList<E>();
+    ArrayList<C> list = new ArrayList<C>();
 
     synchronized (_controllerList) {
       list.addAll(_controllerList);
@@ -214,9 +216,9 @@ public class DeployContainer<E extends DeployController>
    * The entry handles its own internal changes, e.g. a modification to
    * a web.xml file.
    */
-  public E update(String name)
+  public C update(String name)
   {
-    E newController = updateImpl(name);
+    C newController = updateImpl(name);
     
     if (_lifecycle.isActive() && newController != null)
       newController.startOnInit();
@@ -232,27 +234,15 @@ public class DeployContainer<E extends DeployController>
    * The entry handles its own internal changes, e.g. a modification to
    * a web.xml file.
    */
-  E updateImpl(String name)
+  C updateImpl(String name)
   {
-    E oldController = null;
+    C oldController = null;
 
     synchronized (_controllerList) {
       oldController = findDeployedController(name);
     }
-
-    /*
-    if (oldController == null) {
-    }
-    else if (oldController.isModifiedNow()) {
-      _controllerList.remove(oldController);
       
-      oldController.destroy();
-    }
-    else
-      return oldController;
-    */
-      
-    E newController = _deployList.generateController(name);
+    C newController = generateController(name);
     
     if (oldController != null) {
       _controllerList.remove(oldController);
@@ -260,25 +250,15 @@ public class DeployContainer<E extends DeployController>
       oldController.destroy();
     }
 
-    // server/102u
-    if (newController != null && ! _controllerList.contains(newController)) {
-      _controllerList.add(newController);
-    }
-    else
-      newController = null;
-
-    if (newController != null)
-      init(newController);
-
     return newController;
   }
 
   /**
    * Starts a particular controller.
    */
-  private E startImpl(String name)
+  private C startImpl(String name)
   {
-    E oldController = null;
+    C oldController = null;
 
     synchronized (_controllerList) {
       oldController = findDeployedController(name);
@@ -287,19 +267,7 @@ public class DeployContainer<E extends DeployController>
     if (oldController != null)
       return oldController;
       
-    E newController = _deployList.generateController(name);
-
-    // server/102u
-    if (newController != null && ! _controllerList.contains(newController)) {
-      _controllerList.add(newController);
-    }
-    else
-      newController = null;
-
-    if (newController != null)
-      init(newController);
-
-    return newController;
+    return generateController(name);
   }
 
   /**
@@ -307,7 +275,7 @@ public class DeployContainer<E extends DeployController>
    */
   public void remove(String name)
   {
-    E oldController = null;
+    C oldController = null;
 
     synchronized (_controllerList) {
       oldController = findDeployedController(name);
@@ -323,22 +291,31 @@ public class DeployContainer<E extends DeployController>
   /**
    * Generates the controller.
    */
-  private E generateController(String name)
+  private C generateController(String name)
   {
     if (! _lifecycle.isActive())
       return null;
     
-    E newController = _deployList.generateController(name);
+    C newController = _deployList.generateController(name);
 
     if (newController == null)
       return null;
 
     // the new entry might already be generated by another thread
     synchronized (_controllerList) {
-      E controller = findDeployedController(name);
+      C controller = findDeployedController(name);
 
       if (controller != null)
 	return controller;
+
+      /*
+      // server/0523
+      // Controllers with the same root directory are merged
+      controller = mergeWithDeployedController(newController);
+
+      if (controller != null)
+	return controller;
+      */
 
       _controllerList.add(newController);
     }
@@ -348,14 +325,14 @@ public class DeployContainer<E extends DeployController>
     return newController;
   }
 
-  private void init(E controller)
+  private void init(C controller)
   {
     Thread thread = Thread.currentThread();
     ClassLoader oldLoader = thread.getContextClassLoader();
     
     try {
       thread.setContextClassLoader(controller.getParentClassLoader());
-      
+
       controller.init();
     } finally {
       thread.setContextClassLoader(oldLoader);
@@ -365,14 +342,32 @@ public class DeployContainer<E extends DeployController>
   /**
    * Returns an already deployed entry.
    */
-  private E findDeployedController(String name)
+  private C findDeployedController(String name)
   {
     synchronized (_controllerList) {
       for (int i = 0; i < _controllerList.size(); i++) {
-	E controller = _controllerList.get(i);
+	C controller = _controllerList.get(i);
 
 	if (controller.isNameMatch(name)) {
 	  return controller;
+	}
+      }
+    }
+
+    return null;
+  }
+
+  /**
+   * Merge with deployed controller.
+   */
+  private C mergeWithDeployedController(C newController)
+  {
+    synchronized (_controllerList) {
+      for (int i = 0; i < _controllerList.size(); i++) {
+	C oldController = _controllerList.get(i);
+
+	if (oldController.mergeWithDeployedController(newController)) {
+	  return oldController;
 	}
       }
     }
@@ -388,7 +383,7 @@ public class DeployContainer<E extends DeployController>
     if (! _lifecycle.toStop())
       return;
 
-    ArrayList<E> controllers = new ArrayList<E>(_controllerList);
+    ArrayList<C> controllers = new ArrayList<C>(_controllerList);
 
     for (int i = 0; i < controllers.size(); i++)
       controllers.get(i).stop();

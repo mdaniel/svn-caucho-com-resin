@@ -73,6 +73,31 @@ public class PathExpr extends Expr {
 
     return new PathExpr(arrayExpr, _path + '.' + field);
   }
+
+  /**
+   * Creates a method call using this as the <code>obj.method</code>
+   * expression
+   *
+   * @param args the arguments for the method
+   */
+  public Expr createMethod(Expr []args)
+  {
+    if (_expr instanceof ArrayExpr) {
+      // jsp/1b71
+      
+      ArrayExpr array = (ArrayExpr) _expr;
+
+      Expr index = array.getIndex();
+      
+      if (index instanceof StringLiteral) {
+	StringLiteral string = (StringLiteral) index;
+
+	return new MethodExpr(array.getExpr(), string.getValue(), args);
+      }
+    }
+      
+    return new FunctionExpr(this, args);
+  }
   
   /**
    * Evaluate the expression as an object.

@@ -2284,7 +2284,7 @@ public class XmlParser extends AbstractParser {
 	    ch == 0x9 ||
 	    ch == 0xa ||
 	    ch == 0xd ||
-	    ch >= 0xe000 && ch <= 0xfff0);
+	    ch >= 0xe000 && ch <= 0xfffd);
   }
 
   /**

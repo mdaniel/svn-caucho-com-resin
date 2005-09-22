@@ -293,9 +293,11 @@ abstract public class GenericTag extends JspContainerNode {
 	out.printClass(_tagClass);
 	out.println(" " + _tag.getId() + " = null;");
       }
-      
+
+      /*
       if (SimpleTag.class.isAssignableFrom(_tagClass) && hasCustomTag())
         out.println("javax.servlet.jsp.tagext.Tag " + _tag.getId() + "_adapter = null;");
+      */
     }
     else {
       // Any conflicting values must be set each time.

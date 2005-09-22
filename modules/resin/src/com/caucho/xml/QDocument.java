@@ -789,6 +789,11 @@ public class QDocument extends QDocumentFragment implements CauchoDocument {
     return _depends;
   }
 
+  public ArrayList<Depend> getDependencyList()
+  {
+    return _dependList;
+  }
+
   public void setProperty(String name, Object value)
   {
     if (name.equals(DEPENDS))

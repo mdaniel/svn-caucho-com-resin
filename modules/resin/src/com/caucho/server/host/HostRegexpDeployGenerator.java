@@ -149,6 +149,9 @@ public class HostRegexpDeployGenerator extends DeployGenerator<HostController> {
 
       controller.setRegexpName(name);
 
+      controller.setRegexp(regexp);
+      controller.setRootDirectoryPattern(_config.getRootDirectory());
+
       // XXX: not dynamic-deploy in the sense that the mappings are known
       //controller.setDynamicDeploy(true);
       //controller.setRegexpValues(vars);

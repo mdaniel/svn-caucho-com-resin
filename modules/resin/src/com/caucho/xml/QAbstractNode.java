@@ -408,6 +408,14 @@ public abstract class QAbstractNode implements CauchoNode, java.io.Serializable 
 
   // Caucho stuff
 
+  public ArrayList<Depend> getDependencyList()
+  {
+    if (_owner != null)
+      return _owner.getDependencyList();
+    else
+      return null;
+  }
+  
   boolean isNameValid(String name)
   {
     if (name == null || name.length() == 0)

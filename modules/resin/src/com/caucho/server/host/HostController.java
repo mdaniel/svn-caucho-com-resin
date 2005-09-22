@@ -37,6 +37,7 @@ import java.util.logging.Logger;
 import java.util.logging.Level;
 
 import java.util.regex.Pattern;
+import java.util.regex.Matcher;
 
 import javax.servlet.jsp.el.VariableResolver;
 import javax.servlet.jsp.el.ELException;
@@ -44,6 +45,8 @@ import javax.servlet.jsp.el.ELException;
 import javax.management.ObjectName;
 import javax.management.MalformedObjectNameException;
 import javax.management.JMException;
+
+import com.caucho.config.types.PathBuilder;
 
 import com.caucho.util.L10N;
 import com.caucho.util.Alarm;
@@ -67,6 +70,7 @@ import com.caucho.server.webapp.WebAppConfig;
 
 import com.caucho.server.e_app.EarConfig;
 
+import com.caucho.server.deploy.DeployController;
 import com.caucho.server.deploy.EnvironmentDeployController;
 
 import com.caucho.server.host.mbean.HostMBean;
@@ -84,6 +88,9 @@ public class HostController extends EnvironmentDeployController<Host,HostConfig>
   private String _hostName;
   // The regexp name is the matching name of the regexp
   private String _regexpName;
+
+  private Pattern _regexp;
+  private String _rootDirectoryPattern;
 
   // Any host aliases.
   private ArrayList<String> _entryHostAliases
@@ -220,6 +227,21 @@ public class HostController extends EnvironmentDeployController<Host,HostConfig>
     return _hostAliases;
   }
 
+  /**
+   * Sets the regexp pattern
+   */
+  public void setRegexp(Pattern regexp)
+  {
+    _regexp = regexp;
+  }
+
+  /**
+   * Sets the root directory pattern
+   */
+  public void setRootDirectoryPattern(String rootDirectoryPattern)
+  {
+    _rootDirectoryPattern = rootDirectoryPattern;
+  }
 
   /**
    * Adds a dependent file.
@@ -320,8 +342,55 @@ public class HostController extends EnvironmentDeployController<Host,HostConfig>
       if (alias.matcher(name).find())
 	return true;
     }
+
+    if (_regexp != null) {
+      // server/0523
+      
+      Matcher matcher = _regexp.matcher(name);
+
+      if (matcher.matches()) {
+	Path rootDirectory = calculateRoot(matcher);
+
+	if (getRootDirectory().equals(rootDirectory))
+	  return true;
+      }
+    }
     
     return false;
+  }
+
+  private Path calculateRoot(Matcher matcher)
+  {
+    // XXX: duplicates HostRegexp
+
+    Thread thread = Thread.currentThread();
+    ClassLoader oldLoader = thread.getContextClassLoader();
+
+    try {
+      thread.setContextClassLoader(getParentClassLoader());
+      
+      int length = matcher.end() - matcher.start();
+
+      ArrayList<String> vars = new ArrayList<String>();
+
+      HashMap<String,Object> varMap = new HashMap<String,Object>();
+        
+      for (int j = 0; j <= matcher.groupCount(); j++) {
+	vars.add(matcher.group(j));
+	varMap.put("host" + j, matcher.group(j));
+      }
+
+      varMap.put("regexp", vars);
+
+      return PathBuilder.lookupPath(_rootDirectoryPattern, varMap);
+    } catch (Exception e) {
+      log.log(Level.FINE, e.toString(), e);
+
+      // XXX: not quite right
+      return Vfs.lookup(_rootDirectoryPattern);
+    } finally {
+      thread.setContextClassLoader(oldLoader);
+    }
   }
 
   /**
@@ -362,13 +431,20 @@ public class HostController extends EnvironmentDeployController<Host,HostConfig>
   /**
    * Merges with the old controller.
    */
-  protected void mergeController(HostController oldController)
+  protected void mergeController(DeployController<Host> oldControllerV)
   {
-    super.mergeController(oldController);
+    super.mergeController(oldControllerV);
 
+    HostController oldController = (HostController) oldControllerV;
+    
     _entryHostAliases.addAll(oldController._entryHostAliases);
     _entryHostAliasRegexps.addAll(oldController._entryHostAliasRegexps);
     _hostAliases.addAll(oldController._hostAliases);
+
+    if (_regexp == null) {
+      _regexp = oldController._regexp;
+      _rootDirectoryPattern = oldController._rootDirectoryPattern;
+    }
   }
 
   /**

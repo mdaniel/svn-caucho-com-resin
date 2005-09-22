@@ -675,6 +675,9 @@ public class Store {
 
       byte []blockBuffer = block.getBuffer();
 
+      if (FRAGMENT_SIZE < length)
+	length = FRAGMENT_SIZE;
+
       synchronized (blockBuffer) {
 	System.arraycopy(blockBuffer, blockOffset + 1 + fragmentOffset,
 			 buffer, offset, length);
@@ -701,6 +704,9 @@ public class Store {
       int blockOffset = getFragmentOffset(fragmentAddress);
 
       byte []blockBuffer = block.getBuffer();
+
+      if (FRAGMENT_SIZE < 2 * length)
+	length = FRAGMENT_SIZE / 2;
       
       synchronized (blockBuffer) {
 	for (int i = 0; i < length; i++) {

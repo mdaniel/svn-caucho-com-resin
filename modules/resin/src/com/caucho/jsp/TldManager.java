@@ -547,7 +547,7 @@ public class TldManager {
     if (taglibRef != null) {
       taglib = taglibRef.get();
 
-      if (taglib != null)
+      if (taglib != null && ! taglib.isModified())
 	return taglib;
     }
     

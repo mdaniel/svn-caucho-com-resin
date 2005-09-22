@@ -995,7 +995,7 @@ public class DynamicClassLoader extends java.net.URLClassLoader
 	resolveClass(cl);
       return cl;
     }
-	
+    
     if (_lifecycle.isDestroyed()) {
       log().fine(L().l("Loading class {0} when class loader {1} has been closed.",
 		   name, this));

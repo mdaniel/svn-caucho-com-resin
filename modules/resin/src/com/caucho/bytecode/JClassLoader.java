@@ -127,7 +127,7 @@ abstract public class JClassLoader {
    */
   public static JClassLoader getStaticClassLoader()
   {
-    return _staticClassLoader;
+    return getSystemClassLoader();
   }
 
   public JClass descriptorToClass(String name, int i)

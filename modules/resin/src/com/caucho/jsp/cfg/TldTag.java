@@ -40,13 +40,16 @@ import com.caucho.log.Log;
 
 import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
+import com.caucho.config.DependencyBean;
+
+import com.caucho.make.PersistentDependency;
 
 import com.caucho.jsp.JspParseException;
 
 /**
  * Configuration for the taglib tag in the .tld
  */
-public class TldTag {
+public class TldTag implements DependencyBean {
   private final static L10N L = new L10N(TldTag.class);
   private final static Logger log = Log.open(TldTag.class);
   
@@ -70,6 +73,9 @@ public class TldTag {
 
   private String _configLocation;
   private JspParseException _configException;
+  
+  private ArrayList<PersistentDependency> _dependencyList
+    = new ArrayList<PersistentDependency>();
 
   /**
    * Sets the config location.
@@ -77,6 +83,22 @@ public class TldTag {
   public void setConfigLocation(String filename, int line)
   {
     _configLocation = filename + ":" + line + ": ";
+  }
+
+  /**
+   * Adds a dependency.
+   */
+  public void addDependency(PersistentDependency dependency)
+  {
+    _dependencyList.add(dependency);
+  }
+
+  /**
+   * Returns the dependency.
+   */
+  public ArrayList<PersistentDependency> getDependencyList()
+  {
+    return _dependencyList;
   }
 
   /**

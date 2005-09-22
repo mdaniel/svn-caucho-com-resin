@@ -69,6 +69,22 @@ public class ArrayExpr extends Expr {
   }
 
   /**
+   * Returns the base expression.
+   */
+  public Expr getExpr()
+  {
+    return _left;
+  }
+
+  /**
+   * Returns the index expression.
+   */
+  public Expr getIndex()
+  {
+    return _right;
+  }
+
+  /**
    * Creates a method for constant arrays.
    */
   public Expr createMethod(Expr []args)

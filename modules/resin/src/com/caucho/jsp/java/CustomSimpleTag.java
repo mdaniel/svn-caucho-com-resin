@@ -132,6 +132,11 @@ public class CustomSimpleTag extends GenericTag {
       _body.setJspFragment(true);
       _body.generateFragmentPrologue(out);
     }
+    
+    if (hasCustomTag()) {
+      // jsp/18ei
+      out.println("javax.servlet.jsp.tagext.Tag " + _tag.getId() + "_adapter = null;");
+    }
   }
   
   /**

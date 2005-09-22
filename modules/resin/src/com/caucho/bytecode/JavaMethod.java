@@ -46,6 +46,8 @@ import com.caucho.log.Log;
 public class JavaMethod extends JMethod {
   static private final Logger log = Log.open(JavaMethod.class);
 
+  private static final JClass []NULL_CLASS = new JClass[0];
+
   private JavaClassLoader _loader;
   
   private JavaClass _jClass;
@@ -53,6 +55,7 @@ public class JavaMethod extends JMethod {
   private int _accessFlags;
   private String _name;
   private String _descriptor;
+  private JClass []_exceptions = NULL_CLASS;
 
   private ArrayList<Attribute> _attributes = new ArrayList<Attribute>();
 
@@ -274,13 +277,19 @@ public class JavaMethod extends JMethod {
   }
 
   /**
+   * Sets the exception types
+   */
+  public void setExceptionTypes(JClass []exceptions)
+  {
+    _exceptions = exceptions;
+  }
+
+  /**
    * Returns the exception types.
    */
   public JClass []getExceptionTypes()
   {
-    // XXX: where are these?
-    
-    return new JClass[0];
+    return _exceptions;
   }
 
   /**

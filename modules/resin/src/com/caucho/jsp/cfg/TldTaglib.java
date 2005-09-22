@@ -33,12 +33,16 @@ import java.util.ArrayList;
 
 import com.caucho.vfs.Path;
 
+import com.caucho.config.DependencyBean;
+
+import com.caucho.make.PersistentDependency;
+
 import com.caucho.server.webapp.Application;
 
 /**
  * Configuration for the taglib in the .tld
  */
-public class TldTaglib {
+public class TldTaglib implements DependencyBean {
   private String _tlibVersion;
   private String _jspVersion;
   private String _shortName;
@@ -57,7 +61,18 @@ public class TldTaglib {
   private Path _jarPath;
   private Throwable _configException;
 
+  private ArrayList<PersistentDependency> _dependList
+    = new ArrayList<PersistentDependency>();
+
   private boolean _isInit;
+
+  /**
+   * Adds a dependency.
+   */
+  public void addDependency(PersistentDependency depend)
+  {
+    _dependList.add(depend);
+  }
 
   /**
    * Sets the tld version.
@@ -344,5 +359,18 @@ public class TldTaglib {
 
       listener.register(app);
     }
+  }
+
+  /**
+   * Checks for modification.
+   */
+  public boolean isModified()
+  {
+    for (int i = 0; i < _dependList.size(); i++) {
+      if (_dependList.get(i).isModified())
+	return true;
+    }
+
+    return false;
   }
 }

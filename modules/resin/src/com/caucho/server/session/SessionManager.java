@@ -885,7 +885,7 @@ public class SessionManager implements ObjectManager, AlarmListener {
       id = createSessionId(request, true);
     }
 
-    SessionImpl session = create(id, now);
+    SessionImpl session = create(id, now, true);
 
     if (session == null)
       return null;
@@ -1021,7 +1021,7 @@ public class SessionManager implements ObjectManager, AlarmListener {
       if (! isInSessionGroup(key))
 	return null;
 
-      session = create(key, now);
+      session = create(key, now, create);
       isNew = true;
     }
 
@@ -1075,7 +1075,7 @@ public class SessionManager implements ObjectManager, AlarmListener {
    * Creates a session.  It's already been established that the
    * key does not currently have a session.
    */
-  private SessionImpl create(String key, long now)
+  private SessionImpl create(String key, long now, boolean isCreate)
   {
     SessionImpl session = new SessionImpl(this, key, now);
 

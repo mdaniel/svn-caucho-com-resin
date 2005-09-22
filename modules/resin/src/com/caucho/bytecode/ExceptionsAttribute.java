@@ -63,6 +63,14 @@ public class ExceptionsAttribute extends Attribute {
   }
 
   /**
+   * Returns the exceptions.
+   */
+  public ArrayList<String> getExceptionList()
+  {
+    return _exceptions;
+  }
+
+  /**
    * Writes the field to the output.
    */
   public void read(ByteCodeParser in)

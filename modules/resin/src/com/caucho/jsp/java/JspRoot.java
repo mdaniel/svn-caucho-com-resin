@@ -74,7 +74,7 @@ public class JspRoot extends JspContainerNode {
     throws JspParseException
   {
     if (VERSION.equals(name)) {
-      if (! value.equals("2.0"))
+      if (! value.equals("2.0") && ! value.equals("1.2"))
 	throw error(L.l("'{0}' is an supported jsp:root version.",
 			value));
 

@@ -1731,7 +1731,7 @@ public class Application extends ServletContextImpl
 	if (! isPrecompile)
 	  entry = _filterChainCache.get(invocation.getContextURI());
 
-	if (entry != null) {
+	if (entry != null && ! entry.isModified()) {
 	  chain = entry.getFilterChain();
 	} else {
 	  if (_rewriteInvocation != null) {
@@ -2381,12 +2381,19 @@ public class Application extends ServletContextImpl
     String _pathInfo;
     String _servletPath;
     HashMap<String,String> _securityRoleMap;
+    final Dependency _dependency;
 
     FilterChainEntry(FilterChain filterChain, Invocation invocation)
     {
       _filterChain = filterChain;
       _pathInfo = invocation.getPathInfo();
       _servletPath = invocation.getServletPath();
+      _dependency = invocation.getDependency();
+    }
+
+    boolean isModified()
+    {
+      return _dependency != null && _dependency.isModified();
     }
 
     FilterChain getFilterChain()

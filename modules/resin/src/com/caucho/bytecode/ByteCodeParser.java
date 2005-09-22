@@ -448,6 +448,24 @@ public class ByteCodeParser {
       Attribute attr = parseAttribute();
 
       method.addAttribute(attr);
+      
+      if (attr instanceof ExceptionsAttribute) {
+	ExceptionsAttribute exn = (ExceptionsAttribute) attr;
+
+	ArrayList<String> exnNames = exn.getExceptionList();
+
+	if (exnNames.size() > 0) {
+	  JClass []exnClasses = new JClass[exnNames.size()];
+
+	  for (int j = 0; j < exnNames.size(); j++) {
+	    String exnName = exnNames.get(j).replace('/', '.');
+	  
+	    exnClasses[j] = _loader.forName(exnName);
+	  }
+
+	  method.setExceptionTypes(exnClasses);
+	}
+      }
     }
 
     _class.addMethod(method);

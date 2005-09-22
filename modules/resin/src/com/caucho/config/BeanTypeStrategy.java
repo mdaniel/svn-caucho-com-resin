@@ -33,6 +33,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.ref.SoftReference;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -46,6 +47,10 @@ import com.caucho.util.NotImplementedException;
 
 import com.caucho.config.types.Validator;
 
+import com.caucho.make.PersistentDependency;
+
+import com.caucho.vfs.Depend;
+
 import com.caucho.xml.QName;
 import com.caucho.xml.QNode;
 
@@ -53,12 +58,13 @@ public class BeanTypeStrategy extends TypeStrategy {
   protected static final L10N L = new L10N(BeanTypeStrategy.class);
 
   private SoftReference<Method []> _methodsRef;
-  private HashMap<QName,AttributeStrategy> _nsAttributeMap =
-          new HashMap<QName,AttributeStrategy>();
+  private HashMap<QName,AttributeStrategy> _nsAttributeMap
+    = new HashMap<QName,AttributeStrategy>();
   private final Class _type;
 
   private final Method _setParent;
   private final Method _setLocation;
+  private final Method _addDependency;
   private final Method _setSystemId;
   private final Method _setNode;
   private final Method _init;
@@ -80,6 +86,9 @@ public class BeanTypeStrategy extends TypeStrategy {
 
     _setLocation = findMethod("setConfigLocation",
 	   	              new Class[] { String.class, int.class });
+
+    _addDependency = findMethod("addDependency",
+	   	              new Class[] { PersistentDependency.class });
 
     _setSystemId = findMethod("setConfigSystemId",
 	   	              new Class[] { String.class  });
@@ -193,22 +202,26 @@ public class BeanTypeStrategy extends TypeStrategy {
     ClassLoader oldLoader = thread.getContextClassLoader();
 
     try {
-      if (_setNode != null && node instanceof QNode) {
+      if (node instanceof QNode) {
 	QNode qNode = (QNode) node;
-      
-	_setNode.invoke(bean, qNode);
-      }
+	
+	if (_setNode != null)
+	  _setNode.invoke(bean, qNode);
     
-      if (_setLocation != null && node instanceof QNode) {
-	QNode qNode = (QNode) node;
+	if (_setLocation != null)
+	  _setLocation.invoke(bean, qNode.getFilename(), qNode.getLine());
       
-	_setLocation.invoke(bean, qNode.getFilename(), qNode.getLine());
+	if (_setSystemId != null)
+	  _setSystemId.invoke(bean, qNode);
+
+	if (_addDependency != null) {
+	  ArrayList<Depend> dependList = qNode.getDependencyList();
+
+	  for (int i = 0; dependList != null && i < dependList.size(); i++) {
+	    _addDependency.invoke(bean, dependList.get(i));
+	  }
+	}
       }
-      
-      if (_setSystemId != null && node instanceof QNode)
-	_setSystemId.invoke(bean, ((QNode) node).getBaseURI());
-    
-      // XXX: DependencyBean
 
       super.configureBean(builder, bean, node);
 

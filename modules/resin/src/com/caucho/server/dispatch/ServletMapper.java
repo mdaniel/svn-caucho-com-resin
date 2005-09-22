@@ -40,10 +40,17 @@ import com.caucho.util.L10N;
 import com.caucho.util.CauchoSystem;
 
 import com.caucho.vfs.WriteStream;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.Vfs;
+import com.caucho.vfs.Depend;
+
+import com.caucho.make.DependencyContainer;
 
 import com.caucho.log.Log;
 
 import com.caucho.jsp.QServlet;
+
+import com.caucho.server.webapp.Application;
 
 /**
  * Manages dispatching: servlets and filters.
@@ -281,6 +288,8 @@ public class ServletMapper {
       servletName = _defaultServlet;
       vars.clear();
       vars.add(contextURI);
+
+      addWelcomeFileDependency(invocation);
     }
 
     if (servletName == null) {
@@ -326,6 +335,34 @@ public class ServletMapper {
     }
 
     return chain;
+  }
+
+  private void addWelcomeFileDependency(ServletInvocation servletInvocation)
+  {
+    if (! (servletInvocation instanceof Invocation))
+      return;
+
+    Invocation invocation = (Invocation) servletInvocation;
+    
+    String contextURI = invocation.getContextURI();
+
+    DependencyContainer dependencyList = new DependencyContainer();
+
+    Application app = (Application) _servletContext;
+    
+    for (int i = 0; i < _welcomeFileList.size(); i++) {
+      String file = _welcomeFileList.get(i);
+
+      String realPath = app.getRealPath(contextURI + "/" + file);
+
+      Path path = app.getAppDir().lookup(realPath);
+
+      dependencyList.add(new Depend(path));
+    }
+
+    dependencyList.clearModified();
+
+    invocation.setDependency(dependencyList);
   }
   
   private String handleInvoker(ServletInvocation invocation)

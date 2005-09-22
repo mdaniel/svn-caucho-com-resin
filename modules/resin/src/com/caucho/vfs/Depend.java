@@ -182,7 +182,7 @@ public class Depend implements PersistentDependency {
 
       return true;
     }
-    
+
     long sourceLastModified = _source.getLastModified();
     long sourceLength = _source.getLength();
 

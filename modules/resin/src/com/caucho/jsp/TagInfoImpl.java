@@ -31,11 +31,12 @@ package com.caucho.jsp;
 import javax.servlet.jsp.tagext.TagInfo;
 
 import com.caucho.jsp.cfg.TldTag;
+import com.caucho.jsp.java.TagInfoExt;
 
 /**
  * Stores the entire information for a tag library.
  */
-public class TagInfoImpl extends TagInfo {
+public class TagInfoImpl extends TagInfoExt {
   private TldTag _tldTag;
   
   /**
@@ -53,7 +54,9 @@ public class TagInfoImpl extends TagInfo {
 	  tag.getDisplayName(),
 	  tag.getSmallIcon(),
 	  tag.getLargeIcon(),
-	  tag.getVariables());
+	  tag.getVariables(),
+	  tag.getDynamicAttributes(),
+	  tag.getDependencyList());
 
     _tldTag = tag;
   }

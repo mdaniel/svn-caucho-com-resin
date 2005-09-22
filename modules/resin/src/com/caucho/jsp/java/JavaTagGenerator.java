@@ -289,7 +289,7 @@ public class JavaTagGenerator extends JavaJspGenerator {
       String isSetName = "_jsp_" + name + "_isSet";
 
       out.println();
-      out.println("private " + type + " " + name + ";");
+      out.println("private " + type + " _" + name + ";");
       out.println("private boolean " + isSetName + ";");
       
       out.println();
@@ -297,17 +297,20 @@ public class JavaTagGenerator extends JavaJspGenerator {
       out.println("{");
       out.pushDepth();
       out.println(isSetName + " = true;");
-      out.println(name + " = value;");
+      out.println("_" + name + " = value;");
       out.popDepth();
       out.println("}");
-      
+
+      /*
+      // jsp/101f
       out.println();
       out.println("public " + type + " get" + upperName + "()");
       out.println("{");
       out.pushDepth();
-      out.println("return " + name + ";");
+      out.println("return _" + name + ";");
       out.popDepth();
       out.println("}");
+      */
     }
   }
 
@@ -423,13 +426,13 @@ public class JavaTagGenerator extends JavaJspGenerator {
       
       out.println("if (" + isSetName + ")");
       out.println("  pageContext.setAttribute(\"" + name + "\", " +
-                  JspNode.toELObject(name, cl) + ");");
+                  JspNode.toELObject("_" + name, cl) + ");");
     }
 
     // jsp/10a1
     if (_dynamicAttributes != null) {
       out.println("pageContext.setAttribute(\"" + _dynamicAttributes + "\"," +
-		  "this." + _dynamicAttributes + ");");
+		  "this._" + _dynamicAttributes + ");");
     }
   }
 

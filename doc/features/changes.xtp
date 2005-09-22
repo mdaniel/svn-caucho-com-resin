@@ -4,6 +4,13 @@
 
 <s2 title='3.0.snap - Aug 11, 2005'>
 <ul>
+<li>ByteCodeParser wasn't grabbing method exceptions properly (rep by Marcus Richardson, RSN-437)
+<li>JSP 2.0 .tag file wasn't assigning properly for 'value' attribute (rep by William Wallis, RSN-424)
+<li>XML CDATA wasn't supporting xfffd (rep by Tom Davies, RSN-418)
+<li>Adding an index.jsp was not properly detected. (rep by P Barry, RSN-415)
+<li>JSP 2.0 .tag file was not allowing Java reserved names as attributes (rep by Jeroen van Vianen, RSN-433)
+<li>JSP files need to add .tld dependency (rep by Ajit Puthiyavettle, RSN-423)
+<li>Missing JSP adapter declaration for 1.2/2.0 tag files (rep by Andrey Grebnev, RSN-436)
 <li>Single-signon timeout was affecting other sessions (rep by K Wimmer, RSN-404)
 <li>Allow EL expression \${foo.bar} to refer to system property "foo.bar"
 <li>100-continue response needs to be flushed (rep by T Fukuda, RSN-414)

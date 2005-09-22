@@ -30,8 +30,12 @@
 package com.caucho.server.dispatch;
 
 import com.caucho.log.Log;
+
 import com.caucho.make.Dependency;
+import com.caucho.make.DependencyContainer;
+
 import com.caucho.server.webapp.Application;
+
 import com.caucho.util.L10N;
 
 import java.util.logging.Logger;
@@ -186,9 +190,6 @@ public class Invocation extends ServletInvocation implements Dependency {
   public void setApplication(Application app)
   {
     _application = app;
-
-    if (app != null && _dependency == null)
-      _dependency = app.getInvocationDependency();
   }
 
   /**
@@ -200,6 +201,14 @@ public class Invocation extends ServletInvocation implements Dependency {
   }
 
   /**
+   * Returns the dependency list.
+   */
+  public Dependency getDependency()
+  {
+    return _dependency;
+  }
+
+  /**
    * Returns true if the invocation has been modified.  Generally only
    * true if the application has been modified.
    */
@@ -207,7 +216,19 @@ public class Invocation extends ServletInvocation implements Dependency {
   {
     Dependency depend = _dependency;
 
-    return depend == null || depend.isModified();
+    if (depend != null && depend.isModified())
+      return true;
+
+    Application app = _application;
+
+    if (app != null) {
+      depend = app.getInvocationDependency();
+
+      if (depend != null)
+	return depend.isModified();
+    }
+
+    return true;
   }
 
   /**

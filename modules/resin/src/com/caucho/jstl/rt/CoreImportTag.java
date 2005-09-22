@@ -250,8 +250,10 @@ public class CoreImportTag extends BodyTagSupport implements NameValueTag {
     JspWriter out = pageContext.getOut();
     if (out instanceof ResinJspWriter)
       ((ResinJspWriter) out).flushBuffer();
-    else
-      out.flush();
+    else {
+      // jsp/1ei0
+      // out.flush();
+    }
 
     if (_context != null) {
       String context = _context;
