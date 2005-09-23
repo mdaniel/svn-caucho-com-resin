@@ -356,24 +356,6 @@ public class DeployContainer<C extends DeployController>
 
     return null;
   }
-
-  /**
-   * Merge with deployed controller.
-   */
-  private C mergeWithDeployedController(C newController)
-  {
-    synchronized (_controllerList) {
-      for (int i = 0; i < _controllerList.size(); i++) {
-	C oldController = _controllerList.get(i);
-
-	if (oldController.mergeWithDeployedController(newController)) {
-	  return oldController;
-	}
-      }
-    }
-
-    return null;
-  }
   
   /**
    * Closes the stop.
