@@ -247,6 +247,9 @@ public class ManagedConnectionImpl
 	  log.log(Level.FINE, e.toString(), e);
 	}
       }
+
+      if (_xaResource != null && dbPool.isXAForbidSameRM())
+	_xaResource = new DisjointXAResource(_xaResource);
       
       if (transactionTimeout > 0 && _xaResource != null) {
 	try {

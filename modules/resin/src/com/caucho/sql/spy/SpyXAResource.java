@@ -42,8 +42,8 @@ import com.caucho.log.Log;
  * Spying on a connection.
  */
 public class SpyXAResource implements XAResource {
-  protected final static Logger log = Log.open(XAResource.class);
-  protected final static L10N L = new L10N(XAResource.class);
+  protected final static Logger log = Log.open(SpyXAResource.class);
+  protected final static L10N L = new L10N(SpyXAResource.class);
 
   // The underlying resource
   private XAResource _xaResource;
@@ -57,6 +57,14 @@ public class SpyXAResource implements XAResource {
   {
     _xaResource = resource;
     _id = id;
+  }
+
+  /**
+   * Returns the underlying resource.
+   */
+  public XAResource getXAResource()
+  {
+    return _xaResource;
   }
 
   /**
@@ -107,6 +115,9 @@ public class SpyXAResource implements XAResource {
     throws XAException
   {
     try {
+      if (resource instanceof SpyXAResource)
+        resource = ((SpyXAResource) resource).getXAResource();
+	    
       boolean same = _xaResource.isSameRM(resource);
       
       log.info(_id + ":is-same-rm(resource=" + resource + ")->" + same);
@@ -242,7 +253,7 @@ public class SpyXAResource implements XAResource {
 
       return _xaResource.recover(flags);
     } catch (XAException e) {
-      log.log(Level.INFO, e.toString(), e);
+      log.info(e.toString());
       throw e;
     } catch (RuntimeException e) {
       log.log(Level.INFO, e.toString(), e);

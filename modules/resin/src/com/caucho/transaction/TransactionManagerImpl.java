@@ -300,7 +300,9 @@ public class TransactionManagerImpl
   public void recover(XAResource xaRes)
     throws XAException
   {
-    Xid []xids = xaRes.recover(XAResource.TMNOFLAGS);
+    Xid []xids;
+
+    xids = xaRes.recover(XAResource.TMSTARTRSCAN);
 
     if (xids == null || _xaLogManager == null)
       return;
