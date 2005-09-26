@@ -369,6 +369,14 @@ r_rewrite-dispatch = element rewrite-dispatch {
         | element replacement { string })
    }*
 
+   & element forward {
+       (attribute regexp { string }
+        | element regexp { string })
+
+       & (attribute target { string }
+          | element target { string })
+     }*
+
    & element redirect {
        (attribute regexp { string }
         | element regexp { string })
