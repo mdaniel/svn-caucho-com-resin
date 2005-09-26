@@ -333,6 +333,15 @@ public class TransactionImpl implements Transaction, AlarmListener {
   }
 
   /**
+   * Returns true if the local transaction optimization would be allowed.
+   */
+  public boolean allowLocalTransactionOptimization()
+  {
+    // XXX: can also check if all are non-local
+    return _resourceCount == 0;
+  }
+
+  /**
    * Returns the current number of resources.
    */
   public int getEnlistedResourceCount()

@@ -211,7 +211,7 @@ public class SpyXAResource implements XAResource {
     throws XAException
   {
     try {
-      log.info(_id + ":commit(xid=" + xid + (onePhase ? ",1P" : ",2P)"));
+      log.info(_id + ":commit(xid=" + xid + (onePhase ? ",1P)" : ",2P)"));
 
       _xaResource.commit(xid, onePhase);
     } catch (XAException e) {

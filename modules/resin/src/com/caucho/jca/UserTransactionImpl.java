@@ -127,7 +127,13 @@ public class UserTransactionImpl implements UserTransaction {
 	
     poolItem.setTransaction(this);
 
-    poolItem.enableLocalTransactionOptimization(_poolItems.size() == 0);
+    if (xa instanceof TransactionImpl) {
+      TransactionImpl xaImpl = (TransactionImpl) xa;
+      
+      // server/164l
+      if (xaImpl.allowLocalTransactionOptimization())
+	poolItem.enableLocalTransactionOptimization(true);
+    }
 
     if (poolItem.getXid() == null)
       xa.enlistResource(poolItem);

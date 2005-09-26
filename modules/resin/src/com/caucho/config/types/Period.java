@@ -193,11 +193,16 @@ public class Period {
     }
 
     period = sign * period;
-    
+
+    // server/137w
+    /*
     if (period < 0)
       return INFINITE;
     else
       return period;
+    */
+    
+    return period;
   }
 
   /**

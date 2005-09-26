@@ -733,10 +733,9 @@ class PoolItem implements ConnectionEventListener, XAResource {
 	log.finer("start-XA: " + xid + " " + _xaResource);
 
       try {
-	  _xaResource.start(xid, flags);
+	_xaResource.start(xid, flags);
       } catch (XAException e) {
-	  System.out.println("XA: " + e + " " + e.errorCode);
-	  throw e;
+	throw e;
       }
     }
     else {

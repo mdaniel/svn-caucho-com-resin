@@ -75,6 +75,7 @@ public class CacheMapping {
   public void setExpires(Period period)
   {
     _expiresPeriod = period.getPeriod();
+    System.out.println("PERIOD: " + _expiresPeriod);
   }
 
   /**

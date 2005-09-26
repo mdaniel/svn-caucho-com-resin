@@ -675,8 +675,10 @@ public class Store {
 
       byte []blockBuffer = block.getBuffer();
 
-      if (FRAGMENT_SIZE < length)
-	length = FRAGMENT_SIZE;
+      if (FRAGMENT_SIZE - fragmentOffset < length) {
+	// server/13df
+	length = FRAGMENT_SIZE - fragmentOffset;
+      }
 
       synchronized (blockBuffer) {
 	System.arraycopy(blockBuffer, blockOffset + 1 + fragmentOffset,

@@ -212,7 +212,7 @@ public class BeanTypeStrategy extends TypeStrategy {
 	  _setLocation.invoke(bean, qNode.getFilename(), qNode.getLine());
       
 	if (_setSystemId != null)
-	  _setSystemId.invoke(bean, qNode);
+	  _setSystemId.invoke(bean, qNode.getBaseURI());
 
 	if (_addDependency != null) {
 	  ArrayList<Depend> dependList = qNode.getDependencyList();

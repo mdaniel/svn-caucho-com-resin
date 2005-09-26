@@ -368,6 +368,11 @@ public class HostController extends EnvironmentDeployController<Host,HostConfig>
 
     try {
       thread.setContextClassLoader(getParentClassLoader());
+
+      if (_rootDirectoryPattern == null) {
+	// server/129p
+	return Vfs.lookup();
+      }
       
       int length = matcher.end() - matcher.start();
 
@@ -381,6 +386,7 @@ public class HostController extends EnvironmentDeployController<Host,HostConfig>
       }
 
       varMap.put("regexp", vars);
+      varMap.put("host", new TestVar(matcher.group(0), vars));
 
       return PathBuilder.lookupPath(_rootDirectoryPattern, varMap);
     } catch (Exception e) {
@@ -420,7 +426,8 @@ public class HostController extends EnvironmentDeployController<Host,HostConfig>
 
 	return mergedController;
       } catch (Throwable e) {
-	e.printStackTrace();
+	log.log(Level.FINE, e.toString(), e);
+	
 	return null;
       } finally {
 	thread.setContextClassLoader(oldLoader);
@@ -606,6 +613,36 @@ public class HostController extends EnvironmentDeployController<Host,HostConfig>
     public String toString()
     {
       return "Host[" + getId() + "]";
+    }
+  }
+
+  /**
+   * EL variables for the host, when testing for regexp identity .
+   */
+  public class TestVar {
+    private String _name;
+    private ArrayList<String> _regexp;
+
+    TestVar(String name, ArrayList<String> regexp)
+    {
+      _name = name;
+      _regexp = regexp;
+    }
+    
+    public String getName()
+    {
+      return _name;
+    }
+    
+    public String getHostName()
+    {
+      return _name;
+    }
+    
+    public ArrayList<String> getRegexp()
+    {
+      // server/13t0
+      return _regexp;
     }
   }
 }

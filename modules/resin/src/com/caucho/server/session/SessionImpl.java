@@ -556,7 +556,8 @@ public class SessionImpl implements HttpSession, CacheListener {
    */
   public void logout()
   {
-    logout(this);
+    // server/12bw
+    logout(null);
   }
 
   /**
@@ -564,7 +565,7 @@ public class SessionImpl implements HttpSession, CacheListener {
    *
    * @param session the session in case of timeout and single-signon
    */
-  public void logout(SessionImpl session)
+  public void logout(SessionImpl timeoutSession)
   {
     if (_user != null) {
       if (_isValid)
@@ -576,7 +577,7 @@ public class SessionImpl implements HttpSession, CacheListener {
 	ServletAuthenticator auth = getAuthenticator();
 
 	if (auth != null)
-	  auth.logout(_manager.getApplication(), session, _id, user);
+	  auth.logout(_manager.getApplication(), timeoutSession, _id, user);
       } catch (Exception e) {
         log.log(Level.WARNING, e.toString(), e);
       }
