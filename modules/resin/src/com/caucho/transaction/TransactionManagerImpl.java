@@ -302,7 +302,7 @@ public class TransactionManagerImpl
   {
     Xid []xids;
 
-    xids = xaRes.recover(XAResource.TMSTARTRSCAN);
+    xids = xaRes.recover(XAResource.TMSTARTRSCAN|XAResource.TMENDRSCAN);
 
     if (xids == null || _xaLogManager == null)
       return;

@@ -249,7 +249,19 @@ public class SpyXAResource implements XAResource {
     throws XAException
   {
     try {
-      log.info(_id + ":recover(flags=" + flags + ")");
+      String flagString = "";
+
+      if ((flags & XAResource.TMSTARTRSCAN) != 0)
+	flagString += "start";
+
+      if ((flags & XAResource.TMENDRSCAN) != 0) {
+	if (! flagString.equals(""))
+	  flagString += ",";
+	    
+	flagString += "end";
+      }
+      
+      log.info(_id + ":recover(flags=" + flagString + ")");
 
       return _xaResource.recover(flags);
     } catch (XAException e) {
