@@ -304,7 +304,7 @@ public class TransactionManagerImpl
 
     xids = xaRes.recover(XAResource.TMSTARTRSCAN|XAResource.TMENDRSCAN);
 
-    if (xids == null || _xaLogManager == null)
+    if (xids == null)
       return;
 
     for (int i = 0; i < xids.length; i++) {
@@ -315,7 +315,8 @@ public class TransactionManagerImpl
       
       XidImpl xidImpl = new XidImpl(xids[i].getGlobalTransactionId());
 
-      if (_xaLogManager.hasCommittedXid(xidImpl)) {
+      if (_xaLogManager != null &&
+	  _xaLogManager.hasCommittedXid(xidImpl)) {
 	log.fine(L.l("XAResource {0} commit xid {1}", xaRes, xidImpl));
 
 	try {
@@ -325,6 +326,9 @@ public class TransactionManagerImpl
 	}
       }
       else {
+	// XXX: need to check if the transaction belongs to this TM
+	// the ownership is encoded in the xid
+	
 	log.fine(L.l("XAResource {0} forget xid {1}", xaRes, xidImpl));
 	
 	try {
