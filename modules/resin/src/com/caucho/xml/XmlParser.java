@@ -1454,7 +1454,7 @@ public class XmlParser extends AbstractParser {
         reader = new Utf16Reader(this, _is);
         ((Utf16Reader) reader).setReverse(true);
       }
-      else
+      else if (ch2 > 0)
 	_is.unread();
     }
 

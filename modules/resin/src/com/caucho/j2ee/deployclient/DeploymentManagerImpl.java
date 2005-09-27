@@ -107,18 +107,13 @@ public class DeploymentManagerImpl implements DeploymentManager {
     try {
       thread.setContextClassLoader(getClass().getClassLoader());
 
-      System.out.println("PRE-TARGETS:");
-      
       Target []targets = _proxy.getTargets();
-
-      System.out.println("TARGETS: " + targets);
 
       if (targets == null)
 	return new Target[0];
       
       return targets;
     } catch (Throwable e) {
-      e.printStackTrace();
       return new Target[0];
     } finally {
       thread.setContextClassLoader(oldLoader);
@@ -235,12 +230,9 @@ public class DeploymentManagerImpl implements DeploymentManager {
     try {
       thread.setContextClassLoader(getClass().getClassLoader());
 
-      System.out.println("PRE-DIST");
       
       ProgressObject progress
 	= _proxy.distribute(targetList, deploymentPlan, archive);
-
-      System.out.println("POST-DIST:" + progress + " " + progress.getDeploymentStatus().isFailed() + " " + progress.getDeploymentStatus().getMessage());
 
       return progress;
     } finally {

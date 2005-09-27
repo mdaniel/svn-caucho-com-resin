@@ -75,8 +75,6 @@ public class BaseMethod extends ClassComponent {
     _method = method;
     _exceptionTypes = method.getExceptionTypes();
 
-    System.out.println("ET: " + method + " " + _exceptionTypes.length);
-    
     setCall(call);
   }
 
