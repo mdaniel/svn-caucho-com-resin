@@ -95,7 +95,7 @@ public class EjbEntityBean extends EjbBean {
   
   private JClass _compositeKeyClass;
 
-  private String _cmpVersion = "2.0";
+  private String _cmpVersion = "2.x";
   private boolean _isCMP = false;
 
   private DataSource _dataSource;
