@@ -77,13 +77,13 @@ public class CmpExpr extends AbstractBooleanExpr {
     Object aObj = _left.evalObject(env);
     Object bObj = _right.evalObject(env);
 
-    if (aObj == bObj)
-      return _op == LE || _op == GE;
-
     if (aObj == null || bObj == null) {
-      // jsp/1b3d
+      // jsp/1b34, jsp/1b3d
       return false;
     }
+
+    if (aObj == bObj)
+      return _op == LE || _op == GE;
 
     if (aObj instanceof Double || aObj instanceof Float ||
         bObj instanceof Double || bObj instanceof Float) {

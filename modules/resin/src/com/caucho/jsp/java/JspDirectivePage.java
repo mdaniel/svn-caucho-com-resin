@@ -140,6 +140,8 @@ public class JspDirectivePage extends JspNode {
         throw error(L.l("session expects `true' or `false' at `{0}'",
                         value));
 
+      _parseState.markSessionSet();
+
       if (! isValid)
         throw error(L.l("session is assigned different values."));
     }

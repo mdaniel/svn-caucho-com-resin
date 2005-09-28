@@ -205,33 +205,35 @@ public class JspTop extends JspContainerNode implements JspSegmentNode {
   public void generate(JspJavaWriter out)
     throws Exception
   {
-    if (! _hasRoot && ! _gen.isOmitXmlDeclaration()) {
-      String encoding = _gen.getCharacterEncoding();
+    if (! _hasRoot) {
+      if (! _gen.isOmitXmlDeclaration()) {
+	String encoding = _gen.getCharacterEncoding();
 
-      if (encoding == null)
-	encoding = "UTF-8";
+	if (encoding == null)
+	  encoding = "UTF-8";
 
-      out.addText("<?xml version=\"1.0\" encoding=\"" + encoding + "\"?>\n");
-    }
-
-    if (_gen.getDoctypeSystem() != null) {
-      out.addText("<!DOCTYPE ");
-      out.addText(_gen.getDoctypeRootElement());
-
-      if (_gen.getDoctypePublic() != null) {
-	out.addText(" PUBLIC \"");
-	out.addText(_gen.getDoctypePublic());
-	out.addText("\" \"");
-	out.addText(_gen.getDoctypeSystem());
-	out.addText("\"");
+	out.addText("<?xml version=\"1.0\" encoding=\"" + encoding + "\"?>\n");
       }
-      else {
-	out.addText(" SYSTEM \"");
-	out.addText(_gen.getDoctypeSystem());
-	out.addText("\"");
-      }
+
+      if (_gen.getDoctypeSystem() != null) {
+	out.addText("<!DOCTYPE ");
+	out.addText(_gen.getDoctypeRootElement());
+
+	if (_gen.getDoctypePublic() != null) {
+	  out.addText(" PUBLIC \"");
+	  out.addText(_gen.getDoctypePublic());
+	  out.addText("\" \"");
+	  out.addText(_gen.getDoctypeSystem());
+	  out.addText("\"");
+	}
+	else {
+	  out.addText(" SYSTEM \"");
+	  out.addText(_gen.getDoctypeSystem());
+	  out.addText("\"");
+	}
       
-      out.addText(">\n");
+	out.addText(">\n");
+      }
     }
     
     generateChildren(out);

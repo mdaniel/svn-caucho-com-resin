@@ -1046,10 +1046,10 @@ public abstract class JspNode {
 	  return "\"\"";
 	}
 	else if (BigInteger.class.isAssignableFrom(type)) {
-	  return "BigInteger.ZERO";
+	  return "java.math.BigInteger.ZERO";
 	}
 	else if (BigDecimal.class.isAssignableFrom(type)) {
-	  return "BigDecimal.ZERO";
+	  return "java.math.BigDecimal.ZERO";
 	}
 	else if (Number.class.isAssignableFrom(type)) {
 	  // jsp/18s6

@@ -87,6 +87,11 @@ public class PrecompilePageFilterChain implements FilterChain {
       
       return new PrecompilePageFilterChain(pageChain.getServlet());
     }
+    else if (tail.startsWith("=\"false\"") ||
+	     tail.startsWith("=false")) {
+      // jsp/1910
+      return pageChain;
+    }
     else
       return new ExceptionFilterChain(new ConfigException("jsp_precompile requires a true or false value at '" + tail + "'."));
   }

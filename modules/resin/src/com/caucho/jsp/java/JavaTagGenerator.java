@@ -325,13 +325,13 @@ public class JavaTagGenerator extends JavaJspGenerator {
     String dyn = _dynamicAttributes;
 
     out.println();
-    out.println("java.util.HashMap " + dyn + " = new java.util.HashMap();");
+    out.println("java.util.HashMap _" + dyn + " = new java.util.HashMap();");
     out.println();
     out.println("public void setDynamicAttribute(String uri, String localName, Object value)");
     out.println("  throws javax.servlet.jsp.JspException");
     out.println("{");
     out.println("  if (uri == null || \"\".equals(uri))");
-    out.println("    " + dyn + ".put(localName, value);");
+    out.println("    _" + dyn + ".put(localName, value);");
     out.println("}");
   }
 
@@ -432,7 +432,7 @@ public class JavaTagGenerator extends JavaJspGenerator {
     // jsp/10a1
     if (_dynamicAttributes != null) {
       out.println("pageContext.setAttribute(\"" + _dynamicAttributes + "\"," +
-		  "this._" + _dynamicAttributes + ");");
+		  "_" + _dynamicAttributes + ");");
     }
   }
 
