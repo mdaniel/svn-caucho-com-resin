@@ -4,6 +4,15 @@
 
 <s2 title='3.0.snap - Aug 11, 2005'>
 <ul>
+<li>Apache1 mod_caucho needs REQUEST_CHUNKED_DECHUNK (rep by Darren Chapman, RSN-453)
+<li>sendRedirect wasn't closing the output (RSN-325)
+<li>isapi_srun was producing inaccurate error message when unable to connect backend (rep by Jean-Francois Lamy, RSN-408)
+<li>Add getPreparedStatement to UserPreparedStatement (rep by James Kucharski, RSN-402)
+<li>getResource wasn't properly looking up resources in classloader parent (rep by masayuki takahashi, RSN-395)
+<li>Hessian/Burlap now requires java.io.Serializable of serialized classes (rep by Thaddeus Dombrowski, RSN-443)
+<li>If client disconnects in mod_caucho, clean up server stream properly (rep by yBranko Gracnar, RSN-420)
+<li>@OneToOne bidirectional is now allowed (rep by Francois Bertrand, RSN-406)
+<li>Added _FILE_OFFSET_BITS=64 to Linux JNI compilation (rep by Bill Au, RSN-388)
 <li>HostRegexp wasn't properly matching secondary regexps (rep by Shane Cruz, RSN-417)
 <li>ByteCodeParser wasn't grabbing method exceptions properly (rep by Marcus Richardson, RSN-437)
 <li>JSP 2.0 .tag file wasn't assigning properly for 'value' attribute (rep by William Wallis, RSN-424)

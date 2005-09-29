@@ -605,10 +605,16 @@ cse_write_response(stream_t *s, int len, request_rec *r)
     writelen = sublen;
     while (writelen > 0) {
       sentlen = ap_rwrite(s->read_buf + s->read_offset, writelen, r);
+      /*
+       * RSN-420.  If the client fails, should still read data from the
+       * server and complete that side of the socket.
+       */
+      /*
       if (sentlen < 0) {
 	cse_close(s, "write");
 	return -1;
       }
+      */
 
       writelen -= sublen;
     }
@@ -678,7 +684,7 @@ send_data(stream_t *s, request_rec *r)
     case HMUX_DATA:
       len = hmux_read_len(s);
       if (cse_write_response(s, len, r) < 0)
-	return -1;
+	return HMUX_EXIT;
       break;
 
     case HMUX_FLUSH:

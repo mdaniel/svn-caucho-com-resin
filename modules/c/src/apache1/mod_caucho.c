@@ -956,7 +956,7 @@ caucho_request(request_rec *r)
   if (! config)
     return HTTP_SERVICE_UNAVAILABLE;
   
-  if ((retval = ap_setup_client_block(r, REQUEST_CHUNKED_ERROR)))
+  if ((retval = ap_setup_client_block(r, REQUEST_CHUNKED_DECHUNK)))
     return retval;
 
   /* ap_soft_timeout("servlet request", r); */

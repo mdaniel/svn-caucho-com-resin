@@ -721,7 +721,7 @@ public class ServletServer extends ProtocolDispatchServer
   {
     port.setServer(this);
     
-    if (_url.equals("") && _serverId.equals(port.getServerId())) {
+    if (_url.equals("") && port.matchesServerId(_serverId)) {
       if (port.getHost() == null || port.getHost().equals("") ||
           port.getHost().equals("*"))
         _url = "http://localhost";
@@ -948,8 +948,8 @@ public class ServletServer extends ProtocolDispatchServer
       
       for (int i = 0; i < _ports.size(); i++) {
         Port port = _ports.get(i);
-	
-        if (_serverId.equals(port.getServerId()))
+
+	if (port.matchesServerId(_serverId))
           port.bind();
       }
     } finally {
@@ -965,7 +965,7 @@ public class ServletServer extends ProtocolDispatchServer
     for (int i = 0; i < _ports.size(); i++) {
       Port port = _ports.get(i);
 	
-      if (_serverId.equals(port.getServerId()))
+      if (port.matchesServerId(_serverId))
 	return true;
     }
 
@@ -986,7 +986,7 @@ public class ServletServer extends ProtocolDispatchServer
       for (int i = 0; i < _ports.size(); i++) {
         Port port = _ports.get(i);
 	
-        if (_serverId.equals(port.getServerId()))
+        if (port.matchesServerId(_serverId))
           port.start();
       }
     } finally {

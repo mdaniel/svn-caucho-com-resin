@@ -190,7 +190,6 @@ public class HessianProxy implements InvocationHandler {
 
       return in.readReply(method.getReturnType());
     } catch (HessianProtocolException e) {
-      e.printStackTrace();
       throw new HessianRuntimeException(e);
     } finally {
       try {

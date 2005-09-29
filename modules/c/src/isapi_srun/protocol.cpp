@@ -210,11 +210,9 @@ connection_error(config_t *config, EXTENSION_CONTROL_BLOCK *r)
 	  return 1;
   }
 
-  cse_printf(r, "HTTP/1.0 503 Server Error\n\n");
+  cse_printf(r, "HTTP/1.0 503 Busy\n\n");
   cse_printf(r, "<html><body bgcolor='white'>\n");
-  cse_printf(r, "<h1>Can't contact Servlet Runner at %s:%d\n",
-	     (hostname ? hostname : "localhost"),
-	     (port ? port : 6802));
+  cse_printf(r, "<h1>Server is currently unavailable or down for maintenance\n",
   cse_printf(r, "</h1>\n");
   cse_printf(r, "</body></html>\n");
   

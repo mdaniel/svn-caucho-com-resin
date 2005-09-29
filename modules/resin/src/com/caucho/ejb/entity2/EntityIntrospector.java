@@ -907,6 +907,11 @@ public class EntityIntrospector {
 
     JAnnotation manyToOneAnn = field.getAnnotation(ManyToOne.class);
 
+    if (manyToOneAnn == null) {
+      // XXX: ejb/0o03
+      manyToOneAnn = field.getAnnotation(OneToOne.class);
+    }
+
     JAnnotation joinColumns = field.getAnnotation(JoinColumns.class);
     JAnnotation []joinColumnsAnn = null;
 
@@ -1283,39 +1288,58 @@ public class EntityIntrospector {
       AmberManager manager = _entityType.getAmberManager();
 
       String targetName = oneToOneAnn.getString("targetEntity");
+      String mappedBy =  oneToOneAnn.getString("mappedBy");
 
-      if (targetName == null || targetName.equals(""))
-	throw new ConfigException(L.l("can't determine target name"));
+      EntityType targetType = null;
 
-      EntityType targetType = manager.getEntity(targetName);
-      if (targetType == null)
-	throw new ConfigException(L.l("'{0}' is an unknown entity.",
-				      targetName));
+      if (targetName != null && ! targetName.equals("")) {
+	targetType = manager.getEntity(targetName);
+	
+	if (targetType == null)
+	  throw new ConfigException(L.l("{0}: '{1}' is an unknown entity for '{2}'.",
+					_field.getDeclaringClass().getName(),
+					targetName,
+					_field.getName()));
+      }
+      else {
+	targetType = manager.getEntity(_field.getReturnType().getName());
 
-      EntityManyToOneField sourceField = getSourceField(targetType,
-							_entityType);
+	if (targetType == null)
+	  throw new ConfigException(L.l("{0} can't determine target name for '{1}'",
+					_field.getDeclaringClass().getName(),
+					_field.getName()));
+      }
 
-      if (sourceField == null)
-	throw new ConfigException(L.l("'{0}' does not have a matching ManyToOne relation.",
-				      targetType.getName()));
+      if (mappedBy == null || mappedBy.equals("")) {
+	// ejb/0o03
+	addManyToOne(_entityType, _field, _fieldName, _field.getReturnType());
+	
+	// XXX: set unique
+      }
+      else {
+	EntityManyToOneField sourceField
+	  = getSourceField(targetType, mappedBy);
 
-      DependentEntityOneToOneField oneToOne;
+	if (sourceField == null)
+	  throw new ConfigException(L.l("{0}: OneToOne target '{1}' does not have a matching ManyToOne relation.",
+					_field.getDeclaringClass().getName(),
+					targetType.getName()));
 
-      oneToOne = new DependentEntityOneToOneField(_entityType, _fieldName);
-      oneToOne.setTargetField(sourceField);
+	DependentEntityOneToOneField oneToOne;
 
-      _entityType.addField(oneToOne);
+	oneToOne = new DependentEntityOneToOneField(_entityType, _fieldName);
+	oneToOne.setTargetField(sourceField);
+
+	_entityType.addField(oneToOne);
+      }
     }
 
     private EntityManyToOneField getSourceField(EntityType targetType,
-						EntityType entity)
+						String mappedBy)
     {
       for (AmberField field : targetType.getFields()) {
-	if (field instanceof EntityManyToOneField) {
-	  EntityManyToOneField manyToOne = (EntityManyToOneField) field;
-
-	  if (manyToOne.getEntityType().equals(entity))
-	    return manyToOne;
+	if (field.getName().equals(mappedBy)) {
+	  return (EntityManyToOneField) field;
 	}
       }
 

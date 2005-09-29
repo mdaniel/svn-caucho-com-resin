@@ -39,6 +39,16 @@ abstract public class JAccessibleObject extends JAnnotationObject {
   abstract public String getName();
 
   /**
+   * Returns the return type.
+   */
+  abstract public JClass getReturnType();
+  
+  /**
+   * Returns the declaring class
+   */
+  abstract public JClass getDeclaringClass();
+
+  /**
    * Returns true if equals.
    */
   public boolean equals(Object o)

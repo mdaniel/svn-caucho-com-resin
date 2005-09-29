@@ -719,6 +719,7 @@ case "$target_cpu" in
   i?86)
 	CPU=i386
 	resin_plugin="$resin_pro_plugin $resin_ssl_plugin"
+	CFLAGS_JNI="-D_FILE_OFFSET_BITS=64"
 	;;
 
   sparc*)
@@ -733,6 +734,7 @@ case "$target_cpu" in
   x86_64)
 	CPU=$target_cpu
 	resin_plugin="$resin_pro_plugin $resin_ssl_plugin"
+	CFLAGS_JNI="-D_FILE_OFFSET_BITS=64"
 	;;
 	
   *)
@@ -1059,6 +1061,7 @@ fi
 
 AC_SUBST(INCLUDES)
 AC_SUBST(CFLAGS_OPENSSL)
+AC_SUBST(CFLAGS_JNI)
 AC_SUBST(SSL_OBJ)
 
 PERL="perl"

@@ -647,6 +647,14 @@ public class Port implements EnvironmentListener, PortMBean, Runnable {
   }
 
   /**
+   * Returns true if the port matches the server id.
+   */
+  public boolean matchesServerId(String serverId)
+  {
+    return getServerId().equals("*") || getServerId().equals(serverId);
+  }
+
+  /**
    * Initializes the port.
    */
   public void init()

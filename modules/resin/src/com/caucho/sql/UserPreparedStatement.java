@@ -92,6 +92,14 @@ public class UserPreparedStatement extends UserStatement
   }
 
   /**
+   * Returns the underlying statement.
+   */
+  public PreparedStatement getPreparedStatement()
+  {
+    return _pstmt;
+  }
+
+  /**
    * Executes the prepared statement's query.
    */
   public ResultSet executeQuery()

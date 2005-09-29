@@ -49,6 +49,14 @@ abstract public class JField extends JAccessibleObject {
   abstract public JClass getType();
 
   /**
+   * The return type is the type.
+   */
+  public JClass getReturnType()
+  {
+    return getType();
+  }
+
+  /**
    * Returns the parameterized type of the field.
    */
   abstract public JType getGenericType();

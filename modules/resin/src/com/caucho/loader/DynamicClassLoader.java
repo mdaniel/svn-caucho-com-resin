@@ -1237,28 +1237,11 @@ public class DynamicClassLoader extends java.net.URLClassLoader
     
     boolean isNormalJdkOrder = isNormalJdkOrder(name);
 
-    ClassLoader parent = getParent();
-    
     if (isNormalJdkOrder) {
-      ClassLoader systemLoader = ClassLoader.getSystemClassLoader();
+      url = getParentResource(name);
 
-      if (this != systemLoader)
-	url = getSystemResource(name);
-      
-      if (url != null) {
-	_resourceCache.put(name, url);
-	
-        return url;
-      }
-
-      if (parent != null)
-        url = parent.getResource(name);
-
-      if (url != null) {
-	_resourceCache.put(name, url);
-	
-        return url;
-      }
+      if (url != null)
+	return url;
     }
 
     ArrayList<Loader> loaders = _loaders;
@@ -1276,29 +1259,44 @@ public class DynamicClassLoader extends java.net.URLClassLoader
     }
 
     if (! isNormalJdkOrder) {
-      ClassLoader systemLoader = ClassLoader.getSystemClassLoader();
+      url = getParentResource(name);
 
-      if (this != systemLoader)
-	url = getSystemResource(name);
-      
-      if (url != null) {
-	_resourceCache.put(name, url);
-	
-        return url;
-      }
-
-      if (parent != null)
-        url = parent.getResource(name);
-
-      if (url != null) {
-	_resourceCache.put(name, url);
-	
-        return url;
-      }
+      if (url != null)
+	return url;
     }
 
     _resourceCache.put(name, NULL_URL);
     
+    return null;
+  }
+
+  private URL getParentResource(String name)
+  {
+    ClassLoader parent = getParent();
+    
+    ClassLoader systemLoader = ClassLoader.getSystemClassLoader();
+
+    URL url;
+    
+    if (parent != null) {
+      url = parent.getResource(name);
+
+      if (url != null) {
+	_resourceCache.put(name, url);
+	
+	return url;
+      }
+    }
+    else if (this != systemLoader) {
+      url = getSystemResource(name);
+      
+      if (url != null) {
+	_resourceCache.put(name, url);
+	
+	return url;
+      }
+    }
+
     return null;
   }
   

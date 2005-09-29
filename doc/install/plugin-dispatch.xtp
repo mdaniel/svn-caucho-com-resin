@@ -43,18 +43,7 @@ is based on the configuration in the ResinConfigServer's resin.conf.</p>
 tag selects the URLs to send to Resin.
 <a href="doc|config|resin#host">&lt;host&gt;</a> and 
 <a href="doc|config|webapp">&lt;web-app&gt;</a> group the
-servlet-mapping tags.  mod_caucho ignores all other tags in the resin.conf.</p>
-
-<p>(mod_caucho does understand
-<a href="doc|config|resin#include">resin:include</a> and how to
-find web.xml, but that's part of the parsing, not part of the dispatch logic.)</p>
-
-<p>When reading the resin.conf, mod_caucho uses only the following tags:</p>
-<ul>
-<li><a href="doc|config|resin#host">&lt;host&gt;</a> to select virtual hosts.  The <var/id/> attribute names the host.
-<li><a href="doc|config|webapp">&lt;web-app&gt;</a> to select applications.  The <var/id/> attribute selects a URL prefix.
-<li><a href="doc|config|webapp#servlet-mapping">&lt;servlet-mapping&gt;</a> to select URLs.  The <var/url-pattern/> attribute selects URLs.
-</ul>
+servlet-mapping tags.</p>
 
 <section title="url-pattern">
 
