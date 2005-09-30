@@ -138,6 +138,9 @@ class PoolItem implements ConnectionEventListener, XAResource {
       log.log(Level.FINE, e.toString(), e);
     }
 
+    if (_xaResource == null)
+      _isXATransaction = false;
+
     // Gets the local transaction from the driver
     try {
       if (_cm.isLocalTransaction())
@@ -239,7 +242,7 @@ class PoolItem implements ConnectionEventListener, XAResource {
       throw new IllegalStateException(L.l("trying to activate active pool item."));
 
     _poolEventTime = now;
-    _isXATransaction = true; // disable LT-optim by default
+    _isXATransaction = _xaResource != null; // disable LT-optim by default
 
     if (userPoolItem != null) {
       Object uConn = userPoolItem.getUserConnection();
