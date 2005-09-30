@@ -53,14 +53,14 @@ public class HttpResponse extends AbstractHttpResponse {
   static final byte []_contentTypeBytes = "\r\nContent-Type: ".getBytes();
   static final byte []_textHtmlBytes = "\r\nContent-Type: text/html".getBytes();
   static final byte []_connectionCloseBytes = "\r\nConnection: close".getBytes();
-  
+
   final byte []_resinServerBytes;
-  
+
   static final char []_connectionCb = "Connection".toCharArray();
   static final CharBuffer _closeCb = new CharBuffer("Close");
-  
-  private HttpRequest _request;
-  
+
+  private final HttpRequest _request;
+
   private final byte []_dateBuffer = new byte[256];
   private int _dateBufferLength;
   private final CharBuffer _dateCharBuffer = new CharBuffer();
@@ -74,7 +74,7 @@ public class HttpResponse extends AbstractHttpResponse {
   HttpResponse(HttpRequest request)
   {
     super(request);
-    
+
     _request = request;
 
     ServletServer server = (ServletServer) request.getDispatchServer();
@@ -89,9 +89,9 @@ public class HttpResponse extends AbstractHttpResponse {
     throws IOException
   {
     clearBuffer();
-    
+
     setStatus(101);
-    
+
     finish(); // don't need to flush since it'll close anyway
   }
 
@@ -133,7 +133,7 @@ public class HttpResponse extends AbstractHttpResponse {
     if (_lastDate + 1000 < now) {
       fillDate(now);
     }
-    
+
     os.write(_dateBuffer, 0, _dateBufferLength);
     os.flush();
   }
@@ -152,7 +152,7 @@ public class HttpResponse extends AbstractHttpResponse {
     throws IOException
   {
     boolean isChunked = false;
-    
+
     int version = _request.getVersion();
     boolean debug = log.isLoggable(Level.FINE);
 
@@ -201,7 +201,7 @@ public class HttpResponse extends AbstractHttpResponse {
       // automatically set cache headers
       setHeader("Expires", "Thu, 01 Dec 1994 16:00:00 GMT");
       os.print("\r\nCache-Control: no-cache");
-      
+
       if (debug) {
         log.fine(_request.dbgId() + "" +
                  "Expires: Thu, 01 Dec 1994 16:00:00 GMT");
@@ -213,14 +213,14 @@ public class HttpResponse extends AbstractHttpResponse {
       // technically, this could be private="Set-Cookie,Set-Cookie2"
       // but caches don't recognize it, so there's no real extra value
       os.print("\r\nCache-Control: private");
-      
+
       if (debug)
         log.fine(_request.dbgId() + "Cache-Control: private");
     }
     else {
       setHeader("Expires", "Thu, 01 Dec 1994 16:00:00 GMT");
       os.print("\r\nCache-Control: no-cache");
-      
+
       if (debug) {
         log.fine(_request.dbgId() + "" +
                  "Expires: Thu, 01 Dec 1994 16:00:00 GMT");
@@ -258,7 +258,7 @@ public class HttpResponse extends AbstractHttpResponse {
         os.print("\r\nSet-Cookie2: ");
         os.print(cb.getBuffer(), 0, cb.getLength());
       }
-      
+
       if (debug)
         log.fine(_request.dbgId() + "Set-Cookie: " + cb);
     }
@@ -266,14 +266,14 @@ public class HttpResponse extends AbstractHttpResponse {
     String contentType = _contentType;
     if (contentType == "text/html") {
       os.write(_textHtmlBytes, 0, _textHtmlBytes.length);
-      
+
       if (debug)
         log.fine(_request.dbgId() + "Content-Type: text/html");
     }
     else if (contentType != null) {
       os.write(_contentTypeBytes, 0, _contentTypeBytes.length);
       os.print(contentType);
-        
+
       if (debug)
         log.fine(_request.dbgId() + "Content-Type: " + contentType);
     }
@@ -283,7 +283,7 @@ public class HttpResponse extends AbstractHttpResponse {
       os.write(_contentLengthBytes, 0, _contentLengthBytes.length);
       os.print(_contentLength);
       hasContentLength = true;
-      
+
       if (debug)
         log.fine(_request.dbgId() + "Content-Length: " + _contentLength);
     }
@@ -291,7 +291,7 @@ public class HttpResponse extends AbstractHttpResponse {
       hasContentLength = true;
       os.write(_contentLengthBytes, 0, _contentLengthBytes.length);
       os.print(0);
-      
+
       if (debug)
         log.fine(_request.dbgId() + "Content-Length: 0");
     }
@@ -299,7 +299,7 @@ public class HttpResponse extends AbstractHttpResponse {
       os.write(_contentLengthBytes, 0, _contentLengthBytes.length);
       os.print(length);
       hasContentLength = true;
-      
+
       if (debug)
         log.fine(_request.dbgId() + "Content-Length: " + length);
     }
@@ -316,12 +316,12 @@ public class HttpResponse extends AbstractHttpResponse {
       }
       else
       */
-      
+
       if (! _request.allowKeepalive()) {
 /* XXX:   ||            ! req.conn.allocateKeepalive() &&
                req.rawStream.getOffset() >=
                req.rawStream.getLength()) {
-*/      
+*/
         os.write(_connectionCloseBytes, 0, _connectionCloseBytes.length);
         _request.killKeepalive();
 
@@ -335,7 +335,7 @@ public class HttpResponse extends AbstractHttpResponse {
 	! isHead()) {
       os.print("\r\nTransfer-Encoding: chunked");
       isChunked = true;
-      
+
       if (debug)
         log.fine(_request.dbgId() + "Transfer-Encoding: chunked");
     }
@@ -356,9 +356,9 @@ public class HttpResponse extends AbstractHttpResponse {
   {
     if (_lastDate / 60000 == now / 60000) {
       _lastDate = now;
-      
+
       int sec = (int) (now / 1000 % 60);
-      
+
       int s2 = '0' + (sec / 10);
       int s1 = '0' + (sec % 10);
 
@@ -366,7 +366,7 @@ public class HttpResponse extends AbstractHttpResponse {
       _dateBuffer[32] = (byte) s1;
       return;
     }
-    
+
     _lastDate = now;
     _calendar.setGMTTime(now);
     _dateCharBuffer.clear();
@@ -378,12 +378,17 @@ public class HttpResponse extends AbstractHttpResponse {
 
     for (int i = len - 1; i >= 0; i--)
       _dateBuffer[i] = (byte) cb[i];
-          
+
     _dateBuffer[len] = (byte) '\r';
     _dateBuffer[len + 1] = (byte) '\n';
     _dateBuffer[len + 2] = (byte) '\r';
     _dateBuffer[len + 3] = (byte) '\n';
 
     _dateBufferLength = len + 4;
+  }
+
+  public String toString()
+  {
+    return "HttpResponse" + _request.dbgId();
   }
 }

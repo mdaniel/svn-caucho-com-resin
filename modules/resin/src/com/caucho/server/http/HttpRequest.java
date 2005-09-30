@@ -80,10 +80,10 @@ public class HttpRequest extends AbstractHttpRequest
   static final CharBuffer _getCb = new CharBuffer("GET");
   static final CharBuffer _headCb = new CharBuffer("HEAD");
   static final CharBuffer _postCb = new CharBuffer("POST");
-  
+
   static final char []_hostCb = "Host".toCharArray();
   static final char []_userAgentCb = "User-Agent".toCharArray();
-  
+
   static final CharBuffer _http11Cb = new CharBuffer("HTTP/1.1");
   static final CharBuffer _http10Cb = new CharBuffer("HTTP/1.0");
 
@@ -105,7 +105,7 @@ public class HttpRequest extends AbstractHttpRequest
   private int _version;
 
   private final InvocationKey _invocationKey = new InvocationKey();
-  
+
   private final char []_headerBuffer = new char[16 * 1024];
 
   private CharSegment []_headerKeys;
@@ -125,7 +125,7 @@ public class HttpRequest extends AbstractHttpRequest
    *
    * @param server the owning server.
    */
-  HttpRequest(DispatchServer server, Connection conn) 
+  HttpRequest(DispatchServer server, Connection conn)
   {
     super(server, conn);
 
@@ -133,11 +133,11 @@ public class HttpRequest extends AbstractHttpRequest
     _response.init(conn.getWriteStream());
 
     // _urlLengthMax = server.getURLLengthMax();
-    
+
     // XXX: response.setIgnoreClientDisconnect(server.getIgnoreClientDisconnect());
-    
+
     _uri = new byte[_urlLengthMax];
-    
+
     _method = new CharBuffer();
     _uriHost = new CharBuffer();
     _protocol = new CharBuffer();
@@ -178,11 +178,11 @@ public class HttpRequest extends AbstractHttpRequest
 	  }
 
 	  setStartTime();
-      
+
 	  hasRequest = true;
 
 	  if (_protocol.length() == 0)
-	    _protocol.append("HTTP/0.9"); 
+	    _protocol.append("HTTP/0.9");
 
 	  if (log.isLoggable(Level.FINE)) {
 	    log.fine(dbgId() + _method + " " +
@@ -200,7 +200,7 @@ public class HttpRequest extends AbstractHttpRequest
 	  throw e;
 	} catch (Throwable e) {
 	  log.log(Level.FINER, e.toString(), e);
-	
+
 	  throw new BadRequestException(String.valueOf(e));
 	}
 
@@ -223,7 +223,7 @@ public class HttpRequest extends AbstractHttpRequest
 
 	  if (host != null) {
 	    String hostName = host.toString().toLowerCase();
-          
+
 	    invocation.setHost(hostName);
 	    invocation.setPort(_conn.getLocalPort());
 
@@ -239,7 +239,7 @@ public class HttpRequest extends AbstractHttpRequest
 	  InvocationDecoder decoder = _server.getInvocationDecoder();
 
 	  decoder.splitQueryAndUnescape(invocation, _uri, _uriLength);
-	  
+
 	  if (_server.isModified()) {
 	    log.info("<server> is modified");
 
@@ -262,11 +262,11 @@ public class HttpRequest extends AbstractHttpRequest
       }
     } catch (ClientDisconnectException e) {
       _response.killCache();
-      
+
       throw e;
     } catch (Throwable e) {
       log.log(Level.FINE, e.toString(), e);
-      
+
       killKeepalive();
 
       try {
@@ -276,7 +276,7 @@ public class HttpRequest extends AbstractHttpRequest
       } catch (Exception e1) {
         log.log(Level.FINE, e1.toString(), e1);
       }
-      
+
       return false;
     } finally {
       if (hasRequest)
@@ -325,7 +325,7 @@ public class HttpRequest extends AbstractHttpRequest
   {
     return true;
   }
-  
+
   protected boolean checkLogin()
   {
     return true;
@@ -371,12 +371,12 @@ public class HttpRequest extends AbstractHttpRequest
     throws IOException
   {
     int i = 0;
-    
+
     byte []readBuffer = s.getBuffer();
     int readOffset = s.getOffset();
     int readLength = s.getLength();
     int ch;
-    
+
     if (readOffset >= readLength) {
       try {
         if ((readLength = s.fillBuffer()) < 0)
@@ -390,7 +390,7 @@ public class HttpRequest extends AbstractHttpRequest
     ch = readBuffer[readOffset++];
 
     // conn.setAccessTime(getDate());
-    
+
     // skip leading whitespace
     while (ch == ' ' || ch == '\t' || ch == '\r' || ch == '\n') {
       if (readOffset >= readLength) {
@@ -405,7 +405,7 @@ public class HttpRequest extends AbstractHttpRequest
     char []buffer = _method.getBuffer();
     int length = buffer.length;
     int offset = 0;
-    
+
     // scan method
     while (true) {
       if (length <= offset) {
@@ -433,13 +433,13 @@ public class HttpRequest extends AbstractHttpRequest
       if (readOffset >= readLength) {
         if ((readLength = s.fillBuffer()) < 0)
           return false;
-        
+
         readOffset = 0;
       }
-      
+
       ch = readBuffer[readOffset++];
     }
-    
+
     byte []uriBuffer = _uri;
     int uriLength = 0;
 
@@ -483,14 +483,14 @@ public class HttpRequest extends AbstractHttpRequest
             readOffset = 0;
           }
           ch = readBuffer[readOffset++];
-        
+
           switch (ch) {
           case ' ': case '\t': case '\n': case '\r':
             break host;
-          
+
           case '?':
             break host;
-          
+
           case '/':
             break host;
 
@@ -516,7 +516,7 @@ public class HttpRequest extends AbstractHttpRequest
         uriBuffer[uriLength++] = (byte) ch;
         break;
       }
-      
+
       if (readOffset >= readLength) {
         readOffset = 0;
         if ((readLength = s.fillBuffer()) < 0) {
@@ -561,7 +561,7 @@ public class HttpRequest extends AbstractHttpRequest
       ch = readBuffer[readOffset++];
     }
     _protocol.setLength(offset);
-    
+
     if (offset == 0) {
       _protocol.append("HTTP/0.9");
       _version = HTTP_0_9;
@@ -570,7 +570,7 @@ public class HttpRequest extends AbstractHttpRequest
       _version = HTTP_1_1;
     else if (buffer[offset - 1] == '0' && _protocol.equals(_http10Cb))
       _version = HTTP_1_0;
-    
+
     // skip to end of line
     while (ch != '\n') {
       if (readOffset >= readLength) {
@@ -585,8 +585,8 @@ public class HttpRequest extends AbstractHttpRequest
 
     return true;
   }
-  
-  /** 
+
+  /**
    * Parses headers from the read stream.
    *
    * @param s the input read stream
@@ -600,7 +600,7 @@ public class HttpRequest extends AbstractHttpRequest
     if (version < HTTP_1_0) {
       return;
     }
-    
+
     if (version < HTTP_1_1)
       killKeepalive();
 
@@ -619,12 +619,12 @@ public class HttpRequest extends AbstractHttpRequest
     CharSegment []headerValues = _headerValues;
 
     boolean debug = log.isLoggable(Level.FINE);
-    
+
     while (true) {
       int ch;
 
       int keyOffset = headerOffset;
-      
+
       // scan the key
       while (true) {
         if (readLength <= readOffset) {
@@ -640,7 +640,7 @@ public class HttpRequest extends AbstractHttpRequest
         }
         else if (ch == ':')
           break;
-        
+
         headerBuffer[headerOffset++] = (char) ch;
       }
 
@@ -668,10 +668,10 @@ public class HttpRequest extends AbstractHttpRequest
           if ((readLength = s.fillBuffer()) <= 0)
             break;
         }
-        
+
         if (ch == '\n') {
           int ch1 = readBuffer[readOffset];
-          
+
           if (ch1 == ' ' || ch1 == '\t') {
             ch = ' ';
             readOffset++;
@@ -684,24 +684,24 @@ public class HttpRequest extends AbstractHttpRequest
         }
 
         headerBuffer[headerOffset++] = (char) ch;
-        
+
         ch = readBuffer[readOffset++];
       }
 
       while (headerBuffer[headerOffset - 1] <= ' ')
         headerOffset--;
-      
+
       int valueLength = headerOffset - valueOffset;
       headerValues[headerSize].init(headerBuffer, valueOffset, valueLength);
 
       addHeaderInt(headerBuffer, keyOffset, keyLength,
 		   headerValues[headerSize]);
-	
+
       if (debug) {
-        log.fine(dbgId() + 
+        log.fine(dbgId() +
                  headerKeys[headerSize] + ": " + headerValues[headerSize]);
       }
-                               
+
       headerSize++;
       _headerSize = headerSize;
     }
@@ -733,7 +733,7 @@ public class HttpRequest extends AbstractHttpRequest
       _version = HTTP_0_9;
       return HTTP_0_9;
     }
-    
+
     int i = protocol.indexOf('/');
     int len = protocol.length();
     int major = 0;
@@ -776,16 +776,16 @@ public class HttpRequest extends AbstractHttpRequest
         _methodString = "GET";
         return _methodString;
       }
-      
+
       switch (cb.charAt(0)) {
       case 'G':
         _methodString = cb.equals(_getCb) ? "GET" : cb.toString();
         break;
-        
+
       case 'H':
         _methodString = cb.equals(_headCb) ? "HEAD" : cb.toString();
         break;
-        
+
       case 'P':
         _methodString = cb.equals(_postCb) ? "POST" : cb.toString();
         break;
@@ -796,7 +796,7 @@ public class HttpRequest extends AbstractHttpRequest
     }
 
     return _methodString;
-    
+
   }
 
   /**
@@ -891,7 +891,7 @@ public class HttpRequest extends AbstractHttpRequest
     _headerKeys[_headerSize].init(headerBuffer, tail, key.length());
 
     tail += key.length();
-    
+
     for (int i = value.length() - 1; i >= 0; i--)
       headerBuffer[tail + i] = value.charAt(i);
 
@@ -921,7 +921,7 @@ public class HttpRequest extends AbstractHttpRequest
   {
     char []keyBuf = _headerBuffer;
     CharSegment []headerKeys = _headerKeys;
-    
+
     for (int i = _headerSize - 1; i >= 0; i--) {
       CharSegment key = headerKeys[i];
 
@@ -947,7 +947,7 @@ public class HttpRequest extends AbstractHttpRequest
       if (j < 0)
         return _headerValues[i];
     }
- 
+
     return null;
   }
 
@@ -989,7 +989,7 @@ public class HttpRequest extends AbstractHttpRequest
     int i = -1;
     while ((i = matchNextHeader(i + 1, key)) >= 0)
       values.add(_headerValues[i].toString());
-    
+
     return Collections.enumeration(values);
   }
 
@@ -1007,7 +1007,7 @@ public class HttpRequest extends AbstractHttpRequest
     int length = key.length();
 
     char []keyBuf = _headerBuffer;
-    
+
     for (; i < size; i++) {
       CharSegment header = _headerKeys[i];
 
@@ -1015,7 +1015,7 @@ public class HttpRequest extends AbstractHttpRequest
         continue;
 
       int offset = header.getOffset();
-      
+
       int j;
       for (j = 0; j < length; j++) {
         char a = key.charAt(j);
@@ -1093,7 +1093,7 @@ public class HttpRequest extends AbstractHttpRequest
 
       throw new com.caucho.server.dispatch.BadRequestException("POST requires content-length");
     }
-    
+
     else {
       _contentLengthStream.init(rawRead, 0);
       _readStream.init(_contentLengthStream, null);
@@ -1124,10 +1124,10 @@ public class HttpRequest extends AbstractHttpRequest
     throws IOException
   {
     Connection conn = getConnection();
-    
+
     if (! (conn instanceof TcpConnection))
       return super.printRemoteAddr(buffer, offset);
-    
+
     QSocket socket = ((TcpConnection) conn).getSocket();
 
     if (socket instanceof QJniSocket) {
@@ -1136,7 +1136,7 @@ public class HttpRequest extends AbstractHttpRequest
 
       for (int i = 24; i >= 0; i -= 8) {
         int value = (int) (ip >> i) & 0xff;
-      
+
         if (value < 10)
           buffer[offset++] = (byte) (value + '0');
         else if (value < 100) {
@@ -1148,7 +1148,7 @@ public class HttpRequest extends AbstractHttpRequest
           buffer[offset++] = (byte) (value / 10 % 10 + '0');
           buffer[offset++] = (byte) (value % 10 + '0');
         }
-        
+
         if (i != 0)
           buffer[offset++] = (byte) '.';
       }
@@ -1167,14 +1167,14 @@ public class HttpRequest extends AbstractHttpRequest
 
         return offset;
       }
-      
+
       byte []bytes = addr.getAddress();
       for (int i = 0; i < bytes.length; i++) {
         if (i != 0)
           buffer[offset++] = (byte) '.';
 
         int value = bytes[i] & 0xff;
-      
+
         if (value < 10)
           buffer[offset++] = (byte) (value + '0');
         else if (value < 100) {
@@ -1200,7 +1200,7 @@ public class HttpRequest extends AbstractHttpRequest
   public String getRemoteHost()
   {
     Connection conn = getConnection();
-    
+
     if (conn instanceof TcpConnection) {
       QSocket socket = ((TcpConnection) conn).getSocket();
 
@@ -1210,10 +1210,10 @@ public class HttpRequest extends AbstractHttpRequest
 
         CharBuffer cb = _cb;
         cb.clear();
-        
+
         for (int i = 24; i >= 0; i -= 8) {
           int value = (int) (ip >> i) & 0xff;
-      
+
           if (value < 10)
             cb.append((char) (value + '0'));
           else if (value < 100) {
@@ -1225,7 +1225,7 @@ public class HttpRequest extends AbstractHttpRequest
             cb.append((char) (value / 10 % 10 + '0'));
             cb.append((char) (value % 10 + '0'));
           }
-        
+
           if (i != 0)
             cb.append('.');
         }
@@ -1233,18 +1233,18 @@ public class HttpRequest extends AbstractHttpRequest
         return cb.toString();
       }
     }
-    
+
     InetAddress addr = conn.getRemoteAddress();
-    
+
     byte []bytes = addr.getAddress();
     CharBuffer cb = _cb;
     cb.clear();
     for (int i = 0; i < bytes.length; i++) {
       int value = bytes[i] & 0xff;
-        
+
       if (i != 0)
         cb.append('.');
-      
+
       if (value < 10)
         cb.append((char) (value + '0'));
       else if (value < 100) {
@@ -1290,7 +1290,7 @@ public class HttpRequest extends AbstractHttpRequest
   public String findSessionIdFromConnection()
   {
     Connection conn = getConnection();
-    
+
     if (! isSecure() || ! (conn instanceof TcpConnection))
       return null;
 
@@ -1307,7 +1307,7 @@ public class HttpRequest extends AbstractHttpRequest
     byte []sessionId = sslSession.getId();
     if (sessionId == null)
       return null;
-    
+
     CharBuffer cb = CharBuffer.allocate();
     Base64.encode(cb, sessionId, 0, sessionId.length);
     for (int i = cb.length() - 1; i >= 0; i--) {
@@ -1337,7 +1337,7 @@ public class HttpRequest extends AbstractHttpRequest
     _initAttributes = true;
 
     Connection conn = getConnection();
-    
+
     if (! isSecure() || ! (conn instanceof TcpConnection))
       return;
 
@@ -1346,7 +1346,7 @@ public class HttpRequest extends AbstractHttpRequest
 
     String cipherSuite = socket.getCipherSuite();
     super.setAttribute("javax.servlet.request.cipher_suite", cipherSuite);
-    
+
     int keySize = socket.getCipherBits();
     if (keySize != 0)
       super.setAttribute("javax.servlet.request.key_size",
@@ -1363,7 +1363,7 @@ public class HttpRequest extends AbstractHttpRequest
       log.log(Level.FINER, e.toString(), e);
     }
   }
-  
+
   /**
    * Cleans up at the end of the request
    */
@@ -1374,12 +1374,17 @@ public class HttpRequest extends AbstractHttpRequest
 
     skip();
   }
-    
+
   String dbgId()
   {
     if ("".equals(_server.getServerId()))
       return "[" + _conn.getId() + "] ";
     else
       return "[" + _server.getServerId() + ", " + _conn.getId() + "] ";
+  }
+
+  public String toString()
+  {
+    return "HttpRequest" + dbgId();
   }
 }
