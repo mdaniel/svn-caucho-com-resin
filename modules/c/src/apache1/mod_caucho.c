@@ -127,7 +127,7 @@ cse_error(config_t *config, char *format, ...)
   va_list args;
 
   va_start(args, format);
-  vsnprintf(buf, sizeof(buf), format, args);
+  vsprintf(buf, format, args);
   va_end(args);
 
   LOG(("ERROR: %s\n", buf));
