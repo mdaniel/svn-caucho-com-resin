@@ -47,11 +47,16 @@ import com.caucho.config.ConfigException;
  */
 public class Bytes {
   private static final L10N L = new L10N(Bytes.class);
-  
+
+  public static final long BYTE = 1L;
+  public static final long KILOBYTE = 1024;
+  public static final long MEGABYTE = 1024 * 1024;
+  public static final long GIGABYTE = 1024 * 1024 * 1024;
+
   public static final long INFINITE = Long.MAX_VALUE / 2;
 
   private long _bytes;
-  
+
   public Bytes()
   {
   }
@@ -60,7 +65,7 @@ public class Bytes {
   {
     _bytes = bytes;
   }
-  
+
   /**
    * Sets the text.
    */
@@ -95,7 +100,7 @@ public class Bytes {
   {
     if (bytes == null)
       return -1;
-    
+
     long value = 0;
     long sign = 1;
     int i = 0;
@@ -103,7 +108,7 @@ public class Bytes {
 
     if (length == 0)
       return -1;
-    
+
     if (bytes.charAt(i) == '-') {
       sign = -1;
       i++;
@@ -114,11 +119,11 @@ public class Bytes {
 
     if (length <= i)
       return -1;
-    
+
     int ch;
     for (; i < length && (ch = bytes.charAt(i)) >= '0' && ch <= '9'; i++)
       value = 10 * value + ch - '0';
-    
+
     value = sign * value;
 
     if (bytes.endsWith("gb") || bytes.endsWith("g") || bytes.endsWith("G")) {
