@@ -34,56 +34,62 @@ import javax.management.RuntimeOperationsException;
 public class EmptyDescriptor
   implements Descriptor
 {
-    private static final Object[] NULL_OBJECT_ARRAY = new Object[0];
-    private static final String[] NULL_STRING_ARRAY = new String[0];
+  public static final Descriptor EMPTY_DESCRIPTOR =  new EmptyDescriptor();
 
-    public Object getFieldValue(String fieldName)
-      throws RuntimeOperationsException
-    {
-      return null;
-    }
+  private static final Object[] EMPTY_OBJECT_ARRAY = new Object[0];
+  private static final String[] EMPTY_STRING_ARRAY = new String[0];
 
-    public void setField(String fieldName, Object fieldValue)
-      throws RuntimeOperationsException
-    {
-      throw new RuntimeOperationsException(new UnsupportedOperationException());
-    }
-
-    public String[] getFields()
-    {
-      return NULL_STRING_ARRAY;
-    }
-
-    public String[] getFieldNames()
-    {
-      return NULL_STRING_ARRAY;
-    }
-
-    public Object[] getFieldValues(String[] fieldNames)
-    {
-      return NULL_OBJECT_ARRAY;
-    }
-
-    public void removeField(String fieldName)
-    {
-      throw new RuntimeOperationsException(new UnsupportedOperationException());
-    }
-
-    public void setFields(String[] fieldNames, Object[] fieldValues)
-      throws RuntimeOperationsException
-    {
-      throw new RuntimeOperationsException(new UnsupportedOperationException());
-    }
-
-    public Object clone()
-      throws RuntimeOperationsException
-    {
-      return this;
-    }
-
-    public boolean isValid()
-      throws RuntimeOperationsException
-    {
-      return true;
-    }
+  private EmptyDescriptor()
+  {
   }
+
+  public Object getFieldValue(String fieldName)
+    throws RuntimeOperationsException
+  {
+    return null;
+  }
+
+  public void setField(String fieldName, Object fieldValue)
+    throws RuntimeOperationsException
+  {
+    throw new RuntimeOperationsException(new UnsupportedOperationException());
+  }
+
+  public String[] getFields()
+  {
+    return EMPTY_STRING_ARRAY;
+  }
+
+  public String[] getFieldNames()
+  {
+    return EMPTY_STRING_ARRAY;
+  }
+
+  public Object[] getFieldValues(String[] fieldNames)
+  {
+    return EMPTY_OBJECT_ARRAY;
+  }
+
+  public void removeField(String fieldName)
+  {
+    throw new RuntimeOperationsException(new UnsupportedOperationException());
+  }
+
+  public void setFields(String[] fieldNames, Object[] fieldValues)
+    throws RuntimeOperationsException
+  {
+    throw new RuntimeOperationsException(new UnsupportedOperationException());
+  }
+
+  public Object clone()
+    throws RuntimeOperationsException
+  {
+    return this;
+  }
+
+  public boolean isValid()
+    throws RuntimeOperationsException
+  {
+    return true;
+  }
+}

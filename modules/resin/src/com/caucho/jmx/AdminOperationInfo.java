@@ -30,10 +30,34 @@ package com.caucho.jmx;
 
 import javax.management.MBeanOperationInfo;
 
-public class IntrospectionOperationDescriptor
-  extends IntrospectionFeatureDescriptor
+public class AdminOperationInfo
+  extends AdminFeatureInfo
 {
   private int _impact = MBeanOperationInfo.UNKNOWN;
+  private Closure<Boolean> _enabled;
+
+  AdminOperationInfo(String name)
+  {
+    super(name);
+  }
+
+  /**
+   * Set the impact that is returned by
+   * {@link javax.management.MBeanOperationInfo#getImpact()},
+   * default is
+   * {@link javax.management.MBeanOperationInfo#UNKNOWN}.
+   */
+  public AdminOperationInfo setImpact(int impact)
+  {
+    _impact = impact;
+
+    return this;
+  }
+
+  public int getImpact()
+  {
+    return _impact;
+  }
 
   /**
    * If true, the operation can be performed.  If false, the oepration cannot
@@ -44,27 +68,22 @@ public class IntrospectionOperationDescriptor
    * even if this is false.
    * </p>
    *
-   * <p>Set's the descriptor field "enabled".</p>
+   * <p>The corresponding descriptor field is "enabled".</p>
    */
-  public void setEnabled(IntrospectionClosure introspectionClosure)
+  public AdminOperationInfo setEnabled(Closure<Boolean> closure)
   {
-    setField("enabled", introspectionClosure);
+    _enabled = closure;
+
+    return this;
   }
 
-
-  /**
-   * Set the impact that is returned by
-   * {@link javax.management.MBeanOperationInfo#getImpact()},
-   * default is
-   * {@link javax.management.MBeanOperationInfo#UNKNOWN}.
-   */
-  public void setImpact(int impact)
+  public boolean isEnabled()
   {
-    _impact = impact;
+    return _enabled.eval();
   }
 
-  public int getImpact()
-  {
-    return _impact;
+  public interface Closure<T> {
+    public T eval()
+      throws RuntimeException;
   }
 }

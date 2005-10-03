@@ -29,21 +29,15 @@
 
 package com.caucho.server.port;
 
-import java.io.*;
 import java.net.*;
 
-import java.util.ArrayList;
-
 import java.util.logging.*;
-
-import java.nio.channels.Selector;
 
 import javax.management.ObjectName;
 
 import com.caucho.util.L10N;
 import com.caucho.util.FreeList;
 import com.caucho.util.ThreadPool;
-import com.caucho.util.Alarm;
 
 import com.caucho.log.Log;
 
@@ -54,7 +48,6 @@ import com.caucho.vfs.JsseSSLFactory;
 import com.caucho.loader.Environment;
 import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.loader.EnvironmentListener;
-import com.caucho.loader.WeakCloseListener;
 import com.caucho.loader.EnvironmentBean;
 
 import com.caucho.config.ConfigException;
@@ -65,17 +58,19 @@ import com.caucho.lifecycle.Lifecycle;
 
 import com.caucho.jmx.Jmx;
 import com.caucho.jmx.AdminAttributeCategory;
-import com.caucho.jmx.IntrospectionAttributeDescriptor;
-import com.caucho.jmx.IntrospectionMBeanDescriptor;
+import com.caucho.jmx.AdminInfo;
+import com.caucho.jmx.AdminInfoFactory;
 
 import com.caucho.server.port.mbean.PortMBean;
 
 /**
  * Represents a protocol connection.
  */
-public class Port implements EnvironmentListener, PortMBean, Runnable {
+public class Port
+  implements EnvironmentListener, Runnable, PortMBean, AdminInfoFactory
+{
   private static final L10N L = new L10N(Port.class);
-  
+
   private static final Logger log = Log.open(Port.class);
 
   private static final long CLOSE_INTERVAL = 1000L;
@@ -84,7 +79,7 @@ public class Port implements EnvironmentListener, PortMBean, Runnable {
   // themselves are buffering the free connections
   private FreeList<TcpConnection> _freeConn
     = new FreeList<TcpConnection>(32);
-  
+
   // The owning server
   private ProtocolDispatchServer _server;
 
@@ -116,7 +111,7 @@ public class Port implements EnvironmentListener, PortMBean, Runnable {
 
   private int _keepaliveMax = -1;
   private long _keepaliveTimeout = 120000L;
-    
+
   private int _minSpareListen = 5;
   private int _maxSpareListen = 10;
 
@@ -140,38 +135,28 @@ public class Port implements EnvironmentListener, PortMBean, Runnable {
 
   private volatile int _threadCount;
   private final Object _threadCountLock = new Object();
-  
+
   private volatile int _idleThreadCount;
   private volatile int _startThreadCount;
 
   private volatile long _lastThreadTime;
-  
+
   private volatile int _connectionCount;
-  
+
   private volatile int _keepaliveCount;
   private final Object _keepaliveCountLock = new Object();
-  
+
   // The TcpServer thread.
   private Thread _thread;
 
   // True if the port has been bound
   private volatile boolean _isBound;
-  
+
   // The port lifecycle
   private final Lifecycle _lifecycle = new Lifecycle();
 
   public Port()
   {
-  }
-  
-  public void describe(IntrospectionMBeanDescriptor descriptor)
-  {
-    String host = getHost();
-
-    if (host == null || host.length() == 0)
-      host = "*";
-
-    descriptor.setTitle(L.l("Port {0}:{1}", host, getPort()));
   }
 
   /**
@@ -181,7 +166,7 @@ public class Port implements EnvironmentListener, PortMBean, Runnable {
   {
     setServer(parent);
   }
-  
+
   /**
    * Sets the server.
    */
@@ -192,7 +177,7 @@ public class Port implements EnvironmentListener, PortMBean, Runnable {
     if (_protocol != null)
       _protocol.setServer(server);
   }
-  
+
   /**
    * Gets the server.
    */
@@ -200,7 +185,7 @@ public class Port implements EnvironmentListener, PortMBean, Runnable {
   {
     return _server;
   }
-  
+
   /**
    * Sets the id.
    */
@@ -208,7 +193,7 @@ public class Port implements EnvironmentListener, PortMBean, Runnable {
   {
     _serverId = id;
   }
-  
+
   /**
    * Sets the server id.
    */
@@ -216,7 +201,7 @@ public class Port implements EnvironmentListener, PortMBean, Runnable {
   {
     _serverId = id;
   }
-  
+
   /**
    * Gets the server id.
    */
@@ -243,7 +228,7 @@ public class Port implements EnvironmentListener, PortMBean, Runnable {
     if (_server == null)
       throw new IllegalStateException(L.l("Server is not set."));
     */
-    
+
     _protocol = protocol;
     _protocol.setServer(_server);
   }
@@ -267,12 +252,6 @@ public class Port implements EnvironmentListener, PortMBean, Runnable {
       return null;
   }
 
-  public void describeProtocolName(IntrospectionAttributeDescriptor descriptor)
-  {
-    descriptor.setCategory(AdminAttributeCategory.CONFIGURATION);
-    descriptor.setSortOrder(100);
-  }
-
   /**
    * Sets the host.
    */
@@ -281,7 +260,7 @@ public class Port implements EnvironmentListener, PortMBean, Runnable {
   {
     if ("*".equals(host))
       host = null;
-    
+
     _host = host;
     if (host != null)
       _socketAddress = InetAddress.getByName(host);
@@ -293,12 +272,6 @@ public class Port implements EnvironmentListener, PortMBean, Runnable {
   public String getHost()
   {
     return _host;
-  }
-
-  public void describeHost(IntrospectionAttributeDescriptor descriptor)
-  {
-    descriptor.setCategory(AdminAttributeCategory.CONFIGURATION);
-    descriptor.setSortOrder(200);
   }
 
   /**
@@ -317,12 +290,6 @@ public class Port implements EnvironmentListener, PortMBean, Runnable {
     return _port;
   }
 
-  public void describePort(IntrospectionAttributeDescriptor descriptor)
-  {
-    descriptor.setCategory(AdminAttributeCategory.CONFIGURATION);
-    descriptor.setSortOrder(300);
-  }
-
   /**
    * Sets the virtual host for IP-based virtual host.
    */
@@ -338,7 +305,7 @@ public class Port implements EnvironmentListener, PortMBean, Runnable {
   {
     return _virtualHost;
   }
-  
+
   /**
    * Sets the SSL factory
    */
@@ -346,7 +313,7 @@ public class Port implements EnvironmentListener, PortMBean, Runnable {
   {
     _sslFactory = factory;
   }
-  
+
   /**
    * Sets the SSL factory
    */
@@ -355,7 +322,7 @@ public class Port implements EnvironmentListener, PortMBean, Runnable {
   {
     try {
       Class cl = Class.forName("com.caucho.vfs.OpenSSLFactory");
-      
+
       _sslFactory = (SSLFactory) cl.newInstance();
 
       return _sslFactory;
@@ -365,7 +332,7 @@ public class Port implements EnvironmentListener, PortMBean, Runnable {
       throw new ConfigException(L.l("<openssl> requires Resin Professional.  See http://www.caucho.com for more information."));
     }
   }
-  
+
   /**
    * Sets the SSL factory
    */
@@ -374,7 +341,7 @@ public class Port implements EnvironmentListener, PortMBean, Runnable {
     // should probably check that openssl exists
     return new JsseSSLFactory();
   }
-  
+
   /**
    * Sets the SSL factory
    */
@@ -382,7 +349,7 @@ public class Port implements EnvironmentListener, PortMBean, Runnable {
   {
     _sslFactory = factory;
   }
-  
+
   /**
    * Gets the SSL factory.
    */
@@ -415,7 +382,7 @@ public class Port implements EnvironmentListener, PortMBean, Runnable {
   {
     if (minSpare < 1)
       throw new ConfigException(L.l("min-spare-listen must be at least 1."));
-    
+
     _minSpareListen = minSpare;
   }
 
@@ -427,7 +394,7 @@ public class Port implements EnvironmentListener, PortMBean, Runnable {
   {
     if (maxSpare < 1)
       throw new ConfigException(L.l("max-spare-listen must be at least 1."));
-    
+
     _maxSpareListen = maxSpare;
   }
 
@@ -469,12 +436,6 @@ public class Port implements EnvironmentListener, PortMBean, Runnable {
   public int getThreadCount()
   {
     return _threadCount;
-  }
-
-  public void describeThreadCount(IntrospectionAttributeDescriptor descriptor)
-  {
-    descriptor.setCategory(AdminAttributeCategory.STATISTIC);
-    descriptor.setSortOrder(1100);
   }
 
   /**
@@ -525,24 +486,12 @@ public class Port implements EnvironmentListener, PortMBean, Runnable {
     return _threadCount - _idleThreadCount;
   }
 
-  public void describeActiveThreadCount(IntrospectionAttributeDescriptor descriptor)
-  {
-    descriptor.setCategory(AdminAttributeCategory.STATISTIC);
-    descriptor.setSortOrder(1200);
-  }
-
   /**
    * Returns the count of idle threads.
    */
   public int getIdleThreadCount()
   {
     return _idleThreadCount;
-  }
-
-  public void describeIdleThreadCount(IntrospectionAttributeDescriptor descriptor)
-  {
-    descriptor.setCategory(AdminAttributeCategory.STATISTIC);
-    descriptor.setSortOrder(1400);
   }
 
   /**
@@ -559,12 +508,6 @@ public class Port implements EnvironmentListener, PortMBean, Runnable {
   public int getConnectionMax()
   {
     return _connectionMax;
-  }
-
-  public void describeConnectionMax(IntrospectionAttributeDescriptor descriptor)
-  {
-    descriptor.setCategory(AdminAttributeCategory.CONFIGURATION);
-    descriptor.setSortOrder(400);
   }
 
   /**
@@ -596,12 +539,6 @@ public class Port implements EnvironmentListener, PortMBean, Runnable {
     return _keepaliveMax;
   }
 
-  public void describeKeepaliveMax(IntrospectionAttributeDescriptor descriptor)
-  {
-    descriptor.setCategory(AdminAttributeCategory.CONFIGURATION);
-    descriptor.setSortOrder(500);
-  }
-
   /**
    * Returns the number of keepalive connections
    */
@@ -612,23 +549,12 @@ public class Port implements EnvironmentListener, PortMBean, Runnable {
     }
   }
 
-  public void describeKeepaliveCount(IntrospectionAttributeDescriptor descriptor)
-  {
-    descriptor.setIgnored(true);
-  }
-
   /**
    * Returns true if the port is active.
    */
   public boolean isActive()
   {
     return _lifecycle.isActive();
-  }
-
-  public void describeActive(IntrospectionAttributeDescriptor descriptor)
-  {
-    descriptor.setCategory(AdminAttributeCategory.STATISTIC);
-    descriptor.setSortOrder(1000);
   }
 
   /**
@@ -668,9 +594,65 @@ public class Port implements EnvironmentListener, PortMBean, Runnable {
 
     if (_readTimeout <= 0)
       _readTimeout = _timeout;
-    
+
     if (_writeTimeout <= 0)
       _writeTimeout = _timeout;
+  }
+
+  public AdminInfo getAdminInfo()
+  {
+    AdminInfo descriptor = new AdminInfo();
+
+    String host = getHost();
+
+    if (host == null || host.length() == 0)
+      host = "*";
+
+    descriptor.setTitle(L.l("Port {0}:{1}", host, getPort()));
+
+    descriptor.createAdminAttributeInfo("ProtocolName")
+      .setCategory(AdminAttributeCategory.CONFIGURATION);
+
+    descriptor.createAdminAttributeInfo("Host")
+      .setCategory(AdminAttributeCategory.CONFIGURATION);
+
+    descriptor.createAdminAttributeInfo("Port")
+      .setCategory(AdminAttributeCategory.CONFIGURATION);
+
+    descriptor.createAdminAttributeInfo("ThreadCount")
+      .setCategory(AdminAttributeCategory.STATISTIC);
+
+    descriptor.createAdminAttributeInfo("ActiveThreadCount")
+      .setCategory(AdminAttributeCategory.STATISTIC);
+
+    descriptor.createAdminAttributeInfo("IdleThreadCount")
+      .setCategory(AdminAttributeCategory.STATISTIC);
+
+    descriptor.createAdminAttributeInfo("ConnectionMax")
+      .setCategory(AdminAttributeCategory.CONFIGURATION);
+
+    descriptor.createAdminAttributeInfo("KeepaliveMax")
+      .setCategory(AdminAttributeCategory.CONFIGURATION);
+
+    descriptor.createAdminAttributeInfo("KeepaliveCount")
+      .setDeprecated("3.0.15 Use KeepaliveConnectionCount");
+
+    descriptor.createAdminAttributeInfo("Active")
+      .setCategory(AdminAttributeCategory.STATISTIC);
+
+    descriptor.createAdminAttributeInfo("TotalConnectionCount")
+      .setCategory(AdminAttributeCategory.STATISTIC);
+
+    descriptor.createAdminAttributeInfo("ActiveConnectionCount")
+      .setCategory(AdminAttributeCategory.STATISTIC);
+
+    descriptor.createAdminAttributeInfo("KeepaliveConnectionCount")
+      .setCategory(AdminAttributeCategory.STATISTIC);
+
+    descriptor.createAdminAttributeInfo("SelectConnectionCount")
+      .setCategory(AdminAttributeCategory.STATISTIC);
+
+    return descriptor;
   }
 
   /**
@@ -687,7 +669,7 @@ public class Port implements EnvironmentListener, PortMBean, Runnable {
 
     if (_protocol == null)
       throw new IllegalStateException(L.l("`{0}' must have a configured protocol before starting.", this));
-    
+
     try {
       if (_host == null)
 	_objectName = Jmx.getObjectName("type=Port,port=" + _port);
@@ -709,7 +691,7 @@ public class Port implements EnvironmentListener, PortMBean, Runnable {
     }
     else if (_sslFactory != null && _socketAddress != null) {
       _serverSocket = _sslFactory.create(_socketAddress, _port);
-      
+
       log.info(_protocol.getProtocolName() + "s listening to " + _socketAddress.getHostName() + ":" + _port);
     }
     else if (_sslFactory != null) {
@@ -719,7 +701,7 @@ public class Port implements EnvironmentListener, PortMBean, Runnable {
       }
       else {
 	InetAddress addr = InetAddress.getByName(_host);
-	
+
 	_serverSocket = _sslFactory.create(addr, _port);
 
 	log.info(_protocol.getProtocolName() + "s listening to " + _host + ":" + _port);
@@ -777,7 +759,7 @@ public class Port implements EnvironmentListener, PortMBean, Runnable {
       _thread.start();
     } catch (Throwable e) {
       close();
-      
+
       log.log(Level.WARNING, e.toString(), e);
 
       throw e;
@@ -792,12 +774,6 @@ public class Port implements EnvironmentListener, PortMBean, Runnable {
     return _connectionCount;
   }
 
-  public void describeTotalConnectionCount(IntrospectionAttributeDescriptor descriptor)
-  {
-    descriptor.setCategory(AdminAttributeCategory.STATISTIC);
-    descriptor.setSortOrder(1500);
-  }
-
   /**
    * Returns the active connections.
    */
@@ -806,24 +782,12 @@ public class Port implements EnvironmentListener, PortMBean, Runnable {
     return _threadCount - _idleThreadCount;
   }
 
-  public void describeActiveConnectionCount(IntrospectionAttributeDescriptor descriptor)
-  {
-    descriptor.setCategory(AdminAttributeCategory.STATISTIC);
-    descriptor.setSortOrder(1600);
-  }
-
   /**
    * Returns the keepalive connections.
    */
   public int getKeepaliveConnectionCount()
   {
     return getKeepaliveCount();
-  }
-
-  public void describeKeepaliveConnectionCount(IntrospectionAttributeDescriptor descriptor)
-  {
-    descriptor.setCategory(AdminAttributeCategory.STATISTIC);
-    descriptor.setSortOrder(1700);
   }
 
   /**
@@ -837,12 +801,6 @@ public class Port implements EnvironmentListener, PortMBean, Runnable {
       return -1;
   }
 
-  public void describeSelectConnectionCount(IntrospectionAttributeDescriptor descriptor)
-  {
-    descriptor.setCategory(AdminAttributeCategory.STATISTIC);
-    descriptor.setSortOrder(1800);
-  }
-
   /**
    * Accepts a new connection.
    */
@@ -854,13 +812,13 @@ public class Port implements EnvironmentListener, PortMBean, Runnable {
 
 	if (isFirst) {
 	  _startThreadCount--;
-	  
+
 	  if (_startThreadCount < 0) {
 	    System.err.println("StartCount: " + _startThreadCount + " " + conn);
 	    Thread.dumpStack();
 	  }
 	}
-	
+
 	if (_maxSpareListen < _idleThreadCount) {
 	  return false;
 	}
@@ -886,16 +844,16 @@ public class Port implements EnvironmentListener, PortMBean, Runnable {
 	log.log(Level.FINER, e.toString(), e);
     } finally {
       boolean newConn = false;
-      
+
       synchronized (this) {
 	_idleThreadCount--;
-	
+
 	if (_idleThreadCount + _startThreadCount < _minSpareListen) {
 	  notify();
 	}
       }
     }
-    
+
     return false;
   }
 
@@ -958,7 +916,7 @@ public class Port implements EnvironmentListener, PortMBean, Runnable {
 	return false;
       else if (_connectionMax <= _connectionCount + _minSpareConnection)
 	return false;
-      
+
       _keepaliveCount++;
 
       return true;
@@ -976,7 +934,7 @@ public class Port implements EnvironmentListener, PortMBean, Runnable {
       if (_keepaliveCount < 0) {
 	int count = _keepaliveCount;
 	_keepaliveCount = 0;
-	
+
 	log.warning("internal error: negative keepalive count " + count);
       }
     }
@@ -1003,7 +961,7 @@ public class Port implements EnvironmentListener, PortMBean, Runnable {
 	// when the load doesn't justify it
 	Thread.yield();
 	Thread.sleep(10);
-	  
+
 	synchronized (this) {
 	  isStart = _startThreadCount + _idleThreadCount < _minSpareListen;
 	  if (_connectionMax <= _connectionCount)
@@ -1033,17 +991,17 @@ public class Port implements EnvironmentListener, PortMBean, Runnable {
 	e.printStackTrace();
       }
     }
-    
+
     _thread = null;
   }
-  
+
   /**
    * Handles the case where the environment is starting (after init).
    */
   public void environmentStart(EnvironmentClassLoader loader)
   {
   }
-   
+
   /**
    * Handles the case where the environment is stopping
    */
@@ -1058,7 +1016,7 @@ public class Port implements EnvironmentListener, PortMBean, Runnable {
   void free(TcpConnection conn)
   {
     closeConnection(conn);
-    
+
     _freeConn.free(conn);
   }
 
@@ -1082,7 +1040,7 @@ public class Port implements EnvironmentListener, PortMBean, Runnable {
 	} catch (Throwable e) {
 	}
       }
-      
+
       _connectionCount--;
     }
   }
@@ -1094,7 +1052,7 @@ public class Port implements EnvironmentListener, PortMBean, Runnable {
   public void close()
   {
     Environment.removeEnvironmentListener(this);
-    
+
     if (! _lifecycle.toDestroy())
       return;
 
@@ -1103,7 +1061,7 @@ public class Port implements EnvironmentListener, PortMBean, Runnable {
 
     QServerSocket serverSocket = _serverSocket;
     _serverSocket = null;
-    
+
     _selectManager = null;
     AbstractSelectManager selectManager = null;
 
@@ -1125,7 +1083,7 @@ public class Port implements EnvironmentListener, PortMBean, Runnable {
         serverSocket.close();
       } catch (Throwable e) {
       }
-      
+
       try {
         synchronized (serverSocket) {
           serverSocket.notifyAll();
@@ -1140,7 +1098,7 @@ public class Port implements EnvironmentListener, PortMBean, Runnable {
       } catch (Throwable e) {
       }
     }
-    
+
     try {
       if (_objectName != null)
 	Jmx.unregister(_objectName);
@@ -1162,7 +1120,7 @@ public class Port implements EnvironmentListener, PortMBean, Runnable {
     // ping the accept port to wake the listening threads
     if (localPort > 0) {
       int idleCount = _idleThreadCount + _startThreadCount;
-      
+
       for (int i = 0; i < idleCount + 10; i++) {
 	try {
 	  Socket socket;
@@ -1180,7 +1138,7 @@ public class Port implements EnvironmentListener, PortMBean, Runnable {
 	}
       }
     }
-    
+
     log.finest("closed " + this);
   }
 

@@ -29,47 +29,15 @@
 
 package com.caucho.server.resin;
 
-import java.util.*;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import java.io.IOException;
-
 import javax.management.ObjectName;
-
-import javax.servlet.jsp.el.VariableResolver;
-import javax.servlet.jsp.el.ELException;
 
 import com.caucho.util.*;
 import com.caucho.vfs.*;
 
-import com.caucho.log.Log;
-
-import com.caucho.loader.Environment;
-import com.caucho.loader.EnvironmentClassLoader;
-
-import com.caucho.config.BuilderProgram;
-import com.caucho.config.ConfigException;
-import com.caucho.config.types.PathBuilder;
-
-import com.caucho.el.EL;
-import com.caucho.el.MapVariableResolver;
-
-import com.caucho.relaxng.CompactVerifierFactoryImpl;
-
-import com.caucho.loader.EnvironmentListener;
-
-import com.caucho.jmx.Jmx;
-import com.caucho.jmx.IntrospectionMBean;
-import com.caucho.jmx.IntrospectionAttributeDescriptor;
 import com.caucho.jmx.AdminAttributeCategory;
-import com.caucho.jmx.IntrospectionMBeanDescriptor;
-
-import com.caucho.server.session.SessionManager;
+import com.caucho.jmx.AdminInfo;
 
 import com.caucho.server.deploy.DeployControllerAdmin;
-import com.caucho.server.deploy.ExpandDeployController;
 
 import com.caucho.server.resin.mbean.ServletServerMBean;
 
@@ -82,9 +50,11 @@ public class ServerAdmin extends DeployControllerAdmin<ServerController>
   {
     super(controller);
   }
-  
-  public void describe(IntrospectionMBeanDescriptor descriptor)
+
+  public AdminInfo getAdminInfo()
   {
+    AdminInfo descriptor = super.getAdminInfo();
+
     String title;
 
     String id = getId();
@@ -95,6 +65,29 @@ public class ServerAdmin extends DeployControllerAdmin<ServerController>
       title = L.l("Server {0}", id);
 
     descriptor.setTitle(title);
+
+    descriptor.createAdminAttributeInfo("PortObjectNames")
+      .setCategory(AdminAttributeCategory.CHILD);
+
+    descriptor.createAdminAttributeInfo("ClusterObjectNames")
+      .setCategory(AdminAttributeCategory.CHILD);
+
+    descriptor.createAdminAttributeInfo("HostObjectNames")
+      .setCategory(AdminAttributeCategory.CHILD);
+
+    descriptor.createAdminAttributeInfo("InvocationCacheHitCount")
+      .setCategory(AdminAttributeCategory.STATISTIC);
+
+    descriptor.createAdminAttributeInfo("InvocationCacheMissCount")
+      .setCategory(AdminAttributeCategory.STATISTIC);
+
+    descriptor.createAdminAttributeInfo("ProxyCacheHitCount")
+      .setIgnored(true);
+
+    descriptor.createAdminAttributeInfo("ProxyCacheMissCount")
+      .setIgnored(true);
+
+    return descriptor;
   }
 
   /**
@@ -124,17 +117,11 @@ public class ServerAdmin extends DeployControllerAdmin<ServerController>
   public ObjectName []getPortObjectNames()
   {
     ServletServer server = getDeployInstance();
-      
+
     if (server != null)
       return server.getPortObjectNames();
     else
       return new ObjectName[0];
-  }
-  
-  public void describePortObjectNames(IntrospectionAttributeDescriptor descriptor)
-  {
-    descriptor.setCategory(AdminAttributeCategory.CHILD);
-    descriptor.setSortOrder(210);
   }
 
   /**
@@ -143,17 +130,11 @@ public class ServerAdmin extends DeployControllerAdmin<ServerController>
   public ObjectName []getClusterObjectNames()
   {
     ServletServer server = getDeployInstance();
-      
+
     if (server != null)
       return server.getClusterObjectNames();
     else
       return new ObjectName[0];
-  }
-  
-  public void describeClusterObjectNames(IntrospectionAttributeDescriptor descriptor)
-  {
-    descriptor.setCategory(AdminAttributeCategory.CHILD);
-    descriptor.setSortOrder(220);
   }
 
   /**
@@ -169,23 +150,17 @@ public class ServerAdmin extends DeployControllerAdmin<ServerController>
       return new ObjectName[0];
   }
 
-  public void describeHostObjectNames(IntrospectionAttributeDescriptor descriptor)
-  {
-    descriptor.setCategory(AdminAttributeCategory.CHILD);
-    descriptor.setSortOrder(225);
-  }
-
   /**
    * Clears the cache.
    */
   public void clearCache()
   {
     ServletServer server = getDeployInstance();
-      
+
     if (server != null)
       server.clearCache();
   }
-  
+
   /**
    * Clears the cache by regexp patterns.
    *
@@ -195,7 +170,7 @@ public class ServerAdmin extends DeployControllerAdmin<ServerController>
   public void clearCacheByPattern(String hostRegexp, String urlRegexp)
   {
     ServletServer server = getDeployInstance();
-      
+
     if (server != null)
       server.clearCacheByPattern(hostRegexp, urlRegexp);
   }
@@ -206,17 +181,11 @@ public class ServerAdmin extends DeployControllerAdmin<ServerController>
   public long getInvocationCacheHitCount()
   {
     ServletServer server = getDeployInstance();
-      
+
     if (server != null)
       return server.getInvocationCacheHitCount();
     else
       return -1;
-  }
-
-  public void describeInvocationCacheHitCount(IntrospectionAttributeDescriptor descriptor)
-  {
-    descriptor.setCategory(AdminAttributeCategory.STATISTIC);
-    descriptor.setSortOrder(2000);
   }
 
   /**
@@ -225,17 +194,11 @@ public class ServerAdmin extends DeployControllerAdmin<ServerController>
   public long getInvocationCacheMissCount()
   {
     ServletServer server = getDeployInstance();
-      
+
     if (server != null)
       return server.getInvocationCacheMissCount();
     else
       return -1;
-  }
-
-  public void describeInvocationCacheMissCount(IntrospectionAttributeDescriptor descriptor)
-  {
-    descriptor.setCategory(AdminAttributeCategory.STATISTIC);
-    descriptor.setSortOrder(2010);
   }
 
   /**
@@ -244,16 +207,11 @@ public class ServerAdmin extends DeployControllerAdmin<ServerController>
   public long getProxyCacheHitCount()
   {
     ServletServer server = getDeployInstance();
-      
+
     if (server != null)
       return server.getProxyCacheHitCount();
     else
       return -1;
-  }
-
-  public void describeProxyCacheHitCount(IntrospectionAttributeDescriptor descriptor)
-  {
-    descriptor.setIgnored(true);
   }
 
   /**
@@ -262,16 +220,11 @@ public class ServerAdmin extends DeployControllerAdmin<ServerController>
   public long getProxyCacheMissCount()
   {
     ServletServer server = getDeployInstance();
-      
+
     if (server != null)
       return server.getProxyCacheMissCount();
     else
       return -1;
-  }
-
-  public void describeProxyCacheMissCount(IntrospectionAttributeDescriptor descriptor)
-  {
-    descriptor.setIgnored(true);
   }
 
   protected ServletServer getDeployInstance()

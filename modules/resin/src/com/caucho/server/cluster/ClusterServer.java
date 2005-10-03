@@ -40,11 +40,10 @@ import javax.management.MBeanOperationInfo;
 import com.caucho.log.Log;
 
 import com.caucho.jmx.Jmx;
-import com.caucho.jmx.IntrospectionAttributeDescriptor;
-import com.caucho.jmx.IntrospectionOperationDescriptor;
-import com.caucho.jmx.IntrospectionClosure;
 import com.caucho.jmx.AdminAttributeCategory;
-import com.caucho.jmx.IntrospectionMBeanDescriptor;
+import com.caucho.jmx.AdminInfoFactory;
+import com.caucho.jmx.AdminInfo;
+import com.caucho.jmx.AdminOperationInfo;
 
 import com.caucho.vfs.Vfs;
 import com.caucho.vfs.Path;
@@ -56,7 +55,9 @@ import com.caucho.util.L10N;
 /**
  * Defines a connection to one of the servers in a distribution group.
  */
-public class ClusterServer implements ClusterClientMBean {
+public class ClusterServer
+  implements ClusterClientMBean, AdminInfoFactory
+{
   private static final Logger log = Log.open(ClusterServer.class);
   private static final L10N L = new L10N(ClusterServer.class);
 
@@ -76,10 +77,47 @@ public class ClusterServer implements ClusterClientMBean {
   {
   }
 
-  public void describe(IntrospectionMBeanDescriptor descriptor)
+  public AdminInfo getAdminInfo()
   {
+    AdminInfo descriptor = new AdminInfo();
+
     descriptor.setTitle(L.l("ClusterClient {0}:{1}", getHost(), getPort()));
+
+    descriptor.createAdminAttributeInfo("ObjectName")
+      .setIgnored(true);
+
+    descriptor.createAdminAttributeInfo("ActiveCount")
+      .setCategory(AdminAttributeCategory.STATISTIC);
+
+    descriptor.createAdminAttributeInfo("Active")
+      .setCategory(AdminAttributeCategory.CONFIGURATION);
+
+    descriptor.createAdminOperationInfo("Enable")
+      .setImpact(MBeanOperationInfo.ACTION)
+      .setEnabled(
+        new AdminOperationInfo.Closure() {
+          public Object eval()
+          {
+            return !isActive();
+          }
+        });
+
+    descriptor.createAdminOperationInfo("Disable")
+      .setImpact(MBeanOperationInfo.ACTION)
+      .setEnabled(
+        new AdminOperationInfo.Closure() {
+          public Object eval()
+          {
+            return isActive();
+          }
+        });
+
+    descriptor.createAdminOperationInfo("CanConnect")
+      .setImpact(MBeanOperationInfo.INFO);
+
+    return descriptor;
   }
+
 
   /**
    * Sets the owning cluster.
@@ -103,11 +141,6 @@ public class ClusterServer implements ClusterClientMBean {
   public ObjectName getObjectName()
   {
     return _objectName;
-  }
-
-  public void describeObjectName(IntrospectionAttributeDescriptor descriptor)
-  {
-    descriptor.setIgnored(true);
   }
 
   /**
@@ -249,12 +282,6 @@ public class ClusterServer implements ClusterClientMBean {
     return _client.getActiveCount();
   }
 
-  public void describeActiveCount(IntrospectionAttributeDescriptor descriptor)
-  {
-    descriptor.setCategory(AdminAttributeCategory.STATISTIC);
-    descriptor.setSortOrder(200);
-  }
-
   /**
    * Initialize
    */
@@ -305,12 +332,6 @@ public class ClusterServer implements ClusterClientMBean {
     return _client.isActive();
   }
 
-  public void describeActive(IntrospectionAttributeDescriptor descriptor)
-  {
-    descriptor.setCategory(AdminAttributeCategory.CONFIGURATION);
-    descriptor.setSortOrder(100);
-  }
-
   /**
    * Enable the client
    */
@@ -319,40 +340,12 @@ public class ClusterServer implements ClusterClientMBean {
     _client.enable();
   }
 
-  public void describeEnable(IntrospectionOperationDescriptor descriptor)
-  {
-    descriptor.setImpact(MBeanOperationInfo.ACTION);
-    descriptor.setSortOrder(400);
-    descriptor.setEnabled(new IntrospectionClosure() {
-      public Object call()
-        throws Exception
-      {
-        return !isActive();
-      }
-    });
-  }
-
   /**
    * Disable the client
    */
   public void disable()
   {
     _client.disable();
-  }
-
-  public void describeDisable(IntrospectionOperationDescriptor descriptor)
-  {
-    descriptor.setImpact(MBeanOperationInfo.ACTION);
-
-    descriptor.setSortOrder(500);
-
-    descriptor.setEnabled(new IntrospectionClosure() {
-      public Object call()
-        throws Exception
-      {
-        return isActive();
-      }
-    });
   }
 
   /**
@@ -404,12 +397,6 @@ public class ClusterServer implements ClusterClientMBean {
 
       return false;
     }
-  }
-
-  public void describeCanConnect(IntrospectionOperationDescriptor descriptor)
-  {
-    descriptor.setImpact(MBeanOperationInfo.INFO);
-    descriptor.setSortOrder(300);
   }
 
   /**

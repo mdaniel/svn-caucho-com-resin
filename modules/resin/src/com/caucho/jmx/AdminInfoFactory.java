@@ -26,9 +26,9 @@
  * @author Sam
  */
 
+
 package com.caucho.jmx;
 
-public interface IntrospectionClosure<T> {
-  public T call()
-    throws Exception;
+public interface AdminInfoFactory {
+  AdminInfo getAdminInfo();
 }

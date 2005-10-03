@@ -45,11 +45,10 @@ import javax.management.NotificationEmitter;
 import javax.management.MBeanOperationInfo;
 
 import com.caucho.jmx.MBeanHandle;
-import com.caucho.jmx.IntrospectionMBeanDescriptor;
-import com.caucho.jmx.IntrospectionAttributeDescriptor;
 import com.caucho.jmx.AdminAttributeCategory;
-import com.caucho.jmx.IntrospectionOperationDescriptor;
-import com.caucho.jmx.IntrospectionClosure;
+import com.caucho.jmx.AdminInfoFactory;
+import com.caucho.jmx.AdminInfo;
+import com.caucho.jmx.AdminOperationInfo;
 
 import com.caucho.server.deploy.mbean.DeployControllerMBean;
 import com.caucho.lifecycle.LifecycleListener;
@@ -60,7 +59,11 @@ import com.caucho.util.Alarm;
  * A deploy controller for an environment.
  */
 public class DeployControllerAdmin<C extends EnvironmentDeployController>
-  implements DeployControllerMBean, NotificationEmitter, LifecycleListener, java.io.Serializable
+  implements DeployControllerMBean,
+             NotificationEmitter,
+             LifecycleListener,
+             AdminInfoFactory,
+             java.io.Serializable
 {
   private transient final C _controller;
 
@@ -76,8 +79,46 @@ public class DeployControllerAdmin<C extends EnvironmentDeployController>
     controller.addLifecycleListener(this);
   }
 
-  public void describe(IntrospectionMBeanDescriptor descriptor)
+  public AdminInfo getAdminInfo()
   {
+    AdminInfo descriptor = new AdminInfo();
+
+    descriptor.createAdminAttributeInfo("ObjectName")
+      .setIgnored(true);
+
+    descriptor.createAdminAttributeInfo("RootDirectory")
+      .setCategory(AdminAttributeCategory.CONFIGURATION);
+
+    descriptor.createAdminAttributeInfo("State")
+      .setCategory(AdminAttributeCategory.STATISTIC);
+
+    descriptor.createAdminAttributeInfo("StartTime")
+      .setCategory(AdminAttributeCategory.STATISTIC);
+
+    descriptor.createAdminOperationInfo("Start")
+      .setImpact(MBeanOperationInfo.ACTION)
+      .setEnabled(
+        new AdminOperationInfo.Closure() {
+          public Object eval()
+          {
+            return getController().isStopped();
+          }
+        });
+
+    descriptor.createAdminOperationInfo("Restart")
+      .setImpact(MBeanOperationInfo.ACTION)
+      .setEnabled(
+        new AdminOperationInfo.Closure() {
+          public Object eval()
+          {
+            return getController().isActive();
+          }
+        });
+
+    descriptor.createAdminOperationInfo("Update")
+      .setImpact(MBeanOperationInfo.ACTION);
+
+    return descriptor;
   }
 
   /**
@@ -96,11 +137,6 @@ public class DeployControllerAdmin<C extends EnvironmentDeployController>
     return _controller.getObjectName();
   }
 
-  public void describeObjectName(IntrospectionAttributeDescriptor descriptor)
-  {
-    descriptor.setIgnored(true);
-  }
-
   /**
    * Returns the controller state.
    */
@@ -109,24 +145,12 @@ public class DeployControllerAdmin<C extends EnvironmentDeployController>
     return getController().getState();
   }
 
-  public void describeState(IntrospectionAttributeDescriptor descriptor)
-  {
-    descriptor.setCategory(AdminAttributeCategory.STATISTIC);
-    descriptor.setSortOrder(1000);
-  }
-
   /**
    * Returns the time of the last start
    */
   public Date getStartTime()
   {
     return new Date(getController().getStartTime());
-  }
-
-  public void describeStartTime(IntrospectionAttributeDescriptor descriptor)
-  {
-    descriptor.setCategory(AdminAttributeCategory.STATISTIC);
-    descriptor.setSortOrder(1010);
   }
 
   /**
@@ -138,21 +162,6 @@ public class DeployControllerAdmin<C extends EnvironmentDeployController>
     getController().start();
   }
 
-  public void describeStart(IntrospectionOperationDescriptor descriptor)
-  {
-    descriptor.setImpact(MBeanOperationInfo.ACTION);
-
-    descriptor.setSortOrder(10000);
-
-    descriptor.setEnabled(new IntrospectionClosure() {
-      public Object call()
-        throws Exception
-      {
-        return getController().isStopped();
-      }
-    });
-  }
-
   /**
    * Stops the server.
    */
@@ -160,21 +169,6 @@ public class DeployControllerAdmin<C extends EnvironmentDeployController>
     throws Exception
   {
     getController().stop();
-  }
-
-  public void describeStop(IntrospectionOperationDescriptor descriptor)
-  {
-    descriptor.setImpact(MBeanOperationInfo.ACTION);
-
-    descriptor.setSortOrder(10010);
-
-    descriptor.setEnabled(new IntrospectionClosure() {
-      public Object call()
-        throws Exception
-      {
-        return getController().isActive();
-      }
-    });
   }
 
   /**
@@ -187,21 +181,6 @@ public class DeployControllerAdmin<C extends EnvironmentDeployController>
     getController().start();
   }
 
-  public void describeRestart(IntrospectionOperationDescriptor descriptor)
-  {
-    descriptor.setImpact(MBeanOperationInfo.ACTION);
-
-    descriptor.setSortOrder(10020);
-
-    descriptor.setEnabled(new IntrospectionClosure() {
-      public Object call()
-        throws Exception
-      {
-        return getController().isActive();
-      }
-    });
-  }
-
   /**
    * Restarts the server if changes are detected.
    */
@@ -211,25 +190,12 @@ public class DeployControllerAdmin<C extends EnvironmentDeployController>
     getController().update();
   }
 
-  public void describeUpdate(IntrospectionOperationDescriptor descriptor)
-  {
-    descriptor.setImpact(MBeanOperationInfo.ACTION);
-
-    descriptor.setSortOrder(10030);
-  }
-
   /**
    * Returns the root directory
    */
   public String getRootDirectory()
   {
     return _controller.getRootDirectory().getNativePath();
-  }
-
-  public void describeRootDirectory(IntrospectionAttributeDescriptor descriptor)
-  {
-    descriptor.setCategory(AdminAttributeCategory.CONFIGURATION);
-    descriptor.setSortOrder(100);
   }
 
   /**

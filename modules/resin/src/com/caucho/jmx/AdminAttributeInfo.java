@@ -28,41 +28,29 @@
 
 package com.caucho.jmx;
 
-public class IntrospectionFeatureDescriptor
-  extends IntrospectionDescriptor
+public class AdminAttributeInfo
+  extends AdminFeatureInfo
 {
-  /**
-   * If set, clients should ignore this attribute and not display
-   * it, default is null (not deprecated).  The format of the String is
-   * "VERSION[ REASON]", for example "3.0.15" or "3.0.15 Use bar instead".
-   *
-   * <p>Set's the descriptor field "deprecated"</p>
-   */
-  public void setDeprecated(String deprecated)
+  AdminAttributeCategory _category = AdminAttributeCategory.GENERAL;
+
+  AdminAttributeInfo(String name)
   {
-    setField("deprecated", deprecated);
+    super(name);
   }
 
   /**
-   * If "true" the Resin administration service will ignore the attribute,
-   * default false.
-   *
-   * <p>Set's the descriptor field "com.caucho.admin.ignored" to "true" or null</p>
+   * Set a logical category that this attribute belongs to, default is
+   * {@link AdminAttributeCategory#GENERAL}.
    */
-  public void setIgnored(boolean isIgnored)
+  public AdminAttributeInfo setCategory(AdminAttributeCategory category)
   {
-    if (isIgnored)
-      setField("com.caucho.admin.ignored", "true");
-    else
-      removeField("com.caucho.admin.ignored");
+    _category = category;
+
+    return this;
   }
 
-  /**
-   * A number that establishes a sort order for the Resin administration
-   * service, default is null.
-   */
-  public void setSortOrder(int sortOrder)
+  public AdminAttributeCategory getCategory()
   {
-    setField("com.caucho.admin.sortOrder", sortOrder);
+    return _category;
   }
 }

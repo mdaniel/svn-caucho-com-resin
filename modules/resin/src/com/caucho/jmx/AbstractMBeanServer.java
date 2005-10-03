@@ -43,10 +43,7 @@ import java.io.ObjectInputStream;
 
 import javax.management.MBeanServer;
 import javax.management.DynamicMBean;
-import javax.management.MBeanServerDelegate;
-import javax.management.MBeanServerDelegateMBean;
 import javax.management.MBeanServerFactory;
-import javax.management.MBeanRegistration;
 import javax.management.MBeanInfo;
 import javax.management.Attribute;
 import javax.management.AttributeList;
@@ -55,8 +52,6 @@ import javax.management.ObjectName;
 import javax.management.ObjectInstance;
 import javax.management.NotificationFilter;
 import javax.management.NotificationListener;
-import javax.management.NotificationBroadcaster;
-import javax.management.NotificationEmitter;
 import javax.management.QueryExp;
 import javax.management.InstanceNotFoundException;
 import javax.management.MBeanException;
@@ -78,9 +73,7 @@ import com.caucho.util.L10N;
 import com.caucho.log.Log;
 
 import com.caucho.loader.WeakCloseListener;
-import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.loader.Environment;
-import com.caucho.loader.DynamicClassLoader;
 
 /**
  * The main interface for retrieving and managing JMX objects.
@@ -88,9 +81,9 @@ import com.caucho.loader.DynamicClassLoader;
 abstract public class AbstractMBeanServer implements MBeanServer {
   private static final L10N L = new L10N(AbstractMBeanServer.class);
   private static final Logger log = Log.open(AbstractMBeanServer.class);
-  
+
   static ObjectName SERVER_DELEGATE_NAME;
-  
+
   // default domain
   private String _defaultDomain;
 
@@ -168,7 +161,7 @@ abstract public class AbstractMBeanServer implements MBeanServer {
   {
     return null;
   }
-  
+
   /**
    * Instantiate an MBean object to be registered with the server.
    *
@@ -190,14 +183,14 @@ abstract public class AbstractMBeanServer implements MBeanServer {
     } catch (ExceptionInInitializerError e) {
       Throwable cause = e.getCause();
       if (cause instanceof Exception)
-	throw new MBeanException((Exception) cause);
+        throw new MBeanException((Exception) cause);
       else
-	throw e;
+        throw e;
     } catch (IllegalAccessException e) {
       throw new ReflectionException(e);
     }
   }
-  
+
   /**
    * Instantiate an MBean object to be registered with the server.
    *
@@ -215,11 +208,11 @@ abstract public class AbstractMBeanServer implements MBeanServer {
       throw new InstanceNotFoundException(String.valueOf(loaderName));
     else if (! (mbean.getObject() instanceof ClassLoader))
       throw new InstanceNotFoundException(L.l("{0} is not a class loader",
-					      loaderName));
+                                              loaderName));
 
     try {
       ClassLoader loader = (ClassLoader) mbean.getObject();
-      
+
       Class cl = loader.loadClass(className);
 
       return cl.newInstance();
@@ -231,7 +224,7 @@ abstract public class AbstractMBeanServer implements MBeanServer {
       throw new ReflectionException(e);
     }
   }
-  
+
   /**
    * Instantiate an MBean object with the given arguments to be
    * passed to the constructor.
@@ -257,12 +250,12 @@ abstract public class AbstractMBeanServer implements MBeanServer {
     } catch (InstantiationException e) {
       throw new ReflectionException(e);
     } catch (InvocationTargetException e) {
-	throw new MBeanException(e);
+        throw new MBeanException(e);
     } catch (IllegalAccessException e) {
       throw new ReflectionException(e);
     }
   }
-  
+
   /**
    * Instantiate an MBean object with the given arguments to be
    * passed to the constructor.
@@ -284,11 +277,11 @@ abstract public class AbstractMBeanServer implements MBeanServer {
       throw new InstanceNotFoundException(String.valueOf(loaderName));
     else if (! (mbean.getObject() instanceof ClassLoader))
       throw new InstanceNotFoundException(L.l("{0} is not a class loader",
-					      loaderName));
+                                              loaderName));
 
     try {
       ClassLoader loader = (ClassLoader) mbean.getObject();
-      
+
       Class cl = loader.loadClass(className);
 
       Constructor constructor = getConstructor(cl, signature);
@@ -299,7 +292,7 @@ abstract public class AbstractMBeanServer implements MBeanServer {
     } catch (InstantiationException e) {
       throw new ReflectionException(e);
     } catch (InvocationTargetException e) {
-	throw new MBeanException(e);
+        throw new MBeanException(e);
     } catch (IllegalAccessException e) {
       throw new ReflectionException(e);
     }
@@ -314,10 +307,10 @@ abstract public class AbstractMBeanServer implements MBeanServer {
 
     for (int i = 0; i < constructors.length; i++) {
       if (! Modifier.isPublic(constructors[i].getModifiers()))
-	continue;
+        continue;
 
       if (isMatch(constructors[i].getParameterTypes(), sig))
-	return constructors[i];
+        return constructors[i];
     }
 
     return null;
@@ -333,12 +326,12 @@ abstract public class AbstractMBeanServer implements MBeanServer {
 
     for (int i = 0; i < param.length; i++) {
       if (! param[i].getName().equals(sig[i]))
-	return false;
+        return false;
     }
 
     return true;
   }
-  
+
   /**
    * Instantiate and register an MBean.
    *
@@ -349,12 +342,12 @@ abstract public class AbstractMBeanServer implements MBeanServer {
    */
   public ObjectInstance createMBean(String className, ObjectName name)
     throws ReflectionException, InstanceAlreadyExistsException,
-	   MBeanException, NotCompliantMBeanException
+           MBeanException, NotCompliantMBeanException
   {
     return registerMBean(instantiate(className), name);
   }
-  
-  
+
+
   /**
    * Instantiate and register an MBean.
    *
@@ -367,11 +360,11 @@ abstract public class AbstractMBeanServer implements MBeanServer {
   public ObjectInstance createMBean(String className, ObjectName name,
                                     ObjectName loaderName)
     throws ReflectionException, InstanceAlreadyExistsException,
-    MBeanException, NotCompliantMBeanException, InstanceNotFoundException
+           MBeanException, NotCompliantMBeanException, InstanceNotFoundException
   {
     return registerMBean(instantiate(className, loaderName), name);
   }
-  
+
   /**
    * Instantiate and register an MBean.
    *
@@ -385,12 +378,12 @@ abstract public class AbstractMBeanServer implements MBeanServer {
   public ObjectInstance createMBean(String className, ObjectName name,
                                     Object []params, String []signature)
     throws ReflectionException, InstanceAlreadyExistsException,
-    MBeanException, NotCompliantMBeanException
+           MBeanException, NotCompliantMBeanException
   {
     return registerMBean(instantiate(className, params, signature),
-			 name);
+                         name);
   }
-  
+
   /**
    * Instantiate and register an MBean.
    *
@@ -406,12 +399,12 @@ abstract public class AbstractMBeanServer implements MBeanServer {
                                     ObjectName loaderName,
                                     Object []params, String []signature)
     throws ReflectionException, InstanceAlreadyExistsException,
-	   MBeanException, NotCompliantMBeanException, InstanceNotFoundException
+           MBeanException, NotCompliantMBeanException, InstanceNotFoundException
   {
     return registerMBean(instantiate(className, loaderName, params, signature),
-			 name);
+                         name);
   }
-  
+
   /**
    * Registers an MBean with the server.
    *
@@ -422,25 +415,25 @@ abstract public class AbstractMBeanServer implements MBeanServer {
    */
   public ObjectInstance registerMBean(Object object, ObjectName name)
     throws InstanceAlreadyExistsException,
-	   MBeanRegistrationException,
-	   NotCompliantMBeanException
+           MBeanRegistrationException,
+           NotCompliantMBeanException
   {
     if (object == null)
       throw new NullPointerException();
 
     MBeanContext context = getContext();
-    
+
     if (context.getMBean(name) != null) {
       throw new InstanceAlreadyExistsException(String.valueOf(name));
     }
-     
+
     DynamicMBean dynMBean = createMBean(object, name);
 
     if (object instanceof IntrospectionMBean)
       object = ((IntrospectionMBean) object).getImplementation();
     else if (object instanceof StandardMBean)
       object = ((StandardMBean) object).getImplementation();
-    
+
     MBeanWrapper mbean = new MBeanWrapper(context, name, object, dynMBean);
 
     return context.registerMBean(mbean, name);
@@ -474,18 +467,18 @@ abstract public class AbstractMBeanServer implements MBeanServer {
       Class []interfaces = cl.getInterfaces();
 
       String mbeanName = cl.getName() + "MBean";
-      
+
       for (int i = 0; i < interfaces.length; i++) {
-	Class ifc = interfaces[i];
-	
-	if (ifc.getName().equals(mbeanName))
-	  return ifc;
+        Class ifc = interfaces[i];
+
+        if (ifc.getName().equals(mbeanName))
+          return ifc;
       }
     }
 
     return null;
   }
-  
+
   /**
    * Unregisters an MBean from the server.
    *
@@ -493,19 +486,19 @@ abstract public class AbstractMBeanServer implements MBeanServer {
    */
   public void unregisterMBean(ObjectName name)
     throws InstanceNotFoundException,
-    MBeanRegistrationException
+           MBeanRegistrationException
   {
     MBeanContext context = getExistingContext();
 
     if (context != null) {
       context.unregisterMBean(name);
-    
+
       log.finer("unregistered " + name);
     }
-    
+
     // XXX: getDelegate().sendUnregisterNotification(name);
   }
-  
+
   /**
    * Returns the MBean registered with the given name.
    *
@@ -523,7 +516,7 @@ abstract public class AbstractMBeanServer implements MBeanServer {
 
     return mbean.getObjectInstance();
   }
-  
+
   /**
    * Returns a set of MBeans matching the query.
    *
@@ -536,9 +529,9 @@ abstract public class AbstractMBeanServer implements MBeanServer {
   {
     try {
       if (query != null) {
-	query.setMBeanServer(this);
+        query.setMBeanServer(this);
       }
-      
+
       return getView().queryMBeans(name, query);
     } catch (Exception e) {
       log.log(Level.WARNING, e.toString(), e);
@@ -546,7 +539,7 @@ abstract public class AbstractMBeanServer implements MBeanServer {
       return null;
     }
   }
-  
+
   /**
    * Returns a set of names for MBeans matching the query.
    *
@@ -559,9 +552,9 @@ abstract public class AbstractMBeanServer implements MBeanServer {
   {
     try {
       if (query != null) {
-	query.setMBeanServer(this);
+        query.setMBeanServer(this);
       }
-      
+
       return getView().queryNames(name, query);
     } catch (Exception e) {
       log.log(Level.WARNING, e.toString(), e);
@@ -587,7 +580,7 @@ abstract public class AbstractMBeanServer implements MBeanServer {
     if (queryName.isPropertyPattern()) {
       // If the queryName has a '*' in the properties, then check
       // the queryName properties to see if they match
-      
+
       Hashtable map = queryName.getKeyPropertyList();
       Iterator iter = map.keySet().iterator();
       while (iter.hasNext()) {
@@ -601,7 +594,7 @@ abstract public class AbstractMBeanServer implements MBeanServer {
     else {
       String testProps = testName.getCanonicalKeyPropertyListString();
       String queryProps = queryName.getCanonicalKeyPropertyListString();
-    
+
       if (! testProps.equals(queryProps))
         return false;
     }
@@ -620,7 +613,7 @@ abstract public class AbstractMBeanServer implements MBeanServer {
   {
     return getView().getMBean(name) != null;
   }
-  
+
   /**
    * Returns the number of MBeans registered.
    *
@@ -630,7 +623,7 @@ abstract public class AbstractMBeanServer implements MBeanServer {
   {
     return new Integer(getView().getMBeanCount());
   }
-  
+
   /**
    * Returns a specific attribute of a named MBean.
    *
@@ -641,7 +634,7 @@ abstract public class AbstractMBeanServer implements MBeanServer {
    */
   public Object getAttribute(ObjectName name, String attribute)
     throws MBeanException, AttributeNotFoundException,
-    InstanceNotFoundException, ReflectionException
+           InstanceNotFoundException, ReflectionException
   {
     MBeanWrapper mbean = getMBean(name);
 
@@ -651,7 +644,7 @@ abstract public class AbstractMBeanServer implements MBeanServer {
 
     return mbean.getAttribute(attribute);
   }
-  
+
   /**
    * Returns a list of several MBean attributes.
    *
@@ -670,7 +663,7 @@ abstract public class AbstractMBeanServer implements MBeanServer {
 
     return mbean.getAttributes(attributes);
   }
-  
+
   /**
    * Sets an attribute in the MBean.
    *
@@ -679,7 +672,7 @@ abstract public class AbstractMBeanServer implements MBeanServer {
    */
   public void setAttribute(ObjectName name, Attribute attribute)
     throws InstanceNotFoundException, AttributeNotFoundException,
-    InvalidAttributeValueException, MBeanException, ReflectionException
+           InvalidAttributeValueException, MBeanException, ReflectionException
   {
     MBeanWrapper mbean = getMBean(name);
 
@@ -688,7 +681,7 @@ abstract public class AbstractMBeanServer implements MBeanServer {
 
     mbean.setAttribute(attribute);
   }
-  
+
   /**
    * Set an attributes in the MBean.
    *
@@ -705,7 +698,7 @@ abstract public class AbstractMBeanServer implements MBeanServer {
 
     return mbean.setAttributes(attributes);
   }
-  
+
   /**
    * Invokers an operation on an MBean.
    *
@@ -727,7 +720,7 @@ abstract public class AbstractMBeanServer implements MBeanServer {
 
     return mbean.invoke(operationName, params, signature);
   }
-  
+
   /**
    * Returns the default domain for naming the MBean
    */
@@ -735,7 +728,7 @@ abstract public class AbstractMBeanServer implements MBeanServer {
   {
     return _defaultDomain;
   }
-  
+
   /**
    * Adds a listener to a registered MBean
    *
@@ -759,7 +752,7 @@ abstract public class AbstractMBeanServer implements MBeanServer {
 
     getContext().addNotificationListener(name, listener, filter, handback);
   }
-  
+
   /**
    * Adds a listener to a registered MBean
    *
@@ -788,7 +781,7 @@ abstract public class AbstractMBeanServer implements MBeanServer {
 
     addNotificationListener(name, listener, filter, handback);
   }
-  
+
   /**
    * Removes a listener from a registered MBean
    *
@@ -808,7 +801,7 @@ abstract public class AbstractMBeanServer implements MBeanServer {
 
     getContext().removeNotificationListener(name, listener);
   }
-  
+
   /**
    * Removes a listener from a registered MBean
    *
@@ -833,7 +826,7 @@ abstract public class AbstractMBeanServer implements MBeanServer {
 
     removeNotificationListener(name, listener);
   }
-  
+
   /**
    * Removes a listener from a registered MBean
    *
@@ -846,8 +839,8 @@ abstract public class AbstractMBeanServer implements MBeanServer {
    */
   public void removeNotificationListener(ObjectName name,
                                          ObjectName listenerName,
-					 NotificationFilter filter,
-					 Object handback)
+                                         NotificationFilter filter,
+                                         Object handback)
     throws InstanceNotFoundException, ListenerNotFoundException
   {
     MBeanWrapper listenerMBean = getMBean(listenerName);
@@ -864,7 +857,7 @@ abstract public class AbstractMBeanServer implements MBeanServer {
 
     removeNotificationListener(name, listener, filter, handback);
   }
-  
+
   /**
    * Removes a listener from a registered MBean
    *
@@ -877,8 +870,8 @@ abstract public class AbstractMBeanServer implements MBeanServer {
    */
   public void removeNotificationListener(ObjectName name,
                                          NotificationListener listener,
-					 NotificationFilter filter,
-					 Object handback)
+                                         NotificationFilter filter,
+                                         Object handback)
     throws InstanceNotFoundException, ListenerNotFoundException
   {
     MBeanWrapper mbean = getMBean(name);
@@ -890,7 +883,7 @@ abstract public class AbstractMBeanServer implements MBeanServer {
 
     mbean.removeNotificationListener(listener, filter, handback);
   }
-  
+
   /**
    * Returns the analyzed information for an MBean
    *
@@ -900,7 +893,7 @@ abstract public class AbstractMBeanServer implements MBeanServer {
    */
   public MBeanInfo getMBeanInfo(ObjectName name)
     throws InstanceNotFoundException, IntrospectionException,
-    ReflectionException
+           ReflectionException
   {
     MBeanWrapper mbean = getMBean(name);
 
@@ -911,7 +904,7 @@ abstract public class AbstractMBeanServer implements MBeanServer {
 
     return info;
   }
-  
+
   /**
    * Returns true if the MBean is an instance of the specified class.
    *
@@ -944,16 +937,16 @@ abstract public class AbstractMBeanServer implements MBeanServer {
 
     if (isInstanceOf(cl.getSuperclass(), className))
       return true;
-      
+
     Class []ifs = cl.getInterfaces();
     for (int i = 0; i < ifs.length; i++) {
       if (isInstanceOf(ifs[i], className))
-	return true;
+        return true;
     }
 
     return false;
   }
-  
+
   /**
    * Returns the ClassLoader that was used for loading the MBean.
    *
@@ -973,7 +966,7 @@ abstract public class AbstractMBeanServer implements MBeanServer {
 
     return mbean.getContext().getClassLoader();
   }
-  
+
   /**
    * Returns the named ClassLoader.
    *
@@ -988,7 +981,7 @@ abstract public class AbstractMBeanServer implements MBeanServer {
   {
     return null;
   }
-  
+
   /**
    * Returns the ClassLoaderRepository for this MBeanServer
    *
@@ -998,7 +991,7 @@ abstract public class AbstractMBeanServer implements MBeanServer {
   {
     return getContext().getClassLoaderRepository();
   }
-  
+
   /**
    * Deserializes a byte array in the class loader of the mbean.
    *
@@ -1012,7 +1005,7 @@ abstract public class AbstractMBeanServer implements MBeanServer {
   {
     throw new UnsupportedOperationException();
   }
-  
+
   /**
    * Deserializes a byte array in the class loader of the mbean.
    *
@@ -1026,7 +1019,7 @@ abstract public class AbstractMBeanServer implements MBeanServer {
   {
     throw new UnsupportedOperationException();
   }
-  
+
   /**
    * Deserializes a byte array in the class loader of the mbean.
    *
@@ -1040,7 +1033,7 @@ abstract public class AbstractMBeanServer implements MBeanServer {
                                        ObjectName loaderName,
                                        byte []data)
     throws OperationsException, ReflectionException,
-	   InstanceNotFoundException
+           InstanceNotFoundException
   {
     throw new UnsupportedOperationException();
   }
@@ -1062,7 +1055,22 @@ abstract public class AbstractMBeanServer implements MBeanServer {
   {
     return getView().getMBean(name);
   }
-  
+
+  public AdminInfo getAdminInfo(ObjectName name)
+  {
+    MBeanWrapper wrapper = getMBean(name);
+
+    if (wrapper == null)
+      return null;
+
+    Object obj = wrapper.getObject();
+
+    if (!(obj instanceof AdminInfoFactory))
+      return null;
+
+    return (((AdminInfoFactory) obj).getAdminInfo());
+  }
+
   /**
    * Handles the case where a class loader is dropped.
    */
@@ -1076,13 +1084,13 @@ abstract public class AbstractMBeanServer implements MBeanServer {
       log.log(Level.FINER, e.toString(), e);
     }
   }
-  
+
   /**
    * Returns the string form.
    */
   public String toString()
   {
-    if (_defaultDomain != null) 
+    if (_defaultDomain != null)
       return "MBeanServerImpl[domain=" + _defaultDomain + "]";
     else
       return "MBeanServerImpl[]";

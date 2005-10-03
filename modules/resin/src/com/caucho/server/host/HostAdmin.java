@@ -42,10 +42,7 @@ import com.caucho.server.host.mbean.HostMBean;
 import com.caucho.server.webapp.WebAppController;
 import com.caucho.server.webapp.mbean.WebAppMBean;
 import com.caucho.jmx.AdminAttributeCategory;
-import com.caucho.jmx.IntrospectionAttributeDescriptor;
-import com.caucho.jmx.IntrospectionOperationDescriptor;
-import com.caucho.jmx.IntrospectionMBeanDescriptor;
-import com.caucho.jmx.IntrospectionClosure;
+import com.caucho.jmx.AdminInfo;
 import com.caucho.util.L10N;
 
 /**
@@ -64,15 +61,63 @@ public class HostAdmin extends DeployControllerAdmin<HostController>
     super(controller);
   }
 
-  public void describe(IntrospectionMBeanDescriptor descriptor)
+  public AdminInfo getAdminInfo()
   {
+    AdminInfo descriptor = super.getAdminInfo();
+
     String hostName = getHostName();
 
     if (hostName == null || hostName.length() == 0)
       hostName = "*";
 
     descriptor.setTitle(L.l("Host {0}", hostName));
+
+    descriptor.createAdminAttributeInfo("HostName")
+      .setCategory(AdminAttributeCategory.CONFIGURATION);
+
+    descriptor.createAdminAttributeInfo("URL")
+      .setCategory(AdminAttributeCategory.CONFIGURATION);
+
+    descriptor.createAdminAttributeInfo("RootDirectory")
+      .setCategory(AdminAttributeCategory.CONFIGURATION);
+
+    boolean isDocumentDirectoryIgnored = getDocumentDirectory().equals(getRootDirectory());
+
+    descriptor.createAdminAttributeInfo("DocumentDirectory")
+      .setCategory(AdminAttributeCategory.CONFIGURATION)
+      .setIgnored(isDocumentDirectoryIgnored);
+
+    descriptor.createAdminAttributeInfo("WebAppObjectNames")
+      .setCategory(AdminAttributeCategory.CHILD);
+
+    descriptor.createAdminAttributeInfo("WebAppNames")
+      .setCategory(AdminAttributeCategory.CHILD)
+      .setDeprecated("3.0.15 Use WebAppObjectNames");
+
+    descriptor.createAdminAttributeInfo("WebApps")
+      .setDeprecated("3.0.15 Use WebAppNames");
+
+    descriptor.createAdminAttributeInfo("WarDirectory")
+      .setIgnored(true);
+
+    descriptor.createAdminAttributeInfo("WarExpandDirectory")
+      .setIgnored(true);
+
+    descriptor.createAdminAttributeInfo("UpdateWebAppDeploy")
+      .setIgnored(true);
+
+    descriptor.createAdminAttributeInfo("UpdateEarDeploy")
+      .setIgnored(true);
+
+    descriptor.createAdminAttributeInfo("ExpandEarDeploy")
+      .setIgnored(true);
+
+    descriptor.createAdminAttributeInfo("StartEarDeploy")
+      .setIgnored(true);
+
+    return descriptor;
   }
+
 
   public String getName()
   {
@@ -84,23 +129,12 @@ public class HostAdmin extends DeployControllerAdmin<HostController>
     return getController().getHostName();
   }
 
-  public void describeHostName(IntrospectionAttributeDescriptor descriptor)
-  {
-    descriptor.setCategory(AdminAttributeCategory.CONFIGURATION);
-    descriptor.setSortOrder(200);
-  }
-
   /**
    * Returns the mbean object.
    */
   public ObjectName getObjectName()
   {
     return getController().getObjectName();
-  }
-
-  public void describeObjectName(IntrospectionAttributeDescriptor descriptor)
-  {
-    descriptor.setIgnored(true);
   }
 
   public String getURL()
@@ -111,12 +145,6 @@ public class HostAdmin extends DeployControllerAdmin<HostController>
       return host.getURL();
     else
       return null;
-  }
-
-  public void describeURL(IntrospectionAttributeDescriptor descriptor)
-  {
-    descriptor.setCategory(AdminAttributeCategory.CONFIGURATION);
-    descriptor.setSortOrder(210);
   }
 
   /**
@@ -137,12 +165,6 @@ public class HostAdmin extends DeployControllerAdmin<HostController>
       return null;
   }
 
-  public void describeRootDirectory(IntrospectionAttributeDescriptor descriptor)
-  {
-    descriptor.setCategory(AdminAttributeCategory.CONFIGURATION);
-    descriptor.setSortOrder(220);
-  }
-
   /**
    * Returns the host's document directory.
    */
@@ -159,17 +181,6 @@ public class HostAdmin extends DeployControllerAdmin<HostController>
       return path.getNativePath();
     else
       return null;
-  }
-
-  public void describeDocumentDirectory(IntrospectionAttributeDescriptor descriptor)
-  {
-    descriptor.setCategory(AdminAttributeCategory.CONFIGURATION);
-
-    descriptor.setSortOrder(230);
-
-    boolean isIgnored = getDocumentDirectory().equals(getRootDirectory());
-
-    descriptor.setIgnored(isIgnored);
   }
 
   /**
@@ -190,11 +201,6 @@ public class HostAdmin extends DeployControllerAdmin<HostController>
       return null;
   }
 
-  public void describeWarDirectory(IntrospectionAttributeDescriptor descriptor)
-  {
-    descriptor.setIgnored(true);
-  }
-
   public String getWarExpandDirectory()
   {
     Path path = null;
@@ -210,11 +216,6 @@ public class HostAdmin extends DeployControllerAdmin<HostController>
       return null;
   }
 
-  public void describeWarExpandDirectory(IntrospectionAttributeDescriptor descriptor)
-  {
-    descriptor.setIgnored(true);
-  }
-
   /**
    * Updates a .war deployment.
    */
@@ -225,11 +226,6 @@ public class HostAdmin extends DeployControllerAdmin<HostController>
 
     if (host != null)
       host.updateWebAppDeploy(name);
-  }
-
-  public void describeUpdateWebAppDeploy(IntrospectionOperationDescriptor descriptor)
-  {
-    descriptor.setIgnored(true);
   }
 
   /**
@@ -244,11 +240,6 @@ public class HostAdmin extends DeployControllerAdmin<HostController>
       host.updateEarDeploy(name);
   }
 
-  public void describeUpdateEarDeploy(IntrospectionOperationDescriptor descriptor)
-  {
-    descriptor.setIgnored(true);
-  }
-
   /**
    * Expand a .ear deployment.
    */
@@ -260,11 +251,6 @@ public class HostAdmin extends DeployControllerAdmin<HostController>
       host.expandEarDeploy(name);
   }
 
-  public void describeExpandEarDeploy(IntrospectionOperationDescriptor descriptor)
-  {
-    descriptor.setIgnored(true);
-  }
-
   /**
    * Start a .ear deployment.
    */
@@ -274,11 +260,6 @@ public class HostAdmin extends DeployControllerAdmin<HostController>
 
     if (host != null)
       host.startEarDeploy(name);
-  }
-
-  public void describeStartEarDeploy(IntrospectionOperationDescriptor descriptor)
-  {
-    descriptor.setIgnored(true);
   }
 
   /**
@@ -311,20 +292,9 @@ public class HostAdmin extends DeployControllerAdmin<HostController>
     return webappNames;
   }
 
-  public void describeWebAppObjectNames(IntrospectionAttributeDescriptor descriptor)
-  {
-    descriptor.setCategory(AdminAttributeCategory.CHILD);
-  }
-
   final public ObjectName []getWebAppNames()
   {
     return getWebAppObjectNames();
-  }
-
-  public void describeWebAppNames(IntrospectionAttributeDescriptor descriptor)
-  {
-    descriptor.setDeprecated("3.0.15 Use WebAppObjectNames");
-    descriptor.setCategory(AdminAttributeCategory.CHILD);
   }
 
   /**
@@ -348,11 +318,6 @@ public class HostAdmin extends DeployControllerAdmin<HostController>
     }
 
     return webapps;
-  }
-
-  public void describeWebApps(IntrospectionAttributeDescriptor descriptor)
-  {
-    descriptor.setDeprecated("3.0.15 Use WebAppNames");
   }
 
   /**
