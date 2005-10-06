@@ -98,7 +98,7 @@ public class HttpsPath extends HttpPath {
    */
   public StreamImpl openReadImpl() throws IOException
   {
-    HttpStream stream = HttpStream.openRead(this);
+    HttpStreamWrapper stream = HttpStream.openRead(this);
 
     stream.setSSL(true);
     
@@ -110,7 +110,7 @@ public class HttpsPath extends HttpPath {
    */
   public StreamImpl openReadWriteImpl() throws IOException
   {
-    HttpStream stream = HttpStream.openReadWrite(this);
+    HttpStreamWrapper stream = HttpStream.openReadWrite(this);
 
     stream.setSSL(true);
     

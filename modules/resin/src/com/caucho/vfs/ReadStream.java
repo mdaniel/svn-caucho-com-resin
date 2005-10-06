@@ -281,6 +281,19 @@ public final class ReadStream extends InputStream {
   }
 
   /**
+   * Waits for data to be available.
+   */
+  public final boolean waitForRead() throws IOException
+  {
+    if (_readLength <= _readOffset) {
+      if (! readBuffer())
+	return false;
+    }
+
+    return true;
+  }
+
+  /**
    * Skips the next <code>n</code> bytes.
    *
    * @param n bytes to skip.

@@ -83,7 +83,7 @@ class HttpStream extends StreamImpl {
   private MemoryStream _tempStream;
 
   // true if keepalive is allowed
-  private boolean _isKeepalive;
+  private boolean _isKeepalive = true;
   // true after the request has been sent
   private boolean _didGet;
   // content length from the returned response
@@ -129,12 +129,12 @@ class HttpStream extends StreamImpl {
    *
    * @return the opened stream
    */
-  static HttpStream openRead(HttpPath path) throws IOException
+  static HttpStreamWrapper openRead(HttpPath path) throws IOException
   {
     HttpStream stream = createStream(path);
     stream._isPost = false;
 
-    return stream;
+    return new HttpStreamWrapper(stream);
   }
 
   /**
@@ -144,12 +144,12 @@ class HttpStream extends StreamImpl {
    *
    * @return the opened stream
    */
-  static HttpStream openReadWrite(HttpPath path) throws IOException
+  static HttpStreamWrapper openReadWrite(HttpPath path) throws IOException
   {
     HttpStream stream = createStream(path);
     stream._isPost = true;
 
-    return stream;
+    return new HttpStreamWrapper(stream);
   }
 
   /**
@@ -246,7 +246,6 @@ class HttpStream extends StreamImpl {
     _contentLength = -1;
     _isChunked = false;
     _isRequestDone = false;
-    _isKeepalive = true;
     _didGet = false;
     _isPost = false;
     _isHead = false;
@@ -421,6 +420,9 @@ class HttpStream extends StreamImpl {
     } catch (IOException e) {
       _isKeepalive = false;
       throw e;
+    } catch (RuntimeException e) {
+      _isKeepalive = false;
+      throw e;
     }
   }
   
@@ -436,56 +438,64 @@ class HttpStream extends StreamImpl {
     if (_isRequestDone)
       return -1;
 
-    int len = length;
+    try {
+      int len = length;
 
-    if (_isChunked) {
-      if (_chunkLength == 0) {
-        int ch;
+      if (_isChunked) {
+	if (_chunkLength == 0) {
+	  int ch;
 
-        for (ch = _rs.read();
-             ch >= 0 && (ch == '\r' || ch == '\n' || ch == ' ');
-             ch = _rs.read()) {
-        }
+	  for (ch = _rs.read();
+	       ch >= 0 && (ch == '\r' || ch == '\n' || ch == ' ');
+	       ch = _rs.read()) {
+	  }
         
-        for (; ch >= 0 && ch != '\n'; ch = _rs.read()) {
-          if (ch >= '0' && ch <= '9')
-            _chunkLength = 16 * _chunkLength + ch - '0';
-          else if (ch >= 'a' && ch <= 'f')
-            _chunkLength = 16 * _chunkLength + ch - 'a' + 10;
-          else if (ch >= 'A' && ch <= 'F')
-            _chunkLength = 16 * _chunkLength + ch - 'A' + 10;
-        }
+	  for (; ch >= 0 && ch != '\n'; ch = _rs.read()) {
+	    if (ch >= '0' && ch <= '9')
+	      _chunkLength = 16 * _chunkLength + ch - '0';
+	    else if (ch >= 'a' && ch <= 'f')
+	      _chunkLength = 16 * _chunkLength + ch - 'a' + 10;
+	    else if (ch >= 'A' && ch <= 'F')
+	      _chunkLength = 16 * _chunkLength + ch - 'A' + 10;
+	  }
 
-        if (_chunkLength == 0) {
-          _isRequestDone = true;
-          return -1;
-        }
-      }
-      else if (_chunkLength < 0)
-        return -1;
+	  if (_chunkLength == 0) {
+	    _isRequestDone = true;
+	    return -1;
+	  }
+	}
+	else if (_chunkLength < 0)
+	  return -1;
       
-      if (_chunkLength < len)
-        len = _chunkLength;
-    }
-    else if (_contentLength < 0) {
-    }
-    else if (_contentLength == 0) {
-      _isRequestDone = true;
-      return -1;
-    }
-    else if (_contentLength < len)
-      len = _contentLength;
+	if (_chunkLength < len)
+	  len = _chunkLength;
+      }
+      else if (_contentLength < 0) {
+      }
+      else if (_contentLength == 0) {
+	_isRequestDone = true;
+	return -1;
+      }
+      else if (_contentLength < len)
+	len = _contentLength;
 
-    len = _rs.read(buf, offset, len);
+      len = _rs.read(buf, offset, len);
 
-    if (len < 0) {
+      if (len < 0) {
+      }
+      else if (_isChunked)
+	_chunkLength -= len;
+      else if (_contentLength > 0)
+	_contentLength -= len;
+
+      return len;
+    } catch (IOException e) {
+      _isKeepalive = false;
+      throw e;
+    } catch (RuntimeException e) {
+      _isKeepalive = false;
+      throw e;
     }
-    else if (_isChunked)
-      _chunkLength -= len;
-    else if (_contentLength > 0)
-      _contentLength -= len;
-
-    return len;
   }
 
   /**
@@ -499,6 +509,9 @@ class HttpStream extends StreamImpl {
     try {
       getConnInputImpl();
     } catch (IOException e) {
+      _isKeepalive = false;
+      throw e;
+    } catch (RuntimeException e) {
       _isKeepalive = false;
       throw e;
     }
@@ -630,30 +643,32 @@ class HttpStream extends StreamImpl {
       line.clear();
       if (! _rs.readln(line) || line.length() == 0)
   	break;
+
+      int lineLength = line.length();
       
       for (i = 0;
-           i < line.length() && Character.isWhitespace(line.charAt(i));
+           i < lineLength && Character.isWhitespace(line.charAt(i));
            i++) {
       }
 
       key.clear();
       for (;
-           i < line.length() && ! Character.isWhitespace(line.charAt(i)) &&
+           i < lineLength && ! Character.isWhitespace(line.charAt(i)) &&
              line.charAt(i) != ':';
            i++) {
         key.append((char) line.charAt(i));
       }
 
       for (;
-           i < line.length() && Character.isWhitespace(line.charAt(i));
+           i < lineLength && Character.isWhitespace(line.charAt(i));
            i++) {
       }
 
-      if (key.length() == 0 || i >= line.length() || line.charAt(i) != ':')
+      if (key.length() == 0 || lineLength <= i || line.charAt(i) != ':')
         continue;
 
       for (i++;
-           i < line.length() && Character.isWhitespace(line.charAt(i));
+           i < lineLength && Character.isWhitespace(line.charAt(i));
            i++) {
       }
 
@@ -720,6 +735,7 @@ class HttpStream extends StreamImpl {
 
     if (com.caucho.util.CauchoSystem.isTesting())
       _isKeepalive = false; // XXX:
+    
     if (_isKeepalive) {
       HttpStream oldSaved;
       long now = Alarm.getCurrentTime();

@@ -41,6 +41,8 @@ import com.caucho.vfs.ClientDisconnectException;
 
 import com.caucho.loader.Environment;
 
+import com.caucho.server.connection.BroadcastTask;
+
 import com.caucho.log.Log;
 
 /**
@@ -52,6 +54,8 @@ import com.caucho.log.Log;
 public class TcpConnection extends PortConnection implements ThreadTask {
   private static final Logger log = Log.open(TcpConnection.class);
 
+  private static int _g_id;
+  
   private final QSocket _socket;
 
   private boolean _isInUse;
@@ -61,7 +65,8 @@ public class TcpConnection extends PortConnection implements ThreadTask {
   private boolean _isKeepalive;
   private boolean _isDead;
 
-  private static int _g_id;
+  private Object _requestLock = new Object();
+
   private String _id = "tcp-connection-" + _g_id++;
 
   /**
@@ -359,12 +364,18 @@ public class TcpConnection extends PortConnection implements ThreadTask {
 	    
 	    isKeepalive = false;
 
-	    if (! port.isClosed())
-	      isKeepalive = request.handleRequest();
+	    if (! port.isClosed() && getReadStream().waitForRead()) {
+	      synchronized (_requestLock) {
+		isKeepalive = request.handleRequest();
+	      }
+	    }
 	  } while (isKeepalive && readNonBlock() && ! port.isClosed());
 
 	  if (isKeepalive) {
 	    return;
+	  }
+	  else {
+	    getRequest().protocolCloseEvent();
 	  }
 	}
 	catch (ClientDisconnectException e) {
@@ -399,6 +410,16 @@ public class TcpConnection extends PortConnection implements ThreadTask {
 	free();
 
       thread.setName(oldThreadName);
+    }
+  }
+
+  /**
+   * Sends a broadcast request.
+   */
+  public void sendBroadcast(BroadcastTask task)
+  {
+    synchronized (_requestLock) {
+      task.execute(this);
     }
   }
 

@@ -439,6 +439,8 @@ public class EnvironmentClassLoader extends DynamicClassLoader {
     try {
       thread.setContextClassLoader(ClassLoader.getSystemClassLoader());
 
+      ClassLoader loader = thread.getContextClassLoader();
+
       PolicyImpl.init();
       
       EnvironmentStream.setStdout(System.out);

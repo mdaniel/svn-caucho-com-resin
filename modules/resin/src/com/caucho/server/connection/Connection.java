@@ -135,4 +135,11 @@ public abstract class Connection {
    * Returns the remove port of the connection
    */
   public abstract int getRemotePort();
+
+  /**
+   * Sends a broadcast request.
+   */
+  public void sendBroadcast(BroadcastTask task)
+  {
+  }
 }

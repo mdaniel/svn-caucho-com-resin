@@ -30,24 +30,25 @@ package com.caucho.amber.query;
 
 import com.caucho.util.L10N;
 
+import com.caucho.amber.field.AmberField;
 import com.caucho.amber.type.EntityType;
 
-import com.caucho.amber.field.AmberField;
-
 /**
- * Represents from-item table.
+ * Represents a collection from a from-item table.
  */
-public class FromIdSchemaExpr extends SchemaExpr {
-  private static final L10N L = new L10N(FromIdSchemaExpr.class);
-  
-  private IdExpr _id;
+public class ManyToOneSchemaExpr extends SchemaExpr {
+  private static final L10N L = new L10N(CollectionSchemaExpr.class);
+
+  private ManyToOneExpr _expr;
+  private String _name;
 
   /**
-   * Creates the table id expr.
+   * Creates the collection schema.
    */
-  public FromIdSchemaExpr(IdExpr id)
+  public ManyToOneSchemaExpr(ManyToOneExpr expr, String name)
   {
-    _id = id;
+    _expr = expr;
+    _name = name;
   }
 
   /**
@@ -55,7 +56,7 @@ public class FromIdSchemaExpr extends SchemaExpr {
    */
   public String getTailName()
   {
-    return _id.getId();
+    return _name;
   }
 
   /**
@@ -64,7 +65,7 @@ public class FromIdSchemaExpr extends SchemaExpr {
   public SchemaExpr createField(QueryParser parser, String name)
     throws QueryParseException
   {
-    EntityType type = _id.getTargetType();
+    EntityType type = _expr.getTargetType();
 
     AmberField field = type.getField(name);
 
@@ -73,7 +74,7 @@ public class FromIdSchemaExpr extends SchemaExpr {
 			     type.getBeanClass().getName(),
 			     name));
 
-    AmberExpr fieldExpr = _id.createField(parser, name);
+    AmberExpr fieldExpr = _expr.createField(parser, name);
 
     if (fieldExpr instanceof ManyToOneExpr)
       return new ManyToOneSchemaExpr((ManyToOneExpr) fieldExpr, name);
@@ -94,6 +95,10 @@ public class FromIdSchemaExpr extends SchemaExpr {
   public FromItem addFromItem(QueryParser parser, String id)
     throws QueryParseException
   {
-    return parser.addFromItem(_id.getTargetType().getTable(), id);
+    _expr = (ManyToOneExpr) _expr.bindSelect(parser, id);
+
+    FromItem fromItem = _expr.bindSubPath(parser);
+
+    return fromItem;
   }
 }

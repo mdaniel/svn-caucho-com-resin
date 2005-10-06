@@ -4,6 +4,10 @@
 
 <s2 title='3.0.snap - Sep 30, 2005'>
 <ul>
+<li>Added Connection.sendBroadcast for broadcast events (rep by Kirk Rasmussen, RSN-429)
+<li>Added protocolCloseEvent to ServerRequest (rep by Kirk Rasmussen, RSN-429)
+<li>HttpStream needs a wrapper to avoid closing twice and allowing pooling (rep by Esahu Morales)
+<li>Amber IN(foo.next.bar) wasn't properly supported (rep by Christian Amott, RSN-439)
 <li>HttpPath lookup recursive loop (rep by Ajit Puthiyavettle)
 <li>(05-09-30) Apache1 mod_caucho needs REQUEST_CHUNKED_DECHUNK (rep by Darren Chapman, RSN-453)
 <li>sendRedirect wasn't closing the output (RSN-325)
