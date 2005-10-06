@@ -55,7 +55,7 @@ public class Flags implements Cloneable, java.io.Serializable {
     this.system_flags = flags.system_flags;
     
     if (flags.user_flags != null)
-      this.system_flags = new Hashtable(flags.user_flags);
+      this.user_flags = new Hashtable(flags.user_flags);
   }
 
   /**
@@ -271,13 +271,13 @@ public class Flags implements Cloneable, java.io.Serializable {
   }
     
   public static final class Flag {
-    private final static Flag ANSWERED = new Flag(0x01);
-    private final static Flag DELETED = new Flag(0x02);
-    private final static Flag DRAFT = new Flag(0x04);
-    private final static Flag FLAGGED = new Flag(0x08);
-    private final static Flag RECENT = new Flag(0x10);
-    private final static Flag SEEN = new Flag(0x20);
-    private final static Flag USER = new Flag(0x40);
+    public final static Flag ANSWERED = new Flag(0x01);
+    public final static Flag DELETED = new Flag(0x02);
+    public final static Flag DRAFT = new Flag(0x04);
+    public final static Flag FLAGGED = new Flag(0x08);
+    public final static Flag RECENT = new Flag(0x10);
+    public final static Flag SEEN = new Flag(0x20);
+    public final static Flag USER = new Flag(0x40);
 						  
     private final int _mask;
 

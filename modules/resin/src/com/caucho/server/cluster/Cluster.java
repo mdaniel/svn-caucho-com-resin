@@ -52,9 +52,7 @@ import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.loader.EnvironmentListener;
 
 import com.caucho.jmx.Jmx;
-import com.caucho.jmx.IntrospectionAttributeDescriptor;
 import com.caucho.jmx.AdminAttributeCategory;
-import com.caucho.jmx.IntrospectionMBeanDescriptor;
 
 import com.caucho.server.resin.SrunPort;
 
@@ -418,20 +416,6 @@ public class Cluster implements EnvironmentListener, ClusterMBean {
     }
   }
 
-  public void describe(IntrospectionMBeanDescriptor descriptor)
-  {
-    String title;
-
-    String id = getId();
-
-    if (id == null || id.length() == 0)
-      title = L.l("Cluster");
-    else
-      title = L.l("Cluster {0}", id);
-
-    descriptor.setTitle(title);
-  }
-
   /**
    * Returns the server id.
    */
@@ -446,11 +430,6 @@ public class Cluster implements EnvironmentListener, ClusterMBean {
   public ObjectName getObjectName()
   {
     return _objectName;
-  }
-  
-  public void describeObjectName(IntrospectionAttributeDescriptor descriptor)
-  {
-    descriptor.setIgnored(true);
   }
 
   /**
@@ -485,11 +464,6 @@ public class Cluster implements EnvironmentListener, ClusterMBean {
     }
 
     return objectNames;
-  }
-
-  public void describeClientObjectNames(IntrospectionAttributeDescriptor descriptor)
-  {
-    descriptor.setCategory(AdminAttributeCategory.CHILD);
   }
 
   /**

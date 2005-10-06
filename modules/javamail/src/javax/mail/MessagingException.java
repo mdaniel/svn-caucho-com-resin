@@ -60,7 +60,7 @@ public class MessagingException extends Exception {
    */
   public Exception getNextException()
   {
-    getCause();
+    return (Exception) getCause();
   }
 
   /**
@@ -68,6 +68,8 @@ public class MessagingException extends Exception {
    */
   public boolean setNextException(Exception e)
   {
+    initCause(e);
+    
     // XXX:
 
     return true;

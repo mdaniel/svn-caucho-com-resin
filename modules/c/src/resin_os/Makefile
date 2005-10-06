@@ -11,7 +11,7 @@ APACHE_INC=-I/usr/include/httpd
 resin_conf=/private/etc/httpd/httpd.conf
 resin_libexec=/usr/libexec/httpd
 resin_home=/Users/ferg/ws/resin
-JNI_INCLUDE=-I/System/Library/Frameworks/JavaVM.framework/Versions/1.5/Home/include
+JNI_INCLUDE=-I/usr/java/include
 INCLUDES =  -I/usr/include $(JNI_INCLUDE) -I../common
 CFLAGS = -g -O2 -DPOLL -DHAS_JVMTI -DRESIN_HOME=\"$(resin_home)\" $(INCLUDES) -DCPU=\"$(CPU)\" -DOS=$(OS)
 OBJ= jni_os.o jni_jvmti.o jni_jvmdi.o

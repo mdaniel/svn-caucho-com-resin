@@ -469,7 +469,7 @@ ac_includes_default="\
 # include <unistd.h>
 #endif"
 
-ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS build build_cpu build_vendor build_os host host_cpu host_vendor host_os target target_cpu target_vendor target_os INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA PACKAGE VERSION ACLOCAL AUTOCONF AUTOMAKE AUTOHEADER MAKEINFO AMTAR install_sh STRIP ac_ct_STRIP INSTALL_STRIP_PROGRAM AWK SET_MAKE FULL_VERSION CC CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT DEPDIR am__include am__quote AMDEP_TRUE AMDEP_FALSE AMDEPBACKSLASH CCDEPMODE CPP EGREP LN_S ECHO RANLIB ac_ct_RANLIB LIBTOOL LTFLAGS LIBTOOL_SCRIPT SH_LIBTOOL LTCFLAGS plugins LD APACHE_INC apache_libexec apache_conf apache_dir apache_cflags JAVA_HOME resin_home LINUX_SRC HARDCORE_CFLAGS CPU OS SO CFLAGS_SHLIB LD_SHLIB LDFLAGS_SHLIB LIBS_SHLIB PROXY_LIBS SSL_LIBS JNI JNI_INCLUDE INCLUDES CFLAGS_OPENSSL SSL_OBJ PERL LIBOBJS LTLIBOBJS'
+ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS build build_cpu build_vendor build_os host host_cpu host_vendor host_os target target_cpu target_vendor target_os INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA PACKAGE VERSION ACLOCAL AUTOCONF AUTOMAKE AUTOHEADER MAKEINFO AMTAR install_sh STRIP ac_ct_STRIP INSTALL_STRIP_PROGRAM AWK SET_MAKE FULL_VERSION CC CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT DEPDIR am__include am__quote AMDEP_TRUE AMDEP_FALSE AMDEPBACKSLASH CCDEPMODE CPP EGREP LN_S ECHO RANLIB ac_ct_RANLIB LIBTOOL LTFLAGS LIBTOOL_SCRIPT SH_LIBTOOL LTCFLAGS plugins LD APACHE_INC apache_libexec apache_conf apache_dir apache_cflags JAVA_HOME resin_home LINUX_SRC HARDCORE_CFLAGS CPU OS SO CFLAGS_SHLIB LD_SHLIB LDFLAGS_SHLIB LIBS_SHLIB PROXY_LIBS SSL_LIBS JNI JNI_INCLUDE INCLUDES CFLAGS_OPENSSL CFLAGS_JNI SSL_OBJ PERL LIBOBJS LTLIBOBJS'
 ac_subst_files=''
 
 # Initialize some variables set by options.
@@ -8689,7 +8689,7 @@ resin_home=`pwd`
 #
 echo -n "checking if Java is 64-bit... "
 
-$tmpname = /tmp/java$$.out
+tmpname="/tmp/java$$.out"
 
 $JAVA_HOME/bin/java -version 2> $tmpname
 grep "64-Bit" $tmpname 1> /dev/null
@@ -8703,8 +8703,8 @@ fi
 
 rm -f $tmpname
 
-case "$target_os" in
-  x86_64*)
+case "$target_cpu" in
+  x86_64)
 	b64=true
 	;;
 esac
@@ -8966,6 +8966,7 @@ case "$target_cpu" in
   i?86)
 	CPU=i386
 	resin_plugin="$resin_pro_plugin $resin_ssl_plugin"
+	CFLAGS_JNI="-D_FILE_OFFSET_BITS=64"
 	;;
 
   sparc*)
@@ -8980,6 +8981,7 @@ case "$target_cpu" in
   x86_64)
 	CPU=$target_cpu
 	resin_plugin="$resin_pro_plugin $resin_ssl_plugin"
+	CFLAGS_JNI="-D_FILE_OFFSET_BITS=64"
 	;;
 
   *)
@@ -9338,6 +9340,7 @@ fi
 
 rm -f conftest conftest.$ac_ext
 fi
+
 
 
 
@@ -10121,6 +10124,7 @@ s,@JNI@,$JNI,;t t
 s,@JNI_INCLUDE@,$JNI_INCLUDE,;t t
 s,@INCLUDES@,$INCLUDES,;t t
 s,@CFLAGS_OPENSSL@,$CFLAGS_OPENSSL,;t t
+s,@CFLAGS_JNI@,$CFLAGS_JNI,;t t
 s,@SSL_OBJ@,$SSL_OBJ,;t t
 s,@PERL@,$PERL,;t t
 s,@LIBOBJS@,$LIBOBJS,;t t
@@ -11346,6 +11350,7 @@ s,@JNI@,$JNI,;t t
 s,@JNI_INCLUDE@,$JNI_INCLUDE,;t t
 s,@INCLUDES@,$INCLUDES,;t t
 s,@CFLAGS_OPENSSL@,$CFLAGS_OPENSSL,;t t
+s,@CFLAGS_JNI@,$CFLAGS_JNI,;t t
 s,@SSL_OBJ@,$SSL_OBJ,;t t
 s,@PERL@,$PERL,;t t
 s,@LIBOBJS@,$LIBOBJS,;t t

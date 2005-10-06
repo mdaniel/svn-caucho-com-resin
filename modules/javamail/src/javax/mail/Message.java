@@ -39,6 +39,8 @@ import java.util.Date;
 
 import javax.activation.DataHandler;
 
+import javax.mail.search.SearchTerm;
+
 /**
  * Represents a mail message.
  */
@@ -298,6 +300,11 @@ public abstract class Message implements Part {
     return search.match(this);
   }
 
+  protected Session getSession()
+  {
+    return this.session;
+  }
+
   /**
    * The recipient type of a message.
    */
@@ -323,7 +330,7 @@ public abstract class Message implements Part {
       else if (this.type.equals(TO.type))
 	return TO;
       else
-	throw new ObjectStreamException(this.type + " is an unknown RecipientType");
+	throw new IllegalStateException(this.type + " is an unknown RecipientType");
     }
 
     public String toString()

@@ -2,9 +2,10 @@
 
 <a href='changes-2.xtp'>Resin 2.1 changes</a>
 
-<s2 title='3.0.snap - Aug 11, 2005'>
+<s2 title='3.0.snap - Sep 30, 2005'>
 <ul>
-<li>Apache1 mod_caucho needs REQUEST_CHUNKED_DECHUNK (rep by Darren Chapman, RSN-453)
+<li>HttpPath lookup recursive loop (rep by Ajit Puthiyavettle)
+<li>(05-09-30) Apache1 mod_caucho needs REQUEST_CHUNKED_DECHUNK (rep by Darren Chapman, RSN-453)
 <li>sendRedirect wasn't closing the output (RSN-325)
 <li>isapi_srun was producing inaccurate error message when unable to connect backend (rep by Jean-Francois Lamy, RSN-408)
 <li>Add getPreparedStatement to UserPreparedStatement (rep by James Kucharski, RSN-402)

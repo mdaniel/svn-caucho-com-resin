@@ -147,6 +147,13 @@
     </antcall>
   </target>
   
+  <target name="mail" depends="init,jaf">
+    <antcall target="module" inheritRefs="true">
+      <param name="module.name" value="javamail"/>
+      <param name="module.jar" value="javamail-11.jar"/>
+    </antcall>
+  </target>
+  
   <target name="portlet" depends="init">
     <antcall target="module" inheritRefs="true">
       <param name="module.name" value="portlet"/>
@@ -193,6 +200,8 @@
       <param name="module.name" value="resin"/>
       <param name="javac.source" value="1.5"/>
     </antcall>
+
+    
   </target>
 
   <target name="jaf" depends="init">
@@ -568,9 +577,13 @@
   </target>
 
   <target name="dist" depends="dist.build, dist.package"/>
+  
+  <target name="configure">
+     <exec executable="autoconf"/>
+  </target>
 
   <target name="dist.build" 
-          depends="compile, webapps, win32, javadoc, jdk14-compat">
+          depends="compile, webapps, win32, configure, javadoc, jdk14-compat">
     <property name="dist.name" value="${shortproduct}-${version}"/>
 
     <delete dir="${dist}/${dist.name}"/>

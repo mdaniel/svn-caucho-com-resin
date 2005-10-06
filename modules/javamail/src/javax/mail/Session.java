@@ -31,16 +31,28 @@ package javax.mail;
 
 import java.util.Properties;
 
+import java.net.InetAddress;
+
 import java.io.PrintStream;
 
 /**
  * Represents a mail session.
  */
-public abstract class Session {
+public final class Session {
   private static Session _defaultSession;
+
+  private Properties _properties;
 
   private boolean _isDebug;
   private PrintStream _debugOut;
+
+  private Session(Properties props, Authenticator authenticator)
+  {
+    if (props != null)
+      _properties = new Properties(props);
+    else
+      _properties = new Properties();
+  }
   
   /**
    * Returns a new session object.
@@ -48,7 +60,7 @@ public abstract class Session {
   public static Session getInstance(Properties props,
 				    Authenticator authenticator)
   {
-    throw new UnsupportedOperationException();
+    return new Session(props, authenticator);
   }
   
   /**
@@ -111,5 +123,174 @@ public abstract class Session {
   public PrintStream getDebugOut()
   {
     return _debugOut;
+  }
+
+  /**
+   * Returns an array of all the implementations.
+   */
+  public Provider []getProviders()
+  {
+    throw new UnsupportedOperationException();
+  }
+
+  /**
+   * Returns an array of all the implementations.
+   */
+  public Provider getProvider(String protocol)
+    throws NoSuchProviderException
+  {
+    throw new UnsupportedOperationException();
+  }
+
+  /**
+   * Sets a given provider
+   */
+  public void setProvider(Provider provider)
+    throws NoSuchProviderException
+  {
+    throw new UnsupportedOperationException();
+  }
+
+  /**
+   * Returns the store.
+   */
+  public Store getStore()
+    throws NoSuchProviderException
+  {
+    throw new UnsupportedOperationException();
+  }
+
+  /**
+   * Returns the store.
+   */
+  public Store getStore(String protocol)
+    throws NoSuchProviderException
+  {
+    throw new UnsupportedOperationException();
+  }
+
+  /**
+   * Returns the store.
+   */
+  public Store getStore(URLName url)
+    throws NoSuchProviderException
+  {
+    return getStore(url.getProtocol());
+  }
+
+  /**
+   * Returns the store.
+   */
+  public Store getStore(Provider provider)
+    throws NoSuchProviderException
+  {
+    throw new UnsupportedOperationException();
+  }
+
+  /**
+   * Returns a folder for the URL name.
+   */
+  public Folder getFolder(URLName url)
+    throws MessagingException
+  {
+    Store store = getStore(url);
+    
+    throw new UnsupportedOperationException();
+  }
+
+  /**
+   * Returns a transport.
+   */
+  public Transport getTransport()
+    throws NoSuchProviderException
+  {
+    throw new UnsupportedOperationException();
+  }
+
+  /**
+   * Returns a transport.
+   */
+  public Transport getTransport(String protocol)
+    throws NoSuchProviderException
+  {
+    throw new UnsupportedOperationException();
+  }
+
+  /**
+   * Returns a transport.
+   */
+  public Transport getTransport(URLName url)
+    throws NoSuchProviderException
+  {
+    return getTransport(url.getProtocol());
+  }
+
+  /**
+   * Returns a transport.
+   */
+  public Transport getTransport(Provider provider)
+    throws NoSuchProviderException
+  {
+    throw new UnsupportedOperationException();
+  }
+
+  /**
+   * Returns a transport.
+   */
+  public Transport getTransport(Address address)
+    throws NoSuchProviderException
+  {
+    throw new UnsupportedOperationException();
+  }
+  
+  /**
+   * Sets the password authentication
+   */
+  public void setPasswordAuthentication(URLName url,
+					PasswordAuthentication pw)
+  {
+    throw new UnsupportedOperationException();
+  }
+
+  /**
+   * Gets the password authentication
+   */
+  public PasswordAuthentication getPasswordAuthentication(URLName url)
+  {
+    throw new UnsupportedOperationException();
+  }
+
+  /**
+   * Application callback for the username and password.
+   */
+  public PasswordAuthentication
+    requestPasswordAuthentication(InetAddress addr,
+				  int port,
+				  String protocol,
+				  String prompt,
+				  String defaultUserName)
+  {
+    throw new UnsupportedOperationException();
+  }
+
+  /**
+   * Returns the properties.
+   */
+  public Properties getProperties()
+  {
+    return _properties;
+  }
+
+  /**
+   * Returns the property;
+   */
+  public String getProperty(String name)
+  {
+    String prop = getProperties().getProperty(name);
+
+    if (prop == null)
+      prop = System.getProperty(name);
+    
+    return prop;
   }
 }

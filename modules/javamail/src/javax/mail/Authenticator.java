@@ -29,6 +29,8 @@
 
 package javax.mail;
 
+import java.net.InetAddress;
+
 /**
  * Represents a mail authenticator.
  */

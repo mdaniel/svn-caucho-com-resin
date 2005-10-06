@@ -94,7 +94,7 @@ public class DynamicClassLoader extends java.net.URLClassLoader
 
   private final static URL NULL_URL;
   private final static URL []NULL_URL_ARRAY = new URL[0];
-
+  
   private static long _globalDependencyCheckInterval = 2000L;
 
   private String _id;
@@ -150,6 +150,8 @@ public class DynamicClassLoader extends java.net.URLClassLoader
 
   // Lifecycle
   private final Lifecycle _lifecycle = new Lifecycle();
+
+  private long _lastNullCheck;
 
   /**
    * Create a new class loader.

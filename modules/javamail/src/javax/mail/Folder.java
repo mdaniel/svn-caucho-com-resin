@@ -33,10 +33,22 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.IOException;
 
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Date;
 
 import javax.activation.DataHandler;
+
+import javax.mail.event.ConnectionEvent;
+import javax.mail.event.ConnectionListener;
+import javax.mail.event.FolderEvent;
+import javax.mail.event.FolderListener;
+import javax.mail.event.MessageChangedEvent;
+import javax.mail.event.MessageChangedListener;
+import javax.mail.event.MessageCountEvent;
+import javax.mail.event.MessageCountListener;
+
+import javax.mail.search.SearchTerm;
 
 /**
  * Represents a mail folder.
@@ -57,7 +69,10 @@ public abstract class Folder {
    */
   protected int mode;
 
-  private transient ArrayList listeners = new ArrayList();
+  private transient ArrayList _connectionListeners = new ArrayList();
+  private transient ArrayList _folderListeners = new ArrayList();
+  private transient ArrayList _messageCountListeners = new ArrayList();
+  private transient ArrayList _messageChangedListeners = new ArrayList();
 
   /**
    * Create a folder from the given store.
@@ -120,7 +135,7 @@ public abstract class Folder {
   {
     Folder []list = list(pattern);
 
-    ArrayList subscribedLis = new ArrayList();
+    ArrayList subscribedList = new ArrayList();
 
     for (int i = 0; i < list.length; i++) {
       if (list[i].isSubscribed())
@@ -146,7 +161,7 @@ public abstract class Folder {
   /**
    * Returns a list of subscribed folders.
    */
-  public Folder []list()
+  public Folder []listSubscribed()
     throws MessagingException
   {
     return listSubscribed("%");
@@ -255,22 +270,55 @@ public abstract class Folder {
    * Returns the number of new messages in the folder.
    */
   public int getNewMessageCount()
-    throws MessagingException;
-  // XXX: implement
+    throws MessagingException
+  {
+    Message []message = getMessages();
+
+    int count = 0;
+
+    for (int i = 0; i < message.length; i++) {
+      if (message[i] != null && message[i].isSet(Flags.Flag.RECENT))
+	count++;
+    }
+
+    return count;
+  }
 
   /**
    * Returns the number of unread messages in the folder.
    */
   public int getUnreadMessageCount()
-    throws MessagingException;
-  // XXX: implement
+    throws MessagingException
+  {
+    Message []message = getMessages();
+
+    int count = 0;
+
+    for (int i = 0; i < message.length; i++) {
+      if (message[i] != null && ! message[i].isSet(Flags.Flag.SEEN))
+	count++;
+    }
+
+    return count;
+  }
 
   /**
    * Returns the number of deleted messages in the folder.
    */
   public int getDeletedMessageCount()
-    throws MessagingException;
-  // XXX: implement
+    throws MessagingException
+  {
+    Message []message = getMessages();
+
+    int count = 0;
+
+    for (int i = 0; i < message.length; i++) {
+      if (message[i] != null && ! message[i].isSet(Flags.Flag.DELETED))
+	count++;
+    }
+
+    return count;
+  }
 
   /**
    * Returns the messages with the given number.
@@ -282,22 +330,41 @@ public abstract class Folder {
    * Returns the given messages.
    */
   public Message []getMessages(int start, int end)
-    throws MessagingException;
-  // XXX: implement
+    throws MessagingException
+  {
+    int length = end - start + 1;
+    
+    Message []messages = new Message[length];
+
+    for (int i = 0; i < length; i++)
+      messages[i] = getMessage(start + i);
+
+    return messages;
+  }
 
   /**
    * Returns the message objects for the given numbers.
    */
   public Message []getMessages(int []msgnums)
-    throws MessagingException;
-  // XXX: implement
+    throws MessagingException
+  {
+    Message []messages = new Message[msgnums.length];
+
+    for (int i = 0; i < msgnums.length; i++) {
+      messages[i] = getMessage(i);
+    }
+
+    return messages;
+  }
 
   /**
    * Returns all messages.
    */
   public Message []getMessages()
-    throws MessagingException;
-  // XXX: implement
+    throws MessagingException
+  {
+    return getMessages(1, getMessageCount());
+  }
 
   /**
    * Adds new messages to the folder.
@@ -392,7 +459,7 @@ public abstract class Folder {
    */
   public void addConnectionListener(ConnectionListener listener)
   {
-    _listeners.add(listener);
+    _connectionListeners.add(listener);
   }
 
   /**
@@ -400,21 +467,27 @@ public abstract class Folder {
    */
   public void removeConnectionListener(ConnectionListener listener)
   {
-    _listeners.remove(listener);
+    _connectionListeners.remove(listener);
   }
 
   /**
    * Notify all folder listeners of an event.
    */
-  protected void notifyFolderListeners(int type);
-  // XXX: implement
+  protected void notifyConnectionListeners(int type)
+  {
+    ConnectionEvent event = new ConnectionEvent(this, type);
+
+    for (int i = 0; i < _connectionListeners.size(); i++) {
+      event.dispatch(_connectionListeners.get(i));
+    }
+  }
 
   /**
    * Adds a folder listener.
    */
   public void addFolderListener(FolderListener listener)
   {
-    _listeners.add(listener);
+    _folderListeners.add(listener);
   }
 
   /**
@@ -422,27 +495,40 @@ public abstract class Folder {
    */
   public void removeFolderListener(FolderListener listener)
   {
-    _listeners.remove(listener);
+    _folderListeners.remove(listener);
   }
 
   /**
    * Notify all folder listeners of an event.
    */
-  protected void notifyFolderListeners(int type);
-  // XXX: implement
+  protected void notifyFolderListeners(int type)
+  {
+    FolderEvent event = new FolderEvent(this.store, this, type);
+
+    for (int i = 0; i < _folderListeners.size(); i++) {
+      event.dispatch(_folderListeners.get(i));
+    }
+  }
 
   /**
    * Notify renamed listeners about a renaming.
    */
-  protected void notifyFolderRenamedListeners(Folder folder);
-  // XXX: implement
+  protected void notifyFolderRenamedListeners(Folder folder)
+  {
+    FolderEvent event = new FolderEvent(this.store, this,
+					folder, FolderEvent.RENAMED);
+
+    for (int i = 0; i < _folderListeners.size(); i++) {
+      event.dispatch(_folderListeners.get(i));
+    }
+  }
 
   /**
    * Adds a MessageCount listener.
    */
   public void addMessageCountListener(MessageCountListener listener)
   {
-    _listeners.add(listener);
+    _messageCountListeners.add(listener);
   }
 
   /**
@@ -450,7 +536,7 @@ public abstract class Folder {
    */
   public void removeMessageCountListener(MessageCountListener listener)
   {
-    _listeners.remove(listener);
+    _messageCountListeners.remove(listener);
   }
 
   /**
@@ -458,7 +544,7 @@ public abstract class Folder {
    */
   public void addMessageChangedListener(MessageChangedListener listener)
   {
-    _listeners.add(listener);
+    _messageChangedListeners.add(listener);
   }
 
   /**
@@ -466,13 +552,20 @@ public abstract class Folder {
    */
   public void removeMessageChangedListener(MessageChangedListener listener)
   {
-    _listeners.remove(listener);
+    _messageChangedListeners.remove(listener);
   }
 
   /**
    * Notifies MessageChanged listeners.
    */
-  public void notifyMessageChangedListeners(int type, Message msg);
+  public void notifyMessageChangedListeners(int type, Message msg)
+  {
+    MessageChangedEvent event = new MessageChangedEvent(this, type, msg);
+
+    for (int i = 0; i < _messageChangedListeners.size(); i++) {
+      event.dispatch(_messageChangedListeners.get(i));
+    }
+  }
   // XXX: implement
 
   protected void finalize()

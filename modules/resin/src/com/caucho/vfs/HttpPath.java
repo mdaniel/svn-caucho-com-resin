@@ -111,7 +111,7 @@ public class HttpPath extends FilesystemPath {
 
     // parent handles scheme:xxx
     if (colon != -1 && (colon < slash || slash == -1))
-      return super.lookup(userPath, newAttributes);
+      return super.lookupImpl(userPath, newAttributes);
       
       // //hostname
     if (slash == 0 && length > 1 && userPath.charAt(1) == '/')

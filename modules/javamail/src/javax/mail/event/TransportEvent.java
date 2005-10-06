@@ -29,6 +29,10 @@
 
 package javax.mail.event;
 
+import javax.mail.Message;
+import javax.mail.Address;
+import javax.mail.Transport;
+
 /**
  * Represents a transport event.
  */

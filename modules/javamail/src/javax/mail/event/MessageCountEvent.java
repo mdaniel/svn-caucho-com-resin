@@ -29,6 +29,9 @@
 
 package javax.mail.event;
 
+import javax.mail.Message;
+import javax.mail.Folder;
+
 /**
  * Represents a message count event.
  */
@@ -83,10 +86,10 @@ public class MessageCountEvent extends MailEvent {
 
     switch (this.type) {
     case ADDED:
-      listener.added(this);
+      listener.messagesAdded(this);
       break;
     case REMOVED:
-      listener.removed(this);
+      listener.messagesRemoved(this);
       break;
     default:
       throw new UnsupportedOperationException(toString());

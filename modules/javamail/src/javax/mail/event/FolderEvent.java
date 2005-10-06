@@ -29,13 +29,15 @@
 
 package javax.mail.event;
 
+import javax.mail.Folder;
+
 /**
  * Represents a folder event.
  */
 public class FolderEvent extends MailEvent {
-  private static final int CREATED = 1;
-  private static final int DELETED = 2;
-  private static final int RENAMED = 3;
+  public static final int CREATED = 1;
+  public static final int DELETED = 2;
+  public static final int RENAMED = 3;
 
   protected transient Folder folder;
   protected transient  Folder newFolder;

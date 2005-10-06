@@ -58,7 +58,7 @@ public interface Part {
   /**
    * Returns the content-type of the part.
    */
-  public String getContextType()
+  public String getContentType()
     throws MessagingException;
 
   /**
