@@ -249,4 +249,9 @@ public class IiopRequest implements ServerRequest {
       thread.setContextClassLoader(oldLoader);
     }
   }
+
+  public void protocolCloseEvent()
+  {
+  }
+
 }

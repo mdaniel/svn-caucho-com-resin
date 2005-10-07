@@ -1363,6 +1363,10 @@ public class HttpRequest extends AbstractHttpRequest
       log.log(Level.FINER, e.toString(), e);
     }
   }
+  
+  public void protocolCloseEvent()
+  {
+  }
 
   /**
    * Cleans up at the end of the request

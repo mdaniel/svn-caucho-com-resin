@@ -1264,7 +1264,11 @@ public class HmuxRequest extends AbstractHttpRequest
     if (log.isLoggable(Level.FINE))
       log.fine(dbgId() + (char)code + " " + cb);
   }
-    
+  
+  public void protocolCloseEvent()
+  {
+  }
+
   String dbgId()
   {
     String id = _server.getServerId();

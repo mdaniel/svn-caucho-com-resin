@@ -1439,6 +1439,10 @@ public class RunnerRequest extends AbstractHttpRequest
       log.fine(dbgId() + (char)code + " " + cb);
   }
   
+  public void protocolCloseEvent()
+  {
+  }
+  
   /**
    * Cleans up at the end of the request
    */
