@@ -96,14 +96,18 @@ public class CustomSimpleTag extends GenericTag {
 
     _body = new JspBody();
     _body.setParent(this);
+    _body.setStartLocation(_filename, _startLine);
     _body.setGenerator(_gen);
     _body.endAttributes();
+    _body.setEndLocation(_filename, _startLine);
     
     for (int i = 0; i < _children.size(); i++) {
       JspNode node = _children.get(i);
 
       if (! (node instanceof JspAttribute))
-        _body.addChild(node);
+	_body.addChild(node);
+      
+      _body.setEndLocation(node.getFilename(), node.getEndLine());
     }
     _body.endElement();
     _children = null;

@@ -169,7 +169,7 @@ abstract public class JspFragmentNode extends JspContainerNode
     throws Exception
   {
     if (hasScripting() && isJspFragment())
-      throw error(L.l("fragment may not contain scripting elements"));
+      throw error(L.l("Fragments may not contain scripting elements"));
     
     generateChildren(out);
   }
@@ -186,7 +186,7 @@ abstract public class JspFragmentNode extends JspContainerNode
     _isValueFragment = true;
 
     if (hasScripting() && isJspFragment())
-      throw error(L.l("fragment may not contain scripting elements"));
+      throw error(L.l("Fragments may not contain scripting elements"));
 
     _gen.addFragment(this);
     
@@ -229,7 +229,7 @@ abstract public class JspFragmentNode extends JspContainerNode
     throws Exception
   {
     if (hasScripting() && isJspFragment())
-      throw error(L.l("fragment may not contain scripting elements"));
+      throw error(L.l("Fragments may not contain scripting elements"));
     
     out.println();
     out.println("static String " + _fragmentName + "(");

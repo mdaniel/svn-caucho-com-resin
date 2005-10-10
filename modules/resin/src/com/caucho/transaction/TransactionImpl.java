@@ -585,17 +585,6 @@ public class TransactionImpl implements Transaction, AlarmListener {
         }
       }
       
-      if (_status != Status.STATUS_ACTIVE) {
-        int oldStatus = _status;
-        
-        rollbackInt();
-
-        if (_rollbackException != null)
-          throw RollbackExceptionWrapper.create(_rollbackException);
-        else
-          throw new RollbackException(L.l("Transaction was rolled back because the callBeforeCompletion didn't complete properly."));
-      }
-      
       if (log.isLoggable(Level.FINE))
 	log.fine("committing Transaction" + _xid);
 

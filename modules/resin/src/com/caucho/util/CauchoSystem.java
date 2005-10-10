@@ -48,7 +48,8 @@ import com.caucho.loader.EnvironmentLocal;
  * the default variables.
  */
 public class CauchoSystem {
-  private static final Logger log = Log.open(CauchoSystem.class);
+  private static Logger log
+    = Logger.getLogger("com.caucho.util.CauchoSystem");
   
   static char separatorChar = File.separatorChar;
   static char pathSeparatorChar = File.pathSeparatorChar;

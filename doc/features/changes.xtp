@@ -2,9 +2,9 @@
 
 <a href='changes-2.xtp'>Resin 2.1 changes</a>
 
-<s2 title='3.0.snap - Sep 30, 2005'>
+<s2 title='3.0.snap - Oct 10, 2005'>
 <ul>
-<li>Added Connection.sendBroadcast for broadcast events (rep by Kirk Rasmussen, RSN-429)
+<li>(2005-10-10) Added Connection.sendBroadcast for broadcast events (rep by Kirk Rasmussen, RSN-429)
 <li>Added protocolCloseEvent to ServerRequest (rep by Kirk Rasmussen, RSN-429)
 <li>HttpStream needs a wrapper to avoid closing twice and allowing pooling (rep by Esahu Morales)
 <li>Amber IN(foo.next.bar) wasn't properly supported (rep by Christian Amott, RSN-439)
