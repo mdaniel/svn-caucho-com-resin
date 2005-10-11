@@ -50,6 +50,7 @@ public class BlobOutputStream extends OutputStream {
   private Store _store;
 
   private Transaction _xa;
+  private boolean _isLocalXA;
   
   private TempBuffer _tempBuffer;
   private byte []_buffer;
@@ -87,6 +88,7 @@ public class BlobOutputStream extends OutputStream {
     
     init(xa, inode.getStore(), inode.getBuffer(), 0);
 
+    _isLocalXA = true;
     _inode = inode;
   }
 
@@ -96,6 +98,7 @@ public class BlobOutputStream extends OutputStream {
   public void init(Transaction xa, Store store, byte []inode, int inodeOffset)
   {
     _xa = xa;
+    _isLocalXA = false;
     
     _store = store;
 
@@ -166,12 +169,14 @@ public class BlobOutputStream extends OutputStream {
       writeLong(_inodeBuffer, _inodeOffset, _length);
 
       try {
-	_xa.commit();
+	if (_isLocalXA)
+	  _xa.commit();
       } catch (Throwable e) {
 	log.log(Level.FINE, e.toString(), e);
       }
     } finally {
-      _xa.close();
+      if (_isLocalXA)
+	_xa.close();
       
       Inode inode = _inode;
       _inode = null;

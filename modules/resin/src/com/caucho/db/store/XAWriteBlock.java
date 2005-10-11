@@ -72,18 +72,14 @@ public class XAWriteBlock extends WriteBlock {
     return _buffer;
   }
 
-  /*
-  public void setDirty(int boolean isDirty)
-  {
-  }
-  */
-
-  public void write()
+  public void writeImpl(int offset, int length)
     throws IOException
   {
-    System.arraycopy(getBuffer(), 0, _block.getBuffer(), 0, Store.BLOCK_SIZE);
+    System.arraycopy(getBuffer(), offset, _block.getBuffer(), offset,
+		     length);
     
-    _block.write();
+    _block.setDirty(offset, offset + length);
+    // _block.write();
   }
 
   /**

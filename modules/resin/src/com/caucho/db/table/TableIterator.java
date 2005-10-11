@@ -89,7 +89,6 @@ public class TableIterator {
       
     _columns = table.getColumns();
 
-    
     _rowLength = table.getRowLength();
     _rowEnd = table.getRowEnd();
     _rowOffset = _rowEnd;

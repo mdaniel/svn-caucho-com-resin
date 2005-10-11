@@ -290,6 +290,9 @@ public class Database {
       _cachedQueries.put(sql, query);
     }
     */
+    if (log.isLoggable(Level.FINER))
+      log.finer(this + ": " + sql);
+    
     Query query = Parser.parse(this, sql);
 
     return query;

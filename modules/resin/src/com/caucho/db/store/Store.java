@@ -584,7 +584,7 @@ public class Store {
 
     byte []buffer = block.getBuffer();
 
-    for (int i = 0; i < BLOCK_SIZE; i++)
+    for (int i = BLOCK_SIZE - 1; i >= 0; i--)
       buffer[i] = 0;
 
     block.setDirty(0, BLOCK_SIZE);

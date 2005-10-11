@@ -267,7 +267,7 @@ class BlobColumn extends Column {
 
     byte []block = iter.getBuffer();
     int rowOffset = iter.getRowOffset();
-    
+
     if (expr.isNull(null))
       setNull(block, rowOffset);
     else if (expr.isBinaryStream())
@@ -288,12 +288,15 @@ class BlobColumn extends Column {
 	       Expr expr, QueryContext context)
     throws SQLException
   {
-    if (expr.isNull(null))
+    if (expr.isNull(null)) {
       setNull(block, rowOffset);
-    else if (expr.isBinaryStream())
+    }
+    else if (expr.isBinaryStream()) {
       setStream(xa, block, rowOffset, expr.evalStream(context));
-    else
+    }
+    else {
       setString(xa, block, rowOffset, expr.evalString(context));
+    }
   }
 
   /**

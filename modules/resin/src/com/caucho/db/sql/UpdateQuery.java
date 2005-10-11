@@ -115,11 +115,6 @@ class UpdateQuery extends Query {
       }
     
       do {
-	/*
-	  if (_whereExpr != null && ! _whereExpr.evalBoolean(context))
-	  continue;
-	*/
-
 	for (int i = 0; i < setItems.length; i++) {
 	  Column column = setItems[i].getColumn();
 	  Expr expr = setItems[i].getExpr();

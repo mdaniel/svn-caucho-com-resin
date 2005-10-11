@@ -153,7 +153,6 @@ public class SelectQuery extends Query {
 
     int lockIndex = 0;
 
-
     try {
       if (xa.isAutoCommit()) {
 	for (lockIndex = 0; lockIndex < fromItems.length; lockIndex++) {

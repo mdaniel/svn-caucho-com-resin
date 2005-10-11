@@ -86,6 +86,9 @@ public class PathTypeStrategy extends TypeStrategy {
 
     Object obj = expr.evalObject(env);
 
+    if (obj == null)
+      throw new NullPointerException(L.l("Path '{0}' evaluated to null.",
+					 string));
     if (obj instanceof Path)
       return (Path) obj;
 

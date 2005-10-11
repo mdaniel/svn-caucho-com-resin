@@ -363,6 +363,19 @@ public class HmuxRequest extends AbstractHttpRequest
 
       if (_server == null || _server.isDestroyed()) {
 	log.fine(dbgId() + "server is closed");
+	
+	try {
+	  _writeStream.setDisableClose(false);
+	  _writeStream.close();
+	} catch (Throwable e) {
+	}
+	
+	try {
+	  _readStream.setDisableClose(false);
+	  _readStream.close();
+	} catch (Throwable e) {
+	}
+
 	return false;
       }
 

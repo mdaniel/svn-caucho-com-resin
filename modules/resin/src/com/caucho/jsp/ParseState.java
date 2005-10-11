@@ -54,7 +54,7 @@ import com.caucho.jsp.cfg.JspPropertyGroup;
  * Represents the current state of the parser.
  */
 public class ParseState {
-  static L10N L = new L10N(ParseState.class);
+  private static final L10N L = new L10N(ParseState.class);
   static final Logger log = Log.open(ParseState.class);
 
   private Application _application;

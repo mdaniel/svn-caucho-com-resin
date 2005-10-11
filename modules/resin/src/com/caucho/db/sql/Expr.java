@@ -114,7 +114,7 @@ abstract public class Expr {
   }
 
   /**
-   * Returns true if the expression returns a long.
+   * Returns true if the expression returns a binary stream.
    */
   public boolean isBinaryStream()
   {

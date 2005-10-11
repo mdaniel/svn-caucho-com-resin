@@ -198,8 +198,7 @@ abstract public class Block implements ClockCacheItem, CacheListener {
 	if (log.isLoggable(Level.FINER))
 	  log.finer("write db-block " + this + " [" + dirtyMin + ", " + dirtyMax + "]");
 
-	_store.writeBlock((_blockId & Store.BLOCK_MASK) + dirtyMin,
-			  getBuffer(), dirtyMin, dirtyMax - dirtyMin);
+	writeImpl(dirtyMin, dirtyMax - dirtyMin);
       }
       else {
 	if (log.isLoggable(Level.FINER))
@@ -208,6 +207,16 @@ abstract public class Block implements ClockCacheItem, CacheListener {
       
       _isValid = true;
     }
+  }
+
+  /**
+   * Write the dirty block.
+   */
+  protected void writeImpl(int offset, int length)
+    throws IOException
+  {
+    _store.writeBlock((_blockId & Store.BLOCK_MASK) + offset,
+		      getBuffer(), offset, length);
   }
 
   /**

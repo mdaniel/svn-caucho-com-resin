@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -624,8 +625,9 @@ abstract public class Query {
 
       if (whereExprs == null || whereExprs[rowLength] == null) {
       }
-      else if (! whereExprs[rowLength].isSelect(queryContext))
+      else if (! whereExprs[rowLength].isSelect(queryContext)) {
 	return false;
+      }
 
       if (rowLength == 0)
 	return true;
@@ -634,8 +636,9 @@ abstract public class Query {
 	TableIterator row = rows[i];
 	RowIterateExpr iterExpr = _indexExprs[i];
 
-	if (! iterExpr.init(queryContext, row))
+	if (! iterExpr.init(queryContext, row)) {
 	  return false;
+	}
 
 	// XXX: check to make sure others actually lock this properly
 	if (! xa.isAutoCommit())

@@ -138,7 +138,7 @@ public class ConnectionImpl implements java.sql.Connection {
   {
     Transaction xa = _xa;
     _xa = null;
-    
+
     if (xa != null) {
       if (log.isLoggable(Level.FINER))
 	log.finer("rollback " + this + " " + _xa);
