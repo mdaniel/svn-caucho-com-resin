@@ -79,6 +79,7 @@ public class TagInstance {
   private Class _cl;
   private VariableInfo []_varInfo;
   private boolean _needsAdapter;
+  private boolean _hasAdapterDeclaration;
 
   private AnalyzedTag _analyzedTag;
 
@@ -149,6 +150,18 @@ public class TagInstance {
   public void setId(String id)
   {
     _tagId = id;
+  }
+
+  public boolean generateAdapterDeclaration()
+  {
+    if (_hasAdapterDeclaration) {
+      return false;
+    }
+    else {
+      _hasAdapterDeclaration = true;
+      
+      return true;
+    }
   }
 
   public TagInstance getParent()

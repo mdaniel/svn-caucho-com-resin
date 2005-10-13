@@ -138,8 +138,10 @@ public class CustomSimpleTag extends GenericTag {
     }
     
     if (hasCustomTag()) {
-      // jsp/18ei
-      out.println("javax.servlet.jsp.tagext.Tag " + _tag.getId() + "_adapter = null;");
+      // jsp/18ei, jsp/18e8
+      if (_tag.generateAdapterDeclaration()) {
+	out.println("javax.servlet.jsp.tagext.Tag " + _tag.getId() + "_adapter = null;");
+      }
     }
   }
   

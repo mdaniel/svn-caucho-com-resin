@@ -183,12 +183,15 @@ public class JstlFmtMessage extends JstlNode {
     String prefix = "";
     JspNode node;
 
+    // jsp/1c51, jsp/1c54
+    /*
     for (node = getParent(); node != null; node = node.getParent()) {
       if (node instanceof JstlFmtBundle) {
         prefix = ((JstlFmtBundle) node).getPrefixCode();
 	break;
       }
     }
+    */
 
     String paramVar = "null";
 

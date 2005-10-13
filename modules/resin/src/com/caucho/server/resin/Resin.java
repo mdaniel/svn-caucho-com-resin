@@ -61,8 +61,8 @@ import com.caucho.config.ConfigException;
 import com.caucho.license.LicenseCheck;
 
 public class Resin implements ResinServerListener {
-  private static final L10N L = new L10N(Resin.class);
-  private static final Logger log = Log.open(Resin.class);
+  private static L10N _L;
+  private static Logger _log;
 
   private static Resin _resin;
   
@@ -205,7 +205,7 @@ public class Resin implements ResinServerListener {
       }
       */
       else {
-        System.out.println(L.l("unknown argument `{0}'", argv[i]));
+        System.out.println(L().l("unknown argument `{0}'", argv[i]));
         System.out.println();
 	usage();
 	System.exit(66);
@@ -215,7 +215,7 @@ public class Resin implements ResinServerListener {
 
   private static void usage()
   {
-    System.err.println(L.l("usage: Resin [-conf resin.conf] [-server id]"));
+    System.err.println(L().l("usage: Resin [-conf resin.conf] [-server id]"));
   }
 
   /**
@@ -265,28 +265,28 @@ public class Resin implements ResinServerListener {
 	  
 	  msg = e.toString() + "\n";
 	  
-	  log.log(Level.WARNING, e.toString(), e);
+	  log().log(Level.WARNING, e.toString(), e);
 	}
 	  
-	log.log(Level.FINE, e.toString(), e);
+	log().log(Level.FINE, e.toString(), e);
       
-	msg += L.l("\n" +
-		   "Using Resin Open Source under the GNU Public License (GPL).\n" +
-		   "\n" +
-		   "  See http://www.caucho.com for information on Resin Professional.\n");
+	msg += L().l("\n" +
+		     "Using Resin Open Source under the GNU Public License (GPL).\n" +
+		     "\n" +
+		     "  See http://www.caucho.com for information on Resin Professional.\n");
     
-	log.warning(msg);
+	log().warning(msg);
 	System.err.println(msg);
       }
     } catch (Throwable e) {
-      log.log(Level.FINER, e.toString(), e);
+      log().log(Level.FINER, e.toString(), e);
       
-      String msg = L.l("  Using Resin(R) Open Source under the GNU Public License (GPL).\n" +
-		       "\n" +
-		       "  See http://www.caucho.com for information on Resin Professional,\n" +
-		       "  including caching, clustering, JNI acceleration, and OpenSSL integration.\n");
+      String msg = L().l("  Using Resin(R) Open Source under the GNU Public License (GPL).\n" +
+			 "\n" +
+			 "  See http://www.caucho.com for information on Resin Professional,\n" +
+			 "  including caching, clustering, JNI acceleration, and OpenSSL integration.\n");
     
-      log.warning(msg);
+      log().warning(msg);
       System.err.println(msg);
     }
     
@@ -313,7 +313,7 @@ public class Resin implements ResinServerListener {
       Path path = (Path) ctor.newInstance(_configServer, dbDir, _serverId);
 	
       ConfigPath.setRemote(path);
-      log.info("Using configuration from " + _configServer);
+      log().info("Using configuration from " + _configServer);
     }
 
     ResinServer server = new ResinServer();
@@ -377,7 +377,7 @@ public class Resin implements ResinServerListener {
 	_isRestarting = true;
 	_server = null;
 
-	log.info("restarting Resin");
+	log().info("restarting Resin");
 
 	init();
       }
@@ -385,7 +385,7 @@ public class Resin implements ResinServerListener {
 	_isClosed = true;
     } catch (Throwable e) {
       _isClosed = true;
-      log.log(Level.WARNING, e.toString(), e);
+      log().log(Level.WARNING, e.toString(), e);
     }
   }
 
@@ -435,12 +435,12 @@ public class Resin implements ResinServerListener {
 	    pingOut.write('P');
 	  }
 	  else {
-	    log.warning("unknown code: " + (char) code + " " + code);
+	    log().warning("unknown code: " + (char) code + " " + code);
 	    return;
 	  }
 	}
       } catch (Throwable e) {
-	log.log(Level.WARNING, e.toString(), e);
+	log().log(Level.WARNING, e.toString(), e);
 	
 	return;
       } finally {
@@ -472,22 +472,22 @@ public class Resin implements ResinServerListener {
 	  // plenty of free memory
 	}
 	else {
-	  if (log.isLoggable(Level.FINER)) {
-	    log.finer(L.l("free memory {0} max:{1} total:{2} free:{3}",
+	  if (log().isLoggable(Level.FINER)) {
+	    log().finer(L().l("free memory {0} max:{1} total:{2} free:{3}",
 			  "" + getFreeMemory(runtime),
 			  "" + runtime.maxMemory(),
 			  "" + runtime.totalMemory(),
 			  "" + runtime.freeMemory()));
 	  }
 	  
-	  log.info(L.l("Forcing GC due to low memory. {0} free bytes.",
+	  log().info(L().l("Forcing GC due to low memory. {0} free bytes.",
 		       getFreeMemory(runtime)));
 	  
 	  runtime.gc();
 	  
 	  if (getFreeMemory(runtime) < minFreeMemory) {
 	    _isClosed = true;
-	    log.severe(L.l("Restarting due to low free memory. {0} free bytes",
+	    log().severe(L().l("Restarting due to low free memory. {0} free bytes",
 			   getFreeMemory(runtime)));
 	    return;
 	  }
@@ -506,7 +506,7 @@ public class Resin implements ResinServerListener {
 	// The time difference needs to be fairly large because
 	// GC might take a good deal of time.
 	if (10 * 60000L < diff) {
-	  log.severe(L.l("Restarting due to frozen Resin timer manager thread (Alarm).  This error generally indicates a JVM freeze, not an application deadlock."));
+	  log().severe(L().l("Restarting due to frozen Resin timer manager thread (Alarm).  This error generally indicates a JVM freeze, not an application deadlock."));
 	  Runtime.getRuntime().halt(1);
 	}
 	
@@ -544,7 +544,7 @@ public class Resin implements ResinServerListener {
         // instead of returning an end of file in the read.  So those
         // need to be trapped to close the socket.
         if (socketExceptionCount++ == 0) {
-          log.log(Level.FINE, e.toString(), e);
+          log().log(Level.FINE, e.toString(), e);
         }
         else if (socketExceptionCount > 100)
           _isClosed = true;
@@ -559,7 +559,7 @@ public class Resin implements ResinServerListener {
       } catch (Throwable e) {
         _isClosed = true;
 	
-        log.log(Level.FINE, e.toString(), e);
+        log().log(Level.FINE, e.toString(), e);
       }
     }
   }
@@ -613,7 +613,7 @@ public class Resin implements ResinServerListener {
 
       resin.waitForExit();
 
-      System.err.println(L.l("closing server"));
+      System.err.println(L().l("closing server"));
 
       final ResinServer server = resin.getServer();
 
@@ -650,7 +650,7 @@ public class Resin implements ResinServerListener {
     } catch (BindException e) {
       System.out.println(e);
 
-      log.log(Level.FINE, e.toString(), e);
+      log().log(Level.FINE, e.toString(), e);
       
       System.exit(67);
     } catch (Throwable e) {
@@ -668,7 +668,7 @@ public class Resin implements ResinServerListener {
       if (! isCompile)
 	e.printStackTrace(System.err);
       else
-	log.log(Level.CONFIG, e.toString(), e);
+	log().log(Level.CONFIG, e.toString(), e);
     } finally {
       System.exit(1);
     }
@@ -684,7 +684,7 @@ public class Resin implements ResinServerListener {
 
     if (loggingManager == null ||
 	! loggingManager.equals("com.caucho.log.LogManagerImpl")) {
-      throw new ConfigException(L.l("The following system property must be set:\n  -Djava.util.logging.manager=com.caucho.log.LogManagerImpl\nThe JDK 1.4 Logging manager must be set to Resin's log manager."));
+      throw new ConfigException(L().l("The following system property must be set:\n  -Djava.util.logging.manager=com.caucho.log.LogManagerImpl\nThe JDK 1.4 Logging manager must be set to Resin's log manager."));
     }
 
     validatePackage("javax.servlet.Servlet", new String[] {"2.4", "1.4"});
@@ -704,7 +704,7 @@ public class Resin implements ResinServerListener {
     try {
       cl = Class.forName(className);
     } catch (Throwable e) {
-      throw new ConfigException(L.l("class {0} is not loadable on startup.  Resin requires {0} to be in the classpath on startup.",
+      throw new ConfigException(L().l("class {0} is not loadable on startup.  Resin requires {0} to be in the classpath on startup.",
 				    className));
       
     }
@@ -712,11 +712,11 @@ public class Resin implements ResinServerListener {
     Package pkg = cl.getPackage();
 
     if (pkg == null)
-      throw new ConfigException(L.l("package for class {0} is missing.  Resin requires class {0} in the classpath on startup.",
+      throw new ConfigException(L().l("package for class {0} is missing.  Resin requires class {0} in the classpath on startup.",
 				    className));
 
     if (pkg.getSpecificationVersion() == null)
-      throw new ConfigException(L.l("{0} has no specification version.  Resin {1} requires version {2}.",
+      throw new ConfigException(L().l("{0} has no specification version.  Resin {1} requires version {2}.",
 				    pkg, com.caucho.Version.VERSION,
 				    versions[0]));
 
@@ -725,12 +725,27 @@ public class Resin implements ResinServerListener {
 	return;
     }
       
-    throw new ConfigException(L.l("Specification version {0} of {1} is not compatible with Resin {2}.  Resin {2} requires version {3}.",
+    throw new ConfigException(L().l("Specification version {0} of {1} is not compatible with Resin {2}.  Resin {2} requires version {3}.",
 				  pkg.getSpecificationVersion(),
 				  pkg, com.caucho.Version.VERSION,
 				  versions[0]));
   }
-      
+
+  private static L10N L()
+  {
+    if (_L == null)
+      _L = new L10N(Resin.class);
+
+    return _L;
+  }
+
+  private static Logger log()
+  {
+    if (_log == null)
+      _log = Logger.getLogger(Resin.class.getName());
+
+    return _log;
+  }
 
   public class ResinContainer {
     private ResinServer _resin;

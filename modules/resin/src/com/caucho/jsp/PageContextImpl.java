@@ -1197,6 +1197,7 @@ public class PageContextImpl extends PageContext
   {
     String bundleString = null;
 
+    // jsp/1c51, jsp/1c54
     String prefix = (String) getAttribute("caucho.bundle.prefix");
 
     if (prefix != null)
@@ -1469,7 +1470,14 @@ public class PageContextImpl extends PageContext
    */
   static public boolean toBoolean(String value)
   {
-    return (value != null && value.equalsIgnoreCase("true"));
+    if (value == null)
+      return false;
+    else if (value.equalsIgnoreCase("true"))
+      return true;
+    else if (value.equalsIgnoreCase("false"))
+      return false;
+    else
+      return value.trim().equalsIgnoreCase("true");
   }
 
   /**
