@@ -179,8 +179,8 @@ class ResponseStream extends ToByteResponseStream {
 
   public boolean isCommitted()
   {
-    // return _response.isHeaderWritten() || _isClosed;
-    return _response.isHeaderWritten() || _isCommitted || _isClosed;
+    // jsp/17ec
+    return _isCommitted || _isClosed;
   }
 
   public void clear()
@@ -580,6 +580,10 @@ class ResponseStream extends ToByteResponseStream {
 	    else
 	      _next.setBufferOffset(bufferStart - 8);
 	  }
+	}
+	else {
+	  // jsp/01cf
+	  _bufferStartOffset = 0;
 	}
 	
         if (_next != null)
