@@ -30,7 +30,6 @@
 package com.caucho.servlets;
 
 import java.io.*;
-import java.net.*;
 import java.util.*;
 import java.util.logging.*;
 
@@ -44,9 +43,9 @@ import com.caucho.vfs.*;
 /**
  * CGI
  */
-public class CGIServlet extends GenericServlet {
-  static protected final Logger log = Log.open(CGIServlet.class);
-  static final L10N L = new L10N(CGIServlet.class);
+public class CustomCGIServlet extends GenericServlet {
+  static protected final Logger log = Log.open(CustomCGIServlet.class);
+  static final L10N L = new L10N(CustomCGIServlet.class);
   
   private static String REQUEST_URI = "javax.servlet.include.request_uri";
   private static String CONTEXT_PATH = "javax.servlet.include.context_path";
@@ -56,11 +55,7 @@ public class CGIServlet extends GenericServlet {
 
   private String _executable;
   private boolean _stderrIsException = true;
-
-  public void setStderrIsException(boolean isException)
-  {
-    _stderrIsException = isException;
-  }
+  private boolean _ignoreExitCode = false;
 
   /**
    * Sets an executable to run the script.
@@ -68,6 +63,19 @@ public class CGIServlet extends GenericServlet {
   public void setExecutable(String executable)
   {
     _executable = executable;
+  }
+
+  public void setStderrIsException(boolean isException)
+  {
+    _stderrIsException = isException;
+  }
+
+  /**
+   * If true, do not treat a non-zero exit code as an error, default false.
+   */
+  public void setIgnoreExitCode(boolean ignoreExitCode)
+  {
+    _ignoreExitCode = ignoreExitCode;
   }
 
   /**
@@ -110,11 +118,15 @@ public class CGIServlet extends GenericServlet {
     }
     else {
       String fullPath = servletPath + servletPathInfo;
-      int i = getScriptPathIndex(req, fullPath);
+      int i = findScriptPathIndex(req, fullPath);
 
       if (i < 0) {
-	res.sendError(res.SC_NOT_FOUND);
-	return;
+        if (log.isLoggable(Level.FINE))
+          log.fine(L.l("no script path index for `{0}'", fullPath));
+
+        res.sendError(res.SC_NOT_FOUND);
+
+        return;
       }
 
       scriptPath = fullPath.substring(0, i);
@@ -129,12 +141,16 @@ public class CGIServlet extends GenericServlet {
     Path vfsPath = Vfs.lookup(realPath);
 
     if (! vfsPath.canRead() || vfsPath.isDirectory()) {
-	res.sendError(res.SC_NOT_FOUND);
-	return;
+      if (log.isLoggable(Level.FINE))
+        log.fine(L.l("script `{0}' is unreadable", vfsPath));
+
+      res.sendError(res.SC_NOT_FOUND);
+
+      return;
     }
 
-    String []env = setEnvironment(req, requestURI, contextPath,
-				  scriptPath, pathInfo, queryString);
+    String []env = createEnvironment(req, requestURI, contextPath,
+                                     scriptPath, pathInfo, queryString);
 
     String []args = getArgs(realPath);
 
@@ -145,6 +161,30 @@ public class CGIServlet extends GenericServlet {
     try {
       File dir = new File(Vfs.lookup(realPath).getParent().getNativePath());
 			  
+      if (log.isLoggable(Level.FINE)) {
+        CharBuffer argsBuf = new CharBuffer();
+
+        argsBuf.append('[');
+
+        for (String arg : args) {
+          if (argsBuf.length() > 1)
+            argsBuf.append(", ");
+
+          argsBuf.append('"');
+          argsBuf.append(arg);
+          argsBuf.append('"');
+        }
+
+        argsBuf.append(']');
+
+        log.fine(L.l("exec {0} (pwd={1})", argsBuf, dir));
+
+        if (log.isLoggable(Level.FINEST)) {
+          for (String envElement : env)
+            log.finest(envElement);
+        }
+      }
+
       process = runtime.exec(args, env, dir);
 
       PrintWriter out = res.getWriter();
@@ -214,12 +254,24 @@ public class CGIServlet extends GenericServlet {
 	  throw new ServletException(errorString);
       }
     
-      int status = process.waitFor();
+      int exitCode = process.waitFor();
 
-      if (status != 0)
-	throw new ServletException(L.l("CGI execution failed.  Exit code {0}",
-				       status));
+      if (exitCode != 0) {
+        if (hasStatus) {
+          if (log.isLoggable(Level.FINER))
+            log.finer(L.l("exit code {0} (ignored, hasStatus)", exitCode));
+        }
+        else if (_ignoreExitCode) {
+          if (log.isLoggable(Level.FINER))
+            log.finer(L.l("exit code {0} (ignored)", exitCode));
+        }
+        else 
+	  throw new ServletException(L.l("CGI execution failed.  Exit code {0}",
+				         exitCode));
+      }
     } catch (IOException e) {
+      throw e;
+    } catch (ServletException e) {
       throw e;
     } catch (Exception e) {
       throw new ServletException(e);
@@ -237,10 +289,13 @@ public class CGIServlet extends GenericServlet {
   /**
    * Returns the index to the script path.
    */
-  private int getScriptPathIndex(HttpServletRequest req, String fullPath)
+  private int findScriptPathIndex(HttpServletRequest req, String fullPath)
   {
     String realPath = req.getRealPath(fullPath);
     Path path = Vfs.lookup(realPath);
+
+    if (log.isLoggable(Level.FINER))
+      log.finer(L.l("real-path is `{0}'", path));
 
     if (path.canRead() && ! path.isDirectory())
       return fullPath.length();
@@ -253,6 +308,9 @@ public class CGIServlet extends GenericServlet {
 
       realPath = req.getRealPath(subPath);
       path = Vfs.lookup(realPath);
+
+      if (log.isLoggable(Level.FINEST))
+        log.finest(L.l("trying script path {0}", path));
 
       if (path.canRead() && ! path.isDirectory())
 	return head;
@@ -326,10 +384,10 @@ public class CGIServlet extends GenericServlet {
     }
   }
 
-  private String []setEnvironment(HttpServletRequest req,
-				  String requestURI, String contextPath,
-				  String scriptPath, String pathInfo,
-				  String queryString)
+  private String[] createEnvironment(HttpServletRequest req,
+                                     String requestURI, String contextPath,
+                                     String scriptPath, String pathInfo,
+                                     String queryString)
   {
     ArrayList<String> env = new ArrayList<String>();
 
@@ -354,9 +412,13 @@ public class CGIServlet extends GenericServlet {
       env.add("QUERY_STRING="+ queryString);
     env.add("REQUEST_URI=" + requestURI);
 
+    // PHP needs SCRIPT_FILENAME or it reports "No input file specified."
+    env.add("SCRIPT_FILENAME=" + req.getRealPath(scriptPath));
+
     scriptPath = contextPath + scriptPath;
 
     env.add("SCRIPT_NAME=" + scriptPath);
+
     if (pathInfo != null) {
       env.add("PATH_INFO=" + pathInfo);
       env.add("PATH_TRANSLATED=" + req.getRealPath(pathInfo));
@@ -448,6 +510,10 @@ public class CGIServlet extends GenericServlet {
 
       String keyStr = key.toString();
       String valueStr = value.toString();
+
+      if (log.isLoggable(Level.FINEST)) {
+        log.finest(L.l("{0}: {1}", keyStr, valueStr));
+      }
 
       if (keyStr.equalsIgnoreCase("Status")) {
         int status = 0;
