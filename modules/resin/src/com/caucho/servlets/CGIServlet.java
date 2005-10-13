@@ -43,10 +43,10 @@ import com.caucho.vfs.*;
 /**
  * CGI
  */
-public class CustomCGIServlet extends GenericServlet {
-  static protected final Logger log = Log.open(CustomCGIServlet.class);
-  static final L10N L = new L10N(CustomCGIServlet.class);
-  
+public class CGIServlet extends GenericServlet {
+  static protected final Logger log = Log.open(CGIServlet.class);
+  static final L10N L = new L10N(CGIServlet.class);
+
   private static String REQUEST_URI = "javax.servlet.include.request_uri";
   private static String CONTEXT_PATH = "javax.servlet.include.context_path";
   private static String SERVLET_PATH = "javax.servlet.include.servlet_path";
@@ -94,7 +94,7 @@ public class CustomCGIServlet extends GenericServlet {
     String queryString;
 
     requestURI = (String) req.getAttribute(REQUEST_URI);
-    
+
     if (requestURI != null) {
       contextPath = (String) req.getAttribute(CONTEXT_PATH);
       servletPath = (String) req.getAttribute(SERVLET_PATH);
@@ -157,10 +157,10 @@ public class CustomCGIServlet extends GenericServlet {
     Runtime runtime = Runtime.getRuntime();
     Process process = null;
     Alarm alarm = null;
-    
+
     try {
       File dir = new File(Vfs.lookup(realPath).getParent().getNativePath());
-			  
+
       if (log.isLoggable(Level.FINE)) {
         CharBuffer argsBuf = new CharBuffer();
 
@@ -195,7 +195,7 @@ public class CustomCGIServlet extends GenericServlet {
       TimeoutAlarm timeout;
       timeout = new TimeoutAlarm(requestURI, process, inputStream);
       alarm = new Alarm(timeout, 360 * 1000);
-    
+
       OutputStream outputStream = process.getOutputStream();
 
       try {
@@ -218,7 +218,7 @@ public class CustomCGIServlet extends GenericServlet {
 
       try {
 	hasStatus = parseHeaders(req, res, rs);
-      
+
 	int ch;
 	while ((ch = rs.read()) >= 0)
 	  out.print((char) ch);
@@ -227,9 +227,9 @@ public class CustomCGIServlet extends GenericServlet {
 	  rs.close();
 	} catch (Throwable e) {
 	  log.log(Level.FINER, e.toString(), e);
-	  
+
 	}
-	
+
 	inputStream.close();
       }
 
@@ -247,13 +247,13 @@ public class CustomCGIServlet extends GenericServlet {
 
       if (hasContent) {
 	String errorString = error.toString();
-	
+
 	log.warning(errorString);
 
 	if (! hasStatus && _stderrIsException)
 	  throw new ServletException(errorString);
       }
-    
+
       int exitCode = process.waitFor();
 
       if (exitCode != 0) {
@@ -265,7 +265,7 @@ public class CustomCGIServlet extends GenericServlet {
           if (log.isLoggable(Level.FINER))
             log.finer(L.l("exit code {0} (ignored)", exitCode));
         }
-        else 
+        else
 	  throw new ServletException(L.l("CGI execution failed.  Exit code {0}",
 				         exitCode));
       }
@@ -320,12 +320,12 @@ public class CustomCGIServlet extends GenericServlet {
 
     return -1;
   }
-    
+
   private String []getArgs(String path)
   {
     if (_executable != null)
       return new String[] { _executable, path };
-    
+
     ReadStream is = null;
     try {
       is = Vfs.lookup(path).openRead();
@@ -356,7 +356,7 @@ public class CustomCGIServlet extends GenericServlet {
         cb.clear();
         while (ch > 0 && ch != ' ' && ch != '\t' && ch != '\r' && ch != '\n') {
           cb.append((char) ch);
-          
+
           ch = is.read();
         }
 
@@ -392,11 +392,11 @@ public class CustomCGIServlet extends GenericServlet {
     ArrayList<String> env = new ArrayList<String>();
 
     env.add("SERVER_SOFTWARE=Resin/" + com.caucho.Version.VERSION);
-    
+
     env.add("SERVER_NAME=" + req.getServerName());
     //env.add("SERVER_ADDR=" + req.getServerAddr());
     env.add("SERVER_PORT=" + req.getServerPort());
-    
+
     env.add("REMOTE_ADDR=" + req.getRemoteAddr());
     // env.add("REMOTE_PORT=" + req.getRemotePort());
 
@@ -404,7 +404,7 @@ public class CustomCGIServlet extends GenericServlet {
       env.add("REMOTE_USER=" + req.getRemoteUser());
     if (req.getAuthType() != null)
       env.add("AUTH_TYPE=" + req.getAuthType());
-    
+
     env.add("GATEWAY_INTERFACE=CGI/1.1");
     env.add("SERVER_PROTOCOL=" + req.getProtocol());
     env.add("REQUEST_METHOD=" + req.getMethod());
@@ -449,7 +449,7 @@ public class CustomCGIServlet extends GenericServlet {
     CharBuffer cb = CharBuffer.allocate();
 
     cb.append("HTTP_");
-    
+
     for (int i = 0; i < key.length(); i++) {
       char ch = key.charAt(i);
       if (ch == '-')
@@ -465,19 +465,19 @@ public class CustomCGIServlet extends GenericServlet {
 
     return cb.close();
   }
-  
+
   private boolean parseHeaders(HttpServletRequest req,
 			       HttpServletResponse res,
 			       ReadStream rs)
     throws IOException
   {
     boolean hasStatus = false;
-    
+
     CharBuffer key = new CharBuffer();
     CharBuffer value = new CharBuffer();
 
     int ch;
-    
+
     while (true) {
       key.clear();
       value.clear();
@@ -487,7 +487,7 @@ public class CustomCGIServlet extends GenericServlet {
            ch = rs.read()) {
         key.append((char) ch);
       }
-      
+
       for (;
            ch >= 0 && ch == ' ' || ch == ':';
            ch = rs.read()) {
