@@ -154,6 +154,13 @@ public class CGIServlet extends GenericServlet {
 
     String []args = getArgs(realPath);
 
+    if (log.isLoggable(Level.FINER)) {
+      if (args.length > 1)
+	log.finer("[cgi] exec " + args[0] + " " + args[1]);
+      else if (args.length > 0)
+	log.finer("[cgi] exec " + args[0]);
+    }
+
     Runtime runtime = Runtime.getRuntime();
     Process process = null;
     Alarm alarm = null;
@@ -198,17 +205,20 @@ public class CGIServlet extends GenericServlet {
 
       OutputStream outputStream = process.getOutputStream();
 
+      TempBuffer tempBuf = TempBuffer.allocate();
+      byte []buf = tempBuf.getBuffer();
+      
       try {
 	ServletInputStream sis = req.getInputStream();
-	if (sis.available() > 0) {
-	  WriteStream ws = Vfs.openWrite(outputStream);
-	  try {
-	    ws.writeStream(sis);
-	  } finally {
-	    ws.close();
-	  }
+	int len;
+
+	while ((len = sis.read(buf, 0, buf.length)) > 0) {
+	  outputStream.write(buf, 0, len);
 	}
+
 	outputStream.flush();
+      } catch (IOException e) {
+	log.log(Level.FINER, e.toString(), e);
       } finally {
 	outputStream.close();
       }
@@ -389,6 +399,8 @@ public class CGIServlet extends GenericServlet {
                                      String scriptPath, String pathInfo,
                                      String queryString)
   {
+    boolean isFine = log.isLoggable(Level.FINE);
+    
     ArrayList<String> env = new ArrayList<String>();
 
     env.add("SERVER_SOFTWARE=Resin/" + com.caucho.Version.VERSION);
@@ -408,9 +420,20 @@ public class CGIServlet extends GenericServlet {
     env.add("GATEWAY_INTERFACE=CGI/1.1");
     env.add("SERVER_PROTOCOL=" + req.getProtocol());
     env.add("REQUEST_METHOD=" + req.getMethod());
-    if (queryString != null)
+    if (isFine)
+      log.fine("[cgi] REQUEST_METHOD=" + req.getMethod());
+    
+    if (queryString != null) {
       env.add("QUERY_STRING="+ queryString);
+      
+      if (isFine)
+      log.fine("[cgi] QUERY_STRING=" + queryString);
+    }
+
     env.add("REQUEST_URI=" + requestURI);
+
+    if (isFine)
+      log.fine("[cgi] REQUEST_URI=" + requestURI);
 
     // PHP needs SCRIPT_FILENAME or it reports "No input file specified."
     env.add("SCRIPT_FILENAME=" + req.getRealPath(scriptPath));
@@ -418,7 +441,10 @@ public class CGIServlet extends GenericServlet {
     scriptPath = contextPath + scriptPath;
 
     env.add("SCRIPT_NAME=" + scriptPath);
-
+    
+    if (isFine)
+      log.fine("[cgi] SCRIPT_NAME=" + scriptPath);
+    
     if (pathInfo != null) {
       env.add("PATH_INFO=" + pathInfo);
       env.add("PATH_TRANSLATED=" + req.getRealPath(pathInfo));
@@ -428,6 +454,9 @@ public class CGIServlet extends GenericServlet {
     while (e.hasMoreElements()) {
       String key = (String) e.nextElement();
       String value = req.getHeader(key);
+
+      if (isFine)
+	log.fine("[cgi] " + key + "=" + value);
 
       if (key.equalsIgnoreCase("content-length"))
         env.add("CONTENT_LENGTH=" + value);
@@ -446,7 +475,7 @@ public class CGIServlet extends GenericServlet {
 
   private String convertHeader(String key, String value)
   {
-    CharBuffer cb = CharBuffer.allocate();
+    CharBuffer cb = new CharBuffer();
 
     cb.append("HTTP_");
 
@@ -511,9 +540,8 @@ public class CGIServlet extends GenericServlet {
       String keyStr = key.toString();
       String valueStr = value.toString();
 
-      if (log.isLoggable(Level.FINEST)) {
-        log.finest(L.l("{0}: {1}", keyStr, valueStr));
-      }
+      if (log.isLoggable(Level.FINER))
+	log.finer(keyStr + ": " + valueStr);
 
       if (keyStr.equalsIgnoreCase("Status")) {
         int status = 0;
