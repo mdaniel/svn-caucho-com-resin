@@ -37,6 +37,8 @@ import java.util.logging.Level;
 import java.lang.ref.WeakReference;
 
 import java.lang.reflect.Method;
+import java.net.URLStreamHandlerFactory;
+import java.net.URL;
 
 import javax.management.MBeanServer;
 import javax.management.MBeanServerFactory;

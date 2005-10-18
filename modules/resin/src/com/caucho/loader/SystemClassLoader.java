@@ -29,41 +29,42 @@
 
 package com.caucho.loader;
 
-import java.util.*;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.Vfs;
+import com.caucho.config.Config;
+import com.caucho.config.ConfigException;
 
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import java.lang.ref.WeakReference;
-
-import java.lang.reflect.Method;
-
-import javax.management.MBeanServer;
-import javax.management.MBeanServerFactory;
-
-import com.caucho.vfs.EnvironmentStream;
-import com.caucho.vfs.SchemeMap;
-
-import com.caucho.naming.Jndi;
-
-import com.caucho.transaction.TransactionManagerImpl;
-
-import com.caucho.jca.UserTransactionProxy;
-
-import com.caucho.util.ThreadPool;
-
-import com.caucho.jmx.Jmx;
-
-import com.caucho.security.PolicyImpl;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.reflect.Constructor;
+import java.util.Enumeration;
 
 /**
- * ClassLoader that initalizes the Resin environment, and allows byte code
+ * ClassLoader that initalizes the environment and allows byte code
  * enhancement of classes in the system classpath.
  * <pre>
  * java -Djava.system.class.loader=com.caucho.loader.SystemClassLoader ...
  * </pre>
+ * If the system property "system.conf" is defined, it is used as a path
+ * to a configuration file that initializes the enviornment.  Relative paths
+ * are relative to the current directory (See {@link com.caucho.vfs.Vfs#getPwd()}.
+ * <p/>
+ * Resources defined in system.conf are available to all classes loaded within the jvm.
+ * <pre>
+ * java -Dsystem.conf=tests/system.conf -Djava.system.class.loader=com.caucho.loader.SystemClassLoader ...
+ * </pre>
  */
-public class SystemClassLoader extends EnvironmentClassLoader {
+public class SystemClassLoader
+  extends EnvironmentClassLoader
+  implements EnvironmentBean
+{
+  private boolean _isInit;
+
+  private URLClassLoader _loader;
+
   /**
    * Creates a new SystemClassLoader.
    */
@@ -71,4 +72,65 @@ public class SystemClassLoader extends EnvironmentClassLoader {
   {
     super(parent);
   }
+
+  public ClassLoader getClassLoader()
+  {
+    return this;
+  }
+
+  public void init()
+  {
+    if (_isInit)
+      return;
+
+    _isInit = true;
+
+    initClasspath();
+
+    super.init();
+
+    String systemConf = System.getProperty("system.conf");
+
+    if (systemConf != null) {
+      try {
+        Path path = Vfs.lookup(systemConf);
+
+        Config config = new Config();
+
+        config.configure(this, path, getSchema());
+      }
+      catch (Exception ex) {
+        ex.printStackTrace();
+
+        throw new RuntimeException(ex.toString());
+      }
+    }
+  }
+
+  private void initClasspath()
+  {
+    String classpath = System.getProperty("java.class.path");
+
+    String[] classpathElements = classpath.split(File.pathSeparator, 512);
+
+    for (String classpathElement : classpathElements) {
+      SimpleLoader loader = new SimpleLoader(Vfs.lookup(classpathElement));
+
+      try {
+        loader.init();
+        addLoader(loader);
+      }
+      catch (ConfigException ex) {
+        System.err.println("bad classpath elenent " + classpathElement);
+        ex.printStackTrace();
+      }
+    }
+  }
+
+  protected String getSchema()
+  {
+    return "com/caucho/loader/system.rnc";
+  }
 }
+
+

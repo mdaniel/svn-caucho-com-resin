@@ -358,8 +358,9 @@ public class MBeanContext {
       return;
     }
     
-    log.fine(L.l("{0} registered in {1}", getDebugName(name, mbean), this));
-      
+    log.fine(getDebugName(name, mbean) + " registered in " + this);
+    //log.fine(L.l("{0} registered in {1}", getDebugName(name, mbean), this));
+
     _mbeans.put(name, mbean);
 
     _view.add(name, mbean, true);

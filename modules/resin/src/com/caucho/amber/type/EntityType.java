@@ -32,6 +32,8 @@ package com.caucho.amber.type;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Collections;
+import java.util.logging.Logger;
+import java.util.logging.Level;
 
 import java.io.IOException;
 
@@ -81,6 +83,7 @@ import com.caucho.amber.table.Column;
  * Represents an application persistent bean type
  */
 public class EntityType extends Type {
+  private static final Logger log = Logger.getLogger(EntityType.class.getName());
   private static final L10N L = new L10N(EntityType.class);
 
   private AmberManager _amberManager;
@@ -345,7 +348,10 @@ public class EntityType extends Type {
 	if (_isEnhanced) {
 	  ClassLoader loader = getAmberManager().getEnhancedLoader();
 
-	  _instanceClass = Class.forName(getBeanClass().getName(), false, loader);
+          if (log.isLoggable(Level.FINEST))
+            log.finest(L.l("loading bean class `{0}' from `{1}'", getBeanClass().getName(), loader));
+
+          _instanceClass = Class.forName(getBeanClass().getName(), false, loader);
 	}
 	else {
 	  ClassLoader loader = _instanceLoader;
@@ -353,15 +359,18 @@ public class EntityType extends Type {
 	  if (loader == null)
 	    loader = getAmberManager().getEnhancedLoader();
 
-	  _instanceClass = Class.forName(getInstanceClassName(), false, loader);
+          if (log.isLoggable(Level.FINEST))
+            log.finest(L.l("loading instance class `{0}' from `{1}'", getInstanceClassName(), loader));
+
+          _instanceClass = Class.forName(getInstanceClassName(), false, loader);
 	}
       } catch (ClassNotFoundException e) {
 	throw new RuntimeException(e);
       }
 
       if (! Entity.class.isAssignableFrom(_instanceClass)) {
-	throw new AmberRuntimeException(L.l("'{0}' is an illegal instance class",
-					    _instanceClass.getName()));
+	throw new AmberRuntimeException(L.l("'{0}' with classloader {1} is an illegal instance class",
+					    _instanceClass.getName(), _instanceClass.getClassLoader()));
       }
     }
 
@@ -812,7 +821,9 @@ public class EntityType extends Type {
 
       field.init();
     }
-    
+
+    assert getId() != null : "null id for " + _name;
+
     getId().init();
 
     /*

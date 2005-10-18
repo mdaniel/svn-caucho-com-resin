@@ -72,8 +72,6 @@ import com.caucho.make.AlwaysModified;
 
 import com.caucho.lifecycle.Lifecycle;
 
-import com.caucho.java.CompileClassNotFound;
-
 import com.caucho.loader.enhancer.ByteCodeEnhancer;
 import com.caucho.loader.enhancer.EnhancerRuntimeException;
 
@@ -99,6 +97,9 @@ public class DynamicClassLoader extends java.net.URLClassLoader
 
   private String _id;
 
+  private final boolean _isVerbose;
+  private int _verboseDepth;
+
   // List of resource loaders
   private ArrayList<Loader> _loaders = new ArrayList<Loader>();
 
@@ -123,6 +124,9 @@ public class DynamicClassLoader extends java.net.URLClassLoader
   
   // List of packages where the parent has priority.
   private String []_parentPriorityPackages;
+
+  // List of packages where this has priority.
+  private String []_priorityPackages;
 
   // Array of listeners
   // XXX: There's still some questions of what kind of reference this
@@ -162,7 +166,7 @@ public class DynamicClassLoader extends java.net.URLClassLoader
   {
     this(parent, true);
   }
-  
+
   /**
    * Create a new class loader.
    *
@@ -173,19 +177,19 @@ public class DynamicClassLoader extends java.net.URLClassLoader
     super(NULL_URL_ARRAY, getInitParent(parent));
 
     parent = getParent();
-    
+
     _securityManager = System.getSecurityManager();
 
     _isEnableDependencyCheck = enableDependencyCheck;
 
     _dependencies.setCheckInterval(_globalDependencyCheckInterval);
-				   
+
     for (; parent != null; parent = parent.getParent()) {
       if (parent instanceof DynamicClassLoader) {
         DynamicClassLoader loader = (DynamicClassLoader) parent;
 
         loader.init();
-        
+
         addPermissions(loader.getPermissions());
 
         // loader.addListener(this);
@@ -198,6 +202,22 @@ public class DynamicClassLoader extends java.net.URLClassLoader
         break;
       }
     }
+
+    if (System.getProperty("resin.verbose.classpath") != null) {
+
+      _isVerbose = true;
+
+      int depth = 0;
+
+      while (parent != null) {
+        depth++;
+        parent = parent.getParent();
+      }
+
+      _verboseDepth = depth;
+    }
+    else
+      _isVerbose = false;
   }
 
   /**
@@ -210,6 +230,16 @@ public class DynamicClassLoader extends java.net.URLClassLoader
       return parent;
     else
       return Thread.currentThread().getContextClassLoader();
+  }
+
+  private void verbose(String name, String msg)
+  {
+    if (_isVerbose) {
+      for (int i = _verboseDepth; _verboseDepth > 0; _verboseDepth--)
+        System.err.print(' ');
+
+      System.err.println(toString() + " " + name + " " + msg);
+    }
   }
 
   /**
@@ -650,7 +680,7 @@ public class DynamicClassLoader extends java.net.URLClassLoader
   }
 
   /**
-   * Add to the list of packages that don't use the hack.
+   * Add to the list of packages that don't use the {@link #setServletHack(boolean)}.
    */
   public void addParentPriorityPackage(String pkg)
   {
@@ -667,6 +697,26 @@ public class DynamicClassLoader extends java.net.URLClassLoader
     
     newPkgs[oldLength] = pkg;
     _parentPriorityPackages = newPkgs;
+  }
+
+  /**
+   * Add to the list of packages that take priority over the parent
+   */
+  public void addPriorityPackage(String pkg)
+  {
+    if (_priorityPackages == null)
+      _priorityPackages = new String[0];
+
+    int oldLength = _priorityPackages.length;
+    String []newPkgs = new String[oldLength + 1];
+
+    System.arraycopy(_priorityPackages, 0, newPkgs, 0, oldLength);
+
+    if (! pkg.endsWith("."))
+      pkg = pkg + '.';
+
+    newPkgs[oldLength] = pkg;
+    _priorityPackages = newPkgs;
   }
 
   /**
@@ -970,6 +1020,13 @@ public class DynamicClassLoader extends java.net.URLClassLoader
       loaders.get(i).validate();
   }
 
+  public Class<?> loadClass(String name) throws ClassNotFoundException {
+    // the Sun JDK implementation of ClassLoader delegates this call
+    // to loadClass(name, false), but there is no guarantee that other
+    // implementations do.
+    return loadClass(name, false);
+  }
+
   /**
    * Load a class using this class loader
    *
@@ -988,7 +1045,7 @@ public class DynamicClassLoader extends java.net.URLClassLoader
       return super.loadClass(name, resolve);
     }
     */
-      
+
     // The JVM has already cached the classes, so we don't need to
     Class cl = findLoadedClass(name);
 
@@ -1022,8 +1079,10 @@ public class DynamicClassLoader extends java.net.URLClassLoader
       }
     }
     else {
+
       try {
 	cl = findClass(name);
+
       } catch (ClassNotFoundException e) {
         ClassLoader parent = getParent();
         if (parent != null)
@@ -1049,6 +1108,9 @@ public class DynamicClassLoader extends java.net.URLClassLoader
   protected Class findClass(String name)
     throws ClassNotFoundException
   {
+    if (_isVerbose)
+      verbose(name, "findClass");
+
     if (_lifecycle.isDestroyed()) {
       log().fine("Class loader has been closed.");
       return super.findClass(name);
@@ -1073,6 +1135,9 @@ public class DynamicClassLoader extends java.net.URLClassLoader
 
       if (entry == null)
 	throw new ClassNotFoundException(name);
+
+      if (entry != null && _isVerbose)
+        verbose(name, (isNormalJdkOrder(name) ? "found" : "found (took priority from parent)"));
 
       if (_isEnableDependencyCheck)
 	entry.addDependencies(_dependencies);
@@ -1180,6 +1245,9 @@ public class DynamicClassLoader extends java.net.URLClassLoader
 	  if (enhancedBuffer != null) {
 	    bBuf = enhancedBuffer;
 	    bLen = enhancedBuffer.length;
+
+            if (_isVerbose)
+              verbose(name, String.valueOf(_byteCodeEnhancer));
 	  }
 	  /* RSN-109
 	} catch (RuntimeException e) {
@@ -1384,12 +1452,21 @@ public class DynamicClassLoader extends java.net.URLClassLoader
    */
   private boolean isNormalJdkOrder(String className)
   {
+    if (_priorityPackages != null) {
+      String canonName = className.replace('/', '.');
+
+      for (String priorityPackage : _priorityPackages) {
+        if (canonName.startsWith(priorityPackage))
+          return false;
+      }
+    }
+
     if (! _useServletHack)
       return true;
     
+    String canonName = className.replace('/', '.');
     String []pkgs = _parentPriorityPackages;
-    String canonName = className.replace('/', '.'); 
-      
+
     for (int i = 0; pkgs != null && i < pkgs.length; i++) {
       if (canonName.startsWith(pkgs[i]))
         return true;

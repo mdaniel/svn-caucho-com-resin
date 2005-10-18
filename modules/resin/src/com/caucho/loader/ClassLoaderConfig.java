@@ -39,19 +39,23 @@ import com.caucho.util.L10N;
 
 import com.caucho.vfs.Path;
 
+import java.util.ArrayList;
+
 /**
  * Class for configuration.
  */
 public class ClassLoaderConfig {
   private final static L10N L = new L10N(ClassLoaderConfig.class);
-  
+
   private EnvironmentClassLoader _classLoader;
   private EnvironmentBean _owner;
-  
+
   private Path _source;
   private boolean _servletHack;
 
   private int _index;
+
+  private ArrayList<String> _priorityPackages;
 
   public ClassLoaderConfig()
     throws ConfigException
@@ -62,7 +66,7 @@ public class ClassLoaderConfig {
 
     if (! (loader instanceof EnvironmentClassLoader))
       throw new ConfigException(L.l("<class-loader> requires an EnvironmentClassLoader."));
-    
+
     _classLoader = (EnvironmentClassLoader) loader;
 
     /*
@@ -80,7 +84,7 @@ public class ClassLoaderConfig {
   {
     _classLoader.setServletHack(hack);
   }
-  
+
   /**
    * Adds a simple class loader.
    */
@@ -88,7 +92,7 @@ public class ClassLoaderConfig {
   {
     _classLoader.addLoader(loader, _index++);
   }
-  
+
   /**
    * Adds a directory class loader.
    */
@@ -96,7 +100,7 @@ public class ClassLoaderConfig {
   {
     _classLoader.addLoader(loader, _index++);
   }
-  
+
   /**
    * Adds a compiling class loader.
    */
@@ -104,7 +108,7 @@ public class ClassLoaderConfig {
   {
     _classLoader.addLoader(loader, _index++);
   }
-  
+
   /**
    * Adds a tree loader.
    */
@@ -112,7 +116,7 @@ public class ClassLoaderConfig {
   {
     _classLoader.addLoader(loader, _index++);
   }
-  
+
   /**
    * Adds a make class loader.
    */
@@ -120,7 +124,7 @@ public class ClassLoaderConfig {
   {
     _classLoader.addLoader(loader, _index++);
   }
-  
+
   /**
    * Adds an enhancing loader.
    */
@@ -129,7 +133,7 @@ public class ClassLoaderConfig {
   {
     return EnhancerManager.create();
   }
-  
+
   /**
    * Creates the aop.
    */
@@ -142,13 +146,25 @@ public class ClassLoaderConfig {
   */
 
   /**
+   * Add a package for which this class loader will
+   * take precendence over the parent. Any class that
+   * has a qualified name that starts with the passed value
+   * will be loaded from this classloader instead of the
+   * parent classloader.
+   */
+  public void addPriorityPackage(String priorityPackage)
+  {
+    _classLoader.addPriorityPackage(priorityPackage);
+  }
+
+  /**
    * init
    */
   public void init()
     throws ConfigException
   {
     _classLoader.init();
-    
+
     _classLoader.validate();
   }
 
