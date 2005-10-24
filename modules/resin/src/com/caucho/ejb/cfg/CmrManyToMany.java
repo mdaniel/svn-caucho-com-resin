@@ -180,7 +180,6 @@ public class CmrManyToMany extends CmrRelation {
   public void setOrderBy(String orderBySQL)
     throws ConfigException
   {
-    System.out.println("CMR SOB: " + orderBySQL);
     if (orderBySQL != null) {
       ArrayList<String> fields = new ArrayList<String>();
       ArrayList<Boolean> asc = new ArrayList<Boolean>();

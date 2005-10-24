@@ -30,6 +30,9 @@ package com.caucho.amber.query;
 
 import com.caucho.util.CharBuffer;
 
+import com.caucho.amber.type.Type;
+import com.caucho.amber.type.BooleanType;
+
 /**
  * Bound identifier expression.
  */
@@ -51,6 +54,22 @@ class BetweenExpr extends AbstractAmberExpr {
     _max = max;
 
     _isNot = isNot;
+  }
+  
+  /**
+   * Returns true for a boolean expression.
+   */
+  public boolean isBoolean()
+  {
+    return true;
+  }
+
+  /**
+   * Returns the expr type.
+   */
+  public Type getType()
+  {
+    return BooleanType.create();
   }
 
   /**

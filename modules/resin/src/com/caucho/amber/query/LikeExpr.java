@@ -30,6 +30,9 @@ package com.caucho.amber.query;
 
 import com.caucho.util.CharBuffer;
 
+import com.caucho.amber.type.Type;
+import com.caucho.amber.type.BooleanType;
+
 /**
  * Bound identifier expression.
  */
@@ -49,6 +52,22 @@ class LikeExpr extends AbstractAmberExpr {
     _value = value;
     _isNot = isNot;
     _escape = escape;
+  }
+  
+  /**
+   * Returns true for a boolean expression.
+   */
+  public boolean isBoolean()
+  {
+    return true;
+  }
+
+  /**
+   * Returns the expr type.
+   */
+  public Type getType()
+  {
+    return BooleanType.create();
   }
 
   /**

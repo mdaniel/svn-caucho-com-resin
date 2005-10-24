@@ -33,60 +33,56 @@ import java.net.*;
 import java.util.*;
 
 import com.caucho.util.*;
-import com.caucho.vfs.*;
 
-public class StringStream extends StreamImpl {
+public class StringPath extends Path {
   private String _string;
-  private int _length;
-  private int _index;
 
-  StringStream(String string)
+  public StringPath(String string)
   {
-    // this.path = new NullPath("string");
+    super(null);
+
     _string = string;
-    _length = string.length();
-    _index = 0;
+    _schemeMap = SchemeMap.getNullSchemeMap();
   }
 
-  public static ReadStream open(String string)
+  public Path schemeWalk(String userPath, Map<String,Object> attributes,
+                         String path, int offset)
   {
-    StringStream ss = new StringStream(string);
-    return new ReadStream(ss);
+    return this;
   }
 
-  public Path getPath() { return new StringPath(_string); }
-
-  public boolean canRead() { return true; }
-
-  // XXX: encoding issues
-  public int read(byte []buf, int offset, int length) throws IOException
+  public String getURL()
   {
-    if (_length - _index < length)
-      length = _length - _index;
-
-    for (int i = 0; i < length; i++) {
-      int ch = _string.charAt(_index + i); 
-
-      if (ch < 0x80)
-	buf[offset++] = (byte) ch;
-      else if (ch < 0x800) {
-	buf[offset++] = (byte) (0xc0 | (ch >> 6));
-	buf[offset++] = (byte) (0x80 | (ch & 0x3f));
-      }
-      else if (ch < 0x8000) {
-	buf[offset++] = (byte) (0xe0 | (ch >> 12));
-	buf[offset++] = (byte) (0x80 | ((ch >> 6) & 0x3f));
-	buf[offset++] = (byte) (0x80 | ((ch >> 6) & 0x3f));
-      }
-    }
-
-    _index += length;
-
-    return length > 0 ? length : -1;
+    return "string:";
   }
 
-  public int getAvailable() throws IOException
+  public String getScheme()
   {
-    return _length - _index;
+    return "string";
+  }
+
+  public String getPath()
+  {
+    return "string:";
+  }
+
+  public Path lookupImpl(String userPath, Map<String,Object> newAttributes)
+  {
+    return this;
+  }
+
+  public boolean exists()
+  {
+    return true;
+  }
+
+  public boolean canRead()
+  {
+    return true;
+  }
+
+  public StreamImpl openReadImpl()
+  {
+    return new StringStream(_string);
   }
 }
