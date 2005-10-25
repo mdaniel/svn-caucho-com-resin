@@ -174,14 +174,14 @@ public class BurlapProxy implements InvocationHandler {
                 sb.append((char) ch);
             }
           } catch (FileNotFoundException e) {
-            throw new BurlapRuntimeException(String.valueOf(e));
+            throw new BurlapRuntimeException(code + ": " + String.valueOf(e));
           } catch (IOException e) {
           }
 
           if (is != null)
             is.close();
 
-          throw new BurlapProtocolException(sb.toString());
+          throw new BurlapProtocolException(code + ": " + sb.toString());
         }
       }
 

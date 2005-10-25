@@ -47,6 +47,14 @@ public class EmptyExpr extends AbstractAmberExpr {
   }
 
   /**
+   * Returns true as a boolean expression.
+   */
+  public boolean isBoolean()
+  {
+    return true;
+  }
+
+  /**
    * Binds the expression as a select item.
    */
   public AmberExpr bindSelect(QueryParser parser)

@@ -55,7 +55,9 @@ class UnaryExpr extends AbstractAmberExpr {
    */
   public boolean isBoolean()
   {
-    return _token == QueryParser.NOT || _token == QueryParser.NULL;
+    return (_token == QueryParser.NOT ||
+	    _token == QueryParser.NULL ||
+	    _token == QueryParser.NOT_NULL);
   }
 
   /**

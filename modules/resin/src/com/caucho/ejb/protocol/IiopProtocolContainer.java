@@ -97,8 +97,6 @@ public class IiopProtocolContainer extends ProtocolContainer {
 
     if (server.getJndiName() != null)
       _context.setService(server.getJndiName(), service);
-
-    System.out.println("ADD-IIOP: " + server.getEJBName() + " " + server.getJndiName());
   }
 
   /**

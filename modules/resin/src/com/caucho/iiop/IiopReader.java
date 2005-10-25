@@ -202,7 +202,6 @@ public class IiopReader extends org.omg.CORBA_2_3.portable.InputStream {
   public void readRequest()
     throws IOException
   {
-    System.out.println("REQUEST:");
     if (_tempBuffer == null) {
       _tempBuffer = TempBuffer.allocate();
       _buffer = _tempBuffer.getBuffer();
@@ -230,8 +229,6 @@ public class IiopReader extends org.omg.CORBA_2_3.portable.InputStream {
     _flags = _header[6];
     _isBigEndian = (_flags & 1) == 0;
     _hasMoreFragments = (_flags & 2) == 2;
-    if (_hasMoreFragments)
-      System.out.println("More_FRAGS:");
     
     _type = _header[7];
 
@@ -244,7 +241,8 @@ public class IiopReader extends org.omg.CORBA_2_3.portable.InputStream {
     // XXX: ignoring issues with overruns
     _rs.readAll(_buffer, 4, _length - 4);
 
-    writeHexGroup(_buffer, 0, _length);
+    // debug
+    // writeHexGroup(_buffer, 0, _length);
 
     if (_minor == 0) {
       switch (_type) {
@@ -460,7 +458,6 @@ public class IiopReader extends org.omg.CORBA_2_3.portable.InputStream {
       _chunkEnd = -1;
       align4();
       int startOffset = _offset - _fragmentOffset;
-      System.out.println("RV: " + type + " O:" + startOffset);
       
       int code = read_long();
 
@@ -488,15 +485,12 @@ public class IiopReader extends org.omg.CORBA_2_3.portable.InputStream {
       }
       else if ((code & 0x7fffff00) != 0x7fffff00) {
 	repId = readString(code);
-	System.out.println("old-rep:" + code + " " + repId);
       }
       else {
 	isChunked = (code & 8) == 8;
 	boolean hasCodeBase = (code & 1) == 1;
 	int repository = (code & 6);
       
-	System.out.println("chunked:" + isChunked + " CB: " + hasCodeBase + " REP: " + repository + " " + toHex(code));
-
 	if (hasCodeBase) {
 	  readCodeBase();
 	}
@@ -509,8 +503,6 @@ public class IiopReader extends org.omg.CORBA_2_3.portable.InputStream {
 	}
       }
 
-      System.out.println("REP: " + repId);
-
       try {
 	if (isChunked) {
 	  // writeHexGroup(16);
@@ -519,18 +511,13 @@ public class IiopReader extends org.omg.CORBA_2_3.portable.InputStream {
 
 	  _chunkEnd = chunkLength + _offset;
 	  _chunkDepth++;
-
-	  System.out.println("CHUNK: " + _chunkEnd + " L:" + chunkLength + " " + _chunkDepth + " OFFSET:" + _offset);
 	}
 
 	// XXX: assume ucs-16
 	if (repId.equals("IDL:omg.org/CORBA/WStringValue:1.0")) {
 	  value = read_wstring();
-	  System.out.println("V: " + value);
 	}
 	else if (! repId.startsWith("RMI:") && ! repId.startsWith("IDL:")) {
-	  System.out.println("REP: " + repId);
-	  
 	  log.warning("unknown rep: " + repId + " " + Integer.toHexString(code));
 	  throw new UnsupportedOperationException("problem parsing");
 	}
@@ -556,10 +543,8 @@ public class IiopReader extends org.omg.CORBA_2_3.portable.InputStream {
 
 	    int refIndex = _refOffsets.size();
 
-	    System.out.println("VH: " + cl  + " SO:" + startOffset);
 	    value = _valueHandler.readValue(this, startOffset,
 					    cl, repId, runTime);
-	    System.out.println("VH: " + value);
 	  }
 	}
 
@@ -571,13 +556,10 @@ public class IiopReader extends org.omg.CORBA_2_3.portable.InputStream {
 	if (_chunkDepth > 0) {
 	  _chunkDepth--;
 
-	  System.out.println("CHUNK_END: " + _chunkDepth + " " + _chunkEnd + " " + getOffset());
-	  
 	  int delta = _chunkEnd - getOffset();
 	  _chunkEnd = -1;
 	  
 	  if (delta > 0) {
-	    System.out.println("SKIP: " + delta);
 	    skip(delta);
 	  }
 	  
@@ -586,16 +568,12 @@ public class IiopReader extends org.omg.CORBA_2_3.portable.InputStream {
 	  if (newChunk >= 0)
 	    throw new IllegalStateException("expected end of chunk.");
 	  
-	  System.out.println("NEXT_END: NEW: " + newChunk);
-
 	  _chunkDepth = - (newChunk + 1);
 
 	  if (_chunkDepth > 0) {
 	    newChunk = readInt();
 	    //System.out.println("REDO:" + newChunk + " D:" + _chunkDepth);
 	    _chunkEnd = _offset + newChunk;
-	    
-	    System.out.println("NEXT_END:" + _chunkEnd + " D:" + _chunkDepth + " OFF:" + _offset + " NEW: " + newChunk);
 	  }
 	}
       }
@@ -893,8 +871,6 @@ public class IiopReader extends org.omg.CORBA_2_3.portable.InputStream {
       int delta = read_long();
       int offset = _offset + delta - 4;
 
-      System.out.println("D: " + delta + " -> " + offset);
-
       len = readInt(_buffer, offset);
 
       offset += 4;
@@ -910,8 +886,6 @@ public class IiopReader extends org.omg.CORBA_2_3.portable.InputStream {
       cb.append(read_char());
 
     int v = read_octet(); // null
-
-    System.out.println("STRING: " + cb);
 
     return cb.toString();
   }
@@ -1340,8 +1314,6 @@ public class IiopReader extends org.omg.CORBA_2_3.portable.InputStream {
   private void handleChunk()
     throws IOException
   {
-    System.out.println("HANDLE-CHUNK: " + _offset + " " + _chunkEnd);
-
     while (_offset % 4 != 0) {
       _offset++;
     }
@@ -1349,8 +1321,6 @@ public class IiopReader extends org.omg.CORBA_2_3.portable.InputStream {
     int chunkLength = readImpl();
 
     _chunkEnd = getOffset() + chunkLength;
-    
-    System.out.println("NEW-LEN: " + chunkLength + " " + _chunkEnd);
   }
 
   /**
@@ -1374,7 +1344,6 @@ public class IiopReader extends org.omg.CORBA_2_3.portable.InputStream {
   private void handleFragment()
     throws IOException
   {
-    System.out.println("HANDLE-FRAGMENT:");
     if (_length < _offset)
       throw new IllegalStateException(L.l("Read {0} past length {1}",
 					  "" + _offset, "" + _length));

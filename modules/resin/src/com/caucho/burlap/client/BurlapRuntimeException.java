@@ -93,71 +93,18 @@ public class BurlapRuntimeException extends RuntimeException {
   }
 
   /**
-   * Returns the message.
+   * Returns the underlying cause.
    */
-  public String getMessage()
+  public Throwable getRootCause()
   {
-    if (rootCause != null)
-      return rootCause.getMessage();
-    else
-      return super.getMessage();
+    return this.rootCause;
   }
 
   /**
    * Returns the underlying cause.
    */
-  public Throwable getRootCause()
+  public Throwable getCause()
   {
-    return rootCause;
-  }
-
-  /**
-   * Prints the stack trace.
-   */
-  public void printStackTrace()
-  {
-    if (rootCause != null) {
-      System.err.println("Root cause is:");
-      rootCause.printStackTrace();
-    }
-
-    super.printStackTrace();
-  }
-
-  /**
-   * Prints the stack trace.
-   */
-  public void printStackTrace(PrintWriter out)
-  {
-    if (rootCause != null) {
-      out.println("Root cause is:");
-      rootCause.printStackTrace(out);
-    }
-    
-    super.printStackTrace(out);
-  }
-
-  /**
-   * Prints the stack trace.
-   */
-  public void printStackTrace(PrintStream out)
-  {
-    if (rootCause != null) {
-      out.println("Root cause is:");
-      rootCause.printStackTrace(out);
-    }
-
-    super.printStackTrace(out);
-  }
-
-  /**
-   * Prints the exception as a string.
-   */
-  public String toString()
-  {
-    if (rootCause != null)
-      return getClass() + ": " + rootCause;
-    else
-      return super.getMessage();
+    return this.rootCause;
   }
 }

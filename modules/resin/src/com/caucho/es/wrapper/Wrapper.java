@@ -86,8 +86,6 @@ public class Wrapper {
 
     // technically, need to resort to dynamic.  This is a cheat.
     if (! destClass.exists() && cl.getInterfaces().length > 0) {
-      System.out.println("DEST: " + destClass + " " + destClass.exists());
-
       cl = cl.getInterfaces()[0];
       name = cl.getName().replace('/', '.');
     }

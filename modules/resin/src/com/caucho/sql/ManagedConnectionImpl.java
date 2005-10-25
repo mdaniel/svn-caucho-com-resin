@@ -119,6 +119,7 @@ public class ManagedConnectionImpl
   {
     _factory = factory;
     _dbPool = factory.getDBPool();
+    _id = _dbPool.newSpyId();
       
     _driver = driver;
     _connConfig = connConfig;
@@ -131,8 +132,6 @@ public class ManagedConnectionImpl
 
     _lastEventTime = Alarm.getCurrentTime();
 
-    _id = _dbPool.newSpyId();
-    
     int preparedStatementCacheSize = _dbPool.getPreparedStatementCacheSize();
 
     if (preparedStatementCacheSize > 0) {
