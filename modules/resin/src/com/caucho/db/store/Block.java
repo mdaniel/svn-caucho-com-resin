@@ -55,8 +55,8 @@ abstract public class Block implements ClockCacheItem, CacheListener {
   protected static final FreeList<byte[]> _freeBuffers =
     new FreeList<byte[]>(4);
 
-  private Store _store;
-  private long _blockId;
+  private final Store _store;
+  private final long _blockId;
 
   private int _useCount;
 
@@ -68,14 +68,7 @@ abstract public class Block implements ClockCacheItem, CacheListener {
 
   Block(Store store, long blockId)
   {
-    if (store.getId() != (blockId & Store.BLOCK_INDEX_MASK)) {
-      throw new IllegalArgumentException(L.l("block {0} must match store {1}.",
-					     blockId & Store.BLOCK_INDEX_MASK,
-					     store));
-    }
-    else if (store.getId() <= 0) {
-      throw new IllegalArgumentException(L.l("invalid store {0}.", store));
-    }
+    store.validateBlockId(blockId);
     
     _store = store;
     _blockId = blockId;

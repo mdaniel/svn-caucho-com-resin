@@ -596,6 +596,29 @@ public class Store {
 
     return block;
   }
+
+  /**
+   * Check that an allocated block is valid.
+   */
+  protected void validateBlockId(long blockId)
+    throws IllegalArgumentException, IllegalStateException
+  {
+    RuntimeException e = null;
+    
+    if (isClosed())
+      e = new IllegalStateException(L.l("store {0} is closing.", this));
+    else if (getId() <= 0)
+      e = new IllegalStateException(L.l("invalid store {0}.", this));
+    else if (getId() != (blockId & BLOCK_INDEX_MASK)) {
+      e = new IllegalArgumentException(L.l("block {0} must match store {1}.",
+					     blockId & BLOCK_INDEX_MASK,
+					     this));
+    }
+
+    if (e != null)
+      throw e;
+  }
+
   
   /**
    * Frees a block.
