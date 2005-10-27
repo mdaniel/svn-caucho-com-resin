@@ -109,12 +109,12 @@ abstract public class Type {
   /**
    * Generates the type for the table.
    */
-  public String generateCreateTableSQL(AmberManager manager, int length, int precision, int scale)
+  public String generateCreateColumnSQL(AmberManager manager, int length, int precision, int scale)
   {
     if (length == 0)
       length = 255;
 
-    return manager.getCreateTableSQL(Types.VARCHAR, length, precision, scale);
+    return manager.getCreateColumnSQL(Types.VARCHAR, length, precision, scale);
   }
   
   /**

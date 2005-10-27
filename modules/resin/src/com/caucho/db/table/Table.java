@@ -565,6 +565,8 @@ public class Table extends Store {
 
   public TableIterator createTableIterator()
   {
+    assertStoreActive();
+    
     return new TableIterator(this);
   }
 

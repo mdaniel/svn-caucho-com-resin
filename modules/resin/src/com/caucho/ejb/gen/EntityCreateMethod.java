@@ -85,6 +85,16 @@ public class EntityCreateMethod extends BaseMethod {
   public void generateCall(JavaWriter out, String []args)
     throws IOException
   {
+    /*
+    out.println("Thread thread = Thread.currentThread();");
+    out.println("ClassLoader oldLoader = thread.getContextClassLoader();");
+    out.println();
+    out.println("try {");
+    out.pushDepth();
+    out.println("thread.setContextClassLoader(_server.getClassLoader());");
+    out.println();
+    */
+
     out.println(_contextClassName + " cxt;");
     out.println("cxt = new " + _contextClassName + "(_server);");
 
@@ -100,5 +110,12 @@ public class EntityCreateMethod extends BaseMethod {
     else
       throw new RuntimeException(L.l("trying to create unknown type {0}",
                                      retType.getName()));
+
+    /*
+    out.popDepth();
+    out.println("} finally {");
+    out.println("  thread.setContextClassLoader(oldLoader);");
+    out.println("}");
+    */
   }
 }

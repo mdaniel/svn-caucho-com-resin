@@ -268,14 +268,15 @@ public class Column {
     if (_sqlType != null)
       sqlType = _sqlType;
     else {
-      sqlType = _type.generateCreateTableSQL(manager, _length, _precision, _scale);
+      sqlType = _type.generateCreateColumnSQL(manager, _length, _precision, _scale);
     }
 
     if ("identity".equals(_generatorType)) {
       cb.append(manager.getMetaData().createIdentitySQL(sqlType));
-    }else{
+    } else {
       cb.append(sqlType);
     }
+    
     if (isPrimaryKey()) {
       cb.append(" PRIMARY KEY");
     } else if (! "identity".equals(_generatorType)) {

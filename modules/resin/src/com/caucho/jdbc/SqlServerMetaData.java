@@ -64,40 +64,40 @@ public class SqlServerMetaData extends JdbcMetaData {
    * New version to Return SQL for the table with the given
    * SQL type.  Takes, length, precision and scale.
    */
-  public String getCreateTableSQL(int sqlType, int length, int precision, int scale) {
+  public String getCreateColumnSQL(int sqlType, int length, int precision, int scale) {
        String type = null;
 
     switch (sqlType) {
     case Types.BOOLEAN:
-        type = getCreateColumnSQL(Types.BIT, length, precision, scale);
+        type = getCreateColumnSQLImpl(Types.BIT, length, precision, scale);
       break;
 
     case Types.TINYINT:
-        type = getCreateColumnSQL(Types.TINYINT, length, precision, scale);
+        type = getCreateColumnSQLImpl(Types.TINYINT, length, precision, scale);
       break;
 
     case Types.DATE:
-      type = getCreateColumnSQL(sqlType, length, precision, scale);
+      type = getCreateColumnSQLImpl(sqlType, length, precision, scale);
       if (type == null)
-	type = getCreateColumnSQL(Types.TIMESTAMP, length, precision, scale);
+	type = getCreateColumnSQLImpl(Types.TIMESTAMP, length, precision, scale);
       break;
 
     case Types.TIME:
-      type = getCreateColumnSQL(sqlType, length, precision, scale);
+      type = getCreateColumnSQLImpl(sqlType, length, precision, scale);
       if (type == null)
-	type = getCreateColumnSQL(Types.TIMESTAMP, length, precision, scale);
+	type = getCreateColumnSQLImpl(Types.TIMESTAMP, length, precision, scale);
       break;
 
     case Types.DOUBLE:
-      type = getCreateColumnSQL(Types.FLOAT, length, precision, scale);
+      type = getCreateColumnSQLImpl(Types.FLOAT, length, precision, scale);
       break;
 
     case Types.NUMERIC:
-        type = getCreateColumnSQL(Types.NUMERIC, length, precision, scale);
+        type = getCreateColumnSQLImpl(Types.NUMERIC, length, precision, scale);
         break;
 
     default:
-      type = getCreateColumnSQL(sqlType, length, precision, scale);
+      type = getCreateColumnSQLImpl(sqlType, length, precision, scale);
       break;
     }
 

@@ -69,8 +69,6 @@ public class BurlapRemote {
   {
     this.type = type;
     this.url = url;
-
-    Thread.dumpStack();
   }
 
   /**
@@ -78,7 +76,6 @@ public class BurlapRemote {
    */
   public BurlapRemote()
   {
-    Thread.dumpStack();
   }
 
   /**
@@ -86,7 +83,7 @@ public class BurlapRemote {
    */
   public String getType()
   {
-    return type;
+    return this.type;
   }
 
   /**
@@ -94,7 +91,7 @@ public class BurlapRemote {
    */
   public String getURL()
   {
-    return url;
+    return this.url;
   }
 
   /**
@@ -110,7 +107,7 @@ public class BurlapRemote {
    */
   public int hashCode()
   {
-    return url.hashCode();
+    return this.url.hashCode();
   }
 
   /**
@@ -123,7 +120,7 @@ public class BurlapRemote {
 
     BurlapRemote remote = (BurlapRemote) obj;
 
-    return url.equals(remote.url);
+    return this.url.equals(remote.url);
   }
 
   /**
@@ -131,6 +128,6 @@ public class BurlapRemote {
    */
   public String toString()
   {
-    return "[BurlapRemote " + url + "]";
+    return "[BurlapRemote " + this.url + "]";
   }
 }

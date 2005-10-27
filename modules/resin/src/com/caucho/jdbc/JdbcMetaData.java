@@ -293,38 +293,39 @@ public class JdbcMetaData {
    * New version to Return SQL for the table with the given
    * SQL type.  Takes, length, precision and scale.
    */
-  public String getCreateTableSQL(int sqlType, int length, int precision, int scale) {
-       String type = null;
+  public String getCreateColumnSQL(int sqlType, int length, int precision, int scale)
+  {
+    String type = null;
 
     switch (sqlType) {
     case Types.BOOLEAN:
-      type = getCreateColumnSQL(sqlType, length, precision, scale);
+      type = getCreateColumnSQLImpl(sqlType, length, precision, scale);
       if (type == null)
-        type = getCreateColumnSQL(Types.BIT, length, precision, scale);
+        type = getCreateColumnSQLImpl(Types.BIT, length, precision, scale);
       break;
 
     case Types.DATE:
-      type = getCreateColumnSQL(sqlType, length, precision, scale);
+      type = getCreateColumnSQLImpl(sqlType, length, precision, scale);
       if (type == null)
-	type = getCreateColumnSQL(Types.TIMESTAMP, length, precision, scale);
+	type = getCreateColumnSQLImpl(Types.TIMESTAMP, length, precision, scale);
       break;
 
     case Types.TIME:
-      type = getCreateColumnSQL(sqlType, length, precision, scale);
+      type = getCreateColumnSQLImpl(sqlType, length, precision, scale);
       if (type == null)
-	type = getCreateColumnSQL(Types.TIMESTAMP, length, precision, scale);
+	type = getCreateColumnSQLImpl(Types.TIMESTAMP, length, precision, scale);
       break;
 
     case Types.DOUBLE:
-      type = getCreateColumnSQL(Types.DOUBLE, length, precision, scale);
+      type = getCreateColumnSQLImpl(Types.DOUBLE, length, precision, scale);
       break;
 
     case Types.NUMERIC:
-        type = getCreateColumnSQL(Types.NUMERIC, length, precision, scale);
+        type = getCreateColumnSQLImpl(Types.NUMERIC, length, precision, scale);
         break;
 
     default:
-      type = getCreateColumnSQL(sqlType, length, precision, scale);
+      type = getCreateColumnSQLImpl(sqlType, length, precision, scale);
       break;
     }
 
@@ -337,7 +338,7 @@ public class JdbcMetaData {
   /**
    * Returns the SQL for the table with the given SQL type.
    */
-  protected String getCreateColumnSQL(int sqlType, int length, int precision, int scale)
+  protected String getCreateColumnSQLImpl(int sqlType, int length, int precision, int scale)
   {
     Connection conn = null;
 

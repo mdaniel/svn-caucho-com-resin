@@ -118,6 +118,7 @@ public class HessianProxy implements InvocationHandler {
 
     InputStream is = null;
     URLConnection conn = null;
+    HttpURLConnection httpConn = null;
     
     try {
       conn = _factory.openConnection(_url);
@@ -145,7 +146,7 @@ public class HessianProxy implements InvocationHandler {
       os.flush();
 
       if (conn instanceof HttpURLConnection) {
-        HttpURLConnection httpConn = (HttpURLConnection) conn;
+	httpConn = (HttpURLConnection) conn;
         int code = 500;
 
         try {
@@ -199,8 +200,8 @@ public class HessianProxy implements InvocationHandler {
       }
       
       try {
-	if (conn != null)
-	  ((HttpURLConnection) conn).disconnect();
+	if (httpConn != null)
+	  httpConn.disconnect();
       } catch (Throwable e) {
       }
     }

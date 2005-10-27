@@ -619,6 +619,22 @@ public class Store {
       throw e;
   }
 
+  /**
+   * Check that an allocated block is valid.
+   */
+  protected void assertStoreActive()
+    throws IllegalStateException
+  {
+    RuntimeException e = null;
+    
+    if (isClosed())
+      e = new IllegalStateException(L.l("store {0} is closing.", this));
+    else if (getId() <= 0)
+      e = new IllegalStateException(L.l("invalid store {0}.", this));
+
+    if (e != null)
+      throw e;
+  }
   
   /**
    * Frees a block.

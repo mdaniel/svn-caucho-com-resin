@@ -78,9 +78,9 @@ public class PrimitiveByteType extends PrimitiveType {
   /**
    * Generates the type for the table.
    */
-  public String generateCreateTableSQL(AmberManager manager, int length, int precision, int scale)
+  public String generateCreateColumnSQL(AmberManager manager, int length, int precision, int scale)
   {
-    return manager.getCreateTableSQL(Types.TINYINT, length, precision, scale);
+    return manager.getCreateColumnSQL(Types.TINYINT, length, precision, scale);
   }
 
   /**

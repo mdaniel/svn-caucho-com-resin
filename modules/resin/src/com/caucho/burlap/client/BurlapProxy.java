@@ -116,8 +116,10 @@ public class BurlapProxy implements InvocationHandler {
 
     InputStream is = null;
     
+    URLConnection conn = null;
+    HttpURLConnection httpConn = null;
     try {
-      URLConnection conn = _factory.openConnection(_url);
+      conn = _factory.openConnection(_url);
       conn.setRequestProperty("Content-Type", "text/xml");
     
       OutputStream os;
@@ -146,7 +148,7 @@ public class BurlapProxy implements InvocationHandler {
       }
 
       if (conn instanceof HttpURLConnection) {
-        HttpURLConnection httpConn = (HttpURLConnection) conn;
+	httpConn = (HttpURLConnection) conn;
         int code = 500;
 
         try {
@@ -193,8 +195,14 @@ public class BurlapProxy implements InvocationHandler {
     } catch (BurlapProtocolException e) {
       throw new BurlapRuntimeException(e);
     } finally {
-      if (is != null)
-        is.close();
+      try {
+	if (is != null)
+	  is.close();
+      } catch (IOException e) {
+      }
+      
+      if (httpConn != null)
+	httpConn.disconnect();
     }
   }
 }

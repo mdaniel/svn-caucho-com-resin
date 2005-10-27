@@ -72,13 +72,13 @@ public class StringType extends Type {
   /**
    * Generates the type for the table.
    */
-  public String generateCreateTableSQL(AmberManager manager, int length, int precision, int scale)
+  public String generateCreateColumnSQL(AmberManager manager, int length, int precision, int scale)
   {
     if (length == 0)
       length = 255;
     
     return "VARCHAR(" + length + ")";
-    // return manager.getCreateTableSQL(Types.VARCHAR, length);
+    // return manager.getCreateColumnSQL(Types.VARCHAR, length);
   }
 
   /**

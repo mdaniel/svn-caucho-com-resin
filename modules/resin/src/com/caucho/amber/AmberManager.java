@@ -1008,8 +1008,8 @@ public class AmberManager {
    * the SQL for the table with the given SQL type
    * but takes sqlType, length, precision, and scale.
    */
-  public String getCreateTableSQL(int sqlType, int length, int precision, int scale) {
-    return getMetaData().getCreateTableSQL(sqlType, length, precision, scale);
+  public String getCreateColumnSQL(int sqlType, int length, int precision, int scale) {
+    return getMetaData().getCreateColumnSQL(sqlType, length, precision, scale);
   }
 
   public String toString()
