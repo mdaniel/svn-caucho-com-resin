@@ -136,7 +136,7 @@ class MultipartForm {
         if (log.isLoggable(Level.FINE))
           log.fine("mp-file: " + name + "(filename:" + filename + ")");
       } else {
-        CharBuffer value = CharBuffer.allocate();
+        CharBuffer value = new CharBuffer();
         int ch;
 
         for (ch = is.readChar(); ch >= 0; ch = is.readChar())
@@ -145,7 +145,7 @@ class MultipartForm {
         if (log.isLoggable(Level.FINE))
           log.fine("mp-form: " + name + "=" + value);
 
-        addTable(table, name, value.close());
+        addTable(table, name, value.toString());
       }
     }
 

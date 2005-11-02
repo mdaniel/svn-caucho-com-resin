@@ -68,6 +68,8 @@ public class JavaClassGenerator {
   private ClassLoader _parentLoader;
   // class loader
   private ClassLoader _loader;
+
+  private String _encoding;
   
   // The search path
   private Path _searchPath;
@@ -128,6 +130,11 @@ public class JavaClassGenerator {
   public Path getSearchPath()
   {
     return _searchPath;
+  }
+  
+  public void setEncoding(String encoding)
+  {
+    _encoding = encoding;
   }
   
   /**
@@ -258,6 +265,9 @@ public class JavaClassGenerator {
 
     WriteStream os = javaPath.openWrite();
     try {
+      if (_encoding != null)
+	os.setEncoding(_encoding);
+      
       JavaWriter out = new JavaWriter(os);
 
       javaClass.generate(out);
@@ -295,6 +305,9 @@ public class JavaClassGenerator {
     compiler.setClassLoader(getPreloadLoader());
     compiler.setClassDir(getWorkDir());
 
+    if (_encoding != null)
+      compiler.setEncoding(_encoding);
+
     compiler.compile(fullClassName.replace('.', '/') + ".java", null);
   }
   
@@ -308,6 +321,9 @@ public class JavaClassGenerator {
 
     compiler.setClassLoader(getPreloadLoader());
     compiler.setClassDir(getWorkDir());
+
+    if (_encoding != null)
+      compiler.setEncoding(_encoding);
 
     String []files = new String[_pendingFiles.size()];
     _pendingFiles.toArray(files);
