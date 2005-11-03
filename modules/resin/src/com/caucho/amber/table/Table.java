@@ -345,7 +345,7 @@ public class Table {
 	conn.close();
       }
     } catch (Exception e) {
-      throw new ConfigException(e);
+      throw error(e);
     }
   }
 
@@ -407,7 +407,7 @@ public class Table {
     } catch (ConfigException e) {
       throw e;
     } catch (Exception e) {
-      throw new ConfigException(e);
+      throw error(e);
     }
     
     for (Column column : _columns) {
@@ -516,6 +516,14 @@ public class Table {
       return new LineConfigException(_configLocation + msg, e);
     else
       return new ConfigException(msg, e);
+  }
+
+  protected ConfigException error(Throwable e)
+  {
+    if (_configLocation != null)
+      return new LineConfigException(_configLocation + e.getMessage(), e);
+    else
+      return new ConfigException(e);
   }
 
   /**

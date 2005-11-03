@@ -37,7 +37,8 @@ import com.caucho.java.*;
 import com.caucho.util.*;
 
 public class EJBMetaDataImpl implements EJBMetaData, Serializable {
-  private transient EJBHome home;
+  // ejb/0230
+  private EJBHome home;
   
   private Class homeInterfaceClass;
   private Class remoteInterfaceClass;
@@ -49,7 +50,9 @@ public class EJBMetaDataImpl implements EJBMetaData, Serializable {
   /**
    * Null constructor for serialization.
    */
-  public EJBMetaDataImpl() {}
+  public EJBMetaDataImpl()
+  {
+  }
 
   /**
    * Create a new meta data.
@@ -67,22 +70,27 @@ public class EJBMetaDataImpl implements EJBMetaData, Serializable {
 
   public EJBHome getEJBHome()
   {
-    return home;
+    return this.home;
+  }
+
+  public void setEJBHome(EJBHome home)
+  {
+    this.home = home;
   }
 
   public Class getHomeInterfaceClass()
   {
-    return homeInterfaceClass;
+    return this.homeInterfaceClass;
   }
 
   public Class getRemoteInterfaceClass()
   {
-    return remoteInterfaceClass;
+    return this.remoteInterfaceClass;
   }
 
   public Class getPrimaryKeyClass()
   {
-    return primaryKeyClass;
+    return this.primaryKeyClass;
   }
 
   void setSession(boolean isSession)
@@ -92,7 +100,7 @@ public class EJBMetaDataImpl implements EJBMetaData, Serializable {
 
   public boolean isSession()
   {
-    return isSession;
+    return this.isSession;
   }
 
   void setStatelessSession(boolean isStatelessSession)
@@ -102,12 +110,12 @@ public class EJBMetaDataImpl implements EJBMetaData, Serializable {
 
   public boolean isStatelessSession()
   {
-    return isStatelessSession;
+    return this.isStatelessSession;
   }
 
   public String toString()
   {
-    CharBuffer cb = CharBuffer.allocate();
+    CharBuffer cb = new CharBuffer();
 
     cb.append("MetaData[");
     if (isSession() && isStatelessSession())
@@ -126,6 +134,6 @@ public class EJBMetaDataImpl implements EJBMetaData, Serializable {
 
     cb.append("]");
 
-    return cb.close();
+    return cb.toString();
   }
 }

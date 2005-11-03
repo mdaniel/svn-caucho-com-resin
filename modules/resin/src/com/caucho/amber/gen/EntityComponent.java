@@ -513,13 +513,13 @@ public class EntityComponent extends ClassComponent {
     }
     
     out.println();
-    out.println("if (__caucho_item == null) {");
+    out.println("if (__caucho_state == com.caucho.amber.entity.Entity.P_TRANSACTIONAL || __caucho_state == com.caucho.amber.entity.Entity.P_NEW) {");
     out.println("}");
-    out.println("else if (__caucho_state == com.caucho.amber.entity.Entity.P_TRANSACTIONAL || __caucho_state == com.caucho.amber.entity.Entity.P_NEW) {");
-    out.println("}");
-    out.println("else if (! __caucho_session.isInTransaction()) {");
+    out.println("else if (__caucho_session == null ||");
+    out.println("         ! __caucho_session.isInTransaction()) {");
     out.println("  __caucho_state = com.caucho.amber.entity.Entity.P_NON_TRANSACTIONAL;");
-    out.println("  __caucho_item.save(this);");
+    out.println("  if (__caucho_item != null)");
+    out.println("    __caucho_item.save(this);");
     out.println("}");
     out.println("else {");
     out.println("  __caucho_state = com.caucho.amber.entity.Entity.P_TRANSACTIONAL;");

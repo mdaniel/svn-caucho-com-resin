@@ -795,7 +795,7 @@ public class AmberManager {
       Table table = _lazyTable.remove(0);
 
       if (getDataSource() == null)
-	throw new ConfigException(L.l("No configured data-source found."));
+	throw new ConfigException(L.l("No configured data-source found for <ejb-server>."));
 
       if (getCreateDatabaseTables())
 	table.createDatabaseTable(this);

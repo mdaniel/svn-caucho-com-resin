@@ -623,6 +623,8 @@ public class EjbConfig {
 						   targetEntity,
 						   targetField);
 
+	  srcRel.setLocation(relation.getLocation());
+	  
 	  srcRel.setRelationName(relation.getName());
 	  srcRel.setSQLTable(relation.getSQLTable());
 	  srcRel.setOrderBy(sourceRole.getOrderBy());
@@ -636,6 +638,8 @@ public class EjbConfig {
 						   targetField,
 						   sourceEntity,
 						   sourceField);
+
+	  dstRel.setLocation(relation.getLocation());
 
 	  dstRel.setRelationName(relation.getName());
 	  dstRel.setSQLTable(relation.getSQLTable());
@@ -677,6 +681,8 @@ public class EjbConfig {
 						   targetEntity,
 						   targetField);
 
+	  srcRel.setLocation(relation.getLocation());
+	  
 	  if (relation.getName() != null)
 	    srcRel.setRelationName(relation.getName());
 	  else if (relation.getSQLTable() != null)
@@ -708,6 +714,8 @@ public class EjbConfig {
 						 sourceField,
 						 targetEntity);
 
+	  srcRel.setLocation(relation.getLocation());
+	  
 	  srcRel.setSQLColumns(sourceRole.getSQLColumns());
 
 	  /*
@@ -727,6 +735,8 @@ public class EjbConfig {
 	  CmrManyToOne dstRel = new CmrManyToOne(targetEntity,
 						 targetField,
 						 sourceEntity);
+	  
+	  dstRel.setLocation(relation.getLocation());
 	  
 	  dstRel.setSQLColumns(targetRole.getSQLColumns());
       
@@ -760,6 +770,8 @@ public class EjbConfig {
 						 sourceField,
 						 targetEntity);
 
+	  srcRel.setLocation(relation.getLocation());
+	  
 	  srcRel.setSQLColumns(sourceRole.getSQLColumns());
       
 	  sourceEntity.addRelation(srcRel);
@@ -769,6 +781,7 @@ public class EjbConfig {
 						 sourceEntity,
 						 sourceField);
 
+	  dstRel.setLocation(relation.getLocation());
 	  dstRel.setSQLColumns(sourceRole.getSQLColumns());
 	  dstRel.setOrderBy(targetRole.getOrderBy());
 

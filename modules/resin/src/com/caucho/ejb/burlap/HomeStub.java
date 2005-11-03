@@ -72,10 +72,14 @@ abstract public class HomeStub extends BurlapStub implements EJBHome {
 
   public EJBMetaData getEJBMetaData() throws RemoteException
   {
-    if (metaData == null)
-      metaData = _ejb_getEJBMetaData();
+    if (this.metaData == null) {
+      EJBMetaDataImpl metaData = (EJBMetaDataImpl) _ejb_getEJBMetaData();
+      metaData.setEJBHome(this);
+      
+      this.metaData = metaData;
+    }
     
-    return metaData;
+    return this.metaData;
   }
 
   /**

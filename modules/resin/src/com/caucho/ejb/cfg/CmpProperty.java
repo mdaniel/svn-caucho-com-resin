@@ -92,6 +92,15 @@ public class CmpProperty {
   }
 
   /**
+   * Sets the location.
+   */
+  public void setLocation(String location)
+  {
+    if (location != null)
+      _location = location;
+  }
+
+  /**
    * Returns the location of the cmp-field in the config file.
    */
   public String getLocation()
