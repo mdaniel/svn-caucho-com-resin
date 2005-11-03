@@ -109,6 +109,7 @@ public class EnvServerManager implements EnvironmentListener {
   private Path _workPath;
 
   private int _entityCacheSize = 32 * 1024;
+  
   private long _entityCacheTimeout = 5000L;
   
   private ConfigException _initException;

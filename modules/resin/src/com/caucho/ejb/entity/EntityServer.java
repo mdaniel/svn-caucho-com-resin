@@ -107,7 +107,8 @@ public class EntityServer extends AbstractServer {
   private Constructor _contextConstructor;
 
   private boolean _isCacheable = true;
-  private long _cacheTimeout = 5000;
+  // private long _cacheTimeout = 5000;
+  private long _cacheTimeout = 1000;
   private long _invalidateTime;
 
   private int _jdbcIsolation = -1;

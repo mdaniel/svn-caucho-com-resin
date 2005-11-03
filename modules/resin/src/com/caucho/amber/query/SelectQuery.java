@@ -275,7 +275,7 @@ public class SelectQuery extends AbstractQuery {
 
       if (type != null) {
 	long timeout = type.getCacheTimeout();
-
+	
 	if (timeout < _cacheTimeout)
 	  _cacheTimeout = timeout;
 

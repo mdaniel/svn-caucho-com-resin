@@ -1547,7 +1547,6 @@ public class EntityType extends Type {
    */
   public String toString()
   {
-    System.out.println("XXX IN EntityType.toString()");
     return "EntityType[" + _beanClass.getName() + "]";
   }
 }
