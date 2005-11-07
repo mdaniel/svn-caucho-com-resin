@@ -161,31 +161,6 @@ class ClobWriter extends Writer {
   private void flushBlock()
     throws IOException
   {
-    if (_blockCount == 0 && _length <= Inode.INLINE_BLOB_SIZE) {
-      System.arraycopy(_buffer, 0, _inodeBuffer, _inodeOffset + 8, _offset);
-      _offset = 0;
-    }
-    else {
-      int length = _offset;
-      int offset = 0;
-
-      _offset = 0;
-
-      while (offset < length) {
-	int sublen = length - offset;
-
-	if (Inode.INODE_BLOCK_SIZE < sublen)
-	  sublen = Inode.INODE_BLOCK_SIZE;
-	
-	long fragAddr = _store.writeFragment(_xa, _buffer, offset, sublen);
-
-	writeFragmentAddr(_blockCount++, fragAddr);
-
-	offset += sublen;
-      }
-    }
-    
-    Inode.writeLong(_inodeBuffer, _inodeOffset, _length);
   }
 
   /**

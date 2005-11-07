@@ -91,6 +91,11 @@ import com.caucho.db.Database;
  *
  * Fragments are stored in 1k chunks with a single byte prefix indicating
  * its use.
+ *
+ * <h3>Transactions</h3>
+ *
+ * Fragments are not associated with transactions.  The rollback is
+ * associated with a transaction.
  */
 public class Store {
   private final static Logger log = Log.open(Store.class);
@@ -112,7 +117,7 @@ public class Store {
   // Need to use at least 4 fragment blocks before try recycling
   public final static long FRAGMENT_CLOCK_MIN   = 4 * BLOCK_SIZE;
   
-  public final static int FRAGMENT_SIZE = 4 * 1024;
+  public final static int FRAGMENT_SIZE = 8 * 1024;
   public final static int FRAGMENT_PER_BLOCK
     = BLOCK_SIZE / (FRAGMENT_SIZE + 1);
   
@@ -503,7 +508,7 @@ public class Store {
    *
    * @return the block id of the allocated block.
    */
-  public Block allocate()
+  public Block allocateBlock()
     throws IOException
   {
     return allocateBlock(ALLOC_USED);
@@ -514,7 +519,7 @@ public class Store {
    *
    * @return the block id of the allocated block.
    */
-  public Block allocateFragment()
+  private Block allocateFragmentBlock()
     throws IOException
   {
     return allocateBlock(ALLOC_FRAGMENT);
@@ -525,7 +530,7 @@ public class Store {
    *
    * @return the block id of the allocated block.
    */
-  public Block allocateIndex()
+  public Block allocateIndexBlock()
     throws IOException
   {
     return allocateBlock(ALLOC_INDEX);
@@ -707,6 +712,12 @@ public class Store {
 			  byte []buffer, int offset, int length)
     throws IOException
   {
+    if (FRAGMENT_SIZE - fragmentOffset < length) {
+      // server/13df
+      throw new IllegalArgumentException(L.l("read offset {0} length {1} too long",
+					     fragmentOffset, length));
+    }
+
     Block block = readBlock(addressToBlockId(fragmentAddress));
 
     try {
@@ -714,17 +725,35 @@ public class Store {
 
       byte []blockBuffer = block.getBuffer();
 
-      if (FRAGMENT_SIZE - fragmentOffset < length) {
-	// server/13df
-	length = FRAGMENT_SIZE - fragmentOffset;
-      }
-
       synchronized (blockBuffer) {
 	System.arraycopy(blockBuffer, blockOffset + 1 + fragmentOffset,
 			 buffer, offset, length);
       }
 
       return length;
+    } finally {
+      block.free();
+    }
+  }
+  
+  /**
+   * Reads a long value from a fragment.
+   *
+   * @return the long value
+   */
+  public long readFragmentLong(long fragmentAddress, int fragmentOffset)
+    throws IOException
+  {
+    Block block = readBlock(addressToBlockId(fragmentAddress));
+
+    try {
+      int blockOffset = getFragmentOffset(fragmentAddress);
+
+      byte []blockBuffer = block.getBuffer();
+
+      synchronized (blockBuffer) {
+	return readLong(blockBuffer, fragmentOffset);
+      }
     } finally {
       block.free();
     }
@@ -767,23 +796,13 @@ public class Store {
   }
   
   /**
-   * Writes a fragment.
+   * Allocates a new fragment.
    *
    * @return the fragment address
    */
-  public long writeFragment(Transaction xa,
-			    byte []buffer, int offset, int length)
+  public long allocateFragment()
     throws IOException
   {
-    if (buffer == null)
-      throw new NullPointerException();
-    if (FRAGMENT_SIZE < length)
-      throw new IllegalArgumentException("too large fragment: " + length);
-    if (offset < 0 || length <= 0 || buffer.length < offset + length) {
-      System.err.println("bad fragment: " + offset + " " + length);
-      throw new IllegalArgumentException();
-    }
-
     boolean isLoop = false;
     while (true) {
       Block block = null;
@@ -793,15 +812,14 @@ public class Store {
       
 	if (freeBlockId >= 0) {
 	  block = readBlock(freeBlockId);
-
-	  if (freeBlockId != _fragmentClockLastAddr) {
-	    _fragmentClockTotal += FRAGMENT_PER_BLOCK * FRAGMENT_SIZE;
-	  }
 	}
 	else if (! isLoop &&
 		 FRAGMENT_CLOCK_MIN < _fragmentClockTotal &&
 		 2 * _fragmentClockUsed < _fragmentClockTotal) {
-	  System.out.println("USED: " + _fragmentClockUsed / 1024 + " TOTAL:" + _fragmentClockTotal / 1024);
+	  if (log.isLoggable(Level.FINE)) {
+	    log.fine(this + " fragment loop total:" +
+		     _fragmentClockTotal + " used:" + _fragmentClockUsed);
+	  }
 	  
 	  _fragmentClockAddr = 0;
 	  _fragmentClockLastAddr = 0;
@@ -811,68 +829,155 @@ public class Store {
 	  continue;
 	}
 	else {
-	  block = allocateFragment();
+	  block = allocateFragmentBlock();
 	  
 	  _fragmentClockTotal += FRAGMENT_PER_BLOCK * FRAGMENT_SIZE;
 	}
       
 	_fragmentClockAddr = block.getBlockId();
 	_fragmentClockLastAddr = _fragmentClockAddr;
-	
-	WriteBlock writeBlock = xa.createAutoCommitWriteBlock(block);
-	block = writeBlock;
 
-	long fragAddr = writeFragmentBlock(writeBlock, buffer, offset, length);
-	
-	if (fragAddr != 0) {
-	  synchronized (_statLock) {
-	    // XXX: issue with transaction and rollback
-	    _fragmentUseCount++;
-	  }
-	  
+	long fragAddr = allocateFragment(block);
+
+	if (fragAddr != 0)
 	  return fragAddr;
-	}
-	else {
-	  // XXX: db/01g3?
-	  _fragmentClockAddr += BLOCK_SIZE;
-	}
       } finally {
 	if (block != null)
 	  block.free();
       }
+	
+      // XXX: db/01g3?
+      _fragmentClockAddr += BLOCK_SIZE;
+	
+      long nextBlockId = firstFragment(_fragmentClockAddr);
+
+      if (nextBlockId > 0) {
+	updateClockUse(nextBlockId);
+      }
     }
   }
-
+  
+  
   /**
-   * Writes the fragment into the block.
+   * Allocates a new fragment.
+   *
+   * @return the fragment address
    */
-  private long writeFragmentBlock(Block block,
-				  byte []buffer, int offset, int length)
+  private long allocateFragment(Block block)
     throws IOException
   {
-    byte []blockBuffer = block.getBuffer();
+    byte []buffer = block.getBuffer();
 
-    synchronized (blockBuffer) {
+    synchronized (buffer) {
       for (int i = 0; i < FRAGMENT_PER_BLOCK; i++) {
-	int blockOffset = i * (FRAGMENT_SIZE + 1);
+	int offset = i * (1 + FRAGMENT_SIZE);
+	    
+	if (buffer[offset] == 0) {
+	  buffer[offset] = 1;
 
-	if (blockBuffer[blockOffset] == 0) {
-	  blockBuffer[blockOffset] = 1;
-	  
-	  System.arraycopy(buffer, offset,
-			   blockBuffer, blockOffset + 1,
-			   length);
+	  block.setDirty(offset, offset + 1);
+	      
+	  synchronized (_statLock) {
+	    _fragmentUseCount++;
+	  }
 
-	  block.setDirty(blockOffset, blockOffset + length + 1);
-
-	  return (block.getBlockId() & BLOCK_MASK) + i;
+	  return blockIdToAddress(block.getBlockId()) + i;
 	}
-	else
-	  _fragmentClockUsed += FRAGMENT_SIZE;
       }
     }
 
     return 0;
+  }
+  
+  /**
+   * Updates the clock use count.
+   */
+  private void updateClockUse(long blockAddr)
+    throws IOException
+  {
+    Block block = readBlock(blockAddr);
+
+    try {
+      byte []buffer = block.getBuffer();
+
+      synchronized (buffer) {
+	for (int i = 0; i < FRAGMENT_PER_BLOCK; i++) {
+	  int offset = i * (1 + FRAGMENT_SIZE);
+	    
+	  if (buffer[offset] != 0)
+	    _fragmentClockUsed += FRAGMENT_SIZE;
+	}
+      }
+    } finally {
+      block.free();
+    }
+  }
+  
+  /**
+   * Writes a fragment.
+   *
+   * @param fragmentAddress the fragment to write
+   * @param fragmentOffset the offset into the fragment
+   * @param buffer the write buffer
+   * @param offset offset into the write buffer
+   * @param length the number of bytes to write
+   *
+   * @return the fragment id
+   */
+  public void writeFragment(long fragmentAddress, int fragmentOffset,
+			    byte []buffer, int offset, int length)
+    throws IOException
+  {
+    if (FRAGMENT_SIZE - fragmentOffset < length)
+      throw new IllegalArgumentException(L.l("write offset {0} length {1} too long",
+					     fragmentOffset, length));
+    
+    Block block = readBlock(addressToBlockId(fragmentAddress));
+
+    try {
+      int blockOffset = getFragmentOffset(fragmentAddress);
+
+      byte []blockBuffer = block.getBuffer();
+
+      blockOffset += 1 + fragmentOffset;
+
+      synchronized (blockBuffer) {
+	System.arraycopy(buffer, offset,
+			 blockBuffer, blockOffset,
+			 length);
+
+	block.setDirty(blockOffset, blockOffset + length);
+      }
+    } finally {
+      block.free();
+    }
+  }
+  
+  /**
+   * Writes a long value to a fragment.
+   *
+   * @return the long value
+   */
+  public void writeFragmentLong(long fragmentAddress, int fragmentOffset,
+				long value)
+    throws IOException
+  {
+    Block block = readBlock(addressToBlockId(fragmentAddress));
+
+    try {
+      int blockOffset = getFragmentOffset(fragmentAddress);
+
+      byte []blockBuffer = block.getBuffer();
+      int offset = blockOffset + 1 + fragmentOffset;
+
+      synchronized (blockBuffer) {
+	writeLong(blockBuffer, offset, value);
+
+	block.setDirty(offset, offset + 8);
+      }
+    } finally {
+      block.free();
+    }
   }
   
   /**
@@ -1104,6 +1209,37 @@ public class Store {
     e.fillInStackTrace();
     log.log(Level.WARNING, e.toString(), e);
     return e;
+  }
+
+  /**
+   * Reads the long.
+   */
+  public static long readLong(byte []buffer, int offset)
+  {
+    return (((buffer[offset + 0] & 0xffL) << 56) +
+	    ((buffer[offset + 1] & 0xffL) << 48) +
+	    ((buffer[offset + 2] & 0xffL) << 40) +
+	    ((buffer[offset + 3] & 0xffL) << 32) +
+	    ((buffer[offset + 4] & 0xffL) << 24) +
+	    ((buffer[offset + 5] & 0xffL) << 16) +
+	    ((buffer[offset + 6] & 0xffL) << 8) +
+	    ((buffer[offset + 7] & 0xffL)));
+  }
+
+  /**
+   * Writes the long.
+   */
+  public static void writeLong(byte []buffer, int offset, long v)
+  {
+    buffer[offset + 0] = (byte) (v >> 56);
+    buffer[offset + 1] = (byte) (v >> 48);
+    buffer[offset + 2] = (byte) (v >> 40);
+    buffer[offset + 3] = (byte) (v >> 32);
+    
+    buffer[offset + 4] = (byte) (v >> 24);
+    buffer[offset + 5] = (byte) (v >> 16);
+    buffer[offset + 6] = (byte) (v >> 8);
+    buffer[offset + 7] = (byte) (v);
   }
   
   public String toString()

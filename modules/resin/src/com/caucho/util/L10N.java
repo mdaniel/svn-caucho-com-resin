@@ -222,6 +222,11 @@ public class L10N {
   {
     return l(msg, o1, String.valueOf(i2));
   }
+
+  public String l(String msg, int i1, int i2)
+  {
+    return l(msg, String.valueOf(i1), String.valueOf(i2));
+  }
   
   public String l(String msg, Object o1, Object o2, Object o3)
   {

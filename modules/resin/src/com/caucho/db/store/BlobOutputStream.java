@@ -46,25 +46,19 @@ import com.caucho.db.sql.Expr;
 public class BlobOutputStream extends OutputStream {
   private static final Logger log
     = Logger.getLogger(BlobOutputStream.class.getName());
-  
-  private Store _store;
 
   private Transaction _xa;
-  private boolean _isLocalXA;
+  private Store _store;
   
   private TempBuffer _tempBuffer;
   private byte []_buffer;
   private int _offset;
   private int _bufferEnd;
 
-  private long _length;
-
   private Inode _inode;
 
   private byte []_inodeBuffer;
   private int _inodeOffset;
-
-  private int _blockCount;
   
   /**
    * Creates a blob output stream.
@@ -74,7 +68,19 @@ public class BlobOutputStream extends OutputStream {
   public BlobOutputStream(Transaction xa, Store store,
 			  byte []inode, int inodeOffset)
   {
-    init(xa, store, inode, inodeOffset);
+    init(store, inode, inodeOffset);
+
+    _xa = xa;
+  }
+  
+  /**
+   * Creates a blob output stream.
+   *
+   * @param store the output store
+   */
+  public BlobOutputStream(Store store, byte []inode, int inodeOffset)
+  {
+    init(store, inode, inodeOffset);
   }
   
   /**
@@ -84,30 +90,21 @@ public class BlobOutputStream extends OutputStream {
    */
   BlobOutputStream(Inode inode)
   {
-    Transaction xa = Transaction.create();
-    
-    init(xa, inode.getStore(), inode.getBuffer(), 0);
+    init(inode.getStore(), inode.getBuffer(), 0);
 
-    _isLocalXA = true;
     _inode = inode;
   }
 
   /**
    * Initialize the output stream.
    */
-  public void init(Transaction xa, Store store, byte []inode, int inodeOffset)
+  public void init(Store store, byte []inode, int inodeOffset)
   {
-    _xa = xa;
-    _isLocalXA = false;
-    
     _store = store;
-
-    _length = 0;
 
     _inodeBuffer = inode;
     _inodeOffset = inodeOffset;
 
-    _blockCount = 0;
     _offset = 0;
     
     _tempBuffer = TempBuffer.allocate();
@@ -126,7 +123,6 @@ public class BlobOutputStream extends OutputStream {
     }
 
     _buffer[_offset++] = (byte) v;
-    _length++;
   }
 
   /**
@@ -150,7 +146,6 @@ public class BlobOutputStream extends OutputStream {
       _offset += sublen;
 
       length -= sublen;
-      _length += sublen;
     }
   }
 
@@ -165,19 +160,7 @@ public class BlobOutputStream extends OutputStream {
 	return;
       
       flushBlock();
-      
-      writeLong(_inodeBuffer, _inodeOffset, _length);
-
-      try {
-	if (_isLocalXA)
-	  _xa.commit();
-      } catch (Throwable e) {
-	log.log(Level.FINE, e.toString(), e);
-      }
     } finally {
-      if (_isLocalXA)
-	_xa.close();
-      
       Inode inode = _inode;
       _inode = null;
       
@@ -200,94 +183,9 @@ public class BlobOutputStream extends OutputStream {
   private void flushBlock()
     throws IOException
   {
-    if (_blockCount == 0 && _length <= Inode.INLINE_BLOB_SIZE) {
-      System.arraycopy(_buffer, 0, _inodeBuffer, _inodeOffset + 8, _offset);
+    int length = _offset;
+    _offset = 0;
     
-      Inode.writeLong(_inodeBuffer, _inodeOffset, _length);
-    }
-    else {
-      int length = _offset;
-      int offset = 0;
-
-      _offset = 0;
-
-      long currentLength = Inode.readLong(_inodeBuffer, _inodeOffset);
-
-      while (offset < length) {
-	int sublen = length - offset;
-
-	if (Inode.INODE_BLOCK_SIZE < sublen)
-	  sublen = Inode.INODE_BLOCK_SIZE;
-
-	long fragAddr = _store.writeFragment(_xa, _buffer, offset, sublen);
-
-	writeFragmentAddr(_blockCount++, fragAddr);
-
-	currentLength += sublen;
-	Inode.writeLong(_inodeBuffer, _inodeOffset, currentLength);
-
-	offset += sublen;
-      }
-    }
-  }
-
-  /**
-   * Writes the block id into the inode.
-   */
-  private void writeFragmentAddr(int count, long fragAddr)
-    throws IOException
-  {
-    Inode.writeFragmentAddr(count, fragAddr,
-			    _inodeBuffer, _inodeOffset, _store);
-  }
-
-  /**
-   * Writes the long.
-   */
-  private static void writeLong(byte []buffer, int offset, long v)
-  {
-    buffer[offset + 0] = (byte) (v >> 56);
-    buffer[offset + 1] = (byte) (v >> 48);
-    buffer[offset + 2] = (byte) (v >> 40);
-    buffer[offset + 3] = (byte) (v >> 32);
-    
-    buffer[offset + 4] = (byte) (v >> 24);
-    buffer[offset + 5] = (byte) (v >> 16);
-    buffer[offset + 6] = (byte) (v >> 8);
-    buffer[offset + 7] = (byte) (v);
-  }
-
-  /**
-   * Reads a long.
-   */
-  private static long readLong(byte []buffer, int offset)
-  {
-    return (((buffer[offset + 0] & 0xffL) << 56) |
-	    ((buffer[offset + 1] & 0xffL) << 48) |
-	    ((buffer[offset + 2] & 0xffL) << 40) |
-	    ((buffer[offset + 3] & 0xffL) << 32) |
-	    
-	    ((buffer[offset + 4] & 0xffL) << 24) |
-	    ((buffer[offset + 4] & 0xffL) << 16) |
-	    ((buffer[offset + 4] & 0xffL) << 8) |
-	    ((buffer[offset + 4] & 0xffL)));
-  }
-
-  /**
-   * Writes the short.
-   */
-  private static void writeShort(byte []buffer, int offset, short v)
-  {
-    buffer[offset + 0] = (byte) (v >> 8);
-    buffer[offset + 1] = (byte) (v);
-  }
-
-  /**
-   * Reads a short.
-   */
-  private static int readShort(byte []buffer, int offset)
-  {
-    return (((buffer[offset + 0] & 0xff) << 8) |
-	    ((buffer[offset + 1] & 0xff)));
+    Inode.append(_inodeBuffer, _inodeOffset, _store, _buffer, 0, length);
   }
 }

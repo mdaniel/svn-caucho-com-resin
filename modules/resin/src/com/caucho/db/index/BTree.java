@@ -367,7 +367,7 @@ public class BTree {
       byte []rightBuffer = rightBlock.getBuffer();
       long rightBlockId = rightBlock.getBlockId();
     
-      leftBlock = xa.createWriteBlock(_store.allocateIndex());
+      leftBlock = xa.createWriteBlock(_store.allocateIndexBlock());
       leftBlock.setFlushDirtyOnCommit(false);
       leftBlock.setDirty(0, Store.BLOCK_SIZE);
       
@@ -431,13 +431,13 @@ public class BTree {
 
       int parentFlags = getInt(parentBuffer, FLAGS_OFFSET);
 
-      leftBlock = xa.createWriteBlock(_store.allocateIndex());
+      leftBlock = xa.createWriteBlock(_store.allocateIndexBlock());
       leftBlock.setFlushDirtyOnCommit(false);
       leftBlock.setDirty(0, Store.BLOCK_SIZE);
       
       long leftBlockId = leftBlock.getBlockId();
     
-      rightBlock = xa.createWriteBlock(_store.allocateIndex());
+      rightBlock = xa.createWriteBlock(_store.allocateIndexBlock());
       rightBlock.setFlushDirtyOnCommit(false);
       rightBlock.setDirty(0, Store.BLOCK_SIZE);
       
@@ -1276,7 +1276,7 @@ public class BTree {
     Store store = new Store(db, "test", null);
     store.create();
 
-    Block block = store.allocateIndex();
+    Block block = store.allocateIndexBlock();
     long blockId = block.getBlockId();
     block.free();
 
@@ -1288,7 +1288,7 @@ public class BTree {
   {
     Store store = Store.create(path);
 
-    Block block = store.allocateIndex();
+    Block block = store.allocateIndexBlock();
     long blockId = block.getBlockId();
     block.free();
 

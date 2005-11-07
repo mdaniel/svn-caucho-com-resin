@@ -308,6 +308,7 @@ public class DeployContainer<C extends DeployController>
       if (controller != null)
 	return controller;
 
+      // server/10tl
       /*
       // server/0523
       // Controllers with the same root directory are merged
@@ -324,6 +325,7 @@ public class DeployContainer<C extends DeployController>
 
     return newController;
   }
+  
 
   private void init(C controller)
   {

@@ -119,43 +119,14 @@ public class BlobInputStream extends InputStream {
   public int read(byte []buf, int offset, int length)
     throws IOException
   {
-    if (_length <= _offset)
-      return -1;
+    int sublen = Inode.read(_inode, _inodeOffset,
+			    _store, _offset,
+			    buf, offset, length);
 
-    if (_length <= Inode.INLINE_BLOB_SIZE) {
-      if (_length - _offset < length)
-	length = (int) (_length - _offset);
+    if (sublen > 0)
+      _offset += sublen;
 
-      System.arraycopy(_inode, _inodeOffset + 8 + (int) _offset,
-		       buf, offset, length);
-
-      _offset += length;
-
-      return length;
-    }
-
-    long fragAddr = _fragmentId;
-
-    // cache the last fragment id
-    if (fragAddr == 0 ||
-	_lastOffset / Inode.INODE_BLOCK_SIZE !=
-	_offset / Inode.INODE_BLOCK_SIZE) {
-      int count = (int) (_offset / Inode.INODE_BLOCK_SIZE);
-      
-      fragAddr = Inode.readFragmentAddr(count, _inode, _inodeOffset, _store);
-
-      _lastOffset = _offset;
-      _fragmentId = fragAddr;
-    }
-
-    int fragOffset = (int) _offset % Inode.INODE_BLOCK_SIZE;
-
-    int len = _store.readFragment(fragAddr, fragOffset, buf, offset, length);
-
-    if (len > 0)
-      _offset += len;
-
-    return len;
+    return sublen;
   }
 
   /**

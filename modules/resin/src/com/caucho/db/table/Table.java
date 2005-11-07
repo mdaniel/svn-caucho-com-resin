@@ -235,7 +235,7 @@ public class Table extends Store {
     try {
       is.skip(BLOCK_SIZE + ROOT_DATA_END);
 
-      CharBuffer cb = new CharBuffer();
+      StringBuilder cb = new StringBuilder();
 
       int ch;
       while ((ch = is.read()) > 0) {
@@ -297,7 +297,7 @@ public class Table extends Store {
       if (keyCompare == null)
 	continue;
 
-      Block rootBlock = allocate();
+      Block rootBlock = allocateBlock();
       long rootBlockId = rootBlock.getBlockId();
       rootBlock.free();
 
@@ -415,14 +415,18 @@ public class Table extends Store {
 
       Block block = readBlock(addressToBlockId(rootAddr));
 
-      byte []blockBuffer = block.getBuffer();
+      try {
+	byte []blockBuffer = block.getBuffer();
 
-      synchronized (blockBuffer) {
-	for (int j = 0; j < blockBuffer.length; j++) {
-	  blockBuffer[j] = 0;
+	synchronized (blockBuffer) {
+	  for (int j = 0; j < blockBuffer.length; j++) {
+	    blockBuffer[j] = 0;
+	  }
+
+	  block.setDirty(0, BLOCK_SIZE);
 	}
-
-	block.setDirty(0, BLOCK_SIZE);
+      } finally {
+	block.free();
       }
     }
 
@@ -442,30 +446,32 @@ public class Table extends Store {
     Transaction xa = Transaction.create();
     xa.setAutoCommit(true);
 
-    TableIterator iter = createTableIterator();
+    try {
+      TableIterator iter = createTableIterator();
 
-    iter.init(xa);
+      iter.init(xa);
 
-    Column []columns = _row.getColumns();
+      Column []columns = _row.getColumns();
     
-    while (iter.next()) {
-      iter.prevRow();
+      while (iter.next()) {
+	iter.prevRow();
 
-      byte []blockBuffer = iter.getBuffer();
+	byte []blockBuffer = iter.getBuffer();
       
-      while (iter.nextRow()) {
-	long rowAddress = iter.getRowAddress();
-	int rowOffset = iter.getRowOffset();
+	while (iter.nextRow()) {
+	  long rowAddress = iter.getRowAddress();
+	  int rowOffset = iter.getRowOffset();
 	  
-	for (int i = 0; i < columns.length; i++) {
-	  Column column = columns[i];
+	  for (int i = 0; i < columns.length; i++) {
+	    Column column = columns[i];
 
-	  column.setIndex(xa, blockBuffer, rowOffset, rowAddress, null);
+	    column.setIndex(xa, blockBuffer, rowOffset, rowAddress, null);
+	  }
 	}
       }
+    } finally {
+      xa.commit();
     }
-
-    xa.commit();
   }
 
   private void writeTableHeader(WriteStream os)

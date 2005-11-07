@@ -119,47 +119,17 @@ public class ClobReader extends Reader {
   public int read(char []buf, int offset, int length)
     throws IOException
   {
-    if (_length <= _offset)
-      return -1;
+    /*
+    int sublen = Inode.read(_inode, _inodeOffset,
+			    _store, _offset,
+			    buf, offset, length);
+    */
+    int sublen = 0;
 
-    if (_length <= Inode.INLINE_BLOB_SIZE) {
-      if (_length - _offset < 2 * length)
-	length = (int) (_length - _offset) >> 1;
+    if (sublen > 0)
+      _offset += offset;
 
-      for (int i = 0; i < length; i++) {
-	int ch1 = _inode[_inodeOffset + 8 + (int) _offset] & 0xff;
-	int ch2 = _inode[_inodeOffset + 9 + (int) _offset] & 0xff;
-	
-	buf[offset + i] = (char) ((ch1 << 8) + ch2);
-
-	_offset += 2;
-      }
-
-      return length;
-    }
-
-    long fragAddr = _fragmentId;
-
-    // cache the last fragment id
-    if (fragAddr == 0 ||
-	_lastOffset / Inode.INODE_BLOCK_SIZE !=
-	_offset / Inode.INODE_BLOCK_SIZE) {
-      int count = (int) _offset / Inode.INODE_BLOCK_SIZE;
-      
-      fragAddr = Inode.readFragmentAddr(count, _inode, _inodeOffset, _store);
-
-      _lastOffset = _offset;
-      _fragmentId = fragAddr;
-    }
-
-    int fragOffset = (int) _offset % Inode.INODE_BLOCK_SIZE;
-
-    int len = _store.readFragment(fragAddr, fragOffset, buf, offset, length);
-
-    if (len > 0)
-      _offset += 2 * len;
-
-    return len;
+    return sublen;
   }
 
   /**

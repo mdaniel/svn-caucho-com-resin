@@ -185,8 +185,10 @@ public class BlockManager {
     }
     else if (block.allocate())
       return block;
-    else
+    else {
+      System.out.println("NO-ALLOC:");
       block = null;
+    }
 
     if ((blockId & Store.BLOCK_MASK) == 0)
       throw stateError(L.l("Block 0 is reserved."));

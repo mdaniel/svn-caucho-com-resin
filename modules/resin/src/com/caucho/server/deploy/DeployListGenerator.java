@@ -136,10 +136,14 @@ public class DeployListGenerator<E extends DeployController> extends DeployGener
 
       if (controller != null) {
 	// merge with the rest of the entries
-	for (i++; i < _generatorList.size(); i++) {
-	  DeployGenerator<E> generator = _generatorList.get(i);
+	for (int j = 0; j < _generatorList.size(); j++) {
+	  if (i == j)
+	    continue;
+	  
+	  DeployGenerator<E> generator = _generatorList.get(j);
 
-	  controller = generator.mergeController(controller, key);
+	  // XXX: issue with server/10tl
+	  controller = _generatorList.get(j).mergeController(controller, key);
 	}
 	
 	return controller;

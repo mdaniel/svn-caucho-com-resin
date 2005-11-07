@@ -49,16 +49,17 @@ import com.caucho.vfs.OutputStreamWithBuffer;
  * The inode contains 16 long values
  * <pre>
  *  0) length of the saved file
- *  1-14) direct fragment addresses (to 224k)
+ *  1-14) direct fragment addresses (to 112k)
  *  15) pointer to the indirect block
  * </pre>
  *
- * The indirect block itself is divided into sections:
+ * The indirect block (an 8k fragment) itself is divided into sections:
  * <pre>
- *  0-4095) fragment addresses (to 64M)
- *  4096-6143) single indirect fragment addresses (to 256G)
- *  6144-7167) double indirect fragment addresses (to 1P)
- *  7168-8191) triple indirect fragment addresses (to 2^63)
+ *  0-511) single indirect fragment addresses (4M)
+ *  512-639) double indirect fragment addresses (1G, 2^30)
+ *  640-767) triple indirect fragment addresses (to 1T, 2^40)
+ *  768-895) quad indirect fragment addresses (to 1P, 2^50)
+ *  896-1023) penta indirect fragment addresses (to 1X, to 2^60)
  * </pre>
  */
 public class Inode {
@@ -69,16 +70,20 @@ public class Inode {
   public static final int INLINE_BLOB_SIZE = 120;
   public static final int INODE_BLOCK_SIZE = Store.FRAGMENT_SIZE;
 
-  // direct addresses are stored in the inode itself (56k of data).
+  public static final int INDIRECT_BLOCKS = INODE_BLOCK_SIZE / 8;
+
+  // direct addresses are stored in the inode itself (112k of data).
   public static final int DIRECT_BLOCKS = 14;
-  // single indirect addresses are stored in the indirect block (13M data)
-  public static final int SINGLE_INDIRECT_BLOCKS = 4096;
-  // double indirect addresses (2^36 = 64G data)
-  public static final int DOUBLE_INDIRECT_BLOCKS = 2048;
-  // triple indirect addresses (2^48 = 256T data)
-  public static final int TRIPLE_INDIRECT_BLOCKS = 1024;
-  // quad indirect addresses (2^61 = 2E data)
-  public static final int QUAD_INDIRECT_BLOCKS = 1024;
+  // single indirect addresses are stored in the indirect block (4M data)
+  public static final int SINGLE_INDIRECT_BLOCKS = 512;
+  // double indirect addresses (2^30 = 1G data)
+  public static final int DOUBLE_INDIRECT_BLOCKS = 128;
+  // triple indirect addresses (2^40 = 1T data)
+  public static final int TRIPLE_INDIRECT_BLOCKS = 128;
+  // quad indirect addresses (2^50 = 2P data)
+  public static final int QUAD_INDIRECT_BLOCKS = 128;
+  // penta indirect addresses (2^60 = 2X data)
+  public static final int PENTA_INDIRECT_BLOCKS = 128;
   
   private static final byte []NULL_BYTES = new byte[INODE_SIZE];
   
@@ -165,8 +170,9 @@ public class Inode {
       if (length < sublen)
 	sublen = (int) length;
 
-      int len = read(buffer, writeOffset, sublen,
-		     offset, _bytes, 0, _store);
+      int len = read(_bytes, 0, _store,
+		     offset,
+		     buffer, writeOffset, sublen);
 
       if (len <= 0)
 	break;
@@ -180,43 +186,48 @@ public class Inode {
   }
 
   /**
-   * Reads a buffer.
+   * Reads into a buffer.
+   *
+   * @param inode the inode buffer
+   * @param inodeOffset the offset of the inode data in the buffer
+   * @param store the owning store
+   * @param fileOffset the offset into the file to read
+   * @param buffer the buffer receiving the data
+   * @param bufferOffset the offset into the receiving buffer
+   * @param bufferLength the maximum number of bytes to read
+   *
+   * @return the number of bytes read
    */
-  static int read(byte []buffer, int bufferOffset, int bufferLength,
-		  long offset, byte []inode, int inodeOffset, Store store)
+  static int read(byte []inode, int inodeOffset, Store store,
+		  long fileOffset, 
+		  byte []buffer, int bufferOffset, int bufferLength)
     throws IOException
   {
-    int fragOffset;
+    long fileLength = readLong(inode, inodeOffset);
 
-    long fragAddr;
-    
-    synchronized (inode) {
-      long length = readLong(inode, inodeOffset);
+    int sublen = bufferLength;
+    if (fileLength - fileOffset < sublen)
+      sublen = (int) (fileLength - fileOffset);
       
-      if (length <= offset)
-	return -1;
+    if (sublen <= 0)
+      return -1;
 
-      if (length - offset < bufferLength)
-	bufferLength = (int) (length - offset);
+    if (fileLength <= Inode.INLINE_BLOB_SIZE) {
+      System.arraycopy(inode, inodeOffset + 8 + (int) fileOffset,
+		       buffer, bufferOffset, sublen);
 
-      if (length <= Inode.INLINE_BLOB_SIZE) {
-	System.arraycopy(inode, inodeOffset + 8 + (int) offset,
-			 buffer, bufferOffset, bufferLength);
-
-	return bufferLength;
-      }
-
-      int blockCount = (int) (offset / Inode.INODE_BLOCK_SIZE);
-
-      fragOffset = (int) offset % Inode.INODE_BLOCK_SIZE;
-
-      fragAddr = readFragmentAddr(blockCount, inode, inodeOffset, store);
+      return sublen;
     }
 
-    int len = store.readFragment(fragAddr, fragOffset,
-				 buffer, bufferOffset, bufferLength);
+    long fragAddr = readFragmentAddr(inode, inodeOffset, store, fileOffset);
+    int fragOffset = (int) (fileOffset % Inode.INODE_BLOCK_SIZE);
+
+    if (INODE_BLOCK_SIZE - fragOffset < sublen)
+      sublen = INODE_BLOCK_SIZE - fragOffset;
+
+    store.readFragment(fragAddr, fragOffset, buffer, bufferOffset, sublen);
     
-    return len;
+    return sublen;
   }
 
   /**
@@ -264,24 +275,24 @@ public class Inode {
 	if (length <= INLINE_BLOB_SIZE || bytes == null)
 	  return;
 
-	int fragCount = (int) ((length - 1) / INODE_BLOCK_SIZE);
-
-	for (; fragCount >= 0; fragCount--) {
-	  long fragAddr = readFragmentAddr(fragCount, bytes, 0, _store);
+	for (; length > 0; length -= INODE_BLOCK_SIZE) {
+	  long fragAddr = readFragmentAddr(bytes, 0, _store, length - 1);
 
 	  if ((fragAddr & Store.BLOCK_MASK) == 0) {
-	    String msg = _store + ": inode block " + fragCount + " has 0 fragment";
+	    String msg = _store + ": inode block " + length + " has 0 fragment";
 	    throw stateError(msg);
 	  }
 
 	  _store.deleteFragment(fragAddr);
 
+	  int fragCount = (int) ((length - 1) / INODE_BLOCK_SIZE);
+
 	  // remove the indirect blocks
 	  if (fragCount == DIRECT_BLOCKS) {
-	    long blockId = readLong(bytes, (DIRECT_BLOCKS + 1) * 8);
+	    fragAddr = readLong(bytes, (DIRECT_BLOCKS + 1) * 8);
 
-	    if (blockId != 0) {
-	      _store.freeBlock(blockId);
+	    if (fragAddr != 0) {
+	      _store.deleteFragment(fragAddr);
 	    }
 	  }
 	}
@@ -294,35 +305,107 @@ public class Inode {
   }
 
   /**
-   * Returns the fragment id for the given offset.
+   * Updates the buffer.  Called only from the blob classes.
    */
-  static long readFragmentAddr(int fragCount,
-			       byte []inode, int inodeOffset,
-			       Store store)
+  static void append(byte []inode, int inodeOffset,
+		     Store store,
+		     byte []buffer, int offset, int length)
     throws IOException
   {
-    if (fragCount < DIRECT_BLOCKS)
-      return readLong(inode, inodeOffset + 8 * (1 + fragCount));
-    else if (fragCount < DIRECT_BLOCKS + SINGLE_INDIRECT_BLOCKS) {
-      long blockId = readLong(inode, inodeOffset + (DIRECT_BLOCKS + 1) * 8);
+    long currentLength = readLong(inode, inodeOffset);
+    long newLength = currentLength + length;
+    
+    writeLong(inode, inodeOffset, newLength);
 
-      if (blockId == 0)
+    if (newLength <= INLINE_BLOB_SIZE) {
+      System.arraycopy(buffer, offset,
+		       inode, (int) (inodeOffset + 8 + currentLength),
+		       length);
+    }
+    else {
+      // XXX: theoretically deal with case of appending to inline, although
+      // the blobs are the only writers and will avoid that case.
+
+      if (currentLength % INODE_BLOCK_SIZE != 0) {
+	long fragAddr = readFragmentAddr(inode, inodeOffset,
+					 store,
+					 currentLength);
+
+	int fragOffset = (int) (currentLength % INODE_BLOCK_SIZE);
+	int sublen = length;
+
+	if (INODE_BLOCK_SIZE - fragOffset < sublen)
+	  sublen = INODE_BLOCK_SIZE - fragOffset;
+
+	store.writeFragment(fragAddr, fragOffset, buffer, offset, sublen);
+
+	offset += sublen;
+	length -= sublen;
+
+	currentLength += sublen;
+      }
+      
+      while (length > 0) {
+	int sublen = length;
+
+	if (INODE_BLOCK_SIZE < sublen)
+	  sublen = INODE_BLOCK_SIZE;
+
+	long fragAddr = store.allocateFragment();
+
+	writeFragmentAddr(inode, inodeOffset, store, currentLength, fragAddr);
+
+	store.writeFragment(fragAddr, 0, buffer, offset, sublen);	
+
+	offset += sublen;
+	length -= sublen;
+
+	currentLength += sublen;
+      }
+    }
+  }
+
+  /**
+   * Returns the fragment id for the given offset.
+   */
+  static long readFragmentAddr(byte []inode, int inodeOffset,
+			       Store store,
+			       long fileOffset)
+    throws IOException
+  {
+    long fragCount = fileOffset / INODE_BLOCK_SIZE;
+    
+    if (fragCount < DIRECT_BLOCKS)
+      return readLong(inode, (int) (inodeOffset + 8 * (1 + fragCount)));
+    else if (fragCount < DIRECT_BLOCKS + SINGLE_INDIRECT_BLOCKS) {
+      long indirectAddr;
+      indirectAddr = readLong(inode, inodeOffset + (DIRECT_BLOCKS + 1) * 8);
+
+      if (indirectAddr == 0)
 	throw new IllegalStateException(L.l("null block id"));
 
-      Block block = null;
+      int offset = (int) (8 * (fragCount - DIRECT_BLOCKS));
 
-      try {
-	block = store.readBlock(blockId);
+      return store.readFragmentLong(indirectAddr, offset);
+    }
+    else if (fragCount < (DIRECT_BLOCKS +
+			  SINGLE_INDIRECT_BLOCKS +
+			  DOUBLE_INDIRECT_BLOCKS * INDIRECT_BLOCKS)) {
+      long indirectAddr;
+      indirectAddr = readLong(inode, inodeOffset + (DIRECT_BLOCKS + 1) * 8);
 
-	synchronized (block) {
-	  int blockOffset = 8 * (fragCount - DIRECT_BLOCKS);
+      if (indirectAddr == 0)
+	throw new IllegalStateException(L.l("null block id"));
 
-	  return readLong(block.getBuffer(), blockOffset);
-	}
-      } finally {
-	if (block != null)
-	  block.free();
-      }
+      fragCount -= DIRECT_BLOCKS + SINGLE_INDIRECT_BLOCKS;
+
+      int index = (int) (fragCount / INDIRECT_BLOCKS);
+      
+      long doubleIndirectAddr = store.readFragmentLong(indirectAddr, index);
+					  
+      int offset = (int) (8 * (fragCount % INDIRECT_BLOCKS));
+
+      return store.readFragmentLong(doubleIndirectAddr, offset);
     }
     else
       throw new IllegalStateException(L.l("Can't yet support data over 64M"));
@@ -331,47 +414,61 @@ public class Inode {
   /**
    * Writes the block id into the inode.
    */
-  static void writeFragmentAddr(int fragCount, long fragAddr,
-				byte []inode, int offset,
-				Store store)
+  private static void writeFragmentAddr(byte []inode, int offset,
+					Store store,
+					long fragLength, long fragAddr)
     throws IOException
   {
+    int fragCount = (int) (fragLength / Store.FRAGMENT_SIZE);
+    
     // XXX: not sure if correct, needs XA?
     if ((fragAddr & Store.BLOCK_MASK) == 0) {
       String msg = store + ": inode block " + fragCount + " writing 0 fragment";
       throw stateError(msg);
     }
-    
-    if (fragCount < DIRECT_BLOCKS)
+
+    if (fragCount < DIRECT_BLOCKS) {
       writeLong(inode, offset + (fragCount + 1) * 8, fragAddr);
+    }
     else if (fragCount < DIRECT_BLOCKS + SINGLE_INDIRECT_BLOCKS) {
-      long blockId = readLong(inode, offset + (DIRECT_BLOCKS + 1) * 8);
+      long indAddr = readLong(inode, offset + (DIRECT_BLOCKS + 1) * 8);
 
-      Block block = null;
+      if (indAddr == 0) {
+	indAddr = store.allocateFragment();
 
-      try {
-	if (blockId == 0) {
-	  block = store.allocate();
-
-	  blockId = block.getBlockId();
-
-	  writeLong(inode, offset + (DIRECT_BLOCKS + 1) * 8, blockId);
-	}
-	else {
-	  block = store.readBlock(blockId);
-	}
-
-	synchronized (block.getBuffer()) {
-	  int blockOffset = 8 * (fragCount - DIRECT_BLOCKS);
-
-	  writeLong(block.getBuffer(), blockOffset, fragAddr);
-	}
-
-	block.setDirty(offset, offset + INODE_SIZE);
-      } finally {
-	if (block != null)
-	  block.free();
+	writeLong(inode, offset + (DIRECT_BLOCKS + 1) * 8, indAddr);
       }
+
+      int fragOffset = 8 * (fragCount - DIRECT_BLOCKS);
+      
+      store.writeFragmentLong(indAddr, fragOffset, fragAddr);
+    }
+    else if (fragCount < (DIRECT_BLOCKS +
+			  SINGLE_INDIRECT_BLOCKS +
+			  DOUBLE_INDIRECT_BLOCKS * INDIRECT_BLOCKS)) {
+      long indAddr = readLong(inode, offset + (DIRECT_BLOCKS + 1) * 8);
+
+      if (indAddr == 0) {
+	indAddr = store.allocateFragment();
+
+	writeLong(inode, offset + (DIRECT_BLOCKS + 1) * 8, indAddr);
+      }
+
+      int count = fragCount - DIRECT_BLOCKS - SINGLE_INDIRECT_BLOCKS;
+
+      int dblIndCount = count / INDIRECT_BLOCKS;
+
+      long dblIndAddr = store.readFragmentLong(indAddr, dblIndCount * 8);
+
+      if (dblIndAddr == 0) {
+	dblIndAddr = store.allocateFragment();
+
+	store.writeFragmentLong(indAddr, dblIndCount * 8, dblIndAddr);
+      }
+
+      int fragOffset = 8 * (count % INDIRECT_BLOCKS);
+      
+      store.writeFragmentLong(dblIndAddr, fragOffset, fragAddr);
     }
     else
       throw new IllegalStateException(L.l("Can't yet support data over 64M"));

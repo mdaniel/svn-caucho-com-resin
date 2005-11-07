@@ -32,6 +32,8 @@ package com.caucho.util;
 import java.util.ArrayList;
 import java.util.Iterator;
 
+import java.util.logging.Logger;
+
 /**
  * Fixed length cache with a LRU replacement policy.  If cache items
  * implement CacheListener, they will be informed when they're removed
@@ -40,6 +42,8 @@ import java.util.Iterator;
  * <p>LongKeyLruCache is synchronized.
  */
 public class LongKeyLruCache<V> {
+  private static final Logger log
+    = Logger.getLogger(LongKeyLruCache.class.getName());
   private static final Integer NULL = new Integer(0);
   
   // hash table containing the entries.  Its size is twice the capacity
@@ -84,7 +88,7 @@ public class LongKeyLruCache<V> {
   {
     int capacity;
 
-    for (capacity = 16; capacity < 4 * initialCapacity; capacity *= 2) {
+    for (capacity = 16; capacity < 8 * initialCapacity; capacity *= 2) {
     }
 
     _entries = new CacheItem[capacity];
@@ -119,11 +123,11 @@ public class LongKeyLruCache<V> {
       int capacity;
 
       for (capacity = _entries.length;
-	   capacity < 4 * newCapacity;
+	   capacity < 8 * newCapacity;
 	   capacity *= 2) {
       }
 
-      if (capacity == _capacity)
+      if (capacity == _entries.length)
 	return;
 
       CacheItem []oldEntries = _entries;
@@ -185,7 +189,7 @@ public class LongKeyLruCache<V> {
    */
   public V get(long key)
   {
-    int hash = (int) (65537 * key) & _mask;
+    int hash = hash(key) & _mask;
     int count = _size1 + _size2 + 1;
 
     synchronized (this) {
@@ -269,7 +273,7 @@ public class LongKeyLruCache<V> {
 	 max--) {
     }
 
-    int hash = (int) (65537 * key) & _mask;
+    int hash = hash(key) & _mask;
     int count = _size1 + _size2 + 1;
 
     V oldValue = null;
@@ -381,7 +385,7 @@ public class LongKeyLruCache<V> {
     else
       tail = _tail2;
 
-    for (int max = 16; max > 0; max--) {
+    for (int max = 32; max > 0; max--) {
       if (tail == null)
 	return false;
 
@@ -407,6 +411,8 @@ public class LongKeyLruCache<V> {
     
       return true;
     }
+
+    log.fine("LRU-Cache can't remove tail because the tail values are busy.");
 
     return false;
   }
@@ -441,7 +447,7 @@ public class LongKeyLruCache<V> {
    */
   private V removeImpl(long key)
   {
-    int hash = (int) (65537 * key) & _mask;
+    int hash = hash(key) & _mask;
     int count = _size1 + _size2 + 1;
 
     V value = null;
@@ -514,7 +520,7 @@ public class LongKeyLruCache<V> {
    */
   private void refillEntry(CacheItem<V> item)
   {
-    int baseHash = (int) (65537 * item._key);
+    int baseHash = hash(item._key);
 
     for (int count = 0; count < _size1 + _size2 + 1; count++) {
       int hash = (baseHash + count) & _mask;
@@ -524,6 +530,18 @@ public class LongKeyLruCache<V> {
 	return;
       }
     }
+  }
+
+  private static int hash(long key)
+  {
+    long hash = key;
+    
+    hash = 65537 * hash + (key >>> 8);
+    hash = 65537 * hash + (key >>> 16);
+    hash = 65537 * hash + (key >>> 32);
+    hash = 65537 * hash + (key >>> 48);
+
+    return (int) hash;
   }
 
   /**

@@ -105,7 +105,7 @@ abstract public class Block implements ClockCacheItem, CacheListener {
 	return false;
       
       _useCount++;
-      
+
       if (log.isLoggable(Level.FINEST))
 	log.finest(this + " allocate");
 
