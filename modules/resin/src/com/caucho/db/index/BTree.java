@@ -54,7 +54,6 @@ import com.caucho.db.store.Block;
 import com.caucho.db.store.BlockManager;
 import com.caucho.db.store.Store;
 import com.caucho.db.store.Transaction;
-import com.caucho.db.store.WriteBlock;
 
 /**
  * Structure of the table:
@@ -165,7 +164,7 @@ public class BTree {
     long index = _indexRoot;
 
     while (index != 0) {
-      Block block = xa.readBlock(_store, index);
+      Block block = _store.readBlock(index);
       boolean isLeaf = true;
       
       try {
@@ -208,7 +207,7 @@ public class BTree {
       while (index != FAIL) {
 	lastIndex = index;
         
-	Block block = xa.readBlock(_store, index);
+	Block block = _store.readBlock(index);
 
 	try {
 	  byte []buffer = block.getBuffer();
@@ -352,23 +351,20 @@ public class BTree {
     Block rightBlock = null;
 
     try {
-      parentBlock = xa.createWriteBlock(_store, parentIndex);
-      parentBlock.setFlushDirtyOnCommit(false);
+      parentBlock = _store.readBlock(parentIndex);
       parentBlock.setDirty(0, Store.BLOCK_SIZE);
     
       byte []parentBuffer = parentBlock.getBuffer();
       int parentLength = getInt(parentBuffer, LENGTH_OFFSET);
     
-      rightBlock = xa.createWriteBlock(_store, index);
-      rightBlock.setFlushDirtyOnCommit(false);
+      rightBlock = _store.readBlock(index);
       rightBlock.setDirty(0, Store.BLOCK_SIZE);
 
 
       byte []rightBuffer = rightBlock.getBuffer();
       long rightBlockId = rightBlock.getBlockId();
     
-      leftBlock = xa.createWriteBlock(_store.allocateIndexBlock());
-      leftBlock.setFlushDirtyOnCommit(false);
+      leftBlock = _store.allocateIndexBlock();
       leftBlock.setDirty(0, Store.BLOCK_SIZE);
       
       byte []leftBuffer = leftBlock.getBuffer();
@@ -418,27 +414,24 @@ public class BTree {
   {
     log.finer("btree splitting " + (index / BLOCK_SIZE));
 
-    WriteBlock parentBlock = null;
-    WriteBlock leftBlock = null;
-    WriteBlock rightBlock = null;
+    Block parentBlock = null;
+    Block leftBlock = null;
+    Block rightBlock = null;
 
     try {
-      parentBlock = xa.createWriteBlock(_store, index);
-      parentBlock.setFlushDirtyOnCommit(false);
+      parentBlock = _store.readBlock(index);
       parentBlock.setDirty(0, Store.BLOCK_SIZE);
 
       byte []parentBuffer = parentBlock.getBuffer();
 
       int parentFlags = getInt(parentBuffer, FLAGS_OFFSET);
 
-      leftBlock = xa.createWriteBlock(_store.allocateIndexBlock());
-      leftBlock.setFlushDirtyOnCommit(false);
+      leftBlock = _store.allocateIndexBlock();
       leftBlock.setDirty(0, Store.BLOCK_SIZE);
       
       long leftBlockId = leftBlock.getBlockId();
     
-      rightBlock = xa.createWriteBlock(_store.allocateIndexBlock());
-      rightBlock.setFlushDirtyOnCommit(false);
+      rightBlock = _store.allocateIndexBlock();
       rightBlock.setDirty(0, Store.BLOCK_SIZE);
       
       long rightBlockId = rightBlock.getBlockId();
@@ -524,7 +517,7 @@ public class BTree {
   {
     long lastIndex;
     
-    Block block = xa.readBlock(_store, index);
+    Block block = _store.readBlock(index);
 
     try {
       byte []buffer = block.getBuffer();
@@ -533,8 +526,6 @@ public class BTree {
       boolean isLeaf = (flags & LEAF_FLAG) == 0;
       
       if (isLeaf) {
-	block = xa.createWriteBlock(block);
-	block.setFlushDirtyOnCommit(false);
 	block.setDirty(0, Store.BLOCK_SIZE);
 
 	removeLeafBlock(index, block.getBuffer(),
@@ -582,7 +573,7 @@ public class BTree {
     if (_minN <= length)
       return false;
 
-    Block parent = xa.readBlock(_store, parentIndex);
+    Block parent = _store.readBlock(parentIndex);
 
     try {
       byte []parentBuffer = parent.getBuffer();
@@ -593,7 +584,7 @@ public class BTree {
 
       // try to shift from left and right first
       if (leftIndex >= 0) {
-	Block leftBlock = xa.readBlock(_store, leftIndex);
+	Block leftBlock = _store.readBlock(leftIndex);
 
 	try {
 	  byte []leftBuffer = leftBlock.getBuffer();
@@ -601,12 +592,8 @@ public class BTree {
 	  int leftLength = getInt(leftBuffer, LENGTH_OFFSET);
 
 	  if (_minN < leftLength) {
-	    parent = xa.createWriteBlock(parent);
-	    parent.setFlushDirtyOnCommit(false);
 	    parent.setDirty(0, Store.BLOCK_SIZE);
 	    
-	    leftBlock = xa.createWriteBlock(leftBlock);
-	    leftBlock.setFlushDirtyOnCommit(false);
 	    leftBlock.setDirty(0, Store.BLOCK_SIZE);
 	  
 	    moveFromLeft(parent.getBuffer(),
@@ -621,7 +608,7 @@ public class BTree {
       }
 
       if (rightIndex >= 0) {
-	Block rightBlock = xa.readBlock(_store, rightIndex);
+	Block rightBlock = _store.readBlock(rightIndex);
 
 	try {
 	  byte []rightBuffer = rightBlock.getBuffer();
@@ -629,12 +616,8 @@ public class BTree {
 	  int rightLength = getInt(rightBuffer, LENGTH_OFFSET);
 	  
 	  if (_minN < rightLength) {
-	    parent = xa.createWriteBlock(parent);
-	    parent.setFlushDirtyOnCommit(false);
 	    parent.setDirty(0, Store.BLOCK_SIZE);
 	    
-	    rightBlock = xa.createWriteBlock(rightBlock);
-	    rightBlock.setFlushDirtyOnCommit(false);
 	    rightBlock.setDirty(0, Store.BLOCK_SIZE);
 
 	    moveFromRight(parent.getBuffer(),
@@ -652,15 +635,11 @@ public class BTree {
 	return false;
     
       if (leftIndex >= 0) {
-	Block leftBlock = xa.readBlock(_store, leftIndex);
+	Block leftBlock = _store.readBlock(leftIndex);
       
 	try {
-	  parent = xa.createWriteBlock(parent);
-	  parent.setFlushDirtyOnCommit(false);
 	  parent.setDirty(0, Store.BLOCK_SIZE);
 	  
-	  leftBlock = xa.createWriteBlock(leftBlock);
-	  leftBlock.setFlushDirtyOnCommit(false);
 	  leftBlock.setDirty(0, Store.BLOCK_SIZE);
       
 	  mergeLeft(parent.getBuffer(), leftBlock.getBuffer(), buffer, index);
@@ -672,15 +651,11 @@ public class BTree {
       }
     
       if (rightIndex >= 0) {
-	Block rightBlock = xa.readBlock(_store, rightIndex);
+	Block rightBlock = _store.readBlock(rightIndex);
 
 	try {
-	  rightBlock = xa.createWriteBlock(rightBlock);
-	  rightBlock.setFlushDirtyOnCommit(false);
 	  rightBlock.setDirty(0, Store.BLOCK_SIZE);
 	  
-	  parent = xa.createWriteBlock(parent);
-	  parent.setFlushDirtyOnCommit(false);
 	  parent.setDirty(0, Store.BLOCK_SIZE);
 	  
 	  mergeRight(parent.getBuffer(), rightBlock.getBuffer(),
