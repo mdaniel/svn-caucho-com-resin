@@ -114,7 +114,7 @@ class BlobColumn extends Column {
 
       if (Table.INLINE_BLOB_SIZE <= length) {
 	Inode inode = new Inode();
-	inode.init(getTable(), block, rowOffset + _columnOffset);
+	inode.init(getTable(), xa, block, rowOffset + _columnOffset);
 	xa.addDeleteInode(inode);
       }
     }
@@ -169,7 +169,7 @@ class BlobColumn extends Column {
 
       if (Table.INLINE_BLOB_SIZE <= length) {
 	Inode inode = new Inode();
-	inode.init(getTable(), block, rowOffset + _columnOffset);
+	inode.init(getTable(), xa, block, rowOffset + _columnOffset);
 	xa.addDeleteInode(inode);
       }
     }
@@ -210,7 +210,7 @@ class BlobColumn extends Column {
 	return;
       
       Inode inode = new Inode();
-      inode.init(getTable(), block, rowOffset + _columnOffset);
+      inode.init(getTable(), xa, block, rowOffset + _columnOffset);
       xa.addDeleteInode(inode);
     }
   }

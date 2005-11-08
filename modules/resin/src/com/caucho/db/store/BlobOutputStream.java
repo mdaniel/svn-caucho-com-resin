@@ -47,7 +47,7 @@ public class BlobOutputStream extends OutputStream {
   private static final Logger log
     = Logger.getLogger(BlobOutputStream.class.getName());
 
-  private Transaction _xa;
+  private StoreTransaction _xa;
   private Store _store;
   
   private TempBuffer _tempBuffer;
@@ -101,6 +101,7 @@ public class BlobOutputStream extends OutputStream {
   public void init(Store store, byte []inode, int inodeOffset)
   {
     _store = store;
+    _xa = RawTransaction.create();
 
     _inodeBuffer = inode;
     _inodeOffset = inodeOffset;
@@ -186,6 +187,8 @@ public class BlobOutputStream extends OutputStream {
     int length = _offset;
     _offset = 0;
     
-    Inode.append(_inodeBuffer, _inodeOffset, _store, _buffer, 0, length);
+    Inode.append(_inodeBuffer, _inodeOffset,
+		 _store, _xa,
+		 _buffer, 0, length);
   }
 }

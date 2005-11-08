@@ -52,10 +52,11 @@ import com.caucho.db.store.Inode;
 import com.caucho.db.table.Table;
 
 import com.caucho.db.jdbc.ConnectionImpl;
+
 /**
  * Represents a single transaction.
  */
-public class Transaction {
+public class Transaction extends StoreTransaction {
   private static final Logger log = Log.open(Transaction.class);
   private static final L10N L = new L10N(Transaction.class);
 
@@ -302,7 +303,13 @@ public class Transaction {
     if (block instanceof WriteBlock)
       return (WriteBlock) block;
 
-    WriteBlock writeBlock;
+    WriteBlock writeBlock = getWriteBlock(block.getBlockId());
+
+    if (writeBlock != null) {
+      block.free();
+      writeBlock.allocate();
+      return writeBlock;
+    }
     
     if (isAutoCommit())
       writeBlock = new AutoCommitWriteBlock(block);
@@ -319,16 +326,23 @@ public class Transaction {
   /**
    * Returns a modified block.
    */
-  public WriteBlock createAutoCommitWriteBlock(Block block)
+  public Block createAutoCommitWriteBlock(Block block)
     throws IOException
   {
     if (block instanceof WriteBlock) {
-      block.allocate();
-      return (WriteBlock) block;
+      return block;
     }
     else {
-      WriteBlock writeBlock = new AutoCommitWriteBlock(block);
+      WriteBlock writeBlock = getWriteBlock(block.getBlockId());
+
+      if (writeBlock != null) {
+	block.free();
+	writeBlock.allocate();
+	return writeBlock;
+      }
       
+      writeBlock = new AutoCommitWriteBlock(block);
+
       setBlock(writeBlock);
 
       return writeBlock;
@@ -370,26 +384,12 @@ public class Transaction {
   /**
    * Returns a modified block.
    */
-  public WriteBlock createWriteBlock(Store store, long blockAddress)
+  public Block createWriteBlock(Store store, long blockAddress)
     throws IOException
   {
     Block block = readBlock(store, blockAddress);
-    
-    if (block instanceof WriteBlock)
-      return (WriteBlock) block;
 
-    WriteBlock writeBlock;
-    
-    if (isAutoCommit())
-      writeBlock = new AutoCommitWriteBlock(block);
-    else {
-      // XXX: locking too
-      writeBlock = new XAWriteBlock(block);
-    }
-
-    setBlock(writeBlock);
-
-    return writeBlock;
+    return createWriteBlock(block);
   }
 
   /**

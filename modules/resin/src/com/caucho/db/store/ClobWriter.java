@@ -43,7 +43,7 @@ import com.caucho.db.sql.Expr;
 class ClobWriter extends Writer {
   private Store _store;
 
-  private Transaction _xa;
+  private StoreTransaction _xa;
   
   private TempBuffer _tempBuffer;
   private byte []_buffer;
@@ -64,7 +64,7 @@ class ClobWriter extends Writer {
    *
    * @param store the output store
    */
-  ClobWriter(Transaction xa, Store store, byte []inode, int inodeOffset)
+  ClobWriter(StoreTransaction xa, Store store, byte []inode, int inodeOffset)
   {
     init(xa, store, inode, inodeOffset);
   }
@@ -84,8 +84,12 @@ class ClobWriter extends Writer {
   /**
    * Initialize the output stream.
    */
-  public void init(Transaction xa, Store store, byte []inode, int inodeOffset)
+  public void init(StoreTransaction xa, Store store,
+		   byte []inode, int inodeOffset)
   {
+    if (xa == null)
+      xa = RawTransaction.create();
+      
     _xa = xa;
     
     _store = store;
@@ -161,6 +165,10 @@ class ClobWriter extends Writer {
   private void flushBlock()
     throws IOException
   {
+    int length = _offset;
+    _offset = 0;
+    
+    Inode.append(_inodeBuffer, _inodeOffset, _store, _xa, _buffer, 0, length);
   }
 
   /**

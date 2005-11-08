@@ -119,15 +119,12 @@ public class ClobReader extends Reader {
   public int read(char []buf, int offset, int length)
     throws IOException
   {
-    /*
     int sublen = Inode.read(_inode, _inodeOffset,
 			    _store, _offset,
 			    buf, offset, length);
-    */
-    int sublen = 0;
 
     if (sublen > 0)
-      _offset += offset;
+      _offset += sublen;
 
     return sublen;
   }

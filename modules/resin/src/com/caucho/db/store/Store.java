@@ -401,16 +401,6 @@ public class Store {
     }
   }
 
-  /*
-  void lockRead(Transaction xa, long addr)
-    throws SQLException
-  {
-    long blockId = addressToBlockId(addr);
-
-    _database.lockRead(xa, blockId);
-  }
-  */
-
   /**
    * Returns the first block id which contains a row.
    *
@@ -478,19 +468,6 @@ public class Store {
       throw e;
     }
   }
-
-  /**
-   * Writes the data in a block.
-   */
-  /*
-  public void commitBlock(Block block, int min, int max)
-    throws IOException
-  {
-    block.setDirty(min, max);
-
-    block.commit();
-  }
-  */
 
   /**
    * Allocates a new block for a row.
@@ -706,7 +683,13 @@ public class Store {
   /**
    * Reads a fragment.
    *
-   * @return the fragment id
+   * @param fragmentAddress the address of the fragment
+   * @param fragmentOffset the offset inside the fragment to start reading
+   * @param buffer the result buffer
+   * @param offset offset into the result buffer
+   * @param length the number of bytes to read
+   *
+   * @return the number of bytes read
    */
   public int readFragment(long fragmentAddress, int fragmentOffset,
 			  byte []buffer, int offset, int length)
@@ -737,11 +720,57 @@ public class Store {
   }
   
   /**
+   * Reads a fragment for a clob.
+   *
+   * @param fragmentAddress the address of the fragment
+   * @param fragmentOffset the offset inside the fragment to start reading
+   * @param buffer the result buffer
+   * @param offset offset into the result buffer
+   * @param length the length of the fragment in bytes
+   *
+   * @return the number of bytes read
+   */
+  public int readFragment(long fragmentAddress, int fragmentOffset,
+			  char []buffer, int offset, int length)
+    throws IOException
+  {
+    if (FRAGMENT_SIZE - fragmentOffset < length) {
+      // server/13df
+      throw new IllegalArgumentException(L.l("read offset {0} length {1} too long",
+					     fragmentOffset, length));
+    }
+
+    Block block = readBlock(addressToBlockId(fragmentAddress));
+
+    try {
+      int blockOffset = getFragmentOffset(fragmentAddress);
+
+      byte []blockBuffer = block.getBuffer();
+      
+      synchronized (blockBuffer) {
+	for (int i = 0; i < length; i += 2) {
+	  int ch1 = blockBuffer[blockOffset] & 0xff;
+	  int ch2 = blockBuffer[blockOffset + 1] & 0xff;
+
+	  buffer[offset + i] = (char) ((ch1 << 8) + ch2);
+
+	  blockOffset += 2;
+	}
+      }
+
+      return length;
+    } finally {
+      block.free();
+    }
+  }
+  
+  /**
    * Reads a long value from a fragment.
    *
    * @return the long value
    */
-  public long readFragmentLong(long fragmentAddress, int fragmentOffset)
+  public long readFragmentLong(long fragmentAddress,
+			       int fragmentOffset)
     throws IOException
   {
     Block block = readBlock(addressToBlockId(fragmentAddress));
@@ -760,47 +789,11 @@ public class Store {
   }
   
   /**
-   * Reads a fragment for a clob.
-   *
-   * @return the fragment id
-   */
-  public int readFragment(long fragmentAddress, int fragmentOffset,
-			   char []buffer, int offset, int length)
-    throws IOException
-  {
-    Block block = readBlock(addressToBlockId(fragmentAddress));
-
-    try {
-      int blockOffset = getFragmentOffset(fragmentAddress);
-
-      byte []blockBuffer = block.getBuffer();
-
-      if (FRAGMENT_SIZE < 2 * length)
-	length = FRAGMENT_SIZE / 2;
-      
-      synchronized (blockBuffer) {
-	for (int i = 0; i < length; i++) {
-	  int ch1 = blockBuffer[blockOffset] & 0xff;
-	  int ch2 = blockBuffer[blockOffset + 1] & 0xff;
-
-	  buffer[offset + i] = (char) ((ch1 << 8) + ch2);
-
-	  blockOffset += 2;
-	}
-      }
-
-      return length;
-    } finally {
-      block.free();
-    }
-  }
-  
-  /**
    * Allocates a new fragment.
    *
    * @return the fragment address
    */
-  public long allocateFragment()
+  public long allocateFragment(StoreTransaction xa)
     throws IOException
   {
     boolean isLoop = false;
@@ -839,8 +832,12 @@ public class Store {
 
 	long fragAddr = allocateFragment(block);
 
-	if (fragAddr != 0)
+	if (fragAddr != 0) {
+	  // only mark the block for writing if it's actually updated
+	  block = xa.createAutoCommitWriteBlock(block);
+	  
 	  return fragAddr;
+	}
       } finally {
 	if (block != null)
 	  block.free();
@@ -900,6 +897,8 @@ public class Store {
     try {
       byte []buffer = block.getBuffer();
 
+      _fragmentClockTotal += FRAGMENT_PER_BLOCK * FRAGMENT_SIZE;
+      
       synchronized (buffer) {
 	for (int i = 0; i < FRAGMENT_PER_BLOCK; i++) {
 	  int offset = i * (1 + FRAGMENT_SIZE);
@@ -916,6 +915,7 @@ public class Store {
   /**
    * Writes a fragment.
    *
+   * @param xa the owning transaction
    * @param fragmentAddress the fragment to write
    * @param fragmentOffset the offset into the fragment
    * @param buffer the write buffer
@@ -924,7 +924,8 @@ public class Store {
    *
    * @return the fragment id
    */
-  public void writeFragment(long fragmentAddress, int fragmentOffset,
+  public void writeFragment(StoreTransaction xa,
+			    long fragmentAddress, int fragmentOffset,
 			    byte []buffer, int offset, int length)
     throws IOException
   {
@@ -932,9 +933,11 @@ public class Store {
       throw new IllegalArgumentException(L.l("write offset {0} length {1} too long",
 					     fragmentOffset, length));
     
-    Block block = readBlock(addressToBlockId(fragmentAddress));
+    Block block = xa.readBlock(this, addressToBlockId(fragmentAddress));
 
     try {
+      block = xa.createAutoCommitWriteBlock(block);
+      
       int blockOffset = getFragmentOffset(fragmentAddress);
 
       byte []blockBuffer = block.getBuffer();
@@ -954,17 +957,64 @@ public class Store {
   }
   
   /**
+   * Writes a character based
+   *
+   * @param fragmentAddress the fragment to write
+   * @param fragmentOffset the offset into the fragment
+   * @param buffer the write buffer
+   * @param offset offset into the write buffer
+   * @param length the number of bytes to write
+   */
+  public void writeFragment(StoreTransaction xa,
+			    long fragmentAddress, int fragmentOffset,
+			    char []buffer, int offset, int length)
+    throws IOException
+  {
+    if (FRAGMENT_SIZE - fragmentOffset < length)
+      throw new IllegalArgumentException(L.l("write offset {0} length {1} too long",
+					     fragmentOffset, length));
+    
+    Block block = xa.readBlock(this, addressToBlockId(fragmentAddress));
+
+    try {
+      block = xa.createAutoCommitWriteBlock(block);
+	
+      int blockOffset = getFragmentOffset(fragmentAddress);
+
+      byte []blockBuffer = block.getBuffer();
+
+      blockOffset += 1 + fragmentOffset;
+
+      synchronized (blockBuffer) {
+	for (int i = 0; i < length; i += 2) {
+	  char ch = buffer[offset + i];
+
+	  blockBuffer[blockOffset + i] = (byte) (ch >> 8);
+	  blockBuffer[blockOffset + i + 1] = (byte) (ch);
+	}
+
+	block.setDirty(blockOffset, blockOffset + length);
+      }
+    } finally {
+      block.free();
+    }
+  }
+  
+  /**
    * Writes a long value to a fragment.
    *
    * @return the long value
    */
-  public void writeFragmentLong(long fragmentAddress, int fragmentOffset,
+  public void writeFragmentLong(StoreTransaction xa,
+				long fragmentAddress, int fragmentOffset,
 				long value)
     throws IOException
   {
-    Block block = readBlock(addressToBlockId(fragmentAddress));
+    Block block = xa.readBlock(this, addressToBlockId(fragmentAddress));
 
     try {
+      block = xa.createAutoCommitWriteBlock(block);
+      
       int blockOffset = getFragmentOffset(fragmentAddress);
 
       byte []blockBuffer = block.getBuffer();
@@ -983,12 +1033,14 @@ public class Store {
   /**
    * Deletes a fragment.
    */
-  public void deleteFragment(long fragmentAddress)
+  public void deleteFragment(StoreTransaction xa, long fragmentAddress)
     throws IOException
   {
-    Block block = readBlock(addressToBlockId(fragmentAddress));
+    Block block = xa.readBlock(this, addressToBlockId(fragmentAddress));
 
     try {
+      block = xa.createAutoCommitWriteBlock(block);
+      
       int fragOffset = getFragmentOffset(fragmentAddress);
 
       byte []blockBuffer = block.getBuffer();
@@ -998,8 +1050,6 @@ public class Store {
       }
 
       block.setDirty(fragOffset, fragOffset + 1);
-
-      block.commit(); // XXX: shouldn't commit here
     } finally {
       block.free();
     }
