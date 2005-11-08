@@ -1,0 +1,82 @@
+/*
+ * Copyright (c) 1998-2004 Caucho Technology -- all rights reserved
+ *
+ * This file is part of Resin(R) Open Source
+ *
+ * Each copy or derived work must preserve the copyright notice and this
+ * notice unmodified.
+ *
+ * Resin Open Source is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * Resin Open Source is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE, or any warranty
+ * of NON-INFRINGEMENT.  See the GNU General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Resin Open Source; if not, write to the
+ *
+ *   Free Software Foundation, Inc.
+ *   59 Temple Place, Suite 330
+ *   Boston, MA 02111-1307  USA
+ *
+ * @author Scott Ferguson
+ */
+
+package com.caucho.db.store;
+
+import java.io.IOException;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+
+import java.util.logging.Logger;
+import java.util.logging.Level;
+
+import java.sql.SQLException;
+
+import com.caucho.util.L10N;
+import com.caucho.util.FreeList;
+import com.caucho.util.LongKeyHashMap;
+
+import com.caucho.log.Log;
+
+import com.caucho.sql.SQLExceptionWrapper;
+
+import com.caucho.db.store.Inode;
+
+import com.caucho.db.table.Table;
+
+import com.caucho.db.jdbc.ConnectionImpl;
+/**
+ * Represents a single transaction.
+ */
+abstract public class StoreTransaction {
+  private static final Logger log = Log.open(StoreTransaction.class);
+  private static final L10N L = new L10N(StoreTransaction.class);
+
+  /**
+   * Returns a read block.
+   */
+  abstract public Block readBlock(Store store, long blockAddress)
+    throws IOException;
+
+  /**
+   * Returns a modified block.
+   */
+  abstract public Block createWriteBlock(Block block)
+    throws IOException;
+
+  /**
+   * Returns a modified block.
+   */
+  public Block createAutoCommitWriteBlock(Block block)
+    throws IOException
+  {
+    return createWriteBlock(block);
+  }
+}
