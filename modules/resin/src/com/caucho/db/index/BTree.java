@@ -164,7 +164,7 @@ public class BTree {
     long index = _indexRoot;
 
     while (index != 0) {
-      Block block = _store.readBlock(index);
+      Block block = _store.readBlockByAddress(index);
       boolean isLeaf = true;
       
       try {
@@ -207,7 +207,7 @@ public class BTree {
       while (index != FAIL) {
 	lastIndex = index;
         
-	Block block = _store.readBlock(index);
+	Block block = _store.readBlockByAddress(index);
 
 	try {
 	  byte []buffer = block.getBuffer();
@@ -351,13 +351,13 @@ public class BTree {
     Block rightBlock = null;
 
     try {
-      parentBlock = _store.readBlock(parentIndex);
+      parentBlock = _store.readBlockByAddress(parentIndex);
       parentBlock.setDirty(0, Store.BLOCK_SIZE);
     
       byte []parentBuffer = parentBlock.getBuffer();
       int parentLength = getInt(parentBuffer, LENGTH_OFFSET);
     
-      rightBlock = _store.readBlock(index);
+      rightBlock = _store.readBlockByAddress(index);
       rightBlock.setDirty(0, Store.BLOCK_SIZE);
 
 
@@ -419,7 +419,7 @@ public class BTree {
     Block rightBlock = null;
 
     try {
-      parentBlock = _store.readBlock(index);
+      parentBlock = _store.readBlockByAddress(index);
       parentBlock.setDirty(0, Store.BLOCK_SIZE);
 
       byte []parentBuffer = parentBlock.getBuffer();
@@ -517,7 +517,7 @@ public class BTree {
   {
     long lastIndex;
     
-    Block block = _store.readBlock(index);
+    Block block = _store.readBlockByAddress(index);
 
     try {
       byte []buffer = block.getBuffer();
@@ -573,7 +573,7 @@ public class BTree {
     if (_minN <= length)
       return false;
 
-    Block parent = _store.readBlock(parentIndex);
+    Block parent = _store.readBlockByAddress(parentIndex);
 
     try {
       byte []parentBuffer = parent.getBuffer();
@@ -584,7 +584,7 @@ public class BTree {
 
       // try to shift from left and right first
       if (leftIndex >= 0) {
-	Block leftBlock = _store.readBlock(leftIndex);
+	Block leftBlock = _store.readBlockByAddress(leftIndex);
 
 	try {
 	  byte []leftBuffer = leftBlock.getBuffer();
@@ -608,7 +608,7 @@ public class BTree {
       }
 
       if (rightIndex >= 0) {
-	Block rightBlock = _store.readBlock(rightIndex);
+	Block rightBlock = _store.readBlockByAddress(rightIndex);
 
 	try {
 	  byte []rightBuffer = rightBlock.getBuffer();
@@ -635,7 +635,7 @@ public class BTree {
 	return false;
     
       if (leftIndex >= 0) {
-	Block leftBlock = _store.readBlock(leftIndex);
+	Block leftBlock = _store.readBlockByAddress(leftIndex);
       
 	try {
 	  parent.setDirty(0, Store.BLOCK_SIZE);
@@ -651,7 +651,7 @@ public class BTree {
       }
     
       if (rightIndex >= 0) {
-	Block rightBlock = _store.readBlock(rightIndex);
+	Block rightBlock = _store.readBlockByAddress(rightIndex);
 
 	try {
 	  rightBlock.setDirty(0, Store.BLOCK_SIZE);
@@ -1220,7 +1220,7 @@ public class BTree {
     if (_store.getAllocation(blockIndex) != Store.ALLOC_INDEX)
       return null;
     
-    Block block = _store.readBlock(blockId);
+    Block block = _store.readBlockByAddress(blockId);
 
     block.read();
     byte []buffer = block.getBuffer();

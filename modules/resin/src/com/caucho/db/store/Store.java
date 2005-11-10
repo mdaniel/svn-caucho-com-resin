@@ -449,6 +449,15 @@ public class Store {
   /**
    * Returns the matching block.
    */
+  public Block readBlockByAddress(long blockAddress)
+    throws IOException
+  {
+    return readBlock(addressToBlockId(blockAddress));
+  }
+
+  /**
+   * Returns the matching block.
+   */
   public Block readBlock(long blockId)
     throws IOException
   {

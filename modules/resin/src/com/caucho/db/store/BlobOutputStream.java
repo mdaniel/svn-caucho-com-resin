@@ -106,6 +106,8 @@ public class BlobOutputStream extends OutputStream {
     _inodeBuffer = inode;
     _inodeOffset = inodeOffset;
 
+    Inode.clear(_inodeBuffer, _inodeOffset);
+
     _offset = 0;
     
     _tempBuffer = TempBuffer.allocate();

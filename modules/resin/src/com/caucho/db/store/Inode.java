@@ -513,6 +513,17 @@ public class Inode {
   }
 
   /**
+   * Clears the inode.
+   */
+  static void clear(byte []inode, int inodeOffset)
+  {
+    int end = inodeOffset + INODE_SIZE;
+
+    for (; inodeOffset < end; inodeOffset++)
+      inode[inodeOffset] = 0;
+  }
+
+  /**
    * Returns the fragment id for the given offset.
    */
   static long readFragmentAddr(byte []inode, int inodeOffset,
