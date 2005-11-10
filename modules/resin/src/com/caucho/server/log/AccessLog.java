@@ -94,21 +94,6 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener {
   private String _format;
   private Segment []_segments;
 
-  // prefix for the rollover
-  private String _rolloverPrefix;
-
-  // template for the archived files
-  private String _archiveFormat;
-  
-  // How often the logs are rolled over.
-  private long _rolloverPeriod = -1;
-
-  // Maximum size of the log.
-  private long _rolloverSize = ROLLOVER_SIZE;
-
-  // How often the rolloverSize should be checked
-  private long _rolloverCheckTime = ROLLOVER_CHECK_TIME;
-
   private AccessLogBuffer _logBuffer;
   private byte []_buffer;
   private int _length;
@@ -123,6 +108,11 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener {
 
   private Alarm _alarm = new Alarm(this);
   private boolean _isActive;
+
+  public AccessLog()
+  {
+    setRolloverSize(new Bytes(ROLLOVER_SIZE));
+  }
   
   /**
    * Sets the access log format.
