@@ -889,6 +889,11 @@ public class Port
 
   /**
    * Tries to mark the connection as a keepalive connection
+   *
+   * At exit, the connection is either:
+   *   1) freed (no keepalive)
+   *   2) rescheduled (keepalive with new thread)
+   *   3) in select pool (keepalive with poll)
    */
   void keepalive(TcpConnection conn)
   {
@@ -898,6 +903,7 @@ public class Port
     else if (_selectManager != null) {
       if (! _selectManager.keepalive(conn)) {
 	keepaliveEnd(conn);
+        conn.free();
       }
     }
     else {
@@ -1012,6 +1018,8 @@ public class Port
 
   /**
    * Frees the connection.
+   *
+   * Called only from TcpConnection
    */
   void free(TcpConnection conn)
   {
@@ -1022,6 +1030,8 @@ public class Port
 
   /**
    * Frees the connection.
+   *
+   * Called only from TcpConnection
    */
   void kill(TcpConnection conn)
   {
