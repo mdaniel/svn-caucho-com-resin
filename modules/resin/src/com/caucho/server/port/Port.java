@@ -566,8 +566,6 @@ public class Port
     int freeConnections = _connectionMax - _connectionCount - _minSpareConnection;
     int freeSelect = _server.getFreeSelectKeepalive();
 
-    System.out.println("FREE-KA: " + freeKeepalive + " CONN:" + freeConnections + " SEL:" + freeSelect);
-
     if (freeKeepalive < freeConnections)
       return freeSelect < freeKeepalive ? freeSelect : freeKeepalive;
     else

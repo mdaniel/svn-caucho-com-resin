@@ -2,19 +2,19 @@
 
 CC=gcc
 CP=/bin/cp
-CFLAGS=-g -O2 -DPOLL -DHAS_JVMTI -O2 -g -pipe -march=i386 -mcpu=i686 -I/usr/kerberos/include
+CFLAGS=-g -O2 -DPOLL -DHAS_JVMTI 
 CFLAGS_SHLIB=-fpic
-LIBTOOL=/home/ferg/ws/resin/libtool --silent
+LIBTOOL=/home/ferg/test/resin-pro/libtool --silent
 LD=/usr/bin/ld
 LD_SHLIB=gcc
 LIBS_SHLIB=
 LDFLAGS=
 LDFLAGS_SHLIB=-shared -L/usr/lib
-APACHE_INC=-I/usr/include/httpd
-apache_conf=/etc/httpd/conf/httpd.conf
-apache_dir=/etc/httpd
-apache_libexec=/usr/lib/httpd/modules
-resin_home=/home/ferg/ws/resin
+APACHE_INC=-I/usr/local/apache2/include  -I/usr/local/apache2/include 
+apache_conf=/usr/local/apache2/conf/httpd.conf
+apache_dir=/usr/local/apache2
+apache_libexec=/usr/local/apache2/modules
+resin_home=/home/ferg/test/resin-pro
 INCLUDES = $(APACHE_INC) -DRESIN_HOME=\"$(resin_home)\" -I../common
 C=../common
 COMMON_OBJ=$C/stream.lo $C/config.lo $C/memory.lo

@@ -234,9 +234,11 @@ public class Table extends Store {
     if (! path.exists())
       throw new IOException(L.l("table {0} does not exist", name));
 
+    String version = null;
+
     ReadStream is = path.openRead();
     try {
-      is.skip(ROOT_DATA_OFFSET);
+      is.skip(BLOCK_SIZE + ROOT_DATA_OFFSET);
 
       StringBuilder sb = new StringBuilder();
       int ch;
@@ -245,10 +247,14 @@ public class Table extends Store {
 	sb.append((char) ch);
       }
 
-      String version = sb.toString();
-      
-      if (version.compareTo(MIN_VERSION) >= 0 &&
-	  version.compareTo(DB_VERSION) <= 0) {
+      version = sb.toString();
+
+      if (! version.startsWith("Resin-DB")) {
+	throw new SQLException(L.l("table {0} is not a Resin DB.  Version '{1}'",
+				   name, version));
+      }
+      else if (version.compareTo(MIN_VERSION) < 0 ||
+	       DB_VERSION.compareTo(version) < 0) {
 	throw new SQLException(L.l("table {0} is out of date.  Old version {1}.",
 				   name, version));
       }
@@ -270,7 +276,7 @@ public class Table extends Store {
       String sql = cb.toString();
 
       if (log.isLoggable(Level.FINER))
-	log.finer("Table[" + name + "] " + sql);
+	log.finer("Table[" + name + "] " + version + " loading\n" + sql);
 
       try {
 	CreateQuery query = (CreateQuery) Parser.parse(db, sql);

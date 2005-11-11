@@ -530,7 +530,7 @@ public class TcpConnection extends PortConnection implements ThreadTask {
   /**
    * Frees the connection()
    */
-  private final void free()
+  final void free()
   {
     closeImpl();
 
