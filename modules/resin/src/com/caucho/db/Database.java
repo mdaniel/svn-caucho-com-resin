@@ -121,6 +121,19 @@ public class Database {
   }
 
   /**
+   * Ensure a minimum memory size.
+   *
+   * @param minCapacity the minimum capacity in bytes
+   */
+  public void ensureMemoryCapacity(long minCapacity)
+  {
+    int minBlocks = (int) ((minCapacity + Store.BLOCK_SIZE - 1) /
+                           Store.BLOCK_SIZE);
+
+    _blockManager.ensureCapacity(minBlocks);
+  }
+
+  /**
    * Initializes the database.  All *.db files in the database directory
    * are read for stored tables.
    */

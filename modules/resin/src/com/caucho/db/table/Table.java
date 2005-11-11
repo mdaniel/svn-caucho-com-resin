@@ -96,6 +96,9 @@ public class Table extends Store {
   public final static int INLINE_BLOB_SIZE = 120;
   
   public final static long ROW_CLOCK_MIN = 1024;
+
+  private final static String DB_VERSION = "Resin-DB 3.0.15";
+  private final static String MIN_VERSION = "Resin-DB 3.0.15";
   
   private final Row _row;
 
@@ -232,6 +235,28 @@ public class Table extends Store {
       throw new IOException(L.l("table {0} does not exist", name));
 
     ReadStream is = path.openRead();
+    try {
+      is.skip(ROOT_DATA_OFFSET);
+
+      StringBuilder sb = new StringBuilder();
+      int ch;
+
+      while ((ch = is.read()) > 0) {
+	sb.append((char) ch);
+      }
+
+      String version = sb.toString();
+      
+      if (version.compareTo(MIN_VERSION) >= 0 &&
+	  version.compareTo(DB_VERSION) <= 0) {
+	throw new SQLException(L.l("table {0} is out of date.  Old version {1}.",
+				   name, version));
+      }
+    } finally {
+      is.close();
+    }
+
+    is = path.openRead();
     try {
       is.skip(BLOCK_SIZE + ROOT_DATA_END);
 
@@ -477,7 +502,7 @@ public class Table extends Store {
   private void writeTableHeader(WriteStream os)
     throws IOException
   {
-    os.print("Resin-DB 03.14.02");
+    os.print(DB_VERSION);
     os.write(0);
 
     while (os.getBufferOffset() < INDEX_ROOT_OFFSET)

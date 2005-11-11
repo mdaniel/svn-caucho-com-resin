@@ -73,7 +73,9 @@ public class BlockManager {
   }
 
   /**
-   * Ensures the cache has a minimum capacity.
+   * Ensures the cache has a minimum number of blocks.
+   *
+   * @param minCapacity the minimum capacity in blocks
    */
   public void ensureCapacity(int minCapacity)
   {
