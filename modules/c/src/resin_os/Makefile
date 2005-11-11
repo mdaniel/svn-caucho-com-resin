@@ -1,18 +1,18 @@
 CC=gcc
-CFLAGS_SHLIB=-DSHARED_MODULE
-LD=gcc
+CFLAGS_SHLIB=-fpic
+LD=/usr/bin/ld
 OS=
-SO=jnilib
-CPU=powerpc
+SO=so
+CPU=i386
 LDFLAGS=
-LDFLAGS_SHLIB=-bundle -undefined suppress -flat_namespace -Wl,-bind_at_load -L/usr/lib
-PROXY_LIBS=
+LDFLAGS_SHLIB=-shared -L/usr/lib
+PROXY_LIBS=-lpthread
 APACHE_INC=-I/usr/include/httpd
-resin_conf=/private/etc/httpd/httpd.conf
-resin_libexec=/usr/libexec/httpd
-resin_home=/Users/ferg/ws/resin
-JNI_INCLUDE=-I/usr/java/include
-INCLUDES =  -I/usr/include $(JNI_INCLUDE) -I../common
+resin_conf=/etc/httpd/conf/httpd.conf
+resin_libexec=/usr/lib/httpd/modules
+resin_home=/home/ferg/ws/resin
+JNI_INCLUDE=-I/usr/java/include -I/usr/java/include/linux
+INCLUDES =  -I/usr/include -I/usr/kerberos/include $(JNI_INCLUDE) -I../common
 CFLAGS = -g -O2 -DPOLL -DHAS_JVMTI -DRESIN_HOME=\"$(resin_home)\" $(INCLUDES) -DCPU=\"$(CPU)\" -DOS=$(OS)
 OBJ= jni_os.o jni_jvmti.o jni_jvmdi.o
 

@@ -566,6 +566,8 @@ public class Port
     int freeConnections = _connectionMax - _connectionCount - _minSpareConnection;
     int freeSelect = _server.getFreeSelectKeepalive();
 
+    System.out.println("FREE-KA: " + freeKeepalive + " CONN:" + freeConnections + " SEL:" + freeSelect);
+
     if (freeKeepalive < freeConnections)
       return freeSelect < freeKeepalive ? freeSelect : freeKeepalive;
     else
@@ -791,6 +793,14 @@ public class Port
   }
 
   /**
+   * returns the select manager.
+   */
+  public AbstractSelectManager getSelectManager()
+  {
+    return _selectManager;
+  }
+  
+  /**
    * Returns the number of connections in the select.
    */
   public int getSelectConnectionCount()
@@ -814,7 +824,6 @@ public class Port
 	  _startThreadCount--;
 
 	  if (_startThreadCount < 0) {
-	    System.err.println("StartCount: " + _startThreadCount + " " + conn);
 	    Thread.dumpStack();
 	  }
 	}
@@ -888,34 +897,9 @@ public class Port
   }
 
   /**
-   * Tries to mark the connection as a keepalive connection
-   *
-   * At exit, the connection is either:
-   *   1) freed (no keepalive)
-   *   2) rescheduled (keepalive with new thread)
-   *   3) in select pool (keepalive with poll)
+   * Marks a keepalive as starting running.  Called only from TcpConnection.
    */
-  void keepalive(TcpConnection conn)
-  {
-    if (! keepaliveBegin(conn)) {
-      conn.free();
-    }
-    else if (_selectManager != null) {
-      if (! _selectManager.keepalive(conn)) {
-	keepaliveEnd(conn);
-        conn.free();
-      }
-    }
-    else {
-      conn.setKeepalive();
-      ThreadPool.schedule(conn);
-    }
-  }
-
-  /**
-   * Marks a keepalive as starting running.
-   */
-  private boolean keepaliveBegin(TcpConnection conn)
+  boolean keepaliveBegin(TcpConnection conn)
   {
     synchronized (_keepaliveCountLock) {
       if (_keepaliveMax <= _keepaliveCount)
@@ -930,7 +914,7 @@ public class Port
   }
 
   /**
-   * Marks the keepalive as ending
+   * Marks the keepalive as ending. Called only from TcpConnection.
    */
   void keepaliveEnd(TcpConnection conn)
   {
@@ -1044,14 +1028,12 @@ public class Port
   private void closeConnection(TcpConnection conn)
   {
     synchronized (this) {
-      if (_connectionCount == _connectionMax) {
+      if (_connectionCount-- == _connectionMax) {
 	try {
 	  notify();
 	} catch (Throwable e) {
 	}
       }
-
-      _connectionCount--;
     }
   }
 

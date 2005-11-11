@@ -301,13 +301,30 @@ public class TcpConnection extends PortConnection implements ThreadTask {
   }
 
   /**
-   * Adds the connection for keepalive.
+   * Tries to mark the connection as a keepalive connection
+   *
+   * At exit, the connection is either:
+   *   1) freed (no keepalive)
+   *   2) rescheduled (keepalive with new thread)
+   *   3) in select pool (keepalive with poll)
    */
   private void keepalive()
   {
     Port port = getPort();
 
-    port.keepalive(this);
+    if (! port.keepaliveBegin(this)) {
+      free();
+    }
+    else if (port.getSelectManager() != null) {
+      if (! port.getSelectManager().keepalive(this)) {
+	port.keepaliveEnd(this);
+	free();
+      }
+    }
+    else {
+      setKeepalive();
+      ThreadPool.schedule(this);
+    }
   }
 
   /**
@@ -513,7 +530,7 @@ public class TcpConnection extends PortConnection implements ThreadTask {
   /**
    * Frees the connection()
    */
-  public final void free()
+  private final void free()
   {
     closeImpl();
 
