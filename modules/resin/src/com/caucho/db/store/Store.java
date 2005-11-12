@@ -735,15 +735,15 @@ public class Store {
    * @param fragmentOffset the offset inside the fragment to start reading
    * @param buffer the result buffer
    * @param offset offset into the result buffer
-   * @param length the length of the fragment in bytes
+   * @param length the length of the fragment in characters
    *
-   * @return the number of bytes read
+   * @return the number of characters read
    */
   public int readFragment(long fragmentAddress, int fragmentOffset,
 			  char []buffer, int offset, int length)
     throws IOException
   {
-    if (FRAGMENT_SIZE - fragmentOffset < length) {
+    if (FRAGMENT_SIZE - fragmentOffset < 2 * length) {
       // server/13df
       throw new IllegalArgumentException(L.l("read offset {0} length {1} too long",
 					     fragmentOffset, length));
@@ -752,12 +752,13 @@ public class Store {
     Block block = readBlock(addressToBlockId(fragmentAddress));
 
     try {
-      int blockOffset = getFragmentOffset(fragmentAddress);
+      int blockOffset = getFragmentOffset(fragmentAddress) + 1;
+      blockOffset += fragmentOffset;
 
       byte []blockBuffer = block.getBuffer();
       
       synchronized (blockBuffer) {
-	for (int i = 0; i < length; i += 2) {
+	for (int i = 0; i < length; i++) {
 	  int ch1 = blockBuffer[blockOffset] & 0xff;
 	  int ch2 = blockBuffer[blockOffset + 1] & 0xff;
 

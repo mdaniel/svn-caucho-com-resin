@@ -124,7 +124,7 @@ public class ClobReader extends Reader {
 			    buf, offset, length);
 
     if (sublen > 0)
-      _offset += sublen;
+      _offset += 2 * sublen;
 
     return sublen;
   }

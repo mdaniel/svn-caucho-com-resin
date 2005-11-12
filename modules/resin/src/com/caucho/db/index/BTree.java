@@ -1031,6 +1031,7 @@ public class BTree {
       int newOffset = offset + delta;
 
       if (newOffset > 65536) {
+	Thread.dumpStack();
 	System.out.println("OVERFLOW: " + (blockId / Store.BLOCK_SIZE) + ":" + (blockId % Store.BLOCK_SIZE)  + " LENGTH:" + length + " STU:" + getInt(block, LENGTH_OFFSET) + " DELTA:" + delta);
 			   
       }

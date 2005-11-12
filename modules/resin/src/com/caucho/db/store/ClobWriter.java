@@ -57,8 +57,6 @@ class ClobWriter extends Writer {
   private byte []_inodeBuffer;
   private int _inodeOffset;
 
-  private int _blockCount;
-  
   /**
    * Creates a blob output stream.
    *
@@ -99,7 +97,8 @@ class ClobWriter extends Writer {
     _inodeBuffer = inode;
     _inodeOffset = inodeOffset;
 
-    _blockCount = 0;
+    Inode.clear(_inodeBuffer, _inodeOffset);
+
     _offset = 0;
     
     _tempBuffer = TempBuffer.allocate();
@@ -167,19 +166,8 @@ class ClobWriter extends Writer {
   {
     int length = _offset;
     _offset = 0;
-    
-    Inode.append(_inodeBuffer, _inodeOffset, _store, _xa, _buffer, 0, length);
-  }
 
-  /**
-   * Writes the block id into the inode.
-   */
-  private void writeFragmentAddr(int count, long fragAddr)
-  {
-    if (count >= 15)
-      throw new IllegalStateException();
-    
-    writeLong(_inodeBuffer, _inodeOffset + (count + 1) * 8, fragAddr);
+    Inode.append(_inodeBuffer, _inodeOffset, _store, _xa, _buffer, 0, length);
   }
 
   /**
@@ -196,8 +184,6 @@ class ClobWriter extends Writer {
     throws IOException
   {
     try {
-      writeLong(_inodeBuffer, _inodeOffset, _length);
-
       flushBlock();
 
       TempBuffer.free(_tempBuffer);

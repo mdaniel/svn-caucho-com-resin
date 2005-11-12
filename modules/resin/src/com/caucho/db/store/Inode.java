@@ -251,7 +251,7 @@ public class Inode {
   {
     long currentLength = readLong(inode, inodeOffset);
     long newLength = currentLength + length;
-    
+
     writeLong(inode, inodeOffset, newLength);
 
     if (newLength <= INLINE_BLOB_SIZE) {
@@ -313,7 +313,7 @@ public class Inode {
    * @param fileOffset the offset into the file to read
    * @param buffer the buffer receiving the data
    * @param bufferOffset the offset into the receiving buffer
-   * @param bufferLength the maximum number of bytes to read
+   * @param bufferLength the maximum number of chars to read
    *
    * @return the number of chars read
    */
@@ -324,9 +324,9 @@ public class Inode {
   {
     long fileLength = readLong(inode, inodeOffset);
 
-    int sublen = 2 * bufferLength;
-    if (fileLength - fileOffset < sublen)
-      sublen = (int) (fileLength - fileOffset);
+    int sublen = bufferLength;
+    if (fileLength - fileOffset < 2 * sublen)
+      sublen = (int) (fileLength - fileOffset) / 2;
       
     if (sublen <= 0)
       return -1;
@@ -341,14 +341,14 @@ public class Inode {
 	buffer[bufferOffset + i] = ch;
       }
 
-      return sublen / 2;
+      return sublen;
     }
 
     long fragAddr = readFragmentAddr(inode, inodeOffset, store, fileOffset);
     int fragOffset = (int) (fileOffset % Inode.INODE_BLOCK_SIZE);
 
-    if (INODE_BLOCK_SIZE - fragOffset < sublen)
-      sublen = INODE_BLOCK_SIZE - fragOffset;
+    if (INODE_BLOCK_SIZE - fragOffset < 2 * sublen)
+      sublen = (INODE_BLOCK_SIZE - fragOffset) / 2;
 
     store.readFragment(fragAddr, fragOffset, buffer, bufferOffset, sublen);
     

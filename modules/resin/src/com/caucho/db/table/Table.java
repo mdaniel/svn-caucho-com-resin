@@ -291,8 +291,9 @@ public class Table extends Store {
 
 	table.init();
 
+	table.clearIndexes();
 	table.initIndexes();
-	// table._blockMax = path.getLength() / BLOCK_SIZE;
+	table.rebuildIndexes();
       
 	return table;
       } catch (Throwable e) {
@@ -315,28 +316,8 @@ public class Table extends Store {
     throws IOException, SQLException
   {
     super.create();
-    
-    Column []columns = _row.getColumns();
-    for (int i = 0; i < columns.length; i++) {
-      Column column = columns[i];
 
-      if (! column.isUnique())
-	continue;
-
-      KeyCompare keyCompare = column.getIndexKeyCompare();
-
-      if (keyCompare == null)
-	continue;
-
-      Block rootBlock = allocateBlock();
-      long rootBlockId = rootBlock.getBlockId();
-      rootBlock.free();
-
-      BTree btree = new BTree(this, rootBlockId, column.getLength(),
-			      keyCompare);
-
-      column.setIndex(btree);
-    }
+    initIndexes();
 
     byte []tempBuffer = new byte[BLOCK_SIZE];
 
@@ -385,46 +366,26 @@ public class Table extends Store {
   private void initIndexes()
     throws IOException, SQLException
   {
-    int indexCount = 0;
-    
-    Block block = readBlock(addressToBlockId(BLOCK_SIZE));
+    Column []columns = _row.getColumns();
+    for (int i = 0; i < columns.length; i++) {
+      Column column = columns[i];
 
-    try {
-      byte []buffer = block.getBuffer();
+      if (! column.isUnique())
+	continue;
 
-      Column []columns = _row.getColumns();
-      for (int i = 0; i < columns.length; i++) {
-	Column column = columns[i];
+      KeyCompare keyCompare = column.getIndexKeyCompare();
 
-	if (! column.isUnique())
-	  continue;
+      if (keyCompare == null)
+	continue;
 
-	if (column.getIndexKeyCompare() == null)
-	  continue;
-	
-	long indexRoot = getLong(buffer, INDEX_ROOT_OFFSET + indexCount * 8);
+      Block rootBlock = allocateIndexBlock();
+      long rootBlockId = rootBlock.getBlockId();
+      rootBlock.free();
 
-	indexCount++;
+      BTree btree = new BTree(this, rootBlockId, column.getLength(),
+			      keyCompare);
 
-	if (indexRoot > 0) {
-	  if (column.getIndexKeyCompare() == null)
-	    throw new SQLException(L.l("The database index for '{0}' is broken for column {1}",
-				       getName(),
-				       column));
-	  
-	  column.setIndex(new BTree(this, indexRoot,
-				    column.getLength(),
-				    column.getIndexKeyCompare()));
-	}
-      }
-    } finally {
-      block.free();
-    }
-
-    if (indexCount > 0) {
-      clearIndexes();
-    
-      rebuildIndexes();
+      column.setIndex(btree);
     }
   }
   

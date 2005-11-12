@@ -257,8 +257,9 @@ public class Transaction extends StoreTransaction {
     lock.unlockWrite();
     lock.unlockUpgrade();
     lock.unlockRead();
+    
+    commit();
   }
-
 
   /**
    * Returns a read block.
