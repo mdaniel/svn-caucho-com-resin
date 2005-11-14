@@ -4,6 +4,8 @@
 
 <s2 title='3.0.snap - Oct 12, 2005'>
 <ul>
+<li>-stdout/-stderr need to initialize the stream (rep by Keith Fettermann)
+<li>Sessions should be closed before servlets (rep by Michael Fortin)
 <li>Caching fixes for s-maxage and Vary cookies
 <li>Keepalive bookkeeping cleanup
 <li>Caching backend fixes for fragment allocation

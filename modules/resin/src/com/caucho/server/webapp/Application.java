@@ -2340,15 +2340,15 @@ public class Application extends ServletContextImpl
 
       ServletContextEvent event = new ServletContextEvent(this);
 
-      _servletManager.destroy();
-      _filterManager.destroy();
-
       SessionManager sessionManager = _sessionManager;
       _sessionManager = null;
 
       if (sessionManager != null &&
 	  (! _isInheritSession || _controller.getParent() == null))
 	sessionManager.close();
+
+      _servletManager.destroy();
+      _filterManager.destroy();
 
       // server/10g8 -- application listeners after session
       for (int i = _applicationListeners.size() - 1; i >= 0; i--) {

@@ -132,6 +132,7 @@ public class Resin implements ResinServerListener {
         Path path = Vfs.lookup(argv[i + 1]);
 
         RotateStream stream = RotateStream.create(path);
+	stream.init();
 	WriteStream out = stream.getStream();
 	out.setDisableClose(true);
 
@@ -145,6 +146,7 @@ public class Resin implements ResinServerListener {
         Path path = Vfs.lookup(argv[i + 1]);
 
         RotateStream stream = RotateStream.create(path);
+	stream.init();
 	WriteStream out = stream.getStream();
 	out.setDisableClose(true);
 
