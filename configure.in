@@ -472,6 +472,16 @@ grep "64-Bit" $tmpname 1> /dev/null
      
 if test "$?" = "0"; then
    b64=true
+fi
+               	
+$JAVA_HOME/bin/java -d64 -version 2> $tmpname
+grep "64-Bit" $tmpname 1> /dev/null
+     
+if test "$?" = "0"; then
+   b64=true
+fi
+
+if test -n "$b64"; then	
    echo "yes"
 else   
    echo "no"

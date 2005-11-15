@@ -8696,6 +8696,16 @@ grep "64-Bit" $tmpname 1> /dev/null
 
 if test "$?" = "0"; then
    b64=true
+fi
+
+$JAVA_HOME/bin/java -d64 -version 2> $tmpname
+grep "64-Bit" $tmpname 1> /dev/null
+
+if test "$?" = "0"; then
+   b64=true
+fi
+
+if test -n "$b64"; then
    echo "yes"
 else
    echo "no"
@@ -9090,7 +9100,9 @@ if test -r "$JAVA_HOME/include/jvmti.h"; then
 fi
 
 if test -n "$JNI"; then
-  plugins="$plugins $resin_plugin"
+  plugins="$plugins $resin_plugin resin_os"
+else
+  echo "Can't JNI include files in JAVA_HOME: $JAVA_HOME"
 fi
 
 
