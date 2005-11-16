@@ -13,7 +13,7 @@ import javax.servlet.ServletException;
 
 import javax.ejb.Query;
 
-import com.caucho.ejb.entity2.EntityManagerProxy;
+import com.caucho.amber.ejb3.EntityManagerProxy;
 
 /**
  * A client to illustrate the query.

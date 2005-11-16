@@ -445,3 +445,38 @@
 [52:43.360] example.SimpleMessageBean ejbRemove()
 [52:43.360] example.SimpleMessageBean ejbRemove()
 [52:43.360] example.SimpleMessageBean ejbRemove()
+[13:12.337] example.SimpleMessageBean setMessageDrivenContext()
+[13:12.337] example.SimpleMessageBean ejbCreate()
+[13:12.346] example.SimpleMessageBean setMessageDrivenContext()
+[13:12.346] example.SimpleMessageBean ejbCreate()
+[13:12.346] example.SimpleMessageBean setMessageDrivenContext()
+[13:12.346] example.SimpleMessageBean ejbCreate()
+[13:12.347] example.SimpleMessageBean setMessageDrivenContext()
+[13:12.347] example.SimpleMessageBean ejbCreate()
+[13:12.347] example.SimpleMessageBean setMessageDrivenContext()
+[13:12.347] example.SimpleMessageBean ejbCreate()
+[13:46.661] example.SimpleMessageBean ejbRemove()
+[13:46.662] example.SimpleMessageBean ejbRemove()
+[13:46.662] example.SimpleMessageBean ejbRemove()
+[13:46.662] example.SimpleMessageBean ejbRemove()
+[13:46.662] example.SimpleMessageBean ejbRemove()
+[13:46.720] example.SimpleMessageBean setMessageDrivenContext()
+[13:46.720] example.SimpleMessageBean ejbCreate()
+[13:46.721] example.SimpleMessageBean setMessageDrivenContext()
+[13:46.721] example.SimpleMessageBean ejbCreate()
+[13:46.721] example.SimpleMessageBean setMessageDrivenContext()
+[13:46.721] example.SimpleMessageBean ejbCreate()
+[13:46.721] example.SimpleMessageBean setMessageDrivenContext()
+[13:46.722] example.SimpleMessageBean ejbCreate()
+[13:46.722] example.SimpleMessageBean setMessageDrivenContext()
+[13:46.722] example.SimpleMessageBean ejbCreate()
+[13:46.752] example.MessageSenderServlet Sent message: hello, world: message #1
+[13:46.752] example.SimpleMessageBean onMessage(): hello, world: message #1
+[13:46.753] example.SimpleMessageBean onMessage(): hello, world: message #2
+[13:46.753] example.MessageSenderServlet Sent message: hello, world: message #2
+[13:46.754] example.SimpleMessageBean onMessage(): hello, world: message #3
+[13:46.754] example.MessageSenderServlet Sent message: hello, world: message #3
+[13:46.755] example.SimpleMessageBean onMessage(): hello, world: message #4
+[13:46.755] example.MessageSenderServlet Sent message: hello, world: message #4
+[13:46.756] example.SimpleMessageBean onMessage(): hello, world: message #5
+[13:46.756] example.MessageSenderServlet Sent message: hello, world: message #5

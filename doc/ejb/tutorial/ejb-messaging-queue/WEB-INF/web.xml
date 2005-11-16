@@ -6,7 +6,7 @@
   <!--
      - JMS
     -->
-  <resource jndi-name="jms/queue-connectionAbstract-factory"
+  <resource jndi-name="jms/queue-connection-factory"
     type='com.caucho.jms.JVMQueueConnectionFactory'/>
 
   <resource jndi-name="jms/queue"
@@ -17,7 +17,7 @@
      - see also message.ejb
     -->
   <ejb-server config-directory="WEB-INF">
-    <jms-connection-factory>jms/queue-connectionAbstract-factory</jms-connection-factory>
+    <jms-connection-factory>jms/queue-connection-factory</jms-connection-factory>
   </ejb-server>
 
   <!--
