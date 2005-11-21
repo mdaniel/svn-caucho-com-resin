@@ -30,6 +30,10 @@ package com.caucho.util;
 
 import java.io.*;
 import java.util.*;
+
+import java.util.logging.Logger;
+import java.util.logging.Level;
+
 import java.text.*;
 
 import com.caucho.util.*;
@@ -39,6 +43,9 @@ import com.caucho.vfs.*;
  * Resin Date object
  */
 public class QDate {
+  private static final Logger log
+    = Logger.getLogger(QDate.class.getName());
+  
   static final public int YEAR = 0;
   static final public int MONTH = YEAR + 1;
   static final public int DAY_OF_MONTH = MONTH + 1;
@@ -201,14 +208,18 @@ public class QDate {
     else {
       calculateSplit(time - _localTimeZone.getRawOffset());
 
-      long offset = _localTimeZone.getOffset(GregorianCalendar.AD,
-                                             (int) _year,
-                                             (int) _month,
-                                             (int) _dayOfMonth + 1,
-                                             getDayOfWeek(),
-                                             (int) _timeOfDay);
+      try {
+	long offset = _localTimeZone.getOffset(GregorianCalendar.AD,
+					       (int) _year,
+					       (int) _month,
+					       (int) _dayOfMonth + 1,
+					       getDayOfWeek(),
+					       (int) _timeOfDay);
 
-      calculateSplit(time - offset);
+	calculateSplit(time - offset);
+      } catch (Throwable e) {
+	log.log(Level.FINE, e.toString(), e);
+      }
     }
   }
 
