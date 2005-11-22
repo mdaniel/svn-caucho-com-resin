@@ -952,19 +952,6 @@ fi
 
 if test -z "${OPENSSL_LIB}"; then	
   foo=bar
-elif test -r "${OPENSSL_LIB}/libcrypto.so"; then	
-  SSL_LIBS="${SSL_LIBS} -lcrypto"
-elif test -r "${OPENSSL_LIB}/libcrypto.dylib"; then	
-  SSL_LIBS="${SSL_LIBS} -lcrypto"
-elif test -r "${OPENSSL_LIB}/libcrypto.a"; then	
-  SSL_LIBS="${SSL_LIBS} ${OPENSSL_LIB}/libcrypto.a"
-else
-  # probably an error
-  SSL_LIBS="${SSL_LIBS} -lcrypto"
-fi
-
-if test -z "${OPENSSL_LIB}"; then	
-  foo=bar
 elif test -r "${OPENSSL_LIB}/libssl.so"; then	
   SSL_LIBS="${SSL_LIBS} -lssl"
 elif test -r "${OPENSSL_LIB}/libssl.dylib"; then	
@@ -980,6 +967,19 @@ elif test -r "${OPENSSL_LIB}/libssl3.a"; then
 else
   # probably an error
   SSL_LIBS="${SSL_LIBS} -lssl"
+fi
+
+if test -z "${OPENSSL_LIB}"; then	
+  foo=bar
+elif test -r "${OPENSSL_LIB}/libcrypto.so"; then	
+  SSL_LIBS="${SSL_LIBS} -lcrypto"
+elif test -r "${OPENSSL_LIB}/libcrypto.dylib"; then	
+  SSL_LIBS="${SSL_LIBS} -lcrypto"
+elif test -r "${OPENSSL_LIB}/libcrypto.a"; then	
+  SSL_LIBS="${SSL_LIBS} ${OPENSSL_LIB}/libcrypto.a"
+else
+  # probably an error
+  SSL_LIBS="${SSL_LIBS} -lcrypto"
 fi
 
 SSL_OBJ=ssl_stub.o

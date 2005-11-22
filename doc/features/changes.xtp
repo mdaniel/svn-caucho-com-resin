@@ -2,6 +2,12 @@
 
 <a href='changes-2.xtp'>Resin 2.1 changes</a>
 
+<s2 title='3.0.snap - Nov 15, 2005'>
+<ul>
+<li>Change order of ssl and crypt in ./configure (rep by Mattias Jiderhamn)
+</ul>
+</s2>
+
 <s2 title='3.0.15 - Nov 15, 2005'>
 <ul>
 <li>(2005-11-14) -stdout/-stderr need to initialize the stream (rep by Keith Fettermann)
