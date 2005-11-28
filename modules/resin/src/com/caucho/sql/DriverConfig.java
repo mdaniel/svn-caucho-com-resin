@@ -39,11 +39,6 @@ import java.util.logging.Level;
 import java.sql.*;
 import javax.sql.*;
 
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
-
-import javax.resource.spi.ManagedConnectionFactory;
-
 import com.caucho.util.L10N;
 
 import com.caucho.log.Log;
@@ -58,8 +53,7 @@ import com.caucho.config.types.InitParam;
 
 import com.caucho.naming.Jndi;
 
-import com.caucho.sql.spy.SpyConnectionPoolDataSource;
-import com.caucho.sql.spy.SpyXADataSource;
+import com.caucho.profiler.*;
 
 /**
  * Configures the database driver.
@@ -67,12 +61,12 @@ import com.caucho.sql.spy.SpyXADataSource;
 public class DriverConfig {
   protected static final Logger log = Log.open(DriverConfig.class);
   private static final L10N L = new L10N(DriverConfig.class);
-  
+
   private static final int TYPE_UNKNOWN = 0;
   private static final int TYPE_DRIVER = 1;
   private static final int TYPE_POOL = 2;
   private static final int TYPE_XA = 3;
-  
+
   /**
    * The beginning of the URL used to connect to a database with
    * this pooled connection driver.
@@ -98,15 +92,17 @@ public class DriverConfig {
   private String _user;
   private String _password;
   private Properties _info;
-  
+
   private BuilderProgramContainer _init = new BuilderProgramContainer();
 
   private int _driverType;
   private Object _driverObject;
-  
+
   private ConnectionPoolDataSource _poolDataSource;
   private XADataSource _xaDataSource;
   private Driver _driver;
+
+  private ProfilerPoint _profilerPoint;
 
   private boolean _isInit;
   private boolean _isStarted;
@@ -118,7 +114,7 @@ public class DriverConfig {
   public DriverConfig(DBPoolImpl pool)
   {
     _dbPool = pool;
-    
+
     _info = new Properties();
   }
 
@@ -168,10 +164,10 @@ public class DriverConfig {
       _poolDataSource = (ConnectionPoolDataSource) dataSource;
     else
       throw new ConfigException(L.l("data-source `{0}' is of type `{1}' which does not implement XADataSource or ConnectionPoolDataSource.",
-				    dataSource,
-				    dataSource.getClass().getName()));
+                                    dataSource,
+                                    dataSource.getClass().getName()));
   }
-  
+
   /**
    * Returns the JDBC driver class for the pooled object.
    */
@@ -196,7 +192,7 @@ public class DriverConfig {
 
     Config.checkCanInstantiate(driverClass);
   }
-  
+
   /**
    * Returns the connection's JDBC url.
    */
@@ -220,7 +216,7 @@ public class DriverConfig {
   {
     _init.addProgram(program);
   }
-  
+
   /**
    * Returns the connection's user.
    */
@@ -228,7 +224,7 @@ public class DriverConfig {
   {
     return _user;
   }
-  
+
   /**
    * Sets the connection's user.
    */
@@ -236,7 +232,7 @@ public class DriverConfig {
   {
     _user = user;
   }
-  
+
   /**
    * Returns the connection's password
    */
@@ -244,7 +240,7 @@ public class DriverConfig {
   {
     return _password;
   }
-  
+
   /**
    * Sets the connection's password
    */
@@ -267,7 +263,7 @@ public class DriverConfig {
     Iterator<String> iter = paramMap.keySet().iterator();
     while (iter.hasNext()) {
       String key = iter.next();
-      
+
       _info.setProperty(key, paramMap.get(key));
     }
   }
@@ -368,7 +364,30 @@ public class DriverConfig {
   {
     return _dbPool.isXA();
   }
-  
+
+  /**
+   * Configure a ProfilerPointConfig, used to create a ProfilerPoint
+   * that is then passed to setProfiler().
+   * The returned ProfilerPointConfig has a default name set to the URL of
+   * this driver,
+   */
+  public ProfilerPointConfig createProfilerPoint()
+  {
+    ProfilerPointConfig profilerPointConfig = new ProfilerPointConfig();
+
+    profilerPointConfig.setName(getURL());
+    profilerPointConfig.setCategorizing(true);
+
+    return profilerPointConfig;
+  }
+
+  /**
+   * Enables profiling for this driver.
+   */
+  public void setProfilerPoint(ProfilerPoint profilerPoint)
+  {
+    _profilerPoint = profilerPoint;
+  }
 
   /**
    * Initialize the pool's data source
@@ -389,7 +408,7 @@ public class DriverConfig {
 
     if (_xaDataSource == null && _poolDataSource == null) {
       initDriver();
-      
+
       Object driverObject = getDriverObject();
 
       if (driverObject == null) {
@@ -398,17 +417,17 @@ public class DriverConfig {
       }
 
       if (_driverType == TYPE_XA)
-	_xaDataSource = (XADataSource) _driverObject;
+        _xaDataSource = (XADataSource) _driverObject;
       else if (_driverType == TYPE_POOL)
-	_poolDataSource = (ConnectionPoolDataSource) _driverObject;
+        _poolDataSource = (ConnectionPoolDataSource) _driverObject;
       else if (_driverType == TYPE_DRIVER)
-	_driver = (Driver) _driverObject;
+        _driver = (Driver) _driverObject;
       else if (driverObject instanceof XADataSource)
-	_xaDataSource = (XADataSource) _driverObject;
+        _xaDataSource = (XADataSource) _driverObject;
       else if (_driverObject instanceof ConnectionPoolDataSource)
-	_poolDataSource = (ConnectionPoolDataSource) _driverObject;
+        _poolDataSource = (ConnectionPoolDataSource) _driverObject;
       else if (_driverObject instanceof Driver)
-	_driver = (Driver) _driverObject;
+        _driver = (Driver) _driverObject;
       else
         throw new SQLExceptionWrapper(L.l("driver `{0}' has not been configured for pool {1}.  <database> needs a <driver type='...'>.",
                                           _driverClass, getDBPool().getName()));
@@ -419,6 +438,18 @@ public class DriverConfig {
 					  _xaDataSource));
       }
       */
+    }
+
+    if (_profilerPoint != null) {
+      if (log.isLoggable(Level.FINE))
+        log.fine(_profilerPoint.toString());
+
+      if (_xaDataSource != null)
+        _xaDataSource = new XADataSourceWrapper(_profilerPoint, _xaDataSource);
+      else if (_poolDataSource != null)
+        _poolDataSource = new ConnectionPoolDataSourceWrapper(_profilerPoint, _poolDataSource);
+      else if (_driver != null)
+        _driver = new DriverWrapper(_profilerPoint, _driver);
     }
   }
 
@@ -435,7 +466,7 @@ public class DriverConfig {
 
     if (log.isLoggable(Level.CONFIG))
       log.config("loading driver: " + _driverClass.getName());
-      
+
     try {
       _driverObject = _driverClass.newInstance();
     } catch (Exception e) {
@@ -454,9 +485,9 @@ public class DriverConfig {
     PooledConnection conn = null;
     if (_xaDataSource != null) {
       if (user == null && password == null)
-	conn = _xaDataSource.getXAConnection();
+        conn = _xaDataSource.getXAConnection();
       else
-	conn = _xaDataSource.getXAConnection(user, password);
+        conn = _xaDataSource.getXAConnection(user, password);
 
       /*
       if (! _isTransactional) {
@@ -472,11 +503,11 @@ public class DriverConfig {
 					  _poolDataSource));
       }
       */
-      
+
       if (user == null && password == null)
-	conn = _poolDataSource.getPooledConnection();
+        conn = _poolDataSource.getPooledConnection();
       else
-	conn = _poolDataSource.getPooledConnection(user, password);
+        conn = _poolDataSource.getPooledConnection(user, password);
     }
 
     return conn;
@@ -501,7 +532,7 @@ public class DriverConfig {
       throw new SQLException(L.l("can't create connection with null url"));
 
     Properties properties = getInfo();
-    
+
     if (user != null)
       properties.put("user", user);
     else
@@ -531,7 +562,7 @@ public class DriverConfig {
       return;
 
     _isInit = true;
-    
+
     Object driverObject = getDriverObject();
 
     if (driverObject != null) {
@@ -540,53 +571,53 @@ public class DriverConfig {
       return;
     else {
       throw new SQLExceptionWrapper(L.l("driver `{0}' has not been configured for pool {1}.  <database> needs either a <data-source> or a <type>.",
-					_driverClass, getDBPool().getName()));
+                                        _driverClass, getDBPool().getName()));
     }
 
     try {
       // server/14g1
       if (_driverURL != null) { // && ! (driverObject instanceof Driver)) {
-	StringAttributeProgram program;
-	program = new StringAttributeProgram("url", _driverURL);
-	program.configure(driverObject);
+        StringAttributeProgram program;
+        program = new StringAttributeProgram("url", _driverURL);
+        program.configure(driverObject);
       }
     } catch (Throwable e) {
       if (driverObject instanceof Driver)
-	log.log(Level.FINEST, e.toString(), e);
+        log.log(Level.FINEST, e.toString(), e);
       else
-	throw new SQLExceptionWrapper(e);
+        throw new SQLExceptionWrapper(e);
     }
 
     try {
       if (_user != null) { // && ! (driverObject instanceof Driver)) {
-	StringAttributeProgram program;
-	program = new StringAttributeProgram("user", _user);
-	program.configure(driverObject);
+        StringAttributeProgram program;
+        program = new StringAttributeProgram("user", _user);
+        program.configure(driverObject);
       }
     } catch (Throwable e) {
       log.log(Level.FINEST, e.toString(), e);
-      
+
       if (! (driverObject instanceof Driver))
-	throw new SQLExceptionWrapper(e);
+        throw new SQLExceptionWrapper(e);
     }
 
     try {
       if (_password != null) { // && ! (driverObject instanceof Driver)) {
-	StringAttributeProgram program;
-	program = new StringAttributeProgram("password", _password);
-	program.configure(driverObject);
+        StringAttributeProgram program;
+        program = new StringAttributeProgram("password", _password);
+        program.configure(driverObject);
       }
     } catch (Throwable e) {
       log.log(Level.FINEST, e.toString(), e);
-      
+
       if (! (driverObject instanceof Driver))
-	throw new SQLExceptionWrapper(e);
+        throw new SQLExceptionWrapper(e);
     }
 
     try {
       if (_init != null) {
-	_init.configure(driverObject);
-	_init = null;
+        _init.configure(driverObject);
+        _init = null;
       }
 
       Config.init(driverObject);
