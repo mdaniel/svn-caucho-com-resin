@@ -70,7 +70,17 @@ public abstract class Service {
   public void connect(String host, int port, String user, String password)
     throws MessagingException
   {
-    
+    if (host == null)
+      host = this.session.getProperty("java.mail.host");
+
+    if (port <= 0) {
+      String portName = this.session.getProperty("java.mail.port");
+
+      if (portName != null)
+	port = Integer.parseInt(portName);
+    }
+
+    protocolConnect(host, port, user, password);
   }
 
   /**

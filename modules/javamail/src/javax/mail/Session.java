@@ -29,6 +29,8 @@
 
 package javax.mail;
 
+import java.lang.reflect.Constructor;
+
 import java.util.Properties;
 
 import java.net.InetAddress;
@@ -139,7 +141,11 @@ public final class Session {
   public Provider getProvider(String protocol)
     throws NoSuchProviderException
   {
-    throw new UnsupportedOperationException();
+    Provider provider = new Provider();
+
+    provider.setClassName("com.caucho.mail.smtp.SmtpTransport");
+
+    return provider;
   }
 
   /**
@@ -204,7 +210,7 @@ public final class Session {
   public Transport getTransport()
     throws NoSuchProviderException
   {
-    throw new UnsupportedOperationException();
+    return getTransport(getProperty("mail.transport.protocol"));
   }
 
   /**
@@ -213,7 +219,23 @@ public final class Session {
   public Transport getTransport(String protocol)
     throws NoSuchProviderException
   {
-    throw new UnsupportedOperationException();
+    Provider provider = getProvider(protocol);
+
+    String className = provider.getClassName();
+
+    try {
+      ClassLoader loader = Thread.currentThread().getContextClassLoader();
+      
+      Class cl = Class.forName(className, false, loader);
+
+      Constructor cons = cl.getConstructor(new Class[] { Session.class, URLName.class });
+
+      Transport transport = (Transport) cons.newInstance(new Object[] { this, null });
+
+      return transport;
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
   }
 
   /**

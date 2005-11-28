@@ -124,6 +124,8 @@ taken in microseconds (actual accuracy is milliseconds).</p>
 <p>An amber bean now allows an @AmberTableCache annotation to specify
 the read-only and cache timeout attributes.</p>
 
+</section>
+
 <section title="Special Thanks">
 
 <p>Special thanks to Fiaz Hossain for suggesting a fix for the
