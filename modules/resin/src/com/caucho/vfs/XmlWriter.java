@@ -658,6 +658,7 @@ public class XmlWriter
 
       addFlags("hr",  BREAK_BEFORE | BREAK_AFTER | EMPTY);
       addFlags("br", BREAK_AFTER | EMPTY);
+      addFlags("option", EMPTY);
 
       addFlags("img", EMPTY);
 
