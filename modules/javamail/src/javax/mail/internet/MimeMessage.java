@@ -80,7 +80,7 @@ public class MimeMessage extends Message {
   public void setFrom()
     throws MessagingException
   {
-    String user;
+    String user = null;
 
     if (user == null)
       user = this.session.getProperty("mail.from");

@@ -274,6 +274,11 @@ public class RunnerRequest extends AbstractHttpRequest
     _filter = new ServletFilter();
   }
 
+  public boolean isWaitForRead()
+  {
+    return true;
+  }
+
   /**
    * Handles a new request.  Initializes the protocol handler and
    * the request streams.

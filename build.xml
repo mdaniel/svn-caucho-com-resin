@@ -66,7 +66,7 @@
   </target>
 
   <target name="compile" 
-          depends="init, ejb, ejb30, j2eedeploy, jaxrpc, jca, jms, jmx, jsdk, jstl, jta, portlet, script, resin-jdk15, resin, webutil, deploy, conf, ext">
+          depends="init, ejb, ejb30, j2eedeploy, jaxrpc, jca, jms, jmx, jsdk, jstl, jta, mail, portlet, script, resin-jdk15, resin, webutil, deploy, conf, ext">
   </target>
 
   <target name="ejb" depends="init, jta">

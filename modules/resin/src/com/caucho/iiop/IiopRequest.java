@@ -95,6 +95,11 @@ public class IiopRequest implements ServerRequest {
   public void init()
   {
   }
+
+  public boolean isWaitForRead()
+  {
+    return true;
+  }
   
   /**
    * Handles a new connection.  The controlling TcpServer may call
