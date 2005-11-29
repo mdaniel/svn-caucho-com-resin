@@ -153,6 +153,14 @@ public class HttpRequest extends AbstractHttpRequest
   }
 
   /**
+   * Return true if the request waits for a read before beginning.
+   */
+  public final boolean isWaitForRead()
+  {
+    return true;
+  }
+  
+  /**
    * Handles a new HTTP request.
    *
    * <p>Note: ClientDisconnectException must be rethrown to

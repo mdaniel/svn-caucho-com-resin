@@ -66,9 +66,9 @@ public class Provider {
   /**
    * Return the implementing class name.
    */
-  String setClassName(String className)
+  void setClassName(String className)
   {
-    return _className;
+    _className = className;
   }
 
   /**

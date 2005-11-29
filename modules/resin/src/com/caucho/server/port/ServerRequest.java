@@ -43,6 +43,12 @@ public interface ServerRequest {
    * connection thread.
    */
   public void init();
+
+  /**
+   * Return true if the connection should wait for a read before
+   * handling the request.
+   */
+  public boolean isWaitForRead();
   
   /**
    * Handles a new connection.  The controlling TcpServer may call

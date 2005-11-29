@@ -71,10 +71,20 @@ public abstract class Service {
     throws MessagingException
   {
     if (host == null)
-      host = this.session.getProperty("java.mail.host");
+      host = this.session.getProperty("mail.smtp.host");
+
+    if (host == null)
+      host = this.session.getProperty("mail.host");
 
     if (port <= 0) {
-      String portName = this.session.getProperty("java.mail.port");
+      String portName = this.session.getProperty("mail.smtp.port");
+
+      if (portName != null)
+	port = Integer.parseInt(portName);
+    }
+
+    if (port <= 0) {
+      String portName = this.session.getProperty("mail.port");
 
       if (portName != null)
 	port = Integer.parseInt(portName);

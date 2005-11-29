@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -45,7 +46,11 @@ import javax.mail.Transport;
 import javax.mail.URLName;
 import javax.mail.MessagingException;
 
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeMessage;
+
 import com.caucho.util.L10N;
+import com.caucho.util.CauchoSystem;
 
 import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.WriteStream;
@@ -78,7 +83,7 @@ public class SmtpTransport extends Transport {
     throws MessagingException
   {
     if (host == null)
-      throw new MessagingException(L.l("Unknown mail host in connect."));
+      host = "localhost";
 
     if (port < 0)
       port = 25;
@@ -92,12 +97,18 @@ public class SmtpTransport extends Transport {
       _socket.setSoTimeout(10000);
       SocketStream s = new SocketStream(_socket);
     
-      _is = new ReadStream(s);
       _os = new WriteStream(s);
+      _is = new ReadStream(s, _os);
 
       String line = _is.readLine();
       
       log.fine("smtp connection to " + host + ":" + port + " succeeded");
+      log.fine("smtp: " + line);
+
+      _os.print("EHLO " + CauchoSystem.getLocalHost() + "\r\n");
+      _os.flush();
+
+      readResponse();
 
       setConnected(true);
     } catch (IOException e) {
@@ -122,6 +133,81 @@ public class SmtpTransport extends Transport {
   {
     if (! isConnected())
       throw new MessagingException("Transport does not have an active connection.");
+
+    if (! (msg instanceof MimeMessage))
+      throw new MessagingException("message must be a MimeMessage at '"
+				   + msg.getClass().getName() + "'");
+
+    MimeMessage mimeMsg = (MimeMessage) msg;
+
+    try {
+      // XXX: EHLO to resync? or RSET?
+      // XXX: FROM
+
+      String []fromList = mimeMsg.getHeader("From");
+      String from;
+      
+      if (fromList == null || fromList.length < 1) {
+	// XXX: possible should have a default
+	throw new MessagingException("message should have a sender");
+      }
+      else
+	from = fromList[0];
+      
+      _os.print("MAIL FROM:<" + from + ">\r\n");
+      _os.flush();
+
+      readResponse();
+
+      for (int i = 0; i < addresses.length; i++) {
+	InternetAddress addr = (InternetAddress) addresses[i];
+      
+	_os.print("RCPT TO:<" + addr.getAddress() + ">\r\n");
+	_os.flush();
+
+	readResponse();
+      }
+
+      _os.print("DATA\r\n");
+      _os.flush();
+
+      String line = _is.readLine();
+      if (! line.startsWith("354 "))
+	throw new MessagingException("Data not accepted: " + line);
+
+      mimeMsg.writeTo(new DataFilter(_os));
+
+      _os.print("\r\n.\r\n");
+      _os.flush();
+    } catch (IOException e) {
+      log.log(Level.FINER, e.toString(), e);
+
+      throw new MessagingException(e.toString());
+    }
+  }
+
+  private int readResponse()
+    throws IOException, MessagingException
+  {
+    while (true) {
+      String line = _is.readLine();
+      if (line.length() < 4)
+	throw new MessagingException(line);
+
+      int status = 0;
+      for (int i = 0; i < 3; i++) {
+	char ch;
+
+	if ('0' <= (ch = line.charAt(i))  && ch <= '9')
+	  status = 10 * status + ch - '0';
+      }
+
+      if ((status / 100) % 10 != 2)
+	throw new MessagingException(line);
+
+      if (line.charAt(3) != '-')
+	return status;
+    }
   }
 
   /**
@@ -132,13 +218,63 @@ public class SmtpTransport extends Transport {
   {
     Socket socket = _socket;
     _socket = null;
+
+    WriteStream os = _os;
+    _os = null;
     
     setConnected(false);
+
+    try {
+      if (os != null) {
+	os.print("QUIT\r\n");
+	os.flush();
+      }
+    } catch (IOException e) {
+    }
 
     try {
       if (socket != null)
 	socket.close();
     } catch (IOException e) {
+    }
+  }
+
+  private class DataFilter extends OutputStream {
+    private OutputStream _os;
+    
+    private boolean _isCr;
+    private boolean _isLf;
+
+    DataFilter(OutputStream os)
+    {
+      _os = os;
+    }
+    
+    public void write(int ch)
+      throws IOException
+    {
+      switch (ch) {
+      case '\r':
+	_isCr = true;
+	_isLf = false;
+	break;
+      case '\n':
+	_isLf = _isCr;
+	_isCr = false;
+	break;
+      case '.':
+	if (_isLf)
+	  _os.write('.');
+	_isLf = false;
+	_isCr = false;
+	break;
+      default:
+	_isLf = false;
+	_isCr = false;
+	break;
+      }
+
+      _os.write(ch);
     }
   }
 }

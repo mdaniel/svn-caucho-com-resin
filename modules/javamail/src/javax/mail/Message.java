@@ -309,9 +309,9 @@ public abstract class Message implements Part {
    * The recipient type of a message.
    */
   public static class RecipientType implements java.io.Serializable {
-    static final RecipientType BCC = new RecipientType("Bcc");
-    static final RecipientType CC = new RecipientType("Cc");
-    static final RecipientType TO = new RecipientType("To");
+    public static final RecipientType BCC = new RecipientType("Bcc");
+    public static final RecipientType CC = new RecipientType("Cc");
+    public static final RecipientType TO = new RecipientType("To");
     
     protected String type;
 

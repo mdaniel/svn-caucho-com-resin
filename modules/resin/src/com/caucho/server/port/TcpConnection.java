@@ -349,6 +349,7 @@ public class TcpConnection extends PortConnection implements ThreadTask {
     boolean isFirst = ! isKeepalive;
     
     ServerRequest request = getRequest();
+    boolean isWaitForRead = request.isWaitForRead();
 	
     Thread thread = Thread.currentThread();
     String oldThreadName = thread.getName();
@@ -381,7 +382,8 @@ public class TcpConnection extends PortConnection implements ThreadTask {
 	    
 	    isKeepalive = false;
 
-	    if (! port.isClosed() && getReadStream().waitForRead()) {
+	    if (! port.isClosed() &&
+		(! isWaitForRead || getReadStream().waitForRead())) {
 	      synchronized (_requestLock) {
 		isKeepalive = request.handleRequest();
 	      }

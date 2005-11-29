@@ -147,7 +147,7 @@ public final class Session {
 
     return provider;
   }
-
+  
   /**
    * Sets a given provider
    */

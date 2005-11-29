@@ -33,6 +33,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.IOException;
 
+import java.net.InetAddress;
+
 import java.util.Date;
 import java.util.Enumeration;
 
@@ -49,6 +51,12 @@ import javax.mail.MessagingException;
  * Represents a mime-type mail message.
  */
 public class MimeMessage extends Message {
+  protected byte []content;
+  protected Flags flags;
+  protected InternetHeaders headers = new InternetHeaders();
+  protected boolean modified;
+  protected boolean saved;
+  
   /**
    * Creates a message with a session
    */
@@ -72,25 +80,52 @@ public class MimeMessage extends Message {
   public void setFrom()
     throws MessagingException
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    String user;
+
+    if (user == null)
+      user = this.session.getProperty("mail.from");
+
+    if (user == null) {
+      String userName = System.getProperty("user.name");
+      String hostName = "localhost";
+
+      try {
+	InetAddress addr = InetAddress.getLocalHost();
+
+	hostName = addr.getCanonicalHostName();
+      } catch (Throwable e) {
+      }
+
+      user = userName + '@' + hostName;
+    }
+
+    addFrom(new Address[] { new InternetAddress(user) });
   }
 
   /**
-   * Sets the from attribute with an address.
+   * Sets the from attribute using mail.user.
    */
-  public void setFrom(Address address)
+  public void addFrom(Address []address)
     throws MessagingException
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    // XXX: is this correct?
+    setFrom(address[0]);
   }
 
   /**
    * Adds new from addresses.
    */
-  public void addFrom(Address []addresses)
+  public void setFrom(Address address)
     throws MessagingException
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    InternetAddress addr;
+
+    if (! (address instanceof InternetAddress))
+	throw new MessagingException("expected internet address");
+
+    addr = (InternetAddress) address;
+
+    setHeader("From", addr.getAddress());
   }
 
   /**
@@ -117,7 +152,21 @@ public class MimeMessage extends Message {
   public void addRecipients(RecipientType type, Address []addresses)
     throws MessagingException
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    for (int i = 0; i < addresses.length; i++) {
+      InternetAddress addr;
+
+      if (! (addresses[i] instanceof InternetAddress))
+	throw new MessagingException("expected internet address");
+
+      addr = (InternetAddress) addresses[i];
+
+      if (type == RecipientType.TO) {
+	addHeader("To", addr.getAddress());
+      }
+      else {
+	addHeader("Unknown", addr.getAddress());
+      }
+    }
   }
 
   /**
@@ -135,7 +184,7 @@ public class MimeMessage extends Message {
   public void setSubject(String subject)
     throws MessagingException
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    setHeader("Subject", subject);
   }
 
   /**
@@ -341,7 +390,9 @@ public class MimeMessage extends Message {
   public void setText(String text)
     throws MessagingException
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    // XXX: encoding
+    
+    this.content = text.getBytes();
   }
 
   /**
@@ -359,7 +410,33 @@ public class MimeMessage extends Message {
   public void writeTo(OutputStream os)
     throws IOException, MessagingException
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    writeTo(os, new String[0]);
+  }
+
+  /**
+   * Output a bytestream for the part.
+   */
+  public void writeTo(OutputStream os, String []ignoreList)
+    throws IOException, MessagingException
+  {
+    if (! this.saved)
+      saveChanges();
+    
+    Enumeration e = this.headers.getNonMatchingHeaderLines(ignoreList);
+
+    while (e.hasMoreElements()) {
+      String line = (String) e.nextElement();
+
+      os.write(line.getBytes());
+      os.write('\r');
+      os.write('\n');
+    }
+    
+    os.write('\r');
+    os.write('\n');
+
+    if (this.content != null)
+      os.write(this.content, 0, this.content.length);
   }
 
   /**
@@ -368,7 +445,7 @@ public class MimeMessage extends Message {
   public String []getHeader(String headerName)
     throws MessagingException
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    return this.headers.getHeader(headerName);
   }
 
   /**
@@ -378,7 +455,7 @@ public class MimeMessage extends Message {
 			String headerValue)
     throws MessagingException
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    this.headers.setHeader(headerName, headerValue);
   }
 
   /**
@@ -388,7 +465,7 @@ public class MimeMessage extends Message {
 			String headerValue)
     throws MessagingException
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    this.headers.addHeader(headerName, headerValue);
   }
 
   /**
@@ -397,7 +474,7 @@ public class MimeMessage extends Message {
   public void removeHeader(String headerName)
     throws MessagingException
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    this.headers.removeHeader(headerName);
   }
 
   /**
@@ -406,7 +483,7 @@ public class MimeMessage extends Message {
   public Enumeration getAllHeaders()
     throws MessagingException
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    return this.headers.getAllHeaders();
   }
 
   /**
@@ -415,7 +492,7 @@ public class MimeMessage extends Message {
   public Enumeration getMatchingHeaders(String []headerNames)
     throws MessagingException
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    return this.headers.getMatchingHeaders(headerNames);
   }
 
   /**
@@ -424,6 +501,33 @@ public class MimeMessage extends Message {
   public Enumeration getNonMatchingHeaders(String []headerNames)
     throws MessagingException
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    return this.headers.getNonMatchingHeaders(headerNames);
+  }
+
+  /**
+   * Returns a part's headers.
+   */
+  public Enumeration getAllHeaderLines()
+    throws MessagingException
+  {
+    return this.headers.getAllHeaderLines();
+  }
+
+  /**
+   * Returns matching headers.
+   */
+  public Enumeration getMatchingHeaderLines(String []headerNames)
+    throws MessagingException
+  {
+    return this.headers.getMatchingHeaderLines(headerNames);
+  }
+
+  /**
+   * Returns non-matching headers.
+   */
+  public Enumeration getNonMatchingHeaderLines(String []headerNames)
+    throws MessagingException
+  {
+    return this.headers.getNonMatchingHeaderLines(headerNames);
   }
 }
