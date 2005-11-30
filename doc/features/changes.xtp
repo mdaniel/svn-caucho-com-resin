@@ -4,6 +4,11 @@
 
 <s2 title='3.0.snap - Nov 15, 2005'>
 <ul>
+<li>always-load-session now forces a load, ignoring clustering information (#439)
+<li>fmt:param wasn't accepting RT expressions (#464, rep by zgia)
+<li>EL expressions should be enabled if there is no web.xml (RSN-503, rep by Bin Sun)
+<li>JSTL fast was requiring &lt;jsp/> tag (RSN-492)
+<li>AmberManager was requiring JDK 1.5 (RSN-504, rep by Kaven Lin and Takahiro Fukuda)
 <li>Change order of ssl and crypt in ./configure (rep by Mattias Jiderhamn)
 </ul>
 </s2>

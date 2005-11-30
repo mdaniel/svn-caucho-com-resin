@@ -933,10 +933,12 @@ public abstract class JspNode {
     try {
       if (JspFragment.class.equals(type))
 	return generateFragmentParameter(value, rtexpr);
-      else if (rtexpr && hasRuntimeAttribute(value))
+      else if (rtexpr && hasRuntimeAttribute(value)) {
         return getRuntimeAttribute(value);
-      else if (rtexpr && hasELAttribute(value))
+      }
+      else if (rtexpr && containsELAttribute(value)) {
         return generateELValue(type, value);
+      }
       else if (type.equals(boolean.class))
         return String.valueOf(Boolean.valueOf(isEmpty ? "false" : value));
       else if (type.equals(Boolean.class)) {
@@ -1262,6 +1264,14 @@ public abstract class JspNode {
   public boolean hasELAttribute(String value)
   {
     return ! _parseState.isELIgnored() && value.indexOf("${") >= 0;
+  }
+  
+  /**
+   * Returns true if the value is a runtime attribute.
+   */
+  public boolean containsELAttribute(String value)
+  {
+    return value.indexOf("${") >= 0;
   }
 
   /**

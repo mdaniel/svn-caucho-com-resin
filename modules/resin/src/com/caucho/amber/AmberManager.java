@@ -104,7 +104,9 @@ public class AmberManager {
   // private EnvAmberManager _envAmberManager;
 
   private AmberEnhancer _enhancer;
-  private EntityManagerProxy _entityManagerProxy;
+
+  // Actual class is EntityManagerProxy, but EntityManager is JDK 1.5 dependent
+  private Object _entityManagerProxy;
 
   // basic data source
   private DataSource _dataSource;
@@ -187,19 +189,22 @@ public class AmberManager {
       throw new RuntimeException(e);
     }
 
-    _entityManagerProxy = new EntityManagerProxy(this);
-    /*
+    // needed to support JDK 1.4 compatibility
     try {
       bindProxy();
     } catch (Throwable e) {
       log.log(Level.FINE, e.toString(), e);
     }
-    */
+  }
+
+  private void bindProxy()
+  {
+    _entityManagerProxy = new EntityManagerProxy(this);
   }
 
   public EntityManager getEntityManager()
   {
-    return _entityManagerProxy;
+    return (EntityManager) _entityManagerProxy;
   }
 
   /**

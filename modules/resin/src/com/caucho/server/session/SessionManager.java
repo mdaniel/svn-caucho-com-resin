@@ -82,6 +82,10 @@ public class SessionManager implements ObjectManager, AlarmListener {
   private static int FALSE = 0;
   private static int COOKIE = 1;
   private static int TRUE = 2;
+
+  private static int UNSET = 0;
+  private static int SET_TRUE = 1;
+  private static int SET_FALSE = 1;
   
   private static int DECODE[];
   
@@ -138,7 +142,7 @@ public class SessionManager implements ObjectManager, AlarmListener {
   private StoreManager _persistentStore;
   private StoreManager _storeManager;
   private Store _sessionStore;
-  private boolean _alwaysLoadSession;
+  private int _alwaysLoadSession;
   private boolean _alwaysSaveSession;
   private boolean _saveOnlyOnShutdown;
   
@@ -344,7 +348,7 @@ public class SessionManager implements ObjectManager, AlarmListener {
    */
   boolean getAlwaysLoadSession()
   {
-    return _alwaysLoadSession;
+    return _alwaysLoadSession == SET_TRUE;
   }
 
   /**
@@ -352,7 +356,7 @@ public class SessionManager implements ObjectManager, AlarmListener {
    */
   public void setAlwaysLoadSession(boolean load)
   {
-    _alwaysLoadSession = load;
+    _alwaysLoadSession = load ? SET_TRUE : SET_FALSE;
   }
 
   /**
@@ -844,7 +848,11 @@ public class SessionManager implements ObjectManager, AlarmListener {
     if (_persistentStore != null)
       _storeManager = _persistentStore;
     else if (_storeManager != null) {
-      _storeManager.setAlwaysLoad(_alwaysLoadSession);
+      if (_alwaysLoadSession == SET_TRUE)
+	_storeManager.setAlwaysLoad(true);
+      else if (_alwaysLoadSession == SET_FALSE)
+	_storeManager.setAlwaysLoad(false);
+      
       _storeManager.setAlwaysSave(_alwaysSaveSession);
       _storeManager.init();
 
@@ -854,6 +862,11 @@ public class SessionManager implements ObjectManager, AlarmListener {
     if (_storeManager != null) {
       _sessionStore = _storeManager.createStore(_distributionId, this);
       _sessionStore.setMaxIdleTime(_sessionTimeout);
+      
+      if (_alwaysLoadSession == SET_TRUE)
+	_sessionStore.setAlwaysLoad(true);
+      else if (_alwaysLoadSession == SET_FALSE)
+	_sessionStore.setAlwaysLoad(false);
     }
 
     _alarm.queue(60000);

@@ -98,15 +98,21 @@ public class ClusterObject {
 
   private boolean isPrimary(String id)
   {
+    if (_store != null && _store.isAlwaysLoad())
+      return false;
+    
+    else if (_store == null && _storeManager.isAlwaysLoad())
+      return false;
+      
     Cluster cluster = Cluster.getLocal();
 
     if (cluster == null)
-      return ! _storeManager.isAlwaysLoad();
+      return true;
       
     ClusterServer selfServer = cluster.getSelfServer();
 
     if (selfServer == null)
-      return ! _storeManager.isAlwaysLoad();
+      return true;
     else
       return _storeManager.getOwnerIndex(id) == selfServer.getIndex();
   }

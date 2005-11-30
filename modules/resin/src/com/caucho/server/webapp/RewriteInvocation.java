@@ -39,6 +39,9 @@ import java.util.regex.Matcher;
 
 import javax.servlet.FilterChain;
 
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+
 import javax.servlet.http.HttpServletResponse;
 
 import com.caucho.config.ConfigException;
@@ -57,7 +60,17 @@ public class RewriteInvocation {
   static final L10N L = new L10N(RewriteInvocation.class);
   static final Logger log = Logger.getLogger(RewriteInvocation.class.getName());
 
+  private final static FilterChain ACCEPT_CHAIN;
+
   private final ArrayList<Program> _programList = new ArrayList<Program>();
+
+  /**
+   * Adds an accept
+   */
+  public void addAccept(Accept accept)
+  {
+    _programList.add(accept);
+  }
 
   /**
    * Adds a rewrite
@@ -127,8 +140,10 @@ public class RewriteInvocation {
       uri = program.rewrite(uri);
 
       FilterChain chain = program.dispatch(uri);
-      
-      if (chain != null)
+
+      if (chain == ACCEPT_CHAIN)
+	return null;
+      else if (chain != null)
 	return chain;
     }
     
@@ -196,6 +211,44 @@ public class RewriteInvocation {
       }
       else
 	return uri;
+    }
+  }
+
+  public static class Accept extends Program {
+    private Pattern _regexp;
+
+    public String getTagName()
+    {
+      return "accept";
+    }
+
+    /**
+     * Sets the regular expression.
+     */
+    public void setRegexp(String regexp)
+    {
+      _regexp = Pattern.compile(regexp);
+    }
+
+    /**
+     * Init
+     */
+    public void init()
+      throws ConfigException
+    {
+      if (_regexp == null)
+	throw new ConfigException(L.l("{0} needs 'regexp' attribute.",
+				      getTagName()));
+    }
+
+    public FilterChain dispatch(String uri)
+    {
+      Matcher matcher = _regexp.matcher(uri);
+
+      if (matcher.find())
+	return ACCEPT_CHAIN;
+      else
+	return null;
     }
   }
 
@@ -318,4 +371,11 @@ public class RewriteInvocation {
 	throw new ConfigException(L.l("error needs 'regexp' attribute."));
     }
   }
+
+  static {
+    ACCEPT_CHAIN = new FilterChain() {
+	public void doFilter(ServletRequest req, ServletResponse res) {}
+      };
+  }
 }
+  

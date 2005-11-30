@@ -50,6 +50,8 @@ public class Store {
   private String _storeId;
   private long _maxIdleTime;
 
+  private boolean _isAlwaysLoad;
+
   /**
    * Creates the new application view of the store.
    *
@@ -63,6 +65,8 @@ public class Store {
     _storeManager = storeManager;
 
     _maxIdleTime = storeManager.getMaxIdleTime();
+
+    _isAlwaysLoad = _storeManager.isAlwaysLoad();
   }
 
   /**
@@ -103,6 +107,22 @@ public class Store {
       return 60000L;
     else
       return window;
+  }
+
+  /**
+   * Returns true if the object should always be loaded.
+   */
+  public boolean isAlwaysLoad()
+  {
+    return _isAlwaysLoad;
+  }
+
+  /**
+   * Set true if the object should always be loaded.
+   */
+  public void setAlwaysLoad(boolean isAlwaysLoad)
+  {
+    _isAlwaysLoad = isAlwaysLoad;
   }
 
   /**

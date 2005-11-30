@@ -127,7 +127,7 @@ public class JstlCoreIf extends JstlNode {
       ifExpr = _testAttr.generateValue(boolean.class);
     else
       ifExpr = generateValue(boolean.class, _test);
-    
+
     out.println("if (" + ifExpr + ") {");
     out.pushDepth();
 

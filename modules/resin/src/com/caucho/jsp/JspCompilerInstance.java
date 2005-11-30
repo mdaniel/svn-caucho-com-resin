@@ -441,8 +441,7 @@ public class JspCompilerInstance {
       else {
 	Application app = _jspCompiler.getApplication();
 	
-	if (_jspPropertyGroup == null &&
-	    app != null && app.getVersion() == null)
+	if (_jspPropertyGroup == null && app != null && app.isJsp1())
 	  _parseState.setELIgnored(true);
 	
 	_parser.parse(_jspPath, _uri);

@@ -92,6 +92,10 @@ public class Application extends ServletContextImpl
   private static final L10N L = new L10N(Application.class);
   private static final Logger log = Log.open(Application.class);
 
+  private static final int JSP_NONE = 0;
+  private static final int JSP_1 = 1;
+  private static final int JSP_2 = 2;
+
   private static EnvironmentLocal<AbstractAccessLog> _accessLogLocal
     = new EnvironmentLocal<AbstractAccessLog>("caucho.server.access-log");
 
@@ -235,6 +239,7 @@ public class Application extends ServletContextImpl
   private boolean _cookieHttpOnly;
 
   // special
+  private int _jspState;
   private JspPropertyGroup _jsp;
   private ArrayList<JspTaglib> _taglibList;
   private HashMap<String,Object> _extensions = new HashMap<String,Object>();
@@ -448,6 +453,23 @@ public class Application extends ServletContextImpl
   public String getSchema()
   {
     return "com/caucho/server/webapp/resin-web-xml.rnc";
+  }
+
+  /**
+   * Sets the node for testing Servlet/JSP versions.
+   */
+  public void setConfigNode(org.w3c.dom.Node node)
+  {
+    String ns = node.getNamespaceURI();
+
+    if (JSP_2 <= _jspState) {
+    }
+    else if (ns == null || ns.equals("")) {
+      _jspState = JSP_1;
+    }
+    else {
+      _jspState = JSP_2;
+    }
   }
 
   /**
@@ -1176,6 +1198,14 @@ public class Application extends ServletContextImpl
   public JspPropertyGroup getJsp()
   {
     return _jsp;
+  }
+
+  /**
+   * Returns true for JSP 1.x
+   */
+  public boolean isJsp1()
+  {
+    return _jspState == JSP_1;
   }
 
   /**

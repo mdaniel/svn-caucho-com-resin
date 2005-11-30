@@ -361,7 +361,12 @@ r_redeploy-mode =
   | element redeploy-mode { string }
 
 r_rewrite-dispatch = element rewrite-dispatch {
-  (element rewrite {
+  element accept {
+     (attribute regexp { string }
+      | element regexp { string })
+   }*
+
+  & element rewrite {
      (attribute regexp { string }
       | element regexp { string })
 
@@ -399,7 +404,6 @@ r_rewrite-dispatch = element rewrite-dispatch {
        (attribute regexp { string }
         | element regexp { string })
      }*
-  )
 }
 
 r_rewrite-real-path = element rewrite-real-path {

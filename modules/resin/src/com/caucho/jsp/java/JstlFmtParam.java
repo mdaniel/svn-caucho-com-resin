@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -100,9 +101,16 @@ public class JstlFmtParam extends JstlNode {
     throws Exception
   {
     if (_value != null) {
-      int paramIndex = _gen.addExpr(_value);
+      if (getRuntimeAttribute(_value) != null) {
+	// jsp/1c3s
+	
+	out.println(lhs + " = String.valueOf(" + getRuntimeAttribute(_value) + ");");
+      }
+      else {
+	int paramIndex = _gen.addExpr(_value);
 
-      out.println(lhs + " = _caucho_expr_" + paramIndex + ".evalObject(pageContext);");
+	out.println(lhs + " = _caucho_expr_" + paramIndex + ".evalObject(pageContext);");
+      }
     }
     else {
       out.println("out = pageContext.pushBody();");

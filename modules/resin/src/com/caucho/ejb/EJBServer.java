@@ -567,6 +567,9 @@ public class EJBServer
       }
     } catch (NamingException e) {
       log.log(Level.FINER, e.toString(), e);
+    } catch (UnsupportedClassVersionError e) {
+      // JDK 1.4 doesn't support entity manager
+      log.log(Level.FINER, e.toString(), e);
     }
 
     if ("manual".equals(_startupMode))

@@ -120,4 +120,9 @@ public class TempReadStream extends StreamImpl {
     
     _cursor = null;
   }
+
+  public String toString()
+  {
+    return "TempReadStream[]";
+  }
 }
