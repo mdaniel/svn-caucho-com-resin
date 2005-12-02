@@ -266,7 +266,9 @@ abstract public class StoreManager
   {
     if (! _lifecycle.toInit())
       return false;
-    
+
+    _lifecycle.setName(toString());
+
     if (_cluster == null)
       _cluster = Cluster.getLocal();
     
