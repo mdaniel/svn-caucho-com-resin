@@ -188,4 +188,9 @@ public class FileStore extends StoreManager {
 
     _backing.remove(obj.getUniqueId());
   }
+
+  public String toString()
+  {
+    return "FileStore[" + getPath() + "]";
+  }
 }
