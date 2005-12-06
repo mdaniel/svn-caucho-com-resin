@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.php.parser;
+package com.caucho.quercus.parser;
 
 import java.io.IOException;
 

@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.php.lib;
+package com.caucho.quercus.lib;
 
 import javax.crypto.Cipher;
 import java.util.zip.CRC32;
@@ -35,21 +35,21 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.caucho.php.env.Value;
-import com.caucho.php.env.Env;
-import com.caucho.php.env.LongValue;
-import com.caucho.php.env.StringValue;
-import com.caucho.php.env.DefaultValue;
-import com.caucho.php.env.BooleanValue;
-import com.caucho.php.env.ArrayValue;
-import com.caucho.php.env.ConstArrayValue;
-import com.caucho.php.env.ArrayValueImpl;
-import com.caucho.php.env.VarMap;
-import com.caucho.php.env.ChainedMap;
+import com.caucho.quercus.env.Value;
+import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.LongValue;
+import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.DefaultValue;
+import com.caucho.quercus.env.BooleanValue;
+import com.caucho.quercus.env.ArrayValue;
+import com.caucho.quercus.env.ConstArrayValue;
+import com.caucho.quercus.env.ArrayValueImpl;
+import com.caucho.quercus.env.VarMap;
+import com.caucho.quercus.env.ChainedMap;
 
-import com.caucho.php.module.Optional;
-import com.caucho.php.module.PhpModule;
-import com.caucho.php.module.AbstractPhpModule;
+import com.caucho.quercus.module.Optional;
+import com.caucho.quercus.module.PhpModule;
+import com.caucho.quercus.module.AbstractPhpModule;
 
 import com.caucho.util.L10N;
 

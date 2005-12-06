@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.php.program;
+package com.caucho.quercus.program;
 
 import java.util.HashSet;
 
@@ -37,14 +37,14 @@ import com.caucho.java.JavaWriter;
 
 import com.caucho.java.gen.ClassComponent;
 
-import com.caucho.php.env.PhpClass;
+import com.caucho.quercus.env.QuercusClass;
 
-import com.caucho.php.expr.VarExpr;
-import com.caucho.php.expr.VarInfo;
+import com.caucho.quercus.expr.VarExpr;
+import com.caucho.quercus.expr.VarInfo;
 
-import com.caucho.php.gen.PhpWriter;
+import com.caucho.quercus.gen.PhpWriter;
 
-import com.caucho.php.program.InterpretedClassDef;
+import com.caucho.quercus.program.InterpretedClassDef;
 
 /**
  * Represents the main method of a compiled PHP program.
@@ -56,9 +56,9 @@ public class PhpMain extends ClassComponent {
   private Statement _statement;
 
   /**
-   * Creates a new php main
+   * Creates a new quercus main
    *
-   * @param program the owning php program
+   * @param program the owning quercus program
    * @param statement the top-level statement
    */
   public PhpMain(PhpProgram program,
@@ -81,18 +81,18 @@ public class PhpMain extends ClassComponent {
     PhpWriter out = new PhpWriter(javaOut, _program);
 
     out.println();
-    out.println("static com.caucho.vfs.Path _php_selfPath;");
+    out.println("static com.caucho.vfs.Path _quercus_selfPath;");
 
     out.println();
-    out.println("public static void php_setSelfPath(com.caucho.vfs.Path path)");
+    out.println("public static void quercus_setSelfPath(com.caucho.vfs.Path path)");
     out.println("{");
-    out.println("  _php_selfPath = path;");
+    out.println("  _quercus_selfPath = path;");
     out.println("}");
 
     out.println();
     out.println("public com.caucho.vfs.Path getSelfPath(Env env)");
     out.println("{");
-    out.println("  return _php_selfPath;");
+    out.println("  return _quercus_selfPath;");
     out.println("}");
 
     AnalyzeInfo info = new AnalyzeInfo(_functionInfo);
@@ -107,12 +107,12 @@ public class PhpMain extends ClassComponent {
       cl.analyze();
     }
       
-    out.println("public Value execute(com.caucho.php.env.Env env)");
+    out.println("public Value execute(com.caucho.quercus.env.Env env)");
     out.println("  throws Throwable");
     out.println("{");
     out.pushDepth();
 
-    out.println("com.caucho.vfs.WriteStream _php_out = env.getOut();");
+    out.println("com.caucho.vfs.WriteStream _quercus_out = env.getOut();");
 
     for (VarInfo var : _functionInfo.getVariables()) {
       out.println("Value v_" + var.getName() + " = null;");

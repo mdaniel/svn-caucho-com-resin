@@ -27,19 +27,19 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.php.expr;
+package com.caucho.quercus.expr;
 
 import java.io.IOException;
 
 import com.caucho.java.JavaWriter;
 
-import com.caucho.php.env.Env;
-import com.caucho.php.env.Value;
-import com.caucho.php.env.LongValue;
+import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.Value;
+import com.caucho.quercus.env.LongValue;
 
-import com.caucho.php.gen.PhpWriter;
+import com.caucho.quercus.gen.PhpWriter;
 
-import com.caucho.php.program.AnalyzeInfo;
+import com.caucho.quercus.program.AnalyzeInfo;
 
 /**
  * Represents a PHP post increment expression.
@@ -123,7 +123,7 @@ public class PostIncrementExpr extends UnaryExpr {
   public void generateExpr(PhpWriter out)
     throws IOException
   {
-    out.print("new com.caucho.php.expr.PostIncrementExpr(");
+    out.print("new com.caucho.quercus.expr.PostIncrementExpr(");
     _expr.generateExpr(out);
     out.print(", ");
     out.print(_incr);

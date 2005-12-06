@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.php.expr;
+package com.caucho.quercus.expr;
 
 import java.io.IOException;
 
@@ -35,11 +35,11 @@ import java.util.HashSet;
 
 import com.caucho.java.JavaWriter;
 
-import com.caucho.php.env.Env;
-import com.caucho.php.env.LongValue;
-import com.caucho.php.env.DoubleValue;
-import com.caucho.php.env.Value;
-import com.caucho.php.gen.PhpWriter;
+import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.LongValue;
+import com.caucho.quercus.env.DoubleValue;
+import com.caucho.quercus.env.Value;
+import com.caucho.quercus.gen.PhpWriter;
 
 /**
  * Represents a PHP mod expression.
@@ -86,7 +86,7 @@ public class ModExpr extends BinaryExpr {
   public void generate(PhpWriter out)
     throws IOException
   {
-    out.print("new com.caucho.php.env.DoubleValue(");
+    out.print("new com.caucho.quercus.env.DoubleValue(");
     generateDouble(out);
     out.print(")");
   }
@@ -141,7 +141,7 @@ public class ModExpr extends BinaryExpr {
   public void generateExpr(PhpWriter out)
     throws IOException
   {
-    out.print("new com.caucho.php.expr.ModExpr(");
+    out.print("new com.caucho.quercus.expr.ModExpr(");
     _left.generateExpr(out);
     out.print(", ");
     _right.generateExpr(out);

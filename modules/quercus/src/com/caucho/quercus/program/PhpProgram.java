@@ -27,21 +27,21 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.php.program;
+package com.caucho.quercus.program;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Collection;
 
-import com.caucho.php.env.Env;
-import com.caucho.php.env.Value;
-import com.caucho.php.env.NullValue;
-import com.caucho.php.env.PhpClass;
+import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.Value;
+import com.caucho.quercus.env.NullValue;
+import com.caucho.quercus.env.QuercusClass;
 
-import com.caucho.php.page.PhpPage;
+import com.caucho.quercus.page.PhpPage;
 
-import com.caucho.php.Quercus;
+import com.caucho.quercus.Quercus;
 
 import com.caucho.make.PersistentDependency;
 import com.caucho.make.VersionDependency;
@@ -222,7 +222,7 @@ public class PhpProgram extends GenClass {
    */
   public PhpProgram createExprReturn()
   {
-    // php/1515 - used to convert an eval string to return a value
+    // quercus/1515 - used to convert an eval string to return a value
     
     if (_statement instanceof ExprStatement) {
       ExprStatement exprStmt = (ExprStatement) _statement;

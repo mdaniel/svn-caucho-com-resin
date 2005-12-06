@@ -27,14 +27,14 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.php.gen;
+package com.caucho.quercus.gen;
 
 import java.util.logging.Logger;
 
 import com.caucho.java.gen.JavaClassGenerator;
 import com.caucho.java.gen.GenClass;
 
-import com.caucho.php.Quercus;
+import com.caucho.quercus.Quercus;
   
 /**
  * Generator.

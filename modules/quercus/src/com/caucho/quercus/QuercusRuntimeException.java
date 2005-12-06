@@ -27,28 +27,29 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.php;
+package com.caucho.quercus;
 
 /**
- * Parent of PHP exceptions
+ * Parent of PHP runtime exceptions
  */
-public class PhpException extends Exception {
-  public PhpException()
+public class PhpRuntimeException extends RuntimeException {
+  public PhpRuntimeException()
   {
   }
 
-  public PhpException(String msg)
+  public PhpRuntimeException(String msg)
   {
     super(msg);
   }
 
-  public PhpException(Throwable cause)
+  public PhpRuntimeException(Throwable cause)
   {
     super(cause);
   }
 
-  public PhpException(String msg, Throwable cause)
+  public PhpRuntimeException(String msg, Throwable cause)
   {
     super(msg, cause);
   }
 }
+

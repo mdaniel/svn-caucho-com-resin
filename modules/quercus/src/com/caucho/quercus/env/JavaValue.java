@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.php.env;
+package com.caucho.quercus.env;
 
 import java.io.IOException;
 
@@ -38,10 +38,10 @@ import java.util.Map;
 
 import com.caucho.vfs.WriteStream;
 
-import com.caucho.php.program.Function;
-import com.caucho.php.program.AbstractFunction;
+import com.caucho.quercus.program.Function;
+import com.caucho.quercus.program.AbstractFunction;
 
-import com.caucho.php.expr.Expr;
+import com.caucho.quercus.expr.Expr;
 
 /**
  * Represents a PHP java value.

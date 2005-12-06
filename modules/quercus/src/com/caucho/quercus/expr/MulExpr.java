@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.php.expr;
+package com.caucho.quercus.expr;
 
 import java.io.IOException;
 
@@ -35,10 +35,10 @@ import java.util.HashSet;
 
 import com.caucho.java.JavaWriter;
 
-import com.caucho.php.env.Env;
-import com.caucho.php.env.LongValue;
-import com.caucho.php.env.Value;
-import com.caucho.php.gen.PhpWriter;
+import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.LongValue;
+import com.caucho.quercus.env.Value;
+import com.caucho.quercus.gen.PhpWriter;
 
 /**
  * Represents a PHP multiplication expression.
@@ -114,14 +114,14 @@ public class MulExpr extends BinaryExpr {
     throws IOException
   {
     if (_left.isDouble() || _right.isDouble()) {
-      out.print("new com.caucho.php.env.DoubleValue(");
+      out.print("new com.caucho.quercus.env.DoubleValue(");
       _left.generateDouble(out);
       out.print(" * ");
       _right.generateDouble(out);
       out.print(")");
     }
     else if (_left.isLong() && _right.isLong()) {
-      out.print("new com.caucho.php.env.LongValue(");
+      out.print("new com.caucho.quercus.env.LongValue(");
       _left.generateLong(out);
       out.print(" * ");
       _right.generateLong(out);
@@ -213,7 +213,7 @@ public class MulExpr extends BinaryExpr {
   public void generateExpr(PhpWriter out)
     throws IOException
   {
-    out.print("new com.caucho.php.expr.MulExpr(");
+    out.print("new com.caucho.quercus.expr.MulExpr(");
     _left.generateExpr(out);
     out.print(", ");
     _right.generateExpr(out);

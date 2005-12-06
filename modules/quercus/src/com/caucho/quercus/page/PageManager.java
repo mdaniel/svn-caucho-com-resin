@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.php.page;
+package com.caucho.quercus.page;
 
 import java.io.IOException;
 
@@ -46,18 +46,18 @@ import com.caucho.util.ThreadPool;
 
 import com.caucho.java.JavaCompiler;
 
-import com.caucho.php.Quercus;
+import com.caucho.quercus.Quercus;
 
-import com.caucho.php.gen.PhpGenerator;
+import com.caucho.quercus.gen.PhpGenerator;
 
-import com.caucho.php.parser.PhpParser;
+import com.caucho.quercus.parser.PhpParser;
 
-import com.caucho.php.program.PhpProgram;
+import com.caucho.quercus.program.PhpProgram;
 
 import com.caucho.util.LruCache;
 
 /**
- * Each "page" refers to a php file.
+ * Each "page" refers to a quercus file.
  */
 public class PageManager {
   private static final Logger log
@@ -162,7 +162,7 @@ public class PageManager {
   }
   
   /**
-   * Returns a parsed or compiled php program.
+   * Returns a parsed or compiled quercus program.
    *
    * @param path the source file path
    *
@@ -231,7 +231,7 @@ public class PageManager {
 
     page.init(_quercus);
 
-    Method selfPath = pageClass.getMethod("php_setSelfPath",
+    Method selfPath = pageClass.getMethod("quercus_setSelfPath",
 					  new Class[] { Path.class });
 
     selfPath.invoke(null, path);

@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.php.lib;
+package com.caucho.quercus.lib;
 
 import java.util.logging.Logger;
 import java.util.logging.Level;
@@ -37,7 +37,7 @@ import java.io.IOException;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.ReadStream;
 
-import com.caucho.php.env.Env;
+import com.caucho.quercus.env.Env;
 
 /**
  * Represents a PHP open file

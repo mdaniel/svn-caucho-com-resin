@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.php.page;
+package com.caucho.quercus.page;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -37,14 +37,14 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.caucho.java.gen.GenClass;
 
-import com.caucho.php.Quercus;
+import com.caucho.quercus.Quercus;
 
-import com.caucho.php.env.Env;
-import com.caucho.php.env.Value;
-import com.caucho.php.env.PhpClass;
+import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.Value;
+import com.caucho.quercus.env.QuercusClass;
 
-import com.caucho.php.program.AbstractFunction;
-import com.caucho.php.program.AbstractClassDef;
+import com.caucho.quercus.program.AbstractFunction;
+import com.caucho.quercus.program.AbstractClassDef;
 
 import com.caucho.vfs.Path;
 import com.caucho.vfs.WriteStream;
@@ -150,7 +150,7 @@ abstract public class PhpPage {
   /**
    * Initialize the environment
    *
-   * @param php the owning engine
+   * @param quercus the owning engine
    */
   public void init(Env env)
   {

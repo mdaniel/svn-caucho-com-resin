@@ -27,15 +27,15 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.php.program;
+package com.caucho.quercus.program;
 
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.ArrayList;
 
-import com.caucho.php.Quercus;
+import com.caucho.quercus.Quercus;
 
-import com.caucho.php.expr.VarInfo;
+import com.caucho.quercus.expr.VarInfo;
 
 /**
  * Information about a function.
@@ -68,7 +68,7 @@ public class FunctionInfo {
   }
 
   /**
-   * Returns the owning php.
+   * Returns the owning quercus.
    */
   public Quercus getPhp()
   {

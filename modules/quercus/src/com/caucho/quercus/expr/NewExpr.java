@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.php.expr;
+package com.caucho.quercus.expr;
 
 import java.io.IOException;
 
@@ -35,18 +35,18 @@ import java.util.ArrayList;
 
 import java.lang.reflect.Method;
 
-import com.caucho.php.env.Env;
-import com.caucho.php.env.StringValue;
-import com.caucho.php.env.Value;
-import com.caucho.php.env.PhpClass;
+import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.Value;
+import com.caucho.quercus.env.QuercusClass;
 
-import com.caucho.php.module.StaticFunction;
-import com.caucho.php.module.PhpModule;
+import com.caucho.quercus.module.StaticFunction;
+import com.caucho.quercus.module.PhpModule;
 
-import com.caucho.php.program.AbstractFunction;
-import com.caucho.php.program.AnalyzeInfo;
+import com.caucho.quercus.program.AbstractFunction;
+import com.caucho.quercus.program.AnalyzeInfo;
 
-import com.caucho.php.gen.PhpWriter;
+import com.caucho.quercus.gen.PhpWriter;
 
 import com.caucho.util.L10N;
 
@@ -82,7 +82,7 @@ public class NewExpr extends Expr {
   public Value eval(Env env)
     throws Throwable
   {
-    PhpClass cl = env.findClass(_name);
+    QuercusClass cl = env.findClass(_name);
 
     if (cl == null) {
       // XXX: change exception
@@ -118,7 +118,7 @@ public class NewExpr extends Expr {
   {
     /*
     if (out.getProgram().findClass(_name) != null) {
-      out.print("__php_class_" + _name + ".evalNew(env, new Value[] {");
+      out.print("__quercus_class_" + _name + ".evalNew(env, new Value[] {");
 
       for (int i = 0; i < _args.length; i++) {
 	if (i != 0)

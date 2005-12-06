@@ -27,13 +27,13 @@
  * @author Charles Reich
  */
 
-package com.caucho.php.resources;
+package com.caucho.quercus.resources;
 
 import com.caucho.util.Log;
 import com.caucho.util.L10N;
-import com.caucho.php.resources.JdbcConnectionResource;
-import com.caucho.php.resources.JdbcResultResource;
-import com.caucho.php.env.*;
+import com.caucho.quercus.resources.JdbcConnectionResource;
+import com.caucho.quercus.resources.JdbcResultResource;
+import com.caucho.quercus.env.*;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;

@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.php.expr;
+package com.caucho.quercus.expr;
 
 import java.io.IOException;
 
@@ -36,14 +36,14 @@ import java.util.HashSet;
 
 import com.caucho.java.JavaWriter;
 
-import com.caucho.php.env.Env;
-import com.caucho.php.env.LongValue;
-import com.caucho.php.env.ArrayValue;
-import com.caucho.php.env.BooleanValue;
-import com.caucho.php.env.Value;
-import com.caucho.php.gen.PhpWriter;
+import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.LongValue;
+import com.caucho.quercus.env.ArrayValue;
+import com.caucho.quercus.env.BooleanValue;
+import com.caucho.quercus.env.Value;
+import com.caucho.quercus.gen.PhpWriter;
 
-import com.caucho.php.program.AnalyzeInfo;
+import com.caucho.quercus.program.AnalyzeInfo;
 
 /**
  * Represents a PHP list() = each() assignment expression.
@@ -143,7 +143,7 @@ public class ListEachExpr extends Expr {
   public void analyze(AnalyzeInfo info)
   {
     // XXX: should be unique (?)
-    info.getFunction().addTempVar("_php_list");
+    info.getFunction().addTempVar("_quercus_list");
     
     _value.analyze(info);
 
@@ -162,7 +162,7 @@ public class ListEachExpr extends Expr {
   public void generate(PhpWriter out)
     throws IOException
   {
-    String var = "_php_list";
+    String var = "_quercus_list";
 
     out.print("((" + var + " = ");
     _value.generate(out);
@@ -193,7 +193,7 @@ public class ListEachExpr extends Expr {
   public void generateStatement(PhpWriter out)
     throws IOException
   {
-    String var = "_php_list";
+    String var = "_quercus_list";
 
     out.print("if ((" + var + " = ");
     _value.generate(out);

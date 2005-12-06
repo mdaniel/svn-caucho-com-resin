@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.php.page;
+package com.caucho.quercus.page;
 
 import java.util.HashMap;
 
@@ -36,16 +36,16 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.caucho.java.gen.GenClass;
 
-import com.caucho.php.Quercus;
+import com.caucho.quercus.Quercus;
 
-import com.caucho.php.env.Env;
-import com.caucho.php.env.PhpClass;
-import com.caucho.php.env.Value;
+import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.QuercusClass;
+import com.caucho.quercus.env.Value;
 
-import com.caucho.php.program.AbstractFunction;
-import com.caucho.php.program.PhpProgram;
-import com.caucho.php.program.AbstractClassDef;
-import com.caucho.php.program.InterpretedClassDef;
+import com.caucho.quercus.program.AbstractFunction;
+import com.caucho.quercus.program.PhpProgram;
+import com.caucho.quercus.program.AbstractClassDef;
+import com.caucho.quercus.program.InterpretedClassDef;
 
 import com.caucho.vfs.Path;
 import com.caucho.vfs.WriteStream;

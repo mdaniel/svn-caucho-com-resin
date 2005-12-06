@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.php.env;
+package com.caucho.quercus.env;
 
 /**
  * Represents a PHP resource

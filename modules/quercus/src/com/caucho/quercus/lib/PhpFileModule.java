@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.php.lib;
+package com.caucho.quercus.lib;
 
 import java.io.IOException;
 import java.util.Map;
@@ -39,24 +39,24 @@ import java.util.logging.Level;
 
 import com.caucho.util.L10N;
 
-import com.caucho.php.module.PhpModule;
-import com.caucho.php.module.AbstractPhpModule;
-import com.caucho.php.module.Optional;
+import com.caucho.quercus.module.PhpModule;
+import com.caucho.quercus.module.AbstractPhpModule;
+import com.caucho.quercus.module.Optional;
 
-import com.caucho.php.env.Value;
-import com.caucho.php.env.Env;
-import com.caucho.php.env.NullValue;
-import com.caucho.php.env.BooleanValue;
-import com.caucho.php.env.DoubleValue;
-import com.caucho.php.env.LongValue;
-import com.caucho.php.env.StringValue;
-import com.caucho.php.env.ArrayValue;
-import com.caucho.php.env.ArrayValueImpl;
-import com.caucho.php.env.ResourceValue;
-import com.caucho.php.env.VarMap;
-import com.caucho.php.env.ChainedMap;
+import com.caucho.quercus.env.Value;
+import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.NullValue;
+import com.caucho.quercus.env.BooleanValue;
+import com.caucho.quercus.env.DoubleValue;
+import com.caucho.quercus.env.LongValue;
+import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.ArrayValue;
+import com.caucho.quercus.env.ArrayValueImpl;
+import com.caucho.quercus.env.ResourceValue;
+import com.caucho.quercus.env.VarMap;
+import com.caucho.quercus.env.ChainedMap;
 
-import com.caucho.php.resources.StreamResource;
+import com.caucho.quercus.resources.StreamResource;
 
 import com.caucho.util.Alarm;
 
@@ -171,7 +171,7 @@ public class PhpFileModule extends AbstractPhpModule {
    */
   public static boolean chgrp(Env env, Path file, Value group)
   {
-    // php/160i
+    // quercus/160i
     
     try {
       // XXX: safe_mode
@@ -198,7 +198,7 @@ public class PhpFileModule extends AbstractPhpModule {
    */
   public static boolean chmod(Env env, Path file, int mode)
   {
-    // php/160j
+    // quercus/160j
     
     // XXX: safe_mode
 
@@ -239,7 +239,7 @@ public class PhpFileModule extends AbstractPhpModule {
    */
   public static Value clearstatcache(Env env)
   {
-    // php/160l
+    // quercus/160l
     
     // XXX: stubbed
 
@@ -254,7 +254,7 @@ public class PhpFileModule extends AbstractPhpModule {
    */
   public static boolean copy(Path src, Path dst)
   {
-    // php/1603
+    // quercus/1603
     
     try {
       if (! src.canRead() || ! src.isFile())
@@ -303,7 +303,7 @@ public class PhpFileModule extends AbstractPhpModule {
    */
   public String dirname(String path)
   {
-    // php/1601
+    // quercus/1601
     
     int len = path.length();
 
@@ -336,7 +336,7 @@ public class PhpFileModule extends AbstractPhpModule {
    */
   public static double disk_free_space(Path directory)
   {
-    // php/160m
+    // quercus/160m
     
     // XXX: stub
     
@@ -350,7 +350,7 @@ public class PhpFileModule extends AbstractPhpModule {
    */
   public static double disk_total_space(Path directory)
   {
-    // php/160n
+    // quercus/160n
     
     // XXX: stub
     
@@ -373,7 +373,7 @@ public class PhpFileModule extends AbstractPhpModule {
   public boolean fclose(StreamResource file)
     throws IOException
   {
-    // php/1611
+    // quercus/1611
     
     if (file != null) {
       file.close();
@@ -389,7 +389,7 @@ public class PhpFileModule extends AbstractPhpModule {
    */
   public boolean feof(StreamResource file)
   {
-    // php/1618
+    // quercus/1618
     
     if (file != null)
       return file.isEOF();
@@ -403,7 +403,7 @@ public class PhpFileModule extends AbstractPhpModule {
   public boolean fflush(StreamResource file)
     throws IOException
   {
-    // php/1619
+    // quercus/1619
     
     if (file != null) {
       file.flush();
@@ -420,7 +420,7 @@ public class PhpFileModule extends AbstractPhpModule {
   public Value fgetc(StreamResource file)
     throws IOException
   {
-    // php/1612
+    // quercus/1612
     if (file != null) {
       int ch = file.read();
 
@@ -448,7 +448,7 @@ public class PhpFileModule extends AbstractPhpModule {
 		       @Optional String enclosure)
     throws IOException
   {
-    // php/1619
+    // quercus/1619
     
     if (file == null)
       return BooleanValue.FALSE;
@@ -540,7 +540,7 @@ public class PhpFileModule extends AbstractPhpModule {
   public Value fgets(StreamResource file, @Optional long length)
     throws IOException
   {
-    // php/1615
+    // quercus/1615
     
     if (file == null)
       return BooleanValue.FALSE;
@@ -561,7 +561,7 @@ public class PhpFileModule extends AbstractPhpModule {
 		     @Optional String allowedTags)
     throws IOException
   {
-    // php/161a
+    // quercus/161a
     
     if (file == null)
       return BooleanValue.FALSE;
@@ -810,7 +810,7 @@ public class PhpFileModule extends AbstractPhpModule {
 				 @Optional Value context)
     throws IOException
   {
-    // php/1634
+    // quercus/1634
     
     Value fileV = fopen(env, filename, "w", flags, context);
 
@@ -889,7 +889,7 @@ public class PhpFileModule extends AbstractPhpModule {
 			 StreamResource is)
     throws IOException
   {
-    // php/1635
+    // quercus/1635
     if (is == null)
       return BooleanValue.FALSE;
 
@@ -928,7 +928,7 @@ public class PhpFileModule extends AbstractPhpModule {
 		       @Optional String enclosure)
     throws IOException
   {
-    // php/1636
+    // quercus/1636
 
     if (file == null || value == null)
       return BooleanValue.FALSE;
@@ -1239,7 +1239,7 @@ public class PhpFileModule extends AbstractPhpModule {
 			       String filename,
 			       @Optional Value context)
   {
-    // php/160s
+    // quercus/160s
 
     // XXX: safe_mode
     try {
@@ -1322,7 +1322,7 @@ public class PhpFileModule extends AbstractPhpModule {
    */
   public boolean symlink(Path target, Path link)
   {
-    // php/160r
+    // quercus/160r
     
     return false;
   }
@@ -1332,7 +1332,7 @@ public class PhpFileModule extends AbstractPhpModule {
    */
   public static Value tempnam(Env env, Path dir, String prefix)
   {
-    // php/160u
+    // quercus/160u
     
     try {
       Path path = dir.createTempFile(prefix, ".tmp");
@@ -1408,7 +1408,7 @@ public class PhpFileModule extends AbstractPhpModule {
 			       String filename,
 			       @Optional Value context)
   {
-    // php/160p
+    // quercus/160p
     
     // XXX: safe_mode
     try {

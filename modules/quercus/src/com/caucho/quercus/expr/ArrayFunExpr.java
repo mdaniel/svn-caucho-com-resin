@@ -27,22 +27,22 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.php.expr;
+package com.caucho.quercus.expr;
 
 import java.io.IOException;
 
 import java.util.ArrayList;
 
-import com.caucho.php.env.Env;
-import com.caucho.php.env.Value;
-import com.caucho.php.env.ArrayValue;
-import com.caucho.php.env.ArrayValueImpl;
-import com.caucho.php.env.ConstArrayValue;
-import com.caucho.php.env.LongValue;
+import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.Value;
+import com.caucho.quercus.env.ArrayValue;
+import com.caucho.quercus.env.ArrayValueImpl;
+import com.caucho.quercus.env.ConstArrayValue;
+import com.caucho.quercus.env.LongValue;
 
-import com.caucho.php.program.AnalyzeInfo;
+import com.caucho.quercus.program.AnalyzeInfo;
 
-import com.caucho.php.gen.PhpWriter;
+import com.caucho.quercus.gen.PhpWriter;
 
 /**
  * Represents the array function
@@ -206,8 +206,8 @@ public class ArrayFunExpr extends Expr {
   public void generateExpr(PhpWriter out)
     throws IOException
   {
-    // php/3724
-    out.print("new com.caucho.php.expr.ArrayFunExpr(");
+    // quercus/3724
+    out.print("new com.caucho.quercus.expr.ArrayFunExpr(");
     
     out.print("new Expr[] {");
       

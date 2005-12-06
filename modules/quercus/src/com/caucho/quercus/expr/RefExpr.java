@@ -27,21 +27,21 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.php.expr;
+package com.caucho.quercus.expr;
 
 import java.io.IOException;
 
 import com.caucho.java.JavaWriter;
 
-import com.caucho.php.env.Env;
-import com.caucho.php.env.NullValue;
-import com.caucho.php.env.Value;
-import com.caucho.php.env.Var;
-import com.caucho.php.env.RefVar;
+import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.NullValue;
+import com.caucho.quercus.env.Value;
+import com.caucho.quercus.env.Var;
+import com.caucho.quercus.env.RefVar;
 
-import com.caucho.php.gen.PhpWriter;
+import com.caucho.quercus.gen.PhpWriter;
 
-import com.caucho.php.program.AnalyzeInfo;
+import com.caucho.quercus.program.AnalyzeInfo;
 
 /**
  * Represents a PHP reference argument.
@@ -70,7 +70,7 @@ public class RefExpr extends UnaryExpr {
   public Value eval(Env env)
     throws Throwable
   {
-    // php/0d28
+    // quercus/0d28
     Value value = getExpr().evalRef(env);
 
     if (value instanceof Var)

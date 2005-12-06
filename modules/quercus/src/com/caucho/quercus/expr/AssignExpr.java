@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.php.expr;
+package com.caucho.quercus.expr;
 
 import java.io.IOException;
 
@@ -35,11 +35,11 @@ import java.util.HashSet;
 
 import com.caucho.java.JavaWriter;
 
-import com.caucho.php.env.Env;
-import com.caucho.php.env.Value;
-import com.caucho.php.gen.PhpWriter;
+import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.Value;
+import com.caucho.quercus.gen.PhpWriter;
 
-import com.caucho.php.program.AnalyzeInfo;
+import com.caucho.quercus.program.AnalyzeInfo;
 
 /**
  * Represents a PHP assignment expression.
@@ -59,7 +59,7 @@ public class AssignExpr extends Expr {
    */
   public Expr createCopy()
   {
-    // php/3d9e
+    // quercus/3d9e
     return new CopyExpr(this);
   }
 
@@ -130,7 +130,7 @@ public class AssignExpr extends Expr {
   public void generateRef(PhpWriter out)
     throws IOException
   {
-    // php/344m
+    // quercus/344m
     // the 'true' parameter isn't quite logical, but the effect is correct
     _var.generateAssign(out, _value, true);
   }

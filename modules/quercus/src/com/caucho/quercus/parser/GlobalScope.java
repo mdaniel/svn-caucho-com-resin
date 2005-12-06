@@ -27,16 +27,16 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.php.parser;
+package com.caucho.quercus.parser;
 
 import java.util.HashMap;
 
 import com.caucho.util.L10N;
 
-import com.caucho.php.program.Function;
+import com.caucho.quercus.program.Function;
 
-import com.caucho.php.program.AbstractClassDef;
-import com.caucho.php.program.InterpretedClassDef;
+import com.caucho.quercus.program.AbstractClassDef;
+import com.caucho.quercus.program.InterpretedClassDef;
 
 /**
  * Parse scope.

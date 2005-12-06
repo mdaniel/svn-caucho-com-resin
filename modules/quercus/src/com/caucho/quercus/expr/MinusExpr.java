@@ -27,16 +27,16 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.php.expr;
+package com.caucho.quercus.expr;
 
 import java.io.IOException;
 
-import com.caucho.php.env.Env;
-import com.caucho.php.env.LongValue;
-import com.caucho.php.env.Value;
-import com.caucho.php.env.DoubleValue;
+import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.LongValue;
+import com.caucho.quercus.env.Value;
+import com.caucho.quercus.env.DoubleValue;
 
-import com.caucho.php.gen.PhpWriter;
+import com.caucho.quercus.gen.PhpWriter;
 
 /**
  * Represents a PHP unary minus.
@@ -108,7 +108,7 @@ public class MinusExpr extends UnaryExpr {
   public void generateExpr(PhpWriter out)
     throws IOException
   {
-    out.print("new com.caucho.php.expr.MinusExpr(");
+    out.print("new com.caucho.quercus.expr.MinusExpr(");
     _expr.generateExpr(out);
     out.print(")");
   }

@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.php.script;
+package com.caucho.quercus.script;
 
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineFactory;
@@ -75,7 +75,7 @@ public class PhpScriptEngineFactory implements ScriptEngineFactory {
    */
   public String []getNames()
   {
-    return new String[] {"resin-php"};
+    return new String[] {"resin-quercus"};
   }
 
   /**
@@ -83,7 +83,7 @@ public class PhpScriptEngineFactory implements ScriptEngineFactory {
    */
   public String getLanguageName()
   {
-    return "php";
+    return "quercus";
   }
 
   /**

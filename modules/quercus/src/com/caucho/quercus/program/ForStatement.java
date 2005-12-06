@@ -27,18 +27,18 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.php.program;
+package com.caucho.quercus.program;
 
 import java.io.IOException;
 
-import com.caucho.php.env.Env;
-import com.caucho.php.env.Value;
-import com.caucho.php.env.BreakValue;
-import com.caucho.php.env.ContinueValue;
+import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.Value;
+import com.caucho.quercus.env.BreakValue;
+import com.caucho.quercus.env.ContinueValue;
 
-import com.caucho.php.expr.Expr;
+import com.caucho.quercus.expr.Expr;
 
-import com.caucho.php.gen.PhpWriter;
+import com.caucho.quercus.gen.PhpWriter;
 
 /**
  * Represents a for statement.

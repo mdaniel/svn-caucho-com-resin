@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.php.env;
+package com.caucho.quercus.env;
 
 import java.io.InputStream;
 import java.io.IOException;
@@ -60,18 +60,18 @@ import com.caucho.util.Log;
 import com.caucho.util.L10N;
 import com.caucho.util.IntMap;
 
-import com.caucho.php.Quercus;
-import com.caucho.php.PhpRuntimeException;
-import com.caucho.php.PhpExitException;
+import com.caucho.quercus.Quercus;
+import com.caucho.quercus.PhpRuntimeException;
+import com.caucho.quercus.PhpExitException;
 
-import com.caucho.php.expr.Expr;
+import com.caucho.quercus.expr.Expr;
 
-import com.caucho.php.page.PhpPage;
+import com.caucho.quercus.page.PhpPage;
 
-import com.caucho.php.program.AbstractFunction;
-import com.caucho.php.program.AbstractClassDef;
+import com.caucho.quercus.program.AbstractFunction;
+import com.caucho.quercus.program.AbstractClassDef;
 
-import com.caucho.php.resources.StreamContextResource;
+import com.caucho.quercus.resources.StreamContextResource;
 
 /**
  * Handling of POST requests.

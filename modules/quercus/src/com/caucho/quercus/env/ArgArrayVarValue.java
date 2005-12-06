@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.php.env;
+package com.caucho.quercus.env;
 
 import java.io.IOException;
 
@@ -37,13 +37,13 @@ import com.caucho.util.L10N;
 
 import com.caucho.vfs.WriteStream;
 
-import com.caucho.php.PhpRuntimeException;
+import com.caucho.quercus.PhpRuntimeException;
 
-import com.caucho.php.program.AbstractFunction;
+import com.caucho.quercus.program.AbstractFunction;
 
-import com.caucho.php.gen.PhpWriter;
+import com.caucho.quercus.gen.PhpWriter;
 
-import com.caucho.php.expr.Expr;
+import com.caucho.quercus.expr.Expr;
 
 /**
  * Represents an array argument which might be a call to a reference.
@@ -61,7 +61,7 @@ public class ArgArrayVarValue extends Value {
    */
   public Value getArgArray(Value index)
   {
-    // php/3d1r
+    // quercus/3d1r
     return new ArgArrayGetValue(this, index);
   }
 
@@ -70,7 +70,7 @@ public class ArgArrayVarValue extends Value {
    */
   public Value getArgObject(Env env, Value index)
   {
-    // php/3d2t
+    // quercus/3d2t
     return new ArgObjectGetValue(env, this, index);
   }
 
@@ -79,7 +79,7 @@ public class ArgArrayVarValue extends Value {
    */
   public Value getArray(Value index)
   {
-    // php/3d1t
+    // quercus/3d1t
     return _var.getArray().getArray(index);
   }
 
@@ -88,7 +88,7 @@ public class ArgArrayVarValue extends Value {
    */
   public Value getObject(Env env, Value index)
   {
-    // php/3d2t
+    // quercus/3d2t
     return _var.getArray().getObject(env, index);
   }
 }

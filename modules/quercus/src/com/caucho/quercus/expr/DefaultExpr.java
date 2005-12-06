@@ -27,15 +27,15 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.php.expr;
+package com.caucho.quercus.expr;
 
 import java.io.IOException;
 
-import com.caucho.php.env.Env;
-import com.caucho.php.env.DefaultValue;
-import com.caucho.php.env.Value;
+import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.DefaultValue;
+import com.caucho.quercus.env.Value;
 
-import com.caucho.php.gen.PhpWriter;
+import com.caucho.quercus.gen.PhpWriter;
 
 /**
  * Represents a PHP default expression.
@@ -66,7 +66,7 @@ public class DefaultExpr extends Expr {
   public void generate(PhpWriter out)
     throws IOException
   {
-    out.print("com.caucho.php.env.DefaultValue.DEFAULT");
+    out.print("com.caucho.quercus.env.DefaultValue.DEFAULT");
   }
   
   public String toString()

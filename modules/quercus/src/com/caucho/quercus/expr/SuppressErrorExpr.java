@@ -27,18 +27,18 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.php.expr;
+package com.caucho.quercus.expr;
 
 import java.io.IOException;
 
-import com.caucho.php.env.Env;
-import com.caucho.php.env.LongValue;
-import com.caucho.php.env.Value;
-import com.caucho.php.env.DoubleValue;
+import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.LongValue;
+import com.caucho.quercus.env.Value;
+import com.caucho.quercus.env.DoubleValue;
 
-import com.caucho.php.parser.PhpParser;
+import com.caucho.quercus.parser.PhpParser;
 
-import com.caucho.php.gen.PhpWriter;
+import com.caucho.quercus.gen.PhpWriter;
 
 /**
  * Represents a PHP error suppression
@@ -55,7 +55,7 @@ public class SuppressErrorExpr extends UnaryExpr {
   public Expr createAssign(PhpParser parser, Expr value)
     throws IOException
   {
-    // php/03j2
+    // quercus/03j2
     
     return new SuppressErrorExpr(getExpr().createAssign(parser, value));
   }

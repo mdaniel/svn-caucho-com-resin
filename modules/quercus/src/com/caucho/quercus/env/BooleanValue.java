@@ -27,13 +27,13 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.php.env;
+package com.caucho.quercus.env;
 
 import java.io.IOException;
 
 import com.caucho.vfs.WriteStream;
 
-import com.caucho.php.gen.PhpWriter;
+import com.caucho.quercus.gen.PhpWriter;
 
 /**
  * Represents a PHP boolean value.
@@ -163,9 +163,9 @@ public class BooleanValue extends Value {
     throws IOException
   {
     if (_value)
-      out.print("com.caucho.php.env.BooleanValue.TRUE");
+      out.print("com.caucho.quercus.env.BooleanValue.TRUE");
     else
-      out.print("com.caucho.php.env.BooleanValue.FALSE");
+      out.print("com.caucho.quercus.env.BooleanValue.FALSE");
   }
 
   /**

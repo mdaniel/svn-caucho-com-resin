@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.php.servlet;
+package com.caucho.quercus.servlet;
 
 import java.io.PrintWriter;
 import java.io.OutputStream;
@@ -50,21 +50,21 @@ import com.caucho.config.ConfigException;
 
 import com.caucho.server.connection.CauchoResponse;
 
-import com.caucho.php.Quercus;
-import com.caucho.php.PhpExitException;
-import com.caucho.php.PhpRuntimeException;
+import com.caucho.quercus.Quercus;
+import com.caucho.quercus.PhpExitException;
+import com.caucho.quercus.PhpRuntimeException;
 
-import com.caucho.php.gen.PhpGenerator;
+import com.caucho.quercus.gen.PhpGenerator;
 
-import com.caucho.php.env.Env;
+import com.caucho.quercus.env.Env;
 
-import com.caucho.php.parser.PhpParser;
+import com.caucho.quercus.parser.PhpParser;
 
-import com.caucho.php.program.PhpProgram;
+import com.caucho.quercus.program.PhpProgram;
 
-import com.caucho.php.module.PhpModule;
+import com.caucho.quercus.module.PhpModule;
 
-import com.caucho.php.page.PhpPage;
+import com.caucho.quercus.page.PhpPage;
 
 import com.caucho.vfs.Path;
 import com.caucho.vfs.ReadStream;
@@ -84,7 +84,7 @@ public class PhpServlet extends HttpServlet {
   private boolean _isCompileSet;
 
   /**
-   * Set true if php should be compiled into Java.
+   * Set true if quercus should be compiled into Java.
    */
   public void setCompile(String isCompile)
     throws ConfigException
@@ -116,7 +116,7 @@ public class PhpServlet extends HttpServlet {
   }
 
   /**
-   * Adds a php module.
+   * Adds a quercus module.
    */
   public void addModule(PhpModule module)
     throws ConfigException
@@ -125,7 +125,7 @@ public class PhpServlet extends HttpServlet {
   }
   
   /**
-   * Adds a php class.
+   * Adds a quercus class.
    */
   public void addClass(PhpClassConfig classConfig)
     throws ConfigException
@@ -134,7 +134,7 @@ public class PhpServlet extends HttpServlet {
   }
 
   /**
-   * Adds a php.ini configuration
+   * Adds a quercus.ini configuration
    */
   public PhpIni createPhpIni()
     throws ConfigException
@@ -168,7 +168,7 @@ public class PhpServlet extends HttpServlet {
 
       PhpPage page = _quercus.parse(path);
 
-      // php/1b06
+      // quercus/1b06
       response.setContentType("text/html");
 
       WriteStream ws;

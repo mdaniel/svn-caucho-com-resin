@@ -27,19 +27,19 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.php.expr;
+package com.caucho.quercus.expr;
 
 import java.io.IOException;
 
 import com.caucho.java.JavaWriter;
 
-import com.caucho.php.env.Env;
-import com.caucho.php.env.StringValue;
-import com.caucho.php.env.Value;
+import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.Value;
 
-import com.caucho.php.program.AnalyzeInfo;
+import com.caucho.quercus.program.AnalyzeInfo;
 
-import com.caucho.php.gen.PhpWriter;
+import com.caucho.quercus.gen.PhpWriter;
 
 /**
  * Represents a PHP string literal expression.
@@ -108,7 +108,7 @@ public class StringLiteralExpr extends Expr {
     throws IOException
   {
     if (_value.getValue().equals(""))
-      out.print("com.caucho.php.env.StringValue.EMPTY");
+      out.print("com.caucho.quercus.env.StringValue.EMPTY");
     else {
       String var = out.addValue(_value);
 
@@ -175,7 +175,7 @@ public class StringLiteralExpr extends Expr {
   public void generateExpr(PhpWriter out)
     throws IOException
   {
-    out.print("new com.caucho.php.expr.StringLiteralExpr(\"");
+    out.print("new com.caucho.quercus.expr.StringLiteralExpr(\"");
     out.printJavaString(_value.getValue());
     out.print("\")");
   }

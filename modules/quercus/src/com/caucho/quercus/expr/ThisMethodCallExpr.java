@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.php.expr;
+package com.caucho.quercus.expr;
 
 import java.io.IOException;
 
@@ -35,19 +35,19 @@ import java.util.ArrayList;
 
 import java.lang.reflect.Method;
 
-import com.caucho.php.env.Env;
-import com.caucho.php.env.StringValue;
-import com.caucho.php.env.Value;
+import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.Value;
 
-import com.caucho.php.module.StaticFunction;
-import com.caucho.php.module.PhpModule;
+import com.caucho.quercus.module.StaticFunction;
+import com.caucho.quercus.module.PhpModule;
 
-import com.caucho.php.program.AbstractFunction;
-import com.caucho.php.program.AnalyzeInfo;
-import com.caucho.php.program.Function;
-import com.caucho.php.program.Arg;
+import com.caucho.quercus.program.AbstractFunction;
+import com.caucho.quercus.program.AnalyzeInfo;
+import com.caucho.quercus.program.Function;
+import com.caucho.quercus.program.Arg;
 
-import com.caucho.php.gen.PhpWriter;
+import com.caucho.quercus.gen.PhpWriter;
 
 import com.caucho.util.L10N;
 

@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.php.lib;
+package com.caucho.quercus.lib;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -46,22 +46,22 @@ import java.security.MessageDigest;
 
 import javax.crypto.Cipher;
 
-import com.caucho.php.env.Value;
-import com.caucho.php.env.Env;
-import com.caucho.php.env.LongValue;
-import com.caucho.php.env.StringValue;
-import com.caucho.php.env.DefaultValue;
-import com.caucho.php.env.BooleanValue;
-import com.caucho.php.env.ArrayValue;
-import com.caucho.php.env.ArrayValueImpl;
-import com.caucho.php.env.VarMap;
-import com.caucho.php.env.NullValue;
-import com.caucho.php.env.ChainedMap;
+import com.caucho.quercus.env.Value;
+import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.LongValue;
+import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.DefaultValue;
+import com.caucho.quercus.env.BooleanValue;
+import com.caucho.quercus.env.ArrayValue;
+import com.caucho.quercus.env.ArrayValueImpl;
+import com.caucho.quercus.env.VarMap;
+import com.caucho.quercus.env.NullValue;
+import com.caucho.quercus.env.ChainedMap;
 
-import com.caucho.php.module.Reference;
-import com.caucho.php.module.Optional;
-import com.caucho.php.module.PhpModule;
-import com.caucho.php.module.AbstractPhpModule;
+import com.caucho.quercus.module.Reference;
+import com.caucho.quercus.module.Optional;
+import com.caucho.quercus.module.PhpModule;
+import com.caucho.quercus.module.AbstractPhpModule;
 
 import com.caucho.util.L10N;
 import com.caucho.util.RandomUtil;
@@ -101,7 +101,7 @@ public class PhpStringModule extends AbstractPhpModule {
   /**
    * Escapes a string using C syntax.
    *
-   * @param env the php calling environment
+   * @param env the quercus calling environment
    * @param s the source string to convert
    * @param charset the set of characters to convert
    * @return the escaped string
@@ -212,7 +212,7 @@ public class PhpStringModule extends AbstractPhpModule {
   /**
    * Escapes a string for db characters.
    *
-   * @param env the php calling environment
+   * @param env the quercus calling environment
    * @param s the source string to convert
    * @return the escaped string
    */
@@ -282,7 +282,7 @@ public class PhpStringModule extends AbstractPhpModule {
   /**
    * Alias of rtrim.  Removes trailing whitespace.
    *
-   * @param env the php environment
+   * @param env the quercus environment
    * @param str the string to be trimmed
    * @param charset optional set of characters to trim
    * @return the trimmed string
@@ -309,7 +309,7 @@ public class PhpStringModule extends AbstractPhpModule {
   /**
    * Splits a string into chunks
    *
-   * @param env the php environment
+   * @param env the quercus environment
    * @param bodyValue the body string
    * @param chunkLenValue the optional chunk length, defaults to 76
    * @param endValue the optional end value, defaults to \r\n
@@ -567,7 +567,7 @@ public class PhpStringModule extends AbstractPhpModule {
   /**
    * explodes a string into an array
    *
-   * @param env the php environment
+   * @param env the quercus environment
    * @param separator the separator string
    * @param string the string to be exploded
    * @param limit the max number of elements
@@ -795,7 +795,7 @@ public class PhpStringModule extends AbstractPhpModule {
  /**
    * Converts the first charater to an integer.
    *
-   * @param env the php environment
+   * @param env the quercus environment
    * @param stringV the string to be converted
    *
    * @return the integer value
@@ -812,7 +812,7 @@ public class PhpStringModule extends AbstractPhpModule {
  /**
   * Prints the string.
    *
-   * @param env the php environment
+   * @param env the quercus environment
    * @param string the string to print
    */
   public static long print(Env env, String string)
@@ -826,7 +826,7 @@ public class PhpStringModule extends AbstractPhpModule {
   /**
    * Escapes meta characters.
    *
-   * @param env the php environment
+   * @param env the quercus environment
    * @param stringV the string to be quoted
    *
    * @return the quoted
@@ -905,7 +905,7 @@ public class PhpStringModule extends AbstractPhpModule {
   /**
    * Removes trailing whitespace.
    *
-   * @param env the php environment
+   * @param env the quercus environment
    * @param strValue the string to be trimmed
    * @param charset optional set of characters to trim
    * @return the trimmed string
@@ -1011,7 +1011,7 @@ public class PhpStringModule extends AbstractPhpModule {
   /**
    * scans a string
    *
-   * @param env the php environment
+   * @param env the quercus environment
    * @param format the format string
    * @param args the format arguments
    *
@@ -1022,7 +1022,7 @@ public class PhpStringModule extends AbstractPhpModule {
 			     String format,
 			     @Optional Value []args)
   {
-    // php/113-
+    // quercus/113-
     
     int fmtLen = format.length();
     int strlen = string.length();
@@ -1101,7 +1101,7 @@ public class PhpStringModule extends AbstractPhpModule {
   private static int sscanfString(String string, int sIndex, int maxLen,
 				  ArrayValue array)
   {
-    // php/1131
+    // quercus/1131
     int strlen = string.length();
 
     if (maxLen < 0)
@@ -1128,7 +1128,7 @@ public class PhpStringModule extends AbstractPhpModule {
   /**
    * print to the output with a formatter
    *
-   * @param env the php environment
+   * @param env the quercus environment
    * @param format the format string
    * @param args the format arguments
    *
@@ -1145,7 +1145,7 @@ public class PhpStringModule extends AbstractPhpModule {
   /**
    * print to a string with a formatter
    *
-   * @param env the php environment
+   * @param env the quercus environment
    * @param format the format string
    * @param args the format arguments
    *
@@ -1235,7 +1235,7 @@ public class PhpStringModule extends AbstractPhpModule {
   /**
    * Removes leading and trailing whitespace.
    *
-   * @param env the php environment
+   * @param env the quercus environment
    * @param strValue the string to be trimmed
    * @param charset optional set of characters to trim
    * @return the trimmed string

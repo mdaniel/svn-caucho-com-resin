@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.php.lib;
+package com.caucho.quercus.lib;
 
 import java.io.IOException;
 import java.util.Map;
@@ -39,12 +39,12 @@ import javax.servlet.http.Cookie;
 import com.caucho.util.L10N;
 import com.caucho.util.Alarm;
 
-import com.caucho.php.module.PhpModule;
-import com.caucho.php.module.AbstractPhpModule;
-import com.caucho.php.module.Optional;
-import com.caucho.php.module.Reference;
+import com.caucho.quercus.module.PhpModule;
+import com.caucho.quercus.module.AbstractPhpModule;
+import com.caucho.quercus.module.Optional;
+import com.caucho.quercus.module.Reference;
 
-import com.caucho.php.env.*;
+import com.caucho.quercus.env.*;
 
 import com.caucho.vfs.WriteStream;
 

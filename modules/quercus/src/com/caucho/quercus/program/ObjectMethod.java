@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.php.program;
+package com.caucho.quercus.program;
 
 import java.io.IOException;
 
@@ -37,23 +37,23 @@ import java.util.HashSet;
 
 import java.util.logging.Logger;
 
-import com.caucho.php.env.Env;
-import com.caucho.php.env.Value;
+import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.Value;
 
-import com.caucho.php.expr.Expr;
-import com.caucho.php.expr.VarExpr;
-import com.caucho.php.expr.VarInfo;
-import com.caucho.php.expr.VarState;
-import com.caucho.php.expr.ExprHandle;
+import com.caucho.quercus.expr.Expr;
+import com.caucho.quercus.expr.VarExpr;
+import com.caucho.quercus.expr.VarInfo;
+import com.caucho.quercus.expr.VarState;
+import com.caucho.quercus.expr.ExprHandle;
 
 import com.caucho.util.L10N;
 
 import com.caucho.vfs.WriteStream;
 
-import com.caucho.php.env.Var;
-import com.caucho.php.env.NullValue;
+import com.caucho.quercus.env.Var;
+import com.caucho.quercus.env.NullValue;
 
-import com.caucho.php.gen.PhpWriter;
+import com.caucho.quercus.gen.PhpWriter;
 
 /**
  * Represents sequence of statements.
@@ -64,7 +64,7 @@ public class ObjectMethod extends Function {
 
   private String _className;
 
-  ObjectMethod(InterpretedClassDef phpClass,
+  ObjectMethod(InterpretedClassDef quercusClass,
 	       String name,
 	       FunctionInfo info,
 	       Arg []args,
@@ -72,10 +72,10 @@ public class ObjectMethod extends Function {
   {
     super(name, info, args, statements);
 
-    _className = phpClass.getName();
+    _className = quercusClass.getName();
   }
 
-  public ObjectMethod(InterpretedClassDef phpClass,
+  public ObjectMethod(InterpretedClassDef quercusClass,
 		      String name,
 		      FunctionInfo info,
 		      ArrayList<Arg> argList,
@@ -83,7 +83,7 @@ public class ObjectMethod extends Function {
   {
     super(name, info, argList, statementList);
 
-    _className = phpClass.getName();
+    _className = quercusClass.getName();
   }
 
   public String getClassName()

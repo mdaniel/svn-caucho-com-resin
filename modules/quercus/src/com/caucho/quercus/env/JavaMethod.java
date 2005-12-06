@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.php.env;
+package com.caucho.quercus.env;
 
 import java.io.IOException;
 
@@ -37,25 +37,25 @@ import java.lang.reflect.InvocationTargetException;
 
 import java.lang.annotation.Annotation;
 
-import com.caucho.php.Quercus;
+import com.caucho.quercus.Quercus;
 
-import com.caucho.php.expr.Expr;
-import com.caucho.php.expr.NullLiteralExpr;
-import com.caucho.php.expr.DefaultExpr;
-import com.caucho.php.expr.FunctionExpr;
+import com.caucho.quercus.expr.Expr;
+import com.caucho.quercus.expr.NullLiteralExpr;
+import com.caucho.quercus.expr.DefaultExpr;
+import com.caucho.quercus.expr.FunctionExpr;
 
-import com.caucho.php.env.Env;
-import com.caucho.php.env.Value;
+import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.Value;
 
-import com.caucho.php.parser.PhpParser;
+import com.caucho.quercus.parser.PhpParser;
 
-import com.caucho.php.program.AbstractFunction;
+import com.caucho.quercus.program.AbstractFunction;
 
-import com.caucho.php.module.Marshall;
-import com.caucho.php.module.Reference;
-import com.caucho.php.module.Optional;
+import com.caucho.quercus.module.Marshall;
+import com.caucho.quercus.module.Reference;
+import com.caucho.quercus.module.Optional;
 
-import com.caucho.php.gen.PhpWriter;
+import com.caucho.quercus.gen.PhpWriter;
 
 import com.caucho.util.L10N;
 
@@ -274,10 +274,10 @@ public class JavaMethod extends AbstractFunction {
     return _unmarshallReturn.unmarshall(env, value);
   }
 
-  public Value eval(Env env, Object obj, Value []phpArgs)
+  public Value eval(Env env, Object obj, Value []quercusArgs)
     throws Throwable
   {
-    if (phpArgs.length != _marshallArgs.length) {
+    if (quercusArgs.length != _marshallArgs.length) {
       env.warning("mismatched length");
       return NullValue.NULL;
     }
@@ -285,7 +285,7 @@ public class JavaMethod extends AbstractFunction {
     Object []args = new Object[_marshallArgs.length];
 
     for (int i = 0; i < args.length; i++) {
-      args[i] = _marshallArgs[i].marshall(env, phpArgs[i], _paramTypes[i]);
+      args[i] = _marshallArgs[i].marshall(env, quercusArgs[i], _paramTypes[i]);
     }
 
     Object value = _method.invoke(obj, args);
@@ -306,7 +306,7 @@ public class JavaMethod extends AbstractFunction {
     return _unmarshallReturn.unmarshall(env, value);
   }
 
-  public Value eval(Env env, Object obj, Value phpArg1)
+  public Value eval(Env env, Object obj, Value quercusArg1)
     throws Throwable
   {
     if (_marshallArgs.length != 1) {
@@ -315,7 +315,7 @@ public class JavaMethod extends AbstractFunction {
     }
 
     Object []javaArgs = new Object[] {
-      _marshallArgs[0].marshall(env, phpArg1, _paramTypes[0]),
+      _marshallArgs[0].marshall(env, quercusArg1, _paramTypes[0]),
     };
     
     Object value = _method.invoke(obj, javaArgs);

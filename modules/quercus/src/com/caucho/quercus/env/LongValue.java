@@ -27,11 +27,11 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.php.env;
+package com.caucho.quercus.env;
 
 import java.io.IOException;
 
-import com.caucho.php.gen.PhpWriter;
+import com.caucho.quercus.gen.PhpWriter;
 
 import com.caucho.vfs.WriteStream;
 
@@ -220,13 +220,13 @@ public class LongValue extends Value {
     throws IOException
   {
     if (_value == 0)
-      out.print("com.caucho.php.env.LongValue.ZERO");
+      out.print("com.caucho.quercus.env.LongValue.ZERO");
     else if (_value == 1)
-      out.print("com.caucho.php.env.LongValue.ONE");
+      out.print("com.caucho.quercus.env.LongValue.ONE");
     else if (_value == -1)
-      out.print("com.caucho.php.env.LongValue.MINUS_ONE");
+      out.print("com.caucho.quercus.env.LongValue.MINUS_ONE");
     else
-      out.print("new com.caucho.php.env.LongValue(" + _value + "L)");
+      out.print("new com.caucho.quercus.env.LongValue(" + _value + "L)");
   }
 
   /**

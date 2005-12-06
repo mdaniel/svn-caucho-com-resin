@@ -27,18 +27,18 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.php.resources;
+package com.caucho.quercus.resources;
 
 import java.io.IOException;
 
 import com.caucho.vfs.Path;
 
-import com.caucho.php.env.ResourceValue;
-import com.caucho.php.env.Env;
-import com.caucho.php.env.Value;
-import com.caucho.php.env.ArrayValue;
-import com.caucho.php.env.ArrayValueImpl;
-import com.caucho.php.env.StringValue;
+import com.caucho.quercus.env.ResourceValue;
+import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.Value;
+import com.caucho.quercus.env.ArrayValue;
+import com.caucho.quercus.env.ArrayValueImpl;
+import com.caucho.quercus.env.StringValue;
 
 /**
  * Represents a PHP stream context.

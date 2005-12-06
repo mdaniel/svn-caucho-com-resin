@@ -27,31 +27,31 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.php.module;
+package com.caucho.quercus.module;
 
 import java.io.IOException;
 
 import java.lang.reflect.Method;
 import java.lang.annotation.Annotation;
 
-import com.caucho.php.Quercus;
+import com.caucho.quercus.Quercus;
 
-import com.caucho.php.expr.Expr;
-import com.caucho.php.expr.NullLiteralExpr;
-import com.caucho.php.expr.DefaultExpr;
+import com.caucho.quercus.expr.Expr;
+import com.caucho.quercus.expr.NullLiteralExpr;
+import com.caucho.quercus.expr.DefaultExpr;
 
-import com.caucho.php.env.Env;
-import com.caucho.php.env.Value;
-import com.caucho.php.env.NullValue;
-import com.caucho.php.env.StringValue;
-import com.caucho.php.env.BooleanValue;
-import com.caucho.php.env.LongValue;
-import com.caucho.php.env.DoubleValue;
-import com.caucho.php.env.Callback;
+import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.Value;
+import com.caucho.quercus.env.NullValue;
+import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.BooleanValue;
+import com.caucho.quercus.env.LongValue;
+import com.caucho.quercus.env.DoubleValue;
+import com.caucho.quercus.env.Callback;
 
-import com.caucho.php.program.AbstractFunction;
+import com.caucho.quercus.program.AbstractFunction;
 
-import com.caucho.php.gen.PhpWriter;
+import com.caucho.quercus.gen.PhpWriter;
 
 import com.caucho.vfs.Path;
 
@@ -945,7 +945,7 @@ abstract public class Marshall {
       public Object marshall(Env env, Expr expr, Class expectedClass)
 	throws Throwable
       {
-	// php/0d1k
+	// quercus/0d1k
 	return expr.evalRef(env);
       }
     

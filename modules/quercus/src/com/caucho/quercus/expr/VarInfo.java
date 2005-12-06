@@ -27,9 +27,9 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.php.expr;
+package com.caucho.quercus.expr;
 
-import com.caucho.php.program.FunctionInfo;
+import com.caucho.quercus.program.FunctionInfo;
 
 /**
  * Information about a variable's use in a function.

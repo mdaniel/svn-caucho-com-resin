@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.php.env;
+package com.caucho.quercus.env;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -37,15 +37,15 @@ import java.util.LinkedHashMap;
 
 import java.io.IOException;
 
-import com.caucho.php.PhpRuntimeException;
+import com.caucho.quercus.PhpRuntimeException;
 
-import com.caucho.php.program.AbstractFunction;
-import com.caucho.php.program.AbstractClassDef;
-import com.caucho.php.program.Function;
+import com.caucho.quercus.program.AbstractFunction;
+import com.caucho.quercus.program.AbstractClassDef;
+import com.caucho.quercus.program.Function;
 
-import com.caucho.php.expr.Expr;
+import com.caucho.quercus.expr.Expr;
 
-import com.caucho.php.gen.PhpWriter;
+import com.caucho.quercus.gen.PhpWriter;
 
 /**
  * Represents a PHP class value.
@@ -158,7 +158,7 @@ abstract public class CompiledClass extends AbstractClassDef {
       return value;
     }
     else {
-      // php/3d55
+      // quercus/3d55
       return new ArgGetValue(this, name);
     }
 
@@ -246,7 +246,7 @@ abstract public class CompiledClass extends AbstractClassDef {
     throw new UnsupportedOperationException();
 
     /*
-    // php/3d8i
+    // quercus/3d8i
     
     if (_extFields == null)
       _extFields = new ArrayValue();
@@ -262,7 +262,7 @@ abstract public class CompiledClass extends AbstractClassDef {
   {
     throw new UnsupportedOperationException();
     /*
-    // php/3d91
+    // quercus/3d91
     
     if (_extFields != null) {
       Value value = _extFields.remove(name);

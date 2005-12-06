@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.php.servlet;
+package com.caucho.quercus.servlet;
 
 import com.caucho.config.ConfigException;
 

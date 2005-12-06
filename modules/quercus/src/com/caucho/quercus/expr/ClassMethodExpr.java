@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.php.expr;
+package com.caucho.quercus.expr;
 
 import java.io.IOException;
 
@@ -35,17 +35,17 @@ import java.util.ArrayList;
 
 import java.lang.reflect.Method;
 
-import com.caucho.php.env.Env;
-import com.caucho.php.env.PhpClass;
-import com.caucho.php.env.Value;
+import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.QuercusClass;
+import com.caucho.quercus.env.Value;
 
-import com.caucho.php.module.StaticFunction;
-import com.caucho.php.module.PhpModule;
+import com.caucho.quercus.module.StaticFunction;
+import com.caucho.quercus.module.PhpModule;
 
-import com.caucho.php.program.AbstractFunction;
-import com.caucho.php.program.AnalyzeInfo;
+import com.caucho.quercus.program.AbstractFunction;
+import com.caucho.quercus.program.AnalyzeInfo;
 
-import com.caucho.php.gen.PhpWriter;
+import com.caucho.quercus.gen.PhpWriter;
 
 import com.caucho.util.L10N;
 
@@ -88,7 +88,7 @@ public class ClassMethodExpr extends Expr {
   public Value eval(Env env)
     throws Throwable
   {
-    PhpClass cl = env.findClass(_className);
+    QuercusClass cl = env.findClass(_className);
 
     if (cl == null)
       throw new Exception(L.l("{0} is an unknown class", _className));
@@ -132,7 +132,7 @@ public class ClassMethodExpr extends Expr {
     out.printJavaString(_className);
     out.print("\").getFunction(\"");
     out.printJavaString(_name);
-    out.print("\").evalMethod(env, php_this");
+    out.print("\").evalMethod(env, quercus_this");
       
     if (_args.length <= 5) {
       for (int i = 0; i < _args.length; i++) {

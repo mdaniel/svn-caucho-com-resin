@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.php.expr;
+package com.caucho.quercus.expr;
 
 import java.util.ArrayList;
 
@@ -35,18 +35,18 @@ import java.io.IOException;
 
 import java.lang.reflect.Method;
 
-import com.caucho.php.env.Env;
-import com.caucho.php.env.StringValue;
-import com.caucho.php.env.Value;
+import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.Value;
 
-import com.caucho.php.module.StaticFunction;
-import com.caucho.php.module.PhpModule;
+import com.caucho.quercus.module.StaticFunction;
+import com.caucho.quercus.module.PhpModule;
 
-import com.caucho.php.program.AbstractFunction;
-import com.caucho.php.program.AnalyzeInfo;
-import com.caucho.php.program.InterpretedClassDef;
+import com.caucho.quercus.program.AbstractFunction;
+import com.caucho.quercus.program.AnalyzeInfo;
+import com.caucho.quercus.program.InterpretedClassDef;
 
-import com.caucho.php.gen.PhpWriter;
+import com.caucho.quercus.gen.PhpWriter;
 
 import com.caucho.util.L10N;
 
@@ -56,11 +56,11 @@ import com.caucho.util.L10N;
 public class ThisExpr extends AbstractVarExpr {
   private static final L10N L = new L10N(ThisExpr.class);
 
-  private final InterpretedClassDef _phpClass;
+  private final InterpretedClassDef _quercusClass;
   
-  public ThisExpr(InterpretedClassDef phpClass)
+  public ThisExpr(InterpretedClassDef quercusClass)
   {
-    _phpClass = phpClass;
+    _quercusClass = phpClass;
   }
 
   /**
@@ -68,7 +68,7 @@ public class ThisExpr extends AbstractVarExpr {
    */
   public Expr createFieldGet(String name)
   {
-    return new ThisFieldExpr(_phpClass, name);
+    return new ThisFieldExpr(_quercusClass, name);
   }
   
   /**
@@ -155,7 +155,7 @@ public class ThisExpr extends AbstractVarExpr {
   public void generate(PhpWriter out)
     throws IOException
   {
-    out.print("php_this");
+    out.print("quercus_this");
   }
 
   /**

@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.php.env;
+package com.caucho.quercus.env;
 
 import java.io.IOException;
 
@@ -35,9 +35,9 @@ import java.util.Collection;
 
 import com.caucho.vfs.WriteStream;
 
-import com.caucho.php.expr.Expr;
+import com.caucho.quercus.expr.Expr;
 
-import com.caucho.php.program.AbstractFunction;
+import com.caucho.quercus.program.AbstractFunction;
 
 /**
  * Represents a PHP variable value.
@@ -69,7 +69,7 @@ public class Var extends Value {
    */
   protected Value setRaw(Value value)
   {
-    // php/0431
+    // quercus/0431
     _value = value;
 
     return _value;
@@ -418,7 +418,7 @@ public class Var extends Value {
     if (_value.isset())
       return _value;
     else {
-      // php/3d52
+      // quercus/3d52
       return new ArgArrayVarValue(this);
     }
   }

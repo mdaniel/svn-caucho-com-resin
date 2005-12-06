@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.php.lib;
+package com.caucho.quercus.lib;
 
 import java.util.Properties;
 
@@ -45,11 +45,11 @@ import javax.mail.internet.MimeMessage;
 
 import com.caucho.util.L10N;
 
-import com.caucho.php.env.StringValue;
-import com.caucho.php.env.Env;
+import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.Env;
 
-import com.caucho.php.module.AbstractPhpModule;
-import com.caucho.php.module.Optional;
+import com.caucho.quercus.module.AbstractPhpModule;
+import com.caucho.quercus.module.Optional;
 
 /**
  * PHP functions implemented from the mail module
@@ -102,7 +102,7 @@ public class PhpMailModule extends AbstractPhpModule {
 
       smtp.sendMessage(msg, new Address[] { addr });
 
-      log.fine("php-mail: sent mail to " + to);
+      log.fine("quercus-mail: sent mail to " + to);
 
       return true;
     } catch (RuntimeException e) {

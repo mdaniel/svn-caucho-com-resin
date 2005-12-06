@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.php.program;
+package com.caucho.quercus.program;
 
 import java.io.IOException;
 
@@ -39,26 +39,26 @@ import java.util.logging.Logger;
 
 import com.caucho.java.JavaWriter;
 
-import com.caucho.php.Quercus;
+import com.caucho.quercus.Quercus;
 
-import com.caucho.php.env.Env;
-import com.caucho.php.env.Value;
+import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.Value;
 
-import com.caucho.php.expr.Expr;
-import com.caucho.php.expr.VarExpr;
-import com.caucho.php.expr.VarInfo;
-import com.caucho.php.expr.VarState;
-import com.caucho.php.expr.NullLiteralExpr;
-import com.caucho.php.expr.ExprHandle;
+import com.caucho.quercus.expr.Expr;
+import com.caucho.quercus.expr.VarExpr;
+import com.caucho.quercus.expr.VarInfo;
+import com.caucho.quercus.expr.VarState;
+import com.caucho.quercus.expr.NullLiteralExpr;
+import com.caucho.quercus.expr.ExprHandle;
 
 import com.caucho.util.L10N;
 
 import com.caucho.vfs.WriteStream;
 
-import com.caucho.php.env.Var;
-import com.caucho.php.env.NullValue;
+import com.caucho.quercus.env.Var;
+import com.caucho.quercus.env.NullValue;
 
-import com.caucho.php.gen.PhpWriter;
+import com.caucho.quercus.gen.PhpWriter;
 
 /**
  * Represents sequence of statements.
@@ -234,7 +234,7 @@ public class Function extends AbstractFunction {
 	map.put(arg.getName(), values[i].toRefVar());
       }
       else {
-	// php/0d04
+	// quercus/0d04
 	values[i] = args[i].eval(env).copy();
       
 	map.put(arg.getName(), values[i].toVar());
@@ -305,7 +305,7 @@ public class Function extends AbstractFunction {
       else if (arg.isReference())
 	map.put(arg.getName(), args[i].toRefVar());
       else {
-	// php/0d04
+	// quercus/0d04
 	map.put(arg.getName(), args[i].copy().toVar());
       }
     }
@@ -480,7 +480,7 @@ public class Function extends AbstractFunction {
 
     out.print("public ");
     
-    // php/3960
+    // quercus/3960
     out.print("static ");
     
     out.print("Value fun_");
@@ -488,7 +488,7 @@ public class Function extends AbstractFunction {
     out.print("(Env env");
 
     if (! isStatic())
-      out.print(", Value php_this");
+      out.print(", Value quercus_this");
 
     for (int i = 0; i < _args.length; i++) {
       out.print(", ");
@@ -507,7 +507,7 @@ public class Function extends AbstractFunction {
     out.popDepth();
     out.println("}");
 
-    String funName = "__php_fun_" + _name;
+    String funName = "__quercus_fun_" + _name;
 
     out.println();
     out.println("final static AbstractFunction " + funName);
@@ -542,7 +542,7 @@ public class Function extends AbstractFunction {
     if (isStatic())
       out.print("public Value eval" + ref + "(Env env");
     else
-      out.print("public Value evalMethod" + ref + "(Env env, Value php_this");
+      out.print("public Value evalMethod" + ref + "(Env env, Value quercus_this");
 
     for (int i = 0; i < _args.length; i++) {
       out.print(", Value a" + i);
@@ -557,7 +557,7 @@ public class Function extends AbstractFunction {
     out.print("fun_" + _name + "(env");
     
     if (! isStatic())
-      out.print(", php_this");
+      out.print(", quercus_this");
 
     for (int i = 0; i < _args.length; i++) {
       out.print(", a" + i);
@@ -590,7 +590,7 @@ public class Function extends AbstractFunction {
     if (isStatic())
       out.println("(Env env, Value []args)");
     else
-      out.println("(Env env, Value php_this, Value []args)");
+      out.println("(Env env, Value quercus_this, Value []args)");
       
     out.println("  throws Throwable");
     out.println("{");
@@ -598,14 +598,14 @@ public class Function extends AbstractFunction {
 
     // XXX: try to optimize-away the map
 
-    out.println("Value []php_oldArgs = env.setFunctionArgs(args);");
+    out.println("Value []quercus_oldArgs = env.setFunctionArgs(args);");
     out.println("try {");
 
     generateBody(out);
     
     out.println("} finally {");
     out.pushDepth();
-    out.println("env.setFunctionArgs(php_oldArgs);");
+    out.println("env.setFunctionArgs(quercus_oldArgs);");
     out.popDepth();
     out.println("}");
     
@@ -613,7 +613,7 @@ public class Function extends AbstractFunction {
     out.println("}");
 
     out.println();
-    out.println("final static AbstractFunction __php_fun_" + _name);
+    out.println("final static AbstractFunction __quercus_fun_" + _name);
 
     String ref = _isReturnsReference ? "Ref" : "";
     
@@ -663,7 +663,7 @@ public class Function extends AbstractFunction {
     if (isStatic())
       out.println("public Value eval" + ref + "Impl(Env env, Value []args)");
     else
-      out.println("public Value evalMethod" + ref + "Impl(Env env, Value php_this, Value []args)");
+      out.println("public Value evalMethod" + ref + "Impl(Env env, Value quercus_this, Value []args)");
       
     out.println("  throws Throwable");
     out.println("{");
@@ -672,7 +672,7 @@ public class Function extends AbstractFunction {
     if (isStatic())
       out.println("  return fun_" + _name + "(env, args);");
     else
-      out.println("  return fun_" + _name + "(env, php_this, args);");
+      out.println("  return fun_" + _name + "(env, quercus_this, args);");
     
     out.popDepth();
     out.println("}");
@@ -705,7 +705,7 @@ public class Function extends AbstractFunction {
 	out.println(varName + " = " + argName + ".toVar();");
       }
       else if (! var.isAssigned()) {
-	// php/399j
+	// quercus/399j
 	out.println(varName + " = " + argName + ".toArgValue();");
       }
       else if (var.isRef()) {
@@ -721,21 +721,21 @@ public class Function extends AbstractFunction {
     }
       
     if (isVariableMap()) {
-      out.println("java.util.HashMap<String,Var> _php_map = new java.util.HashMap<String,Var>();");
-      out.println("java.util.HashMap<String,Var> _php_oldMap = env.pushEnv(_php_map);");
+      out.println("java.util.HashMap<String,Var> _quercus_map = new java.util.HashMap<String,Var>();");
+      out.println("java.util.HashMap<String,Var> _quercus_oldMap = env.pushEnv(_php_map);");
     
       out.println("try {");
       out.pushDepth();
 
       for (int i = 0; i < _args.length; i++) {
-	out.print("_php_map.put(\"");
+	out.print("_quercus_map.put(\"");
 	out.printJavaString(_args[i].getName());
 	out.println("\", (Var) v_" + _args[i].getName() + ");");
       }
     }
 
     if (_info.isOutUsed())
-      out.println("com.caucho.vfs.WriteStream _php_out = env.getOut();");
+      out.println("com.caucho.vfs.WriteStream _quercus_out = env.getOut();");
 
     _statement.generate(out);
 
@@ -743,14 +743,14 @@ public class Function extends AbstractFunction {
       out.popDepth();
       out.println("} finally {");
       out.pushDepth();
-      // out.println("env.setFunctionArgs(_php_oldArgs);");
-      out.println("env.popEnv(_php_oldMap);");
+      // out.println("env.setFunctionArgs(_quercus_oldArgs);");
+      out.println("env.popEnv(_quercus_oldMap);");
       out.popDepth();
       out.println("}");
     }
 
     if (_statement.fallThrough() != Statement.RETURN)
-      out.println("return com.caucho.php.env.NullValue.NULL;");
+      out.println("return com.caucho.quercus.env.NullValue.NULL;");
   }
   
   /**
@@ -764,7 +764,7 @@ public class Function extends AbstractFunction {
     out.println();
     out.print("addFunction(\"");
     out.printJavaString(_name.toLowerCase());
-    out.println("\", __php_fun_" + _name + ");");
+    out.println("\", __quercus_fun_" + _name + ");");
   }
 
   /**

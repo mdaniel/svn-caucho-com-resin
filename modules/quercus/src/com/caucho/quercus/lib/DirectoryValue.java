@@ -27,18 +27,18 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.php.lib;
+package com.caucho.quercus.lib;
 
 import java.io.IOException;
 
 import com.caucho.vfs.Path;
 
-import com.caucho.php.env.ResourceValue;
-import com.caucho.php.env.Env;
-import com.caucho.php.env.Value;
-import com.caucho.php.env.StringValue;
-import com.caucho.php.env.BooleanValue;
-import com.caucho.php.env.NullValue;
+import com.caucho.quercus.env.ResourceValue;
+import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.Value;
+import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.BooleanValue;
+import com.caucho.quercus.env.NullValue;
 
 /**
  * Represents a PHP directory listing

@@ -27,19 +27,19 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.php.program;
+package com.caucho.quercus.program;
 
 import java.io.IOException;
 
 import com.caucho.java.JavaWriter;
 
-import com.caucho.php.env.Env;
-import com.caucho.php.env.Value;
-import com.caucho.php.env.NullValue;
+import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.Value;
+import com.caucho.quercus.env.NullValue;
 
-import com.caucho.php.expr.Expr;
+import com.caucho.quercus.expr.Expr;
 
-import com.caucho.php.gen.PhpWriter;
+import com.caucho.quercus.gen.PhpWriter;
 
 import com.caucho.vfs.WriteStream;
 
@@ -64,7 +64,7 @@ public class ReturnRefStatement extends Statement {
     throws Throwable
   {
     if (_expr != null) {
-      // php/0750
+      // quercus/0750
       return _expr.evalRef(env);
     }
     else

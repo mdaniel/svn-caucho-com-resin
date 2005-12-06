@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.php.env;
+package com.caucho.quercus.env;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -38,18 +38,18 @@ import java.util.LinkedHashMap;
 
 import java.io.IOException;
 
-import com.caucho.php.Quercus;
-import com.caucho.php.PhpRuntimeException;
+import com.caucho.quercus.Quercus;
+import com.caucho.quercus.PhpRuntimeException;
 
-import com.caucho.php.program.AbstractFunction;
-import com.caucho.php.program.Function;
+import com.caucho.quercus.program.AbstractFunction;
+import com.caucho.quercus.program.Function;
 
-import com.caucho.php.module.Marshall;
-import com.caucho.php.module.JavaMarshall;
+import com.caucho.quercus.module.Marshall;
+import com.caucho.quercus.module.JavaMarshall;
 
-import com.caucho.php.expr.Expr;
+import com.caucho.quercus.expr.Expr;
 
-import com.caucho.php.gen.PhpWriter;
+import com.caucho.quercus.gen.PhpWriter;
 
 /**
  * Represents an introspected Java class.

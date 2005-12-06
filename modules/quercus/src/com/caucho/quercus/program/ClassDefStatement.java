@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.php.program;
+package com.caucho.quercus.program;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -36,13 +36,13 @@ import java.io.IOException;
 
 import com.caucho.java.JavaWriter;
 
-import com.caucho.php.env.Env;
-import com.caucho.php.env.Value;
-import com.caucho.php.env.PhpClass;
+import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.Value;
+import com.caucho.quercus.env.QuercusClass;
 
-import com.caucho.php.expr.VarExpr;
+import com.caucho.quercus.expr.VarExpr;
 
-import com.caucho.php.gen.PhpWriter;
+import com.caucho.quercus.gen.PhpWriter;
 
 import com.caucho.vfs.WriteStream;
 
@@ -61,7 +61,7 @@ public class ClassDefStatement extends Statement {
     throws Throwable
   {
     if (env.findClass(_cl.getName()) == null)
-      env.addClass(_cl.getName(), new PhpClass(_cl, null));
+      env.addClass(_cl.getName(), new QuercusClass(_cl, null));
 
     return null;
   }
@@ -91,7 +91,7 @@ public class ClassDefStatement extends Statement {
     out.println("\") == null)");
     out.print("  env.addClass(\"");
     out.printJavaString(_cl.getName());
-    out.print("\", new PhpClass(new php_" + _cl.getName() + "(), ");
+    out.print("\", new QuercusClass(new quercus_" + _cl.getName() + "(), ");
 
     if (_cl.getParentName() != null) {
       out.print("env.getClass(\"");

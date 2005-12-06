@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.php.expr;
+package com.caucho.quercus.expr;
 
 import java.io.IOException;
 
@@ -35,16 +35,16 @@ import java.util.HashSet;
 
 import com.caucho.java.JavaWriter;
 
-import com.caucho.php.env.Env;
-import com.caucho.php.env.Value;
+import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.Value;
 
-import com.caucho.php.program.Statement;
-import com.caucho.php.program.StatementHandle;
-import com.caucho.php.program.AnalyzeInfo;
+import com.caucho.quercus.program.Statement;
+import com.caucho.quercus.program.StatementHandle;
+import com.caucho.quercus.program.AnalyzeInfo;
 
-import com.caucho.php.parser.PhpParser;
+import com.caucho.quercus.parser.PhpParser;
 
-import com.caucho.php.gen.PhpWriter;
+import com.caucho.quercus.gen.PhpWriter;
 
 import com.caucho.util.L10N;
 
@@ -693,8 +693,8 @@ abstract public class Expr {
   public void generateGetOut(PhpWriter out)
     throws IOException
   {
-    // php/1l07
-    // out.print("_php_out");
+    // quercus/1l07
+    // out.print("_quercus_out");
     
     out.print("env.getOut()");
   }
@@ -745,7 +745,7 @@ abstract public class Expr {
     // XXX: remove when done
     System.out.println("Generate: " + getClass().getName());
     
-    out.print("com.caucho.php.expr.NullLiteralExpr.NULL");
+    out.print("com.caucho.quercus.expr.NullLiteralExpr.NULL");
   }
   
   public String toString()

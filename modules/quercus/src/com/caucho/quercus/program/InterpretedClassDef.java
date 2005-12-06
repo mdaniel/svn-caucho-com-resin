@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.php.program;
+package com.caucho.quercus.program;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -35,15 +35,15 @@ import java.util.LinkedHashMap;
 
 import java.io.IOException;
 
-import com.caucho.php.program.AbstractFunction;
-import com.caucho.php.program.Function;
+import com.caucho.quercus.program.AbstractFunction;
+import com.caucho.quercus.program.Function;
 
-import com.caucho.php.env.Value;
-import com.caucho.php.env.Env;
+import com.caucho.quercus.env.Value;
+import com.caucho.quercus.env.Env;
 
-import com.caucho.php.expr.Expr;
+import com.caucho.quercus.expr.Expr;
 
-import com.caucho.php.gen.PhpWriter;
+import com.caucho.quercus.gen.PhpWriter;
 
 /**
  * Represents an interpreted PHP class definition.
@@ -183,11 +183,11 @@ public class InterpretedClassDef extends AbstractClassDef {
     out.addClass(this);
     
     out.println();
-    out.println("public static class php_" + getName() + " extends CompiledClass {");
+    out.println("public static class quercus_" + getName() + " extends CompiledClass {");
     out.pushDepth();
 
     out.println();
-    out.println("public php_" + getName() + "()");
+    out.println("public quercus_" + getName() + "()");
     out.println("{");
     out.pushDepth();
     out.print("super(\"");
@@ -237,7 +237,7 @@ public class InterpretedClassDef extends AbstractClassDef {
     out.println("{");
 
     if (_constructor != null)
-      out.println("  return __php_fun_" + _constructor.getName() + ";");
+      out.println("  return __quercus_fun_" + _constructor.getName() + ";");
     else
       out.println("  return null;");
       
@@ -262,11 +262,11 @@ public class InterpretedClassDef extends AbstractClassDef {
     for (String key : _functionMap.keySet()) {
       out.print("_methodMap.put(\"");
       out.printJavaString(key);
-      out.println("\", __php_fun_" + key + ");");
+      out.println("\", __quercus_fun_" + key + ");");
       
       out.print("_methodMapLowerCase.put(\"");
       out.printJavaString(key.toLowerCase());
-      out.println("\", __php_fun_" + key + ");");
+      out.println("\", __quercus_fun_" + key + ");");
     }
 
     out.popDepth();
@@ -319,7 +319,7 @@ public class InterpretedClassDef extends AbstractClassDef {
   {
     out.print("addClass(\"");
     out.printJavaString(getName());
-    out.println("\", __php_class_" + getName() + ");");
+    out.println("\", __quercus_class_" + getName() + ");");
   }
 
   public String toString()

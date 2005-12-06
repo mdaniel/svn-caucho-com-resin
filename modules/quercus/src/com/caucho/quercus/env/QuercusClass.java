@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.php.env;
+package com.caucho.quercus.env;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -37,28 +37,28 @@ import java.io.IOException;
 
 import com.caucho.util.L10N;
 
-import com.caucho.php.PhpRuntimeException;
+import com.caucho.quercus.PhpRuntimeException;
 
-import com.caucho.php.program.AbstractFunction;
-import com.caucho.php.program.AbstractClassDef;
+import com.caucho.quercus.program.AbstractFunction;
+import com.caucho.quercus.program.AbstractClassDef;
 
-import com.caucho.php.expr.Expr;
+import com.caucho.quercus.expr.Expr;
 
-import com.caucho.php.gen.PhpWriter;
+import com.caucho.quercus.gen.PhpWriter;
 
 /**
  * Represents a PHP class.
  */
-public class PhpClass {
-  private final L10N L = new L10N(PhpClass.class);
+public class QuercusClass {
+  private final L10N L = new L10N(QuercusClass.class);
 
   private final AbstractClassDef _classDef;
   
   private AbstractClassDef []_classDefList;
 
-  private PhpClass _parent;
+  private QuercusClass _parent;
 
-  public PhpClass(AbstractClassDef classDef, PhpClass parent)
+  public QuercusClass(AbstractClassDef classDef, QuercusClass parent)
   {
     _classDef = classDef;
     _parent = parent;
@@ -91,7 +91,7 @@ public class PhpClass {
   /**
    * Returns the parent class.
    */
-  public PhpClass getParent()
+  public QuercusClass getParent()
   {
     return _parent;
   }
@@ -220,7 +220,7 @@ public class PhpClass {
 
   public String toString()
   {
-    return "PhpClass[" + getName() + "]";
+    return "QuercusClass[" + getName() + "]";
   }
 }
 

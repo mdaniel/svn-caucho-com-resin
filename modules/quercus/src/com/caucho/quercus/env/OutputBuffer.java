@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.php.env;
+package com.caucho.quercus.env;
 
 import java.io.IOException;
 
@@ -35,7 +35,7 @@ import com.caucho.vfs.WriteStream;
 import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.TempStream;
 
-import com.caucho.php.gen.PhpWriter;
+import com.caucho.quercus.gen.PhpWriter;
 
 /**
  * Represents a PHP output buffer

@@ -27,12 +27,12 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.php.resources;
+package com.caucho.quercus.resources;
 
 import com.caucho.util.Log;
-import com.caucho.php.lib.PhpMysqliModule;
-import com.caucho.php.resources.JdbcConnectionResource;
-import com.caucho.php.env.*;
+import com.caucho.quercus.lib.PhpMysqliModule;
+import com.caucho.quercus.resources.JdbcConnectionResource;
+import com.caucho.quercus.env.*;
 
 import java.sql.*;
 import java.util.logging.Level;
@@ -338,55 +338,55 @@ public class JdbcResultResource extends ResourceValue {
 
       result.put(new StringValue("flags"), new LongValue(flags));
       //generate PHP type
-      int phpType = 0;
+      int quercusType = 0;
       switch (type) {
       case Types.DECIMAL:
-        phpType = PhpMysqliModule.MYSQL_TYPE_DECIMAL;
+        quercusType = PhpMysqliModule.MYSQL_TYPE_DECIMAL;
         break;
       case Types.BIT:
-        phpType = PhpMysqliModule.MYSQL_TYPE_TINY;
+        quercusType = PhpMysqliModule.MYSQL_TYPE_TINY;
         break;
       case Types.SMALLINT:
-        phpType = PhpMysqliModule.MYSQL_TYPE_SHORT;
+        quercusType = PhpMysqliModule.MYSQL_TYPE_SHORT;
         break;
       case Types.INTEGER: {
         if (_rs.getString(2).indexOf("medium") == -1)
-          phpType = PhpMysqliModule.MYSQL_TYPE_LONG;
+          quercusType = PhpMysqliModule.MYSQL_TYPE_LONG;
         else
-          phpType = PhpMysqliModule.MYSQL_TYPE_INT24;
+          quercusType = PhpMysqliModule.MYSQL_TYPE_INT24;
         break;
       }
       case Types.REAL:
-        phpType = PhpMysqliModule.MYSQL_TYPE_FLOAT;
+        quercusType = PhpMysqliModule.MYSQL_TYPE_FLOAT;
         break;
       case Types.DOUBLE:
-        phpType = PhpMysqliModule.MYSQL_TYPE_DOUBLE;
+        quercusType = PhpMysqliModule.MYSQL_TYPE_DOUBLE;
         break;
       case Types.BIGINT:
-        phpType = PhpMysqliModule.MYSQL_TYPE_LONGLONG;
+        quercusType = PhpMysqliModule.MYSQL_TYPE_LONGLONG;
         break;
       case Types.DATE:
-        phpType = PhpMysqliModule.MYSQL_TYPE_DATE;
+        quercusType = PhpMysqliModule.MYSQL_TYPE_DATE;
         break;
       case Types.TIMESTAMP:
-        phpType = PhpMysqliModule.MYSQL_TYPE_DATETIME;
+        quercusType = PhpMysqliModule.MYSQL_TYPE_DATETIME;
         break;
       case Types.LONGVARBINARY:
       case Types.LONGVARCHAR:
-        phpType = PhpMysqliModule.MYSQL_TYPE_BLOB;
+        quercusType = PhpMysqliModule.MYSQL_TYPE_BLOB;
         break;
       case Types.CHAR:
-        phpType = PhpMysqliModule.MYSQL_TYPE_STRING;
+        quercusType = PhpMysqliModule.MYSQL_TYPE_STRING;
         break;
       case Types.VARCHAR:
-        phpType = PhpMysqliModule.MYSQL_TYPE_VAR_STRING;
+        quercusType = PhpMysqliModule.MYSQL_TYPE_VAR_STRING;
         break;
       // XXX: may need to revisit default
       default:
-        phpType = PhpMysqliModule.MYSQL_TYPE_NULL;
+        quercusType = PhpMysqliModule.MYSQL_TYPE_NULL;
         break;
       }
-      result.put(new StringValue("type"), new LongValue(phpType));
+      result.put(new StringValue("type"), new LongValue(quercusType));
       result.put(new StringValue("decimals"), new LongValue(scale));
 
     } catch (SQLException e) {
@@ -722,7 +722,7 @@ public class JdbcResultResource extends ResourceValue {
   /**
    * getFieldName returns a StringValue with the column name
    *
-   * @param fieldOffset need to add 1 because java is 1 based index and php is 0 based
+   * @param fieldOffset need to add 1 because java is 1 based index and quercus is 0 based
    */
   public Value getFieldName(int fieldOffset)
   {
@@ -746,7 +746,7 @@ public class JdbcResultResource extends ResourceValue {
   /**
    * getFieldNameAlias returns a StringValue with the column Alias
    *
-   * @param fieldOffset need to add 1 because java is 1 based index and php is 0 based
+   * @param fieldOffset need to add 1 because java is 1 based index and quercus is 0 based
    */
   public Value getFieldNameAlias(int fieldOffset)
   {
@@ -787,7 +787,7 @@ public class JdbcResultResource extends ResourceValue {
   /**
    * getFieldType returns a StringValue with the column type
    *
-   * @param fieldOffset need to add 1 because java is 1 based index and php is 0 based
+   * @param fieldOffset need to add 1 because java is 1 based index and quercus is 0 based
    */
   public Value getFieldType(int fieldOffset)
   {
@@ -981,7 +981,7 @@ public class JdbcResultResource extends ResourceValue {
 
   }
 
-  // XXX: phpbb seems to want this?
+  // XXX: quercusbb seems to want this?
   public Value toKey()
   {
     return new StringValue("JdbcResultResource$" + System.identityHashCode(this));
@@ -1002,7 +1002,7 @@ public class JdbcResultResource extends ResourceValue {
    */
   public String toString()
   {
-    return "com.caucho.php.resources.JdbcResultResource";
+    return "com.caucho.quercus.resources.JdbcResultResource";
   }
 
   /**

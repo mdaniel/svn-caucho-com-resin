@@ -27,9 +27,9 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.php.resources;
+package com.caucho.quercus.resources;
 
-import com.caucho.php.env.*;
+import com.caucho.quercus.env.*;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -498,7 +498,7 @@ public class JdbcConnectionResource extends ResourceValue {
   /**
    * rolls the current transaction back
    *
-   * NOTE: php doesn't seem to support the idea
+   * NOTE: quercus doesn't seem to support the idea
    * of savepoints
    */
   public boolean rollback()

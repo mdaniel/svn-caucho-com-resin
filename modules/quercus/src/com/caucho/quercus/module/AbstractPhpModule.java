@@ -27,17 +27,17 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.php.module;
+package com.caucho.quercus.module;
 
 import java.util.Map;
 import java.util.HashMap;
 
-import com.caucho.php.env.Value;
-import com.caucho.php.env.StringValue;
-import com.caucho.php.env.VarMap;
+import com.caucho.quercus.env.Value;
+import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.VarMap;
 
 /**
- * Represents a php module.
+ * Represents a quercus module.
  */
 public class AbstractPhpModule implements PhpModule {
   protected static final int PHP_INI_USER = 1;
@@ -57,7 +57,7 @@ public class AbstractPhpModule implements PhpModule {
   }
 
   /**
-   * Returns the default php.ini values.
+   * Returns the default quercus.ini values.
    */
   public Map<String,StringValue> getDefaultIni()
   {

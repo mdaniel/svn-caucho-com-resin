@@ -27,19 +27,19 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.php.program;
+package com.caucho.quercus.program;
 
 import java.io.IOException;
 
-import com.caucho.php.env.Env;
-import com.caucho.php.env.Value;
-import com.caucho.php.env.ContinueValue;
-import com.caucho.php.env.BreakValue;
+import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.Value;
+import com.caucho.quercus.env.ContinueValue;
+import com.caucho.quercus.env.BreakValue;
 
-import com.caucho.php.expr.Expr;
-import com.caucho.php.expr.VarExpr;
+import com.caucho.quercus.expr.Expr;
+import com.caucho.quercus.expr.VarExpr;
 
-import com.caucho.php.gen.PhpWriter;
+import com.caucho.quercus.gen.PhpWriter;
 
 /**
  * Represents a foreach statement.
@@ -158,9 +158,9 @@ public class ForeachStatement extends Statement {
   public void generate(PhpWriter out)
     throws IOException
   {
-    String objVar = "php_obj_" + out.generateId();
-    String objCopyVar = "php_copy_" + out.generateId();
-    String iterVar = "php_iter_" + out.generateId();
+    String objVar = "quercus_obj_" + out.generateId();
+    String objCopyVar = "quercus_copy_" + out.generateId();
+    String iterVar = "quercus_iter_" + out.generateId();
 
     out.print("Value " + objVar + " = ");
     _objExpr.generate(out);
@@ -174,8 +174,8 @@ public class ForeachStatement extends Statement {
     out.println("while (" + iterVar + ".hasNext()) {");
     out.pushDepth();
 
-    String keyVar = "php_key_" + out.generateId();
-    String valueVar = "php_value_" + out.generateId();
+    String keyVar = "quercus_key_" + out.generateId();
+    String valueVar = "quercus_value_" + out.generateId();
 
     out.println("Value " + keyVar + " = (Value) " + iterVar + ".next();");
 

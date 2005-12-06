@@ -27,11 +27,11 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.php.program;
+package com.caucho.quercus.program;
 
-import com.caucho.php.expr.VarState;
-import com.caucho.php.expr.VarExpr;
-import com.caucho.php.expr.Expr;
+import com.caucho.quercus.expr.VarState;
+import com.caucho.quercus.expr.VarExpr;
+import com.caucho.quercus.expr.Expr;
 
 /**
  * A handle to a statement

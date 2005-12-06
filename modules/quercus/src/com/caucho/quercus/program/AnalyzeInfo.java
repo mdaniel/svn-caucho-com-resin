@@ -27,15 +27,15 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.php.program;
+package com.caucho.quercus.program;
 
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.ArrayList;
 
-import com.caucho.php.expr.VarInfo;
-import com.caucho.php.expr.VarState;
-import com.caucho.php.expr.VarExpr;
+import com.caucho.quercus.expr.VarInfo;
+import com.caucho.quercus.expr.VarState;
+import com.caucho.quercus.expr.VarExpr;
 
 /**
  * Information about a function.

@@ -27,15 +27,15 @@
  * @author Charles Reich
  */
 
-package com.caucho.php.lib;
+package com.caucho.quercus.lib;
 
-import com.caucho.php.env.*;
-import com.caucho.php.module.AbstractPhpModule;
-import com.caucho.php.module.Optional;
-import com.caucho.php.module.Reference;
-import com.caucho.php.resources.JdbcConnectionResource;
-import com.caucho.php.resources.JdbcResultResource;
-import com.caucho.php.resources.JdbcStatementResource;
+import com.caucho.quercus.env.*;
+import com.caucho.quercus.module.AbstractPhpModule;
+import com.caucho.quercus.module.Optional;
+import com.caucho.quercus.module.Reference;
+import com.caucho.quercus.resources.JdbcConnectionResource;
+import com.caucho.quercus.resources.JdbcResultResource;
+import com.caucho.quercus.resources.JdbcStatementResource;
 import com.caucho.util.Log;
 import com.caucho.util.L10N;
 

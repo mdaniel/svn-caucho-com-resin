@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.php.lib;
+package com.caucho.quercus.lib;
 
 import java.io.IOException;
 
@@ -48,33 +48,33 @@ import com.caucho.util.L10N;
 import com.caucho.util.RandomUtil;
 import com.caucho.util.Log;
 
-import com.caucho.php.module.PhpModule;
-import com.caucho.php.module.AbstractPhpModule;
-import com.caucho.php.module.Optional;
-import com.caucho.php.module.Reference;
-import com.caucho.php.module.UsesSymbolTable;
+import com.caucho.quercus.module.PhpModule;
+import com.caucho.quercus.module.AbstractPhpModule;
+import com.caucho.quercus.module.Optional;
+import com.caucho.quercus.module.Reference;
+import com.caucho.quercus.module.UsesSymbolTable;
 
-import com.caucho.php.env.Value;
-import com.caucho.php.env.Env;
-import com.caucho.php.env.NullValue;
-import com.caucho.php.env.BooleanValue;
-import com.caucho.php.env.DefaultValue;
-import com.caucho.php.env.ArrayValue;
-import com.caucho.php.env.ArrayValueImpl;
-import com.caucho.php.env.DoubleValue;
-import com.caucho.php.env.LongValue;
-import com.caucho.php.env.StringValue;
-import com.caucho.php.env.VarMap;
-import com.caucho.php.env.ChainedMap;
-import com.caucho.php.env.UnsetValue;
-import com.caucho.php.env.Callback;
+import com.caucho.quercus.env.Value;
+import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.NullValue;
+import com.caucho.quercus.env.BooleanValue;
+import com.caucho.quercus.env.DefaultValue;
+import com.caucho.quercus.env.ArrayValue;
+import com.caucho.quercus.env.ArrayValueImpl;
+import com.caucho.quercus.env.DoubleValue;
+import com.caucho.quercus.env.LongValue;
+import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.VarMap;
+import com.caucho.quercus.env.ChainedMap;
+import com.caucho.quercus.env.UnsetValue;
+import com.caucho.quercus.env.Callback;
 
-import com.caucho.php.env.ArrayValue.ValueComparator;
-import com.caucho.php.env.ArrayValue.KeyComparator;
-import com.caucho.php.env.ArrayValue.GetKey;
-import com.caucho.php.env.ArrayValue.AbstractGet;
+import com.caucho.quercus.env.ArrayValue.ValueComparator;
+import com.caucho.quercus.env.ArrayValue.KeyComparator;
+import com.caucho.quercus.env.ArrayValue.GetKey;
+import com.caucho.quercus.env.ArrayValue.AbstractGet;
 
-import com.caucho.php.program.AbstractFunction;
+import com.caucho.quercus.program.AbstractFunction;
 
 import com.caucho.vfs.WriteStream;
 
@@ -2436,7 +2436,7 @@ public class PhpArrayModule extends AbstractPhpModule {
 			 ArrayValue arg, Value []args)
     throws Throwable
   {
-    // php/1730
+    // quercus/1730
     Iterator<Map.Entry<Value,Value>> argIter = arg.entrySet().iterator();
     
     Iterator []iters = new Iterator[args.length];
@@ -2481,7 +2481,7 @@ public class PhpArrayModule extends AbstractPhpModule {
   public Value array_merge(Value []args)
     throws Throwable
   {
-    // php/1731
+    // quercus/1731
 
     ArrayValue result = new ArrayValueImpl();
 

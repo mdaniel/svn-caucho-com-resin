@@ -27,17 +27,17 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.php.expr;
+package com.caucho.quercus.expr;
 
 import java.io.IOException;
 
 import com.caucho.java.JavaWriter;
 
-import com.caucho.php.env.Env;
-import com.caucho.php.env.LongValue;
-import com.caucho.php.env.StringValue;
-import com.caucho.php.env.Value;
-import com.caucho.php.gen.PhpWriter;
+import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.LongValue;
+import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.Value;
+import com.caucho.quercus.gen.PhpWriter;
 
 /**
  * Converts to a long
@@ -73,7 +73,7 @@ public class ToLongExpr extends UnaryExpr {
   public void generate(PhpWriter out)
     throws IOException
   {
-    out.print("new com.caucho.php.env.LongValue(");
+    out.print("new com.caucho.quercus.env.LongValue(");
     
     _expr.generate(out);
 
@@ -88,7 +88,7 @@ public class ToLongExpr extends UnaryExpr {
   public void generateExpr(PhpWriter out)
     throws IOException
   {
-    out.print("new com.caucho.php.expr.ToLongExpr(");
+    out.print("new com.caucho.quercus.expr.ToLongExpr(");
     _expr.generateExpr(out);
     out.print(")");
   }

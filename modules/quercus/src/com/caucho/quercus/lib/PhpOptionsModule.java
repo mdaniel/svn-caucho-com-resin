@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.php.lib;
+package com.caucho.quercus.lib;
 
 import java.io.IOException;
 import java.util.Map;
@@ -35,15 +35,15 @@ import java.util.HashMap;
 
 import com.caucho.util.L10N;
 
-import com.caucho.php.Quercus;
+import com.caucho.quercus.Quercus;
 
-import com.caucho.php.module.PhpModule;
-import com.caucho.php.module.AbstractPhpModule;
-import com.caucho.php.module.Optional;
+import com.caucho.quercus.module.PhpModule;
+import com.caucho.quercus.module.AbstractPhpModule;
+import com.caucho.quercus.module.Optional;
 
-import com.caucho.php.program.PhpProgram;
+import com.caucho.quercus.program.PhpProgram;
 
-import com.caucho.php.env.*;
+import com.caucho.quercus.env.*;
 
 import com.caucho.vfs.WriteStream;
 
@@ -60,7 +60,7 @@ public class PhpOptionsModule extends AbstractPhpModule {
     = new HashMap<String,StringValue>();
 
   /**
-   * Returns the default php.ini values.
+   * Returns the default quercus.ini values.
    */
   public Map<String,StringValue> getDefaultIni()
   {
@@ -70,7 +70,7 @@ public class PhpOptionsModule extends AbstractPhpModule {
   /**
    * Checks the assertion
    */
-  public static boolean php_assert(Env env, String code)
+  public static boolean quercus_assert(Env env, String code)
     throws Throwable
   {
     Quercus quercus = env.getPhp();
@@ -151,7 +151,7 @@ public class PhpOptionsModule extends AbstractPhpModule {
   /**
    * Returns the sapi type.
    */
-  public static String php_php_sapi_name()
+  public static String quercus_php_sapi_name()
   {
     return "apache";
   }
@@ -159,7 +159,7 @@ public class PhpOptionsModule extends AbstractPhpModule {
   /**
    * Returns system information
    */
-  public static String php_php_uname(@Optional("'a'") String mode)
+  public static String quercus_php_uname(@Optional("'a'") String mode)
   {
     // XXX: stubbed
     
@@ -184,18 +184,18 @@ public class PhpOptionsModule extends AbstractPhpModule {
       
     case 'a':
     default:
-      return (php_php_uname("s") + " " +
-	      php_php_uname("n") + " " +
-	      php_php_uname("r") + " " +
-	      php_php_uname("v") + " " +
-	      php_php_uname("m"));
+      return (quercus_php_uname("s") + " " +
+	      quercus_php_uname("n") + " " +
+	      quercus_php_uname("r") + " " +
+	      quercus_php_uname("v") + " " +
+	      quercus_php_uname("m"));
     }
   }
 
   /**
-   * Returns the php version.
+   * Returns the quercus version.
    */
-  public static String phpversion(@Optional String module)
+  public static String quercusversion(@Optional String module)
   {
     return "5.0.0";
   }
@@ -277,11 +277,11 @@ public class PhpOptionsModule extends AbstractPhpModule {
   //@todo void    ini_restore(string varname)
   //XXX main is Dummy for main()
   //@todo int     memory_get_usage()
-  //@todo string  php_ini_scanned_files()
-  //@todo string  php_logo_guid()
-  //@todo string  php_uname([string mode])
-  //@todo boolean phpcredits([int flag])
-  //@todo boolean phpinfo([int what])
+  //@todo string  quercus_ini_scanned_files()
+  //@todo string  quercus_logo_guid()
+  //@todo string  quercus_uname([string mode])
+  //@todo boolean quercuscredits([int flag])
+  //@todo boolean quercusinfo([int what])
   //@todo boolean pupenv(string setting)
   //@todo void    restore_include_path()
   //@todo string  set_include_path(string new_include_path)

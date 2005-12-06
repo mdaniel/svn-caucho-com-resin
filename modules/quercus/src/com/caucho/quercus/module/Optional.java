@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.php.module;
+package com.caucho.quercus.module;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;

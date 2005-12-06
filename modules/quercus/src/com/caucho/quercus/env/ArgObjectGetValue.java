@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.php.env;
+package com.caucho.quercus.env;
 
 import java.io.IOException;
 
@@ -37,13 +37,13 @@ import com.caucho.util.L10N;
 
 import com.caucho.vfs.WriteStream;
 
-import com.caucho.php.PhpRuntimeException;
+import com.caucho.quercus.PhpRuntimeException;
 
-import com.caucho.php.program.AbstractFunction;
+import com.caucho.quercus.program.AbstractFunction;
 
-import com.caucho.php.gen.PhpWriter;
+import com.caucho.quercus.gen.PhpWriter;
 
-import com.caucho.php.expr.Expr;
+import com.caucho.quercus.expr.Expr;
 
 /**
  * Represents an object-get argument which might be a call to a reference.
@@ -65,7 +65,7 @@ public class ArgObjectGetValue extends Value {
    */
   public Value getArg(Value index)
   {
-    // php/3d2u
+    // quercus/3d2u
     return new ArgObjectGetValue(_env, this, index);
   }
 
@@ -74,7 +74,7 @@ public class ArgObjectGetValue extends Value {
    */
   public Var toRefVar()
   {
-    // php/3d2t
+    // quercus/3d2t
     return _obj.getArgRef(_index).toRefVar();
   }
 
@@ -85,7 +85,7 @@ public class ArgObjectGetValue extends Value {
   public Var toVar()
   {
     System.out.println("TO_VAR:");
-    // php/3d52
+    // quercus/3d52
     return _obj.get(_index).toVar();
   }
   */
@@ -95,7 +95,7 @@ public class ArgObjectGetValue extends Value {
    */
   public Value getArgRef(Value index)
   {
-    // php/3d2t
+    // quercus/3d2t
     return _obj.getObject(_env, _index).getArgRef(index);
   }
 

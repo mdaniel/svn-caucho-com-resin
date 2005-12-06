@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.php.env;
+package com.caucho.quercus.env;
 
 import java.io.IOException;
 
@@ -199,7 +199,7 @@ abstract public class ArrayValue extends Value {
     Value value = get(fieldName);
 
     if (value.isset()) {
-      // php/3d52
+      // quercus/3d52
       return value;
     }
     else {

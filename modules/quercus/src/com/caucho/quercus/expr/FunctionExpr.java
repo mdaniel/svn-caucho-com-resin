@@ -27,16 +27,16 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.php.expr;
+package com.caucho.quercus.expr;
 
-import com.caucho.php.Quercus;
-import com.caucho.php.env.Env;
-import com.caucho.php.env.NullValue;
-import com.caucho.php.env.Value;
-import com.caucho.php.gen.PhpWriter;
-import com.caucho.php.program.AbstractFunction;
-import com.caucho.php.program.AnalyzeInfo;
-import com.caucho.php.program.PhpProgram;
+import com.caucho.quercus.Quercus;
+import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.NullValue;
+import com.caucho.quercus.env.Value;
+import com.caucho.quercus.gen.PhpWriter;
+import com.caucho.quercus.program.AbstractFunction;
+import com.caucho.quercus.program.AnalyzeInfo;
+import com.caucho.quercus.program.PhpProgram;
 import com.caucho.util.L10N;
 
 import java.io.IOException;
@@ -52,7 +52,7 @@ public class FunctionExpr extends Expr {
 
   public FunctionExpr(String name, ArrayList<Expr> args)
   {
-    // php/120o
+    // quercus/120o
     _name = name.toLowerCase();
 
     _args = new Expr[args.size()];
@@ -222,9 +222,9 @@ public class FunctionExpr extends Expr {
   public void generateImpl(PhpWriter out, Class retType, boolean isRef)
     throws IOException
   {
-    // Quercus php = out.getPhp();
+    // Quercus quercus = out.getPhp();
 
-    // StaticFunction fun = php.findFunction(_name);
+    // StaticFunction fun = quercus.findFunction(_name);
 
     PhpProgram program = out.getProgram();
 

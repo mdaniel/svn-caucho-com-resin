@@ -27,19 +27,19 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.php.program;
+package com.caucho.quercus.program;
 
 import java.io.IOException;
 
-import com.caucho.php.expr.Expr;
-import com.caucho.php.expr.FunctionExpr;
-import com.caucho.php.expr.NullLiteralExpr;
-import com.caucho.php.expr.DefaultExpr;
+import com.caucho.quercus.expr.Expr;
+import com.caucho.quercus.expr.FunctionExpr;
+import com.caucho.quercus.expr.NullLiteralExpr;
+import com.caucho.quercus.expr.DefaultExpr;
 
-import com.caucho.php.env.Env;
-import com.caucho.php.env.Value;
+import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.Value;
 
-import com.caucho.php.gen.PhpWriter;
+import com.caucho.quercus.gen.PhpWriter;
 
 import com.caucho.util.L10N;
 
@@ -248,7 +248,7 @@ abstract public class AbstractFunction {
     Arg []args = getArgs();
 
     for (int i = 0; i < exprs.length; i++) {
-      // php/0d19
+      // quercus/0d19
       if (i < args.length && args[i].isReference())
 	argValues[i] = exprs[i].evalArg(env);
       else
@@ -323,7 +323,7 @@ abstract public class AbstractFunction {
     Arg []args = getArgs();
 
     for (int i = 0; i < exprs.length; i++) {
-      // php/0d19
+      // quercus/0d19
       if (i < args.length && args[i].isReference())
 	argValues[i] = exprs[i].evalArg(env);
       else

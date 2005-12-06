@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.php.env;
+package com.caucho.quercus.env;
 
 import java.io.IOException;
 
@@ -37,13 +37,13 @@ import com.caucho.util.L10N;
 
 import com.caucho.vfs.WriteStream;
 
-import com.caucho.php.PhpRuntimeException;
+import com.caucho.quercus.PhpRuntimeException;
 
-import com.caucho.php.program.AbstractFunction;
+import com.caucho.quercus.program.AbstractFunction;
 
-import com.caucho.php.gen.PhpWriter;
+import com.caucho.quercus.gen.PhpWriter;
 
-import com.caucho.php.expr.Expr;
+import com.caucho.quercus.expr.Expr;
 
 /**
  * Represents an array-get argument which might be a call to a reference.
@@ -63,7 +63,7 @@ public class ArgGetValue extends Value {
    */
   public Var toRefVar()
   {
-    // php/3d55, php/3d49
+    // quercus/3d55, php/3d49
     return _obj.getArgRef(_index).toRefVar();
   }
 
@@ -80,7 +80,7 @@ public class ArgGetValue extends Value {
    */
   public Var toVar()
   {
-    // php/3d56
+    // quercus/3d56
     return new Var();
   }
 }

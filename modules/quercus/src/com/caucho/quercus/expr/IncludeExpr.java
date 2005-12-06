@@ -27,16 +27,16 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.php.expr;
+package com.caucho.quercus.expr;
 
 import java.io.IOException;
 
 import com.caucho.java.JavaWriter;
 
-import com.caucho.php.env.Env;
-import com.caucho.php.env.NullValue;
-import com.caucho.php.env.Value;
-import com.caucho.php.gen.PhpWriter;
+import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.NullValue;
+import com.caucho.quercus.env.Value;
+import com.caucho.quercus.gen.PhpWriter;
 
 import com.caucho.vfs.Path;
 
@@ -82,7 +82,7 @@ public class IncludeExpr extends UnaryExpr {
     throws IOException
   {
     out.print("env.include(");
-    out.print("_php_selfPath.getParent(), ");
+    out.print("_quercus_selfPath.getParent(), ");
     _expr.generateString(out);
     out.print(", false)");
   }

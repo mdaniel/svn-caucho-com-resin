@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.php.expr;
+package com.caucho.quercus.expr;
 
 import java.io.IOException;
 
@@ -35,22 +35,22 @@ import java.util.ArrayList;
 
 import java.lang.reflect.Method;
 
-import com.caucho.php.Quercus;
+import com.caucho.quercus.Quercus;
 
-import com.caucho.php.gen.PhpWriter;
+import com.caucho.quercus.gen.PhpWriter;
 
-import com.caucho.php.env.Env;
-import com.caucho.php.env.StringValue;
-import com.caucho.php.env.NullThisValue;
-import com.caucho.php.env.Value;
-import com.caucho.php.env.PhpClass;
+import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.NullThisValue;
+import com.caucho.quercus.env.Value;
+import com.caucho.quercus.env.QuercusClass;
 
-import com.caucho.php.module.StaticFunction;
-import com.caucho.php.module.PhpModule;
+import com.caucho.quercus.module.StaticFunction;
+import com.caucho.quercus.module.PhpModule;
 
-import com.caucho.php.program.AbstractFunction;
-import com.caucho.php.program.PhpProgram;
-import com.caucho.php.program.AnalyzeInfo;
+import com.caucho.quercus.program.AbstractFunction;
+import com.caucho.quercus.program.PhpProgram;
+import com.caucho.quercus.program.AnalyzeInfo;
 
 import com.caucho.util.L10N;
 
@@ -112,7 +112,7 @@ public class StaticMethodExpr extends Expr {
     throws Throwable
   {
     if (_fun == null) {
-      PhpClass cl = env.findClass(_className);
+      QuercusClass cl = env.findClass(_className);
 
       if (cl == null) {
         // XXX: change exception
@@ -130,7 +130,7 @@ public class StaticMethodExpr extends Expr {
       _fullArgs = _fun.bindArguments(env, this, _args);
     }
 
-    // php/0953
+    // quercus/0953
     // return _fun.evalMethod(env, NullThisValue.NULL, _fullArgs);
     return _fun.evalMethod(env, env.getThis(), _fullArgs);
   }
@@ -166,7 +166,7 @@ public class StaticMethodExpr extends Expr {
   {
     /*
     PhpProgram program = out.getProgram();
-    PhpClass cl = program.findClass(_className);
+    QuercusClass cl = program.findClass(_className);
     AbstractFunction fun = null;
 
     if (cl != null)
@@ -175,7 +175,7 @@ public class StaticMethodExpr extends Expr {
     if (fun != null) {
       // XXX: check that the null value is okay
       
-      out.print("__php_class_" + _className + "." + _name + "(env, null");
+      out.print("__quercus_class_" + _className + "." + _name + "(env, null");
 
       try {
 	args = fun.bindArguments(null, null, _args);
@@ -196,7 +196,7 @@ public class StaticMethodExpr extends Expr {
     out.print("\").evalMethod(env, ");
 
     if (isMethod())
-      out.print("php_this");
+      out.print("quercus_this");
     else
       out.print("NullThisValue.NULL");
 

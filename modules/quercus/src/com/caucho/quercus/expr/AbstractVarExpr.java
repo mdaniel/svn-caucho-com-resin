@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.php.expr;
+package com.caucho.quercus.expr;
 
 import java.io.IOException;
 
@@ -35,17 +35,17 @@ import java.util.HashSet;
 
 import com.caucho.java.JavaWriter;
 
-import com.caucho.php.env.Env;
-import com.caucho.php.env.NullValue;
-import com.caucho.php.env.Value;
+import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.NullValue;
+import com.caucho.quercus.env.Value;
 
-import com.caucho.php.parser.PhpParser;
+import com.caucho.quercus.parser.PhpParser;
 
-import com.caucho.php.gen.PhpWriter;
+import com.caucho.quercus.gen.PhpWriter;
 
-import com.caucho.php.program.Statement;
-import com.caucho.php.program.AnalyzeInfo;
-import com.caucho.php.program.ExprStatement;
+import com.caucho.quercus.program.Statement;
+import com.caucho.quercus.program.AnalyzeInfo;
+import com.caucho.quercus.program.ExprStatement;
 
 /**
  * Represents an expression that is assignable
@@ -56,7 +56,7 @@ abstract public class AbstractVarExpr extends Expr {
    */
   public void assign(PhpParser parser)
   {
-    // XXX: used by list, e.g. php/03l8.  need further tests
+    // XXX: used by list, e.g. quercus/03l8.  need further tests
   }
 
   /**

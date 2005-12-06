@@ -27,16 +27,16 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.php.module;
+package com.caucho.quercus.module;
 
 import java.util.Map;
 
-import com.caucho.php.env.Value;
-import com.caucho.php.env.StringValue;
-import com.caucho.php.env.VarMap;
+import com.caucho.quercus.env.Value;
+import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.VarMap;
 
 /**
- * Represents a php module.
+ * Represents a quercus module.
  */
 public interface PhpModule {
   public Map<String,Value> getConstMap();
@@ -49,7 +49,7 @@ public interface PhpModule {
   public boolean isExtensionLoaded(String name);
 
   /**
-   * Returns the php.init default values.
+   * Returns the quercus.init default values.
    */
   public Map<String,StringValue> getDefaultIni();
 }

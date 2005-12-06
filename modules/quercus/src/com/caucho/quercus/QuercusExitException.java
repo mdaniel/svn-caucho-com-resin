@@ -27,27 +27,27 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.php;
+package com.caucho.quercus;
 
 /**
- * Parent of PHP runtime exceptions
+ * Exception thrown by die() or exit()
  */
-public class PhpRuntimeException extends RuntimeException {
-  public PhpRuntimeException()
+public class PhpExitException extends PhpRuntimeException {
+  public PhpExitException()
   {
   }
 
-  public PhpRuntimeException(String msg)
+  public PhpExitException(String msg)
   {
     super(msg);
   }
 
-  public PhpRuntimeException(Throwable cause)
+  public PhpExitException(Throwable cause)
   {
     super(cause);
   }
 
-  public PhpRuntimeException(String msg, Throwable cause)
+  public PhpExitException(String msg, Throwable cause)
   {
     super(msg, cause);
   }

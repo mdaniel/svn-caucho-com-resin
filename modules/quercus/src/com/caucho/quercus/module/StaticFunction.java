@@ -27,18 +27,18 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.php.module;
+package com.caucho.quercus.module;
 
-import com.caucho.php.Quercus;
+import com.caucho.quercus.Quercus;
 
-import com.caucho.php.env.Env;
-import com.caucho.php.env.Value;
-import com.caucho.php.expr.DefaultExpr;
-import com.caucho.php.expr.Expr;
-import com.caucho.php.expr.NullLiteralExpr;
-import com.caucho.php.gen.PhpWriter;
-import com.caucho.php.parser.PhpParser;
-import com.caucho.php.program.AbstractFunction;
+import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.Value;
+import com.caucho.quercus.expr.DefaultExpr;
+import com.caucho.quercus.expr.Expr;
+import com.caucho.quercus.expr.NullLiteralExpr;
+import com.caucho.quercus.gen.PhpWriter;
+import com.caucho.quercus.parser.PhpParser;
+import com.caucho.quercus.program.AbstractFunction;
 import com.caucho.util.L10N;
 
 import java.io.IOException;
@@ -53,7 +53,7 @@ import java.lang.reflect.Modifier;
 public class StaticFunction extends AbstractFunction {
   private static final L10N L = new L10N(StaticFunction.class);
 
-  private final PhpModule _phpModule;
+  private final PhpModule _quercusModule;
 
   private final Method _method;
   private final Class []_paramTypes;
@@ -71,9 +71,9 @@ public class StaticFunction extends AbstractFunction {
    *
    * @param method the introspected method.
    */
-  public StaticFunction(Quercus quercus, PhpModule phpModule, Method method)
+  public StaticFunction(Quercus quercus, PhpModule quercusModule, Method method)
   {
-    _phpModule = phpModule;
+    _quercusModule = phpModule;
     _method = method;
     
     boolean callUsesVariableArgs = false;
@@ -164,7 +164,7 @@ public class StaticFunction extends AbstractFunction {
    */
   public PhpModule getModule()
   {
-    return _phpModule;
+    return _quercusModule;
   }
 
   /**
@@ -344,7 +344,7 @@ public class StaticFunction extends AbstractFunction {
     }
 
     try {
-      Object result = _method.invoke(_phpModule, values);
+      Object result = _method.invoke(_quercusModule, values);
 
       return _unmarshallReturn.unmarshall(env, result);
     } catch (InvocationTargetException e) {
@@ -358,7 +358,7 @@ public class StaticFunction extends AbstractFunction {
   /**
    * Evalutes the function.
    */
-  public Value eval(Env env, Value []phpArgs)
+  public Value eval(Env env, Value []quercusArgs)
     throws Throwable
   {
     int len = _paramTypes.length;
@@ -371,11 +371,11 @@ public class StaticFunction extends AbstractFunction {
       javaArgs[k++] = env;
 
     int sublen = _marshallArgs.length;
-    if (phpArgs.length < sublen)
-      sublen = phpArgs.length;
+    if (quercusArgs.length < sublen)
+      sublen = quercusArgs.length;
 
     for (int i = 0; i < sublen; i++) {
-      javaArgs[k] = _marshallArgs[i].marshall(env, phpArgs[i], _paramTypes[k]);
+      javaArgs[k] = _marshallArgs[i].marshall(env, quercusArgs[i], _paramTypes[k]);
 
       k++;
     }
@@ -390,16 +390,16 @@ public class StaticFunction extends AbstractFunction {
     }
     
     if (_hasRestArgs) {
-      Value []rest = new Value[phpArgs.length - _marshallArgs.length];
+      Value []rest = new Value[quercusArgs.length - _marshallArgs.length];
 
-      for (int i = _marshallArgs.length; i < phpArgs.length; i++) {
-	rest[i - _marshallArgs.length] = phpArgs[i];
+      for (int i = _marshallArgs.length; i < quercusArgs.length; i++) {
+	rest[i - _marshallArgs.length] = quercusArgs[i];
       }
 
       javaArgs[k++] = rest;
     }
     
-    Object result = _method.invoke(_phpModule, javaArgs);
+    Object result = _method.invoke(_quercusModule, javaArgs);
 
     return _unmarshallReturn.unmarshall(env, result);
   }
@@ -498,7 +498,7 @@ public class StaticFunction extends AbstractFunction {
   private void generateImpl(PhpWriter out, Expr funExpr, Expr []args)
     throws IOException
   {
-    String var = out.addModule(_phpModule);
+    String var = out.addModule(_quercusModule);
     
     if (Modifier.isStatic(_method.getModifiers()))
       out.print(_method.getDeclaringClass().getName());

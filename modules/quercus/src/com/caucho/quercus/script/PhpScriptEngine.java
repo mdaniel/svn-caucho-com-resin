@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.php.script;
+package com.caucho.quercus.script;
 
 import java.io.Reader;
 
@@ -39,10 +39,10 @@ import javax.script.ScriptEngineFactory;
 import javax.script.SimpleNamespace;
 import javax.script.ScriptException;
 
-import com.caucho.php.parser.PhpParser;
+import com.caucho.quercus.parser.PhpParser;
 
-import com.caucho.php.program.PhpProgram;
-import com.caucho.php.Quercus;
+import com.caucho.quercus.program.PhpProgram;
+import com.caucho.quercus.Quercus;
 
 /**
  * Script engine factory

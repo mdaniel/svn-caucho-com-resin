@@ -27,13 +27,13 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.php.env;
+package com.caucho.quercus.env;
 
 import java.io.IOException;
 
 import com.caucho.vfs.WriteStream;
 
-import com.caucho.php.gen.PhpWriter;
+import com.caucho.quercus.gen.PhpWriter;
 
 /**
  * Represents a PHP default value.
@@ -112,7 +112,7 @@ public class DefaultValue extends NullValue {
   public void generate(PhpWriter out)
     throws IOException
   {
-    out.print("com.caucho.php.env.DefaultValue.DEFAULT");
+    out.print("com.caucho.quercus.env.DefaultValue.DEFAULT");
   }
 }
 

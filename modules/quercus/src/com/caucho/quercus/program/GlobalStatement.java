@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.php.program;
+package com.caucho.quercus.program;
 
 import java.io.IOException;
 
@@ -35,14 +35,14 @@ import java.util.HashSet;
 
 import com.caucho.java.JavaWriter;
 
-import com.caucho.php.env.Env;
-import com.caucho.php.env.Value;
+import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.Value;
 
-import com.caucho.php.expr.Expr;
-import com.caucho.php.expr.VarExpr;
-import com.caucho.php.expr.VarState;
+import com.caucho.quercus.expr.Expr;
+import com.caucho.quercus.expr.VarExpr;
+import com.caucho.quercus.expr.VarState;
 
-import com.caucho.php.gen.PhpWriter;
+import com.caucho.quercus.gen.PhpWriter;
 
 import com.caucho.vfs.WriteStream;
 

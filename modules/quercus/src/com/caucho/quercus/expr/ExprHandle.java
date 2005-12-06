@@ -27,9 +27,9 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.php.expr;
+package com.caucho.quercus.expr;
 
-import com.caucho.php.program.StatementHandle;
+import com.caucho.quercus.program.StatementHandle;
 
 /**
  * A handle to a top expression

@@ -27,13 +27,13 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.php.env;
+package com.caucho.quercus.env;
 
 import java.io.IOException;
 
 import com.caucho.vfs.WriteStream;
 
-import com.caucho.php.gen.PhpWriter;
+import com.caucho.quercus.gen.PhpWriter;
 
 /**
  * Represents a PHP double value.
@@ -255,7 +255,7 @@ public class DoubleValue extends Value {
   public void generate(PhpWriter out)
     throws IOException
   {
-    out.print("new com.caucho.php.env.DoubleValue(" + _value + ")");
+    out.print("new com.caucho.quercus.env.DoubleValue(" + _value + ")");
   }
 
   /**

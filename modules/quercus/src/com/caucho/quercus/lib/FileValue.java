@@ -27,16 +27,16 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.php.lib;
+package com.caucho.quercus.lib;
 
 import java.io.IOException;
 
 import com.caucho.vfs.Path;
 
-import com.caucho.php.env.ResourceValue;
-import com.caucho.php.env.Env;
+import com.caucho.quercus.env.ResourceValue;
+import com.caucho.quercus.env.Env;
 
-import com.caucho.php.resources.StreamResource;
+import com.caucho.quercus.resources.StreamResource;
 
 /**
  * Represents a PHP open file

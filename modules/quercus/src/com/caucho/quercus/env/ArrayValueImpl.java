@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.php.env;
+package com.caucho.quercus.env;
 
 import java.io.IOException;
 
@@ -92,7 +92,7 @@ public class ArrayValueImpl extends ArrayValue {
     this();
 
     for (Entry ptr = copy.getHead(); ptr != null; ptr = ptr._next) {
-      // php/0662 for copy
+      // quercus/0662 for copy
       put(ptr.getKey(), ptr.getRawValue().copy());
     }
   }
@@ -231,7 +231,7 @@ public class ArrayValueImpl extends ArrayValue {
   {
     Entry entry = createEntry(key);
 
-    // php/0434
+    // quercus/0434
     Value oldValue = entry.getRawValue();
     
     if (oldValue instanceof Var && ! (value instanceof Var)) {
@@ -292,11 +292,11 @@ public class ArrayValueImpl extends ArrayValue {
     Entry entry = getEntry(index);
 
     if (entry != null) {
-      // php/3d48
+      // quercus/3d48
       return entry;
     }
     else {
-      // php/3d49
+      // quercus/3d49
       return new ArgGetValue(this, index);
     }
   }
@@ -327,7 +327,7 @@ public class ArrayValueImpl extends ArrayValue {
     Value value = get(fieldName);
 
     if (value.isset()) {
-      // php/3d52
+      // quercus/3d52
       return value;
     }
     else {
@@ -409,7 +409,7 @@ public class ArrayValueImpl extends ArrayValue {
       else if (entry.isDeleted()) {
       }
       else if (key.equals(entry.getKey())) {
-	return entry.getValue(); // php/39a1
+	return entry.getValue(); // quercus/39a1
       }
 
       hash = (hash + 1) & hashMask;
@@ -513,7 +513,7 @@ public class ArrayValueImpl extends ArrayValue {
   public Var getRef(Value index)
   {
     Entry entry = createEntry(index);
-    // php/0431
+    // quercus/0431
     Value value = entry.getRawValue();
 
     if (value instanceof Var)

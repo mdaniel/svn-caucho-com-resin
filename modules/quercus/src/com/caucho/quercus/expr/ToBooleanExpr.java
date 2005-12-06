@@ -27,17 +27,17 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.php.expr;
+package com.caucho.quercus.expr;
 
 import java.io.IOException;
 
 import com.caucho.java.JavaWriter;
 
-import com.caucho.php.env.Env;
-import com.caucho.php.env.BooleanValue;
-import com.caucho.php.env.StringValue;
-import com.caucho.php.env.Value;
-import com.caucho.php.gen.PhpWriter;
+import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.BooleanValue;
+import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.Value;
+import com.caucho.quercus.gen.PhpWriter;
 
 /**
  * Converts to a boolean
@@ -77,7 +77,7 @@ public class ToBooleanExpr extends UnaryExpr {
     
     _expr.generateBoolean(out);
 
-    out.print(" ? com.caucho.php.env.BooleanValue.TRUE : com.caucho.php.env.BooleanValue.FALSE)");
+    out.print(" ? com.caucho.quercus.env.BooleanValue.TRUE : com.caucho.php.env.BooleanValue.FALSE)");
   }
 
   /**
@@ -99,7 +99,7 @@ public class ToBooleanExpr extends UnaryExpr {
   public void generateExpr(PhpWriter out)
     throws IOException
   {
-    out.print("new com.caucho.php.expr.ToBooleanExpr(");
+    out.print("new com.caucho.quercus.expr.ToBooleanExpr(");
     _expr.generateExpr(out);
     out.print(")");
   }

@@ -27,17 +27,17 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.php.expr;
+package com.caucho.quercus.expr;
 
 import java.io.IOException;
 
-import com.caucho.php.env.Env;
-import com.caucho.php.env.NullValue;
-import com.caucho.php.env.Value;
+import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.NullValue;
+import com.caucho.quercus.env.Value;
 
-import com.caucho.php.gen.PhpWriter;
+import com.caucho.quercus.gen.PhpWriter;
 
-import com.caucho.php.program.AnalyzeInfo;
+import com.caucho.quercus.program.AnalyzeInfo;
 
 /**
  * Represents a PHP null expression.
@@ -99,7 +99,7 @@ public class NullLiteralExpr extends Expr {
   public void generate(PhpWriter out)
     throws IOException
   {
-    out.print("com.caucho.php.env.NullValue.NULL");
+    out.print("com.caucho.quercus.env.NullValue.NULL");
   }
 
   /**
@@ -110,7 +110,7 @@ public class NullLiteralExpr extends Expr {
   public void generateExpr(PhpWriter out)
     throws IOException
   {
-    out.print("com.caucho.php.expr.NullLiteralExpr.NULL");
+    out.print("com.caucho.quercus.expr.NullLiteralExpr.NULL");
   }
   
   public String toString()

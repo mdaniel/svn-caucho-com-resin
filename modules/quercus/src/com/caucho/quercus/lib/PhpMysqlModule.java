@@ -27,13 +27,13 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.php.lib;
+package com.caucho.quercus.lib;
 
-import com.caucho.php.env.*;
-import com.caucho.php.module.AbstractPhpModule;
-import com.caucho.php.module.Optional;
-import com.caucho.php.resources.JdbcConnectionResource;
-import com.caucho.php.resources.JdbcResultResource;
+import com.caucho.quercus.env.*;
+import com.caucho.quercus.module.AbstractPhpModule;
+import com.caucho.quercus.module.Optional;
+import com.caucho.quercus.resources.JdbcConnectionResource;
+import com.caucho.quercus.resources.JdbcResultResource;
 import com.caucho.util.L10N;
 import com.caucho.util.Log;
 
@@ -462,7 +462,7 @@ public class PhpMysqlModule extends AbstractPhpModule {
     if (nameV == BooleanValue.FALSE) {
       // XXX: may need to include some field from resultV in string
       // passed to warning.  Left out because of number following @
-      // ie: com.caucho.php.resources.JdbcResultResource@1148603
+      // ie: com.caucho.quercus.resources.JdbcResultResource@1148603
       env.warning(L.l("Field {0} is invalid for MySQL", fieldOffset));
     }
 
@@ -500,7 +500,7 @@ public class PhpMysqlModule extends AbstractPhpModule {
     if (nameV == BooleanValue.FALSE) {
       // XXX: may need to include some field from resultV in string
       // passed to warning.  Left out because of number following @
-      // ie: com.caucho.php.resources.JdbcResultResource@1148603
+      // ie: com.caucho.quercus.resources.JdbcResultResource@1148603
       env.warning("Field " + fieldOffset + " is invalid for MySQL");
     }
 
@@ -523,7 +523,7 @@ public class PhpMysqlModule extends AbstractPhpModule {
     if (nameV == BooleanValue.FALSE) {
       // XXX: may need to include some field from resultV in string
       // passed to warning.  Left out because of number following @
-      // ie: com.caucho.php.resources.JdbcResultResource@1148603
+      // ie: com.caucho.quercus.resources.JdbcResultResource@1148603
       env.warning("Field " + fieldOffset + " is invalid for MySQL");
     }
 
@@ -558,7 +558,7 @@ public class PhpMysqlModule extends AbstractPhpModule {
       if (result == BooleanValue.FALSE) {
         // XXX: may need to include some field from resultV in string
         // passed to warning.  Left out because of number following @
-        // ie: com.caucho.php.resources.JdbcResultResource@1148603
+        // ie: com.caucho.quercus.resources.JdbcResultResource@1148603
         env.warning("Field " + fieldOffset + " is invalid for MySQL");
       }
     }

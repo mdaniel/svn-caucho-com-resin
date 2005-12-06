@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.php.gen;
+package com.caucho.quercus.gen;
 
 import java.io.IOException;
 
@@ -39,16 +39,16 @@ import com.caucho.java.JavaWriter;
 
 import com.caucho.java.gen.JavaWriterWrapper;
 
-import com.caucho.php.Quercus;
+import com.caucho.quercus.Quercus;
 
-import com.caucho.php.env.Value;
+import com.caucho.quercus.env.Value;
 
-import com.caucho.php.expr.Expr;
+import com.caucho.quercus.expr.Expr;
 
-import com.caucho.php.module.PhpModule;
+import com.caucho.quercus.module.PhpModule;
 
-import com.caucho.php.program.InterpretedClassDef;
-import com.caucho.php.program.PhpProgram;
+import com.caucho.quercus.program.InterpretedClassDef;
+import com.caucho.quercus.program.PhpProgram;
   
 /**
  * Writer which gathers additional info.
@@ -158,7 +158,7 @@ public class PhpWriter extends JavaWriterWrapper {
     String var = _valueMap.get(value);
 
     if (var == null) {
-      var = "_php_value_" + generateId();
+      var = "_quercus_value_" + generateId();
 
       _valueMap.put(value, var);
     }
@@ -186,7 +186,7 @@ public class PhpWriter extends JavaWriterWrapper {
     String var = _exprMap.get(expr);
 
     if (var == null) {
-      var = "_php_expr_" + generateId();
+      var = "_quercus_expr_" + generateId();
 
       _exprMap.put(expr, var);
     }
@@ -204,7 +204,7 @@ public class PhpWriter extends JavaWriterWrapper {
     String var = _exprArrayMap.get(exprArray);
 
     if (var == null) {
-      var = "_php_expr_" + generateId();
+      var = "_quercus_expr_" + generateId();
 
       _exprArrayMap.put(exprArray, var);
     }
@@ -222,7 +222,7 @@ public class PhpWriter extends JavaWriterWrapper {
     String var = _moduleMap.get(module);
 
     if (var == null) {
-      var = "_php_module_" + generateId();
+      var = "_quercus_module_" + generateId();
 
       _moduleMap.put(module, var);
     }
@@ -235,7 +235,7 @@ public class PhpWriter extends JavaWriterWrapper {
    */
   public String createStaticVar()
   {
-    String varName = "__php_static_" + _staticVarList.size();
+    String varName = "__quercus_static_" + _staticVarList.size();
     
     _staticVarList.add(varName);
 
@@ -255,7 +255,7 @@ public class PhpWriter extends JavaWriterWrapper {
       Expr expr = entry.getKey();
       String var = entry.getValue();
 
-      println("private static final com.caucho.php.expr.Expr " + var);
+      println("private static final com.caucho.quercus.expr.Expr " + var);
       print("  = ");
       expr.generateExpr(this);
       println(";");
@@ -268,7 +268,7 @@ public class PhpWriter extends JavaWriterWrapper {
       Expr []exprArray = entry.getKey();
       String var = entry.getValue();
 
-      println("private static final com.caucho.php.expr.Expr []" + var);
+      println("private static final com.caucho.quercus.expr.Expr []" + var);
       print("  = new Expr[] {");
 
       for (int i = 0; i < exprArray.length; i++) {
@@ -287,7 +287,7 @@ public class PhpWriter extends JavaWriterWrapper {
       Value value = entry.getKey();
       String var = entry.getValue();
 
-      println("private static final com.caucho.php.env.Value " + var);
+      println("private static final com.caucho.quercus.env.Value " + var);
       print("  = ");
       value.generate(this);
       println(";");
@@ -309,7 +309,7 @@ public class PhpWriter extends JavaWriterWrapper {
       String name = cl.getName();
 
       println();
-      println("static final php_" + name + " __php_class_" + name + " = new php_" + name + "();");
+      println("static final quercus_" + name + " __php_class_" + name + " = new php_" + name + "();");
     }
 
     for (int i = 0; i < _staticVarList.size(); i++) {
@@ -317,7 +317,7 @@ public class PhpWriter extends JavaWriterWrapper {
     }
 
     println();
-    println("public void init(com.caucho.php.Quercus php)");
+    println("public void init(com.caucho.quercus.Quercus php)");
     println("{");
     pushDepth();
     
@@ -327,11 +327,11 @@ public class PhpWriter extends JavaWriterWrapper {
 
       String moduleClass = module.getClass().getName();
 
-      println(var + " = (" + moduleClass + ") php.findModule(\"" + moduleClass + "\");");
+      println(var + " = (" + moduleClass + ") quercus.findModule(\"" + moduleClass + "\");");
     }
 
     for (int i = 0; i < _staticVarList.size(); i++) {
-      println(_staticVarList.get(i) + " = php.createStaticName();");
+      println(_staticVarList.get(i) + " = quercus.createStaticName();");
     }
 
     println("initFunctions();");

@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.php.env;
+package com.caucho.quercus.env;
 
 import java.io.IOException;
 
@@ -38,13 +38,13 @@ import com.caucho.util.L10N;
 
 import com.caucho.vfs.WriteStream;
 
-import com.caucho.php.PhpRuntimeException;
+import com.caucho.quercus.PhpRuntimeException;
 
-import com.caucho.php.program.AbstractFunction;
+import com.caucho.quercus.program.AbstractFunction;
 
-import com.caucho.php.gen.PhpWriter;
+import com.caucho.quercus.gen.PhpWriter;
 
-import com.caucho.php.expr.Expr;
+import com.caucho.quercus.expr.Expr;
 
 /**
  * Represents a PHP expression value.
@@ -911,7 +911,7 @@ abstract public class Value {
    */
   public Value getArgObject(Env env)
   {
-    // php/399l
+    // quercus/399l
     return getObject(env);
   }
 
@@ -1037,7 +1037,7 @@ abstract public class Value {
     // XXX: remove when done
     System.out.println("Generate: " + getClass().getName());
     
-    out.print("com.caucho.php.env.NullValue.NULL");
+    out.print("com.caucho.quercus.env.NullValue.NULL");
   }
 }
 

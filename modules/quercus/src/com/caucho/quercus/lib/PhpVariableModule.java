@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.php.lib;
+package com.caucho.quercus.lib;
 
 import java.io.IOException;
 
@@ -40,12 +40,12 @@ import com.caucho.util.L10N;
 import com.caucho.vfs.Vfs;
 import com.caucho.vfs.ReadStream;
 
-import com.caucho.php.module.AbstractPhpModule;
-import com.caucho.php.module.Optional;
-import com.caucho.php.module.Reference;
-import com.caucho.php.module.UsesSymbolTable;
+import com.caucho.quercus.module.AbstractPhpModule;
+import com.caucho.quercus.module.Optional;
+import com.caucho.quercus.module.Reference;
+import com.caucho.quercus.module.UsesSymbolTable;
 
-import com.caucho.php.env.*;
+import com.caucho.quercus.env.*;
 
 import com.caucho.vfs.WriteStream;
 
@@ -71,7 +71,7 @@ public class PhpVariableModule extends AbstractPhpModule {
   /**
    * Returns a constant
    *
-   * @param env the php calling environment
+   * @param env the quercus calling environment
    * @param name the constant name
    */
   public static Value constant(Env env, String name)
@@ -83,7 +83,7 @@ public class PhpVariableModule extends AbstractPhpModule {
   /**
    * Prints a debug version of the variable
    *
-   * @param env the php calling environment
+   * @param env the quercus calling environment
    * @param v the variable to print
    * @return the escaped stringPhp
    */
@@ -98,7 +98,7 @@ public class PhpVariableModule extends AbstractPhpModule {
   /**
    * Prints a debug version of the variable
    *
-   * @param env the php calling environment
+   * @param env the quercus calling environment
    * @param v the variable to print
    * @return the escaped stringPhp
    */
@@ -119,7 +119,7 @@ public class PhpVariableModule extends AbstractPhpModule {
   /**
    * Prints a debug version of the variable
    *
-   * @param env the php calling environment
+   * @param env the quercus calling environment
    * @param v the variable to print
    * @return the escaped stringPhp
    */
@@ -246,7 +246,7 @@ public class PhpVariableModule extends AbstractPhpModule {
   /**
    * Defines a constant
    *
-   * @param env the php calling environment
+   * @param env the quercus calling environment
    * @param nameV the constant name
    * @param value the constant value
    */
@@ -259,7 +259,7 @@ public class PhpVariableModule extends AbstractPhpModule {
   /**
    * Returns true if the constant is defined.
    *
-   * @param env the php calling environment
+   * @param env the quercus calling environment
    * @param name the constant name
    */
   public static boolean defined(Env env, String name)
@@ -483,7 +483,7 @@ public class PhpVariableModule extends AbstractPhpModule {
   /**
    * Converts to a string
    *
-   * @param env the php calling environment
+   * @param env the quercus calling environment
    * @param v the variable to convert
    * @return the double value
    */
@@ -512,7 +512,7 @@ public class PhpVariableModule extends AbstractPhpModule {
   /**
    * Escapes a string using C syntax.
    *
-   * @param env the php calling environment
+   * @param env the quercus calling environment
    * @param v the variable to print
    * @return the escaped stringPhp
    */

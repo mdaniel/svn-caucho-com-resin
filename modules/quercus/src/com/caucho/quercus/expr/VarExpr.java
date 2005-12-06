@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.php.expr;
+package com.caucho.quercus.expr;
 
 import java.io.IOException;
 
@@ -35,19 +35,19 @@ import java.util.HashSet;
 
 import com.caucho.java.JavaWriter;
 
-import com.caucho.php.env.Env;
-import com.caucho.php.env.NullValue;
-import com.caucho.php.env.Value;
-import com.caucho.php.env.ArrayValue;
-import com.caucho.php.env.ArrayValueImpl;
+import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.NullValue;
+import com.caucho.quercus.env.Value;
+import com.caucho.quercus.env.ArrayValue;
+import com.caucho.quercus.env.ArrayValueImpl;
 
-import com.caucho.php.gen.PhpWriter;
+import com.caucho.quercus.gen.PhpWriter;
 
-import com.caucho.php.parser.PhpParser;
+import com.caucho.quercus.parser.PhpParser;
 
-import com.caucho.php.program.Statement;
-import com.caucho.php.program.AnalyzeInfo;
-import com.caucho.php.program.ExprStatement;
+import com.caucho.quercus.program.Statement;
+import com.caucho.quercus.program.AnalyzeInfo;
+import com.caucho.quercus.program.ExprStatement;
 
 /**
  * Represents a PHP variable expression.
@@ -250,8 +250,8 @@ public class VarExpr extends AbstractVarExpr {
   public Value evalArg(Env env)
     throws Throwable
   {
-    // php/043k
-    // php/0443
+    // quercus/043k
+    // quercus/0443
     
     if (getVarInfo().isGlobal())
       return env.getGlobalVar(_name);
@@ -336,7 +336,7 @@ public class VarExpr extends AbstractVarExpr {
       infoVar = infoVar.analyzeVarState(VarState.VALID);
     }
     else {
-      // php/3a0v
+      // quercus/3a0v
       setVarState(VarState.UNKNOWN);
       
       infoVar = infoVar.analyzeVarState(VarState.VALID);
@@ -529,7 +529,7 @@ public class VarExpr extends AbstractVarExpr {
     value.generate(out);
     out.print(")");
 
-    // php/344l
+    // quercus/344l
     if (! isTop)
       out.print(".copy()");
   }

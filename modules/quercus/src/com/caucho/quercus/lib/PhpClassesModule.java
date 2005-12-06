@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.php.lib;
+package com.caucho.quercus.lib;
 
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -41,27 +41,27 @@ import java.util.logging.Logger;
 import com.caucho.util.L10N;
 import com.caucho.util.RandomUtil;
 
-import com.caucho.php.Quercus;
+import com.caucho.quercus.Quercus;
 
-import com.caucho.php.module.PhpModule;
-import com.caucho.php.module.AbstractPhpModule;
-import com.caucho.php.module.Optional;
+import com.caucho.quercus.module.PhpModule;
+import com.caucho.quercus.module.AbstractPhpModule;
+import com.caucho.quercus.module.Optional;
 
-import com.caucho.php.env.Value;
-import com.caucho.php.env.Env;
-import com.caucho.php.env.NullValue;
-import com.caucho.php.env.BooleanValue;
-import com.caucho.php.env.ArrayValue;
-import com.caucho.php.env.ArrayValueImpl;
-import com.caucho.php.env.LongValue;
-import com.caucho.php.env.DoubleValue;
-import com.caucho.php.env.StringValue;
-import com.caucho.php.env.VarMap;
-import com.caucho.php.env.ObjectValue;
-import com.caucho.php.env.ChainedMap;
-import com.caucho.php.env.ResourceValue;
+import com.caucho.quercus.env.Value;
+import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.NullValue;
+import com.caucho.quercus.env.BooleanValue;
+import com.caucho.quercus.env.ArrayValue;
+import com.caucho.quercus.env.ArrayValueImpl;
+import com.caucho.quercus.env.LongValue;
+import com.caucho.quercus.env.DoubleValue;
+import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.VarMap;
+import com.caucho.quercus.env.ObjectValue;
+import com.caucho.quercus.env.ChainedMap;
+import com.caucho.quercus.env.ResourceValue;
 
-import com.caucho.php.program.PhpProgram;
+import com.caucho.quercus.program.PhpProgram;
 
 import com.caucho.vfs.WriteStream;
 

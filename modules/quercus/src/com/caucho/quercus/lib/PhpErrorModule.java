@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.php.lib;
+package com.caucho.quercus.lib;
 
 import java.io.IOException;
 
@@ -38,25 +38,25 @@ import java.util.logging.Logger;
 
 import com.caucho.util.L10N;
 
-import com.caucho.php.PhpExitException;
+import com.caucho.quercus.PhpExitException;
 
-import com.caucho.php.env.Value;
-import com.caucho.php.env.Env;
-import com.caucho.php.env.NullValue;
-import com.caucho.php.env.BooleanValue;
-import com.caucho.php.env.DoubleValue;
-import com.caucho.php.env.LongValue;
-import com.caucho.php.env.StringValue;
-import com.caucho.php.env.ArrayValue;
-import com.caucho.php.env.ResourceValue;
-import com.caucho.php.env.VarMap;
-import com.caucho.php.env.ChainedMap;
-import com.caucho.php.env.DefaultValue;
-import com.caucho.php.env.Callback;
+import com.caucho.quercus.env.Value;
+import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.NullValue;
+import com.caucho.quercus.env.BooleanValue;
+import com.caucho.quercus.env.DoubleValue;
+import com.caucho.quercus.env.LongValue;
+import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.ArrayValue;
+import com.caucho.quercus.env.ResourceValue;
+import com.caucho.quercus.env.VarMap;
+import com.caucho.quercus.env.ChainedMap;
+import com.caucho.quercus.env.DefaultValue;
+import com.caucho.quercus.env.Callback;
 
-import com.caucho.php.module.PhpModule;
-import com.caucho.php.module.AbstractPhpModule;
-import com.caucho.php.module.Optional;
+import com.caucho.quercus.module.PhpModule;
+import com.caucho.quercus.module.AbstractPhpModule;
+import com.caucho.quercus.module.Optional;
 
 import com.caucho.vfs.WriteStream;
 
@@ -172,7 +172,7 @@ public class PhpErrorModule extends AbstractPhpModule {
   /**
    * Sets an error handler
    *
-   * @param env the php environment
+   * @param env the quercus environment
    * @param fun the error handler
    * @param code errorMask error level
    */
@@ -189,7 +189,7 @@ public class PhpErrorModule extends AbstractPhpModule {
   /**
    * Triggers an error.
    *
-   * @param env the php environment
+   * @param env the quercus environment
    * @param msg the error message
    * @param code the error level
    */
@@ -222,7 +222,7 @@ public class PhpErrorModule extends AbstractPhpModule {
   /**
    * Triggers an error.
    *
-   * @param env the php environment
+   * @param env the quercus environment
    * @param msg the error message
    * @param code the error level
    */

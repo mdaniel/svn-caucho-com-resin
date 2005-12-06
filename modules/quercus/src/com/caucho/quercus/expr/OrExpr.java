@@ -27,19 +27,19 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.php.expr;
+package com.caucho.quercus.expr;
 
 import java.io.IOException;
 
 import com.caucho.java.JavaWriter;
 
-import com.caucho.php.env.Env;
-import com.caucho.php.env.Value;
-import com.caucho.php.env.BooleanValue;
+import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.Value;
+import com.caucho.quercus.env.BooleanValue;
 
-import com.caucho.php.gen.PhpWriter;
+import com.caucho.quercus.gen.PhpWriter;
 
-import com.caucho.php.program.AnalyzeInfo;
+import com.caucho.quercus.program.AnalyzeInfo;
 
 /**
  * Represents a logical or expression.
@@ -96,7 +96,7 @@ public class OrExpr extends BinaryExpr {
    */
   public void analyze(AnalyzeInfo info)
   {
-    // php/3a0z
+    // quercus/3a0z
     _left.analyze(info);
 
     AnalyzeInfo copy = info.copy();
@@ -142,7 +142,7 @@ public class OrExpr extends BinaryExpr {
   public void generateExpr(PhpWriter out)
     throws IOException
   {
-    out.print("new com.caucho.php.expr.OrExpr(");
+    out.print("new com.caucho.quercus.expr.OrExpr(");
     _left.generateExpr(out);
     out.print(", ");
     _right.generateExpr(out);

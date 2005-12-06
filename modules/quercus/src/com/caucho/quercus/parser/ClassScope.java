@@ -27,18 +27,18 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.php.parser;
+package com.caucho.quercus.parser;
 
 import com.caucho.util.L10N;
 
-import com.caucho.php.env.PhpClass;
-import com.caucho.php.env.Value;
-import com.caucho.php.env.StringValue;
+import com.caucho.quercus.env.QuercusClass;
+import com.caucho.quercus.env.Value;
+import com.caucho.quercus.env.StringValue;
 
-import com.caucho.php.expr.Expr;
+import com.caucho.quercus.expr.Expr;
 
-import com.caucho.php.program.Function;
-import com.caucho.php.program.InterpretedClassDef;
+import com.caucho.quercus.program.Function;
+import com.caucho.quercus.program.InterpretedClassDef;
 
 /**
  * Class parse scope.

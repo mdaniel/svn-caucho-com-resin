@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.php.env;
+package com.caucho.quercus.env;
 
 import java.io.IOException;
 
@@ -62,19 +62,19 @@ import com.caucho.util.L10N;
 import com.caucho.util.IntMap;
 import com.caucho.util.Alarm;
 
-import com.caucho.php.Quercus;
-import com.caucho.php.PhpRuntimeException;
-import com.caucho.php.PhpExitException;
+import com.caucho.quercus.Quercus;
+import com.caucho.quercus.PhpRuntimeException;
+import com.caucho.quercus.PhpExitException;
 
-import com.caucho.php.expr.Expr;
+import com.caucho.quercus.expr.Expr;
 
-import com.caucho.php.page.PhpPage;
+import com.caucho.quercus.page.PhpPage;
 
-import com.caucho.php.program.AbstractFunction;
-import com.caucho.php.program.AbstractClassDef;
-import com.caucho.php.program.PhpProgram;
+import com.caucho.quercus.program.AbstractFunction;
+import com.caucho.quercus.program.AbstractClassDef;
+import com.caucho.quercus.program.PhpProgram;
 
-import com.caucho.php.resources.StreamContextResource;
+import com.caucho.quercus.resources.StreamContextResource;
 
 /**
  * Represents the PHP environment.
@@ -1620,7 +1620,7 @@ public class Env {
     throws Throwable
   {
     /*
-    PhpClass oldClass = findClass(name);
+    QuercusClass oldClass = findClass(name);
 
     if (oldClass != null) {
       throw new Exception(L.l("can't redefine function {0}", name));
@@ -1729,7 +1729,7 @@ public class Env {
   private PhpClass findClassImpl(String name)
   {
     /*
-    PhpClass cl = null;
+    QuercusClass cl = null;
 
     cl = _quercus.findClass(name);
     if (cl != null)

@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.php.env;
+package com.caucho.quercus.env;
 
 import java.io.IOException;
 
@@ -35,9 +35,9 @@ import java.util.Collection;
 
 import com.caucho.vfs.WriteStream;
 
-import com.caucho.php.expr.Expr;
+import com.caucho.quercus.expr.Expr;
 
-import com.caucho.php.program.AbstractFunction;
+import com.caucho.quercus.program.AbstractFunction;
 
 /**
  * Represents a reference to a PHP variable in a function call.
@@ -145,7 +145,7 @@ public class RefVar extends Value {
    */
   public Value copy()
   {
-    // php/0d05
+    // quercus/0d05
     return this;
   }
   

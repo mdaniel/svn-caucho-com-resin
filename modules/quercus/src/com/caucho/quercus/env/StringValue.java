@@ -27,13 +27,13 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.php.env;
+package com.caucho.quercus.env;
 
 import java.io.IOException;
 
 import com.caucho.vfs.WriteStream;
 
-import com.caucho.php.gen.PhpWriter;
+import com.caucho.quercus.gen.PhpWriter;
 
 /**
  * Represents a PHP string value.
@@ -453,7 +453,7 @@ public class StringValue extends Value {
   public void generate(PhpWriter out)
     throws IOException
   {
-    out.print("new com.caucho.php.env.StringValue(\"");
+    out.print("new com.caucho.quercus.env.StringValue(\"");
     out.printJavaString(_value);
     out.print("\")");
   }

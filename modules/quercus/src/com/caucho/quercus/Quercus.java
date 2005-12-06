@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.php;
+package com.caucho.quercus;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -50,30 +50,30 @@ import javax.sql.DataSource;
 
 import com.caucho.config.ConfigException;
 
-import com.caucho.php.env.Value;
-import com.caucho.php.env.StringValue;
-import com.caucho.php.env.NullValue;
-import com.caucho.php.env.BooleanValue;
-import com.caucho.php.env.ArrayValueImpl;
-import com.caucho.php.env.LongValue;
-import com.caucho.php.env.DoubleValue;
-import com.caucho.php.env.Env;
-import com.caucho.php.env.VarMap;
-import com.caucho.php.env.ChainedMap;
-import com.caucho.php.env.PhpClass;
-import com.caucho.php.env.JavaClassDefinition;
-import com.caucho.php.env.SessionArrayValue;
+import com.caucho.quercus.env.Value;
+import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.NullValue;
+import com.caucho.quercus.env.BooleanValue;
+import com.caucho.quercus.env.ArrayValueImpl;
+import com.caucho.quercus.env.LongValue;
+import com.caucho.quercus.env.DoubleValue;
+import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.VarMap;
+import com.caucho.quercus.env.ChainedMap;
+import com.caucho.quercus.env.QuercusClass;
+import com.caucho.quercus.env.JavaClassDefinition;
+import com.caucho.quercus.env.SessionArrayValue;
 
-import com.caucho.php.module.PhpModule;
-import com.caucho.php.module.StaticFunction;
+import com.caucho.quercus.module.PhpModule;
+import com.caucho.quercus.module.StaticFunction;
 
-import com.caucho.php.page.PhpPage;
-import com.caucho.php.page.PageManager;
+import com.caucho.quercus.page.PhpPage;
+import com.caucho.quercus.page.PageManager;
 
-import com.caucho.php.parser.PhpParser;
+import com.caucho.quercus.parser.PhpParser;
 
-import com.caucho.php.program.PhpProgram;
-import com.caucho.php.program.InterpretedClassDef;
+import com.caucho.quercus.program.PhpProgram;
+import com.caucho.quercus.program.InterpretedClassDef;
 
 import com.caucho.vfs.Path;
 import com.caucho.vfs.ReadStream;
@@ -96,10 +96,10 @@ public class Quercus {
   private HashMap<String,StaticFunction> _staticFunctions
     = new HashMap<String,StaticFunction>();
 
-  private PhpClass _stdClass;
+  private QuercusClass _stdClass;
   
-  private HashMap<String,PhpClass> _staticClasses
-    = new HashMap<String,PhpClass>();
+  private HashMap<String,QuercusClass> _staticClasses
+    = new HashMap<String,QuercusClass>();
   
   private HashMap<String,JavaClassDefinition> _javaClassWrappers
     = new HashMap<String,JavaClassDefinition>();
@@ -263,7 +263,7 @@ public class Quercus {
   }
   
   /**
-   * Parses a php program.
+   * Parses a quercus program.
    *
    * @param path the source file path
    *
@@ -277,7 +277,7 @@ public class Quercus {
   }
   
   /**
-   * Parses a php string.
+   * Parses a quercus string.
    *
    * @param code the source code
    *
@@ -298,7 +298,7 @@ public class Quercus {
   }
   
   /**
-   * Parses a php string.
+   * Parses a quercus string.
    *
    * @param code the source code
    *
@@ -354,7 +354,7 @@ public class Quercus {
   /**
    * Returns the stdClass definition.
    */
-  public PhpClass getStdClass()
+  public QuercusClass getStdClass()
   {
     return _stdClass;
   }
@@ -362,7 +362,7 @@ public class Quercus {
   /**
    * Returns the class with the given name.
    */
-  public PhpClass findClass(String name)
+  public QuercusClass findClass(String name)
   {
     return _staticClasses.get(name);
   }
@@ -436,7 +436,7 @@ public class Quercus {
   }
 
   /**
-   * Scans the classpath for META-INF/services/com.caucho.php.PhpModule
+   * Scans the classpath for META-INF/services/com.caucho.quercus.PhpModule
    */ 
   private void initStaticFunctions()
   {
@@ -444,8 +444,8 @@ public class Quercus {
     ClassLoader loader = thread.getContextClassLoader();
     
     try {
-      String phpModule = "META-INF/services/com.caucho.php.PhpModule";
-      Enumeration<URL> urls = loader.getResources(phpModule);
+      String quercusModule = "META-INF/services/com.caucho.php.PhpModule";
+      Enumeration<URL> urls = loader.getResources(quercusModule);
 
       while (urls.hasMoreElements()) {
         URL url = urls.nextElement();
@@ -575,7 +575,7 @@ public class Quercus {
 
 	String methodName = method.getName();
 
-	if (methodName.startsWith("php_"))
+	if (methodName.startsWith("quercus_"))
 	  methodName = methodName.substring(4);
 
 	_staticFunctions.put(methodName, function);
@@ -586,7 +586,7 @@ public class Quercus {
   }
 
   /**
-   * Scans the classpath for META-INF/services/com.caucho.php.PhpJavaClass
+   * Scans the classpath for META-INF/services/com.caucho.quercus.PhpJavaClass
    */ 
   private void initStaticClassServices()
   {
@@ -594,8 +594,8 @@ public class Quercus {
     ClassLoader loader = thread.getContextClassLoader();
     
     try {
-      String phpModule = "META-INF/services/com.caucho.php.PhpJavaClass";
-      Enumeration<URL> urls = loader.getResources(phpModule);
+      String quercusModule = "META-INF/services/com.caucho.php.PhpJavaClass";
+      Enumeration<URL> urls = loader.getResources(quercusModule);
 
       while (urls.hasMoreElements()) {
         URL url = urls.nextElement();
@@ -668,13 +668,13 @@ public class Quercus {
   }
 
   /**
-   * Scans the classpath for META-INF/services/com.caucho.php.PhpClass
+   * Scans the classpath for META-INF/services/com.caucho.quercus.QuercusClass
    */ 
   private void initStaticClasses()
   {
     InterpretedClassDef classDef = new InterpretedClassDef("stdClass", null);
     
-    _stdClass = new PhpClass(classDef, null);
+    _stdClass = new QuercusClass(classDef, null);
 
     _staticClasses.put(_stdClass.getName(), _stdClass);
   }

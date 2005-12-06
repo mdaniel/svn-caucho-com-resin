@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.php.parser;
+package com.caucho.quercus.parser;
 
 import java.io.StringReader;
 import java.io.Reader;
@@ -38,26 +38,26 @@ import java.util.HashMap;
 
 import com.caucho.java.JavaWriter;
 
-import com.caucho.php.PhpRuntimeException;
+import com.caucho.quercus.PhpRuntimeException;
 
-import com.caucho.php.expr.*;
+import com.caucho.quercus.expr.*;
 
-import com.caucho.php.env.NullValue;
+import com.caucho.quercus.env.NullValue;
 
-import com.caucho.php.program.*;
+import com.caucho.quercus.program.*;
 
-import com.caucho.php.Quercus;
+import com.caucho.quercus.Quercus;
 
-import com.caucho.php.env.Env;
-import com.caucho.php.env.Value;
-import com.caucho.php.env.BooleanValue;
-import com.caucho.php.env.StringValue;
-import com.caucho.php.env.LongValue;
-import com.caucho.php.env.DoubleValue;
-import com.caucho.php.env.CallbackFunction;
-import com.caucho.php.env.PhpClass;
+import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.Value;
+import com.caucho.quercus.env.BooleanValue;
+import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.LongValue;
+import com.caucho.quercus.env.DoubleValue;
+import com.caucho.quercus.env.CallbackFunction;
+import com.caucho.quercus.env.QuercusClass;
 
-import com.caucho.php.program.InterpretedClassDef;
+import com.caucho.quercus.program.InterpretedClassDef;
 
 import com.caucho.util.IntMap;
 import com.caucho.util.L10N;
@@ -184,7 +184,7 @@ public class PhpParser {
   private boolean _returnsReference = false;
 
   private Scope _scope = _globalScope;
-  private InterpretedClassDef _phpClass;
+  private InterpretedClassDef _quercusClass;
 
   private FunctionInfo _function;
   
@@ -320,7 +320,7 @@ public class PhpParser {
   {
     _function = new FunctionInfo(_quercus, "main");
 
-    // php/0b0d
+    // quercus/0b0d
     _function.setVariableVar(true);
     _function.setUsesSymbolTable(true);
     
@@ -683,7 +683,7 @@ public class PhpParser {
     ArrayList<Expr> args;
 
     if (token == '(') {
-      // php/112z
+      // quercus/112z
       args = parseArgs();
     }
     else {
@@ -1109,7 +1109,7 @@ public class PhpParser {
       String name = parseIdentifier();
 
       _function = new FunctionInfo(_quercus, name);
-      _function.setDeclaringClass(_phpClass);
+      _function.setDeclaringClass(_quercusClass);
       
       _function.setReturnsReference(_returnsReference);
 
@@ -1129,8 +1129,8 @@ public class PhpParser {
 
       Function function;
 
-      if (_phpClass != null)
-	function = new ObjectMethod(_phpClass,
+      if (_quercusClass != null)
+	function = new ObjectMethod(_quercusClass,
 				    name, _function,
 				    args, statementList);
       else
@@ -1254,13 +1254,13 @@ public class PhpParser {
     else
       _peekToken = token;
 
-    InterpretedClassDef oldClass = _phpClass;
+    InterpretedClassDef oldClass = _quercusClass;
     Scope oldScope = _scope;
 
     try {
-      _phpClass = oldScope.addClass(name, parentName);
+      _quercusClass = oldScope.addClass(name, parentName);
     
-      _scope = new ClassScope(_phpClass);
+      _scope = new ClassScope(_quercusClass);
 
       expect('{');
 
@@ -1268,9 +1268,9 @@ public class PhpParser {
 
       expect('}');
 
-      return _phpClass;
+      return _quercusClass;
     } finally {
-      _phpClass = oldClass;
+      _quercusClass = oldClass;
       _scope = oldScope;
     }
   }
@@ -1301,7 +1301,7 @@ public class PhpParser {
 	parseClassDefinition();
 	break;
 
-	/* php/0260
+	/* quercus/0260
       case VAR:
 	parseClassVarDefinition(false);
 	break;
@@ -2113,7 +2113,7 @@ public class PhpParser {
 
       return var;
 
-      /* php/0211
+      /* quercus/0211
     case '&':
       {
 	Expr expr = parseTerm();
@@ -2138,7 +2138,7 @@ public class PhpParser {
 
     case '!':
       {
-	// XXX: php/03i3 vs php/03i4
+	// XXX: quercus/03i3 vs php/03i4
 	
         Expr expr = parseTerm();
 
@@ -2276,7 +2276,7 @@ public class PhpParser {
     int token = parseToken();
 
     if (token == THIS) {
-      return new ThisExpr(_phpClass);
+      return new ThisExpr(_quercusClass);
     }
     else if (token == '$') {
       _peekToken = token;
@@ -2322,12 +2322,12 @@ public class PhpParser {
       return expr;
     }
     else if (className.equals("parent")) {
-      className = _phpClass.getParentName();
+      className = _quercusClass.getParentName();
       
       return new ClassMethodExpr(className, name, args);
     }
     else if (className.equals("self")) {
-      className = _phpClass.getName();
+      className = _quercusClass.getName();
       
       return new ClassMethodExpr(className, name, args);
     }
@@ -2951,7 +2951,7 @@ public class PhpParser {
   }
 
   /**
-   * Parses php text
+   * Parses quercus text
    */
   private int parsePhpText()
     throws IOException
@@ -2981,7 +2981,7 @@ public class PhpParser {
 	  sb.append("<?ph");
 	}
 	else if (! Character.isWhitespace((ch = read()))) {
-	  sb.append("<?php");
+	  sb.append("<?quercus");
 	}
 	else {
 	  _lexeme = sb.toString();
@@ -3002,7 +3002,7 @@ public class PhpParser {
   }
 
   /**
-   * Parses the <script language="php"> opening
+   * Parses the <script language="quercus"> opening
    */
   private boolean parseScriptBegin(StringBuilder sb)
     throws IOException
@@ -3021,7 +3021,7 @@ public class PhpParser {
     
     parseWhitespace(sb);
     
-    if (! parseTextMatch(sb, "=\"php\""))
+    if (! parseTextMatch(sb, "=\"quercus\""))
       return false;
 
     parseWhitespace(sb);
@@ -3169,7 +3169,7 @@ public class PhpParser {
 	String varName = _sb.toString();
 
 	if (varName.equals("this"))
-	  tail = new ThisExpr(_phpClass);
+	  tail = new ThisExpr(_quercusClass);
 	else
 	  tail = new VarExpr(_function.createVar(varName));
 
@@ -3348,7 +3348,7 @@ public class PhpParser {
 	  _sb.append('{');
 	}
       }
-      /* php/013c
+      /* quercus/013c
       else if ((ch == '\r' || ch == '\n') && _heredocEnd == null)
 	throw error(L.l("unexpected newline in string."));
       */
@@ -3730,12 +3730,12 @@ public class PhpParser {
     _insensitiveReserved.put("for", FOR);
     _insensitiveReserved.put("function", FUNCTION);
     _insensitiveReserved.put("class", CLASS);
-    // php/0261
+    // quercus/0261
     // _insensitiveReserved.put("new", NEW);
     _insensitiveReserved.put("return", RETURN);
     _insensitiveReserved.put("break", BREAK);
     _insensitiveReserved.put("continue", CONTINUE);
-    // php/0260
+    // quercus/0260
     //    _insensitiveReserved.put("var", VAR);
     _insensitiveReserved.put("this", THIS);
     _insensitiveReserved.put("private", PRIVATE);
