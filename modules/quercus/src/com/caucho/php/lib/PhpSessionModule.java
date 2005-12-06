@@ -44,7 +44,7 @@ import com.caucho.util.L10N;
 import com.caucho.util.RandomUtil;
 import com.caucho.util.Alarm;
 
-import com.caucho.php.Php;
+import com.caucho.php.Quercus;
 
 import com.caucho.php.module.PhpModule;
 import com.caucho.php.module.AbstractPhpModule;

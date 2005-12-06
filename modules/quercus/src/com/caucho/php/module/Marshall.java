@@ -34,7 +34,7 @@ import java.io.IOException;
 import java.lang.reflect.Method;
 import java.lang.annotation.Annotation;
 
-import com.caucho.php.Php;
+import com.caucho.php.Quercus;
 
 import com.caucho.php.expr.Expr;
 import com.caucho.php.expr.NullLiteralExpr;
@@ -63,7 +63,7 @@ import com.caucho.util.L10N;
 abstract public class Marshall {
   private static final L10N L = new L10N(Marshall.class);
 
-  public static Marshall create(Php php, Class argType)
+  public static Marshall create(Quercus quercus, Class argType)
   {
     if (argType.isAssignableFrom(Value.class)) {
       return MARSHALL_VALUE;
@@ -135,7 +135,7 @@ abstract public class Marshall {
       return MARSHALL_VALUE;
     }
     else {
-      return new JavaMarshall(php.getJavaClassDefinition(argType.getName()));
+      return new JavaMarshall(quercus.getJavaClassDefinition(argType.getName()));
     }
   }
   

@@ -39,7 +39,7 @@ import com.caucho.java.JavaWriter;
 
 import com.caucho.java.gen.JavaWriterWrapper;
 
-import com.caucho.php.Php;
+import com.caucho.php.Quercus;
 
 import com.caucho.php.env.Value;
 
@@ -86,7 +86,7 @@ public class PhpWriter extends JavaWriterWrapper {
   /**
    * Returns the engine.
    */
-  public Php getPhp()
+  public Quercus getPhp()
   {
     return _program.getPhp();
   }
@@ -317,7 +317,7 @@ public class PhpWriter extends JavaWriterWrapper {
     }
 
     println();
-    println("public void init(com.caucho.php.Php php)");
+    println("public void init(com.caucho.php.Quercus php)");
     println("{");
     pushDepth();
     

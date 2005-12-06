@@ -29,7 +29,7 @@
 
 package com.caucho.php.module;
 
-import com.caucho.php.Php;
+import com.caucho.php.Quercus;
 
 import com.caucho.php.env.Env;
 import com.caucho.php.env.Value;
@@ -71,7 +71,7 @@ public class StaticFunction extends AbstractFunction {
    *
    * @param method the introspected method.
    */
-  public StaticFunction(Php php, PhpModule phpModule, Method method)
+  public StaticFunction(Quercus quercus, PhpModule phpModule, Method method)
   {
     _phpModule = phpModule;
     _method = method;
@@ -151,10 +151,10 @@ public class StaticFunction extends AbstractFunction {
       if (isReference)
 	_marshallArgs[i] = Marshall.MARSHALL_REFERENCE;
       else
-	_marshallArgs[i] = Marshall.create(php, argType);
+	_marshallArgs[i] = Marshall.create(quercus, argType);
     }
 
-    _unmarshallReturn = Marshall.create(php, method.getReturnType());
+    _unmarshallReturn = Marshall.create(quercus, method.getReturnType());
   }
 
   /**

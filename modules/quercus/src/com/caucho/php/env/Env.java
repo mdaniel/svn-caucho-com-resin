@@ -62,7 +62,7 @@ import com.caucho.util.L10N;
 import com.caucho.util.IntMap;
 import com.caucho.util.Alarm;
 
-import com.caucho.php.Php;
+import com.caucho.php.Quercus;
 import com.caucho.php.PhpRuntimeException;
 import com.caucho.php.PhpExitException;
 
@@ -124,7 +124,7 @@ public class Env {
 
   private static final IntMap SPECIAL_VARS = new IntMap();
   
-  private Php _php;
+  private Quercus _quercus;
   private PhpPage _page;
 
   private Value _this = NullValue.NULL;
@@ -188,13 +188,13 @@ public class Env {
   // XXX: need to look this up from the module itself
   private int _errorMask = E_DEFAULT;
 
-  public Env(Php php,
+  public Env(Quercus quercus,
 	     PhpPage page,
 	     WriteStream out,
 	     HttpServletRequest request,
 	     HttpServletResponse response)
   {
-    _php = php;
+    _quercus = quercus;
 
     _page = page;
 
@@ -204,7 +204,7 @@ public class Env {
     _request = request;
     _response = response;
 
-    _constMap = new ChainedMap<String,Value>(_php.getConstMap());
+    _constMap = new ChainedMap<String,Value>(_quercus.getConstMap());
 
     _page.init(this);
 
@@ -240,9 +240,9 @@ public class Env {
   /**
    * Returns the owning PHP engine.
    */
-  public Php getPhp()
+  public Quercus getPhp()
   {
-    return _php;
+    return _quercus;
   }
 
   /**
@@ -250,7 +250,7 @@ public class Env {
    */
   public DataSource getDatabase()
   {
-    return _php.getDatabase();
+    return _quercus.getDatabase();
   }
 
   /**
@@ -399,7 +399,7 @@ public class Env {
    */
   public SessionArrayValue createSession(String sessionId)
   {
-    SessionArrayValue session = _php.loadSession(this, sessionId);
+    SessionArrayValue session = _quercus.loadSession(this, sessionId);
 
     if (session == null)
       session = new SessionArrayValue(this, sessionId);
@@ -422,7 +422,7 @@ public class Env {
     if (oldValue != null)
       return oldValue;
     else
-      return _php.getIni(var);
+      return _quercus.getIni(var);
   }
 
   /**
@@ -590,7 +590,7 @@ public class Env {
    */
   public final String createStaticName()
   {
-    return _php.createStaticName();
+    return _quercus.createStaticName();
   }
 
   /**
@@ -1272,7 +1272,7 @@ public class Env {
 	return fun;
     }
     
-    fun = _php.findFunction(name);
+    fun = _quercus.findFunction(name);
     if (fun != null) {
       return fun;
     }
@@ -1343,9 +1343,9 @@ public class Env {
     if (log.isLoggable(Level.FINER))
       log.finer(code);
 
-    Php php = getPhp();
+    Quercus quercus = getPhp();
 
-    PhpProgram program = php.parseEvalExpr(code);
+    PhpProgram program = quercus.parseEvalExpr(code);
 
     Value value = program.execute(this);
 
@@ -1645,7 +1645,7 @@ public class Env {
   public Value createObject()
   {
     try {
-      return _php.getStdClass().newInstance(this);
+      return _quercus.getStdClass().newInstance(this);
     } catch (Throwable e) {
       log.log(Level.WARNING, e.toString(), e);
 
@@ -1658,7 +1658,7 @@ public class Env {
    */
   public JavaClassDefinition getJavaClassDefinition(String className)
   {
-    return _php.getJavaClassDefinition(className);
+    return _quercus.getJavaClassDefinition(className);
   }
 
   /**
@@ -1731,7 +1731,7 @@ public class Env {
     /*
     PhpClass cl = null;
 
-    cl = _php.findClass(name);
+    cl = _quercus.findClass(name);
     if (cl != null)
       return cl;
 
@@ -1896,7 +1896,7 @@ public class Env {
 
     _includeSet.add(path);
 
-    PhpPage page = _php.parse(path);
+    PhpPage page = _quercus.parse(path);
 
     page.importDefinitions(this);
 
@@ -2447,7 +2447,7 @@ public class Env {
       popOutputBuffer();
 
     if (_session != null && _session.getSize() > 0)
-      _php.saveSession(this, _session.getId(), _session);
+      _quercus.saveSession(this, _session.getId(), _session);
     
     for (ResourceValue resource : _resourceList) {
       try {

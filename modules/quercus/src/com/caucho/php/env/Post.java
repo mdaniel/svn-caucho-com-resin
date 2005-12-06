@@ -60,7 +60,7 @@ import com.caucho.util.Log;
 import com.caucho.util.L10N;
 import com.caucho.util.IntMap;
 
-import com.caucho.php.Php;
+import com.caucho.php.Quercus;
 import com.caucho.php.PhpRuntimeException;
 import com.caucho.php.PhpExitException;
 

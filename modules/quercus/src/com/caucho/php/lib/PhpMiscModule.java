@@ -42,7 +42,7 @@ import java.util.logging.Level;
 import com.caucho.util.L10N;
 import com.caucho.util.RandomUtil;
 
-import com.caucho.php.Php;
+import com.caucho.php.Quercus;
 
 import com.caucho.php.module.PhpModule;
 import com.caucho.php.module.AbstractPhpModule;
@@ -81,9 +81,9 @@ public class PhpMiscModule extends AbstractPhpModule {
     if (log.isLoggable(Level.FINER))
       log.finer(code);
 
-    Php php = env.getPhp();
+    Quercus quercus = env.getPhp();
 
-    PhpProgram program = php.parseCode(code);
+    PhpProgram program = quercus.parseCode(code);
 
     Value value = program.execute(env);
 

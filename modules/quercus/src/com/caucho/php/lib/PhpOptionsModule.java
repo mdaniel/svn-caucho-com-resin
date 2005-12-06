@@ -35,7 +35,7 @@ import java.util.HashMap;
 
 import com.caucho.util.L10N;
 
-import com.caucho.php.Php;
+import com.caucho.php.Quercus;
 
 import com.caucho.php.module.PhpModule;
 import com.caucho.php.module.AbstractPhpModule;
@@ -73,9 +73,9 @@ public class PhpOptionsModule extends AbstractPhpModule {
   public static boolean php_assert(Env env, String code)
     throws Throwable
   {
-    Php php = env.getPhp();
+    Quercus quercus = env.getPhp();
 
-    PhpProgram program = php.parseCode(code);
+    PhpProgram program = quercus.parseCode(code);
 
     Value value = program.execute(env);
     

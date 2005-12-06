@@ -37,7 +37,7 @@ import java.lang.reflect.InvocationTargetException;
 
 import java.lang.annotation.Annotation;
 
-import com.caucho.php.Php;
+import com.caucho.php.Quercus;
 
 import com.caucho.php.expr.Expr;
 import com.caucho.php.expr.NullLiteralExpr;
@@ -78,7 +78,7 @@ public class JavaMethod extends AbstractFunction {
    *
    * @param method the introspected method.
    */
-  public JavaMethod(Php php, Method method)
+  public JavaMethod(Quercus quercus, Method method)
   {
     _method = method;
 
@@ -125,13 +125,13 @@ public class JavaMethod extends AbstractFunction {
 
       Class argType = param[i + envOffset];
 
-      _marshallArgs[i] = Marshall.create(php, argType);
+      _marshallArgs[i] = Marshall.create(quercus, argType);
 
       if (isReference)
 	_marshallArgs[i] = Marshall.MARSHALL_REFERENCE;
     }
 
-    _unmarshallReturn = Marshall.create(php, method.getReturnType());
+    _unmarshallReturn = Marshall.create(quercus, method.getReturnType());
   }
 
   /**

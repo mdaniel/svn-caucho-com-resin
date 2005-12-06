@@ -42,7 +42,7 @@ import javax.script.ScriptException;
 import com.caucho.php.parser.PhpParser;
 
 import com.caucho.php.program.PhpProgram;
-import com.caucho.php.Php;
+import com.caucho.php.Quercus;
 
 /**
  * Script engine factory
@@ -62,7 +62,7 @@ public class PhpScriptEngine extends GenericScriptEngine {
     throws ScriptException
   {
     try {
-      PhpProgram program = null; // new Php().parse(null, script);
+      PhpProgram program = null; // new Quercus().parse(null, script);
 
       System.out.println("PGM: " + program);
       

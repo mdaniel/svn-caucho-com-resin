@@ -29,7 +29,7 @@
 
 package com.caucho.php.expr;
 
-import com.caucho.php.Php;
+import com.caucho.php.Quercus;
 import com.caucho.php.env.Env;
 import com.caucho.php.env.NullValue;
 import com.caucho.php.env.Value;
@@ -156,8 +156,8 @@ public class FunctionExpr extends Expr {
    */
   public void analyze(AnalyzeInfo info)
   {
-    Php php = info.getFunction().getPhp();
-    AbstractFunction fun = php.findFunction(_name);
+    Quercus quercus = info.getFunction().getPhp();
+    AbstractFunction fun = quercus.findFunction(_name);
     
     if (fun != null && fun.isCallUsesVariableArgs())
       info.getFunction().setVariableArgs(true);
@@ -222,7 +222,7 @@ public class FunctionExpr extends Expr {
   public void generateImpl(PhpWriter out, Class retType, boolean isRef)
     throws IOException
   {
-    // Php php = out.getPhp();
+    // Quercus php = out.getPhp();
 
     // StaticFunction fun = php.findFunction(_name);
 

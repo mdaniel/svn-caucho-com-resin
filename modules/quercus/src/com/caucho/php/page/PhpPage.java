@@ -37,7 +37,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.caucho.java.gen.GenClass;
 
-import com.caucho.php.Php;
+import com.caucho.php.Quercus;
 
 import com.caucho.php.env.Env;
 import com.caucho.php.env.Value;
@@ -140,9 +140,9 @@ abstract public class PhpPage {
   /**
    * Initialize the program
    *
-   * @param php the owning engine
+   * @param quercus the owning engine
    */
-  public void init(Php php)
+  public void init(Quercus quercus)
     throws Throwable
   {
   }

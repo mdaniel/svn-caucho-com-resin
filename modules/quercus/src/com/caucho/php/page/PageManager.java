@@ -46,7 +46,7 @@ import com.caucho.util.ThreadPool;
 
 import com.caucho.java.JavaCompiler;
 
-import com.caucho.php.Php;
+import com.caucho.php.Quercus;
 
 import com.caucho.php.gen.PhpGenerator;
 
@@ -63,7 +63,7 @@ public class PageManager {
   private static final Logger log
     = Logger.getLogger(PageManager.class.getName());
 
-  private final Php _php;
+  private final Quercus _quercus;
   
   private Path _pwd;
   private boolean _isLazyCompile;
@@ -80,9 +80,9 @@ public class PageManager {
   /**
    * Constructor.
    */ 
-  public PageManager(Php php)
+  public PageManager(Quercus quercus)
   {
-    _php = php;
+    _quercus = quercus;
     
     _pwd = Vfs.getPwd();
   }
@@ -158,7 +158,7 @@ public class PageManager {
     else
       relPath = pathName;
 
-    return "_php." + JavaCompiler.mangleName(relPath);
+    return "_quercus." + JavaCompiler.mangleName(relPath);
   }
   
   /**
@@ -179,7 +179,7 @@ public class PageManager {
       program = _programCache.get(path);
 
       if (program == null || program.isModified()) {
-	program = PhpParser.parse(_php, path);
+	program = PhpParser.parse(_quercus, path);
 	_programCache.put(path, program);
       }
 
@@ -203,7 +203,7 @@ public class PageManager {
 	return new InterpretedPage(program);
       }
       else if (isCompile()) {
-	PhpGenerator gen = new PhpGenerator(_php);
+	PhpGenerator gen = new PhpGenerator(_quercus);
 	
 	Class pageClass;
 
@@ -229,7 +229,7 @@ public class PageManager {
   {
     PhpPage page = (PhpPage) pageClass.newInstance();
 
-    page.init(_php);
+    page.init(_quercus);
 
     Method selfPath = pageClass.getMethod("php_setSelfPath",
 					  new Class[] { Path.class });
@@ -269,7 +269,7 @@ public class PageManager {
 	  continue;
 
 	try {
-	  PhpGenerator gen = new PhpGenerator(_php);
+	  PhpGenerator gen = new PhpGenerator(_quercus);
 	
 	  Class pageClass = gen.generate(program);
 

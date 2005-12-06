@@ -35,7 +35,7 @@ import java.util.ArrayList;
 
 import java.lang.reflect.Method;
 
-import com.caucho.php.Php;
+import com.caucho.php.Quercus;
 
 import com.caucho.php.gen.PhpWriter;
 

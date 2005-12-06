@@ -33,7 +33,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.ArrayList;
 
-import com.caucho.php.Php;
+import com.caucho.php.Quercus;
 
 import com.caucho.php.expr.VarInfo;
 
@@ -41,7 +41,7 @@ import com.caucho.php.expr.VarInfo;
  * Information about a function.
  */
 public class FunctionInfo {
-  private final Php _php;
+  private final Quercus _quercus;
 
   private final String _name;
   
@@ -61,18 +61,18 @@ public class FunctionInfo {
   private boolean _isVariableArgs;
   private boolean _isUsesSymbolTable;
 
-  public FunctionInfo(Php php, String name)
+  public FunctionInfo(Quercus quercus, String name)
   {
-    _php = php;
+    _quercus = quercus;
     _name = name;
   }
 
   /**
    * Returns the owning php.
    */
-  public Php getPhp()
+  public Quercus getPhp()
   {
-    return _php;
+    return _quercus;
   }
 
   /**
@@ -206,7 +206,7 @@ public class FunctionInfo {
       var = new VarInfo(name, this);
       var.setGlobal(_isGlobal);
 
-      if (Php.isSuperGlobal(name))
+      if (Quercus.isSuperGlobal(name))
 	var.setGlobal(true);
       
       _varMap.put(name, var);

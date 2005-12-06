@@ -36,7 +36,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.caucho.java.gen.GenClass;
 
-import com.caucho.php.Php;
+import com.caucho.php.Quercus;
 
 import com.caucho.php.env.Env;
 import com.caucho.php.env.PhpClass;

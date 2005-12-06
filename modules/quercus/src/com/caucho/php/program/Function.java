@@ -39,7 +39,7 @@ import java.util.logging.Logger;
 
 import com.caucho.java.JavaWriter;
 
-import com.caucho.php.Php;
+import com.caucho.php.Quercus;
 
 import com.caucho.php.env.Env;
 import com.caucho.php.env.Value;

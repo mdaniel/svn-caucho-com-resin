@@ -38,7 +38,7 @@ import java.util.LinkedHashMap;
 
 import java.io.IOException;
 
-import com.caucho.php.Php;
+import com.caucho.php.Quercus;
 import com.caucho.php.PhpRuntimeException;
 
 import com.caucho.php.program.AbstractFunction;
@@ -179,15 +179,15 @@ public class JavaClassDefinition {
   /**
    * Introspects the Java class.
    */
-  public void introspect(Php php)
+  public void introspect(Quercus quercus)
   {
-    introspectMethods(php, _type);
+    introspectMethods(quercus, _type);
   }
 
   /**
    * Introspects the Java class.
    */
-  private void introspectMethods(Php php, Class type)
+  private void introspectMethods(Quercus quercus, Class type)
   {
     if (type == null || type.equals(Object.class))
       return;
@@ -195,7 +195,7 @@ public class JavaClassDefinition {
     Class []ifcs = type.getInterfaces();
     
     for (int i = 0; i < ifcs.length; i++) {
-      introspectMethods(php, ifcs[i]);
+      introspectMethods(quercus, ifcs[i]);
     }
 
     Method []methods = type.getDeclaredMethods();
@@ -208,12 +208,12 @@ public class JavaClassDefinition {
       else if (! Modifier.isPublic(method.getModifiers()))
 	continue;
 
-      JavaMethod javaMethod = new JavaMethod(php, method);
+      JavaMethod javaMethod = new JavaMethod(quercus, method);
 
       _functionMap.put(method.getName(), javaMethod);
     }
 
-    introspectMethods(php, type.getSuperclass());
+    introspectMethods(quercus, type.getSuperclass());
   }
 }
 

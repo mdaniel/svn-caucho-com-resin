@@ -46,7 +46,7 @@ import com.caucho.php.env.NullValue;
 
 import com.caucho.php.program.*;
 
-import com.caucho.php.Php;
+import com.caucho.php.Quercus;
 
 import com.caucho.php.env.Env;
 import com.caucho.php.env.Value;
@@ -162,7 +162,7 @@ public class PhpParser {
   private final static IntMap _insensitiveReserved = new IntMap();
   private final static IntMap _reserved = new IntMap();
 
-  private Php _php;
+  private Quercus _quercus;
 
   private Path _sourceFile;
 
@@ -190,14 +190,14 @@ public class PhpParser {
   
   private boolean _isTop;
 
-  PhpParser(Php php)
+  PhpParser(Quercus quercus)
   {
-    _php = php;
+    _quercus = quercus;
   }
 
-  PhpParser(Php php, Path sourceFile, Reader is)
+  PhpParser(Quercus quercus, Path sourceFile, Reader is)
   {
-    _php = php;
+    _quercus = quercus;
 
     init(sourceFile, is);
   }
@@ -220,14 +220,14 @@ public class PhpParser {
     _peekToken = -1;
   }
   
-  public static PhpProgram parse(Php php, Path path)
+  public static PhpProgram parse(Quercus quercus, Path path)
     throws IOException
   {
     ReadStream is = path.openRead();
 
     try {
       PhpParser parser;
-      parser = new PhpParser(php, path, is.getReader());
+      parser = new PhpParser(quercus, path, is.getReader());
 
       return parser.parse();
     } finally {
@@ -235,52 +235,52 @@ public class PhpParser {
     }
   }
   
-  public static PhpProgram parse(Php php,
+  public static PhpProgram parse(Quercus quercus,
                                  Path path, Reader is)
     throws IOException
   {
-    return new PhpParser(php, path, is).parse();
+    return new PhpParser(quercus, path, is).parse();
   }
   
-  public static PhpProgram parseEval(Php php, String str)
+  public static PhpProgram parseEval(Quercus quercus, String str)
     throws IOException
   {
     Path path = new StringPath(str);
 
-    PhpParser parser = new PhpParser(php, path, path.openRead().getReader());
+    PhpParser parser = new PhpParser(quercus, path, path.openRead().getReader());
 
     return parser.parseCode();
   }
   
-  public static PhpProgram parseEvalExpr(Php php, String str)
+  public static PhpProgram parseEvalExpr(Quercus quercus, String str)
     throws IOException
   {
     Path path = new StringPath(str);
 
-    PhpParser parser = new PhpParser(php, path, path.openRead().getReader());
+    PhpParser parser = new PhpParser(quercus, path, path.openRead().getReader());
 
     return parser.parseCode().createExprReturn();
   }
   
-  public static Value parseFunction(Php php, String args, String code)
+  public static Value parseFunction(Quercus quercus, String args, String code)
     throws IOException
   {
     Path argPath = new StringPath(args);
     Path codePath = new StringPath(code);
 
-    PhpParser parser = new PhpParser(php);
+    PhpParser parser = new PhpParser(quercus);
 
     Function fun = parser.parseFunction(argPath, codePath);
 
     return new CallbackFunction(fun);
   }
   
-  public static Expr parse(Php php, String str)
+  public static Expr parse(Quercus quercus, String str)
     throws IOException
   {
     Path path = Vfs.lookup("string:");
     
-    return new PhpParser(php, path, new StringReader(str)).parseExpr();
+    return new PhpParser(quercus, path, new StringReader(str)).parseExpr();
   }
   
   public static Expr parseDefault(String str)
@@ -318,7 +318,7 @@ public class PhpParser {
   PhpProgram parse()
     throws IOException
   {
-    _function = new FunctionInfo(_php, "main");
+    _function = new FunctionInfo(_quercus, "main");
 
     // php/0b0d
     _function.setVariableVar(true);
@@ -326,7 +326,7 @@ public class PhpParser {
     
     Statement stmt = parseTop();
 
-    PhpProgram program = new PhpProgram(_php, _sourceFile,
+    PhpProgram program = new PhpProgram(_quercus, _sourceFile,
 					_globalScope.getFunctionMap(),
 					_globalScope.getClassMap(),
 					_function,
@@ -344,13 +344,13 @@ public class PhpParser {
   PhpProgram parseCode()
     throws IOException
   {
-    _function = new FunctionInfo(_php, "eval");
+    _function = new FunctionInfo(_quercus, "eval");
     // XXX: need param or better function name for non-global?
     _function.setGlobal(false);
 
     ArrayList<Statement> stmtList = parseStatementList();
     
-    return new PhpProgram(_php, _sourceFile,
+    return new PhpProgram(_quercus, _sourceFile,
 			  _globalScope.getFunctionMap(),
 			  _globalScope.getClassMap(),
 			  _function,
@@ -360,7 +360,7 @@ public class PhpParser {
   Function parseFunction(Path argPath, Path codePath)
     throws IOException
   {
-    _function = new FunctionInfo(_php, "anonymous");
+    _function = new FunctionInfo(_quercus, "anonymous");
     // XXX: need param or better function name for non-global?
     _function.setGlobal(false);
 
@@ -1108,7 +1108,7 @@ public class PhpParser {
 
       String name = parseIdentifier();
 
-      _function = new FunctionInfo(_php, name);
+      _function = new FunctionInfo(_quercus, name);
       _function.setDeclaringClass(_phpClass);
       
       _function.setReturnsReference(_returnsReference);

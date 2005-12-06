@@ -50,7 +50,7 @@ import com.caucho.config.ConfigException;
 
 import com.caucho.server.connection.CauchoResponse;
 
-import com.caucho.php.Php;
+import com.caucho.php.Quercus;
 import com.caucho.php.PhpExitException;
 import com.caucho.php.PhpRuntimeException;
 
@@ -79,7 +79,7 @@ public class PhpServlet extends HttpServlet {
   private static final Logger log
     = Logger.getLogger(PhpServlet.class.getName());
 
-  private final Php _php = new Php();
+  private final Quercus _quercus = new Quercus();
 
   private boolean _isCompileSet;
 
@@ -92,15 +92,15 @@ public class PhpServlet extends HttpServlet {
     _isCompileSet = true;
 
     if ("true".equals(isCompile) || "".equals(isCompile)) {
-      _php.setCompile(true);
-      _php.setLazyCompile(false);
+      _quercus.setCompile(true);
+      _quercus.setLazyCompile(false);
     }
     else if ("false".equals(isCompile)) {
-      _php.setCompile(false);
-      _php.setLazyCompile(false);
+      _quercus.setCompile(false);
+      _quercus.setLazyCompile(false);
     }
     else if ("lazy".equals(isCompile)) {
-      _php.setLazyCompile(true);
+      _quercus.setLazyCompile(true);
     }
     else
       throw new ConfigException(L.l("'{0}' is an unknown compile value.  Values are 'true', 'false', or 'lazy'.",
@@ -112,7 +112,7 @@ public class PhpServlet extends HttpServlet {
    */
   public void setDatabase(DataSource database)
   {
-    _php.setDatabase(database);
+    _quercus.setDatabase(database);
   }
 
   /**
@@ -121,7 +121,7 @@ public class PhpServlet extends HttpServlet {
   public void addModule(PhpModule module)
     throws ConfigException
   {
-    _php.addModule(module);
+    _quercus.addModule(module);
   }
   
   /**
@@ -130,7 +130,7 @@ public class PhpServlet extends HttpServlet {
   public void addClass(PhpClassConfig classConfig)
     throws ConfigException
   {
-    _php.addJavaClass(classConfig.getName(), classConfig.getType());
+    _quercus.addJavaClass(classConfig.getName(), classConfig.getType());
   }
 
   /**
@@ -139,7 +139,7 @@ public class PhpServlet extends HttpServlet {
   public PhpIni createPhpIni()
     throws ConfigException
   {
-    return new PhpIni(_php);
+    return new PhpIni(_quercus);
   }
   
   /**
@@ -149,7 +149,7 @@ public class PhpServlet extends HttpServlet {
     throws ServletException
   {
     if (! _isCompileSet) {
-      _php.setLazyCompile(true);
+      _quercus.setLazyCompile(true);
       
       // XXX: for validating QA
       // throw new ServletException("compile must be set.");
@@ -166,7 +166,7 @@ public class PhpServlet extends HttpServlet {
     try {
       Path path = getPath(request);
 
-      PhpPage page = _php.parse(path);
+      PhpPage page = _quercus.parse(path);
 
       // php/1b06
       response.setContentType("text/html");
@@ -184,7 +184,7 @@ public class PhpServlet extends HttpServlet {
 	ws = Vfs.openWrite(out);
       }
 	
-      Env env = new Env(_php, page, ws, request, response);
+      Env env = new Env(_quercus, page, ws, request, response);
       try {
 	page.executeTop(env);
 
@@ -243,15 +243,15 @@ public class PhpServlet extends HttpServlet {
    */
   public void destroy()
   {
-    _php.close();
+    _quercus.close();
   }
 
   public static class PhpIni {
-    private Php _php;
+    private Quercus _quercus;
 
-    PhpIni(Php php)
+    PhpIni(Quercus quercus)
     {
-      _php = php;
+      _quercus = quercus;
     }
 
     /**
@@ -259,7 +259,7 @@ public class PhpServlet extends HttpServlet {
      */
     public void put(String key, String value)
     {
-      _php.setIni(key, value);
+      _quercus.setIni(key, value);
     }
   }
 }

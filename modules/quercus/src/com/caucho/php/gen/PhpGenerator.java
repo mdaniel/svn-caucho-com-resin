@@ -34,7 +34,7 @@ import java.util.logging.Logger;
 import com.caucho.java.gen.JavaClassGenerator;
 import com.caucho.java.gen.GenClass;
 
-import com.caucho.php.Php;
+import com.caucho.php.Quercus;
   
 /**
  * Generator.
@@ -43,11 +43,11 @@ public class PhpGenerator {
   private static final Logger log
     = Logger.getLogger(PhpGenerator.class.getName());
 
-  private final Php _php;
+  private final Quercus _quercus;
 
-  public PhpGenerator(Php php)
+  public PhpGenerator(Quercus quercus)
   {
-    _php = php;
+    _quercus = quercus;
   }
 
   public Class preload(GenClass cl)

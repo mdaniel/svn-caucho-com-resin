@@ -41,7 +41,7 @@ import com.caucho.php.env.PhpClass;
 
 import com.caucho.php.page.PhpPage;
 
-import com.caucho.php.Php;
+import com.caucho.php.Quercus;
 
 import com.caucho.make.PersistentDependency;
 import com.caucho.make.VersionDependency;
@@ -56,7 +56,7 @@ import com.caucho.vfs.WriteStream;
  * Represents a compiled PHP program.
  */
 public class PhpProgram extends GenClass {
-  private Php _php;
+  private Quercus _quercus;
 
   private PhpPage _compiledPage;
   
@@ -75,21 +75,21 @@ public class PhpProgram extends GenClass {
     = new ArrayList<PersistentDependency>();
 
   /**
-   * Creates a new php program
+   * Creates a new quercus program
    *
-   * @param php the owning php engine
+   * @param quercus the owning quercus engine
    * @param sourceFile the path to the source file
    * @param statement the top-level statement
    */
-  public PhpProgram(Php php, Path sourceFile,
+  public PhpProgram(Quercus quercus, Path sourceFile,
 		    HashMap<String, Function> functionMap,
 		    HashMap<String, InterpretedClassDef> classMap,
 		    FunctionInfo functionInfo,
 		    Statement statement)
   {
-    super(php.getClassName(sourceFile));
+    super(quercus.getClassName(sourceFile));
     
-    _php = php;
+    _quercus = quercus;
 
     _sourceFile = sourceFile;
     addDepend(sourceFile);
@@ -107,12 +107,12 @@ public class PhpProgram extends GenClass {
     _statement = statement;
 
     // Java generation code
-    setSuperClassName("com.caucho.php.page.PhpPage");
+    setSuperClassName("com.caucho.quercus.page.PhpPage");
 
-    addImport("com.caucho.php.Php");
-    addImport("com.caucho.php.env.*");
-    addImport("com.caucho.php.expr.*");
-    addImport("com.caucho.php.program.*");
+    addImport("com.caucho.quercus.Quercus");
+    addImport("com.caucho.quercus.env.*");
+    addImport("com.caucho.quercus.expr.*");
+    addImport("com.caucho.quercus.program.*");
     
     PhpMain main = new PhpMain(this, functionInfo, statement);
     addComponent(main);
@@ -123,9 +123,9 @@ public class PhpProgram extends GenClass {
   /**
    * Returns the engine.
    */
-  public Php getPhp()
+  public Quercus getPhp()
   {
-    return _php;
+    return _quercus;
   }
 
   /**
