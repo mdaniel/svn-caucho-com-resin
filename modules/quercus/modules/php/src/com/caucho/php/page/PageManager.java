@@ -1,0 +1,284 @@
+/*
+ * Copyright (c) 1998-2004 Caucho Technology -- all rights reserved
+ *
+ * This file is part of Resin(R) Open Source
+ *
+ * Each copy or derived work must preserve the copyright notice and this
+ * notice unmodified.
+ *
+ * Resin Open Source is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * Resin Open Source is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE, or any warranty
+ * of NON-INFRINGEMENT.  See the GNU General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Resin Open Source; if not, write to the
+ *
+ *   Free Software Foundation, Inc.
+ *   59 Temple Place, Suite 330
+ *   Boston, MA 02111-1307  USA
+ *
+ * @author Scott Ferguson
+ */
+
+package com.caucho.php.page;
+
+import java.io.IOException;
+
+import java.lang.reflect.Method;
+
+import java.util.ArrayList;
+
+import java.util.logging.Logger;
+import java.util.logging.Level;
+
+import com.caucho.vfs.Vfs;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.IOExceptionWrapper;
+
+import com.caucho.util.ThreadPool;
+
+import com.caucho.java.JavaCompiler;
+
+import com.caucho.php.Php;
+
+import com.caucho.php.gen.PhpGenerator;
+
+import com.caucho.php.parser.PhpParser;
+
+import com.caucho.php.program.PhpProgram;
+
+import com.caucho.util.LruCache;
+
+/**
+ * Each "page" refers to a php file.
+ */
+public class PageManager {
+  private static final Logger log
+    = Logger.getLogger(PageManager.class.getName());
+
+  private final Php _php;
+  
+  private Path _pwd;
+  private boolean _isLazyCompile;
+  private boolean _isCompile;
+
+  private LruCache<Path,PhpProgram> _programCache
+    = new LruCache<Path,PhpProgram>(1024);
+
+  private ArrayList<Path> _pendingPages = new ArrayList<Path>();
+  private boolean _isCompilerActive;
+
+  private boolean _isClosed;
+  
+  /**
+   * Constructor.
+   */ 
+  public PageManager(Php php)
+  {
+    _php = php;
+    
+    _pwd = Vfs.getPwd();
+  }
+
+  /**
+   * Sets the owning directory.
+   */
+  public void setPwd(Path pwd)
+  {
+    _pwd = pwd;
+  }
+
+  /**
+   * Gets the owning directory.
+   */
+  public Path getPwd()
+  {
+    return _pwd;
+  }
+
+  /**
+   * true if the pages should be compiled.
+   */
+  public boolean isCompile()
+  {
+    return _isCompile;
+  }
+
+  /**
+   * true if the pages should be compiled.
+   */
+  public void setCompile(boolean isCompile)
+  {
+    _isCompile = isCompile;
+  }
+
+  /**
+   * true if the pages should be compiled lazily.
+   */
+  public boolean isLazyCompile()
+  {
+    return _isLazyCompile;
+  }
+
+  /**
+   * true if the pages should be compiled.
+   */
+  public void setLazyCompile(boolean isCompile)
+  {
+    _isLazyCompile = isCompile;
+  }
+
+  /**
+   * true if the manager is active.
+   */
+  public boolean isActive()
+  {
+    return ! _isClosed;
+  }
+
+  /**
+   * Returns the relative path.
+   */
+  public String getClassName(Path path)
+  {
+    String pathName = path.getFullPath();
+    String pwdName = getPwd().getFullPath();
+
+    String relPath;
+
+    if (pathName.startsWith(pwdName))
+      relPath = pathName.substring(pwdName.length());
+    else
+      relPath = pathName;
+
+    return "_php." + JavaCompiler.mangleName(relPath);
+  }
+  
+  /**
+   * Returns a parsed or compiled php program.
+   *
+   * @param path the source file path
+   *
+   * @return the parsed program
+   *
+   * @throws IOException
+   */
+  public PhpPage parse(Path path)
+    throws IOException
+  {
+    try {
+      PhpProgram program;
+
+      program = _programCache.get(path);
+
+      if (program == null || program.isModified()) {
+	program = PhpParser.parse(_php, path);
+	_programCache.put(path, program);
+      }
+
+      if (program.getCompiledPage() != null)
+	return program.getCompiledPage();
+    
+      if (isLazyCompile()) {
+	boolean spawn = false;
+
+	synchronized (_pendingPages) {
+	  if (! _pendingPages.contains(path)) {
+	    _pendingPages.add(path);
+	    spawn = ! _isCompilerActive;
+	    _isCompilerActive = true;
+	  }
+	}
+
+	if (spawn)
+	  ThreadPool.schedule(new CompileThread());
+	
+	return new InterpretedPage(program);
+      }
+      else if (isCompile()) {
+	PhpGenerator gen = new PhpGenerator(_php);
+	
+	Class pageClass;
+
+	synchronized (_pendingPages) {
+	  pageClass = gen.generate(program);
+	}
+
+	return createPage(path, program, pageClass);
+      }
+      else
+	return new InterpretedPage(program);
+    } catch (IOException e) {
+      throw e;
+    } catch (RuntimeException e) {
+      throw e;
+    } catch (Throwable e) {
+      throw new IOExceptionWrapper(e);
+    }
+  }
+
+  private PhpPage createPage(Path path, PhpProgram program, Class pageClass)
+    throws Throwable
+  {
+    PhpPage page = (PhpPage) pageClass.newInstance();
+
+    page.init(_php);
+
+    Method selfPath = pageClass.getMethod("php_setSelfPath",
+					  new Class[] { Path.class });
+
+    selfPath.invoke(null, path);
+
+    program.setCompiledPage(page);
+
+    return page;
+  }
+
+  public void close()
+  {
+    _isClosed = true;
+  }
+
+  class CompileThread implements Runnable {
+    public void run()
+    {
+      while (isActive()) {
+	Path path = null;
+
+	synchronized (_pendingPages) {
+	  if (_pendingPages.size() == 0) {
+	    _isCompilerActive = false;
+	    return;
+	  }
+	  
+	  path = _pendingPages.remove(0);
+	}
+
+	PhpProgram program = _programCache.get(path);
+
+	if (program == null || program.isModified())
+	  continue;
+	else if (program.getCompiledPage() != null)
+	  continue;
+
+	try {
+	  PhpGenerator gen = new PhpGenerator(_php);
+	
+	  Class pageClass = gen.generate(program);
+
+	  createPage(path, program, pageClass);
+	} catch (Throwable e) {
+	  log.log(Level.FINE, e.toString(), e);
+	}
+      }
+    }
+  }
+}
+

@@ -1,0 +1,1070 @@
+/*
+ * Copyright (c) 1998-2004 Caucho Technology -- all rights reserved
+ *
+ * This file is part of Resin(R) Open Source
+ *
+ * Each copy or derived work must preserve the copyright notice and this
+ * notice unmodified.
+ *
+ * Resin Open Source is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * Resin Open Source is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE, or any warranty
+ * of NON-INFRINGEMENT.  See the GNU General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Resin Open Source; if not, write to the
+ *
+ *   Free Software Foundation, Inc.
+ *   59 Temple Place, Suite 330
+ *   Boston, MA 02111-1307  USA
+ *
+ * @author Scott Ferguson
+ */
+
+package com.caucho.php.lib;
+
+import java.io.IOException;
+
+import java.util.Map;
+import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.Iterator;
+
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
+import java.util.regex.PatternSyntaxException;
+
+import com.caucho.util.L10N;
+
+import com.caucho.php.PhpRuntimeException;
+
+import com.caucho.php.module.PhpModule;
+import com.caucho.php.module.AbstractPhpModule;
+import com.caucho.php.module.Optional;
+import com.caucho.php.module.Reference;
+
+import com.caucho.php.env.Value;
+import com.caucho.php.env.Env;
+import com.caucho.php.env.NullValue;
+import com.caucho.php.env.BooleanValue;
+import com.caucho.php.env.ArrayValue;
+import com.caucho.php.env.ArrayValueImpl;
+import com.caucho.php.env.LongValue;
+import com.caucho.php.env.StringValue;
+import com.caucho.php.env.DefaultValue;
+import com.caucho.php.env.VarMap;
+import com.caucho.php.env.ChainedMap;
+import com.caucho.php.env.Callback;
+
+import com.caucho.php.program.AbstractFunction;
+
+import com.caucho.util.LruCache;
+
+import com.caucho.vfs.WriteStream;
+
+/**
+ * PHP regexp routines.
+ */
+public class PhpRegexpModule extends AbstractPhpModule {
+  private static final L10N L = new L10N(PhpRegexpModule.class);
+
+  private static final int REGEXP_EVAL = 0x01;
+  
+  public static final int PREG_PATTERN_ORDER = 0x01;
+  public static final int PREG_SET_ORDER = 0x02;
+  public static final int PREG_OFFSET_CAPTURE = 0x04;
+
+  public static final int PREG_SPLIT_NO_EMPTY = 0x01;
+  public static final int PREG_SPLIT_DELIM_CAPTURE = 0x02;
+  public static final int PREG_SPLIT_OFFSET_CAPTURE = 0x04;
+
+  public static final boolean []PREG_QUOTE = new boolean[256];
+  
+  private static final LruCache<String,Pattern> _patternCache
+    = new LruCache<String,Pattern>(1024);
+
+  private static final LruCache<String,ArrayList<Replacement>> _replacementCache
+    = new LruCache<String,ArrayList<Replacement>>(1024);
+
+  private static final HashMap<String,Value> _constMap
+    = new HashMap<String,Value>();
+
+  static {
+    _constMap.put("PREG_PATTERN_ORDER", new LongValue(PREG_PATTERN_ORDER));
+    _constMap.put("PREG_SET_ORDER", new LongValue(PREG_SET_ORDER));
+    _constMap.put("PREG_OFFSET_CAPTURE", new LongValue(PREG_OFFSET_CAPTURE));
+  }
+
+  /**
+   * Adds the constant to the PHP engine's constant map.
+   *
+   * @return the new constant chain
+   */
+  public Map<String,Value> getConstMap()
+  {
+    return _constMap;
+  }
+
+  /**
+   * Returns the index of the first match.
+   *
+   * @param env the calling environment
+   */
+  public static Value ereg(Env env,
+			   Value patternV,
+			   Value stringV,
+			   @Optional Value regsV)
+    throws Throwable
+  {
+    return ereg(env, patternV, stringV, regsV, 0);
+  }
+
+  /**
+   * Returns the index of the first match.
+   *
+   * @param env the calling environment
+   */
+  public static Value eregi(Env env,
+			    Value patternV,
+			    Value stringV,
+			    @Optional Value regsV)
+    throws Throwable
+  {
+    return ereg(env, patternV, stringV, regsV, Pattern.CASE_INSENSITIVE);
+  }
+
+  /**
+   * Returns the index of the first match.
+   *
+   * @param env the calling environment
+   */
+  private static Value ereg(Env env,
+			    Value patternV,
+			    Value stringV,
+			    Value regsV,
+			    int flags)
+    throws Throwable
+  {
+    Pattern pattern = Pattern.compile(patternV.toString(env), flags);
+    Matcher matcher = pattern.matcher(stringV.toString(env));
+
+    if (! (matcher.find()))
+      return BooleanValue.FALSE;
+
+    if (regsV != null)
+      regsV = regsV.toValue();
+
+    if (regsV instanceof ArrayValue) {
+      ArrayValue regs = (ArrayValue) regsV;
+
+      regs.put(LongValue.ZERO, new StringValue(matcher.group()));
+      int count = matcher.groupCount();
+
+      for (int i = 1; i <= count; i++) {
+	regs.put(new LongValue(i), new StringValue(matcher.group(i)));
+      }
+      
+      int len = matcher.end() - matcher.start();
+
+      if (len == 0)
+	return LongValue.ONE;
+      else
+	return new LongValue(len);
+    }
+    else {
+      return LongValue.ONE;
+    }
+  }
+
+  /**
+   * Returns the index of the first match.
+   *
+   * @param env the calling environment
+   */
+  public static Value preg_match(Env env,
+				 Value patternV,
+				 Value stringV,
+				 @Optional @Reference Value regsVar,
+				 @Optional int flags,
+				 @Optional int offset)
+    throws Throwable
+  {
+    String patternString = patternV.toString();
+
+    if (patternString.length() < 2) // XXX: should be error
+      return LongValue.ZERO;
+    
+    Pattern pattern = compileRegexp(patternString);
+    Matcher matcher = pattern.matcher(stringV.toString(env));
+
+    if (! (matcher.find(offset)))
+      return LongValue.ZERO;
+
+    boolean isOffsetCapture = (flags & PREG_OFFSET_CAPTURE) != 0;
+
+    ArrayValue regs;
+
+    if (regsVar instanceof DefaultValue)
+      regs = null;
+    else
+      regs = new ArrayValueImpl();
+
+    if (regs != null) {
+      if (isOffsetCapture) {
+	ArrayValueImpl part = new ArrayValueImpl();
+	part.append(new StringValue(matcher.group()));
+	part.append(new LongValue(matcher.start()));
+	
+	regs.put(LongValue.ZERO, part);
+      }
+      else
+	regs.put(LongValue.ZERO, new StringValue(matcher.group()));
+      
+      int count = matcher.groupCount();
+
+      for (int i = 1; i <= count; i++) {
+	Value value;
+	if (matcher.group(i) != null)
+	  value = new StringValue(matcher.group(i));
+	else
+	  value = NullValue.NULL;
+      
+	if (isOffsetCapture) {
+	  ArrayValueImpl part = new ArrayValueImpl();
+	  part.append(value);
+	  part.append(new LongValue(matcher.start()));
+	
+	  regs.put(new LongValue(i), part);
+	}
+	else
+	  regs.put(new LongValue(i), value);
+      }
+
+      regsVar.set(regs);
+    }
+
+    return LongValue.ONE;
+  }
+
+  /**
+   * Returns the index of the first match.
+   *
+   * @param env the calling environment
+   */
+  public static Value preg_match_all(String patternString,
+				     String subject,
+				     @Reference Value matchRef,
+				     @Optional("PREG_PATTERN_ORDER") int flags,
+				     @Optional int offset)
+    throws Throwable
+  {
+    if (patternString.length() < 2) // XXX: should be error
+      return LongValue.ZERO;
+
+    Pattern pattern = compileRegexp(patternString);
+    Matcher matcher = pattern.matcher(subject);
+
+    int i = 0;
+
+    ArrayValue matches;
+
+    if (matchRef instanceof ArrayValue)
+      matches = (ArrayValue) matchRef;
+    else
+      matches = new ArrayValueImpl();
+
+    matches.clear();
+
+    ArrayList<ArrayValue> matchList = new ArrayList<ArrayValue>();
+
+    if ((flags & PREG_PATTERN_ORDER) != 0) {
+      for (int j = 0; j <= matcher.groupCount(); j++) {
+	ArrayValue values = new ArrayValueImpl();
+	matches.append(values);
+	matchList.add(values);
+      }
+    }
+    
+    matchRef.set(matches);
+
+    if (! (matcher.find())) {
+      return LongValue.ZERO;
+    }
+
+    int count = 0;
+    
+    do {
+      count++;
+      
+      if ((flags & PREG_PATTERN_ORDER) != 0) {
+	for (int j = 0; j <= matcher.groupCount(); j++) {
+	  ArrayValue values = matchList.get(j);
+
+	  String groupValue = matcher.group(j);
+
+	  if (groupValue != null)
+	    values.append(new StringValue(groupValue));
+	  else
+	    values.append(NullValue.NULL);
+	}
+      }
+      else if ((flags & PREG_SET_ORDER) != 0) {
+	ArrayValue matchResult = new ArrayValueImpl();
+	matches.append(matchResult);
+	
+	for (int j = 0; j <= matcher.groupCount(); j++) {
+	  String groupValue = matcher.group(j);
+
+	  if (groupValue != null)
+	    matchResult.append(new StringValue(groupValue));
+	  else
+	    matchResult.append(NullValue.NULL);
+	}
+      }
+      else {
+	throw new UnsupportedOperationException();
+      }
+    } while (matcher.find());
+
+    return new LongValue(count);
+  }
+
+  /**
+   * Quotes regexp values
+   */
+  public static String preg_quote(String string,
+				  @Optional String delim)
+    throws Throwable
+  {
+    StringBuilder sb = new StringBuilder();
+
+    boolean []extra = null;
+
+    if (delim != null && ! delim.equals("")) {
+      extra = new boolean[256];
+
+      for (int i = 0; i < delim.length(); i++)
+	extra[delim.charAt(i)] = true;
+    }
+
+    int length = string.length();
+    for (int i = 0; i < length; i++) {
+      char ch = string.charAt(i);
+
+      if (ch >= 256)
+	sb.append(ch);
+      else if (PREG_QUOTE[ch]) {
+	sb.append('\\');
+	sb.append(ch);
+      }
+      else if (extra != null && extra[ch]) {
+	sb.append('\\');
+	sb.append(ch);
+      }
+      else
+	sb.append(ch);
+    }
+
+    return sb.toString();
+  }
+
+  /**
+   * Replaces values using regexps
+   */
+  public static Value preg_replace(Env env,
+				   Value patternValue,
+				   Value replacement,
+				   String subject,
+				   @Optional("4294967296") long limit,
+				   @Optional @Reference Value countV)
+    throws Throwable
+  {
+    String string = subject;
+    
+    if (patternValue.isArray() && replacement.isArray()) {
+      ArrayValue patternArray = (ArrayValue) patternValue;
+      ArrayValue replacementArray = (ArrayValue) replacement;
+      
+      Iterator<Value> patternIter = patternArray.values().iterator(); 
+      Iterator<Value> replacementIter = replacementArray.values().iterator();
+
+      while (patternIter.hasNext() && replacementIter.hasNext()) {
+	string = pregReplaceString(env,
+				   patternIter.next().toString(),
+				   replacementIter.next().toString(),
+				   string,
+				   limit,
+				   countV);
+      }
+    }
+    else if (patternValue.isArray()) {
+      ArrayValue patternArray = (ArrayValue) patternValue;
+      
+      Iterator<Value> patternIter = patternArray.values().iterator(); 
+
+      while (patternIter.hasNext()) {
+	string = pregReplaceString(env,
+				   patternIter.next().toString(),
+				   replacement.toString(),
+				   string,
+				   limit,
+				   countV);
+      }
+    }
+    else {
+      string = pregReplaceString(env,
+				 patternValue.toString(),
+				 replacement.toString(),
+				 string,
+				 limit,
+				 countV);
+    }
+
+    return new StringValue(string);
+  }
+
+  /**
+   * Replaces values using regexps
+   */
+  private static String pregReplaceString(Env env,
+					  String patternString,
+					  String replacement,
+					  String subject,
+					  long limit,
+					  Value countV)
+    throws Throwable
+  {
+    Pattern pattern = compileRegexp(patternString);
+
+    int patternFlags = regexpFlags(patternString);
+
+    ArrayList<Replacement> replacementProgram
+      = _replacementCache.get(replacement);
+
+    if (replacementProgram == null) {
+      replacementProgram = compileReplacement(env, replacement);
+      _replacementCache.put(replacement, replacementProgram);
+    }
+
+    return preg_replace_impl(env, pattern, replacementProgram,
+			     subject, countV,
+			     (patternFlags & REGEXP_EVAL) != 0);
+  }
+
+  /**
+   * Replaces values using regexps
+   */
+  public static Value ereg_replace(Env env,
+				   String patternString,
+				   String replacement,
+				   String subject)
+    throws Throwable
+  {
+    Pattern pattern = Pattern.compile(cleanRegexp(patternString, false));
+
+    ArrayList<Replacement> replacementProgram
+      = _replacementCache.get(replacement);
+
+    if (replacementProgram == null) {
+      replacementProgram = compileReplacement(env, replacement);
+      _replacementCache.put(replacement, replacementProgram);
+    }
+
+    String result = preg_replace_impl(env, pattern, replacementProgram,
+				      subject, NullValue.NULL, false);
+
+    return new StringValue(result);
+  }
+
+  /**
+   * Replaces values using regexps
+   */
+  public static Value eregi_replace(Env env,
+				    String patternString,
+				    String replacement,
+				    String subject)
+    throws Throwable
+  {
+    Pattern pattern = Pattern.compile(cleanRegexp(patternString, false),
+				      Pattern.CASE_INSENSITIVE);
+
+    ArrayList<Replacement> replacementProgram
+      = _replacementCache.get(replacement);
+
+    if (replacementProgram == null) {
+      replacementProgram = compileReplacement(env, replacement);
+      _replacementCache.put(replacement, replacementProgram);
+    }
+
+    String result = preg_replace_impl(env, pattern, replacementProgram,
+				      subject, NullValue.NULL, false);
+
+    return new StringValue(result);
+  }
+
+  /**
+   * Replaces values using regexps
+   */
+  private static String preg_replace_impl(Env env,
+					  Pattern pattern,
+					  ArrayList<Replacement> replacementList,
+					  String subject,
+					  Value countV,
+					  boolean isEval)
+    throws Throwable
+  {
+    Matcher matcher = pattern.matcher(subject);
+
+    StringBuilder result = new StringBuilder();
+    int tail = 0;
+
+    int replacementLen = replacementList.size();
+
+    while (matcher.find()) {
+      if (tail < matcher.start())
+	result.append(subject.substring(tail, matcher.start()));
+
+      if (isEval) {
+	StringBuilder evalString = new StringBuilder();
+	
+	for (int i = 0; i <  replacementLen; i++) {
+	  Replacement replacement = replacementList.get(i);
+
+	  replacement.eval(evalString, matcher);
+	}
+
+	result.append(env.evalCode(evalString.toString()));
+      }
+      else {
+	for (int i = 0; i <  replacementLen; i++) {
+	  Replacement replacement = replacementList.get(i);
+
+	  replacement.eval(result, matcher);
+	}
+      }
+
+      tail = matcher.end();
+    }
+
+    if (tail < subject.length())
+      result.append(subject.substring(tail));
+
+    return result.toString();
+  }
+
+  /**
+   * Replaces values using regexps
+   */
+  public static Value preg_replace_callback(Env env,
+					    String patternString,
+					    Callback fun,
+					    String subject,
+					    @Optional("4294967296") long limit,
+					    @Optional @Reference Value countV)
+    throws Throwable
+  {
+    Pattern pattern = compileRegexp(patternString);
+
+    Matcher matcher = pattern.matcher(subject);
+
+    StringBuilder result = new StringBuilder();
+    int tail = 0;
+
+    while (matcher.find()) {
+      if (tail < matcher.start())
+	result.append(subject.substring(tail, matcher.start()));
+
+      ArrayValue regs = new ArrayValueImpl();
+
+      for (int i = 0; i <= matcher.groupCount(); i++) {
+	String group = matcher.group(i);
+
+	if (group != null)
+	  regs.append(new StringValue(group));
+	else
+	  regs.append(StringValue.EMPTY);
+      }
+
+      Value replacement = fun.eval(env, regs);
+
+      result.append(replacement);
+
+      tail = matcher.end();
+    }
+
+    if (tail < subject.length())
+      result.append(subject.substring(tail));
+
+    return new StringValue(result.toString());
+  }
+
+  /**
+   * Returns the index of the first match.
+   *
+   * @param env the calling environment
+   */
+  public static Value preg_split(Env env,
+				 String patternString,
+				 String string,
+				 @Optional("-1") long limit,
+				 @Optional int flags)
+    throws Throwable
+  {
+    Pattern pattern = compileRegexp(patternString);
+
+    if (limit < 0)
+      limit = Long.MAX_VALUE;
+
+    ArrayValue result = new ArrayValueImpl();
+
+    if ((flags & PREG_SPLIT_OFFSET_CAPTURE) != 0) {
+      int head = 0;
+
+      Matcher matcher = pattern.matcher(string);
+      while (matcher.find()) {
+	String value = string.substring(head, matcher.start());
+
+	ArrayValue part = new ArrayValueImpl();
+	part.append(new StringValue(value));
+	part.append(new LongValue(head));
+
+	result.append(part);
+	
+	head = matcher.end();
+      }
+
+      if (head < string.length()) {
+	ArrayValue part = new ArrayValueImpl();
+	part.append(new StringValue(string.substring(head)));
+	part.append(new LongValue(head));
+	
+	result.append(part);
+      }
+    }
+    else if ((flags & PREG_SPLIT_DELIM_CAPTURE) != 0) {
+      int head = 0;
+
+      Matcher matcher = pattern.matcher(string);
+      while (matcher.find()) {
+	String value = string.substring(head, matcher.start());
+
+	result.append(new StringValue(value));
+	
+	for (int i = 1; i <= matcher.groupCount(); i++)
+	  result.append(new StringValue(matcher.group(i)));
+	
+	head = matcher.end();
+      }
+
+      if (head < string.length()) {
+	result.append(new StringValue(string.substring(head)));
+      }
+    }
+    else {
+      String []value = pattern.split(string);
+
+      for (int i = 0; i < value.length; i++)
+	result.append(new StringValue(value[i]));
+    }
+
+    return result;
+  }
+
+  /**
+   * Returns the index of the first match.
+   *
+   * @param env the calling environment
+   */
+  public static Value split(Env env,
+			    String patternString,
+			    String string,
+			    @Optional long limit)
+    throws Throwable
+  {
+    patternString = cleanRegexp(patternString, false);
+    
+    Pattern pattern = Pattern.compile(patternString);
+
+    String []value = pattern.split(string);
+
+    ArrayValue result = new ArrayValueImpl();
+
+    for (int i = 0; i < value.length; i++)
+      result.append(new StringValue(value[i]));
+
+    return result;
+  }
+
+  private static Pattern compileRegexp(String rawRegexp)
+  {
+    Pattern pattern = _patternCache.get(rawRegexp);
+
+    if (pattern != null)
+      return pattern;
+    
+    char delim = rawRegexp.charAt(0);
+    if (delim == '{')
+      delim = '}';
+    else if (delim == '[')
+      delim = ']';
+    
+    int tail = rawRegexp.lastIndexOf(delim);
+
+    if (tail <= 0)
+      throw new IllegalStateException(L.l("Can't find second {0} in regexp '{1}'.",
+					  String.valueOf((char) delim),
+					  rawRegexp));
+    
+    int len = rawRegexp.length();
+
+    int flags = 0;
+    boolean isExt = false;
+    boolean isGreedy = true;
+
+    for (int i = tail + 1; i < len; i++) {
+      char ch = rawRegexp.charAt(i);
+
+      switch (ch) {
+      case 'i':
+	flags |= Pattern.CASE_INSENSITIVE;
+	break;
+      case 's':
+	flags |= Pattern.DOTALL;
+	break;
+      case 'x':
+	flags |= Pattern.COMMENTS;
+	break;
+      case 'm':
+	flags |= Pattern.MULTILINE;
+	break;
+      case 'U':
+	isGreedy = false;
+	break;
+      }
+    }
+
+    String regexp = rawRegexp.substring(1, tail);
+
+    regexp = cleanRegexp(regexp, (flags & Pattern.COMMENTS) != 0);
+
+    if (! isGreedy)
+      regexp = toNonGreedy(regexp);
+    
+    pattern = Pattern.compile(regexp, flags);
+
+    _patternCache.put(rawRegexp, pattern);
+
+    return pattern;
+  }
+
+  private static int regexpFlags(String rawRegexp)
+  {
+    char delim = rawRegexp.charAt(0);
+    if (delim == '{')
+      delim = '}';
+    else if (delim == '[')
+      delim = ']';
+    
+    int tail = rawRegexp.lastIndexOf(delim);
+
+    if (tail <= 0)
+      throw new IllegalStateException(L.l("Can't find second {0} in regexp '{1}'.",
+					  String.valueOf((char) delim),
+					  rawRegexp));
+    
+    int len = rawRegexp.length();
+
+    int flags = 0;
+
+    for (int i = tail + 1; i < len; i++) {
+      char ch = rawRegexp.charAt(i);
+
+      switch (ch) {
+      case 'e':
+	flags |= REGEXP_EVAL;
+	break;
+      }
+    }
+
+    return flags;
+  }
+
+  private static ArrayList<Replacement>
+    compileReplacement(Env env, String replacement)
+    throws Exception
+  {
+    ArrayList<Replacement> program = new ArrayList<Replacement>();
+    StringBuilder text = new StringBuilder();
+
+    for (int i = 0; i < replacement.length(); i++) {
+      char ch = replacement.charAt(i);
+
+      if ((ch == '\\' || ch == '$') && i + 1 < replacement.length()) {
+	char digit;
+	  
+	if ('0' <= (digit = replacement.charAt(i + 1)) && digit <= '9') {
+	  int group = digit - '0';
+	  i++;
+
+	  if (i + 1 < replacement.length() &&
+	      '0' <= (digit = replacement.charAt(i + 1)) && digit <= '9') {
+	    group = 10 * group + digit - '0';
+	    i++;
+	  }
+
+	  if (text.length() > 0)
+	    program.add(new TextReplacement(text.toString()));
+
+	  program.add(new GroupReplacement(group));
+	  
+	  text.setLength(0);
+	}
+	else if (ch == '\\') {
+	  i++;
+	    
+	  text.append(digit);
+	}
+	else if (ch == '$' && digit == '{') {
+	  i += 2;
+
+	  int group = 0;
+
+	  while (i < replacement.length() &&
+		 '0' <= (digit = replacement.charAt(i)) && digit <= '9') {
+	    group = 10 * group + digit - '0';
+
+	    i++;
+	  }
+
+	  if (digit != '}') {
+	    env.warning(L.l("bad regexp {0}", replacement));
+	    throw new Exception("bad regexp");
+	  }
+
+
+	  if (text.length() > 0)
+	    program.add(new TextReplacement(text.toString()));
+
+	  program.add(new GroupReplacement(group));
+	  text.setLength(0);
+	}
+	else
+	  text.append(ch);
+      }
+      else
+	text.append(ch);
+    }
+
+    if (text.length() > 0)
+      program.add(new TextReplacement(text.toString()));
+
+    return program;
+  }
+
+  /**
+   * Cleans the regexp from valid values that the Java regexps can't
+   * handle.  Currently "+?".
+   */
+  // XXX: not handling '['
+  private static String cleanRegexp(String regexp, boolean isComments)
+  {
+    int len = regexp.length();
+
+    StringBuilder sb = new StringBuilder();
+    char quote = 0;
+
+    for (int i = 0; i < len; i++) {
+      char ch = regexp.charAt(i);
+
+      switch (ch) {
+      case '\\':
+	sb.append(ch);
+	
+	if (i + 1 < len) {
+	  i++;
+	  
+	  ch = regexp.charAt(i);
+
+	  if ('1' <= ch && ch <= '3') {
+	    // Java's regexp requires \0 for octal
+	    
+	    sb.append('\\');
+	    sb.append('0');
+	    sb.append(ch);
+	  }
+	  else
+	    sb.append(ch);
+	}
+	break;
+	
+      case '[':
+	if (quote == '[')
+	  sb.append("\\[");
+	else
+	  sb.append(ch);
+	
+	if (quote == 0)
+	  quote = ch;
+	break;
+	
+      case '#':
+	if (quote == '[' && isComments)
+	  sb.append("\\#");
+	else
+	  sb.append(ch);
+	break;
+	
+      case ']':
+	sb.append(ch);
+
+	if (quote == '[')
+	  quote = 0;
+	break;
+
+      case '{':
+	if (i + 1 < len &&
+	    ('0' <= (ch = regexp.charAt(i + 1)) && ch <= '9' || ch == ',')) {
+	  sb.append("{");
+	  for (i++;
+	       i < len && ('0' <= (ch = regexp.charAt(i)) && ch <= '9' || ch == ',');
+	       i++) {
+	    sb.append(ch);
+	  }
+	  
+	  if (i < len)
+	    sb.append(regexp.charAt(i));
+	}
+	else {
+	  sb.append("\\{");
+	}
+	break;
+
+      case '}':
+	sb.append("\\}");
+	break;
+
+      default:
+	sb.append(ch);
+      }
+    }
+
+    return sb.toString();
+  }
+
+  /**
+   * Converts to non-greedy.
+   */
+  private static String toNonGreedy(String regexp)
+  {
+    int len = regexp.length();
+
+    StringBuilder sb = new StringBuilder();
+    char quote = 0;
+
+    for (int i = 0; i < len; i++) {
+      char ch = regexp.charAt(i);
+
+      switch (ch) {
+      case '\\':
+	sb.append(ch);
+	
+	if (i + 1 < len) {
+	  sb.append(regexp.charAt(i + 1));
+	  i++;
+	}
+	break;
+	
+      case '[':
+	sb.append(ch);
+	
+	if (quote == 0)
+	  quote = ch;
+	break;
+	
+      case ']':
+	sb.append(ch);
+
+	if (quote == '[')
+	  quote = 0;
+	break;
+
+      case '*':
+      case '?':
+      case '+':
+	sb.append(ch);
+	
+	if (i + 1 < len && (ch = regexp.charAt(i + 1)) != '?') {
+	  sb.append('?');
+	}
+	break;
+
+      default:
+	sb.append(ch);
+      }
+    }
+
+    return sb.toString();
+  }
+
+  static class Replacement {
+    void eval(StringBuilder sb, Matcher matcher)
+    {
+    }
+  }
+
+  static class TextReplacement extends Replacement {
+    private String _text;
+
+    TextReplacement(String text)
+    {
+      _text = text;
+    }
+    
+    void eval(StringBuilder sb, Matcher matcher)
+    {
+      sb.append(_text);
+    }
+  }
+
+  static class GroupReplacement extends Replacement {
+    private int _group;
+
+    GroupReplacement(int group)
+    {
+      _group = group;
+    }
+    
+    void eval(StringBuilder sb, Matcher matcher)
+    {
+      if (_group <= matcher.groupCount())
+	sb.append(matcher.group(_group));
+    }
+  }
+  
+  static {
+    PREG_QUOTE['\\'] = true;
+    PREG_QUOTE['+'] = true;
+    PREG_QUOTE['*'] = true;
+    PREG_QUOTE['?'] = true;
+    PREG_QUOTE['['] = true;
+    PREG_QUOTE['^'] = true;
+    PREG_QUOTE[']'] = true;
+    PREG_QUOTE['$'] = true;
+    PREG_QUOTE['('] = true;
+    PREG_QUOTE[')'] = true;
+    PREG_QUOTE['{'] = true;
+    PREG_QUOTE['}'] = true;
+    PREG_QUOTE['='] = true;
+    PREG_QUOTE['!'] = true;
+    PREG_QUOTE['<'] = true;
+    PREG_QUOTE['>'] = true;
+    PREG_QUOTE['|'] = true;
+    PREG_QUOTE[':'] = true;
+  }
+}

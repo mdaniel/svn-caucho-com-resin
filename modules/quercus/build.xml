@@ -1,0 +1,133 @@
+<project name="php" default="compile" basedir=".">
+  <property file="local.properties"/>
+
+  <property name="install" location="${basedir}/"/>
+
+  <property name="src" location="${basedir}/src"/>
+
+  <property name="resin" location="../resin"/>
+  <property name="resin.lib" location="${resin}/lib"/>
+
+  <property name="build" location="${install}/build"/>
+  <property name="lib" location="${install}/lib"/>
+  <property name="clientlib" location="${install}/clientlib"/>
+  <property name="dist" location="${install}/dist"/>
+
+  <property name="resin.src" location="${resin}/src"/>
+  <property name="resin.build" location="${resin}/build"/>
+
+  <property name="javac.verbose" value="no"/>
+  <property name="javac.debug" value="on"/>
+  <property name="javac.optimize" value="off"/>
+  <property name="javac.deprecation" value="off"/>
+  <property name="javac.nowarn" value="on"/>
+  <property name="javac.memoryMaximumSize" value="256m"/>
+  <property name="javac.source" value="1.4"/>
+
+  <property name="jar.compress" value="false"/>
+  <property name="jar.index" value="true"/>
+  <property name="jar.update" value="true"/>
+
+  <property name="shell" value="bash"/>
+
+  <target name="tstamp">
+    <tstamp/>
+    <tstamp>
+      <format property="date" pattern="EEE, dd MMM yyyy hh:mm:ss zzz"/>
+    </tstamp>
+    <tstamp>
+      <format property="vdate" pattern="yyyyMMdd'T'hhmmss"/>
+    </tstamp>
+    <tstamp>
+      <format property="snapshotdate" pattern="yyMMdd"/>
+    </tstamp>
+  </target>
+
+  <target name="init" depends="tstamp">
+    <property name="product" value="Resin"/>
+    <property name="shortproduct" value="resin-pro"/>
+    <property name="version" value="3.0.s${snapshotdate}"/>
+
+    <mkdir dir="${build}"/>
+    <mkdir dir="${build}/webapps"/>
+
+    <condition property="unix">
+      <os family="unix"/>
+    </condition>
+  </target>
+
+  <target name="compile" 
+          depends="init, php">
+  </target>
+
+  <target name="php" depends="init">
+    <!-- build module -->
+    <antcall target="module" inheritRefs="true">
+      <param name="module.name" value="php"/>
+      <param name="javac.source" value="1.5"/>
+    </antcall>
+  </target>
+
+  <target name="module">
+    <property name="module.src" value="${basedir}/modules/${module.name}/src"/>
+    <property name="module.build" value="${basedir}/modules/${module.name}/classes"/>
+    <property name="openmodule.build" value="${resin.build}/${module.name}"/>
+    <property name="module.dist" value="${lib}"/>
+    <property name="module.jar" value="${module.name}.jar"/>
+
+    <property file="${module.src}/module.properties"/>
+
+    <mkdir dir="${module.build}" />
+
+    <copy todir="${module.build}">
+      <fileset dir="${module.src}">
+        <exclude name="**/*.svn/**"/>
+
+        <include name="**/*.xml"/>
+        <include name="**/*.rnc"/>
+        <include name="**/*.tld"/>
+        <include name="**/*.properties"/>
+        <include name="META-INF/**"/>
+      </fileset>
+    </copy>
+
+    <javac srcdir="${module.src}" destdir="${module.build}"
+           excludes="**/.svn/**"
+           fork="true" 
+           verbose="${javac.verbose}" 
+           debug="${javac.debug}" optimize="${javac.optimize}"
+           deprecation="${javac.deprecation}" nowarn="${javac.nowarn}"
+           source="${javac.source}"
+           memoryMaximumSize="${javac.memoryMaximumSize}">
+      <classpath>
+        <fileset dir="${resin.lib}">
+          <include name="*.jar"/>
+       </fileset>
+      </classpath>
+    </javac>
+
+    <mkdir dir="${module.dist}" />
+    <mkdir dir="${openmodule.build}"/>
+
+    <jar jarfile="${module.dist}/${module.jar}"
+         compress="${jar.compress}" index="${jar.index}" update="${jar.update}">
+      <fileset dir="${openmodule.build}">
+        <exclude name=".cvsignore"/>
+        <exclude name=".svn"/>
+      </fileset>
+      <fileset dir="${module.build}">
+        <exclude name=".svn"/>
+      </fileset>
+    </jar>
+  </target>
+
+  <target name="clean" depends="init">
+    <delete>
+      <fileset dir=".">
+        <include name="**/*.class"/>
+      </fileset>
+    </delete>
+    <delete dir="${dist}"/>
+  </target>
+</project>
+

@@ -1,0 +1,697 @@
+/*
+ * Copyright (c) 1998-2004 Caucho Technology -- all rights reserved
+ *
+ * This file is part of Resin(R) Open Source
+ *
+ * Each copy or derived work must preserve the copyright notice and this
+ * notice unmodified.
+ *
+ * Resin Open Source is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * Resin Open Source is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE, or any warranty
+ * of NON-INFRINGEMENT.  See the GNU General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Resin Open Source; if not, write to the
+ *
+ *   Free Software Foundation, Inc.
+ *   59 Temple Place, Suite 330
+ *   Boston, MA 02111-1307  USA
+ *
+ * @author Scott Ferguson
+ */
+
+package com.caucho.php;
+
+import java.io.IOException;
+import java.io.InputStream;
+
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Enumeration;
+import java.util.Map;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import java.net.URL;
+
+import javax.sql.DataSource;
+
+import com.caucho.config.ConfigException;
+
+import com.caucho.php.env.Value;
+import com.caucho.php.env.StringValue;
+import com.caucho.php.env.NullValue;
+import com.caucho.php.env.BooleanValue;
+import com.caucho.php.env.ArrayValueImpl;
+import com.caucho.php.env.LongValue;
+import com.caucho.php.env.DoubleValue;
+import com.caucho.php.env.Env;
+import com.caucho.php.env.VarMap;
+import com.caucho.php.env.ChainedMap;
+import com.caucho.php.env.PhpClass;
+import com.caucho.php.env.JavaClassDefinition;
+import com.caucho.php.env.SessionArrayValue;
+
+import com.caucho.php.module.PhpModule;
+import com.caucho.php.module.StaticFunction;
+
+import com.caucho.php.page.PhpPage;
+import com.caucho.php.page.PageManager;
+
+import com.caucho.php.parser.PhpParser;
+
+import com.caucho.php.program.PhpProgram;
+import com.caucho.php.program.InterpretedClassDef;
+
+import com.caucho.vfs.Path;
+import com.caucho.vfs.ReadStream;
+import com.caucho.vfs.Vfs;
+
+import com.caucho.util.Log;
+import com.caucho.util.LruCache;
+
+/**
+ * Facade for the PHP language.
+ */
+public class Php {
+  private static final Logger log = Log.open(Php.class);
+
+  private final PageManager _pageManager;
+
+  private HashMap<String,PhpModule> _modules
+    = new HashMap<String,PhpModule>();
+  
+  private HashMap<String,StaticFunction> _staticFunctions
+    = new HashMap<String,StaticFunction>();
+
+  private PhpClass _stdClass;
+  
+  private HashMap<String,PhpClass> _staticClasses
+    = new HashMap<String,PhpClass>();
+  
+  private HashMap<String,JavaClassDefinition> _javaClassWrappers
+    = new HashMap<String,JavaClassDefinition>();
+
+  private HashMap<String,StringValue> _iniMap
+    = new HashMap<String,StringValue>();
+
+  private LruCache<String,PhpProgram> _evalCache
+    = new LruCache<String,PhpProgram>(256);
+
+  private VarMap<String,Value> _constMap;
+
+  private static HashSet<String> _superGlobals
+    = new HashSet<String>();
+
+  // XXX: needs to be a timed LRU
+  private HashMap<String,SessionArrayValue> _sessionMap
+    = new HashMap<String,SessionArrayValue>();
+
+  private DataSource _database;
+
+  private long _staticId;
+
+  /**
+   * Constructor.
+   */ 
+  public Php()
+  {
+    initStaticFunctions();
+    initStaticClasses();
+    initStaticClassServices();
+    
+    _pageManager = new PageManager(this);
+  }
+
+  /**
+   * Returns the working directory.
+   */
+  public Path getPwd()
+  {
+    return _pageManager.getPwd();
+  }
+
+  /**
+   * Set true if pages should be compiled.
+   */
+  public void setCompile(boolean isCompile)
+  {
+    _pageManager.setCompile(isCompile);
+  }
+
+  /**
+   * Set true if pages should be compiled.
+   */
+  public void setLazyCompile(boolean isCompile)
+  {
+    _pageManager.setLazyCompile(isCompile);
+  }
+
+  /**
+   * Sets the default data source.
+   */
+  public void setDatabase(DataSource database)
+  {
+    _database = database;
+  }
+
+  /**
+   * Gets the default data source.
+   */
+  public DataSource getDatabase()
+  {
+    return _database;
+  }
+
+  /**
+   * Adds a module
+   */
+  public void addModule(PhpModule module)
+    throws ConfigException
+  {
+    try {
+      introspectPhpModuleClass(module.getClass());
+    } catch (Exception e) {
+      throw new ConfigException(e);
+    }
+  }
+
+  /**
+   * Adds a java class
+   */
+  public void addJavaClass(String name, Class type)
+    throws ConfigException
+  {
+    try {
+      introspectPhpJavaClass(name, type);
+    } catch (Exception e) {
+      throw new ConfigException(e);
+    }
+  }
+
+  /**
+   * Adds a java class
+   */
+  public JavaClassDefinition getJavaClassDefinition(String className)
+  {
+    JavaClassDefinition def = _javaClassWrappers.get(className);
+
+    if (def != null)
+      return def;
+
+    try {
+      ClassLoader loader = Thread.currentThread().getContextClassLoader();
+      
+      Class type = Class.forName(className, false, loader);
+				 
+      def = new JavaClassDefinition(className, type);
+
+      _javaClassWrappers.put(className, def);
+
+      def.introspect(this);
+
+      return def;
+    } catch (RuntimeException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new PhpRuntimeException(e);
+    }
+  }
+
+  /**
+   * Sets an ini value.
+   */
+  public void setIni(String name, StringValue value)
+  {
+    _iniMap.put(name, value);
+  }
+
+  /**
+   * Sets an ini value.
+   */
+  public void setIni(String name, String value)
+  {
+    setIni(name, new StringValue(value));
+  }
+
+  /**
+   * Gets an ini value.
+   */
+  public StringValue getIni(String name)
+  {
+    return _iniMap.get(name);
+  }
+
+  /**
+   * Returns the relative path.
+   */
+  public String getClassName(Path path)
+  {
+    return _pageManager.getClassName(path);
+  }
+  
+  /**
+   * Parses a php program.
+   *
+   * @param path the source file path
+   *
+   * @return the parsed program
+   *
+   * @throws IOException
+   */
+  public PhpPage parse(Path path) throws IOException
+  {
+    return _pageManager.parse(path);
+  }
+  
+  /**
+   * Parses a php string.
+   *
+   * @param code the source code
+   *
+   * @return the parsed program
+   *
+   * @throws IOException
+   */
+  public PhpProgram parseCode(String code) throws IOException
+  {
+    PhpProgram program = _evalCache.get(code);
+
+    if (program == null) {
+      program = PhpParser.parseEval(this, code);
+      _evalCache.put(code, program);
+    }
+
+    return program;
+  }
+  
+  /**
+   * Parses a php string.
+   *
+   * @param code the source code
+   *
+   * @return the parsed program
+   *
+   * @throws IOException
+   */
+  public PhpProgram parseEvalExpr(String code) throws IOException
+  {
+    // XXX: possible conflict with parse eval because of the
+    // return value changes
+    PhpProgram program = _evalCache.get(code);
+
+    if (program == null) {
+      program = PhpParser.parseEvalExpr(this, code);
+      _evalCache.put(code, program);
+    }
+
+    return program;
+  }
+  
+  /**
+   * Parses a function.
+   *
+   * @param args the arguments
+   * @param code the source code
+   *
+   * @return the parsed program
+   *
+   * @throws IOException
+   */
+  public Value parseFunction(String args, String code) throws IOException
+  {
+    return PhpParser.parseFunction(this, args, code);
+  }
+
+  /**
+   * Returns the function with the given name.
+   */
+  public StaticFunction findFunction(String name)
+  {
+    return _staticFunctions.get(name);
+  }
+
+  /**
+   * Returns true if the variable is a superglobal.
+   */
+  public static boolean isSuperGlobal(String name)
+  {
+    return _superGlobals.contains(name);
+  }
+
+  /**
+   * Returns the stdClass definition.
+   */
+  public PhpClass getStdClass()
+  {
+    return _stdClass;
+  }
+  
+  /**
+   * Returns the class with the given name.
+   */
+  public PhpClass findClass(String name)
+  {
+    return _staticClasses.get(name);
+  }
+
+  /**
+   * Returns the module with the given name.
+   */
+  public PhpModule findModule(String name)
+  {
+    return _modules.get(name);
+  }
+
+  /**
+   * Returns true if an extension is loaded.
+   */
+  public boolean isExtensionLoaded(String name)
+  {
+    for (PhpModule module : _modules.values()) {
+      if (module.isExtensionLoaded(name))
+	return true;
+    }
+
+    return false;
+  }
+
+  /**
+   * Returns true if an extension is loaded.
+   */
+  public Value getExtensionFuncs(String name)
+  {
+    for (PhpModule module : _modules.values()) {
+      if (module.isExtensionLoaded(name)) {
+	// XXX:
+	
+	return new ArrayValueImpl();
+      }
+    }
+
+    return BooleanValue.FALSE;
+  }
+
+  public VarMap<String,Value> getConstMap()
+  {
+    return _constMap;
+  }
+
+  public String createStaticName()
+  {
+    return "s" + _staticId++;
+  }
+
+  /**
+   * Loads the session from the backing.
+   */
+  public SessionArrayValue loadSession(Env env, String sessionId)
+  {
+    SessionArrayValue session = _sessionMap.get(sessionId);
+
+    if (session != null)
+      return (SessionArrayValue) session.copy(env);
+    else
+      return null;
+  }
+
+  /**
+   * Saves the session to the backing.
+   */
+  public void saveSession(Env env, String sessionId, SessionArrayValue session)
+  {
+    _sessionMap.put(sessionId, (SessionArrayValue) session.copy(env));
+  }
+
+  /**
+   * Scans the classpath for META-INF/services/com.caucho.php.PhpModule
+   */ 
+  private void initStaticFunctions()
+  {
+    Thread thread = Thread.currentThread();
+    ClassLoader loader = thread.getContextClassLoader();
+    
+    try {
+      String phpModule = "META-INF/services/com.caucho.php.PhpModule";
+      Enumeration<URL> urls = loader.getResources(phpModule);
+
+      while (urls.hasMoreElements()) {
+        URL url = urls.nextElement();
+
+        InputStream is = null;
+        ReadStream rs =  null;
+        try {
+          is = url.openStream();
+          rs = Vfs.openRead(is);
+
+          parseServicesModule(rs);
+        } catch (Throwable e) {
+          log.log(Level.WARNING, e.toString(), e);
+        } finally {
+          if (rs != null)
+            rs.close();
+          if (is != null)
+            is.close();
+        }
+      }
+
+    } catch (Exception e) {
+      log.log(Level.WARNING, e.toString(), e);
+    }
+  }
+
+  /**
+   * Parses the services file, looking for PHP services.
+   */
+  private void parseServicesModule(ReadStream in)
+          throws IOException, ClassNotFoundException,
+          IllegalAccessException, InstantiationException
+  {
+    ClassLoader loader = Thread.currentThread().getContextClassLoader();
+    String line;
+
+    while ((line = in.readLine()) != null) {
+      int p = line.indexOf('#');
+
+      if (p >= 0)
+        line = line.substring(0, p);
+
+      line = line.trim();
+
+      if (line.length() > 0) {
+        String className = line;
+
+        Class cl = Class.forName(className, false, loader);
+
+        introspectPhpModuleClass(cl);
+      }
+    }
+  }
+
+  /**
+   * Introspects the module class for functions.
+   *
+   * @param cl the class to introspect.
+   */
+  private void introspectPhpModuleClass(Class cl)
+    throws IllegalAccessException, InstantiationException
+  {
+    log.fine("PHP loading module " + cl.getName());
+
+    PhpModule module = (PhpModule) cl.newInstance();
+
+    _modules.put(module.getClass().getName(), module);
+
+    Map<String,Value> map = module.getConstMap();
+
+    if (map != null)
+      _constMap = new ChainedMap<String,Value>(_constMap, map);
+
+    for (Field field : cl.getFields()) {
+      if (! Modifier.isPublic(field.getModifiers()))
+        continue;
+      
+      if (! Modifier.isStatic(field.getModifiers()))
+        continue;
+      
+      if (! Modifier.isFinal(field.getModifiers()))
+        continue;
+
+      Object value = field.get(null);
+
+      if (value == null)
+	_constMap.put(field.getName(), NullValue.NULL);
+      else if (Byte.class.equals(value.getClass()) ||
+	       Short.class.equals(value.getClass()) ||
+	       Integer.class.equals(value.getClass()) ||
+	       Long.class.equals(value.getClass())) {
+	_constMap.put(field.getName(),
+		      LongValue.create(((Number) value).longValue()));
+      }
+      else if (Float.class.equals(value.getClass()) ||
+	       Double.class.equals(value.getClass())) {
+	_constMap.put(field.getName(),
+		      DoubleValue.create(((Number) value).doubleValue()));
+      }
+      else if (String.class.equals(value.getClass())) {
+	_constMap.put(field.getName(),
+		      new StringValue((String) value));
+      }
+      else {
+	// XXX: unknown types, e.g. Character?
+      }
+    }
+    
+    Map<String,StringValue> iniMap = module.getDefaultIni();
+
+    if (map != null)
+      _iniMap.putAll(iniMap);
+
+    for (Method method : cl.getMethods()) {
+      if (! Modifier.isPublic(method.getModifiers()))
+        continue;
+
+      Class retType = method.getReturnType();
+
+      if (void.class.isAssignableFrom(retType))
+        continue;
+
+      Class []params = method.getParameterTypes();
+
+      try {
+	StaticFunction function = new StaticFunction(this, module, method);
+
+	String methodName = method.getName();
+
+	if (methodName.startsWith("php_"))
+	  methodName = methodName.substring(4);
+
+	_staticFunctions.put(methodName, function);
+      } catch (Exception e) {
+	log.log(Level.FINE, e.toString(), e);
+      }
+    }
+  }
+
+  /**
+   * Scans the classpath for META-INF/services/com.caucho.php.PhpJavaClass
+   */ 
+  private void initStaticClassServices()
+  {
+    Thread thread = Thread.currentThread();
+    ClassLoader loader = thread.getContextClassLoader();
+    
+    try {
+      String phpModule = "META-INF/services/com.caucho.php.PhpJavaClass";
+      Enumeration<URL> urls = loader.getResources(phpModule);
+
+      while (urls.hasMoreElements()) {
+        URL url = urls.nextElement();
+
+        InputStream is = null;
+        ReadStream rs =  null;
+        try {
+          is = url.openStream();
+          rs = Vfs.openRead(is);
+
+          parseClassServicesModule(rs);
+        } catch (Throwable e) {
+          log.log(Level.WARNING, e.toString(), e);
+        } finally {
+          if (rs != null)
+            rs.close();
+          if (is != null)
+            is.close();
+        }
+      }
+
+    } catch (Exception e) {
+      log.log(Level.WARNING, e.toString(), e);
+    }
+  }
+
+  /**
+   * Parses the services file, looking for PHP services.
+   */
+  private void parseClassServicesModule(ReadStream in)
+          throws IOException, ClassNotFoundException,
+          IllegalAccessException, InstantiationException
+  {
+    ClassLoader loader = Thread.currentThread().getContextClassLoader();
+    String line;
+
+    while ((line = in.readLine()) != null) {
+      int p = line.indexOf('#');
+
+      if (p >= 0)
+        line = line.substring(0, p);
+
+      line = line.trim();
+
+      if (line.length() > 0) {
+        String className = line;
+
+        Class cl = Class.forName(className, false, loader);
+
+	p = className.lastIndexOf('.');
+
+        introspectPhpJavaClass(className.substring(p + 1), cl);
+      }
+    }
+  }
+
+  /**
+   * Introspects the module class for functions.
+   *
+   * @param cl the class to introspect.
+   */
+  private void introspectPhpJavaClass(String name, Class type)
+    throws IllegalAccessException, InstantiationException
+  {
+    log.fine("PHP loading class " + type.getName());
+
+    JavaClassDefinition def = new JavaClassDefinition(name, type);
+
+    // _staticClasses.put(name, def);
+  }
+
+  /**
+   * Scans the classpath for META-INF/services/com.caucho.php.PhpClass
+   */ 
+  private void initStaticClasses()
+  {
+    InterpretedClassDef classDef = new InterpretedClassDef("stdClass", null);
+    
+    _stdClass = new PhpClass(classDef, null);
+
+    _staticClasses.put(_stdClass.getName(), _stdClass);
+  }
+
+  public void close()
+  {
+    _pageManager.close();
+  }
+
+  static {
+    _superGlobals.add("_SERVER");
+    _superGlobals.add("_GET");
+    _superGlobals.add("_POST");
+    _superGlobals.add("_COOKIE");
+    _superGlobals.add("_REQUEST");
+    _superGlobals.add("_SESSION");
+    _superGlobals.add("GLOBALS");
+  }
+}
+

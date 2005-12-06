@@ -1,0 +1,1425 @@
+/*
+ * Copyright (c) 1998-2004 Caucho Technology -- all rights reserved
+ *
+ * This file is part of Resin(R) Open Source
+ *
+ * Each copy or derived work must preserve the copyright notice and this
+ * notice unmodified.
+ *
+ * Resin Open Source is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * Resin Open Source is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE, or any warranty
+ * of NON-INFRINGEMENT.  See the GNU General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Resin Open Source; if not, write to the
+ *
+ *   Free Software Foundation, Inc.
+ *   59 Temple Place, Suite 330
+ *   Boston, MA 02111-1307  USA
+ *
+ * @author Scott Ferguson
+ */
+
+package com.caucho.php.lib;
+
+import java.io.IOException;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.Arrays;
+
+import java.util.logging.Logger;
+import java.util.logging.Level;
+
+import com.caucho.util.L10N;
+
+import com.caucho.php.module.PhpModule;
+import com.caucho.php.module.AbstractPhpModule;
+import com.caucho.php.module.Optional;
+
+import com.caucho.php.env.Value;
+import com.caucho.php.env.Env;
+import com.caucho.php.env.NullValue;
+import com.caucho.php.env.BooleanValue;
+import com.caucho.php.env.DoubleValue;
+import com.caucho.php.env.LongValue;
+import com.caucho.php.env.StringValue;
+import com.caucho.php.env.ArrayValue;
+import com.caucho.php.env.ArrayValueImpl;
+import com.caucho.php.env.ResourceValue;
+import com.caucho.php.env.VarMap;
+import com.caucho.php.env.ChainedMap;
+
+import com.caucho.php.resources.StreamResource;
+
+import com.caucho.util.Alarm;
+
+import com.caucho.vfs.WriteStream;
+import com.caucho.vfs.TempBuffer;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.Vfs;
+
+/**
+ * Information about PHP file
+ */
+public class PhpFileModule extends AbstractPhpModule {
+  private static final L10N L = new L10N(PhpFileModule.class);
+  private static final Logger log
+    = Logger.getLogger(PhpFileModule.class.getName());
+
+  public static final int SEEK_SET = 0;
+  public static final int SEEK_CUR = 1;
+  public static final int SEEK_END = 2;
+  
+  public static final String DIRECTORY_SEPARATOR = "/";
+  public static final String PATH_SEPARATOR = ":";
+
+  private static final HashMap<String,Value> _constMap =
+          new HashMap<String,Value>();
+
+  static {
+    _constMap.put("SEEK_SET", LongValue.create(SEEK_SET));
+    _constMap.put("SEEK_CUR", LongValue.create(SEEK_CUR));
+    _constMap.put("SEEK_END", LongValue.create(SEEK_END));
+  }
+
+  /**
+   * Adds the constant to the PHP engine's constant map.
+   *
+   * @return the new constant chain
+   */
+  public Map<String,Value> getConstMap()
+  {
+    return _constMap;
+  }
+
+  /**
+   * Returns the base name of a string.
+   */
+  public static String basename(String path, @Optional String suffix)
+  {
+    int len = path.length();
+
+    if (len == 0)
+      return "";
+    else if (path.endsWith("/"))
+      len -= 1;
+    else if (path.endsWith("\\"))
+      len -= 1;
+    
+    int p = path.lastIndexOf('/', len - 1);
+
+    if (p < 0)
+      p = path.lastIndexOf('\\', len - 1);
+
+    String file;
+
+    if (p < 0)
+      file = path.substring(0, len);
+    else
+      file = path.substring(p + 1, len);
+
+    if (suffix != null && file.endsWith(suffix))
+      file = file.substring(0, file.length() - suffix.length());
+
+    return file;
+  }
+
+  /**
+   * Changes the working directory
+   *
+   * @param path the path to change to
+   */
+  public static boolean chdir(Env env, Path path)
+  {
+    if (path.isDirectory()) {
+      env.setPwd(path);
+      return true;
+    }
+    else
+      return false;
+  }
+
+  /**
+   * Changes the working directory, forming a virtual root
+   *
+   * @param path the path to change to
+   */
+  public static boolean chroot(Env env, Path path)
+  {
+    if (path.isDirectory()) {
+      env.setPwd(path.createRoot());
+
+      return true;
+    }
+    else
+      return false;
+  }
+
+  /**
+   * Changes the group of the file.
+   *
+   * @param env the PHP executing environment
+   * @param file the file to change the group of
+   * @param group the group id to change to
+   */
+  public static boolean chgrp(Env env, Path file, Value group)
+  {
+    // php/160i
+    
+    try {
+      // XXX: safe_mode
+
+      if (group instanceof LongValue)
+	file.changeGroup(group.toInt());
+      else
+	file.changeGroup(group.toString());
+    
+      return true;
+    } catch (IOException e) {
+      log.log(Level.FINE, e.toString(), e);
+
+      return false;
+    }
+  }
+
+  /**
+   * Changes the permissions of the file.
+   *
+   * @param env the PHP executing environment
+   * @param filename the file to change the group of
+   * @param mode the mode id to change to
+   */
+  public static boolean chmod(Env env, Path file, int mode)
+  {
+    // php/160j
+    
+    // XXX: safe_mode
+
+    file.chmod(mode);
+    
+    return true;
+  }
+
+  /**
+   * Changes the ownership of the file.
+   *
+   * @param env the PHP executing environment
+   * @param filename the file to change the group of
+   * @param user the user id to change to
+   */
+  public static boolean chown(Env env, Path file, Value user)
+  {
+    try {
+      // XXX: safe_mode
+
+      if (user instanceof LongValue)
+	file.changeOwner(user.toInt());
+      else
+	file.changeOwner(user.toString());
+    
+      return true;
+    } catch (IOException e) {
+      log.log(Level.FINE, e.toString(), e);
+
+      return false;
+    }
+  }
+
+  /**
+   * Clears the stat cache for the file
+   *
+   * @param env the PHP executing environment
+   */
+  public static Value clearstatcache(Env env)
+  {
+    // php/160l
+    
+    // XXX: stubbed
+
+    return NullValue.NULL;
+  }
+
+  /**
+   * Copies a file to the destination.
+   *
+   * @param src the source path
+   * @param dst the destination path
+   */
+  public static boolean copy(Path src, Path dst)
+  {
+    // php/1603
+    
+    try {
+      if (! src.canRead() || ! src.isFile())
+	return false;
+
+      WriteStream os = dst.openWrite();
+
+      try {
+	src.writeToStream(os);
+      } finally {
+	os.close();
+      }
+    
+      return true;
+    } catch (IOException e) {
+      log.log(Level.FINE, e.toString(), e);
+
+      return false;
+    }
+  }
+
+  /**
+   * Opens a directory
+   *
+   * @param path the path to change to
+   */
+  public static Value dir(Env env, Path path)
+    throws IOException
+  {
+    if (path.isDirectory()) {
+      DirectoryValue dir = new DirectoryValue(path);
+
+      env.addResource(dir);
+      
+      return dir;
+    }
+    else {
+      // XXX: warning message
+      
+      return BooleanValue.FALSE;
+    }
+  }
+
+  /**
+   * Returns the directory name of a string.
+   */
+  public String dirname(String path)
+  {
+    // php/1601
+    
+    int len = path.length();
+
+    if (len == 0)
+      return ".";
+    else if (path.equals("/"))
+      return path;
+    
+    int p = path.lastIndexOf('/', len - 2);
+
+    if (p == 0)
+      return "/";
+    else if (p > 0)
+      return path.substring(0, p);
+    
+    p = path.lastIndexOf('\\', len - 2);
+
+    if (p == 0)
+      return "\\";
+    else if (p > 0)
+      return path.substring(0, p);
+
+    return ".";
+  }
+
+  /**
+   * Returns the free space for disk partition containing the directory
+   *
+   * @param directory the disk directory
+   */
+  public static double disk_free_space(Path directory)
+  {
+    // php/160m
+    
+    // XXX: stub
+    
+    return 0;
+  }
+
+  /**
+   * Returns the total space for disk partition containing the directory
+   *
+   * @param directory the disk directory
+   */
+  public static double disk_total_space(Path directory)
+  {
+    // php/160n
+    
+    // XXX: stub
+    
+    return 0;
+  }
+
+  /**
+   * Returns the total space for disk partition containing the directory
+   *
+   * @param directory the disk directory
+   */
+  public static double diskfreespace(Path directory)
+  {
+    return disk_free_space(directory);
+  }
+
+  /**
+   * Closes a file.
+   */
+  public boolean fclose(StreamResource file)
+    throws IOException
+  {
+    // php/1611
+    
+    if (file != null) {
+      file.close();
+
+      return true;
+    }
+    else
+      return false;
+  }
+
+  /**
+   * Checks for the end of file.
+   */
+  public boolean feof(StreamResource file)
+  {
+    // php/1618
+    
+    if (file != null)
+      return file.isEOF();
+    else
+      return true;
+  }
+
+  /**
+   * Flushes a file.
+   */
+  public boolean fflush(StreamResource file)
+    throws IOException
+  {
+    // php/1619
+    
+    if (file != null) {
+      file.flush();
+
+      return true;
+    }
+    else
+      return false;
+  }
+
+  /**
+   * Returns the next character
+   */
+  public Value fgetc(StreamResource file)
+    throws IOException
+  {
+    // php/1612
+    if (file != null) {
+      int ch = file.read();
+
+      if (ch >= 0)
+	return new StringValue(String.valueOf((char) ch));
+      else
+	return BooleanValue.FALSE;
+    }
+    else
+      return BooleanValue.FALSE;
+  }
+
+  /**
+   * Parses a comma-separated-value line from a file.
+   *
+   * @param file the file to read
+   * @param length the maximum line length
+   * @param delimiter optional comma replacement
+   * @param enclosure optional quote replacement
+   */
+  public Value fgetcsv(Env env,
+		       StreamResource file,
+		       @Optional int length,
+		       @Optional String delimiter,
+		       @Optional String enclosure)
+    throws IOException
+  {
+    // php/1619
+    
+    if (file == null)
+      return BooleanValue.FALSE;
+
+    if (length <= 0)
+      length = Integer.MAX_VALUE;
+
+    int comma = ',';
+
+    if (delimiter != null && delimiter.length() > 0)
+      comma = delimiter.charAt(0);
+
+    int quote = '"';
+
+    if (enclosure != null && enclosure.length() > 0)
+      quote = enclosure.charAt(0);
+
+    ArrayValue array = new ArrayValueImpl();
+
+    int ch;
+
+    while (true) {
+      // scan whitespace
+      while (true) {
+	ch = file.read();
+      
+	if (ch < 0 || ch == '\n')
+	  return array;
+	else if (ch == '\r') {
+	  file.readOptionalLinefeed();
+	  return array;
+	}
+	else if (ch == ' ' || ch == '\t')
+	  continue;
+	else
+	  break;
+      }
+
+      StringBuilder sb = new StringBuilder();
+	
+      if (ch == quote) {
+	for (ch = file.read(); ch >= 0; ch = file.read()) {
+	  if (ch == quote) {
+	    ch = file.read();
+	    
+	    if (ch == quote)
+	      sb.append((char) ch);
+	    else
+	      break;
+	  }
+	  else
+	    sb.append((char) ch);
+	}
+
+	array.append(new StringValue(sb.toString()));
+
+	for (; ch >= 0 && ch == ' ' || ch == '\t'; ch = file.read()) {
+	}
+      }
+      else {
+	for (;
+	     ch >= 0 && ch != comma && ch != '\r' && ch != '\n';
+	     ch = file.read()) {
+	  sb.append((char) ch);
+	}
+
+	array.append(new StringValue(sb.toString()));
+      }
+
+      if (ch < 0)
+	return array;
+      else if (ch == '\n')
+	return array;
+      else if (ch == '\r') {
+	file.readOptionalLinefeed();
+	return array;
+      }
+      else if (ch == comma) {
+      }
+      else {
+	env.warning("expected comma");
+      }
+    }
+  }
+
+  /**
+   * Returns the next line
+   */
+  public Value fgets(StreamResource file, @Optional long length)
+    throws IOException
+  {
+    // php/1615
+    
+    if (file == null)
+      return BooleanValue.FALSE;
+    
+    String value = file.readLine();
+
+    if (value != null)
+      return new StringValue(value);
+    else
+      return BooleanValue.FALSE;
+  }
+
+  /**
+   * Returns the next line stripping tags
+   */
+  public Value fgetss(StreamResource file,
+		     @Optional long length,
+		     @Optional String allowedTags)
+    throws IOException
+  {
+    // php/161a
+    
+    if (file == null)
+      return BooleanValue.FALSE;
+    
+    String value = file.readLine();
+
+    if (value != null)
+      return new StringValue(PhpStringModule.strip_tags(value, allowedTags));
+    else
+      return BooleanValue.FALSE;
+  }
+
+  /**
+   * Parses the file, returning it in an array.
+   *
+   * @param filename the file's name
+   * @param useIncludePath if true, use the include path
+   * @param context the resource context
+   */
+  public static Value file(Env env,
+			   String filename,
+			   @Optional int useIncludePath,
+			   @Optional Value context)
+    throws IOException
+  {
+    Value fileValue = fopen(env, filename, "r", useIncludePath, context);
+
+    if (fileValue instanceof FileValue) {
+      FileValue file = (FileValue) fileValue;
+      
+      try {
+	ArrayValue result = new ArrayValueImpl();
+	String line;
+
+	while ((line = file.readLine()) != null)
+	  result.append(new StringValue(line));
+
+	return result;
+      } finally {
+	file.close();
+      } 
+    }
+    
+    return BooleanValue.FALSE;
+  }
+
+  /**
+   * Returns the file access time
+   *
+   * @param path the path to check
+   */
+  public static Value fileatime(Path path)
+  {
+    long time = path.getLastAccessTime();
+
+    if (time <= 24 * 3600 * 1000L)
+      return BooleanValue.FALSE;
+    else
+      return new LongValue(time / 1000L);
+  }
+
+  /**
+   * Returns the file create time
+   *
+   * @param path the path to check
+   */
+  public static Value filectime(Path path)
+  {
+    long time = path.getCreateTime();
+
+    if (time <= 24 * 3600 * 1000L)
+      return BooleanValue.FALSE;
+    else
+      return new LongValue(time / 1000L);
+  }
+
+  /**
+   * Returns the file's group
+   *
+   * @param path the path to check
+   */
+  public static Value filegroup(Path path)
+  {
+    // XXX: stubbed
+    return BooleanValue.FALSE;
+  }
+
+  /**
+   * Returns the file's inocde
+   *
+   * @param path the path to check
+   */
+  public static Value fileinode(Path path)
+  {
+    // XXX: stubbed
+    
+    return BooleanValue.FALSE;
+  }
+
+  /**
+   * Returns the file modified time
+   *
+   * @param path the path to check
+   */
+  public static Value filemtime(Path path)
+  {
+    long time = path.getLastModified();
+
+    if (time <= 24 * 3600 * 1000L)
+      return BooleanValue.FALSE;
+    else
+      return new LongValue(time / 1000L);
+  }
+
+  /**
+   * Returns the file's owner
+   *
+   * @param path the path to check
+   */
+  public static Value fileowner(Path path)
+  {
+    // XXX: stubbed
+    return BooleanValue.FALSE;
+  }
+
+  /**
+   * Returns the file's permissions
+   *
+   * @param path the path to check
+   */
+  public static Value fileperms(Path path)
+  {
+    // XXX: stubbed
+    
+    if (! path.exists())
+      return BooleanValue.FALSE;
+    else {
+      int perms = 0;
+
+      if (path.isDirectory()) {
+	perms += 01000;
+	perms += 0111;
+      }
+      
+      if (path.canRead())
+	perms += 0444;
+      
+      if (path.canWrite())
+	perms += 0222;
+
+      return new LongValue(perms);
+    }
+  }
+
+  /**
+   * Returns the file's size
+   *
+   * @param path the path to check
+   */
+  public static Value filesize(Path path)
+  {
+    if (! path.exists() || ! path.isFile())
+      return BooleanValue.FALSE;
+    
+    long length = path.getLength();
+
+    if (length < 0)
+      return BooleanValue.FALSE;
+    else
+      return new LongValue(length);
+  }
+ 
+  /**
+   * Returns the file's type
+   *
+   * @param path the path to check
+   */
+  public static Value filetype(Path path)
+  {
+    // XXX: incomplete
+    
+    if (! path.exists())
+      return BooleanValue.FALSE;
+    else if (path.isDirectory())
+      return new StringValue("dir");
+    else
+      return new StringValue("file");
+  }
+
+  /**
+   * Returns true if file exists
+   *
+   * @param path the path to check
+   */
+  public static boolean file_exists(Path path)
+  {
+    return path.exists();
+  }
+
+  /**
+   * Parses the file, returning it in an array.
+   *
+   * @param filename the file's name
+   * @param useIncludePath if true, use the include path
+   * @param context the resource context
+   */
+  public static Value file_get_contents(Env env,
+					String filename,
+					@Optional int useIncludePath,
+					@Optional Value context,
+					@Optional long offset,
+					@Optional("4294967296") long maxLen)
+    throws IOException
+  {
+    Value fileValue = fopen(env, filename, "r", useIncludePath, context);
+
+    if (! (fileValue instanceof FileValue))
+      return BooleanValue.FALSE;
+    
+    FileValue file = (FileValue) fileValue;
+      
+    try {
+      StringBuilder sb = new StringBuilder();
+
+      int ch;
+
+      while ((ch = file.read()) >= 0) {
+	sb.append((char) ch);
+      }
+
+      // XXX: handle offset and maxlen
+
+      return new StringValue(sb.toString());
+    } finally {
+      file.close();
+    } 
+  }
+
+  /**
+   * Writes data to a file.
+   */
+  public Value file_put_contents(Env env,
+				 String filename,
+				 Value data,
+				 @Optional int flags,
+				 @Optional Value context)
+    throws IOException
+  {
+    // php/1634
+    
+    Value fileV = fopen(env, filename, "w", flags, context);
+
+    if (! (fileV instanceof StreamResource))
+      return fileV;
+
+    StreamResource file = (StreamResource) fileV;
+
+    long dataWritten = 0;
+    
+    try {
+      if (data instanceof ArrayValue) {
+	for (Value item : ((ArrayValue) data).values()) {
+	  file.print(item.toString());
+	}
+      }
+      else
+	file.print(data.toString());
+    } finally {
+      file.close();
+    }
+
+    return new LongValue(dataWritten);
+  }
+
+  /**
+   * Advisory locking
+   *
+   * @param fileV the file handle
+   * @param operation the locking operation
+   * @param wouldBlock the resource context
+   */
+  public static boolean flock(Value fileV,
+			      int operation,
+			      @Optional Value wouldBlock)
+    throws IOException
+  {
+    // XXX: stubbed,  also wouldblock is a ref
+    
+    return true;
+  }
+
+  // XXX: fnmatch
+
+  /**
+   * Opens a file.
+   */
+  public static Value fopen(Env env,
+			    String filename,
+			    String mode,
+			    @Optional int useIncludePath,
+			    @Optional Value context)
+  {
+    try {
+      Path path = env.getPwd().lookup(filename);
+
+      if (mode.startsWith("r"))
+	return new FileReadValue(path);
+      else if (mode.startsWith("w"))
+	return new FileWriteValue(path);
+      else if (mode.startsWith("x") && ! path.exists())
+	return new FileWriteValue(path);
+    
+      return NullValue.NULL;
+    } catch (IOException e) {
+      log.log(Level.FINE, e.toString(), e);
+
+      return BooleanValue.FALSE;
+    }
+  }
+
+  /**
+   * Output the filepointer data to the output stream.
+   */
+  public Value fpassthru(Env env,
+			 StreamResource is)
+    throws IOException
+  {
+    // php/1635
+    if (is == null)
+      return BooleanValue.FALSE;
+
+    TempBuffer temp = TempBuffer.allocate();
+    byte []buffer = temp.getBuffer();
+
+    int len;
+
+    WriteStream out = env.getOut();
+
+    long writeLength = 0;
+
+    while ((len = is.read(buffer, 0, buffer.length)) > 0) {
+      out.write(buffer, 0, len);
+
+      writeLength += len;
+    }
+
+    TempBuffer.free(temp);
+
+    return new LongValue(writeLength);
+  }
+
+  /**
+   * Parses a comma-separated-value line from a file.
+   *
+   * @param file the file to read
+   * @param length the maximum line length
+   * @param delimiter optional comma replacement
+   * @param enclosure optional quote replacement
+   */
+  public Value fputcsv(Env env,
+		       StreamResource file,
+		       ArrayValue value,
+		       @Optional String delimiter,
+		       @Optional String enclosure)
+    throws IOException
+  {
+    // php/1636
+
+    if (file == null || value == null)
+      return BooleanValue.FALSE;
+
+    char comma = ',';
+    char quote = '\"';
+
+    if (delimiter != null && delimiter.length() > 0)
+      comma = delimiter.charAt(0);
+    
+    if (enclosure != null && enclosure.length() > 0)
+      quote = enclosure.charAt(0);
+
+    int writeLength = 0;
+    boolean isFirst = true;
+
+    for (Value data : value.values()) {
+      if (! isFirst) {
+	file.print(comma);
+	writeLength++;
+      }
+      isFirst = false;
+
+      String s = data.toString();
+      int strlen = s.length();
+
+      writeLength++;
+      file.print(quote);
+
+      for (int i = 0; i < strlen; i++) {
+	char ch = s.charAt(i);
+
+	if (ch != quote) {
+	  file.print(ch);
+	  writeLength++;
+	}
+	else {
+	  file.print(quote);
+	  file.print(quote);
+	  writeLength += 2;
+	}
+      }
+
+      file.print(quote);
+      writeLength++;
+    }
+
+    file.print("\n");
+    writeLength++;
+
+    return LongValue.create(writeLength);
+  }
+
+  /**
+   * Writes a string to the file.
+   */
+  public Value fputs(Value fileV, String value, @Optional("-1") int length)
+    throws IOException
+  {
+    return fwrite(fileV, value, length);
+  }
+
+  /**
+   * Reads content from a file.
+   *
+   * @param file the file's name
+   */
+  public static Value fread(Value fileValue, long length)
+    throws IOException
+  {
+    if (! (fileValue instanceof FileValue))
+      return BooleanValue.FALSE;
+    
+    FileValue file = (FileValue) fileValue;
+
+    StringBuilder sb = new StringBuilder();
+
+    int ch;
+
+    // XXX: handle socket timeout
+    for (int i = 0; i < length &&  ((ch = file.read()) >= 0); i++)
+      sb.append((char) ch);
+    
+    return new StringValue(sb.toString());
+  }
+
+  /**
+   * Reads and parses a line.
+   */
+  public static Value fscanf(Env env,
+			     StreamResource file,
+			     String format,
+			     @Optional Value []args)
+    throws IOException
+  {
+    
+    if (file == null)
+      return BooleanValue.FALSE;
+    
+    String value = file.readLine();
+
+    if (value == null)
+      return BooleanValue.FALSE;
+
+    return PhpStringModule.sscanf(env, value, format, args);
+  }
+  
+  // XXX: fseek
+  // XXX: fstat
+
+  /**
+   * Returns the current position.
+   *
+   * @param file the stream to test
+   */
+  public static Value ftell(StreamResource file)
+  {
+    if (file == null)
+      return BooleanValue.FALSE;
+    else
+      return new LongValue(file.getPosition());
+  }
+
+  // XXX: ftruncate
+
+  /**
+   * Writes a string to the file.
+   */
+  public Value fwrite(Value fileV, String value,  @Optional("-1") int length)
+    throws IOException
+  {
+    if (! (fileV instanceof FileValue))
+      return BooleanValue.FALSE;
+
+    FileValue file = (FileValue) fileV;
+
+    file.print(value);
+    
+    return BooleanValue.TRUE;
+  }
+
+  // XXX: glob
+
+  /**
+   * Returns the current working directory.
+   *
+   * @return the current directory
+   */
+  public static String getcwd(Env env)
+  {
+    return env.getPwd().getNativePath();
+  }
+
+  /**
+   * Returns true if the path is a directory.
+   *
+   * @param path the path to check
+   */
+  public static boolean is_dir(Path path)
+  {
+    return path.isDirectory();
+  }
+
+  /**
+   * Returns true if the path is an executable file
+   *
+   * @param path the path to check
+   */
+  public static boolean is_executable(Path path)
+  {
+    // XXX: todo
+    
+    return false;
+  }
+
+  /**
+   * Returns true if the path is a file.
+   *
+   * @param path the path to check
+   */
+  public static boolean is_file(Path path)
+  {
+    return path.isFile();
+  }
+
+  /**
+   * Returns true if the path is a symbolic link
+   *
+   * @param path the path to check
+   */
+  public static boolean is_link(Path path)
+  {
+    // XXX: todo
+    
+    return false;
+  }
+
+  /**
+   * Returns true if the path is readable
+   *
+   * @param path the path to check
+   */
+  public static boolean is_readable(Path path)
+  {
+    return path.canRead();
+  }
+
+  /**
+   * Returns true if the path is writable
+   *
+   * @param path the path to check
+   */
+  public static boolean is_writable(Path path)
+  {
+    return path.canWrite();
+  }
+
+  /**
+   * Returns true if the path is writable
+   *
+   * @param path the path to check
+   */
+  public static boolean is_writeable(Path path)
+  {
+    return is_writable(path);
+  }
+
+  // XXX: link
+  // XXX: linkinfo
+  // XXX: lstat
+  // XXX: mkdir
+  // XXX: move_uploaded_file
+
+  /**
+   * Opens a directory
+   *
+   * @param path the path to change to
+   */
+  public static Value opendir(Env env, String pathName,
+			      @Optional Value context)
+    throws IOException
+  {
+    Path path = env.getPwd().lookup(pathName);
+    
+    if (path.isDirectory()) {
+      return new DirectoryValue(path);
+    }
+    else {
+      // XXX: warning message
+      
+      return BooleanValue.FALSE;
+    }
+  }
+
+  // XXX: parse_ini_file
+  // XXX: pathinfo
+  // XXX: pclose
+  // XXX: popen
+
+  /**
+   * Reads the next entry
+   *
+   * @param dir the directory resource
+   */
+  public static Value readdir(Env env, Value dirV)
+    throws Exception
+  {
+    if (! (dirV instanceof DirectoryValue)) {
+      env.warning(L.l("expected directory in readdir at '{0}'", dirV));
+
+      return BooleanValue.FALSE;
+    }
+
+    DirectoryValue dir = (DirectoryValue) dirV;
+
+    return dir.readdir();
+  }
+
+  // XXX: readfile
+  // XXX: readlink
+  // XXX: realpath
+  // XXX: rename
+  // XXX: rewind
+
+  /**
+   * Rewinds the directory listing
+   *
+   * @param dir the directory resource
+   */
+  public static Value rewinddir(Env env, Value dirV)
+    throws Exception
+  {
+    if (! (dirV instanceof DirectoryValue)) {
+      env.warning(L.l("expected directory in rewinddir at '{0}'", dirV));
+
+      return BooleanValue.FALSE;
+    }
+
+    DirectoryValue dir = (DirectoryValue) dirV;
+
+    return dir.rewinddir();
+  }
+
+  /**
+   * remove a directory
+   */
+  public static boolean rmdir(Env env,
+			       String filename,
+			       @Optional Value context)
+  {
+    // php/160s
+
+    // XXX: safe_mode
+    try {
+      Path path = env.getPwd().lookup(filename);
+
+      return path.remove();
+    } catch (IOException e) {
+      log.log(Level.FINE, e.toString(), e);
+
+      return false;
+    }
+  }
+
+  /**
+   * Closes the directory
+   *
+   * @param dir the directory resource
+   */
+  public static Value closedir(Env env, Value dirV)
+    throws IOException
+  {
+    return BooleanValue.TRUE;
+  }
+
+  /**
+   * Scan the directory
+   *
+   * @param dir the directory resource
+   */
+  public static Value scandir(Env env, String fileName,
+			      @Optional("1") int order,
+			      @Optional Value context)
+    throws IOException
+  {
+    Path path = env.getPwd().lookup(fileName);
+
+    String []values = path.list();
+
+    Arrays.sort(values);
+
+    ArrayValue result = new ArrayValueImpl();
+
+    if (order == 1) {
+      for (int i = 0; i < values.length; i++)
+	result.append(new LongValue(i), new StringValue(values[i]));
+    }
+    else {
+      for (int i = values.length - 1; i >= 0; i--) {
+	result.append(new LongValue(values.length - i - 1),
+		      new StringValue(values[i]));
+      }
+    }
+    
+    return result;
+  }
+
+  /**
+   * Sets the write buffer.
+   */
+  public static int set_file_buffer(StreamResource stream,
+				    int bufferSize)
+  {
+    return PhpStreamModule.stream_set_write_buffer(stream, bufferSize);
+  }
+
+  /**
+   * Returns file statistics
+   */
+  public static Value stat(Env env, Path path)
+  {
+    ArrayValue result = new ArrayValueImpl();
+
+    result.put(new StringValue("size"), new LongValue(path.getLength()));
+    
+    return result;
+  }
+
+  /**
+   * Creates a symlink
+   */
+  public boolean symlink(Path target, Path link)
+  {
+    // php/160r
+    
+    return false;
+  }
+  
+  /**
+   * Creates a temporary file.
+   */
+  public static Value tempnam(Env env, Path dir, String prefix)
+  {
+    // php/160u
+    
+    try {
+      Path path = dir.createTempFile(prefix, ".tmp");
+      return new StringValue(path.getTail());
+    } catch (IOException e) {
+      log.log(Level.FINE, e.toString(), e);
+
+      return BooleanValue.FALSE;
+    }
+  }
+
+  /**
+   * Creates a temporary file.
+   */
+  public static Value tmpfile(Env env)
+  {
+    try {
+      Path tmp = env.getPwd().lookup("/tmp");
+
+      tmp.mkdirs();
+
+      Path file = tmp.createTempFile("resin", "tmp");
+
+      return new FileWriteValue(file);
+    } catch (IOException e) {
+      log.log(Level.FINE, e.toString(), e);
+
+      return NullValue.NULL;
+    }
+  }
+
+  /**
+   * sets the time to the current time
+   */
+  public static boolean touch(Path path,
+			      @Optional int time, 
+			      @Optional int atime)
+  {
+    try {
+      if (path.exists()) {
+	if (time > 0)
+	  path.setLastModified(1000L * time);
+	else
+	  path.setLastModified(Alarm.getCurrentTime());
+      }
+      else {
+	WriteStream ws = path.openWrite();
+	ws.close();
+      }
+    
+      return true;
+    } catch (IOException e) {
+      log.log(Level.FINE, e.toString(), e);
+
+      return false;
+    }
+  }
+
+  /**
+   * umask call
+   */
+  public static int umask(int mask)
+  {
+    // XXX: stub
+    
+    return mask;
+  }
+
+  /**
+   * remove call
+   */
+  public static boolean unlink(Env env,
+			       String filename,
+			       @Optional Value context)
+  {
+    // php/160p
+    
+    // XXX: safe_mode
+    try {
+      Path path = env.getPwd().lookup(filename);
+
+      return path.remove();
+    } catch (IOException e) {
+      log.log(Level.FINE, e.toString(), e);
+
+      return false;
+    }
+  }
+}
+

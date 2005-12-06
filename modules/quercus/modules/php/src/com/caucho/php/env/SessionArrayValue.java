@@ -1,0 +1,138 @@
+/*
+ * Copyright (c) 1998-2004 Caucho Technology -- all rights reserved
+ *
+ * This file is part of Resin(R) Open Source
+ *
+ * Each copy or derived work must preserve the copyright notice and this
+ * notice unmodified.
+ *
+ * Resin Open Source is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * Resin Open Source is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE, or any warranty
+ * of NON-INFRINGEMENT.  See the GNU General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Resin Open Source; if not, write to the
+ *
+ *   Free Software Foundation, Inc.
+ *   59 Temple Place, Suite 330
+ *   Boston, MA 02111-1307  USA
+ *
+ * @author Scott Ferguson
+ */
+
+package com.caucho.php.env;
+
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.TreeMap;
+import java.util.Map;
+import java.util.Set;
+import java.util.Iterator;
+import java.util.Enumeration;
+import java.util.LinkedHashMap;
+import java.util.IdentityHashMap;
+
+import javax.servlet.http.HttpServletRequest;
+
+import com.caucho.vfs.WriteStream;
+
+/**
+ * Represents the $_SESSION
+ */
+public class SessionArrayValue extends ArrayValueImpl {
+  private String _id;
+  private transient Env _env;
+  
+  public SessionArrayValue(Env env, String id)
+  {
+    _env = env;
+    _id = id;
+  }
+  
+  public SessionArrayValue(Env env, String id,
+			   IdentityHashMap<Value,Value> map,
+			   ArrayValueImpl copy)
+  {
+    super(env, map, copy);
+    
+    _env = env;
+    _id = id;
+  }
+
+  /**
+   * Returns the session id.
+   */
+  public String getId()
+  {
+    return _id;
+  }
+  
+  /**
+   * Converts to an object.
+   */
+  public Object toObject()
+  {
+    return null;
+  }
+
+  /**
+   * Adds a new value.
+   */
+  public Value put(Value key, Value value)
+  {
+    return super.put(key, value);
+  }
+
+  /**
+   * Gets a new value.
+   */
+  public Value get(Value key)
+  {
+    return super.get(key);
+  }
+  
+  /**
+   * Returns the array ref.
+   */
+  public Var getRef(Value key)
+  {
+    return super.getRef(key);
+  }
+  
+  /**
+   * Copy for assignment.
+   */
+  public Value copy()
+  {
+    return new ArrayValueImpl(this);
+  }
+  
+  /**
+   * Copy for serialization
+   */
+  public Value copy(Env env, IdentityHashMap<Value,Value> map)
+  {
+    Value oldValue = map.get(this);
+
+    if (oldValue != null)
+      return oldValue;
+
+    return new SessionArrayValue(env, _id, map, this);
+  }
+
+  /**
+   * Returns an iterator of the entries.
+   */
+  public Set<Map.Entry<Value,Value>> entrySet()
+  {
+    return super.entrySet();
+  }
+}
+
