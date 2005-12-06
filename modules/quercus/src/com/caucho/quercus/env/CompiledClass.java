@@ -37,7 +37,7 @@ import java.util.LinkedHashMap;
 
 import java.io.IOException;
 
-import com.caucho.quercus.PhpRuntimeException;
+import com.caucho.quercus.QuercusRuntimeException;
 
 import com.caucho.quercus.program.AbstractFunction;
 import com.caucho.quercus.program.AbstractClassDef;
@@ -282,7 +282,7 @@ abstract public class CompiledClass extends AbstractClassDef {
     try {
       return getClass().newInstance();
     } catch (Exception e) {
-      throw new PhpRuntimeException(e);
+      throw new QuercusRuntimeException(e);
     }
     */
     throw new UnsupportedOperationException();

@@ -37,7 +37,7 @@ import com.caucho.util.L10N;
 
 import com.caucho.vfs.WriteStream;
 
-import com.caucho.quercus.PhpRuntimeException;
+import com.caucho.quercus.QuercusRuntimeException;
 
 import com.caucho.quercus.program.AbstractFunction;
 

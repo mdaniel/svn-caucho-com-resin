@@ -38,7 +38,7 @@ import java.util.HashMap;
 
 import com.caucho.java.JavaWriter;
 
-import com.caucho.quercus.PhpRuntimeException;
+import com.caucho.quercus.QuercusRuntimeException;
 
 import com.caucho.quercus.expr.*;
 
@@ -292,7 +292,7 @@ public class PhpParser {
     } catch (IOException e) {
       e.printStackTrace();
       
-      throw new PhpRuntimeException(e);
+      throw new QuercusRuntimeException(e);
     }
   }
 

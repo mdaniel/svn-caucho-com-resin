@@ -37,7 +37,7 @@ import java.io.IOException;
 
 import com.caucho.util.L10N;
 
-import com.caucho.quercus.PhpRuntimeException;
+import com.caucho.quercus.QuercusRuntimeException;
 
 import com.caucho.quercus.program.AbstractFunction;
 import com.caucho.quercus.program.AbstractClassDef;
@@ -213,7 +213,7 @@ public class QuercusClass {
     if (fun != null)
       return fun;
     else {
-      throw new PhpRuntimeException(L.l("{0}::{1} is an unknown method",
+      throw new QuercusRuntimeException(L.l("{0}::{1} is an unknown method",
 					getName(), name));
     }
   }

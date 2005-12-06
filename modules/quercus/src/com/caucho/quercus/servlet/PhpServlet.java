@@ -51,8 +51,8 @@ import com.caucho.config.ConfigException;
 import com.caucho.server.connection.CauchoResponse;
 
 import com.caucho.quercus.Quercus;
-import com.caucho.quercus.PhpExitException;
-import com.caucho.quercus.PhpRuntimeException;
+import com.caucho.quercus.QuercusExitException;
+import com.caucho.quercus.QuercusRuntimeException;
 
 import com.caucho.quercus.gen.PhpGenerator;
 
@@ -189,7 +189,7 @@ public class PhpServlet extends HttpServlet {
 	page.executeTop(env);
 
 	return;
-      } catch (PhpExitException e) {
+      } catch (QuercusExitException e) {
 	throw e;
       } catch (Throwable e) {
 	if (response.isCommitted())
@@ -205,7 +205,7 @@ public class PhpServlet extends HttpServlet {
 	if (ws != null)
 	  ws.close();
       }
-    } catch (PhpExitException e) {
+    } catch (QuercusExitException e) {
       log.log(Level.FINEST, e.toString(), e);
       // normal exit
     } catch (RuntimeException e) {

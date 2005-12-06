@@ -32,22 +32,22 @@ package com.caucho.quercus;
 /**
  * Parent of PHP runtime exceptions
  */
-public class PhpRuntimeException extends RuntimeException {
-  public PhpRuntimeException()
+public class QuercusRuntimeException extends RuntimeException {
+  public QuercusRuntimeException()
   {
   }
 
-  public PhpRuntimeException(String msg)
+  public QuercusRuntimeException(String msg)
   {
     super(msg);
   }
 
-  public PhpRuntimeException(Throwable cause)
+  public QuercusRuntimeException(Throwable cause)
   {
     super(cause);
   }
 
-  public PhpRuntimeException(String msg, Throwable cause)
+  public QuercusRuntimeException(String msg, Throwable cause)
   {
     super(msg, cause);
   }

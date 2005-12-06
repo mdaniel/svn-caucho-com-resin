@@ -50,11 +50,11 @@ import com.caucho.quercus.expr.Expr;
 public class ObjectValue extends Value {
   private static final StringValue TO_STRING = new StringValue("__toString");
   
-  private final PhpClass _cl;
+  private final QuercusClass _cl;
 
   private final ArrayValue _map = new ArrayValueImpl();
 
-  public ObjectValue(PhpClass cl)
+  public ObjectValue(QuercusClass cl)
   {
     _cl = cl;
 

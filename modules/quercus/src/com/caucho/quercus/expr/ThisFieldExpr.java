@@ -64,7 +64,7 @@ public class ThisFieldExpr extends AbstractVarExpr {
 
   public ThisFieldExpr(InterpretedClassDef quercusClass, String name)
   {
-    _quercusClass = phpClass;
+    _quercusClass = quercusClass;
     
     _name = new StringValue(name);
   }

@@ -38,7 +38,7 @@ import com.caucho.util.L10N;
 
 import com.caucho.vfs.WriteStream;
 
-import com.caucho.quercus.PhpRuntimeException;
+import com.caucho.quercus.QuercusRuntimeException;
 
 import com.caucho.quercus.program.AbstractFunction;
 
@@ -202,7 +202,7 @@ abstract public class Value {
    */
   public Value toKey()
   {
-    throw new PhpRuntimeException(L.l("{0} is not a valid key", this));
+    throw new QuercusRuntimeException(L.l("{0} is not a valid key", this));
   }
   
   /**

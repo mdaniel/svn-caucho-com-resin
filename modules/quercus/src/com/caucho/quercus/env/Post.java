@@ -61,8 +61,8 @@ import com.caucho.util.L10N;
 import com.caucho.util.IntMap;
 
 import com.caucho.quercus.Quercus;
-import com.caucho.quercus.PhpRuntimeException;
-import com.caucho.quercus.PhpExitException;
+import com.caucho.quercus.QuercusRuntimeException;
+import com.caucho.quercus.QuercusExitException;
 
 import com.caucho.quercus.expr.Expr;
 

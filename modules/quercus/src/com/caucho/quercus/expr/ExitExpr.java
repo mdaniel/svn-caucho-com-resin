@@ -35,7 +35,7 @@ import java.util.HashSet;
 
 import com.caucho.java.JavaWriter;
 
-import com.caucho.quercus.PhpExitException;
+import com.caucho.quercus.QuercusExitException;
 
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.NullValue;
@@ -77,10 +77,10 @@ public class ExitExpr extends Expr {
       
       env.getOut().print(msg);
 
-      throw new PhpExitException(msg);
+      throw new QuercusExitException(msg);
     }
     else
-      throw new PhpExitException();
+      throw new QuercusExitException();
   }
 
   //

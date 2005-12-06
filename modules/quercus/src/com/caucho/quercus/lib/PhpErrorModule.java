@@ -38,7 +38,7 @@ import java.util.logging.Logger;
 
 import com.caucho.util.L10N;
 
-import com.caucho.quercus.PhpExitException;
+import com.caucho.quercus.QuercusExitException;
 
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.Env;

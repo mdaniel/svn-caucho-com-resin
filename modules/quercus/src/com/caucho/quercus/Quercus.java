@@ -226,7 +226,7 @@ public class Quercus {
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
-      throw new PhpRuntimeException(e);
+      throw new QuercusRuntimeException(e);
     }
   }
 
@@ -436,7 +436,7 @@ public class Quercus {
   }
 
   /**
-   * Scans the classpath for META-INF/services/com.caucho.quercus.PhpModule
+   * Scans the classpath for META-INF/services/com.caucho.quercus.QuercusModule
    */ 
   private void initStaticFunctions()
   {
@@ -444,7 +444,7 @@ public class Quercus {
     ClassLoader loader = thread.getContextClassLoader();
     
     try {
-      String quercusModule = "META-INF/services/com.caucho.php.PhpModule";
+      String quercusModule = "META-INF/services/com.caucho.quercus.QuercusModule";
       Enumeration<URL> urls = loader.getResources(quercusModule);
 
       while (urls.hasMoreElements()) {

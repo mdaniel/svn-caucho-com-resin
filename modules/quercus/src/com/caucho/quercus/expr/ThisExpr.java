@@ -60,7 +60,7 @@ public class ThisExpr extends AbstractVarExpr {
   
   public ThisExpr(InterpretedClassDef quercusClass)
   {
-    _quercusClass = phpClass;
+    _quercusClass = quercusClass;
   }
 
   /**

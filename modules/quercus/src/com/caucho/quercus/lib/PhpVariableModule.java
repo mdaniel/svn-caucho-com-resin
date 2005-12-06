@@ -180,7 +180,7 @@ public class PhpVariableModule extends AbstractPhpModule {
 	if (isSyntaxOnly)
 	  return true;
 	
-	PhpClass cl = env.findClass(obj.toString());
+	QuercusClass cl = env.findClass(obj.toString());
 	if (cl == null)
 	  return false;
 

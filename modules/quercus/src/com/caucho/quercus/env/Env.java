@@ -63,8 +63,8 @@ import com.caucho.util.IntMap;
 import com.caucho.util.Alarm;
 
 import com.caucho.quercus.Quercus;
-import com.caucho.quercus.PhpRuntimeException;
-import com.caucho.quercus.PhpExitException;
+import com.caucho.quercus.QuercusRuntimeException;
+import com.caucho.quercus.QuercusExitException;
 
 import com.caucho.quercus.expr.Expr;
 
@@ -141,8 +141,8 @@ public class Env {
   private HashMap<String,AbstractClassDef> _classDefMap
     = new HashMap<String,AbstractClassDef>();
 
-  private HashMap<String,PhpClass> _classMap
-    = new HashMap<String,PhpClass>();
+  private HashMap<String,QuercusClass> _classMap
+    = new HashMap<String,QuercusClass>();
 
   private HashMap<String,Value> _optionMap
     = new HashMap<String,Value>();
@@ -269,7 +269,7 @@ public class Env {
     long now = Alarm.getCurrentTime();
 
     if (_startTime + _timeLimit < now)
-      throw new PhpRuntimeException(L.l("script timed out"));
+      throw new QuercusRuntimeException(L.l("script timed out"));
   }
 
   /**
@@ -1309,7 +1309,7 @@ public class Env {
    */
   public AbstractFunction findMethod(String className, String methodName)
   {
-    PhpClass cl = findClass(className);
+    QuercusClass cl = findClass(className);
 
     if (cl == null) {
       error(L.l("'{0}' is an unknown class.", className));
@@ -1616,7 +1616,7 @@ public class Env {
   /**
    * Adds a class, e.g. from an include.
    */
-  public void addClass(String name, PhpClass cl)
+  public void addClass(String name, QuercusClass cl)
     throws Throwable
   {
     /*
@@ -1683,9 +1683,9 @@ public class Env {
    *
    * @return the found class or null if no class found.
    */
-  public PhpClass findClass(String name)
+  public QuercusClass findClass(String name)
   {
-    PhpClass cl = _classMap.get(name);
+    QuercusClass cl = _classMap.get(name);
 
     if (cl != null)
       return cl;
@@ -1708,14 +1708,14 @@ public class Env {
    *
    * @return the found class or null if no class found.
    */
-  public PhpClass getClass(String name)
+  public QuercusClass getClass(String name)
   {
-    PhpClass cl = findClass(name);
+    QuercusClass cl = findClass(name);
 
     if (cl != null)
       return cl;
     else
-      throw new PhpRuntimeException(L.l("'{0}' is an unknown class.",
+      throw new QuercusRuntimeException(L.l("'{0}' is an unknown class.",
 					name));
   }
 
@@ -1726,7 +1726,7 @@ public class Env {
    *
    * @return the found class or null if no class found.
    */
-  private PhpClass findClassImpl(String name)
+  private QuercusClass findClassImpl(String name)
   {
     /*
     QuercusClass cl = null;
@@ -1763,12 +1763,12 @@ public class Env {
     if (classDef != null) {
       String parentName	= classDef.getParentName();
       
-      PhpClass parent = null;
+      QuercusClass parent = null;
 
       if (parentName != null)
 	parent = getClass(parentName);
 
-      return new PhpClass(classDef, parent);
+      return new QuercusClass(classDef, parent);
     }
 
     if (_autoload == null)
@@ -1795,10 +1795,10 @@ public class Env {
    */
   public AbstractFunction findFunction(String className, String methodName)
   {
-    PhpClass cl = findClass(className);
+    QuercusClass cl = findClass(className);
 
     if (cl == null)
-      throw new PhpRuntimeException(L.l("'{0}' is an unknown class",
+      throw new QuercusRuntimeException(L.l("'{0}' is an unknown class",
 					className));
 
     return cl.findFunction(methodName);
@@ -1828,7 +1828,7 @@ public class Env {
 	throw new IllegalStateException(L.l("unknown callback name {0}", name));
 
       if (obj instanceof StringValue) {
-	PhpClass cl = findClass(obj.toString());
+	QuercusClass cl = findClass(obj.toString());
 
 	if (cl == null)
 	  throw new IllegalStateException(L.l("can't find class {0}",
@@ -1969,7 +1969,7 @@ public class Env {
    */
   public Value exit(String msg)
   {
-    throw new PhpExitException(msg);
+    throw new QuercusExitException(msg);
   }
 
   /**
@@ -1977,7 +1977,7 @@ public class Env {
    */
   public Value exit()
   {
-    throw new PhpExitException();
+    throw new QuercusExitException();
   }
 
   /**
@@ -2074,7 +2074,7 @@ public class Env {
     
     error(B_ERROR, fullMsg);
 
-    throw new PhpRuntimeException(fullMsg);
+    throw new QuercusRuntimeException(fullMsg);
   }
 
   /**
@@ -2219,7 +2219,7 @@ public class Env {
     }
 
     if ((mask & (E_ERROR|E_CORE_ERROR|E_COMPILE_ERROR|E_USER_ERROR)) != 0) {
-      throw new PhpRuntimeException(msg);
+      throw new QuercusRuntimeException(msg);
     }
 
     return NullValue.NULL;

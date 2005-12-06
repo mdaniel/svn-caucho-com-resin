@@ -33,7 +33,7 @@ import java.io.IOException;
 
 import com.caucho.util.L10N;
 
-import com.caucho.quercus.PhpRuntimeException;
+import com.caucho.quercus.QuercusRuntimeException;
 
 import com.caucho.quercus.program.AbstractFunction;
 
@@ -117,7 +117,7 @@ abstract public class AbstractClassDef {
     if (fun != null)
       return fun;
 
-    throw new PhpRuntimeException(L.l("no function " + name));
+    throw new QuercusRuntimeException(L.l("no function " + name));
   }
 
   public String toString()

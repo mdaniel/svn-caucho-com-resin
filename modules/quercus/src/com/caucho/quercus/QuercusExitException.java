@@ -32,22 +32,22 @@ package com.caucho.quercus;
 /**
  * Exception thrown by die() or exit()
  */
-public class PhpExitException extends PhpRuntimeException {
-  public PhpExitException()
+public class QuercusExitException extends QuercusRuntimeException {
+  public QuercusExitException()
   {
   }
 
-  public PhpExitException(String msg)
+  public QuercusExitException(String msg)
   {
     super(msg);
   }
 
-  public PhpExitException(Throwable cause)
+  public QuercusExitException(Throwable cause)
   {
     super(cause);
   }
 
-  public PhpExitException(String msg, Throwable cause)
+  public QuercusExitException(String msg, Throwable cause)
   {
     super(msg, cause);
   }

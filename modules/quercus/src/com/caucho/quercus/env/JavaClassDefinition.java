@@ -39,7 +39,7 @@ import java.util.LinkedHashMap;
 import java.io.IOException;
 
 import com.caucho.quercus.Quercus;
-import com.caucho.quercus.PhpRuntimeException;
+import com.caucho.quercus.QuercusRuntimeException;
 
 import com.caucho.quercus.program.AbstractFunction;
 import com.caucho.quercus.program.Function;
@@ -98,7 +98,7 @@ public class JavaClassDefinition {
 
       return new JavaValue(_type.newInstance(), this);
     } catch (Exception e) {
-      throw new PhpRuntimeException(e);
+      throw new QuercusRuntimeException(e);
     }
       
   }

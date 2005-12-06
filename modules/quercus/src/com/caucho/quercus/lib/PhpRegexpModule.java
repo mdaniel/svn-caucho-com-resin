@@ -42,7 +42,7 @@ import java.util.regex.PatternSyntaxException;
 
 import com.caucho.util.L10N;
 
-import com.caucho.quercus.PhpRuntimeException;
+import com.caucho.quercus.QuercusRuntimeException;
 
 import com.caucho.quercus.module.PhpModule;
 import com.caucho.quercus.module.AbstractPhpModule;

@@ -73,7 +73,7 @@ public class StaticFunction extends AbstractFunction {
    */
   public StaticFunction(Quercus quercus, PhpModule quercusModule, Method method)
   {
-    _quercusModule = phpModule;
+    _quercusModule = quercusModule;
     _method = method;
     
     boolean callUsesVariableArgs = false;

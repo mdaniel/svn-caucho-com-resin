@@ -32,22 +32,22 @@ package com.caucho.quercus;
 /**
  * Parent of PHP exceptions
  */
-public class PhpException extends Exception {
-  public PhpException()
+public class QuercusException extends Exception {
+  public QuercusException()
   {
   }
 
-  public PhpException(String msg)
+  public QuercusException(String msg)
   {
     super(msg);
   }
 
-  public PhpException(Throwable cause)
+  public QuercusException(Throwable cause)
   {
     super(cause);
   }
 
-  public PhpException(String msg, Throwable cause)
+  public QuercusException(String msg, Throwable cause)
   {
     super(msg, cause);
   }
