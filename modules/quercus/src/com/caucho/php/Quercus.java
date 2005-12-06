@@ -85,8 +85,8 @@ import com.caucho.util.LruCache;
 /**
  * Facade for the PHP language.
  */
-public class Php {
-  private static final Logger log = Log.open(Php.class);
+public class Quercus {
+  private static final Logger log = Log.open(Quercus.class);
 
   private final PageManager _pageManager;
 
@@ -126,7 +126,7 @@ public class Php {
   /**
    * Constructor.
    */ 
-  public Php()
+  public Quercus()
   {
     initStaticFunctions();
     initStaticClasses();
@@ -655,7 +655,7 @@ public class Php {
   /**
    * Introspects the module class for functions.
    *
-   * @param cl the class to introspect.
+   * @param name the class to introspect.
    */
   private void introspectPhpJavaClass(String name, Class type)
     throws IllegalAccessException, InstantiationException
