@@ -47,7 +47,7 @@ class QNotation extends QNode implements Notation {
 
   public String getNodeName() { return _name; }
   public String getTagName() { return _name; }
-  public short getNodeType() { return -1; }
+  public short getNodeType() { return Node.NOTATION_NODE; }
 
   public String getPublicId() { return _publicId; }
   public void setPublicId(String arg) { _publicId = arg; }

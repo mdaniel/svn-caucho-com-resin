@@ -74,10 +74,10 @@ import com.caucho.vfs.WriteStream;
 /**
  * Servlet to call PHP through javax.script.
  */
-public class PhpServlet extends HttpServlet {
-  private static final L10N L = new L10N(PhpServlet.class);
+public class QuercusServlet extends HttpServlet {
+  private static final L10N L = new L10N(QuercusServlet.class);
   private static final Logger log
-    = Logger.getLogger(PhpServlet.class.getName());
+    = Logger.getLogger(QuercusServlet.class.getName());
 
   private final Quercus _quercus = new Quercus();
 

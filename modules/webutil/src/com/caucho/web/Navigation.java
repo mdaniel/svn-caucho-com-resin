@@ -317,7 +317,7 @@ public class Navigation {
       return "/";
     
     if (url.startsWith("http:") || url.charAt(0) == '/')
-      return normalizeURL(url);
+      return url; //  normalizeURL(url);
 
     for (; node instanceof Element; node = node.getParentNode()) {
       Element elt = (Element) node;
@@ -343,9 +343,12 @@ public class Navigation {
   {
     if (url.startsWith("/"))
       return url;
-    else if (! url.startsWith("http://"))
+    else if (url.startsWith("http://"))
+      return url;
+    else
       return "/" + url;
-    
+
+    /*
     int i;
     for (i = "http://".length(); i < url.length(); i++) {
       if (url.charAt(i) == '/') {
@@ -354,6 +357,7 @@ public class Navigation {
     }
     
     return "/";
+    */
   }
 
   static Expr linkPattern;

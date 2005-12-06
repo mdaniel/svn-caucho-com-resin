@@ -63,7 +63,7 @@ class QEntity extends QNode implements Entity {
 
   public String getNodeName() { return _name; }
   public String getTagName() { return _name; }
-  public short getNodeType() { return -1; }
+  public short getNodeType() { return Node.ENTITY_NODE; }
 
   public String getPublicId() { return _publicId; }
   public void setPublicId(String arg) { _publicId = arg; }

@@ -201,9 +201,10 @@
    
   <mime-mapping extension=".xls" mime-type="application/vnd.ms-excel"/>
   <mime-mapping extension=".xbm" mime-type="image/x-xbitmap"/>
-  <mime-mapping extension=".xpm" mime-type="image/x-xpixmax"/>
-  <mime-mapping extension=".xwd" mime-type="image/x-xwindowdump"/>
   <mime-mapping extension=".xml" mime-type="text/xml"/>
+  <mime-mapping extension=".xpm" mime-type="image/x-xpixmax"/>
+  <mime-mapping extension=".xsl" mime-type="text/xml"/>
+  <mime-mapping extension=".xwd" mime-type="image/x-xwindowdump"/>
     
   <mime-mapping extension=".zip" mime-type="application/zip"/>
   <mime-mapping extension=".z" mime-type="application/octet-stream"/>

@@ -66,7 +66,7 @@
   </target>
 
   <target name="compile" 
-          depends="init, ejb, ejb30, j2eedeploy, jaxrpc, jca, jms, jmx, jsdk, jstl, jta, mail, portlet, script, resin-jdk15, resin, webutil, deploy, conf, ext">
+          depends="init, ejb, ejb30, j2eedeploy, jaxrpc, jca, jms, jmx, jsdk, jstl, jta, mail, portlet, script, resin-jdk15, resin, quercus, webutil, deploy, conf, ext">
   </target>
 
   <target name="ejb" depends="init, jta">
@@ -225,6 +225,13 @@
     </antcall>
   </target>
 
+  <target name="quercus" depends="init, resin">
+    <antcall target="module" inheritRefs="true">
+      <param name="module.name" value="quercus"/>
+      <param name="javac.source" value="1.5"/>
+    </antcall>
+  </target>
+
   <target name="module">
     <property name="module.src" value="${modules}/${module.name}/src"/>
     <property name="module.build" value="${modules}/${module.name}/classes"/>
@@ -350,13 +357,6 @@
         <exclude name="**/.svnignore"/>
       </fileset>
     </jar>
-  </target>
-
-  <target name="quercus" depends="init">
-    <!--
-      compile to ${build}/quercus
-      install ${install}/webapps/quercus.war
-      -->
   </target>
 
   <target name="javadoc" depends="init">

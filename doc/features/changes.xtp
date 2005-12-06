@@ -4,6 +4,8 @@
 
 <s2 title='3.0.snap - Nov 15, 2005'>
 <ul>
+<li>(2005-11-15) QEntity and QNotation were returning bad values for getNodeType (#424)
+<li>Added mime-type for xsl files (#444, rep by rdhauwe)
 <li>always-load-session now forces a load, ignoring clustering information (#439)
 <li>fmt:param wasn't accepting RT expressions (#464, rep by zgia)
 <li>EL expressions should be enabled if there is no web.xml (RSN-503, rep by Bin Sun)

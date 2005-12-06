@@ -47,7 +47,7 @@ class QElementDef extends QNode {
 
   public String getNodeName() { return "#element"; }
   public String getTagName() { return "#element"; }
-  public short getNodeType() { return -1; }
+  public short getNodeType() { return Node.ELEMENT_NODE; }
 
   Node importNode(QDocument owner, boolean deep) 
   {
