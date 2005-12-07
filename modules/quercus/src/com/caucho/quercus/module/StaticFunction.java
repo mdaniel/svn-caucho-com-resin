@@ -53,7 +53,7 @@ import java.lang.reflect.Modifier;
 public class StaticFunction extends AbstractFunction {
   private static final L10N L = new L10N(StaticFunction.class);
 
-  private final PhpModule _quercusModule;
+  private final QuercusModule _quercusModule;
 
   private final Method _method;
   private final Class []_paramTypes;
@@ -71,7 +71,7 @@ public class StaticFunction extends AbstractFunction {
    *
    * @param method the introspected method.
    */
-  public StaticFunction(Quercus quercus, PhpModule quercusModule, Method method)
+  public StaticFunction(Quercus quercus, QuercusModule quercusModule, Method method)
   {
     _quercusModule = quercusModule;
     _method = method;
@@ -162,7 +162,7 @@ public class StaticFunction extends AbstractFunction {
    *
    * @return the module object
    */
-  public PhpModule getModule()
+  public QuercusModule getModule()
   {
     return _quercusModule;
   }

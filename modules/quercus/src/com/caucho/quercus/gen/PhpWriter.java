@@ -45,7 +45,7 @@ import com.caucho.quercus.env.Value;
 
 import com.caucho.quercus.expr.Expr;
 
-import com.caucho.quercus.module.PhpModule;
+import com.caucho.quercus.module.QuercusModule;
 
 import com.caucho.quercus.program.InterpretedClassDef;
 import com.caucho.quercus.program.PhpProgram;
@@ -65,8 +65,8 @@ public class PhpWriter extends JavaWriterWrapper {
   private HashMap<Expr[],String> _exprArrayMap
     = new HashMap<Expr[],String>();
   
-  private HashMap<PhpModule,String> _moduleMap
-    = new HashMap<PhpModule,String>();
+  private HashMap<QuercusModule,String> _moduleMap
+    = new HashMap<QuercusModule,String>();
 
   private ArrayList<InterpretedClassDef> _classList
     = new ArrayList<InterpretedClassDef>();
@@ -217,7 +217,7 @@ public class PhpWriter extends JavaWriterWrapper {
    *
    * @return the generated id for the expression
    */
-  public String addModule(PhpModule module)
+  public String addModule(QuercusModule module)
   {
     String var = _moduleMap.get(module);
 
@@ -296,8 +296,8 @@ public class PhpWriter extends JavaWriterWrapper {
     if (! _moduleMap.isEmpty())
       println();
     
-    for (Map.Entry<PhpModule,String> entry : _moduleMap.entrySet()) {
-      PhpModule module = entry.getKey();
+    for (Map.Entry<QuercusModule,String> entry : _moduleMap.entrySet()) {
+      QuercusModule module = entry.getKey();
       String var = entry.getValue();
 
       String moduleClass = module.getClass().getName();
@@ -321,8 +321,8 @@ public class PhpWriter extends JavaWriterWrapper {
     println("{");
     pushDepth();
     
-    for (Map.Entry<PhpModule,String> entry : _moduleMap.entrySet()) {
-      PhpModule module = entry.getKey();
+    for (Map.Entry<QuercusModule,String> entry : _moduleMap.entrySet()) {
+      QuercusModule module = entry.getKey();
       String var = entry.getValue();
 
       String moduleClass = module.getClass().getName();

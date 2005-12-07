@@ -29,7 +29,6 @@
 
 package com.caucho.quercus.servlet;
 
-import java.io.PrintWriter;
 import java.io.OutputStream;
 import java.io.IOException;
 
@@ -52,22 +51,14 @@ import com.caucho.server.connection.CauchoResponse;
 
 import com.caucho.quercus.Quercus;
 import com.caucho.quercus.QuercusExitException;
-import com.caucho.quercus.QuercusRuntimeException;
-
-import com.caucho.quercus.gen.PhpGenerator;
 
 import com.caucho.quercus.env.Env;
 
-import com.caucho.quercus.parser.PhpParser;
-
-import com.caucho.quercus.program.PhpProgram;
-
-import com.caucho.quercus.module.PhpModule;
+import com.caucho.quercus.module.QuercusModule;
 
 import com.caucho.quercus.page.PhpPage;
 
 import com.caucho.vfs.Path;
-import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.Vfs;
 import com.caucho.vfs.WriteStream;
 
@@ -118,7 +109,7 @@ public class QuercusServlet extends HttpServlet {
   /**
    * Adds a quercus module.
    */
-  public void addModule(PhpModule module)
+  public void addModule(QuercusModule module)
     throws ConfigException
   {
     _quercus.addModule(module);

@@ -33,23 +33,13 @@ import java.io.IOException;
 
 import java.util.ArrayList;
 
-import java.lang.reflect.Method;
-
-import com.caucho.quercus.Quercus;
-
 import com.caucho.quercus.gen.PhpWriter;
 
 import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.StringValue;
-import com.caucho.quercus.env.NullThisValue;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.QuercusClass;
 
-import com.caucho.quercus.module.StaticFunction;
-import com.caucho.quercus.module.PhpModule;
-
 import com.caucho.quercus.program.AbstractFunction;
-import com.caucho.quercus.program.PhpProgram;
 import com.caucho.quercus.program.AnalyzeInfo;
 
 import com.caucho.util.L10N;

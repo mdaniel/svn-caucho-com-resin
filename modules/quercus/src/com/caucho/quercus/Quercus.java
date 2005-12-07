@@ -64,7 +64,7 @@ import com.caucho.quercus.env.QuercusClass;
 import com.caucho.quercus.env.JavaClassDefinition;
 import com.caucho.quercus.env.SessionArrayValue;
 
-import com.caucho.quercus.module.PhpModule;
+import com.caucho.quercus.module.QuercusModule;
 import com.caucho.quercus.module.StaticFunction;
 
 import com.caucho.quercus.page.PhpPage;
@@ -90,8 +90,8 @@ public class Quercus {
 
   private final PageManager _pageManager;
 
-  private HashMap<String,PhpModule> _modules
-    = new HashMap<String,PhpModule>();
+  private HashMap<String,QuercusModule> _modules
+    = new HashMap<String,QuercusModule>();
   
   private HashMap<String,StaticFunction> _staticFunctions
     = new HashMap<String,StaticFunction>();
@@ -178,7 +178,7 @@ public class Quercus {
   /**
    * Adds a module
    */
-  public void addModule(PhpModule module)
+  public void addModule(QuercusModule module)
     throws ConfigException
   {
     try {
@@ -370,7 +370,7 @@ public class Quercus {
   /**
    * Returns the module with the given name.
    */
-  public PhpModule findModule(String name)
+  public QuercusModule findModule(String name)
   {
     return _modules.get(name);
   }
@@ -380,7 +380,7 @@ public class Quercus {
    */
   public boolean isExtensionLoaded(String name)
   {
-    for (PhpModule module : _modules.values()) {
+    for (QuercusModule module : _modules.values()) {
       if (module.isExtensionLoaded(name))
 	return true;
     }
@@ -393,7 +393,7 @@ public class Quercus {
    */
   public Value getExtensionFuncs(String name)
   {
-    for (PhpModule module : _modules.values()) {
+    for (QuercusModule module : _modules.values()) {
       if (module.isExtensionLoaded(name)) {
 	// XXX:
 	
@@ -510,7 +510,7 @@ public class Quercus {
   {
     log.fine("PHP loading module " + cl.getName());
 
-    PhpModule module = (PhpModule) cl.newInstance();
+    QuercusModule module = (QuercusModule) cl.newInstance();
 
     _modules.put(module.getClass().getName(), module);
 
