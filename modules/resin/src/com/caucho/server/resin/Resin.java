@@ -691,7 +691,7 @@ public class Resin implements ResinServerListener {
 
     validatePackage("javax.servlet.Servlet", new String[] {"2.4", "1.4"});
     validatePackage("javax.servlet.jsp.jstl.core.Config", new String[] {"1.1"});
-    validatePackage("javax.management.MBeanServer", new String[] {"1.2" });
+    validatePackage("javax.management.MBeanServer", new String[] { "1.2", "1.5" });
     validatePackage("javax.resource.spi.ResourceAdapter", new String[] {"1.5", "1.4"});
   }
 
@@ -713,24 +713,29 @@ public class Resin implements ResinServerListener {
     
     Package pkg = cl.getPackage();
 
-    if (pkg == null)
-      throw new ConfigException(L().l("package for class {0} is missing.  Resin requires class {0} in the classpath on startup.",
-				    className));
+    if (pkg == null) {
+      log().warning(L().l("package for class {0} is missing.  Resin requires class {0} in the classpath on startup.",
+			className));
 
-    if (pkg.getSpecificationVersion() == null)
-      throw new ConfigException(L().l("{0} has no specification version.  Resin {1} requires version {2}.",
+      return;
+    }
+    else if (pkg.getSpecificationVersion() == null) {
+      log().warning(L().l("{0} has no specification version.  Resin {1} requires version {2}.",
 				    pkg, com.caucho.Version.VERSION,
 				    versions[0]));
+
+      return;
+    }
 
     for (int i = 0; i < versions.length; i++) {
       if (versions[i].compareTo(pkg.getSpecificationVersion()) <= 0)
 	return;
     }
       
-    throw new ConfigException(L().l("Specification version {0} of {1} is not compatible with Resin {2}.  Resin {2} requires version {3}.",
-				  pkg.getSpecificationVersion(),
-				  pkg, com.caucho.Version.VERSION,
-				  versions[0]));
+    log().warning(L().l("Specification version {0} of {1} is not compatible with Resin {2}.  Resin {2} requires version {3}.",
+		      pkg.getSpecificationVersion(),
+		      pkg, com.caucho.Version.VERSION,
+		      versions[0]));
   }
 
   private static L10N L()

@@ -42,9 +42,11 @@ public class CacheMapping {
 
   // The path-mapping pattern
   private String _urlPattern;
+  private String _urlRegexp;
   
   // The period
-  private long _expiresPeriod = Long.MIN_VALUE;
+  private long _maxAge = Long.MIN_VALUE;
+  private long _sMaxAge = Long.MIN_VALUE;
 
   /**
    * Creates the path mapping.
@@ -70,19 +72,59 @@ public class CacheMapping {
   }
 
   /**
+   * Sets the urlRegexp
+   */
+  public void setUrlRegexp(String urlRegexp)
+  {
+    _urlRegexp = urlRegexp;
+  }
+
+  /**
+   * Sets the urlRegexp
+   */
+  public String getUrlRegexp()
+  {
+    return _urlRegexp;
+  }
+
+  /**
    * Sets the period
    */
   public void setExpires(Period period)
   {
-    _expiresPeriod = period.getPeriod();
+    setMaxAge(period);
+  }
+
+  /**
+   * Sets the period
+   */
+  public void setMaxAge(Period period)
+  {
+    _maxAge = period.getPeriod();
   }
 
   /**
    * Gets the expires period.
    */
-  public long getExpires()
+  public long getMaxAge()
   {
-    return _expiresPeriod;
+    return _maxAge;
+  }
+
+  /**
+   * Sets the period
+   */
+  public void setSMaxAge(Period period)
+  {
+    _sMaxAge = period.getPeriod();
+  }
+
+  /**
+   * Gets the expires period.
+   */
+  public long getSMaxAge()
+  {
+    return _sMaxAge;
   }
 
   /**
@@ -91,9 +133,9 @@ public class CacheMapping {
   public void init()
     throws ServletException
   {
-    if (_urlPattern == null)
+    if (_urlPattern == null && _urlRegexp == null)
       throw new ServletException(L.l("cache-mapping needs 'url-pattern' attribute."));
-    if (_expiresPeriod == Long.MIN_VALUE)
-      throw new ServletException(L.l("cache-mapping needs 'expires' attribute."));
+    if (_maxAge == Long.MIN_VALUE && _sMaxAge == Long.MIN_VALUE)
+      throw new ServletException(L.l("cache-mapping needs 'max-age' attribute."));
   }
 }

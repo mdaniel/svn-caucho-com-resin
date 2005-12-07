@@ -44,10 +44,15 @@ r_archive-path =
   | element archive-path { string }
 
 r_cache-mapping = element cache-mapping {
-  r_url-pattern
+  (r_url-pattern | r_url-regexp)
 
   & (attribute expires { r_period }
-     | element expires { r_period })
+     | element expires { r_period }
+     | attribute max-age { r_period }
+     | element max-age { r_period })?
+
+  & (attribute s-max-age { r_period }
+     | element s-max-age { r_period })?
 }
 
 r_constraint = element constraint {

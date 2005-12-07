@@ -29,6 +29,8 @@
 package com.caucho.jms;
 
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Collections;
 import java.util.HashMap;
 
 import java.util.logging.Logger;
@@ -74,8 +76,8 @@ public class ConnectionFactoryImpl implements ConnectionFactory  {
 
   private JdbcManager _jdbcManager;
 
-  private ArrayList<ConnectionImpl> _connections =
-    new ArrayList<ConnectionImpl>();
+  private List<ConnectionImpl> _connections =
+    Collections.synchronizedList(new ArrayList<ConnectionImpl>());
 
   private HashMap<String,Queue> _queues =
     new HashMap<String,Queue>();

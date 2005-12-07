@@ -1,0 +1,22 @@
+<document>
+  <header>
+    <product>resin</product>
+    <title>Resin 3.0.16 Release Notes</title>
+  </header>
+
+<body>
+
+<summary objsummary='localtoc'/>
+
+<section title="cache-mapping additions">
+
+<p>The &lt;<a href="http://wiki.caucho.com/Cache-mapping">cache-mapping</a>> tag now allows url-regexp.</p>
+
+<p>&lt;max-age> replaces &lt;expires>.</p>
+
+<p>&lt;s-max-age> added.</p>
+
+</section>
+
+</body>
+</document>

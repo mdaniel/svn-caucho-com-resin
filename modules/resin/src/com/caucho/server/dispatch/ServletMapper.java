@@ -256,12 +256,8 @@ public class ServletMapper {
           }
           else if (! contextURI.endsWith("/")) {
             String contextPath = invocation.getContextPath();
-            String queryString = invocation.getQueryString();
-            
-            if (queryString != null)
-              return new RedirectFilterChain(contextPath + contextURI + "/?" + queryString);
-            else
-              return new RedirectFilterChain(contextPath + contextURI + "/");
+
+	    return new RedirectFilterChain(contextPath + contextURI + "/");
           }
           else {
             String uri = contextURI + file;

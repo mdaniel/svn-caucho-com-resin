@@ -472,7 +472,12 @@ public class Inode {
 	  long fragAddr = readFragmentAddr(bytes, 0, _store, length - 1);
 
 	  if ((fragAddr & Store.BLOCK_MASK) == 0) {
-	    String msg = _store + ": inode block " + length + " has 0 fragment";
+	    String msg = _store + ": inode block " + Long.toHexString(length) + " has 0 fragment";
+	    throw stateError(msg);
+	  }
+	  else if (fragAddr < 0) {
+	    String msg = _store + ": inode block " + Long.toHexString(length) + " has invalid fragment " + Long.toHexString(fragAddr);
+	    
 	    throw stateError(msg);
 	  }
 
@@ -544,7 +549,9 @@ public class Inode {
 
       int offset = (int) (8 * (fragCount - DIRECT_BLOCKS));
 
-      return store.readFragmentLong(indirectAddr, offset);
+      long fragAddr = store.readFragmentLong(indirectAddr, offset);
+
+      return fragAddr;
     }
     else if (fragCount < (DIRECT_BLOCKS +
 			  SINGLE_INDIRECT_BLOCKS +

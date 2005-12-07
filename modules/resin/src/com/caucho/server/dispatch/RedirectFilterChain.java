@@ -40,6 +40,7 @@ import javax.servlet.http.*;
 public class RedirectFilterChain implements FilterChain {
   // servlet
   private String _url;
+  private String _queryString;
 
   /**
    * Create the redirect filter chain servlet.
@@ -49,6 +50,17 @@ public class RedirectFilterChain implements FilterChain {
   public RedirectFilterChain(String url)
   {
     _url = url;
+  }
+
+  /**
+   * Create the redirect filter chain servlet.
+   *
+   * @param url the URL to redirect to.
+   */
+  public RedirectFilterChain(String url, String queryString)
+  {
+    _url = url;
+    _queryString = queryString;
   }
   
   /**
@@ -63,8 +75,17 @@ public class RedirectFilterChain implements FilterChain {
                        ServletResponse response)
     throws ServletException, IOException
   {
+    HttpServletRequest req = (HttpServletRequest) request;
     HttpServletResponse res = (HttpServletResponse) response;
 
-    res.sendRedirect(res.encodeURL(_url));
+    String queryString = _queryString;
+
+    if (queryString == null)
+      queryString = req.getQueryString();
+
+    if (queryString != null && _url.indexOf('?') < 0)
+      res.sendRedirect(res.encodeURL(_url + '?' + queryString));
+    else
+      res.sendRedirect(res.encodeURL(_url));
   }
 }

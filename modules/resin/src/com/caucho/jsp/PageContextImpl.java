@@ -465,8 +465,17 @@ public class PageContextImpl extends PageContext
       return value;
 
     HttpSession session = getSession();
-    if (session != null && (value = session.getValue(name)) != null)
-      return value;
+    if (session != null) {
+      try {
+	value = session.getValue(name);
+      } catch (IllegalArgumentException e) {
+	// jsp/162e
+	log.log(Level.FINE, e.toString(), e);
+      }
+
+      if (value != null)
+	return value;
+    }
 
     return getServletContext().getAttribute(name);
   }

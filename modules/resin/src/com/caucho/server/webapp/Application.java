@@ -2251,20 +2251,36 @@ public class Application extends ServletContextImpl
   public void addCacheMapping(CacheMapping mapping)
     throws Exception
   {
-    _cacheMappingMap.addMap(mapping.getUrlPattern(), mapping);
+    if (mapping.getUrlRegexp() != null)
+      _cacheMappingMap.addRegexp(mapping.getUrlRegexp(), mapping);
+    else
+      _cacheMappingMap.addMap(mapping.getUrlPattern(), mapping);
   }
 
   /**
    * Returns the time for a cache mapping.
    */
-  public long getCacheTime(String uri)
+  public long getMaxAge(String uri)
   {
     CacheMapping map = (CacheMapping) _cacheMappingMap.map(uri);
 
     if (map != null)
-      return map.getExpires();
+      return map.getMaxAge();
     else
-      return 5000L;
+      return -1;
+  }
+
+  /**
+   * Returns the time for a cache mapping.
+   */
+  public long getSMaxAge(String uri)
+  {
+    CacheMapping map = (CacheMapping) _cacheMappingMap.map(uri);
+
+    if (map != null)
+      return map.getSMaxAge();
+    else
+      return -1;
   }
 
   /**

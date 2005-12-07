@@ -4,11 +4,20 @@
 
 <s2 title='3.0.snap - Nov 15, 2005'>
 <ul>
+<li>conn.isClosed() should not throw an exceptiono (#453)
+<li>Offset bug in session/cache fragment store (#460, #480, #4, rep by K Fetterman, C Amott, A Balandran)
+<li>jmx validation needs to check vs 1.5 
+<li>cache-mapping adds max-age and s-max-age
+<li>cache-mapping adds url-regexp (#440, rep by B Yang)
+<li>_collections in jms.ConnectionFactoryImpl needs to be synchronized (#401, rep by T Gennaro)
+<li>pageContext.findAttribute was throwing IllegalArgumentException for invalidated session (rep by B Davis)
+<li>welcome-file mapping was caching query parameters (#486, rep by Joshua Manton)
+<li>httpd.exe buffers sizes need increasing (#435)
 <li>when detect error while writing cache, disable keepalive and close
-<li>sockets and SSL changed to use blocking instead of non-blocking (476)
-<li>Hosts with unset root-directory were getting merged without warning (474, rep by L Geller)
-<li>Digest auth was requiring quoted string at end of client response (420, Dustin Stallings)
-<li>DOM needs to add the DocumentType as the first value for a parsed XML (284, rep by foolfish)
+<li>sockets and SSL changed to use blocking instead of non-blocking (#476)
+<li>Hosts with unset root-directory were getting merged without warning (#474, rep by L Geller)
+<li>Digest auth was requiring quoted string at end of client response (#420, Dustin Stallings)
+<li>DOM needs to add the DocumentType as the first value for a parsed XML (#284, rep by foolfish)
 <li>(2005-11-15) QEntity and QNotation were returning bad values for getNodeType (#424)
 <li>Added mime-type for xsl files (#444, rep by rdhauwe)
 <li>always-load-session now forces a load, ignoring clustering information (#439)

@@ -791,7 +791,7 @@ public class Store {
       byte []blockBuffer = block.getBuffer();
 
       synchronized (blockBuffer) {
-	return readLong(blockBuffer, fragmentOffset);
+	return readLong(blockBuffer, blockOffset + fragmentOffset + 1);
       }
     } finally {
       block.free();
@@ -1092,6 +1092,13 @@ public class Store {
     long blockAddress = blockId & BLOCK_MASK;
 
     try {
+      if (blockAddress < 0 || _fileSize < blockAddress + length) {
+	throw new IllegalStateException(L.l("block at {0} is invalid for file {1} (length {2})",
+					    Long.toHexString(blockAddress),
+					    _path,
+					    Long.toHexString(_fileSize)));
+      }
+
       int readLen = is.read(blockAddress, buffer, offset, length);
 
       if (readLen < 0) {

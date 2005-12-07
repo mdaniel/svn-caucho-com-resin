@@ -604,9 +604,9 @@ public class UserConnection implements java.sql.Connection {
     try {
       return getMConn() == null || getConnection() == null || getConnection().isClosed();
     } catch (SQLException e) {
-      fatalEvent();
-      
-      throw e;
+      log.log(Level.FINER, e.toString(), e);
+
+      return true;
     }
   }
 
