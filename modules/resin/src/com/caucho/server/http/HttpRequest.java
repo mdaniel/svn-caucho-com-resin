@@ -275,13 +275,14 @@ public class HttpRequest extends AbstractHttpRequest
     } catch (Throwable e) {
       log.log(Level.FINE, e.toString(), e);
 
+      _response.killCache();
       killKeepalive();
 
       try {
         _errorManager.sendServletError(e, this, _response);
       } catch (ClientDisconnectException e1) {
         throw e1;
-      } catch (Exception e1) {
+      } catch (Throwable e1) {
         log.log(Level.FINE, e1.toString(), e1);
       }
 

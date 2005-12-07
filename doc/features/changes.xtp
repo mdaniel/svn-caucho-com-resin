@@ -4,6 +4,11 @@
 
 <s2 title='3.0.snap - Nov 15, 2005'>
 <ul>
+<li>when detect error while writing cache, disable keepalive and close
+<li>sockets and SSL changed to use blocking instead of non-blocking (476)
+<li>Hosts with unset root-directory were getting merged without warning (474, rep by L Geller)
+<li>Digest auth was requiring quoted string at end of client response (420, Dustin Stallings)
+<li>DOM needs to add the DocumentType as the first value for a parsed XML (284, rep by foolfish)
 <li>(2005-11-15) QEntity and QNotation were returning bad values for getNodeType (#424)
 <li>Added mime-type for xsl files (#444, rep by rdhauwe)
 <li>always-load-session now forces a load, ignoring clustering information (#439)

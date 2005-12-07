@@ -46,6 +46,7 @@ import javax.management.ObjectName;
 import javax.management.MalformedObjectNameException;
 import javax.management.JMException;
 
+import com.caucho.config.ConfigException;
 import com.caucho.config.types.PathBuilder;
 
 import com.caucho.util.L10N;
@@ -424,6 +425,19 @@ public class HostController extends EnvironmentDeployController<Host,HostConfig>
 	mergedController.mergeController(this);
 	mergedController.mergeController(newController);
 
+	if (! getHostName().equals(newController.getHostName())) {
+	  ConfigException e;
+
+	  e = new ConfigException(L.l("Illegal merge of {0} and {1}.  Both hosts have the same root-directory '{2}'.",
+					getHostName(),
+					newController.getHostName(),
+					getRootDirectory()));
+
+	  log.log(Level.FINE, e.toString(), e);
+
+	  mergedController.setConfigException(e);
+	}
+
 	return mergedController;
       } catch (Throwable e) {
 	log.log(Level.FINE, e.toString(), e);
@@ -438,13 +452,15 @@ public class HostController extends EnvironmentDeployController<Host,HostConfig>
   /**
    * Merges with the old controller.
    */
-  protected void mergeController(DeployController<Host> oldControllerV)
+  protected void mergeController(DeployController oldControllerV)
   {
     super.mergeController(oldControllerV);
 
     HostController oldController = (HostController) oldControllerV;
     
     _entryHostAliases.addAll(oldController._entryHostAliases);
+    if (! oldController.getHostName().equals(""))
+      _entryHostAliases.add(oldController.getHostName());
     _entryHostAliasRegexps.addAll(oldController._entryHostAliasRegexps);
     _hostAliases.addAll(oldController._hostAliases);
 

@@ -99,8 +99,12 @@ public class DOMBuilder implements XMLWriter, ContentHandler, ErrorHandler {
     if (systemId != null && _top instanceof Document) {
       Document tdoc = (Document) _top;
       DocumentType dtd = tdoc.getDoctype();
-      if (tdoc instanceof QDocument && dtd == null)
-        ((QDocument) tdoc).setDoctype(new QDocumentType(null));
+      if (tdoc instanceof QDocument && dtd == null) {
+	dtd = new QDocumentType(null);
+	((QDocument) tdoc).setDoctype(dtd);
+
+	tdoc.appendChild(dtd);
+      }
       
       if (dtd instanceof QDocumentType && dtd.getSystemId() == null)
         ((QDocumentType) dtd).setSystemId(systemId);

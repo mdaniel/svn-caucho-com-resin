@@ -156,9 +156,12 @@ abstract public class ExpandDeployController<I extends DeployInstance>
   /**
    * Merges with the old controller.
    */
-  protected void mergeController(ExpandDeployController<I> oldController)
+  protected void mergeController(DeployController oldControllerV)
   {
-    super.mergeController(oldController);
+    super.mergeController(oldControllerV);
+
+    ExpandDeployController<I> oldController;
+    oldController = (ExpandDeployController<I>) oldControllerV;
     
     if (oldController._expandCleanupFileSet != null)
       _expandCleanupFileSet = oldController._expandCleanupFileSet;

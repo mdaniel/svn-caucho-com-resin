@@ -1974,6 +1974,10 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
 
 	cache.finishCaching(_statusCode == 200 && _allowCache);
       }
+    } catch (IOException e) {
+      _request.killKeepalive();
+      
+      throw e;
     } finally {
       _isClosed = true;
       _cacheStream = null;

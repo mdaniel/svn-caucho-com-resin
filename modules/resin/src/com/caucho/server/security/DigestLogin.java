@@ -309,7 +309,9 @@ public class DigestLogin extends AbstractLogin {
            ch != cursor.DONE && ch != ',' && ! XmlChar.isWhitespace(ch);
            ch = cursor.read())
         cb.append((char) ch);
-      cursor.previous();
+
+      if (ch != cursor.DONE)
+	cursor.previous();
     }
 
     return cb.close();

@@ -138,7 +138,7 @@ abstract public class DeployController<I extends DeployInstance>
   /**
    * Merges with the old controller.
    */
-  protected void mergeController(DeployController<I> newController)
+  protected void mergeController(DeployController newController)
   {
   }
 
@@ -435,11 +435,21 @@ abstract public class DeployController<I extends DeployInstance>
   /**
    * Returns the current instance.
    */
-  public I getDeployInstance()
+  public final I getDeployInstance()
   {
     synchronized (this) {
-      if (_deployInstance == null)
-	_deployInstance = instantiateDeployInstance();
+      if (_deployInstance == null) {
+	Thread thread = Thread.currentThread();
+	ClassLoader oldLoader = thread.getContextClassLoader();
+
+	try {
+	  thread.setContextClassLoader(_parentLoader);
+	  
+	  _deployInstance = instantiateDeployInstance();
+	} finally {
+	  thread.setContextClassLoader(oldLoader);
+	}
+      }
 
       return _deployInstance;
     }

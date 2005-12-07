@@ -297,10 +297,12 @@ abstract public class
   /**
    * Merges with the old controller.
    */
-  protected void mergeController(EnvironmentDeployController<I,C> oldController)
+  protected void mergeController(DeployController oldControllerV)
   {
-    super.mergeController(oldController);
-    
+    super.mergeController(oldControllerV);
+
+    EnvironmentDeployController<I,C> oldController;
+    oldController = (EnvironmentDeployController) oldControllerV;
     // setId(oldController.getId());
 
     _configDefaults.addAll(oldController._configDefaults);
