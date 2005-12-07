@@ -317,7 +317,7 @@ public class PhpWriter extends JavaWriterWrapper {
     }
 
     println();
-    println("public void init(com.caucho.quercus.Quercus php)");
+    println("public void init(com.caucho.quercus.Quercus quercus)");
     println("{");
     pushDepth();
     

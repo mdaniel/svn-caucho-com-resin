@@ -29,22 +29,6 @@
 
 package com.caucho.quercus.env;
 
-import java.io.IOException;
-
-import java.util.Collection;
-
-import com.caucho.util.L10N;
-
-import com.caucho.vfs.WriteStream;
-
-import com.caucho.quercus.QuercusRuntimeException;
-
-import com.caucho.quercus.program.AbstractFunction;
-
-import com.caucho.quercus.gen.PhpWriter;
-
-import com.caucho.quercus.expr.Expr;
-
 /**
  * Represents an array-get argument which might be a call to a reference.
  */
@@ -63,7 +47,7 @@ public class ArgGetValue extends Value {
    */
   public Var toRefVar()
   {
-    // quercus/3d55, php/3d49
+    // quercus/3d55, quercus/3d49
     return _obj.getArgRef(_index).toRefVar();
   }
 

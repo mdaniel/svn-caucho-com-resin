@@ -296,10 +296,6 @@ public class TransactionImpl implements Transaction, AlarmListener {
 
     if (_resourceCount > 0 && flags != XAResource.TMJOIN)
       xid = new XidImpl(_xid, _resourceCount + 1);
-    /*
-    if (_resourceCount > 0)
-      xid = new XidImpl(_xid, _resourceCount + 1);
-    */
       
     try {
       if (_timeout > 0)

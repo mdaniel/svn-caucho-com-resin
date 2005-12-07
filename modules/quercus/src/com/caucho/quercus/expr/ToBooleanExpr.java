@@ -31,11 +31,8 @@ package com.caucho.quercus.expr;
 
 import java.io.IOException;
 
-import com.caucho.java.JavaWriter;
-
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.BooleanValue;
-import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.gen.PhpWriter;
 
@@ -77,7 +74,7 @@ public class ToBooleanExpr extends UnaryExpr {
     
     _expr.generateBoolean(out);
 
-    out.print(" ? com.caucho.quercus.env.BooleanValue.TRUE : com.caucho.php.env.BooleanValue.FALSE)");
+    out.print(" ? com.caucho.quercus.env.BooleanValue.TRUE : com.caucho.quercus.env.BooleanValue.FALSE)");
   }
 
   /**

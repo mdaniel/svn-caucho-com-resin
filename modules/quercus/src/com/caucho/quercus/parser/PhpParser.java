@@ -34,15 +34,10 @@ import java.io.Reader;
 import java.io.IOException;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-
-import com.caucho.java.JavaWriter;
 
 import com.caucho.quercus.QuercusRuntimeException;
 
 import com.caucho.quercus.expr.*;
-
-import com.caucho.quercus.env.NullValue;
 
 import com.caucho.quercus.program.*;
 
@@ -51,11 +46,9 @@ import com.caucho.quercus.Quercus;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.BooleanValue;
-import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.LongValue;
 import com.caucho.quercus.env.DoubleValue;
 import com.caucho.quercus.env.CallbackFunction;
-import com.caucho.quercus.env.QuercusClass;
 
 import com.caucho.quercus.program.InterpretedClassDef;
 
@@ -2138,7 +2131,7 @@ public class PhpParser {
 
     case '!':
       {
-	// XXX: quercus/03i3 vs php/03i4
+	// XXX: quercus/03i3 vs quercus/03i4
 	
         Expr expr = parseTerm();
 

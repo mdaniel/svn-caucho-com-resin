@@ -594,7 +594,7 @@ public class Quercus {
     ClassLoader loader = thread.getContextClassLoader();
     
     try {
-      String quercusModule = "META-INF/services/com.caucho.php.PhpJavaClass";
+      String quercusModule = "META-INF/services/com.caucho.quercus.PhpJavaClass";
       Enumeration<URL> urls = loader.getResources(quercusModule);
 
       while (urls.hasMoreElements()) {

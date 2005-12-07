@@ -105,7 +105,7 @@ public class ConfigLibrary {
   }
 
   /**
-   * Scans the classpath for META-INF/services/com.caucho.php.PhpModule
+   * Scans the classpath for META-INF/services/com.caucho.quercus.PhpModule
    */ 
   private void configureLibrary()
   {

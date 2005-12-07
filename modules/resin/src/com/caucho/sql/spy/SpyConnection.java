@@ -28,7 +28,6 @@
 
 package com.caucho.sql.spy;
 
-import java.io.*;
 import java.sql.*;
 import java.util.*;
 import java.util.logging.*;

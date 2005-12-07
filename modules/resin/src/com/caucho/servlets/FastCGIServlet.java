@@ -348,7 +348,7 @@ public class FastCGIServlet extends GenericServlet {
       scriptPath = scriptPath + pathInfo;
 
     /*
-     * FastCGI (specifically php) uses the PATH_INFO and PATH_TRANSLATED
+     * FastCGI (specifically quercus) uses the PATH_INFO and PATH_TRANSLATED
      * for the script path.
      */
     log.finer("FCGI file: " + _app.getRealPath(scriptPath));
