@@ -41,6 +41,8 @@
 #include <fcntl.h>
 #include "common.h"
 
+#define BUF_SIZE (32 * 1024)
+
 static int g_is_dead;
 static int g_is_started;
 static int g_keepalive_handle = -1;
@@ -257,7 +259,7 @@ set_jdk_args(char *exe, char *cp,
 	     char *resin_home, char *server_root, int jit,
 	     char *main, int argc, char **argv, char **java_argv)
 {
-	char buf[8192];
+	char buf[BUF_SIZE];
 	int j;
 
 	char **args = (char **) malloc((20 + argc) * (sizeof (char *)));
@@ -299,7 +301,7 @@ static char **
 set_ms_args(char *exe, char *cp, char *server_root, int jit, char *main, int argc, char **argv,
 			char **java_argv)
 {
-	char buf[8192];
+	char buf[BUF_SIZE];
 
 	char **args = (char **) malloc((12 + argc) * (sizeof (char *)));
 	int i = 0;
@@ -327,8 +329,8 @@ set_ms_args(char *exe, char *cp, char *server_root, int jit, char *main, int arg
 char **
 get_server_args(char *name, char *full_name, char *main, int argc, char **argv)
 {
-	char buf[8192];
-	char program[8192];
+	char buf[BUF_SIZE];
+	char program[BUF_SIZE];
 
 	char *java_exe = 0;
 	char *java_home = 0;

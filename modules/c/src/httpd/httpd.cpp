@@ -7,6 +7,8 @@
 #include "resource.h"
 #include "common.h"
 
+#define BUF_SIZE (32 * 1024)
+
 static char **g_args;
 static HINSTANCE g_hInstance;
 

@@ -4,6 +4,8 @@
 #include <stdarg.h>
 #include "common.h"
 
+#define BUF_SIZE (32 * 1024)
+
 static SERVICE_STATUS_HANDLE g_status_handle;
 static SERVICE_STATUS g_status;
 static char *g_name;       // name of service
@@ -160,8 +162,8 @@ install_service(char *name, char *full_name, char **service_args)
     SC_HANDLE   service;
     SC_HANDLE   manager;
 
-    TCHAR path[4096];
-	TCHAR args[4096];
+    TCHAR path[BUF_SIZE];
+	TCHAR args[BUF_SIZE];
 
     if (! GetModuleFileName(NULL, path, sizeof(path)))
       die("Can't get module executable");

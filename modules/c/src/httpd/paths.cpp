@@ -48,6 +48,8 @@
 #define HKEY_RESIN "Software\\Caucho Technology\\Resin\\CurrentVersion"
 #define HKEY_RESIN_HOME "Resin Home"
 
+#define BUF_SIZE (32 * 1024)
+
 extern void install_service(char *name);
 extern void remove_service(char *name);
 static int g_is_dead = 0;
@@ -126,7 +128,7 @@ concat(char *a, char *b)
 static char *
 find_path(char *exe)
 {
-	char buf[8192];
+	char buf[BUF_SIZE];
 	char *path = getenv("PATH");
 	struct stat info;
 
@@ -201,7 +203,7 @@ get_canonical_path(char *path)
 static char *
 get_parent(char *path)
 {
-	char buf[8192];
+	char buf[BUF_SIZE];
 	strcpy(buf, path);
 
 	for (int i = strlen(path) - 1; i >= 0 && buf[i] != '\\'; i--) {
@@ -215,7 +217,7 @@ get_parent(char *path)
 static char *
 reg_query_string(HKEY key, char *subkey, char *value)
 {
-	char buf[1024];
+	char buf[BUF_SIZE];
 	DWORD len = sizeof buf;
 	DWORD type;
 	int rc = RegQueryValueEx(key, subkey, 0, &type, (LPBYTE) buf, &len);
@@ -245,7 +247,7 @@ static char *
 find_jdk_registry(char *jdk)
 {
 	HKEY hKeyJdk;
-	char buf[1024];
+	char buf[BUF_SIZE];
 	HKEY hKeyVersion = 0;
 	
 	if (! (hKeyJdk = reg_lookup(HKEY_LOCAL_MACHINE, jdk)))
@@ -297,7 +299,7 @@ add_classpath(char *cp, char *path)
 char *
 get_java_home(char *resin_home, char *java_home)
 {
-	char buf[8192];
+	char buf[BUF_SIZE];
 	struct stat info;
 	char *path;
 
@@ -389,7 +391,7 @@ static char *
 find_resin_registry()
 {
 	HKEY hKeyResin;
-	char buf[1024];
+	char buf[BUF_SIZE];
 	
 	if (! (hKeyResin = reg_lookup(HKEY_LOCAL_MACHINE, HKEY_RESIN))) {
 		LOG(("can't find resin %s\n", HKEY_RESIN));
@@ -411,7 +413,7 @@ get_resin_home(char *resin_home, char *path)
 {
 	char *program = path;
 	char root[1024];
-	char buf[8192];
+	char buf[BUF_SIZE];
 	struct stat info;
 
 	if (resin_home)
@@ -479,7 +481,7 @@ set_classpath(char *cp, char *resin_home, char *java_home, char *env_classpath)
 {
 	WIN32_FIND_DATA scanDir;
 	HANDLE hSearch;
-	char buf[4096];
+	char buf[BUF_SIZE];
 	struct stat info;
 
 	if (env_classpath)
@@ -529,7 +531,7 @@ set_classpath(char *cp, char *resin_home, char *java_home, char *env_classpath)
 char *
 get_java_exe(char *java_home)
 {
-	char buf[4096];
+	char buf[BUF_SIZE];
 	struct stat info;
 
 	if (! java_home)
