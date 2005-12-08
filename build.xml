@@ -619,6 +619,7 @@
         <exclude name="**/lib/jaf.jar"/>
         <exclude name="**/lib/saaj.jar"/>
         <exclude name="**/lib/jaxrpc.jar"/>
+        <exclude name="**/lib/javamail-11.jar"/>
 
         <include name="automake/**"/>
         <include name="conf/**"/>

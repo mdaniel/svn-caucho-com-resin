@@ -1709,7 +1709,7 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
       CauchoRequest req = (CauchoRequest) _originalRequest;
       Application app = req.getApplication();
       
-      long maxAge = app.getCacheTime(req.getRequestURI());
+      long maxAge = app.getMaxAge(req.getRequestURI());
 
       if (maxAge > 0 && ! containsHeader("Expires")) {
 	setDateHeader("Expires", maxAge + Alarm.getCurrentTime());

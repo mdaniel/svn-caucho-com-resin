@@ -851,17 +851,28 @@ public class Env {
 			    String key,
 			    String []formValue)
   {
-    if (key.endsWith("[]")) {
-      key = key.substring(0, key.length() - 2);
+    if (key.endsWith("]") && key.indexOf('[') > 0) {
+      int p = key.indexOf('[');
+      
+      String index = key.substring(p + 1, key.length() - 1);
+      
+      key = key.substring(0, p);
 
       Value keyValue = new StringValue(key);
       Value value = array.get(keyValue);
       if (value == null || ! value.isset())
 	value = new ArrayValueImpl();
 
-      for (int i = 0; i < formValue.length; i++) {
-	value.put(new StringValue(formValue[i]));
+      if (index.equals("")) {
+	for (int i = 0; i < formValue.length; i++) {
+	  value.put(new StringValue(formValue[i]));
+	}
       }
+      else if ('0' <= index.charAt(0) && index.charAt(0) <= '9')
+	value.put(new LongValue(StringValue.toLong(index)),
+		  new StringValue(formValue[0]));
+      else
+	value.put(new StringValue(index), new StringValue(formValue[0]));
 
       array.put(keyValue, value);
     }

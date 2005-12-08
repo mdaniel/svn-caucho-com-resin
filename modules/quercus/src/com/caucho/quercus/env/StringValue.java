@@ -197,23 +197,31 @@ public class StringValue extends Value {
    */
   public long toLong()
   {
-    if (_value.equals(""))
+    return toLong(_value);
+  }
+  
+  /**
+   * Converts to a long.
+   */
+  public static long toLong(String string)
+  {
+    if (string.equals(""))
       return 0;
 
-    int len = _value.length();
+    int len = string.length();
 
     long value = 0;
     long sign = 1;
 
     int i = 0;
 
-    if (_value.charAt(0) == '-') {
+    if (string.charAt(0) == '-') {
       sign = -1;
       i = 1;
     }
     
     for (; i < len; i++) {
-      char ch = _value.charAt(i);
+      char ch = string.charAt(i);
 
       if ('0' <= ch && ch <= '9')
 	value = 10 * value + ch - '0';
