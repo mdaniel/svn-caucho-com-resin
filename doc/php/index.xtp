@@ -1,0 +1,16 @@
+<document>
+  <header>
+    <product>resin</product>
+    <title>PHP</title>
+    <level>toplevel-topic</level>
+    <type>contents</type>
+    <description>
+      Resin's <em>Quercus</em> is an implementation of the PHP language.
+    </description>
+  </header>
+
+  <body>
+    <summary/>
+  </body>
+</document>
+

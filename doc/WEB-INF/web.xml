@@ -27,6 +27,17 @@
     </web-app-default>
   </web-app-deploy>
 
+  <web-app-deploy url-prefix="/php/tutorial"
+                  path="php/tutorial"
+                  startup-mode="lazy">
+    <web-app-default>
+      <servlet servlet-name="viewfile" 
+               servlet-class="com.caucho.doc.ViewFileServlet"/>
+      <servlet-mapping url-pattern="/viewfile/*" servlet-name="viewfile"/>
+      <inherit-session>true</inherit-session>
+    </web-app-default>
+  </web-app-deploy>
+
   <web-app-deploy url-prefix="/servlet/tutorial"
                   path="servlet/tutorial"
                   startup-mode="lazy">

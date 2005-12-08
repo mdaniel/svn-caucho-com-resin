@@ -1,0 +1,31 @@
+<document>
+  <header>
+    <title>Quercus/PHP Jara Module</title>
+        <description>
+          <p>Adding PHP functions with a Java module.</p>
+        </description>
+    <type>tutorial</type>
+    <tutorial-startpage>hello.php</tutorial-startpage>
+  </header>
+
+  <body>
+
+See <a href="http://wiki.caucho.com/PHP_Hello_World_Module">http://wiki.caucho.com/PHP_Hello_World_Module</a> for more details.
+
+    <summary/>
+
+<section title="Files in this tutorial">
+<deftable>
+<tr><td><viewfile-link file="hello.php"/>
+    <td>The PHP Hello, World
+<tr><td><viewfile-link file="WEB-INF/classes/example/HelloModule.java"/>
+    <td>The Java module definition
+<tr><td><viewfile-link file="WEB-INF/resin-web.xml"/>
+    <td>web.xml configuration
+<tr><td><viewfile-link file="WEB-INF/classes/META-INF/services/com.caucho.quercus.QuercusModule"/>
+    <td>Adding the module
+</deftable>
+
+</section>
+  </body>
+</document>
