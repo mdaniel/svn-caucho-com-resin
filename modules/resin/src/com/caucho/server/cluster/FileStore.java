@@ -46,7 +46,7 @@ import com.caucho.vfs.TempStream;
  * Class storing distributed objects based on the filesystem.
  */
 public class FileStore extends StoreManager {
-  protected FileBacking _backing = new FileBacking();
+  private final FileBacking _backing = new FileBacking();
 
   /**
    * Create a new file-based persistent session store.
@@ -191,6 +191,6 @@ public class FileStore extends StoreManager {
 
   public String toString()
   {
-    return "FileStore[" + getPath() + "]";
+    return "FileStore[]";
   }
 }
