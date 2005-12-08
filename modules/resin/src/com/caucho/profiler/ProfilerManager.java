@@ -30,13 +30,9 @@
 package com.caucho.profiler;
 
 import com.caucho.loader.EnvironmentLocal;
+import com.caucho.util.LruCache;
 
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 
 /**
  * The main entry point for profiling.  This class is used to obtain instances
@@ -49,8 +45,8 @@ import java.util.TreeSet;
 public class ProfilerManager {
   private static final EnvironmentLocal<ProfilerManager> _local = new EnvironmentLocal<ProfilerManager>();
 
-  private final HashMap<String, ProfilerPoint> _profilerPointMap
-    = new HashMap<String, ProfilerPoint>();
+  private final LruCache<String, ProfilerPoint> _profilerPointMap
+    = new LruCache<String, ProfilerPoint>(1024);
 
   private boolean _isEnabled = false;
 
@@ -130,7 +126,14 @@ public class ProfilerManager {
   public Set<ProfilerPoint> getAllProfilerPoints()
   {
     synchronized (_profilerPointMap) {
-      return new TreeSet<ProfilerPoint>(_profilerPointMap.values());
+      TreeSet<ProfilerPoint> allProfilerPoints = new TreeSet<ProfilerPoint>();
+
+      Iterator<ProfilerPoint> existingValues = _profilerPointMap.values();
+
+      while (existingValues.hasNext())
+        allProfilerPoints.add(existingValues.next());
+
+      return allProfilerPoints;
     }
   }
 
@@ -193,7 +196,11 @@ public class ProfilerManager {
   private void fillAllProfilerNodes(Collection<ProfilerNode> profilerNodes)
   {
     synchronized (_profilerPointMap) {
-      for (ProfilerPoint profilerPoint : _profilerPointMap.values()) {
+      Iterator<ProfilerPoint> iter = _profilerPointMap.values();
+
+      while (iter.hasNext()) {
+        ProfilerPoint profilerPoint = iter.next();
+
         synchronized (profilerPoint) {
           profilerNodes.addAll(profilerPoint.getProfilerNodes());
         }
@@ -205,7 +212,11 @@ public class ProfilerManager {
                                       Collection<ProfilerNode> profilerNodes)
   {
     synchronized (_profilerPointMap) {
-      for (ProfilerPoint profilerPoint : _profilerPointMap.values()) {
+      Iterator<ProfilerPoint> iter = _profilerPointMap.values();
+
+      while (iter.hasNext()) {
+        ProfilerPoint profilerPoint = iter.next();
+
         synchronized (profilerPoint) {
           for (ProfilerNode profilerNode : profilerPoint.getProfilerNodes()) {
             if (profilerNode.getParent() == parent)
@@ -222,7 +233,11 @@ public class ProfilerManager {
   public void reset()
   {
     synchronized (_profilerPointMap) {
-      for (ProfilerPoint profilerPoint : _profilerPointMap.values()) {
+      Iterator<ProfilerPoint> iter = _profilerPointMap.values();
+
+      while (iter.hasNext()) {
+        ProfilerPoint profilerPoint = iter.next();
+
         profilerPoint.reset();
       }
     }
