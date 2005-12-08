@@ -1408,6 +1408,7 @@ public class PhpParser {
     case '}':
     case PHP_END:
     case TEXT:
+    case TEXT_ECHO:
       break;
 
     default:
@@ -3721,6 +3722,9 @@ public class PhpParser {
 
     case TEXT:
       return "TEXT (token " + token + ")";
+
+    case TEXT_ECHO:
+      return "<?=";
       
     default:
       if (32 <= token && token < 127)
