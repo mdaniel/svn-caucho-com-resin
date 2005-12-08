@@ -60,6 +60,7 @@ import com.caucho.quercus.env.DoubleValue;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.VarMap;
 import com.caucho.quercus.env.ChainedMap;
+import com.caucho.quercus.env.AbstractQuercusClass;
 import com.caucho.quercus.env.QuercusClass;
 import com.caucho.quercus.env.JavaClassDefinition;
 import com.caucho.quercus.env.SessionArrayValue;
@@ -102,6 +103,9 @@ public class Quercus {
     = new HashMap<String,QuercusClass>();
   
   private HashMap<String,JavaClassDefinition> _javaClassWrappers
+    = new HashMap<String,JavaClassDefinition>();
+  
+  private HashMap<String,JavaClassDefinition> _lowerJavaClassWrappers
     = new HashMap<String,JavaClassDefinition>();
 
   private HashMap<String,StringValue> _iniMap
@@ -228,6 +232,19 @@ public class Quercus {
     } catch (Exception e) {
       throw new QuercusRuntimeException(e);
     }
+  }
+
+  /**
+   * Finds the java class wrapper.
+   */
+  public AbstractQuercusClass findJavaClassWrapper(String name)
+  {
+    AbstractQuercusClass def = _javaClassWrappers.get(name);
+
+    if (def != null)
+      return def;
+
+    return _lowerJavaClassWrappers.get(name.toLowerCase());
   }
 
   /**
@@ -364,7 +381,9 @@ public class Quercus {
    */
   public QuercusClass findClass(String name)
   {
-    return _staticClasses.get(name);
+    QuercusClass def = _staticClasses.get(name);
+
+    return def;
   }
 
   /**
@@ -493,9 +512,14 @@ public class Quercus {
       if (line.length() > 0) {
         String className = line;
 
-        Class cl = Class.forName(className, false, loader);
+	try {
+	  Class cl = Class.forName(className, false, loader);
 
-        introspectPhpModuleClass(cl);
+	  introspectPhpModuleClass(cl);
+	} catch (Throwable e) {
+	  log.info("Failed loading " + className + "\n" + e.toString());
+	  log.log(Level.FINE, e.toString(), e);
+	}
       }
     }
   }
@@ -586,7 +610,7 @@ public class Quercus {
   }
 
   /**
-   * Scans the classpath for META-INF/services/com.caucho.quercus.PhpJavaClass
+   * Scans the classpath for META-INF/services/com.caucho.quercus.QuercusClass
    */ 
   private void initStaticClassServices()
   {
@@ -594,7 +618,7 @@ public class Quercus {
     ClassLoader loader = thread.getContextClassLoader();
     
     try {
-      String quercusModule = "META-INF/services/com.caucho.quercus.PhpJavaClass";
+      String quercusModule = "META-INF/services/com.caucho.quercus.QuercusClass";
       Enumeration<URL> urls = loader.getResources(quercusModule);
 
       while (urls.hasMoreElements()) {
@@ -660,11 +684,12 @@ public class Quercus {
   private void introspectPhpJavaClass(String name, Class type)
     throws IllegalAccessException, InstantiationException
   {
-    log.fine("PHP loading class " + type.getName());
-
     JavaClassDefinition def = new JavaClassDefinition(name, type);
 
-    // _staticClasses.put(name, def);
+    _javaClassWrappers.put(name, def);
+    _lowerJavaClassWrappers.put(name.toLowerCase(), def);
+    
+    def.introspect(this);
   }
 
   /**

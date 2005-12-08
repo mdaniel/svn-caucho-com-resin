@@ -151,6 +151,7 @@ public class PhpParser {
   private final static int SYSTEM_STRING = 547;
   private final static int SIMPLE_SYSTEM_STRING = 548;
   private final static int COMPLEX_SYSTEM_STRING = 549;
+  private final static int TEXT_ECHO = 550;
 
   private final static IntMap _insensitiveReserved = new IntMap();
   private final static IntMap _reserved = new IntMap();
@@ -382,10 +383,14 @@ public class PhpParser {
     
     ArrayList<Statement> statements = new ArrayList<Statement>();
 
-    parsePhpText();
+    int token = parsePhpText();
 
     if (_lexeme.length() > 0)
       statements.add(new TextStatement(_lexeme));
+
+    if (token == TEXT_ECHO) {
+      parseEcho(statements);
+    }
     
     statements.addAll(parseStatementList());
 
@@ -504,6 +509,14 @@ public class PhpParser {
 	if (_lexeme.length() > 0) {
 	  statements.add(new TextStatement(_lexeme));
 	}
+	break;
+	
+      case TEXT_ECHO:
+	if (_lexeme.length() > 0)
+	  statements.add(new TextStatement(_lexeme));
+
+	parseEcho(statements);
+
 	break;
 
       default:
@@ -2964,7 +2977,17 @@ public class PhpParser {
 	else if (ch != '?') {
 	  sb.append('<');
 	}
-	else if ((ch = read()) != 'p') {
+	else if ((ch = read()) == '=') {
+	  _lexeme = sb.toString();
+
+	  return TEXT_ECHO;
+	}
+	else if (Character.isWhitespace(ch)) {
+	  _lexeme = sb.toString();
+
+	  return TEXT;
+	}
+	else if (ch != 'p') {
 	  sb.append("<?");
 	}
 	else if ((ch = read()) != 'h') {
@@ -2974,7 +2997,7 @@ public class PhpParser {
 	  sb.append("<?ph");
 	}
 	else if (! Character.isWhitespace((ch = read()))) {
-	  sb.append("<?quercus");
+	  sb.append("<?php");
 	}
 	else {
 	  _lexeme = sb.toString();

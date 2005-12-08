@@ -29,6 +29,14 @@
 
 package com.caucho.quercus.lib;
 
+import javax.sql.DataSource;
+
+import java.sql.Connection;
+import java.sql.SQLException;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import com.caucho.quercus.env.*;
 import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.quercus.module.Optional;
@@ -38,11 +46,6 @@ import com.caucho.quercus.resources.JdbcResultResource;
 import com.caucho.quercus.resources.JdbcStatementResource;
 import com.caucho.util.Log;
 import com.caucho.util.L10N;
-
-import javax.sql.DataSource;
-import java.sql.SQLException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 
 /**
@@ -211,8 +214,8 @@ public class QuercusMysqliModule extends AbstractQuercusModule {
   /**
    * Closes a mysqli connection
    */ 
-  public boolean mysqli_close(Env env,
-                              JdbcConnectionResource connV)
+  public static boolean mysqli_close(Env env,
+				     JdbcConnectionResource connV)
   {
     if (connV == null)
       return false;
@@ -226,28 +229,38 @@ public class QuercusMysqliModule extends AbstractQuercusModule {
    * returns new mysqli connection
    */
   public static Value mysqli_connect(Env env,
-                                     @Optional String host,
+                                     @Optional("localhost") String host,
                                      @Optional String userName,
                                      @Optional String password,
                                      @Optional String dbname,
-                                     @Optional int port,
+                                     @Optional("3306") int port,
                                      @Optional String socket)
     throws IllegalStateException
   {
     try {
-      DataSource database = env.getDatabase();
+      if (host == null || host.equals(""))
+	host = "localhost";
 
-      if (database == null)
-        throw new SQLException("no configured database");
+      String driver = "com.mysql.jdbc.jdbc2.optional.MysqlConnectionPoolDataSource";
+      
+      String url = "jdbc:mysql://" + host + ":" + port + "/" + dbname;
 
-      ResourceValue conn = new JdbcConnectionResource(database.getConnection());
+      Connection jConn = env.getConnection(driver, url, userName, password);
+
+      ResourceValue conn = new JdbcConnectionResource(jConn);
+      
       env.addResource(conn);
 
       return conn;
-
     } catch (SQLException e) {
       env.warning("A link to the server could not be established. " + e.toString());
       env.setSpecialValue("mysqli.connectErrno",new LongValue(e.getErrorCode()));
+      env.setSpecialValue("mysqli.connectError", new StringValue(e.getMessage()));
+
+      log.log(Level.FINE, e.toString(), e);
+      return BooleanValue.FALSE;
+    } catch (Exception e) {
+      env.warning("A link to the server could not be established. " + e.toString());
       env.setSpecialValue("mysqli.connectError", new StringValue(e.getMessage()));
 
       log.log(Level.FINE, e.toString(), e);

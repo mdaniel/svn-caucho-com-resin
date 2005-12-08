@@ -54,7 +54,7 @@ import com.caucho.quercus.gen.PhpWriter;
 /**
  * Represents an introspected Java class.
  */
-public class JavaClassDefinition {
+public class JavaClassDefinition extends AbstractQuercusClass {
   private final String _name;
   private final Class _type;
   
@@ -118,7 +118,7 @@ public class JavaClassDefinition {
   public Value evalNew(Env env, Value []args)
     throws Throwable
   {
-    throw new UnsupportedOperationException();
+    return new JavaValue(_type.newInstance(), this);
   }
 
   /**

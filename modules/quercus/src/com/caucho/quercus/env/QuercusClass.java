@@ -49,7 +49,7 @@ import com.caucho.quercus.gen.PhpWriter;
 /**
  * Represents a PHP class.
  */
-public class QuercusClass {
+public class QuercusClass extends AbstractQuercusClass {
   private final L10N L = new L10N(QuercusClass.class);
 
   private final AbstractClassDef _classDef;

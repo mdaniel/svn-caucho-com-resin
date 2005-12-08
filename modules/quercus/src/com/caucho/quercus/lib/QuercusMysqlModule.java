@@ -38,6 +38,7 @@ import com.caucho.util.L10N;
 import com.caucho.util.Log;
 
 import javax.sql.DataSource;
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.logging.Level;
@@ -731,36 +732,38 @@ public class QuercusMysqlModule extends AbstractQuercusModule {
    * Returns a new mysql connection.
    */
   public Value mysql_pconnect(Env env,
-                              @Optional Value serverV,
-                              @Optional Value userV,
-                              @Optional Value passwordV,
+                              @Optional String server,
+                              @Optional String user,
+                              @Optional String password,
                               @Optional Value newLinkV,
                               @Optional Value flagsV)
   {
-    return mysql_connect(env, serverV, userV,
-      passwordV, newLinkV,
-      flagsV);
+    return mysql_connect(env, server, user, password,
+			 newLinkV, flagsV);
   }
 
   /**
    * Returns a new mysql connection.
    */
   public Value mysql_connect(Env env,
-                             @Optional Value serverV,
-                             @Optional Value userV,
-                             @Optional Value passwordV,
+                             @Optional String host,
+                             @Optional String userName,
+                             @Optional String password,
                              @Optional Value newLinkV,
                              @Optional Value flagsV)
   {
     try {
-      DataSource database = env.getDatabase();
+      if (host == null || host.equals(""))
+	host = "localhost";
 
-      if (database == null)
-	throw new IllegalStateException("no configured database");
+      String driver = "com.mysql.jdbc.jdbc2.optional.MysqlConnectionPoolDataSource";
+      
+      String url = "jdbc:mysql://" + host + ":3306/";
 
-      JdbcConnectionResource value;
+      Connection jConn = env.getConnection(driver, url, userName, password);
 
-      value = new JdbcConnectionResource(database.getConnection());
+      ResourceValue value = new JdbcConnectionResource(jConn);
+      
       env.addResource(value);
       env.setSpecialValue("caucho.mysql", value);
 

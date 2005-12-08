@@ -44,6 +44,9 @@ import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import java.sql.Connection;
+import java.sql.SQLException;
+
 import javax.sql.DataSource;
 
 import javax.servlet.http.HttpServletRequest;
@@ -56,11 +59,12 @@ import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.WriteStream;
 import com.caucho.vfs.ByteToChar;
 
-
 import com.caucho.util.Log;
 import com.caucho.util.L10N;
 import com.caucho.util.IntMap;
 import com.caucho.util.Alarm;
+
+import com.caucho.sql.DatabaseManager;
 
 import com.caucho.quercus.Quercus;
 import com.caucho.quercus.QuercusRuntimeException;
@@ -251,6 +255,26 @@ public class Env {
   public DataSource getDatabase()
   {
     return _quercus.getDatabase();
+  }
+
+  /**
+   * Returns the configured database.
+   */
+  public Connection getConnection(String driver, String url,
+				  String userName, String password)
+    throws Exception
+  {
+    DataSource database = _quercus.getDatabase();
+
+    if (database != null)
+      return database.getConnection();
+
+    database = DatabaseManager.findDatabase(driver, url);
+
+    if (userName == null || userName.equals(""))
+      return database.getConnection();
+    else
+      return database.getConnection(userName, password);
   }
 
   /**
@@ -1710,6 +1734,23 @@ public class Env {
     }
     else
       return null;
+  }
+
+  /**
+   * Finds the class with the given name.
+   *
+   * @param name the class name
+   *
+   * @return the found class or null if no class found.
+   */
+  public AbstractQuercusClass findAbstractClass(String name)
+  {
+    AbstractQuercusClass cl = findClass(name);
+
+    if (cl != null)
+      return cl;
+
+    return _quercus.findJavaClassWrapper(name);
   }
 
   /**
