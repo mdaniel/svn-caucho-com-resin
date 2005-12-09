@@ -366,7 +366,7 @@ r_redeploy-mode =
   | element redeploy-mode { string }
 
 r_rewrite-dispatch = element rewrite-dispatch {
-  element accept {
+  element dispatch {
      (attribute regexp { string }
       | element regexp { string })
    }*

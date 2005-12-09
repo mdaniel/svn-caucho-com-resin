@@ -67,7 +67,7 @@ public class RewriteInvocation {
   /**
    * Adds an accept
    */
-  public void addAccept(Accept accept)
+  public void addDispatch(Accept accept)
   {
     _programList.add(accept);
   }
