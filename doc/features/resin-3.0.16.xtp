@@ -8,6 +8,25 @@
 
 <summary objsummary='localtoc'/>
 
+<section title="cache/cluster session backend fixes">
+
+<p>Important fixes to the cache/cluster session, for bugs introduced in
+3.0.15.</p>
+
+</section>
+
+<section title="SSL changed to use blocking read/write">
+
+<p>The SSL and JNI sockets now use blocking reads and writes.</p>
+
+</section>
+
+<section title="host/web-app merging">
+
+<p>&lt;host> merging now uses the &lt;host-name> values.<p>
+
+</section>
+
 <section title="cache-mapping additions">
 
 <p>The &lt;<a href="http://wiki.caucho.com/Cache-mapping">cache-mapping</a>> tag now allows url-regexp.</p>
