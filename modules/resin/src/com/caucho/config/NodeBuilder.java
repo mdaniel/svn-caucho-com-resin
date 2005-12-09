@@ -570,7 +570,7 @@ public class NodeBuilder {
     else {
       String value = XmlUtil.textValue(node);
 
-      if (value.equals(""))
+      if (value == null || value.equals(""))
 	return "";
       else if (node instanceof Element) {
 	String space = ((Element) node).getAttribute("xml:space");

@@ -286,8 +286,14 @@ public class XmlUtil {
       else
         return "";
     }
-    else
-      return node.getNodeValue();
+    else {
+      String value = node.getNodeValue();
+
+      if (value != null)
+	return value;
+      else
+	return "";
+    }
   }
 
   /**

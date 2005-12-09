@@ -447,34 +447,6 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController> ex
   }
 
   /**
-   * Finds the matching entry.
-   */
-  /*
-  public E mergeController(String name)
-  {
-    request();
-
-    if (! _controllerNames.contains(name))
-      return null;
-
-    Thread thread = Thread.currentThread();
-    ClassLoader oldLoader = thread.getContextClassLoader();
-    try {
-      thread.setContextClassLoader(getParentClassLoader());
-	
-      E controller = createController(name);
-
-      if (controller != null)
-	controller.setExpandCleanupFileSet(_expandCleanupFileSet);
-
-      return controller;
-    } finally {
-      thread.setContextClassLoader(oldLoader);
-    }
-  }
-  */
-
-  /**
    * Returns the digest of the expand and archive directories.
    */
   private long getDigest()

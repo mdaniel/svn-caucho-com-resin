@@ -147,15 +147,17 @@ public class HostSingleDeployGenerator
   public HostController mergeController(HostController controller,
 					String name)
   {
+    /*
     // if directory matches, merge them
     if (controller.getRootDirectory().equals(_controller.getRootDirectory()))
       return controller.merge(_controller);
-    // else if the names don't match, return the new controller
-    else if (! _controller.isNameMatch(name))
-      return controller;
+    */
+    // If the names match, merge the controller
+    if (_controller.isNameMatch(name))
+      return controller.merge(_controller);
     // otherwise, the single deploy overrides
     else
-      return _controller;
+      return controller;
   }
 
   public String toString()
