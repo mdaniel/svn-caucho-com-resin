@@ -2267,7 +2267,7 @@ public class Application extends ServletContextImpl
     if (map != null)
       return map.getMaxAge();
     else
-      return -1;
+      return Long.MIN_VALUE;
   }
 
   /**
@@ -2280,7 +2280,7 @@ public class Application extends ServletContextImpl
     if (map != null)
       return map.getSMaxAge();
     else
-      return -1;
+      return Long.MIN_VALUE;
   }
 
   /**
