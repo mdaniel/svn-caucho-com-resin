@@ -85,7 +85,7 @@ public class SessionManager implements ObjectManager, AlarmListener {
 
   private static int UNSET = 0;
   private static int SET_TRUE = 1;
-  private static int SET_FALSE = 1;
+  private static int SET_FALSE = 2;
   
   private static int DECODE[];
   

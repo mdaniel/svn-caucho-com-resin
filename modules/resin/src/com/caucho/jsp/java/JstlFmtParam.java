@@ -101,7 +101,7 @@ public class JstlFmtParam extends JstlNode {
     throws Exception
   {
     if (_value != null) {
-      if (getRuntimeAttribute(_value) != null) {
+      if (! getRuntimeAttribute(_value).equals(_value)) {
 	// jsp/1c3s
 	
 	out.println(lhs + " = String.valueOf(" + getRuntimeAttribute(_value) + ");");
