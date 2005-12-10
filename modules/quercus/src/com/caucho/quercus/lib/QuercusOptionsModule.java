@@ -191,7 +191,7 @@ public class QuercusOptionsModule extends AbstractQuercusModule {
   /**
    * Returns the quercus version.
    */
-  public static String quercusversion(@Optional String module)
+  public static String phpversion(@Optional String module)
   {
     return "5.0.0";
   }
