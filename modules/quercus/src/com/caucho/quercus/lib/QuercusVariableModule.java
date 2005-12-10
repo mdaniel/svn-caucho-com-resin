@@ -35,6 +35,9 @@ import java.util.Map;
 import java.util.HashMap;
 import java.util.IdentityHashMap;
 
+import java.util.logging.Logger;
+import java.util.logging.Level;
+
 import com.caucho.util.L10N;
 
 import com.caucho.vfs.Vfs;
@@ -52,6 +55,8 @@ import com.caucho.vfs.WriteStream;
  * Information about PHP variables.
  */
 public class QuercusVariableModule extends AbstractQuercusModule {
+  private static final Logger log
+    = Logger.getLogger(QuercusVariableModule.class.getName());
   private static final L10N L = new L10N(QuercusVariableModule.class);
 
   private static final HashMap<String,Value> _constMap
@@ -570,12 +575,19 @@ public class QuercusVariableModule extends AbstractQuercusModule {
   /**
    * Unserializes the value from a string.
    */
-  public static Value unserialize(String v)
-    throws IOException
+  public static Value unserialize(Env env, String v)
   {
-    UnserializeReader is = new UnserializeReader(v);
+    try {
+      UnserializeReader is = new UnserializeReader(v);
 
-    return unserialize(is);
+      return unserialize(is);
+    } catch (IOException e) {
+      log.log(Level.FINE, e.toString(), e);
+      
+      env.notice(e.toString());
+
+      return BooleanValue.FALSE;
+    }
   }
 
   private static Value unserialize(UnserializeReader is)
