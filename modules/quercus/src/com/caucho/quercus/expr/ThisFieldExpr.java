@@ -200,7 +200,7 @@ public class ThisFieldExpr extends AbstractVarExpr {
     if (_quercusClass.get(_name) != null) {
       // quercus/3d80
       
-      String var = "quercus_this._php_" + _name;
+      String var = "quercus_this._quercus_" + _name;
     
       out.print("(" + var + " != null ? " + var + " : NullValue.NULL)");
     }
@@ -225,7 +225,7 @@ public class ThisFieldExpr extends AbstractVarExpr {
     if (_quercusClass.get(_name) != null) {
       // quercus/3d85
       
-      String var = "quercus_this._php_" + _name;
+      String var = "quercus_this._quercus_" + _name;
     
       out.print("(" + var + " = (" + var + " != null ? " + var + ".toRefVar() : new Var()))");
     }
@@ -287,7 +287,7 @@ public class ThisFieldExpr extends AbstractVarExpr {
     if (_quercusClass.get(_name) != null) {
       // quercus/3d8c
       
-      String var = "quercus_this._php_" + _name;
+      String var = "quercus_this._quercus_" + _name;
     
       out.print("(" + var + " = (" + var + " != null ? " + var + ".getArray() : new ArrayValue()))");
     }
@@ -313,7 +313,7 @@ public class ThisFieldExpr extends AbstractVarExpr {
     if (_quercusClass.get(_name) != null) {
       // quercus/3d8f
       
-      String var = "quercus_this._php_" + _name;
+      String var = "quercus_this._quercus_" + _name;
     
       out.print("(" + var + " = (" + var + " != null ? " + var + ".getObject(env) : env.createObject()))");
     }
@@ -387,7 +387,7 @@ public class ThisFieldExpr extends AbstractVarExpr {
     // quercus/3d91
     
     if (_quercusClass.get(_name) != null) {
-      String var = "quercus_this._php_" + _name;
+      String var = "quercus_this._quercus_" + _name;
     
       out.print(var + " = null");
     }

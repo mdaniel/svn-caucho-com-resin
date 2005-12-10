@@ -722,7 +722,7 @@ public class Function extends AbstractFunction {
       
     if (isVariableMap()) {
       out.println("java.util.HashMap<String,Var> _quercus_map = new java.util.HashMap<String,Var>();");
-      out.println("java.util.HashMap<String,Var> _quercus_oldMap = env.pushEnv(_php_map);");
+      out.println("java.util.HashMap<String,Var> _quercus_oldMap = env.pushEnv(_quercus_map);");
     
       out.println("try {");
       out.pushDepth();
