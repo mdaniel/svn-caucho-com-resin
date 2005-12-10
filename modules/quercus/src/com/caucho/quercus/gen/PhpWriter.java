@@ -309,7 +309,7 @@ public class PhpWriter extends JavaWriterWrapper {
       String name = cl.getName();
 
       println();
-      println("static final quercus_" + name + " __php_class_" + name + " = new php_" + name + "();");
+      println("static final quercus_" + name + " __quercus_class_" + name + " = new quercus_" + name + "();");
     }
 
     for (int i = 0; i < _staticVarList.size(); i++) {
