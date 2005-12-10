@@ -600,7 +600,7 @@ public class Quercus {
 	String methodName = method.getName();
 
 	if (methodName.startsWith("quercus_"))
-	  methodName = methodName.substring(4);
+	  methodName = methodName.substring(8);
 
 	_staticFunctions.put(methodName, function);
       } catch (Exception e) {

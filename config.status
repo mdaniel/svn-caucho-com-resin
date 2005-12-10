@@ -510,7 +510,7 @@ s,@ac_ct_STRIP@,strip,;t t
 s,@INSTALL_STRIP_PROGRAM@,${SHELL} $(install_sh) -c -s,;t t
 s,@AWK@,awk,;t t
 s,@SET_MAKE@,,;t t
-s,@FULL_VERSION@,Resin 3.0.9 -- Tue Nov 15 15:56:30 PST 2005,;t t
+s,@FULL_VERSION@,Resin 3.0.9 -- Fri Dec  9 14:47:16 PST 2005,;t t
 s,@CC@,gcc,;t t
 s,@CFLAGS@,-g -O2 -DPOLL -DHAS_JVMTI,;t t
 s,@LDFLAGS@,,;t t
@@ -555,7 +555,7 @@ s,@LD_SHLIB@,cc,;t t
 s,@LDFLAGS_SHLIB@,-bundle -undefined suppress -flat_namespace -Wl,-bind_at_load -L/usr/lib,;t t
 s,@LIBS_SHLIB@,,;t t
 s,@PROXY_LIBS@,,;t t
-s,@SSL_LIBS@, -lcrypto -lssl,;t t
+s,@SSL_LIBS@, -lssl -lcrypto,;t t
 s,@JNI@,yes,;t t
 s,@JNI_INCLUDE@,-I/System/Library/Frameworks/JavaVM.framework/Versions/1.5/Home/include,;t t
 s,@INCLUDES@, -I/usr/include,;t t

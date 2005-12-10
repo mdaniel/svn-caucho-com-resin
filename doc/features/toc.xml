@@ -4,6 +4,7 @@
     <item link="overview.xtp" title="Feature Overview"/>
 
     <item link="release-notes.xtp" title="Release Notes">
+      <item link="resin-3.0.16.xtp" title="Resin 3.0.16"/>
       <item link="resin-3.0.15.xtp" title="Resin 3.0.15"/>
       <item link="resin-3.0.14.xtp" title="Resin 3.0.14"/>
       <item link="resin-3.0.13.xtp" title="Resin 3.0.13"/>
