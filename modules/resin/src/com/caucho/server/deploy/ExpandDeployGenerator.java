@@ -340,6 +340,14 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController> ex
   }
 
   /**
+   * Return true for a matching key.
+   */
+  protected boolean isDeployedKey(String key)
+  {
+    return _controllerNames.contains(key);
+  }
+
+  /**
    * Forces an update.
    */
   public void update()
@@ -426,9 +434,6 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController> ex
   public E generateController(String name)
   {
     request();
-
-    if (! _controllerNames.contains(name))
-      return null;
 
     Thread thread = Thread.currentThread();
     ClassLoader oldLoader = thread.getContextClassLoader();

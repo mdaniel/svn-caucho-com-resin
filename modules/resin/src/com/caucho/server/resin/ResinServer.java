@@ -126,6 +126,7 @@ public class ResinServer
     _startTime = Alarm.getCurrentTime();
 
     _variableMap.put("resin", new Var());
+    _variableMap.put("java", new JavaVar());
 
     _variableMap.put("resinHome", CauchoSystem.getResinHome());
     _variableMap.put("serverRoot", CauchoSystem.getServerRoot());
@@ -614,6 +615,19 @@ public class ResinServer
     public boolean isProfessional()
     {
       return _isResinProfessional;
+    }
+  }
+
+  /**
+   * Java variables
+   */
+  public class JavaVar {
+    /**
+     * Returns true for JDK 5
+     */
+    public boolean isJava5()
+    {
+      return CauchoSystem.isJdk15();
     }
   }
 }

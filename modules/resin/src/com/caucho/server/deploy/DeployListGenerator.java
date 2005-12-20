@@ -51,11 +51,13 @@ import com.caucho.lifecycle.Lifecycle;
 /**
  * A list of deploy objects.
  */
-public class DeployListGenerator<E extends DeployController> extends DeployGenerator<E> implements Dependency {
+public class DeployListGenerator<E extends DeployController>
+  extends DeployGenerator<E> implements Dependency {
   private static final Logger log = Log.open(DeployListGenerator.class);
   private static final L10N L = new L10N(DeployListGenerator.class);
 
-  private ArrayList<DeployGenerator<E>> _generatorList = new ArrayList<DeployGenerator<E>>();
+  private ArrayList<DeployGenerator<E>> _generatorList
+    = new ArrayList<DeployGenerator<E>>();
 
   /**
    * Creates the deploy.
@@ -137,9 +139,6 @@ public class DeployListGenerator<E extends DeployController> extends DeployGener
       if (controller != null) {
 	// merge with the rest of the entries
 	for (int j = 0; j < _generatorList.size(); j++) {
-	  if (i == j)
-	    continue;
-	  
 	  DeployGenerator<E> generator = _generatorList.get(j);
 
 	  // XXX: issue with server/10tl

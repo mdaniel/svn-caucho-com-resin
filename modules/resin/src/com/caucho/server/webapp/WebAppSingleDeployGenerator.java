@@ -202,7 +202,9 @@ public class WebAppSingleDeployGenerator
     
     _controller.setParentWebApp(_parentWebApp);
     
-    _controller.setConfig(_config);
+    // _controller.setConfig(_config);
+    // server/1h13
+    _controller.addConfigDefault(_config);
 
     _controller.setSourceType("single");
 
@@ -223,7 +225,7 @@ public class WebAppSingleDeployGenerator
   public WebAppController generateController(String name)
   {
     if (name.equals(_controller.getContextPath()))
-      return _controller;
+      return new WebAppController(_urlPrefix, _rootDirectory, _container);
     else
       return null;
   }
@@ -234,9 +236,14 @@ public class WebAppSingleDeployGenerator
   public WebAppController mergeController(WebAppController controller,
 					  String name)
   {
-    // if directory matches, merge them
-    if (controller.getRootDirectory().equals(_controller.getRootDirectory()))
-      return _controller.merge(controller);
+    // if directory matches, merge the two controllers.  The
+    // last controller has priority.
+    if (controller.getRootDirectory().equals(_controller.getRootDirectory())) {
+      // server/1h10
+      controller.setContextPath(_controller.getContextPath());
+      
+      return controller.merge(_controller);
+    }
     // else if the names don't match, return the new controller
     else if (! _controller.isNameMatch(name))
       return controller;

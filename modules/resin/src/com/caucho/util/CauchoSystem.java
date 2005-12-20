@@ -318,6 +318,15 @@ public class CauchoSystem {
     return _localHost;
   }
 
+  public static boolean isJdk15()
+  {
+    try {
+      return Class.forName("java.lang.annotation.Annotation") != null;
+    } catch (Throwable e) {
+      return false;
+    }
+  }
+
   public static String getUserName()
   {
     if (_userName == null)

@@ -429,15 +429,11 @@ public class ApplicationContainer
   {
     clearCache();
 
-    System.out.println("UPDATE: " + name);
     _appDeploy.update();
     WebAppController controller = _appDeploy.update(name);
 
-    System.out.println("CONTROLLER: " + controller);
-
     if (controller != null) {
       Throwable configException = controller.getConfigException();
-      System.out.println("CE: " + configException);
 
       if (configException != null)
 	throw configException;

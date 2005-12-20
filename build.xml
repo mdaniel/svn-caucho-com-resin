@@ -533,9 +533,6 @@
             <include name="*.jar" />
           </fileset>
        </classpath>
-<!--
-       <arg line="${build}/resin/com/caucho/util/L10N.class"/>
--->
        <arg line="${modules}/resin/classes"/>
     </java>
 

@@ -2,9 +2,15 @@
 
 <a href='changes-2.xtp'>Resin 2.1 changes</a>
 
-<s2 title='3.0.snap - Dec 7, 2005'>
+<s2 title='3.0.snap - Dec 10, 2005'>
 <ul>
-<li>Caching no longer automatically adds Expires and Cache-Control
+<li>Added check for JDK 1.5 ($\{java.isJjava15()}) for Quercus
+</ul>
+</s2>
+
+<s2 title='3.0.16 - Dec 10, 2005'>
+<ul>
+<li>(2005-12-10) Caching no longer automatically adds Expires and Cache-Control
 <li>merge hosts based on host-name, not root-directory
 <li>(2005-12-07) conn.isClosed() should not throw an exceptiono (#453)
 <li>Offset bug in session/cache fragment store (#460, #480, #4, rep by K Fetterman, C Amott, A Balandran)

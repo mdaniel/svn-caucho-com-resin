@@ -44,6 +44,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.caucho.util.L10N;
+import com.caucho.util.CauchoSystem;
 
 import com.caucho.config.ConfigException;
 
@@ -70,7 +71,7 @@ public class QuercusServlet extends HttpServlet {
   private static final Logger log
     = Logger.getLogger(QuercusServlet.class.getName());
 
-  private final Quercus _quercus = new Quercus();
+  private Quercus _quercus;
 
   private boolean _isCompileSet;
 
@@ -82,16 +83,18 @@ public class QuercusServlet extends HttpServlet {
   {
     _isCompileSet = true;
 
+    Quercus quercus = getQuercus();
+
     if ("true".equals(isCompile) || "".equals(isCompile)) {
-      _quercus.setCompile(true);
-      _quercus.setLazyCompile(false);
+      quercus.setCompile(true);
+      quercus.setLazyCompile(false);
     }
     else if ("false".equals(isCompile)) {
-      _quercus.setCompile(false);
-      _quercus.setLazyCompile(false);
+      quercus.setCompile(false);
+      quercus.setLazyCompile(false);
     }
     else if ("lazy".equals(isCompile)) {
-      _quercus.setLazyCompile(true);
+      quercus.setLazyCompile(true);
     }
     else
       throw new ConfigException(L.l("'{0}' is an unknown compile value.  Values are 'true', 'false', or 'lazy'.",
@@ -103,7 +106,7 @@ public class QuercusServlet extends HttpServlet {
    */
   public void setDatabase(DataSource database)
   {
-    _quercus.setDatabase(database);
+    getQuercus().setDatabase(database);
   }
 
   /**
@@ -112,7 +115,7 @@ public class QuercusServlet extends HttpServlet {
   public void addModule(QuercusModule module)
     throws ConfigException
   {
-    _quercus.addModule(module);
+    getQuercus().addModule(module);
   }
   
   /**
@@ -121,7 +124,7 @@ public class QuercusServlet extends HttpServlet {
   public void addClass(PhpClassConfig classConfig)
     throws ConfigException
   {
-    _quercus.addJavaClass(classConfig.getName(), classConfig.getType());
+    getQuercus().addJavaClass(classConfig.getName(), classConfig.getType());
   }
 
   /**
@@ -130,7 +133,7 @@ public class QuercusServlet extends HttpServlet {
   public PhpIni createPhpIni()
     throws ConfigException
   {
-    return new PhpIni(_quercus);
+    return new PhpIni(getQuercus());
   }
   
   /**
@@ -139,8 +142,19 @@ public class QuercusServlet extends HttpServlet {
   public void init()
     throws ServletException
   {
+    if (! CauchoSystem.isJdk15())
+      throw new ServletException(L.l("Quercus requires JDK 1.5"));
+
+    initImpl();
+  }
+
+  private void initImpl()
+    throws ServletException
+  {
+    getQuercus();
+    
     if (! _isCompileSet) {
-      _quercus.setLazyCompile(true);
+      getQuercus().setLazyCompile(true);
       
       // XXX: for validating QA
       // throw new ServletException("compile must be set.");
@@ -157,7 +171,7 @@ public class QuercusServlet extends HttpServlet {
     try {
       Path path = getPath(request);
 
-      PhpPage page = _quercus.parse(path);
+      PhpPage page = getQuercus().parse(path);
 
       // quercus/1b06
       response.setContentType("text/html");
@@ -175,7 +189,7 @@ public class QuercusServlet extends HttpServlet {
 	ws = Vfs.openWrite(out);
       }
 	
-      Env env = new Env(_quercus, page, ws, request, response);
+      Env env = new Env(getQuercus(), page, ws, request, response);
       try {
 	page.executeTop(env);
 
@@ -227,6 +241,17 @@ public class QuercusServlet extends HttpServlet {
       fullPath = scriptPath;
 
     return Vfs.lookup().lookup(req.getRealPath(fullPath));
+  }
+
+  /**
+   * Returns the Quercus instance.
+   */
+  private Quercus getQuercus()
+  {
+    if (_quercus == null)
+      _quercus = new Quercus();
+
+    return _quercus;
   }
   
   /**

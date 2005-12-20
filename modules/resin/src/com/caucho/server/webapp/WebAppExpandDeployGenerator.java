@@ -34,6 +34,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Set;
 
 import java.util.logging.Logger;
 import java.util.logging.Level;
@@ -76,6 +77,10 @@ public class WebAppExpandDeployGenerator extends ExpandDeployGenerator<WebAppCon
 
   private HashMap<Path,WebAppConfig> _webAppConfigMap
     = new HashMap<Path,WebAppConfig>();
+
+  // Maps from the context-path to the webapps directory
+  private HashMap<String,Path> _contextPathMap
+    = new HashMap<String,Path>();
 
   private ClassLoader _parentLoader;
 
@@ -175,6 +180,9 @@ public class WebAppExpandDeployGenerator extends ExpandDeployGenerator<WebAppCon
     Path appDir = getExpandDirectory().lookup(docDir);
 
     _webAppConfigMap.put(appDir, config);
+
+    if (config.getContextPath() != null)
+      _contextPathMap.put(config.getContextPath(), appDir);
   }
 
   /**
@@ -191,6 +199,19 @@ public class WebAppExpandDeployGenerator extends ExpandDeployGenerator<WebAppCon
   protected Logger getLog()
   {
     return log;
+  }
+
+  /**
+   * Returns the deployed keys.
+   */
+  protected void fillDeployedKeys(Set<String> keys)
+  {
+    super.fillDeployedKeys(keys);
+
+    for (WebAppConfig cfg : _webAppConfigMap.values()) {
+      if (cfg.getContextPath() != null)
+	keys.add(cfg.getContextPath());
+    }
   }
 
   /**
@@ -213,6 +234,14 @@ public class WebAppExpandDeployGenerator extends ExpandDeployGenerator<WebAppCon
 
     String segmentName = name.substring(_urlPrefix.length());
 
+    Path webAppRoot = _contextPathMap.get(segmentName);
+    
+    if (webAppRoot != null)
+      segmentName = "/" + webAppRoot.getTail();
+    else if (segmentName.indexOf('/', 1) > 0)
+      return null;
+
+
     if (segmentName.equals("")) {
       if (CaseInsensitive.isCaseInsensitive())
 	segmentName = "/root";
@@ -234,6 +263,9 @@ public class WebAppExpandDeployGenerator extends ExpandDeployGenerator<WebAppCon
     else
       rootDirectory = getExpandDirectory().lookup(expandName);
 
+    if (! rootDirectory.isDirectory() && ! jarPath.isFile())
+      return null;
+
     WebAppConfig cfg = _webAppConfigMap.get(rootDirectory);
 
     if (cfg != null && cfg.getContextPath() != null)
@@ -241,25 +273,51 @@ public class WebAppExpandDeployGenerator extends ExpandDeployGenerator<WebAppCon
 
     WebAppController controller
       = new WebAppController(name, rootDirectory, _container);
-
-    try {
-      controller.setWarName(segmentName.substring(1));
+    
+    controller.setWarName(segmentName.substring(1));
       
+    controller.setParentWebApp(_parent);
+
+    controller.setDynamicDeploy(true);
+    controller.setSourceType("expand");
+
+    return controller;
+  }
+
+  
+  /**
+   * Returns the current array of application entries.
+   */
+  protected WebAppController mergeController(WebAppController controller,
+					     String key)
+  {
+    try {
+      Path expandDirectory = getExpandDirectory();
+      Path rootDirectory = controller.getRootDirectory();
+	
+      if (! expandDirectory.equals(rootDirectory.getParent()))
+	return controller;
+
+      controller = super.mergeController(controller, key);
+
+      if (controller.getArchivePath() == null) {
+	String archiveName = rootDirectory.getTail() + ".war";
+	
+	Path jarPath = getArchiveDirectory().lookup(archiveName);
+
+	if (! jarPath.isDirectory()) {
+	  controller.setArchivePath(jarPath);
+	  controller.addDepend(jarPath);
+	}
+      }
+
       controller.setStartupMode(getStartupMode());
       // controller.setRedeployMode(getRedeployMode());
 
-      controller.setParentWebApp(_parent);
-
-      if (jarPath != null) {
-	controller.setArchivePath(jarPath);
-	controller.addDepend(jarPath);
-      }
-
-      controller.setDynamicDeploy(true);
-      controller.setSourceType("expand");
-
       for (int i = 0; i < _webAppDefaults.size(); i++)
 	controller.addConfigDefault(_webAppDefaults.get(i));
+
+      WebAppConfig cfg = _webAppConfigMap.get(rootDirectory);
 
       if (cfg != null)
 	controller.addConfigDefault(cfg);

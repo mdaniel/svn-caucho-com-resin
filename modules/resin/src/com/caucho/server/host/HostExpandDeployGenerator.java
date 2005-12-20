@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -134,8 +135,11 @@ public class HostExpandDeployGenerator extends ExpandDeployGenerator<HostControl
    */
   public HostController createController(String name)
   {
-    Path rootDirectory = getExpandDirectory().lookup(name);
+    if (! isDeployedKey(name))
+      return null;
     
+    Path rootDirectory = getExpandDirectory().lookup(name);
+
     HostController controller
       = new HostController(name, rootDirectory, _container);
 
@@ -158,9 +162,6 @@ public class HostExpandDeployGenerator extends ExpandDeployGenerator<HostControl
       controller.setArchivePath(jarPath);
 
       controller.addDepend(jarPath);
-
-      for (int i = 0; i < _hostDefaults.size(); i++)
-	controller.addConfigDefault(_hostDefaults.get(i));
     } catch (ConfigException e) {
       controller.setConfigException(e);
       
@@ -175,6 +176,19 @@ public class HostExpandDeployGenerator extends ExpandDeployGenerator<HostControl
     return controller;
   }
 
+  
+  /**
+   * Adds configuration to the current controller
+   */
+  protected HostController mergeController(HostController controller,
+					   String key)
+  {
+    for (int i = 0; i < _hostDefaults.size(); i++)
+      controller.addConfigDefault(_hostDefaults.get(i));
+
+    return controller;
+  }
+  
   public boolean equals(Object o)
   {
     if (o == null || ! getClass().equals(o.getClass()))

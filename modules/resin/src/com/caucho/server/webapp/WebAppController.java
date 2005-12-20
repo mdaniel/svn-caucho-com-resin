@@ -323,11 +323,14 @@ public class WebAppController
       try {
 	thread.setContextClassLoader(getParentClassLoader());
 
+	//  The contextPath comes from current web-app
 	WebAppController mergedController
-	  = new WebAppController(newController.getContextPath(),
+	  = new WebAppController(getContextPath(),
 				 getRootDirectory(),
 				 _container);
 
+	// server/1h1{2,3}
+	// This controller overrides configuration from the new controller
 	mergedController.mergeController(this);
 	mergedController.mergeController(newController);
 
