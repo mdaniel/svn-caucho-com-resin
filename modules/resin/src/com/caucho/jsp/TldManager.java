@@ -36,21 +36,14 @@ import java.util.*;
 import java.util.logging.*;
 import java.util.zip.*;
 import java.util.jar.*;
-import java.beans.*;
-
-import javax.servlet.*;
-import javax.servlet.jsp.tagext.*;
 
 import com.caucho.util.*;
 import com.caucho.vfs.*;
 import com.caucho.log.Log;
-import com.caucho.server.http.*;
 import com.caucho.jsp.cfg.*;
 
 import com.caucho.loader.DynamicClassLoader;
 import com.caucho.loader.EnvironmentLocal;
-
-import com.caucho.relaxng.CompactVerifierFactoryImpl;
 
 import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
@@ -159,8 +152,6 @@ public class TldManager {
     if (_isInit)
       return;
     _isInit = true;
-
-    int maxDepth = 64;
 
     // loads Resin's tag library implementation
     if (_cauchoTaglibs == null) {
@@ -591,7 +582,9 @@ public class TldManager {
     }
 
     try {
-      new Config().configure(taglib, is, schema);
+      Config config = new Config();
+      config.setEL(false);
+      config.configure(taglib, is, schema);
     } catch (ConfigException e) {
       log.warning(e.toString());
       log.log(Level.FINER, e.toString(), e);
@@ -620,7 +613,7 @@ public class TldManager {
   /**
    * Parses the .tld
    *
-   * @param is the input stream to the taglib
+   * @param path location of the taglib
    */
   private TldPreload parseTldPreload(Path path)
     throws JspParseException, IOException
@@ -694,7 +687,6 @@ public class TldManager {
   /**
    * Finds the path to the jar specified by the location.
    *
-   * @param appDir the application directory
    * @param location the tag-location specified in the web.xml
    *
    * @return the found jar or null

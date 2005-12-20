@@ -1,3 +1,4 @@
+com.caucho.quercus.lib.QuercusApacheModule
 com.caucho.quercus.lib.QuercusArrayModule
 com.caucho.quercus.lib.QuercusClassesModule
 com.caucho.quercus.lib.QuercusDateModule

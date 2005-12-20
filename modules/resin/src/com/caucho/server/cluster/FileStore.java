@@ -29,17 +29,11 @@
 
 package com.caucho.server.cluster;
 
-import java.io.IOException;
-
-import java.util.logging.Logger;
 import java.util.logging.Level;
-
-import com.caucho.util.Alarm;
 
 import com.caucho.vfs.Vfs;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.ReadStream;
-import com.caucho.vfs.WriteStream;
 import com.caucho.vfs.TempStream;
 
 /**
@@ -49,10 +43,7 @@ public class FileStore extends StoreManager {
   private final FileBacking _backing = new FileBacking();
 
   /**
-   * Create a new file-based persistent session store.
-   *
-   * @param manager the session manager for the application
-   * @param path path to the session directory
+   * Create a new file-based persistent store.
    */
   public FileStore()
   {
@@ -85,7 +76,7 @@ public class FileStore extends StoreManager {
     if (! super.init())
       return false;
     
-    String serverId = Cluster.getLocal().getServerId();
+    String serverId = Cluster.getServerId();
     
     String tableName = _backing.serverNameToTableName(serverId);
     
@@ -162,6 +153,10 @@ public class FileStore extends StoreManager {
     try {
       _backing.storeSelf(obj.getUniqueId(), is, tempStream.getLength(),
 			 obj.getExpireInterval(), 0, 0);
+
+      if (log.isLoggable(Level.FINE))
+        log.fine("file store: " + obj.getUniqueId() + " length=" +
+                 tempStream.getLength());
     } finally {
       is.close();
     }

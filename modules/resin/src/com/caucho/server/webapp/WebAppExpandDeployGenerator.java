@@ -241,7 +241,6 @@ public class WebAppExpandDeployGenerator extends ExpandDeployGenerator<WebAppCon
     else if (segmentName.indexOf('/', 1) > 0)
       return null;
 
-
     if (segmentName.equals("")) {
       if (CaseInsensitive.isCaseInsensitive())
 	segmentName = "/root";
@@ -264,6 +263,8 @@ public class WebAppExpandDeployGenerator extends ExpandDeployGenerator<WebAppCon
       rootDirectory = getExpandDirectory().lookup(expandName);
 
     if (! rootDirectory.isDirectory() && ! jarPath.isFile())
+      return null;
+    else if (! isValidDirectory(rootDirectory, segmentName))
       return null;
 
     WebAppConfig cfg = _webAppConfigMap.get(rootDirectory);

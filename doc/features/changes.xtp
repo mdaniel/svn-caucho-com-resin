@@ -4,6 +4,13 @@
 
 <s2 title='3.0.snap - Dec 10, 2005'>
 <ul>
+<li>Multiple hosts combine by host-name, not root-directory (#489)
+<li>.tld parsing should not evaluate EL expressions (#499)
+<li>Added file/cluster store logging for length of serialized object (#522)
+<li>Quercus: unset allows multiple arguments (#509, rep by bago)
+<li>Quercus: stdClass wasn't found from script (#513, rep by bago)
+<li>Quercus: $return is not a reserved name (#514, rep by bago)
+<li>Quercus Apache module: apache_note, apache_request_headers, virtual, getallheaders (#516, rep by bago)
 <li>Added check for JDK 1.5 ($\{java.isJjava15()}) for Quercus
 </ul>
 </s2>

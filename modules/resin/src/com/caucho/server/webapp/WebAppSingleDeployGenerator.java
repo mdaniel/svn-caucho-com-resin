@@ -192,6 +192,13 @@ public class WebAppSingleDeployGenerator
       _rootDirectory = PathBuilder.lookupPath(appDir, null,
 					      _container.getDocumentDirectory());
     }
+
+    String archivePath = _config.getArchivePath();
+
+    if (archivePath != null) {
+      _archivePath = PathBuilder.lookupPath(archivePath, null,
+					      _container.getRootDirectory());
+    }
     
     _controller = new WebAppController(_urlPrefix, _rootDirectory, _container);
 
@@ -224,8 +231,15 @@ public class WebAppSingleDeployGenerator
    */
   public WebAppController generateController(String name)
   {
-    if (name.equals(_controller.getContextPath()))
-      return new WebAppController(_urlPrefix, _rootDirectory, _container);
+    if (name.equals(_controller.getContextPath())) {
+      WebAppController webApp;
+      
+      webApp = new WebAppController(_urlPrefix, _rootDirectory, _container);
+
+      webApp.setArchivePath(_controller.getArchivePath());
+
+      return webApp;
+    }
     else
       return null;
   }
@@ -241,6 +255,8 @@ public class WebAppSingleDeployGenerator
     if (controller.getRootDirectory().equals(_controller.getRootDirectory())) {
       // server/1h10
       controller.setContextPath(_controller.getContextPath());
+      
+      controller.setDynamicDeploy(false);
       
       return controller.merge(_controller);
     }

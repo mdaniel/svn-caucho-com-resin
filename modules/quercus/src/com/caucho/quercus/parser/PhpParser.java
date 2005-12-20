@@ -424,7 +424,7 @@ public class PhpParser {
 	break;
 
       case UNSET:
-	statements.add(parseUnset());
+	parseUnset(statements);
 	break;
 
       case FUNCTION:
@@ -774,9 +774,34 @@ public class PhpParser {
   private Statement parseUnset()
     throws IOException
   {
-    Expr expr = parseTopExpr();
+    ArrayList<Statement> statementList = new ArrayList<Statement>();
+    parseUnset(statementList);
 
-    return expr.createUnset();
+    return BlockStatement.create(statementList);
+  }
+
+  /**
+   * Parses the unset statement.
+   */
+  private void parseUnset(ArrayList<Statement> statementList)
+    throws IOException
+  {
+    int token = parseToken();
+
+    if (token != '(') {
+      _peekToken = token;
+
+      statementList.add(parseTopExpr().createUnset());
+
+      return;
+    }
+
+    do {
+      statementList.add(parseTopExpr().createUnset());
+    } while ((token = parseToken()) == ',');
+
+    _peekToken = token;
+    expect(')');
   }
 
   /**
@@ -2607,6 +2632,7 @@ public class PhpParser {
     case CASE:
     case TRUE:
     case FALSE:
+    case RETURN:
       return _lexeme;
       
     default:

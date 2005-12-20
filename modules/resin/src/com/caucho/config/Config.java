@@ -92,6 +92,7 @@ public class Config {
 
   private ConfigLibrary _configLibrary;
 
+  private boolean _isEL;
   private boolean _allowResinInclude;
 
   public Config()
@@ -115,6 +116,22 @@ public class Config {
   public void setResinInclude(boolean useResinInclude)
   {
     _allowResinInclude = useResinInclude;
+  }
+
+  /**
+   * True if EL expressions are allowed
+   */
+  public boolean isEL()
+  {
+    return _isEL;
+  }
+
+  /**
+   * True if EL expressions are allowed
+   */
+  public void setEL(boolean isEL)
+  {
+    _isEL = isEL;
   }
 
   /**
@@ -260,7 +277,7 @@ public class Config {
 
   private NodeBuilder createBuilder()
   {
-    NodeBuilder builder = new NodeBuilder();
+    NodeBuilder builder = new NodeBuilder(this);
 
     for (String var : _vars.keySet())
       builder.putVar(var, _vars.get(var));

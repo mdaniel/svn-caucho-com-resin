@@ -1823,6 +1823,10 @@ public class Env {
       return new QuercusClass(classDef, parent);
     }
 
+    QuercusClass staticClass = _quercus.findClass(name);
+    if (staticClass != null)
+      return staticClass;
+
     if (_autoload == null)
       _autoload = findFunction("__autoload");
 

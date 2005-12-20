@@ -101,10 +101,22 @@ public class NodeBuilder {
   private static ThreadLocal<NodeBuilder> _currentBuilder
     = new ThreadLocal<NodeBuilder>();
 
+  private Config _config;
+
   private ArrayList<ValidatorEntry> _validators
     = new ArrayList<ValidatorEntry>();
 
   private ConfigVariableResolver _varResolver = new ConfigVariableResolver();
+
+  NodeBuilder()
+  {
+
+  }
+  
+  NodeBuilder(Config config)
+  {
+    _config = config;
+  }
 
   public static NodeBuilder getCurrentBuilder()
   {
@@ -115,6 +127,15 @@ public class NodeBuilder {
   static void setCurrentBuilder(NodeBuilder builder)
   {
     _currentBuilder.set(builder);
+  }
+
+  /**
+   * Returns true if EL expressions are used.
+   */
+  private boolean isEL()
+  {
+    // server/26b6
+    return _config == null || _config.isEL();
   }
 
   /**
@@ -259,7 +280,8 @@ public class NodeBuilder {
     if (bean == null && ! hasChildren(top)) {
       String value = textValue(top);
 
-      if (value != null && value.startsWith("${") && value.endsWith("}")) {
+      if (isEL() && value != null &&
+          value.startsWith("${") && value.endsWith("}")) {
         bean = evalObject(value);
 
 	return bean;
@@ -412,7 +434,7 @@ public class NodeBuilder {
 
     if (value == null)
       return null;
-    else if (value.indexOf("${") >= 0)
+    else if (isEL() && value.indexOf("${") >= 0)
       return evalObject(value);
     else
       return value;
@@ -425,7 +447,7 @@ public class NodeBuilder {
 
     if (value == null)
       return "";
-    else if (value.indexOf("${") >= 0)
+    else if (isEL() && value.indexOf("${") >= 0)
       return evalString(value);
     else
       return value;
@@ -589,7 +611,7 @@ public class NodeBuilder {
   public String evalString(String exprString)
     throws ELException
   {
-    if (exprString.indexOf("${") >= 0) {
+    if (exprString.indexOf("${") >= 0 && isEL()) {
       ELParser parser = new ELParser(exprString);
       parser.setCheckEscape(true);
       Expr expr = parser.parse();
@@ -606,7 +628,7 @@ public class NodeBuilder {
   public boolean evalBoolean(String exprString)
     throws ELException
   {
-    if (exprString.indexOf("${") >= 0) {
+    if (exprString.indexOf("${") >= 0 && isEL()) {
       ELParser parser = new ELParser(exprString);
       parser.setCheckEscape(true);
       Expr expr = parser.parse();
@@ -623,7 +645,7 @@ public class NodeBuilder {
   public Object evalObject(String exprString)
     throws ELException
   {
-    if (exprString.indexOf("${") >= 0) {
+    if (exprString.indexOf("${") >= 0 && isEL()) {
       ELParser parser = new ELParser(exprString);
       parser.setCheckEscape(true);
       Expr expr = parser.parse();

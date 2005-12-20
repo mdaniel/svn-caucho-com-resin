@@ -142,6 +142,9 @@ public class HostExpandDeployGenerator extends ExpandDeployGenerator<HostControl
 
     HostController controller
       = new HostController(name, rootDirectory, _container);
+    
+    if (! isValidDirectory(rootDirectory, name))
+      return null;
 
     try {
       String hostName = getHostName();

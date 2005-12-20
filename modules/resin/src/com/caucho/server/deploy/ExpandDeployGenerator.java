@@ -525,28 +525,35 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController> ex
 	continue;
       else if (entryName.endsWith(getExtension()))
 	continue;
-      
-      if (! rootDirectory.isDirectory() ||
-	  pathName.startsWith(".")) {
-        continue;
-      }
 
-      if (pathName.equalsIgnoreCase("web-inf") ||
-	  pathName.equalsIgnoreCase("meta-inf"))
-        continue;
-
-      for (int j = 0; j < _requireFiles.size(); j++) {
-	String file = _requireFiles.get(j);
-
-	if (! rootDirectory.lookup(file).canRead())
-	  continue loop;
-      }
+      if (! isValidDirectory(rootDirectory, pathName))
+	continue;
 
       if (! entryNames.contains(entryName))
 	entryNames.add(entryName);
     }
 
     return entryNames;
+  }
+
+  protected boolean isValidDirectory(Path rootDirectory, String pathName)
+  {
+    if (! rootDirectory.isDirectory() || pathName.startsWith(".")) {
+      return false;
+    }
+
+    if (pathName.equalsIgnoreCase("web-inf") ||
+	pathName.equalsIgnoreCase("meta-inf"))
+      return false;
+
+    for (int j = 0; j < _requireFiles.size(); j++) {
+      String file = _requireFiles.get(j);
+
+      if (! rootDirectory.lookup(file).canRead())
+	return false;
+    }
+
+    return true;
   }
 
   /**

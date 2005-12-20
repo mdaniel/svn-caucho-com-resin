@@ -119,7 +119,7 @@ public class HostSingleDeployGenerator
     
     _controller = new HostController(hostName, _config, _container, null);
 
-    _controller.init();
+    // _controller.init();
   }
 
   /**
@@ -135,8 +135,10 @@ public class HostSingleDeployGenerator
    */
   public HostController generateController(String name)
   {
-    if (_controller.isNameMatch(name))
-      return _controller;
+    if (_controller.isNameMatch(name)) {
+      return new HostController(_controller.getName(), _config,
+				_container, null);
+    }
     else
       return null;
   }
@@ -154,7 +156,7 @@ public class HostSingleDeployGenerator
     */
     // If the names match, merge the controller
     if (_controller.isNameMatch(name))
-      return controller.merge(_controller);
+      return _controller.merge(controller);
     // otherwise, the single deploy overrides
     else
       return controller;
