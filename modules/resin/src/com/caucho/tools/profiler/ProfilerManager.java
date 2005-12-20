@@ -27,7 +27,7 @@
  */
 
 
-package com.caucho.profiler;
+package com.caucho.tools.profiler;
 
 import com.caucho.loader.EnvironmentLocal;
 import com.caucho.util.LruCache;

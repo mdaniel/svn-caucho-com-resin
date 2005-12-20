@@ -27,7 +27,7 @@
  */
 
 
-package com.caucho.profiler;
+package com.caucho.tools.profiler;
 
 import com.caucho.util.CharBuffer;
 import com.caucho.util.L10N;

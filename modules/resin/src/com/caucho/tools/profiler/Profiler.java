@@ -27,52 +27,16 @@
  */
 
 
-package com.caucho.profiler;
-
-import com.caucho.config.ConfigException;
-import com.caucho.util.L10N;
+package com.caucho.tools.profiler;
 
 /**
- * Configure a ProfilerPoint.
+ * Each thread has a {@link Profiler} that is used to demarcate the start() and
+ * finish() of code execution at a {@link ProfilerPoint}. A Profiler is obtained
+ * with {@link ProfilerPoint#start()}.
+ *
+ * @see ProfilerManager
  */
-public class ProfilerPointConfig {
-  private static final L10N L = new L10N(ProfilerPointConfig.class);
+public interface Profiler {
 
-  private String _name;
-  private boolean _isCategorizing;
-
-  public String getName()
-  {
-    return _name;
-  }
-
-  public void setName(String name)
-  {
-    _name = name;
-  }
-
-  public boolean isCategorizing()
-  {
-    return _isCategorizing;
-  }
-
-  public void setCategorizing(boolean categorizing)
-  {
-    _isCategorizing = categorizing;
-  }
-
-  public void init()
-    throws ConfigException
-  {
-    if (getName() == null)
-      throw new ConfigException(L.l("`{0}' is required", "name"));
-  }
-
-  public ProfilerPoint replaceObject()
-  {
-    if (_isCategorizing)
-      return ProfilerManager.getLocal() .getCategorizingProfilerPoint(getName());
-    else
-      return ProfilerManager.getLocal() .getProfilerPoint(getName());
-  }
+  public void finish();
 }

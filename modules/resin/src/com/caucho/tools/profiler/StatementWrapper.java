@@ -27,7 +27,7 @@
  */
 
 
-package com.caucho.profiler;
+package com.caucho.tools.profiler;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -65,7 +65,14 @@ public final class StatementWrapper
   {
     setSql(sql);
 
-    return wrap(_statement.executeQuery(sql));
+    Profiler profiler = _profilerPoint.start();
+
+    try {
+      return wrap(_statement.executeQuery(sql));
+    }
+    finally {
+      profiler.finish();
+    }
   }
 
   public int executeUpdate(String sql)

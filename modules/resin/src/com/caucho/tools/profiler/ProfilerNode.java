@@ -27,7 +27,7 @@
  */
 
 
-package com.caucho.profiler;
+package com.caucho.tools.profiler;
 
 /**
  * Gathers statistics for a {@link ProfilerPoint} with a particular parentage.

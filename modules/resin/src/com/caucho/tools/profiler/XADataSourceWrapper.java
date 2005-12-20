@@ -27,101 +27,71 @@
  */
 
 
-package com.caucho.profiler;
+package com.caucho.tools.profiler;
 
-import com.caucho.config.ConfigException;
-import com.caucho.util.L10N;
-
-import javax.sql.DataSource;
+import javax.sql.XAConnection;
+import javax.sql.XADataSource;
 import java.io.PrintWriter;
-import java.sql.Connection;
 import java.sql.SQLException;
 
-public final class DataSourceWrapper
-  implements DataSource
+public final class XADataSourceWrapper
+  implements XADataSource
 {
-  private static final L10N L = new L10N(DataSourceWrapper.class);
-
-  private final DataSource _dataSource;
   private final ProfilerPoint _profilerPoint;
+  private final XADataSource _dataSource;
 
-  public DataSourceWrapper(ProfilerPoint profilerPoint, DataSource dataSource)
+  public XADataSourceWrapper(ProfilerPoint profilerPoint,
+                             XADataSource dataSource)
   {
     _profilerPoint = profilerPoint;
     _dataSource = dataSource;
   }
 
-  private Connection wrap(Connection connection)
+  private XAConnectionWrapper wrap(XAConnection connection)
   {
-    return new ConnectionWrapper(_profilerPoint, connection);
+    return new XAConnectionWrapper(_profilerPoint, connection);
   }
 
-  public Connection getConnection()
+  public XAConnection getXAConnection()
     throws SQLException
   {
-    return wrap(_dataSource.getConnection());
+    return wrap(_dataSource.getXAConnection());
   }
 
-  public Connection getConnection(String username, String password)
+  public XAConnection getXAConnection(String user, String password)
     throws SQLException
   {
-    return wrap(_dataSource.getConnection(username, password));
+    return wrap(_dataSource.getXAConnection(user, password));
   }
 
   public PrintWriter getLogWriter()
     throws SQLException
   {
-    Profiler profiler = _profilerPoint.start();
-
-    try {
-      return _dataSource.getLogWriter();
-    }
-    finally {
-      profiler.finish();
-    }
+    return _dataSource.getLogWriter();
   }
 
   public void setLogWriter(PrintWriter out)
     throws SQLException
   {
-    Profiler profiler = _profilerPoint.start();
-
-    try {
-      _dataSource.setLogWriter(out);
-    }
-    finally {
-      profiler.finish();
-    }
+    _dataSource.setLogWriter(out);
   }
 
   public void setLoginTimeout(int seconds)
     throws SQLException
   {
-    Profiler profiler = _profilerPoint.start();
-
-    try {
-      _dataSource.setLoginTimeout(seconds);
-    }
-    finally {
-      profiler.finish();
-    }
+    _dataSource.setLoginTimeout(seconds);
   }
 
   public int getLoginTimeout()
     throws SQLException
   {
-    Profiler profiler = _profilerPoint.start();
+    return _dataSource.getLoginTimeout();
 
-    try {
-      return _dataSource.getLoginTimeout();
-    }
-    finally {
-      profiler.finish();
-    }
   }
 
   public String toString()
   {
-    return "DataSourceWrapper[" + _profilerPoint.getName() + "]";
+    return "XADataSourceWrapper[" + _profilerPoint.getName() + "]";
   }
 }
+

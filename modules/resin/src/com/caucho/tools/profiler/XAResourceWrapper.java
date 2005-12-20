@@ -27,7 +27,7 @@
  */
 
 
-package com.caucho.profiler;
+package com.caucho.tools.profiler;
 
 import javax.transaction.xa.XAException;
 import javax.transaction.xa.XAResource;

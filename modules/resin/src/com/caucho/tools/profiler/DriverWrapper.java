@@ -27,71 +27,66 @@
  */
 
 
-package com.caucho.profiler;
+package com.caucho.tools.profiler;
 
-import javax.sql.XAConnection;
-import javax.sql.XADataSource;
-import java.io.PrintWriter;
+import java.sql.Connection;
+import java.sql.Driver;
+import java.sql.DriverPropertyInfo;
 import java.sql.SQLException;
+import java.util.Properties;
 
-public final class XADataSourceWrapper
-  implements XADataSource
+public class DriverWrapper
+  implements Driver
 {
   private final ProfilerPoint _profilerPoint;
-  private final XADataSource _dataSource;
+  private final Driver _driver;
 
-  public XADataSourceWrapper(ProfilerPoint profilerPoint,
-                             XADataSource dataSource)
+  public DriverWrapper(ProfilerPoint profilerPoint, Driver driver)
   {
     _profilerPoint = profilerPoint;
-    _dataSource = dataSource;
+    _driver = driver;
   }
 
-  private XAConnectionWrapper wrap(XAConnection connection)
+  private Connection wrap(Connection connection)
   {
-    return new XAConnectionWrapper(_profilerPoint, connection);
+    return new ConnectionWrapper(_profilerPoint, connection);
   }
 
-  public XAConnection getXAConnection()
+  public Connection connect(String url, Properties info)
     throws SQLException
   {
-    return wrap(_dataSource.getXAConnection());
+    return wrap(_driver.connect(url, info));
   }
 
-  public XAConnection getXAConnection(String user, String password)
+  public boolean acceptsURL(String url)
     throws SQLException
   {
-    return wrap(_dataSource.getXAConnection(user, password));
+    return _driver.acceptsURL(url);
   }
 
-  public PrintWriter getLogWriter()
+  public DriverPropertyInfo[] getPropertyInfo(String url, Properties info)
     throws SQLException
   {
-    return _dataSource.getLogWriter();
+    return _driver.getPropertyInfo(url, info);
   }
 
-  public void setLogWriter(PrintWriter out)
-    throws SQLException
+  public int getMajorVersion()
   {
-    _dataSource.setLogWriter(out);
+    return _driver.getMajorVersion();
   }
 
-  public void setLoginTimeout(int seconds)
-    throws SQLException
+  public int getMinorVersion()
   {
-    _dataSource.setLoginTimeout(seconds);
+    return _driver.getMinorVersion();
   }
 
-  public int getLoginTimeout()
-    throws SQLException
+  public boolean jdbcCompliant()
   {
-    return _dataSource.getLoginTimeout();
-
+    return _driver.jdbcCompliant();
   }
 
   public String toString()
   {
-    return "XADataSourceWrapper[" + _profilerPoint.getName() + "]";
+    return "DriverWrapper[" + _profilerPoint.getName() + "]";
   }
 }
-

@@ -27,69 +27,69 @@
  */
 
 
-package com.caucho.profiler;
+package com.caucho.tools.profiler;
 
-import javax.sql.ConnectionEventListener;
-import javax.sql.XAConnection;
-import javax.transaction.xa.XAResource;
-import java.sql.Connection;
+import javax.sql.ConnectionPoolDataSource;
+import javax.sql.PooledConnection;
+import java.io.PrintWriter;
 import java.sql.SQLException;
 
-public final class XAConnectionWrapper
-  implements XAConnection
+public final class ConnectionPoolDataSourceWrapper
+  implements ConnectionPoolDataSource
 {
-  private final XAConnection _connection;
   private final ProfilerPoint _profilerPoint;
+  private final ConnectionPoolDataSource _dataSource;
 
-  private XAResource _xaResource;
-
-  public XAConnectionWrapper(ProfilerPoint profilerPoint,
-                             XAConnection connection)
+  public ConnectionPoolDataSourceWrapper(ProfilerPoint profilerPoint,
+                                         ConnectionPoolDataSource dataSource)
   {
     _profilerPoint = profilerPoint;
-    _connection = connection;
+    _dataSource = dataSource;
   }
 
-  private ConnectionWrapper wrap(Connection connection)
-  {
-    return new ConnectionWrapper(_profilerPoint, connection);
-  }
-
-  private XAResourceWrapper wrap(XAResource xaResource)
-  {
-    return new XAResourceWrapper(_profilerPoint, xaResource);
-  }
-
-  public XAResource getXAResource()
+  public PooledConnection getPooledConnection()
     throws SQLException
   {
-    return wrap(_connection.getXAResource());
+    return wrap(_dataSource.getPooledConnection());
   }
 
-  public Connection getConnection()
+  private PooledConnection wrap(PooledConnection pooledConnection)
+  {
+    return new PooledConnectionWrapper(_profilerPoint, pooledConnection);
+  }
+
+  public PooledConnection getPooledConnection(String user, String password)
     throws SQLException
   {
-    return wrap(_connection.getConnection());
+    return wrap(_dataSource.getPooledConnection(user, password));
   }
 
-  public void close()
+  public PrintWriter getLogWriter()
     throws SQLException
   {
-    _connection.close();
+    return _dataSource.getLogWriter();
   }
 
-  public void addConnectionEventListener(ConnectionEventListener listener)
+  public void setLogWriter(PrintWriter out)
+    throws SQLException
   {
-    _connection.addConnectionEventListener(listener);
+    _dataSource.setLogWriter(out);
   }
 
-  public void removeConnectionEventListener(ConnectionEventListener listener)
+  public void setLoginTimeout(int seconds)
+    throws SQLException
   {
-    _connection.removeConnectionEventListener(listener);
+    _dataSource.setLoginTimeout(seconds);
+  }
+
+  public int getLoginTimeout()
+    throws SQLException
+  {
+    return _dataSource.getLoginTimeout();
   }
 
   public String toString()
   {
-    return "XAConnectionWrapper[" + _profilerPoint.getName() + "]";
+    return "ConnectionPoolDataSourceWrapper[" + _profilerPoint.getName() + "]";
   }
 }

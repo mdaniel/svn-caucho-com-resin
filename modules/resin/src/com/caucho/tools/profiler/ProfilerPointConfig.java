@@ -27,59 +27,52 @@
  */
 
 
-package com.caucho.profiler;
+package com.caucho.tools.profiler;
 
-import java.util.Comparator;
+import com.caucho.config.ConfigException;
+import com.caucho.util.L10N;
 
-abstract class ProfilerNodeComparator
-  implements Comparator<ProfilerNode>
-{
-  private boolean isDescendingName;
-  private boolean _isDescending;
+/**
+ * Configure a ProfilerPoint.
+ */
+public class ProfilerPointConfig {
+  private static final L10N L = new L10N(ProfilerPointConfig.class);
 
-  public void setDescendingName(boolean isDescendingName)
+  private String _name;
+  private boolean _isCategorizing;
+
+  public String getName()
   {
-    this.isDescendingName = isDescendingName;
+    return _name;
   }
 
-  public void setDescending(boolean isDescending)
+  public void setName(String name)
   {
-    _isDescending = isDescending;
+    _name = name;
   }
 
-  abstract protected int compareImpl(ProfilerNode o1, ProfilerNode o2);
-
-  protected int compareLong(long l1, long l2)
+  public boolean isCategorizing()
   {
-    if (l1 < l2)
-      return -1;
-    else if (l1 == l2)
-      return 0;
+    return _isCategorizing;
+  }
+
+  public void setCategorizing(boolean categorizing)
+  {
+    _isCategorizing = categorizing;
+  }
+
+  public void init()
+    throws ConfigException
+  {
+    if (getName() == null)
+      throw new ConfigException(L.l("`{0}' is required", "name"));
+  }
+
+  public ProfilerPoint replaceObject()
+  {
+    if (_isCategorizing)
+      return ProfilerManager.getLocal().getCategorizingProfilerPoint(getName());
     else
-      return 1;
-  }
-
-  public int compare(ProfilerNode o1, ProfilerNode o2)
-  {
-    int cmp;
-
-    if (_isDescending)
-      cmp = compareImpl(o2, o1);
-    else
-      cmp = compareImpl(o1, o2);
-
-    if (cmp == 0) {
-      if (isDescendingName)
-        cmp = o2.getName().compareTo(o1.getName());
-      else
-        cmp = o1.getName().compareTo(o2.getName());
-    }
-
-    if (cmp == 0) {
-      if (!o1.equals(o2))
-        cmp = -1;
-    }
-
-    return cmp;
+      return ProfilerManager.getLocal().getProfilerPoint(getName());
   }
 }

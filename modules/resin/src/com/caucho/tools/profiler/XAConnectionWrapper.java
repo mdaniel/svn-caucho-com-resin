@@ -27,29 +27,43 @@
  */
 
 
-package com.caucho.profiler;
+package com.caucho.tools.profiler;
 
 import javax.sql.ConnectionEventListener;
-import javax.sql.PooledConnection;
+import javax.sql.XAConnection;
+import javax.transaction.xa.XAResource;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-public final class PooledConnectionWrapper
-  implements PooledConnection
+public final class XAConnectionWrapper
+  implements XAConnection
 {
-  private final PooledConnection _connection;
+  private final XAConnection _connection;
   private final ProfilerPoint _profilerPoint;
 
-  public PooledConnectionWrapper(ProfilerPoint profilerPoint,
-                                 PooledConnection connection)
+  private XAResource _xaResource;
+
+  public XAConnectionWrapper(ProfilerPoint profilerPoint,
+                             XAConnection connection)
   {
     _profilerPoint = profilerPoint;
     _connection = connection;
   }
 
-  private Connection wrap(Connection connection)
+  private ConnectionWrapper wrap(Connection connection)
   {
     return new ConnectionWrapper(_profilerPoint, connection);
+  }
+
+  private XAResourceWrapper wrap(XAResource xaResource)
+  {
+    return new XAResourceWrapper(_profilerPoint, xaResource);
+  }
+
+  public XAResource getXAResource()
+    throws SQLException
+  {
+    return wrap(_connection.getXAResource());
   }
 
   public Connection getConnection()
@@ -76,8 +90,6 @@ public final class PooledConnectionWrapper
 
   public String toString()
   {
-    return "PooledConnectionWrapper[" + _profilerPoint.getName() + "]";
+    return "XAConnectionWrapper[" + _profilerPoint.getName() + "]";
   }
 }
-
-

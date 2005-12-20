@@ -27,7 +27,7 @@
  */
 
 
-package com.caucho.profiler;
+package com.caucho.tools.profiler;
 
 import com.caucho.jmx.Jmx;
 import com.caucho.util.L10N;

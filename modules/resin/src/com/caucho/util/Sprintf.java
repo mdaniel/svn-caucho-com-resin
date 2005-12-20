@@ -200,8 +200,9 @@ public class Sprintf {
     return sprintf(format, new Object[] { arg0 } );
   }
 
-  public static CharBuffer sprintf(CharBuffer result, String format, 
-                                   Object[] args)
+  public static CharBuffer sprintf(CharBuffer result,
+                                   String format,
+                                   Object ... args)
   {
     int length = args.length;
     int arg = 0;

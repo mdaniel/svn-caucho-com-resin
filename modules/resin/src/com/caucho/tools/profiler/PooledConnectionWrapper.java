@@ -27,24 +27,24 @@
  */
 
 
-package com.caucho.profiler;
+package com.caucho.tools.profiler;
 
+import javax.sql.ConnectionEventListener;
+import javax.sql.PooledConnection;
 import java.sql.Connection;
-import java.sql.Driver;
-import java.sql.DriverPropertyInfo;
 import java.sql.SQLException;
-import java.util.Properties;
 
-public class DriverWrapper
-  implements Driver
+public final class PooledConnectionWrapper
+  implements PooledConnection
 {
+  private final PooledConnection _connection;
   private final ProfilerPoint _profilerPoint;
-  private final Driver _driver;
 
-  public DriverWrapper(ProfilerPoint profilerPoint, Driver driver)
+  public PooledConnectionWrapper(ProfilerPoint profilerPoint,
+                                 PooledConnection connection)
   {
     _profilerPoint = profilerPoint;
-    _driver = driver;
+    _connection = connection;
   }
 
   private Connection wrap(Connection connection)
@@ -52,41 +52,32 @@ public class DriverWrapper
     return new ConnectionWrapper(_profilerPoint, connection);
   }
 
-  public Connection connect(String url, Properties info)
+  public Connection getConnection()
     throws SQLException
   {
-    return wrap(_driver.connect(url, info));
+    return wrap(_connection.getConnection());
   }
 
-  public boolean acceptsURL(String url)
+  public void close()
     throws SQLException
   {
-    return _driver.acceptsURL(url);
+    _connection.close();
   }
 
-  public DriverPropertyInfo[] getPropertyInfo(String url, Properties info)
-    throws SQLException
+  public void addConnectionEventListener(ConnectionEventListener listener)
   {
-    return _driver.getPropertyInfo(url, info);
+    _connection.addConnectionEventListener(listener);
   }
 
-  public int getMajorVersion()
+  public void removeConnectionEventListener(ConnectionEventListener listener)
   {
-    return _driver.getMajorVersion();
-  }
-
-  public int getMinorVersion()
-  {
-    return _driver.getMinorVersion();
-  }
-
-  public boolean jdbcCompliant()
-  {
-    return _driver.jdbcCompliant();
+    _connection.removeConnectionEventListener(listener);
   }
 
   public String toString()
   {
-    return "DriverWrapper[" + _profilerPoint.getName() + "]";
+    return "PooledConnectionWrapper[" + _profilerPoint.getName() + "]";
   }
 }
+
+

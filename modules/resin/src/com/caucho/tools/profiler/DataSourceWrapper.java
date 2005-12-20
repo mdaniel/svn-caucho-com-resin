@@ -27,69 +27,101 @@
  */
 
 
-package com.caucho.profiler;
+package com.caucho.tools.profiler;
 
-import javax.sql.ConnectionPoolDataSource;
-import javax.sql.PooledConnection;
+import com.caucho.config.ConfigException;
+import com.caucho.util.L10N;
+
+import javax.sql.DataSource;
 import java.io.PrintWriter;
+import java.sql.Connection;
 import java.sql.SQLException;
 
-public final class ConnectionPoolDataSourceWrapper
-  implements ConnectionPoolDataSource
+public final class DataSourceWrapper
+  implements DataSource
 {
-  private final ProfilerPoint _profilerPoint;
-  private final ConnectionPoolDataSource _dataSource;
+  private static final L10N L = new L10N(DataSourceWrapper.class);
 
-  public ConnectionPoolDataSourceWrapper(ProfilerPoint profilerPoint,
-                                         ConnectionPoolDataSource dataSource)
+  private final DataSource _dataSource;
+  private final ProfilerPoint _profilerPoint;
+
+  public DataSourceWrapper(ProfilerPoint profilerPoint, DataSource dataSource)
   {
     _profilerPoint = profilerPoint;
     _dataSource = dataSource;
   }
 
-  public PooledConnection getPooledConnection()
-    throws SQLException
+  private Connection wrap(Connection connection)
   {
-    return wrap(_dataSource.getPooledConnection());
+    return new ConnectionWrapper(_profilerPoint, connection);
   }
 
-  private PooledConnection wrap(PooledConnection pooledConnection)
-  {
-    return new PooledConnectionWrapper(_profilerPoint, pooledConnection);
-  }
-
-  public PooledConnection getPooledConnection(String user, String password)
+  public Connection getConnection()
     throws SQLException
   {
-    return wrap(_dataSource.getPooledConnection(user, password));
+    return wrap(_dataSource.getConnection());
+  }
+
+  public Connection getConnection(String username, String password)
+    throws SQLException
+  {
+    return wrap(_dataSource.getConnection(username, password));
   }
 
   public PrintWriter getLogWriter()
     throws SQLException
   {
-    return _dataSource.getLogWriter();
+    Profiler profiler = _profilerPoint.start();
+
+    try {
+      return _dataSource.getLogWriter();
+    }
+    finally {
+      profiler.finish();
+    }
   }
 
   public void setLogWriter(PrintWriter out)
     throws SQLException
   {
-    _dataSource.setLogWriter(out);
+    Profiler profiler = _profilerPoint.start();
+
+    try {
+      _dataSource.setLogWriter(out);
+    }
+    finally {
+      profiler.finish();
+    }
   }
 
   public void setLoginTimeout(int seconds)
     throws SQLException
   {
-    _dataSource.setLoginTimeout(seconds);
+    Profiler profiler = _profilerPoint.start();
+
+    try {
+      _dataSource.setLoginTimeout(seconds);
+    }
+    finally {
+      profiler.finish();
+    }
   }
 
   public int getLoginTimeout()
     throws SQLException
   {
-    return _dataSource.getLoginTimeout();
+    Profiler profiler = _profilerPoint.start();
+
+    try {
+      return _dataSource.getLoginTimeout();
+    }
+    finally {
+      profiler.finish();
+    }
   }
 
   public String toString()
   {
-    return "ConnectionPoolDataSourceWrapper[" + _profilerPoint.getName() + "]";
+    return "DataSourceWrapper[" + _profilerPoint.getName() + "]";
   }
 }

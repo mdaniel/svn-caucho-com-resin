@@ -27,9 +27,11 @@
  */
 
 
-package com.caucho.profiler;
+package com.caucho.tools.profiler;
 
 import com.caucho.util.L10N;
+import com.caucho.util.CharBuffer;
+import com.caucho.util.Sprintf;
 import com.caucho.vfs.XmlWriter;
 
 import javax.servlet.ServletException;
@@ -38,7 +40,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Collection;
-import java.util.Formatter;
 
 /**
  * Html interface to profiling information.
@@ -97,12 +98,17 @@ public class ProfilerServlet
     XmlWriter out = new XmlWriter(response.getWriter());
 
     out.setStrategy(XmlWriter.HTML);
-    out.setIndenting(true);
+    out.setIndenting(false);
 
     out.println(
       "<!DOCTYPE html  PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\"  \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">");
 
-    String title = L.l("Profiling Results for {0}", request.getContextPath());
+    String contextPath = request.getContextPath();
+
+    if (contextPath == null || contextPath.length() == 0)
+      contextPath = "/";
+
+    String title = L.l("Profiling Results for {0}", contextPath);
 
     out.startElement("html");
 
@@ -126,10 +132,6 @@ public class ProfilerServlet
 
     out.endElement("head");
 
-    out.writeElement("Total of " +
-                     _profilerManager.getAllProfilerNodes().size() +
-                     " nodes");
-
     out.startElement("body");
     out.writeElement("h1", title);
 
@@ -138,12 +140,12 @@ public class ProfilerServlet
 
     out.startElement("tr");
 
-    out.writeElement("th", L.l("Name"));
+    out.writeLineElement("th", L.l("Name"));
 
-    out.writeElement("th", L.l("Average Time"));
-    out.writeElement("th", L.l("Total Time"));
+    out.writeLineElement("th", L.l("Average Time"));
+    out.writeLineElement("th", L.l("Total Time"));
 
-    out.writeElement("th", L.l("Invocation Count"));
+    out.writeLineElement("th", L.l("Invocation Count"));
 
     out.endElement("tr");
 
@@ -199,12 +201,12 @@ public class ProfilerServlet
 
     // Name
 
-    out.startElement("td");
+    out.startLineElement("td");
 
     out.startElement("table");
     out.startElement("tr");
 
-    out.startElement("td");
+    out.startLineElement("td");
 
     if (depth > 0) {
       for (int i = depth; i > 0; i--) {
@@ -214,19 +216,19 @@ public class ProfilerServlet
 
       out.write("&rarr;");
     }
-    out.endElement("td");
+    out.endLineElement("td");
 
-    out.startElement("td");
+    out.startLineElement("td");
     out.writeAttribute("class", "text");
     out.writeText(node.getName());
-    out.endElement("td");
+    out.endLineElement("td");
 
     out.endElement("tr");
     out.endElement("table");
 
-    out.endElement("td");
+    out.endLineElement("td");
 
-    out.startElement("td");
+    out.startLineElement("td");
     out.writeAttribute("class", "number");
     if (averageThisTime < 0)
       out.write("&nbsp;");
@@ -236,20 +238,20 @@ public class ProfilerServlet
       printTime(out, averageTotalTime);
     }
 
-    out.endElement("td");
+    out.endLineElement("td");
 
-    out.startElement("td");
+    out.startLineElement("td");
 
     out.writeAttribute("class", "number");
     String timeString = createTimeString(totalTime, thisTime, childrenTime);
     out.writeAttribute("title", timeString);
     printTime(out, totalTime);
-    out.endElement("td");
+    out.endLineElement("td");
 
-    out.startElement("td");
+    out.startLineElement("td");
     out.writeAttribute("class", "number");
     out.print(invocationCount);
-    out.endElement("td");
+    out.endLineElement("td");
 
     out.endElement("tr");
 
@@ -262,20 +264,18 @@ public class ProfilerServlet
                                   long thisTime,
                                   long childrenTime)
   {
-    StringBuilder builder = new StringBuilder();
+    CharBuffer cb = new CharBuffer();
 
-    Formatter formatter = new Formatter(builder);
+    cb.append("totalTime=");
+    formatTime(cb, totalTime);
 
-    builder.append("totalTime=");
-    formatTime(formatter, totalTime);
+    cb.append(" thisTime=");
+    formatTime(cb, thisTime);
 
-    builder.append(" thisTime=");
-    formatTime(formatter, thisTime);
+    cb.append(" childrenTime=");
+    formatTime(cb, childrenTime);
 
-    builder.append(" childrenTime=");
-    formatTime(formatter, childrenTime);
-
-    return builder.toString();
+    return cb.toString();
   }
 
   private void displayChildren(Collection<ProfilerNode> children,
@@ -291,30 +291,31 @@ public class ProfilerServlet
 
   private void printTime(XmlWriter out, long time)
   {
-    formatTime(new Formatter(out), time);
+    CharBuffer cb = new CharBuffer();
+    formatTime(cb, time);
+    out.writeText(cb.toString());
   }
 
-  private void formatTime(Formatter formatter, long nanoseconds)
+  private void formatTime(CharBuffer cb, long nanoseconds)
   {
     long milliseconds = nanoseconds / 1000000;
 
     long minutes = milliseconds /  1000 / 60;
 
     if (minutes > 0) {
-      formatter.format("%d:", minutes);
+      Sprintf.sprintf(cb, "%d:", minutes);
       milliseconds -= minutes * 60 * 1000;
     }
 
     long seconds = milliseconds /  1000;
 
     if (minutes > 0)
-      formatter.format("%02d.", seconds);
+      Sprintf.sprintf(cb, "%02d.", seconds);
     else
-      formatter.format("%d.", seconds);
+      Sprintf.sprintf(cb, "%d.", seconds);
 
     milliseconds -= seconds * 1000;
 
-    formatter.format("%03d", milliseconds);
+    Sprintf.sprintf(cb, "%03d", milliseconds);
   }
-
 }

@@ -53,7 +53,7 @@ import com.caucho.config.types.InitParam;
 
 import com.caucho.naming.Jndi;
 
-import com.caucho.profiler.*;
+import com.caucho.tools.profiler.*;
 
 /**
  * Configures the database driver.

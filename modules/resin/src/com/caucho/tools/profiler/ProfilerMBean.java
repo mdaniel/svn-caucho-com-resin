@@ -27,7 +27,7 @@
  */
 
 
-package com.caucho.profiler;
+package com.caucho.tools.profiler;
 
 import javax.management.ObjectName;
 import javax.management.openmbean.TabularData;

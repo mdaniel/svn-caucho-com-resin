@@ -33,6 +33,8 @@ import java.util.ArrayList;
 
 import java.util.logging.Logger;
 import java.util.logging.Level;
+import java.lang.reflect.Method;
+import java.lang.reflect.InvocationTargetException;
 
 import com.caucho.log.Log;
 
@@ -62,6 +64,8 @@ public class Alarm implements ThreadTask {
   static private long _testTime;
   static private int _testCount;
 
+  static private final Method _nanoTimeMethod;
+
   private long _wakeTime;
   private AlarmListener _listener;
   private ClassLoader _contextLoader;
@@ -75,6 +79,19 @@ public class Alarm implements ThreadTask {
     _currentTime = System.currentTimeMillis();
     _alarmThread = new AlarmThread();
     _alarmThread.start();
+
+    Method nanoTimeMethod;
+
+    try
+    {
+      nanoTimeMethod = System.class.getMethod("nanoTime", null);
+    }
+    catch (NoSuchMethodException e)
+    {
+      nanoTimeMethod = null;
+    }
+
+    _nanoTimeMethod = nanoTimeMethod;
   }
     
   /**
@@ -160,7 +177,8 @@ public class Alarm implements ThreadTask {
   }
 
   /**
-   * Returns the current time.  Convenient for minimizing system calls.
+   * Returns the approximate current time in milliseconds.
+   * Convenient for minimizing system calls.
    */
   public static long getCurrentTime()
   {
@@ -168,7 +186,7 @@ public class Alarm implements ThreadTask {
   }
 
   /**
-   * Returns the exact current time.
+   * Returns the exact current time in milliseconds.
    */
   public static long getExactTime()
   {
@@ -176,6 +194,28 @@ public class Alarm implements ThreadTask {
       return _testTime;
     else
       return System.currentTimeMillis();
+  }
+
+  /**
+   * Returns the exact current time in nanoseconds.
+   */
+  public static long getExactTimeNanoseconds()
+  {
+    if (_testTime > 0)
+      return _testTime * 1000000L;
+    else if (_nanoTimeMethod != null) {
+      try {
+        return (Long) _nanoTimeMethod.invoke(null);
+      }
+      catch (IllegalAccessException ex) {
+        log.log(Level.WARNING, ex.toString(), ex);
+      }
+      catch (InvocationTargetException ex) {
+        log.log(Level.WARNING, ex.toString(), ex);
+      }
+    }
+
+    return getExactTime() * 1000000L;
   }
 
   /**

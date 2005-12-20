@@ -27,7 +27,9 @@
  */
 
 
-package com.caucho.profiler;
+package com.caucho.tools.profiler;
+
+import com.caucho.util.Alarm;
 
 import java.util.ArrayList;
 import java.util.logging.Level;
@@ -58,9 +60,9 @@ final class ThreadProfiler
     return current;
   }
 
-  private long currentTime()
+  private long currentTimeNanoseconds()
   {
-    return System.nanoTime();
+    return Alarm.getExactTimeNanoseconds();
   }
 
   void start(ProfilerPoint profilerPoint)
@@ -94,6 +96,13 @@ final class ThreadProfiler
 
     ProfilerNode parentNode;
 
+    /** XXX:>>
+    for (int i = 0; i < stackLen; i++)
+      System.out.print("  ");
+    System.out.println(">>start " + profilerPoint);
+    (new Exception()).printStackTrace(System.out);
+     */
+
     if (stackLen == 0) {
       parentNode = null;
     }
@@ -104,7 +113,7 @@ final class ThreadProfiler
 
       long parentStartTime = _startTimeStack[topOfStack];
 
-      long parentTime = currentTime() - parentStartTime;
+      long parentTime = currentTimeNanoseconds() - parentStartTime;
 
       _cumulativeTimeStack[topOfStack]
         = _cumulativeTimeStack[topOfStack] + parentTime;
@@ -131,13 +140,21 @@ final class ThreadProfiler
 
     // push a new node onto the stack
 
+    long currentTime = currentTimeNanoseconds();
+
     ProfilerNode node = profilerPoint.getProfilerNode(parentNode);
 
     _nodeStack.add(node);
 
     _unwindStack[stackLen] = isUnwind;
-    _startTimeStack[stackLen] = currentTime();
+    _startTimeStack[stackLen] = currentTime;
     _cumulativeTimeStack[stackLen] = 0;
+
+    /** XXX:>>
+    for (int i = 0; i < stackLen; i++)
+      System.out.print("  ");
+    System.out.println(">>startNode " + node + " currentTime " + currentTime);
+     */
 
     if (log.isLoggable(Level.FINEST)) {
       log.finest("[" + stackLen + "] start "  + node + " isUnwind=" + isUnwind);
@@ -152,16 +169,28 @@ final class ThreadProfiler
     ProfilerNode node = _nodeStack.remove(removeIndex);
     long startTime = _startTimeStack[removeIndex];
 
-    long time = currentTime() - startTime;
+    long currentTime = currentTimeNanoseconds();
+
+    long time = currentTime - startTime;
 
     long totalTime = _cumulativeTimeStack[removeIndex] + time;
 
     node.update(totalTime);
 
+    /** XXX:>>
+    for (int i = 0; i < removeIndex; i++)
+      System.out.print("  ");
+    System.out.println(">>finishNode " + node +
+      " startTime " + startTime +
+      " currentTime " + currentTime +
+      " totalTime" + time +
+      " time"  + totalTime);
+     */
+
     int parentIndex = removeIndex - 1;
 
     if (parentIndex >= 0) {
-      _startTimeStack[parentIndex] = currentTime();
+      _startTimeStack[parentIndex] = currentTimeNanoseconds();
 
       boolean isUnwind = _unwindStack[parentIndex];
 
@@ -178,6 +207,11 @@ final class ThreadProfiler
       }
     }
 
+    /** XXX:>>
+    for (int i = 0; i < removeIndex; i++)
+      System.out.print("  ");
+    System.out.println(">>finish " + node + " " + totalTime);
+     */
   }
 
   public String toString()
