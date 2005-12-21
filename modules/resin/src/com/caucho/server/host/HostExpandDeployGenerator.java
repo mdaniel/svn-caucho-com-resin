@@ -135,15 +135,29 @@ public class HostExpandDeployGenerator extends ExpandDeployGenerator<HostControl
    */
   public HostController createController(String name)
   {
+    // server/13g3
+    if (name.equals(""))
+      return null;
+    
+    /*
     if (! isDeployedKey(name))
       return null;
+    */
     
     Path rootDirectory = getExpandDirectory().lookup(name);
 
     HostController controller
       = new HostController(name, rootDirectory, _container);
+
+
+    Path jarPath = getArchiveDirectory().lookup(name + ".jar");
+    controller.setArchivePath(jarPath);
     
-    if (! isValidDirectory(rootDirectory, name))
+    if (rootDirectory.isDirectory() &&
+	! isValidDirectory(rootDirectory, name))
+      return null;
+    else if (! rootDirectory.isDirectory() &&
+	     ! jarPath.isFile())
       return null;
 
     try {
@@ -158,18 +172,8 @@ public class HostExpandDeployGenerator extends ExpandDeployGenerator<HostControl
       }
       else
 	controller.setHostName(name);
-      
-      controller.setStartupMode(getStartupMode());
-
-      Path jarPath = getArchiveDirectory().lookup(name + ".jar");
-      controller.setArchivePath(jarPath);
 
       controller.addDepend(jarPath);
-    } catch (ConfigException e) {
-      controller.setConfigException(e);
-      
-      log.warning(e.toString());
-      log.log(Level.FINER, e.toString(), e);
     } catch (Throwable e) {
       controller.setConfigException(e);
       
@@ -186,8 +190,21 @@ public class HostExpandDeployGenerator extends ExpandDeployGenerator<HostControl
   protected HostController mergeController(HostController controller,
 					   String key)
   {
-    for (int i = 0; i < _hostDefaults.size(); i++)
-      controller.addConfigDefault(_hostDefaults.get(i));
+    try {
+      controller.setStartupMode(getStartupMode());
+    
+      for (int i = 0; i < _hostDefaults.size(); i++)
+	controller.addConfigDefault(_hostDefaults.get(i));
+    } catch (ConfigException e) {
+      controller.setConfigException(e);
+      
+      log.warning(e.toString());
+      log.log(Level.FINER, e.toString(), e);
+    } catch (Throwable e) {
+      controller.setConfigException(e);
+      
+      log.log(Level.WARNING, e.toString(), e);
+    }
 
     return controller;
   }
