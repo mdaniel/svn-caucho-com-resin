@@ -120,7 +120,7 @@ public class TagFileManager {
   public TagInfo getTag(Path path, String location, TagLibraryInfo taglib)
     throws JspParseException
   {
-    if (! path.canRead())
+    if (path == null || ! path.canRead())
       return null;
 
     try {
