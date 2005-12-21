@@ -262,9 +262,11 @@ public class WebAppExpandDeployGenerator extends ExpandDeployGenerator<WebAppCon
     else
       rootDirectory = getExpandDirectory().lookup(expandName);
 
-    if (! rootDirectory.isDirectory() && ! jarPath.isFile())
+    if (! rootDirectory.isDirectory() &&
+	(jarPath == null || ! jarPath.isFile()))
       return null;
-    else if (! isValidDirectory(rootDirectory, segmentName))
+    else if (rootDirectory.isDirectory() &&
+	     ! isValidDirectory(rootDirectory, segmentName.substring(1)))
       return null;
 
     WebAppConfig cfg = _webAppConfigMap.get(rootDirectory);

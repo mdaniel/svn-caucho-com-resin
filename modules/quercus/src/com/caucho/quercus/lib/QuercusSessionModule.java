@@ -47,6 +47,7 @@ import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.NullValue;
 import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.Callback;
 
 /**
  * PHP class information
@@ -127,6 +128,31 @@ public class QuercusSessionModule extends AbstractQuercusModule {
     env.setIni("session.cookie_secure", secure ? "1" : "0");
 
     return NullValue.NULL;
+  }
+
+  /**
+   * Sets the session save handler
+   */
+  public boolean session_set_save_handler(Env env,
+					  Callback open,
+					  Callback close,
+					  Callback read,
+					  Callback write,
+					  Callback directory,
+					  Callback gc)
+
+    throws Throwable
+  {
+    SessionCallback cb = new SessionCallback(open,
+					     close,
+					     read,
+					     write,
+					     directory,
+					     gc);
+
+    env.setSpecialValue("quercus.save.session", cb);
+    
+    return true;
   }
 
   /**
@@ -226,6 +252,30 @@ public class QuercusSessionModule extends AbstractQuercusModule {
       return '_';
     else
       return '-';
+  }
+
+  static class SessionCallback extends Value {
+    private Callback _open;
+    private Callback _close;
+    private Callback _read;
+    private Callback _write;
+    private Callback _destroy;
+    private Callback _gc;
+
+    SessionCallback(Callback open,
+		    Callback close,
+		    Callback read,
+		    Callback write,
+		    Callback destroy,
+		    Callback gc)
+    {
+      _open = open;
+      _close = close;
+      _read = read;
+      _write = write;
+      _destroy = destroy;
+      _gc = gc;
+    }
   }
 
   static {

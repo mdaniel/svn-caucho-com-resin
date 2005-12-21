@@ -35,6 +35,12 @@ import com.caucho.util.CharBuffer;
 
 import com.caucho.quercus.module.AbstractQuercusModule;
 
+import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.Value;
+import com.caucho.quercus.env.LongValue;
+import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.ArrayValueImpl;
+
 /**
  * PHP URL
  */
@@ -97,6 +103,202 @@ public class QuercusUrlModule extends AbstractQuercusModule {
   public static String base64_decode(String str)
   {
     return Base64.decode(str);
+  }
+
+  enum ParseUrlState {
+    INIT, USER, PASS, HOST, PORT, PATH, QUERY, FRAGMENT
+  };
+
+  /**
+   * Parses the URL into an array.
+   */
+  public static Value parse_url(Env env, String str)
+  {
+    int i = 0;
+    int length = str.length();
+
+    CharBuffer sb = new CharBuffer();
+
+    ArrayValueImpl value = new ArrayValueImpl();
+
+    ParseUrlState state = ParseUrlState.INIT;
+
+    String user = null;
+
+    for (; i < length; i++) {
+      char ch = str.charAt(i);
+
+      switch (ch) {
+      case ':':
+	if (state == ParseUrlState.INIT) {
+	  value.put("scheme", sb.toString());
+	  sb.clear();
+
+	  if (length <= i + 1 || str.charAt(i + 1) != '/') {
+	    state = ParseUrlState.PATH;
+	  }
+	  else if (length <= i + 2 || str.charAt(i + 2) != '/') {
+	    state = ParseUrlState.PATH;
+	  }
+	  else if (length <= i + 3 || str.charAt(i + 3) != '/') {
+	    i += 2;
+	    state = ParseUrlState.USER;
+	  }
+	  else {
+	    // file:///foo
+	    
+	    i += 2;
+	    state = ParseUrlState.PATH;
+	  }
+	}
+	else if (state == ParseUrlState.USER) {
+	  user = sb.toString();
+	  sb.clear();
+	  state = ParseUrlState.PASS;
+	}
+	else if (state == ParseUrlState.HOST) {
+	  value.put("host", sb.toString());
+	  sb.clear();
+	  state = ParseUrlState.PORT;
+	}
+	else
+	  sb.append(ch);
+	break;
+
+      case '@':
+	if (state == ParseUrlState.USER) {
+	  value.put("user", sb.toString());
+	  sb.clear();
+	  state = ParseUrlState.HOST;
+	}
+	else if (state == ParseUrlState.PASS) {
+	  value.put("user", user);
+	  value.put("pass", sb.toString());
+	  sb.clear();
+	  state = ParseUrlState.HOST;
+	}
+	else
+	  sb.append(ch);
+	break;
+	
+      case '/':
+	if (state == ParseUrlState.USER || state == ParseUrlState.HOST) {
+	  value.put("host", sb.toString());
+	  sb.clear();
+	  state = ParseUrlState.PATH;
+	  sb.append(ch);
+	}
+	else if (state == ParseUrlState.PASS) {
+	  value.put("host", user);
+	  value.put(new StringValue("port"),
+		    new LongValue(new StringValue(sb.toString()).toLong()));
+	  sb.clear();
+	  state = ParseUrlState.PATH;
+	  sb.append(ch);
+	}
+	else if (state == ParseUrlState.PORT) {
+	  value.put(new StringValue("port"),
+		    new LongValue(new StringValue(sb.toString()).toLong()));
+	  sb.clear();
+	  state = ParseUrlState.PATH;
+	  sb.append(ch);
+	}
+	else
+	  sb.append(ch);
+	break;
+	
+      case '?':
+	if (state == ParseUrlState.USER || state == ParseUrlState.HOST) {
+	  value.put("host", sb.toString());
+	  sb.clear();
+	  state = ParseUrlState.QUERY;
+	}
+	else if (state == ParseUrlState.PASS) {
+	  value.put("host", user);
+	  value.put(new StringValue("port"),
+		    new LongValue(new StringValue(sb.toString()).toLong()));
+	  sb.clear();
+	  state = ParseUrlState.QUERY;
+	}
+	else if (state == ParseUrlState.PORT) {
+	  value.put(new StringValue("port"),
+		    new LongValue(new StringValue(sb.toString()).toLong()));
+	  sb.clear();
+	  state = ParseUrlState.QUERY;
+	}
+	else if (state == ParseUrlState.PATH) {
+	  if (sb.length() > 0)
+	    value.put("path", sb.toString());
+	  sb.clear();
+	  state = ParseUrlState.QUERY;
+	}
+	else
+	  sb.append(ch);
+	break;
+	
+      case '#':
+	if (state == ParseUrlState.USER || state == ParseUrlState.HOST) {
+	  value.put("host", sb.toString());
+	  sb.clear();
+	  state = ParseUrlState.FRAGMENT;
+	}
+	else if (state == ParseUrlState.PASS) {
+	  value.put("host", user);
+	  value.put(new StringValue("port"),
+		    new LongValue(new StringValue(sb.toString()).toLong()));
+	  sb.clear();
+	  state = ParseUrlState.FRAGMENT;
+	}
+	else if (state == ParseUrlState.PORT) {
+	  value.put(new StringValue("port"),
+		    new LongValue(new StringValue(sb.toString()).toLong()));
+	  sb.clear();
+	  state = ParseUrlState.FRAGMENT;
+	}
+	else if (state == ParseUrlState.PATH) {
+	  if (sb.length() > 0)
+	    value.put("path", sb.toString());
+	  sb.clear();
+	  state = ParseUrlState.FRAGMENT;
+	}
+	else if (state == ParseUrlState.QUERY) {
+	  if (sb.length() > 0)
+	    value.put("query", sb.toString());
+	  sb.clear();
+	  state = ParseUrlState.FRAGMENT;
+	}
+	else
+	  sb.append(ch);
+	break;
+
+      default:
+	sb.append((char) ch);
+	break;
+      }
+    }
+
+    if (sb.length() == 0) {
+    }
+    else if (state == ParseUrlState.USER ||
+	     state == ParseUrlState.HOST)
+      value.put("host", sb.toString());
+    else if (state == ParseUrlState.PASS) {
+      value.put("host", user);
+      value.put(new StringValue("port"),
+		new LongValue(new StringValue(sb.toString()).toLong()));
+    }
+    else if (state == ParseUrlState.PORT) {
+      value.put(new StringValue("port"),
+		new LongValue(new StringValue(sb.toString()).toLong()));
+    }
+    else if (state == ParseUrlState.QUERY)
+      value.put("query", sb.toString());
+    else if (state == ParseUrlState.FRAGMENT)
+      value.put("fragment", sb.toString());
+    else
+      value.put("path", sb.toString());
+
+    return value;
   }
 
   private static char toHexDigit(int d)

@@ -494,6 +494,14 @@ abstract public class AbstractFunction {
   }
 
   /**
+   * Returns true if the function can generate the call directly.
+   */
+  public boolean canGenerateCall(Expr []args)
+  {
+    return true;
+  }
+
+  /**
    * Generates code to evaluate the expression.
    *
    * @param out the writer to the Java source code.

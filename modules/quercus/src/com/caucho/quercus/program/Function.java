@@ -368,6 +368,15 @@ public class Function extends AbstractFunction {
   }
 
   /**
+   * Returns true if the function can generate the call directly.
+   */
+  public boolean canGenerateCall(Expr []args)
+  {
+    // can only handle case where the arg length matches
+    return args.length < _args.length;
+  }
+
+  /**
    * Generates code to evaluate the expression.
    *
    * @param out the writer to the Java source code.
@@ -394,8 +403,8 @@ public class Function extends AbstractFunction {
    *
    * @param out the writer to the Java source code.
    */
-    private void generateImpl(PhpWriter out, Expr funExpr,
-			      Expr []args, boolean isRef)
+  private void generateImpl(PhpWriter out, Expr funExpr,
+			    Expr []args, boolean isRef)
     throws IOException
   {
     out.print("fun_" + _name + "(env");

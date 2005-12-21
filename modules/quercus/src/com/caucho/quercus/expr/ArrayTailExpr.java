@@ -55,6 +55,14 @@ public class ArrayTailExpr extends AbstractVarExpr {
   }
 
   /**
+   * Returns true for an expression that can be read (only $a[] uses this)
+   */
+  public boolean canRead()
+  {
+    return false;
+  }
+
+  /**
    * Returns the expr.
    */
   public Expr getExpr()
@@ -218,7 +226,7 @@ public class ArrayTailExpr extends AbstractVarExpr {
   public void generate(PhpWriter out)
     throws IOException
   {
-    throw new UnsupportedOperationException();
+    throw new UnsupportedOperationException(toString() + " cannot be read");
   }
 
   /**

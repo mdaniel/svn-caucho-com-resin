@@ -111,6 +111,14 @@ abstract public class Expr {
     return false;
   }
 
+  /**
+   * Returns true for an expression that can be read (only $a[] uses this)
+   */
+  public boolean canRead()
+  {
+    return true;
+  }
+
   public Expr createAssign(PhpParser parser, Expr value)
     throws IOException
   {
@@ -170,6 +178,14 @@ abstract public class Expr {
    * Creates a assignment
    */
   public Expr createCopy()
+  {
+    return this;
+  }
+
+  /**
+   * Copy for things like $a .= "test";
+   */
+  public Expr copy()
   {
     return this;
   }

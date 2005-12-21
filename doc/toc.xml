@@ -16,7 +16,9 @@
     <item link="jsp/index.xtp" title="JSP" atoc-descend="true"/>
     <item link="php/index.xtp" title="PHP" atoc-descend="true"/>
     <item link="servlet/index.xtp" title="Servlets and Filters" atoc-descend="true"/>
+    <!--
     <item link="portlet/index.xtp" title="Portlets" atoc-descend="true"/>
+    -->
     <item link="db/index.xtp" title="Databases" atoc-descend="true"/>
     <item link="jmx/index.xtp" title="Admin (JMX)" atoc-descend="true"/>
 <!--

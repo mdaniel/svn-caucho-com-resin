@@ -92,7 +92,7 @@ public class Config {
 
   private ConfigLibrary _configLibrary;
 
-  private boolean _isEL;
+  private boolean _isEL = true;
   private boolean _allowResinInclude;
 
   public Config()

@@ -69,7 +69,7 @@ public class WSDLParser {
 
       WSDLDefinitions wsdl = new WSDLDefinitions();
       
-      new NodeBuilder().configure(wsdl, doc.getDocumentElement());
+      new Config().configure(wsdl, doc.getDocumentElement());
 
       return wsdl;
     } catch (ParserConfigurationException e) {

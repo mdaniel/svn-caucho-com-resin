@@ -2146,18 +2146,46 @@ public class QuercusStringModule extends AbstractQuercusModule {
    */
   private static String strtr_array(String string, ArrayValue map)
   {
+    int size = map.getSize();
+
+    String []from = new String[size];
+    String []to = new String[size];
+    int k = 0;
+
+    for (Map.Entry<Value,Value> entry : map.entrySet()) {
+      from[k] = entry.getKey().toString();
+      to[k] = entry.getValue().toString();
+
+      k++;
+    }
+    
     StringBuilder result = new StringBuilder();
     int len = string.length();
+    int head = 0;
 
-    for (int i = 0; i < len; i++) {
-      char ch = string.charAt(i);
+    while (head < len) {
+      int bestHead = len;
+      int bestI = -1;
+      int bestLength = 0;
 
-      Value value = map.get(StringValue.create(ch));
+      for (int i = 0; i < from.length; i++) {
+	int p = string.indexOf(from[i], head);
 
-      if (! value.isNull())
-	result.append(value);
-      else
-	result.append(ch);
+	if (p >= 0 && (p < bestHead ||
+		       p == bestHead && bestLength < from[i].length())) {
+	  bestHead = p;
+	  bestI = i;
+	  bestLength = from[i].length();
+	}
+      }
+
+      if (head != bestHead)
+	result.append(string.substring(head, bestHead));
+
+      if (bestI >= 0)
+	result.append(to[bestI]);
+
+      head = bestHead + bestLength;
     }
 
     return result.toString();

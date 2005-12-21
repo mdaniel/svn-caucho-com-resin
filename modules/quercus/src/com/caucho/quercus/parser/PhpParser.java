@@ -1612,47 +1612,91 @@ public class PhpParser {
 	break;
 	
       case PLUS_ASSIGN:
-        expr = expr.createAssign(this, new AddExpr(expr, parseAssignExpr()));
+	if (expr.canRead())
+	  expr = expr.createAssign(this, new AddExpr(expr.copy(),
+						     parseAssignExpr()));
+	else // php/03d4
+	  expr = expr.createAssign(this, parseAssignExpr());
 	break;
 	
       case MINUS_ASSIGN:
-        expr = expr.createAssign(this, new SubExpr(expr, parseAssignExpr()));
+	if (expr.canRead())
+	  expr = expr.createAssign(this, new SubExpr(expr.copy(),
+						     parseAssignExpr()));
+	else
+	  expr = expr.createAssign(this, parseAssignExpr());
 	break;
 	
       case APPEND_ASSIGN:
-        expr = expr.createAssign(this, AppendExpr.create(expr, parseAssignExpr()));
+	if (expr.canRead())
+	  expr = expr.createAssign(this, AppendExpr.create(expr.copy(),
+							   parseAssignExpr()));
+	else
+	  expr = expr.createAssign(this, parseAssignExpr());
 	break;
 	
       case MUL_ASSIGN:
-        expr = expr.createAssign(this, new MulExpr(expr, parseAssignExpr()));
+	if (expr.canRead())
+	  expr = expr.createAssign(this, new MulExpr(expr.copy(),
+						     parseAssignExpr()));
+	else
+	  expr = expr.createAssign(this, parseAssignExpr());
 	break;
 	
       case DIV_ASSIGN:
-        expr = expr.createAssign(this, new DivExpr(expr, parseAssignExpr()));
+	if (expr.canRead())
+	  expr = expr.createAssign(this, new DivExpr(expr.copy(),
+						     parseAssignExpr()));
+	else
+	  expr = expr.createAssign(this, parseAssignExpr());
 	break;
 	
       case MOD_ASSIGN:
-        expr = expr.createAssign(this, new ModExpr(expr, parseAssignExpr()));
+	if (expr.canRead())
+	  expr = expr.createAssign(this, new ModExpr(expr.copy(),
+						     parseAssignExpr()));
+	else
+	  expr = expr.createAssign(this, parseAssignExpr());
 	break;
 	
       case LSHIFT_ASSIGN:
-        expr = expr.createAssign(this, new LeftShiftExpr(expr, parseAssignExpr()));
+	if (expr.canRead())
+	  expr = expr.createAssign(this, new LeftShiftExpr(expr.copy(),
+							   parseAssignExpr()));
+	else
+	  expr = expr.createAssign(this, parseAssignExpr());
 	break;
 	
       case RSHIFT_ASSIGN:
-        expr = expr.createAssign(this, new RightShiftExpr(expr, parseAssignExpr()));
+	if (expr.canRead())
+	  expr = expr.createAssign(this, new RightShiftExpr(expr.copy(),
+							    parseAssignExpr()));
+	else
+	  expr = expr.createAssign(this, parseAssignExpr());
 	break;
 	
       case AND_ASSIGN:
-        expr = expr.createAssign(this, new BitAndExpr(expr, parseAssignExpr()));
+	if (expr.canRead())
+	  expr = expr.createAssign(this, new BitAndExpr(expr.copy(),
+							parseAssignExpr()));
+	else
+	  expr = expr.createAssign(this, parseAssignExpr());
 	break;
 	
       case OR_ASSIGN:
-        expr = expr.createAssign(this, new BitOrExpr(expr, parseAssignExpr()));
+	if (expr.canRead())
+	  expr = expr.createAssign(this, new BitOrExpr(expr.copy(),
+						       parseAssignExpr()));
+	else
+	  expr = expr.createAssign(this, parseAssignExpr());
 	break;
 	
       case XOR_ASSIGN:
-        expr = expr.createAssign(this, new BitXorExpr(expr, parseAssignExpr()));
+	if (expr.canRead())
+	  expr = expr.createAssign(this, new BitXorExpr(expr.copy(),
+							parseAssignExpr()));
+	else
+	  expr = expr.createAssign(this, parseAssignExpr());
 	break;
 	
       default:

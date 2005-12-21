@@ -91,6 +91,14 @@ public class VarExpr extends AbstractVarExpr {
   }
 
   /**
+   * Copy for things like $a .= "test";
+   */
+  public Expr copy()
+  {
+    return new VarExpr(_var);
+  }
+
+  /**
    * Creates the assignment.
    */
   public Expr createAssign(PhpParser parser, Expr value)

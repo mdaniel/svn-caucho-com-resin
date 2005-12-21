@@ -1942,6 +1942,9 @@ public class Env {
   public Value include(Path pwd, String include, boolean isOnce)
     throws Throwable
   {
+    // php/0b0g
+    pwd = getPwd();
+    
     Path path = lookupInclude(pwd, include);
 
     if (path == null)
@@ -1968,7 +1971,7 @@ public class Env {
 
     for (int i = 0; i < pathList.size(); i++) {
       Path path = pathList.get(i).lookup(relPath);
-      
+
       if (path.canRead())
 	return path;
     }

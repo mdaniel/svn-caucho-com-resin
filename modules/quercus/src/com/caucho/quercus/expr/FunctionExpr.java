@@ -233,7 +233,7 @@ public class FunctionExpr extends Expr {
     if (fun == null || ! fun.isGlobal())
       fun = program.getPhp().findFunction(_name);
 
-    if (fun != null) {
+    if (fun != null && fun.canGenerateCall(_args)) {
       if (void.class.equals(retType))
 	fun.generateTop(out, this, _args);
       else if (boolean.class.equals(retType))

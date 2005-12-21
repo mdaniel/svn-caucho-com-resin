@@ -538,6 +538,7 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController> ex
 
   protected boolean isValidDirectory(Path rootDirectory, String pathName)
   {
+    
     if (! rootDirectory.isDirectory() || pathName.startsWith(".")) {
       return false;
     }
