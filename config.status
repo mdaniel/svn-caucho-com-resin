@@ -510,7 +510,7 @@ s,@ac_ct_STRIP@,strip,;t t
 s,@INSTALL_STRIP_PROGRAM@,${SHELL} $(install_sh) -c -s,;t t
 s,@AWK@,awk,;t t
 s,@SET_MAKE@,,;t t
-s,@FULL_VERSION@,Resin 3.0.9 -- Fri Dec  9 14:47:16 PST 2005,;t t
+s,@FULL_VERSION@,Resin 3.0.9 -- Wed Dec 21 16:14:35 PST 2005,;t t
 s,@CC@,gcc,;t t
 s,@CFLAGS@,-g -O2 -DPOLL -DHAS_JVMTI,;t t
 s,@LDFLAGS@,,;t t
