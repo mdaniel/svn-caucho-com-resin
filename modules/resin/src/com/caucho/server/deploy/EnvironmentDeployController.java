@@ -257,7 +257,7 @@ abstract public class
       }
     } catch (Exception e) {
       // XXX: thrown?
-      log.log(Level.WARNING, e.toString(), e);
+      log.log(Level.FINE, e.toString(), e);
     }
   }
 
