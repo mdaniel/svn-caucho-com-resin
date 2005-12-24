@@ -233,7 +233,7 @@ public class ArrayValueImpl extends ArrayValue {
 
     // quercus/0434
     Value oldValue = entry.getRawValue();
-    
+
     if (oldValue instanceof Var && ! (value instanceof Var)) {
       oldValue.set(value);
     }
@@ -292,11 +292,11 @@ public class ArrayValueImpl extends ArrayValue {
     Entry entry = getEntry(index);
 
     if (entry != null) {
-      // quercus/3d48
-      return entry;
+      // php/3d48, php/39aj
+      return entry.toArg();
     }
     else {
-      // quercus/3d49
+      // php/3d49
       return new ArgGetValue(this, index);
     }
   }

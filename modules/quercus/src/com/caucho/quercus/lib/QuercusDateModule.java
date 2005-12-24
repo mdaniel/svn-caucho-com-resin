@@ -58,12 +58,12 @@ public class QuercusDateModule extends AbstractQuercusModule {
           new HashMap<String,Value>();
 
   private static final String []_shortDayOfWeek = {
-    "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"
+    "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"
   };
   
   private static final String []_fullDayOfWeek = {
     "Sunday", "Monday", "Tuesday", "Wednesday",
-    "Thursday", "Friday", "Saturday"
+    "Thursday", "Friday", "Saturday", "Sunday"
   };
   
   private static final String []_shortMonth = {
@@ -214,12 +214,16 @@ public class QuercusDateModule extends AbstractQuercusModule {
 	    switch (day) {
 	    case 1: case 21: case 31:
 	      sb.append("st");
+	      break;
 	    case 2: case 22:
 	      sb.append("nd");
+	      break;
 	    case 3: case 23:
 	      sb.append("rd");
+	      break;
 	    default:
 	      sb.append("th");
+	      break;
 	    }
 	    break;
 	  }

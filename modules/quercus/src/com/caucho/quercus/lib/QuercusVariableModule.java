@@ -664,7 +664,6 @@ public class QuercusVariableModule extends AbstractQuercusModule {
 	}
 
 	unserializeExpect(is, '}');
-	unserializeExpect(is, ';');
 
 	return array;
       }

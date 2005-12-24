@@ -41,7 +41,7 @@ import com.caucho.quercus.gen.PhpWriter;
 public class BooleanValue extends Value {
   public static final BooleanValue TRUE = new BooleanValue(true);
   public static final BooleanValue FALSE = new BooleanValue(false);
-
+  
   private final boolean _value;
 
   private BooleanValue(boolean value)
@@ -103,6 +103,18 @@ public class BooleanValue extends Value {
   public String toString()
   {
     return _value ? "1" : "";
+  }
+  
+  /**
+   * Converts to an object.
+   */
+  public Value toObject(Env env)
+  {
+    Value obj = env.createObject();
+
+    obj.put(SCALAR_V, this);
+    
+    return obj;
   }
   
   /**

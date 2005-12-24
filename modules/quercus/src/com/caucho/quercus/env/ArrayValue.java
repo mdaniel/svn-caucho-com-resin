@@ -586,7 +586,7 @@ abstract public class ArrayValue extends Value {
       entry.getValue().serialize(sb);
     }
     
-    sb.append("};");
+    sb.append("}");
   }
   
   /**
@@ -699,6 +699,14 @@ abstract public class ArrayValue extends Value {
       // XXX: need test
       return getRawValue().toValue();
     }
+  
+    /**
+     * Converts to an argument value.
+     */
+    public Value toArgValue()
+    {
+      return getRawValue().toValue();
+    }
     
     public Value setValue(Value value)
     {
@@ -733,6 +741,18 @@ abstract public class ArrayValue extends Value {
 	return new RefVar((Var) value);
       else
 	return new RefVar(this);
+    }
+
+    public Value toArg()
+    {
+      // php/39a4
+      Value value = getRawValue();
+
+      // php/39aj
+      if (value instanceof Var)
+	return value;
+      else
+	return this;
     }
   }
 

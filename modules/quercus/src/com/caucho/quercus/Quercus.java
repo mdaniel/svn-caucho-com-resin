@@ -703,7 +703,7 @@ public class Quercus {
    */ 
   private void initStaticClasses()
   {
-    InterpretedClassDef classDef = new InterpretedClassDef("StdClass", null);
+    InterpretedClassDef classDef = new InterpretedClassDef("stdClass", null);
     
     _stdClass = new QuercusClass(classDef, null);
 

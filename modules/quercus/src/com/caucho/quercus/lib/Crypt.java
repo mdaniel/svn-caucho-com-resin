@@ -256,8 +256,6 @@ public class Crypt {
   {
     int v = (int) (result & 0x3f);
 
-    System.out.println("V: " + Integer.toHexString(v));
-
     if (v < 0x0c)
       return (char) (v + 0x2e);
     else if (v < 0x26)

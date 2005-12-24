@@ -101,10 +101,10 @@ abstract public class CompiledMethodRef_N extends CompiledMethodRef {
       }
     }
 
-    return evalMethodImpl(env, obj, args);
+    return evalMethodRefImpl(env, obj, args);
   }
 
-  abstract public Value evalMethodImpl(Env env, Value obj, Value []argValues)
+  abstract public Value evalMethodRefImpl(Env env, Value obj, Value []argValues)
     throws Throwable;
 
   /**

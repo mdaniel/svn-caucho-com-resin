@@ -255,7 +255,7 @@ abstract public class Marshall {
 	  valueClassName = valueClassName.substring(p + 1);
 	  
 	  env.warning(L.l("'{0}' is an unexpected argument, expected {1}",
-			  value, expectedClass.getName()));
+			  value, className));
 
 	  return null;
 	}

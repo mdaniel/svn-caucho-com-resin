@@ -2,6 +2,16 @@
 
 <a href='changes-2.xtp'>Resin 2.1 changes</a>
 
+<s2 title='3.0.snap - Dec 22, 2005'>
+<ul>
+<li>Quercus: parse priority with ?: and += (#524)
+<li>Quercus: reserved words: $echo, $require, $or, $and, $xor (#537, #531, #530 rep by bago)
+<li>Quercus: date issues with 'st', 'nd', 'rd' (#548)
+<li>Quercus: serialization of array added extra ';' (#555, fixed! by bago)
+<li>Quercus: _SERVER['REQUEST_URI'] needs query string (#550, rep by bago)
+</ul>
+</s2>
+
 <s2 title='3.0.17 - Dec 22, 2005'>
 <ul>
 <li>(2005-12-22) Quercus: add parse_url (#508, rep by bago)

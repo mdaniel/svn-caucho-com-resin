@@ -1721,7 +1721,7 @@ public class PhpParser {
       case '?':
 	Expr trueExpr = parseExpr();
 	expect(':');
-	expr = new ConditionalExpr(expr, trueExpr, parseOrExpr());
+	expr = new ConditionalExpr(expr, trueExpr, parseExpr());
 	break;
       default:
 	_peekToken = token;
@@ -2677,6 +2677,11 @@ public class PhpParser {
     case TRUE:
     case FALSE:
     case RETURN:
+    case ECHO:
+    case AND_RES:
+    case OR_RES:
+    case XOR_RES:
+    case REQUIRE:
       return _lexeme;
       
     default:
@@ -3759,8 +3764,14 @@ public class PhpParser {
     case TRUE: return "true";
     case FALSE: return "false";
       
+    case AND_RES: return "'and'";
+    case OR_RES: return "'or'";
+    case XOR_RES: return "'xor'";
+      
     case IF: return "'if'";
     case ELSE: return "'else'";
+      
+    case ECHO: return "'echo'";
       
     case LIST: return "'list'";
     case CASE: return "'case'";

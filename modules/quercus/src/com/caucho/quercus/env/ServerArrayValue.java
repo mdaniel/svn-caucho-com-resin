@@ -214,8 +214,15 @@ public class ServerArrayValue extends ArrayValueImpl {
     super.put(SCRIPT_NAME_V,
 	      new StringValue(request.getContextPath() +
 			      request.getServletPath()));
+
+    String requestURI = request.getRequestURI();
+    String queryString = request.getQueryString();
+
+    if (queryString != null)
+      requestURI = requestURI + '?' + queryString;
+    
     super.put(REQUEST_URI_V,
-	      new StringValue(request.getRequestURI()));
+	      new StringValue(requestURI));
     super.put(SCRIPT_FILENAME_V,
 	      new StringValue(request.getRealPath(request.getServletPath())));
 

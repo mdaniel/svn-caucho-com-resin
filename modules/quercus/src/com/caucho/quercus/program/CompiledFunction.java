@@ -123,7 +123,7 @@ abstract public class CompiledFunction extends AbstractFunction {
 			     Value a2, Value a3, Value a4)
     throws Throwable
   {
-    return evalMethod(env, a1, a2, a3, a4);
+    return evalMethod(env, obj, a1, a2, a3, a4);
   }
 
   public Value evalMethodRef(Env env, Value obj, Value a1, Value a2,

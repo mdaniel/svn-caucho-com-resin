@@ -420,7 +420,7 @@ the object, there is more flexibility in the configuration.  The following
 example shows the use of two distinct periodic tasks.
 </p>
 
-<p>An example illustrates dome of the flexibility of dependency injection.
+<p>An example illustrates some of the flexibility of dependency injection.
 </p>
 
 <p>
