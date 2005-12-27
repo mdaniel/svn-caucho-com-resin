@@ -344,23 +344,30 @@ public class QuercusMysqlModule extends AbstractQuercusModule {
     if (!(conn instanceof JdbcConnectionResource))
       return BooleanValue.FALSE;
 
-    Value currentCatalog = conn.getCatalog();
+    String currentCatalog = conn.getCatalog().toString();
 
-    String sql = "SHOW FULL COLUMNS FROM " + fieldTable + " LIKE \'" + fieldName + "\'";
+    try {
+      String sql = "SHOW FULL COLUMNS FROM " + fieldTable + " LIKE \'" + fieldName + "\'";
 
-    Value metaResult = mysql_db_query(env, fieldCatalog.toString(), sql, null);
+      if (! fieldCatalog.toString().equals(""))
+	mysql_select_db(env, fieldCatalog.toString(), conn);
 
-    if (!(metaResult instanceof JdbcResultResource))
-      return BooleanValue.FALSE;
+      Value metaResult = mysql_query(env, sql, conn);
 
-    Value fieldResult = ((JdbcResultResource) metaResult).fetchField(env, fieldLength.toInt(), fieldTable.toString(), fieldType.toString());
+      if (!(metaResult instanceof JdbcResultResource))
+	return BooleanValue.FALSE;
 
-    result.setFieldOffset(fieldOffset + 1);
-
-    // Reset current catalog
-    conn.setCatalog(currentCatalog.toString());
+      Value fieldResult = ((JdbcResultResource) metaResult).fetchField(env, fieldLength.toInt(), fieldTable.toString(), fieldType.toString());
+      
+      result.setFieldOffset(fieldOffset + 1);
     
-    return fieldResult;
+      return fieldResult;
+    } finally {
+      // Reset current catalog
+      if (! currentCatalog.equals("") &&
+	  ! fieldCatalog.toString().equals(currentCatalog))
+	conn.setCatalog(currentCatalog);
+    }
   }
 
   /**
@@ -368,10 +375,10 @@ public class QuercusMysqlModule extends AbstractQuercusModule {
    */
   public Value mysql_query(Env env,
                            String sql,
-                           @Optional JdbcConnectionResource connV)
+                           @Optional JdbcConnectionResource conn)
     throws Throwable
   {
-    JdbcConnectionResource conn = getConnection(env, connV);
+    conn = getConnection(env, conn);
 
     return QuercusMysqliModule.mysqli_query(conn, sql, MYSQL_STORE_RESULT);
   }
@@ -679,11 +686,11 @@ public class QuercusMysqlModule extends AbstractQuercusModule {
   public Value mysql_db_query(Env env,
                               String databaseName,
                               String query,
-                              @Optional JdbcConnectionResource connV)
+                              @Optional JdbcConnectionResource conn)
     throws Throwable
   {
-    if (mysql_select_db(env, databaseName, connV))
-      return mysql_query(env, query, connV);
+    if (mysql_select_db(env, databaseName, conn))
+      return mysql_query(env, query, conn);
     else
       return BooleanValue.FALSE;
   }

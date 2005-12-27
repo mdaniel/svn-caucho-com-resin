@@ -131,8 +131,7 @@ abstract public class Marshall {
       return MARSHALL_EXT_VALUE;
     }
     else if (void.class.equals(argType)) {
-      // XXX:
-      return MARSHALL_VALUE;
+      return MARSHALL_VOID;
     }
     else {
       return new JavaMarshall(quercus.getJavaClassDefinition(argType.getName()));
@@ -1021,6 +1020,38 @@ abstract public class Marshall {
 	out.print("env.createCallback(");
 	expr.generate(out);
 	out.print(")");
+      }
+    
+      public void generateResultStart(PhpWriter out)
+	throws IOException
+      {
+	throw new UnsupportedOperationException();
+      }
+    };
+
+  static final Marshall MARSHALL_VOID = new Marshall() {
+      public Object marshall(Env env, Expr expr, Class expectedClass)
+	throws Throwable
+      {
+	throw new UnsupportedOperationException();
+      }
+      
+      public Object marshall(Env env, Value value, Class expectedClass)
+	throws Throwable
+      {
+	throw new UnsupportedOperationException();
+      }
+    
+      public Value unmarshall(Env env, Object value)
+	throws Throwable
+      {
+	return NullValue.NULL;
+      }
+    
+      public void generate(PhpWriter out, Expr expr, Class argClass)
+	throws IOException
+      {
+	throw new UnsupportedOperationException();
       }
     
       public void generateResultStart(PhpWriter out)

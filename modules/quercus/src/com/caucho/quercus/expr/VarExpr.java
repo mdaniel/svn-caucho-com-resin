@@ -389,7 +389,11 @@ public class VarExpr extends AbstractVarExpr {
    */
   public void setVarState(VarState state)
   {
-    _varState = state;
+    // php/3a0i
+    if (_varState == VarState.INIT || _varState == state)
+      _varState = state;
+    else
+      _varState = VarState.UNKNOWN;
   }
 
   /**

@@ -4,6 +4,7 @@
 
 <s2 title='3.0.snap - Dec 22, 2005'>
 <ul>
+<li>Quercus: mysql_fetch_field shouldn't switch catalog when null (#554, rep by bago)
 <li>Quercus: parse priority with ?: and += (#524)
 <li>Quercus: reserved words: $echo, $require, $or, $and, $xor (#537, #531, #530 rep by bago)
 <li>Quercus: date issues with 'st', 'nd', 'rd' (#548)

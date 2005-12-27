@@ -608,7 +608,7 @@ public class ManagedConnectionImpl
 	conn.setReadOnly(false);
       _readOnly = false;
 
-      if (_catalog != null)
+      if (_catalog != null && ! _catalog.equals(""))
 	conn.setCatalog(_catalog);
       _catalog = null;
 

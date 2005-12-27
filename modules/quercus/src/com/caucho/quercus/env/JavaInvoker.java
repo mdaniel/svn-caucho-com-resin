@@ -62,8 +62,10 @@ import com.caucho.util.L10N;
 /**
  * Represents the introspected static function information.
  */
-public class JavaMethod extends AbstractFunction {
-  private static final L10N L = new L10N(JavaMethod.class);
+abstract public class JavaInvoker {
+  private static final L10N L = new L10N(JavaInvoker.class);
+  
+  private static final Object []NULL_ARGS = new Object[0];
 
   private final Method _method;
   private final Class []_paramTypes;
@@ -78,10 +80,8 @@ public class JavaMethod extends AbstractFunction {
    *
    * @param method the introspected method.
    */
-  public JavaMethod(Quercus quercus, Method method)
+  public JavaInvoker(Class []param, Class retType)
   {
-    _method = method;
-
     Class []param = method.getParameterTypes();
 
     _paramTypes = param;
@@ -132,16 +132,6 @@ public class JavaMethod extends AbstractFunction {
     }
 
     _unmarshallReturn = Marshall.create(quercus, method.getReturnType());
-  }
-
-  /**
-   * Returns the function's method.
-   *
-   * @return the reflection method.
-   */
-  public Method getMethod()
-  {
-    return _method;
   }
 
   /**
@@ -275,7 +265,7 @@ public class JavaMethod extends AbstractFunction {
       args[k++] = _marshallArgs[i].marshall(env, expr[i], _paramTypes[i]);
     }
 
-    Object value = _method.invoke(obj, args);
+    Object value = invoke(obj, args);
 
     return _unmarshallReturn.unmarshall(env, value);
   }
@@ -294,7 +284,7 @@ public class JavaMethod extends AbstractFunction {
       args[i] = _marshallArgs[i].marshall(env, quercusArgs[i], _paramTypes[i]);
     }
 
-    Object value = _method.invoke(obj, args);
+    Object value = invoke(obj, args);
 
     return _unmarshallReturn.unmarshall(env, value);
   }
@@ -307,7 +297,7 @@ public class JavaMethod extends AbstractFunction {
       return NullValue.NULL;
     }
 
-    Object value = _method.invoke(obj);
+    Object value = invoke(obj, NULL_ARGS);
 
     return _unmarshallReturn.unmarshall(env, value);
   }
@@ -324,7 +314,7 @@ public class JavaMethod extends AbstractFunction {
       _marshallArgs[0].marshall(env, quercusArg1, _paramTypes[0]),
     };
     
-    Object value = _method.invoke(obj, javaArgs);
+    Object value = invoke(obj, javaArgs);
 
     return _unmarshallReturn.unmarshall(env, value);
   }
@@ -333,4 +323,7 @@ public class JavaMethod extends AbstractFunction {
   {
     throw new UnsupportedOperationException();
   }
+
+  abstract public Object invoke(Object obj, Object []args)
+    throws Throwable;
 }
