@@ -223,7 +223,7 @@ public class Quercus {
       
       Class type = Class.forName(className, false, loader);
 				 
-      def = new JavaClassDefinition(className, type);
+      def = new JavaClassDefinition(this, className, type);
 
       _javaClassWrappers.put(className, def);
 
@@ -690,7 +690,7 @@ public class Quercus {
   private void introspectPhpJavaClass(String name, Class type)
     throws IllegalAccessException, InstantiationException
   {
-    JavaClassDefinition def = new JavaClassDefinition(name, type);
+    JavaClassDefinition def = new JavaClassDefinition(this, name, type);
 
     _javaClassWrappers.put(name, def);
     _lowerJavaClassWrappers.put(name.toLowerCase(), def);

@@ -62,12 +62,12 @@ import com.caucho.util.L10N;
 /**
  * Represents the introspected static function information.
  */
-abstract public class JavaInvoker {
+abstract public class JavaInvoker extends AbstractFunction {
   private static final L10N L = new L10N(JavaInvoker.class);
   
   private static final Object []NULL_ARGS = new Object[0];
 
-  private final Method _method;
+  private final String _name;
   private final Class []_paramTypes;
   private final boolean _hasEnv;
   private final Expr []_defaultExprs;
@@ -80,17 +80,18 @@ abstract public class JavaInvoker {
    *
    * @param method the introspected method.
    */
-  public JavaInvoker(Class []param, Class retType)
+  public JavaInvoker(Quercus quercus,
+		     String name,
+		     Class []param,
+		     Annotation [][]paramAnn,
+		     Class retType)
   {
-    Class []param = method.getParameterTypes();
-
+    _name = name;
     _paramTypes = param;
 
     _hasEnv = param.length > 0 && param[0].equals(Env.class);
     _hasRestArgs = param.length > 0 && param[param.length - 1].equals(Value[].class);
 
-    Annotation [][]paramAnn = method.getParameterAnnotations();
-    
     int argLength = paramAnn.length;
 
     if (_hasRestArgs)
@@ -131,7 +132,7 @@ abstract public class JavaInvoker {
 	_marshallArgs[i] = Marshall.MARSHALL_REFERENCE;
     }
 
-    _unmarshallReturn = Marshall.create(quercus, method.getReturnType());
+    _unmarshallReturn = Marshall.create(quercus, retType);
   }
 
   /**
@@ -201,7 +202,7 @@ abstract public class JavaInvoker {
 	length = args.length;
       else {
 	env.warning(L.l("function '{0}' has {1} required arguments, but only {2} were provided",
-			_method.getName(), _defaultExprs.length, args.length));
+			_name, _defaultExprs.length, args.length));
 
 	return null;
       }
@@ -217,7 +218,7 @@ abstract public class JavaInvoker {
       }
 
       env.warning(L.l("function '{0}' has {1} required arguments, but only {2} were provided",
-		      _method.getName(), required, args.length));
+		      _name, required, args.length));
 
       return null;
     }

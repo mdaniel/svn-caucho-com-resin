@@ -30,6 +30,7 @@
 package com.caucho.quercus.env;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
 
 import java.util.HashMap;
@@ -55,21 +56,25 @@ import com.caucho.quercus.gen.PhpWriter;
  * Represents an introspected Java class.
  */
 public class JavaClassDefinition extends AbstractQuercusClass {
+  private final Quercus _quercus;
+  
   private final String _name;
   private final Class _type;
   
   private final HashMap<String,JavaMethod> _functionMap
     = new HashMap<String,JavaMethod>();
 
-  private final Marshall _marshall;
+  private JavaConstructor _cons;
 
-  public JavaClassDefinition(String name, Class type)
+  private Marshall _marshall;
+
+  public JavaClassDefinition(Quercus quercus, String name, Class type)
   {
+    _quercus = quercus;
+    
     _name = name;
 
     _type = type;
-
-    _marshall = new JavaMarshall(this);
   }
   
   /**
@@ -109,7 +114,7 @@ public class JavaClassDefinition extends AbstractQuercusClass {
   public Value evalNew(Env env, Expr []args)
     throws Throwable
   {
-    return new JavaValue(_type.newInstance(), this);
+    return _cons.eval(env, null, args);
   }
 
   /**
@@ -182,6 +187,15 @@ public class JavaClassDefinition extends AbstractQuercusClass {
   public void introspect(Quercus quercus)
   {
     introspectMethods(quercus, _type);
+
+    _marshall = new JavaMarshall(this);
+
+    Constructor []cons = _type.getConstructors();
+
+    if (cons.length > 0)
+      _cons = new JavaConstructor(_quercus, cons[0]);
+    else
+      _cons = null;
   }
 
   /**
