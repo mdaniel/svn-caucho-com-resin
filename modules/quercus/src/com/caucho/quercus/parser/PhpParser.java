@@ -2359,6 +2359,13 @@ public class PhpParser {
 
       return new VarVarExpr(parseTermBase());
     }
+    else if (token == '{') {
+      Expr expr = new VarVarExpr(parseExpr());
+
+      expect('}');
+
+      return expr;
+    }
     else if (_lexeme == null)
       throw error(L.l("Expected identifier at '{0}'", tokenName(token)));
 

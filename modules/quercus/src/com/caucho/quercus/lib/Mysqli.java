@@ -31,6 +31,11 @@ package com.caucho.quercus.lib;
 
 import java.sql.SQLException;
 
+import java.util.logging.Logger;
+import java.util.logging.Level;
+
+import com.caucho.util.L10N;
+
 import com.caucho.quercus.resources.JdbcConnectionResource;
 
 import com.caucho.quercus.env.Env;
@@ -42,10 +47,15 @@ import com.caucho.quercus.module.Optional;
  * mysqli object oriented API facade
  */
 public class Mysqli {
+  private static final Logger log = Logger.getLogger(Mysqli.class.getName());
+  private static final L10N L = new L10N(Mysqli.class);
+
+  private Env _env;
   private JdbcConnectionResource _conn;
   
-  public Mysqli()
+  public Mysqli(Env env)
   {
+    _env = env;
   }
 
   /**
@@ -61,10 +71,77 @@ public class Mysqli {
   }
 
   /**
+   * Connects to the underlying database.
+   */
+  public boolean real_connect(Env env,
+			      @Optional("localhost") String host,
+			      @Optional String userName,
+			      @Optional String password,
+			      @Optional String dbname,
+			      @Optional("3306") int port,
+			      @Optional String socket,
+			      @Optional int flags)
+  {
+    if (_conn != null) {
+      env.warning(L.l("Connection is already opened to '{0}'", _conn));
+      return false;
+    }
+
+    Value value = QuercusMysqliModule.mysqli_connect(env, host,
+						     userName, password,
+						     dbname, port, socket);
+
+    if (value instanceof JdbcConnectionResource)
+      _conn = (JdbcConnectionResource) value;
+
+    return _conn != null;
+  }
+
+  /**
+   * Selects the underlying database/catalog to use.
+   *
+   * @param dbname the name of the database to select.
+   */
+  public boolean select_db(String dbname)
+  {
+    validateConnection();
+    
+    try {
+      _conn.setCatalog(dbname);
+
+      return true;
+    } catch (SQLException e) {
+      log.log(Level.FINE, e.toString(), e);
+      _env.warning(e.getMessage());
+      return false;
+    }
+  }
+
+  /**
    * Closes the connection.
    */
   public boolean close(Env env)
   {
-    return QuercusMysqliModule.mysqli_close(env, _conn);
+    JdbcConnectionResource conn = _conn;
+    _conn = null;
+    
+    if (conn != null)
+      return QuercusMysqliModule.mysqli_close(env, conn);
+    else
+      return false;
+  }
+
+  private void validateConnection()
+  {
+    if (_conn == null)
+      _env.error(L.l("Connection is not properly initialized"));
+  }
+
+  public String toString()
+  {
+    if (_conn != null)
+      return "Mysqli[" + _conn + "]";
+    else
+      return "Mysqli[]";
   }
 }

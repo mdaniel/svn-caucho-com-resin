@@ -42,10 +42,13 @@ import com.caucho.quercus.Quercus;
 
 import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.quercus.module.Optional;
+import com.caucho.quercus.module.Reference;
 
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.NullValue;
+import com.caucho.quercus.env.LongValue;
+import com.caucho.quercus.env.StringValue;
 
 import com.caucho.quercus.program.PhpProgram;
 
@@ -95,6 +98,70 @@ public class QuercusMiscModule extends AbstractQuercusModule {
     Thread.dumpStack();
 
     return NullValue.NULL;
+  }
+
+  /**
+   * Execute a system command.
+   */
+  public static String exec(Env env, String command,
+			    @Optional Value output,
+			    @Optional @Reference Value result)
+  {
+    String []args = new String[3];
+
+    try {
+      args[0] = "sh";
+      args[1] = "-c";
+      args[2] = command;
+      Process process = Runtime.getRuntime().exec(args);
+
+      InputStream is = process.getInputStream();
+      OutputStream os = process.getOutputStream();
+      os.close();
+
+      StringBuilder sb = new StringBuilder();
+      String line = "";
+
+      int ch;
+      boolean hasCr = false;
+      while ((ch = is.read()) >= 0) {
+	if (ch == '\n') {
+	  if (! hasCr) {
+	    line = sb.toString();
+	    sb.setLength(0);
+	    if (output != null)
+	      output.put(new StringValue(line));
+	  }
+	  hasCr = false;
+	}
+	else if (ch == '\r') {
+	  line = sb.toString();
+	  sb.setLength(0);
+	  output.put(new StringValue(line));
+	  hasCr = true;
+	}
+	else
+	  sb.append((char) ch);
+      }
+
+      if (sb.length() > 0) {
+	line = sb.toString();
+	sb.setLength(0);
+	output.put(new StringValue(line));
+      }
+
+      is.close();
+
+      int status = process.waitFor();
+
+      result.set(new LongValue(status));
+
+      return line;
+    } catch (Exception e) {
+      env.warning(e.getMessage(), e);
+
+      return null;
+    }
   }
 
   /**
@@ -156,7 +223,8 @@ public class QuercusMiscModule extends AbstractQuercusModule {
   /**
    * Execute a system command.
    */
-  public static String system(Env env, String command)
+  public static String system(Env env, String command,
+			      @Optional @Reference Value result)
   {
     String []args = new String[3];
 
@@ -171,15 +239,19 @@ public class QuercusMiscModule extends AbstractQuercusModule {
       os.close();
 
       StringBuilder sb = new StringBuilder();
+      String line = "";
 
       int ch;
+      boolean hasCr = false;
       while ((ch = is.read()) >= 0) {
-        sb.append((char) ch);
+	sb.append((char) ch);
       }
 
       is.close();
 
-      process.waitFor();
+      int status = process.waitFor();
+
+      result.set(new LongValue(status));
 
       return sb.toString();
     } catch (Exception e) {

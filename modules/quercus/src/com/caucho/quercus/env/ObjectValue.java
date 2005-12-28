@@ -444,7 +444,7 @@ public class ObjectValue extends Value {
       entry.getValue().serialize(sb);
     }
     
-    sb.append("};");
+    sb.append("}");
   }
   
   /**

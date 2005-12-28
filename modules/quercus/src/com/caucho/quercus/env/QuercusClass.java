@@ -178,6 +178,15 @@ public class QuercusClass extends AbstractQuercusClass {
 	return fun;
       
     }
+
+    name = name.toLowerCase();
+    for (int i = 0; i < _classDefList.length; i++) {
+      AbstractFunction fun = _classDefList[i].findFunctionLowerCase(name);
+
+      if (fun != null)
+	return fun;
+      
+    }
     
     return null;
   }

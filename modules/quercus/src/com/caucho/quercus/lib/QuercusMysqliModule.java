@@ -1037,6 +1037,14 @@ public class QuercusMysqliModule extends AbstractQuercusModule {
   }
 
   /**
+   * Creates a new mysqli object.
+   */
+  public static Mysqli mysqli_init(Env env)
+  {
+    return new Mysqli(env);
+  }
+
+  /**
    * Closes a prepared statement.
    *
    * @return true on success or false on failure

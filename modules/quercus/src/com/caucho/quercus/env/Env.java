@@ -67,6 +67,7 @@ import com.caucho.util.Alarm;
 import com.caucho.sql.DatabaseManager;
 
 import com.caucho.quercus.Quercus;
+import com.caucho.quercus.QuercusException;
 import com.caucho.quercus.QuercusRuntimeException;
 import com.caucho.quercus.QuercusExitException;
 
@@ -2141,6 +2142,12 @@ public class Env {
    */
   public Value warning(String msg)
   {
+    if (log.isLoggable(Level.FINER)) {
+      QuercusException e = new QuercusException(msg);
+      
+      log.log(Level.FINER, e.toString(), e);
+    }
+    
     return error(B_WARNING, msg + getFunctionLocation());
   }
 

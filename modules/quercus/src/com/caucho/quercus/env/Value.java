@@ -362,8 +362,7 @@ abstract public class Value {
 			args[3], args[4]);
       
     default:
-      return env.error(L.l("'{0}' is an unknown method in '{1}'.",
-			   methodName, this));
+      return errorNoMethod(env, methodName);
     }
   }
 
@@ -373,8 +372,7 @@ abstract public class Value {
   public Value evalMethod(Env env, String methodName)
     throws Throwable
   {
-    return env.error(L.l("'{0}' is an unknown method in  {1}.",
-			 methodName, this));
+    return errorNoMethod(env, methodName);
   }
 
   /**
@@ -383,8 +381,7 @@ abstract public class Value {
   public Value evalMethod(Env env, String methodName, Value a0)
     throws Throwable
   {
-    return env.error(L.l("'{0}' is an unknown method in {1}.",
-			 methodName, this));
+    return errorNoMethod(env, methodName);
   }
 
   /**
@@ -393,8 +390,7 @@ abstract public class Value {
   public Value evalMethod(Env env, String methodName, Value a0, Value a1)
     throws Throwable
   {
-    return env.error(L.l("{0}: '{1}' is an unknown method.",
-			 toString(), methodName));
+    return errorNoMethod(env, methodName);
   }
 
   /**
@@ -404,8 +400,7 @@ abstract public class Value {
 			  Value a0, Value a1, Value a2)
     throws Throwable
   {
-    return env.error(L.l("{0}: '{1}' is an unknown method.",
-			 toString(), methodName));
+    return errorNoMethod(env, methodName);
   }
 
   /**

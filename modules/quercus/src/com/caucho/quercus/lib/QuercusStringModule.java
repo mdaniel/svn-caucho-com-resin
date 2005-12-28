@@ -802,8 +802,136 @@ public class QuercusStringModule extends AbstractQuercusModule {
       return string.charAt(0);
   }
 
- /**
-  * Prints the string.
+  /**
+   * Parses the string as a query string.
+   *
+   * @param env the calling environment
+   * @param str the query string
+   * @param array the optional result array
+   */
+  public static Value parse_str(Env env, String str,
+				@Optional ArrayValue array)
+    throws IOException
+  {
+    ByteToChar byteToChar = env.getByteToChar();
+    int len = str.length();
+
+
+    for (int i = 0; i < len; i++) {
+      int ch = 0;
+      
+      byteToChar.clear();
+
+      for (; i < len && (ch = str.charAt(i)) != '='; i++) {
+	i = addQueryChar(byteToChar, str, len, i, ch);
+      }
+
+      String key = byteToChar.getConvertedString();
+      byteToChar.clear();
+
+      String value;
+      if (ch == '=') {
+	for (i++; i < len && (ch = str.charAt(i)) != '&'; i++) {
+	  i = addQueryChar(byteToChar, str, len, i, ch);
+	}
+      
+	value = byteToChar.getConvertedString();
+      }
+      else
+	value = "";
+
+      addQueryValue(env, array, key, value);
+    }
+    
+    return NullValue.NULL;
+  }
+
+  private static int addQueryChar(ByteToChar byteToChar, String str, int len,
+				  int i, int ch)
+    throws IOException
+  {
+    switch (ch) {
+    case '+':
+      byteToChar.addChar(' ');
+      return i;
+
+    case '%':
+      if (i + 2 < len) {
+	int d1 = hexToDigit(str.charAt(i + 1));
+	int d2 = hexToDigit(str.charAt(i + 2));
+
+	byteToChar.addByte(d1 * 16 + d2);
+
+	return i + 2;
+      }
+      else {
+	byteToChar.addByte((byte) ch);
+	return i;
+      }
+      
+    default:
+      byteToChar.addByte((byte) ch);
+      return i;
+    }
+  }
+
+  private static int hexToDigit(char ch)
+  {
+    if ('0' <= ch && ch <= '9')
+      return ch - '0';
+    else if ('a' <= ch && ch <= 'f')
+      return ch - 'a' + 10;
+    else if ('A' <= ch && ch <= 'F')
+      return ch - 'A' + 10;
+    else {
+      // XXX: error of some sort
+      return 0;
+    }
+  }
+  
+  public static void addQueryValue(Env env, ArrayValue array,
+				   String key, String valueStr)
+  {
+    int p;
+
+    Value value = new StringValue(valueStr);
+    
+    if ((p = key.indexOf('[')) > 0 && key.endsWith("]")) {
+      String index = key.substring(p + 1, key.length() - 1);
+      key = key.substring(0, p);
+
+      Value keyValue = new StringValue(key);
+
+      Value part;
+
+      if (array != null)
+	part = array.get(keyValue);
+      else
+	part = env.getVar(key);
+
+      if (! part.isArray())
+	part = new ArrayValueImpl();
+
+      if (index.equals(""))
+	part.put(value);
+      else
+	part.put(new StringValue(index), value);
+
+      if (array != null)
+	array.put(keyValue, part);
+      else
+	env.setVar(key, part);
+    }
+    else {
+      if (array != null)
+	array.put(new StringValue(key), value);
+      else
+	env.setVar(key, value);
+    }
+  }
+
+  /**
+   * Prints the string.
    *
    * @param env the quercus environment
    * @param string the string to print

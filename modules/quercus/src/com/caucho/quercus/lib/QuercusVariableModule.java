@@ -525,8 +525,6 @@ public class QuercusVariableModule extends AbstractQuercusModule {
   {
     print_r_impl(env, v, 0);
 
-    env.getOut().println();
-
     return BooleanValue.FALSE;
   }
 
@@ -553,7 +551,7 @@ public class QuercusVariableModule extends AbstractQuercusModule {
 	out.println();
       }
       printDepth(out, 8 * depth);
-      out.print(")");
+      out.println(")");
     }
     else {
       v.print(env);
@@ -580,8 +578,8 @@ public class QuercusVariableModule extends AbstractQuercusModule {
     try {
       UnserializeReader is = new UnserializeReader(v);
 
-      return unserialize(is);
-    } catch (IOException e) {
+      return unserialize(env, is);
+    } catch (Throwable e) {
       log.log(Level.FINE, e.toString(), e);
       
       env.notice(e.toString());
@@ -590,8 +588,8 @@ public class QuercusVariableModule extends AbstractQuercusModule {
     }
   }
 
-  private static Value unserialize(UnserializeReader is)
-    throws IOException
+  private static Value unserialize(Env env, UnserializeReader is)
+    throws Throwable
   {
     int ch = is.read();
 
@@ -657,8 +655,8 @@ public class QuercusVariableModule extends AbstractQuercusModule {
 
 	ArrayValue array = new ArrayValueImpl();
 	for (int i = 0; i < len; i++) {
-	  Value key = unserialize(is);
-	  Value value = unserialize(is);
+	  Value key = unserialize(env, is);
+	  Value value = unserialize(env, is);
 
 	  array.append(key, value);
 	}
@@ -666,6 +664,38 @@ public class QuercusVariableModule extends AbstractQuercusModule {
 	unserializeExpect(is, '}');
 
 	return array;
+      }
+      
+    case 'O':
+      {
+	unserializeExpect(is, ':');
+	int len = (int) unserializeInt(is);
+	unserializeExpect(is, ':');
+	unserializeExpect(is, '"');
+
+	char []buf = new char[len];
+
+	is.read(buf, 0, len);
+
+	String className = new String(buf);
+
+	unserializeExpect(is, '"');
+	unserializeExpect(is, ':');
+	long count = unserializeInt(is);
+	unserializeExpect(is, ':');
+	unserializeExpect(is, '{');
+
+	Value obj = env.getClass(className).newInstance(env);
+	for (int i = 0; i < len; i++) {
+	  Value key = unserialize(env, is);
+	  Value value = unserialize(env, is);
+
+	  obj.put(key, value);
+	}
+
+	unserializeExpect(is, '}');
+
+	return obj;
       }
       
     case 'N':

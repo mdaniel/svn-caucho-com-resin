@@ -4,6 +4,8 @@
 
 <s2 title='3.0.snap - Dec 22, 2005'>
 <ul>
+<li>Quercus: recognize $\{$foo} (#562, rep by Anoop K Achuthan)
+<li>Quercus: method_exists, exec, parse_str (#568, #574, #552)
 <li>Quercus: mysql_fetch_field shouldn't switch catalog when null (#554, rep by bago)
 <li>Quercus: parse priority with ?: and += (#524)
 <li>Quercus: reserved words: $echo, $require, $or, $and, $xor (#537, #531, #530 rep by bago)

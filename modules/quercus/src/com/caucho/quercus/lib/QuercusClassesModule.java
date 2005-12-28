@@ -97,4 +97,15 @@ public class QuercusClassesModule extends AbstractQuercusModule {
   {
     return value instanceof ObjectValue;
   }
+
+  /**
+   * Returns true if the named method exists on the object.
+   *
+   * @param obj the object to test
+   * @param methodName the name of the method
+   */
+  public static boolean method_exists(Value obj, String methodName)
+  {
+    return obj.findFunction(methodName) != null;
+  }
 }

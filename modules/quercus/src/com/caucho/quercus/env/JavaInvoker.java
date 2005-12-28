@@ -75,6 +75,8 @@ abstract public class JavaInvoker extends AbstractFunction {
   private final boolean _hasRestArgs;
   private final Marshall _unmarshallReturn;
 
+  private final boolean _isRestReference = false;
+
   /**
    * Creates the statically introspected function.
    *
@@ -246,29 +248,52 @@ abstract public class JavaInvoker extends AbstractFunction {
     throw new UnsupportedOperationException();
   }
 
-  public Value eval(Env env, Object obj, Expr []expr)
+  public Value eval(Env env, Object obj, Expr []exprs)
     throws Throwable
   {
-    if (expr.length != _marshallArgs.length) {
-      env.warning("mismatched length");
-      return NullValue.NULL;
-    }
+    int len = _defaultExprs.length + (_hasEnv ? 1 : 0) + (_hasRestArgs ? 1 : 0);
+    
+    Object []values = new Object[len];
 
-    int len = _marshallArgs.length + (_hasEnv ? 1 : 0);
     int k = 0;
 
-    Object []args = new Object[len];
-
     if (_hasEnv)
-      args[k++] = env;
+      values[k++] = env;
 
     for (int i = 0; i < _marshallArgs.length; i++) {
-      args[k++] = _marshallArgs[i].marshall(env, expr[i], _paramTypes[i]);
+      if (exprs.length <= i) {
+	values[k] = _marshallArgs[i].marshall(env, _defaultExprs[i], _paramTypes[k]);
+      }
+      else if (exprs[i] != null) {
+	values[k] = _marshallArgs[i].marshall(env, exprs[i], _paramTypes[k]);
+      }
+
+      k++;
     }
 
-    Object value = invoke(obj, args);
+    if (_hasRestArgs) {
+      Value []rest = new Value[exprs.length - _marshallArgs.length];
 
-    return _unmarshallReturn.unmarshall(env, value);
+      for (int i = _marshallArgs.length; i < exprs.length; i++) {
+	if (_isRestReference)
+	  rest[i - _marshallArgs.length] = exprs[i].evalRef(env);
+	else
+	  rest[i - _marshallArgs.length] = exprs[i].eval(env);
+      }
+
+      values[values.length - 1] = rest;
+    }
+
+    try {
+      Object result = invoke(obj, values);
+
+      return _unmarshallReturn.unmarshall(env, result);
+    } catch (InvocationTargetException e) {
+      if (e.getCause() != null)
+	throw e.getCause();
+      else
+	throw e;
+    }
   }
 
   public Value eval(Env env, Object obj, Value []quercusArgs)

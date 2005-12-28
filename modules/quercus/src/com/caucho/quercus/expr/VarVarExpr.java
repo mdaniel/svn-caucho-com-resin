@@ -210,9 +210,9 @@ public class VarVarExpr extends AbstractVarExpr {
   public void generateAssign(PhpWriter out, Expr value, boolean isTop)
     throws IOException
   {
-    out.print("env.setVar(");
+    out.print("env.getVar(");
     _var.generateString(out);
-    out.print(", ");
+    out.print(").set(");
     value.generate(out);
     out.print(")");
   }
