@@ -4,6 +4,7 @@
 
 <s2 title='3.0.snap - Dec 22, 2005'>
 <ul>
+<li>Quercus: added alternate syntax (#536, rep by bago)
 <li>Quercus: objects extend ArrayValue
 <li>Quercus: session_set_save_handler (#511, rep by bago)
 <li>Quercus: setlocale, array_merge_recursive (#529, #533 rep by bago)

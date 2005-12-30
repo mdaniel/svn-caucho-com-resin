@@ -66,7 +66,7 @@ import com.caucho.vfs.ReadStream;
  */
 public class PhpParser {
   private final static L10N L = new L10N(PhpParser.class);
-  
+
   private final static int IDENTIFIER = 256;
   private final static int STRING = 257;
   private final static int LONG = 258;
@@ -152,6 +152,11 @@ public class PhpParser {
   private final static int SIMPLE_SYSTEM_STRING = 548;
   private final static int COMPLEX_SYSTEM_STRING = 549;
   private final static int TEXT_ECHO = 550;
+  private final static int ENDIF = 551;
+  private final static int ENDWHILE = 552;
+  private final static int ENDFOR = 553;
+  private final static int ENDFOREACH = 554;
+  private final static int ENDSWITCH = 555;
 
   private final static IntMap _insensitiveReserved = new IntMap();
   private final static IntMap _reserved = new IntMap();
@@ -502,6 +507,13 @@ public class PhpParser {
       case '}':
       case CASE:
       case DEFAULT:
+      case ELSE:
+      case ELSEIF:
+      case ENDIF:
+      case ENDWHILE:
+      case ENDFOR:
+      case ENDFOREACH:
+      case ENDSWITCH:
 	_peekToken = token;
 	return statements;
 
@@ -827,10 +839,17 @@ public class PhpParser {
 
       expect(')');
 
+      int token = parseToken();
+
+      if (token == ':')
+	return parseAlternateIf(test, fileName, line);
+      else
+	_peekToken = token;
+
       Statement trueBlock = parseStatement();
       Statement falseBlock = null;
 
-      int token = parseToken();
+      token = parseToken();
 
       if (token == ELSEIF) {
 	falseBlock = parseIf();
@@ -852,6 +871,46 @@ public class PhpParser {
   }
 
   /**
+   * Parses the if statement
+   */
+  private Statement parseAlternateIf(Expr test, String fileName, int line)
+    throws IOException
+  {
+    Statement trueBlock = BlockStatement.create(parseStatementList());
+
+    Statement falseBlock = null;
+
+    int token = parseToken();
+
+    if (token == ELSEIF) {
+      String subFileName = getFileName();
+      int subLine = getLine();
+      
+      Expr subTest = parseExpr();
+      expect(':');
+      
+      falseBlock = parseAlternateIf(subTest, subFileName, subLine);
+    }
+    else if (token == ELSE) {
+      expect(':');
+      
+      falseBlock = BlockStatement.create(parseStatementList());
+
+      expect(ENDIF);
+    }
+    else {
+      _peekToken = token;
+      expect(ENDIF);
+    }
+
+    Statement stmt = new IfStatement(test, trueBlock, falseBlock);
+
+    stmt.setLocation(fileName, line);
+
+    return stmt;
+  }
+
+  /**
    * Parses the switch statement
    */
   private Statement parseSwitch()
@@ -870,9 +929,19 @@ public class PhpParser {
 
       expect(')');
 
-      expect('{');
+      boolean isAlternate = false;
 
-      int token;
+      int token = parseToken();
+
+      if (token == ':')
+	isAlternate = true;
+      else if (token == '{')
+	isAlternate = false;
+      else {
+	_peekToken = token;
+
+	expect('{');
+      }
 
       ArrayList<Expr[]> caseList = new ArrayList<Expr[]>();
       ArrayList<BlockStatement> blockList = new ArrayList<BlockStatement>();
@@ -944,7 +1013,7 @@ public class PhpParser {
 	if (blockList.size() > 0 &&
 	    ! fallThroughList.contains(blockList.size() - 1)) {
 	  fallThroughList.add(blockList.size() - 1);
-      }
+	}
 
 	  
 	if (block.fallThrough() != Statement.FALL_THROUGH)
@@ -953,7 +1022,10 @@ public class PhpParser {
 
       _peekToken = token;
 
-      expect('}');
+      if (isAlternate)
+	expect(ENDSWITCH);
+      else
+	expect('}');
 
       SwitchStatement stmt = new SwitchStatement(test,
 						 caseList, blockList,
@@ -977,15 +1049,31 @@ public class PhpParser {
     _isTop = false;
 
     try {
+      String fileName = getFileName();
+      int line = getLine();
+      
       expect('(');
 
       Expr test = parseExpr();
 
       expect(')');
-    
-      Statement block = parseStatement();
 
-      return new WhileStatement(test, block);
+      Statement block;
+
+      int token = parseToken();
+
+      if (token == ':') {
+	block = BlockStatement.create(parseStatementList());
+
+	expect(ENDWHILE);
+      }
+      else {
+	_peekToken = token;
+    
+	block = parseStatement();
+      }
+
+      return new WhileStatement(test, block).setLocation(fileName, line);
     } finally {
       _isTop = oldTop;
     }
@@ -1026,6 +1114,9 @@ public class PhpParser {
     _isTop = false;
 
     try {
+      String fileName = getFileName();
+      int line = getLine();
+      
       expect('(');
 
       Expr init = null;
@@ -1055,9 +1146,24 @@ public class PhpParser {
 	expect(')');
       }
 
-      Statement block = parseStatement();
+      Statement block;
+
+      token = parseToken();
+
+      if (token == ':') {
+	block = BlockStatement.create(parseStatementList());
+
+	expect(ENDFOR);
+      }
+      else {
+	_peekToken = token;
+	
+	block = parseStatement();
+      }
 
       Statement stmt = new ForStatement(init, test, incr, block);
+
+      stmt.setLocation(fileName, line);
 
       return stmt;
     } finally {
@@ -1075,6 +1181,9 @@ public class PhpParser {
     _isTop = false;
 
     try {
+      String fileName = getFileName();
+      int line = getLine();
+      
       expect('(');
 
       Expr objExpr = parseTopExpr();
@@ -1126,9 +1235,27 @@ public class PhpParser {
       else
 	throw error(L.l("expected ')' in foreach"));
     
-      Statement block = parseStatement();
+      Statement block;
 
-      return new ForeachStatement(objExpr, keyVar, valueVar, isRef, block);
+      token = parseToken();
+
+      if (token == ':') {
+	block = BlockStatement.create(parseStatementList());
+
+	expect(ENDFOREACH);
+      }
+      else {
+	_peekToken = token;
+
+	block = parseStatement();
+      }
+
+      Statement stmt;
+      stmt = new ForeachStatement(objExpr, keyVar, valueVar, isRef, block);
+
+      stmt.setLocation(fileName, line);
+
+      return stmt;
     } finally {
       _isTop = oldTop;
     }
@@ -3802,6 +3929,21 @@ public class PhpParser {
       
     case IF: return "'if'";
     case ELSE: return "'else'";
+    case ELSEIF: return "'elseif'";
+    case ENDIF: return "'endif'";
+      
+    case WHILE: return "'while'";
+    case ENDWHILE: return "'endwhile'";
+    case DO: return "'do'";
+      
+    case FOR: return "'for'";
+    case ENDFOR: return "'endfor'";
+      
+    case FOREACH: return "'foreach'";
+    case ENDFOREACH: return "'endforeach'";
+      
+    case SWITCH: return "'switch'";
+    case ENDSWITCH: return "'endswitch'";
       
     case ECHO: return "'echo'";
       
@@ -3893,6 +4035,11 @@ public class PhpParser {
     _insensitiveReserved.put("exit", EXIT);
     _insensitiveReserved.put("global", GLOBAL);
     _insensitiveReserved.put("list", LIST);
+    _insensitiveReserved.put("endif", ENDIF);
+    _insensitiveReserved.put("endwhile", ENDWHILE);
+    _insensitiveReserved.put("endfor", ENDFOR);
+    _insensitiveReserved.put("endforeach", ENDFOREACH);
+    _insensitiveReserved.put("endswitch", ENDSWITCH);
     
     _insensitiveReserved.put("true", TRUE);
     _insensitiveReserved.put("false", FALSE);

@@ -29,8 +29,12 @@
 
 package com.caucho.quercus.program;
 
+import java.io.IOException;
+
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
+
+import com.caucho.quercus.gen.PhpWriter;
 
 import com.caucho.vfs.WriteStream;
 
@@ -47,6 +51,16 @@ public class NullStatement extends Statement {
     throws Throwable
   {
     return null;
+  }
+
+  /**
+   * Generates the Java code for the statement.
+   *
+   * @param out the writer to the generated Java source.
+   */
+  protected void generateImpl(PhpWriter out)
+    throws IOException
+  {
   }
   
   public String toString()
