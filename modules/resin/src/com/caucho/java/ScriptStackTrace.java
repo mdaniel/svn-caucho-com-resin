@@ -112,7 +112,30 @@ public class ScriptStackTrace {
 					     ClassLoader loader)
   {
     try {
-      Class cl = loader.loadClass(trace.getClassName());
+      LineMap map = getScriptLineMap(trace.getClassName(), loader);
+
+      if (map != null) {
+	LineMap.Line line = map.getLine(trace.getLineNumber());
+	if (line != null) {
+	  out.print(trace.getClassName() + "." + trace.getMethodName());
+	  out.print("(" + line.getSourceFilename() + ":");
+	  out.println(line.getSourceLine(trace.getLineNumber()) + ")");
+	  return;
+	}
+      }
+    } catch (Throwable e) {
+    }
+    
+    out.println(trace);
+  }
+
+  /**
+   * Loads the local line map for a class.
+   */
+  public static LineMap getScriptLineMap(String className, ClassLoader loader)
+  {
+    try {
+      Class cl = loader.loadClass(className);
 
       LineMap map = _scriptMap.get(cl);
 
@@ -121,18 +144,12 @@ public class ScriptStackTrace {
 	_scriptMap.put(cl, map);
       }
 
-      LineMap.Line line = map.getLine(trace.getLineNumber());
-      if (line != null) {
-	out.print(trace.getClassName() + "." + trace.getMethodName());
-	out.print("(" + line.getSourceFilename() + ":");
-	out.println(line.getSourceLine(trace.getLineNumber()) + ")");
-	return;
-      }
+      return map;
     } catch (Throwable e) {
+      return null;
     }
-    
-    out.println(trace);
   }
+  
 
   /**
    * Loads the script map for a class

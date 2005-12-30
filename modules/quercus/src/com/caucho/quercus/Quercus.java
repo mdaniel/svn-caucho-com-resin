@@ -444,6 +444,7 @@ public class Quercus {
    */
   public SessionArrayValue loadSession(Env env, String sessionId)
   {
+    
     SessionArrayValue session = _sessionMap.get(sessionId);
 
     if (session != null)
@@ -458,6 +459,14 @@ public class Quercus {
   public void saveSession(Env env, String sessionId, SessionArrayValue session)
   {
     _sessionMap.put(sessionId, (SessionArrayValue) session.copy(env));
+  }
+
+  /**
+   * Removes the session to the backing.
+   */
+  public void destroySession(Env env, String sessionId)
+  {
+    _sessionMap.remove(sessionId);
   }
 
   /**

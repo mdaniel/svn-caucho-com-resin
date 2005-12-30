@@ -216,6 +216,14 @@ abstract public class Value {
   }
   
   /**
+   * Copy as an array item
+   */
+  public Value copyArrayItem()
+  {
+    return copy();
+  }
+  
+  /**
    * Copy for serialization
    */
   public final Value copy(Env env)

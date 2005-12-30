@@ -155,7 +155,7 @@ public class ForeachStatement extends Statement {
    *
    * @param out the writer to the generated Java source.
    */
-  public void generate(PhpWriter out)
+  protected void generateImpl(PhpWriter out)
     throws IOException
   {
     String objVar = "quercus_obj_" + out.generateId();

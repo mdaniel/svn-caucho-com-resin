@@ -33,7 +33,10 @@ import java.util.HashSet;
 
 import java.io.IOException;
 
+import com.caucho.vfs.Path;
+
 import com.caucho.java.JavaWriter;
+import com.caucho.java.LineMap;
 
 import com.caucho.java.gen.ClassComponent;
 
@@ -79,6 +82,14 @@ public class PhpMain extends ClassComponent {
     throws IOException
   {
     PhpWriter out = new PhpWriter(javaOut, _program);
+
+    Path dstPath = javaOut.getWriteStream().getPath();
+    String dstFilename = dstPath.getFullPath();
+    LineMap lineMap = new LineMap(dstFilename);
+
+    lineMap.setSourceType("PHP");
+
+    javaOut.setLineMap(lineMap);
 
     out.println();
     out.println("static com.caucho.vfs.Path _quercus_selfPath;");
@@ -159,6 +170,8 @@ public class PhpMain extends ClassComponent {
     out.println("}");
 
     out.generateCoda();
+
+    javaOut.generateSmap();
   }
 }
 

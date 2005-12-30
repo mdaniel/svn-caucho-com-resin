@@ -156,7 +156,7 @@ public class BlockStatement extends Statement {
    *
    * @param out the writer to the generated Java source.
    */
-  public void generate(PhpWriter out)
+  protected void generateImpl(PhpWriter out)
     throws IOException
   {
     for (int i = 0; i < _statements.length; i++) {

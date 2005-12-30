@@ -98,15 +98,17 @@ public class ArrayFunExpr extends Expr {
 
     for (int i = 0; i < _values.length; i++) {
       Expr keyExpr = _keys[i];
-      Value value = _values[i].eval(env).toValue();
+      Value value = _values[i].evalArg(env);
+
+      value = value.toArgValue();
 
       if (keyExpr != null) {
-	Value key = keyExpr.eval(env).toValue();
+	Value key = keyExpr.evalArg(env).toArgValue();
 	
-	array.append(key, value);
+	array.put(key, value);
       }
       else
-	array.append(value);
+	array.put(value);
     }
 
     return array;

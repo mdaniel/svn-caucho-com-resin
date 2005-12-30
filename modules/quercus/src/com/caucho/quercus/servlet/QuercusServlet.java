@@ -51,6 +51,7 @@ import com.caucho.config.ConfigException;
 import com.caucho.server.connection.CauchoResponse;
 
 import com.caucho.quercus.Quercus;
+import com.caucho.quercus.QuercusLineRuntimeException;
 import com.caucho.quercus.QuercusExitException;
 
 import com.caucho.quercus.env.Env;
@@ -196,6 +197,10 @@ public class QuercusServlet extends HttpServlet {
 	return;
       } catch (QuercusExitException e) {
 	throw e;
+      } catch (QuercusLineRuntimeException e) {
+	log.log(Level.FINE, e.toString(), e);
+
+	return;
       } catch (Throwable e) {
 	if (response.isCommitted())
 	  e.printStackTrace(ws.getPrintWriter());

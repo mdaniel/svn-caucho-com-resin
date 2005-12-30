@@ -564,8 +564,9 @@ public class PhpParser {
       return parseForeach();
 
     case TEXT:
-      if (_lexeme.length() > 0)
+      if (_lexeme.length() > 0) {
 	return new TextStatement(_lexeme);
+      }
       else
 	return parseStatement();
       
@@ -684,6 +685,9 @@ public class PhpParser {
   private Statement parsePrint()
     throws IOException
   {
+    String fileName = getFileName();
+    int line = getLine();
+    
     int token = parseToken();
 
     ArrayList<Expr> args;
@@ -702,7 +706,7 @@ public class PhpParser {
     FunctionExpr expr = new FunctionExpr("print", args);
     expr.setLocation(getFileName(), getLine());
 
-    return new ExprStatement(expr);
+    return new ExprStatement(expr).setLocation(fileName, line);
   }
 
   /**
@@ -810,6 +814,9 @@ public class PhpParser {
   private Statement parseIf()
     throws IOException
   {
+    String fileName = getFileName();
+    int line = getLine();
+    
     boolean oldTop = _isTop;
     _isTop = false;
 
@@ -836,6 +843,8 @@ public class PhpParser {
 
       Statement stmt = new IfStatement(test, trueBlock, falseBlock);
 
+      stmt.setLocation(fileName, line);
+
       return stmt;
     } finally {
       _isTop = oldTop;
@@ -848,6 +857,9 @@ public class PhpParser {
   private Statement parseSwitch()
     throws IOException
   {
+    String fileName = getFileName();
+    int line = getLine();
+    
     boolean oldTop = _isTop;
     _isTop = false;
 
@@ -874,7 +886,12 @@ public class PhpParser {
       
 	while (token == CASE || token == DEFAULT) {
 	  if (token == CASE) {
+	    String caseFileName = getFileName();
+	    int caseLine = getLine();
+	    
 	    Expr value = parseExpr();
+
+	    value.setLocation(caseFileName, caseLine);
 
 	    valueList.add(value);
 	  }
@@ -941,6 +958,8 @@ public class PhpParser {
       SwitchStatement stmt = new SwitchStatement(test,
 						 caseList, blockList,
 						 defaultBlock);
+      
+      stmt.setLocation(fileName, line);
 
       return stmt;
     } finally {
@@ -1241,13 +1260,16 @@ public class PhpParser {
   private Statement parseReturn()
     throws IOException
   {
+    String fileName = getFileName();
+    int line = getLine();
+    
     int token = parseToken();
 
     switch (token) {
     case ';':
       _peekToken = token;
 
-      return new ReturnStatement(NullLiteralExpr.NULL);
+      return new ReturnStatement(NullLiteralExpr.NULL).setLocation(fileName, line);
       
     default:
       _peekToken = token;
@@ -1262,9 +1284,9 @@ public class PhpParser {
       */
 
       if (_returnsReference)
-	return new ReturnRefStatement(expr);
+	return new ReturnRefStatement(expr).setLocation(fileName, line);
       else
-	return new ReturnStatement(expr);
+	return new ReturnStatement(expr).setLocation(fileName, line);
     }
   }
 
@@ -1420,9 +1442,12 @@ public class PhpParser {
   private Statement parseExprStatement()
     throws IOException
   {
+    String fileName = getFileName();
+    int line = getLine();
+    
     Expr expr = parseTopExpr();
 
-    Statement statement = new ExprStatement(expr);
+    Statement statement = new ExprStatement(expr).setLocation(fileName, line);
 
     int token = parseToken();
     _peekToken = token;
@@ -3349,7 +3374,7 @@ public class PhpParser {
       tail = new ArrayGetExpr(tail, new LongLiteralExpr(index));
     }
     else if (isIdentifierPart((char) ch)) {
-      for (ch = read();
+      for (;
 	   ch > 0 && isIdentifierPart((char) ch);
 	   ch = read()) {
 	_sb.append((char) ch);
@@ -3874,4 +3899,3 @@ public class PhpParser {
     _insensitiveReserved.put("null", NULL);
   }
 }
-

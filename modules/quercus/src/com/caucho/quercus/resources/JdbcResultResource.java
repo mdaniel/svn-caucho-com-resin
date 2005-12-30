@@ -831,7 +831,6 @@ public class JdbcResultResource extends ResourceValue {
       return result;
 
     } else {
-      _rs.close();
       return BooleanValue.FALSE;
     }
   }

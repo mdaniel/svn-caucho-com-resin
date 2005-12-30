@@ -53,6 +53,20 @@ abstract public class Statement {
   public static final int FALL_THROUGH = 0;
   public static final int BREAK_FALL_THROUGH = 0x1;
   public static final int RETURN = 0x3;
+
+  private String _fileName;
+  private int _line;
+
+  /**
+   * Sets the location of the statement in the source.
+   */
+  public Statement setLocation(String fileName, int line)
+  {
+    _fileName = fileName;
+    _line = line;
+
+    return this;
+  }
   
   abstract public Value execute(Env env)
     throws Throwable;
@@ -104,11 +118,20 @@ abstract public class Statement {
    *
    * @param out the writer to the generated Java source.
    */
-  public void generate(PhpWriter out)
+  public final void generate(PhpWriter out)
     throws IOException
   {
-    System.out.println("IMPL: " + getClass().getName());
+    if (_fileName != null)
+      out.setLocation(_fileName, _line);
+    
+    generateImpl(out);
   }
+
+  /**
+   * Implementation of the generation.
+   */
+  abstract protected void generateImpl(PhpWriter out)
+    throws IOException;
 
   /**
    * Generates the Java code for the statement.

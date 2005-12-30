@@ -35,6 +35,7 @@ import java.util.Map;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Comparator;
+import java.util.Locale;
 import java.util.logging.Logger;
 import java.util.logging.Level;
 
@@ -1281,8 +1282,10 @@ public class QuercusArrayModule extends AbstractQuercusModule {
       array.sort(CN_VALUE_REVERSE, NO_KEY_RESET, NOT_STRICT);
       break;
     case SORT_LOCALE_STRING:
+      Locale locale = env.getLocaleInfo().getCollate();
       array.sort(new CompareLocale(ArrayValue.GET_VALUE, SORT_REVERSE,
-        Collator.getInstance(env.getLocale())), NO_KEY_RESET, NOT_STRICT);
+				   Collator.getInstance(locale)),
+		 NO_KEY_RESET, NOT_STRICT);
       break;
     default: array.sort(CNO_VALUE_REVERSE, NO_KEY_RESET, NOT_STRICT);
       break;
@@ -1316,8 +1319,10 @@ public class QuercusArrayModule extends AbstractQuercusModule {
       array.sort(CN_VALUE_NORMAL, NO_KEY_RESET, NOT_STRICT);
       break;
     case SORT_LOCALE_STRING:
+      Locale locale = env.getLocaleInfo().getCollate();
       array.sort(new CompareLocale(ArrayValue.GET_VALUE, SORT_NORMAL,
-        Collator.getInstance(env.getLocale())), NO_KEY_RESET, NOT_STRICT);
+				   Collator.getInstance(locale)),
+		 NO_KEY_RESET, NOT_STRICT);
       break;
     default:
       array.sort(CNO_VALUE_NORMAL, NO_KEY_RESET, NOT_STRICT);
@@ -1352,8 +1357,10 @@ public class QuercusArrayModule extends AbstractQuercusModule {
       array.sort(CN_KEY_NORMAL, NO_KEY_RESET, NOT_STRICT);
       break;
     case SORT_LOCALE_STRING:
+      Locale locale = env.getLocaleInfo().getCollate();
       array.sort(new CompareLocale(ArrayValue.GET_KEY, SORT_NORMAL,
-        Collator.getInstance(env.getLocale())), NO_KEY_RESET, NOT_STRICT);
+				   Collator.getInstance(locale)),
+		 NO_KEY_RESET, NOT_STRICT);
       break;
     default:
       array.sort(CNO_KEY_NORMAL, NO_KEY_RESET, NOT_STRICT);
@@ -1388,8 +1395,10 @@ public class QuercusArrayModule extends AbstractQuercusModule {
       array.sort(CN_KEY_REVERSE, NO_KEY_RESET, NOT_STRICT);
       break;
     case SORT_LOCALE_STRING:
+      Locale locale = env.getLocaleInfo().getCollate();
       array.sort(new CompareLocale(ArrayValue.GET_KEY, SORT_REVERSE,
-        Collator.getInstance(env.getLocale())), NO_KEY_RESET, NOT_STRICT);
+				   Collator.getInstance(locale)),
+		 NO_KEY_RESET, NOT_STRICT);
       break;
     default:
       array.sort(CNO_KEY_REVERSE, NO_KEY_RESET, NOT_STRICT);
@@ -1515,8 +1524,10 @@ public class QuercusArrayModule extends AbstractQuercusModule {
       array.sort(CN_VALUE_NORMAL, KEY_RESET, STRICT);
       break;
     case SORT_LOCALE_STRING:
+      Locale locale = env.getLocaleInfo().getCollate();
       array.sort(new CompareLocale(ArrayValue.GET_VALUE, SORT_NORMAL,
-        Collator.getInstance(env.getLocale())), KEY_RESET, STRICT);
+				   Collator.getInstance(locale)),
+		 KEY_RESET, STRICT);
       break;
     default:
       array.sort(CNO_VALUE_NORMAL, KEY_RESET, STRICT);
@@ -1550,8 +1561,10 @@ public class QuercusArrayModule extends AbstractQuercusModule {
       array.sort(CN_VALUE_REVERSE, KEY_RESET, STRICT);
       break;
     case SORT_LOCALE_STRING:
+      Locale locale = env.getLocaleInfo().getCollate();
       array.sort(new CompareLocale(ArrayValue.GET_VALUE, SORT_REVERSE,
-        Collator.getInstance(env.getLocale())), KEY_RESET, STRICT);
+				   Collator.getInstance(locale)),
+		 KEY_RESET, STRICT);
       break;
     default:
       array.sort(CNO_VALUE_REVERSE, KEY_RESET, STRICT);
@@ -2496,6 +2509,71 @@ public class QuercusArrayModule extends AbstractQuercusModule {
     }
 
     return result;
+  }
+
+  /**
+   * Maps the given function with the array arguments.
+   *
+   * @param fun the function name
+   * @param args the vector of array arguments
+   * 
+   * @return an array with all of the mapped values
+   */
+  public Value array_merge_recursive(Value []args)
+    throws Throwable
+  {
+    // quercus/173a
+
+    ArrayValue result = new ArrayValueImpl();
+
+    for (int i = 0; i < args.length; i++) {
+      if (! (args[i].toValue() instanceof ArrayValue))
+        continue;
+
+      arrayMergeRecursiveImpl(result, (ArrayValue) args[i].toValue());
+    }
+
+    return result;
+  }
+
+  private static void arrayMergeRecursiveImpl(ArrayValue result,
+					      ArrayValue array)
+  {
+    for (Map.Entry<Value,Value> entry : array.entrySet()) {
+      Value key = entry.getKey();
+      Value value = entry.getValue().toValue();
+
+      if (key.isNumber()) {
+	result.append(value);
+      }
+      else {
+	Value oldValue = result.get(key).toValue();
+
+	if (oldValue != null && oldValue.isset()) {
+	  if (oldValue.isArray() && value.isArray()) {
+	    arrayMergeRecursiveImpl((ArrayValue) oldValue, (ArrayValue) value);
+	  }
+	  else if (oldValue.isArray()) {
+	    oldValue.put(value);
+	  }
+	  else if (value.isArray()) {
+	    // XXX: s/b insert?
+	    value.put(oldValue);
+	  }
+	  else {
+	    ArrayValue newArray = new ArrayValueImpl();
+
+	    newArray.put(oldValue);
+	    newArray.put(value);
+
+	    result.put(key, newArray);
+	  }
+	}
+	else {
+	  result.put(key, value);
+	}
+      }
+    }
   }
 
   /**

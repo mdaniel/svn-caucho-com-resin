@@ -38,6 +38,8 @@ import java.util.logging.Level;
 import com.caucho.util.L10N;
 import com.caucho.util.RandomUtil;
 
+import com.caucho.java.ScriptStackTrace;
+
 import com.caucho.quercus.Quercus;
 
 import com.caucho.quercus.module.AbstractQuercusModule;
@@ -95,7 +97,15 @@ public class QuercusMiscModule extends AbstractQuercusModule {
   public static Value dump_stack()
     throws Throwable
   {
-    Thread.dumpStack();
+    Exception e = new Exception("Stack trace");
+    e.fillInStackTrace();
+
+    com.caucho.vfs.WriteStream out = com.caucho.vfs.Vfs.openWrite("stderr:");
+    try {
+      ScriptStackTrace.printStackTrace(e, out.getPrintWriter());
+    } finally {
+      out.close();
+    }
 
     return NullValue.NULL;
   }

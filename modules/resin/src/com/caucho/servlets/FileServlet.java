@@ -98,6 +98,10 @@ public class FileServlet extends GenericServlet {
     String enable = getInitParameter("enable-range");
     if (enable != null && enable.equals("false"))
       _isEnableRange = false;
+
+    String encoding = getInitParameter("character-encoding");
+    if (encoding != null && ! "".equals(encoding))
+      _characterEncoding = encoding;
   }
 
   private RequestDispatcher getDirectoryServlet()

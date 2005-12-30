@@ -93,7 +93,7 @@ public class ArrayValueImpl extends ArrayValue {
 
     for (Entry ptr = copy.getHead(); ptr != null; ptr = ptr._next) {
       // quercus/0662 for copy
-      put(ptr.getKey(), ptr.getRawValue().copy());
+      put(ptr.getKey(), ptr.getRawValue().copyArrayItem());
     }
   }
 
@@ -245,18 +245,6 @@ public class ArrayValueImpl extends ArrayValue {
   }
 
   /**
-   * Add
-   */
-  public ArrayValue append(Value value)
-  {
-    Value key = createTailKey();
-
-    put(key, value.toArgValue());
-
-    return this;
-  }
-
-  /**
    * Add to the beginning
    */
   public ArrayValue unshift(Value value)
@@ -356,7 +344,11 @@ public class ArrayValueImpl extends ArrayValue {
    */
   public ArrayValue put(Value value)
   {
-    return append(value);
+    Value key = createTailKey();
+
+    put(key, value);
+
+    return this;
   }
 
   /**
@@ -376,16 +368,6 @@ public class ArrayValueImpl extends ArrayValue {
   public Value createTailKey()
   {
     return LongValue.create(_index++);
-  }
-
-  /**
-   * Add
-   */
-  public ArrayValue append(Value key, Value value)
-  {
-    put(key, value.toArgValue());
-
-    return this;
   }
 
   /**

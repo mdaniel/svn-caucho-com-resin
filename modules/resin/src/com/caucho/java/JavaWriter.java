@@ -454,6 +454,33 @@ public class JavaWriter {
   }
 
   /**
+   * Generates the smap file.
+   */
+  public void generateSmap()
+    throws IOException
+  {
+    if (_lineMap != null) {
+      Path dstPath = getWriteStream().getPath();
+      Path smap = dstPath.getParent().lookup(dstPath.getTail() + ".smap");
+
+      WriteStream out = smap.openWrite();
+      try {
+	String srcName = _lineMap.getLastSourceFilename();
+
+	LineMapWriter writer = new LineMapWriter(out);
+	
+	if (_lineMap.getSourceType() != null)
+	  writer.setSourceType(_lineMap.getSourceType());
+	
+	writer.write(_lineMap);
+      } finally {
+	out.close();
+      }
+    }
+    
+  }
+
+  /**
    * Returns the error message with proper line number.
    */
   public String errorMessage(String message)

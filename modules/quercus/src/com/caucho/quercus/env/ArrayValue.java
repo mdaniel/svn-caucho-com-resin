@@ -97,6 +97,7 @@ abstract public class ArrayValue extends Value {
    * @param env
    */
   public String toString(Env env)
+    throws Throwable
   {
     return "Array";
   }
@@ -145,7 +146,7 @@ abstract public class ArrayValue extends Value {
   /**
    * Add
    */
-  abstract public ArrayValue append(Value value);
+  abstract public ArrayValue put(Value value);
 
   /**
    * Add to front.
@@ -224,14 +225,6 @@ abstract public class ArrayValue extends Value {
   }
 
   /**
-   * Add
-   */
-  public ArrayValue put(Value value)
-  {
-    return append(value);
-  }
-
-  /**
    * Sets the array ref.
    */
   abstract public Value putRef();
@@ -261,16 +254,6 @@ abstract public class ArrayValue extends Value {
     }
 
     return result;
-  }
-
-  /**
-   * Add
-   */
-  public ArrayValue append(Value key, Value value)
-  {
-    put(key, value.toArgValue());
-
-    return this;
   }
 
   /**
@@ -318,6 +301,24 @@ abstract public class ArrayValue extends Value {
   public Collection<Value> values()
   {
     return new ValueCollection();
+  }
+
+  /**
+   * Add
+   */
+  public ArrayValue append(Value key, Value value)
+  {
+    put(key, value.toArgValue());
+
+    return this;
+  }
+
+  /**
+   * Add
+   */
+  public ArrayValue append(Value value)
+  {
+    return put(value.toArgValue());
   }
 
   /**
@@ -648,6 +649,48 @@ abstract public class ArrayValue extends Value {
     }
     
     return true;
+  }
+  
+  /**
+   * Test for ===
+   * 
+   * @param rValue rhs ArrayValue to compare to
+   * 
+   * @return true if this is equal to rValue, false otherwise
+   */
+  public boolean eql(Value rValue)
+    throws Throwable
+  {
+    if (rValue == null)
+      return false;
+    else if (getSize() != rValue.getSize())
+      return false;
+
+    rValue = rValue.toValue();
+
+    if (! (rValue instanceof ArrayValue))
+      return false;
+
+    ArrayValue rArray = (ArrayValue) rValue;
+
+    Iterator<Map.Entry<Value,Value>> iterA = entrySet().iterator();
+    Iterator<Map.Entry<Value,Value>> iterB = rArray.entrySet().iterator();
+
+    while (iterA.hasNext() && iterB.hasNext()) {
+      Map.Entry<Value,Value> entryA = iterA.next();
+      Map.Entry<Value,Value> entryB = iterB.next();
+
+      if (! entryA.getKey().eql(entryB.getKey()))
+	return false;
+      
+      if (! entryA.getValue().eql(entryB.getValue()))
+	return false;
+    }
+
+    if (iterA.hasNext() || iterB.hasNext())
+      return false;
+    else
+      return true;
   }
 
   public static class Entry extends Var implements Map.Entry<Value,Value> {

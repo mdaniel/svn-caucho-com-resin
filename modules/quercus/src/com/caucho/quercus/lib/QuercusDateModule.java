@@ -531,14 +531,21 @@ public class QuercusDateModule extends AbstractQuercusModule {
 			 @Optional("-1") long now)
   {
     try {
-      long time = new QDate().parseLocalDate(timeString);
-
       if (now >= 0)
 	now = 1000L * now;
       else
 	now = Alarm.getCurrentTime();
 
-      return new LongValue((time - now) / 1000L);
+      System.out.println("***STR: " + timeString);
+
+      if (timeString.equals("now"))
+	return new LongValue(now / 1000L);
+      
+      long time = new QDate().parseLocalDate(timeString);
+
+      // only handling exact dates
+
+      return new LongValue(time / 1000L);
     } catch (Exception e) {
       log.log(Level.FINE, e.toString(), e);
 

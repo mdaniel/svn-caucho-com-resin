@@ -115,7 +115,21 @@ public class ServerArrayValue extends ArrayValueImpl {
    */
   public Value put(Value key, Value value)
   {
-    throw new UnsupportedOperationException("_SERVER is read-only");
+    if (! _isFilled)
+      fillMap();
+
+    return super.put(key, value);
+  }
+
+  /**
+   * Adds a new value.
+   */
+  public ArrayValue put(Value value)
+  {
+    if (! _isFilled)
+      fillMap();
+
+    return super.put(value);
   }
 
   /**
@@ -167,7 +181,10 @@ public class ServerArrayValue extends ArrayValueImpl {
    */
   public void put(String key, String value)
   {
-    throw new UnsupportedOperationException("_SERVER is read-only");
+    if (! _isFilled)
+      fillMap();
+
+    super.put(key, value);
   }
 
   /**

@@ -111,7 +111,21 @@ public class StringValue extends Value {
    */
   public boolean isLong()
   {
-    return getNumericType() == IS_LONG;
+    String value = _value;
+    
+    int len = value.length();
+
+    if (len == 0)
+      return false;
+    
+    for (int i = 0; i < len; i++) {
+      char ch = value.charAt(i);
+      
+      if (! ('0' <= ch && ch <= '9'))
+	return false;
+    }
+    
+    return true;
   }
 
   /**
@@ -295,7 +309,10 @@ public class StringValue extends Value {
    */
   public Value toKey()
   {
-    return this;
+    if (isLong())
+      return new LongValue(toLong());
+    else
+      return this;
   }
 
   /**

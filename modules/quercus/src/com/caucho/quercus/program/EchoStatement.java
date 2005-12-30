@@ -92,7 +92,7 @@ public class EchoStatement extends Statement {
    *
    * @param out the writer to the generated Java source.
    */
-  public void generate(PhpWriter out)
+  protected void generateImpl(PhpWriter out)
     throws IOException
   {
     _expr.generatePrint(out);

@@ -1153,7 +1153,23 @@ public class QuercusFileModule extends AbstractQuercusModule {
   // XXX: link
   // XXX: linkinfo
   // XXX: lstat
-  // XXX: mkdir
+
+  /**
+   * Changes the working directory
+   *
+   * @param path the path to change to
+   */
+  public static boolean mkdir(Env env, Path path)
+  {
+    try {
+      return path.mkdir();
+    } catch (IOException e) {
+      log.log(Level.FINE, e.toString(), e);
+
+      return false;
+    }
+  }
+  
   // XXX: move_uploaded_file
 
   /**

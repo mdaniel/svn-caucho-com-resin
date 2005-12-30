@@ -39,6 +39,8 @@ import java.util.regex.Matcher;
 
 import com.caucho.util.L10N;
 
+import com.caucho.quercus.QuercusRuntimeException;
+
 import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.quercus.module.Optional;
 import com.caucho.quercus.module.Reference;
@@ -105,12 +107,12 @@ public class QuercusRegexpModule extends AbstractQuercusModule {
    * @param env the calling environment
    */
   public static Value ereg(Env env,
-                           Value patternV,
-                           Value stringV,
+                           String pattern,
+                           String string,
                            @Optional Value regsV)
     throws Throwable
   {
-    return ereg(env, patternV, stringV, regsV, 0);
+    return ereg(env, pattern, string, regsV, 0);
   }
 
   /**
@@ -119,12 +121,12 @@ public class QuercusRegexpModule extends AbstractQuercusModule {
    * @param env the calling environment
    */
   public static Value eregi(Env env,
-                            Value patternV,
-                            Value stringV,
+                            String pattern,
+                            String string,
                             @Optional Value regsV)
     throws Throwable
   {
-    return ereg(env, patternV, stringV, regsV, Pattern.CASE_INSENSITIVE);
+    return ereg(env, pattern, string, regsV, Pattern.CASE_INSENSITIVE);
   }
 
   /**
@@ -133,14 +135,16 @@ public class QuercusRegexpModule extends AbstractQuercusModule {
    * @param env the calling environment
    */
   private static Value ereg(Env env,
-                            Value patternV,
-                            Value stringV,
+                            String rawPattern,
+                            String string,
                             Value regsV,
                             int flags)
     throws Throwable
   {
-    Pattern pattern = Pattern.compile(patternV.toString(env), flags);
-    Matcher matcher = pattern.matcher(stringV.toString(env));
+    String cleanPattern = cleanRegexp(rawPattern, false);
+
+    Pattern pattern = Pattern.compile(cleanPattern, flags);
+    Matcher matcher = pattern.matcher(string);
 
     if (! (matcher.find()))
       return BooleanValue.FALSE;
@@ -855,6 +859,18 @@ public class QuercusRegexpModule extends AbstractQuercusModule {
     return program;
   }
 
+  private static final String []POSIX_CLASSES = {
+    "[:alnum:]", "[:alpha:]", "[:blank:]", "[:cntrl:]",
+    "[:digit:]", "[:graph:]", "[:lower:]", "[:print:]",
+    "[:punct:]", "[:space:]", "[:upper:]", "[:xdigit:]"
+  };
+
+  private static final String []REGEXP_CLASSES = {
+    "\\p{Alnum}", "\\p{Alpha}", "\\p{Blank}", "\\p{Cntrl}",
+    "\\p{Digit}", "\\p{Graph}", "\\p{Lower}", "\\p{Print}",
+    "\\p{Punct}", "\\p{Space}", "\\p{Upper}", "\\p{XDigit}"
+  };
+
   /**
    * Cleans the regexp from valid values that the Java regexps can't
    * handle.  Currently "+?".
@@ -886,16 +902,54 @@ public class QuercusRegexpModule extends AbstractQuercusModule {
             sb.append('0');
             sb.append(ch);
           }
+	  else if (ch == 'x' && i + 1 < len && regexp.charAt(i + 1) == '{') {
+	    int tail = regexp.indexOf('}', i + 1);
+
+	    if (tail > 0) {
+	      String hex = regexp.substring(i + 2, tail);
+	      
+	      if (hex.length() == 2)
+		sb.append("x" + hex);
+	      else if (hex.length() == 4)
+		sb.append("u" + hex);
+	      else
+		throw new QuercusRuntimeException(L.l("illegal hex escape"));
+
+	      i = tail;
+	    }
+	    else {
+	      sb.append("\\x");
+	    }
+	  }
           else
             sb.append(ch);
         }
         break;
 
       case '[':
-        if (quote == '[')
-          sb.append("\\[");
-        else
-          sb.append(ch);
+        if (quote == '[') {
+	  if (i + 1 < len && regexp.charAt(i + 1) == ':') {
+	    String test = regexp.substring(i);
+	    boolean hasMatch = false;
+
+	    for (int j = 0; j < POSIX_CLASSES.length; j++) {
+	      if (test.startsWith(POSIX_CLASSES[j])) {
+		hasMatch = true;
+		
+		sb.append(REGEXP_CLASSES[j]);
+	    
+		i += POSIX_CLASSES[j].length() - 1;
+	      }
+	    }
+
+	    if (! hasMatch)
+	      sb.append("\\[");
+	  }
+	  else
+	    sb.append("\\[");
+	}
+	else
+	  sb.append(ch);
 
         if (quote == 0)
           quote = ch;

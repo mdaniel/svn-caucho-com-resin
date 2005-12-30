@@ -604,11 +604,27 @@ public class JavaCompiler {
       throw (Error) exn;
     else
       throw new IOExceptionWrapper(exn);
+
+    for (int i = 0; i < path.length; i++) {
+      Path javaPath = getSourceDir().lookup(path[i]);
+
+      if (! path[i].endsWith(".java"))
+	continue;
+
+      String className = path[i].substring(0, path[i].length() - 5) + ".class";
+      Path classPath = getClassDir().lookup(className);
+      Path smapPath = getSourceDir().lookup(path[i] + ".smap");
+
+      if (classPath.canRead() && smapPath.canRead())
+	mergeSmap(classPath, smapPath);
+    }
   }
 
   public void mergeSmap(Path classPath, Path smapPath)
   {
     try {
+      log.fine("merging .smap for " + classPath.getTail());
+      
       ByteCodeParser parser = new ByteCodeParser();
       JavaClass javaClass;
       

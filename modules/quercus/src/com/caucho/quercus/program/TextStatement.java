@@ -82,7 +82,7 @@ public class TextStatement extends Statement {
    *
    * @param out the writer to the generated Java source.
    */
-  public void generate(PhpWriter out)
+  protected void generateImpl(PhpWriter out)
     throws IOException
   {
     generateGetOut(out);

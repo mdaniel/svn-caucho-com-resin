@@ -69,6 +69,8 @@ public class QuercusMailModule extends AbstractQuercusModule {
   {
     Transport smtp = null;
 
+    System.out.println("MAILING: " + to);
+
     try {
       Properties props = new Properties();
       
@@ -106,6 +108,8 @@ public class QuercusMailModule extends AbstractQuercusModule {
 
       return true;
     } catch (RuntimeException e) {
+      log.log(Level.FINER, e.toString(), e);
+      
       throw e;
     } catch (MessagingException e) {
       log.log(Level.FINE, e.toString(), e);

@@ -8,6 +8,7 @@ com.caucho.quercus.lib.QuercusFileModule
 com.caucho.quercus.lib.QuercusFunctionModule
 com.caucho.quercus.lib.QuercusHtmlModule
 com.caucho.quercus.lib.QuercusHttpModule
+com.caucho.quercus.lib.QuercusImageModule
 com.caucho.quercus.lib.QuercusJavaModule
 com.caucho.quercus.lib.QuercusMailModule
 com.caucho.quercus.lib.QuercusMathModule

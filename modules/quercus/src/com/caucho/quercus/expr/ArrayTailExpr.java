@@ -289,7 +289,7 @@ public class ArrayTailExpr extends AbstractVarExpr {
     _expr.generateArray(out);
     out.print(".put(");
     value.generate(out);
-    out.print(")");
+    out.print(".toArgValue())");
   }
 
   /**
@@ -303,7 +303,7 @@ public class ArrayTailExpr extends AbstractVarExpr {
     _expr.generateArray(out);
     out.print(".put(");
     value.generateRef(out);
-    out.print(")");
+    out.print(".toArgValue())");
   }
 
   /**

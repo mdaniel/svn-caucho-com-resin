@@ -210,7 +210,17 @@ public class Var extends Value {
    */
   public Value copy()
   {
+    // php/041d
     return _value.copy();
+  }
+  
+  /**
+   * Copy the value as an array item.
+   */
+  public Value copyArrayItem()
+  {
+    // php/041d
+    return this;
   }
   
   /**

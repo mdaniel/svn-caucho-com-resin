@@ -134,7 +134,81 @@ public class Post {
 	value.append((char) ch);
       }
 
-      post.put(name, value.toString());
+      addFormValue(post, name, new String[] { value.toString() });
+    }
+  }
+
+  public static void addFormValue(ArrayValue array,
+				  String key,
+				  String []formValue)
+  {
+    int p = key.indexOf('[');
+    int q = key.indexOf(']', p);
+    
+    if (p > 0 && p < q) {
+      String index = key;
+      
+      key = key.substring(0, p);
+
+      Value keyValue = new StringValue(key);
+      Value value = array.get(keyValue);
+      if (value == null || ! value.isset()) {
+	value = new ArrayValueImpl();
+	array.put(keyValue, value);
+      }
+      else if (! value.isArray()) {
+	value = new ArrayValueImpl().put(value);
+	array.put(keyValue, value);
+      }
+      
+      array = (ArrayValue) value;
+
+      int p1;
+      while ((p1 = index.indexOf('[', q)) > 0) {
+	key = index.substring(p + 1, q);
+
+	if (key.equals("")) {
+	  value = new ArrayValueImpl();
+	  array.put(value);
+	}
+	else {
+	  keyValue = new StringValue(key);
+	  value = array.get(keyValue);
+	  
+	  if (value == null || ! value.isset()) {
+	    value = new ArrayValueImpl();
+	    array.put(keyValue, value);
+	  }
+	  else if (! value.isArray()) {
+	    value = new ArrayValueImpl().put(value);
+	    array.put(keyValue, value);
+	  }
+	}
+
+	array = (ArrayValue) value;
+
+	p = p1;
+	q = index.indexOf(']', p);
+      }
+
+      if (q > 0)
+	index = index.substring(p + 1, q);
+      else
+	index = index.substring(p + 1);
+
+      if (index.equals("")) {
+	for (int i = 0; i < formValue.length; i++) {
+	  array.put(new StringValue(formValue[i]));
+	}
+      }
+      else if ('0' <= index.charAt(0) && index.charAt(0) <= '9')
+	array.put(new LongValue(StringValue.toLong(index)),
+		  new StringValue(formValue[0]));
+      else
+	array.put(new StringValue(index), new StringValue(formValue[0]));
+    }
+    else {
+      array.put(new StringValue(key), new StringValue(formValue[0]));
     }
   }
 

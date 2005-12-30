@@ -76,8 +76,8 @@ abstract public class CompiledFunction_1 extends CompiledFunction {
   public Expr []bindArguments(Env env, Expr fun, Expr []args)
     throws Exception
   {
-    if (args.length != 1)
-      env.warning(L.l("incorrect number of arguments"));
+    if (args.length > 1)
+      log.fine(L.l(env.getLocation() + "incorrect number of arguments" + env.getFunctionLocation()));
 
     return args;
   }

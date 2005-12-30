@@ -331,6 +331,7 @@ public class JdbcConnectionResource extends ResourceValue {
         _affectedRows = stmt.getUpdateCount();
         _warnings = stmt.getWarnings();
         _fieldCount = false;
+	stmt.close();
       }
     } catch (DataTruncation truncationError) {
       try {

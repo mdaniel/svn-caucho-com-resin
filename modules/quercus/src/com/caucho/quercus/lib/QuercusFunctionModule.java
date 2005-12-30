@@ -72,12 +72,25 @@ public class QuercusFunctionModule extends AbstractQuercusModule {
    */
   public static Value call_user_func_array(Env env,
                                            Callback function,
-                                           ArrayValue argArray)
+                                           Value arg)
     throws Throwable
   {
-    Value []args = new Value[argArray.getSize()];
+    ArrayValue argArray;
+    
+    if (arg instanceof ArrayValue)
+      argArray = (ArrayValue) arg;
+    else
+      argArray = new ArrayValueImpl().put(arg);
+	
+    Value []args;
 
-    argArray.values().toArray(args);
+    if (argArray != null) {
+      args = new Value[argArray.getSize()];
+
+      argArray.values().toArray(args);
+    }
+    else
+      args = new Value[0];
 
     return function.eval(env, args);
   }
@@ -152,5 +165,17 @@ public class QuercusFunctionModule extends AbstractQuercusModule {
   public static boolean function_exists(Env env, String name)
   {
     return env.findFunction(name) != null;
+  }
+
+  /**
+   * Registers a shutdown function.
+   */
+  public static Value register_shutdown_function(Env env,
+						 Callback fun,
+						 Value []args)
+  {
+    env.addShutdown(fun, args);
+    
+    return NullValue.NULL;
   }
 }

@@ -31,6 +31,7 @@ package com.caucho.quercus.lib;
 
 import java.util.Map;
 import java.util.Iterator;
+import java.util.Locale;
 
 import java.util.logging.Logger;
 import java.util.logging.Level;
@@ -51,6 +52,8 @@ import com.caucho.quercus.env.BooleanValue;
 import com.caucho.quercus.env.ArrayValue;
 import com.caucho.quercus.env.ArrayValueImpl;
 import com.caucho.quercus.env.NullValue;
+import com.caucho.quercus.env.LocaleInfo;
+import com.caucho.quercus.env.Post;
 
 import com.caucho.quercus.module.Reference;
 import com.caucho.quercus.module.Optional;
@@ -840,7 +843,7 @@ public class QuercusStringModule extends AbstractQuercusModule {
       else
 	value = "";
 
-      addQueryValue(env, array, key, value);
+      Post.addFormValue(array, key, new String[] { value } );
     }
     
     return NullValue.NULL;
@@ -1054,6 +1057,142 @@ public class QuercusStringModule extends AbstractQuercusModule {
     }
 
     return new StringValue("");
+  }
+
+  /**
+   * Sets locale configuration.
+   */
+  public static Value setlocale(Env env,
+				int category,
+				Value localeArg,
+				Value []fallback)
+  {
+    LocaleInfo localeInfo = env.getLocaleInfo();
+
+    if (localeArg instanceof ArrayValue) {
+      for (Value value : ((ArrayValue) localeArg).values()) {
+	Locale locale = setLocale(localeInfo, category, value.toString());
+
+	if (locale != null)
+	  return new StringValue(locale.toString());
+      }
+    }
+    else {
+      Locale locale = setLocale(localeInfo, category, localeArg.toString());
+
+      if (locale != null)
+	return new StringValue(locale.toString());
+    }
+
+    for (int i = 0; i < fallback.length; i++) {
+      Locale locale = setLocale(localeInfo, category, fallback[i].toString());
+
+      if (locale != null)
+	return new StringValue(locale.toString());
+    }
+
+    return BooleanValue.FALSE;
+  }
+
+  /**
+   * Sets locale configuration.
+   */
+  private static Locale setLocale(LocaleInfo localeInfo,
+				  int category,
+				  String localeName)
+  {
+    String language = null;
+    String country = null;
+    String variant = null;
+    
+    int p = localeName.indexOf('_');
+    int p1 = localeName.indexOf('-');
+
+    if (p1 > 0 && (p1 < p || p < 0))
+      p = p1;
+
+    Locale locale;
+
+    if (p > 0) {
+      language = localeName.substring(0, p);
+
+      int q = localeName.indexOf('-', p + 1);
+      int q1 = localeName.indexOf('.', p + 1);
+      // XXX: '.' should be charset?
+
+      if (q1 > 0 && (q1 < q || q < 0))
+	q = q1;
+      
+      q1 = localeName.indexOf('@', p + 1);
+      // XXX: '@' is ??
+
+      if (q1 > 0 && (q1 < q || q < 0))
+	q = q1;
+      
+      q1 = localeName.indexOf('_', p + 1);
+
+      if (q1 > 0 && (q1 < q || q < 0))
+	q = q1;
+
+      if (q > 0) {
+	country = localeName.substring(p + 1, q);
+	variant = localeName.substring(q + 1);
+
+	locale = new Locale(language, country, variant);
+      }
+      else {
+	country = localeName.substring(p + 1);
+
+	locale = new Locale(language, country);
+      }
+    }
+    else
+      locale = new Locale(localeName);
+
+    if (! isValidLocale(locale))
+      return null;
+
+    switch (category) {
+    case LC_ALL:
+      localeInfo.setAll(locale);
+      return localeInfo.getMessages();
+    case LC_COLLATE:
+      localeInfo.setCollate(locale);
+      return localeInfo.getCollate();
+    case LC_CTYPE:
+      localeInfo.setCtype(locale);
+      return localeInfo.getCtype();
+    case LC_MONETARY:
+      localeInfo.setMonetary(locale);
+      return localeInfo.getMonetary();
+    case LC_NUMERIC:
+      localeInfo.setNumeric(locale);
+      return localeInfo.getNumeric();
+    case LC_TIME:
+      localeInfo.setTime(locale);
+      return localeInfo.getTime();
+    case LC_MESSAGES:
+      localeInfo.setMessages(locale);
+      return localeInfo.getMessages();
+    default:
+      return null;
+    }
+  }
+
+  /**
+   * Returns true if the locale is supported.
+   */
+  private static boolean isValidLocale(Locale locale)
+  {
+    Locale []validLocales = Locale.getAvailableLocales();
+
+    for (int i = 0; i < validLocales.length; i++) {
+      if (validLocales[i].equals(locale)) {
+	return true;
+      }
+    }
+
+    return false;
   }
 
   /**
@@ -1804,7 +1943,7 @@ public class QuercusStringModule extends AbstractQuercusModule {
    *
    * @param env the calling environment
    */
-  public static Value strchr(Env env, Value haystack, Value needle)
+  public static Value strchr(Env env, String haystack, Value needle)
     throws Throwable
   {
     return strstr(env, haystack, needle);
@@ -1882,16 +2021,15 @@ public class QuercusStringModule extends AbstractQuercusModule {
    * @param needV the string to search for
    */
   public static Value strpos(Env env,
-			     Value haystackV,
+			     String haystack,
 			     Value needleV,
 			     @Optional Value offsetV)
     throws Throwable
   {
-    String haystack = haystackV.toString(env);
     String needle;
 
     if (needleV instanceof StringValue)
-      needle = needleV.toString(env);
+      needle = needleV.toString();
     else
       needle = String.valueOf((char) needleV.toInt());
 
@@ -2174,15 +2312,14 @@ public class QuercusStringModule extends AbstractQuercusModule {
    * @return the trailing match or FALSE
    */
   public static Value strstr(Env env,
-			     Value haystackV,
+			     String haystack,
 			     Value needleV)
     throws Throwable
   {
-    String haystack = haystackV.toString(env);
     String needle;
 
     if (needleV instanceof StringValue) {
-      needle = needleV.toString(env);
+      needle = needleV.toString();
     }
     else {
       needle = String.valueOf((char) needleV.toLong());
@@ -2190,7 +2327,7 @@ public class QuercusStringModule extends AbstractQuercusModule {
 
     int i = haystack.indexOf(needle);
 
-    if (i > 0)
+    if (i >= 0)
       return new StringValue(haystack.substring(i));
     else
       return BooleanValue.FALSE;

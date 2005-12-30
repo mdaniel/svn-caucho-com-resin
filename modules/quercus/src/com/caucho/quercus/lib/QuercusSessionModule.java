@@ -40,6 +40,8 @@ import com.caucho.util.L10N;
 import com.caucho.util.RandomUtil;
 import com.caucho.util.Alarm;
 
+import com.caucho.java.WorkDir;
+
 import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.quercus.module.Optional;
 
@@ -48,6 +50,8 @@ import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.NullValue;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.Callback;
+import com.caucho.quercus.env.SessionArrayValue;
+import com.caucho.quercus.env.SessionCallback;
 
 /**
  * PHP class information
@@ -108,6 +112,23 @@ public class QuercusSessionModule extends AbstractQuercusModule {
   }
 
   /**
+   * Start the session
+   */
+  public boolean session_destroy(Env env)
+    throws Throwable
+  {
+    SessionArrayValue session = env.getSession();
+    
+    if (session == null)
+      return false;
+
+    env.destroySession(session.getId());
+    
+    return true;
+  }
+
+
+  /**
    * Sets the session cookie parameters
    */
   public Value session_set_cookie_params(Env env,
@@ -150,7 +171,7 @@ public class QuercusSessionModule extends AbstractQuercusModule {
 					     directory,
 					     gc);
 
-    env.setSpecialValue("quercus.save.session", cb);
+    env.setSessionCallback(cb);
     
     return true;
   }
@@ -164,6 +185,8 @@ public class QuercusSessionModule extends AbstractQuercusModule {
     if (env.getSession() != null)
       return true;
 
+    SessionCallback cb = env.getSessionCallback();
+    
     Value sessionIdValue = env.getSpecialValue("caucho.session_id");
     String sessionId = null;
 
@@ -172,6 +195,9 @@ public class QuercusSessionModule extends AbstractQuercusModule {
     }
     else {
       String cookieName = env.getIni("session.name").toString();
+
+      if (cb != null)
+	cb.open(env, WorkDir.getLocalWorkDir().getPath(), cookieName);
 
       Cookie []cookies = env.getRequest().getCookies();
 
@@ -212,6 +238,7 @@ public class QuercusSessionModule extends AbstractQuercusModule {
     }
 
     env.setSpecialValue("caucho.session_id", new StringValue(sessionId));
+    
     env.createSession(sessionId);
 
     return true;
@@ -252,30 +279,6 @@ public class QuercusSessionModule extends AbstractQuercusModule {
       return '_';
     else
       return '-';
-  }
-
-  static class SessionCallback extends Value {
-    private Callback _open;
-    private Callback _close;
-    private Callback _read;
-    private Callback _write;
-    private Callback _destroy;
-    private Callback _gc;
-
-    SessionCallback(Callback open,
-		    Callback close,
-		    Callback read,
-		    Callback write,
-		    Callback destroy,
-		    Callback gc)
-    {
-      _open = open;
-      _close = close;
-      _read = read;
-      _write = write;
-      _destroy = destroy;
-      _gc = gc;
-    }
   }
 
   static {

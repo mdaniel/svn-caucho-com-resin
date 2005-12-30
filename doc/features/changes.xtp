@@ -4,6 +4,14 @@
 
 <s2 title='3.0.snap - Dec 22, 2005'>
 <ul>
+<li>Quercus: objects extend ArrayValue
+<li>Quercus: session_set_save_handler (#511, rep by bago)
+<li>Quercus: setlocale, array_merge_recursive (#529, #533 rep by bago)
+<li>Quercus: generating line numbers for compiled PHP code
+<li>Quercus: $_SERVER is writeable (#563, rep by bago)
+<li>Quercus: const values in interpolated associative arrays parsed wrong (#586)
+<li>Quercus: register_shutdown_function (#551, #573, rep by bago)
+<li>Quercus: === for arrays was implemented improperly (#560, rep by bago)
 <li>Quercus: recognize $\{$foo} (#562, rep by Anoop K Achuthan)
 <li>Quercus: method_exists, exec, parse_str (#568, #574, #552)
 <li>Quercus: mysql_fetch_field shouldn't switch catalog when null (#554, rep by bago)

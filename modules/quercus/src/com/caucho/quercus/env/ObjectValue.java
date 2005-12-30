@@ -47,17 +47,17 @@ import com.caucho.quercus.expr.Expr;
 /**
  * Represents a PHP object value.
  */
-public class ObjectValue extends Value {
+public class ObjectValue extends ArrayValueWrapper {
   private static final StringValue TO_STRING = new StringValue("__toString");
   
   private final QuercusClass _cl;
 
-  private final ArrayValue _map = new ArrayValueImpl();
-
   public ObjectValue(QuercusClass cl)
   {
+    super(new ArrayValueImpl());
     _cl = cl;
 
+    
     // _cl.initFields(_map);
   }
 
@@ -299,131 +299,12 @@ public class ObjectValue extends Value {
   }
 
   /**
-   * Returns the indices
-   */
-  public Collection<Value> getIndices()
-  {
-    return _map.getIndices();
-  }
-
-  /**
-   * Returns the field value.
-   */
-  public Value get(Value fieldName)
-  {
-    Value value = _map.get(fieldName);
-    
-    return value;
-  }
-
-  /**
-   * Returns a reference to the field value.
-   */
-  public Value getArgRef(Value fieldName)
-  {
-    return _map.getArgRef(fieldName);
-  }
-
-  /**
-   * Returns a reference to the field value.
-   */
-  public Value getRef(Value fieldName)
-  {
-    return _map.getRef(fieldName);
-  }
-
-  /**
-   * Returns the value as an array.
-   */
-  public Value getArray(Value fieldName)
-  {
-    Value value = get(fieldName);
-
-    if (! value.isset()) {
-      value = new ArrayValueImpl();
-
-      put(fieldName, value);
-    }
-    
-    return value;
-  }
-
-  /**
    * Returns the value for the variable, creating an object if the var
    * is unset.
    */
   public Value getObject(Env env)
   {
     return this;
-  }
-
-  /**
-   * Returns the field value, creating an object if it's unset.
-   */
-  public Value getObject(Env env, Value fieldName)
-  {
-    Value value = get(fieldName);
-
-    if (! value.isset()) {
-      value = env.createObject();
-
-      put(fieldName, value);
-    }
-    
-    return value;
-  }
-
-  /**
-   * Returns the value as an argument which may be a reference.
-   */
-  public Value getArg(Value index)
-  {
-    // quercus/3d9d
-    
-    /*
-    Value value = get(index);
-
-    if (value.isset())
-      return value;
-    else {
-      return new ArgGetValue(this, index);
-    }
-    */
-    return _map.getArg(index);
-  }
-  
-  /**
-   * Adds a new value.
-   */
-  public Value put(Value key, Value value)
-  {
-    return _map.put(key, value);
-  }
-
-  /**
-   * Removes the field value.
-   */
-  public Value remove(Value fieldName)
-  {
-    Value value = _map.remove(fieldName);
-    
-    return value;
-  }
-
-  /**
-   * Returns the size.
-   */
-  public int getSize()
-  {
-    return _map.getSize();
-  }
-
-  /**
-   * Returns an iterator of the entries.
-   */
-  public Set<Map.Entry<Value,Value>> entrySet()
-  {
-    return _map.entrySet();
   }
 
   /**

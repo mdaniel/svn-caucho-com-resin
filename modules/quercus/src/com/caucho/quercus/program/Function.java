@@ -270,7 +270,7 @@ public class Function extends AbstractFunction {
       else
 	return value.copy();
     } finally {
-      env.setFunctionArgs(oldArgs);
+      env.restoreFunctionArgs(oldArgs);
       env.popEnv(oldMap);
     }
   }
@@ -339,7 +339,7 @@ public class Function extends AbstractFunction {
       else
 	return value.copy();
     } finally {
-      env.setFunctionArgs(oldArgs);
+      env.restoreFunctionArgs(oldArgs);
       env.popEnv(oldMap);
     }
   }
@@ -609,12 +609,14 @@ public class Function extends AbstractFunction {
 
     out.println("Value []quercus_oldArgs = env.setFunctionArgs(args);");
     out.println("try {");
+    out.pushDepth();
 
     generateBody(out);
     
+    out.popDepth();
     out.println("} finally {");
     out.pushDepth();
-    out.println("env.setFunctionArgs(quercus_oldArgs);");
+    out.println("env.restoreFunctionArgs(quercus_oldArgs);");
     out.popDepth();
     out.println("}");
     

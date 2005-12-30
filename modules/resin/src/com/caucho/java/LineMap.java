@@ -43,6 +43,8 @@ import com.caucho.util.*;
 public class LineMap implements Serializable {
   private String _dstFilename;
   private String _srcFilename;
+
+  private String _srcType = "JSP";
   
   private String _lastSrcFilename;
   
@@ -74,6 +76,16 @@ public class LineMap implements Serializable {
       _dstFilename = dstFilename;
     else
       _dstFilename = dstFilename.substring(tail + 1); 
+  }
+
+  public void setSourceType(String type)
+  {
+    _srcType = type;
+  }
+
+  public String getSourceType()
+  {
+    return _srcType;
   }
 
   public String getDestFilename()

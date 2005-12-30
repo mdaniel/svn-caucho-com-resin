@@ -59,6 +59,12 @@ import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.WriteStream;
 import com.caucho.vfs.ByteToChar;
 
+import com.caucho.java.ScriptStackTrace;
+import com.caucho.java.LineMap;
+import com.caucho.java.WorkDir;
+
+import com.caucho.loader.SimpleLoader;
+
 import com.caucho.util.Log;
 import com.caucho.util.L10N;
 import com.caucho.util.IntMap;
@@ -68,6 +74,7 @@ import com.caucho.sql.DatabaseManager;
 
 import com.caucho.quercus.Quercus;
 import com.caucho.quercus.QuercusException;
+import com.caucho.quercus.QuercusLineRuntimeException;
 import com.caucho.quercus.QuercusRuntimeException;
 import com.caucho.quercus.QuercusExitException;
 
@@ -78,6 +85,8 @@ import com.caucho.quercus.page.PhpPage;
 import com.caucho.quercus.program.AbstractFunction;
 import com.caucho.quercus.program.AbstractClassDef;
 import com.caucho.quercus.program.PhpProgram;
+
+import com.caucho.quercus.lib.QuercusVariableModule;
 
 import com.caucho.quercus.resources.StreamContextResource;
 
@@ -126,15 +135,23 @@ public class Env {
   private static final int _SESSION = 7;
   private static final int HTTP_GET_VARS = 8;
   private static final int HTTP_POST_VARS = 9;
+  private static final int PHP_SELF = 10;
 
   private static final IntMap SPECIAL_VARS = new IntMap();
+
+  private static final StringValue PHP_SELF_STRING
+    = new StringValue("PHP_SELF");
   
   private Quercus _quercus;
   private PhpPage _page;
 
   private Value _this = NullValue.NULL;
 
-  private ArrayList<ResourceValue> _resourceList = new ArrayList<ResourceValue>();
+  private ArrayList<ResourceValue> _resourceList
+    = new ArrayList<ResourceValue>();
+  private ArrayList<Shutdown> _shutdownList
+    = new ArrayList<Shutdown>();
+  
   private HashMap<String,Var> _globalMap = new HashMap<String,Var>();
   private HashMap<String,Var> _staticMap = new HashMap<String,Var>();
   private HashMap<String,Var> _map = _globalMap;
@@ -186,7 +203,11 @@ public class Env {
   
   private WriteStream _out;
 
+  private LocaleInfo _locale;
+
   private Callback []_errorHandlers = new Callback[B_STRICT + 1];
+  
+  private SessionCallback _sessionCallback;
 
   private StreamContextResource _defaultStreamContext;
 
@@ -402,6 +423,22 @@ public class Env {
   }
 
   /**
+   * Sets the session callback.
+   */
+  public void setSessionCallback(SessionCallback cb)
+  {
+    _sessionCallback = cb;
+  }
+
+  /**
+   * Gets the session callback.
+   */
+  public SessionCallback getSessionCallback()
+  {
+    return _sessionCallback;
+  }
+
+  /**
    * Returns the session.
    */
   public SessionArrayValue getSession()
@@ -416,7 +453,10 @@ public class Env {
   {
     _session = session;
 
-    setGlobalValue("_SESSION", session);
+    if (session != null)
+      setGlobalValue("_SESSION", session);
+    else
+      unsetGlobalVar("_SESSION");
   }
 
   /**
@@ -424,7 +464,25 @@ public class Env {
    */
   public SessionArrayValue createSession(String sessionId)
   {
-    SessionArrayValue session = _quercus.loadSession(this, sessionId);
+    SessionCallback cb = getSessionCallback();
+
+    SessionArrayValue session = null;
+
+    if (cb != null) {
+      String value = cb.read(this, sessionId);
+
+      if (value != null && ! value.equals("")) {
+	Value unserialize = QuercusVariableModule.unserialize(this, value);
+
+	if (unserialize instanceof ArrayValue) {
+	  ArrayValue arrayValue = (ArrayValue) unserialize;
+	
+	  session = new SessionArrayValue(this, sessionId, arrayValue);
+	}
+      }
+    }
+    else
+      session = _quercus.loadSession(this, sessionId);
 
     if (session == null)
       session = new SessionArrayValue(this, sessionId);
@@ -432,6 +490,25 @@ public class Env {
     setSession(session);
 
     return session;
+  }
+
+  /**
+   * Create the session.
+   */
+  public void destroySession(String sessionId)
+  {
+    SessionCallback cb = getSessionCallback();
+
+    SessionArrayValue session = null;
+
+    if (cb != null) {
+      cb.destroy(this, sessionId);
+    }
+    else {
+      _quercus.destroySession(this, sessionId);
+    }
+
+    setSession(null);
   }
 
   /**
@@ -739,8 +816,12 @@ public class Env {
   {
     Var var = _map.get(name);
 
-    if (var == null)
-      return getSpecialRef(name);
+    if (var == null) {
+      var = getSpecialRef(name);
+
+      if (var != null)
+	_globalMap.put(name, var);
+    }
 
     return var;
   }
@@ -752,8 +833,11 @@ public class Env {
   {
     Var var = _globalMap.get(name);
 
-    if (var == null)
-      return getSpecialRef(name);
+    if (var == null) {
+      var = getSpecialRef(name);
+      if (var != null)
+	_globalMap.put(name, var);
+    }
 
     return var;
   }
@@ -777,6 +861,11 @@ public class Env {
 	
 	if (_post == null)
 	  _post = post;
+	else {
+	  for (Map.Entry<Value,Value> entry : _post.entrySet()) {
+	    post.put(entry.getKey(), entry.getValue());
+	  }
+	}
       
 	var.set(post);
 
@@ -788,7 +877,7 @@ public class Env {
 	    
 	  String []value = (String []) entry.getValue();
 
-	  addFormValue(post, key, value);
+	  Post.addFormValue(post, key, value);
 	}
       }
       break;
@@ -813,7 +902,7 @@ public class Env {
 	    
 	  String []value = (String []) entry.getValue();
 
-	  addFormValue(array, key, value);
+	  Post.addFormValue(array, key, value);
 	}
 
 	if (name.equals("_REQUEST") && _post != null) {
@@ -867,43 +956,20 @@ public class Env {
 
 	return var;
       }
+      
+    case PHP_SELF:
+      {
+	var = new Var();
+	  
+	var.set(getGlobalVar("_SERVER").get(PHP_SELF_STRING));
+	
+	_globalMap.put(name, var);
+
+	return var;
+      }
     }
 
     return var;
-  }
-
-  private void addFormValue(ArrayValue array,
-			    String key,
-			    String []formValue)
-  {
-    if (key.endsWith("]") && key.indexOf('[') > 0) {
-      int p = key.indexOf('[');
-      
-      String index = key.substring(p + 1, key.length() - 1);
-      
-      key = key.substring(0, p);
-
-      Value keyValue = new StringValue(key);
-      Value value = array.get(keyValue);
-      if (value == null || ! value.isset())
-	value = new ArrayValueImpl();
-
-      if (index.equals("")) {
-	for (int i = 0; i < formValue.length; i++) {
-	  value.put(new StringValue(formValue[i]));
-	}
-      }
-      else if ('0' <= index.charAt(0) && index.charAt(0) <= '9')
-	value.put(new LongValue(StringValue.toLong(index)),
-		  new StringValue(formValue[0]));
-      else
-	value.put(new StringValue(index), new StringValue(formValue[0]));
-
-      array.put(keyValue, value);
-    }
-    else {
-      array.put(new StringValue(key), new StringValue(formValue[0]));
-    }
   }
 
   private static String decodeValue(String s)
@@ -1097,9 +1163,23 @@ public class Env {
   {
     Value []oldArgs = _functionArgs;
 
+    for (int i = 0; args != null && i < args.length; i++) {
+      // php/3715
+      // XXX: count the copies
+      args[i] = args[i].toArgValue().copy();
+    }
+
     _functionArgs = args;
 
     return oldArgs;
+  }
+
+  /**
+   * Pushes a new environment.
+   */
+  public final void restoreFunctionArgs(Value []args)
+  {
+    _functionArgs = args;
   }
 
   /**
@@ -2285,7 +2365,10 @@ public class Env {
     }
 
     if ((mask & (E_ERROR|E_CORE_ERROR|E_COMPILE_ERROR|E_USER_ERROR)) != 0) {
-      throw new QuercusRuntimeException(msg);
+      if (! "".equals(getLocation()))
+	throw new QuercusLineRuntimeException(getLocation() + getCodeName(mask) + msg);
+      else
+	throw new QuercusRuntimeException(msg);
     }
 
     return NullValue.NULL;
@@ -2396,13 +2479,41 @@ public class Env {
    */
   public String getLocation()
   {
-    // XXX: need to work with compiled code, too
     Expr call = peekCall(0);
 
     if (call != null)
       return call.getLocation();
-    else
+    else {
+      Exception e = new Exception();
+      e.fillInStackTrace();
+
+      StackTraceElement []trace = e.getStackTrace();
+
+      ClassLoader loader = SimpleLoader.create(WorkDir.getLocalWorkDir());
+
+      for (int i = 0; i < trace.length; i++) {
+	String className = trace[i].getClassName();
+
+	if (className.startsWith("_quercus")) {
+	  LineMap lineMap = ScriptStackTrace.getScriptLineMap(className,
+							      loader);
+	  
+	  LineMap.Line line = null;
+
+	  if (lineMap != null)
+	    line = lineMap.getLine(trace[i].getLineNumber());
+	  
+	  if (line != null) {
+	    int sourceLine = line.getSourceLine(trace[i].getLineNumber());
+	    
+	    return line.getSourceFilename() + ":" + sourceLine + ": ";
+	  }
+
+	}
+      }
+      
       return "";
+    }
   }
 
   /**
@@ -2497,11 +2608,24 @@ public class Env {
   {
     return "Env[]";
   }
-  
-  // XXX: 
-  public Locale getLocale()
+
+  /**
+   * Returns the locale info.
+   */
+  public LocaleInfo getLocaleInfo()
   {
-    return Locale.getDefault();
+    if (_locale == null)
+      _locale = new LocaleInfo();
+
+    return _locale;
+  }
+
+  /**
+   * Registers a shutdown function.
+   */
+  public void addShutdown(Callback callback, Value []args)
+  {
+    _shutdownList.add(new Shutdown(callback, args));
   }
 
   /**
@@ -2512,8 +2636,27 @@ public class Env {
     while (_outputBuffer != null)
       popOutputBuffer();
 
-    if (_session != null && _session.getSize() > 0)
-      _quercus.saveSession(this, _session.getId(), _session);
+    try {
+      for (int i = 0; i < _shutdownList.size(); i++)
+	_shutdownList.get(i).eval(this);
+    } catch (Throwable e) {
+      log.log(Level.FINE, e.toString(), e);
+    }
+
+    if (_session != null && _session.getSize() > 0) {
+      SessionCallback cb = getSessionCallback();
+
+      if (cb != null) {
+	String value = QuercusVariableModule.serialize(_session.getArray());
+
+	cb.write(this, _session.getId(), value);
+
+	cb.close(this);
+      }
+      else {
+	_quercus.saveSession(this, _session.getId(), _session);
+      }
+    }
     
     for (ResourceValue resource : _resourceList) {
       try {
@@ -2528,12 +2671,13 @@ public class Env {
     SPECIAL_VARS.put("GLOBALS", _GLOBAL);
     SPECIAL_VARS.put("_SERVER", _SERVER);
     SPECIAL_VARS.put("_GET", _GET);
-    SPECIAL_VARS.put("HTTP_GET_VARS", HTTP_GET_VARS);
     SPECIAL_VARS.put("_POST", _POST);
-    SPECIAL_VARS.put("HTTP_POST_VARS", HTTP_POST_VARS);
     SPECIAL_VARS.put("_REQUEST", _REQUEST);
     SPECIAL_VARS.put("_COOKIE", _COOKIE);
     SPECIAL_VARS.put("_SESSION", _SESSION);
+    SPECIAL_VARS.put("HTTP_GET_VARS", HTTP_GET_VARS);
+    SPECIAL_VARS.put("HTTP_POST_VARS", HTTP_POST_VARS);
+    SPECIAL_VARS.put("PHP_SELF", PHP_SELF);
   }
 }
 

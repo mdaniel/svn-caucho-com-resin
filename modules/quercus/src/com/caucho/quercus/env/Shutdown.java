@@ -29,65 +29,26 @@
 
 package com.caucho.quercus.env;
 
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.TreeMap;
-import java.util.Map;
-import java.util.Set;
-import java.util.Iterator;
-import java.util.Enumeration;
-import java.util.LinkedHashMap;
-import java.util.IdentityHashMap;
-
-import javax.servlet.http.HttpServletRequest;
-
-import com.caucho.vfs.WriteStream;
-
 /**
- * Represents the $_SESSION
+ * Represents a PHP shutdown function.
  */
-public class SessionArrayValue extends ArrayValueWrapper {
-  private String _id;
-  private transient Env _env;
-  
-  public SessionArrayValue(Env env, String id)
-  {
-    super(new ArrayValueImpl());
-    
-    _env = env;
-    _id = id;
-  }
-  
-  public SessionArrayValue(Env env, String id, ArrayValue array)
-  {
-    super(array);
-    
-    _env = env;
-    _id = id;
-  }
+public class Shutdown {
+  private final Callback _callback;
+  private final Value []_args;
 
-  /**
-   * Returns the session id.
-   */
-  public String getId()
+  public Shutdown(Callback callback, Value []args)
   {
-    return _id;
+    _callback = callback;
+    _args = args;
   }
   
   /**
-   * Converts to an object.
+   * Evaluate the shutdown function
    */
-  public Object toObject()
+  public void eval(Env env)
+    throws Throwable
   {
-    return null;
-  }
-
-  /**
-   * Copy for serialization
-   */
-  public Value copy(Env env, IdentityHashMap<Value,Value> map)
-  {
-    return new SessionArrayValue(env, _id, (ArrayValue) getArray().copy(env, map));
+    _callback.eval(env, _args);
   }
 }
 

@@ -127,7 +127,7 @@ public class QuercusVariableModule extends AbstractQuercusModule {
    * @param v the variable to print
    * @return the escaped stringPhp
    */
-  public static Value debug_var_dump(Env env, Value v)
+  public static Value resin_var_dump(Env env, Value v)
     throws Throwable
   {
     WriteStream out = Vfs.openWrite("stdout:");

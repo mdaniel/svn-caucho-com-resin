@@ -40,6 +40,7 @@ import com.caucho.vfs.*;
  */
 public class LineMapWriter {
   private WriteStream _os;
+  private String _sourceType = "JSP";
 
   /**
    * Creates the writer.
@@ -50,6 +51,14 @@ public class LineMapWriter {
   }
 
   /**
+   * Sets the source-type, e.g. JSP
+   */
+  public void setSourceType(String type)
+  {
+    _sourceType = type;
+  }
+
+  /**
    * Writes the line map
    */
   public void write(LineMap lineMap)
@@ -57,8 +66,8 @@ public class LineMapWriter {
   {
     _os.println("SMAP");
     _os.println(lineMap.getDestFilename());
-    _os.println("JSP");
-    _os.println("*S JSP");
+    _os.println(_sourceType);
+    _os.println("*S " + _sourceType);
 
     IntMap fileMap = new IntMap();
 
