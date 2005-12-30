@@ -254,10 +254,13 @@ public class QuercusVariableModule extends AbstractQuercusModule {
    * @param nameV the constant name
    * @param value the constant value
    */
-  public static Value define(Env env, String name, Value value)
+  public static Value define(Env env,
+			     String name,
+			     Value value,
+			     @Optional boolean isCaseInsensitive)
     throws Throwable
   {
-    return env.addConstant(name, value);
+    return env.addConstant(name, value, isCaseInsensitive);
   }
 
   /**
@@ -686,7 +689,7 @@ public class QuercusVariableModule extends AbstractQuercusModule {
 	unserializeExpect(is, '{');
 
 	Value obj = env.getClass(className).newInstance(env);
-	for (int i = 0; i < len; i++) {
+	for (int i = 0; i < count; i++) {
 	  Value key = unserialize(env, is);
 	  Value value = unserialize(env, is);
 
@@ -706,7 +709,7 @@ public class QuercusVariableModule extends AbstractQuercusModule {
       }
       
     default:
-      return NullValue.NULL;
+      return BooleanValue.FALSE;
     }
   }
 

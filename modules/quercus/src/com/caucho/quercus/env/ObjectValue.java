@@ -306,6 +306,16 @@ public class ObjectValue extends ArrayValueWrapper {
   {
     return this;
   }
+  
+  /**
+   * Copy for assignment.
+   */
+  public Value copy()
+  {
+    return this;
+  }
+
+  // XXX: need to check the other copy, e.g. for sessions
 
   /**
    * Serializes the value.

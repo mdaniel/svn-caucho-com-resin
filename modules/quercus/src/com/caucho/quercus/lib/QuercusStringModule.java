@@ -57,6 +57,7 @@ import com.caucho.quercus.env.Post;
 
 import com.caucho.quercus.module.Reference;
 import com.caucho.quercus.module.Optional;
+import com.caucho.quercus.module.UsesSymbolTable;
 import com.caucho.quercus.module.AbstractQuercusModule;
 
 import com.caucho.util.L10N;
@@ -812,6 +813,7 @@ public class QuercusStringModule extends AbstractQuercusModule {
    * @param str the query string
    * @param array the optional result array
    */
+  @UsesSymbolTable
   public static Value parse_str(Env env, String str,
 				@Optional ArrayValue array)
     throws IOException
@@ -819,6 +821,10 @@ public class QuercusStringModule extends AbstractQuercusModule {
     ByteToChar byteToChar = env.getByteToChar();
     int len = str.length();
 
+    ArrayValue result = array;
+
+    if (result == null)
+      result = new ArrayValueImpl();
 
     for (int i = 0; i < len; i++) {
       int ch = 0;
@@ -843,7 +849,13 @@ public class QuercusStringModule extends AbstractQuercusModule {
       else
 	value = "";
 
-      Post.addFormValue(array, key, new String[] { value } );
+      Post.addFormValue(result, key, new String[] { value } );
+    }
+
+    if (array == null) {
+      QuercusArrayModule.extract(env, result,
+				 QuercusArrayModule.EXTR_OVERWRITE,
+				 null);
     }
     
     return NullValue.NULL;
@@ -1416,9 +1428,100 @@ public class QuercusStringModule extends AbstractQuercusModule {
   {
     Object []values = new Object[args.length];
 
+    // XXX: will need to actually parse and break this up to handle
+    // %02s
+    format = cleanPrintfFormat(format);
+
     parsePrintfFormat(format, args, values);
     
     return String.format(format, values);
+  }
+
+  private static String cleanPrintfFormat(String format)
+  {
+    StringBuilder sb = new StringBuilder();
+    StringBuilder flags = new StringBuilder();
+
+    int length = format.length();
+
+    for (int i = 0; i < length; i++) {
+      char ch = format.charAt(i);
+
+      if (i + 1 < length && ch == '%') {
+	// The C printf silently ignores invalid flags, so we need to
+	// remove them if present.
+
+	sb.append(ch);
+
+	boolean isLeft = false;
+	boolean isAlt = false;
+	
+	flags.setLength(0);
+
+	int j = i + 1;
+
+	loop:
+	for (; j < length; j++) {
+	  ch = format.charAt(j);
+
+	  switch (ch) {
+	  case '-':
+	    isLeft = true;
+	    break;
+	  case '#':
+	    isAlt = true;
+	    break;
+	  case '+': case ' ': case '0': case ',': case '(':
+	    flags.append(ch);
+	    break;
+	  default:
+	    break loop;
+	  }
+	}
+
+	int head = j;
+	loop:
+	for (; j < length; j++) {
+	  ch = format.charAt(j);
+	  
+	  switch (ch) {
+	  case '%':
+	    sb.append(ch);
+	    break loop;
+	    
+	  case '0': case '1': case '2': case '3': case '4':
+	  case '5': case '6': case '7': case '8': case '9':
+	  case '.':
+	    break;
+
+	  case 'b': case 'B': case 's': case 'S': case 'c':
+	    if (isLeft)
+	      sb.append('-');
+	    if (isAlt)
+	      sb.append('#');
+	    sb.append(format, head, j);
+	    sb.append(ch);
+	    i = j;
+	    break loop;
+
+	  default:
+	    if (isLeft)
+	      sb.append('-');
+	    if (isAlt)
+	      sb.append('#');
+	    sb.append(flags);
+	    sb.append(format, head, j);
+	    sb.append(ch);
+	    i = j;
+	    break loop;
+	  }
+	}
+      }
+      else
+	sb.append(ch);
+    }
+    
+    return sb.toString();
   }
 
   private static void parsePrintfFormat(String format,

@@ -1220,7 +1220,24 @@ public class QuercusFileModule extends AbstractQuercusModule {
   // XXX: readfile
   // XXX: readlink
   // XXX: realpath
-  // XXX: rename
+
+  /**
+   * Renames a file
+   *
+   * @param from the path to change to
+   * @param to the path to change to
+   */
+  public static boolean rename(Env env, Path fromPath, Path toPath)
+  {
+    try {
+      return fromPath.renameTo(toPath);
+    } catch (IOException e) {
+      log.log(Level.FINE, e.toString(), e);
+
+      return false;
+    }
+  }
+
   // XXX: rewind
 
   /**

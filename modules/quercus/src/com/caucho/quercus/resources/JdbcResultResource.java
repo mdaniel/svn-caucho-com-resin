@@ -488,9 +488,14 @@ public class JdbcResultResource extends ResourceValue {
 
       if (_metaData.getColumnCount() <= fieldOffset || fieldOffset < 0)
         return BooleanValue.FALSE;
-      else
-        return new StringValue(_metaData.getTableName(fieldOffset + 1));
+      else {
+	String tableName = _metaData.getTableName(fieldOffset + 1);
 
+	if (tableName == null || tableName.equals(""))
+	  return BooleanValue.FALSE;
+	else
+	  return new StringValue(tableName);
+      }
     } catch (SQLException e) {
       log.log(Level.FINE, e.toString(), e);
       return BooleanValue.FALSE;

@@ -76,9 +76,6 @@ public class PhpParser {
   private final static int PHP_END = 262;
   private final static int EQ = 263;
   private final static int DEREF = 264;
-  private final static int THIS = 265;
-  private final static int TRUE = 266;
-  private final static int FALSE = 267;
   private final static int LEQ = 268;
   private final static int GEQ = 269;
   private final static int NEQ = 270;
@@ -86,9 +83,6 @@ public class PhpParser {
   private final static int NEQUALS = 272;
   private final static int C_AND = 273;
   private final static int C_OR = 274;
-  private final static int XOR_RES = 275;
-  private final static int AND_RES = 276;
-  private final static int OR_RES = 277;
   
   private final static int PLUS_ASSIGN = 278;
   private final static int MINUS_ASSIGN = 279;
@@ -111,8 +105,8 @@ public class PhpParser {
   private final static int ARRAY_RIGHT = 294;
   private final static int SIMPLE_STRING_ESCAPE = 295;
   private final static int COMPLEX_STRING_ESCAPE = 296;
-  private final static int LIST = 297;
   
+  private final static int FIRST_IDENTIFIER_LEXEME = 512;
   private final static int ECHO = 512;
   private final static int NULL = 513;
   private final static int IF = 514;
@@ -157,6 +151,17 @@ public class PhpParser {
   private final static int ENDFOR = 553;
   private final static int ENDFOREACH = 554;
   private final static int ENDSWITCH = 555;
+  
+  private final static int XOR_RES = 556;
+  private final static int AND_RES = 557;
+  private final static int OR_RES = 558;
+  private final static int LIST = 559;
+  
+  private final static int THIS = 560;
+  private final static int TRUE = 561;
+  private final static int FALSE = 562;
+  
+  private final static int LAST_IDENTIFIER_LEXEME = 1024;
 
   private final static IntMap _insensitiveReserved = new IntMap();
   private final static IntMap _reserved = new IntMap();
@@ -2822,30 +2827,12 @@ public class PhpParser {
   {
     int token = parseToken();
 
-    switch (token) {
-    case IDENTIFIER:
+    if (token == IDENTIFIER)
       return _lexeme;
-
-    case DEFAULT:
-    case CLASS:
-    case PROTECTED:
-    case PUBLIC:
-    case FUNCTION:
-    case LIST:
-    case CASE:
-    case TRUE:
-    case FALSE:
-    case RETURN:
-    case ECHO:
-    case AND_RES:
-    case OR_RES:
-    case XOR_RES:
-    case REQUIRE:
+    else if (FIRST_IDENTIFIER_LEXEME <= token)
       return _lexeme;
-      
-    default:
+    else
       throw error(L.l("expected identifier at {0}.", tokenName(token)));
-    }
   }
 
   /**
@@ -3963,6 +3950,8 @@ public class PhpParser {
     case PRIVATE: return "private";
     case PROTECTED: return "protected";
     case PUBLIC: return "public";
+      
+    case GLOBAL: return "global";
       
     case FUNCTION: return "function";
       

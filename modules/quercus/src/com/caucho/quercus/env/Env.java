@@ -29,6 +29,8 @@
 
 package com.caucho.quercus.env;
 
+import java.lang.ref.SoftReference;
+
 import java.io.IOException;
 
 import java.text.Collator;
@@ -147,15 +149,19 @@ public class Env {
 
   private Value _this = NullValue.NULL;
 
-  private ArrayList<ResourceValue> _resourceList
-    = new ArrayList<ResourceValue>();
+  private ArrayList<SoftReference<ResourceValue>> _resourceList
+    = new ArrayList<SoftReference<ResourceValue>>();
   private ArrayList<Shutdown> _shutdownList
     = new ArrayList<Shutdown>();
   
   private HashMap<String,Var> _globalMap = new HashMap<String,Var>();
   private HashMap<String,Var> _staticMap = new HashMap<String,Var>();
   private HashMap<String,Var> _map = _globalMap;
+  
   private VarMap<String,Value> _constMap;
+  
+  private HashMap<String,Value> _lowerConstMap
+    = new HashMap<String,Value>();
 
   private HashMap<String,AbstractFunction> _funMap
     = new HashMap<String,AbstractFunction>();
@@ -251,7 +257,7 @@ public class Env {
    */
   public void addResource(ResourceValue resource)
   {
-    _resourceList.add(resource);
+    _resourceList.add(new SoftReference<ResourceValue>(resource));
   }
 
   /**
@@ -260,7 +266,16 @@ public class Env {
    */
   public void removeResource(ResourceValue resource)
   {
-    _resourceList.remove(resource);
+    for (int i = _resourceList.size() - 1; i >= 0; i--) {
+      SoftReference<ResourceValue> ref = _resourceList.get(i);
+
+      ResourceValue res = ref.get();
+
+      if (resource.equals(res)) {
+	_resourceList.remove(i);
+	break;
+      }
+    }
   }
 
   /**
@@ -1200,6 +1215,11 @@ public class Env {
     if (value != null)
       return value;
     else {
+      value = _lowerConstMap.get(name.toLowerCase());
+
+      if (value != null)
+	return value;
+      
       /* XXX:
       notice(L.l("Converting undefined constant '{0}' to string.",
 		 name));
@@ -1241,7 +1261,9 @@ public class Env {
   /**
    * Sets a constant.
    */
-  public Value addConstant(String name, Value value)
+  public Value addConstant(String name,
+			   Value value,
+			   boolean isCaseInsensitive)
   {
     Value oldValue = _constMap.get(name);
 
@@ -1249,6 +1271,9 @@ public class Env {
       return oldValue;
     
     _constMap.put(name, value);
+
+    if (isCaseInsensitive)
+      _lowerConstMap.put(name.toLowerCase(), value);
 
     return value;
   }
@@ -2658,9 +2683,12 @@ public class Env {
       }
     }
     
-    for (ResourceValue resource : _resourceList) {
+    for (SoftReference<ResourceValue> ref : _resourceList) {
       try {
-	resource.close();
+	ResourceValue resource = ref.get();
+
+	if (resource != null)
+	  resource.close();
       } catch (Throwable e) {
 	log.log(Level.FINER, e.toString(), e);
       }

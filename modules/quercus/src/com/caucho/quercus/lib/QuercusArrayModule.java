@@ -1749,9 +1749,9 @@ public class QuercusArrayModule extends AbstractQuercusModule {
    *   table
    */
   @UsesSymbolTable
-  public Value extract(Env env, ArrayValue array,
-                       @Optional("EXTR_OVERWRITE") long rawType,
-                       @Optional("NULL") Value valuePrefix )
+  public static Value extract(Env env, ArrayValue array,
+			      @Optional("EXTR_OVERWRITE") long rawType,
+			      @Optional("NULL") Value valuePrefix )
   {
     if (array == null)
       return NullValue.NULL;
@@ -1846,14 +1846,14 @@ public class QuercusArrayModule extends AbstractQuercusModule {
    * 
    * @return true if the name is valid, false otherwise
    */
-  private boolean validVariableName(String variableName)
+  private static boolean validVariableName(String variableName)
   {
     if (variableName.length() < 1)
       return false;
 
     char checkChar = variableName.charAt(0);
 
-    if (!Character.isLetter(checkChar) && checkChar != '_')
+    if (! Character.isLetter(checkChar) && checkChar != '_')
       return false;
 
     for (int k = 1; k < variableName.length(); k++) {
