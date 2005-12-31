@@ -77,7 +77,19 @@ public class JdbcResultResource extends ResourceValue {
    */
   public JdbcConnectionResource getConnection()
   {
-    return this._conn;
+    return _conn;
+  }
+
+  /**
+   * Returns column count.
+   */
+  public int getFieldCount()
+  {
+    try {
+      return getMetaData().getColumnCount();
+    } catch (SQLException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   /**
@@ -117,9 +129,7 @@ public class JdbcResultResource extends ResourceValue {
                               Value mixedFieldV)
   {
     try {
-
-      if (_metaData == null)
-        _metaData = _rs.getMetaData();
+      ResultSetMetaData md = getMetaData();
 
       int colNumber;
 
@@ -836,7 +846,7 @@ public class JdbcResultResource extends ResourceValue {
       return result;
 
     } else {
-      return BooleanValue.FALSE;
+      return NullValue.NULL;
     }
   }
 
@@ -864,11 +874,11 @@ public class JdbcResultResource extends ResourceValue {
       for (int i = 0; i < count; i++) {
         Value value = getColumnValue(_rs, _metaData, i + 1);
 
-        if ((type & 0x1) != 0)
-          array.put(_columnNames[i], value);
-
         if ((type & 0x2) != 0)
           array.put(LongValue.create(i), value);
+
+        if ((type & 0x1) != 0)
+          array.put(_columnNames[i], value);
       }
 
       return array;
@@ -1071,6 +1081,15 @@ public class JdbcResultResource extends ResourceValue {
       log.log(Level.FINE, e.toString(), e);
       return BooleanValue.FALSE;
     }
+  }
+
+  private ResultSetMetaData getMetaData()
+    throws SQLException
+  {
+    if (_metaData == null)
+      _metaData = _rs.getMetaData();
+
+    return _metaData;
   }
 }
 

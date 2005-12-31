@@ -189,6 +189,7 @@ public class QuercusMysqliModule extends AbstractQuercusModule {
       return false;
     }
   }
+  
   /**
    * Returns the client encoding.
    * 

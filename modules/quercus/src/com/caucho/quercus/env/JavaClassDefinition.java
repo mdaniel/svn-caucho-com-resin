@@ -39,6 +39,8 @@ import java.util.LinkedHashMap;
 
 import java.io.IOException;
 
+import com.caucho.util.L10N;
+
 import com.caucho.quercus.Quercus;
 import com.caucho.quercus.QuercusRuntimeException;
 
@@ -56,6 +58,8 @@ import com.caucho.quercus.gen.PhpWriter;
  * Represents an introspected Java class.
  */
 public class JavaClassDefinition extends AbstractQuercusClass {
+  private final static L10N L = new L10N(JavaClassDefinition.class);
+  
   private final Quercus _quercus;
   
   private final String _name;
@@ -135,7 +139,8 @@ public class JavaClassDefinition extends AbstractQuercusClass {
     JavaMethod method = _functionMap.get(name);
 
     if (method == null) {
-      env.warning("'" + name + "' is an unknown method.");
+      env.warning(env.getLocation() + L.l("{0}::{1} is an unknown method.",
+					  _name, name));
 
       return NullValue.NULL;
     }

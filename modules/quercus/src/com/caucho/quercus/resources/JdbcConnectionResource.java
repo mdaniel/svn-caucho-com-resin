@@ -54,8 +54,10 @@ public class JdbcConnectionResource extends ResourceValue {
 
   private HashMap<TableKey,JdbcTableMetaData> _tableMetadataMap
     = new HashMap<TableKey,JdbcTableMetaData>();
-  
+
+  private JdbcResultResource _rs;
   private int _affectedRows;
+  
   private String _errorMessage = "";
   private int _errorCode;
   private boolean _fieldCount = false;
@@ -102,9 +104,12 @@ public class JdbcConnectionResource extends ResourceValue {
   /**
    * @return _fieldCount
    */
-  public boolean getFieldCount()
+  public int getFieldCount()
   {
-    return _fieldCount;
+    if (_rs == null)
+      return 0;
+    else
+      return _rs.getFieldCount();
   }
 
   /**
@@ -212,7 +217,7 @@ public class JdbcConnectionResource extends ResourceValue {
   public String getServerInfo()
     throws SQLException
   {
-    return _dmd.getDatabaseProductVersion();
+    return getMetaData().getDatabaseProductVersion();
   }
 
   /**
@@ -266,7 +271,7 @@ public class JdbcConnectionResource extends ResourceValue {
    */
   public boolean nextResult()
   {
-    if (_nextResultValue < _resultValues.size() - 1) {
+    if (_nextResultValue + 1 < _resultValues.size()) {
       _hasBeenUsed = false;
       _nextResultValue++;
       return true;
@@ -351,6 +356,7 @@ public class JdbcConnectionResource extends ResourceValue {
     // But DO NOT close the individual result sets.
     // They may still be in use.
     _resultValues.clear();
+    _rs = null;
 
     Statement stmt = null;
 
@@ -358,14 +364,15 @@ public class JdbcConnectionResource extends ResourceValue {
       stmt = _conn.createStatement();
 
       if (stmt.execute(sql)) {
+	ResultSet rs = stmt.getResultSet();
+
+	_rs = new JdbcResultResource(stmt, rs, this);
         _affectedRows = 0;
-        _resultValues.add(new JdbcResultResource(stmt, stmt.getResultSet(), this));
+        _resultValues.add(_rs);
         _warnings = stmt.getWarnings();
-        _fieldCount = true;
       } else {
         _affectedRows = stmt.getUpdateCount();
         _warnings = stmt.getWarnings();
-        _fieldCount = false;
 	stmt.close();
       }
     } catch (DataTruncation truncationError) {
@@ -456,18 +463,18 @@ public class JdbcConnectionResource extends ResourceValue {
     Statement stmt = null;
 
     try {
-
+      _rs = null;
+      
       for (String s : splitQuery) {
         stmt = _conn.createStatement();
         if (stmt.execute(s)) {
           _affectedRows = 0;
-          _resultValues.add(new JdbcResultResource(stmt, stmt.getResultSet(), this));
+	  _rs = new JdbcResultResource(stmt, stmt.getResultSet(), this);
+          _resultValues.add(_rs);
           _warnings = stmt.getWarnings();
-          _fieldCount = true;
         } else {
           _affectedRows = stmt.getUpdateCount();
           _warnings = stmt.getWarnings();
-          _fieldCount = false;
         }
       }
     } catch (DataTruncation truncationError) {

@@ -29,7 +29,7 @@
 
 package com.caucho.quercus.lib;
 
-import java.sql.SQLException;
+import java.sql.*;
 
 import java.util.logging.Logger;
 import java.util.logging.Level;
@@ -37,8 +37,12 @@ import java.util.logging.Level;
 import com.caucho.util.L10N;
 
 import com.caucho.quercus.resources.JdbcConnectionResource;
+import com.caucho.quercus.resources.JdbcResultResource;
 
 import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.BooleanValue;
+import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.LongValue;
 import com.caucho.quercus.env.Value;
 
 import com.caucho.quercus.module.Optional;
@@ -51,7 +55,22 @@ public class Mysqli {
   private static final L10N L = new L10N(Mysqli.class);
 
   private Env _env;
+  private String _host;
+  
   private JdbcConnectionResource _conn;
+  
+  public Mysqli(Env env,
+		@Optional("localhost") String host,
+		@Optional String user,
+		@Optional String password,
+		@Optional String db,
+		@Optional("3306") int port,
+		@Optional String socket)
+  {
+    _env = env;
+
+    real_connect(env, host, user, password, db, port, socket, 0);
+  }
   
   public Mysqli(Env env)
   {
@@ -59,15 +78,250 @@ public class Mysqli {
   }
 
   /**
+   * returns the number of affected rows.
+   */
+  public int affected_rows()
+  {
+    return validateConnection().getAffectedRows();
+  }
+
+  /**
+   * sets the autocommit mode
+   */
+  public boolean autocommit(boolean isAutoCommit)
+  {
+    return validateConnection().setAutoCommit(isAutoCommit);
+  }
+
+  /**
+   * Changes the user and database
+   *
+   * @param user the new user
+   * @param password the new password
+   * @param db the new database
+   */
+  public boolean change_user(String user, String password, String db)
+  {
+    // XXX: these need to be saved
+    String host = "localhost";
+    int port = 3306;
+    String socket = null;
+    int flags = 0;
+
+    close(_env);
+
+    return real_connect(_env, host, user, password, db, port, socket, flags);
+  }
+  
+  /**
+   * Returns the client encoding.
+   * 
+   * XXX: stubbed out. has to be revised once we
+   * figure out what to do with character encoding
+   */
+  public String character_set_name()
+  {
+    return "latin1";
+  }
+  
+  /**
+   * Alias for character_set_name
+   */
+  public String client_encoding()
+  {
+    return character_set_name();
+  }
+
+  /**
+   * Commits the transaction
+   */
+  public boolean commit()
+  {
+    return validateConnection().commit();
+  }
+
+  /**
+   * Returns the error code for the most recent function call
+   */
+  public int errno()
+  {
+    return validateConnection().getErrorCode();
+  }
+
+  /**
+   * Returns the error string for the most recent function call
+   */
+  public String error()
+  {
+    return validateConnection().getErrorMessage();
+  }
+
+  /**
+   * Escapes the string
+   */
+  public String escape_string(String str)
+  {
+    return real_escape_string(str);
+  }
+
+  /**
+   * Returns the host information.
+   */
+  public String get_host_info()
+  {
+    return _host + " via TCP socket";
+  }
+
+  /**
+   * Returns the protocol information.
+   */
+  public int get_proto_info()
+  {
+    return 10;
+  }
+
+  /**
+   * Returns the server information.
+   */
+  public String get_server_info()
+  {
+    try {
+      return validateConnection().getServerInfo();
+    } catch (SQLException e) {
+      return null;
+    }
+  }
+
+  /**
+   * Returns the server information.
+   */
+  public int get_server_version()
+  {
+    try {
+      String info = validateConnection().getServerInfo();
+      
+      String[] result = info.split("[.]");
+
+      if (result.length < 3)
+	return 0;
+
+      return (Integer.parseInt(result[0]) * 10000 +
+	      Integer.parseInt(result[1]) * 100 +
+	      Integer.parseInt(result[2]));
+    } catch (SQLException e) {
+      return 0;
+    }
+  }
+
+  /**
+   * Returns the number of columns in the last query.
+   */
+  public int field_count()
+  {
+    return validateConnection().getFieldCount();
+  }
+  
+  /**
+   * returns ID generated for an AUTO_INCREMENT column by the previous
+   * INSERT query on success, 0 if the previous query does not generate
+   * an AUTO_INCREMENT value, or FALSE if no MySQL connection was established
+   *
+   */
+  public Value insert_id()
+     throws SQLException
+  {
+    JdbcConnectionResource connV = validateConnection();
+
+    Connection conn = connV.getConnection();
+    Statement stmt = null;
+    
+    try {
+      stmt = conn.createStatement();
+
+      ResultSet rs = stmt.executeQuery("SELECT @@identity");
+
+      if (rs.next())
+	return new LongValue(rs.getLong(1));
+    } finally {
+      stmt.close();
+    }
+
+    return BooleanValue.FALSE;
+  }
+  
+  /**
+   * Stub: kills the given mysql thread.
+   */
+  public boolean kill(int processId)
+  {
+    return false;
+  }
+  
+  /**
+   * Check for more results in a multi-query
+   */
+  public boolean more_results()
+  {
+    return validateConnection().moreResults();
+  }
+
+  /**
+   * executes one or multiple queries which are
+   * concatenated by a semicolon.
+   */
+  public boolean multi_query(String query)
+  {
+    return validateConnection().multiQuery(query);
+  }
+
+  /**
+   * prepares next result set from a previous call to
+   * mysqli_multi_query
+   */
+  public boolean next_result()
+  {
+    return validateConnection().nextResult();
+  }
+
+  /**
+   * Sets a mysqli options
+   */
+  public boolean options(int option, Value value)
+  {
+    return false;
+  }
+
+  /**
+   * Pings the database
+   */
+  public boolean ping()
+    throws SQLException
+  {
+    return _conn != null && ! _conn.getConnection().isClosed();
+  }
+	    
+  /**
    * returns JdbcResultResource representing the results of the query.
    *
    * <i>resultMode</i> is ignored, MYSQLI_USE_RESULT would represent
    * an unbuffered query, but that is not supported.
    */
   public Value query(String sql,
-    		     @Optional("MYSQLI_STORE_RESULT") int resultMode)
+		     @Optional("MYSQLI_STORE_RESULT") int resultMode)
   {
-    return QuercusMysqliModule.mysqli_query(_conn, sql, resultMode);
+    JdbcConnectionResource conn = validateConnection();
+
+    try {
+      Value result = conn.query(sql);
+
+      if (result instanceof JdbcResultResource)
+	return _env.wrapJava(new MysqliResult(this, (JdbcResultResource) result));
+      else
+	return result;
+    } catch (Throwable e) {
+      log.log(Level.FINE, e.toString(), e);
+      return BooleanValue.FALSE;
+    }
   }
 
   /**
@@ -87,6 +341,8 @@ public class Mysqli {
       return false;
     }
 
+    _host = host;
+
     Value value = QuercusMysqliModule.mysqli_connect(env, host,
 						     userName, password,
 						     dbname, port, socket);
@@ -95,6 +351,64 @@ public class Mysqli {
       _conn = (JdbcConnectionResource) value;
 
     return _conn != null;
+  }
+
+  /**
+   * Escapes the string
+   */
+  public String real_escape_string(String str)
+  {
+    StringBuilder buf = new StringBuilder();
+
+    final int strLength = str.length();
+
+    for (int i = 0; i < strLength; i++) {
+      char c = str.charAt(i);
+      
+      switch (c) {
+      case '\u0000':
+        buf.append('\\');
+        buf.append('\u0000');
+        break;
+      case '\n':
+        buf.append('\\');
+        buf.append('n');
+        break;
+      case '\r':
+        buf.append('\\');
+        buf.append('r');
+        break;
+      case '\\':
+        buf.append('\\');
+        buf.append('\\');
+        break;
+      case '\'':
+        buf.append('\\');
+        buf.append('\'');
+        break;
+      case '"':
+        buf.append('\\');
+        buf.append('\"');
+        break;
+      case '\032':
+        buf.append('\\');
+        buf.append('Z');
+        break;
+      default:
+        buf.append(c);
+        break;
+      }
+    }
+
+    return buf.toString();
+  }
+
+  /**
+   * Rolls the transaction back
+   */
+  public boolean rollback()
+  {
+    return validateConnection().rollback();
   }
 
   /**
@@ -118,6 +432,114 @@ public class Mysqli {
   }
 
   /**
+   * Sets the character set
+   */
+  public boolean set_charset(String charset)
+  {
+    return false;
+  }
+
+  /**
+   * Sets a mysqli option
+   */
+  public boolean set_opt(int option, Value value)
+  {
+    return options(option, value);
+  }
+
+  /**
+   * Returns the SQLSTATE error
+   */
+  public String sqlstate()
+  {
+    return "HY" + validateConnection().getErrorCode();
+  }
+
+  /**
+   * returns a string with the status of the connection
+   * or FALSE if error
+   */
+  public Value stat(Env env)
+    throws SQLException
+  {
+    JdbcConnectionResource connV = validateConnection();
+
+    Connection conn = connV.getConnection();
+    Statement stmt = null;
+    
+    StringBuilder str = new StringBuilder();
+
+    try {
+      stmt = conn.createStatement();
+      stmt.execute("SHOW STATUS");
+
+      ResultSet rs = stmt.getResultSet();
+
+      while (rs.next()) {
+        if (str.length() > 0)
+          str.append(' ');
+        str.append(rs.getString(1));
+        str.append(": ");
+        str.append(rs.getString(2));
+      }
+
+      return new StringValue(str.toString());
+    } catch (SQLException e) {
+      log.log(Level.WARNING, e.toString(), e);
+      // XXX: save error
+
+      return BooleanValue.FALSE;
+    } finally {
+      if (stmt != null)
+	stmt.close();
+    }
+  }
+
+  /**
+   * Transfers the result set from the last query on the
+   * database connection represented by conn.
+   *
+   * Used in conjunction with mysqli_multi_query
+   */
+  public Value store_result(Env env)
+  {
+    Value value = validateConnection().storeResult();
+
+    if (value instanceof JdbcResultResource)
+      return env.wrapJava(new MysqliResult(this, (JdbcResultResource) value));
+    else
+      return value;
+  }
+
+  /**
+   * Returns a bogus thread id
+   */
+  public int thread_id()
+  {
+    return 1;
+  }
+
+  /**
+   * Returns true for thread_safe
+   */
+  public boolean thread_safe()
+  {
+    return true;
+  }
+
+  /**
+   * returns the number of warnings from the last query
+   * in the connection object.
+   *
+   * @return number of warnings
+   */
+  public int warning_count()
+    throws SQLException
+  {
+    return validateConnection().getWarningCount();
+  }
+
+  /**
    * Closes the connection.
    */
   public boolean close(Env env)
@@ -131,10 +553,14 @@ public class Mysqli {
       return false;
   }
 
-  private void validateConnection()
+  private JdbcConnectionResource validateConnection()
   {
-    if (_conn == null)
+    JdbcConnectionResource conn = _conn;
+    
+    if (conn == null)
       _env.error(L.l("Connection is not properly initialized"));
+
+    return conn;
   }
 
   public String toString()
