@@ -75,6 +75,15 @@ public class QuercusClassesModule extends AbstractQuercusModule {
   }
 
   /**
+   * Returns the declared classes
+   */
+  public static Value get_declared_classes(Env env)
+    throws Throwable
+  {
+    return env.getDeclaredClasses();
+  }
+
+  /**
    * Returns the object's variables
    */
   public Value get_object_vars(Value obj)

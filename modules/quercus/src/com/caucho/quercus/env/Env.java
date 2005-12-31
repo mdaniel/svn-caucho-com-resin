@@ -42,6 +42,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Iterator;
 import java.util.Locale;
+import java.util.Collections;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -137,7 +138,8 @@ public class Env {
   private static final int _SESSION = 7;
   private static final int HTTP_GET_VARS = 8;
   private static final int HTTP_POST_VARS = 9;
-  private static final int PHP_SELF = 10;
+  private static final int HTTP_COOKIE_VARS = 10;
+  private static final int PHP_SELF = 11;
 
   private static final IntMap SPECIAL_VARS = new IntMap();
 
@@ -169,8 +171,8 @@ public class Env {
   private HashMap<String,AbstractClassDef> _classDefMap
     = new HashMap<String,AbstractClassDef>();
 
-  private HashMap<String,QuercusClass> _classMap
-    = new HashMap<String,QuercusClass>();
+  private HashMap<String,AbstractQuercusClass> _classMap
+    = new HashMap<String,AbstractQuercusClass>();
 
   private HashMap<String,Value> _optionMap
     = new HashMap<String,Value>();
@@ -948,6 +950,7 @@ public class Env {
       }
     
     case _COOKIE:
+    case HTTP_COOKIE_VARS:
       {
 	var = new Var();
 
@@ -1450,7 +1453,7 @@ public class Env {
    */
   public AbstractFunction findMethod(String className, String methodName)
   {
-    QuercusClass cl = findClass(className);
+    AbstractQuercusClass cl = findClass(className);
 
     if (cl == null) {
       error(L.l("'{0}' is an unknown class.", className));
@@ -1824,9 +1827,9 @@ public class Env {
    *
    * @return the found class or null if no class found.
    */
-  public QuercusClass findClass(String name)
+  public AbstractQuercusClass findClass(String name)
   {
-    QuercusClass cl = _classMap.get(name);
+    AbstractQuercusClass cl = _classMap.get(name);
 
     if (cl != null)
       return cl;
@@ -1840,6 +1843,48 @@ public class Env {
     }
     else
       return null;
+  }
+
+  /**
+   * Returns the declared classes.
+
+   * @return an array of the declared classes()
+   */
+  public Value getDeclaredClasses()
+  {
+    ArrayList<String> names = new ArrayList<String>();
+    
+    for (String name : _classMap.keySet()) {
+      if (! names.contains(name))
+	names.add(name);
+    }
+
+    for (String name : _classDefMap.keySet()) {
+      if (! names.contains(name))
+	names.add(name);
+    }
+
+    if (_page != null) {
+      for (String name : _page.getClassMap().keySet()) {
+	if (! names.contains(name))
+	  names.add(name);
+      }
+    }
+    
+    for (String name : _quercus.getClassMap().keySet()) {
+      if (! names.contains(name))
+	names.add(name);
+    }
+
+    Collections.sort(names);
+    
+    ArrayValue array = new ArrayValueImpl();
+
+    for (String name : names) {
+      array.put(new StringValue(name));
+    }
+	
+    return array;
   }
 
   /**
@@ -1866,15 +1911,14 @@ public class Env {
    *
    * @return the found class or null if no class found.
    */
-  public QuercusClass getClass(String name)
+  public AbstractQuercusClass getClass(String name)
   {
-    QuercusClass cl = findClass(name);
+    AbstractQuercusClass cl = findClass(name);
 
     if (cl != null)
       return cl;
     else
-      throw new QuercusRuntimeException(L.l("'{0}' is an unknown class.",
-					name));
+      throw errorException(L.l("'{0}' is an unknown class.", name));
   }
 
   /**
@@ -1884,7 +1928,7 @@ public class Env {
    *
    * @return the found class or null if no class found.
    */
-  private QuercusClass findClassImpl(String name)
+  private AbstractQuercusClass findClassImpl(String name)
   {
     /*
     QuercusClass cl = null;
@@ -1921,15 +1965,19 @@ public class Env {
     if (classDef != null) {
       String parentName	= classDef.getParentName();
       
-      QuercusClass parent = null;
+      AbstractQuercusClass parent = null;
 
       if (parentName != null)
 	parent = getClass(parentName);
 
-      return new QuercusClass(classDef, parent);
+
+      if (parent == null || parent instanceof QuercusClass)
+	return new QuercusClass(classDef, (QuercusClass) parent);
+      else
+	throw new IllegalStateException(parent.toString());
     }
 
-    QuercusClass staticClass = _quercus.findClass(name);
+    AbstractQuercusClass staticClass = _quercus.findClass(name);
     if (staticClass != null)
       return staticClass;
 
@@ -1957,7 +2005,7 @@ public class Env {
    */
   public AbstractFunction findFunction(String className, String methodName)
   {
-    QuercusClass cl = findClass(className);
+    AbstractQuercusClass cl = findClass(className);
 
     if (cl == null)
       throw new QuercusRuntimeException(L.l("'{0}' is an unknown class",
@@ -1990,7 +2038,7 @@ public class Env {
 	throw new IllegalStateException(L.l("unknown callback name {0}", name));
 
       if (obj instanceof StringValue) {
-	QuercusClass cl = findClass(obj.toString());
+	AbstractQuercusClass cl = findClass(obj.toString());
 
 	if (cl == null)
 	  throw new IllegalStateException(L.l("can't find class {0}",
@@ -2705,6 +2753,7 @@ public class Env {
     SPECIAL_VARS.put("_SESSION", _SESSION);
     SPECIAL_VARS.put("HTTP_GET_VARS", HTTP_GET_VARS);
     SPECIAL_VARS.put("HTTP_POST_VARS", HTTP_POST_VARS);
+    SPECIAL_VARS.put("HTTP_COOKIE_VARS", HTTP_COOKIE_VARS);
     SPECIAL_VARS.put("PHP_SELF", PHP_SELF);
   }
 }

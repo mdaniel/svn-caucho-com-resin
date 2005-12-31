@@ -184,7 +184,7 @@ public class QuercusVariableModule extends AbstractQuercusModule {
 	if (isSyntaxOnly)
 	  return true;
 	
-	QuercusClass cl = env.findClass(obj.toString());
+	AbstractQuercusClass cl = env.findClass(obj.toString());
 	if (cl == null)
 	  return false;
 
@@ -688,7 +688,7 @@ public class QuercusVariableModule extends AbstractQuercusModule {
 	unserializeExpect(is, ':');
 	unserializeExpect(is, '{');
 
-	Value obj = env.getClass(className).newInstance(env);
+	Value obj = env.getClass(className).evalNew(env, new Value[0]);
 	for (int i = 0; i < count; i++) {
 	  Value key = unserialize(env, is);
 	  Value value = unserialize(env, is);
@@ -821,7 +821,26 @@ public class QuercusVariableModule extends AbstractQuercusModule {
     try {
       valueSet.put(v, "printing");
 
-      if (v instanceof ArrayValue) {
+      if (v instanceof ObjectValue) {
+	ObjectValue object = (ObjectValue) v;
+
+	out.println("object(" + object.getName() + ") (" + object.getSize() + ") {");
+
+	for (Map.Entry<Value,Value> mapEntry : object.entrySet()) {
+	  ArrayValue.Entry entry = (ArrayValue.Entry) mapEntry;
+	  
+	  printDepth(out, 2 * depth + 2);
+	  out.print("[");
+	  out.print("\"" + entry.getKey().toString(env) + "\"");
+	  out.println("]=>");
+	  printDepth(out, 2 * depth + 2);
+	  var_dump_impl(env, out, entry.getRawValue(), depth + 1, valueSet);
+	  out.println();
+	}
+	printDepth(out, 2 * depth);
+	out.print("}");
+      }
+      else if (v instanceof ArrayValue) {
 	ArrayValue array = (ArrayValue) v;
 
 	out.println("array(" + array.getSize() + ") {");
@@ -837,25 +856,6 @@ public class QuercusVariableModule extends AbstractQuercusModule {
 	    out.print("\"" + key + "\"");
 	  else
 	    out.print(key);
-	  out.println("]=>");
-	  printDepth(out, 2 * depth + 2);
-	  var_dump_impl(env, out, entry.getRawValue(), depth + 1, valueSet);
-	  out.println();
-	}
-	printDepth(out, 2 * depth);
-	out.print("}");
-      }
-      else if (v instanceof ObjectValue) {
-	ObjectValue object = (ObjectValue) v;
-
-	out.println("object(" + object.getName() + ") (" + object.getSize() + ") {");
-
-	for (Map.Entry<Value,Value> mapEntry : object.entrySet()) {
-	  ArrayValue.Entry entry = (ArrayValue.Entry) mapEntry;
-	  
-	  printDepth(out, 2 * depth + 2);
-	  out.print("[");
-	  out.print("\"" + entry.getKey().toString(env) + "\"");
 	  out.println("]=>");
 	  printDepth(out, 2 * depth + 2);
 	  var_dump_impl(env, out, entry.getRawValue(), depth + 1, valueSet);

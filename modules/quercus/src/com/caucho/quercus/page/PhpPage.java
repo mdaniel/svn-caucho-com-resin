@@ -99,6 +99,14 @@ abstract public class PhpPage {
   }
 
   /**
+   * Returns the class map.
+   */
+  public HashMap<String,AbstractClassDef> getClassMap()
+  {
+    return _classMap;
+  }
+
+  /**
    * Execute the program as top-level, i.e. not included.
    *
    * @param env the calling environment

@@ -218,6 +218,14 @@ public class PhpProgram extends GenClass {
   }
 
   /**
+   * Finds a function.
+   */
+  public HashMap<String,AbstractClassDef> getClassMap()
+  {
+    return new HashMap<String,AbstractClassDef>(_classMap);
+  }
+
+  /**
    * Creates a return for the final expr.
    */
   public PhpProgram createExprReturn()

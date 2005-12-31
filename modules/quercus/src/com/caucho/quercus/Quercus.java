@@ -99,11 +99,11 @@ public class Quercus {
 
   private QuercusClass _stdClass;
   
-  private HashMap<String,QuercusClass> _staticClasses
-    = new HashMap<String,QuercusClass>();
+  private HashMap<String,AbstractQuercusClass> _staticClasses
+    = new HashMap<String,AbstractQuercusClass>();
   
-  private HashMap<String,QuercusClass> _lowerStaticClasses
-    = new HashMap<String,QuercusClass>();
+  private HashMap<String,AbstractQuercusClass> _lowerStaticClasses
+    = new HashMap<String,AbstractQuercusClass>();
   
   private HashMap<String,JavaClassDefinition> _javaClassWrappers
     = new HashMap<String,JavaClassDefinition>();
@@ -382,14 +382,22 @@ public class Quercus {
   /**
    * Returns the class with the given name.
    */
-  public QuercusClass findClass(String name)
+  public AbstractQuercusClass findClass(String name)
   {
-    QuercusClass def = _staticClasses.get(name);
+    AbstractQuercusClass def = _staticClasses.get(name);
 
     if (def == null)
       def = _lowerStaticClasses.get(name.toLowerCase());
 
     return def;
+  }
+
+  /**
+   * Returns the class maps.
+   */
+  public HashMap<String,AbstractQuercusClass> getClassMap()
+  {
+    return _staticClasses;
   }
 
   /**
@@ -703,6 +711,9 @@ public class Quercus {
 
     _javaClassWrappers.put(name, def);
     _lowerJavaClassWrappers.put(name.toLowerCase(), def);
+
+    _staticClasses.put(name, def);
+    _lowerStaticClasses.put(name.toLowerCase(), def);
     
     def.introspect(this);
   }

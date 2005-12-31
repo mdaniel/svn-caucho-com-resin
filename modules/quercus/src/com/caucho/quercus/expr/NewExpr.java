@@ -79,8 +79,7 @@ public class NewExpr extends Expr {
     AbstractQuercusClass cl = env.findAbstractClass(_name);
 
     if (cl == null) {
-      // XXX: change exception
-      throw new Exception(L.l("no matching class {0}", _name));
+      throw env.errorException(L.l("no matching class {0}", _name));
     }
 
     // _fullArgs = _cl.bindArguments(_args);

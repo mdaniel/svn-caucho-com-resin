@@ -50,6 +50,13 @@ import com.caucho.quercus.gen.PhpWriter;
  * Represents a PHP class.
  */
 abstract public class AbstractQuercusClass {
+  private static final L10N L = new L10N(AbstractQuercusClass.class);
+  
+  /**
+   * Returns the name.
+   */
+  abstract public String getName();
+  
   /**
    * Creates a new instance.
    */
@@ -61,5 +68,41 @@ abstract public class AbstractQuercusClass {
    */
   abstract public Value evalNew(Env env, Value []args)
     throws Throwable;
+
+  /**
+   * Finds a function.
+   */
+  public AbstractFunction findFunction(String name)
+  {
+    return null;
+  }
+
+  /**
+   * Finds a function.
+   */
+  public AbstractFunction findFunctionLowerCase(String name)
+  {
+    return null;
+  }
+
+  /**
+   * Finds the matching function.
+   */
+  public final AbstractFunction getFunction(String name)
+  {
+    AbstractFunction fun = findFunction(name);
+
+    if (fun != null)
+      return fun;
+
+    fun = findFunctionLowerCase(name.toLowerCase());
+    
+    if (fun != null)
+      return fun;
+    else {
+      throw new QuercusRuntimeException(L.l("{0}::{1} is an unknown method",
+					getName(), name));
+    }
+  }
 }
 

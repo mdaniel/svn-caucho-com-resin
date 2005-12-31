@@ -121,6 +121,14 @@ public class InterpretedPage extends PhpPage {
   {
     return _program.findClass(name);
   }
+
+  /**
+   * Returns the class map.
+   */
+  public HashMap<String,AbstractClassDef> getClassMap()
+  {
+    return _program.getClassMap();
+  }
   
   public String toString()
   {

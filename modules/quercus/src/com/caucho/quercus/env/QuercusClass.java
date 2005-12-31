@@ -207,26 +207,6 @@ public class QuercusClass extends AbstractQuercusClass {
     return null;
   }
 
-  /**
-   * Finds the matching function.
-   */
-  public final AbstractFunction getFunction(String name)
-  {
-    AbstractFunction fun = findFunction(name);
-
-    if (fun != null)
-      return fun;
-
-    fun = findFunctionLowerCase(name.toLowerCase());
-    
-    if (fun != null)
-      return fun;
-    else {
-      throw new QuercusRuntimeException(L.l("{0}::{1} is an unknown method",
-					getName(), name));
-    }
-  }
-
   public String toString()
   {
     return "QuercusClass[" + getName() + "]";

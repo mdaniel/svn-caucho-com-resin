@@ -352,14 +352,18 @@ public class QuercusMysqlModule extends AbstractQuercusModule {
       if (! fieldCatalog.toString().equals(""))
 	mysql_select_db(env, fieldCatalog.toString(), conn);
 
-      Value metaResult = mysql_query(env, sql, conn);
+      Value metaResultV = mysql_query(env, sql, conn);
 
-      if (!(metaResult instanceof JdbcResultResource))
+      if (!(metaResultV instanceof JdbcResultResource))
 	return BooleanValue.FALSE;
 
-      Value fieldResult = ((JdbcResultResource) metaResult).fetchField(env, fieldLength.toInt(), fieldTable.toString(), fieldType.toString());
+      JdbcResultResource metaResult = (JdbcResultResource) metaResultV;
+
+      Value fieldResult = metaResult.fetchField(env, fieldLength.toInt(), fieldTable.toString(), fieldType.toString());
       
       result.setFieldOffset(fieldOffset + 1);
+
+      metaResult.close();
     
       return fieldResult;
     } finally {
