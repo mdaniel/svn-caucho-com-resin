@@ -611,14 +611,6 @@ public class ArrayValueImpl extends ArrayValue {
   }
 
   /**
-   * Convenience for lib.
-   */
-  public void put(String key, String value)
-  {
-    put(new StringValue(key), new StringValue(value));
-  }
-
-  /**
    * Pops the top value.
    */
   public Value pop()

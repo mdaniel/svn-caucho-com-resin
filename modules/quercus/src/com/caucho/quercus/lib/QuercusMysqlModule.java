@@ -29,20 +29,24 @@
 
 package com.caucho.quercus.lib;
 
-import com.caucho.quercus.env.*;
-import com.caucho.quercus.module.AbstractQuercusModule;
-import com.caucho.quercus.module.Optional;
-import com.caucho.quercus.resources.JdbcConnectionResource;
-import com.caucho.quercus.resources.JdbcResultResource;
-import com.caucho.util.L10N;
-import com.caucho.util.Log;
-
-import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import javax.sql.DataSource;
+
+import com.caucho.util.L10N;
+import com.caucho.util.Log;
+
+import com.caucho.quercus.env.*;
+import com.caucho.quercus.module.AbstractQuercusModule;
+import com.caucho.quercus.module.Optional;
+import com.caucho.quercus.resources.JdbcConnectionResource;
+import com.caucho.quercus.resources.JdbcResultResource;
+import com.caucho.quercus.resources.JdbcTableMetaData;
+import com.caucho.quercus.resources.JdbcColumnMetaData;
 
 /**
  * PHP mysql routines.
@@ -338,40 +342,45 @@ public class QuercusMysqlModule extends AbstractQuercusModule {
         || (fieldCatalog == BooleanValue.FALSE)) {
       return BooleanValue.FALSE;
     }
+    
+    result.setFieldOffset(fieldOffset + 1);
 
-    // Store current catalog
     JdbcConnectionResource conn = getConnection(env, null);
-    if (!(conn instanceof JdbcConnectionResource))
+
+    JdbcTableMetaData tableMd = conn.getTableMetaData(fieldCatalog.toString(),
+						      null,
+						      fieldTable.toString());
+
+    if (tableMd == null)
       return BooleanValue.FALSE;
 
-    String currentCatalog = conn.getCatalog().toString();
-
-    try {
-      String sql = "SHOW FULL COLUMNS FROM " + fieldTable + " LIKE \'" + fieldName + "\'";
-
-      if (! fieldCatalog.toString().equals(""))
-	mysql_select_db(env, fieldCatalog.toString(), conn);
-
-      Value metaResultV = mysql_query(env, sql, conn);
-
-      if (!(metaResultV instanceof JdbcResultResource))
-	return BooleanValue.FALSE;
-
-      JdbcResultResource metaResult = (JdbcResultResource) metaResultV;
-
-      Value fieldResult = metaResult.fetchField(env, fieldLength.toInt(), fieldTable.toString(), fieldType.toString());
+    JdbcColumnMetaData columnMd = tableMd.getColumn(fieldName.toString());
       
-      result.setFieldOffset(fieldOffset + 1);
+    if (columnMd == null)
+      return BooleanValue.FALSE;
 
-      metaResult.close();
+    ArrayValue fieldResult = env.createObject();
+
+    fieldResult.put("name", columnMd.getName());
+    fieldResult.put("table", tableMd.getName());
+    fieldResult.put("def", "");
+    fieldResult.put("max_length", fieldLength.toInt());
+
+    fieldResult.put("not_null", columnMd.isNotNull() ? 1 : 0);
     
-      return fieldResult;
-    } finally {
-      // Reset current catalog
-      if (! currentCatalog.equals("") &&
-	  ! fieldCatalog.toString().equals(currentCatalog))
-	conn.setCatalog(currentCatalog);
-    }
+    fieldResult.put("primary_key", columnMd.isPrimaryKey() ? 1 : 0);
+    fieldResult.put("multiple_key", columnMd.isIndex() && ! columnMd.isPrimaryKey() ? 1 : 0);
+    fieldResult.put("unique_key", columnMd.isUnique() ? 1 : 0);
+    
+    fieldResult.put("numeric", columnMd.isNumeric() ? 1 : 0);
+    fieldResult.put("blob", columnMd.isBlob() ? 1 : 0);
+
+    fieldResult.put("type", fieldType.toString());
+
+    fieldResult.put("unsigned", columnMd.isUnsigned() ? 1 : 0);
+    fieldResult.put("zerofill", columnMd.isZeroFill() ? 1 : 0);
+    
+    return fieldResult;
   }
 
   /**

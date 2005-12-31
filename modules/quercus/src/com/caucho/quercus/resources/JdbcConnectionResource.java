@@ -29,25 +29,32 @@
 
 package com.caucho.quercus.resources;
 
-import com.caucho.quercus.env.*;
-
-import java.sql.*;
 import java.util.ArrayList;
+import java.util.HashMap;
+
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import java.sql.*;
+
+import com.caucho.quercus.env.*;
 
 /**
  * Represents a JDBC Connection value.
  */
 public class JdbcConnectionResource extends ResourceValue {
-
   private static final Logger log
     = Logger.getLogger(JdbcConnectionResource.class.getName());
   
   private Connection _conn;
   // cached statement
   private Statement _stmt;
+  
   private DatabaseMetaData _dmd;
+
+  private HashMap<TableKey,JdbcTableMetaData> _tableMetadataMap
+    = new HashMap<TableKey,JdbcTableMetaData>();
+  
   private int _affectedRows;
   private String _errorMessage = "";
   private int _errorCode;
@@ -205,10 +212,38 @@ public class JdbcConnectionResource extends ResourceValue {
   public String getServerInfo()
     throws SQLException
   {
+    return _dmd.getDatabaseProductVersion();
+  }
+
+  /**
+   * Returns the table metadata.
+   */
+  public JdbcTableMetaData getTableMetaData(String catalog,
+					    String schema,
+					    String table)
+    throws SQLException
+  {
+    TableKey key = new TableKey(catalog, schema, table);
+
+    JdbcTableMetaData tableMd = _tableMetadataMap.get(key);
+
+    if (tableMd != null)
+      return tableMd;
+
+    tableMd = new JdbcTableMetaData(catalog, schema, table, getMetaData());
+
+    _tableMetadataMap.put(key, tableMd);
+
+    return tableMd;
+  }
+
+  private DatabaseMetaData getMetaData()
+    throws SQLException
+  {
     if (_dmd == null)
       _dmd = _conn.getMetaData();
 
-    return _dmd.getDatabaseProductVersion();
+    return _dmd;
   }
 
   /**
@@ -629,6 +664,62 @@ public class JdbcConnectionResource extends ResourceValue {
         return 0;
     } else
       return 0;
+  }
+
+  static class TableKey {
+    private final String _catalog;
+    private final String _schema;
+    private final String _table;
+
+    TableKey(String catalog, String schema, String table)
+    {
+      _catalog = catalog;
+      _schema = schema;
+      _table = table;
+    }
+
+    public int hashCode()
+    {
+      int hash = 37;
+
+      if (_catalog != null)
+	hash = 65537 * hash + _catalog.hashCode();
+
+      if (_schema != null)
+	hash = 65537 * hash + _schema.hashCode();
+
+      if (_table != null)
+	hash = 65537 * hash + _table.hashCode();
+
+      return hash;
+    }
+
+    public boolean equals(Object o)
+    {
+      if (this == o)
+	return true;
+      else if (! (o instanceof TableKey))
+	return false;
+
+      TableKey key = (TableKey) o;
+
+      if ((_catalog == null) != (key._catalog == null))
+	return false;
+      else if (_catalog != null && ! _catalog.equals(key._catalog))
+	return false;
+
+      if ((_schema == null) != (key._schema == null))
+	return false;
+      else if (_schema != null && ! _schema.equals(key._schema))
+	return false;
+
+      if ((_table == null) != (key._table == null))
+	return false;
+      else if (_table != null && ! _table.equals(key._table))
+	return false;
+
+      return true;
+    }
   }
 }
 

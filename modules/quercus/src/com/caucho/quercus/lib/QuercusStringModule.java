@@ -558,6 +558,10 @@ public class QuercusStringModule extends AbstractQuercusModule {
   public static String crypt(String string, @Optional String salt)
     throws Exception
   {
+    if (salt == null || salt.equals("")) {
+      salt = ("" + Crypt.resultToChar(RandomUtil.nextInt(0x40)) +
+	      Crypt.resultToChar(RandomUtil.nextInt(0x40)));
+    }
     return Crypt.crypt(string, salt);
   }
 

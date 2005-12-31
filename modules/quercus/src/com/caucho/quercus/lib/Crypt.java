@@ -252,7 +252,7 @@ public class Crypt {
     return sb.toString();
   }
 
-  private static char resultToChar(long result)
+  static char resultToChar(long result)
   {
     int v = (int) (result & 0x3f);
 

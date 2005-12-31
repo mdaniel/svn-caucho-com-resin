@@ -1786,7 +1786,7 @@ public class Env {
   /**
    * Creates a stdClass object.
    */
-  public Value createObject()
+  public ArrayValue createObject()
   {
     try {
       return _quercus.getStdClass().newInstance(this);

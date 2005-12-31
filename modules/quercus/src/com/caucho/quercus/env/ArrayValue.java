@@ -304,6 +304,22 @@ abstract public class ArrayValue extends Value {
   }
 
   /**
+   * Convenience for lib.
+   */
+  public void put(String key, String value)
+  {
+    put(new StringValue(key), new StringValue(value));
+  }
+
+  /**
+   * Convenience for lib.
+   */
+  public void put(String key, long value)
+  {
+    put(new StringValue(key), new LongValue(value));
+  }
+
+  /**
    * Add
    */
   public ArrayValue append(Value key, Value value)
@@ -319,14 +335,6 @@ abstract public class ArrayValue extends Value {
   public ArrayValue append(Value value)
   {
     return put(value.toArgValue());
-  }
-
-  /**
-   * Convenience for lib.
-   */
-  public void put(String key, String value)
-  {
-    put(new StringValue(key), new StringValue(value));
   }
 
   /**
