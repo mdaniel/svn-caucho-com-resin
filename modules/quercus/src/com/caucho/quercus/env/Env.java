@@ -886,13 +886,13 @@ public class Env {
       
 	var.set(post);
 
-	Iterator iter = _request.getParameterMap().entrySet().iterator();
-	while (iter.hasNext()) {
-	  Map.Entry entry = (Map.Entry) iter.next();
-      
-	  String key = (String) entry.getKey();
-	    
-	  String []value = (String []) entry.getValue();
+	ArrayList<String> keys = new ArrayList<String>();
+	keys.addAll(_request.getParameterMap().keySet());
+
+	Collections.sort(keys);
+	
+	for (String key : keys) {
+	  String []value = _request.getParameterValues(key);
 
 	  Post.addFormValue(post, key, value);
 	}
@@ -911,13 +911,13 @@ public class Env {
 	
 	_globalMap.put(name, var);
 
-	Iterator iter = _request.getParameterMap().entrySet().iterator();
-	while (iter.hasNext()) {
-	  Map.Entry entry = (Map.Entry) iter.next();
-      
-	  String key = (String) entry.getKey();
-	    
-	  String []value = (String []) entry.getValue();
+	ArrayList<String> keys = new ArrayList<String>();
+	keys.addAll(_request.getParameterMap().keySet());
+
+	Collections.sort(keys);
+	
+	for (String key : keys) {
+	  String []value = _request.getParameterValues(key);
 
 	  Post.addFormValue(array, key, value);
 	}
