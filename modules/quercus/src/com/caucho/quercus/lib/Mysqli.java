@@ -315,7 +315,7 @@ public class Mysqli {
       Value result = conn.query(sql);
 
       if (result instanceof JdbcResultResource)
-	return _env.wrapJava(new MysqliResult(this, (JdbcResultResource) result));
+	return _env.wrapJava(new MysqliResult((JdbcResultResource) result));
       else
 	return result;
     } catch (Throwable e) {
@@ -527,7 +527,7 @@ public class Mysqli {
     Value value = validateConnection().storeResult();
 
     if (value instanceof JdbcResultResource)
-      return env.wrapJava(new MysqliResult(this, (JdbcResultResource) value));
+      return env.wrapJava(new MysqliResult((JdbcResultResource) value));
     else
       return value;
   }
