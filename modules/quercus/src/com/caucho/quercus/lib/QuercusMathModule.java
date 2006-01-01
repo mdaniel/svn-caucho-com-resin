@@ -53,48 +53,30 @@ import com.caucho.util.RandomUtil;
 public class QuercusMathModule extends AbstractQuercusModule {
   private static final L10N L = new L10N(QuercusMathModule.class);
 
-  public static final DoubleValue PI = new DoubleValue(Math.PI);
-  public static final DoubleValue E = new DoubleValue(Math.E);
+  public static final double PI = Math.PI;
+  public static final double E = Math.E;
 
   public static final long RAND_MAX = 1L << 32;
 
-  private static final HashMap<String,Value> _constMap =
-          new HashMap<String,Value>();
-
-  static {
-    _constMap.put("M_PI", PI);
-    _constMap.put("M_E", E);
-
-    _constMap.put("M_LOG2E", new DoubleValue(log2(Math.E)));
-    _constMap.put("M_LOG10E", new DoubleValue(Math.log10(Math.E)));
-    _constMap.put("M_LN2", new DoubleValue(Math.log(2)));
-    _constMap.put("M_LN10", new DoubleValue(Math.log(10)));
-    _constMap.put("M_PI_2", new DoubleValue(Math.PI / 2));
-    _constMap.put("M_PI_4", new DoubleValue(Math.PI / 4));
-    _constMap.put("M_1_PI", new DoubleValue(1 / Math.PI));
-    _constMap.put("M_2_PI", new DoubleValue(2 / Math.PI));
-    _constMap.put("M_SQRTPI", new DoubleValue(Math.sqrt(Math.PI)));
-    _constMap.put("M_2_SQRTPI", new DoubleValue(2 / Math.sqrt(Math.PI)));
-    _constMap.put("M_SQRT2", new DoubleValue(Math.sqrt(2)));
-    _constMap.put("M_SQRT3", new DoubleValue(Math.sqrt(3)));
-    _constMap.put("M_SQRT1_2", new DoubleValue(1 / Math.sqrt(2)));
-    _constMap.put("M_LNPI", new DoubleValue(Math.log(Math.PI)));
-    _constMap.put("M_EULER", new DoubleValue(0.57721566490153286061));
-  }
+  public static final double M_LOG2E = log2(Math.E);
+  public static final double M_LOG10E = Math.log10(Math.E);
+  public static final double M_LN2 = Math.log(2);
+  public static final double M_LN10 = Math.log(10);
+  public static final double M_PI_2 = Math.PI / 2;
+  public static final double M_PI_4 = Math.PI / 4;
+  public static final double M_1_PI = 1 / Math.PI;
+  public static final double M_2_PI = 2 / Math.PI;
+  public static final double M_SQRTPI = Math.sqrt(Math.PI);
+  public static final double M_2_SQRTPI = 2 / Math.sqrt(Math.PI);
+  public static final double M_SQRT2 = Math.sqrt(2);
+  public static final double M_SQRT3 = Math.sqrt(3);
+  public static final double M_SQRT1_2 = 1 / Math.sqrt(2);
+  public static final double M_LNPI = Math.log(Math.PI);
+  public static final double M_EULER = 0.57721566490153286061;
 
   private static double log2(double v)
   {
     return Math.log(v) / Math.log(2);
-  }
-
-  /**
-   * Adds the constant to the PHP engine's constant map.
-   *
-   * @return the new constant chain
-   */
-  public Map<String,Value> getConstMap()
-  {
-    return _constMap;
   }
 
   public static Value abs(Env env, Value value)
@@ -176,9 +158,9 @@ public class QuercusMathModule extends AbstractQuercusModule {
     return sb2.toString();
   }
 
-  public static Value deg2rad(Value value)
+  public static double deg2rad(double value)
   {
-    return new DoubleValue(value.toDouble() * Math.PI / 180);
+    return value * Math.PI / 180;
   }
 
   public static Value exp(Value value)
@@ -201,7 +183,7 @@ public class QuercusMathModule extends AbstractQuercusModule {
     return Math.IEEEremainder(xV, yV);
   }
 
-  public static Value hexdec(String s)
+  public static long hexdec(String s)
   {
     long v = 0;
     int len = s.length();
@@ -217,7 +199,7 @@ public class QuercusMathModule extends AbstractQuercusModule {
         v = 16 * v + ch - 'A' + 10;
     }
 
-    return new LongValue(v);
+    return v;
   }
 
   public static double hypot(double a, double b)
@@ -225,17 +207,17 @@ public class QuercusMathModule extends AbstractQuercusModule {
     return Math.hypot(a, b);
   }
 
-  public static Value is_finite(Value value)
+  public static boolean is_finite(Value value)
   {
     if (value instanceof LongValue)
-      return BooleanValue.TRUE;
+      return true;
     else if (value instanceof DoubleValue) {
       double v = value.toDouble();
 
-      return Double.isInfinite(v) ? BooleanValue.FALSE : BooleanValue.TRUE;
+      return Double.isInfinite(v);
     }
     else
-      return BooleanValue.FALSE;
+      return false;
   }
 
   public static Value is_infinite(Value value)
@@ -381,29 +363,35 @@ public class QuercusMathModule extends AbstractQuercusModule {
     return NullValue.NULL;
   }
 
-  public static Value pi()
+  public static double pi()
   {
     return PI;
   }
 
-  public static Value pow(Value base, Value exp)
+  public static double pow(double base, double exp)
   {
-    return new DoubleValue(Math.pow(base.toDouble(), exp.toDouble()));
+    return Math.pow(base, exp);
   }
 
-  public static Value rad2deg(Value value)
+  public static double rad2deg(double value)
   {
-    return new DoubleValue(180 * value.toDouble() / Math.PI);
+    return 180 * value / Math.PI;
   }
 
-  public static Value round(Value value)
+  public static double round(double value, @Optional int precision)
   {
-    return new DoubleValue(Math.round(value.toDouble()));
+    if (precision > 0) {
+      double exp = Math.pow(10, precision);
+      
+      return Math.round(value * exp) / exp;
+    }
+    else
+      return Math.round(value);
   }
 
-  public static Value sin(Value value)
+  public static double sin(double value)
   {
-    return new DoubleValue(Math.sin(value.toDouble()));
+    return Math.sin(value);
   }
 
   public static Value sinh(Value value)
@@ -411,9 +399,9 @@ public class QuercusMathModule extends AbstractQuercusModule {
     return new DoubleValue(Math.sinh(value.toDouble()));
   }
 
-  public static Value sqrt(Value value)
+  public static double sqrt(double value)
   {
-    return new DoubleValue(Math.sqrt(value.toDouble()));
+    return Math.sqrt(value);
   }
 
   public static Value srand(@Optional long seed)
@@ -421,9 +409,9 @@ public class QuercusMathModule extends AbstractQuercusModule {
     return NullValue.NULL;
   }
 
-  public static Value tan(Value value)
+  public static double tan(double value)
   {
-    return new DoubleValue(Math.tan(value.toDouble()));
+    return Math.tan(value);
   }
 
   public static double tanh(double value)
