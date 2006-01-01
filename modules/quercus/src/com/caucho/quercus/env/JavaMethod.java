@@ -77,6 +77,7 @@ public class JavaMethod extends JavaInvoker {
     super(quercus, method.getName(),
 	  method.getParameterTypes(),
 	  method.getParameterAnnotations(),
+	  method.getAnnotations(),
 	  method.getReturnType());
     
     _method = method;

@@ -362,7 +362,7 @@ public class QuercusMysqliModule extends AbstractQuercusModule {
    *
    * @return false if no result set, true otherwise
    */
-  public static boolean mysqli_field_count(JdbcConnectionResource conn)
+  public static int mysqli_field_count(JdbcConnectionResource conn)
   {
     return conn.getFieldCount();
   }

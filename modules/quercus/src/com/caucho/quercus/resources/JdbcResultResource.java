@@ -71,6 +71,12 @@ public class JdbcResultResource extends ResourceValue {
     _conn = conn;
   }
 
+  public JdbcResultResource(ResultSetMetaData md, JdbcConnectionResource conn)
+  {
+    _metaData = md;
+    _conn = conn;
+  }
+
   /**
    * getter and setter for _conn needed by fetch_field and other functions that do a query on the connection which
    * created this result set
@@ -688,6 +694,7 @@ public class JdbcResultResource extends ResourceValue {
       else
         rs.absolute(currentRow);
     }
+    
     return result;
   }
 

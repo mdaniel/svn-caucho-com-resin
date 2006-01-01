@@ -79,6 +79,7 @@ public class JavaConstructor extends JavaInvoker {
 	  cons.getDeclaringClass().getName(),
 	  cons.getParameterTypes(),
 	  cons.getParameterAnnotations(),
+	  cons.getAnnotations(),
 	  cons.getDeclaringClass());
 
     _constructor = cons;

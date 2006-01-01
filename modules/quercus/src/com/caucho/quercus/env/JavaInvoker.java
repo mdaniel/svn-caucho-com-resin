@@ -54,6 +54,8 @@ import com.caucho.quercus.program.AbstractFunction;
 import com.caucho.quercus.module.Marshall;
 import com.caucho.quercus.module.Reference;
 import com.caucho.quercus.module.Optional;
+import com.caucho.quercus.module.VariableArguments;
+import com.caucho.quercus.module.UsesSymbolTable;
 
 import com.caucho.quercus.gen.PhpWriter;
 
@@ -75,7 +77,11 @@ abstract public class JavaInvoker extends AbstractFunction {
   private final boolean _hasRestArgs;
   private final Marshall _unmarshallReturn;
 
-  private final boolean _isRestReference = false;
+  private final boolean _isRestReference;
+  
+  private final boolean _isCallUsesVariableArgs;
+  private final boolean _isCallUsesSymbolTable;
+  
 
   /**
    * Creates the statically introspected function.
@@ -86,13 +92,45 @@ abstract public class JavaInvoker extends AbstractFunction {
 		     String name,
 		     Class []param,
 		     Annotation [][]paramAnn,
+		     Annotation []methodAnn,
 		     Class retType)
   {
     _name = name;
+    
+    boolean callUsesVariableArgs = false;
+    boolean callUsesSymbolTable = false;
+
+    for (Annotation ann : methodAnn) {
+      if (VariableArguments.class.isAssignableFrom(ann.annotationType())) {
+	callUsesVariableArgs = true;
+      }
+      
+      if (UsesSymbolTable.class.isAssignableFrom(ann.annotationType())) {
+	callUsesSymbolTable = true;
+      }
+    }
+
+    _isCallUsesVariableArgs = callUsesVariableArgs;
+    _isCallUsesSymbolTable = callUsesSymbolTable;
+
     _paramTypes = param;
 
     _hasEnv = param.length > 0 && param[0].equals(Env.class);
-    _hasRestArgs = param.length > 0 && param[param.length - 1].equals(Value[].class);
+
+    boolean hasRestArgs = false;
+    boolean isRestReference = false;
+    
+    if (param.length > 0 && param[param.length - 1].equals(Value[].class)) {
+      hasRestArgs = true;
+
+      for (Annotation ann : paramAnn[param.length - 1]) {
+	if (Reference.class.isAssignableFrom(ann.annotationType()))
+	  isRestReference = true;
+      }
+    }
+
+    _hasRestArgs = hasRestArgs;
+    _isRestReference = isRestReference;
 
     int argLength = paramAnn.length;
 
@@ -106,7 +144,6 @@ abstract public class JavaInvoker extends AbstractFunction {
     _marshallArgs = new Marshall[argLength - envOffset];
 
     for (int i = 0; i < argLength - envOffset; i++) {
-      boolean isOptional = false;
       boolean isReference = false;
 
       for (Annotation ann : paramAnn[i + envOffset]) {
@@ -128,10 +165,10 @@ abstract public class JavaInvoker extends AbstractFunction {
 
       Class argType = param[i + envOffset];
 
-      _marshallArgs[i] = Marshall.create(quercus, argType);
-
       if (isReference)
 	_marshallArgs[i] = Marshall.MARSHALL_REFERENCE;
+      else
+	_marshallArgs[i] = Marshall.create(quercus, argType);
     }
 
     _unmarshallReturn = Marshall.create(quercus, retType);
@@ -261,12 +298,14 @@ abstract public class JavaInvoker extends AbstractFunction {
       values[k++] = env;
 
     for (int i = 0; i < _marshallArgs.length; i++) {
-      if (exprs.length <= i) {
-	values[k] = _marshallArgs[i].marshall(env, _defaultExprs[i], _paramTypes[k]);
-      }
-      else if (exprs[i] != null) {
-	values[k] = _marshallArgs[i].marshall(env, exprs[i], _paramTypes[k]);
-      }
+      Expr expr;
+      
+      if (i < exprs.length && exprs[i] != null)
+	expr = exprs[i];
+      else
+	expr = _defaultExprs[i];
+      
+      values[k] = _marshallArgs[i].marshall(env, expr, _paramTypes[k]);
 
       k++;
     }

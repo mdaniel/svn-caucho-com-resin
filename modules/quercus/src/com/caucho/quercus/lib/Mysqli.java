@@ -494,6 +494,27 @@ public class Mysqli {
 	stmt.close();
     }
   }
+  
+  /**
+   * returns a statement for use with
+   * mysqli_stmt_prepare
+   */
+  public MysqliStatement stmt_init(Env env)
+  {
+    return new MysqliStatement(validateConnection());
+  }
+  
+  /**
+   * returns a prepared statement
+   */
+  public MysqliStatement prepare(Env env, String query)
+  {
+    MysqliStatement stmt = new MysqliStatement(validateConnection());
+    
+    stmt.prepare(query);
+    
+    return stmt;
+  }
 
   /**
    * Transfers the result set from the last query on the
