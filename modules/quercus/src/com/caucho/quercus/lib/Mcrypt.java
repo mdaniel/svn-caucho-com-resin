@@ -43,6 +43,8 @@ import com.caucho.quercus.QuercusRuntimeException;
 import com.caucho.quercus.module.AbstractQuercusModule;
 
 import com.caucho.quercus.env.Value;
+import com.caucho.quercus.env.ArrayValue;
+import com.caucho.quercus.env.ArrayValueImpl;
 import com.caucho.quercus.env.Env;
 
 /**
@@ -151,6 +153,35 @@ public class Mcrypt {
   }
 
   /**
+   * Returns the supported key sizes
+   */
+  public Value get_supported_key_sizes()
+  {
+    ArrayValue value = new ArrayValueImpl();
+
+    if (QuercusMcryptModule.MCRYPT_RIJNDAEL_128.equals(_algorithm)) {
+      value.put(128 / 8);
+    }
+    else if (QuercusMcryptModule.MCRYPT_RIJNDAEL_192.equals(_algorithm)) {
+      value.put(128 / 8);
+      value.put(192 / 8);
+    }
+    else if (QuercusMcryptModule.MCRYPT_RIJNDAEL_256.equals(_algorithm)) {
+      value.put(128 / 8);
+      value.put(192 / 8);
+      value.put(256 / 8);
+    }
+    else if (QuercusMcryptModule.MCRYPT_3DES.equals(_algorithm)) {
+      value.put(24);
+    }
+    else if (QuercusMcryptModule.MCRYPT_DES.equals(_algorithm)) {
+      value.put(8);
+    }
+
+    return value;
+  }
+
+  /**
    * Returns the key size in bytes.
    */
   public int get_key_size()
@@ -170,6 +201,14 @@ public class Mcrypt {
   }
 
   /**
+   * Returns the initialization vector size.
+   */
+  public String get_modes_name()
+  {
+    return _mode;
+  }
+
+  /**
    * Initialize the crypt.
    */
   public int init(String keyString, String iv)
@@ -180,9 +219,40 @@ public class Mcrypt {
       keyBytes[i] = (byte) keyString.charAt(i);
     
     _key = new SecretKeySpec(keyBytes, getAlgorithm(_algorithm));
-    _iv = new IvParameterSpec(iv.getBytes());
+
+    if (_mode.equals("CBC") || _mode.equals("CFB") || _mode.equals("OFB"))
+      _iv = new IvParameterSpec(iv.getBytes());
+    else
+      _iv = null;
 
     return 0;
+  }
+
+  /**
+   * Returns true for block algorithms
+   */
+  public boolean is_block_algorithm()
+  {
+    if (_algorithm.equals(QuercusMcryptModule.MCRYPT_BLOWFISH))
+      return false;
+    else
+      return true;
+  }
+
+  /**
+   * Returns true for block algorithms
+   */
+  public boolean is_block_algorithm_mode()
+  {
+    return _mode.equals("CBC") || _mode.equals("CFB") || _mode.equals("OFB");
+  }
+
+  /**
+   * Returns true for block algorithms
+   */
+  public boolean is_block_mode()
+  {
+    return _mode.equals("CBC") || _mode.equals("ECB");
   }
 
   private byte []pad(byte []data)

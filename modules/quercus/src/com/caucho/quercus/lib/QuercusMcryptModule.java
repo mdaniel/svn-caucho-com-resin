@@ -32,6 +32,7 @@ package com.caucho.quercus.lib;
 import java.util.logging.*;
 
 import com.caucho.util.L10N;
+import com.caucho.util.RandomUtil;
 
 import com.caucho.vfs.Path;
 
@@ -41,6 +42,8 @@ import com.caucho.quercus.module.Optional;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.BooleanValue;
 import com.caucho.quercus.env.LongValue;
+import com.caucho.quercus.env.ArrayValue;
+import com.caucho.quercus.env.ArrayValueImpl;
 import com.caucho.quercus.env.Env;
 
 /**
@@ -55,6 +58,9 @@ public class QuercusMcryptModule extends AbstractQuercusModule {
   public static final int MCRYPT_DEV_RANDOM = 0;
   public static final int MCRYPT_DEV_URANDOM = 1;
   public static final int MCRYPT_RAND = 2;
+  
+  public static final int MCRYPT_ENCRYPT = 0;
+  public static final int MCRYPT_DECRYPT = 1;
   
   public static final String MCRYPT_MODE_ECB = "ecb";
   public static final String MCRYPT_MODE_CBC = "cbc";
@@ -73,6 +79,54 @@ public class QuercusMcryptModule extends AbstractQuercusModule {
   public static final String MCRYPT_RIJNDAEL_256 = "rijndael-256";
 
   /**
+   * Encrypt with cbc
+   */
+  public static String mcrypt_cbc(Env env,
+				  String cipher,
+				  String key,
+				  String data,
+				  int mode,
+				  @Optional String iv)
+  {
+    try {
+      Mcrypt mcrypt = new Mcrypt(env, cipher, "cbc");
+
+      mcrypt.init(key, iv);
+
+      if (mode == MCRYPT_ENCRYPT)
+	return new String(mcrypt.encrypt(data.getBytes()));
+      else
+	return new String(mcrypt.decrypt(data.getBytes()));
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  /**
+   * Encrypt with cfb
+   */
+  public static String mcrypt_cfb(Env env,
+				  String cipher,
+				  String key,
+				  String data,
+				  int mode,
+				  @Optional String iv)
+  {
+    try {
+      Mcrypt mcrypt = new Mcrypt(env, cipher, "cfb");
+
+      mcrypt.init(key, iv);
+
+      if (mode == MCRYPT_ENCRYPT)
+	return new String(mcrypt.encrypt(data.getBytes()));
+      else
+	return new String(mcrypt.decrypt(data.getBytes()));
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  /**
    * Creates the IV vector.
    */
   public static String mcrypt_create_iv(int size,
@@ -84,6 +138,51 @@ public class QuercusMcryptModule extends AbstractQuercusModule {
       sb.append((char) RandomUtil.nextInt(256));
 
     return sb.toString();
+  }
+
+  /**
+   * Decrypt
+   */
+  public static String mcrypt_decrypt(Env env,
+				      String cipher,
+				      String key,
+				      String data,
+				      String mode,
+				      @Optional String iv)
+  {
+    try {
+      Mcrypt mcrypt = new Mcrypt(env, cipher, mode);
+
+      mcrypt.init(key, iv);
+
+      return new String(mcrypt.decrypt(data.getBytes()));
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  /**
+   * Encrypt with cfb
+   */
+  public static String mcrypt_ecb(Env env,
+				  String cipher,
+				  String key,
+				  String data,
+				  int mode,
+				  @Optional String iv)
+  {
+    try {
+      Mcrypt mcrypt = new Mcrypt(env, cipher, "ecb");
+
+      mcrypt.init(key, iv);
+
+      if (mode == MCRYPT_ENCRYPT)
+	return new String(mcrypt.encrypt(data.getBytes()));
+      else
+	return new String(mcrypt.decrypt(data.getBytes()));
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
   }
 
   /**
@@ -131,6 +230,72 @@ public class QuercusMcryptModule extends AbstractQuercusModule {
   }
 
   /**
+   * Returns the mode name
+   */
+  public static String mcrypt_enc_get_modes_name(Mcrypt mcrypt)
+  {
+    if (mcrypt != null)
+      return mcrypt.get_modes_name();
+    else
+      return null;
+  }
+
+  /**
+   * Returns the supported key sizes
+   */
+  public static Value mcrypt_enc_get_supported_key_sizes(Mcrypt mcrypt)
+  {
+    if (mcrypt != null)
+      return mcrypt.get_supported_key_sizes();
+    else
+      return BooleanValue.FALSE;
+  }
+
+  /**
+   * Returns true for block encoding modes
+   */
+  public static boolean mcrypt_enc_is_block_algorithm(Mcrypt mcrypt)
+  {
+    if (mcrypt != null)
+      return mcrypt.is_block_algorithm();
+    else
+      return false;
+  }
+
+  /**
+   * Returns true for block encoding modes
+   */
+  public static boolean mcrypt_enc_is_block_algorithm_mode(Mcrypt mcrypt)
+  {
+    if (mcrypt != null)
+      return mcrypt.is_block_algorithm_mode();
+    else
+      return false;
+  }
+
+  /**
+   * Returns true for block output modes
+   */
+  public static boolean mcrypt_enc_is_block_mode(Mcrypt mcrypt)
+  {
+    if (mcrypt != null)
+      return mcrypt.is_block_mode();
+    else
+      return false;
+  }
+
+  /**
+   * Returns true for block output modes
+   */
+  public static boolean mcrypt_enc_self_test(Mcrypt mcrypt)
+  {
+    if (mcrypt != null)
+      return true;
+    else
+      return false;
+  }
+
+  /**
    * Encrypt
    */
   public static String mcrypt_encrypt(Env env,
@@ -146,27 +311,6 @@ public class QuercusMcryptModule extends AbstractQuercusModule {
       mcrypt.init(key, iv);
 
       return new String(mcrypt.encrypt(data.getBytes()));
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
-  }
-
-  /**
-   * Decrypt
-   */
-  public static String mcrypt_decrypt(Env env,
-				      String cipher,
-				      String key,
-				      String data,
-				      String mode,
-				      @Optional String iv)
-  {
-    try {
-      Mcrypt mcrypt = new Mcrypt(env, cipher, mode);
-
-      mcrypt.init(key, iv);
-
-      return new String(mcrypt.decrypt(data.getBytes()));
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
@@ -219,6 +363,48 @@ public class QuercusMcryptModule extends AbstractQuercusModule {
     }
   }
 
+  private static final String []ALGORITHMS = {
+    MCRYPT_ARCFOUR, MCRYPT_BLOWFISH,  MCRYPT_DES, MCRYPT_3DES,
+    MCRYPT_RC4, MCRYPT_RIJNDAEL_128, MCRYPT_RIJNDAEL_192,
+    MCRYPT_RIJNDAEL_256
+  };
+
+  /**
+   * Lists the available algorithms
+   */
+  public static Value mcrypt_list_algorithms(Env env)
+  {
+    ArrayValue array = new ArrayValueImpl();
+
+    for (int i = 0; i < ALGORITHMS.length; i++) {
+      try {
+	Mcrypt mcrypt = new Mcrypt(env, ALGORITHMS[i], "cbc");
+
+	array.put(mcrypt.get_algorithms_name());
+      } catch (Throwable e) {
+      }
+    }
+
+    return array;
+  }
+
+  /**
+   * Lists the available modes.
+   */
+  public static Value mcrypt_list_modes(Env env)
+  {
+    ArrayValue array = new ArrayValueImpl();
+
+    array.put(MCRYPT_MODE_ECB);
+    array.put(MCRYPT_MODE_CBC);
+    array.put(MCRYPT_MODE_CFB);
+    array.put(MCRYPT_MODE_OFB);
+    array.put(MCRYPT_MODE_NOFB);
+
+    return array;
+  }
+    
+
   /**
    * Closes the module
    */
@@ -270,6 +456,96 @@ public class QuercusMcryptModule extends AbstractQuercusModule {
   }
 
   /**
+   * Returns the key size for an algorithm.
+   */
+  public static Value mcrypt_module_get_supported_key_sizes(Env env,
+							    String cipher,
+							    @Optional String libDir)
+  {
+    try {
+      Mcrypt mcrypt = new Mcrypt(env, cipher, "cbc");
+
+      return mcrypt.get_supported_key_sizes();
+    } catch (Exception e) {
+      env.error(e);
+
+      return BooleanValue.FALSE;
+    }
+  }
+
+  /**
+   * Returns true for block algorithms
+   */
+  public static boolean mcrypt_module_is_block_algorithm(Env env,
+						       String cipher,
+						       @Optional String libDir)
+  {
+    try {
+      Mcrypt mcrypt = new Mcrypt(env, cipher, "cbc");
+
+      return mcrypt.is_block_algorithm();
+    } catch (Exception e) {
+      env.error(e);
+
+      return false;
+    }
+  }
+
+  /**
+   * Returns true for block modes
+   */
+  public static boolean mcrypt_module_is_block_algorithm_mode(Env env,
+						       String mode,
+						       @Optional String libDir)
+  {
+    try {
+      Mcrypt mcrypt = new Mcrypt(env, "des", mode);
+
+      return mcrypt.is_block_algorithm_mode();
+    } catch (Exception e) {
+      env.error(e);
+
+      return false;
+    }
+  }
+
+  /**
+   * Returns true for block modes
+   */
+  public static boolean mcrypt_module_is_block_mode(Env env,
+						       String mode,
+						       @Optional String libDir)
+  {
+    try {
+      Mcrypt mcrypt = new Mcrypt(env, "des", mode);
+
+      return mcrypt.is_block_mode();
+    } catch (Exception e) {
+      env.error(e);
+
+      return false;
+    }
+  }
+
+  /**
+   * Returns true for block modes
+   */
+  public static boolean mcrypt_module_self_test(Env env,
+						String algorithm,
+						Path libDir)
+  {
+    try {
+      Mcrypt mcrypt = new Mcrypt(env, algorithm, "cbc");
+
+      return true;
+    } catch (Exception e) {
+      env.error(e);
+
+      return false;
+    }
+  }
+
+  /**
    * Open a new mcrypt object.
    */
   public static Value mcrypt_module_open(Env env,
@@ -284,6 +560,30 @@ public class QuercusMcryptModule extends AbstractQuercusModule {
       env.error(e);
 
       return BooleanValue.FALSE;
+    }
+  }
+
+  /**
+   * Encrypt with ofb
+   */
+  public static String mcrypt_ofb(Env env,
+				  String cipher,
+				  String key,
+				  String data,
+				  int mode,
+				  @Optional String iv)
+  {
+    try {
+      Mcrypt mcrypt = new Mcrypt(env, cipher, "ofb");
+
+      mcrypt.init(key, iv);
+
+      if (mode == MCRYPT_ENCRYPT)
+	return new String(mcrypt.encrypt(data.getBytes()));
+      else
+	return new String(mcrypt.decrypt(data.getBytes()));
+    } catch (Exception e) {
+      throw new RuntimeException(e);
     }
   }
 

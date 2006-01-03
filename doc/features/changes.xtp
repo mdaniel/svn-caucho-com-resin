@@ -4,6 +4,7 @@
 
 <s2 title='3.0.snap - Dec 22, 2005'>
 <ul>
+<li>Quercus: added mcrypt (#606)
 <li>Quercus: round has optional argument (#612, rep by bago)
 <li>Quercus: table/column metadata encapsulated for mysql
 <li>Quercus: get_declared_classes (#605)

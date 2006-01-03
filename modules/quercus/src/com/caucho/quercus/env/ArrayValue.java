@@ -320,6 +320,22 @@ abstract public class ArrayValue extends Value {
   }
 
   /**
+   * Convenience for lib.
+   */
+  public void put(String value)
+  {
+    put(new StringValue(value));
+  }
+
+  /**
+   * Convenience for lib.
+   */
+  public void put(long value)
+  {
+    put(new LongValue(value));
+  }
+
+  /**
    * Add
    */
   public ArrayValue append(Value key, Value value)
