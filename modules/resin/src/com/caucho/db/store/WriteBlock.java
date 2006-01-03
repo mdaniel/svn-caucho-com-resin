@@ -56,21 +56,13 @@ abstract public class WriteBlock extends Block {
     super(block.getStore(), block.getBlockId());
 
     _block = block;
+
+    allocate();
   }
 
   /* XXX: need this?
   public void setDirty(int min, int max)
   {
-  }
-  */
-
-  /**
-   * Frees a block from a query.
-   */
-  public void free()
-  {
-    // Does not free the actual block, since the transaction is responsible
-    // The block will be freed with the destroy
   }
 
   /**

@@ -339,6 +339,7 @@ public class Transaction extends StoreTransaction {
       if (writeBlock != null) {
 	block.free();
 	writeBlock.allocate();
+
 	return writeBlock;
       }
       

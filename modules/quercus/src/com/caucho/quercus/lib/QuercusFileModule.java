@@ -74,24 +74,11 @@ public class QuercusFileModule extends AbstractQuercusModule {
   public static final String DIRECTORY_SEPARATOR = "/";
   public static final String PATH_SEPARATOR = ":";
 
-  private static final HashMap<String,Value> _constMap =
-          new HashMap<String,Value>();
-
-  static {
-    _constMap.put("SEEK_SET", LongValue.create(SEEK_SET));
-    _constMap.put("SEEK_CUR", LongValue.create(SEEK_CUR));
-    _constMap.put("SEEK_END", LongValue.create(SEEK_END));
-  }
-
-  /**
-   * Adds the constant to the PHP engine's constant map.
-   *
-   * @return the new constant chain
-   */
-  public Map<String,Value> getConstMap()
-  {
-    return _constMap;
-  }
+  public static final int UPLOAD_ERROR_OK = 0;
+  public static final int UPLOAD_ERR_INI_SIZE = 1;
+  public static final int UPLOAD_ERR_FORM_SIZE = 2;
+  public static final int UPLOAD_ERR_PARTIAL = 3;
+  public static final int UPLOAD_ERR_NO_FILE = 4;
 
   /**
    * Returns the base name of a string.
@@ -1130,7 +1117,15 @@ public class QuercusFileModule extends AbstractQuercusModule {
     return path.canRead();
   }
 
-  // XXX: is_uploaded_file
+  /**
+   * Returns true for an uploaded file.
+   *
+   * @param tail the temp name of the uploaded file
+   */
+  public static boolean is_uploaded_file(Env env, String tail)
+  {
+    return env.getUploadDirectory().lookup(tail).canRead();
+  }
 
   /**
    * Returns true if the path is writable
@@ -1171,8 +1166,30 @@ public class QuercusFileModule extends AbstractQuercusModule {
       return false;
     }
   }
-  
-  // XXX: move_uploaded_file
+
+  /**
+   * Moves the uploaded file.
+   *
+   * @param tail the temp name of the uploaded file
+   * @param dst the destination path
+   */
+  public static boolean move_uploaded_file(Env env, String tail, Path dst)
+  {
+    Path src = env.getUploadDirectory().lookup(tail);
+
+    try {
+      if (src.canRead()) {
+	src.renameTo(dst);
+	return true;
+      }
+      else
+	return false;
+    } catch (IOException e) {
+      env.warning(e);
+
+      return false;
+    }
+  }
 
   /**
    * Opens a directory

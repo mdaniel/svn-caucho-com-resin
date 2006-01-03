@@ -231,7 +231,7 @@ public class MysqliStatement {
    * <p/>
    * returns true on success, false on error null if no more rows
    */
-  public Value fetch()
+  public boolean fetch()
   {
     try {
       if (_rs.next()) {
@@ -241,12 +241,13 @@ public class MysqliStatement {
         for (int i = 0; i < size; i++) {
           _results[i].set(JdbcResultResource.getColumnValue(_rs, md, i + 1));
         }
-        return BooleanValue.TRUE;
+
+        return true;
       } else
-        return NullValue.NULL;
+        return false;
     } catch (SQLException e) {
       log.log(Level.FINE, e.toString(), e);
-      return BooleanValue.FALSE;
+      return false;
     }
   }
 
@@ -377,19 +378,19 @@ public class MysqliStatement {
   }
 
   /**
-   * Saves the result as buffered.
-   */
-  public boolean store_result()
-  {
-    return true;
-  }
-
-  /**
    * Returns the SQLSTATE error
    */
   public String sqlstate()
   {
     return "HY" + errno();
+  }
+
+  /**
+   * Saves the result as buffered.
+   */
+  public boolean store_result()
+  {
+    return true;
   }
 
   public boolean close()

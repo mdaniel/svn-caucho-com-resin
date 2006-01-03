@@ -563,7 +563,7 @@ public class Store {
       setAllocation(blockIndex, ALLOC_USED);
 
       if (log.isLoggable(Level.FINE))
-	log.fine(this + " allocating block " + blockIndex);
+	log.fine(this + " allocating block " + blockIndex + " " + codeToName(code));
 
       if (_blockCount <= blockIndex)
 	_blockCount = blockIndex + 1;
@@ -1307,6 +1307,27 @@ public class Store {
     buffer[offset + 5] = (byte) (v >> 16);
     buffer[offset + 6] = (byte) (v >> 8);
     buffer[offset + 7] = (byte) (v);
+  }
+
+  /**
+   * Debug names for the allocation.
+   */
+  public static String codeToName(int code)
+  {
+    switch (code) {
+    case ALLOC_FREE:
+      return "free";
+    case ALLOC_ROW:
+      return "row";
+    case ALLOC_USED:
+      return "used";
+    case ALLOC_FRAGMENT:
+      return "fragment";
+    case ALLOC_INDEX:
+      return "index";
+    default:
+      return String.valueOf(code);
+    }
   }
   
   public String toString()

@@ -154,6 +154,17 @@ public class QuercusMysqliModule extends AbstractQuercusModule {
   }
 
   /**
+   * Alias for mysqli_stmt_bind_param
+   */
+  public static boolean mysqli_bind_param(Env env,
+                                          MysqliStatement stmt,
+                                          String types,
+                                          @Reference Value[] params)
+  {
+    return mysqli_stmt_bind_param(env, stmt, types, params);
+  }
+
+  /**
    * commits the current transaction to the database connection specified
    * by the connV parameter
    * 
@@ -166,26 +177,6 @@ public class QuercusMysqliModule extends AbstractQuercusModule {
       return true;
     else {
       env.warning("could not commit transaction");
-      return false;
-    }
-  }
-  
-  /**
-   * rolls back the current transaction to the database
-   * connection specified by the connV parameter
-   * 
-   * returns true on success or false on failur
-   * 
-   * NOTE: PHP does not seem to support the idea of
-   * savepoints.
-   */ 
-  public static boolean mysqli_rollback(Env env,
-                                        JdbcConnectionResource connV)
-  {
-    if (connV.rollback())
-      return true;
-    else {
-      env.warning("could not rollback transaction");
       return false;
     }
   }
@@ -279,7 +270,7 @@ public class QuercusMysqliModule extends AbstractQuercusModule {
 
   /**
    * returns a string that describes the connection error
-   */
+vv   */
   public static String mysqli_connect_error(Env env)
   {
     return env.getSpecialValue("mysqli.connectError").toString();
@@ -314,6 +305,184 @@ public class QuercusMysqliModule extends AbstractQuercusModule {
       return 0;
 
     return conn.getErrorCode();
+  }
+
+  /**
+   * alias for mysqli_real_escape_string()
+   */
+  public static String mysqli_escape_string(JdbcConnectionResource connV,
+                                            String unescapedString)
+  {
+    return mysqli_real_escape_string(connV, unescapedString);
+  }
+
+  /**
+   * @see Value JdbcResultResource.fetchFieldDirect
+   *
+   * @param fieldOffset 0 <= fieldOffset < number of fields
+   * @return an object or BooleanValue.FALSE
+   *
+   */
+  public static Value mysqli_fetch_field_direct(Env env,
+                                                JdbcResultResource result,
+                                                int fieldOffset)
+  {
+    if (result == null)
+      return BooleanValue.FALSE;
+
+    return result.fetchFieldDirect(env, fieldOffset);
+  }
+
+  /**
+   * @see Value JdbcResultResource.fetchFieldDirect
+   *
+   * @return an object or BooleanValue.FALSE if no more columns
+   */
+  public static Value mysqli_fetch_field(Env env,
+                                         JdbcResultResource result)
+  {
+    if (result == null)
+      return BooleanValue.FALSE;
+
+    return result.fetchNextField(env);
+  }
+
+  /**
+   * returns an array of fetch_field Objects
+   *
+   * @see Value JdbcResultResource.fetchFieldDirect
+   *
+   * @param result result set
+   */
+  public static Value mysqli_fetch_fields(Env env,
+                                          JdbcResultResource result)
+  {
+    if (result == null)
+      return BooleanValue.FALSE;
+
+    return result.getFieldDirectArray(env);
+  }
+
+  /**
+   * returns an array of integers respresenting the size of each column
+   * FALSE if an error occurred.
+   */
+  public static Value mysqli_fetch_lengths(JdbcResultResource resultV)
+  {
+    if (resultV == null)
+      return BooleanValue.FALSE;
+
+    return resultV.getLengths();
+  }
+
+  /**
+   * seeks to the specified field offset.
+   * If the next call to mysql_fetch_field() doesn't include
+   * a field offset, the field offset specified in
+   * mysqli_field_seek() will be returned.
+   */
+  public static boolean mysqli_field_seek(Env env,
+                                          JdbcResultResource resultV,
+                                          int fieldOffset)
+  {
+    if (resultV == null) {
+      env.warning(L.l("Invalid result value"));
+      return false;
+    }
+
+    resultV.setFieldOffset(fieldOffset);
+
+    return true;
+  }
+
+  /**
+   * returns the position of the field cursor used for the last
+   * mysqli_fetch_field() call. This value can be used as an
+   * argument to mysqli_field_seek()
+   */
+  public static Value mysqli_field_tell(JdbcResultResource resultV)
+  {
+    if (resultV == null)
+      return BooleanValue.FALSE;
+
+    return new LongValue(resultV.getFieldOffset());
+  }
+
+  /**
+   * frees a mysqli result
+   */
+  public static boolean mysqli_free_result(JdbcResultResource result)
+  {
+    if (result == null)
+      return false;
+    else {
+      result.close();
+      return true;
+    }
+  }
+  /**
+   * returns ID generated for an AUTO_INCREMENT column by the previous
+   * INSERT query on success, 0 if the previous query does not generate
+   * an AUTO_INCREMENT value, or FALSE if no MySQL connection was established
+   *
+   */
+  public static Value mysqli_insert_id(JdbcConnectionResource conn)
+     throws SQLException
+  {
+    Value result;
+    result = mysqli_query(conn, "SELECT @@identity", MYSQLI_STORE_RESULT);
+
+    if (result instanceof JdbcResultResource)
+      return new LongValue(((JdbcResultResource) result).getInsertID());
+    else
+      return BooleanValue.FALSE;
+  }
+
+  /**
+   * returns the number of fields from specified result set
+   */
+  public static Value mysqli_num_fields(Env env,
+                                        JdbcResultResource resultV)
+  {
+    if (resultV == null) {
+      env.warning(L.l("supplied argument is not a valid MySQL result resource"));
+      return NullValue.NULL;
+    } else
+      return resultV.getNumFields();
+  }
+
+  /**
+   * executes one or multiple queires which are
+   * concatenated by a semicolon.
+   */
+  public static boolean mysqli_multi_query(JdbcConnectionResource connV,
+                                           String query)
+  {
+    return connV.multiQuery(query);
+  }
+
+  /**
+   * indicates if one or more result sets are available from
+   * a previous call to mysqli_multi_query
+   */
+  public static boolean mysqli_more_results(JdbcConnectionResource connV)
+  {
+    if (connV == null)
+      return false;
+
+    return connV.moreResults();
+  }
+
+  /**
+   * prepares next result set from a previous call to
+   * mysqli_multi_query
+   */
+  public static boolean mysqli_next_result(JdbcConnectionResource connV)
+  {
+    if (connV == null)
+      return false;
+
+    return connV.nextResult();
   }
 
   /**
@@ -542,6 +711,69 @@ public class QuercusMysqliModule extends AbstractQuercusModule {
   }
 
   /**
+   * Sets the options for a mysqli object
+   */
+  public static boolean mysqli_options(Mysqli mysqli,
+				       int option,
+				       Value value)
+  {
+    if (mysqli != null)
+      return mysqli.options(option, value);
+    else
+      return false;
+  }
+
+  /**
+   * Alias of mysqli_stmt_param_count
+   */
+  public static int mysqli_param_count(MysqliStatement stmt)
+  {
+    return mysqli_stmt_param_count(stmt);
+  }
+  
+  /**
+   * rolls back the current transaction to the database
+   * connection specified by the connV parameter
+   * 
+   * returns true on success or false on failur
+   * 
+   * NOTE: PHP does not seem to support the idea of
+   * savepoints.
+   */ 
+  public static boolean mysqli_rollback(Env env,
+                                        JdbcConnectionResource connV)
+  {
+    if (connV.rollback())
+      return true;
+    else {
+      env.warning("could not rollback transaction");
+      return false;
+    }
+  }
+
+  /**
+   * Sets the character set for a mysqli object
+   */
+  public static boolean mysqli_set_charset(Mysqli mysqli,
+					   String charset)
+  {
+    if (mysqli != null)
+      return mysqli.set_charset(charset);
+    else
+      return false;
+  }
+
+  /**
+   * Sets the options for a mysqli object
+   */
+  public static boolean mysqli_set_opt(Mysqli mysqli,
+				       int option,
+				       Value value)
+  {
+    return mysqli_options(mysqli, option, value);
+  }
+
+  /**
    * returns the number of rows in the result set
    * of a prepared statement
    */
@@ -558,24 +790,160 @@ public class QuercusMysqliModule extends AbstractQuercusModule {
    * returns an integer representing the number of parameters
    * or -1 if no query has been prepared
    */
-  public static int mysqli_stmt_param_count(JdbcStatementResource stmt)
+  public static int mysqli_stmt_param_count(MysqliStatement stmt)
   {
-    return stmt.countMarkers();
-  }
-
-  public static int mysqli_param_count(JdbcStatementResource stmt)
-  {
-    return mysqli_stmt_param_count(stmt);
+    if (stmt != null)
+      return stmt.param_count();
+    else
+      return -1;
   }
 
   /**
-   * alias for mysqli_real_escape_string()
+   * prepares a statment with a query.
    */
-  public static String mysqli_escape_string(JdbcConnectionResource connV,
-                                            String unescapedString)
+  public static boolean mysqli_stmt_prepare(MysqliStatement stmt,
+					    String query)
   {
-    return mysqli_real_escape_string(connV, unescapedString);
+    if (stmt != null)
+      return stmt.prepare(query);
+    else
+      return false;
   }
+
+  /**
+   * resets a statment
+   */
+  public static boolean mysqli_stmt_reset(MysqliStatement stmt)
+  {
+    if (stmt != null)
+      return stmt.reset();
+    else
+      return false;
+  }
+
+  /**
+   * Returns result information for metadata
+   */
+  public Value mysqli_stmt_result_metadata(Env env, MysqliStatement stmt)
+    throws SQLException
+  {
+    if (stmt != null)
+      return stmt.result_metadata(env);
+    else
+      return BooleanValue.FALSE;
+  }
+
+  /**
+   * Returns an error string
+   */
+  public String mysqli_stmt_sqlstate(MysqliStatement stmt)
+  {
+    if (stmt != null)
+      return stmt.sqlstate();
+    else
+      return "";
+  }
+
+  /**
+   * Saves the result.
+   */
+  public boolean mysqli_stmt_store_result(MysqliStatement stmt)
+  {
+    if (stmt != null)
+      return stmt.store_result();
+    else
+      return false;
+  }
+
+  /**
+   * Transfers the result set from the last query on the
+   * database connection represented by conn.
+   *
+   * Used in conjunction with mysqli_multi_query
+   */
+   public static Value mysqli_store_result(JdbcConnectionResource conn)
+  {
+    if (conn == null)
+      return BooleanValue.FALSE;
+
+    return conn.storeResult();
+  }
+
+  public static Value mysqli_use_result(JdbcConnectionResource conn)
+  {
+    return QuercusMysqliModule.mysqli_store_result(conn);
+  }
+
+  /**
+   * returns the number of warnings from the last query
+   * in the connection object.
+   *
+   * @return number of warnings
+   */
+  public static int mysqli_warning_count(JdbcConnectionResource conn)
+    throws SQLException
+  {
+    return conn.getWarningCount();
+  }
+
+  /**
+   * Checks if the connection is still valid
+   */
+  public static boolean mysqli_ping(JdbcConnectionResource conn)
+    throws SQLException
+  {
+    return conn != null && !conn.getConnection().isClosed();
+  }
+
+  /**
+   * returns JdbcResultResource representing the results of the query.
+   *
+   * <i>resultMode</i> is ignored, MYSQLI_USE_RESULT would represent
+   * an unbuffered query, but that is not supported.
+   */
+  public static Value mysqli_query(JdbcConnectionResource conn,
+                                   String sql,
+                                   @Optional("MYSQLI_STORE_RESULT") int resultMode)
+  {
+    return query(conn, sql);
+  }
+
+  private static Value query(JdbcConnectionResource conn,
+                             String sql)
+  {
+    if (conn == null)
+      return BooleanValue.FALSE;
+
+    try {
+      Value result = conn.query(sql);
+      return result;
+    } catch (Throwable e) {
+      log.log(Level.FINE, e.toString(), e);
+      return BooleanValue.FALSE;
+    }
+  }
+
+  /**
+   * Connects to the database.
+   */
+  public static boolean mysqli_real_connect(Env env,
+					    Mysqli mysqli,
+					    @Optional("localhost") String host,
+					    @Optional String userName,
+					    @Optional String password,
+					    @Optional String dbname,
+					    @Optional("3306") int port,
+					    @Optional String socket,
+					    @Optional int flags)
+
+  {
+    if (mysqli != null)
+      return mysqli.real_connect(env, host, userName, password,
+				 dbname, port, socket, flags);
+    else
+      return false;
+  }
+  
   /**
    * Escapes the following special character in unescapedString.
    * (all of the comments are from the MySQL source code).
@@ -671,243 +1039,6 @@ public class QuercusMysqliModule extends AbstractQuercusModule {
   }
 
   /**
-   * @see Value JdbcResultResource.fetchFieldDirect
-   *
-   * @param fieldOffset 0 <= fieldOffset < number of fields
-   * @return an object or BooleanValue.FALSE
-   *
-   */
-  public static Value mysqli_fetch_field_direct(Env env,
-                                                JdbcResultResource result,
-                                                int fieldOffset)
-  {
-    if (result == null)
-      return BooleanValue.FALSE;
-
-    return result.fetchFieldDirect(env, fieldOffset);
-  }
-
-  /**
-   * @see Value JdbcResultResource.fetchFieldDirect
-   *
-   * @return an object or BooleanValue.FALSE if no more columns
-   */
-  public static Value mysqli_fetch_field(Env env,
-                                         JdbcResultResource result)
-  {
-    if (result == null)
-      return BooleanValue.FALSE;
-
-    return result.fetchNextField(env);
-  }
-
-  /**
-   * returns an array of fetch_field Objects
-   *
-   * @see Value JdbcResultResource.fetchFieldDirect
-   *
-   * @param result result set
-   */
-  public static Value mysqli_fetch_fields(Env env,
-                                          JdbcResultResource result)
-  {
-    if (result == null)
-      return BooleanValue.FALSE;
-
-    return result.getFieldDirectArray(env);
-  }
-
-  /**
-   * returns an array of integers respresenting the size of each column
-   * FALSE if an error occurred.
-   */
-  public static Value mysqli_fetch_lengths(JdbcResultResource resultV)
-  {
-    if (resultV == null)
-      return BooleanValue.FALSE;
-
-    return resultV.getLengths();
-  }
-
-  /**
-   * seeks to the specified field offset.
-   * If the next call to mysql_fetch_field() doesn't include
-   * a field offset, the field offset specified in
-   * mysqli_field_seek() will be returned.
-   */
-  public static boolean mysqli_field_seek(Env env,
-                                          JdbcResultResource resultV,
-                                          int fieldOffset)
-  {
-    if (resultV == null) {
-      env.warning(L.l("Invalid result value"));
-      return false;
-    }
-
-    resultV.setFieldOffset(fieldOffset);
-
-    return true;
-  }
-
-  /**
-   * returns the position of the field cursor used for the last
-   * mysqli_fetch_field() call. This value can be used as an
-   * argument to mysqli_field_seek()
-   */
-  public static Value mysqli_field_tell(JdbcResultResource resultV)
-  {
-    if (resultV == null)
-      return BooleanValue.FALSE;
-
-    return new LongValue(resultV.getFieldOffset());
-  }
-
-  /**
-   * frees a mysqli result
-   */
-  public static boolean mysqli_free_result(JdbcResultResource result)
-  {
-    if (result == null)
-      return false;
-    else {
-      result.close();
-      return true;
-    }
-  }
-  /**
-   * returns ID generated for an AUTO_INCREMENT column by the previous
-   * INSERT query on success, 0 if the previous query does not generate
-   * an AUTO_INCREMENT value, or FALSE if no MySQL connection was established
-   *
-   */
-  public static Value mysqli_insert_id(JdbcConnectionResource conn)
-     throws SQLException
-  {
-    Value result;
-    result = mysqli_query(conn, "SELECT @@identity", MYSQLI_STORE_RESULT);
-
-    if (result instanceof JdbcResultResource)
-      return new LongValue(((JdbcResultResource) result).getInsertID());
-    else
-      return BooleanValue.FALSE;
-  }
-
-  /**
-   * returns the number of fields from specified result set
-   */
-  public static Value mysqli_num_fields(Env env,
-                                        JdbcResultResource resultV)
-  {
-    if (resultV == null) {
-      env.warning(L.l("supplied argument is not a valid MySQL result resource"));
-      return NullValue.NULL;
-    } else
-      return resultV.getNumFields();
-  }
-
-  /**
-   * executes one or multiple queires which are
-   * concatenated by a semicolon.
-   */
-  public static boolean mysqli_multi_query(JdbcConnectionResource connV,
-                                           String query)
-  {
-    return connV.multiQuery(query);
-  }
-
-  /**
-   * indicates if one or more result sets are available from
-   * a previous call to mysqli_multi_query
-   */
-  public static boolean mysqli_more_results(JdbcConnectionResource connV)
-  {
-    if (connV == null)
-      return false;
-
-    return connV.moreResults();
-  }
-
-  /**
-   * prepares next result set from a previous call to
-   * mysqli_multi_query
-   */
-  public static boolean mysqli_next_result(JdbcConnectionResource connV)
-  {
-    if (connV == null)
-      return false;
-
-    return connV.nextResult();
-  }
-
-  /**
-   * Transfers the result set from the last query on the
-   * database connection represented by conn.
-   *
-   * Used in conjunction with mysqli_multi_query
-   */
-   public static Value mysqli_store_result(JdbcConnectionResource conn)
-  {
-    if (conn == null)
-      return BooleanValue.FALSE;
-
-    return conn.storeResult();
-  }
-
-  public static Value mysqli_use_result(JdbcConnectionResource conn)
-  {
-    return QuercusMysqliModule.mysqli_store_result(conn);
-  }
-
-  /**
-   * returns the number of warnings from the last query
-   * in the connection object.
-   *
-   * @return number of warnings
-   */
-  public static int mysqli_warning_count(JdbcConnectionResource conn)
-    throws SQLException
-  {
-    return conn.getWarningCount();
-  }
-
-  /**
-   * Checks if the connection is still valid
-   */
-  public static boolean mysqli_ping(JdbcConnectionResource conn)
-    throws SQLException
-  {
-    return conn != null && !conn.getConnection().isClosed();
-  }
-
-  /**
-   * returns JdbcResultResource representing the results of the query.
-   *
-   * <i>resultMode</i> is ignored, MYSQLI_USE_RESULT would represent
-   * an unbuffered query, but that is not supported.
-   */
-  public static Value mysqli_query(JdbcConnectionResource conn,
-                                   String sql,
-                                   @Optional("MYSQLI_STORE_RESULT") int resultMode)
-  {
-    return query(conn, sql);
-  }
-
-  private static Value query(JdbcConnectionResource conn,
-                             String sql)
-  {
-    if (conn == null)
-      return BooleanValue.FALSE;
-
-    try {
-      Value result = conn.query(sql);
-      return result;
-    } catch (Throwable e) {
-      log.log(Level.FINE, e.toString(), e);
-      return BooleanValue.FALSE;
-    }
-  }
-
-  /**
    * mysqli_real_query is "used to excute only a query
    * against the database." I assume this means just a
    * SELECT query.
@@ -994,6 +1125,17 @@ public class QuercusMysqliModule extends AbstractQuercusModule {
   }
 
   /**
+   * returns the number of affected rows.
+   */
+  public int mysql_stmt_affected_rows(Mysqli mysqli)
+  {
+    if (mysqli != null)
+      return mysqli.affected_rows();
+    else
+      return -1;
+  }
+
+  /**
    * binds variables for the parameter markers
    * in SQL statement that was passed to
    * mysqli_prepare().
@@ -1005,36 +1147,142 @@ public class QuercusMysqliModule extends AbstractQuercusModule {
    * s: corresponding variable has type string (which really means all other types);
    */
   public static boolean mysqli_stmt_bind_param(Env env,
-                                               JdbcStatementResource stmtV,
+                                               MysqliStatement stmt,
                                                String types,
                                                @Reference Value[] params)
   {
-    return stmtV.bindParams(env, types, params);
-  }
-
-  public static boolean mysqli_bind_param(Env env,
-                                          JdbcStatementResource stmtV,
-                                          String types,
-                                          @Reference Value[] params)
-  {
-    return mysqli_stmt_bind_param(env, stmtV, types, params);
+    if (stmt != null)
+      return stmt.bind_param(env, types, params);
+    else
+      return false;
   }
 
   /**
    * binds outparams to result set
    */
   public static boolean mysqli_stmt_bind_result(Env env,
-                                                JdbcStatementResource stmt,
+                                                MysqliStatement stmt,
                                                 @Reference Value[] outParams)
   {
-    return stmt.bindResults(env, outParams);
+    if (stmt != null)
+      return stmt.bind_result(env, outParams);
+    else
+      return false;
+  }
+
+  /**
+   * closes the statement
+   */
+  public boolean mysql_stmt_close(MysqliStatement stmt)
+    throws SQLException
+  {
+    if (stmt != null)
+      return stmt.close();
+    else
+      return false;
+  }
+
+  /**
+   * Seeks to a given result
+   */
+  public Value mysqli_stmt_data_seek(MysqliStatement stmt, int offset)
+  {
+    if (stmt != null)
+      stmt.data_seek(offset);
+
+    return NullValue.NULL;
+  }
+  
+  /**
+   * returns the error number
+   */
+  public int mysql_stmt_errno(MysqliStatement stmt)
+  {
+    if (stmt != null)
+      return stmt.errno();
+    else
+      return 0;
+  }
+
+  /**
+   * returns the error number
+   */
+  public String mysql_stmt_error(MysqliStatement stmt)
+  {
+    if (stmt != null)
+      return stmt.error();
+    else
+      return null;
+  }
+
+  /**
+   * executes statement stored in resultV. The statement has been prepared using mysqli_prepare.
+   * <p/>
+   * returns true on success or false on failure
+   */
+  public boolean mysqli_stmt_execute(Env env, MysqliStatement stmt)
+  {
+    if (stmt != null)
+      return stmt.execute(env);
+    else
+      return false;
+  }
+  
+  /**
+   * Fetch results from a prepared statement into bound variables.
+   * <p/>
+   * returns true on success, false on error null if no more rows
+   */
+  public boolean mysqli_stmt_fetch(MysqliStatement stmt)
+  {
+    if (stmt != null)
+      return stmt.fetch();
+    else
+      return false;
+  }
+
+  /**
+   * Frees the associated result
+   */
+  public Value mysqli_stmt_free_result(MysqliStatement stmt)
+  {
+    if (stmt != null)
+      stmt.free_result();
+
+    return NullValue.NULL;
+  }
+
+  /**
+   * Creates a new prepared statement.
+   */
+  public MysqliStatement mysqli_stmt_init(Env env, Mysqli mysqli)
+  {
+    if (mysqli != null)
+      return mysqli.stmt_init(env);
+    else
+      return null;
   }
 
   public static boolean mysqli_bind_result(Env env,
-                                           JdbcStatementResource stmt,
+                                           MysqliStatement stmt,
                                            @Reference Value[] outParams)
   {
     return mysqli_stmt_bind_result(env, stmt, outParams);
+  }
+
+  /**
+   * changes the user and database.
+   */
+  public static boolean mysqli_change_user(Env env,
+					   Mysqli mysqli,
+					   String user,
+					   String password,
+					   String db)
+  {
+    if (mysqli != null)
+      return mysqli.change_user(user, password, db);
+    else
+      return false;
   }
 
   /**
@@ -1237,7 +1485,6 @@ public class QuercusMysqliModule extends AbstractQuercusModule {
     }
   }
 
-  //@todo mysqli_change_user
   //@todo mysqli_debug
   //@todo mysqli_disable_reads_from_master
   //@todo mysqli_disable_rpl_parse
@@ -1246,10 +1493,8 @@ public class QuercusMysqliModule extends AbstractQuercusModule {
   //@todo mysqli_enable_reads_from_master
   //@todo mysqli_enable_rpl_parse
   //@todo mysqli_info
-  //@todo mysqli_init
   //@todo mysqli_kill
   //@todo mysqli_master_query
-  //@todo mysqli_options
   //@todo mysqli_report
   //@todo mysqli_rpl_parse_enable
   //@todo mysqli_rpl_probe

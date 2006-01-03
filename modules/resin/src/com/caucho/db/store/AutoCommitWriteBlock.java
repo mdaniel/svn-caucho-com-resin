@@ -85,15 +85,6 @@ public class AutoCommitWriteBlock extends WriteBlock {
   }
 
   /**
-   * Frees a block from a query.
-   */
-  public void free()
-  {
-    // Does not free the actual block, since the transaction is responsible
-    // The block will be freed with the destroy
-  }
-
-  /**
    * Closes the write block.
    */
   void destroy()

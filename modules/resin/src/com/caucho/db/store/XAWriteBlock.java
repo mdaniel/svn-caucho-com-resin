@@ -83,13 +83,6 @@ public class XAWriteBlock extends WriteBlock {
   }
 
   /**
-   * Frees a block from a query.
-   */
-  public void free()
-  {
-  }
-
-  /**
    * Called when the block is removed from the cache.
    */
   protected void freeImpl()

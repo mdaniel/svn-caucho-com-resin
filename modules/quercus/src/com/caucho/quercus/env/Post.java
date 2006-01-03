@@ -77,7 +77,9 @@ import com.caucho.quercus.resources.StreamContextResource;
  * Handling of POST requests.
  */
 public class Post {
-  static void fillPost(ArrayValue post, HttpServletRequest request)
+  static void fillPost(Env env,
+		       ArrayValue post, ArrayValue files,
+		       HttpServletRequest request)
   {
     InputStream is = null;
     
@@ -98,7 +100,7 @@ public class Post {
       MultipartStream ms = new MultipartStream(Vfs.openRead(is), boundary);
       // ms.setEncoding(javaEncoding);
 
-      readMultipartStream(ms, post);
+      readMultipartStream(env, ms, post, files);
     } catch (IOException e) {
       e.printStackTrace();
     } finally {
@@ -110,8 +112,10 @@ public class Post {
     }
   }
 
-  private static void readMultipartStream(MultipartStream ms,
-					  ArrayValue post)
+  private static void readMultipartStream(Env env,
+					  MultipartStream ms,
+					  ArrayValue post,
+					  ArrayValue files)
     throws IOException
   {
     ReadStream is;
@@ -127,20 +131,54 @@ public class Post {
       String name = getAttribute(attr, "name");
       String filename = getAttribute(attr, "filename");
 
-      StringBuilder value = new StringBuilder();
-      int ch;
+      if (filename == null) {
+	StringBuilder value = new StringBuilder();
+	int ch;
 
-      while ((ch = is.read()) >= 0) {
-	value.append((char) ch);
+	while ((ch = is.read()) >= 0) {
+	  value.append((char) ch);
+	}
+
+	addFormValue(post, name, new StringValue(value.toString()), null);
       }
+      else {
+	Path tmpName = env.getUploadDirectory().createTempFile("php", "tmp");
 
-      addFormValue(post, name, new String[] { value.toString() });
+	env.addRemovePath(tmpName);
+
+	WriteStream os = tmpName.openWrite();
+	try {
+	  os.writeStream(is);
+	} finally {
+	  os.close();
+	}
+
+	ArrayValue entry = new ArrayValueImpl();
+	entry.put("name", filename);
+	String mimeType = getAttribute(attr, "mime-type");
+	if (mimeType != null)
+	  entry.put("type", mimeType);
+	entry.put("size", tmpName.getLength());
+	entry.put("tmp_name", tmpName.getTail());
+
+	// XXX: error
+
+	addFormValue(files, name, entry, null);
+      }
     }
   }
 
   public static void addFormValue(ArrayValue array,
 				  String key,
-				  String []formValue)
+				  String []formValueList)
+  {
+    addFormValue(array, key, new StringValue(formValueList[0]), formValueList);
+  }
+
+  public static void addFormValue(ArrayValue array,
+				  String key,
+				  Value formValue,
+				  String []formValueList)
   {
     int p = key.indexOf('[');
     int q = key.indexOf(']', p);
@@ -197,18 +235,21 @@ public class Post {
 	index = index.substring(p + 1);
 
       if (index.equals("")) {
-	for (int i = 0; i < formValue.length; i++) {
-	  array.put(new StringValue(formValue[i]));
+	if (formValueList != null) {
+	  for (int i = 0; i < formValueList.length; i++) {
+	    array.put(new StringValue(formValueList[i]));
+	  }
 	}
+	else
+	  array.put(formValue);
       }
       else if ('0' <= index.charAt(0) && index.charAt(0) <= '9')
-	array.put(new LongValue(StringValue.toLong(index)),
-		  new StringValue(formValue[0]));
+	array.put(new LongValue(StringValue.toLong(index)), formValue);
       else
-	array.put(new StringValue(index), new StringValue(formValue[0]));
+	array.put(new StringValue(index), formValue);
     }
     else {
-      array.put(new StringValue(key), new StringValue(formValue[0]));
+      array.put(new StringValue(key), formValue);
     }
   }
 

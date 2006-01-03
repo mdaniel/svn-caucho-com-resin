@@ -140,6 +140,8 @@ public class Env {
   private static final int HTTP_POST_VARS = 9;
   private static final int HTTP_COOKIE_VARS = 10;
   private static final int PHP_SELF = 11;
+  private static final int _FILES = 12;
+  private static final int HTTP_POST_FILES = 13;
 
   private static final IntMap SPECIAL_VARS = new IntMap();
 
@@ -199,11 +201,14 @@ public class Env {
 
   private Path _selfPath;
   private Path _pwd;
+  private Path _uploadPath;
+  private ArrayList<Path> _removePaths;
 
   private HttpServletRequest _request;
   private HttpServletResponse _response;
 
   private ArrayValue _post;
+  private ArrayValue _files;
   private SessionArrayValue _session;
   
   private WriteStream _originalOut;
@@ -248,7 +253,8 @@ public class Env {
 
     if (_request.getMethod().equals("POST")) {
       _post = new ArrayValueImpl();
-      Post.fillPost(_post, _request);
+      _files = new ArrayValueImpl();
+      Post.fillPost(this, _post, _files, _request);
     }
 
     _startTime = Alarm.getCurrentTime();
@@ -421,6 +427,40 @@ public class Env {
   public void setSelfPath(Path path)
   {
     _selfPath = path;
+  }
+
+  /**
+   * Returns the upload directory.
+   */
+  public Path getUploadDirectory()
+  {
+    if (_uploadPath == null) {
+      String realPath = getRequest().getRealPath("WEB-INF/upload");
+      
+      _uploadPath = getPwd().lookup(realPath);
+      
+      try {
+	if (! _uploadPath.isDirectory())
+	  _uploadPath.mkdirs();
+      } catch (IOException e) {
+	log.log(Level.FINE, e.toString(), e);
+      }
+      
+      _uploadPath = _uploadPath.createRoot();
+    }
+
+    return _uploadPath;
+  }
+
+  /**
+   * Adds an auto-remove path.
+   */
+  public void addRemovePath(Path path)
+  {
+    if (_removePaths == null)
+      _removePaths = new ArrayList<Path>();
+
+    _removePaths.add(path);
   }
 
   /**
@@ -896,6 +936,25 @@ public class Env {
 
 	  Post.addFormValue(post, key, value);
 	}
+      }
+      break;
+      
+    case HTTP_POST_FILES:
+    case _FILES:
+      {
+	var = new Var();
+	
+	_globalMap.put(name, var);
+
+	ArrayValue files = new ArrayValueImpl();
+
+	if (_files != null) {
+	  for (Map.Entry<Value,Value> entry : _files.entrySet()) {
+	    files.put(entry.getKey(), entry.getValue());
+	  }
+	}
+      
+	var.set(files);
       }
       break;
       
@@ -2325,6 +2384,14 @@ public class Env {
   }
 
   /**
+   * A warning with an exception.
+   */
+  public Value warning(Throwable e)
+  {
+    return warning(e.toString(), e);
+  }
+
+  /**
    * A notice.
    */
   public Value notice(String msg)
@@ -2751,6 +2818,16 @@ public class Env {
 	log.log(Level.FINER, e.toString(), e);
       }
     }
+
+    for (int i = 0; _removePaths != null && i < _removePaths.size(); i++) {
+      Path path = _removePaths.get(i);
+
+      try {
+	path.remove();
+      } catch (IOException e) {
+	log.log(Level.FINER, e.toString(), e);
+      }
+    }
   }
 
   static {
@@ -2758,11 +2835,13 @@ public class Env {
     SPECIAL_VARS.put("_SERVER", _SERVER);
     SPECIAL_VARS.put("_GET", _GET);
     SPECIAL_VARS.put("_POST", _POST);
+    SPECIAL_VARS.put("_FILES", _FILES);
     SPECIAL_VARS.put("_REQUEST", _REQUEST);
     SPECIAL_VARS.put("_COOKIE", _COOKIE);
     SPECIAL_VARS.put("_SESSION", _SESSION);
     SPECIAL_VARS.put("HTTP_GET_VARS", HTTP_GET_VARS);
     SPECIAL_VARS.put("HTTP_POST_VARS", HTTP_POST_VARS);
+    SPECIAL_VARS.put("HTTP_POST_FILES", HTTP_POST_FILES);
     SPECIAL_VARS.put("HTTP_COOKIE_VARS", HTTP_COOKIE_VARS);
     SPECIAL_VARS.put("PHP_SELF", PHP_SELF);
   }
