@@ -1063,8 +1063,15 @@ public class QuercusArrayModule extends AbstractQuercusModule {
     double typecheck = (double) ((int) sum);
 
     return DoubleValue.create(sum);
-
   }
+
+  // XXX: array_udiff
+  // XXX: array_udiff_assoc
+  // XXX: array_udiff_uassoc
+
+  // XXX: array_uintersect
+  // XXX: array_uintersect_assoc
+  // XXX: array_uintersect_uassoc
 
   /**
    * Returns the inputted array without duplicates
@@ -1474,6 +1481,8 @@ public class QuercusArrayModule extends AbstractQuercusModule {
       }
     }
   }
+
+  // XXX: compact
 
   /**
    * Determines if the key is in the array

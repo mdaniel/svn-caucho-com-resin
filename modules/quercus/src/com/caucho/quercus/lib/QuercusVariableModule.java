@@ -146,11 +146,165 @@ public class QuercusVariableModule extends AbstractQuercusModule {
   }
 
   /**
+   * Defines a constant
+   *
+   * @param env the quercus calling environment
+   * @param nameV the constant name
+   * @param value the constant value
+   */
+  public static Value define(Env env,
+			     String name,
+			     Value value,
+			     @Optional boolean isCaseInsensitive)
+    throws Throwable
+  {
+    return env.addConstant(name, value, isCaseInsensitive);
+  }
+
+  /**
+   * Returns true if the constant is defined.
+   *
+   * @param env the quercus calling environment
+   * @param name the constant name
+   */
+  public static boolean defined(Env env, String name)
+    throws Throwable
+  {
+    return env.isDefined(name);
+  }
+
+  /**
+   * Converts to a double
+   *
+   * @param v the variable to convert
+   * @return the double value
+   */
+  public static Value doubleval(Value v)
+         throws IOException
+  {
+    return floatval(v);
+  }
+
+  /**
+   * Returns true for an empty variable.
+   *
+   * @param env the calling environment
+   * @param v the value to test
+   * @return the escaped stringPhp
+   */
+  public static Value empty(Env env, Value v)
+    throws Throwable
+  {
+    v = v.toValue();
+
+    if (v instanceof NullValue)
+      return BooleanValue.TRUE;
+    else if (v instanceof StringValue) {
+      String s = v.toString(env);
+      
+      return (s.equals("") || s.equals("0")
+	      ? BooleanValue.TRUE
+	      : BooleanValue.FALSE);
+    }
+    else if (v instanceof LongValue) {
+      return v.toLong() == 0 ? BooleanValue.TRUE : BooleanValue.FALSE;
+    }
+    else if (v instanceof BooleanValue) {
+      return v.toBoolean() ? BooleanValue.FALSE : BooleanValue.TRUE;
+    }
+    else if (v instanceof ArrayValue) {
+      ArrayValue array = (ArrayValue) v;
+
+      return array.getSize() == 0 ? BooleanValue.TRUE : BooleanValue.FALSE;
+    }
+    else
+      return BooleanValue.FALSE;
+  }
+
+  /**
+   * Converts to a double
+   *
+   * @param v the variable to convert
+   * @return the double value
+   */
+  public static Value floatval(Value v)
+         throws IOException
+  {
+    return new DoubleValue(v.toDouble());
+  }
+
+  /**
+   * Returns the defined variables in the current scope.
+   */
+  @UsesSymbolTable
+  public static Value get_defined_vars(Env env)
+  {
+    ArrayValue result = new ArrayValueImpl();
+
+    HashMap<String,Var> map = env.getEnv();
+
+    for (Map.Entry<String,Var> entry : map.entrySet()) {
+      result.append(new StringValue(entry.getKey()),
+		    entry.getValue().toValue());
+    }
+
+    HashMap<String,Var> globalMap = env.getGlobalEnv();
+    if (map != globalMap) {
+      for (Map.Entry<String,Var> entry : globalMap.entrySet()) {
+	result.append(new StringValue(entry.getKey()),
+		      entry.getValue().toValue());
+      }
+    }
+
+    return result;
+  }
+
+  /**
    * Returns the type string for the variable
    */
   public static String gettype(Value v)
   {
     return v.getType();
+  }
+
+  /**
+   * Converts to a long
+   *
+   * @param v the variable to convert
+   * @return the double value
+   */
+  public static Value intval(Value v)
+         throws IOException
+  {
+    return new LongValue(v.toLong());
+  }
+
+  /**
+   * Returns true for an array.
+   *
+   * @param v the value to test
+   *
+   * @return true for an array
+   */
+  public static boolean is_array(Value v)
+         throws IOException
+  {
+    return v.isArray();
+  }
+
+  /**
+   * Returns true for a boolean
+   *
+   * @param v the value to test
+   *
+   * @return true for a boolean
+   */
+  public static Value is_bool(Value v)
+         throws IOException
+  {
+    return (v.toValue() instanceof BooleanValue
+	    ? BooleanValue.TRUE
+	    : BooleanValue.FALSE);
   }
 
   /**
@@ -201,168 +355,6 @@ public class QuercusVariableModule extends AbstractQuercusModule {
     }
     else
       return false;
-  }
-
-  /**
-   * Returns the type string for the variable
-   */
-  public static boolean isset(Value v)
-  {
-    return v.isset();
-  }
-
-  /**
-   * Returns true for an empty variable.
-   *
-   * @param env the calling environment
-   * @param v the value to test
-   * @return the escaped stringPhp
-   */
-  public static Value empty(Env env, Value v)
-    throws Throwable
-  {
-    v = v.toValue();
-
-    if (v instanceof NullValue)
-      return BooleanValue.TRUE;
-    else if (v instanceof StringValue) {
-      String s = v.toString(env);
-      
-      return (s.equals("") || s.equals("0")
-	      ? BooleanValue.TRUE
-	      : BooleanValue.FALSE);
-    }
-    else if (v instanceof LongValue) {
-      return v.toLong() == 0 ? BooleanValue.TRUE : BooleanValue.FALSE;
-    }
-    else if (v instanceof BooleanValue) {
-      return v.toBoolean() ? BooleanValue.FALSE : BooleanValue.TRUE;
-    }
-    else if (v instanceof ArrayValue) {
-      ArrayValue array = (ArrayValue) v;
-
-      return array.getSize() == 0 ? BooleanValue.TRUE : BooleanValue.FALSE;
-    }
-    else
-      return BooleanValue.FALSE;
-  }
-
-  /**
-   * Defines a constant
-   *
-   * @param env the quercus calling environment
-   * @param nameV the constant name
-   * @param value the constant value
-   */
-  public static Value define(Env env,
-			     String name,
-			     Value value,
-			     @Optional boolean isCaseInsensitive)
-    throws Throwable
-  {
-    return env.addConstant(name, value, isCaseInsensitive);
-  }
-
-  /**
-   * Returns true if the constant is defined.
-   *
-   * @param env the quercus calling environment
-   * @param name the constant name
-   */
-  public static boolean defined(Env env, String name)
-    throws Throwable
-  {
-    return env.isDefined(name);
-  }
-
-  /**
-   * Converts to a double
-   *
-   * @param v the variable to convert
-   * @return the double value
-   */
-  public static Value doubleval(Value v)
-         throws IOException
-  {
-    return floatval(v);
-  }
-
-  /**
-   * Converts to a double
-   *
-   * @param v the variable to convert
-   * @return the double value
-   */
-  public static Value floatval(Value v)
-         throws IOException
-  {
-    return new DoubleValue(v.toDouble());
-  }
-
-  /**
-   * Returns the defined variables in the current scope.
-   */
-  @UsesSymbolTable
-  public static Value get_defined_vars(Env env)
-  {
-    ArrayValue result = new ArrayValueImpl();
-
-    HashMap<String,Var> map = env.getEnv();
-
-    for (Map.Entry<String,Var> entry : map.entrySet()) {
-      result.append(new StringValue(entry.getKey()),
-		    entry.getValue().toValue());
-    }
-
-    HashMap<String,Var> globalMap = env.getGlobalEnv();
-    if (map != globalMap) {
-      for (Map.Entry<String,Var> entry : globalMap.entrySet()) {
-	result.append(new StringValue(entry.getKey()),
-		      entry.getValue().toValue());
-      }
-    }
-
-    return result;
-  }
-
-  /**
-   * Converts to a long
-   *
-   * @param v the variable to convert
-   * @return the double value
-   */
-  public static Value intval(Value v)
-         throws IOException
-  {
-    return new LongValue(v.toLong());
-  }
-
-  /**
-   * Returns true for an array.
-   *
-   * @param v the value to test
-   *
-   * @return true for an array
-   */
-  public static boolean is_array(Value v)
-         throws IOException
-  {
-    return v.isArray();
-  }
-
-  /**
-   * Returns true for a boolean
-   *
-   * @param v the value to test
-   *
-   * @return true for a boolean
-   */
-  public static Value is_bool(Value v)
-         throws IOException
-  {
-    return (v.toValue() instanceof BooleanValue
-	    ? BooleanValue.TRUE
-	    : BooleanValue.FALSE);
   }
 
   /**
@@ -474,6 +466,8 @@ public class QuercusVariableModule extends AbstractQuercusModule {
       return false;
   }
 
+  // XXX: is_object
+
   /**
    * Returns true for a real
    *
@@ -488,6 +482,32 @@ public class QuercusVariableModule extends AbstractQuercusModule {
   }
 
   /**
+   * Returns true if the value is a resource
+   */
+  public boolean is_resource(Value value)
+  {
+    return (value.toValue() instanceof ResourceValue);
+  }
+
+  // XXX: is_scalar
+
+  /**
+   * Returns true if the value is a string
+   */
+  public boolean is_string(Value value)
+  {
+    return (value.toValue() instanceof StringValue);
+  }
+
+  /**
+   * Returns the type string for the variable
+   */
+  public static boolean isset(Value v)
+  {
+    return v.isset();
+  }
+
+  /**
    * Converts to a string
    *
    * @param env the quercus calling environment
@@ -498,22 +518,6 @@ public class QuercusVariableModule extends AbstractQuercusModule {
     throws Throwable
   {
     return new StringValue(v.toString(env));
-  }
-
-  /**
-   * Returns true if the value is a resource
-   */
-  public boolean is_resource(Value value)
-  {
-    return (value.toValue() instanceof ResourceValue);
-  }
-
-  /**
-   * Returns true if the value is a string
-   */
-  public boolean is_string(Value value)
-  {
-    return (value.toValue() instanceof StringValue);
   }
 
   /**

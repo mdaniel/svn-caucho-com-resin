@@ -89,14 +89,6 @@ public class QuercusDateModule extends AbstractQuercusModule {
   }
 
   /**
-   * Returns the current time in seconds.
-   */
-  public static long time()
-  {
-    return Alarm.getCurrentTime() / 1000L;
-  }
-
-  /**
    * Returns the formatted date.
    */
   public String date(String format,
@@ -536,8 +528,6 @@ public class QuercusDateModule extends AbstractQuercusModule {
       else
 	now = Alarm.getCurrentTime();
 
-      System.out.println("***STR: " + timeString);
-
       if (timeString.equals("now"))
 	return new LongValue(now / 1000L);
       
@@ -551,6 +541,14 @@ public class QuercusDateModule extends AbstractQuercusModule {
 
       return BooleanValue.FALSE;
     }
+  }
+
+  /**
+   * Returns the current time in seconds.
+   */
+  public static long time()
+  {
+    return Alarm.getCurrentTime() / 1000L;
   }
 }
 

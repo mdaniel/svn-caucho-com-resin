@@ -116,6 +116,14 @@ public class QuercusOptionsModule extends AbstractQuercusModule {
   }
 
   /**
+   * Sets an initialization value.
+   */
+  public static Value ini_alter(Env env, String varName, String value)
+  {
+    return ini_set(env, varName, value);
+  }
+
+  /**
    * Returns an initialization value.
    */
   public static String ini_get(Env env, String varName)
@@ -147,7 +155,7 @@ public class QuercusOptionsModule extends AbstractQuercusModule {
   /**
    * Returns the sapi type.
    */
-  public static String quercus_php_sapi_name()
+  public static String php_sapi_name()
   {
     return "apache";
   }
@@ -155,7 +163,7 @@ public class QuercusOptionsModule extends AbstractQuercusModule {
   /**
    * Returns system information
    */
-  public static String quercus_php_uname(@Optional("'a'") String mode)
+  public static String php_uname(@Optional("'a'") String mode)
   {
     // XXX: stubbed
 
@@ -180,11 +188,11 @@ public class QuercusOptionsModule extends AbstractQuercusModule {
 
     case 'a':
     default:
-      return (quercus_php_uname("s") + " " +
-              quercus_php_uname("n") + " " +
-              quercus_php_uname("r") + " " +
-              quercus_php_uname("v") + " " +
-              quercus_php_uname("m"));
+      return (php_uname("s") + " " +
+              php_uname("n") + " " +
+              php_uname("r") + " " +
+              php_uname("v") + " " +
+              php_uname("m"));
     }
   }
 

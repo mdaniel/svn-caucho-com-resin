@@ -73,32 +73,6 @@ public class QuercusSessionModule extends AbstractQuercusModule {
   }
 
   /**
-   * Start the session
-   */
-  public String session_id(Env env)
-  {
-    Value sessionIdValue = env.getSpecialValue("caucho.session_id");
-
-    if (sessionIdValue != null)
-      return sessionIdValue.toString();
-    else
-      return "";
-  }
-
-  /**
-   * Returns the object's class name
-   */
-  public Value session_name(Env env, @Optional String newValue)
-  {
-    Value value = env.getIni("session.name");
-
-    if (newValue != null && ! newValue.equals(""))
-      env.setIni("session.name", newValue);
-
-    return value;
-  }
-
-  /**
    * Returns the session cache limiter value
    */
   public Value session_cache_limiter(Env env, @Optional String newValue)
@@ -127,6 +101,31 @@ public class QuercusSessionModule extends AbstractQuercusModule {
     return true;
   }
 
+  /**
+   * Returns the session id
+   */
+  public String session_id(Env env)
+  {
+    Value sessionIdValue = env.getSpecialValue("caucho.session_id");
+
+    if (sessionIdValue != null)
+      return sessionIdValue.toString();
+    else
+      return "";
+  }
+
+  /**
+   * Returns the object's class name
+   */
+  public Value session_name(Env env, @Optional String newValue)
+  {
+    Value value = env.getIni("session.name");
+
+    if (newValue != null && ! newValue.equals(""))
+      env.setIni("session.name", newValue);
+
+    return value;
+  }
 
   /**
    * Sets the session cookie parameters

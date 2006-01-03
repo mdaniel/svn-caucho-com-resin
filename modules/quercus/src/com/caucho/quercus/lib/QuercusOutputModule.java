@@ -65,17 +65,6 @@ public class QuercusOutputModule extends AbstractQuercusModule {
   /**
    * Clears the output buffer
    */
-  public static Value ob_implicit_flush(Env env, @Optional int flag)
-    throws Throwable
-  {
-    // XXX: stubbed out
-
-    return NullValue.NULL;
-  }
-
-  /**
-   * Clears the output buffer
-   */
   public static Value ob_clean(Env env)
     throws Throwable
   {
@@ -88,20 +77,6 @@ public class QuercusOutputModule extends AbstractQuercusModule {
     }
     else
       return BooleanValue.FALSE;
-  }
-
-  /**
-   * Pushes the output buffer
-   */
-  public boolean ob_start(Env env,
-                          @Optional Callback callback,
-                          @Optional int chunkSize,
-                          @Optional boolean erase)
-    throws Throwable
-  {
-    env.pushOutputBuffer(callback, chunkSize, erase);
-
-    return true;
   }
 
   /**
@@ -128,20 +103,6 @@ public class QuercusOutputModule extends AbstractQuercusModule {
   }
 
   /**
-   * Pushes the output buffer
-   */
-  public static Value ob_get_contents(Env env)
-    throws Throwable
-  {
-    OutputBuffer ob = env.getOutputBuffer();
-
-    if (ob != null)
-      return ob.getContents();
-    else
-      return BooleanValue.FALSE;
-  }
-
-  /**
    * Returns the contents of the output buffer
    */
   public static Value ob_get_clean(Env env)
@@ -163,6 +124,20 @@ public class QuercusOutputModule extends AbstractQuercusModule {
   /**
    * Pushes the output buffer
    */
+  public static Value ob_get_contents(Env env)
+    throws Throwable
+  {
+    OutputBuffer ob = env.getOutputBuffer();
+
+    if (ob != null)
+      return ob.getContents();
+    else
+      return BooleanValue.FALSE;
+  }
+
+  /**
+   * Pushes the output buffer
+   */
   public static Value ob_get_length(Env env)
     throws Throwable
   {
@@ -172,5 +147,30 @@ public class QuercusOutputModule extends AbstractQuercusModule {
       return ob.getLength();
     else
       return BooleanValue.FALSE;
+  }
+
+  /**
+   * Clears the output buffer
+   */
+  public static Value ob_implicit_flush(Env env, @Optional int flag)
+    throws Throwable
+  {
+    // XXX: stubbed out
+
+    return NullValue.NULL;
+  }
+
+  /**
+   * Pushes the output buffer
+   */
+  public boolean ob_start(Env env,
+                          @Optional Callback callback,
+                          @Optional int chunkSize,
+                          @Optional boolean erase)
+    throws Throwable
+  {
+    env.pushOutputBuffer(callback, chunkSize, erase);
+
+    return true;
   }
 }

@@ -48,6 +48,28 @@ public class QuercusUrlModule extends AbstractQuercusModule {
   private static final L10N L = new L10N(QuercusUrlModule.class);
 
   /**
+   * Encodes base64
+   */
+  public static String base64_encode(String str)
+  {
+    CharBuffer cb = new CharBuffer();
+
+    byte []bytes = str.getBytes();
+
+    Base64.encode(cb, bytes, 0, bytes.length);
+
+    return cb.toString();
+  }
+
+  /**
+   * Decodes base64
+   */
+  public static String base64_decode(String str)
+  {
+    return Base64.decode(str);
+  }
+
+  /**
    * Gets the magic quotes value.
    */
   public static String urlencode(String str)
@@ -81,28 +103,6 @@ public class QuercusUrlModule extends AbstractQuercusModule {
     }
 
     return sb.toString();
-  }
-
-  /**
-   * Encodes base64
-   */
-  public static String base64_encode(String str)
-  {
-    CharBuffer cb = new CharBuffer();
-
-    byte []bytes = str.getBytes();
-
-    Base64.encode(cb, bytes, 0, bytes.length);
-
-    return cb.toString();
-  }
-
-  /**
-   * Decodes base64
-   */
-  public static String base64_decode(String str)
-  {
-    return Base64.decode(str);
   }
 
   enum ParseUrlState {

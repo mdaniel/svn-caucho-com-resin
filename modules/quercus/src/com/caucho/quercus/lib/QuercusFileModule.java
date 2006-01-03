@@ -1130,6 +1130,8 @@ public class QuercusFileModule extends AbstractQuercusModule {
     return path.canRead();
   }
 
+  // XXX: is_uploaded_file
+
   /**
    * Returns true if the path is writable
    *
@@ -1362,6 +1364,8 @@ public class QuercusFileModule extends AbstractQuercusModule {
     // quercus/160u
 
     try {
+      // XXX: remove on exit
+      
       Path path = dir.createTempFile(prefix, ".tmp");
       return new StringValue(path.getTail());
     } catch (IOException e) {
@@ -1377,6 +1381,8 @@ public class QuercusFileModule extends AbstractQuercusModule {
   public static Value tmpfile(Env env)
   {
     try {
+      // XXX: remove on exit
+      
       Path tmp = env.getPwd().lookup("/tmp");
 
       tmp.mkdirs();

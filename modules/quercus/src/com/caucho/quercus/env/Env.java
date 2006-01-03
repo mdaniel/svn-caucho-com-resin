@@ -2279,6 +2279,16 @@ public class Env {
   }
 
   /**
+   * A warning with an exception.
+   */
+  public Value error(Throwable e)
+  {
+    log.log(Level.WARNING, e.toString(), e);
+    
+    return error(e.toString());
+  }
+
+  /**
    * A fatal runtime error.
    */
   public RuntimeException errorException(String msg)

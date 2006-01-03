@@ -94,6 +94,11 @@ public class QuercusApacheModule extends AbstractQuercusModule {
     return false;
   }
 
+  // XXX: apache_get_modules
+  // XXX: apache_get_version
+  // XXX: apache_getenv
+  // XXX: apache_lookup_uri
+  
   /**
    * Gets and sets apache notes
    */
@@ -115,14 +120,6 @@ public class QuercusApacheModule extends AbstractQuercusModule {
   }
 
   /**
-   * Stub for resetting the output timeout.
-   */
-  public boolean apache_reset_timeout()
-  {
-    return false;
-  }
-
-  /**
    * Returns all the request headers
    */
   public Value apache_request_headers(Env env)
@@ -141,6 +138,20 @@ public class QuercusApacheModule extends AbstractQuercusModule {
 
     return result;
   }
+
+  // XXX: apache_response_headers
+
+  /**
+   * Stub for resetting the output timeout.
+   */
+  public boolean apache_reset_timeout()
+  {
+    return false;
+  }
+
+  // XXX: apache_setenv
+  // XXX: ascii2ebcdic
+  // XXX: ebcdic2ascii
 
   /**
    * Returns all the request headers

@@ -1567,39 +1567,6 @@ public class QuercusStringModule extends AbstractQuercusModule {
   }
 
   /**
-   * Removes tags from a string.
-   *
-   * @param str the string to remove
-   * @param allowable_tags the allowable tags
-   */
-  public static String strip_tags(String string, @Optional String allowTags)
-  {
-    // XXX: allowTags is stubbed
-    
-    StringBuilder result = new StringBuilder();
-
-    int len = string.length();
-    
-    for (int i = 0; i < len; i++) {
-      char ch = string.charAt(i);
-
-      if (ch != '<') {
-	result.append(ch);
-	continue;
-      }
-
-      for (i++; i < len; i++) {
-	ch = string.charAt(i);
-
-	if (ch == '>')
-	  break;
-      }
-    }
-
-    return result.toString();
-  }
-
-  /**
    * Removes leading and trailing whitespace.
    *
    * @param env the quercus environment
@@ -1643,6 +1610,8 @@ public class QuercusStringModule extends AbstractQuercusModule {
       return new StringValue(str.substring(head, tail + 1));
     }
   }
+
+  // XXX: str_ireplace
 
   /**
    * pads strings
@@ -2021,6 +1990,17 @@ public class QuercusStringModule extends AbstractQuercusModule {
   }
 
   /**
+   * Finds the index of a substring
+   *
+   * @param env the calling environment
+   */
+  public static Value strchr(Env env, String haystack, Value needle)
+    throws Throwable
+  {
+    return strstr(env, haystack, needle);
+  }
+
+  /**
    * Locale-based comparison
    * XXX: i18n
    *
@@ -2045,15 +2025,39 @@ public class QuercusStringModule extends AbstractQuercusModule {
       return LongValue.ONE;
   }
 
+  // XXX: strcspn
+
   /**
-   * Finds the index of a substring
+   * Removes tags from a string.
    *
-   * @param env the calling environment
+   * @param str the string to remove
+   * @param allowable_tags the allowable tags
    */
-  public static Value strchr(Env env, String haystack, Value needle)
-    throws Throwable
+  public static String strip_tags(String string, @Optional String allowTags)
   {
-    return strstr(env, haystack, needle);
+    // XXX: allowTags is stubbed
+    
+    StringBuilder result = new StringBuilder();
+
+    int len = string.length();
+    
+    for (int i = 0; i < len; i++) {
+      char ch = string.charAt(i);
+
+      if (ch != '<') {
+	result.append(ch);
+	continue;
+      }
+
+      for (i++; i < len; i++) {
+	ch = string.charAt(i);
+
+	if (ch == '>')
+	  break;
+      }
+    }
+
+    return result.toString();
   }
 
   /**
