@@ -4,46 +4,47 @@
 
 <s2 title='3.0.snap - Dec 22, 2005'>
 <ul>
+<li>Quercus: func_get_args copy/ref issues (#607, rep by Stefano Bagnara)
 <li>Quercus: $_FILES, is_uploaded_file, move_uploaded_file (#652, 
 <li>Persistent session block reference count not properly updated (#596, rep by Keith Fetterman)
 <li>Quercus: added mcrypt (#606)
-<li>Quercus: round has optional argument (#612, rep by bago)
+<li>Quercus: round has optional argument (#612, rep by Stefano Bagnara)
 <li>Quercus: table/column metadata encapsulated for mysql
 <li>Quercus: get_declared_classes (#605)
-<li>Quercus: extra arguments should be logged, not PHP warning (#512, rep by bago)
-<li>Quercus: strtr and with longer strings (#534, rep by bago)
+<li>Quercus: extra arguments should be logged, not PHP warning (#512, rep by Stefano Bagnara)
+<li>Quercus: strtr and with longer strings (#534, rep by Stefano Bagnara)
 <li>Quercus: HTTP_COOKIE_VARS (#569)
 <li>Quercus: regexp support for :alnum: (#597)
-<li>Quercus: added alternate syntax (#536, rep by bago)
+<li>Quercus: added alternate syntax (#536, rep by Stefano Bagnara)
 <li>Quercus: objects extend ArrayValue
-<li>Quercus: session_set_save_handler (#511, rep by bago)
-<li>Quercus: setlocale, array_merge_recursive (#529, #533 rep by bago)
+<li>Quercus: session_set_save_handler (#511, rep by Stefano Bagnara)
+<li>Quercus: setlocale, array_merge_recursive (#529, #533 rep by Stefano Bagnara)
 <li>Quercus: generating line numbers for compiled PHP code
-<li>Quercus: $_SERVER is writeable (#563, rep by bago)
+<li>Quercus: $_SERVER is writeable (#563, rep by Stefano Bagnara)
 <li>Quercus: const values in interpolated associative arrays parsed wrong (#586)
-<li>Quercus: register_shutdown_function (#551, #573, rep by bago)
-<li>Quercus: === for arrays was implemented improperly (#560, rep by bago)
+<li>Quercus: register_shutdown_function (#551, #573, rep by Stefano Bagnara)
+<li>Quercus: === for arrays was implemented improperly (#560, rep by Stefano Bagnara)
 <li>Quercus: recognize $\{$foo} (#562, rep by Anoop K Achuthan)
 <li>Quercus: method_exists, exec, parse_str (#568, #574, #552)
-<li>Quercus: mysql_fetch_field shouldn't switch catalog when null (#554, rep by bago)
+<li>Quercus: mysql_fetch_field shouldn't switch catalog when null (#554, rep by Stefano Bagnara)
 <li>Quercus: parse priority with ?: and += (#524)
-<li>Quercus: reserved words: $echo, $require, $or, $and, $xor (#537, #531, #530 rep by bago)
+<li>Quercus: reserved words: $echo, $require, $or, $and, $xor (#537, #531, #530 rep by Stefano Bagnara)
 <li>Quercus: date issues with 'st', 'nd', 'rd' (#548)
-<li>Quercus: serialization of array added extra ';' (#555, fixed! by bago)
-<li>Quercus: _SERVER['REQUEST_URI'] needs query string (#550, rep by bago)
+<li>Quercus: serialization of array added extra ';' (#555, fixed! by Stefano Bagnara)
+<li>Quercus: _SERVER['REQUEST_URI'] needs query string (#550, rep by Stefano Bagnara)
 </ul>
 </s2>
 
 <s2 title='3.0.17 - Dec 22, 2005'>
 <ul>
-<li>(2005-12-22) Quercus: add parse_url (#508, rep by bago)
+<li>(2005-12-22) Quercus: add parse_url (#508, rep by Stefano Bagnara)
 <li>(2005-12-20) Multiple hosts combine by host-name, not root-directory (#489)
 <li>.tld parsing should not evaluate EL expressions (#499)
 <li>Added file/cluster store logging for length of serialized object (#522)
-<li>Quercus: unset allows multiple arguments (#509, rep by bago)
-<li>Quercus: stdClass wasn't found from script (#513, rep by bago)
-<li>Quercus: $return is not a reserved name (#514, rep by bago)
-<li>Quercus Apache module: apache_note, apache_request_headers, virtual, getallheaders (#516, rep by bago)
+<li>Quercus: unset allows multiple arguments (#509, rep by Stefano Bagnara)
+<li>Quercus: stdClass wasn't found from script (#513, rep by Stefano Bagnara)
+<li>Quercus: $return is not a reserved name (#514, rep by Stefano Bagnara)
+<li>Quercus Apache module: apache_note, apache_request_headers, virtual, getallheaders (#516, rep by Stefano Bagnara)
 <li>Added check for JDK 1.5 ($\{java.isJjava15()}) for Quercus
 </ul>
 </s2>

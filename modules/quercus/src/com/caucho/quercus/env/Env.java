@@ -1249,8 +1249,7 @@ public class Env {
 
     for (int i = 0; args != null && i < args.length; i++) {
       // php/3715
-      // XXX: count the copies
-      args[i] = args[i].toArgValue().copy();
+      args[i] = args[i].toValue().toArgValue();
     }
 
     _functionArgs = args;
@@ -2727,6 +2726,22 @@ public class Env {
       return new Var(value);
     else
       return value;
+  }
+
+  /**
+   * Sets a reference
+   */
+  public static Value setRef(Value oldValue, Value value)
+  {
+    if (value instanceof Var)
+      return value;
+    else if (oldValue instanceof Var) {
+      oldValue.set(value);
+
+      return value;
+    }
+    else
+      return new Var(value);
   }
 
   /**

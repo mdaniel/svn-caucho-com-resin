@@ -289,11 +289,14 @@ public class QuercusMysqlModule extends AbstractQuercusModule {
    * Returns a row from the connection
    */
   public Value mysql_fetch_array(Env env,
-                                 JdbcResultResource result,
+                                 MysqliResult result,
                                  @Optional("MYSQL_BOTH") int type)
     throws Exception
   {
-    return QuercusMysqliModule.mysqli_fetch_array(env, result, type);
+    if (result != null)
+      return result.fetch_array(type);
+    else
+      return BooleanValue.FALSE;
   }
 
   /**

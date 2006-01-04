@@ -568,9 +568,13 @@ public class VarExpr extends AbstractVarExpr {
       out.print(")");
     }
     else {
+      // php/3475
       out.print(getJavaVar());
-      out.print(" = ");
+      out.print(" = Env.setRef(");
+      out.print(getJavaVar());
+      out.print(", ");
       value.generateRef(out);
+      out.print(")");
     }
     
     if (! isTop)
