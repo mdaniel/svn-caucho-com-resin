@@ -157,11 +157,17 @@ public class SmtpTransport extends Transport {
       _os.print("MAIL FROM:<" + from + ">\r\n");
       _os.flush();
 
+      if (log.isLoggable(Level.FINER))
+	log.finer("mail from:" + from);
+
       readResponse();
 
       for (int i = 0; i < addresses.length; i++) {
 	InternetAddress addr = (InternetAddress) addresses[i];
-      
+
+	if (log.isLoggable(Level.FINER))
+	  log.finer("mail to:" + addr.getAddress());
+
 	_os.print("RCPT TO:<" + addr.getAddress() + ">\r\n");
 	_os.flush();
 

@@ -94,10 +94,8 @@ abstract public class ArrayValue extends Value {
   
   /**
    * Converts to a string.
-   * @param env
    */
-  public String toString(Env env)
-    throws Throwable
+  public String toString()
   {
     return "Array";
   }

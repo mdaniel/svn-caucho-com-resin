@@ -1005,7 +1005,12 @@ abstract public class Marshall {
       public Object marshall(Env env, Value value, Class expectedClass)
 	throws Throwable
       {
-	return env.createCallback(value);
+	Callback cb = env.createCallback(value);
+
+	if (cb != null)
+	  return cb;
+	else
+	  return null;
       }
     
       public Value unmarshall(Env env, Object value)

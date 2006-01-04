@@ -876,8 +876,11 @@ public class Env {
     if (var == null) {
       var = getSpecialRef(name);
 
-      if (var != null)
+      if (var != null) {
 	_globalMap.put(name, var);
+
+	var = _map.get(name);
+      }
     }
 
     return var;
@@ -916,9 +919,7 @@ public class Env {
 
 	ArrayValue post = new ArrayValueImpl();
 	
-	if (_post == null)
-	  _post = post;
-	else {
+	if (_post != null) {
 	  for (Map.Entry<Value,Value> entry : _post.entrySet()) {
 	    post.put(entry.getKey(), entry.getValue());
 	  }
@@ -993,6 +994,8 @@ public class Env {
     case _SERVER:
       {
 	var = new Var();
+	
+	_globalMap.put(name, var);
 	  
 	var.set(new ServerArrayValue(this));
 
@@ -1002,6 +1005,8 @@ public class Env {
     case _GLOBAL:
       {
 	var = new Var();
+	
+	_globalMap.put(name, var);
 	  
 	var.set(new GlobalArrayValue(this));
 
@@ -1012,6 +1017,7 @@ public class Env {
     case HTTP_COOKIE_VARS:
       {
 	var = new Var();
+	_globalMap.put(name, var);
 
 	ArrayValue array = new ArrayValueImpl();
 
@@ -1037,6 +1043,7 @@ public class Env {
     case PHP_SELF:
       {
 	var = new Var();
+	_globalMap.put(name, var);
 	  
 	var.set(getGlobalVar("_SERVER").get(PHP_SELF_STRING));
 	
@@ -2110,7 +2117,7 @@ public class Env {
       }
     }
     else
-      throw new IllegalStateException(L.l("unknown callback {0}", value));
+      return null;
   }
 
   /**

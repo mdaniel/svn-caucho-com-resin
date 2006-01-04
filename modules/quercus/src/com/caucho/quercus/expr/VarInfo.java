@@ -91,8 +91,9 @@ public class VarInfo {
    */
   public boolean isVariable()
   {
-    // return _function != null && _function.isVariableVar();
-    return _function != null && _function.isUsesSymbolTable();
+    // php/3251
+    return _function != null && (_function.isUsesSymbolTable() ||
+				 _function.isVariableVar());
   }
 
   /**

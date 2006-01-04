@@ -184,7 +184,7 @@ public class ArrayValueImpl extends ArrayValue {
    */
   public Value toArgValue()
   {
-    return this;
+    return copy();
   }
 
   /**

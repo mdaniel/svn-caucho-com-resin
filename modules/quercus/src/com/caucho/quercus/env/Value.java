@@ -248,7 +248,11 @@ abstract public class Value {
   }
   
   /**
-   * Convert to an argument value.
+   * Convert to a function argument value, e.g. for
+   *
+   * function foo($a)
+   *
+   * where $a is never assigned in the function
    */
   public Value toArgValue()
   {
@@ -256,7 +260,23 @@ abstract public class Value {
   }
   
   /**
-   * Converts to a variable
+   * Convert to a function argument reference value, e.g. for
+   *
+   * function foo(&$a)
+   *
+   * where $a is never assigned in the function
+   */
+  public Value toRefValue()
+  {
+    return toValue();
+  }
+  
+  /**
+   * Convert to a function argument value, e.g. for
+   *
+   * function foo($a)
+   *
+   * where $a is used as a variable in the function
    */
   public Var toVar()
   {
@@ -264,7 +284,11 @@ abstract public class Value {
   }
   
   /**
-   * Converts to a reference variable
+   * Convert to a function argument reference value, e.g. for
+   *
+   * function foo(&$a)
+   *
+   * where $a is used as a variable in the function
    */
   public Var toRefVar()
   {

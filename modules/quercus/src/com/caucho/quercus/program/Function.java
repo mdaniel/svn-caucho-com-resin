@@ -713,17 +713,26 @@ public class Function extends AbstractFunction {
 	out.println(varName + " = null;");
       }
       else if (isVariableMap()) {
+	// XXX: need to distinguish ref
 	out.println(varName + " = " + argName + ".toVar();");
       }
-      else if (! var.isAssigned()) {
-	// quercus/399j
-	out.println(varName + " = " + argName + ".toArgValue();");
-      }
-      else if (var.isRef()) {
-	out.println(varName + " = " + argName + ".toRefVar();");
+      else if (var.isAssigned()) {
+	if (var.isRef()) {
+	  out.println(varName + " = " + argName + ".toRefVar();");
+	}
+	else {
+	  out.println(varName + " = " + argName + ".toVar();");
+	}
       }
       else {
-	out.println(varName + " = " + argName + ".toVar();");
+	if (var.isRef()) {
+	  // php/344r
+	  out.println(varName + " = " + argName + ".toRefValue();");
+	}
+	else {
+	  // php/399j
+	  out.println(varName + " = " + argName + ".toArgValue();");
+	}
       }
     }
     

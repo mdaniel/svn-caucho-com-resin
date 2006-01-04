@@ -53,8 +53,8 @@ import com.caucho.util.RandomUtil;
 public class QuercusMathModule extends AbstractQuercusModule {
   private static final L10N L = new L10N(QuercusMathModule.class);
 
-  public static final double PI = Math.PI;
-  public static final double E = Math.E;
+  public static final double M_PI = Math.PI;
+  public static final double M_E = Math.E;
 
   public static final long RAND_MAX = 1L << 32;
 
@@ -214,7 +214,7 @@ public class QuercusMathModule extends AbstractQuercusModule {
     else if (value instanceof DoubleValue) {
       double v = value.toDouble();
 
-      return Double.isInfinite(v);
+      return ! Double.isInfinite(v);
     }
     else
       return false;
@@ -365,7 +365,7 @@ public class QuercusMathModule extends AbstractQuercusModule {
 
   public static double pi()
   {
-    return PI;
+    return M_PI;
   }
 
   public static double pow(double base, double exp)

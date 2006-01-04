@@ -360,8 +360,46 @@ public class MysqliStatement {
     return true;
   }
 
+
   /**
-   * Returns result information for metadata
+   * mysqli_stmt_result_metadata seems to be some initial
+   * step towards getting metadata from a resultset created
+   * by a SELECT run by a prepared statement.
+   *
+   * NB: the $field variable in the following 2 PHP
+   * scripts will be equivalent:
+   *
+   * $result = mysqli_query($link,"SELECT * FROM test");
+   * $field = mysqli_fetch_field($result);
+   *
+   * AND
+   *
+   * $stmt = mysqli_prepare($link, "SELECT * FROM test");
+   * mysqli_stmt_execute($stmt);
+   * $metaData = mysqli_stmt_result_metadata($stmt);
+   * $field = mysqli_fetch_field($metaData);
+   *
+   * So it seems that this function just provides a link into
+   * the resultset.
+   *
+   * The PHP documentation is clear that this function returns
+   * a mysqli_result with NO DATA.
+   *
+   * For simplicity, we return a mysqli_result with all the data.
+   *
+   * We check that mysqli_stmt_execute() has been run.
+   *
+   * From libmysql.c:
+   *   This function should be used after mysql_stmt_execute().
+   *   ...
+   *   Next steps you may want to make:
+   *   - find out number of columns is result set by calling
+   *     mysql_num_fields(res)....
+   *   - fetch metadata for any column with mysql_fetch_field...
+   *
+   * So basically, this function seems to exist only to be a
+   * way to get at the metadata from a resultset generated
+   * by a prepared statement.
    */
   public Value result_metadata(Env env)
     throws SQLException

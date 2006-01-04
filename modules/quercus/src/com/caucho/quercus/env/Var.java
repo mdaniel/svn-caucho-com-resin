@@ -194,7 +194,33 @@ public class Var extends Value {
    */
   public Value toArgValue()
   {
+    return _value.toArgValue();
+  }
+  
+  /**
+   * Converts to a function argument ref value.
+   */
+  public Value toRefValue()
+  {
+    // php/344r
     return _value;
+  }
+  
+  /**
+   * Converts to a variable
+   */
+  public Var toVar()
+  {
+    // php/3d04
+    return new Var(toArgValue());
+  }
+  
+  /**
+   * Converts to a reference variable
+   */
+  public Var toRefVar()
+  {
+    return this;
   }
 
   /**
@@ -224,27 +250,11 @@ public class Var extends Value {
   }
   
   /**
-   * Converts to a variable
-   */
-  public Var toVar()
-  {
-    return new Var(toValue());
-  }
-  
-  /**
    * Converts to a variable reference (for function  arguments)
    */
   public Value toRef()
   {
     return new RefVar(this);
-  }
-  
-  /**
-   * Converts to a reference variable
-   */
-  public Var toRefVar()
-  {
-    return this;
   }
 
   /**

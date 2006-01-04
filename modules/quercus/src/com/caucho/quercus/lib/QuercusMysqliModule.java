@@ -206,58 +206,28 @@ public class QuercusMysqliModule extends AbstractQuercusModule {
   /**
    * Closes a mysqli connection
    */ 
-  public static boolean mysqli_close(Env env,
-				     JdbcConnectionResource connV)
+  public static boolean mysqli_close(Env env, Mysqli conn)
   {
-    if (connV == null)
+    
+    if (conn != null)
+      return conn.close(env);
+    else
       return false;
-
-    connV.close();
-    env.removeResource(connV);
-
-    return true;
   }
+  
   /**
    * returns new mysqli connection
    */
-  public static Value mysqli_connect(Env env,
-                                     @Optional("localhost") String host,
-                                     @Optional String userName,
-                                     @Optional String password,
-                                     @Optional String dbname,
-                                     @Optional("3306") int port,
-                                     @Optional String socket)
+  public static Mysqli mysqli_connect(Env env,
+				      @Optional("localhost") String host,
+				      @Optional String userName,
+				      @Optional String password,
+				      @Optional String dbname,
+				      @Optional("3306") int port,
+				      @Optional String socket)
     throws IllegalStateException
   {
-    try {
-      if (host == null || host.equals(""))
-	host = "localhost";
-
-      String driver = "com.mysql.jdbc.jdbc2.optional.MysqlConnectionPoolDataSource";
-      
-      String url = "jdbc:mysql://" + host + ":" + port + "/" + dbname;
-
-      Connection jConn = env.getConnection(driver, url, userName, password);
-
-      ResourceValue conn = new JdbcConnectionResource(jConn);
-      
-      env.addResource(conn);
-
-      return conn;
-    } catch (SQLException e) {
-      env.warning("A link to the server could not be established. " + e.toString());
-      env.setSpecialValue("mysqli.connectErrno",new LongValue(e.getErrorCode()));
-      env.setSpecialValue("mysqli.connectError", new StringValue(e.getMessage()));
-
-      log.log(Level.FINE, e.toString(), e);
-      return BooleanValue.FALSE;
-    } catch (Exception e) {
-      env.warning("A link to the server could not be established. " + e.toString());
-      env.setSpecialValue("mysqli.connectError", new StringValue(e.getMessage()));
-
-      log.log(Level.FINE, e.toString(), e);
-      return BooleanValue.FALSE;
-    }
+    return new Mysqli(env, host, userName, password, dbname, port, socket);
   }
 
   /**
@@ -314,6 +284,11 @@ vv   */
                                             String unescapedString)
   {
     return mysqli_real_escape_string(connV, unescapedString);
+  }
+
+  public static boolean mysqli_fetch(MysqliStatement stmt)
+  {
+    return mysqli_stmt_fetch(stmt);
   }
 
   /**
@@ -540,16 +515,17 @@ vv   */
    * returns a row for the result
    */
   public static Value mysqli_fetch_array(Env env,
-                                         JdbcResultResource result,
+                                         MysqliResult result,
                                          @Optional("MYSQLI_BOTH") int type)
     throws Exception
   {
-    if (result == null) {
+    if (result != null) {
+      return result.fetch_array(type);
+    } else {
       env.warning(L.l("supplied argument is not a valid MySQL result resource"));
       return BooleanValue.FALSE;
     }
 
-    return result.fetchArray(type);
   }
 
   /**
@@ -777,13 +753,13 @@ vv   */
    * returns the number of rows in the result set
    * of a prepared statement
    */
-  public static Value mysqli_stmt_num_rows(JdbcStatementResource stmt)
+  public static Value mysqli_stmt_num_rows(MysqliStatement stmt)
     throws SQLException
   {
-    if (stmt == null)
+    if (stmt != null)
+      return stmt.num_rows();
+    else
       return BooleanValue.FALSE;
-
-    return stmt.getNumRows();
   }
 
   /**
@@ -824,7 +800,8 @@ vv   */
   /**
    * Returns result information for metadata
    */
-  public Value mysqli_stmt_result_metadata(Env env, MysqliStatement stmt)
+  public static Value mysqli_stmt_result_metadata(Env env,
+						  MysqliStatement stmt)
     throws SQLException
   {
     if (stmt != null)
@@ -836,7 +813,7 @@ vv   */
   /**
    * Returns an error string
    */
-  public String mysqli_stmt_sqlstate(MysqliStatement stmt)
+  public static String mysqli_stmt_sqlstate(MysqliStatement stmt)
   {
     if (stmt != null)
       return stmt.sqlstate();
@@ -847,7 +824,7 @@ vv   */
   /**
    * Saves the result.
    */
-  public boolean mysqli_stmt_store_result(MysqliStatement stmt)
+  public static boolean mysqli_stmt_store_result(MysqliStatement stmt)
   {
     if (stmt != null)
       return stmt.store_result();
@@ -1220,7 +1197,7 @@ vv   */
    * <p/>
    * returns true on success or false on failure
    */
-  public boolean mysqli_stmt_execute(Env env, MysqliStatement stmt)
+  public static boolean mysqli_stmt_execute(Env env, MysqliStatement stmt)
   {
     if (stmt != null)
       return stmt.execute(env);
@@ -1233,7 +1210,7 @@ vv   */
    * <p/>
    * returns true on success, false on error null if no more rows
    */
-  public boolean mysqli_stmt_fetch(MysqliStatement stmt)
+  public static boolean mysqli_stmt_fetch(MysqliStatement stmt)
   {
     if (stmt != null)
       return stmt.fetch();
@@ -1244,23 +1221,12 @@ vv   */
   /**
    * Frees the associated result
    */
-  public Value mysqli_stmt_free_result(MysqliStatement stmt)
+  public static Value mysqli_stmt_free_result(MysqliStatement stmt)
   {
     if (stmt != null)
       stmt.free_result();
 
     return NullValue.NULL;
-  }
-
-  /**
-   * Creates a new prepared statement.
-   */
-  public MysqliStatement mysqli_stmt_init(Env env, Mysqli mysqli)
-  {
-    if (mysqli != null)
-      return mysqli.stmt_init(env);
-    else
-      return null;
   }
 
   public static boolean mysqli_bind_result(Env env,
@@ -1285,6 +1251,18 @@ vv   */
       return false;
   }
 
+  public static boolean mysqli_execute(Env env,
+                                       MysqliStatement stmt)
+  {
+    return mysqli_stmt_execute(env, stmt);
+  }
+  
+  public static Value mysqli_get_metadata(Env env, MysqliStatement stmt)
+    throws SQLException
+  {
+    return mysqli_stmt_result_metadata(env, stmt);
+  }
+
   /**
    * Creates a new mysqli object.
    */
@@ -1294,118 +1272,41 @@ vv   */
   }
 
   /**
-   * Closes a prepared statement.
-   *
-   * @return true on success or false on failure
+   * Prepare a statement.
    */
-  public static boolean mysqli_stmt_close(JdbcStatementResource stmt)
+  public static MysqliStatement mysqli_prepare(Env env,
+					       Mysqli conn,
+					       String query)
+    throws SQLException
   {
-    stmt.close();
-
-    return true;
-  }
-
-  /**
-   * seeks to an arbitrary result pointer specified
-   * by the offset.
-   *
-   * @return NULL on success or FALSE on failure
-   */
-  public static Value mysqli_stmt_data_seek(JdbcStatementResource stmt,
-                                            int offset)
-  {
-    if (stmt.dataSeek(offset))
-      return NullValue.NULL;
+    if (conn != null)
+      return conn.prepare(env, query);
     else
-      return BooleanValue.FALSE;
+      return null;
   }
+
   /**
-   * Executes a query previously prepared by mysqli_prepare.
-   *
-   * Returns true on success or false on failure.
+   * closes a statement
    */
-  public static boolean mysqli_stmt_execute(Env env,
-                                            JdbcStatementResource stmtV)
+  public static boolean mysqli_stmt_close(MysqliStatement stmt)
+    throws SQLException
   {
-    if (stmtV != null)
-      return stmtV.execute(env);
-    else {
-      env.warning("invalid statement");
+    if (stmt != null)
+      return stmt.close();
+    else
       return false;
-    }
-  }
-
-  public static boolean mysqli_execute(Env env,
-                                       JdbcStatementResource stmt)
-  {
-    return mysqli_stmt_execute(env, stmt);
-  }
-
-  /**
-   * mysqli_stmt_result_metadata seems to be some initial
-   * step towards getting metadata from a resultset created
-   * by a SELECT run by a prepared statement.
-   *
-   * NB: the $field variable in the following 2 PHP
-   * scripts will be equivalent:
-   *
-   * $result = mysqli_query($link,"SELECT * FROM test");
-   * $field = mysqli_fetch_field($result);
-   *
-   * AND
-   *
-   * $stmt = mysqli_prepare($link, "SELECT * FROM test");
-   * mysqli_stmt_execute($stmt);
-   * $metaData = mysqli_stmt_result_metadata($stmt);
-   * $field = mysqli_fetch_field($metaData);
-   *
-   * So it seems that this function just provides a link into
-   * the resultset.
-   *
-   * The PHP documentation is clear that this function returns
-   * a mysqli_result with NO DATA.
-   *
-   * For simplicity, we return a mysqli_result with all the data.
-   *
-   * We check that mysqli_stmt_execute() has been run.
-   *
-   * From libmysql.c:
-   *   This function should be used after mysql_stmt_execute().
-   *   ...
-   *   Next steps you may want to make:
-   *   - find out number of columns is result set by calling
-   *     mysql_num_fields(res)....
-   *   - fetch metadata for any column with mysql_fetch_field...
-   *
-   * So basically, this function seems to exist only to be a
-   * way to get at the metadata from a resultset generated
-   * by a prepared statement.
-   */
-  public static Value mysqli_stmt_result_metadata(JdbcStatementResource stmt)
-  {
-    return stmt.getResultMetadata();
-  }
-
-  public static Value mysqli_get_metadata(JdbcStatementResource stmt)
-  {
-    return QuercusMysqliModule.mysqli_stmt_result_metadata(stmt);
-  }
-
-  /**
-   * frees a result set created by a prepared statement
-   */
-  public static boolean mysqli_stmt_free_result(JdbcStatementResource stmt)
-  {
-    return stmt.freeResult();
   }
 
   /**
    * returns a statement for use with
    * mysqli_stmt_prepare
    */
-  public static JdbcStatementResource mysqli_stmt_init(JdbcConnectionResource conn)
+  public static MysqliStatement mysqli_stmt_init(Env env, Mysqli conn)
   {
-    return new JdbcStatementResource(conn);
+    if (conn != null)
+      return conn.stmt_init(env);
+    else
+      return null;
   }
 
   /**
@@ -1414,41 +1315,6 @@ vv   */
   public static boolean mysqli_stmt_store_result(JdbcStatementResource stmt)
   {
     return stmt.storeResult();
-  }
-
-  /**
-   * fetches the results from a prepared statement
-   * into the variables bound my mysqli_stmt_bind_result
-   */
-  public static Value mysqli_stmt_fetch(JdbcStatementResource stmt)
-  {
-    return stmt.fetch();
-  }
-
-  public static Value mysqli_fetch(JdbcStatementResource stmt)
-  {
-    return mysqli_stmt_fetch(stmt);
-  }
-
-  /**
-   * returns a statement object or FALSE on error
-   */
-  public static boolean mysqli_stmt_prepare(JdbcStatementResource stmt,
-                                            String query)
-  {
-    return stmt.prepareStatement(query);
-  }
-
-  public static Value mysqli_prepare(JdbcConnectionResource conn,
-                                     String query)
-    throws SQLException
-  {
-    try {
-      return new JdbcStatementResource(conn,query);
-    } catch (SQLException e) {
-      log.log(Level.FINE, e.toString(), e);
-      throw e;
-    }
   }
 
   /**

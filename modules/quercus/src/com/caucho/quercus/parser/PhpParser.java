@@ -2435,13 +2435,12 @@ public class PhpParser {
       {
 	if (_lexeme.equals("new"))
 	  return parseNew();
-	    
-        token = parseToken();
-
-        _peekToken = token;
 
 	String className = null;
 	String name = _lexeme;
+	    
+        token = parseToken();
+        _peekToken = token;
 
 	if (token == SCOPE) {
 	  _peekToken = -1;

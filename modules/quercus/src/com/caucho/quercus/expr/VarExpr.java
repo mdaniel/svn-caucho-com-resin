@@ -656,17 +656,10 @@ public class VarExpr extends AbstractVarExpr {
   public void generateUnset(PhpWriter out)
     throws IOException
   {
-    if (_var.isGlobal()) {
-      out.print(getJavaVar());
-      out.print(" = env.unsetVar(\"");
-      out.printJavaString(_name);
-      out.print("\")");
-    }
-    else {
-      out.print(getJavaVar());
-      out.print(" = ");
-      out.print("null");
-    }
+    out.print(getJavaVar());
+    out.print(" = env.unsetVar(\"");
+    out.printJavaString(_name);
+    out.print("\")");
   }
 
   public int hashCode()

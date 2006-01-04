@@ -343,14 +343,36 @@ public class Mysqli {
 
     _host = host;
 
-    Value value = QuercusMysqliModule.mysqli_connect(env, host,
-						     userName, password,
-						     dbname, port, socket);
+    try {
+      if (host == null || host.equals(""))
+	host = "localhost";
 
-    if (value instanceof JdbcConnectionResource)
-      _conn = (JdbcConnectionResource) value;
+      String driver = "com.mysql.jdbc.jdbc2.optional.MysqlConnectionPoolDataSource";
+      
+      String url = "jdbc:mysql://" + host + ":" + port + "/" + dbname;
 
-    return _conn != null;
+      Connection jConn = env.getConnection(driver, url, userName, password);
+
+      _conn = new JdbcConnectionResource(jConn);
+      
+      env.addResource(_conn);
+
+      return true;
+    } catch (SQLException e) {
+      env.warning("A link to the server could not be established. " + e.toString());
+      env.setSpecialValue("mysqli.connectErrno",new LongValue(e.getErrorCode()));
+      env.setSpecialValue("mysqli.connectError", new StringValue(e.getMessage()));
+
+      log.log(Level.FINE, e.toString(), e);
+      
+      return false;
+    } catch (Exception e) {
+      env.warning("A link to the server could not be established. " + e.toString());
+      env.setSpecialValue("mysqli.connectError", new StringValue(e.getMessage()));
+
+      log.log(Level.FINE, e.toString(), e);
+      return false;
+    }
   }
 
   /**
@@ -568,8 +590,12 @@ public class Mysqli {
     JdbcConnectionResource conn = _conn;
     _conn = null;
     
-    if (conn != null)
-      return QuercusMysqliModule.mysqli_close(env, conn);
+    if (conn != null) {
+      env.removeResource(conn);
+      conn.close();
+      
+      return true;
+    }
     else
       return false;
   }
