@@ -99,16 +99,13 @@ public class ArrayValueImpl extends ArrayValue {
 
   public ArrayValueImpl(Env env,
 			IdentityHashMap<Value,Value> map,
-			ArrayValueImpl copy)
+			ArrayValue copy)
   {
+    this();
+    
     map.put(copy, this);
-    
-    int length = copy._entries.length;
-    
-    _entries = new Entry[length];
-    _hashMask = copy._hashMask;
 
-    for (Entry ptr = copy._head; ptr != null; ptr = ptr._next) {
+    for (Entry ptr = copy.getHead(); ptr != null; ptr = ptr._next) {
       put(ptr.getKey(), ptr.getValue().copy(env, map));
     }
   }

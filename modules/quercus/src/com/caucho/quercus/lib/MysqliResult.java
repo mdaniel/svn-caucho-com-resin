@@ -112,12 +112,66 @@ public class MysqliResult {
   }
 
   /**
+   * Returns the field lengths
+   */
+  public Value fetch_lengths()
+    throws Exception
+  {
+    return validateResult().getLengths();
+  }
+
+  /**
+   * Returns the field table
+   */
+  public Value fetch_field_catalog(int offset)
+    throws Exception
+  {
+    return validateResult().getFieldCatalog(offset);
+  }
+
+  /**
    * Returns the field metadata
    */
   public Value fetch_field_direct(Env env, int offset)
     throws Exception
   {
     return validateResult().fetchFieldDirect(env, offset);
+  }
+
+  /**
+   * Returns the field length
+   */
+  public Value fetch_field_length(int offset)
+    throws Exception
+  {
+    return validateResult().getFieldLength(offset);
+  }
+
+  /**
+   * Returns the field name
+   */
+  public Value fetch_field_name(int offset)
+    throws Exception
+  {
+    return validateResult().getFieldName(offset);
+  }
+
+  /**
+   * Returns the field table
+   */
+  public Value fetch_field_table(int offset)
+    throws Exception
+  {
+    return validateResult().getFieldTable(offset);
+  }
+
+  /**
+   * Returns the field type
+   */
+  public Value fetch_field_type(Env env, int offset)
+    throws Exception
+  {
+    return validateResult().getFieldType(offset);
   }
 
   /**
@@ -212,7 +266,7 @@ public class MysqliResult {
       rs.close();
   }
 
-  private JdbcResultResource validateResult()
+  JdbcResultResource validateResult()
   {
     return _rs;
   }

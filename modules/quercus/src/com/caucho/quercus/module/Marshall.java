@@ -63,7 +63,15 @@ import com.caucho.util.L10N;
 abstract public class Marshall {
   private static final L10N L = new L10N(Marshall.class);
 
-  public static Marshall create(Quercus quercus, Class argType)
+  public static Marshall create(Quercus quercus,
+				Class argType)
+  {
+    return create(quercus, argType, false);
+  }
+
+  public static Marshall create(Quercus quercus,
+				Class argType,
+				boolean isNotNull)
   {
     if (argType.isAssignableFrom(Value.class)) {
       return MARSHALL_VALUE;
@@ -134,7 +142,8 @@ abstract public class Marshall {
       return MARSHALL_VOID;
     }
     else {
-      return new JavaMarshall(quercus.getJavaClassDefinition(argType.getName()));
+      return new JavaMarshall(quercus.getJavaClassDefinition(argType.getName()),
+			      isNotNull);
     }
   }
   

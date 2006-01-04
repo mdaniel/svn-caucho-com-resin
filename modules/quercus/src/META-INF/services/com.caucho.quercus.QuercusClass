@@ -1,1 +1,3 @@
 com.caucho.quercus.lib.Mysqli
+com.caucho.quercus.lib.Memcache
+

@@ -167,6 +167,15 @@ public class Mysqli {
   /**
    * Returns the host information.
    */
+  public String get_client_info()
+    throws SQLException
+  {
+    return validateConnection().getClientInfo();
+  }
+
+  /**
+   * Returns the host information.
+   */
   public String get_host_info()
   {
     return _host + " via TCP socket";
@@ -600,7 +609,7 @@ public class Mysqli {
       return false;
   }
 
-  private JdbcConnectionResource validateConnection()
+  JdbcConnectionResource validateConnection()
   {
     JdbcConnectionResource conn = _conn;
     

@@ -64,10 +64,12 @@ public class JavaMarshall extends Marshall {
   private static final L10N L = new L10N(JavaMarshall.class);
   
   private final JavaClassDefinition _def;
+  private final boolean _isNotNull;
 
-  public JavaMarshall(JavaClassDefinition def)
+  public JavaMarshall(JavaClassDefinition def, boolean isNotNull)
   {
     _def = def;
+    _isNotNull = isNotNull;
   }
 
   public Object marshall(Env env, Expr expr, Class argClass)
@@ -83,10 +85,16 @@ public class JavaMarshall extends Marshall {
   {
     Object obj = value.toJavaObject();
 
-    if (obj == null)
+    if (obj == null) {
+      if (_isNotNull) {
+	env.warning(L.l("null is an unexpected argument, expected {0}",
+			shortName(argClass)));
+      }
+	
       return null;
+    }
     else if (! argClass.isAssignableFrom(obj.getClass()))
-      env.error(L.l("Can't assign to {0}", argClass));
+      env.error(L.l("Can't assign {0} to {1}", obj, argClass));
     
     return obj;
   }
@@ -110,6 +118,18 @@ public class JavaMarshall extends Marshall {
     throws IOException
   {
     out.print("env.wrapJava(");
+  }
+
+  private static String shortName(Class cl)
+  {
+    String name = cl.getName();
+
+    int p = name.lastIndexOf('.');
+
+    if (p > 0)
+      return name.substring(p + 1);
+    else
+      return name;
   }
 }
 

@@ -126,6 +126,9 @@ public class Quercus {
   private HashMap<String,SessionArrayValue> _sessionMap
     = new HashMap<String,SessionArrayValue>();
 
+  private HashMap<String,Object> _specialMap
+    = new HashMap<String,Object>();
+
   private DataSource _database;
 
   private long _staticId;
@@ -475,6 +478,22 @@ public class Quercus {
   public void destroySession(Env env, String sessionId)
   {
     _sessionMap.remove(sessionId);
+  }
+
+  /**
+   * Loads a special value
+   */
+  public Object getSpecial(String key)
+  {
+    return _specialMap.get(key);
+  }
+
+  /**
+   * Saves a special value
+   */
+  public void setSpecial(String key, Object value)
+  {
+    _specialMap.put(key, value);
   }
 
   /**

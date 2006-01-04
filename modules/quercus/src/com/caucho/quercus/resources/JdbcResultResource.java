@@ -890,7 +890,6 @@ public class JdbcResultResource extends ResourceValue {
 
       return array;
     } else {
-      _rs.close();
       return NullValue.NULL;
     }
   }

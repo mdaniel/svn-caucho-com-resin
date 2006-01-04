@@ -128,6 +128,7 @@ public class StaticFunction extends AbstractFunction {
 
     for (int i = 0; i < argLength - envOffset; i++) {
       boolean isReference = false;
+      boolean isNotNull = false;
 
       for (Annotation ann : paramAnn[i + envOffset]) {
         if (Optional.class.isAssignableFrom(ann.annotationType())) {
@@ -144,6 +145,9 @@ public class StaticFunction extends AbstractFunction {
         else if (Reference.class.isAssignableFrom(ann.annotationType())) {
 	  isReference = true;
 	}
+        else if (NotNull.class.isAssignableFrom(ann.annotationType())) {
+	  isNotNull = true;
+	}
       }
 
       Class argType = param[i + envOffset];
@@ -151,7 +155,7 @@ public class StaticFunction extends AbstractFunction {
       if (isReference)
 	_marshallArgs[i] = Marshall.MARSHALL_REFERENCE;
       else
-	_marshallArgs[i] = Marshall.create(quercus, argType);
+	_marshallArgs[i] = Marshall.create(quercus, argType, isNotNull);
     }
 
     _unmarshallReturn = Marshall.create(quercus, method.getReturnType());

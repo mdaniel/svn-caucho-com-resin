@@ -35,6 +35,7 @@ import java.util.LinkedHashMap;
 import java.util.HashMap;
 import java.util.Set;
 import java.util.Collection;
+import java.util.IdentityHashMap;
 import java.util.Map;
 
 import com.caucho.vfs.WriteStream;
@@ -57,6 +58,15 @@ public class ObjectValue extends ArrayValueWrapper {
     super(new ArrayValueImpl());
     _cl = cl;
 
+    
+    // _cl.initFields(_map);
+  }
+
+  public ObjectValue(Env env, IdentityHashMap<Value,Value> map,
+		     QuercusClass cl, ArrayValue oldValue)
+  {
+    super(new ArrayValueImpl(env, map, oldValue));
+    _cl = cl;
     
     // _cl.initFields(_map);
   }
@@ -313,6 +323,19 @@ public class ObjectValue extends ArrayValueWrapper {
   public Value copy()
   {
     return this;
+  }
+  
+  /**
+   * Copy for serialization
+   */
+  public Value copy(Env env, IdentityHashMap<Value,Value> map)
+  {
+    Value oldValue = map.get(this);
+
+    if (oldValue != null)
+      return oldValue;
+
+    return new ObjectValue(env, map, _cl, getArray());
   }
 
   // XXX: need to check the other copy, e.g. for sessions

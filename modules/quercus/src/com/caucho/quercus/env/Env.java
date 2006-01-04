@@ -181,8 +181,9 @@ public class Env {
   
   private HashMap<String,StringValue> _iniMap;
 
-  private HashMap<String,Value> _specialMap
-    = new HashMap<String,Value>();
+  // specialMap is used for implicit resources like the mysql link
+  private HashMap<String,Object> _specialMap
+    = new HashMap<String,Object>();
 
   private String _includePath;
   private ArrayList<Path> _includePathList;
@@ -682,11 +683,9 @@ public class Env {
   /**
    * Gets a special value.  Created to handle mySQL connection.
    */
-  public Value getSpecialValue(String name)
+  public Object getSpecialValue(String name)
   {
-    Value value = (Value) _specialMap.get(name);
-
-    return value;
+    return _specialMap.get(name);
   }
   /**
    * Gets a global
@@ -1149,7 +1148,7 @@ public class Env {
   /**
    * Sets a value.  Created at first to hold mysql connection.
    */
-  public Value setSpecialValue(String name, Value value)
+  public Object setSpecialValue(String name, Object value)
   {
     _specialMap.put(name,value);
 
@@ -1321,7 +1320,7 @@ public class Env {
   /**
    * Removes a specialValue
    */
-  public Value removeSpecialValue(String name)
+  public Object removeSpecialValue(String name)
   {
     return _specialMap.remove(name);
   }

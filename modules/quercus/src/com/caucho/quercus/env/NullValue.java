@@ -115,7 +115,7 @@ public class NullValue extends Value {
    */
   public Object toJavaObject()
   {
-    return "";
+    return null;
   }
   
   /**
