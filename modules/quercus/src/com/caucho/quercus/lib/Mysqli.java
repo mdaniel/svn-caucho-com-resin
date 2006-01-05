@@ -564,6 +564,22 @@ public class Mysqli {
   }
 
   /**
+   * Transfers the result set from the last query on the
+   * database connection represented by conn.
+   *
+   * Used in conjunction with mysqli_multi_query
+   */
+  public Value use_result(Env env)
+  {
+    Value value = validateConnection().storeResult();
+
+    if (value instanceof JdbcResultResource)
+      return env.wrapJava(new MysqliResult((JdbcResultResource) value));
+    else
+      return value;
+  }
+
+  /**
    * Returns a bogus thread id
    */
   public int thread_id()
