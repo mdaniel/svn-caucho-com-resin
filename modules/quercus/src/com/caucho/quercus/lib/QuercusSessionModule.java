@@ -106,7 +106,7 @@ public class QuercusSessionModule extends AbstractQuercusModule {
    */
   public String session_id(Env env)
   {
-    Value sessionIdValue = env.getSpecialValue("caucho.session_id");
+    Value sessionIdValue = (Value) env.getSpecialValue("caucho.session_id");
 
     if (sessionIdValue != null)
       return sessionIdValue.toString();
@@ -186,7 +186,7 @@ public class QuercusSessionModule extends AbstractQuercusModule {
 
     SessionCallback cb = env.getSessionCallback();
     
-    Value sessionIdValue = env.getSpecialValue("caucho.session_id");
+    Value sessionIdValue = (Value) env.getSpecialValue("caucho.session_id");
     String sessionId = null;
 
     if (sessionIdValue != null && ! sessionIdValue.isNull()) {

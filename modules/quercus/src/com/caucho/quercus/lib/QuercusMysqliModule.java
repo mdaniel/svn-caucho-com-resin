@@ -235,7 +235,7 @@ public class QuercusMysqliModule extends AbstractQuercusModule {
    */
   public static int mysqli_connect_errno(Env env)
   {
-    return env.getSpecialValue("mysqli.connectErrno").toInt();
+    return ((Value) env.getSpecialValue("mysqli.connectErrno")).toInt();
   }
 
   /**

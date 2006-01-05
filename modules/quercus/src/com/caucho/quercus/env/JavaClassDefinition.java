@@ -193,7 +193,7 @@ public class JavaClassDefinition extends AbstractQuercusClass {
   {
     introspectMethods(quercus, _type);
 
-    _marshall = new JavaMarshall(this);
+    _marshall = new JavaMarshall(this, false);
 
     Constructor []cons = _type.getConstructors();
 
