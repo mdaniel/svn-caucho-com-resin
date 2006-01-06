@@ -54,6 +54,7 @@ abstract public class Value {
 
   public static final StringValue SCALAR_V = new StringValue("scalar");
 
+  public static final Value []NULL_VALUE_ARRAY = new Value[0];
   public static final Value []NULL_ARGS = new Value[0];
 
   /**
@@ -854,6 +855,22 @@ abstract public class Value {
   public Collection<Value> getIndices()
   {
     return new java.util.ArrayList<Value>();
+  }
+
+  /**
+   * Returns the field keys.
+   */
+  public Value []getKeyArray()
+  {
+    return NULL_VALUE_ARRAY;
+  }
+
+  /**
+   * Returns the field values.
+   */
+  public Value []getValueArray()
+  {
+    return NULL_VALUE_ARRAY;
   }
 
   /**

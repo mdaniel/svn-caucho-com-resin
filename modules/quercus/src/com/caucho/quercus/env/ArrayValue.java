@@ -263,6 +263,44 @@ abstract public class ArrayValue extends Value {
   }
 
   /**
+   * Returns the field keys.
+   */
+  public Value []getKeyArray()
+  {
+    int size = getSize();
+
+    if (size == 0)
+      return NULL_VALUE_ARRAY;
+
+    Value []keys = new Value[size];
+
+    int i = 0;
+    for (Entry ptr = getHead(); ptr != null; ptr = ptr._next)
+      keys[i++] = ptr.getKey();
+
+    return keys;
+  }
+
+  /**
+   * Returns the field values.
+   */
+  public Value []getValueArray()
+  {
+    int size = getSize();
+
+    if (size == 0)
+      return NULL_VALUE_ARRAY;
+
+    Value []values = new Value[size];
+
+    int i = 0;
+    for (Entry ptr = getHead(); ptr != null; ptr = ptr._next)
+      values[i++] = ptr.getValue().copy();
+
+    return values;
+  }
+
+  /**
    * Gets a new value.
    */
   abstract public Value get(Value key);

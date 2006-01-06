@@ -158,42 +158,52 @@ public class ForeachStatement extends Statement {
   protected void generateImpl(PhpWriter out)
     throws IOException
   {
-    String objVar = "quercus_obj_" + out.generateId();
-    String objCopyVar = "quercus_copy_" + out.generateId();
-    String iterVar = "quercus_iter_" + out.generateId();
+    int id = out.generateId();
+    
+    String objVar = "quercus_obj_" + id;
+    String keysVar = "quercus_keys_" + id;
+    String valuesVar = "quercus_values_" + id;
+    String indexVar = "quercus_index_" + id;
 
     out.print("Value " + objVar + " = ");
     _objExpr.generate(out);
     out.println(";");
 
-    out.println("Value " + objCopyVar + " = " + objVar + ".copy();");
+    if (_key != null || _isRef)
+      out.println("Value []" + keysVar + " = " + objVar + ".getKeyArray();");
 
-    out.println("java.util.Iterator " + iterVar + " = " +
-		objCopyVar + ".getIndices().iterator();");
+    if (! _isRef)
+      out.println("Value []" + valuesVar + " = " + objVar + ".getValueArray();");
 
-    out.println("while (" + iterVar + ".hasNext()) {");
+    if (_key != null || _isRef) {
+      out.println("for (int " + indexVar + " = 0; " +
+		  indexVar + " < " + keysVar + ".length; " +
+		  indexVar + "++) {");
+    }
+    else {
+      out.println("for (int " + indexVar + " = 0; " +
+		  indexVar + " < " + valuesVar + ".length; " +
+		  indexVar + "++) {");
+    }
+
     out.pushDepth();
 
-    String keyVar = "quercus_key_" + out.generateId();
-    String valueVar = "quercus_value_" + out.generateId();
-
-    out.println("Value " + keyVar + " = (Value) " + iterVar + ".next();");
-
-    if (_isRef)
-      out.println("Value " + valueVar + " = " + objVar + ".getRef(" + keyVar + ");");
-    else
-      out.println("Value " + valueVar + " = " + objCopyVar + ".get(" + keyVar + ");");
+    String keyVar = keysVar + "[" + indexVar + "]";
 
     if (_key != null) {
       _key.generate(out);
       out.println(".set(" + keyVar + ");");
     }
-
+    
     if (_isRef) {
+      String valueVar = objVar + ".getRef(" + keyVar + ")";
+      
       _value.generateAssignRef(out, valueVar);
       out.println(";");
     }
     else {
+      String valueVar = valuesVar + "[" + indexVar + "]";
+      
       _value.generate(out);
       out.println(".set(" + valueVar + ");");
     }

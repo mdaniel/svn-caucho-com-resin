@@ -298,6 +298,22 @@ public class RefVar extends Value {
   }
 
   /**
+   * Returns the array keys.
+   */
+  public Value []getKeyArray()
+  {
+    return _var.getKeyArray();
+  }
+
+  /**
+   * Returns the array values.
+   */
+  public Value []getValueArray()
+  {
+    return _var.getValueArray();
+  }
+
+  /**
    * Returns the array ref.
    */
   public Value get(Value index)

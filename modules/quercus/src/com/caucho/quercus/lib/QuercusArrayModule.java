@@ -462,7 +462,7 @@ public class QuercusArrayModule extends AbstractQuercusModule {
     if (array == null)
       return NullValue.NULL;
 
-    ArrayValue newArray = new ArrayValueImpl();
+    ArrayValue newArray = new ArrayValueImpl(array.getSize());
 
     for (Map.Entry<Value, Value> entry : array.entrySet()) {
       Value entryValue = entry.getValue();

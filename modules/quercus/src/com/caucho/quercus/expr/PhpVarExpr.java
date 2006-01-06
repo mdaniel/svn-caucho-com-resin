@@ -53,8 +53,6 @@ public class PhpVarExpr extends VarExpr {
   public PhpVarExpr(VarInfo var)
   {
     super(var);
-
-    setVarState(VarState.UNSET);
   }
 
   /**

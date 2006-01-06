@@ -275,12 +275,9 @@ public class Var extends Value {
    */
   public Value copyReturn()
   {
-    /*
     if (_refCount < 1)
       return _value;
     else
-      return _value.copy();
-    */
       return _value.copy();
   }
   
@@ -438,6 +435,22 @@ public class Var extends Value {
   public Collection<Value> getIndices()
   {
     return _value.getIndices();
+  }
+
+  /**
+   * Returns the array keys.
+   */
+  public Value []getKeyArray()
+  {
+    return _value.getKeyArray();
+  }
+
+  /**
+   * Returns the array values.
+   */
+  public Value []getValueArray()
+  {
+    return _value.getValueArray();
   }
 
   /**

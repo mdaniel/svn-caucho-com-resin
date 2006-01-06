@@ -50,6 +50,7 @@ public class StringValue extends Value {
   private final static StringValue []CHAR_STRINGS;
   
   private final String _value;
+  private final char []_chars;
 
   public StringValue(String value)
   {
@@ -57,6 +58,8 @@ public class StringValue extends Value {
       throw new NullPointerException();
     
     _value = value;
+    _chars = new char[value.length()];
+    value.getChars(0, _chars.length, _chars, 0);
   }
 
   /**
@@ -113,15 +116,13 @@ public class StringValue extends Value {
    */
   public boolean isLong()
   {
-    String value = _value;
-    
-    int len = value.length();
+    int len = _chars.length;
 
     if (len == 0)
       return false;
     
     for (int i = 0; i < len; i++) {
-      char ch = value.charAt(i);
+      char ch = _chars[i];
       
       if (! ('0' <= ch && ch <= '9'))
 	return false;
@@ -151,7 +152,8 @@ public class StringValue extends Value {
    */
   private int getNumericType()
   {
-    int len = _value.length();
+    char []chars = _chars;
+    int len = chars.length;
 
     if (len == 0)
       return IS_STRING;
@@ -160,17 +162,17 @@ public class StringValue extends Value {
     int ch = 0;
     boolean hasPoint = false;
 
-    if (i < len && ((ch = _value.charAt(i)) == '+' || ch == '-')) {
+    if (i < len && ((ch = chars[i]) == '+' || ch == '-')) {
       i++;
     }
 
     if (len <= i)
       return IS_STRING;
 
-    ch = _value.charAt(i);
+    ch = chars[i];
 
     if (ch == '.') {
-      for (i++; i < len && '0' <= (ch = _value.charAt(i)) && ch <= '9'; i++) {
+      for (i++; i < len && '0' <= (ch = chars[i]) && ch <= '9'; i++) {
 	return IS_DOUBLE;
       }
       
@@ -179,14 +181,14 @@ public class StringValue extends Value {
     else if (! ('0' <= ch && ch <= '9'))
       return IS_STRING;
 
-    for (; i < len && '0' <= (ch = _value.charAt(i)) && ch <= '9'; i++) {
+    for (; i < len && '0' <= (ch = chars[i]) && ch <= '9'; i++) {
     }
 
     if (len <= i)
       return IS_LONG;
     else if (ch == '.' || ch == 'e' || ch == 'E') {
       for (i++;
-	   i < len && ('0' <= (ch = _value.charAt(i)) && ch <= '9' ||
+	   i < len && ('0' <= (ch = chars[i]) && ch <= '9' ||
 		       ch == '+' || ch == '-' || ch == 'e' || ch == 'E');
 	   i++) {
       }
@@ -492,7 +494,7 @@ public class StringValue extends Value {
   public void print(Env env)
     throws IOException
   {
-    env.getOut().print(_value);
+    env.getOut().print(_chars, 0, _chars.length);
   }
 
   /**
@@ -501,9 +503,9 @@ public class StringValue extends Value {
   public void serialize(StringBuilder sb)
   {
     sb.append("s:");
-    sb.append(_value.length());
+    sb.append(_chars.length);
     sb.append(":\"");
-    sb.append(_value);
+    sb.append(_chars, 0, _chars.length);
     sb.append("\";");
   }
 
@@ -538,7 +540,15 @@ public class StringValue extends Value {
    */
   public int hashCode()
   {
-    return _value.hashCode();
+    char []chars = _chars;
+    int len = _chars.length;
+
+    int hash = 37;
+
+    for (int i = 0; i < len; i++)
+      hash = 65531 * hash + chars[i];
+
+    return hash;
   }
 
   /**

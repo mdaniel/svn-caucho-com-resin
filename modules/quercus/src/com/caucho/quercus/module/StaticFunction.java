@@ -341,7 +341,7 @@ public class StaticFunction extends AbstractFunction {
 	if (_isRestReference)
 	  rest[i - _marshallArgs.length] = exprs[i].evalRef(env);
 	else
-	  rest[i - _marshallArgs.length] = exprs[i].eval(env);
+	  rest[i - _marshallArgs.length] = exprs[i].eval(env).toValue();
       }
 
       values[values.length - 1] = rest;
@@ -397,7 +397,10 @@ public class StaticFunction extends AbstractFunction {
       Value []rest = new Value[quercusArgs.length - _marshallArgs.length];
 
       for (int i = _marshallArgs.length; i < quercusArgs.length; i++) {
-	rest[i - _marshallArgs.length] = quercusArgs[i];
+	if (_isRestReference)
+	  rest[i - _marshallArgs.length] = quercusArgs[i];
+	else
+	  rest[i - _marshallArgs.length] = quercusArgs[i].toValue();
       }
 
       javaArgs[k++] = rest;
@@ -545,8 +548,11 @@ public class StaticFunction extends AbstractFunction {
       for (int i = _marshallArgs.length; i < args.length; i++) {
 	if (_isRestReference)
 	  args[i].generateRef(out);
-	else
+	else {
 	  args[i].generate(out);
+	  // php/3c1r
+	  out.print(".toValue()");
+	}
 
 	out.print(", ");
       }

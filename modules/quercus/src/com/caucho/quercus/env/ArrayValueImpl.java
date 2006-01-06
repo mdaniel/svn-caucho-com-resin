@@ -87,12 +87,23 @@ public class ArrayValueImpl extends ArrayValue {
     _hashMask = _entries.length - 1;
   }
 
+  public ArrayValueImpl(int size)
+  {
+    int capacity = DEFAULT_SIZE;
+
+    while (capacity < 4 * size)
+      capacity *= 2;
+    
+    _entries = new Entry[capacity];
+    _hashMask = _entries.length - 1;
+  }
+
   public ArrayValueImpl(ArrayValue copy)
   {
-    this();
+    this(copy.getSize());
 
     for (Entry ptr = copy.getHead(); ptr != null; ptr = ptr._next) {
-      // quercus/0662 for copy
+      // php/0662 for copy
       put(ptr.getKey(), ptr.getRawValue().copyArrayItem());
     }
   }
