@@ -471,7 +471,7 @@ public class QuercusArrayModule extends AbstractQuercusModule {
 
       if (searchValue == null || searchValue instanceof DefaultValue)
         newArray.put(entryKey);
-      else if (entryValue.eq(searchValue)
+      else if (entryValue.eq(searchValue))
       	newArray.put(entryKey);
     }
 
