@@ -471,8 +471,8 @@ public class QuercusArrayModule extends AbstractQuercusModule {
 
       if (searchValue == null || searchValue instanceof DefaultValue)
         newArray.put(entryKey);
-      else if (entryValue.eq(searchValue))
-        newArray.put(entryKey);
+      else if (entryValue.eq(searchValue)
+      	newArray.put(entryKey);
     }
 
     return newArray;
@@ -1501,8 +1501,6 @@ public class QuercusArrayModule extends AbstractQuercusModule {
     if (stack == null)
       return false;
 
-    Value foundKey;
-
     if (strict)
       return stack.containsStrict(needle) != NullValue.NULL;
     else
@@ -1764,49 +1762,49 @@ public class QuercusArrayModule extends AbstractQuercusModule {
   {
     if (array == null)
       return NullValue.NULL;
-
+    
     long extractType = rawType & ~EXTR_REFS;
-
+    
     boolean extrRefs = (rawType & EXTR_REFS) != 0;
-
-    if (extractType < EXTR_OVERWRITE || extractType > EXTR_IF_EXISTS &&
+    
+    if (extractType < EXTR_OVERWRITE || extractType > EXTR_IF_EXISTS && 
         extractType != EXTR_REFS) {
       env.warning("Unknown extract type");
-
+      
       return NullValue.NULL;
     }
-
+    
     if (extractType >= EXTR_PREFIX_SAME && extractType <= EXTR_PREFIX_IF_EXISTS &&
         (valuePrefix == null || (! (valuePrefix instanceof StringValue)))) {
       env.warning("Prefix expected to be specified");
-
+      
       return NullValue.NULL;
     }
-
+    
     String prefix = "";
-
+    
     if (valuePrefix instanceof StringValue)
       prefix = ((StringValue) valuePrefix).toString() + "_";
-
+    
     int completedSymbols = 0;
-
-    for (Value entryKey : array.keySet()) {
+    
+    for (Value entryKey : array.keySet()) { 
       Value entryValue = null;
-
+      
       if (extrRefs)
         entryValue = array.getRef(entryKey);
       else
         entryValue = array.get(entryKey);
-
-      Value tableValue = env.getValue(entryKey.toString());
-
+      
       String symbolName = entryKey.toString();
-
+      
+      Value tableValue = env.getValue(symbolName);
+      
       switch ((int) extractType) {
       case EXTR_SKIP:
         if (tableValue != NullValue.NULL)
           symbolName = "";
-
+      
         break;
       case EXTR_PREFIX_SAME:
         if (tableValue != NullValue.NULL)
@@ -1815,37 +1813,37 @@ public class QuercusArrayModule extends AbstractQuercusModule {
         break;
       case EXTR_PREFIX_ALL:
         symbolName = prefix + symbolName;
-
+        
         break;
       case EXTR_PREFIX_INVALID:
         if (! validVariableName(symbolName))
           symbolName = prefix + symbolName;
-
+        
         break;
       case EXTR_IF_EXISTS:
         if (tableValue == NullValue.NULL)
           entryValue = tableValue;
-
+        
         break;
       case EXTR_PREFIX_IF_EXISTS:
         if (tableValue != NullValue.NULL)
           symbolName = prefix + symbolName;
         else
           symbolName = "";
-
+        
         break;
       default:
-
+        
         break;
       }
-
+      
       if (validVariableName(symbolName)) {
         env.setValue(symbolName, entryValue);
 
         completedSymbols++;
       }
     }
-
+    
     return LongValue.create(completedSymbols);
   }
 
@@ -2595,6 +2593,137 @@ public class QuercusArrayModule extends AbstractQuercusModule {
     return BooleanValue.TRUE;
   }
 
+  /**
+   * Sorts the given arrays.
+   * @param arrays  arrays to sort
+   *
+   * @return true on success, and false on failure
+   */
+  /*
+  public boolean array_multisort(Env env, Value[] arrays)
+    throws Throwable
+  {
+    if (arrays.length < 1) {
+      env.warning("Wrong parameter count");
+      
+      return false;
+    }
+    
+    if (! (arrays[0] instanceof ArrayValue)) {
+      env.warning("Argument #1 is expected to be an array or a sort flag that" +
+        " has not already been specified");
+      
+      return false;
+    }
+    
+    int inputCtr = 0;
+    
+    while(inputCtr < arrays.length) {
+      
+      Value currentArray = arrays[inputCtr];
+      
+      if (! (currentArray instanceof ArrayValue)) {
+        env.warning("Argument #" + (inputCtr + 1) +
+            " is expected to be an array or a sort flag");
+        
+        return false;
+      }
+      
+      boolean firstFlagSet = false;
+      boolean secondFlagSet = false;
+      
+      while(inputCtr++ < arrays.length && 
+            ! (currentArray instanceof ArrayValue)) {
+        Value currentFlag = arrays[inputCtr];
+        
+        if (! (currentFlag instanceof LongValue)) {
+          env.warning("Argument #" + (inputCtr + 1) +
+            " is expected to be an array or a sort flag");
+          
+          return false;
+        }
+        
+        long currentFlagValue = currentFlag.toLong();
+        
+        if (currentFlagValue == SORT_DESC || currentFlagValue == SORT_ASC) {
+          if (firstFlagSet) {
+            env.warning("Argument #" + (inputCtr + 1) + " is expected to be" +
+                " an array or a sort flag that has not already been specified");
+            
+            return false;
+          }
+          else
+            firstFlagSet =  true;
+        }
+        else if (currentFlagValue == SORT_REGULAR || 
+                 currentFlagValue == SORT_NUMERIC ||
+                 currentFlagValue == SORT_STRING) {
+          if (secondFlagSet) {
+            env.warning("Argument #" + (inputCtr + 1) + " is expected to be" +
+                " an array or a sort flag that has not already been specified");
+            
+            return false;
+          }
+          else
+            secondFlagSet = true;
+        }
+        else {
+          env.warning("Argument #" + (inputCtr + 1) +
+            " is an unknown sort flag");
+          
+          return false;
+        } 
+      }
+    }
+    
+    inputCtr = 0;
+    
+    ArrayValue keyArray = new ArrayValue();
+    
+    ArrayValue duplicateArray = new ArrayValue();
+    
+    boolean keyArrayInit = false;
+    
+    ArrayValue currentArray = (ArrayValue) arrays[inputCtr];
+    
+    for (int k = 0; k < currentArray.size(); k++)
+      duplicateArray.append(NullValue.NULL);
+            
+    while (inputCtr < arrays.length) {     
+      currentArray = (ArrayValue) arrays[inputCtr];
+        
+      int flag1 = SORT_ASC;
+      int flag2 = SORT_REGULAR;
+        
+      Value possibleFlag = arrays[inputCtr++];
+
+      while (! (possibleFlag instanceof ArrayValue)) {
+        int flagValue = (int) possibleFlag.toLong();
+          
+        if (flagValue == SORT_DESC || flagValue == SORT_ASC)
+          flag1 = flagValue;
+        else
+          flag2 = flagValue;
+          
+        possibleFlag = arrays[inputCtr++];
+      }
+        
+      if (flag1 == SORT_ASC)
+        sort(env, currentArray, flag2);
+      else
+        rsort(env, currentArray, flag2);
+        
+      if (! keyArrayInit)
+        for (Value key: currentArray.keySet())
+          keyArray.append(key);
+        
+      for (Map.Entry<Value, Value> entry: currentArray.entrySet()) {
+        
+      }
+    }
+    return true;
+  }*/
+  
   // XXX: Performance Test asort
   /**
    * Sorts the array.
@@ -2637,6 +2766,75 @@ public class QuercusArrayModule extends AbstractQuercusModule {
     return BooleanValue.TRUE;
   }*/
 
+  /**
+   * Creates an array with all the values of the first array that are not present in the
+   * other arrays, using a provided callback function to determine equivalence.
+   * 
+   * @param arrays  first array is checked against the rest
+   * @param cmp	a callback function to determine equivalence
+   *
+   * @return an array with all the values of the first array that are not in the rest
+   */
+  public Value array_udiff(Env env, Value[] arrays, Callback cmp)
+  {
+    if (arrays.length < 2) {
+    	env.warning("Wrong paremeter count for array_udiff()");
+    	
+    	return NullValue.NULL;
+    }
+    
+    if (! (arrays[0] instanceof ArrayValue)) {
+    	env.warning("Argument #1 is not an array");
+    	
+    	return NullValue.NULL;
+    }
+    
+    ArrayValue array = (ArrayValue) arrays[0];
+    
+    ArrayValue diffArray = new ArrayValueImpl();
+
+    boolean isFound = false;
+    
+    for (Value entryKey: array.keySet()) {
+    	Value entryValue = array.get(entryKey);
+    	
+      for (int k = 1; k < arrays.length && ! isFound; k++) {
+      	if (! (arrays[k] instanceof ArrayValue)) {
+      		env.warning("Argument #" + (k + 1) + " is not an array");
+      		
+      		return NullValue.NULL;
+      	}
+      	
+        ArrayValue checkArray = (ArrayValue) arrays[k];
+        
+        for (Map.Entry<Value, Value> entry: checkArray.entrySet()) {
+        	try {
+        		isFound = cmp.eval(env, entryValue, entry.getValue()).toLong() == 0;
+        	}
+        	catch (Throwable t) {
+            log.log(Level.WARNING, t.toString(), t);
+            
+            env.warning("An error occurred while invoking the filter callback");
+            
+            return NullValue.NULL;
+          } 
+        	
+        	if (isFound)
+        		break;
+        }
+      }
+      
+      if (! isFound)
+      	diffArray.append(entryKey, entryValue);
+      
+      isFound = false;
+    }
+    
+    return diffArray;
+  }
+  
+
+  
   /**
    * Returns the size of the array.
    */
