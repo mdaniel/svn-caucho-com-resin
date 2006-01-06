@@ -275,9 +275,12 @@ public class Var extends Value {
    */
   public Value copyReturn()
   {
+    /*
     if (_refCount < 1)
       return _value;
     else
+      return _value.copy();
+    */
       return _value.copy();
   }
   
