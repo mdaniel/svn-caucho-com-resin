@@ -1262,9 +1262,11 @@ public class Env {
   {
     Value []oldArgs = _functionArgs;
 
+    Value []newArgs = new Value[args.length];
+
     for (int i = 0; args != null && i < args.length; i++) {
-      // php/3715
-      args[i] = args[i].toValue().toArgValue();
+      // php/3715, 3768
+      newArgs[i] = args[i].toValue().toArgValue();
     }
 
     _functionArgs = args;

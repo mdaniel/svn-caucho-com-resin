@@ -607,18 +607,22 @@ public class Function extends AbstractFunction {
 
     // XXX: try to optimize-away the map
 
-    out.println("Value []quercus_oldArgs = env.setFunctionArgs(args);");
-    out.println("try {");
-    out.pushDepth();
+    if (_info.isVariableArgs()) {
+      out.println("Value []quercus_oldArgs = env.setFunctionArgs(args);");
+      out.println("try {");
+      out.pushDepth();
+    }
 
     generateBody(out);
     
-    out.popDepth();
-    out.println("} finally {");
-    out.pushDepth();
-    out.println("env.restoreFunctionArgs(quercus_oldArgs);");
-    out.popDepth();
-    out.println("}");
+    if (_info.isVariableArgs()) {
+      out.popDepth();
+      out.println("} finally {");
+      out.pushDepth();
+      out.println("env.restoreFunctionArgs(quercus_oldArgs);");
+      out.popDepth();
+      out.println("}");
+    }
     
     out.popDepth();
     out.println("}");

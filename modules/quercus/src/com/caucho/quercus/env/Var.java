@@ -238,7 +238,7 @@ public class Var extends Value {
   public Var toRefVar()
   {
     _refCount = 2;
-    
+
     return this;
   }
 
