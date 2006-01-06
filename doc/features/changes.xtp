@@ -2,9 +2,9 @@
 
 <a href='changes-2.xtp'>Resin 2.1 changes</a>
 
-<s2 title='3.0.snap - Dec 22, 2005'>
+<s2 title='3.0.snap - Jan 5, 2005'>
 <ul>
-<li>Quercus: func_get_args copy/ref issues (#607, rep by Stefano Bagnara)
+<li>(2005-01-05) Quercus: func_get_args copy/ref issues (#607, rep by Stefano Bagnara)
 <li>Quercus: $_FILES, is_uploaded_file, move_uploaded_file (#652, 
 <li>Persistent session block reference count not properly updated (#596, rep by Keith Fetterman)
 <li>Quercus: added mcrypt (#606)
