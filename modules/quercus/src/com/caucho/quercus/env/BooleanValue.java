@@ -205,6 +205,14 @@ public class BooleanValue extends Value {
   }
 
   /**
+   * Exports the value.
+   */
+  public void varExport(StringBuilder sb)
+  {
+    sb.append(_value ? "true" : "false");
+  }
+
+  /**
    * Returns the hash code
    */
   public int hashCode()

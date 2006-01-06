@@ -90,6 +90,18 @@ public class CopyExpr extends UnaryExpr {
   }
 
   /**
+   * Generates code to evaluate the expression.
+   *
+   * @param out the writer to the Java source code.
+   */
+  public void generateReturn(PhpWriter out)
+    throws IOException
+  {
+    _expr.generate(out);
+    out.print(".copyReturn()");
+  }
+
+  /**
    * Generates code to recreate the expression.
    *
    * @param out the writer to the Java source code.

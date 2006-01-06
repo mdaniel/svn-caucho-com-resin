@@ -91,10 +91,14 @@ public class RefExpr extends UnaryExpr {
   {
     Value value = getExpr().evalRef(env);
 
+    // php/112d
+    return value;
+    /*
     if (value instanceof Var)
       return new RefVar((Var) value);
     else
       return value;
+    */
   }
 
   //
@@ -119,6 +123,18 @@ public class RefExpr extends UnaryExpr {
   {
     _expr.generateRef(out);
     out.print(".toRef()");
+  }
+
+  /**
+   * Generates code to evaluate the expression.
+   *
+   * @param out the writer to the Java source code.
+   */
+  public void generateRef(PhpWriter out)
+    throws IOException
+  {
+    // php/3c1q
+    _expr.generateRef(out);
   }
   
   public String toString()

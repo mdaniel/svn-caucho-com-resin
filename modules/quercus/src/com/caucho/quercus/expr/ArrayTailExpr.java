@@ -286,10 +286,11 @@ public class ArrayTailExpr extends AbstractVarExpr {
   public void generateAssign(PhpWriter out, Expr value, boolean isTop)
     throws IOException
   {
+    // php/3a55
     _expr.generateArray(out);
     out.print(".put(");
     value.generate(out);
-    out.print(".toArgValue())");
+    out.print(")");
   }
 
   /**
@@ -300,10 +301,11 @@ public class ArrayTailExpr extends AbstractVarExpr {
   public void generateAssignRef(PhpWriter out, Expr value, boolean isTop)
     throws IOException
   {
+    // php/3a56
     _expr.generateArray(out);
     out.print(".put(");
     value.generateRef(out);
-    out.print(".toArgValue())");
+    out.print(")");
   }
 
   /**

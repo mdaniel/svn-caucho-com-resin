@@ -103,12 +103,9 @@ public class QuercusStringModule extends AbstractQuercusModule {
    * @param charset the set of characters to convert
    * @return the escaped string
    */
-  public static Value addcslashes(Env env, Value s, Value charset)
-    throws Throwable
+  public static String addcslashes(String source, String charset)
   {
-    String source = s.toString(env);
-
-    boolean []bitmap = parseCharsetBitmap(charset.toString(env));
+    boolean []bitmap = parseCharsetBitmap(charset);
 
     StringBuilder sb = new StringBuilder();
     int length = source.length();
@@ -159,7 +156,7 @@ public class QuercusStringModule extends AbstractQuercusModule {
       }
     }
 
-    return new StringValue(sb.toString());
+    return sb.toString();
   }
 
   /**
@@ -213,13 +210,9 @@ public class QuercusStringModule extends AbstractQuercusModule {
    * @param s the source string to convert
    * @return the escaped string
    */
-  public static Value addslashes(Env env, Value s)
+  public static String addslashes(Env env, String source)
     throws Throwable
   {
-    // XXX: sybase?
-
-    String source = s.toString(env);
-
     StringBuilder sb = new StringBuilder();
     int length = source.length();
     for (int i = 0; i < length; i++) {
@@ -244,7 +237,7 @@ public class QuercusStringModule extends AbstractQuercusModule {
       }
     }
 
-    return new StringValue(sb.toString());
+    return sb.toString();
   }
 
   /**

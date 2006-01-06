@@ -43,6 +43,8 @@ public class VarInfo {
   private boolean _isArgument;
   private boolean _isRef;
   private boolean _isAssigned;
+  // true if the content of the variable might be modified
+  private boolean _isContentModified;
 
   // XXX: move to arg?
   private int _argumentIndex;

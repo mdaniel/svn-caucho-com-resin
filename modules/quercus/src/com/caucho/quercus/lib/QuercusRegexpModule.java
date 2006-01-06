@@ -85,22 +85,6 @@ public class QuercusRegexpModule extends AbstractQuercusModule {
   private static final HashMap<String,Value> _constMap
     = new HashMap<String,Value>();
 
-  static {
-    _constMap.put("PREG_PATTERN_ORDER", new LongValue(PREG_PATTERN_ORDER));
-    _constMap.put("PREG_SET_ORDER", new LongValue(PREG_SET_ORDER));
-    _constMap.put("PREG_OFFSET_CAPTURE", new LongValue(PREG_OFFSET_CAPTURE));
-  }
-
-  /**
-   * Adds the constant to the PHP engine's constant map.
-   *
-   * @return the new constant chain
-   */
-  public Map<String,Value> getConstMap()
-  {
-    return _constMap;
-  }
-
   /**
    * Returns the index of the first match.
    *
@@ -249,15 +233,15 @@ public class QuercusRegexpModule extends AbstractQuercusModule {
    *
    * @param env the calling environment
    */
-  public static Value preg_match_all(String patternString,
-                                     String subject,
-                                     @Reference Value matchRef,
-                                     @Optional("PREG_PATTERN_ORDER") int flags,
-                                     @Optional int offset)
+  public static int preg_match_all(String patternString,
+				   String subject,
+				   @Reference Value matchRef,
+				   @Optional("PREG_PATTERN_ORDER") int flags,
+				   @Optional int offset)
     throws Throwable
   {
     if (patternString.length() < 2) // XXX: should be error
-      return LongValue.ZERO;
+      return 0;
 
     Pattern pattern = compileRegexp(patternString);
     Matcher matcher = pattern.matcher(subject);
@@ -273,20 +257,20 @@ public class QuercusRegexpModule extends AbstractQuercusModule {
 
     matches.clear();
 
+    matchRef.set(matches);
+
     ArrayList<ArrayValue> matchList = new ArrayList<ArrayValue>();
 
     if ((flags & PREG_PATTERN_ORDER) != 0) {
       for (int j = 0; j <= matcher.groupCount(); j++) {
         ArrayValue values = new ArrayValueImpl();
-        matches.append(values);
+        matches.put(values);
         matchList.add(values);
       }
     }
 
-    matchRef.set(matches);
-
     if (! (matcher.find())) {
-      return LongValue.ZERO;
+      return 0;
     }
 
     int count = 0;
@@ -301,22 +285,22 @@ public class QuercusRegexpModule extends AbstractQuercusModule {
           String groupValue = matcher.group(j);
 
           if (groupValue != null)
-            values.append(new StringValue(groupValue));
+            values.put(new StringValue(groupValue));
           else
-            values.append(NullValue.NULL);
+            values.put(NullValue.NULL);
         }
       }
       else if ((flags & PREG_SET_ORDER) != 0) {
         ArrayValue matchResult = new ArrayValueImpl();
-        matches.append(matchResult);
+        matches.put(matchResult);
 
         for (int j = 0; j <= matcher.groupCount(); j++) {
           String groupValue = matcher.group(j);
 
           if (groupValue != null)
-            matchResult.append(new StringValue(groupValue));
+            matchResult.put(new StringValue(groupValue));
           else
-            matchResult.append(NullValue.NULL);
+            matchResult.put(NullValue.NULL);
         }
       }
       else {
@@ -324,7 +308,7 @@ public class QuercusRegexpModule extends AbstractQuercusModule {
       }
     } while (matcher.find());
 
-    return new LongValue(count);
+    return count;
   }
 
   /**
@@ -578,9 +562,9 @@ public class QuercusRegexpModule extends AbstractQuercusModule {
         String group = matcher.group(i);
 
         if (group != null)
-          regs.append(new StringValue(group));
+          regs.put(new StringValue(group));
         else
-          regs.append(StringValue.EMPTY);
+          regs.put(StringValue.EMPTY);
       }
 
       Value replacement = fun.eval(env, regs);
@@ -623,20 +607,20 @@ public class QuercusRegexpModule extends AbstractQuercusModule {
         String value = string.substring(head, matcher.start());
 
         ArrayValue part = new ArrayValueImpl();
-        part.append(new StringValue(value));
-        part.append(new LongValue(head));
+        part.put(new StringValue(value));
+        part.put(new LongValue(head));
 
-        result.append(part);
+        result.put(part);
 
         head = matcher.end();
       }
 
       if (head < string.length()) {
         ArrayValue part = new ArrayValueImpl();
-        part.append(new StringValue(string.substring(head)));
-        part.append(new LongValue(head));
+        part.put(new StringValue(string.substring(head)));
+        part.put(new LongValue(head));
 
-        result.append(part);
+        result.put(part);
       }
     }
     else if ((flags & PREG_SPLIT_DELIM_CAPTURE) != 0) {

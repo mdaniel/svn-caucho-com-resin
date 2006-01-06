@@ -228,10 +228,17 @@ public class ArrayValueImpl extends ArrayValue {
   {
     Entry entry = createEntry(key);
 
-    // quercus/0434
+    // php/0434
     Value oldValue = entry.getRawValue();
 
-    if (oldValue instanceof Var && ! (value instanceof Var)) {
+    if (value instanceof Var) {
+      // php/0a59
+      Var var = (Var) value;
+      var.setReference();
+
+      entry.setRaw(var);
+    }
+    else if (oldValue instanceof Var) {
       oldValue.set(value);
     }
     else {

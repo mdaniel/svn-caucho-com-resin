@@ -224,6 +224,14 @@ abstract public class Value {
   }
   
   /**
+   * Copy as a return value
+   */
+  public Value copyReturn()
+  {
+    return copy();
+  }
+  
+  /**
    * Copy for serialization
    */
   public final Value copy(Env env)
@@ -1047,6 +1055,14 @@ abstract public class Value {
    * Serializes the value.
    */
   public void serialize(StringBuilder sb)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  /**
+   * Exports the value.
+   */
+  public void varExport(StringBuilder sb)
   {
     throw new UnsupportedOperationException(getClass().getName());
   }

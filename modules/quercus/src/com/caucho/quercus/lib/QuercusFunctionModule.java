@@ -112,6 +112,14 @@ public class QuercusFunctionModule extends AbstractQuercusModule {
   }
 
   /**
+   * Returns an array of the defined functions
+   */
+  public static Value get_defined_functions(Env env)
+  {
+    return env.getDefinedFunctions();
+  }
+
+  /**
    * Returns the nth function argument.
    */
   @VariableArguments
@@ -137,7 +145,7 @@ public class QuercusFunctionModule extends AbstractQuercusModule {
 
     ArrayValue result = new ArrayValueImpl();
     for (int i = 0; i < args.length; i++)
-      result.append(args[i]);
+      result.put(args[i]);
 
     return result;
   }

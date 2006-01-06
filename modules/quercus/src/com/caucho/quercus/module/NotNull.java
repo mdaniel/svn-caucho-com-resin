@@ -27,54 +27,17 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.quercus.env;
+package com.caucho.quercus.module;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+import java.lang.annotation.ElementType;
 
 /**
- * Represents an array-get argument which might be a call to a reference.
+ * The @NotNull annotation.
  */
-public class ArgGetValue extends Value {
-  private final Value _obj;
-  private final Value _index;
-
-  public ArgGetValue(Value obj, Value index)
-  {
-    _obj = obj;
-    _index = index;
-  }
-
-  /**
-   * Converts to a reference variable.
-   */
-  public Var toRefVar()
-  {
-    // php/3d55, php/3d49
-    return _obj.getArgRef(_index).toRefVar();
-  }
-
-  /**
-   * Converts to a reference variable.
-   */
-  public Value toRefValue()
-  {
-    // php/3a57
-    return _obj.getArgRef(_index);
-  }
-
-  /**
-   * Converts to a value.
-   */
-  public Value toValue()
-  {
-    return _obj.get(_index);
-  }
-
-  /**
-   * Converts to a variable.
-   */
-  public Var toVar()
-  {
-    // quercus/3d56
-    return new Var();
-  }
+@Target({ElementType.PARAMETER})
+@Retention(RetentionPolicy.RUNTIME)
+public @interface NotNull {
 }
-

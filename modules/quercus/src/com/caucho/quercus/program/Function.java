@@ -268,7 +268,7 @@ public class Function extends AbstractFunction {
       else if (_isReturnsReference && isRef)
 	return value;
       else
-	return value.copy();
+	return value.copyReturn();
     } finally {
       env.restoreFunctionArgs(oldArgs);
       env.popEnv(oldMap);
@@ -716,23 +716,16 @@ public class Function extends AbstractFunction {
 	// XXX: need to distinguish ref
 	out.println(varName + " = " + argName + ".toVar();");
       }
+      else if (var.isRef()) {
+	// php/344r, 3a57
+	out.println(varName + " = " + argName + ".toRefVar();");
+      }
       else if (var.isAssigned()) {
-	if (var.isRef()) {
-	  out.println(varName + " = " + argName + ".toRefVar();");
-	}
-	else {
-	  out.println(varName + " = " + argName + ".toVar();");
-	}
+	out.println(varName + " = " + argName + ".toVar();");
       }
       else {
-	if (var.isRef()) {
-	  // php/344r
-	  out.println(varName + " = " + argName + ".toRefValue();");
-	}
-	else {
-	  // php/399j
-	  out.println(varName + " = " + argName + ".toArgValue();");
-	}
+	// php/399j
+	out.println(varName + " = " + argName + ".toArgValue();");
       }
     }
     

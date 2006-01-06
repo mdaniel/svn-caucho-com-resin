@@ -208,13 +208,13 @@ public class QuercusArrayModule extends AbstractQuercusModule {
 
       if (i % size == 0) {
         currentArray =  new ArrayValueImpl();
-        newArray.append(currentArray);
+        newArray.put(currentArray);
       }
 
       if (preserveKeys)
-        currentArray.append(key, value);
+        currentArray.put(key, value);
       else
-        currentArray.append(new LongValue(i % size), value);
+        currentArray.put(new LongValue(i % size), value);
 
       i++;
     }
@@ -249,7 +249,7 @@ public class QuercusArrayModule extends AbstractQuercusModule {
     ArrayValue array = new ArrayValueImpl();
 
     while (keyIter.hasNext() && valueIter.hasNext()) {
-      array.append(keyIter.next(), valueIter.next());
+      array.put(keyIter.next(), valueIter.next());
     }
 
     return array;
@@ -470,9 +470,9 @@ public class QuercusArrayModule extends AbstractQuercusModule {
 
 
       if (searchValue == null || searchValue instanceof DefaultValue)
-        newArray.append(entryKey);
+        newArray.put(entryKey);
       else if (entryValue.eq(searchValue))
-        newArray.append(entryKey);
+        newArray.put(entryKey);
     }
 
     return newArray;
@@ -664,7 +664,7 @@ public class QuercusArrayModule extends AbstractQuercusModule {
   public int array_push(Env env, ArrayValue array, Value []values)
   {
     for (int i = 0; i < values.length; i++) {
-      array.append(values[i]);
+      array.put(values[i]);
     }
 
     return array.getSize();
@@ -1722,7 +1722,7 @@ public class QuercusArrayModule extends AbstractQuercusModule {
     ArrayValue array = new ArrayValueImpl();
 
     do {
-      array.append(start);
+      array.put(start);
 
       start = rangeIncrement(start, step);
     } while ((increment && start.leq(end, env)) ||
@@ -2511,9 +2511,9 @@ public class QuercusArrayModule extends AbstractQuercusModule {
         Value value = entry.getValue();
 
         if (key.isNumber())
-          result.append(value);
+          result.put(value);
         else
-          result.append(key, value);
+          result.put(key, value);
       }
     }
 
@@ -2553,7 +2553,7 @@ public class QuercusArrayModule extends AbstractQuercusModule {
       Value value = entry.getValue().toValue();
 
       if (key.isNumber()) {
-	result.append(value);
+	result.put(value);
       }
       else {
 	Value oldValue = result.get(key).toValue();

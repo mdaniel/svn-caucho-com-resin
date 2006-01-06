@@ -631,6 +631,17 @@ abstract public class Expr {
   }
 
   /**
+   * Generates code for a return value
+   *
+   * @param out the writer to the Java source code.
+   */
+  public void generateReturn(PhpWriter out)
+    throws IOException
+  {
+    generate(out);
+  }
+
+  /**
    * Generates code to recreate the expression.
    *
    * @param out the writer to the Java source code.

@@ -61,8 +61,9 @@ public class ReturnStatement extends Statement {
   public Value execute(Env env)
     throws Throwable
   {
-    if (_expr != null)
-      return _expr.eval(env);
+    if (_expr != null) {
+      return _expr.evalRef(env);
+    }
     else
       return NullValue.NULL;
   }
@@ -101,7 +102,7 @@ public class ReturnStatement extends Statement {
     
     if (_expr != null) {
       out.print("return ");
-      _expr.createCopy().generate(out);
+      _expr.createCopy().generateReturn(out);
       out.println(";");
     }
     else

@@ -84,6 +84,22 @@ public class ArgArrayGetValue extends Value {
   }
 
   /**
+   * Converts to a arg value
+   */
+  public Value toArgValue()
+  {
+    return _obj.get(_index);
+  }
+
+  /**
+   * Converts to a ref value
+   */
+  public Value toRefValue()
+  {
+    return _obj.getArgRef(_index).toRefValue();
+  }
+
+  /**
    * Converts to a ref var.
    */
   public Var toRefVar()

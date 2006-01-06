@@ -334,7 +334,9 @@ abstract public class ArrayValue extends Value {
   }
 
   /**
-   * Add
+   * Appends as an argument - only called from compiled code
+   *
+   * XXX: change name to appendArg
    */
   public ArrayValue append(Value key, Value value)
   {
@@ -344,7 +346,9 @@ abstract public class ArrayValue extends Value {
   }
 
   /**
-   * Add
+   * Appends as an argument - only called from compiled code
+   *
+   * XXX: change name to appendArg
    */
   public ArrayValue append(Value value)
   {
@@ -361,7 +365,7 @@ abstract public class ArrayValue extends Value {
     if (value instanceof ArrayValue)
       return value;
     else
-      return new ArrayValueImpl().append(value);
+      return new ArrayValueImpl().put(value);
   }
 
   /**
@@ -456,11 +460,11 @@ abstract public class ArrayValue extends Value {
 
     ArrayValue result = new ArrayValueImpl();
 
-    result.append(LongValue.ZERO, _current.getKey());
-    result.append(KEY, _current.getKey());
+    result.put(LongValue.ZERO, _current.getKey());
+    result.put(KEY, _current.getKey());
     
-    result.append(LongValue.ONE, _current.getValue());
-    result.append(VALUE, _current.getValue());
+    result.put(LongValue.ONE, _current.getValue());
+    result.put(VALUE, _current.getValue());
 
     _current = _current._next;
 
@@ -589,9 +593,9 @@ abstract public class ArrayValue extends Value {
       Value key = entries[j].getKey();
       
       if (resetKeys && (! (key instanceof StringValue) || strict))
-        append(LongValue.create(base++), entries[j].getValue());
+        put(LongValue.create(base++), entries[j].getValue());
       else
-        append(entries[j].getKey(), entries[j].getValue());
+        put(entries[j].getKey(), entries[j].getValue());
     }
   }
 
@@ -610,6 +614,24 @@ abstract public class ArrayValue extends Value {
     }
     
     sb.append("}");
+  }
+
+  /**
+   * Exports the value.
+   */
+  public void varExport(StringBuilder sb)
+  {
+    sb.append("array(");
+
+    boolean isFirst = true;
+    for (Entry entry = getHead(); entry != null; entry = entry._next) {
+      entry.getKey().varExport(sb);
+      sb.append(" => ");
+      entry.getValue().varExport(sb);
+      sb.append(", ");
+    }
+
+    sb.append(")");
   }
   
   /**
@@ -635,9 +657,9 @@ abstract public class ArrayValue extends Value {
       Value key = entries[j].getKey();
       
       if (! (key instanceof StringValue) || strict)
-        append(LongValue.create(base++), entries[j].getValue());
+        put(LongValue.create(base++), entries[j].getValue());
       else
-        append(entries[j].getKey(), entries[j].getValue());
+        put(entries[j].getKey(), entries[j].getValue());
     }
 
     return true;

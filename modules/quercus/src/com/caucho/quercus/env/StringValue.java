@@ -35,6 +35,8 @@ import com.caucho.vfs.WriteStream;
 
 import com.caucho.quercus.gen.PhpWriter;
 
+import com.caucho.quercus.lib.QuercusStringModule;
+
 /**
  * Represents a PHP string value.
  */
@@ -341,7 +343,7 @@ public class StringValue extends Value {
     if (index < 0 || len <= index)
       return StringValue.EMPTY;
     else
-      return new StringValue(String.valueOf(_value.charAt((int) index)));
+      return StringValue.create(_value.charAt((int) index));
   }
 
   /**
@@ -503,6 +505,32 @@ public class StringValue extends Value {
     sb.append(":\"");
     sb.append(_value);
     sb.append("\";");
+  }
+
+  /**
+   * Exports the value.
+   */
+  public void varExport(StringBuilder sb)
+  {
+    sb.append("'");
+    
+    String value = _value;
+    int len = value.length();
+    for (int i = 0; i < len; i++) {
+      char ch = value.charAt(i);
+
+      switch (ch) {
+      case '\'':
+	sb.append("\\'");
+	break;
+      case '\\':
+	sb.append("\\\\");
+	break;
+      default:
+	sb.append(ch);
+      }
+    }
+    sb.append("'");
   }
 
   /**

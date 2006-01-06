@@ -207,6 +207,14 @@ public class LongValue extends Value {
     sb.append(";");
   }
 
+  /**
+   * Exports the value.
+   */
+  public void varExport(StringBuilder sb)
+  {
+    sb.append(_value);
+  }
+
   //
   // Java generator code
   //

@@ -160,6 +160,14 @@ public class NullValue extends Value {
   }
 
   /**
+   * Exports the value.
+   */
+  public void varExport(StringBuilder sb)
+  {
+    sb.append("null");
+  }
+
+  /**
    * Returns a new array.
    */
   public Value getArray()

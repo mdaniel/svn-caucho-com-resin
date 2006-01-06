@@ -595,6 +595,27 @@ public class QuercusVariableModule extends AbstractQuercusModule {
     }
   }
 
+  /**
+   * Serializes the value to a string.
+   */
+  public static Value var_export(Env env,
+				 Value v,
+				 @Optional boolean isReturn)
+    throws IOException
+  {
+    StringBuilder sb = new StringBuilder();
+
+    v.varExport(sb);
+
+    if (isReturn)
+      return new StringValue(sb.toString());
+    else {
+      env.getOut().print(sb);
+
+      return NullValue.NULL;
+    }
+  }
+
   private static Value unserialize(Env env, UnserializeReader is)
     throws Throwable
   {
@@ -665,7 +686,7 @@ public class QuercusVariableModule extends AbstractQuercusModule {
 	  Value key = unserialize(env, is);
 	  Value value = unserialize(env, is);
 
-	  array.append(key, value);
+	  array.put(key, value);
 	}
 
 	unserializeExpect(is, '}');
@@ -722,10 +743,12 @@ public class QuercusVariableModule extends AbstractQuercusModule {
   {
     int ch = is.read();
 
-    if (ch < 0)
+    if (ch == expectCh) {
+    }
+    else if (ch < 0)
       throw new IOException(L.l("expected '{0}' at end of string",
 				String.valueOf((char) expectCh)));
-    else if (ch != expectCh)
+    else
       throw new IOException(L.l("expected '{0}' at '{1}'",
 				String.valueOf((char) expectCh),
 				String.valueOf((char) ch)));
@@ -903,7 +926,7 @@ public class QuercusVariableModule extends AbstractQuercusModule {
       out.print(' ');
   }
 
-  static class UnserializeReader {
+  static final class UnserializeReader {
     private final char []_buffer;
     private final int _length;
     
@@ -915,7 +938,7 @@ public class QuercusVariableModule extends AbstractQuercusModule {
       _length = _buffer.length;
     }
     
-    public int read()
+    public final int read()
     {
       if (_index < _length)
 	return _buffer[_index++];
@@ -923,7 +946,7 @@ public class QuercusVariableModule extends AbstractQuercusModule {
 	return -1;
     }
     
-    public int read(char []buffer, int offset, int length)
+    public final int read(char []buffer, int offset, int length)
     {
       System.arraycopy(_buffer, _index, buffer, offset, length);
 
@@ -932,7 +955,7 @@ public class QuercusVariableModule extends AbstractQuercusModule {
       return length;
     }
 
-    public void unread()
+    public final void unread()
     {
       _index--;
     }

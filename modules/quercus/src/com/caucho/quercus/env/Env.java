@@ -162,12 +162,16 @@ public class Env {
   private HashMap<String,Var> _staticMap = new HashMap<String,Var>();
   private HashMap<String,Var> _map = _globalMap;
   
-  private VarMap<String,Value> _constMap;
+  private HashMap<String,Value> _constMap
+    = new HashMap<String,Value>();
   
   private HashMap<String,Value> _lowerConstMap
-    = new HashMap<String,Value>();
+     = new HashMap<String,Value>();
 
   private HashMap<String,AbstractFunction> _funMap
+    = new HashMap<String,AbstractFunction>();
+
+  private HashMap<String,AbstractFunction> _lowerFunMap
     = new HashMap<String,AbstractFunction>();
 
   private HashMap<String,AbstractClassDef> _classDefMap
@@ -244,9 +248,14 @@ public class Env {
     _request = request;
     _response = response;
 
-    _constMap = new ChainedMap<String,Value>(_quercus.getConstMap());
+    _constMap = new HashMap<String,Value>();
 
     _page.init(this);
+    try {
+      _page.importDefinitions(this);
+    } catch (Throwable e) {
+      throw new RuntimeException(e);
+    }
 
     setPwd(Vfs.lookup());
 
@@ -736,6 +745,7 @@ public class Env {
 
     if (value == null) {
       Var var = new Var();
+      var.setGlobal();
       _globalMap.put(name, var);
       value = var;
     }
@@ -762,6 +772,7 @@ public class Env {
 
     if (var == null) {
       var = new Var();
+      var.setGlobal();
       _staticMap.put(name, var);
     }
     
@@ -790,8 +801,12 @@ public class Env {
   {
     Var var;
 
-    if (value instanceof Var)
+    if (value instanceof Var) {
       var = (Var) value;
+
+      if (_map == _globalMap)
+	var.setGlobal();
+    }
     else
       var = new Var(value.toValue());
     
@@ -833,7 +848,7 @@ public class Env {
   {
     if (var == null)
       var = new Var();
-    
+
     return var;
   }
 
@@ -876,6 +891,7 @@ public class Env {
       var = getSpecialRef(name);
 
       if (var != null) {
+	var.setGlobal();
 	_globalMap.put(name, var);
 
 	var = _map.get(name);
@@ -1281,24 +1297,27 @@ public class Env {
 
     if (value != null)
       return value;
-    else {
-      value = _lowerConstMap.get(name.toLowerCase());
 
-      if (value != null)
-	return value;
-      
-      /* XXX:
-      notice(L.l("Converting undefined constant '{0}' to string.",
-		 name));
-      */
-
-      value = new StringValue(name);
-
-      // XXX:
-      _constMap.put(name, value);
-
+    value = _quercus.getConstant(name);
+    if (value != null)
       return value;
-    }
+    
+    value = _lowerConstMap.get(name.toLowerCase());
+
+    if (value != null)
+      return value;
+      
+    /* XXX:
+       notice(L.l("Converting undefined constant '{0}' to string.",
+       name));
+    */
+
+    value = new StringValue(name);
+
+    // XXX:
+    _constMap.put(name, value);
+
+    return value;
   }
 
   /**
@@ -1399,6 +1418,29 @@ public class Env {
   }
 
   /**
+   * Returns an array of the defined functions.
+   */
+  public ArrayValue getDefinedFunctions()
+  {
+    ArrayValue result = new ArrayValueImpl();
+
+    ArrayValue internal = _quercus.getDefinedFunctions();
+    ArrayValue user = new ArrayValueImpl();
+
+    result.put(new StringValue("internal"), internal);
+    result.put(new StringValue("user"), user);
+
+    for (String name : _funMap.keySet()) {
+      StringValue key = new StringValue(name);
+
+      if (! internal.contains(key).isset())
+	user.put(name);
+    }
+
+    return result;
+  }
+
+  /**
    * Finds the java reflection method for the function with
    * the given name.
    *
@@ -1420,7 +1462,7 @@ public class Env {
       return fun;
     }
     else
-      return _funMap.get(name.toLowerCase());
+      return _lowerFunMap.get(name.toLowerCase());
   }
 
   /**
@@ -1472,13 +1514,15 @@ public class Env {
   private AbstractFunction findFunctionImpl(String name)
   {
     AbstractFunction fun = null;
-    
+
+    /*
     if (_page != null) {
       fun = _page.findFunction(name);
 
       if (fun != null)
 	return fun;
     }
+    */
     
     fun = _quercus.findFunction(name);
     if (fun != null) {
@@ -1501,7 +1545,7 @@ public class Env {
     }
 
     _funMap.put(name, fun);
-    _funMap.put(name.toLowerCase(), fun);
+    _lowerFunMap.put(name.toLowerCase(), fun);
 
     return BooleanValue.TRUE;
   }
@@ -2157,13 +2201,18 @@ public class Env {
   /**
    * Evaluates an included file.
    */
-  public Value include(Path pwd, String include, boolean isOnce)
+  public Value include(Path scriptPwd, String include, boolean isOnce)
     throws Throwable
   {
     // php/0b0g
-    pwd = getPwd();
+    Path selfPath = getPwd();
     
-    Path path = lookupInclude(pwd, include);
+    Path path = lookupInclude(selfPath, include);
+
+    if (path == null) {
+      // php/0b0l
+      path = lookupInclude(scriptPwd, include);
+    }
 
     if (path == null)
       throw errorException(L.l("'{0}' is not a valid path", include));

@@ -540,10 +540,6 @@ public class VarExpr extends AbstractVarExpr {
     out.print(".set(");
     value.generate(out);
     out.print(")");
-
-    // quercus/344l
-    if (! isTop)
-      out.print(".copy()");
   }
 
   /**

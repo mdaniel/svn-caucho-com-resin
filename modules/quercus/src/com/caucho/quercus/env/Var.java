@@ -44,6 +44,7 @@ import com.caucho.quercus.program.AbstractFunction;
  */
 public class Var extends Value {
   private Value _value = NullValue.NULL;
+  private int _refCount;
 
   public Var()
   {
@@ -52,6 +53,22 @@ public class Var extends Value {
   public Var(Value value)
   {
     _value = value.toValue();
+  }
+
+  /**
+   * Adds a reference.
+   */
+  public void setReference()
+  {
+    _refCount = 1;
+  }
+
+  /**
+   * Sets as a global variable
+   */
+  public void setGlobal()
+  {
+    _refCount = 1;
   }
   
   /**
@@ -220,6 +237,8 @@ public class Var extends Value {
    */
   public Var toRefVar()
   {
+    _refCount = 2;
+    
     return this;
   }
 
@@ -245,8 +264,21 @@ public class Var extends Value {
    */
   public Value copyArrayItem()
   {
+    _refCount = 2;
+    
     // php/041d
     return this;
+  }
+  
+  /**
+   * Copy the value as a return value.
+   */
+  public Value copyReturn()
+  {
+    if (_refCount < 1)
+      return _value;
+    else
+      return _value.copy();
   }
   
   /**
@@ -254,6 +286,8 @@ public class Var extends Value {
    */
   public Value toRef()
   {
+    _refCount = 2;
+    
     return new RefVar(this);
   }
 

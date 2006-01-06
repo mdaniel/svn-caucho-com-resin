@@ -54,6 +54,7 @@ import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.NullValue;
 import com.caucho.quercus.env.BooleanValue;
+import com.caucho.quercus.env.ArrayValue;
 import com.caucho.quercus.env.ArrayValueImpl;
 import com.caucho.quercus.env.LongValue;
 import com.caucho.quercus.env.DoubleValue;
@@ -94,6 +95,9 @@ public class Quercus {
   private HashMap<String,QuercusModule> _modules
     = new HashMap<String,QuercusModule>();
   
+  private HashMap<String,Value> _constMap
+    = new HashMap<String,Value>();
+  
   private HashMap<String,StaticFunction> _staticFunctions
     = new HashMap<String,StaticFunction>();
 
@@ -116,8 +120,6 @@ public class Quercus {
 
   private LruCache<String,PhpProgram> _evalCache
     = new LruCache<String,PhpProgram>(256);
-
-  private VarMap<String,Value> _constMap;
 
   private static HashSet<String> _superGlobals
     = new HashSet<String>();
@@ -367,6 +369,20 @@ public class Quercus {
   }
 
   /**
+   * Returns an array of the defined functions.
+   */
+  public ArrayValue getDefinedFunctions()
+  {
+    ArrayValue internal = new ArrayValueImpl();
+
+    for (String name : _staticFunctions.keySet()) {
+      internal.put(name);
+    }
+
+    return internal;
+  }
+
+  /**
    * Returns true if the variable is a superglobal.
    */
   public static boolean isSuperGlobal(String name)
@@ -440,9 +456,17 @@ public class Quercus {
     return BooleanValue.FALSE;
   }
 
-  public VarMap<String,Value> getConstMap()
+  public HashMap<String,Value> getConstMap()
   {
     return _constMap;
+  }
+
+  /**
+   * Returns a named constant.
+   */
+  public Value getConstant(String name)
+  {
+    return _constMap.get(name);
   }
 
   public String createStaticName()
@@ -583,7 +607,7 @@ public class Quercus {
     Map<String,Value> map = module.getConstMap();
 
     if (map != null)
-      _constMap = new ChainedMap<String,Value>(_constMap, map);
+      _constMap.putAll(map);
 
     for (Field field : cl.getFields()) {
       if (! Modifier.isPublic(field.getModifiers()))
