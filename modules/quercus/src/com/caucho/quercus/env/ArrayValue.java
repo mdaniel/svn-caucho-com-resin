@@ -777,8 +777,6 @@ abstract public class ArrayValue extends Value {
 
   public final static class Entry extends Var
     implements Map.Entry<Value,Value> {
-    boolean _isDeleted;
-    
     Entry _prev;
     Entry _next;
     
@@ -792,21 +790,6 @@ abstract public class ArrayValue extends Value {
     {
       _key = key;
       setValue(value);
-    }
-    
-    public boolean isDeleted()
-    {
-      return _isDeleted;
-    }
-    
-    public void setDeleted()
-    {
-      _isDeleted = true;
-    }
-    
-    public void setValid()
-    {
-      _isDeleted = false;
     }
 
     public Value getValue()

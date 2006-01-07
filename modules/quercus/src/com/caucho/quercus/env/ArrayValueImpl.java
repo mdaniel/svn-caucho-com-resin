@@ -403,11 +403,8 @@ public class ArrayValueImpl extends ArrayValue {
 
       if (entry == null) 
 	return UnsetValue.UNSET;
-      else if (entry.isDeleted()) {
-      }
-      else if (key.equals(entry.getKey())) {
+      else if (key.equals(entry.getKey()))
 	return entry.getValue(); // quercus/39a1
-      }
 
       hash = (hash + 1) & hashMask;
     }
@@ -445,11 +442,8 @@ public class ArrayValueImpl extends ArrayValue {
 
       if (entry == null) 
 	return null;
-      else if (entry.isDeleted()) {
-      }
-      else if (key.equals(entry.getKey())) {
+      else if (key.equals(entry.getKey()))
 	return entry;
-      }
 
       hash = (hash + 1) & _hashMask;
     }
@@ -474,8 +468,6 @@ public class ArrayValueImpl extends ArrayValue {
 
       if (entry == null)
 	return UnsetValue.UNSET;
-      else if (entry.isDeleted()) {
-      }
       else if (key.equals(entry.getKey())) {
 	if (entry._prev != null)
 	  entry._prev._next = entry._next;
@@ -492,16 +484,38 @@ public class ArrayValueImpl extends ArrayValue {
 
 	_current = _head;
 
-	entry.setDeleted();
 	_size--;
 
-	return entry.getValue();
+	Value value = entry.getValue();
+
+	shiftEntries(hash + 1);
+
+	return value;
       }
 
       hash = (hash + 1) & _hashMask;
     }
     
     return UnsetValue.UNSET;
+  }
+
+  /**
+   * Shift entries after a delete.
+   */
+  private void shiftEntries(int index)
+  {
+    int capacity = _entries.length;
+    
+    for (; index < capacity; index++) {
+      Entry entry = _entries[index];
+
+      if (entry == null)
+	return;
+
+      _entries[index] = null;
+
+      addEntry(entry);
+    }
   }
 
   /**
@@ -543,7 +557,6 @@ public class ArrayValueImpl extends ArrayValue {
     int hashMask = _hashMask;
 
     int hash = key.hashCode() & hashMask;
-    Entry newEntry = null;
 
     int count = capacity;
     for (; count >= 0; count--) {
@@ -551,27 +564,16 @@ public class ArrayValueImpl extends ArrayValue {
 
       if (entry == null)
 	break;
-      else if (key.equals(entry.getKey()) && ! entry.isDeleted()) {
+      else if (key.equals(entry.getKey()))
 	return entry;
-      }
-      /*
-      else if (entry.getKey() == null && newEntry == null)
-	newEntry = entry;
-      */
-      else if (entry.isDeleted() && newEntry == null)
-	newEntry = entry;
 
       hash = (hash + 1) & hashMask;
     }
     
     _size++;
 
-    if (newEntry == null) {
-      newEntry = new Entry();
-      _entries[hash] = newEntry;
-    }
-    else
-      newEntry.setValid();
+    Entry newEntry = new Entry();
+    _entries[hash] = newEntry;
     
     newEntry._key = key;
 
