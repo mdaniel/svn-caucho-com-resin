@@ -33,6 +33,8 @@ import java.io.IOException;
 
 import com.caucho.vfs.WriteStream;
 
+import com.caucho.quercus.Quercus;
+
 import com.caucho.quercus.gen.PhpWriter;
 
 import com.caucho.quercus.lib.QuercusStringModule;
@@ -43,9 +45,9 @@ import com.caucho.quercus.lib.QuercusStringModule;
 public class StringValue extends Value {
   public static final StringValue EMPTY = new StringValue("");
 
-  private static final int IS_STRING = 0;
-  private static final int IS_LONG = 1;
-  private static final int IS_DOUBLE = 2;
+  protected static final int IS_STRING = 0;
+  protected static final int IS_LONG = 1;
+  protected static final int IS_DOUBLE = 2;
 
   private final static StringValue []CHAR_STRINGS;
   
@@ -112,6 +114,14 @@ public class StringValue extends Value {
   }
 
   /**
+   * Interns the string.
+   */
+  public InternStringValue intern(Quercus quercus)
+  {
+    return quercus.intern(_value);
+  }
+
+  /**
    * Returns true for a long
    */
   public boolean isLong()
@@ -150,7 +160,7 @@ public class StringValue extends Value {
   /**
    * Converts to a double.
    */
-  private int getNumericType()
+  protected int getNumericType()
   {
     char []chars = _chars;
     int len = chars.length;
@@ -313,10 +323,32 @@ public class StringValue extends Value {
    */
   public Value toKey()
   {
-    if (isLong())
-      return new LongValue(toLong());
-    else
+    char []chars = _chars;
+    int len = chars.length;
+
+    if (len == 0)
       return this;
+    
+    int sign = 1;
+    long value = 0;
+
+    int i = 0;
+    char ch = chars[i];
+    if (ch == '-') {
+      sign = -1;
+      i++;
+    }
+
+    for (; i < len; i++) {
+      ch = chars[i];
+
+      if ('0' <= ch && ch <= '9')
+	value = 10 * value + ch - '0';
+      else
+	return this;
+    }
+
+    return new LongValue(sign * value);
   }
 
   /**
@@ -482,7 +514,7 @@ public class StringValue extends Value {
   public void generate(PhpWriter out)
     throws IOException
   {
-    out.print("new com.caucho.quercus.env.StringValue(\"");
+    out.print("new InternStringValue(\"");
     out.printJavaString(_value);
     out.print("\")");
   }

@@ -255,7 +255,7 @@ public class PhpWriter extends JavaWriterWrapper {
       Expr expr = entry.getKey();
       String var = entry.getValue();
 
-      println("private static final com.caucho.quercus.expr.Expr " + var);
+      println("private final com.caucho.quercus.expr.Expr " + var);
       print("  = ");
       expr.generateExpr(this);
       println(";");
@@ -279,7 +279,7 @@ public class PhpWriter extends JavaWriterWrapper {
       }
       println("};");
     }
-    
+
     if (! _valueMap.isEmpty())
       println();
     

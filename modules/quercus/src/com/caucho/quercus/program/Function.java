@@ -88,6 +88,8 @@ public class Function extends AbstractFunction {
     _isReturnsReference = info.isReturnsReference();
     _args = args;
     _statement = new BlockStatement(statements);
+
+    setGlobal(info.isPageStatic());
   }
 
   public Function(String name,
@@ -107,6 +109,8 @@ public class Function extends AbstractFunction {
     statementList.toArray(statements);
 
     _statement = new BlockStatement(statements);
+    
+    setGlobal(info.isPageStatic());
   }
 
   /**
@@ -712,19 +716,26 @@ public class Function extends AbstractFunction {
 
 	argName = "args[" + var.getArgumentIndex() + "]";
       }
-      
-      if (! var.isArgument()) {
+
+      if (! var.isReference()) {
+	out.println(varName + " = NullValue.NULL;");
+      }
+      else if (! var.isArgument()) {
 	out.println(varName + " = null;");
       }
       else if (isVariableMap()) {
 	// XXX: need to distinguish ref
 	out.println(varName + " = " + argName + ".toVar();");
       }
-      else if (var.isRef()) {
+      else if (var.isReadOnly()) {
+	// php/3a70
+	out.println(varName + " = " + argName + ".toValue();");
+      }
+      else if (var.isRefArgument()) {
 	// php/344r, 3a57
 	out.println(varName + " = " + argName + ".toRefVar();");
       }
-      else if (var.isAssigned()) {
+      else if (var.isAssigned() && var.isReference()) {
 	out.println(varName + " = " + argName + ".toVar();");
       }
       else {

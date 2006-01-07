@@ -164,11 +164,10 @@ public class PhpMain extends ClassComponent {
     for (InterpretedClassDef cl : _program.getClasses()) {
       cl.generateInit(out);
     }
-    
-    out.popDepth();
-    
-    out.println("}");
 
+    out.popDepth();
+    out.println("}");
+    
     out.generateCoda();
 
     javaOut.generateSmap();

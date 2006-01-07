@@ -81,8 +81,10 @@ public class AssignRefExpr extends Expr {
   public void analyze(AnalyzeInfo info)
   {
     _var.analyzeAssign(info);
+    _var.analyzeSetReference(info);
 
     _value.analyze(info);
+    _value.analyzeSetReference(info);
   }
 
   /**

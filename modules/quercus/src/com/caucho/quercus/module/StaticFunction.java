@@ -38,6 +38,7 @@ import com.caucho.quercus.expr.Expr;
 import com.caucho.quercus.expr.NullLiteralExpr;
 import com.caucho.quercus.gen.PhpWriter;
 import com.caucho.quercus.parser.PhpParser;
+import com.caucho.quercus.program.AnalyzeInfo;
 import com.caucho.quercus.program.AbstractFunction;
 import com.caucho.util.L10N;
 
@@ -57,6 +58,7 @@ public class StaticFunction extends AbstractFunction {
 
   private final Method _method;
   private final Class []_paramTypes;
+  private final Annotation [][]_paramAnn;
   private final boolean _hasEnv;
   private final Expr []_defaultExprs;
   private final Marshall []_marshallArgs;
@@ -98,7 +100,7 @@ public class StaticFunction extends AbstractFunction {
 
     _hasEnv = param.length > 0 && param[0].equals(Env.class);
 
-    Annotation [][]paramAnn = method.getParameterAnnotations();
+    _paramAnn = method.getParameterAnnotations();
 
     boolean hasRestArgs = false;
     boolean isRestReference = false;
@@ -106,7 +108,7 @@ public class StaticFunction extends AbstractFunction {
     if (param.length > 0 && param[param.length - 1].equals(Value[].class)) {
       hasRestArgs = true;
 
-      for (Annotation ann : paramAnn[param.length - 1]) {
+      for (Annotation ann : _paramAnn[param.length - 1]) {
 	if (Reference.class.isAssignableFrom(ann.annotationType()))
 	  isRestReference = true;
       }
@@ -115,7 +117,7 @@ public class StaticFunction extends AbstractFunction {
     _hasRestArgs = hasRestArgs;
     _isRestReference = isRestReference;
 
-    int argLength = paramAnn.length;
+    int argLength = _paramAnn.length;
 
     if (_hasRestArgs)
       argLength -= 1;
@@ -130,7 +132,7 @@ public class StaticFunction extends AbstractFunction {
       boolean isReference = false;
       boolean isNotNull = false;
 
-      for (Annotation ann : paramAnn[i + envOffset]) {
+      for (Annotation ann : _paramAnn[i + envOffset]) {
         if (Optional.class.isAssignableFrom(ann.annotationType())) {
 	  Optional opt = (Optional) ann;
 
@@ -414,6 +416,44 @@ public class StaticFunction extends AbstractFunction {
   //
   // Java generation code.
   //
+
+  /**
+   * Analyzes the arguments for read-only and reference.
+   */
+  public void analyzeArguments(Expr []args, AnalyzeInfo info)
+  {
+    int env = _hasEnv ? 1 : 0;
+    
+    for (int i = 0; i < args.length; i++) {
+      if (_marshallArgs.length <= i) {
+	// XXX: not quite true
+	args[i].analyzeSetModified(info);
+	args[i].analyzeSetReference(info);
+
+	continue;
+      }
+
+      Marshall marshall = _marshallArgs[i];
+
+      if (isReadOnly(_paramAnn[i + env]) || marshall.isReadOnly()) {
+      }
+      else {
+	args[i].analyzeSetModified(info);
+	args[i].analyzeSetReference(info);
+      }
+    }
+  }
+
+  private boolean isReadOnly(Annotation []ann)
+  {
+    for (int i = 0; i < ann.length; i++) {
+      if (ReadOnly.class.isAssignableFrom(ann[i].annotationType()))
+	return true;
+    }
+
+    return false;
+  }
+    
 
   /**
    * Generates code to evaluate the expression.

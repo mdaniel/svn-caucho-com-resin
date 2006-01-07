@@ -494,6 +494,17 @@ abstract public class AbstractFunction {
   }
 
   /**
+   * Analyzes the arguments for read-only and reference.
+   */
+  public void analyzeArguments(Expr []args, AnalyzeInfo info)
+  {
+    for (int i = 0; i < args.length; i++) {
+      args[i].analyzeSetModified(info);
+      args[i].analyzeSetReference(info);
+    }
+  }
+
+  /**
    * Returns true if the function can generate the call directly.
    */
   public boolean canGenerateCall(Expr []args)

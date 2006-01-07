@@ -216,6 +216,8 @@ public class ArrayTailExpr extends AbstractVarExpr {
   public void analyze(AnalyzeInfo info)
   {
     _expr.analyze(info);
+    _expr.analyzeSetReference(info);
+    _expr.analyzeSetModified(info);
   }
 
   /**

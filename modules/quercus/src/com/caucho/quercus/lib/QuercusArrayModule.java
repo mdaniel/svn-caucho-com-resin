@@ -47,6 +47,7 @@ import com.caucho.util.RandomUtil;
 import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.quercus.module.Optional;
 import com.caucho.quercus.module.Reference;
+import com.caucho.quercus.module.ReadOnly;
 import com.caucho.quercus.module.UsesSymbolTable;
 
 import com.caucho.quercus.env.Value;
@@ -134,22 +135,6 @@ public class QuercusArrayModule extends AbstractQuercusModule {
     = new CompareNatural(ArrayValue.GET_VALUE, SORT_NORMAL, CASE_SENSITIVE);
   private static final CompareNatural CNA_VALUE_NORMAL_INSENSITIVE
     = new CompareNatural(ArrayValue.GET_VALUE, SORT_NORMAL, CASE_INSENSITIVE);
-
-  private static final HashMap<String,Value> _constMap
-    = new HashMap<String,Value>();
-
-  /**
-   * Adds the constant to the PHP engine's constant map.
-   *
-   * @return the new constant chain
-   */
-  public Map<String,Value> getConstMap()
-  {
-    _constMap.put("CASE_LOWER", new LongValue(CASE_LOWER));
-    _constMap.put("CASE_UPPER", new LongValue(CASE_UPPER));
-
-    return _constMap;
-  }
 
   /**
    * Changes the key case
@@ -301,7 +286,7 @@ public class QuercusArrayModule extends AbstractQuercusModule {
   /**
    * Returns the size of the array.
    */
-  public Value count(Value value)
+  public static Value count(@ReadOnly Value value)
   {
     return new LongValue(value.getSize());
   }
@@ -309,7 +294,7 @@ public class QuercusArrayModule extends AbstractQuercusModule {
   /**
    * Returns the current value of the array.
    */
-  public Value current(Value value)
+  public static Value current(@ReadOnly Value value)
   {
     if (value instanceof ArrayValue) {
       ArrayValue array = (ArrayValue) value;
@@ -323,7 +308,7 @@ public class QuercusArrayModule extends AbstractQuercusModule {
   /**
    * Returns the current key of the array.
    */
-  public Value key(Value value)
+  public static Value key(@ReadOnly Value value)
   {
     if (value instanceof ArrayValue) {
       ArrayValue array = (ArrayValue) value;
@@ -337,7 +322,7 @@ public class QuercusArrayModule extends AbstractQuercusModule {
   /**
    * Returns the current value of the array.
    */
-  public Value pos(Value value)
+  public static Value pos(@ReadOnly Value value)
   {
     return current(value);
   }
@@ -345,7 +330,7 @@ public class QuercusArrayModule extends AbstractQuercusModule {
   /**
    * Returns the next value of the array.
    */
-  public Value next(Value value)
+  public static Value next(Value value)
   {
     if (value instanceof ArrayValue) {
       ArrayValue array = (ArrayValue) value;
@@ -359,7 +344,7 @@ public class QuercusArrayModule extends AbstractQuercusModule {
   /**
    * Returns the next value of the array.
    */
-  public Value each(Value value)
+  public static Value each(Value value)
   {
     if (value instanceof ArrayValue) {
       ArrayValue array = (ArrayValue) value;
@@ -373,7 +358,7 @@ public class QuercusArrayModule extends AbstractQuercusModule {
   /**
    * Returns the previous value of the array.
    */
-  public Value prev(Value value)
+  public static Value prev(Value value)
   {
     if (value instanceof ArrayValue) {
       ArrayValue array = (ArrayValue) value;
@@ -387,7 +372,7 @@ public class QuercusArrayModule extends AbstractQuercusModule {
   /**
    * Resets the pointer
    */
-  public Value reset(Value value)
+  public static Value reset(Value value)
   {
     if (value instanceof ArrayValue) {
       ArrayValue array = (ArrayValue) value;
@@ -401,7 +386,7 @@ public class QuercusArrayModule extends AbstractQuercusModule {
   /**
    * Returns the current value of the array.
    */
-  public Value shuffle(ArrayValue array)
+  public static Value shuffle(ArrayValue array)
   {
     if (array == null)
       return BooleanValue.FALSE;
@@ -414,7 +399,7 @@ public class QuercusArrayModule extends AbstractQuercusModule {
   /**
    * Resets the pointer to the end
    */
-  public Value end(Value value)
+  public static Value end(Value value)
   {
     if (value instanceof ArrayValue) {
       ArrayValue array = (ArrayValue) value;
@@ -435,7 +420,8 @@ public class QuercusArrayModule extends AbstractQuercusModule {
    * 
    * @throw NullPointerException
    */
-  public static boolean array_key_exists(Value key, ArrayValue searchArray)
+  public static boolean array_key_exists(@ReadOnly Value key,
+					 @ReadOnly ArrayValue searchArray)
   {
     if (searchArray == null)
       return false;
@@ -454,8 +440,9 @@ public class QuercusArrayModule extends AbstractQuercusModule {
    * 
    * @throws NullPointerException
    */
-  public Value array_keys(Env env, ArrayValue array,
-                          @Optional Value searchValue,
+  public Value array_keys(Env env,
+			  @ReadOnly ArrayValue array,
+                          @Optional @ReadOnly Value searchValue,
                           @Optional boolean isStrict)
     throws Throwable
   {
@@ -824,7 +811,9 @@ public class QuercusArrayModule extends AbstractQuercusModule {
    * 
    * @throws NullPointerException
    */
-  public Value array_search(Env env, Value needle, ArrayValue array,
+  public Value array_search(Env env,
+			    @ReadOnly Value needle,
+			    @ReadOnly ArrayValue array,
                             @Optional("false") boolean strict)
     throws Throwable
   {
@@ -1050,7 +1039,7 @@ public class QuercusArrayModule extends AbstractQuercusModule {
    * 
    * @return the sum of the elements
    */
-  public Value array_sum(Env env, ArrayValue array)
+  public Value array_sum(Env env, @ReadOnly ArrayValue array)
   {
     if (array == null)
       return NullValue.NULL;
@@ -1494,7 +1483,8 @@ public class QuercusArrayModule extends AbstractQuercusModule {
    * 
    * @throws ClassCastException if the elements are not mutually comparable
    */
-  public boolean in_array(Value needle, ArrayValue stack,
+  public boolean in_array(@ReadOnly Value needle,
+			  @ReadOnly ArrayValue stack,
                           @Optional("false") boolean strict)
     throws Throwable
   {
@@ -1675,7 +1665,9 @@ public class QuercusArrayModule extends AbstractQuercusModule {
    * 
    * @return the new array
    */
-  public Value range(Env env, Value start, Value end,
+  public Value range(Env env,
+		     @ReadOnly Value start,
+		     @ReadOnly Value end,
                      @Optional("1") long step)
     throws Throwable
   {
@@ -2838,7 +2830,7 @@ public class QuercusArrayModule extends AbstractQuercusModule {
   /**
    * Returns the size of the array.
    */
-  public Value sizeof(Value value)
+  public static Value sizeof(@ReadOnly Value value)
   {
     return count(value);
   }

@@ -52,6 +52,7 @@ import com.caucho.config.ConfigException;
 
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.InternStringValue;
 import com.caucho.quercus.env.NullValue;
 import com.caucho.quercus.env.BooleanValue;
 import com.caucho.quercus.env.ArrayValue;
@@ -92,6 +93,9 @@ public class Quercus {
 
   private final PageManager _pageManager;
 
+  private HashMap<String,InternStringValue> _internMap
+    = new HashMap<String,InternStringValue>();
+  
   private HashMap<String,QuercusModule> _modules
     = new HashMap<String,QuercusModule>();
   
@@ -461,6 +465,25 @@ public class Quercus {
     return _constMap;
   }
 
+  /**
+   * Interns a string.
+   */
+  public InternStringValue intern(String name)
+  {
+    synchronized (_internMap) {
+      InternStringValue value = _internMap.get(name);
+
+      if (value == null) {
+	name = name.intern();
+	
+	value = new InternStringValue(name);
+	_internMap.put(name, value);
+      }
+
+      return value;
+    }
+  }
+  
   /**
    * Returns a named constant.
    */

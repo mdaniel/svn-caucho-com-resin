@@ -187,7 +187,7 @@ public class NullValue extends Value {
   public void generate(PhpWriter out)
     throws IOException
   {
-    out.print("com.caucho.quercus.env.NullValue.NULL");
+    out.print("NullValue.NULL");
   }
 
   /**

@@ -164,20 +164,18 @@ public class QuercusRegexpModule extends AbstractQuercusModule {
    * @param env the calling environment
    */
   public static Value preg_match(Env env,
-                                 Value patternV,
-                                 Value stringV,
+                                 String patternString,
+                                 String string,
                                  @Optional @Reference Value regsVar,
                                  @Optional int flags,
                                  @Optional int offset)
     throws Throwable
   {
-    String patternString = patternV.toString();
-
     if (patternString.length() < 2) // XXX: should be error
       return LongValue.ZERO;
 
     Pattern pattern = compileRegexp(patternString);
-    Matcher matcher = pattern.matcher(stringV.toString(env));
+    Matcher matcher = pattern.matcher(string);
 
     if (! (matcher.find(offset)))
       return LongValue.ZERO;

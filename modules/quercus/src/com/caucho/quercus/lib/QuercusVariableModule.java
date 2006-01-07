@@ -45,6 +45,7 @@ import com.caucho.vfs.Vfs;
 import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.quercus.module.Optional;
 import com.caucho.quercus.module.Reference;
+import com.caucho.quercus.module.ReadOnly;
 import com.caucho.quercus.module.UsesSymbolTable;
 
 import com.caucho.quercus.env.*;
@@ -58,19 +59,6 @@ public class QuercusVariableModule extends AbstractQuercusModule {
   private static final Logger log
     = Logger.getLogger(QuercusVariableModule.class.getName());
   private static final L10N L = new L10N(QuercusVariableModule.class);
-
-  private static final HashMap<String,Value> _constMap
-    = new HashMap<String,Value>();
-
-  /**
-   * Adds the constant to the PHP engine's constant map.
-   *
-   * @return the new constant chain
-   */
-  public Map<String,Value> getConstMap()
-  {
-    return _constMap;
-  }
 
   /**
    * Returns a constant
@@ -91,7 +79,7 @@ public class QuercusVariableModule extends AbstractQuercusModule {
    * @param v the variable to print
    * @return the escaped stringPhp
    */
-  public static Value debug_zval_dump(Env env, Value v)
+  public static Value debug_zval_dump(Env env, @ReadOnly Value v)
     throws Throwable
   {
     debug_impl(env, v, 0);
@@ -106,7 +94,7 @@ public class QuercusVariableModule extends AbstractQuercusModule {
    * @param v the variable to print
    * @return the escaped stringPhp
    */
-  public static Value var_dump(Env env, Value v)
+  public static Value var_dump(Env env, @ReadOnly Value v)
     throws Throwable
   {
     if (v instanceof RefVar)
@@ -127,7 +115,7 @@ public class QuercusVariableModule extends AbstractQuercusModule {
    * @param v the variable to print
    * @return the escaped stringPhp
    */
-  public static Value resin_var_dump(Env env, Value v)
+  public static Value resin_var_dump(Env env, @ReadOnly Value v)
     throws Throwable
   {
     WriteStream out = Vfs.openWrite("stdout:");
@@ -179,7 +167,7 @@ public class QuercusVariableModule extends AbstractQuercusModule {
    * @param v the variable to convert
    * @return the double value
    */
-  public static Value doubleval(Value v)
+  public static Value doubleval(@ReadOnly Value v)
          throws IOException
   {
     return floatval(v);
@@ -192,7 +180,7 @@ public class QuercusVariableModule extends AbstractQuercusModule {
    * @param v the value to test
    * @return the escaped stringPhp
    */
-  public static Value empty(Env env, Value v)
+  public static Value empty(Env env, @ReadOnly Value v)
     throws Throwable
   {
     v = v.toValue();
@@ -227,7 +215,7 @@ public class QuercusVariableModule extends AbstractQuercusModule {
    * @param v the variable to convert
    * @return the double value
    */
-  public static Value floatval(Value v)
+  public static Value floatval(@ReadOnly Value v)
          throws IOException
   {
     return new DoubleValue(v.toDouble());
@@ -262,7 +250,7 @@ public class QuercusVariableModule extends AbstractQuercusModule {
   /**
    * Returns the type string for the variable
    */
-  public static String gettype(Value v)
+  public static String gettype(@ReadOnly Value v)
   {
     return v.getType();
   }
@@ -273,7 +261,7 @@ public class QuercusVariableModule extends AbstractQuercusModule {
    * @param v the variable to convert
    * @return the double value
    */
-  public static Value intval(Value v)
+  public static Value intval(@ReadOnly Value v)
          throws IOException
   {
     return new LongValue(v.toLong());
@@ -286,7 +274,7 @@ public class QuercusVariableModule extends AbstractQuercusModule {
    *
    * @return true for an array
    */
-  public static boolean is_array(Value v)
+  public static boolean is_array(@ReadOnly Value v)
          throws IOException
   {
     return v.isArray();
@@ -299,7 +287,7 @@ public class QuercusVariableModule extends AbstractQuercusModule {
    *
    * @return true for a boolean
    */
-  public static Value is_bool(Value v)
+  public static Value is_bool(@ReadOnly Value v)
          throws IOException
   {
     return (v.toValue() instanceof BooleanValue
@@ -364,7 +352,7 @@ public class QuercusVariableModule extends AbstractQuercusModule {
    *
    * @return true for a double
    */
-  public static boolean is_double(Value v)
+  public static boolean is_double(@ReadOnly Value v)
          throws IOException
   {
     return is_float(v);
@@ -377,7 +365,7 @@ public class QuercusVariableModule extends AbstractQuercusModule {
    *
    * @return true for a double
    */
-  public static boolean is_float(Value v)
+  public static boolean is_float(@ReadOnly Value v)
          throws IOException
   {
     return (v.toValue() instanceof DoubleValue);
@@ -390,7 +378,7 @@ public class QuercusVariableModule extends AbstractQuercusModule {
    *
    * @return true for a double
    */
-  public static Value is_int(Value v)
+  public static Value is_int(@ReadOnly Value v)
          throws IOException
   {
     return (v.toValue() instanceof LongValue
@@ -405,7 +393,7 @@ public class QuercusVariableModule extends AbstractQuercusModule {
    *
    * @return true for a double
    */
-  public static Value is_integer(Value v)
+  public static Value is_integer(@ReadOnly Value v)
          throws IOException
   {
     return is_int(v);
@@ -418,7 +406,7 @@ public class QuercusVariableModule extends AbstractQuercusModule {
    *
    * @return true for a double
    */
-  public static Value is_long(Value v)
+  public static Value is_long(@ReadOnly Value v)
          throws IOException
   {
     return is_int(v);
@@ -431,7 +419,7 @@ public class QuercusVariableModule extends AbstractQuercusModule {
    *
    * @return true for null
    */
-  public static boolean is_null(Value v)
+  public static boolean is_null(@ReadOnly Value v)
          throws IOException
   {
     return v.isNull();
@@ -445,8 +433,8 @@ public class QuercusVariableModule extends AbstractQuercusModule {
    *
    * @return true for numeric
    */
-  public static boolean is_numeric(Env env, Value v)
-         throws IOException
+  public static boolean is_numeric(Env env, @ReadOnly Value v)
+    throws IOException
   {
     v = v.toValue();
 
@@ -475,7 +463,7 @@ public class QuercusVariableModule extends AbstractQuercusModule {
    *
    * @return true for a real
    */
-  public static boolean is_real(Value v)
+  public static boolean is_real(@ReadOnly Value v)
          throws IOException
   {
     return is_float(v);
@@ -484,7 +472,7 @@ public class QuercusVariableModule extends AbstractQuercusModule {
   /**
    * Returns true if the value is a resource
    */
-  public boolean is_resource(Value value)
+  public boolean is_resource(@ReadOnly Value value)
   {
     return (value.toValue() instanceof ResourceValue);
   }
@@ -494,7 +482,7 @@ public class QuercusVariableModule extends AbstractQuercusModule {
   /**
    * Returns true if the value is a string
    */
-  public boolean is_string(Value value)
+  public boolean is_string(@ReadOnly Value value)
   {
     return (value.toValue() instanceof StringValue);
   }
@@ -502,7 +490,7 @@ public class QuercusVariableModule extends AbstractQuercusModule {
   /**
    * Returns the type string for the variable
    */
-  public static boolean isset(Value v)
+  public static boolean isset(@ReadOnly Value v)
   {
     return v.isset();
   }
@@ -514,10 +502,13 @@ public class QuercusVariableModule extends AbstractQuercusModule {
    * @param v the variable to convert
    * @return the double value
    */
-  public static Value strval(Env env, Value v)
+  public static Value strval(Env env, @ReadOnly Value v)
     throws Throwable
   {
-    return new StringValue(v.toString(env));
+    if (v instanceof StringValue)
+      return (StringValue) v;
+    else
+      return new StringValue(v.toString(env));
   }
 
   /**
@@ -527,7 +518,9 @@ public class QuercusVariableModule extends AbstractQuercusModule {
    * @param v the variable to print
    * @return the escaped stringPhp
    */
-  public static Value print_r(Env env, Value v, @Optional Value isRet)
+  public static Value print_r(Env env,
+			      @ReadOnly Value v,
+			      @Optional Value isRet)
     throws Throwable
   {
     print_r_impl(env, v, 0);
@@ -568,7 +561,7 @@ public class QuercusVariableModule extends AbstractQuercusModule {
   /**
    * Serializes the value to a string.
    */
-  public static String serialize(Value v)
+  public static String serialize(@ReadOnly Value v)
   {
     StringBuilder sb = new StringBuilder();
 
@@ -599,7 +592,7 @@ public class QuercusVariableModule extends AbstractQuercusModule {
    * Serializes the value to a string.
    */
   public static Value var_export(Env env,
-				 Value v,
+				 @ReadOnly Value v,
 				 @Optional boolean isReturn)
     throws IOException
   {
@@ -624,44 +617,42 @@ public class QuercusVariableModule extends AbstractQuercusModule {
     switch (ch) {
     case 'b':
       {
-	unserializeExpect(is, ':');
-	long v = unserializeInt(is);
-	unserializeExpect(is, ';');
+	is.expect(':');
+	long v = is.readInt();
+	is.expect(';');
 
 	return v == 0 ? BooleanValue.FALSE : BooleanValue.TRUE;
       }
       
     case 's':
       {
-	unserializeExpect(is, ':');
-	int len = (int) unserializeInt(is);
-	unserializeExpect(is, ':');
-	unserializeExpect(is, '"');
+	is.expect(':');
+	int len = (int) is.readInt();
+	is.expect(':');
+	is.expect('"');
 
-	char []buf = new char[len];
+	String s = is.readString(len);
 
-	is.read(buf, 0, len);
+	is.expect('"');
+	is.expect(';');
 
-	unserializeExpect(is, '"');
-	unserializeExpect(is, ';');
-
-	return new StringValue(new String(buf));
+	return new StringValue(s);
       }
       
     case 'i':
       {
-	unserializeExpect(is, ':');
+	is.expect(':');
 	
-	long value = unserializeInt(is);
+	long value = is.readInt();
 	
-	unserializeExpect(is, ';');
+	is.expect(';');
 
 	return new LongValue(value);
       }
       
     case 'd':
       {
-	unserializeExpect(is, ':');
+	is.expect(':');
 
 	StringBuilder sb = new StringBuilder();
 	for (ch = is.read(); ch >= 0 && ch != ';'; ch = is.read()) {
@@ -676,12 +667,12 @@ public class QuercusVariableModule extends AbstractQuercusModule {
       
     case 'a':
       {
-	unserializeExpect(is, ':');
-	long len = unserializeInt(is);
-	unserializeExpect(is, ':');
-	unserializeExpect(is, '{');
+	is.expect(':');
+	long len = is.readInt();
+	is.expect(':');
+	is.expect('{');
 
-	ArrayValue array = new ArrayValueImpl();
+	ArrayValue array = new ArrayValueImpl((int) len);
 	for (int i = 0; i < len; i++) {
 	  Value key = unserialize(env, is);
 	  Value value = unserialize(env, is);
@@ -689,29 +680,25 @@ public class QuercusVariableModule extends AbstractQuercusModule {
 	  array.put(key, value);
 	}
 
-	unserializeExpect(is, '}');
+	is.expect('}');
 
 	return array;
       }
       
     case 'O':
       {
-	unserializeExpect(is, ':');
-	int len = (int) unserializeInt(is);
-	unserializeExpect(is, ':');
-	unserializeExpect(is, '"');
+	is.expect(':');
+	int len = (int) is.readInt();
+	is.expect(':');
+	is.expect('"');
 
-	char []buf = new char[len];
+	String className = is.readString(len);
 
-	is.read(buf, 0, len);
-
-	String className = new String(buf);
-
-	unserializeExpect(is, '"');
-	unserializeExpect(is, ':');
-	long count = unserializeInt(is);
-	unserializeExpect(is, ':');
-	unserializeExpect(is, '{');
+	is.expect('"');
+	is.expect(':');
+	long count = is.readInt();
+	is.expect(':');
+	is.expect('{');
 
 	Value obj = env.getClass(className).evalNew(env, new Value[0]);
 	for (int i = 0; i < count; i++) {
@@ -721,14 +708,14 @@ public class QuercusVariableModule extends AbstractQuercusModule {
 	  obj.put(key, value);
 	}
 
-	unserializeExpect(is, '}');
+	is.expect('}');
 
 	return obj;
       }
       
     case 'N':
       {
-	unserializeExpect(is, ';');
+	is.expect(';');
 
 	return NullValue.NULL;
       }
@@ -736,46 +723,6 @@ public class QuercusVariableModule extends AbstractQuercusModule {
     default:
       return BooleanValue.FALSE;
     }
-  }
-
-  private static void unserializeExpect(UnserializeReader is, int expectCh)
-    throws IOException
-  {
-    int ch = is.read();
-
-    if (ch == expectCh) {
-    }
-    else if (ch < 0)
-      throw new IOException(L.l("expected '{0}' at end of string",
-				String.valueOf((char) expectCh)));
-    else
-      throw new IOException(L.l("expected '{0}' at '{1}'",
-				String.valueOf((char) expectCh),
-				String.valueOf((char) ch)));
-  }
-
-  private static long unserializeInt(UnserializeReader is)
-    throws IOException
-  {
-    int ch = is.read();
-    long sign = 1;
-    long value = 0;
-
-    if (ch == '-') {
-      sign = -1;
-      ch = is.read();
-    }
-    else if (ch == '+') {
-      ch = is.read();
-    }
-
-    for (; '0' <= ch && ch <= '9'; ch = is.read()) {
-      value = 10 * value + ch - '0';
-    }
-
-    is.unread();
-    
-    return sign * value;
   }
 
   private static void debug_impl(Env env, Value v, int depth)
@@ -936,6 +883,54 @@ public class QuercusVariableModule extends AbstractQuercusModule {
     {
       _buffer = s.toCharArray();
       _length = _buffer.length;
+    }
+
+    public final void expect(int expectCh)
+      throws IOException
+    {
+      if (_length <= _index)
+	throw new IOException(L.l("expected '{0}' at end of string",
+				  String.valueOf((char) expectCh)));
+    
+      int ch = _buffer[_index++];
+
+      if (ch != expectCh)
+	throw new IOException(L.l("expected '{0}' at '{1}'",
+				  String.valueOf((char) expectCh),
+				  String.valueOf((char) ch)));
+    }
+
+    public final long readInt()
+    {
+      int ch = read();
+      
+      long sign = 1;
+      long value = 0;
+
+      if (ch == '-') {
+	sign = -1;
+	ch = read();
+      }
+      else if (ch == '+') {
+	ch = read();
+      }
+
+      for (; '0' <= ch && ch <= '9'; ch = read()) {
+	value = 10 * value + ch - '0';
+      }
+
+      unread();
+    
+      return sign * value;
+    }
+
+    public final String readString(int len)
+    {
+      String s = new String(_buffer, _index, len);
+
+      _index += len;
+
+      return s;
     }
     
     public final int read()

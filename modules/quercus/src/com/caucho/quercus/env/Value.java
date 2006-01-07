@@ -1101,5 +1101,10 @@ abstract public class Value {
     
     out.print("com.caucho.quercus.env.NullValue.NULL");
   }
+
+  public String toInternString()
+  {
+    return toString().intern();
+  }
 }
 

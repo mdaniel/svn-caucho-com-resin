@@ -263,7 +263,10 @@ public class DoubleValue extends Value {
   public void generate(PhpWriter out)
     throws IOException
   {
-    out.print("new com.caucho.quercus.env.DoubleValue(" + _value + ")");
+    if (_value == 0)
+      out.print("DoubleValue.ZERO");
+    else
+      out.print("new DoubleValue(" + _value + ")");
   }
 
   /**

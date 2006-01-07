@@ -354,6 +354,22 @@ public class VarExpr extends AbstractVarExpr {
   }
 
   /**
+   * Analyze the expression as modified
+   */
+  public void analyzeSetModified(AnalyzeInfo info)
+  {
+    getVarInfo().setModified();
+  }
+
+  /**
+   * Analyze the expression as modified
+   */
+  public void analyzeSetReference(AnalyzeInfo info)
+  {
+    getVarInfo().setReference();
+  }
+
+  /**
    * Analyze the expression
    */
   public void analyzeUnset(AnalyzeInfo info)
@@ -461,6 +477,9 @@ public class VarExpr extends AbstractVarExpr {
     if (state == VarState.INIT) {
       throw new IllegalStateException(getLocation() + "'" + this + "' is not analyzed.");
     }
+    else if (! _var.isReference()) {
+      out.print(getJavaVar());
+    }
     else if (state == VarState.VALID) {
       out.print(getJavaVar());
     }
@@ -479,10 +498,13 @@ public class VarExpr extends AbstractVarExpr {
 	out.printJavaString(_name);
 	out.print("\"))");
       }
-      else {
+      else if (_var.isReference()) {
 	out.print("(");
 	out.print(getJavaVar());
 	out.print(" = new Var())");
+      }
+      else {
+	out.print("NullValue.NULL");
       }
     }
     else {
@@ -536,10 +558,101 @@ public class VarExpr extends AbstractVarExpr {
   public void generateAssign(PhpWriter out, Expr value, boolean isTop)
     throws IOException
   {
-    generate(out);
-    out.print(".set(");
-    value.generate(out);
-    out.print(")");
+    VarState state = getVarState();
+
+    if (state == VarState.INIT) {
+      throw new IllegalStateException(getLocation() + "'" + this + "' is not analyzed.");
+    }
+    else if (! _var.isReference()) {
+      if (isTop) {
+	// php/3a60
+	out.print(getJavaVar());
+	out.print(" = ");
+	value.generate(out);
+      }
+      else {
+	out.print("(");
+	out.print(getJavaVar());
+	out.print(" = ");
+	value.generate(out);
+	out.print(")");
+      }
+    }
+    else if (state == VarState.VALID) {
+      out.print(getJavaVar());
+      out.print(".set(");
+      value.generate(out);
+      out.print(")");
+    }
+    else if (state == VarState.UNSET) {
+      if (_var.isGlobal()) {
+	out.print("(");
+	out.print(getJavaVar());
+	out.print(" = env.getGlobalVar(\"");
+	out.printJavaString(_name);
+	out.print("\"))");
+	out.print(".set(");
+	value.generate(out);
+	out.print(")");
+      }
+      else if (_var.isVariable()) {
+	out.print("(");
+	out.print(getJavaVar());
+	out.print(" = env.getVar(\"");
+	out.printJavaString(_name);
+	out.print("\"))");
+	out.print(".set(");
+	value.generate(out);
+	out.print(")");
+      }
+      else if (_var.isReference()) {
+	out.print("(");
+	out.print(getJavaVar());
+	out.print(" = new Var())");
+	out.print(".set(");
+	value.generate(out);
+	out.print(")");
+      }
+      else {
+	out.print("NullValue.NULL");
+      }
+    }
+    else {
+      if (_var.isGlobal()) {
+	out.print("(");
+	out.print(getJavaVar());
+	out.print(" = env.getGlobalVar(\"");
+	out.printJavaString(_name);
+	out.print("\", ");
+	out.print(getJavaVar());
+	out.print("))");
+	out.print(".set(");
+	value.generate(out);
+	out.print(")");
+      }
+      else if (_var.isVariable()) {
+	out.print("(");
+	out.print(getJavaVar());
+	out.print(" = env.getVar(\"");
+	out.printJavaString(_name);
+	out.print("\", ");
+	out.print(getJavaVar());
+	out.print("))");
+	out.print(".set(");
+	value.generate(out);
+	out.print(")");
+      }
+      else {
+	out.print("(");
+	out.print(getJavaVar());
+	out.print(" = env.getLocalVar(");
+	out.print(getJavaVar());
+	out.print("))");
+	out.print(".set(");
+	value.generate(out);
+	out.print(")");
+      }
+    }
   }
 
   /**

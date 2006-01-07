@@ -52,7 +52,7 @@ public class PostIncrementExpr extends UnaryExpr {
   {
     // super(expr.createRef());
     super(expr);
-    
+
     _incr = incr;
   }
   
@@ -99,6 +99,9 @@ public class PostIncrementExpr extends UnaryExpr {
   {
     _expr.analyze(info);
     _expr.analyzeAssign(info);
+
+    _expr.analyzeSetReference(info);
+    _expr.analyzeSetModified(info);
   }
 
   /**

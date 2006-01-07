@@ -103,45 +103,45 @@ abstract public class CompiledFunctionRef extends AbstractFunction {
   public Value evalMethod(Env env, Value obj, Value []argValues)
     throws Throwable
   {
-    return evalMethodRef(env, obj, argValues).copy();
+    return evalMethodRef(env, obj, argValues).copyReturn();
   }
 
   public Value evalMethod(Env env, Value obj)
     throws Throwable
   {
-    return evalMethodRef(env, obj).copy();
+    return evalMethodRef(env, obj).copyReturn();
   }
 
   public Value evalMethod(Env env, Value obj, Value arg)
     throws Throwable
   {
-    return evalMethodRef(env, obj, arg).copy();
+    return evalMethodRef(env, obj, arg).copyReturn();
   }
 
   public Value evalMethod(Env env, Value obj, Value a1, Value a2)
     throws Throwable
   {
-    return evalMethodRef(env, obj, a1, a2).copy();
+    return evalMethodRef(env, obj, a1, a2).copyReturn();
   }
 
   public Value evalMethod(Env env, Value obj, Value a1, Value a2, Value a3)
     throws Throwable
   {
-    return evalMethodRef(env, obj, a1, a2, a3).copy();
+    return evalMethodRef(env, obj, a1, a2, a3).copyReturn();
   }
 
   public Value evalMethod(Env env, Value obj, Value a1,
 			  Value a2, Value a3, Value a4)
     throws Throwable
   {
-    return evalMethodRef(env, obj, a1, a2, a3, a4).copy();
+    return evalMethodRef(env, obj, a1, a2, a3, a4).copyReturn();
   }
 
   public Value evalMethod(Env env, Value obj, Value a1, Value a2,
 			  Value a3, Value a4, Value a5)
     throws Throwable
   {
-    return evalMethodRef(env, obj, a1, a2, a3, a4, a5).copy();
+    return evalMethodRef(env, obj, a1, a2, a3, a4, a5).copyReturn();
   }
 
   /**

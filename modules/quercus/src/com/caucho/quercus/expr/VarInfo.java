@@ -41,10 +41,11 @@ public class VarInfo {
   
   private boolean _isGlobal;
   private boolean _isArgument;
-  private boolean _isRef;
+  private boolean _isRefArgument;
   private boolean _isAssigned;
-  // true if the content of the variable might be modified
-  private boolean _isContentModified;
+  
+  // true if the variable is a reference
+  private boolean _isReference;
 
   // XXX: move to arg?
   private int _argumentIndex;
@@ -54,6 +55,9 @@ public class VarInfo {
     _name = name;
     
     _function = function;
+
+    if (function != null && function.isPageMain())
+      _isReference = true;
   }
 
   /**
@@ -133,17 +137,19 @@ public class VarInfo {
   /**
    * True if the variable is a reference function argument
    */
-  public boolean isRef()
+  public boolean isRefArgument()
   {
-    return _isRef;
+    return _isRefArgument;
   }
 
   /**
    * True if the variable is a reference function argument
    */
-  public void setRef(boolean isRef)
+  public void setRefArgument(boolean isRef)
   {
-    _isRef = isRef;
+    _isRefArgument = isRef;
+    
+    setReference();
   }
 
   /**
@@ -160,6 +166,52 @@ public class VarInfo {
   public void setAssigned(boolean isAssigned)
   {
     _isAssigned = isAssigned;
+
+    if (isReference()) {
+      // php/3a7c
+      setModified();
+    }
+  }
+
+  /**
+   * True if the variable is used as a reference in the function.
+   */
+  public boolean isReference()
+  {
+    return (_isReference || isGlobal() || isArgument() || isVariable());
+  }
+
+  /**
+   * True if the variable is assigned in the function.
+   */
+  public void setReference()
+  {
+    _isReference = true;
+
+    if (_isAssigned)
+      setModified();
+  }
+
+  /**
+   * Returns true for a read-only variable, i.e. one that doesn't
+   * need to be copied as an argument.
+   */
+  public boolean isReadOnly()
+  {
+    return _function.isReadOnly();
+  }
+
+  /**
+   * Sets as modified.
+   */
+  public void setModified()
+  {
+    _function.setModified();
+  }
+
+  public String toString()
+  {
+    return "VarInfo[" + _name + "]";
   }
 }
 

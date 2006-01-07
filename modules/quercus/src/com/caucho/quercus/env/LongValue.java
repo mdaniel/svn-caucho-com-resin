@@ -228,13 +228,15 @@ public class LongValue extends Value {
     throws IOException
   {
     if (_value == 0)
-      out.print("com.caucho.quercus.env.LongValue.ZERO");
+      out.print("LongValue.ZERO");
     else if (_value == 1)
-      out.print("com.caucho.quercus.env.LongValue.ONE");
+      out.print("LongValue.ONE");
     else if (_value == -1)
-      out.print("com.caucho.quercus.env.LongValue.MINUS_ONE");
+      out.print("LongValue.MINUS_ONE");
+    else if (STATIC_MIN <= _value && _value <= STATIC_MAX)
+      out.print("LongValue.STATIC_VALUES[" + (_value - STATIC_MIN) + "]");
     else
-      out.print("new com.caucho.quercus.env.LongValue(" + _value + "L)");
+      out.print("new LongValue(" + _value + "L)");
   }
 
   /**
@@ -242,7 +244,7 @@ public class LongValue extends Value {
    */
   public int hashCode()
   {
-    return (int) (37 + 65521 * _value);
+    return (int) (37 + 65537 * _value);
   }
 
   /**

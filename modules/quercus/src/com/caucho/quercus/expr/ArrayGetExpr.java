@@ -230,6 +230,35 @@ public class ArrayGetExpr extends AbstractVarExpr {
   }
 
   /**
+   * Analyze the statement
+   */
+  public void analyzeAssign(AnalyzeInfo info)
+  {
+    analyze(info);
+
+    _expr.analyzeSetModified(info);
+    // php/3a68
+    _expr.analyzeSetReference(info);
+  }
+
+  /**
+   * Analyze the statement as modified
+   */
+  public void analyzeSetModified(AnalyzeInfo info)
+  {
+    _expr.analyzeSetModified(info);
+  }
+
+  /**
+   * Analyze the statement as a reference
+   */
+  public void analyzeSetReference(AnalyzeInfo info)
+  {
+    // php/3a69
+    _expr.analyzeSetReference(info);
+  }
+
+  /**
    * Generates code to evaluate the expression.
    *
    * @param out the writer to the Java source code.

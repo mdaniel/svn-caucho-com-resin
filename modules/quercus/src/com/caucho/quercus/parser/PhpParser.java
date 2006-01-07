@@ -323,6 +323,7 @@ public class PhpParser {
     throws IOException
   {
     _function = new FunctionInfo(_quercus, "main");
+    _function.setPageMain(true);
 
     // quercus/0b0d
     _function.setVariableVar(true);
@@ -367,6 +368,7 @@ public class PhpParser {
     _function = new FunctionInfo(_quercus, "anonymous");
     // XXX: need param or better function name for non-global?
     _function.setGlobal(false);
+    _function.setPageMain(true);
 
     init(argPath);
 
@@ -1292,6 +1294,7 @@ public class PhpParser {
 
       _function = new FunctionInfo(_quercus, name);
       _function.setDeclaringClass(_quercusClass);
+      _function.setPageStatic(oldTop);
       
       _function.setReturnsReference(_returnsReference);
 
@@ -1375,7 +1378,7 @@ public class PhpParser {
       VarInfo var = _function.createVar(argName);
       var.setArgument(true);
       var.setArgumentIndex(args.size() - 1);
-      var.setRef(isReference);
+      var.setRefArgument(isReference);
       
       if (token != ',') {
 	_peekToken = token;

@@ -168,6 +168,17 @@ public class FunctionExpr extends Expr {
     for (int i = 0; i < _args.length; i++) {
       _args[i].analyze(info);
     }
+
+    // check for read-only and refs
+    
+    if (fun != null)
+      fun.analyzeArguments(_args, info);
+    else {
+      for (int i = 0; i < _args.length; i++) {
+	_args[i].analyzeSetModified(info);
+	_args[i].analyzeSetReference(info);
+      }
+    }
   }
 
   /**

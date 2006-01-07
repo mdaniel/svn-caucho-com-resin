@@ -125,11 +125,19 @@ public class ForeachStatement extends Statement {
 
     AnalyzeInfo loopInfo = info.createLoop(contInfo, breakInfo);
 
-    if (_key != null)
+    if (_key != null) {
       _key.analyzeAssign(loopInfo);
 
-    if (_value != null)
+      // XXX: not necessarily true
+      _key.analyzeSetReference(loopInfo);
+    }
+
+    if (_value != null) {
       _value.analyzeAssign(loopInfo);
+
+      // XXX: not necessarily true
+      _value.analyzeSetReference(loopInfo);
+    }
 
     _block.analyze(loopInfo);
 

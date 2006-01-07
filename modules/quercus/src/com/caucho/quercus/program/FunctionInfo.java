@@ -54,12 +54,18 @@ public class FunctionInfo {
   private AbstractClassDef _classDef;
 
   private boolean _isGlobal;
+  
+  private boolean _isPageMain;
+  private boolean _isPageStatic;
+  
   private boolean _isReturnsReference;
   private boolean _isVariableVar;
   private boolean _isOutUsed;
 
   private boolean _isVariableArgs;
   private boolean _isUsesSymbolTable;
+
+  private boolean _isReadOnly = true;
 
   public FunctionInfo(Quercus quercus, String name)
   {
@@ -89,6 +95,38 @@ public class FunctionInfo {
   public void setGlobal(boolean isGlobal)
   {
     _isGlobal = isGlobal;
+  }
+
+  /**
+   * True for a main function (top-level script).
+   */
+  public boolean isPageMain()
+  {
+    return _isPageMain;
+  }
+
+  /**
+   * True for a main function (top-level script).
+   */
+  public void setPageMain(boolean isPageMain)
+  {
+    _isPageMain = isPageMain;
+  }
+
+  /**
+   * True for a static function (top-level script).
+   */
+  public boolean isPageStatic()
+  {
+    return _isPageStatic;
+  }
+
+  /**
+   * True for a static function (top-level script).
+   */
+  public void setPageStatic(boolean isPageStatic)
+  {
+    _isPageStatic = isPageStatic;
   }
 
   /**
@@ -193,6 +231,22 @@ public class FunctionInfo {
   public void setOutUsed()
   {
     _isOutUsed = true;
+  }
+
+  /**
+   * Returns true for a read-only function, i.e. no values are changed.
+   */
+  public boolean isReadOnly()
+  {
+    return _isReadOnly;
+  }
+
+  /**
+   * True for a non-read-only function
+   */
+  public void setModified()
+  {
+    _isReadOnly = false;
   }
 
   /**

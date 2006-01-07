@@ -484,6 +484,20 @@ abstract public class Expr {
   }
 
   /**
+   * Analyze as modified.
+   */
+  public void analyzeSetModified(AnalyzeInfo info)
+  {
+  }
+
+  /**
+   * Analyze as reference
+   */
+  public void analyzeSetReference(AnalyzeInfo info)
+  {
+  }
+
+  /**
    * Returns the variables state.
    *
    * @param var the variables to test

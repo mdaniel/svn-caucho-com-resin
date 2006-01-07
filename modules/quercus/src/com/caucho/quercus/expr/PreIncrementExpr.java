@@ -98,6 +98,9 @@ public class PreIncrementExpr extends UnaryExpr {
   {
     _expr.analyze(info);
     _expr.analyzeAssign(info);
+
+    _expr.analyzeSetReference(info);
+    _expr.analyzeSetModified(info);
   }
 
   /**
