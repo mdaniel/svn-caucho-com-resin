@@ -586,6 +586,17 @@ abstract public class Expr {
   }
 
   /**
+   * Generates code to recreate the expression.
+   *
+   * @param out the writer to the Java source code.
+   */
+  public void generateCopy(PhpWriter out)
+    throws IOException
+  {
+    generate(out);
+  }
+
+  /**
    * Generates code to recreate the expression, creating an array
    * for an unset value.
    *

@@ -431,7 +431,6 @@ public class Function extends AbstractFunction {
 	  arg.generateRef(out);
 	}
 	else {
-	  arg = arg.createCopy();
 	  arg.generateArg(out);
 	}
       }
@@ -444,7 +443,7 @@ public class Function extends AbstractFunction {
     for (int i = _args.length; i < args.length; i++) {
       if (i != 0)
 	out.print(", ");
-      args[i].createCopy().generateArg(out);
+      args[i].generateArg(out);
     }
       
     if (isVariableArgs() && (_args.length > 0 || args.length > 0))
@@ -464,7 +463,8 @@ public class Function extends AbstractFunction {
   private boolean isVariableMap()
   {
     // return _info.isVariableVar();
-    return _info.isUsesSymbolTable();
+    // php/3254
+    return _info.isUsesSymbolTable() || _info.isVariableVar();
   }
   
   /**

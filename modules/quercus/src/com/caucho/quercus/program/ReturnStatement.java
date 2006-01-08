@@ -36,6 +36,7 @@ import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.NullValue;
 
 import com.caucho.quercus.expr.Expr;
+import com.caucho.quercus.expr.VarExpr;
 
 import com.caucho.quercus.gen.PhpWriter;
 
@@ -102,7 +103,19 @@ public class ReturnStatement extends Statement {
     
     if (_expr != null) {
       out.print("return ");
-      _expr.createCopy().generateReturn(out);
+
+      // php/3a5h
+      _expr.generate(out);
+      
+      /**
+      Expr copy = _expr.createCopy();
+
+      if (_expr instanceof VarExpr)
+	copy.generateReturn(out);
+      else
+	copy.generate(out);
+      */
+      
       out.println(";");
     }
     else

@@ -188,6 +188,18 @@ public class VarVarExpr extends AbstractVarExpr {
     
     _var.analyze(info);
   }
+  /**
+   * Analyze the expression
+   */
+  public void analyzeAssign(AnalyzeInfo info)
+  {
+    info.getFunction().setVariableVar(true);
+    
+    _var.analyzeAssign(info);
+
+    // php/3253
+    info.clear();
+  }
 
   /**
    * Generates code to evaluate the expression
@@ -200,6 +212,18 @@ public class VarVarExpr extends AbstractVarExpr {
     out.print("env.getVar(");
     _var.generateString(out);
     out.print(")");
+  }
+
+  /**
+   * Generates code to evaluate the expression, copying the result
+   *
+   * @param out the writer to the Java source code.
+   */
+  public void generateCopy(PhpWriter out)
+    throws IOException
+  {
+    generate(out);
+    out.print(".copy()");  // php/3a5t
   }
 
   /**

@@ -195,6 +195,23 @@ public class ConditionalExpr extends Expr {
   }
 
   /**
+   * Generates code to evaluate the expression, copying the result
+   *
+   * @param out the writer to the Java source code.
+   */
+  public void generateCopy(PhpWriter out)
+    throws IOException
+  {
+    out.print("(");
+    _test.generateBoolean(out);
+    out.print(" ? ");
+    _trueExpr.generateCopy(out); // php/3a5o
+    out.print(" : ");
+    _falseExpr.generateCopy(out); // php/3a5o
+    out.print(")");
+  }
+
+  /**
    * Generates code to recreate the expression.
    *
    * @param out the writer to the Java source code.

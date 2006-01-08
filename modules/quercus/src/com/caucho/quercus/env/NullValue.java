@@ -197,5 +197,10 @@ public class NullValue extends Value {
   {
     return env.createObject();
   }
+
+  public String toDebugString()
+  {
+    return "null";
+  }
 }
 

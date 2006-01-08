@@ -87,9 +87,9 @@ public class VarInfo {
   /**
    * True if the variable is global.
    */
-  public void setGlobal(boolean isGlobal)
+  public void setGlobal()
   {
-    _isGlobal = isGlobal;
+    _isGlobal = true;
   }
 
   /**
@@ -145,9 +145,9 @@ public class VarInfo {
   /**
    * True if the variable is a reference function argument
    */
-  public void setRefArgument(boolean isRef)
+  public void setRefArgument()
   {
-    _isRefArgument = isRef;
+    _isRefArgument = true;
     
     setReference();
   }
@@ -163,9 +163,9 @@ public class VarInfo {
   /**
    * True if the variable is assigned in the function.
    */
-  public void setAssigned(boolean isAssigned)
+  public void setAssigned()
   {
-    _isAssigned = isAssigned;
+    _isAssigned = true;
 
     if (isReference()) {
       // php/3a7c

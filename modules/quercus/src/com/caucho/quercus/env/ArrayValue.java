@@ -411,7 +411,7 @@ abstract public class ArrayValue extends Value {
    * @param env
    */
   public void print(Env env)
-    throws IOException
+    throws Throwable
   {
     env.getOut().print("Array");
   }

@@ -133,6 +133,20 @@ public class SuppressErrorExpr extends UnaryExpr {
     _expr.generate(out);
     out.println(")");
   }
+
+  /**
+   * Generates code to recreate the expression.
+   *
+   * @param out the writer to the Java source code.
+   */
+  public void generateCopy(PhpWriter out)
+    throws IOException
+  {
+    // php/3a5s
+    out.print("env.suppress(env.setErrorMask(0), ");
+    _expr.generateCopy(out);
+    out.println(")");
+  }
   
   public String toString()
   {

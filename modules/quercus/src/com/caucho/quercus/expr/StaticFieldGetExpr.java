@@ -62,23 +62,6 @@ public class StaticFieldGetExpr extends Expr {
   }
 
   /**
-   * Returns the assignment.
-   */
-  public Expr createAssign(PhpParser parser, Expr value)
-  {
-    return new StaticFieldSetExpr(_className, _varName, value);
-  }
-
-  /**
-   * Creates a reference.
-   */
-  public Expr createRef()
-    throws IOException
-  {
-    return new StaticFieldRefExpr(_className, _varName);
-  }
-
-  /**
    * Evaluates the expression.
    *
    * @param env the calling environment.

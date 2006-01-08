@@ -51,7 +51,7 @@ public class AssignExpr extends Expr {
   public AssignExpr(AbstractVarExpr var, Expr value)
   {
     _var = var;
-    _value = value.createCopy();
+    _value = value;
   }
 
   /**
@@ -130,9 +130,21 @@ public class AssignExpr extends Expr {
   public void generateRef(PhpWriter out)
     throws IOException
   {
-    // quercus/344m
+    // php/344m
     // the 'true' parameter isn't quite logical, but the effect is correct
     _var.generateAssign(out, _value, true);
+  }
+
+  /**
+   * Generates code to evaluate the expression, copying the result
+   *
+   * @param out the writer to the Java source code.
+   */
+  public void generateCopy(PhpWriter out)
+    throws IOException
+  {
+    generate(out);
+    out.print(".copy()");  // php/3a5q
   }
 
   /**

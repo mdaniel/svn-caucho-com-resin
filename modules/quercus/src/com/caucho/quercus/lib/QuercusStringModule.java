@@ -32,6 +32,7 @@ package com.caucho.quercus.lib;
 import java.util.Map;
 import java.util.Iterator;
 import java.util.Locale;
+import java.util.ArrayList;
 
 import java.util.logging.Logger;
 import java.util.logging.Level;
@@ -1425,13 +1426,164 @@ public class QuercusStringModule extends AbstractQuercusModule {
   {
     Object []values = new Object[args.length];
 
-    // XXX: will need to actually parse and break this up to handle
-    // %02s
-    format = cleanPrintfFormat(format);
+    ArrayList<PrintfSegment> segments = parsePrintfFormat(format);
 
-    parsePrintfFormat(format, args, values);
+    StringBuilder sb = new StringBuilder();
+
+    for (int i = 0; i < segments.size(); i++)
+      segments.get(i).apply(sb, args);
+
+    return sb.toString();
+  }
+
+  private static ArrayList<PrintfSegment> parsePrintfFormat(String format)
+  {
+    ArrayList<PrintfSegment> segments = new ArrayList<PrintfSegment>();
     
-    return String.format(format, values);
+    StringBuilder sb = new StringBuilder();
+    StringBuilder flags = new StringBuilder();
+
+    int length = format.length();
+    int index = 0;
+
+    for (int i = 0; i < length; i++) {
+      char ch = format.charAt(i);
+
+      if (i + 1 < length && ch == '%') {
+	// The C printf silently ignores invalid flags, so we need to
+	// remove them if present.
+
+	sb.append(ch);
+
+	boolean isLeft = false;
+	boolean isAlt = false;
+	boolean isZero = false;
+	
+	flags.setLength(0);
+
+	int j = i + 1;
+
+	loop:
+	for (; j < length; j++) {
+	  ch = format.charAt(j);
+
+	  switch (ch) {
+	  case '-':
+	    isLeft = true;
+	    break;
+	  case '#':
+	    isAlt = true;
+	    break;
+	  case '0':
+	    isZero = true;
+	    flags.append(ch);
+	    break;
+	  case '+': case ' ': case ',': case '(':
+	    flags.append(ch);
+	    break;
+	  default:
+	    break loop;
+	  }
+	}
+
+	int head = j;
+	loop:
+	for (; j < length; j++) {
+	  ch = format.charAt(j);
+	  
+	  switch (ch) {
+	  case '%':
+	    i = j - 1;
+	    break loop;
+	    
+	  case '0': case '1': case '2': case '3': case '4':
+	  case '5': case '6': case '7': case '8': case '9':
+	  case '.':
+	    break;
+
+	  case 'b': case 'B':
+	    if (isLeft)
+	      sb.append('-');
+	    if (isAlt)
+	      sb.append('#');
+	    sb.append(format, head, j);
+	    sb.append(ch);
+	    i = j;
+	    break loop;
+
+	  case 's': case 'S':
+	    sb.setLength(sb.length() - 1);
+	    segments.add(new StringPrintfSegment(sb,
+						 isLeft || isAlt,
+						 isZero,
+						 ch == 'S',
+						 format.substring(head, j),
+						 index++));
+	    sb.setLength(0);
+	    i = j;
+	    break loop;
+
+	  case 'c': case 'C':
+	    sb.setLength(sb.length() - 1);
+	    segments.add(new CharPrintfSegment(sb,
+					       isLeft || isAlt,
+					       isZero,
+					       ch == 'C',
+					       format.substring(head, j),
+					       index++));
+	    sb.setLength(0);
+	    i = j;
+	    break loop;
+
+	  case 'd': case 'x': case 'o': case 'X':
+	    if (isLeft)
+	      sb.append('-');
+	    if (isAlt)
+	      sb.append('#');
+	    sb.append(flags);
+	    sb.append(format, head, j);
+	    sb.append(ch);
+
+	    segments.add(new LongPrintfSegment(sb.toString(), index++));
+	    sb.setLength(0);
+	    i = j;
+	    break loop;
+
+	  case 'e': case 'E': case 'f': case 'g': case 'G':
+	    if (isLeft)
+	      sb.append('-');
+	    if (isAlt)
+	      sb.append('#');
+	    sb.append(flags);
+	    sb.append(format, head, j);
+	    sb.append(ch);
+
+	    segments.add(new DoublePrintfSegment(sb.toString(), index++));
+	    sb.setLength(0);
+	    i = j;
+	    break loop;
+
+	  default:
+	    if (isLeft)
+	      sb.append('-');
+	    if (isAlt)
+	      sb.append('#');
+	    sb.append(flags);
+	    sb.append(format, head, j);
+	    sb.append(ch);
+	    i = j;
+	    break loop;
+	  }
+	}
+      }
+      else
+	sb.append(ch);
+    }
+
+    if (sb.length() > 0)
+      segments.add(new TextPrintfSegment(sb));
+    
+    return segments;
   }
 
   private static String cleanPrintfFormat(String format)
@@ -2744,6 +2896,181 @@ public class QuercusStringModule extends AbstractQuercusModule {
   private static boolean isWhitespace(char ch)
   {
     return ch == ' ' || ch == '\t' || ch == '\n' || ch == '\r';
+  }
+
+  abstract static class PrintfSegment {
+    abstract public void apply(StringBuilder sb, Value []args);
+  }
+  
+  static class TextPrintfSegment extends PrintfSegment {
+    private final char []_text;
+
+    TextPrintfSegment(StringBuilder text)
+    {
+      _text = new char[text.length()];
+      
+      text.getChars(0, _text.length, _text, 0);
+    }
+    
+    public void apply(StringBuilder sb, Value []args)
+    {
+      sb.append(_text, 0, _text.length);
+    }
+  }
+  
+  static class LongPrintfSegment extends PrintfSegment {
+    private final String _format;
+    private final int _index;
+
+    LongPrintfSegment(String format, int index)
+    {
+      _format = format;
+      _index = index;
+    }
+    
+    public void apply(StringBuilder sb, Value []args)
+    {
+      long value;
+      
+      if (_index < args.length)
+	value = args[_index].toLong();
+      else
+	value = 0;
+      
+      sb.append(String.format(_format, new Long(value)));
+    }
+  }
+  
+  static class DoublePrintfSegment extends PrintfSegment {
+    private final String _format;
+    private final int _index;
+
+    DoublePrintfSegment(String format, int index)
+    {
+      _format = format;
+      _index = index;
+    }
+    
+    public void apply(StringBuilder sb, Value []args)
+    {
+      double value;
+      
+      if (_index < args.length)
+	value = args[_index].toDouble();
+      else
+	value = 0;
+      
+      sb.append(String.format(_format, new Double(value)));
+    }
+  }
+  
+  static class StringPrintfSegment extends PrintfSegment {
+    private final char []_prefix;
+    private final int _min;
+    private final int _max;
+    private final boolean _isLeft;
+    private final boolean _isUpper;
+    private final char _pad;
+    protected final int _index;
+
+    StringPrintfSegment(StringBuilder prefix,
+			boolean isLeft, boolean isZero, boolean isUpper,
+			String format, int index)
+    {
+      _prefix = new char[prefix.length()];
+
+      _isLeft = isLeft;
+      _isUpper = isUpper;
+
+      _pad = isZero ? '0' : ' ';
+      
+      prefix.getChars(0, _prefix.length, _prefix, 0);
+
+      int i = 0;
+      int len = format.length();
+
+      int min = 0;
+      int max = Integer.MAX_VALUE;
+      char ch = ' ';
+
+      for (; i < len && '0' <= (ch = format.charAt(i)) && ch <= '9'; i++) {
+	min = 10 * min + ch - '0';
+      }
+
+      if (ch == '.') {
+	max = 0;
+	
+	for (i++; i < len && '0' <= (ch = format.charAt(i)) && ch <= '9'; i++) {
+	  max = 10 * max + ch - '0';
+	}
+      }
+
+      _min = min;
+      _max = max;
+
+      _index = index;
+    }
+    
+    public void apply(StringBuilder sb, Value []args)
+    {
+      sb.append(_prefix, 0, _prefix.length);
+
+      String value = toValue(args);
+
+      int len = value.length();
+
+      if (_max < len) {
+	value = value.substring(0, _max);
+	len = _max;
+      }
+
+      if (_isUpper)
+	value = value.toUpperCase();
+
+      if (! _isLeft) {
+	for (int i = len; i < _min; i++) {
+	  sb.append(_pad);
+	}
+      }
+      
+      sb.append(value);
+
+      if (_isLeft) {
+	for (int i = len; i < _min; i++) {
+	  sb.append(_pad);
+	}
+      }
+    }
+
+    String toValue(Value []args)
+    {
+      if (_index < args.length)
+	return args[_index].toString();
+      else
+	return "";
+    }
+  }
+  
+  static class CharPrintfSegment extends StringPrintfSegment {
+    CharPrintfSegment(StringBuilder prefix,
+		      boolean isLeft, boolean isZero, boolean isUpper,
+		      String format, int index)
+    {
+      super(prefix, isLeft, isZero, isUpper, format, index);
+    }
+
+    String toValue(Value []args)
+    {
+      if (args.length <= _index)
+	return "";
+
+      Value v = args[_index];
+      
+      if (v.isLong())
+	return String.valueOf((char) v.toLong());
+      else
+	return v.charAt(0).toString();
+    }
   }
 }
 

@@ -536,6 +536,17 @@ public class StaticFunction extends AbstractFunction {
   {
     generateImpl(out, funExpr, args);
   }
+  
+  /**
+   * Generates code to evaluate as a double expression.
+   *
+   * @param out the writer to the Java source code.
+   */
+  public void generateCopy(PhpWriter out, Expr funExpr, Expr []args)
+    throws IOException
+  {
+    generate(out, funExpr, args);
+  }
 
   /**
    * Generates code to evaluate the expression.

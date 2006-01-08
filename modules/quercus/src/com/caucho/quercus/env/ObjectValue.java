@@ -377,6 +377,16 @@ public class ObjectValue extends ArrayValueWrapper {
   }
   
   /**
+   * Converts to a string.
+   * @param env
+   */
+  public void print(Env env)
+    throws Throwable
+  {
+    env.getOut().print(toString(env));
+  }
+  
+  /**
    * Converts to an object.
    */
   public Value toObject(Env env)

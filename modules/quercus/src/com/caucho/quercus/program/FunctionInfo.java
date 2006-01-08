@@ -258,10 +258,12 @@ public class FunctionInfo {
 
     if (var == null) {
       var = new VarInfo(name, this);
-      var.setGlobal(_isGlobal);
+
+      if (_isGlobal)
+	var.setGlobal();
 
       if (Quercus.isSuperGlobal(name))
-	var.setGlobal(true);
+	var.setGlobal();
       
       _varMap.put(name, var);
     }

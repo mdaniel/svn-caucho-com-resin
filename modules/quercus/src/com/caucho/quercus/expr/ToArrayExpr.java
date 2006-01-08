@@ -87,6 +87,21 @@ public class ToArrayExpr extends UnaryExpr {
   }
 
   /**
+   * Generates code to evaluate the expression.
+   *
+   * @param out the writer to the Java source code.
+   */
+  public void generateCopy(PhpWriter out)
+    throws IOException
+  {
+    out.print("ArrayValue.toArray(");
+    
+    _expr.generateCopy(out); // php/3a5u
+
+    out.print(")");
+  }
+
+  /**
    * Generates code to recreate the expression.
    *
    * @param out the writer to the Java source code.

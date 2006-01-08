@@ -108,6 +108,18 @@ public class AssignRefExpr extends Expr {
   {
     _var.generateAssignRef(out, _value, true);
   }
+
+  /**
+   * Generates code to evaluate the expression, copying the result
+   *
+   * @param out the writer to the Java source code.
+   */
+  public void generateCopy(PhpWriter out)
+    throws IOException
+  {
+    generate(out);
+    out.print(".copy()");  // php/3a5r
+  }
   
   public String toString()
   {

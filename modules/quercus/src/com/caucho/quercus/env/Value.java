@@ -229,7 +229,9 @@ abstract public class Value {
    */
   public Value copyReturn()
   {
-    return copy();
+    // php/3a5d
+    
+    return this;
   }
   
   /**
@@ -467,7 +469,7 @@ abstract public class Value {
   private Value errorNoMethod(Env env, String methodName)
   {
     return env.error(L.l("{0}: '{1}' is an unknown method.",
-			 toString(), methodName));
+			 toDebugString(), methodName));
   }
 
   /**
@@ -1105,6 +1107,11 @@ abstract public class Value {
   public String toInternString()
   {
     return toString().intern();
+  }
+
+  public String toDebugString()
+  {
+    return toString();
   }
 }
 

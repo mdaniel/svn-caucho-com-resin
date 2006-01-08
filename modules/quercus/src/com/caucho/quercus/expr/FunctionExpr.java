@@ -189,7 +189,19 @@ public class FunctionExpr extends Expr {
   public void generate(PhpWriter out)
     throws IOException
   {
-    generateImpl(out, Value.class, false);
+    generateImpl(out, Value.class, false, false);
+  }
+
+  /**
+   * Generates code to evaluate the expression.
+   *
+   * @param out the writer to the Java source code.
+   */
+  public void generateCopy(PhpWriter out)
+    throws IOException
+  {
+    generateImpl(out, Value.class, false, true);
+
   }
 
   /**
@@ -200,7 +212,7 @@ public class FunctionExpr extends Expr {
   public void generateRef(PhpWriter out)
     throws IOException
   {
-    generateImpl(out, Value.class, true);
+    generateImpl(out, Value.class, true, false);
   }
 
   /**
@@ -211,7 +223,7 @@ public class FunctionExpr extends Expr {
   public void generateTop(PhpWriter out)
     throws IOException
   {
-    generateImpl(out, void.class, true);
+    generateImpl(out, void.class, true, false);
   }
 
   /**
@@ -222,7 +234,7 @@ public class FunctionExpr extends Expr {
   public void generateBoolean(PhpWriter out)
     throws IOException
   {
-    generateImpl(out, boolean.class, false);
+    generateImpl(out, boolean.class, false, false);
   }
 
   /**
@@ -230,7 +242,8 @@ public class FunctionExpr extends Expr {
    *
    * @param out the writer to the Java source code.
    */
-  public void generateImpl(PhpWriter out, Class retType, boolean isRef)
+  public void generateImpl(PhpWriter out, Class retType,
+			   boolean isRef, boolean isCopy)
     throws IOException
   {
     // Quercus quercus = out.getPhp();
@@ -251,6 +264,8 @@ public class FunctionExpr extends Expr {
 	fun.generateBoolean(out, this, _args);
       else if (isRef)
 	fun.generateRef(out, this, _args);
+      else if (isCopy)
+	fun.generateCopy(out, this, _args);
       else
 	fun.generate(out, this, _args);
     }
@@ -291,6 +306,8 @@ public class FunctionExpr extends Expr {
     
       if (boolean.class.equals(retType))
 	out.print(".toBoolean()");
+      else if (isCopy)
+	out.print(".copyReturn()");
     }
   }
   

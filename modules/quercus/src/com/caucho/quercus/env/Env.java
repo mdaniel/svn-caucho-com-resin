@@ -723,8 +723,13 @@ public class Env {
     var = getRef(name);
 
     if (var == null) {
-      var = new Var();
-      _map.put(name, (Var) var);
+      Var newVar = new Var();
+      var = newVar;
+      
+      if (_map == _globalMap)
+	newVar.setGlobal();
+      
+      _map.put(name, newVar);
     }
     
     return (Var) var;
@@ -1126,6 +1131,12 @@ public class Env {
 
     if (var == null) {
       var = new Var();
+
+      if (_map == _globalMap) {
+	// php/379c
+	var.setGlobal();
+      }
+      
       _map.put(name, var);
     }
     
@@ -1141,6 +1152,7 @@ public class Env {
 
     if (var == null) {
       var = new Var();
+      var.setGlobal();
       _globalMap.put(name, var);
     }
     

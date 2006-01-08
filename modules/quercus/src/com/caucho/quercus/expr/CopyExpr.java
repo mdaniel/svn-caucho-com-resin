@@ -45,6 +45,7 @@ public class CopyExpr extends UnaryExpr {
   public CopyExpr(Expr expr)
   {
     super(expr);
+    Thread.dumpStack();
   }
   
   /**

@@ -103,7 +103,7 @@ public class VarExpr extends AbstractVarExpr {
    */
   public Expr createAssign(PhpParser parser, Expr value)
   {
-    _var.setAssigned(true);
+    _var.setAssigned();
     
     return super.createAssign(parser, value);
   }
@@ -113,7 +113,7 @@ public class VarExpr extends AbstractVarExpr {
    */
   public void assign(PhpParser parser)
   {
-    _var.setAssigned(true);
+    _var.setAssigned();
   }
 
   /**
@@ -121,7 +121,7 @@ public class VarExpr extends AbstractVarExpr {
    */
   public Expr createAssignRef(PhpParser parser, Expr value)
   {
-    _var.setAssigned(true);
+    _var.setAssigned();
     
     return super.createAssignRef(parser, value);
   }
@@ -327,7 +327,7 @@ public class VarExpr extends AbstractVarExpr {
    */
   public void analyzeAssign(AnalyzeInfo info)
   {
-    getVarInfo().setAssigned(true);
+    getVarInfo().setAssigned();
     
     VarExpr infoVar = info.getVar(getName());
 
@@ -555,6 +555,18 @@ public class VarExpr extends AbstractVarExpr {
    *
    * @param out the writer to the Java source code.
    */
+  public void generateCopy(PhpWriter out)
+    throws IOException
+  {
+    generate(out);
+    out.print(".copy()"); // php/3a5o
+  }
+
+  /**
+   * Generates code to evaluate the expression
+   *
+   * @param out the writer to the Java source code.
+   */
   public void generateAssign(PhpWriter out, Expr value, boolean isTop)
     throws IOException
   {
@@ -568,20 +580,20 @@ public class VarExpr extends AbstractVarExpr {
 	// php/3a60
 	out.print(getJavaVar());
 	out.print(" = ");
-	value.generate(out);
+	value.generateCopy(out);
       }
       else {
 	out.print("(");
 	out.print(getJavaVar());
 	out.print(" = ");
-	value.generate(out);
+	value.generateCopy(out);
 	out.print(")");
       }
     }
     else if (state == VarState.VALID) {
       out.print(getJavaVar());
       out.print(".set(");
-      value.generate(out);
+      value.generateCopy(out);
       out.print(")");
     }
     else if (state == VarState.UNSET) {
@@ -592,7 +604,7 @@ public class VarExpr extends AbstractVarExpr {
 	out.printJavaString(_name);
 	out.print("\"))");
 	out.print(".set(");
-	value.generate(out);
+	value.generateCopy(out);
 	out.print(")");
       }
       else if (_var.isVariable()) {
@@ -602,7 +614,7 @@ public class VarExpr extends AbstractVarExpr {
 	out.printJavaString(_name);
 	out.print("\"))");
 	out.print(".set(");
-	value.generate(out);
+	value.generateCopy(out);  // php/3a51
 	out.print(")");
       }
       else if (_var.isReference()) {
@@ -610,7 +622,7 @@ public class VarExpr extends AbstractVarExpr {
 	out.print(getJavaVar());
 	out.print(" = new Var())");
 	out.print(".set(");
-	value.generate(out);
+	value.generateCopy(out);
 	out.print(")");
       }
       else {
@@ -627,7 +639,7 @@ public class VarExpr extends AbstractVarExpr {
 	out.print(getJavaVar());
 	out.print("))");
 	out.print(".set(");
-	value.generate(out);
+	value.generateCopy(out);
 	out.print(")");
       }
       else if (_var.isVariable()) {
@@ -639,7 +651,7 @@ public class VarExpr extends AbstractVarExpr {
 	out.print(getJavaVar());
 	out.print("))");
 	out.print(".set(");
-	value.generate(out);
+	value.generateCopy(out);
 	out.print(")");
       }
       else {
@@ -649,7 +661,7 @@ public class VarExpr extends AbstractVarExpr {
 	out.print(getJavaVar());
 	out.print("))");
 	out.print(".set(");
-	value.generate(out);
+	value.generateCopy(out);
 	out.print(")");
       }
     }

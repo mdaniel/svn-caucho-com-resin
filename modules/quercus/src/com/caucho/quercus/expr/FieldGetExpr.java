@@ -45,7 +45,7 @@ import com.caucho.util.L10N;
  * Represents a PHP field reference.
  */
 public class FieldGetExpr extends AbstractVarExpr {
-  private static final L10N L = new L10N(FieldRefExpr.class);
+  private static final L10N L = new L10N(FieldGetExpr.class);
 
   private final Expr _objExpr;
   private final StringValue _name;
@@ -209,6 +209,35 @@ public class FieldGetExpr extends AbstractVarExpr {
   }
 
   /**
+   * Analyze the statement as an assignement
+   */
+  public void analyzeAssign(AnalyzeInfo info)
+  {
+    _objExpr.analyze(info);
+
+    // php/3a6e
+    _objExpr.analyzeSetReference(info);
+    _objExpr.analyzeSetModified(info);
+  }
+
+  /**
+   * Analyze the statement as modified
+   */
+  public void analyzeSetModified(AnalyzeInfo info)
+  {
+    _objExpr.analyzeSetModified(info);
+  }
+
+  /**
+   * Analyze the statement as a reference
+   */
+  public void analyzeSetReference(AnalyzeInfo info)
+  {
+    // php/3a6f
+    _objExpr.analyzeSetReference(info);
+  }
+
+  /**
    * Generates code to evaluate the expression.
    *
    * @param out the writer to the Java source code.
@@ -248,6 +277,18 @@ public class FieldGetExpr extends AbstractVarExpr {
     out.print(".getRef(");
     out.print(out.addValue(_name));
     out.print(")");
+  }
+
+  /**
+   * Generates code to evaluate the expression, where the result is copied.
+   *
+   * @param out the writer to the Java source code.
+   */
+  public void generateCopy(PhpWriter out)
+    throws IOException
+  {
+    generate(out);
+    out.print(".copy()"); // php/3a5n
   }
 
   /**

@@ -56,7 +56,7 @@ public class QuercusMathModule extends AbstractQuercusModule {
   public static final double M_PI = Math.PI;
   public static final double M_E = Math.E;
 
-  public static final long RAND_MAX = 1L << 32;
+  public static final long RAND_MAX = Integer.MAX_VALUE;
 
   public static final double M_LOG2E = log2(Math.E);
   public static final double M_LOG10E = Math.log10(Math.E);
@@ -376,6 +376,12 @@ public class QuercusMathModule extends AbstractQuercusModule {
   public static double rad2deg(double value)
   {
     return 180 * value / Math.PI;
+  }
+
+  public static long rand(@Optional int min,
+			  @Optional("RAND_MAX") int max)
+  {
+    return mt_rand(min, max);
   }
 
   public static double round(double value, @Optional int precision)

@@ -742,6 +742,9 @@ public class PhpParser {
       if (expr instanceof VarExpr) {
 	VarExpr var = (VarExpr) expr;
 
+	// php/3a6g
+	var.getVarInfo().setGlobal();
+
 	statementList.add(new GlobalStatement(var));
       }
       else
@@ -782,6 +785,7 @@ public class PhpParser {
 	token = parseToken();
       }
 
+      var.getVarInfo().setReference();
       statementList.add(new StaticStatement(var, init));
       
       if (token != ',') {
@@ -1378,7 +1382,7 @@ public class PhpParser {
       VarInfo var = _function.createVar(argName);
       var.setArgument(true);
       var.setArgumentIndex(args.size() - 1);
-      var.setRefArgument(isReference);
+      var.setRefArgument();
       
       if (token != ',') {
 	_peekToken = token;

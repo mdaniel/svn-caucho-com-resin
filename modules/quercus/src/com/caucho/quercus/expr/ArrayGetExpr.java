@@ -357,6 +357,18 @@ public class ArrayGetExpr extends AbstractVarExpr {
   }
 
   /**
+   * Generates code to evaluate the expression with a copied result.
+   *
+   * @param out the writer to the Java source code.
+   */
+  public void generateCopy(PhpWriter out)
+    throws IOException
+  {
+    generate(out);
+    out.print(".copy()"); // php/3a5m
+  }
+
+  /**
    * Generates code to evaluate the expression.
    *
    * @param out the writer to the Java source code.
@@ -368,7 +380,7 @@ public class ArrayGetExpr extends AbstractVarExpr {
     out.print(".put(");
     _index.generate(out);
     out.print(", ");
-    value.generate(out);
+    value.generateCopy(out);  // php/3a5k
     out.print(")");
   }
 

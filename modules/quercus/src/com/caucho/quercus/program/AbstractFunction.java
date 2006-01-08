@@ -591,6 +591,18 @@ abstract public class AbstractFunction {
   }
   
   /**
+   * Generates code to evaluate as a double expression.
+   *
+   * @param out the writer to the Java source code.
+   */
+  public void generateCopy(PhpWriter out, Expr funExpr, Expr []args)
+    throws IOException
+  {
+    generate(out, funExpr, args);
+    out.print(".copyReturn()");
+  }
+  
+  /**
    * Generates the code for the class component.
    *
    * @param out the writer to the output stream.

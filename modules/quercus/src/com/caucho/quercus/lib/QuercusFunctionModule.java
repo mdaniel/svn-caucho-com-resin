@@ -64,7 +64,7 @@ public class QuercusFunctionModule extends AbstractQuercusModule {
                                      Value []args)
     throws Throwable
   {
-    return function.eval(env, args);
+    return function.eval(env, args).copyReturn();
   }
 
   /**
@@ -92,7 +92,7 @@ public class QuercusFunctionModule extends AbstractQuercusModule {
     else
       args = new Value[0];
 
-    return function.eval(env, args);
+    return function.eval(env, args).copyReturn();
   }
 
   /**
