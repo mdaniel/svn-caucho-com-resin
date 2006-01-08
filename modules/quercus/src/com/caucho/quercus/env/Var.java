@@ -89,6 +89,9 @@ public class Var extends Value {
     // quercus/0431
     _value = value;
 
+    if (value instanceof ArrayValue.Entry)
+      throw new IllegalStateException();
+
     return _value;
   }
 

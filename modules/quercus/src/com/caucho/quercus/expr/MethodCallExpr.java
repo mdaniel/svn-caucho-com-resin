@@ -120,6 +120,13 @@ public class MethodCallExpr extends Expr {
   {
     generateImpl(out, true);
   }
+
+  public void generateCopy(PhpWriter out)
+    throws IOException
+  {
+    generateImpl(out, false);
+    out.print(".copyReturn()"); // php/3a5x
+  }
   
   /**
    * Generates code to recreate the expression.

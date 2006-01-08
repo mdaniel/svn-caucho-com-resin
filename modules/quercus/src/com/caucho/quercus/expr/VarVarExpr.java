@@ -237,7 +237,7 @@ public class VarVarExpr extends AbstractVarExpr {
     out.print("env.getVar(");
     _var.generateString(out);
     out.print(").set(");
-    value.generate(out);
+    value.generateCopy(out);
     out.print(")");
   }
 

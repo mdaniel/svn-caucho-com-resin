@@ -141,7 +141,12 @@ public class QuercusOptionsModule extends AbstractQuercusModule {
    */
   public static Value ini_set(Env env, String varName, String value)
   {
-    return env.setIni(varName, value);
+    Value oldValue = env.setIni(varName, value);
+
+    if (oldValue != null)
+      return oldValue;
+    else
+      return NullValue.NULL;
   }
 
   /**

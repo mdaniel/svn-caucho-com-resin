@@ -303,7 +303,7 @@ public class FieldGetExpr extends AbstractVarExpr {
     out.print(".put(");
     out.print(out.addValue(_name));
     out.print(", ");
-    value.generate(out);
+    value.generateCopy(out);
     out.print(")");
   }
 

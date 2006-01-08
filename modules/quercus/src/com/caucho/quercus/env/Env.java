@@ -583,15 +583,20 @@ public class Env {
    */
   public StringValue getIni(String var)
   {
-    StringValue oldValue = null;
+    StringValue value = null;
     
     if (_iniMap != null)
-      oldValue = _iniMap.get(var);
+      value = _iniMap.get(var);
 
-    if (oldValue != null)
-      return oldValue;
+    if (value != null)
+      return value;
+
+    value = _quercus.getIni(var);
+
+    if (value != null)
+      return value;
     else
-      return _quercus.getIni(var);
+      return null;
   }
 
   /**
@@ -1281,7 +1286,7 @@ public class Env {
       newArgs[i] = args[i].toValue().toArgValue();
     }
 
-    _functionArgs = args;
+    _functionArgs = newArgs;
 
     return oldArgs;
   }
@@ -2325,13 +2330,15 @@ public class Env {
    */
   public Value cast(Class cl, Value value)
   {
+    value = value.toValue();
+    
     if (value.isNull())
       return null;
     else if (cl.isAssignableFrom(value.getClass()))
       return value;
     else {
-      error(L.l("{0} is not assignable to {1}",
-		value, cl.getName()));
+      error(L.l("{0} ({1}) is not assignable to {2}",
+		value, value.getClass().getName(), cl.getName()));
 
       return value;
     }

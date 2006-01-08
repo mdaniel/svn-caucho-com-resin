@@ -262,6 +262,18 @@ public class ThisFieldExpr extends AbstractVarExpr {
   }
 
   /**
+   * Generates code to evaluate the expression, as a copy.
+   *
+   * @param out the writer to the Java source code.
+   */
+  public void generateCopy(PhpWriter out)
+    throws IOException
+  {
+    generate(out);
+    out.print(".copy()");
+  }
+
+  /**
    * Generates code to evaluate the expression.
    *
    * @param out the writer to the Java source code.
@@ -356,7 +368,7 @@ public class ThisFieldExpr extends AbstractVarExpr {
     out.print("quercus_this.put(");
     out.print(_name);
     out.print(", ");
-    value.generate(out);
+    value.generateCopy(out);
     out.print(")");
   }
 

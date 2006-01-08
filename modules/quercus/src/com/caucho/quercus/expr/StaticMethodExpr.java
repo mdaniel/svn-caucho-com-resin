@@ -215,6 +215,13 @@ public class StaticMethodExpr extends Expr {
       out.print("})");
     }
   }
+
+  public void generateCopy(PhpWriter out)
+    throws IOException
+  {
+    generate(out);
+    out.print(".copyReturn()"); // php/3a5y
+  }
   
   public String toString()
   {
