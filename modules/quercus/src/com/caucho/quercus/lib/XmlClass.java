@@ -61,9 +61,9 @@ public class XmlClass {
 
   private Env _env;
   private String _encoding;
-  private CallbackFunction _startElementHandler;
-  private CallbackFunction _endElementHandler;
-  private CallbackFunction _characterDataHandler;
+  private Callback _startElementHandler;
+  private Callback _endElementHandler;
+  private Callback _characterDataHandler;
 
   private XmlHandler _handler = new XmlHandler();
 
@@ -85,8 +85,8 @@ public class XmlClass {
   public boolean xml_set_element_handler(Value start_element_handler,
                                          Value end_element_handler)
   {
-    _startElementHandler = (CallbackFunction) _env.createCallback(start_element_handler);
-    _endElementHandler = (CallbackFunction) _env.createCallback(end_element_handler);
+    _startElementHandler = _env.createCallback(start_element_handler);
+    _endElementHandler = _env.createCallback(end_element_handler);
     return true;
   }
 
@@ -98,14 +98,14 @@ public class XmlClass {
    */
   public boolean xml_set_character_data_handler(Value handler)
   {
-    _characterDataHandler = (CallbackFunction) _env.createCallback(handler);
+    _characterDataHandler = _env.createCallback(handler);
     return true;
   }
 
-  public boolean xml_parse(FilePath fileName)
+  public boolean xml_parse(Path path)
     throws IOException, SAXException, ParserConfigurationException
   {
-    System.out.println("HERE!!!!!!!!!! " + fileName);
+    System.out.println("HERE!!!!!!!!!! " + path);
     /*FilePath path = new FilePath(fileName);
     InputSource is = new InputSource(path.openRead());
 
