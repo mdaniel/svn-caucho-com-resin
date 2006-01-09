@@ -392,6 +392,19 @@ abstract public class ArrayValue extends Value {
   {
     return put(value.toArgValue());
   }
+  
+  /**
+   * Appends as an argument - only called from compiled code
+   *
+   * XXX: change name to appendArg
+   */
+  public ArrayValue append(ArrayValue array)
+  {
+  	for (Map.Entry<Value, Value> entry: array.entrySet())	
+  		put(entry.getKey(), entry.getValue().toArgValue());
+
+    return this;
+  }
 
   /**
    * Convert to an array.
@@ -864,6 +877,11 @@ abstract public class ArrayValue extends Value {
 	return this;
     }
   }
+  
+  /**
+   * Takes the values of this array and puts them in a vector
+   */
+  public abstract Value[] valuesToArray();
 
   public class EntrySet extends AbstractSet<Map.Entry<Value,Value>> {
     EntrySet()

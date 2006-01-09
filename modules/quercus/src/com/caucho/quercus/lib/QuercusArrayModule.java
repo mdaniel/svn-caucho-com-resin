@@ -2762,14 +2762,14 @@ public class QuercusArrayModule extends AbstractQuercusModule {
    * Creates an array with all the values of the first array that are not present in the
    * other arrays, using a provided callback function to determine equivalence.
    * 
-   * @param arrays  first array is checked against the rest
-   * @param cmp	a callback function to determine equivalence
+   * @param arrays  first array is checked against the rest.  Last element is the
+   * 													 callback function.
    *
    * @return an array with all the values of the first array that are not in the rest
    */
-  public Value array_udiff(Env env, Value[] arrays, Callback cmp)
+  public Value array_udiff(Env env, Value[] arrays)
   {
-    if (arrays.length < 2) {
+    if (arrays.length < 3) {
     	env.warning("Wrong paremeter count for array_udiff()");
     	
     	return NullValue.NULL;
@@ -2783,6 +2783,27 @@ public class QuercusArrayModule extends AbstractQuercusModule {
     
     ArrayValue array = (ArrayValue) arrays[0];
     
+    Value callbackValue = arrays[arrays.length - 1];
+    
+    Callback cmp = null;
+    
+    try{
+    	cmp = env.createCallback(callbackValue);
+    }
+    catch (Throwable t) {
+    	log.log(Level.WARNING, t.toString(), t);
+    	
+    	env.warning("Not a valid callback " + callbackValue.toString());
+    	
+    	return NullValue.NULL;
+    }
+    
+    if (cmp == null) {
+    	env.warning("Not a valid callback " + callbackValue.toString());
+    	
+    	return NullValue.NULL;
+    }
+    
     ArrayValue diffArray = new ArrayValueImpl();
 
     boolean isFound = false;
@@ -2790,7 +2811,7 @@ public class QuercusArrayModule extends AbstractQuercusModule {
     for (Value entryKey: array.keySet()) {
     	Value entryValue = array.get(entryKey);
     	
-      for (int k = 1; k < arrays.length && ! isFound; k++) {
+      for (int k = 1; k < arrays.length - 1 && ! isFound; k++) {
       	if (! (arrays[k] instanceof ArrayValue)) {
       		env.warning("Argument #" + (k + 1) + " is not an array");
       		
@@ -2825,8 +2846,550 @@ public class QuercusArrayModule extends AbstractQuercusModule {
     return diffArray;
   }
   
+  /**
+   * Creates an array with all the values of the first array that are not present in the
+   * other arrays, using a provided callback function to determine equivalence.  Also
+   * checks the key for equality using an internal comparison function.
+   * 
+   * @param arrays  first array is checked against the rest.  Last element is the
+   * 													 callback function.
+   *
+   * @return an array with all the values of the first array that are not in the rest
+   */
+  public Value array_udiff_assoc(Env env, Value[] arrays)
+  {
+    if (arrays.length < 3) {
+    	env.warning("Wrong paremeter count for array_udiff_assoc()");
+    	
+    	return NullValue.NULL;
+    }
+    
+    if (! (arrays[0] instanceof ArrayValue)) {
+    	env.warning("Argument #1 is not an array");
+    	
+    	return NullValue.NULL;
+    }
+    
+    ArrayValue array = (ArrayValue) arrays[0];
+    
+    Value callbackValue = arrays[arrays.length - 1];
+    
+    Callback cmp = null;
+    
+    try{
+    	cmp = env.createCallback(callbackValue);
+    }
+    catch (Throwable t) {
+    	log.log(Level.WARNING, t.toString(), t);
+    	
+    	env.warning("Not a valid callback " + callbackValue.toString());
+    	
+    	return NullValue.NULL;
+    }
+    
+    if (cmp == null) {
+    	env.warning("Not a valid callback " + callbackValue.toString());
+    	
+    	return NullValue.NULL;
+    }
+    
+    ArrayValue diffArray = new ArrayValueImpl();
 
+    boolean isFound = false;
+    
+    for (Value entryKey: array.keySet()) {
+    	Value entryValue = array.get(entryKey);
+    	
+      for (int k = 1; k < arrays.length - 1 && ! isFound; k++) {
+      	if (! (arrays[k] instanceof ArrayValue)) {
+      		env.warning("Argument #" + (k + 1) + " is not an array");
+      		
+      		return NullValue.NULL;
+      	}
+      	
+        ArrayValue checkArray = (ArrayValue) arrays[k];
+        
+        for (Map.Entry<Value, Value> entry: checkArray.entrySet()) {
+        	try {
+        		boolean keyFound = entryKey.eql(entry.getKey());
+        		
+        		boolean valueFound = false;
+        		
+        		if (keyFound)
+        			valueFound = cmp.eval(env, entryValue, entry.getValue()).toLong() == 0;
+        		
+        		isFound = keyFound && valueFound;
+        	}
+        	catch (Throwable t) {
+            log.log(Level.WARNING, t.toString(), t);
+            
+            env.warning("An error occurred while invoking the filter callback");
+            
+            return NullValue.NULL;
+          } 
+        	
+        	if (isFound)
+        		break;
+        }
+      }
+      
+      if (! isFound)
+      	diffArray.append(entryKey, entryValue);
+      
+      isFound = false;
+    }
+    
+    return diffArray;
+  }
   
+  /**
+   * Creates an array with all the values of the first array that are not present in the
+   * other arrays, using a provided callback function to determine equivalence.  Also
+   * checks keys using a provided callback function.
+   * 
+   * @param arrays  first array is checked against the rest.  Last two elementare 
+   * 													 the callback functions.
+   *
+   * @return an array with all the values of the first array that are not in the rest
+   */
+  public Value array_udiff_uassoc(Env env, Value[] arrays)
+  {
+    if (arrays.length < 4) {
+    	env.warning("Wrong paremeter count for array_udiff_uassoc()");
+    	
+    	return NullValue.NULL;
+    }
+    
+    if (! (arrays[0] instanceof ArrayValue)) {
+    	env.warning("Argument #1 is not an array");
+    	
+    	return NullValue.NULL;
+    }
+    
+    ArrayValue array = (ArrayValue) arrays[0];
+    
+    Value callbackValue = arrays[arrays.length - 2];
+    
+    Callback cmpValue = null;
+    
+    try{
+    	cmpValue = env.createCallback(callbackValue);
+    }
+    catch (Throwable t) {
+    	log.log(Level.WARNING, t.toString(), t);
+    	
+    	env.warning("Not a valid callback " + callbackValue.toString());
+    	
+    	return NullValue.NULL;
+    }
+    
+    if (cmpValue == null) {
+    	env.warning("Not a valid callback " + callbackValue.toString());
+    	
+    	return NullValue.NULL;
+    }
+    
+    Value callbackKey = arrays[arrays.length - 1];
+    
+    Callback cmpKey = null;
+    
+    try{
+    	cmpKey = env.createCallback(callbackKey);
+    }
+    catch (Throwable t) {
+    	log.log(Level.WARNING, t.toString(), t);
+    	
+    	env.warning("Not a valid callback " + callbackKey.toString());
+    	
+    	return NullValue.NULL;
+    }
+    
+    if (cmpKey == null) {
+    	env.warning("Not a valid callback " + callbackKey.toString());
+    	
+    	return NullValue.NULL;
+    }
+    
+    ArrayValue diffArray = new ArrayValueImpl();
+
+    boolean isFound = false;
+    
+    for (Value entryKey: array.keySet()) {
+    	Value entryValue = array.get(entryKey);
+    	
+      for (int k = 1; k < arrays.length - 2 && ! isFound; k++) {
+      	if (! (arrays[k] instanceof ArrayValue)) {
+      		env.warning("Argument #" + (k + 1) + " is not an array");
+      		
+      		return NullValue.NULL;
+      	}
+      	
+        ArrayValue checkArray = (ArrayValue) arrays[k];
+        
+        for (Map.Entry<Value, Value> entry: checkArray.entrySet()) {
+        	try {
+        		boolean valueFound = 
+        			cmpValue.eval(env, entryValue, entry.getValue()).toLong() == 0;
+        		
+        		boolean keyFound = false;
+        		
+        		if (valueFound)
+        			keyFound = cmpKey.eval(env, entryKey, entry.getKey()).toLong() == 0;
+        		
+        		isFound = valueFound && keyFound;
+        	}
+        	catch (Throwable t) {
+            log.log(Level.WARNING, t.toString(), t);
+            
+            env.warning("An error occurred while invoking the filter callback");
+            
+            return NullValue.NULL;
+          } 
+        	
+        	if (isFound)
+        		break;
+        }
+      }
+      
+      if (! isFound)
+      	diffArray.append(entryKey, entryValue);
+      
+      isFound = false;
+    }
+    
+    return diffArray;
+  }
+  
+  /**
+   * Creates an array with all the values of the first array that are present in the
+   * other arrays, using a provided callback function to determine equivalence.
+   * 
+   * @param arrays  first array is checked against the rest.  Last element is the
+   * 													 callback function.
+   *
+   * @return an array with all the values of the first array that are in the rest
+   */
+  public Value array_uintersect(Env env, Value[] arrays)
+  {
+    if (arrays.length < 3) {
+    	env.warning("Wrong paremeter count for array_uintersect()");
+    	
+    	return NullValue.NULL;
+    }
+    
+    if (! (arrays[0] instanceof ArrayValue)) {
+    	env.warning("Argument #1 is not an array");
+    	
+    	return NullValue.NULL;
+    }
+    
+    ArrayValue array = (ArrayValue) arrays[0];
+    
+    Value callbackValue = arrays[arrays.length - 1];
+    
+    Callback cmp = null;
+    
+    try{
+    	cmp = env.createCallback(callbackValue);
+    }
+    catch (Throwable t) {
+    	log.log(Level.WARNING, t.toString(), t);
+    	
+    	env.warning("Not a valid callback " + callbackValue.toString());
+    	
+    	return NullValue.NULL;
+    }
+    
+    if (cmp == null) {
+    	env.warning("Not a valid callback " + callbackValue.toString());
+    	
+    	return NullValue.NULL;
+    }
+    
+    ArrayValue interArray = new ArrayValueImpl();
+
+    boolean isFound = true;
+    
+    for (Value entryKey: array.keySet()) {
+    	Value entryValue = array.get(entryKey);
+    	
+      for (int k = 1; k < arrays.length - 1 && isFound; k++) {
+      	if (! (arrays[k] instanceof ArrayValue)) {
+      		env.warning("Argument #" + (k + 1) + " is not an array");
+      		
+      		return NullValue.NULL;
+      	}
+      	
+        ArrayValue checkArray = (ArrayValue) arrays[k];
+        
+        for (Map.Entry<Value, Value> entry: checkArray.entrySet()) {
+        	try {
+        		isFound = cmp.eval(env, entryValue, entry.getValue()).toLong() == 0;
+        	}
+        	catch (Throwable t) {
+            log.log(Level.WARNING, t.toString(), t);
+            
+            env.warning("An error occurred while invoking the filter callback");
+            
+            return NullValue.NULL;
+          } 
+        	
+        	if (isFound)
+        		break;
+        }
+      }
+      
+      if (isFound)
+      	interArray.append(entryKey, entryValue);
+    }
+    
+    return interArray;
+  }
+  
+  /**
+   * Creates an array with all the values of the first array that are present in the
+   * other arrays, using a provided callback function to determine equivalence. Also
+   * checks the keys for equivalence using an internal comparison.
+   * 
+   * @param arrays  first array is checked against the rest.  Last element is the
+   * 													 callback function.
+   *
+   * @return an array with all the values of the first array that are in the rest
+   */
+  public Value array_uintersect_assoc(Env env, Value[] arrays)
+  {
+    if (arrays.length < 3) {
+    	env.warning("Wrong paremeter count for array_uintersect_assoc()");
+    	
+    	return NullValue.NULL;
+    }
+    
+    if (! (arrays[0] instanceof ArrayValue)) {
+    	env.warning("Argument #1 is not an array");
+    	
+    	return NullValue.NULL;
+    }
+    
+    ArrayValue array = (ArrayValue) arrays[0];
+    
+    Value callbackValue = arrays[arrays.length - 1];
+    
+    Callback cmp = null;
+    
+    try{
+    	cmp = env.createCallback(callbackValue);
+    }
+    catch (Throwable t) {
+    	log.log(Level.WARNING, t.toString(), t);
+    	
+    	env.warning("Not a valid callback " + callbackValue.toString());
+    	
+    	return NullValue.NULL;
+    }
+    
+    if (cmp == null) {
+    	env.warning("Not a valid callback " + callbackValue.toString());
+    	
+    	return NullValue.NULL;
+    }
+    
+    ArrayValue interArray = new ArrayValueImpl();
+
+    boolean isFound = true;
+    
+    for (Value entryKey: array.keySet()) {
+    	Value entryValue = array.get(entryKey);
+    	
+      for (int k = 1; k < arrays.length - 1 && isFound; k++) {
+      	if (! (arrays[k] instanceof ArrayValue)) {
+      		env.warning("Argument #" + (k + 1) + " is not an array");
+      		
+      		return NullValue.NULL;
+      	}
+      	
+        ArrayValue checkArray = (ArrayValue) arrays[k];
+        
+        for (Map.Entry<Value, Value> entry: checkArray.entrySet()) {
+        	try {
+        		boolean keyFound = entryKey.eql(entry.getKey());
+        		
+        		boolean valueFound = false;
+        		
+        		if (keyFound)
+        			valueFound = cmp.eval(env, entryValue, entry.getValue()).toLong() == 0;
+        		
+        		isFound = keyFound && valueFound;
+        	}
+        	catch (Throwable t) {
+            log.log(Level.WARNING, t.toString(), t);
+            
+            env.warning("An error occurred while invoking the filter callback");
+            
+            return NullValue.NULL;
+          } 
+        	
+        	if (isFound)
+        		break;
+        }
+      }
+      
+      if (isFound)
+      	interArray.append(entryKey, entryValue);
+    }
+    
+    return interArray;
+  }
+  
+  /**
+   * Creates an array with all the values of the first array that are present in the
+   * other arrays, using a provided callback function to determine equivalence. Also
+   * checks the keys for equivalence using a pass callback function
+   * 
+   * @param arrays  first array is checked against the rest.  Last two elements are the
+   * 													 callback functions.
+   *
+   * @return an array with all the values of the first array that are in the rest
+   */
+  public Value array_uintersect_uassoc(Env env, Value[] arrays)
+  {
+    if (arrays.length < 4) {
+    	env.warning("Wrong paremeter count for array_uintersect_uassoc()");
+    	
+    	return NullValue.NULL;
+    }
+    
+    if (! (arrays[0] instanceof ArrayValue)) {
+    	env.warning("Argument #1 is not an array");
+    	
+    	return NullValue.NULL;
+    }
+    
+    ArrayValue array = (ArrayValue) arrays[0];
+    
+    Value callbackValue = arrays[arrays.length - 2];
+    
+    Callback cmpValue = null;
+    
+    try{
+    	cmpValue = env.createCallback(callbackValue);
+    }
+    catch (Throwable t) {
+    	log.log(Level.WARNING, t.toString(), t);
+    	
+    	env.warning("Not a valid callback " + callbackValue.toString());
+    	
+    	return NullValue.NULL;
+    }
+    
+    if (cmpValue == null) {
+    	env.warning("Not a valid callback " + callbackValue.toString());
+    	
+    	return NullValue.NULL;
+    }
+    
+    Value callbackKey = arrays[arrays.length - 1];
+    
+    Callback cmpKey = null;
+    
+    try{
+    	cmpKey = env.createCallback(callbackKey);
+    }
+    catch (Throwable t) {
+    	log.log(Level.WARNING, t.toString(), t);
+    	
+    	env.warning("Not a valid callback " + callbackKey.toString());
+    	
+    	return NullValue.NULL;
+    }
+    
+    if (cmpKey == null) {
+    	env.warning("Not a valid callback " + callbackKey.toString());
+    	
+    	return NullValue.NULL;
+    }
+    
+    ArrayValue interArray = new ArrayValueImpl();
+
+    boolean isFound = true;
+    
+    for (Value entryKey: array.keySet()) {
+    	Value entryValue = array.get(entryKey);
+    	
+      for (int k = 1; k < arrays.length - 2 && isFound; k++) {
+      	if (! (arrays[k] instanceof ArrayValue)) {
+      		env.warning("Argument #" + (k + 1) + " is not an array");
+      		
+      		return NullValue.NULL;
+      	}
+      	
+        ArrayValue checkArray = (ArrayValue) arrays[k];
+        
+        for (Map.Entry<Value, Value> entry: checkArray.entrySet()) {
+        	try {
+        		boolean valueFound = 
+        			cmpValue.eval(env, entryValue, entry.getValue()).toLong() == 0;
+        		
+        		boolean keyFound = false;
+        		
+        		if (valueFound)
+        			keyFound = cmpKey.eval(env, entryKey, entry.getKey()).toLong() == 0;
+        		
+        		isFound = valueFound && keyFound;
+        	}
+        	catch (Throwable t) {
+            log.log(Level.WARNING, t.toString(), t);
+            
+            env.warning("An error occurred while invoking the filter callback");
+            
+            return NullValue.NULL;
+          } 
+        	
+        	if (isFound)
+        		break;
+        }
+      }
+      
+      if (isFound)
+      	interArray.append(entryKey, entryValue);
+    }
+    
+    return interArray;
+  }
+  
+  /**
+   * Creates an array of corresponding values to variables in the symbol name.  The
+   * passed parameters are the names of the variables to be added to the array.
+   * 
+   * @param variables  contains the names of variables to add to the array
+   *
+   * @return an array with the values of variables that match those passed
+   */
+  @UsesSymbolTable
+  public Value compact(Env env, Value[] variables)
+  {
+  	ArrayValue compactArray = new ArrayValueImpl();
+  	
+  	for (int k = 0; k < variables.length; k++) {
+  		Value variableName = variables[k];
+  		
+    	if (variableName instanceof StringValue) {
+    		Value tableValue = env.getValue(variableName.toString());
+    		
+    		if (tableValue != NullValue.NULL)
+    			compactArray.append(variableName, tableValue);
+    	}
+    	else if (variableName instanceof ArrayValue) {
+    		ArrayValue array = (ArrayValue) variableName;
+    		
+    		ArrayValue innerArray = (ArrayValue) compact(env, array.valuesToArray());
+    		
+    		compactArray.append(innerArray);
+    	}
+  	}
+  	
+  	return compactArray;
+  }
+    	
   /**
    * Returns the size of the array.
    */
