@@ -32,6 +32,7 @@ package com.caucho.quercus.lib;
 import com.caucho.util.L10N;
 
 import com.caucho.quercus.module.AbstractQuercusModule;
+import com.caucho.quercus.module.Optional;
 
 import com.caucho.quercus.env.*;
 
@@ -59,6 +60,15 @@ public class QuercusXmlModule extends AbstractQuercusModule {
     // XXX: need to make a marker for the string
 
     return new StringValue(str);
+  }
+
+  /**
+   * returns a new Xml Parser
+   */
+  public XmlClass xml_parser_create(Env env,
+                                    @Optional String encoding)
+  {
+    return new XmlClass(env,encoding);
   }
 }
 

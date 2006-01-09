@@ -1,3 +1,4 @@
 com.caucho.quercus.lib.Mysqli
 com.caucho.quercus.lib.Memcache
+com.caucho.quercus.lib.XmlClass
 
