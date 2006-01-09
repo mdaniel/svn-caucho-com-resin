@@ -106,9 +106,8 @@ public class XmlClass {
     throws IOException, SAXException, ParserConfigurationException
   {
     System.out.println("HERE!!!!!!!!!! " + path);
-    /*FilePath path = new FilePath(fileName);
     InputSource is = new InputSource(path.openRead());
-
+/*
     SAXParserFactory factory = SAXParserFactory.newInstance();
     SAXParser saxParser = factory.newSAXParser();
     saxParser.parse(is, _handler);
