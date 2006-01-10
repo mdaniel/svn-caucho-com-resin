@@ -82,7 +82,7 @@ public class IncludeExpr extends UnaryExpr {
     throws IOException
   {
     out.print("env.include(");
-    out.print("_quercus_selfPath.getParent(), ");
+    out.print("env.getSelfDirectory(), ");
     _expr.generateString(out);
     out.print(", false)");
   }

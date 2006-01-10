@@ -284,7 +284,7 @@ abstract public class ArrayValue extends Value {
   /**
    * Returns the field values.
    */
-  public Value []getValueArray()
+  public Value []getValueArray(Env env)
   {
     int size = getSize();
 
@@ -380,7 +380,7 @@ abstract public class ArrayValue extends Value {
    */
   public ArrayValue append(Value key, Value value)
   {
-    put(key, value.toArgValue());
+    put(key, value);
 
     return this;
   }
@@ -392,7 +392,9 @@ abstract public class ArrayValue extends Value {
    */
   public ArrayValue append(Value value)
   {
-    return put(value.toArgValue());
+    put(value);
+
+    return this;
   }
   
   /**
@@ -400,12 +402,10 @@ abstract public class ArrayValue extends Value {
    *
    * XXX: change name to appendArg
    */
-  public ArrayValue append(ArrayValue array)
+  public void putAll(ArrayValue array)
   {
-  	for (Map.Entry<Value, Value> entry: array.entrySet())	
-  		put(entry.getKey(), entry.getValue().toArgValue());
-
-    return this;
+    for (Map.Entry<Value, Value> entry : array.entrySet())	
+      put(entry.getKey(), entry.getValue());
   }
 
   /**

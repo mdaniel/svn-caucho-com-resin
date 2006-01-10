@@ -309,9 +309,9 @@ public class RefVar extends Value {
   /**
    * Returns the array values.
    */
-  public Value []getValueArray()
+  public Value []getValueArray(Env env)
   {
-    return _var.getValueArray();
+    return _var.getValueArray(env);
   }
 
   /**

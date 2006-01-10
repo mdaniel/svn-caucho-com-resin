@@ -78,8 +78,9 @@ abstract public class CompiledMethod_2 extends CompiledMethod {
   public Expr []bindArguments(Env env, Expr fun, Expr []args)
     throws Exception
   {
-    if (args.length != 2)
-      env.warning(L.l("incorrect"));
+    if (args.length > 2)
+      env.warning(L.l("incorrect number of arguments {0}, expected 2",
+		      args.length));
 
     return args;
   }

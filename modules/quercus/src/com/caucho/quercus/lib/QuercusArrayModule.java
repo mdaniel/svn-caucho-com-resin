@@ -2838,7 +2838,7 @@ public class QuercusArrayModule extends AbstractQuercusModule {
       }
       
       if (! isFound)
-      	diffArray.append(entryKey, entryValue);
+      	diffArray.put(entryKey, entryValue);
       
       isFound = false;
     }
@@ -2934,7 +2934,7 @@ public class QuercusArrayModule extends AbstractQuercusModule {
       }
       
       if (! isFound)
-      	diffArray.append(entryKey, entryValue);
+      	diffArray.put(entryKey, entryValue);
       
       isFound = false;
     }
@@ -3052,7 +3052,7 @@ public class QuercusArrayModule extends AbstractQuercusModule {
       }
       
       if (! isFound)
-      	diffArray.append(entryKey, entryValue);
+      	diffArray.put(entryKey, entryValue);
       
       isFound = false;
     }
@@ -3140,7 +3140,7 @@ public class QuercusArrayModule extends AbstractQuercusModule {
       }
       
       if (isFound)
-      	interArray.append(entryKey, entryValue);
+      	interArray.put(entryKey, entryValue);
     }
     
     return interArray;
@@ -3234,7 +3234,7 @@ public class QuercusArrayModule extends AbstractQuercusModule {
       }
       
       if (isFound)
-      	interArray.append(entryKey, entryValue);
+      	interArray.put(entryKey, entryValue);
     }
     
     return interArray;
@@ -3350,7 +3350,7 @@ public class QuercusArrayModule extends AbstractQuercusModule {
       }
       
       if (isFound)
-      	interArray.append(entryKey, entryValue);
+      	interArray.put(entryKey, entryValue);
     }
     
     return interArray;
@@ -3365,29 +3365,29 @@ public class QuercusArrayModule extends AbstractQuercusModule {
    * @return an array with the values of variables that match those passed
    */
   @UsesSymbolTable
-  public Value compact(Env env, Value[] variables)
+  public ArrayValue compact(Env env, Value[] variables)
   {
-  	ArrayValue compactArray = new ArrayValueImpl();
+    ArrayValue compactArray = new ArrayValueImpl();
   	
-  	for (int k = 0; k < variables.length; k++) {
-  		Value variableName = variables[k];
+    for (int k = 0; k < variables.length; k++) {
+      Value variableName = variables[k];
   		
-    	if (variableName instanceof StringValue) {
-    		Value tableValue = env.getValue(variableName.toString());
+      if (variableName instanceof StringValue) {
+	Value tableValue = env.getValue(variableName.toString());
     		
-    		if (tableValue != NullValue.NULL)
-    			compactArray.append(variableName, tableValue);
-    	}
-    	else if (variableName instanceof ArrayValue) {
-    		ArrayValue array = (ArrayValue) variableName;
+	if (tableValue.isset())
+	  compactArray.put(variableName, tableValue);
+      }
+      else if (variableName instanceof ArrayValue) {
+	ArrayValue array = (ArrayValue) variableName;
     		
-    		ArrayValue innerArray = (ArrayValue) compact(env, array.valuesToArray());
+	ArrayValue innerArray = compact(env, array.valuesToArray());
     		
-    		compactArray.append(innerArray);
-    	}
-  	}
+	compactArray.putAll(innerArray);
+      }
+    }
   	
-  	return compactArray;
+    return compactArray;
   }
     	
   /**

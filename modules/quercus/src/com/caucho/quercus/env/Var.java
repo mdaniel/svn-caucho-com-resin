@@ -451,9 +451,9 @@ public class Var extends Value {
   /**
    * Returns the array values.
    */
-  public Value []getValueArray()
+  public Value []getValueArray(Env env)
   {
-    return _value.getValueArray();
+    return _value.getValueArray(env);
   }
 
   /**

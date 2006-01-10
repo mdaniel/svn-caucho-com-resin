@@ -119,6 +119,7 @@ public class QuercusFileModule extends AbstractQuercusModule {
    */
   public static boolean chdir(Env env, Path path)
   {
+    System.out.println("*** CHDIR: " + path.getFullPath());
     if (path.isDirectory()) {
       env.setPwd(path);
       return true;

@@ -145,9 +145,9 @@ public class ArrayFunExpr extends Expr {
       try {
 	for (int i = 0; i < _keys.length; i++) {
 	  if (_keys[i] != null)
-	    array.append(_keys[i].eval(null), _values[i].eval(null));
+	    array.put(_keys[i].eval(null), _values[i].eval(null));
 	  else
-	    array.append(_values[i].eval(null));
+	    array.put(_values[i].eval(null));
 	}
       } catch (RuntimeException e) {
 	throw e;

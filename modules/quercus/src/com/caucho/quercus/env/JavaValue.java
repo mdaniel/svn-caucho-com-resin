@@ -133,6 +133,14 @@ public class JavaValue extends Value {
   {
     return _classDef.evalMethod(env, _object, methodName, a1);
   }
+
+  /**
+   * Returns the iterator values.
+   */
+  public Value []getValueArray(Env env)
+  {
+    return _classDef.getValueArray(env, _object);
+  }
   
   /**
    * Converts to a string.

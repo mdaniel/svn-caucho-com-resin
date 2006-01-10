@@ -92,6 +92,17 @@ public class QuercusMiscModule extends AbstractQuercusModule {
   }
 
   /**
+   * Comples and evaluates an expression.
+   */
+  public Value resin_thread_dump()
+    throws Throwable
+  {
+    Thread.dumpStack();
+
+    return NullValue.NULL;
+  }
+
+  /**
    * Dumps the stack.
    */
   public static Value dump_stack()

@@ -34,8 +34,10 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
 
 import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.LinkedHashMap;
+import java.util.Iterator;
 
 import java.io.IOException;
 
@@ -69,6 +71,8 @@ public class JavaClassDefinition extends AbstractQuercusClass {
     = new HashMap<String,JavaMethod>();
 
   private JavaConstructor _cons;
+
+  private Method _iterator;
 
   private Marshall _marshall;
 
@@ -109,7 +113,6 @@ public class JavaClassDefinition extends AbstractQuercusClass {
     } catch (Exception e) {
       throw new QuercusRuntimeException(e);
     }
-      
   }
 
   /**
@@ -175,6 +178,38 @@ public class JavaClassDefinition extends AbstractQuercusClass {
     return getMethod(env, name).eval(env, obj, a1);
   }
 
+  /**
+   * Returns the values for an iterator.
+   */
+  public Value []getValueArray(Env env, Object obj)
+  {
+    try {
+      if (_iterator == null)
+	return new Value[0];
+
+      Iterator iter = (Iterator) _iterator.invoke(obj);
+
+      ArrayList<Value> values = new ArrayList<Value>();
+
+      while (iter.hasNext()) {
+	Object objValue = iter.next();
+
+	if (objValue instanceof Value)
+	  values.add((Value) objValue);
+	else
+	  values.add(env.wrapJava(objValue));
+      }
+
+      Value []valueArray = new Value[values.size()];
+
+      values.toArray(valueArray);
+
+      return valueArray;
+    } catch (Throwable e) {
+      throw new RuntimeException(e);
+    }
+  }
+
   private JavaMethod getMethod(Env env, String name)
   {
     JavaMethod method = _functionMap.get(name);
@@ -201,6 +236,15 @@ public class JavaClassDefinition extends AbstractQuercusClass {
       _cons = new JavaConstructor(_quercus, cons[0]);
     else
       _cons = null;
+
+    try {
+      Method method = _type.getMethod("iterator", new Class[0]);
+
+      if (method != null &&
+	  Iterator.class.isAssignableFrom(method.getReturnType()))
+	_iterator = method;
+    } catch (Throwable e) {
+    }
   }
 
   /**

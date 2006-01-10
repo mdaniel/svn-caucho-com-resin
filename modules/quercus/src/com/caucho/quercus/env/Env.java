@@ -142,6 +142,7 @@ public class Env {
   private static final int PHP_SELF = 11;
   private static final int _FILES = 12;
   private static final int HTTP_POST_FILES = 13;
+  private static final int _ENV = 14;
 
   private static final IntMap SPECIAL_VARS = new IntMap();
 
@@ -197,7 +198,7 @@ public class Env {
   private AbstractFunction _autoload;
 
   private long _startTime;
-  private long _timeLimit = 60000L;
+  private long _timeLimit = 600000L;
 
   private Expr []_callStack = new Expr[256];
   private int _callStackTop;
@@ -412,8 +413,7 @@ public class Env {
    */
   public Path getPwd()
   {
-    // return _pwd;
-    return getSelfPath().getParent();
+    return _pwd;
   }
 
   /**
@@ -432,6 +432,14 @@ public class Env {
     return _selfPath;
   }
 
+  /**
+   * Returns the initial directory.
+   */
+  public Path getSelfDirectory()
+  {
+    return _selfPath.getParent();
+  }
+  
   /**
    * Sets the initial directory.
    */
@@ -936,6 +944,17 @@ public class Env {
     Var var = null;
 
     switch (SPECIAL_VARS.get(name)) {
+    case _ENV:
+      {
+	var = new Var();
+	
+	_globalMap.put(name, var);
+
+	var.set(new ArrayValueImpl());
+
+	return var;
+      }
+      
     case HTTP_POST_VARS:
     case _POST:
       {
@@ -2206,7 +2225,7 @@ public class Env {
   public Value require_once(String include)
     throws Throwable
   {
-    return include(getPwd(), include, true);
+    return include(getSelfDirectory(), include, true);
   }
 
   /**
@@ -2215,7 +2234,7 @@ public class Env {
   public Value require(String include)
     throws Throwable
   {
-    return include(getPwd(), include, false);
+    return include(getSelfDirectory(), include, false);
   }
 
   /**
@@ -2224,7 +2243,7 @@ public class Env {
   public Value include(String include)
     throws Throwable
   {
-    return include(getPwd(), include, false);
+    return include(getSelfDirectory(), include, false);
   }
 
   /**
@@ -2233,7 +2252,7 @@ public class Env {
   public Value include_once(String include)
     throws Throwable
   {
-    return include(getPwd(), include, true);
+    return include(getSelfDirectory(), include, true);
   }
 
   /**
@@ -2243,7 +2262,7 @@ public class Env {
     throws Throwable
   {
     // php/0b0g
-    Path selfPath = getPwd();
+    Path selfPath = getSelfDirectory();
     
     Path path = lookupInclude(selfPath, include);
 
@@ -3007,6 +3026,7 @@ public class Env {
     SPECIAL_VARS.put("_REQUEST", _REQUEST);
     SPECIAL_VARS.put("_COOKIE", _COOKIE);
     SPECIAL_VARS.put("_SESSION", _SESSION);
+    SPECIAL_VARS.put("_ENV", _ENV);
     SPECIAL_VARS.put("HTTP_GET_VARS", HTTP_GET_VARS);
     SPECIAL_VARS.put("HTTP_POST_VARS", HTTP_POST_VARS);
     SPECIAL_VARS.put("HTTP_POST_FILES", HTTP_POST_FILES);

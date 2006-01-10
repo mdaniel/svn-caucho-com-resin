@@ -803,13 +803,15 @@ public class Quercus {
   }
 
   static {
-    _superGlobals.add("_SERVER");
+    _superGlobals.add("GLOBALS");
+    _superGlobals.add("_COOKIE");
+    _superGlobals.add("_ENV");
+    _superGlobals.add("_FILES");
     _superGlobals.add("_GET");
     _superGlobals.add("_POST");
-    _superGlobals.add("_COOKIE");
-    _superGlobals.add("_REQUEST");
+    _superGlobals.add("_SERVER");
     _superGlobals.add("_SESSION");
-    _superGlobals.add("GLOBALS");
+    _superGlobals.add("_REQUEST");
   }
 }
 

@@ -81,29 +81,47 @@ public class ForeachStatement extends Statement {
     Value origObj = _objExpr.eval(env);
     Value obj = origObj.copy();
 
-    for (Value key : obj.getIndices()) {
-      if (_keyName != null)
-	env.setValue(_keyName, key);
-
-      if (_isRef) {
-	Value value = origObj.getRef(key);
-
+    if (_key == null) {
+      for (Value value : obj.getValueArray(env)) {
 	env.setValue(_valueName, value);
+
+	Value result = _block.execute(env);
+
+	if (result == null || result instanceof ContinueValue) {
+	}
+	else if (result instanceof BreakValue)
+	  return null;
+	else
+	  return result;
       }
-      else {
-	Value value = obj.get(key).toValue();
+
+      return null;
+    }
+    else {
+      for (Value key : obj.getKeyArray()) {
+	if (_keyName != null)
+	  env.setValue(_keyName, key);
+
+	if (_isRef) {
+	  Value value = origObj.getRef(key);
+
+	  env.setValue(_valueName, value);
+	}
+	else {
+	  Value value = obj.get(key).toValue();
       
-	env.setValue(_valueName, value);
-      }
+	  env.setValue(_valueName, value);
+	}
 
-      Value result = _block.execute(env);
+	Value result = _block.execute(env);
 
-      if (result == null || result instanceof ContinueValue) {
+	if (result == null || result instanceof ContinueValue) {
+	}
+	else if (result instanceof BreakValue)
+	  return null;
+	else
+	  return result;
       }
-      else if (result instanceof BreakValue)
-	return null;
-      else
-	return result;
     }
 
     return null;
@@ -181,7 +199,7 @@ public class ForeachStatement extends Statement {
       out.println("Value []" + keysVar + " = " + objVar + ".getKeyArray();");
 
     if (! _isRef)
-      out.println("Value []" + valuesVar + " = " + objVar + ".getValueArray();");
+      out.println("Value []" + valuesVar + " = " + objVar + ".getValueArray(env);");
 
     if (_key != null || _isRef) {
       out.println("for (int " + indexVar + " = 0; " +

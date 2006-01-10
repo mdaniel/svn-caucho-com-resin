@@ -878,7 +878,7 @@ abstract public class Value {
   /**
    * Returns the field values.
    */
-  public Value []getValueArray()
+  public Value []getValueArray(Env env)
   {
     return NULL_VALUE_ARRAY;
   }
