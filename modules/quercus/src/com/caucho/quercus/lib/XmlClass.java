@@ -60,7 +60,7 @@ public class XmlClass {
   public static final int XML_OPTION_TARGET_ENCODING = 0x2;
   public static final int XML_OPTION_SKIP_TAGSTART = 0x3;
   public static final int XML_OPTION_SKIP_WHITE = 0x4;
-  
+
   private Env _env;
   private String _encoding;
   private Callback _startElementHandler;
@@ -116,7 +116,7 @@ public class XmlClass {
    * @throws ParserConfigurationException
    */
   public boolean xml_parse(String data,
-                           @Optional boolean is_final)
+                           @Optional("true") boolean is_final)
     throws IOException, SAXException, ParserConfigurationException
   {
 
