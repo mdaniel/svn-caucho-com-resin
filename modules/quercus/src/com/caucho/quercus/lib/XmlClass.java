@@ -29,11 +29,10 @@
 
 package com.caucho.quercus.lib;
 
-import java.sql.*;
-
 import java.util.logging.Logger;
 import java.util.logging.Level;
 import java.io.IOException;
+import java.io.StringReader;
 
 import com.caucho.util.L10N;
 
@@ -49,7 +48,6 @@ import javax.xml.parsers.ParserConfigurationException;
 import com.caucho.quercus.module.Optional;
 
 import com.caucho.vfs.Path;
-import com.caucho.vfs.FilePath;
 
 /**
  * XML object oriented API facade
@@ -64,7 +62,7 @@ public class XmlClass {
   private Callback _endElementHandler;
   private Callback _characterDataHandler;
 
-  private XmlHandler _handler = new XmlHandler();
+  private StringBuffer _xmlString = new StringBuffer();
 
   public XmlClass(Env env,
                   String encoding)
@@ -101,22 +99,40 @@ public class XmlClass {
     return true;
   }
 
-  public boolean xml_parse(Path path)
+  /**
+   * xml_parse will keep accumulating "data" until
+   * either is_final is true or omitted
+   *
+   * @param data
+   * @param is_final
+   * @return
+   * @throws IOException
+   * @throws SAXException
+   * @throws ParserConfigurationException
+   */
+  public boolean xml_parse(String data,
+                           @Optional boolean is_final)
     throws IOException, SAXException, ParserConfigurationException
   {
-    System.out.println("HERE!!!!!!!!!! " + path);
-    InputSource is = new InputSource(path.openRead());
+
+    _xmlString.append(data);
+    
+   if (is_final) {
+
+    InputSource is = new InputSource(new StringReader(_xmlString.toString()));
 
     SAXParserFactory factory = SAXParserFactory.newInstance();
     SAXParser saxParser = factory.newSAXParser();
-    saxParser.parse(is, _handler);
+    saxParser.parse(is, new XmlHandler());
 
+   }
     return true;
   }
 
   class XmlHandler extends DefaultHandler {
 
     /**
+     * wrapper for _startElementHandler.  creates Value[] args
      *
      * @param namespaceURI
      * @param lName
@@ -130,17 +146,30 @@ public class XmlClass {
                              Attributes attrs)
       throws SAXException
     {
-      Value[] args = new Value[2];
+      /**
+       *  args[0] reference to this parser
+       *  args[1] name of element
+       *  args[2] array of attributes
+       *
+       *  Typical call in PHP looks like:
+       *
+       *  function startElement($parser, $name, $attrs) {...}
+       */
+      Value[] args = new Value[3];
+
+      //XXX: Need to pass a reference to this XmlClass
+      args[0] = NullValue.NULL;
+
       String eName = lName; // element name
       if ("".equals(eName)) eName = qName;
-      args[0] = new StringValue(eName);
+      args[1] = new StringValue(eName);
 
       // turn attrs into an array of name, value pairs
-      args[1] = new ArrayValueImpl();
+      args[2] = new ArrayValueImpl();
       for (int i = 0; i < attrs.getLength(); i++) {
         String aName = attrs.getLocalName(i); // Attr name
         if ("".equals(aName)) aName = attrs.getQName(i);
-        args[1].put(new StringValue(aName), new StringValue(attrs.getValue(i)));
+        args[2].put(new StringValue(aName), new StringValue(attrs.getValue(i)));
       }
 
       try {
@@ -150,18 +179,34 @@ public class XmlClass {
       }
     }
 
+    /**
+     * wrapper for _endElementHandler
+     *
+     * @param namespaceURI
+     * @param sName
+     * @param qName
+     * @throws SAXException
+     */
     public void endElement(String namespaceURI,
                            String sName,
                            String qName)
       throws SAXException
     {
       try {
-        _endElementHandler.eval(_env, new StringValue(sName));
+        _endElementHandler.eval(_env, NullValue.NULL, new StringValue(sName));
       } catch (Throwable t) {
         throw new SAXException(L.l(t.getMessage()));
       }
     }
 
+    /**
+     * wrapper for _characterDataHandler
+     *
+     * @param ch
+     * @param start
+     * @param length
+     * @throws SAXException
+     */
     public void characters(char[] ch,
                            int start,
                            int length)
@@ -170,7 +215,7 @@ public class XmlClass {
       String s = new String(ch,start,length);
 
       try {
-        _characterDataHandler.eval(_env, new StringValue(s));
+        _characterDataHandler.eval(_env, NullValue.NULL, new StringValue(s));
       } catch (Throwable t) {
         throw new SAXException(L.l(t.getMessage()));
       }

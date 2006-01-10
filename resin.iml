@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module version="4" relativePaths="true" type="JAVA_MODULE">
+  <component name="ModuleRootManager" />
+  <component name="NewModuleRootManager">
+    <output url="file://$MODULE_DIR$/classes" />
+    <exclude-output />
+    <content url="file://$MODULE_DIR$">
+      <sourceFolder url="file://$MODULE_DIR$/doc/WEB-INF/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/doc/amber/tutorial/cmp-basic-field/WEB-INF/classes" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/doc/amber/tutorial/cmp-basic/WEB-INF/classes" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/doc/amber/tutorial/cmp-create/WEB-INF/classes" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/doc/amber/tutorial/cmp-inherit/WEB-INF/classes" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/doc/amber/tutorial/cmp-many2many/WEB-INF/classes" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/doc/amber/tutorial/cmp-many2one/WEB-INF/classes" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/doc/amber/tutorial/cmp-one2many/WEB-INF/classes" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/doc/amber/tutorial/cmp-query/WEB-INF/classes" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/doc/amber/tutorial/cmp-session/WEB-INF/classes" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/doc/amber/tutorial/cmp-xa/WEB-INF/classes" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/doc/amber/tutorial/resin-xa/WEB-INF/classes" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/doc/cmp/tutorial/cmp-basic-transaction/WEB-INF/classes" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/doc/cmp/tutorial/cmp-basic/WEB-INF/classes" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/doc/cmp/tutorial/cmp-create/WEB-INF/classes" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/doc/cmp/tutorial/cmp-ejbql/WEB-INF/classes" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/doc/cmp/tutorial/cmp-find/WEB-INF/classes" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/doc/cmp/tutorial/cmp-id/WEB-INF/classes" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/doc/cmp/tutorial/cmp-many2many/WEB-INF/classes" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/doc/cmp/tutorial/cmp-many2one/WEB-INF/classes" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/doc/cmp/tutorial/cmp-map/WEB-INF/classes" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/doc/cmp/tutorial/cmp-one2many/WEB-INF/classes" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/doc/cmp/tutorial/cmp-one2one/WEB-INF/classes" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/doc/cmp/tutorial/cmp-select/WEB-INF/classes" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/doc/cmp/tutorial/cmp-xbasic/WEB-INF/classes" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/doc/cmp/tutorial/cmp-xcreate/WEB-INF/classes" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/doc/cmp/tutorial/cmp-xdoclet/WEB-INF/classes" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/doc/cmp/tutorial/cmp-xfind/WEB-INF/classes" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/doc/cmp/tutorial/cmp-xone2one/WEB-INF/classes" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/doc/cmp/tutorial/init/WEB-INF/classes" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/doc/db/tutorial/jdbc-basic/WEB-INF/classes" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/doc/db/tutorial/jdbc-ioc/WEB-INF/classes" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/doc/ejb/tutorial/ejb-entity-home/WEB-INF/classes" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/doc/ejb/tutorial/ejb-messaging-queue/WEB-INF/classes" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/doc/ejb/tutorial/ejb-session-local/WEB-INF/classes" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/doc/ejb/tutorial/ejb-stateless-hello/WEB-INF/classes" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/doc/ejb3/tutorial/stateless/WEB-INF/classes" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/doc/ioc/tutorial/aop-connection/WEB-INF/classes" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/doc/jms/tutorial/ioc-listener/WEB-INF/classes" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/doc/jms/tutorial/listener/WEB-INF/classes" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/doc/jmx/tutorial/basic/WEB-INF/classes" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/doc/jmx/tutorial/listener/WEB-INF/classes" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/doc/jmx/tutorial/mbean-server/WEB-INF/classes" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/doc/jmx/tutorial/registration/WEB-INF/classes" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/doc/jsp/tutorial/taglib-reuse/WEB-INF/classes" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/doc/php/tutorial/module/WEB-INF/classes" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/doc/portlet/tutorial/basic-action/WEB-INF/classes" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/doc/portlet/tutorial/basic-hello/WEB-INF/classes" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/doc/portlet/tutorial/basic-jsp/WEB-INF/classes" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/doc/portlet/tutorial/basic-modes/WEB-INF/classes" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/doc/portlet/tutorial/basic-render/WEB-INF/classes" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/doc/portlet/tutorial/portal-hello/WEB-INF/classes" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/doc/protocols/tutorial/burlap-add/WEB-INF/classes" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/doc/protocols/tutorial/custom-protocol/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/doc/protocols/tutorial/hessian-add/WEB-INF/classes" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/doc/protocols/tutorial/hessian-ioc/WEB-INF/classes" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/doc/protocols/tutorial/hessian-service/WEB-INF/classes" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/doc/resource/tutorial/basic/WEB-INF/classes" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/doc/resource/tutorial/injection/WEB-INF/classes" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/doc/resource/tutorial/jca-connection/WEB-INF/classes" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/doc/resource/tutorial/jca-cron/WEB-INF/classes" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/doc/resource/tutorial/jca-lifecycle/WEB-INF/classes" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/doc/resource/tutorial/jca-timer/WEB-INF/classes" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/doc/resource/tutorial/jca-work/WEB-INF/classes" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/doc/resource/tutorial/jndi-appconfig/WEB-INF/classes" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/doc/resource/tutorial/lifecycle/WEB-INF/classes" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/doc/servlet/tutorial/bean-init/WEB-INF/classes" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/doc/servlet/tutorial/filter-templates/WEB-INF/classes" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/doc/servlet/tutorial/helloworld/WEB-INF/classes" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/doc/servlet/tutorial/sub-bean/WEB-INF/classes" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/doc/webapp/tutorial/periodictask/WEB-INF/classes" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/modules/boot/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/modules/ejb/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/modules/ejb30/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/modules/j2eedeploy/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/modules/jaf/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/modules/javadoc/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/modules/javamail/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/modules/jaxrpc/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/modules/jca/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/modules/jms/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/modules/jmx/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/modules/jsdk/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/modules/jstl/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/modules/jta/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/modules/portlet/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/modules/quercus/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/modules/resin-jdk15/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/modules/resin/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/modules/saaj/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/modules/script/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/modules/webutil/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/modules/widget/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/modules/widget/tests" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/webapps/ROOT/WEB-INF/classes" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/webapps/ROOT/WEB-INF/work" isTestSource="false" />
+    </content>
+    <orderEntry type="inheritedJdk" />
+    <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntryProperties />
+  </component>
+</module>
+
