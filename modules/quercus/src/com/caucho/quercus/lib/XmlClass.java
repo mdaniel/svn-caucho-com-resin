@@ -56,6 +56,11 @@ public class XmlClass {
   private static final Logger log = Logger.getLogger(XmlClass.class.getName());
   private static final L10N L = new L10N(XmlClass.class);
 
+  public static final int XML_OPTION_CASE_FOLDING = 0x1;
+  public static final int XML_OPTION_TARGET_ENCODING = 0x2;
+  public static final int XML_OPTION_SKIP_TAGSTART = 0x3;
+  public static final int XML_OPTION_SKIP_WHITE = 0x4;
+  
   private Env _env;
   private String _encoding;
   private Callback _startElementHandler;
