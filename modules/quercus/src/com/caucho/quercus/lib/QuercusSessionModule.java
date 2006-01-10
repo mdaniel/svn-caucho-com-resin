@@ -35,6 +35,7 @@ import java.util.HashMap;
 import java.util.logging.Logger;
 
 import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletResponse;
 
 import com.caucho.util.L10N;
 import com.caucho.util.RandomUtil;
@@ -73,14 +74,38 @@ public class QuercusSessionModule extends AbstractQuercusModule {
   }
 
   /**
-   * Returns the session cache limiter value
+   * Returns and/or sets the value of session.cache_limiter, affecting the
+   * cache related headers that are sent as a result of a call to
+   * {@link #session_start(Env)}.
+   *
+   * If the optional parameter is not supplied, this function simply returns the existing value.
+   * If the optional parameter is supplied, the returned value
+   * is the old value that was set before the new value is applied.
+   *
+   * Valid values are "nocache" (the default), "private", "private_no_expire",
+   * and "public". If a value other than these values is supplied, then a warning is produced
+   * and no cache related headers will be sent to the client.
    */
   public Value session_cache_limiter(Env env, @Optional String newValue)
   {
     Value value = env.getIni("session.cache_limiter");
 
-    if (newValue != null && ! newValue.equals(""))
-      env.setIni("session.cache_limiter", newValue);
+    if (newValue == null || "".equals(newValue)) // XXX: php/1k16
+      return value;
+
+    env.setIni("session.cache_limiter", newValue);
+
+    return value;
+  }
+
+  public Value session_cache_expire(Env env, @Optional String newValue)
+  {
+    Value value = env.getIni("session.cache_expire");
+
+    if (newValue == null || newValue.length() == 0)
+      return value;
+
+    env.setIni("session.cache_expire", newValue);
 
     return value;
   }
@@ -92,12 +117,12 @@ public class QuercusSessionModule extends AbstractQuercusModule {
     throws Throwable
   {
     SessionArrayValue session = env.getSession();
-    
+
     if (session == null)
       return false;
 
     env.destroySession(session.getId());
-    
+
     return true;
   }
 
@@ -171,7 +196,7 @@ public class QuercusSessionModule extends AbstractQuercusModule {
 					     gc);
 
     env.setSessionCallback(cb);
-    
+
     return true;
   }
 
@@ -181,13 +206,17 @@ public class QuercusSessionModule extends AbstractQuercusModule {
   public boolean session_start(Env env)
     throws Throwable
   {
-    if (env.getSession() != null)
+    if (env.getSession() != null) {
+      env.notice(L.l("session has already been started"));
       return true;
+    }
 
-    SessionCallback cb = env.getSessionCallback();
-    
+    SessionCallback callback = env.getSessionCallback();
+
     Value sessionIdValue = (Value) env.getSpecialValue("caucho.session_id");
     String sessionId = null;
+
+    final HttpServletResponse response = env.getResponse();
 
     if (sessionIdValue != null && ! sessionIdValue.isNull()) {
       sessionId = sessionIdValue.toString();
@@ -195,8 +224,8 @@ public class QuercusSessionModule extends AbstractQuercusModule {
     else {
       String cookieName = env.getIni("session.name").toString();
 
-      if (cb != null)
-	cb.open(env, WorkDir.getLocalWorkDir().getPath(), cookieName);
+      if (callback != null)
+	callback.open(env, WorkDir.getLocalWorkDir().getPath(), cookieName);
 
       Cookie []cookies = env.getRequest().getCookies();
 
@@ -212,32 +241,60 @@ public class QuercusSessionModule extends AbstractQuercusModule {
         Cookie cookie = new Cookie(cookieName, sessionId);
         cookie.setVersion(1);
 
-        Value path = env.getIni("session.cookie_path");
-        cookie.setPath(path.toString());
+        if (response.isCommitted()) {
+          env.warning(L.l("cannot send session cookie because response is committed"));
+        }
+        else {
+          Value path = env.getIni("session.cookie_path");
+          cookie.setPath(path.toString());
 
-        Value maxAge = env.getIni("session.cookie_lifetime");
-        if (maxAge.toInt() != 0)
-          cookie.setMaxAge(maxAge.toInt());
+          Value maxAge = env.getIni("session.cookie_lifetime");
+          if (maxAge.toInt() != 0)
+            cookie.setMaxAge(maxAge.toInt());
 
-        Value domain = env.getIni("session.cookie_domain");
-        cookie.setDomain(domain.toString());
+          Value domain = env.getIni("session.cookie_domain");
+          cookie.setDomain(domain.toString());
 
-        Value secure = env.getIni("session.cookie_secure");
-        cookie.setSecure(secure.toBoolean());
+          Value secure = env.getIni("session.cookie_secure");
+          cookie.setSecure(secure.toBoolean());
 
-        env.getResponse().addCookie(cookie);
-
-        String cacheLimiter = env.getIni("session.cache_limiter").toString();
-
-        if ("private".equals(cacheLimiter))
-          env.getResponse().addHeader("Cache-Control", "private");
-        else if ("nocache".equals(cacheLimiter))
-          env.getResponse().addHeader("Cache-Control", "nocache");
+          response.addCookie(cookie);
+        }
       }
     }
 
     env.setSpecialValue("caucho.session_id", new StringValue(sessionId));
-    
+
+    if (response.isCommitted())
+      env.warning(L.l("cannot send session cache limiter headers because response is committed"));
+    else {
+      Value cacheLimiterValue = env.getIni("session.cache_limiter");
+      String cacheLimiter = String.valueOf(cacheLimiterValue);
+
+      Value cacheExpireValue = env.getIni("session.cache_expire");
+      int cacheExpire = cacheExpireValue.toInt() * 60;
+
+      if ("nocache".equals(cacheLimiter)) {
+        response.setHeader("Expires", "Thu, 19 Nov 1981 08:52:00 GMT");
+        response.addHeader("Cache-Control", "no-store, no-cache, must-revalidate, post-check=0, pre-check=0");
+        response.addHeader("Pragma", "no-cache");
+      }
+      else if ("private".equals(cacheLimiter)) {
+        response.setHeader("Expires", "Thu, 19 Nov 1981 08:52:00 GMT");
+        response.addHeader("Cache-Control", "private, max-age=" + cacheExpire + ", pre-check=" + cacheExpire);
+        response.setDateHeader("Last-Modified", env.getLastModified());
+      }
+      else if ("private_no_expire".equals(cacheLimiter)) {
+        response.addHeader("Cache-Control", "private, max-age=" + cacheExpire + ", pre-check=" + cacheExpire);
+        response.setDateHeader("Last-Modified", env.getLastModified());
+      }
+      else if ("public".equals(cacheLimiter)) {
+        response.setDateHeader("Expires", Alarm.getCurrentTime());
+        response.addHeader("Cache-Control", "public, max-age=" + cacheExpire);
+        response.setDateHeader("Last-Modified", env.getLastModified());
+      }
+    }
+
     env.createSession(sessionId);
 
     return true;
@@ -299,7 +356,7 @@ public class QuercusSessionModule extends AbstractQuercusModule {
     addIni(_iniMap, "session.entropy_file", "", PHP_INI_ALL);
     addIni(_iniMap, "session.entropy_length", "0", PHP_INI_ALL);
     addIni(_iniMap, "session.cache_limiter", "nocache", PHP_INI_ALL);
-    addIni(_iniMap, "session.cache_exire", "180", PHP_INI_ALL);
+    addIni(_iniMap, "session.cache_expire", "180", PHP_INI_ALL);
     addIni(_iniMap, "session.use_trans_sid", "0", PHP_INI_ALL);
     addIni(_iniMap, "session.bug_compat_42", "1", PHP_INI_ALL);
     addIni(_iniMap, "session.bug_compat_warn", "1", PHP_INI_ALL);
