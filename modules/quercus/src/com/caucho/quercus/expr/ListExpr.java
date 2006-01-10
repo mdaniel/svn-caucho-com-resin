@@ -116,10 +116,23 @@ public class ListExpr extends Expr {
     
     for (int i = 0; i < len; i++) {
       if (_varList[i] != null)
-	_varList[i].evalAssign(env, value.get(_keyList[i]));
+	_varList[i].evalAssign(env, value.get(_keyList[i]).copy());
     }
     
     return value;
+  }
+
+  /**
+   * Evaluates the expression.
+   *
+   * @param env the calling environment.
+   *
+   * @return the expression value.
+   */
+  public Value evalCopy(Env env)
+    throws Throwable
+  {
+    return eval(env).copy();
   }
 
   //

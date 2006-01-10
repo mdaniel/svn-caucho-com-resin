@@ -340,6 +340,19 @@ abstract public class Expr {
   }
   
   /**
+   * Evaluates the expression as a copy
+   *
+   * @param env the calling environment.
+   *
+   * @return the expression value.
+   */
+  public Value evalCopy(Env env)
+    throws Throwable
+  {
+    return eval(env);
+  }
+  
+  /**
    * Evaluates the expression as a function argument where it is unknown
    * if the value is a reference.
    *

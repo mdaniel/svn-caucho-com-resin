@@ -251,6 +251,14 @@ abstract public class Value {
   }
   
   /**
+   * Clone for the clone keyword
+   */
+  public Value clone()
+  {
+    return this;
+  }
+  
+  /**
    * Convert to a ref.
    */
   public Value toRef()

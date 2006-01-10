@@ -251,9 +251,8 @@ public class Function extends AbstractFunction {
 
       Expr defaultExpr = arg.getDefault();
 
-      if (defaultExpr == null) {
-	return env.error("expected exception");
-      }
+      if (defaultExpr == null)
+	return env.error("expected default expression");
       else if (arg.isReference())
 	map.put(arg.getName(), defaultExpr.evalRef(env).toVar());
       else {
@@ -320,9 +319,8 @@ public class Function extends AbstractFunction {
 
       Expr defaultExpr = arg.getDefault();
 
-      if (defaultExpr == null) {
-	return env.error("expected exception");
-      }
+      if (defaultExpr == null)
+	return env.error("expected default expression");
       else if (arg.isReference())
 	map.put(arg.getName(), defaultExpr.evalRef(env).toVar());
       else {
@@ -543,10 +541,7 @@ public class Function extends AbstractFunction {
 
       Expr defaultExpr = _args[i].getDefault();
       
-      if (defaultExpr != null)
-	defaultExpr.generateExpr(out);
-      else
-	out.print("null");
+      defaultExpr.generateExpr(out);
     }
     out.println(") {");
   
@@ -728,8 +723,8 @@ public class Function extends AbstractFunction {
 	out.println(varName + " = " + argName + ".toVar();");
       }
       else if (var.isReadOnly()) {
-	// php/3a70
-	out.println(varName + " = " + argName + ".toValue();");
+	// php/3a70, php/343k
+	out.println(varName + " = " + argName + ".toArgValue();");
       }
       else if (var.isRefArgument()) {
 	// php/344r, 3a57

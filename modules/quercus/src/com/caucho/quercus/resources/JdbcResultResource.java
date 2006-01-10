@@ -750,7 +750,6 @@ public class JdbcResultResource extends ResourceValue {
   {
 
     try {
-
       if (_metaData == null)
         _metaData = _rs.getMetaData();
 
@@ -758,7 +757,6 @@ public class JdbcResultResource extends ResourceValue {
         return BooleanValue.FALSE;
       else
         return new StringValue(_metaData.getColumnName(fieldOffset + 1));
-
     } catch (Exception e) {
       log.log(Level.FINE, e.toString(), e);
       return BooleanValue.FALSE;

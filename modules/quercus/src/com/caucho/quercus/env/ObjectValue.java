@@ -337,6 +337,19 @@ public class ObjectValue extends ArrayValueWrapper {
 
     return new ObjectValue(env, map, _cl, getArray());
   }
+  
+  /**
+   * Clone the object
+   */
+  public Value clone()
+  {
+    ObjectValue newObject = new ObjectValue(_cl);
+
+    for (ArrayValue.Entry ptr = getHead(); ptr != null; ptr = ptr.getNext())
+      newObject.put(ptr.getKey(), ptr.getValue());
+    
+    return newObject;
+  }
 
   // XXX: need to check the other copy, e.g. for sessions
 

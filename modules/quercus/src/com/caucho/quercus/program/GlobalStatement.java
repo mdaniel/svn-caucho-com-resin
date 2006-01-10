@@ -77,7 +77,7 @@ public class GlobalStatement extends Statement {
    */
   public boolean analyze(AnalyzeInfo info)
   {
-    // _var.analyzeAssign(info);
+    _var.analyzeAssign(info);
 
     return true;
   }
@@ -90,12 +90,20 @@ public class GlobalStatement extends Statement {
   protected void generateImpl(PhpWriter out)
     throws IOException
   {
-    /*
     out.print(_var.getJavaVar());
     out.print(" = env.getGlobalVar(\"");
     out.printJavaString(_var.getName());
     out.println("\");");
-    */
+
+    FunctionInfo funInfo = _var.getVarInfo().getFunction();
+    if (funInfo.isVariableVar() && ! funInfo.isPageMain()) {
+      // php/3a84
+      out.print("_quercus_map.put(\"");
+      out.printJavaString(_var.getName());
+      out.print("\", (Var) ");
+      out.print(_var.getJavaVar());
+      out.println(");");
+    }
   }
 
   /**

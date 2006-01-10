@@ -106,6 +106,9 @@ public class MethodCallExpr extends Expr {
     
     for (int i = 0; i < _args.length; i++) {
       _args[i].analyze(info);
+      
+      _args[i].analyzeSetReference(info);
+      _args[i].analyzeSetModified(info);
     }
   }
 

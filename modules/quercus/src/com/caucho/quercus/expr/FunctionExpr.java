@@ -58,6 +58,14 @@ public class FunctionExpr extends Expr {
     _args = new Expr[args.size()];
     args.toArray(_args);
   }
+
+  public FunctionExpr(String name, Expr []args)
+  {
+    // quercus/120o
+    _name = name.toLowerCase();
+
+    _args = args;
+  }
   
   /**
    * Returns the location if known.
@@ -93,7 +101,7 @@ public class FunctionExpr extends Expr {
   public Value eval(Env env)
     throws Throwable
   {
-    return evalImpl(env, false);
+    return evalImpl(env, false, false);
   }
   
   /**
@@ -106,7 +114,7 @@ public class FunctionExpr extends Expr {
   public Value evalRef(Env env)
     throws Throwable
   {
-    return evalImpl(env, true);
+    return evalImpl(env, true, false);
   }
   
   /**
@@ -116,7 +124,20 @@ public class FunctionExpr extends Expr {
    *
    * @return the expression value.
    */
-  private Value evalImpl(Env env, boolean isRef)
+  public Value evalCopy(Env env)
+    throws Throwable
+  {
+    return evalImpl(env, false, true);
+  }
+  
+  /**
+   * Evaluates the expression.
+   *
+   * @param env the calling environment.
+   *
+   * @return the expression value.
+   */
+  private Value evalImpl(Env env, boolean isRef, boolean isCopy)
     throws Throwable
   {
     env.pushCall(this);
@@ -140,6 +161,8 @@ public class FunctionExpr extends Expr {
 	return NullValue.NULL;
       else if (isRef)
 	return fun.evalRef(env, fullArgs);
+      else if (isCopy)
+	return fun.evalCopy(env, fullArgs);
       else
 	return fun.eval(env, fullArgs);
     } finally {
@@ -309,6 +332,26 @@ public class FunctionExpr extends Expr {
       else if (isCopy)
 	out.print(".copyReturn()");
     }
+  }
+
+  /**
+   * Generates code to recreate the expression.  Used for default values.
+   *
+   * @param out the writer to the Java source code.
+   */
+  public void generateExpr(PhpWriter out)
+    throws IOException
+  {
+    out.print("new FunctionExpr(\"");
+    out.printJavaString(_name);
+    out.print("\", new Expr[] {");
+    
+    for (int i = 0; i < _args.length; i++) {
+      _args[i].generateExpr(out);
+      out.print(", ");
+    }
+
+    out.print("})");
   }
   
   public String toString()

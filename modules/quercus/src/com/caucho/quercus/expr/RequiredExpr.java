@@ -31,22 +31,21 @@ package com.caucho.quercus.expr;
 
 import java.io.IOException;
 
-import com.caucho.java.JavaWriter;
-
 import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.ArrayValue;
-import com.caucho.quercus.env.ArrayValueImpl;
+import com.caucho.quercus.env.DefaultValue;
 import com.caucho.quercus.env.Value;
+import com.caucho.quercus.env.NullValue;
 
 import com.caucho.quercus.gen.PhpWriter;
 
 /**
- * Converts to an array
+ * Represents a PHP required expression.
  */
-public class ToArrayExpr extends UnaryExpr {
-  public ToArrayExpr(Expr expr)
+public class RequiredExpr extends Expr {
+  public static final RequiredExpr REQUIRED = new RequiredExpr();
+  
+  public RequiredExpr()
   {
-    super(expr);
   }
 
   /**
@@ -59,64 +58,9 @@ public class ToArrayExpr extends UnaryExpr {
   public Value eval(Env env)
     throws Throwable
   {
-    Value value = _expr.eval(env).toValue();
+    env.error("required argument missing");
 
-    if (value instanceof ArrayValue)
-      return value;
-    else
-      return new ArrayValueImpl().append(value);
-  }
-
-  /**
-   * Evaluates the expression.
-   *
-   * @param env the calling environment.
-   *
-   * @return the expression value.
-   */
-  public Value evalCopy(Env env)
-    throws Throwable
-  {
-    Value value = _expr.eval(env).toValue();
-
-    if (value instanceof ArrayValue)
-      return value.copy();
-    else
-      return new ArrayValueImpl().append(value);
-  }
-
-  //
-  // Java code generation
-  //
-
-  /**
-   * Generates code to evaluate the expression.
-   *
-   * @param out the writer to the Java source code.
-   */
-  public void generate(PhpWriter out)
-    throws IOException
-  {
-    out.print("ArrayValue.toArray(");
-
-    _expr.generate(out);
-
-    out.print(")");
-  }
-
-  /**
-   * Generates code to evaluate the expression.
-   *
-   * @param out the writer to the Java source code.
-   */
-  public void generateCopy(PhpWriter out)
-    throws IOException
-  {
-    out.print("ArrayValue.toArray(");
-    
-    _expr.generateCopy(out); // php/3a5u
-
-    out.print(")");
+    return NullValue.NULL;
   }
 
   /**
@@ -127,14 +71,12 @@ public class ToArrayExpr extends UnaryExpr {
   public void generateExpr(PhpWriter out)
     throws IOException
   {
-    out.print("new com.caucho.quercus.expr.ToArrayExpr(");
-    _expr.generateExpr(out);
-    out.print(")");
+    out.print("com.caucho.quercus.expr.RequiredExpr.REQUIRED");
   }
   
   public String toString()
   {
-    return "((array) " + _expr + ")";
+    return "required";
   }
 }
 

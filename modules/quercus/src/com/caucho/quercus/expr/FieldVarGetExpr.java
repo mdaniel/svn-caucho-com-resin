@@ -262,7 +262,7 @@ public class FieldVarGetExpr extends AbstractVarExpr {
     out.print(".put(");
     _nameExpr.generate(out);
     out.print(", ");
-    value.generate(out);
+    value.generateCopy(out); // php/3a85
     out.print(")");
   }
 

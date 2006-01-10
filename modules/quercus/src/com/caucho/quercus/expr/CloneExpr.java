@@ -31,29 +31,22 @@ package com.caucho.quercus.expr;
 
 import java.io.IOException;
 
-import java.util.HashSet;
-
 import com.caucho.java.JavaWriter;
 
 import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.NullValue;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.gen.PhpWriter;
 
-import com.caucho.quercus.program.AnalyzeInfo;
-
 /**
- * Represents a PHP assignment expression.
+ * Represents a PHP clone
  */
-public class AssignRefExpr extends Expr {
-  private final AbstractVarExpr _var;
-  private final Expr _value;
-
-  public AssignRefExpr(AbstractVarExpr var, Expr value)
+public class CloneExpr extends UnaryExpr {
+  public CloneExpr(Expr expr)
   {
-    _var = var;
-    _value = value;
+    super(expr);
   }
-
+  
   /**
    * Evaluates the expression.
    *
@@ -64,28 +57,7 @@ public class AssignRefExpr extends Expr {
   public Value eval(Env env)
     throws Throwable
   {
-    Value value = _value.evalRef(env);
-
-    _var.evalAssign(env, value);
-    
-    return value;
-  }
-
-  /**
-   * Evaluates the expression.
-   *
-   * @param env the calling environment.
-   *
-   * @return the expression value.
-   */
-  public Value evalCopy(Env env)
-    throws Throwable
-  {
-    Value value = _value.evalRef(env);
-
-    _var.evalAssign(env, value);
-    
-    return value.copy();
+    return _expr.eval(env).clone();
   }
 
   //
@@ -93,54 +65,20 @@ public class AssignRefExpr extends Expr {
   //
 
   /**
-   * Analyze the expression
-   */
-  public void analyze(AnalyzeInfo info)
-  {
-    _var.analyzeAssign(info);
-    _var.analyzeSetReference(info);
-
-    _value.analyze(info);
-    _value.analyzeSetReference(info);
-  }
-
-  /**
-   * Generates code to evaluate the expression
+   * Generates code to evaluate the expression.
    *
    * @param out the writer to the Java source code.
    */
   public void generate(PhpWriter out)
     throws IOException
   {
-    _var.generateAssignRef(out, _value, false);
-  }
-
-  /**
-   * Generates code to evaluate the expression
-   *
-   * @param out the writer to the Java source code.
-   */
-  public void generateTop(PhpWriter out)
-    throws IOException
-  {
-    _var.generateAssignRef(out, _value, true);
-  }
-
-  /**
-   * Generates code to evaluate the expression, copying the result
-   *
-   * @param out the writer to the Java source code.
-   */
-  public void generateCopy(PhpWriter out)
-    throws IOException
-  {
-    generate(out);
-    out.print(".copy()");  // php/3a5r
+    _expr.generate(out);
+    out.print(".clone()");
   }
   
   public String toString()
   {
-    return "(" + _var + " =& " + _value + ")";
+    return "clone " + _expr.toString();
   }
 }
 

@@ -413,6 +413,15 @@ public class StaticFunction extends AbstractFunction {
     return _unmarshallReturn.unmarshall(env, result);
   }
 
+  /**
+   * Evaluates the function, returning a copy
+   */
+  public Value evalCopy(Env env, Value []args)
+    throws Throwable
+  {
+    return eval(env, args);
+  }
+
   //
   // Java generation code.
   //

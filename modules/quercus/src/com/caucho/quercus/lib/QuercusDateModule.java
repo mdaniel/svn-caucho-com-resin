@@ -54,9 +54,6 @@ public class QuercusDateModule extends AbstractQuercusModule {
   private static final Logger log
     = Logger.getLogger(QuercusDateModule.class.getName());
 
-  private static final HashMap<String,Value> _constMap =
-          new HashMap<String,Value>();
-
   private static final String []_shortDayOfWeek = {
     "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"
   };
@@ -79,16 +76,6 @@ public class QuercusDateModule extends AbstractQuercusModule {
   private QDate _gmtCalendar = new QDate();
 
   /**
-   * Adds the constant to the PHP engine's constant map.
-   *
-   * @return the new constant chain
-   */
-  public Map<String,Value> getConstMap()
-  {
-    return _constMap;
-  }
-
-  /**
    * Returns the formatted date.
    */
   public String date(String format,
@@ -97,6 +84,32 @@ public class QuercusDateModule extends AbstractQuercusModule {
     return date(format, time, false);
   }
 
+  /**
+   * Returns an array of the current date.
+   */
+  public Value getdate(@Optional("time()") long time)
+  {
+    QDate date = new QDate(false);
+
+    date.setLocalTime(1000 * time);
+
+    ArrayValue array = new ArrayValueImpl();
+
+    array.put("seconds", date.getSecond());
+    array.put("minutes", date.getMinute());
+    array.put("hours", date.getHour());
+    array.put("mday", date.getDayOfMonth());
+    array.put("wday", date.getDayOfWeek());
+    array.put("mon", date.getMonth() + 1);
+    array.put("year", date.getYear());
+    array.put("yday", date.getDayOfYear());
+    array.put("weekday", _fullDayOfWeek[date.getDayOfWeek()]);
+    array.put("month", _fullMonth[date.getMonth()]);
+    array.put(new LongValue(0), new LongValue(time));
+
+    return array;
+  }
+  
   /**
    * Returns the formatted date.
    */

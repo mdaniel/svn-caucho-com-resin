@@ -104,6 +104,21 @@ public class FieldGetExpr extends AbstractVarExpr {
   }
   
   /**
+   * Evaluates the expression as a copyable  value.
+   *
+   * @param env the calling environment.
+   *
+   * @return the expression value.
+   */
+  public Value evalCopy(Env env)
+    throws Throwable
+  {
+    Value obj = _objExpr.eval(env);
+
+    return obj.get(_name).copy();
+  }
+  
+  /**
    * Evaluates the expression.
    *
    * @param env the calling environment.
@@ -303,7 +318,7 @@ public class FieldGetExpr extends AbstractVarExpr {
     out.print(".put(");
     out.print(out.addValue(_name));
     out.print(", ");
-    value.generateCopy(out);
+    value.generateCopy(out); // php/3a82
     out.print(")");
   }
 

@@ -709,7 +709,7 @@ public class QuercusArrayModule extends AbstractQuercusModule {
 
     ArrayValue randArray = new ArrayValueImpl();
 
-    for (int i = 0; i < length; i++) {
+    for (int i = 0; i < num; i++) {
       randArray.put(keys[i]);
     }
 

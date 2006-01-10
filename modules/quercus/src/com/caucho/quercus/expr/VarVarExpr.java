@@ -81,6 +81,26 @@ public class VarVarExpr extends AbstractVarExpr {
   }
 
   /**
+   * Evaluates the expression, returning a copy as necessary.
+   *
+   * @param env the calling environment.
+   *
+   * @return the expression value.
+   */
+  public Value evalCopy(Env env)
+    throws Throwable
+  {
+    String varName = _var.evalString(env);
+
+    Value value = env.getValue(varName);
+
+    if (value != null)
+      return value.copy();
+    else
+      return NULL;
+  }
+
+  /**
    * Evaluates the expression.
    *
    * @param env the calling environment.
@@ -237,7 +257,7 @@ public class VarVarExpr extends AbstractVarExpr {
     out.print("env.getVar(");
     _var.generateString(out);
     out.print(").set(");
-    value.generateCopy(out);
+    value.generateCopy(out); // php/3a84
     out.print(")");
   }
 

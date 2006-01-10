@@ -65,6 +65,9 @@ public class Arg {
     _name = name;
     _default = defaultExpr;
     _isReference = isReference;
+
+    if (_default == null)
+      throw new IllegalStateException();
   }
 
   /**

@@ -150,6 +150,19 @@ public class VarExpr extends AbstractVarExpr {
   }
 
   /**
+   * Evaluates the expression.
+   *
+   * @param env the calling environment.
+   *
+   * @return the expression value.
+   */
+  public Value evalCopy(Env env)
+    throws Throwable
+  {
+    return eval(env).copy();
+  }
+
+  /**
    * Evaluates the expression, converting to an array if unset.
    *
    * @param env the calling environment.

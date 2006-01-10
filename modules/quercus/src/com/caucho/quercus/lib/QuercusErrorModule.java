@@ -54,36 +54,21 @@ public class QuercusErrorModule extends AbstractQuercusModule {
   private static final Logger log
     = Logger.getLogger(QuercusErrorModule.class.getName());
 
-  private static final HashMap<String,Value> _constMap
-    = new HashMap<String,Value>();
+  public static final int E_ERROR = Env.E_ERROR;
+  public static final int E_WARNING = Env.E_WARNING;
+  public static final int E_PARSE = Env.E_PARSE;
+  public static final int E_NOTICE = Env.E_NOTICE;
+  public static final int E_CORE_ERROR = Env.E_CORE_ERROR;
+  public static final int E_CORE_WARNING = Env.E_CORE_WARNING;
+  public static final int E_COMPILE_ERROR = Env.E_COMPILE_ERROR;
+  public static final int E_COMPILE_WARNING = Env.E_COMPILE_WARNING;
+  public static final int E_USER_ERROR = Env.E_USER_ERROR;
+  public static final int E_USER_WARNING = Env.E_USER_WARNING;
+  public static final int E_USER_NOTICE = Env.E_USER_NOTICE;
+  public static final int E_ALL = Env.E_ALL;
+  public static final int E_STRICT = Env.E_STRICT;
 
   private long _errorReporting = Env.E_DEFAULT;
-
-  static {
-    _constMap.put("E_ERROR", new LongValue(Env.E_ERROR));
-    _constMap.put("E_WARNING", new LongValue(Env.E_WARNING));
-    _constMap.put("E_PARSE", new LongValue(Env.E_PARSE));
-    _constMap.put("E_NOTICE", new LongValue(Env.E_NOTICE));
-    _constMap.put("E_CORE_ERROR", new LongValue(Env.E_CORE_ERROR));
-    _constMap.put("E_CORE_WARNING", new LongValue(Env.E_CORE_WARNING));
-    _constMap.put("E_COMPILE_ERROR", new LongValue(Env.E_COMPILE_ERROR));
-    _constMap.put("E_COMPILE_WARNING", new LongValue(Env.E_COMPILE_WARNING));
-    _constMap.put("E_USER_ERROR", new LongValue(Env.E_USER_ERROR));
-    _constMap.put("E_USER_WARNING", new LongValue(Env.E_USER_WARNING));
-    _constMap.put("E_USER_NOTICE", new LongValue(Env.E_USER_NOTICE));
-    _constMap.put("E_ALL", new LongValue(Env.E_ALL));
-    _constMap.put("E_STRICT", new LongValue(Env.E_STRICT));
-  }
-
-  /**
-   * Adds the constant to the PHP engine's constant map.
-   *
-   * @return the new constant chain
-   */
-  public Map<String,Value> getConstMap()
-  {
-    return _constMap;
-  }
 
   /**
    * Exits
@@ -156,20 +141,31 @@ public class QuercusErrorModule extends AbstractQuercusModule {
   }
 
   /**
+   * Restores the error handler
+   *
+   * @param env the quercus environment
+   */
+  public static boolean restore_error_handler(Env env)
+  {
+    env.restoreErrorHandler();
+
+    return true;
+  }
+
+  /**
    * Sets an error handler
    *
    * @param env the quercus environment
    * @param fun the error handler
    * @param code errorMask error level
    */
-  public static Value set_error_handler(Env env,
-                                        Callback fun,
-                                        @Optional("E_USER_NOTICE") int errorMask)
-    throws Exception
+  public static boolean set_error_handler(Env env,
+					  Callback fun,
+					  @Optional("E_ALL") int errorMask)
   {
     env.setErrorHandler(errorMask, fun);
 
-    return BooleanValue.TRUE;
+    return true;
   }
 
   /**

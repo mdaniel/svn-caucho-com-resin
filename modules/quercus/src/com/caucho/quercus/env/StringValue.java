@@ -253,6 +253,8 @@ public class StringValue extends Value {
 
       if ('0' <= ch && ch <= '9')
 	value = 10 * value + ch - '0';
+      else
+	return sign * value;
     }
 
     return value;

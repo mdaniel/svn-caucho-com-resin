@@ -59,6 +59,7 @@ import com.caucho.quercus.env.Post;
 import com.caucho.quercus.module.Reference;
 import com.caucho.quercus.module.Optional;
 import com.caucho.quercus.module.UsesSymbolTable;
+import com.caucho.quercus.module.NotNull;
 import com.caucho.quercus.module.AbstractQuercusModule;
 
 import com.caucho.util.L10N;
@@ -1404,12 +1405,14 @@ public class QuercusStringModule extends AbstractQuercusModule {
    *
    * @return the formatted string
    */
-  public static Value printf(Env env, String format, Value []args)
+  public static int printf(Env env, String format, Value []args)
     throws Throwable
   {
-    env.getOut().print(sprintf(env, format, args));
+    String str = sprintf(env, format, args);
+    
+    env.getOut().print(str);
 
-    return NullValue.NULL;
+    return str.length();
   }
 
   /**
@@ -2839,6 +2842,55 @@ public class QuercusStringModule extends AbstractQuercusModule {
 
     return new StringValue(sb.toString());
   }
+
+  /**
+   * Formatted strings with array arguments
+   *
+   * @param string the input string
+   */
+  public static int vprintf(Env env,
+			    String format,
+			    @NotNull ArrayValue array)
+    throws Throwable
+  {
+    Value []args;
+
+    if (array != null) {
+      args = new Value[array.getSize()];
+      int i = 0;
+      for (Value value : array.values())
+	args[i++] = value;
+    }
+    else
+      args = new Value[0];
+
+    return printf(env, format, args);
+  }
+
+  /**
+   * Formatted strings with array arguments
+   *
+   * @param string the input string
+   */
+  public static String vsprintf(Env env,
+				String format,
+				@NotNull ArrayValue array)
+    throws Throwable
+  {
+    Value []args;
+
+    if (array != null) {
+      args = new Value[array.getSize()];
+      int i = 0;
+      for (Value value : array.values())
+	args[i++] = value;
+    }
+    else
+      args = new Value[0];
+
+    return sprintf(env, format, args);
+  }
+  
   /**
    * Wraps a string to the given number of characters.
    *

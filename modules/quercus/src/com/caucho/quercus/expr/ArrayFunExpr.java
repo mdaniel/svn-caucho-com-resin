@@ -166,10 +166,10 @@ public class ArrayFunExpr extends Expr {
 	out.print(".");
 	out.print("append(");
 	if (_keys[i] != null) {
-	  _keys[i].generate(out);
+	  _keys[i].generateCopy(out);
 	  out.print(", ");
 	}
-	_values[i].generate(out);
+	_values[i].generateCopy(out);
 	out.print(")");
       }
     }
@@ -182,7 +182,7 @@ public class ArrayFunExpr extends Expr {
 	  out.print(", ");
 	    
 	if (_keys[i] != null)
-	  _keys[i].generate(out);
+	  _keys[i].generateCopy(out);
 	else
 	  out.print("null");
       }
@@ -193,7 +193,7 @@ public class ArrayFunExpr extends Expr {
 	if (i != 0)
 	  out.print(", ");
 	    
-	_values[i].generate(out);
+	_values[i].generateCopy(out);
       }
 
       out.print("})");

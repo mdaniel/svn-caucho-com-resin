@@ -4,6 +4,7 @@
 
 <s2 title='3.0.snap - Jan 6, 2005'>
 <ul>
+<li>Added Remote-IP to HTTP debugging (rep by Michael O'Dea)
 <li>Quercus: sprintf reworked to handle format incompatibilies (#553, rep by Stefano Bagnara)
 <li>Quercus: var_export (#647)
 <li>(2006-01-06) Quercus: get_defined_functions (#556, rep by Stefano Bagnara)

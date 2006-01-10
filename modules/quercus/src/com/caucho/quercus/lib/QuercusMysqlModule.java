@@ -448,14 +448,14 @@ public class QuercusMysqlModule extends AbstractQuercusModule {
    * @throws Exception
    */
   public Value mysql_field_name(Env env,
-                                MysqliResult result,
+                                @NotNull MysqliResult result,
                                 int fieldOffset)
     throws Exception
   {
-    if (result != null)
-      return result.fetch_field_name(fieldOffset);
-    else
+    if (result == null)
       return BooleanValue.FALSE;
+    
+    return result.fetch_field_name(fieldOffset);
   }
 
   /**

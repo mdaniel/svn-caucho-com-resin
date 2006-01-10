@@ -78,6 +78,9 @@ abstract public class CompiledFunction_5 extends CompiledFunction {
     _default_2 = default_2;
     _default_3 = default_3;
     _default_4 = default_4;
+    if (default_0 == null || default_1 == null || default_2 == null ||
+	default_3 == null || default_4 == null)
+      Thread.dumpStack();
   }
   
   /**

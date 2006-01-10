@@ -160,6 +160,7 @@ public class PhpParser {
   private final static int THIS = 560;
   private final static int TRUE = 561;
   private final static int FALSE = 562;
+  private final static int CLONE = 563;
   
   private final static int LAST_IDENTIFIER_LEXEME = 1024;
 
@@ -742,8 +743,8 @@ public class PhpParser {
       if (expr instanceof VarExpr) {
 	VarExpr var = (VarExpr) expr;
 
-	// php/3a6g
-	var.getVarInfo().setGlobal();
+	// php/3a6g, php/3a58
+	var.getVarInfo().setReference();
 
 	statementList.add(new GlobalStatement(var));
       }
@@ -1365,7 +1366,7 @@ public class PhpParser {
       }
       
       String argName = parseIdentifier();
-      Expr defaultExpr = null;
+      Expr defaultExpr = RequiredExpr.REQUIRED;
 
       token = parseToken();
       if (token == '=') {
@@ -1382,7 +1383,9 @@ public class PhpParser {
       VarInfo var = _function.createVar(argName);
       var.setArgument(true);
       var.setArgumentIndex(args.size() - 1);
-      var.setRefArgument();
+
+      if (isReference)
+	var.setRefArgument();
       
       if (token != ',') {
 	_peekToken = token;
@@ -2406,6 +2409,13 @@ public class PhpParser {
         Expr expr = parseTerm();
 
 	return new SuppressErrorExpr(expr);
+      }
+
+    case CLONE:
+      {
+        Expr expr = parseTerm();
+
+	return new CloneExpr(expr);
       }
 
     case INCR:
@@ -3947,6 +3957,8 @@ public class PhpParser {
     case CLASS: return "'class'";
     case RETURN: return "'return'";
       
+    case CLONE: return "'clone'";
+      
     case SIMPLE_STRING_ESCAPE: return "string";
     case COMPLEX_STRING_ESCAPE: return "string";
       
@@ -4039,5 +4051,6 @@ public class PhpParser {
     _insensitiveReserved.put("true", TRUE);
     _insensitiveReserved.put("false", FALSE);
     _insensitiveReserved.put("null", NULL);
+    _insensitiveReserved.put("clone", CLONE);
   }
 }

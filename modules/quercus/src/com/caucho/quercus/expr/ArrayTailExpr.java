@@ -291,7 +291,7 @@ public class ArrayTailExpr extends AbstractVarExpr {
     // php/3a55
     _expr.generateArray(out);
     out.print(".put(");
-    value.generate(out);
+    value.generateCopy(out); // php/3a80
     out.print(")");
   }
 

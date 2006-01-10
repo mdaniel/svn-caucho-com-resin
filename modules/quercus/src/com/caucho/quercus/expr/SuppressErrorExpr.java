@@ -116,6 +116,25 @@ public class SuppressErrorExpr extends UnaryExpr {
       env.setErrorMask(oldErrorMask);
     }
   }
+  
+  /**
+   * Evaluates the expression, copying the results as necessary
+   *
+   * @param env the calling environment.
+   *
+   * @return the expression value.
+   */
+  public Value evalCopy(Env env)
+    throws Throwable
+  {
+    int oldErrorMask = env.setErrorMask(0);
+
+    try {
+      return _expr.evalCopy(env);
+    } finally {
+      env.setErrorMask(oldErrorMask);
+    }
+  }
 
   //
   // Java code generation

@@ -195,6 +195,7 @@ public class HttpRequest extends AbstractHttpRequest
 	  if (log.isLoggable(Level.FINE)) {
 	    log.fine(dbgId() + _method + " " +
 		     new String(_uri, 0, _uriLength) + " " + _protocol);
+	    log.fine(dbgId() + "Remote-IP: " + _conn.getRemoteHost() + ":" + _conn.getRemotePort());
 	  }
 
 	  parseHeaders(_rawRead);

@@ -223,6 +223,7 @@ public class Env {
 
   private LocaleInfo _locale;
 
+  private Callback []_prevErrorHandlers = new Callback[B_STRICT + 1];
   private Callback []_errorHandlers = new Callback[B_STRICT + 1];
   
   private SessionCallback _sessionCallback;
@@ -1439,6 +1440,24 @@ public class Env {
   /**
    * Returns an array of the defined functions.
    */
+  public ArrayValue getDefinedConstants()
+  {
+    ArrayValue result = new ArrayValueImpl();
+
+    for (Map.Entry<String,Value> entry : _quercus.getConstMap().entrySet()) {
+      result.put(new StringValue(entry.getKey()), entry.getValue());
+    }
+
+    for (Map.Entry<String,Value> entry : _constMap.entrySet()) {
+      result.put(new StringValue(entry.getKey()), entry.getValue());
+    }
+
+    return result;
+  }
+
+  /**
+   * Returns an array of the defined functions.
+   */
   public ArrayValue getDefinedFunctions()
   {
     ArrayValue result = new ArrayValueImpl();
@@ -2534,6 +2553,9 @@ public class Env {
    */
   public void setErrorHandler(int mask, Callback fun)
   {
+    for (int i = 0; i < _errorHandlers.length; i++)
+      _prevErrorHandlers[i] = _errorHandlers[i];
+
     if ((mask & E_ERROR) != 0)
       _errorHandlers[B_ERROR] = fun;
     
@@ -2560,6 +2582,15 @@ public class Env {
   }
 
   /**
+   * Sets an error handler
+   */
+  public void restoreErrorHandler()
+  {
+    for (int i = 0; i < _errorHandlers.length; i++)
+      _errorHandlers[i] = _prevErrorHandlers[i];
+  }
+
+  /**
    * Writes an error.
    */
   public Value error(int code, String msg)
@@ -2568,16 +2599,34 @@ public class Env {
 
       if (code >= 0 && code < _errorHandlers.length &&
 	  _errorHandlers[code] != null) {
+	Callback handler = _errorHandlers[code];
+	
 	try {
-	  _errorHandlers[code].eval(this,
-				    new LongValue(mask),
-				    new StringValue(msg));
+	  _errorHandlers[code] = null;
+
+	  Value fileNameV = NullValue.NULL;
+	  
+	  String fileName = getFileName();
+	  if (fileName != null)
+	    fileNameV = new StringValue(fileName);
+	  
+	  Value lineV = NullValue.NULL;
+	  int line = getLine();
+	  if (line > 0)
+	    lineV = new LongValue(line);
+	  
+	  Value context = NullValue.NULL;
+			 
+	  handler.eval(this, new LongValue(mask), new StringValue(msg),
+		       fileNameV, lineV, context);
 
 	  return NullValue.NULL;
 	} catch (RuntimeException e) {
 	  throw e;
 	} catch (Throwable e) {
 	  throw new RuntimeException(e);
+	} finally {
+	  _errorHandlers[code] = handler;
 	}
       }
       
@@ -2697,6 +2746,34 @@ public class Env {
     }    
 
     return null;
+  }
+
+  private String getFileName()
+  {
+    String loc = getLocation();
+
+    if (loc == null || loc.equals(""))
+      return null;
+
+    int p = loc.indexOf(':');
+
+    return loc.substring(0, p);
+  }
+
+  private int getLine()
+  {
+    String loc = getLocation();
+
+    if (loc == null || loc.equals(""))
+      return -1;
+
+    int p = loc.indexOf(':');
+    int q = loc.lastIndexOf(':');
+
+    if (p < q)
+      return Integer.parseInt(loc.substring(p + 1, q));
+    else
+      return -1;
   }
 
   /**

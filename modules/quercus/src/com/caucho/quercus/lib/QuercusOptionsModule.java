@@ -98,6 +98,14 @@ public class QuercusOptionsModule extends AbstractQuercusModule {
   }
 
   /**
+   * Returns the constants as an array
+   */
+  public static Value get_defined_constants(Env env)
+  {
+    return env.getDefinedConstants();
+  }
+
+  /**
    * Returns extension function swith a given name
    */
   public static Value get_extension_funcs(Env env, String name)

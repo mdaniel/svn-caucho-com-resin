@@ -89,6 +89,22 @@ public class ConditionalExpr extends Expr {
       return _falseExpr.evalBoolean(env);
   }
 
+  /**
+   * Evaluates the expression.
+   *
+   * @param env the calling environment.
+   *
+   * @return the expression value.
+   */
+  public Value evalCopy(Env env)
+    throws Throwable
+  {
+    if (_test.evalBoolean(env))
+      return _trueExpr.evalCopy(env);
+    else
+      return _falseExpr.evalCopy(env);
+  }
+
   //
   // Java code generation
   //

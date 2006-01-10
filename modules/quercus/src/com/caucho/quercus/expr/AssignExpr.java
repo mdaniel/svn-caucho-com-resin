@@ -73,7 +73,7 @@ public class AssignExpr extends Expr {
   public Value eval(Env env)
     throws Throwable
   {
-    Value value = _value.eval(env);
+    Value value = _value.evalCopy(env);
 
     _var.evalAssign(env, value);
     

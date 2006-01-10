@@ -294,8 +294,10 @@ abstract public class ArrayValue extends Value {
     Value []values = new Value[size];
 
     int i = 0;
-    for (Entry ptr = getHead(); ptr != null; ptr = ptr._next)
-      values[i++] = ptr.getValue().copy();
+    for (Entry ptr = getHead(); ptr != null; ptr = ptr._next) {
+      // XXX: the toValue() needs a test
+      values[i++] = ptr.getValue().toValue().copy();
+    }
 
     return values;
   }
@@ -803,6 +805,11 @@ abstract public class ArrayValue extends Value {
     {
       _key = key;
       setValue(value);
+    }
+
+    public Entry getNext()
+    {
+      return _next;
     }
 
     public Value getValue()

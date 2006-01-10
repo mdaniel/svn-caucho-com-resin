@@ -149,6 +149,15 @@ abstract public class AbstractFunction {
   {
     return eval(env, args);
   }
+
+  /**
+   * Evaluates the function, returning a copy
+   */
+  public Value evalCopy(Env env, Value []args)
+    throws Throwable
+  {
+    return eval(env, args).copy();
+  }
   
   /**
    * Evaluates the function as a method call.
@@ -256,6 +265,15 @@ abstract public class AbstractFunction {
     }
 
     return eval(env, argValues);
+  }
+
+  /**
+   * Evaluates the function.
+   */
+  public Value evalCopy(Env env, Expr []exprs)
+    throws Throwable
+  {
+    return eval(env, exprs).copy();
   }
 
   /**

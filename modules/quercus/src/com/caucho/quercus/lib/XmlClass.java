@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -53,8 +54,6 @@ import com.caucho.vfs.FilePath;
 /**
  * XML object oriented API facade
  */
-
-
 public class XmlClass {
   private static final Logger log = Logger.getLogger(XmlClass.class.getName());
   private static final L10N L = new L10N(XmlClass.class);
@@ -107,11 +106,11 @@ public class XmlClass {
   {
     System.out.println("HERE!!!!!!!!!! " + path);
     InputSource is = new InputSource(path.openRead());
-/*
+
     SAXParserFactory factory = SAXParserFactory.newInstance();
     SAXParser saxParser = factory.newSAXParser();
     saxParser.parse(is, _handler);
-*/
+
     return true;
   }
 

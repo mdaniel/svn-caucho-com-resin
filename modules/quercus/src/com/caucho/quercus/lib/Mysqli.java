@@ -638,7 +638,7 @@ public class Mysqli {
   public String toString()
   {
     if (_conn != null)
-      return "Mysqli[" + _conn + "]";
+      return "Mysqli[" + _host + "]";
     else
       return "Mysqli[]";
   }

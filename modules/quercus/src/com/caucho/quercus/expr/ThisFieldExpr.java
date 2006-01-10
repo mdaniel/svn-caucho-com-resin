@@ -81,6 +81,21 @@ public class ThisFieldExpr extends AbstractVarExpr {
    *
    * @return the expression value.
    */
+  public Value evalCopy(Env env)
+    throws Throwable
+  {
+    Value obj = env.getThis();
+
+    return obj.get(_name).copy();
+  }
+  
+  /**
+   * Evaluates the expression.
+   *
+   * @param env the calling environment.
+   *
+   * @return the expression value.
+   */
   public Value evalRef(Env env)
     throws Throwable
   {

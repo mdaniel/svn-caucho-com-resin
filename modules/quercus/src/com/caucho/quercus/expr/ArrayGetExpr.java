@@ -89,6 +89,23 @@ public class ArrayGetExpr extends AbstractVarExpr {
   }
 
   /**
+   * Evaluates the expression as a copyable result.
+   *
+   * @param env the calling environment.
+   *
+   * @return the expression value.
+   */
+  public Value evalCopy(Env env)
+    throws Throwable
+  {
+    Value array = _expr.eval(env);
+
+    Value index = _index.eval(env);
+
+    return array.get(index).copy();
+  }
+
+  /**
    * Evaluates the expression, creating an array if the value is unset..
    *
    * @param env the calling environment.
