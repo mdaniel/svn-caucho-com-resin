@@ -888,8 +888,18 @@ abstract public class ArrayValue extends Value {
   /**
    * Takes the values of this array and puts them in a vector
    */
-  public abstract Value[] valuesToArray();
+  public Value[] valuesToArray()
+  {
+    Value[] values = new Value[getSize()];
 
+    int i = 0;
+    for (Entry ptr = getHead(); ptr != null; ptr = ptr.getNext()) {
+      values[i++] = ptr.getValue();
+    }
+
+    return values;
+  }
+  
   public class EntrySet extends AbstractSet<Map.Entry<Value,Value>> {
     EntrySet()
     {

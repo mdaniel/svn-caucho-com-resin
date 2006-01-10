@@ -690,22 +690,5 @@ public class ArrayValueImpl extends ArrayValue {
 
     _current = _head;
   }
-  
-  /**
-   * Takes the values of this array and puts them in a vector
-   */
-  public Value[] valuesToArray() {
-  	Value[] values = new Value[getSize()];
-  	
-  	int ctr = 0;
-  	
-  	for (Value key: keySet()) {
-  		values[ctr] = get(key);
-  		
-  		ctr++;
-  	}
-  	
-  	return values;
-  }
 }
 
