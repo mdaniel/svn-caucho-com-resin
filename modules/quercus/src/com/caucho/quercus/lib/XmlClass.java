@@ -105,6 +105,10 @@ public class XmlClass {
   private Callback _endElementHandler;
   private Callback _characterDataHandler;
   private Callback _processingInstructionHandler;
+  private Callback _defaultHandler;
+  private Callback _startNamespaceDeclHandler;
+  private Callback _endNamespaceDeclHandler;
+
   private Value _parser;
 
   private StringBuffer _xmlString = new StringBuffer();
@@ -147,6 +151,27 @@ public class XmlClass {
   }
 
   /**
+   * The php documentation is very vague as to the purpose
+   * of the default handler.
+   *
+   * We are interpreting it as an alternative to the character
+   * data handler.
+   *
+   * If character handler is defined, then use that.  Otherwise,
+   * use default handler, if it is defined.
+   *
+   * XXX: Need to confirm that this is appropriate
+   *
+   * @param handler
+   * @return true always even if handler is disabled
+   */
+  public boolean xml_set_default_handler(Value handler)
+  {
+    _defaultHandler = _env.createCallback(handler);
+    return true;
+  }
+
+  /**
    * Sets the processing instruction handler function
    *
    * @param processingInstructionHandler
@@ -155,6 +180,30 @@ public class XmlClass {
   public boolean xml_set_processing_instruction_handler(Value processingInstructionHandler)
   {
     _processingInstructionHandler = _env.createCallback(processingInstructionHandler);
+    return true;
+  }
+
+  /**
+   * Sets the startPrefixMapping handler
+   *
+   * @param startNamespaceDeclHandler
+   * @return true always even if handler is disabled
+   */
+  public boolean xml_set_start_namespace_decl_handler(Value startNamespaceDeclHandler)
+  {
+    _startNamespaceDeclHandler = _env.createCallback(startNamespaceDeclHandler);
+    return true;
+  }
+
+  /**
+   * Sets the endPrefixMapping handler
+   *
+   * @param endNamespaceDeclHandler
+   * @return true always even if handler is disabled
+   */
+  public boolean xml_set_end_namespace_decl_handler(Value endNamespaceDeclHandler)
+  {
+    _endNamespaceDeclHandler = _env.createCallback(endNamespaceDeclHandler);
     return true;
   }
 
@@ -231,7 +280,10 @@ public class XmlClass {
       }
 
       try {
-        _startElementHandler.eval(_env,args);
+        if (_startElementHandler != null)
+          _startElementHandler.eval(_env,args);
+        else
+          throw new Throwable("start element handler is not set");
       } catch (Throwable t) {
         log.log(Level.FINE, t.toString(), t);
         throw new SAXException(L.l(t.getMessage()));
@@ -252,7 +304,10 @@ public class XmlClass {
       throws SAXException
     {
       try {
-        _endElementHandler.eval(_env, _parser, new StringValue(sName));
+        if (_endElementHandler != null)
+          _endElementHandler.eval(_env, _parser, new StringValue(sName));
+        else
+          throw new Throwable("end element handler is not set");
       } catch (Throwable t) {
         log.log(Level.FINE, t.toString(), t);
         throw new SAXException(L.l(t.getMessage()));
@@ -275,19 +330,74 @@ public class XmlClass {
       String s = new String(ch,start,length);
 
       try {
-        _characterDataHandler.eval(_env, _parser, new StringValue(s));
+        if (_characterDataHandler != null)
+          _characterDataHandler.eval(_env, _parser, new StringValue(s));
+        else if (_defaultHandler != null)
+          _defaultHandler.eval(_env, _parser, new StringValue(s));
+        else
+          throw new Throwable("neither character data handler nor default handler is set");
       } catch (Throwable t) {
         log.log(Level.FINE, t.toString(), t);
         throw new SAXException(L.l(t.getMessage()));
       }
     }
 
+    /**
+     * wrapper for _processingInstructionHandler
+     * @param target
+     * @param data
+     * @throws SAXException
+     */
     public void processingInstruction(String target,
                                       String data)
       throws SAXException
     {
       try {
-        _processingInstructionHandler.eval(_env, _parser, new StringValue(target), new StringValue(data));
+        if (_processingInstructionHandler != null)
+          _processingInstructionHandler.eval(_env, _parser, new StringValue(target), new StringValue(data));
+        else
+          throw new Throwable("processing instruction handler is not set");
+      } catch (Throwable t) {
+        log.log(Level.FINE, t.toString(), t);
+        throw new SAXException(L.l(t.getMessage()));
+      }
+    }
+
+    /**
+     * wrapper for _startNamespaceDeclHandler
+     * @param prefix
+     * @param uri
+     * @throws SAXException
+     */
+    public void startPrefixMapping (String prefix,
+                                    String uri)
+      throws SAXException
+    {
+      try {
+        if (_startNamespaceDeclHandler != null)
+          _startNamespaceDeclHandler.eval(_env, new StringValue(prefix), new StringValue(uri));
+        else
+          throw new Throwable("start namespace decl handler is not set");
+      } catch (Throwable t) {
+        log.log(Level.FINE, t.toString(), t);
+        throw new SAXException(L.l(t.getMessage()));
+      }
+    }
+
+    /**
+     * wrapper for _endNamespaceDeclHandler
+     *
+     * @param prefix
+     * @throws SAXException
+     */
+    public void endPrefixMapping(String prefix)
+      throws SAXException
+    {
+      try {
+        if (_endNamespaceDeclHandler != null)
+          _endNamespaceDeclHandler.eval(_env, new StringValue(prefix));
+        else
+          throw new Throwable("end namespace decl handler is not set");
       } catch (Throwable t) {
         log.log(Level.FINE, t.toString(), t);
         throw new SAXException(L.l(t.getMessage()));
