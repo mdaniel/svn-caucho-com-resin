@@ -58,37 +58,79 @@ public class XmlClass {
   public static final int XML_OPTION_TARGET_ENCODING = 0x2;
   public static final int XML_OPTION_SKIP_TAGSTART = 0x3;
   public static final int XML_OPTION_SKIP_WHITE = 0x4;
+  public static final int XML_ERROR_NONE = 0;
+  public static final int XML_ERROR_NO_MEMORY = 1;
+  public static final int XML_ERROR_SYNTAX = 2;
+  public static final int XML_ERROR_NO_ELEMENTS = 3;
+  public static final int XML_ERROR_INVALID_TOKEN = 4;
+  public static final int XML_ERROR_UNCLOSED_TOKEN = 5;
+  public static final int XML_ERROR_PARTIAL_CHAR = 6;
+  public static final int XML_ERROR_TAG_MISMATCH = 7;
+  public static final int XML_ERROR_DUPLICATE_ATTRIBUTE = 8;
+  public static final int XML_ERROR_JUNK_AFTER_DOC_ELEMENT = 9;
+  public static final int XML_ERROR_PARAM_ENTITY_REF = 10;
+  public static final int XML_ERROR_UNDEFINED_ENTITY = 11;
+  public static final int XML_ERROR_RECURSIVE_ENTITY_REF = 12;
+  public static final int XML_ERROR_ASYNC_ENTITY = 13;
+  public static final int XML_ERROR_BAD_CHAR_REF = 14;
+  public static final int XML_ERROR_BINARY_ENTITY_REF = 15;
+  public static final int XML_ERROR_ATTRIBUTE_EXTERNAL_ENTITY_REF = 16;
+  public static final int XML_ERROR_MISPLACED_XML_PI = 17;
+  public static final int XML_ERROR_UNKNOWN_ENCODING = 18;
+  public static final int XML_ERROR_INCORRECT_ENCODING = 19;
+  public static final int XML_ERROR_UNCLOSED_CDATA_SECTION = 20;
+  public static final int XML_ERROR_EXTERNAL_ENTITY_HANDLING = 21;
+  public static final int XML_ERROR_NOT_STANDALONE = 22;
+  public static final int XML_ERROR_UNEXPECTED_STATE = 23;
+  public static final int XML_ERROR_ENTITY_DECLARED_IN_PE = 24;
+  public static final int XML_ERROR_FEATURE_REQUIRES_XML_DTD = 25;
+  public static final int XML_ERROR_CANT_CHANGE_FEATURE_ONCE_PARSING = 26;
+  public static final int XML_ERROR_UNBOUND_PREFIX = 27;
+  public static final int XML_ERROR_UNDECLARING_PREFIX = 28;
+  public static final int XML_ERROR_INCOMPLETE_PE = 29;
+  public static final int XML_ERROR_XML_DECL = 30;
+  public static final int XML_ERROR_TEXT_DECL = 31;
+  public static final int XML_ERROR_PUBLICID = 32;
+  public static final int XML_ERROR_SUSPENDED = 33;
+  public static final int XML_ERROR_NOT_SUSPENDED = 34;
+  public static final int XML_ERROR_ABORTED = 35;
+  public static final int XML_ERROR_FINISHED = 36;
+  public static final int XML_ERROR_SUSPEND_PE = 37;
 
   private Env _env;
-  private String _encoding;
+  private String _outputEncoding;
+  private String _separator;
+
   private Callback _startElementHandler;
   private Callback _endElementHandler;
   private Callback _characterDataHandler;
+  private Callback _processingInstructionHandler;
   private Value _parser;
 
   private StringBuffer _xmlString = new StringBuffer();
 
   public XmlClass(Env env,
-                  String encoding)
+                  String outputEncoding,
+                  String separator)
   {
     _env = env;
-    _encoding = encoding;
+    _outputEncoding = outputEncoding;
     _parser = _env.wrapJava(this);
   }
 
   /**
    * Sets the element handler functions for the XML parser.
    *
-   * @param start_element_handler must exist when xml_parse is called
-   * @param end_element_handler must exist when xml_parse is called
+   * @param startElementHandler must exist when xml_parse is called
+   * @param endElementHandler must exist when xml_parse is called
    * @return true always even if handlers are disabled
    */
 
-  public boolean xml_set_element_handler(Value start_element_handler,
-                                         Value end_element_handler)
+  public boolean xml_set_element_handler(Value startElementHandler,
+                                         Value endElementHandler)
   {
-    _startElementHandler = _env.createCallback(start_element_handler);
-    _endElementHandler = _env.createCallback(end_element_handler);
+    _startElementHandler = _env.createCallback(startElementHandler);
+    _endElementHandler = _env.createCallback(endElementHandler);
     return true;
   }
 
@@ -101,6 +143,18 @@ public class XmlClass {
   public boolean xml_set_character_data_handler(Value handler)
   {
     _characterDataHandler = _env.createCallback(handler);
+    return true;
+  }
+
+  /**
+   * Sets the processing instruction handler function
+   *
+   * @param processingInstructionHandler
+   * @return true always even if handler is disabled
+   */
+  public boolean xml_set_processing_instruction_handler(Value processingInstructionHandler)
+  {
+    _processingInstructionHandler = _env.createCallback(processingInstructionHandler);
     return true;
   }
 
@@ -123,6 +177,8 @@ public class XmlClass {
 
     if (is_final) {
       InputSource is = new InputSource(new StringReader(_xmlString.toString()));
+      if (_outputEncoding == null)
+        _outputEncoding = is.getEncoding();
 
       SAXParserFactory factory = SAXParserFactory.newInstance();
       SAXParser saxParser = factory.newSAXParser();
@@ -177,6 +233,7 @@ public class XmlClass {
       try {
         _startElementHandler.eval(_env,args);
       } catch (Throwable t) {
+        log.log(Level.FINE, t.toString(), t);
         throw new SAXException(L.l(t.getMessage()));
       }
     }
@@ -197,6 +254,7 @@ public class XmlClass {
       try {
         _endElementHandler.eval(_env, _parser, new StringValue(sName));
       } catch (Throwable t) {
+        log.log(Level.FINE, t.toString(), t);
         throw new SAXException(L.l(t.getMessage()));
       }
     }
@@ -219,6 +277,19 @@ public class XmlClass {
       try {
         _characterDataHandler.eval(_env, _parser, new StringValue(s));
       } catch (Throwable t) {
+        log.log(Level.FINE, t.toString(), t);
+        throw new SAXException(L.l(t.getMessage()));
+      }
+    }
+
+    public void processingInstruction(String target,
+                                      String data)
+      throws SAXException
+    {
+      try {
+        _processingInstructionHandler.eval(_env, _parser, new StringValue(target), new StringValue(data));
+      } catch (Throwable t) {
+        log.log(Level.FINE, t.toString(), t);
         throw new SAXException(L.l(t.getMessage()));
       }
     }

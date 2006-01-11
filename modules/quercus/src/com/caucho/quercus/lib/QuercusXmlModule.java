@@ -66,9 +66,23 @@ public class QuercusXmlModule extends AbstractQuercusModule {
    * returns a new Xml Parser
    */
   public XmlClass xml_parser_create(Env env,
-                                    @Optional String encoding)
+                                    @Optional String outputEncoding)
   {
-    return new XmlClass(env,encoding);
+    return new XmlClass(env,encoding,null);
+  }
+
+  /**
+   *
+   * @param env
+   * @param outputEncoding
+   * @param separator
+   * @return namespace aware Xml Parser
+   */
+  public XmlClass xml_parser_create_ns(Env env,
+                                       @Optional String outputEncoding,
+                                       @Optional(":") String separator)
+  {
+    return new XmlClass(env,outputEncoding,separator);
   }
 }
 
