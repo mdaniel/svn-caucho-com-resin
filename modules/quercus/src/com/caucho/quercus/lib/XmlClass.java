@@ -47,8 +47,6 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import com.caucho.quercus.module.Optional;
 
-import com.caucho.vfs.Path;
-
 /**
  * XML object oriented API facade
  */
@@ -66,6 +64,7 @@ public class XmlClass {
   private Callback _startElementHandler;
   private Callback _endElementHandler;
   private Callback _characterDataHandler;
+  private Value _parser;
 
   private StringBuffer _xmlString = new StringBuffer();
 
@@ -74,6 +73,7 @@ public class XmlClass {
   {
     _env = env;
     _encoding = encoding;
+    _parser = _env.wrapJava(this);
   }
 
   /**
@@ -120,7 +120,7 @@ public class XmlClass {
     throws IOException, SAXException, ParserConfigurationException
   {
     _xmlString.append(data);
-    
+
     if (is_final) {
       InputSource is = new InputSource(new StringReader(_xmlString.toString()));
 
@@ -128,7 +128,7 @@ public class XmlClass {
       SAXParser saxParser = factory.newSAXParser();
       saxParser.parse(is, new XmlHandler());
     }
-    
+
     return true;
   }
 
@@ -160,8 +160,7 @@ public class XmlClass {
        */
       Value[] args = new Value[3];
 
-      //XXX: Need to pass a reference to this XmlClass
-      args[0] = NullValue.NULL;
+      args[0] = _parser;
 
       String eName = lName; // element name
       if ("".equals(eName)) eName = qName;
@@ -196,7 +195,7 @@ public class XmlClass {
       throws SAXException
     {
       try {
-        _endElementHandler.eval(_env, NullValue.NULL, new StringValue(sName));
+        _endElementHandler.eval(_env, _parser, new StringValue(sName));
       } catch (Throwable t) {
         throw new SAXException(L.l(t.getMessage()));
       }
@@ -218,7 +217,7 @@ public class XmlClass {
       String s = new String(ch,start,length);
 
       try {
-        _characterDataHandler.eval(_env, NullValue.NULL, new StringValue(s));
+        _characterDataHandler.eval(_env, _parser, new StringValue(s));
       } catch (Throwable t) {
         throw new SAXException(L.l(t.getMessage()));
       }
