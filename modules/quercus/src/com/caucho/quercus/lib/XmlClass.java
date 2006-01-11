@@ -31,6 +31,8 @@ package com.caucho.quercus.lib;
 
 import java.util.logging.Logger;
 import java.util.logging.Level;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.io.IOException;
 import java.io.StringReader;
 
@@ -46,6 +48,7 @@ import javax.xml.parsers.SAXParserFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
 import com.caucho.quercus.module.Optional;
+import com.caucho.quercus.module.Reference;
 
 /**
  * XML object oriented API facade
@@ -111,6 +114,12 @@ public class XmlClass {
 
   private Value _parser;
 
+  SAXParserFactory _factory = SAXParserFactory.newInstance();
+
+  //Used by structHandler to keep track of depth within tree;
+  //startElement increments, endElement decrements
+  private int _level;
+
   private StringBuffer _xmlString = new StringBuffer();
 
   public XmlClass(Env env,
@@ -120,6 +129,7 @@ public class XmlClass {
     _env = env;
     _outputEncoding = outputEncoding;
     _parser = _env.wrapJava(this);
+    _separator = separator;
   }
 
   /**
@@ -220,7 +230,7 @@ public class XmlClass {
    */
   public boolean xml_parse(String data,
                            @Optional("true") boolean is_final)
-    throws IOException, SAXException, ParserConfigurationException
+    throws Exception
   {
     _xmlString.append(data);
 
@@ -228,13 +238,162 @@ public class XmlClass {
       InputSource is = new InputSource(new StringReader(_xmlString.toString()));
       if (_outputEncoding == null)
         _outputEncoding = is.getEncoding();
-
-      SAXParserFactory factory = SAXParserFactory.newInstance();
-      SAXParser saxParser = factory.newSAXParser();
-      saxParser.parse(is, new XmlHandler());
+      try {
+        SAXParser saxParser = _factory.newSAXParser();
+        saxParser.parse(is, new XmlHandler());
+      } catch (Exception ex) {
+        log.log(Level.FINE, ex.toString(), ex);
+        throw new Exception(L.l(ex.getMessage()));
+      }
     }
 
     return true;
+  }
+
+  /**
+   * Parses data into 2 parallel array structures.
+   *
+   * @param data
+   * @param valueArray
+   * @param indexArray
+   * @return 0 for failure, 1 for success
+   */
+  public Value xml_parse_into_struct(String data,
+                                   @Reference Value valueArray,
+                                   @Optional @Reference Value indexArray)
+    throws Exception
+  {
+    _xmlString.append(data);
+
+    _level = 1;
+
+    InputSource is = new InputSource(new StringReader(_xmlString.toString()));
+    try {
+      SAXParser saxParser = _factory.newSAXParser();
+      valueArray = new ArrayValueImpl();
+      saxParser.parse(is, new StructHandler(valueArray, indexArray));
+    } catch (Exception ex) {
+      log.log(Level.FINE, ex.toString(), ex);
+      throw new Exception(L.l(ex.getMessage()));
+    }
+    return valueArray;
+  }
+
+  /**
+   * handler solely for xml_parse_into_struct
+   */
+  class StructHandler extends DefaultHandler {
+    private Value _valueArray;
+    private Value _indexArray;
+    private HashMap<Integer, String> _paramList = new HashMap<Integer, String> ();
+
+    // Used to determine whether a given element has sub elements
+    private boolean _isComplete = true;
+    private boolean _isOutside = true;
+
+    private int _valueArrayIndex = 0;
+
+    public StructHandler(Value valueArray,
+                         Value indexArray)
+    {
+      _valueArray = valueArray;
+      _indexArray = indexArray;
+    }
+
+    /**
+     * helper function to create an array of attributes for a tag
+     * @param attrs
+     * @return array of attributes
+     */
+    private ArrayValueImpl createAttributeArray(Attributes attrs)
+    {
+      ArrayValueImpl result = new ArrayValueImpl();
+
+      // turn attrs into an array of name, value pairs
+      for (int i = 0; i < attrs.getLength(); i++) {
+        String aName = attrs.getLocalName(i); // Attr name
+        if ("".equals(aName)) aName = attrs.getQName(i);
+        result.put(new StringValue(aName.toUpperCase()), new StringValue(attrs.getValue(i)));
+      }
+
+      return result;
+    }
+
+    public void startElement(String namespaceURI,
+                             String lName,
+                             String qName,
+                             Attributes attrs)
+      throws SAXException
+    {
+      Value elementArray = new ArrayValueImpl();
+
+      String eName = lName; // element name
+      if ("".equals(eName)) eName = qName;
+
+      elementArray.put(new StringValue("tag"), new StringValue(eName.toUpperCase()));
+      elementArray.put(new StringValue("type"), new StringValue("open"));
+      elementArray.put(new StringValue("level"), new DoubleValue((double) _level));
+      _paramList.put(_level, eName.toUpperCase());
+
+      if (attrs.getLength() > 0) {
+        elementArray.put(new StringValue("attributes"), createAttributeArray(attrs));
+      }
+
+      _valueArray.put(new DoubleValue((double)_valueArrayIndex), elementArray);
+      _valueArrayIndex++;
+      _level++;
+      _isComplete = true;
+      _isOutside = false;
+
+      //XXX: _valueArray.get(new DoubleValue((double) _valueArrayIndex - 1));
+    }
+
+    public void endElement(String namespaceURI,
+                           String sName,
+                           String qName)
+      throws SAXException
+    {
+      Value elementArray;
+
+      if (_isComplete) {
+        elementArray = _valueArray.get(new DoubleValue((double) _valueArrayIndex - 1));
+        elementArray.put(new StringValue("type"), new StringValue("complete"));
+      } else {
+        elementArray = new ArrayValueImpl();
+        String eName = sName; // element name
+        if ("".equals(sName)) eName = qName;
+        elementArray.put(new StringValue("tag"), new StringValue(eName.toUpperCase()));
+        elementArray.put(new StringValue("type"), new StringValue("close"));
+        elementArray.put(new StringValue("level"), new DoubleValue((double) _level - 1));
+        _valueArray.put(new DoubleValue((double)_valueArrayIndex), elementArray);
+        _valueArrayIndex++;
+      }
+
+      _level--;
+      _isComplete = false;
+      _isOutside = true;
+    }
+
+    public void characters(char[] ch,
+                           int start,
+                           int length)
+      throws SAXException
+    {
+      String s = new String(ch, start, length);
+
+      if (_isOutside) {
+        Value elementArray = new ArrayValueImpl();
+        elementArray.put(new StringValue("tag"), new StringValue(_paramList.get(_level - 1)));
+        elementArray.put(new StringValue("value"), new StringValue(s));
+        elementArray.put(new StringValue("type"), new StringValue("cdata"));
+        elementArray.put(new StringValue("level"), new DoubleValue((double) _level - 1));
+        _valueArray.put(new DoubleValue((double)_valueArrayIndex), elementArray);
+        _valueArrayIndex++;
+      } else {
+        Value elementArray = _valueArray.get(new DoubleValue((double) _valueArrayIndex - 1));
+        elementArray.put(new StringValue("value"), new StringValue(s));
+      }
+    }
   }
 
   class XmlHandler extends DefaultHandler {
