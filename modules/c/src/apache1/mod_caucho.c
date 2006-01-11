@@ -484,7 +484,6 @@ cse_dispatch(request_rec *r)
     return OK;
   }
 
-  LOG(("HOST: %s\n", host? host:"null"));
   /* Check for exact virtual host match */
   if (cse_match_request(config, host, ap_get_server_port(r), uri, 0, now) ||
       r->handler && ! strcmp(r->handler, "caucho-request")) {

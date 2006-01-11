@@ -4,6 +4,11 @@
 
 <s2 title='3.0.snap - Jan 10, 2005'>
 <ul>
+<li>plugins should not dispatch automatically if no ResinConfigServer (#3, rep by M Muenke)
+<li>./configure script wasn't adding resinssl on solaris (#665, rep by Mark Demma)
+<li>jsp:include/jsp:forward not properly handling runtime expressions (#852, rep by Rudy D'hauwe)
+<li>PageContext.removeAttribute must handle invalid session (#703, rep by Bryan Davis)
+<li>Amber entities not properly detached at end of context (#824, rep by C Amott)
 <li>(2006-01- 10) chdir/pwd fixes
 <li>Added Remote-IP to HTTP debugging (rep by Michael O'Dea)
 <li>Quercus: sprintf reworked to handle format incompatibilies (#553, rep by Stefano Bagnara)

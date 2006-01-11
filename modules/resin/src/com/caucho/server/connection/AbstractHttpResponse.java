@@ -586,7 +586,7 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
     ServletOutputStream out = getOutputStream();
     out.println("The URL has moved <a href=\"" + path + "\">here</a>");
     // closeConnection();
-    
+
     close();
   }
 

@@ -738,7 +738,7 @@ case "$target_cpu" in
 	else
   	  CPU=sparc
 	fi
-	resin_plugin="$resin_pro_plugin $resin_ssl_plusin"
+	resin_plugin="$resin_pro_plugin $resin_ssl_plugin"
 	;;
 
   x86_64)

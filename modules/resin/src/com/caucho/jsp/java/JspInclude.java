@@ -146,13 +146,11 @@ public class JspInclude extends JspNode {
 
       out.print("pageContext.include(");
       out.print(generateParameterValue(String.class, _page));
-      
-      if (_page.indexOf('?') >= 0)
-	hasQuery = true;
     }
 
     if (_params != null) {
-      generateIncludeParams(out, _params, hasQuery);
+      out.print(", ");
+      generateIncludeParams(out, _params);
     }
 
     out.print(", " + _flush);

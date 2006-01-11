@@ -113,13 +113,11 @@ public class JspForward extends JspNode {
       out.print("pageContext.forward(\"");
       out.print(_page);
       out.print("\"");
-      
-      if (_page.indexOf('?') >= 0)
-	hasQuery = true;
     }
 
     if (_params != null) {
-      generateIncludeParams(out, _params, hasQuery);
+      out.print(", ");
+      generateIncludeParams(out, _params);
     }
     
     out.println(");");

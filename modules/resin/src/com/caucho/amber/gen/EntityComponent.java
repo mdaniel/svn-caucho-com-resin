@@ -155,6 +155,8 @@ public class EntityComponent extends ClassComponent {
       
       generateMethods(out);
 
+      generateDetach(out);
+      
       generateLoad(out);
       
       int min = 0;
@@ -472,6 +474,29 @@ public class EntityComponent extends ClassComponent {
 
     out.println("__caucho_load_0(aConn);");
     
+    out.popDepth();
+    out.println("}");
+  }
+
+  /**
+   * Generates the detach
+   */
+  private void generateDetach(JavaWriter out)
+    throws IOException
+  {
+    if (_entityType.getParentType() != null)
+      return;
+    
+    out.println();
+    out.println("public void __caucho_detach()");
+    out.println("{");
+    out.pushDepth();
+
+    out.println("__caucho_session = null;");
+    out.println("__caucho_home = null;");
+    
+    out.println("__caucho_state = com.caucho.amber.entity.Entity.TRANSIENT;");
+
     out.popDepth();
     out.println("}");
   }

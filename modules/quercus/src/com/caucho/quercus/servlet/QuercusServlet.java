@@ -192,6 +192,8 @@ public class QuercusServlet extends HttpServlet {
 	
       Env env = new Env(getQuercus(), page, ws, request, response);
       try {
+	env.start();
+	
 	page.executeTop(env);
 
 	return;

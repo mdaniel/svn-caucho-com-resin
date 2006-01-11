@@ -50,6 +50,8 @@ import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.NullValue;
 import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.ArrayValue;
+import com.caucho.quercus.env.ArrayValueImpl;
 import com.caucho.quercus.env.Callback;
 import com.caucho.quercus.env.SessionArrayValue;
 import com.caucho.quercus.env.SessionCallback;
@@ -111,9 +113,77 @@ public class QuercusSessionModule extends AbstractQuercusModule {
   }
 
   /**
-   * Start the session
+   * Alias of session_write_close.
    */
-  public boolean session_destroy(Env env)
+  public static Value session_commit(Env env)
+  {
+    return session_write_close(env);
+  }
+
+  /**
+   * Encodes the session values.
+   */
+  public static boolean session_decode(Env env, String value)
+    throws Throwable
+  {
+    Value session = env.getGlobalValue("_SESSION");
+
+    if (! session.isArray()) {
+      env.warning(L.l("session_decode requires valid session"));
+      return false;
+    }
+
+    UnserializeReader is = new UnserializeReader(value);
+
+    StringBuilder sb = new StringBuilder();
+    
+    while (true) {
+      int ch;
+      
+      sb.setLength(0);
+
+      while ((ch = is.read()) > 0 && ch != '|') {
+	sb.append((char) ch);
+      }
+
+      if (sb.length() == 0)
+	return true;
+
+      String key = sb.toString();
+
+      session.put(new StringValue(key), is.unserialize(env));
+    }
+  }
+
+  /**
+   * Encodes the session values.
+   */
+  public static String session_encode(Env env)
+  {
+    Value session = env.getGlobalValue("_SESSION");
+
+    if (! session.isArray()) {
+      env.warning(L.l("session_encode requires valid session"));
+      return null;
+    }
+
+    ArrayValue array = (ArrayValue) session.toValue();
+
+    StringBuilder sb = new StringBuilder();
+
+    for (Map.Entry<Value,Value> entry : array.entrySet()) {
+      sb.append(entry.getKey().toString());
+      sb.append("|");
+      entry.getValue().serialize(sb);
+    }
+
+    return sb.toString();
+  }
+
+  /**
+   * Destroys the session
+   */
+  public static boolean session_destroy(Env env)
     throws Throwable
   {
     SessionArrayValue session = env.getSession();
@@ -127,16 +197,60 @@ public class QuercusSessionModule extends AbstractQuercusModule {
   }
 
   /**
+   * Returns the session cookie parameters
+   */
+  public static ArrayValue session_get_cookie_params(Env env)
+  {
+    ArrayValue array = new ArrayValueImpl();
+
+    array.put("lifetime", env.getIniLong("session.cookie_lifetime"));
+    array.put("path", env.getIniString("session.cookie_path"));
+    array.put("domain", env.getIniString("session.cookie_domain"));
+    array.put("secure", env.getIniBoolean("session.cookie_secure"));
+
+    return array;
+  }
+
+  /**
    * Returns the session id
    */
-  public String session_id(Env env)
+  public static String session_id(Env env,
+				  @Optional String id)
   {
     Value sessionIdValue = (Value) env.getSpecialValue("caucho.session_id");
 
+    String oldValue;
+    
     if (sessionIdValue != null)
-      return sessionIdValue.toString();
+      oldValue = sessionIdValue.toString();
     else
-      return "";
+      oldValue = "";
+
+    if (id != null && ! "".equals(id))
+      env.setSpecialValue("caucho.session_id", new StringValue(id));
+
+    return oldValue;
+  }
+
+  /**
+   * Returns true if a session variable is registered.
+   */
+  public static boolean session_is_registered(Env env, String name)
+  {
+    return env.getGlobalValue("_SESSION").get(new StringValue(name)).isset();
+  }
+
+  /**
+   * Returns the object's class name
+   */
+  public Value session_module_name(Env env, @Optional String newValue)
+  {
+    Value value = env.getIni("session.save_handler");
+
+    if (newValue != null && ! newValue.equals(""))
+      env.setIni("session.save_handler", newValue);
+
+    return value;
   }
 
   /**
@@ -153,24 +267,106 @@ public class QuercusSessionModule extends AbstractQuercusModule {
   }
 
   /**
+   * Regenerates the session id
+   */
+  public static boolean session_regenerate_id(Env env,
+					      @Optional boolean deleteOld)
+    throws Throwable
+  {
+    SessionArrayValue session = env.getSession();
+
+    if (deleteOld)
+      session_destroy(env);
+
+    env.setSession(null);
+
+    String sessionId = generateSessionId(env);
+    session_id(env, sessionId);
+
+    session_start(env);
+
+    SessionArrayValue newSession = env.getSession();
+
+    if (session != null) {
+      for (Map.Entry<Value,Value> entry : session.entrySet())
+	newSession.put(entry.getKey(), entry.getValue());
+    }
+
+    return true;
+  }
+
+  /**
+   * Registers global variables in the session.
+   */
+  public boolean session_register(Env env, Value []values)
+    throws Throwable
+  {
+    Value session = env.getGlobalValue("_SESSION");
+
+    if (! session.isArray()) {
+      session_start(env);
+      session = env.getGlobalValue("_SESSION");
+    }
+
+    for (int i = 0; i < values.length; i++)
+      sessionRegisterImpl(env, (ArrayValue) session, values[i]);
+
+    return true;
+  }
+
+  /**
+   * Registers global variables in the session.
+   */
+  private void sessionRegisterImpl(Env env, ArrayValue session, Value value)
+  {
+    value = value.toValue();
+    
+    if (value instanceof StringValue) {
+      String name = value.toString();
+      
+      session.put(new StringValue(name), env.getGlobalVar(name));
+    } else if (value.isArray()) {
+      ArrayValue array = (ArrayValue) value.toValue();
+
+      for (Value subValue : array.values()) {
+	sessionRegisterImpl(env, session, subValue);
+      }
+    }
+  }
+
+  /**
+   * Returns the session's save path
+   */
+  public Value session_save_path(Env env, @Optional String newValue)
+  {
+    Value value = env.getIni("session.save_path");
+
+    if (newValue != null && ! newValue.equals(""))
+      env.setIni("session.save_path", newValue);
+
+    return value;
+  }
+
+  /**
    * Sets the session cookie parameters
    */
   public Value session_set_cookie_params(Env env,
                                          long lifetime,
-                                         @Optional String path,
-                                         @Optional String domain,
-                                         @Optional boolean secure)
+                                         @Optional Value path,
+                                         @Optional Value domain,
+                                         @Optional Value secure)
     throws Throwable
   {
     env.setIni("session.cookie_lifetime", String.valueOf(lifetime));
 
-    if (path != null)
-      env.setIni("session.cookie_path", path);
+    if (path.isset())
+      env.setIni("session.cookie_path", path.toString());
 
-    if (domain != null)
-      env.setIni("session.cookie_domain", domain);
+    if (domain.isset())
+      env.setIni("session.cookie_domain", domain.toString());
 
-    env.setIni("session.cookie_secure", secure ? "1" : "0");
+    if (secure.isset())
+      env.setIni("session.cookie_secure", secure.toBoolean() ? "1" : "0");
 
     return NullValue.NULL;
   }
@@ -203,7 +399,7 @@ public class QuercusSessionModule extends AbstractQuercusModule {
   /**
    * Start the session
    */
-  public boolean session_start(Env env)
+  public static boolean session_start(Env env)
     throws Throwable
   {
     if (env.getSession() != null) {
@@ -218,48 +414,59 @@ public class QuercusSessionModule extends AbstractQuercusModule {
 
     final HttpServletResponse response = env.getResponse();
 
-    if (sessionIdValue != null && ! sessionIdValue.isNull()) {
+    env.removeConstant("SID");
+    
+    String cookieName = env.getIni("session.name").toString();
+
+    if (callback != null)
+      callback.open(env, WorkDir.getLocalWorkDir().getPath(), cookieName);
+
+    boolean generateCookie = true;
+
+    if (sessionIdValue != null)
       sessionId = sessionIdValue.toString();
-    }
-    else {
-      String cookieName = env.getIni("session.name").toString();
 
-      if (callback != null)
-	callback.open(env, WorkDir.getLocalWorkDir().getPath(), cookieName);
-
+    if (sessionId == null || "".equals(sessionId)) {
       Cookie []cookies = env.getRequest().getCookies();
-
+      
       for (int i = 0; cookies != null && i < cookies.length; i++) {
         if (cookies[i].getName().equals(cookieName)) {
           sessionId = cookies[i].getValue();
+	  generateCookie = false;
         }
       }
+    }
 
-      if (sessionId == null) {
-        sessionId = generateSessionId(env);
+    if (! generateCookie) {
+      env.addConstant("SID", StringValue.EMPTY, false);
+    }
+    else {
+      if (sessionId == null || "".equals(sessionId))
+	sessionId = generateSessionId(env);
 
-        Cookie cookie = new Cookie(cookieName, sessionId);
-        cookie.setVersion(1);
+      env.addConstant("SID", new StringValue(cookieName + '=' + sessionId), false);
 
-        if (response.isCommitted()) {
-          env.warning(L.l("cannot send session cookie because response is committed"));
-        }
-        else {
-          Value path = env.getIni("session.cookie_path");
-          cookie.setPath(path.toString());
+      Cookie cookie = new Cookie(cookieName, sessionId);
+      cookie.setVersion(1);
 
-          Value maxAge = env.getIni("session.cookie_lifetime");
-          if (maxAge.toInt() != 0)
-            cookie.setMaxAge(maxAge.toInt());
+      if (response.isCommitted()) {
+	env.warning(L.l("cannot send session cookie because response is committed"));
+      }
+      else {
+	Value path = env.getIni("session.cookie_path");
+	cookie.setPath(path.toString());
 
-          Value domain = env.getIni("session.cookie_domain");
-          cookie.setDomain(domain.toString());
+	Value maxAge = env.getIni("session.cookie_lifetime");
+	if (maxAge.toInt() != 0)
+	  cookie.setMaxAge(maxAge.toInt());
 
-          Value secure = env.getIni("session.cookie_secure");
-          cookie.setSecure(secure.toBoolean());
+	Value domain = env.getIni("session.cookie_domain");
+	cookie.setDomain(domain.toString());
 
-          response.addCookie(cookie);
-        }
+	Value secure = env.getIni("session.cookie_secure");
+	cookie.setSecure(secure.toBoolean());
+
+	response.addCookie(cookie);
       }
     }
 
@@ -298,6 +505,47 @@ public class QuercusSessionModule extends AbstractQuercusModule {
     env.createSession(sessionId);
 
     return true;
+  }
+
+  /**
+   * Unsets the specified session values
+   */
+  public boolean session_unregister(Env env, Value key)
+  {
+    Value value = env.getGlobalValue("_SESSION");
+
+    if (! value.isArray())
+      return false;
+
+    value.remove(key);
+
+    return true;
+  }
+
+  /**
+   * Unsets the session values
+   */
+  public Value session_unset(Env env)
+  {
+    Value value = env.getGlobalValue("_SESSION");
+
+    if (! value.isArray())
+      return NullValue.NULL;
+
+    for (Value key : value.getKeyArray())
+      value.remove(key);
+
+    return NullValue.NULL;
+  }
+
+  /**
+   * Writes the session and closes it.
+   */
+  public static Value session_write_close(Env env)
+  {
+    env.sessionWriteClose();
+
+    return NullValue.NULL;
   }
 
   private static String generateSessionId(Env env)

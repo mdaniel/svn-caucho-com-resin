@@ -80,6 +80,7 @@ import com.caucho.quercus.program.AbstractClassDef;
 import com.caucho.quercus.program.PhpProgram;
 
 import com.caucho.quercus.lib.QuercusVariableModule;
+import com.caucho.quercus.lib.QuercusSessionModule;
 
 import com.caucho.quercus.resources.StreamContextResource;
 
@@ -260,6 +261,13 @@ public class Env {
     }
 
     _startTime = Alarm.getCurrentTime();
+  }
+
+  public void start()
+    throws Throwable
+  {
+    if (getIniBoolean("session.auto_start"))
+      QuercusSessionModule.session_start(this);
   }
 
   /**
@@ -544,10 +552,14 @@ public class Env {
   {
     _session = session;
 
-    if (session != null)
+    if (session != null) {
       setGlobalValue("_SESSION", session);
-    else
+      setGlobalValue("HTTP_SESSION_VARS", session);
+    }
+    else {
       unsetGlobalVar("_SESSION");
+      unsetGlobalVar("HTTP_SESSION_VARS");
+    }
   }
 
   /**
@@ -1986,7 +1998,7 @@ public class Env {
   }
 
   /**
-   * Returns a Java class defintion.
+   * Returns a PHP value for a Java object
    */
   public Value wrapJava(Object obj)
   {
@@ -2995,20 +3007,7 @@ public class Env {
       log.log(Level.FINE, e.toString(), e);
     }
 
-    if (_session != null && _session.getSize() > 0) {
-      SessionCallback callback = getSessionCallback();
-
-      if (callback != null) {
-	String value = QuercusVariableModule.serialize(_session.getArray());
-
-	callback.write(this, _session.getId(), value);
-
-	callback.close(this);
-      }
-      else {
-	_quercus.saveSession(this, _session.getId(), _session);
-      }
-    }
+    sessionWriteClose();
 
     for (SoftReference<ResourceValue> ref : _resourceList) {
       try {
@@ -3028,6 +3027,27 @@ public class Env {
 	path.remove();
       } catch (IOException e) {
 	log.log(Level.FINER, e.toString(), e);
+      }
+    }
+  }
+
+  public void sessionWriteClose()
+  {
+    SessionArrayValue session = _session;
+    _session = null;
+    
+    if (session != null && session.getSize() > 0) {
+      SessionCallback callback = getSessionCallback();
+
+      if (callback != null) {
+	String value = QuercusVariableModule.serialize(session.getArray());
+
+	callback.write(this, session.getId(), value);
+
+	callback.close(this);
+      }
+      else {
+	_quercus.saveSession(this, session.getId(), session);
       }
     }
   }

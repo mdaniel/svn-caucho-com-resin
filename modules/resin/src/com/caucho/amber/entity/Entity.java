@@ -62,6 +62,11 @@ public interface Entity {
     throws SQLException;
 
   /**
+   * Detatch the entity
+   */
+  public void __caucho_detach();
+
+  /**
    * Creates the entity in the database, making it persistent-new.
    */
   public boolean __caucho_create(AmberConnectionImpl aConn,

@@ -360,6 +360,14 @@ abstract public class ArrayValue extends Value {
   /**
    * Convenience for lib.
    */
+  public void put(String key, boolean value)
+  {
+    put(new StringValue(key), value ? BooleanValue.TRUE : BooleanValue.FALSE);
+  }
+
+  /**
+   * Convenience for lib.
+   */
   public void put(String value)
   {
     put(new StringValue(value));

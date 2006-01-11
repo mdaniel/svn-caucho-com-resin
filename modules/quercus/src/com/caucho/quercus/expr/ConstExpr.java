@@ -44,7 +44,6 @@ import com.caucho.quercus.gen.PhpWriter;
  */
 public class ConstExpr extends Expr {
   private final String _var;
-  private Value _value;
 
   public ConstExpr(String var)
   {
@@ -69,14 +68,12 @@ public class ConstExpr extends Expr {
   public Value eval(Env env)
     throws Throwable
   {
-    if (_value == null) {
-      _value = env.getConstant(_var);
+    Value value = env.getConstant(_var);
 
-      if (_value == null)
-	_value = new StringValue(_var);
-    }
+    if (value == null)
+      value = new StringValue(_var);
     
-    return _value;
+    return value;
   }
 
   //

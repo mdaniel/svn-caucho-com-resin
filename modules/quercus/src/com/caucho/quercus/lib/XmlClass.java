@@ -119,18 +119,16 @@ public class XmlClass {
                            @Optional("true") boolean is_final)
     throws IOException, SAXException, ParserConfigurationException
   {
-
     _xmlString.append(data);
     
-   if (is_final) {
+    if (is_final) {
+      InputSource is = new InputSource(new StringReader(_xmlString.toString()));
 
-    InputSource is = new InputSource(new StringReader(_xmlString.toString()));
-
-    SAXParserFactory factory = SAXParserFactory.newInstance();
-    SAXParser saxParser = factory.newSAXParser();
-    saxParser.parse(is, new XmlHandler());
-
-   }
+      SAXParserFactory factory = SAXParserFactory.newInstance();
+      SAXParser saxParser = factory.newSAXParser();
+      saxParser.parse(is, new XmlHandler());
+    }
+    
     return true;
   }
 

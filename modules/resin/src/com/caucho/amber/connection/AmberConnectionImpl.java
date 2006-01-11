@@ -106,6 +106,8 @@ public class AmberConnectionImpl {
   
   private boolean _isAutoCommit = true;
 
+  private int _depth;
+
   private LruCache<String,PreparedStatement> _preparedStatementMap
     = new LruCache<String,PreparedStatement>(32);
   
@@ -1129,6 +1131,12 @@ public class AmberConnectionImpl {
     } catch (SQLException e) {
       throw new AmberRuntimeException(e);
     } finally {
+      _depth = 0;
+
+      for (int i = _entities.size() - 1; i >= 0; i--) {
+	_entities.get(i).__caucho_detach();
+      }
+      
       _entities.clear();
       _txEntities.clear();
       _completionList.clear();
@@ -1142,6 +1150,8 @@ public class AmberConnectionImpl {
    */
   public void pushDepth()
   {
+    // these aren't necessary because the AmberConnection is added as
+    // a close callback to the UserTransaction
   }
 
   /**

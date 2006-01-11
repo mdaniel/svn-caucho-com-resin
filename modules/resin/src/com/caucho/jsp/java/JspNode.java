@@ -884,21 +884,20 @@ public abstract class JspNode {
    * Generate include params.
    */
   void generateIncludeParams(JspJavaWriter out,
-                             ArrayList params,
-                             boolean hasQuery)
+                             ArrayList params)
     throws Exception
   {
+    boolean hasQuery = false;
+    
     for (int i = 0; i < params.size(); i++) {
       JspParam param = (JspParam) params.get(i);
       String value = param.getValue();
         
-      if (! hasQuery)
-        out.print("+ \"?\"");
-      else
-        out.print("+ \"&\"");
+      if (hasQuery)
+        out.print("+ \"&\" + ");
         
       hasQuery = true;
-      out.print("+ \"" + param.getName() + "=\"");
+      out.print("\"" + param.getName() + "=\"");
 
       String outValue = generateParameterValue(String.class, value);
 

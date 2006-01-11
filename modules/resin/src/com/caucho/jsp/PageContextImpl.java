@@ -318,8 +318,16 @@ public class PageContextImpl extends PageContext
     // jsp/162b
     if (_request != null)
       _request.removeAttribute(name);
-    if (_session != null)
-      _session.removeAttribute(name);
+
+    if (_session != null) {
+      try {
+	_session.removeAttribute(name);
+      } catch (IllegalStateException e) {
+	// jsp/162f
+	log.log(Level.FINE, e.toString(), e);
+      }
+    }
+    
     if (_application != null)
       _application.removeAttribute(name);
   }
@@ -857,6 +865,24 @@ public class PageContextImpl extends PageContext
    *
    * @param relativeUrl url relative to the current request.
    */
+  public void include(String relativeUrl, String query, boolean flush)
+    throws ServletException, IOException
+  {
+    if ("".equals(query)) {
+    }
+    else if (relativeUrl.indexOf('?') > 0)
+      relativeUrl = relativeUrl + '&' + query;
+    else
+      relativeUrl = relativeUrl + '?' + query;
+
+    include(relativeUrl, flush);
+  }
+  
+  /**
+   * Include another servlet into the current output stream.
+   *
+   * @param relativeUrl url relative to the current request.
+   */
   public void include(String relativeUrl, boolean flush)
     throws ServletException, IOException
   {
@@ -895,6 +921,24 @@ public class PageContextImpl extends PageContext
       _out.flush();
 
     rd.include(req, res);
+  }
+  
+  /**
+   * Include another servlet into the current output stream.
+   *
+   * @param relativeUrl url relative to the current request.
+   */
+  public void forward(String relativeUrl, String query)
+    throws ServletException, IOException
+  {
+    if ("".equals(query)) {
+    }
+    else if (relativeUrl.indexOf('?') > 0)
+      relativeUrl = relativeUrl + '&' + query;
+    else
+      relativeUrl = relativeUrl + '?' + query;
+
+    include(relativeUrl);
   }
 
   /**

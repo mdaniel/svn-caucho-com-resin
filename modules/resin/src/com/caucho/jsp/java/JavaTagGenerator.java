@@ -242,9 +242,8 @@ public class JavaTagGenerator extends JavaJspGenerator {
     out.print("public class ");
     out.print(_className);
 
-    if (hasScripting()) {
+    if (hasScripting())
       out.print(" extends com.caucho.jsp.java.JspTagSupport");
-    }
     else
       out.print(" extends com.caucho.jsp.java.JspTagFileSupport");
 
@@ -296,8 +295,8 @@ public class JavaTagGenerator extends JavaJspGenerator {
       out.println("public void set" + upperName + "(" + type + " value)");
       out.println("{");
       out.pushDepth();
-      out.println(isSetName + " = true;");
-      out.println("_" + name + " = value;");
+      out.println("this." + isSetName + " = true;");
+      out.println("this._" + name + " = value;");
       out.popDepth();
       out.println("}");
 

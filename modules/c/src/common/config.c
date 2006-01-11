@@ -1268,6 +1268,10 @@ cse_match_request(config_t *config, const char *host, int port,
   
   resin_host_t *match_host;
 
+  /* If no ResinConfigServer, never match unless explicit, bug #3 */
+  if (! config || ! config->config_cluster.srun_size)
+    return 0;
+
   if (! host)
     host = "";
   if (! uri)
