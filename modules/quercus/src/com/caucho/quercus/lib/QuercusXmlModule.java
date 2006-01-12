@@ -33,6 +33,8 @@ import com.caucho.util.L10N;
 
 import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.quercus.module.Optional;
+import com.caucho.quercus.module.NotNull;
+import com.caucho.quercus.module.Reference;
 
 import com.caucho.quercus.env.*;
 
@@ -83,6 +85,73 @@ public class QuercusXmlModule extends AbstractQuercusModule {
                                        @Optional(":") String separator)
   {
     return new XmlClass(env,outputEncoding,separator);
+  }
+
+  public boolean xml_set_element_handler(@NotNull XmlClass parser,
+                                         @NotNull Value startElementHandler,
+                                         @NotNull Value endElementHandler)
+  {
+    if (parser == null)
+      return false;
+
+    return parser.xml_set_element_handler(startElementHandler, endElementHandler);
+  }
+
+  public boolean xml_set_character_data_handler(@NotNull XmlClass parser,
+                                                @NotNull Value handler)
+  {
+    if (parser == null)
+      return false;
+
+    return parser.xml_set_character_data_handler(handler);
+  }
+
+  public boolean xml_set_processing_instruction_handler(@NotNull XmlClass parser,
+                                                        @NotNull Value handler)
+  {
+    if (parser == null)
+      return false;
+
+    return parser.xml_set_processing_instruction_handler(handler);
+  }
+
+  public boolean xml_set_default_handler(@NotNull XmlClass parser,
+                                         @NotNull Value handler)
+  {
+    if (parser == null)
+      return false;
+
+    return parser.xml_set_default_handler(handler);
+  }
+
+  public boolean xml_start_namespace_decl_handler(@NotNull XmlClass parser,
+                                                  @NotNull Value handler)
+  {
+    if (parser == null)
+      return false;
+
+    return parser.xml_set_start_namespace_decl_handler(handler);
+  }
+
+  public boolean xml_set_end_namespace_decl_handler(@NotNull XmlClass parser,
+                                                    @NotNull Value handler)
+  {
+    if (parser == null)
+      return false;
+
+    return parser.xml_set_end_namespace_decl_handler(handler);
+  }
+
+  public int xml_parse_into_struct(@NotNull XmlClass parser,
+                                   @NotNull String data,
+                                   @Reference Value valueArray,
+                                   @Optional @Reference Value indexArray)
+    throws Exception
+  {
+    if (parser == null)
+      return 0;
+
+    return parser.xml_parse_into_struct(data, valueArray, indexArray);
   }
 }
 

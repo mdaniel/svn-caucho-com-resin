@@ -116,10 +116,6 @@ public class XmlClass {
 
   SAXParserFactory _factory = SAXParserFactory.newInstance();
 
-  //Used by structHandler to keep track of depth within tree;
-  //startElement increments, endElement decrements
-  private int _level;
-
   private StringBuffer _xmlString = new StringBuffer();
 
   public XmlClass(Env env,
@@ -254,30 +250,34 @@ public class XmlClass {
    * Parses data into 2 parallel array structures.
    *
    * @param data
-   * @param valueArray
-   * @param indexArray
+   * @param valsV
+   * @param indexV
    * @return 0 for failure, 1 for success
    */
-  public Value xml_parse_into_struct(String data,
-                                     Value valueArray,
-                                     @Optional Value indexArray)
+  public int xml_parse_into_struct(String data,
+                                   @Reference Value valsV,
+                                   @Optional @Reference Value indexV)
     throws Exception
   {
     _xmlString.append(data);
 
-    _level = 1;
-
     InputSource is = new InputSource(new StringReader(_xmlString.toString()));
+
+    Value valueArray = new ArrayValueImpl();
+    Value indexArray = new ArrayValueImpl();
+
     try {
       SAXParser saxParser = _factory.newSAXParser();
-      valueArray = new ArrayValueImpl();
-      indexArray = new ArrayValueImpl();
       saxParser.parse(is, new StructHandler(valueArray, indexArray));
     } catch (Exception ex) {
       log.log(Level.FINE, ex.toString(), ex);
       throw new Exception(L.l(ex.getMessage()));
     }
-    return indexArray;
+
+    valsV.set(valueArray);
+    indexV.set(indexArray);
+
+    return 1;
   }
 
   /**
@@ -286,6 +286,11 @@ public class XmlClass {
   class StructHandler extends DefaultHandler {
     private Value _valueArray;
     private Value _indexArray;
+
+    //Keeps track of depth within tree;
+    //startElement increments, endElement decrements
+    private int _level = 1;
+
     private HashMap<Integer, String> _paramList = new HashMap<Integer, String> ();
 
     // Used to determine whether a given element has sub elements
