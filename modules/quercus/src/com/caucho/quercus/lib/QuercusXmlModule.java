@@ -75,7 +75,7 @@ public class QuercusXmlModule extends AbstractQuercusModule {
    */
   public boolean xml_parse(@NotNull XmlClass parser,
                            @NotNull String data,
-                           @Optional boolean isFinal)
+                           @Optional("true") boolean isFinal)
     throws Exception
   {
     if (parser == null)
