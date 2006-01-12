@@ -98,6 +98,19 @@ public class QuercusOptionsModule extends AbstractQuercusModule {
   }
 
   /**
+   * Returns the configuration value of a configuration.
+   */
+  public static Value get_cfg_var(Env env, String name)
+  {
+    Value value = env.getConfigVar(name);
+
+    if (value != null)
+      return value;
+    else
+      return NullValue.NULL;
+  }
+
+  /**
    * Returns the constants as an array
    */
   public static Value get_defined_constants(Env env)
@@ -110,7 +123,12 @@ public class QuercusOptionsModule extends AbstractQuercusModule {
    */
   public static Value get_include_path(Env env)
   {
-    return env.getIni("include_path");
+    Value value = env.getIni("include_path");
+
+    if (value != null)
+      return value;
+    else
+      return StringValue.EMPTY;
   }
 
   /**
@@ -150,6 +168,19 @@ public class QuercusOptionsModule extends AbstractQuercusModule {
       return v.toString();
     else
       return null;
+  }
+
+  /**
+   * Restore the initial configuration value
+   */
+  public static Value ini_restore(Env env, String name)
+  {
+    Value value = env.getConfigVar(name);
+
+    if (value != null)
+      env.setIni(name, value.toString());
+
+    return NullValue.NULL;
   }
 
   /**

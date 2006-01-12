@@ -134,6 +134,7 @@ public class Env {
   private static final int _FILES = 12;
   private static final int HTTP_POST_FILES = 13;
   private static final int _ENV = 14;
+  private static final int HTTP_SERVER_VARS = 15;
 
   private static final IntMap SPECIAL_VARS = new IntMap();
 
@@ -630,10 +631,15 @@ public class Env {
 
     value = _quercus.getIni(var);
 
-    if (value != null)
-      return value;
-    else
-      return null;
+    return value;
+  }
+
+  /**
+   * Returns the configuration value of an init var.
+   */
+  public Value getConfigVar(String var)
+  {
+    return _quercus.getIni(var);
   }
 
   /**
@@ -1064,6 +1070,7 @@ public class Env {
 	return var;
       }
 
+    case HTTP_SERVER_VARS:
     case _SERVER:
       {
 	var = new Var();
@@ -2371,6 +2378,9 @@ public class Env {
   public String setIncludePath(String path)
   {
     _prevIncludePath = getIniString("include_path");
+
+    if (_prevIncludePath == null)
+      _prevIncludePath = "";
     
     setIni("include_path", path);
 
@@ -2380,7 +2390,7 @@ public class Env {
   /**
    * Restores the previous include path.
    */
-  public void restoreIncludePath(String path)
+  public void restoreIncludePath()
   {
     String path = getIniString("include_path");
     
@@ -3091,6 +3101,7 @@ public class Env {
     SPECIAL_VARS.put("HTTP_POST_VARS", HTTP_POST_VARS);
     SPECIAL_VARS.put("HTTP_POST_FILES", HTTP_POST_FILES);
     SPECIAL_VARS.put("HTTP_COOKIE_VARS", HTTP_COOKIE_VARS);
+    SPECIAL_VARS.put("HTTP_SERVER_VARS", HTTP_SERVER_VARS);
     SPECIAL_VARS.put("PHP_SELF", PHP_SELF);
   }
 }

@@ -256,6 +256,47 @@ public class QuercusVariableModule extends AbstractQuercusModule {
   }
 
   /**
+   * Imports request variables
+   *
+   * @param types the variables to import
+   * @param prefix the prefix
+   */
+  public static boolean import_request_variables(Env env,
+						 String types,
+						 @Optional String prefix)
+  {
+    if ("".equals(prefix))
+      env.notice(L.l("import_request_variables should use a prefix argument"));
+
+    for (int i = 0; i < types.length(); i++) {
+      char ch = types.charAt(i);
+
+      Value value = null;
+
+      if (ch == 'c' || ch == 'C')
+	value = env.getGlobalValue("_COOKIE");
+      else if (ch == 'g' || ch == 'G')
+	value = env.getGlobalValue("_GET");
+      else if (ch == 'p' || ch == 'P')
+	value = env.getGlobalValue("_POST");
+
+      if (! (value instanceof ArrayValue))
+	continue;
+
+      ArrayValue array = (ArrayValue) value;
+
+      for (Map.Entry<Value,Value> entry : array.entrySet()) {
+	String key = entry.getKey().toString();
+
+	env.setGlobalValue(prefix + key,
+			 array.getRef(entry.getKey()));
+      }
+    }
+
+    return true;
+  }
+
+  /**
    * Converts to a long
    *
    * @param v the variable to convert
