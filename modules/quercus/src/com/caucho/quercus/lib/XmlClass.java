@@ -259,8 +259,8 @@ public class XmlClass {
    * @return 0 for failure, 1 for success
    */
   public Value xml_parse_into_struct(String data,
-                                   @Reference Value valueArray,
-                                   @Optional @Reference Value indexArray)
+                                     Value valueArray,
+                                     @Optional Value indexArray)
     throws Exception
   {
     _xmlString.append(data);
@@ -271,12 +271,13 @@ public class XmlClass {
     try {
       SAXParser saxParser = _factory.newSAXParser();
       valueArray = new ArrayValueImpl();
+      indexArray = new ArrayValueImpl();
       saxParser.parse(is, new StructHandler(valueArray, indexArray));
     } catch (Exception ex) {
       log.log(Level.FINE, ex.toString(), ex);
       throw new Exception(L.l(ex.getMessage()));
     }
-    return valueArray;
+    return indexArray;
   }
 
   /**
@@ -340,12 +341,15 @@ public class XmlClass {
       }
 
       _valueArray.put(new DoubleValue((double)_valueArrayIndex), elementArray);
+
+      Value indexArray = new ArrayValueImpl();
+      indexArray.put(new DoubleValue((double) _valueArrayIndex));
+      _indexArray.put(new StringValue(eName.toUpperCase()), indexArray);
+
       _valueArrayIndex++;
       _level++;
       _isComplete = true;
       _isOutside = false;
-
-      //XXX: _valueArray.get(new DoubleValue((double) _valueArrayIndex - 1));
     }
 
     public void endElement(String namespaceURI,
@@ -354,6 +358,8 @@ public class XmlClass {
       throws SAXException
     {
       Value elementArray;
+
+      _level--;
 
       if (_isComplete) {
         elementArray = _valueArray.get(new DoubleValue((double) _valueArrayIndex - 1));
@@ -364,12 +370,15 @@ public class XmlClass {
         if ("".equals(sName)) eName = qName;
         elementArray.put(new StringValue("tag"), new StringValue(eName.toUpperCase()));
         elementArray.put(new StringValue("type"), new StringValue("close"));
-        elementArray.put(new StringValue("level"), new DoubleValue((double) _level - 1));
+        elementArray.put(new StringValue("level"), new DoubleValue((double) _level));
         _valueArray.put(new DoubleValue((double)_valueArrayIndex), elementArray);
+
+        Value indexArray = _indexArray.get(new StringValue(_paramList.get(_level)));
+        indexArray.put(new DoubleValue((double) _valueArrayIndex));
+
         _valueArrayIndex++;
       }
 
-      _level--;
       _isComplete = false;
       _isOutside = true;
     }
@@ -388,6 +397,10 @@ public class XmlClass {
         elementArray.put(new StringValue("type"), new StringValue("cdata"));
         elementArray.put(new StringValue("level"), new DoubleValue((double) _level - 1));
         _valueArray.put(new DoubleValue((double)_valueArrayIndex), elementArray);
+
+        Value indexArray = _indexArray.get(new StringValue(_paramList.get(_level - 1)));
+        indexArray.put(new DoubleValue((double) _valueArrayIndex));
+
         _valueArrayIndex++;
       } else {
         Value elementArray = _valueArray.get(new DoubleValue((double) _valueArrayIndex - 1));
