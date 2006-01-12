@@ -85,6 +85,8 @@ public class QuercusXmlModule extends AbstractQuercusModule {
   }
 
   /**
+   * XXX: Should we return warning if separator is
+   * anything but ":"???
    *
    * @param env
    * @param outputEncoding
@@ -115,6 +117,15 @@ public class QuercusXmlModule extends AbstractQuercusModule {
       return false;
 
     return parser.xml_set_character_data_handler(handler);
+  }
+
+  public boolean xml_set_object(@NotNull XmlClass parser,
+                                @NotNull Value obj)
+  {
+    if (parser == null)
+      return false;
+
+    return parser.xml_set_object(obj);
   }
 
   public boolean xml_set_processing_instruction_handler(@NotNull XmlClass parser,
@@ -172,5 +183,16 @@ public class QuercusXmlModule extends AbstractQuercusModule {
     else
       return true;
   }
+
+  // @todo xml_error_string
+  // @todo xml_get_current_byte_index
+  // @todo xml_get_current_colmn_number
+  // @todo xml_get_current_line_number
+  // @todo xml_get_error_code
+  // @todo xml_parser_get_option
+  // @todo xml_parser_set_option
+  // @todo xml_set_external_entity_ref_handler
+  // @todo xml_set_notation_decl_handler
+  // @todo xml_set_unparsed_entity_decl_handler
 }
 
