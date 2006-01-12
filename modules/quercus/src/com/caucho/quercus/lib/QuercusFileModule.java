@@ -30,8 +30,6 @@
 package com.caucho.quercus.lib;
 
 import java.io.IOException;
-import java.util.Map;
-import java.util.HashMap;
 import java.util.Arrays;
 
 import java.util.logging.Logger;
@@ -42,14 +40,7 @@ import com.caucho.util.L10N;
 import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.quercus.module.Optional;
 
-import com.caucho.quercus.env.Value;
-import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.NullValue;
-import com.caucho.quercus.env.BooleanValue;
-import com.caucho.quercus.env.LongValue;
-import com.caucho.quercus.env.StringValue;
-import com.caucho.quercus.env.ArrayValue;
-import com.caucho.quercus.env.ArrayValueImpl;
+import com.caucho.quercus.env.*;
 
 import com.caucho.quercus.resources.StreamResource;
 
@@ -119,13 +110,15 @@ public class QuercusFileModule extends AbstractQuercusModule {
    */
   public static boolean chdir(Env env, Path path)
   {
-    System.out.println("*** CHDIR: " + path.getFullPath());
     if (path.isDirectory()) {
       env.setPwd(path);
       return true;
     }
-    else
+    else {
+      env.warning(L.l("{0} is not a directory", path.getFullPath()));
+
       return false;
+    }
   }
 
   /**
@@ -140,8 +133,11 @@ public class QuercusFileModule extends AbstractQuercusModule {
 
       return true;
     }
-    else
+    else {
+      env.warning(L.l("{0} is not a directory", path.getFullPath()));
+
       return false;
+    }
   }
 
   /**
@@ -153,6 +149,12 @@ public class QuercusFileModule extends AbstractQuercusModule {
    */
   public static boolean chgrp(Env env, Path file, Value group)
   {
+    if (!file.canRead()) {
+      env.warning(L.l("{0} cannot be read", file.getFullPath()));
+
+      return false;
+    }
+
     // quercus/160i
 
     try {
@@ -175,11 +177,17 @@ public class QuercusFileModule extends AbstractQuercusModule {
    * Changes the permissions of the file.
    *
    * @param env the PHP executing environment
-   * @param filename the file to change the group of
+   * @param file the file to change the group of
    * @param mode the mode id to change to
    */
   public static boolean chmod(Env env, Path file, int mode)
   {
+    if (!file.canRead()) {
+      env.warning(L.l("{0} cannot be read", file.getFullPath()));
+
+      return false;
+    }
+
     // quercus/160j
 
     // XXX: safe_mode
@@ -193,11 +201,17 @@ public class QuercusFileModule extends AbstractQuercusModule {
    * Changes the ownership of the file.
    *
    * @param env the PHP executing environment
-   * @param filename the file to change the group of
+   * @param file the file to change the group of
    * @param user the user id to change to
    */
   public static boolean chown(Env env, Path file, Value user)
   {
+    if (!file.canRead()) {
+      env.warning(L.l("{0} cannot be read", file.getFullPath()));
+
+      return false;
+    }
+
     try {
       // XXX: safe_mode
 
@@ -234,13 +248,16 @@ public class QuercusFileModule extends AbstractQuercusModule {
    * @param src the source path
    * @param dst the destination path
    */
-  public static boolean copy(Path src, Path dst)
+  public static boolean copy(Env env, Path src, Path dst)
   {
     // quercus/1603
 
     try {
-      if (! src.canRead() || ! src.isFile())
+      if (! src.canRead() || ! src.isFile()) {
+        env.warning(L.l("{0} cannot be read", src.getFullPath()));
+
         return false;
+      }
 
       WriteStream os = dst.openWrite();
 
@@ -266,18 +283,17 @@ public class QuercusFileModule extends AbstractQuercusModule {
   public static Value dir(Env env, Path path)
     throws IOException
   {
-    if (path.isDirectory()) {
-      DirectoryValue dir = new DirectoryValue(path);
-
-      env.addResource(dir);
-
-      return dir;
-    }
-    else {
-      // XXX: warning message
+    if (!path.isDirectory()) {
+      env.warning(L.l("{0} is not a directory", path.getFullPath()));
 
       return BooleanValue.FALSE;
     }
+
+    DirectoryValue dir = new DirectoryValue(path);
+
+    env.addResource(dir);
+
+    return dir;
   }
 
   /**
@@ -316,13 +332,17 @@ public class QuercusFileModule extends AbstractQuercusModule {
    *
    * @param directory the disk directory
    */
-  public static double disk_free_space(Path directory)
+  public static Value disk_free_space(Env env, Path directory)
   {
     // quercus/160m
 
-    // XXX: stub
+    if (!directory.canRead()) {
+      env.warning(L.l("{0} cannot be read", directory.getFullPath()));
 
-    return 0;
+      return BooleanValue.FALSE;
+    }
+
+    return new DoubleValue(directory.getDiskSpaceFree());
   }
 
   /**
@@ -330,13 +350,16 @@ public class QuercusFileModule extends AbstractQuercusModule {
    *
    * @param directory the disk directory
    */
-  public static double disk_total_space(Path directory)
+  public static Value disk_total_space(Env env, Path path)
   {
     // quercus/160n
+    if (!path.canRead()) {
+      env.warning(L.l("{0} cannot be read", path.getFullPath()));
 
-    // XXX: stub
+      return BooleanValue.FALSE;
+    }
 
-    return 0;
+    return new DoubleValue(path.getDiskSpaceTotal());
   }
 
   /**
@@ -344,73 +367,79 @@ public class QuercusFileModule extends AbstractQuercusModule {
    *
    * @param directory the disk directory
    */
-  public static double diskfreespace(Path directory)
+  public static Value diskfreespace(Env env, Path directory)
   {
-    return disk_free_space(directory);
+    return disk_free_space(env, directory);
   }
 
   /**
    * Closes a file.
    */
-  public boolean fclose(StreamResource file)
+  public boolean fclose(Env env, StreamResource file)
     throws IOException
   {
     // quercus/1611
 
-    if (file != null) {
-      file.close();
-
-      return true;
-    }
-    else
+    if (file == null) {
+      env.warning(L.l("{0} is null", "handle"));
       return false;
+    }
+
+    file.close();
+
+    return true;
   }
 
   /**
    * Checks for the end of file.
    */
-  public boolean feof(StreamResource file)
+  public boolean feof(Env env, StreamResource file)
   {
     // quercus/1618
 
-    if (file != null)
-      return file.isEOF();
-    else
-      return true;
+    if (file == null) {
+      env.warning(L.l("{0} is null", "handle"));
+      return false;
+    }
+
+    return file.isEOF();
   }
 
   /**
    * Flushes a file.
    */
-  public boolean fflush(StreamResource file)
+  public boolean fflush(Env env, StreamResource file)
     throws IOException
   {
     // quercus/1619
 
-    if (file != null) {
-      file.flush();
+    if (file == null) {
+      env.warning(L.l("{0} is null", "handle"));
 
-      return true;
-    }
-    else
       return false;
+    }
+
+    file.flush();
+
+    return true;
   }
 
   /**
    * Returns the next character
    */
-  public Value fgetc(StreamResource file)
+  public Value fgetc(Env env, StreamResource file)
     throws IOException
   {
-    // quercus/1612
-    if (file != null) {
-      int ch = file.read();
-
-      if (ch >= 0)
-        return new StringValue(String.valueOf((char) ch));
-      else
-        return BooleanValue.FALSE;
+    if (file == null) {
+      env.warning(L.l("{0} is null", "handle"));
+      return BooleanValue.FALSE;
     }
+
+    // quercus/1612
+    int ch = file.read();
+
+    if (ch >= 0)
+      return new StringValue(String.valueOf((char) ch));
     else
       return BooleanValue.FALSE;
   }
@@ -432,9 +461,12 @@ public class QuercusFileModule extends AbstractQuercusModule {
   {
     // quercus/1619
 
-    if (file == null)
+    if (file == null) {
+      env.warning(L.l("{0} is null", "handle"));
       return BooleanValue.FALSE;
+    }
 
+    // XXX: length is never used
     if (length <= 0)
       length = Integer.MAX_VALUE;
 
@@ -519,13 +551,15 @@ public class QuercusFileModule extends AbstractQuercusModule {
   /**
    * Returns the next line
    */
-  public Value fgets(StreamResource file, @Optional long length)
+  public Value fgets(Env env, StreamResource file, @Optional long length)
     throws IOException
   {
     // quercus/1615
 
-    if (file == null)
+    if (file == null) {
+      env.warning(L.l("{0} is null", "handle"));
       return BooleanValue.FALSE;
+    }
 
     String value = file.readLine();
 
@@ -538,15 +572,18 @@ public class QuercusFileModule extends AbstractQuercusModule {
   /**
    * Returns the next line stripping tags
    */
-  public Value fgetss(StreamResource file,
+  public Value fgetss(Env env,
+                      StreamResource file,
                       @Optional long length,
                       @Optional String allowedTags)
     throws IOException
   {
     // quercus/161a
 
-    if (file == null)
+    if (file == null) {
+      env.warning(L.l("{0} is null", "handle"));
       return BooleanValue.FALSE;
+    }
 
     String value = file.readLine();
 
@@ -595,8 +632,13 @@ public class QuercusFileModule extends AbstractQuercusModule {
    *
    * @param path the path to check
    */
-  public static Value fileatime(Path path)
+  public static Value fileatime(Env env, Path path)
   {
+    if (!path.canRead()) {
+      env.warning(L.l("{0} cannot be read", path.getFullPath()));
+      return BooleanValue.FALSE;
+    }
+
     long time = path.getLastAccessTime();
 
     if (time <= 24 * 3600 * 1000L)
@@ -610,8 +652,13 @@ public class QuercusFileModule extends AbstractQuercusModule {
    *
    * @param path the path to check
    */
-  public static Value filectime(Path path)
+  public static Value filectime(Env env, Path path)
   {
+    if (!path.canRead()) {
+      env.warning(L.l("{0} cannot be read", path.getFullPath()));
+      return BooleanValue.FALSE;
+    }
+
     long time = path.getCreateTime();
 
     if (time <= 24 * 3600 * 1000L)
@@ -625,10 +672,14 @@ public class QuercusFileModule extends AbstractQuercusModule {
    *
    * @param path the path to check
    */
-  public static Value filegroup(Path path)
+  public static Value filegroup(Env env, Path path)
   {
-    // XXX: stubbed
-    return BooleanValue.FALSE;
+    if (!path.canRead()) {
+      env.warning(L.l("{0} cannot be read", path.getFullPath()));
+      return BooleanValue.FALSE;
+    }
+
+    return new LongValue(path.getGroup());
   }
 
   /**
@@ -636,11 +687,14 @@ public class QuercusFileModule extends AbstractQuercusModule {
    *
    * @param path the path to check
    */
-  public static Value fileinode(Path path)
+  public static Value fileinode(Env env, Path path)
   {
-    // XXX: stubbed
+    if (!path.canRead()) {
+      env.warning(L.l("{0} cannot be read", path.getFullPath()));
+      return BooleanValue.FALSE;
+    }
 
-    return BooleanValue.FALSE;
+    return new LongValue(path.getInode());
   }
 
   /**
@@ -648,8 +702,13 @@ public class QuercusFileModule extends AbstractQuercusModule {
    *
    * @param path the path to check
    */
-  public static Value filemtime(Path path)
+  public static Value filemtime(Env env, Path path)
   {
+    if (!path.canRead()) {
+      env.warning(L.l("{0} cannot be read", path.getFullPath()));
+      return BooleanValue.FALSE;
+    }
+
     long time = path.getLastModified();
 
     if (time <= 24 * 3600 * 1000L)
@@ -663,10 +722,14 @@ public class QuercusFileModule extends AbstractQuercusModule {
    *
    * @param path the path to check
    */
-  public static Value fileowner(Path path)
+  public static Value fileowner(Env env, Path path)
   {
-    // XXX: stubbed
-    return BooleanValue.FALSE;
+    if (!path.canRead()) {
+      env.warning(L.l("{0} cannot be read", path.getFullPath()));
+      return BooleanValue.FALSE;
+    }
+
+    return new LongValue(path.getOwner());
   }
 
   /**
@@ -674,9 +737,14 @@ public class QuercusFileModule extends AbstractQuercusModule {
    *
    * @param path the path to check
    */
-  public static Value fileperms(Path path)
+  public static Value fileperms(Env env, Path path)
   {
-    // XXX: stubbed
+    if (!path.canRead()) {
+      env.warning(L.l("{0} cannot be read", path.getFullPath()));
+      return BooleanValue.FALSE;
+    }
+
+    // XXX: stubbed (faked)
 
     if (! path.exists())
       return BooleanValue.FALSE;
@@ -703,10 +771,12 @@ public class QuercusFileModule extends AbstractQuercusModule {
    *
    * @param path the path to check
    */
-  public static Value filesize(Path path)
+  public static Value filesize(Env env, Path path)
   {
-    if (! path.exists() || ! path.isFile())
+    if (! path.exists() || ! path.isFile()) {
+      env.warning(L.l("{0} cannot be read", path.getFullPath()));
       return BooleanValue.FALSE;
+    }
 
     long length = path.getLength();
 
@@ -721,12 +791,14 @@ public class QuercusFileModule extends AbstractQuercusModule {
    *
    * @param path the path to check
    */
-  public static Value filetype(Path path)
+  public static Value filetype(Env env, Path path)
   {
     // XXX: incomplete
 
-    if (! path.exists())
+    if (! path.exists()) {
+      env.warning(L.l("{0} cannot be read", path.getFullPath()));
       return BooleanValue.FALSE;
+    }
     else if (path.isDirectory())
       return new StringValue("dir");
     else
@@ -825,12 +897,18 @@ public class QuercusFileModule extends AbstractQuercusModule {
    * @param operation the locking operation
    * @param wouldBlock the resource context
    */
-  public static boolean flock(Value fileV,
+  public static boolean flock(Env env,
+                              Value fileV,
                               int operation,
                               @Optional Value wouldBlock)
     throws IOException
   {
     // XXX: stubbed,  also wouldblock is a ref
+
+    if (fileV == null || fileV.isNull()) {
+      env.warning(L.l("{0} is null", "handle"));
+      return false;
+    }
 
     return true;
   }
@@ -856,6 +934,8 @@ public class QuercusFileModule extends AbstractQuercusModule {
       else if (mode.startsWith("x") && ! path.exists())
         return new FileWriteValue(path);
 
+      env.warning(L.l("bad mode `{0}'", mode));
+
       return NullValue.NULL;
     } catch (IOException e) {
       log.log(Level.FINE, e.toString(), e);
@@ -872,8 +952,10 @@ public class QuercusFileModule extends AbstractQuercusModule {
     throws IOException
   {
     // quercus/1635
-    if (is == null)
+    if (is == null) {
+      env.warning(L.l("{0} is null", "handle"));
       return BooleanValue.FALSE;
+    }
 
     TempBuffer temp = TempBuffer.allocate();
     byte []buffer = temp.getBuffer();
@@ -899,7 +981,6 @@ public class QuercusFileModule extends AbstractQuercusModule {
    * Parses a comma-separated-value line from a file.
    *
    * @param file the file to read
-   * @param length the maximum line length
    * @param delimiter optional comma replacement
    * @param enclosure optional quote replacement
    */
@@ -912,8 +993,15 @@ public class QuercusFileModule extends AbstractQuercusModule {
   {
     // quercus/1636
 
-    if (file == null || value == null)
+    if (file == null) {
+      env.warning(L.l("{0} is null", "handle"));
       return BooleanValue.FALSE;
+    }
+
+    if (value == null) {
+      env.warning(L.l("{0} is null", "array"));
+      return BooleanValue.FALSE;
+    }
 
     char comma = ',';
     char quote = '\"';
@@ -967,22 +1055,24 @@ public class QuercusFileModule extends AbstractQuercusModule {
   /**
    * Writes a string to the file.
    */
-  public Value fputs(Value fileV, String value, @Optional("-1") int length)
+  public Value fputs(Env env, Value fileV, String value, @Optional("-1") int length)
     throws IOException
   {
-    return fwrite(fileV, value, length);
+    return fwrite(env, fileV, value, length);
   }
 
   /**
    * Reads content from a file.
    *
-   * @param file the file's name
+   * @param fileValue the file
    */
-  public static Value fread(Value fileValue, long length)
+  public static Value fread(Env env, Value fileValue, long length)
     throws IOException
   {
-    if (! (fileValue instanceof FileValue))
+    if (! (fileValue instanceof FileValue)) {
+      env.warning(L.l("bad {0}", "handle"));
       return BooleanValue.FALSE;
+    }
 
     FileValue file = (FileValue) fileValue;
 
@@ -1007,8 +1097,10 @@ public class QuercusFileModule extends AbstractQuercusModule {
     throws IOException
   {
 
-    if (file == null)
+    if (file == null) {
+      env.warning(L.l("{0} is null", "handle"));
       return BooleanValue.FALSE;
+    }
 
     String value = file.readLine();
 
@@ -1026,10 +1118,12 @@ public class QuercusFileModule extends AbstractQuercusModule {
    *
    * @param file the stream to test
    */
-  public static Value ftell(StreamResource file)
+  public static Value ftell(Env env, StreamResource file)
   {
-    if (file == null)
+    if (file == null) {
+      env.warning(L.l("{0} is null", "handle"));
       return BooleanValue.FALSE;
+    }
     else
       return new LongValue(file.getPosition());
   }
@@ -1039,11 +1133,13 @@ public class QuercusFileModule extends AbstractQuercusModule {
   /**
    * Writes a string to the file.
    */
-  public Value fwrite(Value fileV, String value,  @Optional("-1") int length)
+  public Value fwrite(Env env, Value fileV, String value,  @Optional("-1") int length)
     throws IOException
   {
-    if (! (fileV instanceof FileValue))
+    if (! (fileV instanceof FileValue)) {
+      env.warning(L.l("bad {0}", "handle"));
       return BooleanValue.FALSE;
+    }
 
     FileValue file = (FileValue) fileV;
 
@@ -1081,9 +1177,7 @@ public class QuercusFileModule extends AbstractQuercusModule {
    */
   public static boolean is_executable(Path path)
   {
-    // XXX: todo
-
-    return false;
+    return path.isExecutable();
   }
 
   /**
@@ -1103,9 +1197,7 @@ public class QuercusFileModule extends AbstractQuercusModule {
    */
   public static boolean is_link(Path path)
   {
-    // XXX: todo
-
-    return false;
+    return path.isSymbolicLink();
   }
 
   /**
@@ -1148,14 +1240,29 @@ public class QuercusFileModule extends AbstractQuercusModule {
     return is_writable(path);
   }
 
-  // XXX: link
+  /**
+   * Creates a hard link
+   */
+  public boolean link(Env env, Path target, Path link)
+  {
+    // quercus/160w
+    if (!target.canRead()) {
+      env.warning(L.l("{0} cannot be read", target.getFullPath()));
+      return false;
+    }
+
+    // XXX: stubbed
+
+    return false;
+  }
+
   // XXX: linkinfo
   // XXX: lstat
 
   /**
-   * Changes the working directory
+   * Makes the directory
    *
-   * @param path the path to change to
+   * @param path the directory to make
    */
   public static boolean mkdir(Env env, Path path)
   {
@@ -1195,7 +1302,7 @@ public class QuercusFileModule extends AbstractQuercusModule {
   /**
    * Opens a directory
    *
-   * @param path the path to change to
+   * @param pathName the directory to open
    */
   public static Value opendir(Env env, String pathName,
                               @Optional Value context)
@@ -1207,7 +1314,7 @@ public class QuercusFileModule extends AbstractQuercusModule {
       return new DirectoryValue(path);
     }
     else {
-      // XXX: warning message
+      env.warning(L.l("{0} is not a directory", path.getFullPath()));
 
       return BooleanValue.FALSE;
     }
@@ -1221,14 +1328,13 @@ public class QuercusFileModule extends AbstractQuercusModule {
   /**
    * Reads the next entry
    *
-   * @param dir the directory resource
+   * @param dirV the directory resource
    */
   public static Value readdir(Env env, Value dirV)
     throws Exception
   {
     if (! (dirV instanceof DirectoryValue)) {
-      env.warning(L.l("expected directory in readdir at '{0}'", dirV));
-
+      env.warning(L.l("{0} is not a directory", dirV));
       return BooleanValue.FALSE;
     }
 
@@ -1244,11 +1350,16 @@ public class QuercusFileModule extends AbstractQuercusModule {
   /**
    * Renames a file
    *
-   * @param from the path to change to
-   * @param to the path to change to
+   * @param fromPath the path to change to
+   * @param toPath the path to change to
    */
   public static boolean rename(Env env, Path fromPath, Path toPath)
   {
+    if (!fromPath.canRead()) {
+      env.warning(L.l("{0} cannot be read", fromPath.getFullPath()));
+      return false;
+    }
+
     try {
       return fromPath.renameTo(toPath);
     } catch (IOException e) {
@@ -1263,14 +1374,13 @@ public class QuercusFileModule extends AbstractQuercusModule {
   /**
    * Rewinds the directory listing
    *
-   * @param dir the directory resource
+   * @param dirV the directory resource
    */
   public static Value rewinddir(Env env, Value dirV)
     throws Exception
   {
     if (! (dirV instanceof DirectoryValue)) {
-      env.warning(L.l("expected directory in rewinddir at '{0}'", dirV));
-
+      env.warning(L.l("{0} is not a directory", dirV));
       return BooleanValue.FALSE;
     }
 
@@ -1292,6 +1402,11 @@ public class QuercusFileModule extends AbstractQuercusModule {
     try {
       Path path = env.getPwd().lookup(filename);
 
+      if (!path.isDirectory()) {
+        env.warning(L.l("{0} is not a directory", path.getFullPath()));
+        return false;
+      }
+
       return path.remove();
     } catch (IOException e) {
       log.log(Level.FINE, e.toString(), e);
@@ -1303,7 +1418,7 @@ public class QuercusFileModule extends AbstractQuercusModule {
   /**
    * Closes the directory
    *
-   * @param dir the directory resource
+   * @param dirV the directory resource
    */
   public static Value closedir(Env env, Value dirV)
     throws IOException
@@ -1314,7 +1429,7 @@ public class QuercusFileModule extends AbstractQuercusModule {
   /**
    * Scan the directory
    *
-   * @param dir the directory resource
+   * @param fileName the directory
    */
   public static Value scandir(Env env, String fileName,
                               @Optional("1") int order,
@@ -1322,6 +1437,11 @@ public class QuercusFileModule extends AbstractQuercusModule {
     throws IOException
   {
     Path path = env.getPwd().lookup(fileName);
+
+    if (!path.isDirectory()) {
+      env.warning(L.l("{0} is not a directory", path.getFullPath()));
+      return BooleanValue.FALSE;
+    }
 
     String []values = path.list();
 
@@ -1357,6 +1477,7 @@ public class QuercusFileModule extends AbstractQuercusModule {
    */
   public static Value stat(Env env, Path path)
   {
+    // XXX: what if it doesn't exist?
     ArrayValue result = new ArrayValueImpl();
 
     result.put(new StringValue("size"), new LongValue(path.getLength()));
@@ -1367,9 +1488,15 @@ public class QuercusFileModule extends AbstractQuercusModule {
   /**
    * Creates a symlink
    */
-  public boolean symlink(Path target, Path link)
+  public boolean symlink(Env env, Path target, Path link)
   {
     // quercus/160r
+    if (!target.canRead()) {
+      env.warning(L.l("{0} cannot be read", target.getFullPath()));
+      return false;
+    }
+
+    // XXX: stubbed
 
     return false;
   }
@@ -1381,9 +1508,14 @@ public class QuercusFileModule extends AbstractQuercusModule {
   {
     // quercus/160u
 
+    if (!dir.isDirectory()) {
+      env.warning(L.l("{0} is not a directory", dir.getFullPath()));
+      return BooleanValue.FALSE;
+    }
+
     try {
       // XXX: remove on exit
-      
+
       Path path = dir.createTempFile(prefix, ".tmp");
       return new StringValue(path.getTail());
     } catch (IOException e) {
@@ -1400,7 +1532,8 @@ public class QuercusFileModule extends AbstractQuercusModule {
   {
     try {
       // XXX: remove on exit
-      
+      // XXX: location of tmp files s/b configurable
+
       Path tmp = env.getPwd().lookup("/tmp");
 
       tmp.mkdirs();
@@ -1422,6 +1555,8 @@ public class QuercusFileModule extends AbstractQuercusModule {
                               @Optional int time,
                               @Optional int atime)
   {
+    // XXX: atime not implemented (it might be > time)
+
     try {
       if (path.exists()) {
         if (time > 0)

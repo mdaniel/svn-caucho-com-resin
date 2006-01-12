@@ -56,7 +56,7 @@ import com.caucho.util.*;
  */
 public abstract class Path {
   protected final static L10N L = new L10N(Path.class);
-  
+
   private static final Integer LOCK = new Integer(0);
 
   private static final LruCache<PathKey,Path> _pathLookupCache
@@ -81,7 +81,7 @@ public abstract class Path {
 
   /**
    * Looks up a new path based on the old path.
-   * 
+   *
    * @param name relative url to the new path
    * @return The new path.
    */
@@ -140,7 +140,7 @@ public abstract class Path {
   {
     if (userPath == null)
       return lookupImpl(getPath(), newAttributes);
-    
+
     String scheme = scanScheme(userPath);
 
     if (scheme == null)
@@ -151,18 +151,18 @@ public abstract class Path {
     SchemeMap schemeMap = _schemeMap;
     if (schemeMap == null)
       schemeMap = SchemeMap.getLocalSchemeMap();
-    
+
     // Special case to handle the windows special schemes
     // c:xxx -> file:/c:xxx
     if (CauchoSystem.isWindows()) {
       int length = scheme.length();
       int ch;
-      
+
       if (length == 1 &&
           ((ch = scheme.charAt(0)) >= 'a' && ch <= 'z' ||
             ch >= 'A' && ch <= 'Z')) {
         path = schemeMap.getScheme("file");
-      
+
         if (path != null)
           return path.schemeWalk(userPath, newAttributes, "/" + userPath, 0);
       }
@@ -173,7 +173,7 @@ public abstract class Path {
     // assume the foo:bar is a subfile
     if (path == null)
       return schemeWalk(userPath, newAttributes, userPath, 0);
-    
+
     return path.schemeWalk(userPath, newAttributes,
                            userPath, scheme.length() + 1);
   }
@@ -218,13 +218,13 @@ public abstract class Path {
   public ArrayList<Path> getResources()
   {
     ArrayList<Path> list = new ArrayList<Path>();
-    
+
     //if (exists())
       list.add(this);
 
     return list;
   }
-  
+
   /**
    * Returns the parent path.
    */
@@ -242,7 +242,7 @@ public abstract class Path {
     int i = 0;
     if (uri == null)
       return null;
-    
+
     int length = uri.length();
     if (length == 0)
       return null;
@@ -345,7 +345,7 @@ public abstract class Path {
    * parsers to give intelligent error messages, with the user's path
    * instead of the whole path.
    *
-   * The following will print '../test.html': 
+   * The following will print '../test.html':
    * <code><pre>
    * Path path = Pwd.lookup("/some/dir").lookup("../test.html");
    * System.out.println(path.getUserPath());
@@ -422,6 +422,40 @@ public abstract class Path {
   }
 
   /**
+   * Tests if the path is marked as executable
+   */
+  public boolean isExecutable()
+  {
+    return false;
+  }
+
+  /**
+   * Change the executable status of the of the oath.
+   *
+   * @throws UnsupportedOperationException
+   */
+  public void setExecutable(boolean isExecutable)
+  {
+    throw new UnsupportedOperationException("setExecutable");
+  }
+
+  /**
+   * Tests if the path refers to a symbolic link.
+   */
+  public boolean isSymbolicLink()
+  {
+    return false;
+  }
+
+  /**
+   * Tests if the path refers to a hard link.
+   */
+  public boolean isHardLink()
+  {
+    return false;
+  }
+
+  /**
    * Tests if the path refers to an object.
    */
   public boolean isObject()
@@ -488,11 +522,23 @@ public abstract class Path {
     return false;
   }
 
+  public int getInode()
+  {
+    return -1;
+  }
+
   /**
    * Sets the file to read only
    */
   public void setReadOnly(boolean isReadOnly)
   {
+    // XXX: stubbed
+  }
+
+  public int getGroup()
+  {
+    // XXX: stubbed
+    return -1002;
   }
 
   /**
@@ -521,6 +567,12 @@ public abstract class Path {
     // XXX: "safe_mode" check with current owner
   }
 
+  public int getOwner()
+  {
+    // XXX: stub
+    return -1001;
+  }
+
   /**
    * Changes the owner
    */
@@ -537,6 +589,16 @@ public abstract class Path {
     throws IOException
   {
     // XXX: "safe_mode" check with current owner
+  }
+
+  public long getDiskSpaceFree()
+  {
+    return 1024 * 1024 * 1024;
+  }
+
+  public long getDiskSpaceTotal()
+  {
+    return 1024 * 1024 * 1024 * 2;
   }
 
   /**
@@ -632,7 +694,7 @@ public abstract class Path {
   {
     return createRoot(SchemeMap.getNullSchemeMap());
   }
-  
+
   public Path createRoot(SchemeMap schemeMap)
   {
     throw new UnsupportedOperationException("createRoot");
@@ -657,8 +719,8 @@ public abstract class Path {
   }
 
   /**
-   * Gets the object at the path.  Normal filesystems will generally 
-   * typically return null. 
+   * Gets the object at the path.  Normal filesystems will generally
+   * typically return null.
    *
    * <p>A bean filesystem or a mime-type aware filesystem could deserialize
    * the contents of the file.
@@ -669,11 +731,11 @@ public abstract class Path {
   }
 
   /**
-   * Sets the object at the path.  
+   * Sets the object at the path.
    *
-   * <p>Normal filesystems will generally do nothing. However, a bean 
-   * filesystem or a mime-type aware filesystem could serialize the object 
-   * and store it. 
+   * <p>Normal filesystems will generally do nothing. However, a bean
+   * filesystem or a mime-type aware filesystem could serialize the object
+   * and store it.
    */
   public void setValue(Object obj) throws Exception
   {
@@ -704,7 +766,7 @@ public abstract class Path {
   {
     StreamImpl impl = openReadImpl();
     impl.setPath(this);
-    
+
     return new ReadStream(impl);
   }
 
@@ -721,7 +783,7 @@ public abstract class Path {
   /**
    * Opens a resin ReadWritePair for reading and writing.
    *
-   * <p>A chat channel, for example, would open its socket using this 
+   * <p>A chat channel, for example, would open its socket using this
    * interface.
    */
   public ReadWritePair openReadWrite() throws IOException
@@ -736,7 +798,7 @@ public abstract class Path {
   /**
    * Opens a resin ReadWritePair for reading and writing.
    *
-   * <p>A chat channel, for example, would open its socket using this 
+   * <p>A chat channel, for example, would open its socket using this
    * interface.
    *
    * @param is pre-allocated ReadStream to be initialized
@@ -832,7 +894,7 @@ public abstract class Path {
 	os.write(buffer, 0, len);
     } finally {
       TempBuffer.free(tempBuffer);
-      
+
       is.close();
     }
   }
@@ -915,7 +977,7 @@ public abstract class Path {
     } catch (IOException e) {
       // XXX: log
       e.printStackTrace();
-      
+
       return -1;
     }
   }
@@ -996,7 +1058,7 @@ public abstract class Path {
 	}
 	cb.append("%23");
 	break;
-	
+
       case '%':
 	if (cb == null) {
 	  cb = new CharBuffer();
@@ -1004,7 +1066,7 @@ public abstract class Path {
 	}
 	cb.append("%25");
 	break;
-	
+
       default:
 	if (cb != null)
 	  cb.append(ch);

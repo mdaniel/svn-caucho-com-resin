@@ -36,12 +36,12 @@ import com.caucho.util.*;
 
 public class MemoryPath extends FilesystemPath {
   private static L10N L = new L10N(MemoryPath.class);
-  
+
   private Node _rootNode;
 
-  protected MemoryPath(FilesystemPath root, 
-		       String userPath, Map<String,Object> attributes,
-		       String path)
+  protected MemoryPath(FilesystemPath root,
+                       String userPath, Map<String,Object> attributes,
+                       String path)
   {
     super(root, userPath, path);
 
@@ -151,11 +151,35 @@ public class MemoryPath extends FilesystemPath {
     }
   }
 
+  public void setExecutable(boolean isExecutable)
+  {
+    synchronized (_rootNode) {
+      Node node = lookupAll();
+
+      if (node != null && (node.type == node.FILE || node.type == node.DIR))
+        node.isExecutable = isExecutable;
+      else
+        super.setExecutable(isExecutable);
+    }
+  }
+
+  public boolean isExecutable()
+  {
+    synchronized (_rootNode) {
+      Node node = lookupAll();
+
+      if (node != null && (node.type == node.FILE || node.type == node.DIR))
+        return node.isExecutable;
+      else
+        return super.isExecutable();
+    }
+  }
+
   public long getLength()
   {
     synchronized (_rootNode) {
       Node node = lookupAll();
-    
+
       if (node != null && node.type == node.FILE)
 	return ((ByteBuffer) node.data).length();
       else
@@ -284,7 +308,7 @@ public class MemoryPath extends FilesystemPath {
     synchronized (_rootNode) {
       if (! (path instanceof MemoryPath))
 	return false;
-    
+
       MemoryPath file = (MemoryPath) path;
       if (_rootNode != file._rootNode)
 	return false;
@@ -292,7 +316,7 @@ public class MemoryPath extends FilesystemPath {
       Node oldParent = lookupAllButTail();
       if (oldParent == null)
 	return false;
-    
+
       Node child = oldParent.lookup(getTail());
       if (child == null)
 	return false;
@@ -419,6 +443,7 @@ public class MemoryPath extends FilesystemPath {
     Node firstChild;
     long lastModified;
     int type;
+    boolean isExecutable;
 
     Object data;
 
@@ -439,7 +464,7 @@ public class MemoryPath extends FilesystemPath {
 	  return node;
         }
       }
-      
+
       return null;
     }
 
@@ -488,7 +513,7 @@ public class MemoryPath extends FilesystemPath {
 	if (node.name.equals(name)) {
           if (node.firstChild != null)
             return false;
-          
+
 	  if (last != null)
 	    last.next = node.next;
 	  else
@@ -518,6 +543,7 @@ public class MemoryPath extends FilesystemPath {
 
       return newNode;
     }
+
   };
 
   public class MemoryStream extends StreamImpl {
@@ -557,7 +583,7 @@ public class MemoryPath extends FilesystemPath {
 
 	System.arraycopy(_bb.getBuffer(), _offset, buf, bufOffset, sublen);
 	_offset += sublen;
-        
+
 	return sublen;
       }
     }
@@ -592,7 +618,7 @@ public class MemoryPath extends FilesystemPath {
       synchronized (_bb) {
 	_bb.add(buf, offset, length);
       }
-      
+
       _node.lastModified = Alarm.getCurrentTime();
     }
   }
