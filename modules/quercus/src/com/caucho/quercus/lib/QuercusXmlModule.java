@@ -64,6 +64,15 @@ public class QuercusXmlModule extends AbstractQuercusModule {
     return new StringValue(str);
   }
 
+  /**
+   * @see boolean XmlClass.xml_parse
+   *
+   * @param parser
+   * @param data
+   * @param isFinal
+   * @return false if parser == null
+   * @throws Exception
+   */
   public boolean xml_parse(@NotNull XmlClass parser,
                            @NotNull String data,
                            @Optional boolean isFinal)
@@ -100,6 +109,14 @@ public class QuercusXmlModule extends AbstractQuercusModule {
     return new XmlClass(env,outputEncoding,separator);
   }
 
+  /**
+   * @see boolean XmlClass.xml_set_element_handler
+   *
+   * @param parser
+   * @param startElementHandler
+   * @param endElementHandler
+   * @return false if parser == null
+   */
   public boolean xml_set_element_handler(@NotNull XmlClass parser,
                                          @NotNull Value startElementHandler,
                                          @NotNull Value endElementHandler)
@@ -110,6 +127,13 @@ public class QuercusXmlModule extends AbstractQuercusModule {
     return parser.xml_set_element_handler(startElementHandler, endElementHandler);
   }
 
+  /**
+   * @see boolean XmlClass.xml_set_character_data_handler
+   *
+   * @param parser
+   * @param handler
+   * @return false if parser == null
+   */
   public boolean xml_set_character_data_handler(@NotNull XmlClass parser,
                                                 @NotNull Value handler)
   {
@@ -119,6 +143,12 @@ public class QuercusXmlModule extends AbstractQuercusModule {
     return parser.xml_set_character_data_handler(handler);
   }
 
+  /**
+   *
+   * @param parser
+   * @param obj
+   * @return false if parser == null
+   */
   public boolean xml_set_object(@NotNull XmlClass parser,
                                 @NotNull Value obj)
   {
@@ -128,6 +158,12 @@ public class QuercusXmlModule extends AbstractQuercusModule {
     return parser.xml_set_object(obj);
   }
 
+  /**
+   *
+   * @param parser
+   * @param handler
+   * @return false if parser == null
+   */
   public boolean xml_set_processing_instruction_handler(@NotNull XmlClass parser,
                                                         @NotNull Value handler)
   {
@@ -137,6 +173,12 @@ public class QuercusXmlModule extends AbstractQuercusModule {
     return parser.xml_set_processing_instruction_handler(handler);
   }
 
+  /**
+   *
+   * @param parser
+   * @param handler
+   * @return false if parser == null
+   */
   public boolean xml_set_default_handler(@NotNull XmlClass parser,
                                          @NotNull Value handler)
   {
@@ -146,6 +188,12 @@ public class QuercusXmlModule extends AbstractQuercusModule {
     return parser.xml_set_default_handler(handler);
   }
 
+  /**
+   *
+   * @param parser
+   * @param handler
+   * @return false if parser == null
+   */
   public boolean xml_start_namespace_decl_handler(@NotNull XmlClass parser,
                                                   @NotNull Value handler)
   {
@@ -155,6 +203,12 @@ public class QuercusXmlModule extends AbstractQuercusModule {
     return parser.xml_set_start_namespace_decl_handler(handler);
   }
 
+  /**
+   *
+   * @param parser
+   * @param handler
+   * @return false if parser == null
+   */
   public boolean xml_set_end_namespace_decl_handler(@NotNull XmlClass parser,
                                                     @NotNull Value handler)
   {
@@ -164,6 +218,15 @@ public class QuercusXmlModule extends AbstractQuercusModule {
     return parser.xml_set_end_namespace_decl_handler(handler);
   }
 
+  /**
+   *
+   * @param parser
+   * @param data
+   * @param valueArray
+   * @param indexArray
+   * @return false if parser == null
+   * @throws Exception
+   */
   public int xml_parse_into_struct(@NotNull XmlClass parser,
                                    @NotNull String data,
                                    @Reference Value valueArray,
@@ -176,6 +239,12 @@ public class QuercusXmlModule extends AbstractQuercusModule {
     return parser.xml_parse_into_struct(data, valueArray, indexArray);
   }
 
+  /**
+   * stub function.  parser_free taken care of by garbage collection
+   *
+   * @param parser
+   * @return false if parser == null, otherwise true
+   */
   public boolean xml_parser_free(@NotNull XmlClass parser)
   {
     if (parser == null)
