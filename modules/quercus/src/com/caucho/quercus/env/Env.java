@@ -181,6 +181,7 @@ public class Env {
   private HashMap<String,Object> _specialMap
     = new HashMap<String,Object>();
 
+  private String _prevIncludePath = ".";
   private String _includePath;
   private ArrayList<Path> _includePathList;
 
@@ -2362,6 +2363,30 @@ public class Env {
     }
 
     return _includePathList;
+  }
+
+  /**
+   * Sets the include path.
+   */
+  public String setIncludePath(String path)
+  {
+    _prevIncludePath = getIniString("include_path");
+    
+    setIni("include_path", path);
+
+    return _prevIncludePath;
+  }
+
+  /**
+   * Restores the previous include path.
+   */
+  public void restoreIncludePath(String path)
+  {
+    String path = getIniString("include_path");
+    
+    setIni("include_path", _prevIncludePath);
+
+    _prevIncludePath = path;
   }
 
   /**

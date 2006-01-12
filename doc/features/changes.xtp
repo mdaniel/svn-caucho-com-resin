@@ -4,6 +4,10 @@
 
 <s2 title='3.0.snap - Jan 10, 2005'>
 <ul>
+<li>ParseTagManager methods need to be synchronized for JSP compilation on server startup (#704, rep by Bryan Davis)
+<li>FileServlet needs to get character-encoding from init-param (#583, rep by Anoop Achuthan)
+<li>BigDecimal.ZERO is a JDK 1.5 constant (#858, rep by Vinny)
+<li>AbstractLogRollover should not use java.util.logging for messages to avoid deadlock (#851, rep by Thomas Moorer)
 <li>plugins should not dispatch automatically if no ResinConfigServer (#3, rep by M Muenke)
 <li>./configure script wasn't adding resinssl on solaris (#665, rep by Mark Demma)
 <li>jsp:include/jsp:forward not properly handling runtime expressions (#852, rep by Rudy D'hauwe)

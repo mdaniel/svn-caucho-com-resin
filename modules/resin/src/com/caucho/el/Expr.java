@@ -58,6 +58,10 @@ public abstract class Expr {
   
   private static final long DAY = 24L * 3600L * 1000L;
 
+  private static final BigDecimal BIG_DECIMAL_ZERO = new BigDecimal("0");
+
+  private static final BigInteger BIG_INTEGER_ZERO = new BigInteger("0");
+
   // lexeme codes
   final static int ADD = 1;
   final static int SUB = ADD + 1;
@@ -551,7 +555,7 @@ public abstract class Expr {
     throws ELException
   {
     if (value == null)
-      return BigDecimal.ZERO;
+      return BIG_DECIMAL_ZERO;
     else if  (value instanceof BigDecimal)
       return (BigDecimal) value;
     else if (value instanceof Number) {
@@ -560,7 +564,7 @@ public abstract class Expr {
       return new BigDecimal(dValue);
     }
     else if (value.equals(""))
-      return BigDecimal.ZERO;
+      return BIG_DECIMAL_ZERO;
     else if (value instanceof String) {
       return new BigDecimal((String) value);
     }
@@ -573,7 +577,7 @@ public abstract class Expr {
       
       error(e, env);
 
-      return BigDecimal.ZERO;
+      return BIG_DECIMAL_ZERO;
     }
   }
 
@@ -588,7 +592,7 @@ public abstract class Expr {
     throws ELException
   {
     if (value == null)
-      return BigInteger.ZERO;
+      return BIG_INTEGER_ZERO;
     else if  (value instanceof BigInteger)
       return (BigInteger) value;
     else if (value instanceof Number) {
@@ -596,7 +600,7 @@ public abstract class Expr {
       return new BigDecimal(value.toString()).toBigInteger();
     }
     else if (value.equals(""))
-      return BigInteger.ZERO;
+      return BIG_INTEGER_ZERO;
     else if (value instanceof String) {
       return new BigInteger((String) value);
     }
@@ -609,7 +613,7 @@ public abstract class Expr {
       
       error(e, env);
 
-      return BigInteger.ZERO;
+      return BIG_INTEGER_ZERO;
     }
   }
 

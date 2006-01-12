@@ -281,6 +281,42 @@ public class EnvironmentStream extends StreamImpl {
     return _origSystemErr;
   }
 
+  /**
+   * Logs a message to the original stderr in cases where java.util.logging
+   * is dangerous, e.g. in the logging code itself.
+   */
+  public static void logStderr(String msg, Throwable e)
+  {
+    try {
+      long now = Alarm.getCurrentTime();
+    
+      msg = QDate.formatLocal(now, "[%Y-%m-%d %H:%M:%S] ") + msg;
+
+      _origSystemErr.println(msg);
+
+      e.printStackTrace(_origSystemErr.getPrintWriter());
+
+      _origSystemErr.flush();
+    } catch (Throwable e1) {
+    }
+  }
+
+  /**
+   * Logs a message to the original stderr in cases where java.util.logging
+   * is dangerous, e.g. in the logging code itself.
+   */
+  public static void logStderr(String msg)
+  {
+    try {
+      long now = Alarm.getCurrentTime();
+    
+      msg = QDate.formatLocal(now, "[%Y-%m-%d %H:%M:%S] ") + msg;
+
+      _origSystemErr.println(msg);
+    } catch (Throwable e1) {
+    }
+  }
+
   static {
     _origSystemOut.setFlushOnNewline(true);
     _origSystemErr.setFlushOnNewline(true);

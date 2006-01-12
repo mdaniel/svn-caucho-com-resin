@@ -58,7 +58,6 @@ import com.caucho.config.ConfigException;
  * Abstract class for a log that rolls over based on size or period.
  */
 public class AbstractRolloverLog {
-  protected static final Logger log = Log.open(AbstractRolloverLog.class);
   protected static final L10N L = new L10N(AbstractRolloverLog.class);
 
   // Milliseconds in a day
@@ -376,7 +375,7 @@ public class AbstractRolloverLog {
       if (os != null)
 	os.close();
     } catch (Throwable e) {
-      log.log(Level.FINER, e.toString(), e);
+      // can't log in log routines
     }
       
     Path path = getPath();
@@ -389,21 +388,21 @@ public class AbstractRolloverLog {
       if (! path.getParent().isDirectory())
 	path.getParent().mkdirs();
     } catch (Throwable e) {
-      log.log(Level.FINER, e.toString(), e);
+      logWarning(L.l("Can't create log directory {0}", path.getParent()), e);
     }
+
+    Exception exn = null;
     
     for (int i = 0; i < 3 && _os == null; i++) {
       try {
 	_os = path.openAppend();
       } catch (IOException e) {
-	log.fine(L.l("Can't open log '{0}'.\n{1}",
-		     getPath(), e.toString()));
+	exn = e;
       }
     }
 
-    if (_os == null)
-      log.warning(L.l("Can't open log file '{0}'.",
-		      getPath()));
+    if (exn != null)
+      logWarning(L.l("Can't create log directory {0}", path), exn);
   }
 
   /**
@@ -418,7 +417,7 @@ public class AbstractRolloverLog {
       if (os != null)
 	os.close();
     } catch (Throwable e) {
-      log.log(Level.FINER, e.toString(), e);
+      // can't log in log routines
     }
   }
 
@@ -428,7 +427,7 @@ public class AbstractRolloverLog {
     
     String savedName = savedPath.getTail();
     
-    log.info(L.l("Archiving access log to {0}.", savedName));
+    logInfo(L.l("Archiving access log to {0}.", savedName));
 	     
     try {
       WriteStream os = _os;
@@ -436,13 +435,16 @@ public class AbstractRolloverLog {
       if (os != null)
 	os.close();
     } catch (IOException e) {
-      log.log(Level.FINE, e.toString(), e);
+      // can't log in log routines
     }
 
     try {
-      savedPath.getParent().mkdirs();
+      if (! savedPath.getParent().isDirectory())
+	savedPath.getParent().mkdirs();
     } catch (Throwable e) {
-      log.log(Level.WARNING, e.toString(), e);
+      logWarning(L.l("Can't open archive directory {0}",
+		     savedPath.getParent()),
+		 e);
     }
         
     try {
@@ -462,20 +464,20 @@ public class AbstractRolloverLog {
 	try {
 	  out.close();
 	} catch (Throwable e) {
-	  log.log(Level.WARNING, e.toString(), e);
+	  // can't log in log rotation routines
 	}
 
 	try {
 	  if (out != os)
 	    os.close();
 	} catch (Throwable e) {
-	  log.log(Level.WARNING, e.toString(), e);
+	  // can't log in log rotation routines
 	}
 	  
 	path.remove();
       }
     } catch (Throwable e) {
-      log.log(Level.WARNING, e.toString(), e);
+      logWarning(L.l("Error rotating logs"), e);
     }
   }
 
@@ -543,6 +545,22 @@ public class AbstractRolloverLog {
       return _rolloverPrefix + "." + _calendar.formatLocal(time, "%Y%m%d");
     else
       return _rolloverPrefix + "." + _calendar.formatLocal(time, "%Y%m%d.%H");
+  }
+
+  /**
+   * error messages from the log itself
+   */
+  private void logInfo(String msg)
+  {
+    EnvironmentStream.logStderr(msg);
+  }
+
+  /**
+   * error messages from the log itself
+   */
+  private void logWarning(String msg, Throwable e)
+  {
+    EnvironmentStream.logStderr(msg, e);
   }
 
   /**

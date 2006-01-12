@@ -106,6 +106,14 @@ public class QuercusOptionsModule extends AbstractQuercusModule {
   }
 
   /**
+   * Returns the include path
+   */
+  public static Value get_include_path(Env env)
+  {
+    return env.getIni("include_path");
+  }
+
+  /**
    * Returns extension function swith a given name
    */
   public static Value get_extension_funcs(Env env, String name)
@@ -218,6 +226,24 @@ public class QuercusOptionsModule extends AbstractQuercusModule {
   }
 
   /**
+   * Sets the include path
+   */
+  public static String set_include_path(Env env, String includePath)
+  {
+    return env.setIncludePath(includePath);
+  }
+
+  /**
+   * Sets the include path
+   */
+  public static Value restore_include_path(Env env)
+  {
+    env.restoreIncludePath();
+
+    return NullValue.NULL;
+  }
+
+  /**
    * Sets the magic quotes value.
    */
   public static Value set_magic_quotes_runtime(Env env, Value value)
@@ -275,7 +301,6 @@ public class QuercusOptionsModule extends AbstractQuercusModule {
   //@todo boolean extension_loaded(string name)
   //@todo string  get_cfg_var(string varname)
   //@todo string  get_current_user()
-  //@todo array   get_defined_constants([mixed categorize])
   //@todo array   get_extension_funcs(string module_name)
   //@todo string  get_include_path()
   //@todo array   get_included_files()

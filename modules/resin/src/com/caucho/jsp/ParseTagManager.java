@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -71,7 +72,7 @@ public class ParseTagManager {
   /**
    * Analyzes the tag.
    */
-  public AnalyzedTag analyzeTag(Class cl)
+  public synchronized  AnalyzedTag analyzeTag(Class cl)
   {
     return _taglibManager.analyzeTag(cl);
   }
@@ -79,7 +80,7 @@ public class ParseTagManager {
   /**
    * Returns the tag with the given qname.
    */
-  public TagInfo getTag(QName qname)
+  public synchronized TagInfo getTag(QName qname)
     throws JspParseException
   {
     TagInfo tag = getTagImpl(qname);
@@ -163,7 +164,7 @@ public class ParseTagManager {
   /**
    * Returns the tag with the given qname.
    */
-  public Class getTagClass(QName qname)
+  public synchronized Class getTagClass(QName qname)
     throws Exception
   {
     TagInfo tagInfo = getTag(qname);
@@ -179,7 +180,7 @@ public class ParseTagManager {
       return null;
   }
 
-  public Taglib addTaglib(QName qname)
+  public synchronized Taglib addTaglib(QName qname)
     throws JspParseException
   {
     String prefix = qname.getPrefix();
@@ -196,8 +197,11 @@ public class ParseTagManager {
 
     return taglib;
   }
-    
-  public Taglib addTaglib(String prefix, String uri)
+
+  /**
+   * Lookup and add a taglib based on a prefix and uri
+   */
+  public synchronized Taglib addTaglib(String prefix, String uri)
     throws JspParseException
   {
     Taglib taglib = null;
@@ -237,7 +241,7 @@ public class ParseTagManager {
   /**
    * Adds a taglib.
    */
-  public Taglib addTaglibDir(String prefix, String dir)
+  public synchronized Taglib addTaglibDir(String prefix, String dir)
     throws JspParseException
   {
     return  _taglibManager.getTaglibDir(prefix, dir);
@@ -246,7 +250,9 @@ public class ParseTagManager {
   /**
    * Adds a taglib.
    */
-  public Taglib addTaglib(String prefix, String uri, String location)
+  public synchronized Taglib addTaglib(String prefix,
+				       String uri,
+				       String location)
     throws JspParseException
   {
     return _taglibManager.getTaglib(prefix, uri, location);
