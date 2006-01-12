@@ -164,5 +164,13 @@ public class QuercusXmlModule extends AbstractQuercusModule {
 
     return parser.xml_parse_into_struct(data, valueArray, indexArray);
   }
+
+  public boolean xml_parser_free(@NotNull XmlClass parser)
+  {
+    if (parser == null)
+      return false;
+    else
+      return true;
+  }
 }
 

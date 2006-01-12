@@ -31,7 +31,6 @@ package com.caucho.quercus.lib;
 
 import java.util.logging.Logger;
 import java.util.logging.Level;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.io.IOException;
 import java.io.StringReader;
@@ -102,6 +101,12 @@ public class XmlClass {
 
   private Env _env;
   private String _outputEncoding;
+
+  /** XXX: _separator is set by xml_parse_create_ns but
+   *  not yet used.  Default value is ":"
+   *  Possibly should report error if user wants to use
+   *  anything other than ":"
+   */
   private String _separator;
 
   private Callback _startElementHandler;
