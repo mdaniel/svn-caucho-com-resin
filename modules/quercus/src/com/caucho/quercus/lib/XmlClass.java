@@ -113,6 +113,7 @@ public class XmlClass {
   private Callback _endNamespaceDeclHandler;
 
   private Value _parser;
+  private Value _obj;
 
   SAXParserFactory _factory = SAXParserFactory.newInstance();
 
@@ -139,8 +140,20 @@ public class XmlClass {
   public boolean xml_set_element_handler(Value startElementHandler,
                                          Value endElementHandler)
   {
-    _startElementHandler = _env.createCallback(startElementHandler);
-    _endElementHandler = _env.createCallback(endElementHandler);
+    if (_obj == null) {
+      _startElementHandler = _env.createCallback(startElementHandler);
+      _endElementHandler = _env.createCallback(endElementHandler);
+    } else {
+      Value value = new ArrayValueImpl();
+      value.put(_obj);
+      value.put(startElementHandler);
+      _startElementHandler = _env.createCallback(value);
+
+      value = new ArrayValueImpl();
+      value.put(_obj);
+      value.put(endElementHandler);
+      _endElementHandler = _env.createCallback(value);
+    }
     return true;
   }
 
@@ -152,7 +165,15 @@ public class XmlClass {
    */
   public boolean xml_set_character_data_handler(Value handler)
   {
-    _characterDataHandler = _env.createCallback(handler);
+    if (_obj == null) {
+      _characterDataHandler = _env.createCallback(handler);
+    } else {
+      Value value = new ArrayValueImpl();
+      value.put(_obj);
+      value.put(handler);
+      _characterDataHandler = _env.createCallback(value);
+    }
+
     return true;
   }
 
@@ -214,23 +235,39 @@ public class XmlClass {
   }
 
   /**
+   * sets the object which houses all the callback functions
+   *
+   * @param obj
+   * @return returns true unless obj == null
+   */
+  public boolean xml_set_object(Value obj)
+  {
+    if (obj == null)
+      return false;
+
+    _obj = obj;
+
+    return true;
+  }
+
+  /**
    * xml_parse will keep accumulating "data" until
    * either is_final is true or omitted
    *
    * @param data
-   * @param is_final
+   * @param isFinal
    * @return
    * @throws IOException
    * @throws SAXException
    * @throws ParserConfigurationException
    */
   public boolean xml_parse(String data,
-                           @Optional("true") boolean is_final)
+                           @Optional("true") boolean isFinal)
     throws Exception
   {
     _xmlString.append(data);
 
-    if (is_final) {
+    if (isFinal) {
       InputSource is = new InputSource(new StringReader(_xmlString.toString()));
       if (_outputEncoding == null)
         _outputEncoding = is.getEncoding();

@@ -64,6 +64,17 @@ public class QuercusXmlModule extends AbstractQuercusModule {
     return new StringValue(str);
   }
 
+  public boolean xml_parse(@NotNull XmlClass parser,
+                           @NotNull String data,
+                           @Optional boolean isFinal)
+    throws Exception
+  {
+    if (parser == null)
+      return false;
+
+    return parser.xml_parse(data, isFinal);
+  }
+
   /**
    * returns a new Xml Parser
    */
