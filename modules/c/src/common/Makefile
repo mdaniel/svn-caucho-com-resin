@@ -1,13 +1,13 @@
 .SUFFIXES: .o .lo
 
 CC=gcc
-CFLAGS=-g -O2 -DPOLL -DHAS_JVMTI
-CFLAGS_SHLIB=-DSHARED_MODULE
-LIBTOOL=/Users/ferg/ws/resin/libtool --silent
-LD=gcc
-LD_SHLIB=cc
+CFLAGS=-g -O2 -DPOLL -DB64 -m64 -fPIC -DHAS_JVMTI
+CFLAGS_SHLIB=-fpic
+LIBTOOL=/home/ferg/ws/resin/libtool --silent
+LD=/usr/bin/ld
+LD_SHLIB=gcc
 LDFLAGS=
-LDFLAGS_SHLIB=-bundle -undefined suppress -flat_namespace -Wl,-bind_at_load -L/usr/lib
+LDFLAGS_SHLIB=-shared -fPIC -L/usr/lib64
 OBJ=stream.o config.o memory.o
 OBJ_PICS=stream.lo config.lo memory.lo
 INCLUDES= -I/usr/include
