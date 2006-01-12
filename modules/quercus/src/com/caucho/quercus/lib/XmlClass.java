@@ -194,7 +194,14 @@ public class XmlClass {
    */
   public boolean xml_set_default_handler(Value handler)
   {
-    _defaultHandler = _env.createCallback(handler);
+    if (_obj == null) {
+      _defaultHandler = _env.createCallback(handler);
+    } else {
+      Value value = new ArrayValueImpl();
+      value.put(_obj);
+      value.put(handler);
+      _defaultHandler = _env.createCallback(value);
+    }
     return true;
   }
 
@@ -206,7 +213,14 @@ public class XmlClass {
    */
   public boolean xml_set_processing_instruction_handler(Value processingInstructionHandler)
   {
-    _processingInstructionHandler = _env.createCallback(processingInstructionHandler);
+    if (_obj == null) {
+      _processingInstructionHandler = _env.createCallback(processingInstructionHandler);
+    } else {
+      Value value = new ArrayValueImpl();
+      value.put(_obj);
+      value.put(processingInstructionHandler);
+      _processingInstructionHandler = _env.createCallback(value);
+    }
     return true;
   }
 
@@ -218,7 +232,14 @@ public class XmlClass {
    */
   public boolean xml_set_start_namespace_decl_handler(Value startNamespaceDeclHandler)
   {
-    _startNamespaceDeclHandler = _env.createCallback(startNamespaceDeclHandler);
+    if (_obj == null) {
+      _startNamespaceDeclHandler = _env.createCallback(startNamespaceDeclHandler);
+    } else {
+      Value value = new ArrayValueImpl();
+      value.put(_obj);
+      value.put(startNamespaceDeclHandler);
+      _startNamespaceDeclHandler = _env.createCallback(value);
+    }
     return true;
   }
 
@@ -230,7 +251,14 @@ public class XmlClass {
    */
   public boolean xml_set_end_namespace_decl_handler(Value endNamespaceDeclHandler)
   {
-    _endNamespaceDeclHandler = _env.createCallback(endNamespaceDeclHandler);
+    if (_obj == null) {
+      _endNamespaceDeclHandler = _env.createCallback(endNamespaceDeclHandler);
+    } else {
+      Value value = new ArrayValueImpl();
+      value.put(_obj);
+      value.put(endNamespaceDeclHandler);
+      _endNamespaceDeclHandler = _env.createCallback(value);
+    }
     return true;
   }
 
