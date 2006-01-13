@@ -56,11 +56,6 @@ public class XmlClass {
   private static final Logger log = Logger.getLogger(XmlClass.class.getName());
   private static final L10N L = new L10N(XmlClass.class);
 
-  public static final int XML_OPTION_CASE_FOLDING = 0x0;
-  public static final int XML_OPTION_SKIP_TAGSTART = 0x1;
-  public static final int XML_OPTION_SKIP_WHITE = 0x2;
-  public static final int XML_OPTION_TARGET_ENCODING = 0x3;
-
   /**
    * XML_OPTION_CASE_FOLDING is enabled by default
    *
@@ -78,45 +73,6 @@ public class XmlClass {
   // XML_OPTION_SKIP_WHITE = 0 (do not skip)
   // XML_OPTION_SKIP_WHITE = 1 (skip)
   private boolean _xmlOptionSkipWhite = false;
-
-  public static final int XML_ERROR_NONE = 0;
-  public static final int XML_ERROR_NO_MEMORY = 1;
-  public static final int XML_ERROR_SYNTAX = 2;
-  public static final int XML_ERROR_NO_ELEMENTS = 3;
-  public static final int XML_ERROR_INVALID_TOKEN = 4;
-  public static final int XML_ERROR_UNCLOSED_TOKEN = 5;
-  public static final int XML_ERROR_PARTIAL_CHAR = 6;
-  public static final int XML_ERROR_TAG_MISMATCH = 7;
-  public static final int XML_ERROR_DUPLICATE_ATTRIBUTE = 8;
-  public static final int XML_ERROR_JUNK_AFTER_DOC_ELEMENT = 9;
-  public static final int XML_ERROR_PARAM_ENTITY_REF = 10;
-  public static final int XML_ERROR_UNDEFINED_ENTITY = 11;
-  public static final int XML_ERROR_RECURSIVE_ENTITY_REF = 12;
-  public static final int XML_ERROR_ASYNC_ENTITY = 13;
-  public static final int XML_ERROR_BAD_CHAR_REF = 14;
-  public static final int XML_ERROR_BINARY_ENTITY_REF = 15;
-  public static final int XML_ERROR_ATTRIBUTE_EXTERNAL_ENTITY_REF = 16;
-  public static final int XML_ERROR_MISPLACED_XML_PI = 17;
-  public static final int XML_ERROR_UNKNOWN_ENCODING = 18;
-  public static final int XML_ERROR_INCORRECT_ENCODING = 19;
-  public static final int XML_ERROR_UNCLOSED_CDATA_SECTION = 20;
-  public static final int XML_ERROR_EXTERNAL_ENTITY_HANDLING = 21;
-  public static final int XML_ERROR_NOT_STANDALONE = 22;
-  public static final int XML_ERROR_UNEXPECTED_STATE = 23;
-  public static final int XML_ERROR_ENTITY_DECLARED_IN_PE = 24;
-  public static final int XML_ERROR_FEATURE_REQUIRES_XML_DTD = 25;
-  public static final int XML_ERROR_CANT_CHANGE_FEATURE_ONCE_PARSING = 26;
-  public static final int XML_ERROR_UNBOUND_PREFIX = 27;
-  public static final int XML_ERROR_UNDECLARING_PREFIX = 28;
-  public static final int XML_ERROR_INCOMPLETE_PE = 29;
-  public static final int XML_ERROR_XML_DECL = 30;
-  public static final int XML_ERROR_TEXT_DECL = 31;
-  public static final int XML_ERROR_PUBLICID = 32;
-  public static final int XML_ERROR_SUSPENDED = 33;
-  public static final int XML_ERROR_NOT_SUSPENDED = 34;
-  public static final int XML_ERROR_ABORTED = 35;
-  public static final int XML_ERROR_FINISHED = 36;
-  public static final int XML_ERROR_SUSPEND_PE = 37;
 
   private Env _env;
 
@@ -425,28 +381,28 @@ public class XmlClass {
                                        Value value)
   {
     switch(option) {
-      case XML_OPTION_CASE_FOLDING:
+      case QuercusXmlModule.XML_OPTION_CASE_FOLDING:
         if (value instanceof BooleanValue) {
           _xmlOptionCaseFolding = value.toBoolean();
           return true;
         } else {
           return false;
         }
-      case XML_OPTION_SKIP_TAGSTART:
+      case QuercusXmlModule.XML_OPTION_SKIP_TAGSTART:
         if (value instanceof DoubleValue) {
           _xmlOptionSkipTagstart = value.toLong();
           return true;
         } else {
           return false;
         }
-      case XML_OPTION_SKIP_WHITE:
+      case QuercusXmlModule.XML_OPTION_SKIP_WHITE:
         if (value instanceof BooleanValue) {
           _xmlOptionSkipWhite = value.toBoolean();
           return true;
         } else {
           return false;
         }
-      case XML_OPTION_TARGET_ENCODING:
+      case QuercusXmlModule.XML_OPTION_TARGET_ENCODING:
         if (value instanceof StringValue) {
           _xmlOptionTargetEncoding = value.toString();
           return true;
@@ -466,16 +422,16 @@ public class XmlClass {
   public Value xml_parser_get_option(int option)
   {
     switch (option) {
-    case XML_OPTION_CASE_FOLDING:
-      return _xmlOptionCaseFolding ? BooleanValue.TRUE : BooleanValue.FALSE;
-    case XML_OPTION_SKIP_TAGSTART:
-      return new DoubleValue((double) _xmlOptionSkipTagstart);
-    case XML_OPTION_SKIP_WHITE:
-      return _xmlOptionSkipWhite ? BooleanValue.TRUE : BooleanValue.FALSE;
-    case XML_OPTION_TARGET_ENCODING:
-      return new StringValue(_xmlOptionTargetEncoding);
-    default:
-      return BooleanValue.FALSE;
+      case QuercusXmlModule.XML_OPTION_CASE_FOLDING:
+        return (_xmlOptionCaseFolding ? BooleanValue.TRUE : BooleanValue.FALSE);
+      case QuercusXmlModule.XML_OPTION_SKIP_TAGSTART:
+        return new DoubleValue((double) _xmlOptionSkipTagstart);
+      case QuercusXmlModule.XML_OPTION_SKIP_WHITE:
+        return (_xmlOptionSkipWhite ? BooleanValue.TRUE : BooleanValue.FALSE);
+      case QuercusXmlModule.XML_OPTION_TARGET_ENCODING:
+        return new StringValue(_xmlOptionTargetEncoding);
+      default:
+        return BooleanValue.FALSE;
     }
   }
   /**
@@ -539,7 +495,7 @@ public class XmlClass {
       elementArray.put(new StringValue("tag"), new StringValue(eName));
       elementArray.put(new StringValue("type"), new StringValue("open"));
       elementArray.put(new StringValue("level"), new DoubleValue((double) _level));
-      _paramList.put(_level, eName.toUpperCase());
+      _paramList.put(_level, eName);
 
       if (attrs.getLength() > 0) {
         elementArray.put(new StringValue("attributes"), createAttributeArray(attrs));
@@ -647,8 +603,8 @@ public class XmlClass {
 
       String eName = lName; // element name
       if ("".equals(eName)) eName = qName;
-      args[1] = new StringValue(eName);
       if (_xmlOptionCaseFolding) eName = eName.toUpperCase();
+      args[1] = new StringValue(eName);
 
       // turn attrs into an array of name, value pairs
       args[2] = new ArrayValueImpl();
@@ -832,7 +788,7 @@ public class XmlClass {
       args[3] = new StringValue(systemId);
       args[4] = new StringValue(publicId);
       args[5] = new StringValue(notationName);
-      
+
       try {
         if (_unparsedEntityDeclHandler != null)
           _unparsedEntityDeclHandler.eval(_env, args);
