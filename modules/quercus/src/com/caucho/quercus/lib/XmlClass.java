@@ -56,10 +56,25 @@ public class XmlClass {
   private static final Logger log = Logger.getLogger(XmlClass.class.getName());
   private static final L10N L = new L10N(XmlClass.class);
 
-  public static final int XML_OPTION_CASE_FOLDING = 0x1;
-  public static final int XML_OPTION_TARGET_ENCODING = 0x2;
-  public static final int XML_OPTION_SKIP_TAGSTART = 0x3;
-  public static final int XML_OPTION_SKIP_WHITE = 0x4;
+  public static final int XML_OPTION_CASE_FOLDING = 0x0;
+  public static final int XML_OPTION_SKIP_TAGSTART = 0x1;
+  public static final int XML_OPTION_SKIP_WHITE = 0x2;
+  public static final int XML_OPTION_TARGET_ENCODING = 0x3;
+
+  // XML_OPTION_CASE_FOLDING = 1 means enabled (default)
+  // XML_OPTION_CASE_FOLDING = 0 means disabled
+  private boolean _xmlOptionCaseFolding = true;
+
+  private String _xmlOptionTargetEncoding;
+
+  // XML_OPTION_SKIP_TAGSTART specifies how many chars
+  // should be skipped in the beginning of a tag name (default = 0)
+  private long _xmlOptionSkipTagstart = 0;
+
+  // XML_OPTION_SKIP_WHITE = 0 (do not skip)
+  // XML_OPTION_SKIP_WHITE = 1 (skip)
+  private boolean _xmlOptionSkipWhite = false;
+
   public static final int XML_ERROR_NONE = 0;
   public static final int XML_ERROR_NO_MEMORY = 1;
   public static final int XML_ERROR_SYNTAX = 2;
@@ -100,7 +115,6 @@ public class XmlClass {
   public static final int XML_ERROR_SUSPEND_PE = 37;
 
   private Env _env;
-  private String _outputEncoding;
 
   /** XXX: _separator is set by xml_parse_create_ns but
    *  not yet used.  Default value is ":"
@@ -116,6 +130,7 @@ public class XmlClass {
   private Callback _defaultHandler;
   private Callback _startNamespaceDeclHandler;
   private Callback _endNamespaceDeclHandler;
+  private Callback _notationDeclHandler;
 
   private Value _parser;
   private Value _obj;
@@ -129,7 +144,7 @@ public class XmlClass {
                   String separator)
   {
     _env = env;
-    _outputEncoding = outputEncoding;
+    _xmlOptionTargetEncoding = outputEncoding;
     _parser = _env.wrapJava(this);
     _separator = separator;
   }
@@ -268,6 +283,25 @@ public class XmlClass {
   }
 
   /**
+   * Sets the notationDecl handler
+   *
+   * @param handler
+   * @return true always even if handler is disabled
+   */
+  public boolean xml_set_notation_decl_handler(Value handler)
+  {
+    if (_obj == null) {
+      _notationDeclHandler = _env.createCallback(handler);
+    } else {
+      Value value = new ArrayValueImpl();
+      value.put(_obj);
+      value.put(handler);
+      _notationDeclHandler = _env.createCallback(value);
+    }
+    return true;
+  }
+
+  /**
    * sets the object which houses all the callback functions
    *
    * @param obj
@@ -302,8 +336,8 @@ public class XmlClass {
 
     if (isFinal) {
       InputSource is = new InputSource(new StringReader(_xmlString.toString()));
-      if (_outputEncoding == null)
-        _outputEncoding = is.getEncoding();
+      if (_xmlOptionTargetEncoding == null)
+        _xmlOptionTargetEncoding = is.getEncoding();
       try {
         SAXParser saxParser = _factory.newSAXParser();
         saxParser.parse(is, new XmlHandler());
@@ -351,6 +385,76 @@ public class XmlClass {
   }
 
   /**
+   *  sets one of the following:
+   *  _xmlOptionCaseFolding (ENABLED / DISABLED)
+   *  _xmlOptionTargetEncoding (String)
+   *  _xmlOptionSkipTagstart (int)
+   *  _xmlOptionSkipWhite (ENABLED / DISABLED)
+   *
+   * XXX: currently only _xmlOptionCaseFolding actually does something
+   *
+   * @param option
+   * @param value
+   * @return true unless value could not be set
+   */
+  public boolean xml_parser_set_option(int option,
+                                       Value value)
+  {
+    switch(option) {
+      case XML_OPTION_CASE_FOLDING:
+        if (value instanceof BooleanValue) {
+          _xmlOptionCaseFolding = value.toBoolean();
+          return true;
+        } else {
+          return false;
+        }
+      case XML_OPTION_SKIP_TAGSTART:
+        if (value instanceof DoubleValue) {
+          _xmlOptionSkipTagstart = value.toLong();
+          return true;
+        } else {
+          return false;
+        }
+      case XML_OPTION_SKIP_WHITE:
+        if (value instanceof BooleanValue) {
+          _xmlOptionSkipWhite = value.toBoolean();
+          return true;
+        } else {
+          return false;
+        }
+      case XML_OPTION_TARGET_ENCODING:
+        if (value instanceof StringValue) {
+          _xmlOptionTargetEncoding = value.toString();
+          return true;
+        } else {
+          return false;
+        }
+      default:
+        return false;
+    }
+  }
+
+  /**
+   *
+   * @param option
+   * @return relevant value
+   */
+  public Value xml_parser_get_option(int option)
+  {
+    switch (option) {
+    case XML_OPTION_CASE_FOLDING:
+      return _xmlOptionCaseFolding ? BooleanValue.TRUE : BooleanValue.FALSE;
+    case XML_OPTION_SKIP_TAGSTART:
+      return new DoubleValue((double) _xmlOptionSkipTagstart);
+    case XML_OPTION_SKIP_WHITE:
+      return _xmlOptionSkipWhite ? BooleanValue.TRUE : BooleanValue.FALSE;
+    case XML_OPTION_TARGET_ENCODING:
+      return new StringValue(_xmlOptionTargetEncoding);
+    default:
+      return BooleanValue.FALSE;
+    }
+  }
+  /**
    * handler solely for xml_parse_into_struct
    */
   class StructHandler extends DefaultHandler {
@@ -389,7 +493,8 @@ public class XmlClass {
       for (int i = 0; i < attrs.getLength(); i++) {
         String aName = attrs.getLocalName(i); // Attr name
         if ("".equals(aName)) aName = attrs.getQName(i);
-        result.put(new StringValue(aName.toUpperCase()), new StringValue(attrs.getValue(i)));
+        if (_xmlOptionCaseFolding) aName = aName.toUpperCase();
+        result.put(new StringValue(aName), new StringValue(attrs.getValue(i)));
       }
 
       return result;
@@ -405,8 +510,9 @@ public class XmlClass {
 
       String eName = lName; // element name
       if ("".equals(eName)) eName = qName;
+      if (_xmlOptionCaseFolding) eName = eName.toUpperCase();
 
-      elementArray.put(new StringValue("tag"), new StringValue(eName.toUpperCase()));
+      elementArray.put(new StringValue("tag"), new StringValue(eName));
       elementArray.put(new StringValue("type"), new StringValue("open"));
       elementArray.put(new StringValue("level"), new DoubleValue((double) _level));
       _paramList.put(_level, eName.toUpperCase());
@@ -419,7 +525,7 @@ public class XmlClass {
 
       Value indexArray = new ArrayValueImpl();
       indexArray.put(new DoubleValue((double) _valueArrayIndex));
-      _indexArray.put(new StringValue(eName.toUpperCase()), indexArray);
+      _indexArray.put(new StringValue(eName), indexArray);
 
       _valueArrayIndex++;
       _level++;
@@ -443,7 +549,8 @@ public class XmlClass {
         elementArray = new ArrayValueImpl();
         String eName = sName; // element name
         if ("".equals(sName)) eName = qName;
-        elementArray.put(new StringValue("tag"), new StringValue(eName.toUpperCase()));
+        if (_xmlOptionCaseFolding) eName = eName.toUpperCase();
+        elementArray.put(new StringValue("tag"), new StringValue(eName));
         elementArray.put(new StringValue("type"), new StringValue("close"));
         elementArray.put(new StringValue("level"), new DoubleValue((double) _level));
         _valueArray.put(new DoubleValue((double)_valueArrayIndex), elementArray);
@@ -517,12 +624,14 @@ public class XmlClass {
       String eName = lName; // element name
       if ("".equals(eName)) eName = qName;
       args[1] = new StringValue(eName);
+      if (_xmlOptionCaseFolding) eName = eName.toUpperCase();
 
       // turn attrs into an array of name, value pairs
       args[2] = new ArrayValueImpl();
       for (int i = 0; i < attrs.getLength(); i++) {
         String aName = attrs.getLocalName(i); // Attr name
         if ("".equals(aName)) aName = attrs.getQName(i);
+        if (_xmlOptionCaseFolding) aName = aName.toUpperCase();
         args[2].put(new StringValue(aName), new StringValue(attrs.getValue(i)));
       }
 
@@ -553,6 +662,7 @@ public class XmlClass {
       try {
         String eName = sName; // element name
         if ("".equals(eName)) eName = qName;
+        if (_xmlOptionCaseFolding) qName = qName.toUpperCase();
 
         if (_endElementHandler != null)
           _endElementHandler.eval(_env, _parser, new StringValue(eName));
@@ -648,6 +758,27 @@ public class XmlClass {
           _endNamespaceDeclHandler.eval(_env, new StringValue(prefix));
         else
           throw new Throwable("end namespace decl handler is not set");
+      } catch (Throwable t) {
+        log.log(Level.FINE, t.toString(), t);
+        throw new SAXException(L.l(t.getMessage()));
+      }
+    }
+
+    public void notationDecl(String name,
+                             String publicId,
+                             String systemId)
+      throws SAXException
+    {
+      try {
+        if (_notationDeclHandler != null)
+          _notationDeclHandler.eval(_env,
+                                    _parser,
+                                    new StringValue(name),
+                                    new StringValue(""),
+                                    new StringValue(systemId),
+                                    new StringValue(publicId));
+        else
+          throw new Throwable("notation declaration handler is not set");
       } catch (Throwable t) {
         log.log(Level.FINE, t.toString(), t);
         throw new SAXException(L.l(t.getMessage()));

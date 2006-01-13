@@ -110,6 +110,41 @@ public class QuercusXmlModule extends AbstractQuercusModule {
   }
 
   /**
+   *
+   * @see boolean XmlClass.xml_parser_set_option
+   *
+   * @param parser
+   * @param option
+   * @param value
+   * @return false if parser == null
+   */
+  public boolean xml_parser_set_option(@NotNull XmlClass parser,
+                                       @NotNull int option,
+                                       @NotNull Value value)
+  {
+    if (parser == null)
+      return false;
+
+    return parser.xml_parser_set_option(option, value);
+  }
+
+  /**
+   * @see boolean XmlClass.xml_parser_get_option
+   *
+   * @param parser
+   * @param option
+   * @return false if parser == null
+   */
+  public Value xml_parser_get_option(@NotNull XmlClass parser,
+                                       @NotNull int option)
+  {
+    if (parser == null)
+      return BooleanValue.FALSE;
+
+    return parser.xml_parser_get_option(option);
+  }
+
+  /**
    * @see boolean XmlClass.xml_set_element_handler
    *
    * @param parser
@@ -221,6 +256,22 @@ public class QuercusXmlModule extends AbstractQuercusModule {
   }
 
   /**
+   * @see boolean XmlClass.xml_set_notation_decl_handler
+   *
+   * @param parser
+   * @param handler
+   * @return false is parser == null
+   */
+  public boolean xml_set_notation_decl_handler(@NotNull XmlClass parser,
+                                               @NotNull Value handler)
+  {
+    if (parser == null)
+      return false;
+
+    return parser.xml_set_notation_decl_handler(handler);
+  }
+
+  /**
    *
    * @param parser
    * @param handler
@@ -275,10 +326,7 @@ public class QuercusXmlModule extends AbstractQuercusModule {
   // @todo xml_get_current_colmn_number
   // @todo xml_get_current_line_number
   // @todo xml_get_error_code
-  // @todo xml_parser_get_option
-  // @todo xml_parser_set_option
   // @todo xml_set_external_entity_ref_handler
-  // @todo xml_set_notation_decl_handler
   // @todo xml_set_unparsed_entity_decl_handler
 }
 
