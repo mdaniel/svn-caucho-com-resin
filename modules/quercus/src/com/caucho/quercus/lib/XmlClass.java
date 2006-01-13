@@ -66,12 +66,17 @@ public class XmlClass {
 
   private String _xmlOptionTargetEncoding;
 
-  // XML_OPTION_SKIP_TAGSTART specifies how many chars
-  // should be skipped in the beginning of a tag name (default = 0)
+  /**
+   *  XML_OPTION_SKIP_TAGSTART specifies how many chars
+   *  should be skipped in the beginning of a tag name (default = 0)
+   *
+   *  XXX: Not yet implemented
+   */
   private long _xmlOptionSkipTagstart = 0;
 
-  // XML_OPTION_SKIP_WHITE = 0 (do not skip)
-  // XML_OPTION_SKIP_WHITE = 1 (skip)
+  /**
+   *  XXX: _xmlOptionSkipWhite not yet implemented
+   */
   private boolean _xmlOptionSkipWhite = false;
 
   private Env _env;
@@ -389,7 +394,7 @@ public class XmlClass {
           return false;
         }
       case QuercusXmlModule.XML_OPTION_SKIP_TAGSTART:
-        if (value instanceof DoubleValue) {
+        if (value instanceof LongValue) {
           _xmlOptionSkipTagstart = value.toLong();
           return true;
         } else {
@@ -425,7 +430,7 @@ public class XmlClass {
       case QuercusXmlModule.XML_OPTION_CASE_FOLDING:
         return (_xmlOptionCaseFolding ? BooleanValue.TRUE : BooleanValue.FALSE);
       case QuercusXmlModule.XML_OPTION_SKIP_TAGSTART:
-        return new DoubleValue((double) _xmlOptionSkipTagstart);
+        return new LongValue(_xmlOptionSkipTagstart);
       case QuercusXmlModule.XML_OPTION_SKIP_WHITE:
         return (_xmlOptionSkipWhite ? BooleanValue.TRUE : BooleanValue.FALSE);
       case QuercusXmlModule.XML_OPTION_TARGET_ENCODING:
