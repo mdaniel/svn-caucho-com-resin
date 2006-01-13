@@ -306,12 +306,27 @@ public class QuercusXmlModule extends AbstractQuercusModule {
       return true;
   }
 
+  /**
+   * @see boolean XmlClass.xml_set_unparsed_entity_decl_handler
+   *
+   * @param parser
+   * @param handler
+   * @return false if parser == null, otherwise true
+   */
+  public boolean xml_set_unparsed_entity_decl_handler(@NotNull XmlClass parser,
+                                                      @NotNull Value handler)
+  {
+    if (parser == null)
+      return false;
+
+    return parser.xml_set_unparsed_entity_decl_handler(handler);
+  }
+
   // @todo xml_error_string
   // @todo xml_get_current_byte_index
   // @todo xml_get_current_colmn_number
   // @todo xml_get_current_line_number
   // @todo xml_get_error_code
   // @todo xml_set_external_entity_ref_handler
-  // @todo xml_set_unparsed_entity_decl_handler
 }
 

@@ -135,6 +135,7 @@ public class XmlClass {
   private Callback _startNamespaceDeclHandler;
   private Callback _endNamespaceDeclHandler;
   private Callback _notationDeclHandler;
+  private Callback _unparsedEntityDeclHandler;
 
   private Value _parser;
   private Value _obj;
@@ -263,6 +264,25 @@ public class XmlClass {
       value.put(_obj);
       value.put(startNamespaceDeclHandler);
       _startNamespaceDeclHandler = _env.createCallback(value);
+    }
+    return true;
+  }
+
+  /**
+   * Sets the unparsedEntityDecl handler
+   *
+   * @param handler
+   * @return true always even if handler is disabled
+   */
+  public boolean xml_set_unparsed_entity_decl_handler(Value handler)
+  {
+    if (_obj == null) {
+      _unparsedEntityDeclHandler = _env.createCallback(handler);
+    } else {
+      Value value = new ArrayValueImpl();
+      value.put(_obj);
+      value.put(handler);
+      _unparsedEntityDeclHandler = _env.createCallback(value);
     }
     return true;
   }
@@ -783,6 +803,41 @@ public class XmlClass {
                                     new StringValue(publicId));
         else
           throw new Throwable("notation declaration handler is not set");
+      } catch (Throwable t) {
+        log.log(Level.FINE, t.toString(), t);
+        throw new SAXException(L.l(t.getMessage()));
+      }
+    }
+
+    @Override
+    public void unparsedEntityDecl(String name,
+                                   String publicId,
+                                   String systemId,
+                                   String notationName)
+      throws SAXException
+    {
+      /**
+       * args[0] reference to this parser
+       * args[1] name
+       * args[2] base (always "")
+       * args[3] systemId
+       * args[4] publicId
+       * args[5] notationName
+       */
+      Value[] args = new Value[6];
+
+      args[0] = _parser;
+      args[1] = new StringValue(name);
+      args[2] = new StringValue("");
+      args[3] = new StringValue(systemId);
+      args[4] = new StringValue(publicId);
+      args[5] = new StringValue(notationName);
+      
+      try {
+        if (_unparsedEntityDeclHandler != null)
+          _unparsedEntityDeclHandler.eval(_env, args);
+        else
+          throw new Throwable("unparsed entity declaration handler is not set");
       } catch (Throwable t) {
         log.log(Level.FINE, t.toString(), t);
         throw new SAXException(L.l(t.getMessage()));
