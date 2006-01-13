@@ -551,8 +551,11 @@ public class XmlClass {
       throws SAXException
     {
       try {
+        String eName = sName; // element name
+        if ("".equals(eName)) eName = qName;
+
         if (_endElementHandler != null)
-          _endElementHandler.eval(_env, _parser, new StringValue(sName));
+          _endElementHandler.eval(_env, _parser, new StringValue(eName));
         else
           throw new Throwable("end element handler is not set");
       } catch (Throwable t) {

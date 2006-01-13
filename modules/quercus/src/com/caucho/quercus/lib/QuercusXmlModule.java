@@ -143,6 +143,23 @@ public class QuercusXmlModule extends AbstractQuercusModule {
     return parser.xml_set_character_data_handler(handler);
   }
 
+
+  /**
+   * @see boolean XmlClass.xml_set_start_namespace_decl_handler
+   *
+   * @param parser
+   * @param startNamespaceDeclHandler
+   * @return false if parser == null
+   */
+  public boolean xml_set_start_namespace_decl_handler(@NotNull XmlClass parser,
+                                                      @NotNull Value startNamespaceDeclHandler)
+  {
+    if (parser == null)
+      return false;
+
+    return parser.xml_set_start_namespace_decl_handler(startNamespaceDeclHandler);
+  }
+
   /**
    *
    * @param parser
