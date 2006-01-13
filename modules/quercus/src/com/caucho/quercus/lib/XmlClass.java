@@ -61,8 +61,12 @@ public class XmlClass {
   public static final int XML_OPTION_SKIP_WHITE = 0x2;
   public static final int XML_OPTION_TARGET_ENCODING = 0x3;
 
-  // XML_OPTION_CASE_FOLDING = 1 means enabled (default)
-  // XML_OPTION_CASE_FOLDING = 0 means disabled
+  /**
+   * XML_OPTION_CASE_FOLDING is enabled by default
+   *
+   * only affects startElement (including attribute
+   * names) and endElement handlers.
+   */
   private boolean _xmlOptionCaseFolding = true;
 
   private String _xmlOptionTargetEncoding;
