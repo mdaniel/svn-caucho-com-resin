@@ -49,7 +49,7 @@ public class QuercusXmlModule extends AbstractQuercusModule {
   public static final int XML_OPTION_SKIP_TAGSTART = 0x1;
   public static final int XML_OPTION_SKIP_WHITE = 0x2;
   public static final int XML_OPTION_TARGET_ENCODING = 0x3;
-  
+
   public static final int XML_ERROR_NONE = 0;
   public static final int XML_ERROR_NO_MEMORY = 1;
   public static final int XML_ERROR_SYNTAX = 2;
@@ -369,7 +369,7 @@ public class QuercusXmlModule extends AbstractQuercusModule {
 
   // @todo xml_error_string
   // @todo xml_get_current_byte_index
-  // @todo xml_get_current_colmn_number
+  // @todo xml_get_current_column_number
   // @todo xml_get_current_line_number
   // @todo xml_get_error_code
   // @todo xml_set_external_entity_ref_handler
