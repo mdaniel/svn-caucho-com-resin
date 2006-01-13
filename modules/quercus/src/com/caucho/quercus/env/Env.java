@@ -227,6 +227,8 @@ public class Env {
   // XXX: need to look this up from the module itself
   private int _errorMask = E_DEFAULT;
 
+  private int _objectId = 0;
+
   public Env(Quercus quercus,
 	     PhpPage page,
 	     WriteStream out,
@@ -1995,6 +1997,14 @@ public class Env {
 
       throw new RuntimeException(e);
     }
+  }
+
+  /**
+   * Generate an object id.
+   */
+  public int generateId()
+  {
+    return ++_objectId;
   }
 
   /**

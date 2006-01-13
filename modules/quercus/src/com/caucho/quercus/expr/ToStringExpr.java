@@ -63,7 +63,7 @@ public class ToStringExpr extends UnaryExpr {
     if (value instanceof StringValue)
       return value;
     else
-      return new StringValue(value.toString(env));
+      return new StringValue(value.toString());
   }
 
   //
@@ -80,7 +80,7 @@ public class ToStringExpr extends UnaryExpr {
   {
     _expr.generate(out);
 
-    out.print(".toStringValue(env)");
+    out.print(".toStringValue()");
   }
 
   /**

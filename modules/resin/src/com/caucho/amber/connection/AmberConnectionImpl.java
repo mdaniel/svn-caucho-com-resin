@@ -612,6 +612,7 @@ public class AmberConnectionImpl {
     for (int i = 0; i < _txEntities.size(); i++) {
       Entity entity = _txEntities.get(i);
 
+      System.out.println("FLUSH: " + entity);
       entity.__caucho_flush();
     }
 
@@ -854,6 +855,8 @@ public class AmberConnectionImpl {
     if (contains(obj))
       return;
 
+    flush(); // need to flush things like delete
+
     Entity entity = (Entity) obj;
 	
     home.save(this, entity);
@@ -889,6 +892,23 @@ public class AmberConnectionImpl {
       return;
 
     Entity entity = (Entity) obj;
+    
+    Entity oldEntity = getEntity(entity.getClass().getName(),
+				 entity.__caucho_getPrimaryKey());
+
+    if (oldEntity == null) {
+      AmberEntityHome entityHome;
+      entityHome = _amberManager.getEntityHome(entity.getClass().getName());
+
+      if (entityHome == null)
+	throw new AmberException(L.l("entity has no matching home"));
+    
+      entityHome.makePersistent(entity, this, true);
+      
+      addEntity(entity);
+    }
+    else
+      entity = oldEntity;
 
     entity.__caucho_delete();
   }

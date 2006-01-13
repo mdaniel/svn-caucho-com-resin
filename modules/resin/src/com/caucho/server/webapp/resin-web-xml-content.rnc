@@ -387,14 +387,6 @@ r_rewrite-dispatch = element rewrite-dispatch {
           | element target { string })
      }*
 
-   & element redirect {
-       (attribute regexp { string }
-        | element regexp { string })
-
-       & (attribute target { string }
-          | element target { string })
-     }*
-
    & element forbidden {
        (attribute regexp { string }
         | element regexp { string })
@@ -405,9 +397,25 @@ r_rewrite-dispatch = element rewrite-dispatch {
         | element regexp { string })
      }*
 
+   & element moved-permanently {
+       (attribute regexp { string }
+        | element regexp { string })
+
+       & (attribute target { string }
+          | element target { string })
+     }*
+
    & element not-found {
        (attribute regexp { string }
         | element regexp { string })
+     }*
+
+   & element redirect {
+       (attribute regexp { string }
+        | element regexp { string })
+
+       & (attribute target { string }
+          | element target { string })
      }*
 }
 

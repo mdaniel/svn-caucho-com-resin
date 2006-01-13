@@ -34,6 +34,7 @@ import java.util.logging.Logger;
 import com.caucho.util.L10N;
 
 import com.caucho.quercus.module.AbstractQuercusModule;
+import com.caucho.quercus.module.ReadOnly;
 
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.Env;
@@ -42,6 +43,8 @@ import com.caucho.quercus.env.ArrayValue;
 import com.caucho.quercus.env.ArrayValueImpl;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.ObjectValue;
+
+import com.caucho.quercus.env.AbstractQuercusClass;
 
 /**
  * PHP class information
@@ -100,11 +103,49 @@ public class QuercusClassesModule extends AbstractQuercusModule {
   }
 
   /**
+   * Returns true if the object implements the given class.
+   */
+  public static boolean is_a(@ReadOnly Value value, String name)
+  {
+    return value.isA(name);
+  }
+
+  /**
    * Returns true if the argument is an object.
    */
-  public static boolean is_object(Value value)
+  public static boolean is_object(@ReadOnly Value value)
   {
     return value instanceof ObjectValue;
+  }
+
+  /**
+   * Returns the object's class name
+   */
+  public Value get_parent_class(Env env, @ReadOnly Value value)
+    throws Throwable
+  {
+    if (value instanceof ObjectValue) {
+      ObjectValue obj = (ObjectValue) value;
+
+      String parent = obj.getParentName();
+
+      if (parent != null)
+	return new StringValue(parent);
+    }
+    else if (value instanceof StringValue) {
+      String className = value.toString();
+
+      AbstractQuercusClass cl = env.findClass(className);
+
+      if (cl != null) {
+	String parent = cl.getParentName();
+
+	if (parent != null)
+	  return new StringValue(parent);
+      }
+    }
+
+    return BooleanValue.FALSE;
   }
 
   /**

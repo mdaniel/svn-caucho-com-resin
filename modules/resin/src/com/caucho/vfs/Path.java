@@ -547,7 +547,6 @@ public abstract class Path {
   public void changeGroup(int gid)
     throws IOException
   {
-    // XXX: "safe_mode" check with current owner
   }
 
   /**
@@ -556,7 +555,6 @@ public abstract class Path {
   public void changeGroup(String groupName)
     throws IOException
   {
-    // XXX: "safe_mode" check with current owner
   }
 
   /**
@@ -564,7 +562,6 @@ public abstract class Path {
    */
   public void chmod(int value)
   {
-    // XXX: "safe_mode" check with current owner
   }
 
   public int getOwner()
@@ -579,7 +576,6 @@ public abstract class Path {
   public void changeOwner(int uid)
     throws IOException
   {
-    // XXX: "safe_mode" check with current owner
   }
 
   /**
@@ -588,7 +584,6 @@ public abstract class Path {
   public void changeOwner(String ownerName)
     throws IOException
   {
-    // XXX: "safe_mode" check with current owner
   }
 
   public long getDiskSpaceFree()

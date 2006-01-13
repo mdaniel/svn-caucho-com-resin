@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -46,9 +47,10 @@ import com.caucho.loader.EnvironmentLocal;
  * Resin's rotating path-based log.
  */
 public class PathHandler extends Handler {
-  private static L10N L = new L10N(PathHandler.class);
+  private static final L10N L = new L10N(PathHandler.class);
   
   private Path _path;
+  private String _encoding;
 
   public PathHandler(Path path)
   {
@@ -72,6 +74,9 @@ public class PathHandler extends Handler {
 	  _path.getParent().mkdirs();
 	  os = _path.openAppend();
 	}
+
+	if (_encoding != null)
+	  os.setEncoding(_encoding);
 
 	String msg = record.getMessage();
 	os.println(msg);

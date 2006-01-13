@@ -35,6 +35,8 @@ import java.util.LinkedHashMap;
 
 import java.io.IOException;
 
+import com.caucho.quercus.QuercusRuntimeException;
+
 import com.caucho.quercus.program.AbstractFunction;
 import com.caucho.quercus.program.Function;
 
@@ -60,6 +62,9 @@ public class InterpretedClassDef extends AbstractClassDef {
 
   private final HashMap<String,Expr> _staticFieldMap
     = new LinkedHashMap<String,Expr>();
+
+  private final HashMap<String,Expr> _constMap
+    = new HashMap<String,Expr>();
 
   private Function _constructor;
   private AbstractFunction _destructor;
@@ -115,6 +120,22 @@ public class InterpretedClassDef extends AbstractClassDef {
   public void addStaticValue(Value name, Expr value)
   {
     _staticFieldMap.put(name.toString(), value);
+  }
+
+  /**
+   * Adds a const value.
+   */
+  public void addConstant(String name, Expr value)
+  {
+    _constMap.put(name, value);
+  }
+
+  /**
+   * Return a const value.
+   */
+  public Expr findConstant(String name)
+  {
+    return _constMap.get(name);
   }
 
   /**

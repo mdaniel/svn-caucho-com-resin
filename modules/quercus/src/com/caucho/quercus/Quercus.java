@@ -642,29 +642,12 @@ public class Quercus {
       if (! Modifier.isFinal(field.getModifiers()))
         continue;
 
-      Object value = field.get(null);
+      Object obj = field.get(null);
 
-      if (value == null)
-	_constMap.put(field.getName(), NullValue.NULL);
-      else if (Byte.class.equals(value.getClass()) ||
-	       Short.class.equals(value.getClass()) ||
-	       Integer.class.equals(value.getClass()) ||
-	       Long.class.equals(value.getClass())) {
-	_constMap.put(field.getName(),
-		      LongValue.create(((Number) value).longValue()));
-      }
-      else if (Float.class.equals(value.getClass()) ||
-	       Double.class.equals(value.getClass())) {
-	_constMap.put(field.getName(),
-		      DoubleValue.create(((Number) value).doubleValue()));
-      }
-      else if (String.class.equals(value.getClass())) {
-	_constMap.put(field.getName(),
-		      new StringValue((String) value));
-      }
-      else {
-	// XXX: unknown types, e.g. Character?
-      }
+      Value value = objectToValue(obj);
+
+      if (value != null)
+	_constMap.put(field.getName(), value);
     }
     
     Map<String,StringValue> iniMap = module.getDefaultIni();
@@ -695,6 +678,30 @@ public class Quercus {
       } catch (Exception e) {
 	log.log(Level.FINE, e.toString(), e);
       }
+    }
+  }
+
+  public static Value objectToValue(Object obj)
+  {
+    if (obj == null)
+      return NullValue.NULL;
+    else if (Byte.class.equals(obj.getClass()) ||
+	     Short.class.equals(obj.getClass()) ||
+	     Integer.class.equals(obj.getClass()) ||
+	     Long.class.equals(obj.getClass())) {
+      return LongValue.create(((Number) obj).longValue());
+    }
+    else if (Float.class.equals(obj.getClass()) ||
+	     Double.class.equals(obj.getClass())) {
+      return DoubleValue.create(((Number) obj).doubleValue());
+    }
+    else if (String.class.equals(obj.getClass())) {
+      return new StringValue((String) obj);
+    }
+    else {
+      // XXX: unknown types, e.g. Character?
+
+      return null;
     }
   }
 

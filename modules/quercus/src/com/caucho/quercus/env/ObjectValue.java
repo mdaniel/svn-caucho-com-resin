@@ -50,15 +50,14 @@ import com.caucho.quercus.expr.Expr;
  */
 public class ObjectValue extends ArrayValueWrapper {
   private static final StringValue TO_STRING = new StringValue("__toString");
-  
+
   private final QuercusClass _cl;
 
   public ObjectValue(QuercusClass cl)
   {
     super(new ArrayValueImpl());
-    _cl = cl;
 
-    
+    _cl = cl;
     // _cl.initFields(_map);
   }
 
@@ -66,6 +65,7 @@ public class ObjectValue extends ArrayValueWrapper {
 		     QuercusClass cl, ArrayValue oldValue)
   {
     super(new ArrayValueImpl(env, map, oldValue));
+
     _cl = cl;
     
     // _cl.initFields(_map);
@@ -77,6 +77,14 @@ public class ObjectValue extends ArrayValueWrapper {
   public String getName()
   {
     return _cl.getName();
+  }
+
+  /**
+   * Returns the parent class
+   */
+  public String getParentName()
+  {
+    return _cl.getParentName();
   }
   
   /**
@@ -93,6 +101,14 @@ public class ObjectValue extends ArrayValueWrapper {
   public boolean toBoolean()
   {
     return true;
+  }
+
+  /**
+   * Returns true for an implementation of a class
+   */
+  public boolean isA(String name)
+  {
+    return _cl.isA(name);
   }
 
   /**
@@ -417,7 +433,7 @@ public class ObjectValue extends ArrayValueWrapper {
 
   public String toString()
   {
-    return "ObjectValue@" + System.identityHashCode(this) + "[" + _cl.getName() + "]";
+    return "ObjectValue@" + System.identityHashCode(this) +  "[" + _cl.getName() + "]";
   }
 }
 

@@ -638,6 +638,8 @@ public class XmlParser extends AbstractParser {
     _attrNames.clear();
     _attrValues.clear();
 
+    boolean hasWhitespace = true;
+
     while (ch != -1) {
       if (! XmlChar.isNameStart(ch)) {
         if (! _isJsp || ch != '<')
@@ -646,6 +648,11 @@ public class XmlParser extends AbstractParser {
         ch = parseJspAttribute(isElement);
         continue;
       }
+
+      if (! hasWhitespace)
+	throw error(L.l("attributes must be separated by whitespace"));
+
+      hasWhitespace = false;
       
       ch = _reader.parseName(_text, ch);
 
@@ -678,6 +685,9 @@ public class XmlParser extends AbstractParser {
 	  throw error(L.l("xmlns: needs value at {0}", badChar(ch)));
 	ch = skipWhitespace(_reader.read());
 	ch = parseValue(_text, ch, true);
+	
+	hasWhitespace = isWhitespace(ch);
+	
 	ch = skipWhitespace(ch);
 
 	// topNamespaceNode = element;
@@ -709,6 +719,9 @@ public class XmlParser extends AbstractParser {
       if (ch == '=') {
 	ch = skipWhitespace(_reader.read());
 	ch = parseValue(_text, ch, true);
+
+	hasWhitespace = isWhitespace(ch);
+	
 	ch = skipWhitespace(ch);
 
 	value = _text.toString();
@@ -717,8 +730,10 @@ public class XmlParser extends AbstractParser {
 	throw error(L.l("attribute `{0}' expects value at {1}.  XML requires attributes to have explicit values.",
                         attrName, badChar(ch)));
       }
-      else
+      else {
 	value = attrName; // xxx: conflict xsl/0432
+	hasWhitespace = true;
+      }
 
       _attrValues.add(value);
     }

@@ -30,6 +30,7 @@
 package com.caucho.quercus.env;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.Field;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
 
@@ -66,6 +67,9 @@ public class JavaClassDefinition extends AbstractQuercusClass {
   
   private final String _name;
   private final Class _type;
+  
+  private final HashMap<String,Value> _constMap
+    = new HashMap<String,Value>();
   
   private final HashMap<String,JavaMethod> _functionMap
     = new HashMap<String,JavaMethod>();
@@ -222,10 +226,19 @@ public class JavaClassDefinition extends AbstractQuercusClass {
   }
 
   /**
+   * Finds the matching constant
+   */
+  public Value findConstant(Env env, String name)
+  {
+    return _constMap.get(name);
+  }
+
+  /**
    * Introspects the Java class.
    */
   public void introspect(Quercus quercus)
   {
+    introspectConstants(quercus, _type);
     introspectMethods(quercus, _type);
 
     _marshall = new JavaMarshall(this, false);
@@ -245,6 +258,46 @@ public class JavaClassDefinition extends AbstractQuercusClass {
 	_iterator = method;
     } catch (Throwable e) {
     }
+  }
+
+  /**
+   * Introspects the Java class.
+   */
+  private void introspectConstants(Quercus quercus, Class type)
+  {
+    if (type == null || type.equals(Object.class))
+      return;
+    
+    Class []ifcs = type.getInterfaces();
+    
+    for (int i = 0; i < ifcs.length; i++) {
+      introspectConstants(quercus, ifcs[i]);
+    }
+
+    Field []fields = type.getDeclaredFields();
+
+    for (int i = 0; i < fields.length; i++) {
+      Field field = fields[i];
+
+      if (_constMap.get(field.getName()) != null)
+	continue;
+      else if (! Modifier.isPublic(field.getModifiers()))
+	continue;
+      else if (! Modifier.isStatic(field.getModifiers()))
+	continue;
+      else if (! Modifier.isFinal(field.getModifiers()))
+	continue;
+
+      try {
+	Value value = Quercus.objectToValue(field.get(null));
+
+	if (value != null)
+	  _constMap.put(field.getName(), value);
+      } catch (Throwable e) {
+      }
+    }
+
+    introspectConstants(quercus, type.getSuperclass());
   }
 
   /**

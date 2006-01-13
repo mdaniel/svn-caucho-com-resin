@@ -279,8 +279,8 @@ public class QuercusStringModule extends AbstractQuercusModule {
    * @param charset optional set of characters to trim
    * @return the trimmed string
    */
-  public static Value chop(Env env, Value str,
-                           @Optional Value charset)
+  public static String chop(Env env, String str,
+                           @Optional String charset)
     throws Throwable
   {
     return rtrim(env, str, charset);
@@ -950,10 +950,10 @@ public class QuercusStringModule extends AbstractQuercusModule {
    * @param env the quercus environment
    * @param string the string to print
    */
-  public static long print(Env env, String string)
+  public static long print(Env env, Value value)
     throws Throwable
   {
-    env.getOut().print(string);
+    env.getOut().print(value.toString(env));
 
     return 1;
   }
@@ -966,11 +966,9 @@ public class QuercusStringModule extends AbstractQuercusModule {
    *
    * @return the quoted
    */
-  public static Value quotemeta(Env env,
-                                Value stringV)
+  public static Value quotemeta(Env env, String string)
     throws Throwable
   {
-    String string = stringV.toString(env);
     StringBuilder sb = new StringBuilder();
 
     int len = string.length();
@@ -1010,31 +1008,30 @@ public class QuercusStringModule extends AbstractQuercusModule {
    * @param charset optional set of characters to trim
    * @return the trimmed string
    */
-  public static Value ltrim(Env env,
-                            Value strValue,
-                            @Optional Value charset)
+  public static String ltrim(Env env,
+			     String str,
+			     @Optional String charset)
     throws Throwable
   {
-    String str = strValue.toString(env);
     boolean []trim;
 
-    if (charset instanceof DefaultValue)
+    if (charset.equals(""))
       trim = TRIM_WHITESPACE;
     else
-      trim = parseCharsetBitmap(charset.toString(env));
+      trim = parseCharsetBitmap(charset);
 
     for (int i = 0; i < str.length(); i++) {
       char ch = str.charAt(i);
 
       if (ch >= 256 || ! trim[ch]) {
         if (i == 0)
-          return strValue;
+          return str;
         else
-          return new StringValue(str.substring(i));
+          return str.substring(i);
       }
     }
 
-    return new StringValue("");
+    return "";
   }
 
   /**
@@ -1045,29 +1042,30 @@ public class QuercusStringModule extends AbstractQuercusModule {
    * @param charset optional set of characters to trim
    * @return the trimmed string
    */
-  public static Value rtrim(Env env, Value strValue, @Optional Value charset)
+  public static String rtrim(Env env,
+			     String str,
+			     @Optional String charset)
     throws Throwable
   {
-    String str = strValue.toString(env);
     boolean []trim;
 
-    if (charset instanceof DefaultValue)
+    if (charset.equals(""))
       trim = TRIM_WHITESPACE;
     else
-      trim = parseCharsetBitmap(charset.toString(env));
+      trim = parseCharsetBitmap(charset);
 
     for (int i = str.length() - 1; i >= 0; i--) {
       char ch = str.charAt(i);
 
       if (ch >= 256 || ! trim[ch]) {
         if (i == str.length())
-          return strValue;
+          return str;
         else
-          return new StringValue(str.substring(0, i + 1));
+          return str.substring(0, i + 1);
       }
     }
 
-    return new StringValue("");
+    return "";
   }
 
   /**
@@ -1825,12 +1823,9 @@ public class QuercusStringModule extends AbstractQuercusModule {
    * @param stringV string to repeat
    * @param countV number of times to repeat
    */
-  public static Value str_repeat(Env env, Value stringV, Value countV)
+  public static Value str_repeat(Env env, String string, int count)
     throws Throwable
   {
-    String string = stringV.toString(env);
-    int count = countV.toInt();
-
     StringBuilder sb = new StringBuilder();
 
     for (int i = 0; i < count; i++)
@@ -1984,11 +1979,9 @@ public class QuercusStringModule extends AbstractQuercusModule {
    * @param env the calling environment
    * @param stringV string to convert
    */
-  public static Value str_rot13(Env env, Value stringV)
+  public static Value str_rot13(Env env, String string)
     throws Throwable
   {
-    String string = stringV.toString(env);
-
     StringBuilder sb = new StringBuilder();
 
     int len = string.length();
@@ -2041,20 +2034,10 @@ public class QuercusStringModule extends AbstractQuercusModule {
    * @param chunkV chunk size
    */
   public static Value str_split(Env env,
-				Value stringV,
-                                @Optional Value chunkV)
+				String string,
+                                @Optional("1") int chunk)
     throws Throwable
   {
-    String string = stringV.toString(env);
-
-    int chunk = 1;
-
-    if (! (chunkV instanceof DefaultValue))
-      chunk = chunkV.toInt();
-
-    if (chunk < 1)
-      return BooleanValue.FALSE;
-
     ArrayValue array = new ArrayValueImpl();
 
     int strLen = string.length();
@@ -2157,12 +2140,9 @@ public class QuercusStringModule extends AbstractQuercusModule {
    * @param bValue right value
    * @return -1, 0, or 1
    */
-  public static Value strcoll(Env env, Value aValue, Value bValue)
+  public static Value strcoll(Env env, String a, String b)
     throws Throwable
   {
-    String a = aValue.toString(env);
-    String b = bValue.toString(env);
-
     int cmp = a.compareTo(b);
 
     if (cmp == 0)
@@ -2311,16 +2291,15 @@ public class QuercusStringModule extends AbstractQuercusModule {
    * @param offsetV optional starting position
    */
   public static Value stripos(Env env,
-			      Value haystackV,
+			      String haystack,
 			      Value needleV,
 			      @Optional Value offsetV)
     throws Throwable
   {
-    String haystack = haystackV.toString(env);
     String needle;
 
     if (needleV instanceof StringValue)
-      needle = needleV.toString(env);
+      needle = needleV.toString();
     else
       needle = String.valueOf((char) needleV.toInt());
 
@@ -2371,15 +2350,14 @@ public class QuercusStringModule extends AbstractQuercusModule {
    * @return the trailing match or FALSE
    */
   public static Value stristr(Env env,
-			      Value haystackV,
+			      String haystack,
 			      Value needleV)
     throws Throwable
   {
-    String haystack = haystackV.toString(env);
     String needle;
 
     if (needleV instanceof StringValue) {
-      needle = needleV.toString(env);
+      needle = needleV.toString();
     }
     else {
       needle = String.valueOf((char) needleV.toLong());
@@ -2405,15 +2383,14 @@ public class QuercusStringModule extends AbstractQuercusModule {
    * @return the trailing match or FALSE
    */
   public static Value strrchr(Env env,
-			      Value haystackV,
+			      String haystack,
 			      Value needleV)
     throws Throwable
   {
-    String haystack = haystackV.toString(env);
     String needle;
 
     if (needleV instanceof StringValue) {
-      needle = needleV.toString(env);
+      needle = needleV.toString();
     }
     else {
       needle = String.valueOf((char) needleV.toLong());
@@ -2432,11 +2409,10 @@ public class QuercusStringModule extends AbstractQuercusModule {
    *
    * @param env the calling environment
    */
-  public static Value strrev(Env env, Value stringV)
+  public static Value strrev(Env env, String string)
     throws Throwable
   {
     StringBuilder sb = new StringBuilder();
-    String string = stringV.toString(env);
 
     for (int i = string.length() - 1; i >= 0; i--) {
       sb.append(string.charAt(i));
@@ -2453,16 +2429,15 @@ public class QuercusStringModule extends AbstractQuercusModule {
    * @param needleV the string to search for
    */
   public static Value strrpos(Env env,
-			      Value haystackV,
+			      String haystack,
 			      Value needleV,
 			      @Optional Value offsetV)
     throws Throwable
   {
-    String haystack = haystackV.toString(env);
     String needle;
 
     if (needleV instanceof StringValue)
-      needle = needleV.toString(env);
+      needle = needleV.toString();
     else
       needle = String.valueOf((char) needleV.toInt());
 
@@ -2490,16 +2465,15 @@ public class QuercusStringModule extends AbstractQuercusModule {
    * @param offsetV the optional offset to start searching
    */
   public static Value strripos(Env env,
-			       Value haystackV,
+			       String haystack,
 			       Value needleV,
 			       @Optional Value offsetV)
     throws Throwable
   {
-    String haystack = haystackV.toString(env);
     String needle;
 
     if (needleV instanceof StringValue)
-      needle = needleV.toString(env);
+      needle = needleV.toString();
     else
       needle = String.valueOf((char) needleV.toInt());
 
@@ -2598,12 +2572,10 @@ public class QuercusStringModule extends AbstractQuercusModule {
    * @param env the calling environment
    * @param stringV the input string
    */
-  public static Value strtolower(Env env, Value stringV)
+  public static String strtolower(Env env, String string)
     throws Throwable
   {
-    String string = stringV.toString(env);
-
-    return new StringValue(string.toLowerCase());
+    return string.toLowerCase();
   }
 
   /**
@@ -2612,12 +2584,10 @@ public class QuercusStringModule extends AbstractQuercusModule {
    * @param env the calling environment
    * @param stringV the input string
    */
-  public static Value strtoupper(Env env, Value stringV)
+  public static String strtoupper(Env env, String string)
     throws Throwable
   {
-    String string = stringV.toString(env);
-
-    return new StringValue(string.toUpperCase());
+    return string.toUpperCase();
   }
 
   /**
@@ -2812,11 +2782,9 @@ public class QuercusStringModule extends AbstractQuercusModule {
    * @param env the calling environment
    * @param stringV the input string
    */
-  public static Value ucwords(Env env, Value stringV)
+  public static String ucwords(Env env, String string)
     throws Throwable
   {
-    String string = stringV.toString(env);
-
     int strLen = string.length();
 
     boolean isStart = true;
@@ -2840,7 +2808,7 @@ public class QuercusStringModule extends AbstractQuercusModule {
       }
     }
 
-    return new StringValue(sb.toString());
+    return sb.toString();
   }
 
   /**

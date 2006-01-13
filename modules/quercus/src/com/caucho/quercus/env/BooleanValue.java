@@ -71,6 +71,14 @@ public class BooleanValue extends Value {
   {
     return "boolean";
   }
+
+  /**
+   * Returns true for a scalar
+   */
+  public boolean isScalar()
+  {
+    return true;
+  }
   
   /**
    * Converts to a boolean.

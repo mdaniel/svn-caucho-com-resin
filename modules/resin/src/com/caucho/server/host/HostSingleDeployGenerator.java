@@ -116,6 +116,9 @@ public class HostSingleDeployGenerator
     String rawHostName = _config.getId();
 
     String hostName = Config.evalString(rawHostName);
+
+    if (hostName.equals("*"))  // server/1f20
+      hostName = "";
     
     _controller = new HostController(hostName, _config, _container, null);
 

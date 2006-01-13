@@ -161,6 +161,8 @@ public class PhpParser {
   private final static int TRUE = 561;
   private final static int FALSE = 562;
   private final static int CLONE = 563;
+  private final static int INSTANCEOF = 564;
+  private final static int CONST = 565;
   
   private final static int LAST_IDENTIFIER_LEXEME = 1024;
 
@@ -1502,6 +1504,10 @@ public class PhpParser {
 	break;
 	*/
 
+      case CONST:
+	parseClassConstDefinition();
+	break;
+
       case PUBLIC:
       case PRIVATE:
       case PROTECTED:
@@ -1571,6 +1577,29 @@ public class PhpParser {
 	((ClassScope) _scope).addStaticVar(name, expr);
       else
 	((ClassScope) _scope).addVar(name, expr);
+
+      token = parseToken();
+    } while (token == ',');
+
+    _peekToken = token;
+  }
+
+  /**
+   * Parses a const definition
+   */
+  private void parseClassConstDefinition()
+    throws IOException
+  {
+    int token;
+    
+    do {
+      String name = parseIdentifier();
+      
+      expect('=');
+
+      Expr expr = parseExpr();
+
+      ((ClassScope) _scope).addConstant(name, expr);
 
       token = parseToken();
     } while (token == ',');
@@ -2058,6 +2087,9 @@ public class PhpParser {
 
     case GEQ:
       return new GeqExpr(expr, parseShiftExpr());
+
+    case INSTANCEOF:
+      return new InstanceOfExpr(expr, parseIdentifier());
       
     default:
       _peekToken = token;
@@ -2479,7 +2511,7 @@ public class PhpParser {
         if (token == '(')
           return parseFunction(className, name);
         else
-          return parseConstant(name);
+          return parseConstant(className, name);
       }
 
     case '(':
@@ -2595,10 +2627,12 @@ public class PhpParser {
   /**
    * Parses the next constant
    */
-  private Expr parseConstant(String name)
+  private Expr parseConstant(String className, String name)
     throws IOException
   {
-    if (name.equals("__FILE__"))
+    if (className != null)
+      return new ClassConstExpr(className, name);
+    else if (name.equals("__FILE__"))
       return new StringLiteralExpr(_file);
     else if (name.equals("__LINE__"))
       return new LongLiteralExpr(_line);
@@ -3958,6 +3992,7 @@ public class PhpParser {
     case RETURN: return "'return'";
       
     case CLONE: return "'clone'";
+    case INSTANCEOF: return "'instanceof'";
       
     case SIMPLE_STRING_ESCAPE: return "string";
     case COMPLEX_STRING_ESCAPE: return "string";
@@ -4052,5 +4087,7 @@ public class PhpParser {
     _insensitiveReserved.put("false", FALSE);
     _insensitiveReserved.put("null", NULL);
     _insensitiveReserved.put("clone", CLONE);
+    _insensitiveReserved.put("instanceof", INSTANCEOF);
+    _insensitiveReserved.put("const", CONST);
   }
 }

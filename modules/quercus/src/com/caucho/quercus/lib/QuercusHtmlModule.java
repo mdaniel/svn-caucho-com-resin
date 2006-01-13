@@ -112,7 +112,7 @@ public class QuercusHtmlModule extends AbstractQuercusModule {
     throws Throwable
   {
       // XXX: quotestyle and charset
-    String string = stringV.toString(env);
+    String string = stringV.toString();
     StringBuilder sb = new StringBuilder();
 
     int len = string.length();
@@ -199,7 +199,7 @@ public class QuercusHtmlModule extends AbstractQuercusModule {
   public static Value nl2br(Env env, Value stringV)
     throws Throwable
   {
-    String string = stringV.toString(env);
+    String string = stringV.toString();
 
     int strLen = string.length();
 

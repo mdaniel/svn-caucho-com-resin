@@ -4,6 +4,13 @@
 
 <s2 title='3.0.snap - Jan 10, 2005'>
 <ul>
+<li>Quercus: version_compare fixes (#610, rep by Stefano Bagnara)
+<li>XML parser needs to detect missing whitespace between attributes (#472, rep by M Duchovny)
+<li>64-bit detection for JNI needs to be distinguished from 64-bit for plugins (rep by Leonid Kaminsky)
+<li>Added &lt;moved-permanently> to &lt;rewrite-dispatch> (#403, rep by A Achuthan)
+<li>java.util.logging now uses the System property "file.encoding" to encode strings (#322, rep by Han)
+<li>Host with id="*" wasn't automatically started (#849, rep by Jean-Francois Lamy)
+<li>./configure not properly detecting Apache 2 vs Apache 1 (#429)
 <li>ParseTagManager methods need to be synchronized for JSP compilation on server startup (#704, rep by Bryan Davis)
 <li>FileServlet needs to get character-encoding from init-param (#583, rep by Anoop Achuthan)
 <li>BigDecimal.ZERO is a JDK 1.5 constant (#858, rep by Vinny)

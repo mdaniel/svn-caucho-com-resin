@@ -76,6 +76,14 @@ public class DoubleValue extends Value {
   {
     return true;
   }
+
+  /**
+   * Returns true for a scalar
+   */
+  public boolean isScalar()
+  {
+    return true;
+  }
   
   /**
    * Converts to a boolean.

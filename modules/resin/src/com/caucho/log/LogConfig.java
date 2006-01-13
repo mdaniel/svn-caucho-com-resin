@@ -273,6 +273,12 @@ public class LogConfig extends RotateLog implements LogMBean {
 	filter.setStream(os);
 	os = new WriteStream(filter);
       }
+
+      String encoding = System.getProperty("file.encoding");
+      
+      if (encoding != null)
+	os.setEncoding(encoding);
+      
       os.setDisableClose(true);
     }
 

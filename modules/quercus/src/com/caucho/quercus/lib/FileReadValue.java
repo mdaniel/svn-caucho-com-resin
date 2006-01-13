@@ -183,7 +183,7 @@ public class FileReadValue extends FileValue {
    * Converts to a string.
    * @param env
    */
-  public String toString(Env env)
+  public String toString()
   {
     return "File[" + getPath() + "]";
   }

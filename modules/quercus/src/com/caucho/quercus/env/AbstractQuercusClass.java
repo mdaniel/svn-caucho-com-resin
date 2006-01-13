@@ -104,5 +104,44 @@ abstract public class AbstractQuercusClass {
 					getName(), name));
     }
   }
+
+  /**
+   * Finds the matching constant
+   */
+  public Expr findConstant(String name)
+  {
+    return null;
+  }
+
+  /**
+   * Finds the matching constant
+   */
+  public final Value getConstant(Env env, String name)
+    throws Throwable
+  {
+    Expr expr = findConstant(name);
+
+    if (expr != null)
+      return expr.eval(env);
+
+    throw new QuercusRuntimeException(L.l("{0}::{1} is an unknown constant",
+					getName(), name));
+  }
+
+  /**
+   * Returns the parent class
+   */
+  public String getParentName()
+  {
+    return null;
+  }
+
+  /**
+   * Returns value for instanceof.
+   */
+  public boolean isA(String name)
+  {
+    return false;
+  }
 }
 

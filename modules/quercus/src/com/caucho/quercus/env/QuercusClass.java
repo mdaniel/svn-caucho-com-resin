@@ -136,6 +136,27 @@ public class QuercusClass extends AbstractQuercusClass {
   }
 
   /**
+   * Returns the parent class.
+   */
+  public String getParentName()
+  {
+    return _classDefList[0].getParentName();
+  }
+
+  /**
+   * Returns true for an implementation of a class
+   */
+  public boolean isA(String name)
+  {
+    for (int i = _classDefList.length - 1; i >= 0; i--) {
+      if (_classDefList[i].isA(name))
+	return true;
+    }
+
+    return false;
+  }
+
+  /**
    * Creates a new instance.
    */
   public ObjectValue newInstance(Env env)
@@ -202,6 +223,22 @@ public class QuercusClass extends AbstractQuercusClass {
 
       if (fun != null)
 	return fun;
+    }
+    
+    return null;
+  }
+
+  /**
+   * Finds the matching constant.
+   */
+  public Expr findConstant(String name)
+  {
+    // XXX: cache constant
+    for (int i = 0; i < _classDefList.length; i++) {
+      Expr expr = _classDefList[i].findConstant(name);
+
+      if (expr != null)
+	return expr;
     }
     
     return null;

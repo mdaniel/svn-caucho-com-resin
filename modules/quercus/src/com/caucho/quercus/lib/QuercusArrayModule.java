@@ -1704,7 +1704,7 @@ public class QuercusArrayModule extends AbstractQuercusModule {
 
     boolean increment = true;
 
-    if (! end.geq(start, env)) {
+    if (! end.geq(start)) {
       step *= -1;
       increment = false;
     }
@@ -1715,8 +1715,8 @@ public class QuercusArrayModule extends AbstractQuercusModule {
       array.put(start);
 
       start = rangeIncrement(start, step);
-    } while ((increment && start.leq(end, env)) ||
-             (!increment && start.geq(end, env)));
+    } while ((increment && start.leq(end)) ||
+             (!increment && start.geq(end)));
 
     return array;
   }

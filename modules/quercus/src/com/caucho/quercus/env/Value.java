@@ -58,9 +58,17 @@ abstract public class Value {
   public static final Value []NULL_ARGS = new Value[0];
 
   /**
-   * Returns true for a long-value.
+   * Returns true for an implementation of a class
    */
-  public boolean isLong()
+  public boolean isA(String name)
+  {
+    return false;
+  }
+
+  /**
+   * Returns true for an array.
+   */
+  public boolean isArray()
   {
     return false;
   }
@@ -74,19 +82,27 @@ abstract public class Value {
   }
 
   /**
+   * Returns true for a long-value.
+   */
+  public boolean isLong()
+  {
+    return false;
+  }
+
+  /**
+   * Returns true for a null.
+   */
+  public boolean isNull()
+  {
+    return false;
+  }
+
+  /**
    * Returns true for a number.
    */
   public boolean isNumber()
   {
     return isLong() || isDouble();
-  }
-
-  /**
-   * Returns true for an array.
-   */
-  public boolean isArray()
-  {
-    return false;
   }
 
   /**
@@ -98,9 +114,9 @@ abstract public class Value {
   }
 
   /**
-   * Returns true for a null.
+   * Returns true for a scalar
    */
-  public boolean isNull()
+  public boolean isScalar()
   {
     return false;
   }
@@ -165,7 +181,7 @@ abstract public class Value {
    * Converts to a string value.
    * @param env
    */
-  public Value toStringValue(Env env)
+  public Value toStringValue()
     throws Throwable
   {
     Value value = toValue();
@@ -173,7 +189,7 @@ abstract public class Value {
     if (value instanceof StringValue)
       return value;
     else
-      return new StringValue(value.toString(env));
+      return new StringValue(value.toString());
   }
   
   /**
@@ -633,21 +649,20 @@ abstract public class Value {
   /**
    * Returns true for less than
    */
-  public boolean lt(Value rValue, Env env)
-    throws Throwable
+  public boolean lt(Value rValue)
   {
     if (isLong() && rValue.isLong())
       return toLong() < rValue.toLong();
     else if (isNumber() || rValue.isNumber())
       return toDouble() < rValue.toDouble();
     else
-      return toString(env).compareTo(rValue.toString(env)) < 0;
+      return toString().compareTo(rValue.toString()) < 0;
   }
 
   /**
    * Returns true for less than or equal to
    */
-  public boolean leq(Value rValue, Env env)
+  public boolean leq(Value rValue)
     throws Throwable
   {
     if (isLong() && rValue.isLong())
@@ -655,13 +670,13 @@ abstract public class Value {
     else if (isNumber() || rValue.isNumber())
       return toDouble() <= rValue.toDouble();
     else
-      return toString(env).compareTo(rValue.toString(env)) <= 0;
+      return toString().compareTo(rValue.toString()) <= 0;
   }
 
   /**
    * Returns true for greater than
    */
-  public boolean gt(Value rValue, Env env)
+  public boolean gt(Value rValue)
     throws Throwable
   {
     if (isLong() && rValue.isLong())
@@ -669,13 +684,13 @@ abstract public class Value {
     else if (isNumber() || rValue.isNumber())
       return toDouble() > rValue.toDouble();
     else
-      return toString(env).compareTo(rValue.toString(env)) > 0;
+      return toString().compareTo(rValue.toString()) > 0;
   }
 
   /**
    * Returns true for greater than or equal to
    */
-  public boolean geq(Value rValue, Env env)
+  public boolean geq(Value rValue)
     throws Throwable
   {
     if (isLong() && rValue.isLong())
@@ -683,7 +698,7 @@ abstract public class Value {
     else if (isNumber() || rValue.isNumber())
       return toDouble() >= rValue.toDouble();
     else
-      return toString(env).compareTo(rValue.toString(env)) >= 0;
+      return toString().compareTo(rValue.toString()) >= 0;
   }
 
   /**

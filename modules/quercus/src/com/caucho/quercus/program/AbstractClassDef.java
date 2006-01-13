@@ -82,6 +82,14 @@ abstract public class AbstractClassDef {
     throws Throwable;
 
   /**
+   * Returns value for instanceof.
+   */
+  public boolean isA(String name)
+  {
+    return _name.equals(name);
+  }
+
+  /**
    * Returns the constructor
    */
   abstract public AbstractFunction findConstructor();
@@ -118,6 +126,14 @@ abstract public class AbstractClassDef {
       return fun;
 
     throw new QuercusRuntimeException(L.l("no function " + name));
+  }
+
+  /**
+   * Finds the matching constant
+   */
+  public Expr findConstant(String name)
+  {
+    return null;
   }
 
   public String toString()

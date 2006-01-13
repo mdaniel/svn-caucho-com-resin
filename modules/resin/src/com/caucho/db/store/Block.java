@@ -101,13 +101,13 @@ abstract public class Block implements ClockCacheItem, CacheListener {
   boolean allocate()
   {
     synchronized (this) {
-      if (getBuffer() == null)
-	return false;
-      
       _useCount++;
-
+      
       if (log.isLoggable(Level.FINEST))
 	log.finest(this + " allocate");
+
+      if (getBuffer() == null)
+	return false;
 
       if (_useCount > 32 && log.isLoggable(Level.FINE)) {
 	Thread.dumpStack();

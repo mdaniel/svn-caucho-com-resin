@@ -1063,7 +1063,7 @@ abstract public class ArrayValue extends Value {
 
 	if (aValue.eq(bValue))
 	  return 0;
-	else if (aValue.lt(bValue, null))
+	else if (aValue.lt(bValue))
 	  return -1;
 	else
 	  return 1;
@@ -1084,7 +1084,7 @@ abstract public class ArrayValue extends Value {
 
 	if (aKey.eq(bKey))
 	  return 0;
-	else if (aKey.lt(bKey, null))
+	else if (aKey.lt(bKey))
 	  return -1;
 	else
 	  return 1;

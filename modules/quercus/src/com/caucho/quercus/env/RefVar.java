@@ -49,6 +49,14 @@ public class RefVar extends Value {
   {
     _var = var;
   }
+
+  /**
+   * Returns true for an implementation of a class
+   */
+  public boolean isA(String name)
+  {
+    return _var.isA(name);
+  }
   
   /**
    * True for a long
@@ -72,6 +80,14 @@ public class RefVar extends Value {
   public boolean isNumber()
   {
     return _var.isNumber();
+  }
+
+  /**
+   * Returns true for a scalar
+   */
+  public boolean isScalar()
+  {
+    return _var.isScalar();
   }
   
   /**

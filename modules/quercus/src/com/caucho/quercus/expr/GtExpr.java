@@ -76,7 +76,7 @@ public final class GtExpr extends BinaryExpr {
     Value lValue = _left.eval(env);
     Value rValue = _right.eval(env);
 
-    return lValue.gt(rValue, env);
+    return lValue.gt(rValue);
   }
 
   //
@@ -122,7 +122,7 @@ public final class GtExpr extends BinaryExpr {
       _left.generate(out);
       out.print(".gt(");
       _right.generate(out);
-      out.print(", env)");
+      out.print(")");
     }
   }
   

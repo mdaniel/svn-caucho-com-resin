@@ -76,6 +76,14 @@ public class ClassScope extends Scope {
   {
     _cl.addStaticValue(new StringValue(name), value);
   }
+  
+  /**
+   * Adds a constant value
+   */
+  public void addConstant(String name, Expr value)
+  {
+    _cl.addConstant(name, value);
+  }
 
   /**
    * Adds a class

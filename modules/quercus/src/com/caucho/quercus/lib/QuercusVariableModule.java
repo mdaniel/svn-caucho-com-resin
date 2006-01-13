@@ -188,7 +188,7 @@ public class QuercusVariableModule extends AbstractQuercusModule {
     if (v instanceof NullValue)
       return BooleanValue.TRUE;
     else if (v instanceof StringValue) {
-      String s = v.toString(env);
+      String s = v.toString();
       
       return (s.equals("") || s.equals("0")
 	      ? BooleanValue.TRUE
@@ -333,6 +333,19 @@ public class QuercusVariableModule extends AbstractQuercusModule {
     return (v.toValue() instanceof BooleanValue
 	    ? BooleanValue.TRUE
 	    : BooleanValue.FALSE);
+  }
+
+  /**
+   * Returns true for a scalar
+   *
+   * @param v the value to test
+   *
+   * @return true for a scalar
+   */
+  public static boolean is_scalar(@ReadOnly Value v)
+         throws IOException
+  {
+    return v.isScalar();
   }
 
   /**
@@ -484,7 +497,7 @@ public class QuercusVariableModule extends AbstractQuercusModule {
       return true;
     else if (v instanceof StringValue) {
       try {
-	Double.parseDouble(v.toString(env));
+	Double.parseDouble(v.toString());
 	return true;
       } catch (Throwable e) {
 	return false;
@@ -548,7 +561,7 @@ public class QuercusVariableModule extends AbstractQuercusModule {
     if (v instanceof StringValue)
       return (StringValue) v;
     else
-      return new StringValue(v.toString(env));
+      return new StringValue(v.toString());
   }
 
   /**
@@ -608,6 +621,50 @@ public class QuercusVariableModule extends AbstractQuercusModule {
     v.serialize(sb);
 
     return sb.toString();
+  }
+
+  /**
+   * Converts the variable to a specified tyep.
+   */
+  public static boolean settype(Env env,
+				@Reference Value var,
+				String type)
+  {
+    Value value = var.toValue();
+
+    if ("null".equals(type)) {
+      var.set(NullValue.NULL);
+      return true;
+    }
+    else if ("boolean".equals(type) || "bool".equals(type)) {
+      var.set(value.toBoolean() ? BooleanValue.TRUE : BooleanValue.TRUE);
+      return true;
+    }
+    else if ("string".equals(type)) {
+      var.set(new StringValue(value.toString()));
+      return true;
+    }
+    else if ("int".equals(type) || "integer".equals(type)) {
+      var.set(new LongValue(value.toLong()));
+      return true;
+    }
+    else if ("float".equals(type) || "double".equals(type)) {
+      var.set(new DoubleValue(value.toDouble()));
+      return true;
+    }
+    else if ("object".equals(type)) {
+      var.set(value.toObject(env));
+      return true;
+    }
+    else if ("array".equals(type)) {
+      if (value.isArray())
+	var.set(value);
+      else
+	var.set(new ArrayValueImpl().append(value));
+      return true;
+    }
+    else
+      return false;
   }
 
   /**
@@ -691,7 +748,7 @@ public class QuercusVariableModule extends AbstractQuercusModule {
       out.print("float(" + v.toDouble() + ")");
     }
     else if (v instanceof StringValue) {
-      out.print("string(" + v.toString(env) + ")");
+      out.print("string(" + v.toString() + ")");
     }
     else if (v instanceof NullValue) {
       out.print("NULL");
@@ -729,7 +786,7 @@ public class QuercusVariableModule extends AbstractQuercusModule {
 	  
 	  printDepth(out, 2 * depth + 2);
 	  out.print("[");
-	  out.print("\"" + entry.getKey().toString(env) + "\"");
+	  out.print("\"" + entry.getKey().toString() + "\"");
 	  out.println("]=>");
 	  printDepth(out, 2 * depth + 2);
 	  var_dump_impl(env, out, entry.getRawValue(), depth + 1, valueSet);

@@ -76,7 +76,7 @@ public final class LeqExpr extends BinaryExpr {
     Value lValue = _left.eval(env);
     Value rValue = _right.eval(env);
 
-    return lValue.leq(rValue, env);
+    return lValue.leq(rValue);
   }
 
   //
@@ -122,7 +122,7 @@ public final class LeqExpr extends BinaryExpr {
       _left.generate(out);
       out.print(".leq(");
       _right.generate(out);
-      out.print(", env)");
+      out.print(")");
     }
   }
   

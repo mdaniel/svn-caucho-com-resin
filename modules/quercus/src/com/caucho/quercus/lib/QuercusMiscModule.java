@@ -242,6 +242,19 @@ public class QuercusMiscModule extends AbstractQuercusModule {
   }
 
   /**
+   * Sleep for a number of seconds.
+   */
+  public static long sleep(long seconds)
+  {
+    try {
+      Thread.sleep(seconds * 1000);
+    } catch (Throwable e) {
+    }
+
+    return seconds;
+  }
+
+  /**
    * Execute a system command.
    */
   public static String system(Env env, String command,

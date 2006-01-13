@@ -54,6 +54,9 @@ public class QuercusDateModule extends AbstractQuercusModule {
   private static final Logger log
     = Logger.getLogger(QuercusDateModule.class.getName());
 
+  public static final int CAL_GREGORIAN = 0;
+  public static final int CAL_JULIAN = 1;
+
   private static final String []_shortDayOfWeek = {
     "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"
   };
@@ -74,6 +77,19 @@ public class QuercusDateModule extends AbstractQuercusModule {
 
   private QDate _localCalendar = QDate.createLocal();
   private QDate _gmtCalendar = new QDate();
+
+  /**
+   * Returns the days in a given month.
+   */
+  public int cal_days_in_month(int cal, int month, int year)
+  {
+    QDate date = new QDate();
+
+    date.setYear(year);
+    date.setMonth(month - 1);
+
+    return date.getDaysInMonth();
+  }
 
   /**
    * Returns the formatted date.

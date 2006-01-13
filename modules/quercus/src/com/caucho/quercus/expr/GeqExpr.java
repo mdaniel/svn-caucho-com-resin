@@ -76,7 +76,7 @@ public final class GeqExpr extends BinaryExpr {
     Value lValue = _left.eval(env);
     Value rValue = _right.eval(env);
 
-    return lValue.geq(rValue, env);
+    return lValue.geq(rValue);
   }
 
   //
@@ -122,7 +122,7 @@ public final class GeqExpr extends BinaryExpr {
       _left.generate(out);
       out.print(".geq(");
       _right.generate(out);
-      out.print(", env)");
+      out.print(")");
     }
   }
   

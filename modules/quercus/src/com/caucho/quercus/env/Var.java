@@ -110,6 +110,14 @@ public class Var extends Value {
   {
     return _value.isset();
   }
+
+  /**
+   * Returns true for an implementation of a class
+   */
+  public boolean isA(String name)
+  {
+    return _value.isA(name);
+  }
   
   /**
    * True for a number
@@ -141,6 +149,14 @@ public class Var extends Value {
   public boolean isNumber()
   {
     return _value.isNumber();
+  }
+
+  /**
+   * Returns true for a scalar
+   */
+  public boolean isScalar()
+  {
+    return _value.isScalar();
   }
   
   /**

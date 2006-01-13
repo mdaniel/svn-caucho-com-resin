@@ -42,12 +42,16 @@ import com.caucho.quercus.parser.PhpParser;
 import com.caucho.quercus.gen.PhpWriter;
 
 /**
- * Represents a PHP comparison expression.
+ * Represents a PHP instanceof expression.
  */
-public final class LtExpr extends BinaryExpr {
-  public LtExpr(Expr left, Expr right)
+public final class InstanceOfExpr extends UnaryExpr {
+  private final String _right;
+  
+  public InstanceOfExpr(Expr left, String right)
   {
-    super(left, right);
+    super(left);
+
+    _right = right;
   }
 
   /**
@@ -73,14 +77,13 @@ public final class LtExpr extends BinaryExpr {
   public boolean evalBoolean(Env env)
     throws Throwable
   {
-    Value lValue = _left.eval(env);
-    Value rValue = _right.eval(env);
+    Value lValue = _expr.eval(env);
 
-    return lValue.lt(rValue);
+    return _expr.eval(env).isA(_right);
   }
 
   //
-  // Java generation code
+  // java generation code
   //
 
   /**
@@ -104,31 +107,15 @@ public final class LtExpr extends BinaryExpr {
   public void generateBoolean(PhpWriter out)
     throws IOException
   {
-    if (_left.isLong() && _right.isLong()) {
-      out.print("(");
-      _left.generateLong(out);
-      out.print(" < ");
-      _right.generateLong(out);
-      out.print(")");
-    }
-    else if (_left.isNumber() || _right.isNumber()) {
-      out.print("(");
-      _left.generateDouble(out);
-      out.print(" < ");
-      _right.generateDouble(out);
-      out.print(")");
-    }
-    else {
-      _left.generate(out);
-      out.print(".lt(");
-      _right.generate(out);
-      out.print(")");
-    }
+    _expr.generate(out);
+    out.print(".isA(\"");
+    out.printJavaString(_right);
+    out.print("\")");
   }
   
   public String toString()
   {
-    return "(" + _left + " < " + _right + ")";
+    return "(" + _expr + " instanceof " + _right + ")";
   }
 }
 

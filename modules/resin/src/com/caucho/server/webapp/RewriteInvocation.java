@@ -49,6 +49,7 @@ import com.caucho.config.ConfigException;
 import com.caucho.server.dispatch.Invocation;
 import com.caucho.server.dispatch.RedirectFilterChain;
 import com.caucho.server.dispatch.ForwardFilterChain;
+import com.caucho.server.dispatch.MovedFilterChain;
 import com.caucho.server.dispatch.ErrorFilterChain;
 
 import com.caucho.util.L10N;
@@ -86,6 +87,16 @@ public class RewriteInvocation {
   public void addRedirect(Redirect redirect)
   {
     _programList.add(redirect);
+  }
+
+  /**
+   * Adds a moved-permanently
+   */
+  public void addMovedPermanently(Moved moved)
+  {
+    moved.setStatusCode(301);
+    
+    _programList.add(moved);
   }
 
   /**
@@ -290,6 +301,57 @@ public class RewriteInvocation {
 	throw new ConfigException(L.l("redirect needs 'regexp' attribute."));
       if (_target == null)
 	throw new ConfigException(L.l("redirect needs 'target' attribute."));
+    }
+  }
+
+  public static class Moved extends Program {
+    private int _code = 302;
+    
+    private String _target;
+    private Pattern _regexp;
+
+    /**
+     * Sets the regular expression.
+     */
+    public void setRegexp(String regexp)
+    {
+      _regexp = Pattern.compile(regexp);
+    }
+
+    public void setTarget(String target)
+    {
+      _target = target;
+    }
+
+    /**
+     * Sets the redirect code.
+     */
+    public void setStatusCode(int code)
+    {
+      _code = code;
+    }
+
+    public FilterChain dispatch(String uri)
+    {
+      Matcher matcher = _regexp.matcher(uri);
+
+      if (matcher.find()) {
+	matcher.reset();
+	uri = matcher.replaceAll(_target);
+
+	return new MovedFilterChain(_code, uri);
+      }
+      else
+	return null;
+    }
+
+    public void init()
+      throws ConfigException
+    {
+      if (_regexp == null)
+	throw new ConfigException(L.l("moved needs 'regexp' attribute."));
+      if (_target == null)
+	throw new ConfigException(L.l("moved needs 'target' attribute."));
     }
   }
 

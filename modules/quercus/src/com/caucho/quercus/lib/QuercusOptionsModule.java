@@ -31,6 +31,7 @@ package com.caucho.quercus.lib;
 
 import java.util.Map;
 import java.util.HashMap;
+import java.util.ArrayList;
 
 import com.caucho.util.L10N;
 
@@ -299,18 +300,116 @@ public class QuercusOptionsModule extends AbstractQuercusModule {
    */
   public static Value version_compare(String version1,
                                       String version2,
-                                      @Optional String operator)
+                                      @Optional("cmp") String op)
   {
-    // XXX: incomplete
+    ArrayList<Value> expanded1 = expandVersion(version1);
+    ArrayList<Value> expanded2 = expandVersion(version2);
+    
+    int cmp = compareTo(expanded1, expanded2);
 
-    int cmp = version1.compareTo(version2);
+    if ("eq".equals(op) || "==".equals(op) || "=".equals(op))
+      return cmp == 0 ? BooleanValue.TRUE : BooleanValue.FALSE;
+    else if ("ne".equals(op) || "!=".equals(op) || "<>".equals(op))
+      return cmp != 0 ? BooleanValue.TRUE : BooleanValue.FALSE;
+    else if ("lt".equals(op) || "<".equals(op))
+      return cmp < 0 ? BooleanValue.TRUE : BooleanValue.FALSE;
+    else if ("le".equals(op) || "<=".equals(op))
+      return cmp <= 0 ? BooleanValue.TRUE : BooleanValue.FALSE;
+    else if ("gt".equals(op) || ">".equals(op))
+      return cmp > 0 ? BooleanValue.TRUE : BooleanValue.FALSE;
+    else if ("ge".equals(op) || ">=".equals(op))
+      return cmp >= 0 ? BooleanValue.TRUE : BooleanValue.FALSE;
+    else {
+      if (cmp == 0)
+	return new LongValue(0);
+      else if (cmp < 0)
+	return new LongValue(-1);
+      else
+	return new LongValue(1);
+    }
+  }
 
-    if (cmp == 0)
-      return new LongValue(0);
-    else if (cmp < 0)
-      return new LongValue(-1);
+  private static ArrayList<Value> expandVersion(String version)
+  {
+    ArrayList<Value> expand = new ArrayList<Value>();
+
+    int len = version.length();
+    int i = 0;
+
+    while (i < len) {
+      char ch = version.charAt(i);
+
+      if ('0' <= ch && ch <= '9') {
+	int value = 0;
+
+	for (; i < len && '0' <= ch && ch <= '9'; i++) {
+	  value = 10 * value + ch - '0';
+	}
+
+	expand.add(new LongValue(value));
+      }
+      else if (Character.isLetter((char) ch)) {
+	StringBuilder sb = new StringBuilder();
+
+	for (; i < len && Character.isLetter((char) ch); ch++) {
+	  sb.append((char) ch);
+	}
+
+	String s = sb.toString();
+
+	if (s.equals("dev"))
+	  s = "a";
+	else if (s.equals("alpha") || s.equals("a"))
+	  s = "b";
+	else if (s.equals("beta") || s.equals("b"))
+	  s = "c";
+	else if (s.equals("RC"))
+	  s = "d";
+	else if (s.equals("pl"))
+	  s = "e";
+	else
+	  s = "z" + s;
+
+	expand.add(new StringValue(s));
+      }
+    }
+
+    return expand;
+  }
+
+  private static int compareTo(ArrayList<Value> a, ArrayList<Value> b)
+  {
+    int i = 0;
+
+    while (true) {
+      if (a.size() <= i && b.size() <= i)
+	return 0;
+      else if (a.size() <= i)
+	return -1;
+      else if (b.size() <= i)
+	return -1;
+
+      int cmp = compareTo(a.get(i), b.get(i));
+
+      if (cmp != 0)
+	return cmp;
+
+      i++;
+    }
+  }
+
+  private static int compareTo(Value a, Value b)
+  {
+    if (a.equals(b))
+      return 0;
+    else if (a.isLong() && ! b.isLong())
+      return -1;
+    else if (b.isLong() && ! a.isLong())
+      return 1;
+    else if (a.lt(b))
+      return -1;
     else
-      return new LongValue(1);
+      return 1;
   }
 
   static {

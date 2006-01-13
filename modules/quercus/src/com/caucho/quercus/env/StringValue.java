@@ -156,6 +156,14 @@ public class StringValue extends Value {
   {
     return getNumericType() != IS_STRING;
   }
+
+  /**
+   * Returns true for a scalar
+   */
+  public boolean isScalar()
+  {
+    return true;
+  }
   
   /**
    * Converts to a double.
