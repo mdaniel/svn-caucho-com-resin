@@ -33,7 +33,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 
 /**
- * Represents the final servlet in a filter chain.
+ * Does an internal forward of the request.
  */
 public class ForwardFilterChain implements FilterChain {
   // servlet
@@ -79,5 +79,13 @@ public class ForwardFilterChain implements FilterChain {
 
       disp.forward(request, response);
     }
+  }
+
+  public String toString()
+  {
+    if (_disp != null)
+      return "ForwardFilterChain[" + _disp + "]";
+    else
+      return "ForwardFilterChain[" + _url + "]";
   }
 }

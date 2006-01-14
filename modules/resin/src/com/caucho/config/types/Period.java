@@ -35,7 +35,7 @@ import com.caucho.util.QDate;
 import com.caucho.config.ConfigException;
 
 /**
- * Class-loading TypeBuilder
+ * Representations of time in milliseconds.
  */
 public class Period {
   static L10N L = new L10N(Period.class);

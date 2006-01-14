@@ -36,7 +36,7 @@ import javax.servlet.*;
 import javax.servlet.http.*;
 
 /**
- * Represents the final servlet in a filter chain.
+ * Responds with an error code.
  */
 public class ErrorFilterChain implements FilterChain {
   // servlet
@@ -51,7 +51,7 @@ public class ErrorFilterChain implements FilterChain {
   {
     _errorCode = errorCode;
   }
-  
+
   /**
    * Invokes the final servlet at the end of the chain.
    *
@@ -67,5 +67,10 @@ public class ErrorFilterChain implements FilterChain {
     HttpServletResponse res = (HttpServletResponse) response;
 
     res.sendError(_errorCode);
+  }
+
+  public String toString()
+  {
+    return "ErrorFilterChain[" + _errorCode + "]";
   }
 }
