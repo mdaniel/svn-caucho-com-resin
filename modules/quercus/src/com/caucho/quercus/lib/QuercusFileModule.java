@@ -51,7 +51,7 @@ import com.caucho.vfs.TempBuffer;
 import com.caucho.vfs.Path;
 
 /**
- * Information about PHP file
+ * Information and actions for about files
  */
 public class QuercusFileModule extends AbstractQuercusModule {
   private static final L10N L = new L10N(QuercusFileModule.class);
@@ -597,7 +597,7 @@ public class QuercusFileModule extends AbstractQuercusModule {
    * Parses the file, returning it in an array.
    *
    * @param filename the file's name
-   * @param useIncludePath if true, use the include path
+   * @param useIncludePath if 1, use the include path
    * @param context the resource context
    */
   public static Value file(Env env,
@@ -606,7 +606,7 @@ public class QuercusFileModule extends AbstractQuercusModule {
                            @Optional Value context)
     throws IOException
   {
-    Value fileValue = fopen(env, filename, "r", useIncludePath, context);
+    Value fileValue = fopen(env, filename, "r", useIncludePath == 1, context);
 
     if (fileValue instanceof FileValue) {
       FileValue file = (FileValue) fileValue;
@@ -746,24 +746,20 @@ public class QuercusFileModule extends AbstractQuercusModule {
 
     // XXX: stubbed (faked)
 
-    if (! path.exists())
-      return BooleanValue.FALSE;
-    else {
-      int perms = 0;
+    int perms = 0;
 
-      if (path.isDirectory()) {
-        perms += 01000;
-        perms += 0111;
-      }
-
-      if (path.canRead())
-        perms += 0444;
-
-      if (path.canWrite())
-        perms += 0222;
-
-      return new LongValue(perms);
+    if (path.isDirectory()) {
+      perms += 01000;
+      perms += 0111;
     }
+
+    if (path.canRead())
+      perms += 0444;
+
+    if (path.canWrite())
+      perms += 0222;
+
+    return new LongValue(perms);
   }
 
   /**
@@ -824,7 +820,7 @@ public class QuercusFileModule extends AbstractQuercusModule {
    */
   public static Value file_get_contents(Env env,
                                         String filename,
-                                        @Optional int useIncludePath,
+                                        @Optional boolean useIncludePath,
                                         @Optional Value context,
                                         @Optional long offset,
                                         @Optional("4294967296") long maxLen)
@@ -866,7 +862,8 @@ public class QuercusFileModule extends AbstractQuercusModule {
   {
     // quercus/1634
 
-    Value fileV = fopen(env, filename, "w", flags, context);
+    // XXX: bug862, flags check for FILE_USE_INCLUDE_PATH, FILE_APPEND, LOCK_EX
+    Value fileV = fopen(env, filename, "w", false, context);
 
     if (! (fileV instanceof StreamResource))
       return fileV;
@@ -921,16 +918,32 @@ public class QuercusFileModule extends AbstractQuercusModule {
   public static Value fopen(Env env,
                             String filename,
                             String mode,
-                            @Optional int useIncludePath,
+                            @Optional boolean useIncludePath,
                             @Optional Value context)
   {
+    // XXX: useInputPath
+    // XXX: context
     try {
       Path path = env.getPwd().lookup(filename);
 
-      if (mode.startsWith("r"))
+      if (mode.startsWith("r")) {
+        if (!path.canRead()) {
+          env.warning(L.l("{0} cannot be read", path.getFullPath()));
+
+          return BooleanValue.FALSE;
+        }
+
         return new FileReadValue(path);
-      else if (mode.startsWith("w"))
+      }
+      else if (mode.startsWith("w")) {
+        if (path.exists() && !path.canWrite()) {
+          env.warning(L.l("{0} cannot be written", path.getFullPath()));
+
+          return BooleanValue.FALSE;
+        }
+
         return new FileWriteValue(path);
+      }
       else if (mode.startsWith("x") && ! path.exists())
         return new FileWriteValue(path);
 
@@ -1243,17 +1256,20 @@ public class QuercusFileModule extends AbstractQuercusModule {
   /**
    * Creates a hard link
    */
-  public boolean link(Env env, Path target, Path link)
+  public boolean link(Env env, Path source, Path destination)
   {
-    // quercus/160w
-    if (!target.canRead()) {
-      env.warning(L.l("{0} cannot be read", target.getFullPath()));
+    if (!source.canRead()) {
+      env.warning(L.l("{0} cannot be read", source.getFullPath()));
       return false;
     }
 
-    // XXX: stubbed
-
-    return false;
+    try {
+      return source.createHardLinkTo(destination);
+    }
+    catch (IOException e) {
+      log.log(Level.FINE, e.toString(), e);
+      return false;
+    }
   }
 
   // XXX: linkinfo
@@ -1343,7 +1359,33 @@ public class QuercusFileModule extends AbstractQuercusModule {
     return dir.readdir();
   }
 
-  // XXX: readfile
+  /**
+   * Read the contents of a file and write them out.
+   */
+  public Value readfile(Env env,
+                        String filename,
+                        @Optional boolean useIncludePath,
+                        @Optional Value context)
+  {
+    Value fileValue = fopen(env, filename, "r", useIncludePath, context);
+
+    Value result = BooleanValue.FALSE;
+
+    try {
+      if (fileValue instanceof StreamResource) {
+        StreamResource streamValue = (StreamResource) fileValue;
+
+        result = fpassthru(env, streamValue);
+        fclose(env, streamValue);
+      }
+    }
+    catch (IOException e) {
+      log.log(Level.FINE, e.toString(), e);
+    }
+
+    return result;
+  }
+
   // XXX: readlink
   // XXX: realpath
 
@@ -1488,17 +1530,20 @@ public class QuercusFileModule extends AbstractQuercusModule {
   /**
    * Creates a symlink
    */
-  public boolean symlink(Env env, Path target, Path link)
+  public boolean symlink(Env env, Path source, Path destination)
   {
-    // quercus/160r
-    if (!target.canRead()) {
-      env.warning(L.l("{0} cannot be read", target.getFullPath()));
+    if (!source.canRead()) {
+      env.warning(L.l("{0} cannot be read", source.getFullPath()));
       return false;
     }
 
-    // XXX: stubbed
-
-    return false;
+    try {
+      return source.createSymbolicLinkTo(destination);
+    }
+    catch (IOException e) {
+      log.log(Level.FINE, e.toString(), e);
+      return false;
+    }
   }
 
   /**

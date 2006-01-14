@@ -527,18 +527,22 @@ public abstract class Path {
     return -1;
   }
 
+  public boolean isReadOnly()
+  {
+    return false;
+  }
+
   /**
    * Sets the file to read only
    */
   public void setReadOnly(boolean isReadOnly)
   {
-    // XXX: stubbed
+    // XXX: "safe_mode" check with current owner
   }
 
   public int getGroup()
   {
-    // XXX: stubbed
-    return -1002;
+    return 0;
   }
 
   /**
@@ -567,7 +571,7 @@ public abstract class Path {
   public int getOwner()
   {
     // XXX: stub
-    return -1001;
+    return 0;
   }
 
   /**
@@ -588,12 +592,12 @@ public abstract class Path {
 
   public long getDiskSpaceFree()
   {
-    return 1024 * 1024 * 1024;
+    return -1;
   }
 
   public long getDiskSpaceTotal()
   {
-    return 1024 * 1024 * 1024 * 2;
+    return -1;
   }
 
   /**
@@ -1073,6 +1077,28 @@ public abstract class Path {
       return cb.toString();
     else
       return rawURL;
+  }
+
+  /**
+   * Create a new <i>path</i> that is a hard link to this path.
+   *
+   * @param path the new path to create
+   */
+  public boolean createHardLinkTo(Path path)
+    throws IOException
+  {
+    return false;
+  }
+
+  /**
+   * Create a new <i>path</i> that is a symbolic link to this path.
+   *
+   * @param path the new path to create
+   */
+  public boolean createSymbolicLinkTo(Path path)
+    throws IOException
+  {
+    return false;
   }
 
   private class ArrayIterator implements Iterator<String> {

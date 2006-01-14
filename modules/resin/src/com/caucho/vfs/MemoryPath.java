@@ -33,6 +33,7 @@ import java.io.*;
 import java.util.*;
 
 import com.caucho.util.*;
+import com.caucho.config.types.Bytes;
 
 public class MemoryPath extends FilesystemPath {
   private static L10N L = new L10N(MemoryPath.class);
@@ -60,8 +61,8 @@ public class MemoryPath extends FilesystemPath {
   }
 
   public Path fsWalk(String userPath,
-		     Map<String,Object> attributes,
-		     String path)
+                     Map<String,Object> attributes,
+                     String path)
   {
     return new MemoryPath(_root, userPath, attributes, path);
   }
@@ -86,6 +87,16 @@ public class MemoryPath extends FilesystemPath {
     synchronized (_rootNode) {
       return lookupAll() != null;
     }
+  }
+
+  public long getDiskSpaceFree()
+  {
+    return Bytes.MEGABYTE * 2;
+  }
+
+  public long getDiskSpaceTotal()
+  {
+    return Bytes.MEGABYTE * 4;
   }
 
   private Node lookupAll()
@@ -113,10 +124,10 @@ public class MemoryPath extends FilesystemPath {
       int tail = fullPath.indexOf('/', head);
 
       if (tail == -1 || tail == fullPath.length() - 1)
-	return node;
+        return node;
 
       if (head != tail)
-	node = node.lookup(fullPath.substring(head, tail));
+        node = node.lookup(fullPath.substring(head, tail));
 
       head = tail + 1;
     }
@@ -181,9 +192,9 @@ public class MemoryPath extends FilesystemPath {
       Node node = lookupAll();
 
       if (node != null && node.type == node.FILE)
-	return ((ByteBuffer) node.data).length();
+        return ((ByteBuffer) node.data).length();
       else
-	return 0;
+        return 0;
     }
   }
 
@@ -220,11 +231,11 @@ public class MemoryPath extends FilesystemPath {
       Node node = lookupAll();
 
       if (node == null || node.data != null)
-	return new String[0];
+        return new String[0];
 
       ArrayList<String> a = new ArrayList<String>();
       for (Node child = node.firstChild; child != null; child = child.next) {
-	a.add(child.name);
+        a.add(child.name);
       }
 
       return (String []) a.toArray(new String[a.size()]);
@@ -242,32 +253,32 @@ public class MemoryPath extends FilesystemPath {
       Node node = this._rootNode;
 
       while (node != null && head < fullPath.length()) {
-	int tail = fullPath.indexOf('/', head);
-	String name;
+        int tail = fullPath.indexOf('/', head);
+        String name;
 
-	if (tail == head) {
-	  head = tail + 1;
-	  continue;
-	}
-	if (tail == -1) {
-	  name = fullPath.substring(head);
-	  if (node.lookup(name) != null)
-	    return false;
-	  node.createDir(name);
-	  return true;
-	}
+        if (tail == head) {
+          head = tail + 1;
+          continue;
+        }
+        if (tail == -1) {
+          name = fullPath.substring(head);
+          if (node.lookup(name) != null)
+            return false;
+          node.createDir(name);
+          return true;
+        }
 
-	name = fullPath.substring(head, tail);
-	Node next = node.lookup(name);
+        name = fullPath.substring(head, tail);
+        Node next = node.lookup(name);
 
-	if (next == null && parent)
-	  next = node.createDir(name);
+        if (next == null && parent)
+          next = node.createDir(name);
 
-	if (next == null || next.type != next.DIR)
-	  return false;
+        if (next == null || next.type != next.DIR)
+          return false;
 
-	node = next;
-	head = tail + 1;
+        node = next;
+        head = tail + 1;
       }
 
       return false;
@@ -291,11 +302,11 @@ public class MemoryPath extends FilesystemPath {
       String tail = getTail();
 
       if (node == null)
-	return false;
+        return false;
 
       Node child = node.lookup(tail);
       if (child == null || child.firstChild != null)
-	return false;
+        return false;
 
       node.remove(tail);
 
@@ -307,30 +318,69 @@ public class MemoryPath extends FilesystemPath {
   {
     synchronized (_rootNode) {
       if (! (path instanceof MemoryPath))
-	return false;
+        return false;
 
       MemoryPath file = (MemoryPath) path;
       if (_rootNode != file._rootNode)
-	return false;
+        return false;
 
       Node oldParent = lookupAllButTail();
       if (oldParent == null)
-	return false;
+        return false;
 
       Node child = oldParent.lookup(getTail());
       if (child == null)
-	return false;
+        return false;
 
       Node newParent = file.lookupAllButTail();
       if (newParent == null || newParent.type != Node.DIR)
-	return false;
+        return false;
 
       if (newParent.lookup(file.getTail()) != null)
-	return false;
+        return false;
 
       oldParent.remove(getTail());
       child.name = file.getTail();
       newParent.create(child);
+
+      return true;
+    }
+  }
+
+  public boolean createHardLinkTo(Path path)
+    throws IOException
+  {
+    return createLinkTo(path, false);
+  }
+
+  public boolean createSymbolicLinkTo(Path path)
+    throws IOException
+  {
+    return createLinkTo(path, true);
+  }
+
+  private boolean createLinkTo(Path path, boolean isSymbolic)
+    throws IOException
+  {
+    synchronized (_rootNode) {
+      if (! (path instanceof MemoryPath))
+        return false;
+
+      MemoryPath file = (MemoryPath) path;
+      if (_rootNode != file._rootNode)
+        return false;
+
+      Node fileParentNode = file.lookupAllButTail();
+      String fileTail = file.getTail();
+
+      Node thisNode = lookupAll();
+
+      if (fileParentNode == null || thisNode == null)
+        throw new IOException(L.l("{0} can't create link to {1}", getFullPath(), path.getFullPath()));
+
+      Node fileNode = fileParentNode.createLink(fileTail, thisNode, isSymbolic);
+
+      file._rootNode = fileNode;
 
       return true;
     }
@@ -342,9 +392,9 @@ public class MemoryPath extends FilesystemPath {
       Node node = lookupAll();
 
       if (node == null)
-	throw new FileNotFoundException(getPath());
+        throw new FileNotFoundException(getPath());
       else if (node.type != node.FILE)
-	throw new IOException("is directory: " + getPath());
+        throw new IOException("is directory: " + getPath());
 
       return new MemoryStream(node, (ByteBuffer) node.data, false);
     }
@@ -368,17 +418,17 @@ public class MemoryPath extends FilesystemPath {
       String tail = getTail();
 
       if (node == null || node.type != Node.DIR)
-	throw new IOException(L.l("can't create file {0}", getFullPath()));
+        throw new IOException(L.l("can't create file {0}", getFullPath()));
 
       Node child = node.lookup(tail);
       if (child == null)
-	child = node.createFile(tail, new ByteBuffer(256));
+        child = node.createFile(tail, new ByteBuffer(256));
       else if (! append) {
-	node.remove(tail);
-	child = node.createFile(tail, new ByteBuffer(256));
+        node.remove(tail);
+        child = node.createFile(tail, new ByteBuffer(256));
       }
       else if (child.type != child.FILE)
-	throw new IOException(L.l("can't create file {0}", getFullPath()));
+        throw new IOException(L.l("can't create file {0}", getFullPath()));
       return new MemoryStream(child, (ByteBuffer) child.data, true);
     }
   }
@@ -389,7 +439,7 @@ public class MemoryPath extends FilesystemPath {
       Node node = lookupAll();
 
       if (node == null || node.type != node.OBJECT)
-	throw new IOException("no such object: " + getFullPath().toString());
+        throw new IOException("no such object: " + getFullPath().toString());
 
       return node.data;
     }
@@ -402,15 +452,15 @@ public class MemoryPath extends FilesystemPath {
       String tail = getTail();
 
       if (node == null || node.type != Node.DIR)
-	throw new IOException(L.l("can't set object {0}", getFullPath()));
+        throw new IOException(L.l("can't set object {0}", getFullPath()));
 
       Node child = node.lookup(tail);
       if (child == null)
-	child = node.createObject(tail, object);
+        child = node.createObject(tail, object);
       else if (child.type == child.OBJECT)
-	child.data = object;
+        child.data = object;
       else
-	throw new IOException(L.l("can't set object {0}", getFullPath()));
+        throw new IOException(L.l("can't set object {0}", getFullPath()));
     }
   }
 
@@ -443,14 +493,14 @@ public class MemoryPath extends FilesystemPath {
     Node firstChild;
     long lastModified;
     int type;
-    boolean isExecutable;
-
     Object data;
+    boolean isExecutable;
+    boolean isSymbolicLink;
 
     Node(String name, Object data, int type)
     {
       if (name == null)
-	throw new NullPointerException();
+        throw new NullPointerException();
       this.name = name;
       this.data = data;
       this.type = type;
@@ -460,8 +510,8 @@ public class MemoryPath extends FilesystemPath {
     Node lookup(String name)
     {
       for (Node node = firstChild; node != null; node = node.next) {
-	if (node.name.equals(name)) {
-	  return node;
+        if (node.name.equals(name)) {
+          return node;
         }
       }
 
@@ -471,8 +521,8 @@ public class MemoryPath extends FilesystemPath {
     private Node create(String name, Object data, int type)
     {
       for (Node node = firstChild; node != null; node = node.next) {
-	if (node.name.equals(name))
-	  return null;
+        if (node.name.equals(name))
+          return null;
       }
 
       Node newNode = new Node(name, data, type);
@@ -498,6 +548,19 @@ public class MemoryPath extends FilesystemPath {
       return create(name, data, OBJECT);
     }
 
+    Node createLink(String name, Node source, boolean isSymbolic)
+    {
+      // XXX: not a true link
+      Node newNode = create(name, source.data, source.type);
+
+      newNode.firstChild = source.firstChild;
+      newNode.lastModified = source.lastModified;
+      newNode.isExecutable = source.isExecutable;
+      newNode.isSymbolicLink = isSymbolic;
+
+      return newNode;
+    }
+
     Node create(Node newNode)
     {
       newNode.next = firstChild;
@@ -510,19 +573,19 @@ public class MemoryPath extends FilesystemPath {
     {
       Node last = null;
       for (Node node = firstChild; node != null; node = node.next) {
-	if (node.name.equals(name)) {
+        if (node.name.equals(name)) {
           if (node.firstChild != null)
             return false;
 
-	  if (last != null)
-	    last.next = node.next;
-	  else
-	    firstChild = node.next;
+          if (last != null)
+            last.next = node.next;
+          else
+            firstChild = node.next;
 
-	  return true;
-	}
+          return true;
+        }
 
-	last = node;
+        last = node;
       }
 
       return false;
@@ -543,7 +606,6 @@ public class MemoryPath extends FilesystemPath {
 
       return newNode;
     }
-
   };
 
   public class MemoryStream extends StreamImpl {
@@ -558,7 +620,7 @@ public class MemoryPath extends FilesystemPath {
 
       _node = node;
       if (write)
-	node.lastModified = Alarm.getCurrentTime();
+        node.lastModified = Alarm.getCurrentTime();
       _write = write;
 
       _bb = bb;
@@ -574,17 +636,17 @@ public class MemoryPath extends FilesystemPath {
     public int read(byte []buf, int bufOffset, int length) throws IOException
     {
       synchronized (_bb) {
-	int sublen = _bb.length() - _offset;
-	if (length < sublen)
-	  sublen = length;
+        int sublen = _bb.length() - _offset;
+        if (length < sublen)
+          sublen = length;
 
-	if (sublen <= 0)
-	  return -1;
+        if (sublen <= 0)
+          return -1;
 
-	System.arraycopy(_bb.getBuffer(), _offset, buf, bufOffset, sublen);
-	_offset += sublen;
+        System.arraycopy(_bb.getBuffer(), _offset, buf, bufOffset, sublen);
+        _offset += sublen;
 
-	return sublen;
+        return sublen;
       }
     }
 
@@ -597,9 +659,9 @@ public class MemoryPath extends FilesystemPath {
     {
       _offset = pos;
       if (_offset < 0)
-	_offset = 0;
+        _offset = 0;
       if (_offset > _bb.length())
-	_offset = _bb.length();
+        _offset = _bb.length();
     }
 
     public boolean canWrite() { return true; }
@@ -616,7 +678,7 @@ public class MemoryPath extends FilesystemPath {
       throws IOException
     {
       synchronized (_bb) {
-	_bb.add(buf, offset, length);
+        _bb.add(buf, offset, length);
       }
 
       _node.lastModified = Alarm.getCurrentTime();
