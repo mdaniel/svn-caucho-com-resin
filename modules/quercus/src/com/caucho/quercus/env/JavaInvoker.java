@@ -302,8 +302,12 @@ abstract public class JavaInvoker extends AbstractFunction {
       
       if (i < exprs.length && exprs[i] != null)
 	expr = exprs[i];
-      else
+      else {
 	expr = _defaultExprs[i];
+
+	if (expr == null)
+	  expr = new DefaultExpr();
+      }
       
       values[k] = _marshallArgs[i].marshall(env, expr, _paramTypes[k]);
 
@@ -335,53 +339,98 @@ abstract public class JavaInvoker extends AbstractFunction {
     }
   }
 
-  public Value eval(Env env, Object obj, Value []quercusArgs)
+  public Value eval(Env env, Object obj, Value []args)
     throws Throwable
   {
-    if (quercusArgs.length != _marshallArgs.length) {
-      env.warning("mismatched length");
-      return NullValue.NULL;
+    int len = _defaultExprs.length + (_hasEnv ? 1 : 0) + (_hasRestArgs ? 1 : 0);
+    
+    Object []values = new Object[len];
+
+    int k = 0;
+
+    if (_hasEnv)
+      values[k++] = env;
+
+    for (int i = 0; i < _marshallArgs.length; i++) {
+      Value value;
+      
+      if (i < args.length && args[i] != null)
+	values[k] = _marshallArgs[i].marshall(env, args[i], _paramTypes[k]);
+      else if (_defaultExprs[i] != null) {
+	values[k] = _marshallArgs[i].marshall(env,
+					      _defaultExprs[i],
+					      _paramTypes[k]);
+      }
+      else {
+	values[k] = _marshallArgs[i].marshall(env,
+					      NullValue.NULL,
+					      _paramTypes[k]);
+      }
+
+      k++;
     }
 
-    Object []args = new Object[_marshallArgs.length];
+    if (_hasRestArgs) {
+      Value []rest = new Value[args.length - _marshallArgs.length];
 
-    for (int i = 0; i < args.length; i++) {
-      args[i] = _marshallArgs[i].marshall(env, quercusArgs[i], _paramTypes[i]);
+      for (int i = _marshallArgs.length; i < args.length; i++) {
+	if (_isRestReference)
+	  rest[i - _marshallArgs.length] = args[i];
+	else
+	  rest[i - _marshallArgs.length] = args[i].toValue();
+      }
+
+      values[values.length - 1] = rest;
     }
 
-    Object value = invoke(obj, args);
+    try {
+      Object result = invoke(obj, values);
 
-    return _unmarshallReturn.unmarshall(env, value);
+      return _unmarshallReturn.unmarshall(env, result);
+    } catch (InvocationTargetException e) {
+      if (e.getCause() != null)
+	throw e.getCause();
+      else
+	throw e;
+    }
   }
 
   public Value eval(Env env, Object obj)
     throws Throwable
   {
-    if (_marshallArgs.length != 0) {
-      env.warning("mismatched length");
-      return NullValue.NULL;
-    }
-
-    Object value = invoke(obj, NULL_ARGS);
-
-    return _unmarshallReturn.unmarshall(env, value);
+    return eval(env, obj, new Value[0]);
   }
 
-  public Value eval(Env env, Object obj, Value quercusArg1)
+  public Value eval(Env env, Object obj, Value a1)
     throws Throwable
   {
-    if (_marshallArgs.length != 1) {
-      env.warning("mismatched length");
-      return NullValue.NULL;
-    }
+    return eval(env, obj, new Value[] { a1 });
+  }
 
-    Object []javaArgs = new Object[] {
-      _marshallArgs[0].marshall(env, quercusArg1, _paramTypes[0]),
-    };
-    
-    Object value = invoke(obj, javaArgs);
+  public Value eval(Env env, Object obj, Value a1, Value a2)
+    throws Throwable
+  {
+    return eval(env, obj, new Value[] { a1, a2 });
+  }
 
-    return _unmarshallReturn.unmarshall(env, value);
+  public Value eval(Env env, Object obj, Value a1, Value a2, Value a3)
+    throws Throwable
+  {
+    return eval(env, obj, new Value[] { a1, a2, a3 });
+  }
+
+  public Value eval(Env env, Object obj,
+		    Value a1, Value a2, Value a3, Value a4)
+    throws Throwable
+  {
+    return eval(env, obj, new Value[] { a1, a2, a3, a4 });
+  }
+
+  public Value eval(Env env, Object obj,
+		    Value a1, Value a2, Value a3, Value a4, Value a5)
+    throws Throwable
+  {
+    return eval(env, obj, new Value[] { a1, a2, a3, a4, a5 });
   }
 
   public void generate(PhpWriter out, Expr funExpr, Expr []expr)

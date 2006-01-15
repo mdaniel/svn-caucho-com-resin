@@ -546,6 +546,22 @@ public class QuercusDateModule extends AbstractQuercusModule {
   }
 
   /**
+   * Returns the formatted date.
+   */
+  public String strftime(String format,
+			 @Optional("-1") long phpTime)
+  {
+    long time;
+    
+    if (phpTime < 0)
+      time = Alarm.getCurrentTime();
+    else
+      time = 1000 * phpTime;
+    
+    return QDate.formatLocal(time, format);
+  }
+
+  /**
    * Parses the time
    */
   public Value strtotime(String timeString,

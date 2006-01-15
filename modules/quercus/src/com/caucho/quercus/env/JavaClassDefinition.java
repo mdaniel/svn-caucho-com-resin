@@ -40,6 +40,9 @@ import java.util.Map;
 import java.util.LinkedHashMap;
 import java.util.Iterator;
 
+import java.util.logging.Logger;
+import java.util.logging.Level;
+
 import java.io.IOException;
 
 import com.caucho.util.L10N;
@@ -61,6 +64,8 @@ import com.caucho.quercus.gen.PhpWriter;
  * Represents an introspected Java class.
  */
 public class JavaClassDefinition extends AbstractQuercusClass {
+  private final static Logger log
+    = Logger.getLogger(JavaClassDefinition.class.getName());
   private final static L10N L = new L10N(JavaClassDefinition.class);
   
   private final Quercus _quercus;
@@ -134,7 +139,7 @@ public class JavaClassDefinition extends AbstractQuercusClass {
   public Value evalNew(Env env, Value []args)
     throws Throwable
   {
-    return new JavaValue(_type.newInstance(), this);
+    return _cons.eval(env, null, args);
   }
 
   /**
@@ -154,7 +159,7 @@ public class JavaClassDefinition extends AbstractQuercusClass {
 
     return method.eval(env, obj, args);
   }
-
+  
   /**
    * Eval a method
    */
@@ -180,6 +185,46 @@ public class JavaClassDefinition extends AbstractQuercusClass {
     throws Throwable
   {
     return getMethod(env, name).eval(env, obj, a1);
+  }
+
+  /**
+   * Eval a method
+   */
+  public Value evalMethod(Env env, Object obj, String name,
+			  Value a1, Value a2)
+    throws Throwable
+  {
+    return getMethod(env, name).eval(env, obj, a1, a2);
+  }
+
+  /**
+   * Eval a method
+   */
+  public Value evalMethod(Env env, Object obj, String name,
+			  Value a1, Value a2, Value a3)
+    throws Throwable
+  {
+    return getMethod(env, name).eval(env, obj, a1, a2, a3);
+  }
+
+  /**
+   * Eval a method
+   */
+  public Value evalMethod(Env env, Object obj, String name,
+			  Value a1, Value a2, Value a3, Value a4)
+    throws Throwable
+  {
+    return getMethod(env, name).eval(env, obj, a1, a2, a3, a4);
+  }
+
+  /**
+   * Eval a method
+   */
+  public Value evalMethod(Env env, Object obj, String name,
+			  Value a1, Value a2, Value a3, Value a4, Value a5)
+    throws Throwable
+  {
+    return getMethod(env, name).eval(env, obj, a1, a2, a3, a4, a5);
   }
 
   /**
@@ -294,6 +339,7 @@ public class JavaClassDefinition extends AbstractQuercusClass {
 	if (value != null)
 	  _constMap.put(field.getName(), value);
       } catch (Throwable e) {
+	log.log(Level.FINER, e.toString(), e);
       }
     }
 

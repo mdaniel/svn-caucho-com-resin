@@ -63,7 +63,7 @@ public class PDOStatement {
   private JdbcResultResource _result;
   private ResultSet _rs;
 
-  private int _fetchStyle = 3;
+  private int _fetchStyle = PDO.FETCH_BOTH;
   
   PDOStatement(PDO pdo, JdbcResultResource result)
   {
@@ -92,12 +92,31 @@ public class PDOStatement {
    * Fetch the next row.
    */
   public Value fetch(Env env,
-		     @Optional("0x3") int style,
+		     @Optional int style,
 		     @Optional int cursorOrientation,
 		     @Optional int cursorOffset)
     throws SQLException
   {
-    return _result.fetchArray(style);
+    if (style == 0)
+      style = _fetchStyle;
+    
+    switch (style) {
+    case PDO.FETCH_ASSOC:
+      return _result.fetchArray(PDO.FETCH_ASSOC);
+      
+    case PDO.FETCH_NUM:
+      return _result.fetchArray(PDO.FETCH_NUM);
+      
+    case PDO.FETCH_BOTH:
+      return _result.fetchArray(PDO.FETCH_BOTH);
+      
+    case PDO.FETCH_OBJ:
+    case PDO.FETCH_LAZY:
+      return _result.fetchObject(env);
+
+    default:
+      return BooleanValue.FALSE;
+    }
   }
 
   /**
@@ -139,6 +158,16 @@ public class PDOStatement {
     }
 
     return rows.iterator();
+  }
+
+  /**
+   * Sets the fetch mode.
+   */
+  public boolean setFetchMode(int mode)
+  {
+    _fetchStyle = mode;
+
+    return true;
   }
 
   public String toString()

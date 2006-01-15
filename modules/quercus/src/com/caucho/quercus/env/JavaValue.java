@@ -135,6 +135,45 @@ public class JavaValue extends Value {
   }
 
   /**
+   * Evaluates a method.
+   */
+  public Value evalMethod(Env env, String methodName, Value a1, Value a2)
+    throws Throwable
+  {
+    return _classDef.evalMethod(env, _object, methodName, a1, a2);
+  }
+
+  /**
+   * Evaluates a method.
+   */
+  public Value evalMethod(Env env, String methodName,
+			  Value a1, Value a2, Value a3)
+    throws Throwable
+  {
+    return _classDef.evalMethod(env, _object, methodName, a1, a2, a3);
+  }
+
+  /**
+   * Evaluates a method.
+   */
+  public Value evalMethod(Env env, String methodName,
+			  Value a1, Value a2, Value a3, Value a4)
+    throws Throwable
+  {
+    return _classDef.evalMethod(env, _object, methodName, a1, a2, a3, a4);
+  }
+
+  /**
+   * Evaluates a method.
+   */
+  public Value evalMethod(Env env, String methodName,
+			  Value a1, Value a2, Value a3, Value a4, Value a5)
+    throws Throwable
+  {
+    return _classDef.evalMethod(env, _object, methodName, a1, a2, a3, a4, a5);
+  }
+
+  /**
    * Returns the iterator values.
    */
   public Value []getValueArray(Env env)

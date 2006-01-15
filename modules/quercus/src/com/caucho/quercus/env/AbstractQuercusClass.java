@@ -108,7 +108,7 @@ abstract public class AbstractQuercusClass {
   /**
    * Finds the matching constant
    */
-  public Expr findConstant(String name)
+  public Value findConstant(Env env, String name)
   {
     return null;
   }
@@ -119,10 +119,10 @@ abstract public class AbstractQuercusClass {
   public final Value getConstant(Env env, String name)
     throws Throwable
   {
-    Expr expr = findConstant(name);
+    Value value = findConstant(env, name);
 
-    if (expr != null)
-      return expr.eval(env);
+    if (value != null)
+      return value;
 
     throw new QuercusRuntimeException(L.l("{0}::{1} is an unknown constant",
 					getName(), name));

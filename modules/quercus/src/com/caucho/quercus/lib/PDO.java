@@ -24,7 +24,7 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Charles Reich
+ * @author Scott Ferguson
  */
 
 package com.caucho.quercus.lib;
@@ -55,9 +55,62 @@ public class PDO {
   private static final Logger log = Logger.getLogger(PDO.class.getName());
   private static final L10N L = new L10N(PDO.class);
 
-  public static int FETCH_ASSOC = 0x1;
-  public static int FETCH_NUM = 0x2;
-  public static int FETCH_BOTH = FETCH_ASSOC|FETCH_NUM;
+  public static final int ATTR_AUTOCOMMIT = 1;
+  public static final int ATTR_CASE = 2;
+  public static final int ATTR_CLIENT_VERSION = 3;
+  public static final int ATTR_CONNECTION_STATUS = 4;
+  public static final int ATTR_CURSOR = 5;
+  public static final int ATTR_CURSOR_NAME = 6;
+  public static final int ATTR_DRIVER_NAME = 7;
+  public static final int ATTR_ERRMODE = 8;
+  public static final int ATTR_FETCH_CATALOG_NAMES = 9;
+  public static final int ATTR_FETCH_TABLE_NAMES = 10;
+  public static final int ATTR_ORACLE_NULLS = 11;
+  public static final int ATTR_PERSISTENT = 12;
+  public static final int ATTR_PREFETCH = 13;
+  public static final int ATTR_SERVER_INFO = 14;
+  public static final int ATTR_SERVER_VERSION = 15;
+  public static final int ATTR_TIMEOUT = 16;
+
+  public static final int CASE_NATURAL = 1;
+  public static final int CASE_LOWER = 2;
+  public static final int CASE_UPPER = 2;
+  
+  public static final int CURSOR_FWDONLY = 1;
+  public static final int CURSOR_SCROLL = 2;
+  
+  public static final int ERR_NONE = 0;
+  
+  public static final int ERRMODE_SILENT = 1;
+  public static final int ERRMODE_WARNING = 2;
+  public static final int ERRMODE_EXCEPTION = 3;
+  
+  public static final int FETCH_ASSOC = 0x1;
+  public static final int FETCH_NUM = 0x2;
+  public static final int FETCH_BOTH = FETCH_ASSOC|FETCH_NUM;
+  public static final int FETCH_OBJ = 0x4;
+  public static final int FETCH_LAZY = 0x5;
+  public static final int FETCH_BOUND = 0x6;
+  public static final int FETCH_COLUMN = 0x7;
+  public static final int FETCH_CLASS = 0x8;
+  public static final int FETCH_INTO = 0x9;
+  public static final int FETCH_FUNC = 0xa;
+  public static final int FETCH_GROUP= 0xb;
+  public static final int FETCH_UNIQUE= 0xc;
+  
+  public static final int FETCH_ORI_NEXT = 0x100;
+  public static final int FETCH_ORI_PRIOR = 0x101;
+  public static final int FETCH_ORI_FIRST = 0x102;
+  public static final int FETCH_ORI_ABS = 0x103;
+  public static final int FETCH_ORI_REL = 0x104;
+  
+  public static final int PARAM_BOOL = 1;
+  public static final int PARAM_NULL = 2;
+  public static final int PARAM_INT = 3;
+  public static final int PARAM_STR = 4;
+  public static final int PARAM_LOB = 5;
+  public static final int PARAM_STMT = 6;
+  public static final int PARAM_INPUT_OUTPUT = 0x8000;
 
   private final Env _env;
   private final String _dsn;

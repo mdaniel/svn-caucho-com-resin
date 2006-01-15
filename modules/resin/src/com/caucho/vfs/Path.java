@@ -537,7 +537,6 @@ public abstract class Path {
    */
   public void setReadOnly(boolean isReadOnly)
   {
-    // XXX: "safe_mode" check with current owner
   }
 
   public int getGroup()
@@ -570,7 +569,6 @@ public abstract class Path {
 
   public int getOwner()
   {
-    // XXX: stub
     return 0;
   }
 

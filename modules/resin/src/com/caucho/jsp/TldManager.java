@@ -112,10 +112,6 @@ public class TldManager {
       _localManager.set(manager);
     }
 
-    synchronized (manager) {
-      manager.init();
-    }
-
     return manager;
   }
 
@@ -429,6 +425,8 @@ public class TldManager {
   TldTaglib parseTld(String uri, String mapLocation, String location)
     throws JspParseException, IOException
   {
+    init();
+    
     for (int i = 0; i < _preloadTaglibs.size(); i++) {
       TldPreload preload = _preloadTaglibs.get(i);
 
@@ -449,6 +447,8 @@ public class TldManager {
   TldTaglib parseTld(String location)
     throws JspParseException, IOException
   {
+    init();
+    
     TldTaglib tld = findTld(location);
 
     /* XXX: jsp/18n0 handled on init
