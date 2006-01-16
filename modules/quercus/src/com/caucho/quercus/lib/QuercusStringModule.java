@@ -74,7 +74,7 @@ import com.caucho.vfs.Path;
 public class QuercusStringModule extends AbstractQuercusModule {
   private static final Logger log =
     Logger.getLogger(QuercusStringModule.class.getName());
-  
+
   private static final L10N L = new L10N(QuercusStringModule.class);
 
   public static final int CRYPT_SALT_LENGTH = 2;
@@ -82,9 +82,9 @@ public class QuercusStringModule extends AbstractQuercusModule {
   public static final int CRYPT_EXT_DES = 0;
   public static final int CRYPT_MD5 = 0;
   public static final int CRYPT_BLOWFISH = 0;
-  
+
   public static final int CHAR_MAX = 1;
-  
+
   public static final int LC_CTYPE = 1;
   public static final int LC_NUMERIC = 2;
   public static final int LC_TIME = 3;
@@ -92,7 +92,7 @@ public class QuercusStringModule extends AbstractQuercusModule {
   public static final int LC_MONETARY = 5;
   public static final int LC_ALL = 6;
   public static final int LC_MESSAGES = 7;
-  
+
   public static final int STR_PAD_LEFT = 1;
   public static final int STR_PAD_RIGHT = 0;
   public static final int STR_PAD_BOTH = 2;
@@ -355,7 +355,7 @@ public class QuercusStringModule extends AbstractQuercusModule {
     ByteToChar byteToChar = env.getByteToChar();
 
     int length = source.length();
-    
+
     int i = 0;
     while (i < length) {
       int ch1 = source.charAt(i++);
@@ -369,17 +369,17 @@ public class QuercusStringModule extends AbstractQuercusModule {
 
       while (sublen > 0) {
 	int code = 0;
-	
+
 	code = ((source.charAt(i++) - 0x20) & 0x3f) << 18;
 	code += ((source.charAt(i++) - 0x20) & 0x3f) << 12;
 	code += ((source.charAt(i++) - 0x20) & 0x3f) << 6;
 	code += ((source.charAt(i++) - 0x20) & 0x3f);
 
 	byteToChar.addByte(code >> 16);
-	
+
 	if (sublen > 1)
 	  byteToChar.addByte(code >> 8);
-	
+
 	if (sublen > 2)
 	  byteToChar.addByte(code);
 
@@ -399,7 +399,7 @@ public class QuercusStringModule extends AbstractQuercusModule {
       return BooleanValue.FALSE;
 
     StringBuilder result = new StringBuilder();
-    
+
     int i = 0;
     int length = source.length();
     while (i < length) {
@@ -417,7 +417,7 @@ public class QuercusStringModule extends AbstractQuercusModule {
 
 	if (i < length)
 	  code += source.charAt(i++) << 8;
-	
+
 	if (i < length)
 	  code += source.charAt(i++);
 
@@ -472,10 +472,10 @@ public class QuercusStringModule extends AbstractQuercusModule {
 	for (int i = 0; i < count.length; i++) {
 	  result.put(new LongValue(i), new LongValue(count[i]));
 	}
-	
+
 	return result;
       }
-      
+
     case 1:
       {
 	ArrayValue result = new ArrayValueImpl();
@@ -484,10 +484,10 @@ public class QuercusStringModule extends AbstractQuercusModule {
 	  if (count[i] > 0)
 	    result.put(new LongValue(i), new LongValue(count[i]));
 	}
-	
+
 	return result;
       }
-      
+
     case 2:
       {
 	ArrayValue result = new ArrayValueImpl();
@@ -496,10 +496,10 @@ public class QuercusStringModule extends AbstractQuercusModule {
 	  if (count[i] == 0)
 	    result.put(new LongValue(i), new LongValue(count[i]));
 	}
-	
+
 	return result;
       }
-      
+
     case 3:
       {
 	StringBuilder sb = new StringBuilder();
@@ -508,10 +508,10 @@ public class QuercusStringModule extends AbstractQuercusModule {
 	  if (count[i] > 0)
 	    sb.append((char) i);
 	}
-	
+
 	return new StringValue(sb.toString());
       }
-      
+
     case 4:
       {
 	StringBuilder sb = new StringBuilder();
@@ -520,7 +520,7 @@ public class QuercusStringModule extends AbstractQuercusModule {
 	  if (count[i] == 0)
 	    sb.append((char) i);
 	}
-	
+
 	return new StringValue(sb.toString());
       }
 
@@ -629,7 +629,7 @@ public class QuercusStringModule extends AbstractQuercusModule {
   {
     String glue;
     ArrayValue pieces;
-      
+
     if (piecesV instanceof ArrayValue) {
       pieces = (ArrayValue) piecesV;
       glue = glueV.toString();
@@ -827,7 +827,7 @@ public class QuercusStringModule extends AbstractQuercusModule {
 
     for (int i = 0; i < len; i++) {
       int ch = 0;
-      
+
       byteToChar.clear();
 
       for (; i < len && (ch = str.charAt(i)) != '='; i++) {
@@ -842,7 +842,7 @@ public class QuercusStringModule extends AbstractQuercusModule {
 	for (i++; i < len && (ch = str.charAt(i)) != '&'; i++) {
 	  i = addQueryChar(byteToChar, str, len, i, ch);
 	}
-      
+
 	value = byteToChar.getConvertedString();
       }
       else
@@ -856,7 +856,7 @@ public class QuercusStringModule extends AbstractQuercusModule {
 				 QuercusArrayModule.EXTR_OVERWRITE,
 				 null);
     }
-    
+
     return NullValue.NULL;
   }
 
@@ -882,7 +882,7 @@ public class QuercusStringModule extends AbstractQuercusModule {
 	byteToChar.addByte((byte) ch);
 	return i;
       }
-      
+
     default:
       byteToChar.addByte((byte) ch);
       return i;
@@ -902,14 +902,14 @@ public class QuercusStringModule extends AbstractQuercusModule {
       return 0;
     }
   }
-  
+
   public static void addQueryValue(Env env, ArrayValue array,
 				   String key, String valueStr)
   {
     int p;
 
     Value value = new StringValue(valueStr);
-    
+
     if ((p = key.indexOf('[')) > 0 && key.endsWith("]")) {
       String index = key.substring(p + 1, key.length() - 1);
       key = key.substring(0, p);
@@ -1113,7 +1113,7 @@ public class QuercusStringModule extends AbstractQuercusModule {
     String language = null;
     String country = null;
     String variant = null;
-    
+
     int p = localeName.indexOf('_');
     int p1 = localeName.indexOf('-');
 
@@ -1131,13 +1131,13 @@ public class QuercusStringModule extends AbstractQuercusModule {
 
       if (q1 > 0 && (q1 < q || q < 0))
 	q = q1;
-      
+
       q1 = localeName.indexOf('@', p + 1);
       // XXX: '@' is ??
 
       if (q1 > 0 && (q1 < q || q < 0))
 	q = q1;
-      
+
       q1 = localeName.indexOf('_', p + 1);
 
       if (q1 > 0 && (q1 < q || q < 0))
@@ -1292,7 +1292,7 @@ public class QuercusStringModule extends AbstractQuercusModule {
 			     @Optional Value []args)
   {
     // quercus/113-
-    
+
     int fmtLen = format.length();
     int strlen = string.length();
 
@@ -1343,7 +1343,7 @@ public class QuercusStringModule extends AbstractQuercusModule {
 
 	    maxLen = 10 * maxLen + ch - '0';
 	    break;
-	    
+
 	  case 's':
 	    sIndex = sscanfString(string, sIndex, maxLen, array);
 	    break loop;
@@ -1388,7 +1388,7 @@ public class QuercusStringModule extends AbstractQuercusModule {
       else
 	sb.append(ch);
     }
-    
+
     array.append(new StringValue(sb.toString()));
 
     return sIndex;
@@ -1407,7 +1407,7 @@ public class QuercusStringModule extends AbstractQuercusModule {
     throws Throwable
   {
     String str = sprintf(env, format, args);
-    
+
     env.getOut().print(str);
 
     return str.length();
@@ -1440,7 +1440,7 @@ public class QuercusStringModule extends AbstractQuercusModule {
   private static ArrayList<PrintfSegment> parsePrintfFormat(String format)
   {
     ArrayList<PrintfSegment> segments = new ArrayList<PrintfSegment>();
-    
+
     StringBuilder sb = new StringBuilder();
     StringBuilder flags = new StringBuilder();
 
@@ -1459,7 +1459,7 @@ public class QuercusStringModule extends AbstractQuercusModule {
 	boolean isLeft = false;
 	boolean isAlt = false;
 	boolean isZero = false;
-	
+
 	flags.setLength(0);
 
 	int j = i + 1;
@@ -1491,12 +1491,12 @@ public class QuercusStringModule extends AbstractQuercusModule {
 	loop:
 	for (; j < length; j++) {
 	  ch = format.charAt(j);
-	  
+
 	  switch (ch) {
 	  case '%':
 	    i = j - 1;
 	    break loop;
-	    
+
 	  case '0': case '1': case '2': case '3': case '4':
 	  case '5': case '6': case '7': case '8': case '9':
 	  case '.':
@@ -1583,7 +1583,7 @@ public class QuercusStringModule extends AbstractQuercusModule {
 
     if (sb.length() > 0)
       segments.add(new TextPrintfSegment(sb));
-    
+
     return segments;
   }
 
@@ -1605,7 +1605,7 @@ public class QuercusStringModule extends AbstractQuercusModule {
 
 	boolean isLeft = false;
 	boolean isAlt = false;
-	
+
 	flags.setLength(0);
 
 	int j = i + 1;
@@ -1633,12 +1633,12 @@ public class QuercusStringModule extends AbstractQuercusModule {
 	loop:
 	for (; j < length; j++) {
 	  ch = format.charAt(j);
-	  
+
 	  switch (ch) {
 	  case '%':
 	    sb.append(ch);
 	    break loop;
-	    
+
 	  case '0': case '1': case '2': case '3': case '4':
 	  case '5': case '6': case '7': case '8': case '9':
 	  case '.':
@@ -1670,7 +1670,7 @@ public class QuercusStringModule extends AbstractQuercusModule {
       else
 	sb.append(ch);
     }
-    
+
     return sb.toString();
   }
 
@@ -1849,7 +1849,7 @@ public class QuercusStringModule extends AbstractQuercusModule {
     throws Throwable
   {
     countV.set(LongValue.ZERO);
-    
+
     if (subjectV instanceof ArrayValue) {
       ArrayValue subjectArray = (ArrayValue) subjectV;
       ArrayValue resultArray = new ArrayValueImpl();
@@ -1891,7 +1891,7 @@ public class QuercusStringModule extends AbstractQuercusModule {
     else if (replaceV instanceof ArrayValue) {
       ArrayValue searchArray = (ArrayValue) searchV;
       ArrayValue replaceArray = (ArrayValue) replaceV;
-	
+
       Iterator<Value> searchIter = searchArray.values().iterator();
       Iterator<Value> replaceIter = replaceArray.values().iterator();
 
@@ -1910,7 +1910,7 @@ public class QuercusStringModule extends AbstractQuercusModule {
     }
     else {
       ArrayValue searchArray = (ArrayValue) searchV;
-	
+
       Iterator<Value> searchIter = searchArray.values().iterator();
 
       while (searchIter.hasNext()) {
@@ -1940,7 +1940,7 @@ public class QuercusStringModule extends AbstractQuercusModule {
 					 Value countV)
   {
     long count = countV.toLong();
-    
+
     int head = 0;
     int next;
 
@@ -2164,11 +2164,11 @@ public class QuercusStringModule extends AbstractQuercusModule {
   public static String strip_tags(String string, @Optional String allowTags)
   {
     // XXX: allowTags is stubbed
-    
+
     StringBuilder result = new StringBuilder();
 
     int len = string.length();
-    
+
     for (int i = 0; i < len; i++) {
       char ch = string.charAt(i);
 
@@ -2238,10 +2238,10 @@ public class QuercusStringModule extends AbstractQuercusModule {
   {
     if (length < a.length())
       a = a.substring(0, length);
-    
+
     if (length < b.length())
       b = b.substring(0, length);
-    
+
     int cmp = a.compareTo(b);
 
     if (cmp == 0)
@@ -2612,17 +2612,17 @@ public class QuercusStringModule extends AbstractQuercusModule {
     int len = from.length();
     if (to.length() < len)
       len = to.length();
-    
+
     char []map = new char[256];
     for (int i = len - 1; i >= 0; i--)
       map[from.charAt(i)] = to.charAt(i);
 
     StringBuilder sb = new StringBuilder();
-    
+
     len = string.length();
     for (int i = 0; i < len; i++) {
       char ch = string.charAt(i);
-      
+
       if (map[ch] != 0)
 	sb.append(map[ch]);
       else
@@ -2631,7 +2631,7 @@ public class QuercusStringModule extends AbstractQuercusModule {
 
     return sb.toString();
   }
-    
+
   /**
    * Translates characters in a string to target values.
    *
@@ -2652,7 +2652,7 @@ public class QuercusStringModule extends AbstractQuercusModule {
 
       k++;
     }
-    
+
     StringBuilder result = new StringBuilder();
     int len = string.length();
     int head = 0;
@@ -2727,13 +2727,56 @@ public class QuercusStringModule extends AbstractQuercusModule {
     }
   }
 
+  public static Value substr_count(Env env,
+                                   String haystack,
+                                   String needle,
+                                   @Optional("0") int offset,
+                                   @Optional("-1") int length)
+  {
+    if (needle.length() == 0) {
+      env.warning(L.l("empty substr"));
+      return BooleanValue.FALSE;
+    }
+
+    int haystackLength = haystack.length();
+
+    if (offset < 0 || offset > haystackLength) {
+      env.warning(L.l("offset `{0}' out of range", offset));
+      return BooleanValue.FALSE;
+    }
+
+    if (length > -1) {
+      if (offset + length > haystackLength) {
+        env.warning(L.l("length `{0}' out of range", length));
+        return BooleanValue.FALSE;
+      }
+      else
+        haystackLength = offset + length;
+    }
+
+    int needleLength = needle.length();
+
+    int count = 0;
+
+    int end = haystackLength - needleLength + 1;
+
+    for (int i = offset; i < end; i++) {
+      if (haystack.startsWith(needle, i)) {
+        count++;
+        i += needleLength;
+      }
+    }
+
+    return new LongValue(count);
+  }
+
   /**
-   * Returns a substring
+   * Replaces a substring with a replacement
    *
-   * @param env the calling environment
-   * @param stringV the string
-   * @param startV the start offset
-   * @param lenV the optional length
+   * @param string the string to modify
+   * @param replacement the replacement string
+   * @param start the start offset
+   * @param len the optional length
    */
   public static Value substr_replace(String string,
 				     String replacement,
@@ -2792,7 +2835,7 @@ public class QuercusStringModule extends AbstractQuercusModule {
 
     for (int i = 0; i < strLen; i++) {
       char ch = string.charAt(i);
-      
+
       switch (ch) {
       case ' ': case '\t': case '\r': case '\n':
 	isStart = true;
@@ -2858,7 +2901,7 @@ public class QuercusStringModule extends AbstractQuercusModule {
 
     return sprintf(env, format, args);
   }
-  
+
   /**
    * Wraps a string to the given number of characters.
    *
@@ -2921,23 +2964,23 @@ public class QuercusStringModule extends AbstractQuercusModule {
   abstract static class PrintfSegment {
     abstract public void apply(StringBuilder sb, Value []args);
   }
-  
+
   static class TextPrintfSegment extends PrintfSegment {
     private final char []_text;
 
     TextPrintfSegment(StringBuilder text)
     {
       _text = new char[text.length()];
-      
+
       text.getChars(0, _text.length, _text, 0);
     }
-    
+
     public void apply(StringBuilder sb, Value []args)
     {
       sb.append(_text, 0, _text.length);
     }
   }
-  
+
   static class LongPrintfSegment extends PrintfSegment {
     private final String _format;
     private final int _index;
@@ -2947,20 +2990,20 @@ public class QuercusStringModule extends AbstractQuercusModule {
       _format = format;
       _index = index;
     }
-    
+
     public void apply(StringBuilder sb, Value []args)
     {
       long value;
-      
+
       if (_index < args.length)
 	value = args[_index].toLong();
       else
 	value = 0;
-      
+
       sb.append(String.format(_format, new Long(value)));
     }
   }
-  
+
   static class DoublePrintfSegment extends PrintfSegment {
     private final String _format;
     private final int _index;
@@ -2970,20 +3013,20 @@ public class QuercusStringModule extends AbstractQuercusModule {
       _format = format;
       _index = index;
     }
-    
+
     public void apply(StringBuilder sb, Value []args)
     {
       double value;
-      
+
       if (_index < args.length)
 	value = args[_index].toDouble();
       else
 	value = 0;
-      
+
       sb.append(String.format(_format, new Double(value)));
     }
   }
-  
+
   static class StringPrintfSegment extends PrintfSegment {
     private final char []_prefix;
     private final int _min;
@@ -3003,7 +3046,7 @@ public class QuercusStringModule extends AbstractQuercusModule {
       _isUpper = isUpper;
 
       _pad = isZero ? '0' : ' ';
-      
+
       prefix.getChars(0, _prefix.length, _prefix, 0);
 
       int i = 0;
@@ -3019,7 +3062,7 @@ public class QuercusStringModule extends AbstractQuercusModule {
 
       if (ch == '.') {
 	max = 0;
-	
+
 	for (i++; i < len && '0' <= (ch = format.charAt(i)) && ch <= '9'; i++) {
 	  max = 10 * max + ch - '0';
 	}
@@ -3030,7 +3073,7 @@ public class QuercusStringModule extends AbstractQuercusModule {
 
       _index = index;
     }
-    
+
     public void apply(StringBuilder sb, Value []args)
     {
       sb.append(_prefix, 0, _prefix.length);
@@ -3052,7 +3095,7 @@ public class QuercusStringModule extends AbstractQuercusModule {
 	  sb.append(_pad);
 	}
       }
-      
+
       sb.append(value);
 
       if (_isLeft) {
@@ -3070,7 +3113,7 @@ public class QuercusStringModule extends AbstractQuercusModule {
 	return "";
     }
   }
-  
+
   static class CharPrintfSegment extends StringPrintfSegment {
     CharPrintfSegment(StringBuilder prefix,
 		      boolean isLeft, boolean isZero, boolean isUpper,
@@ -3085,7 +3128,7 @@ public class QuercusStringModule extends AbstractQuercusModule {
 	return "";
 
       Value v = args[_index];
-      
+
       if (v.isLong())
 	return String.valueOf((char) v.toLong());
       else
