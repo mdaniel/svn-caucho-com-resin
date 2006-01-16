@@ -350,16 +350,17 @@ public class QuercusFileModule extends AbstractQuercusModule {
    *
    * @param directory the disk directory
    */
-  public static Value disk_total_space(Env env, Path path)
+  public static Value disk_total_space(Env env, Path directory)
   {
     // quercus/160n
-    if (!path.canRead()) {
-      env.warning(L.l("{0} cannot be read", path.getFullPath()));
+
+    if (!directory.canRead()) {
+      env.warning(L.l("{0} cannot be read", directory.getFullPath()));
 
       return BooleanValue.FALSE;
     }
 
-    return new DoubleValue(path.getDiskSpaceTotal());
+    return new DoubleValue(directory.getDiskSpaceTotal());
   }
 
   /**
@@ -1208,9 +1209,12 @@ public class QuercusFileModule extends AbstractQuercusModule {
    *
    * @param path the path to check
    */
-  public static boolean is_link(Path path)
+  public static boolean is_link(Env env, Path path)
   {
-    return path.isSymbolicLink();
+    // XXX: check win behaviour
+    env.warning(L.l("is_link is not supported"));
+
+    return false;
   }
 
   /**
@@ -1258,18 +1262,10 @@ public class QuercusFileModule extends AbstractQuercusModule {
    */
   public boolean link(Env env, Path source, Path destination)
   {
-    if (!source.canRead()) {
-      env.warning(L.l("{0} cannot be read", source.getFullPath()));
-      return false;
-    }
+    // XXX: check win behaviour
+    env.warning(L.l("link is not supported"));
 
-    try {
-      return source.createHardLinkTo(destination);
-    }
-    catch (IOException e) {
-      log.log(Level.FINE, e.toString(), e);
-      return false;
-    }
+    return false;
   }
 
   // XXX: linkinfo
@@ -1532,18 +1528,10 @@ public class QuercusFileModule extends AbstractQuercusModule {
    */
   public boolean symlink(Env env, Path source, Path destination)
   {
-    if (!source.canRead()) {
-      env.warning(L.l("{0} cannot be read", source.getFullPath()));
-      return false;
-    }
+    // XXX: check win behaviour
+    env.warning(L.l("symlink is not supported"));
 
-    try {
-      return source.createSymbolicLinkTo(destination);
-    }
-    catch (IOException e) {
-      log.log(Level.FINE, e.toString(), e);
-      return false;
-    }
+    return false;
   }
 
   /**

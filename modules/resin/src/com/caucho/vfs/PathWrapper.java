@@ -41,16 +41,16 @@ public abstract class PathWrapper extends Path {
   protected final static L10N L = new L10N(PathWrapper.class);
 
   private final Path _path;
-  
+
   /**
    * Creates a new Path object.
    *
-   * @param root the new Path root.
+   * @param path the new Path root.
    */
   protected PathWrapper(Path path)
   {
     super(path);
-    
+
     _path = path;
   }
 
@@ -93,7 +93,7 @@ public abstract class PathWrapper extends Path {
   {
     return getWrappedPath().lookupImpl(userPath, newAttributes);
   }
-  
+
   /**
    * Looks up a native path, adding attributes.
    */
@@ -119,7 +119,7 @@ public abstract class PathWrapper extends Path {
   {
     return getWrappedPath().getResources();
   }
-  
+
   /**
    * Returns the parent path.
    */
@@ -153,7 +153,7 @@ public abstract class PathWrapper extends Path {
   {
     return getWrappedPath().getURL();
   }
-  
+
   /**
    * Returns the url scheme
    */
@@ -161,7 +161,7 @@ public abstract class PathWrapper extends Path {
   {
     return getWrappedPath().getScheme();
   }
-  
+
   /**
    * Returns the hostname
    */
@@ -169,7 +169,7 @@ public abstract class PathWrapper extends Path {
   {
     return getWrappedPath().getHost();
   }
-  
+
   /**
    * Returns the port.
    */
@@ -177,7 +177,7 @@ public abstract class PathWrapper extends Path {
   {
     return getWrappedPath().getPort();
   }
-  
+
   /**
    * Returns the path.  e.g. for HTTP, returns the part after the
    * host and port.
@@ -197,7 +197,7 @@ public abstract class PathWrapper extends Path {
   {
     return getWrappedPath().getTail();
   }
-  
+
   /**
    * Returns the query string of the path.
    */
@@ -216,13 +216,13 @@ public abstract class PathWrapper extends Path {
   {
     return getWrappedPath().getNativePath();
   }
-  
+
   /**
    * Returns the last string used as a lookup, if available.  This allows
    * parsers to give intelligent error messages, with the user's path
    * instead of the whole path.
    *
-   * The following will print '../test.html': 
+   * The following will print '../test.html':
    * <code><pre>
    * Path path = Pwd.lookup("/some/dir").lookup("../test.html");
    * System.out.println(path.getUserPath());
@@ -242,7 +242,7 @@ public abstract class PathWrapper extends Path {
   {
     getWrappedPath().setUserPath(userPath);
   }
-  
+
   /**
    * Returns the full path, including the restricted root.
    *
@@ -369,19 +369,11 @@ public abstract class PathWrapper extends Path {
   }
 
   /**
-   * Sets the file to read only
-   */
-  public void setReadOnly(boolean isReadOnly)
-  {
-    getWrappedPath().setReadOnly(isReadOnly);
-  }
-
-  /**
    * Changes the permissions
    */
-  public void chmod(int value)
+  public boolean chmod(int value)
   {
-    getWrappedPath().chmod(value);
+    return getWrappedPath().chmod(value);
   }
 
   /**
@@ -459,7 +451,7 @@ public abstract class PathWrapper extends Path {
   {
     return getWrappedPath().createRoot();
   }
-  
+
   public Path createRoot(SchemeMap schemeMap)
   {
     return getWrappedPath().createRoot(schemeMap);
@@ -484,8 +476,8 @@ public abstract class PathWrapper extends Path {
   }
 
   /**
-   * Gets the object at the path.  Normal filesystems will generally 
-   * typically return null. 
+   * Gets the object at the path.  Normal filesystems will generally
+   * typically return null.
    *
    * <p>A bean filesystem or a mime-type aware filesystem could deserialize
    * the contents of the file.
@@ -496,11 +488,11 @@ public abstract class PathWrapper extends Path {
   }
 
   /**
-   * Sets the object at the path.  
+   * Sets the object at the path.
    *
-   * <p>Normal filesystems will generally do nothing. However, a bean 
-   * filesystem or a mime-type aware filesystem could serialize the object 
-   * and store it. 
+   * <p>Normal filesystems will generally do nothing. However, a bean
+   * filesystem or a mime-type aware filesystem could serialize the object
+   * and store it.
    */
   public void setValue(Object obj) throws Exception
   {
@@ -527,7 +519,7 @@ public abstract class PathWrapper extends Path {
   /**
    * Opens a resin ReadWritePair for reading and writing.
    *
-   * <p>A chat channel, for example, would open its socket using this 
+   * <p>A chat channel, for example, would open its socket using this
    * interface.
    */
   public ReadWritePair openReadWrite() throws IOException
@@ -538,7 +530,7 @@ public abstract class PathWrapper extends Path {
   /**
    * Opens a resin ReadWritePair for reading and writing.
    *
-   * <p>A chat channel, for example, would open its socket using this 
+   * <p>A chat channel, for example, would open its socket using this
    * interface.
    *
    * @param is pre-allocated ReadStream to be initialized
@@ -634,6 +626,65 @@ public abstract class PathWrapper extends Path {
     throws IOException
   {
     getWrappedPath().setObject(obj);
+  }
+
+  public int getInode()
+  {
+    return getWrappedPath().getInode();
+  }
+
+  public boolean isExecutable()
+  {
+    return getWrappedPath().isExecutable();
+  }
+
+  public boolean setExecutable(boolean isExecutable)
+  {
+    return getWrappedPath().setExecutable(isExecutable);
+  }
+
+  public int getGroup()
+  {
+    return getWrappedPath().getGroup();
+  }
+
+  public boolean changeGroup(int gid)
+    throws IOException
+  {
+    return getWrappedPath().changeGroup(gid);
+  }
+
+  public boolean changeGroup(String groupName)
+    throws IOException
+  {
+    return getWrappedPath().changeGroup(groupName);
+  }
+
+  public int getOwner()
+  {
+    return getWrappedPath().getOwner();
+  }
+
+  public boolean changeOwner(int uid)
+    throws IOException
+  {
+    return getWrappedPath().changeOwner(uid);
+  }
+
+  public boolean changeOwner(String ownerName)
+    throws IOException
+  {
+    return getWrappedPath().changeOwner(ownerName);
+  }
+
+  public long getDiskSpaceFree()
+  {
+    return getWrappedPath().getDiskSpaceFree();
+  }
+
+  public long getDiskSpaceTotal()
+  {
+    return getWrappedPath().getDiskSpaceTotal();
   }
 
   public int hashCode()

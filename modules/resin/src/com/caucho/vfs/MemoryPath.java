@@ -89,16 +89,6 @@ public class MemoryPath extends FilesystemPath {
     }
   }
 
-  public long getDiskSpaceFree()
-  {
-    return Bytes.MEGABYTE * 2;
-  }
-
-  public long getDiskSpaceTotal()
-  {
-    return Bytes.MEGABYTE * 4;
-  }
-
   private Node lookupAll()
   {
     Node node = lookupAllButTail();
@@ -162,15 +152,17 @@ public class MemoryPath extends FilesystemPath {
     }
   }
 
-  public void setExecutable(boolean isExecutable)
+  public boolean setExecutable(boolean isExecutable)
   {
     synchronized (_rootNode) {
       Node node = lookupAll();
 
-      if (node != null && (node.type == node.FILE || node.type == node.DIR))
+      if (node != null && (node.type == node.FILE || node.type == node.DIR)) {
         node.isExecutable = isExecutable;
+        return true;
+      }
       else
-        super.setExecutable(isExecutable);
+        return false;
     }
   }
 
@@ -182,7 +174,7 @@ public class MemoryPath extends FilesystemPath {
       if (node != null && (node.type == node.FILE || node.type == node.DIR))
         return node.isExecutable;
       else
-        return super.isExecutable();
+        return false;
     }
   }
 
@@ -347,45 +339,6 @@ public class MemoryPath extends FilesystemPath {
     }
   }
 
-  public boolean createHardLinkTo(Path path)
-    throws IOException
-  {
-    return createLinkTo(path, false);
-  }
-
-  public boolean createSymbolicLinkTo(Path path)
-    throws IOException
-  {
-    return createLinkTo(path, true);
-  }
-
-  private boolean createLinkTo(Path path, boolean isSymbolic)
-    throws IOException
-  {
-    synchronized (_rootNode) {
-      if (! (path instanceof MemoryPath))
-        return false;
-
-      MemoryPath file = (MemoryPath) path;
-      if (_rootNode != file._rootNode)
-        return false;
-
-      Node fileParentNode = file.lookupAllButTail();
-      String fileTail = file.getTail();
-
-      Node thisNode = lookupAll();
-
-      if (fileParentNode == null || thisNode == null)
-        throw new IOException(L.l("{0} can't create link to {1}", getFullPath(), path.getFullPath()));
-
-      Node fileNode = fileParentNode.createLink(fileTail, thisNode, isSymbolic);
-
-      file._rootNode = fileNode;
-
-      return true;
-    }
-  }
-
   protected StreamImpl openReadImpl() throws IOException
   {
     synchronized (_rootNode) {
@@ -495,7 +448,6 @@ public class MemoryPath extends FilesystemPath {
     int type;
     Object data;
     boolean isExecutable;
-    boolean isSymbolicLink;
 
     Node(String name, Object data, int type)
     {
@@ -546,19 +498,6 @@ public class MemoryPath extends FilesystemPath {
     Node createObject(String name, Object data)
     {
       return create(name, data, OBJECT);
-    }
-
-    Node createLink(String name, Node source, boolean isSymbolic)
-    {
-      // XXX: not a true link
-      Node newNode = create(name, source.data, source.type);
-
-      newNode.firstChild = source.firstChild;
-      newNode.lastModified = source.lastModified;
-      newNode.isExecutable = source.isExecutable;
-      newNode.isSymbolicLink = isSymbolic;
-
-      return newNode;
     }
 
     Node create(Node newNode)
