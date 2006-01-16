@@ -3,4 +3,6 @@ com.caucho.quercus.lib.Mysqli
 com.caucho.quercus.pdflib.PDF
 com.caucho.quercus.lib.PDO
 com.caucho.quercus.lib.XmlClass
+com.caucho.quercus.lib.ZipEntryClass
+com.caucho.quercus.lib.ZipFileClass
 

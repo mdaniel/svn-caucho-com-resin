@@ -28,45 +28,24 @@
 
 package com.caucho.quercus.lib;
 
-import com.caucho.util.L10N;
-import com.caucho.util.Log;
+import java.util.logging.Logger;
+
+import java.util.zip.ZipEntry;
 
 import java.io.IOException;
 
-import com.caucho.quercus.module.AbstractQuercusModule;
+import com.caucho.util.L10N;
 
-import java.util.logging.Logger;
+public class ZipEntryClass {
+  private static final Logger log = Logger.getLogger(ZipEntryClass.class.getName());
+  private static final L10N L = new L10N(ZipEntryClass.class);
 
-/**
- * PHP Zip
- */
+  private ZipEntry _zipEntry;
 
-public class QuercusZipModule extends AbstractQuercusModule {
-
-  private static final Logger log = Log.open(QuercusZipModule.class);
-  private static final L10N L = new L10N(QuercusZipModule.class);
-
-  /**
-   * Returns true for the Zip extension.
-   */
-  public boolean isExtensionLoaded(String name)
-  {
-    return "zip".equals(name);
-  }
-
-  public ZipFileClass zip_open(String fileName)
+  public ZipEntryClass(ZipEntry zipEntry)
     throws IOException
   {
-    return new ZipFileClass(fileName);
+    _zipEntry = zipEntry;
   }
 
-  // @todo zip_close()
-  // @todo zip_entry_close()
-  // @todo zip_entry_compressedsize()
-  // @todo zip_entry_compressionmethod()
-  // @todo zip_entry_filesize()
-  // @todo zip_entry_name()
-  // @todo zip_entry_open()
-  // @todo zip_entry_read()
-  // @todo zip_read()
 }

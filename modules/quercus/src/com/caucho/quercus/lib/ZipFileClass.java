@@ -30,31 +30,27 @@
 package com.caucho.quercus.lib;
 
 import java.util.logging.Logger;
-import java.util.logging.Level;
-import java.util.HashMap;
+
+import java.util.zip.ZipFile;
+
 import java.io.IOException;
-import java.io.StringReader;
 
 import com.caucho.util.L10N;
-
-import com.caucho.quercus.env.*;
-
-import org.xml.sax.*;
-import org.xml.sax.helpers.DefaultHandler;
-
-import javax.xml.parsers.SAXParser;
-import javax.xml.parsers.SAXParserFactory;
-import javax.xml.parsers.ParserConfigurationException;
-
-import com.caucho.quercus.module.Optional;
-import com.caucho.quercus.module.Reference;
 
 /**
  * Zip object oriented API facade
  */
 
-public class ZipClass {
-  private static final Logger log = Logger.getLogger(ZipClass.class.getName());
-  private static final L10N L = new L10N(ZipClass.class);
+public class ZipFileClass {
+  private static final Logger log = Logger.getLogger(ZipFileClass.class.getName());
+  private static final L10N L = new L10N(ZipFileClass.class);
+
+  private ZipFile _zipFile;
+
+  public ZipFileClass(String zipFileName)
+    throws IOException
+  {
+    _zipFile = new ZipFile(zipFileName);
+  }
 
 }
