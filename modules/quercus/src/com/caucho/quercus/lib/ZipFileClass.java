@@ -72,4 +72,14 @@ public class ZipFileClass {
       return null;
   }
 
+  public void zip_close()
+    throws IOException
+  {
+    _zipFile.close();
+  }
+
+  public ZipFile getZipFile()
+  {
+    return _zipFile;
+  }
 }

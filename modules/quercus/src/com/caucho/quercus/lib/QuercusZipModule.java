@@ -34,6 +34,9 @@ import com.caucho.util.Log;
 import java.io.IOException;
 
 import com.caucho.quercus.module.AbstractQuercusModule;
+import com.caucho.quercus.module.NotNull;
+import com.caucho.quercus.module.Optional;
+import com.caucho.quercus.env.*;
 
 import java.util.logging.Logger;
 
@@ -54,24 +57,78 @@ public class QuercusZipModule extends AbstractQuercusModule {
     return "zip".equals(name);
   }
 
-  public ZipFileClass zip_open(String fileName)
+  public ZipFileClass zip_open(@NotNull String fileName)
     throws IOException
   {
     return new ZipFileClass(fileName);
   }
 
-  public ZipEntryClass zip_read(ZipFileClass zipFile)
+  public ZipEntryClass zip_read(@NotNull ZipFileClass zipFile)
     throws IOException
   {
+    if (zipFile == null)
+      return null;
+
     return zipFile.zip_read();
   }
 
-  // @todo zip_close()
-  // @todo zip_entry_close()
+  /**
+   *
+   * @param zipEntry
+   * @return false if zipEntry is null
+   */
+  public Value zip_entry_name(@NotNull ZipEntryClass zipEntry)
+  {
+    if (zipEntry == null)
+      return BooleanValue.FALSE;
+
+    return new StringValue(zipEntry.zip_entry_name());
+  }
+
+  /**
+   *
+   * @param zipEntry
+   * @return false if zipEntry is null
+   */
+  public Value zip_entry_filesize(@NotNull ZipEntryClass zipEntry)
+  {
+    if (zipEntry == null)
+      return BooleanValue.FALSE;
+
+    return new LongValue(zipEntry.zip_entry_filesize());
+  }
+
+  public void zip_close(@NotNull ZipFileClass zipFile)
+    throws IOException
+  {
+    if (zipFile != null)
+      zipFile.zip_close();
+  }
+
+  /**
+   *
+   * @param file
+   * @param entry
+   * @param mode ignored - always "rb" from fopen()
+   * @return true on success or false on failure
+   */
+  public boolean zip_entry_open(@NotNull ZipFileClass file,
+                                @NotNull ZipEntryClass entry,
+                                @Optional String mode)
+  {
+    if ((file == null) || (entry == null))
+      return false;
+
+    return entry.zip_entry_open(file);
+  }
+
+  public void zip_entry_close(@NotNull ZipEntryClass entry)
+  {
+    if (entry != null)
+      entry.zip_entry_close();
+  }
+
   // @todo zip_entry_compressedsize()
   // @todo zip_entry_compressionmethod()
-  // @todo zip_entry_filesize()
-  // @todo zip_entry_name()
-  // @todo zip_entry_open()
-  // @todo zip_read()
+  // @todo zip_entry_read()
 }
