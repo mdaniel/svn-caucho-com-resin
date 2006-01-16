@@ -60,6 +60,12 @@ public class QuercusZipModule extends AbstractQuercusModule {
     return new ZipFileClass(fileName);
   }
 
+  public ZipEntryClass zip_read(ZipFileClass zipFile)
+    throws IOException
+  {
+    return zipFile.zip_read();
+  }
+
   // @todo zip_close()
   // @todo zip_entry_close()
   // @todo zip_entry_compressedsize()
@@ -67,6 +73,5 @@ public class QuercusZipModule extends AbstractQuercusModule {
   // @todo zip_entry_filesize()
   // @todo zip_entry_name()
   // @todo zip_entry_open()
-  // @todo zip_entry_read()
   // @todo zip_read()
 }

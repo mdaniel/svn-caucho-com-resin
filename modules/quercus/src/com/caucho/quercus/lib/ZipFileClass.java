@@ -32,6 +32,8 @@ package com.caucho.quercus.lib;
 import java.util.logging.Logger;
 
 import java.util.zip.ZipFile;
+import java.util.zip.ZipEntry;
+import java.util.Enumeration;
 
 import java.io.IOException;
 
@@ -46,11 +48,28 @@ public class ZipFileClass {
   private static final L10N L = new L10N(ZipFileClass.class);
 
   private ZipFile _zipFile;
+  private Enumeration _entries;
 
   public ZipFileClass(String zipFileName)
     throws IOException
   {
     _zipFile = new ZipFile(zipFileName);
+  }
+
+  /**
+   *
+   * @return next zip_entry or null
+   */
+  public ZipEntryClass zip_read()
+    throws IOException
+  {
+    if (_entries == null)
+      _entries = _zipFile.entries();
+
+    if (_entries.hasMoreElements())
+      return new ZipEntryClass((ZipEntry) _entries.nextElement());
+    else
+      return null;
   }
 
 }

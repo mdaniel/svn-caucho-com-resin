@@ -650,7 +650,7 @@ public class XmlClass {
         if (_xmlOptionCaseFolding) qName = qName.toUpperCase();
 
         if (_endElementHandler != null)
-          _endElementHandler.eval(_env, _parser, new StringValue(eName));
+          _endElementHandler.eval(_env, _parser, new StringValue(qName));
         else
           throw new Throwable("end element handler is not set");
       } catch (Throwable t) {
