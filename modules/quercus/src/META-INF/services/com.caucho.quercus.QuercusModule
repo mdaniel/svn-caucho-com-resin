@@ -26,5 +26,6 @@ com.caucho.quercus.lib.QuercusStringModule
 com.caucho.quercus.lib.QuercusUrlModule
 com.caucho.quercus.lib.QuercusVariableModule
 com.caucho.quercus.lib.QuercusXmlModule
+com.caucho.quercus.lib.QuercusZipModule
 com.caucho.quercus.lib.QuercusZlibModule
 

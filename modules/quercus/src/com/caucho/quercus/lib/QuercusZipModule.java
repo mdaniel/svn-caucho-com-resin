@@ -41,41 +41,30 @@ import com.caucho.quercus.env.*;
 import java.util.logging.Logger;
 
 /**
- * PHP ZLib
+ * PHP Zip
  */
-public class QuercusZlibModule extends AbstractQuercusModule {
 
-  private static final Logger log = Log.open(QuercusZlibModule.class);
-  private static final L10N L = new L10N(QuercusZlibModule.class);
+public class QuercusZipModule extends AbstractQuercusModule {
+
+  private static final Logger log = Log.open(QuercusZipModule.class);
+  private static final L10N L = new L10N(QuercusZipModule.class);
 
   /**
-   * Returns true for the Zlib extension.
+   * Returns true for the Zip extension.
    */
   public boolean isExtensionLoaded(String name)
   {
-    return "zlib".equals(name);
+    return "zip".equals(name);
   }
 
-  // @todo gzclose()
-  // @todo gzcompress()
-  // @todo gzdeflate()
-  // @todo gzencode()
-  // @todo gzeof()
-  // @todo gzfile()
-  // @todo gzgetc()
-  // @todo gzgets()
-  // @todo gzgetss()
-  // @todo gzinflate()
-  // @todo gzopen()
-  // @todo gzpassthru()
-  // @todo gzputs()
-  // @todo gzread()
-  // @todo gzread()
-  // @todo gzrewind()
-  // @todo gzseek()
-  // @todo gztell()
-  // @todo gzuncompress()
-  // @todo gzwrite()
-  // @todo readgzfile()
-  // @todo zlib_get_coding_type()
+  // @todo zip_close()
+  // @todo zip_entry_close()
+  // @todo zip_entry_compressedsize()
+  // @todo zip_entry_compressionmethod()
+  // @todo zip_entry_filesize()
+  // @todo zip_entry_name()
+  // @todo zip_entry_open()
+  // @todo zip_entry_read()
+  // @todo zip_open()
+  // @todo zip_read()
 }
