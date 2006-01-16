@@ -442,7 +442,7 @@ public class QuercusMysqlModule extends AbstractQuercusModule {
    * Returns field name at given offset.
    *
    * @param env
-   * @param resultV
+   * @param result
    * @param fieldOffset
    * @return
    * @throws Exception
