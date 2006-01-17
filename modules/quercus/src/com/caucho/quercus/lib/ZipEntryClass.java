@@ -39,6 +39,9 @@ import java.io.InputStream;
 
 import com.caucho.util.L10N;
 import com.caucho.quercus.env.BooleanValue;
+import com.caucho.quercus.env.Value;
+import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.module.Optional;
 
 public class ZipEntryClass {
   private static final Logger log = Logger.getLogger(ZipEntryClass.class.getName());
@@ -84,5 +87,51 @@ public class ZipEntryClass {
     } catch (IOException ex) {
       log.log(Level.FINE,  ex.toString(), ex);
     }
+  }
+
+  /**
+   *
+   * @param length
+   * @return FALSE if end of file or IOException
+   */
+  public Value zip_entry_read (@Optional("1024") int length)
+  {
+    byte[] buf = new byte[length];
+    int numBytes;
+
+    try {
+      numBytes = _is.read(buf,0,length);
+    } catch (IOException ex) {
+      log.log(Level.FINE,  ex.toString(),  ex);
+      return BooleanValue.FALSE;
+    }
+
+    if (numBytes == 0)
+      return BooleanValue.FALSE;
+    else
+      return new StringValue(buf.toString());
+  }
+
+  public long zip_entry_compressedsize()
+  {
+    if (_zipEntry == null)
+      return -1;
+
+    return _zipEntry.getCompressedSize();
+  }
+
+  /**
+   * seems like only two values are:
+   * ZipEntry.DEFLATED
+   * ZipEntry.STORED
+   *
+   * @return the compression method
+   */
+  public long zip_entry_compressionmethod()
+  {
+    if (_zipEntry == null)
+      return -1;
+
+    return _zipEntry.getMethod();
   }
 }

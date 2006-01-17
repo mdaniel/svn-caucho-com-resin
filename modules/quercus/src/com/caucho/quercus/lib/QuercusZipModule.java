@@ -128,7 +128,21 @@ public class QuercusZipModule extends AbstractQuercusModule {
       entry.zip_entry_close();
   }
 
+  /**
+   *
+   * @param entry
+   * @param length
+   * @return false or string
+   */
+  public Value zip_entry_read(@NotNull ZipEntryClass entry,
+                              @Optional("1024") int length)
+  {
+    if (entry == null)
+      return BooleanValue.FALSE;
+
+    return entry.zip_entry_read(length);
+  }
+
   // @todo zip_entry_compressedsize()
   // @todo zip_entry_compressionmethod()
-  // @todo zip_entry_read()
 }
