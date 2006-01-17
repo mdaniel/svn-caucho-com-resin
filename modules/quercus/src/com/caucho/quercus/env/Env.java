@@ -441,7 +441,7 @@ public class Env {
   {
     return _selfPath.getParent();
   }
-  
+
   /**
    * Sets the initial directory.
    */
@@ -740,7 +740,8 @@ public class Env {
   }
 
   /**
-   * Gets a special value.  Created to handle mySQL connection.
+   * Gets a special value, a special value is used to store and retrieve
+   * module specific values in the env using a unique name.
    */
   public Object getSpecialValue(String name)
   {
@@ -775,10 +776,10 @@ public class Env {
     if (var == null) {
       Var newVar = new Var();
       var = newVar;
-      
+
       if (_map == _globalMap)
 	newVar.setGlobal();
-      
+
       _map.put(name, newVar);
     }
 
@@ -983,14 +984,14 @@ public class Env {
     case _ENV:
       {
 	var = new Var();
-	
+
 	_globalMap.put(name, var);
 
 	var.set(new ArrayValueImpl());
 
 	return var;
       }
-      
+
     case HTTP_POST_VARS:
     case _POST:
       {
@@ -1198,7 +1199,7 @@ public class Env {
 	// php/379c
 	var.setGlobal();
       }
-      
+
       _map.put(name, var);
     }
 
@@ -1236,7 +1237,8 @@ public class Env {
     return value;
   }
   /**
-   * Sets a value.  Created at first to hold mysql connection.
+   * Sets a special value, a special value is used to store and retrieve
+   * module specific values in the env using a unique name.
    */
   public Object setSpecialValue(String name, Object value)
   {
@@ -2391,7 +2393,7 @@ public class Env {
 
     if (_prevIncludePath == null)
       _prevIncludePath = "";
-    
+
     setIni("include_path", path);
 
     return _prevIncludePath;
@@ -2403,7 +2405,7 @@ public class Env {
   public void restoreIncludePath()
   {
     String path = getIniString("include_path");
-    
+
     setIni("include_path", _prevIncludePath);
 
     _prevIncludePath = path;
@@ -2441,7 +2443,7 @@ public class Env {
   public Value cast(Class cl, Value value)
   {
     value = value.toValue();
-    
+
     if (value.isNull())
       return null;
     else if (cl.isAssignableFrom(value.getClass()))
@@ -2691,23 +2693,23 @@ public class Env {
       if (code >= 0 && code < _errorHandlers.length &&
 	  _errorHandlers[code] != null) {
 	Callback handler = _errorHandlers[code];
-	
+
 	try {
 	  _errorHandlers[code] = null;
 
 	  Value fileNameV = NullValue.NULL;
-	  
+
 	  String fileName = getFileName();
 	  if (fileName != null)
 	    fileNameV = new StringValue(fileName);
-	  
+
 	  Value lineV = NullValue.NULL;
 	  int line = getLine();
 	  if (line > 0)
 	    lineV = new LongValue(line);
-	  
+
 	  Value context = NullValue.NULL;
-			 
+
 	  handler.eval(this, new LongValue(mask), new StringValue(msg),
 		       fileNameV, lineV, context);
 
@@ -3080,7 +3082,7 @@ public class Env {
   {
     SessionArrayValue session = _session;
     _session = null;
-    
+
     if (session != null && session.getSize() > 0) {
       SessionCallback callback = getSessionCallback();
 
