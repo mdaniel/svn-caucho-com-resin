@@ -48,7 +48,6 @@ public class ZipEntryClass {
   private InputStream _is;
 
   public ZipEntryClass(ZipEntry zipEntry)
-    throws IOException
   {
     _zipEntry = zipEntry;
   }
