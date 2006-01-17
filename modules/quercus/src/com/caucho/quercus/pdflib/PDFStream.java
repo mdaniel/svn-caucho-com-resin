@@ -262,6 +262,46 @@ public class PDFStream {
       return false;
     }
   }
+  
+  public boolean setlinewidth(double w)
+    throws IOException
+  {
+    _out.println(w + " w");
+
+    return true;
+  }
+
+  /**
+   * Saves the graphics state
+   */
+  public boolean save()
+    throws IOException
+  {
+    _out.println("q");
+
+    return true;
+  }
+
+  /**
+   * Restores the graphics state
+   */
+  public boolean restore()
+    throws IOException
+  {
+    _out.println("Q");
+
+    return true;
+  }
+  
+  public boolean concat(double a, double b, double c,
+			double d, double e, double f)
+    throws IOException
+  {
+    _out.println(String.format("%.4f %.4f %.4f %.4f %.4f %.4f cm",
+			       a, b, c, d, e, f));
+
+    return true;
+  }
 
   public void show(String text)
     throws IOException

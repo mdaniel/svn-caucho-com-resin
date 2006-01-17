@@ -310,8 +310,6 @@ public class ResponseAdapter extends ResponseWrapper
     if (_originalResponseStream != responseStream)
       _originalResponseStream.close();
 
-    _responseStream = _originalResponseStream;
-
     if (response instanceof CauchoResponse) {
       ((CauchoResponse) response).close();
     }

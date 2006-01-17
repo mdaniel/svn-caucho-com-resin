@@ -372,6 +372,9 @@ public class BeanTypeStrategy extends TypeStrategy {
     for (int i = 0; i < methods.length; i++) {
       Method method = methods[i];
 
+      if (! Modifier.isPublic(method.getModifiers()))
+	continue;
+	
       if (!ignoreCase && !method.getName().equals(methodName))
         continue;
       if (ignoreCase && !method.getName().equalsIgnoreCase(methodName))

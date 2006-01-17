@@ -118,7 +118,7 @@ public class RequestDispatcherImpl implements RequestDispatcher {
    * Forwards the request to the servlet named by the request dispatcher.
    *
    * @param req the servlet request.
-   * @param response the servlet response.
+   * @param res the servlet response.
    * @param method special to tell if from error.
    */
   public void forward(HttpServletRequest req, HttpServletResponse res,

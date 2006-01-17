@@ -4,6 +4,8 @@
 
 <s2 title='3.0.snap - Jan 10, 2005'>
 <ul>
+<li>WIN32 doesn't support SNDTIMEO/RCVTIMEO (rep by Michael Quigley)
+<li>Configuration needs to ignore protected setters (#863, rep by Bill Au)
 <li>Quercus: version_compare fixes (#610, rep by Stefano Bagnara)
 <li>XML parser needs to detect missing whitespace between attributes (#472, rep by M Duchovny)
 <li>64-bit detection for JNI needs to be distinguished from 64-bit for plugins (rep by Leonid Kaminsky)

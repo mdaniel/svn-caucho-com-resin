@@ -81,7 +81,6 @@ public class PDFPage {
     out.println("     /MediaBox [0 0 " + _width + " " + _height + "]");
     out.println("     /Contents " + streamId + " 0 R");
     out.println("     /Resources <<");
-    out.println("       /ProcSet 7 0 R");
 
     for (int i = 0; i < _resources.size(); i++) {
       out.println("      " + _resources.get(i));

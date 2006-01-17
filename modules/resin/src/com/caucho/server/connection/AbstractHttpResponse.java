@@ -30,7 +30,6 @@
 package com.caucho.server.connection;
 
 import java.io.*;
-import java.net.*;
 import java.util.*;
 
 import java.util.logging.Logger;
@@ -50,9 +49,6 @@ import com.caucho.xml.XmlChar;
 
 import com.caucho.log.Log;
 
-import com.caucho.server.connection.CauchoRequest;
-import com.caucho.server.connection.CauchoResponse;
-
 import com.caucho.server.webapp.Application;
 import com.caucho.server.webapp.ErrorPageManager;
 
@@ -63,8 +59,6 @@ import com.caucho.server.dispatch.InvocationDecoder;
 
 import com.caucho.server.cache.AbstractCacheFilterChain;
 import com.caucho.server.cache.AbstractCacheEntry;
-
-import com.caucho.jsp.JspPrintWriter;
 
 /**
  * Encapsulates the servlet response, controlling response headers and the
@@ -140,8 +134,6 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
   private boolean _allowCache;
   private boolean _isPrivateCache;
   private boolean _hasCacheControl;
-
-  private boolean _hasServer;
 
   protected boolean _isTopCache;
 
@@ -318,8 +310,6 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
     _allowCache = true;
     _isNoCache = false;
     _isTopCache = false;
-    
-    _hasServer = false;
 
     _sessionId = null;
 
@@ -387,7 +377,7 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
    * Sets the cache entry so we can use it if the servlet returns
    * not_modified response.
    *
-   * @param cacheEntry the saved cache entry
+   * @param entry the saved cache entry
    */
   public void setCacheEntry(AbstractCacheEntry entry)
   {
@@ -676,9 +666,9 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
 
     try {
       if (queryString != null)
-        return hostPrefix + new InvocationDecoder().normalizeUri(path) + '?' + queryString;
+        return hostPrefix + InvocationDecoder.normalizeUri(path) + '?' + queryString;
       else
-        return hostPrefix + new InvocationDecoder().normalizeUri(path);
+        return hostPrefix + InvocationDecoder.normalizeUri(path);
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
@@ -815,7 +805,6 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
       return true;
 	
     case HEADER_SERVER:
-      _hasServer = true;
       return false;
 
     default:
@@ -857,7 +846,7 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
    * Convenience for adding an integer header.  If an old header already
    * exists, both will be sent to the browser.
    *
-   * @param name the header name.
+   * @param key the header name.
    * @param value an integer to be converted to a string for the header.
    */
   public void addIntHeader(String key, int value)
@@ -886,7 +875,7 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
    * Convenience for adding a date header.  If an old header with the
    * same name exists, both will be displayed.
    *
-   * @param name the header name.
+   * @param key the header name.
    * @param value an time in milliseconds to be converted to a date string.
    */
   public void addDateHeader(String key, long value)
@@ -1915,8 +1904,6 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
   /**
    * Complete the request.  Flushes the streams, completes caching
    * and writes the appropriate logs.
-   *
-   * @param flush true if the response should be flushed.
    */
   public void finish() throws IOException
   {
@@ -1927,7 +1914,7 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
    * Complete the request.  Flushes the streams, completes caching
    * and writes the appropriate logs.
    *
-   * @param flush true if the response should be flushed.
+   * @param isClose true if the response should be flushed.
    */
   private void finish(boolean isClose) throws IOException
   {

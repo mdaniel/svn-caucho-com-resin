@@ -73,6 +73,8 @@ public class AbstractRolloverLog {
 
   // template for the archived files
   private String _archiveFormat;
+  // .gz or .zip
+  private String _archiveSuffix = "";
   
   // How often the logs are rolled over.
   private long _rolloverPeriod = Period.INFINITE;
@@ -144,7 +146,18 @@ public class AbstractRolloverLog {
    */
   public void setArchiveFormat(String format)
   {
-    _archiveFormat = format;
+    if (format.endsWith(".gz")) {
+      _archiveFormat = format.substring(0, format.length() - ".gz".length());
+      _archiveSuffix = ".gz";
+    }
+    else if (format.endsWith(".zip")) {
+      _archiveFormat = format.substring(0, format.length() - ".zip".length());
+      _archiveSuffix = ".zip";
+    }
+    else {
+      _archiveFormat = format;
+      _archiveSuffix = "";
+    }
   }
 
   /**
@@ -152,7 +165,7 @@ public class AbstractRolloverLog {
    */
   public String getArchiveFormat()
   {
-    return _archiveFormat;
+    return _archiveFormat + _archiveSuffix;
   }
 
   /**
@@ -514,16 +527,30 @@ public class AbstractRolloverLog {
     Path newPath = path.getParent().lookup(name);
 
     if (newPath.exists()) {
+      archiveFormat = _archiveFormat;
+      
       if (archiveFormat == null)
 	archiveFormat = _rolloverPrefix + ".%Y%m%d.%H%M";
       else if (! archiveFormat.contains("%H"))
 	archiveFormat = archiveFormat + ".%H%M";
       else if (! archiveFormat.contains("%M"))
 	archiveFormat = archiveFormat + ".%M";
-      
-      name = getFormatName(archiveFormat, time);
 
-      newPath = path.getParent().lookup(name);
+      for (int i = 0; i < 100; i++) {
+	String suffix;
+
+	if (i == 0)
+	  suffix = _archiveSuffix;
+	else
+	  suffix = "." + i + _archiveSuffix;
+	
+	name = getFormatName(archiveFormat + suffix, time);
+
+	newPath = path.getParent().lookup(name);
+
+	if (! newPath.exists())
+	  break;
+      }
     }
 
     return newPath;

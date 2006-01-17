@@ -866,6 +866,18 @@ abstract public class Value {
     return new LongValue(lLong >> rLong);
   }
 
+  // string functions
+
+  /**
+   * Returns the length as a string.
+   */
+  public int strlen()
+  {
+    return toString().length();
+  }
+
+  // array functions
+
   /**
    * Returns the array size.
    */

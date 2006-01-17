@@ -558,8 +558,7 @@ abstract public class StoreManager
   /**
    * When the object is no longer valid, remove it from the backing store.
    *
-   * @param storeId the identifier of the storeage group
-   * @param objectId the identifier of the object to remove
+   * @param obj the object to remove
    */
   public void remove(ClusterObject obj)
     throws Exception
@@ -570,7 +569,7 @@ abstract public class StoreManager
   /**
    * When the object is no longer valid, remove it from the backing store.
    *
-   * @param storeId the identifier of the storeage group
+   * @param store the identifier of the storeage group
    * @param objectId the identifier of the object to remove
    */
   public void remove(Store store, String objectId)

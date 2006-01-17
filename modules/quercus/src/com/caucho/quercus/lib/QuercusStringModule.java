@@ -2191,13 +2191,11 @@ public class QuercusStringModule extends AbstractQuercusModule {
   /**
    * Returns the length of a string.
    *
-   * @param env the calling environment
    * @param v the argument value
    */
-  public static long strlen(String string)
-    throws Throwable
+  public static long strlen(Value value)
   {
-    return string.length();
+    return value.strlen();
   }
 
   /**
@@ -2572,8 +2570,7 @@ public class QuercusStringModule extends AbstractQuercusModule {
    * @param env the calling environment
    * @param stringV the input string
    */
-  public static String strtolower(Env env, String string)
-    throws Throwable
+  public static String strtolower(String string)
   {
     return string.toLowerCase();
   }
@@ -2584,8 +2581,7 @@ public class QuercusStringModule extends AbstractQuercusModule {
    * @param env the calling environment
    * @param stringV the input string
    */
-  public static String strtoupper(Env env, String string)
-    throws Throwable
+  public static String strtoupper(String string)
   {
     return string.toUpperCase();
   }

@@ -306,6 +306,9 @@ class ResponseStream extends ToByteResponseStream {
 	writeChunk(buffer, startOffset, length);
 
 	buffer = _next.nextBuffer(offset);
+	      
+	if (log.isLoggable(Level.FINE))
+	  log.fine("[" + dbgId() + "] write-chunk(" + offset + ")");
 
 	_bufferStartOffset = 8 + _next.getBufferOffset();
 	_next.setBufferOffset(_bufferStartOffset);
@@ -316,7 +319,12 @@ class ResponseStream extends ToByteResponseStream {
 	if (_cacheStream != null)
 	  writeCache(_next.getBuffer(), startOffset, length);
 	
-	return _next.nextBuffer(offset);
+	byte []buffer = _next.nextBuffer(offset);
+	      
+	if (log.isLoggable(Level.FINE))
+	  log.fine("[" + dbgId() + "] write-chunk(" + offset + ")");
+
+	return buffer;
       }
     } catch (ClientDisconnectException e) {
       _response.killCache();
@@ -441,6 +449,9 @@ class ResponseStream extends ToByteResponseStream {
 	  else {
 	    _isCommitted = true;
 	    _next.write(buf, offset, length);
+
+	    if (log.isLoggable(Level.FINE))
+	      log.fine("[" + dbgId() + "] write-data(" + _tailChunkedLength + ")");
 	  }
 
 	  if (_cacheStream != null)
@@ -473,6 +484,10 @@ class ResponseStream extends ToByteResponseStream {
 			   
 	      _isCommitted = true;
 	      buffer = _next.nextBuffer(bufferOffset);
+	      
+	      if (log.isLoggable(Level.FINE))
+		log.fine("[" + dbgId() + "] write-chunk(" + bufferOffset + ")");
+	      
 	      bufferStart = _next.getBufferOffset() + 8;
 	      bufferOffset = bufferStart;
 	    }
@@ -671,6 +686,9 @@ class ResponseStream extends ToByteResponseStream {
 	
 	_isCommitted = true;
 	_next.write(_tailChunked, 0, _tailChunkedLength);
+
+	if (log.isLoggable(Level.FINE))
+          log.fine("[" + dbgId() + "] write-chunk(" + _tailChunkedLength + ")");
       }
 
       CauchoRequest req = _response.getRequest();
@@ -678,7 +696,7 @@ class ResponseStream extends ToByteResponseStream {
         if (log.isLoggable(Level.FINE)) {
           String id;
           if (req instanceof AbstractHttpRequest) {
-            Connection conn = ((AbstractHttpRequest) req).getConnection();;
+            Connection conn = ((AbstractHttpRequest) req).getConnection();
             if (conn != null)
               id = String.valueOf(conn.getId());
             else
@@ -753,6 +771,21 @@ class ResponseStream extends ToByteResponseStream {
     else {
       _cacheStream.write(buf, offset, length);
     }
+  }
+
+  private String dbgId()
+  {
+    Object req = _response.getRequest();
+    
+    if (req instanceof AbstractHttpRequest) {
+      Connection conn = ((AbstractHttpRequest) req).getConnection();
+      if (conn != null)
+	return String.valueOf(conn.getId());
+      else
+	return "jni";
+    }
+    else
+      return "inc";
   }
 
   /**

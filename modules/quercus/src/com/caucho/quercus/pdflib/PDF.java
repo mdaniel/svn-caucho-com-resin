@@ -39,12 +39,15 @@ import java.util.logging.Level;
 import com.caucho.util.L10N;
 
 import com.caucho.vfs.WriteStream;
+import com.caucho.vfs.TempStream;
+import com.caucho.vfs.TempBuffer;
 
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.BooleanValue;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.LongValue;
 import com.caucho.quercus.env.ArrayValue;
+import com.caucho.quercus.env.TempBufferStringValue;
 import com.caucho.quercus.env.Value;
 
 import com.caucho.quercus.module.Optional;
@@ -64,7 +67,9 @@ public class PDF {
 
   private HashMap<PDFProcSet,PDFProcSet> _procSetMap
     = new HashMap<PDFProcSet,PDFProcSet>();
-  
+
+  private TempStream _tempStream;
+  private WriteStream _os;
   private PDFWriter _out;
 
   private int _pageId;
@@ -78,9 +83,14 @@ public class PDF {
     _out = new PDFWriter(env.getOut());
   }
 
-  public boolean begin_document()
+  public boolean begin_document(String fileName, @Optional String optList)
     throws IOException
   {
+    _tempStream = new TempStream();
+    _tempStream.openWrite();
+    _os = new WriteStream(_tempStream);
+    
+    _out = new PDFWriter(_os);
     _out.beginDocument();
 
     _pageId = _out.writeHeader();
@@ -99,6 +109,20 @@ public class PDF {
   public boolean begin_page_ext(double width, double height, String opt)
   {
     return begin_page(width, height);
+  }
+
+  /**
+   * Returns the result as a string.
+   */
+  public Value get_buffer()
+  {
+    TempStream ts = _tempStream;
+    _tempStream = null;
+
+    if (ts == null)
+      return BooleanValue.FALSE;
+
+    return new TempBufferStringValue(ts.getHead());
   }
 
   /**
@@ -449,6 +473,60 @@ public class PDF {
   }
 
   /**
+   * Sets the color to a grayscale
+   */
+  public boolean setgray_stroke(double g)
+    throws IOException
+  {
+    return _stream.setcolor("stroke", "gray", g, 0, 0, 0);
+  }
+
+  /**
+   * Sets the color to a grayscale
+   */
+  public boolean setgray_fill(double g)
+    throws IOException
+  {
+    return _stream.setcolor("fill", "gray", g, 0, 0, 0);
+  }
+
+  /**
+   * Sets the color to a grayscale
+   */
+  public boolean setgray(double g)
+    throws IOException
+  {
+    return _stream.setcolor("both", "gray", g, 0, 0, 0);
+  }
+
+  /**
+   * Sets the color to a rgb
+   */
+  public boolean setrgbcolor_stroke(double r, double g, double b)
+    throws IOException
+  {
+    return _stream.setcolor("stroke", "rgb", r, g, b, 0);
+  }
+
+  /**
+   * Sets the fill color to a rgb
+   */
+  public boolean setrgbcolor_fill(double r, double g, double b)
+    throws IOException
+  {
+    return _stream.setcolor("fill", "rgb", r, g, b, 0);
+  }
+
+  /**
+   * Sets the color to a rgb
+   */
+  public boolean setrgbcolor(double r, double g, double b)
+    throws IOException
+  {
+    return _stream.setcolor("both", "rgb", r, g, b, 0);
+  }
+
+  /**
    * Sets the color
    */
   public boolean setcolor(String fstype, String colorspace,
@@ -456,6 +534,97 @@ public class PDF {
     throws IOException
   {
     return _stream.setcolor(fstype, colorspace, c1, c2, c3, c4);
+  }
+
+  /**
+   * Sets the line width
+   */
+  public boolean setlinewidth(double w)
+    throws IOException
+  {
+    return _stream.setlinewidth(w);
+  }
+
+  /**
+   * Concatenates the matrix
+   */
+  public boolean concat(double a, double b, double c,
+			double d, double e, double f)
+    throws IOException
+  {
+    return _stream.concat(a, b, c, d, e, f);
+  }
+
+  /**
+   * Skews the coordinates
+   *
+   * @param a degrees to skew the x axis
+   * @param b degrees to skew the y axis
+   */
+  public boolean skew(double aDeg, double bDeg)
+    throws IOException
+  {
+    double a = aDeg * Math.PI / 180;
+    double b = bDeg * Math.PI / 180;
+    
+    return _stream.concat(1, Math.tan(a), Math.tan(b), 1, 0, 0);
+  }
+  
+  /**
+   * scales the coordinates
+   *
+   * @param sx amount to scale the x axis
+   * @param sy amount to scale the y axis
+   */
+  public boolean scale(double sx, double sy)
+    throws IOException
+  {
+    return _stream.concat(sx, 0, 0, sy, 0, 0);
+  }
+  
+  /**
+   * translates the coordinates
+   *
+   * @param tx amount to translate the x axis
+   * @param ty amount to translate the y axis
+   */
+  public boolean translate(double tx, double ty)
+    throws IOException
+  {
+    return _stream.concat(1, 0, 0, 1, tx, ty);
+  }
+  
+  /**
+   * rotates the coordinates
+   *
+   * @param p amount to rotate
+   */
+  public boolean rotate(double pDeg)
+    throws IOException
+  {
+    double p = pDeg * Math.PI / 180;
+    
+    return _stream.concat(Math.cos(p), Math.sin(p),
+			  -Math.sin(p), Math.cos(p),
+			  0, 0);
+  }
+
+  /**
+   * Saves the graphics state.
+   */
+  public boolean save()
+    throws IOException
+  {
+    return _stream.save();
+  }
+
+  /**
+   * Restores the graphics state.
+   */
+  public boolean restore()
+    throws IOException
+  {
+    return _stream.restore();
   }
   
   /**
@@ -517,10 +686,13 @@ public class PDF {
     _out.writeStream(streamId, _stream);
   }
   
-  public boolean end_document(Env env)
+  public boolean end_document(Env env, @Optional String optList)
     throws IOException
   {
     _out.endDocument();
+
+    _os.close();
+    _out = null;
 
     return true;
   }
@@ -528,7 +700,7 @@ public class PDF {
   public boolean close(Env env)
     throws IOException
   {
-    return end_document(env);
+    return end_document(env, "");
   }
 
   public String toString()

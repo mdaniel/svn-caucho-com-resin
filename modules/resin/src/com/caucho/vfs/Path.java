@@ -422,6 +422,40 @@ public abstract class Path {
   }
 
   /**
+   * Tests if the path is marked as executable
+   */
+  public boolean isExecutable()
+  {
+    return false;
+  }
+
+  /**
+   * Change the executable status of the of the oath.
+   *
+   * @throws UnsupportedOperationException
+   */
+  public boolean setExecutable(boolean isExecutable)
+  {
+    return false;
+  }
+
+  /**
+   * Tests if the path refers to a symbolic link.
+   */
+  public boolean isSymbolicLink()
+  {
+    return false;
+  }
+
+  /**
+   * Tests if the path refers to a hard link.
+   */
+  public boolean isHardLink()
+  {
+    return false;
+  }
+
+  /**
    * Tests if the path refers to an object.
    */
   public boolean isObject()
@@ -491,22 +525,6 @@ public abstract class Path {
   public int getInode()
   {
     return 0;
-  }
-
-  /**
-   * Tests if the path is marked as executable
-   */
-  public boolean isExecutable()
-  {
-    return false;
-  }
-
-  /**
-   * Change the executable status of the path.
-   */
-  public boolean setExecutable(boolean isExecutable)
-  {
-    return false;
   }
 
   public int getGroup()
