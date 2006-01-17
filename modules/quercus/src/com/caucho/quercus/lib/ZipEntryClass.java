@@ -127,11 +127,20 @@ public class ZipEntryClass {
    *
    * @return the compression method
    */
-  public long zip_entry_compressionmethod()
+  public String zip_entry_compressionmethod()
   {
     if (_zipEntry == null)
-      return -1;
+      return "";
 
-    return _zipEntry.getMethod();
+    Integer method = _zipEntry.getMethod();
+
+    switch(method) {
+      case ZipEntry.DEFLATED:
+        return "deflated";
+      case ZipEntry.STORED:
+        return "stored";
+      default:
+        return method.toString();
+    }
   }
 }
