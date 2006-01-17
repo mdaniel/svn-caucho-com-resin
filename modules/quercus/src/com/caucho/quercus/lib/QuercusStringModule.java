@@ -100,17 +100,20 @@ public class QuercusStringModule extends AbstractQuercusModule {
   /**
    * Escapes a string using C syntax.
    *
-   * @param env the quercus calling environment
-   * @param s the source string to convert
-   * @param charset the set of characters to convert
+   * @see #stripcslashes
+   *
+   * @param source the source string to convert
+   * @param characters the set of characters to convert
    * @return the escaped string
    */
-  public static String addcslashes(String source, String charset)
+  public static String addcslashes(String source, String characters)
   {
-    boolean []bitmap = parseCharsetBitmap(charset);
+    boolean []bitmap = parseCharsetBitmap(characters);
 
-    StringBuilder sb = new StringBuilder();
     int length = source.length();
+
+    StringBuilder sb = new StringBuilder(length * 5 / 4);
+
     for (int i = 0; i < length; i++) {
       char ch = source.charAt(i);
 
@@ -874,7 +877,8 @@ public class QuercusStringModule extends AbstractQuercusModule {
 	int d1 = hexToDigit(str.charAt(i + 1));
 	int d2 = hexToDigit(str.charAt(i + 2));
 
-	byteToChar.addByte(d1 * 16 + d2);
+        // XXX: d1 and d2 may be -1 if not valid hex chars
+        byteToChar.addByte(d1 * 16 + d2);
 
 	return i + 2;
       }
@@ -897,10 +901,16 @@ public class QuercusStringModule extends AbstractQuercusModule {
       return ch - 'a' + 10;
     else if ('A' <= ch && ch <= 'F')
       return ch - 'A' + 10;
-    else {
-      // XXX: error of some sort
-      return 0;
-    }
+    else
+      return -1;
+  }
+
+  private static int octToDigit(char ch)
+  {
+    if ('0' <= ch && ch <= '7')
+      return ch - '0';
+    else
+      return -1;
   }
 
   public static void addQueryValue(Env env, ArrayValue array,
@@ -2030,8 +2040,8 @@ public class QuercusStringModule extends AbstractQuercusModule {
    * split into an array
    *
    * @param env the calling environment
-   * @param stringV string to split
-   * @param chunkV chunk size
+   * @param string string to split
+   * @param chunk chunk size
    */
   public static Value str_split(Env env,
 				String string,
@@ -2057,12 +2067,77 @@ public class QuercusStringModule extends AbstractQuercusModule {
     return array;
   }
 
+  public static Value str_word_count(String string,
+                                     @Optional int format,
+                                     @Optional String additionalWordCharacters)
+    throws Throwable
+  {
+    if (format < 0 || format > 2)
+      return NullValue.NULL;
+
+    int strlen = string.length();
+    boolean isAdditionalWordCharacters = additionalWordCharacters.length() > 0;
+
+    ArrayValueImpl resultArray = null;
+
+    if (format > 0)
+      resultArray = new ArrayValueImpl();
+
+    boolean isBetweenWords = true;
+
+    int wordCount = 0;
+
+    int lastWordStart = 0;
+
+    for (int i = 0; i <= strlen; i++) {
+      boolean isWordCharacter;
+
+      if (i < strlen) {
+        int ch = string.charAt(i);
+
+        isWordCharacter = Character.isLetter(ch)
+                          || ch == '-'
+                          || ch == '\''
+                          || (isAdditionalWordCharacters
+                              && additionalWordCharacters.indexOf(ch) > -1);
+      }
+      else
+        isWordCharacter = false;
+
+      if (isWordCharacter) {
+        if (isBetweenWords) {
+          // starting a word
+          isBetweenWords = false;
+
+          lastWordStart = i;
+          wordCount++;
+        }
+      }
+      else {
+        if (!isBetweenWords) {
+          // finished a word
+          isBetweenWords = true;
+
+          if (format > 0) {
+            StringValue word = new StringValue(string.substring(lastWordStart, i));
+
+            if (format == 1)
+              resultArray.append(word);
+            else if (format == 2)
+              resultArray.put(new LongValue(lastWordStart), word);
+          }
+        }
+      }
+    }
+
+    return resultArray == null ? new LongValue(wordCount) : resultArray;
+  }
+
   /**
    * Case-insensitive comparison
    *
-   * @param env
-   * @param aValue left value
-   * @param bValue right value
+   * @param a left value
+   * @param b right value
    * @return -1, 0, or 1
    */
   public static int strcasecmp(String a, String b)
@@ -2153,13 +2228,32 @@ public class QuercusStringModule extends AbstractQuercusModule {
       return LongValue.ONE;
   }
 
-  // XXX: strcspn
+  /**
+   * Finds the number of initial characters in <i>string</i> that do not match
+   * one of the characters in <i>characters</i>
+   *
+   * @param string the string to search in
+   * @param characters the character set
+   * @param offset the starting offset
+   * @param length the length
+   *
+   * @return the length of the match or FALSE if the offset or length are invalid
+   */
+  public static Value strcspn(Env env,
+                              String string,
+                              String characters,
+                              @Optional("0") int offset,
+                              @Optional("-2147483648") int length)
+  {
+    return strspnImpl(string, characters, offset, length, false);
+  }
+
 
   /**
    * Removes tags from a string.
    *
-   * @param str the string to remove
-   * @param allowable_tags the allowable tags
+   * @param string the string to remove
+   * @param allowTags the allowable tags
    */
   public static String strip_tags(String string, @Optional String allowTags)
   {
@@ -2254,8 +2348,8 @@ public class QuercusStringModule extends AbstractQuercusModule {
    * Returns the position of a substring.
    *
    * @param env the calling environment
-   * @param haystackV the string to search in
-   * @param needV the string to search for
+   * @param haystack the string to search in
+   * @param needleV the string to search for
    */
   public static Value strpos(Env env,
 			     String haystack,
@@ -2284,7 +2378,7 @@ public class QuercusStringModule extends AbstractQuercusModule {
    * Returns the position of a substring, testing case insensitive.
    *
    * @param env the calling environment
-   * @param haystackV the full argument to check
+   * @param haystack the full argument to check
    * @param needleV the substring argument to check
    * @param offsetV optional starting position
    */
@@ -2312,6 +2406,117 @@ public class QuercusStringModule extends AbstractQuercusModule {
       return BooleanValue.FALSE;
     else
       return new LongValue(pos);
+  }
+
+  /**
+   * Strip out the backslashes, recognizing the escape sequences, octal,
+   * and hexadecimal representations.
+   *
+   * @param source the string to clean
+   * @see #addcslashes
+   */
+  public static String stripcslashes(String source)
+  {
+    StringBuilder result = new StringBuilder(source.length() * 5 / 4);
+
+    int length = source.length();
+
+    for (int i = 0; i < length; i++) {
+      int ch = source.charAt(i);
+
+      if (ch == '\\') {
+        i++;
+
+        if (i == length)
+          ch = '\\';
+        else {
+          ch = source.charAt(i);
+
+          switch (ch) {
+          case 'a':
+            ch = 0x07;
+            break;
+          case 'b':
+            ch = '\b';
+            break;
+          case 't':
+            ch = '\t';
+            break;
+          case 'n':
+            ch = '\n';
+            break;
+          case 'v':
+            ch = 0xb;
+            break;
+          case 'f':
+            ch = '\f';
+            break;
+          case 'r':
+            ch = '\r';
+            break;
+          case 'x':
+            // up to two digits for a hex number
+            if (i + 1 == length)
+              break;
+
+            int digitValue = hexToDigit(source.charAt(i + 1));
+
+            if (digitValue < 0)
+              break;
+
+            ch = digitValue;
+            i++;
+
+            if (i + 1 == length)
+              break;
+
+            digitValue = hexToDigit(source.charAt(i + 1));
+
+            if (digitValue < 0)
+              break;
+
+            ch = ((ch << 4) | digitValue);
+            i++;
+
+            break;
+          default:
+            // up to three digits from 0 to 7 for an octal number
+            digitValue = octToDigit((char) ch);
+
+            if (digitValue < 0)
+              break;
+
+            ch = digitValue;
+
+            if (i + 1 == length)
+              break;
+
+            digitValue = octToDigit(source.charAt(i + 1));
+
+            if (digitValue < 0)
+              break;
+
+            ch = ((ch << 3) | digitValue);
+            i++;
+
+            if (i + 1 == length)
+              break;
+
+            digitValue = octToDigit(source.charAt(i + 1));
+
+            if (digitValue < 0)
+              break;
+
+            ch = ((ch << 3) | digitValue);
+            i++;
+          }
+        }
+      } // if ch == '/'
+
+      result.append((char) ch);
+    }
+
+    return result.toString();
   }
 
   /**
@@ -2343,7 +2548,7 @@ public class QuercusStringModule extends AbstractQuercusModule {
    * Finds the first instance of a substring, testing case insensitively
    *
    * @param env the calling environment
-   * @param haystackV the string to search in
+   * @param haystack the string to search in
    * @param needleV the string to search for
    * @return the trailing match or FALSE
    */
@@ -2494,57 +2699,86 @@ public class QuercusStringModule extends AbstractQuercusModule {
   }
 
   /**
-   * Finds the length of a matching set.
+   * Finds the number of initial characters in <i>string</i> that match one of
+   * the characters in <i>characters</i>
    *
    * @param string the string to search in
-   * @param charset the character set
+   * @param characters the character set
    * @param offset the starting offset
    * @param length the length
-   * @return the trailing match or FALSE
+   *
+   * @return the length of the match or FALSE if the offset or length are invalid
    */
-  public static long strspn(String string,
-			    String charset,
-			    @Optional int offset,
-			    @Optional("-1") int length)
+  public static Value strspn(String string,
+		             String characters,
+		             @Optional int offset,
+			     @Optional("-2147483648") int length)
     throws Throwable
   {
-    if (length < 0)
-      length = Integer.MAX_VALUE;
+    return strspnImpl(string, characters, offset, length, true);
+  }
 
+  private static Value strspnImpl(String string,
+                                  String characters,
+                                  int offset,
+                                  int length,
+                                  boolean isMatch)
+  {
     int strlen = string.length();
-    boolean []set = new boolean[256];
-    for (int i = charset.length() - 1; i >= 0; i--) {
-      set[charset.charAt(i)] = true;
+
+    // see also strcspn which uses the same procedure for determining
+    // effective offset and length
+    if (offset < 0) {
+      offset += strlen;
+
+      if (offset < 0)
+        offset = 0;
+    }
+
+    if (offset > strlen)
+      return BooleanValue.FALSE;
+
+    if (length ==  -2147483648)
+      length = strlen;
+    else if (length < 0) {
+      length += (strlen - offset);
+
+      if (length < 0)
+        length = 0;
     }
 
     int end = offset + length;
+
     if (strlen < end)
       end = strlen;
 
     int count = 0;
+
     for (; offset < end; offset++) {
       char ch = string.charAt(offset);
 
-      if (set[ch])
-	count++;
+      boolean isPresent = characters.indexOf(ch) > -1;
+
+      if (isPresent == isMatch)
+        count++;
       else
-	return count;
+        return new LongValue(count);
     }
 
-    return count;
+    return new LongValue(count);
   }
 
   /**
    * Finds the first instance of a substring
    *
    * @param env the calling environment
-   * @param haystackV the string to search in
+   * @param haystack the string to search in
    * @param needleV the string to search for
    * @return the trailing match or FALSE
    */
   public static Value strstr(Env env,
-			     String haystack,
-			     Value needleV)
+                             String haystack,
+                             Value needleV)
     throws Throwable
   {
     String needle;
@@ -2562,6 +2796,103 @@ public class QuercusStringModule extends AbstractQuercusModule {
       return new StringValue(haystack.substring(i));
     else
       return BooleanValue.FALSE;
+  }
+
+  /**
+   * Split a string into tokens using any character in another string as a delimiter.
+   *
+   * The first call establishes the string to search and the characters to use as tokens,
+   * the first token is returned:
+   * <pre>
+   *   strtok("hello, world", ", ")
+   *     => "hello"
+   * </pre>
+   *
+   * Subsequent calls pass only the token characters, the next token is returned:
+   * <pre>
+   *   strtok("hello, world", ", ")
+   *     => "hello"
+   *   strtok(", ")
+   *     => "world"
+   * </pre>
+   *
+   * False is returned if there are no more tokens:
+   * <pre>
+   *   strtok("hello, world", ", ")
+   *     => "hello"
+   *   strtok(", ")
+   *     => "world"
+   *   strtok(", ")
+   *     => false
+   * </pre>
+   *
+   * Calls that pass two arguments reset the search string:
+   * <pre>
+   *   strtok("hello, world", ", ")
+   *     => "hello"
+   *   strtok("goodbye, world", ", ")
+   *     => "goodbye"
+   *   strtok("world")
+   *     => false
+   *   strtok(", ")
+   *     => false
+   * </pre>
+   */
+  public static Value strtok(Env env, String string1, @Optional Value string2)
+  {
+    String string;
+    String characters;
+    int offset;
+
+    if (string2.isNull()) {
+      String savedString = (String) env.getSpecialValue("caucho.strtok_string");
+      Integer savedOffset = (Integer) env.getSpecialValue("caucho.strtok_offset");
+
+      string = savedString == null ? "" : savedString;
+      offset = savedOffset == null ? 0 : savedOffset.intValue();
+      characters = string1;
+    }
+    else {
+      string = string1;
+      offset = 0;
+      characters = string2.toString();
+
+      env.setSpecialValue("caucho.strtok_string", string);
+    }
+
+    int strlen = string.length();
+
+    // skip any at beginning
+    for (; offset < strlen; offset++) {
+      char ch = string.charAt(offset);
+
+      if (characters.indexOf(ch) < 0)
+        break;
+    }
+
+    Value result;
+
+    if (offset == strlen)
+      result = BooleanValue.FALSE;
+    else {
+      int start = offset;
+
+      offset++;
+
+      // find end
+      for (; offset < strlen; offset++) {
+        char ch = string.charAt(offset);
+
+        if (characters.indexOf(ch) > -1)
+          break;
+      }
+
+      result = new StringValue(string.substring(start, offset));
+    }
+
+    env.setSpecialValue("caucho.strtok_offset", offset);
+
+    return result;
   }
 
   /**
