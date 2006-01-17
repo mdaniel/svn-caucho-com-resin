@@ -422,40 +422,6 @@ public abstract class Path {
   }
 
   /**
-   * Tests if the path is marked as executable
-   */
-  public boolean isExecutable()
-  {
-    return false;
-  }
-
-  /**
-   * Change the executable status of the of the oath.
-   *
-   * @throws UnsupportedOperationException
-   */
-  public void setExecutable(boolean isExecutable)
-  {
-    throw new UnsupportedOperationException("setExecutable");
-  }
-
-  /**
-   * Tests if the path refers to a symbolic link.
-   */
-  public boolean isSymbolicLink()
-  {
-    return false;
-  }
-
-  /**
-   * Tests if the path refers to a hard link.
-   */
-  public boolean isHardLink()
-  {
-    return false;
-  }
-
-  /**
    * Tests if the path refers to an object.
    */
   public boolean isObject()
@@ -524,19 +490,23 @@ public abstract class Path {
 
   public int getInode()
   {
-    return -1;
+    return 0;
   }
 
-  public boolean isReadOnly()
+  /**
+   * Tests if the path is marked as executable
+   */
+  public boolean isExecutable()
   {
     return false;
   }
 
   /**
-   * Sets the file to read only
+   * Change the executable status of the path.
    */
-  public void setReadOnly(boolean isReadOnly)
+  public boolean setExecutable(boolean isExecutable)
   {
+    return false;
   }
 
   public int getGroup()
@@ -547,24 +517,29 @@ public abstract class Path {
   /**
    * Changes the group
    */
-  public void changeGroup(int gid)
+  public boolean changeGroup(int gid)
     throws IOException
   {
+    return false;
   }
 
   /**
    * Changes the group
    */
-  public void changeGroup(String groupName)
+  public boolean changeGroup(String groupName)
     throws IOException
   {
+    return false;
   }
 
   /**
    * Changes the permissions
+   *
+   * @return true if successful
    */
-  public void chmod(int value)
+  public boolean chmod(int value)
   {
+    return false;
   }
 
   public int getOwner()
@@ -574,28 +549,34 @@ public abstract class Path {
 
   /**
    * Changes the owner
+   *
+   * @return true if successful
    */
-  public void changeOwner(int uid)
+  public boolean changeOwner(int uid)
     throws IOException
   {
+    return false;
   }
 
   /**
    * Changes the owner
+   *
+   * @return true if successful
    */
-  public void changeOwner(String ownerName)
+  public boolean changeOwner(String ownerName)
     throws IOException
   {
+    return false;
   }
 
   public long getDiskSpaceFree()
   {
-    return -1;
+    return 0;
   }
 
   public long getDiskSpaceTotal()
   {
-    return -1;
+    return 0;
   }
 
   /**
@@ -635,7 +616,8 @@ public abstract class Path {
 
   /**
    * Removes the file or directory named by this path.
-   * @return true if successful.
+   *
+   * @return true if successful
    */
   public boolean remove() throws IOException
   {
@@ -1075,28 +1057,6 @@ public abstract class Path {
       return cb.toString();
     else
       return rawURL;
-  }
-
-  /**
-   * Create a new <i>path</i> that is a hard link to this path.
-   *
-   * @param path the new path to create
-   */
-  public boolean createHardLinkTo(Path path)
-    throws IOException
-  {
-    return false;
-  }
-
-  /**
-   * Create a new <i>path</i> that is a symbolic link to this path.
-   *
-   * @param path the new path to create
-   */
-  public boolean createSymbolicLinkTo(Path path)
-    throws IOException
-  {
-    return false;
   }
 
   private class ArrayIterator implements Iterator<String> {
