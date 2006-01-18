@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2000 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2004 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -19,27 +19,52 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
-*
- *   Free Software Foundation, Inc.
+ *   Free SoftwareFoundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
  * @author Scott Ferguson
  */
 
-package com.caucho;
+package com.caucho.config;
 
-final public class Version {
-  public static final String COPYRIGHT =
-    "Copyright(c) 1998-2006 Caucho Technology.  All rights reserved.";
+import java.io.*;
 
-  public static String FULL_VERSION = "Resin-@VERSION@ (built @DATE@)";
-  public static String VERSION = "@VERSION@";
-  public static String VERSION_DATE = "@VERSION_DATE@";
+import com.caucho.util.LineCompileException;
 
-  public static void main(String []argv)
+/**
+ * Thrown by the various Builders
+ */
+public class LineConfigRuntimeException extends RuntimeException
+{
+  /**
+   * Create a null exception
+   */
+  public LineConfigRuntimeException()
   {
-    System.out.println(FULL_VERSION);
-    System.out.println(COPYRIGHT);
+  }
+
+  /**
+   * Creates an exception with a message
+   */
+  public LineConfigRuntimeException(String msg)
+  {
+    super(msg);
+  }
+
+  /**
+   * Creates an exception with a message
+   */
+  public LineConfigRuntimeException(String msg, Throwable cause)
+  {
+    super(msg, cause);
+  }
+
+  /**
+   * Creates an exception with a message
+   */
+  public LineConfigRuntimeException(Throwable cause)
+  {
+    super(cause);
   }
 }

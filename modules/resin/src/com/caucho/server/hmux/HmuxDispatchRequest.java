@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -219,8 +220,7 @@ public class HmuxDispatchRequest {
 
     Host host = _server.getHost(hostName, 80);
     if (host == null || ! host.isActive()) {
-      queryServer(os);
-      writeString(os, HMUX_NO_CHANGE, "");
+      writeString(os, HMUX_WEB_APP, "");
 
       if (isLoggable)
 	log.fine(dbgId() + "host '" + host + "' not active");

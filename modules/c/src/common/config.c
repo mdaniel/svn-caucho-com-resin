@@ -959,6 +959,7 @@ cse_update_host(config_t *config, resin_host_t *host, time_t now)
 /**
  * Matches the host information in the config
  */
+
 static resin_host_t *
 cse_match_host_impl(config_t *config, const char *host_name,
 		    int port, time_t now)

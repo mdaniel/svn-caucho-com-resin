@@ -319,8 +319,10 @@ class DispatchRequest extends RequestAdapter {
       String []oldValues = (String []) super.getParameterValues(key);
       String []newValues = (String []) table.get(key);
 
-      if (newValues == null)
+      if (newValues == null && oldValues == null)
 	table.put(key, oldValues);
+      else if (oldValues == null)
+	table.put(key, newValues);
       else {
 	String []next = new String[oldValues.length + newValues.length];
 	System.arraycopy(newValues, 0, next, 0, newValues.length);

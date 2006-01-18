@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+*
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -30,11 +31,11 @@ package com.caucho;
 
 final public class Version {
   public static final String COPYRIGHT =
-    "Copyright(c) 1998-2004 Caucho Technology.  All rights reserved.";
+    "Copyright(c) 1998-2006 Caucho Technology.  All rights reserved.";
 
-  public static String FULL_VERSION = "Resin-3.0.s060110 (built Tue, 10 Jan 2006 09:17:04 PST)";
-  public static String VERSION = "3.0.s060110";
-  public static String VERSION_DATE = "20060110T091704";
+  public static String FULL_VERSION = "Resin-3.0.s060117 (built Tue, 17 Jan 2006 11:42:54 PST)";
+  public static String VERSION = "3.0.s060117";
+  public static String VERSION_DATE = "20060117T114254";
 
   public static void main(String []argv)
   {

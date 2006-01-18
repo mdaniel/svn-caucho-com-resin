@@ -42,6 +42,8 @@ import com.caucho.java.LineMap;
 import com.caucho.java.ScriptStackTrace;
 import com.caucho.java.LineMapException;
 
+import com.caucho.config.LineConfigRuntimeException;
+
 import com.caucho.util.L10N;
 import com.caucho.util.Log;
 import com.caucho.util.ExceptionWrapper;
@@ -192,6 +194,7 @@ public class ErrorPageManager {
     boolean isLineCompileException = false;
     boolean isServletException = false;
     Throwable compileException = null;
+    String lineMessage = null;
 
     boolean lookupErrorPage = true;
     while (true) {
@@ -214,6 +217,10 @@ public class ErrorPageManager {
         }
 	else if (compileException == null) // ! isLineCompileException)
           compileException = rootExn;
+      }
+      else if (rootExn instanceof LineConfigRuntimeException) {
+	if (lineMessage == null)
+	  lineMessage = rootExn.getMessage();
       }
 
       if (rootExn instanceof BadRequestException)
@@ -398,7 +405,7 @@ public class ErrorPageManager {
       out.println(escapeHtml(rootExn.toString()));
 
     if (doStackTrace || log.isLoggable(Level.FINE)) {
-      printStackTrace(out, rootExn, lineMap);
+      printStackTrace(out, lineMessage, rootExn, lineMap);
     }
 
     out.println("</pre></code>");
@@ -617,11 +624,16 @@ public class ErrorPageManager {
   /**
    * Escapes HTML symbols in a stack trace.
    */
-  private void printStackTrace(PrintWriter out, Throwable e,
+  private void printStackTrace(PrintWriter out,
+			       String lineMessage,
+			       Throwable e,
                                LineMap lineMap)
   {
     CharArrayWriter writer = new CharArrayWriter();
     PrintWriter pw = new PrintWriter(writer);
+
+    if (lineMessage != null)
+      pw.println(lineMessage);
 
     if (lineMap != null)
       lineMap.printStackTrace(e, pw);

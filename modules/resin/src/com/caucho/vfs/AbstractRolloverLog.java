@@ -531,9 +531,9 @@ public class AbstractRolloverLog {
       
       if (archiveFormat == null)
 	archiveFormat = _rolloverPrefix + ".%Y%m%d.%H%M";
-      else if (! archiveFormat.contains("%H"))
+      else if (archiveFormat.indexOf("%H") < 0)
 	archiveFormat = archiveFormat + ".%H%M";
-      else if (! archiveFormat.contains("%M"))
+      else if (archiveFormat.indexOf("%M") < 0)
 	archiveFormat = archiveFormat + ".%M";
 
       for (int i = 0; i < 100; i++) {

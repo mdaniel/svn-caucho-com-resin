@@ -453,4 +453,9 @@ public class UserPreparedStatement extends UserStatement
     else
       _cacheItem.toIdle();
   }
+
+  public String toString()
+  {
+    return "UserPreparedStatement[" + _pstmt + "]";
+  }
 }
