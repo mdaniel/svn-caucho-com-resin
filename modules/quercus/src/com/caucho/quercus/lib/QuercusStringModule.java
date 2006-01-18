@@ -2769,12 +2769,13 @@ public class QuercusStringModule extends AbstractQuercusModule {
   }
 
   /**
-   * Finds the first instance of a substring
+   * Finds the first instance of a needle in haystack and returns
+   * the portion of haystack from the beginning of needle to the end of haystack.
    *
    * @param env the calling environment
    * @param haystack the string to search in
-   * @param needleV the string to search for
-   * @return the trailing match or FALSE
+   * @param needleV the string to search for, or the oridinal value of a character
+   * @return the trailing match or FALSE if needle is not found
    */
   public static Value strstr(Env env,
                              String haystack,
@@ -2788,6 +2789,11 @@ public class QuercusStringModule extends AbstractQuercusModule {
     }
     else {
       needle = String.valueOf((char) needleV.toLong());
+    }
+
+    if (needle.length() == 0) {
+      env.warning("empty needle");
+      return BooleanValue.FALSE;
     }
 
     int i = haystack.indexOf(needle);
