@@ -449,10 +449,8 @@ public class Mysqli {
    */
   public boolean select_db(String dbname)
   {
-    validateConnection();
-    
     try {
-      _conn.setCatalog(dbname);
+      validateConnection().setCatalog(dbname);
 
       return true;
     } catch (SQLException e) {

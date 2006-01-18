@@ -59,6 +59,30 @@ public class QuercusHttpModule extends AbstractQuercusModule {
   {
     HttpServletResponse res = env.getResponse();
 
+    int len = header.length();
+    
+    if (header.startsWith("HTTP/")) {
+      int p = header.indexOf(' ');
+      int status = 0;
+      int ch;
+
+      for (; p < len && header.charAt(p) == ' '; p++) {
+      }
+      
+      for (; p < len && '0' <= (ch = header.charAt(p)) && ch <= '9'; p++) {
+	status = 10 * status + ch - '0';
+      }
+
+      for (; p < len && header.charAt(p) == ' '; p++) {
+      }
+
+      if (status > 0) {
+	res.setStatus(status, header.substring(p));
+	
+	return NullValue.NULL;
+      }
+    }
+
     int p = header.indexOf(':');
 
     if (p > 0) {
