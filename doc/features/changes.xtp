@@ -2,8 +2,9 @@
 
 <a href='changes-2.xtp'>Resin 2.1 changes</a>
 
-<s2 title='3.0.snap - Jan 10, 2005'>
+<s2 title='3.0.snap - Jan 10, 2006'>
 <ul>
+<li>(2006-01-10) Added enable-select-manager
 <li>virtual hosts not handled by resin were not properly left to Apache (#846, #576 rep by borisk, Roberto Pesenato)
 <li>exceptions in resources should show stack trace (#445)
 <li>Check for null getParameterValues in DispatchRequest (#493)

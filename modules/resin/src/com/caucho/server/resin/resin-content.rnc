@@ -295,6 +295,9 @@ r_server-Basis =
 
   & r_ear-default*
 
+  & (attribute enable-select-manager { r_boolean-Type }
+     | element enable-select-manager { r_boolean-Type })?
+
   & r_error-page*
 
   & r_http*

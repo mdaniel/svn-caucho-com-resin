@@ -738,7 +738,7 @@ public class Port
     try {
       bind();
 
-      if (_serverSocket.isJNI()) {
+      if (_serverSocket.isJNI() && _server.isEnableSelectManager()) {
 	_selectManager = _server.getSelectManager();
 
 	if (_selectManager == null) {

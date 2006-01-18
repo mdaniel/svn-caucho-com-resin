@@ -120,6 +120,7 @@ public class ServletServer extends ProtocolDispatchServer
 
   private long _waitForActiveTime = 10000L;
 
+  private boolean _enableSelectManager;
   private int _keepaliveMax = 256;
   private ArrayList<Port> _ports = new ArrayList<Port>();
 
@@ -174,15 +175,16 @@ public class ServletServer extends ProtocolDispatchServer
 	thread.setContextClassLoader(oldLoader);
       }
 
-      try {
-	Class cl = Class.forName("com.caucho.server.port.JniSelectManager");
-	Method method = cl.getMethod("create", new Class[0]);
+      if (_enableSelectManager) {
+	try {
+	  Class cl = Class.forName("com.caucho.server.port.JniSelectManager");
+	  Method method = cl.getMethod("create", new Class[0]);
 
-	setSelectManager((AbstractSelectManager) method.invoke(null, null));
-      } catch (Throwable e) {
-	log.log(Level.FINER, e.toString());
+	  setSelectManager((AbstractSelectManager) method.invoke(null, null));
+	} catch (Throwable e) {
+	  log.log(Level.FINER, e.toString());
+	}
       }
-    
     } catch (Throwable e) {
       log.log(Level.WARNING, e.toString(), e);
       
@@ -534,6 +536,22 @@ public class ServletServer extends ProtocolDispatchServer
     if (selectManager != null)
       selectManager.setSelectMax(max);
   }
+  
+  /**
+   * Sets true if the select manager should be enabled
+   */
+  public void setEnableSelectManager(boolean enable)
+  {
+    _enableSelectManager = enable;
+  }
+  
+  /**
+   * Sets true if the select manager should be enabled
+   */
+  public boolean isEnableSelectManager()
+  {
+    return _enableSelectManager;
+  }
 
   /**
    * Returns the number of select keepalives available.
@@ -862,7 +880,7 @@ public class ServletServer extends ProtocolDispatchServer
 	return;
 
       AbstractSelectManager selectManager = getSelectManager();
-      if (selectManager != null)
+      if (isEnableSelectManager() && selectManager != null)
 	selectManager.start();
 
       Cluster cluster = Cluster.getLocal();
