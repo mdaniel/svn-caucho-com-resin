@@ -92,6 +92,16 @@ public class PDFStream {
     _hasFont = false;
   }
 
+  public PDFFont getFont()
+  {
+    return _font;
+  }
+
+  public double getFontSize()
+  {
+    return _fontSize;
+  }
+
   public void setTextPos(double x, double y)
   {
     _textX = x;

@@ -62,6 +62,8 @@ public class PDF {
 
   private static final double KAPPA = 0.5522847498;
 
+  private static HashMap<String,Font> _faceMap = new HashMap<String,Font>();
+  
   private HashMap<PDFFont,PDFFont> _fontMap
     = new HashMap<PDFFont,PDFFont>();
 
@@ -126,6 +128,59 @@ public class PDF {
   }
 
   /**
+   * Returns the value for a parameter.
+   */
+  public String get_parameter(String name)
+  {
+    if ("fontname".equals(name)) {
+      PDFFont font = _stream.getFont();
+
+      if (font != null)
+	return font.getFontName();
+      else
+	return null;
+    }
+    else
+      return null;
+  }
+
+  /**
+   * Returns the value for a parameter.
+   */
+  public double get_value(String name)
+  {
+    if ("ascender".equals(name)) {
+      PDFFont font = _stream.getFont();
+
+      if (font != null)
+	return font.getAscender();
+      else
+	return 0;
+    }
+    else if ("capheight".equals(name)) {
+      PDFFont font = _stream.getFont();
+
+      if (font != null)
+	return font.getCapHeight();
+      else
+	return 0;
+    }
+    else if ("descender".equals(name)) {
+      PDFFont font = _stream.getFont();
+
+      if (font != null)
+	return font.getDescender();
+      else
+	return 0;
+    }
+    else if ("fontsize".equals(name)) {
+      return _stream.getFontSize();
+    }
+    else
+      return 0;
+  }
+
+  /**
    * Loads a font for later use.
    *
    * @param name the font name, e.g. Helvetica
@@ -135,7 +190,9 @@ public class PDF {
   public PDFFont load_font(String name, String encoding, String opt)
     throws IOException
   {
-    PDFFont font = new PDFFont(name, encoding, opt);
+    Font face = loadFont(name);
+    
+    PDFFont font = new PDFFont(face, encoding, opt);
 
     PDFFont oldFont = _fontMap.get(font);
 
@@ -149,6 +206,22 @@ public class PDF {
     _out.addPendingObject(font);
 
     return font;
+  }
+
+  private Font loadFont(String name)
+    throws IOException
+  {
+    synchronized (_faceMap) {
+      Font face = _faceMap.get(name);
+
+      if (face == null) {
+	face = new AfmParser().parse(name);
+
+	_faceMap.put(name, face);
+      }
+
+      return face;
+    }
   }
 
   /**
@@ -170,6 +243,18 @@ public class PDF {
 
     return true;
   }
+
+  /**
+   * Returns the length of a string for a font.
+   */
+  public double stringwidth(String string, @NotNull PDFFont font, double size)
+  {
+    if (font == null)
+      return 0;
+
+    return size * font.stringWidth(string) / 1000.0;
+  }
+  
 
   /**
    * Sets the text position.

@@ -49,13 +49,15 @@ public class PDFFont extends PDFObject {
   private static final L10N L = new L10N(PDFFont.class);
 
   private int _id;
-  private final String _name;
+  
+  private final Font _face;
+  
   private final String _encoding;
   private final String _opt;
   
-  PDFFont(String name, String encoding, String opt)
+  PDFFont(Font face, String encoding, String opt)
   {
-    _name = name;
+    _face = face;
     _encoding = encoding;
     _opt = opt;
   }
@@ -68,6 +70,36 @@ public class PDFFont extends PDFObject {
   public int getId()
   {
     return _id;
+  }
+
+  public String getFontName()
+  {
+    return _face.getFontName();
+  }
+
+  public String getFontStyle()
+  {
+    return _face.getWeight();
+  }
+
+  public double getAscender()
+  {
+    return _face.getAscender();
+  }
+
+  public double getCapHeight()
+  {
+    return _face.getCapHeight();
+  }
+
+  public double getDescender()
+  {
+    return _face.getDescender();
+  }
+
+  public double stringWidth(String text)
+  {
+    return _face.stringWidth(text);
   }
 
   public String getPDFName()
@@ -86,7 +118,7 @@ public class PDFFont extends PDFObject {
   {
     out.println("<< /Type /Font");
     out.println("   /Subtype /Type1");
-    out.println("   /Name /" + _name);
+    out.println("   /Name /" + _face.getFontName());
     out.println("   /BaseFont /Helvetica");
     out.println("   /Encoding /MacRomanEncoding");
     out.println(">>");
@@ -96,7 +128,7 @@ public class PDFFont extends PDFObject {
   {
     int hash = 37;
 
-    hash = 65521 * hash + _name.hashCode();
+    hash = 65521 * hash + _face.hashCode();
     hash = 65521 * hash + _encoding.hashCode();
     hash = 65521 * hash + _opt.hashCode();
     
@@ -112,13 +144,13 @@ public class PDFFont extends PDFObject {
 
     PDFFont font = (PDFFont) o;
 
-    return (_name.equals(font._name) &&
+    return (_face == font._face &&
 	    _encoding.equals(font._encoding) &&
 	    _opt.equals(font._opt));
   }
 
   public String toString()
   {
-    return "PDFFont[" + _name + "," + _encoding + "," + _opt + "]";
+    return "PDFFont[" + _face.getFontName() + "," + _encoding + "," + _opt + "]";
   }
 }

@@ -3994,19 +3994,21 @@ public class PhpParser {
     case CLONE: return "'clone'";
     case INSTANCEOF: return "'instanceof'";
       
-    case SIMPLE_STRING_ESCAPE: return "string";
-    case COMPLEX_STRING_ESCAPE: return "string";
+    case SIMPLE_STRING_ESCAPE: return "'string'";
+    case COMPLEX_STRING_ESCAPE: return "'string'";
       
-    case REQUIRE: return "require";
-    case REQUIRE_ONCE: return "require_once";
+    case REQUIRE: return "'require'";
+    case REQUIRE_ONCE: return "'require_once'";
       
-    case PRIVATE: return "private";
-    case PROTECTED: return "protected";
-    case PUBLIC: return "public";
+    case PRIVATE: return "'private'";
+    case PROTECTED: return "'protected'";
+    case PUBLIC: return "'public'";
       
-    case GLOBAL: return "global";
+    case GLOBAL: return "'global'";
       
-    case FUNCTION: return "function";
+    case FUNCTION: return "'function'";
+      
+    case THIS: return "'this'";
       
     case ARRAY_RIGHT: return "'=>'";
     case LSHIFT: return "'<<'";

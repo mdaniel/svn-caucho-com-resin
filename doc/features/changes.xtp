@@ -4,6 +4,7 @@
 
 <s2 title='3.0.snap - Jan 10, 2005'>
 <ul>
+<li>virtual hosts not handled by resin were not properly left to Apache (#846, #576 rep by borisk, Roberto Pesenato)
 <li>exceptions in resources should show stack trace (#445)
 <li>Check for null getParameterValues in DispatchRequest (#493)
 <li>AbstractRolloverLog had JDK 1.5 dependency (#498)

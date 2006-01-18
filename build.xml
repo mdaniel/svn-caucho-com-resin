@@ -248,6 +248,7 @@
         <include name="**/*.xsll"/>
         <include name="**/*.rnc"/>
         <include name="**/*.tld"/>
+        <include name="**/*.afm"/>
         <include name="**/*.properties"/>
         <include name="META-INF/**"/>
       </fileset>
