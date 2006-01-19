@@ -73,6 +73,8 @@ public class QuercusRegexpModule extends AbstractQuercusModule {
   public static final int PREG_SPLIT_NO_EMPTY = 0x01;
   public static final int PREG_SPLIT_DELIM_CAPTURE = 0x02;
   public static final int PREG_SPLIT_OFFSET_CAPTURE = 0x04;
+  
+  public static final int PREG_GREP_INVERT = 1;
 
   public static final boolean []PREG_QUOTE = new boolean[256];
 
@@ -675,6 +677,75 @@ public class QuercusRegexpModule extends AbstractQuercusModule {
     return result;
   }
 
+  /**
+   * Returns an array of all the values that matched the given pattern if the flag
+   * no flag is passed.  Otherwise it will return an array of all the values that did
+   * not match.
+   *
+   * @param patternString  the pattern
+   * @param input  the array to check the pattern against
+   * @param flag  0 for matching and 1 for elements that do not match
+   * 
+   * @return an array of either matching elements are non-matching elements
+   */
+  public static ArrayValue preg_grep (Env env,
+  																				String patternString,
+  																				ArrayValue input,
+  																				@Optional("0") int flag)
+  	throws Throwable
+  {
+  	Pattern pattern = compileRegexp(patternString);
+  	
+  	Matcher matcher = null;
+  	
+  	ArrayValue matchArray = new ArrayValueImpl();
+  	
+  	for (Map.Entry<Value, Value> entry: input.entrySet()) {
+  		Value entryValue = entry.getValue();
+  		Value entryKey = entry.getKey();
+  		
+  		matcher = pattern.matcher(entryValue.toString());
+  			
+  		boolean found = matcher.find();
+  		
+  		if (!found && flag == 1)
+  			matchArray.append(entryKey, entryValue);
+  		else if ((found && flag == 0))
+  			matchArray.append(entryKey, entryValue);
+  	}
+  	
+  	return matchArray;
+  }
+  
+  /**
+   * Returns an array of strings produces from splitting the passed string around the 
+   * provided pattern.  The pattern is case insensitive.
+   *
+   * @param patternString  the pattern
+   * @param string  the string to split
+   * @param limit  if specified, the maximum number of elements in the array
+   * 
+   * @return an array of strings split around the pattern string
+   */
+  public static ArrayValue spliti (Env env,
+  																				String patternString,
+  																				String string,
+  																				@Optional("-1") long limit)
+  {
+    patternString = cleanRegexp(patternString, false);
+  	
+  	Pattern pattern = Pattern.compile(patternString, Pattern.CASE_INSENSITIVE);
+  	
+  	String groups[] = pattern.split(string, (int) limit);
+  	
+  	ArrayValue result = new ArrayValueImpl();
+
+  	for (int k = 0; k < groups.length; k++)
+  		result.append(new StringValue(groups[k]));
+
+    return result;
+  }
+  
   private static Pattern compileRegexp(String rawRegexp)
   {
     Pattern pattern = _patternCache.get(rawRegexp);
