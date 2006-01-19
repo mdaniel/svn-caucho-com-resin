@@ -33,6 +33,7 @@ import java.util.logging.Logger;
 
 import java.util.zip.ZipFile;
 import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 import java.util.Enumeration;
 
 import java.io.IOException;
@@ -41,6 +42,7 @@ import com.caucho.util.L10N;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.BooleanValue;
+import com.caucho.vfs.Path;
 
 /**
  * Zip object oriented API facade
@@ -50,28 +52,27 @@ public class ZipClass {
   private static final Logger log = Logger.getLogger(ZipClass.class.getName());
   private static final L10N L = new L10N(ZipClass.class);
 
+  private ZipInputStream _zipInputStream;
   private ZipFile _zipFile;
-  private Enumeration _entries;
 
-  public ZipClass(String zipFileName)
+  public ZipClass(Path zipPath)
     throws IOException
   {
-    _zipFile = new ZipFile(zipFileName);
+    _zipInputStream = new ZipInputStream(zipPath.openRead());
   }
 
   /**
    *
-   * 
+   *
    * @return next zip_entry or null
    */
   public Value zip_read(Env env)
     throws IOException
   {
-    if (_entries == null)
-      _entries = _zipFile.entries();
+    ZipEntry entry;
 
-    if (_entries.hasMoreElements())
-      return env.wrapJava(new ZipEntryClass((ZipEntry) _entries.nextElement()));
+    if ((entry = _zipInputStream.getNextEntry()) != null)
+      return env.wrapJava(new ZipEntryClass(entry));
     else
       return BooleanValue.FALSE;
   }

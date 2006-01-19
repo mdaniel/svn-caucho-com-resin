@@ -37,8 +37,10 @@ import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.quercus.module.NotNull;
 import com.caucho.quercus.module.Optional;
 import com.caucho.quercus.env.*;
+import com.caucho.vfs.Path;
 
 import java.util.logging.Logger;
+import java.util.logging.Level;
 
 /**
  * PHP Zip
@@ -57,10 +59,22 @@ public class QuercusZipModule extends AbstractQuercusModule {
     return "zip".equals(name);
   }
 
-  public ZipClass zip_open(@NotNull String fileName)
+  public Value zip_open(Env env,
+                        @NotNull Path path)
     throws IOException
   {
-    return new ZipClass(fileName);
+    Value value = BooleanValue.FALSE;
+
+    if (path == null)
+      return value;
+
+    try {
+      value = env.wrapJava(new ZipClass(path));
+    } catch (IOException ex) {
+      log.log(Level.FINE, ex.toString(), ex);
+    }
+
+    return value;
   }
 
   public Value zip_read(Env env,
@@ -131,7 +145,7 @@ public class QuercusZipModule extends AbstractQuercusModule {
 
   /**
    *
-   * 
+   *
    * @param entry
    * @param length
    * @return false or string
