@@ -38,6 +38,9 @@ import java.util.Enumeration;
 import java.io.IOException;
 
 import com.caucho.util.L10N;
+import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.Value;
+import com.caucho.quercus.env.BooleanValue;
 
 /**
  * Zip object oriented API facade
@@ -60,16 +63,16 @@ public class ZipClass {
    *
    * @return next zip_entry or null
    */
-  public ZipEntryClass zip_read()
+  public Value zip_read(Env env)
     throws IOException
   {
     if (_entries == null)
       _entries = _zipFile.entries();
 
     if (_entries.hasMoreElements())
-      return new ZipEntryClass((ZipEntry) _entries.nextElement());
+      return env.wrapJava(new ZipEntryClass((ZipEntry) _entries.nextElement()));
     else
-      return null;
+      return BooleanValue.FALSE;
   }
 
   public void zip_close()

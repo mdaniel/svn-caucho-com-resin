@@ -63,13 +63,14 @@ public class QuercusZipModule extends AbstractQuercusModule {
     return new ZipClass(fileName);
   }
 
-  public ZipEntryClass zip_read(@NotNull ZipClass zipFile)
+  public Value zip_read(Env env,
+                        @NotNull ZipClass zipFile)
     throws IOException
   {
     if (zipFile == null)
-      return null;
+      return NullValue.NULL;
 
-    return zipFile.zip_read();
+    return zipFile.zip_read(env);
   }
 
   /**
