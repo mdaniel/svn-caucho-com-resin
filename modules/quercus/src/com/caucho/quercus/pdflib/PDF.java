@@ -666,6 +666,7 @@ public class PDF {
   public PDFImage open_image_file(String type, Path file,
 				  @Optional String stringParam,
 				  @Optional int intParam)
+    throws IOException
   {
     return new PDFImage(file);
   }
