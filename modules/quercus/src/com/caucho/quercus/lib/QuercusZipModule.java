@@ -57,13 +57,13 @@ public class QuercusZipModule extends AbstractQuercusModule {
     return "zip".equals(name);
   }
 
-  public ZipFileClass zip_open(@NotNull String fileName)
+  public ZipClass zip_open(@NotNull String fileName)
     throws IOException
   {
-    return new ZipFileClass(fileName);
+    return new ZipClass(fileName);
   }
 
-  public ZipEntryClass zip_read(@NotNull ZipFileClass zipFile)
+  public ZipEntryClass zip_read(@NotNull ZipClass zipFile)
     throws IOException
   {
     if (zipFile == null)
@@ -98,7 +98,7 @@ public class QuercusZipModule extends AbstractQuercusModule {
     return new LongValue(zipEntry.zip_entry_filesize());
   }
 
-  public void zip_close(@NotNull ZipFileClass zipFile)
+  public void zip_close(@NotNull ZipClass zipFile)
     throws IOException
   {
     if (zipFile != null)
@@ -112,7 +112,7 @@ public class QuercusZipModule extends AbstractQuercusModule {
    * @param mode ignored - always "rb" from fopen()
    * @return true on success or false on failure
    */
-  public boolean zip_entry_open(@NotNull ZipFileClass file,
+  public boolean zip_entry_open(@NotNull ZipClass file,
                                 @NotNull ZipEntryClass entry,
                                 @Optional String mode)
   {

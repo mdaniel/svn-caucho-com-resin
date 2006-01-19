@@ -43,14 +43,14 @@ import com.caucho.util.L10N;
  * Zip object oriented API facade
  */
 
-public class ZipFileClass {
-  private static final Logger log = Logger.getLogger(ZipFileClass.class.getName());
-  private static final L10N L = new L10N(ZipFileClass.class);
+public class ZipClass {
+  private static final Logger log = Logger.getLogger(ZipClass.class.getName());
+  private static final L10N L = new L10N(ZipClass.class);
 
   private ZipFile _zipFile;
   private Enumeration _entries;
 
-  public ZipFileClass(String zipFileName)
+  public ZipClass(String zipFileName)
     throws IOException
   {
     _zipFile = new ZipFile(zipFileName);

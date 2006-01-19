@@ -65,7 +65,7 @@ public class ZipEntryClass {
     return _zipEntry.getSize();
   }
 
-  public boolean zip_entry_open(ZipFileClass file)
+  public boolean zip_entry_open(ZipClass file)
   {
     ZipFile zipFile = file.getZipFile();
 
