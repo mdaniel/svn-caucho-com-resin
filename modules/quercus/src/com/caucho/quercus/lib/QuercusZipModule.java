@@ -131,6 +131,7 @@ public class QuercusZipModule extends AbstractQuercusModule {
 
   /**
    *
+   * 
    * @param entry
    * @param length
    * @return false or string

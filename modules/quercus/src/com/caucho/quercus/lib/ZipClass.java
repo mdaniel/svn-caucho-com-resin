@@ -61,6 +61,7 @@ public class ZipClass {
 
   /**
    *
+   * 
    * @return next zip_entry or null
    */
   public Value zip_read(Env env)

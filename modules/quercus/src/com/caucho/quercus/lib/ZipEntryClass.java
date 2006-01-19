@@ -91,6 +91,7 @@ public class ZipEntryClass {
 
   /**
    *
+   * 
    * @param length
    * @return FALSE if end of file or IOException
    */
