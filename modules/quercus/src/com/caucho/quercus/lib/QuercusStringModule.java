@@ -45,6 +45,7 @@ import java.io.IOException;
 import java.security.MessageDigest;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
+import java.text.NumberFormat;
 
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.Env;
@@ -159,7 +160,7 @@ public class QuercusStringModule extends AbstractQuercusModule {
         }
         else {
           sb.append("\\");
-          sb.append((char) ch);
+          sb.append(ch);
           break;
         }
       }
@@ -215,11 +216,10 @@ public class QuercusStringModule extends AbstractQuercusModule {
   /**
    * Escapes a string for db characters.
    *
-   * @param env the quercus calling environment
-   * @param s the source string to convert
+   * @param source the source string to convert
    * @return the escaped string
    */
-  public static String addslashes(Env env, String source)
+  public static String addslashes(String source)
     throws Throwable
   {
     StringBuilder sb = new StringBuilder();
@@ -308,11 +308,9 @@ public class QuercusStringModule extends AbstractQuercusModule {
   /**
    * Splits a string into chunks
    *
-   * @param env the quercus environment
-   * @param bodyValue the body string
-   * @param chunkLenValue the optional chunk length, defaults to 76
-   * @param endValue the optional end value, defaults to \r\n
-   * @return
+   * @param body the body string
+   * @param chunkLen the optional chunk length, defaults to 76
+   * @param end the optional end value, defaults to "\r\n"
    */
   public static String chunk_split(String body,
                                    @Optional("76") int chunkLen,
@@ -342,9 +340,8 @@ public class QuercusStringModule extends AbstractQuercusModule {
   /**
    * Converts from one cyrillic set to another.
    *
-   * In the Java implementation, this doesn't matter since
-   * the underlying encoding is already 16 bits, unless we attach
-   * an encoding to the StringValue object..
+   * This implementation does nothing, because quercus stores strings as
+   * 16 bit unicode.
    */
   public static Value convert_cyr_string(Value str,
                                          Value from,
@@ -375,7 +372,7 @@ public class QuercusStringModule extends AbstractQuercusModule {
       int sublen = ch1 - 0x20;
 
       while (sublen > 0) {
-        int code = 0;
+        int code;
 
         code = ((source.charAt(i++) - 0x20) & 0x3f) << 18;
         code += ((source.charAt(i++) - 0x20) & 0x3f) << 12;
@@ -442,18 +439,6 @@ public class QuercusStringModule extends AbstractQuercusModule {
 
     return new StringValue(result.toString());
   }
-
-  /**
-   * Converts an integer digit to a uuencoded char.
-   */
-  private static char toUUChar(int d)
-  {
-    if (d == 0)
-      return (char) 0x60;
-    else
-      return (char) (0x20 + (d & 0x3f));
-  }
-
   /**
    * Returns an array of information about the characters.
    */
@@ -568,16 +553,14 @@ public class QuercusStringModule extends AbstractQuercusModule {
   }
 
   /**
-   * explodes a string into an array
+   * Explodes a string into an array
    *
-   * @param env the quercus environment
    * @param separator the separator string
    * @param string the string to be exploded
    * @param limit the max number of elements
    * @return an array of exploded values
    */
-  public static Value explode(Env env,
-                              String separator,
+  public static Value explode(String separator,
                               String string,
                               @Optional("0x7fffffff") long limit)
     throws Throwable
@@ -604,7 +587,7 @@ public class QuercusStringModule extends AbstractQuercusModule {
       head = tail + separator.length();
     }
 
-    LongValue key = new LongValue(i++);
+    LongValue key = new LongValue(i + 1);
 
     StringValue chunk = new StringValue(string.substring(head));
 
@@ -613,12 +596,21 @@ public class QuercusStringModule extends AbstractQuercusModule {
     return array;
   }
 
+  /**
+   * Use printf style formatting to write a string to a file.
+   * @param fd the file to write to
+   * @param format the format string
+   * @param args the valujes to apply to the format string
+   */
   public static Value fprintf(Env env,
-                              Value fdV,
-                              Value formatV,
-                              Value []argsV)
+                              Value fd,
+                              String format,
+                              Value []args)
+    throws Throwable
   {
-    throw new UnsupportedOperationException();
+    String value = sprintf(format, args);
+
+    return QuercusFileModule.fwrite(env, fd, value, -1);
   }
 
   /**
@@ -629,8 +621,7 @@ public class QuercusStringModule extends AbstractQuercusModule {
    *
    * @return a string of imploded values
    */
-  public static Value implode(Env env,
-                              Value glueV,
+  public static Value implode(Value glueV,
                               Value piecesV)
     throws Throwable
   {
@@ -669,24 +660,22 @@ public class QuercusStringModule extends AbstractQuercusModule {
   /**
    * implodes an array into a string
    *
-   * @param env the calling environment
    * @param glueV the separator string
-   * @param arrayV the array to be imploded
+   * @param piecesV the array to be imploded
    *
    * @return a string of imploded values
    */
-  public static Value join(Env env,
-                           Value glueV,
+  public static Value join(Value glueV,
                            Value piecesV)
     throws Throwable
   {
-    return implode(env, glueV, piecesV);
+    return implode(glueV, piecesV);
   }
 
   /**
    * returns the md5 hash
    *
-   * @param string the string
+   * @param source the string
    * @param rawOutput if true, return the raw binary
    *
    * @return a string of imploded values
@@ -712,8 +701,8 @@ public class QuercusStringModule extends AbstractQuercusModule {
       int d1 = (digest[i] >> 4) & 0xf;
       int d2 = (digest[i] & 0xf);
 
-      sb.append(toHex(d1));
-      sb.append(toHex(d2));
+      sb.append(toHexChar(d1));
+      sb.append(toHexChar(d2));
     }
 
     return sb.toString();
@@ -722,7 +711,7 @@ public class QuercusStringModule extends AbstractQuercusModule {
   /**
    * returns the md5 hash
    *
-   * @param path the string
+   * @param source the string
    * @param rawOutput if true, return the raw binary
    *
    * @return a string of imploded values
@@ -763,19 +752,26 @@ public class QuercusStringModule extends AbstractQuercusModule {
       int d1 = (digest[i] >> 4) & 0xf;
       int d2 = (digest[i] & 0xf);
 
-      sb.append(toHex(d1));
-      sb.append(toHex(d2));
+      sb.append(toHexChar(d1));
+      sb.append(toHexChar(d2));
     }
 
     return new StringValue(sb.toString());
   }
 
-  private static char toHex(int d)
+  /**
+   * Returns a formatted money value.
+   *
+   * @param format the format
+   * @param value the value
+   *
+   * @return a string of formatted values
+   */
+  public static String money_format(Env env, String format, double value)
   {
-    if (d < 10)
-      return (char) (d + '0');
-    else
-      return (char) (d - 10 + 'a');
+    Locale monetaryLocale = env.getLocaleInfo().getMonetary();
+
+    return NumberFormat.getCurrencyInstance(monetaryLocale).format(value);
   }
 
   /**
@@ -786,7 +782,7 @@ public class QuercusStringModule extends AbstractQuercusModule {
    * @param pointValue the decimal point string
    * @param groupValue the thousands separator
    *
-   * @return a string of imploded values
+   * @return a string of the formatted number
    */
   public static String number_format(Env env,
                                      double value,
@@ -961,26 +957,6 @@ public class QuercusStringModule extends AbstractQuercusModule {
     }
   }
 
-  private static int hexToDigit(char ch)
-  {
-    if ('0' <= ch && ch <= '9')
-      return ch - '0';
-    else if ('a' <= ch && ch <= 'f')
-      return ch - 'a' + 10;
-    else if ('A' <= ch && ch <= 'F')
-      return ch - 'A' + 10;
-    else
-      return -1;
-  }
-
-  private static int octToDigit(char ch)
-  {
-    if ('0' <= ch && ch <= '7')
-      return ch - '0';
-    else
-      return -1;
-  }
-
   public static void addQueryValue(Env env, ArrayValue array,
                                    String key, String valueStr)
   {
@@ -1026,7 +1002,7 @@ public class QuercusStringModule extends AbstractQuercusModule {
    * Prints the string.
    *
    * @param env the quercus environment
-   * @param string the string to print
+   * @param value the string to print
    */
   public static long print(Env env, Value value)
     throws Throwable
@@ -1039,12 +1015,11 @@ public class QuercusStringModule extends AbstractQuercusModule {
   /**
    * Escapes meta characters.
    *
-   * @param env the quercus environment
-   * @param stringV the string to be quoted
+   * @param string the string to be quoted
    *
    * @return the quoted
    */
-  public static Value quotemeta(Env env, String string)
+  public static Value quotemeta(String string)
     throws Throwable
   {
     StringBuilder sb = new StringBuilder();
@@ -1082,30 +1057,30 @@ public class QuercusStringModule extends AbstractQuercusModule {
   /**
    * Removes leading whitespace.
    *
-   * @param strValue the string to be trimmed
-   * @param charset optional set of characters to trim
+   * @param string the string to be trimmed
+   * @param characters optional set of characters to trim
    * @return the trimmed string
    */
   public static String ltrim(Env env,
-                             String str,
-                             @Optional String charset)
+                             String string,
+                             @Optional String characters)
     throws Throwable
   {
     boolean []trim;
 
-    if (charset.equals(""))
+    if (characters.equals(""))
       trim = TRIM_WHITESPACE;
     else
-      trim = parseCharsetBitmap(charset);
+      trim = parseCharsetBitmap(characters);
 
-    for (int i = 0; i < str.length(); i++) {
-      char ch = str.charAt(i);
+    for (int i = 0; i < string.length(); i++) {
+      char ch = string.charAt(i);
 
       if (ch >= 256 || ! trim[ch]) {
         if (i == 0)
-          return str;
+          return string;
         else
-          return str.substring(i);
+          return string.substring(i);
       }
     }
 
@@ -1116,30 +1091,30 @@ public class QuercusStringModule extends AbstractQuercusModule {
    * Removes trailing whitespace.
    *
    * @param env the quercus environment
-   * @param strValue the string to be trimmed
-   * @param charset optional set of characters to trim
+   * @param string the string to be trimmed
+   * @param characters optional set of characters to trim
    * @return the trimmed string
    */
   public static String rtrim(Env env,
-                             String str,
-                             @Optional String charset)
+                             String string,
+                             @Optional String characters)
     throws Throwable
   {
     boolean []trim;
 
-    if (charset.equals(""))
+    if (characters.equals(""))
       trim = TRIM_WHITESPACE;
     else
-      trim = parseCharsetBitmap(charset);
+      trim = parseCharsetBitmap(characters);
 
-    for (int i = str.length() - 1; i >= 0; i--) {
-      char ch = str.charAt(i);
+    for (int i = string.length() - 1; i >= 0; i--) {
+      char ch = string.charAt(i);
 
       if (ch >= 256 || ! trim[ch]) {
-        if (i == str.length())
-          return str;
+        if (i == string.length())
+          return string;
         else
-          return str.substring(0, i + 1);
+          return string.substring(0, i + 1);
       }
     }
 
@@ -1188,9 +1163,9 @@ public class QuercusStringModule extends AbstractQuercusModule {
                                   int category,
                                   String localeName)
   {
-    String language = null;
-    String country = null;
-    String variant = null;
+    String language;
+    String country;
+    String variant;
 
     int p = localeName.indexOf('_');
     int p1 = localeName.indexOf('-');
@@ -1285,7 +1260,7 @@ public class QuercusStringModule extends AbstractQuercusModule {
   /**
    * returns the md5 hash
    *
-   * @param string the string
+   * @param source the string
    * @param rawOutput if true, return the raw binary
    *
    * @return a string of imploded values
@@ -1311,8 +1286,8 @@ public class QuercusStringModule extends AbstractQuercusModule {
       int d1 = (digest[i] >> 4) & 0xf;
       int d2 = (digest[i] & 0xf);
 
-      sb.append(toHex(d1));
-      sb.append(toHex(d2));
+      sb.append(toHexChar(d1));
+      sb.append(toHexChar(d2));
     }
 
     return sb.toString();
@@ -1321,7 +1296,7 @@ public class QuercusStringModule extends AbstractQuercusModule {
   /**
    * returns the md5 hash
    *
-   * @param path the string
+   * @param source the string
    * @param rawOutput if true, return the raw binary
    *
    * @return a string of imploded values
@@ -1358,14 +1333,12 @@ public class QuercusStringModule extends AbstractQuercusModule {
   /**
    * scans a string
    *
-   * @param env the quercus environment
    * @param format the format string
    * @param args the format arguments
    *
    * @return the formatted string
    */
-  public static Value sscanf(Env env,
-                             String string,
+  public static Value sscanf(String string,
                              String format,
                              @Optional Value []args)
   {
@@ -1484,7 +1457,7 @@ public class QuercusStringModule extends AbstractQuercusModule {
   public static int printf(Env env, String format, Value []args)
     throws Throwable
   {
-    String str = sprintf(env, format, args);
+    String str = sprintf(format, args);
 
     env.getOut().print(str);
 
@@ -1492,19 +1465,16 @@ public class QuercusStringModule extends AbstractQuercusModule {
   }
 
   /**
-   * print to a string with a formatter
+   * Print to a string with a formatter
    *
-   * @param env the quercus environment
    * @param format the format string
    * @param args the format arguments
    *
    * @return the formatted string
    */
-  public static String sprintf(Env env, String format, Value []args)
+  public static String sprintf(String format, Value []args)
     throws Throwable
   {
-    Object []values = new Object[args.length];
-
     ArrayList<PrintfSegment> segments = parsePrintfFormat(format);
 
     StringBuilder sb = new StringBuilder();
@@ -1665,6 +1635,7 @@ public class QuercusStringModule extends AbstractQuercusModule {
     return segments;
   }
 
+  // XXX: dead code?
   private static String cleanPrintfFormat(String format)
   {
     StringBuilder sb = new StringBuilder();
@@ -1752,6 +1723,7 @@ public class QuercusStringModule extends AbstractQuercusModule {
     return sb.toString();
   }
 
+  // XXX: dead code?
   private static void parsePrintfFormat(String format,
                                         Value []args,
                                         Object []values)
@@ -1793,26 +1765,25 @@ public class QuercusStringModule extends AbstractQuercusModule {
   /**
    * Removes leading and trailing whitespace.
    *
-   * @param env the quercus environment
-   * @param strValue the string to be trimmed
-   * @param charset optional set of characters to trim
+   * @param string the string to be trimmed
+   * @param characters optional set of characters to trim
    * @return the trimmed string
    */
-  public static Value trim(Env env, String str, @Optional String charset)
+  public static Value trim(String string, @Optional String characters)
     throws Throwable
   {
     boolean []trim;
 
-    if (charset == null || charset.equals(""))
+    if (characters == null || characters.equals(""))
       trim = TRIM_WHITESPACE;
     else
-      trim = parseCharsetBitmap(charset.toString());
+      trim = parseCharsetBitmap(characters.toString());
 
-    int len = str.length();
+    int len = string.length();
 
     int head = 0;
     for (; head < len; head++) {
-      char ch = str.charAt(head);
+      char ch = string.charAt(head);
 
       if (ch >= 256 || ! trim[ch]) {
         break;
@@ -1821,7 +1792,7 @@ public class QuercusStringModule extends AbstractQuercusModule {
 
     int tail = len - 1;
     for (; tail >= 0; tail--) {
-      char ch = str.charAt(tail);
+      char ch = string.charAt(tail);
 
       if (ch >= 256 || ! trim[ch]) {
         break;
@@ -1831,23 +1802,21 @@ public class QuercusStringModule extends AbstractQuercusModule {
     if (tail < head)
       return StringValue.EMPTY;
     else {
-      return new StringValue(str.substring(head, tail + 1));
+      return new StringValue(string.substring(head, tail + 1));
     }
   }
 
   // XXX: str_ireplace
 
   /**
-   * pads strings
+   * Pads strings
    *
-   * @param env the calling environment
-   * @param stringV string
-   * @param lengthV length
-   * @param padV padding string
-   * @param typeV padding type
+   * @param string string
+   * @param length length
+   * @param pad padding string
+   * @param type padding type
    */
-  public static String str_pad(Env env,
-                               String string,
+  public static String str_pad(String string,
                                int length,
                                @Optional("' '") String pad,
                                @Optional("STR_PAD_RIGHT") int type)
@@ -1897,11 +1866,10 @@ public class QuercusStringModule extends AbstractQuercusModule {
   /**
    * repeats a string
    *
-   * @param env the calling environment
-   * @param stringV string to repeat
-   * @param countV number of times to repeat
+   * @param string string to repeat
+   * @param count number of times to repeat
    */
-  public static Value str_repeat(Env env, String string, int count)
+  public static Value str_repeat(String string, int count)
     throws Throwable
   {
     StringBuilder sb = new StringBuilder();
@@ -1915,26 +1883,26 @@ public class QuercusStringModule extends AbstractQuercusModule {
   /**
    * replaces substrings.
    *
-   * @param searchV search string
-   * @param replaceV replacement string
-   * @param subjectV replacement
-   * @param countV return value
+   * @param search search string
+   * @param replace replacement string
+   * @param subject replacement
+   * @param count return value
    */
-  public static Value str_replace(Value searchV,
-                                  Value replaceV,
-                                  Value subjectV,
-                                  @Reference @Optional Value countV)
+  public static Value str_replace(Value search,
+                                  Value replace,
+                                  Value subject,
+                                  @Reference @Optional Value count)
     throws Throwable
   {
-    countV.set(LongValue.ZERO);
+    count.set(LongValue.ZERO);
 
-    if (subjectV instanceof ArrayValue) {
-      ArrayValue subjectArray = (ArrayValue) subjectV;
+    if (subject instanceof ArrayValue) {
+      ArrayValue subjectArray = (ArrayValue) subject;
       ArrayValue resultArray = new ArrayValueImpl();
 
       for (Value value : subjectArray.values()) {
-        Value result = str_replace_impl(searchV, replaceV,
-                                        value.toString(), countV);
+        Value result = str_replace_impl(search, replace,
+                                        value.toString(), count);
 
         resultArray.append(value);
       }
@@ -1942,33 +1910,33 @@ public class QuercusStringModule extends AbstractQuercusModule {
       return resultArray;
     }
     else {
-      return str_replace_impl(searchV, replaceV, subjectV.toString(), countV);
+      return str_replace_impl(search, replace, subject.toString(), count);
     }
   }
 
   /**
    * replaces substrings.
    *
-   * @param searchV search string
-   * @param replaceV replacement string
-   * @param subjectV replacement
-   * @param countV return value
+   * @param search search string
+   * @param replace replacement string
+   * @param subject replacement
+   * @param count return value
    */
-  private static Value str_replace_impl(Value searchV,
-                                        Value replaceV,
+  private static Value str_replace_impl(Value search,
+                                        Value replace,
                                         String subject,
-                                        Value countV)
+                                        Value count)
     throws Throwable
   {
-    if (! searchV.isArray()) {
-      subject = str_replace_impl(searchV.toString(),
-                                 replaceV.toString(),
+    if (! search.isArray()) {
+      subject = str_replace_impl(search.toString(),
+                                 replace.toString(),
                                  subject,
-                                 countV);
+                                 count);
     }
-    else if (replaceV instanceof ArrayValue) {
-      ArrayValue searchArray = (ArrayValue) searchV;
-      ArrayValue replaceArray = (ArrayValue) replaceV;
+    else if (replace instanceof ArrayValue) {
+      ArrayValue searchArray = (ArrayValue) search;
+      ArrayValue replaceArray = (ArrayValue) replace;
 
       Iterator<Value> searchIter = searchArray.values().iterator();
       Iterator<Value> replaceIter = replaceArray.values().iterator();
@@ -1983,11 +1951,11 @@ public class QuercusStringModule extends AbstractQuercusModule {
         subject = str_replace_impl(searchItem.toString(),
                                    replaceItem.toString(),
                                    subject,
-                                   countV);
+                                   count);
       }
     }
     else {
-      ArrayValue searchArray = (ArrayValue) searchV;
+      ArrayValue searchArray = (ArrayValue) search;
 
       Iterator<Value> searchIter = searchArray.values().iterator();
 
@@ -1995,9 +1963,9 @@ public class QuercusStringModule extends AbstractQuercusModule {
         Value searchItem = searchIter.next();
 
         subject = str_replace_impl(searchItem.toString(),
-                                   replaceV.toString(),
+                                   replace.toString(),
                                    subject,
-                                   countV);
+                                   count);
       }
     }
 
@@ -2023,7 +1991,6 @@ public class QuercusStringModule extends AbstractQuercusModule {
     int next;
 
     int searchLen = search.length();
-    int replaceLen = replace.length();
 
     StringBuilder result = new StringBuilder();
 
@@ -2054,10 +2021,9 @@ public class QuercusStringModule extends AbstractQuercusModule {
   /**
    * rot13 conversion
    *
-   * @param env the calling environment
-   * @param stringV string to convert
+   * @param string string to convert
    */
-  public static Value str_rot13(Env env, String string)
+  public static Value str_rot13(String string)
     throws Throwable
   {
     StringBuilder sb = new StringBuilder();
@@ -2107,12 +2073,10 @@ public class QuercusStringModule extends AbstractQuercusModule {
   /**
    * split into an array
    *
-   * @param env the calling environment
    * @param string string to split
    * @param chunk chunk size
    */
-  public static Value str_split(Env env,
-                                String string,
+  public static Value str_split(String string,
                                 @Optional("1") int chunk)
     throws Throwable
   {
@@ -2278,12 +2242,11 @@ public class QuercusStringModule extends AbstractQuercusModule {
    * Locale-based comparison
    * XXX: i18n
    *
-   * @param env
-   * @param aValue left value
-   * @param bValue right value
+   * @param a left value
+   * @param b right value
    * @return -1, 0, or 1
    */
-  public static Value strcoll(Env env, String a, String b)
+  public static Value strcoll(String a, String b)
     throws Throwable
   {
     int cmp = a.compareTo(b);
@@ -2307,8 +2270,7 @@ public class QuercusStringModule extends AbstractQuercusModule {
    *
    * @return the length of the match or FALSE if the offset or length are invalid
    */
-  public static Value strcspn(Env env,
-                              String string,
+  public static Value strcspn(String string,
                               String characters,
                               @Optional("0") int offset,
                               @Optional("-2147483648") int length)
@@ -2353,7 +2315,7 @@ public class QuercusStringModule extends AbstractQuercusModule {
   /**
    * Returns the length of a string.
    *
-   * @param v the argument value
+   * @param value the argument value
    */
   public static long strlen(Value value)
   {
@@ -2389,8 +2351,8 @@ public class QuercusStringModule extends AbstractQuercusModule {
   /**
    * Case-sensitive comparison
    *
-   * @param aValue left value
-   * @param bValue right value
+   * @param a left value
+   * @param b right value
    * @return -1, 0, or 1
    */
   public static int strncmp(String a, String b, int length)
@@ -2415,12 +2377,10 @@ public class QuercusStringModule extends AbstractQuercusModule {
   /**
    * Returns the position of a substring.
    *
-   * @param env the calling environment
    * @param haystack the string to search in
    * @param needleV the string to search for
    */
-  public static Value strpos(Env env,
-                             String haystack,
+  public static Value strpos(String haystack,
                              Value needleV,
                              @Optional Value offsetV)
     throws Throwable
@@ -2445,13 +2405,11 @@ public class QuercusStringModule extends AbstractQuercusModule {
   /**
    * Returns the position of a substring, testing case insensitive.
    *
-   * @param env the calling environment
    * @param haystack the full argument to check
    * @param needleV the substring argument to check
    * @param offsetV optional starting position
    */
-  public static Value stripos(Env env,
-                              String haystack,
+  public static Value stripos(String haystack,
                               Value needleV,
                               @Optional Value offsetV)
     throws Throwable
@@ -2620,8 +2578,7 @@ public class QuercusStringModule extends AbstractQuercusModule {
    * @param needleV the string to search for
    * @return the trailing match or FALSE
    */
-  public static Value stristr(Env env,
-                              String haystack,
+  public static Value stristr(String haystack,
                               Value needleV)
     throws Throwable
   {
@@ -2648,13 +2605,11 @@ public class QuercusStringModule extends AbstractQuercusModule {
   /**
    * Finds the last instance of a substring
    *
-   * @param env the calling environment
-   * @param haystackV the string to search in
+   * @param haystack the string to search in
    * @param needleV the string to search for
    * @return the trailing match or FALSE
    */
-  public static Value strrchr(Env env,
-                              String haystack,
+  public static Value strrchr(String haystack,
                               Value needleV)
     throws Throwable
   {
@@ -2680,7 +2635,7 @@ public class QuercusStringModule extends AbstractQuercusModule {
    *
    * @param env the calling environment
    */
-  public static Value strrev(Env env, String string)
+  public static Value strrev(String string)
     throws Throwable
   {
     StringBuilder sb = new StringBuilder();
@@ -2695,12 +2650,10 @@ public class QuercusStringModule extends AbstractQuercusModule {
   /**
    * Returns the position of a substring.
    *
-   * @param env the calling environment
-   * @param haystackV the string to search in
+   * @param haystack the string to search in
    * @param needleV the string to search for
    */
-  public static Value strrpos(Env env,
-                              String haystack,
+  public static Value strrpos(String haystack,
                               Value needleV,
                               @Optional Value offsetV)
     throws Throwable
@@ -2731,12 +2684,11 @@ public class QuercusStringModule extends AbstractQuercusModule {
    * Returns the position of a substring, testing case-insensitive.
    *
    * @param env the calling environment
-   * @param haystackV the full string to test
+   * @param haystack the full string to test
    * @param needleV the substring string to test
    * @param offsetV the optional offset to start searching
    */
-  public static Value strripos(Env env,
-                               String haystack,
+  public static Value strripos(String haystack,
                                Value needleV,
                                @Optional Value offsetV)
     throws Throwable
@@ -2923,7 +2875,7 @@ public class QuercusStringModule extends AbstractQuercusModule {
       Integer savedOffset = (Integer) env.getSpecialValue("caucho.strtok_offset");
 
       string = savedString == null ? "" : savedString;
-      offset = savedOffset == null ? 0 : savedOffset.intValue();
+      offset = savedOffset == null ? 0 : savedOffset;
       characters = string1;
     }
     else {
@@ -2972,8 +2924,7 @@ public class QuercusStringModule extends AbstractQuercusModule {
   /**
    * Converts to lower case.
    *
-   * @param env the calling environment
-   * @param stringV the input string
+   * @param string the input string
    */
   public static String strtolower(String string)
   {
@@ -2983,8 +2934,7 @@ public class QuercusStringModule extends AbstractQuercusModule {
   /**
    * Converts to upper case.
    *
-   * @param env the calling environment
-   * @param stringV the input string
+   * @param string the input string
    */
   public static String strtoupper(String string)
   {
@@ -2995,7 +2945,8 @@ public class QuercusStringModule extends AbstractQuercusModule {
    * Translates characters in a string to target values.
    *
    * @param string the source string
-   * @param map the character map
+   * @param fromV the from characters
+   * @param to the to character map
    */
   public static String strtr(Env env,
                              String string,
@@ -3090,8 +3041,8 @@ public class QuercusStringModule extends AbstractQuercusModule {
    * Returns a substring
    *
    * @param env the calling environment
-   * @param stringV the string
-   * @param startV the start offset
+   * @param string the string
+   * @param start the start offset
    * @param lenV the optional length
    */
   public static Value substr(Env env,
@@ -3223,10 +3174,9 @@ public class QuercusStringModule extends AbstractQuercusModule {
   /**
    * Uppercases the first character of each word
    *
-   * @param env the calling environment
-   * @param stringV the input string
+   * @param string the input string
    */
-  public static String ucwords(Env env, String string)
+  public static String ucwords(String string)
     throws Throwable
   {
     int strLen = string.length();
@@ -3258,7 +3208,8 @@ public class QuercusStringModule extends AbstractQuercusModule {
   /**
    * Formatted strings with array arguments
    *
-   * @param string the input string
+   * @param format the format string
+   * @param array the arguments to apply to the format string
    */
   public static int vprintf(Env env,
                             String format,
@@ -3282,10 +3233,10 @@ public class QuercusStringModule extends AbstractQuercusModule {
   /**
    * Formatted strings with array arguments
    *
-   * @param string the input string
+   * @param format the format string
+   * @param array the arguments to apply to the format string
    */
-  public static String vsprintf(Env env,
-                                String format,
+  public static String vsprintf(String format,
                                 @NotNull ArrayValue array)
     throws Throwable
   {
@@ -3300,7 +3251,7 @@ public class QuercusStringModule extends AbstractQuercusModule {
     else
       args = new Value[0];
 
-    return sprintf(env, format, args);
+    return sprintf(format, args);
   }
 
   /**
@@ -3362,6 +3313,45 @@ public class QuercusStringModule extends AbstractQuercusModule {
     return ch == ' ' || ch == '\t' || ch == '\n' || ch == '\r';
   }
 
+  /**
+   * Converts an integer digit to a uuencoded char.
+   */
+  private static char toUUChar(int d)
+  {
+    if (d == 0)
+      return (char) 0x60;
+    else
+      return (char) (0x20 + (d & 0x3f));
+  }
+
+  private static char toHexChar(int d)
+  {
+    if (d < 10)
+      return (char) (d + '0');
+    else
+      return (char) (d - 10 + 'a');
+  }
+
+  private static int hexToDigit(char ch)
+  {
+    if ('0' <= ch && ch <= '9')
+      return ch - '0';
+    else if ('a' <= ch && ch <= 'f')
+      return ch - 'a' + 10;
+    else if ('A' <= ch && ch <= 'F')
+      return ch - 'A' + 10;
+    else
+      return -1;
+  }
+
+  private static int octToDigit(char ch)
+  {
+    if ('0' <= ch && ch <= '7')
+      return ch - '0';
+    else
+      return -1;
+  }
+
   abstract static class PrintfSegment {
     abstract public void apply(StringBuilder sb, Value []args);
   }
@@ -3401,7 +3391,7 @@ public class QuercusStringModule extends AbstractQuercusModule {
       else
         value = 0;
 
-      sb.append(String.format(_format, new Long(value)));
+      sb.append(String.format(_format, value));
     }
   }
 
@@ -3424,7 +3414,7 @@ public class QuercusStringModule extends AbstractQuercusModule {
       else
         value = 0;
 
-      sb.append(String.format(_format, new Double(value)));
+      sb.append(String.format(_format, value));
     }
   }
 

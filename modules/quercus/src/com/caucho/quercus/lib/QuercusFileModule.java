@@ -1069,7 +1069,7 @@ public class QuercusFileModule extends AbstractQuercusModule {
   /**
    * Writes a string to the file.
    */
-  public Value fputs(Env env, Value fileV, String value, @Optional("-1") int length)
+  public static Value fputs(Env env, Value fileV, String value, @Optional("-1") int length)
     throws IOException
   {
     return fwrite(env, fileV, value, length);
@@ -1121,7 +1121,7 @@ public class QuercusFileModule extends AbstractQuercusModule {
     if (value == null)
       return BooleanValue.FALSE;
 
-    return QuercusStringModule.sscanf(env, value, format, args);
+    return QuercusStringModule.sscanf(value, format, args);
   }
 
   // XXX: fseek
@@ -1147,7 +1147,7 @@ public class QuercusFileModule extends AbstractQuercusModule {
   /**
    * Writes a string to the file.
    */
-  public Value fwrite(Env env, Value fileV, String value,  @Optional("-1") int length)
+  public static Value fwrite(Env env, Value fileV, String value,  @Optional("-1") int length)
     throws IOException
   {
     if (! (fileV instanceof FileValue)) {
