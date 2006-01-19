@@ -71,7 +71,7 @@ public class RequiredExpr extends Expr {
   public void generateExpr(PhpWriter out)
     throws IOException
   {
-    out.print("com.caucho.quercus.expr.RequiredExpr.REQUIRED");
+    out.print("RequiredExpr.REQUIRED");
   }
   
   public String toString()

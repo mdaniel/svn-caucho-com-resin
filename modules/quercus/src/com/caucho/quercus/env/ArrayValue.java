@@ -836,6 +836,26 @@ abstract public class ArrayValue extends Value {
       // XXX: need test
       return getRawValue().toValue();
     }
+
+    /**
+     * Argument used/declared as a ref.
+     */
+    public Var toRefVar()
+    {
+      // php/376a
+      
+      Value val = getRawValue();
+
+      if (val instanceof Var)
+	return (Var) val;
+      else {
+	Var var = new Var(val);
+
+	setRaw(var);
+
+	return var;
+      }
+    }
   
     /**
      * Converts to an argument value.

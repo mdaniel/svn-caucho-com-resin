@@ -130,16 +130,27 @@ public class QuercusImageModule extends AbstractQuercusModule {
 
     if (ch == 137) {
       // PNG - http://www.libpng.org/pub/png/spec/iso/index-object.html
-      if (is.read() != 80 ||
-	  is.read() != 78 ||
-	  is.read() != 71 ||
-	  is.read() != 13 ||
-	  is.read() != 10 ||
+      if (is.read() != 'P' ||
+	  is.read() != 'N' ||
+	  is.read() != 'G' ||
+	  is.read() != '\r' ||
+	  is.read() != '\n' ||
 	  is.read() != 26 ||
-	  is.read() != 10)
+	  is.read() != '\n')
 	return false;
 
       return parsePNGImageSize(is, info);
+    }
+    else if (ch == 'G') {
+      // GIF
+      if (is.read() != 'I' ||
+	  is.read() != 'F' ||
+	  is.read() != '8' ||
+	  is.read() != '7' ||
+	  is.read() != 'a')
+	return false;
+      
+      return parseGIFImageSize(is, info);
     }
     else
       return false;
@@ -186,6 +197,30 @@ public class QuercusImageModule extends AbstractQuercusModule {
     }
     
     return false;
+  }
+
+  /**
+   * Parses the image size from the PNG file.
+   */
+  private static boolean parseGIFImageSize(ReadStream is, ImageInfo info)
+    throws IOException
+  {
+    int length;
+
+    int width = (is.read() & 0xff) + 256 * (is.read() & 0xff);
+    int height = (is.read() & 0xff) + 256 * (is.read() & 0xff);
+
+    int flags = is.read() & 0xff;
+
+    info._width = width;
+    info._height = height;
+    info._type = IMAGETYPE_GIF;
+	
+    info._bits = flags & 0x7;
+
+    info._mime = "image/gif";
+
+    return true;
   }
 
   private static int pngCode(String code)

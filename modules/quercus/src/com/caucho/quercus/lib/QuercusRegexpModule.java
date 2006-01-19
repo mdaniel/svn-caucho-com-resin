@@ -678,9 +678,9 @@ public class QuercusRegexpModule extends AbstractQuercusModule {
   }
 
   /**
-   * Returns an array of all the values that matched the given pattern if the flag
-   * no flag is passed.  Otherwise it will return an array of all the values that did
-   * not match.
+   * Returns an array of all the values that matched the given pattern
+   * if the flag no flag is passed.  Otherwise it will return an array
+   * of all the values that did not match.
    *
    * @param patternString  the pattern
    * @param input  the array to check the pattern against
@@ -689,37 +689,37 @@ public class QuercusRegexpModule extends AbstractQuercusModule {
    * @return an array of either matching elements are non-matching elements
    */
   public static ArrayValue preg_grep (Env env,
-  																				String patternString,
-  																				ArrayValue input,
-  																				@Optional("0") int flag)
-  	throws Throwable
+				      String patternString,
+				      ArrayValue input,
+				      @Optional("0") int flag)
+    throws Throwable
   {
-  	Pattern pattern = compileRegexp(patternString);
+    Pattern pattern = compileRegexp(patternString);
   	
-  	Matcher matcher = null;
+    Matcher matcher = null;
   	
-  	ArrayValue matchArray = new ArrayValueImpl();
+    ArrayValue matchArray = new ArrayValueImpl();
   	
-  	for (Map.Entry<Value, Value> entry: input.entrySet()) {
-  		Value entryValue = entry.getValue();
-  		Value entryKey = entry.getKey();
+    for (Map.Entry<Value, Value> entry: input.entrySet()) {
+      Value entryValue = entry.getValue();
+      Value entryKey = entry.getKey();
   		
-  		matcher = pattern.matcher(entryValue.toString());
+      matcher = pattern.matcher(entryValue.toString());
   			
-  		boolean found = matcher.find();
+      boolean found = matcher.find();
   		
-  		if (!found && flag == 1)
-  			matchArray.append(entryKey, entryValue);
-  		else if ((found && flag == 0))
-  			matchArray.append(entryKey, entryValue);
-  	}
+      if (!found && flag == 1)
+	matchArray.append(entryKey, entryValue);
+      else if ((found && flag == 0))
+	matchArray.append(entryKey, entryValue);
+    }
   	
-  	return matchArray;
+    return matchArray;
   }
   
   /**
-   * Returns an array of strings produces from splitting the passed string around the 
-   * provided pattern.  The pattern is case insensitive.
+   * Returns an array of strings produces from splitting the passed
+   * string around the provided pattern.  The pattern is case insensitive.
    *
    * @param patternString  the pattern
    * @param string  the string to split
@@ -727,21 +727,21 @@ public class QuercusRegexpModule extends AbstractQuercusModule {
    * 
    * @return an array of strings split around the pattern string
    */
-  public static ArrayValue spliti (Env env,
-  																				String patternString,
-  																				String string,
-  																				@Optional("-1") long limit)
+  public static ArrayValue spliti(Env env,
+				  String patternString,
+				  String string,
+				  @Optional("-1") long limit)
   {
     patternString = cleanRegexp(patternString, false);
   	
-  	Pattern pattern = Pattern.compile(patternString, Pattern.CASE_INSENSITIVE);
+    Pattern pattern = Pattern.compile(patternString, Pattern.CASE_INSENSITIVE);
   	
-  	String groups[] = pattern.split(string, (int) limit);
+    String groups[] = pattern.split(string, (int) limit);
   	
-  	ArrayValue result = new ArrayValueImpl();
+    ArrayValue result = new ArrayValueImpl();
 
-  	for (int k = 0; k < groups.length; k++)
-  		result.append(new StringValue(groups[k]));
+    for (int k = 0; k < groups.length; k++)
+      result.append(new StringValue(groups[k]));
 
     return result;
   }

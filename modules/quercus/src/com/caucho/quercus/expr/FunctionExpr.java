@@ -265,6 +265,18 @@ public class FunctionExpr extends Expr {
    *
    * @param out the writer to the Java source code.
    */
+  public void generateValue(PhpWriter out)
+    throws IOException
+  {
+    generate(out);  // php/3c4k
+    out.print(".toValue()");
+  }
+
+  /**
+   * Generates code to evaluate the expression.
+   *
+   * @param out the writer to the Java source code.
+   */
   public void generateImpl(PhpWriter out, Class retType,
 			   boolean isRef, boolean isCopy)
     throws IOException

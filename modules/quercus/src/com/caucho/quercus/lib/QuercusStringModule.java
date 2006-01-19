@@ -646,8 +646,10 @@ public class QuercusStringModule extends AbstractQuercusModule {
       glue = piecesV.toString();
     }
     else {
-      // XXX: handled wrong?
-      throw new IllegalStateException(L.l("neither arg is an array"));
+      env.error(L.l("neither argument to implode is an array: {0}, {1}",
+		    glueV.getClass().getName(), piecesV.getClass().getName()));
+
+      return BooleanValue.FALSE;
     }
 
     StringBuilder sb = new StringBuilder();

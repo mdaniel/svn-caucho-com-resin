@@ -41,6 +41,7 @@ import com.caucho.util.L10N;
 import com.caucho.vfs.WriteStream;
 import com.caucho.vfs.TempStream;
 import com.caucho.vfs.TempBuffer;
+import com.caucho.vfs.Path;
 
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.BooleanValue;
@@ -245,6 +246,14 @@ public class PDF {
   }
 
   /**
+   * Sets generic informatino.
+   */
+  public boolean set_info(String key, String value)
+  {
+    return true;
+  }
+
+  /**
    * Returns the length of a string for a font.
    */
   public double stringwidth(String string, @NotNull PDFFont font, double size)
@@ -284,6 +293,17 @@ public class PDF {
     throws IOException
   {
     _stream.closepath();
+
+    return true;
+  }
+
+  /**
+   * Appends the current path to the clipping path.
+   */
+  public boolean clip()
+    throws IOException
+  {
+    _stream.clip();
 
     return true;
   }
@@ -641,6 +661,16 @@ public class PDF {
   }
 
   /**
+   * open image
+   */
+  public PDFImage open_image_file(String type, Path file,
+				  @Optional String stringParam,
+				  @Optional int intParam)
+  {
+    return new PDFImage(file);
+  }
+
+  /**
    * Skews the coordinates
    *
    * @param a degrees to skew the x axis
@@ -743,7 +773,7 @@ public class PDF {
     return true;
   }
 
-  public void end_page()
+  public boolean end_page()
     throws IOException
   {
     _stream.flush();
@@ -769,6 +799,14 @@ public class PDF {
     _page.write(_out, streamId);
 
     _out.writeStream(streamId, _stream);
+
+    return true;
+  }
+  
+  public boolean end_page_ext(String optlist)
+    throws IOException
+  {
+    return end_page();
   }
   
   public boolean end_document(Env env, @Optional String optList)
@@ -786,6 +824,12 @@ public class PDF {
     throws IOException
   {
     return end_document(env, "");
+  }
+
+  public boolean delete()
+    throws IOException
+  {
+    return true;
   }
 
   public String toString()
