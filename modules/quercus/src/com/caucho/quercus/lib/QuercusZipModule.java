@@ -112,11 +112,13 @@ public class QuercusZipModule extends AbstractQuercusModule {
     return new LongValue(zipEntry.zip_entry_filesize());
   }
 
-  public void zip_close(@NotNull ZipClass zipFile)
+  public boolean zip_close(@NotNull ZipClass zipFile)
     throws IOException
   {
     if (zipFile != null)
       zipFile.zip_close();
+
+    return true;
   }
 
   /**
