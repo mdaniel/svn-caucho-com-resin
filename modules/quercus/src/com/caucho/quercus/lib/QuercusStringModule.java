@@ -621,7 +621,8 @@ public class QuercusStringModule extends AbstractQuercusModule {
    *
    * @return a string of imploded values
    */
-  public static Value implode(Value glueV,
+  public static Value implode(Env env,
+                              Value glueV,
                               Value piecesV)
     throws Throwable
   {
@@ -665,11 +666,12 @@ public class QuercusStringModule extends AbstractQuercusModule {
    *
    * @return a string of imploded values
    */
-  public static Value join(Value glueV,
+  public static Value join(Env env,
+                           Value glueV,
                            Value piecesV)
     throws Throwable
   {
-    return implode(glueV, piecesV);
+    return implode(env, glueV, piecesV);
   }
 
   /**
@@ -1462,6 +1464,47 @@ public class QuercusStringModule extends AbstractQuercusModule {
     env.getOut().print(str);
 
     return str.length();
+  }
+
+  private static final char[] SOUNDEX_VALUES = "01230120022455012623010202".toCharArray();
+
+  public static Value soundex(String string)
+  {
+    int length = string.length();
+
+    if (length == 0)
+      return BooleanValue.FALSE;
+
+    StringBuilder result = new StringBuilder(4);
+
+    int count = 0;
+    char lastCode = 0;
+
+
+    for (int i = 0; i < length && count < 4; i++) {
+      char ch = Character.toUpperCase(string.charAt(i));
+
+      if ('A' <= ch  && ch <= 'Z') {
+        char code = SOUNDEX_VALUES[ch - 'A'];
+
+        if (count == 0) {
+          result.append(ch);
+          count++;
+        }
+        else if (code != '0' && code != lastCode) {
+          result.append(code);
+          count++;
+        }
+
+        lastCode = code;
+      }
+    }
+
+    for (; count < 4; count++) {
+      result.append('0');
+    }
+
+    return new StringValue(result.toString());
   }
 
   /**
