@@ -109,13 +109,8 @@ public class ZipEntryClass {
 
     if (numBytes == 0)
       return BooleanValue.FALSE;
-    else {
-     // System.out.println("buf: " + buf);
-     // System.out.println("numBytes: " + numBytes);
-     // System.out.println("buf.length: " + buf.length);
-     // System.out.println("length: " + length);
-      return new StringValue(buf.toString());
-    }
+    else
+      return new StringValue(new String(buf));
   }
 
   public long zip_entry_compressedsize()

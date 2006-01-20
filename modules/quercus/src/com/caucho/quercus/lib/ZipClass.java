@@ -30,6 +30,7 @@
 package com.caucho.quercus.lib;
 
 import java.util.logging.Logger;
+import java.util.logging.Level;
 
 import java.util.zip.ZipFile;
 import java.util.zip.ZipEntry;
@@ -55,9 +56,12 @@ public class ZipClass {
   private ZipInputStream _zipInputStream;
 
   public ZipClass(Path zipPath)
-    throws IOException
   {
-    _zipInputStream = new ZipInputStream(zipPath.openRead());
+    try {
+      _zipInputStream = new ZipInputStream(zipPath.openRead());
+    } catch (IOException ex) {
+      log.log(Level.FINE,  ex.toString(),  ex);
+    }
   }
 
   /**

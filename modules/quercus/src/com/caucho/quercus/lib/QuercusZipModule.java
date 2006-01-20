@@ -68,13 +68,12 @@ public class QuercusZipModule extends AbstractQuercusModule {
     if (path == null)
       return value;
 
-    try {
-      value = env.wrapJava(new ZipClass(path));
-    } catch (IOException ex) {
-      log.log(Level.FINE, ex.toString(), ex);
-    }
+    ZipClass zip = new ZipClass(path);
 
-    return value;
+    if (zip.getZipInputStream() == null)
+      return BooleanValue.FALSE;
+    else
+      return env.wrapJava(zip);
   }
 
   public Value zip_read(Env env,
