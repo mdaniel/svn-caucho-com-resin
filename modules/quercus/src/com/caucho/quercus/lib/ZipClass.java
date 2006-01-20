@@ -53,7 +53,6 @@ public class ZipClass {
   private static final L10N L = new L10N(ZipClass.class);
 
   private ZipInputStream _zipInputStream;
-  private ZipFile _zipFile;
 
   public ZipClass(Path zipPath)
     throws IOException
@@ -80,11 +79,11 @@ public class ZipClass {
   public void zip_close()
     throws IOException
   {
-    _zipFile.close();
+    _zipInputStream.close();
   }
 
-  public ZipFile getZipFile()
+  public ZipInputStream getZipInputStream()
   {
-    return _zipFile;
+    return _zipInputStream;
   }
 }
