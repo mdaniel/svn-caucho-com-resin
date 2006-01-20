@@ -137,10 +137,17 @@ public class QuercusZipModule extends AbstractQuercusModule {
     return entry.zip_entry_open(file);
   }
 
-  public void zip_entry_close(@NotNull ZipEntryClass entry)
+  /**
+   *
+   * @param entry
+   * @return always true.  This has no meaning.
+   */
+  public boolean zip_entry_close(@NotNull ZipEntryClass entry)
   {
     if (entry != null)
       entry.zip_entry_close();
+
+    return true;
   }
 
   /**

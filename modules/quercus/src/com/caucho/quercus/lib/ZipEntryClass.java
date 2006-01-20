@@ -80,9 +80,12 @@ public class ZipEntryClass {
   /**
    * stubbed out for now.  Not sure if zip_entry_close is
    * applicable given we are using ZipInputStream
+   *
+   * @return true.  has no meaning
    */
-  public void zip_entry_close()
+  public boolean zip_entry_close()
   {
+    return true;
   }
 
   /**
