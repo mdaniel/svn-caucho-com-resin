@@ -777,6 +777,361 @@ public class QuercusStringModule extends AbstractQuercusModule {
   }
 
   /**
+   * Returns the metaphone of a string.
+   * This implentation produces identical results to the php version, which does contain some bugs.
+   */
+  public static String metaphone(String string)
+  {
+    int length = string.length();
+    int index = 0;
+    char ch = 0;
+
+    // ignore everything up until first letter
+    for (; index < length; index++) {
+      ch = toUpperCase(string.charAt(index));
+
+      if ('A' <= ch && ch <= 'Z')
+        break;
+    }
+
+    if (index == length)
+      return "";
+
+    int lastIndex = length - 1;
+
+    StringBuilder result = new StringBuilder(length);
+
+    // special case first letter
+
+    char nextCh
+      = index < lastIndex
+      ? toUpperCase(string.charAt(index + 1))
+      : 0;
+
+    switch (ch) {
+      case 'A':
+        if (nextCh == 'E') {
+          result.append('E');
+          index += 2;
+        }
+        else {
+          result.append('A');
+          index += 1;
+        }
+
+        break;
+
+      case 'E':
+      case 'I':
+      case 'O':
+      case 'U':
+        result.append(ch);
+        index += 1;
+        break;
+
+      case 'G':
+      case 'K':
+      case 'P':
+        if (nextCh == 'N') {
+          result.append('N');
+          index += 2;
+        }
+
+        break;
+
+      case 'W':
+        if (nextCh == 'H' || nextCh == 'R') {
+          result.append(nextCh);
+          index += 2;
+        }
+        else {
+          switch (nextCh) {
+            case 'A':
+            case 'E':
+            case 'I':
+            case 'O':
+            case 'U':
+              result.append('W');
+              index += 2;
+              break;
+            default:
+              break;
+          }
+        }
+
+        break;
+
+      case 'X':
+        result.append('S');
+        index += 1;
+        break;
+
+      default:
+        break;
+    }
+
+    // the rest of the letters
+
+    char prevCh;
+
+    for (; index < length; index++) {
+
+      if (index > 0)
+        prevCh = toUpperCase(string.charAt(index - 1));
+      else
+        prevCh = 0;
+
+      ch = toUpperCase(string.charAt(index));
+
+      if (ch < 'A' || ch > 'Z')
+        continue;
+
+      if (ch == prevCh && ch != 'C')
+        continue;
+
+      if (index + 1 < length)
+        nextCh = toUpperCase(string.charAt(index + 1));
+      else
+        nextCh = 0;
+
+      char nextnextCh;
+
+      if (index + 2 < length)
+        nextnextCh = toUpperCase(string.charAt(index + 2));
+      else
+        nextnextCh = 0;
+
+
+      switch (ch) {
+        case 'B':
+          if (prevCh != 'M')
+            result.append('B');
+          break;
+
+        case 'C':
+            switch (nextCh) {
+              case 'E':
+              case 'I':
+              case 'Y':
+                // makesoft
+                if (nextCh == 'I' && nextnextCh == 'A') {
+                  result.append('X');
+                }
+                else if (prevCh == 'S') {
+                }
+                else {
+                  result.append('S');
+                }
+                break;
+              default:
+                if (nextCh == 'H') {
+                  result.append('X');
+                  index++;
+                }
+                else {
+                  result.append('K');
+                }
+                break;
+            }
+
+          break;
+
+        case 'D':
+          if (nextCh == 'G') {
+            switch (nextnextCh) {
+              case 'E':
+              case 'I':
+              case 'Y':
+                // makesoft
+                result.append('J');
+                index++;
+                break;
+              default:
+                break;
+            }
+          }
+          else
+            result.append('T');
+
+          break;
+
+        case 'G':
+          if (nextCh == 'H') {
+            boolean isSilent = false;
+
+            if (index - 3 >= 0) {
+              char prev3Ch = toUpperCase(string.charAt(index - 3));
+              switch (prev3Ch) {
+                // noghtof
+                case 'B':
+                case 'D':
+                case 'H':
+                  isSilent = true;
+                  break;
+                default:
+                  break;
+              }
+            }
+
+            if (!isSilent) {
+              if (index - 4 >= 0) {
+                char prev4Ch = toUpperCase(string.charAt(index - 4));
+
+                isSilent = (prev4Ch == 'H');
+              }
+            }
+
+            if (!isSilent) {
+              result.append('F');
+              index++;
+            }
+          }
+          else if (nextCh == 'N') {
+            char nextnextnextCh;
+
+            if (index + 3 < length)
+              nextnextnextCh = toUpperCase(string.charAt(index + 3));
+            else
+              nextnextnextCh = 0;
+
+            if (nextnextCh < 'A' || nextnextCh > 'Z') {
+            }
+            else if (nextnextCh == 'E' && nextnextnextCh == 'D') {
+            }
+            else
+              result.append('K');
+          }
+          else if (prevCh == 'G') {
+            result.append('K');
+          }
+          else {
+            switch (nextCh) {
+              case 'E':
+              case 'I':
+              case 'Y':
+                // makesoft
+                result.append('J');
+                break;
+              default:
+                result.append('K');
+                break;
+            }
+          }
+
+          break;
+
+        case 'H':
+        case 'W':
+        case 'Y':
+          switch (nextCh) {
+            case 'A':
+            case 'E':
+            case 'I':
+            case 'O':
+            case 'U':
+              // followed by a vowel
+
+              if (ch == 'H') {
+                switch (prevCh) {
+                  case 'C':
+                  case 'G':
+                  case 'P':
+                  case 'S':
+                  case 'T':
+                    // affecth
+                    break;
+                  default:
+                    result.append('H');
+                    break;
+                }
+              }
+              else
+                result.append(ch);
+
+              break;
+            default:
+              // not followed by a vowel
+              break;
+          }
+
+          break;
+
+        case 'K':
+          if (prevCh != 'C')
+            result.append('K');
+
+          break;
+
+        case 'P':
+          if (nextCh == 'H')
+            result.append('F');
+          else
+            result.append('P');
+
+          break;
+
+        case 'Q':
+          result.append('K');
+          break;
+
+        case 'S':
+          if (nextCh == 'I' && (nextnextCh == 'O' || nextnextCh == 'A')) {
+            result.append('X');
+          }
+          else if (nextCh == 'H') {
+            result.append('X');
+            index++;
+          }
+          else
+            result.append('S');
+
+          break;
+
+        case 'T':
+          if (nextCh == 'I' && (nextnextCh == 'O' || nextnextCh == 'A')) {
+            result.append('X');
+          }
+          else if (nextCh == 'H') {
+            result.append('0');
+            index++;
+          }
+          else
+            result.append('T');
+
+          break;
+
+        case 'V':
+          result.append('F');
+
+          break;
+
+        case 'X':
+          result.append('K');
+          result.append('S');
+          break;
+
+        case 'Z':
+          result.append('S');
+          break;
+
+        case 'F':
+        case 'J':
+        case 'L':
+        case 'M':
+        case 'N':
+        case 'R':
+          result.append(ch);
+          break;
+
+        default:
+          break;
+      }
+    }
+
+    return result.toString();
+  }
+
+  /**
    * Returns a formatted number.
    *
    * @param value the value
@@ -1482,7 +1837,7 @@ public class QuercusStringModule extends AbstractQuercusModule {
 
 
     for (int i = 0; i < length && count < 4; i++) {
-      char ch = Character.toUpperCase(string.charAt(i));
+      char ch = toUpperCase(string.charAt(i));
 
       if ('A' <= ch  && ch <= 'Z') {
         char code = SOUNDEX_VALUES[ch - 'A'];
@@ -3354,6 +3709,17 @@ public class QuercusStringModule extends AbstractQuercusModule {
   private static boolean isWhitespace(char ch)
   {
     return ch == ' ' || ch == '\t' || ch == '\n' || ch == '\r';
+  }
+
+  /**
+   * Returns the uppercase equivalent of the caharacter
+   */
+  private static char toUpperCase(char ch)
+  {
+    if (ch >= 'a' && ch <= 'z')
+      return (char) ('A' + (ch - 'a'));
+    else
+      return ch;
   }
 
   /**
