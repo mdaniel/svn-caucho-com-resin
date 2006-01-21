@@ -43,6 +43,7 @@ import com.caucho.quercus.env.BooleanValue;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.module.Optional;
+import com.caucho.quercus.module.NotNull;
 
 public class ZipEntryClass {
   private static final Logger log = Logger.getLogger(ZipEntryClass.class.getName());
@@ -71,7 +72,7 @@ public class ZipEntryClass {
    * @param zipClass
    * @return always returns true because we are using ZipInputStream
    */
-  public boolean zip_entry_open(ZipClass zipClass)
+  public boolean zip_entry_open(@NotNull ZipClass zipClass)
   {
     _zipClass = zipClass;
     return true;

@@ -80,10 +80,16 @@ public class ZipClass {
       return BooleanValue.FALSE;
   }
 
-  public void zip_close()
+  /**
+   *
+   * @return always true, just there so Quercus can see the function
+   * @throws IOException
+   */
+  public boolean zip_close()
     throws IOException
   {
     _zipInputStream.close();
+    return true;
   }
 
   public ZipInputStream getZipInputStream()
