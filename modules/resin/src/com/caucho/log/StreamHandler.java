@@ -172,7 +172,7 @@ public class StreamHandler extends Handler {
     if (_os == null || handler._os == null)
       return false;
     else
-      return _os.getSource() == handler._os.getSource();
+      return _os.getPath().equals(handler._os.getPath());
   }
 
   public String toString()

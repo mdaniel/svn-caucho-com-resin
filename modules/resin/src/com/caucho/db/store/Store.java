@@ -160,7 +160,8 @@ public class Store {
 
   private SoftReference<RandomAccessWrapper> _cachedRowFile;
   
-  private Lock _tableLock;
+  private Lock _rowLock;
+  
   private final Lifecycle _lifecycle = new Lifecycle();
 
   public Store(Database database, String name, Lock tableLock)
@@ -176,7 +177,7 @@ public class Store {
    * @param lock the table lock
    * @param path the path to the files
    */
-  public Store(Database database, String name, Lock tableLock, Path path)
+  public Store(Database database, String name, Lock rowLock, Path path)
   {
     _database = database;
     _blockManager = _database.getBlockManager();
@@ -186,10 +187,10 @@ public class Store {
 
     _id = _blockManager.allocateStoreId();
 
-    if (tableLock == null)
-      tableLock = new Lock(_id);
+    if (rowLock == null)
+      rowLock = new Lock(_id);
 
-    _tableLock = tableLock;
+    _rowLock = rowLock;
   }
 
   /**
@@ -248,7 +249,7 @@ public class Store {
    */
   public Lock getLock()
   {
-    return _tableLock;
+    return _rowLock;
   }
 
   /**

@@ -67,7 +67,7 @@ public class PDF {
   
   private HashMap<PDFFont,PDFFont> _fontMap
     = new HashMap<PDFFont,PDFFont>();
-
+  
   private HashMap<PDFProcSet,PDFProcSet> _procSetMap
     = new HashMap<PDFProcSet,PDFProcSet>();
 
@@ -668,7 +668,21 @@ public class PDF {
 				  @Optional int intParam)
     throws IOException
   {
-    return new PDFImage(file);
+    PDFImage img = new PDFImage(file);
+    
+    img.setId(_out.allocateId(1));
+
+    _out.addPendingObject(img);
+
+    return img;
+  }
+
+  public boolean fit_image(PDFImage img, double x, double y,
+			   @Optional String opt)
+  {
+    
+    
+    return true;
   }
 
   /**

@@ -23,6 +23,9 @@ r_access-log = element access-log {
 
   & r_log-Content
 
+  & (attribute auto-flush { r_boolean-Type }
+     | element auto-flush { r_boolean-Type })?
+
   & (attribute format { string }
      | element format { string })?
 

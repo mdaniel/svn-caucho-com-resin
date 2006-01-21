@@ -383,8 +383,14 @@ public class Resin implements ResinServerListener {
 
 	init();
       }
-      else
+      else {
 	_isClosed = true;
+
+	Socket socket = _pingSocket;
+	
+	if (socket != null)
+	  socket.setSoTimeout(1000);
+      }
     } catch (Throwable e) {
       _isClosed = true;
       log().log(Level.WARNING, e.toString(), e);
@@ -529,7 +535,10 @@ public class Resin implements ResinServerListener {
           _isClosed = true;
         }
         else {
-          Thread.sleep(10000);
+	  if (_isClosed && ! _isRestarting)
+	    Thread.sleep(1000);
+	  else
+	    Thread.sleep(10000);
         }
       } catch (SocketTimeoutException e) {
         socketExceptionCount = 0;

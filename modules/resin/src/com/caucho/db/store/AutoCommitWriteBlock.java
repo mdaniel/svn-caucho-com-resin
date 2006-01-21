@@ -84,6 +84,14 @@ public class AutoCommitWriteBlock extends WriteBlock {
     _block.commit();
   }
 
+  public void free()
+  {
+    super.free();
+
+    if (isFree())
+      destroy();
+  }
+
   /**
    * Closes the write block.
    */

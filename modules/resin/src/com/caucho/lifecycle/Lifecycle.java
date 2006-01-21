@@ -355,11 +355,19 @@ public final class Lifecycle implements LifecycleState {
   }
 
   /**
-   * Returns true if the state is stopping.
+   * Returns true if the state is closed
+   */
+  public boolean isDestroying()
+  {
+    return IS_DESTROYING <= _state;
+  }
+
+  /**
+   * Returns true if the state is closed
    */
   public boolean isDestroyed()
   {
-    return IS_DESTROYING <= _state;
+    return IS_DESTROYED <= _state;
   }
   
   /**

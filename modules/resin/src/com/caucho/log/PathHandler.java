@@ -119,11 +119,18 @@ public class PathHandler extends Handler {
    */
   public boolean equals(Object o)
   {
-    if (! (o instanceof PathHandler))
+    if (this == o)
+      return true;
+    else if (! (o instanceof PathHandler))
       return false;
 
     PathHandler handler = (PathHandler) o;
 
     return _path.equals(handler._path);
+  }
+
+  public String toString()
+  {
+    return "PathHandler[" + _path + "]";
   }
 }

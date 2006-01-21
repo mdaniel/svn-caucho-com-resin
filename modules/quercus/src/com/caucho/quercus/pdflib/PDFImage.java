@@ -37,17 +37,28 @@ import java.util.logging.Level;
 import com.caucho.util.L10N;
 
 import com.caucho.vfs.ReadStream;
+import com.caucho.vfs.WriteStream;
+import com.caucho.vfs.TempStream;
+import com.caucho.vfs.TempBuffer;
 import com.caucho.vfs.Path;
 
 /**
  * deals with an image
  */
-public class PDFImage {
+public class PDFImage extends PDFObject {
   private static final Logger log
     = Logger.getLogger(PDFImage.class.getName());
   private static final L10N L = new L10N(PDFImage.class);
 
   private ReadStream _is;
+
+  private int _id;
+
+  private String _type;
+  private int _width;
+  private int _height;
+  private int _bits;
+  private TempBuffer _jpegHead;
   
   public PDFImage(Path path)
     throws IOException
@@ -59,6 +70,22 @@ public class PDFImage {
     } finally {
       _is.close();
     }
+  }
+  
+  /**
+   * Returns the object id.
+   */
+  public int getId()
+  {
+    return _id;
+  }
+  
+  /**
+   * Sets the object id.
+   */
+  public void setId(int id)
+  {
+    _id = id;
   }
 
   private boolean parseImage()
@@ -75,6 +102,28 @@ public class PDFImage {
 	return false;
 
       return parseGIF();
+    }
+    else if (ch == 0xff) {
+      if (_is.read() != 0xd8)
+	return false;
+
+      TempStream ts = new TempStream();
+
+      WriteStream ws = new WriteStream(ts);
+      ws.write(0xff);
+      ws.write(0xd8);
+      _is.writeToStream(ws);
+      ws.close();
+
+      _jpegHead = ts.getHead();
+      _is.close();
+
+      _is = new ReadStream();
+      ts.openRead(_is);
+
+      parseJPEG();
+
+      return true;
     }
 
     return false;
@@ -167,6 +216,59 @@ public class PDFImage {
       }
     }
     */
+  }
+
+  private boolean parseJPEG()
+    throws IOException
+  {
+    if (_is.read() != 0xff ||
+	_is.read() != 0xd8)
+      return false;
+
+    int ch;
+
+    while ((ch = _is.read()) == 0xff) {
+      ch = _is.read();
+
+      if (ch == 0xff) {
+	_is.unread();
+      }
+      else if (0xd0 <= ch && ch <= 0xd9) {
+	// rst
+      }
+      else if (0x01 == ch) {
+	// rst
+      }
+      else if (ch == 0xc0) {
+	int len = 256 * _is.read() + _is.read();
+
+	_bits = _is.read();
+	_height = 256 * _is.read() + _is.read();
+	_width = 256 * _is.read() + _is.read();
+	_type = "jpeg";
+
+	return true;
+      }
+      else {
+	int len = 256 * _is.read() + _is.read();
+
+	_is.skip(len - 2);
+      }
+    }
+    
+    return false;
+  }
+
+  /**
+   * Writes the object to the stream
+   */
+  public void writeObject(PDFWriter out)
+    throws IOException
+  {
+    out.println("<< /Type /Image");
+    out.println("   /Subtype /Type1");
+    out.println("   /Name /I" + _id);
+    out.println(">>");
   }
 
   static class GIFDecode {

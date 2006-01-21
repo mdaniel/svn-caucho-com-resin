@@ -521,7 +521,7 @@ public class ResinServer
    */
   public boolean isClosing()
   {
-    return _lifecycle.isDestroyed();
+    return _lifecycle.isDestroying();
   }
 
   /**

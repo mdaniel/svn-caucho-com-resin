@@ -62,26 +62,23 @@ public class Transaction extends StoreTransaction {
 
   private static long AUTO_COMMIT_TIMEOUT = 30000L;
 
-  private static final FreeList<Transaction> _freeList =
-    new FreeList<Transaction>(32);
-
   private boolean _isAutoCommit = true;
   private ConnectionImpl _conn;
   
-  private ArrayList<Lock> _readLocks = new ArrayList<Lock>();
-  private ArrayList<Lock> _reqWriteLocks = new ArrayList<Lock>();
-  private ArrayList<Lock> _writeLocks = new ArrayList<Lock>();
+  private ArrayList<Lock> _readLocks;
+  private ArrayList<Lock> _upgradeLocks;
+  private ArrayList<Lock> _writeLocks;
   
   private LongKeyHashMap<WriteBlock> _writeBlocks;
 
   // inodes that need to be deleted on a commit
-  private ArrayList<Inode> _deleteInodes = new ArrayList<Inode>();
+  private ArrayList<Inode> _deleteInodes;
   
   // inodes that need to be deleted on a rollback
-  private ArrayList<Inode> _addInodes = new ArrayList<Inode>();
+  private ArrayList<Inode> _addInodes;
   
   // blocks that need deallocating on a commit
-  private ArrayList<Block> _deallocateBlocks = new ArrayList<Block>();
+  private ArrayList<Block> _deallocateBlocks;
 
   private boolean _isRollbackOnly;
 
@@ -93,11 +90,7 @@ public class Transaction extends StoreTransaction {
 
   public static Transaction create(ConnectionImpl conn)
   {
-    Transaction xa = _freeList.allocate();
-
-    if (xa == null) {
-      xa = new Transaction();
-    }
+    Transaction xa = new Transaction();
     
     xa.init(conn);
 
@@ -106,10 +99,7 @@ public class Transaction extends StoreTransaction {
 
   public static Transaction create()
   {
-    Transaction xa = _freeList.allocate();
-
-    if (xa == null)
-      xa = new Transaction();
+    Transaction xa = new Transaction();
 
     return xa;
   }
@@ -131,10 +121,12 @@ public class Transaction extends StoreTransaction {
   /**
    * Acquires a new read lock.
    */
+  /*
   public void addReadLock(Lock lock)
   {
     _readLocks.add(lock);
   }
+  */
   
   /**
    * Acquires a new read lock.
@@ -169,7 +161,15 @@ public class Transaction extends StoreTransaction {
     if (_isRollbackOnly)
       throw new SQLException(L.l("can't get lock with rollback transaction"));
 
+    if (_isAutoCommit) {
+      lock.lockRead(this, _timeout);
+      return;
+    }
+
     try {
+      if (_readLocks == null)
+	_readLocks = new ArrayList<Lock>();
+      
       if (! _readLocks.contains(lock)) {
 	lock.lockRead(this, _timeout);
 	_readLocks.add(lock);
@@ -191,21 +191,31 @@ public class Transaction extends StoreTransaction {
     if (_isRollbackOnly)
       throw new SQLException(L.l("can't get lock with rollback transaction"));
 
+    if (_isAutoCommit) {
+      lock.lockReadAndWrite(this, _timeout);
+      return;
+    }
+
     try {
+      if (_readLocks == null)
+	_readLocks = new ArrayList<Lock>();
+      if (_upgradeLocks == null)
+	_upgradeLocks = new ArrayList<Lock>();
+      
       // the actual locking happens at the commit
       // this should probably be an upgrade lock
       
-      if (_reqWriteLocks.contains(lock)) {
+      if (_upgradeLocks.contains(lock)) {
 	return;
       }
       else if (_readLocks.contains(lock)) {
 	lock.lockUpgrade(this, _timeout);
-	_reqWriteLocks.add(lock);
+	_upgradeLocks.add(lock);
       }
       else {
 	lock.lockReadAndUpgrade(this, _timeout);
 	_readLocks.add(lock);
-	_reqWriteLocks.add(lock);
+	_upgradeLocks.add(lock);
       }
     } catch (SQLException e) {
       setRollbackOnly();
@@ -215,50 +225,28 @@ public class Transaction extends StoreTransaction {
   }
   
   /**
-   * Acquires a new write lock.
+   * If auto-commit, commit the read
    */
-  public void lockAutoCommitRead(Lock lock)
+  public void autoCommitRead(Lock lock)
     throws SQLException
   {
-    lock.lockRead(this, _timeout);
+    if (_isAutoCommit)
+      lock.unlockRead();
   }
   
   /**
-   * Acquires a new write lock.
+   * If auto-commit, commit the write
    */
-  public void unlockAutoCommitRead(Lock lock)
+  public void autoCommitWrite(Lock lock)
     throws SQLException
   {
-    lock.unlockRead();
-  }
-  
-  /**
-   * Acquires a new write lock.
-   */
-  public void lockAutoCommitWrite(Lock lock)
-    throws SQLException
-  {
-    lock.lockReadAndUpgrade(this, _timeout);
-    try {
-      lock.lockWrite(this, _timeout);
-    } catch (SQLException e) {
-      lock.unlockUpgrade();
-
-      throw e;
+    if (_isAutoCommit) {
+      try {
+	commit();
+      } finally {
+	lock.unlockWrite();
+      }
     }
-  }
-  
-  /**
-   * Acquires a new write lock.
-   */
-  public void commitAutoCommitWrite(Lock lock)
-    throws SQLException
-  {
-    lock.unlockWrite();
-    lock.unlockUpgrade();
-    lock.unlockRead();
-    
-    commit();
   }
 
   /**
@@ -317,9 +305,9 @@ public class Transaction extends StoreTransaction {
     else {
       // XXX: locking
       writeBlock = new XAWriteBlock(block);
+      setBlock(writeBlock);
     }
 
-    setBlock(writeBlock);
 
     return writeBlock;
   }
@@ -345,7 +333,7 @@ public class Transaction extends StoreTransaction {
       
       writeBlock = new AutoCommitWriteBlock(block);
 
-      setBlock(writeBlock);
+      // setBlock(writeBlock);
 
       return writeBlock;
     }
@@ -363,10 +351,11 @@ public class Transaction extends StoreTransaction {
 
     if (isAutoCommit())
       writeBlock = new AutoCommitWriteBlock(block);
-    else
+    else {
       writeBlock = new XAWriteBlock(block);
 
-    setBlock(writeBlock);
+      setBlock(writeBlock);
+    }
 
     return writeBlock;
   }
@@ -379,8 +368,12 @@ public class Transaction extends StoreTransaction {
   {
     if (isAutoCommit())
       block.getStore().freeBlock(block.getBlockId());
-    else
+    else {
+      if (_deallocateBlocks == null)
+	_deallocateBlocks = new ArrayList<Block>();
+      
       _deallocateBlocks.add(block);
+    }
   }
 
   /**
@@ -412,6 +405,9 @@ public class Transaction extends StoreTransaction {
    */
   public void addDeleteInode(Inode inode)
   {
+    if (_deleteInodes == null)
+      _deleteInodes = new ArrayList<Inode>();
+    
     _deleteInodes.add(inode);
   }
 
@@ -420,6 +416,9 @@ public class Transaction extends StoreTransaction {
    */
   public void addAddInode(Inode inode)
   {
+    if (_addInodes == null)
+      _addInodes = new ArrayList<Inode>();
+    
     _addInodes.add(inode);
   }
 
@@ -457,20 +456,22 @@ public class Transaction extends StoreTransaction {
     try {
       LongKeyHashMap<WriteBlock> writeBlocks = _writeBlocks;
 
-      if (_reqWriteLocks != null) {
-	for (int i = 0; i < _reqWriteLocks.size(); i++) {
-	  Lock lock = _reqWriteLocks.get(i);
+      if (_upgradeLocks != null) {
+	for (int i = 0; i < _upgradeLocks.size(); i++) {
+	  Lock lock = _upgradeLocks.get(i);
 	  lock.lockWrite(this, _timeout);
 
 	  _writeLocks.add(lock);
 	}
       }
 
-      for (int i = 0; i < _deleteInodes.size(); i++) {
-	Inode inode = _deleteInodes.get(i);
+      if (_deleteInodes != null) {
+	for (int i = 0; i < _deleteInodes.size(); i++) {
+	  Inode inode = _deleteInodes.get(i);
 
-	// XXX: should be allocating based on auto-commit
-	inode.remove();
+	  // XXX: should be allocating based on auto-commit
+	  inode.remove();
+	}
       }
 
       if (writeBlocks != null) {
@@ -487,13 +488,15 @@ public class Transaction extends StoreTransaction {
 	}
       }
 
-      for (int i = 0; i < _deallocateBlocks.size(); i++) {
-	Block block = _deallocateBlocks.get(i);
+      if (_deallocateBlocks != null) {
+	for (int i = 0; i < _deallocateBlocks.size(); i++) {
+	  Block block = _deallocateBlocks.get(i);
 
-	try {
-	  block.getStore().freeBlock(block.getBlockId());
-	} catch (IOException e) {
-	  throw new SQLExceptionWrapper(e);
+	  try {
+	    block.getStore().freeBlock(block.getBlockId());
+	  } catch (IOException e) {
+	    throw new SQLExceptionWrapper(e);
+	  }
 	}
       }
     } finally {
@@ -528,9 +531,9 @@ public class Transaction extends StoreTransaction {
       _writeLocks.clear();
     }
     
-    if (_reqWriteLocks != null) {
-      for (int i = 0; i < _reqWriteLocks.size(); i++) {
-	Lock lock = _reqWriteLocks.get(i);
+    if (_upgradeLocks != null) {
+      for (int i = 0; i < _upgradeLocks.size(); i++) {
+	Lock lock = _upgradeLocks.get(i);
 
 	try {
 	  // if (! _writeLocks.contains(lock))
@@ -540,7 +543,7 @@ public class Transaction extends StoreTransaction {
 	}
       }
 
-      _reqWriteLocks.clear();
+      _upgradeLocks.clear();
     }
     
     if (_readLocks != null) {
@@ -556,22 +559,10 @@ public class Transaction extends StoreTransaction {
 
       _readLocks.clear();
     }
-
-    _deleteInodes.clear();
-    _addInodes.clear();
   }
 
   void close()
   {
-    if (_readLocks != null)
-      _readLocks.clear();
-    
-    if (_reqWriteLocks != null)
-      _reqWriteLocks.clear();
-    
-    if (_writeLocks != null)
-      _writeLocks.clear();
-
     LongKeyHashMap<WriteBlock> writeBlocks = _writeBlocks;
     _writeBlocks = null;
 
@@ -586,12 +577,5 @@ public class Transaction extends StoreTransaction {
       
       // writeBlocks.clear();
     }
-
-    _deallocateBlocks.clear();
-    _deleteInodes.clear();
-    _addInodes.clear();
-    _isRollbackOnly = false;
-
-    _freeList.free(this);
   }
 }

@@ -154,10 +154,8 @@ public class SelectQuery extends Query {
     int lockIndex = 0;
 
     try {
-      if (xa.isAutoCommit()) {
-	for (lockIndex = 0; lockIndex < fromItems.length; lockIndex++) {
-	  xa.lockAutoCommitRead(fromItems[lockIndex].getTable().getLock());
-	}
+      for (; lockIndex < fromItems.length; lockIndex++) {
+	xa.lockRead(fromItems[lockIndex].getTable().getLock());
       }
 
       rows = result.initRows(fromItems);
@@ -174,14 +172,14 @@ public class SelectQuery extends Query {
     } catch (IOException e) {
       throw new SQLExceptionWrapper(e);
     } finally {
+      // autoCommitRead must be before freeRows in case freeRows
+      // throws an exception
+      for (int i = 0; i < lockIndex; i++) {
+	xa.autoCommitRead(fromItems[i].getTable().getLock());
+      }
+      
       if (rows != null)
 	freeRows(rows, rows.length);
-
-      if (xa.isAutoCommit()) {
-	for (int i = 0; i < lockIndex; i++) {
-	  xa.unlockAutoCommitRead(fromItems[i].getTable().getLock());
-	}
-      }
     }
   }
 
@@ -194,8 +192,6 @@ public class SelectQuery extends Query {
 		       Transaction xa)
     throws SQLException, IOException
   {
-    // xa.lockRead(getDatabase().getDatabaseLock());
-
     FromItem []fromItems = getFromItems();
     int rowLength = fromItems.length;
 

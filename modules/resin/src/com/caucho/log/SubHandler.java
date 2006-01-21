@@ -116,7 +116,19 @@ public class SubHandler extends Handler {
 
     if (_handler == null)
       return false;
-    else
-      return o.equals(_handler);
+    else if (o.equals(_handler))
+      return true;
+
+    if (! (o instanceof SubHandler))
+      return false;
+
+    SubHandler subHandler = (SubHandler) o;
+
+    return _handler.equals(subHandler._handler);
+  }
+
+  public String toString()
+  {
+    return "SubHandler[" + _handler + "]";
   }
 }

@@ -78,10 +78,7 @@ class DeleteQuery extends Query {
     context.init(xa, rows);
 
     // must be outside finally so failed locks don't get unlocked
-    if (xa.isAutoCommit())
-      xa.lockAutoCommitWrite(_table.getLock());
-    else
-      xa.lockWrite(_table.getLock());
+    xa.lockWrite(_table.getLock());
     
     try {
       if (! start(rows, rows.length, context, xa))
@@ -92,10 +89,11 @@ class DeleteQuery extends Query {
 	context.setRowUpdateCount(++count);
       } while (nextTuple(rows, rows.length, context, xa));
     } finally {
-      freeRows(rows, rows.length);
+      // autoCommitWrite must be before freeRows in case freeRows
+      // throws an exception
+      xa.autoCommitWrite(_table.getLock());
       
-      if (xa.isAutoCommit())
-	xa.commitAutoCommitWrite(_table.getLock());
+      freeRows(rows, rows.length);
     }
   }
 

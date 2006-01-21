@@ -111,24 +111,17 @@ class InsertQuery extends Query {
   public void execute(QueryContext queryContext, Transaction xa)
     throws SQLException
   {
-    boolean isOkay = false;
-    
     // must be outside finally so failed locks don't get unlocked
-    if (xa.isAutoCommit())
-      xa.lockAutoCommitWrite(_table.getLock());
-    else
-      xa.lockWrite(_table.getLock());
+    xa.lockWrite(_table.getLock());
     
     try {
       _table.insert(queryContext, xa, _columns, _values);
 
       queryContext.setRowUpdateCount(1);
-      isOkay = true;
     } catch (java.io.IOException e) {
       throw new SQLExceptionWrapper(e);
     } finally {
-      if (xa.isAutoCommit())
-	xa.commitAutoCommitWrite(_table.getLock());
+      xa.autoCommitWrite(_table.getLock());
     }
   }
 

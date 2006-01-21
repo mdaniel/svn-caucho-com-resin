@@ -102,17 +102,11 @@ class UpdateQuery extends Query {
     context.init(xa, rows);
 
     // must be outside finally so failed locks don't get unlocked
-    if (xa.isAutoCommit())
-      xa.lockAutoCommitWrite(_table.getLock());
-    else
-      xa.lockWrite(_table.getLock());
+    xa.lockWrite(_table.getLock());
     
-    boolean isOkay = false;
     try {
-      if (! start(rows, rows.length, context, xa)) {
-	isOkay = true;
+      if (! start(rows, rows.length, context, xa))
 	return;
-      }
     
       do {
 	for (int i = 0; i < setItems.length; i++) {
@@ -126,13 +120,12 @@ class UpdateQuery extends Query {
 
 	context.setRowUpdateCount(++count);
       } while (nextTuple(rows, rows.length, context, xa));
-
-      isOkay = true;
     } finally {
-      freeRows(rows, rows.length);
+      // autoCommitWrite must be before freeRows in case freeRows
+      // throws an exception
+      xa.autoCommitWrite(_table.getLock());
       
-      if (xa.isAutoCommit())
-	xa.commitAutoCommitWrite(_table.getLock());
+      freeRows(rows, rows.length);
     }
   }
 

@@ -112,6 +112,9 @@ public class QuercusImageModule extends AbstractQuercusModule {
     if (info._bits >= 0)
       imageArray.put(new StringValue("bits"), new LongValue(info._bits));
 
+    if (info._type == IMAGETYPE_JPEG)
+      imageArray.put("channels", 3);
+
     if (info._mime != null)
       imageArray.put("mime", info._mime);
     
@@ -151,6 +154,13 @@ public class QuercusImageModule extends AbstractQuercusModule {
 	return false;
       
       return parseGIFImageSize(is, info);
+    }
+    else if (ch == 0xff) {
+      // JPEG
+      if (is.read() != 0xd8)
+	return false;
+
+      return parseJPEGImageSize(is, info);
     }
     else
       return false;
@@ -221,6 +231,54 @@ public class QuercusImageModule extends AbstractQuercusModule {
     info._mime = "image/gif";
 
     return true;
+  }
+
+  /**
+   * Parses the image size from the PNG file.
+   */
+  private static boolean parseJPEGImageSize(ReadStream is, ImageInfo info)
+    throws IOException
+  {
+    int ch;
+
+    while ((ch = is.read()) == 0xff) {
+      ch = is.read();
+
+      if (ch == 0xff) {
+	is.unread();
+      }
+      else if (0xd0 <= ch && ch <= 0xd9) {
+	// rst
+      }
+      else if (0x01 == ch) {
+	// rst
+      }
+      else if (ch == 0xc0) {
+	int len = 256 * is.read() + is.read();
+
+	int bits = is.read();
+	int height = 256 * is.read() + is.read();
+	int width = 256 * is.read() + is.read();
+
+	info._width = width;
+	info._height = height;
+	info._type = IMAGETYPE_JPEG;
+	
+	info._bits = bits;
+
+	info._mime = "image/jpeg";
+
+	return true;
+      }
+      else {
+	int len = 256 * is.read() + is.read();
+
+	is.skip(len - 2);
+      }
+    }
+
+    
+    return false;
   }
 
   private static int pngCode(String code)

@@ -100,6 +100,8 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener {
 
   private Object _bufferLock = new Object();
 
+  private boolean _isAutoFlush;
+
   private final CharBuffer _cb = new CharBuffer();
   
   private final CharBuffer _timeCharBuffer = new CharBuffer();
@@ -178,6 +180,14 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener {
   public void setRolloverCheckTime(long period)
   {
     _logWriter.setRolloverCheckPeriod(period);
+  }
+
+  /**
+   * Sets the auto-flush attribute.
+   */
+  public void setAutoFlush(boolean isAutoFlush)
+  {
+    _isAutoFlush =  isAutoFlush;
   }
   
   /**
@@ -302,6 +312,9 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener {
       
       _length = log(request, response, _buffer, _length, BUFFER_SIZE);
     }
+
+    if (_isAutoFlush)
+      flush();
   }
   
   /**

@@ -78,6 +78,14 @@ public class TimestampFilter extends StreamImpl {
     _stream = stream;
   }
 
+  public Path getPath()
+  {
+    if (_stream != null)
+      return _stream.getPath();
+    else
+      return super.getPath();
+  }
+
   /**
    * Returns true if the stream can write.
    */
