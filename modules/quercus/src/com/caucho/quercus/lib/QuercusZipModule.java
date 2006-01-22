@@ -63,10 +63,8 @@ public class QuercusZipModule extends AbstractQuercusModule {
                         @NotNull Path path)
     throws IOException
   {
-    Value value = BooleanValue.FALSE;
-
     if (path == null)
-      return value;
+      return BooleanValue.FALSE;
 
     ZipClass zip = new ZipClass(path);
 
