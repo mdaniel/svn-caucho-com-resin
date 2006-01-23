@@ -43,7 +43,7 @@ import com.caucho.vfs.TempBuffer;
 /**
  * pdf object oriented API facade
  */
-public class PDFProcSet extends PDFObject {
+public class PDFProcSet {
 
   private int _id;
   private String _set = "";
@@ -76,13 +76,7 @@ public class PDFProcSet extends PDFObject {
   String getResource()
     throws IOException
   {
-    return ("/ProcSet " + _id + " 0 R");
-  }
-
-  public void writeObject(PDFWriter out)
-    throws IOException
-  {
-    out.println("[" + _set + "]");
+    return ("/ProcSet [" + _set + "]");
   }
 
   public int hashCode()

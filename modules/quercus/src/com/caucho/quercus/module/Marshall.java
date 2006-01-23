@@ -1006,6 +1006,12 @@ abstract public class Marshall {
 	return env.getPwd().lookup(expr.evalString(env));
       }
     
+      public Object marshall(Env env, Value value, Class expectedClass)
+	throws Throwable
+      {
+	return env.getPwd().lookup(value.toString());
+      }
+    
       public Value unmarshall(Env env, Object value)
 	throws Throwable
       {

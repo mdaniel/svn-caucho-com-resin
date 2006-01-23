@@ -87,6 +87,12 @@ public class ClusterGroup {
 
     if (port.getIndex() < 0)
       port.setIndex(getCluster().getServerList().length + 1);
+    else if (port.getIndex() != getCluster().getServerList().length) {
+      log.config(L.l("srun index '{0}' for port 'id={1}' does not match expected cluster index '{2}'",
+		     port.getIndex(),
+		     port.getServerId(),
+		     getCluster().getServerList().length));
+    }
     
     server.init();
 

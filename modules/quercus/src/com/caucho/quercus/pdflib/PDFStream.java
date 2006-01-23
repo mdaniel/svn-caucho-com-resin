@@ -354,6 +354,18 @@ public class PDFStream {
     _out.println(") T*");
   }
 
+  public boolean fit_image(PDFImage img)
+    throws IOException
+  {
+    _procSet.add("/ImageB");
+    _procSet.add("/ImageC");
+    _procSet.add("/ImageI");
+    
+    _out.println("/I" + img.getId() + " Do");
+
+    return true;
+  }
+
   public void flushToGraph()
     throws IOException
   {

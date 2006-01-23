@@ -96,7 +96,11 @@ public class JavaMethod extends JavaInvoker {
   public Object invoke(Object obj, Object []args)
     throws Throwable
   {
-    return _method.invoke(obj, args);
+    try {
+      return _method.invoke(obj, args);
+    } catch (IllegalArgumentException e) {
+      throw new IllegalArgumentException(_method.getName() + ": " + e.getMessage());
+    }
   }
 
   public void generate(PhpWriter out, Expr funExpr, Expr []expr)

@@ -4,6 +4,8 @@
 
 <s2 title='3.0.snap - Jan 10, 2006'>
 <ul>
+<li>Added warning message when srun index does not match expected value (#484)
+<li>backing store locking/timing issues causing trouble with cluster store (#848, rep by C Amott)
 <li>lifecycle/ResinServer was not distinguishing between destroying and destroyed (#878, found! by Mark Lai)
 <li>Add auto-flush attribute to access-log (#820, rep by Rick Ross)
 <li>duplicate &lt;log> were outputting duplicate results (#877, rep by Mark Lai)

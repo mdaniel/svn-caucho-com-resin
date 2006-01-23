@@ -613,21 +613,33 @@
         <exclude name="**/WEB-INF/db/**"/>
         <exclude name="**/*~"/>
 
-        <!-- excluded since incomplete -->
-        <exclude name="**/lib/jaf.jar"/>
-        <exclude name="**/lib/saaj.jar"/>
-        <exclude name="**/lib/jaxrpc.jar"/>
-        <exclude name="**/lib/javamail-11.jar"/>
-
         <include name="automake/**"/>
         <include name="conf/**"/>
         <include name="contrib/**"/>
         <include name="doc/**"/>
-        <include name="lib/**"/>
         <include name="modules/**/src/**"/>
         <include name="win32/**"/>
         <include name="bin/**"/>
         <include name="automake/**"/>
+	
+        <include name="lib/aopalliance.jar"/>
+        <include name="lib/ejb-20.jar"/>
+        <include name="lib/ejb-30.jar"/>
+        <include name="lib/j2eedeploy.jar"/>
+        <include name="lib/jca-15.jar"/>
+        <include name="lib/jms-11.jar"/>
+        <include name="lib/jmx-12.jar"/>
+        <include name="lib/jsdk-24.jar"/>
+        <include name="lib/jstl-11.jar"/>
+        <include name="lib/jta-101.jar"/>
+        <include name="lib/portlet-10.jar"/>
+        <include name="lib/quercus.jar"/>
+        <include name="lib/resin-jdk15.jar"/>
+        <include name="lib/resin.jar"/>
+        <include name="lib/resinboot.jar"/>
+        <include name="lib/saaj.jar"/>
+        <include name="lib/script-10.jar"/>
+        <include name="lib/webutil.jar"/>
 
         <include name="webapps/resin-doc.war"/>
         <include name="webapps/ROOT/index.jsp"/>

@@ -62,6 +62,10 @@ public class PDFWriter {
 
   private int _lastObject;
 
+  private String _creator = "Quercus PDF";
+  private String _author;
+  private String _title;
+
   private ArrayList<PDFObject> _pendingObjects
     = new ArrayList<PDFObject>();
 
@@ -72,10 +76,26 @@ public class PDFWriter {
     _out = out;
   }
 
+  public void setCreator(String creator)
+  {
+    _creator = creator;
+  }
+
+  public void setAuthor(String author)
+  {
+    _author = author;
+  }
+
+  public void setTitle(String title)
+  {
+    _title = title;
+  }
+
   public void beginDocument()
     throws IOException
   {
     println("%PDF-1.4");
+    println("#\u00c0\u00c3\u00c4\u00c9");
   }
   
   public int writeHeader()
@@ -196,6 +216,14 @@ public class PDFWriter {
 	break;
       }
     }
+  }
+
+  public void write(byte []buffer, int offset, int length)
+    throws IOException
+  {
+    _out.write(buffer, offset, length);
+
+    _offset += length;
   }
 
   public void print(String s)

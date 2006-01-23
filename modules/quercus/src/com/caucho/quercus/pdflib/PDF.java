@@ -114,6 +114,24 @@ public class PDF {
     return begin_page(width, height);
   }
 
+  public boolean set_info(String key, String value)
+  {
+    if ("Author".equals(key)) {
+      _out.setAuthor(key);
+      return true;
+    }
+    else if ("Title".equals(key)) {
+      _out.setTitle(key);
+      return true;
+    }
+    else if ("Creator".equals(key)) {
+      _out.setCreator(key);
+      return true;
+    }
+    else
+      return false;
+  }
+
   /**
    * Returns the result as a string.
    */
@@ -679,8 +697,17 @@ public class PDF {
 
   public boolean fit_image(PDFImage img, double x, double y,
 			   @Optional String opt)
+    throws IOException
   {
+    _page.addResource(img.getResource());
+
+    _stream.save();
+
+    concat(img.getWidth(), 0, 0, img.getHeight(), x, y);
     
+    _stream.fit_image(img);
+
+    _stream.restore();
     
     return true;
   }
@@ -794,18 +821,6 @@ public class PDF {
     _stream.flush();
 
     PDFProcSet procSet = _stream.getProcSet();
-    PDFProcSet oldProcSet = _procSetMap.get(procSet);
-
-    if (oldProcSet != null)
-      procSet = oldProcSet;
-    else {
-      int id = _out.allocateId(1);
-      procSet.setId(id);
-
-      _procSetMap.put(procSet, procSet);
-    }
-
-    _out.addPendingObject(procSet);
 
     _page.addResource(procSet.getResource());
     

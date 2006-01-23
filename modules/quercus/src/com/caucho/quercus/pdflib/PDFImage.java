@@ -88,6 +88,16 @@ public class PDFImage extends PDFObject {
     _id = id;
   }
 
+  public double getWidth()
+  {
+    return _width;
+  }
+
+  public double getHeight()
+  {
+    return _height;
+  }
+
   private boolean parseImage()
     throws IOException
   {
@@ -259,16 +269,39 @@ public class PDFImage extends PDFObject {
     return false;
   }
 
+  String getResource()
+    throws IOException
+  {
+    return("/XObject << /I" + _id + " " + _id + " 0 R >>");
+  }
+
   /**
    * Writes the object to the stream
    */
   public void writeObject(PDFWriter out)
     throws IOException
   {
-    out.println("<< /Type /Image");
-    out.println("   /Subtype /Type1");
-    out.println("   /Name /I" + _id);
+    int length = 0;
+    
+    for (TempBuffer ptr = _jpegHead; ptr != null; ptr = ptr.getNext())
+      length += ptr.getLength();
+    
+    out.println("<< /Type /XObject");
+    out.println("   /Subtype /Image");
+    out.println("   /Width " + _width);
+    out.println("   /Height " + _height);
+    out.println("   /ColorSpace /DeviceRGB");
+    out.println("   /BitsPerComponent " + _bits);
+    out.println("   /Filter /DCTDecode");
+    out.println("   /Length " + length);
     out.println(">>");
+    out.println("stream");
+    
+    for (TempBuffer ptr = _jpegHead; ptr != null; ptr = ptr.getNext()) {
+      out.write(ptr.getBuffer(), 0, ptr.getLength());
+    }
+    out.println();
+    out.println("endstream");
   }
 
   static class GIFDecode {
