@@ -37,8 +37,10 @@ import com.caucho.quercus.module.NotNull;
 import com.caucho.quercus.module.Reference;
 
 import com.caucho.quercus.env.*;
+import com.caucho.vfs.Path;
 
 import java.util.logging.Logger;
+import java.io.IOException;
 
 /**
  * PHP ZLib
@@ -56,7 +58,45 @@ public class QuercusZlibModule extends AbstractQuercusModule {
     return "zlib".equals(name);
   }
 
-  // @todo gzclose()
+  /**
+   *
+   * @param env
+   * @param fileName
+   * @param mode
+   * @param useIncludePath always on
+   * @return ZlibClass
+   */
+  public Value gzopen(Env env,
+                      @NotNull String fileName,
+                      @NotNull String mode,
+                      @Optional("0") int useIncludePath)
+  {
+    if (fileName == null)
+      return BooleanValue.FALSE;
+
+    ZlibClass zlib = new ZlibClass(env, fileName, mode, useIncludePath);
+    return env.wrapJava(zlib);
+  }
+
+  public int gzwrite(Env env,
+                     @NotNull ZlibClass zp,
+                     @NotNull String s,
+                     @Optional("0") int length)
+  {
+    if ((zp == null) || (s == null) || (s == ""))
+      return 0;
+
+    return zp.gzwrite(env, s,length);
+  }
+
+  public boolean gzclose(@NotNull ZlibClass zp)
+  {
+    if (zp == null)
+      return false;
+
+    return zp.gzclose();
+  }
+  
   // @todo gzcompress()
   // @todo gzdeflate()
   // @todo gzencode()
@@ -66,7 +106,6 @@ public class QuercusZlibModule extends AbstractQuercusModule {
   // @todo gzgets()
   // @todo gzgetss()
   // @todo gzinflate()
-  // @todo gzopen()
   // @todo gzpassthru()
   // @todo gzputs()
   // @todo gzread()
