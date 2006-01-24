@@ -947,6 +947,7 @@ public class QuercusStringModule extends AbstractQuercusModule {
                 index++;
                 break;
               default:
+                result.append('T');
                 break;
             }
           }
@@ -2294,6 +2295,12 @@ public class QuercusStringModule extends AbstractQuercusModule {
   {
     count.set(LongValue.ZERO);
 
+    if (subject.isNull())
+      return StringValue.EMPTY;
+
+    if (search.isNull())
+      return subject;
+
     if (subject instanceof ArrayValue) {
       ArrayValue subjectArray = (ArrayValue) subject;
       ArrayValue resultArray = new ArrayValueImpl();
@@ -2302,13 +2309,18 @@ public class QuercusStringModule extends AbstractQuercusModule {
         Value result = str_replace_impl(search, replace,
                                         value.toString(), count);
 
-        resultArray.append(value);
+        resultArray.append(result);
       }
 
       return resultArray;
     }
     else {
-      return str_replace_impl(search, replace, subject.toString(), count);
+      String subjectString = subject.toString();
+
+      if (subjectString.length() == 0)
+        return StringValue.EMPTY;
+
+      return str_replace_impl(search, replace, subjectString, count);
     }
   }
 
@@ -2327,7 +2339,12 @@ public class QuercusStringModule extends AbstractQuercusModule {
     throws Throwable
   {
     if (! search.isArray()) {
-      subject = str_replace_impl(search.toString(),
+      String searchString = search.toString();
+
+      if (searchString.length() == 0)
+        return new StringValue(subject);
+
+      subject = str_replace_impl(searchString,
                                  replace.toString(),
                                  subject,
                                  count);
@@ -3356,10 +3373,8 @@ public class QuercusStringModule extends AbstractQuercusModule {
 
     String from = fromV.toString();
 
-    if (to == null)
-      env.error("strtr requires 3 args.");
-
     int len = from.length();
+
     if (to.length() < len)
       len = to.length();
 
@@ -3523,30 +3538,81 @@ public class QuercusStringModule extends AbstractQuercusModule {
   /**
    * Replaces a substring with a replacement
    *
-   * @param string the string to modify
+   * @param subjectV a string to modify, or an array of strings to modify
    * @param replacement the replacement string
-   * @param start the start offset
-   * @param len the optional length
+   * @param startV the start offset
+   * @param lengthV the optional length
    */
-  public static Value substr_replace(String string,
+  public static Value substr_replace(Value subjectV,
                                      String replacement,
-                                     int start,
-                                     @Optional("-1") int len)
+                                     Value startV,
+                                     @Optional Value lengthV)
+  {
+    int start = 0;
+    int length = Integer.MAX_VALUE / 2;
+
+    if ( !(lengthV.isNull() || lengthV.isArray()) )
+      length = lengthV.toInt();
+
+    if ( !(startV.isNull() || startV.isArray()) )
+      start = startV.toInt();
+
+    Iterator<Value> startIterator =
+      startV.isArray()
+      ? ((ArrayValue) startV).values().iterator()
+      : null;
+
+    Iterator<Value> lengthIterator =
+      lengthV.isArray()
+      ? ((ArrayValue) lengthV).values().iterator()
+      : null;
+
+    if (subjectV.isArray()) {
+      ArrayValue resultArray = new ArrayValueImpl();
+
+      ArrayValue subjectArray = (ArrayValue) subjectV;
+
+      for (Value value : subjectArray.values()) {
+
+        if (lengthIterator != null && lengthIterator.hasNext())
+          length = lengthIterator.next().toInt();
+
+        if (startIterator != null && startIterator.hasNext())
+          start = startIterator.next().toInt();
+
+        Value result = substr_replace_impl(value.toString(), replacement, start, length);
+
+        resultArray.append(result);
+      }
+
+      return resultArray;
+    }
+    else {
+      if (lengthIterator != null && lengthIterator.hasNext())
+        length = lengthIterator.next().toInt();
+
+      if (startIterator != null && startIterator.hasNext())
+        start = startIterator.next().toInt();
+
+      return substr_replace_impl(subjectV.toString(), replacement, start, length);
+    }
+  }
+
+  private static Value substr_replace_impl(String string, String replacement, int start, int len)
   {
     int strLen = string.length();
 
-    if (strLen < start)
+    if (start > strLen)
       start = strLen;
+    else if (start < 0)
+      start = Math.max(strLen + start, 0);
 
     int end;
 
     if (len < 0)
-      end = strLen;
+      end = Math.max(strLen + len, start);
     else
-      end = start + len;
-
-    if (strLen < end)
-      end = strLen;
+      end = Math.min(start + len, strLen);
 
     String result;
 
