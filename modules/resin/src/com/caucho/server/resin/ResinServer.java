@@ -449,6 +449,9 @@ public class ResinServer
 	int uid = CauchoSystem.setUser(_userName, _groupName);
 	if (uid >= 0)
 	  log.info(L.l("Running as {0}(uid={1})", _userName, "" + uid));
+	else
+	  log.warning(L.l("Can't run as {0}(uid={1}), running as root.",
+			  _userName, "" + uid));
       } catch (Exception e) {
 	log.log(Level.WARNING, e.toString(), e);
       }

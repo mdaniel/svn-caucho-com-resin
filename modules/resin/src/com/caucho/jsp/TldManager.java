@@ -173,6 +173,8 @@ public class TldManager {
     // loads tag libraries from the global context (so there's no
     // need to reparse the jars for each web-app
     if (_globalTaglibs == null) {
+      log.info("Loading .tld files from global classpath");
+      
       ArrayList<TldPreload> globalTaglibs = new ArrayList<TldPreload>();
 
       Thread thread = Thread.currentThread();

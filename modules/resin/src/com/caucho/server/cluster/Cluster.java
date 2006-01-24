@@ -309,6 +309,9 @@ public class Cluster implements EnvironmentListener, ClusterMBean {
   public StoreManager createJdbcStore()
     throws ConfigException
   {
+    if (getStore() != null)
+      throw new ConfigException(L.l("multiple jdbc stores are not allowed in a cluster."));
+      
     StoreManager store = null;
     
     try {
@@ -329,9 +332,38 @@ public class Cluster implements EnvironmentListener, ClusterMBean {
     return store;
   }
 
+  public StoreManager createFileStore()
+    throws ConfigException
+  {
+    if (getStore() != null)
+      throw new ConfigException(L.l("multiple file stores are not allowed in a cluster."));
+      
+    StoreManager store = null;
+    
+    try {
+      Class cl = Class.forName("com.caucho.server.cluster.FileStore");
+	
+      store = (StoreManager) cl.newInstance();
+
+      store.setCluster(this);
+
+      setStore(store);
+    } catch (Throwable e) {
+      log.log(Level.FINER, e.toString(), e);
+    }
+
+    if (store == null)
+      throw new ConfigException(L.l("'file' persistent sessions are available in Resin Professional.  See http://www.caucho.com for information and licensing."));
+
+    return store;
+  }
+
   public StoreManager createClusterStore()
     throws ConfigException
   {
+    if (getStore() != null)
+      throw new ConfigException(L.l("multiple cluster stores are not allowed in a cluster."));
+      
     StoreManager store = null;
     
     try {

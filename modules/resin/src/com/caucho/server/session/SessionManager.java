@@ -64,6 +64,7 @@ import com.caucho.server.security.ServletAuthenticator;
 import com.caucho.server.dispatch.InvocationDecoder;
 import com.caucho.server.dispatch.DispatchServer;
 
+import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
 
 import com.caucho.config.types.Period;
@@ -139,8 +140,8 @@ public class SessionManager implements ObjectManager, AlarmListener {
   private int _distributedPort;
 
   //private SessionStore sessionStore;
-  private StoreManager _persistentStore;
   private StoreManager _storeManager;
+  private boolean _isWebAppStore; // i.e. for old-style compatibility
   private Store _sessionStore;
   private int _alwaysLoadSession;
   private boolean _alwaysSaveSession;
@@ -320,9 +321,9 @@ public class SessionManager implements ObjectManager, AlarmListener {
   public void setPersistentStore(JndiBuilder store)
     throws javax.naming.NamingException, ConfigException
   {
-    _persistentStore = (StoreManager) store.getObject();
+    _storeManager = (StoreManager) store.getObject();
 
-    if (_persistentStore == null)
+    if (_storeManager == null)
       throw new ConfigException(L.l("{0} is an unknown persistent store.",
 				    store.getJndiName()));
   }
@@ -567,15 +568,24 @@ public class SessionManager implements ObjectManager, AlarmListener {
   /**
    * Sets the file store.
    */
-  public FileStore createFileStore()
+  public StoreManager createFileStore()
+    throws ConfigException
   {
-    FileStore store = new FileStore();
+    Cluster cluster = getCluster();
 
-    store.setPath(Vfs.getPwd().lookup("WEB-INF/sessions"));
+    if (cluster == null)
+      throw new ConfigException(L.l("<file-store> needs a defined <cluster>."));
     
-    _storeManager = store;
+    if (cluster.getStore() != null)
+      throw new ConfigException(L.l("<file-store> may not be used with a defined <persistent-store>.  Use <use-persistent-store> instead."));
 
-    return store;
+    StoreManager fileStore = cluster.createFileStore();
+    
+    _storeManager = fileStore;
+
+    _isWebAppStore = true;
+
+    return fileStore;
   }
 
   /**
@@ -589,7 +599,12 @@ public class SessionManager implements ObjectManager, AlarmListener {
     if (cluster == null)
       throw new ConfigException(L.l("<jdbc-store> needs a defined <cluster>."));
     
+    if (cluster.getStore() != null)
+      throw new ConfigException(L.l("<jdbc-store> may not be used with a defined <persistent-store>.  Use <use-persistent-store> instead."));
+    
     _storeManager = cluster.createJdbcStore();
+
+    _isWebAppStore = true;
 
     return _storeManager;
   }
@@ -633,7 +648,7 @@ public class SessionManager implements ObjectManager, AlarmListener {
   {
     if (! enable)
       return;
-    
+
     Cluster cluster = getCluster();
 
     if (cluster == null)
@@ -650,13 +665,18 @@ public class SessionManager implements ObjectManager, AlarmListener {
       }
     }
 
-    if (store == null)
+    if (store != null) {
+    }
+    else if (! Config.evalBoolean("${resin.isProfessional()}")) {
+      throw new ConfigException(L.l("use-persistent-store in <session-config> requires Resin professional."));
+    }
+    else
       throw new ConfigException(L.l("use-persistent-store in <session-config> requires a configured <persistent-store> in the <server>"));
     
-    _storeManager = store;
+    if (_isWebAppStore)
+      throw new ConfigException(L.l("use-persistent-store may not be used with <jdbc-store> or <file-store>."));
     
-    // server/0182
-    _persistentStore = _storeManager;
+    _storeManager = store;
   }
 
   /**
@@ -845,9 +865,9 @@ public class SessionManager implements ObjectManager, AlarmListener {
     if (_cluster == null)
       getCluster();
 
-    if (_persistentStore != null)
-      _storeManager = _persistentStore;
-    else if (_storeManager != null) {
+    if (_isWebAppStore) {
+      // for backward compatibility
+      
       if (_alwaysLoadSession == SET_TRUE)
 	_storeManager.setAlwaysLoad(true);
       else if (_alwaysLoadSession == SET_FALSE)

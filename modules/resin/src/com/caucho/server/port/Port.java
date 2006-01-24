@@ -1113,13 +1113,16 @@ public class Port
 
       for (int i = 0; i < idleCount + 10; i++) {
 	try {
-	  Socket socket;
+	  Socket socket = new Socket();
+	  InetSocketAddress addr;
 
 	  if (localAddress == null ||
 	      localAddress.getHostAddress().startsWith("0."))
-	    socket = new Socket("127.0.0.1", localPort);
+	    addr = new InetSocketAddress("127.0.0.1", localPort);
 	  else
-	    socket = new Socket(localAddress, localPort);
+	    addr = new InetSocketAddress(localAddress, localPort);
+
+	  socket.connect(addr, 100);
 
 	  socket.close();
 	} catch (ConnectException e) {

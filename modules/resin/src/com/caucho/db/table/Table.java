@@ -75,13 +75,14 @@ import com.caucho.db.sql.QueryContext;
  * Table format:
  *
  * <pre>
- * Block 0: allocation
- * Block 1: table definition
+ * Block 0: allocation table
+ * Block 1: fragment table
+ * Block 2: table definition
  *   0    - store data
  *   1024 - table data
  *    1024 - index pointers
  *   2048 - CREATE text
- * Block 2: first data
+ * Block 3: first data
  * </pre>
  */
 public class Table extends Store {
@@ -97,8 +98,8 @@ public class Table extends Store {
   
   public final static long ROW_CLOCK_MIN = 1024;
 
-  private final static String DB_VERSION = "Resin-DB 3.0.15";
-  private final static String MIN_VERSION = "Resin-DB 3.0.15";
+  private final static String DB_VERSION = "Resin-DB 3.0.18";
+  private final static String MIN_VERSION = "Resin-DB 3.0.18";
   
   private final Row _row;
 
@@ -238,7 +239,8 @@ public class Table extends Store {
 
     ReadStream is = path.openRead();
     try {
-      is.skip(BLOCK_SIZE + ROOT_DATA_OFFSET);
+      // skip allocation table and fragment table
+      is.skip(DATA_START + ROOT_DATA_OFFSET);
 
       StringBuilder sb = new StringBuilder();
       int ch;
@@ -264,7 +266,8 @@ public class Table extends Store {
 
     is = path.openRead();
     try {
-      is.skip(BLOCK_SIZE + ROOT_DATA_END);
+      // skip allocation table and fragment table
+      is.skip(DATA_START + ROOT_DATA_END);
 
       StringBuilder cb = new StringBuilder();
 

@@ -72,6 +72,7 @@ $kill_time = 60;
 #
 # The pid file to use for start/stop (defaults to httpd.pid)
 #
+$pid_dir="";
 $pid_file="";
 
 #
@@ -99,6 +100,7 @@ sub usage {
     print "  -stdout <file>  : stdout log\n";
     print "  -stderr <file>  : stderr log\n";
     print "  -jvm-log <file> : jvm log\n";
+    print "  -pid-dir <file> : directory for the pid\n";
     print "  -pid <file>     : file for the pid\n";
     print "  -no-auto-restart : disable automatic server restart\n";
     print "cmd:\n";
@@ -198,6 +200,11 @@ while ( $#ARGV >= 0) {
     }
     elsif ($ARGV[0] eq "-jvm-log") {
 	$jvm_log=&normalize_path($ARGV[1]);
+	shift(@ARGV);
+	shift(@ARGV);
+    }
+    elsif ($ARGV[0] eq "-pid-dir") {
+	$pid_dir = &normalize_path($ARGV[1]);
 	shift(@ARGV);
 	shift(@ARGV);
     }
@@ -410,17 +417,21 @@ if (! $JAVA_HOME) {
 #  }
 }
 
+if (! $pid_dir) {
+  $pid_dir = "$SERVER_ROOT";
+}
+
 if (! $pid_file) {
     if ($server) {
-      $pid_file = "$SERVER_ROOT/${name}-${server}.pid";
+      $pid_file = "$pid_dir/${name}-${server}.pid";
     }
     else {
-      $pid_file = "$SERVER_ROOT/${name}.pid";
+      $pid_file = "$pid_dir/${name}.pid";
     }
 }
 
 if ($pid_file =~ "^[^/]") {
-    $pid_file = "$SERVER_ROOT/$pid_file";
+    $pid_file = "$pid_dir/$pid_file";
 }
 #
 # If desired, close the old server
@@ -723,8 +734,11 @@ if ($cmd eq "start" || $cmd eq "restart") {
           close(STDOUT);
           close(STDERR);
 
+	  my $haveStdin = defined(fileno(STDIN));
+	  open(STDIN, "</dev/null") unless $haveStdin;
           open(STDOUT, ">>$jvm_log");
           open(STDERR, ">&STDOUT");
+          close(STDIN) unless $haveStdin;
 
 	  exec("$JAVA_EXE $JAVA_ARGS $class -socketwait $port $conf $RESIN_ARGS");
           print(STDERR "Can't start java: $JAVA_EXE $JAVA_ARGS $class $conf $RESIN_ARGS");

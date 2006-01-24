@@ -1184,8 +1184,9 @@ public abstract class JspNode {
       return var + ".evalBigDecimal(pageContext)";
     else if (Object.class.equals(type))
       return var + ".evalObject(pageContext)";
-    else
-      return "(" + type.getName() + ")" + var + ".evalObject(pageContext)";
+    else {
+      return "(" + classToString(type) + ") " + var + ".evalObject(pageContext)";
+    }
   }
 
   public void convertParameterValue(JspJavaWriter out, String type, String value)
@@ -1209,6 +1210,14 @@ public abstract class JspNode {
       out.print("((java.lang.Double) " + value + ").doubleValue()");
     else
       out.print("(" + type + ")" + value);
+  }
+
+  protected String classToString(Class cl)
+  {
+    if (cl.isArray())
+      return classToString(cl.getComponentType()) + "[]";
+    else
+      return cl.getName();
   }
 
   /**

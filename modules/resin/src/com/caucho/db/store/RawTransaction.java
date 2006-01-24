@@ -63,6 +63,6 @@ public class RawTransaction extends StoreTransaction {
   public Block createWriteBlock(Block block)
     throws IOException
   {
-    return block;
+    return new AutoCommitWriteBlock(block);
   }
 }

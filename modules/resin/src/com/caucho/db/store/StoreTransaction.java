@@ -77,6 +77,6 @@ abstract public class StoreTransaction {
   public Block createAutoCommitWriteBlock(Block block)
     throws IOException
   {
-    return createWriteBlock(block);
+    return block;
   }
 }

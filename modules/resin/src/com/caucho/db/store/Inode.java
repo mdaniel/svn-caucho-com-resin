@@ -436,6 +436,11 @@ public class Inode {
    */
   void closeOutputStream()
   {
+    try {
+      _store.saveAllocation();
+    } catch (Throwable e) {
+      log.log(Level.FINER, e.toString(), e);
+    }
   }
 
   /**
@@ -513,6 +518,12 @@ public class Inode {
 	log.log(Level.WARNING, e.toString(), e);
       } finally {
 	System.arraycopy(NULL_BYTES, 0, _bytes, 0, NULL_BYTES.length);
+
+	try {
+	  _store.saveAllocation();
+	} catch (Throwable e) {
+	  log.log(Level.FINE, e.toString(), e);
+	}
       }
     }
   }

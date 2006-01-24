@@ -264,14 +264,6 @@ public class PDF {
   }
 
   /**
-   * Sets generic informatino.
-   */
-  public boolean set_info(String key, String value)
-  {
-    return true;
-  }
-
-  /**
    * Returns the length of a string for a font.
    */
   public double stringwidth(String string, @NotNull PDFFont font, double size)

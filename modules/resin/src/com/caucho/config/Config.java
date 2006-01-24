@@ -560,7 +560,7 @@ public class Config {
    * Evaluates an EL string in the context.
    */
   public static String evalString(String str)
-         throws ELException
+    throws ELException
   {
     return AttributeStrategy.evalString(str);
   }
@@ -572,6 +572,15 @@ public class Config {
          throws ELException
   {
     return EL.evalString(str, getEnvironment(varMap));
+  }
+
+  /**
+   * Evaluates an EL boolean in the context.
+   */
+  public static boolean evalBoolean(String str)
+    throws ELException
+  {
+    return AttributeStrategy.evalBoolean(str);
   }
 
   public static VariableResolver getEnvironment(HashMap<String,Object> varMap)

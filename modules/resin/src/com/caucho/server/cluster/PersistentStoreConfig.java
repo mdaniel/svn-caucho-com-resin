@@ -91,6 +91,9 @@ public class PersistentStoreConfig {
     else if (type.equals("file"))
       _store = new FileStore();
     else if (type.equals("cluster") || type.equals("tcp")) {
+      if (cluster == null)
+	throw new ConfigException(L.l("Cluster store needs a defined <cluster>.  Use 'file' for single-machine persistence."));
+      
       try {
 	Class cl = Class.forName("com.caucho.server.cluster.ClusterStore");
 

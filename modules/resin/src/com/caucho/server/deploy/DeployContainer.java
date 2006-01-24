@@ -58,10 +58,10 @@ public class DeployContainer<C extends DeployController>
   private static final Logger log = Log.open(DeployContainer.class);
   private static final L10N L = new L10N(DeployContainer.class);
 
-  private DeployListGenerator<C> _generatorList
+  private final DeployListGenerator<C> _generatorList
     = new DeployListGenerator<C>(this);
 
-  private ArrayList<C> _controllerList = new ArrayList<C>();
+  private final ArrayList<C> _controllerList = new ArrayList<C>();
 
   private final Lifecycle _lifecycle = new Lifecycle();
 
@@ -146,8 +146,14 @@ public class DeployContainer<C extends DeployController>
       startImpl(key);
     }
 
-    for (int i = 0; i < _controllerList.size(); i++) {
-      C controller = _controllerList.get(i);
+    ArrayList<C> controllerList;
+
+    synchronized (_controllerList) {
+      controllerList = new ArrayList<C>(_controllerList);
+    }
+
+    for (int i = 0; i < controllerList.size(); i++) {
+      C controller = controllerList.get(i);
 
       controller.startOnInit();
     }
@@ -240,7 +246,9 @@ public class DeployContainer<C extends DeployController>
     C newController = generateController(name);
     
     if (oldController != null) {
-      _controllerList.remove(oldController);
+      synchronized (_controllerList) {
+	_controllerList.remove(oldController);
+      }
       
       oldController.destroy();
     }
@@ -368,7 +376,11 @@ public class DeployContainer<C extends DeployController>
     if (! _lifecycle.toStop())
       return;
 
-    ArrayList<C> controllers = new ArrayList<C>(_controllerList);
+    ArrayList<C> controllers;
+
+    synchronized (_controllerList) {
+      controllers = new ArrayList<C>(_controllerList);
+    }
 
     for (int i = 0; i < controllers.size(); i++)
       controllers.get(i).stop();
@@ -385,7 +397,10 @@ public class DeployContainer<C extends DeployController>
       return;
     
     _generatorList.destroy();
-    _controllerList.clear();
+    
+    synchronized (_controllerList) {
+      _controllerList.clear();
+    }
   }
 
   public String toString()

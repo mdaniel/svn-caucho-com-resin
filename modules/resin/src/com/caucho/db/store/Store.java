@@ -66,9 +66,12 @@ import com.caucho.db.Database;
  *
  * The store is block-based, where each block is 64k.  Block allocation
  * is tracked by a free block, block 0.  Each block is represented as a
- * two-bit value: free, row, or used.  Since 64k stores 256k entries, the
- * free block can handle a 64G database size.  If the database is larger,
- * another free block occurs at block 256k handling another 64G.
+ * two-byte value.  The first byte is the allocation code: free, row,
+ * or used.  The second byte is a fragment allocation mask.
+ *
+ * Since 64k stores 32k entries, the allocation block can handle
+ * a 2G database size.  If the database is larger, another free block
+ * occurs at block 32k handling another 2G.
  *
  * The blocks are marked as free (00), row (01), used (10) or fragment(11).
  * Row-blocks are table rows, so a table iterator will only look at
@@ -89,7 +92,7 @@ import com.caucho.db.Database;
  *
  * <h3>Blobs and fragments</h3>
  *
- * Fragments are stored in 1k chunks with a single byte prefix indicating
+ * Fragments are stored in 8k chunks with a single byte prefix indicating
  * its use.
  *
  * <h3>Transactions</h3>
@@ -107,6 +110,9 @@ public class Store {
   public final static long BLOCK_MASK = ~ BLOCK_INDEX_MASK;
   public final static long BLOCK_OFFSET_MASK = BLOCK_SIZE - 1;
 
+  public final static int ALLOC_PER_BLOCK = BLOCK_SIZE / 2;
+  public final static long ALLOC_SEGMENT = BLOCK_SIZE * ALLOC_PER_BLOCK;
+  
   public final static int ALLOC_FREE     = 0x00;
   public final static int ALLOC_ROW      = 0x01;
   public final static int ALLOC_USED     = 0x02;
@@ -114,12 +120,10 @@ public class Store {
   public final static int ALLOC_INDEX    = 0x04;
   public final static int ALLOC_MASK     = 0x0f;
 
-  // Need to use at least 4 fragment blocks before try recycling
-  public final static long FRAGMENT_CLOCK_MIN   = 4 * BLOCK_SIZE;
-  
   public final static int FRAGMENT_SIZE = 8 * 1024;
-  public final static int FRAGMENT_PER_BLOCK
-    = BLOCK_SIZE / (FRAGMENT_SIZE + 1);
+  public final static int FRAGMENT_PER_BLOCK = BLOCK_SIZE / FRAGMENT_SIZE;
+  
+  public final static long DATA_START = BLOCK_SIZE;
   
   public final static int STORE_CREATE_END = 1024;
 
@@ -141,18 +145,15 @@ public class Store {
   private long _fileSize;
   private long _blockCount;
 
-  private Object _allocationLock = new Object();
+  private final Object _allocationLock = new Object();
   private byte []_allocationTable;
   
-  private long _clockAddr;
-
-  // the current address of the fragment clock
-  private long _fragmentClockAddr;
-  private long _fragmentClockLastAddr;
-  // the total bytes viewed of the clock (?)
-  private long _fragmentClockTotal;
-  // the total used bytes in the clock (s/b free?)
-  private long _fragmentClockUsed;
+  private final Object _allocationWriteLock = new Object();
+  private int _allocDirtyMin = Integer.MAX_VALUE;
+  private int _allocDirtyMax;
+  
+  private final Object _fragmentLock = new Object();
+  private byte []_fragmentTable;
 
   private final Object _statLock = new Object();
   // number of fragments currently used
@@ -342,6 +343,7 @@ public class Store {
       throw new SQLException(L.l("Table `{0}' already exists.  CREATE can not override an existing table.", _name));
 
     _allocationTable = new byte[ALLOC_CHUNK_SIZE];
+    _fragmentTable = new byte[ALLOC_CHUNK_SIZE];
 
     // allocates the allocation table itself
     setAllocation(0, ALLOC_USED);
@@ -536,15 +538,15 @@ public class Store {
     synchronized (_allocationLock) {
       long end = _blockCount;
 
-      if (2 * _allocationTable.length < end)
-	end = 2 * _allocationTable.length;
+      if (_allocationTable.length < 2 * end)
+	end = _allocationTable.length;
 
       for (blockIndex = 0; blockIndex < end; blockIndex++) {
 	if (getAllocation(blockIndex) == ALLOC_FREE)
 	  break;
       }
 
-      if (2 * _allocationTable.length <= blockIndex) {
+      if (_allocationTable.length <= 2 * blockIndex) {
 	// expand the allocation table
 	byte []newTable = new byte[_allocationTable.length + ALLOC_CHUNK_SIZE];
 	System.arraycopy(_allocationTable, 0,
@@ -552,9 +554,9 @@ public class Store {
 			 _allocationTable.length);
 	_allocationTable = newTable;
 
-	// if the allocation table is over 64k, allocate the block for the
-	// extension (each allocation block of 64k allocates 16G)
-	if (blockIndex % (2 * BLOCK_SIZE) == 0) {
+	// if the allocation table is over 32k, allocate the block for the
+	// extension (each allocation block of 32k allocates 2G)
+	if (blockIndex % ALLOC_PER_BLOCK == 0) {
 	  setAllocation(blockIndex, ALLOC_USED);
 	  blockIndex++;
 	}
@@ -583,8 +585,9 @@ public class Store {
 
     synchronized (_allocationLock) {
       setAllocation(blockIndex, code);
-      saveAllocation();
     }
+    
+    saveAllocation();
 
     return block;
   }
@@ -651,10 +654,9 @@ public class Store {
    */
   public final int getAllocation(long blockIndex)
   {
-    int allocOffset = (int) (blockIndex >> 1);
-    int allocBits = 4 * (int) (blockIndex & 0x1);
+    int allocOffset = (int) (2 * blockIndex);
 
-    return (_allocationTable[allocOffset] >> allocBits) & ALLOC_MASK;
+    return _allocationTable[allocOffset] & ALLOC_MASK;
   }
 
   /**
@@ -662,31 +664,56 @@ public class Store {
    */
   private void setAllocation(long blockIndex, int code)
   {
-    int allocOffset = (int) (blockIndex >> 1);
-    int allocBits = 4 * (int) (blockIndex & 0x1);
+    int allocOffset = (int) (2 * blockIndex);
 
-    int mask = ALLOC_MASK << allocBits;
+    _allocationTable[allocOffset] = (byte) code;
 
-    _allocationTable[allocOffset] =
-      (byte) ((_allocationTable[allocOffset] & ~mask) | (code << allocBits));
+    setAllocDirty(allocOffset, allocOffset + 1);
+  }
 
+  /**
+   * Sets the dirty range for the allocation table.
+   */
+  private void setAllocDirty(int min, int max)
+  {
+    if (min < _allocDirtyMin)
+      _allocDirtyMin = min;
+    
+    if (_allocDirtyMax < max)
+      _allocDirtyMax = max;
   }
 
   /**
    * Sets the allocation for a block.
    */
-  private void saveAllocation()
+  void saveAllocation()
     throws IOException
   {
-    int allocCount = _allocationTable.length;
+    // cache doesn't actually need to write this data
+    if (! _isFlushDirtyBlocksOnCommit)
+      return;
     
-    for (int i = 0; i < allocCount; i += BLOCK_SIZE) {
-      int len = allocCount - i;
+    synchronized (_allocationWriteLock) {
+      int dirtyMin;
+      int dirtyMax;
+
+      synchronized (_allocationLock) {
+	dirtyMin = _allocDirtyMin;
+	_allocDirtyMin = Integer.MAX_VALUE;
 	
-      if (BLOCK_SIZE < len)
-	len = BLOCK_SIZE;
-	
-      writeBlock(i * 2L * BLOCK_SIZE, _allocationTable, i, len);
+	dirtyMax = _allocDirtyMax;
+	_allocDirtyMax = 0;
+      }
+
+      if (dirtyMax <= dirtyMin)
+	return;
+      
+      long allocBlock = dirtyMin / ALLOC_PER_BLOCK;
+      long allocOffset = dirtyMin % ALLOC_PER_BLOCK;
+
+      // XXX: 2G issues
+      writeBlock(allocBlock * ALLOC_SEGMENT + allocOffset,
+		 _allocationTable, dirtyMin, dirtyMax - dirtyMin + 2);
     }
   }
   
@@ -719,7 +746,7 @@ public class Store {
       byte []blockBuffer = block.getBuffer();
 
       synchronized (blockBuffer) {
-	System.arraycopy(blockBuffer, blockOffset + 1 + fragmentOffset,
+	System.arraycopy(blockBuffer, blockOffset + fragmentOffset,
 			 buffer, offset, length);
       }
 
@@ -753,7 +780,7 @@ public class Store {
     Block block = readBlock(addressToBlockId(fragmentAddress));
 
     try {
-      int blockOffset = getFragmentOffset(fragmentAddress) + 1;
+      int blockOffset = getFragmentOffset(fragmentAddress);
       blockOffset += fragmentOffset;
 
       byte []blockBuffer = block.getBuffer();
@@ -792,7 +819,7 @@ public class Store {
       byte []blockBuffer = block.getBuffer();
 
       synchronized (blockBuffer) {
-	return readLong(blockBuffer, blockOffset + fragmentOffset + 1);
+	return readLong(blockBuffer, blockOffset + fragmentOffset);
       }
     } finally {
       block.free();
@@ -804,122 +831,62 @@ public class Store {
    *
    * @return the fragment address
    */
-  public long allocateFragment(StoreTransaction xa)
+  long allocateFragment(StoreTransaction xa)
     throws IOException
   {
-    boolean isLoop = false;
+    synchronized (_allocationLock) {
+      byte []allocationTable = _allocationTable;
+      
+      for (int i = 0; i < allocationTable.length; i += 2) {
+	int fragMask =  allocationTable[i + 1];
+
+	if (allocationTable[i] == ALLOC_FRAGMENT &&
+	    fragMask != 0xff) {
+	  for (int j = 0; j < FRAGMENT_PER_BLOCK; j++) {
+	    if ((fragMask & (1 << j)) == 0) {
+	      allocationTable[i + 1] = (byte) (fragMask | (1 << j));
+
+	      setAllocDirty(i, i + 2);
+
+	      _fragmentUseCount++;
+
+	      return i * BLOCK_SIZE / 2 + j;
+	    }
+	  }
+	}
+      }
+    }
+
     while (true) {
-      Block block = null;
+      Block block = allocateFragmentBlock();
 
       try {
-	long freeBlockId = firstFragment(_fragmentClockAddr);
-      
-	if (freeBlockId >= 0) {
-	  block = readBlock(freeBlockId);
-	}
-	else if (! isLoop &&
-		 FRAGMENT_CLOCK_MIN < _fragmentClockTotal &&
-		 2 * _fragmentClockUsed < _fragmentClockTotal) {
-	  if (log.isLoggable(Level.FINE)) {
-	    log.fine(this + " fragment loop total:" +
-		     _fragmentClockTotal + " used:" + _fragmentClockUsed);
+	long blockId = block.getBlockId();
+
+	synchronized (_allocationLock) {
+	  byte []allocationTable = _allocationTable;
+
+	  int i = 2 * (int) (blockId / BLOCK_SIZE);
+	
+	  int fragMask =  allocationTable[i + 1];
+
+	  if (allocationTable[i] == ALLOC_FRAGMENT && fragMask != 0xff) {
+	    for (int j = 0; j < FRAGMENT_PER_BLOCK; j++) {
+	      if ((fragMask & (1 << j)) == 0) {
+		allocationTable[i + 1] = (byte) (fragMask | (1 << j));
+
+		setAllocDirty(i, i + 2);
+
+		_fragmentUseCount++;
+
+		return i * BLOCK_SIZE / 2 + j;
+	      }
+	    }
 	  }
-	  
-	  _fragmentClockAddr = 0;
-	  _fragmentClockLastAddr = 0;
-	  _fragmentClockUsed = 0;
-	  _fragmentClockTotal = 0;
-	  isLoop = true;
-	  continue;
-	}
-	else {
-	  block = allocateFragmentBlock();
-	  
-	  _fragmentClockTotal += FRAGMENT_PER_BLOCK * FRAGMENT_SIZE;
-	}
-      
-	_fragmentClockAddr = block.getBlockId();
-	_fragmentClockLastAddr = _fragmentClockAddr;
-
-	long fragAddr = allocateFragment(block);
-
-	if (fragAddr != 0) {
-	  // only mark the block for writing if it's actually updated
-	  block = xa.createAutoCommitWriteBlock(block);
-	  
-	  return fragAddr;
 	}
       } finally {
-	if (block != null)
-	  block.free();
+	block.free();
       }
-	
-      // XXX: db/01g3?
-      _fragmentClockAddr += BLOCK_SIZE;
-	
-      long nextBlockId = firstFragment(_fragmentClockAddr);
-
-      if (nextBlockId > 0) {
-	updateClockUse(nextBlockId);
-      }
-    }
-  }
-  
-  
-  /**
-   * Allocates a new fragment.
-   *
-   * @return the fragment address
-   */
-  private long allocateFragment(Block block)
-    throws IOException
-  {
-    byte []buffer = block.getBuffer();
-
-    synchronized (buffer) {
-      for (int i = 0; i < FRAGMENT_PER_BLOCK; i++) {
-	int offset = i * (1 + FRAGMENT_SIZE);
-	    
-	if (buffer[offset] == 0) {
-	  buffer[offset] = 1;
-
-	  block.setDirty(offset, offset + 1);
-	      
-	  synchronized (_statLock) {
-	    _fragmentUseCount++;
-	  }
-
-	  return blockIdToAddress(block.getBlockId()) + i;
-	}
-      }
-    }
-
-    return 0;
-  }
-  
-  /**
-   * Updates the clock use count.
-   */
-  private void updateClockUse(long blockAddr)
-    throws IOException
-  {
-    Block block = readBlock(blockAddr);
-
-    try {
-      byte []buffer = block.getBuffer();
-
-      _fragmentClockTotal += FRAGMENT_PER_BLOCK * FRAGMENT_SIZE;
-      
-      synchronized (buffer) {
-	for (int i = 0; i < FRAGMENT_PER_BLOCK; i++) {
-	  int offset = i * (1 + FRAGMENT_SIZE);
-	    
-	  if (buffer[offset] != 0)
-	    _fragmentClockUsed += FRAGMENT_SIZE;
-	}
-      }
-    } finally {
-      block.free();
     }
   }
   
@@ -953,7 +920,7 @@ public class Store {
 
       byte []blockBuffer = block.getBuffer();
 
-      blockOffset += 1 + fragmentOffset;
+      blockOffset += fragmentOffset;
 
       synchronized (blockBuffer) {
 	System.arraycopy(buffer, offset,
@@ -994,7 +961,7 @@ public class Store {
 
       byte []blockBuffer = block.getBuffer();
 
-      blockOffset += 1 + fragmentOffset;
+      blockOffset += fragmentOffset;
 
       synchronized (blockBuffer) {
 	for (int i = 0; i < length; i += 2) {
@@ -1029,7 +996,7 @@ public class Store {
       int blockOffset = getFragmentOffset(fragmentAddress);
 
       byte []blockBuffer = block.getBuffer();
-      int offset = blockOffset + 1 + fragmentOffset;
+      int offset = blockOffset + fragmentOffset;
 
       synchronized (blockBuffer) {
 	writeLong(blockBuffer, offset, value);
@@ -1044,7 +1011,7 @@ public class Store {
   /**
    * Deletes a fragment.
    */
-  public void deleteFragment(StoreTransaction xa, long fragmentAddress)
+  void deleteFragment(StoreTransaction xa, long fragmentAddress)
     throws IOException
   {
     Block block = xa.readBlock(this, addressToBlockId(fragmentAddress));
@@ -1056,18 +1023,20 @@ public class Store {
 
       byte []blockBuffer = block.getBuffer();
 
-      synchronized (blockBuffer) {
-	blockBuffer[fragOffset] = 0;
+      synchronized (_allocationLock) {
+	int i = 2 * (int) (fragmentAddress / BLOCK_SIZE);
+	int j = (int) fragmentAddress & 0xff;
+
+	_allocationTable[i + 1] &= ~(1 << j);
+
+	_fragmentUseCount--;
+	
+	setAllocDirty(i + 1, i + 2);
       }
 
-      block.setDirty(fragOffset, fragOffset + 1);
+      // inode handles the save allocation
     } finally {
       block.free();
-    }
-
-    synchronized (_statLock) {
-      // XXX: issue with transaction and rollback
-      _fragmentUseCount--;
     }
   }
 
@@ -1078,7 +1047,7 @@ public class Store {
   {
     int id = (int) (fragmentAddress & BLOCK_OFFSET_MASK);
 
-    return (int) ((FRAGMENT_SIZE + 1) * id);
+    return (int) (FRAGMENT_SIZE * id);
   }
 
   /**

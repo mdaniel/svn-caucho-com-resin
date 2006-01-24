@@ -1082,6 +1082,14 @@ public class ServletServer extends ProtocolDispatchServer
   /**
    * Returns true if the server is stopped.
    */
+  public boolean isStopping()
+  {
+    return _lifecycle.isStopping();
+  }
+
+  /**
+   * Returns true if the server is stopped.
+   */
   public boolean isStopped()
   {
     return _lifecycle.isStopped();
@@ -1093,6 +1101,14 @@ public class ServletServer extends ProtocolDispatchServer
   public boolean isDestroyed()
   {
     return _lifecycle.isDestroyed();
+  }
+
+  /**
+   * Returns true if the server is closed.
+   */
+  public boolean isDestroying()
+  {
+    return _lifecycle.isDestroying();
   }
 
   /**
@@ -1149,6 +1165,10 @@ public class ServletServer extends ProtocolDispatchServer
    */
   public void clearCache()
   {
+    // skip the clear on restart
+    if (isStopping())
+      return;
+    
     if (log.isLoggable(Level.FINEST))
       log.finest("ServletServer clearCache");
 

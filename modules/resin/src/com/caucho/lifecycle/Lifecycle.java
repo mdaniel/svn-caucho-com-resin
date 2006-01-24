@@ -349,6 +349,14 @@ public final class Lifecycle implements LifecycleState {
   /**
    * Returns true if the state is stopping.
    */
+  public boolean isStopping()
+  {
+    return IS_STOPPING <= _state;
+  }
+
+  /**
+   * Returns true if the state is stopping.
+   */
   public boolean isStopped()
   {
     return IS_STOPPING <= _state;

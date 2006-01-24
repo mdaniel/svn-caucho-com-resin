@@ -62,8 +62,6 @@ public class TaglibManager {
   static final L10N L = new L10N(TaglibManager.class);
   private static final Logger log = Log.open(TaglibManager.class);
 
-  private static ArrayList<TldTaglib> _cauchoTaglibs;
-  
   private JspResourceManager _resourceManager;
   private Application _application;
 

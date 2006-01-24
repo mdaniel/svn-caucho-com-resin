@@ -4,6 +4,12 @@
 
 <s2 title='3.0.snap - Jan 10, 2006'>
 <ul>
+<li>tag attribute of String[] wasn't set properly (#885, rep by tipiirai)
+<li>use-persistent-store error message needing Resin Professional (#558, rep by K Fetterman)
+<li>Add log message when searching classpath for .tld files (#888)
+<li>failed setuid now gives warning message
+<li>refactored fragment allocation for cache backing store to avoid timing issues
+<li>changed shutdown/restart code to use timed socket connections
 <li>Added warning message when srun index does not match expected value (#484)
 <li>backing store locking/timing issues causing trouble with cluster store (#848, rep by C Amott)
 <li>lifecycle/ResinServer was not distinguishing between destroying and destroyed (#878, found! by Mark Lai)

@@ -98,10 +98,10 @@ public class DebugStore {
   {
     out.println();
 
-    for (int i = 0; i < count; i++) {
-      int v = allocTable[i / 4];
+    for (int i = 0; i < 2 * count; i += 2) {
+      int v = allocTable[i];
 
-      int code = (v >> (2 * (i % 4))) & 0x3;
+      int code = v & 0xf;
 
       switch (code) {
       case Store.ALLOC_FREE:
@@ -139,52 +139,33 @@ public class DebugStore {
     
     byte []block = new byte[Store.BLOCK_SIZE];
     
-    for (int i = 0; i < count; i++) {
-      int v = allocTable[i / 4];
-
-      int code = (v >> (2 * (i % 4))) & 0x3;
+    for (int i = 0; i < 2 * count; i += 2) {
+      int code = allocTable[i];
 
       if (code == Store.ALLOC_FRAGMENT) {
-	readBlock(block, i);
+	int fragCount = 0;
+	
+	for (int j = 0; j < 8; j++) {
+	  if ((allocTable[i + 1] & (1 << j)) != 0)
+	    fragCount++;
+	}
 
-	totalUsed += debugFragmentBlock(out, block, i);
+	totalUsed += fragCount;
+
+	out.println();
+	
+	out.print("Fragment Block " + (i / 2) + ": ");
+	for (int j = 0; j < 8; j++) {
+	  if ((allocTable[i + 1] & (1 << j)) != 0)
+	    out.print("1");
+	  else
+	    out.print(".");
+	}
       }
     }
 
     out.println();
     out.println("Total-used: " + totalUsed);
-  }
-
-  private int debugFragmentBlock(WriteStream out, byte []block, long count)
-    throws IOException
-  {
-    int used = readShort(block, 0);
-    int fragCount = readShort(block, 2);
-
-    out.println();
-    
-    out.println("Fragment Block " + count + ": " +
-		       used + "/" + fragCount);
-
-    int offset = 4;
-    for (int i = 0; offset < used; i++) {
-      if ((i & 7) == 0) {
-	if (i != 0)
-	  out.println();
-	
-	out.print(readShort(block, offset) + ":");
-	offset += 2;
-      }
-
-      int len = readShort(block, offset);
-
-      out.print(len + " ");
-
-      offset += 2 + len;
-    }
-    out.println();
-
-    return used;
   }
 
   private void readBlock(byte []block, long count)

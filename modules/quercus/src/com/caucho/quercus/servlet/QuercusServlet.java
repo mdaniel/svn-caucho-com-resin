@@ -107,6 +107,10 @@ public class QuercusServlet extends HttpServlet {
    */
   public void setDatabase(DataSource database)
   {
+    System.out.println("SET-DB: " + database);
+    System.out.println("Cluster: " + com.caucho.server.cluster.Cluster.getLocal());
+    
+    
     getQuercus().setDatabase(database);
   }
 
