@@ -40,6 +40,7 @@ import com.caucho.quercus.env.*;
 import com.caucho.vfs.Path;
 
 import java.util.logging.Logger;
+import java.util.zip.DataFormatException;
 import java.io.IOException;
 
 /**
@@ -115,7 +116,7 @@ public class QuercusZlibModule extends AbstractQuercusModule {
 
   public Value gzgetc(Env env,
                       @NotNull ZlibClass zp)
-    throws IOException
+    throws IOException, DataFormatException
   {
     if (zp == null)
       return BooleanValue.FALSE;
