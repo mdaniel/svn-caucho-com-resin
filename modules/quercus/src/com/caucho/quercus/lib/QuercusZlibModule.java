@@ -113,13 +113,20 @@ public class QuercusZlibModule extends AbstractQuercusModule {
     return zp.gzclose();
   }
 
+  public Value gzgetc(Env env,
+                      @NotNull ZlibClass zp)
+    throws IOException
+  {
+    if (zp == null)
+      return BooleanValue.FALSE;
 
+    return zp.gzgetc(env);
+  }
   // @todo gzcompress()
   // @todo gzdeflate()
   // @todo gzencode()
   // @todo gzeof()
   // @todo gzfile()
-  // @todo gzgetc()
   // @todo gzgets()
   // @todo gzgetss()
   // @todo gzinflate()

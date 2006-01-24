@@ -34,20 +34,27 @@ import java.util.logging.Level;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.Deflater;
 import java.util.zip.Inflater;
+import java.util.zip.DataFormatException;
 import java.util.regex.*;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 
 import com.caucho.util.L10N;
+import com.caucho.util.ByteBuffer;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.BooleanValue;
 import com.caucho.quercus.env.NullValue;
+import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.LongValue;
 import com.caucho.quercus.module.Optional;
 import com.caucho.quercus.module.NotNull;
 import com.caucho.vfs.Path;
+import com.caucho.vfs.ReadStream;
 
 /**
  * Zlib object oriented API facade
@@ -58,7 +65,14 @@ public class ZlibClass {
   private static final L10N L = new L10N(ZlibClass.class);
 
   private Deflater _deflater;
-  private GZIPInputStream _gzis; // Used if reading from compressed file
+  private Inflater _inflater;
+  // XXX: Currently reads the entire compressed file into
+  // memory and converts bytes to String.  Need to investigate
+  // if there is a better way.
+  private String _uncompressedFile;
+  private int _charPointer;
+
+  private Path _path;
   private Value _fileValue; // Created by fopen... can be BooleanValue.FALSE
 
   /**
@@ -76,6 +90,7 @@ public class ZlibClass {
                    String mode,
                    int useIncludePath)
   {
+    _inflater = new Inflater();
     // Set level
     Pattern pattern = Pattern.compile("[0-9]");
     Matcher matcher = pattern.matcher(mode);
@@ -98,22 +113,11 @@ public class ZlibClass {
      *   _deflater.setStrategy(Deflater.HUFFMAN_ONLY);
      */
 
-    // If open for reading then create _gzis
-    if (mode.startsWith("r") || (mode.indexOf("+") != -1)) {
-      Path path = env.getPwd().lookup(fileName);
-      try {
-        _gzis = new GZIPInputStream(path.openRead());
-      } catch (IOException e) {
-        log.log(Level.FINE, e.getMessage(), e);
-      }
-    }
+     // Strip everything to the right of the level
+     // before sending mode to fopen
+     _fileValue = QuercusFileModule.fopen(env, fileName, mode.substring(0,matcher.start()), true, null);
 
-    // If not just open for reading then create _fileValue
-    if (!mode.startsWith("r") || (mode.indexOf("+") != -1)) {
-      // Strip everything to the right of the level
-      // before sending mode to fopen
-      _fileValue = QuercusFileModule.fopen(env, fileName, mode.substring(0,matcher.start()), true, null);
-    }
+    _path = env.getPwd().lookup(fileName);
 
   }
 
@@ -138,12 +142,9 @@ public class ZlibClass {
       length = s.length();
     else
       length = Math.min(length, s.length());
-    byte[] input;
-    try {
-      input = s.getBytes("UTF-8");
-    } catch (UnsupportedEncodingException e) {
-      input = s.getBytes();
-    }
+
+    byte[] input = s.getBytes();
+
     _deflater.setInput(input);
     _deflater.finish();
     byte[] output = new byte[2 * input.length];
@@ -151,6 +152,7 @@ public class ZlibClass {
 
     try {
       fileValue.write(output, 0, compressedDataLength);
+      fileValue.flush();
     } catch (IOException e) {
       log.log(Level.FINE, e.getMessage(), e);
       env.warning(L.l(e.getMessage()));
@@ -184,5 +186,35 @@ public class ZlibClass {
                     @Optional("0") int length)
   {
     return gzwrite(env, s, length);
+  }
+
+  /**
+   *
+   * @param env
+   * @return the next character or BooleanValue.FALSE
+   */
+  public Value gzgetc(Env env)
+    throws IOException, DataFormatException
+  {
+    if (_uncompressedFile == null) {
+      ReadStream rs = _path.openRead();
+      ByteBuffer b = new ByteBuffer();
+      int ch;
+      while ((ch = rs.read()) >= 0) {
+        b.append(ch);
+      }
+      byte[] compressedBytes = b.getBuffer();
+      _inflater.setInput(compressedBytes);
+      byte[] inflatedBytes = new byte[compressedBytes.length];
+      _inflater.inflate(inflatedBytes);
+      _uncompressedFile = new String(inflatedBytes);
+      return new StringValue(_uncompressedFile);
+    }
+
+    /*
+    if (ch >= 0)
+      return new StringValue(String.valueOf((char) ch));
+    else */
+      return BooleanValue.FALSE;
   }
 }
