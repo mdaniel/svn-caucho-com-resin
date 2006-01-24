@@ -70,7 +70,8 @@ public class ZlibClass {
   // memory and converts bytes to String.  Need to investigate
   // if there is a better way.
   private String _uncompressedFile;
-  private int _charPointer;
+  private int _uncompressedFileLength;
+  private int _index;
 
   private Path _path;
   private Value _fileValue; // Created by fopen... can be BooleanValue.FALSE
@@ -197,24 +198,42 @@ public class ZlibClass {
     throws IOException, DataFormatException
   {
     if (_uncompressedFile == null) {
-      ReadStream rs = _path.openRead();
-      ByteBuffer b = new ByteBuffer();
-      int ch;
-      while ((ch = rs.read()) >= 0) {
-        b.append(ch);
-      }
-      byte[] compressedBytes = b.getBuffer();
-      _inflater.setInput(compressedBytes);
-      byte[] inflatedBytes = new byte[compressedBytes.length];
-      _inflater.inflate(inflatedBytes);
-      _uncompressedFile = new String(inflatedBytes);
-      return new StringValue(_uncompressedFile);
+       fillUncompressedFile();
     }
 
-    /*
-    if (ch >= 0)
-      return new StringValue(String.valueOf((char) ch));
-    else */
+    if (_index < _uncompressedFileLength) {
+      char[] ch = new char[1];
+      ch[0] = _uncompressedFile.charAt(_index++);
+      return new StringValue(new String(ch));
+    } else
       return BooleanValue.FALSE;
+  }
+
+
+  private void fillUncompressedFile()
+    throws IOException, DataFormatException
+  {
+    ReadStream rs = _path.openRead();
+    ByteBuffer b = new ByteBuffer();
+
+    int ch;
+    while ((ch = rs.read()) >= 0) {
+      b.append(ch);
+    }
+
+    byte[] compressedBytes = b.getBuffer();
+    _inflater.setInput(compressedBytes);
+
+    int length = compressedBytes.length;
+    byte[] inflatedBytes = new byte[length];
+    ByteBuffer inflatedBuffer = new ByteBuffer();
+    int totalBytes = 0;
+    while (!_inflater.finished()) {
+      int numBytes = _inflater.inflate(inflatedBytes);
+      inflatedBuffer.append(inflatedBytes,0,numBytes);
+      totalBytes += numBytes;
+    }
+    _uncompressedFile = new String(inflatedBuffer.getBuffer(),0,totalBytes);
+    _uncompressedFileLength = _uncompressedFile.length();
   }
 }
