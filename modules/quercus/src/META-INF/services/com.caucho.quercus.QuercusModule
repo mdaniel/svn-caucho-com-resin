@@ -1,5 +1,6 @@
 com.caucho.quercus.lib.QuercusApacheModule
 com.caucho.quercus.lib.QuercusArrayModule
+com.caucho.quercus.lib.QuercusBcmathModule
 com.caucho.quercus.lib.QuercusClassesModule
 com.caucho.quercus.lib.QuercusDateModule
 com.caucho.quercus.lib.QuercusErrorModule
