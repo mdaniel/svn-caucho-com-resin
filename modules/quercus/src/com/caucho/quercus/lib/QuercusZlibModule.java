@@ -89,6 +89,22 @@ public class QuercusZlibModule extends AbstractQuercusModule {
     return zp.gzwrite(env, s,length);
   }
 
+  /**
+   *
+   * @param env
+   * @param zp
+   * @param s
+   * @param length
+   * @return alias of gzwrite
+   */
+  public int gzputs(Env env,
+                    @NotNull ZlibClass zp,
+                    @NotNull String s,
+                    @Optional("0") int length)
+  {
+    return gzwrite(env, zp, s, length);
+  }
+
   public boolean gzclose(@NotNull ZlibClass zp)
   {
     if (zp == null)
@@ -96,7 +112,8 @@ public class QuercusZlibModule extends AbstractQuercusModule {
 
     return zp.gzclose();
   }
-  
+
+
   // @todo gzcompress()
   // @todo gzdeflate()
   // @todo gzencode()
@@ -107,7 +124,6 @@ public class QuercusZlibModule extends AbstractQuercusModule {
   // @todo gzgetss()
   // @todo gzinflate()
   // @todo gzpassthru()
-  // @todo gzputs()
   // @todo gzread()
   // @todo gzread()
   // @todo gzrewind()

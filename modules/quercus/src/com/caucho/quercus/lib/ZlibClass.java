@@ -58,7 +58,7 @@ public class ZlibClass {
   private static final L10N L = new L10N(ZlibClass.class);
 
   private Deflater _deflater;
-  private Inflater _inflater;
+  private GZIPInputStream _gzis; // Used if reading from compressed file
   private Value _fileValue; // Created by fopen... can be BooleanValue.FALSE
 
   /**
@@ -76,8 +76,6 @@ public class ZlibClass {
                    String mode,
                    int useIncludePath)
   {
-    _inflater = new Inflater();
-
     // Set level
     Pattern pattern = Pattern.compile("[0-9]");
     Matcher matcher = pattern.matcher(mode);
@@ -100,9 +98,22 @@ public class ZlibClass {
      *   _deflater.setStrategy(Deflater.HUFFMAN_ONLY);
      */
 
-    // Strip everything to the right of the level
-    // before sending mode to fopen
-    _fileValue = QuercusFileModule.fopen(env, fileName, mode.substring(0,matcher.start()), true, null);
+    // If open for reading then create _gzis
+    if (mode.startsWith("r") || (mode.indexOf("+") != -1)) {
+      Path path = env.getPwd().lookup(fileName);
+      try {
+        _gzis = new GZIPInputStream(path.openRead());
+      } catch (IOException e) {
+        log.log(Level.FINE, e.getMessage(), e);
+      }
+    }
+
+    // If not just open for reading then create _fileValue
+    if (!mode.startsWith("r") || (mode.indexOf("+") != -1)) {
+      // Strip everything to the right of the level
+      // before sending mode to fopen
+      _fileValue = QuercusFileModule.fopen(env, fileName, mode.substring(0,matcher.start()), true, null);
+    }
 
   }
 
@@ -159,5 +170,19 @@ public class ZlibClass {
     fv.close();
 
     return true;
+  }
+
+  /**
+   * alias of gzwrite
+   * @param env
+   * @param s
+   * @param length
+   * @return # of uncompressed bytes
+   */
+  public int gzputs(Env env,
+                    @NotNull String s,
+                    @Optional("0") int length)
+  {
+    return gzwrite(env, s, length);
   }
 }
