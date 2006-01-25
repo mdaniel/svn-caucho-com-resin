@@ -28,17 +28,21 @@
 
 package com.caucho.quercus.lib;
 
+import com.caucho.quercus.env.ArrayValue;
+import com.caucho.quercus.env.ArrayValueImpl;
 import com.caucho.quercus.env.BooleanValue;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.module.NotNull;
 import com.caucho.quercus.module.Optional;
+import com.caucho.util.ByteBuffer;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -83,9 +87,10 @@ public class ZlibClass {
     // Set level
     Pattern pattern = Pattern.compile("[0-9]");
     Matcher matcher = pattern.matcher(mode);
-    if (matcher.find())
+    if (matcher.find()) {
       _deflater = new Deflater((int) mode.charAt(matcher.start()) - (int) '0');
-    else
+      mode = mode.substring(0,matcher.start());
+    } else
       _deflater = new Deflater();
 
     /**
@@ -104,7 +109,8 @@ public class ZlibClass {
 
      // Strip everything to the right of the level
      // before sending mode to fopen
-     _fileValue = QuercusFileModule.fopen(env, fileName, mode.substring(0,matcher.start()), true, null);
+     _fileValue = QuercusFileModule.fopen(env, fileName, mode, true, null);
+
 
     _path = env.getPwd().lookup(fileName);
 
@@ -136,11 +142,19 @@ public class ZlibClass {
 
     _deflater.setInput(input);
     _deflater.finish();
-    byte[] output = new byte[2 * input.length];
-    int compressedDataLength = _deflater.deflate(output);
+    byte[] output = new byte[input.length];
+    ByteBuffer buf = new ByteBuffer();
+    int compressedDataLength;
+    int fullCompressedDataLength = 0;
+    
+    while (!_deflater.finished()) {
+      compressedDataLength = _deflater.deflate(output);
+      fullCompressedDataLength += compressedDataLength;
+      buf.append(output,0,compressedDataLength);
+    }
 
     try {
-      fileValue.write(output, 0, compressedDataLength);
+      fileValue.write(buf.getBuffer(), 0, fullCompressedDataLength);
       fileValue.flush();
     } catch (IOException e) {
       log.log(Level.FINE, e.getMessage(), e);
@@ -228,6 +242,85 @@ public class ZlibClass {
   }
 
   /**
+   * helper function for ZlibModule.gzfile
+   * need to have created a ZlibClass before calling this
+   * 
+   * @return array of uncompressed lines
+   * @throws IOException
+   * @throws DataFormatException
+   */
+  public Value gzfile()
+    throws IOException, DataFormatException
+  {
+    ArrayValue array = new ArrayValueImpl();
+    
+    if (_bufferedReader == null) {
+      getBufferedReader();
+    }
+    
+    StringBuffer sb = new StringBuffer();
+    int readChar;
+    while (true) {
+      readChar = _bufferedReader.read();
+      if (readChar >= 0) {
+        sb.append(Character.toString((char) readChar));
+        if ((((char) readChar) == '\n') || (((char) readChar) == '\r')) {
+          array.put(sb.toString());
+          sb = new StringBuffer();
+        }
+      } else
+        break;
+    }
+    
+    array.put(sb.toString());
+    
+    return array;
+  }
+
+  /**
+   * helper function for readgzfile.
+   * Not meant to be called directly from PHP
+   * 
+   * @return uncompressed file
+   * @throws IOException
+   * @throws DataFormatException
+   */
+  public InputStream readgzfile()
+    throws IOException, DataFormatException
+  {
+    return new InflaterInputStream(_path.openRead(), new Inflater());
+  }
+  
+  /**
+   * same as gzgets but does not stop at '\n' or '\r'
+   * @param length
+   * @return StringValue
+   * @throws IOException
+   * @throws DataFormatException
+   */
+  public Value gzread(int length)
+    throws IOException, DataFormatException
+   {
+     if (_bufferedReader == null) {
+       getBufferedReader();
+     }
+    
+     StringBuffer sb = new StringBuffer();
+     int readChar;
+     for (int i=0; i < length - 1; i++) {
+       readChar = _bufferedReader.read();
+       if (readChar >= 0) {
+         sb.append(Character.toString((char) readChar));
+       } else
+         break;
+     }
+     if (sb.length() > 0)
+       return new StringValue(sb.toString());
+     else
+       return BooleanValue.FALSE;
+   }
+
+  /**
    * 
    * @return true if eof
    */
@@ -279,6 +372,19 @@ public class ZlibClass {
   }
 
   /**
+   * resets _bufferedReader to beginning of file stream.
+   * 
+   * @return always true
+   * @throws IOException
+   */
+  public boolean gzrewind()
+    throws IOException
+  {
+    getBufferedReader();
+    return true;
+  }
+  
+  /**
    * helper function to open file for reading when necessary
    * 
    * @throws IOException
@@ -286,6 +392,12 @@ public class ZlibClass {
   private void getBufferedReader()
     throws IOException
   {
+    BufferedReader bufferedReader = _bufferedReader;
+    
+    _bufferedReader = null;
+    if (bufferedReader != null)
+      bufferedReader.close();
+    
     _bufferedReader = new BufferedReader(new InputStreamReader(new InflaterInputStream(_path.openRead(), new Inflater())));
   }
 }

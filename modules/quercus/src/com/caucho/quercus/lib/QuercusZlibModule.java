@@ -84,6 +84,48 @@ public class QuercusZlibModule extends AbstractQuercusModule {
     return env.wrapJava(zlib);
   }
 
+  /**
+   * 
+   * @param env
+   * @param fileName
+   * @param useIncludePath
+   * @return array of uncompressed lines from fileName
+   */
+  public Value gzfile(Env env,
+                      @NotNull String fileName,
+                      @Optional("0") int useIncludePath)
+    throws IOException, DataFormatException
+  {
+    if (fileName == null)
+      return BooleanValue.FALSE;
+    
+    ZlibClass zlib = new ZlibClass(env,fileName,"r",useIncludePath);
+    return zlib.gzfile();
+  }
+  
+  /**
+   * outputs uncompressed bytes directly to browser
+   * 
+   * @param env
+   * @param fileName
+   * @param useIncludePath
+   * @return
+   * @throws IOException
+   * @throws DataFormatException
+   */
+  public boolean readgzfile(Env env,
+                            @NotNull String fileName,
+                            @Optional("0") int useIncludePath)
+    throws IOException, DataFormatException
+  {
+    if (fileName == null)
+      return false;
+    
+    ZlibClass zlib = new ZlibClass(env, fileName,"r",useIncludePath);
+    env.getOut().writeStream(zlib.readgzfile());
+    return true;
+  }
+  
   public int gzwrite(Env env,
                      @NotNull ZlibClass zp,
                      @NotNull String s,
@@ -137,6 +179,16 @@ public class QuercusZlibModule extends AbstractQuercusModule {
     return zp.gzgetc();
   }
 
+  public Value gzread(@NotNull ZlibClass zp,
+                      int length)
+    throws IOException, DataFormatException
+  {
+    if (zp == null)
+      return BooleanValue.FALSE;
+    
+    return zp.gzread(length);
+  }
+  
   public Value gzgets(@NotNull ZlibClass zp,
                       int length)
     throws IOException, DataFormatException
@@ -158,8 +210,18 @@ public class QuercusZlibModule extends AbstractQuercusModule {
     return zp.gzgetss(length,allowedTags);
   }
 
+  public boolean gzrewind(@NotNull ZlibClass zp)
+    throws IOException
+  {
+    if (zp == null)
+      return false;
+    
+    return zp.gzrewind();
+  }
+  
   /**
    * compresses data using zlib
+   * XXX: does not work, need to find a way to pass byte arrays.
    * 
    * @param data
    * @param level (default is Deflater.DEFAULT_COMPRESSION)
@@ -177,13 +239,21 @@ public class QuercusZlibModule extends AbstractQuercusModule {
     deflater.setInput(input);
     deflater.finish();
 
-    byte[] output = new byte[2 * input.length];
-    int compressedLength = deflater.deflate(output);
-
-    return new StringValue(new String(output,0,compressedLength));
+    byte[] output = new byte[input.length];
+    ByteBuffer buf = new ByteBuffer();
+    int compressedDataLength;
+    int fullCompressedDataLength = 0;
+    while (!deflater.finished()) {
+      compressedDataLength = deflater.deflate(output);
+      fullCompressedDataLength += compressedDataLength;
+      buf.append(output,0,compressedDataLength);
+    }
+    
+    return new StringValue(new String(buf.getBuffer(),0,fullCompressedDataLength));
   }
 
   /**
+   * XXX: Does not work.  Need to find a way to pass byte arrays.
    * 
    * @param data
    * @param length (maximum length of string returned)
@@ -200,22 +270,23 @@ public class QuercusZlibModule extends AbstractQuercusModule {
     int uncompressedLength = 0;
     int fullUncompressedLength = 0;
     ByteBuffer buf = new ByteBuffer();
-    
+
     while(!inflater.finished()) {
       uncompressedLength = inflater.inflate(output);
       fullUncompressedLength += uncompressedLength;
       buf.append(output,0,uncompressedLength);
     }
-    
+
     if (length == 0)
       length = fullUncompressedLength;
     else
       length = Math.min(fullUncompressedLength, length);
-    
+
     return new StringValue(new String(output,0,length));
   }
 
   /**
+   * XXX: Does not work.  Need to find a way to pass byte arrays
    * 
    * @param data
    * @param level
@@ -233,30 +304,21 @@ public class QuercusZlibModule extends AbstractQuercusModule {
     deflater.setInput(input);
     deflater.finish();
 
-    byte[] output = new byte[2 * input.length];
-    int compressedLength = deflater.deflate(output);
-    /*
-    // The following will be taken out.  Only to test inflate
-    byte[] result = new byte[output.length];
-    int uncompressedLength = 0;
-    int fullUncompressedLength = 0;
+    byte[] output = new byte[input.length];
     ByteBuffer buf = new ByteBuffer();
-    Inflater inflater = new Inflater(true);
-    inflater.setInput(output,0,output.length);
-    
-    while (!inflater.finished()) {
-      uncompressedLength = inflater.inflate(result);
-      fullUncompressedLength += uncompressedLength;
-      buf.append(result,0,uncompressedLength);
+    int compressedDataLength;
+    int fullCompressedDataLength = 0;
+    while (!deflater.finished()) {
+      compressedDataLength = deflater.deflate(output);
+      fullCompressedDataLength += compressedDataLength;
+      buf.append(output,0,compressedDataLength);
     }
     
-    return new StringValue(new String(buf.getBuffer()));
-    // END OF CODE TO TAKE OUT LATER
-    */
-    return new StringValue(new String(output,0,compressedLength));
-  }
+    return new StringValue(new String(buf.getBuffer(),0,fullCompressedDataLength));
+}
 
   /**
+   * XXX: does not work.  Need to find a way to pass byte arrays
    * 
    * @param data compressed using Deflate algorithm
    * @param length (maximum length of string returned)
@@ -264,37 +326,33 @@ public class QuercusZlibModule extends AbstractQuercusModule {
    */
   public Value gzinflate(String data,
                          @Optional("0") int length)
-    throws DataFormatException
+    throws DataFormatException, IOException
   {
-    byte[] input = data.getBytes();
+    byte[] input = data.getBytes(); 
     byte[] output = new byte[input.length];
     Inflater inflater = new Inflater(true);
     inflater.setInput(input,0,input.length);
     int uncompressedLength = 0;
     int fullUncompressedLength = 0;
     ByteBuffer buf = new ByteBuffer();
-    
+
     while(!inflater.finished()) {
       uncompressedLength = inflater.inflate(output);
       fullUncompressedLength += uncompressedLength;
       buf.append(output,0,uncompressedLength);
     }
-    
+
     if (length == 0)
       length = fullUncompressedLength;
     else
       length = Math.min(fullUncompressedLength, length);
-    
+
     return new StringValue(new String(output,0,length));
   }
-  
-  // @todo gzencode()
-  // @todo gzfile() -- XXX Skip for now
-  // @todo gzpassthru() -- XXX Skip for now
-  // @todo gzread()
-  // @todo gzrewind()
-  // @todo gzseek() -- XXX Skip for now
-  // @todo gztell() -- XXX Skip for now
-  // @todo readgzfile() -- XXX Skip for now
+
+  // @todo gzencode() -- XXX Skip for now (until solve byte[] problem)
+  // @todo gzpassthru()
+  // @todo gzseek()
+  // @todo gztell()
   // @todo zlib_get_coding_type()
 }
