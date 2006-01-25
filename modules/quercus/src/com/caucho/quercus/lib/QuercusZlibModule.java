@@ -114,31 +114,56 @@ public class QuercusZlibModule extends AbstractQuercusModule {
     return zp.gzclose();
   }
 
-  public Value gzgetc(Env env,
-                      @NotNull ZlibClass zp)
+  public boolean gzeof(@NotNull ZlibClass zp)
+    throws IOException
+  {
+    if (zp == null)
+      return false;
+    
+    return zp.gzeof();
+  }
+  
+  public Value gzgetc(@NotNull ZlibClass zp)
     throws IOException, DataFormatException
   {
     if (zp == null)
       return BooleanValue.FALSE;
 
-    return zp.gzgetc(env);
+    return zp.gzgetc();
   }
+
+  public Value gzgets(@NotNull ZlibClass zp,
+                      int length)
+    throws IOException, DataFormatException
+  {
+    if (zp == null)
+      return BooleanValue.FALSE;
+
+    return zp.gzgets(length);
+  }
+  
+  public Value gzgetss(@NotNull ZlibClass zp,
+                       int length,
+                       @Optional String allowedTags)
+    throws IOException, DataFormatException
+  {
+    if (zp == null)
+      return BooleanValue.FALSE;
+    
+    return zp.gzgetss(length,allowedTags);
+  }
+
   // @todo gzcompress()
   // @todo gzdeflate()
   // @todo gzencode()
-  // @todo gzeof()
-  // @todo gzfile()
-  // @todo gzgets()
-  // @todo gzgetss()
+  // @todo gzfile() -- XXX Skip for now
   // @todo gzinflate()
-  // @todo gzpassthru()
-  // @todo gzread()
+  // @todo gzpassthru() -- XXX Skip for now
   // @todo gzread()
   // @todo gzrewind()
-  // @todo gzseek()
-  // @todo gztell()
+  // @todo gzseek() -- XXX Skip for now
+  // @todo gztell() -- XXX Skip for now
   // @todo gzuncompress()
-  // @todo gzwrite()
-  // @todo readgzfile()
+  // @todo readgzfile() -- XXX Skip for now
   // @todo zlib_get_coding_type()
 }

@@ -28,33 +28,29 @@
 
 package com.caucho.quercus.lib;
 
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import java.util.zip.GZIPInputStream;
-import java.util.zip.Deflater;
-import java.util.zip.Inflater;
-import java.util.zip.DataFormatException;
-import java.util.regex.*;
-
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-
-import com.caucho.util.L10N;
-import com.caucho.util.ByteBuffer;
-import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.BooleanValue;
-import com.caucho.quercus.env.NullValue;
+import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.StringValue;
-import com.caucho.quercus.env.LongValue;
-import com.caucho.quercus.module.Optional;
+import com.caucho.quercus.env.Value;
 import com.caucho.quercus.module.NotNull;
+import com.caucho.quercus.module.Optional;
+import com.caucho.util.ByteBuffer;
+import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.ReadStream;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.BufferedReader;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.zip.DataFormatException;
+import java.util.zip.Deflater;
+import java.util.zip.Inflater;
+import java.util.zip.InflaterInputStream;
 
 /**
  * Zlib object oriented API facade
@@ -65,22 +61,18 @@ public class ZlibClass {
   private static final L10N L = new L10N(ZlibClass.class);
 
   private Deflater _deflater;
-  private Inflater _inflater;
-  // XXX: Currently reads the entire compressed file into
-  // memory and converts bytes to String.  Need to investigate
-  // if there is a better way.
-  private String _uncompressedFile;
-  private int _uncompressedFileLength;
-  private int _index;
+  private BufferedReader _bufferedReader;
 
   private Path _path;
   private Value _fileValue; // Created by fopen... can be BooleanValue.FALSE
 
   /**
    * Creates and sets _deflater.
-   * Also creates _fileValue.  All functions are wrappers around
+   * Also creates _fileValue.  All write functions are wrappers around
    * the _fileValue functions using _deflater to compress the
-   * byte stream or _inflater to decompress the byte stream.
+   * byte stream.
+   * 
+   * All read functions use _bufferedReader;
    *
    * @param fileName
    * @param mode (ie: "w9" or "r7f")
@@ -91,7 +83,6 @@ public class ZlibClass {
                    String mode,
                    int useIncludePath)
   {
-    _inflater = new Inflater();
     // Set level
     Pattern pattern = Pattern.compile("[0-9]");
     Matcher matcher = pattern.matcher(mode);
@@ -191,49 +182,113 @@ public class ZlibClass {
 
   /**
    *
-   * @param env
    * @return the next character or BooleanValue.FALSE
    */
-  public Value gzgetc(Env env)
+  public Value gzgetc()
     throws IOException, DataFormatException
   {
-    if (_uncompressedFile == null) {
-       fillUncompressedFile();
+    if (_bufferedReader == null) {
+      getBufferedReader();
     }
-
-    if (_index < _uncompressedFileLength) {
-      char[] ch = new char[1];
-      ch[0] = _uncompressedFile.charAt(_index++);
-      return new StringValue(new String(ch));
-    } else
+    int ch = _bufferedReader.read();
+    
+    if (ch >= 0)
+      return new StringValue(Character.toString((char) ch));
+    else
       return BooleanValue.FALSE;
   }
 
-
-  private void fillUncompressedFile()
+  /**
+   * Gets a (uncompressed) string of up to length - 1 bytes read
+   * from the given file pointer. Reading ends when length - 1 bytes
+   * have been read, on a newline, or on EOF (whichever comes first).
+   *
+   * @param length
+   * @return StringValue
+   */
+  public Value gzgets(int length)
     throws IOException, DataFormatException
   {
-    ReadStream rs = _path.openRead();
-    ByteBuffer b = new ByteBuffer();
-
-    int ch;
-    while ((ch = rs.read()) >= 0) {
-      b.append(ch);
+    if (_bufferedReader == null) {
+      getBufferedReader();
     }
-
-    byte[] compressedBytes = b.getBuffer();
-    _inflater.setInput(compressedBytes);
-
-    int length = compressedBytes.length;
-    byte[] inflatedBytes = new byte[length];
-    ByteBuffer inflatedBuffer = new ByteBuffer();
-    int totalBytes = 0;
-    while (!_inflater.finished()) {
-      int numBytes = _inflater.inflate(inflatedBytes);
-      inflatedBuffer.append(inflatedBytes,0,numBytes);
-      totalBytes += numBytes;
+    
+    StringBuffer sb = new StringBuffer();
+    int readChar;
+    for (int i=0; i < length - 1; i++) {
+      readChar = _bufferedReader.read();
+      if (readChar >= 0) {
+        sb.append(Character.toString((char) readChar));
+        if ((((char) readChar) == '\n') || (((char) readChar) == '\r'))
+          break;
+      } else
+        break;
     }
-    _uncompressedFile = new String(inflatedBuffer.getBuffer(),0,totalBytes);
-    _uncompressedFileLength = _uncompressedFile.length();
+    if (sb.length() > 0)
+      return new StringValue(sb.toString());
+    else
+      return BooleanValue.FALSE;
+  }
+
+  /**
+   * 
+   * @return true if eof
+   */
+  public boolean gzeof()
+    throws IOException
+  {
+    if (_bufferedReader == null) {
+      getBufferedReader();
+    }
+    
+    _bufferedReader.mark(1);
+    int result = _bufferedReader.read();
+    _bufferedReader.reset();
+    
+    return (result == -1);
+  }
+
+  /**
+   * 
+   * @param length
+   * @param allowedTags
+   * @return next line stripping tags
+   * @throws IOException
+   * @throws DataFormatException
+   */
+  public Value gzgetss(int length,
+                       @Optional String allowedTags)
+    throws IOException, DataFormatException
+  {
+    if (_bufferedReader == null) {
+      getBufferedReader();
+    }
+    
+    StringBuffer sb = new StringBuffer();
+    int readChar;
+    for (int i=0; i < length - 1; i++) {
+      readChar = _bufferedReader.read();
+      if (readChar >= 0) {
+        sb.append(Character.toString((char) readChar));
+        if ((((char) readChar) == '\n') || (((char) readChar) == '\r'))
+          break;
+      } else
+        break;
+    }
+    if (sb.length() > 0)
+      return new StringValue(QuercusStringModule.strip_tags(sb.toString(), allowedTags));
+    else
+      return BooleanValue.FALSE;
+  }
+
+  /**
+   * helper function to open file for reading when necessary
+   * 
+   * @throws IOException
+   */
+  private void getBufferedReader()
+    throws IOException
+  {
+    _bufferedReader = new BufferedReader(new InputStreamReader(new InflaterInputStream(_path.openRead(), new Inflater())));
   }
 }
