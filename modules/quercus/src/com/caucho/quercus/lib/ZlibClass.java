@@ -34,15 +34,12 @@ import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.module.NotNull;
 import com.caucho.quercus.module.Optional;
-import com.caucho.util.ByteBuffer;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
-import com.caucho.vfs.ReadStream;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;

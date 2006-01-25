@@ -28,20 +28,18 @@
 
 package com.caucho.quercus.lib;
 
+import com.caucho.quercus.env.BooleanValue;
+import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.Value;
+import com.caucho.quercus.module.AbstractQuercusModule;
+import com.caucho.quercus.module.NotNull;
+import com.caucho.quercus.module.Optional;
 import com.caucho.util.L10N;
 import com.caucho.util.Log;
 
-import com.caucho.quercus.module.AbstractQuercusModule;
-import com.caucho.quercus.module.Optional;
-import com.caucho.quercus.module.NotNull;
-import com.caucho.quercus.module.Reference;
-
-import com.caucho.quercus.env.*;
-import com.caucho.vfs.Path;
-
+import java.io.IOException;
 import java.util.logging.Logger;
 import java.util.zip.DataFormatException;
-import java.io.IOException;
 
 /**
  * PHP ZLib
