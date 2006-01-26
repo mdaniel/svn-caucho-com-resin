@@ -29,21 +29,12 @@
 
 package com.caucho.quercus.lib;
 
-import java.util.Map;
-import java.util.HashMap;
-
 import com.caucho.util.L10N;
 
 import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.quercus.module.Optional;
 
-import com.caucho.quercus.env.Value;
-import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.NullValue;
-import com.caucho.quercus.env.BooleanValue;
-import com.caucho.quercus.env.ArrayValue;
-import com.caucho.quercus.env.DoubleValue;
-import com.caucho.quercus.env.LongValue;
+import com.caucho.quercus.env.*;
 
 import com.caucho.util.RandomUtil;
 
@@ -122,6 +113,97 @@ public class QuercusMathModule extends AbstractQuercusModule {
     throw new UnsupportedOperationException();
   }
 
+  public static Value base_convert(Env env, String number, int fromBase, int toBase)
+  {
+    if (fromBase < 2 || fromBase > 36) {
+      env.warning(L.l("invalid `{0}' ({1})", "from base", fromBase));
+      return BooleanValue.FALSE;
+    }
+
+    if (toBase < 2 || toBase > 36) {
+      env.warning(L.l("invalid `{0}' ({1})", "to base", toBase));
+      return BooleanValue.FALSE;
+    }
+
+    long result = 0;
+
+    int len = number.length();
+
+    for (int i = 0; i < len; i++) {
+      int ch = number.charAt(i);
+
+      int value;
+
+      if ('0' <= ch && ch <= '9')
+        value = ch - '0';
+      else if ('a' <= ch && ch <= 'z')
+        value = ch - 'a' + 10;
+      else if ('A' <= ch && ch <= 'Z')
+        value = ch - 'a' + 10;
+      else
+        continue;
+
+      if (value >= fromBase)
+        continue;
+
+      result = result * fromBase;
+
+      result += value;
+    }
+
+    if (result == 0)
+      return new StringValue("0");
+
+    StringBuffer sb = new StringBuffer();
+
+    do {
+      int d = (int) (result % toBase);
+      result = result / toBase;
+
+      if (d < 10)
+        sb.append((char) (d + '0'));
+      else
+        sb.append((char) (d - 10 + 'a'));
+    } while (result != 0);
+
+    sb.reverse();
+
+    return new StringValue(sb.toString());
+  }
+
+  /**
+   * Returns the long value of an binary number.
+   *
+   * @param bin A string represeantion of an binary number.
+   * @return the decimal equivalent of the binary number
+   * @throws ArithmeticException if the binary number cannot fit in a long
+   */
+  public static long bindec(String bin)
+  {
+    // This implementation deliberately differs from the php implementation,
+    // which returns an int or a float.  Quercus uses long's to represent
+    // integral values and the long represenation is more accurate than a float.
+    long result = 0;
+
+    int len = bin.length();
+
+    for (int i = 0; i < len; i++) {
+      char ch = bin.charAt(i);
+
+      if ('0' == ch)
+        result = result << 1;
+      else if ('1' == ch) {
+        result = result << 1;
+        result += 1;
+      }
+
+      if (result < 0)
+        throw new ArithmeticException(L.l("overflow"));
+    }
+
+    return result;
+  }
+
   public static double ceil(double value)
   {
     return Math.ceil(value);
@@ -137,8 +219,41 @@ public class QuercusMathModule extends AbstractQuercusModule {
     return Math.cosh(value);
   }
 
+  /**
+   * Returns a binary representation of a number.
+   * @param value the number
+   */
+  public static String decbin(long value)
+  {
+    if (value == 0)
+      return "0";
+
+    StringBuilder sb = new StringBuilder();
+
+    while (value != 0) {
+      int d = (int) (value & 1);
+      value = value >> 1;
+
+      if (d == 0)
+        sb.append('0');
+      else
+        sb.append('1');
+    }
+
+    sb.reverse();
+
+    return sb.toString();
+  }
+
+  /**
+   * Returns a hexadecimal representation of a number.
+   * @param value the number
+   */
   public static String dechex(long value)
   {
+    if (value == 0)
+      return "0";
+
     StringBuilder sb = new StringBuilder();
 
     while (value != 0) {
@@ -151,11 +266,32 @@ public class QuercusMathModule extends AbstractQuercusModule {
         sb.append((char) (d + 'a' - 10));
     }
 
-    StringBuilder sb2 = new StringBuilder();
-    for (int i = sb.length() - 1; i >= 0; i--)
-      sb2.append(sb.charAt(i));
+    sb.reverse();
 
-    return sb2.toString();
+    return sb.toString();
+  }
+
+  /**
+   * Returns an octal representation of a number.
+   * @param value the number
+   */
+  public static String decoct(long value)
+  {
+    if (value == 0)
+      return "0";
+
+    StringBuilder sb = new StringBuilder();
+
+    while (value != 0) {
+      int d = (int) (value & 7);
+      value = value >> 3;
+
+      sb.append((char) (d + '0'));
+    }
+
+    sb.reverse();
+
+    return sb.toString();
   }
 
   public static double deg2rad(double value)
@@ -363,6 +499,38 @@ public class QuercusMathModule extends AbstractQuercusModule {
     return NullValue.NULL;
   }
 
+  /**
+   * Returns the long value of an octal number.
+   *
+   * @param oct A string represeantion of an octal number.
+   * @return the decimal equivalent of the octal number
+   * @throws ArithmeticException if the octal number cannot fit in a long
+   */
+  public static long octdec(String oct)
+  {
+    // This implementation deliberately differs from the php implementation,
+    // which returns an int or a float.  Quercus uses long's to represent
+    // integral values and the long represenation is more accurate than a float.
+    long result = 0;
+
+    int len = oct.length();
+
+    for (int i = 0; i < len; i++) {
+      int ch = oct.charAt(i);
+
+      if ('0' <= ch && ch <= '9') {
+        result = result << 3;
+        result += ch - '0';
+
+        if (result < 0)
+          throw new ArithmeticException(L.l("overflow"));
+      }
+    }
+
+    return result;
+  }
+
+
   public static double pi()
   {
     return M_PI;
@@ -388,7 +556,7 @@ public class QuercusMathModule extends AbstractQuercusModule {
   {
     if (precision > 0) {
       double exp = Math.pow(10, precision);
-      
+
       return Math.round(value * exp) / exp;
     }
     else
