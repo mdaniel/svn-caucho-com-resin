@@ -29,9 +29,9 @@
 
 package com.caucho.quercus.lib;
 
+import com.caucho.quercus.env.ArrayValueImpl;
 import com.caucho.quercus.env.BooleanValue;
 import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.module.NotNull;
 import com.caucho.quercus.module.Optional;
@@ -151,7 +151,12 @@ public class SimpleXMLElementClass extends Value{
   }
   
   public Value get(Value value) {
-    return new StringValue(value.toString());
+    ArrayValueImpl array = new ArrayValueImpl();
+    array.put(value);
+    return array;
+    //String s = value.toString();
+    //return new StringValue("Charlie");
+    //return new StringValue(s);
   }
   
   //@todo attributes
