@@ -30,6 +30,8 @@
 package com.caucho.quercus.lib;
 
 import com.caucho.quercus.env.BooleanValue;
+import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.module.NotNull;
 import com.caucho.quercus.module.Optional;
@@ -37,6 +39,7 @@ import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -48,11 +51,15 @@ import java.util.logging.Logger;
 /**
  * SimpleXML object oriented API facade
  */
-public class SimpleXMLElementClass {
+public class SimpleXMLElementClass extends Value{
   private static final Logger log = Logger.getLogger(SimpleXMLElementClass.class.getName());
   private static final L10N L = new L10N(SimpleXMLElementClass.class);
-  
+
   private Document _document;
+  private Element _element;
+
+  private String _className;
+  private int _options;
 
   /**
    * constructor used by simplexml_load_string
@@ -73,6 +80,9 @@ public class SimpleXMLElementClass {
     } catch (Exception e) {
       log.log(Level.FINE, L.l(e.toString()), e);
     }
+
+    _className = className;
+    _options = options;
   }
 
   /**
@@ -93,6 +103,26 @@ public class SimpleXMLElementClass {
     } catch (Exception e) {
       log.log(Level.FINE, L.l(e.toString()), e);
     }
+
+    _className = className;
+    _options = options;
+  }
+
+  /**
+   * constructor used by SimpleXMLElement->children
+   * that function returns an Array of SimpleXMLElements
+   * 
+   * @param element
+   * @param className
+   * @param options
+   */
+  public SimpleXMLElementClass(Element element,
+                               String className,
+                               int options)
+  {
+    _element = element;
+    _className = className;
+    _options = options;
   }
 
   /**
@@ -102,11 +132,28 @@ public class SimpleXMLElementClass {
    */
   public Value asXML(@Optional Path file)
   {
-    
+
     return BooleanValue.FALSE;
+  }
+
+  public Value children(Env env)
+  {
+    return BooleanValue.FALSE;
+    /*
+    NodeList nodes = _element.getChildNodes();
+    ArrayValueImpl children = new ArrayValueImpl();
+
+    for (int i = 0; i < nodes.getLength(); i++) {
+      NamedNodeMap attributes = nodes.item(i).getAttributes();
+      ArrayValueImpl child = new ArrayValueImpl();
+      children.put(env.wrapJava(new SimpleXMLElementClass((Element) nodes.item(i),_className, _options)));
+    }*/
+  }
+  
+  public Value get(Value value) {
+    return new StringValue(value.toString());
   }
   
   //@todo attributes
-  //@todo children
   //@todo xpath
 }
