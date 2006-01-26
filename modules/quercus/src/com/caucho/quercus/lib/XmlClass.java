@@ -29,25 +29,25 @@
 
 package com.caucho.quercus.lib;
 
-import java.util.logging.Logger;
-import java.util.logging.Level;
-import java.util.HashMap;
-import java.io.IOException;
-import java.io.StringReader;
-
-import com.caucho.util.L10N;
-
 import com.caucho.quercus.env.*;
-
-import org.xml.sax.*;
-import org.xml.sax.helpers.DefaultHandler;
-
-import javax.xml.parsers.SAXParser;
-import javax.xml.parsers.SAXParserFactory;
-import javax.xml.parsers.ParserConfigurationException;
-
 import com.caucho.quercus.module.Optional;
 import com.caucho.quercus.module.Reference;
+import com.caucho.util.L10N;
+
+import org.xml.sax.Attributes;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+import org.xml.sax.helpers.DefaultHandler;
+
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
+import java.io.IOException;
+import java.io.StringReader;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * XML object oriented API facade
@@ -352,8 +352,8 @@ public class XmlClass {
 
     InputSource is = new InputSource(new StringReader(_xmlString.toString()));
 
-    Value valueArray = new ArrayValueImpl();
-    Value indexArray = new ArrayValueImpl();
+    ArrayValueImpl valueArray = new ArrayValueImpl();
+    ArrayValueImpl indexArray = new ArrayValueImpl();
 
     try {
       SAXParser saxParser = _factory.newSAXParser();
@@ -443,23 +443,25 @@ public class XmlClass {
    * handler solely for xml_parse_into_struct
    */
   class StructHandler extends DefaultHandler {
-    private Value _valueArray;
-    private Value _indexArray;
+    private ArrayValueImpl _valueArray;
+    private ArrayValueImpl _indexArray;
 
     //Keeps track of depth within tree;
     //startElement increments, endElement decrements
     private int _level = 1;
 
-    private HashMap<Integer, String> _paramList = new HashMap<Integer, String> ();
-
+    private HashMap<Integer, String> _paramHashMap = new HashMap<Integer, String> ();
+    private HashMap<StringValue, ArrayValueImpl> _indexArrayHashMap = new HashMap<StringValue, ArrayValueImpl>();
+    private ArrayList<StringValue> _indexArrayKeys = new ArrayList<StringValue>();
+    
     // Used to determine whether a given element has sub elements
     private boolean _isComplete = true;
     private boolean _isOutside = true;
 
     private int _valueArrayIndex = 0;
 
-    public StructHandler(Value valueArray,
-                         Value indexArray)
+    public StructHandler(ArrayValueImpl valueArray,
+                         ArrayValueImpl indexArray)
     {
       _valueArray = valueArray;
       _indexArray = indexArray;
@@ -485,6 +487,14 @@ public class XmlClass {
       return result;
     }
 
+    public void endDocument()
+      throws SAXException
+    {
+      for(StringValue sv : _indexArrayKeys) {
+        _indexArray.put(sv, _indexArrayHashMap.get(sv));
+      }
+    }
+    
     public void startElement(String namespaceURI,
                              String lName,
                              String qName,
@@ -500,17 +510,24 @@ public class XmlClass {
       elementArray.put(new StringValue("tag"), new StringValue(eName));
       elementArray.put(new StringValue("type"), new StringValue("open"));
       elementArray.put(new StringValue("level"), new DoubleValue((double) _level));
-      _paramList.put(_level, eName);
+      _paramHashMap.put(_level, eName);
 
       if (attrs.getLength() > 0) {
         elementArray.put(new StringValue("attributes"), createAttributeArray(attrs));
       }
 
       _valueArray.put(new DoubleValue((double)_valueArrayIndex), elementArray);
-
-      Value indexArray = new ArrayValueImpl();
+      
+      StringValue key = new StringValue(eName);
+      ArrayValueImpl indexArray = _indexArrayHashMap.get(key);
+      
+      if (indexArray == null) {
+        indexArray = new ArrayValueImpl();
+        _indexArrayKeys.add(key);
+      }
+      
       indexArray.put(new DoubleValue((double) _valueArrayIndex));
-      _indexArray.put(new StringValue(eName), indexArray);
+      _indexArrayHashMap.put(key, indexArray);
 
       _valueArrayIndex++;
       _level++;
@@ -540,8 +557,16 @@ public class XmlClass {
         elementArray.put(new StringValue("level"), new DoubleValue((double) _level));
         _valueArray.put(new DoubleValue((double)_valueArrayIndex), elementArray);
 
-        Value indexArray = _indexArray.get(new StringValue(_paramList.get(_level)));
+        StringValue key = new StringValue(eName);
+        ArrayValueImpl indexArray = _indexArrayHashMap.get(key);
+      
+        if (indexArray == null) {
+          indexArray = new ArrayValueImpl();
+          _indexArrayKeys.add(key);
+        }
+      
         indexArray.put(new DoubleValue((double) _valueArrayIndex));
+        _indexArrayHashMap.put(key, indexArray);
 
         _valueArrayIndex++;
       }
@@ -559,13 +584,13 @@ public class XmlClass {
 
       if (_isOutside) {
         Value elementArray = new ArrayValueImpl();
-        elementArray.put(new StringValue("tag"), new StringValue(_paramList.get(_level - 1)));
+        elementArray.put(new StringValue("tag"), new StringValue(_paramHashMap.get(_level - 1)));
         elementArray.put(new StringValue("value"), new StringValue(s));
         elementArray.put(new StringValue("type"), new StringValue("cdata"));
         elementArray.put(new StringValue("level"), new DoubleValue((double) _level - 1));
         _valueArray.put(new DoubleValue((double)_valueArrayIndex), elementArray);
 
-        Value indexArray = _indexArray.get(new StringValue(_paramList.get(_level - 1)));
+        Value indexArray = _indexArray.get(new StringValue(_paramHashMap.get(_level - 1)));
         indexArray.put(new DoubleValue((double) _valueArrayIndex));
 
         _valueArrayIndex++;

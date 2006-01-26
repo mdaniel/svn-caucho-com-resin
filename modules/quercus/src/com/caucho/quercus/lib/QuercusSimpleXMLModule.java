@@ -35,7 +35,7 @@ import com.caucho.quercus.module.AbstractQuercusModule;
  */
 public class QuercusSimpleXMLModule extends AbstractQuercusModule {
   
-  //@todo simplexml_import_dom
+  //@todo simplexml_import_dom -- Skip until (XXX. DOM Functions implemented)
   //@todo simplexml_load_file
   //@todo simplexml_load_string
 }
