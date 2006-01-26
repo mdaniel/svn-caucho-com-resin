@@ -29,11 +29,83 @@
 
 package com.caucho.quercus.lib;
 
+import com.caucho.quercus.env.BooleanValue;
+import com.caucho.quercus.env.Value;
+import com.caucho.quercus.module.NotNull;
+import com.caucho.quercus.module.Optional;
+import com.caucho.util.L10N;
+import com.caucho.vfs.Path;
+
+import org.w3c.dom.Document;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import java.io.ByteArrayInputStream;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+
 /**
  * SimpleXML object oriented API facade
  */
 public class SimpleXMLElementClass {
-  //@todo asXML
+  private static final Logger log = Logger.getLogger(SimpleXMLElementClass.class.getName());
+  private static final L10N L = new L10N(SimpleXMLElementClass.class);
+  
+  private Document _document;
+
+  /**
+   * constructor used by simplexml_load_string
+   * XXX: className and options currently are unsupported
+   * 
+   * @param data
+   * @param className
+   * @param options
+   */
+  public SimpleXMLElementClass(@NotNull String data,
+                               @Optional String className,
+                               @Optional int options)
+  {
+    DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+    try {
+      DocumentBuilder builder = factory.newDocumentBuilder();
+      _document = builder.parse(new ByteArrayInputStream(data.getBytes()));
+    } catch (Exception e) {
+      log.log(Level.FINE, L.l(e.toString()), e);
+    }
+  }
+
+  /**
+   * constructor used by simplexml_load_file
+   * XXX: className and options currently are unsupported
+   * @param file
+   * @param className
+   * @param options
+   */
+  public SimpleXMLElementClass(@NotNull Path file,
+                               @Optional String className,
+                               @Optional int options)
+  {
+    DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+    try {
+      DocumentBuilder builder = factory.newDocumentBuilder();
+      _document = builder.parse(file.openRead());
+    } catch (Exception e) {
+      log.log(Level.FINE, L.l(e.toString()), e);
+    }
+  }
+
+  /**
+   * 
+   * @param file
+   * @return XML string if file is not specified otherwise true on success, false on failure
+   */
+  public Value asXML(@Optional Path file)
+  {
+    
+    return BooleanValue.FALSE;
+  }
+  
   //@todo attributes
   //@todo children
   //@todo xpath

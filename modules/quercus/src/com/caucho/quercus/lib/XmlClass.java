@@ -518,16 +518,7 @@ public class XmlClass {
 
       _valueArray.put(new DoubleValue((double)_valueArrayIndex), elementArray);
       
-      StringValue key = new StringValue(eName);
-      ArrayValueImpl indexArray = _indexArrayHashMap.get(key);
-      
-      if (indexArray == null) {
-        indexArray = new ArrayValueImpl();
-        _indexArrayKeys.add(key);
-      }
-      
-      indexArray.put(new DoubleValue((double) _valueArrayIndex));
-      _indexArrayHashMap.put(key, indexArray);
+      addToIndexArrayHashMap(eName);
 
       _valueArrayIndex++;
       _level++;
@@ -557,17 +548,7 @@ public class XmlClass {
         elementArray.put(new StringValue("level"), new DoubleValue((double) _level));
         _valueArray.put(new DoubleValue((double)_valueArrayIndex), elementArray);
 
-        StringValue key = new StringValue(eName);
-        ArrayValueImpl indexArray = _indexArrayHashMap.get(key);
-      
-        if (indexArray == null) {
-          indexArray = new ArrayValueImpl();
-          _indexArrayKeys.add(key);
-        }
-      
-        indexArray.put(new DoubleValue((double) _valueArrayIndex));
-        _indexArrayHashMap.put(key, indexArray);
-
+        addToIndexArrayHashMap(eName);
         _valueArrayIndex++;
       }
 
@@ -575,6 +556,20 @@ public class XmlClass {
       _isOutside = true;
     }
 
+    private void addToIndexArrayHashMap(String eName)
+    {
+      StringValue key = new StringValue(eName);
+      ArrayValueImpl indexArray = _indexArrayHashMap.get(key);
+      
+      if (indexArray == null) {
+        indexArray = new ArrayValueImpl();
+        _indexArrayKeys.add(key);
+      }
+      
+      indexArray.put(new DoubleValue((double) _valueArrayIndex));
+      _indexArrayHashMap.put(key, indexArray);
+    }
+   
     public void characters(char[] ch,
                            int start,
                            int length)
@@ -672,10 +667,10 @@ public class XmlClass {
       try {
         String eName = sName; // element name
         if ("".equals(eName)) eName = qName;
-        if (_xmlOptionCaseFolding) qName = qName.toUpperCase();
+        if (_xmlOptionCaseFolding) eName = eName.toUpperCase();
 
         if (_endElementHandler != null)
-          _endElementHandler.eval(_env, _parser, new StringValue(qName));
+          _endElementHandler.eval(_env, _parser, new StringValue(eName));
         else
           throw new Throwable("end element handler is not set");
       } catch (Throwable t) {

@@ -22,6 +22,7 @@ com.caucho.quercus.lib.QuercusOptionsModule
 com.caucho.quercus.lib.QuercusOutputModule
 com.caucho.quercus.lib.QuercusRegexpModule
 com.caucho.quercus.lib.QuercusSessionModule
+com.caucho.quercus.lib.QuercusSimpleXMLModule
 com.caucho.quercus.lib.QuercusStreamModule
 com.caucho.quercus.lib.QuercusStringModule
 com.caucho.quercus.lib.QuercusUrlModule
