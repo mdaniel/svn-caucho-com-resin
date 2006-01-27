@@ -32,6 +32,8 @@ package com.caucho.quercus.lib;
 import com.caucho.quercus.env.ArrayValueImpl;
 import com.caucho.quercus.env.BooleanValue;
 import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.LongValue;
+import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.module.NotNull;
 import com.caucho.quercus.module.Optional;
@@ -40,6 +42,8 @@ import com.caucho.vfs.Path;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -77,6 +81,7 @@ public class SimpleXMLElementClass extends Value{
     try {
       DocumentBuilder builder = factory.newDocumentBuilder();
       _document = builder.parse(new ByteArrayInputStream(data.getBytes()));
+      _element = _document.getDocumentElement();
     } catch (Exception e) {
       log.log(Level.FINE, L.l(e.toString()), e);
     }
@@ -100,6 +105,7 @@ public class SimpleXMLElementClass extends Value{
     try {
       DocumentBuilder builder = factory.newDocumentBuilder();
       _document = builder.parse(file.openRead());
+      _element = _document.getDocumentElement();
     } catch (Exception e) {
       log.log(Level.FINE, L.l(e.toString()), e);
     }
@@ -150,15 +156,35 @@ public class SimpleXMLElementClass extends Value{
     }*/
   }
   
-  public Value get(Value value) {
-    ArrayValueImpl array = new ArrayValueImpl();
-    array.put(value);
-    return array;
-    //String s = value.toString();
-    //return new StringValue("Charlie");
-    //return new StringValue(s);
+  public Value get(Value name)
+  {
+    ArrayValueImpl result = new ArrayValueImpl();
+    
+    NodeList nodes = _element.getElementsByTagName(name.toString());
+    int count = 0;
+    for (int i = 0; i < nodes.getLength(); i++) {
+      Node node = nodes.item(i);
+      if (node.getParentNode() == _element) {
+        ArrayValueImpl nodeArray = new ArrayValueImpl();
+        
+        if (node.getChildNodes().getLength() > 1)
+          nodeArray.put(name, new SimpleXMLElementClass((Element) node, _className, _options));
+        else 
+          nodeArray.put(name, new StringValue(node.getFirstChild().getNodeValue()));
+        
+        result.put(new LongValue(count), nodeArray);
+        count++;
+      }
+    }
+    
+    return result;
   }
   
+  public Value toValue()
+  {
+    ArrayValueImpl result = new ArrayValueImpl();
+    return new StringValue("Charlie");
+  }
   //@todo attributes
   //@todo xpath
 }
