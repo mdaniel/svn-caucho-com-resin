@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2000 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2004 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -19,27 +19,48 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
-*
+ *
  *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Scott Ferguson
+ * @author Charles Reich
  */
 
-package com.caucho;
+package com.caucho.quercus.env;
 
-final public class Version {
-  public static final String COPYRIGHT =
-    "Copyright(c) 1998-2006 Caucho Technology.  All rights reserved.";
+import java.io.IOException;
 
-  public static String FULL_VERSION = "Resin-3.0.s060126 (built Thu, 26 Jan 2006 08:21:04 EST)";
-  public static String VERSION = "3.0.s060126";
-  public static String VERSION_DATE = "20060126T082104";
+import com.caucho.vfs.WriteStream;
 
-  public static void main(String []argv)
+import com.caucho.quercus.Quercus;
+
+import com.caucho.quercus.gen.PhpWriter;
+
+import com.caucho.quercus.lib.QuercusStringModule;
+
+/**
+ * Represents a PHP byte array value.
+ * Created to work with ZlibModule
+ */
+public class ByteArrayValue extends Value {
+  private final byte[] _value;
+
+  public ByteArrayValue(byte[] value)
   {
-    System.out.println(FULL_VERSION);
-    System.out.println(COPYRIGHT);
+    if (value == null)
+      throw new NullPointerException();
+    
+    _value = value;
+  }
+  
+  public byte[] getValue()
+  {
+    return _value;
+  }
+  
+  public String getType()
+  {
+    return "byteArray";
   }
 }

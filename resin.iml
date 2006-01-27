@@ -99,8 +99,6 @@
       <sourceFolder url="file://$MODULE_DIR$/modules/webutil/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/modules/widget/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/modules/widget/tests" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/webapps/ROOT/WEB-INF/classes" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/webapps/ROOT/WEB-INF/work" isTestSource="false" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
