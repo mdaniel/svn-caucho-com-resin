@@ -29,12 +29,7 @@
 
 package com.caucho.quercus.lib;
 
-import com.caucho.quercus.env.ArrayValueImpl;
-import com.caucho.quercus.env.BooleanValue;
-import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.LongValue;
-import com.caucho.quercus.env.StringValue;
-import com.caucho.quercus.env.Value;
+import com.caucho.quercus.env.*;
 import com.caucho.quercus.module.NotNull;
 import com.caucho.quercus.module.Optional;
 import com.caucho.util.L10N;
@@ -50,12 +45,13 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.ByteArrayInputStream;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.HashMap;
 
 
 /**
  * SimpleXML object oriented API facade
  */
-public class SimpleXMLElementClass extends Value{
+public class SimpleXMLElementClass extends Value {
   private static final Logger log = Logger.getLogger(SimpleXMLElementClass.class.getName());
   private static final L10N L = new L10N(SimpleXMLElementClass.class);
 
@@ -155,36 +151,64 @@ public class SimpleXMLElementClass extends Value{
       children.put(env.wrapJava(new SimpleXMLElementClass((Element) nodes.item(i),_className, _options)));
     }*/
   }
-  
+
   public Value get(Value name)
   {
     ArrayValueImpl result = new ArrayValueImpl();
-    
+
     NodeList nodes = _element.getElementsByTagName(name.toString());
     int count = 0;
     for (int i = 0; i < nodes.getLength(); i++) {
       Node node = nodes.item(i);
       if (node.getParentNode() == _element) {
         ArrayValueImpl nodeArray = new ArrayValueImpl();
+        NodeList children = node.getChildNodes();
+
+        HashMap<StringValue, ArrayValueImpl> childArrayHashMap = new HashMap<StringValue, ArrayValueImpl>();
         
-        if (node.getChildNodes().getLength() > 1)
-          nodeArray.put(name, new SimpleXMLElementClass((Element) node, _className, _options));
-        else 
-          nodeArray.put(name, new StringValue(node.getFirstChild().getNodeValue()));
-        
+        for (int j = 0; j < children.getLength(); j++) {
+          Node child = children.item(j);
+          // Check to see if child is empty (ie: "\n")
+          if (child.getChildNodes().getLength() > 0) {
+            StringValue childName = new StringValue(child.getNodeName());
+            ArrayValueImpl childArray = childArrayHashMap.get(childName);
+            if (childArray == null) {
+              childArray = new ArrayValueImpl();
+              childArrayHashMap.put(childName, childArray);
+            }
+
+            // Check to see if child is single node or element itself
+            if (child.getChildNodes().getLength() > 1)
+              childArray.put(new SimpleXMLElementClass((Element) child, _className, _options));
+            else
+              childArray.put(new StringValue(child.getFirstChild().getNodeValue()));
+            
+            // if childArray has only one element, only put the Value
+            if (childArray.size() == 1)
+              nodeArray.put(childName,childArray.get(new LongValue(0)));
+            else
+              nodeArray.put(childName, childArray);
+          }
+        }
         result.put(new LongValue(count), nodeArray);
         count++;
       }
     }
-    
+
     return result;
   }
   
+  public void print(Env env)
+    throws Throwable
+  {
+    NodeList childNodes = _element.getChildNodes();
+    env.getOut().print("Charlie");
+  }
+  /*
   public Value toValue()
   {
-    ArrayValueImpl result = new ArrayValueImpl();
-    return new StringValue("Charlie");
-  }
+    return get(new StringValue(_element.getNodeName()));
+  }*/
   //@todo attributes
   //@todo xpath
 }
