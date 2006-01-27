@@ -143,7 +143,7 @@ public class QuercusMathModule extends AbstractQuercusModule {
       else
         continue;
 
-      if (value >= fromBase)
+      if (fromBase <= value)
         continue;
 
       result = result * fromBase;
@@ -191,9 +191,9 @@ public class QuercusMathModule extends AbstractQuercusModule {
       char ch = bin.charAt(i);
 
       if ('0' == ch)
-        result = result << 1;
+        result = 2 * result;
       else if ('1' == ch) {
-        result = result << 1;
+        result = 2 * result;
         result += 1;
       }
 
@@ -232,7 +232,7 @@ public class QuercusMathModule extends AbstractQuercusModule {
 
     while (value != 0) {
       int d = (int) (value & 1);
-      value = value >> 1;
+      value = value / 2;
 
       if (d == 0)
         sb.append('0');
@@ -284,7 +284,7 @@ public class QuercusMathModule extends AbstractQuercusModule {
 
     while (value != 0) {
       int d = (int) (value & 7);
-      value = value >> 3;
+      value = value / 8;
 
       sb.append((char) (d + '0'));
     }
@@ -518,7 +518,7 @@ public class QuercusMathModule extends AbstractQuercusModule {
     for (int i = 0; i < len; i++) {
       int ch = oct.charAt(i);
 
-      if ('0' <= ch && ch <= '9') {
+      if ('0' <= ch && ch <= '7') {
         result = result << 3;
         result += ch - '0';
 

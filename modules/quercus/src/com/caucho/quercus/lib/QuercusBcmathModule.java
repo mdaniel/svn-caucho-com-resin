@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2004 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -24,7 +24,7 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Scott Ferguson
+ * @author Sam
  */
 
 package com.caucho.quercus.lib;
@@ -33,6 +33,8 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.math.MathContext;
 import java.math.BigInteger;
+import java.util.HashMap;
+import java.util.Map;
 
 import com.caucho.util.L10N;
 
@@ -51,6 +53,23 @@ public class QuercusBcmathModule extends AbstractQuercusModule {
   private static final BigDecimal ONE = BigDecimal.ONE;
   private static final BigDecimal TWO = new BigDecimal(2);
   private static final int SQRT_MAX_ITERATIONS = 50;
+
+  private static final HashMap<String,StringValue> _iniMap
+    = new HashMap<String,StringValue>();
+
+  static {
+    addIni(_iniMap, "bcmath.scale", "0", PHP_INI_ALL);
+  }
+
+  public boolean isExtensionLoaded(String name)
+  {
+    return "bcmath".equals(name);
+  }
+
+  public Map<String,StringValue> getDefaultIni()
+  {
+    return _iniMap;
+  }
 
   private static BigDecimal toBigDecimal(Value value)
   {
@@ -87,6 +106,14 @@ public class QuercusBcmathModule extends AbstractQuercusModule {
     return scale;
   }
 
+  /**
+   * Set the default scale to use for subsequent calls to bcmath functions.
+   * The scale is the number of decimal points to include in the string that
+   * results from bcmath calculations.
+   *
+   * A default scale set with this function overrides the value of the
+   * "bcmath.scale" ini variable.
+   */
   public static boolean bcscale(Env env, int scale)
   {
     env.setIni("bcmath.scale", String.valueOf(scale));
@@ -94,6 +121,13 @@ public class QuercusBcmathModule extends AbstractQuercusModule {
     return true;
   }
 
+  /**
+   * Add two arbitrary precision numbers.
+   *
+   * The optional scale indicates the number of decimal digits to include in
+   * the result, the default is the value of a previous call to {@link #bcscale}
+   * or the value of the ini variable "bcmath.scale".
+   */
   public static String bcadd(Env env, Value value1, Value value2, @Optional("-1") int scale)
   {
     scale = calculateScale(env, scale);
@@ -108,6 +142,13 @@ public class QuercusBcmathModule extends AbstractQuercusModule {
     return bd.toPlainString();
   }
 
+  /**
+   * Subtract arbitrary precision number (value2) from another (value1).
+   *
+   * The optional scale indicates the number of decimal digits to include in
+   * the result, the default is the value of a previous call to {@link #bcscale}
+   * or the value of the ini variable "bcmath.scale".
+   */
   public static String bcsub(Env env, Value value1, Value value2, @Optional("-1") int scale)
   {
     scale = calculateScale(env, scale);
@@ -122,6 +163,13 @@ public class QuercusBcmathModule extends AbstractQuercusModule {
     return bd.toPlainString();
   }
 
+  /**
+   * Multiply two arbitrary precision numbers.
+   *
+   * The optional scale indicates the number of decimal digits to include in
+   * the result, the default is the value of a previous call to {@link #bcscale}
+   * or the value of the ini variable "bcmath.scale".
+   */
   public static String bcmul(Env env, Value value1, Value value2, @Optional("-1") int scale)
   {
     scale = calculateScale(env, scale);
@@ -145,6 +193,15 @@ public class QuercusBcmathModule extends AbstractQuercusModule {
     return bd.toPlainString();
   }
 
+  /**
+   * Divide one arbitrary precision number (value1) by another (value2).
+   *
+   * A division by zero results in a warning message and a return value of null.
+   *
+   * The optional scale indicates the number of decimal digits to include in
+   * the result, the default is the value of a previous call to {@link #bcscale}
+   * or the value of the ini variable "bcmath.scale".
+   */
   public static String bcdiv(Env env, Value value1, Value value2, @Optional("-1") int scale)
   {
     scale = calculateScale(env, scale);
@@ -171,6 +228,15 @@ public class QuercusBcmathModule extends AbstractQuercusModule {
     return result.toPlainString();
   }
 
+  /**
+   * Raise one arbitrary precision number (base) to the power of another (exp).
+   *
+   * exp must be a whole number. Negative exp is supported.
+   *
+   * The optional scale indicates the number of decimal digits to include in
+   * the result, the default is the value of a previous call to {@link #bcscale}
+   * or the value of the ini variable "bcmath.scale".
+   */
   public static String bcpow(Env env, Value base, Value exp, @Optional("-1") int scale)
   {
     scale = calculateScale(env, scale);
@@ -210,6 +276,15 @@ public class QuercusBcmathModule extends AbstractQuercusModule {
     return bd.toPlainString();
   }
 
+  /**
+   * Return the square root of an arbitrary precision number.
+   *
+   * A negative operand results in a warning message and a return value of null.
+   *
+   * The optional scale indicates the number of decimal digits to include in
+   * the result, the default is the value of a previous call to {@link #bcscale}
+   * or the value of the ini variable "bcmath.scale".
+   */
   public static String bcsqrt(Env env, Value operand, @Optional("-1") int scale)
   {
     scale = calculateScale(env, scale);
@@ -282,6 +357,14 @@ public class QuercusBcmathModule extends AbstractQuercusModule {
     return value.toPlainString();
   }
 
+  /**
+   * Compare two arbitrary precision numbers, return -1 if value 1 < value2,
+   * 0 if value1 == value2, 1 if value1 > value2.
+   *
+   * The optional scale indicates the number of decimal digits to include in
+   * comparing the values, the default is the value of a previous call to
+   * {@link #bcscale} or the value of the ini variable "bcmath.scale".
+   */
   public static int bccomp(Env env, Value value1, Value value2, @Optional("-1") int scale)
   {
     scale = calculateScale(env, scale);
@@ -295,6 +378,13 @@ public class QuercusBcmathModule extends AbstractQuercusModule {
     return bd1.compareTo(bd2);
   }
 
+  /**
+   * Return the modulus of an aribtrary precison number.
+   * The returned number is always a whole number.
+   *
+   * A modulus of 0 results in a division by zero warning message and a
+   * return value of null.
+   */
   public static String bcmod(Env env, Value value, Value modulus)
   {
     BigDecimal bd1 = toBigDecimal(value).setScale(0, RoundingMode.DOWN);
@@ -313,6 +403,17 @@ public class QuercusBcmathModule extends AbstractQuercusModule {
     return bd.toPlainString();
   }
 
+  /**
+   * Raise one arbitrary precision number (base) to the power of another (exp),
+   * and then return the modulus.
+   * The returned number is always a whole number.
+   *
+   * exp must be a whole number. Negative exp is supported.
+   *
+   * The optional scale indicates the number of decimal digits to include in
+   * the pow calculation, the default is the value of a previous call to {@link #bcscale}
+   * or the value of the ini variable "bcmath.scale".
+   */
   public static String bcpowmod(Env env, Value base, Value exp, Value modulus, @Optional("-1") int scale)
   {
     scale = calculateScale(env, scale);
@@ -325,4 +426,5 @@ public class QuercusBcmathModule extends AbstractQuercusModule {
 
     return bcmod(env, new StringValue(pow), modulus);
   }
+
 }

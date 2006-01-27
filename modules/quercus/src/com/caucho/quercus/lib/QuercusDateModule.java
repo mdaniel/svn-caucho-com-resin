@@ -29,8 +29,6 @@
 
 package com.caucho.quercus.lib;
 
-import java.util.Map;
-import java.util.HashMap;
 import java.util.TimeZone;
 
 import java.util.logging.Logger;
@@ -47,7 +45,7 @@ import com.caucho.quercus.module.Optional;
 import com.caucho.quercus.env.*;
 
 /**
- * PHP date libraries
+ * Date functions.
  */
 public class QuercusDateModule extends AbstractQuercusModule {
   private static final L10N L = new L10N(QuercusDateModule.class);
@@ -60,12 +58,12 @@ public class QuercusDateModule extends AbstractQuercusModule {
   private static final String []_shortDayOfWeek = {
     "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"
   };
-  
+
   private static final String []_fullDayOfWeek = {
     "Sunday", "Monday", "Tuesday", "Wednesday",
     "Thursday", "Friday", "Saturday", "Sunday"
   };
-  
+
   private static final String []_shortMonth = {
     "Jan", "Feb", "Mar", "Apr", "May", "Jun",
     "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
@@ -125,7 +123,33 @@ public class QuercusDateModule extends AbstractQuercusModule {
 
     return array;
   }
-  
+
+  public Value gettimeofday(@Optional boolean isFloatReturn)
+  {
+    long gmtTime = Alarm.getCurrentTime();
+
+    if (isFloatReturn) {
+      return new DoubleValue(((double) Alarm.getCurrentTime()) / 1000.0);
+    }
+    else {
+      ArrayValueImpl result = new ArrayValueImpl();
+
+      TimeZone localTimeZone = TimeZone.getDefault();
+
+      long sec = gmtTime / 1000L;
+      long microsec = (gmtTime - (sec * 1000)) * 1000L;
+      long minutesWest = localTimeZone.getRawOffset() / 1000L / 60L * -1L;
+      long dstTime = localTimeZone.useDaylightTime() ? 1 : 0;
+
+      result.put("sec", sec);
+      result.put("usec", microsec);
+      result.put("minuteswest", minutesWest);
+      result.put("dsttime", dstTime);
+
+      return result;
+    }
+  }
+
   /**
    * Returns the formatted date.
    */
@@ -157,22 +181,22 @@ public class QuercusDateModule extends AbstractQuercusModule {
 
     if (hour >= 0)
       gmtDate.setHour(hour);
-    
+
     if (minute >= 0)
       gmtDate.setMinute(minute);
 
     if (second >= 0)
       gmtDate.setSecond(second);
-    
+
     if (month > 0)
       gmtDate.setMonth(month - 1);
-    
+
     if (day > 0)
       gmtDate.setDayOfMonth(day);
-    
+
     if (year > 0)
       gmtDate.setYear(year);
-    
+
     return gmtDate.getGMTTime() / 1000L;
   }
 
@@ -204,7 +228,7 @@ public class QuercusDateModule extends AbstractQuercusModule {
 	    sb.append(day % 10);
 	    break;
 	  }
-	
+
 	case 'D':
 	  {
 	    int day = calendar.getDayOfWeek();
@@ -212,14 +236,14 @@ public class QuercusDateModule extends AbstractQuercusModule {
 	    sb.append(_shortDayOfWeek[day - 1]);
 	    break;
 	  }
-	
+
 	case 'j':
 	  {
 	    int day = calendar.getDayOfMonth();
 	    sb.append(day);
 	    break;
 	  }
-	
+
 	case 'l':
 	  {
 	    int day = calendar.getDayOfWeek();
@@ -227,7 +251,7 @@ public class QuercusDateModule extends AbstractQuercusModule {
 	    sb.append(_fullDayOfWeek[day]);
 	    break;
 	  }
-	
+
 	case 'S':
 	  {
 	    int day = calendar.getDayOfMonth();
@@ -248,7 +272,7 @@ public class QuercusDateModule extends AbstractQuercusModule {
 	    }
 	    break;
 	  }
-	
+
 	case 'w':
 	  {
 	    int day = calendar.getDayOfWeek();
@@ -256,7 +280,7 @@ public class QuercusDateModule extends AbstractQuercusModule {
 	    sb.append(day);
 	    break;
 	  }
-	
+
 	case 'z':
 	  {
 	    int day = calendar.getDayOfYear();
@@ -264,7 +288,7 @@ public class QuercusDateModule extends AbstractQuercusModule {
 	    sb.append(day);
 	    break;
 	  }
-	
+
 	case 'W':
 	  {
 	    int week = calendar.getWeek();
@@ -272,7 +296,7 @@ public class QuercusDateModule extends AbstractQuercusModule {
 	    sb.append(week);
 	    break;
 	  }
-	
+
 	case 'm':
 	  {
 	    int month = calendar.getMonth() + 1;
@@ -280,55 +304,55 @@ public class QuercusDateModule extends AbstractQuercusModule {
 	    sb.append(month % 10);
 	    break;
 	  }
-	
+
 	case 'M':
 	  {
 	    int month = calendar.getMonth();
 	    sb.append(_shortMonth[month]);
 	    break;
 	  }
-	
+
 	case 'F':
 	  {
 	    int month = calendar.getMonth();
 	    sb.append(_fullMonth[month]);
 	    break;
 	  }
-	
+
 	case 'n':
 	  {
 	    int month = calendar.getMonth() + 1;
 	    sb.append(month);
 	    break;
 	  }
-	
+
 	case 't':
 	  {
 	    int days = calendar.getDaysInMonth();
 	    sb.append(days);
 	    break;
 	  }
-	
+
 	case 'Y':
 	  {
 	    int year = calendar.getYear();
-	  
+
 	    sb.append((year / 1000) % 10);
 	    sb.append((year / 100) % 10);
 	    sb.append((year / 10) % 10);
 	    sb.append((year) % 10);
 	    break;
 	  }
-	
+
 	case 'y':
 	  {
 	    int year = calendar.getYear();
-	  
+
 	    sb.append((year / 10) % 10);
 	    sb.append((year) % 10);
 	    break;
 	  }
-	
+
 	case 'L':
 	  {
 	    if (calendar.isLeapYear())
@@ -337,7 +361,7 @@ public class QuercusDateModule extends AbstractQuercusModule {
 	      sb.append(0);
 	    break;
 	  }
-	
+
 	case 'a':
 	  {
 	    int hour = calendar.getHour();
@@ -348,7 +372,7 @@ public class QuercusDateModule extends AbstractQuercusModule {
 	      sb.append("pm");
 	    break;
 	  }
-	
+
 	case 'A':
 	  {
 	    int hour = calendar.getHour();
@@ -359,7 +383,7 @@ public class QuercusDateModule extends AbstractQuercusModule {
 	      sb.append("PM");
 	    break;
 	  }
-	
+
 	case 'g':
 	  {
 	    int hour = calendar.getHour() % 12;
@@ -370,7 +394,7 @@ public class QuercusDateModule extends AbstractQuercusModule {
 	    sb.append(hour);
 	    break;
 	  }
-	
+
 	case 'G':
 	  {
 	    int hour = calendar.getHour();
@@ -378,7 +402,7 @@ public class QuercusDateModule extends AbstractQuercusModule {
 	    sb.append(hour);
 	    break;
 	  }
-	
+
 	case 'h':
 	  {
 	    int hour = calendar.getHour() % 12;
@@ -390,7 +414,7 @@ public class QuercusDateModule extends AbstractQuercusModule {
 	    sb.append(hour % 10);
 	    break;
 	  }
-	
+
 	case 'H':
 	  {
 	    int hour = calendar.getHour();
@@ -399,7 +423,7 @@ public class QuercusDateModule extends AbstractQuercusModule {
 	    sb.append(hour % 10);
 	    break;
 	  }
-	
+
 	case 'i':
 	  {
 	    int minutes = calendar.getMinute();
@@ -408,7 +432,7 @@ public class QuercusDateModule extends AbstractQuercusModule {
 	    sb.append(minutes % 10);
 	    break;
 	  }
-	
+
 	case 's':
 	  {
 	    int seconds = calendar.getSecond();
@@ -417,7 +441,7 @@ public class QuercusDateModule extends AbstractQuercusModule {
 	    sb.append(seconds % 10);
 	    break;
 	  }
-	
+
 	case 'O':
 	  {
 	    long offset = calendar.getZoneOffset();
@@ -435,7 +459,7 @@ public class QuercusDateModule extends AbstractQuercusModule {
 	    sb.append(minute % 10);
 	    break;
 	  }
-	
+
 	case 'I':
 	  {
 	    if (calendar.isDST())
@@ -444,15 +468,15 @@ public class QuercusDateModule extends AbstractQuercusModule {
 	      sb.append('0');
 	    break;
 	  }
-	
+
 	case 'T':
 	  {
 	    TimeZone zone = calendar.getLocalTimeZone();
-	  
+
 	    sb.append(zone.getDisplayName(calendar.isDST(), TimeZone.SHORT));
 	    break;
 	  }
-	
+
 	case 'Z':
 	  {
 	    long offset = calendar.getZoneOffset();
@@ -460,19 +484,19 @@ public class QuercusDateModule extends AbstractQuercusModule {
 	    sb.append(offset / (1000));
 	    break;
 	  }
-	
+
 	case 'c':
 	  {
 	    sb.append(calendar.printISO8601());
 	    break;
 	  }
-	
+
 	case 'r':
 	  {
 	    sb.append(calendar.printDate());
 	    break;
 	  }
-	
+
 	case 'U':
 	  {
 	    sb.append(now / 1000);
@@ -482,7 +506,7 @@ public class QuercusDateModule extends AbstractQuercusModule {
 	case '\\':
 	  sb.append(format.charAt(i++));
 	  break;
-	
+
 	default:
 	  sb.append(ch);
 	  break;
@@ -499,7 +523,7 @@ public class QuercusDateModule extends AbstractQuercusModule {
   public static Value microtime(@Optional boolean getAsFloat)
   {
     long now = Alarm.getCurrentTime();
-    
+
     if (getAsFloat) {
       return new DoubleValue((double) now / 1000.0);
     }
@@ -526,22 +550,22 @@ public class QuercusDateModule extends AbstractQuercusModule {
 
     if (hour >= 0)
       date.setHour(hour);
-    
+
     if (minute >= 0)
       date.setMinute(minute);
 
     if (second >= 0)
       date.setSecond(second);
-    
+
     if (month > 0)
       date.setMonth(month - 1);
-    
+
     if (day > 0)
       date.setDayOfMonth(day);
-    
+
     if (year > 0)
       date.setYear(year);
-    
+
     return date.getLocalTime() / 1000L;
   }
 
@@ -552,12 +576,12 @@ public class QuercusDateModule extends AbstractQuercusModule {
 			 @Optional("-1") long phpTime)
   {
     long time;
-    
+
     if (phpTime < 0)
       time = Alarm.getCurrentTime();
     else
       time = 1000 * phpTime;
-    
+
     return QDate.formatLocal(time, format);
   }
 
@@ -575,7 +599,7 @@ public class QuercusDateModule extends AbstractQuercusModule {
 
       if (timeString.equals("now"))
 	return new LongValue(now / 1000L);
-      
+
       long time = new QDate().parseLocalDate(timeString);
 
       // only handling exact dates

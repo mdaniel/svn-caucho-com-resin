@@ -50,7 +50,7 @@ public class StringValue extends Value {
   protected static final int IS_DOUBLE = 2;
 
   private final static StringValue []CHAR_STRINGS;
-  
+
   private final String _value;
   private final char []_chars;
 
@@ -58,10 +58,41 @@ public class StringValue extends Value {
   {
     if (value == null)
       throw new NullPointerException();
-    
+
     _value = value;
     _chars = new char[value.length()];
     value.getChars(0, _chars.length, _chars, 0);
+  }
+
+  /**
+   * Create a string out of a character array.  This constructor may use
+   * the passed character array without copying, so the caller should assume
+   * that the array can no longer be modified.
+   */
+  public StringValue(char[] chars)
+  {
+    _chars = chars;
+    // XXX: string constructor copies the array
+    _value = new String(chars);
+  }
+
+  /**
+   * Create a string out of a bye array, with no consideration of character
+   * encoding. * Each byte becomes one character.
+   */
+  public StringValue(byte[] bytes)
+  {
+    final int len = bytes.length;
+
+    char[] chars = new char[len];
+
+    for (int i = 0; i < len; i++) {
+      chars[i] = (char) bytes[i];
+    }
+
+    // XXX: string constructor copies the array
+    _value = new String(chars);
+    _chars = chars;
   }
 
   /**
@@ -130,14 +161,14 @@ public class StringValue extends Value {
 
     if (len == 0)
       return false;
-    
+
     for (int i = 0; i < len; i++) {
       char ch = _chars[i];
-      
+
       if (! ('0' <= ch && ch <= '9'))
 	return false;
     }
-    
+
     return true;
   }
 
@@ -164,7 +195,7 @@ public class StringValue extends Value {
   {
     return true;
   }
-  
+
   /**
    * Converts to a double.
    */
@@ -175,7 +206,7 @@ public class StringValue extends Value {
 
     if (len == 0)
       return IS_STRING;
-    
+
     int i = 0;
     int ch = 0;
     boolean hasPoint = false;
@@ -193,7 +224,7 @@ public class StringValue extends Value {
       for (i++; i < len && '0' <= (ch = chars[i]) && ch <= '9'; i++) {
 	return IS_DOUBLE;
       }
-      
+
       return IS_STRING;
     }
     else if (! ('0' <= ch && ch <= '9'))
@@ -219,7 +250,7 @@ public class StringValue extends Value {
     else
       return IS_STRING;
   }
-  
+
   /**
    * Converts to a boolean.
    */
@@ -227,7 +258,7 @@ public class StringValue extends Value {
   {
     return ! _value.equals("") && ! _value.equals("0");
   }
-  
+
   /**
    * Converts to a long.
    */
@@ -235,7 +266,7 @@ public class StringValue extends Value {
   {
     return toLong(_value);
   }
-  
+
   /**
    * Converts to a long.
    */
@@ -255,7 +286,7 @@ public class StringValue extends Value {
       sign = -1;
       i = 1;
     }
-    
+
     for (; i < len; i++) {
       char ch = string.charAt(i);
 
@@ -267,7 +298,7 @@ public class StringValue extends Value {
 
     return value;
   }
-  
+
   /**
    * Converts to a double.
    */
@@ -295,7 +326,7 @@ public class StringValue extends Value {
       if (i < len && (ch = _value.charAt(i)) == '+' || ch == '-') {
 	i++;
       }
-      
+
       for (; i < len && '0' <= (ch = _value.charAt(i)) && ch <= '9'; i++) {
       }
 
@@ -310,7 +341,7 @@ public class StringValue extends Value {
     else
       return Double.parseDouble(_value.substring(0, i));
   }
-  
+
   /**
    * Converts to a string.
    * @param env
@@ -319,7 +350,7 @@ public class StringValue extends Value {
   {
     return _value;
   }
-  
+
   /**
    * Converts to an object.
    */
@@ -338,7 +369,7 @@ public class StringValue extends Value {
 
     if (len == 0)
       return this;
-    
+
     int sign = 1;
     long value = 0;
 
@@ -359,6 +390,23 @@ public class StringValue extends Value {
     }
 
     return new LongValue(sign * value);
+  }
+
+  /**
+   * Converts to a byte array, with no consideration of character encoding.
+   * Each character becomes one byte, characters with values above 255 are
+   * not correctly preserved.
+   */
+  public byte[] toBytes()
+  {
+    final int len = _chars.length;
+    byte[] bytes = new byte[len];
+
+    for (int i = 0; i < len; i++) {
+      bytes[i] = (byte) _chars[i];
+    }
+
+    return bytes;
   }
 
   /**
@@ -383,7 +431,7 @@ public class StringValue extends Value {
   public Value charAt(long index)
   {
     int len = _value.length();
-    
+
     if (index < 0 || len <= index)
       return StringValue.EMPTY;
     else
@@ -422,7 +470,7 @@ public class StringValue extends Value {
   {
     if (incr > 0) {
       StringBuilder tail = new StringBuilder();
-      
+
       for (int i = _value.length() - 1; i >= 0; i--) {
 	char ch = _value.charAt(i);
 
@@ -452,7 +500,7 @@ public class StringValue extends Value {
 	  return new LongValue(toLong() + 1);
 	}
       }
-      
+
       return new StringValue(tail.toString());
     }
     else if (isLong()) {
@@ -469,7 +517,7 @@ public class StringValue extends Value {
   public boolean eq(Value rValue)
   {
     rValue = rValue.toValue();
-    
+
     if (rValue instanceof BooleanValue) {
       String v = toString();
 
@@ -489,7 +537,7 @@ public class StringValue extends Value {
       else if (rValue instanceof BooleanValue)
 	return toLong() == rValue.toLong();
       else
-	return _value.equals(rValue.toString());	
+	return _value.equals(rValue.toString());
     }
     else if (rValue.isNumber())
       return toDouble() == rValue.toDouble();
@@ -503,7 +551,7 @@ public class StringValue extends Value {
   public boolean eql(Value rValue)
   {
     rValue = rValue.toValue();
-    
+
     if (! (rValue instanceof StringValue))
       return false;
 
@@ -528,7 +576,7 @@ public class StringValue extends Value {
     out.printJavaString(_value);
     out.print("\")");
   }
-  
+
   /**
    * Prints the value.
    * @param env
@@ -557,7 +605,7 @@ public class StringValue extends Value {
   public void varExport(StringBuilder sb)
   {
     sb.append("'");
-    
+
     String value = _value;
     int len = value.length();
     for (int i = 0; i < len; i++) {

@@ -14,6 +14,7 @@ com.caucho.quercus.lib.QuercusJavaModule
 com.caucho.quercus.lib.QuercusMailModule
 com.caucho.quercus.lib.QuercusMathModule
 com.caucho.quercus.lib.QuercusMcryptModule
+com.caucho.quercus.lib.QuercusMhashModule
 com.caucho.quercus.lib.QuercusMiscModule
 com.caucho.quercus.lib.QuercusMysqlModule
 com.caucho.quercus.lib.QuercusMysqliModule
