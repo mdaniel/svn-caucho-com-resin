@@ -203,11 +203,14 @@ public class SimpleXMLElementValue extends ArrayValueImpl {
   }
 
   /**
-   * returns this SimpleXMLElementValue but treats it as an
-   * ArrayValueImpl in that it puts each child element in itself.
+   * If name is a LongValue, then treat this as ArrayValueImpl.
+   * 
+   * If name is a StringValue then get returns a
+   * new SimpleXMLElementValue but also treats it as an
+   * ArrayValueImpl in that it puts each child element into it.
    * 
    * @param name tagName of immediate children of _element
-   * @return this (set up as an array)
+   * @return either this(name) or new SimpleXMLElementValue
    */
   
   public Value get(Value name)
@@ -239,7 +242,13 @@ public class SimpleXMLElementValue extends ArrayValueImpl {
    */
   public Value copy()
   {
-    return this;
+    SimpleXMLElementValue result = new SimpleXMLElementValue(_element, _className, _options);
+    
+    for (Entry ptr = this.getHead(); ptr != null; ptr = ptr._next) {
+      result.put(ptr.getKey(), ptr.getRawValue().copyArrayItem());
+    }
+    
+    return result;
   }
 
   public String toString()
