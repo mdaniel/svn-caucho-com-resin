@@ -137,7 +137,7 @@ public class QuercusVariableModule extends AbstractQuercusModule {
    * Defines a constant
    *
    * @param env the quercus calling environment
-   * @param nameV the constant name
+   * @param name the constant name
    * @param value the constant value
    */
   public static Value define(Env env,
@@ -591,7 +591,7 @@ public class QuercusVariableModule extends AbstractQuercusModule {
     if (v instanceof ArrayValue) {
       ArrayValue array = (ArrayValue) v;
 
-      out.println("Array");
+      out.println(v.toString());
       printDepth(out, 8 * depth);
       out.println("(");
 
@@ -605,8 +605,7 @@ public class QuercusVariableModule extends AbstractQuercusModule {
       }
       printDepth(out, 8 * depth);
       out.println(")");
-    }
-    else {
+    } else {
       v.print(env);
     }
   }

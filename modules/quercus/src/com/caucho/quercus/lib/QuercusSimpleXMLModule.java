@@ -31,19 +31,20 @@ package com.caucho.quercus.lib;
 import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.quercus.module.NotNull;
 import com.caucho.quercus.module.Optional;
+import com.caucho.quercus.env.SimpleXMLElementValue;
 
 /**
  * PHP SimpleXML
  */
 public class QuercusSimpleXMLModule extends AbstractQuercusModule {
-  
-  public SimpleXMLElementClass simplexml_load_string(@NotNull String data,
+
+  public SimpleXMLElementValue simplexml_load_string(@NotNull String data,
                                                      @Optional String className,
                                                      @Optional int options)
   {
-    return new SimpleXMLElementClass(data, className, options);
+    return new SimpleXMLElementValue(data, className, options);
   }
-  
+
   //@todo simplexml_import_dom -- Skip until (XXX. DOM Functions implemented)
   //@todo simplexml_load_file
   //@todo simplexml_load_string
