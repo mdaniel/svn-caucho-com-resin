@@ -219,16 +219,18 @@ public class SimpleXMLElementValue extends ArrayValueImpl {
       return super.get(name);
 
     } else {
+      SimpleXMLElementValue result = new SimpleXMLElementValue(_element, _className, _options);
+      
       NodeList nodes = _element.getElementsByTagName(name.toString());
 
       for (int i = 0; i < nodes.getLength(); i++) {
         Node node = nodes.item(i);
         if (node.getParentNode() == _element) {
-          this.put(fillChildren((Element) node));
+          result.put(fillChildren((Element) node));
         }
       }
   
-      return this;
+      return result;
     }
   }
   
@@ -239,13 +241,6 @@ public class SimpleXMLElementValue extends ArrayValueImpl {
   {
     return this;
   }
-  /*
-  public void print(Env env)
-    throws Throwable
-  {
-    NodeList childNodes = _element.getChildNodes();
-    env.getOut().print("Charlie");
-  }*/
 
   public String toString()
   {
