@@ -28,10 +28,11 @@
 
 package com.caucho.quercus.lib;
 
+import com.caucho.quercus.env.SimpleXMLElementValue;
 import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.quercus.module.NotNull;
 import com.caucho.quercus.module.Optional;
-import com.caucho.quercus.env.SimpleXMLElementValue;
+import com.caucho.vfs.Path;
 
 /**
  * PHP SimpleXML
@@ -45,7 +46,12 @@ public class QuercusSimpleXMLModule extends AbstractQuercusModule {
     return new SimpleXMLElementValue(data, className, options);
   }
 
+  public SimpleXMLElementValue simplexml_load_file(@NotNull Path file,
+                                                   @Optional String className,
+                                                   @Optional int options)
+  {
+    return new SimpleXMLElementValue(file, className, options);
+  }
+  
   //@todo simplexml_import_dom -- Skip until (XXX. DOM Functions implemented)
-  //@todo simplexml_load_file
-  //@todo simplexml_load_string
 }

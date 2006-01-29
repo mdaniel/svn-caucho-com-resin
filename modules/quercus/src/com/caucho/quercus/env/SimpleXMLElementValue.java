@@ -49,7 +49,6 @@ import java.util.logging.Logger;
 
 
 /**
- * SimpleXML object oriented API facade
  * SimpleXMLElement is a pseudo-array
  * 
  * $xmlString = "<root><a><b a1=\"v1\">foo</b><b a1=\"v2\">bar</b></a></root>"
@@ -137,15 +136,6 @@ public class SimpleXMLElementValue extends ArrayValueImpl {
     _element = element;
     _className = className;
     _options = options;
-    
-    /*
-    try {
-      DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-      Document _document = builder.newDocument();
-      _document.adoptNode(_element);
-    } catch (Exception e) {
-      log.log(Level.FINE,  L.l(e.toString()), e);
-    }*/
   }
 
   /**
@@ -159,12 +149,22 @@ public class SimpleXMLElementValue extends ArrayValueImpl {
     return BooleanValue.FALSE;
   }
 
+  /**
+   * 
+   * @param data currently ignored
+   * @return attribute array
+   */
+  public Value attributes(@Optional String data)
+  {
+    return super.get(new StringValue("@attributes"));
+  }
+  
   public Element getElement()
   {
     return _element;
   }
   
-  public SimpleXMLElementValue fillChildren(SimpleXMLElementValue simpleXMLElement)
+  private SimpleXMLElementValue fillChildren(SimpleXMLElementValue simpleXMLElement)
   {
     Element node = simpleXMLElement.getElement();
     
