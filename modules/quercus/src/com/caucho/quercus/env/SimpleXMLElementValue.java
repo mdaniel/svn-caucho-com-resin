@@ -36,16 +36,16 @@ import com.caucho.vfs.Path;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-import org.w3c.dom.NamedNodeMap;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.ByteArrayInputStream;
+import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.HashMap;
 
 
 /**
@@ -85,9 +85,11 @@ public class SimpleXMLElementValue extends ArrayValueImpl {
   {
     DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
     try {
+      
       DocumentBuilder builder = factory.newDocumentBuilder();
       _document = builder.parse(new ByteArrayInputStream(data.getBytes()));
       _element = _document.getDocumentElement();
+      
     } catch (Exception e) {
       log.log(Level.FINE, L.l(e.toString()), e);
     }
@@ -109,9 +111,11 @@ public class SimpleXMLElementValue extends ArrayValueImpl {
   {
     DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
     try {
+      
       DocumentBuilder builder = factory.newDocumentBuilder();
       _document = builder.parse(file.openRead());
       _element = _document.getDocumentElement();
+      
     } catch (Exception e) {
       log.log(Level.FINE, L.l(e.toString()), e);
     }
@@ -156,8 +160,6 @@ public class SimpleXMLElementValue extends ArrayValueImpl {
   public SimpleXMLElementValue fillChildren(SimpleXMLElementValue simpleXMLElement)
   {
     Element node = simpleXMLElement.getElement();
-    
-    //SimpleXMLElementValue nodeXMLElementValue = new SimpleXMLElementValue(node, _className, _options);
     
     NodeList children = node.getChildNodes();
     
@@ -230,6 +232,19 @@ public class SimpleXMLElementValue extends ArrayValueImpl {
       return super.get(name);
 
     } else {
+      
+      // First check to see if there is an @attribute array
+      // If @attribute array exists and name is an attribute,
+      // then return the attribute value
+      Value attributeArray =  super.get(new StringValue("@attributes"));
+      if (attributeArray instanceof ArrayValue) {
+        Value value = attributeArray.get(name);
+        if (value instanceof StringValue)
+          return value;
+      }
+      
+      // Either there is no @attribute array or name is not an attribute
+      // so assume we are meant to return a SimpleXMLElementValue
       SimpleXMLElementValue result = new SimpleXMLElementValue(_element, _className, _options);
       
       NodeList nodes = _element.getElementsByTagName(name.toString());
@@ -243,18 +258,28 @@ public class SimpleXMLElementValue extends ArrayValueImpl {
           
           //Generate @attributes array, if applicable
           NamedNodeMap attrs = node.getAttributes();
+          attributeArray = new ArrayValueImpl();
           int attrLength = attrs.getLength();
+          
           if (attrLength > 0) {
-            ArrayValueImpl attributeArray = new ArrayValueImpl();
             for (int j=0; j < attrLength; j++) {
               Node attribute = attrs.item(j);
-              attributeArray.put(attribute.getNodeName(), attribute.getNodeValue());
+              StringValue nodeName = new StringValue(attribute.getNodeName());
+              StringValue nodeValue = new StringValue(attribute.getNodeValue());
+              attributeArray.put(nodeName, nodeValue);
             }
             childElement.put(new StringValue("@attributes"), attributeArray, false);
           }
           
-          //Generate fillChildren array
-          result.put(fillChildren(childElement), false);
+          // Generate fillChildren array and store all
+          // values in result.  Also store attributes in result
+          // but use associative array (ie: simpleXmlElement['foo'] => bar)
+          if (node.getChildNodes().getLength() > 1)
+            result.put(fillChildren(childElement), false);
+          else {
+            childElement.put(new StringValue(node.getFirstChild().getNodeValue()), false);
+            result.put(childElement, false);
+          }
         }
       }
   
@@ -292,17 +317,19 @@ public class SimpleXMLElementValue extends ArrayValueImpl {
         if (node.getParentNode() == _element)
           break;
       }
+      
       // XXX: Need to handle case if node does not exist
       if (node == null)
         return BooleanValue.FALSE;
       
       // Replace contents of node with value.toString()
       //Node replacementNode = node.cloneNode(false);
-      System.out.println("Existing: " + node.getFirstChild().getNodeValue());
-      node.setNodeValue(value.toString());
+      //System.out.println("Existing: " + node.getFirstChild().getNodeValue());
+      //node.setNodeValue(value.toString());
       
 
-      System.out.println("Replacement: " + node.getFirstChild().getNodeValue());
+      //System.out.println("Replacement: " + node.getFirstChild().getNodeValue());
+      //XXX: figure out code to replace element with text
       return super.put(key, value);
     } else {
       return super.put(key, value);
