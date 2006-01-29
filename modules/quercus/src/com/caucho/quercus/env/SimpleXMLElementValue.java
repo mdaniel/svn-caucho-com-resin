@@ -360,6 +360,16 @@ public class SimpleXMLElementValue extends ArrayValueImpl {
     return result;
   }
 
+  /**
+   * Prints the value.
+   * @param env
+   */
+  public void print(Env env)
+    throws Throwable
+  {
+    env.getOut().print(get(new LongValue(0)));
+  }
+  
   public String toString()
   {
     return "SimpleXMLElement Object";
