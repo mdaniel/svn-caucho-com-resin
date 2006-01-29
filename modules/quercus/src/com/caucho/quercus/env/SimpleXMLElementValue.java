@@ -255,9 +255,10 @@ public class SimpleXMLElementValue extends ArrayValueImpl {
       }
       
       // Either there is no @attribute array or name is not an attribute
-      // so assume we are meant to return a SimpleXMLElementValue
+      // so assume we are meant to return a SimpleXMLElementValue      
       NodeList nodes = _element.getElementsByTagName(name.toString());
       int nodeLength = nodes.getLength();
+      
       SimpleXMLElementValue result = new SimpleXMLElementValue(_element, _className, _options);
       
       SimpleXMLElementValue childElement = null;
@@ -299,7 +300,7 @@ public class SimpleXMLElementValue extends ArrayValueImpl {
         }
       }
       
-      if (numberOfChildren == 1)
+      if (numberOfChildren == 1) 
         return childElement;
       else
         return result;
@@ -382,6 +383,24 @@ public class SimpleXMLElementValue extends ArrayValueImpl {
   {
     env.getOut().print(get(new LongValue(0)));
   }
+  
+  /**
+   * Converts to a raw value.
+   * If SimpleXMLElementValue has 2 elements and the first is an
+   * attribute array, then return StringValue
+   */
+   public Value toValue()
+   {
+     if (getSize() == 2) {
+       Value attributeArray = super.get(new StringValue("@attributes"));
+       if (attributeArray instanceof ArrayValue) {
+         return super.get(new LongValue(0));
+       } 
+     }
+     
+     return this;
+   }
+
   
   public String toString()
   {
