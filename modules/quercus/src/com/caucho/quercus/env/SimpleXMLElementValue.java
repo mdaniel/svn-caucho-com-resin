@@ -383,27 +383,25 @@ public class SimpleXMLElementValue extends ArrayValueImpl {
   {
     env.getOut().print(get(new LongValue(0)));
   }
-  
+
   /**
-   * Converts to a raw value.
-   * If SimpleXMLElementValue has 2 elements and the first is an
-   * attribute array, then return StringValue
+   * if simpleXMLElement has attributes, need to check here to see if it
+   * has just one other entry.  If so, return the String stored there.
+   * 
+   * @return either node value or "SimpleXMLElement Object"
    */
-   public Value toValue()
-   {
+  public String toString()
+  {
+     if (getSize() == 1) {
+       return super.get(new LongValue(0)).toString();
+     }
+    
      if (getSize() == 2) {
        Value attributeArray = super.get(new StringValue("@attributes"));
        if (attributeArray instanceof ArrayValue) {
-         return super.get(new LongValue(0));
+         return super.get(new LongValue(0)).toString();
        } 
      }
-     
-     return this;
-   }
-
-  
-  public String toString()
-  {
     return "SimpleXMLElement Object";
   }
   //@todo attributes
