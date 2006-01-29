@@ -38,6 +38,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.w3c.dom.NamedNodeMap;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -147,9 +148,16 @@ public class SimpleXMLElementValue extends ArrayValueImpl {
     return BooleanValue.FALSE;
   }
 
-  public SimpleXMLElementValue fillChildren(Element node)
+  public Element getElement()
   {
-    SimpleXMLElementValue childValue = new SimpleXMLElementValue((Element) node, _className, _options);
+    return _element;
+  }
+  
+  public SimpleXMLElementValue fillChildren(SimpleXMLElementValue simpleXMLElement)
+  {
+    Element node = simpleXMLElement.getElement();
+    
+    //SimpleXMLElementValue nodeXMLElementValue = new SimpleXMLElementValue(node, _className, _options);
     
     NodeList children = node.getChildNodes();
     
@@ -184,7 +192,7 @@ public class SimpleXMLElementValue extends ArrayValueImpl {
       if (child.getChildNodes().getLength() == 1)
         childArray.put(new StringValue(child.getFirstChild().getNodeValue()));
       else {
-        childArray.put(fillChildren((Element) child)); // recursion
+        childArray.put(fillChildren(new SimpleXMLElementValue((Element) child, _className, _options))); // recursion
       }
       
       // if childArray has only one element, only put the Value
@@ -194,12 +202,12 @@ public class SimpleXMLElementValue extends ArrayValueImpl {
       // whatever was stored in nodeArray.get(childName)
       // with the updated childArray.
       if (childArray.size() == 1)
-        childValue.put(childName,childArray.get(new LongValue(0)));
+        simpleXMLElement.put(childName,childArray.get(new LongValue(0)), false);
       else
-        childValue.put(childName, childArray);
+        simpleXMLElement.put(childName, childArray, false);
     }
     
-    return childValue;
+    return simpleXMLElement;
   }
 
   /**
@@ -225,11 +233,28 @@ public class SimpleXMLElementValue extends ArrayValueImpl {
       SimpleXMLElementValue result = new SimpleXMLElementValue(_element, _className, _options);
       
       NodeList nodes = _element.getElementsByTagName(name.toString());
-
-      for (int i = 0; i < nodes.getLength(); i++) {
+      int nodeLength = nodes.getLength();
+      
+      for (int i = 0; i < nodeLength; i++) {
         Node node = nodes.item(i);
         if (node.getParentNode() == _element) {
-          result.put(fillChildren((Element) node));
+          
+          SimpleXMLElementValue childElement = new SimpleXMLElementValue((Element) node, _className, _options);
+          
+          //Generate @attributes array, if applicable
+          NamedNodeMap attrs = node.getAttributes();
+          int attrLength = attrs.getLength();
+          if (attrLength > 0) {
+            ArrayValueImpl attributeArray = new ArrayValueImpl();
+            for (int j=0; j < attrLength; j++) {
+              Node attribute = attrs.item(j);
+              attributeArray.put(attribute.getNodeName(), attribute.getNodeValue());
+            }
+            childElement.put(new StringValue("@attributes"), attributeArray, false);
+          }
+          
+          //Generate fillChildren array
+          result.put(fillChildren(childElement), false);
         }
       }
   
@@ -237,7 +262,64 @@ public class SimpleXMLElementValue extends ArrayValueImpl {
     }
   }
   
-   /**
+  private Value put(Value value, boolean setPhpValue)
+  {
+    Value key = createTailKey();
+      
+    put(key, value,setPhpValue);
+    return this;
+  }
+
+  /**
+   * if this is a PHP assignment, then put finds the first element whose
+   * tagname == key.  Then replaces its firstChild by a new child with the
+   * string value.toString(). 
+   * 
+   * @param key
+   * @param value
+   * @param setPhpValue if true, then this is a Php assignment
+   * @return SimpleXMLElementValue
+   */
+  private Value put(Value key, Value value, boolean setPhpValue)
+  {
+    if (setPhpValue) {
+      
+      // get 1st child with tagname == key
+      NodeList nodes = _element.getElementsByTagName(key.toString());
+      Node node = null;
+      for (int i = 0; i < nodes.getLength(); i++) {
+        node = nodes.item(i);
+        if (node.getParentNode() == _element)
+          break;
+      }
+      // XXX: Need to handle case if node does not exist
+      if (node == null)
+        return BooleanValue.FALSE;
+      
+      // Replace contents of node with value.toString()
+      //Node replacementNode = node.cloneNode(false);
+      System.out.println("Existing: " + node.getFirstChild().getNodeValue());
+      node.setNodeValue(value.toString());
+      
+
+      System.out.println("Replacement: " + node.getFirstChild().getNodeValue());
+      return super.put(key, value);
+    } else {
+      return super.put(key, value);
+    }
+  }
+  
+  public ArrayValue put(Value value)
+  {
+    return (ArrayValue) put(value, true);
+  }
+  
+  public Value put(Value key, Value value)
+  {
+    return put(key, value, true);
+  }
+  
+  /**
    * Copy for assignment.
    */
   public Value copy()
@@ -245,7 +327,7 @@ public class SimpleXMLElementValue extends ArrayValueImpl {
     SimpleXMLElementValue result = new SimpleXMLElementValue(_element, _className, _options);
     
     for (Entry ptr = this.getHead(); ptr != null; ptr = ptr._next) {
-      result.put(ptr.getKey(), ptr.getRawValue().copyArrayItem());
+      result.put(ptr.getKey(), ptr.getRawValue().copyArrayItem(), false);
     }
     
     return result;
