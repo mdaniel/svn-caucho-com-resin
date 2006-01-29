@@ -60,17 +60,7 @@ public class SimpleXMLElementValue extends ArrayValueImpl {
 
   private String _className;
   private int _options;
-/*
-  public SimpleXMLElementValue(SimpleXMLElementValue copy)
-  {
-    this(copy.getSize());
 
-    for (Entry ptr = copy.getHead(); ptr != null; ptr = ptr._next) {
-      // php/0662 for copy
-      put(ptr.getKey(), ptr.getRawValue().copyArrayItem());
-    }
-  }*/
-  
   /**
    * constructor used by simplexml_load_string
    * XXX: className and options currently are unsupported
@@ -139,6 +129,15 @@ public class SimpleXMLElementValue extends ArrayValueImpl {
     _element = element;
     _className = className;
     _options = options;
+    
+    /*
+    try {
+      DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+      Document _document = builder.newDocument();
+      _document.adoptNode(_element);
+    } catch (Exception e) {
+      log.log(Level.FINE,  L.l(e.toString()), e);
+    }*/
   }
 
   /**
@@ -227,10 +226,14 @@ public class SimpleXMLElementValue extends ArrayValueImpl {
   {
     // If name is Long, then treat this as an array
     // else treat as SimpleXMLElementValue
+    // if name = 0, then return th
+    // because $parent->child is equivalent to $parent->child[0]
     if (name instanceof LongValue) {
-      
-      return super.get(name);
-
+      Value result = super.get(name);
+      if (!(result instanceof SimpleXMLElementValue) && (name.toLong() == 0)) {
+        result = this;
+      }
+      return result;
     } else {
       
       // First check to see if there is an @attribute array
@@ -245,16 +248,21 @@ public class SimpleXMLElementValue extends ArrayValueImpl {
       
       // Either there is no @attribute array or name is not an attribute
       // so assume we are meant to return a SimpleXMLElementValue
-      SimpleXMLElementValue result = new SimpleXMLElementValue(_element, _className, _options);
-      
       NodeList nodes = _element.getElementsByTagName(name.toString());
       int nodeLength = nodes.getLength();
+      SimpleXMLElementValue result = new SimpleXMLElementValue(_element, _className, _options);
       
+      SimpleXMLElementValue childElement = null;
+      
+      // if numberOfChildren = 1, then return childElement not result
+      // used because $parent->child is equivalent to $parent->child[0]
+      int numberOfChildren = 0;
       for (int i = 0; i < nodeLength; i++) {
         Node node = nodes.item(i);
         if (node.getParentNode() == _element) {
           
-          SimpleXMLElementValue childElement = new SimpleXMLElementValue((Element) node, _className, _options);
+          numberOfChildren++;
+          childElement = new SimpleXMLElementValue((Element) node, _className, _options);
           
           //Generate @attributes array, if applicable
           NamedNodeMap attrs = node.getAttributes();
@@ -282,8 +290,11 @@ public class SimpleXMLElementValue extends ArrayValueImpl {
           }
         }
       }
-  
-      return result;
+      
+      if (numberOfChildren == 1)
+        return childElement;
+      else
+        return result;
     }
   }
   
@@ -322,14 +333,8 @@ public class SimpleXMLElementValue extends ArrayValueImpl {
       if (node == null)
         return BooleanValue.FALSE;
       
-      // Replace contents of node with value.toString()
-      //Node replacementNode = node.cloneNode(false);
-      //System.out.println("Existing: " + node.getFirstChild().getNodeValue());
-      //node.setNodeValue(value.toString());
-      
+      node.getFirstChild().setNodeValue(value.toString());
 
-      //System.out.println("Replacement: " + node.getFirstChild().getNodeValue());
-      //XXX: figure out code to replace element with text
       return super.put(key, value);
     } else {
       return super.put(key, value);
