@@ -29,28 +29,22 @@
 
 package com.caucho.quercus.lib;
 
-import java.io.IOException;
-
-import java.util.Map;
-import java.util.HashMap;
-import java.util.IdentityHashMap;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import com.caucho.util.L10N;
-
-import com.caucho.vfs.Vfs;
-
+import com.caucho.quercus.env.*;
 import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.quercus.module.Optional;
-import com.caucho.quercus.module.Reference;
 import com.caucho.quercus.module.ReadOnly;
+import com.caucho.quercus.module.Reference;
 import com.caucho.quercus.module.UsesSymbolTable;
-
-import com.caucho.quercus.env.*;
-
+import com.caucho.util.L10N;
+import com.caucho.vfs.Vfs;
 import com.caucho.vfs.WriteStream;
+
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.IdentityHashMap;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Information about PHP variables.
@@ -797,7 +791,7 @@ public class QuercusVariableModule extends AbstractQuercusModule {
       else if (v instanceof ArrayValue) {
 	ArrayValue array = (ArrayValue) v;
 
-	out.println("array(" + array.getSize() + ") {");
+	out.println(v.toString() + "(" + array.getSize() + ") {");
 
 	for (Map.Entry<Value,Value> mapEntry : array.entrySet()) {
 	  ArrayValue.Entry entry = (ArrayValue.Entry) mapEntry;

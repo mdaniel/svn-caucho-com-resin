@@ -50,12 +50,20 @@ import java.util.logging.Logger;
 
 /**
  * SimpleXML object oriented API facade
+ * SimpleXMLElement is a pseudo-array
+ * 
+ * $xmlString = "<root><a><b a1=\"v1\">foo</b><b a1=\"v2\">bar</b></a></root>"
+ * $xml = simplexml_load_string($xmlstr);
+ * 
+ * $xml->root has 1 element so you can access by $xml->root[0] as well
+ * $xml->root->a is equivalent to $xml->root[0]->a
+ * foreach ($xml->root->a->b as $b) {echo $b['a1']." ";} will output "v1 v2"
+ * 
  */
 public class SimpleXMLElementValue extends ArrayValueImpl {
   private static final Logger log = Logger.getLogger(SimpleXMLElementValue.class.getName());
   private static final L10N L = new L10N(SimpleXMLElementValue.class);
 
-  private Document _document;
   private Element _element;
 
   private String _className;
@@ -77,8 +85,8 @@ public class SimpleXMLElementValue extends ArrayValueImpl {
     try {
       
       DocumentBuilder builder = factory.newDocumentBuilder();
-      _document = builder.parse(new ByteArrayInputStream(data.getBytes()));
-      _element = _document.getDocumentElement();
+      Document document = builder.parse(new ByteArrayInputStream(data.getBytes()));
+      _element = document.getDocumentElement();
       
     } catch (Exception e) {
       log.log(Level.FINE, L.l(e.toString()), e);
@@ -103,8 +111,8 @@ public class SimpleXMLElementValue extends ArrayValueImpl {
     try {
       
       DocumentBuilder builder = factory.newDocumentBuilder();
-      _document = builder.parse(file.openRead());
-      _element = _document.getDocumentElement();
+      Document document = builder.parse(file.openRead());
+      _element = document.getDocumentElement();
       
     } catch (Exception e) {
       log.log(Level.FINE, L.l(e.toString()), e);
@@ -226,11 +234,11 @@ public class SimpleXMLElementValue extends ArrayValueImpl {
   {
     // If name is Long, then treat this as an array
     // else treat as SimpleXMLElementValue
-    // if name = 0, then return th
+    // if name = 0, then return this
     // because $parent->child is equivalent to $parent->child[0]
     if (name instanceof LongValue) {
       Value result = super.get(name);
-      if (!(result instanceof SimpleXMLElementValue) && (name.toLong() == 0)) {
+      if (!(result instanceof StringValue) && !(result instanceof SimpleXMLElementValue) && (name.toLong() == 0)) {
         result = this;
       }
       return result;
