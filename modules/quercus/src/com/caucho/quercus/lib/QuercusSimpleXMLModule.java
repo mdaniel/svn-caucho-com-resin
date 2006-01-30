@@ -29,20 +29,32 @@
 package com.caucho.quercus.lib;
 
 import com.caucho.quercus.env.BooleanValue;
-import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.NullValue;
 import com.caucho.quercus.env.SimpleXMLElementValue;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.quercus.module.NotNull;
 import com.caucho.quercus.module.Optional;
+import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
+
+import org.w3c.dom.Document;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import java.io.ByteArrayInputStream;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * PHP SimpleXML
  */
 public class QuercusSimpleXMLModule extends AbstractQuercusModule {
-
   
+  private static final Logger log = Logger.getLogger(QuercusSimpleXMLModule.class.getName());
+  private static final L10N L = new L10N(QuercusSimpleXMLModule.class);
+
+  /*
   public SimpleXMLElementValue simplexml_load_string(Env env,
                                                      @NotNull String data,
                                                      @Optional String className,
@@ -50,6 +62,23 @@ public class QuercusSimpleXMLModule extends AbstractQuercusModule {
   {
  
     return new SimpleXMLElementValue(data, className, options);
+  }*/
+
+  public Value simplexml_load_string(@NotNull String data,
+                                     @Optional String className,
+                                     @Optional int options)
+  {
+    DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+    try {
+
+      DocumentBuilder builder = factory.newDocumentBuilder();
+      Document document = builder.parse(new ByteArrayInputStream(data.getBytes()));
+      return new SimpleXMLElementClass(document.getDocumentElement());
+
+    } catch (Exception e) {
+      log.log(Level.FINE, L.l(e.toString()), e);
+      return NullValue.NULL;
+    }
   }
   /*
   public Value simplexml_load_string(Env env,
@@ -66,24 +95,24 @@ public class QuercusSimpleXMLModule extends AbstractQuercusModule {
   {
     return new SimpleXMLElementValue(file, className, options);
   }
-  
+
   public Value simplexml_attributes(@NotNull SimpleXMLElementValue xmlElement,
                                     @Optional String data)
   {
     if (xmlElement == null)
       return BooleanValue.FALSE;
-    
+
     return xmlElement.attributes(data);
   }
-  
+
   public Value simplexml_children(@NotNull SimpleXMLElementValue xmlElement,
                                   @Optional String nsprefix)
   {
     if (xmlElement == null)
       return BooleanValue.FALSE;
-    
+
     return xmlElement.children(nsprefix);
   }
-  
+
   //@todo simplexml_import_dom -- Skip until (XXX. DOM Functions implemented)
 }
