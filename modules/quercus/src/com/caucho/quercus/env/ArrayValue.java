@@ -61,12 +61,12 @@ abstract public class ArrayValue extends Value {
 
   protected static final StringValue KEY = new StringValue("key");
   protected static final StringValue VALUE = new StringValue("value");
-  
+
   private static final int SORT_REGULAR = 0;
   private static final int SORT_NUMERIC = 1;
   private static final int SORT_STRING = 2;
   private static final int SORT_LOCALE_STRING = 5;
-  
+
   public static final GetKey GET_KEY = new GetKey();
   public static final GetValue GET_VALUE = new GetValue();
 
@@ -75,7 +75,7 @@ abstract public class ArrayValue extends Value {
   protected ArrayValue()
   {
   }
-  
+
   /**
    * Returns the type.
    */
@@ -91,15 +91,15 @@ abstract public class ArrayValue extends Value {
   {
     return getSize() != 0;
   }
-  
+
   /**
    * Converts to a string.
    */
   public String toString()
   {
-    return "Array";
+    return "array";
   }
-  
+
   /**
    * Converts to an object.
    */
@@ -115,12 +115,12 @@ abstract public class ArrayValue extends Value {
   {
     return true;
   }
-  
+
   /**
    * Copy for assignment.
    */
   abstract public Value copy();
-  
+
   /**
    * Copy for serialization
    */
@@ -135,7 +135,7 @@ abstract public class ArrayValue extends Value {
    * Clears the array
    */
   abstract public void clear();
-  
+
   /**
    * Adds a new value.
    */
@@ -163,7 +163,7 @@ abstract public class ArrayValue extends Value {
 
       put(fieldName, value);
     }
-    
+
     return value;
   }
 
@@ -171,7 +171,7 @@ abstract public class ArrayValue extends Value {
    * Returns the value as an argument which may be a reference.
    */
   abstract public Value getArg(Value index);
-  
+
   /**
    * Returns the value as an array.
    */
@@ -186,7 +186,7 @@ abstract public class ArrayValue extends Value {
       put(fieldName, value);
     }
     */
-    
+
     return value;
   }
 
@@ -218,7 +218,7 @@ abstract public class ArrayValue extends Value {
 
       put(fieldName, value);
     }
-    
+
     return value;
   }
 
@@ -239,7 +239,7 @@ abstract public class ArrayValue extends Value {
     throws Throwable
   {
     rValue = rValue.toValue();
-    
+
     if (! (rValue instanceof ArrayValue))
       return copy();
 
@@ -404,7 +404,7 @@ abstract public class ArrayValue extends Value {
 
     return this;
   }
-  
+
   /**
    * Appends as an argument - only called from compiled code
    *
@@ -412,7 +412,7 @@ abstract public class ArrayValue extends Value {
    */
   public void putAll(ArrayValue array)
   {
-    for (Map.Entry<Value, Value> entry : array.entrySet())	
+    for (Map.Entry<Value, Value> entry : array.entrySet())
       put(entry.getKey(), entry.getValue());
   }
 
@@ -458,7 +458,7 @@ abstract public class ArrayValue extends Value {
    * Returns the tail.
    */
   abstract protected Entry getTail();
-  
+
   /**
    * Returns the current value.
    */
@@ -523,7 +523,7 @@ abstract public class ArrayValue extends Value {
 
     result.put(LongValue.ZERO, _current.getKey());
     result.put(KEY, _current.getKey());
-    
+
     result.put(LongValue.ONE, _current.getValue());
     result.put(VALUE, _current.getValue());
 
@@ -551,14 +551,14 @@ abstract public class ArrayValue extends Value {
 
     return current();
   }
-  
+
   /**
    * Returns the corresponding key if this array contains the given value
-   * 
+   *
    * @param value  the value to search for in the array
-   * 
+   *
    * @return the key if it is found in the array, NULL otherwise
-   * 
+   *
    * @throws NullPointerException
    */
   public Value contains(Value value)
@@ -567,17 +567,17 @@ abstract public class ArrayValue extends Value {
       if (entry.getValue().eq(value))
         return entry.getKey();
     }
-      
+
     return NullValue.NULL;
   }
-  
+
   /**
    * Returns the corresponding key if this array contains the given value
-   * 
+   *
    * @param value  the value to search for in the array
-   * 
+   *
    * @return the key if it is found in the array, NULL otherwise
-   * 
+   *
    * @throws NullPointerException
    */
   public Value containsStrict(Value value)
@@ -587,48 +587,48 @@ abstract public class ArrayValue extends Value {
       if (entry.getValue().eql(value))
         return entry.getKey();
     }
-      
+
     return NullValue.NULL;
   }
-  
+
   /**
    * Returns the corresponding valeu if this array contains the given key
-   * 
+   *
    * @param key  the key to search for in the array
-   * 
+   *
    * @return the value if it is found in the array, NULL otherwise
-   * 
+   *
    * @throws NullPointerException
    */
   abstract public Value containsKey(Value key);
-  
+
   /**
    * Returns an object array of this array.  This is a copy of this object's
    * backing structure.  Null elements are not included.
-   * 
+   *
    * @return an object array of this array
    */
   public Map.Entry<Value, Value>[] toArray()
-  {   
-    ArrayList<Map.Entry<Value, Value>> array = 
+  {
+    ArrayList<Map.Entry<Value, Value>> array =
       new ArrayList<Map.Entry<Value, Value>>(getSize());
-    
+
     for (Entry entry = getHead(); entry != null; entry = entry._next)
       array.add(entry);
 
     Map.Entry<Value, Value>[]result = new Entry[array.size()];
-    
+
     return array.toArray(result);
   }
-  
+
   /**
    * Sorts this array based using the passed Comparator
-   * 
+   *
    * @param comparator the comparator for sorting the array
    * @param resetKeys  true if the keys should not be preserved
    * @param strict  true if alphabetic keys should not be preserved
    */
-  public void sort(Comparator<Map.Entry<Value, Value>> comparator, 
+  public void sort(Comparator<Map.Entry<Value, Value>> comparator,
                    boolean resetKeys, boolean strict)
     throws Throwable
   {
@@ -644,15 +644,15 @@ abstract public class ArrayValue extends Value {
     Arrays.sort(entries, comparator);
 
     clear();
-    
+
     long base = 0;
-    
+
     if (! resetKeys)
       strict = false;
-    
+
     for (int j = 0; j < entries.length; j++) {
       Value key = entries[j].getKey();
-      
+
       if (resetKeys && (! (key instanceof StringValue) || strict))
         put(LongValue.create(base++), entries[j].getValue());
       else
@@ -673,7 +673,7 @@ abstract public class ArrayValue extends Value {
       entry.getKey().serialize(sb);
       entry.getValue().serialize(sb);
     }
-    
+
     sb.append("}");
   }
 
@@ -694,10 +694,10 @@ abstract public class ArrayValue extends Value {
 
     sb.append(")");
   }
-  
+
   /**
    * Resets all numerical keys with the first index as base
-   * 
+   *
    * @param base  the initial index
    * @param strict  if true, string keys are also reset
    */
@@ -713,10 +713,10 @@ abstract public class ArrayValue extends Value {
     }
 
     clear();
-    
+
     for (int j = 0; j < entries.length; j++) {
       Value key = entries[j].getKey();
-      
+
       if (! (key instanceof StringValue) || strict)
         put(LongValue.create(base++), entries[j].getValue());
       else
@@ -725,42 +725,42 @@ abstract public class ArrayValue extends Value {
 
     return true;
   }
-  
+
   /**
    * Test for equality
-   * 
+   *
    * @param rValue rhs ArrayValue to compare to
-   * 
+   *
    * @return true if this is equal to rValue, false otherwise
    */
   public boolean eq(Value rValue)
   {
     if (rValue == null)
       return false;
-      
+
     for (Map.Entry<Value, Value> entry: entrySet()) {
       Value entryValue = entry.getValue();
 
       Value entryKey = entry.getKey();
-      
+
       Value rEntryValue = rValue.get(entryKey);
-      
-      if ((rEntryValue instanceof ArrayValue) && 
+
+      if ((rEntryValue instanceof ArrayValue) &&
         !entryValue.eq((ArrayValue) rEntryValue))
         return false;
-      
+
       if (! entryValue.eq(rEntryValue))
-        return false;       
+        return false;
     }
-    
+
     return true;
   }
-  
+
   /**
    * Test for ===
-   * 
+   *
    * @param rValue rhs ArrayValue to compare to
-   * 
+   *
    * @return true if this is equal to rValue, false otherwise
    */
   public boolean eql(Value rValue)
@@ -787,7 +787,7 @@ abstract public class ArrayValue extends Value {
 
       if (! entryA.getKey().eql(entryB.getKey()))
 	return false;
-      
+
       if (! entryA.getValue().eql(entryB.getValue()))
 	return false;
     }
@@ -802,7 +802,7 @@ abstract public class ArrayValue extends Value {
     implements Map.Entry<Value,Value> {
     Entry _prev;
     Entry _next;
-    
+
     Value _key;
 
     public Entry()
@@ -829,7 +829,7 @@ abstract public class ArrayValue extends Value {
     {
       return _key;
     }
-    
+
     public Value toValue()
     {
       // The value may be a var
@@ -843,7 +843,7 @@ abstract public class ArrayValue extends Value {
     public Var toRefVar()
     {
       // php/376a
-      
+
       Value val = getRawValue();
 
       if (val instanceof Var)
@@ -856,7 +856,7 @@ abstract public class ArrayValue extends Value {
 	return var;
       }
     }
-  
+
     /**
      * Converts to an argument value.
      */
@@ -864,7 +864,7 @@ abstract public class ArrayValue extends Value {
     {
       return getRawValue().toValue();
     }
-    
+
     public Value setValue(Value value)
     {
       Value oldValue = toValue();
@@ -873,7 +873,7 @@ abstract public class ArrayValue extends Value {
 
       return oldValue;
     }
-  
+
     /**
      * Converts to a variable reference (for function  arguments)
      */
@@ -886,7 +886,7 @@ abstract public class ArrayValue extends Value {
       else
 	return new RefVar(this);
     }
-  
+
     /**
      * Converts to a variable reference (for function  arguments)
      */
@@ -912,7 +912,7 @@ abstract public class ArrayValue extends Value {
 	return this;
     }
   }
-  
+
   /**
    * Takes the values of this array and puts them in a vector
    */
@@ -927,7 +927,7 @@ abstract public class ArrayValue extends Value {
 
     return values;
   }
-  
+
   public class EntrySet extends AbstractSet<Map.Entry<Value,Value>> {
     EntrySet()
     {
@@ -975,7 +975,7 @@ abstract public class ArrayValue extends Value {
       return new ValueIterator(getHead());
     }
   }
-  
+
   public static class EntryIterator
     implements Iterator<Map.Entry<Value,Value>> {
     private Entry _current;
@@ -984,7 +984,7 @@ abstract public class ArrayValue extends Value {
     {
       _current = head;
     }
-    
+
     public boolean hasNext()
     {
       return _current != null;
@@ -1007,7 +1007,7 @@ abstract public class ArrayValue extends Value {
       throw new UnsupportedOperationException();
     }
   }
-  
+
   public static class KeyIterator
     implements Iterator<Value> {
     private Entry _current;
@@ -1016,7 +1016,7 @@ abstract public class ArrayValue extends Value {
     {
       _current = head;
     }
-    
+
     public boolean hasNext()
     {
       return _current != null;
@@ -1039,7 +1039,7 @@ abstract public class ArrayValue extends Value {
       throw new UnsupportedOperationException();
     }
   }
-  
+
   public static class ValueIterator
     implements Iterator<Value> {
     private Entry _current;
@@ -1048,7 +1048,7 @@ abstract public class ArrayValue extends Value {
     {
       _current = head;
     }
-    
+
     public boolean hasNext()
     {
       return _current != null;
@@ -1071,8 +1071,8 @@ abstract public class ArrayValue extends Value {
       throw new UnsupportedOperationException();
     }
   }
-  
-  public static class ValueComparator implements 
+
+  public static class ValueComparator implements
     Comparator<Map.Entry<Value,Value>> {
     public int compare(Map.Entry<Value,Value> aEntry,
 		       Map.Entry<Value,Value> bEntry)
@@ -1092,8 +1092,8 @@ abstract public class ArrayValue extends Value {
       }
     }
   }
-  
-  public static class KeyComparator implements 
+
+  public static class KeyComparator implements
     Comparator<Map.Entry<Value,Value>> {
     public int compare(Map.Entry<Value,Value> aEntry,
 		       Map.Entry<Value,Value> bEntry)
@@ -1113,18 +1113,18 @@ abstract public class ArrayValue extends Value {
       }
     }
   }
-  
+
   public static abstract class AbstractGet {
     public abstract Value get(Map.Entry<Value, Value> entry);
   }
-  
+
   public static class GetKey extends AbstractGet {
     public Value get(Map.Entry<Value, Value> entry)
     {
       return entry.getKey();
     }
   }
-  
+
   public static class GetValue extends AbstractGet {
     public Value get(Map.Entry<Value, Value> entry)
     {
