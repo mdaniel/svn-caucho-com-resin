@@ -43,13 +43,22 @@ import org.w3c.dom.NodeList;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.ByteArrayInputStream;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 
 /**
- * SimpleXMLElement is a pseudo-array
+ * SimpleXMLElement is a pseudo ArrayValueImpl
+ * Internally looks like:
+ * SimpleXMLElementValue Object
+ * (
+ *   [@attributes] => Array Value (if there are attributes)
+ *   [0] => StringValue or SimpleXMLElementValue (if any children)
+ *   ...
+ *   [N] => StringValue or SimpleXMLElementValue (if any children)
+ * )
  * 
  * $xmlString = "<root><a><b a1=\"v1\">foo</b><b a1=\"v2\">bar</b></a></root>"
  * $xml = simplexml_load_string($xmlstr);
@@ -93,6 +102,7 @@ public class SimpleXMLElementValue extends ArrayValueImpl {
 
     _className = className;
     _options = options;
+    fillSimpleXMLElement();
   }
 
   /**
@@ -136,6 +146,8 @@ public class SimpleXMLElementValue extends ArrayValueImpl {
     _element = element;
     _className = className;
     _options = options;
+    
+    fillSimpleXMLElement();
   }
 
   /**
@@ -163,148 +175,55 @@ public class SimpleXMLElementValue extends ArrayValueImpl {
   {
     return _element;
   }
-  
-  private SimpleXMLElementValue fillChildren(SimpleXMLElementValue simpleXMLElement)
-  {
-    Element node = simpleXMLElement.getElement();
-    
-    NodeList children = node.getChildNodes();
-    
-    // Loop through children of node.
-    // If a child of node has no children itself, then it is empty
-    // and will be skipped.  If a child has only 1 child,
-    // then it is text, and the text will be added to childArray
-    // If a child has more than 1 child, then it is a parent node
-    // and will be added to childArray as a SimpleXMLElement.
-    HashMap<StringValue, ArrayValueImpl> childrenHashMap = new HashMap<StringValue, ArrayValueImpl>();
-    
-    for (int j = 0; j < children.getLength(); j++) {
-      Node child = children.item(j);
-      
-      //skip empty children
-      if (child.getChildNodes().getLength() == 0)
-        continue;
-      
-      StringValue childName = new StringValue(child.getNodeName());
-      
-      // Check to see if this is the first instance of a child
-      // with this NodeName.  If so create a new ArrayValueImpl,
-      // if not add to existing ArrayValueImpl
-      ArrayValueImpl childArray = childrenHashMap.get(childName);
-      if (childArray == null) {
-        childArray = new ArrayValueImpl();
-        childrenHashMap.put(childName, childArray);
-      }
-      
-      //if text node return value
-      //otherwise recursive fill new SimpleXMLElement
-      if (child.getChildNodes().getLength() == 1)
-        childArray.put(new StringValue(child.getFirstChild().getNodeValue()));
-      else {
-        childArray.put(fillChildren(new SimpleXMLElementValue((Element) child, _className, _options))); // recursion
-      }
-      
-      // if childArray has only one element, only put the Value
-      // Note: if it turns out that a subsequent iteration adds
-      // to this particular childArray (ie: childArrayHashMap.get(childName)
-      // does not return null), then nodeArray.put() will replace
-      // whatever was stored in nodeArray.get(childName)
-      // with the updated childArray.
-      if (childArray.size() == 1)
-        simpleXMLElement.put(childName,childArray.get(new LongValue(0)), false);
-      else
-        simpleXMLElement.put(childName, childArray, false);
-    }
-    
-    return simpleXMLElement;
-  }
 
   /**
-   * If name is a LongValue, then treat this as ArrayValueImpl.
    * 
-   * If name is a StringValue then get returns a
-   * new SimpleXMLElementValue but also treats it as an
-   * ArrayValueImpl in that it puts each child element into it.
-   * 
-   * @param name tagName of immediate children of _element
-   * @return either this(name) or new SimpleXMLElementValue
+   * @param nsprefix ignored for now
+   * @return SimpleXMLElementValue filled with the children
    */
+  public Value children(@Optional String nsprefix)
+  {
+    return this;
+  }
   
   public Value get(Value name)
   {
-    // If name is Long, then treat this as an array
-    // else treat as SimpleXMLElementValue
-    // if name = 0, then return this
-    // because $parent->child is equivalent to $parent->child[0]
-    if (name instanceof LongValue) {
-      Value result = super.get(name);
-      if (!(result instanceof StringValue) && !(result instanceof SimpleXMLElementValue) && (name.toLong() == 0)) {
-        result = this;
-      }
-      return result;
-    } else {
-      
-      // First check to see if there is an @attribute array
-      // If @attribute array exists and name is an attribute,
-      // then return the attribute value
-      Value attributeArray =  super.get(new StringValue("@attributes"));
-      if (attributeArray instanceof ArrayValue) {
-        Value value = attributeArray.get(name);
-        if (value instanceof StringValue)
-          return value;
-      }
-      
-      // Either there is no @attribute array or name is not an attribute
-      // so assume we are meant to return a SimpleXMLElementValue      
-      NodeList nodes = _element.getElementsByTagName(name.toString());
-      int nodeLength = nodes.getLength();
-      
-      SimpleXMLElementValue result = new SimpleXMLElementValue(_element, _className, _options);
-      
-      SimpleXMLElementValue childElement = null;
-      
-      // if numberOfChildren = 1, then return childElement not result
-      // used because $parent->child is equivalent to $parent->child[0]
-      int numberOfChildren = 0;
-      for (int i = 0; i < nodeLength; i++) {
-        Node node = nodes.item(i);
-        if (node.getParentNode() == _element) {
-          
-          numberOfChildren++;
-          childElement = new SimpleXMLElementValue((Element) node, _className, _options);
-          
-          //Generate @attributes array, if applicable
-          NamedNodeMap attrs = node.getAttributes();
-          attributeArray = new ArrayValueImpl();
-          int attrLength = attrs.getLength();
-          
-          if (attrLength > 0) {
-            for (int j=0; j < attrLength; j++) {
-              Node attribute = attrs.item(j);
-              StringValue nodeName = new StringValue(attribute.getNodeName());
-              StringValue nodeValue = new StringValue(attribute.getNodeValue());
-              attributeArray.put(nodeName, nodeValue);
-            }
-            childElement.put(new StringValue("@attributes"), attributeArray, false);
-          }
-          
-          // Generate fillChildren array and store all
-          // values in result.  Also store attributes in result
-          // but use associative array (ie: simpleXmlElement['foo'] => bar)
-          if (node.getChildNodes().getLength() > 1)
-            result.put(fillChildren(childElement), false);
-          else {
-            childElement.put(new StringValue(node.getFirstChild().getNodeValue()), false);
-            result.put(childElement, false);
-          }
-        }
-      }
-      
-      if (numberOfChildren == 1) 
-        return childElement;
-      else
-        return result;
+    // First check to see if there is an @attribute array
+    // If @attribute array exists and name is an attribute,
+    // then return the attribute value
+    Value attributeArray =  super.get(new StringValue("@attributes"));
+    if (attributeArray instanceof ArrayValue) {
+      Value value = attributeArray.get(name);
+      if (value instanceof StringValue)
+        return value;
     }
+    
+    return super.get(name);
+  }
+
+  /**
+   * helper function to make Attribute Array
+   * @param node
+   * @return either ArrayValueImpl or NullValue.NULL
+   */
+  private Value getAttributes(Element node)
+  {
+    NamedNodeMap attrs = node.getAttributes();
+    ArrayValueImpl attributeArray = new ArrayValueImpl();
+    int attrLength = attrs.getLength();
+    
+    if (attrLength > 0) {
+      for (int j=0; j < attrLength; j++) {
+        Node attribute = attrs.item(j);
+        StringValue nodeName = new StringValue(attribute.getNodeName());
+        StringValue nodeValue = new StringValue(attribute.getNodeValue());
+        attributeArray.put(nodeName, nodeValue);
+      }
+      
+      return attributeArray;
+    }
+    
+    return NullValue.NULL;
   }
   
   private Value put(Value value, boolean setPhpValue)
@@ -392,17 +311,68 @@ public class SimpleXMLElementValue extends ArrayValueImpl {
    */
   public String toString()
   {
-     if (getSize() == 1) {
+    
+    if ((getSize() == 1)){
        return super.get(new LongValue(0)).toString();
      }
-    
+    /*
      if (getSize() == 2) {
        Value attributeArray = super.get(new StringValue("@attributes"));
        if (attributeArray instanceof ArrayValue) {
          return super.get(new LongValue(0)).toString();
        } 
-     }
+     }*/
+    
     return "SimpleXMLElement Object";
+  }
+  
+  private void fillSimpleXMLElement()
+  {
+    Value attrs = getAttributes(_element);
+    if (attrs instanceof ArrayValueImpl)
+      put (new StringValue("@attributes"), attrs, false);
+    
+    NodeList children = _element.getChildNodes();
+    int nodeLength = children.getLength();
+    HashMap<StringValue, ArrayValueImpl> childrenHashMap = new HashMap<StringValue, ArrayValueImpl>();
+    ArrayList<StringValue> childrenList = new ArrayList<StringValue>();
+    
+    for (int j = 0; j < nodeLength; j++) {
+      Node child = children.item(j);
+      
+      //skip empty children (ie: "\n ");
+      if ((child.getNodeName().equals("#text")) && (child.getChildNodes().getLength() == 0))
+        continue;
+      
+      StringValue childTagName = new StringValue(child.getNodeName());
+      
+      // Check to see if this is the first instance of a child
+      // with this NodeName.  If so create a new ArrayValueImpl,
+      // if not add to existing ArrayValueImpl
+      ArrayValueImpl childArray = childrenHashMap.get(childTagName);
+      if (childArray == null) {
+        childArray = new ArrayValueImpl();
+        childrenHashMap.put(childTagName, childArray);
+        childrenList.add(childTagName);
+      }
+      
+      // Recursion happens here
+      // if only text, put StringValue 
+      if ((child.getChildNodes().getLength() == 1) && (child.getFirstChild().getNodeName().equals("#text")))
+        childArray.put(new StringValue(child.getFirstChild().getNodeValue()));
+      else
+        childArray.put(new SimpleXMLElementValue((Element) child, _className, _options));
+    }
+    
+    //loop through childrenHashMap and put each element in this SimpleXMLElement
+    for (StringValue childName : childrenList) {
+      ArrayValueImpl childArray = childrenHashMap.get(childName);
+      
+      if (childArray.size() == 1)
+        put(childName,childArray.get(new LongValue(0)), false);
+      else
+        put(childName, childArray, false);
+    }
   }
   //@todo attributes
   //@todo xpath

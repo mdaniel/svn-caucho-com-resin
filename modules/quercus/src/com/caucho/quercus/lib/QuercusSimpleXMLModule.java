@@ -29,6 +29,7 @@
 package com.caucho.quercus.lib;
 
 import com.caucho.quercus.env.BooleanValue;
+import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.SimpleXMLElementValue;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.module.AbstractQuercusModule;
@@ -41,12 +42,23 @@ import com.caucho.vfs.Path;
  */
 public class QuercusSimpleXMLModule extends AbstractQuercusModule {
 
-  public SimpleXMLElementValue simplexml_load_string(@NotNull String data,
+  
+  public SimpleXMLElementValue simplexml_load_string(Env env,
+                                                     @NotNull String data,
                                                      @Optional String className,
                                                      @Optional int options)
   {
+ 
     return new SimpleXMLElementValue(data, className, options);
   }
+  /*
+  public Value simplexml_load_string(Env env,
+                                     @NotNull String data,
+                                     @Optional String className,
+                                     @Optional int options)
+  {
+     return env.wrapJava(new SimpleXMLElementClass(data, className, options));
+  }*/
 
   public SimpleXMLElementValue simplexml_load_file(@NotNull Path file,
                                                    @Optional String className,
@@ -55,13 +67,22 @@ public class QuercusSimpleXMLModule extends AbstractQuercusModule {
     return new SimpleXMLElementValue(file, className, options);
   }
   
-  public Value simplexml_attributes (@NotNull SimpleXMLElementValue xmlElement,
-                                     @Optional String data)
+  public Value simplexml_attributes(@NotNull SimpleXMLElementValue xmlElement,
+                                    @Optional String data)
   {
     if (xmlElement == null)
       return BooleanValue.FALSE;
     
     return xmlElement.attributes(data);
+  }
+  
+  public Value simplexml_children(@NotNull SimpleXMLElementValue xmlElement,
+                                  @Optional String nsprefix)
+  {
+    if (xmlElement == null)
+      return BooleanValue.FALSE;
+    
+    return xmlElement.children(nsprefix);
   }
   
   //@todo simplexml_import_dom -- Skip until (XXX. DOM Functions implemented)
