@@ -694,7 +694,9 @@ public class QuercusRegexpModule extends AbstractQuercusModule {
 				      @Optional("0") int flag)
     throws Throwable
   {
-    Pattern pattern = compileRegexp(patternString);
+  	// php/151b
+  	
+  	Pattern pattern = compileRegexp(patternString);
   	
     Matcher matcher = null;
   	
@@ -732,6 +734,8 @@ public class QuercusRegexpModule extends AbstractQuercusModule {
 				  String string,
 				  @Optional("-1") long limit)
   {
+  	// php/151c
+  	
     patternString = cleanRegexp(patternString, false);
   	
     Pattern pattern = Pattern.compile(patternString, Pattern.CASE_INSENSITIVE);

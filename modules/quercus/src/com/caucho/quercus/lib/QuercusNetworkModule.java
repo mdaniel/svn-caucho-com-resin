@@ -31,8 +31,12 @@ package com.caucho.quercus.lib;
 
 import java.util.Map;
 import java.util.HashMap;
+import java.util.regex.Pattern;
 
+import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import java.net.InetAddress;
 
 import com.caucho.util.L10N;
 
@@ -40,10 +44,14 @@ import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.quercus.module.Optional;
 import com.caucho.quercus.module.Reference;
 
+import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.NullValue;
 import com.caucho.quercus.env.BooleanValue;
 import com.caucho.quercus.env.LongValue;
+import com.caucho.quercus.env.ArrayValue;
+import com.caucho.quercus.env.ArrayValueImpl;
+import com.caucho.quercus.env.Env;
 
 /**
  * Information about PHP network
@@ -106,6 +114,131 @@ public class QuercusNetworkModule extends AbstractQuercusModule {
     }
 
     return new LongValue(v);
+  }
+  
+  /**
+   * Returns the IP address of the given host name.  If the IP address cannot
+   * be obtained, then the provided host name is returned instead.
+   * 
+   * @param hostname  the host name who's IP to search for
+   * 
+   * @return the IP for the given host name or, if the IP cannot be obtained,
+   * 								the provided host name
+   */
+  public static Value gethostbyname(String hostname)
+  {
+  	// php/1m01
+  	
+  	InetAddress ip = null;
+  	
+  	try{
+  		ip = InetAddress.getByName(hostname);
+  	}
+  	catch (Exception e) {
+  		log.log(Level.WARNING, e.toString(), e);
+  		
+  		return StringValue.create(hostname);
+  	}
+  	
+  	return StringValue.create(ip.getHostAddress());
+  }
+  
+  /**
+   * Returns the IP addresses of the given host name.  If the IP addresses
+   *  cannot be obtained, then the provided host name is returned instead.
+   * 
+   * @param hostname  the host name who's IP to search for
+   * 
+   * @return the IPs for the given host name or, if the IPs cannot be obtained,
+   * 								the provided host name
+   */
+  public static Value gethostbynamel(String hostname)
+  {
+  	// php/1m02
+  	
+  	InetAddress ip[] = null;
+  	
+  	try{
+  		ip = InetAddress.getAllByName(hostname);
+  	}
+  	catch (Exception e) {
+  		log.log(Level.WARNING, e.toString(), e);
+  		
+  		return BooleanValue.FALSE;
+  	}
+  	
+  	ArrayValue ipArray = new ArrayValueImpl();
+  	
+  	for (int k = 0; k < ip.length; k++) {
+  		String currentIPString = ip[k].getHostAddress();
+  		
+  		StringValue currentIP = new StringValue((currentIPString));
+  		
+  		ipArray.append(currentIP);
+  	}
+  	
+  	return ipArray;
+  }
+  
+  /**
+   * Returns the IP address of the given host name.  If the IP address cannot
+   * be obtained, then the provided host name is returned instead.
+   * 
+   * @param hostname  the host name who's IP to search for
+   * 
+   * @return the IP for the given host name or, if the IP cannot be obtained,
+   * 								the provided host name
+   */
+  public static Value gethostbyaddr(Env env, String ip)
+  {
+  	// php/1m03
+  	
+  	String formIPv4 = "(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\." +
+  			"(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\." +
+  			"(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\." +
+  			"(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)";
+  	
+  	CharSequence ipToCS = ip.subSequence(0, ip.length());
+  	
+  	if (! (Pattern.matches(formIPv4, ipToCS))) {
+  		env.warning("Address is not in a.b.c.d form");
+  		
+  		return BooleanValue.FALSE;
+  	}
+  	
+  	String splitIP[] = null;
+  	
+  	try {
+  	  splitIP = ip.split("\\.");
+  	}
+  	catch (Exception e) {
+  		log.log(Level.WARNING, e.toString(), e);
+  		
+  		env.warning("Regex expression invalid");
+  		
+  		return StringValue.create(ip);
+  	}
+  	
+  	byte addr[] = new byte[splitIP.length];
+  	
+  	for (int k = 0; k < splitIP.length; k++) {
+  		Integer intForm = new Integer(splitIP[k]);
+
+  		addr[k] = intForm.byteValue();
+  	}
+  	
+  	InetAddress host = null;
+  	
+  	try{
+  		host = InetAddress.getByAddress(addr);
+  	}
+  	catch (Exception e) {
+  		log.log(Level.WARNING, e.toString(), e);
+  		
+  		return StringValue.create(ip);
+  	}
+  	
+  	return StringValue.create(host.getHostName());
   }
 }
 
