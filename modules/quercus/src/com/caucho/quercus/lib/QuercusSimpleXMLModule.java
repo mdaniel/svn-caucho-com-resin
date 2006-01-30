@@ -28,7 +28,9 @@
 
 package com.caucho.quercus.lib;
 
+import com.caucho.quercus.env.BooleanValue;
 import com.caucho.quercus.env.SimpleXMLElementValue;
+import com.caucho.quercus.env.Value;
 import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.quercus.module.NotNull;
 import com.caucho.quercus.module.Optional;
@@ -51,6 +53,15 @@ public class QuercusSimpleXMLModule extends AbstractQuercusModule {
                                                    @Optional int options)
   {
     return new SimpleXMLElementValue(file, className, options);
+  }
+  
+  public Value simplexml_attributes (@NotNull SimpleXMLElementValue xmlElement,
+                                     @Optional String data)
+  {
+    if (xmlElement == null)
+      return BooleanValue.FALSE;
+    
+    return xmlElement.attributes(data);
   }
   
   //@todo simplexml_import_dom -- Skip until (XXX. DOM Functions implemented)
