@@ -29,12 +29,7 @@
 
 package com.caucho.quercus.lib;
 
-import com.caucho.quercus.env.ArrayValue;
-import com.caucho.quercus.env.ArrayValueImpl;
-import com.caucho.quercus.env.LongValue;
-import com.caucho.quercus.env.NullValue;
-import com.caucho.quercus.env.StringValue;
-import com.caucho.quercus.env.Value;
+import com.caucho.quercus.env.*;
 
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
@@ -190,4 +185,15 @@ public class SimpleXMLElementClass extends Value {
     return "SimpleXMLElement Object";
   }
     
+  public Value evalMethod(Env env, String methodName)
+    throws Throwable
+  {
+    if ("attributes".equals(methodName)) {
+      return attributes();
+    } else if ("children".equals(methodName)) {
+      return children();
+    } 
+    
+    return super.evalMethod(env, methodName);
+  }
 }
