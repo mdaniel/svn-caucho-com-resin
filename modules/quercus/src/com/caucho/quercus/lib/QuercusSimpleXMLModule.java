@@ -73,7 +73,7 @@ public class QuercusSimpleXMLModule extends AbstractQuercusModule {
 
       DocumentBuilder builder = factory.newDocumentBuilder();
       Document document = builder.parse(new ByteArrayInputStream(data.getBytes()));
-      return new SimpleXMLElementClass(document.getDocumentElement());
+      return new SimpleXMLElementClass(document, document.getDocumentElement());
 
     } catch (Exception e) {
       log.log(Level.FINE, L.l(e.toString()), e);

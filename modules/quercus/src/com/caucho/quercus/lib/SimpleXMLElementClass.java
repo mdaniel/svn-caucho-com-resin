@@ -31,10 +31,12 @@ package com.caucho.quercus.lib;
 
 import com.caucho.quercus.env.*;
 
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.w3c.dom.Text;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -45,15 +47,32 @@ import java.util.HashMap;
 
 public class SimpleXMLElementClass extends Value {
 
-  Element _element;
-  Value _attributes;
-  Value _children;
+  //private static final Logger log = Logger.getLogger(SimpleXMLElementClass.class.getName());
+  //private static final L10N L = new L10N(SimpleXMLElementClass.class);
 
-  public SimpleXMLElementClass(Element element)
+  private Document _document;
+  private Element _element;
+  
+  private Value _attributes;
+  private Value _children;
+
+  /**
+   *  need to pass document for setting text values
+   * 
+   * @param document
+   * @param element
+   */
+  public SimpleXMLElementClass(Document document,
+                               Element element)
   {
+    _document = document;
     _element = element;
   }
 
+  /**
+   * helper function to fill _attributes if _element has
+   * any attributes.  If not sets _attributes to NullValue.NULL.
+   */
   private void setAttributes()
   {
     NamedNodeMap attrs = _element.getAttributes();
@@ -61,7 +80,7 @@ public class SimpleXMLElementClass extends Value {
 
     if (attrLength > 0) {
       _attributes = new ArrayValueImpl();
-      
+
       for (int j=0; j < attrLength; j++) {
         Node attribute = attrs.item(j);
         StringValue nodeName = new StringValue(attribute.getNodeName());
@@ -75,7 +94,7 @@ public class SimpleXMLElementClass extends Value {
 
     }
   }
-  
+
   /**
    * 
    * @return either ArrayValueImpl or NullValue.NULL
@@ -98,44 +117,86 @@ public class SimpleXMLElementClass extends Value {
     int nodeLength = children.getLength();
     HashMap<StringValue, ArrayValue> childrenHashMap = new HashMap<StringValue, ArrayValue>();
     ArrayList<StringValue> childrenList = new ArrayList<StringValue>();
-    
-    for (int i=0; i < nodeLength; i++) {
-      Node child = children.item(i);
-      
-      //skip empty children (ie: "\n ")
-      if ((child.getNodeName().equals("#text")) && (child.getChildNodes().getLength() == 0))
-        continue;
-      
-      StringValue childTagName = new StringValue((child.getNodeName()));
-      
-      // Check to see if this is the first instance of a child
-      // with this NodeName.  If so create a new ArrayValueImpl,
-      // if not add to existing ArrayValueImpl
-      ArrayValue childArray = childrenHashMap.get(childTagName);
-      if (childArray == null) {
-        childArray = new ArrayValueImpl();
-        childrenHashMap.put(childTagName, childArray);
-        childrenList.add(childTagName);
-      }
-      
-      // if only text, put StringValue 
-      if ((child.getChildNodes().getLength() == 1) && (child.getFirstChild().getNodeName().equals("#text")))
-        childArray.put(new StringValue(child.getFirstChild().getNodeValue()));
+
+    /**
+     * All child text nodes get ignored ifthere are more children
+     * 
+     * For example:
+     * 
+     * $foo = simplexml_load_string('<foo>before<fooChild>misc</fooChild>after</foo>');
+     * print_r($foo) =>
+     *  SimpleXMLElement Object
+     *  (
+     *    [fooChild] => misc
+     *  )
+     * 
+     * print_r($foo->children()) => 
+     *  SimpleXMLElement Object
+     *  (
+     *     [0] => misc
+     *  )
+     * 
+     * COMPARE WITH:
+     * 
+     * $foo = simplexml_load_string('<foo>bar</foo>');
+     * print_r($foo) =>
+     *  SimpleXMLElement Object
+     *  (
+     *    [0] => bar
+     *  )
+     * 
+     * print_r($foo->children()) =>
+     *  SimpleXMLElement Object
+     *  (
+     *  )
+     * Therefore, treat the case of 1 child as special case
+     */
+
+    if (nodeLength == 1) { //("#text".equals(children.item(0).getNodeName()))) {
+      Node firstChild = children.item(0);
+
+      _children = new ArrayValueImpl();
+
+      if (firstChild.getNodeType() == Node.TEXT_NODE)
+        _children.put(new LongValue(0), new StringValue(children.item(0).getNodeValue()));
       else
-        childArray.put(new SimpleXMLElementClass((Element) child));
+        _children.put(new StringValue(firstChild.getNodeName()), new SimpleXMLElementClass(_document, (Element) firstChild));
+
+    } else {
+      for (int i=0; i < nodeLength; i++) {
+        Node child = children.item(i);
+
+        //skip all text nodes since we know that there is more than 1 node
+        if (child.getNodeType() == Node.TEXT_NODE) //(child.getNodeName().equals("#text"))
+          continue;
+
+        StringValue childTagName = new StringValue((child.getNodeName()));
+
+        // Check to see if this is the first instance of a child
+        // with this NodeName.  If so create a new ArrayValueImpl,
+        // if not add to existing ArrayValueImpl
+        ArrayValue childArray = childrenHashMap.get(childTagName);
+        if (childArray == null) {
+          childArray = new ArrayValueImpl();
+          childrenHashMap.put(childTagName, childArray);
+          childrenList.add(childTagName);
+        }
+
+        childArray.put(new SimpleXMLElementClass(_document, (Element) child));
+      }
     }
-    
-    //loop through childrenHashMap and put each element in this SimpleXMLElement
+
+    //loop through childrenList and put each element in _children
     if (childrenList.size() > 0) {
+      _children = new ArrayValueImpl();
       for (StringValue childName : childrenList) {
         ArrayValue childArray = childrenHashMap.get(childName);
-        _children = new ArrayValueImpl();
         if (childArray.getSize() == 1)
           _children.put(childName,childArray.get(new LongValue(0)));
         else
           _children.put(childName, childArray);
       }
-    } else {
+    } else if (_children == null) { //_children wasn't set in case of exactly 1 child
       _children = NullValue.NULL;
     }
   }
@@ -152,39 +213,42 @@ public class SimpleXMLElementClass extends Value {
   public Value get(Value name)
   {
     Value result;
-    
+
     // First check to see if there are attributes
     // If so and name is an attribute,
     // then return the attribute value
-    if (_attributes == null)
-      setAttributes();
-    
+    attributes();
+
     if (_attributes instanceof ArrayValue) {
       result = _attributes.get(name);
       if (result instanceof StringValue)
         return result;
     }
-    
-    if (_children == null)
-      fillChildren();
-    
+
+    children();
+
     if (_children instanceof ArrayValue) {
       result = _children.get(name);
       if (result != null)
         return result;
     }
-  
+
     return NullValue.NULL;
   }
-  
+
   /**
    * Converts to a string.
    */
   public String toString()
   {
+    //If this is a text node, then print the value
+    NodeList children = _element.getChildNodes();
+    if ((children.getLength() == 1) && (children.item(0).getNodeType() == Node.TEXT_NODE)) // ("#text".equals(children.item(0).getNodeName())))
+      return children.item(0).getNodeValue();
+
     return "SimpleXMLElement Object";
   }
-    
+
   public Value evalMethod(Env env, String methodName)
     throws Throwable
   {
@@ -192,8 +256,75 @@ public class SimpleXMLElementClass extends Value {
       return attributes();
     } else if ("children".equals(methodName)) {
       return children();
-    } 
-    
+    }
+
     return super.evalMethod(env, methodName);
+  }
+
+  public Element getElement()
+  { 
+    return _element;
+  }
+
+  public Value put(Value name, Value value)
+  {
+    Value child;
+
+    children();
+
+    if (_children instanceof ArrayValue) {
+      child = _children.get(name);
+
+      if (child == null)
+        return BooleanValue.FALSE;
+
+      // Issue warning if array
+      if (child instanceof ArrayValue) {
+
+      } else {
+        /**
+         *  $foo = simplexml_load_string('<parent><child><sub1 /><sub2 /></child></parent>');
+         *  $foo->child = "bar";
+         * 
+         *  EQUIVALENT TO:
+         * 
+         *  $foo = simplexml_load_string('<parent><child>bar</child></parent>');
+         * 
+         * So remove all children first then add text node; 
+         */
+        Element element = ((SimpleXMLElementClass) child).getElement();
+        NodeList children = element.getChildNodes();
+        int childrenLength = children.getLength();
+
+        for (int i = 0; i < childrenLength; i++)
+          element.removeChild(children.item(i));
+
+        Text text = _document.createTextNode(value.toString());
+        
+        element.appendChild(text);
+      }
+    }
+
+    return value;
+  }
+
+  /**
+   * Prints the value.
+   * @param env
+   */
+  public void print(Env env)
+    throws Throwable
+  {
+    /*
+    if (_children == null)
+      fillChildren();
+    
+    if (_attributes == null)
+      setAttributes();
+    
+    QuercusVariableModule.print_r(env, _attributes, NullValue.NULL);
+    QuercusVariableModule.print_r(env, _children, NullValue.NULL);
+    */
+    env.getOut().print(toString(env));
   }
 }
