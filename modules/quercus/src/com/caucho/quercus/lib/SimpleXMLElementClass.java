@@ -152,7 +152,7 @@ public class SimpleXMLElementClass extends Value {
      * Therefore, treat the case of 1 child as special case
      */
 
-    if (nodeLength == 1) { //("#text".equals(children.item(0).getNodeName()))) {
+    if (nodeLength == 1) {
       Node firstChild = children.item(0);
       SimpleXMLElementClass simpleXMLChild = new SimpleXMLElementClass(_document,  (Element) firstChild);
       
@@ -168,7 +168,7 @@ public class SimpleXMLElementClass extends Value {
         Node child = children.item(i);
 
         //skip all text nodes since we know that there is more than 1 node
-        if (child.getNodeType() == Node.TEXT_NODE) //(child.getNodeName().equals("#text"))
+        if (child.getNodeType() == Node.TEXT_NODE)
           continue;
 
         StringValue childTagName = new StringValue((child.getNodeName()));
@@ -259,7 +259,7 @@ public class SimpleXMLElementClass extends Value {
   {
     //If this is a text node, then print the value
     NodeList children = _element.getChildNodes();
-    if ((children.getLength() == 1) && (children.item(0).getNodeType() == Node.TEXT_NODE)) // ("#text".equals(children.item(0).getNodeName())))
+    if ((children.getLength() == 1) && (children.item(0).getNodeType() == Node.TEXT_NODE))
       return children.item(0).getNodeValue();
 
     return "SimpleXMLElement Object";
@@ -272,6 +272,8 @@ public class SimpleXMLElementClass extends Value {
       return attributes();
     } else if ("children".equals(methodName)) {
       return children();
+    } else if ("asXML".equals(methodName)) {
+      return asXML();
     }
 
     return super.evalMethod(env, methodName);
@@ -337,5 +339,75 @@ public class SimpleXMLElementClass extends Value {
     
     return NullValue.NULL;
   }
-  
+
+  /**
+   * 
+   * @return this SimpleXMLElement as well formed XML
+   */
+  public StringValue asXML()
+  {
+    StringBuffer result = new StringBuffer();
+    
+    result.append("<?xml version=\"1.0\"?>\n");
+    result.append(generateXML().toString());
+    
+    return new StringValue(result.toString());
+  }
+
+  /**
+   * recursive helper function for asXML
+   * @return XML in string buffer
+   */
+  public StringBuffer generateXML()
+  {
+    StringBuffer sb = new StringBuffer();
+    
+    // If this is a text node, then just return the text
+    if (_element.getNodeType() == Node.TEXT_NODE) {
+      sb.append(_element.getNodeValue());
+      return sb;
+    }
+    
+    // not a text node
+    sb.append("<");
+    
+    sb.append(_element.getNodeName());
+    
+    // add attributes, if any
+    NamedNodeMap attrs = _element.getAttributes();
+    int attrLength = attrs.getLength();
+    
+    for (int i=0; i < attrLength; i++) {
+      Node attribute = attrs.item(i);
+      sb.append(" " + attribute.getNodeName() + "=\"" + attribute.getNodeValue() + "\"");
+    }
+    
+    // recurse through children, if any
+    NodeList children = _element.getChildNodes();
+    int nodeLength = children.getLength();
+    
+    if (nodeLength == 0) {
+      sb.append(" />");
+      return sb;
+    }
+    
+    sb.append(">");
+    
+    // there are children
+    for (int i=0; i < nodeLength; i++) {
+      Node child = children.item(i);
+      
+      if (child.getNodeType() == Node.TEXT_NODE) {
+        sb.append(child.getNodeValue());
+        continue;
+      }
+      SimpleXMLElementClass simple = new SimpleXMLElementClass(_document, (Element) child);
+      sb.append(simple.generateXML());
+    }
+    
+    // add closing tag
+    sb.append("</" + _element.getNodeName() + ">");
+    
+    return sb;
+  }
 }
