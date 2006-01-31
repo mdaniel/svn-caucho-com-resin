@@ -28,9 +28,7 @@
 
 package com.caucho.quercus.lib;
 
-import com.caucho.quercus.env.BooleanValue;
 import com.caucho.quercus.env.NullValue;
-import com.caucho.quercus.env.SimpleXMLElementValue;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.quercus.module.NotNull;
@@ -54,16 +52,6 @@ public class QuercusSimpleXMLModule extends AbstractQuercusModule {
   private static final Logger log = Logger.getLogger(QuercusSimpleXMLModule.class.getName());
   private static final L10N L = new L10N(QuercusSimpleXMLModule.class);
 
-  /*
-  public SimpleXMLElementValue simplexml_load_string(Env env,
-                                                     @NotNull String data,
-                                                     @Optional String className,
-                                                     @Optional int options)
-  {
- 
-    return new SimpleXMLElementValue(data, className, options);
-  }*/
-
   public Value simplexml_load_string(@NotNull String data,
                                      @Optional String className,
                                      @Optional int options)
@@ -73,45 +61,29 @@ public class QuercusSimpleXMLModule extends AbstractQuercusModule {
 
       DocumentBuilder builder = factory.newDocumentBuilder();
       Document document = builder.parse(new ByteArrayInputStream(data.getBytes()));
-      return new SimpleXMLElementClass(document, document.getDocumentElement());
+      return new SimpleXMLElementValue(document, document.getDocumentElement());
 
     } catch (Exception e) {
       log.log(Level.FINE, L.l(e.toString()), e);
       return NullValue.NULL;
     }
   }
-  /*
-  public Value simplexml_load_string(Env env,
-                                     @NotNull String data,
-                                     @Optional String className,
-                                     @Optional int options)
+
+  public Value simplexml_load_file(@NotNull Path file,
+                                   @Optional String className,
+                                   @Optional int options)
   {
-     return env.wrapJava(new SimpleXMLElementClass(data, className, options));
-  }*/
-
-  public SimpleXMLElementValue simplexml_load_file(@NotNull Path file,
-                                                   @Optional String className,
-                                                   @Optional int options)
-  {
-    return new SimpleXMLElementValue(file, className, options);
-  }
-
-  public Value simplexml_attributes(@NotNull SimpleXMLElementValue xmlElement,
-                                    @Optional String data)
-  {
-    if (xmlElement == null)
-      return BooleanValue.FALSE;
-
-    return xmlElement.attributes(data);
-  }
-
-  public Value simplexml_children(@NotNull SimpleXMLElementValue xmlElement,
-                                  @Optional String nsprefix)
-  {
-    if (xmlElement == null)
-      return BooleanValue.FALSE;
-
-    return xmlElement.children(nsprefix);
+    DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+    try {
+      
+      DocumentBuilder builder = factory.newDocumentBuilder();
+      Document document = builder.parse(file.openRead());
+      return new SimpleXMLElementValue(document, document.getDocumentElement());
+      
+    } catch (Exception e) {
+      log.log(Level.FINE, L.l(e.toString()), e);
+      return NullValue.NULL;
+    }
   }
 
   //@todo simplexml_import_dom -- Skip until (XXX. DOM Functions implemented)
