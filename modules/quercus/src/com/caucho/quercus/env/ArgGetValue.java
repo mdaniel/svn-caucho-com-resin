@@ -29,6 +29,10 @@
 
 package com.caucho.quercus.env;
 
+import com.caucho.vfs.WriteStream;
+
+import java.util.IdentityHashMap;
+
 /**
  * Represents an array-get argument which might be a call to a reference.
  */
@@ -75,6 +79,15 @@ public class ArgGetValue extends Value {
   {
     // quercus/3d56
     return new Var();
+  }
+
+  public void varDumpImpl(Env env,
+                          WriteStream out,
+                          int depth,
+                          IdentityHashMap<Value,String> valueSet)
+    throws Throwable
+  {
+    toValue().varDumpImpl(env, out, depth, valueSet);
   }
 }
 

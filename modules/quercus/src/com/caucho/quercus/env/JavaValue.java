@@ -35,6 +35,7 @@ import java.util.LinkedHashMap;
 import java.util.HashMap;
 import java.util.Set;
 import java.util.Map;
+import java.util.IdentityHashMap;
 
 import com.caucho.vfs.WriteStream;
 
@@ -65,7 +66,7 @@ public class JavaValue extends Value {
   {
     return _classDef.getName();
   }
-  
+
   /**
    * Returns the type.
    */
@@ -73,7 +74,7 @@ public class JavaValue extends Value {
   {
     return "object";
   }
-  
+
   /**
    * Converts to a boolean.
    */
@@ -81,7 +82,7 @@ public class JavaValue extends Value {
   {
     return true;
   }
-  
+
   /**
    * Converts to a long.
    */
@@ -89,7 +90,7 @@ public class JavaValue extends Value {
   {
     return 1;
   }
-  
+
   /**
    * Converts to a double.
    */
@@ -180,7 +181,7 @@ public class JavaValue extends Value {
   {
     return _classDef.getValueArray(env, _object);
   }
-  
+
   /**
    * Converts to a string.
    */
@@ -188,13 +189,23 @@ public class JavaValue extends Value {
   {
     return String.valueOf(_object);
   }
-  
+
   /**
    * Converts to an object.
    */
   public Object toJavaObject()
   {
     return _object;
+  }
+
+  public void varDumpImpl(Env env,
+                          WriteStream out,
+                          int depth,
+                          IdentityHashMap<Value, String> valueSet)
+    throws Throwable
+  {
+    // XXX: implement like for php object
+    out.print(getClass().getName());
   }
 }
 

@@ -30,6 +30,7 @@
 package com.caucho.quercus.env;
 
 import java.io.IOException;
+import java.util.IdentityHashMap;
 
 import com.caucho.vfs.WriteStream;
 
@@ -666,6 +667,17 @@ public class StringValue extends Value {
 
     for (int i = 0; i < CHAR_STRINGS.length; i++)
       CHAR_STRINGS[i] = new StringValue(String.valueOf((char) i));
+  }
+
+  public void varDumpImpl(Env env,
+                          WriteStream out,
+                          int depth,
+                          IdentityHashMap<Value, String> valueSet)
+    throws Throwable
+  {
+    String s = toString();
+
+    out.print("string(" + s.length() + ") \"" + s + "\"");
   }
 }
 

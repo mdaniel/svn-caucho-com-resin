@@ -31,8 +31,10 @@ package com.caucho.quercus.env;
 
 import java.util.logging.Logger;
 import java.util.logging.Level;
+import java.util.IdentityHashMap;
 
 import com.caucho.quercus.QuercusRuntimeException;
+import com.caucho.vfs.WriteStream;
 
 /**
  * Represents a PHP session callback.
@@ -40,7 +42,7 @@ import com.caucho.quercus.QuercusRuntimeException;
 public class SessionCallback extends Value {
   private static final Logger log
     = Logger.getLogger(SessionCallback.class.getName());
-  
+
   private Callback _open;
   private Callback _close;
   private Callback _read;
@@ -49,11 +51,11 @@ public class SessionCallback extends Value {
   private Callback _gc;
 
   public SessionCallback(Callback open,
-			 Callback close,
-			 Callback read,
-			 Callback write,
-			 Callback destroy,
-			 Callback gc)
+                         Callback close,
+                         Callback read,
+                         Callback write,
+                         Callback destroy,
+                         Callback gc)
   {
     _open = open;
     _close = close;
@@ -75,9 +77,9 @@ public class SessionCallback extends Value {
       Value value = _read.eval(env, new StringValue(id));
 
       if (value instanceof StringValue)
-	return value.toString();
+        return value.toString();
       else
-	return null;
+        return null;
     } catch (RuntimeException e) {
       throw e;
     } catch (Throwable e) {
@@ -116,5 +118,14 @@ public class SessionCallback extends Value {
     } catch (Throwable e) {
       log.log(Level.FINE, e.toString(), e);
     }
+  }
+
+  public void varDumpImpl(Env env,
+                          WriteStream out,
+                          int depth,
+                          IdentityHashMap<Value, String> valueSet)
+    throws Throwable
+  {
+    out.print(getClass().getName());
   }
 }

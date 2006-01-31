@@ -30,6 +30,7 @@
 package com.caucho.quercus.env;
 
 import java.io.IOException;
+import java.util.IdentityHashMap;
 
 import com.caucho.vfs.WriteStream;
 
@@ -52,7 +53,7 @@ public class NullValue extends Value {
   {
     return NULL;
   }
-  
+
   /**
    * Returns the type.
    */
@@ -68,7 +69,7 @@ public class NullValue extends Value {
   {
     return false;
   }
-  
+
   /**
    * Converts to a boolean.
    */
@@ -76,7 +77,7 @@ public class NullValue extends Value {
   {
     return false;
   }
-  
+
   /**
    * Returns true for a null.
    */
@@ -84,7 +85,7 @@ public class NullValue extends Value {
   {
     return true;
   }
-  
+
   /**
    * Converts to a long.
    */
@@ -92,7 +93,7 @@ public class NullValue extends Value {
   {
     return 0;
   }
-  
+
   /**
    * Converts to a double.
    */
@@ -100,7 +101,7 @@ public class NullValue extends Value {
   {
     return 0;
   }
-  
+
   /**
    * Converts to a string.
    * @param env
@@ -109,7 +110,7 @@ public class NullValue extends Value {
   {
     return "";
   }
-  
+
   /**
    * Converts to an object.
    */
@@ -117,7 +118,7 @@ public class NullValue extends Value {
   {
     return null;
   }
-  
+
   /**
    * Converts to an object.
    */
@@ -141,7 +142,7 @@ public class NullValue extends Value {
   {
     return rValue.isNull();
   }
-  
+
   /**
    * Prints the value.
    * @param env
@@ -201,6 +202,15 @@ public class NullValue extends Value {
   public String toDebugString()
   {
     return "null";
+  }
+
+  public void varDumpImpl(Env env,
+                          WriteStream out,
+                          int depth,
+                          IdentityHashMap<Value, String> valueSet)
+    throws Throwable
+  {
+    out.print("NULL");
   }
 }
 

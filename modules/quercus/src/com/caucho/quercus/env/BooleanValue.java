@@ -30,6 +30,7 @@
 package com.caucho.quercus.env;
 
 import java.io.IOException;
+import java.util.IdentityHashMap;
 
 import com.caucho.vfs.WriteStream;
 
@@ -41,7 +42,7 @@ import com.caucho.quercus.gen.PhpWriter;
 public class BooleanValue extends Value {
   public static final BooleanValue TRUE = new BooleanValue(true);
   public static final BooleanValue FALSE = new BooleanValue(false);
-  
+
   private final boolean _value;
 
   private BooleanValue(boolean value)
@@ -79,7 +80,7 @@ public class BooleanValue extends Value {
   {
     return true;
   }
-  
+
   /**
    * Converts to a boolean.
    */
@@ -87,7 +88,7 @@ public class BooleanValue extends Value {
   {
     return _value;
   }
-  
+
   /**
    * Converts to a long.
    */
@@ -95,7 +96,7 @@ public class BooleanValue extends Value {
   {
     return _value ? 1 : 0;
   }
-  
+
   /**
    * Converts to a double.
    */
@@ -103,16 +104,15 @@ public class BooleanValue extends Value {
   {
     return _value ? 1 : 0;
   }
-  
+
   /**
    * Converts to a string.
-   * @param env
    */
   public String toString()
   {
     return _value ? "1" : "";
   }
-  
+
   /**
    * Converts to an object.
    */
@@ -121,10 +121,10 @@ public class BooleanValue extends Value {
     Value obj = env.createObject();
 
     obj.put(SCALAR_V, this);
-    
+
     return obj;
   }
-  
+
   /**
    * Converts to an object.
    */
@@ -148,7 +148,7 @@ public class BooleanValue extends Value {
   {
     if (rValue instanceof StringValue) {
       String v = rValue.toString();
-      
+
       if (_value)
 	return ! v.equals("") && ! v.equals("0");
       else
@@ -159,7 +159,7 @@ public class BooleanValue extends Value {
     else
       return toString().equals(rValue.toString());
   }
-  
+
   /**
    * Prints the value.
    * @param env
@@ -241,6 +241,19 @@ public class BooleanValue extends Value {
     BooleanValue value = (BooleanValue) o;
 
     return _value == value._value;
+  }
+
+
+  public void varDumpImpl(Env env,
+                          WriteStream out,
+                          int depth,
+                          IdentityHashMap<Value,String> valueSet)
+    throws Throwable
+  {
+    if (toBoolean())
+      out.print("bool(true)");
+    else
+      out.print("bool(false)");
   }
 }
 

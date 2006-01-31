@@ -30,6 +30,7 @@
 package com.caucho.quercus.env;
 
 import java.io.IOException;
+import java.util.IdentityHashMap;
 
 import com.caucho.vfs.WriteStream;
 
@@ -41,7 +42,7 @@ import com.caucho.quercus.program.AbstractFunction;
 public class CallbackFunction extends Callback {
   private Env _env;
   private String _funName;
-  
+
   private AbstractFunction _fun;
 
   public CallbackFunction(Env env, String funName)
@@ -54,7 +55,7 @@ public class CallbackFunction extends Callback {
   {
     _fun = fun;
   }
-  
+
   /**
    * Evaluates the callback with no arguments.
    *
@@ -65,7 +66,7 @@ public class CallbackFunction extends Callback {
   {
     return getFunction().eval(env);
   }
-  
+
   /**
    * Evaluates the callback with 1 argument.
    *
@@ -76,7 +77,7 @@ public class CallbackFunction extends Callback {
   {
     return getFunction().eval(env, a1);
   }
-  
+
   /**
    * Evaluates the callback with 2 arguments.
    *
@@ -87,7 +88,7 @@ public class CallbackFunction extends Callback {
   {
     return getFunction().eval(env, a1, a2);
   }
-  
+
   /**
    * Evaluates the callback with 3 arguments.
    *
@@ -98,7 +99,7 @@ public class CallbackFunction extends Callback {
   {
     return getFunction().eval(env, a1, a2, a3);
   }
-  
+
   /**
    * Evaluates the callback with 3 arguments.
    *
@@ -110,7 +111,7 @@ public class CallbackFunction extends Callback {
   {
     return getFunction().eval(env, a1, a2, a3, a4);
   }
-  
+
   /**
    * Evaluates the callback with 3 arguments.
    *
@@ -122,7 +123,7 @@ public class CallbackFunction extends Callback {
   {
     return getFunction().eval(env, a1, a2, a3, a4, a5);
   }
-  
+
   public Value eval(Env env, Value []args)
     throws Throwable
   {
@@ -135,5 +136,17 @@ public class CallbackFunction extends Callback {
       _fun = _env.getFunction(_funName);
 
     return _fun;
+  }
+
+  public void varDumpImpl(Env env,
+                          WriteStream out,
+                          int depth,
+                          IdentityHashMap<Value, String> valueSet)
+    throws Throwable
+  {
+    out.print(getClass().getName());
+    out.print('[');
+    out.print(_funName);
+    out.print(']');
   }
 }

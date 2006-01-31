@@ -30,6 +30,7 @@
 package com.caucho.quercus.lib;
 
 import com.caucho.quercus.env.*;
+import com.caucho.vfs.WriteStream;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -40,6 +41,7 @@ import org.w3c.dom.Text;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.IdentityHashMap;
 
 /**
  * SimpleXMLElement object oriented API facade
@@ -52,13 +54,13 @@ public class SimpleXMLElementClass extends Value {
 
   private Document _document;
   private Element _element;
-  
+
   private Value _attributes;
   private Value _children;
 
   /**
    *  need to pass document for setting text values
-   * 
+   *
    * @param document
    * @param element
    */
@@ -96,7 +98,7 @@ public class SimpleXMLElementClass extends Value {
   }
 
   /**
-   * 
+   *
    * @return either ArrayValueImpl or NullValue.NULL
    */
   public Value attributes()
@@ -120,31 +122,31 @@ public class SimpleXMLElementClass extends Value {
 
     /**
      * All child text nodes get ignored ifthere are more children
-     * 
+     *
      * For example:
-     * 
+     *
      * $foo = simplexml_load_string('<foo>before<fooChild>misc</fooChild>after</foo>');
      * print_r($foo) =>
      *  SimpleXMLElement Object
      *  (
      *    [fooChild] => misc
      *  )
-     * 
-     * print_r($foo->children()) => 
+     *
+     * print_r($foo->children()) =>
      *  SimpleXMLElement Object
      *  (
      *     [0] => misc
      *  )
-     * 
+     *
      * COMPARE WITH:
-     * 
+     *
      * $foo = simplexml_load_string('<foo>bar</foo>');
      * print_r($foo) =>
      *  SimpleXMLElement Object
      *  (
      *    [0] => bar
      *  )
-     * 
+     *
      * print_r($foo->children()) =>
      *  SimpleXMLElement Object
      *  (
@@ -155,7 +157,7 @@ public class SimpleXMLElementClass extends Value {
     if (nodeLength == 1) {
       Node firstChild = children.item(0);
       SimpleXMLElementClass simpleXMLChild = new SimpleXMLElementClass(_document,  (Element) firstChild);
-      
+
       _children = new ArrayValueImpl();
 
       if (firstChild.getNodeType() == Node.TEXT_NODE)
@@ -214,18 +216,18 @@ public class SimpleXMLElementClass extends Value {
   public Value getArray(Value name)
   {
     Value result;
-    
+
     children();
-    
+
     if (_children instanceof ArrayValue) {
       result = _children.get(name);
       if (result != null)
         return result;
     }
-    
+
     return NullValue.NULL;
   }
-  
+
   public Value get(Value name)
   {
     Value result;
@@ -280,7 +282,7 @@ public class SimpleXMLElementClass extends Value {
   }
 
   public Element getElement()
-  { 
+  {
     return _element;
   }
 
@@ -303,12 +305,12 @@ public class SimpleXMLElementClass extends Value {
         /**
          *  $foo = simplexml_load_string('<parent><child><sub1 /><sub2 /></child></parent>');
          *  $foo->child = "bar";
-         * 
+         *
          *  EQUIVALENT TO:
-         * 
+         *
          *  $foo = simplexml_load_string('<parent><child>bar</child></parent>');
-         * 
-         * So remove all children first then add text node; 
+         *
+         * So remove all children first then add text node;
          */
         Element element = ((SimpleXMLElementClass) child).getElement();
         NodeList children = element.getChildNodes();
@@ -318,14 +320,14 @@ public class SimpleXMLElementClass extends Value {
           element.removeChild(children.item(i));
 
         Text text = _document.createTextNode(value.toString());
-        
+
         element.appendChild(text);
       }
     }
 
     return value;
   }
-  
+
   /**
    * Returns the value for a field, creating an object if the field
    * is unset.
@@ -333,24 +335,24 @@ public class SimpleXMLElementClass extends Value {
   public Value getObject(Env env, Value index)
   {
     Value result = children().get(index);
-    
+
     if (result != null)
       return result;
-    
+
     return NullValue.NULL;
   }
 
   /**
-   * 
+   *
    * @return this SimpleXMLElement as well formed XML
    */
   public StringValue asXML()
   {
     StringBuffer result = new StringBuffer();
-    
+
     result.append("<?xml version=\"1.0\"?>\n");
     result.append(generateXML().toString());
-    
+
     return new StringValue(result.toString());
   }
 
@@ -361,42 +363,42 @@ public class SimpleXMLElementClass extends Value {
   public StringBuffer generateXML()
   {
     StringBuffer sb = new StringBuffer();
-    
+
     // If this is a text node, then just return the text
     if (_element.getNodeType() == Node.TEXT_NODE) {
       sb.append(_element.getNodeValue());
       return sb;
     }
-    
+
     // not a text node
     sb.append("<");
-    
+
     sb.append(_element.getNodeName());
-    
+
     // add attributes, if any
     NamedNodeMap attrs = _element.getAttributes();
     int attrLength = attrs.getLength();
-    
+
     for (int i=0; i < attrLength; i++) {
       Node attribute = attrs.item(i);
       sb.append(" " + attribute.getNodeName() + "=\"" + attribute.getNodeValue() + "\"");
     }
-    
+
     // recurse through children, if any
     NodeList children = _element.getChildNodes();
     int nodeLength = children.getLength();
-    
+
     if (nodeLength == 0) {
       sb.append(" />");
       return sb;
     }
-    
+
     sb.append(">");
-    
+
     // there are children
     for (int i=0; i < nodeLength; i++) {
       Node child = children.item(i);
-      
+
       if (child.getNodeType() == Node.TEXT_NODE) {
         sb.append(child.getNodeValue());
         continue;
@@ -404,10 +406,19 @@ public class SimpleXMLElementClass extends Value {
       SimpleXMLElementClass simple = new SimpleXMLElementClass(_document, (Element) child);
       sb.append(simple.generateXML());
     }
-    
+
     // add closing tag
     sb.append("</" + _element.getNodeName() + ">");
-    
+
     return sb;
+  }
+
+  protected void varDumpImpl(Env env,
+                             WriteStream out,
+                             int depth,
+                             IdentityHashMap<Value, String> valueSet)
+    throws Throwable
+  {
+    out.print(getClass().getName());
   }
 }

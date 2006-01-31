@@ -30,6 +30,7 @@
 package com.caucho.quercus.env;
 
 import java.io.IOException;
+import java.util.IdentityHashMap;
 
 import com.caucho.quercus.gen.PhpWriter;
 
@@ -45,7 +46,7 @@ public class LongValue extends Value {
 
   public static final int STATIC_MIN = -32;
   public static final int STATIC_MAX = 32;
-  
+
   public static final LongValue[]STATIC_VALUES;
 
   private final long _value;
@@ -94,7 +95,7 @@ public class LongValue extends Value {
   {
     return true;
   }
-  
+
   /**
    * Converts to a boolean.
    */
@@ -102,7 +103,7 @@ public class LongValue extends Value {
   {
     return _value != 0;
   }
-  
+
   /**
    * Converts to a long.
    */
@@ -110,7 +111,7 @@ public class LongValue extends Value {
   {
     return _value;
   }
-  
+
   /**
    * Converts to a double.
    */
@@ -118,7 +119,7 @@ public class LongValue extends Value {
   {
     return _value;
   }
-  
+
   /**
    * Converts to a string.
    * @param env
@@ -135,7 +136,7 @@ public class LongValue extends Value {
   {
     return this;
   }
-  
+
   /**
    * Converts to an object.
    */
@@ -186,7 +187,7 @@ public class LongValue extends Value {
   public boolean eql(Value rValue)
   {
     rValue = rValue.toValue();
-    
+
     if (! (rValue instanceof LongValue))
       return false;
 
@@ -194,7 +195,7 @@ public class LongValue extends Value {
 
     return _value == rLong;
   }
-  
+
   /**
    * Prints the value.
    * @param env
@@ -268,6 +269,15 @@ public class LongValue extends Value {
     LongValue value = (LongValue) o;
 
     return _value == value._value;
+  }
+
+  public void varDumpImpl(Env env,
+                          WriteStream out,
+                          int depth,
+                          IdentityHashMap<Value,String> valueSet)
+    throws Throwable
+  {
+    out.print("int(" + toLong() + ")");
   }
 
   static {

@@ -91,11 +91,7 @@ public class QuercusVariableModule extends AbstractQuercusModule {
   public static Value var_dump(Env env, @ReadOnly Value v)
     throws Throwable
   {
-    if (v instanceof RefVar)
-      env.getOut().print("&");
-    
-    var_dump_impl(env, env.getOut(), v.toValue(), 0,
-		  new IdentityHashMap<Value,String>());
+    v.varDump(env, env.getOut(), 0,  new IdentityHashMap<Value,String>());
 
     env.getOut().println();
 
@@ -113,12 +109,8 @@ public class QuercusVariableModule extends AbstractQuercusModule {
     throws Throwable
   {
     WriteStream out = Vfs.openWrite("stdout:");
-    
-    if (v instanceof RefVar)
-      out.print("&");
-    
-    var_dump_impl(env, out, v.toValue(), 0,
-		  new IdentityHashMap<Value,String>());
+
+    v.varDump(env, out, 0, new IdentityHashMap<Value,String>());
 
     out.println();
 
@@ -183,7 +175,7 @@ public class QuercusVariableModule extends AbstractQuercusModule {
       return BooleanValue.TRUE;
     else if (v instanceof StringValue) {
       String s = v.toString();
-      
+
       return (s.equals("") || s.equals("0")
 	      ? BooleanValue.TRUE
 	      : BooleanValue.FALSE);
@@ -353,7 +345,7 @@ public class QuercusVariableModule extends AbstractQuercusModule {
     if (v instanceof StringValue) {
       if (nameRef != null)
 	nameRef.set(v);
-      
+
       if (isSyntaxOnly)
 	return true;
       else
@@ -362,17 +354,17 @@ public class QuercusVariableModule extends AbstractQuercusModule {
     else if (v instanceof ArrayValue) {
       Value obj = v.get(LongValue.ZERO);
       Value name = v.get(LongValue.ONE);
-      
+
       if (! (name instanceof StringValue))
 	return false;
 
       if (nameRef != null)
 	nameRef.set(name);
-      
+
       if (obj instanceof StringValue) {
 	if (isSyntaxOnly)
 	  return true;
-	
+
 	AbstractQuercusClass cl = env.findClass(obj.toString());
 	if (cl == null)
 	  return false;
@@ -604,6 +596,13 @@ public class QuercusVariableModule extends AbstractQuercusModule {
     }
   }
 
+  private static void printDepth(WriteStream out, int depth)
+    throws IOException
+  {
+    for (int i = 0; i < depth; i++)
+      out.print(' ');
+  }
+
   /**
    * Serializes the value to a string.
    */
@@ -671,7 +670,7 @@ public class QuercusVariableModule extends AbstractQuercusModule {
       return is.unserialize(env);
     } catch (Throwable e) {
       log.log(Level.FINE, e.toString(), e);
-      
+
       env.notice(e.toString());
 
       return BooleanValue.FALSE;
@@ -706,7 +705,7 @@ public class QuercusVariableModule extends AbstractQuercusModule {
 
     if (v instanceof Var)
       out.print("&");
-    
+
     v = v.toValue();
 
     if (v instanceof ArrayValue) {
@@ -718,7 +717,7 @@ public class QuercusVariableModule extends AbstractQuercusModule {
 
       for (Map.Entry<Value,Value> mapEntry : array.entrySet()) {
 	ArrayValue.Entry entry = (ArrayValue.Entry) mapEntry;
-	
+
         printDepth(out, 2 * depth);
         out.print("    [");
         out.print(entry.getKey());
@@ -749,102 +748,6 @@ public class QuercusVariableModule extends AbstractQuercusModule {
     else {
       v.print(env);
     }
-  }
-
-  private static void var_dump_impl(Env env, WriteStream out,
-				    Value v, int depth,
-				    IdentityHashMap<Value,String> valueSet)
-    throws Throwable
-  {
-    if (v instanceof Var)
-      out.print("&");
-    
-    v = v.toValue();
-    
-    if (valueSet.get(v) != null) {
-      out.print("#recursion#");
-      return;
-    }
-
-    try {
-      valueSet.put(v, "printing");
-
-      if (v instanceof ObjectValue) {
-	ObjectValue object = (ObjectValue) v;
-
-	out.println("object(" + object.getName() + ") (" + object.getSize() + ") {");
-
-	for (Map.Entry<Value,Value> mapEntry : object.entrySet()) {
-	  ArrayValue.Entry entry = (ArrayValue.Entry) mapEntry;
-	  
-	  printDepth(out, 2 * depth + 2);
-	  out.print("[");
-	  out.print("\"" + entry.getKey().toString() + "\"");
-	  out.println("]=>");
-	  printDepth(out, 2 * depth + 2);
-	  var_dump_impl(env, out, entry.getRawValue(), depth + 1, valueSet);
-	  out.println();
-	}
-	printDepth(out, 2 * depth);
-	out.print("}");
-      }
-      else if (v instanceof ArrayValue) {
-	ArrayValue array = (ArrayValue) v;
-
-	out.println("array(" + array.getSize() + ") {");
-
-	for (Map.Entry<Value,Value> mapEntry : array.entrySet()) {
-	  ArrayValue.Entry entry = (ArrayValue.Entry) mapEntry;
-	  
-	  printDepth(out, 2 * depth + 2);
-	  out.print("[");
-
-	  Value key = entry.getKey();
-	  if (key instanceof StringValue)
-	    out.print("\"" + key + "\"");
-	  else
-	    out.print(key);
-	  out.println("]=>");
-	  printDepth(out, 2 * depth + 2);
-	  var_dump_impl(env, out, entry.getRawValue(), depth + 1, valueSet);
-	  out.println();
-	}
-	printDepth(out, 2 * depth);
-	out.print("}");
-      }
-      else if (v instanceof BooleanValue) {
-	if (v.toBoolean())
-	  out.print("bool(true)");
-	else
-	  out.print("bool(false)");
-      }
-      else if (v instanceof LongValue) {
-	out.print("int(" + v.toLong() + ")");
-      }
-      else if (v instanceof DoubleValue) {
-	out.print("float(" + v.toDouble() + ")");
-      }
-      else if (v instanceof StringValue) {
-	String s = v.toString();
-      
-	out.print("string(" + s.length() + ") \"" + s + "\"");
-      }
-      else if (v instanceof NullValue) {
-	out.print("NULL");
-      }
-      else {
-	v.print(env);
-      }
-    } finally {
-      valueSet.remove(v);
-    }
-  }
-
-  private static void printDepth(WriteStream out, int depth)
-    throws IOException
-  {
-    for (int i = 0; i < depth; i++)
-      out.print(' ');
   }
 }
 

@@ -32,6 +32,7 @@ package com.caucho.quercus.env;
 import java.io.IOException;
 
 import java.util.Collection;
+import java.util.IdentityHashMap;
 
 import com.caucho.vfs.WriteStream;
 
@@ -70,7 +71,7 @@ public class Var extends Value {
   {
     _refCount = 1;
   }
-  
+
   /**
    * Sets the value.
    */
@@ -80,7 +81,7 @@ public class Var extends Value {
 
     return _value;
   }
-  
+
   /**
    * Sets the value.
    */
@@ -118,7 +119,7 @@ public class Var extends Value {
   {
     return _value.isA(name);
   }
-  
+
   /**
    * True for a number
    */
@@ -126,7 +127,7 @@ public class Var extends Value {
   {
     return _value.isNull();
   }
-  
+
   /**
    * True for a long
    */
@@ -134,7 +135,7 @@ public class Var extends Value {
   {
     return _value.isLong();
   }
-  
+
   /**
    * True to a double.
    */
@@ -142,7 +143,7 @@ public class Var extends Value {
   {
     return _value.isDouble();
   }
-  
+
   /**
    * True for a number
    */
@@ -158,7 +159,7 @@ public class Var extends Value {
   {
     return _value.isScalar();
   }
-  
+
   /**
    * Converts to a boolean.
    */
@@ -166,7 +167,7 @@ public class Var extends Value {
   {
     return _value.toBoolean();
   }
-  
+
   /**
    * Converts to a long.
    */
@@ -174,7 +175,7 @@ public class Var extends Value {
   {
     return _value.toLong();
   }
-  
+
   /**
    * Converts to a double.
    */
@@ -182,7 +183,7 @@ public class Var extends Value {
   {
     return _value.toDouble();
   }
-  
+
   /**
    * Converts to a string.
    * @param env
@@ -192,7 +193,7 @@ public class Var extends Value {
   {
     return _value.toString(env);
   }
-  
+
   /**
    * Converts to an object.
    */
@@ -200,7 +201,7 @@ public class Var extends Value {
   {
     return _value.toJavaObject();
   }
-  
+
   /**
    * Converts to an object.
    */
@@ -208,7 +209,7 @@ public class Var extends Value {
   {
     return _value.toObject(env);
   }
-  
+
   /**
    * Returns to the value value.
    */
@@ -216,7 +217,7 @@ public class Var extends Value {
   {
     return _value;
   }
-  
+
   /**
    * Converts to a raw value.
    */
@@ -224,7 +225,7 @@ public class Var extends Value {
   {
     return _value;
   }
-  
+
   /**
    * Converts to a raw value.
    */
@@ -232,7 +233,7 @@ public class Var extends Value {
   {
     return _value.toArgValue();
   }
-  
+
   /**
    * Converts to a function argument ref value.
    */
@@ -241,7 +242,7 @@ public class Var extends Value {
     // php/344r
     return _value;
   }
-  
+
   /**
    * Converts to a variable
    */
@@ -250,7 +251,7 @@ public class Var extends Value {
     // php/3d04
     return new Var(toArgValue());
   }
-  
+
   /**
    * Converts to a reference variable
    */
@@ -268,7 +269,7 @@ public class Var extends Value {
   {
     return _value.toKey();
   }
-  
+
   /**
    * Copy the value.
    */
@@ -277,18 +278,18 @@ public class Var extends Value {
     // php/041d
     return _value.copy();
   }
-  
+
   /**
    * Copy the value as an array item.
    */
   public Value copyArrayItem()
   {
     _refCount = 2;
-    
+
     // php/041d
     return this;
   }
-  
+
   /**
    * Copy the value as a return value.
    */
@@ -299,14 +300,14 @@ public class Var extends Value {
     else
       return _value.copy();
   }
-  
+
   /**
    * Converts to a variable reference (for function  arguments)
    */
   public Value toRef()
   {
     _refCount = 2;
-    
+
     return new RefVar(this);
   }
 
@@ -352,7 +353,7 @@ public class Var extends Value {
     throws Throwable
   {
     _value = _value.preincr(incr);
-    
+
     return _value;
   }
 
@@ -365,7 +366,7 @@ public class Var extends Value {
     Value value = _value;
 
     _value = value.postincr(incr);
-    
+
     return value;
   }
 
@@ -495,7 +496,7 @@ public class Var extends Value {
   {
     if (! _value.isset())
       _value = new ArrayValueImpl();
-    
+
     return _value;
   }
 
@@ -538,7 +539,7 @@ public class Var extends Value {
   {
     if (! _value.isset())
       _value = env.createObject();
-    
+
     return _value;
   }
 
@@ -784,6 +785,16 @@ public class Var extends Value {
   public String toString()
   {
     return _value.toString();
+  }
+
+  public void varDumpImpl(Env env,
+                          WriteStream out,
+                          int depth,
+                          IdentityHashMap<Value, String> valueSet)
+    throws Throwable
+  {
+    out.print("&");
+    _value.varDump(env, out, depth, valueSet);
   }
 }
 

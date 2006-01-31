@@ -30,6 +30,7 @@
 package com.caucho.quercus.env;
 
 import java.io.IOException;
+import java.util.IdentityHashMap;
 
 import com.caucho.vfs.WriteStream;
 
@@ -40,7 +41,7 @@ import com.caucho.quercus.gen.PhpWriter;
  */
 public class DoubleValue extends Value {
   public static final DoubleValue ZERO = new DoubleValue(0);
-  
+
   private final double _value;
 
   public DoubleValue(double value)
@@ -60,7 +61,7 @@ public class DoubleValue extends Value {
     else
       return new DoubleValue(value.doubleValue());
   }
-  
+
   /**
    * Returns the type.
    */
@@ -84,7 +85,7 @@ public class DoubleValue extends Value {
   {
     return true;
   }
-  
+
   /**
    * Converts to a boolean.
    */
@@ -92,7 +93,7 @@ public class DoubleValue extends Value {
   {
     return _value != 0;
   }
-  
+
   /**
    * Converts to a long.
    */
@@ -100,7 +101,7 @@ public class DoubleValue extends Value {
   {
     return (long) _value;
   }
-  
+
   /**
    * Converts to a double.
    */
@@ -195,7 +196,7 @@ public class DoubleValue extends Value {
   public boolean eql(Value rValue)
   {
     rValue = rValue.toValue();
-    
+
     if (! (rValue instanceof DoubleValue))
       return false;
 
@@ -203,7 +204,7 @@ public class DoubleValue extends Value {
 
     return _value == rDouble;
   }
-  
+
   /**
    * Converts to a string.
    * @param env
@@ -217,7 +218,7 @@ public class DoubleValue extends Value {
     else
       return String.valueOf(_value);
   }
-  
+
   /**
    * Converts to an object.
    */
@@ -225,7 +226,7 @@ public class DoubleValue extends Value {
   {
     return String.valueOf(_value);
   }
-  
+
   /**
    * Prints the value.
    * @param env
@@ -298,6 +299,15 @@ public class DoubleValue extends Value {
     DoubleValue value = (DoubleValue) o;
 
     return _value == value._value;
+  }
+
+  public void varDumpImpl(Env env,
+                          WriteStream out,
+                          int depth,
+                          IdentityHashMap<Value, String> valueSet)
+    throws Throwable
+  {
+    out.print("float(" + toDouble() + ")");
   }
 }
 

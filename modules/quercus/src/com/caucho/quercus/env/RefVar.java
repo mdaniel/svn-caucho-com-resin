@@ -32,6 +32,7 @@ package com.caucho.quercus.env;
 import java.io.IOException;
 
 import java.util.Collection;
+import java.util.IdentityHashMap;
 
 import com.caucho.vfs.WriteStream;
 
@@ -44,7 +45,7 @@ import com.caucho.quercus.program.AbstractFunction;
  */
 public class RefVar extends Value {
   private Var _var;
-  
+
   public RefVar(Var var)
   {
     _var = var;
@@ -57,7 +58,7 @@ public class RefVar extends Value {
   {
     return _var.isA(name);
   }
-  
+
   /**
    * True for a long
    */
@@ -65,7 +66,7 @@ public class RefVar extends Value {
   {
     return _var.isLong();
   }
-  
+
   /**
    * True to a double.
    */
@@ -73,7 +74,7 @@ public class RefVar extends Value {
   {
     return _var.isDouble();
   }
-  
+
   /**
    * True for a number
    */
@@ -89,7 +90,7 @@ public class RefVar extends Value {
   {
     return _var.isScalar();
   }
-  
+
   /**
    * Converts to a boolean.
    */
@@ -97,7 +98,7 @@ public class RefVar extends Value {
   {
     return _var.toBoolean();
   }
-  
+
   /**
    * Converts to a long.
    */
@@ -105,7 +106,7 @@ public class RefVar extends Value {
   {
     return _var.toLong();
   }
-  
+
   /**
    * Converts to a double.
    */
@@ -113,7 +114,7 @@ public class RefVar extends Value {
   {
     return _var.toDouble();
   }
-  
+
   /**
    * Converts to a string.
    * @param env
@@ -123,7 +124,7 @@ public class RefVar extends Value {
   {
     return _var.toString(env);
   }
-  
+
   /**
    * Converts to an object.
    */
@@ -131,7 +132,7 @@ public class RefVar extends Value {
   {
     return _var.toObject(env);
   }
-  
+
   /**
    * Converts to an object.
    */
@@ -139,7 +140,7 @@ public class RefVar extends Value {
   {
     return _var.toJavaObject();
   }
-  
+
   /**
    * Converts to a raw value.
    */
@@ -155,7 +156,7 @@ public class RefVar extends Value {
   {
     return _var.isArray();
   }
-  
+
   /**
    * Copy the value.
    */
@@ -164,7 +165,7 @@ public class RefVar extends Value {
     // quercus/0d05
     return this;
   }
-  
+
   /**
    * Converts to an argument value.
    */
@@ -173,7 +174,7 @@ public class RefVar extends Value {
     // php/343k
     return _var;
   }
-  
+
   /**
    * Converts to a variable
    */
@@ -181,7 +182,7 @@ public class RefVar extends Value {
   {
     return _var;
   }
-  
+
   /**
    * Converts to a reference variable
    */
@@ -416,6 +417,16 @@ public class RefVar extends Value {
     throws Throwable
   {
     _var.print(env);
+  }
+
+  public void varDumpImpl(Env env,
+                          WriteStream out,
+                          int depth,
+                          IdentityHashMap<Value,String> valueSet)
+    throws Throwable
+  {
+    out.print("&");
+    toValue().varDumpImpl(env, out, depth, valueSet);
   }
 }
 

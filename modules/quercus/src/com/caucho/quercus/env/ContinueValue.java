@@ -30,6 +30,7 @@
 package com.caucho.quercus.env;
 
 import java.io.IOException;
+import java.util.IdentityHashMap;
 
 import com.caucho.vfs.WriteStream;
 
@@ -42,7 +43,7 @@ public class ContinueValue extends Value {
   private ContinueValue()
   {
   }
-  
+
   /**
    * Converts to a boolean.
    */
@@ -50,7 +51,7 @@ public class ContinueValue extends Value {
   {
     return false;
   }
-  
+
   /**
    * Converts to a long.
    */
@@ -58,7 +59,7 @@ public class ContinueValue extends Value {
   {
     return 0;
   }
-  
+
   /**
    * Converts to a double.
    */
@@ -66,7 +67,7 @@ public class ContinueValue extends Value {
   {
     return 0;
   }
-  
+
   /**
    * Converts to a string.
    * @param env
@@ -75,7 +76,7 @@ public class ContinueValue extends Value {
   {
     return "";
   }
-  
+
   /**
    * Converts to an object.
    */
@@ -83,7 +84,7 @@ public class ContinueValue extends Value {
   {
     return "";
   }
-  
+
   /**
    * Prints the value.
    * @param env
@@ -91,6 +92,15 @@ public class ContinueValue extends Value {
   public void print(Env env)
     throws IOException
   {
+  }
+
+  public void varDumpImpl(Env env,
+                          WriteStream out,
+                          int depth,
+                          IdentityHashMap<Value, String> valueSet)
+    throws Throwable
+  {
+    out.print(getClass().getName());
   }
 }
 

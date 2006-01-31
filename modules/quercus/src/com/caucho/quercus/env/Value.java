@@ -120,7 +120,7 @@ abstract public class Value {
   {
     return false;
   }
-  
+
   /**
    * Converts to a boolean.
    */
@@ -128,7 +128,7 @@ abstract public class Value {
   {
     return true;
   }
-  
+
   /**
    * Converts to a long.
    */
@@ -165,7 +165,7 @@ abstract public class Value {
     else
       return s.charAt(0);
   }
-  
+
   /**
    * Converts to a string.
    *
@@ -176,7 +176,7 @@ abstract public class Value {
   {
     return toString();
   }
-  
+
   /**
    * Converts to a string value.
    * @param env
@@ -191,7 +191,7 @@ abstract public class Value {
     else
       return new StringValue(value.toString());
   }
-  
+
   /**
    * Converts to an object.
    */
@@ -199,7 +199,7 @@ abstract public class Value {
   {
     return env.createObject();
   }
-  
+
   /**
    * Converts to a java object.
    */
@@ -207,7 +207,7 @@ abstract public class Value {
   {
     return null;
   }
-  
+
   /**
    * Converts to a raw value.
    */
@@ -223,7 +223,7 @@ abstract public class Value {
   {
     throw new QuercusRuntimeException(L.l("{0} is not a valid key", this));
   }
-  
+
   /**
    * Copy for assignment.
    */
@@ -231,7 +231,7 @@ abstract public class Value {
   {
     return this;
   }
-  
+
   /**
    * Copy as an array item
    */
@@ -239,17 +239,17 @@ abstract public class Value {
   {
     return copy();
   }
-  
+
   /**
    * Copy as a return value
    */
   public Value copyReturn()
   {
     // php/3a5d
-    
+
     return this;
   }
-  
+
   /**
    * Copy for serialization
    */
@@ -257,7 +257,7 @@ abstract public class Value {
   {
     return copy(env, new IdentityHashMap<Value,Value>());
   }
-  
+
   /**
    * Copy for serialization
    */
@@ -265,7 +265,7 @@ abstract public class Value {
   {
     return this;
   }
-  
+
   /**
    * Clone for the clone keyword
    */
@@ -273,7 +273,7 @@ abstract public class Value {
   {
     return this;
   }
-  
+
   /**
    * Convert to a ref.
    */
@@ -281,7 +281,7 @@ abstract public class Value {
   {
     return this;
   }
-  
+
   /**
    * Convert to a function argument value, e.g. for
    *
@@ -293,7 +293,7 @@ abstract public class Value {
   {
     return toValue();
   }
-  
+
   /**
    * Convert to a function argument reference value, e.g. for
    *
@@ -305,7 +305,7 @@ abstract public class Value {
   {
     return toValue();
   }
-  
+
   /**
    * Convert to a function argument value, e.g. for
    *
@@ -317,7 +317,7 @@ abstract public class Value {
   {
     return new Var(this);
   }
-  
+
   /**
    * Convert to a function argument reference value, e.g. for
    *
@@ -410,24 +410,24 @@ abstract public class Value {
     switch (args.length) {
     case 0:
       return evalMethod(env, methodName);
-      
+
     case 1:
       return evalMethod(env, methodName, args[0]);
-      
+
     case 2:
       return evalMethod(env, methodName, args[0], args[1]);
-      
+
     case 3:
       return evalMethod(env, methodName, args[0], args[1], args[2]);
-      
+
     case 4:
       return evalMethod(env, methodName, args[0], args[1], args[2],
 			args[3]);
-      
+
     case 5:
       return evalMethod(env, methodName, args[0], args[1], args[2],
 			args[3], args[4]);
-      
+
     default:
       return errorNoMethod(env, methodName);
     }
@@ -520,24 +520,24 @@ abstract public class Value {
     switch (args.length) {
     case 0:
       return evalMethodRef(env, methodName);
-      
+
     case 1:
       return evalMethodRef(env, methodName, args[0]);
-      
+
     case 2:
       return evalMethodRef(env, methodName, args[0], args[1]);
-      
+
     case 3:
       return evalMethodRef(env, methodName, args[0], args[1], args[2]);
-      
+
     case 4:
       return evalMethodRef(env, methodName, args[0], args[1], args[2],
 			args[3]);
-      
+
     case 5:
       return evalMethodRef(env, methodName, args[0], args[1], args[2],
 			args[3], args[4]);
-      
+
     default:
       return env.error(L.l("'{0}' is an unknown method in '{1}'.",
 			   methodName, this));
@@ -614,7 +614,7 @@ abstract public class Value {
   {
     return NullValue.NULL;
   }
- 
+
   /**
    * Returns true for equality
    */
@@ -727,7 +727,7 @@ abstract public class Value {
   {
     long lLong = toLong();
     long rLong = rValue.toLong();
-    
+
     return new LongValue(lLong + rLong);
   }
 
@@ -738,7 +738,7 @@ abstract public class Value {
     throws Throwable
   {
     long rLong = toLong();
-    
+
     return new LongValue(lLong + rLong);
   }
 
@@ -749,7 +749,7 @@ abstract public class Value {
     throws Throwable
   {
     long lValue = toLong();
-    
+
     return new LongValue(lValue + incr);
   }
 
@@ -760,7 +760,7 @@ abstract public class Value {
     throws Throwable
   {
     long lValue = toLong();
-    
+
     return new LongValue(lValue + incr);
   }
 
@@ -772,7 +772,7 @@ abstract public class Value {
   {
     long lLong = toLong();
     long rLong = rValue.toLong();
-    
+
     return new LongValue(lLong - rLong);
   }
 
@@ -783,7 +783,7 @@ abstract public class Value {
     throws Throwable
   {
     long lLong = toLong();
-    
+
     return new LongValue(lLong - rLong);
   }
 
@@ -794,7 +794,7 @@ abstract public class Value {
     throws Throwable
   {
     long rLong = toLong();
-    
+
     return new LongValue(lLong - rLong);
   }
 
@@ -814,7 +814,7 @@ abstract public class Value {
     throws Throwable
   {
     long rLong = toLong();
-    
+
     return new LongValue(lLong * rLong);
   }
 
@@ -826,7 +826,7 @@ abstract public class Value {
   {
     double lDouble = toDouble();
     double rDouble = rValue.toDouble();
-    
+
     return new DoubleValue(lDouble / rDouble);
   }
 
@@ -850,7 +850,7 @@ abstract public class Value {
   {
     long lLong = toLong();
     long rLong = rValue.toLong();
-    
+
     return new LongValue(lLong << rLong);
   }
 
@@ -862,7 +862,7 @@ abstract public class Value {
   {
     long lLong = toLong();
     long rLong = rValue.toLong();
-    
+
     return new LongValue(lLong >> rLong);
   }
 
@@ -1055,7 +1055,7 @@ abstract public class Value {
     ArrayValue value = new ArrayValueImpl();
 
     put(value);
-    
+
     return value;
   }
 
@@ -1067,7 +1067,7 @@ abstract public class Value {
     Value value = env.createObject();
 
     put(value);
-    
+
     return value;
   }
 
@@ -1094,7 +1094,7 @@ abstract public class Value {
   {
     return NullValue.NULL;
   }
-  
+
   /**
    * Prints the value.
    * @param env
@@ -1135,7 +1135,7 @@ abstract public class Value {
   {
     // XXX: remove when done
     System.out.println("Generate: " + getClass().getName());
-    
+
     out.print("com.caucho.quercus.env.NullValue.NULL");
   }
 
@@ -1148,5 +1148,32 @@ abstract public class Value {
   {
     return toString();
   }
+
+  public void varDump(Env env,
+                      WriteStream out,
+                      int depth,
+                      IdentityHashMap<Value, String> valueSet)
+    throws Throwable
+  {
+    if (valueSet.get(this) != null) {
+       out.print("#recursion#");
+       return;
+     }
+
+    valueSet.put(this, "printing");
+
+    try {
+      varDumpImpl(env, out, depth, valueSet);
+    }
+    finally {
+      valueSet.remove(this);
+    }
+  }
+
+  abstract protected void varDumpImpl(Env env,
+                                      WriteStream out,
+                                      int depth,
+                                      IdentityHashMap<Value, String> valueSet)
+    throws Throwable;
 }
 

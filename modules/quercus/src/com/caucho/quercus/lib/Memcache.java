@@ -33,6 +33,7 @@ import java.sql.*;
 
 import java.util.logging.Logger;
 import java.util.logging.Level;
+import java.util.IdentityHashMap;
 
 import com.caucho.util.L10N;
 import com.caucho.util.LruCache;
@@ -44,6 +45,7 @@ import com.caucho.quercus.env.LongValue;
 import com.caucho.quercus.env.Value;
 
 import com.caucho.quercus.module.Optional;
+import com.caucho.vfs.WriteStream;
 
 /**
  * memcache object oriented API facade
@@ -58,26 +60,26 @@ public class Memcache {
    * Adds a server.
    */
   public boolean addServer(Env env,
-			   String host,
-			   @Optional int port,
-			   @Optional boolean persistent,
-			   @Optional int weight,
-			   @Optional int timeout,
-			   @Optional int retryInterval)
+                           String host,
+                           @Optional int port,
+                           @Optional boolean persistent,
+                           @Optional int weight,
+                           @Optional int timeout,
+                           @Optional int retryInterval)
   {
     if (_cache == null)
       connect(env, host, port, timeout);
-    
+
     return true;
   }
-  
+
   /**
    * Connect to a server.
    */
   public boolean connect(Env env,
-			 String host,
-			 @Optional int port,
-			 @Optional("1") int timeout)
+                         String host,
+                         @Optional int port,
+                         @Optional("1") int timeout)
   {
     // Always true since this is a local copy
 
@@ -90,7 +92,7 @@ public class Memcache {
 
       env.getPhp().setSpecial(name, _cache);
     }
-    
+
     return true;
   }
 
@@ -124,9 +126,9 @@ public class Memcache {
    * Connect to a server.
    */
   public boolean pconnect(Env env,
-			  String host,
-			  @Optional int port,
-			  @Optional("1") int timeout)
+                          String host,
+                          @Optional int port,
+                          @Optional("1") int timeout)
   {
     return connect(env, host, port, timeout);
   }
@@ -135,10 +137,10 @@ public class Memcache {
    * Sets a value.
    */
   public boolean set(Env env,
-		     String key,
-		     Value value,
-		     @Optional int flag,
-		     @Optional int expire)
+                     String key,
+                     Value value,
+                     @Optional int flag,
+                     @Optional int expire)
   {
     _cache.set(key, value.copy(env));
 
@@ -149,7 +151,7 @@ public class Memcache {
    * Sets the compression threshold
    */
   public boolean setCompressThreshold(int threshold,
-				      @Optional double minSavings)
+                                      @Optional double minSavings)
   {
     return true;
   }
@@ -178,6 +180,15 @@ public class Memcache {
     public void set(String key, Value value)
     {
       _map.put(key, value);
+    }
+
+    public void varDumpImpl(Env env,
+                            WriteStream out,
+                            int depth,
+                            IdentityHashMap<Value, String> valueSet)
+      throws Throwable
+    {
+      out.print(getClass().getName());
     }
   }
 }

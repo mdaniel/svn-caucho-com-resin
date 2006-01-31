@@ -32,6 +32,7 @@ package com.caucho.quercus.env;
 import java.io.IOException;
 
 import java.util.Collection;
+import java.util.IdentityHashMap;
 
 import com.caucho.util.L10N;
 
@@ -90,6 +91,15 @@ public class ArgArrayVarValue extends Value {
   {
     // quercus/3d2t
     return _var.getArray().getObject(env, index);
+  }
+
+  public void varDumpImpl(Env env,
+                          WriteStream out,
+                          int depth,
+                          IdentityHashMap<Value, String> valueSet)
+    throws Throwable
+  {
+    out.print(getClass().getName());
   }
 }
 

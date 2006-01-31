@@ -29,6 +29,10 @@
 
 package com.caucho.quercus.env;
 
+import com.caucho.vfs.WriteStream;
+
+import java.util.IdentityHashMap;
+
 /**
  * Represents a PHP resource
  */
@@ -36,7 +40,7 @@ public class ResourceValue extends Value {
   public void close()
   {
   }
-  
+
   /**
    * Converts to a string.
    * @param env
@@ -46,11 +50,20 @@ public class ResourceValue extends Value {
     return "ResourceValue[]";
   }
 
+  public void varDumpImpl(Env env,
+                          WriteStream out,
+                          int depth,
+                          IdentityHashMap<Value, String> valueSet)
+    throws Throwable
+  {
+    out.print("resource(" + toString(env) + ")");
+  }
+
   protected void finalize()
     throws Throwable
   {
     close();
-    
+
     super.finalize();
   }
 }

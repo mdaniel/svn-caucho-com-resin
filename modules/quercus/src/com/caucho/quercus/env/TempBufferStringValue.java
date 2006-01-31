@@ -30,6 +30,7 @@
 package com.caucho.quercus.env;
 
 import java.io.IOException;
+import java.util.IdentityHashMap;
 
 import com.caucho.vfs.WriteStream;
 import com.caucho.vfs.TempBuffer;
@@ -60,14 +61,14 @@ public class TempBufferStringValue extends AbstractStringValue {
   public int strlen()
   {
     int len = 0;
-    
+
     for (TempBuffer ptr = _head; ptr != null; ptr = ptr.getNext()) {
       len += ptr.getLength();
     }
 
     return len;
   }
-  
+
   /**
    * Prints the value.
    *
@@ -77,7 +78,7 @@ public class TempBufferStringValue extends AbstractStringValue {
     throws Throwable
   {
     WriteStream out = env.getOut();
-    
+
     for (TempBuffer ptr = _head; ptr != null; ptr = ptr.getNext()) {
       out.write(ptr.getBuffer(), 0, ptr.getLength());
     }

@@ -51,6 +51,7 @@ import java.util.logging.Level;
 import com.caucho.vfs.WriteStream;
 
 import com.caucho.util.RandomUtil;
+import com.caucho.quercus.lib.QuercusVariableModule;
 
 /**
  * Represents a PHP array value.
@@ -746,7 +747,7 @@ abstract public class ArrayValue extends Value {
       Value rEntryValue = rValue.get(entryKey);
 
       if ((rEntryValue instanceof ArrayValue) &&
-        !entryValue.eq((ArrayValue) rEntryValue))
+          !entryValue.eq((ArrayValue) rEntryValue))
         return false;
 
       if (! entryValue.eq(rEntryValue))
@@ -786,16 +787,49 @@ abstract public class ArrayValue extends Value {
       Map.Entry<Value,Value> entryB = iterB.next();
 
       if (! entryA.getKey().eql(entryB.getKey()))
-	return false;
+        return false;
 
       if (! entryA.getValue().eql(entryB.getValue()))
-	return false;
+        return false;
     }
 
     if (iterA.hasNext() || iterB.hasNext())
       return false;
     else
       return true;
+  }
+
+  public void varDumpImpl(Env env,
+                          WriteStream out,
+                          int depth,
+                          IdentityHashMap<Value, String> valueSet)
+    throws Throwable
+  {
+    out.println("array(" + getSize() + ") {");
+
+    depth++;
+
+    for (Map.Entry<Value,Value> mapEntry : entrySet()) {
+      ArrayValue.Entry entry = (ArrayValue.Entry) mapEntry;
+
+      entry.varDump(env, out, depth, valueSet);
+
+      out.println();
+    }
+
+    depth--;
+
+    printDepth(out, 2 * depth);
+
+    out.print("}");
+  }
+
+  // XXX: remove this, s/b out.print(depth, ' ');
+  protected static void printDepth(WriteStream out, int depth)
+    throws IOException
+  {
+    for (int i = 0; i < depth; i++)
+      out.print(' ');
   }
 
   public final static class Entry extends Var
@@ -847,13 +881,13 @@ abstract public class ArrayValue extends Value {
       Value val = getRawValue();
 
       if (val instanceof Var)
-	return (Var) val;
+        return (Var) val;
       else {
-	Var var = new Var(val);
+        Var var = new Var(val);
 
-	setRaw(var);
+        setRaw(var);
 
-	return var;
+        return var;
       }
     }
 
@@ -882,9 +916,9 @@ abstract public class ArrayValue extends Value {
       Value value = toValue();
 
       if (value instanceof Var)
-	return new RefVar((Var) value);
+        return new RefVar((Var) value);
       else
-	return new RefVar(this);
+        return new RefVar(this);
     }
 
     /**
@@ -895,9 +929,9 @@ abstract public class ArrayValue extends Value {
       Value value = toValue();
 
       if (value instanceof Var)
-	return new RefVar((Var) value);
+        return new RefVar((Var) value);
       else
-	return new RefVar(this);
+        return new RefVar(this);
     }
 
     public Value toArg()
@@ -907,9 +941,30 @@ abstract public class ArrayValue extends Value {
 
       // php/39aj
       if (value instanceof Var)
-	return value;
+        return value;
       else
-	return this;
+        return this;
+    }
+
+    public void varDumpImpl(Env env,
+                            WriteStream out,
+                            int depth,
+                            IdentityHashMap<Value, String> valueSet)
+      throws Throwable
+    {
+      printDepth(out, 2 * depth);
+      out.print("[");
+
+      if (_key instanceof StringValue)
+        out.print("\"" + _key + "\"");
+      else
+        out.print(_key);
+
+      out.println("]=>");
+
+      printDepth(out, 2 * depth);
+
+      super.toValue().varDump(env, out, depth, valueSet);
     }
   }
 
@@ -993,13 +1048,13 @@ abstract public class ArrayValue extends Value {
     public Map.Entry<Value,Value> next()
     {
       if (_current != null) {
-	Map.Entry<Value,Value> next = _current;
-	_current = _current._next;
+        Map.Entry<Value,Value> next = _current;
+        _current = _current._next;
 
-	return next;
+        return next;
       }
       else
-	return null;
+        return null;
     }
 
     public void remove()
@@ -1025,13 +1080,13 @@ abstract public class ArrayValue extends Value {
     public Value next()
     {
       if (_current != null) {
-	Value next = _current.getKey();
-	_current = _current._next;
+        Value next = _current.getKey();
+        _current = _current._next;
 
-	return next;
+        return next;
       }
       else
-	return null;
+        return null;
     }
 
     public void remove()
@@ -1057,13 +1112,13 @@ abstract public class ArrayValue extends Value {
     public Value next()
     {
       if (_current != null) {
-	Value next = _current.getValue();
-	_current = _current._next;
+        Value next = _current.getValue();
+        _current = _current._next;
 
-	return next;
+        return next;
       }
       else
-	return null;
+        return null;
     }
 
     public void remove()
@@ -1073,43 +1128,43 @@ abstract public class ArrayValue extends Value {
   }
 
   public static class ValueComparator implements
-    Comparator<Map.Entry<Value,Value>> {
+                                      Comparator<Map.Entry<Value,Value>> {
     public int compare(Map.Entry<Value,Value> aEntry,
-		       Map.Entry<Value,Value> bEntry)
+                       Map.Entry<Value,Value> bEntry)
     {
       try {
-	Value aValue = aEntry.getValue();
-	Value bValue = bEntry.getValue();
+        Value aValue = aEntry.getValue();
+        Value bValue = bEntry.getValue();
 
-	if (aValue.eq(bValue))
-	  return 0;
-	else if (aValue.lt(bValue))
-	  return -1;
-	else
-	  return 1;
+        if (aValue.eq(bValue))
+          return 0;
+        else if (aValue.lt(bValue))
+          return -1;
+        else
+          return 1;
       } catch (Throwable e) {
-	throw new RuntimeException(e);
+        throw new RuntimeException(e);
       }
     }
   }
 
   public static class KeyComparator implements
-    Comparator<Map.Entry<Value,Value>> {
+                                    Comparator<Map.Entry<Value,Value>> {
     public int compare(Map.Entry<Value,Value> aEntry,
-		       Map.Entry<Value,Value> bEntry)
+                       Map.Entry<Value,Value> bEntry)
     {
       try {
-	Value aKey = aEntry.getKey();
-	Value bKey = bEntry.getKey();
+        Value aKey = aEntry.getKey();
+        Value bKey = bEntry.getKey();
 
-	if (aKey.eq(bKey))
-	  return 0;
-	else if (aKey.lt(bKey))
-	  return -1;
-	else
-	  return 1;
+        if (aKey.eq(bKey))
+          return 0;
+        else if (aKey.lt(bKey))
+          return -1;
+        else
+          return 1;
       } catch (Throwable e) {
-	throw new RuntimeException(e);
+        throw new RuntimeException(e);
       }
     }
   }

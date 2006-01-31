@@ -44,6 +44,7 @@ import com.caucho.quercus.program.Function;
 import com.caucho.quercus.program.AbstractFunction;
 
 import com.caucho.quercus.expr.Expr;
+import com.caucho.quercus.lib.QuercusVariableModule;
 
 /**
  * Represents a PHP object value.
@@ -62,12 +63,12 @@ public class ObjectValue extends ArrayValueWrapper {
   }
 
   public ObjectValue(Env env, IdentityHashMap<Value,Value> map,
-		     QuercusClass cl, ArrayValue oldValue)
+                     QuercusClass cl, ArrayValue oldValue)
   {
     super(new ArrayValueImpl(env, map, oldValue));
 
     _cl = cl;
-    
+
     // _cl.initFields(_map);
   }
 
@@ -86,7 +87,7 @@ public class ObjectValue extends ArrayValueWrapper {
   {
     return _cl.getParentName();
   }
-  
+
   /**
    * Returns the type.
    */
@@ -94,7 +95,7 @@ public class ObjectValue extends ArrayValueWrapper {
   {
     return "object";
   }
-  
+
   /**
    * Converts to a boolean.
    */
@@ -118,7 +119,7 @@ public class ObjectValue extends ArrayValueWrapper {
   {
     return true;
   }
-  
+
   /**
    * Converts to a long.
    */
@@ -126,7 +127,7 @@ public class ObjectValue extends ArrayValueWrapper {
   {
     return 1;
   }
-  
+
   /**
    * Converts to a double.
    */
@@ -164,7 +165,7 @@ public class ObjectValue extends ArrayValueWrapper {
       return fun.evalMethod(env, this, args);
     else
       return env.error(L.l("Call to undefined method {0}::{1}()",
-			   _cl.getName(), methodName));
+                           _cl.getName(), methodName));
   }
 
   /**
@@ -189,7 +190,7 @@ public class ObjectValue extends ArrayValueWrapper {
    * Evaluates a method.
    */
   public Value evalMethod(Env env, String methodName,
-			  Value a0, Value a1)
+                          Value a0, Value a1)
     throws Throwable
   {
     return _cl.getFunction(methodName).evalMethod(env, this, a0, a1);
@@ -199,33 +200,33 @@ public class ObjectValue extends ArrayValueWrapper {
    * Evaluates a method.
    */
   public Value evalMethod(Env env, String methodName,
-			  Value a0, Value a1, Value a2)
+                          Value a0, Value a1, Value a2)
     throws Throwable
   {
     return _cl.getFunction(methodName).evalMethod(env, this,
-						  a0, a1, a2);
+                                                  a0, a1, a2);
   }
 
   /**
    * Evaluates a method.
    */
   public Value evalMethod(Env env, String methodName,
-			  Value a0, Value a1, Value a2, Value a3)
+                          Value a0, Value a1, Value a2, Value a3)
     throws Throwable
   {
     return _cl.getFunction(methodName).evalMethod(env, this,
-						  a0, a1, a2, a3);
+                                                  a0, a1, a2, a3);
   }
 
   /**
    * Evaluates a method.
    */
   public Value evalMethod(Env env, String methodName,
-			  Value a0, Value a1, Value a2, Value a3, Value a4)
+                          Value a0, Value a1, Value a2, Value a3, Value a4)
     throws Throwable
   {
     return _cl.getFunction(methodName).evalMethod(env, this,
-						  a0, a1, a2, a3, a4);
+                                                  a0, a1, a2, a3, a4);
   }
 
   /**
@@ -268,7 +269,7 @@ public class ObjectValue extends ArrayValueWrapper {
    * Evaluates a method.
    */
   public Value evalMethodRef(Env env, String methodName,
-			  Value a0, Value a1)
+                             Value a0, Value a1)
     throws Throwable
   {
     return _cl.getFunction(methodName).evalMethodRef(env, this, a0, a1);
@@ -278,33 +279,33 @@ public class ObjectValue extends ArrayValueWrapper {
    * Evaluates a method.
    */
   public Value evalMethodRef(Env env, String methodName,
-			  Value a0, Value a1, Value a2)
+                             Value a0, Value a1, Value a2)
     throws Throwable
   {
     return _cl.getFunction(methodName).evalMethodRef(env, this,
-						  a0, a1, a2);
+                                                     a0, a1, a2);
   }
 
   /**
    * Evaluates a method.
    */
   public Value evalMethodRef(Env env, String methodName,
-			  Value a0, Value a1, Value a2, Value a3)
+                             Value a0, Value a1, Value a2, Value a3)
     throws Throwable
   {
     return _cl.getFunction(methodName).evalMethodRef(env, this,
-						  a0, a1, a2, a3);
+                                                     a0, a1, a2, a3);
   }
 
   /**
    * Evaluates a method.
    */
   public Value evalMethodRef(Env env, String methodName,
-			  Value a0, Value a1, Value a2, Value a3, Value a4)
+                             Value a0, Value a1, Value a2, Value a3, Value a4)
     throws Throwable
   {
     return _cl.getFunction(methodName).evalMethodRef(env, this,
-						  a0, a1, a2, a3, a4);
+                                                     a0, a1, a2, a3, a4);
   }
 
   /**
@@ -317,7 +318,7 @@ public class ObjectValue extends ArrayValueWrapper {
 
     try {
       env.setThis(this);
-	
+
       return fun.eval(env, args);
     } finally {
       env.setThis(oldThis);
@@ -332,7 +333,7 @@ public class ObjectValue extends ArrayValueWrapper {
   {
     return this;
   }
-  
+
   /**
    * Copy for assignment.
    */
@@ -340,7 +341,7 @@ public class ObjectValue extends ArrayValueWrapper {
   {
     return this;
   }
-  
+
   /**
    * Copy for serialization
    */
@@ -353,7 +354,7 @@ public class ObjectValue extends ArrayValueWrapper {
 
     return new ObjectValue(env, map, _cl, getArray());
   }
-  
+
   /**
    * Clone the object
    */
@@ -363,7 +364,7 @@ public class ObjectValue extends ArrayValueWrapper {
 
     for (ArrayValue.Entry ptr = getHead(); ptr != null; ptr = ptr.getNext())
       newObject.put(ptr.getKey(), ptr.getValue());
-    
+
     return newObject;
   }
 
@@ -386,10 +387,10 @@ public class ObjectValue extends ArrayValueWrapper {
       entry.getKey().serialize(sb);
       entry.getValue().serialize(sb);
     }
-    
+
     sb.append("}");
   }
-  
+
   /**
    * Converts to a string.
    * @param env
@@ -404,7 +405,7 @@ public class ObjectValue extends ArrayValueWrapper {
     else
       return "Object id #1";
   }
-  
+
   /**
    * Converts to a string.
    * @param env
@@ -414,7 +415,7 @@ public class ObjectValue extends ArrayValueWrapper {
   {
     env.getOut().print(toString(env));
   }
-  
+
   /**
    * Converts to an object.
    */
@@ -422,7 +423,7 @@ public class ObjectValue extends ArrayValueWrapper {
   {
     return this;
   }
-  
+
   /**
    * Converts to an object.
    */
@@ -434,6 +435,31 @@ public class ObjectValue extends ArrayValueWrapper {
   public String toString()
   {
     return "ObjectValue@" + System.identityHashCode(this) +  "[" + _cl.getName() + "]";
+  }
+
+  public void varDumpImpl(Env env,
+                          WriteStream out,
+                          int depth,
+                          IdentityHashMap<Value, String> valueSet)
+    throws Throwable
+  {
+    out.println("object(" + getName() + ") (" + getSize() + ") {");
+
+    depth++;
+
+    for (Map.Entry<Value,Value> mapEntry : entrySet()) {
+      ArrayValue.Entry entry = (ArrayValue.Entry) mapEntry;
+
+      entry.varDump(env, out, depth, valueSet);
+
+      out.println();
+    }
+
+    depth--;
+
+    printDepth(out, 2 * depth);
+
+    out.print("}");
   }
 }
 

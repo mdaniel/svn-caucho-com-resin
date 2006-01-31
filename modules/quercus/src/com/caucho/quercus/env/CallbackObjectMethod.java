@@ -30,6 +30,7 @@
 package com.caucho.quercus.env;
 
 import java.io.IOException;
+import java.util.IdentityHashMap;
 
 import com.caucho.vfs.WriteStream;
 
@@ -48,7 +49,7 @@ public class CallbackObjectMethod extends Callback {
     _methodName = methodName;
     // XXX: should be able to cache actual method
   }
-  
+
   /**
    * Evaluates the callback with no arguments.
    *
@@ -59,7 +60,7 @@ public class CallbackObjectMethod extends Callback {
   {
     return _obj.evalMethod(env, _methodName);
   }
-  
+
   /**
    * Evaluates the callback with 1 argument.
    *
@@ -70,7 +71,7 @@ public class CallbackObjectMethod extends Callback {
   {
     return _obj.evalMethod(env, _methodName, a1);
   }
-  
+
   /**
    * Evaluates the callback with 2 arguments.
    *
@@ -81,7 +82,7 @@ public class CallbackObjectMethod extends Callback {
   {
     return _obj.evalMethod(env, _methodName, a1, a2);
   }
-  
+
   /**
    * Evaluates the callback with 3 arguments.
    *
@@ -92,7 +93,7 @@ public class CallbackObjectMethod extends Callback {
   {
     return _obj.evalMethod(env, _methodName, a1, a2, a3);
   }
-  
+
   /**
    * Evaluates the callback with 3 arguments.
    *
@@ -104,7 +105,7 @@ public class CallbackObjectMethod extends Callback {
   {
     return _obj.evalMethod(env, _methodName, a1, a2, a3, a4);
   }
-  
+
   /**
    * Evaluates the callback with 3 arguments.
    *
@@ -116,11 +117,23 @@ public class CallbackObjectMethod extends Callback {
   {
     return _obj.evalMethod(env, _methodName, a1, a2, a3, a4, a5);
   }
-  
+
   public Value eval(Env env, Value []args)
     throws Throwable
   {
     return _obj.evalMethod(env, _methodName, args);
+  }
+
+  public void varDumpImpl(Env env,
+                          WriteStream out,
+                          int depth,
+                          IdentityHashMap<Value, String> valueSet)
+    throws Throwable
+  {
+    out.print(getClass().getName());
+    out.print('[');
+    out.print(_methodName);
+    out.print(']');
   }
 }
 
