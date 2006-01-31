@@ -185,7 +185,7 @@ public class Resin implements ResinServerListener {
         }
         
         if (socket == null) {
-          System.err.println("Can't connect to parent process through socket " + socket);
+          System.err.println("Can't connect to parent process through socket " + socketport);
           System.err.println("Resin needs to connect to its parent.");
           System.exit(0);
         }

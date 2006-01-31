@@ -118,7 +118,7 @@ public class JstlXmlSet extends JstlNode {
                       getTagName()));
 
     String select = ("com.caucho.jstl.el.XmlSetTag.evalObject(pageContext, " +
-		     _gen.addXPathExpr(_select) + ")");
+		     _gen.addXPathExpr(_select, getNamespaceContext()) + ")");
       
     generateSetOrRemove(out, _var, _scope, select);
   }

@@ -62,7 +62,8 @@ public class ForEachTag extends TagSupport
   protected int _begin;
   protected int _end;
   protected int _step;
-  
+
+  protected Object _initialVar;
   protected Object _current;
   protected int _index;
   protected int _count;
@@ -167,6 +168,9 @@ public class ForEachTag extends TagSupport
       if (_varStatus != null)
 	pageContext.setAttribute(_varStatus, this);
 
+      if (_var != null)
+	_initialVar = pageContext.getAttribute(_var);
+
       return doAfterBody();
     } catch (Exception e) {
       throw new JspException(e);
@@ -175,8 +179,12 @@ public class ForEachTag extends TagSupport
 
   public int doAfterBody() throws JspException
   {
-    if (_iterator == null)
+    if (_iterator == null) {
+      if (_var != null)
+	pageContext.setAttribute(_var, _initialVar);
+	
       return SKIP_BODY;
+    }
     else if (_iterator.hasNext()) {
       int stepCount;
 
@@ -186,8 +194,12 @@ public class ForEachTag extends TagSupport
         stepCount = _step;
 
       for (; stepCount > 0; stepCount--) {
-        if (! _iterator.hasNext())
+        if (! _iterator.hasNext()) {
+	  if (_var != null)
+	    pageContext.setAttribute(_var, _initialVar);
+	
           return SKIP_BODY;
+	}
         
         _index++;
         _current = _iterator.next();
@@ -200,11 +212,19 @@ public class ForEachTag extends TagSupport
 
       if (_index - 1 <= _end || _end < 0)
         return EVAL_BODY_AGAIN;
-      else
+      else {
+	if (_var != null)
+	  pageContext.setAttribute(_var, _initialVar);
+	
         return SKIP_BODY;
+      }
     }
-    else
+    else {
+      if (_var != null)
+	pageContext.setAttribute(_var, _initialVar);
+	
       return SKIP_BODY;
+    }
   }
 
   // LoopTag

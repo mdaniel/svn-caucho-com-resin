@@ -53,6 +53,8 @@ public class ClusterObject {
 
   private boolean _isPrimary;
   private long _maxIdleTime;
+  
+  private long _expireInterval = -1;
 
   private long _accessTime;
 
@@ -77,6 +79,8 @@ public class ClusterObject {
     _uniqueId = _storeId + ';' + objectId;
 
     _isPrimary = isPrimary(_objectId);
+    
+    _expireInterval = getMaxIdleTime() + getAccessWindow();
   }
 
   ClusterObject(StoreManager storeManager,
@@ -94,6 +98,8 @@ public class ClusterObject {
     _uniqueId = _storeId + ';' + objectId;
 
     _isPrimary = isPrimary(_objectId);
+
+    _expireInterval = getMaxIdleTime() + getAccessWindow();
   }
 
   private boolean isPrimary(String id)
@@ -184,14 +190,6 @@ public class ClusterObject {
       return 60000L;
     else
       return window;
-  }
-
-  /**
-   * Returns the expire time.
-   */
-  public long getExpireInterval()
-  {
-    return getMaxIdleTime() + getAccessWindow();
   }
 
   /**
@@ -337,6 +335,28 @@ public class ClusterObject {
   public void setAccessTime(long accessTime)
   {
     _accessTime = accessTime;
+  }
+
+  /**
+   * Sets the max access time.
+   */
+  public long getExpireInterval()
+  {
+    return _expireInterval;
+  }
+
+  /**
+   * Sets the max access time.
+   */
+  public void setExpireInterval(long expireInterval)
+  {
+    try {
+      _expireInterval = expireInterval;
+      
+      _storeManager.setExpireInterval(getUniqueId(), expireInterval);
+    } catch (Exception e) {
+      log.log(Level.WARNING, e.toString(), e);
+    }
   }
 
   /**

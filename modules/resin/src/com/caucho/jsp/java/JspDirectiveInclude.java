@@ -84,10 +84,17 @@ public class JspDirectiveInclude extends JspNode {
       if (parseState.isXml()) {
 	Xml xml = new Xml();
 	xml.setContentHandler(new JspContentHandler(parseState.getBuilder()));
-	Path path = parseState.resolvePath(_file);
+	Path path = resolvePath(_file, parseState);
 	
 	path.setUserPath(_file);
 	xml.setNamespaceAware(true);
+
+	for (Namespace ns = parseState.getNamespaces();
+	     ns != null;
+	     ns = ns.getNext()) {
+	  xml.pushNamespace(ns.getPrefix(), ns.getURI());
+	}
+	
 	xml.parse(path);
       }
       else
@@ -97,6 +104,29 @@ public class JspDirectiveInclude extends JspNode {
     } catch (IOException e) {
       throw error(e);
     }
+  }
+
+  private Path resolvePath(String value, ParseState parseState)
+  {
+    Path include;
+    if (value.length() > 0 && value.charAt(0) == '/')
+      include = parseState.resolvePath(value);
+    else
+      include = parseState.resolvePath(parseState.getUriPwd() + value);
+
+    return include;
+    /*
+    String newUrl = _uriPwd;
+
+    if (value.startsWith("/"))
+      newUrl = value;
+    else
+      newUrl = _uriPwd + value;
+
+    include.set
+
+    return newUrl;
+    */
   }
 
   /**

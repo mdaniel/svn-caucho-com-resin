@@ -378,7 +378,7 @@ public class ApplicationContainer
   /**
    * Sets the war-expansion
    */
-  public WebAppExpandDeployGenerator createWebAppDeploy()
+  public WebAppExpandDeployGenerator createWarDeploy()
   {
     return new WebAppExpandDeployGenerator(_appDeploy);
   }
@@ -386,7 +386,24 @@ public class ApplicationContainer
   /**
    * Sets the war-expansion
    */
+  public WebAppExpandDeployGenerator createWebAppDeploy()
+  {
+    return createWarDeploy();
+  }
+
+  /**
+   * Sets the war-expansion
+   */
   public void addWebAppDeploy(WebAppExpandDeployGenerator deploy)
+    throws ConfigException
+  {
+    addWarDeploy(deploy);
+  }
+
+  /**
+   * Sets the war-expansion
+   */
+  public void addWarDeploy(WebAppExpandDeployGenerator deploy)
     throws ConfigException
   {
     WebAppExpandDeployGenerator webAppDeploy = (WebAppExpandDeployGenerator) deploy;

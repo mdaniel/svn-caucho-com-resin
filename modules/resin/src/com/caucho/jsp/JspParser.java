@@ -499,8 +499,9 @@ public class JspParser {
       case '&':
         if (! _isXml)
           addText((char) ch);
-        else
+        else {
           addText((char) parseEntity());
+	}
         ch = read();
         break;
 
@@ -1517,9 +1518,11 @@ public class JspParser {
     for (; ch >= 'a' && ch <= 'z'; ch = read())
       cb.append((char) ch);
 
-    if (ch != ';')
-      throw error(L.l("expected ';' at `{0}' in entity `&{1}'.  The XML entity syntax is &name;",
+    if (ch != ';') {
+      
+      log.warning(L.l("expected ';' at `{0}' in entity `&{1}'.  The XML entity syntax is &name;",
                       badChar(ch), cb));
+    }
 
     String entity = cb.close();
     if (entity.equals("lt"))

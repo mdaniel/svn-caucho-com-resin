@@ -176,7 +176,8 @@ public class RequestDispatcherImpl implements RequestDispatcher {
     String queryString;
 
     /* Changed to match tomcat */
-    if (! _isLogin)
+    // server/10y3
+    if (_isLogin)
       queryString = newQueryString;
     else if (reqQueryString == null)
       queryString = newQueryString;
@@ -202,7 +203,9 @@ public class RequestDispatcherImpl implements RequestDispatcher {
     
     if (reqWrapper != null) {
       reqWrapper.setRequest(subRequest);
-      topRequest = reqWrapper;
+
+      if (topRequest == parentRequest) // server/172o
+	topRequest = reqWrapper;
     }
 
     Object oldUri = null;

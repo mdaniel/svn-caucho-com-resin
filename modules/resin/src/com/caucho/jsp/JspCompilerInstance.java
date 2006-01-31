@@ -221,6 +221,17 @@ public class JspCompilerInstance {
   {
     _parseState = new ParseState();
 
+    String uriPwd;
+    if (_uri != null) {
+      int p = _uri.lastIndexOf('/');
+      uriPwd = p <= 0 ? "/" : _uri.substring(0, p + 1);
+    }
+    else {
+      uriPwd = "/";
+    }
+    _parseState.setUriPwd(uriPwd);
+ 
+
     if (_className == null)
       _className = JavaCompiler.mangleName("jsp/" + _uri);
 

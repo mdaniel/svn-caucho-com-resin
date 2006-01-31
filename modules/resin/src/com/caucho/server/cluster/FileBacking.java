@@ -96,6 +96,7 @@ public class FileBacking {
   private String _loadQuery;
   private String _updateQuery;
   private String _accessQuery;
+  private String _setExpiresQuery;
   private String _insertQuery;
   private String _invalidateQuery;
   private String _timeoutQuery;
@@ -148,6 +149,7 @@ public class FileBacking {
 		    "VALUES(?,?,?,?,?,?,?)");
     _updateQuery = "UPDATE " + _tableName + " SET data=?, mod_time=?, access_time=? WHERE id=?";
     _accessQuery = "UPDATE " + _tableName + " SET access_time=? WHERE id=?";
+    _setExpiresQuery = "UPDATE " + _tableName + " SET expire_interval=? WHERE id=?";
     _invalidateQuery = "DELETE FROM " + _tableName + " WHERE id=?";
 
     // access window is 1/4 the expire interval
@@ -353,6 +355,35 @@ public class FileBacking {
       if (count > 0) {
 	if (log.isLoggable(Level.FINE)) 
 	  log.fine("access cluster: " + uniqueId);
+	return;
+      }
+    } finally {
+      conn.close();
+    }
+  }
+
+  /**
+   * Sets the object's expire_interval.
+   *
+   * @param obj the object to store.
+   */
+  public void setExpireInterval(String uniqueId, long expireInterval)
+    throws Exception
+  {
+    ClusterConnection conn = getConnection();
+    
+    try {
+      PreparedStatement stmt = conn.prepareSetExpireInterval();
+
+      int expireMinutes = (int) (expireInterval / 60000L);
+      stmt.setInt(1, expireMinutes);
+      stmt.setString(2, uniqueId);
+
+      int count = stmt.executeUpdate();
+
+      if (count > 0) {
+	if (log.isLoggable(Level.FINE)) 
+	  log.fine("set expire interval: " + uniqueId + " " + expireInterval);
 	return;
       }
     } finally {
@@ -584,6 +615,7 @@ public class FileBacking {
     private PreparedStatement _updateStatement;
     private PreparedStatement _insertStatement;
     private PreparedStatement _accessStatement;
+    private PreparedStatement _setExpiresStatement;
     private PreparedStatement _invalidateStatement;
     private PreparedStatement _timeoutStatement;
 
@@ -626,6 +658,15 @@ public class FileBacking {
 	_accessStatement = _conn.prepareStatement(_accessQuery);
 
       return _accessStatement;
+    }
+
+    PreparedStatement prepareSetExpireInterval()
+      throws SQLException
+    {
+      if (_setExpiresStatement == null)
+	_setExpiresStatement = _conn.prepareStatement(_setExpiresQuery);
+
+      return _setExpiresStatement;
     }
 
     PreparedStatement prepareInvalidate()

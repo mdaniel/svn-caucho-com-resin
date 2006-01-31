@@ -201,8 +201,8 @@ public class TagFileTag extends GenericTag {
     String mapName = null;
 
     if (isDynamic) {
-      JspTagSupport tag = (JspTagSupport) _tagClass.newInstance();
-      mapAttribute = tag._caucho_getDynamicAttributes();
+      TagInfoExt tagInfoImpl = (TagInfoExt) _tagInfo;
+      mapAttribute = tagInfoImpl.getDynamicAttributesName();
     }
     
     // fill all mentioned attributes

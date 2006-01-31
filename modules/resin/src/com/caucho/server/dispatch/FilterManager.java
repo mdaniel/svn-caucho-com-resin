@@ -82,6 +82,13 @@ public class FilterManager {
    */
   public void init()
   {
+    for (String name : _filters.keySet()) {
+      try {
+	createFilter(name);
+      } catch (Exception e) {
+	log.log(Level.WARNING, e.toString(), e);
+      }
+    }
   }
 
   /**

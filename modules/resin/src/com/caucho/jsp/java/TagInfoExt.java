@@ -39,6 +39,8 @@ import com.caucho.make.PersistentDependency;
  * Information for a tag file.
  */
 public class TagInfoExt extends TagInfo {
+  private String _dynamicAttributesName;
+  
   private ArrayList<PersistentDependency> _dependList =
     new ArrayList<PersistentDependency>();
 
@@ -53,16 +55,23 @@ public class TagInfoExt extends TagInfo {
 		    String smallIcon,
 		    String largeIcon,
 		    TagVariableInfo []tvi,
-		    boolean dynamicAttributes,
+		    String dynamicAttributesName,
 		    ArrayList<PersistentDependency> dependList)
   {
     super(tagName, tagClassName, bodyContent, infoString,
 	  taglib, tagExtraInfo, attributeInfo, displayName,
-	  smallIcon, largeIcon, tvi, dynamicAttributes);
+	  smallIcon, largeIcon, tvi, dynamicAttributesName != null);
 
+    _dynamicAttributesName = dynamicAttributesName;
     if (dependList != null)
       _dependList.addAll(dependList);
   }
+
+  public String getDynamicAttributesName()
+  {
+    return _dynamicAttributesName;
+  }
+  
   /**
    * Returns the dependency list.
    */

@@ -212,8 +212,9 @@ public class XmlTransformTag extends BodyTagSupport implements NameValueTag {
         
         result = new DOMResult(top);
       }
-      else
-        result = new StreamResult(out);
+      else {
+        result = new StreamResult(new WriterWrapper(out));
+      }
 
       transformer.transform(source, result);
 
@@ -281,5 +282,46 @@ public class XmlTransformTag extends BodyTagSupport implements NameValueTag {
     }
 
     return url;
+  }
+
+  static class WriterWrapper extends Writer {
+    private JspWriter _out;
+
+    WriterWrapper(JspWriter out)
+    {
+      _out = out;
+    }
+    
+    public void write(char []buf, int off, int len)
+      throws IOException
+    {
+      _out.write(buf, off, len);
+    }
+    
+    public void write(int ch)
+      throws IOException
+    {
+      _out.write(ch);
+    }
+    
+    public void write(String s)
+      throws IOException
+    {
+      _out.write(s);
+    }
+    
+    public void write(String s, int off, int len)
+      throws IOException
+    {
+      _out.write(s, off, len);
+    }
+
+    public void flush()
+    {
+    }
+
+    public void close()
+    {
+    }
   }
 }

@@ -51,6 +51,8 @@ import com.caucho.log.Log;
 import com.caucho.el.*;
 import com.caucho.xml.QName;
 import com.caucho.xml.XmlChar;
+import com.caucho.xpath.XPath;
+import com.caucho.xpath.NamespaceContext;
 
 public abstract class JspNode {
   static final L10N L = new L10N(JspNode.class);
@@ -62,6 +64,8 @@ public abstract class JspNode {
   protected int _startLine;
   protected int _endAttributeLine;
   protected int _endLine;
+
+  protected Namespace _ns;
   
   protected JavaJspGenerator _gen;
   protected ParseState _parseState;
@@ -315,10 +319,40 @@ public abstract class JspNode {
   /**
    * Adds a namespace, e.g. from a prefix declaration.
    */
-  public void addNamespace(String prefix, String value)
+  public final void addNamespace(String prefix, String value)
+  {
+    addNamespaceRec(prefix, value);
+  }
+
+  /**
+   * Adds a namespace, e.g. from a prefix declaration.
+   */
+  public final void setNamespace(Namespace ns)
+  {
+    _ns = ns;
+  }
+
+  /**
+   * Returns the XPath namespace context.
+   */
+  public final NamespaceContext getNamespaceContext()
+  {
+    NamespaceContext ns = null;
+
+    for (Namespace ptr = _ns; ptr != null; ptr = ptr.getNext()) {
+      ns = new NamespaceContext(ns, ptr.getPrefix(), ptr.getURI());
+    }
+
+    return ns;
+  }
+
+  /**
+   * Adds a namespace, e.g. from a prefix declaration.
+   */
+  public void addNamespaceRec(String prefix, String value)
   {
     if (_parent != null)
-      _parent.addNamespace(prefix, value);
+      _parent.addNamespaceRec(prefix, value);
   }
 
   /**
@@ -994,11 +1028,14 @@ public abstract class JspNode {
       }
       else if (com.caucho.xpath.Expr.class.isAssignableFrom(type)) {
         int exprIndex;
-
+	
+	com.caucho.xpath.Expr expr;
         if (isEmpty)
-          return _gen.addXPathExpr("");
+	  expr = XPath.parseExpr("");
         else
-          return _gen.addXPathExpr(value);
+	  expr = XPath.parseExpr(value, getNamespaceContext());
+	
+	return _gen.addXPathExpr(expr);
       }
       else if (! type.equals(String.class) &&
                ! type.equals(Object.class)) {
@@ -1025,7 +1062,11 @@ public abstract class JspNode {
       return ("_caucho_expr_" + exprIndex);
     }
     else if (com.caucho.xpath.Expr.class.isAssignableFrom(type)) {
-      return _gen.addXPathExpr(value);
+      com.caucho.xpath.Expr expr;
+
+      expr = XPath.parseExpr(value, getNamespaceContext());
+      
+      return _gen.addXPathExpr(expr);
     }
 
     Expr expr = _gen.genExpr(value);

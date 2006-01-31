@@ -614,6 +614,11 @@ public class ParseState {
     }
   }
 
+  public Namespace getNamespaces()
+  {
+    return _namespaces;
+  }
+
   /**
    * Pushes a namespace.
    */

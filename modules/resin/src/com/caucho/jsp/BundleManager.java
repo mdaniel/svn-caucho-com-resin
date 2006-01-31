@@ -211,7 +211,7 @@ public class BundleManager {
     }
     
     try {
-      InputStream is = loader.getResourceAsStream(name.replace('.', '/') + ".properties");
+      InputStream is = loader.getResourceAsStream('/' + name.replace('.', '/') + ".properties");
 
       if (is instanceof ReadStream) {
         Path path = ((ReadStream) is).getPath();

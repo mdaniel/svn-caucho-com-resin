@@ -103,7 +103,7 @@ public class JstlXmlOut extends JstlNode {
       throw error(L.l("required attribute `select' missing from <{0}>",
                       getTagName()));
 
-    String select = _gen.addXPathExpr(_select);
+    String select = _gen.addXPathExpr(_select, getNamespaceContext());
       
     String escapeXml = "true";
 

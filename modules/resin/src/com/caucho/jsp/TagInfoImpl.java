@@ -55,7 +55,7 @@ public class TagInfoImpl extends TagInfoExt {
 	  tag.getSmallIcon(),
 	  tag.getLargeIcon(),
 	  tag.getVariables(),
-	  tag.getDynamicAttributes(),
+	  tag.getDynamicAttributeName(),
 	  tag.getDependencyList());
 
     _tldTag = tag;

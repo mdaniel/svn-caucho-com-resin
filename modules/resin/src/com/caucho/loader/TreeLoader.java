@@ -181,6 +181,7 @@ public class TreeLoader extends Loader implements Dependency {
 
       for (int j = 0; list != null && j < list.length; j++) {
 	Path path = dir.lookup(list[j]);
+
 	if (list[j].endsWith(".jar") || list[j].endsWith(".zip")) {
 	  addJar(path);
 	}

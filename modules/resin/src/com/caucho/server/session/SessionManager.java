@@ -112,6 +112,7 @@ public class SessionManager implements ObjectManager, AlarmListener {
   private boolean _enableSessionUrls = true;
 
   private boolean _isModuloSessionId = false;
+  private boolean _isAppendServerIndex = false;
   
   // invalidate the session after the listeners have been called
   private boolean _isInvalidateAfterListener;
@@ -856,6 +857,14 @@ public class SessionManager implements ObjectManager, AlarmListener {
     _isModuloSessionId = isModulo;
   }
 
+  /**
+   * Sets module session id generation.
+   */
+  public void setCookieAppendServerIndex(boolean isAppend)
+  {
+    _isAppendServerIndex = isAppend;
+  }
+
   public void start()
     throws Exception
   {
@@ -1011,6 +1020,11 @@ public class SessionManager implements ObjectManager, AlarmListener {
 	  cb.append(convert(random));
 	  random = random >> 6;
 	}
+      }
+
+      if (_isAppendServerIndex) {
+	cb.append('.');
+	cb.append(index);
       }
 
       id = cb.toString();

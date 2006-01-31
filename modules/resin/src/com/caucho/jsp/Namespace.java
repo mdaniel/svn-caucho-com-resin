@@ -28,7 +28,7 @@
 
 package com.caucho.jsp;
 
-class Namespace {
+public class Namespace {
   Namespace _next;
   String _prefix;
   String _uri;
@@ -40,12 +40,17 @@ class Namespace {
     _uri = uri;
   }
 
-  Namespace getNext()
+  public Namespace getNext()
   {
     return _next;
   }
 
-  String getURI()
+  public String getPrefix()
+  {
+    return _prefix;
+  }
+
+  public String getURI()
   {
     return _uri;
   }

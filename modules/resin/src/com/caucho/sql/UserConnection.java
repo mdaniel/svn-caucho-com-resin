@@ -603,7 +603,7 @@ public class UserConnection implements java.sql.Connection {
     throws SQLException
   {
     try {
-      return getMConn() == null || getConnection() == null || getConnection().isClosed();
+      return _mConn == null || getConnection() == null || getConnection().isClosed();
     } catch (SQLException e) {
       log.log(Level.FINER, e.toString(), e);
 

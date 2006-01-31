@@ -50,6 +50,7 @@ abstract public class LoopTagSupport extends TagSupport
   protected String itemId;
   protected String statusId;
 
+  private Object _initialVar;
   private Object _current;
   private LoopTagStatus _status;
   private int _index;
@@ -146,6 +147,9 @@ abstract public class LoopTagSupport extends TagSupport
 
     prepare();
 
+    if (this.itemId != null)
+      _initialVar = pageContext.getAttribute(itemId);
+
     if (getLoopStatus() == null)
       _status = new Status();
 
@@ -181,8 +185,12 @@ abstract public class LoopTagSupport extends TagSupport
       stepCount = step;
 
     for (; stepCount > 0; stepCount--) {
-      if (! hasNext())
+      if (! hasNext()) {
+	if (this.itemId != null)
+	  pageContext.setAttribute(itemId, _initialVar);
+	
 	return SKIP_BODY;
+      }
         
       _index++;
       _current = next();
@@ -199,8 +207,9 @@ abstract public class LoopTagSupport extends TagSupport
       
       return EVAL_BODY_AGAIN;
     }
-    else
+    else {
       return SKIP_BODY;
+    }
   }
   
   public void doCatch(Throwable t) throws Throwable
@@ -211,10 +220,10 @@ abstract public class LoopTagSupport extends TagSupport
   public void doFinally()
   {
     if (itemId != null)
-      pageContext.removeAttribute(itemId);
+      pageContext.setAttribute(itemId, _initialVar);
     
     if (statusId != null)
-      pageContext.removeAttribute(statusId);
+      pageContext.setAttribute(statusId, null);
   }
 
   public class Status implements LoopTagStatus {

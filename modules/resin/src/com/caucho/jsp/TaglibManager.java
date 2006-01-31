@@ -76,8 +76,6 @@ public class TaglibManager {
   private HashMap<String,Taglib> _taglibMap = new HashMap<String,Taglib>();
   private HashMap<String,Taglib> _taglibDirMap = new HashMap<String,Taglib>();
   
-  private JspParseException _loadAllTldException;
-
   private TagAnalyzer _tagAnalyzer = new TagAnalyzer();
 
   private volatile boolean _isInit;

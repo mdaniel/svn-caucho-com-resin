@@ -84,6 +84,14 @@ public class ClusterContainer {
   }
 
   /**
+   * Creates the cluster for the current level.
+   */
+  public static ClusterContainer getLocal(ClassLoader loader)
+  {
+    return _clusterContainerLocal.get(loader);
+  }
+
+  /**
    * Sets the parent container.
    */
   private void setParent(ClusterContainer parent)

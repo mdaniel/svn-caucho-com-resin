@@ -791,7 +791,7 @@ public class QuercusVariableModule extends AbstractQuercusModule {
       else if (v instanceof ArrayValue) {
 	ArrayValue array = (ArrayValue) v;
 
-	out.println(v.toString() + "(" + array.getSize() + ") {");
+	out.println("array(" + array.getSize() + ") {");
 
 	for (Map.Entry<Value,Value> mapEntry : array.entrySet()) {
 	  ArrayValue.Entry entry = (ArrayValue.Entry) mapEntry;

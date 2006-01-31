@@ -349,8 +349,9 @@ public class JavaJspBuilder extends JspBuilder {
     throws JspParseException
   {
     _currentNode.addChild(_openNode);
-    
+
     _currentNode = _openNode;
+    _currentNode.setNamespace(_parseState.getNamespaces());
     _currentNode.endAttributes();
     _currentNode.setEndAttributeLocation(_filename, _line);
   }

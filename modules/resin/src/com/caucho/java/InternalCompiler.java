@@ -49,6 +49,8 @@ import com.caucho.loader.EnvironmentClassLoader;
  * Compiles Java source, returning the loaded class.
  */
 public class InternalCompiler extends AbstractJavaCompiler {
+  private static final Logger log = Log.open(InternalCompiler.class);
+  
   private static boolean _hasCompiler; // already tested for compiler
   
   Process _process;
@@ -119,13 +121,14 @@ public class InternalCompiler extends AbstractJavaCompiler {
       }
 
       if (log.isLoggable(Level.FINE)) {
-        CharBuffer msg = CharBuffer.allocate();
+        CharBuffer msg = new CharBuffer();
 	msg.append("javac(int)");
 	for (int i = 0; i < argList.size(); i++) {
 	  msg.append(" ");
 	  msg.append(argList.get(i));
 	}
-        log.fine(msg.close());
+
+        log.fine(msg.toString());
       }
 
       String []argArray = argList.toArray(new String[argList.size()]);

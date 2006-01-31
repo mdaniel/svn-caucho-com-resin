@@ -242,7 +242,9 @@ public class CoreImportTag extends BodyTagSupport implements NameValueTag {
       throw new JspTagException(L.l("URL may not be null for `{0}'",
                                     _url));
 
-    if (url.indexOf('?') > 0)
+    if (_query == null || _query.getLength() == 0) {
+    }
+    else if (url.indexOf('?') > 0)
       url = url + '&' + _query;
     else
       url = url + '?' + _query;

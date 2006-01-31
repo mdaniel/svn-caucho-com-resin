@@ -398,6 +398,17 @@ abstract public class StoreManager
    */
   abstract public void accessImpl(String uniqueId)
     throws Exception;
+  
+  /**
+   * Sets the timef for the expires interval.
+   *
+   * @param uniqueId the identifier of the object.
+   * @param long the time in ms for the expire
+   */
+  public void setExpireInterval(String uniqueId, long expires)
+    throws Exception
+  {
+  }
 
   /**
    * When the object is no longer valid, remove it from the backing store.

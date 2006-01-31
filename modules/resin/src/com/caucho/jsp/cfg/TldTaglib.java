@@ -347,13 +347,12 @@ public class TldTaglib implements DependencyBean {
   /**
    * Applies the listeners.
    */
-  public void init(Application app)
+  public void initListeners(Application app)
     throws InstantiationException, IllegalAccessException
   {
-    if (app == null || _isInit)
+    if (app == null)
       return;
-    _isInit = true;
-
+    
     for (int i = 0; i < _listeners.size(); i++) {
       TldListener listener = _listeners.get(i);
 

@@ -2,9 +2,41 @@
 
 <a href='changes-2.xtp'>Resin 2.1 changes</a>
 
-<s2 title='3.0.snap - Jan 10, 2006'>
+<s2 title='3.0.snap - Jan 24, 2006'>
 <ul>
-<li>tag attribute of String[] wasn't set properly (#885, rep by tipiirai)
+<li>added expand-suffix to web-app-deploy (#664, rep by George Cox)
+<li>add session-config/cookie-append-server-index (#706, rep by Serge Knystautas)
+<li>add min/max to profiler (#540, rep by Bill Au)
+<li>added system information to log file (#488)
+<li>added war-deploy as alias for web-app-deploy (#661, rep by George Cox)
+<li>Python implementation of Hessian bug fixes (#413, rep by Tim Peoples)
+<li>Handling UTF-8 characters over 0x10000 (#507)
+<li>Filters need the init() called at startup time (#494)
+<li>JSTL x:transform needs to handle body content flushing properly (#456, rep by urutora90)
+<li>HttpSession.setExpireInterval wasn't updating persistent session interval (#457, rep by Serge Knystautas)
+<li>forward must merge both old and new query string (#898, #876 rep by Sunil Racherla)
+<li>.tld loading required for JSF (#146, rep by prakashhegde)
+<li>XmlAuthenticator issue with passwords.xml changes (#475)
+<li>XmlAuthenticator wasn't handling empty userName (#494, rep by Shane Cruz)
+<li>ListenerResource must only spawn one listener for topics (#427, rep by martin)
+<li>body tag output flushes were disabling internal proxy cache (#279, rep by quotemedia)
+<li>tag-file issues with circular dynamic-attributes (#268, rep by Caleb Richardson)
+<li>Improve error message for failing connect-to-socket call (#225, rep by david)
+<li>multiple filter wrappers and forward were not handled properly (#243, rep by T Fukada)
+<li>Change error message for missing .tld file (#239)
+<li>ServletServer wasn't getting the ClusterContainer from its own classloader (#231, rep by K MacClay)
+<li>-server-root wasn't setting server.root properly on windows (#389, #495, rpe by martin, Keith Fetterman)
+<li>Fixed getResourceAsStream issue with spaces in classpath (#64, #598, rep by E Bowman, Kai Virkki Efecte)
+<li>wrapper.pl kill enhancment (#52, fixed! by B Bernstein)
+<li>JSTL XPath wasn't properly handling namespaces (#23, rep by jjongsma)
+<li>c:forEach wasn't properly restoring var with variables in request (#373, rep by bregnvig)
+<li>BundleManager wasn't finding properties in .jar files (fixed! by drice)
+<li>conn.isClosed() was throwing IllegalStateException (#564)
+<li>ExpiresFilter was not accepting IoC configuration (#890, rep by Serge Knystautas)
+<li>includes of .jspx files were not keeping namespaces (#872, rep by Bill Au)
+<li>JspCompiler wasn't properly setting isXml for jspx (#872, rep by Bill Au)
+<li>MysqlXAConnector cannot handle local transaction optimization (#894, rep by Brandon Cruz)
+<li>(2006-01-24) tag attribute of String[] wasn't set properly (#885, rep by tipiirai)
 <li>use-persistent-store error message needing Resin Professional (#558, rep by K Fetterman)
 <li>Add log message when searching classpath for .tld files (#888)
 <li>failed setuid now gives warning message

@@ -69,6 +69,7 @@ public class TldTag implements DependencyBean {
   private ArrayList<TldFragmentAttribute> _fragmentAttributeList =
     new ArrayList<TldFragmentAttribute>();
   private boolean _dynamicAttributes;
+  private String _dynamicAttributeName;
   private String _example;
 
   private String _configLocation;
@@ -477,6 +478,22 @@ public class TldTag implements DependencyBean {
   public void setDynamicAttributes(boolean dynamicAttributes)
   {
     _dynamicAttributes = dynamicAttributes;
+  }
+
+  /**
+   * Gets the dynamic-attrisavesavebutes
+   */
+  public String getDynamicAttributeName()
+  {
+    return _dynamicAttributeName;
+  }
+
+  /**
+   * Sets the dynamic-attributes
+   */
+  public void setDynamicAttributeName(String name)
+  {
+    _dynamicAttributeName = name;
   }
 
   /**

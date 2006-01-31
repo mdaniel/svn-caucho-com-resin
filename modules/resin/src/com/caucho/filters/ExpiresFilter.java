@@ -71,7 +71,12 @@ public class ExpiresFilter implements Filter {
   /**
    * How long to cache the file for.
    */
-  private long cacheTime = 2000L;
+  private long _cacheTime = 2000L;
+
+  public void setCacheTime(Period period)
+  {
+    _cacheTime = period.getPeriod();
+  }
   
   /**
    * Filter init reads the filter configuration
@@ -83,7 +88,7 @@ public class ExpiresFilter implements Filter {
 
     if (time != null) {
       try {
-        cacheTime = Period.toPeriod(time);
+        _cacheTime = Period.toPeriod(time);
       } catch (Exception e) {
         throw new ServletException(e);
       }
@@ -97,10 +102,12 @@ public class ExpiresFilter implements Filter {
                        FilterChain nextFilter)
     throws ServletException, IOException
   {
-    if (cacheTime > 0) {
+    if (_cacheTime > 0) {
       HttpServletResponse res = (HttpServletResponse) response;
+
+      res.addHeader("Cache-Control", "max-age=" + (_cacheTime / 1000));
       
-      res.setDateHeader("Expires", Alarm.getCurrentTime() + cacheTime);
+      res.setDateHeader("Expires", Alarm.getCurrentTime() + _cacheTime);
     }
 
     nextFilter.doFilter(request, response);

@@ -1614,9 +1614,12 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
   {
     if (_cacheInvocation == null)
       return false;
+    /*
+      // jsp/17ah
     else if (_responseStream != _originalResponseStream) {
       return false;
     }
+    */
     else if (! isCauchoResponseStream()) {
       return false;
     }

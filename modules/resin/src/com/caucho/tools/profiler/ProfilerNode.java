@@ -40,6 +40,9 @@ final public class ProfilerNode {
   private long _time;
   private long _invocationCount;
 
+  private long _minTime = Long.MAX_VALUE;
+  private long _maxTime = Long.MIN_VALUE;
+
   ProfilerNode(ProfilerNode parent, ProfilerPoint profilerPoint)
   {
     _parent = parent;
@@ -74,6 +77,12 @@ final public class ProfilerNode {
       if (_invocationCount > 0) {
         _time += totalTime;
       }
+
+      if (totalTime < _minTime)
+	_minTime = totalTime;
+
+      if (_maxTime < totalTime)
+	_maxTime = totalTime;
     }
   }
 
@@ -84,6 +93,24 @@ final public class ProfilerNode {
   public long getTime()
   {
     return _time;
+  }
+
+  /**
+   * Minimum time for this node in nanoseconds, does not include
+   * the time for child nodes.
+   */
+  public long getMinTime()
+  {
+    return _minTime;
+  }
+
+  /**
+   * Minimum time for this node in nanoseconds, does not include
+   * the time for child nodes.
+   */
+  public long getMaxTime()
+  {
+    return _maxTime;
   }
 
   void incrementInvocationCount()

@@ -257,12 +257,24 @@ public class ManagedConnectionImpl
 	  log.log(Level.FINER, e.toString(), e);
 	}
       }
+
+      boolean allowLocalTransaction = true;
+      String className = "";
+
+      if (_pooledConnection != null)
+	className = _pooledConnection.getClass().getName();
       
-      if (_pooledConnection instanceof XAConnection &&
-	  _pooledConnection.getClass().getName().startsWith("oracle")) {
-	// Oracle does not allow local transactions
+      if (! (_pooledConnection instanceof XAConnection)) {
       }
-      else
+      else if (className.startsWith("oracle")) {
+	// Oracle does not allow local transactions
+	allowLocalTransaction = false;
+      }
+      else if (className.equals("com.mysql.jdbc.jdbc2.optional.MysqlXAConnection")) {
+	allowLocalTransaction = false;
+      }
+
+      if (allowLocalTransaction)
 	_localTransaction = new LocalTransactionImpl();
     }
 

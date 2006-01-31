@@ -173,6 +173,18 @@ public class FileStore extends StoreManager {
   {
     _backing.updateAccess(uniqueId);
   }
+  
+  /**
+   * Sets the timef for the expires interval.
+   *
+   * @param uniqueId the identifier of the object.
+   * @param long the time in ms for the expire
+   */
+  public void setExpireInterval(String uniqueId, long expires)
+    throws Exception
+  {
+    _backing.setExpireInterval(uniqueId, expires);
+  }
 
   /**
    * When the session is no longer valid, remove it from the backing store.

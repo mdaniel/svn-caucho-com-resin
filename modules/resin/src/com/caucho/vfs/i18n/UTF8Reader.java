@@ -39,7 +39,8 @@ import com.caucho.vfs.*;
  * Implements an encoding reader for UTF8.
  */
 public class UTF8Reader extends EncodingReader {
-  private InputStream is;
+  private InputStream _is;
+  private int _peek = -1;
 
   /**
    * Null-arg constructor for instantiation by com.caucho.vfs.Encoding only.
@@ -53,7 +54,7 @@ public class UTF8Reader extends EncodingReader {
    */
   private UTF8Reader(InputStream is)
   {
-    this.is = is;
+    _is = is;
   }
 
   /**
@@ -75,6 +76,14 @@ public class UTF8Reader extends EncodingReader {
   public int read()
     throws IOException
   {
+    if (_peek >= 0) {
+      int peek = _peek;
+      _peek = -1;
+      return peek;
+    }
+
+    InputStream is = _is;
+    
     int ch1 = is.read();
 
     if (ch1 < 0x80) {
@@ -106,9 +115,38 @@ public class UTF8Reader extends EncodingReader {
       int ch = ((ch1 & 0x1f) << 12) + ((ch2 & 0x3f) << 6) + (ch3 & 0x3f);
 
       if (ch == 0xfeff) // handle some writers, e.g. microsoft
-        return read();
+        return is.read();
       else
         return ch;
+    }
+    else if ((ch1 & 0xf0) == 0xf0) {
+      int ch2 = is.read();
+      int ch3 = is.read();
+      int ch4 = is.read();
+
+      if (ch2 < 0)
+        throw new EOFException("unexpected end of file in utf8 character");
+      else if ((ch2 & 0xc0) != 0x80)
+        throw new CharConversionException("illegal utf8 encoding");
+      
+      if (ch3 < 0)
+        throw new EOFException("unexpected end of file in utf8 character");
+      else if ((ch3 & 0xc0) != 0x80)
+        throw new CharConversionException("illegal utf8 encoding");
+      
+      if (ch4 < 0)
+        throw new EOFException("unexpected end of file in utf8 character");
+      else if ((ch4 & 0xc0) != 0x80)
+        throw new CharConversionException("illegal utf8 encoding");
+      
+      int ch = (((ch1 & 0xf) << 18) +
+		((ch2 & 0x3f) << 12) +
+		((ch3 & 0x3f) << 6) +
+		((ch4 & 0x3f)));
+
+      _peek = 0xdc00 + (ch & 0x3ff);
+      
+      return 0xd800 + ((ch - 0x10000) / 0x400);
     }
     else
       throw new CharConversionException("illegal utf8 encoding at (" +

@@ -69,8 +69,7 @@ public class XmlAuthenticator extends AbstractAuthenticator {
   private Path _path;
   private Hashtable<String,User> _userMap = new Hashtable<String,User>();
 
-  private long _lastModified;
-  private long _lastLength;
+  private Depend _depend;
   private long _lastCheck;
 
   /**
@@ -108,16 +107,26 @@ public class XmlAuthenticator extends AbstractAuthenticator {
     throws ServletException
   {
     super.init();
-    
+
+    reload();
+  }
+
+  /**
+   * Reload the authenticator.
+   */
+  public synchronized void reload()
+    throws ServletException
+  {
     if (_path == null)
       return;
     
     try {
-      new Config().configureBean(this, _path);
-
       _lastCheck = Alarm.getCurrentTime();
-      _lastModified = _path.getLastModified();
-      _lastLength = _path.getLength();
+      _depend = new Depend(_path);
+      
+      _userMap = new Hashtable<String,User>();
+      
+      new Config().configureBean(this, _path);
     } catch (Exception e) {
       throw new ServletException(e);
     }
@@ -133,7 +142,10 @@ public class XmlAuthenticator extends AbstractAuthenticator {
     throws ServletException
   {
     if (isModified())
-      init();
+      reload();
+
+    if  (userName == null)
+      return null;
 
     User user = _userMap.get(userName);
     if (user == null)
@@ -152,7 +164,7 @@ public class XmlAuthenticator extends AbstractAuthenticator {
     throws ServletException
   {
     if (isModified())
-      init();
+      reload();
 
     User user = (User) _userMap.get(userName);
     if (user == null)
@@ -197,15 +209,13 @@ public class XmlAuthenticator extends AbstractAuthenticator {
   {
     if (_path == null)
       return false;
+    else if (_depend == null)
+      return true;
     else if (Alarm.getCurrentTime() < _lastCheck + 5000)
       return false;
-    else if (_lastModified != _path.getLastModified())
-      return true;
-    else if (_lastLength != _path.getLength())
-      return true;
     else {
       _lastCheck = Alarm.getCurrentTime();
-      return false;
+      return _depend.isModified();
     }
   }
 

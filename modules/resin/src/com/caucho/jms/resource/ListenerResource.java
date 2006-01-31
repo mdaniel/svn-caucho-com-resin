@@ -37,7 +37,9 @@ import javax.jms.MessageListener;
 import javax.jms.Connection;
 import javax.jms.JMSException;
 import javax.jms.Session;
+import javax.jms.Topic;
 import javax.jms.MessageConsumer;
+
 import com.caucho.util.Log;
 import com.caucho.util.L10N;
 import com.caucho.config.Config;
@@ -104,6 +106,9 @@ public class ListenerResource {
       throw new ConfigException(L.l("connection-factory is required for ListenerResource."));
 
     _conn = _connFactory.createConnection();
+
+    if (_destination instanceof Topic)
+      _listenerMax = 1;
   }
 
   public void start() throws Throwable

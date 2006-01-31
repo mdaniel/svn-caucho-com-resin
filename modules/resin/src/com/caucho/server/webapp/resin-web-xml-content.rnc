@@ -118,6 +118,9 @@ r_ear-deploy = element ear-deploy {
   & (attribute expand-prefix { string }
      | element expand-prefix { string })?
 
+  & (attribute expand-suffix { string }
+     | element expand-suffix { string })?
+
   & r_lazy-init?
 
   & (attribute require-file { string }
@@ -536,6 +539,9 @@ r_session-config = element session-config {
   & (attribute always-save-session { r_boolean-Type }
      | element always-save-session { r_boolean-Type })?
 
+  & (attribute cookie-append-server-index { r_boolean-Type }
+     | element cookie-append-server-index { r_boolean-Type })?
+
   & (attribute cookie-domain { string }
      | element cookie-domain { string })?
 
@@ -670,6 +676,9 @@ r_web-app-deploy = element web-app-deploy {
 
   & (attribute expand-prefix { string }
      | element expand-prefix { string })?
+
+  & (attribute expand-suffix { string }
+     | element expand-suffix { string })?
 
   & r_expand-cleanup-fileset?
 

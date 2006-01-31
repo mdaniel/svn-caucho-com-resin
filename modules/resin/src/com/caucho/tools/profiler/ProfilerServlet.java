@@ -143,6 +143,8 @@ public class ProfilerServlet
     out.writeLineElement("th", L.l("Name"));
 
     out.writeLineElement("th", L.l("Average Time"));
+    out.writeLineElement("th", L.l("Min Time"));
+    out.writeLineElement("th", L.l("Max Time"));
     out.writeLineElement("th", L.l("Total Time"));
 
     out.writeLineElement("th", L.l("Invocation Count"));
@@ -170,6 +172,8 @@ public class ProfilerServlet
       =  _profilerManager.getChildProfilerNodes(node, comparator);
 
     long thisTime = node.getTime();
+    long minTime = node.getMinTime();
+    long maxTime = node.getMaxTime();
 
     long childrenTime = 0;
 
@@ -241,7 +245,22 @@ public class ProfilerServlet
     out.endLineElement("td");
 
     out.startLineElement("td");
+    out.writeAttribute("class", "number");
+    if (minTime < Long.MAX_VALUE)
+      printTime(out, minTime);
+    else
+      out.print("&nbsp;");
+    out.endLineElement("td");
 
+    out.startLineElement("td");
+    out.writeAttribute("class", "number");
+    if (Long.MIN_VALUE < maxTime)
+      printTime(out, maxTime);
+    else
+      out.print("&nbsp;");
+    out.endLineElement("td");
+
+    out.startLineElement("td");
     out.writeAttribute("class", "number");
     String timeString = createTimeString(totalTime, thisTime, childrenTime);
     out.writeAttribute("title", timeString);

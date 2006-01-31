@@ -66,6 +66,8 @@
 
     <resource>com.caucho.jca.Resource</resource>
 
+    <rar-deploy>com.caucho.jca.ResourceDeploy</rar-deploy>
+    
     <resource-deploy>com.caucho.jca.ResourceDeploy</resource-deploy>
 
     <resource-env-ref>com.caucho.config.types.ResourceEnvRef</resource-env-ref>

@@ -483,7 +483,7 @@ class XPathParser {
 
 	if (p > 0) {
 	  String prefix = name.substring(0, p);
-	  ns = _namespace.find(_namespace, prefix);
+	  ns = NamespaceContext.find(_namespace, prefix);
 	  local = name.substring(p + 1);
 	}
 	else if (nodeType != Node.ATTRIBUTE_NODE)

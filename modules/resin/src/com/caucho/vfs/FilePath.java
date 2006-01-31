@@ -182,6 +182,14 @@ public class FilePath extends FilesystemPath {
   }
 
   /**
+   * Returns the full url for the given path.
+   */
+  public String getURL()
+  {
+    return escapeURL("file://" + getFullPath());
+  }
+
+  /**
    * Returns the native path.
    */
   public String getNativePath()

@@ -123,7 +123,7 @@ public class JspRoot extends JspContainerNode {
   /**
    * Adds a namespace, e.g. from a prefix declaration.
    */
-  public void addNamespace(String prefix, String value)
+  public void addNamespaceRec(String prefix, String value)
   {
     _namespaceMap.put(prefix, value);
   }

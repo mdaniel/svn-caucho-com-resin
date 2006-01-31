@@ -288,6 +288,7 @@ public abstract class Path {
   {
     return escapeURL(getScheme() + ":" + getFullPath());
   }
+  
   /**
    * Returns the url scheme
    */
@@ -1048,6 +1049,14 @@ public abstract class Path {
       char ch = rawURL.charAt(i);
 
       switch (ch) {
+      case ' ':
+	if (cb == null) {
+	  cb = new CharBuffer();
+	  cb.append(rawURL, 0, i);
+	}
+	cb.append("%20");
+	break;
+	
       case '#':
 	if (cb == null) {
 	  cb = new CharBuffer();

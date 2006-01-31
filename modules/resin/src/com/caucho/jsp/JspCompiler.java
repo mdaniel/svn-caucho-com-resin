@@ -654,9 +654,16 @@ public class JspCompiler implements EnvironmentBean {
 
     uri = path.getPath().substring(appDir.getPath().length());
 
+
+    if (uri.endsWith("x"))
+      compiler.setXml(true);
+    else
+      compiler.setXml(false);
+    
     String className = JspCompiler.urlToClassName(uri);
     JspCompilerInstance compInst;
     compInst = compiler.getCompilerInstance(path, uri, className);
+    
     JspGenerator gen = compInst.generate();
 
     if (! gen.isStatic())

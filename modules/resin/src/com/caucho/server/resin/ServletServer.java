@@ -797,7 +797,8 @@ public class ServletServer extends ProtocolDispatchServer
    */
   public ObjectName []getClusterObjectNames()
   {
-    ClusterContainer clusterContainer = ClusterContainer.getLocal();
+    ClusterContainer clusterContainer
+      = ClusterContainer.getLocal(getClassLoader());
     if (clusterContainer == null)
       return new ObjectName[0];
     
@@ -878,6 +879,20 @@ public class ServletServer extends ProtocolDispatchServer
       
       if (! _lifecycle.toStarting())
 	return;
+
+      log.info("");
+      log.info(System.getProperty("os.name") + " " +
+	       System.getProperty("os.version") + " " +
+	       System.getProperty("os.arch"));
+      log.info("Java " + System.getProperty("java.vm.version") + ", " +
+	       System.getProperty("sun.arch.data.model") + ", " +
+	       System.getProperty("java.vm.info") + ", " +
+	       System.getProperty("file.encoding") + ", " +
+	       System.getProperty("user.language") + ", " +
+	       System.getProperty("java.vm.vendor"));
+      log.info("resin.home = " + System.getProperty("resin.home"));
+      log.info("server.root = " + System.getProperty("server.root"));
+      log.info("");
 
       AbstractSelectManager selectManager = getSelectManager();
       if (isEnableSelectManager() && selectManager != null)

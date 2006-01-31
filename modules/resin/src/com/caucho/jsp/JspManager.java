@@ -81,7 +81,10 @@ public class JspManager extends PageManager {
       JspFactory.setDefaultFactory(new QJspFactory());
 
     try {
-      TldManager.create(new AppResourceManager(app), app);
+      TldManager tld = TldManager.create(new AppResourceManager(app), app);
+
+      // must be initialized at startup for <listeners>, e.g. JSF
+      tld.init();
     } catch (Exception e) {
       log.log(Level.WARNING, e.toString(), e);
     }

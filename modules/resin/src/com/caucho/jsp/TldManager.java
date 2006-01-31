@@ -93,6 +93,10 @@ public class TldManager {
       if (jsp != null)
 	_tldFileSet = jsp.getTldFileSet();
     }
+
+    // JSF has a global listener hidden in one of the *.tld which
+    // requires Resin to search all the JSPs.
+    initGlobal();
   }
 
   static TldManager create(JspResourceManager resourceManager,
@@ -149,64 +153,8 @@ public class TldManager {
       return;
     _isInit = true;
 
-    // loads Resin's tag library implementation
-    if (_cauchoTaglibs == null) {
-      ArrayList<TldPreload> cauchoTaglibs = new ArrayList<TldPreload>();
-
-      Thread thread = Thread.currentThread();
-      ClassLoader oldLoader = thread.getContextClassLoader();
-      thread.setContextClassLoader(ClassLoader.getSystemClassLoader());
-      try {
-	MergePath cauchoClassPath = new MergePath();
-	cauchoClassPath.addClassPath();
-
-	loadClassPathTlds(cauchoTaglibs,
-			  cauchoClassPath.getMergePaths(),
-			  "com/caucho");
-      } finally {
-	thread.setContextClassLoader(oldLoader);
-      }
-
-      _cauchoTaglibs = cauchoTaglibs;
-    }
-
-    // loads tag libraries from the global context (so there's no
-    // need to reparse the jars for each web-app
-    if (_globalTaglibs == null) {
-      log.info("Loading .tld files from global classpath");
-      
-      ArrayList<TldPreload> globalTaglibs = new ArrayList<TldPreload>();
-
-      Thread thread = Thread.currentThread();
-      ClassLoader oldLoader = thread.getContextClassLoader();
-      thread.setContextClassLoader(getClass().getClassLoader());
-      try {
-	MergePath globalClassPath = new MergePath();
-	globalClassPath.addClassPath();
-	
-	ArrayList<Path> paths = globalClassPath.getMergePaths();
-	_globalPaths = paths;
-
-	loadClassPathTlds(globalTaglibs, paths, "");
-
-	for (int i = globalTaglibs.size() - 1; i >= 0; i--) {
-	  TldPreload tld = globalTaglibs.get(i);
-
-	  if (tld.getPath() == null || tld.getPath().getPath() == null)
-	    continue;
-	  
-	  String tldPathName = tld.getPath().getPath();
-
-	  if (tldPathName.startsWith("/com/caucho"))
-	    globalTaglibs.remove(i);
-	}
-      } finally {
-	thread.setContextClassLoader(oldLoader);
-      }
-
-      _globalTaglibs = globalTaglibs;
-    }
-
+    log.fine("Loading .tld files");
+    
     String dir;
 
     if (_tldDir == null)
@@ -266,6 +214,59 @@ public class TldManager {
     taglibs.addAll(_cauchoTaglibs);
 
     _preloadTaglibs = taglibs;
+
+    for (int i = 0; i < taglibs.size(); i++) {
+      try {
+	taglibs.get(i).initListeners(_application);
+      } catch (Exception e) {
+	throw new JspParseException(e);
+      }
+    }
+  }
+
+  public synchronized void initGlobal()
+  {
+    // loads tag libraries from the global context (so there's no
+    // need to reparse the jars for each web-app
+    if (_globalTaglibs == null) {
+      log.info("Loading .tld files from global classpath");
+      
+      ArrayList<TldPreload> globalTaglibs = new ArrayList<TldPreload>();
+      ArrayList<TldPreload> cauchoTaglibs = new ArrayList<TldPreload>();
+
+      Thread thread = Thread.currentThread();
+      ClassLoader oldLoader = thread.getContextClassLoader();
+      thread.setContextClassLoader(TldManager.class.getClassLoader());
+      try {
+	MergePath globalClassPath = new MergePath();
+	globalClassPath.addClassPath();
+	
+	ArrayList<Path> paths = globalClassPath.getMergePaths();
+	_globalPaths = paths;
+
+	loadClassPathTlds(globalTaglibs, paths, "");
+
+	for (int i = globalTaglibs.size() - 1; i >= 0; i--) {
+	  TldPreload tld = globalTaglibs.get(i);
+
+	  if (tld.getPath() == null || tld.getPath().getPath() == null)
+	    continue;
+	  
+	  String tldPathName = tld.getPath().getPath();
+
+	  if (tldPathName.startsWith("/com/caucho")) {
+	    cauchoTaglibs.add(globalTaglibs.remove(i));
+	  }
+	}
+      } catch (Exception e) {
+	log.log(Level.WARNING, e.toString(), e);
+      } finally {
+	thread.setContextClassLoader(oldLoader);
+      }
+
+      _globalTaglibs = globalTaglibs;
+      _cauchoTaglibs = cauchoTaglibs;
+    }
   }
 
   private void loadClassPathTlds(ArrayList<TldPreload> taglibs,
@@ -292,7 +293,8 @@ public class TldManager {
   }
   */
 
-  private void loadAllTlds(ArrayList<TldPreload> taglibs, FileSetType fileSet)
+  private void loadAllTlds(ArrayList<TldPreload> taglibs,
+			   FileSetType fileSet)
     throws JspParseException, IOException
   {
     for (Path path : fileSet.getPaths()) {
@@ -513,7 +515,7 @@ public class TldManager {
                                           location));
       }
       else {
-        throw new JspParseException(L.l("Can't find taglib `{0}'.  A taglib uri ending in *.jar must point to an actual jar or match a taglib-uri in a taglib map.", location));
+        throw new JspParseException(L.l("Can't find taglib `{0}'.  A taglib uri ending in *.jar must point to an actual jar or match a URI in a .tld file.", location));
       }
     }
     else if (path.exists() && path.canRead() && path.isFile())
@@ -674,13 +676,6 @@ public class TldManager {
       taglib.setConfigException(e);
     } finally {
       is.close();
-    }
-
-    try {
-      if (taglib.getConfigException() == null)
-	taglib.init(_application);
-    } catch (Exception e) {
-      throw new JspParseException(e);
     }
     
     return taglib;

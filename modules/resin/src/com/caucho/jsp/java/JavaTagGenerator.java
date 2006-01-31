@@ -570,18 +570,19 @@ public class JavaTagGenerator extends JavaJspGenerator {
       }
     }
 
-    return new TagInfo(tag.getName(),
-		       _fullClassName,
-		       _bodyContent,
-		       "tagfile tag",
-		       taglib,
-		       null,
-		       tag.getAttributes(),
-		       tag.getDisplayName(),
-		       tag.getSmallIcon(),
-		       tag.getLargeIcon(),
-		       tag.getVariables(),
-		       _dynamicAttributes != null);
+    return new TagInfoExt(tag.getName(),
+			  _fullClassName,
+			  _bodyContent,
+			  "tagfile tag",
+			  taglib,
+			  null,
+			  tag.getAttributes(),
+			  tag.getDisplayName(),
+			  tag.getSmallIcon(),
+			  tag.getLargeIcon(),
+			  tag.getVariables(),
+			  _dynamicAttributes,
+			  null);
   }
   
   /**
@@ -661,7 +662,10 @@ public class JavaTagGenerator extends JavaJspGenerator {
     out.println("                   tag.getSmallIcon(),");
     out.println("                   tag.getLargeIcon(),");
     out.println("                   tag.getVariables(),");
-    out.println("                   " + (_dynamicAttributes != null) + ",");
+    if (_dynamicAttributes != null)
+      out.println("                   \"" + _dynamicAttributes + "\",");
+    else
+      out.println("                   null,");
     out.println("                   _caucho_depends);");
 
     out.popDepth();

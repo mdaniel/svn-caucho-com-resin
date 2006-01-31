@@ -1538,10 +1538,7 @@ public class PageContextImpl extends PageContext
    */
   public void pageSetOrRemove(String var, Object value)
   {
-    if (value != null)
-      setAttribute(var, value);
-    else
-      removeAttribute(var);
+    putAttribute(var, value);
   }
 
   /**

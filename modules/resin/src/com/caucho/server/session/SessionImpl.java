@@ -195,6 +195,9 @@ public class SessionImpl implements HttpSession, CacheListener {
       _maxInactiveInterval = Long.MAX_VALUE / 2;
     else
       _maxInactiveInterval = ((long) value) * 1000;
+
+    if (_clusterObject != null)
+      _clusterObject.setExpireInterval(_maxInactiveInterval);
   }
 
   /**

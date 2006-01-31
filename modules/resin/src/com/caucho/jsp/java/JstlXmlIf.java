@@ -115,7 +115,7 @@ public class JstlXmlIf extends JstlNode {
                       getTagName()));
 
     String select = ("com.caucho.jstl.el.XmlIfTag.evalBoolean(pageContext, " +
-		     _gen.addXPathExpr(_select) + ")");
+		     _gen.addXPathExpr(_select, getNamespaceContext()) + ")");
 
 
     out.println("if (" + select + ") {");

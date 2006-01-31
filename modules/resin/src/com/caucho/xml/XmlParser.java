@@ -139,7 +139,8 @@ public class XmlParser extends AbstractParser {
 
     _isHtml = _policy instanceof HtmlPolicy;
 
-    _namespaceMap = null;
+    // jsp/193b
+    // _namespaceMap = null;
     
     _textLength = 0;
     _isIgnorableWhitespace = true;
@@ -493,7 +494,16 @@ public class XmlParser extends AbstractParser {
 
       if (hasInclude) {
         _stopOnIncludeEnd = true;
-        ch = parseDoctypeDecl(_dtd);
+	try {
+	  ch = parseDoctypeDecl(_dtd);
+	} catch (XmlParseException e) {
+	  if (_extSystemId != null &&
+	      _extSystemId.startsWith("http")) {
+	    log.log(Level.FINE, e.toString(), e);
+	  }
+	  else
+	    throw e;
+	}
         _stopOnIncludeEnd = false;
 
         while (_reader != null && _reader != oldReader)
@@ -952,6 +962,13 @@ public class XmlParser extends AbstractParser {
     
     if (_elementTop == 0)
       _activeNode = DOC_NAME;
+  }
+
+  public void pushNamespace(String prefix, String uri)
+  {
+    _namespaceMap = new NamespaceMap(_namespaceMap, prefix, uri);
+
+    _policy.setNamespace(_namespaceMap);
   }
 
   private void popNamespaces(NamespaceMap oldMap)

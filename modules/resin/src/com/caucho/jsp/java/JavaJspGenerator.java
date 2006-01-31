@@ -352,8 +352,19 @@ public class JavaJspGenerator extends JspGenerator {
   {
     if (log.isLoggable(Level.FINEST))
       log.finest("taglib prefix=" + prefix + " uri:" + uri);
-    
-    Taglib taglib = _tagManager.addTaglib(prefix, uri);
+
+    Taglib taglib;
+
+    try {
+      taglib = _tagManager.addTaglib(prefix, uri);
+    } catch (JspParseException e) {
+      if (isOptional) {
+	log.log(Level.FINE, e.toString(), e);
+	return;
+      }
+
+      throw e;
+    }
 
     if (taglib == null && isOptional && 
 	! uri.startsWith("urn:jsptld:") && ! uri.startsWith("urn:jsptagdir:"))
@@ -1135,10 +1146,10 @@ public class JavaJspGenerator extends JspGenerator {
   /**
    * Adds an expression to the expression list.
    */
-  public String addXPathExpr(String value)
-    throws Exception
+  public String addXPathExpr(String value, NamespaceContext ns)
+    throws JspParseException, XPathParseException
   {
-    return addXPathExpr(com.caucho.xpath.XPath.parseExpr(value));
+    return addXPathExpr(XPath.parseExpr(value, ns));
   }
 
   /**

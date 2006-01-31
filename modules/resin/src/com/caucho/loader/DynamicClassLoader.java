@@ -1383,7 +1383,10 @@ public class DynamicClassLoader extends java.net.URLClassLoader
 
     if (url != null) {
       try {
-	return Vfs.lookup(url.toString()).openRead();
+	// XXX: if want to use JNI filesystem, must either avoid getResource
+	// or extend lookup to handle % escapes
+	// server/2499
+	return Vfs.openRead(url.openStream());
       } catch (IOException e) {
 	log().log(Level.FINE, e.toString(), e);
       }

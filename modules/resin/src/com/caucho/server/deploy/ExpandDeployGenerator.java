@@ -77,6 +77,8 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController> ex
   private String _extension = ".jar";
   
   private String _expandPrefix = "";
+  private String _expandSuffix = "";
+  
   private ArrayList<String> _requireFiles = new ArrayList<String>();
 
   private TreeSet<String> _controllerNames = new TreeSet<String>();
@@ -236,6 +238,23 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController> ex
   public String getExpandPrefix()
   {
     return _expandPrefix;
+  }
+
+  /**
+   * Sets the expand suffix to check for new applications.
+   */
+  public void setExpandSuffix(String suffix)
+    throws ConfigException
+  {
+    _expandSuffix = suffix;
+  }
+
+  /**
+   * Gets the expand suffix.
+   */
+  public String getExpandSuffix()
+  {
+    return _expandSuffix;
   }
 
   /**
@@ -563,8 +582,8 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController> ex
    */
   protected String pathNameToEntryName(String name)
   {
-    if (_expandPrefix == null)
-      return name;
+    if (_expandPrefix == null) {
+    }
     else if (_expandPrefix.equals("") &&
 	     (name.startsWith("_") ||
 	      name.startsWith(".") ||
@@ -573,8 +592,15 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController> ex
       return null;
     }
     else if (name.startsWith(_expandPrefix)) {
-      return name.substring(_expandPrefix.length());
+      name = name.substring(_expandPrefix.length());
     }
+    else
+      return null;
+
+    if (_expandSuffix == null)
+      return name;
+    else if (name.endsWith(_expandSuffix))
+      return name.substring(0, name.length() - _expandSuffix.length());
     else
       return null;
   }
