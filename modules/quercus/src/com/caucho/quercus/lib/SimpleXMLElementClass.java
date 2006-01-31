@@ -154,13 +154,14 @@ public class SimpleXMLElementClass extends Value {
 
     if (nodeLength == 1) { //("#text".equals(children.item(0).getNodeName()))) {
       Node firstChild = children.item(0);
-
+      SimpleXMLElementClass simpleXMLChild = new SimpleXMLElementClass(_document,  (Element) firstChild);
+      
       _children = new ArrayValueImpl();
 
       if (firstChild.getNodeType() == Node.TEXT_NODE)
-        _children.put(new LongValue(0), new StringValue(children.item(0).getNodeValue()));
+        _children.put(new LongValue(0), simpleXMLChild);
       else
-        _children.put(new StringValue(firstChild.getNodeName()), new SimpleXMLElementClass(_document, (Element) firstChild));
+        _children.put(new StringValue(firstChild.getNodeName()), simpleXMLChild);
 
     } else {
       for (int i=0; i < nodeLength; i++) {
@@ -210,6 +211,21 @@ public class SimpleXMLElementClass extends Value {
     return _children;
   }
 
+  public Value getArray(Value name)
+  {
+    Value result;
+    
+    children();
+    
+    if (_children instanceof ArrayValue) {
+      result = _children.get(name);
+      if (result != null)
+        return result;
+    }
+    
+    return NullValue.NULL;
+  }
+  
   public Value get(Value name)
   {
     Value result;
@@ -307,24 +323,19 @@ public class SimpleXMLElementClass extends Value {
 
     return value;
   }
-
+  
   /**
-   * Prints the value.
-   * @param env
+   * Returns the value for a field, creating an object if the field
+   * is unset.
    */
-  public void print(Env env)
-    throws Throwable
+  public Value getObject(Env env, Value index)
   {
-    /*
-    if (_children == null)
-      fillChildren();
+    Value result = children().get(index);
     
-    if (_attributes == null)
-      setAttributes();
+    if (result != null)
+      return result;
     
-    QuercusVariableModule.print_r(env, _attributes, NullValue.NULL);
-    QuercusVariableModule.print_r(env, _children, NullValue.NULL);
-    */
-    env.getOut().print(toString(env));
+    return NullValue.NULL;
   }
+  
 }
