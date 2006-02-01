@@ -979,6 +979,72 @@ abstract public class Value {
   }
 
   /**
+   * Returns the field ref.
+   */
+  public Value getField(String index)
+  {
+    return NullValue.NULL;
+  }
+
+  /**
+   * Returns the field ref.
+   */
+  public Value getFieldRef(String index)
+  {
+    return NullValue.NULL;
+  }
+
+  /**
+   * Returns the field ref.
+   */
+  public Value getFieldArg(String index)
+  {
+    return NullValue.NULL;
+  }
+
+  /**
+   * Returns the value for a field, creating an object if the field
+   * is unset.
+   */
+  public Value getFieldObject(Env env, String index)
+  {
+    return NullValue.NULL;
+  }
+
+  /**
+   * Returns the value for a field, creating an object if the field
+   * is unset.
+   */
+  public Value getFieldArgObject(Env env, String index)
+  {
+    return getFieldObject(env, index);
+  }
+
+  /**
+   * Returns the value for a field, creating an object if the field
+   * is unset.
+   */
+  public Value getFieldArray(String index)
+  {
+    return NullValue.NULL;
+  }
+
+  /**
+   * Returns the field ref.
+   */
+  public Value putField(String index, Value object)
+  {
+    return NullValue.NULL;
+  }
+
+  /**
+   * Removes the field ref.
+   */
+  public void removeField(String index)
+  {
+  }
+
+  /**
    * Returns the value for the variable, creating an object if the var
    * is unset.
    */
@@ -1170,10 +1236,20 @@ abstract public class Value {
     }
   }
 
-  abstract protected void varDumpImpl(Env env,
+  protected void varDumpImpl(Env env,
                                       WriteStream out,
                                       int depth,
                                       IdentityHashMap<Value, String> valueSet)
-    throws Throwable;
+    throws Throwable
+  {
+    out.print(toString());
+  }
+
+  protected void printDepth(WriteStream out, int depth)
+    throws IOException
+  {
+    for (int i = 0; i < depth; i++)
+      out.print(' ');
+  }
 }
 

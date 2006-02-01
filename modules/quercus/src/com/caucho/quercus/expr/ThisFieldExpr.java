@@ -50,13 +50,13 @@ public class ThisFieldExpr extends AbstractVarExpr {
 
   private final InterpretedClassDef _quercusClass;
   
-  private final StringValue _name;
+  private final String _name;
 
   public ThisFieldExpr(InterpretedClassDef quercusClass, String name)
   {
     _quercusClass = quercusClass;
     
-    _name = new StringValue(name);
+    _name = name.intern();
   }
   
   /**
@@ -71,7 +71,7 @@ public class ThisFieldExpr extends AbstractVarExpr {
   {
     Value obj = env.getThis();
 
-    return obj.get(_name);
+    return obj.getField(_name);
   }
   
   /**
@@ -86,7 +86,7 @@ public class ThisFieldExpr extends AbstractVarExpr {
   {
     Value obj = env.getThis();
 
-    return obj.get(_name).copy();
+    return obj.getField(_name).copy();
   }
   
   /**
@@ -101,7 +101,7 @@ public class ThisFieldExpr extends AbstractVarExpr {
   {
     Value obj = env.getThis();
 
-    return obj.getRef(_name);
+    return obj.getFieldRef(_name);
   }
   
   /**
@@ -116,7 +116,7 @@ public class ThisFieldExpr extends AbstractVarExpr {
   {
     Value obj = env.getThis();
 
-    return obj.getArg(_name);
+    return obj.getFieldArg(_name);
   }
 
   /**
@@ -131,7 +131,7 @@ public class ThisFieldExpr extends AbstractVarExpr {
   {
     Value obj = env.getThis();
 
-    return obj.getArgObject(env, _name);
+    return obj.getFieldArgObject(env, _name);
   }
   
   /**
@@ -146,7 +146,7 @@ public class ThisFieldExpr extends AbstractVarExpr {
   {
     Value obj = env.getThis();
 
-    obj.put(_name, value);
+    obj.putField(_name, value);
   }
 
   /**
@@ -161,7 +161,7 @@ public class ThisFieldExpr extends AbstractVarExpr {
   {
     Value obj = env.getThis();
 
-    return obj.getArray(_name);
+    return obj.getFieldArray(_name);
   }
 
   /**
@@ -176,9 +176,7 @@ public class ThisFieldExpr extends AbstractVarExpr {
   {
     Value obj = env.getThis();
 
-    // quercus/0d8f
-
-    return obj.getObject(env, _name);
+    return obj.getFieldObject(env, _name);
   }
   
   /**
@@ -193,7 +191,7 @@ public class ThisFieldExpr extends AbstractVarExpr {
   {
     Value obj = env.getThis();
 
-    obj.remove(_name);
+    obj.removeField(_name);
   }
 
   /**
@@ -223,9 +221,9 @@ public class ThisFieldExpr extends AbstractVarExpr {
       // quercus/3d8o
       */
       
-    out.print("quercus_this.get(");
-    out.print(_name);
-    out.print(")");
+    out.print("quercus_this.getField(\"");
+    out.printJavaString(_name);
+    out.print("\")");
   }
 
   /**
@@ -248,9 +246,9 @@ public class ThisFieldExpr extends AbstractVarExpr {
       // quercus/3d8g
       */
       
-    out.print("quercus_this.getRef(");
-    out.print(_name);
-    out.print(")");
+    out.print("quercus_this.getFieldRef(\"");
+    out.printJavaString(_name);
+    out.print("\")");
   }
 
   /**
@@ -271,9 +269,9 @@ public class ThisFieldExpr extends AbstractVarExpr {
       // quercus/3d8r
       */
       
-    out.print("quercus_this.getArg(");
-    out.print(_name);
-    out.print(")");
+    out.print("quercus_this.getFieldArg(\"");
+    out.printJavaString(_name);
+    out.print("\")");
   }
 
   /**
@@ -296,9 +294,9 @@ public class ThisFieldExpr extends AbstractVarExpr {
   public void generateArgObject(PhpWriter out)
     throws IOException
   {
-    out.print("quercus_this.getArgObject(env, ");
-    out.print(_name);
-    out.print(")");
+    out.print("quercus_this.getFieldArgObject(env, \"");
+    out.printJavaString(_name);
+    out.print("\")");
   }
 
   /**
@@ -322,9 +320,9 @@ public class ThisFieldExpr extends AbstractVarExpr {
       // quercus/3d8i
       */
       
-    out.print("quercus_this.getArray(");
-    out.print(_name);
-    out.print(")");
+    out.print("quercus_this.getFieldArray(\"");
+    out.printJavaString(_name);
+    out.print("\")");
   }
 
   /**
@@ -348,9 +346,9 @@ public class ThisFieldExpr extends AbstractVarExpr {
       // quercus/3d8h
       */
       
-    out.print("quercus_this.getObject(env, ");
-    out.print(_name);
-    out.print(")");
+    out.print("quercus_this.getFieldObject(env, \"");
+    out.printJavaString(_name);
+    out.print("\")");
   }
 
   /**
@@ -380,9 +378,9 @@ public class ThisFieldExpr extends AbstractVarExpr {
       // quercus/3d90
       */
       
-    out.print("quercus_this.put(");
-    out.print(_name);
-    out.print(", ");
+    out.print("quercus_this.putField(\"");
+    out.printJavaString(_name);
+    out.print("\", ");
     value.generateCopy(out);
     out.print(")");
   }
@@ -395,9 +393,9 @@ public class ThisFieldExpr extends AbstractVarExpr {
   public void generateAssignRef(PhpWriter out, Expr value, boolean isTop)
     throws IOException
   {
-    out.print("quercus_this.put(");
-    out.print(_name);
-    out.print(", ");
+    out.print("quercus_this.putField(\"");
+    out.printJavaString(_name);
+    out.print("\", ");
     value.generateRef(out);
     out.print(")");
   }
@@ -421,9 +419,9 @@ public class ThisFieldExpr extends AbstractVarExpr {
     else {
     */
     
-    out.print("quercus_this.remove(");
-    out.print(_name);
-    out.print(")");
+    out.print("quercus_this.removeField(\"");
+    out.printJavaString(_name);
+    out.print("\")");
   }
   
   public String toString()

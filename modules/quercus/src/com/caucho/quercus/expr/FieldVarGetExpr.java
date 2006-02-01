@@ -68,7 +68,7 @@ public class FieldVarGetExpr extends AbstractVarExpr {
   {
     Value value = _objExpr.evalArgObject(env);
 
-    return value.getArg(_nameExpr.eval(env));
+    return value.getFieldArg(_nameExpr.evalString(env));
   }
 
   /**
@@ -84,7 +84,7 @@ public class FieldVarGetExpr extends AbstractVarExpr {
     // quercus/0d1k
     Value value = _objExpr.evalObject(env);
 
-    return value.getRef(_nameExpr.eval(env));
+    return value.getFieldRef(_nameExpr.evalString(env));
   }
   
   /**
@@ -99,7 +99,7 @@ public class FieldVarGetExpr extends AbstractVarExpr {
   {
     Value obj = _objExpr.eval(env);
 
-    return obj.get(_nameExpr.eval(env));
+    return obj.getField(_nameExpr.evalString(env));
   }
   
   /**
@@ -114,7 +114,7 @@ public class FieldVarGetExpr extends AbstractVarExpr {
   {
     Value obj = _objExpr.evalObject(env);
 
-    obj.put(_nameExpr.eval(env), value);
+    obj.putField(_nameExpr.evalString(env), value);
   }
 
   /**
@@ -129,7 +129,7 @@ public class FieldVarGetExpr extends AbstractVarExpr {
   {
     Value obj = _objExpr.evalObject(env);
 
-    return obj.getArray(_nameExpr.eval(env));
+    return obj.getFieldArray(_nameExpr.evalString(env));
   }
 
   /**
@@ -144,7 +144,7 @@ public class FieldVarGetExpr extends AbstractVarExpr {
   {
     Value obj = _objExpr.evalObject(env);
 
-    return obj.getObject(env, _nameExpr.eval(env));
+    return obj.getFieldObject(env, _nameExpr.evalString(env));
   }
 
   /**
@@ -159,7 +159,7 @@ public class FieldVarGetExpr extends AbstractVarExpr {
   {
     Value obj = _objExpr.evalObject(env);
 
-    return obj.getArgObject(env, _nameExpr.eval(env));
+    return obj.getFieldArgObject(env, _nameExpr.evalString(env));
   }
 
   /**

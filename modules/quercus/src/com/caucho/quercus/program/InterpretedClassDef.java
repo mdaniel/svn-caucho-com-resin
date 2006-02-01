@@ -57,8 +57,8 @@ public class InterpretedClassDef extends AbstractClassDef {
   private final HashMap<String,AbstractFunction> _functionMapLowerCase
     = new HashMap<String,AbstractFunction>();
 
-  private final HashMap<Value,Expr> _fieldMap
-    = new LinkedHashMap<Value,Expr>();
+  private final HashMap<String,Expr> _fieldMap
+    = new LinkedHashMap<String,Expr>();
 
   private final HashMap<String,Expr> _staticFieldMap
     = new LinkedHashMap<String,Expr>();
@@ -77,7 +77,7 @@ public class InterpretedClassDef extends AbstractClassDef {
   /**
    * Returns the map.
    */
-  public HashMap<Value,Expr> getFieldMap()
+  public HashMap<String,Expr> getFieldMap()
   {
     return _fieldMap;
   }
@@ -143,7 +143,7 @@ public class InterpretedClassDef extends AbstractClassDef {
    */
   public void addValue(Value name, Expr value)
   {
-    _fieldMap.put(name, value);
+    _fieldMap.put(name.toString(), value);
   }
 
   /**
@@ -151,7 +151,7 @@ public class InterpretedClassDef extends AbstractClassDef {
    */
   public Expr get(Value name)
   {
-    return _fieldMap.get(name);
+    return _fieldMap.get(name.toString());
   }
 
   /**
@@ -173,8 +173,8 @@ public class InterpretedClassDef extends AbstractClassDef {
   public void initInstance(Env env, Value object)
     throws Throwable
   {
-    for (Map.Entry<Value,Expr> entry : _fieldMap.entrySet())
-      object.put(entry.getKey(), entry.getValue().eval(env).copy());
+    for (Map.Entry<String,Expr> entry : _fieldMap.entrySet())
+      object.putField(entry.getKey(), entry.getValue().eval(env).copy());
   }
 
   /**
@@ -232,13 +232,13 @@ public class InterpretedClassDef extends AbstractClassDef {
     out.println("{");
     out.pushDepth();
     
-    for (Map.Entry<Value,Expr> entry : _fieldMap.entrySet()) {
-      Value key = entry.getKey();
+    for (Map.Entry<String,Expr> entry : _fieldMap.entrySet()) {
+      String key = entry.getKey();
       Expr value = entry.getValue();
 
-      out.print("value.put(");
-      out.print(out.addValue(key));
-      out.print(",");
+      out.print("value.putField(\"");
+      out.printJavaString(key);
+      out.print("\",");
       value.generateExpr(out);
       out.print(".eval(env)");
       out.println(");");

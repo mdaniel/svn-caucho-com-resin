@@ -326,26 +326,26 @@ public class QuercusMysqlModule extends AbstractQuercusModule {
     if (columnMd == null)
       return BooleanValue.FALSE;
 
-    ArrayValue fieldResult = env.createObject();
+    ObjectValue fieldResult = env.createObject();
 
-    fieldResult.put("name", columnMd.getName());
-    fieldResult.put("table", tableMd.getName());
-    fieldResult.put("def", "");
-    fieldResult.put("max_length", fieldLength.toInt());
+    fieldResult.putField("name", columnMd.getName());
+    fieldResult.putField("table", tableMd.getName());
+    fieldResult.putField("def", "");
+    fieldResult.putField("max_length", fieldLength.toInt());
 
-    fieldResult.put("not_null", columnMd.isNotNull() ? 1 : 0);
+    fieldResult.putField("not_null", columnMd.isNotNull() ? 1 : 0);
     
-    fieldResult.put("primary_key", columnMd.isPrimaryKey() ? 1 : 0);
-    fieldResult.put("multiple_key", columnMd.isIndex() && ! columnMd.isPrimaryKey() ? 1 : 0);
-    fieldResult.put("unique_key", columnMd.isUnique() ? 1 : 0);
+    fieldResult.putField("primary_key", columnMd.isPrimaryKey() ? 1 : 0);
+    fieldResult.putField("multiple_key", columnMd.isIndex() && ! columnMd.isPrimaryKey() ? 1 : 0);
+    fieldResult.putField("unique_key", columnMd.isUnique() ? 1 : 0);
     
-    fieldResult.put("numeric", columnMd.isNumeric() ? 1 : 0);
-    fieldResult.put("blob", columnMd.isBlob() ? 1 : 0);
+    fieldResult.putField("numeric", columnMd.isNumeric() ? 1 : 0);
+    fieldResult.putField("blob", columnMd.isBlob() ? 1 : 0);
 
-    fieldResult.put("type", fieldType.toString());
+    fieldResult.putField("type", fieldType.toString());
 
-    fieldResult.put("unsigned", columnMd.isUnsigned() ? 1 : 0);
-    fieldResult.put("zerofill", columnMd.isZeroFill() ? 1 : 0);
+    fieldResult.putField("unsigned", columnMd.isUnsigned() ? 1 : 0);
+    fieldResult.putField("zerofill", columnMd.isZeroFill() ? 1 : 0);
     
     return fieldResult;
   }

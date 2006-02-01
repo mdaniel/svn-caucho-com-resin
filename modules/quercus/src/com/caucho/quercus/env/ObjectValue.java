@@ -36,7 +36,9 @@ import java.util.HashMap;
 import java.util.Set;
 import java.util.Collection;
 import java.util.IdentityHashMap;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.AbstractSet;
 
 import com.caucho.vfs.WriteStream;
 
@@ -49,19 +51,27 @@ import com.caucho.quercus.lib.QuercusVariableModule;
 /**
  * Represents a PHP object value.
  */
-public class ObjectValue extends ArrayValueWrapper {
+public class ObjectValue extends Value {
   private static final StringValue TO_STRING = new StringValue("__toString");
 
+  private static final int DEFAULT_SIZE = 16;
+  
   private final QuercusClass _cl;
+  
+  private Entry []_entries;
+  private int _hashMask;
+
+  private int _size;
 
   public ObjectValue(QuercusClass cl)
   {
-    super(new ArrayValueImpl());
-
     _cl = cl;
-    // _cl.initFields(_map);
+    
+    _entries = new Entry[DEFAULT_SIZE];
+    _hashMask = _entries.length - 1;
   }
 
+  /*
   public ObjectValue(Env env, IdentityHashMap<Value,Value> map,
                      QuercusClass cl, ArrayValue oldValue)
   {
@@ -71,6 +81,7 @@ public class ObjectValue extends ArrayValueWrapper {
 
     // _cl.initFields(_map);
   }
+  */
 
   /**
    * Returns the class name.
@@ -134,6 +145,196 @@ public class ObjectValue extends ArrayValueWrapper {
   public double toDouble()
   {
     return toLong();
+  }
+
+  /**
+   * Returns the number of entries.
+   */
+  public int getSize()
+  {
+    return _size;
+  }
+
+  /**
+   * Gets a new value.
+   */
+  public Value getField(String key)
+  {
+    int capacity = _entries.length;
+
+    int hashMask = _hashMask;
+    int hash = key.hashCode() & hashMask;
+
+    int count = capacity;
+    for (; count >= 0; count--) {
+      Entry entry = _entries[hash];
+
+      if (entry == null) 
+	return UnsetValue.UNSET;
+      else if (key.equals(entry.getKey()))
+	return entry.getValue();
+
+      hash = (hash + 1) & hashMask;
+    }
+
+    return UnsetValue.UNSET;
+  }
+
+  /**
+   * Returns the array ref.
+   */
+  public Var getFieldRef(String index)
+  {
+    Entry entry = createEntry(index);
+
+    Value value = entry.getRawValue();
+
+    if (value instanceof Var)
+      return (Var) value;
+
+    Var var = new Var(value);
+
+    entry.setValue(var);
+    
+    return var;
+  }
+
+  /**
+   * Gets a new value.
+   */
+  private Entry getEntry(String key)
+  {
+    int capacity = _entries.length;
+
+    int hash = key.hashCode() & _hashMask;
+
+    int count = capacity;
+    for (; count >= 0; count--) {
+      Entry entry = _entries[hash];
+
+      if (entry == null) 
+	return null;
+      else if (key.equals(entry.getKey()))
+	return entry;
+
+      hash = (hash + 1) & _hashMask;
+    }
+
+    return null;
+  }
+  
+  /**
+   * Adds a new value.
+   */
+  public Value putField(String key, Value value)
+  {
+    Entry entry = createEntry(key);
+
+    Value oldValue = entry.getRawValue();
+
+    if (value instanceof Var) {
+      Var var = (Var) value;
+      var.setReference();
+
+      entry.setRaw(var);
+    }
+    else if (oldValue instanceof Var) {
+      oldValue.set(value);
+    }
+    else {
+      entry.setRaw(value);
+    }
+
+    return value;
+  }
+  
+  /**
+   * Adds a new value.
+   */
+  public Value putField(String key, String value)
+  {
+    return putField(key, new StringValue(value));
+  }
+  
+  /**
+   * Adds a new value.
+   */
+  public Value putField(String key, long value)
+  {
+    return putField(key, LongValue.create(value));
+  }
+  
+  /**
+   * Adds a new value.
+   */
+  public Value putField(String key, double value)
+  {
+    return putField(key, DoubleValue.create(value));
+  }
+
+  /**
+   * Creates the entry for a key.
+   */
+  private Entry createEntry(String key)
+  {
+    int capacity = _entries.length;
+
+    int hashMask = _hashMask;
+
+    int hash = key.hashCode() & hashMask;
+
+    int count = capacity;
+    for (; count >= 0; count--) {
+      Entry entry = _entries[hash];
+
+      if (entry == null)
+	break;
+      else if (key.equals(entry.getKey()))
+	return entry;
+
+      hash = (hash + 1) & hashMask;
+    }
+    
+    _size++;
+
+    Entry newEntry = new Entry(key);
+    _entries[hash] = newEntry;
+
+    if (_entries.length <= 2 * _size)
+      expand();
+
+    return newEntry;
+  }
+
+  private void expand()
+  {
+    Entry []entries = _entries;
+    
+    _entries = new Entry[2 * entries.length];
+    _hashMask = _entries.length - 1;
+
+    for (int i = entries.length - 1; i >= 0; i--) {
+      Entry entry = entries[i];
+
+      if (entry != null)
+	addEntry(entry);
+    }
+  }
+
+  private void addEntry(Entry entry)
+  {
+    int capacity = _entries.length;
+
+    int hash = entry.getKey().hashCode() & _hashMask;
+
+    for (int i = capacity; i >= 0; i--) {
+      if (_entries[hash] == null) {
+	_entries[hash] = entry;
+	return;
+      }
+
+      hash = (hash + 1) & _hashMask;
+    }
   }
 
   /**
@@ -352,7 +553,10 @@ public class ObjectValue extends ArrayValueWrapper {
     if (oldValue != null)
       return oldValue;
 
-    return new ObjectValue(env, map, _cl, getArray());
+    // XXX:
+    // return new ObjectValue(env, map, _cl, getArray());
+    
+    return this;
   }
 
   /**
@@ -362,8 +566,8 @@ public class ObjectValue extends ArrayValueWrapper {
   {
     ObjectValue newObject = new ObjectValue(_cl);
 
-    for (ArrayValue.Entry ptr = getHead(); ptr != null; ptr = ptr.getNext())
-      newObject.put(ptr.getKey(), ptr.getValue());
+    for (Map.Entry<String,Value> entry : entrySet())
+      newObject.putField(entry.getKey(), entry.getValue());
 
     return newObject;
   }
@@ -383,8 +587,15 @@ public class ObjectValue extends ArrayValueWrapper {
     sb.append(getSize());
     sb.append(":{");
 
-    for (Map.Entry<Value,Value> entry : entrySet()) {
-      entry.getKey().serialize(sb);
+    for (Map.Entry<String,Value> entry : entrySet()) {
+      String key = entry.getKey();
+
+      sb.append("s:");
+      sb.append(key.length());
+      sb.append(":\"");
+      sb.append(key);
+      sb.append("\"");
+      
       entry.getValue().serialize(sb);
     }
 
@@ -432,9 +643,169 @@ public class ObjectValue extends ArrayValueWrapper {
     return this;
   }
 
+  public Set<Map.Entry<String,Value>> entrySet()
+  {
+    return new EntrySet();
+  }
+
   public String toString()
   {
     return "ObjectValue@" + System.identityHashCode(this) +  "[" + _cl.getName() + "]";
+  }
+  
+  public class EntrySet extends AbstractSet<Map.Entry<String,Value>> {
+    EntrySet()
+    {
+    }
+
+    public int size()
+    {
+      return ObjectValue.this.getSize();
+    }
+
+    public Iterator<Map.Entry<String,Value>> iterator()
+    {
+      return new EntryIterator(ObjectValue.this._entries);
+    }
+  }
+  
+  public static class EntryIterator
+    implements Iterator<Map.Entry<String,Value>> {
+    private final Entry []_list;
+    private int _index;
+
+    EntryIterator(Entry []list)
+    {
+      _list = list;
+    }
+    
+    public boolean hasNext()
+    {
+      for (; _index < _list.length && _list[_index] == null; _index++) {
+      }
+      
+      return _index < _list.length;
+    }
+
+    public Map.Entry<String,Value> next()
+    {
+      for (; _index < _list.length && _list[_index] == null; _index++) {
+      }
+
+      if (_list.length <= _index)
+	return null;
+
+      return _list[_index++];
+    }
+
+    public void remove()
+    {
+      throw new UnsupportedOperationException();
+    }
+  }
+
+  public final static class Entry extends Var
+    implements Map.Entry<String,Value> {
+    private final String _key;
+
+    public Entry(String key)
+    {
+      _key = key;
+    }
+
+    public Entry(String key, Value value)
+    {
+      _key = key;
+      setValue(value);
+    }
+
+    public Value getValue()
+    {
+      return getRawValue().toValue();
+    }
+
+    public String getKey()
+    {
+      return _key;
+    }
+    
+    public Value toValue()
+    {
+      // The value may be a var
+      // XXX: need test
+      return getRawValue().toValue();
+    }
+
+    /**
+     * Argument used/declared as a ref.
+     */
+    public Var toRefVar()
+    {
+      Value val = getRawValue();
+
+      if (val instanceof Var)
+	return (Var) val;
+      else {
+	Var var = new Var(val);
+
+	setRaw(var);
+
+	return var;
+      }
+    }
+  
+    /**
+     * Converts to an argument value.
+     */
+    public Value toArgValue()
+    {
+      return getRawValue().toValue();
+    }
+    
+    public Value setValue(Value value)
+    {
+      Value oldValue = toValue();
+
+      setRaw(value);
+
+      return oldValue;
+    }
+  
+    /**
+     * Converts to a variable reference (for function  arguments)
+     */
+    public Value toRef()
+    {
+      Value value = toValue();
+
+      if (value instanceof Var)
+	return new RefVar((Var) value);
+      else
+	return new RefVar(this);
+    }
+  
+    /**
+     * Converts to a variable reference (for function  arguments)
+     */
+    public Value toArgRef()
+    {
+      Value value = toValue();
+
+      if (value instanceof Var)
+	return new RefVar((Var) value);
+      else
+	return new RefVar(this);
+    }
+
+    public Value toArg()
+    {
+      Value value = getRawValue();
+
+      if (value instanceof Var)
+	return value;
+      else
+	return this;
+    }
   }
 
   public void varDumpImpl(Env env,
@@ -447,17 +818,19 @@ public class ObjectValue extends ArrayValueWrapper {
 
     depth++;
 
-    for (Map.Entry<Value,Value> mapEntry : entrySet()) {
-      ArrayValue.Entry entry = (ArrayValue.Entry) mapEntry;
+    for (Map.Entry<String,Value> entry : entrySet()) {
+      printDepth(out, 2 * depth);
+      out.println("[\"" + entry.getKey() + "\"]=>");
 
-      entry.varDump(env, out, depth, valueSet);
+      printDepth(out, 2 * depth);
+      entry.getValue().varDumpImpl(env, out, depth, valueSet);
 
       out.println();
     }
 
     depth--;
 
-    printDepth(out, 2 * depth);
+    // printDepth(out, 2 * depth);
 
     out.print("}");
   }

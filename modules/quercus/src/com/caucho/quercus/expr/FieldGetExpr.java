@@ -48,13 +48,28 @@ public class FieldGetExpr extends AbstractVarExpr {
   private static final L10N L = new L10N(FieldGetExpr.class);
 
   private final Expr _objExpr;
-  private final StringValue _name;
+  private final String _name;
 
   public FieldGetExpr(Expr objExpr, String name)
   {
     _objExpr = objExpr;
     
-    _name = new StringValue(name);
+    _name = name.intern();
+  }
+  
+  /**
+   * Evaluates the expression.
+   *
+   * @param env the calling environment.
+   *
+   * @return the expression value.
+   */
+  public Value eval(Env env)
+    throws Throwable
+  {
+    Value obj = _objExpr.eval(env);
+
+    return obj.getField(_name);
   }
 
   /**
@@ -69,7 +84,7 @@ public class FieldGetExpr extends AbstractVarExpr {
   {
     Value value = _objExpr.evalArgObject(env);
 
-    return value.getArg(_name);
+    return value.getFieldArg(_name);
   }
 
   /**
@@ -85,22 +100,7 @@ public class FieldGetExpr extends AbstractVarExpr {
     // quercus/0d1k
     Value value = _objExpr.evalObject(env);
 
-    return value.getRef(_name);
-  }
-  
-  /**
-   * Evaluates the expression.
-   *
-   * @param env the calling environment.
-   *
-   * @return the expression value.
-   */
-  public Value eval(Env env)
-    throws Throwable
-  {
-    Value obj = _objExpr.eval(env);
-
-    return obj.get(_name);
+    return value.getFieldRef(_name);
   }
   
   /**
@@ -115,7 +115,7 @@ public class FieldGetExpr extends AbstractVarExpr {
   {
     Value obj = _objExpr.eval(env);
 
-    return obj.get(_name).copy();
+    return obj.getField(_name).copy();
   }
   
   /**
@@ -130,7 +130,7 @@ public class FieldGetExpr extends AbstractVarExpr {
   {
     Value obj = _objExpr.evalObject(env);
 
-    obj.put(_name, value);
+    obj.putField(_name, value);
   }
 
   /**
@@ -145,7 +145,8 @@ public class FieldGetExpr extends AbstractVarExpr {
   {
     Value obj = _objExpr.evalObject(env);
 
-    return obj.getArray(_name);
+    throw new UnsupportedOperationException();
+    // return obj.getArray(_name);
   }
 
   /**
@@ -160,7 +161,8 @@ public class FieldGetExpr extends AbstractVarExpr {
   {
     Value obj = _objExpr.evalObject(env);
 
-    return obj.getObject(env, _name);
+    throw new UnsupportedOperationException();
+    //return obj.getObject(env, _name);
   }
 
   /**
@@ -175,7 +177,8 @@ public class FieldGetExpr extends AbstractVarExpr {
   {
     Value obj = _objExpr.evalObject(env);
 
-    return obj.getArgObject(env, _name);
+    throw new UnsupportedOperationException();
+    //return obj.getArgObject(env, _name);
   }
 
   /**
@@ -208,7 +211,7 @@ public class FieldGetExpr extends AbstractVarExpr {
   {
     Value obj = _objExpr.eval(env);
 
-    obj.remove(_name);
+    obj.removeField(_name);
   }
 
   //
@@ -261,9 +264,9 @@ public class FieldGetExpr extends AbstractVarExpr {
     throws IOException
   {
     _objExpr.generate(out);
-    out.print(".get(");
-    out.print(out.addValue(_name));
-    out.print(")");
+    out.print(".getField(\"");
+    out.printJavaString(_name);
+    out.print("\")");
   }
 
   /**
@@ -275,8 +278,8 @@ public class FieldGetExpr extends AbstractVarExpr {
     throws IOException
   {
     _objExpr.generateArgObject(out);
-    out.print(".getArg(");
-    out.print(out.addValue(_name));
+    out.print(".getFieldArg(");
+    out.printJavaString(_name);
     out.print(")");
   }
 
@@ -289,8 +292,8 @@ public class FieldGetExpr extends AbstractVarExpr {
     throws IOException
   {
     _objExpr.generateObject(out);
-    out.print(".getRef(");
-    out.print(out.addValue(_name));
+    out.print(".getFieldRef(");
+    out.printJavaString(_name);
     out.print(")");
   }
 
@@ -303,7 +306,7 @@ public class FieldGetExpr extends AbstractVarExpr {
     throws IOException
   {
     generate(out);
-    out.print(".copy()"); // php/3a5n
+    out.print(".copy()");
   }
 
   /**
@@ -315,10 +318,10 @@ public class FieldGetExpr extends AbstractVarExpr {
     throws IOException
   {
     _objExpr.generateObject(out);
-    out.print(".put(");
-    out.print(out.addValue(_name));
+    out.print(".putField(");
+    out.printJavaString(_name);
     out.print(", ");
-    value.generateCopy(out); // php/3a82
+    value.generateCopy(out);
     out.print(")");
   }
 
@@ -331,8 +334,8 @@ public class FieldGetExpr extends AbstractVarExpr {
     throws IOException
   {
     _objExpr.generateObject(out);
-    out.print(".put(");
-    out.print(out.addValue(_name));
+    out.print(".putField(");
+    out.printJavaString(_name);
     out.print(", ");
     value.generateRef(out);
     out.print(")");
@@ -347,8 +350,8 @@ public class FieldGetExpr extends AbstractVarExpr {
     throws IOException
   {
     _objExpr.generateObject(out);
-    out.print(".getObject(env, ");
-    out.print(out.addValue(_name));
+    out.print(".getFieldObject(env, ");
+    out.printJavaString(_name);
     out.print(")");
   }
 
@@ -361,8 +364,8 @@ public class FieldGetExpr extends AbstractVarExpr {
     throws IOException
   {
     _objExpr.generateArgObject(out);
-    out.print(".getArgObject(env, ");
-    out.print(out.addValue(_name));
+    out.print(".getFieldArgObject(env, ");
+    out.printJavaString(_name);
     out.print(")");
   }
 
@@ -375,8 +378,8 @@ public class FieldGetExpr extends AbstractVarExpr {
     throws IOException
   {
     _objExpr.generateObject(out);
-    out.print(".getArray(");
-    out.print(out.addValue(_name));
+    out.print(".getFieldArray(");
+    out.printJavaString(_name);
     out.print(")");
   }
 
@@ -389,8 +392,8 @@ public class FieldGetExpr extends AbstractVarExpr {
     throws IOException
   {
     _objExpr.generateArgObject(out);
-    out.print(".getArgArray(");
-    out.print(out.addValue(_name));
+    out.print(".getFieldArgArray(");
+    out.printJavaString(_name);
     out.print(")");
   }
 
@@ -403,8 +406,8 @@ public class FieldGetExpr extends AbstractVarExpr {
     throws IOException
   {
     _objExpr.generate(out);
-    out.print(".remove(");
-    out.print(out.addValue(_name));
+    out.print(".removeField(");
+    out.printJavaString(_name);
     out.print(")");
   }
 
@@ -416,15 +419,15 @@ public class FieldGetExpr extends AbstractVarExpr {
   public void generateExpr(PhpWriter out)
     throws IOException
   {
-    out.print("new FieldRefExpr(");
+    out.print("new FieldGetExpr(");
 
     _objExpr.generateExpr(out);
     
-    out.print(", ");
+    out.print(", \"");
     
-    _name.generate(out);
+    out.printJavaString(_name);
     
-    out.print(")");
+    out.print("\")");
   }
   
   public String toString()
