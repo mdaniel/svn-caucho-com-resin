@@ -51,44 +51,40 @@ import com.caucho.config.ConfigException;
  *
  * This module uses the {@link MessageDigest} class to calculate
  * digests. Typical java installations support MD2, MD5, SHA1, SHA256, SHA384,
- * and SHA512.  Extension libraries such as
- * <a href="http://www.bouncycastle.org/">bouncycastle</a>
- * can be used to extend the digest algorithms that are available.
- *
- * <h3>Configuring the java algorithm name and provider</h3>
- *
- * Configuration can override the default java algorithm name and/or
- * provider that corresponds to the PHP name.  If only a java name
- * is supplied, it is used in a call to {@link MessageDigest#getInstance(String)}.
- * If a java name and provider is supplied they are used in a call
- * to {@link MessageDigest#getInstance(String, String)}.
- *
- * <pre>
- * &lt;init>
- *   &lt;algorithm name="MHASH_TIGER" java-name="PUSSYCAT"/>
- *   &lt;algorithm name="MHASH_GOST" java-name="GOST" java-provider="hogwarts"/>
- * &lt;/init>
- * </pre>
- *
- * <h3>Configuring new algorithm's</h3>
- *
- * Configuration can provide new algorithms to the PHP environment.
- *
- * <pre>
- * &lt;init>
- *   &lt;algorithm name="MHASH_MYSPECIALHASH" java-name="specialhash"/>
- * &lt;/init>
- * </pre>
- *
- * <pre>
- * &lt;?php $hash = mhash(MHASH_MYSPECIALHASH, $data)  ... ?>
- * </pre>
- *
+ * and SHA512.
  */
 public class QuercusMhashModule extends AbstractQuercusModule {
   private static final L10N L = new L10N(QuercusMhashModule.class);
   private static final Logger log
     = Logger.getLogger(QuercusMhashModule.class.getName());
+
+  public static final int MHASH_CRC32 = 0;
+  public static final int MHASH_MD5 = 1;
+  public static final int MHASH_SHA1 = 2;
+  public static final int MHASH_HAVAL256 = 3;
+  public static final int MHASH_RIPEMD160 = 5;
+  public static final int MHASH_TIGER = 7;
+  public static final int MHASH_GOST = 8;
+  public static final int MHASH_CRC32B = 9;
+  public static final int MHASH_HAVAL224 = 10;
+  public static final int MHASH_HAVAL192 = 11;
+  public static final int MHASH_HAVAL160 = 12;
+  public static final int MHASH_HAVAL128 = 13;
+  public static final int MHASH_TIGER128 = 14;
+  public static final int MHASH_TIGER160 = 15;
+  public static final int MHASH_MD4 = 16;
+  public static final int MHASH_SHA256 = 17;
+  public static final int MHASH_ADLER32 = 18;
+  public static final int MHASH_SHA224 = 19;
+  public static final int MHASH_SHA512 = 20;
+  public static final int MHASH_SHA384 = 21;
+  public static final int MHASH_WHIRLPOOL = 22;
+  public static final int MHASH_RIPEMD128 = 23;
+  public static final int MHASH_RIPEMD256 = 24;
+  public static final int MHASH_RIPEMD320 = 25;
+  public static final int MHASH_SNEFRU128 = 26;
+  public static final int MHASH_SNEFRU256 = 27;
+  public static final int MHASH_MD2 = 28;
 
   private HashMap<Integer, MhashAlgorithm> _algorithmMap
     = new HashMap<Integer, MhashAlgorithm>();
@@ -97,36 +93,41 @@ public class QuercusMhashModule extends AbstractQuercusModule {
 
   public QuercusMhashModule()
   {
-    addAlgorithm("MHASH_CRC32", 0, "CRC32");
-    addAlgorithm("MHASH_MD5", 1, "MD5");
-    addAlgorithm("MHASH_SHA1", 2, "SHA-1");
-    addAlgorithm("MHASH_HAVAL256", 3, "HAVAL-256");
-    addAlgorithm("MHASH_RIPEMD160", 5, "RIPEMD-160");
-    addAlgorithm("MHASH_TIGER", 7, "TIGER");
-    addAlgorithm("MHASH_GOST", 8, "GOST");
-    addAlgorithm("MHASH_CRC32B", 9, "CRC32B");
-    addAlgorithm("MHASH_HAVAL224", 10, "HAVAL-224");
-    addAlgorithm("MHASH_HAVAL192", 11, "HAVAL-192");
-    addAlgorithm("MHASH_HAVAL160", 12, "HAVAL-160");
-    addAlgorithm("MHASH_HAVAL128", 13, "HAVAL-128");
-    addAlgorithm("MHASH_TIGER128", 14, "TIGER-128");
-    addAlgorithm("MHASH_TIGER160", 15, "TIGER-160");
-    addAlgorithm("MHASH_MD4", 16, "MD4");
-    addAlgorithm("MHASH_SHA256", 17, "SHA-256");
-    addAlgorithm("MHASH_ADLER32", 18, "ADLER-32");
-    addAlgorithm("MHASH_SHA224", 19, "SHA-224");
-    addAlgorithm("MHASH_SHA512", 20, "SHA-512");
-    addAlgorithm("MHASH_SHA384", 21, "SHA-384");
-    addAlgorithm("MHASH_WHIRLPOOL", 22, "WHIRLPOOL");
-    addAlgorithm("MHASH_RIPEMD128", 23, "RIPEMD-128");
-    addAlgorithm("MHASH_RIPEMD256", 24, "RIPEMD-256");
-    addAlgorithm("MHASH_RIPEMD320", 25, "RIPEMD-320");
-    addAlgorithm("MHASH_SNEFRU128", 26, "SNEFRU-128");
-    addAlgorithm("MHASH_SNEFRU256", 27, "SNEFRU-256");
-    addAlgorithm("MHASH_MD2", 28, "MD2");
+    addAlgorithm(MHASH_CRC32, "CRC32",  "CRC32");
+    addAlgorithm(MHASH_MD5, "MD5",  "MD5");
+    addAlgorithm(MHASH_SHA1, "SHA1",  "SHA-1");
+    addAlgorithm(MHASH_HAVAL256, "HAVAL256",  "HAVAL-256");
+    addAlgorithm(MHASH_RIPEMD160, "RIPEMD160",  "RIPEMD-160");
+    addAlgorithm(MHASH_TIGER, "TIGER",  "TIGER");
+    addAlgorithm(MHASH_GOST, "GOST",  "GOST");
+    addAlgorithm(MHASH_CRC32B, "CRC32B",  "CRC32B");
+    addAlgorithm(MHASH_HAVAL224, "HAVAL224",  "HAVAL-224");
+    addAlgorithm(MHASH_HAVAL192, "HAVAL192",  "HAVAL-192");
+    addAlgorithm(MHASH_HAVAL160, "HAVAL160",  "HAVAL-160");
+    addAlgorithm(MHASH_HAVAL128, "HAVAL128",  "HAVAL-128");
+    addAlgorithm(MHASH_TIGER128, "TIGER128",  "TIGER-128");
+    addAlgorithm(MHASH_TIGER160, "TIGER160",  "TIGER-160");
+    addAlgorithm(MHASH_MD4, "MD4",  "MD4");
+    addAlgorithm(MHASH_SHA256, "SHA256",  "SHA-256");
+    addAlgorithm(MHASH_ADLER32, "ADLER32",  "ADLER-32");
+    addAlgorithm(MHASH_SHA224, "SHA224",  "SHA-224");
+    addAlgorithm(MHASH_SHA512, "SHA512",  "SHA-512");
+    addAlgorithm(MHASH_SHA384, "SHA384",  "SHA-384");
+    addAlgorithm(MHASH_WHIRLPOOL, "WHIRLPOOL",  "WHIRLPOOL");
+    addAlgorithm(MHASH_RIPEMD128, "RIPEMD128",  "RIPEMD-128");
+    addAlgorithm(MHASH_RIPEMD256, "RIPEMD256",  "RIPEMD-256");
+    addAlgorithm(MHASH_RIPEMD320, "RIPEMD320",  "RIPEMD-320");
+    addAlgorithm(MHASH_SNEFRU128, "SNEFRU128",  "SNEFRU-128");
+    addAlgorithm(MHASH_SNEFRU256, "SNEFRU256",  "SNEFRU-256");
+    addAlgorithm(MHASH_MD2, "MD2",  "MD2");
   }
 
-  private void addAlgorithm(String name, int ordinal, String javaName)
+  public boolean isExtensionLoaded(String name)
+  {
+    return "mhash".equals(name);
+  }
+
+  private void addAlgorithm(int ordinal, String name, String javaName)
   {
     MhashAlgorithm algorithm = new MhashAlgorithm(name, javaName, null);
 
@@ -134,55 +135,6 @@ public class QuercusMhashModule extends AbstractQuercusModule {
 
     if (ordinal > _highestOrdinal)
       _highestOrdinal = ordinal;
-  }
-
-  public void addAlgorithm(MhashAlgorithm algorithm)
-    throws ConfigException
-  {
-    // first, check for reconfigure
-
-    for (MhashAlgorithm compare : _algorithmMap.values()) {
-      if (compare.getName().equals(algorithm.getName())) {
-
-        compare.setJavaName(algorithm.getJavaName());
-        compare.setJavaProvider(algorithm.getJavaProvider());
-
-        if (compare.createMessageDigest() == null)
-          throw new ConfigException(L.l("no MessageDigest for `{0}'", compare));
-
-        log.config(L.l("reconfigured `{0}'", algorithm));
-
-        return;
-      }
-    }
-
-    // not a reconfigure, so add new
-
-    if (algorithm.createMessageDigest() == null)
-      throw new ConfigException(L.l("no MessageDigest for `{0}'", algorithm));
-
-    int ordinal = ++_highestOrdinal;
-
-    _algorithmMap.put(ordinal, algorithm);
-
-    log.config(L.l("added `{0}'", algorithm));
-
-  }
-
-  public Map<String, Value> getConstMap()
-  {
-    HashMap<String, Value> constMap = new HashMap<String, Value>();
-
-    for (Map.Entry<Integer, MhashAlgorithm> entry : _algorithmMap.entrySet()) {
-      constMap.put(entry.getValue().getName(), new LongValue(entry.getKey()));
-    }
-
-    return constMap;
-  }
-
-  public boolean isExtensionLoaded(String name)
-  {
-    return "mhash".equals(name);
   }
 
   public Value mhash(int hash, String data, @Optional String key)
@@ -236,7 +188,7 @@ public class QuercusMhashModule extends AbstractQuercusModule {
     if (algorithm == null)
       return BooleanValue.FALSE;
     else
-      return new StringValue(algorithm.getShortName());
+      return new StringValue(algorithm.getName());
   }
 
   // XXX: public String mhash_keygen_s2k(int hash, String password, String salt, int bytes)
@@ -259,7 +211,7 @@ public class QuercusMhashModule extends AbstractQuercusModule {
     }
 
     /**
-     * The php name, for example `MHASH_CRC32'.
+     * The php name, for example `CRC32'.
      */
     public void setName(String name)
     {
@@ -308,19 +260,8 @@ public class QuercusMhashModule extends AbstractQuercusModule {
       if (_name == null)
         throw new ConfigException(L.l("`{0}' is required", "name"));
 
-      if (!_name.startsWith("MHASH_"))
-        throw new ConfigException(L.l("`{0}' must begin with `{1}'", "name", "MHASH_"));
-
       if (_javaName == null)
         throw new ConfigException(L.l("`{0}' is required", "java-name"));
-    }
-
-    /**
-     * Returns the name without the MHASH_ prefix.
-     */
-    public String getShortName()
-    {
-      return _name.substring(6);
     }
 
     /**
