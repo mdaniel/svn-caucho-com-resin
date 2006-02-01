@@ -562,38 +562,13 @@ public class QuercusVariableModule extends AbstractQuercusModule {
 			      @Optional Value isRet)
     throws Throwable
   {
-    print_r_impl(env, v, 0);
+    // XXX: isRet is ignored
 
-    return BooleanValue.FALSE;
-  }
-
-  private static void print_r_impl(Env env, Value v, int depth)
-    throws Throwable
-  {
     WriteStream out = env.getOut();
 
-    v = v.toValue();
+    v.printR(env, out, 0, new IdentityHashMap<Value, String>());
 
-    if (v instanceof ArrayValue) {
-      ArrayValue array = (ArrayValue) v;
-
-      out.println(v.toString());
-      printDepth(out, 8 * depth);
-      out.println("(");
-
-      for (Map.Entry<Value,Value> entry : array.entrySet()) {
-        printDepth(out, 8 * depth);
-        out.print("    [");
-        out.print(entry.getKey());
-        out.print("] => ");
-        print_r_impl(env, entry.getValue().toValue(), depth + 1); // XXX: recursion
-	out.println();
-      }
-      printDepth(out, 8 * depth);
-      out.println(")");
-    } else {
-      v.print(env);
-    }
+    return BooleanValue.FALSE;
   }
 
   private static void printDepth(WriteStream out, int depth)

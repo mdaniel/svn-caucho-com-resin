@@ -428,5 +428,14 @@ public class RefVar extends Value {
     out.print("&");
     toValue().varDumpImpl(env, out, depth, valueSet);
   }
+
+  protected void printRImpl(Env env,
+                            WriteStream out,
+                            int depth,
+                            IdentityHashMap<Value, String> valueSet)
+    throws Throwable
+  {
+    toValue().printRImpl(env, out, depth, valueSet);
+  }
 }
 

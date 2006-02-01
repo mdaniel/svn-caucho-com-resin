@@ -1215,10 +1215,10 @@ abstract public class Value {
     return toString();
   }
 
-  public void varDump(Env env,
-                      WriteStream out,
-                      int depth,
-                      IdentityHashMap<Value, String> valueSet)
+  final public void varDump(Env env,
+                            WriteStream out,
+                            int depth,
+                            IdentityHashMap<Value, String> valueSet)
     throws Throwable
   {
     if (valueSet.get(this) != null) {
@@ -1237,9 +1237,39 @@ abstract public class Value {
   }
 
   protected void varDumpImpl(Env env,
-                                      WriteStream out,
-                                      int depth,
-                                      IdentityHashMap<Value, String> valueSet)
+                             WriteStream out,
+                             int depth,
+                             IdentityHashMap<Value, String> valueSet)
+    throws Throwable
+  {
+    out.print(toString());
+  }
+
+  final public void printR(Env env,
+                           WriteStream out,
+                           int depth,
+                           IdentityHashMap<Value, String> valueSet)
+    throws Throwable
+  {
+    if (valueSet.get(this) != null) {
+      out.print("#recursion#");
+      return;
+    }
+
+    valueSet.put(this, "printing");
+
+    try {
+      printRImpl(env, out, depth, valueSet);
+    }
+    finally {
+      valueSet.remove(this);
+    }
+  }
+
+  protected void printRImpl(Env env,
+                            WriteStream out,
+                            int depth,
+                            IdentityHashMap<Value, String> valueSet)
     throws Throwable
   {
     out.print(toString());

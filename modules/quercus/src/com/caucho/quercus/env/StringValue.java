@@ -66,20 +66,8 @@ public class StringValue extends Value {
   }
 
   /**
-   * Create a string out of a character array.  This constructor may use
-   * the passed character array without copying, so the caller should assume
-   * that the array can no longer be modified.
-   */
-  public StringValue(char[] chars)
-  {
-    _chars = chars;
-    // XXX: string constructor copies the array
-    _value = new String(chars);
-  }
-
-  /**
-   * Create a string out of a bye array, with no consideration of character
-   * encoding. * Each byte becomes one character.
+   * Create a string out of a byte array, with no consideration of character
+   * encoding. Each byte becomes one character.
    */
   public StringValue(byte[] bytes)
   {

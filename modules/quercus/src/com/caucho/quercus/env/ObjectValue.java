@@ -55,9 +55,9 @@ public class ObjectValue extends Value {
   private static final StringValue TO_STRING = new StringValue("__toString");
 
   private static final int DEFAULT_SIZE = 16;
-  
+
   private final QuercusClass _cl;
-  
+
   private Entry []_entries;
   private int _hashMask;
 
@@ -66,7 +66,7 @@ public class ObjectValue extends Value {
   public ObjectValue(QuercusClass cl)
   {
     _cl = cl;
-    
+
     _entries = new Entry[DEFAULT_SIZE];
     _hashMask = _entries.length - 1;
   }
@@ -169,7 +169,7 @@ public class ObjectValue extends Value {
     for (; count >= 0; count--) {
       Entry entry = _entries[hash];
 
-      if (entry == null) 
+      if (entry == null)
 	return UnsetValue.UNSET;
       else if (key.equals(entry.getKey()))
 	return entry.getValue();
@@ -195,7 +195,7 @@ public class ObjectValue extends Value {
     Var var = new Var(value);
 
     entry.setValue(var);
-    
+
     return var;
   }
 
@@ -212,7 +212,7 @@ public class ObjectValue extends Value {
     for (; count >= 0; count--) {
       Entry entry = _entries[hash];
 
-      if (entry == null) 
+      if (entry == null)
 	return null;
       else if (key.equals(entry.getKey()))
 	return entry;
@@ -222,7 +222,7 @@ public class ObjectValue extends Value {
 
     return null;
   }
-  
+
   /**
    * Adds a new value.
    */
@@ -247,7 +247,7 @@ public class ObjectValue extends Value {
 
     return value;
   }
-  
+
   /**
    * Adds a new value.
    */
@@ -255,7 +255,7 @@ public class ObjectValue extends Value {
   {
     return putField(key, new StringValue(value));
   }
-  
+
   /**
    * Adds a new value.
    */
@@ -263,7 +263,7 @@ public class ObjectValue extends Value {
   {
     return putField(key, LongValue.create(value));
   }
-  
+
   /**
    * Adds a new value.
    */
@@ -294,7 +294,7 @@ public class ObjectValue extends Value {
 
       hash = (hash + 1) & hashMask;
     }
-    
+
     _size++;
 
     Entry newEntry = new Entry(key);
@@ -309,7 +309,7 @@ public class ObjectValue extends Value {
   private void expand()
   {
     Entry []entries = _entries;
-    
+
     _entries = new Entry[2 * entries.length];
     _hashMask = _entries.length - 1;
 
@@ -555,7 +555,7 @@ public class ObjectValue extends Value {
 
     // XXX:
     // return new ObjectValue(env, map, _cl, getArray());
-    
+
     return this;
   }
 
@@ -595,7 +595,7 @@ public class ObjectValue extends Value {
       sb.append(":\"");
       sb.append(key);
       sb.append("\"");
-      
+
       entry.getValue().serialize(sb);
     }
 
@@ -652,7 +652,48 @@ public class ObjectValue extends Value {
   {
     return "ObjectValue@" + System.identityHashCode(this) +  "[" + _cl.getName() + "]";
   }
-  
+
+  public void varDumpImpl(Env env,
+                          WriteStream out,
+                          int depth,
+                          IdentityHashMap<Value, String> valueSet)
+    throws Throwable
+  {
+    out.println("object(" + getName() + ") (" + getSize() + ") {");
+
+    for (Map.Entry<String,Value> mapEntry : entrySet()) {
+      ObjectValue.Entry entry = (ObjectValue.Entry) mapEntry;
+
+      entry.varDump(env, out, depth + 1, valueSet);
+    }
+
+    printDepth(out, 2 * depth);
+
+    out.print("}");
+  }
+
+  protected void printRImpl(Env env,
+                            WriteStream out,
+                            int depth,
+                            IdentityHashMap<Value, String> valueSet)
+    throws Throwable
+  {
+    out.print(_cl.getName());
+    out.print(' ');
+    out.println("Object");
+    printDepth(out, 4 * depth);
+    out.println("(");
+
+    for (Map.Entry<String,Value> mapEntry : entrySet()) {
+      ObjectValue.Entry entry = (ObjectValue.Entry) mapEntry;
+
+      entry.printR(env, out, depth + 1, valueSet);
+    }
+
+    printDepth(out, 4 * depth);
+    out.println(")");
+  }
+
   public class EntrySet extends AbstractSet<Map.Entry<String,Value>> {
     EntrySet()
     {
@@ -668,7 +709,7 @@ public class ObjectValue extends Value {
       return new EntryIterator(ObjectValue.this._entries);
     }
   }
-  
+
   public static class EntryIterator
     implements Iterator<Map.Entry<String,Value>> {
     private final Entry []_list;
@@ -678,12 +719,12 @@ public class ObjectValue extends Value {
     {
       _list = list;
     }
-    
+
     public boolean hasNext()
     {
       for (; _index < _list.length && _list[_index] == null; _index++) {
       }
-      
+
       return _index < _list.length;
     }
 
@@ -728,7 +769,7 @@ public class ObjectValue extends Value {
     {
       return _key;
     }
-    
+
     public Value toValue()
     {
       // The value may be a var
@@ -753,7 +794,7 @@ public class ObjectValue extends Value {
 	return var;
       }
     }
-  
+
     /**
      * Converts to an argument value.
      */
@@ -761,7 +802,7 @@ public class ObjectValue extends Value {
     {
       return getRawValue().toValue();
     }
-    
+
     public Value setValue(Value value)
     {
       Value oldValue = toValue();
@@ -770,7 +811,7 @@ public class ObjectValue extends Value {
 
       return oldValue;
     }
-  
+
     /**
      * Converts to a variable reference (for function  arguments)
      */
@@ -783,7 +824,7 @@ public class ObjectValue extends Value {
       else
 	return new RefVar(this);
     }
-  
+
     /**
      * Converts to a variable reference (for function  arguments)
      */
@@ -806,33 +847,36 @@ public class ObjectValue extends Value {
       else
 	return this;
     }
-  }
 
-  public void varDumpImpl(Env env,
-                          WriteStream out,
-                          int depth,
-                          IdentityHashMap<Value, String> valueSet)
-    throws Throwable
-  {
-    out.println("object(" + getName() + ") (" + getSize() + ") {");
-
-    depth++;
-
-    for (Map.Entry<String,Value> entry : entrySet()) {
+    public void varDumpImpl(Env env,
+                            WriteStream out,
+                            int depth,
+                            IdentityHashMap<Value, String> valueSet)
+      throws Throwable
+    {
       printDepth(out, 2 * depth);
-      out.println("[\"" + entry.getKey() + "\"]=>");
+      out.println("[\"" + getKey() + "\"]=>");
 
       printDepth(out, 2 * depth);
-      entry.getValue().varDumpImpl(env, out, depth, valueSet);
+      super.toValue().varDump(env, out, depth, valueSet);
 
       out.println();
     }
 
-    depth--;
+    protected void printRImpl(Env env,
+                              WriteStream out,
+                              int depth,
+                              IdentityHashMap<Value, String> valueSet)
+      throws Throwable
+    {
+      printDepth(out, 4 * depth);
+      out.print("[" + getKey() + "] => ");
+      super.toValue().printR(env, out, depth + 1, valueSet);
 
-    // printDepth(out, 2 * depth);
+      out.println();
+    }
 
-    out.print("}");
   }
+
 }
 
