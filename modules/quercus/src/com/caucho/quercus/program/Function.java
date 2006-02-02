@@ -69,7 +69,7 @@ public class Function extends AbstractFunction {
 
   private final FunctionInfo _info;
   private final boolean _isReturnsReference;
-  
+
   private final String _name;
   private final Arg []_args;
   private final Statement _statement;
@@ -100,16 +100,16 @@ public class Function extends AbstractFunction {
     _name = name;
     _info = info;
     _isReturnsReference = info.isReturnsReference();
-    
+
     _args = new Arg[argList.size()];
     argList.toArray(_args);
-    
+
     Statement []statements = new Statement[statementList.size()];
 
     statementList.toArray(statements);
 
     _statement = new BlockStatement(statements);
-    
+
     setGlobal(info.isPageStatic());
   }
 
@@ -148,7 +148,7 @@ public class Function extends AbstractFunction {
   {
     throw new UnsupportedOperationException();
   }
-  
+
   public Value execute(Env env)
     throws Throwable
   {
@@ -175,7 +175,7 @@ public class Function extends AbstractFunction {
     else {
       if (_args[args.length].getDefault() == null) {
 	int required = 0;
-	
+
 	for (required = _args.length - 1; required >= 0; required--) {
 	  if (_args[required].getDefault() == null)
 	    break;
@@ -188,7 +188,7 @@ public class Function extends AbstractFunction {
       expandedArgs = new Expr[_args.length];
 
       System.arraycopy(args, 0, expandedArgs, 0, args.length);
-    
+
       for (int i = args.length; i < expandedArgs.length; i++) {
 	Expr defaultExpr = _args[i].getDefault();
 
@@ -198,22 +198,22 @@ public class Function extends AbstractFunction {
 	  expandedArgs[i] = NullLiteralExpr.NULL;
       }
     }
-    
+
     return expandedArgs;
   }
-  
+
   public Value eval(Env env, Expr []args)
     throws Throwable
   {
     return evalImpl(env, args, false);
   }
-  
+
   public Value evalRef(Env env, Expr []args)
     throws Throwable
   {
     return evalImpl(env, args, true);
   }
-  
+
   private Value evalImpl(Env env, Expr []args, boolean isRef)
     throws Throwable
   {
@@ -234,13 +234,13 @@ public class Function extends AbstractFunction {
       }
       else if (arg.isReference()) {
 	values[i] = args[i].evalRef(env);
-      
+
 	map.put(arg.getName(), values[i].toRefVar());
       }
       else {
 	// quercus/0d04
 	values[i] = args[i].eval(env).copy();
-      
+
 	map.put(arg.getName(), values[i].toVar());
       }
     }
@@ -259,7 +259,7 @@ public class Function extends AbstractFunction {
 	map.put(arg.getName(), defaultExpr.eval(env).copy().toVar());
       }
     }
-      
+
     HashMap<String,Var> oldMap = env.pushEnv(map);
     Value []oldArgs = env.setFunctionArgs(values);
 
@@ -277,19 +277,19 @@ public class Function extends AbstractFunction {
       env.popEnv(oldMap);
     }
   }
-  
+
   public Value eval(Env env, Value []args)
     throws Throwable
   {
     return evalImpl(env, args, false);
   }
-  
+
   public Value evalRef(Env env, Value []args)
     throws Throwable
   {
     return evalImpl(env, args, true);
   }
-  
+
   private Value evalImpl(Env env, Value []args, boolean isRef)
     throws Throwable
   {
@@ -327,7 +327,7 @@ public class Function extends AbstractFunction {
 	map.put(arg.getName(), defaultExpr.eval(env).copy().toVar());
       }
     }
-      
+
     HashMap<String,Var> oldMap = env.pushEnv(map);
     Value []oldArgs = env.setFunctionArgs(args);
 
@@ -375,7 +375,7 @@ public class Function extends AbstractFunction {
   public boolean canGenerateCall(Expr []args)
   {
     // can only handle case where the arg length matches
-    return args.length < _args.length;
+    return args.length <= _args.length;
   }
 
   /**
@@ -421,7 +421,7 @@ public class Function extends AbstractFunction {
     for (int i = 0; i < _args.length; i++) {
       if (i != 0 || ! isVariableArgs())
 	out.print(", ");
-	
+
       if (i < args.length) {
 	Expr arg = args[i];
 
@@ -443,13 +443,13 @@ public class Function extends AbstractFunction {
 	out.print(", ");
       args[i].generateArg(out);
     }
-      
+
     if (isVariableArgs() && (_args.length > 0 || args.length > 0))
       out.print("}");
 
     out.print(")");
 
-    if (! isRef && _isReturnsReference)
+    if (! (isRef && _isReturnsReference))
       out.print(".copy()");
   }
 
@@ -464,7 +464,7 @@ public class Function extends AbstractFunction {
     // php/3254
     return _info.isUsesSymbolTable() || _info.isVariableVar();
   }
-  
+
   /**
    * Generates the code for the class component.
    *
@@ -478,7 +478,7 @@ public class Function extends AbstractFunction {
     else
       generateFixedArgs(out);
   }
-  
+
   /**
    * Generates the code for the class component.
    *
@@ -490,10 +490,10 @@ public class Function extends AbstractFunction {
     out.println();
 
     out.print("public ");
-    
+
     // quercus/3960
     out.print("static ");
-    
+
     out.print("Value fun_");
     out.print(_name);
     out.print("(Env env");
@@ -531,7 +531,7 @@ public class Function extends AbstractFunction {
     else {
       out.print(" = new CompiledMethod" + ref + "_" + _args.length);
     }
-    
+
     out.print("(\"");
     out.printJavaString(_name);
     out.print("\"");
@@ -540,11 +540,11 @@ public class Function extends AbstractFunction {
       out.print(", ");
 
       Expr defaultExpr = _args[i].getDefault();
-      
+
       defaultExpr.generateExpr(out);
     }
     out.println(") {");
-  
+
     out.pushDepth();
 
     if (isStatic())
@@ -556,14 +556,14 @@ public class Function extends AbstractFunction {
       out.print(", Value a" + i);
     }
     out.println(")");
-    
+
     out.println("  throws Throwable");
     out.println("{");
 
     out.print("  return ");
 
     out.print("fun_" + _name + "(env");
-    
+
     if (! isStatic())
       out.print(", quercus_this");
 
@@ -571,7 +571,7 @@ public class Function extends AbstractFunction {
       out.print(", a" + i);
     }
     out.println(");");
-    
+
     out.println("}");
     out.popDepth();
     out.println("};");
@@ -581,7 +581,7 @@ public class Function extends AbstractFunction {
       out.println("static { " + funName + ".setGlobal(false); }");
     }
   }
-  
+
   /**
    * Generates the code for the class component.
    *
@@ -599,7 +599,7 @@ public class Function extends AbstractFunction {
       out.println("(Env env, Value []args)");
     else
       out.println("(Env env, Value quercus_this, Value []args)");
-      
+
     out.println("  throws Throwable");
     out.println("{");
     out.pushDepth();
@@ -613,7 +613,7 @@ public class Function extends AbstractFunction {
     }
 
     generateBody(out);
-    
+
     if (_info.isVariableArgs()) {
       out.popDepth();
       out.println("} finally {");
@@ -622,7 +622,7 @@ public class Function extends AbstractFunction {
       out.popDepth();
       out.println("}");
     }
-    
+
     out.popDepth();
     out.println("}");
 
@@ -630,12 +630,12 @@ public class Function extends AbstractFunction {
     out.println("final static AbstractFunction __quercus_fun_" + _name);
 
     String ref = _isReturnsReference ? "Ref" : "";
-    
+
     if (isStatic())
       out.print(" = new CompiledFunction" + ref + "_N(");
     else
       out.print(" = new CompiledMethod" + ref + "_N(");
-    
+
     out.print("\"");
     out.printJavaString(_name);
     out.print("\", new Expr[] {");
@@ -645,7 +645,7 @@ public class Function extends AbstractFunction {
 	out.print(", ");
 
       Expr defaultExpr = _args[i].getDefault();
-      
+
       if (defaultExpr != null)
 	defaultExpr.generateExpr(out);
       else
@@ -654,7 +654,7 @@ public class Function extends AbstractFunction {
     out.println("}");
     /*
     out.print(", new boolean [] {");
-    
+
     for (int i = 0; i < _args.length; i++) {
       if (i != 0)
 	out.print(", ");
@@ -664,7 +664,7 @@ public class Function extends AbstractFunction {
     out.print("}");
     */
     out.println(") {");
-  
+
     out.pushDepth();
 
     /*
@@ -678,7 +678,7 @@ public class Function extends AbstractFunction {
       out.println("public Value eval" + ref + "Impl(Env env, Value []args)");
     else
       out.println("public Value evalMethod" + ref + "Impl(Env env, Value quercus_this, Value []args)");
-      
+
     out.println("  throws Throwable");
     out.println("{");
     out.pushDepth();
@@ -687,7 +687,7 @@ public class Function extends AbstractFunction {
       out.println("  return fun_" + _name + "(env, args);");
     else
       out.println("  return fun_" + _name + "(env, quercus_this, args);");
-    
+
     out.popDepth();
     out.println("}");
     out.popDepth();
@@ -699,7 +699,7 @@ public class Function extends AbstractFunction {
   {
     out.println("env.checkTimeout();");
     out.println();
-    
+
     for (VarInfo var : _info.getVariables()) {
       String varName = "v_" + var.getName();
       String argName = varName;
@@ -738,15 +738,15 @@ public class Function extends AbstractFunction {
 	out.println(varName + " = " + argName + ".toArgValue();");
       }
     }
-    
+
     for (String var : _info.getTempVariables()) {
       out.println("Value " + var + ";");
     }
-      
+
     if (isVariableMap()) {
       out.println("java.util.HashMap<String,Var> _quercus_map = new java.util.HashMap<String,Var>();");
       out.println("java.util.HashMap<String,Var> _quercus_oldMap = env.pushEnv(_quercus_map);");
-    
+
       out.println("try {");
       out.pushDepth();
 
@@ -775,7 +775,7 @@ public class Function extends AbstractFunction {
     if (_statement.fallThrough() != Statement.RETURN)
       out.println("return com.caucho.quercus.env.NullValue.NULL;");
   }
-  
+
   /**
    * Generates the code for the initialization component.
    *
@@ -799,7 +799,7 @@ public class Function extends AbstractFunction {
     out.println("function " + _name + "()");
     _statement.debug(out);
   }
-  
+
   public String toString()
   {
     return "Function[" + _name + "]";
