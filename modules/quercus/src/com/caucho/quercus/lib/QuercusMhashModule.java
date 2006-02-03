@@ -158,9 +158,9 @@ public class QuercusMhashModule extends AbstractQuercusModule {
     // XXX: s/b "StringValue data" as parameter
     StringValue dataV = new StringValue(data);
 
-    byte[] result = messageDigest.digest(dataV.toBytes());
+    byte[] result = messageDigest.digest(dataV.toString().getBytes());
 
-    return new StringValue(result);
+    return new StringValue(new String(result));
   }
 
   /**
