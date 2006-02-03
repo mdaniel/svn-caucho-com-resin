@@ -186,9 +186,12 @@ public class SimpleXMLElementValue extends Value {
               mapEntry.getValue().printR(env, out, depth + 4, valueSet);
               out.println();
             }
+            printDepth(out, 4 * (depth + 2));
+            out.println(')');
           } else 
             ((Value) entry.getValue()).printR(env, out, depth + 2, valueSet);
-            out.println();
+          
+          out.println();
         }
   
         //Print closing parenthesis
@@ -204,7 +207,10 @@ public class SimpleXMLElementValue extends Value {
         printDepth(out, 4 * depth);
         out.println('(');
       }
+      
       printAttributes(out, depth);
+      printDepth(out, 4 * depth);
+      out.println(')');
     }
     
     if (depth == 0)
@@ -772,6 +778,8 @@ public class SimpleXMLElementValue extends Value {
         out.println("[" + entry.getKey().toString() + "] => " + entry.getValue().toString());
       }
       out.println();
+      printDepth(out, 4 * (depth + 2));
+      out.println(')');
     }
   }
 }
