@@ -581,6 +581,18 @@ write_added_headers(stream_t *s, request_rec *r)
     cse_write_string(s, HMUX_HEADER, headers[i].key);
     cse_write_string(s, HMUX_STRING, headers[i].val);
   }
+
+  if (r->prev) {
+    if (r->prev->args) {
+      cse_write_string(s, HMUX_HEADER, "REDIRECT_QUERY_STRING");
+      cse_write_string(s, HMUX_STRING, r->prev->args);
+    }
+    
+    if (r->prev->uri) {
+      cse_write_string(s, HMUX_HEADER, "REDIRECT_URL");
+      cse_write_string(s, HMUX_STRING, r->prev->uri);
+    }
+  }
 }
 
 /**
