@@ -934,7 +934,14 @@ public class QuercusFileModule extends AbstractQuercusModule {
           return BooleanValue.FALSE;
         }
 
-        return new FileReadValue(path);
+        boolean addSlashes;
+
+        if (mode.contains("b"))
+          addSlashes = false;
+        else
+          addSlashes = env.getIniBoolean("magic_quotes_runtime");
+
+        return new FileReadValue(path, addSlashes);
       }
       else if (mode.startsWith("w")) {
         if (path.exists() && !path.canWrite()) {

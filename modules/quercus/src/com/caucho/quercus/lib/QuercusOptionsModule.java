@@ -149,6 +149,14 @@ public class QuercusOptionsModule extends AbstractQuercusModule {
   }
 
   /**
+   * Gets the magic quotes runtime value.
+   */
+  public static Value get_magic_quotes_runtime(Env env)
+  {
+    return LongValue.create(env.getIni("magic_quotes_runtime").toLong());
+  }
+
+  /**
    * Sets an initialization value.
    */
   public static Value ini_alter(Env env, String varName, String value)
@@ -278,9 +286,7 @@ public class QuercusOptionsModule extends AbstractQuercusModule {
    */
   public static Value set_magic_quotes_runtime(Env env, Value value)
   {
-    env.setIni("magic_quotes_runtime", value.toString());
-
-    return value;
+    return env.setIniBoolean("magic_quotes_runtime", value);
   }
 
   /**

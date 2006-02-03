@@ -40,21 +40,24 @@ import com.caucho.vfs.ReadStream;
 import com.caucho.quercus.env.Env;
 
 /**
- * Represents a PHP open file
+ * Represents a Quercus open file
  */
 public class FileReadValue extends FileValue {
   private static final Logger log
     = Logger.getLogger(FileReadValue.class.getName());
-  
+
   private ReadStream _is;
   private long _offset;
 
-  public FileReadValue(Path path)
+  public FileReadValue(Path path, boolean addSlashes)
     throws IOException
   {
     super(path);
-    
+
     _is = path.openRead();
+
+    if (addSlashes)
+      _is.pushFilter(new AddSlashesStreamFilter());
   }
 
   /**
@@ -126,7 +129,7 @@ public class FileReadValue extends FileValue {
     throws IOException
   {
     // XXX: offset messed up
-    
+
     if (_is != null)
       return _is.readLineNoChop();
     else
@@ -178,7 +181,7 @@ public class FileReadValue extends FileValue {
       log.log(Level.FINE, e.toString(), e);
     }
   }
-  
+
   /**
    * Converts to a string.
    * @param env

@@ -615,6 +615,47 @@ public class Env {
   }
 
   /**
+   * Returns the configuration value of an init var.
+   */
+  public Value getConfigVar(String var)
+  {
+    return _quercus.getIni(var);
+  }
+
+  /**
+   * Sets an ini value.
+   */
+  public Value setIni(String var, String value)
+  {
+    StringValue oldValue = getIni(var);
+
+    if (_iniMap == null)
+      _iniMap = new HashMap<String,StringValue>();
+
+    _iniMap.put(var, new StringValue(value));
+
+    return oldValue;
+  }
+
+  /**
+   * Sets a boolean ini value.
+   */
+  public Value setIniBoolean(String var, Value value)
+  {
+    // XXX: needs testing and correlation with Quercus.setIni
+
+    if (value instanceof StringValue) {
+      if ("off".equalsIgnoreCase(value.toString()))
+        return setIni(var, "");
+
+      if ("on".equalsIgnoreCase(value.toString()))
+        return setIni(var, "1");
+    }
+
+    return setIni(var, value.toBoolean() ? "1" : "");
+  }
+
+  /**
    * Returns an ini value.
    */
   public StringValue getIni(String var)
@@ -630,29 +671,6 @@ public class Env {
     value = _quercus.getIni(var);
 
     return value;
-  }
-
-  /**
-   * Returns the configuration value of an init var.
-   */
-  public Value getConfigVar(String var)
-  {
-    return _quercus.getIni(var);
-  }
-
-  /**
-   * Returns an ini value.
-   */
-  public Value setIni(String var, String value)
-  {
-    StringValue oldValue = getIni(var);
-
-    if (_iniMap == null)
-      _iniMap = new HashMap<String,StringValue>();
-
-    _iniMap.put(var, new StringValue(value));
-
-    return oldValue;
   }
 
   /**
