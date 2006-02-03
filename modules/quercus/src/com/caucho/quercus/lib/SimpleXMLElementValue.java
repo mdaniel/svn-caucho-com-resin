@@ -141,7 +141,7 @@ public class SimpleXMLElementValue extends Value {
     }
     
     if (_childMap == null)
-      fillChildrenHashMap();
+      fillChildMap();
     
     Set keyValues = _childMap.entrySet();
     int keyLength = keyValues.size();
@@ -333,7 +333,7 @@ public class SimpleXMLElementValue extends Value {
   /**
    * 
    */
-  public void fillChildrenHashMap()
+  public void fillChildMap()
   {
     NodeList children = _element.getChildNodes();
     int nodeLength = children.getLength();
@@ -493,7 +493,7 @@ public class SimpleXMLElementValue extends Value {
   }
 
   /**
-   * gets all children from expression $xml->foo
+   * 
    * @param name
    * @return ArrayValue, SimpleXMLElement or null
    */
@@ -501,7 +501,7 @@ public class SimpleXMLElementValue extends Value {
   {
     Value result = null;
     
-    fillChildrenHashMap();
+    fillChildMap();
     
     if (!_childMap.isEmpty())   
       result = _childMap.get(new StringValue(name));
@@ -577,18 +577,59 @@ public class SimpleXMLElementValue extends Value {
     return _element;
   }
 
-   /**
-   * Returns the field ref.
+  /**
+   * XXX: Currently does not work for $xml->inside->wayinside = "foo";
+   * 
+   * $xml = simpleXML_load_string("<foo><inside><wayinside>bar</wayinside></inside></foo>");
+   * 
+   * need to check for the following 2 cases:
+   * $xml->inside->wayinside = "New Value";
+   * or
+   * $temp = $xml->inside;
+   * $temp->wayinside = "New Value;
+   * 
+   * Both are valid
+   * 
    */
-  public Value putField(String index, Value object)
-  {
-    NodeList children = _element.getChildNodes();
-    int nodeLength = children.getLength();
+  public Value putField(String name, Value value)
+  {    
+    if (_childMap == null)
+     fillChildMap();
     
-    if (nodeLength == 0)
-      return NullValue.NULL;
-    
-    
+    if (!_childMap.isEmpty()) {
+      Value result = _childMap.get(new StringValue(name));  
+      
+      if (result == null)
+        return BooleanValue.FALSE;
+
+      // Issue warning if array
+      if (result instanceof ArrayValue) {
+
+      } else {
+        /**
+         *  $foo = simplexml_load_string('<parent><child><sub1 /><sub2 /></child></parent>');
+         *  $foo->child = "bar";
+         * 
+         *  EQUIVALENT TO:
+         * 
+         *  $foo = simplexml_load_string('<parent><child>bar</child></parent>');
+         * 
+         * So remove all children first then add text node; 
+         */
+        Element element = ((SimpleXMLElementValue) result).getElement();
+        NodeList children = element.getChildNodes();
+        int childrenLength = children.getLength();
+
+        for (int i = 0; i < childrenLength; i++)
+          element.removeChild(children.item(i));
+
+        Text text = _document.createTextNode(value.toString());
+
+        element.appendChild(text);
+        
+        return value;
+      }
+    }
     
     return NullValue.NULL;
   }
