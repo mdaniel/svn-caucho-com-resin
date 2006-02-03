@@ -663,7 +663,7 @@ public class ObjectValue extends Value {
     out.print("}");
   }
 
-  public void printRImpl(Env env,
+  protected void printRImpl(Env env,
                             WriteStream out,
                             int depth,
                             IdentityHashMap<Value, String> valueSet)
@@ -854,7 +854,7 @@ public class ObjectValue extends Value {
       out.println();
     }
 
-    public void printRImpl(Env env,
+    protected void printRImpl(Env env,
                               WriteStream out,
                               int depth,
                               IdentityHashMap<Value, String> valueSet)

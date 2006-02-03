@@ -424,7 +424,7 @@ public class RefVar extends Value {
     toValue().varDumpImpl(env, out, depth, valueSet);
   }
 
-  public void printRImpl(Env env,
+  protected void printRImpl(Env env,
                             WriteStream out,
                             int depth,
                             IdentityHashMap<Value, String> valueSet)

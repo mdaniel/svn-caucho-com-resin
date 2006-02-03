@@ -801,7 +801,7 @@ abstract public class ArrayValue extends Value {
     out.print("}");
   }
 
-  public void printRImpl(Env env,
+  protected void printRImpl(Env env,
                             WriteStream out,
                             int depth,
                             IdentityHashMap<Value, String> valueSet)
@@ -956,10 +956,10 @@ abstract public class ArrayValue extends Value {
       super.toValue().varDump(env, out, depth, valueSet);
     }
 
-    public void printRImpl(Env env,
-                           WriteStream out,
-                           int depth,
-                           IdentityHashMap<Value, String> valueSet)
+    protected void printRImpl(Env env,
+                              WriteStream out,
+                              int depth,
+                              IdentityHashMap<Value, String> valueSet)
       throws Throwable
     {
       printDepth(out, 8 * depth);
