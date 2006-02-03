@@ -81,6 +81,7 @@ import com.caucho.quercus.program.PhpProgram;
 
 import com.caucho.quercus.lib.QuercusVariableModule;
 import com.caucho.quercus.lib.QuercusSessionModule;
+import com.caucho.quercus.lib.QuercusStringModule;
 
 import com.caucho.quercus.resources.StreamContextResource;
 
@@ -173,9 +174,6 @@ public class Env {
   private HashMap<String,AbstractQuercusClass> _classMap
     = new HashMap<String,AbstractQuercusClass>();
 
-  private HashMap<String,Value> _optionMap
-    = new HashMap<String,Value>();
-
   private HashMap<String,StringValue> _iniMap;
 
   // specialMap is used for implicit resources like the mysql link
@@ -261,7 +259,7 @@ public class Env {
     if (_request.getMethod().equals("POST")) {
       _post = new ArrayValueImpl();
       _files = new ArrayValueImpl();
-      Post.fillPost(this, _post, _files, _request);
+      Post.fillPost(this, _post, _files, _request, getIniBoolean("magic_quotes_gpc"));
     }
 
     _startTime = Alarm.getCurrentTime();
@@ -606,8 +604,6 @@ public class Env {
   {
     SessionCallback callback = getSessionCallback();
 
-    SessionArrayValue session = null;
-
     if (callback != null) {
       callback.destroy(this, sessionId);
     }
@@ -790,7 +786,7 @@ public class Env {
    * Gets a variable
    *
    * @param name the variable name
-   * @param var the current value of the variable
+   * @param value the current value of the variable
    */
   public final Var getGlobalVar(String name, Value value)
   {
@@ -1017,7 +1013,7 @@ public class Env {
 	for (String key : keys) {
 	  String []value = _request.getParameterValues(key);
 
-	  Post.addFormValue(post, key, value);
+	  Post.addFormValue(post, key, value, getIniBoolean("magic_quotes_gpc"));
 	}
       }
       break;
@@ -1061,7 +1057,7 @@ public class Env {
 	for (String key : keys) {
 	  String []value = _request.getParameterValues(key);
 
-	  Post.addFormValue(array, key, value);
+          Post.addFormValue(array, key, value, getIniBoolean("magic_quotes_gpc"));
 	}
 
 	if (name.equals("_REQUEST") && _post != null) {
@@ -1109,10 +1105,16 @@ public class Env {
 	  for (int i = 0; i < cookies.length; i++) {
 	    Cookie cookie = cookies[i];
 
-	    String value = decodeValue(cookie.getValue());
+            String value = decodeValue(cookie.getValue());
 
-	    array.append(new StringValue(cookie.getName()),
-			 new StringValue(value));
+            StringValue valueAsValue;
+
+            if (getIniBoolean("magic_quotes_gpc"))
+              valueAsValue = QuercusStringModule.addslashes(value);
+            else
+              valueAsValue = new StringValue(value);
+
+            array.append(new StringValue(cookie.getName()), valueAsValue);
 	  }
 	}
 
@@ -1456,32 +1458,6 @@ public class Env {
   public Value getExtensionFuncs(String name)
   {
     return getPhp().getExtensionFuncs(name);
-  }
-
-  /**
-   * Returns an option.
-   */
-  public Value getOption(String name)
-  {
-    Value value = _optionMap.get(name);
-
-    if (value != null)
-      return value;
-    else
-      return NullValue.NULL;
-  }
-
-  /**
-   * Sets an option.
-   */
-  public Value setOption(String name, Value value)
-  {
-    Value oldValue = _optionMap.put(name, value);
-
-    if (oldValue != null)
-      return oldValue;
-    else
-      return NullValue.NULL;
   }
 
   /**
@@ -2364,7 +2340,6 @@ public class Env {
       _includePathList = new ArrayList<Path>();
 
       int head = 0;
-      int length = includePath.length();
       int tail;
       while ((tail = includePath.indexOf(':', head)) >= 0) {
 	String subpath = includePath.substring(head, tail);

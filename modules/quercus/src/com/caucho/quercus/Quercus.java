@@ -95,27 +95,27 @@ public class Quercus {
 
   private HashMap<String,InternStringValue> _internMap
     = new HashMap<String,InternStringValue>();
-  
+
   private HashMap<String,QuercusModule> _modules
     = new HashMap<String,QuercusModule>();
-  
+
   private HashMap<String,Value> _constMap
     = new HashMap<String,Value>();
-  
+
   private HashMap<String,StaticFunction> _staticFunctions
     = new HashMap<String,StaticFunction>();
 
   private QuercusClass _stdClass;
-  
+
   private HashMap<String,AbstractQuercusClass> _staticClasses
     = new HashMap<String,AbstractQuercusClass>();
-  
+
   private HashMap<String,AbstractQuercusClass> _lowerStaticClasses
     = new HashMap<String,AbstractQuercusClass>();
-  
+
   private HashMap<String,JavaClassDefinition> _javaClassWrappers
     = new HashMap<String,JavaClassDefinition>();
-  
+
   private HashMap<String,JavaClassDefinition> _lowerJavaClassWrappers
     = new HashMap<String,JavaClassDefinition>();
 
@@ -141,13 +141,13 @@ public class Quercus {
 
   /**
    * Constructor.
-   */ 
+   */
   public Quercus()
   {
     initStaticFunctions();
     initStaticClasses();
     initStaticClassServices();
-    
+
     _pageManager = new PageManager(this);
   }
 
@@ -229,9 +229,9 @@ public class Quercus {
 
     try {
       ClassLoader loader = Thread.currentThread().getContextClassLoader();
-      
+
       Class type = Class.forName(className, false, loader);
-				 
+
       def = new JavaClassDefinition(this, className, type);
 
       _javaClassWrappers.put(className, def);
@@ -272,6 +272,9 @@ public class Quercus {
    */
   public void setIni(String name, String value)
   {
+    if ("off".equalsIgnoreCase(value))
+      value = "";
+
     setIni(name, new StringValue(value));
   }
 
@@ -290,7 +293,7 @@ public class Quercus {
   {
     return _pageManager.getClassName(path);
   }
-  
+
   /**
    * Parses a quercus program.
    *
@@ -304,7 +307,7 @@ public class Quercus {
   {
     return _pageManager.parse(path);
   }
-  
+
   /**
    * Parses a quercus string.
    *
@@ -325,7 +328,7 @@ public class Quercus {
 
     return program;
   }
-  
+
   /**
    * Parses a quercus string.
    *
@@ -348,7 +351,7 @@ public class Quercus {
 
     return program;
   }
-  
+
   /**
    * Parses a function.
    *
@@ -401,7 +404,7 @@ public class Quercus {
   {
     return _stdClass;
   }
-  
+
   /**
    * Returns the class with the given name.
    */
@@ -452,7 +455,7 @@ public class Quercus {
     for (QuercusModule module : _modules.values()) {
       if (module.isExtensionLoaded(name)) {
 	// XXX:
-	
+
 	return new ArrayValueImpl();
       }
     }
@@ -475,7 +478,7 @@ public class Quercus {
 
       if (value == null) {
 	name = name.intern();
-	
+
 	value = new InternStringValue(name);
 	_internMap.put(name, value);
       }
@@ -483,7 +486,7 @@ public class Quercus {
       return value;
     }
   }
-  
+
   /**
    * Returns a named constant.
    */
@@ -502,7 +505,7 @@ public class Quercus {
    */
   public SessionArrayValue loadSession(Env env, String sessionId)
   {
-    
+
     SessionArrayValue session = _sessionMap.get(sessionId);
 
     if (session != null)
@@ -545,12 +548,12 @@ public class Quercus {
 
   /**
    * Scans the classpath for META-INF/services/com.caucho.quercus.QuercusModule
-   */ 
+   */
   private void initStaticFunctions()
   {
     Thread thread = Thread.currentThread();
     ClassLoader loader = thread.getContextClassLoader();
-    
+
     try {
       String quercusModule = "META-INF/services/com.caucho.quercus.QuercusModule";
       Enumeration<URL> urls = loader.getResources(quercusModule);
@@ -635,10 +638,10 @@ public class Quercus {
     for (Field field : cl.getFields()) {
       if (! Modifier.isPublic(field.getModifiers()))
         continue;
-      
+
       if (! Modifier.isStatic(field.getModifiers()))
         continue;
-      
+
       if (! Modifier.isFinal(field.getModifiers()))
         continue;
 
@@ -649,7 +652,7 @@ public class Quercus {
       if (value != null)
 	_constMap.put(field.getName(), value);
     }
-    
+
     Map<String,StringValue> iniMap = module.getDefaultIni();
 
     if (map != null)
@@ -707,12 +710,12 @@ public class Quercus {
 
   /**
    * Scans the classpath for META-INF/services/com.caucho.quercus.QuercusClass
-   */ 
+   */
   private void initStaticClassServices()
   {
     Thread thread = Thread.currentThread();
     ClassLoader loader = thread.getContextClassLoader();
-    
+
     try {
       String quercusModule = "META-INF/services/com.caucho.quercus.QuercusClass";
       Enumeration<URL> urls = loader.getResources(quercusModule);
@@ -787,17 +790,17 @@ public class Quercus {
 
     _staticClasses.put(name, def);
     _lowerStaticClasses.put(name.toLowerCase(), def);
-    
+
     def.introspect(this);
   }
 
   /**
    * Scans the classpath for META-INF/services/com.caucho.quercus.QuercusClass
-   */ 
+   */
   private void initStaticClasses()
   {
     InterpretedClassDef classDef = new InterpretedClassDef("stdClass", null);
-    
+
     _stdClass = new QuercusClass(classDef, null);
 
     _staticClasses.put(_stdClass.getName(), _stdClass);

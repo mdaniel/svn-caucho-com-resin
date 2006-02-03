@@ -219,8 +219,7 @@ public class QuercusStringModule extends AbstractQuercusModule {
    * @param source the source string to convert
    * @return the escaped string
    */
-  public static String addslashes(String source)
-    throws Throwable
+  public static StringValue addslashes(String source)
   {
     StringBuilder sb = new StringBuilder();
     int length = source.length();
@@ -246,7 +245,7 @@ public class QuercusStringModule extends AbstractQuercusModule {
       }
     }
 
-    return sb.toString();
+    return new StringValue(sb.toString());
   }
 
   /**
@@ -1273,7 +1272,7 @@ public class QuercusStringModule extends AbstractQuercusModule {
       else
         value = "";
 
-      Post.addFormValue(result, key, new String[] { value } );
+      Post.addFormValue(result, key, new String[] { value }, env.getIniBoolean("magic_quotes_gpc"));
     }
 
     if (array == null) {

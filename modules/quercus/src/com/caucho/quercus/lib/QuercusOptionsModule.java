@@ -133,7 +133,7 @@ public class QuercusOptionsModule extends AbstractQuercusModule {
   }
 
   /**
-   * Returns extension function swith a given name
+   * Returns extension function with a given name.
    */
   public static Value get_extension_funcs(Env env, String name)
   {
@@ -145,9 +145,7 @@ public class QuercusOptionsModule extends AbstractQuercusModule {
    */
   public static Value get_magic_quotes_gpc(Env env)
   {
-    // XXX: stub
-
-    return env.getOption("magic_quotes_gpc");
+    return LongValue.create(env.getIni("magic_quotes_gpc").toLong());
   }
 
   /**
@@ -202,7 +200,7 @@ public class QuercusOptionsModule extends AbstractQuercusModule {
    */
   public static Value magic_quotes_runtime(Env env)
   {
-    return env.getOption("magic_quotes_runtime");
+    return env.getIni("magic_quotes_runtime");
   }
 
   /**
@@ -280,7 +278,7 @@ public class QuercusOptionsModule extends AbstractQuercusModule {
    */
   public static Value set_magic_quotes_runtime(Env env, Value value)
   {
-    env.setOption("magic_quotes_runtime", value);
+    env.setIni("magic_quotes_runtime", value.toString());
 
     return value;
   }
@@ -304,7 +302,7 @@ public class QuercusOptionsModule extends AbstractQuercusModule {
   {
     ArrayList<Value> expanded1 = expandVersion(version1);
     ArrayList<Value> expanded2 = expandVersion(version2);
-    
+
     int cmp = compareTo(expanded1, expanded2);
 
     if ("eq".equals(op) || "==".equals(op) || "=".equals(op))

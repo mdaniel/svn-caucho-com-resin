@@ -32,90 +32,60 @@ package com.caucho.quercus.env;
 import java.io.InputStream;
 import java.io.IOException;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Iterator;
-import java.util.Locale;
-
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import javax.sql.DataSource;
-
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.Cookie;
 
 import com.caucho.vfs.Vfs;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.WriteStream;
-import com.caucho.vfs.ByteToChar;
 import com.caucho.vfs.MultipartStream;
-
-import com.caucho.util.Log;
-import com.caucho.util.L10N;
-import com.caucho.util.IntMap;
-
-import com.caucho.quercus.Quercus;
-import com.caucho.quercus.QuercusRuntimeException;
-import com.caucho.quercus.QuercusExitException;
-
-import com.caucho.quercus.expr.Expr;
-
-import com.caucho.quercus.page.PhpPage;
-
-import com.caucho.quercus.program.AbstractFunction;
-import com.caucho.quercus.program.AbstractClassDef;
-
-import com.caucho.quercus.resources.StreamContextResource;
+import com.caucho.quercus.lib.QuercusStringModule;
 
 /**
  * Handling of POST requests.
  */
 public class Post {
   static void fillPost(Env env,
-		       ArrayValue post, ArrayValue files,
-		       HttpServletRequest request)
+                       ArrayValue post, ArrayValue files,
+                       HttpServletRequest request,
+                       boolean addSlashesToValues)
   {
     InputStream is = null;
-    
+
     try {
       if (! request.getMethod().equals("POST"))
-	return;
+        return;
 
       String contentType = request.getHeader("Content-Type");
 
       if (contentType == null ||
-	  ! contentType.startsWith("multipart/form-data"))
-	return;
+          ! contentType.startsWith("multipart/form-data"))
+        return;
 
       String boundary = getBoundary(contentType);
 
       is = request.getInputStream();
-      
+
       MultipartStream ms = new MultipartStream(Vfs.openRead(is), boundary);
       // ms.setEncoding(javaEncoding);
 
-      readMultipartStream(env, ms, post, files);
+      readMultipartStream(env, ms, post, files, addSlashesToValues);
     } catch (IOException e) {
       e.printStackTrace();
     } finally {
       try {
-	if (is != null)
-	  is.close();
+        if (is != null)
+          is.close();
       } catch (IOException e) {
       }
     }
   }
 
   private static void readMultipartStream(Env env,
-					  MultipartStream ms,
-					  ArrayValue post,
-					  ArrayValue files)
+                                          MultipartStream ms,
+                                          ArrayValue post,
+                                          ArrayValue files,
+                                          boolean addSlashesToValues)
     throws IOException
   {
     ReadStream is;
@@ -132,125 +102,140 @@ public class Post {
       String filename = getAttribute(attr, "filename");
 
       if (filename == null) {
-	StringBuilder value = new StringBuilder();
-	int ch;
+        StringBuilder value = new StringBuilder();
+        int ch;
 
-	while ((ch = is.read()) >= 0) {
-	  value.append((char) ch);
-	}
+        while ((ch = is.read()) >= 0) {
+          value.append((char) ch);
+        }
 
-	addFormValue(post, name, new StringValue(value.toString()), null);
+        addFormValue(post, name, new StringValue(value.toString()), null, addSlashesToValues);
       }
       else {
-	Path tmpName = env.getUploadDirectory().createTempFile("php", "tmp");
+        Path tmpName = env.getUploadDirectory().createTempFile("php", "tmp");
 
-	env.addRemovePath(tmpName);
+        env.addRemovePath(tmpName);
 
-	WriteStream os = tmpName.openWrite();
-	try {
-	  os.writeStream(is);
-	} finally {
-	  os.close();
-	}
+        WriteStream os = tmpName.openWrite();
+        try {
+          os.writeStream(is);
+        } finally {
+          os.close();
+        }
 
-	ArrayValue entry = new ArrayValueImpl();
-	entry.put("name", filename);
-	String mimeType = getAttribute(attr, "mime-type");
-	if (mimeType != null)
-	  entry.put("type", mimeType);
-	entry.put("size", tmpName.getLength());
-	entry.put("tmp_name", tmpName.getTail());
+        ArrayValue entry = new ArrayValueImpl();
+        entry.put("name", filename);
+        String mimeType = getAttribute(attr, "mime-type");
+        if (mimeType != null)
+          entry.put("type", mimeType);
+        entry.put("size", tmpName.getLength());
+        entry.put("tmp_name", tmpName.getTail());
 
-	// XXX: error
+        // XXX: error
 
-	addFormValue(files, name, entry, null);
+        addFormValue(files, name, entry, null, addSlashesToValues);
       }
     }
   }
 
   public static void addFormValue(ArrayValue array,
-				  String key,
-				  String []formValueList)
+                                  String key,
+                                  String []formValueList,
+                                  boolean addSlashesToValues)
   {
-    addFormValue(array, key, new StringValue(formValueList[0]), formValueList);
+    addFormValue(array, key, new StringValue(formValueList[0]), formValueList, addSlashesToValues);
   }
 
   public static void addFormValue(ArrayValue array,
-				  String key,
-				  Value formValue,
-				  String []formValueList)
+                                  String key,
+                                  Value formValue,
+                                  String []formValueList,
+                                  boolean addSlashesToValues)
   {
     int p = key.indexOf('[');
     int q = key.indexOf(']', p);
-    
+
     if (p > 0 && p < q) {
       String index = key;
-      
+
       key = key.substring(0, p);
 
       Value keyValue = new StringValue(key);
-      Value value = array.get(keyValue);
-      if (value == null || ! value.isset()) {
-	value = new ArrayValueImpl();
-	array.put(keyValue, value);
+      Value existingValue = array.get(keyValue);
+
+      if (existingValue == null || ! existingValue.isset()) {
+        existingValue = new ArrayValueImpl();
+        array.put(keyValue, existingValue);
       }
-      else if (! value.isArray()) {
-	value = new ArrayValueImpl().put(value);
-	array.put(keyValue, value);
+      else if (! existingValue.isArray()) {
+        existingValue = new ArrayValueImpl().put(existingValue);
+        array.put(keyValue, existingValue);
       }
-      
-      array = (ArrayValue) value;
+
+      array = (ArrayValue) existingValue;
 
       int p1;
       while ((p1 = index.indexOf('[', q)) > 0) {
-	key = index.substring(p + 1, q);
+        key = index.substring(p + 1, q);
 
-	if (key.equals("")) {
-	  value = new ArrayValueImpl();
-	  array.put(value);
-	}
-	else {
-	  keyValue = new StringValue(key);
-	  value = array.get(keyValue);
-	  
-	  if (value == null || ! value.isset()) {
-	    value = new ArrayValueImpl();
-	    array.put(keyValue, value);
-	  }
-	  else if (! value.isArray()) {
-	    value = new ArrayValueImpl().put(value);
-	    array.put(keyValue, value);
-	  }
-	}
+        if (key.equals("")) {
+          existingValue = new ArrayValueImpl();
+          array.put(existingValue);
+        }
+        else {
+          keyValue = new StringValue(key);
+          existingValue = array.get(keyValue);
 
-	array = (ArrayValue) value;
+          if (existingValue == null || ! existingValue.isset()) {
+            existingValue = new ArrayValueImpl();
+            array.put(keyValue, existingValue);
+          }
+          else if (! existingValue.isArray()) {
+            existingValue = new ArrayValueImpl().put(existingValue);
+            array.put(keyValue, existingValue);
+          }
+        }
 
-	p = p1;
-	q = index.indexOf(']', p);
+        array = (ArrayValue) existingValue;
+
+        p = p1;
+        q = index.indexOf(']', p);
       }
 
       if (q > 0)
-	index = index.substring(p + 1, q);
+        index = index.substring(p + 1, q);
       else
-	index = index.substring(p + 1);
+        index = index.substring(p + 1);
 
       if (index.equals("")) {
-	if (formValueList != null) {
-	  for (int i = 0; i < formValueList.length; i++) {
-	    array.put(new StringValue(formValueList[i]));
-	  }
-	}
-	else
-	  array.put(formValue);
+        if (formValueList != null) {
+          for (int i = 0; i < formValueList.length; i++) {
+            put(array, null, new StringValue(formValueList[i]), addSlashesToValues);
+          }
+        }
+        else
+          array.put(formValue);
       }
       else if ('0' <= index.charAt(0) && index.charAt(0) <= '9')
-	array.put(new LongValue(StringValue.toLong(index)), formValue);
+        put(array, new LongValue(StringValue.toLong(index)), formValue, addSlashesToValues);
       else
-	array.put(new StringValue(index), formValue);
+        put(array, new StringValue(index), formValue, addSlashesToValues);
     }
     else {
-      array.put(new StringValue(key), formValue);
+      put(array, new StringValue(key), formValue, addSlashesToValues);
     }
+  }
+
+  private static void put(ArrayValue array, Value key, Value value, boolean addSlashes)
+  {
+    if (addSlashes && (value instanceof StringValue)) {
+      value = QuercusStringModule.addslashes(value.toString());
+    }
+
+    if (key == null)
+      array.put(value);
+    else
+      array.put(key, value);
   }
 
   private static String getBoundary(String contentType)
@@ -269,27 +254,27 @@ public class Post {
       return null;
     else if ((ch = contentType.charAt(i)) == '\'') {
       StringBuilder sb = new StringBuilder();
-      
+
       for (i++; i < length && (ch = contentType.charAt(i)) != '\''; i++) {
-	sb.append(ch);
+        sb.append(ch);
       }
 
       return sb.toString();
     }
     else if (ch == '"') {
       StringBuilder sb = new StringBuilder();
-      
+
       for (i++; i < length && (ch = contentType.charAt(i)) != '"'; i++) {
-	sb.append(ch);
+        sb.append(ch);
       }
 
       return sb.toString();
     }
     else {
       StringBuilder sb = new StringBuilder();
-      
+
       for (; i < length && (ch = contentType.charAt(i)) != ' ' && ch != ';'; i++) {
-	sb.append(ch);
+        sb.append(ch);
       }
 
       return sb.toString();
@@ -300,7 +285,7 @@ public class Post {
   {
     if (attr == null)
       return null;
-    
+
     int length = attr.length();
     int i = attr.indexOf(name);
     if (i < 0)
@@ -308,12 +293,12 @@ public class Post {
 
     for (i += name.length(); i < length && attr.charAt(i) != '='; i++) {
     }
-    
+
     for (i++; i < length && attr.charAt(i) == ' '; i++) {
     }
 
     StringBuilder value = new StringBuilder();
-    
+
     if (i < length && attr.charAt(i) == '\'') {
       for (i++; i < length && attr.charAt(i) != '\''; i++)
         value.append(attr.charAt(i));
