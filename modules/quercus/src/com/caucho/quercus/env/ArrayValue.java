@@ -29,29 +29,10 @@
 
 package com.caucho.quercus.env;
 
-import java.io.IOException;
-
-import java.util.HashMap;
-import java.util.TreeMap;
-import java.util.Map;
-import java.util.Set;
-import java.util.AbstractSet;
-import java.util.AbstractCollection;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.Arrays;
-import java.util.ArrayList;
-import java.util.IdentityHashMap;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
 import com.caucho.vfs.WriteStream;
 
-import com.caucho.util.RandomUtil;
-import com.caucho.quercus.lib.QuercusVariableModule;
+import java.util.*;
+import java.util.logging.Logger;
 
 /**
  * Represents a PHP array value.
@@ -820,7 +801,7 @@ abstract public class ArrayValue extends Value {
     out.print("}");
   }
 
-  protected void printRImpl(Env env,
+  public void printRImpl(Env env,
                             WriteStream out,
                             int depth,
                             IdentityHashMap<Value, String> valueSet)

@@ -30,6 +30,7 @@
 package com.caucho.quercus.lib;
 
 import com.caucho.quercus.env.*;
+import com.caucho.vfs.WriteStream;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -44,8 +45,13 @@ import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.IdentityHashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * SimpleXMLElement object oriented API facade
@@ -58,6 +64,9 @@ public class SimpleXMLElementValue extends Value {
 
   private Value _attributes;
   private Value _children;
+
+  private HashMap<StringValue, Value> _childrenHashMap;
+
 
   /**
    *  need to pass document for setting text values
@@ -111,8 +120,106 @@ public class SimpleXMLElementValue extends Value {
     return _attributes;
   }
 
+  @Override
+  public void printRImpl(Env env,
+                         WriteStream out,
+                         int depth,
+                         IdentityHashMap<Value, String> valueSet)
+    throws IOException, Throwable
+  {
+    if (depth == 0) {
+      out.println("SimpleXMLElement Object");
+      out.println('(');
+    }
+    
+    if (_childrenHashMap == null)
+      fillChildrenHashMap();
+    
+    Set keyValues = _childrenHashMap.entrySet();
+    int keyLength = keyValues.size();
+    Iterator keyIterator = keyValues.iterator();
+    Map.Entry entry;
+    
+    if (keyIterator.hasNext()) {
+      entry = (Map.Entry) keyIterator.next();
+    
+      if (entry.getValue() instanceof StringValue) {
+        if (depth == 0) {
+          printDepth(out, 4);
+          out.print("[0] => ");
+        }
+        
+        out.println(entry.getValue().toString());
+      } else {
+        if (depth != 0) {
+          out.println("SimpleXMLElement Object");
+      
+          printDepth(out, 4 * depth);
+          out.println('(');
+        }
+   
+        printAttributes(out, depth);
+        
+        // loop through each element of _childrenHashMap
+        // but first reset iterator
+        keyIterator = keyValues.iterator();
+        for (int i = 0; i < keyLength; i++) {
+          entry = (Map.Entry) keyIterator.next();
+          printDepth(out, 4 * (depth + 1));
+          out.print("[" + entry.getKey() + "] => ");
+          if (entry.getValue() instanceof ArrayValue) {
+            out.println("Array");
+            printDepth(out, 4 * (depth + 2));
+            out.println('(');
+            // Iterate through each SimpleXMLElement
+            for (Map.Entry<Value, Value> mapEntry : ((ArrayValue) entry.getValue()).entrySet()) {
+              printDepth(out, 4 * (depth + 3));
+              out.print("[" + mapEntry.getKey().toString() + "] => ");
+              mapEntry.getValue().printR(env, out, depth + 4, valueSet);
+              out.println();
+            }
+          } else 
+            ((Value) entry.getValue()).printRImpl(env, out, depth + 2, valueSet);
+          out.println();
+        }
+  
+        //Print closing parenthesis
+        if (depth != 0) {
+          printDepth(out, 4 * depth);
+          out.println(")");
+        }
+      }
+    } else {
+      if (depth != 0) {
+        out.println("SimpleXMLElement Object");
+        
+        printDepth(out, 4 * depth);
+        out.println('(');
+      }
+      printAttributes(out, depth);
+    }
+    
+    if (depth == 0)
+      out.print(')');
+  }
+
   /**
-   * helper function for children
+   * helper function for print_r and var_dump
+   * This is different from fillChildren(), for example:
+   * 
+   * $xmlString = "<parent><child role=\"son\"/><child role=\"daughter\"/></parent>";
+   * $xml = simplexml_from_string($xmlString);
+   * 
+   * print_r($xml) returns:
+   * 
+   * SimpleXMLElement Object
+   * (
+   *   [child] => //2 SimpleXMLElement Objects
+   * )
+   * 
+   * BUT
+   * 
+   * foreach ($xml->children() as $child) ... will return 2 elements
    */
   private void fillChildren()
   {
@@ -157,16 +264,20 @@ public class SimpleXMLElementValue extends Value {
 
     if (nodeLength == 1) {
       Node firstChild = children.item(0);
-      SimpleXMLElementValue simpleXMLChild = new SimpleXMLElementValue(_document,  (Element) firstChild);
 
-      _children = new ArrayValueImpl();
+      if (firstChild.getNodeType() == Node.TEXT_NODE) {
 
-      if (firstChild.getNodeType() == Node.TEXT_NODE)
-        _children.put(new LongValue(0), simpleXMLChild);
-      else
+        _children = new StringValue(firstChild.getNodeValue());
+
+      } else {
+
+        SimpleXMLElementValue simpleXMLChild = new SimpleXMLElementValue(_document,  (Element) firstChild);
+        _children = new ArrayValueImpl();
         _children.put(new StringValue(firstChild.getNodeName()), simpleXMLChild);
 
+      }
     } else {
+
       for (int i=0; i < nodeLength; i++) {
         Node child = children.item(i);
 
@@ -205,20 +316,158 @@ public class SimpleXMLElementValue extends Value {
     }
   }
 
+  /**
+   * 
+   */
+  public void fillChildrenHashMap()
+  {
+    NodeList children = _element.getChildNodes();
+    int nodeLength = children.getLength();
+
+    _childrenHashMap = new HashMap<StringValue, Value>();
+
+    if (nodeLength == 0)
+      return;
+    
+    // If <foo><bar>misc</bar></foo>, then put (bar , misc)
+    // into foo's _childrenHashMap
+    if ((nodeLength == 1) && (children.item(0).getNodeType() == Node.TEXT_NODE)) {
+        _childrenHashMap.put(new StringValue("0"), new StringValue(children.item(0).getNodeValue()));
+      
+    } else {
+      for (int i=0; i < nodeLength; i++) {
+        Node child = children.item(i);
+  
+        if (child.getNodeType() == Node.TEXT_NODE)
+          continue;
+  
+        StringValue childTagName = new StringValue(child.getNodeName());
+  
+        // Check to see if this is the first instance of a child
+        // with this NodeName.  If so create a new ArrayValueImpl,
+        // if not add to existing ArrayValueImpl
+        ArrayValue childArray = (ArrayValue) _childrenHashMap.get(childTagName);
+        if (childArray == null) {
+          childArray = new ArrayValueImpl();
+          _childrenHashMap.put(childTagName, childArray);
+        }
+  
+        childArray.put(new SimpleXMLElementValue(_document, (Element) child));
+      }
+  
+      // Iterate over _childrenHashMap and replace all entries with only one
+      // element from ArrayValue to SimpleXMLElementValue
+      Set keyValues = _childrenHashMap.entrySet();
+      int keyLength = keyValues.size();
+      Iterator keyIterator = keyValues.iterator();
+      for (int i=0; i < keyLength; i++) {
+        Map.Entry entry = (Map.Entry) keyIterator.next();
+        ArrayValue childArray = (ArrayValue) entry.getValue();
+        if (childArray.getSize() == 1)
+          _childrenHashMap.put((StringValue) entry.getKey(), childArray.get(new LongValue(0)));
+      }
+    }
+  }
+
+  public Value fillForPrintR()
+  {
+    Value result = NullValue.NULL;
+    HashMap<StringValue, ArrayValue> childrenHashMap = new HashMap<StringValue, ArrayValue>();
+    NodeList children = _element.getChildNodes();
+    int nodeLength = children.getLength();
+
+    ArrayList<StringValue> childrenList = new ArrayList<StringValue>();
+    SimpleXMLElementValue childValue;
+
+    if (nodeLength == 1) {
+      Node firstChild = children.item(0);
+
+      if (firstChild.getNodeType() == Node.TEXT_NODE) {
+
+       return new StringValue(firstChild.getNodeValue());
+
+      } else {
+        childValue = new SimpleXMLElementValue(_document, (Element) firstChild);
+        result = new ArrayValueImpl();
+
+        result.put(new StringValue(firstChild.getNodeName()), childValue.fillForPrintR()); //recursion
+
+        return result;
+      }
+
+    } else { //more than 1 node (so skip all text nodes)
+
+      for (int i=0; i < nodeLength; i++) {
+        Node child = children.item(i);
+
+        if (child.getNodeType() == Node.TEXT_NODE)
+          continue;
+
+        StringValue childTagName = new StringValue(child.getNodeName());
+
+        // Check to see if this is the first instance of a child
+        // with this NodeName.  If so create a new ArrayValueImpl,
+        // if not add to existing ArrayValueImpl
+        ArrayValue childArray = childrenHashMap.get(childTagName);
+        if (childArray == null) {
+          childArray = new ArrayValueImpl();
+          childrenHashMap.put(childTagName, childArray);
+          childrenList.add(childTagName);
+        }
+
+        childValue = new SimpleXMLElementValue(_document, (Element) child);
+
+        childArray.put(childValue.fillForPrintR()); // recursion
+      }
+
+      //loop through childrenList and put each element in result
+      if (childrenList.size() > 0) {
+        result = new ArrayValueImpl();
+        for (StringValue childName : childrenList) {
+          ArrayValue childArray = childrenHashMap.get(childName);
+          if (childArray.getSize() == 1)
+            result.put(childName, childArray.get(new LongValue(0)));
+          else
+            result.put(childName, childArray);
+        }
+      }
+
+      return result;
+    }
+  }
+
+  /**
+   * NOTE: this function does not use fillChildren()
+   * 
+   * @return shallow array of immediate children()
+   */
   public Value children()
   {
-    if (_children == null) {
-      fillChildren();
+    ArrayValue childArray = new ArrayValueImpl();
+
+    NodeList children = _element.getChildNodes();
+    int nodeLength = children.getLength();
+
+    for (int i=0; i < nodeLength; i++) {
+      Node child = children.item(i);
+
+      if (child.getNodeType() == Node.TEXT_NODE)
+        continue;
+
+      childArray.put(new SimpleXMLElementValue(_document, (Element) child));
     }
 
-    return _children;
+    if (childArray.getSize() > 0)
+      return childArray;
+    else
+      return NullValue.NULL;
   }
 
   public Value getArray(Value name)
   {
     Value result;
 
-    children();
+    fillChildren();
 
     if (_children instanceof ArrayValue) {
       result = _children.get(name);
@@ -244,7 +493,7 @@ public class SimpleXMLElementValue extends Value {
         return result;
     }
 
-    children();
+    fillChildren();
 
     if (_children instanceof ArrayValue) {
       result = _children.get(name);
@@ -307,7 +556,7 @@ public class SimpleXMLElementValue extends Value {
   {
     Value child;
 
-    children();
+    fillChildren();
 
     if (_children instanceof ArrayValue) {
       child = _children.get(name);
@@ -351,7 +600,10 @@ public class SimpleXMLElementValue extends Value {
    */
   public Value getObject(Env env, Value index)
   {
-    Value result = children().get(index);
+    if (_children == null)
+      fillChildren();
+
+    Value result = _children.get(index);
 
     if (result != null)
       return result;
@@ -451,10 +703,10 @@ public class SimpleXMLElementValue extends Value {
     NodeList nodes = (NodeList) xpath.evaluate(path, is, XPathConstants.NODESET);
 
     int nodeLength = nodes.getLength();
-    
+
     if (nodeLength == 0)
       return NullValue.NULL;
-    
+
     // There are matching nodes
     Value result = new ArrayValueImpl();
     for (int i = 0; i < nodeLength; i++) {
@@ -464,4 +716,27 @@ public class SimpleXMLElementValue extends Value {
     return result;
   }
 
+  private void printAttributes(WriteStream out,
+                               int depth)
+    throws IOException
+  {
+    if (_attributes == null)
+      attributes();
+
+    // Print attributes if not null
+    if (_attributes != NullValue.NULL) {
+      printDepth(out, 4 * (depth + 1));
+      out.println("[@attributes] => Array");
+      printDepth(out, 4 * (depth + 2));
+      out.println('(');
+      
+      // Iterate through each attribute ([name] => value)
+      for (Map.Entry<Value, Value> mapEntry : ((ArrayValue) _attributes).entrySet()) {
+        ArrayValue.Entry entry = (ArrayValue.Entry) mapEntry;
+        printDepth(out, 4 * (depth + 3));
+        out.println("[" + entry.getKey().toString() + "] => " + entry.getValue().toString());
+      }
+      out.println();
+    }
+  }
 }

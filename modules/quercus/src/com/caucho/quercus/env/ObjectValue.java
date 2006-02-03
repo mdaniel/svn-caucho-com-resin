@@ -29,24 +29,15 @@
 
 package com.caucho.quercus.env;
 
-import java.io.IOException;
+import com.caucho.quercus.expr.Expr;
+import com.caucho.quercus.program.AbstractFunction;
+import com.caucho.vfs.WriteStream;
 
-import java.util.LinkedHashMap;
-import java.util.HashMap;
-import java.util.Set;
-import java.util.Collection;
+import java.util.AbstractSet;
 import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.AbstractSet;
-
-import com.caucho.vfs.WriteStream;
-
-import com.caucho.quercus.program.Function;
-import com.caucho.quercus.program.AbstractFunction;
-
-import com.caucho.quercus.expr.Expr;
-import com.caucho.quercus.lib.QuercusVariableModule;
+import java.util.Set;
 
 /**
  * Represents a PHP object value.
@@ -672,7 +663,7 @@ public class ObjectValue extends Value {
     out.print("}");
   }
 
-  protected void printRImpl(Env env,
+  public void printRImpl(Env env,
                             WriteStream out,
                             int depth,
                             IdentityHashMap<Value, String> valueSet)
@@ -863,7 +854,7 @@ public class ObjectValue extends Value {
       out.println();
     }
 
-    protected void printRImpl(Env env,
+    public void printRImpl(Env env,
                               WriteStream out,
                               int depth,
                               IdentityHashMap<Value, String> valueSet)

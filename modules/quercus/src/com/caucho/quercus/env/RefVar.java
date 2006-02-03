@@ -29,16 +29,11 @@
 
 package com.caucho.quercus.env;
 
-import java.io.IOException;
+import com.caucho.quercus.program.AbstractFunction;
+import com.caucho.vfs.WriteStream;
 
 import java.util.Collection;
 import java.util.IdentityHashMap;
-
-import com.caucho.vfs.WriteStream;
-
-import com.caucho.quercus.expr.Expr;
-
-import com.caucho.quercus.program.AbstractFunction;
 
 /**
  * Represents a reference to a PHP variable in a function call.
@@ -429,7 +424,7 @@ public class RefVar extends Value {
     toValue().varDumpImpl(env, out, depth, valueSet);
   }
 
-  protected void printRImpl(Env env,
+  public void printRImpl(Env env,
                             WriteStream out,
                             int depth,
                             IdentityHashMap<Value, String> valueSet)
