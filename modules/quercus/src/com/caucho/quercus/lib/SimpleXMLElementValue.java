@@ -65,7 +65,7 @@ public class SimpleXMLElementValue extends Value {
   private Value _attributes;
   private Value _children;
 
-  private HashMap<StringValue, Value> _childrenHashMap;
+  private HashMap<StringValue, Value> _childMap;
 
 
   /**
@@ -120,8 +120,16 @@ public class SimpleXMLElementValue extends Value {
     return _attributes;
   }
 
+ /* @Override
+  public void printR(Env env,
+                     WriteStream out,
+                     int depth,
+                     IdentityHashMap<Value, String> valueSet)
+  {
+    
+  } */
   @Override
-  public void printRImpl(Env env,
+  protected void printRImpl(Env env,
                          WriteStream out,
                          int depth,
                          IdentityHashMap<Value, String> valueSet)
@@ -132,10 +140,10 @@ public class SimpleXMLElementValue extends Value {
       out.println('(');
     }
     
-    if (_childrenHashMap == null)
+    if (_childMap == null)
       fillChildrenHashMap();
     
-    Set keyValues = _childrenHashMap.entrySet();
+    Set keyValues = _childMap.entrySet();
     int keyLength = keyValues.size();
     Iterator keyIterator = keyValues.iterator();
     Map.Entry entry;
@@ -160,7 +168,7 @@ public class SimpleXMLElementValue extends Value {
    
         printAttributes(out, depth);
         
-        // loop through each element of _childrenHashMap
+        // loop through each element of _childMap
         // but first reset iterator
         keyIterator = keyValues.iterator();
         for (int i = 0; i < keyLength; i++) {
@@ -179,8 +187,8 @@ public class SimpleXMLElementValue extends Value {
               out.println();
             }
           } else 
-            ((Value) entry.getValue()).printRImpl(env, out, depth + 2, valueSet);
-          out.println();
+            ((Value) entry.getValue()).printR(env, out, depth + 2, valueSet);
+            out.println();
         }
   
         //Print closing parenthesis
@@ -200,7 +208,7 @@ public class SimpleXMLElementValue extends Value {
     }
     
     if (depth == 0)
-      out.print(')');
+      out.println(')');
   }
 
   /**
@@ -324,15 +332,15 @@ public class SimpleXMLElementValue extends Value {
     NodeList children = _element.getChildNodes();
     int nodeLength = children.getLength();
 
-    _childrenHashMap = new HashMap<StringValue, Value>();
+    _childMap = new HashMap<StringValue, Value>();
 
     if (nodeLength == 0)
       return;
     
     // If <foo><bar>misc</bar></foo>, then put (bar , misc)
-    // into foo's _childrenHashMap
+    // into foo's _childMap
     if ((nodeLength == 1) && (children.item(0).getNodeType() == Node.TEXT_NODE)) {
-        _childrenHashMap.put(new StringValue("0"), new StringValue(children.item(0).getNodeValue()));
+        _childMap.put(new StringValue("0"), new StringValue(children.item(0).getNodeValue()));
       
     } else {
       for (int i=0; i < nodeLength; i++) {
@@ -346,25 +354,25 @@ public class SimpleXMLElementValue extends Value {
         // Check to see if this is the first instance of a child
         // with this NodeName.  If so create a new ArrayValueImpl,
         // if not add to existing ArrayValueImpl
-        ArrayValue childArray = (ArrayValue) _childrenHashMap.get(childTagName);
+        ArrayValue childArray = (ArrayValue) _childMap.get(childTagName);
         if (childArray == null) {
           childArray = new ArrayValueImpl();
-          _childrenHashMap.put(childTagName, childArray);
+          _childMap.put(childTagName, childArray);
         }
   
         childArray.put(new SimpleXMLElementValue(_document, (Element) child));
       }
   
-      // Iterate over _childrenHashMap and replace all entries with only one
+      // Iterate over _childMap and replace all entries with only one
       // element from ArrayValue to SimpleXMLElementValue
-      Set keyValues = _childrenHashMap.entrySet();
+      Set keyValues = _childMap.entrySet();
       int keyLength = keyValues.size();
       Iterator keyIterator = keyValues.iterator();
       for (int i=0; i < keyLength; i++) {
         Map.Entry entry = (Map.Entry) keyIterator.next();
         ArrayValue childArray = (ArrayValue) entry.getValue();
         if (childArray.getSize() == 1)
-          _childrenHashMap.put((StringValue) entry.getKey(), childArray.get(new LongValue(0)));
+          _childMap.put((StringValue) entry.getKey(), childArray.get(new LongValue(0)));
       }
     }
   }
@@ -489,8 +497,8 @@ public class SimpleXMLElementValue extends Value {
     
     fillChildrenHashMap();
     
-    if (!_childrenHashMap.isEmpty())   
-      result = _childrenHashMap.get(new StringValue(name));
+    if (!_childMap.isEmpty())   
+      result = _childMap.get(new StringValue(name));
 
     return result;
   }
@@ -563,6 +571,22 @@ public class SimpleXMLElementValue extends Value {
     return _element;
   }
 
+   /**
+   * Returns the field ref.
+   */
+  public Value putField(String index, Value object)
+  {
+    NodeList children = _element.getChildNodes();
+    int nodeLength = children.getLength();
+    
+    if (nodeLength == 0)
+      return NullValue.NULL;
+    
+    
+    
+    return NullValue.NULL;
+  }
+  
   public Value put(Value name, Value value)
   {
     Value child;

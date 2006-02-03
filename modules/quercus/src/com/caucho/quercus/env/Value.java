@@ -173,7 +173,6 @@ abstract public class Value {
 
   /**
    * Converts to a string value.
-   * @param env
    */
   public Value toStringValue()
     throws Throwable
@@ -1260,7 +1259,7 @@ abstract public class Value {
     }
   }
 
-  public void printRImpl(Env env,
+  protected void printRImpl(Env env,
                             WriteStream out,
                             int depth,
                             IdentityHashMap<Value, String> valueSet)
