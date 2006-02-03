@@ -478,10 +478,32 @@ public class SimpleXMLElementValue extends Value {
     return NullValue.NULL;
   }
 
+  /**
+   * gets all children from expression $xml->foo
+   * @param name
+   * @return ArrayValue, SimpleXMLElement or null
+   */
+  public Value getField(String name)
+  {
+    Value result = null;
+    
+    fillChildrenHashMap();
+    
+    if (!_childrenHashMap.isEmpty())   
+      result = _childrenHashMap.get(new StringValue(name));
+
+    return result;
+  }
+
+  /**
+   * gets the attribute 'name' from SimpleXMLElement
+   * @param name
+   * @return StringValue or null
+   */
   public Value get(Value name)
   {
-    Value result;
-
+    Value result = null;
+    
     // First check to see if there are attributes
     // If so and name is an attribute,
     // then return the attribute value
@@ -493,17 +515,8 @@ public class SimpleXMLElementValue extends Value {
         return result;
     }
 
-    fillChildren();
-
-    if (_children instanceof ArrayValue) {
-      result = _children.get(name);
-      if (result != null)
-        return result;
-    }
-
-    return NullValue.NULL;
+    return result;
   }
-
   /**
    * Converts to a string.
    */
@@ -526,8 +539,6 @@ public class SimpleXMLElementValue extends Value {
       return children();
     } else if ("asXML".equals(methodName)) {
       return asXML();
-    } else if ("xpath".equals(methodName)) {
-      return BooleanValue.FALSE;
     }
 
     return super.evalMethod(env, methodName);
