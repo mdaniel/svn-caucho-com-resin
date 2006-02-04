@@ -370,7 +370,7 @@ public class QuercusZlibModule extends AbstractQuercusModule {
     return new StringValue(new String(output,0,length));
   }
 
-  // @todo gzencode() -- XXX Skip for now (until solve byte[] problem)
+  // @todo gzencode() -- gzencode() vs. gzdeflate()??
   // @todo gzpassthru()
   // @todo gzseek()
   // @todo gztell()
