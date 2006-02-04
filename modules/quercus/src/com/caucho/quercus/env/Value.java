@@ -36,7 +36,9 @@ import com.caucho.quercus.program.AbstractFunction;
 import com.caucho.util.L10N;
 import com.caucho.vfs.WriteStream;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Collection;
 import java.util.IdentityHashMap;
 
@@ -1022,6 +1024,17 @@ abstract public class Value {
     return NullValue.NULL;
   }
 
+  /**
+   * Returns a byteArrayInputStream for the value.
+   * See TempBufferStringValue for how this can be overriden
+   * 
+   * @return InputStream
+   */
+  public InputStream getInputStream()
+  {
+    return new ByteArrayInputStream(toString().getBytes());
+  }
+  
   /**
    * Returns the field ref.
    */

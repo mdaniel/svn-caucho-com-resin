@@ -31,16 +31,18 @@ package com.caucho.quercus.lib;
 import com.caucho.quercus.env.BooleanValue;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.TempBufferStringValue;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.quercus.module.NotNull;
 import com.caucho.quercus.module.Optional;
 import com.caucho.util.ByteBuffer;
-import com.caucho.util.L10N;
-import com.caucho.util.Log;
+import com.caucho.vfs.ReadStream;
+import com.caucho.vfs.TempBuffer;
+import com.caucho.vfs.VfsStream;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.util.logging.Logger;
 import java.util.zip.DataFormatException;
 import java.util.zip.Deflater;
 import java.util.zip.Inflater;
@@ -50,8 +52,8 @@ import java.util.zip.Inflater;
  */
 public class QuercusZlibModule extends AbstractQuercusModule {
 
-  private static final Logger log = Log.open(QuercusZlibModule.class);
-  private static final L10N L = new L10N(QuercusZlibModule.class);
+ // private static final Logger log = Log.open(QuercusZlibModule.class);
+  //private static final L10N L = new L10N(QuercusZlibModule.class);
 
   public static final int FORCE_GZIP = 0x1;
   public static final int FORCE_DEFLATE = 0x2;
@@ -131,7 +133,7 @@ public class QuercusZlibModule extends AbstractQuercusModule {
                      @NotNull String s,
                      @Optional("0") int length)
   {
-    if ((zp == null) || (s == null) || (s == ""))
+    if ((zp == null) || (s == null) || ("".equals(s)))
       return 0;
 
     return zp.gzwrite(env, s,length);
@@ -221,7 +223,6 @@ public class QuercusZlibModule extends AbstractQuercusModule {
   
   /**
    * compresses data using zlib
-   * XXX: does not work, need to find a way to pass byte arrays.
    * 
    * @param data
    * @param level (default is Deflater.DEFAULT_COMPRESSION)
@@ -229,7 +230,7 @@ public class QuercusZlibModule extends AbstractQuercusModule {
    */
   public Value gzcompress(String data,
                           @Optional("-1") int level)
-    throws DataFormatException
+    throws DataFormatException, IOException
   {
     if (level == -1)
       level = Deflater.DEFAULT_COMPRESSION;
@@ -249,27 +250,37 @@ public class QuercusZlibModule extends AbstractQuercusModule {
       buf.append(output,0,compressedDataLength);
     }
     
-    return new StringValue(new String(buf.getBuffer(),0,fullCompressedDataLength));
+    ByteArrayInputStream result = new ByteArrayInputStream(buf.getBuffer(),0,fullCompressedDataLength);
+    ReadStream readStream = new ReadStream(new VfsStream(result,null));
+    return new TempBufferStringValue(TempBuffer.copyFromStream(readStream));
   }
 
   /**
-   * XXX: Does not work.  Need to find a way to pass byte arrays.
    * 
    * @param data
    * @param length (maximum length of string returned)
    * @return uncompressed string
    */
-  public Value gzuncompress(String data,
+  public Value gzuncompress(TempBufferStringValue data,
                             @Optional("0") int length)
-    throws DataFormatException
+    throws DataFormatException, IOException
   {
-    byte[] input = data.getBytes();
+    ByteArrayInputStream is = data.getInputStream(); 
+    ByteBuffer buf = new ByteBuffer();
+    byte[] input;
+    // put all the data in the inputstream in input
+    int b;
+    while ((b = is.read()) != -1) {
+      buf.append(b);
+    }
+    input = buf.getBuffer();
+    
     byte[] output = new byte[input.length];
     Inflater inflater = new Inflater();
     inflater.setInput(input,0,input.length);
     int uncompressedLength = 0;
     int fullUncompressedLength = 0;
-    ByteBuffer buf = new ByteBuffer();
+    buf = new ByteBuffer();
 
     while(!inflater.finished()) {
       uncompressedLength = inflater.inflate(output);
@@ -286,7 +297,6 @@ public class QuercusZlibModule extends AbstractQuercusModule {
   }
 
   /**
-   * XXX: Does not work.  Need to find a way to pass byte arrays
    * 
    * @param data
    * @param level
@@ -294,7 +304,7 @@ public class QuercusZlibModule extends AbstractQuercusModule {
    */
   public Value gzdeflate(String data,
                          @Optional("-1") int level)
-   throws DataFormatException
+   throws DataFormatException, IOException
   {
     if (level == -1)
       level = Deflater.DEFAULT_COMPRESSION;
@@ -314,27 +324,37 @@ public class QuercusZlibModule extends AbstractQuercusModule {
       buf.append(output,0,compressedDataLength);
     }
     
-    return new StringValue(new String(buf.getBuffer(),0,fullCompressedDataLength));
+    ByteArrayInputStream result = new ByteArrayInputStream(buf.getBuffer(),0,fullCompressedDataLength);
+    ReadStream readStream = new ReadStream(new VfsStream(result,null));
+    return new TempBufferStringValue(TempBuffer.copyFromStream(readStream));
 }
 
   /**
-   * XXX: does not work.  Need to find a way to pass byte arrays
    * 
    * @param data compressed using Deflate algorithm
    * @param length (maximum length of string returned)
    * @return uncompressed string
    */
-  public Value gzinflate(String data,
+  public Value gzinflate(TempBufferStringValue data,
                          @Optional("0") int length)
     throws DataFormatException, IOException
   {
-    byte[] input = data.getBytes(); 
+    ByteArrayInputStream is = data.getInputStream(); 
+    ByteBuffer buf = new ByteBuffer();
+    byte[] input;
+    // put all the data in the inputstream in input
+    int b;
+    while ((b = is.read()) != -1) {
+      buf.append(b);
+    }
+    input = buf.getBuffer();
+    
     byte[] output = new byte[input.length];
     Inflater inflater = new Inflater(true);
     inflater.setInput(input,0,input.length);
-    int uncompressedLength = 0;
+    int uncompressedLength;
     int fullUncompressedLength = 0;
-    ByteBuffer buf = new ByteBuffer();
+    buf = new ByteBuffer();
 
     while(!inflater.finished()) {
       uncompressedLength = inflater.inflate(output);

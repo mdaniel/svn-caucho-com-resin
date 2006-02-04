@@ -29,17 +29,10 @@
 
 package com.caucho.quercus.env;
 
-import java.io.IOException;
-import java.util.IdentityHashMap;
-
-import com.caucho.vfs.WriteStream;
 import com.caucho.vfs.TempBuffer;
+import com.caucho.vfs.WriteStream;
 
-import com.caucho.quercus.Quercus;
-
-import com.caucho.quercus.gen.PhpWriter;
-
-import com.caucho.quercus.lib.QuercusStringModule;
+import java.io.ByteArrayInputStream;
 
 /**
  * Represents a PHP string value implemented as a TempBuffer, with
@@ -55,6 +48,16 @@ public class TempBufferStringValue extends AbstractStringValue {
     _head = buffer;
   }
 
+  /**
+   * 
+   * @return _head as inputstream
+   */
+  @Override
+  public ByteArrayInputStream getInputStream()
+  {
+    return new ByteArrayInputStream(_head.getBuffer());
+  }
+  
   /**
    * Returns the length as a string.
    */
