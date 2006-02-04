@@ -52,9 +52,9 @@ import java.util.logging.Logger;
 /**
  * XML object oriented API facade
  */
-public class XmlClass {
-  private static final Logger log = Logger.getLogger(XmlClass.class.getName());
-  private static final L10N L = new L10N(XmlClass.class);
+public class Xml {
+  private static final Logger log = Logger.getLogger(Xml.class.getName());
+  private static final L10N L = new L10N(Xml.class);
 
   /**
    * XML_OPTION_CASE_FOLDING is enabled by default
@@ -105,9 +105,9 @@ public class XmlClass {
 
   private StringBuffer _xmlString = new StringBuffer();
 
-  public XmlClass(Env env,
-                  String outputEncoding,
-                  String separator)
+  public Xml(Env env,
+             String outputEncoding,
+             String separator)
   {
     _env = env;
     _xmlOptionTargetEncoding = outputEncoding;

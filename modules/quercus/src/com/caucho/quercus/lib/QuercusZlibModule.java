@@ -70,7 +70,7 @@ public class QuercusZlibModule extends AbstractQuercusModule {
    * @param fileName
    * @param mode
    * @param useIncludePath always on
-   * @return ZlibClass
+   * @return Zlib
    */
   public Value gzopen(Env env,
                       @NotNull String fileName,
@@ -80,7 +80,7 @@ public class QuercusZlibModule extends AbstractQuercusModule {
     if (fileName == null)
       return BooleanValue.FALSE;
 
-    ZlibClass zlib = new ZlibClass(env, fileName, mode, useIncludePath);
+    Zlib zlib = new Zlib(env, fileName, mode, useIncludePath);
     return env.wrapJava(zlib);
   }
 
@@ -99,7 +99,7 @@ public class QuercusZlibModule extends AbstractQuercusModule {
     if (fileName == null)
       return BooleanValue.FALSE;
     
-    ZlibClass zlib = new ZlibClass(env,fileName,"r",useIncludePath);
+    Zlib zlib = new Zlib(env,fileName,"r",useIncludePath);
     return zlib.gzfile();
   }
   
@@ -121,13 +121,13 @@ public class QuercusZlibModule extends AbstractQuercusModule {
     if (fileName == null)
       return false;
     
-    ZlibClass zlib = new ZlibClass(env, fileName,"r",useIncludePath);
+    Zlib zlib = new Zlib(env, fileName,"r",useIncludePath);
     env.getOut().writeStream(zlib.readgzfile());
     return true;
   }
   
   public int gzwrite(Env env,
-                     @NotNull ZlibClass zp,
+                     @NotNull Zlib zp,
                      @NotNull String s,
                      @Optional("0") int length)
   {
@@ -146,14 +146,14 @@ public class QuercusZlibModule extends AbstractQuercusModule {
    * @return alias of gzwrite
    */
   public int gzputs(Env env,
-                    @NotNull ZlibClass zp,
+                    @NotNull Zlib zp,
                     @NotNull String s,
                     @Optional("0") int length)
   {
     return gzwrite(env, zp, s, length);
   }
 
-  public boolean gzclose(@NotNull ZlibClass zp)
+  public boolean gzclose(@NotNull Zlib zp)
   {
     if (zp == null)
       return false;
@@ -161,7 +161,7 @@ public class QuercusZlibModule extends AbstractQuercusModule {
     return zp.gzclose();
   }
 
-  public boolean gzeof(@NotNull ZlibClass zp)
+  public boolean gzeof(@NotNull Zlib zp)
     throws IOException
   {
     if (zp == null)
@@ -170,7 +170,7 @@ public class QuercusZlibModule extends AbstractQuercusModule {
     return zp.gzeof();
   }
 
-  public Value gzgetc(@NotNull ZlibClass zp)
+  public Value gzgetc(@NotNull Zlib zp)
     throws IOException, DataFormatException
   {
     if (zp == null)
@@ -179,7 +179,7 @@ public class QuercusZlibModule extends AbstractQuercusModule {
     return zp.gzgetc();
   }
 
-  public Value gzread(@NotNull ZlibClass zp,
+  public Value gzread(@NotNull Zlib zp,
                       int length)
     throws IOException, DataFormatException
   {
@@ -189,7 +189,7 @@ public class QuercusZlibModule extends AbstractQuercusModule {
     return zp.gzread(length);
   }
   
-  public Value gzgets(@NotNull ZlibClass zp,
+  public Value gzgets(@NotNull Zlib zp,
                       int length)
     throws IOException, DataFormatException
   {
@@ -199,7 +199,7 @@ public class QuercusZlibModule extends AbstractQuercusModule {
     return zp.gzgets(length);
   }
 
-  public Value gzgetss(@NotNull ZlibClass zp,
+  public Value gzgetss(@NotNull Zlib zp,
                        int length,
                        @Optional String allowedTags)
     throws IOException, DataFormatException
@@ -210,7 +210,7 @@ public class QuercusZlibModule extends AbstractQuercusModule {
     return zp.gzgetss(length,allowedTags);
   }
 
-  public boolean gzrewind(@NotNull ZlibClass zp)
+  public boolean gzrewind(@NotNull Zlib zp)
     throws IOException
   {
     if (zp == null)

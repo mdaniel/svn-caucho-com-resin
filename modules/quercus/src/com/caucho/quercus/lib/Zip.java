@@ -29,33 +29,28 @@
 
 package com.caucho.quercus.lib;
 
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import java.util.zip.ZipFile;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
-import java.util.Enumeration;
-
-import java.io.IOException;
-
-import com.caucho.util.L10N;
+import com.caucho.quercus.env.BooleanValue;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
-import com.caucho.quercus.env.BooleanValue;
+import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
+
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.zip.ZipInputStream;
 
 /**
  * Zip object oriented API facade
  */
 
-public class ZipClass {
-  private static final Logger log = Logger.getLogger(ZipClass.class.getName());
-  private static final L10N L = new L10N(ZipClass.class);
+public class Zip {
+  private static final Logger log = Logger.getLogger(Zip.class.getName());
+  private static final L10N L = new L10N(Zip.class);
 
   private ZipInputStream _zipInputStream;
 
-  public ZipClass(Path zipPath)
+  public Zip(Path zipPath)
   {
     try {
       _zipInputStream = new ZipInputStream(zipPath.openRead());
@@ -72,10 +67,10 @@ public class ZipClass {
   public Value zip_read(Env env)
     throws IOException
   {
-    ZipEntry entry;
+    java.util.zip.ZipEntry entry;
 
     if ((entry = _zipInputStream.getNextEntry()) != null)
-      return env.wrapJava(new ZipEntryClass(entry));
+      return env.wrapJava(new ZipEntry(entry));
     else
       return BooleanValue.FALSE;
   }

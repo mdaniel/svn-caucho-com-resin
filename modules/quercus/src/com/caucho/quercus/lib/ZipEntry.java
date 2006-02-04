@@ -28,31 +28,26 @@
 
 package com.caucho.quercus.lib;
 
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
-import java.util.zip.ZipInputStream;
+import com.caucho.quercus.env.BooleanValue;
+import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.Value;
+import com.caucho.quercus.module.NotNull;
+import com.caucho.quercus.module.Optional;
+import com.caucho.util.L10N;
 
 import java.io.IOException;
-import java.io.InputStream;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.zip.ZipInputStream;
 
-import com.caucho.util.L10N;
-import com.caucho.quercus.env.BooleanValue;
-import com.caucho.quercus.env.Value;
-import com.caucho.quercus.env.StringValue;
-import com.caucho.quercus.module.Optional;
-import com.caucho.quercus.module.NotNull;
+public class ZipEntry {
+  private static final Logger log = Logger.getLogger(ZipEntry.class.getName());
+  private static final L10N L = new L10N(ZipEntry.class);
 
-public class ZipEntryClass {
-  private static final Logger log = Logger.getLogger(ZipEntryClass.class.getName());
-  private static final L10N L = new L10N(ZipEntryClass.class);
+  private java.util.zip.ZipEntry _zipEntry;
+  private Zip _zip;
 
-  private ZipEntry _zipEntry;
-  private ZipClass _zipClass;
-
-  public ZipEntryClass(ZipEntry zipEntry)
+  public ZipEntry(java.util.zip.ZipEntry zipEntry)
   {
     _zipEntry = zipEntry;
   }
@@ -69,12 +64,12 @@ public class ZipEntryClass {
 
   /**
    *
-   * @param zipClass
+   * @param zip
    * @return always returns true because we are using ZipInputStream
    */
-  public boolean zip_entry_open(@NotNull ZipClass zipClass)
+  public boolean zip_entry_open(@NotNull Zip zip)
   {
-    _zipClass = zipClass;
+    _zip = zip;
     return true;
   }
 
@@ -99,7 +94,7 @@ public class ZipEntryClass {
   {
     byte[] buf = new byte[length];
     int numBytes;
-    ZipInputStream zis = _zipClass.getZipInputStream();
+    ZipInputStream zis = _zip.getZipInputStream();
 
     try {
       numBytes = zis.read(buf,0,length);
@@ -137,9 +132,9 @@ public class ZipEntryClass {
     Integer method = _zipEntry.getMethod();
 
     switch(method) {
-      case ZipEntry.DEFLATED:
+      case java.util.zip.ZipEntry.DEFLATED:
         return "deflated";
-      case ZipEntry.STORED:
+      case java.util.zip.ZipEntry.STORED:
         return "stored";
       default:
         return method.toString();

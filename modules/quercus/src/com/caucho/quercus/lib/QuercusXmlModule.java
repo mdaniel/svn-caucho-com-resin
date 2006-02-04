@@ -29,14 +29,15 @@
 
 package com.caucho.quercus.lib;
 
-import com.caucho.util.L10N;
-
+import com.caucho.quercus.env.BooleanValue;
+import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.Value;
 import com.caucho.quercus.module.AbstractQuercusModule;
-import com.caucho.quercus.module.Optional;
 import com.caucho.quercus.module.NotNull;
+import com.caucho.quercus.module.Optional;
 import com.caucho.quercus.module.Reference;
-
-import com.caucho.quercus.env.*;
+import com.caucho.util.L10N;
 
 /**
  * PHP XML
@@ -110,7 +111,7 @@ public class QuercusXmlModule extends AbstractQuercusModule {
   }
 
   /**
-   * @see boolean XmlClass.xml_parse
+   * @see boolean Xml.xml_parse
    *
    * @param parser
    * @param data
@@ -118,7 +119,7 @@ public class QuercusXmlModule extends AbstractQuercusModule {
    * @return false if parser == null
    * @throws Exception
    */
-  public boolean xml_parse(@NotNull XmlClass parser,
+  public boolean xml_parse(@NotNull Xml parser,
                            @NotNull String data,
                            @Optional("true") boolean isFinal)
     throws Exception
@@ -132,10 +133,10 @@ public class QuercusXmlModule extends AbstractQuercusModule {
   /**
    * returns a new Xml Parser
    */
-  public XmlClass xml_parser_create(Env env,
+  public Xml xml_parser_create(Env env,
                                     @Optional String outputEncoding)
   {
-    return new XmlClass(env,outputEncoding,null);
+    return new Xml(env,outputEncoding,null);
   }
 
   /**
@@ -147,23 +148,23 @@ public class QuercusXmlModule extends AbstractQuercusModule {
    * @param separator
    * @return namespace aware Xml Parser
    */
-  public XmlClass xml_parser_create_ns(Env env,
+  public Xml xml_parser_create_ns(Env env,
                                        @Optional String outputEncoding,
                                        @Optional("':'") String separator)
   {
-    return new XmlClass(env,outputEncoding,separator);
+    return new Xml(env,outputEncoding,separator);
   }
 
   /**
    *
-   * @see boolean XmlClass.xml_parser_set_option
+   * @see boolean Xml.xml_parser_set_option
    *
    * @param parser
    * @param option
    * @param value
    * @return false if parser == null
    */
-  public boolean xml_parser_set_option(@NotNull XmlClass parser,
+  public boolean xml_parser_set_option(@NotNull Xml parser,
                                        @NotNull int option,
                                        @NotNull Value value)
   {
@@ -174,13 +175,13 @@ public class QuercusXmlModule extends AbstractQuercusModule {
   }
 
   /**
-   * @see boolean XmlClass.xml_parser_get_option
+   * @see boolean Xml.xml_parser_get_option
    *
    * @param parser
    * @param option
    * @return false if parser == null
    */
-  public Value xml_parser_get_option(@NotNull XmlClass parser,
+  public Value xml_parser_get_option(@NotNull Xml parser,
                                        @NotNull int option)
   {
     if (parser == null)
@@ -190,14 +191,14 @@ public class QuercusXmlModule extends AbstractQuercusModule {
   }
 
   /**
-   * @see boolean XmlClass.xml_set_element_handler
+   * @see boolean Xml.xml_set_element_handler
    *
    * @param parser
    * @param startElementHandler
    * @param endElementHandler
    * @return false if parser == null
    */
-  public boolean xml_set_element_handler(@NotNull XmlClass parser,
+  public boolean xml_set_element_handler(@NotNull Xml parser,
                                          @NotNull Value startElementHandler,
                                          @NotNull Value endElementHandler)
   {
@@ -208,13 +209,13 @@ public class QuercusXmlModule extends AbstractQuercusModule {
   }
 
   /**
-   * @see boolean XmlClass.xml_set_character_data_handler
+   * @see boolean Xml.xml_set_character_data_handler
    *
    * @param parser
    * @param handler
    * @return false if parser == null
    */
-  public boolean xml_set_character_data_handler(@NotNull XmlClass parser,
+  public boolean xml_set_character_data_handler(@NotNull Xml parser,
                                                 @NotNull Value handler)
   {
     if (parser == null)
@@ -225,13 +226,13 @@ public class QuercusXmlModule extends AbstractQuercusModule {
 
 
   /**
-   * @see boolean XmlClass.xml_set_start_namespace_decl_handler
+   * @see boolean Xml.xml_set_start_namespace_decl_handler
    *
    * @param parser
    * @param startNamespaceDeclHandler
    * @return false if parser == null
    */
-  public boolean xml_set_start_namespace_decl_handler(@NotNull XmlClass parser,
+  public boolean xml_set_start_namespace_decl_handler(@NotNull Xml parser,
                                                       @NotNull Value startNamespaceDeclHandler)
   {
     if (parser == null)
@@ -246,7 +247,7 @@ public class QuercusXmlModule extends AbstractQuercusModule {
    * @param obj
    * @return false if parser == null
    */
-  public boolean xml_set_object(@NotNull XmlClass parser,
+  public boolean xml_set_object(@NotNull Xml parser,
                                 @NotNull Value obj)
   {
     if (parser == null)
@@ -261,7 +262,7 @@ public class QuercusXmlModule extends AbstractQuercusModule {
    * @param handler
    * @return false if parser == null
    */
-  public boolean xml_set_processing_instruction_handler(@NotNull XmlClass parser,
+  public boolean xml_set_processing_instruction_handler(@NotNull Xml parser,
                                                         @NotNull Value handler)
   {
     if (parser == null)
@@ -276,7 +277,7 @@ public class QuercusXmlModule extends AbstractQuercusModule {
    * @param handler
    * @return false if parser == null
    */
-  public boolean xml_set_default_handler(@NotNull XmlClass parser,
+  public boolean xml_set_default_handler(@NotNull Xml parser,
                                          @NotNull Value handler)
   {
     if (parser == null)
@@ -286,13 +287,13 @@ public class QuercusXmlModule extends AbstractQuercusModule {
   }
 
   /**
-   * @see boolean XmlClass.xml_set_notation_decl_handler
+   * @see boolean Xml.xml_set_notation_decl_handler
    *
    * @param parser
    * @param handler
    * @return false is parser == null
    */
-  public boolean xml_set_notation_decl_handler(@NotNull XmlClass parser,
+  public boolean xml_set_notation_decl_handler(@NotNull Xml parser,
                                                @NotNull Value handler)
   {
     if (parser == null)
@@ -307,7 +308,7 @@ public class QuercusXmlModule extends AbstractQuercusModule {
    * @param handler
    * @return false if parser == null
    */
-  public boolean xml_set_end_namespace_decl_handler(@NotNull XmlClass parser,
+  public boolean xml_set_end_namespace_decl_handler(@NotNull Xml parser,
                                                     @NotNull Value handler)
   {
     if (parser == null)
@@ -325,7 +326,7 @@ public class QuercusXmlModule extends AbstractQuercusModule {
    * @return false if parser == null
    * @throws Exception
    */
-  public int xml_parse_into_struct(@NotNull XmlClass parser,
+  public int xml_parse_into_struct(@NotNull Xml parser,
                                    @NotNull String data,
                                    @Reference Value valueArray,
                                    @Optional @Reference Value indexArray)
@@ -343,7 +344,7 @@ public class QuercusXmlModule extends AbstractQuercusModule {
    * @param parser
    * @return false if parser == null, otherwise true
    */
-  public boolean xml_parser_free(@NotNull XmlClass parser)
+  public boolean xml_parser_free(@NotNull Xml parser)
   {
     if (parser == null)
       return false;
@@ -352,13 +353,13 @@ public class QuercusXmlModule extends AbstractQuercusModule {
   }
 
   /**
-   * @see boolean XmlClass.xml_set_unparsed_entity_decl_handler
+   * @see boolean Xml.xml_set_unparsed_entity_decl_handler
    *
    * @param parser
    * @param handler
    * @return false if parser == null, otherwise true
    */
-  public boolean xml_set_unparsed_entity_decl_handler(@NotNull XmlClass parser,
+  public boolean xml_set_unparsed_entity_decl_handler(@NotNull Xml parser,
                                                       @NotNull Value handler)
   {
     if (parser == null)

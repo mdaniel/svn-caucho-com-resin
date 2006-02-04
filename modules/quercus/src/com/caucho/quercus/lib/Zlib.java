@@ -57,9 +57,9 @@ import java.util.zip.InflaterInputStream;
  * Zlib object oriented API facade
  */
 
-public class ZlibClass {
-  private static final Logger log = Logger.getLogger(ZlibClass.class.getName());
-  private static final L10N L = new L10N(ZlibClass.class);
+public class Zlib {
+  private static final Logger log = Logger.getLogger(Zlib.class.getName());
+  private static final L10N L = new L10N(Zlib.class);
 
   private Deflater _deflater;
   private BufferedReader _bufferedReader;
@@ -79,10 +79,10 @@ public class ZlibClass {
    * @param mode (ie: "w9" or "r7f")
    * @param useIncludePath is always on
    */
-  public ZlibClass(Env env,
-                   String fileName,
-                   String mode,
-                   int useIncludePath)
+  public Zlib(Env env,
+              String fileName,
+              String mode,
+              int useIncludePath)
   {
     // Set level
     Pattern pattern = Pattern.compile("[0-9]");
@@ -243,7 +243,7 @@ public class ZlibClass {
 
   /**
    * helper function for ZlibModule.gzfile
-   * need to have created a ZlibClass before calling this
+   * need to have created a Zlib before calling this
    * 
    * @return array of uncompressed lines
    * @throws IOException

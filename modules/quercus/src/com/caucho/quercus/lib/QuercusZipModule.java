@@ -28,19 +28,21 @@
 
 package com.caucho.quercus.lib;
 
-import com.caucho.util.L10N;
-import com.caucho.util.Log;
-
-import java.io.IOException;
-
+import com.caucho.quercus.env.BooleanValue;
+import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.LongValue;
+import com.caucho.quercus.env.NullValue;
+import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.Value;
 import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.quercus.module.NotNull;
 import com.caucho.quercus.module.Optional;
-import com.caucho.quercus.env.*;
+import com.caucho.util.L10N;
+import com.caucho.util.Log;
 import com.caucho.vfs.Path;
 
+import java.io.IOException;
 import java.util.logging.Logger;
-import java.util.logging.Level;
 
 /**
  * PHP Zip
@@ -66,7 +68,7 @@ public class QuercusZipModule extends AbstractQuercusModule {
     if (path == null)
       return BooleanValue.FALSE;
 
-    ZipClass zip = new ZipClass(path);
+    Zip zip = new Zip(path);
 
     if (zip.getZipInputStream() == null)
       return BooleanValue.FALSE;
@@ -75,7 +77,7 @@ public class QuercusZipModule extends AbstractQuercusModule {
   }
 
   public Value zip_read(Env env,
-                        @NotNull ZipClass zipFile)
+                        @NotNull Zip zipFile)
     throws IOException
   {
     if (zipFile == null)
@@ -89,7 +91,7 @@ public class QuercusZipModule extends AbstractQuercusModule {
    * @param zipEntry
    * @return false if zipEntry is null
    */
-  public Value zip_entry_name(@NotNull ZipEntryClass zipEntry)
+  public Value zip_entry_name(@NotNull ZipEntry zipEntry)
   {
     if (zipEntry == null)
       return BooleanValue.FALSE;
@@ -102,7 +104,7 @@ public class QuercusZipModule extends AbstractQuercusModule {
    * @param zipEntry
    * @return false if zipEntry is null
    */
-  public Value zip_entry_filesize(@NotNull ZipEntryClass zipEntry)
+  public Value zip_entry_filesize(@NotNull ZipEntry zipEntry)
   {
     if (zipEntry == null)
       return BooleanValue.FALSE;
@@ -110,7 +112,7 @@ public class QuercusZipModule extends AbstractQuercusModule {
     return new LongValue(zipEntry.zip_entry_filesize());
   }
 
-  public boolean zip_close(@NotNull ZipClass zipFile)
+  public boolean zip_close(@NotNull Zip zipFile)
     throws IOException
   {
     if (zipFile != null)
@@ -126,8 +128,8 @@ public class QuercusZipModule extends AbstractQuercusModule {
    * @param mode ignored - always "rb" from fopen()
    * @return true on success or false on failure
    */
-  public boolean zip_entry_open(@NotNull ZipClass file,
-                                @NotNull ZipEntryClass entry,
+  public boolean zip_entry_open(@NotNull Zip file,
+                                @NotNull ZipEntry entry,
                                 @Optional String mode)
   {
     if ((file == null) || (entry == null))
@@ -141,7 +143,7 @@ public class QuercusZipModule extends AbstractQuercusModule {
    * @param entry
    * @return always true.  This has no meaning.
    */
-  public boolean zip_entry_close(@NotNull ZipEntryClass entry)
+  public boolean zip_entry_close(@NotNull ZipEntry entry)
   {
     if (entry != null)
       entry.zip_entry_close();
@@ -156,7 +158,7 @@ public class QuercusZipModule extends AbstractQuercusModule {
    * @param length
    * @return false or string
    */
-  public Value zip_entry_read(@NotNull ZipEntryClass entry,
+  public Value zip_entry_read(@NotNull ZipEntry entry,
                               @Optional("1024") int length)
   {
     if (entry == null)
@@ -170,7 +172,7 @@ public class QuercusZipModule extends AbstractQuercusModule {
    * @param entry
    * @return empty string, stored or deflated
    */
-  public String zip_entry_compressionmethod(@NotNull ZipEntryClass entry)
+  public String zip_entry_compressionmethod(@NotNull ZipEntry entry)
   {
     if (entry == null)
       return "";
@@ -183,7 +185,7 @@ public class QuercusZipModule extends AbstractQuercusModule {
    * @param entry
    * @return -1, or compressed size
    */
-  public long zip_entry_compressedsize(@NotNull ZipEntryClass entry)
+  public long zip_entry_compressedsize(@NotNull ZipEntry entry)
   {
     if (entry == null)
       return -1;
