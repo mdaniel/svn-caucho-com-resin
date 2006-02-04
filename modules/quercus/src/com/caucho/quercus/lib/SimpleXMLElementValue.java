@@ -414,11 +414,9 @@ public class SimpleXMLElementValue extends Value {
          * So remove all children first then add text node; 
          */
         Element element = ((SimpleXMLElementValue) result).getElement();
-        NodeList children = element.getChildNodes();
-        int childrenLength = children.getLength();
-
-        for (int i = 0; i < childrenLength; i++)
-          element.removeChild(children.item(i));
+        while (element.hasChildNodes()) {
+          element.removeChild(element.getFirstChild());
+        }
 
         Text text = _document.createTextNode(value.toString());
 
