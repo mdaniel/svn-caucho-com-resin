@@ -130,8 +130,9 @@ public class SimpleXMLElementValue extends Value {
       out.println('(');
     }
     
-    if (_childMap == null)
-      fillChildMap();
+    // Need to refill _childMap because elements might have been
+    // replaced
+    fillChildMap();
     
     Set keyValues = _childMap.entrySet();
     int keyLength = keyValues.size();
@@ -296,8 +297,8 @@ public class SimpleXMLElementValue extends Value {
   {
     Value result = null;
     
-    if (_childMap == null)
-      fillChildMap();
+    // Always fillChildMap because an element may have been overwritten
+    fillChildMap();
     
     if (!_childMap.isEmpty())   
       result = _childMap.get(new StringValue(name));
@@ -388,9 +389,9 @@ public class SimpleXMLElementValue extends Value {
    * 
    */
   public Value putField(String name, Value value)
-  {    
-    if (_childMap == null)
-     fillChildMap();
+  { 
+    // always recreated _childMap
+    fillChildMap();
     
     if (!_childMap.isEmpty()) {
       Value result = _childMap.get(new StringValue(name));  
@@ -400,7 +401,7 @@ public class SimpleXMLElementValue extends Value {
 
       // Issue warning if array
       if (result instanceof ArrayValue) {
-
+        //XXX: Need to put a warning here "Cannot assign to an array of nodes (duplicate subnodes or attr detected)"
       } else {
         /**
          *  $foo = simplexml_load_string('<parent><child><sub1 /><sub2 /></child></parent>');
