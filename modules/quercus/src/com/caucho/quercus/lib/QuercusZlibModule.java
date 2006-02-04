@@ -370,7 +370,23 @@ public class QuercusZlibModule extends AbstractQuercusModule {
     return new StringValue(new String(output,0,length));
   }
 
-  // @todo gzencode() -- gzencode() vs. gzdeflate()??
+  /**
+   * 
+   * XXX: treated as a wrapper for gzcompress
+   * 
+   * @param data
+   * @param level
+   * @param encodingMode XXX:ignored for now
+   * @return gzcompress
+   */
+  public Value gzencode(String data,
+                        @Optional("-1") int level,
+                        @Optional int encodingMode)
+    throws DataFormatException, IOException
+  {
+    return gzcompress(data, level);
+  }
+
   // @todo gzpassthru()
   // @todo gzseek()
   // @todo gztell()
