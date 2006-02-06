@@ -38,6 +38,7 @@ import java.util.logging.Level;
 
 import java.sql.*;
 import javax.sql.*;
+import javax.resource.spi.ManagedConnectionFactory;
 
 import com.caucho.util.L10N;
 
@@ -66,6 +67,7 @@ public class DriverConfig {
   private static final int TYPE_DRIVER = 1;
   private static final int TYPE_POOL = 2;
   private static final int TYPE_XA = 3;
+  private static final int TYPE_JCA = 4;
 
   /**
    * The beginning of the URL used to connect to a database with
@@ -98,6 +100,7 @@ public class DriverConfig {
   private int _driverType;
   private Object _driverObject;
 
+  private ManagedConnectionFactory _jcaDataSource;
   private ConnectionPoolDataSource _poolDataSource;
   private XADataSource _xaDataSource;
   private Driver _driver;
@@ -138,6 +141,9 @@ public class DriverConfig {
     else if ("XADataSource".equals(type)) {
       _driverType = TYPE_XA;
     }
+    else if ("ManagedConnectionFactory".equals(type)) {
+      _driverType = TYPE_JCA;
+    }
     else if ("Driver".equals(type)) {
       _driverType = TYPE_DRIVER;
     }
@@ -162,6 +168,8 @@ public class DriverConfig {
       _xaDataSource = (XADataSource) dataSource;
     else if (dataSource instanceof ConnectionPoolDataSource)
       _poolDataSource = (ConnectionPoolDataSource) dataSource;
+    else if (dataSource instanceof ManagedConnectionFactory)
+      _jcaDataSource = (ManagedConnectionFactory) dataSource;
     else
       throw new ConfigException(L.l("data-source `{0}' is of type `{1}' which does not implement XADataSource or ConnectionPoolDataSource.",
                                     dataSource,
@@ -186,7 +194,8 @@ public class DriverConfig {
 
     if (! Driver.class.isAssignableFrom(driverClass) &&
         ! XADataSource.class.isAssignableFrom(driverClass) &&
-        ! ConnectionPoolDataSource.class.isAssignableFrom(driverClass))
+        ! ConnectionPoolDataSource.class.isAssignableFrom(driverClass) &&
+        ! ManagedConnectionFactory.class.isAssignableFrom(driverClass))
       throw new ConfigException(L.l("`{0}' is not a valid database type.",
                                     driverClass.getName()));
 
@@ -426,6 +435,8 @@ public class DriverConfig {
         _xaDataSource = (XADataSource) _driverObject;
       else if (_driverObject instanceof ConnectionPoolDataSource)
         _poolDataSource = (ConnectionPoolDataSource) _driverObject;
+      else if (_driverObject instanceof ManagedConnectionFactory)
+        _jcaDataSource = (ManagedConnectionFactory) _driverObject;
       else if (_driverObject instanceof Driver)
         _driver = (Driver) _driverObject;
       else

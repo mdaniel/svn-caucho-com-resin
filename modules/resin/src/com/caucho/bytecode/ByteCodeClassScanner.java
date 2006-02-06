@@ -180,7 +180,7 @@ public class ByteCodeClassScanner {
     case ByteCodeParser.CP_CLASS:
       {
 	if (_cpOffset.length <= i) {
-	  int []offset = new int[2 * _cpOffset.length];
+	  int []offset = new int[2 * i];
 	  System.arraycopy(_cpOffset, 0, offset, 0, _cpOffset.length);
 	  _cpOffset = offset;
 	}
@@ -272,7 +272,7 @@ public class ByteCodeClassScanner {
     case ByteCodeParser.CP_UTF8:
       {
 	if (_cpOffset.length <= i) {
-	  int []offset = new int[2 * _cpOffset.length];
+	  int []offset = new int[2 * i + 1];
 	  System.arraycopy(_cpOffset, 0, offset, 0, _cpOffset.length);
 	  _cpOffset = offset;
 	}

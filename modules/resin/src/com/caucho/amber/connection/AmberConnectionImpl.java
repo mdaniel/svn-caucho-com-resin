@@ -464,6 +464,19 @@ public class AmberConnectionImpl {
   }
 
   /**
+   * Removes an entity.
+   */
+  public boolean removeEntity(Entity entity)
+  {
+    _entities.remove(entity);
+
+    if (_isInTransaction)
+      _txEntities.remove(entity);
+
+    return true;
+  }
+
+  /**
    * Loads the object based on itself.
    */
   public boolean contains(Object obj)
@@ -609,10 +622,9 @@ public class AmberConnectionImpl {
   public void flush()
     throws SQLException
   {
-    for (int i = 0; i < _txEntities.size(); i++) {
+    for (int i = _txEntities.size() - 1; i >= 0; i--) {
       Entity entity = _txEntities.get(i);
 
-      System.out.println("FLUSH: " + entity);
       entity.__caucho_flush();
     }
 
@@ -852,10 +864,11 @@ public class AmberConnectionImpl {
   public void create(AmberEntityHome home, Object obj)
     throws SQLException
   {
-    if (contains(obj))
-      return;
-
     flush(); // need to flush things like delete
+
+    if (contains(obj)) {
+      return;
+    }
 
     Entity entity = (Entity) obj;
 	

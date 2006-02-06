@@ -178,22 +178,22 @@ public class BeanSerializer extends AbstractSerializer {
     } catch (Exception e) {
     }
 
-    try {
-      out.writeMapBegin(cl.getName());
+    out.writeMapBegin(cl.getName());
 
-      for (int i = 0; i < _methods.length; i++) {
-	Method method = _methods[i];
+    for (int i = 0; i < _methods.length; i++) {
+      Method method = _methods[i];
+
+      try {
+	Object value = _methods[i].invoke(obj, (Object []) null);
       
 	out.writeString(_names[i]);
-	out.writeObject(_methods[i].invoke(obj, (Object []) null));
+	out.writeObject(value);
+      } catch (Throwable e) {
+	// XXX: log when available
       }
-      
-      out.writeMapEnd();
-    } catch (IllegalAccessException e) {
-      throw new IOExceptionWrapper(e);
-    } catch (InvocationTargetException e) {
-      throw new IOExceptionWrapper(e);
     }
+      
+    out.writeMapEnd();
   }
 
   /**

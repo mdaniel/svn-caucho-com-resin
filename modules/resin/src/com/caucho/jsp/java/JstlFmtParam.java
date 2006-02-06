@@ -81,6 +81,8 @@ public class JstlFmtParam extends JstlNode {
     os.print("<fmt:param>");
 
     printXmlText(os, _value);
+    
+    printXmlChildren(os);
 
     os.print("</fmt:param>");
   }

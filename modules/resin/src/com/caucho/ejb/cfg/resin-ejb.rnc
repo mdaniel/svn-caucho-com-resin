@@ -25,7 +25,7 @@ r_abstract-schema-name = element abstract-schema-name { string }
 
 r_abstract-sql-type =
   attribute abstract-sql-type { string }
-  | element abstract-schema-type { string }
+  | element abstract-sql-type { string }
 
 r_activation-config-property = element activation-config-property {
   (attribute activation-config-property-name { string }

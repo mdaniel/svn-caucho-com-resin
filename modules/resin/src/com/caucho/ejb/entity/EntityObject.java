@@ -85,7 +85,7 @@ abstract public class EntityObject extends AbstractEJBObject
   /**
    * Returns the server.
    */
-  public EntityServer getServer()
+  public EntityServer _caucho_getEntityServer()
   {
     return getEntityContext().getEntityServer();
   }
@@ -95,7 +95,7 @@ abstract public class EntityObject extends AbstractEJBObject
    */
   public boolean isMatch(EntityServer server, Object key)
   {
-    return server == getServer() && key.equals(getPrimaryKey());
+    return server == _caucho_getEntityServer() && key.equals(getPrimaryKey());
   }
 
   /**
@@ -128,7 +128,7 @@ abstract public class EntityObject extends AbstractEJBObject
   public EJBHome getEJBHome()
   {
     try {
-      return getServer().getEJBHome();
+      return _caucho_getEntityServer().getEJBHome();
     } catch (Exception e) {
       return null;
     }
@@ -140,7 +140,7 @@ abstract public class EntityObject extends AbstractEJBObject
   public EJBLocalHome getEJBLocalHome()
   {
     try {
-      return (EJBLocalHome) getServer().getEJBLocalHome();
+      return (EJBLocalHome) _caucho_getEntityServer().getEJBLocalHome();
     } catch (Exception e) {
       return null;
     }
@@ -183,7 +183,7 @@ abstract public class EntityObject extends AbstractEJBObject
   /*
   public void remove() throws RemoveException
   {
-    getServer().remove(getHandle());
+    _caucho_getServer().remove(getHandle());
   }
   */
 
@@ -192,7 +192,7 @@ abstract public class EntityObject extends AbstractEJBObject
    */
   public AbstractServer __caucho_getServer()
   {
-    return getServer();
+    return _caucho_getEntityServer();
   }
 
   /**
@@ -200,7 +200,7 @@ abstract public class EntityObject extends AbstractEJBObject
    */
   public String __caucho_getId()
   {
-    return getServer().encodeId(getPrimaryKey());
+    return _caucho_getEntityServer().encodeId(getPrimaryKey());
   }
 
   /**

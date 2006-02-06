@@ -726,11 +726,20 @@ public class EntityComponent extends ClassComponent {
     out.pushDepth();
 
     out.println("int state = __caucho_state;");
-    out.println("__caucho_state = com.caucho.amber.entity.Entity.P_NON_TRANSACTIONAL;");
-    
     int dirtyCount = _entityType.getDirtyIndex();
     for (int i = 0; i <= dirtyCount / 64; i++) {
       out.println("long updateMask_" + i + " = __caucho_updateMask_" + i + ";");
+    }
+
+    if (_entityType.getParentType() != null) {
+      out.println();
+      out.println("super.__caucho_afterCommit();");
+    }
+
+    out.println();
+    out.println("__caucho_state = com.caucho.amber.entity.Entity.P_NON_TRANSACTIONAL;");
+    
+    for (int i = 0; i <= dirtyCount / 64; i++) {
       out.println("__caucho_updateMask_" + i + " = 0L;");
     }
 
@@ -745,43 +754,51 @@ public class EntityComponent extends ClassComponent {
 
     out.println(_extClassName + " item = (" + _extClassName + ") __caucho_item.getEntity();");
 
-    // if loaded in transaction, then copy results
-    // ejb/0a06, ejb/0893
-    out.println("if ((__caucho_loadMask_0 & 1L) != 0) {");
-    out.pushDepth();
-    out.println("item.__caucho_loadMask_0 = 1L;");
+    if (_entityType.getParentType() != null) {
+      // if loaded in transaction, then copy results
+      // ejb/0a06, ejb/0893
+      out.println("if ((__caucho_loadMask_0 & 1L) != 0) {");
+      out.pushDepth();
+      out.println("item.__caucho_loadMask_0 = 1L;");
     
-    _entityType.generateCopyLoadObject(out, "item", "super", 0);
+      _entityType.generateCopyLoadObject(out, "item", "super", 0);
+    }
     
     for (int i = 1; i < _entityType.getLoadGroupIndex(); i++) {
       String loadVar = "__caucho_loadMask_" + (i / 64);
       long mask = (1L << (i % 64));
-      
-      out.println("if ((" + loadVar + " & " + mask + "L) != 0) {");
-      out.pushDepth();
-      
-      _entityType.generateCopyLoadObject(out, "item", "super", i);
 
-      out.println("item." + loadVar + " |= " + mask + "L;");
+      if (_entityType.isLoadGroupOwnedByType(i)) {
+	out.println("if ((" + loadVar + " & " + mask + "L) != 0) {");
+	out.pushDepth();
+      
+	_entityType.generateCopyLoadObject(out, "item", "super", i);
 
+	out.println("item." + loadVar + " |= " + mask + "L;");
+
+	out.popDepth();
+	out.println("}");
+      }
+    }
+
+    if (_entityType.getParentType() != null) {
       out.popDepth();
       out.println("}");
     }
-
-    out.popDepth();
-    out.println("}");
     
     for (int i = 0; i < _entityType.getDirtyIndex(); i++) {
       int group = i / 64;
       long mask = (1L << (i % 64));
       
-      out.println("if ((updateMask_" + group + " & " + mask + "L) != 0) {");
-      out.pushDepth();
+      if (_entityType.isDirtyIndexOwnedByType(i)) {
+	out.println("if ((updateMask_" + group + " & " + mask + "L) != 0) {");
+	out.pushDepth();
       
-      _entityType.generateCopyUpdateObject(out, "item", "super", i);
+	_entityType.generateCopyUpdateObject(out, "item", "super", i);
 
-      out.popDepth();
-      out.println("}");
+	out.popDepth();
+	out.println("}");
+      }
     }
     
     out.popDepth();
@@ -997,6 +1014,8 @@ public class EntityComponent extends ClassComponent {
     out.print("__caucho_home.delete(__caucho_session, ");
     out.print(id.toObject(id.generateGetProperty("this")));
     out.println(");");
+
+    out.print("__caucho_session.removeEntity(this);");
     
     String table = _entityType.getTable().getName();
     String where = _entityType.getId().generateMatchArgWhere(null);

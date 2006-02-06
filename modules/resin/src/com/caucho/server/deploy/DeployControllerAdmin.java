@@ -51,8 +51,11 @@ import com.caucho.jmx.AdminInfo;
 import com.caucho.jmx.AdminOperationInfo;
 
 import com.caucho.server.deploy.mbean.DeployControllerMBean;
-import com.caucho.lifecycle.LifecycleListener;
+
 import com.caucho.lifecycle.Lifecycle;
+import com.caucho.lifecycle.LifecycleListener;
+import com.caucho.lifecycle.LifecycleNotification;
+
 import com.caucho.util.Alarm;
 
 /**
@@ -241,21 +244,39 @@ public class DeployControllerAdmin<C extends EnvironmentDeployController>
     Logger log = _controller.getLog();
 
     long timestamp = Alarm.getCurrentTime();
-    long sequence;
 
     String oldValue = Lifecycle.getStateName(oldState);
     String newValue = Lifecycle.getStateName(newState);
     String message = newValue;
 
-    sequence = _sequence++;
-
     if (log.isLoggable(Level.FINEST))
       log.log(Level.FINEST,  toString() + " lifecycleEvent `" + newValue  + "'");
 
+    if (newState == Lifecycle.IS_ACTIVE) {
+      LifecycleNotification notif;
+      notif = new LifecycleNotification(LifecycleNotification.AFTER_START,
+					this, _sequence++, timestamp,
+					toString () + " started");
+
+      _broadcaster.sendNotification(notif);
+    }
+
+    if (oldState == Lifecycle.IS_ACTIVE) {
+      LifecycleNotification notif;
+      notif = new LifecycleNotification(LifecycleNotification.BEFORE_STOP,
+					this, _sequence++, timestamp,
+					toString() + " stopping");
+
+      _broadcaster.sendNotification(notif);
+    }
+
+    /*
     AttributeChangeNotification notification
-      = new AttributeChangeNotification(this, sequence, timestamp, message, "State", "java.lang.String", oldValue, newValue);
+      = new AttributeChangeNotification(this, _sequence++,
+					timestamp, message, "State", "java.lang.String", oldValue, newValue);
 
     _broadcaster.sendNotification(notification);
+    */
   }
 
   public String toString()

@@ -43,6 +43,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Attr;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.CharacterData;
+import org.w3c.dom.DocumentType;
 import org.w3c.dom.Comment;
 import org.w3c.dom.ProcessingInstruction;
 
@@ -349,6 +350,9 @@ public class NodeBuilder {
       QName qName = ((QAbstractNode) node).getQName();
 
       if (node instanceof Comment) {
+        return;
+      }
+      else if (node instanceof DocumentType) {
         return;
       }
       else if (node instanceof ProcessingInstruction) {

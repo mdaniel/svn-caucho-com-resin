@@ -54,9 +54,9 @@ public class SubEntityType extends EntityType {
     _parent = parent;
     _root = parent.getRootType();
 
-    _loadGroupIndex = _parent.getLoadGroupIndex() + 1;
-    _defaultLoadGroupIndex = _loadGroupIndex;
-    _dirtyIndex = _parent.getDirtyIndex();
+    _loadGroupIndex = -1;
+    _defaultLoadGroupIndex = -1;
+    _dirtyIndex = -1;
   }
 
   /**
@@ -101,6 +101,46 @@ public class SubEntityType extends EntityType {
   {
     return getRootType().getDiscriminator();
   }
+
+  /**
+   * Returns the load group index, overriding the parent.
+   */
+  public int getLoadGroupIndex()
+  {
+    if (_loadGroupIndex < 0) {
+      _loadGroupIndex = _parent.getLoadGroupIndex() + 1;
+      _defaultLoadGroupIndex = _loadGroupIndex;
+    }
+
+    return _loadGroupIndex;
+  }
+
+  /**
+   * Returns the current load group.
+   */
+  public int getDefaultLoadGroupIndex()
+  {
+    if (_defaultLoadGroupIndex < 0) {
+      // initialized by getLoadGroupIndex()
+      getLoadGroupIndex();
+    }
+    
+    return _defaultLoadGroupIndex;
+  }
+
+  /**
+   * Returns the dirty index, overriding the parent.
+   */
+  public int getDirtyIndex()
+  {
+    if (_dirtyIndex < 0) {
+      _dirtyIndex = _parent.getDirtyIndex();
+      _minDirtyIndex = _dirtyIndex;
+    }
+
+    return _dirtyIndex;
+  }
+  
 
   /**
    * Printable version of the entity.

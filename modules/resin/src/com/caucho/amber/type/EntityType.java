@@ -122,6 +122,7 @@ public class EntityType extends Type {
   protected int _defaultLoadGroupIndex;
   protected int _loadGroupIndex;
   
+  protected int _minDirtyIndex;
   protected int _dirtyIndex;
 
   protected boolean _hasLoadCallback;
@@ -745,7 +746,11 @@ public class EntityType extends Type {
    */
   public int nextLoadGroupIndex()
   {
-    return ++_loadGroupIndex;
+    int nextLoadGroupIndex = getLoadGroupIndex() + 1;
+
+    _loadGroupIndex = nextLoadGroupIndex;
+    
+    return nextLoadGroupIndex;
   }
 
   /**
@@ -773,11 +778,23 @@ public class EntityType extends Type {
   }
 
   /**
+   * Returns true if the load group is owned by this type (not a subtype).
+   */
+  public boolean isLoadGroupOwnedByType(int i)
+  {
+    return getDefaultLoadGroupIndex() <= i && i <= getLoadGroupIndex();
+  }
+
+  /**
    * Returns the next dirty index
    */
   public int nextDirtyIndex()
   {
-    return _dirtyIndex++;
+    int dirtyIndex = getDirtyIndex();
+
+    _dirtyIndex = dirtyIndex + 1;
+    
+    return dirtyIndex;
   }
 
   /**
@@ -786,6 +803,22 @@ public class EntityType extends Type {
   public int getDirtyIndex()
   {
     return _dirtyIndex;
+  }
+
+  /**
+   * Returns the min dirty group.
+   */
+  public int getMinDirtyIndex()
+  {
+    return _minDirtyIndex;
+  }
+
+  /**
+   * Returns true if the load group is owned by this type (not a subtype).
+   */
+  public boolean isDirtyIndexOwnedByType(int i)
+  {
+    return getMinDirtyIndex() <= i && i < getDirtyIndex();
   }
 
   /**

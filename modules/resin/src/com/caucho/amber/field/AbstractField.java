@@ -85,12 +85,11 @@ abstract public class AbstractField implements AmberField {
   private boolean _isLazy;
 
   private int _updateIndex;
-  private int _loadGroupIndex;
+  private int _loadGroupIndex = -1;
   
   AbstractField(EntityType sourceType)
   {
     _sourceType = sourceType;
-    _loadGroupIndex = sourceType.getDefaultLoadGroupIndex();
   }
   
   AbstractField(EntityType sourceType, String name)
@@ -341,6 +340,8 @@ abstract public class AbstractField implements AmberField {
   {
     if (_isLazy)
       _loadGroupIndex = getSourceType().nextLoadGroupIndex();
+    else
+      _loadGroupIndex = getSourceType().getDefaultLoadGroupIndex();
   }
 
   /**

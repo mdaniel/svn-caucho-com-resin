@@ -229,7 +229,8 @@ public class ManagedConnectionImpl
 
       _driverConnection = _pooledConnection.getConnection();
     }
-    else
+
+    if (_driverConnection == null)
       _driverConnection = _driver.createDriverConnection(user, password);
 
     if (_driverConnection == null)

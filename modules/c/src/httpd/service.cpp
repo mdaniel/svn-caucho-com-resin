@@ -127,6 +127,9 @@ start_service(char *name, char *full_name, char *class_name, int argc, char **ar
 static void
 add_path(char *buf, char *path)
 {
+  int needs_escape = 0;
+  int i;
+  
 	if (! path) {
 		strcat(buf, "\"\"");
 		return;
@@ -134,7 +137,17 @@ add_path(char *buf, char *path)
 
 	buf += strlen(buf);
 	*buf++ = ' ';
-	*buf++ = '"';
+
+	if (path[i] == '\'' || path[i] == '"')
+	  needs_escape = 1;
+
+	for (i = 0; path[i]; i++) {
+	  if (isspace(path[i]))
+	    needs_escape = 1;
+	}
+
+	if (needs_escape)
+	  *buf++ = '"';
 
 	for (; *path; path++) {
 		int ch = *path;
@@ -145,7 +158,9 @@ add_path(char *buf, char *path)
 			*buf++ = ch;
 	}
 
-	*buf++ = '"';
+	if (needs_escape)
+	  *buf++ = '"';
+	
 	*buf = 0;
 }
 

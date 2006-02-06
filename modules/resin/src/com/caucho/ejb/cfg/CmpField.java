@@ -129,6 +129,9 @@ public class CmpField extends CmpProperty {
    */
   public void setJavaType(JClass javaType)
   {
+    if (javaType.getName().equals("java.util.Map"))
+      Thread.dumpStack();
+    
     //_javaType = new JClassWrapper(javaType);
     _javaType = javaType;
   }
@@ -219,9 +222,9 @@ public class CmpField extends CmpProperty {
 			 Character.toUpperCase(name.charAt(0)) +
 			 name.substring(1));
 	
-  JMethod setter = getEntity().getMethod(getEntity().getEJBClassWrapper(),
-					  setterName,
-					  new JClass[] { getter.getReturnType() });
+    JMethod setter = getEntity().getMethod(getEntity().getEJBClassWrapper(),
+					   setterName,
+					   new JClass[] { getter.getReturnType() });
 
     if (setter == null) {
     }

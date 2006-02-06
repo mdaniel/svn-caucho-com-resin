@@ -461,6 +461,9 @@ public class Transaction extends StoreTransaction {
 	  Lock lock = _upgradeLocks.get(i);
 	  lock.lockWrite(this, _timeout);
 
+	  if (_writeLocks == null)
+	    _writeLocks = new ArrayList<Lock>();
+
 	  _writeLocks.add(lock);
 	}
       }
@@ -521,6 +524,12 @@ public class Transaction extends StoreTransaction {
       for (int i = 0; i < _writeLocks.size(); i++) {
 	Lock lock = _writeLocks.get(i);
 
+	if (_upgradeLocks != null)
+	  _upgradeLocks.remove(lock);
+
+	if (_readLocks != null)
+	  _readLocks.remove(lock);
+
 	try {
 	  lock.unlockWrite();
 	} catch (Throwable e) {
@@ -534,6 +543,9 @@ public class Transaction extends StoreTransaction {
     if (_upgradeLocks != null) {
       for (int i = 0; i < _upgradeLocks.size(); i++) {
 	Lock lock = _upgradeLocks.get(i);
+
+	if (_readLocks != null)
+	  _readLocks.remove(lock);
 
 	try {
 	  // if (! _writeLocks.contains(lock))

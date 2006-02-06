@@ -144,7 +144,7 @@ public class FileBacking {
     if (backupLength <= 0)
       backupLength = 1;
     
-    _loadQuery = "SELECT data FROM " + _tableName + " WHERE id=?";
+    _loadQuery = "SELECT access_time,data FROM " + _tableName + " WHERE id=?";
     _insertQuery = ("INSERT into " + _tableName + " (id,data,mod_time,access_time,expire_interval,owner,backup) " +
 		    "VALUES(?,?,?,?,?,?,?)");
     _updateQuery = "UPDATE " + _tableName + " SET data=?, mod_time=?, access_time=? WHERE id=?";
@@ -312,12 +312,17 @@ public class FileBacking {
       boolean validLoad = false;
 
       if (rs.next()) {
-        InputStream is = rs.getBinaryStream(1);
+	long accessTime = rs.getInt(1) * 60000L;
+	
+        InputStream is = rs.getBinaryStream(2);
 
         if (log.isLoggable(Level.FINE))
           log.fine("load local object: " + uniqueId);
       
         validLoad = clusterObj.load(is, obj);
+
+	if (validLoad)
+	  clusterObj.setAccessTime(accessTime);
 
         is.close();
       }
@@ -415,7 +420,7 @@ public class FileBacking {
   /**
    * Reads from the store.
    */
-  public void read(String uniqueId, WriteStream os)
+  public long read(String uniqueId, WriteStream os)
     throws IOException
   {
     Connection conn = null;
@@ -427,11 +432,15 @@ public class FileBacking {
 
       ResultSet rs = pstmt.executeQuery();
       if (rs.next()) {
-	InputStream is = rs.getBinaryStream(1);
+	long accessTime = rs.getInt(1) * 60000L;
+	
+	InputStream is = rs.getBinaryStream(2);
 
 	os.writeStream(is);
 
 	is.close();
+
+	return accessTime;
       }
     } catch (SQLException e) {
       log.log(Level.FINE, e.toString(), e);
@@ -442,6 +451,8 @@ public class FileBacking {
       } catch (SQLException e) {
       }
     }
+
+    return -1;
   }
 
   /**

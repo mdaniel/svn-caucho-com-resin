@@ -566,14 +566,26 @@ sub handler {
     }
     
     if ($child > 0) {
+        $time = $kill_time;
 	# let it die gracefully in 60 seconds
-	while ($kill_time-- > 0 and kill(0, $child)) {
+	while ($time-- > 0 and kill(0, $child)) {
 	    sleep(1);
 	}
 
-	if ($kill_time <= 0) {
-	    kill(-$child);
+	if ($time <= 0) {
+            $time = $kill_time;
+
+            while ($time-- > 0 and kill(-$child)) {
+        	sleep(1);
+            }
 	}
+
+        if ($time < 0) {
+	    print("Resin proc $child did not die, using kill -9");
+
+	    kill(-9, $child);
+        }
+
     }
 
     exit(1);

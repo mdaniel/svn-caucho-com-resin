@@ -287,11 +287,13 @@ public class CustomTag extends GenericTag {
     }
     
     if (analyzedTag.getDoCatch()) {
+      String t = "_jsp_exn_" + _gen.uniqueId();
+      
       out.popDepth();
-      out.println("} catch (Throwable t) {");
+      out.println("} catch (Throwable " + t + ") {");
       out.println("  pageContext.setWriter(" + oldTag + ");");
       out.println("  out = " + oldTag + ";");
-      out.println("  " + name + ".doCatch(t);");
+      out.println("  " + name + ".doCatch(" + t + ");");
       out.pushDepth();
     }
     

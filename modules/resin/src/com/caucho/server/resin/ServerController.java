@@ -52,6 +52,7 @@ import com.caucho.jmx.IntrospectionMBean;
 import com.caucho.server.cluster.Cluster;
 
 import com.caucho.server.deploy.EnvironmentDeployController;
+import com.caucho.server.deploy.DeployControllerAdmin;
 
 import com.caucho.server.resin.mbean.ServletServerMBean;
 
@@ -67,6 +68,8 @@ public class ServerController
 
   // The cluster server id
   private String _serverId = "";
+
+  private ServerAdmin _admin;
 
   public ServerController()
   {
@@ -84,7 +87,9 @@ public class ServerController
   public ServerController(String id, Path rootDirectory)
   {
     super(id, rootDirectory);
-
+    
+    _admin = new ServerAdmin(this);
+      
     getVariableMap().put("server", new Var());
 
     try {
@@ -145,8 +150,16 @@ public class ServerController
   protected Object createMBean()
     throws JMException
   {
-    return new IntrospectionMBean(new ServerAdmin(this),
+    return new IntrospectionMBean(getDeployAdmin(),
 				  ServletServerMBean.class);
+  }
+
+  /**
+   * Returns the deploy admin.
+   */
+  protected DeployControllerAdmin getDeployAdmin()
+  {
+    return _admin;
   }
 
   /**

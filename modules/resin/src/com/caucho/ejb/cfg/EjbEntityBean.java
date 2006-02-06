@@ -31,6 +31,7 @@ package com.caucho.ejb.cfg;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Map;
 import java.util.Enumeration;
 
 import java.io.IOException;
@@ -682,6 +683,10 @@ public class EjbEntityBean extends EjbBean {
 	JClass type = method.getReturnType();
 
 	if (type.isAssignableTo(Collection.class)) {
+	  throw error(L.l("'{0}' needs to be a relation",
+			  fieldName));
+	}
+	else if (type.isAssignableTo(Map.class)) {
 	  throw error(L.l("'{0}' needs to be a relation",
 			  fieldName));
 	}

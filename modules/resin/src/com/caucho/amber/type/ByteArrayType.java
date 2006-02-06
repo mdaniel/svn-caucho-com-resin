@@ -92,7 +92,7 @@ public class ByteArrayType extends Type {
     throws IOException
   {
     out.println("if (" + value + " == null)");
-    out.println("  " + pstmt + ".setNull(" + index + "++, java.sql.Types.DECIMAL);");
+    out.println("  " + pstmt + ".setNull(" + index + "++, java.sql.Types.LONGVARBINARY);");
     out.println("else");
     out.println("  " + pstmt + ".setBytes(" + index + "++, " + value + ");");
   }

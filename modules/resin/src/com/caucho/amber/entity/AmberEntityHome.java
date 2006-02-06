@@ -423,7 +423,7 @@ public class AmberEntityHome {
     throws SQLException
   {
     _manager.removeEntity(getRootType(), key);
-    
+
     /*
     _entityType.childDelete(aConn, key);
 

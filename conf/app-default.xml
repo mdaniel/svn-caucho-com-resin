@@ -17,12 +17,16 @@
 
   <servlet servlet-name="resin-jsp"
            servlet-class="com.caucho.jsp.JspServlet">
+    <init>
+      <load-tld-on-init>false</load-tld-on-init>	   
+    </init>
     <load-on-startup/>
   </servlet>
 
   <servlet servlet-name="resin-jspx"
            servlet-class="com.caucho.jsp.JspServlet">
     <init>
+      <load-tld-on-init>false</load-tld-on-init>	   
       <xml>true</xml>
     </init>
     <load-on-startup/>

@@ -244,6 +244,14 @@ abstract public class DeployController<I extends DeployInstance>
   }
 
   /**
+   * Returns the deploy admin.
+   */
+  protected DeployControllerAdmin getDeployAdmin()
+  {
+    return null;
+  }
+  
+  /**
    * Initialize the entry.
    */
   public final boolean init()

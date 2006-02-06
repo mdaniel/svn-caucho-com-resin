@@ -264,7 +264,7 @@ public class ServletContextImpl implements ServletContext {
 
     Path path = getAppDir().lookupNative(realPath);
 
-    if (path.canRead())
+    if (path.exists())
       return new URL(path.getURL());
 
     return null;

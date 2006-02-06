@@ -127,9 +127,8 @@ public class AmberSelectMethod extends AbstractQueryMethod {
       out.println(";");
     }
     else {
-      out.print(" (");
-      out.print(getReturnType().getPrintName());
-      out.print(") rs.getObject(1);");
+      _amberType.generateLoad(out, "rs", "0", 1, getReturnType());
+      out.println(";");
     }
 
     out.println("rs.close();");

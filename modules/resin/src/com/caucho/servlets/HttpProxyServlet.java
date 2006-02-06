@@ -132,6 +132,8 @@ public class HttpProxyServlet extends GenericServlet {
 				Path path)
     throws ServletException, IOException
   {
+    String hostURL = path.getURL();
+    
     String uri;
     if (req.isRequestedSessionIdFromUrl()) {
       uri =  (req.getRequestURI() + ";jsessionid=" +
@@ -165,7 +167,63 @@ public class HttpProxyServlet extends GenericServlet {
       ws.writeStream(is);
 
       String status = (String) rs.getAttribute("status");
+      int statusCode = 200;
 
+      if (status != null) {
+	try {
+	  statusCode = Integer.parseInt(status);
+	} catch (Throwable e1) {
+	}
+      }
+
+      String location = null;
+      Iterator iter = rs.getAttributeNames();
+      while (iter.hasNext()) {
+	String name = (String) iter.next();
+
+	if (name.equalsIgnoreCase("status")) {
+	}
+	else if (name.equalsIgnoreCase("location"))
+	  location = (String) rs.getAttribute("location");
+	else
+	  res.addHeader(name, (String) rs.getAttribute(name));
+      }
+
+      if (location == null) {
+      }
+      else if (location.startsWith(hostURL)) {
+	location = location.substring(hostURL.length());
+
+	String prefix;
+	if (req.isSecure()) {
+	  if (req.getServerPort() != 443)
+	    prefix = ("https://" + req.getServerName() +
+		      ":" + req.getServerPort());
+	  else
+	    prefix = ("https://" + req.getServerName());
+	}
+	else {
+	  if (req.getServerPort() != 80)
+	    prefix = ("http://" + req.getServerName() +
+		      ":" + req.getServerPort());
+	  else
+	    prefix = ("http://" + req.getServerName());
+	}
+	
+	if (! location.startsWith("/"))
+	  location = prefix + "/" + location;
+	else
+	  location = prefix + location;
+      }
+
+      if (location != null)
+	res.setHeader("Location", location);
+
+      if (statusCode == 302 && location != null)
+	res.sendRedirect(location);
+      else if (statusCode != 200)
+	res.setStatus(statusCode);
+	
       OutputStream os = res.getOutputStream();
       rs.writeToStream(os);
     } catch (IOException e1) {

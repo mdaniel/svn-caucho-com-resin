@@ -565,7 +565,7 @@ sub handler {
       unlink($pid_file);
     }
     
-    if ($child > 0)
+    if ($child > 0) {
         $time = $kill_time;
 	# let it die gracefully in 60 seconds
 	while ($time-- > 0 and kill(0, $child)) {

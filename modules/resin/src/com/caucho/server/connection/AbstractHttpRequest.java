@@ -2280,6 +2280,13 @@ public abstract class AbstractHttpRequest
 
     _server.update();
   }
+
+  void saveSession()
+  {
+    SessionImpl session = _session;
+    if (session != null)
+      session.finish();
+  }
   
   /**
    * Cleans up at the end of the request

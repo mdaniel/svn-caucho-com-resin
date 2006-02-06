@@ -60,6 +60,7 @@ public class IncludeResponseStream extends ToByteResponseStream {
   private final AbstractHttpResponse _response;
 
   private boolean _isCauchoResponseStream;
+  private AbstractResponseStream _nextResponseStream;
   
   private ServletResponse _next;
   private ServletOutputStream _os;
@@ -84,6 +85,9 @@ public class IncludeResponseStream extends ToByteResponseStream {
       CauchoResponse response = (CauchoResponse) next;
 
       _isCauchoResponseStream = response.isCauchoResponseStream();
+
+      if (_isCauchoResponseStream)
+	_nextResponseStream = response.getResponseStream();
     }
     else
       _isCauchoResponseStream = false;
@@ -138,8 +142,10 @@ public class IncludeResponseStream extends ToByteResponseStream {
   protected void flushCharBuffer()
     throws IOException
   {
-    if (_isCauchoResponseStream) {
+    if (_isCauchoResponseStream && _nextResponseStream == null) {
+      // jsp/18ek
       super.flushCharBuffer();
+      
       return;
     }
     

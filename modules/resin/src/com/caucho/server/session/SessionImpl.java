@@ -897,9 +897,18 @@ public class SessionImpl implements HttpSession, CacheListener {
       boolean ignoreNonSerializable =
 	getManager().getIgnoreSerializationErrors();
 
+      Map.Entry []entries = new Map.Entry[set.size()];
+      
       Iterator iter = set.iterator();
+      int i = 0;
       while (iter.hasNext()) {
-	Map.Entry entry = (Map.Entry) iter.next();
+	entries[i++] = (Map.Entry) iter.next();
+      }
+
+      Arrays.sort(entries, KEY_COMPARATOR);
+
+      for (i = 0; i < entries.length; i++) {
+	Map.Entry entry = entries[i];
 	Object value = entry.getValue();
 
 	out.writeUTF((String) entry.getKey());
@@ -945,4 +954,17 @@ public class SessionImpl implements HttpSession, CacheListener {
   {
     return "SessionImpl[" + getId() + "]";
   }
+
+  private static Comparator KEY_COMPARATOR = new Comparator() {
+      public int compare(Object aObj, Object bObj)
+      {
+	Map.Entry a = (Map.Entry) aObj;
+	Map.Entry b = (Map.Entry) bObj;
+
+	String aStr = (String) a.getKey();
+	String bStr = (String) b.getKey();
+
+	return aStr.compareTo(bStr);
+      }
+    };
 }

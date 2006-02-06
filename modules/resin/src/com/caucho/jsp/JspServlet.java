@@ -50,6 +50,7 @@ public class JspServlet extends QServlet {
     "Copyright (c) 1998-2004 Caucho Technology.  All rights reserved.";
 
   private boolean _isXml = false;
+  private boolean _loadTldOnInit = false;
 
   /**
    * Set true when JSP pages should default to xml.
@@ -57,6 +58,14 @@ public class JspServlet extends QServlet {
   public void setXml(boolean isXml)
   {
     _isXml = isXml;
+  }
+
+  /**
+   * Set true when JSP pages should default to xml.
+   */
+  public void setLoadTldOnInit(boolean isPreload)
+  {
+    _loadTldOnInit = isPreload;
   }
   
   /**
@@ -71,6 +80,7 @@ public class JspServlet extends QServlet {
     JspManager manager = new JspManager((Application) getServletContext());
 
     manager.setXml(_isXml);
+    manager.setLoadTldOnInit(_loadTldOnInit);
       
     setManager(manager);
 

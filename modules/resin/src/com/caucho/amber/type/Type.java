@@ -47,6 +47,8 @@ import com.caucho.amber.entity.EntityItem;
 
 import com.caucho.amber.connection.AmberConnectionImpl;
 
+import com.caucho.bytecode.JClass;
+
 /**
  * The type of a property.
  */
@@ -125,6 +127,40 @@ abstract public class Type {
     throws IOException
   {
     throw new UnsupportedOperationException(getClass().getName());
+  }
+  
+  /**
+   * Generates a string to load the type as a property.
+   */
+  public int generateLoad(JavaWriter out, String rs,
+			  String indexVar, int index,
+			  JClass targetType)
+    throws IOException
+  {
+    String i = indexVar + " + " + index;
+    
+    if ("java.lang.Byte".equals(targetType.getName()))
+      out.print("new Byte((byte) " + rs + ".getInt(" + i + "))");
+    else if ("java.lang.Short".equals(targetType.getName()))
+      out.print("new Short((short) " + rs + ".getInt(" + i + "))");
+    else if ("java.lang.Integer".equals(targetType.getName())) {
+      // ejb/0629
+      out.print("new Integer(" + rs + ".getInt(" + i + "))");
+    }
+    else if ("java.lang.Long".equals(targetType.getName()))
+      out.print("new Long(" + rs + ".getLong(" + i + "))");
+    else if ("java.lang.Float".equals(targetType.getName()))
+      out.print("new Float((float) " + rs + ".getDouble(" + i + "))");
+    else if ("java.lang.Double".equals(targetType.getName()))
+      out.print("new Double(" + rs + ".getDouble(" + i + "))");
+    else if ("java.lang.String".equals(targetType.getName()))
+      out.print(rs + ".getString(" + i + ")");
+    else {
+      out.print("(" + targetType.getName() + ") ");
+      out.print(") " + rs + ".getObject(" + i + ");");
+    }
+
+    return index + 1;
   }
   
   /**

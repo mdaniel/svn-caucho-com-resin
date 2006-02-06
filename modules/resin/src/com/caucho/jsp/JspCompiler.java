@@ -565,8 +565,13 @@ public class JspCompiler implements EnvironmentBean {
 
 	Path webXml = appDir.lookup("WEB-INF/web.xml");
 
-	if (webXml.canRead())
-	  new Config().configureBean(app, webXml);
+	if (webXml.canRead()) {
+	  try {
+	    new Config().configureBean(app, webXml);
+	  } catch (Exception e) {
+	    log.log(Level.WARNING, e.toString(), e);
+	  }
+	}
       }
 
       Path appDir = null;

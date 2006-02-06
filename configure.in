@@ -773,6 +773,30 @@ case "$target_os" in
 	PROXY_LIBS='-lnsl -lsocket -lthread'
 	;;
 
+  *freebsd*5*)
+	PROXY_LIBS='-lpthread'
+        jni_os=freebsd        
+        
+	tmp=`ldd $JAVA_HOME/bin/java | sed 's/.*=>//' | grep -c libc_r`
+	tmp=$tmp `ldd $JAVA_HOME/bin/java | sed 's/.*=>//' | grep -c libpthread`
+	tmp=$tmp `ldd $JAVA_HOME/bin/java | sed 's/.*=>//' | grep -c libthr`
+
+	case "$tmp" in
+	100)
+		PROXY_LIBS='-lc_r';
+		;;
+	010)
+		PROXY_LIBS='-lpthread';
+		;;
+	001)
+		PROXY_LIBS='-lthr';
+		;;
+	*)
+		PROXY_LIBS='-lpthread'
+		echo "Using -lpthread as default"
+		;;
+	;;
+
   *freebsd*)
 	PROXY_LIBS='-lc_r'
         jni_os=freebsd

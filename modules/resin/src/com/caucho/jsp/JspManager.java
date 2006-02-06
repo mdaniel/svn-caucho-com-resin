@@ -71,6 +71,7 @@ public class JspManager extends PageManager {
   private static int _count;
 
   private boolean _isXml;
+  private boolean _isLoadTldOnInit;
   private boolean _precompile = true;
 
   public JspManager(Application app)
@@ -79,15 +80,6 @@ public class JspManager extends PageManager {
 
     if (JspFactory.getDefaultFactory() == null)
       JspFactory.setDefaultFactory(new QJspFactory());
-
-    try {
-      TldManager tld = TldManager.create(new AppResourceManager(app), app);
-
-      // must be initialized at startup for <listeners>, e.g. JSF
-      tld.init();
-    } catch (Exception e) {
-      log.log(Level.WARNING, e.toString(), e);
-    }
   }
 
   /**
@@ -104,6 +96,33 @@ public class JspManager extends PageManager {
   public void setXml(boolean isXml)
   {
     _isXml = isXml;
+  }
+
+  /**
+   * Set true if tld should be loaded on init.
+   */
+  public void setLoadTldOnInit(boolean isLoadOnInit)
+  {
+    _isLoadTldOnInit = isLoadOnInit;
+  }
+
+  /**
+   * Initialize the manager.
+   */
+  public void init()
+  {
+    if (_isLoadTldOnInit) {
+      try {
+	Application app = getApplication();
+	
+	TldManager tld = TldManager.create(new AppResourceManager(app), app);
+
+	// must be initialized at startup for <listeners>, e.g. JSF
+	tld.init();
+      } catch (Exception e) {
+	log.log(Level.WARNING, e.toString(), e);
+      }
+    }
   }
 
   /**

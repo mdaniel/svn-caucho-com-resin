@@ -576,6 +576,12 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
     ServletOutputStream out = getOutputStream();
     out.println("The URL has moved <a href=\"" + path + "\">here</a>");
     // closeConnection();
+    
+    if (_request instanceof AbstractHttpRequest) {
+      AbstractHttpRequest request = (AbstractHttpRequest) _request;
+
+      request.saveSession(); // #503
+    }
 
     close();
   }
@@ -1315,11 +1321,8 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
   public void flushBuffer()
     throws IOException
   {
-    _responseStream.flushBuffer();
-
-    // server/1158 needs this uncommented
-    // jsp/15dd wants it commented
-    // _responseStream.flushBuffer(false);
+    // server/10sn
+    _responseStream.flush();
   }
 
   public void flushHeader()
@@ -1925,8 +1928,11 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
       return;
 
     try {
-      if (_request instanceof AbstractHttpRequest)
-	((AbstractHttpRequest) _request).skip();
+      if (_request instanceof AbstractHttpRequest) {
+	AbstractHttpRequest request = (AbstractHttpRequest) _request;
+
+	request.skip();
+      }
 
       if (_statusCode == SC_NOT_MODIFIED) {
 	handleNotModified(_isTopCache);
