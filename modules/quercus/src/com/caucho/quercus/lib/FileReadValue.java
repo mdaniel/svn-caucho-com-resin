@@ -33,6 +33,7 @@ import java.util.logging.Logger;
 import java.util.logging.Level;
 
 import java.io.IOException;
+import java.io.OutputStream;
 
 import com.caucho.vfs.Path;
 import com.caucho.vfs.ReadStream;
@@ -49,15 +50,12 @@ public class FileReadValue extends FileValue {
   private ReadStream _is;
   private long _offset;
 
-  public FileReadValue(Path path, boolean addSlashes)
+  public FileReadValue(Path path)
     throws IOException
   {
     super(path);
 
     _is = path.openRead();
-
-    if (addSlashes)
-      _is.pushFilter(new AddSlashesStreamFilter());
   }
 
   /**
@@ -120,6 +118,15 @@ public class FileReadValue extends FileValue {
     }
     else
       return false;
+  }
+
+  @Override
+  public void writeToStream(OutputStream os, int length)
+    throws IOException
+  {
+    if (_is != null) {
+      _is.writeToStream(os, length);
+    }
   }
 
   /**

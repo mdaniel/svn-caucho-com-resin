@@ -153,7 +153,7 @@ public class QuercusOptionsModule extends AbstractQuercusModule {
    */
   public static Value get_magic_quotes_runtime(Env env)
   {
-    return LongValue.create(env.getIni("magic_quotes_runtime").toLong());
+    return LongValue.ZERO;
   }
 
   /**
@@ -286,7 +286,10 @@ public class QuercusOptionsModule extends AbstractQuercusModule {
    */
   public static Value set_magic_quotes_runtime(Env env, Value value)
   {
-    return env.setIniBoolean("magic_quotes_runtime", value);
+    if (value.toBoolean())
+      throw new UnsupportedOperationException("magic_quotes_runtime");
+
+    return BooleanValue.FALSE;
   }
 
   /**

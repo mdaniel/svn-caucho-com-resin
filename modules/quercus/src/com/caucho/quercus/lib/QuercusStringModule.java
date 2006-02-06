@@ -70,8 +70,6 @@ import com.caucho.util.RandomUtil;
 
 import com.caucho.vfs.ByteToChar;
 import com.caucho.vfs.Path;
-import com.caucho.vfs.StringWriter;
-import com.caucho.vfs.WriteStream;
 
 /**
  * PHP functions implemented from the string module
@@ -223,18 +221,31 @@ public class QuercusStringModule extends AbstractQuercusModule {
    */
   public static StringValue addslashes(String source)
   {
-    StringWriter stringWriter = new StringWriter();
-    WriteStream out = stringWriter.openWrite();
-    out.pushFilter(new AddSlashesStreamFilter());
+    StringBuilder sb = new StringBuilder();
+    int length = source.length();
+    for (int i = 0; i < length; i++) {
+      char ch = source.charAt(i);
 
-    try {
-      out.print(source);
-    }
-    catch (IOException ex) {
-      throw new RuntimeException(ex);
+      switch (ch) {
+      case 0x0:
+        sb.append("\\0");
+        break;
+      case '\'':
+        sb.append("\\'");
+        break;
+      case '\"':
+        sb.append("\\\"");
+        break;
+      case '\\':
+        sb.append("\\\\");
+        break;
+      default:
+        sb.append(ch);
+        break;
+      }
     }
 
-    return new StringValue(stringWriter.getString());
+    return new StringValue(sb.toString());
   }
 
   /**
@@ -627,7 +638,7 @@ public class QuercusStringModule extends AbstractQuercusModule {
     }
     else {
       env.error(L.l("neither argument to implode is an array: {0}, {1}",
-                    glueV.getClass().getName(), piecesV.getClass().getName()));
+		    glueV.getClass().getName(), piecesV.getClass().getName()));
 
       return BooleanValue.FALSE;
     }
@@ -793,8 +804,8 @@ public class QuercusStringModule extends AbstractQuercusModule {
 
     char nextCh
       = index < lastIndex
-        ? toUpperCase(string.charAt(index + 1))
-        : 0;
+      ? toUpperCase(string.charAt(index + 1))
+      : 0;
 
     switch (ch) {
       case 'A':

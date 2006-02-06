@@ -30,8 +30,10 @@
 package com.caucho.quercus.lib;
 
 import java.io.IOException;
+import java.io.OutputStream;
 
 import com.caucho.vfs.Path;
+import com.caucho.vfs.WriteStream;
 
 import com.caucho.quercus.env.ResourceValue;
 import com.caucho.quercus.env.Env;
@@ -91,6 +93,18 @@ public class FileValue extends StreamResource {
   }
 
   /**
+   * Read a maximum of <i>length</i> bytes from the file and write
+   * them to the outputStream.
+   *
+   * @param os the {@link OutputStream}
+   * @param length the maximum number of bytes to read
+   */
+  public void writeToStream(OutputStream os, int length)
+    throws IOException
+  {
+  }
+
+  /**
    * Prints a string to a file.
    */
   public void print(String v)
@@ -104,7 +118,7 @@ public class FileValue extends StreamResource {
   public void close()
   {
   }
-  
+
   /**
    * Converts to a string.
    * @param env

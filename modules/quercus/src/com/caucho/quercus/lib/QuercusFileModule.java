@@ -49,6 +49,8 @@ import com.caucho.util.Alarm;
 import com.caucho.vfs.WriteStream;
 import com.caucho.vfs.TempBuffer;
 import com.caucho.vfs.Path;
+import com.caucho.vfs.TempStream;
+import com.caucho.vfs.StringWriter;
 
 /**
  * Information and actions for about files
@@ -934,14 +936,7 @@ public class QuercusFileModule extends AbstractQuercusModule {
           return BooleanValue.FALSE;
         }
 
-        boolean addSlashes;
-
-        if (mode.contains("b"))
-          addSlashes = false;
-        else
-          addSlashes = env.getIniBoolean("magic_quotes_runtime");
-
-        return new FileReadValue(path, addSlashes);
+        return new FileReadValue(path);
       }
       else if (mode.startsWith("w")) {
         if (path.exists() && !path.canWrite()) {
@@ -1087,7 +1082,7 @@ public class QuercusFileModule extends AbstractQuercusModule {
    *
    * @param fileValue the file
    */
-  public static Value fread(Env env, Value fileValue, long length)
+  public static Value fread(Env env, Value fileValue, int length)
     throws IOException
   {
     if (! (fileValue instanceof FileValue)) {
@@ -1097,15 +1092,16 @@ public class QuercusFileModule extends AbstractQuercusModule {
 
     FileValue file = (FileValue) fileValue;
 
-    StringBuilder sb = new StringBuilder();
+    TempStream tempStream = new TempStream();
+    tempStream.openWrite();
+    WriteStream os = new WriteStream(tempStream);
 
-    int ch;
+    file.writeToStream(os, length);
 
-    // XXX: handle socket timeout
-    for (int i = 0; i < length &&  ((ch = file.read()) >= 0); i++)
-      sb.append((char) ch);
+    os.close();
 
-    return new StringValue(sb.toString());
+    // XX: s/b ReadStreamStringValue ??
+    return new TempBufferStringValue(tempStream.getHead());
   }
 
   /**
@@ -1306,11 +1302,11 @@ public class QuercusFileModule extends AbstractQuercusModule {
 
     try {
       if (src.canRead()) {
-	src.renameTo(dst);
-	return true;
+        src.renameTo(dst);
+        return true;
       }
       else
-	return false;
+        return false;
     } catch (IOException e) {
       env.warning(e);
 
