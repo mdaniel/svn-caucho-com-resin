@@ -29,39 +29,27 @@
 
 package com.caucho.quercus.lib;
 
-import java.util.Map;
-import java.util.HashMap;
-import java.util.ArrayList;
-import java.util.Iterator;
-
-import java.util.regex.Pattern;
-import java.util.regex.Matcher;
-
-import com.caucho.util.L10N;
-
 import com.caucho.quercus.QuercusRuntimeException;
-
+import com.caucho.quercus.env.*;
 import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.quercus.module.Optional;
 import com.caucho.quercus.module.Reference;
-
-import com.caucho.quercus.env.Value;
-import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.NullValue;
-import com.caucho.quercus.env.BooleanValue;
-import com.caucho.quercus.env.ArrayValue;
-import com.caucho.quercus.env.ArrayValueImpl;
-import com.caucho.quercus.env.LongValue;
-import com.caucho.quercus.env.StringValue;
-import com.caucho.quercus.env.DefaultValue;
-import com.caucho.quercus.env.Callback;
-
+import com.caucho.util.L10N;
 import com.caucho.util.LruCache;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * PHP regexp routines.
  */
-public class QuercusRegexpModule extends AbstractQuercusModule {
+public class QuercusRegexpModule
+  extends AbstractQuercusModule
+{
   private static final L10N L = new L10N(QuercusRegexpModule.class);
 
   private static final int REGEXP_EVAL = 0x01;
@@ -73,19 +61,19 @@ public class QuercusRegexpModule extends AbstractQuercusModule {
   public static final int PREG_SPLIT_NO_EMPTY = 0x01;
   public static final int PREG_SPLIT_DELIM_CAPTURE = 0x02;
   public static final int PREG_SPLIT_OFFSET_CAPTURE = 0x04;
-  
+
   public static final int PREG_GREP_INVERT = 1;
 
-  public static final boolean []PREG_QUOTE = new boolean[256];
+  public static final boolean [] PREG_QUOTE = new boolean[256];
 
-  private static final LruCache<String,Pattern> _patternCache
-    = new LruCache<String,Pattern>(1024);
+  private static final LruCache<String, Pattern> _patternCache
+    = new LruCache<String, Pattern>(1024);
 
-  private static final LruCache<String,ArrayList<Replacement>> _replacementCache
-    = new LruCache<String,ArrayList<Replacement>>(1024);
+  private static final LruCache<String, ArrayList<Replacement>> _replacementCache
+    = new LruCache<String, ArrayList<Replacement>>(1024);
 
-  private static final HashMap<String,Value> _constMap
-    = new HashMap<String,Value>();
+  private static final HashMap<String, Value> _constMap
+    = new HashMap<String, Value>();
 
   /**
    * Returns the index of the first match.
@@ -173,23 +161,27 @@ public class QuercusRegexpModule extends AbstractQuercusModule {
                                  @Optional int offset)
     throws Throwable
   {
-    if (patternString.length() < 2) // XXX: should be error
+    if (patternString.length() < 2) {
+      env.warning(L.l("  Pattern must have at least opening and closing delimiters"));
       return LongValue.ZERO;
-
+    }
+    
     Pattern pattern = compileRegexp(patternString);
     Matcher matcher = pattern.matcher(string);
 
-    if (! (matcher.find(offset)))
-      return LongValue.ZERO;
-
-    boolean isOffsetCapture = (flags & PREG_OFFSET_CAPTURE) != 0;
-
     ArrayValue regs;
-
+    
     if (regsVar instanceof DefaultValue)
       regs = null;
     else
       regs = new ArrayValueImpl();
+    
+    if (! (matcher.find(offset))) {
+      regsVar.set(regs);
+      return LongValue.ZERO;
+    }
+    
+    boolean isOffsetCapture = (flags & PREG_OFFSET_CAPTURE) != 0;
 
     if (regs != null) {
       if (isOffsetCapture) {
@@ -214,7 +206,7 @@ public class QuercusRegexpModule extends AbstractQuercusModule {
         if (isOffsetCapture) {
           ArrayValueImpl part = new ArrayValueImpl();
           part.append(value);
-          part.append(new LongValue(matcher.start()));
+          part.append(new LongValue(matcher.start(i)));
 
           regs.put(new LongValue(i), part);
         }
@@ -234,10 +226,10 @@ public class QuercusRegexpModule extends AbstractQuercusModule {
    * @param env the calling environment
    */
   public static int preg_match_all(String patternString,
-				   String subject,
-				   @Reference Value matchRef,
-				   @Optional("PREG_PATTERN_ORDER") int flags,
-				   @Optional int offset)
+                                   String subject,
+                                   @Reference Value matchRef,
+                                   @Optional("PREG_PATTERN_ORDER") int flags,
+                                   @Optional int offset)
     throws Throwable
   {
     if (patternString.length() < 2) // XXX: should be error
@@ -509,7 +501,7 @@ public class QuercusRegexpModule extends AbstractQuercusModule {
       if (isEval) {
         StringBuilder evalString = new StringBuilder();
 
-        for (int i = 0; i <  replacementLen; i++) {
+        for (int i = 0; i < replacementLen; i++) {
           Replacement replacement = replacementList.get(i);
 
           replacement.eval(evalString, matcher);
@@ -518,7 +510,7 @@ public class QuercusRegexpModule extends AbstractQuercusModule {
         result.append(env.evalCode(evalString.toString()));
       }
       else {
-        for (int i = 0; i <  replacementLen; i++) {
+        for (int i = 0; i < replacementLen; i++) {
           Replacement replacement = replacementList.get(i);
 
           replacement.eval(result, matcher);
@@ -678,70 +670,68 @@ public class QuercusRegexpModule extends AbstractQuercusModule {
   }
 
   /**
-   * Returns an array of all the values that matched the given pattern
-   * if the flag no flag is passed.  Otherwise it will return an array
-   * of all the values that did not match.
+   * Returns an array of all the values that matched the given pattern if the
+   * flag no flag is passed.  Otherwise it will return an array of all the
+   * values that did not match.
    *
-   * @param patternString  the pattern
-   * @param input  the array to check the pattern against
-   * @param flag  0 for matching and 1 for elements that do not match
-   * 
+   * @param patternString the pattern
+   * @param input the array to check the pattern against
+   * @param flag 0 for matching and 1 for elements that do not match
    * @return an array of either matching elements are non-matching elements
    */
-  public static ArrayValue preg_grep (Env env,
-				      String patternString,
-				      ArrayValue input,
-				      @Optional("0") int flag)
+  public static ArrayValue preg_grep(Env env,
+                                     String patternString,
+                                     ArrayValue input,
+                                     @Optional("0") int flag)
     throws Throwable
   {
-  	// php/151b
-  	
-  	Pattern pattern = compileRegexp(patternString);
-  	
+    // php/151b
+
+    Pattern pattern = compileRegexp(patternString);
+
     Matcher matcher = null;
-  	
+
     ArrayValue matchArray = new ArrayValueImpl();
-  	
-    for (Map.Entry<Value, Value> entry: input.entrySet()) {
+
+    for (Map.Entry<Value, Value> entry : input.entrySet()) {
       Value entryValue = entry.getValue();
       Value entryKey = entry.getKey();
-  		
+
       matcher = pattern.matcher(entryValue.toString());
-  			
+
       boolean found = matcher.find();
-  		
-      if (!found && flag == 1)
-	matchArray.append(entryKey, entryValue);
-      else if ((found && flag == 0))
-	matchArray.append(entryKey, entryValue);
+
+      if (!found && (flag == PREG_GREP_INVERT))
+        matchArray.append(entryKey, entryValue);
+      else if (found && (flag != PREG_GREP_INVERT))
+        matchArray.append(entryKey, entryValue);
     }
-  	
+
     return matchArray;
   }
-  
+
   /**
-   * Returns an array of strings produces from splitting the passed
-   * string around the provided pattern.  The pattern is case insensitive.
+   * Returns an array of strings produces from splitting the passed string
+   * around the provided pattern.  The pattern is case insensitive.
    *
-   * @param patternString  the pattern
-   * @param string  the string to split
-   * @param limit  if specified, the maximum number of elements in the array
-   * 
+   * @param patternString the pattern
+   * @param string the string to split
+   * @param limit if specified, the maximum number of elements in the array
    * @return an array of strings split around the pattern string
    */
   public static ArrayValue spliti(Env env,
-				  String patternString,
-				  String string,
-				  @Optional("-1") long limit)
+                                  String patternString,
+                                  String string,
+                                  @Optional("-1") long limit)
   {
-  	// php/151c
-  	
+    // php/151c
+
     patternString = cleanRegexp(patternString, false);
-  	
+
     Pattern pattern = Pattern.compile(patternString, Pattern.CASE_INSENSITIVE);
-  	
+
     String groups[] = pattern.split(string, (int) limit);
-  	
+
     ArrayValue result = new ArrayValueImpl();
 
     for (int k = 0; k < groups.length; k++)
@@ -749,7 +739,7 @@ public class QuercusRegexpModule extends AbstractQuercusModule {
 
     return result;
   }
-  
+
   private static Pattern compileRegexp(String rawRegexp)
   {
     Pattern pattern = _patternCache.get(rawRegexp);
@@ -766,9 +756,10 @@ public class QuercusRegexpModule extends AbstractQuercusModule {
     int tail = rawRegexp.lastIndexOf(delim);
 
     if (tail <= 0)
-      throw new IllegalStateException(L.l("Can't find second {0} in regexp '{1}'.",
-                                          String.valueOf((char) delim),
-                                          rawRegexp));
+      throw new IllegalStateException(L.l(
+        "Can't find second {0} in regexp '{1}'.",
+        String.valueOf((char) delim),
+        rawRegexp));
 
     int len = rawRegexp.length();
 
@@ -823,9 +814,10 @@ public class QuercusRegexpModule extends AbstractQuercusModule {
     int tail = rawRegexp.lastIndexOf(delim);
 
     if (tail <= 0)
-      throw new IllegalStateException(L.l("Can't find second {0} in regexp '{1}'.",
-                                          String.valueOf((char) delim),
-                                          rawRegexp));
+      throw new IllegalStateException(L.l(
+        "Can't find second {0} in regexp '{1}'.",
+        String.valueOf((char) delim),
+        rawRegexp));
 
     int len = rawRegexp.length();
 
@@ -916,21 +908,21 @@ public class QuercusRegexpModule extends AbstractQuercusModule {
     return program;
   }
 
-  private static final String []POSIX_CLASSES = {
+  private static final String [] POSIX_CLASSES = {
     "[:alnum:]", "[:alpha:]", "[:blank:]", "[:cntrl:]",
     "[:digit:]", "[:graph:]", "[:lower:]", "[:print:]",
     "[:punct:]", "[:space:]", "[:upper:]", "[:xdigit:]"
   };
 
-  private static final String []REGEXP_CLASSES = {
+  private static final String [] REGEXP_CLASSES = {
     "\\p{Alnum}", "\\p{Alpha}", "\\p{Blank}", "\\p{Cntrl}",
     "\\p{Digit}", "\\p{Graph}", "\\p{Lower}", "\\p{Print}",
     "\\p{Punct}", "\\p{Space}", "\\p{Upper}", "\\p{XDigit}"
   };
 
   /**
-   * Cleans the regexp from valid values that the Java regexps can't
-   * handle.  Currently "+?".
+   * Cleans the regexp from valid values that the Java regexps can't handle.
+   * Currently "+?".
    */
   // XXX: not handling '['
   private static String cleanRegexp(String regexp, boolean isComments)
@@ -959,25 +951,25 @@ public class QuercusRegexpModule extends AbstractQuercusModule {
             sb.append('0');
             sb.append(ch);
           }
-	  else if (ch == 'x' && i + 1 < len && regexp.charAt(i + 1) == '{') {
-	    int tail = regexp.indexOf('}', i + 1);
+          else if (ch == 'x' && i + 1 < len && regexp.charAt(i + 1) == '{') {
+            int tail = regexp.indexOf('}', i + 1);
 
-	    if (tail > 0) {
-	      String hex = regexp.substring(i + 2, tail);
-	      
-	      if (hex.length() == 2)
-		sb.append("x" + hex);
-	      else if (hex.length() == 4)
-		sb.append("u" + hex);
-	      else
-		throw new QuercusRuntimeException(L.l("illegal hex escape"));
+            if (tail > 0) {
+              String hex = regexp.substring(i + 2, tail);
 
-	      i = tail;
-	    }
-	    else {
-	      sb.append("\\x");
-	    }
-	  }
+              if (hex.length() == 2)
+                sb.append("x" + hex);
+              else if (hex.length() == 4)
+                sb.append("u" + hex);
+              else
+                throw new QuercusRuntimeException(L.l("illegal hex escape"));
+
+              i = tail;
+            }
+            else {
+              sb.append("\\x");
+            }
+          }
           else
             sb.append(ch);
         }
@@ -985,28 +977,28 @@ public class QuercusRegexpModule extends AbstractQuercusModule {
 
       case '[':
         if (quote == '[') {
-	  if (i + 1 < len && regexp.charAt(i + 1) == ':') {
-	    String test = regexp.substring(i);
-	    boolean hasMatch = false;
+          if (i + 1 < len && regexp.charAt(i + 1) == ':') {
+            String test = regexp.substring(i);
+            boolean hasMatch = false;
 
-	    for (int j = 0; j < POSIX_CLASSES.length; j++) {
-	      if (test.startsWith(POSIX_CLASSES[j])) {
-		hasMatch = true;
-		
-		sb.append(REGEXP_CLASSES[j]);
-	    
-		i += POSIX_CLASSES[j].length() - 1;
-	      }
-	    }
+            for (int j = 0; j < POSIX_CLASSES.length; j++) {
+              if (test.startsWith(POSIX_CLASSES[j])) {
+                hasMatch = true;
 
-	    if (! hasMatch)
-	      sb.append("\\[");
-	  }
-	  else
-	    sb.append("\\[");
-	}
-	else
-	  sb.append(ch);
+                sb.append(REGEXP_CLASSES[j]);
+
+                i += POSIX_CLASSES[j].length() - 1;
+              }
+            }
+
+            if (! hasMatch)
+              sb.append("\\[");
+          }
+          else
+            sb.append("\\[");
+        }
+        else
+          sb.append(ch);
 
         if (quote == 0)
           quote = ch;
@@ -1031,7 +1023,8 @@ public class QuercusRegexpModule extends AbstractQuercusModule {
             ('0' <= (ch = regexp.charAt(i + 1)) && ch <= '9' || ch == ',')) {
           sb.append("{");
           for (i++;
-               i < len && ('0' <= (ch = regexp.charAt(i)) && ch <= '9' || ch == ',');
+               i < len &&
+               ('0' <= (ch = regexp.charAt(i)) && ch <= '9' || ch == ',');
                i++) {
             sb.append(ch);
           }
@@ -1117,7 +1110,9 @@ public class QuercusRegexpModule extends AbstractQuercusModule {
     }
   }
 
-  static class TextReplacement extends Replacement {
+  static class TextReplacement
+    extends Replacement
+  {
     private String _text;
 
     TextReplacement(String text)
@@ -1131,7 +1126,9 @@ public class QuercusRegexpModule extends AbstractQuercusModule {
     }
   }
 
-  static class GroupReplacement extends Replacement {
+  static class GroupReplacement
+    extends Replacement
+  {
     private int _group;
 
     GroupReplacement(int group)
