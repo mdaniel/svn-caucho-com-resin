@@ -153,17 +153,17 @@ public class QuercusRegexpModule
    *
    * @param env the calling environment
    */
-  public static Value preg_match(Env env,
-                                 String patternString,
-                                 String string,
-                                 @Optional @Reference Value regsVar,
-                                 @Optional int flags,
-                                 @Optional int offset)
+  public static int preg_match(Env env,
+                               String patternString,
+                               String string,
+                               @Optional @Reference Value matchRef,
+                               @Optional int flags,
+                               @Optional int offset)
     throws Throwable
   {
     if (patternString.length() < 2) {
       env.warning(L.l("  Pattern must have at least opening and closing delimiters"));
-      return LongValue.ZERO;
+      return 0;
     }
     
     Pattern pattern = compileRegexp(patternString);
@@ -171,14 +171,14 @@ public class QuercusRegexpModule
 
     ArrayValue regs;
     
-    if (regsVar instanceof DefaultValue)
+    if (matchRef instanceof DefaultValue)
       regs = null;
     else
       regs = new ArrayValueImpl();
     
     if (! (matcher.find(offset))) {
-      regsVar.set(regs);
-      return LongValue.ZERO;
+      matchRef.set(regs);
+      return 0;
     }
     
     boolean isOffsetCapture = (flags & PREG_OFFSET_CAPTURE) != 0;
@@ -214,10 +214,10 @@ public class QuercusRegexpModule
           regs.put(new LongValue(i), value);
       }
 
-      regsVar.set(regs);
+      matchRef.set(regs);
     }
 
-    return LongValue.ONE;
+    return 1;
   }
 
   /**
@@ -225,20 +225,26 @@ public class QuercusRegexpModule
    *
    * @param env the calling environment
    */
-  public static int preg_match_all(String patternString,
+  public static int preg_match_all(Env env,
+                                   String patternString,
                                    String subject,
                                    @Reference Value matchRef,
                                    @Optional("PREG_PATTERN_ORDER") int flags,
                                    @Optional int offset)
     throws Throwable
   {
-    if (patternString.length() < 2) // XXX: should be error
+     if (patternString.length() < 2) {
+      env.warning(L.l("Pattern must have at least opening and closing delimiters"));
       return 0;
+    }
 
+    if (((flags & PREG_PATTERN_ORDER) != 0) && ((flags & PREG_SET_ORDER) != 0)) {
+      env.warning((L.l("Cannot combine PREG_PATTER_ORDER and PREG_SET_ORDER")));
+      return 0;
+    }
+    
     Pattern pattern = compileRegexp(patternString);
     Matcher matcher = pattern.matcher(subject);
-
-    int i = 0;
 
     ArrayValue matches;
 
@@ -276,10 +282,19 @@ public class QuercusRegexpModule
 
           String groupValue = matcher.group(j);
 
-          if (groupValue != null)
-            values.put(new StringValue(groupValue));
-          else
-            values.put(NullValue.NULL);
+          Value result = NullValue.NULL;
+          
+          if (groupValue != null) {
+            if ((flags & PREG_OFFSET_CAPTURE) != 0) {
+              result = new ArrayValueImpl();
+              result.put(new StringValue(groupValue));
+              result.put(new LongValue(matcher.start(j)));
+            } else {
+                result = new StringValue(groupValue);
+            }
+          }
+          
+          values.put(result);
         }
       }
       else if ((flags & PREG_SET_ORDER) != 0) {
@@ -289,10 +304,18 @@ public class QuercusRegexpModule
         for (int j = 0; j <= matcher.groupCount(); j++) {
           String groupValue = matcher.group(j);
 
-          if (groupValue != null)
-            matchResult.put(new StringValue(groupValue));
-          else
-            matchResult.put(NullValue.NULL);
+          Value result = NullValue.NULL;
+          
+          if (groupValue != null) {
+            if ((flags & PREG_OFFSET_CAPTURE) != 0) {
+              result = new ArrayValueImpl();
+              result.put(new StringValue(groupValue));
+              result.put(new LongValue(matcher.start(j)));
+            } else {
+              result = new StringValue(groupValue);
+            }
+          }
+          matchResult.put(result);
         }
       }
       else {
