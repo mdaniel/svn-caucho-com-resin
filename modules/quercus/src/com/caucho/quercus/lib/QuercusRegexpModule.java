@@ -630,6 +630,8 @@ public class QuercusRegexpModule
       
       String value;
       
+      int startPosition = head;
+      
       // If at limit, then just output the rest of string
       if (count == limit - 1) {
         value = string.substring(head);
@@ -638,11 +640,12 @@ public class QuercusRegexpModule
         value = string.substring(head, matcher.start());
         head = matcher.end();
       }
+      
       if ((flags & PREG_SPLIT_OFFSET_CAPTURE) != 0) {
         
         ArrayValue part = new ArrayValueImpl();
         part.put(new StringValue(value));
-        part.put(new LongValue(head));
+        part.put(new LongValue(startPosition));
         
         result.put(part);
       } else {       
