@@ -628,8 +628,16 @@ public class QuercusRegexpModule
         }
       }
       
-      String value = string.substring(head, matcher.start());
+      String value;
       
+      // If at limit, then just output the rest of string
+      if (count == limit - 1) {
+        value = string.substring(head);
+        head = string.length();
+      } else {
+        value = string.substring(head, matcher.start());
+        head = matcher.end();
+      }
       if ((flags & PREG_SPLIT_OFFSET_CAPTURE) != 0) {
         
         ArrayValue part = new ArrayValueImpl();
@@ -640,8 +648,8 @@ public class QuercusRegexpModule
       } else {       
         result.put(new StringValue(value));
       }
-      
-      head = matcher.end();
+
+      count++;
       
       if ((flags & PREG_SPLIT_DELIM_CAPTURE) != 0) {
        for (int i = 1; i <= matcher.groupCount(); i++) {
