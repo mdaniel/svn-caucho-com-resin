@@ -596,7 +596,9 @@ public class QuercusRegexpModule
   }
 
   /**
-   * Returns the index of the first match.
+   * Returns array of substrings or
+   * of arrays ([0] => substring [1] => offset) if
+   * PREG_SPLIT_OFFSET_CAPTURE is set
    *
    * @param env the calling environment
    */
@@ -613,55 +615,61 @@ public class QuercusRegexpModule
       limit = Long.MAX_VALUE;
 
     ArrayValue result = new ArrayValueImpl();
-
-    if ((flags & PREG_SPLIT_OFFSET_CAPTURE) != 0) {
-      int head = 0;
-
-      Matcher matcher = pattern.matcher(string);
-      while (matcher.find()) {
-        String value = string.substring(head, matcher.start());
-
+    int head = 0;
+    Matcher matcher = pattern.matcher(string);
+    long count = 0;
+    
+    while ((matcher.find()) && (count < limit)) {
+      // If empty and we are to skip empty strings, then skip
+      if ((flags & PREG_SPLIT_NO_EMPTY) != 0) {
+        if (head == matcher.start()) {
+          head = matcher.end();
+          continue;
+        }
+      }
+      
+      String value = string.substring(head, matcher.start());
+      
+      if ((flags & PREG_SPLIT_OFFSET_CAPTURE) != 0) {
+        
         ArrayValue part = new ArrayValueImpl();
         part.put(new StringValue(value));
         part.put(new LongValue(head));
-
+        
         result.put(part);
-
-        head = matcher.end();
+      } else {       
+        result.put(new StringValue(value));
       }
-
-      if (head < string.length()) {
+      
+      head = matcher.end();
+      
+      if ((flags & PREG_SPLIT_DELIM_CAPTURE) != 0) {
+       for (int i = 1; i <= matcher.groupCount(); i++) {
+          if ((flags & PREG_SPLIT_OFFSET_CAPTURE) != 0) {
+            ArrayValue part = new ArrayValueImpl();
+            part.put(new StringValue(matcher.group(i)));
+            part.put(new LongValue(matcher.start()));
+            
+            result.put(part);
+          } else {
+            result.put(new StringValue(matcher.group(i)));
+          }
+        }
+      }
+    }
+    
+    if (head < string.length()) {
+      
+      if ((flags & PREG_SPLIT_OFFSET_CAPTURE) != 0) {
+        
         ArrayValue part = new ArrayValueImpl();
         part.put(new StringValue(string.substring(head)));
         part.put(new LongValue(head));
-
+  
         result.put(part);
+      } else {
+        result.put(new StringValue(string.substring(head)));
       }
-    }
-    else if ((flags & PREG_SPLIT_DELIM_CAPTURE) != 0) {
-      int head = 0;
-
-      Matcher matcher = pattern.matcher(string);
-      while (matcher.find()) {
-        String value = string.substring(head, matcher.start());
-
-        result.append(new StringValue(value));
-
-        for (int i = 1; i <= matcher.groupCount(); i++)
-          result.append(new StringValue(matcher.group(i)));
-
-        head = matcher.end();
-      }
-
-      if (head < string.length()) {
-        result.append(new StringValue(string.substring(head)));
-      }
-    }
-    else {
-      String []value = pattern.split(string);
-
-      for (int i = 0; i < value.length; i++)
-        result.append(new StringValue(value[i]));
     }
 
     return result;
