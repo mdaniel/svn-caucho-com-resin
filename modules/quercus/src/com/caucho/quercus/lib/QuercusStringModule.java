@@ -29,47 +29,30 @@
 
 package com.caucho.quercus.lib;
 
-import java.util.Map;
-import java.util.Iterator;
-import java.util.Locale;
-import java.util.ArrayList;
+import com.caucho.quercus.env.*;
+import com.caucho.quercus.module.AbstractQuercusModule;
+import com.caucho.quercus.module.NotNull;
+import com.caucho.quercus.module.Optional;
+import com.caucho.quercus.module.Reference;
+import com.caucho.quercus.module.UsesSymbolTable;
+import com.caucho.util.L10N;
+import com.caucho.util.RandomUtil;
+import com.caucho.vfs.ByteToChar;
+import com.caucho.vfs.Path;
 
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import java.util.zip.CRC32;
-
-import java.io.InputStream;
 import java.io.IOException;
-
+import java.io.InputStream;
 import java.security.MessageDigest;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.NumberFormat;
-
-import com.caucho.quercus.env.Value;
-import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.LongValue;
-import com.caucho.quercus.env.StringValue;
-import com.caucho.quercus.env.DefaultValue;
-import com.caucho.quercus.env.BooleanValue;
-import com.caucho.quercus.env.ArrayValue;
-import com.caucho.quercus.env.ArrayValueImpl;
-import com.caucho.quercus.env.NullValue;
-import com.caucho.quercus.env.LocaleInfo;
-import com.caucho.quercus.env.Post;
-
-import com.caucho.quercus.module.Reference;
-import com.caucho.quercus.module.Optional;
-import com.caucho.quercus.module.UsesSymbolTable;
-import com.caucho.quercus.module.NotNull;
-import com.caucho.quercus.module.AbstractQuercusModule;
-
-import com.caucho.util.L10N;
-import com.caucho.util.RandomUtil;
-
-import com.caucho.vfs.ByteToChar;
-import com.caucho.vfs.Path;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.Locale;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.zip.CRC32;
 
 /**
  * PHP functions implemented from the string module
@@ -586,7 +569,7 @@ public class QuercusStringModule extends AbstractQuercusModule {
       head = tail + separator.length();
     }
 
-    LongValue key = new LongValue(i + 1);
+    LongValue key = new LongValue(i);
 
     StringValue chunk = new StringValue(string.substring(head));
 

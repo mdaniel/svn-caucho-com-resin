@@ -29,18 +29,16 @@
 
 package com.caucho.quercus.lib;
 
-import java.util.HashMap;
-
-import com.caucho.quercus.env.Value;
-import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.ArrayValue;
 import com.caucho.quercus.env.ConstArrayValue;
-
-import com.caucho.quercus.module.Optional;
+import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.Value;
 import com.caucho.quercus.module.AbstractQuercusModule;
-
+import com.caucho.quercus.module.Optional;
 import com.caucho.util.L10N;
+
+import java.util.HashMap;
 
 /**
  * PHP functions implementing html code.
@@ -171,24 +169,46 @@ public class QuercusHtmlModule extends AbstractQuercusModule {
    * @param charset optional charset style
    * @return the trimmed string
    */
-  public static String html_entity_decode(String string,
-					  @Optional int quoteStyle,
-					  @Optional String charset)
+  public static String html_entity_decode(Env env,
+                                          String string,
+	                              				  @Optional int quoteStyle,
+					                                @Optional String charset)
     throws Throwable
   {
     if (string == null)
       return "";
 
-    StringBuilder result = new StringBuilder();
+   // StringBuilder result = new StringBuilder();
 
-    int i = 0;
-    int length = string.length();
+   // int i = 0;
+    //int length = string.length();
 
-    while (i < length) {
-      i++;
+    // generate keys & values for preg_replace
+   // ArrayValue decodedArray = new ArrayValueImpl();
+    //ArrayValue encodedArray = new ArrayValueImpl();
+    
+    Value[] keys = HTML_SPECIALCHARS_ARRAY.getKeyArray();
+    Value[] values = HTML_SPECIALCHARS_ARRAY.getValueArray(env);
+    Value value = null;
+    int length = keys.length;
+    for (int i = 0; i < length; i++) {
+       value = QuercusRegexpModule.ereg_replace(env,
+                                                      values[i].toString(),
+                                                      keys[i].toString(),
+                                                      string);
+      string = value.toString();
     }
-
-    return result.toString();
+    /*
+    Value value = QuercusRegexpModule.preg_replace(env,
+                                                   encodedArray,
+                                                   decodedArray,
+                                                   new StringValue(string),
+                                                   -1,
+                                                   null);*/
+    if (value != null)
+      return value.toString();
+    else
+      return string;
   }
 
   /**

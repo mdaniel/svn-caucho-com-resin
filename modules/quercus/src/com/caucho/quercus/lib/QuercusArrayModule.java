@@ -29,45 +29,27 @@
 
 package com.caucho.quercus.lib;
 
-import java.text.Collator;
-
-import java.util.Map;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Comparator;
-import java.util.Locale;
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import java.lang.Math;
-
+import com.caucho.quercus.env.*;
+import com.caucho.quercus.env.ArrayValue.AbstractGet;
+import com.caucho.quercus.env.ArrayValue.GetKey;
+import com.caucho.quercus.env.ArrayValue.KeyComparator;
+import com.caucho.quercus.env.ArrayValue.ValueComparator;
+import com.caucho.quercus.module.AbstractQuercusModule;
+import com.caucho.quercus.module.Optional;
+import com.caucho.quercus.module.ReadOnly;
+import com.caucho.quercus.module.Reference;
+import com.caucho.quercus.module.UsesSymbolTable;
+import com.caucho.quercus.program.AbstractFunction;
 import com.caucho.util.L10N;
 import com.caucho.util.RandomUtil;
 
-import com.caucho.quercus.module.AbstractQuercusModule;
-import com.caucho.quercus.module.Optional;
-import com.caucho.quercus.module.Reference;
-import com.caucho.quercus.module.ReadOnly;
-import com.caucho.quercus.module.UsesSymbolTable;
-
-import com.caucho.quercus.env.Value;
-import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.NullValue;
-import com.caucho.quercus.env.BooleanValue;
-import com.caucho.quercus.env.DefaultValue;
-import com.caucho.quercus.env.ArrayValue;
-import com.caucho.quercus.env.ArrayValueImpl;
-import com.caucho.quercus.env.DoubleValue;
-import com.caucho.quercus.env.LongValue;
-import com.caucho.quercus.env.StringValue;
-import com.caucho.quercus.env.Callback;
-
-import com.caucho.quercus.env.ArrayValue.ValueComparator;
-import com.caucho.quercus.env.ArrayValue.KeyComparator;
-import com.caucho.quercus.env.ArrayValue.GetKey;
-import com.caucho.quercus.env.ArrayValue.AbstractGet;
-
-import com.caucho.quercus.program.AbstractFunction;
+import java.text.Collator;
+import java.util.Comparator;
+import java.util.Iterator;
+import java.util.Locale;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * PHP array routines.
@@ -420,12 +402,18 @@ public class QuercusArrayModule extends AbstractQuercusModule {
    * 
    * @throw NullPointerException
    */
-  public static boolean array_key_exists(@ReadOnly Value key,
-					 @ReadOnly ArrayValue searchArray)
+  public static boolean array_key_exists(Env env,
+                                         @ReadOnly Value key,
+					                               @ReadOnly ArrayValue searchArray)
   {
     if (searchArray == null)
       return false;
 
+    if (!((key instanceof StringValue) || (key instanceof LongValue))) {
+      env.warning(L.l("The first argument should be either a string or an integer"));
+      return false;
+    }
+    
     return ! searchArray.containsKey(key).isNull();
   }
 
@@ -586,12 +574,19 @@ public class QuercusArrayModule extends AbstractQuercusModule {
    * 
    * @return a filtered array
    */
-  public Value array_filter(Env env, ArrayValue array,
+  public Value array_filter(Env env,
+                            ArrayValue array,
                             @Optional Callback callback)
   {
     if (array == null)
       return NullValue.NULL;
 
+    /*
+    if ((callback != null) && !(callback instanceof Callback)) {
+      env.warning("The second argument, '" + callback.toString() + "', should be a valid callback");
+      return NullValue.NULL;
+    }*/
+    
     ArrayValue filteredArray = new ArrayValueImpl();
 
     if (callback != null) {
@@ -609,8 +604,8 @@ public class QuercusArrayModule extends AbstractQuercusModule {
           return NullValue.NULL;
         }
       }
-    }
-    else {
+    } else {   
+      
       for (Map.Entry<Value, Value> entry: array.entrySet()) {
         if (entry.getValue().toBoolean())
           filteredArray.put(entry.getKey(), entry.getValue());
