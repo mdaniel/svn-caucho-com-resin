@@ -862,6 +862,43 @@ public class QuercusRegexpModule
   }
 
   /**
+   * XXX: Does not handle setlocale
+   * 
+   * @param string
+   * @return regex for case insensitive match
+   */
+  public static String sql_regcase(String string)
+  {
+    Pattern p = Pattern.compile("[a-zA-Z]");
+    Matcher m = p.matcher(string);
+    
+    int head = 0;
+    StringBuilder sb = new StringBuilder();
+    
+    while (m.find()) {
+      sb.append(string.substring(head, m.start()));
+      //substitute [Aa] for a, etc...
+      sb.append('[');
+      char ch = m.group().charAt(0);
+      if ((ch >= 'A') && ('Z' >= ch)) {
+        sb.append(ch);
+        sb.append((char) ('a' + ch - 'A'));
+      } else {
+        sb.append((char) ('A' + ch - 'a'));
+        sb.append(ch);
+      }
+      sb.append(']');
+      head = m.end();
+    }
+    
+    if (head < string.length()) {
+      sb.append(string.substring(head));
+    }
+    
+    return sb.toString();
+  }
+  
+  /**
    * Returns the index of the first match.
    *
    * @param env the calling environment
