@@ -907,7 +907,7 @@ abstract public class ArrayValue extends Value {
       if (value instanceof Var)
         return new RefVar((Var) value);
       else
-        return new RefVar(this);
+	return new RefVar(this);
     }
 
     /**

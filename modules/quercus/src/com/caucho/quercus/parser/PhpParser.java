@@ -2562,7 +2562,8 @@ public class PhpParser {
     else if (token == '$') {
       _peekToken = token;
 
-      return new VarVarExpr(parseTermBase());
+      // php/0d6c
+      return new VarVarExpr(parseTerm());
     }
     else if (token == '{') {
       Expr expr = new VarVarExpr(parseExpr());

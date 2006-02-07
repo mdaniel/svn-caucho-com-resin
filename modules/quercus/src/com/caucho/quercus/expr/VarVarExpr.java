@@ -229,6 +229,19 @@ public class VarVarExpr extends AbstractVarExpr {
   public void generate(PhpWriter out)
     throws IOException
   {
+    out.print("env.getValue(");
+    _var.generateString(out);
+    out.print(")");
+  }
+
+  /**
+   * Generates code to evaluate the expression
+   *
+   * @param out the writer to the Java source code.
+   */
+  public void generateRef(PhpWriter out)
+    throws IOException
+  {
     out.print("env.getVar(");
     _var.generateString(out);
     out.print(")");

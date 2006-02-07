@@ -145,8 +145,7 @@ public class FieldGetExpr extends AbstractVarExpr {
   {
     Value obj = _objExpr.evalObject(env);
 
-    throw new UnsupportedOperationException();
-    // return obj.getArray(_name);
+    return obj.getFieldArray(_name);
   }
 
   /**
@@ -161,8 +160,8 @@ public class FieldGetExpr extends AbstractVarExpr {
   {
     Value obj = _objExpr.evalObject(env);
 
-    throw new UnsupportedOperationException();
-    //return obj.getObject(env, _name);
+    // php/0a6f
+    return obj.getFieldObject(env, _name);
   }
 
   /**
@@ -278,9 +277,9 @@ public class FieldGetExpr extends AbstractVarExpr {
     throws IOException
   {
     _objExpr.generateArgObject(out);
-    out.print(".getFieldArg(");
+    out.print(".getFieldArg(\"");
     out.printJavaString(_name);
-    out.print(")");
+    out.print("\")");
   }
 
   /**
@@ -292,9 +291,9 @@ public class FieldGetExpr extends AbstractVarExpr {
     throws IOException
   {
     _objExpr.generateObject(out);
-    out.print(".getFieldRef(");
+    out.print(".getFieldRef(\"");
     out.printJavaString(_name);
-    out.print(")");
+    out.print("\")");
   }
 
   /**
@@ -318,9 +317,9 @@ public class FieldGetExpr extends AbstractVarExpr {
     throws IOException
   {
     _objExpr.generateObject(out);
-    out.print(".putField(");
+    out.print(".putField(\"");
     out.printJavaString(_name);
-    out.print(", ");
+    out.print("\", ");
     value.generateCopy(out);
     out.print(")");
   }
@@ -334,9 +333,9 @@ public class FieldGetExpr extends AbstractVarExpr {
     throws IOException
   {
     _objExpr.generateObject(out);
-    out.print(".putField(");
+    out.print(".putField(\"");
     out.printJavaString(_name);
-    out.print(", ");
+    out.print("\", ");
     value.generateRef(out);
     out.print(")");
   }
@@ -350,9 +349,9 @@ public class FieldGetExpr extends AbstractVarExpr {
     throws IOException
   {
     _objExpr.generateObject(out);
-    out.print(".getFieldObject(env, ");
+    out.print(".getFieldObject(env, \"");
     out.printJavaString(_name);
-    out.print(")");
+    out.print("\")");
   }
 
   /**
@@ -364,9 +363,9 @@ public class FieldGetExpr extends AbstractVarExpr {
     throws IOException
   {
     _objExpr.generateArgObject(out);
-    out.print(".getFieldArgObject(env, ");
+    out.print(".getFieldArgObject(env, \"");
     out.printJavaString(_name);
-    out.print(")");
+    out.print("\")");
   }
 
   /**
@@ -378,9 +377,9 @@ public class FieldGetExpr extends AbstractVarExpr {
     throws IOException
   {
     _objExpr.generateObject(out);
-    out.print(".getFieldArray(");
+    out.print(".getFieldArray(\"");
     out.printJavaString(_name);
-    out.print(")");
+    out.print("\")");
   }
 
   /**
@@ -392,9 +391,9 @@ public class FieldGetExpr extends AbstractVarExpr {
     throws IOException
   {
     _objExpr.generateArgObject(out);
-    out.print(".getFieldArgArray(");
+    out.print(".getFieldArgArray(\"");
     out.printJavaString(_name);
-    out.print(")");
+    out.print("\")");
   }
 
   /**
@@ -406,9 +405,9 @@ public class FieldGetExpr extends AbstractVarExpr {
     throws IOException
   {
     _objExpr.generate(out);
-    out.print(".removeField(");
+    out.print(".removeField(\"");
     out.printJavaString(_name);
-    out.print(")");
+    out.print("\")");
   }
 
   /**

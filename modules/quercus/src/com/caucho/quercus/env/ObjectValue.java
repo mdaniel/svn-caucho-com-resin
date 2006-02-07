@@ -160,10 +160,12 @@ public class ObjectValue extends Value {
     for (; count >= 0; count--) {
       Entry entry = _entries[hash];
 
-      if (entry == null)
+      if (entry == null) {
 	return UnsetValue.UNSET;
-      else if (key.equals(entry.getKey()))
+      }
+      else if (key.equals(entry.getKey())) {
 	return entry.getValue();
+      }
 
       hash = (hash + 1) & hashMask;
     }
@@ -188,6 +190,51 @@ public class ObjectValue extends Value {
     entry.setValue(var);
 
     return var;
+  }
+
+  /**
+   * Returns the value as an argument which may be a reference.
+   */
+  public Value getFieldArg(String index)
+  {
+    Entry entry = getEntry(index);
+
+    if (entry != null) {
+      return entry.toArg();
+    }
+    else {
+      return new ArgGetFieldValue(this, index);
+    }
+  }
+
+  /**
+   * Returns the value as an argument which may be a reference.
+   */
+  public Value getFieldArgRef(String index)
+  {
+    Entry entry = getEntry(index);
+
+    if (entry != null) {
+      return entry.toArg();
+    }
+    else {
+      return new ArgGetFieldValue(this, index);
+    }
+  }
+
+  /**
+   * Returns the value as an object
+   */
+  public Value getFieldArgObject(Env env, String fieldName)
+  {
+    Value value = getField(fieldName);
+
+    if (value.isset()) {
+      return value;
+    }
+    else {
+      return new ArgObjectGetFieldValue(env, this, fieldName);
+    }
   }
 
   /**
@@ -261,6 +308,53 @@ public class ObjectValue extends Value {
   public Value putField(String key, double value)
   {
     return putField(key, DoubleValue.create(value));
+  }
+
+  /**
+   * Removes a value.
+   */
+  public void removeField(String key)
+  { 
+    int capacity = _entries.length;
+
+    int hash = key.hashCode() & _hashMask;
+
+    int count = capacity;
+    for (; count >= 0; count--) {
+      Entry entry = _entries[hash];
+
+      if (entry == null)
+	return;
+      else if (key.equals(entry.getKey())) {
+	_size--;
+
+	_entries[hash] = null;
+	shiftEntries(hash + 1);
+
+	return;
+      }
+
+      hash = (hash + 1) & _hashMask;
+    }
+  }
+
+  /**
+   * Shift entries after a delete.
+   */
+  private void shiftEntries(int index)
+  {
+    int capacity = _entries.length;
+    
+    for (; index < capacity; index++) {
+      Entry entry = _entries[index];
+
+      if (entry == null)
+	return;
+
+      _entries[index] = null;
+
+      addEntry(entry);
+    }
   }
 
   /**

@@ -567,8 +567,16 @@ public class StaticFunction extends AbstractFunction {
   {
     String var = out.addModule(_quercusModule);
     
-    if (Modifier.isStatic(_method.getModifiers()))
-      out.print(_method.getDeclaringClass().getName());
+    if (Modifier.isStatic(_method.getModifiers())) {
+      String className = _method.getDeclaringClass().getName();
+
+      if (className.startsWith("com.caucho.quercus.lib.") &&
+	  className.indexOf('.', "com.caucho.quercus.lib.".length()) < 0) {
+	out.print(className.substring("com.caucho.quercus.lib.".length()));
+      }
+      else
+	out.print(className);
+    }
     else
       out.print(var);
 

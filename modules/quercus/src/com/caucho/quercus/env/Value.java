@@ -310,7 +310,7 @@ abstract public class Value {
    */
   public Var toVar()
   {
-    return new Var(this);
+    return new Var(copy());
   }
 
   /**
@@ -986,7 +986,7 @@ abstract public class Value {
    */
   public Value getFieldRef(String index)
   {
-    return NullValue.NULL;
+    return getField(index);
   }
 
   /**
@@ -994,7 +994,15 @@ abstract public class Value {
    */
   public Value getFieldArg(String index)
   {
-    return NullValue.NULL;
+    return getFieldRef(index);
+  }
+
+  /**
+   * Returns the field ref for an argument.
+   */
+  public Value getFieldArgRef(String index)
+  {
+    return getFieldRef(index);
   }
 
   /**
@@ -1003,7 +1011,15 @@ abstract public class Value {
    */
   public Value getFieldObject(Env env, String index)
   {
-    return NullValue.NULL;
+    Value v = getField(index);
+
+    if (! v.isset()) {
+      v = env.createObject();
+
+      putField(index, v);
+    }
+      
+    return v;
   }
 
   /**
@@ -1021,7 +1037,23 @@ abstract public class Value {
    */
   public Value getFieldArray(String index)
   {
-    return NullValue.NULL;
+    Value v = getField(index);
+
+    if (! v.isset()) {
+      v = new ArrayValueImpl();
+
+      putField(index, v);
+    }
+      
+    return v;
+  }
+
+  /**
+   * Returns the field ref.
+   */
+  public Value getFieldArgArray(String index)
+  {
+    return getFieldArray(index);
   }
 
   /**

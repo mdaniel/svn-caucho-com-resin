@@ -164,8 +164,9 @@ public class QuercusClass extends AbstractQuercusClass {
   {
     ObjectValue object = new ObjectValue(this);
 
-    for (int i = _classDefList.length - 1; i >= 0; i--)
+    for (int i = _classDefList.length - 1; i >= 0; i--) {
       _classDefList[i].initInstance(env, object);
+    }
 
     return object;
   }

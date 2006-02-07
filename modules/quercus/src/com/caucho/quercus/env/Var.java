@@ -576,6 +576,38 @@ public class Var extends Value {
   }
 
   /**
+   * Returns the field ref.
+   */
+  public Value getField(String index)
+  {
+    return _value.getField(index);
+  }
+
+  /**
+   * Returns the field ref.
+   */
+  public Value getFieldRef(String index)
+  {
+    return _value.getFieldRef(index);
+  }
+
+  /**
+   * Sets the field.
+   */
+  public Value putField(String index, Value value)
+  {
+    return _value.putField(index, value);
+  }
+
+  /**
+   * Unsets the field.
+   */
+  public void removeField(String index)
+  {
+    _value.removeField(index);
+  }
+
+  /**
    * Returns the character at an index
    */
   public Value charAt(long index)

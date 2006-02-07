@@ -488,6 +488,7 @@ public class ArrayValueImpl extends ArrayValue {
 
 	Value value = entry.getValue();
 
+	_entries[hash] = null;
 	shiftEntries(hash + 1);
 
 	return value;

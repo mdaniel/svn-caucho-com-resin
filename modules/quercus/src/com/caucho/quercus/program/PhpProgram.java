@@ -113,6 +113,7 @@ public class PhpProgram extends GenClass {
     addImport("com.caucho.quercus.env.*");
     addImport("com.caucho.quercus.expr.*");
     addImport("com.caucho.quercus.program.*");
+    addImport("com.caucho.quercus.lib.*");
     
     PhpMain main = new PhpMain(this, functionInfo, statement);
     addComponent(main);

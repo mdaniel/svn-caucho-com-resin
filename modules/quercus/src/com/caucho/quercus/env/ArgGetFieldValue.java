@@ -19,42 +19,63 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
  * @author Scott Ferguson
  */
 
-package com.caucho.ejb.entity;
+package com.caucho.quercus.env;
 
-import java.io.*;
-import java.util.*;
-import java.rmi.*;
-import java.security.*;
+import com.caucho.vfs.WriteStream;
 
-import javax.ejb.*;
-import javax.transaction.*;
-
-import com.caucho.vfs.*;
-import com.caucho.java.*;
-
-import com.caucho.ejb.protocol.LocalSkeletonWrapper;
+import java.util.IdentityHashMap;
 
 /**
- * Abstract base class for an EntityObject.
+ * Represents an field-get argument which might be a call to a reference.
  */
-abstract public class EntityLocal extends EntityObject
-{
-  /**
-   * Serialize the HomeSkeletonWrapper in place of this object.
-   *
-   * @return the matching skeleton wrapper.
-   */
-  public Object writeReplace() throws ObjectStreamException
+public class ArgGetFieldValue extends Value {
+  private final Value _obj;
+  private final String _index;
+
+  public ArgGetFieldValue(Value obj, String index)
   {
-    String serverId = _caucho_getEntityServer().getEJBName();
-    Object key = getPrimaryKey();
-    return new LocalSkeletonWrapper(serverId, key);
+    _obj = obj;
+    _index = index;
+  }
+
+  /**
+   * Converts to a reference variable.
+   */
+  public Var toRefVar()
+  {
+    return _obj.getFieldRef(_index).toRefVar();
+  }
+
+  /**
+   * Converts to a reference variable.
+   */
+  public Value toRefValue()
+  {
+    return _obj.getFieldRef(_index);
+  }
+
+  /**
+   * Converts to a value.
+   */
+  public Value toValue()
+  {
+    return _obj.getField(_index);
+  }
+
+  /**
+   * Converts to a variable.
+   */
+  public Var toVar()
+  {
+    return new Var();
   }
 }
+

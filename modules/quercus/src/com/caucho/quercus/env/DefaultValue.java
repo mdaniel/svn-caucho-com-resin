@@ -112,7 +112,29 @@ public class DefaultValue extends NullValue {
   public void generate(PhpWriter out)
     throws IOException
   {
-    out.print("com.caucho.quercus.env.DefaultValue.DEFAULT");
+    out.print("DefaultValue.DEFAULT");
+  }
+
+  /**
+   * Generates code to recreate the expression.
+   *
+   * @param out the writer to the Java source code.
+   */
+  public void generateLong(PhpWriter out)
+    throws IOException
+  {
+    out.print("0");
+  }
+
+  /**
+   * Generates code to recreate the expression.
+   *
+   * @param out the writer to the Java source code.
+   */
+  public void generateString(PhpWriter out)
+    throws IOException
+  {
+    out.print("\"\"");
   }
 }
 
