@@ -478,6 +478,12 @@ public class QuercusRegexpModule
                                                 Value countV)
     throws Throwable
   {
+    
+    long numberOfMatches = 0;
+    
+    if (limit < 0)
+      limit = Long.MAX_VALUE;
+    
     Pattern pattern = compileRegexp(patternString);
     
     Matcher matcher = pattern.matcher(subject);
@@ -485,7 +491,13 @@ public class QuercusRegexpModule
     StringBuilder result = new StringBuilder();
     int tail = 0;
     
-    while (matcher.find()) {
+    while (matcher.find() && numberOfMatches < limit) {
+      // Increment countV (note: if countV != null, then it should be a Var)
+      if ((countV != null) && (countV instanceof Var)) {
+        long count = ((Var) countV).getRawValue().toLong();
+        countV.set(new LongValue(count + 1));
+      }
+      
       if (tail < matcher.start())
         result.append(subject.substring(tail, matcher.start()));
       
@@ -505,6 +517,8 @@ public class QuercusRegexpModule
       result.append(replacement);
       
       tail = matcher.end();
+      
+      numberOfMatches++;
     }
     
     if (tail < subject.length())
