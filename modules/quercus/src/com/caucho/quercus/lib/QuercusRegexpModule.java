@@ -844,7 +844,7 @@ public class QuercusRegexpModule
       }
     }
     
-    if (head < string.length()) {
+    if ((head <= string.length()) && (count != limit)) {
       
       if ((flags & PREG_SPLIT_OFFSET_CAPTURE) != 0) {
         
@@ -875,22 +875,15 @@ public class QuercusRegexpModule
     if (limit < 0)
       limit = Long.MAX_VALUE;
     
-    // make sure patternString is surrounded by delimiter
-    // without outside '/', patternString "[,:]" becomes ",:"
-    StringBuilder sb = new StringBuilder();
-    if (patternString.charAt(0) != '/') {
-      sb.append('/');
-      sb.append(patternString);
-      sb.append('/');
-      patternString = sb.toString();
-    }
-    
-    Pattern pattern = compileRegexp(patternString);
+    patternString = cleanRegexp(patternString, false);
+
+    Pattern pattern = Pattern.compile(patternString);
 
     ArrayValue result = new ArrayValueImpl();
-    int head = 0;
+
     Matcher matcher = pattern.matcher(string);
     long count = 0;
+    int head = 0;
     
     while ((matcher.find()) && (count < limit)) {
       String value;
@@ -907,10 +900,10 @@ public class QuercusRegexpModule
       count++;
     }
     
-    if (head < string.length()) {
+    if ((head <= string.length() && (count != limit))) {
       result.put(new StringValue(string.substring(head)));
     }
-    
+
     return result;
   }
 
@@ -969,18 +962,39 @@ public class QuercusRegexpModule
                                   String string,
                                   @Optional("-1") long limit)
   {
+    if (limit < 0)
+      limit = Long.MAX_VALUE;
+    
     // php/151c
 
     patternString = cleanRegexp(patternString, false);
 
     Pattern pattern = Pattern.compile(patternString, Pattern.CASE_INSENSITIVE);
 
-    String groups[] = pattern.split(string, (int) limit);
-
     ArrayValue result = new ArrayValueImpl();
 
-    for (int k = 0; k < groups.length; k++)
-      result.append(new StringValue(groups[k]));
+    Matcher matcher = pattern.matcher(string);
+    long count = 0;
+    int head = 0;
+    
+    while ((matcher.find()) && (count < limit)) {
+      String value;
+      if (count == limit - 1) {
+        value = string.substring(head);
+        head = string.length();
+      } else {
+        value = string.substring(head, matcher.start());
+        head = matcher.end();
+      }
+      
+      result.put(new StringValue(value));
+      
+      count++;
+    }
+    
+    if ((head <= string.length()) && (count != limit)) {
+      result.put(new StringValue(string.substring(head)));
+    }
 
     return result;
   }
