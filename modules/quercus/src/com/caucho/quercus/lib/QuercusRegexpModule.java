@@ -366,17 +366,61 @@ public class QuercusRegexpModule
   }
 
   /**
-   * Replaces values using regexps
+   * Loops through subject if subject is array of strings
+   * 
+   * @param env
+   * @param pattern string or array
+   * @param replacement string or array
+   * @param subject string or array
+   * @param limit
+   * @param count
+   * @return
+   * @throws Throwable
    */
   public static Value preg_replace(Env env,
+                                   Value pattern,
+                                   Value replacement,
+                                   Value subject,
+                                   @Optional("-1") long limit,
+                                   @Optional @Reference Value count)
+    throws Throwable
+  {
+    if (subject instanceof ArrayValue) {
+      ArrayValue result = new ArrayValueImpl();
+
+      for (Value value : ((ArrayValue) subject).values()) {
+        result.put(pregReplace(env,
+                               pattern,
+                               replacement,
+                               value.toString(),
+                               limit,
+                               count));
+      }
+      
+      return result;
+      
+    } else if (subject instanceof StringValue) {
+      return pregReplace(env, pattern, replacement, subject.toString(), limit, count);
+    } else
+      return NullValue.NULL;
+    
+  }
+  
+  /**
+   * Replaces values using regexps
+   */
+  private static Value pregReplace(Env env,
                                    Value patternValue,
                                    Value replacement,
                                    String subject,
-                                   @Optional("4294967296") long limit,
-                                   @Optional @Reference Value countV)
+                                   @Optional("-1") long limit,
+                                   Value countV)
     throws Throwable
   {
     String string = subject;
+
+    if (limit < 0)
+      limit = Long.MAX_VALUE;
 
     if (patternValue.isArray() && replacement.isArray()) {
       ArrayValue patternArray = (ArrayValue) patternValue;
@@ -393,22 +437,18 @@ public class QuercusRegexpModule
                                    limit,
                                    countV);
       }
-    }
-    else if (patternValue.isArray()) {
+    } else if (patternValue.isArray()) {
       ArrayValue patternArray = (ArrayValue) patternValue;
 
-      Iterator<Value> patternIter = patternArray.values().iterator();
-
-      while (patternIter.hasNext()) {
+      for (Value value : patternArray.values()) {
         string = pregReplaceString(env,
-                                   patternIter.next().toString(),
+                                   value.toString(),
                                    replacement.toString(),
                                    string,
                                    limit,
                                    countV);
       }
-    }
-    else {
+    } else {
       string = pregReplaceString(env,
                                  patternValue.toString(),
                                  replacement.toString(),
@@ -420,6 +460,59 @@ public class QuercusRegexpModule
     return new StringValue(string);
   }
 
+  /**
+   * replaces values using regexps and callback fun
+   * @param env
+   * @param patternString
+   * @param fun
+   * @param subject
+   * @param limit
+   * @param countV
+   * @return subject with everything replaced
+   */
+  private static String pregReplaceImpl(Env env,
+                                        String patternString,
+                                        Callback fun,
+                                        String subject,
+                                        long limit,
+                                        Value countV)
+    throws Throwable
+  {
+    Pattern pattern = compileRegexp(patternString);
+    
+    Matcher matcher = pattern.matcher(subject);
+    
+    StringBuilder result = new StringBuilder();
+    int tail = 0;
+    
+    while (matcher.find()) {
+      if (tail < matcher.start())
+        result.append(subject.substring(tail, matcher.start()));
+      
+      ArrayValue regs = new ArrayValueImpl();
+      
+      for (int i = 0; i <= matcher.groupCount(); i++) {
+        String group = matcher.group(i);
+        
+        if (group != null)
+          regs.put(new StringValue(group));
+        else
+          regs.put(StringValue.EMPTY);
+      }
+      
+      Value replacement = fun.eval(env, regs);
+      
+      result.append(replacement);
+      
+      tail = matcher.end();
+    }
+    
+    if (tail < subject.length())
+      result.append(subject.substring(tail));
+    
+    return result.toString();
+  }
+  
   /**
    * Replaces values using regexps
    */
@@ -433,6 +526,7 @@ public class QuercusRegexpModule
   {
     Pattern pattern = compileRegexp(patternString);
 
+    // check for e modifier in patternString
     int patternFlags = regexpFlags(patternString);
 
     ArrayList<Replacement> replacementProgram
@@ -443,9 +537,12 @@ public class QuercusRegexpModule
       _replacementCache.put(replacement, replacementProgram);
     }
 
-    return preg_replace_impl(env, pattern, replacementProgram,
-                             subject, countV,
-                             (patternFlags & REGEXP_EVAL) != 0);
+    return pregReplaceImpl(env,
+                           pattern,
+                           replacementProgram,
+                           subject,
+                           countV,
+                           (patternFlags & REGEXP_EVAL) != 0);
   }
 
   /**
@@ -467,8 +564,8 @@ public class QuercusRegexpModule
       _replacementCache.put(replacement, replacementProgram);
     }
 
-    String result = preg_replace_impl(env, pattern, replacementProgram,
-                                      subject, NullValue.NULL, false);
+    String result = pregReplaceImpl(env, pattern, replacementProgram,
+                                    subject, NullValue.NULL, false);
 
     return new StringValue(result);
   }
@@ -493,8 +590,8 @@ public class QuercusRegexpModule
       _replacementCache.put(replacement, replacementProgram);
     }
 
-    String result = preg_replace_impl(env, pattern, replacementProgram,
-                                      subject, NullValue.NULL, false);
+    String result = pregReplaceImpl(env, pattern, replacementProgram,
+                                    subject, NullValue.NULL, false);
 
     return new StringValue(result);
   }
@@ -502,12 +599,12 @@ public class QuercusRegexpModule
   /**
    * Replaces values using regexps
    */
-  private static String preg_replace_impl(Env env,
-                                          Pattern pattern,
-                                          ArrayList<Replacement> replacementList,
-                                          String subject,
-                                          Value countV,
-                                          boolean isEval)
+  private static String pregReplaceImpl(Env env,
+                                        Pattern pattern,
+                                        ArrayList<Replacement> replacementList,
+                                        String subject,
+                                        Value countV,
+                                        boolean isEval)
     throws Throwable
   {
     Matcher matcher = pattern.matcher(subject);
@@ -518,9 +615,19 @@ public class QuercusRegexpModule
     int replacementLen = replacementList.size();
 
     while (matcher.find()) {
+      
+      // Increment countV (note: if countV != null, then it should be a Var)
+      if ((countV != null) && (countV instanceof Var)) {
+        long count = ((Var) countV).getRawValue().toLong();
+        countV.set(new LongValue(count + 1));
+      }
+      
+      // append all text up to match
       if (tail < matcher.start())
         result.append(subject.substring(tail, matcher.start()));
 
+      // if isEval then append replacement evaluated as PHP code
+      // else append replacement string
       if (isEval) {
         StringBuilder evalString = new StringBuilder();
 
@@ -531,8 +638,7 @@ public class QuercusRegexpModule
         }
 
         result.append(env.evalCode(evalString.toString()));
-      }
-      else {
+      } else {
         for (int i = 0; i < replacementLen; i++) {
           Replacement replacement = replacementList.get(i);
 
@@ -550,49 +656,89 @@ public class QuercusRegexpModule
   }
 
   /**
-   * Replaces values using regexps
+   * Loops through subject if subject is array of strings
+   * 
+   * @param env
+   * @param pattern
+   * @param fun
+   * @param subject
+   * @param limit
+   * @param count
+   * @return
+   * @throws Throwable
    */
   public static Value preg_replace_callback(Env env,
-                                            String patternString,
+                                            Value pattern,
                                             Callback fun,
-                                            String subject,
-                                            @Optional("4294967296") long limit,
-                                            @Optional @Reference Value countV)
+                                            Value subject,
+                                            @Optional("-1") long limit,
+                                            @Optional @Reference Value count)
     throws Throwable
   {
-    Pattern pattern = compileRegexp(patternString);
-
-    Matcher matcher = pattern.matcher(subject);
-
-    StringBuilder result = new StringBuilder();
-    int tail = 0;
-
-    while (matcher.find()) {
-      if (tail < matcher.start())
-        result.append(subject.substring(tail, matcher.start()));
-
-      ArrayValue regs = new ArrayValueImpl();
-
-      for (int i = 0; i <= matcher.groupCount(); i++) {
-        String group = matcher.group(i);
-
-        if (group != null)
-          regs.put(new StringValue(group));
-        else
-          regs.put(StringValue.EMPTY);
+    if (subject instanceof ArrayValue) {
+      ArrayValue result = new ArrayValueImpl();
+      
+      for (Value value : ((ArrayValue) subject).values()) {
+        result.put(pregReplaceCallback(env,
+                                       pattern,
+                                       fun,
+                                       value.toString(),
+                                       limit,
+                                       count));
       }
-
-      Value replacement = fun.eval(env, regs);
-
-      result.append(replacement);
-
-      tail = matcher.end();
+        
+      return result;
+      
+    } else if (subject instanceof StringValue) {
+      return pregReplaceCallback(env,
+                                 pattern,
+                                 fun,
+                                 subject.toString(),
+                                 limit,
+                                 count);
+    } else {
+      return NullValue.NULL;
     }
-
-    if (tail < subject.length())
-      result.append(subject.substring(tail));
-
-    return new StringValue(result.toString());
+  }
+  
+  /**
+   * Replaces values using regexps
+   */
+  private static Value pregReplaceCallback(Env env,
+                                           Value patternValue,
+                                           Callback fun,
+                                           String subject,
+                                           @Optional("-1") long limit,
+                                           @Optional @Reference Value countV)
+    throws Throwable
+  {
+    if (limit < 0)
+      limit = Long.MAX_VALUE;
+    
+    if (patternValue.isArray()) {
+      ArrayValue patternArray = (ArrayValue) patternValue;
+      
+      for (Value value : patternArray.values()) {
+        subject = pregReplaceImpl(env,
+                                  value.toString(),
+                                  fun,
+                                  subject,
+                                  limit,
+                                  countV);
+      }
+      
+      return new StringValue(subject);
+      
+    } else if (patternValue instanceof StringValue) {
+      return new StringValue(pregReplaceImpl(env,
+                                             patternValue.toString(),
+                                             fun,
+                                             subject,
+                                             limit,
+                                             countV));
+    } else {
+      return NullValue.NULL;
+    }
   }
 
   /**
@@ -907,13 +1053,13 @@ public class QuercusRegexpModule
           program.add(new GroupReplacement(group));
 
           text.setLength(0);
-        }
-        else if (ch == '\\') {
+        } else if (ch == '\\') {
           i++;
 
           text.append(digit);
-        }
-        else if (ch == '$' && digit == '{') {
+      // took out test for ch == '$' because must be true
+      //} else if (ch == '$' && digit == '{') {
+        } else if (digit == '{') {
           i += 2;
 
           int group = 0;
