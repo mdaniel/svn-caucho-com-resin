@@ -470,12 +470,12 @@ public class QuercusRegexpModule
    * @param countV
    * @return subject with everything replaced
    */
-  private static String pregReplaceImpl(Env env,
-                                        String patternString,
-                                        Callback fun,
-                                        String subject,
-                                        long limit,
-                                        Value countV)
+  private static String pregReplaceCallbackImpl(Env env,
+                                                String patternString,
+                                                Callback fun,
+                                                String subject,
+                                                long limit,
+                                                Value countV)
     throws Throwable
   {
     Pattern pattern = compileRegexp(patternString);
@@ -537,12 +537,13 @@ public class QuercusRegexpModule
       _replacementCache.put(replacement, replacementProgram);
     }
 
-    return pregReplaceImpl(env,
-                           pattern,
-                           replacementProgram,
-                           subject,
-                           countV,
-                           (patternFlags & REGEXP_EVAL) != 0);
+    return pregReplaceStringImpl(env,
+                                 pattern,
+                                 replacementProgram,
+                                 subject,
+                                 limit,
+                                 countV,
+                                 (patternFlags & REGEXP_EVAL) != 0);
   }
 
   /**
@@ -564,8 +565,13 @@ public class QuercusRegexpModule
       _replacementCache.put(replacement, replacementProgram);
     }
 
-    String result = pregReplaceImpl(env, pattern, replacementProgram,
-                                    subject, NullValue.NULL, false);
+    String result = pregReplaceStringImpl(env,
+                                          pattern,
+                                          replacementProgram,
+                                          subject,
+                                          -1,
+                                          NullValue.NULL,
+                                          false);
 
     return new StringValue(result);
   }
@@ -590,8 +596,8 @@ public class QuercusRegexpModule
       _replacementCache.put(replacement, replacementProgram);
     }
 
-    String result = pregReplaceImpl(env, pattern, replacementProgram,
-                                    subject, NullValue.NULL, false);
+    String result = pregReplaceStringImpl(env, pattern, replacementProgram,
+                                          subject, -1, NullValue.NULL, false);
 
     return new StringValue(result);
   }
@@ -599,14 +605,21 @@ public class QuercusRegexpModule
   /**
    * Replaces values using regexps
    */
-  private static String pregReplaceImpl(Env env,
-                                        Pattern pattern,
-                                        ArrayList<Replacement> replacementList,
-                                        String subject,
-                                        Value countV,
-                                        boolean isEval)
+  private static String pregReplaceStringImpl(Env env,
+                                              Pattern pattern,
+                                              ArrayList<Replacement> replacementList,
+                                              String subject,
+                                              long limit,
+                                              Value countV,
+                                              boolean isEval)
     throws Throwable
   {
+    
+    long numberOfMatches = 0;
+    
+    if (limit < 0)
+      limit = Long.MAX_VALUE;
+    
     Matcher matcher = pattern.matcher(subject);
 
     StringBuilder result = new StringBuilder();
@@ -614,7 +627,7 @@ public class QuercusRegexpModule
 
     int replacementLen = replacementList.size();
 
-    while (matcher.find()) {
+    while (matcher.find() && numberOfMatches < limit) {
       
       // Increment countV (note: if countV != null, then it should be a Var)
       if ((countV != null) && (countV instanceof Var)) {
@@ -647,6 +660,8 @@ public class QuercusRegexpModule
       }
 
       tail = matcher.end();
+      
+      numberOfMatches++;
     }
 
     if (tail < subject.length())
@@ -719,23 +734,23 @@ public class QuercusRegexpModule
       ArrayValue patternArray = (ArrayValue) patternValue;
       
       for (Value value : patternArray.values()) {
-        subject = pregReplaceImpl(env,
-                                  value.toString(),
-                                  fun,
-                                  subject,
-                                  limit,
-                                  countV);
+        subject = pregReplaceCallbackImpl(env,
+                                          value.toString(),
+                                          fun,
+                                          subject,
+                                          limit,
+                                          countV);
       }
       
       return new StringValue(subject);
       
     } else if (patternValue instanceof StringValue) {
-      return new StringValue(pregReplaceImpl(env,
-                                             patternValue.toString(),
-                                             fun,
-                                             subject,
-                                             limit,
-                                             countV));
+      return new StringValue(pregReplaceCallbackImpl(env,
+                                                     patternValue.toString(),
+                                                     fun,
+                                                     subject,
+                                                     limit,
+                                                     countV));
     } else {
       return NullValue.NULL;
     }
