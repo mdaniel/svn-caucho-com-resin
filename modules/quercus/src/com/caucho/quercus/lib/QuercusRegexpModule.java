@@ -784,10 +784,10 @@ public class QuercusRegexpModule
                                  @Optional int flags)
     throws Throwable
   {
-    Pattern pattern = compileRegexp(patternString);
-
     if (limit < 0)
       limit = Long.MAX_VALUE;
+    
+    Pattern pattern = compileRegexp(patternString);
 
     ArrayValue result = new ArrayValueImpl();
     int head = 0;
@@ -869,20 +869,48 @@ public class QuercusRegexpModule
   public static Value split(Env env,
                             String patternString,
                             String string,
-                            @Optional long limit)
+                            @Optional("-1") long limit)
     throws Throwable
   {
-    patternString = cleanRegexp(patternString, false);
-
-    Pattern pattern = Pattern.compile(patternString);
-
-    String []value = pattern.split(string);
+    if (limit < 0)
+      limit = Long.MAX_VALUE;
+    
+    // make sure patternString is surrounded by delimiter
+    // without outside '/', patternString "[,:]" becomes ",:"
+    StringBuilder sb = new StringBuilder();
+    if (patternString.charAt(0) != '/') {
+      sb.append('/');
+      sb.append(patternString);
+      sb.append('/');
+      patternString = sb.toString();
+    }
+    
+    Pattern pattern = compileRegexp(patternString);
 
     ArrayValue result = new ArrayValueImpl();
-
-    for (int i = 0; i < value.length; i++)
-      result.append(new StringValue(value[i]));
-
+    int head = 0;
+    Matcher matcher = pattern.matcher(string);
+    long count = 0;
+    
+    while ((matcher.find()) && (count < limit)) {
+      String value;
+      if (count == limit - 1) {
+        value = string.substring(head);
+        head = string.length();
+      } else {
+        value = string.substring(head, matcher.start());
+        head = matcher.end();
+      }
+      
+      result.put(new StringValue(value));
+      
+      count++;
+    }
+    
+    if (head < string.length()) {
+      result.put(new StringValue(string.substring(head)));
+    }
+    
     return result;
   }
 
@@ -965,11 +993,12 @@ public class QuercusRegexpModule
       return pattern;
 
     char delim = rawRegexp.charAt(0);
+
     if (delim == '{')
       delim = '}';
     else if (delim == '[')
       delim = ']';
-
+   
     int tail = rawRegexp.lastIndexOf(delim);
 
     if (tail <= 0)
