@@ -46,6 +46,7 @@ import java.io.IOException;
 import java.util.zip.DataFormatException;
 import java.util.zip.Deflater;
 import java.util.zip.Inflater;
+import java.util.zip.InflaterInputStream;
 
 /**
  * PHP ZLib
@@ -100,11 +101,11 @@ public class QuercusZlibModule extends AbstractQuercusModule {
   {
     if (fileName == null)
       return BooleanValue.FALSE;
-    
+
     Zlib zlib = new Zlib(env,fileName,"r",useIncludePath);
     return zlib.gzfile();
   }
-  
+
   /**
    * outputs uncompressed bytes directly to browser
    * 
@@ -122,12 +123,12 @@ public class QuercusZlibModule extends AbstractQuercusModule {
   {
     if (fileName == null)
       return false;
-    
+
     Zlib zlib = new Zlib(env, fileName,"r",useIncludePath);
     env.getOut().writeStream(zlib.readgzfile());
     return true;
   }
-  
+
   public int gzwrite(Env env,
                      @NotNull Zlib zp,
                      @NotNull String s,
@@ -187,10 +188,10 @@ public class QuercusZlibModule extends AbstractQuercusModule {
   {
     if (zp == null)
       return BooleanValue.FALSE;
-    
+
     return zp.gzread(length);
   }
-  
+
   public Value gzgets(@NotNull Zlib zp,
                       int length)
     throws IOException, DataFormatException
@@ -217,10 +218,10 @@ public class QuercusZlibModule extends AbstractQuercusModule {
   {
     if (zp == null)
       return false;
-    
+
     return zp.gzrewind();
   }
-  
+
   /**
    * compresses data using zlib
    * 
@@ -249,7 +250,7 @@ public class QuercusZlibModule extends AbstractQuercusModule {
       fullCompressedDataLength += compressedDataLength;
       buf.append(output,0,compressedDataLength);
     }
-    
+
     ByteArrayInputStream result = new ByteArrayInputStream(buf.getBuffer(),0,fullCompressedDataLength);
     ReadStream readStream = new ReadStream(new VfsStream(result,null));
     return new TempBufferStringValue(TempBuffer.copyFromStream(readStream));
@@ -262,38 +263,25 @@ public class QuercusZlibModule extends AbstractQuercusModule {
    * @return uncompressed string
    */
   public Value gzuncompress(Value data,
-                            @Optional("0") int length)
+                            @Optional("0") long length)
     throws DataFormatException, IOException
   {
-    ByteArrayInputStream is = data.toInputStream(); 
-    ByteBuffer buf = new ByteBuffer();
-    byte[] input;
-    // put all the data in the inputstream in input
-    int b;
-    while ((b = is.read()) != -1) {
-      buf.append(b);
-    }
-    input = buf.getBuffer();
-    
-    byte[] output = new byte[input.length];
-    Inflater inflater = new Inflater();
-    inflater.setInput(input,0,input.length);
-    int uncompressedLength;
-    int fullUncompressedLength = 0;
-    buf = new ByteBuffer();
-
-    while(!inflater.finished()) {
-      uncompressedLength = inflater.inflate(output);
-      fullUncompressedLength += uncompressedLength;
-      buf.append(output,0,uncompressedLength);
-    }
-
     if (length == 0)
-      length = fullUncompressedLength;
-    else
-      length = Math.min(fullUncompressedLength, length);
-
-    return new StringValue(new String(output,0,length));
+      length = Long.MAX_VALUE;
+    
+    ByteArrayInputStream is = data.toInputStream();
+    InflaterInputStream iis = new InflaterInputStream(is, new Inflater());
+    
+    StringBuilder uncompressed = new StringBuilder();
+    int numChars = 0;
+    int ch;
+    
+    while ((numChars < length) && ((ch = iis.read()) != -1)) {
+      numChars++;
+      uncompressed.append((char) ch);
+    }
+    
+    return new StringValue(uncompressed.toString());
   }
 
   /**
@@ -323,7 +311,7 @@ public class QuercusZlibModule extends AbstractQuercusModule {
       fullCompressedDataLength += compressedDataLength;
       buf.append(output,0,compressedDataLength);
     }
-    
+
     ByteArrayInputStream result = new ByteArrayInputStream(buf.getBuffer(),0,fullCompressedDataLength);
     ReadStream readStream = new ReadStream(new VfsStream(result,null));
     return new TempBufferStringValue(TempBuffer.copyFromStream(readStream));
@@ -335,39 +323,26 @@ public class QuercusZlibModule extends AbstractQuercusModule {
    * @param length (maximum length of string returned)
    * @return uncompressed string
    */
-  public Value gzinflate(TempBufferStringValue data,
-                         @Optional("0") int length)
+  public Value gzinflate(Value data,
+                         @Optional("0") long length)
     throws DataFormatException, IOException
   {
-    ByteArrayInputStream is = data.toInputStream(); 
-    ByteBuffer buf = new ByteBuffer();
-    byte[] input;
-    // put all the data in the inputstream in input
-    int b;
-    while ((b = is.read()) != -1) {
-      buf.append(b);
-    }
-    input = buf.getBuffer();
-    
-    byte[] output = new byte[input.length];
-    Inflater inflater = new Inflater(true);
-    inflater.setInput(input,0,input.length);
-    int uncompressedLength;
-    int fullUncompressedLength = 0;
-    buf = new ByteBuffer();
-
-    while(!inflater.finished()) {
-      uncompressedLength = inflater.inflate(output);
-      fullUncompressedLength += uncompressedLength;
-      buf.append(output,0,uncompressedLength);
-    }
-
     if (length == 0)
-      length = fullUncompressedLength;
-    else
-      length = Math.min(fullUncompressedLength, length);
+      length = Long.MAX_VALUE;
+    
+    ByteArrayInputStream is = data.toInputStream();
+    InflaterInputStream iis = new InflaterInputStream(is, new Inflater(true));
+    
+    StringBuilder inflated = new StringBuilder();
+    int numChars = 0;
+    int ch;
+    
+    while ((numChars < length) && ((ch = iis.read()) != -1)) {
+      numChars++;
+      inflated.append((char) ch);
+    }
 
-    return new StringValue(new String(output,0,length));
+    return new StringValue(inflated.toString());
   }
 
   /**
