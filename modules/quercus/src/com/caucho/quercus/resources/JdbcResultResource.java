@@ -494,16 +494,18 @@ public class JdbcResultResource extends ResourceValue {
   }
 
   /**
-   * returns the table at the fieldOffset
+   * Returns the table corresponding to the field.
    */
-  public Value getFieldTable(int fieldOffset)
+  public Value getFieldTable(Env env, int fieldOffset)
   {
     try {
       if (_metaData == null)
         _metaData = _rs.getMetaData();
 
-      if (_metaData.getColumnCount() <= fieldOffset || fieldOffset < 0)
+      if (_metaData.getColumnCount() <= fieldOffset || fieldOffset < 0) {
+        env.invalidArgument("field", fieldOffset);
         return BooleanValue.FALSE;
+      }
       else {
 	String tableName = _metaData.getTableName(fieldOffset + 1);
 
@@ -564,11 +566,11 @@ public class JdbcResultResource extends ResourceValue {
   public Value fetchFieldDirect(Env env,
                                 int fieldOffset)
   {
-    Value fieldTable = getFieldTable(fieldOffset);
-    Value fieldName = getFieldName(fieldOffset);
+    Value fieldTable = getFieldTable(env, fieldOffset);
+    Value fieldName = getFieldName(env, fieldOffset);
     Value fieldAlias = getFieldNameAlias(fieldOffset);
     Value fieldType = getJdbcType(fieldOffset);
-    Value fieldLength = getFieldLength(fieldOffset);
+    Value fieldLength = getFieldLength(env, fieldOffset);
     Value fieldScale = getFieldScale(fieldOffset);
     Value fieldCatalog = getFieldCatalog(fieldOffset);
 
@@ -628,14 +630,16 @@ public class JdbcResultResource extends ResourceValue {
   /**
    * @return length of field for specified column
    */
-  public Value getFieldLength(int fieldOffset)
+  public Value getFieldLength(Env env, int fieldOffset)
   {
     try {
       if (_metaData == null)
         _metaData = _rs.getMetaData();
 
-      if (_metaData.getColumnCount() <= fieldOffset || fieldOffset < 0)
+      if (_metaData.getColumnCount() <= fieldOffset || fieldOffset < 0) {
+        env.invalidArgument("field", fieldOffset);
         return BooleanValue.FALSE;
+      }
       else
         return new LongValue((long) _metaData.getPrecision(fieldOffset + 1));
 
@@ -694,7 +698,7 @@ public class JdbcResultResource extends ResourceValue {
       else
         rs.absolute(currentRow);
     }
-    
+
     return result;
   }
 
@@ -746,15 +750,17 @@ public class JdbcResultResource extends ResourceValue {
    *
    * @param fieldOffset need to add 1 because java is 1 based index and quercus is 0 based
    */
-  public Value getFieldName(int fieldOffset)
+  public Value getFieldName(Env env, int fieldOffset)
   {
 
     try {
       if (_metaData == null)
         _metaData = _rs.getMetaData();
 
-      if (_metaData.getColumnCount() <= fieldOffset || fieldOffset < 0)
+      if (_metaData.getColumnCount() <= fieldOffset || fieldOffset < 0) {
+        env.invalidArgument("field", fieldOffset);
         return BooleanValue.FALSE;
+      }
       else
         return new StringValue(_metaData.getColumnName(fieldOffset + 1));
     } catch (Exception e) {
@@ -809,15 +815,17 @@ public class JdbcResultResource extends ResourceValue {
    *
    * @param fieldOffset need to add 1 because java is 1 based index and quercus is 0 based
    */
-  public Value getFieldType(int fieldOffset)
+  public Value getFieldType(Env env, int fieldOffset)
   {
     try {
 
       if (_metaData == null)
         _metaData = _rs.getMetaData();
 
-      if (_metaData.getColumnCount() <= fieldOffset || fieldOffset < 0)
+      if (_metaData.getColumnCount() <= fieldOffset || fieldOffset < 0) {
+        env.invalidArgument("field", fieldOffset);
         return BooleanValue.FALSE;
+      }
       else
         return getColumnPHPName(_metaData.getColumnType(fieldOffset + 1));
 
@@ -842,7 +850,7 @@ public class JdbcResultResource extends ResourceValue {
       int count = _metaData.getColumnCount();
 
       for (int i = 0; i < count; i++) {
-        Value name = getFieldName(i);
+        Value name = getFieldName(env, i);
         Value value = getColumnValue(_rs, _metaData, i + 1);
 
         result.put(name, value);

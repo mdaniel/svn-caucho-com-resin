@@ -38,6 +38,7 @@ import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 
 /**
  * Represents a PHP object value.
@@ -161,10 +162,10 @@ public class ObjectValue extends Value {
       Entry entry = _entries[hash];
 
       if (entry == null) {
-	return UnsetValue.UNSET;
+        return UnsetValue.UNSET;
       }
       else if (key.equals(entry.getKey())) {
-	return entry.getValue();
+        return entry.getValue();
       }
 
       hash = (hash + 1) & hashMask;
@@ -236,9 +237,9 @@ public class ObjectValue extends Value {
       Entry entry = _entries[hash];
 
       if (entry == null)
-	return null;
+        return null;
       else if (key.equals(entry.getKey()))
-	return entry;
+        return entry;
 
       hash = (hash + 1) & _hashMask;
     }
@@ -299,7 +300,7 @@ public class ObjectValue extends Value {
    * Removes a value.
    */
   public void removeField(String key)
-  { 
+  {
     int capacity = _entries.length;
 
     int hash = key.hashCode() & _hashMask;
@@ -309,14 +310,14 @@ public class ObjectValue extends Value {
       Entry entry = _entries[hash];
 
       if (entry == null)
-	return;
+        return;
       else if (key.equals(entry.getKey())) {
-	_size--;
+        _size--;
 
-	_entries[hash] = null;
-	shiftEntries(hash + 1);
+        _entries[hash] = null;
+        shiftEntries(hash + 1);
 
-	return;
+        return;
       }
 
       hash = (hash + 1) & _hashMask;
@@ -329,12 +330,12 @@ public class ObjectValue extends Value {
   private void shiftEntries(int index)
   {
     int capacity = _entries.length;
-    
+
     for (; index < capacity; index++) {
       Entry entry = _entries[index];
 
       if (entry == null)
-	return;
+        return;
 
       _entries[index] = null;
 
@@ -358,9 +359,9 @@ public class ObjectValue extends Value {
       Entry entry = _entries[hash];
 
       if (entry == null)
-	break;
+        break;
       else if (key.equals(entry.getKey()))
-	return entry;
+        return entry;
 
       hash = (hash + 1) & hashMask;
     }
@@ -387,7 +388,7 @@ public class ObjectValue extends Value {
       Entry entry = entries[i];
 
       if (entry != null)
-	addEntry(entry);
+        addEntry(entry);
     }
   }
 
@@ -399,8 +400,8 @@ public class ObjectValue extends Value {
 
     for (int i = capacity; i >= 0; i--) {
       if (_entries[hash] == null) {
-	_entries[hash] = entry;
-	return;
+        _entries[hash] = entry;
+        return;
       }
 
       hash = (hash + 1) & _hashMask;
@@ -718,6 +719,11 @@ public class ObjectValue extends Value {
     return new EntrySet();
   }
 
+  public Set<Map.Entry<String,Value>> sortedEntrySet()
+  {
+    return new TreeSet<Map.Entry<String, Value>>(new EntrySet());
+  }
+
   public String toString()
   {
     return "ObjectValue@" + System.identityHashCode(this) +  "[" + _cl.getName() + "]";
@@ -804,7 +810,7 @@ public class ObjectValue extends Value {
       }
 
       if (_list.length <= _index)
-	return null;
+        return null;
 
       return _list[_index++];
     }
@@ -855,13 +861,13 @@ public class ObjectValue extends Value {
       Value val = getRawValue();
 
       if (val instanceof Var)
-	return (Var) val;
+        return (Var) val;
       else {
-	Var var = new Var(val);
+        Var var = new Var(val);
 
-	setRaw(var);
+        setRaw(var);
 
-	return var;
+        return var;
       }
     }
 
@@ -890,9 +896,9 @@ public class ObjectValue extends Value {
       Value value = toValue();
 
       if (value instanceof Var)
-	return new RefVar((Var) value);
+        return new RefVar((Var) value);
       else
-	return new RefVar(this);
+        return new RefVar(this);
     }
 
     /**
@@ -903,9 +909,9 @@ public class ObjectValue extends Value {
       Value value = toValue();
 
       if (value instanceof Var)
-	return new RefVar((Var) value);
+        return new RefVar((Var) value);
       else
-	return new RefVar(this);
+        return new RefVar(this);
     }
 
     public Value toArg()
@@ -913,9 +919,31 @@ public class ObjectValue extends Value {
       Value value = getRawValue();
 
       if (value instanceof Var)
-	return value;
+        return value;
       else
-	return this;
+        return this;
+    }
+
+    public int compareTo(Value o)
+    {
+      if (o == null)
+        return 1;
+
+      if (!(o instanceof Entry))
+        return 1;
+
+      Entry other = (Entry) o;
+
+      String thisKey = getKey();
+      String otherKey = other.getKey();
+
+      if (thisKey == null)
+        return otherKey == null ? 0 : -1;
+
+      if (otherKey == null)
+        return 1;
+      
+      return thisKey.compareTo(otherKey);
     }
 
     public void varDumpImpl(Env env,

@@ -45,7 +45,7 @@ public class ResourceValue extends Value {
    * Converts to a string.
    * @param env
    */
-  public String toString(Env env)
+  public String toString()
   {
     return "ResourceValue[]";
   }
@@ -57,14 +57,6 @@ public class ResourceValue extends Value {
     throws Throwable
   {
     out.print("resource(" + toString(env) + ")");
-  }
-
-  protected void finalize()
-    throws Throwable
-  {
-    close();
-
-    super.finalize();
   }
 }
 

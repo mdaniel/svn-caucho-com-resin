@@ -309,5 +309,17 @@ public class DoubleValue extends Value {
   {
     out.print("float(" + toDouble() + ")");
   }
+
+  protected int compareToImpl(Value o)
+  {
+    if ((o instanceof LongValue) || (o instanceof DoubleValue)) {
+      double thisValue = toDouble();
+      double otherValue = o.toDouble();
+
+      return thisValue == otherValue ? 0 : (thisValue < otherValue ? -1 : 1);
+    }
+
+    return -1 * o.compareTo(this);
+  }
 }
 

@@ -107,10 +107,6 @@ public class QuercusServlet extends HttpServlet {
    */
   public void setDatabase(DataSource database)
   {
-    System.out.println("SET-DB: " + database);
-    System.out.println("Cluster: " + com.caucho.server.cluster.Cluster.getLocal());
-    
-    
     getQuercus().setDatabase(database);
   }
 
@@ -122,7 +118,7 @@ public class QuercusServlet extends HttpServlet {
   {
     getQuercus().addModule(module);
   }
-  
+
   /**
    * Adds a quercus class.
    */
@@ -140,7 +136,7 @@ public class QuercusServlet extends HttpServlet {
   {
     return new PhpIni(getQuercus());
   }
-  
+
   /**
    * Gets the script manager.
    */
@@ -157,15 +153,15 @@ public class QuercusServlet extends HttpServlet {
     throws ServletException
   {
     getQuercus();
-    
+
     if (! _isCompileSet) {
       getQuercus().setLazyCompile(true);
-      
+
       // XXX: for validating QA
       // throw new ServletException("compile must be set.");
     }
   }
-  
+
   /**
    * Service.
    */
@@ -193,11 +189,11 @@ public class QuercusServlet extends HttpServlet {
 
 	ws = Vfs.openWrite(out);
       }
-	
+
       Env env = new Env(getQuercus(), page, ws, request, response);
       try {
 	env.start();
-	
+
 	page.executeTop(env);
 
 	return;
@@ -210,7 +206,7 @@ public class QuercusServlet extends HttpServlet {
       } catch (Throwable e) {
 	if (response.isCommitted())
 	  e.printStackTrace(ws.getPrintWriter());
-	
+
 	ws = null;
 
 	throw e;
@@ -237,12 +233,12 @@ public class QuercusServlet extends HttpServlet {
     String pathInfo = req.getPathInfo();
 
     Path pwd = Vfs.lookup();
-      
+
     Path path = pwd.lookup(req.getRealPath(scriptPath));
 
     if (path.isFile())
       return path;
-    
+
     // XXX: include
 
     String fullPath;
@@ -264,7 +260,7 @@ public class QuercusServlet extends HttpServlet {
 
     return _quercus;
   }
-  
+
   /**
    * Gets the script manager.
    */

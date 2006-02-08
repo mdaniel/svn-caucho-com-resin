@@ -278,6 +278,18 @@ public class LongValue extends Value {
     out.print("int(" + toLong() + ")");
   }
 
+  protected int compareToImpl(Value o)
+  {
+    if ((o instanceof LongValue) || (o instanceof DoubleValue)) {
+      double thisValue = toDouble();
+      double otherValue = o.toDouble();
+
+      return thisValue == otherValue ? 0 : (thisValue < otherValue ? -1 : 1);
+    }
+
+    return -1 * o.compareTo(this);
+  }
+
   static {
     STATIC_VALUES = new LongValue[STATIC_MAX - STATIC_MIN + 1];
 

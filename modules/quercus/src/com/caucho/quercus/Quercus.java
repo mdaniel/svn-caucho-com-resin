@@ -264,6 +264,14 @@ public class Quercus {
    */
   public void setIni(String name, StringValue value)
   {
+    // XXX: s/b specified some other way
+    if ("magic_quotes_sybase".equals(value.toString())
+        ||  "magic_quotes_runtime".equals(value.toString()))
+    {
+      if (value.toBoolean())
+        throw new UnsupportedOperationException(name);
+    }
+
     _iniMap.put(name, value);
   }
 

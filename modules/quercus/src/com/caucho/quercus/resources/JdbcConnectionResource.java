@@ -45,11 +45,11 @@ import com.caucho.quercus.env.*;
 public class JdbcConnectionResource extends ResourceValue {
   private static final Logger log
     = Logger.getLogger(JdbcConnectionResource.class.getName());
-  
+
   private Connection _conn;
   // cached statement
   private Statement _stmt;
-  
+
   private DatabaseMetaData _dmd;
 
   private HashMap<TableKey,JdbcTableMetaData> _tableMetadataMap
@@ -57,7 +57,7 @@ public class JdbcConnectionResource extends ResourceValue {
 
   private JdbcResultResource _rs;
   private int _affectedRows;
-  
+
   private String _errorMessage = "";
   private int _errorCode;
   private boolean _fieldCount = false;
@@ -344,11 +344,7 @@ public class JdbcConnectionResource extends ResourceValue {
   }
 
   /**
-   * Used for single queries.
-   * the JdbcConnectionResource now stores the
-   * result sets so that mysqli_store_result
-   * and mysqli_use_result can return result
-   * values.
+   * Execute a single query.
    */
   public Value query(String sql)
   {
@@ -464,7 +460,7 @@ public class JdbcConnectionResource extends ResourceValue {
 
     try {
       _rs = null;
-      
+
       for (String s : splitQuery) {
         stmt = _conn.createStatement();
         if (stmt.execute(s)) {
@@ -609,14 +605,10 @@ public class JdbcConnectionResource extends ResourceValue {
 
   /**
    * Converts to a string.
-   * @param env
-   *
-   * XXX: this method overridden so tests will pass
    */
-  public String toString(Env env)
+  public String toString()
   {
-    return "UserConnection[com.caucho.sql.ManagedConnectionImpl]";
-    //return _conn.toString();
+    return _conn.toString();
   }
 
   /**

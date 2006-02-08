@@ -43,7 +43,7 @@ import com.caucho.quercus.lib.QuercusStringModule;
 /**
  * Represents a PHP string value.
  */
-public class StringValue extends Value {
+public class StringValue extends AbstractStringValue {
   public static final StringValue EMPTY = new StringValue("");
 
   protected static final int IS_STRING = 0;
@@ -650,13 +650,6 @@ public class StringValue extends Value {
     return _value;
   }
 
-  static {
-    CHAR_STRINGS = new StringValue[256];
-
-    for (int i = 0; i < CHAR_STRINGS.length; i++)
-      CHAR_STRINGS[i] = new StringValue(String.valueOf((char) i));
-  }
-
   public void varDumpImpl(Env env,
                           WriteStream out,
                           int depth,
@@ -667,5 +660,13 @@ public class StringValue extends Value {
 
     out.print("string(" + s.length() + ") \"" + s + "\"");
   }
+
+  static {
+    CHAR_STRINGS = new StringValue[256];
+
+    for (int i = 0; i < CHAR_STRINGS.length; i++)
+      CHAR_STRINGS[i] = new StringValue(String.valueOf((char) i));
+  }
+
 }
 

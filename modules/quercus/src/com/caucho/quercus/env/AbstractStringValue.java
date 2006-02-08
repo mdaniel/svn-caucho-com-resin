@@ -54,5 +54,18 @@ abstract public class AbstractStringValue extends Value {
 
     out.print("string(" + s.length() + ") \"" + s + "\"");
   }
+
+  public int compareToImpl(Value o)
+  {
+    if ((o instanceof LongValue) || (o instanceof DoubleValue)) {
+      // Strings are sorted after numbers
+      return 1;
+    }
+
+    if (o instanceof AbstractStringValue)
+      return toString().compareTo(o.toString());
+
+    return super.compareToImpl(o);
+  }
 }
 

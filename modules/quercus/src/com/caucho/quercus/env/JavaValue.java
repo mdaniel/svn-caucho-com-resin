@@ -47,7 +47,7 @@ import com.caucho.quercus.expr.Expr;
 /**
  * Represents a PHP java value.
  */
-public class JavaValue extends Value {
+public class JavaValue extends ResourceValue {
   private final JavaClassDefinition _classDef;
 
   private final Object _object;
@@ -190,22 +190,13 @@ public class JavaValue extends Value {
     return String.valueOf(_object);
   }
 
+
   /**
    * Converts to an object.
    */
   public Object toJavaObject()
   {
     return _object;
-  }
-
-  public void varDumpImpl(Env env,
-                          WriteStream out,
-                          int depth,
-                          IdentityHashMap<Value, String> valueSet)
-    throws Throwable
-  {
-    // XXX: implement like for php object
-    out.print(getClass().getName());
   }
 }
 

@@ -56,9 +56,9 @@ public class Mysqli {
 
   private Env _env;
   private String _host;
-  
+
   private JdbcConnectionResource _conn;
-  
+
   public Mysqli(Env env,
 		@Optional("localhost") String host,
 		@Optional String user,
@@ -71,7 +71,7 @@ public class Mysqli {
 
     real_connect(env, host, user, password, db, port, socket, 0);
   }
-  
+
   public Mysqli(Env env)
   {
     _env = env;
@@ -112,10 +112,10 @@ public class Mysqli {
 
     return real_connect(_env, host, user, password, db, port, socket, flags);
   }
-  
+
   /**
    * Returns the client encoding.
-   * 
+   *
    * XXX: stubbed out. has to be revised once we
    * figure out what to do with character encoding
    */
@@ -123,7 +123,7 @@ public class Mysqli {
   {
     return "latin1";
   }
-  
+
   /**
    * Alias for character_set_name
    */
@@ -208,7 +208,7 @@ public class Mysqli {
   {
     try {
       String info = validateConnection().getServerInfo();
-      
+
       String[] result = info.split("[.]");
 
       if (result.length < 3)
@@ -229,7 +229,7 @@ public class Mysqli {
   {
     return validateConnection().getFieldCount();
   }
-  
+
   /**
    * returns ID generated for an AUTO_INCREMENT column by the previous
    * INSERT query on success, 0 if the previous query does not generate
@@ -243,7 +243,7 @@ public class Mysqli {
 
     Connection conn = connV.getConnection();
     Statement stmt = null;
-    
+
     try {
       stmt = conn.createStatement();
 
@@ -257,7 +257,7 @@ public class Mysqli {
 
     return BooleanValue.FALSE;
   }
-  
+
   /**
    * Stub: kills the given mysql thread.
    */
@@ -265,7 +265,7 @@ public class Mysqli {
   {
     return false;
   }
-  
+
   /**
    * Check for more results in a multi-query
    */
@@ -308,16 +308,19 @@ public class Mysqli {
   {
     return _conn != null && ! _conn.getConnection().isClosed();
   }
-	    
+
   /**
-   * returns JdbcResultResource representing the results of the query.
+   * Executes a query.
    *
-   * <i>resultMode</i> is ignored, MYSQLI_USE_RESULT would represent
-   * an unbuffered query, but that is not supported.
+   * @param sql the escaped query string (can contain escape sequences like `\n' and `\Z')
+   * @param resultMode ignored
+   *
+   * @return a {@link JdbcResultResource}, or BooleanValue.FALSE for failure
    */
   public Value query(String sql,
 		     @Optional("MYSQLI_STORE_RESULT") int resultMode)
   {
+    // XXX: resultMode = MYSQLI_USE_RESULT is an unbuffered query, not supported.
     JdbcConnectionResource conn = validateConnection();
 
     try {
@@ -357,13 +360,13 @@ public class Mysqli {
 	host = "localhost";
 
       String driver = "com.mysql.jdbc.jdbc2.optional.MysqlConnectionPoolDataSource";
-      
+
       String url = "jdbc:mysql://" + host + ":" + port + "/" + dbname;
 
       Connection jConn = env.getConnection(driver, url, userName, password);
 
       _conn = new JdbcConnectionResource(jConn);
-      
+
       env.addResource(_conn);
 
       return true;
@@ -373,7 +376,7 @@ public class Mysqli {
       env.setSpecialValue("mysqli.connectError", new StringValue(e.getMessage()));
 
       log.log(Level.FINE, e.toString(), e);
-      
+
       return false;
     } catch (Exception e) {
       env.warning("A link to the server could not be established. " + e.toString());
@@ -395,7 +398,7 @@ public class Mysqli {
 
     for (int i = 0; i < strLength; i++) {
       char c = str.charAt(i);
-      
+
       switch (c) {
       case '\u0000':
         buf.append('\\');
@@ -432,6 +435,61 @@ public class Mysqli {
     }
 
     return buf.toString();
+  }
+
+  /**
+   * Unescape the string.
+   */
+  private static String real_unescape_string(String str)
+  {
+    StringBuilder result = new StringBuilder(str.length());
+
+    int length = str.length();
+
+    for (int i = 0; i < length; i++) {
+      int ch = str.charAt(i);
+
+      if (ch == '\\') {
+        i++;
+
+        if (i == length)
+          ch = '\\';
+        else {
+          ch = str.charAt(i);
+
+          switch (ch) {
+            case '\\':
+            case '\'':
+            case '\"':
+              break;
+            case 'n':
+              ch = '\n';
+              break;
+            case 'r':
+              ch = '\r';
+              break;
+            case 'Z':
+              ch = ' ';
+              break;
+            case 'u':
+              // XXX: s/b proper unicode handling?
+              if (str.regionMatches(i, "u0000", 0, 5)) {
+                ch = (char) 0;
+                i += 5;
+              }
+              else {
+                i--;
+                ch = '\'';
+              }
+
+          }
+        }
+      } // if ch == '/'
+
+      result.append((char) ch);
+    }
+
+    return result.toString();
   }
 
   /**
@@ -495,7 +553,7 @@ public class Mysqli {
 
     Connection conn = connV.getConnection();
     Statement stmt = null;
-    
+
     StringBuilder str = new StringBuilder();
 
     try {
@@ -523,7 +581,7 @@ public class Mysqli {
 	stmt.close();
     }
   }
-  
+
   /**
    * returns a statement for use with
    * mysqli_stmt_prepare
@@ -532,16 +590,16 @@ public class Mysqli {
   {
     return new MysqliStatement(validateConnection());
   }
-  
+
   /**
    * returns a prepared statement
    */
   public MysqliStatement prepare(Env env, String query)
   {
     MysqliStatement stmt = new MysqliStatement(validateConnection());
-    
+
     stmt.prepare(query);
-    
+
     return stmt;
   }
 
@@ -612,11 +670,11 @@ public class Mysqli {
   {
     JdbcConnectionResource conn = _conn;
     _conn = null;
-    
+
     if (conn != null) {
       env.removeResource(conn);
       conn.close();
-      
+
       return true;
     }
     else
@@ -626,7 +684,7 @@ public class Mysqli {
   JdbcConnectionResource validateConnection()
   {
     JdbcConnectionResource conn = _conn;
-    
+
     if (conn == null)
       _env.error(L.l("Connection is not properly initialized"));
 

@@ -53,7 +53,7 @@ public class MysqliResult {
   private static final L10N L = new L10N(MysqliResult.class);
 
   private JdbcResultResource _rs;
-  
+
   MysqliResult(JdbcResultResource rs)
   {
     _rs = rs;
@@ -70,7 +70,7 @@ public class MysqliResult {
       return true;
     else {
       env.warning(L.l("Offset {0} is invalid for MySQL (or the query data is unbuffered)", rowNumber));
-      
+
       return false;
     }
   }
@@ -141,28 +141,28 @@ public class MysqliResult {
   /**
    * Returns the field length
    */
-  public Value fetch_field_length(int offset)
+  public Value fetch_field_length(Env env, int offset)
     throws Exception
   {
-    return validateResult().getFieldLength(offset);
+    return validateResult().getFieldLength(env, offset);
   }
 
   /**
    * Returns the field name
    */
-  public Value fetch_field_name(int offset)
+  public Value fetch_field_name(Env env, int offset)
     throws Exception
   {
-    return validateResult().getFieldName(offset);
+    return validateResult().getFieldName(env, offset);
   }
 
   /**
-   * Returns the field table
+   * Returns the table corresponding to the field.
    */
-  public Value fetch_field_table(int offset)
+  public Value fetch_field_table(Env env, int offset)
     throws Exception
   {
-    return validateResult().getFieldTable(offset);
+    return validateResult().getFieldTable(env, offset);
   }
 
   /**
@@ -171,7 +171,7 @@ public class MysqliResult {
   public Value fetch_field_type(Env env, int offset)
     throws Exception
   {
-    return validateResult().getFieldType(offset);
+    return validateResult().getFieldType(env, offset);
   }
 
   /**
@@ -270,7 +270,7 @@ public class MysqliResult {
   {
     return _rs;
   }
-  
+
   public String toString()
   {
     if (_rs != null)

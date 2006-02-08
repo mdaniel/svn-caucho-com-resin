@@ -2869,7 +2869,7 @@ public class QuercusStringModule extends AbstractQuercusModule {
    */
   public static String stripcslashes(String source)
   {
-    StringBuilder result = new StringBuilder(source.length() * 5 / 4);
+    StringBuilder result = new StringBuilder(source.length());
 
     int length = source.length();
 
