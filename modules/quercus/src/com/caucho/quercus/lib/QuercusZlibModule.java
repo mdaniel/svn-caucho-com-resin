@@ -261,11 +261,11 @@ public class QuercusZlibModule extends AbstractQuercusModule {
    * @param length (maximum length of string returned)
    * @return uncompressed string
    */
-  public Value gzuncompress(TempBufferStringValue data,
+  public Value gzuncompress(Value data,
                             @Optional("0") int length)
     throws DataFormatException, IOException
   {
-    ByteArrayInputStream is = data.getInputStream(); 
+    ByteArrayInputStream is = data.toInputStream(); 
     ByteBuffer buf = new ByteBuffer();
     byte[] input;
     // put all the data in the inputstream in input
@@ -278,7 +278,7 @@ public class QuercusZlibModule extends AbstractQuercusModule {
     byte[] output = new byte[input.length];
     Inflater inflater = new Inflater();
     inflater.setInput(input,0,input.length);
-    int uncompressedLength = 0;
+    int uncompressedLength;
     int fullUncompressedLength = 0;
     buf = new ByteBuffer();
 
@@ -339,7 +339,7 @@ public class QuercusZlibModule extends AbstractQuercusModule {
                          @Optional("0") int length)
     throws DataFormatException, IOException
   {
-    ByteArrayInputStream is = data.getInputStream(); 
+    ByteArrayInputStream is = data.toInputStream(); 
     ByteBuffer buf = new ByteBuffer();
     byte[] input;
     // put all the data in the inputstream in input

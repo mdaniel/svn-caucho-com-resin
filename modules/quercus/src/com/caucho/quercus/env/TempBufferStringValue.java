@@ -53,7 +53,7 @@ public class TempBufferStringValue extends AbstractStringValue {
    * @return _head as inputstream
    */
   @Override
-  public ByteArrayInputStream getInputStream()
+  public ByteArrayInputStream toInputStream()
   {
     return new ByteArrayInputStream(_head.getBuffer());
   }

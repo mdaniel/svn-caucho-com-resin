@@ -38,7 +38,6 @@ import com.caucho.vfs.WriteStream;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Collection;
 import java.util.IdentityHashMap;
 
@@ -1027,7 +1026,7 @@ abstract public class Value {
    * 
    * @return InputStream
    */
-  public InputStream getInputStream()
+  public ByteArrayInputStream toInputStream()
   {
     return new ByteArrayInputStream(toString().getBytes());
   }
