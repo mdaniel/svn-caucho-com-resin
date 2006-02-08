@@ -35,6 +35,8 @@ import java.util.IdentityHashMap;
 
 /**
  * Represents an array-get argument which might be a call to a reference.
+ *
+ * foo($a[0]), where is not known if foo is defined as foo($a) or foo(&amp;$a)
  */
 public class ArgGetValue extends Value {
   private final Value _obj;
@@ -45,6 +47,22 @@ public class ArgGetValue extends Value {
     _obj = obj;
     _index = index;
   }
+
+  // XXX: getArg(Value)
+  // XXX: getArgArray(Value)
+  // XXX: getArgObject(Value)
+
+  /**
+   * Returns the arg object for a field reference, e.g.
+   * foo($a[0]->x)
+   */
+  public Value getFieldArg(Env env, String index)
+  {
+    return new ArgGetFieldValue(env, this, index); // php/3d2p
+  }
+
+  // XXX: getFieldArgArray(String)
+  // XXX: getFieldArgObject(String)
 
   /**
    * Converts to a reference variable.
@@ -81,13 +99,21 @@ public class ArgGetValue extends Value {
     return new Var();
   }
 
-  public void varDumpImpl(Env env,
-                          WriteStream out,
-                          int depth,
-                          IdentityHashMap<Value,String> valueSet)
-    throws Throwable
+  /**
+   * Converts to a reference variable.
+   */
+  public Value getFieldObject(Env env, String index)
   {
-    toValue().varDumpImpl(env, out, depth, valueSet);
+    return _obj.getObject(env, _index).getFieldObject(env, index);
+  }
+
+  /**
+   * Converts to a reference variable.
+   */
+  public Value getFieldRef(Env env, String index)
+  {
+    // php/3d2p
+    return _obj.getObject(env, _index).getFieldRef(env, index);
   }
 }
 

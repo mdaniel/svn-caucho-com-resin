@@ -509,7 +509,7 @@ public class Var extends Value {
       return _value;
     else {
       // quercus/3d52
-      return new ArgArrayVarValue(this);
+      return new ArgVarArrayValue(this);
     }
   }
 
@@ -521,7 +521,18 @@ public class Var extends Value {
     if (_value.isset())
       return _value;
     else
-      return new ArgObjectVarValue(this, env);
+      return new ArgVarObjectValue(this, env);
+  }
+
+  /**
+   * Returns the array ref.
+   */
+  public Value getArg(Value index)
+  {
+    if (_value.isset())
+      return _value.getArg(index);
+    else
+      return new ArgGetValue(this, index); // php/3d2p
   }
 
   /**
@@ -529,7 +540,21 @@ public class Var extends Value {
    */
   public Value getArgRef(Value index)
   {
-    return _value.getArgRef(index);
+    if (_value.isset())
+      return _value.getArgRef(index);
+    else
+      return new ArgGetValue(this, index);
+  }
+
+  /**
+   * Returns the array ref.
+   */
+  public Value getFieldArg(Env env, String index)
+  {
+    if (_value.isset())
+      return _value.getFieldArg(env, index);
+    else
+      return new ArgGetFieldValue(env, this, index);
   }
 
   /**
@@ -541,6 +566,18 @@ public class Var extends Value {
       _value = env.createObject();
 
     return _value;
+  }
+
+  /**
+   * Returns the value, creating an object if unset.
+   */
+  public Value getObject(Env env, Value index)
+  {
+    // php/3d2p
+    if (! _value.isset())
+      _value = new ArrayValueImpl();
+
+    return _value.getObject(env, index);
   }
 
   /**
@@ -586,9 +623,9 @@ public class Var extends Value {
   /**
    * Returns the field ref.
    */
-  public Value getFieldRef(String index)
+  public Value getFieldRef(Env env, String index)
   {
-    return _value.getFieldRef(index);
+    return _value.getFieldRef(env, index);
   }
 
   /**

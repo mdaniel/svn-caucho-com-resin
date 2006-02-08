@@ -449,8 +449,10 @@ public class Function extends AbstractFunction {
 
     out.print(")");
 
+    /* php/3a70 - should only be generated from generateCopy
     if (! (isRef && _isReturnsReference))
-      out.print(".copy()");
+      out.print(".copyReturn()");
+    */
   }
 
   private boolean isVariableArgs()
@@ -570,7 +572,15 @@ public class Function extends AbstractFunction {
     for (int i = 0; i < _args.length; i++) {
       out.print(", a" + i);
     }
-    out.println(");");
+    out.print(")");
+
+    // php/3a5x, php/37a2
+    /*
+    if (! _isReturnsReference)
+      out.print(".copyReturn()");
+    */
+    
+    out.println(";");
 
     out.println("}");
     out.popDepth();
@@ -684,9 +694,17 @@ public class Function extends AbstractFunction {
     out.pushDepth();
 
     if (isStatic())
-      out.println("  return fun_" + _name + "(env, args);");
+      out.print("return fun_" + _name + "(env, args)");
     else
-      out.println("  return fun_" + _name + "(env, quercus_this, args);");
+      out.print("return fun_" + _name + "(env, quercus_this, args)");
+
+    // php/3a5x, php/37aq
+    /*
+    if (! _isReturnsReference)
+      out.print(".copyReturn()"); // php/37aq
+    */
+
+    out.println(";");
 
     out.popDepth();
     out.println("}");
@@ -712,30 +730,38 @@ public class Function extends AbstractFunction {
 	argName = "args[" + var.getArgumentIndex() + "]";
       }
 
-      if (! var.isReference()) {
-	out.println(varName + " = NullValue.NULL;");
-      }
-      else if (! var.isArgument()) {
-	out.println(varName + " = null;");
-      }
-      else if (isVariableMap()) {
-	// XXX: need to distinguish ref
-	out.println(varName + " = " + argName + ".toVar();");
-      }
-      else if (var.isReadOnly()) {
-	// php/3a70, php/343k
-	out.println(varName + " = " + argName + ".toArgValue();");
-      }
-      else if (var.isRefArgument()) {
-	// php/344r, 3a57
-	out.println(varName + " = " + argName + ".toRefVar();");
-      }
-      else if (var.isAssigned() && var.isReference()) {
-	out.println(varName + " = " + argName + ".toVar();");
+      if (var.isArgument()) {
+	if (isVariableMap()) {
+	  // XXX: need to distinguish ref
+	  out.println(varName + " = " + argName + ".toVar();");
+	}
+	else if (var.isReadOnly() && ! var.isReference()) {
+	  // php/3a70, php/343k
+	  out.println(varName + " = " + argName + ".toArgValue();");
+	}
+	else if (var.isReadOnly()) {
+	  // php/3783
+	  out.println(varName + " = " + argName + ".toRefValue();");
+	}
+	else if (var.isRefArgument()) {
+	  // php/344r, 3a57
+	  out.println(varName + " = " + argName + ".toRefVar();");
+	}
+	else if (var.isAssigned() && var.isReference()) {
+	  out.println(varName + " = " + argName + ".toVar();");
+	}
+	else {
+	  // php/399j
+	  out.println(varName + " = " + argName + ".toArgValue();");
+	}
       }
       else {
-	// php/399j
-	out.println(varName + " = " + argName + ".toArgValue();");
+	// local variable, i.e. not argument
+	
+	if (var.isReference())
+	  out.println(varName + " = null;");
+	else
+	  out.println(varName + " = NullValue.NULL;");
       }
     }
 

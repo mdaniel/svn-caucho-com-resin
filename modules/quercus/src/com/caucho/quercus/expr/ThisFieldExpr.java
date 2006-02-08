@@ -101,7 +101,7 @@ public class ThisFieldExpr extends AbstractVarExpr {
   {
     Value obj = env.getThis();
 
-    return obj.getFieldRef(_name);
+    return obj.getFieldRef(env, _name);
   }
   
   /**
@@ -116,7 +116,7 @@ public class ThisFieldExpr extends AbstractVarExpr {
   {
     Value obj = env.getThis();
 
-    return obj.getFieldArg(_name);
+    return obj.getFieldArg(env, _name);
   }
 
   /**
@@ -161,7 +161,7 @@ public class ThisFieldExpr extends AbstractVarExpr {
   {
     Value obj = env.getThis();
 
-    return obj.getFieldArray(_name);
+    return obj.getFieldArray(env, _name);
   }
 
   /**
@@ -221,7 +221,7 @@ public class ThisFieldExpr extends AbstractVarExpr {
       // quercus/3d8o
       */
       
-    out.print("quercus_this.getField(\"");
+    out.print("quercus_this.getField(env, \"");
     out.printJavaString(_name);
     out.print("\")");
   }
@@ -246,7 +246,7 @@ public class ThisFieldExpr extends AbstractVarExpr {
       // quercus/3d8g
       */
       
-    out.print("quercus_this.getFieldRef(\"");
+    out.print("quercus_this.getFieldRef(env, \"");
     out.printJavaString(_name);
     out.print("\")");
   }
@@ -269,7 +269,7 @@ public class ThisFieldExpr extends AbstractVarExpr {
       // quercus/3d8r
       */
       
-    out.print("quercus_this.getFieldArg(\"");
+    out.print("quercus_this.getFieldArg(env, \"");
     out.printJavaString(_name);
     out.print("\")");
   }
@@ -320,7 +320,7 @@ public class ThisFieldExpr extends AbstractVarExpr {
       // quercus/3d8i
       */
       
-    out.print("quercus_this.getFieldArray(\"");
+    out.print("quercus_this.getFieldArray(env, \"");
     out.printJavaString(_name);
     out.print("\")");
   }

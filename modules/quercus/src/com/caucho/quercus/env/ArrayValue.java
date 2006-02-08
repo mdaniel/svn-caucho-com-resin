@@ -99,6 +99,14 @@ abstract public class ArrayValue extends Value {
   }
 
   /**
+   * Copy as a return value
+   */
+  public Value copyReturn()
+  {
+    return copy(); // php/3a5e
+  }
+
+  /**
    * Copy for assignment.
    */
   abstract public Value copy();
@@ -184,7 +192,7 @@ abstract public class ArrayValue extends Value {
       return value;
     }
     else {
-      return new ArgObjectGetValue(env, this, fieldName);
+      return new ArgGetObjectValue(env, this, fieldName);
     }
   }
 

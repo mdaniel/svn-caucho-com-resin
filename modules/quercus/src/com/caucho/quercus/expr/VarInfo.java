@@ -178,6 +178,7 @@ public class VarInfo {
    */
   public boolean isReference()
   {
+    // php/3a70 vs php/3995
     return (_isReference || isGlobal() || isArgument() || isVariable());
   }
 

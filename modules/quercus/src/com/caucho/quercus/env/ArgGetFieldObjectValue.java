@@ -29,27 +29,44 @@
 
 package com.caucho.quercus.env;
 
-import com.caucho.vfs.WriteStream;
+import java.io.IOException;
 
+import java.util.Collection;
 import java.util.IdentityHashMap;
 
+import com.caucho.util.L10N;
+
+import com.caucho.vfs.WriteStream;
+
+import com.caucho.quercus.QuercusRuntimeException;
+
+import com.caucho.quercus.program.AbstractFunction;
+
+import com.caucho.quercus.gen.PhpWriter;
+
+import com.caucho.quercus.expr.Expr;
+
 /**
- * Represents an field-get argument which might be a call to a reference.
+ * Represents an object-getField argument which might be a call to a reference
+ * and which might create an object
+ *
+ * e.g. foo($a->x[0]) where foo($a) or foo(&amp;$a)
  */
-public class ArgGetFieldValue extends Value {
+public class ArgGetFieldObjectValue extends Value {
   private final Env _env;
   private final Value _obj;
   private final String _index;
 
-  public ArgGetFieldValue(Env env, Value obj, String index)
+  public ArgGetFieldObjectValue(Env env, Value obj, String index)
   {
     _env = env;
     _obj = obj;
     _index = index;
+    Thread.dumpStack();
   }
 
   /**
-   * Creates an argument which may create the given field.
+   * Returns the value for a getField arg.
    */
   public Value getFieldArg(Env env, String index)
   {
@@ -58,45 +75,43 @@ public class ArgGetFieldValue extends Value {
   }
 
   /**
-   * Converts to a reference variable.
-   */
-  public Value getFieldRef(Env env, String index)
-  {
-    // php/3d2q
-    return _obj.getFieldObject(_env, _index).getFieldRef(_env, index);
-  }
-
-  /**
-   * Converts to a reference variable.
+   * Converts to a ref var.
    */
   public Var toRefVar()
   {
-    // php/3d2t
-    return _obj.getFieldRef(_env, _index).toRefVar();
+    // quercus/3d2t
+    return _obj.getFieldArgRef(_env, _index).toRefVar();
   }
 
   /**
-   * Converts to a reference variable.
+   * Converts to a var.
    */
-  public Value toRefValue()
-  {
-    return _obj.getFieldRef(_env, _index);
-  }
-
-  /**
-   * Converts to a value.
-   */
-  public Value toValue()
-  {
-    return _obj.getField(_index);
-  }
-
-  /**
-   * Converts to a variable.
-   */
+  /*
   public Var toVar()
   {
-    return new Var();
+    System.out.println("TO_VAR:");
+    // quercus/3d52
+    return _obj.getField(_index).toVar();
   }
+  */
+
+  /**
+   * Returns the value, converting to an object if necessary.
+   */
+  public Value getArgRef(Value index)
+  {
+    // quercus/3d2t
+    return _obj.getFieldObject(_env, _index).getArgRef(index);
+  }
+
+  /**
+   * Returns the value, converting to an object if necessary.
+   */
+  /*
+  public Value getFieldObject(Env env, Value index)
+  {
+    return _obj.getFieldObject(_env, _index).getFieldObject(env, index);
+  }
+  */
 }
 

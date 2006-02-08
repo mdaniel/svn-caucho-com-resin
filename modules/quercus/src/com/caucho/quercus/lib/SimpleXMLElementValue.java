@@ -273,7 +273,7 @@ public class SimpleXMLElementValue extends Value {
     NodeList children = _element.getChildNodes();
     int nodeLength = children.getLength();
 
-    for (int i=0; i < nodeLength; i++) {
+    for (int i = 0; i < nodeLength; i++) {
       Node child = children.item(i);
 
       if (child.getNodeType() == Node.TEXT_NODE)

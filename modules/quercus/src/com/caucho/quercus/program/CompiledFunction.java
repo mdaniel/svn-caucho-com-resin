@@ -98,39 +98,46 @@ abstract public class CompiledFunction extends AbstractFunction {
   public Value evalMethodRef(Env env, Value obj, Value []argValues)
     throws Throwable
   {
-    return evalMethod(env, obj, argValues);
+    return evalMethod(env, obj, argValues).copyReturn();
+  }
+
+  public Value evalMethodRef(Env env, Value obj)
+    throws Throwable
+  {
+    // php/37a2
+    return evalMethod(env, obj).copyReturn();
   }
 
   public Value evalMethodRef(Env env, Value obj, Value arg)
     throws Throwable
   {
-    return evalMethod(env, obj, arg);
+    return evalMethod(env, obj, arg).copyReturn();
   }
 
   public Value evalMethodRef(Env env, Value obj, Value a1, Value a2)
     throws Throwable
   {
-    return evalMethod(env, obj, a1, a2);
+    return evalMethod(env, obj, a1, a2).copyReturn();
   }
 
   public Value evalMethodRef(Env env, Value obj, Value a1, Value a2, Value a3)
     throws Throwable
   {
-    return evalMethod(env, obj, a1, a2, a3);
+    return evalMethod(env, obj, a1, a2, a3).copyReturn();
   }
 
   public Value evalMethodRef(Env env, Value obj, Value a1,
 			     Value a2, Value a3, Value a4)
     throws Throwable
   {
-    return evalMethod(env, obj, a1, a2, a3, a4);
+    return evalMethod(env, obj, a1, a2, a3, a4).copyReturn();
   }
 
   public Value evalMethodRef(Env env, Value obj, Value a1, Value a2,
 			     Value a3, Value a4, Value a5)
     throws Throwable
   {
-    return evalMethod(env, obj, a1, a2, a3, a4, a5);
+    return evalMethod(env, obj, a1, a2, a3, a4, a5).copyReturn();
   }
 
   /**

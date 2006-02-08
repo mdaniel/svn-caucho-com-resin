@@ -176,7 +176,7 @@ public class ObjectValue extends Value {
   /**
    * Returns the array ref.
    */
-  public Var getFieldRef(String index)
+  public Var getFieldRef(Env env, String index)
   {
     Entry entry = createEntry(index);
 
@@ -195,7 +195,7 @@ public class ObjectValue extends Value {
   /**
    * Returns the value as an argument which may be a reference.
    */
-  public Value getFieldArg(String index)
+  public Value getFieldArg(Env env, String index)
   {
     Entry entry = getEntry(index);
 
@@ -203,14 +203,14 @@ public class ObjectValue extends Value {
       return entry.toArg();
     }
     else {
-      return new ArgGetFieldValue(this, index);
+      return new ArgGetFieldValue(env, this, index);
     }
   }
 
   /**
    * Returns the value as an argument which may be a reference.
    */
-  public Value getFieldArgRef(String index)
+  public Value getFieldArgRef(Env env, String index)
   {
     Entry entry = getEntry(index);
 
@@ -218,7 +218,7 @@ public class ObjectValue extends Value {
       return entry.toArg();
     }
     else {
-      return new ArgGetFieldValue(this, index);
+      return new ArgGetFieldValue(env, this, index);
     }
   }
 
@@ -233,7 +233,7 @@ public class ObjectValue extends Value {
       return value;
     }
     else {
-      return new ArgObjectGetFieldValue(env, this, fieldName);
+      return new ArgGetFieldObjectValue(env, this, fieldName);
     }
   }
 
@@ -699,7 +699,7 @@ public class ObjectValue extends Value {
     if (fun != null)
       return fun.evalMethod(env, this, new Expr[0]).toString(env);
     else
-      return "Object id #1";
+      return _cl.getName() + "[]";
   }
 
   /**
@@ -960,8 +960,6 @@ public class ObjectValue extends Value {
 
       out.println();
     }
-
   }
-
 }
 

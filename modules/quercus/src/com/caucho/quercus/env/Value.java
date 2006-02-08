@@ -984,7 +984,7 @@ abstract public class Value {
   /**
    * Returns the field ref.
    */
-  public Value getFieldRef(String index)
+  public Value getFieldRef(Env env, String index)
   {
     return getField(index);
   }
@@ -992,17 +992,17 @@ abstract public class Value {
   /**
    * Returns the field ref.
    */
-  public Value getFieldArg(String index)
+  public Value getFieldArg(Env env, String index)
   {
-    return getFieldRef(index);
+    return getFieldRef(env, index);
   }
 
   /**
    * Returns the field ref for an argument.
    */
-  public Value getFieldArgRef(String index)
+  public Value getFieldArgRef(Env env, String index)
   {
-    return getFieldRef(index);
+    return getFieldRef(env, index);
   }
 
   /**
@@ -1035,9 +1035,9 @@ abstract public class Value {
    * Returns the value for a field, creating an object if the field
    * is unset.
    */
-  public Value getFieldArray(String index)
+  public Value getFieldArray(Env env, String index)
   {
-    Value v = getField(index);
+    Value v = getFieldRef(env, index);
 
     if (! v.isset()) {
       v = new ArrayValueImpl();
@@ -1051,9 +1051,9 @@ abstract public class Value {
   /**
    * Returns the field ref.
    */
-  public Value getFieldArgArray(String index)
+  public Value getFieldArgArray(Env env, String index)
   {
-    return getFieldArray(index);
+    return getFieldArray(env, index);
   }
 
   /**

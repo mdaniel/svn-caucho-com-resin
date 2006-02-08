@@ -47,83 +47,91 @@ import com.caucho.quercus.gen.PhpWriter;
 import com.caucho.quercus.expr.Expr;
 
 /**
- * Represents an array-get argument which might be a call to a reference.
+ * Represents an array-get argument which might be a call to a reference
+ * and which might automatically create an object.
+ *
+ * e.g. foo($a[0]->x) where foo($a) or foo(&amp;$a)
  */
-public class ArgArrayGetValue extends Value {
+public class ArgGetObjectValue extends Value {
+  private final Env _env;
   private final Value _obj;
   private final Value _index;
 
-  public ArgArrayGetValue(Value obj, Value index)
+  public ArgGetObjectValue(Env env, Value obj, Value index)
   {
+    _env = env;
     _obj = obj;
     _index = index;
   }
 
   /**
-   * Returns the wrapper for the get arg array.
-   */
-  public Value getArgArray(Value index)
-  {
-    return new ArgArrayGetValue(this, index);
-  }
-
-  /**
-   * Returns the wrapper for the get arg array.
+   * Returns the value for a get arg.
    */
   public Value getArg(Value index)
   {
-    // quercus/3d1p
-    return new ArgArrayGetValue(this, index);
+    return new ArgGetObjectValue(_env, this, index);
   }
 
+  // XXX: getArgArray
+  // XXX: getArgObject
+
   /**
-   * Returns the reference, creaing the array if necessary.
+   * Returns the value, converting to an object if necessary.
    */
   public Value getArgRef(Value index)
   {
-    return _obj.getArray(_index).getArgRef(index);
+     return _obj.getObject(_env, _index).getArgRef(index);
   }
 
   /**
-   * Converts to a arg value
+   * Returns the value, converting to an object if necessary.
    */
-  public Value toArgValue()
+  public Value getFieldArg(Env env, String index)
   {
-    return _obj.get(_index);
+    // php/3d2t
+    return new ArgGetFieldValue(_env, this, index);
   }
 
-  /**
-   * Converts to a ref value
-   */
-  public Value toRefValue()
-  {
-    return _obj.getArgRef(_index).toRefValue();
-  }
+  // XXX: getFieldArgArray
+  // XXX: getFieldArgObject
 
   /**
    * Converts to a ref var.
    */
   public Var toRefVar()
   {
-    return _obj.getArgRef(_index).toRefVar();
+     return _obj.getArgRef(_index).toRefVar();
   }
 
   /**
-   * Converts to a function variable.
+   * Converts to a var.
    */
+  /*
   public Var toVar()
   {
-    // quercus/3d54
+    System.out.println("TO_VAR:");
+    // quercus/3d52
     return _obj.get(_index).toVar();
   }
+  */
 
-  public void varDumpImpl(Env env,
-                          WriteStream out,
-                          int depth,
-                          IdentityHashMap<Value, String> valueSet)
-    throws Throwable
+  /**
+   * Returns the field reference of the value.
+   */
+  public Value getFieldRef(String index)
   {
-    out.print(getClass().getName());
+    // php/3d2t
+    return _obj.getObject(_env, _index).getFieldRef(_env, index);
   }
+
+  /**
+   * Returns the value, converting to an object if necessary.
+   */
+  /*
+  public Value getObject(Env env, Value index)
+  {
+    return _obj.getObject(_env, _index).getObject(env, index);
+  }
+  */
 }
 

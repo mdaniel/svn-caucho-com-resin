@@ -47,67 +47,59 @@ import com.caucho.quercus.gen.PhpWriter;
 import com.caucho.quercus.expr.Expr;
 
 /**
- * Represents an object-getField argument which might be a call to a reference.
+ * Represents an array argument which might be a call to a reference.
  */
-public class ArgObjectGetFieldValue extends Value {
-  private final Env _env;
-  private final Value _obj;
-  private final String _index;
+public class ArgVarArrayValue extends Value {
+  private final Var _var;
 
-  public ArgObjectGetFieldValue(Env env, Value obj, String index)
+  public ArgVarArrayValue(Var var)
   {
-    _env = env;
-    _obj = obj;
-    _index = index;
+    _var = var;
   }
 
   /**
-   * Returns the value for a getField arg.
+   * Returns the wrapper for the get arg array.
    */
-  public Value getFieldArg(String index)
+  public Value getArgArray(Value index)
   {
-    // quercus/3d2u
-    return new ArgObjectGetFieldValue(_env, this, index);
+    // quercus/3d1r
+    return new ArgGetArrayValue(this, index);
   }
 
   /**
-   * Converts to a ref var.
+   * Returns the wrapper for the get arg object.
    */
-  public Var toRefVar()
+  public Value getArgObject(Env env, Value index)
   {
     // quercus/3d2t
-    return _obj.getFieldArgRef(_index).toRefVar();
+    return new ArgGetObjectValue(env, this, index);
   }
 
   /**
-   * Converts to a var.
+   * Returns the value, converting to an array if needed.
    */
-  /*
-  public Var toVar()
+  public Value getArray(Value index)
   {
-    System.out.println("TO_VAR:");
-    // quercus/3d52
-    return _obj.getField(_index).toVar();
+    // quercus/3d1t
+    return _var.getArray().getArray(index);
   }
-  */
 
   /**
-   * Returns the value, converting to an object if necessary.
+   * Returns the value, converting to an object if needed.
    */
-  public Value getArgRef(Value index)
+  public Value getObject(Env env, Value index)
   {
     // quercus/3d2t
-    return _obj.getFieldObject(_env, _index).getArgRef(index);
+    return _var.getArray().getObject(env, index);
   }
 
-  /**
-   * Returns the value, converting to an object if necessary.
-   */
-  /*
-  public Value getFieldObject(Env env, Value index)
+  public void varDumpImpl(Env env,
+                          WriteStream out,
+                          int depth,
+                          IdentityHashMap<Value, String> valueSet)
+    throws Throwable
   {
-    return _obj.getFieldObject(_env, _index).getFieldObject(env, index);
+    out.print(getClass().getName());
   }
-  */
 }
 

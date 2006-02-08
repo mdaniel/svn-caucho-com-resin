@@ -238,6 +238,8 @@ abstract public class Marshall {
       public void generate(PhpWriter out, Expr expr, Class argClass)
 	throws IOException
       {
+	// php/3a70 vs php/3783 - see generated code
+	// generate vs generateValue
 	expr.generateValue(out);
       }
     

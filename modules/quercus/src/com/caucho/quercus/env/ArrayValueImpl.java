@@ -334,7 +334,7 @@ public class ArrayValueImpl extends ArrayValue {
       return value;
     }
     else {
-      return new ArgObjectGetValue(env, this, fieldName);
+      return new ArgGetObjectValue(env, this, fieldName);
     }
   }
 

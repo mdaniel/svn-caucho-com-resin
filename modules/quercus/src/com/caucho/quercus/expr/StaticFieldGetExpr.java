@@ -43,9 +43,9 @@ import com.caucho.quercus.gen.PhpWriter;
 import com.caucho.util.L10N;
 
 /**
- * Represents a PHP field reference.
+ * Represents a PHP static field reference.
  */
-public class StaticFieldGetExpr extends Expr {
+public class StaticFieldGetExpr extends AbstractVarExpr {
   private static final L10N L = new L10N(StaticFieldGetExpr.class);
 
   private final String _className;
@@ -59,6 +59,19 @@ public class StaticFieldGetExpr extends Expr {
     _varName = varName;
 
     _envName = className + "::" + varName;
+  }
+  
+  /**
+   * Evaluates the expression.
+   *
+   * @param env the calling environment.
+   *
+   * @return the expression value.
+   */
+  public Value eval(Env env)
+    throws Throwable
+  {
+    return env.getGlobalValue(_envName);
   }
 
   /**
@@ -94,10 +107,23 @@ public class StaticFieldGetExpr extends Expr {
    *
    * @return the expression value.
    */
-  public Value eval(Env env)
+  public void evalAssign(Env env, Value value)
     throws Throwable
   {
-    return env.getGlobalValue(_envName);
+    env.setGlobalValue(_envName, value);
+  }
+  
+  /**
+   * Evaluates the expression.
+   *
+   * @param env the calling environment.
+   *
+   * @return the expression value.
+   */
+  public void evalUnset(Env env)
+    throws Throwable
+  {
+    // env.removeGlobal(_envName);
   }
 
   //
@@ -120,6 +146,43 @@ public class StaticFieldGetExpr extends Expr {
     throws IOException
   {
     out.print("env.getGlobalVar(\"" + _envName + "\")");
+  }
+
+  /**
+   * Generates code to evaluate the expression.
+   *
+   * @param out the writer to the Java source code.
+   */
+  public void generateAssign(PhpWriter out, Expr value, boolean isTop)
+    throws IOException
+  {
+    out.print("env.setGlobalValue(\"" + _envName + "\", ");
+    value.generateCopy(out);
+    out.print(")");
+  }
+
+  /**
+   * Generates code to evaluate the expression.
+   *
+   * @param out the writer to the Java source code.
+   */
+  public void generateAssignRef(PhpWriter out, Expr value, boolean isTop)
+    throws IOException
+  {
+    out.print("env.setGlobalValue(\"" + _envName + "\", ");
+    value.generateRef(out);
+    out.print(")");
+  }
+
+  /**
+   * Generates code to evaluate the expression.
+   *
+   * @param out the writer to the Java source code.
+   */
+  public void generateUnset(PhpWriter out)
+    throws IOException
+  {
+    out.print("env.removeGlobalVar(\"" + _envName + "\")");
   }
   
   public String toString()

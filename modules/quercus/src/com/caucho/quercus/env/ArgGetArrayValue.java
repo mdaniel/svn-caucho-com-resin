@@ -47,16 +47,19 @@ import com.caucho.quercus.gen.PhpWriter;
 import com.caucho.quercus.expr.Expr;
 
 /**
- * Represents an object argument which might be a call to a reference.
+ * Represents an array-get argument which might be a call to a reference
+ * and which might automatically create an array.
+ *
+ * e.g. foo($a[0][1]), where foo($a) or foo(&amp;$a)
  */
-public class ArgObjectVarValue extends Value {
-  private final Var _var;
-  private final Env _env;
+public class ArgGetArrayValue extends Value {
+  private final Value _obj;
+  private final Value _index;
 
-  public ArgObjectVarValue(Var var, Env env)
+  public ArgGetArrayValue(Value obj, Value index)
   {
-    _var = var;
-    _env = env;
+    _obj = obj;
+    _index = index;
   }
 
   /**
@@ -64,33 +67,57 @@ public class ArgObjectVarValue extends Value {
    */
   public Value getArgArray(Value index)
   {
-    return new ArgArrayGetValue(this, index);
+    return new ArgGetArrayValue(this, index);
   }
 
   /**
    * Returns the wrapper for the get arg array.
    */
-  public Value getArgObject(Env env, Value index)
+  public Value getArg(Value index)
   {
-    // quercus/3d2u
-    return new ArgObjectGetValue(env, this, index);
+    // quercus/3d1p
+    return new ArgGetArrayValue(this, index);
   }
 
   /**
-   * Returns the value, converting to an array if needed.
+   * Returns the reference, creaing the array if necessary.
    */
-  public Value getArray(Value index)
+  public Value getArgRef(Value index)
   {
-    return _var.getObject(_env).getArray(index);
+    return _obj.getArray(_index).getArgRef(index);
   }
 
   /**
-   * Returns the value, converting to an object if needed.
+   * Converts to a arg value
    */
-  public Value getObject(Env env, Value index)
+  public Value toArgValue()
   {
-    // quercus/3d2u
-    return _var.getObject(_env).getObject(env, index);
+    return _obj.get(_index);
+  }
+
+  /**
+   * Converts to a ref value
+   */
+  public Value toRefValue()
+  {
+    return _obj.getArgRef(_index).toRefValue();
+  }
+
+  /**
+   * Converts to a ref var.
+   */
+  public Var toRefVar()
+  {
+    return _obj.getArgRef(_index).toRefVar();
+  }
+
+  /**
+   * Converts to a function variable.
+   */
+  public Var toVar()
+  {
+    // quercus/3d54
+    return _obj.get(_index).toVar();
   }
 
   public void varDumpImpl(Env env,

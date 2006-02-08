@@ -2245,24 +2245,6 @@ public class PhpParser {
 	term = parseFunction(term);
         break;
 
-      case '=':
-	token = parseToken();
-	
-	try {
-	  if (token == '&')
-	    return term.createAssignRef(this, parseAssignExpr());
-	  else {
-	    _peekToken = token;
-	    return term.createAssign(this, parseAssignExpr());
-	  }
-	} catch (PhpParseException e) {
-	  throw e;
-	} catch (IOException e) {
-	  throw error(e.getMessage());
-	}
-
-	// XXX: other assignment
-
       default:
         _peekToken = token;
         return term;

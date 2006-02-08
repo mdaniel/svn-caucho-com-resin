@@ -311,8 +311,10 @@ public class ArrayGetExpr extends AbstractVarExpr {
   public void generateArgArray(PhpWriter out)
     throws IOException
   {
-    _expr.generateArgArray(out);
-    out.print(".getArgArray(");
+    // _expr.generateArgArray(out);
+    //out.print(".getArgArray(");
+    _expr.generateArg(out);
+    out.print(".getArg(");
     _index.generate(out);
     out.print(")");
   }
@@ -339,8 +341,11 @@ public class ArrayGetExpr extends AbstractVarExpr {
   public void generateArgObject(PhpWriter out)
     throws IOException
   {
-    _expr.generateArgArray(out);
-    out.print(".getArgObject(env, ");
+    //_expr.generateArgArray(out);
+    //out.print(".getArgObject(env, ");
+    
+    _expr.generateArg(out);
+    out.print(".getArg(");
     _index.generate(out);
     out.print(")");
   }
@@ -353,7 +358,8 @@ public class ArrayGetExpr extends AbstractVarExpr {
   public void generateRef(PhpWriter out)
     throws IOException
   {
-    _expr.generateArray(out);
+    // _expr.generateArray(out);
+    _expr.generateArg(out);
     out.print(".getRef(");
     _index.generate(out);
     out.print(")");
@@ -367,7 +373,8 @@ public class ArrayGetExpr extends AbstractVarExpr {
   public void generateArg(PhpWriter out)
     throws IOException
   {
-    _expr.generateArgArray(out);
+    // _expr.generateArgArray(out);
+    _expr.generateArg(out);
     out.print(".getArg(");
     _index.generate(out);
     out.print(")");

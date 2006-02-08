@@ -47,14 +47,17 @@ import com.caucho.quercus.gen.PhpWriter;
 import com.caucho.quercus.expr.Expr;
 
 /**
- * Represents an array argument which might be a call to a reference.
+ * Represents an object argument which might be a call to a reference.
  */
-public class ArgArrayVarValue extends Value {
+public class ArgVarObjectValue extends Value {
   private final Var _var;
+  private final Env _env;
 
-  public ArgArrayVarValue(Var var)
+  public ArgVarObjectValue(Var var, Env env)
   {
     _var = var;
+    _env = env;
+    Thread.dumpStack();
   }
 
   /**
@@ -62,17 +65,35 @@ public class ArgArrayVarValue extends Value {
    */
   public Value getArgArray(Value index)
   {
-    // quercus/3d1r
-    return new ArgArrayGetValue(this, index);
+    return new ArgGetArrayValue(this, index);
   }
 
   /**
-   * Returns the wrapper for the get arg object.
+   * Returns the wrapper for the get arg array.
    */
   public Value getArgObject(Env env, Value index)
   {
-    // quercus/3d2t
-    return new ArgObjectGetValue(env, this, index);
+    // quercus/3d2u
+    return new ArgGetObjectValue(env, this, index);
+  }
+
+  /**
+   * Returns the wrapper for the get arg array.
+   */
+  public Value getFieldArgArray(String index)
+  {
+    // php/3d1q
+    return new ArgGetFieldArrayValue(_env, this, index);
+  }
+
+  /**
+   * Returns the wrapper for the get arg array.
+   */
+  public Value getFieldArgObject(Env env, String index)
+  {
+    // php/3d2q
+    // return new ArgGetFieldObjectValue(_env, this, index);
+    return new ArgGetFieldValue(env, this, index);
   }
 
   /**
@@ -80,8 +101,7 @@ public class ArgArrayVarValue extends Value {
    */
   public Value getArray(Value index)
   {
-    // quercus/3d1t
-    return _var.getArray().getArray(index);
+    return _var.getObject(_env).getArray(index);
   }
 
   /**
@@ -89,17 +109,17 @@ public class ArgArrayVarValue extends Value {
    */
   public Value getObject(Env env, Value index)
   {
-    // quercus/3d2t
-    return _var.getArray().getObject(env, index);
+    // quercus/3d2u
+    return _var.getObject(_env).getObject(env, index);
   }
 
-  public void varDumpImpl(Env env,
-                          WriteStream out,
-                          int depth,
-                          IdentityHashMap<Value, String> valueSet)
-    throws Throwable
+  /**
+   * Returns the value, converting to an array if needed.
+   */
+  public Value getFieldArray(Env env, String index)
   {
-    out.print(getClass().getName());
+    // php/3d1q
+    return _var.getObject(_env).getFieldArray(_env, index);
   }
 }
 

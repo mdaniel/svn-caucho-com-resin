@@ -167,7 +167,7 @@ abstract public class CompiledClass extends AbstractClassDef {
   }
 
   /**
-   * Returns the field value, if unset, creates an ArgObjectGetValue.
+   * Returns the field value, if unset, creates an ArgGetObjectValue.
    */
   public Value getArgObject(Env env, Value name)
   {
@@ -180,13 +180,13 @@ abstract public class CompiledClass extends AbstractClassDef {
       return value;
     }
     else {
-      return new ArgObjectGetValue(env, this, name);
+      return new ArgGetObjectValue(env, this, name);
     }
     */
   }
 
   /**
-   * Returns the field value, if unset, creates an ArgArrayGetValue
+   * Returns the field value, if unset, creates an ArgGetArrayValue
    */
   public Value getArgArray(Env env, Value name)
   {
@@ -199,7 +199,7 @@ abstract public class CompiledClass extends AbstractClassDef {
       return value;
     }
     else {
-      return new ArgObjectGetValue(env, this, name);
+      return new ArgGetObjectValue(env, this, name);
     }
     */
   }
