@@ -1266,7 +1266,11 @@ public class QuercusStringModule extends AbstractQuercusModule {
         if (openBracketIndex > 0) {
           Value v = env.getVar(key.substring(0,openBracketIndex)).getRawValue();
           if (v instanceof ArrayValue) {
-            //XXX: Check to make sure valid string (ie: foo[...])  
+            //Check to make sure valid string (ie: foo[...])
+            if (closeBracketIndex < 0) {
+              env.warning(L.l("invalid array " + key));
+              return NullValue.NULL;
+            }
             if (closeBracketIndex > openBracketIndex + 1) {
               String index = key.substring(key.indexOf('[') + 1,key.indexOf(']'));
               v.put(new StringValue(index), new StringValue(value));
