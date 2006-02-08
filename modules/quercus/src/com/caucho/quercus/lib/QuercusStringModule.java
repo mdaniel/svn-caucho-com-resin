@@ -1888,8 +1888,8 @@ public class QuercusStringModule extends AbstractQuercusModule {
 
     StringBuilder sb = new StringBuilder();
 
-    for (int i = 0; i < segments.size(); i++)
-      segments.get(i).apply(sb, args);
+    for (PrintfSegment segment : segments)
+      segment.apply(sb, args);
 
     return sb.toString();
   }
@@ -1951,7 +1951,9 @@ public class QuercusStringModule extends AbstractQuercusModule {
 
           switch (ch) {
           case '%':
-            i = j - 1;
+            i = j; 
+            segments.add(new TextPrintfSegment(sb));
+            sb.setLength(0);
             break loop;
 
           case '0': case '1': case '2': case '3': case '4':
@@ -2033,8 +2035,7 @@ public class QuercusStringModule extends AbstractQuercusModule {
             break loop;
           }
         }
-      }
-      else
+      } else
         sb.append(ch);
     }
 
