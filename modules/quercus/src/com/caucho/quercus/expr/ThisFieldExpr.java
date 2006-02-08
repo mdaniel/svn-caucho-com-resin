@@ -221,7 +221,7 @@ public class ThisFieldExpr extends AbstractVarExpr {
       // quercus/3d8o
       */
       
-    out.print("quercus_this.getField(env, \"");
+    out.print("quercus_this.getField(\"");
     out.printJavaString(_name);
     out.print("\")");
   }
