@@ -163,40 +163,6 @@ abstract public class ArrayValue extends Value {
   abstract public Value getArg(Value index);
 
   /**
-   * Returns the value as an array.
-   */
-  public Value getArgArray(Value fieldName)
-  {
-    Value value = get(fieldName);
-
-    /* XXX:
-    if (! value.isset()) {
-      value = new ArrayValue();
-
-      put(fieldName, value);
-    }
-    */
-
-    return value;
-  }
-
-  /**
-   * Returns the value as an object
-   */
-  public Value getArgObject(Env env, Value fieldName)
-  {
-    Value value = get(fieldName);
-
-    if (value.isset()) {
-      // quercus/3d52
-      return value;
-    }
-    else {
-      return new ArgGetObjectValue(env, this, fieldName);
-    }
-  }
-
-  /**
    * Returns the field value, creating an object if it's unset.
    */
   public Value getObject(Env env, Value fieldName)

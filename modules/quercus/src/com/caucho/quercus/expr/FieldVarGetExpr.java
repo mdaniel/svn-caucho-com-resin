@@ -66,7 +66,7 @@ public class FieldVarGetExpr extends AbstractVarExpr {
   public Value evalArg(Env env)
     throws Throwable
   {
-    Value value = _objExpr.evalArgObject(env);
+    Value value = _objExpr.evalArg(env);
 
     return value.getFieldArg(env, _nameExpr.evalString(env));
   }
@@ -146,39 +146,6 @@ public class FieldVarGetExpr extends AbstractVarExpr {
 
     return obj.getFieldObject(env, _nameExpr.evalString(env));
   }
-
-  /**
-   * Evaluates the expression, creating an object if the field is unset.
-   *
-   * @param env the calling environment.
-   *
-   * @return the expression value.
-   */
-  public Value evalArgObject(Env env)
-    throws Throwable
-  {
-    Value obj = _objExpr.evalObject(env);
-
-    return obj.getFieldArgObject(env, _nameExpr.evalString(env));
-  }
-
-  /**
-   * Evaluates the expression, creating an array if the field is unset.
-   *
-   * @param env the calling environment.
-   *
-   * @return the expression value.
-   */
-  public Value evalArgArray(Env env)
-    throws Throwable
-  {
-    throw new UnsupportedOperationException();
-    /*
-    Value obj = _objExpr.evalArgObject(env);
-
-    return obj.getArgArray(env, _name);
-    */
-  }
   
   /**
    * Evaluates the expression.
@@ -230,7 +197,7 @@ public class FieldVarGetExpr extends AbstractVarExpr {
   public void generateArg(PhpWriter out)
     throws IOException
   {
-    _objExpr.generateArgObject(out);
+    _objExpr.generateArg(out);
     out.print(".getFieldArg(");
     _nameExpr.generateString(out);
     out.print(")");
@@ -301,39 +268,11 @@ public class FieldVarGetExpr extends AbstractVarExpr {
    *
    * @param out the writer to the Java source code.
    */
-  public void generateArgObject(PhpWriter out)
-    throws IOException
-  {
-    _objExpr.generateArgObject(out);
-    out.print(".getFieldArgObject(env, ");
-    _nameExpr.generateString(out);
-    out.print(")");
-  }
-
-  /**
-   * Generates code to evaluate the expression.
-   *
-   * @param out the writer to the Java source code.
-   */
   public void generateArray(PhpWriter out)
     throws IOException
   {
     _objExpr.generateObject(out);
     out.print(".getFieldArray(");
-    _nameExpr.generateString(out);
-    out.print(")");
-  }
-
-  /**
-   * Generates code to evaluate the expression.
-   *
-   * @param out the writer to the Java source code.
-   */
-  public void generateArgArray(PhpWriter out)
-    throws IOException
-  {
-    _objExpr.generateArgObject(out);
-    out.print(".getFieldArgArray(");
     _nameExpr.generateString(out);
     out.print(")");
   }

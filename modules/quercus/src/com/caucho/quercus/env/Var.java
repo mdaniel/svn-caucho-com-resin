@@ -485,19 +485,6 @@ public class Var extends Value {
   }
 
   /**
-   * Returns the array ref.
-   */
-  public Value getArgArray()
-  {
-    if (_value.isset())
-      return _value;
-    else {
-      // quercus/3d52
-      return new ArgVarArrayValue(this);
-    }
-  }
-
-  /**
    * Returns the value, creating an object if unset.
    */
   public Value getObject(Env env)
@@ -506,17 +493,6 @@ public class Var extends Value {
       _value = env.createObject();
 
     return _value;
-  }
-
-  /**
-   * Returns the array ref.
-   */
-  public Value getArgObject(Env env)
-  {
-    if (_value.isset())
-      return _value;
-    else
-      return new ArgVarObjectValue(this, env);
   }
 
   /**

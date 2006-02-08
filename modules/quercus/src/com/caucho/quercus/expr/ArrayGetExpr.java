@@ -123,23 +123,6 @@ public class ArrayGetExpr extends AbstractVarExpr {
   }
 
   /**
-   * Evaluates the expression, creating an array if the value is unset..
-   *
-   * @param env the calling environment.
-   *
-   * @return the expression value.
-   */
-  public Value evalArgArray(Env env)
-    throws Throwable
-  {
-    Value array = _expr.evalArray(env);
-
-    Value index = _index.eval(env);
-
-    return array.getArgArray(index);
-  }
-
-  /**
    * Evaluates the expression, creating an object if the value is unset.
    *
    * @param env the calling environment.
@@ -154,23 +137,6 @@ public class ArrayGetExpr extends AbstractVarExpr {
     Value index = _index.eval(env);
 
     return array.getObject(env, index);
-  }
-
-  /**
-   * Evaluates the expression, creating an object if the value is unset.
-   *
-   * @param env the calling environment.
-   *
-   * @return the expression value.
-   */
-  public Value evalArgObject(Env env)
-    throws Throwable
-  {
-    Value array = _expr.evalArray(env);
-
-    Value index = _index.eval(env);
-
-    return array.getArgObject(env, index);
   }
 
   /**
@@ -308,44 +274,11 @@ public class ArrayGetExpr extends AbstractVarExpr {
    *
    * @param out the writer to the Java source code.
    */
-  public void generateArgArray(PhpWriter out)
-    throws IOException
-  {
-    // _expr.generateArgArray(out);
-    //out.print(".getArgArray(");
-    _expr.generateArg(out);
-    out.print(".getArg(");
-    _index.generate(out);
-    out.print(")");
-  }
-
-  /**
-   * Generates code to evaluate the expression.
-   *
-   * @param out the writer to the Java source code.
-   */
   public void generateObject(PhpWriter out)
     throws IOException
   {
     _expr.generateArray(out);
     out.print(".getObject(env, ");
-    _index.generate(out);
-    out.print(")");
-  }
-
-  /**
-   * Generates code to evaluate the expression.
-   *
-   * @param out the writer to the Java source code.
-   */
-  public void generateArgObject(PhpWriter out)
-    throws IOException
-  {
-    //_expr.generateArgArray(out);
-    //out.print(".getArgObject(env, ");
-    
-    _expr.generateArg(out);
-    out.print(".getArg(");
     _index.generate(out);
     out.print(")");
   }
@@ -372,7 +305,6 @@ public class ArrayGetExpr extends AbstractVarExpr {
   public void generateArg(PhpWriter out)
     throws IOException
   {
-    // _expr.generateArgArray(out);
     _expr.generateArg(out);
     out.print(".getArg(");
     _index.generate(out);

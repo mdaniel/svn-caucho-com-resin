@@ -223,21 +223,6 @@ public class ObjectValue extends Value {
   }
 
   /**
-   * Returns the value as an object
-   */
-  public Value getFieldArgObject(Env env, String fieldName)
-  {
-    Value value = getField(fieldName);
-
-    if (value.isset()) {
-      return value;
-    }
-    else {
-      return new ArgGetFieldObjectValue(env, this, fieldName);
-    }
-  }
-
-  /**
    * Gets a new value.
    */
   private Entry getEntry(String key)

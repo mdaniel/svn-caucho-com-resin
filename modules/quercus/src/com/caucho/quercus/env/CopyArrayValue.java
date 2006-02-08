@@ -160,22 +160,6 @@ public class CopyArrayValue extends ArrayValue {
   }
 
   /**
-   * Returns the value as an array.
-   */
-  public Value getArgArray(Value fieldName)
-  {
-    return getCopyArray().getArgArray(fieldName);
-  }
-
-  /**
-   * Returns the value as an object
-   */
-  public Value getArgObject(Env env, Value fieldName)
-  {
-    return getCopyArray().getArgObject(env, fieldName);
-  }
-
-  /**
    * Returns the field value, creating an object if it's unset.
    */
   public Value getObject(Env env, Value fieldName)

@@ -231,21 +231,6 @@ public class VarExpr extends AbstractVarExpr {
   }
 
   /**
-   * Evaluates the expression, converting to an object if unset.
-   *
-   * @param env the calling environment.
-   *
-   * @return the expression value.
-   */
-  public Value evalArgObject(Env env)
-    throws Throwable
-  {
-    // XXX:
-    
-    return evalObject(env);
-  }
-
-  /**
    * Evaluates the expression.
    *
    * @param env the calling environment.
@@ -756,35 +741,11 @@ public class VarExpr extends AbstractVarExpr {
    *
    * @param out the writer to the Java source code.
    */
-  public void generateArgArray(PhpWriter out)
-    throws IOException
-  {
-    generate(out);
-    out.print(".getArgArray()");
-  }
-
-  /**
-   * Generates code to evaluate the expression
-   *
-   * @param out the writer to the Java source code.
-   */
   public void generateObject(PhpWriter out)
     throws IOException
   {
     generate(out);
     out.print(".getObject(env)");
-  }
-
-  /**
-   * Generates code to evaluate the expression
-   *
-   * @param out the writer to the Java source code.
-   */
-  public void generateArgObject(PhpWriter out)
-    throws IOException
-  {
-    generate(out);
-    out.print(".getArgObject(env)");
   }
 
   /**

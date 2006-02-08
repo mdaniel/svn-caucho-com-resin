@@ -118,21 +118,6 @@ public class ThisFieldExpr extends AbstractVarExpr {
 
     return obj.getFieldArg(env, _name);
   }
-
-  /**
-   * Evaluates the expression, creating an object if the field is unset.
-   *
-   * @param env the calling environment.
-   *
-   * @return the expression value.
-   */
-  public Value evalArgObject(Env env)
-    throws Throwable
-  {
-    Value obj = env.getThis();
-
-    return obj.getFieldArgObject(env, _name);
-  }
   
   /**
    * Evaluates the expression.
@@ -252,29 +237,6 @@ public class ThisFieldExpr extends AbstractVarExpr {
   }
 
   /**
-   * Generates code to evaluate the expression.
-   *
-   * @param out the writer to the Java source code.
-   */
-  public void generateArg(PhpWriter out)
-    throws IOException
-  {
-    /*
-    if (_quercusClass.get(_name) != null) {
-      // quercus/3d8p
-
-      generateRef(out);
-    }
-    else {
-      // quercus/3d8r
-      */
-      
-    out.print("quercus_this.getFieldArg(env, \"");
-    out.printJavaString(_name);
-    out.print("\")");
-  }
-
-  /**
    * Generates code to evaluate the expression, as a copy.
    *
    * @param out the writer to the Java source code.
@@ -291,10 +253,10 @@ public class ThisFieldExpr extends AbstractVarExpr {
    *
    * @param out the writer to the Java source code.
    */
-  public void generateArgObject(PhpWriter out)
+  public void generateArg(PhpWriter out)
     throws IOException
   {
-    out.print("quercus_this.getFieldArgObject(env, \"");
+    out.print("quercus_this.getFieldArg(env, \"");
     out.printJavaString(_name);
     out.print("\")");
   }

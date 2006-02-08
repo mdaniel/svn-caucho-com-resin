@@ -82,7 +82,7 @@ public class FieldGetExpr extends AbstractVarExpr {
   public Value evalArg(Env env)
     throws Throwable
   {
-    Value value = _objExpr.evalArgObject(env);
+    Value value = _objExpr.evalArg(env);
 
     return value.getFieldArg(env, _name);
   }
@@ -163,40 +163,6 @@ public class FieldGetExpr extends AbstractVarExpr {
     // php/0a6f
     return obj.getFieldObject(env, _name);
   }
-
-  /**
-   * Evaluates the expression, creating an object if the field is unset.
-   *
-   * @param env the calling environment.
-   *
-   * @return the expression value.
-   */
-  public Value evalArgObject(Env env)
-    throws Throwable
-  {
-    Value obj = _objExpr.evalObject(env);
-
-    throw new UnsupportedOperationException();
-    //return obj.getArgObject(env, _name);
-  }
-
-  /**
-   * Evaluates the expression, creating an array if the field is unset.
-   *
-   * @param env the calling environment.
-   *
-   * @return the expression value.
-   */
-  public Value evalArgArray(Env env)
-    throws Throwable
-  {
-    throw new UnsupportedOperationException();
-    /*
-    Value obj = _objExpr.evalArgObject(env);
-
-    return obj.getArgArray(env, _name);
-    */
-  }
   
   /**
    * Evaluates the expression.
@@ -276,7 +242,6 @@ public class FieldGetExpr extends AbstractVarExpr {
   public void generateArg(PhpWriter out)
     throws IOException
   {
-    //_objExpr.generateArgObject(out);
     _objExpr.generateArg(out);
     out.print(".getFieldArg(env, \"");
     out.printJavaString(_name);
@@ -360,41 +325,11 @@ public class FieldGetExpr extends AbstractVarExpr {
    *
    * @param out the writer to the Java source code.
    */
-  public void generateArgObject(PhpWriter out)
-    throws IOException
-  {
-    //_objExpr.generateArgObject(out);
-    //out.print(".getFieldArgObject(env, \"");
-    _objExpr.generateArg(out);
-    out.print(".getFieldArg(env, \"");
-    out.printJavaString(_name);
-    out.print("\")");
-  }
-
-  /**
-   * Generates code to evaluate the expression.
-   *
-   * @param out the writer to the Java source code.
-   */
   public void generateArray(PhpWriter out)
     throws IOException
   {
     _objExpr.generateObject(out);
     out.print(".getFieldArray(env, \"");
-    out.printJavaString(_name);
-    out.print("\")");
-  }
-
-  /**
-   * Generates code to evaluate the expression.
-   *
-   * @param out the writer to the Java source code.
-   */
-  public void generateArgArray(PhpWriter out)
-    throws IOException
-  {
-    _objExpr.generateArgObject(out);
-    out.print(".getFieldArgArray(env, \"");
     out.printJavaString(_name);
     out.print("\")");
   }

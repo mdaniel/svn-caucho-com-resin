@@ -57,9 +57,6 @@ public class ArgGetValue extends Value {
     return new ArgGetValue(this, index); // php/3d1p
   }
 
-  // XXX: getArgArray(Value)
-  // XXX: getArgObject(Value)
-
   /**
    * Returns the arg object for a field reference, e.g.
    * foo($a[0]->x)
@@ -68,9 +65,6 @@ public class ArgGetValue extends Value {
   {
     return new ArgGetFieldValue(env, this, index); // php/3d2p
   }
-
-  // XXX: getFieldArgArray(String)
-  // XXX: getFieldArgObject(String)
 
   /**
    * Converts to a reference variable.

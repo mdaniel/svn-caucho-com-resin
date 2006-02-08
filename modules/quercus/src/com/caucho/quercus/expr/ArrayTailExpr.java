@@ -157,32 +157,6 @@ public class ArrayTailExpr extends AbstractVarExpr {
   }
 
   /**
-   * Evaluates the expression, assigning an array if unset.
-   *
-   * @param env the calling environment.
-   *
-   * @return the expression value.
-   */
-  public Value evalArgArray(Env env)
-    throws Throwable
-  {
-    return evalArray(env);
-  }
-
-  /**
-   * Evaluates the expression, assigning an object if unset..
-   *
-   * @param env the calling environment.
-   *
-   * @return the expression value.
-   */
-  public Value evalArgObject(Env env)
-    throws Throwable
-  {
-    return evalObject(env);
-  }
-
-  /**
    * Evaluates the expression.
    *
    * @param env the calling environment.

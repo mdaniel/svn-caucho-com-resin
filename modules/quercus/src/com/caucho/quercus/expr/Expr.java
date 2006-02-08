@@ -365,32 +365,6 @@ abstract public class Expr {
   {
     return eval(env);
   }
-  
-  /**
-   * Evaluates the expression, creating an array for unassigned values.
-   *
-   * @param env the calling environment.
-   *
-   * @return the expression value.
-   */
-  public Value evalArgArray(Env env)
-    throws Throwable
-  {
-    return eval(env);
-  }
-  
-  /**
-   * Evaluates the expression, creating an object for unassigned values.
-   *
-   * @param env the calling environment.
-   *
-   * @return the expression value.
-   */
-  public Value evalArgObject(Env env)
-    throws Throwable
-  {
-    return eval(env);
-  }
 
   /**
    * Needed to handle list.
@@ -622,18 +596,6 @@ abstract public class Expr {
   }
 
   /**
-   * Generates code to recreate the expression, creating an array
-   * for an unset value.
-   *
-   * @param out the writer to the Java source code.
-   */
-  public void generateArgArray(PhpWriter out)
-    throws IOException
-  {
-    generateArray(out);
-  }
-
-  /**
    * Generates code to recreate the expression, creating an object
    * for an unset value.
    *
@@ -643,18 +605,6 @@ abstract public class Expr {
     throws IOException
   {
     generate(out);
-  }
-
-  /**
-   * Generates code to recreate the expression, creating an object
-   * for an unset value.
-   *
-   * @param out the writer to the Java source code.
-   */
-  public void generateArgObject(PhpWriter out)
-    throws IOException
-  {
-    generateObject(out);
   }
 
   /**

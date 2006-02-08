@@ -167,44 +167,6 @@ abstract public class CompiledClass extends AbstractClassDef {
   }
 
   /**
-   * Returns the field value, if unset, creates an ArgGetObjectValue.
-   */
-  public Value getArgObject(Env env, Value name)
-  {
-    throw new UnsupportedOperationException();
-    
-    /*
-    Value value = get(name);
-
-    if (value.isset()) {
-      return value;
-    }
-    else {
-      return new ArgGetObjectValue(env, this, name);
-    }
-    */
-  }
-
-  /**
-   * Returns the field value, if unset, creates an ArgGetArrayValue
-   */
-  public Value getArgArray(Env env, Value name)
-  {
-    throw new UnsupportedOperationException();
-
-    /*
-    Value value = get(name);
-
-    if (value.isset()) {
-      return value;
-    }
-    else {
-      return new ArgGetObjectValue(env, this, name);
-    }
-    */
-  }
-
-  /**
    * Adds a value.
    */
   public Value put(Value name, Value value)

@@ -950,27 +950,9 @@ abstract public class Value {
    * Returns the value for a field, creating an array if the field
    * is unset.
    */
-  public Value getArgArray()
-  {
-    return this;
-  }
-
-  /**
-   * Returns the value for a field, creating an array if the field
-   * is unset.
-   */
   public Value getArray(Value index)
   {
     return NullValue.NULL;
-  }
-
-  /**
-   * Returns the value for a field, creating an array if the field
-   * is unset.
-   */
-  public Value getArgArray(Value index)
-  {
-    return getArray(index);
   }
 
   /**
@@ -1026,15 +1008,6 @@ abstract public class Value {
    * Returns the value for a field, creating an object if the field
    * is unset.
    */
-  public Value getFieldArgObject(Env env, String index)
-  {
-    return getFieldObject(env, index);
-  }
-
-  /**
-   * Returns the value for a field, creating an object if the field
-   * is unset.
-   */
   public Value getFieldArray(Env env, String index)
   {
     Value v = getField(index);
@@ -1046,14 +1019,6 @@ abstract public class Value {
     }
       
     return v;
-  }
-
-  /**
-   * Returns the field ref.
-   */
-  public Value getFieldArgArray(Env env, String index)
-  {
-    return getFieldArray(env, index);
   }
 
   /**
@@ -1098,25 +1063,6 @@ abstract public class Value {
   public Value getObject(Env env, Value index)
   {
     return NullValue.NULL;
-  }
-
-  /**
-   * Returns the value for a field, creating an object if the field
-   * is unset.
-   */
-  public Value getArgObject(Env env)
-  {
-    // quercus/399l
-    return getObject(env);
-  }
-
-  /**
-   * Returns the value for a field, creating an object if the field
-   * is unset.
-   */
-  public Value getArgObject(Env env, Value index)
-  {
-    return getObject(env, index);
   }
 
   /**
