@@ -2572,6 +2572,14 @@ public class Env {
   }
 
   /**
+   * A warning about an invalid argument passed to a function.
+   */
+  public Value invalidArgument(String name, Object value)
+  {
+    return warning(L.l("invalid value `{0}' for `{1}'", value, name));
+  }
+
+  /**
    * A notice.
    */
   public Value notice(String msg)

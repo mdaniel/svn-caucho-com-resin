@@ -737,7 +737,7 @@ public class ObjectValue extends Value {
   {
     out.println("object(" + getName() + ") (" + getSize() + ") {");
 
-    for (Map.Entry<String,Value> mapEntry : entrySet()) {
+    for (Map.Entry<String,Value> mapEntry : sortedEntrySet()) {
       ObjectValue.Entry entry = (ObjectValue.Entry) mapEntry;
 
       entry.varDump(env, out, depth + 1, valueSet);
@@ -760,7 +760,7 @@ public class ObjectValue extends Value {
     printDepth(out, 4 * depth);
     out.println("(");
 
-    for (Map.Entry<String,Value> mapEntry : entrySet()) {
+    for (Map.Entry<String,Value> mapEntry : sortedEntrySet()) {
       ObjectValue.Entry entry = (ObjectValue.Entry) mapEntry;
 
       entry.printR(env, out, depth + 1, valueSet);
@@ -942,7 +942,7 @@ public class ObjectValue extends Value {
 
       if (otherKey == null)
         return 1;
-      
+
       return thisKey.compareTo(otherKey);
     }
 
