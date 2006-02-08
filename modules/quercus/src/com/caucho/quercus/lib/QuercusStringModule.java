@@ -1231,10 +1231,9 @@ public class QuercusStringModule extends AbstractQuercusModule {
 
     if (result == null)
       result = new ArrayValueImpl();
-
+    
     for (int i = 0; i < len; i++) {
       int ch = 0;
-
       byteToChar.clear();
 
       for (; i < len && (ch = str.charAt(i)) != '='; i++) {
@@ -1242,6 +1241,7 @@ public class QuercusStringModule extends AbstractQuercusModule {
       }
 
       String key = byteToChar.getConvertedString();
+      
       byteToChar.clear();
 
       String value;
@@ -1254,8 +1254,32 @@ public class QuercusStringModule extends AbstractQuercusModule {
       }
       else
         value = "";
-
-      Post.addFormValue(result, key, new String[] { value }, env.getIniBoolean("magic_quotes_gpc"));
+      
+      if (array != null) {
+        Post.addFormValue(result, key, new String[] { value }, env.getIniBoolean("magic_quotes_gpc"));
+      } else {
+        // If key is an exsiting array, then append this value to existing array
+        // Only use extract(EXTR_OVERWRITE) on non-array variables or 
+        // non-existing arrays
+        int openBracketIndex = key.indexOf('[');
+        int closeBracketIndex = key.indexOf(']');
+        if (openBracketIndex > 0) {
+          Value v = env.getVar(key.substring(0,openBracketIndex)).getRawValue();
+          if (v instanceof ArrayValue) {
+            //XXX: Check to make sure valid string (ie: foo[...])  
+            if (closeBracketIndex > openBracketIndex + 1) {
+              String index = key.substring(key.indexOf('[') + 1,key.indexOf(']'));
+              v.put(new StringValue(index), new StringValue(value));
+            } else {
+              v.put(new StringValue(value));
+            }
+          } else {
+            Post.addFormValue(result, key, new String[] { value }, env.getIniBoolean("magic_quotes_gpc"));
+          }
+        } else {
+          Post.addFormValue(result, key, new String[] { value }, env.getIniBoolean("magic_quotes_gpc"));
+        }
+      }
     }
 
     if (array == null) {
@@ -2970,7 +2994,6 @@ public class QuercusStringModule extends AbstractQuercusModule {
   /**
    * Finds the first instance of a substring, testing case insensitively
    *
-   * @param env the calling environment
    * @param haystack the string to search in
    * @param needleV the string to search for
    * @return the trailing match or FALSE
@@ -3030,7 +3053,6 @@ public class QuercusStringModule extends AbstractQuercusModule {
   /**
    * Reverses a string.
    *
-   * @param env the calling environment
    */
   public static Value strrev(String string)
     throws Throwable
@@ -3080,7 +3102,6 @@ public class QuercusStringModule extends AbstractQuercusModule {
   /**
    * Returns the position of a substring, testing case-insensitive.
    *
-   * @param env the calling environment
    * @param haystack the full string to test
    * @param needleV the substring string to test
    * @param offsetV the optional offset to start searching

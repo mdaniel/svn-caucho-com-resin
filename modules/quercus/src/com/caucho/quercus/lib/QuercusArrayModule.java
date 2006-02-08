@@ -1743,9 +1743,10 @@ public class QuercusArrayModule extends AbstractQuercusModule {
    *   table
    */
   @UsesSymbolTable
-  public static Value extract(Env env, ArrayValue array,
-			      @Optional("EXTR_OVERWRITE") long rawType,
-			      @Optional("NULL") Value valuePrefix )
+  public static Value extract(Env env,
+                              ArrayValue array,
+			                        @Optional("EXTR_OVERWRITE") long rawType,
+			                        @Optional("NULL") Value valuePrefix )
   {
     if (array == null)
       return NullValue.NULL;
