@@ -315,7 +315,7 @@ public class QuercusZlibModule extends AbstractQuercusModule {
     ByteArrayInputStream result = new ByteArrayInputStream(buf.getBuffer(),0,fullCompressedDataLength);
     ReadStream readStream = new ReadStream(new VfsStream(result,null));
     return new TempBufferStringValue(TempBuffer.copyFromStream(readStream));
-}
+  }
 
   /**
    * 
