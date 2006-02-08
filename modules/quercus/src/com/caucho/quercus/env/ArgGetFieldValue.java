@@ -51,19 +51,19 @@ public class ArgGetFieldValue extends Value {
   /**
    * Creates an argument which may create the given field.
    */
+  public Value getArg(Value index)
+  {
+    // php/3d1q
+    return new ArgGetValue(this, index);
+  }
+
+  /**
+   * Creates an argument which may create the given field.
+   */
   public Value getFieldArg(Env env, String index)
   {
     // php/3d2q
     return new ArgGetFieldValue(env, this, index);
-  }
-
-  /**
-   * Converts to a reference variable.
-   */
-  public Value getFieldRef(Env env, String index)
-  {
-    // php/3d2q
-    return _obj.getFieldObject(_env, _index).getFieldRef(_env, index);
   }
 
   /**
@@ -97,6 +97,24 @@ public class ArgGetFieldValue extends Value {
   public Var toVar()
   {
     return new Var();
+  }
+
+  /**
+   * Converts to a reference variable.
+   */
+  public Value getArgRef(Value index)
+  {
+    // php/3d1q
+    return _obj.getFieldArray(_env, _index).getArgRef(index);
+  }
+
+  /**
+   * Converts to a reference variable.
+   */
+  public Value getFieldRef(Env env, String index)
+  {
+    // php/3d2q
+    return _obj.getFieldObject(_env, _index).getFieldRef(_env, index);
   }
 }
 

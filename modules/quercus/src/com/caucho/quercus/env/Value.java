@@ -914,7 +914,7 @@ abstract public class Value {
   }
 
   /**
-   * Returns the array ref.
+   * Returns a reference to the array value.
    */
   public Value getRef(Value index)
   {
@@ -922,7 +922,7 @@ abstract public class Value {
   }
 
   /**
-   * Returns the array ref.
+   * Returns the array ref as a function argument.
    */
   public Value getArg(Value index)
   {
@@ -1037,7 +1037,7 @@ abstract public class Value {
    */
   public Value getFieldArray(Env env, String index)
   {
-    Value v = getFieldRef(env, index);
+    Value v = getField(index);
 
     if (! v.isset()) {
       v = new ArrayValueImpl();

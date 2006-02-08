@@ -746,8 +746,9 @@ public class VarExpr extends AbstractVarExpr {
   public void generateArray(PhpWriter out)
     throws IOException
   {
+    // php/3d11
     generate(out);
-    out.print(".getArray()");
+    // out.print(".getArray()");
   }
 
   /**

@@ -358,8 +358,7 @@ public class ArrayGetExpr extends AbstractVarExpr {
   public void generateRef(PhpWriter out)
     throws IOException
   {
-    // _expr.generateArray(out);
-    _expr.generateArg(out);
+    _expr.generateArray(out); // php/3d1c
     out.print(".getRef(");
     _index.generate(out);
     out.print(")");

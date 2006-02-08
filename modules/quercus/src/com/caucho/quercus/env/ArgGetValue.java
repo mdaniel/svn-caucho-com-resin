@@ -48,7 +48,15 @@ public class ArgGetValue extends Value {
     _index = index;
   }
 
-  // XXX: getArg(Value)
+  /**
+   * Returns the arg object for a field reference, e.g.
+   * foo($a[0][1])
+   */
+  public Value getArg(Value index)
+  {
+    return new ArgGetValue(this, index); // php/3d1p
+  }
+
   // XXX: getArgArray(Value)
   // XXX: getArgObject(Value)
 
@@ -97,6 +105,14 @@ public class ArgGetValue extends Value {
   {
     // quercus/3d56
     return new Var();
+  }
+
+  /**
+   * Returns the reference.
+   */
+  public Value getArgRef(Value index)
+  {
+    return _obj.getArray(_index).getRef(index); // php/3d1p
   }
 
   /**

@@ -476,22 +476,6 @@ public class Var extends Value {
   /**
    * Returns the array ref.
    */
-  public Value get(Value index)
-  {
-    return _value.get(index);
-  }
-
-  /**
-   * Returns the array ref.
-   */
-  public Value getRef(Value index)
-  {
-    return _value.getRef(index);
-  }
-
-  /**
-   * Returns the array ref.
-   */
   public Value getArray()
   {
     if (! _value.isset())
@@ -514,6 +498,17 @@ public class Var extends Value {
   }
 
   /**
+   * Returns the value, creating an object if unset.
+   */
+  public Value getObject(Env env)
+  {
+    if (! _value.isset())
+      _value = env.createObject();
+
+    return _value;
+  }
+
+  /**
    * Returns the array ref.
    */
   public Value getArgObject(Env env)
@@ -522,6 +517,26 @@ public class Var extends Value {
       return _value;
     else
       return new ArgVarObjectValue(this, env);
+  }
+
+  /**
+   * Returns the array ref.
+   */
+  public Value get(Value index)
+  {
+    return _value.get(index);
+  }
+
+  /**
+   * Returns the array ref.
+   */
+  public Value getRef(Value index)
+  {
+    // php/3d1a
+    if (! _value.isset())
+      _value = new ArrayValueImpl();
+
+    return _value.getRef(index);
   }
 
   /**
@@ -547,25 +562,15 @@ public class Var extends Value {
   }
 
   /**
-   * Returns the array ref.
-   */
-  public Value getFieldArg(Env env, String index)
-  {
-    if (_value.isset())
-      return _value.getFieldArg(env, index);
-    else
-      return new ArgGetFieldValue(env, this, index);
-  }
-
-  /**
    * Returns the value, creating an object if unset.
    */
-  public Value getObject(Env env)
+  public Value getArray(Value index)
   {
+    // php/3d11
     if (! _value.isset())
-      _value = env.createObject();
+      _value = new ArrayValueImpl();
 
-    return _value;
+    return _value.getArray(index);
   }
 
   /**
@@ -585,7 +590,12 @@ public class Var extends Value {
    */
   public Value put(Value index, Value value)
   {
-    return _value.put(index, value);
+    Value array = _value;
+
+    if (! array.isset())
+      _value = array = new ArrayValueImpl();
+    
+    return array.put(index, value);
   }
 
   /**
@@ -593,7 +603,12 @@ public class Var extends Value {
    */
   public Value put(Value value)
   {
-    return _value.put(value);
+    Value array = _value;
+
+    if (! array.isset())
+      _value = array = new ArrayValueImpl();
+    
+    return array.put(value);
   }
 
   /**
@@ -601,7 +616,12 @@ public class Var extends Value {
    */
   public Value putRef()
   {
-    return _value.putRef();
+    Value array = _value;
+
+    if (! array.isset())
+      _value = array = new ArrayValueImpl();
+    
+    return array.putRef();
   }
 
   /**
@@ -626,6 +646,40 @@ public class Var extends Value {
   public Value getFieldRef(Env env, String index)
   {
     return _value.getFieldRef(env, index);
+  }
+
+  /**
+   * Returns the array ref.
+   */
+  public Value getFieldArg(Env env, String index)
+  {
+    if (_value.isset())
+      return _value.getFieldArg(env, index);
+    else
+      return new ArgGetFieldValue(env, this, index);
+  }
+
+  /**
+   * Returns the field value as an array
+   */
+  public Value getFieldArray(Env env, String index)
+  {
+    // php/3d1q
+    if (! _value.isset())
+      _value = env.createObject();
+    
+    return _value.getFieldArray(env, index);
+  }
+
+  /**
+   * Returns the field value as an object
+   */
+  public Value getFieldObject(Env env, String index)
+  {
+    if (! _value.isset())
+      _value = env.createObject();
+    
+    return _value.getFieldObject(env, index);
   }
 
   /**
