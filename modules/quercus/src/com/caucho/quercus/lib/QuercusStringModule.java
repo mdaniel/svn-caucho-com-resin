@@ -2298,7 +2298,8 @@ public class QuercusStringModule extends AbstractQuercusModule {
    * @param subject replacement
    * @param count return value
    */
-  public static Value str_replace(Value search,
+  public static Value str_replace(Env env,
+                                  Value search,
                                   Value replace,
                                   Value subject,
                                   @Reference @Optional Value count)
@@ -2317,8 +2318,11 @@ public class QuercusStringModule extends AbstractQuercusModule {
       ArrayValue resultArray = new ArrayValueImpl();
 
       for (Value value : subjectArray.values()) {
-        Value result = str_replace_impl(search, replace,
-                                        value.toString(), count);
+        Value result = str_replace_impl(env,
+                                        search,
+                                        replace,
+                                        value.toString(),
+                                        count);
 
         resultArray.append(result);
       }
@@ -2331,7 +2335,11 @@ public class QuercusStringModule extends AbstractQuercusModule {
       if (subjectString.length() == 0)
         return StringValue.EMPTY;
 
-      return str_replace_impl(search, replace, subjectString, count);
+      return str_replace_impl(env,
+                              search,
+                              replace,
+                              subjectString,
+                              count);
     }
   }
 
@@ -2343,7 +2351,8 @@ public class QuercusStringModule extends AbstractQuercusModule {
    * @param subject replacement
    * @param count return value
    */
-  private static Value str_replace_impl(Value search,
+  private static Value str_replace_impl(Env env,
+                                        Value search,
                                         Value replace,
                                         String subject,
                                         Value count)
@@ -2355,7 +2364,12 @@ public class QuercusStringModule extends AbstractQuercusModule {
       if (searchString.length() == 0)
         return new StringValue(subject);
 
-      subject = str_replace_impl(searchString,
+      if (replace instanceof ArrayValue) {
+        env.warning(L.l("Array to string conversion"));
+      }
+      
+      subject = str_replace_impl(env,
+                                 searchString,
                                  replace.toString(),
                                  subject,
                                  count);
@@ -2374,7 +2388,8 @@ public class QuercusStringModule extends AbstractQuercusModule {
         if (replaceItem == null)
           replaceItem = NullValue.NULL;
 
-        subject = str_replace_impl(searchItem.toString(),
+        subject = str_replace_impl(env,
+                                   searchItem.toString(),
                                    replaceItem.toString(),
                                    subject,
                                    count);
@@ -2388,7 +2403,8 @@ public class QuercusStringModule extends AbstractQuercusModule {
       while (searchIter.hasNext()) {
         Value searchItem = searchIter.next();
 
-        subject = str_replace_impl(searchItem.toString(),
+        subject = str_replace_impl(env,
+                                   searchItem.toString(),
                                    replace.toString(),
                                    subject,
                                    count);
@@ -2406,7 +2422,8 @@ public class QuercusStringModule extends AbstractQuercusModule {
    * @param subject replacement
    * @param countV return value
    */
-  private static String str_replace_impl(String search,
+  private static String str_replace_impl(Env env,
+                                         String search,
                                          String replace,
                                          String subject,
                                          Value countV)
