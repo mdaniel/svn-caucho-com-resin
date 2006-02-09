@@ -918,29 +918,37 @@ public class QuercusArrayModule
   }
 
   /**
-   * Returns the removed chunk of the array and splices in replace.  If offset
+   * Returns the removed chunk of the arrayV and splices in replace.  If offset
    * is negative, then the start index is that far from the end.  Otherwise, it
    * is the start index.  If length is not given then from start index to the
    * end is removed.  If length is negative, that is the index to stop removing
    * elements.  Otherwise that is the number of elements to remove.  If replace
-   * is given, replace will be inserted into the array at offset.
+   * is given, replace will be inserted into the arrayV at offset.
    *
-   * @param array the array to splice
-   * @param offset the start index for the new array chunk
+   * @param array the arrayV to splice
+   * @param offset the start index for the new arrayV chunk
    * @param length the number of elements to remove / stop index
-   * @param replace the elements to add to the array
-   * @return the part of the array removed from input
+   * @param replace the elements to add to the arrayV
+   * @return the part of the arrayV removed from input
    */
   public Value array_splice(Env env, 
-                            ArrayValue array,
+                            @Reference Value array, //array gets spliced at offset
                             long offset,
                             @Optional("NULL") Value length,
                             @Optional("NULL") Value replace)
   {
-    if (array == null)
+    Value arrayV;
+    
+    if (array != null) {
+      arrayV = array.toValue();
+      if (!(arrayV instanceof ArrayValue)) {
+        env.warning(L.l("'" + arrayV.toString() + "' is an unexpected argument, expected ArrayValue"));
+        return NullValue.NULL;
+      }
+    } else
       return NullValue.NULL;
 
-    long size = array.getSize();
+    long size = arrayV.getSize();
 
     long startIndex = offset;
 
@@ -996,7 +1004,7 @@ public class QuercusArrayModule
       for (Map.Entry<Value, Value> rEntry : replacement.entrySet())
         splicedArray.put(rEntry.getValue());
     else {
-      for (Map.Entry<Value, Value> entry : array.entrySet()) {
+      for (Map.Entry<Value, Value> entry : ((ArrayValue) arrayV).entrySet()) {
         Value entryKey = entry.getKey();
 
         Value entryValue = entry.getValue();
@@ -1021,7 +1029,7 @@ public class QuercusArrayModule
         index++;
       }
     }
-
+    array.set(splicedArray);
     return returnArray;
   }
 
