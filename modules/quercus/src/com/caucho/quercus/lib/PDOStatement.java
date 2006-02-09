@@ -64,11 +64,11 @@ public class PDOStatement {
   private ResultSet _rs;
 
   private int _fetchStyle = PDO.FETCH_BOTH;
-  
+
   PDOStatement(PDO pdo, JdbcResultResource result)
   {
     _pdo = pdo;
-    
+
     _result = result;
   }
 
@@ -79,7 +79,7 @@ public class PDOStatement {
   {
     JdbcResultResource result = _result;
     _result = null;
-    
+
     if (result == null)
       return false;
 
@@ -99,17 +99,17 @@ public class PDOStatement {
   {
     if (style == 0)
       style = _fetchStyle;
-    
+
     switch (style) {
     case PDO.FETCH_ASSOC:
       return _result.fetchArray(PDO.FETCH_ASSOC);
-      
+
     case PDO.FETCH_NUM:
       return _result.fetchArray(PDO.FETCH_NUM);
-      
+
     case PDO.FETCH_BOTH:
       return _result.fetchArray(PDO.FETCH_BOTH);
-      
+
     case PDO.FETCH_OBJ:
     case PDO.FETCH_LAZY:
       return _result.fetchObject(env);
@@ -128,7 +128,7 @@ public class PDOStatement {
 
     if (result == null)
       return 0;
-    
+
     return result.getFieldCount();
   }
 
@@ -145,17 +145,13 @@ public class PDOStatement {
     if (result == null)
       return rows.iterator();
 
-    try {
-      Value value;
-    
-      while ((value = result.fetchArray(_fetchStyle)).isset()) {
-	rows.add(value);
-      }
+    Value value;
 
-      result.close();
-    } catch (SQLException e) {
-      throw new RuntimeException(e);
+    while ((value = result.fetchArray(_fetchStyle)).isset()) {
+      rows.add(value);
     }
+
+    result.close();
 
     return rows.iterator();
   }

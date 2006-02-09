@@ -29,14 +29,10 @@
 
 package com.caucho.quercus.lib;
 
-import java.sql.SQLException;
-
 import java.util.logging.Logger;
-import java.util.logging.Level;
 
 import com.caucho.util.L10N;
 
-import com.caucho.quercus.resources.JdbcConnectionResource;
 import com.caucho.quercus.resources.JdbcResultResource;
 
 import com.caucho.quercus.env.Env;
@@ -79,7 +75,6 @@ public class MysqliResult {
    * Returns an array representing the row.
    */
   public Value fetch_array(@Optional("MYSQLI_BOTH") int type)
-    throws Exception
   {
     return validateResult().fetchArray(type);
   }
@@ -88,7 +83,6 @@ public class MysqliResult {
    * Returns an associative array representing the row.
    */
   public Value fetch_assoc()
-    throws Exception
   {
     return validateResult().fetchArray(JdbcResultResource.ASSOC);
   }
@@ -97,7 +91,6 @@ public class MysqliResult {
    * Returns the field metadata
    */
   public Value fetch_field(Env env)
-    throws Exception
   {
     return validateResult().fetchNextField(env);
   }
@@ -106,7 +99,6 @@ public class MysqliResult {
    * Returns the field metadata
    */
   public Value fetch_fields(Env env)
-    throws Exception
   {
     return validateResult().getFieldDirectArray(env);
   }
@@ -115,7 +107,6 @@ public class MysqliResult {
    * Returns the field lengths
    */
   public Value fetch_lengths()
-    throws Exception
   {
     return validateResult().getLengths();
   }
@@ -124,7 +115,6 @@ public class MysqliResult {
    * Returns the field table
    */
   public Value fetch_field_catalog(int offset)
-    throws Exception
   {
     return validateResult().getFieldCatalog(offset);
   }
@@ -133,7 +123,6 @@ public class MysqliResult {
    * Returns the field metadata
    */
   public Value fetch_field_direct(Env env, int offset)
-    throws Exception
   {
     return validateResult().fetchFieldDirect(env, offset);
   }
@@ -142,7 +131,6 @@ public class MysqliResult {
    * Returns the field length
    */
   public Value fetch_field_length(Env env, int offset)
-    throws Exception
   {
     return validateResult().getFieldLength(env, offset);
   }
@@ -151,7 +139,6 @@ public class MysqliResult {
    * Returns the field name
    */
   public Value fetch_field_name(Env env, int offset)
-    throws Exception
   {
     return validateResult().getFieldName(env, offset);
   }
@@ -160,7 +147,6 @@ public class MysqliResult {
    * Returns the table corresponding to the field.
    */
   public Value fetch_field_table(Env env, int offset)
-    throws Exception
   {
     return validateResult().getFieldTable(env, offset);
   }
@@ -169,7 +155,6 @@ public class MysqliResult {
    * Returns the field type
    */
   public Value fetch_field_type(Env env, int offset)
-    throws Exception
   {
     return validateResult().getFieldType(env, offset);
   }
@@ -178,7 +163,6 @@ public class MysqliResult {
    * Returns an object representing the row.
    */
   public Value fetch_object(Env env)
-    throws Exception
   {
     return validateResult().fetchObject(env);
   }
@@ -187,7 +171,6 @@ public class MysqliResult {
    * Returns an object representing the row.
    */
   public Value fetch_row()
-    throws Exception
   {
     return validateResult().fetchArray(JdbcResultResource.NUM);
   }
@@ -196,7 +179,6 @@ public class MysqliResult {
    * Returns the number of fields
    */
   public int field_count(Env env)
-    throws Exception
   {
     return validateResult().getFieldCount();
   }
@@ -205,7 +187,6 @@ public class MysqliResult {
    * Sets the index into field metadata
    */
   public boolean field_seek(Env env, int offset)
-    throws Exception
   {
     validateResult().setFieldOffset(offset);
 
@@ -216,7 +197,6 @@ public class MysqliResult {
    * Returns the index into field metadata
    */
   public int field_tell(Env env)
-    throws Exception
   {
     return validateResult().getFieldOffset();
   }
@@ -246,24 +226,33 @@ public class MysqliResult {
   }
 
   /**
-   * returns the number of rows in the result set.
+   * Returns the number of rows in the result set.
    */
   public Value num_rows()
-    throws SQLException
   {
     return validateResult().getNumRows();
+  }
+
+  public Value result(Env env, int row, Value field)
+  {
+    return validateResult().getResultField(env, row, field);
   }
 
   /**
    * Closes the result.
    */
-  public void close()
+  public boolean close()
   {
     JdbcResultResource rs = _rs;
     _rs = null;
 
-    if (rs != null)
+    if (rs != null) {
       rs.close();
+      return true;
+    }
+    else {
+      return false;
+    }
   }
 
   JdbcResultResource validateResult()

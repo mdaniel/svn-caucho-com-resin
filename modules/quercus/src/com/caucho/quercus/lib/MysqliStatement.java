@@ -58,18 +58,18 @@ public class MysqliStatement {
   private JdbcConnectionResource _conn;
 
   private String _query;
-  
+
   private PreparedStatement _pstmt;
   private ResultSet _rs;
   private ResultSetMetaData _rsMetaData;
-  
+
   private char[] _types;
   private Value[] _params;
   private Value[] _results;
-  
+
   private String _errorMessage;
   private int _errorCode;
-  
+
   MysqliStatement(JdbcConnectionResource conn)
   {
     _conn = conn;
@@ -273,16 +273,10 @@ public class MysqliStatement {
    */
   public Value num_rows()
   {
-    try {
-      if (_rs != null)
-	return JdbcResultResource.getNumRows(_rs);
-      else
-	return BooleanValue.FALSE;
-    } catch (SQLException e) {
-      log.log(Level.FINER, e.toString(), e);
-
+    if (_rs != null)
+      return JdbcResultResource.getNumRows(_rs);
+    else
       return BooleanValue.FALSE;
-    }
   }
 
   /**
@@ -338,11 +332,11 @@ public class MysqliStatement {
     try {
       if (_pstmt != null)
         _pstmt.close();
-      
+
       _query = query;
-      
+
       _pstmt = _conn.getConnection().prepareStatement(query);
-      
+
       return true;
     } catch (SQLException e) {
       log.log(Level.FINE, e.toString(), e);
@@ -408,7 +402,7 @@ public class MysqliStatement {
       JdbcResultResource result;
 
       result = new JdbcResultResource(_rs.getMetaData(), _conn);
-      
+
       return env.wrapJava(new MysqliResult(result));
     }
     else
@@ -441,7 +435,7 @@ public class MysqliStatement {
     stmt = null;
 
     _rs = null;
-    
+
     if (stmt != null)
       stmt.close();
 
@@ -452,7 +446,7 @@ public class MysqliStatement {
   {
     return _conn;
   }
-  
+
   private ResultSetMetaData getMetaData()
     throws SQLException
   {

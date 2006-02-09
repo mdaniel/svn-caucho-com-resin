@@ -946,8 +946,7 @@ abstract public class ArrayValue extends Value {
 
     public String toString()
     {
-      return "ArrayValue.Entry[" + _key + " => " + toValue() + "]";
-
+      return "ArrayValue.Entry[" + getKey() + "]";
     }
   }
 

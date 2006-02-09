@@ -168,7 +168,6 @@ public class Mysqli {
    * Returns the host information.
    */
   public String get_client_info()
-    throws SQLException
   {
     return validateConnection().getClientInfo();
   }
@@ -237,25 +236,29 @@ public class Mysqli {
    *
    */
   public Value insert_id()
-     throws SQLException
   {
-    JdbcConnectionResource connV = validateConnection();
-
-    Connection conn = connV.getConnection();
-    Statement stmt = null;
-
     try {
-      stmt = conn.createStatement();
+      JdbcConnectionResource connV = validateConnection();
+      Connection conn = connV.getConnection();
 
-      ResultSet rs = stmt.executeQuery("SELECT @@identity");
+      Statement stmt = null;
 
-      if (rs.next())
-	return new LongValue(rs.getLong(1));
-    } finally {
-      stmt.close();
+      try {
+        stmt = conn.createStatement();
+
+        ResultSet rs = stmt.executeQuery("SELECT @@identity");
+
+        if (rs.next())
+          return new LongValue(rs.getLong(1));
+        else
+          return BooleanValue.FALSE;
+      } finally {
+        stmt.close();
+      }
+    } catch (SQLException e) {
+      log.log(Level.FINE, e.toString(), e);
+      return BooleanValue.FALSE;
     }
-
-    return BooleanValue.FALSE;
   }
 
   /**
@@ -264,6 +267,16 @@ public class Mysqli {
   public boolean kill(int processId)
   {
     return false;
+  }
+
+  public Value list_dbs()
+  {
+    Value result = validateConnection().getCatalogs();
+
+    if (result instanceof JdbcResultResource)
+      return _env.wrapJava(new MysqliResult((JdbcResultResource) result));
+    else
+      return result;
   }
 
   /**
@@ -304,9 +317,13 @@ public class Mysqli {
    * Pings the database
    */
   public boolean ping()
-    throws SQLException
   {
-    return _conn != null && ! _conn.getConnection().isClosed();
+    try {
+      return _conn != null && ! _conn.getConnection().isClosed();
+    } catch (SQLException e) {
+      log.log(Level.FINE, e.toString(), e);
+      return false;
+    }
   }
 
   /**
@@ -547,38 +564,37 @@ public class Mysqli {
    * or FALSE if error
    */
   public Value stat(Env env)
-    throws SQLException
   {
-    JdbcConnectionResource connV = validateConnection();
-
-    Connection conn = connV.getConnection();
-    Statement stmt = null;
-
-    StringBuilder str = new StringBuilder();
-
     try {
-      stmt = conn.createStatement();
-      stmt.execute("SHOW STATUS");
+      JdbcConnectionResource connV = validateConnection();
 
-      ResultSet rs = stmt.getResultSet();
+      Connection conn = connV.getConnection();
+      Statement stmt = null;
 
-      while (rs.next()) {
-        if (str.length() > 0)
-          str.append(' ');
-        str.append(rs.getString(1));
-        str.append(": ");
-        str.append(rs.getString(2));
+      StringBuilder str = new StringBuilder();
+
+      try {
+        stmt = conn.createStatement();
+        stmt.execute("SHOW STATUS");
+
+        ResultSet rs = stmt.getResultSet();
+
+        while (rs.next()) {
+          if (str.length() > 0)
+            str.append(' ');
+          str.append(rs.getString(1));
+          str.append(": ");
+          str.append(rs.getString(2));
+        }
+
+        return new StringValue(str.toString());
+      } finally {
+        if (stmt != null)
+          stmt.close();
       }
-
-      return new StringValue(str.toString());
     } catch (SQLException e) {
-      log.log(Level.WARNING, e.toString(), e);
-      // XXX: save error
-
+      log.log(Level.FINE, e.toString(), e);
       return BooleanValue.FALSE;
-    } finally {
-      if (stmt != null)
-	stmt.close();
     }
   }
 

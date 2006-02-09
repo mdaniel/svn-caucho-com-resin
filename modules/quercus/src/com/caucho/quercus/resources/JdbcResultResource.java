@@ -125,24 +125,24 @@ public class JdbcResultResource extends ResourceValue {
   }
 
   /**
-   * return column index from particular row NOTE: row is 0-based in PHP and 1-based in Java
-   * <p/>
-   * There is no check on whether row is a valid row number _rs.absolute won't accept an invalid number
-   * <p/>
-   * Also, there is no check on whether the colNumber is valid
+   * Returns the value at a particular row and column.
    */
-  public Value getResultField(int row,
-                              Value mixedFieldV)
+  public Value getResultField(Env env, int row, Value field)
   {
     try {
       ResultSetMetaData md = getMetaData();
 
       int colNumber;
 
-      if (mixedFieldV.isNumber())
-        colNumber = mixedFieldV.toInt();
+      if (field.isNumber())
+        colNumber = field.toInt();
       else
-        colNumber = getColumnNumber(mixedFieldV.toString(), _metaData);
+        colNumber = getColumnNumber(field.toString(), _metaData);
+
+      if (colNumber < 0 || colNumber >= md.getColumnCount()) {
+        env.invalidArgument("field", field);
+        return BooleanValue.FALSE;
+      }
 
       int currentRow = _rs.getRow();
 
@@ -151,6 +151,7 @@ public class JdbcResultResource extends ResourceValue {
           _rs.absolute(currentRow);
         else
           _rs.beforeFirst();
+
         return BooleanValue.FALSE;
       }
 
@@ -160,13 +161,10 @@ public class JdbcResultResource extends ResourceValue {
       log.log(Level.FINE, e.toString(), e);
       return BooleanValue.FALSE;
     }
-
   }
 
-  /**
-   * @see int JdbcConnectionResource.getWarningCount()
-   */
-  public ResultSet getResultSet()
+  // XXX: s/b removed
+  ResultSet getResultSet()
   {
     return _rs;
   }
@@ -671,7 +669,6 @@ public class JdbcResultResource extends ResourceValue {
   }
 
   public Value getNumRows()
-    throws SQLException
   {
     return getNumRows(_rs);
   }
@@ -680,26 +677,30 @@ public class JdbcResultResource extends ResourceValue {
    * returns number of rows returned in query
    */
   public static Value getNumRows(ResultSet rs)
-    throws SQLException
   {
-    Value result = BooleanValue.FALSE;
-    int currentRow = rs.getRow();
-
     try {
-      rs.last();
-      int count = rs.getRow();
+      int currentRow = rs.getRow();
 
-      result = new LongValue((long) count);
-    } catch (Exception e) {
+      try {
+        rs.last();
+        int count = rs.getRow();
+
+        return new LongValue((long) count);
+      } catch (Exception e) {
+        log.log(Level.FINE, e.toString(), e);
+
+        return BooleanValue.FALSE;
+      } finally {
+        if (currentRow == 0)
+          rs.beforeFirst();
+        else
+          rs.absolute(currentRow);
+      }
+
+    } catch (SQLException e) {
       log.log(Level.FINE, e.toString(), e);
-    } finally {
-      if (currentRow == 0)
-        rs.beforeFirst();
-      else
-        rs.absolute(currentRow);
+      return BooleanValue.FALSE;
     }
-
-    return result;
   }
 
   /**
@@ -839,27 +840,31 @@ public class JdbcResultResource extends ResourceValue {
    * returns an object with properties that correspond to the fetched row and moves the internal data pointer ahead.
    */
   public Value fetchObject(Env env)
-    throws SQLException
   {
-    if (_rs.next()) {
-      Value result = env.createObject();
+    try {
+      if (_rs.next()) {
+        Value result = env.createObject();
 
-      if (_metaData == null)
-        _metaData = _rs.getMetaData();
+        if (_metaData == null)
+          _metaData = _rs.getMetaData();
 
-      int count = _metaData.getColumnCount();
+        int count = _metaData.getColumnCount();
 
-      for (int i = 0; i < count; i++) {
-        Value name = getFieldName(env, i);
-        Value value = getColumnValue(_rs, _metaData, i + 1);
+        for (int i = 0; i < count; i++) {
+          String name = _metaData.getColumnName(i + 1);
+          Value value = getColumnValue(_rs, _metaData, i + 1);
 
-        result.put(name, value);
+          result.putField(name, value);
+        }
+
+        return result;
+
+      } else {
+        return NullValue.NULL;
       }
-
-      return result;
-
-    } else {
-      return NullValue.NULL;
+    } catch (SQLException e) {
+      log.log(Level.FINE, e.toString(), e);
+      return BooleanValue.FALSE;
     }
   }
 
@@ -867,36 +872,40 @@ public class JdbcResultResource extends ResourceValue {
    * Fetch the next line as an array.
    */
   public Value fetchArray(int type)
-    throws SQLException
   {
-    if (_rs.next()) {
-      ArrayValue array = new ArrayValueImpl();
+    try {
+      if (_rs.next()) {
+        ArrayValue array = new ArrayValueImpl();
 
-      if (_metaData == null)
-        _metaData = _rs.getMetaData();
+        if (_metaData == null)
+          _metaData = _rs.getMetaData();
 
-      int count = _metaData.getColumnCount();
+        int count = _metaData.getColumnCount();
 
-      if ((type & 0x1) != 0) {
-        _columnNames = new Value[count];
+        if ((type & 0x1) != 0) {
+          _columnNames = new Value[count];
 
-        for (int i = 0; i < count; i++)
-          _columnNames[i] = new StringValue(_metaData.getColumnName(i + 1));
+          for (int i = 0; i < count; i++)
+            _columnNames[i] = new StringValue(_metaData.getColumnName(i + 1));
+        }
+
+        for (int i = 0; i < count; i++) {
+          Value value = getColumnValue(_rs, _metaData, i + 1);
+
+          if ((type & 0x2) != 0)
+            array.put(LongValue.create(i), value);
+
+          if ((type & 0x1) != 0)
+            array.put(_columnNames[i], value);
+        }
+
+        return array;
+      } else {
+        return NullValue.NULL;
       }
-
-      for (int i = 0; i < count; i++) {
-        Value value = getColumnValue(_rs, _metaData, i + 1);
-
-        if ((type & 0x2) != 0)
-          array.put(LongValue.create(i), value);
-
-        if ((type & 0x1) != 0)
-          array.put(_columnNames[i], value);
-      }
-
-      return array;
-    } else {
-      return NullValue.NULL;
+    } catch (SQLException e) {
+      log.log(Level.FINE, e.toString(), e);
+      return BooleanValue.FALSE;
     }
   }
 
@@ -1043,13 +1052,8 @@ public class JdbcResultResource extends ResourceValue {
                                      int rowNumber)
   {
     // throw error if rowNumber is after last row
-    try {
-      Value numRows = getNumRows(rs);
-      if (!numRows.isNumber() || numRows.toLong() <= rowNumber || rowNumber < 0) {
-        return false;
-      }
-    } catch (SQLException e) {
-      log.log(Level.FINE, e.toString(), e);
+    Value numRows = getNumRows(rs);
+    if (!numRows.isNumber() || numRows.toLong() <= rowNumber || rowNumber < 0) {
       return false;
     }
 

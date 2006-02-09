@@ -116,7 +116,6 @@ public class JdbcConnectionResource extends ResourceValue {
    * Returns JdbcResultResource of available databases
    */
   public Value getCatalogs()
-    throws SQLException
   {
     try {
       if (_dmd == null)
@@ -156,17 +155,19 @@ public class JdbcConnectionResource extends ResourceValue {
   }
 
   /**
-   * returns the client version
-   * XXX: PHP seems to return the same value
-   * for client_info and server_info
+   * Returns the client version
    */
   public String getClientInfo()
-    throws SQLException
   {
-    if (_dmd == null)
-      _dmd = _conn.getMetaData();
+    try {
+      if (_dmd == null)
+        _dmd = _conn.getMetaData();
 
-    return _dmd.getDatabaseProductVersion();
+      return _dmd.getDatabaseProductVersion();
+    } catch (SQLException e) {
+      log.log(Level.FINE, e.toString(), e);
+      return null;
+    }
   }
 
   /**
@@ -397,7 +398,7 @@ public class JdbcConnectionResource extends ResourceValue {
   }
 
   /**
-   * metaquery is a helper function used by the
+   * Used by the
    * various mysqli functions to query the database
    * for metadata about the resultset which is
    * not in ResultSetMetaData.
@@ -640,9 +641,6 @@ public class JdbcConnectionResource extends ResourceValue {
 
   /**
    * This functions queries the connection with "SHOW WARNING"
-   *
-   * I can't step through the _warnings chain because it seems
-   * to have the last (not the first warning)
    *
    * @return # of warnings
    */

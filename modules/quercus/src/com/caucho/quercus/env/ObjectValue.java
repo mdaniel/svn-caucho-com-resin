@@ -247,6 +247,16 @@ public class ObjectValue extends Value {
     return null;
   }
 
+  public Value put(Value index, Value value)
+  {
+    return putField(index.toString(), value);
+  }
+
+  public Value put(Value value)
+  {
+    throw new UnsupportedOperationException();
+  }
+
   /**
    * Adds a new value.
    */
@@ -973,6 +983,11 @@ public class ObjectValue extends Value {
       super.toValue().printR(env, out, depth + 1, valueSet);
 
       out.println();
+    }
+
+    public String toString()
+    {
+      return "ObjectValue.Entry[" + getKey() + "]";
     }
   }
 }
