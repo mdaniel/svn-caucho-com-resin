@@ -404,18 +404,25 @@ public class QuercusArrayModule
    */
   public static boolean array_key_exists(Env env,
                                          @ReadOnly Value key,
-                                         @ReadOnly ArrayValue searchArray)
+                                         @ReadOnly Value searchArray)
   {
     if (searchArray == null)
       return false;
 
+    if (!((searchArray instanceof ArrayValue) || (searchArray instanceof ObjectValue))) {
+      env.warning(L.l("'" + searchArray.toString() + "' is an unexpected argument, expected ArrayValue or ObjectValue"));
+      return false;
+    }
+    
     if (!((key instanceof StringValue) || (key instanceof LongValue))) {
       env.warning(L.l(
         "The first argument should be either a string or an integer"));
       return false;
     }
-
-    return ! searchArray.containsKey(key).isNull();
+    if (searchArray instanceof ArrayValue)
+      return ! ((ArrayValue) searchArray).containsKey(key).isNull();
+    else
+      return ! searchArray.getField(key.toString()).isNull();
   }
 
   /**
