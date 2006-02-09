@@ -2285,7 +2285,7 @@ public abstract class AbstractHttpRequest
   {
     SessionImpl session = _session;
     if (session != null)
-      session.finish();
+      session.flush();
   }
   
   /**

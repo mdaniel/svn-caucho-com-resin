@@ -42,6 +42,7 @@ import com.caucho.util.Log;
 import com.caucho.util.L10N;
 
 import com.caucho.vfs.OutputStreamWithBuffer;
+import com.caucho.vfs.TempCharBuffer;
 
 /**
  * Represents the indexes for a BLOB or CLOB.
@@ -196,6 +197,36 @@ public class Inode {
   }
 
   /**
+   * Writes the inode value to a stream.
+   */
+  public void writeToWriter(Writer writer)
+    throws IOException
+  {
+    TempCharBuffer tempBuffer = TempCharBuffer.allocate();
+
+    char []buffer = tempBuffer.getBuffer();
+    int writeLength = buffer.length;
+    long offset = 0;
+    
+    while (true) {
+      int sublen = writeLength;
+
+      int len = read(_bytes, 0, _store,
+		     offset,
+		     buffer, 0, sublen);
+
+      if (len <= 0)
+	break;
+
+      writer.write(buffer, 0, len);
+
+      offset += 2 * len;
+    }
+
+    TempCharBuffer.free(tempBuffer);
+  }
+
+  /**
    * Reads into a buffer.
    *
    * @param inode the inode buffer
@@ -315,7 +346,7 @@ public class Inode {
    * @param bufferOffset the offset into the receiving buffer
    * @param bufferLength the maximum number of chars to read
    *
-   * @return the number of chars read
+   * @return the number of characters read
    */
   static int read(byte []inode, int inodeOffset, Store store,
 		  long fileOffset, 
@@ -324,21 +355,23 @@ public class Inode {
   {
     long fileLength = readLong(inode, inodeOffset);
 
-    int sublen = bufferLength;
-    if (fileLength - fileOffset < 2 * sublen)
-      sublen = (int) (fileLength - fileOffset) / 2;
+    int sublen = (int) (fileLength - fileOffset) / 2;
+    if (bufferLength < sublen)
+      sublen = bufferLength;
       
     if (sublen <= 0)
       return -1;
 
     if (fileLength <= Inode.INLINE_BLOB_SIZE) {
       int baseOffset = inodeOffset + 8 + (int) fileOffset;
-      
-      for (int i = 0; i < sublen; i += 2) {
-	char ch = (char) (((inode[baseOffset + i] & 0xff) << 8) +
-			  ((inode[baseOffset + i + 1] & 0xff)));
+
+      for (int i = 0; i < sublen; i++) {
+	char ch = (char) (((inode[baseOffset] & 0xff) << 8) +
+			  ((inode[baseOffset + 1] & 0xff)));
 
 	buffer[bufferOffset + i] = ch;
+
+	baseOffset += 2;
       }
 
       return sublen;

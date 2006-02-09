@@ -1963,8 +1963,11 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
       else
 	_rawWrite.flushBuffer();
 
-      if (_cacheStream != null && _cacheInvocation != null) {
+      if (_cacheInvocation == null) {
+      }
+      else if (_cacheStream != null || _cacheWriter != null) {
 	_cacheStream = null;
+	_cacheWriter = null;
 	AbstractCacheFilterChain cache = _cacheInvocation;
 	_cacheInvocation = null;
 

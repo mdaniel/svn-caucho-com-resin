@@ -60,9 +60,11 @@ import com.caucho.config.ConfigException;
 public class AbstractRolloverLog {
   protected static final L10N L = new L10N(AbstractRolloverLog.class);
 
+  // Milliseconds in an hour
+  private static final long HOUR = 3600L * 1000L;
   // Milliseconds in a day
   private static final long DAY = 24L * 3600L * 1000L;
-  
+
   // Default maximum log size = 2G
   private static final long DEFAULT_ROLLOVER_SIZE = Bytes.INFINITE;
   // How often to check size
@@ -165,7 +167,10 @@ public class AbstractRolloverLog {
    */
   public String getArchiveFormat()
   {
-    return _archiveFormat + _archiveSuffix;
+    if (_archiveFormat == null)
+      return _rolloverPrefix + ".%Y%m%d.%H%M";
+    else
+      return _archiveFormat;
   }
 
   /**
@@ -188,7 +193,7 @@ public class AbstractRolloverLog {
   /**
    * Sets the log rollover period, rounded up to the nearest hour.
    *
-   * @param period the new rollover period in milliseconds.
+   * @return the new period in milliseconds.
    */
   public long getRolloverPeriod()
   {
@@ -198,7 +203,7 @@ public class AbstractRolloverLog {
   /**
    * Sets the log rollover size, rounded up to the megabyte.
    *
-   * @param size maximum size of the log file
+   * @param bytes maximum size of the log file
    */
   public void setRolloverSize(Bytes bytes)
   {
@@ -213,7 +218,7 @@ public class AbstractRolloverLog {
   /**
    * Sets the log rollover size, rounded up to the megabyte.
    *
-   * @param size maximum size of the log file
+   * @return maximum size of the log file
    */
   public long getRolloverSize()
   {
@@ -236,7 +241,7 @@ public class AbstractRolloverLog {
   /**
    * Sets how often the log rollover will be checked.
    *
-   * @param period how often the log rollover will be checked.
+   * @return how often the log rollover will be checked.
    */
   public long getRolloverCheckPeriod()
   {
@@ -265,7 +270,6 @@ public class AbstractRolloverLog {
 	lastModified = now;
     
       _calendar.setGMTTime(lastModified);
-      long zone = _calendar.getZoneOffset();
 
       _nextPeriodEnd = Period.periodEnd(lastModified, getRolloverPeriod());
     }
@@ -274,6 +278,15 @@ public class AbstractRolloverLog {
 
     if (_nextPeriodEnd < _nextRolloverCheckTime && _nextPeriodEnd > 0)
       _nextRolloverCheckTime = _nextPeriodEnd;
+
+    if (_archiveFormat != null || getRolloverPeriod() <= 0) {
+    }
+    else if (getRolloverPeriod() % DAY == 0)
+      _archiveFormat = _rolloverPrefix + ".%Y%m%d";
+    else if (getRolloverPeriod() % HOUR == 0)
+      _archiveFormat = _rolloverPrefix + ".%Y%m%d.%H";
+    else
+      _archiveFormat = _rolloverPrefix + ".%Y%m%d.%H%M";
 
     rolloverLog(now);
   }
@@ -436,10 +449,13 @@ public class AbstractRolloverLog {
 
   private void movePathToArchive(Path savedPath)
   {
+    if (savedPath == null)
+      return;
+    
     Path path = getPath();
     
     String savedName = savedPath.getTail();
-    
+
     logInfo(L.l("Archiving access log to {0}.", savedName));
 	     
     try {
@@ -521,17 +537,12 @@ public class AbstractRolloverLog {
     Path path = getPath();
 
     String archiveFormat = getArchiveFormat();
-    
-    String name = getFormatName(archiveFormat, time);
 
+    String name = getFormatName(archiveFormat + _archiveSuffix, time);
     Path newPath = path.getParent().lookup(name);
 
     if (newPath.exists()) {
-      archiveFormat = _archiveFormat;
-      
-      if (archiveFormat == null)
-	archiveFormat = _rolloverPrefix + ".%Y%m%d.%H%M";
-      else if (archiveFormat.indexOf("%H") < 0)
+      if (archiveFormat.indexOf("%H") < 0)
 	archiveFormat = archiveFormat + ".%H%M";
       else if (archiveFormat.indexOf("%M") < 0)
 	archiveFormat = archiveFormat + ".%M";

@@ -799,6 +799,11 @@ public class SessionImpl implements HttpSession, CacheListener {
     if (count < 0)
       throw new IllegalStateException();
 
+    flush();
+  }
+
+  public void flush()
+  {
     if (_manager != null && _manager.getSaveOnlyOnShutdown())
       return;
 

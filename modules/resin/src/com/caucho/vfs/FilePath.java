@@ -186,7 +186,7 @@ public class FilePath extends FilesystemPath {
    */
   public String getURL()
   {
-    return escapeURL("file://" + getFullPath());
+    return escapeURL("file:" + getFullPath());
   }
 
   /**
