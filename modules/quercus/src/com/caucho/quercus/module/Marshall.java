@@ -1033,12 +1033,14 @@ abstract public class Marshall {
     {
       Callback cb = env.createCallback(value);
 
-      if (cb != null)
+     // return env.createCallback(value);
+      
+     if (cb != null)
         return cb;
-      else if (value instanceof DefaultValue)
+     else if (value instanceof DefaultValue)
         return null;
-      else
-        return new CallbackFunction(value.toString(), true); //null;
+     else
+        return new CallbackFunction(env, value.toString()); //null;
     }
 
     public Value unmarshall(Env env, Object value)

@@ -576,14 +576,15 @@ public class QuercusArrayModule
     if (array == null)
       return NullValue.NULL;
 
-    if ((callback instanceof CallbackFunction) && ((CallbackFunction) callback).isInvalid()) {
-      env.warning("The second argument, '" + ((CallbackFunction) callback).getFunctionName() + "', should be a valid callback");
-      return NullValue.NULL;
-    }
-
     ArrayValue filteredArray = new ArrayValueImpl();
 
     if (callback != null) {
+      
+      if (callback.isInvalid()) {
+        env.warning("The second argument, '" + ((CallbackFunction) callback).getFunctionName() + "', should be a valid callback");
+        return NullValue.NULL;
+      }
+      
       for (Map.Entry<Value, Value> entry : array.entrySet()) {
         try {
           boolean isMatch = callback.eval(env, entry.getValue()).toBoolean();
@@ -1575,6 +1576,11 @@ public class QuercusArrayModule
     if (array == null)
       return false;
 
+    if (func.isInvalid()) {
+      env.warning(L.l("Invalid comparison function"));
+      return false;
+    }
+    
     CompareCallBack cmp;
 
     cmp = new CompareCallBack(ArrayValue.GET_VALUE, SORT_NORMAL, func, env);

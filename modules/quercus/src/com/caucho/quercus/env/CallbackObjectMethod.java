@@ -29,12 +29,9 @@
 
 package com.caucho.quercus.env;
 
-import java.io.IOException;
-import java.util.IdentityHashMap;
-
 import com.caucho.vfs.WriteStream;
 
-import com.caucho.quercus.program.AbstractFunction;
+import java.util.IdentityHashMap;
 
 /**
  * Represents a call to an object's method
@@ -134,6 +131,12 @@ public class CallbackObjectMethod extends Callback {
     out.print('[');
     out.print(_methodName);
     out.print(']');
+  }
+  
+  // XXX: just a placeholder, need real implementation here
+  public boolean isInvalid()
+  {
+    return false;
   }
 }
 

@@ -29,12 +29,6 @@
 
 package com.caucho.quercus.env;
 
-import java.io.IOException;
-
-import com.caucho.vfs.WriteStream;
-
-import com.caucho.quercus.gen.PhpWriter;
-
 /**
  * Represents a call to a function.
  */
@@ -46,7 +40,7 @@ abstract public class Callback extends Value {
    */
   abstract public Value eval(Env env)
     throws Throwable;
-  
+
   /**
    * Evaluates the callback with 1 arguments.
    *
@@ -54,7 +48,7 @@ abstract public class Callback extends Value {
    */
   abstract public Value eval(Env env, Value a1)
     throws Throwable;
-  
+
   /**
    * Evaluates the callback with 2 arguments.
    *
@@ -62,7 +56,7 @@ abstract public class Callback extends Value {
    */
   abstract public Value eval(Env env, Value a1, Value a2)
     throws Throwable;
-  
+
   /**
    * Evaluates the callback with 3 arguments.
    *
@@ -70,25 +64,25 @@ abstract public class Callback extends Value {
    */
   abstract public Value eval(Env env, Value a1, Value a2, Value a3)
     throws Throwable;
-  
+
   /**
    * Evaluates the callback with 4 arguments.
    *
    * @param env the calling environment
    */
   abstract public Value eval(Env env, Value a1, Value a2, Value a3,
-			     Value a4)
+                             Value a4)
     throws Throwable;
-  
+
   /**
    * Evaluates the callback with 5 arguments.
    *
    * @param env the calling environment
    */
   abstract public Value eval(Env env, Value a1, Value a2, Value a3,
-			     Value a4, Value a5)
+                             Value a4, Value a5)
     throws Throwable;
-  
+
   /**
    * Evaluates the callback with variable arguments.
    *
@@ -96,5 +90,11 @@ abstract public class Callback extends Value {
    */
   abstract public Value eval(Env env, Value []args)
     throws Throwable;
+
+  /**
+   * 
+   * @return true if this is an invalid callback reference
+   */
+  abstract public boolean isInvalid();
 }
 
