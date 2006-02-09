@@ -54,7 +54,9 @@ import java.util.logging.Logger;
 /**
  * PHP array routines.
  */
-public class QuercusArrayModule extends AbstractQuercusModule {
+public class QuercusArrayModule
+  extends AbstractQuercusModule
+{
   private static final L10N L = new L10N(QuercusArrayModule.class);
 
   private static final Logger log =
@@ -129,7 +131,7 @@ public class QuercusArrayModule extends AbstractQuercusModule {
 
     ArrayValue newArray = new ArrayValueImpl();
 
-    for (Map.Entry<Value,Value> entry : array.entrySet()) {
+    for (Map.Entry<Value, Value> entry : array.entrySet()) {
       Value keyValue = entry.getKey();
 
       if (keyValue instanceof StringValue) {
@@ -152,7 +154,8 @@ public class QuercusArrayModule extends AbstractQuercusModule {
   /**
    * Chunks the array
    */
-  public Value array_chunk(Env env, ArrayValue array,
+  public Value array_chunk(Env env,
+                           ArrayValue array,
                            int size,
                            @Optional boolean preserveKeys)
   {
@@ -169,12 +172,12 @@ public class QuercusArrayModule extends AbstractQuercusModule {
     }
 
     int i = 0;
-    for (Map.Entry<Value,Value> entry : array.entrySet()) {
+    for (Map.Entry<Value, Value> entry : array.entrySet()) {
       Value key = entry.getKey();
       Value value = entry.getKey();
 
       if (i % size == 0) {
-        currentArray =  new ArrayValueImpl();
+        currentArray = new ArrayValueImpl();
         newArray.put(currentArray);
       }
 
@@ -195,7 +198,7 @@ public class QuercusArrayModule extends AbstractQuercusModule {
   public Value array_combine(Env env, ArrayValue keys,
                              ArrayValue values)
   {
-    if(keys == null || values == null)
+    if (keys == null || values == null)
       return BooleanValue.FALSE;
 
     if (keys.getSize() < 1 || values.getSize() < 1) {
@@ -233,7 +236,7 @@ public class QuercusArrayModule extends AbstractQuercusModule {
 
     ArrayValue result = new ArrayValueImpl();
 
-    for (Value value: array.values()) {
+    for (Value value : array.values()) {
       if (! (value instanceof LongValue) && ! (value instanceof StringValue))
         env.warning("Can only count STRING and INTEGER values!");
       else {
@@ -394,42 +397,37 @@ public class QuercusArrayModule extends AbstractQuercusModule {
 
   /**
    * Checks if the key is in the given array
-   * 
-   * @param key  a key to check for in the array
-   * @param array  the array to search for the key in
-   * 
-   * @return  true if the key is in the array, and false otherwise
-   * 
-   * @throw NullPointerException
+   *
+   * @param key a key to check for in the array
+   * @param searchArray the array to search for the key in
+   * @return true if the key is in the array, and false otherwise
    */
   public static boolean array_key_exists(Env env,
                                          @ReadOnly Value key,
-					                               @ReadOnly ArrayValue searchArray)
+                                         @ReadOnly ArrayValue searchArray)
   {
     if (searchArray == null)
       return false;
 
     if (!((key instanceof StringValue) || (key instanceof LongValue))) {
-      env.warning(L.l("The first argument should be either a string or an integer"));
+      env.warning(L.l(
+        "The first argument should be either a string or an integer"));
       return false;
     }
-    
+
     return ! searchArray.containsKey(key).isNull();
   }
 
   /**
    * Returns an array of the keys in the given array
-   * 
-   * @param array  the array to obtain the keys for
-   * @param valueType  the corresponding value of the returned key 
-   *   array
-   * 
+   *
+   * @param array the array to obtain the keys for
+   * @param searchValue the corresponding value of the returned key array
    * @return an array containing the keys
-   * 
    * @throws NullPointerException
    */
   public Value array_keys(Env env,
-			  @ReadOnly ArrayValue array,
+                          @ReadOnly ArrayValue array,
                           @Optional @ReadOnly Value searchValue,
                           @Optional boolean isStrict)
     throws Throwable
@@ -447,22 +445,21 @@ public class QuercusArrayModule extends AbstractQuercusModule {
       if (searchValue == null || searchValue instanceof DefaultValue)
         newArray.put(entryKey);
       else if (entryValue.eq(searchValue))
-      	newArray.put(entryKey);
+        newArray.put(entryKey);
     }
 
     return newArray;
   }
 
   /**
-   * Returns an array with a number of indices filled with the given value, 
+   * Returns an array with a number of indices filled with the given value,
    * starting at the start index.
-   * 
-   * @param start  the index to start filling the array
-   * @param num  the number of entries to fill
-   * @param value  the value to fill the entries with
-   * 
-   * @return an array filled with the given value starting from the given start 
-   *   index
+   *
+   * @param start the index to start filling the array
+   * @param num the number of entries to fill
+   * @param value the value to fill the entries with
+   * @return an array filled with the given value starting from the given start
+   *         index
    */
   public Value array_fill(Env env, long start, long num, Value value)
   {
@@ -482,22 +479,22 @@ public class QuercusArrayModule extends AbstractQuercusModule {
   }
 
   /**
-   * Returns an array with the given array's keys as values and its values as 
-   * keys.  If the given array has matching values, the latest value will be 
+   * Returns an array with the given array's keys as values and its values as
+   * keys.  If the given array has matching values, the latest value will be
    * transfered and the others will be lost.
-   * 
-   * @param value  the array to flip
-   * 
+   *
+   * @param array the array to flip
    * @return an array with it's keys and values swapped
    */
-  public Value array_flip(Env env, ArrayValue array)
+  public Value array_flip(Env env,
+                          ArrayValue array)
   {
     if (array == null)
       return BooleanValue.FALSE;
 
     ArrayValue newArray = new ArrayValueImpl();
 
-    for (Map.Entry<Value, Value> entry: array.entrySet()) {
+    for (Map.Entry<Value, Value> entry : array.entrySet()) {
       Value entryValue = entry.getValue();
 
       if ((entryValue instanceof LongValue) ||
@@ -511,17 +508,16 @@ public class QuercusArrayModule extends AbstractQuercusModule {
   }
 
   /**
-   * Returns an array with either the front/end padded with the pad value.  If 
-   * the pad size is positive, the padding is performed on the end.  If 
-   * negative, then the array is padded on the front.  The pad size is the new 
-   * array size.  If this size is not greater than the current array size, then 
+   * Returns an array with either the front/end padded with the pad value.  If
+   * the pad size is positive, the padding is performed on the end.  If
+   * negative, then the array is padded on the front.  The pad size is the new
+   * array size.  If this size is not greater than the current array size, then
    * the original input array is returned.
-   * 
-   * @param input  the array to pad
-   * @param padSize  the amount to pad the array by
-   * @param padValue  determines front/back padding and the value to place in 
-   *   the padded space
-   * 
+   *
+   * @param input the array to pad
+   * @param padSize the amount to pad the array by
+   * @param padValue determines front/back padding and the value to place in the
+   * padded space
    * @return a padded array
    */
   public Value array_pad(Env env, ArrayValue input, long padSize,
@@ -566,12 +562,11 @@ public class QuercusArrayModule extends AbstractQuercusModule {
   }
 
   /**
-   * Returns an array that filters out any values that do not hold true when 
+   * Returns an array that filters out any values that do not hold true when
    * used in the callback function.
-   * 
-   * @param input  the array to filter
-   * @param callback  the function name for filtering
-   * 
+   *
+   * @param array the array to filter
+   * @param callback the function name for filtering
    * @return a filtered array
    */
   public Value array_filter(Env env,
@@ -581,16 +576,15 @@ public class QuercusArrayModule extends AbstractQuercusModule {
     if (array == null)
       return NullValue.NULL;
 
-    /*
-    if ((callback != null) && !(callback instanceof Callback)) {
-      env.warning("The second argument, '" + callback.toString() + "', should be a valid callback");
+    if ((callback instanceof CallbackFunction) && ((CallbackFunction) callback).isInvalid()) {
+      env.warning("The second argument, '" + ((CallbackFunction) callback).getFunctionName() + "', should be a valid callback");
       return NullValue.NULL;
-    }*/
-    
+    }
+
     ArrayValue filteredArray = new ArrayValueImpl();
 
     if (callback != null) {
-      for (Map.Entry<Value, Value> entry: array.entrySet()) {
+      for (Map.Entry<Value, Value> entry : array.entrySet()) {
         try {
           boolean isMatch = callback.eval(env, entry.getValue()).toBoolean();
 
@@ -604,9 +598,10 @@ public class QuercusArrayModule extends AbstractQuercusModule {
           return NullValue.NULL;
         }
       }
-    } else {   
-      
-      for (Map.Entry<Value, Value> entry: array.entrySet()) {
+    }
+    else {
+
+      for (Map.Entry<Value, Value> entry : array.entrySet()) {
         if (entry.getValue().toBoolean())
           filteredArray.put(entry.getKey(), entry.getValue());
       }
@@ -617,12 +612,12 @@ public class QuercusArrayModule extends AbstractQuercusModule {
 
   /**
    * Returns the product of the input array's elements as a double.
-   * 
-   * @param value  the array for who's product is to be found
-   * 
+   *
+   * @param array the array for who's product is to be found
    * @return the produce of the array's elements
    */
-  public Value array_product(Env env, ArrayValue array)
+  public Value array_product(Env env,
+                             ArrayValue array)
   {
     if (array == null)
       return NullValue.NULL;
@@ -632,7 +627,7 @@ public class QuercusArrayModule extends AbstractQuercusModule {
 
     double product = 1;
 
-    for (Map.Entry<Value, Value> entry: array.entrySet())
+    for (Map.Entry<Value, Value> entry : array.entrySet())
       product *= entry.getValue().toDouble();
 
     return DoubleValue.create(product);
@@ -640,7 +635,7 @@ public class QuercusArrayModule extends AbstractQuercusModule {
 
   /**
    * Appends a value to the array
-   * 
+   *
    * @return the number of elements in the final array
    */
   public int array_push(Env env, ArrayValue array, Value []values)
@@ -654,15 +649,15 @@ public class QuercusArrayModule extends AbstractQuercusModule {
 
   /**
    * Returns num sized array of random keys from the given array
-   * 
-   * @param value  the array from which the keys will come from
-   * @param num  the number of random keys to return
-   * 
+   *
+   * @param array the array from which the keys will come from
+   * @param num the number of random keys to return
    * @return the produce of the array's elements
-   * 
    * @throws NullPointerException
    */
-  public Value array_rand(Env env, ArrayValue array, @Optional("1") long num)
+  public Value array_rand(Env env,
+                          ArrayValue array,
+                          @Optional("1") long num)
     throws Throwable
   {
     if (array == null)
@@ -673,7 +668,7 @@ public class QuercusArrayModule extends AbstractQuercusModule {
 
     if (num < 1 || array.getSize() < num) {
       env.warning("Second argument has to be between 1 and the number of " +
-        "elements in the array");
+                  "elements in the array");
 
       return NullValue.NULL;
     }
@@ -714,15 +709,17 @@ public class QuercusArrayModule extends AbstractQuercusModule {
   /**
    * Returns the value of the array when its elements have been reduced using
    * the callback function.
-   * 
-   * @param input  the array to reduce
-   * @param callback  the function to use for reducing the array
-   * @param startNum  used as the element before the first element of the array
-   *   for purposes of using the callback function
-   * 
-   * @return the result from reducing the input array with the callback function
+   *
+   * @param array the array to reduce
+   * @param callback the function to use for reducing the array
+   * @param initialValue used as the element before the first element of the
+   * array for purposes of using the callback function
+   * @return the result from reducing the input array with the callback
+   *         function
    */
-  public Value array_reduce(Env env, ArrayValue array, String callback,
+  public Value array_reduce(Env env,
+                            ArrayValue array,
+                            String callback,
                             @Optional("NULL") Value initialValue)
   {
     if (array == null)
@@ -732,18 +729,18 @@ public class QuercusArrayModule extends AbstractQuercusModule {
 
     if (func == null) {
       env.warning("The second argument, '" + callback +
-        "', should be a valid callback");
+                  "', should be a valid callback");
 
       return NullValue.NULL;
     }
 
     Value result = initialValue;
 
-    for (Map.Entry<Value, Value> entry: array.entrySet()) {
+    for (Map.Entry<Value, Value> entry : array.entrySet()) {
       try {
         result = func.eval(env, result, entry.getValue());
       }
-      catch(Throwable t) {
+      catch (Throwable t) {
         // XXX: may be used for error checking later
         log.log(Level.WARNING, t.toString(), t);
         env.warning("An error occurred while invoking the reduction callback");
@@ -757,13 +754,13 @@ public class QuercusArrayModule extends AbstractQuercusModule {
 
   /**
    * Returns the inputted array reversed, preserving the keys if keyed is true
-   * 
-   * @param input  the array to reverse
-   * @param keyed  true if the keys are to be preservered
-   * 
+   *
+   * @param inputArray the array to reverse
+   * @param keyed true if the keys are to be preservered
    * @return the array in reverse
    */
-  public Value array_reverse(Env env, ArrayValue inputArray,
+  public Value array_reverse(Env env,
+                             ArrayValue inputArray,
                              @Optional("false") boolean keyed)
   {
     if (inputArray == null)
@@ -796,26 +793,25 @@ public class QuercusArrayModule extends AbstractQuercusModule {
   }
 
   /**
-   * Returns the key of the needle being searched for or false if it's not found
-   * 
-   * @param haystack  the array to search
-   * @param needle  the value to search for
-   * @param strict  checks for type aswell
-   * 
+   * Returns the key of the needle being searched for or false if it's not
+   * found
+   *
+   * @param needle the value to search for
+   * @param array the array to search
+   * @param strict checks for type aswell
    * @return the key of the needle
-   * 
    * @throws NullPointerException
    */
   public Value array_search(Env env,
-			    @ReadOnly Value needle,
-			    @ReadOnly ArrayValue array,
+                            @ReadOnly Value needle,
+                            @ReadOnly ArrayValue array,
                             @Optional("false") boolean strict)
     throws Throwable
   {
     if (array == null)
       return BooleanValue.FALSE;
 
-    for (Map.Entry<Value, Value> entry: array.entrySet()) {
+    for (Map.Entry<Value, Value> entry : array.entrySet()) {
       Value entryValue = entry.getValue();
 
       Value entryKey = entry.getKey();
@@ -835,12 +831,12 @@ public class QuercusArrayModule extends AbstractQuercusModule {
 
   /**
    * Shifts the elements in the array left by one, returning the leftmost value
-   * 
-   * @param input  the array to shift
-   * 
+   *
+   * @param array the array to shift
    * @return the left most value in the array
    */
-  public Value array_shift(Env env, ArrayValue array)
+  public Value array_shift(Env env,
+                           ArrayValue array)
     throws Throwable
   {
     if (array == null)
@@ -859,21 +855,22 @@ public class QuercusArrayModule extends AbstractQuercusModule {
   }
 
   /**
-   * Returns a chunk of the array.  The offset is the start index, elements is 
-   * the number of values to take, and presKeys is if the keys are to be 
+   * Returns a chunk of the array.  The offset is the start index, elements is
+   * the number of values to take, and presKeys is if the keys are to be
    * preserved. If offset is negative, then it's that number from the end of the
-   * array.  If elements is negative, then the new array will have from offset 
+   * array.  If elements is negative, then the new array will have from offset
    * to elements number of values.
-   * 
-   * @param input  the array to take the chunk from
-   * @param offset  the start index for the new array chunk
-   * @param elements  the number of elements in the array chunk
-   * @param presKeys  true if the keys of the elements are to be preserved,
-   *   false otherwise
-   * 
+   *
+   * @param array the array to take the chunk from
+   * @param offset the start index for the new array chunk
+   * @param elements the number of elements in the array chunk
+   * @param presKeys true if the keys of the elements are to be preserved, false
+   * otherwise
    * @return the array chunk
    */
-  public Value array_slice(Env env, ArrayValue array, long offset,
+  public Value array_slice(Env env,
+                           ArrayValue array,
+                           long offset,
                            @Optional("NULL") Value elements,
                            @Optional("false") boolean presKeys)
   {
@@ -927,15 +924,16 @@ public class QuercusArrayModule extends AbstractQuercusModule {
    * end is removed.  If length is negative, that is the index to stop removing
    * elements.  Otherwise that is the number of elements to remove.  If replace
    * is given, replace will be inserted into the array at offset.
-   * 
-   * @param input  the array to splice
-   * @param offset  the start index for the new array chunk
-   * @param length  the number of elements to remove / stop index
-   * @param replace  the elements to add to the array
-   * 
+   *
+   * @param array the array to splice
+   * @param offset the start index for the new array chunk
+   * @param length the number of elements to remove / stop index
+   * @param replace the elements to add to the array
    * @return the part of the array removed from input
    */
-  public Value array_splice(Env env, ArrayValue array, long offset,
+  public Value array_splice(Env env, 
+                            ArrayValue array,
+                            long offset,
                             @Optional("NULL") Value length,
                             @Optional("NULL") Value replace)
   {
@@ -995,16 +993,16 @@ public class QuercusArrayModule extends AbstractQuercusModule {
    // DEBUG*/
 
     if (size == 0)
-      for (Map.Entry<Value, Value> rEntry: replacement.entrySet())
+      for (Map.Entry<Value, Value> rEntry : replacement.entrySet())
         splicedArray.put(rEntry.getValue());
     else {
-      for (Map.Entry<Value, Value> entry: array.entrySet()) {
+      for (Map.Entry<Value, Value> entry : array.entrySet()) {
         Value entryKey = entry.getKey();
 
         Value entryValue = entry.getValue();
 
         if (index == startIndex)
-          for (Map.Entry<Value, Value> rEntry: replacement.entrySet())
+          for (Map.Entry<Value, Value> rEntry : replacement.entrySet())
             splicedArray.put(rEntry.getValue());
 
         if (index >= startIndex && index < endIndex) {
@@ -1029,19 +1027,19 @@ public class QuercusArrayModule extends AbstractQuercusModule {
 
   /**
    * Returns the sum of the elements in the array
-   * 
-   * @param input  the array to sum
-   * 
+   *
+   * @param array the array to sum
    * @return the sum of the elements
    */
-  public Value array_sum(Env env, @ReadOnly ArrayValue array)
+  public Value array_sum(Env env,
+                         @ReadOnly ArrayValue array)
   {
     if (array == null)
       return NullValue.NULL;
 
     double sum = 0;
 
-    for (Map.Entry<Value, Value> entry: array.entrySet())
+    for (Map.Entry<Value, Value> entry : array.entrySet())
       sum += entry.getValue().toDouble();
 
     double typecheck = (double) ((int) sum);
@@ -1059,14 +1057,13 @@ public class QuercusArrayModule extends AbstractQuercusModule {
 
   /**
    * Returns the inputted array without duplicates
-   * 
-   * @param input  the array to get rid of the duplicates from
-   * 
+   *
+   * @param array the array to get rid of the duplicates from
    * @return an array without duplicates
-   * 
    * @throws ClassCastException
    */
-  public Value array_unique(Env env, ArrayValue array)
+  public Value array_unique(Env env,
+                            ArrayValue array)
     throws Throwable
   {
     if (array == null)
@@ -1078,7 +1075,7 @@ public class QuercusArrayModule extends AbstractQuercusModule {
 
     ArrayValue uniqueArray = new ArrayValueImpl();
 
-    for(Map.Entry<Value, Value> entry: array.entrySet()) {
+    for (Map.Entry<Value, Value> entry : array.entrySet()) {
       Value entryValue = entry.getValue();
 
       if (lastEntry == null) {
@@ -1104,12 +1101,14 @@ public class QuercusArrayModule extends AbstractQuercusModule {
 
   /**
    * Prepends the elements to the array
-   * 
-   * @param input the array to shift
-   * 
+   *
+   * @param array the array to shift
+   * @param values
    * @return the left most value in the array
    */
-  public Value array_unshift(Env env, ArrayValue array, Value []values)
+  public Value array_unshift(Env env,
+                             ArrayValue array,
+                             Value []values)
     throws Throwable
   {
     if (array == null)
@@ -1126,19 +1125,19 @@ public class QuercusArrayModule extends AbstractQuercusModule {
 
   /**
    * Returns the values in the passed array with numerical indices.
-   * 
-   * @param input  the array to get the values from
-   * 
+   *
+   * @param array the array to get the values from
    * @return an array with the values of the passed array
    */
-  public Value array_values(Env env, ArrayValue array)
+  public Value array_values(Env env,
+                            ArrayValue array)
   {
     if (array == null)
       return NullValue.NULL;
 
     ArrayValue arrayValues = new ArrayValueImpl();
 
-    for (Map.Entry<Value, Value> entry: array.entrySet())
+    for (Map.Entry<Value, Value> entry : array.entrySet())
       arrayValues.put(entry.getValue());
 
     return arrayValues;
@@ -1148,14 +1147,15 @@ public class QuercusArrayModule extends AbstractQuercusModule {
    * Recursively executes a callback function on all elements in the array,
    * including elements of elements (i.e., arrays within arrays).  Returns true
    * if the process succeeded, otherwise false.
-   * 
-   * @param input  the array to walk
-   * @param call  the name of the callback function
-   * @param extra  extra parameter required by the callback function
-   * 
+   *
+   * @param array the array to walk
+   * @param call the name of the callback function
+   * @param extra extra parameter required by the callback function
    * @return true if the walk succedded, false otherwise
    */
-  public boolean array_walk_recursive(Env env, ArrayValue array, Value call,
+  public boolean array_walk_recursive(Env env, 
+                                      ArrayValue array,
+                                      Value call,
                                       @Optional("NULL") Value extra)
   {
     if (array == null)
@@ -1172,7 +1172,7 @@ public class QuercusArrayModule extends AbstractQuercusModule {
     if (callback == null)
       return true;
 
-    for (Map.Entry<Value, Value> entry: array.entrySet()) {
+    for (Map.Entry<Value, Value> entry : array.entrySet()) {
       Value entryValue = entry.getValue();
 
       if (entryValue instanceof ArrayValue)
@@ -1181,7 +1181,7 @@ public class QuercusArrayModule extends AbstractQuercusModule {
         try {
           arrayWalkImpl(env, entry, extra, callback);
         }
-        catch(Throwable t) {
+        catch (Throwable t) {
           log.log(Level.WARNING, t.toString(), t);
           env.warning("An error occured while invoking the callback");
 
@@ -1195,9 +1195,9 @@ public class QuercusArrayModule extends AbstractQuercusModule {
 
   /**
    * array_walk_recursive helper function.
-   * 
-   * @param entry  the entry to evaluate
-   * @param callback  the callback function
+   *
+   * @param entry the entry to evaluate
+   * @param callback the callback function
    */
   private void arrayWalkImpl(Env env, Map.Entry<Value, Value> entry,
                              Value extra, AbstractFunction callback)
@@ -1208,14 +1208,15 @@ public class QuercusArrayModule extends AbstractQuercusModule {
 
   /**
    * Executes a callback on each of the elements in the array.
-   * 
-   * @param input  the array to walk along
-   * @param call  the name of the callback function
-   * @param extra  extra parameter required by the callback function
-   * 
+   *
+   * @param array the array to walk along
+   * @param call the name of the callback function
+   * @param extra extra parameter required by the callback function
    * @return true if the walk succedded, false otherwise
    */
-  public boolean array_walk(Env env, ArrayValue array, Value call,
+  public boolean array_walk(Env env, 
+                            ArrayValue array,
+                            Value call,
                             @Optional("NULL") Value extra)
   {
     if (array == null)
@@ -1232,11 +1233,11 @@ public class QuercusArrayModule extends AbstractQuercusModule {
     if (callback == null)
       return true;
 
-    for (Map.Entry<Value, Value> entry: array.entrySet()) {
+    for (Map.Entry<Value, Value> entry : array.entrySet()) {
       try {
         arrayWalkImpl(env, entry, extra, callback);
       }
-      catch(Throwable t) {
+      catch (Throwable t) {
         // XXX: may be used later for error implementation
         log.log(Level.WARNING, t.toString(), t);
         env.warning("An error occured while invoking the callback");
@@ -1250,12 +1251,10 @@ public class QuercusArrayModule extends AbstractQuercusModule {
 
   /**
    * Sorts the array based on values in reverse order, preserving keys
-   * 
-   * @param array  the array to sort
-   * @param sortFlag  provides optional methods to process the sort
-   * 
+   *
+   * @param array the array to sort
+   * @param sortFlag provides optional methods to process the sort
    * @return true if the sort works, false otherwise
-   * 
    * @throws ClassCastException if the elements are not mutually comparable
    */
   public boolean arsort(Env env, ArrayValue array,
@@ -1265,7 +1264,7 @@ public class QuercusArrayModule extends AbstractQuercusModule {
     if (array == null)
       return false;
 
-    switch((int) sortFlag) {
+    switch ((int) sortFlag) {
     case SORT_STRING:
       array.sort(CS_VALUE_REVERSE, NO_KEY_RESET, NOT_STRICT);
       break;
@@ -1275,10 +1274,11 @@ public class QuercusArrayModule extends AbstractQuercusModule {
     case SORT_LOCALE_STRING:
       Locale locale = env.getLocaleInfo().getCollate();
       array.sort(new CompareLocale(ArrayValue.GET_VALUE, SORT_REVERSE,
-				   Collator.getInstance(locale)),
-		 NO_KEY_RESET, NOT_STRICT);
+                                   Collator.getInstance(locale)),
+                 NO_KEY_RESET, NOT_STRICT);
       break;
-    default: array.sort(CNO_VALUE_REVERSE, NO_KEY_RESET, NOT_STRICT);
+    default:
+      array.sort(CNO_VALUE_REVERSE, NO_KEY_RESET, NOT_STRICT);
       break;
     }
 
@@ -1287,12 +1287,10 @@ public class QuercusArrayModule extends AbstractQuercusModule {
 
   /**
    * Sorts the array based on values in ascending order, preserving keys
-   * 
-   * @param array  the array to sort
-   * @param sortFlag  provides optional methods to process the sort
-   * 
+   *
+   * @param array the array to sort
+   * @param sortFlag provides optional methods to process the sort
    * @return true if the sort works, false otherwise
-   * 
    * @throws ClassCastException if the elements are not mutually comparable
    */
   public boolean asort(Env env, ArrayValue array,
@@ -1302,7 +1300,7 @@ public class QuercusArrayModule extends AbstractQuercusModule {
     if (array == null)
       return false;
 
-    switch((int) sortFlag) {
+    switch ((int) sortFlag) {
     case SORT_STRING:
       array.sort(CS_VALUE_NORMAL, NO_KEY_RESET, NOT_STRICT);
       break;
@@ -1312,8 +1310,8 @@ public class QuercusArrayModule extends AbstractQuercusModule {
     case SORT_LOCALE_STRING:
       Locale locale = env.getLocaleInfo().getCollate();
       array.sort(new CompareLocale(ArrayValue.GET_VALUE, SORT_NORMAL,
-				   Collator.getInstance(locale)),
-		 NO_KEY_RESET, NOT_STRICT);
+                                   Collator.getInstance(locale)),
+                 NO_KEY_RESET, NOT_STRICT);
       break;
     default:
       array.sort(CNO_VALUE_NORMAL, NO_KEY_RESET, NOT_STRICT);
@@ -1325,12 +1323,10 @@ public class QuercusArrayModule extends AbstractQuercusModule {
 
   /**
    * Sorts the array based on keys in ascending order, preserving keys
-   * 
-   * @param array  the array to sort
-   * @param sortFlag  provides optional methods to process the sort
-   * 
+   *
+   * @param array the array to sort
+   * @param sortFlag provides optional methods to process the sort
    * @return true if the sort works, false otherwise
-   * 
    * @throws ClassCastException if the elements are not mutually comparable
    */
   public boolean ksort(Env env, ArrayValue array,
@@ -1340,7 +1336,7 @@ public class QuercusArrayModule extends AbstractQuercusModule {
     if (array == null)
       return false;
 
-    switch((int) sortFlag) {
+    switch ((int) sortFlag) {
     case SORT_STRING:
       array.sort(CS_KEY_NORMAL, NO_KEY_RESET, NOT_STRICT);
       break;
@@ -1350,8 +1346,8 @@ public class QuercusArrayModule extends AbstractQuercusModule {
     case SORT_LOCALE_STRING:
       Locale locale = env.getLocaleInfo().getCollate();
       array.sort(new CompareLocale(ArrayValue.GET_KEY, SORT_NORMAL,
-				   Collator.getInstance(locale)),
-		 NO_KEY_RESET, NOT_STRICT);
+                                   Collator.getInstance(locale)),
+                 NO_KEY_RESET, NOT_STRICT);
       break;
     default:
       array.sort(CNO_KEY_NORMAL, NO_KEY_RESET, NOT_STRICT);
@@ -1363,12 +1359,10 @@ public class QuercusArrayModule extends AbstractQuercusModule {
 
   /**
    * Sorts the array based on keys in reverse order, preserving keys
-   * 
-   * @param array  the array to sort
-   * @param sortFlag  provides optional methods to process the sort
-   * 
+   *
+   * @param array the array to sort
+   * @param sortFlag provides optional methods to process the sort
    * @return true if the sort works, false otherwise
-   * 
    * @throws ClassCastException if the elements are not mutually comparable
    */
   public boolean krsort(Env env, ArrayValue array,
@@ -1378,7 +1372,7 @@ public class QuercusArrayModule extends AbstractQuercusModule {
     if (array == null)
       return false;
 
-    switch((int) sortFlag) {
+    switch ((int) sortFlag) {
     case SORT_STRING:
       array.sort(CS_KEY_REVERSE, NO_KEY_RESET, NOT_STRICT);
       break;
@@ -1388,8 +1382,8 @@ public class QuercusArrayModule extends AbstractQuercusModule {
     case SORT_LOCALE_STRING:
       Locale locale = env.getLocaleInfo().getCollate();
       array.sort(new CompareLocale(ArrayValue.GET_KEY, SORT_REVERSE,
-				   Collator.getInstance(locale)),
-		 NO_KEY_RESET, NOT_STRICT);
+                                   Collator.getInstance(locale)),
+                 NO_KEY_RESET, NOT_STRICT);
       break;
     default:
       array.sort(CNO_KEY_REVERSE, NO_KEY_RESET, NOT_STRICT);
@@ -1400,14 +1394,11 @@ public class QuercusArrayModule extends AbstractQuercusModule {
   }
 
   /**
-   * Sorts the array based on string values using natural order, preserving 
+   * Sorts the array based on string values using natural order, preserving
    * keys, case sensitive
-   * 
-   * @param array  the array to sort
-   * @param sortFlag  provides optional methods to process the sort
-   * 
+   *
+   * @param array the array to sort
    * @return true if the sort works, false otherwise
-   * 
    * @throws ClassCastException if the elements are not mutually comparable
    */
   public Value natsort(ArrayValue array)
@@ -1424,14 +1415,11 @@ public class QuercusArrayModule extends AbstractQuercusModule {
   }
 
   /**
-   * Sorts the array based on string values using natural order, preserving 
+   * Sorts the array based on string values using natural order, preserving
    * keys, case insensitive
-   * 
-   * @param array  the array to sort
-   * @param sortFlag  provides optional methods to process the sort
-   * 
+   *
+   * @param array the array to sort
    * @return true if the sort works, false otherwise
-   * 
    * @throws ClassCastException if the elements are not mutually comparable
    */
   public Value natcasesort(ArrayValue array)
@@ -1448,20 +1436,21 @@ public class QuercusArrayModule extends AbstractQuercusModule {
   }
 
   /**
-   * Helper function for natsort and natcasesort to trim the string in the array
-   * 
-   * @param array  the array to trim strings from
+   * Helper function for natsort and natcasesort to trim the string in the
+   * array
+   *
+   * @param array the array to trim strings from
    */
   private void trimArrayStrings(ArrayValue array)
   {
     if (array != null) {
 
-      for (Map.Entry<Value, Value> entry: array.entrySet()) {
+      for (Map.Entry<Value, Value> entry : array.entrySet()) {
         Value entryValue = entry.getValue();
 
         if (entryValue instanceof StringValue)
           array.put(entry.getKey(),
-            StringValue.create(entryValue.toString().trim()));
+                    StringValue.create(entryValue.toString().trim()));
       }
     }
   }
@@ -1470,16 +1459,13 @@ public class QuercusArrayModule extends AbstractQuercusModule {
 
   /**
    * Determines if the key is in the array
-   * 
+   *
    * @param needle the array to sort
-   * @param sortFlag  provides optional methods to process the sort
-   * 
    * @return true if the sort works, false otherwise
-   * 
    * @throws ClassCastException if the elements are not mutually comparable
    */
   public boolean in_array(@ReadOnly Value needle,
-			  @ReadOnly ArrayValue stack,
+                          @ReadOnly ArrayValue stack,
                           @Optional("false") boolean strict)
     throws Throwable
   {
@@ -1494,12 +1480,10 @@ public class QuercusArrayModule extends AbstractQuercusModule {
 
   /**
    * Sorts the array based on values in ascending order
-   * 
-   * @param array  the array to sort
-   * @param sortFlag  provides optional methods to process the sort
-   * 
+   *
+   * @param array the array to sort
+   * @param sortFlag provides optional methods to process the sort
    * @return true if the sort works, false otherwise
-   * 
    * @throws ClassCastException if the elements are not mutually comparable
    */
   public boolean sort(Env env, ArrayValue array, @Optional long sortFlag)
@@ -1508,7 +1492,7 @@ public class QuercusArrayModule extends AbstractQuercusModule {
     if (array == null)
       return false;
 
-    switch((int) sortFlag) {
+    switch ((int) sortFlag) {
     case SORT_STRING:
       array.sort(CS_VALUE_NORMAL, KEY_RESET, STRICT);
       break;
@@ -1518,8 +1502,8 @@ public class QuercusArrayModule extends AbstractQuercusModule {
     case SORT_LOCALE_STRING:
       Locale locale = env.getLocaleInfo().getCollate();
       array.sort(new CompareLocale(ArrayValue.GET_VALUE, SORT_NORMAL,
-				   Collator.getInstance(locale)),
-		 KEY_RESET, STRICT);
+                                   Collator.getInstance(locale)),
+                 KEY_RESET, STRICT);
       break;
     default:
       array.sort(CNO_VALUE_NORMAL, KEY_RESET, STRICT);
@@ -1531,12 +1515,10 @@ public class QuercusArrayModule extends AbstractQuercusModule {
 
   /**
    * Sorts the array based on values in reverse order
-   * 
-   * @param array  the array to sort
-   * @param sortFlag  provides optional methods to process the sort
-   * 
+   *
+   * @param array the array to sort
+   * @param sortFlag provides optional methods to process the sort
    * @return true if the sort works, false otherwise
-   * 
    * @throws ClassCastException if the elements are not mutually comparable
    */
   public boolean rsort(Env env, ArrayValue array, @Optional long sortFlag)
@@ -1545,7 +1527,7 @@ public class QuercusArrayModule extends AbstractQuercusModule {
     if (array == null)
       return false;
 
-    switch((int) sortFlag) {
+    switch ((int) sortFlag) {
     case SORT_STRING:
       array.sort(CS_VALUE_REVERSE, KEY_RESET, STRICT);
       break;
@@ -1555,8 +1537,8 @@ public class QuercusArrayModule extends AbstractQuercusModule {
     case SORT_LOCALE_STRING:
       Locale locale = env.getLocaleInfo().getCollate();
       array.sort(new CompareLocale(ArrayValue.GET_VALUE, SORT_REVERSE,
-				   Collator.getInstance(locale)),
-		 KEY_RESET, STRICT);
+                                   Collator.getInstance(locale)),
+                 KEY_RESET, STRICT);
       break;
     default:
       array.sort(CNO_VALUE_REVERSE, KEY_RESET, STRICT);
@@ -1567,15 +1549,13 @@ public class QuercusArrayModule extends AbstractQuercusModule {
   }
 
   /**
-   * Sorts the array based on values in ascending order using a callback 
+   * Sorts the array based on values in ascending order using a callback
    * function
-   * 
-   * @param array  the array to sort
-   * @param callback  the name of the callback function
-   * @param sortFlag  provides optional methods to process the sort
-   * 
+   *
+   * @param array the array to sort
+   * @param func the name of the callback function
+   * @param sortFlag provides optional methods to process the sort
    * @return true if the sort works, false otherwise
-   * 
    * @throws ClassCastException if the elements are not mutually comparable
    */
   public boolean usort(Env env,
@@ -1597,18 +1577,18 @@ public class QuercusArrayModule extends AbstractQuercusModule {
   }
 
   /**
-   * Sorts the array based on values in ascending order using a callback 
+   * Sorts the array based on values in ascending order using a callback
    * function
-   * 
-   * @param array  the array to sort
-   * @param callback  the name of the callback function
-   * @param sortFlag  provides optional methods to process the sort
-   * 
+   *
+   * @param array the array to sort
+   * @param func the name of the callback function
+   * @param sortFlag provides optional methods to process the sort
    * @return true if the sort works, false otherwise
-   * 
    * @throws ClassCastException if the elements are not mutually comparable
    */
-  public boolean uasort(Env env, ArrayValue array, Callback func,
+  public boolean uasort(Env env,
+                        ArrayValue array,
+                        Callback func,
                         @Optional long sortFlag)
     throws Throwable
   {
@@ -1616,21 +1596,19 @@ public class QuercusArrayModule extends AbstractQuercusModule {
       return false;
 
     array.sort(new CompareCallBack(ArrayValue.GET_VALUE, SORT_NORMAL, func,
-      env), NO_KEY_RESET, NOT_STRICT);
+                                   env), NO_KEY_RESET, NOT_STRICT);
 
     return true;
   }
 
   /**
-   * Sorts the array based on values in ascending order using a callback 
+   * Sorts the array based on values in ascending order using a callback
    * function
-   * 
-   * @param array  the array to sort
-   * @param callback  the name of the callback function
-   * @param sortFlag  provides optional methods to process the sort
-   * 
+   *
+   * @param array the array to sort
+   * @param func the name of the callback function
+   * @param sortFlag provides optional methods to process the sort
    * @return true if the sort works, false otherwise
-   * 
    * @throws ClassCastException if the elements are not mutually comparable
    */
   public boolean uksort(Env env,
@@ -1653,16 +1631,16 @@ public class QuercusArrayModule extends AbstractQuercusModule {
 
   /**
    * Creates an array using the start and end values provided
-   * @param start  the 0 index element
-   * @param end  the length - 1 index element
-   * @param step  the new value is increased by this to determine the value for
-   *   the next element
-   * 
+   *
+   * @param start the 0 index element
+   * @param end the length - 1 index element
+   * @param step the new value is increased by this to determine the value for
+   * the next element
    * @return the new array
    */
   public Value range(Env env,
-		     @ReadOnly Value start,
-		     @ReadOnly Value end,
+                     @ReadOnly Value start,
+                     @ReadOnly Value end,
                      @Optional("1") long step)
     throws Throwable
   {
@@ -1685,13 +1663,13 @@ public class QuercusArrayModule extends AbstractQuercusModule {
     if (start.eq(end)) {
     }
     else if (start instanceof StringValue &&
-       (Math.abs(end.toChar() - start.toChar()) <  step)) {
+             (Math.abs(end.toChar() - start.toChar()) < step)) {
       env.warning("steps exceeds the specified range");
 
       return BooleanValue.FALSE;
     }
     else if (start instanceof LongValue &&
-            (Math.abs(end.toLong() - start.toLong()) < step)) {
+             (Math.abs(end.toLong() - start.toLong()) < step)) {
       env.warning("steps exceeds the specified range");
 
       return BooleanValue.FALSE;
@@ -1735,64 +1713,65 @@ public class QuercusArrayModule extends AbstractQuercusModule {
 
   /**
    * Inputs new variables into the symbol table from the passed array
-   * @param array  the array contained the new variables
-   * @param extractType  flag to determine how to handle collisions
-   * @param prefix  used along with the flag
-   * 
-   * @return the number of new variables added from the array to the symbol 
-   *   table
+   *
+   * @param array the array contained the new variables
+   * @param rawType flag to determine how to handle collisions
+   * @param valuePrefix used along with the flag
+   * @return the number of new variables added from the array to the symbol
+   *         table
    */
   @UsesSymbolTable
   public static Value extract(Env env,
                               ArrayValue array,
-			                        @Optional("EXTR_OVERWRITE") long rawType,
-			                        @Optional("NULL") Value valuePrefix )
+                              @Optional("EXTR_OVERWRITE") long rawType,
+                              @Optional("NULL") Value valuePrefix)
   {
     if (array == null)
       return NullValue.NULL;
-    
+
     long extractType = rawType & ~EXTR_REFS;
-    
+
     boolean extrRefs = (rawType & EXTR_REFS) != 0;
-    
-    if (extractType < EXTR_OVERWRITE || extractType > EXTR_IF_EXISTS && 
-        extractType != EXTR_REFS) {
+
+    if (extractType < EXTR_OVERWRITE || extractType > EXTR_IF_EXISTS &&
+                                        extractType != EXTR_REFS) {
       env.warning("Unknown extract type");
-      
+
       return NullValue.NULL;
     }
-    
-    if (extractType >= EXTR_PREFIX_SAME && extractType <= EXTR_PREFIX_IF_EXISTS &&
+
+    if (extractType >= EXTR_PREFIX_SAME &&
+        extractType <= EXTR_PREFIX_IF_EXISTS &&
         (valuePrefix == null || (! (valuePrefix instanceof StringValue)))) {
       env.warning("Prefix expected to be specified");
-      
+
       return NullValue.NULL;
     }
-    
+
     String prefix = "";
-    
+
     if (valuePrefix instanceof StringValue)
       prefix = ((StringValue) valuePrefix).toString() + "_";
-    
+
     int completedSymbols = 0;
-    
-    for (Value entryKey : array.keySet()) { 
+
+    for (Value entryKey : array.keySet()) {
       Value entryValue = null;
-      
+
       if (extrRefs)
         entryValue = array.getRef(entryKey);
       else
         entryValue = array.get(entryKey);
-      
+
       String symbolName = entryKey.toString();
-      
+
       Value tableValue = env.getValue(symbolName);
-      
+
       switch ((int) extractType) {
       case EXTR_SKIP:
         if (tableValue != NullValue.NULL)
           symbolName = "";
-      
+
         break;
       case EXTR_PREFIX_SAME:
         if (tableValue != NullValue.NULL)
@@ -1801,44 +1780,44 @@ public class QuercusArrayModule extends AbstractQuercusModule {
         break;
       case EXTR_PREFIX_ALL:
         symbolName = prefix + symbolName;
-        
+
         break;
       case EXTR_PREFIX_INVALID:
         if (! validVariableName(symbolName))
           symbolName = prefix + symbolName;
-        
+
         break;
       case EXTR_IF_EXISTS:
         if (tableValue == NullValue.NULL)
           entryValue = tableValue;
-        
+
         break;
       case EXTR_PREFIX_IF_EXISTS:
         if (tableValue != NullValue.NULL)
           symbolName = prefix + symbolName;
         else
           symbolName = "";
-        
+
         break;
       default:
-        
+
         break;
       }
-      
+
       if (validVariableName(symbolName)) {
         env.setValue(symbolName, entryValue);
 
         completedSymbols++;
       }
     }
-    
+
     return LongValue.create(completedSymbols);
   }
 
   /**
    * Helper function for extract to determine if a variable name is valid
-   * @param name  the name to check
-   * 
+   *
+   * @param variableName the name to check
    * @return true if the name is valid, false otherwise
    */
   private static boolean validVariableName(String variableName)
@@ -1862,14 +1841,14 @@ public class QuercusArrayModule extends AbstractQuercusModule {
   }
 
   /**
-   * Returns an array with everything that is in array and not in the other 
+   * Returns an array with everything that is in array and not in the other
    * arrays using a passed callback function for comparing
-   * @param array  the primary array
-   * @param arrays  the vector of arrays to check the primary array's values
-   *   against
-   * 
+   *
+   * @param array the primary array
+   * @param arrays the vector of arrays to check the primary array's values
+   * against
    * @return an array with all of the values that are in the primary array but
-   *   not in the other arrays
+   *         not in the other arrays
    */
   public Value array_diff(Env env, ArrayValue array, Value []arrays)
     throws Throwable
@@ -1911,16 +1890,15 @@ public class QuercusArrayModule extends AbstractQuercusModule {
   }
 
 
-
   /**
-   * Returns an array with everything that is in array and not in the other 
+   * Returns an array with everything that is in array and not in the other
    * arrays, keys also used
-   * @param array  the primary array
-   * @param arrays  the vector of arrays to check the primary array's values
-   *   against
-   * 
+   *
+   * @param array the primary array
+   * @param arrays the vector of arrays to check the primary array's values
+   * against
    * @return an array with all of the values that are in the primary array but
-   *   not in the other arrays
+   *         not in the other arrays
    */
   public Value array_diff_assoc(Env env, ArrayValue array, Value []arrays)
     throws Throwable
@@ -1962,14 +1940,14 @@ public class QuercusArrayModule extends AbstractQuercusModule {
   }
 
   /**
-   * Returns an array with everything that is in array and not in the other 
+   * Returns an array with everything that is in array and not in the other
    * arrays, keys used for comparison
-   * @param array  the primary array
-   * @param arrays  the vector of arrays to check the primary array's values
-   *   against
-   * 
+   *
+   * @param array the primary array
+   * @param arrays the vector of arrays to check the primary array's values
+   * against
    * @return an array with all of the values that are in the primary array but
-   *   not in the other arrays
+   *         not in the other arrays
    */
   public Value array_diff_key(Env env, ArrayValue array, Value []arrays)
     throws Throwable
@@ -2009,14 +1987,14 @@ public class QuercusArrayModule extends AbstractQuercusModule {
   }
 
   /**
-   * Returns an array with everything that is in array and not in the other 
+   * Returns an array with everything that is in array and not in the other
    * arrays, keys used for comparison aswell
-   * @param array  the primary array
-   * @param arrays  the vector of arrays to check the primary array's values
-   *   against.  The last element is the callback function.
-   * 
+   *
+   * @param array the primary array
+   * @param arrays the vector of arrays to check the primary array's values
+   * against.  The last element is the callback function.
    * @return an array with all of the values that are in the primary array but
-   *   not in the other arrays
+   *         not in the other arrays
    */
   public Value array_diff_uassoc(Env env, ArrayValue array, Value []arrays)
     throws Throwable
@@ -2058,7 +2036,8 @@ public class QuercusArrayModule extends AbstractQuercusModule {
         Value searchKey = ((ArrayValue) arrays[k]).contains(entryValue);
 
         if (searchKey != NullValue.NULL)
-          ValueFound = ((int) func.eval(env, searchKey, entryKey).toLong()) == 0;
+          ValueFound = ((int) func.eval(env, searchKey, entryKey).toLong()) ==
+                       0;
       }
 
       if (! ValueFound)
@@ -2069,14 +2048,14 @@ public class QuercusArrayModule extends AbstractQuercusModule {
   }
 
   /**
-   * Returns an array with everything that is in array and not in the other 
+   * Returns an array with everything that is in array and not in the other
    * arrays, keys used for comparison only
-   * @param array  the primary array
-   * @param arrays  the vector of arrays to check the primary array's values
-   *   against.  The last element is the callback function.
-   * 
+   *
+   * @param array the primary array
+   * @param arrays the vector of arrays to check the primary array's values
+   * against.  The last element is the callback function.
    * @return an array with all of the values that are in the primary array but
-   *   not in the other arrays
+   *         not in the other arrays
    */
   public Value array_diff_ukey(Env env, ArrayValue array, Value []arrays)
     throws Throwable
@@ -2117,7 +2096,7 @@ public class QuercusArrayModule extends AbstractQuercusModule {
 
         keyFound = false;
 
-        while(keyItr.hasNext() && ! keyFound) {
+        while (keyItr.hasNext() && ! keyFound) {
           Value currentKey = keyItr.next();
 
           keyFound = ((int) func.eval(env, entryKey, currentKey).toLong()) == 0;
@@ -2132,14 +2111,14 @@ public class QuercusArrayModule extends AbstractQuercusModule {
   }
 
   /**
-   * Returns an array with everything that is in array and also in the other 
+   * Returns an array with everything that is in array and also in the other
    * arrays
-   * @param array  the primary array
-   * @param arrays  the vector of arrays to check the primary array's values
-   *   against.  The last element is the callback function.
-   * 
+   *
+   * @param array the primary array
+   * @param arrays the vector of arrays to check the primary array's values
+   * against.  The last element is the callback function.
    * @return an array with all of the values that are in the primary array and
-   *    in the other arrays
+   *         in the other arrays
    */
   public Value array_intersect(Env env, ArrayValue array, Value []arrays)
     throws Throwable
@@ -2182,14 +2161,14 @@ public class QuercusArrayModule extends AbstractQuercusModule {
   }
 
   /**
-   * Returns an array with everything that is in array and also in the other 
+   * Returns an array with everything that is in array and also in the other
    * arrays, keys are also used in the comparison
-   * @param array  the primary array
-   * @param arrays  the vector of arrays to check the primary array's values
-   *   against.  The last element is the callback function.
-   * 
+   *
+   * @param array the primary array
+   * @param arrays the vector of arrays to check the primary array's values
+   * against.  The last element is the callback function.
    * @return an array with all of the values that are in the primary array and
-   *    in the other arrays
+   *         in the other arrays
    */
   public Value array_intersect_assoc(Env env, ArrayValue array, Value []arrays)
     throws Throwable
@@ -2238,14 +2217,14 @@ public class QuercusArrayModule extends AbstractQuercusModule {
   }
 
   /**
-   * Returns an array with everything that is in array and also in the other 
+   * Returns an array with everything that is in array and also in the other
    * arrays, keys are only used in the comparison
-   * @param array  the primary array
-   * @param arrays  the vector of arrays to check the primary array's values
-   *   against.  The last element is the callback function.
-   * 
+   *
+   * @param array the primary array
+   * @param arrays the vector of arrays to check the primary array's values
+   * against.  The last element is the callback function.
    * @return an array with all of the values that are in the primary array and
-   *    in the other arrays
+   *         in the other arrays
    */
   public Value array_intersect_key(Env env, ArrayValue array, Value []arrays)
     throws Throwable
@@ -2288,15 +2267,15 @@ public class QuercusArrayModule extends AbstractQuercusModule {
   }
 
   /**
-   * Returns an array with everything that is in array and also in the other 
+   * Returns an array with everything that is in array and also in the other
    * arrays, keys are also used in the comparison.  Uses a callback function for
    * evalutation the keys.
-   * @param array  the primary array
-   * @param arrays  the vector of arrays to check the primary array's values
-   *   against.  The last element is the callback function.
-   * 
+   *
+   * @param array the primary array
+   * @param arrays the vector of arrays to check the primary array's values
+   * against.  The last element is the callback function.
    * @return an array with all of the values that are in the primary array and
-   *    in the other arrays
+   *         in the other arrays
    */
   public Value array_intersect_uassoc(Env env, ArrayValue array, Value []arrays)
     throws Throwable
@@ -2354,15 +2333,15 @@ public class QuercusArrayModule extends AbstractQuercusModule {
   }
 
   /**
-   * Returns an array with everything that is in array and also in the other 
+   * Returns an array with everything that is in array and also in the other
    * arrays, keys are only used in the comparison.  Uses a callback function for
    * evalutation the keys.
-   * @param array  the primary array
-   * @param arrays  the vector of arrays to check the primary array's values
-   *   against.  The last element is the callback function.
-   * 
+   *
+   * @param array the primary array
+   * @param arrays the vector of arrays to check the primary array's values
+   * against.  The last element is the callback function.
    * @return an array with all of the values that are in the primary array and
-   *    in the other arrays
+   *         in the other arrays
    */
   public Value array_intersect_ukey(Env env, ArrayValue array, Value []arrays)
     throws Throwable
@@ -2392,7 +2371,7 @@ public class QuercusArrayModule extends AbstractQuercusModule {
 
       Value entryKey = entry.getKey();
 
-      for (int k = 0; k < arrays.length -1; k++) {
+      for (int k = 0; k < arrays.length - 1; k++) {
         if (! (arrays[k] instanceof ArrayValue)) {
           env.warning("Argument #" + (k + 2) + " is not an array");
 
@@ -2406,7 +2385,7 @@ public class QuercusArrayModule extends AbstractQuercusModule {
 
         keyFound = false;
 
-        while(keyItr.hasNext() && ! keyFound) {
+        while (keyItr.hasNext() && ! keyFound) {
           Value currentKey = keyItr.next();
 
           keyFound = ((int) func.eval(env, entryKey, currentKey).toLong()) == 0;
@@ -2426,7 +2405,6 @@ public class QuercusArrayModule extends AbstractQuercusModule {
    *
    * @param fun the function name
    * @param args the vector of array arguments
-   * 
    * @return an array with all of the mapped values
    */
   public Value array_map(Env env, Callback fun,
@@ -2434,7 +2412,7 @@ public class QuercusArrayModule extends AbstractQuercusModule {
     throws Throwable
   {
     // quercus/1730
-    Iterator<Map.Entry<Value,Value>> argIter = arg.entrySet().iterator();
+    Iterator<Map.Entry<Value, Value>> argIter = arg.entrySet().iterator();
 
     Iterator []iters = new Iterator[args.length];
     for (int i = 0; i < args.length; i++) {
@@ -2450,7 +2428,7 @@ public class QuercusArrayModule extends AbstractQuercusModule {
 
     Value []param = new Value[args.length + 1];
     while (argIter.hasNext()) {
-      Map.Entry<Value,Value> entry = argIter.next();
+      Map.Entry<Value, Value> entry = argIter.next();
 
       param[0] = entry.getValue();
 
@@ -2470,9 +2448,7 @@ public class QuercusArrayModule extends AbstractQuercusModule {
   /**
    * Maps the given function with the array arguments.
    *
-   * @param fun the function name
    * @param args the vector of array arguments
-   * 
    * @return an array with all of the mapped values
    */
   public Value array_merge(Value []args)
@@ -2488,10 +2464,10 @@ public class QuercusArrayModule extends AbstractQuercusModule {
 
       ArrayValue array = (ArrayValue) args[i].toValue();
 
-      Iterator<Map.Entry<Value,Value>> argIter = array.entrySet().iterator();
+      Iterator<Map.Entry<Value, Value>> argIter = array.entrySet().iterator();
 
       while (argIter.hasNext()) {
-        Map.Entry<Value,Value> entry = argIter.next();
+        Map.Entry<Value, Value> entry = argIter.next();
 
         Value key = entry.getKey();
         Value value = entry.getValue();
@@ -2509,9 +2485,7 @@ public class QuercusArrayModule extends AbstractQuercusModule {
   /**
    * Maps the given function with the array arguments.
    *
-   * @param fun the function name
    * @param args the vector of array arguments
-   * 
    * @return an array with all of the mapped values
    */
   public Value array_merge_recursive(Value []args)
@@ -2521,52 +2495,52 @@ public class QuercusArrayModule extends AbstractQuercusModule {
 
     ArrayValue result = new ArrayValueImpl();
 
-    for (int i = 0; i < args.length; i++) {
-      if (! (args[i].toValue() instanceof ArrayValue))
+    for (Value arg : args) {
+      if (! (arg.toValue() instanceof ArrayValue))
         continue;
 
-      arrayMergeRecursiveImpl(result, (ArrayValue) args[i].toValue());
+      arrayMergeRecursiveImpl(result, (ArrayValue) arg.toValue());
     }
 
     return result;
   }
 
   private static void arrayMergeRecursiveImpl(ArrayValue result,
-					      ArrayValue array)
+                                              ArrayValue array)
   {
-    for (Map.Entry<Value,Value> entry : array.entrySet()) {
+    for (Map.Entry<Value, Value> entry : array.entrySet()) {
       Value key = entry.getKey();
       Value value = entry.getValue().toValue();
 
       if (key.isNumber()) {
-	result.put(value);
+        result.put(value);
       }
       else {
-	Value oldValue = result.get(key).toValue();
+        Value oldValue = result.get(key).toValue();
 
-	if (oldValue != null && oldValue.isset()) {
-	  if (oldValue.isArray() && value.isArray()) {
-	    arrayMergeRecursiveImpl((ArrayValue) oldValue, (ArrayValue) value);
-	  }
-	  else if (oldValue.isArray()) {
-	    oldValue.put(value);
-	  }
-	  else if (value.isArray()) {
-	    // XXX: s/b insert?
-	    value.put(oldValue);
-	  }
-	  else {
-	    ArrayValue newArray = new ArrayValueImpl();
+        if (oldValue != null && oldValue.isset()) {
+          if (oldValue.isArray() && value.isArray()) {
+            arrayMergeRecursiveImpl((ArrayValue) oldValue, (ArrayValue) value);
+          }
+          else if (oldValue.isArray()) {
+            oldValue.put(value);
+          }
+          else if (value.isArray()) {
+            // XXX: s/b insert?
+            value.put(oldValue);
+          }
+          else {
+            ArrayValue newArray = new ArrayValueImpl();
 
-	    newArray.put(oldValue);
-	    newArray.put(value);
+            newArray.put(oldValue);
+            newArray.put(value);
 
-	    result.put(key, newArray);
-	  }
-	}
-	else {
-	  result.put(key, value);
-	}
+            result.put(key, newArray);
+          }
+        }
+        else {
+          result.put(key, value);
+        }
       }
     }
   }
@@ -2711,7 +2685,7 @@ public class QuercusArrayModule extends AbstractQuercusModule {
     }
     return true;
   }*/
-  
+
   // XXX: Performance Test asort
   /**
    * Sorts the array.
@@ -2755,637 +2729,647 @@ public class QuercusArrayModule extends AbstractQuercusModule {
   }*/
 
   /**
-   * Creates an array with all the values of the first array that are not present in the
-   * other arrays, using a provided callback function to determine equivalence.
-   * 
-   * @param arrays  first array is checked against the rest.  Last element is the
-   * 													 callback function.
+   * Creates an array with all the values of the first array that are not
+   * present in the other arrays, using a provided callback function to
+   * determine equivalence.
    *
-   * @return an array with all the values of the first array that are not in the rest
+   * @param arrays first array is checked against the rest.  Last element is the
+   * callback function.
+   * @return an array with all the values of the first array that are not in the
+   *         rest
    */
   public Value array_udiff(Env env, Value[] arrays)
   {
     if (arrays.length < 3) {
-    	env.warning("Wrong paremeter count for array_udiff()");
-    	
-    	return NullValue.NULL;
+      env.warning("Wrong paremeter count for array_udiff()");
+
+      return NullValue.NULL;
     }
-    
+
     if (! (arrays[0] instanceof ArrayValue)) {
-    	env.warning("Argument #1 is not an array");
-    	
-    	return NullValue.NULL;
+      env.warning("Argument #1 is not an array");
+
+      return NullValue.NULL;
     }
-    
+
     ArrayValue array = (ArrayValue) arrays[0];
-    
+
     Value callbackValue = arrays[arrays.length - 1];
-    
+
     Callback cmp = null;
-    
-    try{
-    	cmp = env.createCallback(callbackValue);
+
+    try {
+      cmp = env.createCallback(callbackValue);
     }
     catch (Throwable t) {
-    	log.log(Level.WARNING, t.toString(), t);
-    	
-    	env.warning("Not a valid callback " + callbackValue.toString());
-    	
-    	return NullValue.NULL;
+      log.log(Level.WARNING, t.toString(), t);
+
+      env.warning("Not a valid callback " + callbackValue.toString());
+
+      return NullValue.NULL;
     }
-    
+
     if (cmp == null) {
-    	env.warning("Not a valid callback " + callbackValue.toString());
-    	
-    	return NullValue.NULL;
+      env.warning("Not a valid callback " + callbackValue.toString());
+
+      return NullValue.NULL;
     }
-    
+
     ArrayValue diffArray = new ArrayValueImpl();
 
     boolean isFound = false;
-    
-    for (Value entryKey: array.keySet()) {
-    	Value entryValue = array.get(entryKey);
-    	
+
+    for (Value entryKey : array.keySet()) {
+      Value entryValue = array.get(entryKey);
+
       for (int k = 1; k < arrays.length - 1 && ! isFound; k++) {
-      	if (! (arrays[k] instanceof ArrayValue)) {
-      		env.warning("Argument #" + (k + 1) + " is not an array");
-      		
-      		return NullValue.NULL;
-      	}
-      	
+        if (! (arrays[k] instanceof ArrayValue)) {
+          env.warning("Argument #" + (k + 1) + " is not an array");
+
+          return NullValue.NULL;
+        }
+
         ArrayValue checkArray = (ArrayValue) arrays[k];
-        
-        for (Map.Entry<Value, Value> entry: checkArray.entrySet()) {
-        	try {
-        		isFound = cmp.eval(env, entryValue, entry.getValue()).toLong() == 0;
-        	}
-        	catch (Throwable t) {
+
+        for (Map.Entry<Value, Value> entry : checkArray.entrySet()) {
+          try {
+            isFound = cmp.eval(env, entryValue, entry.getValue()).toLong() == 0;
+          }
+          catch (Throwable t) {
             log.log(Level.WARNING, t.toString(), t);
-            
+
             env.warning("An error occurred while invoking the filter callback");
-            
+
             return NullValue.NULL;
-          } 
-        	
-        	if (isFound)
-        		break;
+          }
+
+          if (isFound)
+            break;
         }
       }
-      
+
       if (! isFound)
-      	diffArray.put(entryKey, entryValue);
-      
+        diffArray.put(entryKey, entryValue);
+
       isFound = false;
     }
-    
+
     return diffArray;
   }
-  
+
   /**
-   * Creates an array with all the values of the first array that are not present in the
-   * other arrays, using a provided callback function to determine equivalence.  Also
-   * checks the key for equality using an internal comparison function.
-   * 
-   * @param arrays  first array is checked against the rest.  Last element is the
-   * 													 callback function.
+   * Creates an array with all the values of the first array that are not
+   * present in the other arrays, using a provided callback function to
+   * determine equivalence.  Also checks the key for equality using an internal
+   * comparison function.
    *
-   * @return an array with all the values of the first array that are not in the rest
+   * @param arrays first array is checked against the rest.  Last element is the
+   * callback function.
+   * @return an array with all the values of the first array that are not in the
+   *         rest
    */
   public Value array_udiff_assoc(Env env, Value[] arrays)
   {
     if (arrays.length < 3) {
-    	env.warning("Wrong paremeter count for array_udiff_assoc()");
-    	
-    	return NullValue.NULL;
+      env.warning("Wrong paremeter count for array_udiff_assoc()");
+
+      return NullValue.NULL;
     }
-    
+
     if (! (arrays[0] instanceof ArrayValue)) {
-    	env.warning("Argument #1 is not an array");
-    	
-    	return NullValue.NULL;
+      env.warning("Argument #1 is not an array");
+
+      return NullValue.NULL;
     }
-    
+
     ArrayValue array = (ArrayValue) arrays[0];
-    
+
     Value callbackValue = arrays[arrays.length - 1];
-    
+
     Callback cmp = null;
-    
-    try{
-    	cmp = env.createCallback(callbackValue);
+
+    try {
+      cmp = env.createCallback(callbackValue);
     }
     catch (Throwable t) {
-    	log.log(Level.WARNING, t.toString(), t);
-    	
-    	env.warning("Not a valid callback " + callbackValue.toString());
-    	
-    	return NullValue.NULL;
+      log.log(Level.WARNING, t.toString(), t);
+
+      env.warning("Not a valid callback " + callbackValue.toString());
+
+      return NullValue.NULL;
     }
-    
+
     if (cmp == null) {
-    	env.warning("Not a valid callback " + callbackValue.toString());
-    	
-    	return NullValue.NULL;
+      env.warning("Not a valid callback " + callbackValue.toString());
+
+      return NullValue.NULL;
     }
-    
+
     ArrayValue diffArray = new ArrayValueImpl();
 
     boolean isFound = false;
-    
-    for (Value entryKey: array.keySet()) {
-    	Value entryValue = array.get(entryKey);
-    	
+
+    for (Value entryKey : array.keySet()) {
+      Value entryValue = array.get(entryKey);
+
       for (int k = 1; k < arrays.length - 1 && ! isFound; k++) {
-      	if (! (arrays[k] instanceof ArrayValue)) {
-      		env.warning("Argument #" + (k + 1) + " is not an array");
-      		
-      		return NullValue.NULL;
-      	}
-      	
+        if (! (arrays[k] instanceof ArrayValue)) {
+          env.warning("Argument #" + (k + 1) + " is not an array");
+
+          return NullValue.NULL;
+        }
+
         ArrayValue checkArray = (ArrayValue) arrays[k];
-        
-        for (Map.Entry<Value, Value> entry: checkArray.entrySet()) {
-        	try {
-        		boolean keyFound = entryKey.eql(entry.getKey());
-        		
-        		boolean valueFound = false;
-        		
-        		if (keyFound)
-        			valueFound = cmp.eval(env, entryValue, entry.getValue()).toLong() == 0;
-        		
-        		isFound = keyFound && valueFound;
-        	}
-        	catch (Throwable t) {
+
+        for (Map.Entry<Value, Value> entry : checkArray.entrySet()) {
+          try {
+            boolean keyFound = entryKey.eql(entry.getKey());
+
+            boolean valueFound = false;
+
+            if (keyFound)
+              valueFound = cmp.eval(env, entryValue, entry.getValue())
+                .toLong() == 0;
+
+            isFound = keyFound && valueFound;
+          }
+          catch (Throwable t) {
             log.log(Level.WARNING, t.toString(), t);
-            
+
             env.warning("An error occurred while invoking the filter callback");
-            
+
             return NullValue.NULL;
-          } 
-        	
-        	if (isFound)
-        		break;
+          }
+
+          if (isFound)
+            break;
         }
       }
-      
+
       if (! isFound)
-      	diffArray.put(entryKey, entryValue);
-      
+        diffArray.put(entryKey, entryValue);
+
       isFound = false;
     }
-    
+
     return diffArray;
   }
-  
+
   /**
-   * Creates an array with all the values of the first array that are not present in the
-   * other arrays, using a provided callback function to determine equivalence.  Also
-   * checks keys using a provided callback function.
-   * 
-   * @param arrays  first array is checked against the rest.  Last two elementare 
-   * 													 the callback functions.
+   * Creates an array with all the values of the first array that are not
+   * present in the other arrays, using a provided callback function to
+   * determine equivalence.  Also checks keys using a provided callback
+   * function.
    *
-   * @return an array with all the values of the first array that are not in the rest
+   * @param arrays first array is checked against the rest.  Last two elementare
+   * the callback functions.
+   * @return an array with all the values of the first array that are not in the
+   *         rest
    */
   public Value array_udiff_uassoc(Env env, Value[] arrays)
   {
     if (arrays.length < 4) {
-    	env.warning("Wrong paremeter count for array_udiff_uassoc()");
-    	
-    	return NullValue.NULL;
+      env.warning("Wrong paremeter count for array_udiff_uassoc()");
+
+      return NullValue.NULL;
     }
-    
+
     if (! (arrays[0] instanceof ArrayValue)) {
-    	env.warning("Argument #1 is not an array");
-    	
-    	return NullValue.NULL;
+      env.warning("Argument #1 is not an array");
+
+      return NullValue.NULL;
     }
-    
+
     ArrayValue array = (ArrayValue) arrays[0];
-    
+
     Value callbackValue = arrays[arrays.length - 2];
-    
+
     Callback cmpValue = null;
-    
-    try{
-    	cmpValue = env.createCallback(callbackValue);
+
+    try {
+      cmpValue = env.createCallback(callbackValue);
     }
     catch (Throwable t) {
-    	log.log(Level.WARNING, t.toString(), t);
-    	
-    	env.warning("Not a valid callback " + callbackValue.toString());
-    	
-    	return NullValue.NULL;
+      log.log(Level.WARNING, t.toString(), t);
+
+      env.warning("Not a valid callback " + callbackValue.toString());
+
+      return NullValue.NULL;
     }
-    
+
     if (cmpValue == null) {
-    	env.warning("Not a valid callback " + callbackValue.toString());
-    	
-    	return NullValue.NULL;
+      env.warning("Not a valid callback " + callbackValue.toString());
+
+      return NullValue.NULL;
     }
-    
+
     Value callbackKey = arrays[arrays.length - 1];
-    
+
     Callback cmpKey = null;
-    
-    try{
-    	cmpKey = env.createCallback(callbackKey);
+
+    try {
+      cmpKey = env.createCallback(callbackKey);
     }
     catch (Throwable t) {
-    	log.log(Level.WARNING, t.toString(), t);
-    	
-    	env.warning("Not a valid callback " + callbackKey.toString());
-    	
-    	return NullValue.NULL;
+      log.log(Level.WARNING, t.toString(), t);
+
+      env.warning("Not a valid callback " + callbackKey.toString());
+
+      return NullValue.NULL;
     }
-    
+
     if (cmpKey == null) {
-    	env.warning("Not a valid callback " + callbackKey.toString());
-    	
-    	return NullValue.NULL;
+      env.warning("Not a valid callback " + callbackKey.toString());
+
+      return NullValue.NULL;
     }
-    
+
     ArrayValue diffArray = new ArrayValueImpl();
 
     boolean isFound = false;
-    
-    for (Value entryKey: array.keySet()) {
-    	Value entryValue = array.get(entryKey);
-    	
+
+    for (Value entryKey : array.keySet()) {
+      Value entryValue = array.get(entryKey);
+
       for (int k = 1; k < arrays.length - 2 && ! isFound; k++) {
-      	if (! (arrays[k] instanceof ArrayValue)) {
-      		env.warning("Argument #" + (k + 1) + " is not an array");
-      		
-      		return NullValue.NULL;
-      	}
-      	
+        if (! (arrays[k] instanceof ArrayValue)) {
+          env.warning("Argument #" + (k + 1) + " is not an array");
+
+          return NullValue.NULL;
+        }
+
         ArrayValue checkArray = (ArrayValue) arrays[k];
-        
-        for (Map.Entry<Value, Value> entry: checkArray.entrySet()) {
-        	try {
-        		boolean valueFound = 
-        			cmpValue.eval(env, entryValue, entry.getValue()).toLong() == 0;
-        		
-        		boolean keyFound = false;
-        		
-        		if (valueFound)
-        			keyFound = cmpKey.eval(env, entryKey, entry.getKey()).toLong() == 0;
-        		
-        		isFound = valueFound && keyFound;
-        	}
-        	catch (Throwable t) {
+
+        for (Map.Entry<Value, Value> entry : checkArray.entrySet()) {
+          try {
+            boolean valueFound =
+              cmpValue.eval(env, entryValue, entry.getValue()).toLong() == 0;
+
+            boolean keyFound = false;
+
+            if (valueFound)
+              keyFound = cmpKey.eval(env, entryKey, entry.getKey()).toLong() ==
+                         0;
+
+            isFound = valueFound && keyFound;
+          }
+          catch (Throwable t) {
             log.log(Level.WARNING, t.toString(), t);
-            
+
             env.warning("An error occurred while invoking the filter callback");
-            
+
             return NullValue.NULL;
-          } 
-        	
-        	if (isFound)
-        		break;
+          }
+
+          if (isFound)
+            break;
         }
       }
-      
+
       if (! isFound)
-      	diffArray.put(entryKey, entryValue);
-      
+        diffArray.put(entryKey, entryValue);
+
       isFound = false;
     }
-    
+
     return diffArray;
   }
-  
+
   /**
-   * Creates an array with all the values of the first array that are present in the
-   * other arrays, using a provided callback function to determine equivalence.
-   * 
-   * @param arrays  first array is checked against the rest.  Last element is the
-   * 													 callback function.
+   * Creates an array with all the values of the first array that are present in
+   * the other arrays, using a provided callback function to determine
+   * equivalence.
    *
-   * @return an array with all the values of the first array that are in the rest
+   * @param arrays first array is checked against the rest.  Last element is the
+   * callback function.
+   * @return an array with all the values of the first array that are in the
+   *         rest
    */
   public Value array_uintersect(Env env, Value[] arrays)
   {
     if (arrays.length < 3) {
-    	env.warning("Wrong paremeter count for array_uintersect()");
-    	
-    	return NullValue.NULL;
+      env.warning("Wrong paremeter count for array_uintersect()");
+
+      return NullValue.NULL;
     }
-    
+
     if (! (arrays[0] instanceof ArrayValue)) {
-    	env.warning("Argument #1 is not an array");
-    	
-    	return NullValue.NULL;
+      env.warning("Argument #1 is not an array");
+
+      return NullValue.NULL;
     }
-    
+
     ArrayValue array = (ArrayValue) arrays[0];
-    
+
     Value callbackValue = arrays[arrays.length - 1];
-    
+
     Callback cmp = null;
-    
-    try{
-    	cmp = env.createCallback(callbackValue);
+
+    try {
+      cmp = env.createCallback(callbackValue);
     }
     catch (Throwable t) {
-    	log.log(Level.WARNING, t.toString(), t);
-    	
-    	env.warning("Not a valid callback " + callbackValue.toString());
-    	
-    	return NullValue.NULL;
+      log.log(Level.WARNING, t.toString(), t);
+
+      env.warning("Not a valid callback " + callbackValue.toString());
+
+      return NullValue.NULL;
     }
-    
+
     if (cmp == null) {
-    	env.warning("Not a valid callback " + callbackValue.toString());
-    	
-    	return NullValue.NULL;
+      env.warning("Not a valid callback " + callbackValue.toString());
+
+      return NullValue.NULL;
     }
-    
+
     ArrayValue interArray = new ArrayValueImpl();
 
     boolean isFound = true;
-    
-    for (Value entryKey: array.keySet()) {
-    	Value entryValue = array.get(entryKey);
-    	
+
+    for (Value entryKey : array.keySet()) {
+      Value entryValue = array.get(entryKey);
+
       for (int k = 1; k < arrays.length - 1 && isFound; k++) {
-      	if (! (arrays[k] instanceof ArrayValue)) {
-      		env.warning("Argument #" + (k + 1) + " is not an array");
-      		
-      		return NullValue.NULL;
-      	}
-      	
+        if (! (arrays[k] instanceof ArrayValue)) {
+          env.warning("Argument #" + (k + 1) + " is not an array");
+
+          return NullValue.NULL;
+        }
+
         ArrayValue checkArray = (ArrayValue) arrays[k];
-        
-        for (Map.Entry<Value, Value> entry: checkArray.entrySet()) {
-        	try {
-        		isFound = cmp.eval(env, entryValue, entry.getValue()).toLong() == 0;
-        	}
-        	catch (Throwable t) {
+
+        for (Map.Entry<Value, Value> entry : checkArray.entrySet()) {
+          try {
+            isFound = cmp.eval(env, entryValue, entry.getValue()).toLong() == 0;
+          }
+          catch (Throwable t) {
             log.log(Level.WARNING, t.toString(), t);
-            
+
             env.warning("An error occurred while invoking the filter callback");
-            
+
             return NullValue.NULL;
-          } 
-        	
-        	if (isFound)
-        		break;
+          }
+
+          if (isFound)
+            break;
         }
       }
-      
+
       if (isFound)
-      	interArray.put(entryKey, entryValue);
+        interArray.put(entryKey, entryValue);
     }
-    
+
     return interArray;
   }
-  
+
   /**
-   * Creates an array with all the values of the first array that are present in the
-   * other arrays, using a provided callback function to determine equivalence. Also
-   * checks the keys for equivalence using an internal comparison.
-   * 
-   * @param arrays  first array is checked against the rest.  Last element is the
-   * 													 callback function.
+   * Creates an array with all the values of the first array that are present in
+   * the other arrays, using a provided callback function to determine
+   * equivalence. Also checks the keys for equivalence using an internal
+   * comparison.
    *
-   * @return an array with all the values of the first array that are in the rest
+   * @param arrays first array is checked against the rest.  Last element is the
+   * callback function.
+   * @return an array with all the values of the first array that are in the
+   *         rest
    */
   public Value array_uintersect_assoc(Env env, Value[] arrays)
   {
     if (arrays.length < 3) {
-    	env.warning("Wrong paremeter count for array_uintersect_assoc()");
-    	
-    	return NullValue.NULL;
+      env.warning("Wrong paremeter count for array_uintersect_assoc()");
+
+      return NullValue.NULL;
     }
-    
+
     if (! (arrays[0] instanceof ArrayValue)) {
-    	env.warning("Argument #1 is not an array");
-    	
-    	return NullValue.NULL;
+      env.warning("Argument #1 is not an array");
+
+      return NullValue.NULL;
     }
-    
+
     ArrayValue array = (ArrayValue) arrays[0];
-    
+
     Value callbackValue = arrays[arrays.length - 1];
-    
+
     Callback cmp = null;
-    
-    try{
-    	cmp = env.createCallback(callbackValue);
+
+    try {
+      cmp = env.createCallback(callbackValue);
     }
     catch (Throwable t) {
-    	log.log(Level.WARNING, t.toString(), t);
-    	
-    	env.warning("Not a valid callback " + callbackValue.toString());
-    	
-    	return NullValue.NULL;
+      log.log(Level.WARNING, t.toString(), t);
+
+      env.warning("Not a valid callback " + callbackValue.toString());
+
+      return NullValue.NULL;
     }
-    
+
     if (cmp == null) {
-    	env.warning("Not a valid callback " + callbackValue.toString());
-    	
-    	return NullValue.NULL;
+      env.warning("Not a valid callback " + callbackValue.toString());
+
+      return NullValue.NULL;
     }
-    
+
     ArrayValue interArray = new ArrayValueImpl();
 
     boolean isFound = true;
-    
-    for (Value entryKey: array.keySet()) {
-    	Value entryValue = array.get(entryKey);
-    	
+
+    for (Value entryKey : array.keySet()) {
+      Value entryValue = array.get(entryKey);
+
       for (int k = 1; k < arrays.length - 1 && isFound; k++) {
-      	if (! (arrays[k] instanceof ArrayValue)) {
-      		env.warning("Argument #" + (k + 1) + " is not an array");
-      		
-      		return NullValue.NULL;
-      	}
-      	
+        if (! (arrays[k] instanceof ArrayValue)) {
+          env.warning("Argument #" + (k + 1) + " is not an array");
+
+          return NullValue.NULL;
+        }
+
         ArrayValue checkArray = (ArrayValue) arrays[k];
-        
-        for (Map.Entry<Value, Value> entry: checkArray.entrySet()) {
-        	try {
-        		boolean keyFound = entryKey.eql(entry.getKey());
-        		
-        		boolean valueFound = false;
-        		
-        		if (keyFound)
-        			valueFound = cmp.eval(env, entryValue, entry.getValue()).toLong() == 0;
-        		
-        		isFound = keyFound && valueFound;
-        	}
-        	catch (Throwable t) {
+
+        for (Map.Entry<Value, Value> entry : checkArray.entrySet()) {
+          try {
+            boolean keyFound = entryKey.eql(entry.getKey());
+
+            boolean valueFound = false;
+
+            if (keyFound)
+              valueFound = cmp.eval(env, entryValue, entry.getValue())
+                .toLong() == 0;
+
+            isFound = keyFound && valueFound;
+          }
+          catch (Throwable t) {
             log.log(Level.WARNING, t.toString(), t);
-            
+
             env.warning("An error occurred while invoking the filter callback");
-            
+
             return NullValue.NULL;
-          } 
-        	
-        	if (isFound)
-        		break;
+          }
+
+          if (isFound)
+            break;
         }
       }
-      
+
       if (isFound)
-      	interArray.put(entryKey, entryValue);
+        interArray.put(entryKey, entryValue);
     }
-    
+
     return interArray;
   }
-  
+
   /**
-   * Creates an array with all the values of the first array that are present in the
-   * other arrays, using a provided callback function to determine equivalence. Also
-   * checks the keys for equivalence using a pass callback function
-   * 
-   * @param arrays  first array is checked against the rest.  Last two elements are the
-   * 													 callback functions.
+   * Creates an array with all the values of the first array that are present in
+   * the other arrays, using a provided callback function to determine
+   * equivalence. Also checks the keys for equivalence using a pass callback
+   * function
    *
-   * @return an array with all the values of the first array that are in the rest
+   * @param arrays first array is checked against the rest.  Last two elements
+   * are the callback functions.
+   * @return an array with all the values of the first array that are in the
+   *         rest
    */
   public Value array_uintersect_uassoc(Env env, Value[] arrays)
   {
     if (arrays.length < 4) {
-    	env.warning("Wrong paremeter count for array_uintersect_uassoc()");
-    	
-    	return NullValue.NULL;
+      env.warning("Wrong paremeter count for array_uintersect_uassoc()");
+
+      return NullValue.NULL;
     }
-    
+
     if (! (arrays[0] instanceof ArrayValue)) {
-    	env.warning("Argument #1 is not an array");
-    	
-    	return NullValue.NULL;
+      env.warning("Argument #1 is not an array");
+
+      return NullValue.NULL;
     }
-    
+
     ArrayValue array = (ArrayValue) arrays[0];
-    
+
     Value callbackValue = arrays[arrays.length - 2];
-    
+
     Callback cmpValue = null;
-    
-    try{
-    	cmpValue = env.createCallback(callbackValue);
+
+    try {
+      cmpValue = env.createCallback(callbackValue);
     }
     catch (Throwable t) {
-    	log.log(Level.WARNING, t.toString(), t);
-    	
-    	env.warning("Not a valid callback " + callbackValue.toString());
-    	
-    	return NullValue.NULL;
+      log.log(Level.WARNING, t.toString(), t);
+
+      env.warning("Not a valid callback " + callbackValue.toString());
+
+      return NullValue.NULL;
     }
-    
+
     if (cmpValue == null) {
-    	env.warning("Not a valid callback " + callbackValue.toString());
-    	
-    	return NullValue.NULL;
+      env.warning("Not a valid callback " + callbackValue.toString());
+
+      return NullValue.NULL;
     }
-    
+
     Value callbackKey = arrays[arrays.length - 1];
-    
+
     Callback cmpKey = null;
-    
-    try{
-    	cmpKey = env.createCallback(callbackKey);
+
+    try {
+      cmpKey = env.createCallback(callbackKey);
     }
     catch (Throwable t) {
-    	log.log(Level.WARNING, t.toString(), t);
-    	
-    	env.warning("Not a valid callback " + callbackKey.toString());
-    	
-    	return NullValue.NULL;
+      log.log(Level.WARNING, t.toString(), t);
+
+      env.warning("Not a valid callback " + callbackKey.toString());
+
+      return NullValue.NULL;
     }
-    
+
     if (cmpKey == null) {
-    	env.warning("Not a valid callback " + callbackKey.toString());
-    	
-    	return NullValue.NULL;
+      env.warning("Not a valid callback " + callbackKey.toString());
+
+      return NullValue.NULL;
     }
-    
+
     ArrayValue interArray = new ArrayValueImpl();
 
     boolean isFound = true;
-    
-    for (Value entryKey: array.keySet()) {
-    	Value entryValue = array.get(entryKey);
-    	
+
+    for (Value entryKey : array.keySet()) {
+      Value entryValue = array.get(entryKey);
+
       for (int k = 1; k < arrays.length - 2 && isFound; k++) {
-      	if (! (arrays[k] instanceof ArrayValue)) {
-      		env.warning("Argument #" + (k + 1) + " is not an array");
-      		
-      		return NullValue.NULL;
-      	}
-      	
+        if (! (arrays[k] instanceof ArrayValue)) {
+          env.warning("Argument #" + (k + 1) + " is not an array");
+
+          return NullValue.NULL;
+        }
+
         ArrayValue checkArray = (ArrayValue) arrays[k];
-        
-        for (Map.Entry<Value, Value> entry: checkArray.entrySet()) {
-        	try {
-        		boolean valueFound = 
-        			cmpValue.eval(env, entryValue, entry.getValue()).toLong() == 0;
-        		
-        		boolean keyFound = false;
-        		
-        		if (valueFound)
-        			keyFound = cmpKey.eval(env, entryKey, entry.getKey()).toLong() == 0;
-        		
-        		isFound = valueFound && keyFound;
-        	}
-        	catch (Throwable t) {
+
+        for (Map.Entry<Value, Value> entry : checkArray.entrySet()) {
+          try {
+            boolean valueFound =
+              cmpValue.eval(env, entryValue, entry.getValue()).toLong() == 0;
+
+            boolean keyFound = false;
+
+            if (valueFound)
+              keyFound = cmpKey.eval(env, entryKey, entry.getKey()).toLong() ==
+                         0;
+
+            isFound = valueFound && keyFound;
+          }
+          catch (Throwable t) {
             log.log(Level.WARNING, t.toString(), t);
-            
+
             env.warning("An error occurred while invoking the filter callback");
-            
+
             return NullValue.NULL;
-          } 
-        	
-        	if (isFound)
-        		break;
+          }
+
+          if (isFound)
+            break;
         }
       }
-      
+
       if (isFound)
-      	interArray.put(entryKey, entryValue);
+        interArray.put(entryKey, entryValue);
     }
-    
+
     return interArray;
   }
-  
+
   /**
-   * Creates an array of corresponding values to variables in the symbol name.  The
-   * passed parameters are the names of the variables to be added to the array.
-   * 
-   * @param variables  contains the names of variables to add to the array
+   * Creates an array of corresponding values to variables in the symbol name.
+   * The passed parameters are the names of the variables to be added to the
+   * array.
    *
+   * @param variables contains the names of variables to add to the array
    * @return an array with the values of variables that match those passed
    */
   @UsesSymbolTable
   public ArrayValue compact(Env env, Value[] variables)
   {
     ArrayValue compactArray = new ArrayValueImpl();
-  	
+
     for (int k = 0; k < variables.length; k++) {
       Value variableName = variables[k];
-  		
+
       if (variableName instanceof StringValue) {
-	Value tableValue = env.getValue(variableName.toString());
-    		
-	if (tableValue.isset())
-	  compactArray.put(variableName, tableValue);
+        Value tableValue = env.getValue(variableName.toString());
+
+        if (tableValue.isset())
+          compactArray.put(variableName, tableValue);
       }
       else if (variableName instanceof ArrayValue) {
-	ArrayValue array = (ArrayValue) variableName;
-    		
-	ArrayValue innerArray = compact(env, array.valuesToArray());
-    		
-	compactArray.putAll(innerArray);
+        ArrayValue array = (ArrayValue) variableName;
+
+        ArrayValue innerArray = compact(env, array.valuesToArray());
+
+        compactArray.putAll(innerArray);
       }
     }
-  	
+
     return compactArray;
   }
-    	
+
   /**
    * Returns the size of the array.
    */
@@ -3394,8 +3378,10 @@ public class QuercusArrayModule extends AbstractQuercusModule {
     return count(value);
   }
 
-  private static class CompareString implements
-    Comparator<Map.Entry<Value, Value>> {
+  private static class CompareString
+    implements
+    Comparator<Map.Entry<Value, Value>>
+  {
     private AbstractGet _getter;
 
     private int _order;
@@ -3406,8 +3392,8 @@ public class QuercusArrayModule extends AbstractQuercusModule {
       _order = order;
     }
 
-    public int compare(Map.Entry<Value,Value> aEntry,
-                       Map.Entry<Value,Value> bEntry)
+    public int compare(Map.Entry<Value, Value> aEntry,
+                       Map.Entry<Value, Value> bEntry)
     {
       String aElement = _getter.get(aEntry).toString();
       String bElement = _getter.get(bEntry).toString();
@@ -3416,8 +3402,10 @@ public class QuercusArrayModule extends AbstractQuercusModule {
     }
   }
 
-  private static class CompareNumeric implements
-    Comparator<Map.Entry<Value, Value>> {
+  private static class CompareNumeric
+    implements
+    Comparator<Map.Entry<Value, Value>>
+  {
     private AbstractGet _getter;
 
     private int _order;
@@ -3428,8 +3416,8 @@ public class QuercusArrayModule extends AbstractQuercusModule {
       _order = order;
     }
 
-    public int compare(Map.Entry<Value,Value> aEntry,
-                       Map.Entry<Value,Value> bEntry)
+    public int compare(Map.Entry<Value, Value> aEntry,
+                       Map.Entry<Value, Value> bEntry)
     {
       try {
         long aElement = _getter.get(aEntry).toLong();
@@ -3441,14 +3429,17 @@ public class QuercusArrayModule extends AbstractQuercusModule {
           return -1 * _order;
         else
           return 1 * _order;
-      } catch (Throwable e) {
+      }
+      catch (Throwable e) {
         throw new RuntimeException(e);
       }
     }
   }
 
-  private static class CompareLocale implements
-    Comparator<Map.Entry<Value, Value>> {
+  private static class CompareLocale
+    implements
+    Comparator<Map.Entry<Value, Value>>
+  {
     private AbstractGet _getter;
 
     private int _order;
@@ -3462,8 +3453,8 @@ public class QuercusArrayModule extends AbstractQuercusModule {
       _collator = collator;
     }
 
-    public int compare(Map.Entry<Value,Value> aEntry,
-                       Map.Entry<Value,Value> bEntry)
+    public int compare(Map.Entry<Value, Value> aEntry,
+                       Map.Entry<Value, Value> bEntry)
     {
       String aElement = _getter.get(aEntry).toString();
       String bElement = _getter.get(bEntry).toString();
@@ -3472,8 +3463,10 @@ public class QuercusArrayModule extends AbstractQuercusModule {
     }
   }
 
-  private static class CompareNormal implements
-    Comparator<Map.Entry<Value, Value>> {
+  private static class CompareNormal
+    implements
+    Comparator<Map.Entry<Value, Value>>
+  {
     private AbstractGet _getter;
 
     private int _order;
@@ -3484,8 +3477,8 @@ public class QuercusArrayModule extends AbstractQuercusModule {
       _order = order;
     }
 
-    public int compare(Map.Entry<Value,Value> aEntry,
-                       Map.Entry<Value,Value> bEntry)
+    public int compare(Map.Entry<Value, Value> aEntry,
+                       Map.Entry<Value, Value> bEntry)
     {
       if (_getter instanceof GetKey) {
         KeyComparator k = new KeyComparator();
@@ -3499,8 +3492,10 @@ public class QuercusArrayModule extends AbstractQuercusModule {
     }
   }
 
-  private static class CompareNatural implements
-    Comparator<Map.Entry<Value, Value>> {
+  private static class CompareNatural
+    implements
+    Comparator<Map.Entry<Value, Value>>
+  {
     private AbstractGet _getter;
 
     private int _order;
@@ -3514,8 +3509,8 @@ public class QuercusArrayModule extends AbstractQuercusModule {
       _isCaseSensitive = isCaseSensitive;
     }
 
-    public int compare(Map.Entry<Value,Value> aEntry,
-                       Map.Entry<Value,Value> bEntry)
+    public int compare(Map.Entry<Value, Value> aEntry,
+                       Map.Entry<Value, Value> bEntry)
     {
       try {
         String aElement = _getter.get(aEntry).toString();
@@ -3529,7 +3524,7 @@ public class QuercusArrayModule extends AbstractQuercusModule {
         StringParser aParser = new StringParser(aElement);
         StringParser bParser = new StringParser(bElement);
 
-        while(aParser.hasNext() && bParser.hasNext()) {
+        while (aParser.hasNext() && bParser.hasNext()) {
           String aPart = aParser.next();
           String bPart = bParser.next();
 
@@ -3558,14 +3553,16 @@ public class QuercusArrayModule extends AbstractQuercusModule {
         else
           return 0;
 
-      } catch (Throwable e) {
+      }
+      catch (Throwable e) {
         throw new RuntimeException(e);
       }
     }
   }
 
   private static class CompareCallBack
-    implements Comparator<Map.Entry<Value, Value>> {
+    implements Comparator<Map.Entry<Value, Value>>
+  {
     private AbstractGet _getter;
 
     private int _order;
@@ -3583,8 +3580,8 @@ public class QuercusArrayModule extends AbstractQuercusModule {
       _env = env;
     }
 
-    public int compare(Map.Entry<Value,Value> aEntry,
-                       Map.Entry<Value,Value> bEntry)
+    public int compare(Map.Entry<Value, Value> aEntry,
+                       Map.Entry<Value, Value> bEntry)
     {
       try {
         Value aElement = _getter.get(aEntry);
@@ -3645,7 +3642,7 @@ public class QuercusArrayModule extends AbstractQuercusModule {
           else if (type == DIGIT && Character.isDigit(_string.charAt(_current)))
             continue;
           else if (type == SYMBOL &&
-            !Character.isLetterOrDigit(_string.charAt(_current)))
+                   !Character.isLetterOrDigit(_string.charAt(_current)))
             continue;
           else
             break;

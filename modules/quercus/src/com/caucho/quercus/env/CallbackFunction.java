@@ -29,21 +29,23 @@
 
 package com.caucho.quercus.env;
 
-import java.io.IOException;
-import java.util.IdentityHashMap;
-
+import com.caucho.quercus.program.AbstractFunction;
 import com.caucho.vfs.WriteStream;
 
-import com.caucho.quercus.program.AbstractFunction;
+import java.util.IdentityHashMap;
 
 /**
  * Represents a call to a function.
  */
 public class CallbackFunction extends Callback {
+ // public static final CallbackFunction INVALID_CALLBACK = new CallbackFunction(null, "Invalid Callback");
+  
   private Env _env;
   private String _funName;
 
   private AbstractFunction _fun;
+  
+  private boolean _isInvalid = false;
 
   public CallbackFunction(Env env, String funName)
   {
@@ -56,6 +58,17 @@ public class CallbackFunction extends Callback {
     _fun = fun;
   }
 
+  public CallbackFunction(String funName, boolean isInvalid)
+  {
+    _funName = funName;
+    _isInvalid = isInvalid;
+  }
+  
+  public boolean isInvalid()
+  {
+    return _isInvalid;
+  }
+  
   /**
    * Evaluates the callback with no arguments.
    *
@@ -130,6 +143,11 @@ public class CallbackFunction extends Callback {
     return getFunction().eval(env, args);
   }
 
+  public String getFunctionName()
+  {
+    return _funName;
+  }
+  
   public AbstractFunction getFunction()
   {
     if (_fun == null)

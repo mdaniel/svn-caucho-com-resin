@@ -29,33 +29,14 @@
 
 package com.caucho.quercus.module;
 
-import java.io.IOException;
-
-import java.lang.reflect.Method;
-import java.lang.annotation.Annotation;
-
 import com.caucho.quercus.Quercus;
-
+import com.caucho.quercus.env.*;
 import com.caucho.quercus.expr.Expr;
-import com.caucho.quercus.expr.NullLiteralExpr;
-import com.caucho.quercus.expr.DefaultExpr;
-
-import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.Value;
-import com.caucho.quercus.env.NullValue;
-import com.caucho.quercus.env.StringValue;
-import com.caucho.quercus.env.BooleanValue;
-import com.caucho.quercus.env.LongValue;
-import com.caucho.quercus.env.DoubleValue;
-import com.caucho.quercus.env.Callback;
-
-import com.caucho.quercus.program.AbstractFunction;
-
 import com.caucho.quercus.gen.PhpWriter;
-
+import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 
-import com.caucho.util.L10N;
+import java.io.IOException;
 
 /**
  * Code for marshalling arguments.
@@ -64,14 +45,14 @@ abstract public class Marshall {
   private static final L10N L = new L10N(Marshall.class);
 
   public static Marshall create(Quercus quercus,
-				Class argType)
+                                Class argType)
   {
     return create(quercus, argType, false);
   }
 
   public static Marshall create(Quercus quercus,
-				Class argType,
-				boolean isNotNull)
+                                Class argType,
+                                boolean isNotNull)
   {
     if (argType.isAssignableFrom(Value.class)) {
       return MARSHALL_VALUE;
@@ -81,7 +62,8 @@ abstract public class Marshall {
     }
     else if (boolean.class.equals(argType)) {
       return MARSHALL_BOOLEAN;
-    } else if (Boolean.class.equals(argType)) {
+    }
+    else if (Boolean.class.equals(argType)) {
       return MARSHALL_BOOLEAN_OBJECT;
     }
     else if (byte.class.equals(argType)) {
@@ -143,10 +125,10 @@ abstract public class Marshall {
     }
     else {
       return new JavaMarshall(quercus.getJavaClassDefinition(argType.getName()),
-			      isNotNull);
+                              isNotNull);
     }
   }
-  
+
   /**
    * Returns true if the result is a primitive boolean.
    */
@@ -186,25 +168,25 @@ abstract public class Marshall {
   {
     return true;
   }
-  
+
   abstract public Object marshall(Env env, Expr expr, Class argClass)
     throws Throwable;
-  
+
   public Object marshall(Env env, Value value, Class argClass)
     throws Throwable
   {
     return value;
   }
-  
+
   abstract public void generate(PhpWriter out, Expr expr, Class argClass)
     throws IOException;
-    
+
   public Value unmarshall(Env env, Object value)
     throws Throwable
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
-    
+
   public void generateResultStart(PhpWriter out)
     throws IOException
   {
@@ -212,898 +194,904 @@ abstract public class Marshall {
   }
 
   static final Marshall MARSHALL_VALUE = new Marshall() {
-      public boolean isReadOnly()
-      {
-	return false;
-      }
-      
-      public Object marshall(Env env, Expr expr, Class expectedClass)
-	throws Throwable
-      {
-	return expr.eval(env);
-      }
-    
-      public Object marshall(Env env, Value value, Class expectedClass)
-	throws Throwable
-      {
-	return value;
-      }
-    
-      public Value unmarshall(Env env, Object value)
-	throws Throwable
-      {
-	return (Value) value;
-      }
-    
-      public void generate(PhpWriter out, Expr expr, Class argClass)
-	throws IOException
-      {
-	// php/3a70 vs php/3783 - see generated code
-	// generate vs generateValue
-	expr.generateValue(out);
-      }
-    
-      public void generateResultStart(PhpWriter out)
-	throws IOException
-      {
-	out.print("((Value) ");
-      }
-    };
+    public boolean isReadOnly()
+    {
+      return false;
+    }
+
+    public Object marshall(Env env, Expr expr, Class expectedClass)
+      throws Throwable
+    {
+      return expr.eval(env);
+    }
+
+    public Object marshall(Env env, Value value, Class expectedClass)
+      throws Throwable
+    {
+      return value;
+    }
+
+    public Value unmarshall(Env env, Object value)
+      throws Throwable
+    {
+      return (Value) value;
+    }
+
+    public void generate(PhpWriter out, Expr expr, Class argClass)
+      throws IOException
+    {
+      // php/3a70 vs php/3783 - see generated code
+      // generate vs generateValue
+      expr.generateValue(out);
+    }
+
+    public void generateResultStart(PhpWriter out)
+      throws IOException
+    {
+      out.print("((Value) ");
+    }
+  };
 
   static final Marshall MARSHALL_EXT_VALUE = new Marshall() {
-      public boolean isReadOnly()
-      {
-	return false;
-      }
-      
-      public Object marshall(Env env, Expr expr, Class expectedClass)
-	throws Throwable
-      {
-	return marshall(env, expr.eval(env), expectedClass);
-      }
-    
-      public Object marshall(Env env, Value value, Class expectedClass)
-	throws Throwable
-      {
-	if (value == null || ! value.isset())
-	  return null;
+    public boolean isReadOnly()
+    {
+      return false;
+    }
 
-	// XXX: need QA, added for mantis view bug page
-	value = value.toValue();
-	
-	if (expectedClass.isAssignableFrom(value.getClass()))
-	  return value;
-	else {
-	  String className = expectedClass.getName();
-	  int p = className.lastIndexOf('.');
-	  className = className.substring(p + 1);
-	  
-	  String valueClassName = value.getClass().getName();
-	  p = valueClassName.lastIndexOf('.');
-	  valueClassName = valueClassName.substring(p + 1);
-	  
-	  env.warning(L.l("'{0}' is an unexpected argument, expected {1}",
-			  value, className));
+    public Object marshall(Env env, Expr expr, Class expectedClass)
+      throws Throwable
+    {
+      return marshall(env, expr.eval(env), expectedClass);
+    }
 
-	  return null;
-	}
+    public Object marshall(Env env, Value value, Class expectedClass)
+      throws Throwable
+    {
+      if (value == null || ! value.isset())
+        return null;
+
+      // XXX: need QA, added for mantis view bug page
+      value = value.toValue();
+
+      if (expectedClass.isAssignableFrom(value.getClass()))
+        return value;
+      else {
+        String className = expectedClass.getName();
+        int p = className.lastIndexOf('.');
+        className = className.substring(p + 1);
+
+        String valueClassName = value.getClass().getName();
+        p = valueClassName.lastIndexOf('.');
+        valueClassName = valueClassName.substring(p + 1);
+
+        env.warning(L.l("'{0}' is an unexpected argument, expected {1}",
+                        value, className));
+
+        return null;
       }
-    
-      public Value unmarshall(Env env, Object value)
-	throws Throwable
-      {
-	return (Value) value;
-      }
-    
-      public void generate(PhpWriter out, Expr expr, Class expectedClass)
-	throws IOException
-      {
-	String className = expectedClass.getName();
-	
-	out.print("((" + className + ") env.cast(" +
-		  className + ".class, ");
-	
-	expr.generateValue(out);
-	out.print("))");
-      }
-    
-      public void generateResultStart(PhpWriter out)
-	throws IOException
-      {
-	out.print("((Value) ");
-      }
-    };
+    }
+
+    public Value unmarshall(Env env, Object value)
+      throws Throwable
+    {
+      return (Value) value;
+    }
+
+    public void generate(PhpWriter out, Expr expr, Class expectedClass)
+      throws IOException
+    {
+      String className = expectedClass.getName();
+
+      out.print("((" + className + ") env.cast(" +
+                className + ".class, ");
+
+      expr.generateValue(out);
+      out.print("))");
+    }
+
+    public void generateResultStart(PhpWriter out)
+      throws IOException
+    {
+      out.print("((Value) ");
+    }
+  };
 
   static final Marshall MARSHALL_STRING = new Marshall() {
-      public boolean isString()
-      {
-	return true;
-      }
-      
-      public Object marshall(Env env, Expr expr, Class expectedClass)
-	throws Throwable
-      {
-	return expr.evalString(env);
-      }
-      
-      public Object marshall(Env env, Value value, Class expectedClass)
-	throws Throwable
-      {
-	return value.toString();
-      }
-    
-      public Value unmarshall(Env env, Object value)
-	throws Throwable
-      {
-	if (value == null)
-	  return NullValue.NULL;
-	else
-	  return new StringValue((String) value);
-      }
-    
-      public void generate(PhpWriter out, Expr expr, Class argClass)
-	throws IOException
-      {
-	expr.generateString(out);
-      }
-    
-      public void generateResultStart(PhpWriter out)
-	throws IOException
-      {
-	out.print("StringValue.create(");
-      }
-    };
+    public boolean isString()
+    {
+      return true;
+    }
+
+    public Object marshall(Env env, Expr expr, Class expectedClass)
+      throws Throwable
+    {
+      return expr.evalString(env);
+    }
+
+    public Object marshall(Env env, Value value, Class expectedClass)
+      throws Throwable
+    {
+      return value.toString();
+    }
+
+    public Value unmarshall(Env env, Object value)
+      throws Throwable
+    {
+      if (value == null)
+        return NullValue.NULL;
+      else
+        return new StringValue((String) value);
+    }
+
+    public void generate(PhpWriter out, Expr expr, Class argClass)
+      throws IOException
+    {
+      expr.generateString(out);
+    }
+
+    public void generateResultStart(PhpWriter out)
+      throws IOException
+    {
+      out.print("StringValue.create(");
+    }
+  };
 
   static final Marshall MARSHALL_BOOLEAN = new Marshall() {
-      public boolean isBoolean()
-      {
-	return true;
-      }
-      
-      public Object marshall(Env env, Expr expr, Class expectedClass)
-	throws Throwable
-      {
-	return expr.evalBoolean(env) ? Boolean.TRUE : Boolean.FALSE;
-      }
-      
-      public Object marshall(Env env, Value value, Class expectedClass)
-	throws Throwable
-      {
-	return value.toBoolean() ? Boolean.TRUE : Boolean.FALSE;
-      }
-    
-      public void generate(PhpWriter out, Expr expr, Class argClass)
-	throws IOException
-      {
-	expr.generateBoolean(out);
-      }
-    
-      public Value unmarshall(Env env, Object value)
-	throws Throwable
-      {
-	if (value == null)
-	  return NullValue.NULL;
-	else
-	  return Boolean.TRUE.equals(value) ? BooleanValue.TRUE : BooleanValue.FALSE;
-      }
-    
-      public void generateResultStart(PhpWriter out)
-	throws IOException
-      {
-	out.print("BooleanValue.create(");
-      }
-    };
+    public boolean isBoolean()
+    {
+      return true;
+    }
+
+    public Object marshall(Env env, Expr expr, Class expectedClass)
+      throws Throwable
+    {
+      return expr.evalBoolean(env) ? Boolean.TRUE : Boolean.FALSE;
+    }
+
+    public Object marshall(Env env, Value value, Class expectedClass)
+      throws Throwable
+    {
+      return value.toBoolean() ? Boolean.TRUE : Boolean.FALSE;
+    }
+
+    public void generate(PhpWriter out, Expr expr, Class argClass)
+      throws IOException
+    {
+      expr.generateBoolean(out);
+    }
+
+    public Value unmarshall(Env env, Object value)
+      throws Throwable
+    {
+      if (value == null)
+        return NullValue.NULL;
+      else
+        return Boolean.TRUE.equals(value)
+               ? BooleanValue.TRUE
+               : BooleanValue.FALSE;
+    }
+
+    public void generateResultStart(PhpWriter out)
+      throws IOException
+    {
+      out.print("BooleanValue.create(");
+    }
+  };
 
   static final Marshall MARSHALL_BOOLEAN_OBJECT = new Marshall() {
-      public Object marshall(Env env, Expr expr, Class expectedClass)
-	throws Throwable
-      {
-	return expr.evalBoolean(env) ? Boolean.TRUE : Boolean.FALSE;
-      }
-          
-      public Object marshall(Env env, Value value, Class expectedClass)
-	throws Throwable
-      {
-	return value.toBoolean() ? Boolean.TRUE : Boolean.FALSE;
-      }
+    public Object marshall(Env env, Expr expr, Class expectedClass)
+      throws Throwable
+    {
+      return expr.evalBoolean(env) ? Boolean.TRUE : Boolean.FALSE;
+    }
 
-      public void generate(PhpWriter out, Expr expr, Class argClass)
-	throws IOException
-      {
-	out.print("(");
-	expr.generateBoolean(out);
-	out.print("? Boolean.TRUE : Boolean.FALSE)");
-      }
-    
-      public Value unmarshall(Env env, Object value)
-	throws Throwable
-      {
-	if (value == null)
-	  return NullValue.NULL;
-	else
-	  return Boolean.TRUE.equals(value) ? BooleanValue.TRUE : BooleanValue.FALSE;
-      }
-    
-      public void generateResultStart(PhpWriter out)
-	throws IOException
-      {
-	out.print("BooleanValue.create(");
-      }
-    };
+    public Object marshall(Env env, Value value, Class expectedClass)
+      throws Throwable
+    {
+      return value.toBoolean() ? Boolean.TRUE : Boolean.FALSE;
+    }
+
+    public void generate(PhpWriter out, Expr expr, Class argClass)
+      throws IOException
+    {
+      out.print("(");
+      expr.generateBoolean(out);
+      out.print("? Boolean.TRUE : Boolean.FALSE)");
+    }
+
+    public Value unmarshall(Env env, Object value)
+      throws Throwable
+    {
+      if (value == null)
+        return NullValue.NULL;
+      else
+        return Boolean.TRUE.equals(value)
+               ? BooleanValue.TRUE
+               : BooleanValue.FALSE;
+    }
+
+    public void generateResultStart(PhpWriter out)
+      throws IOException
+    {
+      out.print("BooleanValue.create(");
+    }
+  };
 
   static final Marshall MARSHALL_BYTE = new Marshall() {
-      public boolean isLong()
-      {
-	return true;
-      }
-      
-      public Object marshall(Env env, Expr expr, Class expectedClass)
-	throws Throwable
-      {
-	return new Byte((byte) expr.evalLong(env));
-      }
-          
-      public Object marshall(Env env, Value value, Class expectedClass)
-	throws Throwable
-      {
-	return new Byte((byte) value.toLong());
-      }
-    
-      public void generate(PhpWriter out, Expr expr, Class argClass)
-	throws IOException
-      {
-	out.print("(byte) ");
-	expr.generateLong(out);
-      }
-    
-      public Value unmarshall(Env env, Object value)
-	throws Throwable
-      {
-	if (value == null)
-	  return LongValue.ZERO;
-	else
-	  return new LongValue(((Number) value).longValue());
-      }
-    
-      public void generateResultStart(PhpWriter out)
-	throws IOException
-      {
-	out.print("LongValue.create(");
-      }
-    };
+    public boolean isLong()
+    {
+      return true;
+    }
+
+    public Object marshall(Env env, Expr expr, Class expectedClass)
+      throws Throwable
+    {
+      return new Byte((byte) expr.evalLong(env));
+    }
+
+    public Object marshall(Env env, Value value, Class expectedClass)
+      throws Throwable
+    {
+      return new Byte((byte) value.toLong());
+    }
+
+    public void generate(PhpWriter out, Expr expr, Class argClass)
+      throws IOException
+    {
+      out.print("(byte) ");
+      expr.generateLong(out);
+    }
+
+    public Value unmarshall(Env env, Object value)
+      throws Throwable
+    {
+      if (value == null)
+        return LongValue.ZERO;
+      else
+        return new LongValue(((Number) value).longValue());
+    }
+
+    public void generateResultStart(PhpWriter out)
+      throws IOException
+    {
+      out.print("LongValue.create(");
+    }
+  };
 
   static final Marshall MARSHALL_BYTE_OBJECT = new Marshall() {
-      public Object marshall(Env env, Expr expr, Class expectedClass)
-	throws Throwable
-      {
-	return new Byte((byte) expr.evalLong(env));
-      }
-          
-      public Object marshall(Env env, Value value, Class expectedClass)
-	throws Throwable
-      {
-	return new Byte((byte) value.toLong());
-      }
-    
-      public void generate(PhpWriter out, Expr expr, Class argClass)
-	throws IOException
-      {
-	out.print("new Byte((byte) ");
-	expr.generateLong(out);
-	out.print(")");
-      }
-    
-      public Value unmarshall(Env env, Object value)
-	throws Throwable
-      {
-	if (value == null)
-	  return LongValue.ZERO;
-	else
-	  return new LongValue(((Number) value).longValue());
-      }
-    
-      public void generateResultStart(PhpWriter out)
-	throws IOException
-      {
-	out.print("LongValue.create(");
-      }
-    };
+    public Object marshall(Env env, Expr expr, Class expectedClass)
+      throws Throwable
+    {
+      return new Byte((byte) expr.evalLong(env));
+    }
+
+    public Object marshall(Env env, Value value, Class expectedClass)
+      throws Throwable
+    {
+      return new Byte((byte) value.toLong());
+    }
+
+    public void generate(PhpWriter out, Expr expr, Class argClass)
+      throws IOException
+    {
+      out.print("new Byte((byte) ");
+      expr.generateLong(out);
+      out.print(")");
+    }
+
+    public Value unmarshall(Env env, Object value)
+      throws Throwable
+    {
+      if (value == null)
+        return LongValue.ZERO;
+      else
+        return new LongValue(((Number) value).longValue());
+    }
+
+    public void generateResultStart(PhpWriter out)
+      throws IOException
+    {
+      out.print("LongValue.create(");
+    }
+  };
 
   static final Marshall MARSHALL_SHORT = new Marshall() {
-      public boolean isLong()
-      {
-	return true;
-      }
-      
-      public Object marshall(Env env, Expr expr, Class expectedClass)
-	throws Throwable
-      {
-	return new Short((short) expr.evalLong(env));
-      }
-          
-      public Object marshall(Env env, Value value, Class expectedClass)
-	throws Throwable
-      {
-	return new Short((short) value.toLong());
-      }
-    
-      public void generate(PhpWriter out, Expr expr, Class argClass)
-	throws IOException
-      {
-	out.print("(short) ");
-	expr.generateLong(out);
-      }
-    
-      public Value unmarshall(Env env, Object value)
-	throws Throwable
-      {
-	if (value == null)
-	  return LongValue.ZERO;
-	else
-	  return new LongValue(((Number) value).longValue());
-      }
-    
-      public void generateResultStart(PhpWriter out)
-	throws IOException
-      {
-	out.print("LongValue.create(");
-      }
-    };
+    public boolean isLong()
+    {
+      return true;
+    }
+
+    public Object marshall(Env env, Expr expr, Class expectedClass)
+      throws Throwable
+    {
+      return new Short((short) expr.evalLong(env));
+    }
+
+    public Object marshall(Env env, Value value, Class expectedClass)
+      throws Throwable
+    {
+      return new Short((short) value.toLong());
+    }
+
+    public void generate(PhpWriter out, Expr expr, Class argClass)
+      throws IOException
+    {
+      out.print("(short) ");
+      expr.generateLong(out);
+    }
+
+    public Value unmarshall(Env env, Object value)
+      throws Throwable
+    {
+      if (value == null)
+        return LongValue.ZERO;
+      else
+        return new LongValue(((Number) value).longValue());
+    }
+
+    public void generateResultStart(PhpWriter out)
+      throws IOException
+    {
+      out.print("LongValue.create(");
+    }
+  };
 
   static final Marshall MARSHALL_SHORT_OBJECT = new Marshall() {
-      public Object marshall(Env env, Expr expr, Class expectedClass)
-	throws Throwable
-      {
-	return new Short((short) expr.evalLong(env));
-      }
-          
-      public Object marshall(Env env, Value value, Class expectedClass)
-	throws Throwable
-      {
-	return new Short((short) value.toLong());
-      }
-    
-      public void generate(PhpWriter out, Expr expr, Class argClass)
-	throws IOException
-      {
-	out.print("new Short((short) ");
-	expr.generateLong(out);
-	out.print(")");
-      }
-    
-      public Value unmarshall(Env env, Object value)
-	throws Throwable
-      {
-	if (value == null)
-	  return LongValue.ZERO;
-	else
-	  return new LongValue(((Number) value).longValue());
-      }
-    
-      public void generateResultStart(PhpWriter out)
-	throws IOException
-      {
-	out.print("LongValue.create(");
-      }
-    };
+    public Object marshall(Env env, Expr expr, Class expectedClass)
+      throws Throwable
+    {
+      return new Short((short) expr.evalLong(env));
+    }
+
+    public Object marshall(Env env, Value value, Class expectedClass)
+      throws Throwable
+    {
+      return new Short((short) value.toLong());
+    }
+
+    public void generate(PhpWriter out, Expr expr, Class argClass)
+      throws IOException
+    {
+      out.print("new Short((short) ");
+      expr.generateLong(out);
+      out.print(")");
+    }
+
+    public Value unmarshall(Env env, Object value)
+      throws Throwable
+    {
+      if (value == null)
+        return LongValue.ZERO;
+      else
+        return new LongValue(((Number) value).longValue());
+    }
+
+    public void generateResultStart(PhpWriter out)
+      throws IOException
+    {
+      out.print("LongValue.create(");
+    }
+  };
 
   static final Marshall MARSHALL_INTEGER = new Marshall() {
-      public boolean isLong()
-      {
-	return true;
-      }
-      
-      public Object marshall(Env env, Expr expr, Class expectedClass)
-	throws Throwable
-      {
-	return new Integer((int) expr.evalLong(env));
-      }
-          
-      public Object marshall(Env env, Value value, Class expectedClass)
-	throws Throwable
-      {
-	return new Integer((int) value.toLong());
-      }
-    
-      public void generate(PhpWriter out, Expr expr, Class argClass)
-	throws IOException
-      {
-	out.print("(int) ");
-	expr.generateLong(out);
-      }
-    
-      public Value unmarshall(Env env, Object value)
-	throws Throwable
-      {
-	if (value == null)
-	  return LongValue.ZERO;
-	else
-	  return new LongValue(((Number) value).longValue());
-      }
-    
-      public void generateResultStart(PhpWriter out)
-	throws IOException
-      {
-	out.print("LongValue.create(");
-      }
-    };
+    public boolean isLong()
+    {
+      return true;
+    }
+
+    public Object marshall(Env env, Expr expr, Class expectedClass)
+      throws Throwable
+    {
+      return new Integer((int) expr.evalLong(env));
+    }
+
+    public Object marshall(Env env, Value value, Class expectedClass)
+      throws Throwable
+    {
+      return new Integer((int) value.toLong());
+    }
+
+    public void generate(PhpWriter out, Expr expr, Class argClass)
+      throws IOException
+    {
+      out.print("(int) ");
+      expr.generateLong(out);
+    }
+
+    public Value unmarshall(Env env, Object value)
+      throws Throwable
+    {
+      if (value == null)
+        return LongValue.ZERO;
+      else
+        return new LongValue(((Number) value).longValue());
+    }
+
+    public void generateResultStart(PhpWriter out)
+      throws IOException
+    {
+      out.print("LongValue.create(");
+    }
+  };
 
   static final Marshall MARSHALL_INTEGER_OBJECT = new Marshall() {
-      public Object marshall(Env env, Expr expr, Class expectedClass)
-	throws Throwable
-      {
-	return new Integer((int) expr.evalLong(env));
-      }
-          
-      public Object marshall(Env env, Value value, Class expectedClass)
-	throws Throwable
-      {
-	return new Integer((int) value.toLong());
-      }
-    
-      public void generate(PhpWriter out, Expr expr, Class argClass)
-	throws IOException
-      {
-	out.print("new Integer((int) ");
-	expr.generateLong(out);
-	out.print(")");
-      }
-    
-      public Value unmarshall(Env env, Object value)
-	throws Throwable
-      {
-	if (value == null)
-	  return LongValue.ZERO;
-	else
-	  return new LongValue(((Number) value).longValue());
-      }
-    
-      public void generateResultStart(PhpWriter out)
-	throws IOException
-      {
-	out.print("LongValue.create(");
-      }
-    };
+    public Object marshall(Env env, Expr expr, Class expectedClass)
+      throws Throwable
+    {
+      return new Integer((int) expr.evalLong(env));
+    }
+
+    public Object marshall(Env env, Value value, Class expectedClass)
+      throws Throwable
+    {
+      return new Integer((int) value.toLong());
+    }
+
+    public void generate(PhpWriter out, Expr expr, Class argClass)
+      throws IOException
+    {
+      out.print("new Integer((int) ");
+      expr.generateLong(out);
+      out.print(")");
+    }
+
+    public Value unmarshall(Env env, Object value)
+      throws Throwable
+    {
+      if (value == null)
+        return LongValue.ZERO;
+      else
+        return new LongValue(((Number) value).longValue());
+    }
+
+    public void generateResultStart(PhpWriter out)
+      throws IOException
+    {
+      out.print("LongValue.create(");
+    }
+  };
 
   static final Marshall MARSHALL_LONG = new Marshall() {
-      public boolean isLong()
-      {
-	return true;
-      }
-      
-      public Object marshall(Env env, Expr expr, Class expectedClass)
-	throws Throwable
-      {
-	return new Long(expr.evalLong(env));
-      }
-          
-      public Object marshall(Env env, Value value, Class expectedClass)
-	throws Throwable
-      {
-	return new Long(value.toLong());
-      }
-    
-      public void generate(PhpWriter out, Expr expr, Class argClass)
-	throws IOException
-      {
-	expr.generateLong(out);
-      }
-    
-      public Value unmarshall(Env env, Object value)
-	throws Throwable
-      {
-	if (value == null)
-	  return LongValue.ZERO;
-	else
-	  return new LongValue(((Number) value).longValue());
-      }
-    
-      public void generateResultStart(PhpWriter out)
-	throws IOException
-      {
-	out.print("LongValue.create(");
-      }
-    };
+    public boolean isLong()
+    {
+      return true;
+    }
+
+    public Object marshall(Env env, Expr expr, Class expectedClass)
+      throws Throwable
+    {
+      return new Long(expr.evalLong(env));
+    }
+
+    public Object marshall(Env env, Value value, Class expectedClass)
+      throws Throwable
+    {
+      return new Long(value.toLong());
+    }
+
+    public void generate(PhpWriter out, Expr expr, Class argClass)
+      throws IOException
+    {
+      expr.generateLong(out);
+    }
+
+    public Value unmarshall(Env env, Object value)
+      throws Throwable
+    {
+      if (value == null)
+        return LongValue.ZERO;
+      else
+        return new LongValue(((Number) value).longValue());
+    }
+
+    public void generateResultStart(PhpWriter out)
+      throws IOException
+    {
+      out.print("LongValue.create(");
+    }
+  };
 
   static final Marshall MARSHALL_LONG_OBJECT = new Marshall() {
-      public Object marshall(Env env, Expr expr, Class expectedClass)
-	throws Throwable
-      {
-	return new Long(expr.evalLong(env));
-      }
-          
-      public Object marshall(Env env, Value value, Class expectedClass)
-	throws Throwable
-      {
-	return new Long(value.toLong());
-      }
-    
-      public void generate(PhpWriter out, Expr expr, Class argClass)
-	throws IOException
-      {
-	out.print("new Long(");
-	expr.generateLong(out);
-	out.print(")");
-      }
-    
-      public Value unmarshall(Env env, Object value)
-	throws Throwable
-      {
-	if (value == null)
-	  return LongValue.ZERO;
-	else
-	  return new LongValue(((Number) value).longValue());
-      }
-    
-      public void generateResultStart(PhpWriter out)
-	throws IOException
-      {
-	out.print("LongValue.create(");
-      }
-    };
+    public Object marshall(Env env, Expr expr, Class expectedClass)
+      throws Throwable
+    {
+      return new Long(expr.evalLong(env));
+    }
+
+    public Object marshall(Env env, Value value, Class expectedClass)
+      throws Throwable
+    {
+      return new Long(value.toLong());
+    }
+
+    public void generate(PhpWriter out, Expr expr, Class argClass)
+      throws IOException
+    {
+      out.print("new Long(");
+      expr.generateLong(out);
+      out.print(")");
+    }
+
+    public Value unmarshall(Env env, Object value)
+      throws Throwable
+    {
+      if (value == null)
+        return LongValue.ZERO;
+      else
+        return new LongValue(((Number) value).longValue());
+    }
+
+    public void generateResultStart(PhpWriter out)
+      throws IOException
+    {
+      out.print("LongValue.create(");
+    }
+  };
 
   static final Marshall MARSHALL_FLOAT = new Marshall() {
-      public boolean isDouble()
-      {
-	return true;
-      }
-      
-      public Object marshall(Env env, Expr expr, Class expectedClass)
-	throws Throwable
-      {
-	return new Float((float) expr.evalDouble(env));
-      }
-          
-      public Object marshall(Env env, Value value, Class expectedClass)
-	throws Throwable
-      {
-	return new Float((float) value.toDouble());
-      }
-    
-      public void generate(PhpWriter out, Expr expr, Class argClass)
-	throws IOException
-      {
-	out.print("(float) ");
-	expr.generateDouble(out);
-      }
-    
-      public Value unmarshall(Env env, Object value)
-	throws Throwable
-      {
-	if (value == null)
-	  return DoubleValue.ZERO;
-	else
-	  return new DoubleValue(((Number) value).doubleValue());
-      }
-    
-      public void generateResultStart(PhpWriter out)
-	throws IOException
-      {
-	out.print("DoubleValue.create(");
-      }
-    };
+    public boolean isDouble()
+    {
+      return true;
+    }
+
+    public Object marshall(Env env, Expr expr, Class expectedClass)
+      throws Throwable
+    {
+      return new Float((float) expr.evalDouble(env));
+    }
+
+    public Object marshall(Env env, Value value, Class expectedClass)
+      throws Throwable
+    {
+      return new Float((float) value.toDouble());
+    }
+
+    public void generate(PhpWriter out, Expr expr, Class argClass)
+      throws IOException
+    {
+      out.print("(float) ");
+      expr.generateDouble(out);
+    }
+
+    public Value unmarshall(Env env, Object value)
+      throws Throwable
+    {
+      if (value == null)
+        return DoubleValue.ZERO;
+      else
+        return new DoubleValue(((Number) value).doubleValue());
+    }
+
+    public void generateResultStart(PhpWriter out)
+      throws IOException
+    {
+      out.print("DoubleValue.create(");
+    }
+  };
 
   static final Marshall MARSHALL_FLOAT_OBJECT = new Marshall() {
-      public Object marshall(Env env, Expr expr, Class expectedClass)
-	throws Throwable
-      {
-	return new Float((float) expr.evalDouble(env));
-      }
-          
-      public Object marshall(Env env, Value value, Class expectedClass)
-	throws Throwable
-      {
-	return new Float((float) value.toDouble());
-      }
-    
-      public void generate(PhpWriter out, Expr expr, Class argClass)
-	throws IOException
-      {
-	out.print("new Float((float) ");
-	expr.generateDouble(out);
-	out.print(")");
-      }
-    
-      public Value unmarshall(Env env, Object value)
-	throws Throwable
-      {
-	if (value == null)
-	  return DoubleValue.ZERO;
-	else
-	  return new DoubleValue(((Number) value).doubleValue());
-      }
-    
-      public void generateResultStart(PhpWriter out)
-	throws IOException
-      {
-	out.print("DoubleValue.create(");
-      }
-    };
+    public Object marshall(Env env, Expr expr, Class expectedClass)
+      throws Throwable
+    {
+      return new Float((float) expr.evalDouble(env));
+    }
+
+    public Object marshall(Env env, Value value, Class expectedClass)
+      throws Throwable
+    {
+      return new Float((float) value.toDouble());
+    }
+
+    public void generate(PhpWriter out, Expr expr, Class argClass)
+      throws IOException
+    {
+      out.print("new Float((float) ");
+      expr.generateDouble(out);
+      out.print(")");
+    }
+
+    public Value unmarshall(Env env, Object value)
+      throws Throwable
+    {
+      if (value == null)
+        return DoubleValue.ZERO;
+      else
+        return new DoubleValue(((Number) value).doubleValue());
+    }
+
+    public void generateResultStart(PhpWriter out)
+      throws IOException
+    {
+      out.print("DoubleValue.create(");
+    }
+  };
 
   static final Marshall MARSHALL_DOUBLE = new Marshall() {
-      public boolean isDouble()
-      {
-	return true;
-      }
-      
-      public Object marshall(Env env, Expr expr, Class expectedClass)
-	throws Throwable
-      {
-	return new Double(expr.evalDouble(env));
-      }
-          
-      public Object marshall(Env env, Value value, Class expectedClass)
-	throws Throwable
-      {
-	return new Double(value.toDouble());
-      }
-    
-      public void generate(PhpWriter out, Expr expr, Class argClass)
-	throws IOException
-      {
-	expr.generateDouble(out);
-      }
-    
-      public Value unmarshall(Env env, Object value)
-	throws Throwable
-      {
-	if (value == null)
-	  return DoubleValue.ZERO;
-	else
-	  return new DoubleValue(((Number) value).doubleValue());
-      }
-    
-      public void generateResultStart(PhpWriter out)
-	throws IOException
-      {
-	out.print("DoubleValue.create(");
-      }
-    };
+    public boolean isDouble()
+    {
+      return true;
+    }
+
+    public Object marshall(Env env, Expr expr, Class expectedClass)
+      throws Throwable
+    {
+      return new Double(expr.evalDouble(env));
+    }
+
+    public Object marshall(Env env, Value value, Class expectedClass)
+      throws Throwable
+    {
+      return new Double(value.toDouble());
+    }
+
+    public void generate(PhpWriter out, Expr expr, Class argClass)
+      throws IOException
+    {
+      expr.generateDouble(out);
+    }
+
+    public Value unmarshall(Env env, Object value)
+      throws Throwable
+    {
+      if (value == null)
+        return DoubleValue.ZERO;
+      else
+        return new DoubleValue(((Number) value).doubleValue());
+    }
+
+    public void generateResultStart(PhpWriter out)
+      throws IOException
+    {
+      out.print("DoubleValue.create(");
+    }
+  };
 
   static final Marshall MARSHALL_DOUBLE_OBJECT = new Marshall() {
-      public Object marshall(Env env, Expr expr, Class expectedClass)
-	throws Throwable
-      {
-	return new Double(expr.evalDouble(env));
-      }
-          
-      public Object marshall(Env env, Value value, Class expectedClass)
-	throws Throwable
-      {
-	return new Double(value.toDouble());
-      }
-    
-      public void generate(PhpWriter out, Expr expr, Class argClass)
-	throws IOException
-      {
-	out.print("new Double(");
-	expr.generateDouble(out);
-	out.print(")");
-      }
-    
-      public Value unmarshall(Env env, Object value)
-	throws Throwable
-      {
-	if (value == null)
-	  return DoubleValue.ZERO;
-	else
-	  return new DoubleValue(((Number) value).doubleValue());
-      }
-    
-      public void generateResultStart(PhpWriter out)
-	throws IOException
-      {
-	out.print("DoubleValue.create(");
-      }
-    };
+    public Object marshall(Env env, Expr expr, Class expectedClass)
+      throws Throwable
+    {
+      return new Double(expr.evalDouble(env));
+    }
+
+    public Object marshall(Env env, Value value, Class expectedClass)
+      throws Throwable
+    {
+      return new Double(value.toDouble());
+    }
+
+    public void generate(PhpWriter out, Expr expr, Class argClass)
+      throws IOException
+    {
+      out.print("new Double(");
+      expr.generateDouble(out);
+      out.print(")");
+    }
+
+    public Value unmarshall(Env env, Object value)
+      throws Throwable
+    {
+      if (value == null)
+        return DoubleValue.ZERO;
+      else
+        return new DoubleValue(((Number) value).doubleValue());
+    }
+
+    public void generateResultStart(PhpWriter out)
+      throws IOException
+    {
+      out.print("DoubleValue.create(");
+    }
+  };
 
   static final Marshall MARSHALL_CHARACTER = new Marshall() {
-      public Object marshall(Env env, Expr expr, Class expectedClass)
-	throws Throwable
-      {
-	return new Character(expr.evalChar(env));
-      }
-      
-      public Object marshall(Env env, Value value, Class expectedClass)
-	throws Throwable
-      {
-	return new Character(value.toChar());
-      }
-    
-      public void generate(PhpWriter out, Expr expr, Class argClass)
-	throws IOException
-      {
-	expr.generateChar(out);
-      }
-    
-      public Value unmarshall(Env env, Object value)
-	throws Throwable
-      {
-	if (value == null)
-	  return NullValue.NULL;
-	else
-	  return new StringValue(value.toString());
-      }
-    
-      public void generateResultStart(PhpWriter out)
-	throws IOException
-      {
-	out.print("StringValue.create(");
-      }
-    };
+    public Object marshall(Env env, Expr expr, Class expectedClass)
+      throws Throwable
+    {
+      return new Character(expr.evalChar(env));
+    }
+
+    public Object marshall(Env env, Value value, Class expectedClass)
+      throws Throwable
+    {
+      return new Character(value.toChar());
+    }
+
+    public void generate(PhpWriter out, Expr expr, Class argClass)
+      throws IOException
+    {
+      expr.generateChar(out);
+    }
+
+    public Value unmarshall(Env env, Object value)
+      throws Throwable
+    {
+      if (value == null)
+        return NullValue.NULL;
+      else
+        return new StringValue(value.toString());
+    }
+
+    public void generateResultStart(PhpWriter out)
+      throws IOException
+    {
+      out.print("StringValue.create(");
+    }
+  };
 
   static final Marshall MARSHALL_CHARACTER_OBJECT = new Marshall() {
-      public Object marshall(Env env, Expr expr, Class expectedClass)
-	throws Throwable
-      {
-	return new Character(expr.evalChar(env));
-      }
-      
-      public Object marshall(Env env, Value value, Class expectedClass)
-	throws Throwable
-      {
-	return new Character(value.toChar());
-      }
-    
-      public void generate(PhpWriter out, Expr expr, Class argClass)
-	throws IOException
-      {
-	out.print("new Character(");
-	expr.generateChar(out);
-	out.print(")");
-      }
-    
-      public Value unmarshall(Env env, Object value)
-	throws Throwable
-      {
-	if (value == null)
-	  return NullValue.NULL;
-	else
-	  return new StringValue(value.toString());
-      }
-    
-      public void generateResultStart(PhpWriter out)
-	throws IOException
-      {
-	out.print("StringValue.create(");
-      }
-    };
+    public Object marshall(Env env, Expr expr, Class expectedClass)
+      throws Throwable
+    {
+      return new Character(expr.evalChar(env));
+    }
+
+    public Object marshall(Env env, Value value, Class expectedClass)
+      throws Throwable
+    {
+      return new Character(value.toChar());
+    }
+
+    public void generate(PhpWriter out, Expr expr, Class argClass)
+      throws IOException
+    {
+      out.print("new Character(");
+      expr.generateChar(out);
+      out.print(")");
+    }
+
+    public Value unmarshall(Env env, Object value)
+      throws Throwable
+    {
+      if (value == null)
+        return NullValue.NULL;
+      else
+        return new StringValue(value.toString());
+    }
+
+    public void generateResultStart(PhpWriter out)
+      throws IOException
+    {
+      out.print("StringValue.create(");
+    }
+  };
 
   public static final Marshall MARSHALL_REFERENCE = new Marshall() {
-      public boolean isReadOnly()
-      {
-	return false;
-      }
-      
-      public Object marshall(Env env, Expr expr, Class expectedClass)
-	throws Throwable
-      {
-	// quercus/0d1k
-	return expr.evalRef(env);
-      }
-    
-      public Value unmarshall(Env env, Object value)
-	throws Throwable
-      {
-	throw new UnsupportedOperationException();
-      }
-    
-      public void generate(PhpWriter out, Expr expr, Class argClass)
-	throws IOException
-      {
-	expr.generateRef(out);
-      }
-    
-      public void generateResultStart(PhpWriter out)
-	throws IOException
-      {
-	throw new UnsupportedOperationException();
-      }
-    };
+    public boolean isReadOnly()
+    {
+      return false;
+    }
+
+    public Object marshall(Env env, Expr expr, Class expectedClass)
+      throws Throwable
+    {
+      // quercus/0d1k
+      return expr.evalRef(env);
+    }
+
+    public Value unmarshall(Env env, Object value)
+      throws Throwable
+    {
+      throw new UnsupportedOperationException();
+    }
+
+    public void generate(PhpWriter out, Expr expr, Class argClass)
+      throws IOException
+    {
+      expr.generateRef(out);
+    }
+
+    public void generateResultStart(PhpWriter out)
+      throws IOException
+    {
+      throw new UnsupportedOperationException();
+    }
+  };
 
   static final Marshall MARSHALL_PATH = new Marshall() {
-      public Object marshall(Env env, Expr expr, Class expectedClass)
-	throws Throwable
-      {
-	return env.getPwd().lookup(expr.evalString(env));
-      }
-    
-      public Object marshall(Env env, Value value, Class expectedClass)
-	throws Throwable
-      {
-	return env.getPwd().lookup(value.toString());
-      }
-    
-      public Value unmarshall(Env env, Object value)
-	throws Throwable
-      {
-	throw new UnsupportedOperationException();
-      }
-    
-      public void generate(PhpWriter out, Expr expr, Class argClass)
-	throws IOException
-      {
-	out.print("env.getPwd().lookup(");
-	expr.generateString(out);
-	out.print(")");
-      }
-    
-      public void generateResultStart(PhpWriter out)
-	throws IOException
-      {
-	throw new UnsupportedOperationException();
-      }
-    };
+    public Object marshall(Env env, Expr expr, Class expectedClass)
+      throws Throwable
+    {
+      return env.getPwd().lookup(expr.evalString(env));
+    }
+
+    public Object marshall(Env env, Value value, Class expectedClass)
+      throws Throwable
+    {
+      return env.getPwd().lookup(value.toString());
+    }
+
+    public Value unmarshall(Env env, Object value)
+      throws Throwable
+    {
+      throw new UnsupportedOperationException();
+    }
+
+    public void generate(PhpWriter out, Expr expr, Class argClass)
+      throws IOException
+    {
+      out.print("env.getPwd().lookup(");
+      expr.generateString(out);
+      out.print(")");
+    }
+
+    public void generateResultStart(PhpWriter out)
+      throws IOException
+    {
+      throw new UnsupportedOperationException();
+    }
+  };
 
   static final Marshall MARSHALL_CALLBACK = new Marshall() {
-      public Object marshall(Env env, Expr expr, Class expectedClass)
-	throws Throwable
-      {
-	return marshall(env, expr.eval(env), expectedClass);
-      }
-    
-      public Object marshall(Env env, Value value, Class expectedClass)
-	throws Throwable
-      {
-	Callback cb = env.createCallback(value);
+    public Object marshall(Env env, Expr expr, Class expectedClass)
+      throws Throwable
+    {
+      return marshall(env, expr.eval(env), expectedClass);
+    }
 
-	if (cb != null)
-	  return cb;
-	else
-	  return null;
-      }
-    
-      public Value unmarshall(Env env, Object value)
-	throws Throwable
-      {
-	throw new UnsupportedOperationException();
-      }
-    
-      public void generate(PhpWriter out, Expr expr, Class argClass)
-	throws IOException
-      {
-	out.print("env.createCallback(");
-	expr.generate(out);
-	out.print(")");
-      }
-    
-      public void generateResultStart(PhpWriter out)
-	throws IOException
-      {
-	throw new UnsupportedOperationException();
-      }
-    };
+    public Object marshall(Env env, Value value, Class expectedClass)
+      throws Throwable
+    {
+      Callback cb = env.createCallback(value);
+
+      if (cb != null)
+        return cb;
+      else if (value instanceof DefaultValue)
+        return null;
+      else
+        return new CallbackFunction(value.toString(), true); //null;
+    }
+
+    public Value unmarshall(Env env, Object value)
+      throws Throwable
+    {
+      throw new UnsupportedOperationException();
+    }
+
+    public void generate(PhpWriter out, Expr expr, Class argClass)
+      throws IOException
+    {
+      out.print("env.createCallback(");
+      expr.generate(out);
+      out.print(")");
+    }
+
+    public void generateResultStart(PhpWriter out)
+      throws IOException
+    {
+      throw new UnsupportedOperationException();
+    }
+  };
 
   static final Marshall MARSHALL_VOID = new Marshall() {
-      public Object marshall(Env env, Expr expr, Class expectedClass)
-	throws Throwable
-      {
-	throw new UnsupportedOperationException();
-      }
-      
-      public Object marshall(Env env, Value value, Class expectedClass)
-	throws Throwable
-      {
-	throw new UnsupportedOperationException();
-      }
-    
-      public Value unmarshall(Env env, Object value)
-	throws Throwable
-      {
-	return NullValue.NULL;
-      }
-    
-      public void generate(PhpWriter out, Expr expr, Class argClass)
-	throws IOException
-      {
-	throw new UnsupportedOperationException();
-      }
-    
-      public void generateResultStart(PhpWriter out)
-	throws IOException
-      {
-	throw new UnsupportedOperationException();
-      }
-    };
+    public Object marshall(Env env, Expr expr, Class expectedClass)
+      throws Throwable
+    {
+      throw new UnsupportedOperationException();
+    }
+
+    public Object marshall(Env env, Value value, Class expectedClass)
+      throws Throwable
+    {
+      throw new UnsupportedOperationException();
+    }
+
+    public Value unmarshall(Env env, Object value)
+      throws Throwable
+    {
+      return NullValue.NULL;
+    }
+
+    public void generate(PhpWriter out, Expr expr, Class argClass)
+      throws IOException
+    {
+      throw new UnsupportedOperationException();
+    }
+
+    public void generateResultStart(PhpWriter out)
+      throws IOException
+    {
+      throw new UnsupportedOperationException();
+    }
+  };
 }
 
