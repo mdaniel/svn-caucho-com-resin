@@ -290,14 +290,6 @@ abstract public class ArrayValue extends Value {
   }
 
   /**
-   * Returns a sorted set of all the of the entries.
-   */
-  public Set<Map.Entry<Value,Value>> sortedEntrySet()
-  {
-    return new TreeSet<Map.Entry<Value, Value>>(entrySet());
-  }
-
-  /**
    * Returns a collection of the values.
    */
   public Collection<Value> values()
@@ -770,7 +762,7 @@ abstract public class ArrayValue extends Value {
   {
     out.println("array(" + getSize() + ") {");
 
-    for (Map.Entry<Value,Value> mapEntry : sortedEntrySet()) {
+    for (Map.Entry<Value,Value> mapEntry : entrySet()) {
       ArrayValue.Entry entry = (ArrayValue.Entry) mapEntry;
 
       entry.varDump(env, out, depth + 1, valueSet);
@@ -793,7 +785,7 @@ abstract public class ArrayValue extends Value {
     printDepth(out, 8 * depth);
     out.println("(");
 
-    for (Map.Entry<Value,Value> mapEntry : sortedEntrySet()) {
+    for (Map.Entry<Value,Value> mapEntry : entrySet()) {
       ArrayValue.Entry entry = (ArrayValue.Entry) mapEntry;
 
       entry.printR(env, out, depth, valueSet);
@@ -956,32 +948,6 @@ abstract public class ArrayValue extends Value {
     {
       return "ArrayValue.Entry[" + _key + " => " + toValue() + "]";
 
-    }
-
-    public int compareTo(Value o)
-    {
-
-      if (o == null)
-        return 1;
-
-      if (!(o instanceof ArrayValue.Entry))
-        return 1;
-
-      ArrayValue.Entry other = (ArrayValue.Entry) o;
-
-      Value thisKey = getKey();
-      Value otherKey = other.getKey();
-
-      int cmp;
-
-      if (thisKey == null)
-        cmp =  otherKey == null ? 0 : -1;
-      else if (otherKey == null)
-        cmp =  1;
-      else
-        cmp = thisKey.compareTo(otherKey);
-
-      return cmp;
     }
   }
 

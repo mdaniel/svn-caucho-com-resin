@@ -45,7 +45,6 @@ import java.util.IdentityHashMap;
  * Represents a PHP expression value.
  */
 abstract public class Value
-  implements Comparable<Value>
 {
   protected static final L10N L = new L10N(Value.class);
 
@@ -1265,68 +1264,6 @@ abstract public class Value
   {
     for (int i = 0; i < depth; i++)
       out.print(' ');
-  }
-
-  /**
-   * Return a comparison of this value to another value.
-   * -1 is returned if this value is less than the other value, 0 for equality,
-   * and 1 if this value is greater than the other value.
-   *
-   * If the other value is null or is an incompatible type with this value,
-   * 1 is returned.
-   *
-   * This method handles the case of a null <i>o</i> and object equality.
-   * Beyond that, references are followed and then {@link #compareToImpl(Value)}
-   * is called.
-   * Derived classes override {@link #compareToImpl} to provide comparison
-   * specific to their type.
-   */
-  public int compareTo(Value o)
-  {
-    if (o == null)
-      return 1;
-
-    if (o == this)
-      return 0;
-
-    Value thisValue = toValue();
-    Value otherValue = o.toValue();
-
-    if (thisValue != this)
-      return thisValue.compareTo(otherValue);
-
-    return compareToImpl(o);
-  }
-
-  /**
-   * Returns the comparison to another value.
-   *
-   * @param o the other value, guaranteed to be non-null.
-   */
-  protected int compareToImpl(Value o)
-  {
-    Class thisClass = getClass();
-    Class otherClass = o.getClass();
-
-    if (thisClass.isAssignableFrom(otherClass)) {
-      int cmp = thisClass.getName().compareTo(otherClass.getName());
-
-      if (cmp != 0)
-        return cmp;
-    }
-
-    int thisIdentity = hashCode();
-    int otherIdentity = o.hashCode();
-
-    return thisIdentity == otherIdentity ? 0 : (thisIdentity < otherIdentity ? -1 : 1);
-  }
-
-  public boolean equals(Object o)
-  {
-    if (o instanceof Value)
-      return compareTo((Value) o) == 0;
-    else
-      return false;
   }
 }
 

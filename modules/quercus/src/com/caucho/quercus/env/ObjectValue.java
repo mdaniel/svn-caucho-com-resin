@@ -719,9 +719,12 @@ public class ObjectValue extends Value {
     return new EntrySet();
   }
 
+  /**
+   * Returns a Set of entries, sorted by key.
+   */
   public Set<Map.Entry<String,Value>> sortedEntrySet()
   {
-    return new TreeSet<Map.Entry<String, Value>>(new EntrySet());
+    return new TreeSet<Map.Entry<String, Value>>(entrySet());
   }
 
   public String toString()
@@ -821,8 +824,11 @@ public class ObjectValue extends Value {
     }
   }
 
-  public final static class Entry extends Var
-    implements Map.Entry<String,Value> {
+  public final static class Entry
+    extends Var
+    implements Map.Entry<String,Value>,
+               Comparable<Map.Entry<String, Value>>
+  {
     private final String _key;
 
     public Entry(String key)
@@ -924,15 +930,10 @@ public class ObjectValue extends Value {
         return this;
     }
 
-    public int compareTo(Value o)
+    public int compareTo(Map.Entry<String, Value> other)
     {
-      if (o == null)
+      if (other == null)
         return 1;
-
-      if (!(o instanceof Entry))
-        return 1;
-
-      Entry other = (Entry) o;
 
       String thisKey = getKey();
       String otherKey = other.getKey();
