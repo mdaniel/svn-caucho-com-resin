@@ -1996,6 +1996,14 @@ public class Env {
   }
 
   /**
+   * Creates a string from a byte.
+   */
+  public Value createString(byte []buffer, int offset, int length)
+  {
+    return new StringValue(new String(buffer, offset, length));
+  }
+
+  /**
    * Generate an object id.
    */
   public int generateId()

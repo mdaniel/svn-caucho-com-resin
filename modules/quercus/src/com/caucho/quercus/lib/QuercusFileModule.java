@@ -1092,16 +1092,24 @@ public class QuercusFileModule extends AbstractQuercusModule {
 
     FileValue file = (FileValue) fileValue;
 
-    TempStream tempStream = new TempStream();
-    tempStream.openWrite();
-    WriteStream os = new WriteStream(tempStream);
+    TempBuffer tempBuf = TempBuffer.allocate();
+    byte []buffer = tempBuf.getBuffer();
 
-    file.writeToStream(os, length);
+    if (buffer.length < length)
+      length = buffer.length;
 
-    os.close();
+    length = file.read(buffer, 0, length);
 
-    // XX: s/b ReadStreamStringValue ??
-    return new TempBufferStringValue(tempStream.getHead());
+    Value s;
+
+    if (length > 0)
+      s = env.createString(buffer, 0, length);
+    else
+      s = BooleanValue.FALSE;
+
+    TempBuffer.free(tempBuf);
+
+    return s;
   }
 
   /**
