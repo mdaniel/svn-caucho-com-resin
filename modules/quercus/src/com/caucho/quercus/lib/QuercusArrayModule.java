@@ -1608,7 +1608,12 @@ public class QuercusArrayModule
   {
     if (array == null)
       return false;
-
+       
+    if (func.isInvalid()) {
+      env.warning(L.l("Invalid comparison function"));
+      return false;
+    }
+    
     array.sort(new CompareCallBack(ArrayValue.GET_VALUE, SORT_NORMAL, func,
                                    env), NO_KEY_RESET, NOT_STRICT);
 
@@ -1634,6 +1639,11 @@ public class QuercusArrayModule
     if (array == null)
       return false;
 
+    if (func.isInvalid()) {
+      env.warning(L.l("Invalid comparison function"));
+      return false;
+    }
+        
     CompareCallBack cmp;
 
     cmp = new CompareCallBack(ArrayValue.GET_KEY, SORT_NORMAL, func, env);
@@ -1803,7 +1813,7 @@ public class QuercusArrayModule
         break;
       case EXTR_IF_EXISTS:
         if (tableValue == NullValue.NULL)
-          entryValue = tableValue;
+          symbolName = "";//entryValue = tableValue;
 
         break;
       case EXTR_PREFIX_IF_EXISTS:
