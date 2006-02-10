@@ -30,9 +30,6 @@
 package com.caucho.quercus.env;
 
 import com.caucho.quercus.program.AbstractFunction;
-import com.caucho.vfs.WriteStream;
-
-import java.util.IdentityHashMap;
 
 /**
  * Represents a call to a function.
@@ -64,12 +61,12 @@ public class CallbackFunction extends Callback {
     _isInvalid = isInvalid;
   }
   */
-  public boolean isInvalid()
+  public boolean isValid()
   {
     if (_fun != null)
-      return false;
+      return true;
 
-    return _env.findFunction(_funName) == null;
+    return _env.findFunction(_funName) != null;
 
     //return _isInvalid;
   }

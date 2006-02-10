@@ -587,7 +587,7 @@ public class QuercusArrayModule
 
     if (callback != null) {
       
-      if (callback.isInvalid()) {
+      if (!callback.isValid()) {
         env.warning("The second argument, '" + ((CallbackFunction) callback).getFunctionName() + "', should be a valid callback");
         return NullValue.NULL;
       }
@@ -1581,7 +1581,7 @@ public class QuercusArrayModule
     if (array == null)
       return false;
 
-    if (func.isInvalid()) {
+    if (!func.isValid()) {
       env.warning(L.l("Invalid comparison function"));
       return false;
     }
@@ -1614,7 +1614,7 @@ public class QuercusArrayModule
     if (array == null)
       return false;
        
-    if (func.isInvalid()) {
+    if (!func.isValid()) {
       env.warning(L.l("Invalid comparison function"));
       return false;
     }
@@ -1644,7 +1644,7 @@ public class QuercusArrayModule
     if (array == null)
       return false;
 
-    if (func.isInvalid()) {
+    if (!func.isValid()) {
       env.warning(L.l("Invalid comparison function"));
       return false;
     }

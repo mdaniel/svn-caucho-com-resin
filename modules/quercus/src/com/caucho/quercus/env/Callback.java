@@ -95,6 +95,6 @@ abstract public class Callback extends Value {
    * 
    * @return true if this is an invalid callback reference
    */
-  abstract public boolean isInvalid();
+  abstract public boolean isValid();
 }
 

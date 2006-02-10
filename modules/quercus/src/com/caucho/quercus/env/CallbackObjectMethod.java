@@ -134,9 +134,9 @@ public class CallbackObjectMethod extends Callback {
   }
   
   // XXX: just a placeholder, need real implementation here
-  public boolean isInvalid()
+  public boolean isValid()
   {
-    return false;
+    return true;
   }
 }
 
