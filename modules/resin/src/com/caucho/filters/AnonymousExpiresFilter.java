@@ -121,8 +121,8 @@ public class AnonymousExpiresFilter implements Filter {
     if (_cacheTime > 0) {
       HttpServletResponse res = (HttpServletResponse) response;
       
-      res.addHeader("Cache-Control", "x-anonymous");
-      res.setDateHeader("Expires", Alarm.getCurrentTime() + _cacheTime);
+      res.addHeader("Vary", "Cookie");
+      res.addHeader("Cache-Control", "s-maxage=" + _cacheTime);
     }
 
     nextFilter.doFilter(request, response);

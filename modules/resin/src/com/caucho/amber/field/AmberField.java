@@ -88,6 +88,11 @@ public interface AmberField {
   public int getLoadGroupIndex();
 
   /**
+   * Returns the load group mask.
+   */
+  public long getCreateLoadMask(int group);
+
+  /**
    * Returns the getter method.
    */
   public JMethod getGetterMethod();

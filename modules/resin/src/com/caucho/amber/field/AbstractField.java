@@ -229,6 +229,19 @@ abstract public class AbstractField implements AmberField {
   }
 
   /**
+   * Returns the load group mask.
+   */
+  public long getCreateLoadMask(int group)
+  {
+    int index = getLoadGroupIndex();
+
+    if (64 * group <= index && index < 64 * (group + 1))
+      return 1L << (index % 64);
+    else
+      return 0;
+  }
+
+  /**
    * Set true for a lazy field.
    */
   public void setLazy(boolean isLazy)

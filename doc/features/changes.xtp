@@ -2,8 +2,9 @@
 
 <a href='changes-2.xtp'>Resin 2.1 changes</a>
 
-<s2 title='3.0.snap - Jan 24, 2006'>
+<s2 title='3.0.snap - Feb 9, 2006'>
 <ul>
+<li>(2006-02-09) class-loader can now appear anywhere, not just first element (#924, rep by dlcr)
 <li>Amber inheritance needs to work with CMR (#301, rep by Francois Bertrand)
 <li>JMX Notifications on restart (#195, #237, rep by Erik Hartenian, Glenn Rush)
 <li>fmt:param wasn't printing children for validation (#893, rep by Ed Hollingsworth)

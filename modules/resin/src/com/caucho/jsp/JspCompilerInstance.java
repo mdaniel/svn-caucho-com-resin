@@ -651,7 +651,8 @@ public class JspCompilerInstance {
     Path classPath = classDir.lookup(className.replace('.', '/') + ".class");
     Path smapPath =  classDir.lookup(fileName + ".smap");
 
-    compiler.mergeSmap(classPath, smapPath);
+    // jsp/18p1
+    // compiler.mergeSmap(classPath, smapPath);
   }
 
   private void readSmap(ClassLoader loader, String className)

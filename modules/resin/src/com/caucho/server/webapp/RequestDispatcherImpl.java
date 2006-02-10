@@ -183,6 +183,8 @@ public class RequestDispatcherImpl implements RequestDispatcher {
       queryString = newQueryString;
     else if (newQueryString == null)
       queryString = reqQueryString;
+    else if (reqQueryString.equals(newQueryString))
+      queryString = newQueryString;
     else
       queryString = newQueryString + '&' + reqQueryString;
 

@@ -86,8 +86,6 @@ r_document-directory =
   | element document-directory { r_path-Type }
 
 r_ear-Content =
-  r_class-loader?,
-
   (r_env-Content
 
    & r_config-file*
@@ -708,8 +706,6 @@ r_web-app-deploy = element web-app-deploy {
 r_web-app-Basis =
   r_env-Basis
 
-  & r_class-loader-Group
-
   & r_access-log*
 
   & (attribute active-wait-time { r_period }
@@ -810,7 +806,7 @@ r_web-app-Basis =
 r_web-app-Flow =
   r_web-app-Basis
 
-  & element rcore:env { r_class-loader-Group, r_web-app-Flow }*
+  & element rcore:env { r_web-app-Flow }*
 
   & element rcore:if { rcore_if-Args, r_web-app-Flow }*
 

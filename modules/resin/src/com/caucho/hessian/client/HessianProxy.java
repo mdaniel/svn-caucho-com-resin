@@ -121,19 +121,6 @@ public class HessianProxy implements InvocationHandler {
     HttpURLConnection httpConn = null;
     
     try {
-      conn = _factory.openConnection(_url);
-      conn.setRequestProperty("Content-Type", "text/xml");
-    
-      OutputStream os = null;
-
-      try {
-	os = conn.getOutputStream();
-      } catch (Exception e) {
-	throw new HessianRuntimeException(e);
-      }
-
-      HessianOutput out = _factory.getHessianOutput(os);
-
       if (! _factory.isOverloadEnabled()) {
       }
       else if (args != null)
@@ -141,9 +128,7 @@ public class HessianProxy implements InvocationHandler {
       else
         methodName = methodName + "__0";
 
-      out.call(methodName, args);
-    
-      os.flush();
+      conn = sendRequest(methodName, args);
 
       if (conn instanceof HttpURLConnection) {
 	httpConn = (HttpURLConnection) conn;
@@ -181,7 +166,7 @@ public class HessianProxy implements InvocationHandler {
           if (is != null)
             is.close();
 
-          throw new HessianProtocolException(sb.toString());
+          throw new HessianProtocolException(code + ": " + sb.toString());
         }
       }
 
@@ -204,6 +189,43 @@ public class HessianProxy implements InvocationHandler {
 	  httpConn.disconnect();
       } catch (Throwable e) {
       }
+    }
+  }
+
+  private URLConnection sendRequest(String methodName, Object []args)
+    throws IOException
+  {
+    URLConnection conn = null;
+    
+    conn = _factory.openConnection(_url);
+    conn.setRequestProperty("Content-Type", "text/xml");
+    
+    OutputStream os = null;
+
+    try {
+      os = conn.getOutputStream();
+    } catch (Exception e) {
+      throw new HessianRuntimeException(e);
+    }
+
+    try {
+      HessianOutput out = _factory.getHessianOutput(os);
+
+      out.call(methodName, args);
+    
+      os.flush();
+
+      return conn;
+    } catch (IOException e) {
+      if (conn instanceof HttpURLConnection)
+	((HttpURLConnection) conn).disconnect();
+
+      throw e;
+    } catch (RuntimeException e) {
+      if (conn instanceof HttpURLConnection)
+	((HttpURLConnection) conn).disconnect();
+
+      throw e;
     }
   }
 }

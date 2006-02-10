@@ -68,8 +68,6 @@ r_host-Content =
 
   & r_application*
 
-  & r_class-loader-Group
-
   & r_document-directory?
 
   & r_ear-default*
@@ -343,7 +341,7 @@ r_server-Basis =
 
 ## <server> flow control
 r_server-Flow =
-  (r_class-loader-Group?, r_server-Basis)
+  r_server-Basis
 
   & element rcore:env { rcore_env-Args, r_server-Flow }*
 

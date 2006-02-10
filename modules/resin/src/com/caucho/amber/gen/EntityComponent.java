@@ -875,7 +875,7 @@ public class EntityComponent extends ClassComponent {
     
     int loadCount = _entityType.getLoadGroupIndex();
     for (int i = 0; i <= loadCount / 64; i++) {
-      out.println("__caucho_loadMask_" + i + " = -1L;");
+      out.println("__caucho_loadMask_" + i + " = " + _entityType.getCreateLoadMask(i) + ";");
     }
     
     int dirtyCount = _entityType.getDirtyIndex();
@@ -954,7 +954,8 @@ public class EntityComponent extends ClassComponent {
     }
 
     for (int i = 0; i <= loadCount / 64; i++) {
-      out.println("entity.__caucho_loadMask_" + i + " = -1L;");
+      out.print("entity.__caucho_loadMask_" + i + " = ");
+      out.println(_entityType.getCreateLoadMask(i) + ";");
     }
 
     out.println();

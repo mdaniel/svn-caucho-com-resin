@@ -1168,6 +1168,20 @@ public class EntityType extends Type {
   }
 
   /**
+   * Returns the load mask generated on create.
+   */
+  public long getCreateLoadMask(int group)
+  {
+    long mask = 0;
+
+    for (int i = 0; i < _fields.size(); i++) {
+      mask |= _fields.get(i).getCreateLoadMask(group);
+    }
+
+    return mask;
+  }
+    
+  /**
    * Generates the update sql.
    */
   public String generateCreateSQL(Table table)

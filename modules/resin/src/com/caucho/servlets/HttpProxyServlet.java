@@ -183,6 +183,10 @@ public class HttpProxyServlet extends GenericServlet {
 
 	if (name.equalsIgnoreCase("status")) {
 	}
+	else if (name.equalsIgnoreCase("transfer-encoding")) {
+	}
+	else if (name.equalsIgnoreCase("content-length")) {
+	}
 	else if (name.equalsIgnoreCase("location"))
 	  location = (String) rs.getAttribute("location");
 	else

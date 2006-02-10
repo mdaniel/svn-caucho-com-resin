@@ -1141,7 +1141,12 @@ public abstract class AbstractHttpRequest
    */
   public boolean getHasCookie()
   {
-    return _hasCookie;
+    if (_hasCookie)
+      return true;
+    else if (_invocation != null)
+      return _invocation.getSessionId() != null;
+    else
+      return false;
   }
 
   /**
@@ -1324,8 +1329,6 @@ public abstract class AbstractHttpRequest
    */
   private String findSessionIdFromUrl()
   {
-    SessionManager manager = getSessionManager();
-
     // server/1319
     // setVaryCookie(getSessionCookie(manager));
 

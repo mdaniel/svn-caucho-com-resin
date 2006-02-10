@@ -234,7 +234,6 @@ public class BodyResponseStream extends AbstractResponseStream {
     if (length == 0)
       return;
     
-    Thread.dumpStack();
     if (_encodingReader == null) {
       if (_in == null)
 	_in = new BufferInputStream();

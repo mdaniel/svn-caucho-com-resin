@@ -194,11 +194,12 @@ public class IncludeResponseStream extends ToByteResponseStream {
   public void write(int ch)
     throws IOException
   {
-    if (_isCauchoResponseStream)
+    flushCharBuffer();
+    
+    if (_isCauchoResponseStream) {
       super.write(ch);
+    }
     else {
-      flushCharBuffer();
-      
       if (_os == null)
 	_os = _next.getOutputStream();
 
@@ -216,11 +217,11 @@ public class IncludeResponseStream extends ToByteResponseStream {
   public void write(byte []buf, int offset, int length)
     throws IOException
   {
-    if (_isCauchoResponseStream)
+    flushCharBuffer();
+      
+    if (false && _isCauchoResponseStream) // jsp/15dv
       super.write(buf, offset, length);
     else {
-      flushCharBuffer();
-      
       if (_os == null)
 	_os = _next.getOutputStream();
 

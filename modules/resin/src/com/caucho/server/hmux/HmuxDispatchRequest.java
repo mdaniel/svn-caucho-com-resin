@@ -219,8 +219,27 @@ public class HmuxDispatchRequest {
     os.write(channel);
 
     Host host = _server.getHost(hostName, 80);
-    if (host == null || ! host.isActive()) {
+    if (host == null) {
+      writeString(os, HmuxRequest.HMUX_HEADER, "check-interval");
+      writeString(os, HmuxRequest.HMUX_STRING,
+		  String.valueOf(_server.getDependencyCheckInterval() / 1000));
       writeString(os, HMUX_WEB_APP, "");
+
+      if (isLoggable)
+	log.fine(dbgId() + "host '" + host + "' not configured");
+      return;
+    }
+    else if (! host.isActive()) {
+      if (etag == null) {
+	// take control until more information is known
+	writeString(os, HMUX_WEB_APP, "");
+	writeString(os, HMUX_MATCH, "/*");
+      }
+      else {
+	sendQuery(null, host, hostName, url);
+
+	writeString(os, HMUX_NO_CHANGE, "");
+      }
 
       if (isLoggable)
 	log.fine(dbgId() + "host '" + host + "' not active");
