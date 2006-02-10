@@ -85,6 +85,30 @@ static resin_host_t *
 cse_match_host_impl(config_t *config, const char *host_name,
 		    int port, time_t now);
 
+static int
+resin_atoi(char *s)
+{
+  int sign = 1;
+  int value = 0;
+
+  if (*s == '-') {
+    sign = -1;
+    s++;
+  }
+  else if (*s == '+') {
+    s++;
+  }
+
+  for (; *s && '0' <= *s && *s <= '9'; s++) {
+    value = 10 * value + *s - '0';
+
+    if (value < 0)
+      return sign > 0 ? 0x7fffffff : 0x8000000;
+  }
+
+  return sign * value;
+}
+
 static location_t *
 cse_add_unique_location(mem_pool_t *pool, web_app_t *app, char *prefix,
                         char *suffix, int is_exact, int ignore)
@@ -506,11 +530,11 @@ read_config(stream_t *s, config_t *config, resin_host_t *host,
       
       if (ch == HMUX_STRING) {
 	if (! strcmp(buffer, "live-time"))
-	  live_time = atoi(value);
+	  live_time = resin_atoi(value);
 	else if (! strcmp(buffer, "dead-time"))
-	  dead_time = atoi(value);
+	  dead_time = resin_atoi(value);
 	else if (! strcmp(buffer, "check-interval")) {
-	  config->update_interval = atoi(value);
+	  config->update_interval = resin_atoi(value);
 	  if (config->update_interval < 5)
 	    config->update_interval = 5;
 	}

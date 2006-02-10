@@ -70,7 +70,7 @@ public class Zip {
     java.util.zip.ZipEntry entry;
 
     if ((entry = _zipInputStream.getNextEntry()) != null)
-      return env.wrapJava(new ZipEntry(entry));
+      return env.wrapJava(new QuercusZipEntry(entry));
     else
       return BooleanValue.FALSE;
   }

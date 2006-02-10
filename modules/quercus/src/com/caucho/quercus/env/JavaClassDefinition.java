@@ -312,6 +312,9 @@ public class JavaClassDefinition extends AbstractQuercusClass {
   {
     if (type == null || type.equals(Object.class))
       return;
+
+    if (! Modifier.isPublic(type.getModifiers()))
+      return;
     
     Class []ifcs = type.getInterfaces();
     

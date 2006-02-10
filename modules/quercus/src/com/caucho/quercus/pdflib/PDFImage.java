@@ -88,12 +88,12 @@ public class PDFImage extends PDFObject {
     _id = id;
   }
 
-  public double getWidth()
+  public double get_width()
   {
     return _width;
   }
 
-  public double getHeight()
+  public double get_height()
   {
     return _height;
   }

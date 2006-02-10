@@ -91,7 +91,7 @@ public class QuercusZipModule extends AbstractQuercusModule {
    * @param zipEntry
    * @return false if zipEntry is null
    */
-  public Value zip_entry_name(@NotNull ZipEntry zipEntry)
+  public Value zip_entry_name(@NotNull QuercusZipEntry zipEntry)
   {
     if (zipEntry == null)
       return BooleanValue.FALSE;
@@ -104,7 +104,7 @@ public class QuercusZipModule extends AbstractQuercusModule {
    * @param zipEntry
    * @return false if zipEntry is null
    */
-  public Value zip_entry_filesize(@NotNull ZipEntry zipEntry)
+  public Value zip_entry_filesize(@NotNull QuercusZipEntry zipEntry)
   {
     if (zipEntry == null)
       return BooleanValue.FALSE;
@@ -129,7 +129,7 @@ public class QuercusZipModule extends AbstractQuercusModule {
    * @return true on success or false on failure
    */
   public boolean zip_entry_open(@NotNull Zip file,
-                                @NotNull ZipEntry entry,
+                                @NotNull QuercusZipEntry entry,
                                 @Optional String mode)
   {
     if ((file == null) || (entry == null))
@@ -143,7 +143,7 @@ public class QuercusZipModule extends AbstractQuercusModule {
    * @param entry
    * @return always true.  This has no meaning.
    */
-  public boolean zip_entry_close(@NotNull ZipEntry entry)
+  public boolean zip_entry_close(@NotNull QuercusZipEntry entry)
   {
     if (entry != null)
       entry.zip_entry_close();
@@ -158,7 +158,7 @@ public class QuercusZipModule extends AbstractQuercusModule {
    * @param length
    * @return false or string
    */
-  public Value zip_entry_read(@NotNull ZipEntry entry,
+  public Value zip_entry_read(@NotNull QuercusZipEntry entry,
                               @Optional("1024") int length)
   {
     if (entry == null)
@@ -172,7 +172,7 @@ public class QuercusZipModule extends AbstractQuercusModule {
    * @param entry
    * @return empty string, stored or deflated
    */
-  public String zip_entry_compressionmethod(@NotNull ZipEntry entry)
+  public String zip_entry_compressionmethod(@NotNull QuercusZipEntry entry)
   {
     if (entry == null)
       return "";
@@ -185,7 +185,7 @@ public class QuercusZipModule extends AbstractQuercusModule {
    * @param entry
    * @return -1, or compressed size
    */
-  public long zip_entry_compressedsize(@NotNull ZipEntry entry)
+  public long zip_entry_compressedsize(@NotNull QuercusZipEntry entry)
   {
     if (entry == null)
       return -1;

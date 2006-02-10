@@ -40,14 +40,14 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.zip.ZipInputStream;
 
-public class ZipEntry {
-  private static final Logger log = Logger.getLogger(ZipEntry.class.getName());
-  private static final L10N L = new L10N(ZipEntry.class);
+public class QuercusZipEntry {
+  private static final Logger log = Logger.getLogger(QuercusZipEntry.class.getName());
+  private static final L10N L = new L10N(QuercusZipEntry.class);
 
   private java.util.zip.ZipEntry _zipEntry;
   private Zip _zip;
 
-  public ZipEntry(java.util.zip.ZipEntry zipEntry)
+  public QuercusZipEntry(java.util.zip.ZipEntry zipEntry)
   {
     _zipEntry = zipEntry;
   }
@@ -119,8 +119,8 @@ public class ZipEntry {
 
   /**
    * seems like only two values are:
-   * ZipEntry.DEFLATED
-   * ZipEntry.STORED
+   * QuercusZipEntry.DEFLATED
+   * QuercusZipEntry.STORED
    *
    * @return the compression method
    */

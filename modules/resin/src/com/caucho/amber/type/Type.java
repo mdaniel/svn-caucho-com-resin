@@ -157,7 +157,7 @@ abstract public class Type {
       out.print(rs + ".getString(" + i + ")");
     else {
       out.print("(" + targetType.getName() + ") ");
-      out.print(") " + rs + ".getObject(" + i + ");");
+      out.print(rs + ".getObject(" + i + ")");
     }
 
     return index + 1;
