@@ -553,7 +553,7 @@ public class QuercusArrayModule
     Iterator<Value> keyIterator = input.keySet().iterator();
 
     for (long ctr = 0; ctr < size; ctr++) {
-      Value newValue = null;
+      Value newValue;
 
       if (padFront && ctr < size - inputSize)
         newValue = padValue;
@@ -648,8 +648,8 @@ public class QuercusArrayModule
    */
   public int array_push(Env env, ArrayValue array, Value []values)
   {
-    for (int i = 0; i < values.length; i++) {
-      array.put(values[i]);
+    for (Value value : values) {
+      array.put(value);
     }
 
     return array.getSize();
@@ -693,7 +693,7 @@ public class QuercusArrayModule
       if (index < 0)
         index *= -1;
 
-      return (Value) keys[index];
+      return keys[index];
     }
 
     int length = keys.length;
@@ -1057,8 +1057,6 @@ public class QuercusArrayModule
 
     for (Map.Entry<Value, Value> entry : array.entrySet())
       sum += entry.getValue().toDouble();
-
-    double typecheck = (double) ((int) sum);
 
     return DoubleValue.create(sum);
   }
@@ -1678,7 +1676,7 @@ public class QuercusArrayModule
     if (step < 1)
       step = 1;
 
-    if (start.getType() != end.getType()) {
+    if (!start.getType().equals(end.getType())) {
       start = LongValue.create(start.toLong());
       end = LongValue.create(end.toLong());
     }
@@ -1782,12 +1780,12 @@ public class QuercusArrayModule
     String prefix = "";
 
     if (valuePrefix instanceof StringValue)
-      prefix = ((StringValue) valuePrefix).toString() + "_";
+      prefix = valuePrefix.toString() + "_";
 
     int completedSymbols = 0;
 
     for (Value entryKey : array.keySet()) {
-      Value entryValue = null;
+      Value entryValue;
 
       if (extrRefs)
         entryValue = array.getRef(entryKey);
@@ -2489,17 +2487,13 @@ public class QuercusArrayModule
 
     ArrayValue result = new ArrayValueImpl();
 
-    for (int i = 0; i < args.length; i++) {
-      if (! (args[i].toValue() instanceof ArrayValue))
+    for (Value arg : args) {
+      if (! (arg.toValue() instanceof ArrayValue))
         continue;
 
-      ArrayValue array = (ArrayValue) args[i].toValue();
+      ArrayValue array = (ArrayValue) arg.toValue();
 
-      Iterator<Map.Entry<Value, Value>> argIter = array.entrySet().iterator();
-
-      while (argIter.hasNext()) {
-        Map.Entry<Value, Value> entry = argIter.next();
-
+      for (Map.Entry<Value, Value> entry : array.entrySet()) {
         Value key = entry.getKey();
         Value value = entry.getValue();
 
@@ -2787,7 +2781,7 @@ public class QuercusArrayModule
 
     Value callbackValue = arrays[arrays.length - 1];
 
-    Callback cmp = null;
+    Callback cmp;
 
     try {
       cmp = env.createCallback(callbackValue);
@@ -2877,7 +2871,7 @@ public class QuercusArrayModule
 
     Value callbackValue = arrays[arrays.length - 1];
 
-    Callback cmp = null;
+    Callback cmp;
 
     try {
       cmp = env.createCallback(callbackValue);
@@ -2975,7 +2969,7 @@ public class QuercusArrayModule
 
     Value callbackValue = arrays[arrays.length - 2];
 
-    Callback cmpValue = null;
+    Callback cmpValue;
 
     try {
       cmpValue = env.createCallback(callbackValue);
@@ -2996,7 +2990,7 @@ public class QuercusArrayModule
 
     Value callbackKey = arrays[arrays.length - 1];
 
-    Callback cmpKey = null;
+    Callback cmpKey;
 
     try {
       cmpKey = env.createCallback(callbackKey);
@@ -3094,7 +3088,7 @@ public class QuercusArrayModule
 
     Value callbackValue = arrays[arrays.length - 1];
 
-    Callback cmp = null;
+    Callback cmp;
 
     try {
       cmp = env.createCallback(callbackValue);
@@ -3182,7 +3176,7 @@ public class QuercusArrayModule
 
     Value callbackValue = arrays[arrays.length - 1];
 
-    Callback cmp = null;
+    Callback cmp;
 
     try {
       cmp = env.createCallback(callbackValue);
@@ -3278,7 +3272,7 @@ public class QuercusArrayModule
 
     Value callbackValue = arrays[arrays.length - 2];
 
-    Callback cmpValue = null;
+    Callback cmpValue;
 
     try {
       cmpValue = env.createCallback(callbackValue);
@@ -3299,7 +3293,7 @@ public class QuercusArrayModule
 
     Value callbackKey = arrays[arrays.length - 1];
 
-    Callback cmpKey = null;
+    Callback cmpKey;
 
     try {
       cmpKey = env.createCallback(callbackKey);
@@ -3380,9 +3374,7 @@ public class QuercusArrayModule
   {
     ArrayValue compactArray = new ArrayValueImpl();
 
-    for (int k = 0; k < variables.length; k++) {
-      Value variableName = variables[k];
-
+    for (Value variableName : variables) {
       if (variableName instanceof StringValue) {
         Value tableValue = env.getValue(variableName.toString());
 
@@ -3455,11 +3447,11 @@ public class QuercusArrayModule
         long bElement = _getter.get(bEntry).toLong();
 
         if (aElement == bElement)
-          return 0 * _order;
+          return 0;
         else if (aElement < bElement)
           return -1 * _order;
         else
-          return 1 * _order;
+          return _order;
       }
       catch (Throwable e) {
         throw new RuntimeException(e);
@@ -3559,7 +3551,7 @@ public class QuercusArrayModule
           String aPart = aParser.next();
           String bPart = bParser.next();
 
-          int comparison = 0;
+          int comparison;
 
           try {
             Long aLong = Long.valueOf(aPart);
@@ -3650,7 +3642,7 @@ public class QuercusArrayModule
 
     public String next()
     {
-      int start = 0;
+      int start;
       int type;
 
       try {
@@ -3669,12 +3661,14 @@ public class QuercusArrayModule
 
         for (start = _current; _current < _length; _current++) {
           if (type == LETTER && Character.isLetter(_string.charAt(_current)))
-            continue;
+          {
+          }
           else if (type == DIGIT && Character.isDigit(_string.charAt(_current)))
-            continue;
+          {
+          }
           else if (type == SYMBOL &&
-                   !Character.isLetterOrDigit(_string.charAt(_current)))
-            continue;
+                   !Character.isLetterOrDigit(_string.charAt(_current))) {
+          }
           else
             break;
         }
