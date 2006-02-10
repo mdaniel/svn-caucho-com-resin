@@ -103,7 +103,7 @@ resin_atoi(char *s)
     value = 10 * value + *s - '0';
 
     if (value < 0)
-      return sign > 0 ? 0x7fffffff : 0x8000000;
+      return sign * 0x3fffffff;
   }
 
   return sign * value;
