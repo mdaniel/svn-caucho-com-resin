@@ -93,14 +93,5 @@ public class ContinueValue extends Value {
     throws IOException
   {
   }
-
-  public void varDumpImpl(Env env,
-                          WriteStream out,
-                          int depth,
-                          IdentityHashMap<Value, String> valueSet)
-    throws Throwable
-  {
-    out.print(getClass().getName());
-  }
 }
 

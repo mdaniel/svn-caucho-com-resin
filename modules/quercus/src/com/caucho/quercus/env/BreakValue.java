@@ -94,13 +94,5 @@ public class BreakValue extends Value {
   {
   }
 
-  public void varDumpImpl(Env env,
-                          WriteStream out,
-                          int depth,
-                          IdentityHashMap<Value, String> valueSet)
-    throws Throwable
-  {
-    out.print(getClass().getName());
-  }
 }
 

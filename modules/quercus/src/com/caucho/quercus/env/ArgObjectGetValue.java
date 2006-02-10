@@ -109,14 +109,5 @@ public class ArgObjectGetValue extends Value {
     return _obj.getObject(_env, _index).getObject(env, index);
   }
   */
-
-  public void varDumpImpl(Env env,
-                          WriteStream out,
-                          int depth,
-                          IdentityHashMap<Value, String> valueSet)
-    throws Throwable
-  {
-    out.print(getClass().getName());
-  }
 }
 

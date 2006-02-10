@@ -119,13 +119,4 @@ public class SessionCallback extends Value {
       log.log(Level.FINE, e.toString(), e);
     }
   }
-
-  public void varDumpImpl(Env env,
-                          WriteStream out,
-                          int depth,
-                          IdentityHashMap<Value, String> valueSet)
-    throws Throwable
-  {
-    out.print(getClass().getName());
-  }
 }

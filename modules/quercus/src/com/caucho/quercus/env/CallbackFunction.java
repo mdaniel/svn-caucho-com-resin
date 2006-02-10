@@ -39,12 +39,12 @@ import java.util.IdentityHashMap;
  */
 public class CallbackFunction extends Callback {
  // public static final CallbackFunction INVALID_CALLBACK = new CallbackFunction(null, "Invalid Callback");
-  
+
   private Env _env;
   private String _funName;
 
   private AbstractFunction _fun;
-  
+
  // private boolean _isInvalid = false;
 
   public CallbackFunction(Env env, String funName)
@@ -73,7 +73,7 @@ public class CallbackFunction extends Callback {
 
     //return _isInvalid;
   }
-  
+
   /**
    * Evaluates the callback with no arguments.
    *
@@ -152,7 +152,7 @@ public class CallbackFunction extends Callback {
   {
     return _funName;
   }
-  
+
   public AbstractFunction getFunction()
   {
     if (_fun == null)
@@ -161,15 +161,8 @@ public class CallbackFunction extends Callback {
     return _fun;
   }
 
-  public void varDumpImpl(Env env,
-                          WriteStream out,
-                          int depth,
-                          IdentityHashMap<Value, String> valueSet)
-    throws Throwable
+  public String toString()
   {
-    out.print(getClass().getName());
-    out.print('[');
-    out.print(_funName);
-    out.print(']');
+    return getClass().getName() + '[' + _funName + ']';
   }
 }
