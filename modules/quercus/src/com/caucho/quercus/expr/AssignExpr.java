@@ -76,8 +76,22 @@ public class AssignExpr extends Expr {
     Value value = _value.evalCopy(env);
 
     _var.evalAssign(env, value);
-    
+
     return value;
+  }
+
+  /**
+   * Evaluates the expression.
+   *
+   * @param env the calling environment.
+   *
+   * @return the expression value.
+   */
+  public Value evalCopy(Env env)
+    throws Throwable
+  {
+    // php/0d9e
+    return eval(env).copy();
   }
 
   /**
@@ -93,7 +107,7 @@ public class AssignExpr extends Expr {
     Value value = _value.eval(env);
 
     _var.evalAssign(env, value);
-    
+
     return value;
   }
 
@@ -157,7 +171,7 @@ public class AssignExpr extends Expr {
   {
     _var.generateAssign(out, _value, true);
   }
-  
+
   public String toString()
   {
     return _var + "=" + _value;

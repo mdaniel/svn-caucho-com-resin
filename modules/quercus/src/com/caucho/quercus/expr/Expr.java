@@ -31,15 +31,13 @@ package com.caucho.quercus.expr;
 
 import java.io.IOException;
 
-import java.util.HashSet;
-
-import com.caucho.java.JavaWriter;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
 
 import com.caucho.quercus.program.Statement;
-import com.caucho.quercus.program.StatementHandle;
 import com.caucho.quercus.program.AnalyzeInfo;
 
 import com.caucho.quercus.parser.PhpParser;
@@ -53,6 +51,7 @@ import com.caucho.util.L10N;
  */
 abstract public class Expr {
   private static final L10N L = new L10N(Expr.class);
+  private static final Logger log = Logger.getLogger(Expr.class.getName());
 
   public static final int COMPILE_ARG_MAX = 5;
 
@@ -67,7 +66,7 @@ abstract public class Expr {
     _fileName = fileName;
     _line = line;
   }
-  
+
   /**
    * Returns the location if known.
    */
@@ -78,7 +77,7 @@ abstract public class Expr {
     else
       return _fileName + ":" + _line + ": ";
   }
-  
+
   /**
    * Returns the location if known.
    */
@@ -265,7 +264,7 @@ abstract public class Expr {
   {
     return false;
   }
-  
+
   /**
    * Evaluates the expression as a constant.
    *
@@ -276,7 +275,7 @@ abstract public class Expr {
   {
     throw new IOException(L.l("{0} is not a constant expression", this));
   }
-  
+
   /**
    * Evaluates the expression.
    *
@@ -286,20 +285,18 @@ abstract public class Expr {
    */
   abstract public Value eval(Env env)
     throws Throwable;
-  
+
   /**
    * Evaluates the expression, discarding the result.
    *
    * @param env the calling environment.
-   *
-   * @return the expression value.
    */
   public void evalTop(Env env)
     throws Throwable
   {
     eval(env);
   }
-  
+
   /**
    * Evaluates the expression, creating an array for unassigned values.
    *
@@ -312,7 +309,7 @@ abstract public class Expr {
   {
     return eval(env);
   }
-  
+
   /**
    * Evaluates the expression, creating an object for unassigned values.
    *
@@ -325,7 +322,7 @@ abstract public class Expr {
   {
     return eval(env);
   }
-  
+
   /**
    * Evaluates the expression as a reference.
    *
@@ -338,7 +335,7 @@ abstract public class Expr {
   {
     return eval(env);
   }
-  
+
   /**
    * Evaluates the expression as a copy
    *
@@ -351,7 +348,7 @@ abstract public class Expr {
   {
     return eval(env);
   }
-  
+
   /**
    * Evaluates the expression as a function argument where it is unknown
    * if the value is a reference.
@@ -375,7 +372,7 @@ abstract public class Expr {
     throw new RuntimeException(L.l("{0} is an invalid left-hand side of an assignment.",
 				   this));
   }
-  
+
   /**
    * Evaluates the expression as a string
    *
@@ -388,7 +385,7 @@ abstract public class Expr {
   {
     return eval(env).toString();
   }
-  
+
   /**
    * Evaluates the expression as a string
    *
@@ -401,7 +398,7 @@ abstract public class Expr {
   {
     return eval(env).toChar();
   }
-  
+
   /**
    * Evaluates the expression as a boolean.
    *
@@ -414,7 +411,7 @@ abstract public class Expr {
   {
     return eval(env).toBoolean();
   }
-  
+
   /**
    * Evaluates the expression as a long
    *
@@ -427,7 +424,7 @@ abstract public class Expr {
   {
     return eval(env).toLong();
   }
-  
+
   /**
    * Evaluates the expression as a double
    *
@@ -506,7 +503,7 @@ abstract public class Expr {
   {
     if (leftState == VarState.UNSET || leftState == VarState.UNDEFINED)
       return leftState;
-    
+
     if (rightState == VarState.UNSET || rightState == VarState.UNDEFINED)
       return rightState;
 
@@ -535,7 +532,7 @@ abstract public class Expr {
     throws IOException
   {
     String var = out.addExpr(this);
-    
+
     out.print(var + ".eval(env)");
   }
 
@@ -549,7 +546,7 @@ abstract public class Expr {
   {
     generate(out);
   }
-  
+
   /**
    * Generates code for a function arg.
    *
@@ -710,7 +707,7 @@ abstract public class Expr {
   {
     // quercus/1l07
     // out.print("_quercus_out");
-    
+
     out.print("env.getOut()");
   }
 
@@ -724,21 +721,21 @@ abstract public class Expr {
   {
     if (isLong()) {
       generateGetOut(out);
-      
+
       out.print(".print(");
       generateLong(out);
       out.print(")");
     }
     else if (isDouble()) {
       generateGetOut(out);
-      
+
       out.print(".print(");
       generateDouble(out);
       out.print(")");
     }
     else if (isString()) {
       generateGetOut(out);
-      
+
       out.print(".print(");
       generateString(out);
       out.print(")");
@@ -759,10 +756,10 @@ abstract public class Expr {
   {
     // XXX: remove when done
     System.out.println("Generate: " + getClass().getName());
-    
+
     out.print("com.caucho.quercus.expr.NullLiteralExpr.NULL");
   }
-  
+
   public String toString()
   {
     return "Expr[]";

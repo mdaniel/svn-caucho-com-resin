@@ -66,7 +66,7 @@ public class BlockStatement extends Statement {
   {
     if (statementList.size() == 1)
       return statementList.get(0);
-    
+
     Statement []statements = new Statement[statementList.size()];
 
     statementList.toArray(statements);
@@ -78,7 +78,7 @@ public class BlockStatement extends Statement {
   {
     if (statementList.length == 1)
       return statementList[0];
-    
+
     Statement []statements = new Statement[statementList.length];
 
     System.arraycopy(statementList, 0, statements, 0, statementList.length);
@@ -103,12 +103,14 @@ public class BlockStatement extends Statement {
   {
     return _statements;
   }
-  
+
   public Value execute(Env env)
     throws Throwable
   {
     for (int i = 0; i < _statements.length; i++) {
-      Value value = _statements[i].execute(env);
+      Statement statement = _statements[i];
+      
+      Value value = statement.execute(env);
 
       if (value != null) {
 	return value;
@@ -140,14 +142,14 @@ public class BlockStatement extends Statement {
    */
   public int fallThrough()
   {
-    
+
     for (int i = 0; i < _statements.length; i++) {
       int fallThrough = _statements[i].fallThrough();
 
       if (fallThrough != FALL_THROUGH)
 	return fallThrough;
     }
-    
+
     return FALL_THROUGH;
   }
 
@@ -192,7 +194,7 @@ public class BlockStatement extends Statement {
     out.popDepth();
     out.println("}");
   }
-  
+
   public String toString()
   {
     return "BlockStatement[]";
