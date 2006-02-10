@@ -193,11 +193,9 @@ typedef struct config_t {
   char *config_path;
   
   char *error_page;
-  char *session_url_prefix;
-  int session_url_prefix_length;
-  char *alt_session_prefix;
-  int alt_session_prefix_length;
-  char *session_cookie;
+  char session_url_prefix[256];
+  char alt_session_url_prefix[256];
+  char session_cookie[256];
   char *iis_priority;
   int override_iis_authentication;
 

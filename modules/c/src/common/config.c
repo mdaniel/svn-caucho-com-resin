@@ -102,7 +102,7 @@ resin_atoi(char *s)
   for (; *s && '0' <= *s && *s <= '9'; s++) {
     value = 10 * value + *s - '0';
 
-    if (value < 0)
+    if (value < 0 || value > 0x3fffffff)
       return sign * 0x3fffffff;
   }
 
@@ -538,6 +538,27 @@ read_config(stream_t *s, config_t *config, resin_host_t *host,
 	  if (config->update_interval < 5)
 	    config->update_interval = 5;
 	}
+	else if (! strcmp(buffer, "session-cookie")) {
+	  int len = sizeof(host->config->session_cookie);
+	
+	  strncpy(host->config->session_cookie, value, len);
+		  
+	  host->config->session_cookie[len - 1] = 0;
+	}
+	else if (! strcmp(buffer, "session-url-prefix")) {
+	  int len = sizeof(host->config->session_url_prefix);
+	
+	  strncpy(host->config->session_url_prefix, value, len);
+	  
+	  host->config->session_url_prefix[len - 1] = 0;
+	}
+	else if (! strcmp(buffer, "alt-session-url-prefix")) {
+	  int len = sizeof(host->config->alt_session_url_prefix);
+	  
+	  strncpy(host->config->alt_session_url_prefix, value, len);
+	  
+	  host->config->alt_session_url_prefix[len - 1] = 0;
+	}
       }
       break;
 	
@@ -654,19 +675,19 @@ write_config(config_t *config)
   hmux_write_string(&s, HMUX_HEADER, "check-interval");
   hmux_write_string(&s, HMUX_STRING, buffer);
 
-  if (config->session_cookie) {
+  if (*config->session_cookie) {
     hmux_write_string(&s, HMUX_HEADER, "cookie");
     hmux_write_string(&s, HMUX_STRING, config->session_cookie);
   }
 
-  if (config->session_url_prefix) {
+  if (*config->session_url_prefix) {
     hmux_write_string(&s, HMUX_HEADER, "session-url-prefix");
     hmux_write_string(&s, HMUX_STRING, config->session_url_prefix);
   }
 
-  if (config->alt_session_prefix) {
+  if (*config->alt_session_url_prefix) {
     hmux_write_string(&s, HMUX_HEADER, "alt-session-url-prefix");
-    hmux_write_string(&s, HMUX_STRING, config->alt_session_prefix);
+    hmux_write_string(&s, HMUX_STRING, config->alt_session_url_prefix);
   }
 
   for (host = config->hosts; host; host = host->next) {
@@ -924,8 +945,8 @@ cse_init_config(config_t *config)
   */
   config->disable_session_failover = 0;
   config->update_interval = 15;
-  config->session_url_prefix = ";jsessionid=";
-  config->session_cookie = "JSESSIONID";
+  strcpy(config->session_url_prefix, ";jsessionid=");
+  strcpy(config->session_cookie, "JSESSIONID");
 
   config->config_cluster.config = config;
   
@@ -1113,8 +1134,7 @@ normalize_uri(config_t *config, const char *raw_uri,
   k = 0;
   for (i = 0; (ch = raw_uri[i]) && i + 1 < len; i++) {
     /* strip the session_url_prefix */
-    if (ch == test_ch && ! strncmp(raw_uri + i, config->session_url_prefix,
-                                   config->session_url_prefix_length)) {
+    if (ch == test_ch && ! strcmp(raw_uri + i, config->session_url_prefix)) {
       break;
     }
     

@@ -13,6 +13,7 @@ AC_SUBST(FULL_VERSION)
 dnl Checks for programs.
 AC_PROG_CC
 AC_PROG_LD
+AC_PROG_EGREP
 
 dnl Checks for poll.h
 AC_CHECK_HEADER(sys/poll.h, [ CFLAGS="$CFLAGS -DPOLL" ])
@@ -46,6 +47,7 @@ AC_SUBST(LIBTOOL_SCRIPT)
 AC_SUBST(LIBTOOL)	
 AC_SUBST(SH_LIBTOOL)	
 AC_SUBST(LTCFLAGS)	
+AC_SUBST(EGREP)
      
 INCLUDES=""
 plugins=common
@@ -795,6 +797,7 @@ case "$target_os" in
 		PROXY_LIBS='-lpthread'
 		echo "Using -lpthread as default"
 		;;
+	esac	
 	;;
 
   *freebsd*)

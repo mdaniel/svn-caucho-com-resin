@@ -4,6 +4,8 @@
 
 <s2 title='3.0.snap - Feb 9, 2006'>
 <ul>
+<li>mod_caucho was not properly handling check-interval larger than 32-bits (#926, rep by Mutsubu Inayama)
+<li>Changes in ./configure and Makefile for MacOSX EGREP libtool issue (#432, rep by jdane)
 <li>(2006-02-09) class-loader can now appear anywhere, not just first element (#924, rep by dlcr)
 <li>Amber inheritance needs to work with CMR (#301, rep by Francois Bertrand)
 <li>JMX Notifications on restart (#195, #237, rep by Erik Hartenian, Glenn Rush)

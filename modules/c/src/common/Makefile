@@ -4,6 +4,7 @@ CC=gcc
 CFLAGS=-g -O2 -DPOLL -DHAS_JVMTI
 CFLAGS_SHLIB=-DSHARED_MODULE
 LIBTOOL=/Users/ferg/ws/test-resin/libtool --silent
+EGREP=grep -E
 LD=gcc
 LD_SHLIB=gcc
 LDFLAGS=

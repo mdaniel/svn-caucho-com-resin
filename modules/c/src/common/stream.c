@@ -252,7 +252,7 @@ cse_connect(struct sockaddr_in *sin, srun_t *srun)
   struct timeval timeout;
   int flags;
   int error = 0;
-  int len = sizeof(error);
+  unsigned int len = sizeof(error);
 
   sock = socket(AF_INET, SOCK_STREAM, 0);
 
@@ -395,7 +395,8 @@ cse_open(stream_t *s, cluster_t *cluster, cluster_srun_t *cluster_srun,
 
   if (srun->send_buffer_size == 0) {
     int size;
-    int len = sizeof(size);
+    unsigned int len = sizeof(size);
+    
 #ifdef SO_SNDBUF
     if (getsockopt(s->socket, SOL_SOCKET, SO_SNDBUF, (char *) &size, &len) >= 0) {
       size -= 1024;
