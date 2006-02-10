@@ -68,8 +68,7 @@ public class JdbcStatementResource extends ResourceValue {
     throws SQLException
   {
     _conn = connV;
-    _query = query;
-    _stmt = _conn.getConnection().prepareStatement(query);
+    prepareStatement(query);
   }
 
   public JdbcStatementResource(JdbcConnectionResource conn)

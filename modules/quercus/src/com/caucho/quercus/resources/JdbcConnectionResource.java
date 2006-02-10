@@ -359,6 +359,7 @@ public class JdbcConnectionResource extends ResourceValue {
 
     try {
       stmt = _conn.createStatement();
+      stmt.setEscapeProcessing(false); // php/1406
 
       if (stmt.execute(sql)) {
 	ResultSet rs = stmt.getResultSet();
@@ -416,6 +417,7 @@ public class JdbcConnectionResource extends ResourceValue {
       // need to create statement after setting catalog or
       // else statement will have wrong catalog
       Statement stmt = _conn.createStatement();
+      stmt.setEscapeProcessing(false);
 
       if (stmt.execute(sql)) {
         Value result = new JdbcResultResource(stmt, stmt.getResultSet(), this);
@@ -464,6 +466,7 @@ public class JdbcConnectionResource extends ResourceValue {
 
       for (String s : splitQuery) {
         stmt = _conn.createStatement();
+        stmt.setEscapeProcessing(false);
         if (stmt.execute(s)) {
           _affectedRows = 0;
 	  _rs = new JdbcResultResource(stmt, stmt.getResultSet(), this);

@@ -132,6 +132,7 @@ public class QuercusMysqlModule extends AbstractQuercusModule {
     try {
       try {
         stmt = conn.validateConnection().getConnection().createStatement();
+        stmt.setEscapeProcessing(false);
         stmt.executeUpdate("CREATE DATABASE " + name);
       } finally {
         if (stmt != null)

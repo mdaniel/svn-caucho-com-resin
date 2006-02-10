@@ -75,16 +75,16 @@ public class PDO {
   public static final int CASE_NATURAL = 1;
   public static final int CASE_LOWER = 2;
   public static final int CASE_UPPER = 2;
-  
+
   public static final int CURSOR_FWDONLY = 1;
   public static final int CURSOR_SCROLL = 2;
-  
+
   public static final int ERR_NONE = 0;
-  
+
   public static final int ERRMODE_SILENT = 1;
   public static final int ERRMODE_WARNING = 2;
   public static final int ERRMODE_EXCEPTION = 3;
-  
+
   public static final int FETCH_ASSOC = 0x1;
   public static final int FETCH_NUM = 0x2;
   public static final int FETCH_BOTH = FETCH_ASSOC|FETCH_NUM;
@@ -97,13 +97,13 @@ public class PDO {
   public static final int FETCH_FUNC = 0xa;
   public static final int FETCH_GROUP= 0xb;
   public static final int FETCH_UNIQUE= 0xc;
-  
+
   public static final int FETCH_ORI_NEXT = 0x100;
   public static final int FETCH_ORI_PRIOR = 0x101;
   public static final int FETCH_ORI_FIRST = 0x102;
   public static final int FETCH_ORI_ABS = 0x103;
   public static final int FETCH_ORI_REL = 0x104;
-  
+
   public static final int PARAM_BOOL = 1;
   public static final int PARAM_NULL = 2;
   public static final int PARAM_INT = 3;
@@ -114,14 +114,14 @@ public class PDO {
 
   private final Env _env;
   private final String _dsn;
-  
+
   private JdbcConnectionResource _conn;
 
   private int _errorCode;
   private String _errorMessage;
 
   private boolean _inTransaction;
-  
+
   public PDO(Env env,
 	     String dsn,
 	     @Optional String user,
@@ -143,7 +143,7 @@ public class PDO {
       return false;
 
     _inTransaction = true;
-    
+
     return _conn.setAutoCommit(false);
   }
 
@@ -156,7 +156,7 @@ public class PDO {
       return false;
 
     _inTransaction = false;
-    
+
     boolean result = _conn.commit();
 
     _conn.setAutoCommit(true);
@@ -175,11 +175,12 @@ public class PDO {
     Statement stmt = null;
     try {
       stmt = conn.createStatement();
+      stmt.setEscapeProcessing(false);
 
       return stmt.executeUpdate(query);
     } catch (SQLException e) {
       log.log(Level.FINE, e.toString(), e);
-      
+
       _errorCode = e.getErrorCode();
       _errorMessage = e.getMessage();
 
@@ -207,15 +208,16 @@ public class PDO {
 
     try {
       stmt = conn.createStatement();
+      stmt.setEscapeProcessing(false);
 
       ResultSet rs = stmt.executeQuery(query);
 
       stmt = null;
-      
+
       return new PDOStatement(this, new JdbcResultResource(stmt, rs, _conn));
     } catch (SQLException e) {
       log.log(Level.FINE, e.toString(), e);
-      
+
       _errorCode = e.getErrorCode();
       _errorMessage = e.getMessage();
 
@@ -249,7 +251,7 @@ public class PDO {
       return false;
 
     _inTransaction = false;
-    
+
     boolean result = _conn.rollback();
 
     _conn.setAutoCommit(true);
@@ -273,13 +275,13 @@ public class PDO {
       String dbname = "test";
 
       String driver = "com.mysql.jdbc.jdbc2.optional.MysqlConnectionPoolDataSource";
-      
+
       String url = "jdbc:mysql://" + host + ":" + port + "/" + dbname;
 
       Connection jConn = env.getConnection(driver, url, userName, password);
 
       _conn = new JdbcConnectionResource(jConn);
-      
+
       env.addResource(_conn);
 
       return true;
@@ -290,7 +292,7 @@ public class PDO {
       _errorMessage = e.getMessage();
 
       log.log(Level.FINE, e.toString(), e);
-      
+
       return false;
     } catch (Exception e) {
       env.warning("A link to the server could not be established. " + e.toString());
@@ -313,7 +315,7 @@ public class PDO {
 
     for (int i = 0; i < strLength; i++) {
       char c = str.charAt(i);
-      
+
       switch (c) {
       case '\u0000':
         buf.append('\\');
