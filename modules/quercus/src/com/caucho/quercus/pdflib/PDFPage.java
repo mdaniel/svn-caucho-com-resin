@@ -53,17 +53,36 @@ public class PDFPage {
   private int _parent;
   private int _id;
 
+  private PDFStream _stream;
+
   private double _width;
   private double _height;
 
   private ArrayList<String> _resources = new ArrayList<String>();
   
-  PDFPage(int parent, int id, double width, double height)
+  PDFPage(PDFWriter out, int parent, double width, double height)
   {
     _parent = parent;
-    _id = id;
+    _id = out.allocateId(1);
     _width = width;
     _height = height;
+    _stream = new PDFStream(out.allocateId(1));
+  }
+
+  /**
+   * Returns the id.
+   */
+  public int getId()
+  {
+    return _id;
+  }
+
+  /**
+   * Returns the stream.
+   */
+  public PDFStream getStream()
+  {
+    return _stream;
   }
 
   void addResource(String resource)
@@ -72,14 +91,14 @@ public class PDFPage {
       _resources.add(resource);
   }
 
-  void write(PDFWriter out, int streamId)
+  void write(PDFWriter out)
     throws IOException
   {
     out.beginObject(_id);
     out.println("  << /Type /Page");
     out.println("     /Parent " + _parent + " 0 R");
     out.println("     /MediaBox [0 0 " + _width + " " + _height + "]");
-    out.println("     /Contents " + streamId + " 0 R");
+    out.println("     /Contents " + _stream.getId() + " 0 R");
     out.println("     /Resources <<");
 
     for (int i = 0; i < _resources.size(); i++) {
@@ -89,5 +108,7 @@ public class PDFPage {
     out.println("     >>");
     out.println("  >>");
     out.endObject();
+
+    _stream.write(out);
   }
 }

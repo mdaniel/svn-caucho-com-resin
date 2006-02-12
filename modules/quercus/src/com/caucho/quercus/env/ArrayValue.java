@@ -79,7 +79,7 @@ abstract public class ArrayValue extends Value {
    */
   public String toString()
   {
-    return "array";
+    return "Array";
   }
 
   /**

@@ -675,7 +675,7 @@ public class ObjectValue extends Value {
       sb.append(key.length());
       sb.append(":\"");
       sb.append(key);
-      sb.append("\"");
+      sb.append("\";");
 
       entry.getValue().serialize(sb);
     }

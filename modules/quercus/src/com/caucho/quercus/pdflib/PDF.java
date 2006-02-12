@@ -31,6 +31,7 @@ package com.caucho.quercus.pdflib;
 
 import java.io.IOException;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import java.util.logging.Logger;
@@ -63,6 +64,8 @@ public class PDF {
 
   private static final double KAPPA = 0.5522847498;
 
+  private static final int PAGE_GROUP = 8;
+
   private static HashMap<String,Font> _faceMap = new HashMap<String,Font>();
   
   private HashMap<PDFFont,PDFFont> _fontMap
@@ -75,10 +78,16 @@ public class PDF {
   private WriteStream _os;
   private PDFWriter _out;
 
-  private int _pageId;
+  private ArrayList<PDFPage> _pageGroup = new ArrayList<PDFPage>();
+  private ArrayList<Integer> _pagesGroupList = new ArrayList<Integer>();
+  private int _pageCount;
+
+  private int _catalogId;
+  
+  private int _pageParentId;
   
   private PDFPage _page;
-  private PDFStream _stream = new PDFStream();
+  private PDFStream _stream;
 
   public PDF(Env env)
     throws IOException
@@ -96,20 +105,35 @@ public class PDF {
     _out = new PDFWriter(_os);
     _out.beginDocument();
 
-    _pageId = _out.writeHeader();
+    _catalogId = _out.allocateId(1);
+    _pageParentId = _out.allocateId(1);
 
     return true;
   }
 
   public boolean begin_page(double width, double height)
+    throws IOException
   {
-    _page = new PDFPage(_pageId - 1, _pageId, width, height);
-    _stream.begin();
+    if (PAGE_GROUP <= _pageGroup.size()) {
+      _out.writePageGroup(_pageParentId, _pageGroup);
+      _pageGroup.clear();
+
+      _pagesGroupList.add(_pageParentId);
+      _pageParentId = _out.allocateId(1);
+    }
+    
+    _page = new PDFPage(_out, _pageParentId, width, height);
+    _stream = _page.getStream();
+
+    _pageCount++;
+    
+    _pageGroup.add(_page);
 
     return true;
   }
 
   public boolean begin_page_ext(double width, double height, String opt)
+    throws IOException
   {
     return begin_page(width, height);
   }
@@ -695,7 +719,7 @@ public class PDF {
 
     _stream.save();
 
-    concat(img.getWidth(), 0, 0, img.getHeight(), x, y);
+    concat(img.get_width(), 0, 0, img.get_height(), x, y);
     
     _stream.fit_image(img);
 
@@ -815,12 +839,9 @@ public class PDF {
     PDFProcSet procSet = _stream.getProcSet();
 
     _page.addResource(procSet.getResource());
-    
-    int streamId = _out.allocateId(1);
 
-    _page.write(_out, streamId);
-
-    _out.writeStream(streamId, _stream);
+    _page = null;
+    _stream = null;
 
     return true;
   }
@@ -834,6 +855,16 @@ public class PDF {
   public boolean end_document(Env env, @Optional String optList)
     throws IOException
   {
+    if (_pageGroup.size() > 0) {
+      _out.writePageGroup(_pageParentId, _pageGroup);
+      _pageGroup.clear();
+
+      if (_pagesGroupList.size() > 0)
+	_pagesGroupList.add(_pageParentId);
+    }
+
+    _out.writeCatalog(_catalogId, _pageParentId, _pagesGroupList, _pageCount);
+    
     _out.endDocument();
 
     _os.close();

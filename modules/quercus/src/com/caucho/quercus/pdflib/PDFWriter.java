@@ -98,33 +98,66 @@ public class PDFWriter {
     println("#\u00c0\u00c3\u00c4\u00c9");
   }
   
-  public int writeHeader()
+  public void writeCatalog(int catalogId, int pagesId,
+			   ArrayList<Integer> pagesList, int pageCount)
     throws IOException
   {
-    int id = allocateId(4);
-    beginObject(id);
+    int pageId = pagesId;
+
+    if (pagesList.size() > 0)
+      pageId = allocateId(1);
+    
+    beginObject(catalogId);
 
     println("  << /Type /Catalog");
-    println("     /Outlines " + (id + 1) + " 0 R");
-    println("     /Pages " + (id + 2) + " 0 R");
+    println("     /Pages " + pageId + " 0 R");
     println("  >>");
 
     endObject();
-    
-    beginObject(id + 1);
-    println("  << /Type Outlines");
-    println("     /Count 0");
-    println("  >>");
-    endObject();
 
-    beginObject(id + 2);
+    if (pagesList.size() > 0) {
+      beginObject(pageId);
+
+      println("  << /Type /Pages");
+      print("     /Kids [");
+
+      for (int i = 0; i < pagesList.size(); i++) {
+	if (i != 0)
+	  print(" ");
+      
+	print(pagesList.get(i) + " 0 R");
+      }
+
+      println("]");
+      println("     /Count " + pageCount);
+      println("  >>");
+
+      endObject();
+    }
+  }
+
+  public void writePageGroup(int id, ArrayList<PDFPage> pages)
+    throws IOException
+  {
+    beginObject(id);
     println("  << /Type /Pages");
-    println("     /Kids [" + (id + 3) + " 0 R]");
-    println("     /Count 1");
+    print("     /Kids [");
+
+    for (int i = 0; i < pages.size(); i++) {
+      if (i != 0)
+	print(" ");
+      
+      print(pages.get(i).getId() + " 0 R");
+    }
+
+    println("]");
+    println("     /Count " + pages.size());
     println("  >>");
     endObject();
 
-    return id + 3;
+    for (int i = 0; i < pages.size(); i++) {
+      pages.get(i).write(this);
+    }
   }
 
   public void writeStream(int id, PDFStream stream)
@@ -189,10 +222,10 @@ public class PDFWriter {
   public void beginObject(int id)
     throws IOException
   {
-    if (id != _lastObject + 1)
-      throw new IllegalStateException("objects must be sequential");
+    while (_xref.size() < id)
+      _xref.add(null);
     
-    _xref.add(new ObjectDef(id, _offset));
+    _xref.set(id - 1, new ObjectDef(id, _offset));
     
     println(id + " 0 obj");
   }

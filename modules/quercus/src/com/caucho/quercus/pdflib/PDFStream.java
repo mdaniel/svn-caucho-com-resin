@@ -48,6 +48,8 @@ public class PDFStream {
     = Logger.getLogger(PDFStream.class.getName());
   private static final L10N L = new L10N(PDFStream.class);
 
+  private int _id;
+  
   private TempStream _tempStream = new TempStream();
   private WriteStream _out = new WriteStream();
 
@@ -65,13 +67,11 @@ public class PDFStream {
   private double _y = 0;
   private boolean _hasGraphicsPos = true;
 
-  PDFStream()
+  PDFStream(int id)
   {
+    _id = id;
+    
     _tempStream = new TempStream();
-  }
-
-  public void begin()
-  {
     _tempStream.openWrite();
     _out.init(_tempStream);
 
@@ -83,6 +83,11 @@ public class PDFStream {
     _hasFont = false;
     _hasTextPos = true;
     _hasGraphicsPos = true;
+  }
+
+  public int getId()
+  {
+    return _id;
   }
 
   public void setFont(PDFFont font, double size)
@@ -401,6 +406,12 @@ public class PDFStream {
     return _tempStream.getLength();
   }
 
+  public void write(PDFWriter out)
+    throws IOException
+  {
+    out.writeStream(getId(), this);
+  }
+	   
   public void writeToStream(WriteStream os)
     throws IOException
   {
@@ -409,5 +420,7 @@ public class PDFStream {
 	 head = head.getNext()) {
       os.write(head.getBuffer(), 0, head.getLength());
     }
+
+    TempBuffer.freeAll(_tempStream.getHead());
   }
 }

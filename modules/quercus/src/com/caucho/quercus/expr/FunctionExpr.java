@@ -185,8 +185,11 @@ public class FunctionExpr extends Expr {
     if (fun != null && fun.isCallUsesVariableArgs())
       info.getFunction().setVariableArgs(true);
     
-    if (fun != null && fun.isCallUsesSymbolTable())
+    if (fun != null && fun.isCallUsesSymbolTable()) {
+      // php/1729
       info.getFunction().setUsesSymbolTable(true);
+      info.clear();
+    }
     
     for (int i = 0; i < _args.length; i++) {
       _args[i].analyze(info);
@@ -224,7 +227,6 @@ public class FunctionExpr extends Expr {
     throws IOException
   {
     generateImpl(out, Value.class, false, true);
-
   }
 
   /**
@@ -297,7 +299,7 @@ public class FunctionExpr extends Expr {
 	fun.generateTop(out, this, _args);
       else if (boolean.class.equals(retType))
 	fun.generateBoolean(out, this, _args);
-      else if (isRef)
+      else if (isRef && fun.isReturnsReference()) // php/3442
 	fun.generateRef(out, this, _args);
       else if (isCopy)
 	fun.generateCopy(out, this, _args);

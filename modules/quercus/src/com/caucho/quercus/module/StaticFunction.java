@@ -414,6 +414,15 @@ public class StaticFunction extends AbstractFunction {
   }
 
   /**
+   * Evaluates the function.
+   */
+  public Value evalCopy(Env env, Expr []exprs)
+    throws Throwable
+  {
+    return eval(env, exprs);
+  }
+
+  /**
    * Evaluates the function, returning a copy
    */
   public Value evalCopy(Env env, Value []args)

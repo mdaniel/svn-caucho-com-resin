@@ -349,7 +349,7 @@ public class QuercusOptionsModule extends AbstractQuercusModule {
       if ('0' <= ch && ch <= '9') {
 	int value = 0;
 
-	for (; i < len && '0' <= ch && ch <= '9'; i++) {
+	for (; i < len && '0' <= (ch = version.charAt(i)) && ch <= '9'; i++) {
 	  value = 10 * value + ch - '0';
 	}
 
@@ -358,7 +358,7 @@ public class QuercusOptionsModule extends AbstractQuercusModule {
       else if (Character.isLetter((char) ch)) {
 	StringBuilder sb = new StringBuilder();
 
-	for (; i < len && Character.isLetter((char) ch); i++) {
+	for (; i < len && Character.isLetter(version.charAt(ch)); i++) {
 	  sb.append((char) ch);
 	}
 

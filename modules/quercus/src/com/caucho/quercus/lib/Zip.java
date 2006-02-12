@@ -91,4 +91,9 @@ public class Zip {
   {
     return _zipInputStream;
   }
+
+  public String toString()
+  {
+    return "Zip[]";
+  }
 }

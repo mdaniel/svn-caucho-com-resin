@@ -161,7 +161,6 @@ public class PDFImage extends PDFObject {
     }
 
     int ch = _is.read();
-    System.out.println("CH: " + (char) ch + " " + ch);
     if (ch != ',')
       return false;
 

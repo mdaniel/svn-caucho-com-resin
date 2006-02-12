@@ -119,6 +119,14 @@ abstract public class AbstractFunction {
   }
 
   /**
+   * True for a returns reference.
+   */
+  public boolean isReturnsReference()
+  {
+    return true;
+  }
+
+  /**
    * Returns the args.
    */
   public Arg []getArgs()

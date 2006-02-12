@@ -144,6 +144,14 @@ public class Function extends AbstractFunction {
     return false;
   }
 
+  /**
+   * True for a returns reference.
+   */
+  public boolean isReturnsReference()
+  {
+    return _isReturnsReference;
+  }
+
   public String getClassName()
   {
     throw new UnsupportedOperationException();
@@ -238,10 +246,14 @@ public class Function extends AbstractFunction {
 	map.put(arg.getName(), values[i].toRefVar());
       }
       else {
-	// quercus/0d04
-	values[i] = args[i].eval(env).copy();
+	// php/0d04
+	values[i] = args[i].eval(env);
 
-	map.put(arg.getName(), values[i].toVar());
+	Var var = values[i].toVar();
+
+	map.put(arg.getName(), var);
+
+	values[i] = var.toValue();
       }
     }
 
@@ -261,7 +273,7 @@ public class Function extends AbstractFunction {
     }
 
     HashMap<String,Var> oldMap = env.pushEnv(map);
-    Value []oldArgs = env.setFunctionArgs(values);
+    Value []oldArgs = env.setFunctionArgsNoCopy(values);
 
     try {
       Value value = _statement.execute(env);

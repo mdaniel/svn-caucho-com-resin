@@ -1362,6 +1362,21 @@ public class Env {
   /**
    * Pushes a new environment.
    */
+  public final Value []setFunctionArgsNoCopy(Value []args)
+  {
+    Value []oldArgs = _functionArgs;
+
+    for (int i = 0; args != null && i < args.length; i++)
+      args[i] = args[i].toValue();
+
+    _functionArgs = args;
+
+    return oldArgs;
+  }
+
+  /**
+   * Pushes a new environment.
+   */
   public final void restoreFunctionArgs(Value []args)
   {
     _functionArgs = args;
