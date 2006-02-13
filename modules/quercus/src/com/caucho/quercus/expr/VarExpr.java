@@ -29,32 +29,25 @@
 
 package com.caucho.quercus.expr;
 
-import java.io.IOException;
-
-import java.util.HashSet;
-
-import com.caucho.java.JavaWriter;
-
+import com.caucho.quercus.env.ArrayValueImpl;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.NullValue;
 import com.caucho.quercus.env.Value;
-import com.caucho.quercus.env.ArrayValue;
-import com.caucho.quercus.env.ArrayValueImpl;
-
 import com.caucho.quercus.gen.PhpWriter;
-
 import com.caucho.quercus.parser.PhpParser;
-
-import com.caucho.quercus.program.Statement;
 import com.caucho.quercus.program.AnalyzeInfo;
-import com.caucho.quercus.program.ExprStatement;
+
+import java.io.IOException;
+import java.util.HashSet;
 
 /**
  * Represents a PHP variable expression.
  */
-public class VarExpr extends AbstractVarExpr {
+public class VarExpr
+  extends AbstractVarExpr
+{
   private static final NullValue NULL = NullValue.create();
-  
+
   private final VarInfo _var;
   private final String _name;
 
@@ -104,7 +97,7 @@ public class VarExpr extends AbstractVarExpr {
   public Expr createAssign(PhpParser parser, Expr value)
   {
     _var.setAssigned();
-    
+
     return super.createAssign(parser, value);
   }
 
@@ -122,7 +115,7 @@ public class VarExpr extends AbstractVarExpr {
   public Expr createAssignRef(PhpParser parser, Expr value)
   {
     _var.setAssigned();
-    
+
     return super.createAssignRef(parser, value);
   }
 
@@ -130,7 +123,6 @@ public class VarExpr extends AbstractVarExpr {
    * Evaluates the expression.
    *
    * @param env the calling environment.
-   *
    * @return the expression value.
    */
   public Value eval(Env env)
@@ -153,7 +145,6 @@ public class VarExpr extends AbstractVarExpr {
    * Evaluates the expression.
    *
    * @param env the calling environment.
-   *
    * @return the expression value.
    */
   public Value evalCopy(Env env)
@@ -166,7 +157,6 @@ public class VarExpr extends AbstractVarExpr {
    * Evaluates the expression, converting to an array if unset.
    *
    * @param env the calling environment.
-   *
    * @return the expression value.
    */
   public Value evalArray(Env env)
@@ -178,18 +168,17 @@ public class VarExpr extends AbstractVarExpr {
       value = env.getGlobalValue(_name);
 
       if (value == null || ! value.isset()) {
-	value = new ArrayValueImpl();
-	
-	env.setGlobalValue(_name, value);
+        value = new ArrayValueImpl();
+
+        env.setGlobalValue(_name, value);
       }
-    }
-    else {
+    } else {
       value = env.getValue(_name);
 
       if (value == null || ! value.isset()) {
-	value = new ArrayValueImpl();
-	
-	env.setValue(_name, value);
+        value = new ArrayValueImpl();
+
+        env.setValue(_name, value);
       }
     }
 
@@ -200,7 +189,6 @@ public class VarExpr extends AbstractVarExpr {
    * Evaluates the expression, converting to an object if unset.
    *
    * @param env the calling environment.
-   *
    * @return the expression value.
    */
   public Value evalObject(Env env)
@@ -212,18 +200,17 @@ public class VarExpr extends AbstractVarExpr {
       value = env.getGlobalValue(_name);
 
       if (value == null || ! value.isset()) {
-	value = env.createObject();
-	
-	env.setGlobalValue(_name, value);
+        value = env.createObject();
+
+        env.setGlobalValue(_name, value);
       }
-    }
-    else {
+    } else {
       value = env.getValue(_name);
 
       if (value == null || ! value.isset()) {
-	value = env.createObject();
-	
-	env.setValue(_name, value);
+        value = env.createObject();
+
+        env.setValue(_name, value);
       }
     }
 
@@ -234,7 +221,6 @@ public class VarExpr extends AbstractVarExpr {
    * Evaluates the expression.
    *
    * @param env the calling environment.
-   *
    * @return the expression value.
    */
   public Value evalRef(Env env)
@@ -250,7 +236,6 @@ public class VarExpr extends AbstractVarExpr {
    * Evaluates the expression.
    *
    * @param env the calling environment.
-   *
    * @return the expression value.
    */
   public Value evalArg(Env env)
@@ -258,7 +243,7 @@ public class VarExpr extends AbstractVarExpr {
   {
     // quercus/043k
     // quercus/0443
-    
+
     if (getVarInfo().isGlobal())
       return env.getGlobalVar(_name);
     else
@@ -269,8 +254,6 @@ public class VarExpr extends AbstractVarExpr {
    * Evaluates the expression.
    *
    * @param env the calling environment.
-   *
-   * @return the expression value.
    */
   public void evalAssign(Env env, Value value)
     throws Throwable
@@ -285,8 +268,6 @@ public class VarExpr extends AbstractVarExpr {
    * Evaluates the expression.
    *
    * @param env the calling environment.
-   *
-   * @return the expression value.
    */
   public void evalUnset(Env env)
     throws Throwable
@@ -310,11 +291,10 @@ public class VarExpr extends AbstractVarExpr {
 
     if (var == null) {
       setVarState(VarState.UNSET);
-      
+
       var = new VarExpr(_var);
       var.setVarState(VarState.VALID);
-    }
-    else
+    } else
       setVarState(var.getVarState());
 
     info.addVar(var.analyzeVarState(VarState.VALID));
@@ -326,7 +306,7 @@ public class VarExpr extends AbstractVarExpr {
   public void analyzeAssign(AnalyzeInfo info)
   {
     getVarInfo().setAssigned();
-    
+
     VarExpr infoVar = info.getVar(getName());
 
     if (infoVar == null) {
@@ -334,17 +314,15 @@ public class VarExpr extends AbstractVarExpr {
 
       infoVar = new VarExpr(getVarInfo());
       infoVar.setVarState(VarState.VALID);
-    }
-    else if (_varState == VarState.INIT ||
-	     _varState == infoVar.getVarState()) {
+    } else if (_varState == VarState.INIT ||
+               _varState == infoVar.getVarState()) {
       setVarState(infoVar.getVarState());
 
       infoVar = infoVar.analyzeVarState(VarState.VALID);
-    }
-    else {
+    } else {
       // quercus/3a0v
       setVarState(VarState.UNKNOWN);
-      
+
       infoVar = infoVar.analyzeVarState(VarState.VALID);
     }
 
@@ -473,66 +451,60 @@ public class VarExpr extends AbstractVarExpr {
     VarState state = getVarState();
 
     if (state == VarState.INIT) {
-      throw new IllegalStateException(getLocation() + "'" + this + "' is not analyzed.");
-    }
-    else if (! _var.isReference()) {
+      throw new IllegalStateException(getLocation() +
+                                      "'" +
+                                      this +
+                                      "' is not analyzed.");
+    } else if (! _var.isReference()) {
       out.print(getJavaVar());
-    }
-    else if (state == VarState.VALID) {
+    } else if (state == VarState.VALID) {
       out.print(getJavaVar());
-    }
-    else if (state == VarState.UNSET) {
+    } else if (state == VarState.UNSET) {
       if (_var.isGlobal()) {
-	out.print("(");
-	out.print(getJavaVar());
-	out.print(" = env.getGlobalVar(\"");
-	out.printJavaString(_name);
-	out.print("\"))");
+        out.print("(");
+        out.print(getJavaVar());
+        out.print(" = env.getGlobalVar(\"");
+        out.printJavaString(_name);
+        out.print("\"))");
+      } else if (_var.isVariable()) {
+        out.print("(");
+        out.print(getJavaVar());
+        out.print(" = env.getVar(\"");
+        out.printJavaString(_name);
+        out.print("\"))");
+      } else if (_var.isReference()) {
+        out.print("(");
+        out.print(getJavaVar());
+        out.print(" = new Var())");
+      } else {
+        out.print("NullValue.NULL");
       }
-      else if (_var.isVariable()) {
-	out.print("(");
-	out.print(getJavaVar());
-	out.print(" = env.getVar(\"");
-	out.printJavaString(_name);
-	out.print("\"))");
-      }
-      else if (_var.isReference()) {
-	out.print("(");
-	out.print(getJavaVar());
-	out.print(" = new Var())");
-      }
-      else {
-	out.print("NullValue.NULL");
-      }
-    }
-    else {
+    } else {
       if (_var.isGlobal()) {
-	out.print("(");
-	out.print(getJavaVar());
-	out.print(" = env.getGlobalVar(\"");
-	out.printJavaString(_name);
-	out.print("\", ");
-	out.print(getJavaVar());
-	out.print("))");
-      }
-      else if (_var.isVariable()) {
-	out.print("(");
-	out.print(getJavaVar());
-	out.print(" = env.getVar(\"");
-	out.printJavaString(_name);
-	out.print("\", ");
-	out.print(getJavaVar());
-	out.print("))");
-      }
-      else {
-	out.print("(");
-	out.print(getJavaVar());
-	out.print(" = env.getLocalVar(");
-	out.print(getJavaVar());
-	out.print("))");
+        out.print("(");
+        out.print(getJavaVar());
+        out.print(" = env.getGlobalVar(\"");
+        out.printJavaString(_name);
+        out.print("\", ");
+        out.print(getJavaVar());
+        out.print("))");
+      } else if (_var.isVariable()) {
+        out.print("(");
+        out.print(getJavaVar());
+        out.print(" = env.getVar(\"");
+        out.printJavaString(_name);
+        out.print("\", ");
+        out.print(getJavaVar());
+        out.print("))");
+      } else {
+        out.print("(");
+        out.print(getJavaVar());
+        out.print(" = env.getLocalVar(");
+        out.print(getJavaVar());
+        out.print("))");
       }
     }
-    
+
     // XXX: handle the .toValue()
   }
 
@@ -571,96 +543,89 @@ public class VarExpr extends AbstractVarExpr {
     VarState state = getVarState();
 
     if (state == VarState.INIT) {
-      throw new IllegalStateException(getLocation() + "'" + this + "' is not analyzed.");
-    }
-    else if (! _var.isReference()) {
+      throw new IllegalStateException(getLocation() +
+                                      "'" +
+                                      this +
+                                      "' is not analyzed.");
+    } else if (! _var.isReference()) {
       if (isTop) {
-	// php/3a60
-	out.print(getJavaVar());
-	out.print(" = ");
-	value.generateCopy(out);
+        // php/3a60
+        out.print(getJavaVar());
+        out.print(" = ");
+        value.generateCopy(out);
+      } else {
+        out.print("(");
+        out.print(getJavaVar());
+        out.print(" = ");
+        value.generateCopy(out);
+        out.print(")");
       }
-      else {
-	out.print("(");
-	out.print(getJavaVar());
-	out.print(" = ");
-	value.generateCopy(out);
-	out.print(")");
-      }
-    }
-    else if (state == VarState.VALID) {
+    } else if (state == VarState.VALID) {
       out.print(getJavaVar());
       out.print(".set(");
       value.generateCopy(out);
       out.print(")");
-    }
-    else if (state == VarState.UNSET) {
+    } else if (state == VarState.UNSET) {
       if (_var.isGlobal()) {
-	out.print("(");
-	out.print(getJavaVar());
-	out.print(" = env.getGlobalVar(\"");
-	out.printJavaString(_name);
-	out.print("\"))");
-	out.print(".set(");
-	value.generateCopy(out);
-	out.print(")");
+        out.print("(");
+        out.print(getJavaVar());
+        out.print(" = env.getGlobalVar(\"");
+        out.printJavaString(_name);
+        out.print("\"))");
+        out.print(".set(");
+        value.generateCopy(out);
+        out.print(")");
+      } else if (_var.isVariable()) {
+        out.print("(");
+        out.print(getJavaVar());
+        out.print(" = env.getVar(\"");
+        out.printJavaString(_name);
+        out.print("\"))");
+        out.print(".set(");
+        value.generateCopy(out);  // php/3a51
+        out.print(")");
+      } else if (_var.isReference()) {
+        out.print("(");
+        out.print(getJavaVar());
+        out.print(" = new Var())");
+        out.print(".set(");
+        value.generateCopy(out);
+        out.print(")");
+      } else {
+        out.print("NullValue.NULL");
       }
-      else if (_var.isVariable()) {
-	out.print("(");
-	out.print(getJavaVar());
-	out.print(" = env.getVar(\"");
-	out.printJavaString(_name);
-	out.print("\"))");
-	out.print(".set(");
-	value.generateCopy(out);  // php/3a51
-	out.print(")");
-      }
-      else if (_var.isReference()) {
-	out.print("(");
-	out.print(getJavaVar());
-	out.print(" = new Var())");
-	out.print(".set(");
-	value.generateCopy(out);
-	out.print(")");
-      }
-      else {
-	out.print("NullValue.NULL");
-      }
-    }
-    else {
+    } else {
       if (_var.isGlobal()) {
-	out.print("(");
-	out.print(getJavaVar());
-	out.print(" = env.getGlobalVar(\"");
-	out.printJavaString(_name);
-	out.print("\", ");
-	out.print(getJavaVar());
-	out.print("))");
-	out.print(".set(");
-	value.generateCopy(out);
-	out.print(")");
-      }
-      else if (_var.isVariable()) {
-	out.print("(");
-	out.print(getJavaVar());
-	out.print(" = env.getVar(\"");
-	out.printJavaString(_name);
-	out.print("\", ");
-	out.print(getJavaVar());
-	out.print("))");
-	out.print(".set(");
-	value.generateCopy(out);
-	out.print(")");
-      }
-      else {
-	out.print("(");
-	out.print(getJavaVar());
-	out.print(" = env.getLocalVar(");
-	out.print(getJavaVar());
-	out.print("))");
-	out.print(".set(");
-	value.generateCopy(out);
-	out.print(")");
+        out.print("(");
+        out.print(getJavaVar());
+        out.print(" = env.getGlobalVar(\"");
+        out.printJavaString(_name);
+        out.print("\", ");
+        out.print(getJavaVar());
+        out.print("))");
+        out.print(".set(");
+        value.generateCopy(out);
+        out.print(")");
+      } else if (_var.isVariable()) {
+        out.print("(");
+        out.print(getJavaVar());
+        out.print(" = env.getVar(\"");
+        out.printJavaString(_name);
+        out.print("\", ");
+        out.print(getJavaVar());
+        out.print("))");
+        out.print(".set(");
+        value.generateCopy(out);
+        out.print(")");
+      } else {
+        out.print("(");
+        out.print(getJavaVar());
+        out.print(" = env.getLocalVar(");
+        out.print(getJavaVar());
+        out.print("))");
+        out.print(".set(");
+        value.generateCopy(out);
+        out.print(")");
       }
     }
   }
@@ -673,11 +638,11 @@ public class VarExpr extends AbstractVarExpr {
   public void generateAssignRef(PhpWriter out, Expr value, boolean isTop)
     throws IOException
   {
-    VarState state = getVarState();
+    //VarState state = getVarState();
 
     if (! isTop)
       out.print("(");
-    
+
     if (_var.isGlobal() || _var.isVariable()) {
       out.print(getJavaVar());
       out.print(" = env.setVar(\"");
@@ -685,8 +650,7 @@ public class VarExpr extends AbstractVarExpr {
       out.print("\", ");
       value.generateRef(out);
       out.print(")");
-    }
-    else {
+    } else {
       // php/3475
       out.print(getJavaVar());
       out.print(" = Env.setRef(");
@@ -695,10 +659,10 @@ public class VarExpr extends AbstractVarExpr {
       value.generateRef(out);
       out.print(")");
     }
-    
+
     if (! isTop)
       out.print(")");
-    
+
     // XXX: handle the .toValue()
   }
 
@@ -715,8 +679,7 @@ public class VarExpr extends AbstractVarExpr {
       out.print(" = env.setVar(\"");
       out.printJavaString(_name);
       out.print("\", " + value + ")");
-    }
-    else {
+    } else {
       out.print(getJavaVar());
       out.print(" = ");
       out.print(value);
@@ -756,10 +719,14 @@ public class VarExpr extends AbstractVarExpr {
   public void generateUnset(PhpWriter out)
     throws IOException
   {
-    out.print(getJavaVar());
-    out.print(" = env.unsetVar(\"");
+    out.print("env.unsetVar(\"");
     out.printJavaString(_name);
-    out.print("\")");
+    out.println("\");");
+    out.print(getJavaVar() + " = NullValue.NULL");
+    //out.print(getJavaVar());
+    //out.print(" = env.unsetVar(\"");
+    //out.printJavaString(_name);
+    //out.print("\")");
   }
 
   public int hashCode()
@@ -778,7 +745,7 @@ public class VarExpr extends AbstractVarExpr {
 
     return _var == var._var;
   }
-  
+
   public String toString()
   {
     return "$" + _name;
