@@ -778,7 +778,7 @@ public class Env {
    */
   public final Var getVar(String name, Value var)
   {
-    if (var != null)
+    if ((var != null) && (var instanceof Var))
       return (Var) var;
 
     var = getRef(name);

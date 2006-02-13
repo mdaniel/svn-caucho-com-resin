@@ -29,45 +29,36 @@
 
 package com.caucho.quercus.servlet;
 
-import java.io.OutputStream;
-import java.io.IOException;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import javax.sql.DataSource;
-
-import javax.servlet.ServletException;
-
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import com.caucho.util.L10N;
-import com.caucho.util.CauchoSystem;
-
 import com.caucho.config.ConfigException;
-
-import com.caucho.server.connection.CauchoResponse;
-
 import com.caucho.quercus.Quercus;
-import com.caucho.quercus.QuercusLineRuntimeException;
 import com.caucho.quercus.QuercusExitException;
-
+import com.caucho.quercus.QuercusLineRuntimeException;
 import com.caucho.quercus.env.Env;
-
 import com.caucho.quercus.module.QuercusModule;
-
 import com.caucho.quercus.page.PhpPage;
-
+import com.caucho.server.connection.CauchoResponse;
+import com.caucho.util.CauchoSystem;
+import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
 import com.caucho.vfs.WriteStream;
 
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.sql.DataSource;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 /**
  * Servlet to call PHP through javax.script.
  */
-public class QuercusServlet extends HttpServlet {
+public class QuercusServlet
+  extends HttpServlet
+{
   private static final L10N L = new L10N(QuercusServlet.class);
   private static final Logger log
     = Logger.getLogger(QuercusServlet.class.getName());
@@ -89,17 +80,15 @@ public class QuercusServlet extends HttpServlet {
     if ("true".equals(isCompile) || "".equals(isCompile)) {
       quercus.setCompile(true);
       quercus.setLazyCompile(false);
-    }
-    else if ("false".equals(isCompile)) {
+    } else if ("false".equals(isCompile)) {
       quercus.setCompile(false);
       quercus.setLazyCompile(false);
-    }
-    else if ("lazy".equals(isCompile)) {
+    } else if ("lazy".equals(isCompile)) {
       quercus.setLazyCompile(true);
-    }
-    else
-      throw new ConfigException(L.l("'{0}' is an unknown compile value.  Values are 'true', 'false', or 'lazy'.",
-				    isCompile));
+    } else
+      throw new ConfigException(L.l(
+        "'{0}' is an unknown compile value.  Values are 'true', 'false', or 'lazy'.",
+        isCompile));
   }
 
   /**
@@ -150,7 +139,7 @@ public class QuercusServlet extends HttpServlet {
   }
 
   private void initImpl()
-    throws ServletException
+   // throws ServletException
   {
     getQuercus();
 
@@ -166,7 +155,7 @@ public class QuercusServlet extends HttpServlet {
    * Service.
    */
   public void service(HttpServletRequest request,
-		      HttpServletResponse response)
+                      HttpServletResponse response)
     throws ServletException, IOException
   {
     try {
@@ -182,47 +171,53 @@ public class QuercusServlet extends HttpServlet {
       // XXX: check if correct.  PHP doesn't expect the lower levels
       // to deal with the encoding, so this may be okay
       if (response instanceof CauchoResponse) {
-	ws = Vfs.openWrite(((CauchoResponse) response).getResponseStream());
-      }
-      else {
-	OutputStream out = response.getOutputStream();
+        ws = Vfs.openWrite(((CauchoResponse) response).getResponseStream());
+      } else {
+        OutputStream out = response.getOutputStream();
 
-	ws = Vfs.openWrite(out);
+        ws = Vfs.openWrite(out);
       }
 
       Env env = new Env(getQuercus(), page, ws, request, response);
       try {
-	env.start();
+        env.start();
 
-	page.executeTop(env);
+        page.executeTop(env);
 
-	return;
-      } catch (QuercusExitException e) {
-	throw e;
-      } catch (QuercusLineRuntimeException e) {
-	log.log(Level.FINE, e.toString(), e);
-
-	return;
-      } catch (Throwable e) {
-	if (response.isCommitted())
-	  e.printStackTrace(ws.getPrintWriter());
-
-	ws = null;
-
-	throw e;
-      } finally {
-	env.close();
-
-	// don't want a flush for an exception
-	if (ws != null)
-	  ws.close();
+     //   return;
       }
-    } catch (QuercusExitException e) {
+      catch (QuercusExitException e) {
+        throw e;
+      }
+      catch (QuercusLineRuntimeException e) {
+        log.log(Level.FINE, e.toString(), e);
+
+      //  return;
+      }
+      catch (Throwable e) {
+        if (response.isCommitted())
+          e.printStackTrace(ws.getPrintWriter());
+
+        ws = null;
+
+        throw e;
+      }
+      finally {
+        env.close();
+
+        // don't want a flush for an exception
+        if (ws != null)
+          ws.close();
+      }
+    }
+    catch (QuercusExitException e) {
       log.log(Level.FINEST, e.toString(), e);
       // normal exit
-    } catch (RuntimeException e) {
+    }
+    catch (RuntimeException e) {
       throw e;
-    } catch (Throwable e) {
+    }
+    catch (Throwable e) {
       throw new ServletException(e);
     }
   }
