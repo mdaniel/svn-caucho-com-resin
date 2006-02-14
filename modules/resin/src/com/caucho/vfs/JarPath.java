@@ -105,7 +105,9 @@ public class JarPath extends FilesystemPath {
    */
   public String getURL()
   {
-    return getScheme() + ":" + getContainer().getURL() + "!" + getFullPath();
+    String path = getFullPath();
+
+    return getScheme() + ":" + getContainer().getURL() + "!" + path;
   }
 
   /**

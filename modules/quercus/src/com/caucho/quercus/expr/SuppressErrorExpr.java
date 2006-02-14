@@ -55,9 +55,20 @@ public class SuppressErrorExpr extends UnaryExpr {
   public Expr createAssign(PhpParser parser, Expr value)
     throws IOException
   {
-    // quercus/03j2
+    // php/03j2
     
     return new SuppressErrorExpr(getExpr().createAssign(parser, value));
+  }
+
+  /**
+   * Creates the assignment.
+   */
+  public Expr createAssignRef(PhpParser parser, Expr value)
+    throws IOException
+  {
+    // php/03j2
+    
+    return new SuppressErrorExpr(getExpr().createAssignRef(parser, value));
   }
   
   /**

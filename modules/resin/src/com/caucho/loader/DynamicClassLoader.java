@@ -1369,6 +1369,7 @@ public class DynamicClassLoader extends java.net.URLClassLoader
 
     return null;
   }
+
   
   /**
    * Opens a stream to a resource somewhere in the classpath
@@ -1379,16 +1380,53 @@ public class DynamicClassLoader extends java.net.URLClassLoader
    */
   public InputStream getResourceAsStream(String name)
   {
-    URL url = getResource(name);
+    boolean isNormalJdkOrder = isNormalJdkOrder(name);
+    InputStream is = null;
 
-    if (url != null) {
-      try {
-	// XXX: if want to use JNI filesystem, must either avoid getResource
-	// or extend lookup to handle % escapes
-	// server/2499
-	return Vfs.openRead(url.openStream());
-      } catch (IOException e) {
-	log().log(Level.FINE, e.toString(), e);
+    if (isNormalJdkOrder) {
+      is = getParentResourceAsStream(name);
+
+      if (is != null)
+	return is;
+    }
+
+    ArrayList<Loader> loaders = _loaders;
+
+    for (int i = 0; loaders != null && i < loaders.size(); i++) {
+      Loader loader = loaders.get(i);
+
+      is = loader.getResourceAsStream(name);
+
+      if (is != null)
+	return is;
+    }
+
+    if (! isNormalJdkOrder) {
+      is = getParentResourceAsStream(name);
+    }
+    
+    return is;
+  }
+
+  private InputStream getParentResourceAsStream(String name)
+  {
+    ClassLoader parent = getParent();
+    
+    ClassLoader systemLoader = ClassLoader.getSystemClassLoader();
+
+    InputStream is;
+    
+    if (parent != null) {
+      is = parent.getResourceAsStream(name);
+
+      if (is != null)
+	return is;
+    }
+    else if (this != systemLoader) {
+      is = getSystemResourceAsStream(name);
+      
+      if (is != null) {
+	return is;
       }
     }
 

@@ -47,6 +47,28 @@ public class PDFModule extends AbstractQuercusModule {
   /**
    * Returns the height of an image.
    */
+  public static String pdf_get_errmsg(PDF pdf)
+  {
+    if (pdf != null)
+      return pdf.get_errmsg();
+    else
+      return "";
+  }
+
+  /**
+   * Returns the height of an image.
+   */
+  public static int pdf_get_errnum(PDF pdf)
+  {
+    if (pdf != null)
+      return pdf.get_errnum();
+    else
+      return 0;
+  }
+
+  /**
+   * Returns the height of an image.
+   */
   public static double pdf_get_image_height(PDFImage image)
   {
     if (image != null)

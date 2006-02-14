@@ -1762,139 +1762,15 @@ public class PhpParser {
   private Expr parseWeakAndExpr()
     throws IOException
   {
-    Expr expr = parseAssignExpr();
-
-    while (true) {
-      int token = parseToken();
-
-      switch (token) {
-      case AND_RES:
-	expr = new AndExpr(expr, parseAssignExpr());
-	break;
-      default:
-	_peekToken = token;
-	return expr;
-      }
-    }
-  }
-
-  /**
-   * Parses an assignment expression.
-   */
-  private Expr parseAssignExpr()
-    throws IOException
-  {
     Expr expr = parseConditionalExpr();
 
     while (true) {
       int token = parseToken();
 
       switch (token) {
-      case '=':
-	token = parseToken();
-	
-	try {
-	  if (token == '&')
-	    expr = expr.createAssignRef(this, parseAssignExpr());
-	  else {
-	    _peekToken = token;
-	    expr = expr.createAssign(this, parseAssignExpr());
-	  }
-	} catch (PhpParseException e) {
-	  throw e;
-	} catch (IOException e) {
-	  throw error(e.getMessage());
-	}
+      case AND_RES:
+	expr = new AndExpr(expr, parseConditionalExpr());
 	break;
-	
-      case PLUS_ASSIGN:
-	if (expr.canRead())
-	  expr = expr.createAssign(this, new AddExpr(expr.copy(),
-						     parseAssignExpr()));
-	else // php/03d4
-	  expr = expr.createAssign(this, parseAssignExpr());
-	break;
-	
-      case MINUS_ASSIGN:
-	if (expr.canRead())
-	  expr = expr.createAssign(this, new SubExpr(expr.copy(),
-						     parseAssignExpr()));
-	else
-	  expr = expr.createAssign(this, parseAssignExpr());
-	break;
-	
-      case APPEND_ASSIGN:
-	if (expr.canRead())
-	  expr = expr.createAssign(this, AppendExpr.create(expr.copy(),
-							   parseAssignExpr()));
-	else
-	  expr = expr.createAssign(this, parseAssignExpr());
-	break;
-	
-      case MUL_ASSIGN:
-	if (expr.canRead())
-	  expr = expr.createAssign(this, new MulExpr(expr.copy(),
-						     parseAssignExpr()));
-	else
-	  expr = expr.createAssign(this, parseAssignExpr());
-	break;
-	
-      case DIV_ASSIGN:
-	if (expr.canRead())
-	  expr = expr.createAssign(this, new DivExpr(expr.copy(),
-						     parseAssignExpr()));
-	else
-	  expr = expr.createAssign(this, parseAssignExpr());
-	break;
-	
-      case MOD_ASSIGN:
-	if (expr.canRead())
-	  expr = expr.createAssign(this, new ModExpr(expr.copy(),
-						     parseAssignExpr()));
-	else
-	  expr = expr.createAssign(this, parseAssignExpr());
-	break;
-	
-      case LSHIFT_ASSIGN:
-	if (expr.canRead())
-	  expr = expr.createAssign(this, new LeftShiftExpr(expr.copy(),
-							   parseAssignExpr()));
-	else
-	  expr = expr.createAssign(this, parseAssignExpr());
-	break;
-	
-      case RSHIFT_ASSIGN:
-	if (expr.canRead())
-	  expr = expr.createAssign(this, new RightShiftExpr(expr.copy(),
-							    parseAssignExpr()));
-	else
-	  expr = expr.createAssign(this, parseAssignExpr());
-	break;
-	
-      case AND_ASSIGN:
-	if (expr.canRead())
-	  expr = expr.createAssign(this, new BitAndExpr(expr.copy(),
-							parseAssignExpr()));
-	else
-	  expr = expr.createAssign(this, parseAssignExpr());
-	break;
-	
-      case OR_ASSIGN:
-	if (expr.canRead())
-	  expr = expr.createAssign(this, new BitOrExpr(expr.copy(),
-						       parseAssignExpr()));
-	else
-	  expr = expr.createAssign(this, parseAssignExpr());
-	break;
-	
-      case XOR_ASSIGN:
-	if (expr.canRead())
-	  expr = expr.createAssign(this, new BitXorExpr(expr.copy(),
-							parseAssignExpr()));
-	else
-	  expr = expr.createAssign(this, parseAssignExpr());
-	break;
-	
       default:
 	_peekToken = token;
 	return expr;
@@ -1917,7 +1793,8 @@ public class PhpParser {
       case '?':
 	Expr trueExpr = parseExpr();
 	expect(':');
-	expr = new ConditionalExpr(expr, trueExpr, parseExpr());
+	// php/33c1
+	expr = new ConditionalExpr(expr, trueExpr, parseOrExpr());
 	break;
       default:
 	_peekToken = token;
@@ -2156,21 +2033,145 @@ public class PhpParser {
   private Expr parseMulExpr()
     throws IOException
   {
-    Expr expr = parseTerm();
+    Expr expr = parseAssignExpr();
 
     while (true) {
       int token = parseToken();
 
       switch (token) {
       case '*':
-	expr = new MulExpr(expr, parseTerm());
+	expr = new MulExpr(expr, parseAssignExpr());
 	break;
       case '/':
-	expr = new DivExpr(expr, parseTerm());
+	expr = new DivExpr(expr, parseAssignExpr());
 	break;
       case '%':
-	expr = new ModExpr(expr, parseTerm());
+	expr = new ModExpr(expr, parseAssignExpr());
 	break;
+      default:
+	_peekToken = token;
+	return expr;
+      }
+    }
+  }
+
+  /**
+   * Parses an assignment expression.
+   */
+  private Expr parseAssignExpr()
+    throws IOException
+  {
+    Expr expr = parseTerm();
+
+    while (true) {
+      int token = parseToken();
+
+      switch (token) {
+      case '=':
+	token = parseToken();
+	
+	try {
+	  if (token == '&')
+	    expr = expr.createAssignRef(this, parseConditionalExpr());
+	  else {
+	    _peekToken = token;
+	    expr = expr.createAssign(this, parseConditionalExpr());
+	  }
+	} catch (PhpParseException e) {
+	  throw e;
+	} catch (IOException e) {
+	  throw error(e.getMessage());
+	}
+	break;
+	
+      case PLUS_ASSIGN:
+	if (expr.canRead())
+	  expr = expr.createAssign(this, new AddExpr(expr.copy(),
+						     parseConditionalExpr()));
+	else // php/03d4
+	  expr = expr.createAssign(this, parseConditionalExpr());
+	break;
+	
+      case MINUS_ASSIGN:
+	if (expr.canRead())
+	  expr = expr.createAssign(this, new SubExpr(expr.copy(),
+						     parseConditionalExpr()));
+	else
+	  expr = expr.createAssign(this, parseConditionalExpr());
+	break;
+	
+      case APPEND_ASSIGN:
+	if (expr.canRead())
+	  expr = expr.createAssign(this, AppendExpr.create(expr.copy(),
+							   parseConditionalExpr()));
+	else
+	  expr = expr.createAssign(this, parseConditionalExpr());
+	break;
+	
+      case MUL_ASSIGN:
+	if (expr.canRead())
+	  expr = expr.createAssign(this, new MulExpr(expr.copy(),
+						     parseConditionalExpr()));
+	else
+	  expr = expr.createAssign(this, parseConditionalExpr());
+	break;
+	
+      case DIV_ASSIGN:
+	if (expr.canRead())
+	  expr = expr.createAssign(this, new DivExpr(expr.copy(),
+						     parseConditionalExpr()));
+	else
+	  expr = expr.createAssign(this, parseConditionalExpr());
+	break;
+	
+      case MOD_ASSIGN:
+	if (expr.canRead())
+	  expr = expr.createAssign(this, new ModExpr(expr.copy(),
+						     parseConditionalExpr()));
+	else
+	  expr = expr.createAssign(this, parseConditionalExpr());
+	break;
+	
+      case LSHIFT_ASSIGN:
+	if (expr.canRead())
+	  expr = expr.createAssign(this, new LeftShiftExpr(expr.copy(),
+							   parseConditionalExpr()));
+	else
+	  expr = expr.createAssign(this, parseConditionalExpr());
+	break;
+	
+      case RSHIFT_ASSIGN:
+	if (expr.canRead())
+	  expr = expr.createAssign(this, new RightShiftExpr(expr.copy(),
+							    parseConditionalExpr()));
+	else
+	  expr = expr.createAssign(this, parseConditionalExpr());
+	break;
+	
+      case AND_ASSIGN:
+	if (expr.canRead())
+	  expr = expr.createAssign(this, new BitAndExpr(expr.copy(),
+							parseConditionalExpr()));
+	else
+	  expr = expr.createAssign(this, parseConditionalExpr());
+	break;
+	
+      case OR_ASSIGN:
+	if (expr.canRead())
+	  expr = expr.createAssign(this, new BitOrExpr(expr.copy(),
+						       parseConditionalExpr()));
+	else
+	  expr = expr.createAssign(this, parseConditionalExpr());
+	break;
+	
+      case XOR_ASSIGN:
+	if (expr.canRead())
+	  expr = expr.createAssign(this, new BitXorExpr(expr.copy(),
+							parseConditionalExpr()));
+	else
+	  expr = expr.createAssign(this, parseConditionalExpr());
+	break;
+	
       default:
 	_peekToken = token;
 	return expr;
@@ -2402,7 +2403,7 @@ public class PhpParser {
 	token = parseToken();
 
 	if (token == '=') {
-	  return new NotExpr(expr.createAssign(this, parseAssignExpr()));
+	  return new NotExpr(expr.createAssign(this, parseConditionalExpr()));
 	}
 	else {
 	  _peekToken = token;
@@ -2780,7 +2781,7 @@ public class PhpParser {
 
     expect('=');
 
-    Expr value = parseAssignExpr();
+    Expr value = parseConditionalExpr();
 
     return ListExpr.create(this, leftVars, value);
   }
@@ -3946,6 +3947,9 @@ public class PhpParser {
     case AND_RES: return "'and'";
     case OR_RES: return "'or'";
     case XOR_RES: return "'xor'";
+      
+    case C_AND: return "'&&'";
+    case C_OR: return "'||'";
       
     case IF: return "'if'";
     case ELSE: return "'else'";

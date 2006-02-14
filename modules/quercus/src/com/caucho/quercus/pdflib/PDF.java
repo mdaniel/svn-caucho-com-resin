@@ -171,6 +171,22 @@ public class PDF {
   }
 
   /**
+   * Returns the error message.
+   */
+  public String get_errmsg()
+  {
+    return "";
+  }
+
+  /**
+   * Returns the error number.
+   */
+  public int get_errnum()
+  {
+    return 0;
+  }
+
+  /**
    * Returns the value for a parameter.
    */
   public String get_parameter(String name)

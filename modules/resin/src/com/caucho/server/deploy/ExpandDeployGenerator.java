@@ -461,8 +461,11 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController> ex
 	
       E controller = createController(name);
 
-      if (controller != null)
+      if (controller != null) {
 	controller.setExpandCleanupFileSet(_expandCleanupFileSet);
+
+	_controllerNames.add(name); // server/1d19
+      }
 
       return controller;
     } finally {

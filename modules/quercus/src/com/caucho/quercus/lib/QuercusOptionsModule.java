@@ -358,7 +358,7 @@ public class QuercusOptionsModule extends AbstractQuercusModule {
       else if (Character.isLetter((char) ch)) {
 	StringBuilder sb = new StringBuilder();
 
-	for (; i < len && Character.isLetter(version.charAt(ch)); i++) {
+	for (; i < len && Character.isLetter(version.charAt(i)); i++) {
 	  sb.append((char) ch);
 	}
 
