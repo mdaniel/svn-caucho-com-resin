@@ -164,7 +164,7 @@ abstract public class AbstractFunction {
   public Value evalCopy(Env env, Value []args)
     throws Throwable
   {
-    return eval(env, args).copy();
+    return eval(env, args).copyReturn();
   }
   
   /**

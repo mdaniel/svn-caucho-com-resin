@@ -216,6 +216,12 @@ public class Function extends AbstractFunction {
     return evalImpl(env, args, false);
   }
 
+  public Value evalCopy(Env env, Expr []args)
+    throws Throwable
+  {
+    return evalImpl(env, args, false);
+  }
+
   public Value evalRef(Env env, Expr []args)
     throws Throwable
   {
@@ -296,6 +302,12 @@ public class Function extends AbstractFunction {
     return evalImpl(env, args, false);
   }
 
+  public Value evalCopy(Env env, Value []args)
+    throws Throwable
+  {
+    return evalImpl(env, args, false);
+  }
+
   public Value evalRef(Env env, Value []args)
     throws Throwable
   {
@@ -351,7 +363,7 @@ public class Function extends AbstractFunction {
       else if (_isReturnsReference && isRef)
 	return value;
       else
-	return value.copy();
+	return value.copyReturn();
     } finally {
       env.restoreFunctionArgs(oldArgs);
       env.popEnv(oldMap);
