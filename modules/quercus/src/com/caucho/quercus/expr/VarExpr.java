@@ -719,9 +719,9 @@ public class VarExpr
   public void generateUnset(PhpWriter out)
     throws IOException
   {
-    out.print("env.unsetVar(\"");
-    out.printJavaString(_name);
-    out.println("\");");
+    //out.print("env.unsetLocalVar(\"");
+    //out.printJavaString(_name);
+    //out.println("\");");
     out.print(getJavaVar() + " = NullValue.NULL");
     //out.print(getJavaVar());
     //out.print(" = env.unsetVar(\"");
