@@ -444,6 +444,9 @@ public class EntityManyToOneField extends AbstractField {
     if (getLoadGroupIndex() == updateIndex) {
       // order matters: ejb/06gc
       out.println(generateAccessor(dst) + " = " + generateAccessor(src) + ";");
+    }
+
+    if (_targetLoadIndex == updateIndex) { // ejb/0h20
       String value = generateGet(src);
       out.println(generateSet(dst, value) + ";");
     }

@@ -174,6 +174,14 @@ public class VarInfo {
   }
 
   /**
+   * True if the Java variable only contains PHP values.
+   */
+  public boolean isValue()
+  {
+    return ! isReference();
+  }
+  
+  /**
    * True if the variable is used as a reference in the function.
    */
   public boolean isReference()

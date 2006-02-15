@@ -47,6 +47,8 @@ import com.caucho.java.gen.CallChain;
 import com.caucho.amber.type.Type;
 import com.caucho.amber.AmberManager;
 
+import com.caucho.ejb.EjbServerManager;
+
 import com.caucho.ejb.gen.BeanAssembler;
 import com.caucho.ejb.gen.ViewClass;
 import com.caucho.ejb.gen.AbstractQueryMethod;
@@ -110,13 +112,21 @@ public class EjbAmberSelectMethod extends EjbBaseMethod {
 
     String returnEJB = parser.getReturnEJB();
     JClass retType = method.getReturnType();
+
+    EjbConfig ejbConfig = getBean().getConfig();
+    EjbServerManager ejbManager = ejbConfig.getEJBManager();
+    EjbEntityBean retBean = (EjbEntityBean) ejbConfig.getBeanConfig(returnEJB);
     
-    AmberManager amberManager = getBean().getConfig().getEJBManager().getAmberManager();
+    AmberManager amberManager = ejbManager.getAmberManager();
 
     Type amberType = null;
 
-    if (returnEJB != null)
-      amberType = amberManager.getEntity(returnEJB);
+    if (returnEJB != null) {
+      amberType = amberManager.getEntity(retBean.getAbstractSchemaName());
+
+      if (amberType == null)
+	throw new NullPointerException("No amber entity for " + returnEJB);
+    }
     else if (retType.isAssignableTo(EJBLocalObject.class)) {
       EjbEntityBean targetBean = getBean().getConfig().findEntityByLocal(retType);
 
@@ -136,7 +146,7 @@ public class EjbAmberSelectMethod extends EjbBaseMethod {
 
     AbstractQueryMethod queryMethod;
     
-    if (method.getReturnType().isAssignableTo(Collection.class))
+    if (retType.isAssignableTo(Collection.class))
       queryMethod = new AmberSelectCollectionMethod((EjbEntityBean) getBean(),
 						    getMethod(),
 						    fullClassName,

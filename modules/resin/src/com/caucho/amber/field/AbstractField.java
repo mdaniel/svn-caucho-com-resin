@@ -528,8 +528,10 @@ abstract public class AbstractField implements AmberField {
       return generateSuperSetter(value);
     else if (isAbstract())
       return obj + "." + getFieldName() + " = " + value;
-    else
+    else if (_setterMethod != null)
       return obj + "." + _setterMethod.getName() + "(" + value + ")";
+    else
+      return ""; // ejb/0gb9
   }
 
   /**

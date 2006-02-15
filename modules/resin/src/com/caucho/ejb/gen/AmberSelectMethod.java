@@ -80,6 +80,9 @@ public class AmberSelectMethod extends AbstractQueryMethod {
     _contextClassName = contextClassName;
     _query = query;
     _amberType = amberType;
+
+    if (amberType == null)
+      throw new NullPointerException();
   }
 
   /**

@@ -284,6 +284,20 @@ public class PDF {
   }
 
   /**
+   * Sets the dashing
+   *
+   * @param b black length
+   * @param w which length
+   */
+  public boolean setdash(double b, double w)
+    throws IOException
+  {
+    _stream.setDash(b, w);
+
+    return true;
+  }
+
+  /**
    * Sets the current font
    *
    * @param name the font name, e.g. Helvetica

@@ -910,8 +910,13 @@ public class AmberConnectionImpl {
 				 entity.__caucho_getPrimaryKey());
 
     if (oldEntity == null) {
-      AmberEntityHome entityHome;
-      entityHome = _amberManager.getEntityHome(entity.getClass().getName());
+      EntityType entityType = entity.__caucho_getEntityType();
+
+      if (entityType == null)
+	throw new AmberException(L.l("entity has no entityType"));
+      
+      AmberEntityHome entityHome = entityType.getHome();
+      //entityHome = _amberManager.getEntityHome(entity.getClass().getName());
 
       if (entityHome == null)
 	throw new AmberException(L.l("entity has no matching home"));

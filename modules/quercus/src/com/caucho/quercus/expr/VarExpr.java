@@ -297,8 +297,7 @@ public class VarExpr
     } else
       setVarState(var.getVarState());
 
-    info.addVar(var);
-    //info.addVar(var.analyzeVarState(VarState.VALID));
+    info.addVar(var.analyzeVarState(VarState.VALID));
   }
 
   /**
@@ -453,61 +452,67 @@ public class VarExpr
 
     if (state == VarState.INIT) {
       throw new IllegalStateException(getLocation() +
-                                      "'" +
-                                      this +
-                                      "' is not analyzed.");
-    } else if (! _var.isReference()) {
-      if (state == VarState.VALID)
-        out.print(getJavaVar());
-      else if (state == VarState.UNSET)
-        out.print("NullValue.NULL");
-      else // (state should be UNKNOWN
-        out.print("(" + getJavaVar() + " = env.getLocalVar(v_" + _name + "))");
-    } else if (state == VarState.VALID) {
+                                      "'" + this + "' is not analyzed.");
+    }
+
+    if (_var.isValue()) {
       out.print(getJavaVar());
-    } else if (state == VarState.UNSET) {
-      if (_var.isGlobal()) {
-        out.print("(");
-        out.print(getJavaVar());
-        out.print(" = env.getGlobalVar(\"");
-        out.printJavaString(_name);
-        out.print("\"))");
-      } else if (_var.isVariable()) {
-        out.print("(");
-        out.print(getJavaVar());
-        out.print(" = env.getVar(\"");
-        out.printJavaString(_name);
-        out.print("\"))");
-      } else if (_var.isReference()) {
-        out.print("(");
-        out.print(getJavaVar());
-        out.print(" = new Var())");
-      } else {
-        out.print("NullValue.NULL");
+    }
+    else if (_var.isGlobal()) {
+      if (state == VarState.VALID) {
+	out.print(getJavaVar());
       }
-    } else {
-      if (_var.isGlobal()) {
-        out.print("(");
-        out.print(getJavaVar());
-        out.print(" = env.getGlobalVar(\"");
-        out.printJavaString(_name);
-        out.print("\", ");
-        out.print(getJavaVar());
-        out.print("))");
-      } else if (_var.isVariable()) {
-        out.print("(");
-        out.print(getJavaVar());
-        out.print(" = env.getVar(\"");
-        out.printJavaString(_name);
-        out.print("\", ");
-        out.print(getJavaVar());
-        out.print("))");
+      else if (state == VarState.UNSET) {
+	out.print("(");
+	out.print(getJavaVar());
+	out.print(" = env.getGlobalVar(\"");
+	out.printJavaString(_name);
+	out.print("\"))");
+      }
+      else {
+	out.print("(");
+	out.print(getJavaVar());
+	out.print(" = env.getGlobalVar(\"");
+	out.printJavaString(_name);
+	out.print("\", ");
+	out.print(getJavaVar());
+	out.print("))");
+      }
+    } else if (_var.isVariable()) { // i.e. stored in symbol table map
+      if (state == VarState.VALID) {
+	out.print(getJavaVar());
+      }
+      else if (state == VarState.UNSET) {
+	out.print("(");
+	out.print(getJavaVar());
+	out.print(" = env.getVar(\"");
+	out.printJavaString(_name);
+	out.print("\"))");
+      }
+      else { // UNKNOWN
+	out.print("(");
+	out.print(getJavaVar());
+	out.print(" = env.getVar(\"");
+	out.printJavaString(_name);
+	out.print("\", ");
+	out.print(getJavaVar());
+	out.print("))");
+      }
+    }
+    else {  // reference in Java local
+      if (state == VarState.VALID) {
+	out.print(getJavaVar());
+      }
+      else if (state == VarState.UNSET) {
+	out.print("(");
+	out.print(getJavaVar());
+	out.print(" = new Var())");
       } else {
-        out.print("(");
-        out.print(getJavaVar());
-        out.print(" = env.getLocalVar(");
-        out.print(getJavaVar());
-        out.print("))");
+	out.print("(");
+	out.print(getJavaVar());
+	out.print(" = env.getLocalVar(");
+	out.print(getJavaVar());
+	out.print("))");
       }
     }
 
@@ -523,7 +528,9 @@ public class VarExpr
     throws IOException
   {
     generate(out);
-    out.print(".toValue()");
+
+    if (_var.isReference())
+      out.print(".toValue()");
   }
 
   /**
@@ -550,10 +557,10 @@ public class VarExpr
 
     if (state == VarState.INIT) {
       throw new IllegalStateException(getLocation() +
-                                      "'" +
-                                      this +
-                                      "' is not analyzed.");
-    } else if (! _var.isReference()) {
+                                      "'" + this + "' is not analyzed.");
+    }
+    
+    if (_var.isValue()) {
       if (isTop) {
         // php/3a60
         out.print(getJavaVar());
@@ -566,13 +573,15 @@ public class VarExpr
         value.generateCopy(out);
         out.print(")");
       }
-    } else if (state == VarState.VALID) {
-      out.print(getJavaVar());
-      out.print(".set(");
-      value.generateCopy(out);
-      out.print(")");
-    } else if (state == VarState.UNSET) {
-      if (_var.isGlobal()) {
+    }
+    else if (_var.isGlobal()) {
+      if (state == VarState.VALID) {
+	out.print(getJavaVar());
+	out.print(".set(");
+	value.generateCopy(out);
+	out.print(")");
+      }
+      else if (state == VarState.UNSET) {
         out.print("(");
         out.print(getJavaVar());
         out.print(" = env.getGlobalVar(\"");
@@ -581,7 +590,28 @@ public class VarExpr
         out.print(".set(");
         value.generateCopy(out);
         out.print(")");
-      } else if (_var.isVariable()) {
+      }
+      else { // VarState.UNKNOWN
+        out.print("(");
+        out.print(getJavaVar());
+        out.print(" = env.getGlobalVar(\"");
+        out.printJavaString(_name);
+        out.print("\", ");
+        out.print(getJavaVar());
+        out.print("))");
+        out.print(".set(");
+        value.generateCopy(out);
+        out.print(")");
+      }
+    }
+    else if (_var.isVariable()) {
+      if (state == VarState.VALID) {
+	out.print(getJavaVar());
+	out.print(".set(");
+	value.generateCopy(out);
+	out.print(")");
+      }
+      else if (state == VarState.UNSET) {
         out.print("(");
         out.print(getJavaVar());
         out.print(" = env.getVar(\"");
@@ -590,29 +620,8 @@ public class VarExpr
         out.print(".set(");
         value.generateCopy(out);  // php/3a51
         out.print(")");
-      } else if (_var.isReference()) {
-        out.print("(");
-        out.print(getJavaVar());
-        out.print(" = new Var())");
-        out.print(".set(");
-        value.generateCopy(out);
-        out.print(")");
-      } else {
-        out.print("NullValue.NULL");
       }
-    } else {
-      if (_var.isGlobal()) {
-        out.print("(");
-        out.print(getJavaVar());
-        out.print(" = env.getGlobalVar(\"");
-        out.printJavaString(_name);
-        out.print("\", ");
-        out.print(getJavaVar());
-        out.print("))");
-        out.print(".set(");
-        value.generateCopy(out);
-        out.print(")");
-      } else if (_var.isVariable()) {
+      else { // VarState.UNKNOWN
         out.print("(");
         out.print(getJavaVar());
         out.print(" = env.getVar(\"");
@@ -623,7 +632,24 @@ public class VarExpr
         out.print(".set(");
         value.generateCopy(out);
         out.print(")");
-      } else {
+      }
+    }
+    else { // local Java reference
+      if (state == VarState.VALID) {
+	out.print(getJavaVar());
+	out.print(".set(");
+	value.generateCopy(out);
+	out.print(")");
+      }
+      else if (state == VarState.UNSET) {
+        out.print("(");
+        out.print(getJavaVar());
+        out.print(" = new Var())");
+        out.print(".set(");
+        value.generateCopy(out);
+        out.print(")");
+      }
+      else { // VarState.UNKNOWN
         out.print("(");
         out.print(getJavaVar());
         out.print(" = env.getLocalVar(");
@@ -644,6 +670,9 @@ public class VarExpr
   public void generateAssignRef(PhpWriter out, Expr value, boolean isTop)
     throws IOException
   {
+    if (_var.isReference())
+      throw new IllegalStateException(this + " cannot be a reference");
+    
     //VarState state = getVarState();
 
     if (! isTop)
@@ -680,6 +709,9 @@ public class VarExpr
   public void generateAssignRef(PhpWriter out, String value)
     throws IOException
   {
+    if (_var.isReference())
+      throw new IllegalStateException(this + " cannot be a reference");
+    
     if (_var.isGlobal()) {
       out.print(getJavaVar());
       out.print(" = env.setVar(\"");
@@ -714,7 +746,7 @@ public class VarExpr
     throws IOException
   {
     generate(out);
-    out.print(".getObject(env)");
+    // out.print(".getObject(env)");
   }
 
   /**
@@ -725,18 +757,15 @@ public class VarExpr
   public void generateUnset(PhpWriter out)
     throws IOException
   {
-    //out.print("env.unsetLocalVar(\"");
-    //out.printJavaString(_name);
-    //out.println("\");");
-    //out.print(getJavaVar() + " = NullValue.NULL");
-    if (_var.isReference()) {
+    if (_var.isValue()) {
+      out.print(getJavaVar());
+      out.print(" = NullValue.NULL");
+    }
+    else {
       out.print(getJavaVar());
       out.print(" = env.unsetVar(\"");
       out.printJavaString(_name);
       out.print("\")");
-    } else {
-      out.print(getJavaVar());
-      out.print(" = null");
     }
   }
 

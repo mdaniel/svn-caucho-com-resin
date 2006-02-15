@@ -747,9 +747,9 @@ public class Function extends AbstractFunction {
       String argName = varName;
 
       if (! var.isArgument())
-	out.println("Value " + varName + ";");
+	out.print("Value ");
       else if (isVariableArgs()) {
-	out.println("Value " + varName + ";");
+	out.print("Value ");
 
 	argName = "args[" + var.getArgumentIndex() + "]";
       }
@@ -759,7 +759,7 @@ public class Function extends AbstractFunction {
 	  // XXX: need to distinguish ref
 	  out.println(varName + " = " + argName + ".toVar();");
 	}
-	else if (var.isReadOnly() && ! var.isReference()) {
+	else if (var.isReadOnly() && var.isValue()) {
 	  // php/3a70, php/343k
 	  out.println(varName + " = " + argName + ".toArgValue();");
 	}
@@ -781,11 +781,11 @@ public class Function extends AbstractFunction {
       }
       else {
 	// local variable, i.e. not argument
-	
-	if (var.isReference())
-	  out.println(varName + " = null;");
-	else
+
+	if (var.isValue())
 	  out.println(varName + " = NullValue.NULL;");
+	else
+	  out.println(varName + " = null;");
       }
     }
 

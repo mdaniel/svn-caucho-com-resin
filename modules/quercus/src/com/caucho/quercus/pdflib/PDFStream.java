@@ -286,6 +286,12 @@ public class PDFStream {
     }
   }
   
+  public void setDash(double b, double w)
+    throws IOException
+  {
+    _out.println("[" + b + " " + w + "] 0 d");
+  }
+  
   public boolean setlinewidth(double w)
     throws IOException
   {

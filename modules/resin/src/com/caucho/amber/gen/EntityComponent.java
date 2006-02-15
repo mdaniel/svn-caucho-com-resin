@@ -534,7 +534,9 @@ public class EntityComponent extends ClassComponent {
       
     for (int i = 0; i <= dirtyCount / 64; i++) {
       out.println("__caucho_dirtyMask_" + i + " = 0;");
-      out.println("__caucho_updateMask_" + i + " = 0;");
+
+      // ejb/0645
+      // out.println("__caucho_updateMask_" + i + " = 0;");
     }
     
     out.println();
@@ -612,7 +614,7 @@ public class EntityComponent extends ClassComponent {
       out.println("long mask_" + i + " = __caucho_dirtyMask_" + i + ";");
       out.println("__caucho_dirtyMask_" + i + " = 0L;");
       out.println("__caucho_updateMask_" + i + " |= mask_" + i + ";");
-      
+
       out.println();
       out.println("if (mask_" + i + " != 0L)");
       out.println("  isDirty = true;");
@@ -742,7 +744,7 @@ public class EntityComponent extends ClassComponent {
     for (int i = 0; i <= dirtyCount / 64; i++) {
       out.println("__caucho_updateMask_" + i + " = 0L;");
     }
-
+    
     out.print("if (updateMask_0 != 0L");
     for (int i = 1; i <= dirtyCount / 64; i++)
       out.print(" || updateMask_" + i + " != 0L");

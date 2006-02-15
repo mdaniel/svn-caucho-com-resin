@@ -29,9 +29,17 @@
 
 package com.caucho.quercus.pdflib;
 
+import java.io.IOException;
+
 import java.util.logging.Logger;
 
+import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.Value;
+import com.caucho.quercus.env.BooleanValue;
+
 import com.caucho.quercus.module.AbstractQuercusModule;
+import com.caucho.quercus.module.NotNull;
+import com.caucho.quercus.module.Optional;
 
 import com.caucho.util.L10N;
 
@@ -86,5 +94,119 @@ public class PDFModule extends AbstractQuercusModule {
       return image.get_width();
     else
       return 0;
+  }
+
+  /**
+   * Creates a new PDF object.
+   */
+  public static PDF pdf_new(Env env)
+    throws IOException
+  {
+    return new PDF(env);
+  }
+
+  /**
+   * Starts the document.
+   */
+  public static boolean pdf_begin_document(@NotNull PDF pdf,
+					   String fileName,
+					   @Optional String optList)
+    throws IOException
+  {
+    if (pdf != null)
+      return pdf.begin_document(fileName, optList);
+    else
+      return false;
+  }
+
+  /**
+   * Starts the page.
+   */
+  public static boolean pdf_begin_page(@NotNull PDF pdf,
+				       double w, double h,
+				       @Optional String optList)
+    throws IOException
+  {
+    if (pdf != null)
+      return pdf.begin_page(w, h);
+    else
+      return false;
+  }
+
+  /**
+   * Starts the page.
+   */
+  public static boolean pdf_end_page(@NotNull PDF pdf)
+    throws IOException
+  {
+    if (pdf != null)
+      return pdf.end_page();
+    else
+      return false;
+  }
+
+  /**
+   * Starts the document.
+   */
+  public static boolean pdf_end_document(Env env,
+					 @NotNull PDF pdf,
+					 @Optional String optList)
+    throws IOException
+  {
+    if (pdf != null)
+      return pdf.end_document(env, optList);
+    else
+      return false;
+  }
+
+  /**
+   * Fills
+   */
+  public boolean pdf_fill_stroke(@NotNull PDF pdf)
+    throws IOException
+  {
+    if (pdf != null)
+      return pdf.fill_stroke();
+    else
+      return false;
+  }
+
+  /**
+   * Returns the result as a string.
+   */
+  public static Value pdf_get_buffer(@NotNull PDF pdf)
+  {
+    if (pdf != null)
+      return pdf.get_buffer();
+    else
+      return BooleanValue.FALSE;
+  }
+
+  /**
+   * Creates a rectangle
+   */
+  public boolean pdf_rect(@NotNull PDF pdf,
+			  double x, double y, double width, double height)
+    throws IOException
+  {
+    if (pdf != null)
+      return pdf.rect(x, y, width, height);
+    else
+      return false;
+  }
+
+  /**
+   * Sets the dashing
+   *
+   * @param b black length
+   * @param w which length
+   */
+  public boolean pdf_setdash(@NotNull PDF pdf, double b, double w)
+    throws IOException
+  {
+    if (pdf != null)
+      return pdf.setdash(b, w);
+    else
+      return false;
   }
 }
