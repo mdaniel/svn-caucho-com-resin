@@ -667,8 +667,9 @@ public class Store {
     int allocOffset = (int) (2 * blockIndex);
 
     _allocationTable[allocOffset] = (byte) code;
+    _allocationTable[allocOffset + 1] = 0;
 
-    setAllocDirty(allocOffset, allocOffset + 1);
+    setAllocDirty(allocOffset, allocOffset + 2);
   }
 
   /**
@@ -705,7 +706,7 @@ public class Store {
 	_allocDirtyMax = 0;
       }
 
-      if (dirtyMax <= dirtyMin)
+      if (dirtyMax < dirtyMin)
 	return;
       
       long allocBlock = dirtyMin / ALLOC_PER_BLOCK;
@@ -713,7 +714,7 @@ public class Store {
 
       // XXX: 2G issues
       writeBlock(allocBlock * ALLOC_SEGMENT + allocOffset,
-		 _allocationTable, dirtyMin, dirtyMax - dirtyMin + 2);
+		 _allocationTable, dirtyMin, dirtyMax - dirtyMin);
     }
   }
   
@@ -846,7 +847,7 @@ public class Store {
 	    if ((fragMask & (1 << j)) == 0) {
 	      allocationTable[i + 1] = (byte) (fragMask | (1 << j));
 
-	      setAllocDirty(i, i + 2);
+	      setAllocDirty(i + 1, i + 2);
 
 	      _fragmentUseCount++;
 
@@ -875,7 +876,7 @@ public class Store {
 	      if ((fragMask & (1 << j)) == 0) {
 		allocationTable[i + 1] = (byte) (fragMask | (1 << j));
 
-		setAllocDirty(i, i + 2);
+		setAllocDirty(i + 1, i + 2);
 
 		_fragmentUseCount++;
 

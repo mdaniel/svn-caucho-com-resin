@@ -84,6 +84,8 @@ public class JspServlet extends QServlet {
       
     setManager(manager);
 
+    manager.init();
+
     if (JspFactory.getDefaultFactory() == null)
       JspFactory.setDefaultFactory(new QJspFactory());
   }
