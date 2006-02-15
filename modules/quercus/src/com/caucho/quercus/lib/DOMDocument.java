@@ -46,7 +46,6 @@ public class DOMDocument extends DOMNode {
   
 
   //METHODS
-  //@todo construct()
   //@todo createAttribute()
   //@todo createAttributeNS()
   //@todo createCDATASection()
