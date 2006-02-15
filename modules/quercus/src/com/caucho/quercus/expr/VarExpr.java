@@ -297,7 +297,8 @@ public class VarExpr
     } else
       setVarState(var.getVarState());
 
-    info.addVar(var.analyzeVarState(VarState.VALID));
+    info.addVar(var);
+    //info.addVar(var.analyzeVarState(VarState.VALID));
   }
 
   /**
@@ -456,7 +457,12 @@ public class VarExpr
                                       this +
                                       "' is not analyzed.");
     } else if (! _var.isReference()) {
-      out.print(getJavaVar());
+      if (state == VarState.VALID)
+        out.print(getJavaVar());
+      else if (state == VarState.UNSET)
+        out.print("NullValue.NULL");
+      else // (state should be UNKNOWN
+        out.print("(" + getJavaVar() + " = env.getLocalVar(v_" + _name + "))");
     } else if (state == VarState.VALID) {
       out.print(getJavaVar());
     } else if (state == VarState.UNSET) {
@@ -722,11 +728,16 @@ public class VarExpr
     //out.print("env.unsetLocalVar(\"");
     //out.printJavaString(_name);
     //out.println("\");");
-    out.print(getJavaVar() + " = NullValue.NULL");
-    //out.print(getJavaVar());
-    //out.print(" = env.unsetVar(\"");
-    //out.printJavaString(_name);
-    //out.print("\")");
+    //out.print(getJavaVar() + " = NullValue.NULL");
+    if (_var.isReference()) {
+      out.print(getJavaVar());
+      out.print(" = env.unsetVar(\"");
+      out.printJavaString(_name);
+      out.print("\")");
+    } else {
+      out.print(getJavaVar());
+      out.print(" = null");
+    }
   }
 
   public int hashCode()
