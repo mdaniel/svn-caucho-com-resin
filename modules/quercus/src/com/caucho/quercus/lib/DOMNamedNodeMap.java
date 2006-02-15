@@ -29,36 +29,10 @@
 
 package com.caucho.quercus.lib;
 
-public class DOMNode {
-  
-  public String nodeName;
-  public String nodeValue;
-  public int nodeType;
-  public DOMNode parentNode;
-  public DOMNodeList childNodes;
-  public DOMNode firstChild;
-  public DOMNode lastChild;
-  public DOMNode previousSibling;
-  public DOMNode nextSibling;
-  public DOMNamedNodeMap attributes;
-  public DOMDocument ownerDocument;
-  public String namespaceURI;
-  public String prefix;
-  public String localName;
-  public String baseURI;
-  public String textContent;
+public class DOMNamedNodeMap {
   
   //METHODS
-  //@todo appendChild()
-  //@todo cloneNode()
-  //@todo hasAttributes()
-  //@todo hsaChildNodes()
-  //@todo insertBefore()
-  //@todo isSameNode()
-  //@todo isSupported()
-  //@todo lookupNamespaceURI()
-  //@todo lookupPrefix()
-  //@todo normalize()
-  //@todo removeChild()
-  //@todo replaceChild()
+  //@todo getNamedItem()
+  //@todo getNamedItemNS()
+  //@todo item()
 }
