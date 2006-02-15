@@ -208,7 +208,7 @@ public class Mysqli {
     try {
       String info = validateConnection().getServerInfo();
 
-      String[] result = info.split("[.]");
+      String[] result = info.split("[.a-z-]");
 
       if (result.length < 3)
 	return 0;

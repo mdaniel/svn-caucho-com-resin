@@ -67,7 +67,7 @@ public class MysqliStatement {
   private Value[] _params;
   private Value[] _results;
 
-  private String _errorMessage;
+  private String _errorMessage = "";
   private int _errorCode;
 
   MysqliStatement(JdbcConnectionResource conn)
@@ -155,9 +155,9 @@ public class MysqliStatement {
   /**
    * Seeks to a given result
    */
-  public void data_seek(int offset)
+  public boolean data_seek(int offset)
   {
-    JdbcResultResource.setRowNumber(_rs, offset);
+    return JdbcResultResource.setRowNumber(_rs, offset);
   }
 
   /**

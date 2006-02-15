@@ -95,7 +95,11 @@ public class QuercusServlet
    * Set the default data source.
    */
   public void setDatabase(DataSource database)
+    throws ConfigException
   {
+    if (database == null)
+      throw new ConfigException(L.l("invalid database"));
+
     getQuercus().setDatabase(database);
   }
 

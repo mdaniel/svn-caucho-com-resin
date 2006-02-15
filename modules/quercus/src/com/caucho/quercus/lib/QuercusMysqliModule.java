@@ -50,7 +50,7 @@ import com.caucho.util.L10N;
 
 
 /**
- * PHP mysql routines.
+ * Quercus mysql routines.
  */
 public class QuercusMysqliModule extends AbstractQuercusModule {
   private static final Logger log = Log.open(QuercusMysqliModule.class);
@@ -166,9 +166,9 @@ public class QuercusMysqliModule extends AbstractQuercusModule {
   /**
    * commits the current transaction to the database connection specified
    * by the connV parameter
-   * 
+   *
    * returns true on success or false on failure
-   */ 
+   */
   public static boolean mysqli_commit(Env env,
                                       @NotNull Mysqli conn)
   {
@@ -177,10 +177,10 @@ public class QuercusMysqliModule extends AbstractQuercusModule {
 
     return conn.commit();
   }
-  
+
   /**
    * Returns the client encoding.
-   * 
+   *
    * XXX: stubbed out. has to be revised once we
    * figure out what to do with character encoding
    */
@@ -188,10 +188,10 @@ public class QuercusMysqliModule extends AbstractQuercusModule {
   {
     if (conn == null)
       return BooleanValue.FALSE;
-    
+
     return new StringValue("latin1");
   }
-  
+
   /**
    * Alias for mysqli_character_set_name
    */
@@ -202,16 +202,16 @@ public class QuercusMysqliModule extends AbstractQuercusModule {
 
   /**
    * Closes a mysqli connection
-   */ 
+   */
   public static boolean mysqli_close(Env env, Mysqli conn)
   {
-    
+
     if (conn != null)
       return conn.close(env);
     else
       return false;
   }
-  
+
   /**
    * returns new mysqli connection
    */
@@ -400,9 +400,9 @@ vv   */
   {
     if (result == null)
       return false;
-    
+
     result.close();
-    
+
     return true;
   }
   /**
@@ -441,7 +441,7 @@ vv   */
   {
     if (conn == null)
       return false;
-    
+
     return conn.multi_query(query);
   }
 
@@ -519,7 +519,7 @@ vv   */
   {
     if (conn == null)
       return 0;
-    
+
     return conn.field_count();
   }
 
@@ -559,7 +559,7 @@ vv   */
   {
     if (result == null)
       return BooleanValue.FALSE;
-    
+
     return result.fetch_row();
   }
 
@@ -705,22 +705,22 @@ vv   */
   {
     return mysqli_stmt_param_count(stmt);
   }
-  
+
   /**
    * rolls back the current transaction to the database
    * connection specified by the connV parameter
-   * 
+   *
    * returns true on success or false on failur
-   * 
+   *
    * NOTE: PHP does not seem to support the idea of
    * savepoints.
-   */ 
+   */
   public static boolean mysqli_rollback(Env env,
 					@NotNull Mysqli conn)
   {
     if (conn == null)
       return false;
-    
+
     return conn.rollback();
   }
 
@@ -732,7 +732,7 @@ vv   */
   {
     if (mysqli == null)
       return false;
-    
+
     return mysqli.set_charset(charset);
   }
 
@@ -755,7 +755,7 @@ vv   */
   {
     if (stmt == null)
       return BooleanValue.FALSE;
-    
+
     return stmt.num_rows();
   }
 
@@ -767,7 +767,7 @@ vv   */
   {
     if (stmt == null)
       return -1;
-    
+
     return stmt.param_count();
   }
 
@@ -826,7 +826,7 @@ vv   */
   {
     if (stmt == null)
       return false;
-    
+
     return stmt.store_result();
   }
 
@@ -850,7 +850,7 @@ vv   */
   {
     if (conn == null)
       return BooleanValue.FALSE;
-    
+
     return conn.use_result(env);
   }
 
@@ -865,7 +865,7 @@ vv   */
   {
     if (conn == null)
       return 0;
-    
+
     return conn.warning_count();
   }
 
@@ -926,7 +926,7 @@ vv   */
     else
       return false;
   }
-  
+
   /**
    * Escapes the following special character in unescapedString.
    * (all of the comments are from the MySQL source code).
@@ -1102,7 +1102,7 @@ vv   */
   {
     if (mysqli == null)
       return -1;
-    
+
     return mysqli.affected_rows();
   }
 
@@ -1124,7 +1124,7 @@ vv   */
   {
     if (stmt == null)
       return false;
-    
+
     return stmt.bind_param(env, types, params);
   }
 
@@ -1137,7 +1137,7 @@ vv   */
   {
     if (stmt == null)
       return false;
-    
+
     return stmt.bind_result(env, outParams);
   }
 
@@ -1149,7 +1149,7 @@ vv   */
   {
     if (stmt == null)
       return false;
-    
+
     return stmt.close();
   }
 
@@ -1158,12 +1158,15 @@ vv   */
    */
   public Value mysqli_stmt_data_seek(@NotNull MysqliStatement stmt, int offset)
   {
-    if (stmt != null)
-      stmt.data_seek(offset);
+    if (stmt == null)
+      return BooleanValue.FALSE;
+
+    if (!stmt.data_seek(offset))
+      return BooleanValue.FALSE;
 
     return NullValue.NULL;
   }
-  
+
   /**
    * returns the error number
    */
@@ -1176,14 +1179,14 @@ vv   */
   }
 
   /**
-   * returns the error number
+   * Returns a descrption of the error or an empty strng for no error.
    */
   public String mysql_stmt_error(MysqliStatement stmt)
   {
-    if (stmt != null)
-      return stmt.error();
-    else
+    if (stmt == null)
       return null;
+
+    return stmt.error();
   }
 
   /**
@@ -1199,7 +1202,7 @@ vv   */
 
     return stmt.execute(env);
   }
-  
+
   /**
    * Fetch results from a prepared statement into bound variables.
    * <p/>
@@ -1209,7 +1212,7 @@ vv   */
   {
     if (stmt == null)
       return false;
-    
+
     return stmt.fetch();
   }
 
@@ -1220,7 +1223,7 @@ vv   */
   {
     if (stmt == null)
       return false;
-    
+
     stmt.free_result();
 
     return true;
@@ -1244,7 +1247,7 @@ vv   */
   {
     if (mysqli == null)
       return false;
-    
+
     return mysqli.change_user(user, password, db);
   }
 
@@ -1253,7 +1256,7 @@ vv   */
   {
     return mysqli_stmt_execute(env, stmt);
   }
-  
+
   public static Value mysqli_get_metadata(Env env,
 					  @NotNull MysqliStatement stmt)
     throws SQLException
@@ -1279,7 +1282,7 @@ vv   */
   {
     if (conn == null)
       return null;
-    
+
     return conn.prepare(env, query);
   }
 
@@ -1291,7 +1294,7 @@ vv   */
   {
     if (stmt == null)
       return false;
-    
+
     return stmt.close();
   }
 
@@ -1304,7 +1307,7 @@ vv   */
   {
     if (conn == null)
       return null;
-    
+
     return conn.stmt_init(env);
   }
 
