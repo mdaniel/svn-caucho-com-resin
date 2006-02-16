@@ -572,7 +572,7 @@ vv   */
     throws Exception
   {
     if (result == null)
-      return null;
+      return NullValue.NULL;
 
     return result.fetch_object(env);
   }
