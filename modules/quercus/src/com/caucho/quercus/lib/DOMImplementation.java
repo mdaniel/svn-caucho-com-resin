@@ -29,10 +29,40 @@
 
 package com.caucho.quercus.lib;
 
+import com.caucho.quercus.module.Optional;
+
+import org.w3c.dom.DOMException;
+
 public class DOMImplementation {
+
+  private org.w3c.dom.DOMImplementation _DOMImplementation;
+
+  public DOMImplementation()
+  {
+    
+  }
+  
+  public DOMDocument createDocument(@Optional String namespaceURI,
+                                    @Optional String qualifiedName,
+                                    @Optional DOMDocumentType doctype)
+    throws DOMException
+  {
+    return new DOMDocument(_DOMImplementation.createDocument(namespaceURI, qualifiedName, doctype.getDocType()));
+  }
+
+  public DOMDocumentType createDocumentType(@Optional String qualifiedName,
+                                            @Optional String publicId,
+                                            @Optional String systemId)
+    throws DOMException
+  {
+    return new DOMDocumentType(_DOMImplementation.createDocumentType(qualifiedName, publicId, systemId));
+  }
+  
+  public boolean hasFeature(String feature,
+                            String version)
+  {
+    return _DOMImplementation.hasFeature(feature, version);
+  }
   
   //@todo construct()
-  //@todo createDocument()
-  //@todo createDocumentType()
-  //@todo hasFeature()
 }
