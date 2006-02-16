@@ -5,5 +5,4 @@ com.caucho.quercus.lib.Mysqli
 com.caucho.quercus.pdflib.PDF
 com.caucho.quercus.lib.PDO
 com.caucho.quercus.lib.Xml
-com.caucho.quercus.lib.ZipEntry
 

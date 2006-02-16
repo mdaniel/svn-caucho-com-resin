@@ -100,6 +100,14 @@ public class JavaValue extends ResourceValue {
   }
 
   /**
+   * Converts to a key.
+   */
+  public Value toKey()
+  {
+    return new LongValue(System.identityHashCode(this));
+  }
+
+  /**
    * Evaluates a method.
    */
   public Value evalMethod(Env env, String methodName, Expr []args)

@@ -36,6 +36,8 @@ import com.caucho.vfs.WriteStream;
 import java.util.AbstractSet;
 import java.util.IdentityHashMap;
 import java.util.Iterator;
+import java.util.Collection;
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
@@ -416,6 +418,23 @@ public class ObjectValue extends Value {
 
       hash = (hash + 1) & _hashMask;
     }
+  }
+
+  /**
+   * Returns the field values.
+   */
+  public Collection<Value> getIndices()
+  {
+    ArrayList<Value> indices = new ArrayList<Value>();
+
+    for (int i = 0; i < _entries.length; i++) {
+      Entry entry = _entries[i];
+
+      if (entry != null)
+	indices.add(new StringValue(entry.getKey()));
+    }
+
+    return indices;
   }
 
   /**
