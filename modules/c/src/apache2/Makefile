@@ -2,20 +2,20 @@
 
 CC=gcc
 CP=/bin/cp
-CFLAGS=-g -O2 -DPOLL -DHAS_JVMTI 
-CFLAGS_SHLIB=-DSHARED_MODULE
+CFLAGS=-g -O2 -DPOLL -DB64 -DHAS_JVMTI -O2 -g -pipe -Wp,-D_FORTIFY_SOURCE=2 -fexceptions -m64 -mtune=nocona
+CFLAGS_SHLIB=-fpic
 EGREP=grep -E
-LIBTOOL=EGREP="grep -E" /Users/ferg/ws/test-resin/libtool --silent
-LD=gcc
+LIBTOOL=EGREP="grep -E" /home/ferg/ws/resin/libtool --silent
+LD=/usr/bin/ld
 LD_SHLIB=gcc
 LIBS_SHLIB=
 LDFLAGS=
-LDFLAGS_SHLIB=-bundle -undefined suppress -flat_namespace -L/usr/lib
-APACHE_INC=-I/usr/local/apache2/include  -I/usr/local/apache2/include 
-apache_conf=/usr/local/apache2/conf/httpd.conf
-apache_dir=/usr/local/apache2
-apache_libexec=/usr/local/apache2/modules
-resin_home=/Users/ferg/ws/test-resin
+LDFLAGS_SHLIB=-shared -fPIC -L/usr/lib64
+APACHE_INC=-I/usr/include/httpd  -I/usr/include/apr-0 
+apache_conf=/etc/httpd/conf/httpd.conf
+apache_dir=/etc/httpd
+apache_libexec=/usr/lib64/httpd/modules
+resin_home=/home/ferg/ws/resin
 INCLUDES = $(APACHE_INC) -DRESIN_HOME=\"$(resin_home)\" -I../common
 C=../common
 COMMON_OBJ=$C/stream.lo $C/config.lo $C/memory.lo

@@ -8737,7 +8737,9 @@ fi;
 
 if test -n "${b64}"; then
    b64_jni=true
+fi
 
+if test -n "${b64_jni}"; then
    CFLAGS="$CFLAGS -DB64"
 fi
 
@@ -8866,7 +8868,8 @@ if test -z "${LD_SHLIB}"; then
 	if test -n "$b64"; then
   	  CFLAGS="$CFLAGS -m64 -fPIC"
 	  LDFLAGS_SHLIB="-shared -fPIC"
-	elif test -n "$b64_jni"; then
+	fi
+	if test -n "$b64_jni"; then
   	  CFLAGS_JNI="$CFLAGS_JNI -m64 -fPIC"
 	  LDFLAGS_SHLIB="-shared -fPIC"
    	fi
@@ -8878,7 +8881,8 @@ if test -z "${LD_SHLIB}"; then
 
 	   if test -n "$b64"; then
   	     CFLAGS="$CFLAGS -m64"
-           elif test -n "$b64_jni"; then
+	   fi
+           if test -n "$b64_jni"; then
   	     CFLAGS_JNI="$CFLAGS_JNI -m64"
    	   fi
 	else
@@ -8886,7 +8890,8 @@ if test -z "${LD_SHLIB}"; then
 
 	   if test -n "$b64"; then
   	     CFLAGS="$CFLAGS -xarch=v9"
-	   elif test -n "$b64_jni"; then
+	   fi
+	   if test -n "$b64_jni"; then
   	     CFLAGS_JNI="$CFLAGS_JNI -xarch=v9"
    	   fi
 	fi
