@@ -406,7 +406,7 @@ public class QuercusArrayModule
                                          @ReadOnly Value key,
                                          @ReadOnly Value searchArray)
   {
-    if (searchArray == null)
+    if (! searchArray.isset() || ! key.isset())
       return false;
 
     if (!((searchArray instanceof ArrayValue) || (searchArray instanceof ObjectValue))) {
@@ -416,7 +416,8 @@ public class QuercusArrayModule
     
     if (!((key instanceof StringValue) || (key instanceof LongValue))) {
       env.warning(L.l(
-        "The first argument should be either a string or an integer"));
+        "The first argument '{0}' should be either a string or an integer",
+	key.getType()));
       return false;
     }
     if (searchArray instanceof ArrayValue)

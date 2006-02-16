@@ -323,26 +323,33 @@ public class QuercusZlibModule extends AbstractQuercusModule {
    * @param length (maximum length of string returned)
    * @return uncompressed string
    */
-  public Value gzinflate(Value data,
+  public Value gzinflate(Env env,
+			 Value data,
                          @Optional("0") long length)
     throws DataFormatException, IOException
   {
-    if (length == 0)
-      length = Long.MAX_VALUE;
+    try {
+      if (length == 0)
+	length = Long.MAX_VALUE;
     
-    ByteArrayInputStream is = data.toInputStream();
-    InflaterInputStream iis = new InflaterInputStream(is, new Inflater(true));
+      ByteArrayInputStream is = data.toInputStream();
+      InflaterInputStream iis = new InflaterInputStream(is, new Inflater(true));
     
-    StringBuilder inflated = new StringBuilder();
-    int numChars = 0;
-    int ch;
+      StringBuilder inflated = new StringBuilder();
+      int numChars = 0;
+      int ch;
     
-    while ((numChars < length) && ((ch = iis.read()) != -1)) {
-      numChars++;
-      inflated.append((char) ch);
-    }
+      while ((numChars < length) && ((ch = iis.read()) != -1)) {
+	numChars++;
+	inflated.append((char) ch);
+      }
 
-    return new StringValue(inflated.toString());
+      return new StringValue(inflated.toString());
+    } catch (Exception e) {
+      env.warning(e);
+
+      return BooleanValue.FALSE;
+    }
   }
 
   /**

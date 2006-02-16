@@ -96,9 +96,10 @@ public class GlobalStatement extends Statement {
     out.println("\");");
 
     FunctionInfo funInfo = _var.getVarInfo().getFunction();
-    if (funInfo.isVariableVar() && ! funInfo.isPageMain()) {
-      // php/3a84
-      out.print("_quercus_map.put(\"");
+    if ((funInfo.isVariableVar() || funInfo.isUsesSymbolTable())
+	&& ! funInfo.isPageMain()) {
+      // php/3a84, php/3235
+      out.print("env.setVar(\"");
       out.printJavaString(_var.getName());
       out.print("\", (Var) ");
       out.print(_var.getJavaVar());

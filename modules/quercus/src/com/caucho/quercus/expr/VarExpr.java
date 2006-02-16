@@ -670,7 +670,7 @@ public class VarExpr
   public void generateAssignRef(PhpWriter out, Expr value, boolean isTop)
     throws IOException
   {
-    if (_var.isReference())
+    if (_var.isValue())
       throw new IllegalStateException(this + " cannot be a reference");
     
     //VarState state = getVarState();
@@ -709,7 +709,7 @@ public class VarExpr
   public void generateAssignRef(PhpWriter out, String value)
     throws IOException
   {
-    if (_var.isReference())
+    if (_var.isValue())
       throw new IllegalStateException(this + " cannot be a reference");
     
     if (_var.isGlobal()) {
