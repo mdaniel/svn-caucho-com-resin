@@ -82,8 +82,7 @@ public class FieldGetExpr extends AbstractVarExpr {
   public Value evalArg(Env env)
     throws Throwable
   {
-    // php/0d2t - evalObject not evalArg
-    Value value = _objExpr.evalObject(env);
+    Value value = _objExpr.evalArg(env);
 
     return value.getFieldArg(env, _name);
   }

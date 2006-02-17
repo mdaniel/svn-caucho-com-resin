@@ -149,9 +149,9 @@ public class ArrayGetExpr extends AbstractVarExpr {
   public Value evalArg(Env env)
     throws Throwable
   {
-    Value value = _expr.evalArray(env);
+    Value value = _expr.evalArg(env); // php/0d2t
 
-    return value.getRef(_index.eval(env));
+    return value.getArg(_index.eval(env));
   }
 
   /**

@@ -53,6 +53,19 @@ public class PDFModule extends AbstractQuercusModule {
     Logger.getLogger(PDFModule.class.getName());
 
   /**
+   * Creates a counterclockwise arg
+   */
+  public boolean pdf_arc(@NotNull PDF pdf,
+			 double x1, double y1, double r, double a, double b)
+    throws IOException
+  {
+    if (pdf != null)
+      return pdf.arc(x1, y1, r, a, b);
+    else
+      return false;
+  }
+
+  /**
    * Returns the height of an image.
    */
   public static String pdf_get_errmsg(PDF pdf)
@@ -109,7 +122,7 @@ public class PDFModule extends AbstractQuercusModule {
    * Starts the document.
    */
   public static boolean pdf_begin_document(@NotNull PDF pdf,
-					   String fileName,
+					   @Optional String fileName,
 					   @Optional String optList)
     throws IOException
   {

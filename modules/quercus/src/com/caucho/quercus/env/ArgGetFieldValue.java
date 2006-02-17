@@ -116,5 +116,10 @@ public class ArgGetFieldValue extends Value {
     // php/3d2q
     return _obj.getFieldObject(_env, _index).getFieldRef(_env, index);
   }
+
+  public String toString()
+  {
+    return "Arg[" + _obj + "->" + _index + "]";
+  }
 }
 
