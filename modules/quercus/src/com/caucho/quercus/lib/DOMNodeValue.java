@@ -29,6 +29,8 @@
 
 package com.caucho.quercus.lib;
 
+import com.caucho.quercus.env.BooleanValue;
+import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.LongValue;
 import com.caucho.quercus.env.NullValue;
 import com.caucho.quercus.env.StringValue;
@@ -38,24 +40,7 @@ import com.caucho.quercus.module.Optional;
 import org.w3c.dom.DOMException;
 import org.w3c.dom.Node;
 
-public class DOMNodeValue extends Value{
-
-  public String nodeName;
-  public String nodeValue;
-  public int nodeType;
-  public DOMNodeValue parentNode;
-  public DOMNodeListValue childNodes;
-  public DOMNodeValue firstChild;
-  public DOMNodeValue lastChild;
-  public DOMNodeValue previousSibling;
-  public DOMNodeValue nextSibling;
-  public DOMNamedNodeMapValue attributes;
-  public DOMDocumentValue ownerDocument;
-  public String namespaceURI;
-  public String prefix;
-  public String localName;
-  public String baseURI;
-  public String textContent;
+public class DOMNodeValue extends Value {
 
   private Node _node;
 
@@ -66,6 +51,7 @@ public class DOMNodeValue extends Value{
     _node = node;
   }
   
+  @Override
   public Value putField(String key, Value value)
   {
     if ("nodeName".equals(key))
@@ -106,18 +92,27 @@ public class DOMNodeValue extends Value{
   
   private Value setNodeValue(Value value)
   {
+    if (_node == null)
+      return NullValue.NULL;
+    
     _node.setNodeValue(value.toString());
     return value;
   }
   
   private Value setPrefix(Value value)
   {
+    if (_node == null)
+      return NullValue.NULL;
+    
     _node.setPrefix(value.toString());
     return value;
   }
   
   private Value setTextContent(Value value)
   {
+    if (_node == null)
+      return NullValue.NULL;
+    
     _node.setTextContent(value.toString());
     return value;
   }
@@ -129,6 +124,7 @@ public class DOMNodeValue extends Value{
     return NullValue.NULL;
   }
   
+  @Override
   public Value getField(String name)
   {
     if ("nodeName".equals(name))
@@ -167,11 +163,63 @@ public class DOMNodeValue extends Value{
       return NullValue.NULL;
   }
   
-  public DOMNodeValue appendChild(DOMNodeValue newNode)
+  @Override
+  public Value evalMethod(Env env, String methodName)
+    throws Throwable
+  {
+    if ("hasAttributes".equals(methodName))
+      return hasAttributes();
+    else if ("hasChildNodes".equals(methodName))
+      return hasChildNodes();
+    else if ("normalize".equals(methodName))
+      return normalize();
+    
+    return super.evalMethod(env, methodName);
+  }
+  
+  @Override
+  public Value evalMethod(Env env, String methodName, Value a0)
+    throws Throwable
+  {
+    if ("appendChild".equals(methodName))
+      return appendChild(a0);
+    else if ("cloneNode".equals(methodName))
+      return cloneNode(a0);
+    else if ("isSameNode".equals(methodName))
+      return isSameNode(a0);
+    else if ("lookupNamespaceURI".equals(methodName))
+      return lookupNamespaceURI(a0);
+    else if ("lookupPrefix".equals(methodName))
+      return lookupPrefix(a0);
+    else if ("removeChild".equals(methodName))
+      return removeChild(a0);
+    
+    return super.evalMethod(env, methodName, a0);
+  }
+  
+  @Override
+  public Value evalMethod(Env env, String methodName, Value a0, Value a1)
+    throws Throwable
+  {
+    if ("insertBefore".equals(methodName))
+      return insertBefore(a0, a1);
+    else if ("isSupported".equals(methodName))
+      return isSupported(a0, a1);
+    else if ("replaceChild".equals(methodName))
+      return replaceChild(a0, a1);
+    
+    return super.evalMethod(env, methodName, a0, a1);
+  }
+  
+  public Value appendChild(Value newNode)
   {
     
+    if (!(newNode instanceof DOMNodeValue)) {
+      return NullValue.NULL;
+    }
+    
     try {
-      _node.appendChild(newNode.getNode());
+      _node.appendChild(((DOMNodeValue)newNode).getNode());
     } catch (DOMException e) {
       //XXX: finish exception handling
       switch (e.code) {
@@ -189,6 +237,95 @@ public class DOMNodeValue extends Value{
     return this;
   }
 
+  public Value insertBefore(Value newNode,
+                            @Optional Value refNode)
+  {
+    Value result = NullValue.NULL;
+    
+    if ((_node == null) || (!(newNode instanceof DOMNodeValue)))
+      return result;
+    
+    if ((refNode != null) && (!(refNode instanceof DOMNodeValue)))
+      return result;
+    
+    try {
+      if (refNode != null)
+        result = new DOMNodeValue(_node.insertBefore(((DOMNodeValue) newNode).getNode(), ((DOMNodeValue)refNode).getNode()));
+      else
+        result = new DOMNodeValue(_node.insertBefore(((DOMNodeValue) newNode).getNode(),null));
+    } catch (DOMException e) {
+      //XXX: finish exception handling
+      switch (e.code) {
+        case DOMException.HIERARCHY_REQUEST_ERR:
+          break;
+        case DOMException.WRONG_DOCUMENT_ERR:
+          break;
+        case DOMException.NO_MODIFICATION_ALLOWED_ERR:
+          break;
+        case DOMException.NOT_FOUND_ERR:
+          break;
+        default:
+          break;
+      }
+    }
+    
+    return result;
+  }
+  
+  public Value removeChild(Value oldNode)
+  {
+    Value result = BooleanValue.FALSE;
+    
+    if ((_node == null) || (!(oldNode instanceof DOMNodeValue)))
+      return result;
+    
+    try {
+      result = new DOMNodeValue(_node.removeChild(((DOMNodeValue) oldNode).getNode()));
+    } catch (DOMException e) {
+      //XXX: finish exception handling
+      switch (e.code) {
+        case DOMException.NO_MODIFICATION_ALLOWED_ERR:
+          break;
+        case DOMException.NOT_FOUND_ERR:
+          break;
+        default:
+          break;
+      }
+    }
+    return result;
+  }
+  
+  public Value replaceChild(Value newNode,
+                            Value oldNode)
+  {
+    Value result = BooleanValue.FALSE;
+    
+    if ((_node == null) || (!(newNode instanceof DOMNodeValue)) || (!(oldNode instanceof DOMNodeValue)))
+      return result;
+    
+    try {
+      result = new DOMNodeValue(_node.replaceChild(((DOMNodeValue)newNode).getNode(), ((DOMNodeValue)oldNode).getNode()));
+    } catch (DOMException e) {
+      //XXX: finish exception handling
+      switch (e.code) {
+        case DOMException.NO_MODIFICATION_ALLOWED_ERR:
+          break;
+        case DOMException.HIERARCHY_REQUEST_ERR:
+          break;
+        case DOMException.WRONG_DOCUMENT_ERR:
+          break;
+        case DOMException.NOT_FOUND_ERR:
+          break;
+        default:
+          break;
+      }
+      
+      result = BooleanValue.FALSE;
+    }
+    
+    return result;
+  }
+  
   public Node getNode()
   {
     return _node;
@@ -227,19 +364,80 @@ public class DOMNodeValue extends Value{
      }
   }
   
-  public DOMNodeValue cloneNode(@Optional("false") boolean deep)
+  public Value cloneNode(@Optional("false") Value deep)
   {
-    return new DOMNodeValue(_node.cloneNode(deep));
+    if ((_node == null) || (!(deep instanceof BooleanValue)))
+      return NullValue.NULL;
+    
+    return new DOMNodeValue(_node.cloneNode(deep.toBoolean()));
   }
   
-  //@todo hasAttributes()
-  //@todo hasChildNodes()
-  //@todo insertBefore()
-  //@todo isSameNode()
-  //@todo isSupported()
-  //@todo lookupNamespaceURI()
-  //@todo lookupPrefix()
-  //@todo normalize()
-  //@todo removeChild()
-  //@todo replaceChild()
+  public Value hasAttributes()
+  {
+    if (_node == null)
+       return BooleanValue.FALSE;
+    
+    if (_node.hasAttributes())
+      return BooleanValue.TRUE;
+    else
+      return BooleanValue.FALSE;
+  }
+  
+  public Value hasChildNodes()
+  {
+    if (_node == null)
+      return BooleanValue.FALSE;
+    
+    if (_node.hasChildNodes())
+      return BooleanValue.TRUE;
+    else
+      return BooleanValue.FALSE;
+  }
+  
+  public Value isSameNode(Value node)
+  {
+    if ((_node == null) || (!(node instanceof DOMNodeValue)))
+      return BooleanValue.FALSE;
+    
+    if (_node.isSameNode(((DOMNodeValue)node).getNode()))
+      return BooleanValue.TRUE;
+    else
+      return BooleanValue.FALSE;
+  }
+  
+  public Value isSupported(Value feature,
+                           Value version)
+  {
+    if (_node == null)
+      return BooleanValue.FALSE;
+    
+    if (_node.isSupported(feature.toString(), version.toString()))
+      return BooleanValue.TRUE;
+    else
+      return BooleanValue.FALSE;
+  }
+  
+  public Value lookupNamespaceURI(Value prefix)
+  {
+    if ((_node == null) || (!(prefix instanceof StringValue)))
+      return NullValue.NULL;
+    
+    return new StringValue (_node.lookupNamespaceURI(prefix.toString()));
+  }
+  
+  public Value lookupPrefix(Value namespaceURI)
+  {
+    if ((_node == null) ||(!(namespaceURI instanceof StringValue)))
+      return NullValue.NULL;
+    
+    return new StringValue(_node.lookupPrefix(namespaceURI.toString()));
+  }
+  
+  public Value normalize()
+  {
+    if (_node != null)
+      _node.normalize();
+    
+    return NullValue.NULL;
+  }
 }
