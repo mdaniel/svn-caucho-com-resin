@@ -323,6 +323,15 @@ public class DBPool implements DataSource {
   }
 
   /**
+   * The number of connections to create at any one time.
+   */
+  public void setMaxCreateConnections(int maxCreateConnections)
+    throws ConfigException
+  {
+    _connectionPool.setMaxCreateConnections(maxCreateConnections);
+  }
+
+  /**
    * Set true if the stack trace should be saved on allocation.
    */
   public void setSaveAllocationStackTrace(boolean save)

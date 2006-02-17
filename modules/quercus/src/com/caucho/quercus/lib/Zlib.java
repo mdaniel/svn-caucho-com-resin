@@ -400,4 +400,9 @@ public class Zlib {
     
     _bufferedReader = new BufferedReader(new InputStreamReader(new InflaterInputStream(_path.openRead(), new Inflater())));
   }
+
+  public String toString()
+  {
+    return "Zlib[]";
+  }
 }

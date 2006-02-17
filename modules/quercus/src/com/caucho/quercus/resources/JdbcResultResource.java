@@ -854,7 +854,7 @@ public class JdbcResultResource extends ResourceValue {
           String name = _metaData.getColumnName(i + 1);
           Value value = getColumnValue(_rs, _metaData, i + 1);
 
-          result.putField(name, value);
+          result.putField(env, name, value);
         }
 
         return result;

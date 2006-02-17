@@ -130,6 +130,18 @@ public class MethodCallExpr extends Expr {
     generateImpl(out, false);
     out.print(".copyReturn()"); // php/3a5x
   }
+
+  /**
+   * Generates code to evaluate the expression.
+   *
+   * @param out the writer to the Java source code.
+   */
+  public void generateValue(PhpWriter out)
+    throws IOException
+  {
+    generateImpl(out, false);
+    out.print(".toValue()");  // php/3a5z
+  }
   
   /**
    * Generates code to recreate the expression.
@@ -167,6 +179,7 @@ public class MethodCallExpr extends Expr {
     }
       
     out.print(")");
+
   }
   
   public String toString()

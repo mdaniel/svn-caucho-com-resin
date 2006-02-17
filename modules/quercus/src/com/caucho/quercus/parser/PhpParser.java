@@ -3293,7 +3293,7 @@ public class PhpParser {
     
     parseWhitespace(sb);
     
-    if (! parseTextMatch(sb, "=\"quercus\""))
+    if (! parseTextMatch(sb, "=\"php\""))
       return false;
 
     parseWhitespace(sb);

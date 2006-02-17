@@ -61,38 +61,38 @@ abstract public class CompiledFunction extends AbstractFunction {
   public Value evalRef(Env env, Value []argValues)
     throws Throwable
   {
-    return eval(env, argValues);
+    return eval(env, argValues).copyReturn();
   }
 
   public Value evalRef(Env env, Value arg)
     throws Throwable
   {
-    return eval(env, arg);
+    return eval(env, arg).copyReturn();
   }
 
   public Value evalRef(Env env, Value a1, Value a2)
     throws Throwable
   {
-    return eval(env, a1, a2);
+    return eval(env, a1, a2).copyReturn();
   }
 
   public Value evalRef(Env env, Value a1, Value a2, Value a3)
     throws Throwable
   {
-    return eval(env, a1, a2, a3);
+    return eval(env, a1, a2, a3).copyReturn();
   }
 
   public Value evalRef(Env env, Value a1, Value a2, Value a3, Value a4)
     throws Throwable
   {
-    return eval(env, a1, a2, a3, a4);
+    return eval(env, a1, a2, a3, a4).copyReturn();
   }
 
   public Value evalRef(Env env, Value a1, Value a2,
 		       Value a3, Value a4, Value a5)
     throws Throwable
   {
-    return eval(env, a1, a2, a3, a4, a5);
+    return eval(env, a1, a2, a3, a4, a5).copyReturn();
   }
 
   public Value evalMethodRef(Env env, Value obj, Value []argValues)

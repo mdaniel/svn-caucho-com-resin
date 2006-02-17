@@ -169,6 +169,20 @@ public class SuppressErrorExpr extends UnaryExpr {
    *
    * @param out the writer to the Java source code.
    */
+  public void generateValue(PhpWriter out)
+    throws IOException
+  {
+    // php/33i2
+    out.print("env.suppress(env.setErrorMask(0), ");
+    _expr.generate(out);
+    out.println(").toValue()");
+  }
+
+  /**
+   * Generates code to recreate the expression.
+   *
+   * @param out the writer to the Java source code.
+   */
   public void generateCopy(PhpWriter out)
     throws IOException
   {

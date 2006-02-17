@@ -174,7 +174,7 @@ public class InterpretedClassDef extends AbstractClassDef {
     throws Throwable
   {
     for (Map.Entry<String,Expr> entry : _fieldMap.entrySet())
-      object.putField(entry.getKey(), entry.getValue().eval(env).copy());
+      object.putField(env, entry.getKey(), entry.getValue().eval(env).copy());
   }
 
   /**
@@ -236,9 +236,9 @@ public class InterpretedClassDef extends AbstractClassDef {
       String key = entry.getKey();
       Expr value = entry.getValue();
 
-      out.print("value.putField(\"");
+      out.print("value.putField(env, \"");
       out.printJavaString(key);
-      out.print("\",");
+      out.print("\", ");
       value.generateExpr(out);
       out.print(".eval(env)");
       out.println(");");

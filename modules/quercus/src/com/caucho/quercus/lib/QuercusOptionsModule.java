@@ -396,7 +396,7 @@ public class QuercusOptionsModule extends AbstractQuercusModule {
       else if (a.size() <= i)
 	return -1;
       else if (b.size() <= i)
-	return -1;
+	return 1;
 
       int cmp = compareTo(a.get(i), b.get(i));
 

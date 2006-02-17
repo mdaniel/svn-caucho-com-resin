@@ -998,7 +998,7 @@ abstract public class Value
     if (! v.isset()) {
       v = env.createObject();
 
-      putField(index, v);
+      putField(env, index, v);
     }
 
     return v;
@@ -1015,7 +1015,7 @@ abstract public class Value
     if (! v.isset()) {
       v = new ArrayValueImpl();
 
-      putField(index, v);
+      putField(env, index, v);
     }
 
     return v;
@@ -1035,7 +1035,7 @@ abstract public class Value
   /**
    * Returns the field ref.
    */
-  public Value putField(String index, Value object)
+  public Value putField(Env env, String index, Value object)
   {
     return NullValue.NULL;
   }

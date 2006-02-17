@@ -279,7 +279,7 @@ public class Function extends AbstractFunction {
     }
 
     HashMap<String,Var> oldMap = env.pushEnv(map);
-    Value []oldArgs = env.setFunctionArgsNoCopy(values);
+    Value []oldArgs = env.setFunctionArgs(values); // php/0476
 
     try {
       Value value = _statement.execute(env);

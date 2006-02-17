@@ -114,7 +114,7 @@ public class FieldVarGetExpr extends AbstractVarExpr {
   {
     Value obj = _objExpr.evalObject(env);
 
-    obj.putField(_nameExpr.evalString(env), value);
+    obj.putField(env, _nameExpr.evalString(env), value);
   }
 
   /**
@@ -226,7 +226,7 @@ public class FieldVarGetExpr extends AbstractVarExpr {
     throws IOException
   {
     _objExpr.generateObject(out);
-    out.print(".putField(");
+    out.print(".putField(env, ");
     _nameExpr.generateString(out);
     out.print(", ");
     value.generateCopy(out); // php/3a85
@@ -242,7 +242,7 @@ public class FieldVarGetExpr extends AbstractVarExpr {
     throws IOException
   {
     _objExpr.generateObject(out);
-    out.print(".putField(");
+    out.print(".putField(env, ");
     _nameExpr.generateString(out);
     out.print(", ");
     value.generateRef(out);

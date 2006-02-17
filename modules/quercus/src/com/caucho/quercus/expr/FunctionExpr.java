@@ -301,7 +301,7 @@ public class FunctionExpr extends Expr {
 	fun.generateBoolean(out, this, _args);
       else if (isRef && fun.isReturnsReference()) // php/3442
 	fun.generateRef(out, this, _args);
-      else if (isCopy)
+      else if (isCopy || isRef) // php/3442
 	fun.generateCopy(out, this, _args);
       else
 	fun.generate(out, this, _args);

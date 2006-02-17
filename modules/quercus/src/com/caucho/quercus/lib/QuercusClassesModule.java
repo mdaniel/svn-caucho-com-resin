@@ -96,7 +96,7 @@ public class QuercusClassesModule extends AbstractQuercusModule {
     ArrayValue result = new ArrayValueImpl();
 
     for (Value name : obj.getIndices()) {
-      result.put(name, obj.get(name));
+      result.put(name, obj.getField(name.toString()));
     }
 
     return result;

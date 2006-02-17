@@ -156,6 +156,18 @@ public class VarFunctionExpr extends Expr {
    *
    * @param out the writer to the Java source code.
    */
+  public void generateCopy(PhpWriter out)
+    throws IOException
+  {
+    generateImpl(out, true);
+    out.print(".copyReturn()");
+  }
+
+  /**
+   * Generates code to recreate the expression.
+   *
+   * @param out the writer to the Java source code.
+   */
   private void generateImpl(PhpWriter out, boolean isRef)
     throws IOException
   {

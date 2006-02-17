@@ -621,6 +621,10 @@ public class Var extends Value {
    */
   public Value getFieldRef(Env env, String index)
   {
+    // php/3a0r
+    if (! _value.isset())
+      _value = env.createObject();
+    
     return _value.getFieldRef(env, index);
   }
 
@@ -661,9 +665,13 @@ public class Var extends Value {
   /**
    * Sets the field.
    */
-  public Value putField(String index, Value value)
+  public Value putField(Env env, String index, Value value)
   {
-    return _value.putField(index, value);
+    // php/3a0s
+    if (! _value.isset())
+      _value = env.createObject();
+
+    return _value.putField(env, index, value);
   }
 
   /**

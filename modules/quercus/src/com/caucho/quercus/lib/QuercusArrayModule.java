@@ -416,7 +416,7 @@ public class QuercusArrayModule
     
     if (!((key instanceof StringValue) || (key instanceof LongValue))) {
       env.warning(L.l(
-        "The first argument '{0}' should be either a string or an integer",
+        "The first argument (a '{0}') should be either a string or an integer",
 	key.getType()));
       return false;
     }

@@ -131,7 +131,7 @@ public class ThisFieldExpr extends AbstractVarExpr {
   {
     Value obj = env.getThis();
 
-    obj.putField(_name, value);
+    obj.putField(env, _name, value);
   }
 
   /**
@@ -340,7 +340,7 @@ public class ThisFieldExpr extends AbstractVarExpr {
       // quercus/3d90
       */
       
-    out.print("quercus_this.putField(\"");
+    out.print("quercus_this.putField(env, \"");
     out.printJavaString(_name);
     out.print("\", ");
     value.generateCopy(out);
@@ -355,7 +355,7 @@ public class ThisFieldExpr extends AbstractVarExpr {
   public void generateAssignRef(PhpWriter out, Expr value, boolean isTop)
     throws IOException
   {
-    out.print("quercus_this.putField(\"");
+    out.print("quercus_this.putField(env, \"");
     out.printJavaString(_name);
     out.print("\", ");
     value.generateRef(out);

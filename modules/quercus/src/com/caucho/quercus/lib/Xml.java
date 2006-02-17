@@ -439,6 +439,12 @@ public class Xml {
         return BooleanValue.FALSE;
     }
   }
+
+  public String toString()
+  {
+    return "Xml[]";
+  }
+  
   /**
    * handler solely for xml_parse_into_struct
    */

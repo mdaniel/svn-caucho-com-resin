@@ -251,7 +251,7 @@ public class ObjectValue extends Value {
 
   public Value put(Value index, Value value)
   {
-    return putField(index.toString(), value);
+    throw new UnsupportedOperationException();
   }
 
   public Value put(Value value)
@@ -262,7 +262,7 @@ public class ObjectValue extends Value {
   /**
    * Adds a new value.
    */
-  public Value putField(String key, Value value)
+  public Value putField(Env env, String key, Value value)
   {
     Entry entry = createEntry(key);
 
@@ -289,7 +289,7 @@ public class ObjectValue extends Value {
    */
   public Value putField(String key, String value)
   {
-    return putField(key, new StringValue(value));
+    return putField(null, key, new StringValue(value));
   }
 
   /**
@@ -297,7 +297,7 @@ public class ObjectValue extends Value {
    */
   public Value putField(String key, long value)
   {
-    return putField(key, LongValue.create(value));
+    return putField(null, key, LongValue.create(value));
   }
 
   /**
@@ -305,7 +305,7 @@ public class ObjectValue extends Value {
    */
   public Value putField(String key, double value)
   {
-    return putField(key, DoubleValue.create(value));
+    return putField(null, key, DoubleValue.create(value));
   }
 
   /**
@@ -667,7 +667,7 @@ public class ObjectValue extends Value {
     ObjectValue newObject = new ObjectValue(_cl);
 
     for (Map.Entry<String,Value> entry : entrySet())
-      newObject.putField(entry.getKey(), entry.getValue());
+      newObject.putField(null, entry.getKey(), entry.getValue());
 
     return newObject;
   }
