@@ -53,10 +53,10 @@ public class FieldGetExpr extends AbstractVarExpr {
   public FieldGetExpr(Expr objExpr, String name)
   {
     _objExpr = objExpr;
-    
+
     _name = name.intern();
   }
-  
+
   /**
    * Evaluates the expression.
    *
@@ -82,7 +82,8 @@ public class FieldGetExpr extends AbstractVarExpr {
   public Value evalArg(Env env)
     throws Throwable
   {
-    Value value = _objExpr.evalArg(env);
+    // php/0d2t - evalObject not evalArg
+    Value value = _objExpr.evalObject(env);
 
     return value.getFieldArg(env, _name);
   }
@@ -102,7 +103,7 @@ public class FieldGetExpr extends AbstractVarExpr {
 
     return value.getFieldRef(env, _name);
   }
-  
+
   /**
    * Evaluates the expression as a copyable  value.
    *
@@ -117,7 +118,7 @@ public class FieldGetExpr extends AbstractVarExpr {
 
     return obj.getField(_name).copy();
   }
-  
+
   /**
    * Evaluates the expression.
    *
@@ -163,7 +164,7 @@ public class FieldGetExpr extends AbstractVarExpr {
     // php/0a6f
     return obj.getFieldObject(env, _name);
   }
-  
+
   /**
    * Evaluates the expression.
    *
@@ -359,14 +360,14 @@ public class FieldGetExpr extends AbstractVarExpr {
     out.print("new FieldGetExpr(");
 
     _objExpr.generateExpr(out);
-    
+
     out.print(", \"");
-    
+
     out.printJavaString(_name);
-    
+
     out.print("\")");
   }
-  
+
   public String toString()
   {
     return _objExpr + "->" + _name;
