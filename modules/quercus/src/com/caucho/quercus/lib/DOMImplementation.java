@@ -42,12 +42,12 @@ public class DOMImplementation {
     
   }
   
-  public DOMDocument createDocument(@Optional String namespaceURI,
+  public DOMDocumentValue createDocument(@Optional String namespaceURI,
                                     @Optional String qualifiedName,
                                     @Optional DOMDocumentType doctype)
     throws DOMException
   {
-    return new DOMDocument(_DOMImplementation.createDocument(namespaceURI, qualifiedName, doctype.getDocType()));
+    return new DOMDocumentValue(_DOMImplementation.createDocument(namespaceURI, qualifiedName, doctype.getDocType()));
   }
 
   public DOMDocumentType createDocumentType(@Optional String qualifiedName,

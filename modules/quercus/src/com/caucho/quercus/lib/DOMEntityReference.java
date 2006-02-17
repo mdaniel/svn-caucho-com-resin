@@ -29,7 +29,7 @@
 
 package com.caucho.quercus.lib;
 
-public class DOMEntityReference extends DOMNode {
+public class DOMEntityReference extends DOMNodeValue {
   
   //@todo construct()
 }

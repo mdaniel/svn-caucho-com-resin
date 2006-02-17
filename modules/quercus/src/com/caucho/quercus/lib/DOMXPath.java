@@ -31,7 +31,7 @@ package com.caucho.quercus.lib;
 
 public class DOMXPath {
   
-  //@todo document (field of type DOMDocument)
+  //@todo document (field of type DOMDocumentValue)
   
   //@todo construct()
   //@todo registerNamespace()

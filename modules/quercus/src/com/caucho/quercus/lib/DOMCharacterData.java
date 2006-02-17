@@ -29,7 +29,7 @@
 
 package com.caucho.quercus.lib;
 
-public class DOMCharacterData extends DOMNode {
+public class DOMCharacterData extends DOMNodeValue {
   
   //PROPERTIES
   //@todo data (String)

@@ -41,10 +41,10 @@ import javax.xml.parsers.ParserConfigurationException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class DOMDocument extends DOMNode {
+public class DOMDocumentValue extends DOMNodeValue {
 
-  private static final Logger log = Log.open(DOMDocument.class);
-  private static final L10N L = new L10N(DOMDocument.class);
+  private static final Logger log = Log.open(DOMDocumentValue.class);
+  private static final L10N L = new L10N(DOMDocumentValue.class);
 
   public String actualEncoding;
   public DOMConfiguration config;
@@ -68,26 +68,28 @@ public class DOMDocument extends DOMNode {
 
   private Document _document;
 
-  public DOMDocument()
+  public DOMDocumentValue()
   {
     createDocument();
   }
 
-  public DOMDocument(String version)
-  {
-    this.version = version;
-    createDocument();
-  }
-
-  public DOMDocument(String version,
-                     String encoding)
+  public DOMDocumentValue(String version)
   {
     this.version = version;
-    this.encoding = encoding;
     createDocument();
+    _document.setXmlVersion(version);
   }
 
-  public DOMDocument(Document document)
+  public DOMDocumentValue(String version,
+                          String encoding)
+  {
+    this.version = version;
+    this.encoding = encoding; //Used when writing XML to a file
+    createDocument();
+    _document.setXmlVersion(version);
+  }
+
+  public DOMDocumentValue(Document document)
   {
     _document = document;
   }

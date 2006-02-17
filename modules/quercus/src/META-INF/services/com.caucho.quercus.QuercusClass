@@ -1,5 +1,5 @@
-com.caucho.quercus.lib.DOMDocument
-com.caucho.quercus.lib.DOMNode
+com.caucho.quercus.lib.DOMDocumentValue
+com.caucho.quercus.lib.DOMNodeValue
 com.caucho.quercus.lib.Memcache
 com.caucho.quercus.lib.Mysqli
 com.caucho.quercus.pdflib.PDF

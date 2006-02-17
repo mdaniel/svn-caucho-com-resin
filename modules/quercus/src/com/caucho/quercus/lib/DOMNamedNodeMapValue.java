@@ -29,7 +29,18 @@
 
 package com.caucho.quercus.lib;
 
-public class DOMNamedNodeMap {
+import com.caucho.quercus.env.Value;
+
+import org.w3c.dom.NamedNodeMap;
+
+public class DOMNamedNodeMapValue extends Value {
+
+  private NamedNodeMap _namedNodeMap;
+  
+  public DOMNamedNodeMapValue(NamedNodeMap namedNodeMap)
+  {
+    _namedNodeMap = namedNodeMap;
+  }
   
   //METHODS
   //@todo getNamedItem()

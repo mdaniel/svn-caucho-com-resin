@@ -29,7 +29,7 @@
 
 package com.caucho.quercus.lib;
 
-public class DOMNotation extends DOMNode {
+public class DOMNotation extends DOMNodeValue {
   
   //PROPERTIES
   //@todo publicId (String)

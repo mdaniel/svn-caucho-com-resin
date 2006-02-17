@@ -29,7 +29,7 @@
 
 package com.caucho.quercus.lib;
 
-public class DOMAttr extends DOMNode{
+public class DOMAttr extends DOMNodeValue {
  
   //PROPERTIES
   //@todo name (String)

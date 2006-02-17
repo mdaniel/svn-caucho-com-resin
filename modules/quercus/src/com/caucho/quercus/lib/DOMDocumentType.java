@@ -31,15 +31,15 @@ package com.caucho.quercus.lib;
 
 import org.w3c.dom.DocumentType;
 
-public class DOMDocumentType extends DOMNode {
+public class DOMDocumentType extends DOMNodeValue {
 
   private DocumentType _docType;
   //PROPERTIES
   //@todo publicId (String)
   //@todo systemId (String)
   //@todo name (String)
-  //@todo entities (DOMNamedNodeMap)
-  //@todo notations (DOMNamedNodeMap)
+  //@todo entities (DOMNamedNodeMapValue)
+  //@todo notations (DOMNamedNodeMapValue)
   //@todo internalSubset (String)
 
   public DOMDocumentType(DocumentType docType)
