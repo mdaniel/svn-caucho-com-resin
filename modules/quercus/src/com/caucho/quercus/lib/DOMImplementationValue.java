@@ -29,22 +29,24 @@
 
 package com.caucho.quercus.lib;
 
+import com.caucho.quercus.env.Value;
 import com.caucho.quercus.module.Optional;
 
 import org.w3c.dom.DOMException;
+import org.w3c.dom.DOMImplementation;
 
-public class DOMImplementation {
+public class DOMImplementationValue extends Value {
 
-  private org.w3c.dom.DOMImplementation _DOMImplementation;
+  private DOMImplementation _DOMImplementation;
 
-  public DOMImplementation()
+  public DOMImplementationValue(DOMImplementation DOMImplementation)
   {
-    
+    _DOMImplementation = DOMImplementation;
   }
-  
+
   public DOMDocumentValue createDocument(@Optional String namespaceURI,
-                                    @Optional String qualifiedName,
-                                    @Optional DOMDocumentType doctype)
+                                         @Optional String qualifiedName,
+                                         @Optional DOMDocumentType doctype)
     throws DOMException
   {
     return new DOMDocumentValue(_DOMImplementation.createDocument(namespaceURI, qualifiedName, doctype.getDocType()));
@@ -57,12 +59,12 @@ public class DOMImplementation {
   {
     return new DOMDocumentType(_DOMImplementation.createDocumentType(qualifiedName, publicId, systemId));
   }
-  
+
   public boolean hasFeature(String feature,
                             String version)
   {
     return _DOMImplementation.hasFeature(feature, version);
   }
-  
+
   //@todo construct()
 }

@@ -29,16 +29,16 @@
 
 package com.caucho.quercus.lib;
 
-public class DOMAttr extends DOMNodeValue {
- 
-  //PROPERTIES
-  //@todo name (String)
-  //@todo ownerElement (DOMElementValue)
-  //@todo schemaTypeInfo (boolean)
-  //@todo specified (boolean)
-  //@todo value (String)
+import com.caucho.quercus.env.Value;
+
+import org.w3c.dom.DOMConfiguration;
+
+public class DOMConfigurationValue extends Value {
+
+  DOMConfiguration _domConfiguration;
   
-  //METHODS
-  //@todo construct()
-  //@todo isId()
+  public DOMConfigurationValue(DOMConfiguration domConfiguration)
+  {
+    _domConfiguration = domConfiguration;
+  }
 }

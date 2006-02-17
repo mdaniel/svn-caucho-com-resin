@@ -29,6 +29,10 @@
 
 package com.caucho.quercus.lib;
 
+import com.caucho.quercus.env.BooleanValue;
+import com.caucho.quercus.env.NullValue;
+import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.Value;
 import com.caucho.util.L10N;
 import com.caucho.util.Log;
 
@@ -46,27 +50,17 @@ public class DOMDocumentValue extends DOMNodeValue {
   private static final Logger log = Log.open(DOMDocumentValue.class);
   private static final L10N L = new L10N(DOMDocumentValue.class);
 
-  public String actualEncoding;
-  public DOMConfiguration config;
-  public DOMDocumentType doctype;
-  public DOMElement documentElement;
-  public String documentURI;
-  public String encoding;
-  public boolean formatOutput;
-  public DOMImplementation implementation;
-  public boolean preserveWhiteSpace;
-  public boolean recover;
-  public boolean resolveExternals;
-  public boolean standalone;
-  public boolean strictErrorChecking;
-  public boolean substituteEntities;
-  public boolean validateOnParse;
-  public String version;
-  public String xmlEncoding;
-  public boolean xmlStandalone;
-  public String xmlVersion;
-
+  private String _encoding;
+  private BooleanValue _formatOutput;
+  private DOMImplementationValue _DOMImplementationValue;
+  private BooleanValue _recover;
+  private BooleanValue _resolveExternals;
+  private BooleanValue _strictErrorChecking = BooleanValue.TRUE;
+  private BooleanValue _substituteEntities;
+  private String _version;
+  
   private Document _document;
+  private DOMConfiguration _DOMConfig;
 
   public DOMDocumentValue()
   {
@@ -75,7 +69,7 @@ public class DOMDocumentValue extends DOMNodeValue {
 
   public DOMDocumentValue(String version)
   {
-    this.version = version;
+    _version = version;
     createDocument();
     _document.setXmlVersion(version);
   }
@@ -83,8 +77,8 @@ public class DOMDocumentValue extends DOMNodeValue {
   public DOMDocumentValue(String version,
                           String encoding)
   {
-    this.version = version;
-    this.encoding = encoding; //Used when writing XML to a file
+    _version = version;
+    _encoding = encoding; //Used when writing XML to a file
     createDocument();
     _document.setXmlVersion(version);
   }
@@ -105,6 +99,130 @@ public class DOMDocumentValue extends DOMNodeValue {
       log.log(Level.FINE, L.l(ex.toString()), ex);
     }
   }
+  
+  @Override
+  public Value getField(String name)
+  {
+    if ("actualEncoding".equals(name))
+    
+      return new StringValue(_document.getXmlEncoding());
+    
+    else if ("config".equals(name)) {
+    
+      if (_DOMConfig == null)
+        _DOMConfig = _document.getDomConfig();
+      
+      return new DOMConfigurationValue(_DOMConfig);
+    
+    } else if ("doctype".equals(name))
+    
+      return new DOMDocumentType(_document.getDoctype());
+    
+    else if ("_documentElementValue".equals(name))
+    
+      return new DOMElementValue(_document.getDocumentElement());
+    
+    else if ("documentURI".equals(name))
+    
+      return new StringValue(_document.getDocumentURI());
+    
+    else if ("encoding".equals(name)) //XXX: encoding vs. actualEncoding???
+    
+      return new StringValue(_document.getXmlEncoding());
+    
+    else if ("formatOutput".equals(name)) //XXX: what is formatOutput???
+    
+      return _formatOutput;
+    
+    else if ("implementation".equals(name)) {
+      
+      if (_DOMImplementationValue == null)
+        _DOMImplementationValue = new DOMImplementationValue(_document.getImplementation());
+    
+      return _DOMImplementationValue;
+    
+    } else if ("preserveWhiteSpace".equals(name))
+    
+      return checkPreserveWhiteSpace();
+    
+    else if ("recover".equals(name)) //XXX: what is recover???
+    
+      return _recover;
+    
+    else if ("resolveExternals".equals(name)) //XXX: what is resolveExternals
+    
+      return _resolveExternals;
+    
+    else if ("standalone".equals(name)) {
+    
+      if (_document.getXmlStandalone())
+        return BooleanValue.TRUE;
+      else 
+        return BooleanValue.FALSE;
+    
+    } else if ("strictErrorChecking".equals(name)) //XXX: throws DOMException on Errors
+    
+      return _strictErrorChecking;
+    
+    else if ("substituteEntities".equals(name))
+    
+      return _substituteEntities;
+    
+    else if ("validateOnParse".equals(name))
+    
+      return checkValidateOnParse();
+    
+    else if ("version".equals(name)) //XXX: version vs. xmlVersion
+    
+      return new StringValue(_document.getXmlVersion());
+    
+    else if ("xmlEncoding".equals(name))
+    
+      return new StringValue(_document.getXmlEncoding());
+    
+    else if ("xmlStandalone".equals(name)) {
+    
+      if (_document.getXmlStandalone())
+        return BooleanValue.TRUE;
+      else
+        return BooleanValue.FALSE;
+    
+    } else if ("xmlVersion".equals(name))
+    
+     return new StringValue(_document.getXmlVersion());
+    
+    else
+    
+      return NullValue.NULL;
+  }
+
+  private Value checkValidateOnParse()
+  {
+    if (_DOMConfig == null)
+      _DOMConfig = _document.getDomConfig();
+
+    return _DOMConfig.getParameter("validate").equals(true)
+           ? BooleanValue.TRUE
+           : BooleanValue.FALSE;
+  }
+
+  private Value checkPreserveWhiteSpace()
+  {
+    if (_DOMConfig == null)
+      _DOMConfig = _document.getDomConfig();
+
+    return _DOMConfig.getParameter("element-content-whitespace").equals(true)
+           ? BooleanValue.TRUE
+           : BooleanValue.FALSE;
+
+  }
+
+  @Override
+  public Value putField(String key, Value value)
+  {
+    return NullValue.NULL;
+  }
+  
   
   //METHODS
   //@todo createAttribute()
