@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2004 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -67,7 +67,7 @@ public class MysqliStatement {
   private Value[] _params;
   private Value[] _results;
 
-  private String _errorMessage = "";
+  private String _errorMessage;
   private int _errorCode;
 
   MysqliStatement(JdbcConnectionResource conn)
@@ -155,9 +155,9 @@ public class MysqliStatement {
   /**
    * Seeks to a given result
    */
-  public boolean data_seek(int offset)
+  public void data_seek(int offset)
   {
-    return JdbcResultResource.setRowNumber(_rs, offset);
+    JdbcResultResource.setRowNumber(_rs, offset);
   }
 
   /**

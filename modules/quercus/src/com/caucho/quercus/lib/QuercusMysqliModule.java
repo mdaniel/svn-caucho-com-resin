@@ -1161,8 +1161,7 @@ vv   */
     if (stmt == null)
       return BooleanValue.FALSE;
 
-    if (!stmt.data_seek(offset))
-      return BooleanValue.FALSE;
+    stmt.data_seek(offset);
 
     return NullValue.NULL;
   }

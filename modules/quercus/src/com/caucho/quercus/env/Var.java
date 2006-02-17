@@ -733,6 +733,15 @@ public class Var extends Value {
   /**
    * Evaluates a method.
    */
+  public Value evalMethod(Env env, String methodName, Expr []args)
+    throws Throwable
+  {
+    return _value.evalMethod(env, methodName, args);
+  }
+
+  /**
+   * Evaluates a method.
+   */
   public Value evalMethod(Env env, String methodName, Value []args)
     throws Throwable
   {
@@ -794,6 +803,15 @@ public class Var extends Value {
     throws Throwable
   {
     return _value.evalMethod(env, methodName, a0, a1, a2, a3, a4);
+  }
+
+  /**
+   * Evaluates a method.
+   */
+  public Value evalMethodRef(Env env, String methodName, Expr []args)
+    throws Throwable
+  {
+    return _value.evalMethodRef(env, methodName, args);
   }
 
   /**

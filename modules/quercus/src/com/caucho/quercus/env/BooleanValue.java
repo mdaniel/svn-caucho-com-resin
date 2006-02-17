@@ -120,7 +120,7 @@ public class BooleanValue extends Value {
   {
     Value obj = env.createObject();
 
-    obj.put(SCALAR_V, this);
+    obj.putField(env, "scalar", this);
 
     return obj;
   }

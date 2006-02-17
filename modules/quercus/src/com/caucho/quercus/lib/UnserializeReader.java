@@ -162,7 +162,7 @@ public final class UnserializeReader {
 	  Value key = unserialize(env);
 	  Value value = unserialize(env);
 
-	  obj.put(key, value);
+	  obj.putField(env, key.toString(), value);
 	}
 
 	expect('}');

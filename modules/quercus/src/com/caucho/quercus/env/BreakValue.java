@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2004 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -94,5 +94,13 @@ public class BreakValue extends Value {
   {
   }
 
+  public void varDumpImpl(Env env,
+                          WriteStream out,
+                          int depth,
+                          IdentityHashMap<Value, String> valueSet)
+    throws Throwable
+  {
+    out.print(getClass().getName());
+  }
 }
 

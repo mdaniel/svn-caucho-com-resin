@@ -58,7 +58,7 @@ public class RequiredExpr extends Expr {
   public Value eval(Env env)
     throws Throwable
   {
-    env.error("required argument missing");
+    env.warning("required argument missing");
 
     return NullValue.NULL;
   }

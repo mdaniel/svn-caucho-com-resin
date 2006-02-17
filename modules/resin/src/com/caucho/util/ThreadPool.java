@@ -36,6 +36,8 @@ import java.util.logging.Level;
 
 import com.caucho.log.Log;
 
+import com.caucho.vfs.EnvironmentStream;
+
 /**
  * A generic pool of threads available for Alarms and Work tasks.
  */
@@ -567,9 +569,9 @@ public class ThreadPool implements Runnable {
 
 	  thread.start();
 	} catch (Throwable e) {
-	  e.printStackTrace();
-	  
 	  _startCount--;
+
+	  e.printStackTrace(EnvironmentStream.getOriginalSystemErr().getPrintWriter());
 	  if (_startCount < 0) {
 	    Thread.dumpStack();
 	    _startCount = 0;

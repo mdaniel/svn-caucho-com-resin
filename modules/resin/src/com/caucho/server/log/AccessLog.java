@@ -303,7 +303,7 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener {
     AbstractHttpRequest request = (AbstractHttpRequest) req;
     AbstractHttpResponse response = (AbstractHttpResponse) res;
 
-    if (_logWriter.isRollover())
+    if (_logWriter.isRollover() || BUFFER_SIZE <= _length + BUFFER_GAP)
       flush();
 
     synchronized (_bufferLock) {
@@ -568,7 +568,7 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener {
    * @param v the new integer to be logged.
    * @return the new offset into the byte buffer.
    */
-  private int print(byte []buffer, int offset, int v)
+  private int print(byte []buffer, int offset, long v)
   {
     if (v == 0) {
       buffer[offset] = (byte) '0';
@@ -583,7 +583,7 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener {
     int length = 0;
     int exp = 10;
     
-    for (; v >= exp; length++)
+    for (; exp <= v && exp > 0; length++)
       exp = 10 * exp;
 
     offset += length;

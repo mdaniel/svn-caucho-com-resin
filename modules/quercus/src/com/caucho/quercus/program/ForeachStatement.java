@@ -81,7 +81,7 @@ public class ForeachStatement extends Statement {
     Value origObj = _objExpr.eval(env);
     Value obj = origObj.copy();
 
-    if (_key == null) {
+    if (_key == null && ! _isRef) {
       for (Value value : obj.getValueArray(env)) {
 	env.setValue(_valueName, value);
 
@@ -104,8 +104,8 @@ public class ForeachStatement extends Statement {
 
 	if (_isRef) {
 	  Value value = origObj.getRef(key);
-
-	  env.setValue(_valueName, value);
+	  
+	  env.setVar(_valueName, value);
 	}
 	else {
 	  Value value = obj.get(key).toValue();
