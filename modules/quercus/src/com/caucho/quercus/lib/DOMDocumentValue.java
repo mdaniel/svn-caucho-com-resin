@@ -29,21 +29,23 @@
 
 package com.caucho.quercus.lib;
 
-import com.caucho.quercus.env.BooleanValue;
-import com.caucho.quercus.env.NullValue;
-import com.caucho.quercus.env.StringValue;
-import com.caucho.quercus.env.Value;
-import com.caucho.util.L10N;
-import com.caucho.util.Log;
-
-import org.w3c.dom.DOMConfiguration;
-import org.w3c.dom.Document;
-
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import org.w3c.dom.DOMConfiguration;
+import org.w3c.dom.Document;
+
+import com.caucho.quercus.env.BooleanValue;
+import com.caucho.quercus.env.NullValue;
+import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.Value;
+import com.caucho.quercus.env.Env;
+
+import com.caucho.util.L10N;
+import com.caucho.util.Log;
 
 public class DOMDocumentValue extends DOMNodeValue {
 
@@ -218,7 +220,7 @@ public class DOMDocumentValue extends DOMNodeValue {
   }
 
   @Override
-  public Value putField(String key, Value value)
+  public Value putField(Env env, String key, Value value)
   {
     return NullValue.NULL;
   }

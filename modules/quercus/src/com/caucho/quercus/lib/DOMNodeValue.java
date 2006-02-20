@@ -52,7 +52,7 @@ public class DOMNodeValue extends Value {
   }
   
   @Override
-  public Value putField(String key, Value value)
+  public Value putField(Env env, String key, Value value)
   {
     if ("nodeName".equals(key))
       return errorReadOnly(key);
