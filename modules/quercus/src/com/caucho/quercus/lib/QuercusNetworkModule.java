@@ -39,6 +39,9 @@ import java.util.logging.Logger;
 
 import java.net.InetAddress;
 
+import javax.naming.*;
+import javax.naming.directory.*;
+
 import com.caucho.util.L10N;
 
 import com.caucho.quercus.module.AbstractQuercusModule;
@@ -292,17 +295,17 @@ public class QuercusNetworkModule extends AbstractQuercusModule {
    */
   public static Value getservbyname(String service, String protocol)
   {
-  	// php/1m06
+    // php/1m06
   	
-  	if (! (_servToNum.containsKey(service)))
-  		return BooleanValue.FALSE;
+    if (! (_servToNum.containsKey(service)))
+      return BooleanValue.FALSE;
   	
-  	ServiceNode node = _servToNum.get(service);
+    ServiceNode node = _servToNum.get(service);
   	
-  	if (! (node.protocolCheck(protocol)))
-  		return BooleanValue.FALSE;
+    if (! (node.protocolCheck(protocol)))
+      return BooleanValue.FALSE;
   	
-  	return node.getPort();
+    return node.getPort();
   }
   
   /**
@@ -317,17 +320,17 @@ public class QuercusNetworkModule extends AbstractQuercusModule {
    */
   public static Value getservbyport(int port, String protocol)
   {
-  	// php/1m07
+    // php/1m07
   	
-  	for (Map.Entry<String, ServiceNode> entry: _servToNum.entrySet()) {
-  		ServiceNode node = entry.getValue();
+    for (Map.Entry<String, ServiceNode> entry: _servToNum.entrySet()) {
+      ServiceNode node = entry.getValue();
   		
-  		if (node.getPort().toLong() == (long) port &&
-  				node.protocolCheck(protocol))
-  			return StringValue.create(entry.getKey());
-  	}
+      if (node.getPort().toLong() == port &&
+	  node.protocolCheck(protocol))
+	return StringValue.create(entry.getKey());
+    }
   	
-  	return BooleanValue.FALSE;
+    return BooleanValue.FALSE;
   }
   
   /**
@@ -341,22 +344,26 @@ public class QuercusNetworkModule extends AbstractQuercusModule {
    * 
    * @return true if records are found, false otherwise
    */
-  public static Value dns_get_mx(String hostname, ArrayValue mxhosts,
-  																		@Optional("NULL")  ArrayValue weight)
+  public static boolean dns_get_mx(String hostname,
+				   ArrayValue mxhosts,
+				   @Optional("NULL") ArrayValue weight)
+    throws NamingException
   {
-  	// php/1m08
+    // php/1m08
   	
-  	Attributes atrs = null;
+    Attributes atrs = null;
   	
     DirContext ictx = new InitialDirContext();          
     atrs = ictx.getAttributes("dns:/" + hostname, new String[] {"MX"});
-    
-    for (Map.entry<String, String> entry: atrs.entrySet()) {
-    	mxhosts.put(entry.getKey());
+
+    /*
+    for (Map.Entry<String, String> entry: atrs.entrySet()) {
+      mxhosts.put(entry.getKey());
     	
-    	if (weight != NullValue.NULL)
-    		weight.put(entry.getValue());
+      if (weight != null)
+	weight.put(entry.getValue());
     }
+    */
     
     return atrs.size() > 0;
   }
@@ -372,166 +379,170 @@ public class QuercusNetworkModule extends AbstractQuercusModule {
    * 
    * @return true if records are found, false otherwise
    */
-  public static Value dns_check_record(String hostname, ArrayValue mxhosts,
-  																		@Optional("NULL")  ArrayValue weight)
+  public static boolean dns_check_record(String hostname, ArrayValue mxhosts,
+					 @Optional("NULL")  ArrayValue weight)
+    throws NamingException
   {
-  	// php/1m09
+    // php/1m09
   	
-  	Attributes atrs = null;
+    Attributes atrs = null;
   	
     DirContext ictx = new InitialDirContext();          
     atrs = ictx.getAttributes("dns:/" + hostname, new String[] {"MX"});
-    
-    for (Map.entry<String, String> entry: atrs.entrySet()) {
-    	mxhosts.put(entry.getKey());
+
+    /*
+    for (Map.Entry<String, String> entry: atrs.entrySet()) {
+      mxhosts.put(entry.getKey());
     	
-    	if (weight != NullValue.NULL)
-    		weight.put(entry.getValue());
+      if (weight != null)
+	weight.put(entry.getValue());
     }
+    */
     
     return atrs.size() > 0;
   }
   
   private static class ServiceNode {
-  	private LongValue _port;
+    private LongValue _port;
   	
-  	private boolean _isTCP;
-  	private boolean _isUDP;
+    private boolean _isTCP;
+    private boolean _isUDP;
   	
-  	ServiceNode(int port, boolean tcp, boolean udp)
-  	{
-  		_port = LongValue.create(port);
-  		_isTCP = tcp;
-  		_isUDP = udp;
-  	}
+    ServiceNode(int port, boolean tcp, boolean udp)
+    {
+      _port = LongValue.create(port);
+      _isTCP = tcp;
+      _isUDP = udp;
+    }
   	
-  	public LongValue getPort()
-  	{
-  		return _port;
-  	}
+    public LongValue getPort()
+    {
+      return _port;
+    }
   	
-  	public boolean protocolCheck(String protocol)
-  	{
-  		if (protocol.equals("tcp"))
-  			return _isTCP;
-  		else if (protocol.equals("udp"))
-  			return _isUDP;
-  		else
-  			return false;
-  	}
+    public boolean protocolCheck(String protocol)
+    {
+      if (protocol.equals("tcp"))
+	return _isTCP;
+      else if (protocol.equals("udp"))
+	return _isUDP;
+      else
+	return false;
+    }
   	
-  	public boolean isTCP()
-  	{
-  		return _isTCP;
-  	}
+    public boolean isTCP()
+    {
+      return _isTCP;
+    }
   	
-  	public boolean isUDP()
-  	{
-  		return _isUDP;
-  	}
+    public boolean isUDP()
+    {
+      return _isUDP;
+    }
   }	
   		
-  static {	_protoToNum.put("ip", LongValue.create(0));
-  						_protoToNum.put("icmp", LongValue.create(1));
-  						_protoToNum.put("ggp", LongValue.create(3));
-  						_protoToNum.put("tcp", LongValue.create(6));
-  						_protoToNum.put("egp", LongValue.create(8));
-  						_protoToNum.put("pup", LongValue.create(12));
-  						_protoToNum.put("udp", LongValue.create(17));
-  						_protoToNum.put("hmp", LongValue.create(12));
-  						_protoToNum.put("xns-idp", LongValue.create(22));
-  						_protoToNum.put("rdp", LongValue.create(27));
-  						_protoToNum.put("rvd", LongValue.create(66));
-  						_servToNum.put("echo", new ServiceNode(7, true, true));
-  						_servToNum.put("discard", new ServiceNode(9, true, true));
-  						_servToNum.put("systat", new ServiceNode(11, true, true));
-  						_servToNum.put("daytime", new ServiceNode(13, true, true));
-  						_servToNum.put("qotd", new ServiceNode(17, true, true));
-  						_servToNum.put("chargen", new ServiceNode(19, true, true));
-  						_servToNum.put("ftp-data", new ServiceNode(20, true, false));
-  						_servToNum.put("ftp", new ServiceNode(21, true, false));
-  						_servToNum.put("telnet", new ServiceNode(23, true, false));
-  						_servToNum.put("smtp", new ServiceNode(25, true, false));
-  						_servToNum.put("time", new ServiceNode(37, true, true));
-  						_servToNum.put("rlp", new ServiceNode(39, false, true));
-  						_servToNum.put("nameserver", new ServiceNode(42, true, true));
-  						_servToNum.put("nicname", new ServiceNode(43, true, false));
-  						_servToNum.put("domain", new ServiceNode(53, true, true));
-  						_servToNum.put("bootps", new ServiceNode(67, false, true));
-  						_servToNum.put("bootpc", new ServiceNode(68, false, true));
-  						_servToNum.put("tftp", new ServiceNode(69, false, true));
-  						_servToNum.put("gopher", new ServiceNode(70, true, false));
-  						_servToNum.put("finger", new ServiceNode(79, true, false));
-  						_servToNum.put("http", new ServiceNode(80, true, false));
-  						_servToNum.put("kerberos", new ServiceNode(88, true, true));
-  						_servToNum.put("hostname", new ServiceNode(101, true, false));
-  						_servToNum.put("iso-tsap", new ServiceNode(102, true, false));
-  						_servToNum.put("rtelnet", new ServiceNode(107, true, false));
-  						_servToNum.put("pop2", new ServiceNode(109, true, false));
-  						_servToNum.put("pop3", new ServiceNode(110, true, false));
-  						_servToNum.put("sunrpc", new ServiceNode(111, true, true));
-  						_servToNum.put("auth", new ServiceNode(113, true, false));
-  						_servToNum.put("uucp-path", new ServiceNode(117, true, false));
-  						_servToNum.put("nntp", new ServiceNode(119, true, false));
-  						_servToNum.put("ntp", new ServiceNode(123, false, true));
-  						_servToNum.put("epmap", new ServiceNode(135, true, true));
-  						_servToNum.put("netbios-ns", new ServiceNode(137, true, true));
-  						_servToNum.put("netbios-dgm", new ServiceNode(138, false, true));
-  						_servToNum.put("netbios-ssn", new ServiceNode(139, true, false));
-  						_servToNum.put("imap", new ServiceNode(143, true, false));
-  						_servToNum.put("pcmail-srv", new ServiceNode(158, true, false));
-  						_servToNum.put("snmp", new ServiceNode(161, false, true));
-  						_servToNum.put("snmptrap", new ServiceNode(162, false, true));
-  						_servToNum.put("print-srv", new ServiceNode(170, true, false));
-  						_servToNum.put("bgp", new ServiceNode(179, true, false));
-  						_servToNum.put("irc", new ServiceNode(194, true, false));
-  						_servToNum.put("ipx", new ServiceNode(213, false, true));
-  						_servToNum.put("ldap", new ServiceNode(389, true, false));
-  						_servToNum.put("https", new ServiceNode(443, true, true));
-  						_servToNum.put("microsoft-ds", new ServiceNode(445, true, true));
-  						_servToNum.put("kpasswd", new ServiceNode(464, true, true));
-  						_servToNum.put("isakmp", new ServiceNode(500, false, true));
-  						_servToNum.put("exec", new ServiceNode(512, true, false));
-  						_servToNum.put("biff", new ServiceNode(512, false, true));
-  						_servToNum.put("login", new ServiceNode(513, true, false));
-  						_servToNum.put("who", new ServiceNode(513, false, true));
-  						_servToNum.put("cmd", new ServiceNode(514, true, false));
-  						_servToNum.put("syslog", new ServiceNode(514, false, true));
-  						_servToNum.put("printer", new ServiceNode(515, true, false));
-  						_servToNum.put("talk", new ServiceNode(517, false, true));
-  						_servToNum.put("ntalk", new ServiceNode(518, false, true));
-  						_servToNum.put("efs", new ServiceNode(520, true, false));
-  						_servToNum.put("router", new ServiceNode(520, false, true));
-  						_servToNum.put("timed", new ServiceNode(525, false, true));
-  						_servToNum.put("tempo", new ServiceNode(526, true, false));
-  						_servToNum.put("courier", new ServiceNode(530, true, false));
-  						_servToNum.put("conference", new ServiceNode(531, true, false));
-  						_servToNum.put("netnews", new ServiceNode(532, true, false));
-  						_servToNum.put("netwall", new ServiceNode(533, false, true));
-  						_servToNum.put("uucp", new ServiceNode(540, true, false));
-  						_servToNum.put("klogin", new ServiceNode(543, true, false));
-  						_servToNum.put("kshell", new ServiceNode(544, true, false));
-  						_servToNum.put("new-rwho", new ServiceNode(550, false, true));
-  						_servToNum.put("remotefs", new ServiceNode(556, true, false));
-  						_servToNum.put("rmonitor", new ServiceNode(560, false, true));
-  						_servToNum.put("monitor", new ServiceNode(561, false, true));
-  						_servToNum.put("ldaps", new ServiceNode(636, true, false));
-  						_servToNum.put("doom", new ServiceNode(666, true, true));
-  						_servToNum.put("kerberos-adm", new ServiceNode(749, true, true));
-  						_servToNum.put("kerberos-iv", new ServiceNode(750, false, true));
-  						_servToNum.put("kpop", new ServiceNode(1109, true, false));
-  						_servToNum.put("phone", new ServiceNode(1167, false, true));
-  						_servToNum.put("ms-sql-s", new ServiceNode(1433, true, true));
-  						_servToNum.put("ms-sql-m", new ServiceNode(1434, true, true));
-  						_servToNum.put("wins", new ServiceNode(1512, true, true));
-  						_servToNum.put("ingreslock", new ServiceNode(1524, true, false));
-  						_servToNum.put("12tp", new ServiceNode(1701, false, true));
-  						_servToNum.put("pptp", new ServiceNode(1723, true, false));
-  						_servToNum.put("radius", new ServiceNode(1812, false, true));
-  						_servToNum.put("radacct", new ServiceNode(1813, false, true));
-  						_servToNum.put("nfsd", new ServiceNode(2049, false, true));
-  						_servToNum.put("knetd", new ServiceNode(2053, true, false));
-  						_servToNum.put("man", new ServiceNode(9535, true, false));
+  static {
+    _protoToNum.put("ip", LongValue.create(0));
+    _protoToNum.put("icmp", LongValue.create(1));
+    _protoToNum.put("ggp", LongValue.create(3));
+    _protoToNum.put("tcp", LongValue.create(6));
+    _protoToNum.put("egp", LongValue.create(8));
+    _protoToNum.put("pup", LongValue.create(12));
+    _protoToNum.put("udp", LongValue.create(17));
+    _protoToNum.put("hmp", LongValue.create(12));
+    _protoToNum.put("xns-idp", LongValue.create(22));
+    _protoToNum.put("rdp", LongValue.create(27));
+    _protoToNum.put("rvd", LongValue.create(66));
+    _servToNum.put("echo", new ServiceNode(7, true, true));
+    _servToNum.put("discard", new ServiceNode(9, true, true));
+    _servToNum.put("systat", new ServiceNode(11, true, true));
+    _servToNum.put("daytime", new ServiceNode(13, true, true));
+    _servToNum.put("qotd", new ServiceNode(17, true, true));
+    _servToNum.put("chargen", new ServiceNode(19, true, true));
+    _servToNum.put("ftp-data", new ServiceNode(20, true, false));
+    _servToNum.put("ftp", new ServiceNode(21, true, false));
+    _servToNum.put("telnet", new ServiceNode(23, true, false));
+    _servToNum.put("smtp", new ServiceNode(25, true, false));
+    _servToNum.put("time", new ServiceNode(37, true, true));
+    _servToNum.put("rlp", new ServiceNode(39, false, true));
+    _servToNum.put("nameserver", new ServiceNode(42, true, true));
+    _servToNum.put("nicname", new ServiceNode(43, true, false));
+    _servToNum.put("domain", new ServiceNode(53, true, true));
+    _servToNum.put("bootps", new ServiceNode(67, false, true));
+    _servToNum.put("bootpc", new ServiceNode(68, false, true));
+    _servToNum.put("tftp", new ServiceNode(69, false, true));
+    _servToNum.put("gopher", new ServiceNode(70, true, false));
+    _servToNum.put("finger", new ServiceNode(79, true, false));
+    _servToNum.put("http", new ServiceNode(80, true, false));
+    _servToNum.put("kerberos", new ServiceNode(88, true, true));
+    _servToNum.put("hostname", new ServiceNode(101, true, false));
+    _servToNum.put("iso-tsap", new ServiceNode(102, true, false));
+    _servToNum.put("rtelnet", new ServiceNode(107, true, false));
+    _servToNum.put("pop2", new ServiceNode(109, true, false));
+    _servToNum.put("pop3", new ServiceNode(110, true, false));
+    _servToNum.put("sunrpc", new ServiceNode(111, true, true));
+    _servToNum.put("auth", new ServiceNode(113, true, false));
+    _servToNum.put("uucp-path", new ServiceNode(117, true, false));
+    _servToNum.put("nntp", new ServiceNode(119, true, false));
+    _servToNum.put("ntp", new ServiceNode(123, false, true));
+    _servToNum.put("epmap", new ServiceNode(135, true, true));
+    _servToNum.put("netbios-ns", new ServiceNode(137, true, true));
+    _servToNum.put("netbios-dgm", new ServiceNode(138, false, true));
+    _servToNum.put("netbios-ssn", new ServiceNode(139, true, false));
+    _servToNum.put("imap", new ServiceNode(143, true, false));
+    _servToNum.put("pcmail-srv", new ServiceNode(158, true, false));
+    _servToNum.put("snmp", new ServiceNode(161, false, true));
+    _servToNum.put("snmptrap", new ServiceNode(162, false, true));
+    _servToNum.put("print-srv", new ServiceNode(170, true, false));
+    _servToNum.put("bgp", new ServiceNode(179, true, false));
+    _servToNum.put("irc", new ServiceNode(194, true, false));
+    _servToNum.put("ipx", new ServiceNode(213, false, true));
+    _servToNum.put("ldap", new ServiceNode(389, true, false));
+    _servToNum.put("https", new ServiceNode(443, true, true));
+    _servToNum.put("microsoft-ds", new ServiceNode(445, true, true));
+    _servToNum.put("kpasswd", new ServiceNode(464, true, true));
+    _servToNum.put("isakmp", new ServiceNode(500, false, true));
+    _servToNum.put("exec", new ServiceNode(512, true, false));
+    _servToNum.put("biff", new ServiceNode(512, false, true));
+    _servToNum.put("login", new ServiceNode(513, true, false));
+    _servToNum.put("who", new ServiceNode(513, false, true));
+    _servToNum.put("cmd", new ServiceNode(514, true, false));
+    _servToNum.put("syslog", new ServiceNode(514, false, true));
+    _servToNum.put("printer", new ServiceNode(515, true, false));
+    _servToNum.put("talk", new ServiceNode(517, false, true));
+    _servToNum.put("ntalk", new ServiceNode(518, false, true));
+    _servToNum.put("efs", new ServiceNode(520, true, false));
+    _servToNum.put("router", new ServiceNode(520, false, true));
+    _servToNum.put("timed", new ServiceNode(525, false, true));
+    _servToNum.put("tempo", new ServiceNode(526, true, false));
+    _servToNum.put("courier", new ServiceNode(530, true, false));
+    _servToNum.put("conference", new ServiceNode(531, true, false));
+    _servToNum.put("netnews", new ServiceNode(532, true, false));
+    _servToNum.put("netwall", new ServiceNode(533, false, true));
+    _servToNum.put("uucp", new ServiceNode(540, true, false));
+    _servToNum.put("klogin", new ServiceNode(543, true, false));
+    _servToNum.put("kshell", new ServiceNode(544, true, false));
+    _servToNum.put("new-rwho", new ServiceNode(550, false, true));
+    _servToNum.put("remotefs", new ServiceNode(556, true, false));
+    _servToNum.put("rmonitor", new ServiceNode(560, false, true));
+    _servToNum.put("monitor", new ServiceNode(561, false, true));
+    _servToNum.put("ldaps", new ServiceNode(636, true, false));
+    _servToNum.put("doom", new ServiceNode(666, true, true));
+    _servToNum.put("kerberos-adm", new ServiceNode(749, true, true));
+    _servToNum.put("kerberos-iv", new ServiceNode(750, false, true));
+    _servToNum.put("kpop", new ServiceNode(1109, true, false));
+    _servToNum.put("phone", new ServiceNode(1167, false, true));
+    _servToNum.put("ms-sql-s", new ServiceNode(1433, true, true));
+    _servToNum.put("ms-sql-m", new ServiceNode(1434, true, true));
+    _servToNum.put("wins", new ServiceNode(1512, true, true));
+    _servToNum.put("ingreslock", new ServiceNode(1524, true, false));
+    _servToNum.put("12tp", new ServiceNode(1701, false, true));
+    _servToNum.put("pptp", new ServiceNode(1723, true, false));
+    _servToNum.put("radius", new ServiceNode(1812, false, true));
+    _servToNum.put("radacct", new ServiceNode(1813, false, true));
+    _servToNum.put("nfsd", new ServiceNode(2049, false, true));
+    _servToNum.put("knetd", new ServiceNode(2053, true, false));
+    _servToNum.put("man", new ServiceNode(9535, true, false));
   }
 }
 
