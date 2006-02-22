@@ -94,14 +94,14 @@ public class QDate {
   private static TimeZone _gmtTimeZone = TimeZone.getTimeZone("UTC");
 
   private static String _localDstName =
-  _localTimeZone.getDisplayName(true, TimeZone.SHORT);
+    _localTimeZone.getDisplayName(true, TimeZone.SHORT);
   private static String _localStdName =
-  _localTimeZone.getDisplayName(false, TimeZone.SHORT);
+    _localTimeZone.getDisplayName(false, TimeZone.SHORT);
 
   private static String _gmtDstName =
-  _gmtTimeZone.getDisplayName(true, TimeZone.SHORT);
+    _gmtTimeZone.getDisplayName(true, TimeZone.SHORT);
   private static String _gmtStdName =
-  _gmtTimeZone.getDisplayName(false, TimeZone.SHORT);
+    _gmtTimeZone.getDisplayName(false, TimeZone.SHORT);
 
   // static dates for the static formatting
   private static QDate _gmtDate = new QDate(false);
@@ -564,11 +564,11 @@ public class QDate {
     if (_lastDate != null && _lastTime == _localTimeOfEpoch)
       return _lastDate;
 
-    CharBuffer cb = CharBuffer.allocate();
+    CharBuffer cb = new CharBuffer();
 
     printDate(cb);
 
-    _lastDate = cb.close();
+    _lastDate = cb.toString();
     _lastTime = _localTimeOfEpoch;
 
     return _lastDate;
@@ -770,7 +770,7 @@ public class QDate {
   {
     _gmtDate.setGMTTime(gmtTime);
 
-    return _gmtDate.format(CharBuffer.allocate(), format).close();
+    return _gmtDate.format(new CharBuffer(), format).toString();
   }
 
   /**
@@ -795,7 +795,7 @@ public class QDate {
   {
     _localDate.setGMTTime(gmtTime);
 
-    return _localDate.format(CharBuffer.allocate(), format).close();
+    return _localDate.format(new CharBuffer(), format).toString();
   }
 
   /**

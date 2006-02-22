@@ -181,23 +181,22 @@ public class BlockManager {
    */
   synchronized Block getBlock(Store store, long blockId)
   {
+    // XXX: proper handling of the synchronized is tricky because
+    // the LRU dirty write might have timing issues
+    
     Block block = _blockCache.get(blockId);
 
-    if (block == null) {
-    }
-    else if (block.allocate())
+    if (block != null && block.allocate())
       return block;
-    else {
-      System.out.println("NO-ALLOC:");
-      block = null;
-    }
-
+    
     if ((blockId & Store.BLOCK_MASK) == 0)
       throw stateError(L.l("Block 0 is reserved."));
 
     block = new ReadBlock(store, blockId);
     block.allocate();
 
+    // needs to be outside the synchronized since the put
+    // can cause an LRU drop which might lead to a dirty write
     _blockCache.put(blockId, block);
 
     return block;
