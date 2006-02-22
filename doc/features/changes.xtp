@@ -4,6 +4,7 @@
 
 <s2 title='3.0.snap - Feb 16, 2006'>
 <ul>
+<li>ConnectionPool needs to be a lifo to avoid accumulating too many pool items (rep b Kaminsky Leonid)
 <li>max-create-connections wasn't included in DBPool (rep by Kaminsky Leonid)
 <li>(2006-02-15) mod_caucho was not properly handling check-interval larger than 32-bits (#926, rep by Mutsubu Inayama)
 <li>Changes in ./configure and Makefile for MacOSX EGREP libtool issue (#432, rep by jdane)

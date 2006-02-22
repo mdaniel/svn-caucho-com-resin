@@ -1,19 +1,19 @@
 CC=gcc
-CFLAGS_SHLIB=-fpic
-LD=/usr/bin/ld
+CFLAGS_SHLIB=-DSHARED_MODULE
+LD=gcc
 OS=
-SO=so
-CPU=x86_64
+SO=jnilib
+CPU=powerpc
 LDFLAGS=
-LDFLAGS_SHLIB=-shared -fPIC -L/usr/lib64
-PROXY_LIBS=-lpthread
-APACHE_INC=-I/usr/include/httpd  -I/usr/include/apr-0 
-resin_conf=/etc/httpd/conf/httpd.conf
-resin_libexec=/usr/lib64/httpd/modules
-resin_home=/home/ferg/ws/resin
-JNI_INCLUDE=-I/usr/java/include -I/usr/java/include/linux
+LDFLAGS_SHLIB=-bundle -undefined suppress -flat_namespace -Wl,-bind_at_load -L/usr/lib
+PROXY_LIBS=
+APACHE_INC=-I/usr/include/httpd
+resin_conf=/private/etc/httpd/httpd.conf
+resin_libexec=/usr/libexec/httpd
+resin_home=/Users/ferg/ws/test-resin
+JNI_INCLUDE=-I/System/Library/Frameworks/JavaVM.framework/Versions/1.5/Home/include
 INCLUDES =  -I/usr/include $(JNI_INCLUDE) -I../common
-CFLAGS = -g -O2 -DPOLL -DB64 -DHAS_JVMTI  -m64 -fPIC -D_FILE_OFFSET_BITS=64 -DRESIN_HOME=\"$(resin_home)\" $(INCLUDES) -DCPU=\"$(CPU)\" -DOS=$(OS)
+CFLAGS = -g -O2 -DPOLL -DHAS_JVMTI  -DRESIN_HOME=\"$(resin_home)\" $(INCLUDES) -DCPU=\"$(CPU)\" -DOS=$(OS)
 OBJ= jni_os.o jni_jvmti.o jni_jvmdi.o
 
 all	: libresin_os.$(SO)

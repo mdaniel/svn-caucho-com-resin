@@ -628,9 +628,6 @@ public class QuercusRegexpModule
                                               boolean isEval)
     throws Throwable
   {
-    
-    long numberOfMatches = 0;
-    
     if (limit < 0)
       limit = Long.MAX_VALUE;
     
@@ -641,8 +638,7 @@ public class QuercusRegexpModule
 
     int replacementLen = replacementList.size();
 
-    while (matcher.find() && numberOfMatches < limit) {
-      
+    while (matcher.find() && limit-- > 0) {
       // Increment countV (note: if countV != null, then it should be a Var)
       if ((countV != null) && (countV instanceof Var)) {
         long count = ((Var) countV).getRawValue().toLong();
@@ -674,8 +670,6 @@ public class QuercusRegexpModule
       }
 
       tail = matcher.end();
-      
-      numberOfMatches++;
     }
 
     if (tail < subject.length())
@@ -1040,7 +1034,7 @@ public class QuercusRegexpModule
   {
     Pattern pattern = _patternCache.get(rawRegexp);
 
-    if (pattern != null)
+    if (pattern != null && false)
       return pattern;
 
     char delim = rawRegexp.charAt(0);

@@ -54,10 +54,11 @@ import javax.transaction.xa.Xid;
 
 import javax.security.auth.Subject;
 
-import com.caucho.util.L10N;
 import com.caucho.util.Alarm;
-import com.caucho.util.WeakAlarm;
 import com.caucho.util.AlarmListener;
+import com.caucho.util.L10N;
+import com.caucho.util.LifoSet;
+import com.caucho.util.WeakAlarm;
 
 import com.caucho.config.ConfigException;
 import com.caucho.config.types.Period;
@@ -127,8 +128,8 @@ public class ConnectionPool
 
   private final ArrayList<PoolItem> _pool = new ArrayList<PoolItem>();
 
-  private final LinkedHashSet<ManagedConnection> _idlePool
-    = new LinkedHashSet<ManagedConnection>();
+  private final LifoSet<ManagedConnection> _idlePool
+    = new LifoSet<ManagedConnection>();
 
   // temporary connection list for the alarm callback
   private final ArrayList<PoolItem> _alarmConnections

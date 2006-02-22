@@ -1141,43 +1141,6 @@ cse_reuse_socket(stream_t *s, cluster_t *cluster, cluster_srun_t *cluster_srun,
 }
 
 void
-cse_close_sockets(config_t *config)
-{
-  int i;
-  cluster_t *cluster;
-
-  if (1) return;
-  
-  for (i = 0; i < cluster->srun_size; i++) {
-    cluster_srun_t *cluster_srun = cluster->srun_list + i;
-    srun_t *srun = cluster_srun->srun;
-    int tail;
-
-    if (! srun)
-      continue;
-
-    cse_lock(srun->lock);
-
-    for (tail = srun->conn_tail;
-         tail != srun->conn_head;
-         tail = (tail + 1) % CONN_POOL_SIZE) {
-      struct conn_t *conn = &srun->conn_pool[tail];
-      int socket = conn->socket;
-      conn->socket = -1;
-      if (socket >= 0)
-        srun->close(socket, conn->ssl);
-    }
-
-    srun->conn_head = 0;
-    srun->conn_tail = 0;
-    
-    cse_unlock(srun->lock);
-  }
-
-  cluster->srun_size = 0;
-}
-
-void
 cse_close_all()
 {
 }

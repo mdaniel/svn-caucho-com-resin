@@ -1155,10 +1155,12 @@ abstract public class AbstractStylesheetFactory
   {
     LruCache<String,SoftReference<StylesheetImpl>> cache;
 
-    cache = _stylesheetCache.get();
+    ClassLoader parentLoader = Thread.currentThread().getContextClassLoader();
+    
+    cache = _stylesheetCache.getLevel(parentLoader);
     if (cache == null) {
       cache = new LruCache<String,SoftReference<StylesheetImpl>>(256);
-      _stylesheetCache.set(cache);
+      _stylesheetCache.set(cache, parentLoader);
     }
 
     SoftReference<StylesheetImpl> stylesheetRef;
@@ -1181,7 +1183,6 @@ abstract public class AbstractStylesheetFactory
     if (! classPath.canRead())
       throw new ClassNotFoundException("can't find compiled XSL `" + className + "'");
 
-    ClassLoader parentLoader = Thread.currentThread().getContextClassLoader();
     DynamicClassLoader loader;
     loader = SimpleLoader.create(parentLoader, getWorkPath(), className);
 

@@ -430,7 +430,8 @@ public class QuercusOptionsModule extends AbstractQuercusModule {
     addIni(_iniMap, "enable_dl", "1", PHP_INI_SYSTEM);
     addIni(_iniMap, "max_execution_time", "30", PHP_INI_ALL);
     addIni(_iniMap, "max_input_time", "-1", PHP_INI_PERDIR);
-    addIni(_iniMap, "magic_quotes_gpc", "1", PHP_INI_PERDIR);
+    //    addIni(_iniMap, "magic_quotes_gpc", "1", PHP_INI_PERDIR);
+    addIni(_iniMap, "magic_quotes_gpc", "0", PHP_INI_PERDIR);
     addIni(_iniMap, "magic_quotes_runtime", "0", PHP_INI_ALL);
   }
 

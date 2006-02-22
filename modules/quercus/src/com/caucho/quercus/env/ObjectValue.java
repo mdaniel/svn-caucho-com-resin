@@ -249,6 +249,14 @@ public class ObjectValue extends Value {
     return null;
   }
 
+  /**
+   * Gets a new value.
+   */
+  public Value get(Value key)
+  {
+    return getField(key.toString());
+  }
+
   public Value put(Value index, Value value)
   {
     throw new UnsupportedOperationException();
@@ -418,6 +426,42 @@ public class ObjectValue extends Value {
 
       hash = (hash + 1) & _hashMask;
     }
+  }
+
+  /**
+   * Returns the key array
+   */
+  public Value []getKeyArray()
+  {
+    Value []keys = new Value[getSize()];
+
+    int k = 0;
+    for (int i = 0; i < _entries.length; i++) {
+      Entry entry = _entries[i];
+
+      if (entry != null)
+	keys[k++] = new StringValue(entry.getKey());
+    }
+
+    return keys;
+  }
+
+  /**
+   * Returns the value array
+   */
+  public Value []getValueArray(Env env)
+  {
+    Value []values = new Value[getSize()];
+
+    int k = 0;
+    for (int i = 0; i < _entries.length; i++) {
+      Entry entry = _entries[i];
+
+      if (entry != null)
+	values[k++] = entry.getValue().toValue();
+    }
+
+    return values;
   }
 
   /**

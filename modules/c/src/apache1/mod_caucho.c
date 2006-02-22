@@ -406,9 +406,9 @@ cse_clean_jsessionid(request_rec *r)
   cse_update_config(config, r->request_time);
   */
 
-  if (config->alt_session_prefix) {
-    if (! strncmp(uri + 1, config->alt_session_prefix,
-                  config->alt_session_prefix_length)) {
+  if (*config->alt_session_url_prefix) {
+    if (! strncmp(uri + 1, config->alt_session_url_prefix,
+                  sizeof(config->alt_session_url_prefix))) {
       char *p = strchr(uri + 1, '/');
 
       if (r->request_config)
@@ -418,7 +418,7 @@ cse_clean_jsessionid(request_rec *r)
 
       /* strip session encoding from file */
       if (r->filename) {
-        char *prefix = strstr(r->filename, config->alt_session_prefix);
+        char *prefix = strstr(r->filename, config->alt_session_url_prefix);
         p = prefix ? strchr(prefix, '/') : 0;
         
         if (prefix && p) {
@@ -532,15 +532,20 @@ get_session_index(config_t *config, request_rec *r, int *backup)
     uri = ap_get_module_config(r->request_config, &caucho_module);
 
   if (uri) {
-    if (config->alt_session_prefix && *config->alt_session_prefix)
-      return cse_session_from_string(uri, config->alt_session_prefix, backup);
+    if (*config->alt_session_url_prefix)
+      return cse_session_from_string(uri,
+				     config->alt_session_url_prefix,
+				     backup);
     else
       return cse_session_from_string(uri + strlen(config->session_url_prefix),
 				     "", backup);
   }
 
-  if (config->alt_session_prefix && *config->alt_session_prefix)
-    return cse_session_from_string(r->uri, config->alt_session_prefix, backup);
+  if (*config->alt_session_url_prefix) {
+    return cse_session_from_string(r->uri,
+				   config->alt_session_url_prefix,
+				   backup);
+  }
   else
     return cse_session_from_string(r->uri, config->session_url_prefix, backup);
 }
@@ -571,7 +576,7 @@ write_env(stream_t *s, request_rec *r, char *session_id)
   cse_write_string(s, HMUX_URL, buf);
 
   cse_write_string(s, HMUX_METHOD, r->method);
-  if (s->config->alt_session_prefix && r->request_config) {
+  if (*s->config->alt_session_url_prefix && r->request_config) {
     char *suburi = ap_get_module_config(r->request_config, &caucho_module);
 
     if (suburi)
@@ -960,7 +965,7 @@ caucho_request(request_rec *r)
 
   /* ap_soft_timeout("servlet request", r); */
   
-  if (r->request_config && ! config->alt_session_prefix &&
+  if (r->request_config && ! *config->alt_session_url_prefix &&
       ((session_id = ap_get_module_config(r->request_config, &caucho_module)) ||
        r->prev &&
        (session_id = ap_get_module_config(r->prev->request_config, &caucho_module)))) {
