@@ -1141,6 +1141,11 @@ cse_reuse_socket(stream_t *s, cluster_t *cluster, cluster_srun_t *cluster_srun,
 }
 
 void
+cse_close_sockets(config_t *config)
+{
+}
+
+void
 cse_close_all()
 {
 }
