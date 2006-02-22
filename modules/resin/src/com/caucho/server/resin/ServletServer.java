@@ -891,6 +891,7 @@ public class ServletServer extends ProtocolDispatchServer
 		 System.getProperty("file.encoding") + ", " +
 		 System.getProperty("user.language") + ", " +
 		 System.getProperty("java.vm.vendor"));
+
 	log.info("resin.home = " + System.getProperty("resin.home"));
 	log.info("server.root = " + System.getProperty("server.root"));
 	log.info("");
