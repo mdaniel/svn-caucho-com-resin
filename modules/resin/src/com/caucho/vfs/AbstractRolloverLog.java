@@ -346,7 +346,7 @@ public class AbstractRolloverLog {
    *
    * @param now current time in milliseconds.
    */
-  protected void rolloverLog(long now)
+  synchronized protected void rolloverLog(long now)
   {
     _nextRolloverCheckTime = now + _rolloverCheckPeriod;
 

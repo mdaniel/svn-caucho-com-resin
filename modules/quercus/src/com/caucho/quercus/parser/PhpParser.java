@@ -3583,6 +3583,14 @@ public class PhpParser {
         case 'x':
           _sb.append((char) parseHexEscape());
           break;
+	case '{':
+	  ch = read();
+	  _peek = ch;
+	  if (ch == '$')
+	    _sb.append('{');
+	  else
+	    _sb.append("\\{");
+	  break;
         default:
           _sb.append('\\');
           _sb.append((char) ch);

@@ -2,7 +2,7 @@
 
 <a href='changes-2.xtp'>Resin 2.1 changes</a>
 
-<s2 title='3.0.snap - Feb 16, 2006'>
+<s2 title='3.0.18 - Feb 23, 2006'>
 <ul>
 <li>ConnectionPool needs to be a lifo to avoid accumulating too many pool items (rep b Kaminsky Leonid)
 <li>max-create-connections wasn't included in DBPool (rep by Kaminsky Leonid)
