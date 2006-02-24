@@ -91,6 +91,25 @@ abstract public class ArrayValue extends Value {
   }
 
   /**
+   * Converts to an object.
+   */
+  public Value toObject(Env env)
+  {
+    Value obj = env.createObject();
+
+    for (Entry entry = getHead(); entry != null; entry = entry._next) {
+      Value key = entry.getKey();
+
+      if (key instanceof StringValue) {
+	// XXX: intern?
+	obj.putField(env, key.toString(), entry.getValue());
+      }
+    }
+
+    return obj;
+  }
+
+  /**
    * Returns true for an array.
    */
   public boolean isArray()

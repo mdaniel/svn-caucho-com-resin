@@ -143,7 +143,13 @@ public class Post {
                                   String []formValueList,
                                   boolean addSlashesToValues)
   {
-    addFormValue(array, key, new StringValue(formValueList[0]), formValueList, addSlashesToValues);
+    // php/081b
+    Value value = new StringValue(formValueList[formValueList.length - 1]);
+    
+    addFormValue(array, key,
+		 value,
+		 formValueList,
+		 addSlashesToValues);
   }
 
   public static void addFormValue(ArrayValue array,
