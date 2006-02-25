@@ -8,9 +8,33 @@
 
 <summary objsummary='localtoc'/>
 
+<section title="Quercus">
+
+<p>Quercus now runs <a href="http://wiki.caucho.com/Quercus:_Drupal">Drupal</a>
+and <a href="http://wiki.caucho.com/Quercus:_Mediawiki">MediaWiki</a>.
+The Caucho forum has some <a href="http://forum.caucho.com/node/16">
+performance results</a>, with Quercus as 3-4 times faster than Apache/mod_php.
+</p>
+
+<p>New modules include:</p>
+<ul>
+<li>mcrypt
+<li>sessions
+<li>PDF (partial)
+<li>SimpleXML
+<li>Zip
+<li>Zlib
+<li>MHash
+<li>Bcmath
+</ul>
+
+</section>
+
 <section title="rewrite-dispatch">
 
 <p><a href="http://wiki.caucho.com/rewrite-dispatch">rewrite-dispatch</a> now accepts &lt;moved-permanently>.</p>
+
+</section>
 
 <section title="JMX System Notifications">
 
@@ -64,12 +88,16 @@ directive exists, mod_caucho dispatch is manual.</p>
 
 </section>
 
+<section title="change log">
+
+<p>Also, many smaller bugs are listed in the <a href="changes.xtp">change log</a>.
+
+</section>
+
 <section title="Special Thanks">
 
 <p>Special thanks to Stefano Bagnara for amazing work finding a huge
 number of Quercus bugs.</p>
-
-</section>
 
 </section>
 
