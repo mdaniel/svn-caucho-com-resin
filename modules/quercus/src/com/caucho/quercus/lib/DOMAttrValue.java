@@ -53,6 +53,11 @@ public class DOMAttrValue extends DOMNodeValue {
     
   }
   
+  public Attr getAttribute()
+  {
+    return _attr;
+  }
+  
   //PROPERTIES
   //@todo name (String)
   //@todo ownerElement (DOMElementValue)
