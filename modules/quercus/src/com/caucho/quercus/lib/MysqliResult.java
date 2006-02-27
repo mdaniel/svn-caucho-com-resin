@@ -84,7 +84,7 @@ public class MysqliResult {
    */
   public Value fetch_assoc()
   {
-    return validateResult().fetchArray(JdbcResultResource.ASSOC);
+    return validateResult().fetchArray(JdbcResultResource.FETCH_ASSOC);
   }
 
   /**
@@ -120,7 +120,7 @@ public class MysqliResult {
   }
 
   /**
-   * Returns the field metadata
+   * Returns the field metadata.
    */
   public Value fetch_field_direct(Env env, int offset)
   {
@@ -172,7 +172,7 @@ public class MysqliResult {
    */
   public Value fetch_row()
   {
-    return validateResult().fetchArray(JdbcResultResource.NUM);
+    return validateResult().fetchArray(JdbcResultResource.FETCH_NUM);
   }
 
   /**

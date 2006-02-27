@@ -648,7 +648,6 @@ public class JdbcConnectionResource extends ResourceValue {
    * @return # of warnings
    */
   public int getWarningCount()
-    throws SQLException
   {
     if (_warnings != null) {
       Value warningResult = metaQuery("SHOW WARNINGS",getCatalog().toString());

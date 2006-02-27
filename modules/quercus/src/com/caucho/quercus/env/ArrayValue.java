@@ -208,7 +208,11 @@ abstract public class ArrayValue extends Value {
   abstract public Value createTailKey();
 
   /**
-   * Adds to the following value.
+   * Returns a union of this array and the rValue as array.
+   * If the rValue is not an array, the returned union contains the elements
+   * of this array only.
+   *
+   * To append a value to this ArrayValue use the {@link #put(Value)} method.
    */
   public Value add(Value rValue)
     throws Throwable

@@ -42,9 +42,7 @@ import com.caucho.quercus.resources.JdbcResultResource;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.BooleanValue;
-import com.caucho.quercus.env.NullValue;
 
-import com.caucho.quercus.module.Optional;
 import com.caucho.quercus.module.Reference;
 
 /**
@@ -145,9 +143,7 @@ public class MysqliStatement {
 
     _results = new Value[size];
 
-    for (int i = 0; i < size; i++) {
-      _results[i] = outParams[i];
-    }
+    System.arraycopy(outParams, 0, _results, 0, size);
 
     return true;
   }
@@ -426,20 +422,24 @@ public class MysqliStatement {
   }
 
   public boolean close()
-    throws SQLException
   {
-    JdbcConnectionResource conn = _conn;
-    _conn = null;
+    try {
+      JdbcConnectionResource conn = _conn;
+      _conn = null;
 
-    Statement stmt = _pstmt;
-    stmt = null;
+      Statement stmt = _pstmt;
+      _pstmt = null;
 
-    _rs = null;
+      _rs = null;
 
-    if (stmt != null)
-      stmt.close();
+      if (stmt != null)
+        stmt.close();
 
-    return conn != null;
+      return conn != null;
+    } catch (SQLException e) {
+      log.log(Level.FINE, e.toString(), e);
+      return false;
+    }
   }
 
   private JdbcConnectionResource validateConnection()

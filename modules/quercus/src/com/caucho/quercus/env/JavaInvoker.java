@@ -66,8 +66,9 @@ import com.caucho.util.L10N;
  */
 abstract public class JavaInvoker extends AbstractFunction {
   private static final L10N L = new L10N(JavaInvoker.class);
-  
+
   private static final Object []NULL_ARGS = new Object[0];
+  private static final Value []NULL_VALUES = new Value[0];
 
   private final String _name;
   private final Class []_paramTypes;
@@ -78,10 +79,10 @@ abstract public class JavaInvoker extends AbstractFunction {
   private final Marshall _unmarshallReturn;
 
   private final boolean _isRestReference;
-  
+
   private final boolean _isCallUsesVariableArgs;
   private final boolean _isCallUsesSymbolTable;
-  
+
 
   /**
    * Creates the statically introspected function.
@@ -96,7 +97,7 @@ abstract public class JavaInvoker extends AbstractFunction {
 		     Class retType)
   {
     _name = name;
-    
+
     boolean callUsesVariableArgs = false;
     boolean callUsesSymbolTable = false;
 
@@ -104,7 +105,7 @@ abstract public class JavaInvoker extends AbstractFunction {
       if (VariableArguments.class.isAssignableFrom(ann.annotationType())) {
 	callUsesVariableArgs = true;
       }
-      
+
       if (UsesSymbolTable.class.isAssignableFrom(ann.annotationType())) {
 	callUsesSymbolTable = true;
       }
@@ -119,7 +120,7 @@ abstract public class JavaInvoker extends AbstractFunction {
 
     boolean hasRestArgs = false;
     boolean isRestReference = false;
-    
+
     if (param.length > 0 && param[param.length - 1].equals(Value[].class)) {
       hasRestArgs = true;
 
@@ -152,7 +153,7 @@ abstract public class JavaInvoker extends AbstractFunction {
 
 	  if (! opt.value().equals("")) {
 	    Expr expr = PhpParser.parseDefault(opt.value());
-	    
+
 	    _defaultExprs[i] = expr;
 	  }
 	  else
@@ -289,7 +290,7 @@ abstract public class JavaInvoker extends AbstractFunction {
     throws Throwable
   {
     int len = _defaultExprs.length + (_hasEnv ? 1 : 0) + (_hasRestArgs ? 1 : 0);
-    
+
     Object []values = new Object[len];
 
     int k = 0;
@@ -299,7 +300,7 @@ abstract public class JavaInvoker extends AbstractFunction {
 
     for (int i = 0; i < _marshallArgs.length; i++) {
       Expr expr;
-      
+
       if (i < exprs.length && exprs[i] != null)
 	expr = exprs[i];
       else {
@@ -308,20 +309,29 @@ abstract public class JavaInvoker extends AbstractFunction {
 	if (expr == null)
 	  expr = new DefaultExpr();
       }
-      
+
       values[k] = _marshallArgs[i].marshall(env, expr, _paramTypes[k]);
 
       k++;
     }
 
     if (_hasRestArgs) {
-      Value []rest = new Value[exprs.length - _marshallArgs.length];
+      Value []rest;
 
-      for (int i = _marshallArgs.length; i < exprs.length; i++) {
-	if (_isRestReference)
-	  rest[i - _marshallArgs.length] = exprs[i].evalRef(env);
-	else
-	  rest[i - _marshallArgs.length] = exprs[i].eval(env);
+      int restLen = exprs.length - _marshallArgs.length;
+
+      if (restLen <= 0)
+        rest = NULL_VALUES;
+      else {
+        rest = new Value[restLen];
+
+
+        for (int i = _marshallArgs.length; i < exprs.length; i++) {
+          if (_isRestReference)
+            rest[i - _marshallArgs.length] = exprs[i].evalRef(env);
+          else
+            rest[i - _marshallArgs.length] = exprs[i].eval(env);
+        }
       }
 
       values[values.length - 1] = rest;
@@ -343,7 +353,7 @@ abstract public class JavaInvoker extends AbstractFunction {
     throws Throwable
   {
     int len = _defaultExprs.length + (_hasEnv ? 1 : 0) + (_hasRestArgs ? 1 : 0);
-    
+
     Object []values = new Object[len];
 
     int k = 0;
@@ -353,7 +363,7 @@ abstract public class JavaInvoker extends AbstractFunction {
 
     for (int i = 0; i < _marshallArgs.length; i++) {
       Value value;
-      
+
       if (i < args.length && args[i] != null)
 	values[k] = _marshallArgs[i].marshall(env, args[i], _paramTypes[k]);
       else if (_defaultExprs[i] != null) {
@@ -371,13 +381,21 @@ abstract public class JavaInvoker extends AbstractFunction {
     }
 
     if (_hasRestArgs) {
-      Value []rest = new Value[args.length - _marshallArgs.length];
+      Value []rest;
 
-      for (int i = _marshallArgs.length; i < args.length; i++) {
-	if (_isRestReference)
-	  rest[i - _marshallArgs.length] = args[i];
-	else
-	  rest[i - _marshallArgs.length] = args[i].toValue();
+      int restLen = args.length - _marshallArgs.length;
+
+      if (restLen <= 0)
+        rest = NULL_VALUES;
+      else {
+        rest = new Value[restLen];
+
+        for (int i = _marshallArgs.length; i < args.length; i++) {
+          if (_isRestReference)
+            rest[i - _marshallArgs.length] = args[i];
+          else
+            rest[i - _marshallArgs.length] = args[i].toValue();
+        }
       }
 
       values[values.length - 1] = rest;

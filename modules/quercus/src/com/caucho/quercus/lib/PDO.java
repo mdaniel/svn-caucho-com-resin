@@ -29,107 +29,126 @@
 
 package com.caucho.quercus.lib;
 
-import java.sql.*;
-
 import java.util.logging.Logger;
 import java.util.logging.Level;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.sql.ResultSet;
 
 import com.caucho.util.L10N;
 
-import com.caucho.quercus.resources.JdbcConnectionResource;
-import com.caucho.quercus.resources.JdbcResultResource;
-
-import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.BooleanValue;
-import com.caucho.quercus.env.StringValue;
-import com.caucho.quercus.env.LongValue;
-import com.caucho.quercus.env.ArrayValue;
-import com.caucho.quercus.env.Value;
+import com.caucho.quercus.env.*;
 
 import com.caucho.quercus.module.Optional;
 
 /**
- * pdo object oriented API facade
+ * PDO object oriented API facade.
  */
 public class PDO {
   private static final Logger log = Logger.getLogger(PDO.class.getName());
   private static final L10N L = new L10N(PDO.class);
 
-  public static final int ATTR_AUTOCOMMIT = 1;
-  public static final int ATTR_CASE = 2;
-  public static final int ATTR_CLIENT_VERSION = 3;
-  public static final int ATTR_CONNECTION_STATUS = 4;
-  public static final int ATTR_CURSOR = 5;
-  public static final int ATTR_CURSOR_NAME = 6;
-  public static final int ATTR_DRIVER_NAME = 7;
-  public static final int ATTR_ERRMODE = 8;
-  public static final int ATTR_FETCH_CATALOG_NAMES = 9;
-  public static final int ATTR_FETCH_TABLE_NAMES = 10;
+  public static final int ATTR_AUTOCOMMIT = 0;
+  public static final int ATTR_PREFETCH = 1;
+  public static final int ATTR_TIMEOUT = 2;
+  public static final int ATTR_ERRMODE = 3;
+  public static final int ATTR_SERVER_VERSION = 4;
+  public static final int ATTR_CLIENT_VERSION = 5;
+  public static final int ATTR_SERVER_INFO = 6;
+  public static final int ATTR_CONNECTION_STATUS = 7;
+  public static final int ATTR_CASE = 8;
+  public static final int ATTR_CURSOR_NAME = 9;
+  public static final int ATTR_CURSOR = 10;
   public static final int ATTR_ORACLE_NULLS = 11;
   public static final int ATTR_PERSISTENT = 12;
-  public static final int ATTR_PREFETCH = 13;
-  public static final int ATTR_SERVER_INFO = 14;
-  public static final int ATTR_SERVER_VERSION = 15;
-  public static final int ATTR_TIMEOUT = 16;
+  public static final int ATTR_STATEMENT_CLASS = 13;
+  public static final int ATTR_FETCH_TABLE_NAMES = 14;
+  public static final int ATTR_FETCH_CATALOG_NAMES = 15;
+  public static final int ATTR_DRIVER_NAME = 16;
+  public static final int ATTR_STRINGIFY_FETCHES = 17;
+  public static final int ATTR_MAX_COLUMN_LEN = 18;
 
-  public static final int CASE_NATURAL = 1;
+  public static final int CASE_NATURAL = 0;
+  public static final int CASE_UPPER = 1;
   public static final int CASE_LOWER = 2;
-  public static final int CASE_UPPER = 2;
 
-  public static final int CURSOR_FWDONLY = 1;
-  public static final int CURSOR_SCROLL = 2;
+  public static final int CURSOR_FWDONLY = 0;
+  public static final int CURSOR_SCROLL = 1;
 
-  public static final int ERR_NONE = 0;
+  public static final String ERR_NONE = "00000";
 
-  public static final int ERRMODE_SILENT = 1;
-  public static final int ERRMODE_WARNING = 2;
-  public static final int ERRMODE_EXCEPTION = 3;
+  public static final int ERRMODE_SILENT = 0;
+  public static final int ERRMODE_WARNING = 1;
+  public static final int ERRMODE_EXCEPTION = 2;
 
-  public static final int FETCH_ASSOC = 0x1;
-  public static final int FETCH_NUM = 0x2;
-  public static final int FETCH_BOTH = FETCH_ASSOC|FETCH_NUM;
-  public static final int FETCH_OBJ = 0x4;
-  public static final int FETCH_LAZY = 0x5;
-  public static final int FETCH_BOUND = 0x6;
-  public static final int FETCH_COLUMN = 0x7;
-  public static final int FETCH_CLASS = 0x8;
-  public static final int FETCH_INTO = 0x9;
-  public static final int FETCH_FUNC = 0xa;
-  public static final int FETCH_GROUP= 0xb;
-  public static final int FETCH_UNIQUE= 0xc;
+  public static final int FETCH_LAZY = 1;
+  public static final int FETCH_ASSOC = 2;
+  public static final int FETCH_NUM = 3;
+  public static final int FETCH_BOTH = 4;
+  public static final int FETCH_OBJ = 5;
+  public static final int FETCH_BOUND = 6;
+  public static final int FETCH_COLUMN = 7;
+  public static final int FETCH_CLASS = 8;
+  public static final int FETCH_INTO = 9;
+  public static final int FETCH_FUNC = 10;
+  public static final int FETCH_NAMED = 11;
 
-  public static final int FETCH_ORI_NEXT = 0x100;
-  public static final int FETCH_ORI_PRIOR = 0x101;
-  public static final int FETCH_ORI_FIRST = 0x102;
-  public static final int FETCH_ORI_ABS = 0x103;
-  public static final int FETCH_ORI_REL = 0x104;
+  public static final int FETCH_GROUP = 0x00010000;
+  public static final int FETCH_UNIQUE = 0x00030000;
+  public static final int FETCH_CLASSTYPE = 0x00040000;
+  public static final int FETCH_SERIALIZE = 0x00080000;
 
-  public static final int PARAM_BOOL = 1;
-  public static final int PARAM_NULL = 2;
-  public static final int PARAM_INT = 3;
-  public static final int PARAM_STR = 4;
-  public static final int PARAM_LOB = 5;
-  public static final int PARAM_STMT = 6;
-  public static final int PARAM_INPUT_OUTPUT = 0x8000;
+  public static final int FETCH_ORI_NEXT = 0;
+  public static final int FETCH_ORI_PRIOR = 1;
+  public static final int FETCH_ORI_FIRST = 2;
+  public static final int FETCH_ORI_LAST = 3;
+  public static final int FETCH_ORI_ABS = 4;
+  public static final int FETCH_ORI_REL = 5;
+
+  public static final int NULL_NATURAL = 0;
+  public static final int NULL_EMPTY_STRING = 1;
+  public static final int NULL_TO_STRING = 2;
+
+  public static final int PARAM_NULL = 0;
+  public static final int PARAM_INT = 1;
+  public static final int PARAM_STR = 2;
+  public static final int PARAM_LOB = 3;
+  public static final int PARAM_STMT = 4;
+  public static final int PARAM_BOOL = 5;
+
+  public static final int PARAM_INPUT_OUTPUT = 0x80000000;
 
   private final Env _env;
   private final String _dsn;
 
-  private JdbcConnectionResource _conn;
+  private final PDOError _error;
 
-  private int _errorCode;
-  private String _errorMessage;
+  private int _case;
+  private int _oracleNulls;
+  private boolean _stringifyFetches;
+
+  private Connection _conn;
 
   private boolean _inTransaction;
 
   public PDO(Env env,
-	     String dsn,
-	     @Optional String user,
-	     @Optional String password,
-	     @Optional ArrayValue options)
+             String dsn,
+             @Optional String user,
+             @Optional String password,
+             @Optional ArrayValue options)
   {
     _env = env;
     _dsn = dsn;
+    _error = new PDOError(_env);
+
+    // XXX: following would be better as annotation on destroy() method
+    _env.addResource(new ResourceValue() {
+      public void close()
+      {
+        destroy();
+      }
+    });
 
     real_connect(env, user, password);
   }
@@ -139,12 +158,22 @@ public class PDO {
    */
   public boolean beginTransaction()
   {
+    if (_conn == null)
+      return false;
+
     if (_inTransaction)
       return false;
 
     _inTransaction = true;
 
-    return _conn.setAutoCommit(false);
+    try {
+      _conn.setAutoCommit(false);
+      return true;
+    }
+    catch (SQLException e) {
+      _error.error(e);
+      return false;
+    }
   }
 
   /**
@@ -152,16 +181,36 @@ public class PDO {
    */
   public boolean commit()
   {
+    if (_conn == null)
+      return false;
+
     if (! _inTransaction)
       return false;
 
     _inTransaction = false;
 
-    boolean result = _conn.commit();
+    boolean result = false;
+    try {
+      _conn.commit();
+      _conn.setAutoCommit(true);
 
-    _conn.setAutoCommit(true);
+      return true;
+    }
+    catch (SQLException e) {
+      _error.error(e);
+    }
 
     return result;
+  }
+
+  public String errorCode()
+  {
+    return _error.errorCode();
+  }
+
+  public ArrayValue errorInfo()
+  {
+    return _error.errorInfo();
   }
 
   /**
@@ -170,22 +219,41 @@ public class PDO {
   public int exec(String query)
     throws SQLException
   {
-    Connection conn = _conn.getConnection();
+    if (_conn == null)
+      return -1;
 
     Statement stmt = null;
+
     try {
-      stmt = conn.createStatement();
+      stmt = _conn.createStatement();
       stmt.setEscapeProcessing(false);
 
-      return stmt.executeUpdate(query);
+      if (stmt.execute(query)) {
+        ResultSet resultSet = null;
+
+        try {
+          resultSet = stmt.getResultSet();
+
+          resultSet.last();
+
+          return resultSet.getRow();
+        }
+        finally {
+          try {
+            if (resultSet != null)
+              resultSet.close();
+          }
+          catch (SQLException e) {
+            log.log(Level.FINER, e.toString(), e);
+          }
+        }
+      }
+      else {
+        return stmt.getUpdateCount();
+      }
     } catch (SQLException e) {
-      log.log(Level.FINE, e.toString(), e);
+      _error.error(e);
 
-      _errorCode = e.getErrorCode();
-      _errorMessage = e.getMessage();
-
-      // XXX: depends on style
-      // throw e;
       return -1;
     } finally {
       try {
@@ -197,40 +265,90 @@ public class PDO {
     }
   }
 
+  public Value getAttribute(int attribute)
+  {
+    switch (attribute) {
+      case ATTR_AUTOCOMMIT:
+        return BooleanValue.create(getAutocommit());
+      case ATTR_CASE:
+        return LongValue.create(getCase());
+      case ATTR_CLIENT_VERSION:
+        throw new UnimplementedException();
+      case ATTR_CONNECTION_STATUS:
+        throw new UnimplementedException();
+      case ATTR_DRIVER_NAME:
+        throw new UnimplementedException();
+      case ATTR_ERRMODE:
+        return LongValue.create(_error.getErrmode());
+      case ATTR_ORACLE_NULLS:
+        return LongValue.create(getOracleNulls());
+      case ATTR_PERSISTENT:
+        throw new UnimplementedException();
+      case ATTR_PREFETCH:
+        throw new UnimplementedException();
+      case ATTR_SERVER_INFO:
+        throw new UnimplementedException();
+      case ATTR_SERVER_VERSION:
+        throw new UnimplementedException();
+      case ATTR_TIMEOUT:
+        throw new UnimplementedException();
+
+      default:
+        /// XXX: check what PHP does
+        _error.warning(L.l("unknown attribute {0}", attribute));
+        return NullValue.NULL;
+
+    }
+  }
+
+  public ArrayValue getAvailableDrivers()
+  {
+    throw new UnimplementedException();
+  }
+
+  public int getCase()
+  {
+    return _case;
+  }
+
+  public int getOracleNulls()
+  {
+    return _oracleNulls;
+  }
+
+  public String lastInsertId(@Optional String name)
+  {
+    throw new UnimplementedException();
+  }
+
+  public Value prepare(String statement, ArrayValue driverOptions)
+  {
+    if (_conn == null)
+      return BooleanValue.FALSE;
+
+    try {
+      return _env.wrapJava(new PDOStatement(_env, _conn, statement, true));
+    } catch (SQLException e) {
+      _error.error(e);
+
+      return BooleanValue.FALSE;
+    }
+  }
+
   /**
    * Queries the database
    */
-  public PDOStatement query(String query)
-    throws SQLException
+  public Value query(String query)
   {
-    Connection conn = _conn.getConnection();
-    Statement stmt = null;
+    if (_conn == null)
+      return BooleanValue.FALSE;
 
     try {
-      stmt = conn.createStatement();
-      stmt.setEscapeProcessing(false);
-
-      ResultSet rs = stmt.executeQuery(query);
-
-      stmt = null;
-
-      return new PDOStatement(this, new JdbcResultResource(stmt, rs, _conn));
+      return _env.wrapJava(new PDOStatement(_env, _conn, query, false));
     } catch (SQLException e) {
-      log.log(Level.FINE, e.toString(), e);
+      _error.error(e);
 
-      _errorCode = e.getErrorCode();
-      _errorMessage = e.getMessage();
-
-      // XXX: depends on style
-      // throw e;
-      return null;
-    } finally {
-      try {
-	if (stmt != null)
-	  stmt.close();
-      } catch (SQLException e) {
-	log.log(Level.FINE, e.toString(), e);
-      }
+      return BooleanValue.FALSE;
     }
   }
 
@@ -247,16 +365,23 @@ public class PDO {
    */
   public boolean rollBack()
   {
+    if (_conn == null)
+      return false;
+
     if (! _inTransaction)
       return false;
 
     _inTransaction = false;
 
-    boolean result = _conn.rollback();
-
-    _conn.setAutoCommit(true);
-
-    return result;
+    try {
+      _conn.rollback();
+      _conn.setAutoCommit(true);
+      return true;
+    }
+    catch (SQLException e) {
+      _error.error(e);
+      return false;
+    }
   }
 
   /**
@@ -278,34 +403,18 @@ public class PDO {
 
       String url = "jdbc:mysql://" + host + ":" + port + "/" + dbname;
 
-      Connection jConn = env.getConnection(driver, url, userName, password);
-
-      _conn = new JdbcConnectionResource(jConn);
-
-      env.addResource(_conn);
+      _conn = env.getConnection(driver, url, userName, password);
 
       return true;
-    } catch (SQLException e) {
-      env.warning("A link to the server could not be established. " + e.toString());
-
-      _errorCode = e.getErrorCode();
-      _errorMessage = e.getMessage();
-
-      log.log(Level.FINE, e.toString(), e);
-
-      return false;
     } catch (Exception e) {
-      env.warning("A link to the server could not be established. " + e.toString());
-
-      // env.setSpecialValue("mysqli.connectError", new StringValue(e.getMessage()));
-
-      log.log(Level.FINE, e.toString(), e);
+      env.warning("A link to the server could not be established.");
+      _error.error(e);
       return false;
     }
   }
 
   /**
-   * Escapes the string
+   * Escapes the string.
    */
   public String real_escape_string(String str)
   {
@@ -354,8 +463,167 @@ public class PDO {
     return buf.toString();
   }
 
+  public boolean setAttribute(int attribute, Value value)
+  {
+    switch (attribute) {
+      case ATTR_AUTOCOMMIT:
+        return setAutocommit(value.toBoolean());
+
+      case ATTR_ERRMODE:
+        return _error.setErrmode(value.toInt());
+
+      case ATTR_CASE:
+        return setCase(value.toInt());
+
+      case ATTR_ORACLE_NULLS:
+        return setOracleNulls(value.toInt());
+
+      case ATTR_STRINGIFY_FETCHES:
+        return setStringifyFetches(value.toBoolean());
+
+      case ATTR_STATEMENT_CLASS:
+        return setStatementClass(value);
+
+      default:
+        // XXX: check what PHP does
+        _error.warning(L.l("invalid attribute"));
+        return false;
+    }
+  }
+
+  /**
+   * Sets the auto commit, if true commit every statement.
+   * @return true on success, false on error.
+   */
+  private boolean setAutocommit(boolean autoCommit)
+  {
+    if (_conn == null)
+      return false;
+
+    try {
+      _conn.setAutoCommit(autoCommit);
+    }
+    catch (SQLException e) {
+      _error.error(e);
+      return false;
+    }
+
+    return true;
+  }
+
+  /**
+   * Returns the auto commit value for the connection.
+   */
+  private boolean getAutocommit()
+  {
+    if (_conn == null)
+      return true;
+
+    try {
+      return _conn.getAutoCommit();
+    }
+    catch (SQLException e) {
+      _error.error(e);
+      return true;
+    }
+  }
+
+  /**
+   * Sets whether or not the convert nulls and empty strings, works for
+   * all drivers.
+   *
+   * <dl>
+   * <dt> {@link NULL_NATURAL}
+   * <dd> no conversion
+   * <dt> {@link NULL_EMPTY_STRING}
+   * <dd> empty string is converted to NULL
+   * <dt> {@link NULL_TO_STRING} NULL
+   * <dd> is converted to an empty string.
+   * </dl>
+   *
+   * @return true on success, false on error.
+   */
+  private boolean setOracleNulls(int value)
+  {
+    switch (value) {
+      case NULL_NATURAL:
+      case NULL_EMPTY_STRING:
+      case NULL_TO_STRING:
+        _oracleNulls = value;
+        return true;
+      default:
+        // XXX: check what PHP does
+        throw new IllegalArgumentException(L.l("Unknown case `{0}'", value));
+    }
+  }
+
+  /**
+   * Force column names to a specific case.
+   *
+   * <dl>
+   * <dt>{@link CASE_LOWER}
+   * <dt>{@link CASE_NATURAL}
+   * <dt>{@link CASE_UPPER}
+   * </dl>
+   */
+  private boolean setCase(int value)
+  {
+    switch (value) {
+      case CASE_LOWER:
+      case CASE_NATURAL:
+      case CASE_UPPER:
+        _case = value;
+        return true;
+
+      default:
+        // XXX: check what PHP does
+        throw new IllegalArgumentException(L.l("Unknown case `{0}'", value));
+    }
+  }
+
+  /**
+   * Convert numeric values to strings when fetching.
+   *
+   * @return true on success, false on error.
+   */
+  private boolean setStringifyFetches(boolean stringifyFetches)
+  {
+    _stringifyFetches = stringifyFetches;
+
+    return true;
+  }
+
+  /**
+   * Sets a custom statement  class derived from PDOStatement.
+   *
+   * @param value an array(classname, array(constructor args)).
+   *
+   * @return true on success, false on error.
+   */
+  private boolean setStatementClass(Value value)
+  {
+    throw new UnimplementedException("ATTR_STATEMENT_CLASS");
+  }
+
   public String toString()
   {
     return "PDO[" + _dsn + "]";
+  }
+
+  private void destroy()
+  {
+    Connection conn = _conn;
+
+    _conn = null;
+
+    if (conn != null) {
+      try {
+        conn.close();
+      }
+      catch (SQLException e) {
+        if (log.isLoggable(Level.WARNING))
+          log.log(Level.WARNING, e.toString(), e);
+      }
+    }
   }
 }

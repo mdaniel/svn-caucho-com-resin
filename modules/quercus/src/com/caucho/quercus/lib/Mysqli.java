@@ -208,17 +208,22 @@ public class Mysqli {
     try {
       String info = validateConnection().getServerInfo();
 
-      String[] result = info.split("[.a-z-]");
-
-      if (result.length < 3)
-	return 0;
-
-      return (Integer.parseInt(result[0]) * 10000 +
-	      Integer.parseInt(result[1]) * 100 +
-	      Integer.parseInt(result[2]));
+      return infoToVersion(info);
     } catch (SQLException e) {
       return 0;
     }
+  }
+
+  static int infoToVersion(String info)
+  {
+    String[] result = info.split("[.a-z-]");
+
+    if (result.length < 3)
+      return 0;
+
+    return (Integer.parseInt(result[0]) * 10000 +
+            Integer.parseInt(result[1]) * 100 +
+            Integer.parseInt(result[2]));
   }
 
   /**
@@ -253,7 +258,8 @@ public class Mysqli {
         else
           return BooleanValue.FALSE;
       } finally {
-        stmt.close();
+        if (stmt != null)
+          stmt.close();
       }
     } catch (SQLException e) {
       log.log(Level.FINE, e.toString(), e);
@@ -455,61 +461,6 @@ public class Mysqli {
   }
 
   /**
-   * Unescape the string.
-   */
-  private static String real_unescape_string(String str)
-  {
-    StringBuilder result = new StringBuilder(str.length());
-
-    int length = str.length();
-
-    for (int i = 0; i < length; i++) {
-      int ch = str.charAt(i);
-
-      if (ch == '\\') {
-        i++;
-
-        if (i == length)
-          ch = '\\';
-        else {
-          ch = str.charAt(i);
-
-          switch (ch) {
-            case '\\':
-            case '\'':
-            case '\"':
-              break;
-            case 'n':
-              ch = '\n';
-              break;
-            case 'r':
-              ch = '\r';
-              break;
-            case 'Z':
-              ch = ' ';
-              break;
-            case 'u':
-              // XXX: s/b proper unicode handling?
-              if (str.regionMatches(i, "u0000", 0, 5)) {
-                ch = (char) 0;
-                i += 5;
-              }
-              else {
-                i--;
-                ch = '\'';
-              }
-
-          }
-        }
-      } // if ch == '/'
-
-      result.append((char) ch);
-    }
-
-    return result.toString();
-  }
-
-  /**
    * Rolls the transaction back
    */
   public boolean rollback()
@@ -674,7 +625,6 @@ public class Mysqli {
    * @return number of warnings
    */
   public int warning_count()
-    throws SQLException
   {
     return validateConnection().getWarningCount();
   }

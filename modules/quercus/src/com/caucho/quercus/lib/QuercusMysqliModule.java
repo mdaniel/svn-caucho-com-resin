@@ -29,9 +29,6 @@
 
 package com.caucho.quercus.lib;
 
-import javax.sql.DataSource;
-
-import java.sql.Connection;
 import java.sql.SQLException;
 
 import java.util.logging.Level;
@@ -42,9 +39,6 @@ import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.quercus.module.Optional;
 import com.caucho.quercus.module.NotNull;
 import com.caucho.quercus.module.Reference;
-import com.caucho.quercus.resources.JdbcConnectionResource;
-import com.caucho.quercus.resources.JdbcResultResource;
-import com.caucho.quercus.resources.JdbcStatementResource;
 import com.caucho.util.Log;
 import com.caucho.util.L10N;
 
@@ -62,8 +56,7 @@ public class QuercusMysqliModule extends AbstractQuercusModule {
   public static final int MYSQLI_USE_RESULT = 0x0;
   public static final int MYSQLI_STORE_RESULT = 0x1;
 
-  // The following flags are based on mysql_com.h
-  // They are used by mysqli_fetch_field.
+  // Used by mysqli_fetch_field.
   public static final int NOT_NULL_FLAG = 0x1;
   public static final int PRI_KEY_FLAG = 0x2;
   public static final int UNIQUE_KEY_FLAG = 0x4;
@@ -72,8 +65,8 @@ public class QuercusMysqliModule extends AbstractQuercusModule {
   public static final int UNSIGNED_FLAG = 0x20;
   public static final int ZEROFILL_FLAG = 0x40;
   public static final int BINARY_FLAG = 0x80;
-  // the following are only sent to new clients
-  // which I guess means mysqli vs. mysql
+
+  // Sent to new clients
   public static final int ENUM_FLAG = 0x100;
   public static final int AUTO_INCREMENT_FLAG = 0x200;
   public static final int TIMESTAMP_FLAG = 0x400;
@@ -85,9 +78,7 @@ public class QuercusMysqliModule extends AbstractQuercusModule {
   public static final int BINCMP_FLAG = 0x20000;  //Intern: Used by sql_yacc???
 
   // The following are numerical respresentations
-  // of types returned by mysqli_fetch_field
-  // mysqli_fetch_fields returns an int instead
-  // of a meaningful string. Based on mysql_com.h
+  // of types returned by mysqli_fetch_field.
   public static final int MYSQL_TYPE_DECIMAL = 0x0;
   public static final int MYSQL_TYPE_TINY = 0x1;
   public static final int MYSQL_TYPE_SHORT = 0x2;
@@ -113,9 +104,6 @@ public class QuercusMysqliModule extends AbstractQuercusModule {
   public static final int MYSQL_TYPE_STRING = 0xFE;
   public static final int MYSQL_TYPE_GEOMETRY = 0xFF;
 
-
-  private static final String MYSQL_CONNECTION = "caucho.mysql";
-
   /**
    * Returns true for the mysql extension.
    */
@@ -129,7 +117,7 @@ public class QuercusMysqliModule extends AbstractQuercusModule {
   }
 
   /**
-   * returns the number of affected rows.
+   * Returns the number of affected rows.
    */
   public static int mysqli_affected_rows(@NotNull Mysqli conn)
   {
@@ -140,11 +128,9 @@ public class QuercusMysqliModule extends AbstractQuercusModule {
   }
 
   /**
-   * Turns on or off auto-commiting daabase modifications
+   * Turns auto-commit on or off.
    */
-  public static boolean mysqli_autocommit(Env env,
-					  @NotNull Mysqli conn,
-                                          boolean mode)
+  public static boolean mysqli_autocommit(@NotNull Mysqli conn, boolean mode)
   {
     if (conn == null)
       return false;
@@ -153,7 +139,7 @@ public class QuercusMysqliModule extends AbstractQuercusModule {
   }
 
   /**
-   * Alias for mysqli_stmt_bind_param
+   * Alias for {@link #mysqli_stmt_bind_param}.
    */
   public static boolean mysqli_bind_param(Env env,
                                           @NotNull MysqliStatement stmt,
@@ -164,13 +150,11 @@ public class QuercusMysqliModule extends AbstractQuercusModule {
   }
 
   /**
-   * commits the current transaction to the database connection specified
-   * by the connV parameter
+   * Commits the current transaction for the supplied connection.
    *
    * returns true on success or false on failure
    */
-  public static boolean mysqli_commit(Env env,
-                                      @NotNull Mysqli conn)
+  public static boolean mysqli_commit(@NotNull Mysqli conn)
   {
     if (conn == null)
       return false;
@@ -181,19 +165,18 @@ public class QuercusMysqliModule extends AbstractQuercusModule {
   /**
    * Returns the client encoding.
    *
-   * XXX: stubbed out. has to be revised once we
-   * figure out what to do with character encoding
    */
   public static Value mysqli_character_set_name(@NotNull Mysqli conn)
   {
     if (conn == null)
       return BooleanValue.FALSE;
 
+    // XXX: stubbed out as "latin1"
     return new StringValue("latin1");
   }
 
   /**
-   * Alias for mysqli_character_set_name
+   * Alias for {@link #mysqli_character_set_name}.
    */
   public static Value mysqli_client_encoding(@NotNull Mysqli conn)
   {
@@ -201,7 +184,7 @@ public class QuercusMysqliModule extends AbstractQuercusModule {
   }
 
   /**
-   * Closes a mysqli connection
+   * Closes a connection.
    */
   public static boolean mysqli_close(Env env, Mysqli conn)
   {
@@ -213,7 +196,7 @@ public class QuercusMysqliModule extends AbstractQuercusModule {
   }
 
   /**
-   * returns new mysqli connection
+   * Returns a new connection.
    */
   public static Mysqli mysqli_connect(Env env,
 				      @Optional("localhost") String host,
@@ -228,7 +211,8 @@ public class QuercusMysqliModule extends AbstractQuercusModule {
   }
 
   /**
-   * returns an error code value for the last call to mysqli_connect().
+   * Returns an error code value for the last call to mysqli_connect(),
+   * 0 for no previous error.
    */
   public static int mysqli_connect_errno(Env env)
   {
@@ -241,8 +225,9 @@ public class QuercusMysqliModule extends AbstractQuercusModule {
   }
 
   /**
-   * returns a string that describes the connection error
-vv   */
+   * Returns an error description for the last call to mysqli_connect(),
+   * "" for no previous error.
+   */
   public static String mysqli_connect_error(Env env)
   {
     Object error = env.getSpecialValue("mysqli.connectError");
@@ -254,9 +239,7 @@ vv   */
   }
 
   /**
-   * seeks to an arbitrary result pointer specified
-   * by the offset in the result set represented by result.
-   * Returns TRUE on success or FALSE on failure
+   * Seeks the specified row.
    */
   public static boolean mysqli_data_seek(Env env,
                                          @NotNull MysqliResult result,
@@ -269,7 +252,8 @@ vv   */
   }
 
   /**
-   * Returns the error code for the most recent function call
+   * Returns the error code for the most recent function call,
+   * 0 for no error.
    */
   public static int mysqli_errno(@NotNull Mysqli conn)
   {
@@ -280,7 +264,7 @@ vv   */
   }
 
   /**
-   * alias for mysqli_real_escape_string()
+   * Alias for {@link #mysqli_real_escape_string}
    */
   public static String mysqli_escape_string(@NotNull Mysqli conn,
                                             String unescapedString)
@@ -297,10 +281,7 @@ vv   */
   }
 
   /**
-   * @see Value JdbcResultResource.fetchFieldDirect
-   *
-   * @param fieldOffset 0 <= fieldOffset < number of fields
-   * @return an object or BooleanValue.FALSE
+   * Returns the field metadata.
    *
    */
   public static Value mysqli_fetch_field_direct(Env env,
@@ -315,9 +296,7 @@ vv   */
   }
 
   /**
-   * @see Value JdbcResultResource.fetchFieldDirect
-   *
-   * @return an object or BooleanValue.FALSE if no more columns
+   * Returns the field metadata.
    */
   public static Value mysqli_fetch_field(Env env,
                                          @NotNull MysqliResult result)
@@ -330,11 +309,7 @@ vv   */
   }
 
   /**
-   * returns an array of fetch_field Objects
-   *
-   * @see Value JdbcResultResource.fetchFieldDirect
-   *
-   * @param result result set
+   * Returns an array of field metadata.
    */
   public static Value mysqli_fetch_fields(Env env,
                                           @NotNull MysqliResult result)
@@ -347,7 +322,7 @@ vv   */
   }
 
   /**
-   * returns an array of integers respresenting the size of each column
+   * Returns an array of integers respresenting the size of each column
    * FALSE if an error occurred.
    */
   public static Value mysqli_fetch_lengths(@NotNull MysqliResult result)
@@ -360,7 +335,7 @@ vv   */
   }
 
   /**
-   * seeks to the specified field offset.
+   * Seeks to the specified field offset.
    * If the next call to mysql_fetch_field() doesn't include
    * a field offset, the field offset specified in
    * mysqli_field_seek() will be returned.
@@ -379,7 +354,7 @@ vv   */
   }
 
   /**
-   * returns the position of the field cursor used for the last
+   * Returns the position of the field cursor used for the last
    * mysqli_fetch_field() call. This value can be used as an
    * argument to mysqli_field_seek()
    */
@@ -394,7 +369,7 @@ vv   */
   }
 
   /**
-   * frees a mysqli result
+   * Frees a mysqli result
    */
   public static boolean mysqli_free_result(MysqliResult result)
   {
@@ -405,14 +380,13 @@ vv   */
 
     return true;
   }
+
   /**
-   * returns ID generated for an AUTO_INCREMENT column by the previous
+   * Returns ID generated for an AUTO_INCREMENT column by the previous
    * INSERT query on success, 0 if the previous query does not generate
    * an AUTO_INCREMENT value, or FALSE if no MySQL connection was established
-   *
    */
   public static Value mysqli_insert_id(@NotNull Mysqli conn)
-     throws SQLException
   {
     if (conn == null)
       return BooleanValue.FALSE;
@@ -421,10 +395,9 @@ vv   */
   }
 
   /**
-   * returns the number of fields from specified result set
+   * Returns the number of fields from specified result set.
    */
-  public static int mysqli_num_fields(Env env,
-				      @NotNull MysqliResult result)
+  public static int mysqli_num_fields(@NotNull MysqliResult result)
   {
     if (result == null)
       return -1;
@@ -433,7 +406,7 @@ vv   */
   }
 
   /**
-   * executes one or multiple queires which are
+   * Executes one or multiple queires which are
    * concatenated by a semicolon.
    */
   public static boolean mysqli_multi_query(@NotNull Mysqli conn,
@@ -446,8 +419,8 @@ vv   */
   }
 
   /**
-   * indicates if one or more result sets are available from
-   * a previous call to mysqli_multi_query
+   * Indicates if one or more result sets are available from
+   * a previous call to mysqli_multi_query.
    */
   public static boolean mysqli_more_results(@NotNull Mysqli conn)
   {
@@ -458,8 +431,8 @@ vv   */
   }
 
   /**
-   * prepares next result set from a previous call to
-   * mysqli_multi_query
+   * Prepares next result set from a previous call to
+   * mysqli_multi_query.
    */
   public static boolean mysqli_next_result(@NotNull Mysqli conn)
   {
@@ -470,7 +443,7 @@ vv   */
   }
 
   /**
-   * Returns the error code for the prepared statement
+   * Returns the error code for the prepared statement.
    */
   public static int mysqli_stmt_errno(@NotNull MysqliStatement stmt)
   {
@@ -481,7 +454,7 @@ vv   */
   }
 
   /**
-   * Returns the error message for the prepared statement
+   * Returns the error message for the prepared statement.
    */
   public static String mysqli_stmt_error(@NotNull MysqliStatement stmt)
   {
@@ -490,8 +463,9 @@ vv   */
 
     return stmt.error();
   }
+
   /**
-   * Returns the most recent error
+   * Returns the most recent error.
    */
   public static String mysqli_error(@NotNull Mysqli conn)
   {
@@ -502,21 +476,23 @@ vv   */
   }
 
   /**
-   * returns a boolean to determine if the last query
+   * Returns a boolean to determine if the last query
    * to the connection returned a resultset.
-   *
-   * XXX: This is slightly different from the actual PHP
-   * description.  It seems that in PHP, mysqli_field_count
-   * returns the actual number of columns.  However, we
-   * do NOT do this to avoid an extra call to getMetaData().
-   *
-   * It seems that the only time this function is used in
-   * practice is to check to see if it is non-zero anyway.
    *
    * @return false if no result set, true otherwise
    */
   public static int mysqli_field_count(@NotNull Mysqli conn)
   {
+    /*
+     * ERRATUM: This is slightly different from the actual PHP
+     * description.  It seems that in PHP, mysqli_field_count
+     * returns the actual number of columns.  However, we
+     * do NOT do this to avoid an extra call to getMetaData().
+     *
+     * It seems that the only time this function is used in
+     * practice is to check to see if it is non-zero anyway.
+     */
+
     if (conn == null)
       return 0;
 
@@ -524,12 +500,10 @@ vv   */
   }
 
   /**
-   * returns a row for the result
+   * Returns a row for the result.
    */
-  public static Value mysqli_fetch_array(Env env,
-                                         @NotNull MysqliResult result,
+  public static Value mysqli_fetch_array(@NotNull MysqliResult result,
                                          @Optional("MYSQLI_BOTH") int type)
-    throws Exception
   {
     if (result == null)
       return BooleanValue.FALSE;
@@ -538,11 +512,9 @@ vv   */
   }
 
   /**
-   * returns an associative array from the result
+   * Returns an associative array from the result.
    */
-  public static Value mysqli_fetch_assoc(Env env,
-                                         @NotNull MysqliResult result)
-    throws Exception
+  public static Value mysqli_fetch_assoc(@NotNull MysqliResult result)
   {
     if (result == null)
       return BooleanValue.FALSE;
@@ -551,11 +523,9 @@ vv   */
   }
 
   /**
-   * returns a row for the resultV
+   * Returns a row for the result.
    */
-  public static Value mysqli_fetch_row(Env env,
-                                       @NotNull MysqliResult result)
-    throws Exception
+  public static Value mysqli_fetch_row(@NotNull MysqliResult result)
   {
     if (result == null)
       return BooleanValue.FALSE;
@@ -567,9 +537,7 @@ vv   */
    * Returns an object with properties that correspond
    * to the fetched row and moves the data pointer ahead.
    */
-  public static Value mysqli_fetch_object(Env env,
-                                          @NotNull MysqliResult result)
-    throws Exception
+  public static Value mysqli_fetch_object(Env env, @NotNull MysqliResult result)
   {
     if (result == null)
       return NullValue.NULL;
@@ -578,58 +546,33 @@ vv   */
   }
 
   /**
-   * returns the MySQL client version
+   * Returns the MySQL client version.
    */
-  public static Value mysqli_get_client_info(Env env)
-    throws SQLException
+  public static String mysqli_get_client_info(Env env)
   {
-    JdbcConnectionResource conn = QuercusMysqliModule.getConnection(env, null);
+    Mysqli mysqli = new Mysqli(env, "localhost", null, null, null, 3306, null);
 
-    if (conn == null)
-      return BooleanValue.FALSE;
-    else
-      return new StringValue(conn.getClientInfo());
+    return mysqli.get_client_info();
   }
 
   /**
-   * helper function for mysqli_get_client_version
-   * and mysqli_get_server_version
-   */
-  private static int infoToVersion(String info)
-  {
-    String[] result = info.split("[.]");
-
-    if (result.length < 3)
-      return 0;
-
-    return (Integer.parseInt(result[0]) * 10000 + Integer.parseInt(result[1]) * 100) + Integer.parseInt(result[2].replaceAll("[a-zA-Z]",""));
-  }
-
-  /**
-   * returns a number that represents the MySQL client library
+   * Returns a number that represents the MySQL client library
    * version in format:
    *
    * main_version*10000 + minor_version*100 + sub_version.
    *
    * For example 4.1.0 is returned as 40100.
    */
-   public static Value mysqli_get_client_version(Env env)
-    throws SQLException
+   public static int mysqli_get_client_version(Env env)
    {
-     JdbcConnectionResource conn = QuercusMysqliModule.getConnection(env, null);
-
-     if (conn == null)
-       return BooleanValue.FALSE;
-     else
-       return new LongValue(QuercusMysqliModule.infoToVersion(conn.getClientInfo()));
+     return Mysqli.infoToVersion(mysqli_get_client_info(env));
    }
 
   /**
-   * returns a string describing the type of MySQL
-   * connection in use
+   * Returns a string describing the type of MySQL
+   * connection in use.
    */
   public static String mysqli_get_host_info(@NotNull Mysqli conn)
-    throws SQLException
   {
     if (conn == null)
       return null;
@@ -638,18 +581,18 @@ vv   */
   }
 
   /**
-   * XXX: always returns protocol of 10
+   * Return protocol number, for example 10.
    */
   public static Value mysqli_get_proto_info(@NotNull Mysqli conn)
   {
+    // XXX: always returns protocol of 10
     return new LongValue(10);
   }
 
   /**
-   * returns the MySQL server version on success
+   * Returns the MySQL server version.
    */
   public static String mysqli_get_server_info(@NotNull Mysqli conn)
-    throws SQLException
   {
     if (conn == null)
       return null;
@@ -658,26 +601,20 @@ vv   */
   }
 
   /**
-   * returns a number that represents the MySQL client library version in format:
-   * <p/>
-   * main_version*10000 + minor_version*100 + sub_version.
-   * <p/>
-   * For example 4.1.0 is returned as 40100.
+   * Returns a number that represents the MySQL server version.
    */
-  public static Value mysqli_get_server_version(JdbcConnectionResource connV)
-    throws SQLException
+  public static int mysqli_get_server_version(@NotNull Mysqli conn)
   {
-    if (connV == null)
-      return BooleanValue.FALSE;
-    else
-      return new LongValue(QuercusMysqliModule.infoToVersion(connV.getServerInfo()));
+    if (conn == null)
+      return 0;
+
+    return conn.get_server_version();
   }
 
   /**
-   * returns the number of rows in the result set.
+   * Returns the number of rows in the result set.
    */
   public static Value mysqli_num_rows(@NotNull MysqliResult result)
-    throws SQLException
   {
     if (result == null)
       return BooleanValue.FALSE;
@@ -686,7 +623,7 @@ vv   */
   }
 
   /**
-   * Sets the options for a mysqli object
+   * Sets the options for a connection.
    */
   public static boolean mysqli_options(@NotNull Mysqli mysqli,
 				       int option,
@@ -699,7 +636,7 @@ vv   */
   }
 
   /**
-   * Alias of mysqli_stmt_param_count
+   * Alias of {@link #mysqli_stmt_param_count}.
    */
   public static int mysqli_param_count(@NotNull MysqliStatement stmt)
   {
@@ -707,16 +644,11 @@ vv   */
   }
 
   /**
-   * rolls back the current transaction to the database
-   * connection specified by the connV parameter
+   * Rolls back the current transaction for the  * connection.
    *
-   * returns true on success or false on failur
-   *
-   * NOTE: PHP does not seem to support the idea of
-   * savepoints.
+   * @return true on success or false on failure.
    */
-  public static boolean mysqli_rollback(Env env,
-					@NotNull Mysqli conn)
+  public static boolean mysqli_rollback(@NotNull Mysqli conn)
   {
     if (conn == null)
       return false;
@@ -725,10 +657,9 @@ vv   */
   }
 
   /**
-   * Sets the character set for a mysqli object
+   * Sets the character set for a conneciton.
    */
-  public static boolean mysqli_set_charset(@NotNull Mysqli mysqli,
-					   String charset)
+  public static boolean mysqli_set_charset(@NotNull Mysqli mysqli, String charset)
   {
     if (mysqli == null)
       return false;
@@ -737,7 +668,7 @@ vv   */
   }
 
   /**
-   * Sets the options for a mysqli object
+   * Sets the options for a connection.
    */
   public static boolean mysqli_set_opt(@NotNull Mysqli mysqli,
 				       int option,
@@ -747,11 +678,9 @@ vv   */
   }
 
   /**
-   * returns the number of rows in the result set
-   * of a prepared statement
+   * Returns the number of rows.
    */
   public static Value mysqli_stmt_num_rows(@NotNull MysqliStatement stmt)
-    throws SQLException
   {
     if (stmt == null)
       return BooleanValue.FALSE;
@@ -760,8 +689,8 @@ vv   */
   }
 
   /**
-   * returns an integer representing the number of parameters
-   * or -1 if no query has been prepared
+   * Returns an integer representing the number of parameters
+   * or -1 if no query has been prepared.
    */
   public static int mysqli_stmt_param_count(@NotNull MysqliStatement stmt)
   {
@@ -772,10 +701,9 @@ vv   */
   }
 
   /**
-   * prepares a statment with a query.
+   * Prepares a statment with a query.
    */
-  public static boolean mysqli_stmt_prepare(MysqliStatement stmt,
-					    String query)
+  public static boolean mysqli_stmt_prepare(MysqliStatement stmt, String query)
   {
     if (stmt != null)
       return stmt.prepare(query);
@@ -784,7 +712,7 @@ vv   */
   }
 
   /**
-   * resets a statment
+   * Resets a statment.
    */
   public static boolean mysqli_stmt_reset(MysqliStatement stmt)
   {
@@ -797,32 +725,35 @@ vv   */
   /**
    * Returns result information for metadata
    */
-  public static Value mysqli_stmt_result_metadata(Env env,
-						  MysqliStatement stmt)
-    throws SQLException
+  public static Value mysqli_stmt_result_metadata(Env env, @NotNull MysqliStatement stmt)
   {
-    if (stmt != null)
-      return stmt.result_metadata(env);
-    else
+    if (stmt == null)
       return BooleanValue.FALSE;
+
+    try {
+      return stmt.result_metadata(env);
+    }
+    catch (SQLException e) {
+      log.log(Level.FINE, e.toString(), e);
+      return BooleanValue.FALSE;
+    }
   }
 
   /**
-   * Returns an error string
+   * Returns an error string.
    */
-  public static String mysqli_stmt_sqlstate(MysqliStatement stmt)
+  public static String mysqli_stmt_sqlstate(@NotNull MysqliStatement stmt)
   {
-    if (stmt != null)
-      return stmt.sqlstate();
-    else
+    if (stmt == null)
       return "";
+
+    return stmt.sqlstate();
   }
 
   /**
    * Saves the result.
    */
-  public static boolean mysqli_stmt_store_result(Env env,
-						 @NotNull MysqliStatement stmt)
+  public static boolean mysqli_stmt_store_result(@NotNull MysqliStatement stmt)
   {
     if (stmt == null)
       return false;
@@ -834,10 +765,9 @@ vv   */
    * Transfers the result set from the last query on the
    * database connection represented by conn.
    *
-   * Used in conjunction with mysqli_multi_query
+   * Used in conjunction with {@link #mysqli_multi_query}
    */
-   public static Value mysqli_store_result(Env env,
-					   @NotNull Mysqli conn)
+  public static Value mysqli_store_result(Env env, @NotNull Mysqli conn)
   {
     if (conn == null)
       return BooleanValue.FALSE;
@@ -845,8 +775,7 @@ vv   */
     return conn.store_result(env);
   }
 
-  public static Value mysqli_use_result(Env env,
-					@NotNull Mysqli conn)
+  public static Value mysqli_use_result(Env env, @NotNull Mysqli conn)
   {
     if (conn == null)
       return BooleanValue.FALSE;
@@ -855,13 +784,12 @@ vv   */
   }
 
   /**
-   * returns the number of warnings from the last query
+   * Returns the number of warnings from the last query
    * in the connection object.
    *
    * @return number of warnings
    */
   public static int mysqli_warning_count(@NotNull Mysqli conn)
-    throws SQLException
   {
     if (conn == null)
       return 0;
@@ -873,33 +801,30 @@ vv   */
    * Checks if the connection is still valid
    */
   public static boolean mysqli_ping(@NotNull Mysqli conn)
-    throws SQLException
   {
     return conn != null && conn.ping();
   }
 
   /**
-   * returns JdbcResultResource representing the results of the query.
+   * Executes a query and returns the result.
    *
-   * <i>resultMode</i> is ignored, MYSQLI_USE_RESULT would represent
-   * an unbuffered query, but that is not supported.
    */
   public static Value mysqli_query(@NotNull Mysqli conn,
                                    String sql,
                                    @Optional("MYSQLI_STORE_RESULT") int resultMode)
   {
+    // ERRATUM: <i>resultMode</i> is ignored, MYSQLI_USE_RESULT would represent
+    //  an unbuffered query, but that is not supported.
     return query(conn, sql);
   }
 
-  private static Value query(Mysqli conn,
-                             String sql)
+  private static Value query(Mysqli conn, String sql)
   {
     if (conn == null)
       return BooleanValue.FALSE;
 
     try {
-      Value result = conn.query(sql, MYSQLI_STORE_RESULT);
-      return result;
+      return conn.query(sql, MYSQLI_STORE_RESULT);
     } catch (Throwable e) {
       log.log(Level.FINE, e.toString(), e);
       return BooleanValue.FALSE;
@@ -929,41 +854,7 @@ vv   */
 
   /**
    * Escapes the following special character in unescapedString.
-   * (all of the comments are from the MySQL source code).
-   * <p/>
-   * case 0:      NULL = ASCII 0 Useful for log files
-   * case '\n':   Useful for log files
-   * case '\r':   Useful for log files
-   * case '\\':   STRICTLY NEEDED BY SQL
-   * case '\'':   STRICTLY NEEDED BY SQL
-   * case '"':    Better safe than sorry
-   * case '\032': This gives problems on Win32
-   * <p/>
-   * PHP documents that their version takes "into account
-   * the current character set of the connection."
-   * <p/>
-   * XXX: taking the encoding used by a particular instance
-   * of MySQL seems like an incorrect assumption.
-   * <p/>
-   * In resin's implementation, the strings passed to this function will
-   * be generated within Java not MySQL, and all strings in Java are
-   * encoded using UTF-16, so there is no question whether a character needs
-   * to be escaped or is part of a multibyte character.
-   * <p/>
-   * Even in the PHP world, iconv, UTF8_encode, or recode_string would
-   * be responsible for changing a string from a series of characters
-   * (ie: a series of bytes) -- not MySQL.
-   * <p/>
-   * So why assume the string is encoded with the same
-   * setting as a particular MySQL instance to
-   * check for multibyte characters?
-   * <p/>
-   * In any case, checking whether a particular byte was part of a multibyte
-   * character would only be important if a string of bytes were read
-   * one at a time, and you didn't know in advance what encoding had been used
-   * or if you didn't know the length of a code unit (ie: 1,2,3, or more bytes).
-   * This seems to be the approach taken in the MySQL source code.
-   * <p/>
+   *
    * @return the escaped string.
    */
   public static String mysqli_real_escape_string(Mysqli conn,
@@ -976,8 +867,7 @@ vv   */
     return buf.toString();
   }
 
-  static void escapeString(StringBuilder buf,
-                           String unescapedString)
+  static void escapeString(StringBuilder buf, String unescapedString)
   {
     char c;
 
@@ -1022,24 +912,17 @@ vv   */
   }
 
   /**
-   * mysqli_real_query is "used to excute only a query
-   * against the database." I assume this means just a
-   * SELECT query.
-   *
-   * It is implemented here as an alias for mysqli_query
+   * Alias for {@link #mysqli_query}.
    */
-  public static Value mysqli_real_query(@NotNull Mysqli conn,
-                                        String query)
+  public static Value mysqli_real_query(@NotNull Mysqli conn, String query)
   {
     return query(conn, query);
   }
 
   /**
-   * returns JdbcResultResource representing the results of the query.
+   * Execute a query with arguments and return a result.
    */
-  static Value mysqli_query(Mysqli conn,
-                            String query,
-                            Object ... args)
+  static Value mysqli_query(Mysqli conn, String query, Object ... args)
   {
     StringBuilder buf = new StringBuilder();
 
@@ -1069,11 +952,9 @@ vv   */
 
 
   /**
-   * Selects the database
+   * Select the database for a connection.
    */
-  public static boolean mysqli_select_db(Env env,
-                                         Mysqli conn,
-                                         String dbName)
+  public static boolean mysqli_select_db(Mysqli conn, String dbName)
   {
     if (conn == null)
       return false;
@@ -1082,12 +963,10 @@ vv   */
   }
 
   /**
-   * returns a string with the status of the connection
-   * or FALSE if error
+   * Returns a string with the status of the connection
+   * or FALSE if error.
    */
-  public static Value mysqli_stat(Env env,
-                                  @NotNull Mysqli conn)
-    throws SQLException
+  public static Value mysqli_stat(Env env, @NotNull Mysqli conn)
   {
     if (conn == null)
       return BooleanValue.FALSE;
@@ -1096,7 +975,7 @@ vv   */
   }
 
   /**
-   * returns the number of affected rows.
+   * Returns the number of affected rows.
    */
   public int mysql_stmt_affected_rows(@NotNull Mysqli mysqli)
   {
@@ -1107,15 +986,17 @@ vv   */
   }
 
   /**
-   * binds variables for the parameter markers
+   * Binds variables for the parameter markers
    * in SQL statement that was passed to
-   * mysqli_prepare().
+   * {@link #mysqli_prepare}.
    *
    * Type specification chars:
-   * i: corresponding variable has type integer;
-   * d: corresponding variable has type double;
-   * b: corresponding variable is a blob and will be sent in packages
-   * s: corresponding variable has type string (which really means all other types);
+   * <dl>
+   * <dt>i<dd>corresponding variable has type integer;
+   * <dt>d<dd>corresponding variable has type double;
+   * <dt>b<dd>corresponding variable is a blob and will be sent in packages
+   * <dt>s<dd>corresponding variable has type string (which really means all other types);
+   * </dl>
    */
   public static boolean mysqli_stmt_bind_param(Env env,
                                                @NotNull MysqliStatement stmt,
@@ -1129,7 +1010,7 @@ vv   */
   }
 
   /**
-   * binds outparams to result set
+   * Binds outparams to result set.
    */
   public static boolean mysqli_stmt_bind_result(Env env,
                                                 @NotNull MysqliStatement stmt,
@@ -1142,10 +1023,9 @@ vv   */
   }
 
   /**
-   * closes the statement
+   * Closes the statement.
    */
   public boolean mysql_stmt_close(MysqliStatement stmt)
-    throws SQLException
   {
     if (stmt == null)
       return false;
@@ -1154,7 +1034,7 @@ vv   */
   }
 
   /**
-   * Seeks to a given result
+   * Seeks to a given result.
    */
   public Value mysqli_stmt_data_seek(@NotNull MysqliStatement stmt, int offset)
   {
@@ -1167,7 +1047,7 @@ vv   */
   }
 
   /**
-   * returns the error number
+   * Returns the error number.
    */
   public int mysql_stmt_errno(MysqliStatement stmt)
   {
@@ -1189,9 +1069,9 @@ vv   */
   }
 
   /**
-   * executes statement stored in resultV. The statement has been prepared using mysqli_prepare.
-   * <p/>
-   * returns true on success or false on failure
+   * Executes a statement that has been prepared using {@link #mysqli_prepare}.
+   *
+   * @return true on success or false on failure
    */
   public static boolean mysqli_stmt_execute(Env env,
 					    @NotNull MysqliStatement stmt)
@@ -1203,9 +1083,8 @@ vv   */
   }
 
   /**
-   * Fetch results from a prepared statement into bound variables.
-   * <p/>
-   * returns true on success, false on error null if no more rows
+   * Fetch results from a prepared statement.
+   * @return true on success, false on error, null if no more rows.
    */
   public static boolean mysqli_stmt_fetch(@NotNull MysqliStatement stmt)
   {
@@ -1216,7 +1095,7 @@ vv   */
   }
 
   /**
-   * Frees the associated result
+   * Frees the result.
    */
   public static boolean mysqli_stmt_free_result(MysqliStatement stmt)
   {
@@ -1236,10 +1115,9 @@ vv   */
   }
 
   /**
-   * changes the user and database.
+   * Changes the user and database.
    */
-  public static boolean mysqli_change_user(Env env,
-					   @NotNull Mysqli mysqli,
+  public static boolean mysqli_change_user(@NotNull Mysqli mysqli,
 					   String user,
 					   String password,
 					   String db)
@@ -1258,7 +1136,6 @@ vv   */
 
   public static Value mysqli_get_metadata(Env env,
 					  @NotNull MysqliStatement stmt)
-    throws SQLException
   {
     return mysqli_stmt_result_metadata(env, stmt);
   }
@@ -1272,12 +1149,11 @@ vv   */
   }
 
   /**
-   * Prepare a statement.
+   * Prepares a statement.
    */
   public static MysqliStatement mysqli_prepare(Env env,
 					       @NotNull Mysqli conn,
 					       String query)
-    throws SQLException
   {
     if (conn == null)
       return null;
@@ -1286,10 +1162,9 @@ vv   */
   }
 
   /**
-   * closes a statement
+   * Closes a statement.
    */
   public static boolean mysqli_stmt_close(MysqliStatement stmt)
-    throws SQLException
   {
     if (stmt == null)
       return false;
@@ -1298,50 +1173,14 @@ vv   */
   }
 
   /**
-   * returns a statement for use with
-   * mysqli_stmt_prepare
+   * Returns a statement for use with {@link #mysqli_stmt_prepare}
    */
-  public static MysqliStatement mysqli_stmt_init(Env env,
-						 @NotNull Mysqli conn)
+  public static MysqliStatement mysqli_stmt_init(Env env, @NotNull Mysqli conn)
   {
     if (conn == null)
       return null;
 
     return conn.stmt_init(env);
-  }
-
-  /**
-   * returns JdbcConnectionResource and creates one if not there already
-   */
-  private static JdbcConnectionResource getConnection(Env env,
-						      JdbcConnectionResource conn)
-    throws SQLException
-  {
-    if (conn != null)
-      return conn;
-
-    JdbcConnectionResource value = (JdbcConnectionResource) env.getSpecialValue(MYSQL_CONNECTION);
-
-    if (value != null)
-      return value;
-
-    //Set for first time
-    DataSource database = env.getDatabase();
-
-    if (database == null)
-      throw new IllegalStateException(L.l("no configured database"));
-
-    try {
-      conn = new JdbcConnectionResource(database.getConnection());
-      env.setSpecialValue(MYSQL_CONNECTION, conn);
-      env.addResource(conn);
-
-      return conn;
-    } catch (SQLException e) {
-      env.warning(L.l("A link to the server could not be established"));
-      log.log(Level.FINE, e.toString(), e);
-      throw new SQLException(L.l("no link could be established"));
-    }
   }
 
   //@todo mysqli_debug

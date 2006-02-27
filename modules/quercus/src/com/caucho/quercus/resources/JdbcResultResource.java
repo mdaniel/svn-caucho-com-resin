@@ -44,8 +44,9 @@ import java.util.logging.Logger;
 public class JdbcResultResource extends ResourceValue {
   private static final Logger log = Log.open(JdbcResultResource.class);
 
-  public static final int ASSOC = 0x1;
-  public static final int NUM = 0x2;
+  public static final int FETCH_ASSOC = 0x1;
+  public static final int FETCH_NUM = 0x2;
+  public static final int FETCH_BOTH = FETCH_ASSOC | FETCH_NUM;
 
   public static final StringValue INTEGER = new StringValue("int");
   public static final StringValue BLOB = new StringValue("blob");
@@ -882,7 +883,7 @@ public class JdbcResultResource extends ResourceValue {
 
         int count = _metaData.getColumnCount();
 
-        if ((type & 0x1) != 0) {
+        if ((type & FETCH_ASSOC) != 0) {
           _columnNames = new Value[count];
 
           for (int i = 0; i < count; i++)
@@ -892,10 +893,10 @@ public class JdbcResultResource extends ResourceValue {
         for (int i = 0; i < count; i++) {
           Value value = getColumnValue(_rs, _metaData, i + 1);
 
-          if ((type & 0x2) != 0)
+          if ((type & FETCH_NUM) != 0)
             array.put(LongValue.create(i), value);
 
-          if ((type & 0x1) != 0)
+          if ((type & FETCH_ASSOC) != 0)
             array.put(_columnNames[i], value);
         }
 
