@@ -29,20 +29,38 @@
 
 package com.caucho.quercus.lib;
 
-import org.w3c.dom.Text;
+import com.caucho.quercus.env.Value;
 
-public class DOMText extends DOMCharacterData {
-  private Text _text;
+import org.w3c.dom.Attr;
+
+public class DOMAttrValue extends DOMNodeValue {
+
+  Attr _attr;
   
-  public DOMText(Text text)
+  public DOMAttrValue(Attr attr)
   {
-    _text = text;
+    _attr = attr;
+  }
+  
+  public DOMAttrValue(Value name)
+  {
+    
+  }
+  
+  public DOMAttrValue(Value name,
+                      Value value)
+  {
+    
   }
   
   //PROPERTIES
-  //@todo wholeText (String)
+  //@todo name (String)
+  //@todo ownerElement (DOMElementValue)
+  //@todo schemaTypeInfo (boolean)
+  //@todo specified (boolean)
+  //@todo value (String)
 
-  // METHODS
-  //@todo isWhitespaceInElementContent()
-  //@todo splitText()
+  //METHODS
+  //@todo construct()
+  //@todo isId()
 }

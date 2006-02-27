@@ -29,7 +29,14 @@
 
 package com.caucho.quercus.lib;
 
+import org.w3c.dom.EntityReference;
+
 public class DOMEntityReference extends DOMNodeValue {
+
+  EntityReference _reference;
   
-  //@todo construct()
+  public DOMEntityReference(EntityReference reference)
+  {
+    _reference = reference;
+  }
 }

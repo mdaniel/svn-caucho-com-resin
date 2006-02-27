@@ -29,7 +29,15 @@
 
 package com.caucho.quercus.lib;
 
-public class DOMComment extends DOMCharacterData {
+import com.caucho.quercus.env.Value;
+
+import org.w3c.dom.CDATASection;
+
+public class DOMCDATASectionValue extends Value {
+  private CDATASection _CDATASection;
   
-  //@todo construct()
+  public DOMCDATASectionValue(CDATASection section)
+  {
+    _CDATASection = section;
+  }
 }

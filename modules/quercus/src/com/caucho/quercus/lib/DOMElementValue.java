@@ -1,5 +1,8 @@
 package com.caucho.quercus.lib;
 
+import com.caucho.quercus.env.NullValue;
+import com.caucho.quercus.env.Value;
+
 import org.w3c.dom.Element;
 
 /**
@@ -13,6 +16,16 @@ public class DOMElementValue extends DOMNodeValue {
   public DOMElementValue(Element element)
   {
     _element = element;
+  }
+  
+  @Override
+  public Value setNodeValue(Value value)
+  {
+    if (_element == null)
+      return NullValue.NULL;
+    
+    _element.setNodeValue(value.toString());
+    return value;
   }
   
   //PROPERTIES

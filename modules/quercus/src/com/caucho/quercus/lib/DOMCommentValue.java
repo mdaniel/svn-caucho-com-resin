@@ -29,16 +29,13 @@
 
 package com.caucho.quercus.lib;
 
-public class DOMAttr extends DOMNodeValue {
- 
-  //PROPERTIES
-  //@todo name (String)
-  //@todo ownerElement (DOMElementValue)
-  //@todo schemaTypeInfo (boolean)
-  //@todo specified (boolean)
-  //@todo value (String)
+import org.w3c.dom.Comment;
+
+public class DOMCommentValue extends DOMCharacterData {
+  private Comment _comment;
   
-  //METHODS
-  //@todo construct()
-  //@todo isId()
+  public DOMCommentValue(Comment comment)
+  {
+    _comment = comment;
+  }
 }

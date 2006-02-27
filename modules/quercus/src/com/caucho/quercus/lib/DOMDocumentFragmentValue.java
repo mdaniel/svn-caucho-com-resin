@@ -29,20 +29,13 @@
 
 package com.caucho.quercus.lib;
 
-import org.w3c.dom.Text;
+import org.w3c.dom.DocumentFragment;
 
-public class DOMText extends DOMCharacterData {
-  private Text _text;
+public class DOMDocumentFragmentValue extends DOMNodeValue {
+  private DocumentFragment _fragment;
   
-  public DOMText(Text text)
+  public DOMDocumentFragmentValue(DocumentFragment fragment)
   {
-    _text = text;
+    _fragment = fragment;
   }
-  
-  //PROPERTIES
-  //@todo wholeText (String)
-
-  // METHODS
-  //@todo isWhitespaceInElementContent()
-  //@todo splitText()
 }

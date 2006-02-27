@@ -388,7 +388,8 @@ public class SimpleXMLElementValue extends Value {
    * Both are valid
    * 
    */
-  public Value putField(String name, Value value)
+  @Override
+  public Value putField(Env env, String name, Value value)
   { 
     // always recreated _childMap
     fillChildMap();
@@ -433,16 +434,21 @@ public class SimpleXMLElementValue extends Value {
    * 
    * @return this SimpleXMLElement as well formed XML
    */
-  public StringValue asXML()
+  public Value asXML()
+  {
+    return asXMLVersion("1.0");
+  }
+
+  public Value asXMLVersion(String version)
   {
     StringBuilder result = new StringBuilder();
 
-    result.append("<?xml version=\"1.0\"?>\n");
+    result.append("<?xml version=\"").append(version).append("\"?>\n");
     result.append(generateXML().toString());
 
     return new StringValue(result.toString());
   }
-
+  
   /**
    * recursive helper function for asXML
    * @return XML in string buffer

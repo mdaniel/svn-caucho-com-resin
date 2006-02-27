@@ -90,7 +90,7 @@ public class DOMNodeValue extends Value {
       return NullValue.NULL;
   }
   
-  private Value setNodeValue(Value value)
+  public Value setNodeValue(Value value)
   {
     if (_node == null)
       return NullValue.NULL;
