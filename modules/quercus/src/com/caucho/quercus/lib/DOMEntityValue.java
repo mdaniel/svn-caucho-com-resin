@@ -29,13 +29,41 @@
 
 package com.caucho.quercus.lib;
 
-public class DOMEntity extends DOMNodeValue {
+import com.caucho.quercus.env.NullValue;
+import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.Value;
+
+import org.w3c.dom.Entity;
+
+public class DOMEntityValue extends DOMNodeValue {
+
+  protected Entity _entity;
   
-  //PROPERTIES
-  //@todo publicId (String)
-  //@todo systemId (String)
-  //@todo notationName (String)
-  //@todo actualEncoding (String)
-  //@todo encoding (String)
-  //@todo version (String)
+  public DOMEntityValue(Entity entity)
+  {
+    super._node = entity;
+    _entity = entity;
+  }
+  @Override
+  public Value getField(String name)
+  {
+    if (_entity == null)
+      return NullValue.NULL;
+    
+    if ("publicId".equals(name)) {
+      return new StringValue(_entity.getPublicId());
+    } else if ("systemId".equals(name)) {
+      return new StringValue(_entity.getSystemId());
+    } else if ("notationName".equals(name)) {
+      return new StringValue(_entity.getNotationName());
+    } else if ("actualEncoding".equals(name)) {
+      return new StringValue(_entity.getInputEncoding());
+    } else if ("encoding".equals(name)) {
+      return new StringValue(_entity.getXmlEncoding());
+    } else if ("version".equals(name)) {
+      return new StringValue(_entity.getXmlVersion());
+    }
+    
+    return NullValue.NULL;
+  }
 }

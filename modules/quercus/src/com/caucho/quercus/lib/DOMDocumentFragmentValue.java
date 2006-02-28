@@ -36,6 +36,7 @@ public class DOMDocumentFragmentValue extends DOMNodeValue {
   
   public DOMDocumentFragmentValue(DocumentFragment fragment)
   {
+    super._node = fragment;
     _fragment = fragment;
   }
 }

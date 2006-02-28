@@ -29,26 +29,27 @@
 
 package com.caucho.quercus.lib;
 
-import org.w3c.dom.DocumentType;
+import org.w3c.dom.Document;
+import org.w3c.dom.EntityReference;
 
-public class DOMDocumentType extends DOMNodeValue {
+public class DOMEntityReferenceValue extends DOMNodeValue {
 
-  private DocumentType _docType;
-  //PROPERTIES
-  //@todo publicId (String)
-  //@todo systemId (String)
-  //@todo name (String)
-  //@todo entities (DOMNamedNodeMapValue)
-  //@todo notations (DOMNamedNodeMapValue)
-  //@todo internalSubset (String)
+  EntityReference _reference;
 
-  public DOMDocumentType(DocumentType docType)
+  public DOMEntityReferenceValue(EntityReference reference)
   {
-    _docType = docType;
+    init(reference);
   }
-  
-  public DocumentType getDocType()
+
+  public DOMEntityReferenceValue(String value)
   {
-    return _docType;
+    Document doc = DOMDocumentValue.createDocument();
+    init(doc.createEntityReference(value));
+  }
+
+  public void init(EntityReference reference)
+  {
+    super._node = reference;
+    _reference = reference;
   }
 }

@@ -63,8 +63,8 @@ public class DOMImplementationValue extends Value {
       if (qualifiedName != null) {
         qn = qualifiedName.toString();
         
-        if ((doctype != null) && (doctype instanceof DOMDocumentType))
-          dt = ((DOMDocumentType) doctype).getDocType();
+        if ((doctype != null) && (doctype instanceof DOMDocumentTypeValue))
+          dt = ((DOMDocumentTypeValue) doctype).getDocType();
       }
     }
 
@@ -94,7 +94,7 @@ public class DOMImplementationValue extends Value {
       }
     }
     
-    return new DOMDocumentType(_DOMImplementation.createDocumentType(qn, pId, sId));
+    return new DOMDocumentTypeValue(_DOMImplementation.createDocumentType(qn, pId, sId));
   }
   
   @Override

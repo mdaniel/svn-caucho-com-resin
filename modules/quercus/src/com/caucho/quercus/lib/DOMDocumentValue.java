@@ -77,7 +77,7 @@ public class DOMDocumentValue extends DOMNodeValue {
 
   public DOMDocumentValue()
   {
-    createDocument();
+    _document = createDocument();
   }
 
   public DOMDocumentValue(String version)
@@ -102,14 +102,15 @@ public class DOMDocumentValue extends DOMNodeValue {
   }
 
   //helper for constructor
-  private void createDocument()
+  public static Document createDocument()
   {
     DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
     try {
       DocumentBuilder builder = factory.newDocumentBuilder();
-      _document = builder.newDocument();
+      return builder.newDocument();
     } catch (ParserConfigurationException ex) {
       log.log(Level.FINE, L.l(ex.toString()), ex);
+      return null;
     }
   }
 
@@ -129,7 +130,7 @@ public class DOMDocumentValue extends DOMNodeValue {
 
     } else if ("doctype".equals(name))
 
-      return new DOMDocumentType(_document.getDoctype());
+      return new DOMDocumentTypeValue(_document.getDoctype());
 
     else if ("_documentElementValue".equals(name))
 
@@ -434,7 +435,7 @@ public class DOMDocumentValue extends DOMNodeValue {
     //XXX: handle INVALID_CHARACTER_ERR,
     //NOT_SUPPORTED_ERR
 
-    return new DOMEntityReference(_document.createEntityReference(name.toString()));
+    return new DOMEntityReferenceValue(_document.createEntityReference(name.toString()));
   }
 
   public Value createProcessingInstruction(Value target,
