@@ -39,6 +39,8 @@ import com.caucho.util.L10N;
 import com.caucho.quercus.resources.JdbcConnectionResource;
 import com.caucho.quercus.resources.JdbcResultResource;
 
+import com.caucho.quercus.QuercusRuntimeException;
+
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.BooleanValue;
 import com.caucho.quercus.env.StringValue;
@@ -651,8 +653,9 @@ public class Mysqli {
   {
     JdbcConnectionResource conn = _conn;
 
-    if (conn == null)
-      _env.error(L.l("Connection is not properly initialized"));
+    if (conn == null) {
+      throw _env.errorException(L.l("Connection is not properly initialized"));
+    }
 
     return conn;
   }

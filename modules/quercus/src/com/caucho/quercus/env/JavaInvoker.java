@@ -133,7 +133,7 @@ abstract public class JavaInvoker extends AbstractFunction {
     _hasRestArgs = hasRestArgs;
     _isRestReference = isRestReference;
 
-    int argLength = paramAnn.length;
+    int argLength = param.length;
 
     if (_hasRestArgs)
       argLength -= 1;

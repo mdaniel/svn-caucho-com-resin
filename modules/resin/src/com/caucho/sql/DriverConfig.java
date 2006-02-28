@@ -359,6 +359,14 @@ public class DriverConfig {
   }
 
   /**
+   * Returns the managed connection factory.
+   */
+  public ManagedConnectionFactory getManagedConnectionFactory()
+  {
+    return _jcaDataSource;
+  }
+
+  /**
    * Returns true if the driver is XA enabled.
    */
   public boolean isXATransaction()

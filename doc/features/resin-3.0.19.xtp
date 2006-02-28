@@ -1,0 +1,34 @@
+<document>
+  <header>
+    <product>resin</product>
+    <title>Resin 3.0.19 Release Notes</title>
+  </header>
+
+<body>
+
+<summary objsummary='localtoc'/>
+
+<section title="JspServlet">
+
+<p>The number of JSP .class files cached can now be configured in the JSP
+servlet.  This affects the memory usage in the permanent memory space.</p>
+</p>
+
+<example>
+&lt;servlet servlet-name="resin-jsp"
+            servlet-class="com.caucho.jsp.JspServlet">
+  &lt;init>
+    &lt;load-tld-on-init>false&lt;/load-tld-on-init>
+    &lt;page-cache-max>1024&lt;/page-cache-max>
+  &lt;/init>
+  &lt;load-on-startup/>
+&lt;/servlet>
+</example>
+
+<p>This fix is related to the OOM/PermMax issues some people have been
+running into with large numbers of JSP files.</p>
+
+</section>
+
+</body>
+</document>

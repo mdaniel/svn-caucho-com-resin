@@ -138,7 +138,8 @@ public class DBPoolImpl implements AlarmListener, EnvironmentListener {
   private ConnectionConfig _connectionConfig
     = new ConnectionConfig();
 
-  private ManagedFactoryImpl _mcf;
+  // private ManagedFactoryImpl _mcf;
+  private ManagedConnectionFactory _mcf;
 
   private String _user;
   private String _password;
@@ -875,6 +876,9 @@ public class DBPoolImpl implements AlarmListener, EnvironmentListener {
       driver.initDriver();
       driver.initDataSource(_isTransactional, _isSpy);
 
+      if (_mcf == null)
+	_mcf = driver.getManagedConnectionFactory();
+
       /*
       if (driver.getXADataSource() == null)
 	_isTransactional = false;
@@ -894,7 +898,6 @@ public class DBPoolImpl implements AlarmListener, EnvironmentListener {
 
       driver.initDriver();
       driver.initDataSource(_isTransactional, _isSpy);
-
       /*
       if (driver.getXADataSource() == null)
 	_isTransactional = false;
@@ -904,7 +907,8 @@ public class DBPoolImpl implements AlarmListener, EnvironmentListener {
     DriverConfig []backupDrivers = new DriverConfig[_backupDriverList.size()];
     _backupDriverList.toArray(backupDrivers);
 
-    _mcf = new ManagedFactoryImpl(this, drivers, backupDrivers);
+    if (_mcf == null)
+      _mcf = new ManagedFactoryImpl(this, drivers, backupDrivers);
 
     if (_name != null) {
       String name = _name;

@@ -229,8 +229,8 @@ public class JspCompilerInstance {
     else {
       uriPwd = "/";
     }
+    
     _parseState.setUriPwd(uriPwd);
- 
 
     if (_className == null)
       _className = JavaCompiler.mangleName("jsp/" + _uri);
@@ -239,6 +239,9 @@ public class JspCompilerInstance {
     Path appDir = _jspCompiler.getAppDir();
     if (appDir == null && app != null)
       appDir = app.getAppDir();
+
+    if (app != null && app.has23Config())
+      _parseState.setELIgnored(true);
 
     JspConfig jspConfig = null;
 
@@ -451,9 +454,11 @@ public class JspCompilerInstance {
       }
       else {
 	Application app = _jspCompiler.getApplication();
-	
+
+	/*
 	if (_jspPropertyGroup == null && app != null && app.isJsp1())
 	  _parseState.setELIgnored(true);
+	*/
 	
 	_parser.parse(_jspPath, _uri);
       }

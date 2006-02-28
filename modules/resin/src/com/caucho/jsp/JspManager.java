@@ -74,10 +74,8 @@ public class JspManager extends PageManager {
   private boolean _isLoadTldOnInit;
   private boolean _precompile = true;
 
-  public JspManager(Application app)
+  public JspManager()
   {
-    super(app);
-
     if (JspFactory.getDefaultFactory() == null)
       JspFactory.setDefaultFactory(new QJspFactory());
   }

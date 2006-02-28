@@ -66,7 +66,7 @@ public class JspPropertyGroup {
   private boolean _ignoreELException = true;
   private boolean _isValidateTaglibSchema = true;
 
-  private int _jspMax = 1024;
+  private int _jspMax = 0;
   private boolean _disableLog = true;
   private long _dependencyCheckInterval = Long.MIN_VALUE;
   private boolean _staticPageGeneratesClass = true;

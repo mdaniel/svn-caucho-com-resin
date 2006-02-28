@@ -29,6 +29,7 @@
 
 package com.caucho.server.dispatch;
 
+import java.lang.ref.SoftReference;
 import java.util.*;
 import java.util.logging.*;
 import java.io.*;
@@ -51,7 +52,7 @@ public class PageFilterChain implements FilterChain {
   private String _jspFile;
   private ServletConfigImpl _config;
   private ServletContext _servletContext;
-  private Page _page;
+  private SoftReference<Page> _pageRef;
   private boolean _isSingleThread;
 
   /**
@@ -116,11 +117,26 @@ public class PageFilterChain implements FilterChain {
     HttpServletResponse res = (HttpServletResponse) response;
     FileNotFoundException notFound = null;
 
-    Page page = _page;
+    SoftReference<Page> pageRef = _pageRef;
+
+    Page page;
+
+    if (pageRef != null)
+      page = pageRef.get();
+    else
+      page = null;
 
     if (page == null || page.cauchoIsModified()) {
       try {
+	_pageRef = null;
+	
 	page = compilePage(page, req, res);
+
+	if (page != null) {
+	  _pageRef = new SoftReference<Page>(page);
+      
+	  _isSingleThread = page instanceof SingleThreadModel;
+	}
       } catch (FileNotFoundException e) {
 	page = null;
 
@@ -171,7 +187,7 @@ public class PageFilterChain implements FilterChain {
     Page newPage = null;
 	
     if (oldPage != null && ! oldPage.startRecompiling()) {
-      return _page;
+      return oldPage;
     }
 
     try {
@@ -210,9 +226,6 @@ public class PageFilterChain implements FilterChain {
     } catch (Exception e) {
       throw new ServletException(e);
     } finally {
-      _page = newPage;
-      _isSingleThread = newPage instanceof SingleThreadModel;
-      
       if (_jspFile != null) {
 	req.removeAttribute("caucho.jsp.jsp-file");
 	req.removeAttribute("caucho.jsp.servlet-config");

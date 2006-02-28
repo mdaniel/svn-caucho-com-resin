@@ -67,42 +67,40 @@ public class XtpServlet extends QServlet {
   {
     super.init(conf);
 
-    try {
-      XtpManager manager = new XtpManager((Application) getServletContext());
-      setManager(manager);
+    XtpManager manager = new XtpManager();
+    manager.initApplication((Application) getServletContext());
+      
+    setManager(manager);
 
-      String strictXslValue = conf.getInitParameter("strict-xsl");
-      if (strictXslValue != null &&
-          ! strictXslValue.equals("false") &&
-          ! strictXslValue.equals("no"))
-        manager.setStrictXsl(true);
+    String strictXslValue = conf.getInitParameter("strict-xsl");
+    if (strictXslValue != null &&
+	! strictXslValue.equals("false") &&
+	! strictXslValue.equals("no"))
+      manager.setStrictXsl(true);
   
-      String strictXmlValue = conf.getInitParameter("strict-xml");
-      if (strictXmlValue != null &&
-          ! strictXmlValue.equals("false") &&
-          ! strictXmlValue.equals("no"))
-        manager.setStrictXml(true);
+    String strictXmlValue = conf.getInitParameter("strict-xml");
+    if (strictXmlValue != null &&
+	! strictXmlValue.equals("false") &&
+	! strictXmlValue.equals("no"))
+      manager.setStrictXml(true);
       
-      String entitiesAsText = conf.getInitParameter("entities-as-text");
-      if (entitiesAsText != null &&
-          ! entitiesAsText.equals("false") &&
-          ! entitiesAsText.equals("no"))
-        manager.setEntitiesAsText(true);
+    String entitiesAsText = conf.getInitParameter("entities-as-text");
+    if (entitiesAsText != null &&
+	! entitiesAsText.equals("false") &&
+	! entitiesAsText.equals("no"))
+      manager.setEntitiesAsText(true);
       
-      String toLower = conf.getInitParameter("html-to-lower");
-      if (toLower != null &&
-          (toLower.equals("no") || toLower.equals("false")))
-        manager.setToLower(false);
+    String toLower = conf.getInitParameter("html-to-lower");
+    if (toLower != null &&
+	(toLower.equals("no") || toLower.equals("false")))
+      manager.setToLower(false);
 
-      String defaultStylesheet = getInitParameter("default-stylesheet");
-      if (defaultStylesheet != null && ! defaultStylesheet.equals(""))
-        manager.setDefaultStylesheet(defaultStylesheet);
+    String defaultStylesheet = getInitParameter("default-stylesheet");
+    if (defaultStylesheet != null && ! defaultStylesheet.equals(""))
+      manager.setDefaultStylesheet(defaultStylesheet);
 
-      if (JspFactory.getDefaultFactory() == null)
-        JspFactory.setDefaultFactory(QJspFactory.create());
-    } catch (RegistryException e) {
-      throw new ServletException(e);
-    }
+    if (JspFactory.getDefaultFactory() == null)
+      JspFactory.setDefaultFactory(QJspFactory.create());
   }
 
   public String getServletInfo()

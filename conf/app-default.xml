@@ -18,7 +18,8 @@
   <servlet servlet-name="resin-jsp"
            servlet-class="com.caucho.jsp.JspServlet">
     <init>
-      <load-tld-on-init>false</load-tld-on-init>	   
+      <load-tld-on-init>false</load-tld-on-init>
+      <page-cache-max>1024</page-cache-max>
     </init>
     <load-on-startup/>
   </servlet>
@@ -27,6 +28,7 @@
            servlet-class="com.caucho.jsp.JspServlet">
     <init>
       <load-tld-on-init>false</load-tld-on-init>	   
+      <page-cache-max>1024</page-cache-max>
       <xml>true</xml>
     </init>
     <load-on-startup/>

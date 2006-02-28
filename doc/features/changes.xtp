@@ -2,6 +2,17 @@
 
 <a href='changes-2.xtp'>Resin 2.1 changes</a>
 
+<s2 title='3.0.snal - Feb 23, 2006'>
+<ul>
+<li>Hessian: use setChunkedStreamingMode when available (#955, rep by Alon Salant)
+<li>Use SoftReference to handle JSP memory issues with many pages (#600, rep by Uwe Schaefer)
+<li>Allow EL expression with missing web.xml (#941, rep by tinyspace)
+<li>Add missing synchronized in ServletManager.addServlet (#946, rep by Fiaz Hossain)
+<li>httpd.exe wasn't allocating enough space for the -J args count (#947, #948, #959, rep by Ed Hollingsworth)
+<li>&lt;database> should support ManagedConnectionFactory (#221, #224, rep by D Rice)
+</ul>
+</s2>
+
 <s2 title='3.0.18 - Feb 23, 2006'>
 <ul>
 <li>ConnectionPool needs to be a lifo to avoid accumulating too many pool items (rep b Kaminsky Leonid)

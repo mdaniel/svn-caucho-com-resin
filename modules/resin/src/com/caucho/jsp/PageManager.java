@@ -72,7 +72,7 @@ abstract public class PageManager {
   private long _updateInterval = 1000;
   private boolean _isAdapter;
   private boolean _omitInitLog;
-  private int _jspMax = 1024;
+  private int _pageCacheMax = 256;
   private LruCache<String,Entry> _cache;
 
   // true if the manager should detect page changes and automatically recompile
@@ -83,7 +83,11 @@ abstract public class PageManager {
    *
    * @param context the servlet application.
    */
-  PageManager(Application application)
+  PageManager()
+  {
+  }
+
+  void initApplication(Application application)
   {
     _application = application;
 
@@ -95,7 +99,9 @@ abstract public class PageManager {
 
     if (jspPropertyGroup != null) {
       _autoCompile = jspPropertyGroup.isAutoCompile();
-      _jspMax = jspPropertyGroup.getJspMax();
+
+      if (jspPropertyGroup.getJspMax() > 0)
+	_pageCacheMax = jspPropertyGroup.getJspMax();
 
       if (jspPropertyGroup.getDependencyCheckInterval() != Long.MIN_VALUE)
 	interval = jspPropertyGroup.getDependencyCheckInterval();
@@ -105,6 +111,11 @@ abstract public class PageManager {
       interval = Integer.MAX_VALUE / 2;
     
     _updateInterval = interval;
+  }
+
+  void setPageCacheMax(int max)
+  {
+    _pageCacheMax = max;
   }
 
   public Path getClassDir()
@@ -187,7 +198,7 @@ abstract public class PageManager {
     if (cache == null) {
       synchronized (this) {
 	if (_cache == null)
-	  _cache = new LruCache<String,Entry>(_jspMax);
+	  _cache = new LruCache<String,Entry>(_pageCacheMax);
 	cache = _cache;
       }
     }

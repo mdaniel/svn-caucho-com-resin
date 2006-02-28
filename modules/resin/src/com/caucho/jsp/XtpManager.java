@@ -91,16 +91,18 @@ public class XtpManager extends PageManager {
   private JspManager _jspManager;
   private String _defaultStylesheet = "default.xsl";
 
-  XtpManager(Application context)
-    throws RegistryException
+  XtpManager()
   {
-    super(context);
+  }
 
+  void initApplication(Application context)
+  {
     if (JspFactory.getDefaultFactory() == null)
       JspFactory.setDefaultFactory(new QJspFactory());
     
     _xslManager = new XslManager(context);
-    _jspManager = new JspManager(context);
+    _jspManager = new JspManager();
+    _jspManager.initApplication(context);
   }
 
   /**

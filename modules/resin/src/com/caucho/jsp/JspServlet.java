@@ -51,6 +51,7 @@ public class JspServlet extends QServlet {
 
   private boolean _isXml = false;
   private boolean _loadTldOnInit = false;
+  private int _pageCacheMax = 256;
 
   /**
    * Set true when JSP pages should default to xml.
@@ -67,6 +68,14 @@ public class JspServlet extends QServlet {
   {
     _loadTldOnInit = isPreload;
   }
+
+  /**
+   * Set true when JSP pages should default to xml.
+   */
+  public void setPageCacheMax(int max)
+  {
+    _pageCacheMax = max;
+  }
   
   /**
    * Initializes the servlet.  Primarily, this sets the PageManager to the
@@ -77,10 +86,13 @@ public class JspServlet extends QServlet {
   {
     super.init(conf);
 
-    JspManager manager = new JspManager((Application) getServletContext());
+    JspManager manager = new JspManager();
 
     manager.setXml(_isXml);
     manager.setLoadTldOnInit(_loadTldOnInit);
+    manager.setPageCacheMax(_pageCacheMax);
+
+    manager.initApplication((Application) getServletContext());
       
     setManager(manager);
 

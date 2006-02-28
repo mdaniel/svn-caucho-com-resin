@@ -105,7 +105,7 @@ public class DBPool implements DataSource {
   private static final L10N L = new L10N(DBPool.class);
 
   private EnvironmentLocal<DBPoolImpl> _localPoolImpl;
-  private EnvironmentLocal<DataSourceImpl> _localDataSourceImpl;
+  private EnvironmentLocal<DataSource> _localDataSourceImpl;
 
   private String _var;
   private String _jndiName;
@@ -114,7 +114,8 @@ public class DBPool implements DataSource {
   private ConnectionPool _connectionPool;
 
   private DBPoolImpl _poolImpl;
-  private DataSourceImpl _dataSource;
+  private DataSource _dataSource;
+  private DataSourceImpl _resinDataSource;
 
   /**
    * Null constructor for the Driver interface; called by the JNDI
@@ -577,10 +578,10 @@ public class DBPool implements DataSource {
     ManagedConnectionFactory mcf = _poolImpl.getManagedConnectionFactory();
     
     
-    _dataSource = (DataSourceImpl) _connectionPool.init(mcf);
+    _dataSource = (DataSource) _connectionPool.init(mcf);
     _connectionPool.start();
 
-    _localDataSourceImpl = new EnvironmentLocal<DataSourceImpl>("caucho.data-source." + getName());
+    _localDataSourceImpl = new EnvironmentLocal<DataSource>("caucho.data-source." + getName());
     _localDataSourceImpl.set(_dataSource);
 
     if (_jndiName != null) {
@@ -668,10 +669,16 @@ public class DBPool implements DataSource {
   /**
    * Returns the underlying data source.
    */
-  private DataSourceImpl getDataSource()
+  private DataSource getDataSource()
   {
-    if (_dataSource == null || _dataSource.isClosed()) {
+    if (_dataSource == null ||
+	_resinDataSource != null && _resinDataSource.isClosed()) {
       _dataSource = _localDataSourceImpl.get();
+
+      if (_dataSource instanceof DataSourceImpl)
+	_resinDataSource = (DataSourceImpl) _dataSource;
+      else
+	_resinDataSource = null;
 
       if (_dataSource == null)
         throw new IllegalStateException(L.l("DBPool `{0}' no longer exists.",

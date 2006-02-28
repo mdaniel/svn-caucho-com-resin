@@ -462,13 +462,8 @@ public class Application extends ServletContextImpl
   {
     String ns = node.getNamespaceURI();
 
-    if (JSP_2 <= _jspState) {
-    }
-    else if (ns == null || ns.equals("")) {
+    if (ns == null || ns.equals("")) {
       _jspState = JSP_1;
-    }
-    else {
-      _jspState = JSP_2;
     }
   }
 
@@ -1203,7 +1198,7 @@ public class Application extends ServletContextImpl
   /**
    * Returns true for JSP 1.x
    */
-  public boolean isJsp1()
+  public boolean has23Config()
   {
     return _jspState == JSP_1;
   }

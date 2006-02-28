@@ -316,6 +316,10 @@ abstract public class QServlet implements Servlet {
       return _manager.getPage(pathInfo, subcontext);
 
     subcontext = getPagePath(uri);
+    if (subcontext == null)
+      throw new FileNotFoundException(L.l("{0} was not found on this server.",
+					  uri));
+    
     return _manager.getPage(uri, subcontext);
   }
 

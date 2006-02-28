@@ -83,26 +83,28 @@ public class ServletManager {
 
     config.setServletManager(this);
 
-    if (_servlets.get(config.getServletName()) != null) {
-      for (int i = _servletList.size() - 1; i >= 0; i--) {
-        ServletConfigImpl oldConfig = _servletList.get(i);
+    synchronized (_servlets) {
+      if (_servlets.get(config.getServletName()) != null) {
+	for (int i = _servletList.size() - 1; i >= 0; i--) {
+	  ServletConfigImpl oldConfig = _servletList.get(i);
 
-        if (config.getServletName().equals(oldConfig.getServletName())) {
-          _servletList.remove(i);
-          break;
-        }
+	  if (config.getServletName().equals(oldConfig.getServletName())) {
+	    _servletList.remove(i);
+	    break;
+	  }
+	}
+
+	/* XXX: need something more sophisticated since the
+	 * resin.conf needs to override the web.xml
+	 * throw new ServletConfigException(L.l("`{0}' is a duplicate servlet-name.  Servlets must have a unique servlet-name.", config.getServletName()));
+	 */
       }
-
-      /* XXX: need something more sophisticated since the
-       * resin.conf needs to override the web.xml
-       * throw new ServletConfigException(L.l("`{0}' is a duplicate servlet-name.  Servlets must have a unique servlet-name.", config.getServletName()));
-       */
+    
+      config.validateClass(! _isLazyValidate);
+    
+      _servlets.put(config.getServletName(), config);
+      _servletList.add(config);
     }
-    
-    config.validateClass(! _isLazyValidate);
-    
-    _servlets.put(config.getServletName(), config);
-    _servletList.add(config);
   }
 
   /**

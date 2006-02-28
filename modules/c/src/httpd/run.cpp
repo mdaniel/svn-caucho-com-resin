@@ -262,11 +262,19 @@ set_jdk_args(char *exe, char *cp,
 	char buf[BUF_SIZE];
 	int j;
 
-	char **args = (char **) malloc((20 + argc) * (sizeof (char *)));
+	char **args;
 	int i = 0;
+	int arg_count = argc;
+
+	for (j = 0; java_argv[j]; j++)
+	  arg_count++;
+
+	args = (char **) malloc((arg_count + 16) * (sizeof (char *)));
+	
 	args[i++] = strdup(rsprintf(buf, "\"%s\"", exe));
 	for (j = 0; java_argv[j]; j++)
           args[i++] = strdup(rsprintf(buf, "\"%s\"", java_argv[j]));
+	
 	args[i++] = "-classpath";
         int k = 0;
         buf[k++] = '\"';
