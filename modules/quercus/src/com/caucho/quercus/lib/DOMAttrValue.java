@@ -29,6 +29,10 @@
 
 package com.caucho.quercus.lib;
 
+import com.caucho.quercus.env.BooleanValue;
+import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.NullValue;
+import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.Value;
 
 import org.w3c.dom.Attr;
@@ -42,15 +46,25 @@ public class DOMAttrValue extends DOMNodeValue {
     _attr = attr;
   }
   
-  public DOMAttrValue(Value name)
+  public Value isId()
   {
+    if (_attr == null)
+      return NullValue.NULL;
     
+    if (_attr.isId())
+      return BooleanValue.TRUE;
+    else
+      return BooleanValue.FALSE;
   }
   
-  public DOMAttrValue(Value name,
-                      Value value)
+  @Override
+  public Value evalMethod(Env env, String methodName)
+    throws Throwable
   {
+    if ("isId".equals(methodName))
+      return isId();
     
+    return super.evalMethod(env, methodName);
   }
   
   public Attr getAttribute()
@@ -58,14 +72,49 @@ public class DOMAttrValue extends DOMNodeValue {
     return _attr;
   }
   
-  //PROPERTIES
-  //@todo name (String)
-  //@todo ownerElement (DOMElementValue)
-  //@todo schemaTypeInfo (boolean)
-  //@todo specified (boolean)
-  //@todo value (String)
+  @Override
+  public Value getField(String index)
+  {
+    if (_attr == null)
+      return NullValue.NULL;
+    
+    if ("name".equals(index)) {
+      
+      return new StringValue(_attr.getName());
+      
+    } else if ("ownerElement".equals(index)) {
+      
+      return new DOMElementValue(_attr.getOwnerElement());
+      
+    } else if ("schemaTypeInfo".equals(index)) {
+      
+      return new DOMTypeInfoValue(_attr.getSchemaTypeInfo());
+      
+    } else if ("specified".equals(index)) {
+      
+      if (_attr.getSpecified())
+        return BooleanValue.TRUE;
+      else
+        return BooleanValue.FALSE;
+      
+    } else if ("value".equals(index)) {
+      
+      return new StringValue(_attr.getValue());
+      
+    }
+    
+    return NullValue.NULL;
+  }
+  
+  @Override
+  public Value putField(Env env, String index, Value object)
+  {
+    if ("value".equals(index)) {
 
-  //METHODS
-  //@todo construct()
-  //@todo isId()
+      _attr.setValue(object.toString());
+      return object;
+    }
+    
+    return NullValue.NULL;
+  }
 }
