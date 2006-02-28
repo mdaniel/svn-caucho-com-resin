@@ -37,31 +37,28 @@ import org.w3c.dom.Entity;
 
 public class DOMEntityValue extends DOMNodeValue {
 
-  protected Entity _entity;
-  
   public DOMEntityValue(Entity entity)
   {
-    super._node = entity;
-    _entity = entity;
+    _node = entity;
   }
   @Override
   public Value getField(String name)
   {
-    if (_entity == null)
+    if (_node == null)
       return NullValue.NULL;
     
     if ("publicId".equals(name)) {
-      return new StringValue(_entity.getPublicId());
+      return new StringValue(((Entity)_node).getPublicId());
     } else if ("systemId".equals(name)) {
-      return new StringValue(_entity.getSystemId());
+      return new StringValue(((Entity)_node).getSystemId());
     } else if ("notationName".equals(name)) {
-      return new StringValue(_entity.getNotationName());
+      return new StringValue(((Entity)_node).getNotationName());
     } else if ("actualEncoding".equals(name)) {
-      return new StringValue(_entity.getInputEncoding());
+      return new StringValue(((Entity)_node).getInputEncoding());
     } else if ("encoding".equals(name)) {
-      return new StringValue(_entity.getXmlEncoding());
+      return new StringValue(((Entity)_node).getXmlEncoding());
     } else if ("version".equals(name)) {
-      return new StringValue(_entity.getXmlVersion());
+      return new StringValue(((Entity)_node).getXmlVersion());
     }
     
     return NullValue.NULL;

@@ -29,6 +29,9 @@
 
 package com.caucho.quercus.lib;
 
+import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.LongValue;
+import com.caucho.quercus.env.NullValue;
 import com.caucho.quercus.env.Value;
 
 import org.w3c.dom.NodeList;
@@ -42,5 +45,33 @@ public class DOMNodeListValue extends Value {
     _nodeList = nodeList;
   }
   
-  //@todo item()
+  public Value item(Value index)
+  {
+    if (_nodeList == null)
+      return NullValue.NULL;
+    
+    return new DOMNodeValue(_nodeList.item(index.toInt()));
+  }
+  
+  @Override
+  public Value evalMethod(Env env, String methodName, Value a0)
+    throws Throwable
+  {
+    if ("item".equals(methodName))
+      return item(a0);
+    
+    return super.evalMethod(env, methodName, a0);
+  }
+  
+  @Override
+  public Value getField(String name)
+  {
+    if (_nodeList == null)
+      return NullValue.NULL;
+    
+    if ("length".equals(name))
+      return new LongValue(_nodeList.getLength());
+    
+    return NullValue.NULL;
+  }
 }

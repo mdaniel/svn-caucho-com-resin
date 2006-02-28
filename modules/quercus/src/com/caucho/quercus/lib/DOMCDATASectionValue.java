@@ -29,15 +29,12 @@
 
 package com.caucho.quercus.lib;
 
-import com.caucho.quercus.env.Value;
-
 import org.w3c.dom.CDATASection;
 
-public class DOMCDATASectionValue extends Value {
-  private CDATASection _CDATASection;
+public class DOMCDATASectionValue extends DOMNodeValue {
   
   public DOMCDATASectionValue(CDATASection section)
   {
-    _CDATASection = section;
+    _node = section;
   }
 }

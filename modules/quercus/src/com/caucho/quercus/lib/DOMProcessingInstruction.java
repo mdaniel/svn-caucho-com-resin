@@ -29,18 +29,44 @@
 
 package com.caucho.quercus.lib;
 
+import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.NullValue;
+import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.Value;
+
 import org.w3c.dom.ProcessingInstruction;
 
 public class DOMProcessingInstruction extends DOMNodeValue {
-  ProcessingInstruction _pi;
   
   public DOMProcessingInstruction(ProcessingInstruction pi)
   {
-    _pi = pi;
+    _node = pi;
   }
   
-  //PROPERTIES
-  //@todo target (String)
-  //@todo data (string)
-
+  @Override
+  public Value getField(String name)
+  {
+    if (_node == null)
+      return NullValue.NULL;
+    
+    if ("data".equals(name))
+      return new StringValue(((ProcessingInstruction) _node).getData());
+    else if ("target".equals(name))
+      return new StringValue(((ProcessingInstruction) _node).getTarget());
+    
+    return NullValue.NULL;
+  }
+  
+  public Value putField(Env env, String key, Value value)
+  {
+    if (_node == null)
+      return NullValue.NULL;
+    
+    if ("data".equals(key)) {
+      ((ProcessingInstruction) _node).setData(value.toString());
+      return value;
+    }
+    
+    return NullValue.NULL;
+  }
 }

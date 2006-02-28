@@ -33,23 +33,16 @@ import org.w3c.dom.Comment;
 import org.w3c.dom.Document;
 
 public class DOMCommentValue extends DOMCharacterDataValue {
-  private Comment _comment;
 
   public DOMCommentValue(Comment comment)
   {
-    init(comment);
+    _node = comment;
   }
 
   public DOMCommentValue(String data)
   {
     Document document = DOMDocumentValue.createDocument();
-    init(document.createComment(data));
+    _node = document.createComment(data);
   }
   
-  private void init(Comment comment)
-  {
-    super._node = comment;
-    super._characterData = comment;
-    _comment = comment;
-  }
 }

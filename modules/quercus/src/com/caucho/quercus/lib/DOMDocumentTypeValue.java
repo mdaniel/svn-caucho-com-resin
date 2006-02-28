@@ -37,43 +37,35 @@ import org.w3c.dom.DocumentType;
 
 public class DOMDocumentTypeValue extends DOMNodeValue {
 
-  private DocumentType _docType;
-  //PROPERTIES
-  //@todo publicId (String)
-  //@todo systemId (String)
-  //@todo name (String)
-  //@todo entities (DOMNamedNodeMapValue)
-  //@todo notations (DOMNamedNodeMapValue)
-  //@todo internalSubset (String)
 
   public DOMDocumentTypeValue(DocumentType docType)
   {
-    _docType = docType;
+    _node = docType;
   }
   
   public DocumentType getDocType()
   {
-    return _docType;
+    return (DocumentType) _node;
   }
   
   @Override
   public Value getField(String name)
   {
-    if (_docType == null)
+    if (_node == null)
       return NullValue.NULL;
     
     if ("publicId".equals(name)) {
-      return new StringValue(_docType.getPublicId());
+      return new StringValue(((DocumentType) _node).getPublicId());
     } else if ("systemId".equals(name)) {
-      return new StringValue(_docType.getSystemId());
+      return new StringValue(((DocumentType) _node).getSystemId());
     } else if ("name".equals(name)) {
-      return new StringValue(_docType.getName());
+      return new StringValue(((DocumentType) _node).getName());
     } else if ("entities".equals(name)) {
-      return new DOMNamedNodeMapValue(_docType.getEntities());
+      return new DOMNamedNodeMapValue(((DocumentType) _node).getEntities());
     } else if ("notations".equals(name)) {
-      return new DOMNamedNodeMapValue(_docType.getNotations());
+      return new DOMNamedNodeMapValue(((DocumentType) _node).getNotations());
     } else if ("internalSubset".equals(name)) {
-      return new StringValue(_docType.getInternalSubset());
+      return new StringValue(((DocumentType) _node).getInternalSubset());
     }
     
     return NullValue.NULL;

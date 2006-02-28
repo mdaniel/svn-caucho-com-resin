@@ -34,22 +34,14 @@ import org.w3c.dom.EntityReference;
 
 public class DOMEntityReferenceValue extends DOMNodeValue {
 
-  EntityReference _reference;
-
   public DOMEntityReferenceValue(EntityReference reference)
   {
-    init(reference);
+    _node = reference;
   }
 
   public DOMEntityReferenceValue(String value)
   {
     Document doc = DOMDocumentValue.createDocument();
-    init(doc.createEntityReference(value));
-  }
-
-  public void init(EntityReference reference)
-  {
-    super._node = reference;
-    _reference = reference;
+    _node = doc.createEntityReference(value);
   }
 }

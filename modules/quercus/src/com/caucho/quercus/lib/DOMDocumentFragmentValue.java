@@ -32,11 +32,9 @@ package com.caucho.quercus.lib;
 import org.w3c.dom.DocumentFragment;
 
 public class DOMDocumentFragmentValue extends DOMNodeValue {
-  private DocumentFragment _fragment;
   
   public DOMDocumentFragmentValue(DocumentFragment fragment)
   {
-    super._node = fragment;
-    _fragment = fragment;
+    _node = fragment;
   }
 }

@@ -38,22 +38,19 @@ import com.caucho.quercus.env.Value;
 import org.w3c.dom.Element;
 
 public class DOMElementValue extends DOMNodeValue {
-
-  private Element _element;
   
   public DOMElementValue(Element element)
   {
-    super._node = element;
-    _element = element;
+    _node = element;
   }
   
   @Override
   public Value setNodeValue(Value value)
   {
-    if (_element == null)
+    if (_node == null)
       return NullValue.NULL;
     
-    _element.setNodeValue(value.toString());
+    ((Element) _node).setNodeValue(value.toString());
     return value;
   }
   
@@ -64,10 +61,10 @@ public class DOMElementValue extends DOMNodeValue {
        return NullValue.NULL;
      else if ("tagName".equals(name)) {
        
-       if (_element == null)
+       if (_node == null)
          return NullValue.NULL;
        
-       return new StringValue(_element.getNodeName());
+       return new StringValue(((Element) _node).getNodeName());
        
      } else
        return NullValue.NULL;
@@ -129,60 +126,60 @@ public class DOMElementValue extends DOMNodeValue {
   
   public Value getAttribute(Value name)
   {
-    if (_element == null)
+    if (_node == null)
       return NullValue.NULL;
     
-    return new StringValue(_element.getAttribute(name.toString()));
+    return new StringValue(((Element) _node).getAttribute(name.toString()));
   }
   
   public Value getAttributeNode(Value name)
   {
-    if (_element == null)
+    if (_node == null)
       return NullValue.NULL;
     
-    return new DOMAttrValue(_element.getAttributeNode(name.toString()));
+    return new DOMAttrValue(((Element) _node).getAttributeNode(name.toString()));
   }
   
   public Value getAttributeNodeNS(Value namespaceURI,
                                   Value localName)
   {
-    if (_element == null)
+    if (_node == null)
       return NullValue.NULL;
     
-    return new DOMAttrValue(_element.getAttributeNodeNS(namespaceURI.toString(), localName.toString()));
+    return new DOMAttrValue(((Element) _node).getAttributeNodeNS(namespaceURI.toString(), localName.toString()));
   }
   
   public Value getAttributeNS(Value namespaceURI,
                               Value localName)
   {
-    if (_element == null)
+    if (_node == null)
       return NullValue.NULL;
     
-    return new StringValue(_element.getAttributeNS(namespaceURI.toString(), localName.toString()));
+    return new StringValue(((Element) _node).getAttributeNS(namespaceURI.toString(), localName.toString()));
   }
   
   public Value getElementsByTagName(Value name)
   {
-    if (_element == null)
+    if (_node == null)
       return NullValue.NULL;
     
-    return new DOMNodeListValue(_element.getElementsByTagName(name.toString()));
+    return new DOMNodeListValue(((Element) _node).getElementsByTagName(name.toString()));
   }
   
   public Value getElementsByTagNameNS(Value namespaceURI, Value localName)
   {
-    if (_element == null)
+    if (_node == null)
       return NullValue.NULL;
     
-    return new DOMNodeListValue(_element.getElementsByTagNameNS(namespaceURI.toString(), localName.toString()));
+    return new DOMNodeListValue(((Element) _node).getElementsByTagNameNS(namespaceURI.toString(), localName.toString()));
   }
  
   public Value hasAttribute(Value name)
   {
-    if (_element == null)
+    if (_node == null)
       return NullValue.NULL;
     
-    if (_element.hasAttribute(name.toString()))
+    if (((Element) _node).hasAttribute(name.toString()))
       return BooleanValue.TRUE;
     else
       return BooleanValue.FALSE;
@@ -191,10 +188,10 @@ public class DOMElementValue extends DOMNodeValue {
   public Value hasAttributeNS(Value namespaceURI,
                               Value localName)
   {
-    if (_element == null)
+    if (_node == null)
       return NullValue.NULL;
     
-    if (_element.hasAttributeNS(namespaceURI.toString(), localName.toString()))
+    if (((Element) _node).hasAttributeNS(namespaceURI.toString(), localName.toString()))
       return BooleanValue.TRUE;
     else
       return BooleanValue.FALSE;
@@ -202,20 +199,20 @@ public class DOMElementValue extends DOMNodeValue {
   
   public Value removeAttribute(Value name)
   {
-    if (_element == null)
+    if (_node == null)
       return BooleanValue.FALSE;
     
-    _element.removeAttribute(name.toString());
+    ((Element) _node).removeAttribute(name.toString());
     
     return BooleanValue.TRUE;
   }
   
   public Value removeAttributeNode(Value oldAttr)
   {
-    if (_element == null)
+    if (_node == null)
       return BooleanValue.FALSE;
     
-    _element.removeAttributeNode(((DOMAttrValue) oldAttr).getAttribute());
+    ((Element) _node).removeAttributeNode(((DOMAttrValue) oldAttr).getAttribute());
     
     return BooleanValue.TRUE;
   }
@@ -223,10 +220,10 @@ public class DOMElementValue extends DOMNodeValue {
   public Value removeAttributeNS(Value namespaceURI,
                                  Value localName)
   {
-    if (_element == null)
+    if (_node == null)
       return BooleanValue.FALSE;
     
-    _element.removeAttributeNS(namespaceURI.toString(), localName.toString());
+    ((Element) _node).removeAttributeNS(namespaceURI.toString(), localName.toString());
     
     return BooleanValue.TRUE;
   }
@@ -234,38 +231,38 @@ public class DOMElementValue extends DOMNodeValue {
   public Value setAttribute(Value name,
                             Value value)
   {
-    if (_element == null)
+    if (_node == null)
       return BooleanValue.FALSE;
     
-    _element.setAttribute(name.toString(), value.toString());
+    ((Element) _node).setAttribute(name.toString(), value.toString());
     
     return BooleanValue.TRUE;
   }
   
   public Value setAttributeNode(Value attrNode)
   {
-    if ((_element == null) || (!(attrNode instanceof DOMAttrValue)))
+    if ((_node == null) || (!(attrNode instanceof DOMAttrValue)))
       return NullValue.NULL;
     
-    return new DOMAttrValue(_element.setAttributeNode(((DOMAttrValue)attrNode).getAttribute()));
+    return new DOMAttrValue(((Element) _node).setAttributeNode(((DOMAttrValue)attrNode).getAttribute()));
   }
   
   public Value setAttributeNodeNS(Value attrNode)
   {
-    if ((_element == null) || (!(attrNode instanceof DOMAttrValue)))
+    if ((_node == null) || (!(attrNode instanceof DOMAttrValue)))
       return NullValue.NULL;
     
-    return new DOMAttrValue(_element.setAttributeNode(((DOMAttrValue)attrNode).getAttribute()));
+    return new DOMAttrValue(((Element) _node).setAttributeNode(((DOMAttrValue)attrNode).getAttribute()));
   }
   
   public Value setAttributeNS(Value namespaceURI,
                               Value qualifiedName,
                               Value value)
   {
-    if (_element == null)
+    if (_node == null)
       return NullValue.NULL;
     
-    _element.setAttributeNS(namespaceURI.toString(), qualifiedName.toString(), value.toString());
+    ((Element) _node).setAttributeNS(namespaceURI.toString(), qualifiedName.toString(), value.toString());
     
     return NullValue.NULL;
   }

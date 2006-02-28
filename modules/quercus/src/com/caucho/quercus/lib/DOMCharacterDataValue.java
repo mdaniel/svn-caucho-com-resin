@@ -38,32 +38,27 @@ import com.caucho.quercus.env.Value;
 import org.w3c.dom.CharacterData;
 
 public class DOMCharacterDataValue extends DOMNodeValue {
-
-  CharacterData _characterData;
-  
-  public DOMCharacterDataValue()
-  {
-    
-  }
+ 
+  public DOMCharacterDataValue() {}
   
   public DOMCharacterDataValue(CharacterData characterData)
   {
-    _characterData = characterData;
+    _node = characterData;
   }
   
   @Override
   public Value getField(String name)
   {
-    if (_characterData == null)
+    if (_node == null)
       return NullValue.NULL;
     
     if ("data".equals(name)) {
 
-      return new StringValue(_characterData.getData());
+      return new StringValue(((CharacterData) _node).getData());
 
     } else if ("length".equals(name)) {
       
-      return new LongValue(_characterData.getLength());
+      return new LongValue(((CharacterData) _node).getLength());
     }
 
     return NullValue.NULL;
@@ -72,12 +67,12 @@ public class DOMCharacterDataValue extends DOMNodeValue {
   @Override
   public Value putField(Env env, String key, Value value)
   {
-    if (_characterData == null)
+    if (((CharacterData) _node) == null)
       return NullValue.NULL;
     
     if ("data".equals(key)) {
       
-      _characterData.setData(value.toString());
+      ((CharacterData) _node).setData(value.toString());
       
       return value;
     }
@@ -87,50 +82,50 @@ public class DOMCharacterDataValue extends DOMNodeValue {
 
   public Value appendData(Value data)
   {
-    if (_characterData == null)
+    if (((CharacterData) _node) == null)
       return NullValue.NULL;
     
-    _characterData.appendData(data.toString());
+    ((CharacterData) _node).appendData(data.toString());
     
     return NullValue.NULL;
   }
   
   public Value deleteData(Value offset, Value count)
   {
-    if (_characterData == null)
+    if (((CharacterData) _node) == null)
       return NullValue.NULL;
     
-    _characterData.deleteData(offset.toInt(), count.toInt());
+    ((CharacterData) _node).deleteData(offset.toInt(), count.toInt());
     
     return NullValue.NULL;
   }
   
   public Value insertData(Value offset, Value data)
   {
-    if (_characterData == null)
+    if (((CharacterData) _node) == null)
       return NullValue.NULL;
     
-    _characterData.insertData(offset.toInt(), data.toString());
+    ((CharacterData) _node).insertData(offset.toInt(), data.toString());
     
     return NullValue.NULL;
   }
   
   public Value replaceData(Value offset, Value count, Value data)
   {
-    if (_characterData == null)
+    if (((CharacterData) _node) == null)
       return NullValue.NULL;
     
-    _characterData.replaceData(offset.toInt(), count.toInt(), data.toString());
+    ((CharacterData) _node).replaceData(offset.toInt(), count.toInt(), data.toString());
     
     return NullValue.NULL;
   }
   
   public Value substringData(Value offset, Value count)
   {
-    if (_characterData == null)
+    if (((CharacterData) _node) == null)
       return NullValue.NULL;
     
-    return new StringValue(_characterData.substringData(offset.toInt(), count.toInt()));
+    return new StringValue(((CharacterData) _node).substringData(offset.toInt(), count.toInt()));
   }
   
   @Override

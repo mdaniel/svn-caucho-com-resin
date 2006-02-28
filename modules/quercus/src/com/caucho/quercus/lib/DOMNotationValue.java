@@ -29,9 +29,30 @@
 
 package com.caucho.quercus.lib;
 
-public class DOMNotation extends DOMNodeValue {
+import com.caucho.quercus.env.NullValue;
+import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.Value;
+
+import org.w3c.dom.Notation;
+
+public class DOMNotationValue extends DOMNodeValue {
   
-  //PROPERTIES
-  //@todo publicId (String)
-  //@todo systemId (String)
+  public DOMNotationValue(Notation notation)
+  {
+    _node = notation;
+  }
+  
+  @Override
+  public Value getField(String name)
+  {
+    if (_node == null)
+      return NullValue.NULL;
+    
+    if ("publicId".equals(name))
+      return new StringValue(((Notation)_node).getPublicId());
+    else if ("systemId".equals(name))
+      return new StringValue(((Notation)_node).getSystemId());
+    
+    return NullValue.NULL;
+  }
 }

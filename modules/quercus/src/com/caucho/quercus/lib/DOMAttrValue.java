@@ -39,19 +39,19 @@ import org.w3c.dom.Attr;
 
 public class DOMAttrValue extends DOMNodeValue {
 
-  Attr _attr;
+ // Attr _attr;
   
   public DOMAttrValue(Attr attr)
   {
-    _attr = attr;
+    _node = attr;
   }
   
   public Value isId()
   {
-    if (_attr == null)
+    if (_node == null)
       return NullValue.NULL;
     
-    if (_attr.isId())
+    if (((Attr)_node).isId())
       return BooleanValue.TRUE;
     else
       return BooleanValue.FALSE;
@@ -69,37 +69,37 @@ public class DOMAttrValue extends DOMNodeValue {
   
   public Attr getAttribute()
   {
-    return _attr;
+    return (Attr) _node;
   }
   
   @Override
   public Value getField(String index)
   {
-    if (_attr == null)
+    if (_node == null)
       return NullValue.NULL;
     
     if ("name".equals(index)) {
       
-      return new StringValue(_attr.getName());
+      return new StringValue(((Attr) _node).getName());
       
     } else if ("ownerElement".equals(index)) {
       
-      return new DOMElementValue(_attr.getOwnerElement());
+      return new DOMElementValue(((Attr) _node).getOwnerElement());
       
     } else if ("schemaTypeInfo".equals(index)) {
       
-      return new DOMTypeInfoValue(_attr.getSchemaTypeInfo());
+      return new DOMTypeInfoValue(((Attr) _node).getSchemaTypeInfo());
       
     } else if ("specified".equals(index)) {
       
-      if (_attr.getSpecified())
+      if (((Attr) _node).getSpecified())
         return BooleanValue.TRUE;
       else
         return BooleanValue.FALSE;
       
     } else if ("value".equals(index)) {
       
-      return new StringValue(_attr.getValue());
+      return new StringValue(((Attr) _node).getValue());
       
     }
     
@@ -111,7 +111,7 @@ public class DOMAttrValue extends DOMNodeValue {
   {
     if ("value".equals(index)) {
 
-      _attr.setValue(object.toString());
+      ((Attr) _node).setValue(object.toString());
       return object;
     }
     
