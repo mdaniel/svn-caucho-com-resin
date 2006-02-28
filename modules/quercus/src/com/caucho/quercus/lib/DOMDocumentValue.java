@@ -454,7 +454,7 @@ public class DOMDocumentValue extends DOMNodeValue {
     if (_document == null)
       return BooleanValue.FALSE;
 
-    return new DOMText(_document.createTextNode(data.toString()));
+    return new DOMTextValue(_document.createTextNode(data.toString()));
   }
 
   public Value getElementById(Value elementId)

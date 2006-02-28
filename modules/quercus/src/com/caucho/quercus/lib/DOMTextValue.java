@@ -29,16 +29,20 @@
 
 package com.caucho.quercus.lib;
 
-public class DOMCharacterData extends DOMNodeValue {
+import org.w3c.dom.Text;
+
+public class DOMTextValue extends DOMCharacterDataValue {
+  private Text _text;
+  
+  public DOMTextValue(Text text)
+  {
+    _text = text;
+  }
   
   //PROPERTIES
-  //@todo data (String)
-  //@todo length (int)
-  
-  //METHODS
-  //@todo appendData()
-  //@todo deleteData()
-  //@todo insertData()
-  //@todo replaceData()
-  //@todo substringData()
+  //@todo wholeText (String)
+
+  // METHODS
+  //@todo isWhitespaceInElementContent()
+  //@todo splitText()
 }

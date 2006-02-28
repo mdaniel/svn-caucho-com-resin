@@ -42,7 +42,7 @@ import org.w3c.dom.Node;
 
 public class DOMNodeValue extends Value {
 
-  private Node _node;
+  protected Node _node;
 
   public DOMNodeValue() {}
 

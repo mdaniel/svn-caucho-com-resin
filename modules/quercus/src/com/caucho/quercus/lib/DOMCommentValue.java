@@ -31,11 +31,12 @@ package com.caucho.quercus.lib;
 
 import org.w3c.dom.Comment;
 
-public class DOMCommentValue extends DOMCharacterData {
+public class DOMCommentValue extends DOMCharacterDataValue {
   private Comment _comment;
   
   public DOMCommentValue(Comment comment)
   {
+    super._characterData = comment;
     _comment = comment;
   }
 }

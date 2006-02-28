@@ -43,6 +43,7 @@ public class DOMElementValue extends DOMNodeValue {
   
   public DOMElementValue(Element element)
   {
+    super._node = element;
     _element = element;
   }
   
