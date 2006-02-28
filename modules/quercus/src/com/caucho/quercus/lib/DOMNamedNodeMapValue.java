@@ -29,6 +29,8 @@
 
 package com.caucho.quercus.lib;
 
+import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.NullValue;
 import com.caucho.quercus.env.Value;
 
 import org.w3c.dom.NamedNodeMap;
@@ -42,8 +44,51 @@ public class DOMNamedNodeMapValue extends Value {
     _namedNodeMap = namedNodeMap;
   }
   
-  //METHODS
-  //@todo getNamedItem()
-  //@todo getNamedItemNS()
-  //@todo item()
+  public Value getNamedItem(Value name)
+  {
+    if (_namedNodeMap == null)
+      return NullValue.NULL;
+    
+    return new DOMNodeValue(_namedNodeMap.getNamedItem(name.toString()));
+      
+  }
+  
+  public Value getNamedItemNS(Value namespaceURI,
+                              Value localName)
+  {
+    if (_namedNodeMap == null)
+      return NullValue.NULL;
+    
+    return new DOMNodeValue(_namedNodeMap.getNamedItemNS(namespaceURI.toString(), localName.toString()));
+  }
+  
+  public Value item(Value index)
+  {
+    if (_namedNodeMap == null)
+      return NullValue.NULL;
+    
+    return new DOMNodeValue(_namedNodeMap.item(index.toInt()));
+  }
+  
+  @Override
+  public Value evalMethod(Env env, String methodName, Value a0)
+    throws Throwable
+  {
+    if ("getNamedItem".equals(methodName))
+      return getNamedItem(a0);
+    else if ("item".equals(methodName))
+      return item(a0);
+    
+    return super.evalMethod(env, methodName, a0);
+  }
+  
+  @Override
+  public Value evalMethod(Env env, String methodName, Value a0, Value a1)
+    throws Throwable
+  {
+     if ("getNamedItemNS".equals(methodName))
+       return getNamedItemNS(a0, a1);
+    
+    return super.evalMethod(env, methodName, a0, a1);
+  }
 }

@@ -29,11 +29,13 @@
 
 package com.caucho.quercus.lib;
 
+import com.caucho.quercus.env.BooleanValue;
+import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.NullValue;
 import com.caucho.quercus.env.Value;
-import com.caucho.quercus.module.Optional;
 
-import org.w3c.dom.DOMException;
 import org.w3c.dom.DOMImplementation;
+import org.w3c.dom.DocumentType;
 
 public class DOMImplementationValue extends Value {
 
@@ -44,27 +46,117 @@ public class DOMImplementationValue extends Value {
     _DOMImplementation = DOMImplementation;
   }
 
-  public DOMDocumentValue createDocument(@Optional String namespaceURI,
-                                         @Optional String qualifiedName,
-                                         @Optional DOMDocumentType doctype)
-    throws DOMException
-  {
-    return new DOMDocumentValue(_DOMImplementation.createDocument(namespaceURI, qualifiedName, doctype.getDocType()));
+  public Value createDocument(Value namespaceURI,
+                              Value qualifiedName,
+                              Value doctype)
+  {   
+    if (_DOMImplementation == null)
+      return NullValue.NULL;
+    
+    String nsURI = null;
+    String qn = null;
+    DocumentType dt = null;
+    
+    if (namespaceURI != null) {
+      nsURI = namespaceURI.toString();
+      
+      if (qualifiedName != null) {
+        qn = qualifiedName.toString();
+        
+        if ((doctype != null) && (doctype instanceof DOMDocumentType))
+          dt = ((DOMDocumentType) doctype).getDocType();
+      }
+    }
+
+    return new DOMDocumentValue(_DOMImplementation.createDocument(nsURI, qn, dt));
   }
 
-  public DOMDocumentType createDocumentType(@Optional String qualifiedName,
-                                            @Optional String publicId,
-                                            @Optional String systemId)
-    throws DOMException
+  public Value createDocumentType(Value qualifiedName,
+                                  Value publicId,
+                                  Value systemId)
   {
-    return new DOMDocumentType(_DOMImplementation.createDocumentType(qualifiedName, publicId, systemId));
+    if (_DOMImplementation == null)
+      return NullValue.NULL;
+    
+    String qn = null;
+    String pId = null;
+    String sId = null;
+    
+    if (qualifiedName != null) {
+      qn = qualifiedName.toString();
+      
+      if (publicId != null) {
+        pId = publicId.toString();
+        
+        if (systemId != null) {
+          sId = systemId.toString();
+        }
+      }
+    }
+    
+    return new DOMDocumentType(_DOMImplementation.createDocumentType(qn, pId, sId));
+  }
+  
+  @Override
+  public Value evalMethod(Env env, String methodName)
+    throws Throwable
+  {
+    if ("createDocument".equals(methodName))
+      return createDocument(null, null, null);
+    else if ("createDocumentType".equals(methodName))
+      return createDocumentType(null, null, null);
+    
+    return super.evalMethod(env, methodName);
+  }
+  
+  @Override
+  public Value evalMethod(Env env, String methodName, Value a0)
+    throws Throwable
+  {
+    if ("createDocument".equals(methodName))
+      return createDocument(a0, null, null);
+    else if ("createDocumentType".equals(methodName))
+      return createDocumentType(a0, null, null);
+    
+    return super.evalMethod(env, methodName, a0);
+  }
+  
+  @Override
+  public Value evalMethod(Env env, String methodName, Value a0, Value a1)
+    throws Throwable
+  {
+    if ("createDocument".equals(methodName))
+      return createDocument(a0, a1, null);
+    else if ("createDocumentType".equals(methodName))
+      return createDocumentType(a0, a1, null);
+    else if ("hasFeature".equals(methodName))
+      return hasFeature(a0, a1);
+    
+    return super.evalMethod(env, methodName, a0, a1);
+  }
+  
+  @Override
+  public Value evalMethod(Env env, String methodName, Value a0, Value a1, Value a2)
+    throws Throwable
+  {
+    if ("createDocument".equals(methodName))
+      return createDocument(a0, a1, a2);
+    else if ("createDocumentType".equals(methodName))
+      return createDocumentType(a0, a1, a2);
+    
+    return super.evalMethod(env, methodName, a0, a1, a2);
+  }
+  
+  public Value hasFeature(Value feature,
+                          Value version)
+  {
+    if (_DOMImplementation == null)
+      return BooleanValue.FALSE;
+    
+    if (_DOMImplementation.hasFeature(feature.toString(), version.toString()))
+      return BooleanValue.TRUE;
+    else
+      return BooleanValue.FALSE;
   }
 
-  public boolean hasFeature(String feature,
-                            String version)
-  {
-    return _DOMImplementation.hasFeature(feature, version);
-  }
-
-  //@todo construct()
 }
