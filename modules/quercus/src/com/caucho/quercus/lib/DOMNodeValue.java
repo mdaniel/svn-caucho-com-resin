@@ -44,8 +44,6 @@ public class DOMNodeValue extends Value {
 
   protected Node _node;
 
-  public DOMNodeValue() {}
-
   public DOMNodeValue(Node node)
   {
     _node = node;
