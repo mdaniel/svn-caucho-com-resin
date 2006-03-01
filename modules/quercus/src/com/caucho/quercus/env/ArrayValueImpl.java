@@ -77,6 +77,7 @@ public class ArrayValueImpl extends ArrayValue {
 
   private int _size;
   private long _index;
+  private boolean _isDirty;
 
   private Entry _head;
   private Entry _tail;
@@ -110,15 +111,33 @@ public class ArrayValueImpl extends ArrayValue {
 
   public ArrayValueImpl(ArrayValueImpl copy)
   {
+    copy._isDirty = true;
+    _isDirty = true;
+    
     _size = copy._size;
-    _entries = new Entry[copy._entries.length];
-    _hashMask = _entries.length - 1;
+    _entries = copy._entries;
+    _hashMask = copy._hashMask;
 
+    _head = copy._head;
+    _current = copy._current;
+    _tail = copy._tail;
+    _index = copy._index;
+  }
+
+  private void copyOnWrite()
+  {
+    if (! _isDirty)
+      return;
+
+    _isDirty = false;
+    
+    Entry []entries = new Entry[_entries.length];
+    
     Entry prev = null;
-    for (Entry ptr = copy._head; ptr != null; ptr = ptr._next) {
+    for (Entry ptr = _head; ptr != null; ptr = ptr._next) {
       Entry ptrCopy = new Entry(ptr._key, ptr._value.copyArrayItem());
       
-      _entries[ptr._index] = ptrCopy;
+      entries[ptr._index] = ptrCopy;
       ptrCopy._index = ptr._index;
 
       if (prev == null)
@@ -132,6 +151,8 @@ public class ArrayValueImpl extends ArrayValue {
     }
 
     _tail = prev;
+
+    _entries = entries;
   }
 
   public ArrayValueImpl(Env env,
@@ -197,6 +218,8 @@ public class ArrayValueImpl extends ArrayValue {
    */
   public Value copy()
   {
+    _isDirty = true;
+    
     return new ArrayValueImpl(this);
   }
   
@@ -205,6 +228,8 @@ public class ArrayValueImpl extends ArrayValue {
    */
   public Value copyReturn()
   {
+    _isDirty = true;
+    
     return new ArrayValueImpl(this);
   }
   
@@ -250,6 +275,11 @@ public class ArrayValueImpl extends ArrayValue {
    */
   public void clear()
   {
+    if (_isDirty) {
+      _entries = new Entry[_entries.length];
+      _isDirty = false;
+    }
+    
     _size = 0;
     _head = _tail = _current = null;
     
@@ -271,6 +301,9 @@ public class ArrayValueImpl extends ArrayValue {
    */
   public Value put(Value key, Value value)
   {
+    if (_isDirty)
+      copyOnWrite();
+    
     Entry entry = createEntry(key);
 
     // php/0434
@@ -298,6 +331,9 @@ public class ArrayValueImpl extends ArrayValue {
    */
   public ArrayValue unshift(Value value)
   {
+    if (_isDirty)
+      copyOnWrite();
+    
     _size++;
     
     if (_entries.length <= 2 * _size)
@@ -326,6 +362,9 @@ public class ArrayValueImpl extends ArrayValue {
    */
   public Value getArg(Value index)
   {
+    if (_isDirty) // XXX: needed?
+      copyOnWrite();
+    
     Entry entry = getEntry(index);
 
     if (entry != null) {
@@ -359,6 +398,9 @@ public class ArrayValueImpl extends ArrayValue {
    */
   public ArrayValue put(Value value)
   {
+    if (_isDirty) 
+      copyOnWrite();
+    
     Value key = createTailKey();
 
     put(key, value);
@@ -371,6 +413,9 @@ public class ArrayValueImpl extends ArrayValue {
    */
   public Value putRef()
   {
+    if (_isDirty) 
+      copyOnWrite();
+    
     // 0d0d
     Value tailKey = createTailKey();
     
@@ -455,7 +500,10 @@ public class ArrayValueImpl extends ArrayValue {
    * Removes a value.
    */
   public Value remove(Value key)
-  { 
+  {
+    if (_isDirty)
+      copyOnWrite();
+    
     int capacity = _entries.length;
 
     key = key.toKey();
@@ -524,6 +572,9 @@ public class ArrayValueImpl extends ArrayValue {
    */
   public Var getRef(Value index)
   {
+    if (_isDirty)
+      copyOnWrite();
+    
     Entry entry = createEntry(index);
     // quercus/0431
     Value value = entry._value;
@@ -543,6 +594,9 @@ public class ArrayValueImpl extends ArrayValue {
    */
   private Entry createEntry(Value key)
   {
+    if (_isDirty)
+      copyOnWrite();
+    
     int capacity = _entries.length;
 
     key = key.toKey();
@@ -633,6 +687,9 @@ public class ArrayValueImpl extends ArrayValue {
    */
   public Value pop()
   {
+    if (_isDirty)
+      copyOnWrite();
+    
     if (_tail != null) {
       Value value = remove(_tail.getKey());
       
@@ -657,6 +714,9 @@ public class ArrayValueImpl extends ArrayValue {
    */
   public void shuffle()
   {
+    if (_isDirty)
+      copyOnWrite();
+    
     Entry []values = new Entry[size()];
 
     int length = values.length;
