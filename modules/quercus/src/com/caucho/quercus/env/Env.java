@@ -2221,7 +2221,7 @@ public class Env {
     if (value instanceof Callback)
       return (Callback) value;
 
-    else if (value instanceof StringValue)
+    else if (value instanceof AbstractStringValue)
       return new CallbackFunction(this, value.toString());
 
     else if (value instanceof ArrayValue) {

@@ -171,9 +171,15 @@ public class AppendExpr extends Expr {
   public void generate(PhpWriter out)
     throws IOException
   {
-    out.print("new com.caucho.quercus.env.StringValue(");
-    generateString(out);
+    out.print("new StringBuilderValue(");
+    _value.generateString(out);
     out.print(")");
+    
+    for (AppendExpr ptr = _next; ptr != null; ptr = ptr._next) {
+      out.print(".append(");
+      ptr._value.generateAppend(out);
+      out.print(")");
+    }
   }
 
   /**
@@ -204,10 +210,9 @@ public class AppendExpr extends Expr {
   public void generatePrint(PhpWriter out)
     throws IOException
   {
-    generateGetOut(out);
-    out.print(".print(");
-    generateString(out);
-    out.print(")");
+    for (AppendExpr ptr = this; ptr != null; ptr = ptr._next) {
+      ptr._value.generatePrint(out);
+    }
   }
   
   public String toString()

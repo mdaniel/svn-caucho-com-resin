@@ -53,7 +53,6 @@ public class StringValue extends AbstractStringValue {
   private final static StringValue []CHAR_STRINGS;
 
   private final String _value;
-  private final char []_chars;
 
   public StringValue(String value)
   {
@@ -61,8 +60,6 @@ public class StringValue extends AbstractStringValue {
       throw new NullPointerException();
 
     _value = value;
-    _chars = new char[value.length()];
-    value.getChars(0, _chars.length, _chars, 0);
   }
 
   /**
@@ -81,7 +78,6 @@ public class StringValue extends AbstractStringValue {
 
     // XXX: string constructor copies the array
     _value = new String(chars);
-    _chars = chars;
   }
 
   /**
@@ -146,13 +142,15 @@ public class StringValue extends AbstractStringValue {
    */
   public boolean isLong()
   {
-    int len = _chars.length;
+    String s = _value;
+    
+    int len = s.length();
 
     if (len == 0)
       return false;
 
     for (int i = 0; i < len; i++) {
-      char ch = _chars[i];
+      char ch = s.charAt(i);
 
       if (! ('0' <= ch && ch <= '9'))
 	return false;
@@ -190,8 +188,8 @@ public class StringValue extends AbstractStringValue {
    */
   protected int getNumericType()
   {
-    char []chars = _chars;
-    int len = chars.length;
+    String s = _value;
+    int len = s.length();
 
     if (len == 0)
       return IS_STRING;
@@ -200,17 +198,17 @@ public class StringValue extends AbstractStringValue {
     int ch = 0;
     boolean hasPoint = false;
 
-    if (i < len && ((ch = chars[i]) == '+' || ch == '-')) {
+    if (i < len && ((ch = s.charAt(i)) == '+' || ch == '-')) {
       i++;
     }
 
     if (len <= i)
       return IS_STRING;
 
-    ch = chars[i];
+    ch = s.charAt(i);
 
     if (ch == '.') {
-      for (i++; i < len && '0' <= (ch = chars[i]) && ch <= '9'; i++) {
+      for (i++; i < len && '0' <= (ch = s.charAt(i)) && ch <= '9'; i++) {
 	return IS_DOUBLE;
       }
 
@@ -219,14 +217,14 @@ public class StringValue extends AbstractStringValue {
     else if (! ('0' <= ch && ch <= '9'))
       return IS_STRING;
 
-    for (; i < len && '0' <= (ch = chars[i]) && ch <= '9'; i++) {
+    for (; i < len && '0' <= (ch = s.charAt(i)) && ch <= '9'; i++) {
     }
 
     if (len <= i)
       return IS_LONG;
     else if (ch == '.' || ch == 'e' || ch == 'E') {
       for (i++;
-	   i < len && ('0' <= (ch = chars[i]) && ch <= '9' ||
+	   i < len && ('0' <= (ch = s.charAt(i)) && ch <= '9' ||
 		       ch == '+' || ch == '-' || ch == 'e' || ch == 'E');
 	   i++) {
       }
@@ -353,8 +351,8 @@ public class StringValue extends AbstractStringValue {
    */
   public Value toKey()
   {
-    char []chars = _chars;
-    int len = chars.length;
+    String s = _value;
+    int len = s.length();
 
     if (len == 0)
       return this;
@@ -363,14 +361,14 @@ public class StringValue extends AbstractStringValue {
     long value = 0;
 
     int i = 0;
-    char ch = chars[i];
+    char ch = s.charAt(i);
     if (ch == '-') {
       sign = -1;
       i++;
     }
 
     for (; i < len; i++) {
-      ch = chars[i];
+      ch = s.charAt(i);
 
       if ('0' <= ch && ch <= '9')
 	value = 10 * value + ch - '0';
@@ -388,11 +386,13 @@ public class StringValue extends AbstractStringValue {
    */
   public byte[] toBytes()
   {
-    final int len = _chars.length;
+    String s = _value;
+    
+    final int len = s.length();
     byte[] bytes = new byte[len];
 
     for (int i = 0; i < len; i++) {
-      bytes[i] = (byte) _chars[i];
+      bytes[i] = (byte) s.charAt(i);
     }
 
     return bytes;
@@ -573,7 +573,7 @@ public class StringValue extends AbstractStringValue {
   public void print(Env env)
     throws IOException
   {
-    env.getOut().print(_chars, 0, _chars.length);
+    env.getOut().print(_value);
   }
 
   /**
@@ -582,9 +582,9 @@ public class StringValue extends AbstractStringValue {
   public void serialize(StringBuilder sb)
   {
     sb.append("s:");
-    sb.append(_chars.length);
+    sb.append(_value.length());
     sb.append(":\"");
-    sb.append(_chars, 0, _chars.length);
+    sb.append(_value);
     sb.append("\";");
   }
 
@@ -619,15 +619,7 @@ public class StringValue extends AbstractStringValue {
    */
   public int hashCode()
   {
-    char []chars = _chars;
-    int len = _chars.length;
-
-    int hash = 37;
-
-    for (int i = 0; i < len; i++)
-      hash = 65531 * hash + chars[i];
-
-    return hash;
+    return _value.hashCode();
   }
 
   /**

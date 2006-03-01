@@ -650,7 +650,6 @@ abstract public class Expr {
     out.print(".toBoolean()");
   }
 
-
   /**
    * Generates code to evaluate a string directly
    *
@@ -661,6 +660,17 @@ abstract public class Expr {
   {
     generate(out);
     out.print(".toString()");
+  }
+
+  /**
+   * Generates code to append to a string builder.
+   *
+   * @param out the writer to the Java source code.
+   */
+  public void generateAppend(PhpWriter out)
+    throws IOException
+  {
+    generateString(out);
   }
 
   /**

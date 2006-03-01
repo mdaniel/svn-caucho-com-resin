@@ -630,6 +630,8 @@ public class QuercusRegexpModule
   {
     if (limit < 0)
       limit = Long.MAX_VALUE;
+
+    int length = subject.length();
     
     Matcher matcher = pattern.matcher(subject);
 
@@ -647,7 +649,7 @@ public class QuercusRegexpModule
       
       // append all text up to match
       if (tail < matcher.start())
-        result.append(subject.substring(tail, matcher.start()));
+        result.append(subject, tail, matcher.start());
 
       // if isEval then append replacement evaluated as PHP code
       // else append replacement string
@@ -672,8 +674,8 @@ public class QuercusRegexpModule
       tail = matcher.end();
     }
 
-    if (tail < subject.length())
-      result.append(subject.substring(tail));
+    if (tail < length)
+      result.append(subject, tail, length);
 
     return result.toString();
   }
@@ -1034,7 +1036,7 @@ public class QuercusRegexpModule
   {
     Pattern pattern = _patternCache.get(rawRegexp);
 
-    if (pattern != null && false)
+    if (pattern != null)
       return pattern;
 
     char delim = rawRegexp.charAt(0);
@@ -1151,7 +1153,7 @@ public class QuercusRegexpModule
           }
 
           if (text.length() > 0)
-            program.add(new TextReplacement(text.toString()));
+            program.add(new TextReplacement(text));
 
           program.add(new GroupReplacement(group));
 
@@ -1179,9 +1181,8 @@ public class QuercusRegexpModule
             throw new Exception("bad regexp");
           }
 
-
           if (text.length() > 0)
-            program.add(new TextReplacement(text.toString()));
+            program.add(new TextReplacement(text));
 
           program.add(new GroupReplacement(group));
           text.setLength(0);
@@ -1194,7 +1195,7 @@ public class QuercusRegexpModule
     }
 
     if (text.length() > 0)
-      program.add(new TextReplacement(text.toString()));
+      program.add(new TextReplacement(text));
 
     return program;
   }
@@ -1404,11 +1405,15 @@ public class QuercusRegexpModule
   static class TextReplacement
     extends Replacement
   {
-    private String _text;
+    private char []_text;
 
-    TextReplacement(String text)
+    TextReplacement(StringBuilder text)
     {
-      _text = text;
+      int length = text.length();
+      
+      _text = new char[length];
+
+      text.getChars(0, length, _text, 0);
     }
 
     void eval(StringBuilder sb, Matcher matcher)

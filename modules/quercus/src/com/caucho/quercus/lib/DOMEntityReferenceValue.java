@@ -41,7 +41,6 @@ public class DOMEntityReferenceValue extends DOMNodeValue {
 
   public DOMEntityReferenceValue(String value)
   {
-    Document doc = DOMDocumentValue.createDocument();
-    _node = doc.createEntityReference(value);
+    super(DOMDocumentValue.createDocument().createEntityReference(value));;
   }
 }
