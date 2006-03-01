@@ -697,7 +697,7 @@ public class QuercusVariableModule extends AbstractQuercusModule {
         out.print("    [");
         out.print(entry.getKey());
         out.print("] => ");
-        debug_impl(env, entry.getRawValue(), depth + 1); // XXX: recursion
+        debug_impl(env, entry.getValue(), depth + 1); // XXX: recursion
       }
       printDepth(out, 2 * depth);
       out.println(")");

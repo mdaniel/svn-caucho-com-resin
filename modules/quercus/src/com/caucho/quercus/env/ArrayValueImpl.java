@@ -104,7 +104,7 @@ public class ArrayValueImpl extends ArrayValue {
 
     for (Entry ptr = copy.getHead(); ptr != null; ptr = ptr._next) {
       // php/0662 for copy
-      put(ptr.getKey(), ptr.getRawValue().copyArrayItem());
+      put(ptr.getKey(), ptr._value.copyArrayItem());
     }
   }
 
@@ -119,6 +119,7 @@ public class ArrayValueImpl extends ArrayValue {
       Entry ptrCopy = new Entry(ptr._key, ptr._value.copyArrayItem());
       
       _entries[ptr._index] = ptrCopy;
+      ptrCopy._index = ptr._index;
 
       if (prev == null)
 	_head = _current = ptrCopy;
@@ -273,20 +274,20 @@ public class ArrayValueImpl extends ArrayValue {
     Entry entry = createEntry(key);
 
     // php/0434
-    Value oldValue = entry.getRawValue();
+    Value oldValue = entry._value;
 
     if (value instanceof Var) {
       // php/0a59
       Var var = (Var) value;
       var.setReference();
 
-      entry.setRaw(var);
+      entry._value = var;
     }
     else if (oldValue instanceof Var) {
       oldValue.set(value);
     }
     else {
-      entry.setRaw(value);
+      entry._value = value;
     }
 
     return value;
@@ -525,7 +526,7 @@ public class ArrayValueImpl extends ArrayValue {
   {
     Entry entry = createEntry(index);
     // quercus/0431
-    Value value = entry.getRawValue();
+    Value value = entry._value;
 
     if (value instanceof Var)
       return (Var) value;
@@ -572,11 +573,9 @@ public class ArrayValueImpl extends ArrayValue {
     
     _size++;
 
-    Entry newEntry = new Entry();
+    Entry newEntry = new Entry(key);
     _entries[hash] = newEntry;
     newEntry._index = hash;
-    
-    newEntry._key = key;
 
     if (_head == null) {
       newEntry._prev = null;

@@ -1,13 +1,3 @@
-com.caucho.quercus.lib.DOMAttrValue
-com.caucho.quercus.lib.DOMCommentValue
-com.caucho.quercus.lib.DOMDocumentValue
-com.caucho.quercus.lib.DOMElementValue
-com.caucho.quercus.lib.DOMEntityReferenceValue
-com.caucho.quercus.lib.DOMImplementation
-com.caucho.quercus.lib.DOMNodeValue
-com.caucho.quercus.lib.DOMProcessingInstructionValue
-com.caucho.quercus.lib.DOMTextValue
-com.caucho.quercus.lib.DOMXPath
 com.caucho.quercus.lib.Memcache
 com.caucho.quercus.lib.Mysqli
 com.caucho.quercus.pdflib.PDF

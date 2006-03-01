@@ -788,7 +788,7 @@ abstract public class ArrayValue extends Value {
     for (Map.Entry<Value,Value> mapEntry : entrySet()) {
       ArrayValue.Entry entry = (ArrayValue.Entry) mapEntry;
 
-      entry.varDump(env, out, depth + 1, valueSet);
+      entry.varDumpImpl(env, out, depth + 1, valueSet);
 
       out.println();
     }
@@ -811,29 +811,32 @@ abstract public class ArrayValue extends Value {
     for (Map.Entry<Value,Value> mapEntry : entrySet()) {
       ArrayValue.Entry entry = (ArrayValue.Entry) mapEntry;
 
-      entry.printR(env, out, depth, valueSet);
+      entry.printRImpl(env, out, depth, valueSet);
     }
 
     printDepth(out, 8 * depth);
     out.println(")");
   }
 
-  public final static class Entry extends Var
-    implements Map.Entry<Value,Value> {
+  public final static class Entry implements Map.Entry<Value,Value> {
+    final Value _key;
+    Value _value;
+    
     Entry _prev;
     Entry _next;
 
-    Value _key;
     int _index;
 
-    public Entry()
+    public Entry(Value key)
     {
+      _key = key;
+      _value = NullValue.NULL;
     }
 
     public Entry(Value key, Value value)
     {
       _key = key;
-      setValue(value);
+      _value = value;
     }
 
     public Entry getNext()
@@ -843,7 +846,7 @@ abstract public class ArrayValue extends Value {
 
     public Value getValue()
     {
-      return getRawValue().toValue();
+      return _value.toValue();
     }
 
     public Value getKey()
@@ -855,7 +858,7 @@ abstract public class ArrayValue extends Value {
     {
       // The value may be a var
       // XXX: need test
-      return getRawValue().toValue();
+      return _value.toValue();
     }
 
     /**
@@ -865,14 +868,14 @@ abstract public class ArrayValue extends Value {
     {
       // php/376a
 
-      Value val = getRawValue();
+      Value val = _value;
 
       if (val instanceof Var)
         return (Var) val;
       else {
         Var var = new Var(val);
 
-        setRaw(var);
+        _value = var;
 
         return var;
       }
@@ -883,14 +886,14 @@ abstract public class ArrayValue extends Value {
      */
     public Value toArgValue()
     {
-      return getRawValue().toValue();
+      return _value.toValue();
     }
 
     public Value setValue(Value value)
     {
-      Value oldValue = toValue();
+      Value oldValue = _value;
 
-      setRaw(value);
+      _value = value;
 
       return oldValue;
     }
@@ -900,12 +903,15 @@ abstract public class ArrayValue extends Value {
      */
     public Value toRef()
     {
-      Value value = toValue();
+      Value value = _value;
 
       if (value instanceof Var)
         return new RefVar((Var) value);
-      else
-	return new RefVar(this);
+      else {
+	_value = new Var(value);
+	
+	return new RefVar((Var) _value);
+      }
     }
 
     /**
@@ -913,24 +919,30 @@ abstract public class ArrayValue extends Value {
      */
     public Value toArgRef()
     {
-      Value value = toValue();
+      Value value = _value;
 
       if (value instanceof Var)
         return new RefVar((Var) value);
-      else
-        return new RefVar(this);
+      else {
+	_value = new Var(_value);
+	
+        return new RefVar((Var) _value);
+      }
     }
 
     public Value toArg()
     {
       // php/39a4
-      Value value = getRawValue();
+      Value value = _value;
 
       // php/39aj
       if (value instanceof Var)
         return value;
-      else
-        return this;
+      else {
+	_value = new Var(value);
+	
+        return _value;
+      }
     }
 
     public void varDumpImpl(Env env,
@@ -951,7 +963,7 @@ abstract public class ArrayValue extends Value {
 
       printDepth(out, 2 * depth);
 
-      super.toValue().varDump(env, out, depth, valueSet);
+      _value.varDump(env, out, depth, valueSet);
     }
 
     protected void printRImpl(Env env,
@@ -964,10 +976,17 @@ abstract public class ArrayValue extends Value {
       out.print("    [");
       out.print(_key);
       out.print("] => ");
-      super.toValue().printR(env, out, depth + 1, valueSet);
+      _value.printR(env, out, depth + 1, valueSet);
       out.println();
     }
 
+    private void printDepth(WriteStream out, int depth)
+      throws java.io.IOException
+    {
+      for (int i = depth; i > 0; i--)
+	out.print(' ');
+    }
+    
     public String toString()
     {
       return "ArrayValue.Entry[" + getKey() + "]";
