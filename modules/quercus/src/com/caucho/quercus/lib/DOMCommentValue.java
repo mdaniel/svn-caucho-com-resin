@@ -33,7 +33,7 @@ import org.w3c.dom.Comment;
 import org.w3c.dom.Document;
 
 public class DOMCommentValue extends DOMCharacterDataValue {
-
+  
   public DOMCommentValue(Comment comment)
   {
     _node = comment;

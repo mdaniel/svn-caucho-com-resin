@@ -96,6 +96,7 @@ public class DOMNodeValue extends Value {
       return NullValue.NULL;
     
     _node.setNodeValue(value.toString());
+    
     return value;
   }
   

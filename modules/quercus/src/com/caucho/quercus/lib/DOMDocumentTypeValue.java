@@ -37,7 +37,6 @@ import org.w3c.dom.DocumentType;
 
 public class DOMDocumentTypeValue extends DOMNodeValue {
 
-
   public DOMDocumentTypeValue(DocumentType docType)
   {
     _node = docType;

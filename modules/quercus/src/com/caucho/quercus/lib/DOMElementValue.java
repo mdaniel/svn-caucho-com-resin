@@ -45,17 +45,6 @@ public class DOMElementValue extends DOMNodeValue {
   }
   
   @Override
-  public Value setNodeValue(Value value)
-  {
-    if (_node == null)
-      return NullValue.NULL;
-    
-    _node.setNodeValue(value.toString());
-    
-    return value;
-  }
-  
-  @Override
   public Value getField(String name)
   {
      if ("schemaTypeInfo".equals(name))

@@ -39,8 +39,6 @@ import org.w3c.dom.Attr;
 
 public class DOMAttrValue extends DOMNodeValue {
 
- // Attr _attr;
-  
   public DOMAttrValue(Attr attr)
   {
     _node = attr;
