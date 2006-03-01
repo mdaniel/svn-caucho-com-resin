@@ -29,18 +29,49 @@
 
 package javax.persistence;
 
+import java.io.InputStream;
+
+import java.net.URL;
+
 import java.util.Map;
+import java.util.ArrayList;
+import java.util.WeakHashMap;
+import java.util.Enumeration;
+
+import java.util.logging.Logger;
+import java.util.logging.Level;
+
+import javax.persistence.spi.PersistenceProvider;
 
 /**
  * Bootstrap class to obtain an EntityManagerFactory.
  */
 public class Persistence {
+  private static final Logger log
+    = Logger.getLogger(Persistence.class.getName());
+  
+  private static final String SERVICE
+    = "META-INF/services/javax.persistence.PersistenceProvider";
+  private static WeakHashMap<ClassLoader,PersistenceProvider[]>
+    _providerMap = new WeakHashMap<ClassLoader,PersistenceProvider[]>();
+  
   /**
    * Create an return an EntityManagerFactory for the named unit.
    */
   public static EntityManagerFactory createEntityManagerFactory(String name)
   {
-    throw new UnsupportedOperationException();
+    PersistenceProvider []providers = getProviderList();
+
+    for (int i = 0; i < providers.length; i++) {
+      EntityManagerFactory factory;
+
+      factory = providers[i].createEntityManagerFactory(name);
+
+      if (factory != null)
+	return factory;
+    }
+    
+    return null;
   }
   
   /**
@@ -49,6 +80,85 @@ public class Persistence {
   public static EntityManagerFactory createEntityManagerFactory(String name,
 								Map props)
   {
+    PersistenceProvider []providerList = getProviderList();
+    
     throw new UnsupportedOperationException();
+  }
+
+  private static PersistenceProvider []getProviderList()
+  {
+    ClassLoader loader = Thread.currentThread().getContextClassLoader();
+
+    PersistenceProvider []providers = _providerMap.get(loader);
+
+    if (providers != null)
+      return providers;
+    
+    ArrayList<PersistenceProvider> list = new ArrayList<PersistenceProvider>();
+
+    try {
+      Enumeration e = loader.getResources(SERVICE);
+
+      while (e.hasMoreElements()) {
+	URL url = (URL) e.nextElement();
+
+	PersistenceProvider provider = loadProvider(url, loader);
+
+	if (provider != null)
+	  list.add(provider);
+      }
+    } catch (Throwable e) {
+      log.log(Level.WARNING, e.toString(), e);
+    }
+
+    providers = new PersistenceProvider[list.size()];
+    list.toArray(providers);
+
+    _providerMap.put(loader, providers);
+    
+    return providers;
+  }
+
+  private static PersistenceProvider loadProvider(URL url, ClassLoader loader)
+  {
+    InputStream is = null;
+    try {
+      is = url.openStream();
+      int ch;
+
+      while ((ch = is.read()) >= 0) {
+	if (Character.isWhitespace((char) ch)) {
+	}
+	else if (ch == '#') {
+	  for (; ch >= 0 && ch != '\n' && ch != '\r'; ch = is.read()) {
+	  }
+	}
+	else {
+	  StringBuilder sb = new StringBuilder();
+
+	  for (;
+	       ch >= 0 && ! Character.isWhitespace((char) ch);
+	       ch = is.read()) {
+	    sb.append((char) ch);
+	  }
+
+	  String className = sb.toString();
+
+	  Class cl = Class.forName(className, false, loader);
+
+	  return (PersistenceProvider) cl.newInstance();
+	}
+      }
+    } catch (Throwable e) {
+      log.log(Level.WARNING, e.toString(), e);
+    } finally {
+      try {
+	if (is != null)
+	  is.close();
+      } catch (Throwable e) {
+      }
+    }
+
+    return null;
   }
 }

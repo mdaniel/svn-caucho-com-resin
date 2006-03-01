@@ -30,8 +30,11 @@ package com.caucho.amber.ejb3;
 
 import java.sql.Connection;
 
-import javax.ejb.EntityManager;
-import javax.ejb.Query;
+import javax.persistence.EntityManager;
+import javax.persistence.EntityTransaction;
+import javax.persistence.Query;
+import javax.persistence.LockModeType;
+import javax.persistence.FlushModeType;
 
 import com.caucho.amber.AmberManager;
 import com.caucho.amber.EnvAmberManager;
@@ -140,6 +143,14 @@ public class EntityManagerImpl implements EntityManager, CloseResource {
       throw new EJBExceptionWrapper(e);
     }
   }
+  
+  /**
+   * Find by the primary key.
+   */
+  public <T> T getReference(Class<T> entityClass, Object primaryKey)
+  {
+    throw new UnsupportedOperationException();
+  }
 
   /**
    * Synchronize with the database.
@@ -150,6 +161,22 @@ public class EntityManagerImpl implements EntityManager, CloseResource {
       AmberConnectionImpl aConn = getAmberConnection();
     
       aConn.flush();
+    } catch (RuntimeException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new EJBExceptionWrapper(e);
+    }
+  }
+
+  /**
+   * Clears the connection
+   */
+  public void clear()
+  {
+    try {
+      AmberConnectionImpl aConn = getAmberConnection();
+    
+      // aConn.clear();
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
@@ -215,6 +242,36 @@ public class EntityManagerImpl implements EntityManager, CloseResource {
   }
 
   /**
+   * Returns the flush mode.
+   */
+  public FlushModeType getFlushMode()
+  {
+    return FlushModeType.AUTO;
+  }
+
+  /**
+   * Returns the flush mode.
+   */
+  public void setFlushMode(FlushModeType mode)
+  {
+  }
+
+  /**
+   * Locks the object.
+   */
+  public void lock(Object entity, LockModeType lockMode)
+  {
+  }
+
+  /**
+   * Returns the transaction.
+   */
+  public EntityTransaction getTransaction()
+  {
+    return null;
+  }
+
+  /**
    * Returns true if the entity belongs to the current context.
    */
   public boolean contains(Object entity)
@@ -228,6 +285,14 @@ public class EntityManagerImpl implements EntityManager, CloseResource {
     } catch (Exception e) {
       throw new EJBExceptionWrapper(e);
     }
+  }
+
+  /**
+   * Returns true if open.
+   */
+  public boolean isOpen()
+  {
+    return _amberManager != null;
   }
 
   /**

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2004 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -38,7 +38,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import javax.ejb.Query;
+import javax.persistence.Query;
+import javax.persistence.TemporalType;
+import javax.persistence.FlushModeType;
 
 import com.caucho.amber.connection.AmberConnectionImpl;
 
@@ -77,7 +79,7 @@ public class QueryImpl implements Query {
   /**
    * Execute the query and return as a List.
    */
-  public List listResults()
+  public List getResultList()
   {
     try {
       ArrayList results = new ArrayList();
@@ -207,6 +209,14 @@ public class QueryImpl implements Query {
    * Sets a calendar parameter.
    */
   public Query setParameter(int index, Calendar value, TemporalType type)
+  {
+    return this;
+  }
+
+  /**
+   * Sets the flush mode type.
+   */
+  public Query setFlushMode(FlushModeType mode)
   {
     return this;
   }

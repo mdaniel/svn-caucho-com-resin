@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2004 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -19,28 +19,34 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
  * @author Scott Ferguson
  */
 
-package javax.ejb;
+package javax.persistence;
 
 import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
+import static java.lang.annotation.RetentionPolicy.*;
 import java.lang.annotation.Target;
-import java.lang.annotation.ElementType;
+import static java.lang.annotation.ElementType.*;
 
 /**
- * The Entity annotation.
+ * The @Column annotation.
  */
-@Target(ElementType.TYPE) @Retention(RetentionPolicy.RUNTIME)
-public @interface Entity {
+@Target({METHOD, FIELD}) @Retention(RUNTIME)
+public @interface Column {
   String name() default "";
-
-  EntityType entityType() default EntityType.CMP;
-  AccessType access() default AccessType.PROPERTY;
-  int version() default 3;
+  boolean unique() default false;
+  boolean nullable() default true;
+  boolean insertable() default true;
+  boolean updatable() default true;
+  String columnDefinition() default "";
+  String table() default "";
+  int length() default 255;
+  int precision() default 0;
+  int scale() default 0;
 }

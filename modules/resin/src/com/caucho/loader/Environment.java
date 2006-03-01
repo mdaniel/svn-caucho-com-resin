@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2004 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -126,6 +126,36 @@ public class Environment {
     }
 
     _globalEnvironmentListeners.remove(listener);
+  }
+  
+  /**
+   * Add listener.
+   *
+   * @param listener object to listen for environment create/destroy
+   * @param loader the context class loader
+   */
+  public static void addChildEnvironmentListener(EnvironmentListener listener)
+  {
+    ClassLoader loader = Thread.currentThread().getContextClassLoader();
+    
+    addChildEnvironmentListener(listener, loader);
+  }
+  
+  /**
+   * Add listener.
+   *
+   * @param listener object to listen for environment create/destroy
+   * @param loader the context class loader
+   */
+  public static void addChildEnvironmentListener(EnvironmentListener listener,
+						 ClassLoader loader)
+  {
+    for (; loader != null; loader = loader.getParent()) {
+      if (loader instanceof EnvironmentClassLoader) {
+        ((EnvironmentClassLoader) loader).addChildListener(listener);
+        return;
+      }
+    }
   }
   
   /**

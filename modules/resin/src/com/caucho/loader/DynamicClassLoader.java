@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2004 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -153,7 +153,7 @@ public class DynamicClassLoader extends java.net.URLClassLoader
   private WeakCloseListener _closeListener;
 
   // Lifecycle
-  private final Lifecycle _lifecycle = new Lifecycle();
+  protected final Lifecycle _lifecycle = new Lifecycle();
 
   private long _lastNullCheck;
 

@@ -69,6 +69,10 @@ import com.caucho.security.PolicyImpl;
 public class EnvironmentClassLoader extends DynamicClassLoader {
   private static boolean _isStaticInit;
 
+  // listeners invoked at the start of any child environment
+  private static EnvironmentLocal<ArrayList<EnvironmentListener>> _childListeners
+    = new EnvironmentLocal<ArrayList<EnvironmentListener>>();
+
   // The owning bean
   private EnvironmentBean _owner;
   
@@ -269,12 +273,68 @@ public class EnvironmentClassLoader extends DynamicClassLoader {
   }
 
   /**
+   * Adds a child listener.
+   */
+  void addChildListener(EnvironmentListener listener)
+  {
+    synchronized (_childListeners) {
+      ArrayList<EnvironmentListener> listeners
+	= _childListeners.getLevel(this);
+
+      if (listeners == null) {
+	listeners = new ArrayList<EnvironmentListener>();
+
+	_childListeners.set(listeners, this);
+      }
+
+      listeners.add(listener);
+    }
+
+    if (_lifecycle.isStarting()) {
+      try {
+	listener.environmentStart(this);
+      } catch (Throwable e) {
+	log().log(Level.WARNING, e.toString(), e);
+      }
+    }
+  }
+
+  /**
+   * Removes a child listener.
+   */
+  void removeChildListener(EnvironmentListener listener)
+  {
+    synchronized (_childListeners) {
+      ArrayList<EnvironmentListener> listeners
+	= _childListeners.getLevel(this);
+
+      if (listeners != null)
+	listeners.remove(listener);
+    }
+  }
+
+  /**
    * Returns the listeners.
    */
   protected ArrayList<EnvironmentListener> getEnvironmentListeners()
   {
     ArrayList<EnvironmentListener> listeners;
     listeners = new ArrayList<EnvironmentListener>();
+
+    // add the descendent listeners
+    synchronized (_childListeners) {
+      ClassLoader loader;
+
+      for (loader = this; loader != null; loader = loader.getParent()) {
+	if (loader instanceof EnvironmentClassLoader) {
+	  ArrayList<EnvironmentListener> childListeners;
+	  childListeners = _childListeners.getLevel(loader);
+
+	  if (childListeners != null)
+	    listeners.addAll(childListeners);	    
+	}
+      }
+    }
 
     if (_listeners == null)
       return listeners;

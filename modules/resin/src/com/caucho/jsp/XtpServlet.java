@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2004 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -46,7 +46,7 @@ import com.caucho.server.webapp.Application;
  */
 public class XtpServlet extends QServlet {
   static final String COPYRIGHT =
-    "Copyright (c) 1998-2004 Caucho Technology.  All rights reserved.";
+    "Copyright (c) 1998-2006 Caucho Technology.  All rights reserved.";
 
   /**
    * Initializes the servlet.  Primarily, this sets the PageManager to the

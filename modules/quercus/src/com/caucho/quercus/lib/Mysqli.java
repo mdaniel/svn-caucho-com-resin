@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2004 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -147,7 +147,10 @@ public class Mysqli {
    */
   public int errno()
   {
-    return validateConnection().getErrorCode();
+    if (_conn != null)
+      return _conn.getErrorCode();
+    else
+      return 0;
   }
 
   /**
@@ -155,7 +158,10 @@ public class Mysqli {
    */
   public String error()
   {
-    return validateConnection().getErrorMessage();
+    if (_conn != null)
+      return _conn.getErrorMessage();
+    else
+      return null;
   }
 
   /**
@@ -478,9 +484,13 @@ public class Mysqli {
   public boolean select_db(String dbname)
   {
     try {
-      validateConnection().setCatalog(dbname);
+      if (_conn != null) {
+	validateConnection().setCatalog(dbname);
 
-      return true;
+	return true;
+      }
+      else
+	return false;
     } catch (SQLException e) {
       log.log(Level.FINE, e.toString(), e);
       _env.warning(e.getMessage());

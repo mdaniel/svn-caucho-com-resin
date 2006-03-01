@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2004 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -72,7 +72,7 @@ import com.caucho.es.parser.*;
  */
 public class Resin {
   static final String COPYRIGHT =
-    "Copyright (c) 1998-2004 Caucho Technology.  All rights reserved.";
+    "Copyright (c) 1998-2006 Caucho Technology.  All rights reserved.";
       
   private static WriteStream dbg;
 

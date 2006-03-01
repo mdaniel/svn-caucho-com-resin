@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2004 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -42,12 +42,16 @@ import javax.ejb.*;
 import javax.sql.*;
 import javax.naming.*;
 
+import javax.persistence.EntityManager;
+
 import javax.jms.ConnectionFactory;
 
 import com.caucho.util.*;
 import com.caucho.vfs.*;
 
 import com.caucho.loader.EnvironmentBean;
+import com.caucho.loader.Environment;
+
 import com.caucho.config.ConfigException;
 
 import com.caucho.config.types.FileSetType;
@@ -69,6 +73,8 @@ import com.caucho.log.Log;
 
 import com.caucho.naming.AbstractModel;
 import com.caucho.naming.ContextImpl;
+
+import com.caucho.amber.manager.PersistenceEnvironmentListener;
 
 import com.caucho.ejb.cfg.EjbMethod;
 
@@ -161,6 +167,8 @@ public class EJBServer
     _mergePath.addClassPath();
 
     _entityIntrospector = new EntityIntrospector(_ejbManager);
+
+    Environment.addChildEnvironmentListener(new PersistenceEnvironmentListener());
   }
 
   /**

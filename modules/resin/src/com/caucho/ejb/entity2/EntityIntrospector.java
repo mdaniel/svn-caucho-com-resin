@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2004 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -29,6 +29,15 @@
 
 package com.caucho.ejb.entity2;
 
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+
+import javax.ejb.*;
+
+import javax.persistence.Entity;
+
 import com.caucho.amber.AmberManager;
 import com.caucho.amber.AmberTableCache;
 import com.caucho.amber.field.*;
@@ -47,12 +56,6 @@ import com.caucho.ejb.EjbServerManager;
 import com.caucho.jdbc.JdbcMetaData;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.L10N;
-
-import javax.ejb.*;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
 
 /**
  * Configuration for an entity bean
@@ -135,7 +138,7 @@ public class EntityIntrospector {
     entityType.setEnhanced(true);
 
     Table table = null;
-    JAnnotation tableAnn = type.getAnnotation(javax.ejb.Table.class);
+    JAnnotation tableAnn = type.getAnnotation(javax.persistence.Table.class);
 
     String tableName = null;
     if (tableAnn != null)
@@ -427,7 +430,7 @@ public class EntityIntrospector {
       if (parentType != null && parentType.getField(fieldName) != null)
 	continue;
 
-      JAnnotation id = method.getAnnotation(javax.ejb.Id.class);
+      JAnnotation id = method.getAnnotation(javax.persistence.Id.class);
       if (id == null)
 	continue;
 
@@ -464,7 +467,7 @@ public class EntityIntrospector {
       if (parentType != null && parentType.getField(fieldName) != null)
 	continue;
 
-      JAnnotation id = field.getAnnotation(javax.ejb.Id.class);
+      JAnnotation id = field.getAnnotation(javax.persistence.Id.class);
 
       if (id == null)
 	continue;
@@ -492,8 +495,8 @@ public class EntityIntrospector {
 			       JClass fieldType)
     throws ConfigException, SQLException
   {
-    JAnnotation id = field.getAnnotation(javax.ejb.Id.class);
-    JAnnotation column = field.getAnnotation(javax.ejb.Column.class);
+    JAnnotation id = field.getAnnotation(javax.persistence.Id.class);
+    JAnnotation column = field.getAnnotation(javax.persistence.Column.class);
 
     Type amberType = manager.createType(fieldType);
 
@@ -773,9 +776,9 @@ public class EntityIntrospector {
 			       JClass fieldType)
     throws ConfigException
   {
-    if (field.isAnnotationPresent(javax.ejb.Id.class)) {
+    if (field.isAnnotationPresent(javax.persistence.Id.class)) {
     }
-    else if (field.isAnnotationPresent(javax.ejb.Basic.class)) {
+    else if (field.isAnnotationPresent(javax.persistence.Basic.class)) {
       addBasic(sourceType, field, fieldName, fieldType);
     }
     else if (field.isAnnotationPresent(javax.ejb.ManyToOne.class)) {
@@ -802,7 +805,7 @@ public class EntityIntrospector {
 						   fieldName,
 						   fieldType));
     }
-    else if (field.isAnnotationPresent(javax.ejb.Transient.class)) {
+    else if (field.isAnnotationPresent(javax.persistence.Transient.class)) {
     }
     else {
       addBasic(sourceType, field, fieldName, fieldType);
@@ -817,8 +820,8 @@ public class EntityIntrospector {
   {
     AmberManager manager = sourceType.getAmberManager();
 
-    JAnnotation basicAnn = field.getAnnotation(javax.ejb.Basic.class);
-    JAnnotation columnAnn = field.getAnnotation(javax.ejb.Column.class);
+    JAnnotation basicAnn = field.getAnnotation(javax.persistence.Basic.class);
+    JAnnotation columnAnn = field.getAnnotation(javax.persistence.Column.class);
 
     Type amberType = manager.createType(fieldType);
 
@@ -850,6 +853,7 @@ public class EntityIntrospector {
 
     Column column;
 
+    /*
     if (columnAnn != null && ! columnAnn.get("secondaryTable").equals("")) {
       String tableName = columnAnn.getString("secondaryTable");
       Table table;
@@ -862,8 +866,9 @@ public class EntityIntrospector {
 
       column = table.createColumn(name, amberType);
     }
-    else
-      column = entityType.getTable().createColumn(name, amberType);
+    */
+
+    column = entityType.getTable().createColumn(name, amberType);
 
     if (columnAnn != null) {
       // primaryKey = column.primaryKey();
@@ -1402,10 +1407,10 @@ public class EntityIntrospector {
   }
 
   static {
-    _propertyAnnotations.add("javax.ejb.Basic");
-    _propertyAnnotations.add("javax.ejb.Column");
-    _propertyAnnotations.add("javax.ejb.Id");
-    _propertyAnnotations.add("javax.ejb.Transient");
+    _propertyAnnotations.add("javax.persistence.Basic");
+    _propertyAnnotations.add("javax.persistence.Column");
+    _propertyAnnotations.add("javax.persistence.Id");
+    _propertyAnnotations.add("javax.persistence.Transient");
     _propertyAnnotations.add("javax.ejb.OneToOne");
     _propertyAnnotations.add("javax.ejb.ManyToOne");
     _propertyAnnotations.add("javax.ejb.OneToMany");

@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -33,8 +34,11 @@ import java.sql.Connection;
 import java.util.logging.Logger;
 import java.util.logging.Level;
 
-import javax.ejb.EntityManager;
-import javax.ejb.Query;
+import javax.persistence.EntityManager;
+import javax.persistence.EntityTransaction;
+import javax.persistence.Query;
+import javax.persistence.LockModeType;
+import javax.persistence.FlushModeType;
 
 import com.caucho.util.L10N;
 
@@ -97,6 +101,46 @@ public class EntityManagerProxy implements EntityManager {
   {
     return getCurrent().find(entityClass, primaryKey);
   }
+  
+  /**
+   * Find by the primary key.
+   */
+  public <T> T getReference(Class<T> entityClass, Object primaryKey)
+  {
+    return getCurrent().getReference(entityClass, primaryKey);
+  }
+
+  /**
+   * Returns the flush mode.
+   */
+  public FlushModeType getFlushMode()
+  {
+    return getCurrent().getFlushMode();
+  }
+
+  /**
+   * Returns the flush mode.
+   */
+  public void setFlushMode(FlushModeType mode)
+  {
+    getCurrent().setFlushMode(mode);
+  }
+
+  /**
+   * Locks the object.
+   */
+  public void lock(Object entity, LockModeType lockMode)
+  {
+    getCurrent().lock(entity, lockMode);
+  }
+
+  /**
+   * Clears the manager.
+   */
+  public void clear()
+  {
+    getCurrent().clear();
+  }
 
   /**
    * Synchronize with the database.
@@ -104,6 +148,14 @@ public class EntityManagerProxy implements EntityManager {
   public void flush()
   {
     getCurrent().flush();
+  }
+
+  /**
+   * Clears the manager.
+   */
+  public void close()
+  {
+    getCurrent().close();
   }
 
   /**
@@ -160,6 +212,22 @@ public class EntityManagerProxy implements EntityManager {
   public boolean contains(Object entity)
   {
     return getCurrent().contains(entity);
+  }
+
+  /**
+   * Returns the entity manager transaction.
+   */
+  public EntityTransaction getTransaction()
+  {
+    return getCurrent().getTransaction();
+  }
+
+  /**
+   * Returns true if open.
+   */
+  public boolean isOpen()
+  {
+    return getCurrent().isOpen();
   }
 
   /**
