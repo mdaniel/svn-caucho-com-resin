@@ -31,6 +31,7 @@ package com.caucho.quercus.lib;
 
 import com.caucho.quercus.env.NullValue;
 import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.StringValueImpl;
 import com.caucho.quercus.env.Value;
 
 import org.w3c.dom.Notation;
@@ -49,9 +50,9 @@ public class DOMNotationValue extends DOMNodeValue {
       return NullValue.NULL;
     
     if ("publicId".equals(name))
-      return new StringValue(((Notation)_node).getPublicId());
+      return new StringValueImpl(((Notation)_node).getPublicId());
     else if ("systemId".equals(name))
-      return new StringValue(((Notation)_node).getSystemId());
+      return new StringValueImpl(((Notation)_node).getSystemId());
     
     return NullValue.NULL;
   }

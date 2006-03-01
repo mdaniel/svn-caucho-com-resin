@@ -47,42 +47,42 @@ import com.caucho.vfs.WriteStream;
  */
 public class ServerArrayValue extends ArrayValueImpl {
   private static final StringValue SERVER_NAME_V
-    = new StringValue("SERVER_NAME");
+    = new StringValueImpl("SERVER_NAME");
   private static final StringValue SERVER_PORT_V
-    = new StringValue("SERVER_PORT");
+    = new StringValueImpl("SERVER_PORT");
   private static final StringValue REMOTE_HOST_V
-    = new StringValue("REMOTE_HOST");
+    = new StringValueImpl("REMOTE_HOST");
   private static final StringValue REMOTE_ADDR_V
-    = new StringValue("REMOTE_ADDR");
+    = new StringValueImpl("REMOTE_ADDR");
   private static final StringValue REMOTE_PORT_V
-    = new StringValue("REMOTE_PORT");
+    = new StringValueImpl("REMOTE_PORT");
   
   private static final StringValue DOCUMENT_ROOT_V
-    = new StringValue("DOCUMENT_ROOT");
+    = new StringValueImpl("DOCUMENT_ROOT");
   
   private static final StringValue SERVER_PROTOCOL_V
-    = new StringValue("SERVER_PROTOCOL");
+    = new StringValueImpl("SERVER_PROTOCOL");
   private static final StringValue REQUEST_METHOD_V
-    = new StringValue("REQUEST_METHOD");
+    = new StringValueImpl("REQUEST_METHOD");
   private static final StringValue QUERY_STRING_V
-    = new StringValue("QUERY_STRING");
+    = new StringValueImpl("QUERY_STRING");
   
   private static final StringValue REQUEST_URI_V
-    = new StringValue("REQUEST_URI");
+    = new StringValueImpl("REQUEST_URI");
   private static final StringValue SCRIPT_NAME_V
-    = new StringValue("SCRIPT_NAME");
+    = new StringValueImpl("SCRIPT_NAME");
   private static final StringValue SCRIPT_FILENAME_V
-    = new StringValue("SCRIPT_FILENAME");
+    = new StringValueImpl("SCRIPT_FILENAME");
   private static final StringValue PATH_INFO_V
-    = new StringValue("PATH_INFO");
+    = new StringValueImpl("PATH_INFO");
   private static final StringValue PATH_TRANSLATED_V
-    = new StringValue("PATH_TRANSLATED");
+    = new StringValueImpl("PATH_TRANSLATED");
   
   private static final StringValue PHP_SELF_V
-    = new StringValue("PHP_SELF");
+    = new StringValueImpl("PHP_SELF");
   
   private static final StringValue HTTPS_V
-    = new StringValue("HTTPS");
+    = new StringValueImpl("HTTPS");
   
   private final Env _env;
   
@@ -205,31 +205,31 @@ public class ServerArrayValue extends ArrayValueImpl {
     HttpServletRequest request = _env.getRequest();
 
     super.put(SERVER_NAME_V,
-	      new StringValue(request.getServerName()));
+	      new StringValueImpl(request.getServerName()));
     super.put(SERVER_PORT_V,
 	      new LongValue(request.getServerPort()));
     super.put(REMOTE_HOST_V,
-	      new StringValue(request.getRemoteHost()));
+	      new StringValueImpl(request.getRemoteHost()));
     super.put(REMOTE_ADDR_V,
-	      new StringValue(request.getRemoteAddr()));
+	      new StringValueImpl(request.getRemoteAddr()));
     super.put(REMOTE_PORT_V,
 	      new LongValue(request.getRemotePort()));
     
     super.put(SERVER_PROTOCOL_V,
-	      new StringValue(request.getProtocol()));
+	      new StringValueImpl(request.getProtocol()));
     super.put(REQUEST_METHOD_V,
-	      new StringValue(request.getMethod()));
+	      new StringValueImpl(request.getMethod()));
     
     if (request.getQueryString() != null) {
       super.put(QUERY_STRING_V,
-		new StringValue(request.getQueryString()));
+		new StringValueImpl(request.getQueryString()));
     }
     
     super.put(DOCUMENT_ROOT_V,
-	      new StringValue(request.getRealPath("/")));
+	      new StringValueImpl(request.getRealPath("/")));
     
     super.put(SCRIPT_NAME_V,
-	      new StringValue(request.getContextPath() +
+	      new StringValueImpl(request.getContextPath() +
 			      request.getServletPath()));
 
     String requestURI = request.getRequestURI();
@@ -239,28 +239,28 @@ public class ServerArrayValue extends ArrayValueImpl {
       requestURI = requestURI + '?' + queryString;
     
     super.put(REQUEST_URI_V,
-	      new StringValue(requestURI));
+	      new StringValueImpl(requestURI));
     super.put(SCRIPT_FILENAME_V,
-	      new StringValue(request.getRealPath(request.getServletPath())));
+	      new StringValueImpl(request.getRealPath(request.getServletPath())));
 
     if (request.getPathInfo() != null) {
       super.put(PATH_INFO_V,
-		new StringValue(request.getPathInfo()));
+		new StringValueImpl(request.getPathInfo()));
       super.put(PATH_TRANSLATED_V,
-		new StringValue(request.getRealPath(request.getPathInfo())));
+		new StringValueImpl(request.getRealPath(request.getPathInfo())));
     }
 
     if (request.isSecure())
-      super.put(HTTPS_V, new StringValue("on"));
+      super.put(HTTPS_V, new StringValueImpl("on"));
 
     String contextPath = request.getContextPath();
     String servletPath = request.getServletPath();
     String pathInfo = request.getPathInfo();
 
     if (pathInfo == null)
-      super.put(PHP_SELF_V, new StringValue(contextPath + servletPath));
+      super.put(PHP_SELF_V, new StringValueImpl(contextPath + servletPath));
     else
-      super.put(PHP_SELF_V, new StringValue(contextPath + servletPath + pathInfo));
+      super.put(PHP_SELF_V, new StringValueImpl(contextPath + servletPath + pathInfo));
 
     Enumeration e = request.getHeaderNames();
     while (e.hasMoreElements()) {
@@ -268,7 +268,7 @@ public class ServerArrayValue extends ArrayValueImpl {
 
       String value = request.getHeader(key);
 
-      super.put(convertHttpKey(key), new StringValue(value));
+      super.put(convertHttpKey(key), new StringValueImpl(value));
     }
   }
 
@@ -293,7 +293,7 @@ public class ServerArrayValue extends ArrayValueImpl {
 	sb.append(ch);
     }
 
-    return new StringValue(sb.toString());
+    return new StringValueImpl(sb.toString());
   }
 }
 

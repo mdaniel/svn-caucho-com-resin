@@ -93,7 +93,7 @@ public class OutputBuffer {
 	sb.append((char) ch);
       }
 
-      return new StringValue(sb.toString());
+      return new StringValueImpl(sb.toString());
     } catch (IOException e) {
       _env.error(e.toString(), e);
 

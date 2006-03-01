@@ -32,6 +32,7 @@ package com.caucho.quercus.lib;
 import com.caucho.quercus.env.BooleanValue;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.StringValueImpl;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.quercus.module.NotNull;
@@ -97,7 +98,7 @@ public class QuercusXmlModule extends AbstractQuercusModule {
   {
     // XXX: need to make a marker for the string
 
-    return new StringValue(str);
+    return new StringValueImpl(str);
   }
 
   /**
@@ -107,7 +108,7 @@ public class QuercusXmlModule extends AbstractQuercusModule {
   {
     // XXX: need to make a marker for the string
 
-    return new StringValue(str);
+    return new StringValueImpl(str);
   }
 
   /**

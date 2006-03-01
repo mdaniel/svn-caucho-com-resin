@@ -45,6 +45,7 @@ import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.BooleanValue;
 import com.caucho.quercus.env.LongValue;
 import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.StringValueImpl;
 import com.caucho.quercus.env.ArrayValue;
 import com.caucho.quercus.env.ArrayValueImpl;
 
@@ -275,7 +276,7 @@ public class QuercusStreamModule extends AbstractQuercusModule {
 
     // XXX: handle offset and maxlen
 
-    return new StringValue(sb.toString());
+    return new StringValueImpl(sb.toString());
   }
 
   /**
@@ -296,13 +297,13 @@ public class QuercusStreamModule extends AbstractQuercusModule {
     if (line == null)
       return BooleanValue.FALSE;
     else if (line.endsWith("\r\n"))
-      return new StringValue(line.substring(0, line.length() - 2));
+      return new StringValueImpl(line.substring(0, line.length() - 2));
     else if (line.endsWith("\r"))
-      return new StringValue(line.substring(0, line.length() - 1));
+      return new StringValueImpl(line.substring(0, line.length() - 1));
     else if (line.endsWith("\n"))
-      return new StringValue(line.substring(0, line.length() - 1));
+      return new StringValueImpl(line.substring(0, line.length() - 1));
     else
-      return new StringValue(line);
+      return new StringValueImpl(line);
   }
 
   /**
@@ -312,8 +313,8 @@ public class QuercusStreamModule extends AbstractQuercusModule {
   {
     ArrayValue value = new ArrayValueImpl();
 
-    value.append(new StringValue("tcp"));
-    value.append(new StringValue("udp"));
+    value.append(new StringValueImpl("tcp"));
+    value.append(new StringValueImpl("udp"));
 
     return value;
   }
@@ -325,10 +326,10 @@ public class QuercusStreamModule extends AbstractQuercusModule {
   {
     ArrayValue value = new ArrayValueImpl();
 
-    value.append(new StringValue("quercus"));
-    value.append(new StringValue("file"));
-    value.append(new StringValue("http"));
-    value.append(new StringValue("ftp"));
+    value.append(new StringValueImpl("quercus"));
+    value.append(new StringValueImpl("file"));
+    value.append(new StringValueImpl("http"));
+    value.append(new StringValueImpl("ftp"));
 
     return value;
   }

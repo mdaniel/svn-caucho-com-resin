@@ -93,7 +93,7 @@ public final class UnserializeReader {
 	expect('"');
 	expect(';');
 
-	return new StringValue(s);
+	return new StringValueImpl(s);
       }
       
     case 'i':

@@ -38,7 +38,7 @@ import java.io.ByteArrayInputStream;
  * Represents a PHP string value implemented as a TempBuffer, with
  * encoding iso-8859-1..
  */
-public class TempBufferStringValue extends AbstractStringValue {
+public class TempBufferStringValue extends StringValue {
   private TempBuffer _head;
 
   private String _string;
@@ -52,7 +52,6 @@ public class TempBufferStringValue extends AbstractStringValue {
    * 
    * @return _head as inputstream
    */
-  @Override
   public ByteArrayInputStream toInputStream()
   {
     return new ByteArrayInputStream(_head.getBuffer());

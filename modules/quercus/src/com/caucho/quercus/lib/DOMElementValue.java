@@ -33,6 +33,7 @@ import com.caucho.quercus.env.BooleanValue;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.NullValue;
 import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.StringValueImpl;
 import com.caucho.quercus.env.Value;
 
 import org.w3c.dom.Element;
@@ -54,7 +55,7 @@ public class DOMElementValue extends DOMNodeValue {
        if (_node == null)
          return NullValue.NULL;
        
-       return new StringValue(_node.getNodeName());
+       return new StringValueImpl(_node.getNodeName());
        
      } else
        return NullValue.NULL;
@@ -119,7 +120,7 @@ public class DOMElementValue extends DOMNodeValue {
     if (_node == null)
       return NullValue.NULL;
     
-    return new StringValue(((Element) _node).getAttribute(name.toString()));
+    return new StringValueImpl(((Element) _node).getAttribute(name.toString()));
   }
   
   public Value getAttributeNode(Value name)
@@ -145,7 +146,7 @@ public class DOMElementValue extends DOMNodeValue {
     if (_node == null)
       return NullValue.NULL;
     
-    return new StringValue(((Element) _node).getAttributeNS(namespaceURI.toString(), localName.toString()));
+    return new StringValueImpl(((Element) _node).getAttributeNS(namespaceURI.toString(), localName.toString()));
   }
   
   public Value getElementsByTagName(Value name)

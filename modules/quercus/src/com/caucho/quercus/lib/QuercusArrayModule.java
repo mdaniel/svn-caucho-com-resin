@@ -142,7 +142,7 @@ public class QuercusArrayModule
         else
           key = key.toLowerCase();
 
-        newArray.put(new StringValue(key), entry.getValue());
+        newArray.put(new StringValueImpl(key), entry.getValue());
       }
       else
         newArray.put(keyValue, entry.getValue());
@@ -996,7 +996,7 @@ public class QuercusArrayModule
    if (offset == 2 && length == NullValue.NULL && replace == NullValue.NULL) {
      ArrayValue testArray = new ArrayValueImpl();
       
-     testArray.put(new StringValue("b"), new LongValue(2));
+     testArray.put(new StringValueImpl("b"), new LongValue(2));
      testArray.put(new LongValue(3));
      testArray.put(new LongValue(4));
       

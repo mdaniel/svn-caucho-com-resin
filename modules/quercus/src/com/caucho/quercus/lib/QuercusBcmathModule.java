@@ -424,7 +424,7 @@ public class QuercusBcmathModule extends AbstractQuercusModule {
     if (pow == null)
       return null;
 
-    return bcmod(env, new StringValue(pow), modulus);
+    return bcmod(env, new StringValueImpl(pow), modulus);
   }
 
 }

@@ -43,18 +43,14 @@ import com.caucho.quercus.lib.QuercusStringModule;
 /**
  * Represents a PHP string value.
  */
-public class StringValue extends AbstractStringValue {
-  public static final StringValue EMPTY = new StringValue("");
-
+public class StringValueImpl extends StringValue {
   protected static final int IS_STRING = 0;
   protected static final int IS_LONG = 1;
   protected static final int IS_DOUBLE = 2;
 
-  private final static StringValue []CHAR_STRINGS;
-
   private final String _value;
 
-  public StringValue(String value)
+  public StringValueImpl(String value)
   {
     if (value == null)
       throw new NullPointerException();
@@ -66,7 +62,7 @@ public class StringValue extends AbstractStringValue {
    * Create a string out of a byte array, with no consideration of character
    * encoding. Each byte becomes one character.
    */
-  public StringValue(byte[] bytes)
+  public StringValueImpl(byte[] bytes)
   {
     final int len = bytes.length;
 
@@ -78,39 +74,6 @@ public class StringValue extends AbstractStringValue {
 
     // XXX: string constructor copies the array
     _value = new String(chars);
-  }
-
-  /**
-   * Creates the string.
-   */
-  public static Value create(String value)
-  {
-    if (value == null)
-      return NullValue.NULL;
-    else
-      return new StringValue(value);
-  }
-
-  /**
-   * Creates the string.
-   */
-  public static Value create(char value)
-  {
-    if (value < CHAR_STRINGS.length)
-      return CHAR_STRINGS[value];
-    else
-      return new StringValue(String.valueOf(value));
-  }
-
-  /**
-   * Creates the string.
-   */
-  public static Value create(Object value)
-  {
-    if (value == null)
-      return NullValue.NULL;
-    else
-      return new StringValue(value.toString());
   }
 
   /**
@@ -252,38 +215,6 @@ public class StringValue extends AbstractStringValue {
   public long toLong()
   {
     return toLong(_value);
-  }
-
-  /**
-   * Converts to a long.
-   */
-  public static long toLong(String string)
-  {
-    if (string.equals(""))
-      return 0;
-
-    int len = string.length();
-
-    long value = 0;
-    long sign = 1;
-
-    int i = 0;
-
-    if (string.charAt(0) == '-') {
-      sign = -1;
-      i = 1;
-    }
-
-    for (; i < len; i++) {
-      char ch = string.charAt(i);
-
-      if ('0' <= ch && ch <= '9')
-	value = 10 * value + ch - '0';
-      else
-	return sign * value;
-    }
-
-    return value;
   }
 
   /**
@@ -437,9 +368,9 @@ public class StringValue extends AbstractStringValue {
     if (index < 0 || len <= index)
       return this;
     else
-      return new StringValue(_value.substring(0, (int) index) +
-			     value +
-			     _value.substring((int) (index + 1)));
+      return new StringValueImpl(_value.substring(0, (int) index) +
+				 value +
+				 _value.substring((int) (index + 1)));
   }
 
   /**
@@ -465,32 +396,32 @@ public class StringValue extends AbstractStringValue {
 
 	if (ch == 'z') {
 	  if (i == 0)
-	    return new StringValue("aa" + tail);
+	    return new StringValueImpl("aa" + tail);
 	  else
 	    tail.insert(0, 'a');
 	}
 	else if ('a' <= ch && ch < 'z') {
-	  return new StringValue(_value.substring(0, i) +
-				 (char) (ch + 1) +
-				 tail);
+	  return new StringValueImpl(_value.substring(0, i) +
+				     (char) (ch + 1) +
+				     tail);
 	}
 	else if (ch == 'Z') {
 	  if (i == 0)
-	    return new StringValue("AA" + tail.toString());
+	    return new StringValueImpl("AA" + tail.toString());
 	  else
 	    tail.insert(0, 'A');
 	}
 	else if ('A' <= ch && ch < 'Z') {
-	  return new StringValue(_value.substring(0, i) +
-				 (char) (ch + 1) +
-				 tail);
+	  return new StringValueImpl(_value.substring(0, i) +
+				     (char) (ch + 1) +
+				     tail);
 	}
 	else if ('0' <= ch && ch <= '9' && i == _value.length() - 1) {
 	  return new LongValue(toLong() + 1);
 	}
       }
 
-      return new StringValue(tail.toString());
+      return new StringValueImpl(tail.toString());
     }
     else if (isLong()) {
       return new LongValue(toLong() - 1);
@@ -532,21 +463,6 @@ public class StringValue extends AbstractStringValue {
       return toDouble() == rValue.toDouble();
     else
       return toString().equals(rValue.toString());
-  }
-
-  /**
-   * Returns true for equality
-   */
-  public boolean eql(Value rValue)
-  {
-    rValue = rValue.toValue();
-
-    if (! (rValue instanceof StringValue))
-      return false;
-
-    String rString = ((StringValue) rValue)._value;
-
-    return _value.equals(rString);
   }
 
   //
@@ -622,43 +538,9 @@ public class StringValue extends AbstractStringValue {
     return _value.hashCode();
   }
 
-  /**
-   * Test for equality
-   */
-  public boolean equals(Object o)
-  {
-    if (this == o)
-      return true;
-    else if (! (o instanceof StringValue))
-      return false;
-
-    StringValue value = (StringValue) o;
-
-    return _value.equals(value._value);
-  }
-
   public String toString()
   {
     return _value;
   }
-
-  public void varDumpImpl(Env env,
-                          WriteStream out,
-                          int depth,
-                          IdentityHashMap<Value, String> valueSet)
-    throws Throwable
-  {
-    String s = toString();
-
-    out.print("string(" + s.length() + ") \"" + s + "\"");
-  }
-
-  static {
-    CHAR_STRINGS = new StringValue[256];
-
-    for (int i = 0; i < CHAR_STRINGS.length; i++)
-      CHAR_STRINGS[i] = new StringValue(String.valueOf((char) i));
-  }
-
 }
 

@@ -28,9 +28,17 @@
 
 package com.caucho.quercus.lib;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.util.zip.DataFormatException;
+import java.util.zip.Deflater;
+import java.util.zip.Inflater;
+import java.util.zip.InflaterInputStream;
+
 import com.caucho.quercus.env.BooleanValue;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.StringValueImpl;
 import com.caucho.quercus.env.TempBufferStringValue;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.module.AbstractQuercusModule;
@@ -40,13 +48,6 @@ import com.caucho.util.ByteBuffer;
 import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.TempBuffer;
 import com.caucho.vfs.VfsStream;
-
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.util.zip.DataFormatException;
-import java.util.zip.Deflater;
-import java.util.zip.Inflater;
-import java.util.zip.InflaterInputStream;
 
 /**
  * PHP ZLib
@@ -281,7 +282,7 @@ public class QuercusZlibModule extends AbstractQuercusModule {
       uncompressed.append((char) ch);
     }
     
-    return new StringValue(uncompressed.toString());
+    return new StringValueImpl(uncompressed.toString());
   }
 
   /**
@@ -344,7 +345,7 @@ public class QuercusZlibModule extends AbstractQuercusModule {
 	inflated.append((char) ch);
       }
 
-      return new StringValue(inflated.toString());
+      return new StringValueImpl(inflated.toString());
     } catch (Exception e) {
       env.warning(e);
 

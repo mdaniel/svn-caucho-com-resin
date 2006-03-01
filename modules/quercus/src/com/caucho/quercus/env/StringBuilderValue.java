@@ -43,9 +43,7 @@ import com.caucho.quercus.lib.QuercusStringModule;
 /**
  * Represents a PHP string value.
  */
-public class StringBuilderValue extends AbstractStringValue {
-  public static final StringValue EMPTY = new StringValue("");
-
+public class StringBuilderValue extends StringValue {
   private char []_buffer;
   private int _length;
   
@@ -431,21 +429,6 @@ public class StringBuilderValue extends AbstractStringValue {
 
       return sb;
     }
-  }
-
-  /**
-   * Returns true for equality
-   */
-  public boolean eql(Value rValue)
-  {
-    rValue = rValue.toValue();
-
-    if (! (rValue instanceof AbstractStringValue))
-      return false;
-
-    String rString = rValue.toString();
-
-    return toString().equals(rString);
   }
 
   //

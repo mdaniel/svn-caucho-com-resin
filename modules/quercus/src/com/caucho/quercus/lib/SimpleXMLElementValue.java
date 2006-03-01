@@ -93,8 +93,8 @@ public class SimpleXMLElementValue extends Value {
 
       for (int j=0; j < attrLength; j++) {
         Node attribute = attrs.item(j);
-        StringValue nodeName = new StringValue(attribute.getNodeName());
-        StringValue nodeValue = new StringValue(attribute.getNodeValue());
+        StringValue nodeName = new StringValueImpl(attribute.getNodeName());
+        StringValue nodeValue = new StringValueImpl(attribute.getNodeValue());
         _attributes.put(nodeName, nodeValue);
       }
 
@@ -224,7 +224,7 @@ public class SimpleXMLElementValue extends Value {
     // If <foo><bar>misc</bar></foo>, then put (bar , misc)
     // into foo's _childMap
     if ((nodeLength == 1) && (children.item(0).getNodeType() == Node.TEXT_NODE)) {
-        _childMap.put(new StringValue("0"), new StringValue(children.item(0).getNodeValue()));
+        _childMap.put(new StringValueImpl("0"), new StringValueImpl(children.item(0).getNodeValue()));
       
     } else {
       for (int i=0; i < nodeLength; i++) {
@@ -233,7 +233,7 @@ public class SimpleXMLElementValue extends Value {
         if (child.getNodeType() == Node.TEXT_NODE)
           continue;
   
-        StringValue childTagName = new StringValue(child.getNodeName());
+        StringValue childTagName = new StringValueImpl(child.getNodeName());
   
         // Check to see if this is the first instance of a child
         // with this NodeName.  If so create a new ArrayValueImpl,
@@ -301,7 +301,7 @@ public class SimpleXMLElementValue extends Value {
     fillChildMap();
     
     if (!_childMap.isEmpty())   
-      result = _childMap.get(new StringValue(name));
+      result = _childMap.get(new StringValueImpl(name));
 
     return result;
   }
@@ -395,7 +395,7 @@ public class SimpleXMLElementValue extends Value {
     fillChildMap();
     
     if (!_childMap.isEmpty()) {
-      Value result = _childMap.get(new StringValue(name));  
+      Value result = _childMap.get(new StringValueImpl(name));
       
       if (result == null)
         return BooleanValue.FALSE;
@@ -446,7 +446,7 @@ public class SimpleXMLElementValue extends Value {
     result.append("<?xml version=\"").append(version).append("\"?>\n");
     result.append(generateXML().toString());
 
-    return new StringValue(result.toString());
+    return new StringValueImpl(result.toString());
   }
   
   /**

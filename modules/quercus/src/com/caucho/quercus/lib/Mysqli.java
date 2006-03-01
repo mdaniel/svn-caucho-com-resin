@@ -44,6 +44,7 @@ import com.caucho.quercus.QuercusRuntimeException;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.BooleanValue;
 import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.StringValueImpl;
 import com.caucho.quercus.env.LongValue;
 import com.caucho.quercus.env.Value;
 
@@ -404,14 +405,14 @@ public class Mysqli {
     } catch (SQLException e) {
       env.warning("A link to the server could not be established. " + e.toString());
       env.setSpecialValue("mysqli.connectErrno",new LongValue(e.getErrorCode()));
-      env.setSpecialValue("mysqli.connectError", new StringValue(e.getMessage()));
+      env.setSpecialValue("mysqli.connectError", new StringValueImpl(e.getMessage()));
 
       log.log(Level.FINE, e.toString(), e);
 
       return false;
     } catch (Exception e) {
       env.warning("A link to the server could not be established. " + e.toString());
-      env.setSpecialValue("mysqli.connectError", new StringValue(e.getMessage()));
+      env.setSpecialValue("mysqli.connectError", new StringValueImpl(e.getMessage()));
 
       log.log(Level.FINE, e.toString(), e);
       return false;
@@ -550,7 +551,7 @@ public class Mysqli {
           str.append(rs.getString(2));
         }
 
-        return new StringValue(str.toString());
+        return new StringValueImpl(str.toString());
       } finally {
         if (stmt != null)
           stmt.close();

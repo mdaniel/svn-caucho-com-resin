@@ -528,7 +528,7 @@ public class QuercusDateModule extends AbstractQuercusModule {
       return new DoubleValue((double) now / 1000.0);
     }
     else {
-      return new StringValue((now % 1000 * 1000) + " " + (now / 1000));
+      return new StringValueImpl((now % 1000 * 1000) + " " + (now / 1000));
     }
   }
 

@@ -39,6 +39,7 @@ import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.ArrayValue;
 import com.caucho.quercus.env.ArrayValueImpl;
 import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.StringValueImpl;
 
 /**
  * Represents a PHP stream context.
@@ -80,8 +81,8 @@ public class StreamContextResource extends ResourceValue {
    */
   public void setOption(String wrapper, String option, Value value)
   {
-    StringValue wrapperV = new StringValue(wrapper);
-    StringValue optionV = new StringValue(option);
+    StringValue wrapperV = new StringValueImpl(wrapper);
+    StringValue optionV = new StringValueImpl(option);
 
     _options.getArray(wrapperV).put(optionV, value);
   }

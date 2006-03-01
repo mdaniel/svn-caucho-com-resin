@@ -129,11 +129,11 @@ public class QuercusRegexpModule
     if (regsV instanceof ArrayValue) {
       ArrayValue regs = (ArrayValue) regsV;
 
-      regs.put(LongValue.ZERO, new StringValue(matcher.group()));
+      regs.put(LongValue.ZERO, new StringValueImpl(matcher.group()));
       int count = matcher.groupCount();
 
       for (int i = 1; i <= count; i++) {
-        regs.put(new LongValue(i), new StringValue(matcher.group(i)));
+        regs.put(new LongValue(i), new StringValueImpl(matcher.group(i)));
       }
 
       int len = matcher.end() - matcher.start();
@@ -186,20 +186,20 @@ public class QuercusRegexpModule
     if (regs != null) {
       if (isOffsetCapture) {
         ArrayValueImpl part = new ArrayValueImpl();
-        part.append(new StringValue(matcher.group()));
+        part.append(new StringValueImpl(matcher.group()));
         part.append(new LongValue(matcher.start()));
 
         regs.put(LongValue.ZERO, part);
       }
       else
-        regs.put(LongValue.ZERO, new StringValue(matcher.group()));
+        regs.put(LongValue.ZERO, new StringValueImpl(matcher.group()));
 
       int count = matcher.groupCount();
 
       for (int i = 1; i <= count; i++) {
         Value value;
         if (matcher.group(i) != null)
-          value = new StringValue(matcher.group(i));
+          value = new StringValueImpl(matcher.group(i));
         else
           value = NullValue.NULL;
 
@@ -287,10 +287,10 @@ public class QuercusRegexpModule
           if (groupValue != null) {
             if ((flags & PREG_OFFSET_CAPTURE) != 0) {
               result = new ArrayValueImpl();
-              result.put(new StringValue(groupValue));
+              result.put(new StringValueImpl(groupValue));
               result.put(new LongValue(matcher.start(j)));
             } else {
-                result = new StringValue(groupValue);
+                result = new StringValueImpl(groupValue);
             }
           }
           
@@ -309,10 +309,10 @@ public class QuercusRegexpModule
           if (groupValue != null) {
             if ((flags & PREG_OFFSET_CAPTURE) != 0) {
               result = new ArrayValueImpl();
-              result.put(new StringValue(groupValue));
+              result.put(new StringValueImpl(groupValue));
               result.put(new LongValue(matcher.start(j)));
             } else {
-              result = new StringValue(groupValue);
+              result = new StringValueImpl(groupValue);
             }
           }
           matchResult.put(result);
@@ -457,7 +457,7 @@ public class QuercusRegexpModule
                                  countV);
     }
 
-    return new StringValue(string);
+    return new StringValueImpl(string);
   }
 
   /**
@@ -507,7 +507,7 @@ public class QuercusRegexpModule
         String group = matcher.group(i);
         
         if (group != null)
-          regs.put(new StringValue(group));
+          regs.put(new StringValueImpl(group));
         else
           regs.put(StringValue.EMPTY);
       }
@@ -587,7 +587,7 @@ public class QuercusRegexpModule
                                           NullValue.NULL,
                                           false);
 
-    return new StringValue(result);
+    return new StringValueImpl(result);
   }
 
   /**
@@ -613,7 +613,7 @@ public class QuercusRegexpModule
     String result = pregReplaceStringImpl(env, pattern, replacementProgram,
                                           subject, -1, NullValue.NULL, false);
 
-    return new StringValue(result);
+    return new StringValueImpl(result);
   }
 
   /**
@@ -752,10 +752,10 @@ public class QuercusRegexpModule
                                           countV);
       }
       
-      return new StringValue(subject);
+      return new StringValueImpl(subject);
       
     } else if (patternValue instanceof StringValue) {
-      return new StringValue(pregReplaceCallbackImpl(env,
+      return new StringValueImpl(pregReplaceCallbackImpl(env,
                                                      patternValue.toString(),
                                                      fun,
                                                      subject,
@@ -815,12 +815,12 @@ public class QuercusRegexpModule
       if ((flags & PREG_SPLIT_OFFSET_CAPTURE) != 0) {
         
         ArrayValue part = new ArrayValueImpl();
-        part.put(new StringValue(value));
+        part.put(new StringValueImpl(value));
         part.put(new LongValue(startPosition));
         
         result.put(part);
       } else {       
-        result.put(new StringValue(value));
+        result.put(new StringValueImpl(value));
       }
 
       count++;
@@ -829,12 +829,12 @@ public class QuercusRegexpModule
        for (int i = 1; i <= matcher.groupCount(); i++) {
           if ((flags & PREG_SPLIT_OFFSET_CAPTURE) != 0) {
             ArrayValue part = new ArrayValueImpl();
-            part.put(new StringValue(matcher.group(i)));
+            part.put(new StringValueImpl(matcher.group(i)));
             part.put(new LongValue(matcher.start()));
             
             result.put(part);
           } else {
-            result.put(new StringValue(matcher.group(i)));
+            result.put(new StringValueImpl(matcher.group(i)));
           }
         }
       }
@@ -845,12 +845,12 @@ public class QuercusRegexpModule
       if ((flags & PREG_SPLIT_OFFSET_CAPTURE) != 0) {
         
         ArrayValue part = new ArrayValueImpl();
-        part.put(new StringValue(string.substring(head)));
+        part.put(new StringValueImpl(string.substring(head)));
         part.put(new LongValue(head));
   
         result.put(part);
       } else {
-        result.put(new StringValue(string.substring(head)));
+        result.put(new StringValueImpl(string.substring(head)));
       }
     }
 
@@ -928,13 +928,13 @@ public class QuercusRegexpModule
         head = matcher.end();
       }
       
-      result.put(new StringValue(value));
+      result.put(new StringValueImpl(value));
       
       count++;
     }
     
     if ((head <= string.length() && (count != limit))) {
-      result.put(new StringValue(string.substring(head)));
+      result.put(new StringValueImpl(string.substring(head)));
     }
 
     return result;
@@ -1020,13 +1020,13 @@ public class QuercusRegexpModule
         head = matcher.end();
       }
       
-      result.put(new StringValue(value));
+      result.put(new StringValueImpl(value));
       
       count++;
     }
     
     if ((head <= string.length()) && (count != limit)) {
-      result.put(new StringValue(string.substring(head)));
+      result.put(new StringValueImpl(string.substring(head)));
     }
 
     return result;

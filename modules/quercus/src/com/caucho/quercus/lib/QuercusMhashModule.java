@@ -156,11 +156,11 @@ public class QuercusMhashModule extends AbstractQuercusModule {
     }
 
     // XXX: s/b "StringValue data" as parameter
-    StringValue dataV = new StringValue(data);
+    StringValue dataV = new StringValueImpl(data);
 
     byte[] result = messageDigest.digest(dataV.toString().getBytes());
 
-    return new StringValue(new String(result));
+    return new StringValueImpl(new String(result));
   }
 
   /**
@@ -188,7 +188,7 @@ public class QuercusMhashModule extends AbstractQuercusModule {
     if (algorithm == null)
       return BooleanValue.FALSE;
     else
-      return new StringValue(algorithm.getName());
+      return new StringValueImpl(algorithm.getName());
   }
 
   // XXX: public String mhash_keygen_s2k(int hash, String password, String salt, int bytes)

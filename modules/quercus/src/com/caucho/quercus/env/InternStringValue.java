@@ -42,9 +42,7 @@ import com.caucho.quercus.lib.QuercusStringModule;
 /**
  * Represents a PHP string value.
  */
-public final class InternStringValue extends StringValue {
-  public static final StringValue EMPTY = new StringValue("");
-  
+public final class InternStringValue extends StringValueImpl {
   private final int _hashCode;
   private final Value _key;
   private final int _type;

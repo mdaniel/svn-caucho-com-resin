@@ -109,7 +109,7 @@ public class Post {
           value.append((char) ch);
         }
 
-        addFormValue(post, name, new StringValue(value.toString()), null, addSlashesToValues);
+        addFormValue(post, name, new StringValueImpl(value.toString()), null, addSlashesToValues);
       }
       else {
         Path tmpName = env.getUploadDirectory().createTempFile("php", "tmp");
@@ -144,7 +144,7 @@ public class Post {
                                   boolean addSlashesToValues)
   {
     // php/081b
-    Value value = new StringValue(formValueList[formValueList.length - 1]);
+    Value value = new StringValueImpl(formValueList[formValueList.length - 1]);
     
     addFormValue(array, key,
 		 value,
@@ -166,7 +166,7 @@ public class Post {
 
       key = key.substring(0, p);
 
-      Value keyValue = new StringValue(key);
+      Value keyValue = new StringValueImpl(key);
       Value existingValue = array.get(keyValue);
 
       if (existingValue == null || ! existingValue.isset()) {
@@ -189,7 +189,7 @@ public class Post {
           array.put(existingValue);
         }
         else {
-          keyValue = new StringValue(key);
+          keyValue = new StringValueImpl(key);
           existingValue = array.get(keyValue);
 
           if (existingValue == null || ! existingValue.isset()) {
@@ -216,7 +216,7 @@ public class Post {
       if (index.equals("")) {
         if (formValueList != null) {
           for (int i = 0; i < formValueList.length; i++) {
-            put(array, null, new StringValue(formValueList[i]), addSlashesToValues);
+            put(array, null, new StringValueImpl(formValueList[i]), addSlashesToValues);
           }
         }
         else
@@ -225,10 +225,10 @@ public class Post {
       else if ('0' <= index.charAt(0) && index.charAt(0) <= '9')
         put(array, new LongValue(StringValue.toLong(index)), formValue, addSlashesToValues);
       else
-        put(array, new StringValue(index), formValue, addSlashesToValues);
+        put(array, new StringValueImpl(index), formValue, addSlashesToValues);
     }
     else {
-      put(array, new StringValue(key), formValue, addSlashesToValues);
+      put(array, new StringValueImpl(key), formValue, addSlashesToValues);
     }
   }
 

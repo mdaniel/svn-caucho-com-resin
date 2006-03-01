@@ -43,10 +43,47 @@ import com.caucho.quercus.lib.QuercusStringModule;
 /**
  * Represents a PHP string value.
  */
-abstract public class AbstractStringValue extends Value {
+abstract public class StringValue extends Value {
+  public static final StringValue EMPTY = new StringValueImpl("");
+
+  private final static StringValue []CHAR_STRINGS;
+
   protected static final int IS_STRING = 0;
   protected static final int IS_LONG = 1;
   protected static final int IS_DOUBLE = 2;
+
+  /**
+   * Creates the string.
+   */
+  public static Value create(String value)
+  {
+    if (value == null)
+      return NullValue.NULL;
+    else
+      return new StringValueImpl(value);
+  }
+
+  /**
+   * Creates the string.
+   */
+  public static Value create(char value)
+  {
+    if (value < CHAR_STRINGS.length)
+      return CHAR_STRINGS[value];
+    else
+      return new StringValueImpl(String.valueOf(value));
+  }
+
+  /**
+   * Creates the string.
+   */
+  public static Value create(Object value)
+  {
+    if (value == null)
+      return NullValue.NULL;
+    else
+      return new StringValueImpl(value.toString());
+  }
 
   /**
    * Pre-increment the following value.
@@ -73,23 +110,23 @@ abstract public class AbstractStringValue extends Value {
 
 	if (ch == 'z') {
 	  if (i == 0)
-	    return new StringValue("aa" + tail);
+	    return new StringValueImpl("aa" + tail);
 	  else
 	    tail.insert(0, 'a');
 	}
 	else if ('a' <= ch && ch < 'z') {
-	  return new StringValue(s.substring(0, i) +
+	  return new StringValueImpl(s.substring(0, i) +
 				 (char) (ch + 1) +
 				 tail);
 	}
 	else if (ch == 'Z') {
 	  if (i == 0)
-	    return new StringValue("AA" + tail.toString());
+	    return new StringValueImpl("AA" + tail.toString());
 	  else
 	    tail.insert(0, 'A');
 	}
 	else if ('A' <= ch && ch < 'Z') {
-	  return new StringValue(s.substring(0, i) +
+	  return new StringValueImpl(s.substring(0, i) +
 				 (char) (ch + 1) +
 				 tail);
 	}
@@ -98,7 +135,7 @@ abstract public class AbstractStringValue extends Value {
 	}
       }
 
-      return new StringValue(tail.toString());
+      return new StringValueImpl(tail.toString());
     }
     else if (isLong()) {
       return new LongValue(toLong() - 1);
@@ -127,7 +164,7 @@ abstract public class AbstractStringValue extends Value {
     int type = getNumericType();
 
     if (type == IS_STRING) {
-      if (rValue instanceof StringValue)
+      if (rValue instanceof StringValueImpl)
 	return v.equals(rValue.toString());
       else if (rValue.isLong())
 	return toLong() ==  rValue.toLong();
@@ -198,6 +235,38 @@ abstract public class AbstractStringValue extends Value {
   }
 
   /**
+   * Converts to a long.
+   */
+  public static long toLong(String string)
+  {
+    if (string.equals(""))
+      return 0;
+
+    int len = string.length();
+
+    long value = 0;
+    long sign = 1;
+
+    int i = 0;
+
+    if (string.charAt(0) == '-') {
+      sign = -1;
+      i = 1;
+    }
+
+    for (; i < len; i++) {
+      char ch = string.charAt(i);
+
+      if ('0' <= ch && ch <= '9')
+	value = 10 * value + ch - '0';
+      else
+	return sign * value;
+    }
+
+    return value;
+  }
+
+  /**
    * Exports the value.
    */
   public void varExport(StringBuilder sb)
@@ -224,6 +293,21 @@ abstract public class AbstractStringValue extends Value {
   }
 
   /**
+   * Returns true for equality
+   */
+  public boolean eql(Value rValue)
+  {
+    rValue = rValue.toValue();
+
+    if (! (rValue instanceof StringValue))
+      return false;
+
+    String rString = rValue.toString();
+
+    return toString().equals(rString);
+  }
+
+  /**
    * Returns the hash code.
    */
   public int hashCode()
@@ -238,7 +322,7 @@ abstract public class AbstractStringValue extends Value {
   {
     if (this == o)
       return true;
-    else if (! (o instanceof AbstractStringValue))
+    else if (! (o instanceof StringValue))
       return false;
 
     return toString().equals(o.toString());
@@ -253,6 +337,13 @@ abstract public class AbstractStringValue extends Value {
     String s = toString();
 
     out.print("string(" + s.length() + ") \"" + s + "\"");
+  }
+
+  static {
+    CHAR_STRINGS = new StringValue[256];
+
+    for (int i = 0; i < CHAR_STRINGS.length; i++)
+      CHAR_STRINGS[i] = new StringValueImpl(String.valueOf((char) i));
   }
 }
 

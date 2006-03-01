@@ -33,6 +33,7 @@ import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.LongValue;
 import com.caucho.quercus.env.NullValue;
 import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.StringValueImpl;
 import com.caucho.quercus.env.Value;
 
 import org.w3c.dom.CharacterData;
@@ -52,7 +53,7 @@ public class DOMCharacterDataValue extends DOMNodeValue {
     
     if ("data".equals(name)) {
 
-      return new StringValue(((CharacterData) _node).getData());
+      return new StringValueImpl(((CharacterData) _node).getData());
 
     } else if ("length".equals(name)) {
       
@@ -123,7 +124,7 @@ public class DOMCharacterDataValue extends DOMNodeValue {
     if (_node == null)
       return NullValue.NULL;
     
-    return new StringValue(((CharacterData) _node).substringData(offset.toInt(), count.toInt()));
+    return new StringValueImpl(((CharacterData) _node).substringData(offset.toInt(), count.toInt()));
   }
   
   @Override

@@ -93,7 +93,7 @@ public class QuercusOptionsModule extends AbstractQuercusModule {
   public static Value getenv(Env env, String var)
   {
     if ("REMOTE_ADDR".equals(var))
-      return new StringValue(env.getRequest().getRemoteAddr());
+      return new StringValueImpl(env.getRequest().getRemoteAddr());
 
     return NullValue.NULL;
   }
@@ -377,7 +377,7 @@ public class QuercusOptionsModule extends AbstractQuercusModule {
 	else
 	  s = "z" + s;
 
-	expand.add(new StringValue(s));
+	expand.add(new StringValueImpl(s));
       }
       else
 	i++;

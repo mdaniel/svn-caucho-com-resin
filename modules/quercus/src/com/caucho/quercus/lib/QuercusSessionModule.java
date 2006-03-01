@@ -50,6 +50,7 @@ import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.NullValue;
 import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.StringValueImpl;
 import com.caucho.quercus.env.ArrayValue;
 import com.caucho.quercus.env.ArrayValueImpl;
 import com.caucho.quercus.env.Callback;
@@ -151,7 +152,7 @@ public class QuercusSessionModule extends AbstractQuercusModule {
 
       String key = sb.toString();
 
-      session.put(new StringValue(key), is.unserialize(env));
+      session.put(new StringValueImpl(key), is.unserialize(env));
     }
   }
 
@@ -227,7 +228,7 @@ public class QuercusSessionModule extends AbstractQuercusModule {
       oldValue = "";
 
     if (id != null && ! "".equals(id))
-      env.setSpecialValue("caucho.session_id", new StringValue(id));
+      env.setSpecialValue("caucho.session_id", new StringValueImpl(id));
 
     return oldValue;
   }
@@ -237,7 +238,7 @@ public class QuercusSessionModule extends AbstractQuercusModule {
    */
   public static boolean session_is_registered(Env env, String name)
   {
-    return env.getGlobalValue("_SESSION").get(new StringValue(name)).isset();
+    return env.getGlobalValue("_SESSION").get(new StringValueImpl(name)).isset();
   }
 
   /**
@@ -324,7 +325,7 @@ public class QuercusSessionModule extends AbstractQuercusModule {
     if (value instanceof StringValue) {
       String name = value.toString();
       
-      session.put(new StringValue(name), env.getGlobalVar(name));
+      session.put(new StringValueImpl(name), env.getGlobalVar(name));
     } else if (value.isArray()) {
       ArrayValue array = (ArrayValue) value.toValue();
 
@@ -444,7 +445,7 @@ public class QuercusSessionModule extends AbstractQuercusModule {
       if (sessionId == null || "".equals(sessionId))
 	sessionId = generateSessionId(env);
 
-      env.addConstant("SID", new StringValue(cookieName + '=' + sessionId), false);
+      env.addConstant("SID", new StringValueImpl(cookieName + '=' + sessionId), false);
 
       Cookie cookie = new Cookie(cookieName, sessionId);
       cookie.setVersion(1);
@@ -470,7 +471,7 @@ public class QuercusSessionModule extends AbstractQuercusModule {
       }
     }
 
-    env.setSpecialValue("caucho.session_id", new StringValue(sessionId));
+    env.setSpecialValue("caucho.session_id", new StringValueImpl(sessionId));
 
     if (response.isCommitted())
       env.warning(L.l("cannot send session cache limiter headers because response is committed"));

@@ -34,6 +34,7 @@ import com.caucho.util.L10N;
 import com.caucho.quercus.env.QuercusClass;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.StringValueImpl;
 
 import com.caucho.quercus.expr.Expr;
 
@@ -66,7 +67,7 @@ public class ClassScope extends Scope {
    */
   public void addVar(String name, Expr value)
   {
-    _cl.addValue(new StringValue(name), value);
+    _cl.addValue(new StringValueImpl(name), value);
   }
   
   /**
@@ -74,7 +75,7 @@ public class ClassScope extends Scope {
    */
   public void addStaticVar(String name, Expr value)
   {
-    _cl.addStaticValue(new StringValue(name), value);
+    _cl.addStaticValue(new StringValueImpl(name), value);
   }
   
   /**

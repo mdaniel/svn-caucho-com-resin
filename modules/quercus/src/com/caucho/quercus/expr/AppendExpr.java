@@ -36,6 +36,7 @@ import com.caucho.java.JavaWriter;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.StringValueImpl;
 
 import com.caucho.quercus.program.AnalyzeInfo;
 
@@ -133,7 +134,7 @@ public class AppendExpr extends Expr {
   public Value eval(Env env)
     throws Throwable
   {
-    return new StringValue(evalString(env));
+    return new StringValueImpl(evalString(env));
   }
   
   public String evalString(Env env)

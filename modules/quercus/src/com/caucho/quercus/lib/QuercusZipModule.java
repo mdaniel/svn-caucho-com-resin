@@ -33,6 +33,7 @@ import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.LongValue;
 import com.caucho.quercus.env.NullValue;
 import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.StringValueImpl;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.quercus.module.NotNull;
@@ -96,7 +97,7 @@ public class QuercusZipModule extends AbstractQuercusModule {
     if (zipEntry == null)
       return BooleanValue.FALSE;
 
-    return new StringValue(zipEntry.zip_entry_name());
+    return new StringValueImpl(zipEntry.zip_entry_name());
   }
 
   /**

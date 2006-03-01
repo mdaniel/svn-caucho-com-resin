@@ -59,8 +59,8 @@ public class ArrayValueImpl extends ArrayValue {
   private static final Logger log
     = Logger.getLogger(ArrayValueImpl.class.getName());
 
-  private static final StringValue KEY = new StringValue("key");
-  private static final StringValue VALUE = new StringValue("value");
+  private static final StringValue KEY = new StringValueImpl("key");
+  private static final StringValue VALUE = new StringValueImpl("value");
   
   private static final int DEFAULT_SIZE = 16;
   

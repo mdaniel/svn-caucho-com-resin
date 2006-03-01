@@ -236,7 +236,7 @@ public class CopyArrayValue extends ArrayValue {
    */
   public void put(String key, String value)
   {
-    put(new StringValue(key), new StringValue(value));
+    put(new StringValueImpl(key), new StringValueImpl(value));
   }
 
   /**

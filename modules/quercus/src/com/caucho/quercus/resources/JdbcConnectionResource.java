@@ -143,7 +143,7 @@ public class JdbcConnectionResource extends ResourceValue {
   public Value getCatalog()
   {
     try {
-      return new StringValue(_conn.getCatalog());
+      return new StringValueImpl(_conn.getCatalog());
     } catch (SQLException e) {
       _errorMessage = e.getMessage();
       _errorCode = e.getErrorCode();
@@ -588,7 +588,7 @@ public class JdbcConnectionResource extends ResourceValue {
         str.append(rs.getString(2));
       }
 
-      return new StringValue(str.toString());
+      return new StringValueImpl(str.toString());
     } catch (SQLException e) {
       _errorMessage = e.getMessage();
       _errorCode = e.getErrorCode();

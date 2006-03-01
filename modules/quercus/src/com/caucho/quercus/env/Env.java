@@ -29,6 +29,21 @@
 
 package com.caucho.quercus.env;
 
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.sql.DataSource;
+import java.io.IOException;
+import java.lang.ref.SoftReference;
+import java.sql.Connection;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import com.caucho.java.LineMap;
 import com.caucho.java.ScriptStackTrace;
 import com.caucho.java.WorkDir;
@@ -57,21 +72,6 @@ import com.caucho.vfs.Path;
 import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.Vfs;
 import com.caucho.vfs.WriteStream;
-
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.sql.DataSource;
-import java.io.IOException;
-import java.lang.ref.SoftReference;
-import java.sql.Connection;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Represents the Quercus environment.
@@ -128,7 +128,7 @@ public class Env {
   private static final IntMap SPECIAL_VARS = new IntMap();
 
   private static final StringValue PHP_SELF_STRING
-    = new StringValue("PHP_SELF");
+    = new StringValueImpl("PHP_SELF");
 
   private Quercus _quercus;
   private PhpPage _page;
@@ -627,7 +627,7 @@ public class Env {
     if (_iniMap == null)
       _iniMap = new HashMap<String, StringValue>();
 
-    _iniMap.put(var, new StringValue(value));
+    _iniMap.put(var, new StringValueImpl(value));
 
     return oldValue;
   }
@@ -1119,9 +1119,9 @@ public class Env {
           if (getIniBoolean("magic_quotes_gpc"))
             valueAsValue = QuercusStringModule.addslashes(value);
           else
-            valueAsValue = new StringValue(value);
+            valueAsValue = new StringValueImpl(value);
 
-          array.append(new StringValue(cookie.getName()), valueAsValue);
+          array.append(new StringValueImpl(cookie.getName()), valueAsValue);
         }
       }
 
@@ -1414,7 +1414,7 @@ public class Env {
        name));
     */
 
-    value = new StringValue(name);
+    value = new StringValueImpl(name);
 
     // XXX:
     _constMap.put(name, value);
@@ -1501,11 +1501,11 @@ public class Env {
     ArrayValue result = new ArrayValueImpl();
 
     for (Map.Entry<String, Value> entry : _quercus.getConstMap().entrySet()) {
-      result.put(new StringValue(entry.getKey()), entry.getValue());
+      result.put(new StringValueImpl(entry.getKey()), entry.getValue());
     }
 
     for (Map.Entry<String, Value> entry : _constMap.entrySet()) {
-      result.put(new StringValue(entry.getKey()), entry.getValue());
+      result.put(new StringValueImpl(entry.getKey()), entry.getValue());
     }
 
     return result;
@@ -1521,11 +1521,11 @@ public class Env {
     ArrayValue internal = _quercus.getDefinedFunctions();
     ArrayValue user = new ArrayValueImpl();
 
-    result.put(new StringValue("internal"), internal);
-    result.put(new StringValue("user"), user);
+    result.put(new StringValueImpl("internal"), internal);
+    result.put(new StringValueImpl("user"), user);
 
     for (String name : _funMap.keySet()) {
-      StringValue key = new StringValue(name);
+      StringValue key = new StringValueImpl(name);
 
       if (! internal.contains(key).isset())
         user.put(name);
@@ -1984,7 +1984,7 @@ public class Env {
    */
   public Value createString(byte []buffer, int offset, int length)
   {
-    return new StringValue(new String(buffer, offset, length));
+    return new StringValueImpl(new String(buffer, offset, length));
   }
 
   /**
@@ -2078,7 +2078,7 @@ public class Env {
     ArrayValue array = new ArrayValueImpl();
 
     for (String name : names) {
-      array.put(new StringValue(name));
+      array.put(new StringValueImpl(name));
     }
 
     return array;
@@ -2142,7 +2142,7 @@ public class Env {
 
       if (_autoload != null) {
 	try {
-	  _autoload.eval(this, new StringValue(name));
+	  _autoload.eval(this, new StringValueImpl(name));
 	} catch (Throwable e) {
 	  throw new RuntimeException(e);
 	}
@@ -2180,7 +2180,7 @@ public class Env {
 
     if (_autoload != null) {
       try {
-        _autoload.eval(this, new StringValue(name));
+        _autoload.eval(this, new StringValueImpl(name));
       }
       catch (Throwable e) {
         throw new RuntimeException(e);
@@ -2221,7 +2221,7 @@ public class Env {
     if (value instanceof Callback)
       return (Callback) value;
 
-    else if (value instanceof AbstractStringValue)
+    else if (value instanceof StringValue)
       return new CallbackFunction(this, value.toString());
 
     else if (value instanceof ArrayValue) {
@@ -2690,7 +2690,7 @@ public class Env {
 
         String fileName = getFileName();
         if (fileName != null)
-          fileNameV = new StringValue(fileName);
+          fileNameV = new StringValueImpl(fileName);
 
         Value lineV = NullValue.NULL;
         int line = getLine();
@@ -2699,7 +2699,7 @@ public class Env {
 
         Value context = NullValue.NULL;
 
-        handler.eval(this, new LongValue(mask), new StringValue(msg),
+        handler.eval(this, new LongValue(mask), new StringValueImpl(msg),
                      fileNameV, lineV, context);
 
         return NullValue.NULL;

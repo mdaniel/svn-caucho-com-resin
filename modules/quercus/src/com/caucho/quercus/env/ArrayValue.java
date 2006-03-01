@@ -41,8 +41,8 @@ abstract public class ArrayValue extends Value {
   private static final Logger log
     = Logger.getLogger(ArrayValue.class.getName());
 
-  protected static final StringValue KEY = new StringValue("key");
-  protected static final StringValue VALUE = new StringValue("value");
+  protected static final StringValue KEY = new StringValueImpl("key");
+  protected static final StringValue VALUE = new StringValueImpl("value");
 
   private static final int SORT_REGULAR = 0;
   private static final int SORT_NUMERIC = 1;
@@ -325,7 +325,7 @@ abstract public class ArrayValue extends Value {
    */
   public void put(String key, String value)
   {
-    put(new StringValue(key), new StringValue(value));
+    put(new StringValueImpl(key), new StringValueImpl(value));
   }
 
   /**
@@ -333,7 +333,7 @@ abstract public class ArrayValue extends Value {
    */
   public void put(String key, long value)
   {
-    put(new StringValue(key), new LongValue(value));
+    put(new StringValueImpl(key), new LongValue(value));
   }
 
   /**
@@ -341,7 +341,7 @@ abstract public class ArrayValue extends Value {
    */
   public void put(String key, boolean value)
   {
-    put(new StringValue(key), value ? BooleanValue.TRUE : BooleanValue.FALSE);
+    put(new StringValueImpl(key), value ? BooleanValue.TRUE : BooleanValue.FALSE);
   }
 
   /**
@@ -349,7 +349,7 @@ abstract public class ArrayValue extends Value {
    */
   public void put(String value)
   {
-    put(new StringValue(value));
+    put(new StringValueImpl(value));
   }
 
   /**

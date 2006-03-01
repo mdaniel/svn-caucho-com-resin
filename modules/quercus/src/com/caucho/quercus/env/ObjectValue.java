@@ -46,7 +46,7 @@ import java.util.TreeSet;
  * Represents a PHP object value.
  */
 public class ObjectValue extends Value {
-  private static final StringValue TO_STRING = new StringValue("__toString");
+  private static final StringValue TO_STRING = new StringValueImpl("__toString");
 
   private static final int DEFAULT_SIZE = 16;
 
@@ -297,7 +297,7 @@ public class ObjectValue extends Value {
    */
   public Value putField(String key, String value)
   {
-    return putField(null, key, new StringValue(value));
+    return putField(null, key, new StringValueImpl(value));
   }
 
   /**
@@ -440,7 +440,7 @@ public class ObjectValue extends Value {
       Entry entry = _entries[i];
 
       if (entry != null)
-	keys[k++] = new StringValue(entry.getKey());
+	keys[k++] = new StringValueImpl(entry.getKey());
     }
 
     return keys;
@@ -475,7 +475,7 @@ public class ObjectValue extends Value {
       Entry entry = _entries[i];
 
       if (entry != null)
-	indices.add(new StringValue(entry.getKey()));
+	indices.add(new StringValueImpl(entry.getKey()));
     }
 
     return indices;

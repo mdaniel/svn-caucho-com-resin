@@ -34,6 +34,7 @@ import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.LongValue;
 import com.caucho.quercus.env.NullValue;
 import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.StringValueImpl;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.module.Optional;
 import com.caucho.util.L10N;
@@ -115,7 +116,7 @@ public class DOMDocumentValue extends DOMNodeValue {
   {
     if ("actualEncoding".equals(name))
 
-      return new StringValue(((Document) _node).getXmlEncoding());
+      return new StringValueImpl(((Document) _node).getXmlEncoding());
 
     else if ("config".equals(name)) {
 
@@ -134,11 +135,11 @@ public class DOMDocumentValue extends DOMNodeValue {
 
     else if ("documentURI".equals(name))
 
-      return new StringValue(((Document) _node).getDocumentURI());
+      return new StringValueImpl(((Document) _node).getDocumentURI());
 
     else if ("encoding".equals(name)) //XXX: actualencoding vs. encoding vs. actualEncoding???
 
-      return new StringValue(((Document) _node).getXmlEncoding());
+      return new StringValueImpl(((Document) _node).getXmlEncoding());
 
     else if ("formatOutput".equals(name)) //XXX: what is formatOutput???
 
@@ -187,11 +188,11 @@ public class DOMDocumentValue extends DOMNodeValue {
 
     else if ("version".equals(name)) //XXX: version vs. xmlVersion
 
-      return new StringValue(((Document) _node).getXmlVersion());
+      return new StringValueImpl(((Document) _node).getXmlVersion());
 
     else if ("xmlEncoding".equals(name))
 
-      return new StringValue(((Document) _node).getXmlEncoding());
+      return new StringValueImpl(((Document) _node).getXmlEncoding());
 
     else if ("xmlStandalone".equals(name)) {
 
@@ -202,7 +203,7 @@ public class DOMDocumentValue extends DOMNodeValue {
 
     } else if ("xmlVersion".equals(name))
 
-     return new StringValue(((Document) _node).getXmlVersion());
+     return new StringValueImpl(((Document) _node).getXmlVersion());
 
     else
 
@@ -673,12 +674,12 @@ public class DOMDocumentValue extends DOMNodeValue {
     if (node == null) {
       
       simpleXML = new SimpleXMLElementValue(((Document) _node), ((Document) _node).getDocumentElement());   
-      return new StringValue(simpleXML.asXML().toString());
+      return new StringValueImpl(simpleXML.asXML().toString());
       
     } else {
       
       simpleXML = new SimpleXMLElementValue(((Document) _node), (Element) ((DOMNodeValue) node).getNode());
-      return new StringValue(simpleXML.generateXML().toString());
+      return new StringValueImpl(simpleXML.generateXML().toString());
     }
   }
   

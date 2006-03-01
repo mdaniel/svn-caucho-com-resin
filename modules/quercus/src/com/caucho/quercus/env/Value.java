@@ -47,7 +47,7 @@ import java.util.IdentityHashMap;
 abstract public class Value {
   protected static final L10N L = new L10N(Value.class);
 
-  public static final StringValue SCALAR_V = new StringValue("scalar");
+  public static final StringValue SCALAR_V = new StringValueImpl("scalar");
 
   public static final Value []NULL_VALUE_ARRAY = new Value[0];
   public static final Value []NULL_ARGS = new Value[0];
@@ -183,7 +183,7 @@ abstract public class Value {
     if (value instanceof StringValue)
       return value;
     else
-      return new StringValue(value.toString());
+      return new StringValueImpl(value.toString());
   }
 
   /**

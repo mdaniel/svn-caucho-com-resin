@@ -68,6 +68,7 @@ import com.caucho.quercus.env.ArrayValueImpl;
 import com.caucho.quercus.env.DoubleValue;
 import com.caucho.quercus.env.LongValue;
 import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.StringValueImpl;
 import com.caucho.quercus.env.Callback;
 
 import com.caucho.quercus.env.ArrayValue.ValueComparator;
@@ -133,7 +134,7 @@ public class QuercusApacheModule extends AbstractQuercusModule {
     while (e.hasMoreElements()) {
       String key = (String) e.nextElement();
 
-      result.put(new StringValue(key), new StringValue(req.getHeader(key)));
+      result.put(new StringValueImpl(key), new StringValueImpl(req.getHeader(key)));
     }
 
     return result;

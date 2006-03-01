@@ -48,12 +48,12 @@ public class JdbcResultResource extends ResourceValue {
   public static final int FETCH_NUM = 0x2;
   public static final int FETCH_BOTH = FETCH_ASSOC | FETCH_NUM;
 
-  public static final StringValue INTEGER = new StringValue("int");
-  public static final StringValue BLOB = new StringValue("blob");
-  public static final StringValue STRING = new StringValue("string");
-  public static final StringValue DATE = new StringValue("date");
-  public static final StringValue DATETIME = new StringValue("datetime");
-  public static final StringValue REAL = new StringValue("real");
+  public static final StringValue INTEGER = new StringValueImpl("int");
+  public static final StringValue BLOB = new StringValueImpl("blob");
+  public static final StringValue STRING = new StringValueImpl("string");
+  public static final StringValue DATE = new StringValueImpl("date");
+  public static final StringValue DATETIME = new StringValueImpl("datetime");
+  public static final StringValue REAL = new StringValueImpl("real");
 
   private Statement _stmt;
   private ResultSet _rs;
@@ -212,46 +212,46 @@ public class JdbcResultResource extends ResourceValue {
 
     try {
       _rs.next();
-      result.put(new StringValue("name"), new StringValue(_rs.getString(1)));
-      result.put(new StringValue("table"), new StringValue(tableName));
-      result.put(new StringValue("max_length"), new LongValue(maxLength));
+      result.put(new StringValueImpl("name"), new StringValueImpl(_rs.getString(1)));
+      result.put(new StringValueImpl("table"), new StringValueImpl(tableName));
+      result.put(new StringValueImpl("max_length"), new LongValue(maxLength));
 
       if (_rs.getString(4).indexOf("YES") == -1)
-        result.put(new StringValue("not_null"), one);
+        result.put(new StringValueImpl("not_null"), one);
       else
-        result.put(new StringValue("not_null"), zero);
+        result.put(new StringValueImpl("not_null"), zero);
 
       if (_rs.getString(5).indexOf("PRI") != -1)
-        result.put(new StringValue("primary_key"), one);
+        result.put(new StringValueImpl("primary_key"), one);
       else
-        result.put(new StringValue("primary_key"), zero);
+        result.put(new StringValueImpl("primary_key"), zero);
 
       if (_rs.getString(5).indexOf("MUL") != -1)
-        result.put(new StringValue("multiple_key"), one);
+        result.put(new StringValueImpl("multiple_key"), one);
       else
-        result.put(new StringValue("multiple_key"), zero);
+        result.put(new StringValueImpl("multiple_key"), zero);
 
       if ((_rs.getString(2).indexOf("int") != -1) || (_rs.getString(2).indexOf("real") != -1))
-        result.put(new StringValue("numeric"), one);
+        result.put(new StringValueImpl("numeric"), one);
       else
-        result.put(new StringValue("numeric"), zero);
+        result.put(new StringValueImpl("numeric"), zero);
 
       if (_rs.getString(2).indexOf("blob") != -1)
-        result.put(new StringValue("blob"), one);
+        result.put(new StringValueImpl("blob"), one);
       else
-        result.put(new StringValue("blob"), zero);
+        result.put(new StringValueImpl("blob"), zero);
 
-      result.put(new StringValue("type"), new StringValue(type));
+      result.put(new StringValueImpl("type"), new StringValueImpl(type));
 
       if (_rs.getString(2).indexOf("unsigned") != -1)
-        result.put(new StringValue("unsigned"), one);
+        result.put(new StringValueImpl("unsigned"), one);
       else
-        result.put(new StringValue("unsigned"), zero);
+        result.put(new StringValueImpl("unsigned"), zero);
 
       if (_rs.getString(2).indexOf("zerofill") != -1)
-        result.put(new StringValue("zerofill"), one);
+        result.put(new StringValueImpl("zerofill"), one);
       else
-        result.put(new StringValue("zerofill"), zero);
+        result.put(new StringValueImpl("zerofill"), zero);
 
       return result;
     } catch (SQLException e) {
@@ -288,16 +288,16 @@ public class JdbcResultResource extends ResourceValue {
         _metaData = _rs.getMetaData();
 
       _rs.next();
-      result.put(new StringValue("name"), new StringValue(name));
-      result.put(new StringValue("orgname"), new StringValue(originalName));
-      result.put(new StringValue("table"), new StringValue(table));
+      result.put(new StringValueImpl("name"), new StringValueImpl(name));
+      result.put(new StringValueImpl("orgname"), new StringValueImpl(originalName));
+      result.put(new StringValueImpl("table"), new StringValueImpl(table));
       //XXX: orgtable same as table
-      result.put(new StringValue("orgtable"), new StringValue(table));
+      result.put(new StringValueImpl("orgtable"), new StringValueImpl(table));
       if (_rs.getString(6) != null)
-        result.put(new StringValue("def"), new StringValue(_rs.getString(6)));
+        result.put(new StringValueImpl("def"), new StringValueImpl(_rs.getString(6)));
       else
-        result.put(new StringValue("def"), new StringValue(""));
-      result.put(new StringValue("max_length"), new LongValue(maxLength));
+        result.put(new StringValueImpl("def"), new StringValueImpl(""));
+      result.put(new StringValueImpl("max_length"), new LongValue(maxLength));
 
       //generate flags
       long flags = 0;
@@ -351,7 +351,7 @@ public class JdbcResultResource extends ResourceValue {
           (type == Types.SMALLINT))
         flags += QuercusMysqliModule.NUM_FLAG;
 
-      result.put(new StringValue("flags"), new LongValue(flags));
+      result.put(new StringValueImpl("flags"), new LongValue(flags));
       //generate PHP type
       int quercusType = 0;
       switch (type) {
@@ -401,8 +401,8 @@ public class JdbcResultResource extends ResourceValue {
         quercusType = QuercusMysqliModule.MYSQL_TYPE_NULL;
         break;
       }
-      result.put(new StringValue("type"), new LongValue(quercusType));
-      result.put(new StringValue("decimals"), new LongValue(scale));
+      result.put(new StringValueImpl("type"), new LongValue(quercusType));
+      result.put(new StringValueImpl("decimals"), new LongValue(scale));
 
     } catch (SQLException e) {
       log.log(Level.FINE, e.toString(), e);
@@ -484,7 +484,7 @@ public class JdbcResultResource extends ResourceValue {
         flags.append("timestamp");
       }
 
-      return new StringValue(flags.toString());
+      return new StringValueImpl(flags.toString());
 
     } catch (SQLException e) {
       log.log(Level.FINE, e.toString(), e);
@@ -511,7 +511,7 @@ public class JdbcResultResource extends ResourceValue {
 	if (tableName == null || tableName.equals(""))
 	  return BooleanValue.FALSE;
 	else
-	  return new StringValue(tableName);
+	  return new StringValueImpl(tableName);
       }
     } catch (SQLException e) {
       log.log(Level.FINE, e.toString(), e);
@@ -739,7 +739,7 @@ public class JdbcResultResource extends ResourceValue {
   {
     try {
       _rs.absolute(i + 1);
-      return new StringValue(_rs.getString(1));
+      return new StringValueImpl(_rs.getString(1));
 
     } catch (SQLException e) {
       log.log(Level.FINE, e.toString(), e);
@@ -764,7 +764,7 @@ public class JdbcResultResource extends ResourceValue {
         return BooleanValue.FALSE;
       }
       else
-        return new StringValue(_metaData.getColumnName(fieldOffset + 1));
+        return new StringValueImpl(_metaData.getColumnName(fieldOffset + 1));
     } catch (Exception e) {
       log.log(Level.FINE, e.toString(), e);
       return BooleanValue.FALSE;
@@ -787,7 +787,7 @@ public class JdbcResultResource extends ResourceValue {
       if (_metaData.getColumnCount() <= fieldOffset || fieldOffset < 0)
         return BooleanValue.FALSE;
       else
-        return new StringValue(_metaData.getColumnLabel(fieldOffset + 1));
+        return new StringValueImpl(_metaData.getColumnLabel(fieldOffset + 1));
 
     } catch (Exception e) {
       log.log(Level.FINE, e.toString(), e);
@@ -887,7 +887,7 @@ public class JdbcResultResource extends ResourceValue {
           _columnNames = new Value[count];
 
           for (int i = 0; i < count; i++)
-            _columnNames[i] = new StringValue(_metaData.getColumnName(i + 1));
+            _columnNames[i] = new StringValueImpl(_metaData.getColumnName(i + 1));
         }
 
         for (int i = 0; i < count; i++) {
@@ -994,7 +994,7 @@ public class JdbcResultResource extends ResourceValue {
         if (strValue == null || rs.wasNull())
           return NullValue.NULL;
         else
-          return new StringValue(strValue);
+          return new StringValueImpl(strValue);
       }
     }
   }
@@ -1020,7 +1020,7 @@ public class JdbcResultResource extends ResourceValue {
   // XXX: quercusbb seems to want this?
   public Value toKey()
   {
-    return new StringValue("JdbcResultResource$" + System.identityHashCode(this));
+    return new StringValueImpl("JdbcResultResource$" + System.identityHashCode(this));
   }
 
   /**
@@ -1092,7 +1092,7 @@ public class JdbcResultResource extends ResourceValue {
       if (_metaData.getColumnCount() <= fieldOffset || fieldOffset < 0)
         return BooleanValue.FALSE;
       else
-        return new StringValue(_metaData.getCatalogName(fieldOffset + 1));
+        return new StringValueImpl(_metaData.getCatalogName(fieldOffset + 1));
 
     } catch (SQLException e) {
       log.log(Level.FINE, e.toString(), e);

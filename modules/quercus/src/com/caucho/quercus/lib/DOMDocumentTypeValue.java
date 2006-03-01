@@ -31,6 +31,7 @@ package com.caucho.quercus.lib;
 
 import com.caucho.quercus.env.NullValue;
 import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.StringValueImpl;
 import com.caucho.quercus.env.Value;
 
 import org.w3c.dom.DocumentType;
@@ -54,17 +55,17 @@ public class DOMDocumentTypeValue extends DOMNodeValue {
       return NullValue.NULL;
     
     if ("publicId".equals(name)) {
-      return new StringValue(((DocumentType) _node).getPublicId());
+      return new StringValueImpl(((DocumentType) _node).getPublicId());
     } else if ("systemId".equals(name)) {
-      return new StringValue(((DocumentType) _node).getSystemId());
+      return new StringValueImpl(((DocumentType) _node).getSystemId());
     } else if ("name".equals(name)) {
-      return new StringValue(((DocumentType) _node).getName());
+      return new StringValueImpl(((DocumentType) _node).getName());
     } else if ("entities".equals(name)) {
       return new DOMNamedNodeMapValue(((DocumentType) _node).getEntities());
     } else if ("notations".equals(name)) {
       return new DOMNamedNodeMapValue(((DocumentType) _node).getNotations());
     } else if ("internalSubset".equals(name)) {
-      return new StringValue(((DocumentType) _node).getInternalSubset());
+      return new StringValueImpl(((DocumentType) _node).getInternalSubset());
     }
     
     return NullValue.NULL;

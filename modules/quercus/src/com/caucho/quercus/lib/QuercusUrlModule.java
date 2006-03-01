@@ -39,6 +39,7 @@ import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.LongValue;
 import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.StringValueImpl;
 import com.caucho.quercus.env.ArrayValueImpl;
 
 /**
@@ -190,15 +191,15 @@ public class QuercusUrlModule extends AbstractQuercusModule {
 	}
 	else if (state == ParseUrlState.PASS) {
 	  value.put("host", user);
-	  value.put(new StringValue("port"),
-		    new LongValue(new StringValue(sb.toString()).toLong()));
+	  value.put(new StringValueImpl("port"),
+		    new LongValue(new StringValueImpl(sb.toString()).toLong()));
 	  sb.clear();
 	  state = ParseUrlState.PATH;
 	  sb.append(ch);
 	}
 	else if (state == ParseUrlState.PORT) {
-	  value.put(new StringValue("port"),
-		    new LongValue(new StringValue(sb.toString()).toLong()));
+	  value.put(new StringValueImpl("port"),
+		    new LongValue(new StringValueImpl(sb.toString()).toLong()));
 	  sb.clear();
 	  state = ParseUrlState.PATH;
 	  sb.append(ch);
@@ -215,14 +216,14 @@ public class QuercusUrlModule extends AbstractQuercusModule {
 	}
 	else if (state == ParseUrlState.PASS) {
 	  value.put("host", user);
-	  value.put(new StringValue("port"),
-		    new LongValue(new StringValue(sb.toString()).toLong()));
+	  value.put(new StringValueImpl("port"),
+		    new LongValue(new StringValueImpl(sb.toString()).toLong()));
 	  sb.clear();
 	  state = ParseUrlState.QUERY;
 	}
 	else if (state == ParseUrlState.PORT) {
-	  value.put(new StringValue("port"),
-		    new LongValue(new StringValue(sb.toString()).toLong()));
+	  value.put(new StringValueImpl("port"),
+		    new LongValue(new StringValueImpl(sb.toString()).toLong()));
 	  sb.clear();
 	  state = ParseUrlState.QUERY;
 	}
@@ -244,14 +245,14 @@ public class QuercusUrlModule extends AbstractQuercusModule {
 	}
 	else if (state == ParseUrlState.PASS) {
 	  value.put("host", user);
-	  value.put(new StringValue("port"),
-		    new LongValue(new StringValue(sb.toString()).toLong()));
+	  value.put(new StringValueImpl("port"),
+		    new LongValue(new StringValueImpl(sb.toString()).toLong()));
 	  sb.clear();
 	  state = ParseUrlState.FRAGMENT;
 	}
 	else if (state == ParseUrlState.PORT) {
-	  value.put(new StringValue("port"),
-		    new LongValue(new StringValue(sb.toString()).toLong()));
+	  value.put(new StringValueImpl("port"),
+		    new LongValue(new StringValueImpl(sb.toString()).toLong()));
 	  sb.clear();
 	  state = ParseUrlState.FRAGMENT;
 	}
@@ -284,12 +285,12 @@ public class QuercusUrlModule extends AbstractQuercusModule {
       value.put("host", sb.toString());
     else if (state == ParseUrlState.PASS) {
       value.put("host", user);
-      value.put(new StringValue("port"),
-		new LongValue(new StringValue(sb.toString()).toLong()));
+      value.put(new StringValueImpl("port"),
+		new LongValue(new StringValueImpl(sb.toString()).toLong()));
     }
     else if (state == ParseUrlState.PORT) {
-      value.put(new StringValue("port"),
-		new LongValue(new StringValue(sb.toString()).toLong()));
+      value.put(new StringValueImpl("port"),
+		new LongValue(new StringValueImpl(sb.toString()).toLong()));
     }
     else if (state == ParseUrlState.QUERY)
       value.put("query", sb.toString());

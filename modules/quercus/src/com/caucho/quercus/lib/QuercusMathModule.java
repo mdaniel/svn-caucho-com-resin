@@ -152,7 +152,7 @@ public class QuercusMathModule extends AbstractQuercusModule {
     }
 
     if (result == 0)
-      return new StringValue("0");
+      return new StringValueImpl("0");
 
     StringBuffer sb = new StringBuffer();
 
@@ -168,7 +168,7 @@ public class QuercusMathModule extends AbstractQuercusModule {
 
     sb.reverse();
 
-    return new StringValue(sb.toString());
+    return new StringValueImpl(sb.toString());
   }
 
   /**

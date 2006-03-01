@@ -31,6 +31,7 @@ package com.caucho.quercus.lib;
 
 import com.caucho.quercus.env.NullValue;
 import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.StringValueImpl;
 import com.caucho.quercus.env.Value;
 
 import org.w3c.dom.NodeList;
@@ -57,7 +58,7 @@ public class DOMXPath{
                         Value contextnode)
     throws XPathException
   {
-    return new StringValue(_xpath.evaluate(expression.toString(), ((DOMNodeValue) contextnode).getNode()));
+    return new StringValueImpl(_xpath.evaluate(expression.toString(), ((DOMNodeValue) contextnode).getNode()));
   }
 
   public Value query(Value expression,

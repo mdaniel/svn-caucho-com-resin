@@ -49,6 +49,7 @@ import com.caucho.quercus.module.Optional;
 import com.caucho.quercus.module.Reference;
 
 import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.StringValueImpl;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.NullValue;
 import com.caucho.quercus.env.BooleanValue;
@@ -180,7 +181,7 @@ public class QuercusNetworkModule extends AbstractQuercusModule {
   	for (int k = 0; k < ip.length; k++) {
   		String currentIPString = ip[k].getHostAddress();
   		
-  		StringValue currentIP = new StringValue((currentIPString));
+  		StringValue currentIP = new StringValueImpl((currentIPString));
   		
   		ipArray.append(currentIP);
   	}

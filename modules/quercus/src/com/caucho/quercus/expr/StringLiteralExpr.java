@@ -35,6 +35,7 @@ import com.caucho.java.JavaWriter;
 
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.InternStringValue;
 import com.caucho.quercus.env.Value;
 
 import com.caucho.quercus.program.AnalyzeInfo;
@@ -49,7 +50,7 @@ public class StringLiteralExpr extends Expr {
 
   public StringLiteralExpr(String value)
   {
-    _value = new StringValue(value);
+    _value = new InternStringValue(value);
   }
   
   public StringLiteralExpr(StringValue value)
@@ -107,7 +108,7 @@ public class StringLiteralExpr extends Expr {
   public void generate(PhpWriter out)
     throws IOException
   {
-    if (_value.getValue().equals(""))
+    if (_value.toString().equals(""))
       out.print("com.caucho.quercus.env.StringValue.EMPTY");
     else {
       String var = out.addValue(_value);
@@ -144,13 +145,13 @@ public class StringLiteralExpr extends Expr {
   public void generatePrint(PhpWriter out)
     throws IOException
   {
-    if (_value.getValue().equals(""))
+    if (_value.toString().equals(""))
       return;
 
     generateGetOut(out);
     
     out.print(".print(\"");
-    out.printJavaString(_value.getValue());
+    out.printJavaString(_value.toString());
     out.print("\")");
   }
 
@@ -163,7 +164,7 @@ public class StringLiteralExpr extends Expr {
     throws IOException
   {
     out.print("\"");
-    out.printJavaString(_value.getValue());
+    out.printJavaString(_value.toString());
     out.print("\"");
   }
 
@@ -175,8 +176,8 @@ public class StringLiteralExpr extends Expr {
   public void generateExpr(PhpWriter out)
     throws IOException
   {
-    out.print("new com.caucho.quercus.expr.StringLiteralExpr(\"");
-    out.printJavaString(_value.getValue());
+    out.print("new StringLiteralExpr(\"");
+    out.printJavaString(_value.toString());
     out.print("\")");
   }
   

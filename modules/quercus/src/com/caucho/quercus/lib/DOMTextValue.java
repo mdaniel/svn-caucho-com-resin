@@ -33,6 +33,7 @@ import com.caucho.quercus.env.BooleanValue;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.NullValue;
 import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.StringValueImpl;
 import com.caucho.quercus.env.Value;
 
 import org.w3c.dom.Text;
@@ -51,7 +52,7 @@ public class DOMTextValue extends DOMCharacterDataValue {
       return NullValue.NULL;
     
     if ("wholeText".equals(name))
-      return new StringValue(((Text) _node).getWholeText());
+      return new StringValueImpl(((Text) _node).getWholeText());
     
     return NullValue.NULL;
   }

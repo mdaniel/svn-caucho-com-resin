@@ -52,6 +52,7 @@ import com.caucho.config.ConfigException;
 
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.StringValueImpl;
 import com.caucho.quercus.env.InternStringValue;
 import com.caucho.quercus.env.NullValue;
 import com.caucho.quercus.env.BooleanValue;
@@ -283,7 +284,7 @@ public class Quercus {
     if ("off".equalsIgnoreCase(value))
       value = "";
 
-    setIni(name, new StringValue(value));
+    setIni(name, new StringValueImpl(value));
   }
 
   /**
@@ -707,7 +708,7 @@ public class Quercus {
       return DoubleValue.create(((Number) obj).doubleValue());
     }
     else if (String.class.equals(obj.getClass())) {
-      return new StringValue((String) obj);
+      return new StringValueImpl((String) obj);
     }
     else {
       // XXX: unknown types, e.g. Character?

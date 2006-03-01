@@ -32,6 +32,7 @@ package com.caucho.quercus.lib;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.NullValue;
 import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.StringValueImpl;
 import com.caucho.quercus.env.Value;
 
 import org.w3c.dom.ProcessingInstruction;
@@ -50,9 +51,9 @@ public class DOMProcessingInstructionValue extends DOMNodeValue {
       return NullValue.NULL;
     
     if ("data".equals(name))
-      return new StringValue(((ProcessingInstruction) _node).getData());
+      return new StringValueImpl(((ProcessingInstruction) _node).getData());
     else if ("target".equals(name))
-      return new StringValue(((ProcessingInstruction) _node).getTarget());
+      return new StringValueImpl(((ProcessingInstruction) _node).getTarget());
     
     return NullValue.NULL;
   }

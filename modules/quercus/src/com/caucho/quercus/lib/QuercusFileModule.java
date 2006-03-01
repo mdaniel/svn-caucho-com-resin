@@ -442,7 +442,7 @@ public class QuercusFileModule extends AbstractQuercusModule {
     int ch = file.read();
 
     if (ch >= 0)
-      return new StringValue(String.valueOf((char) ch));
+      return new StringValueImpl(String.valueOf((char) ch));
     else
       return BooleanValue.FALSE;
   }
@@ -520,7 +520,7 @@ public class QuercusFileModule extends AbstractQuercusModule {
             sb.append((char) ch);
         }
 
-        array.append(new StringValue(sb.toString()));
+        array.append(new StringValueImpl(sb.toString()));
 
         for (; ch >= 0 && ch == ' ' || ch == '\t'; ch = file.read()) {
         }
@@ -532,7 +532,7 @@ public class QuercusFileModule extends AbstractQuercusModule {
           sb.append((char) ch);
         }
 
-        array.append(new StringValue(sb.toString()));
+        array.append(new StringValueImpl(sb.toString()));
       }
 
       if (ch < 0)
@@ -567,7 +567,7 @@ public class QuercusFileModule extends AbstractQuercusModule {
     String value = file.readLine();
 
     if (value != null)
-      return new StringValue(value);
+      return new StringValueImpl(value);
     else
       return BooleanValue.FALSE;
   }
@@ -591,7 +591,7 @@ public class QuercusFileModule extends AbstractQuercusModule {
     String value = file.readLine();
 
     if (value != null)
-      return new StringValue(QuercusStringModule.strip_tags(value, allowedTags));
+      return new StringValueImpl(QuercusStringModule.strip_tags(value, allowedTags));
     else
       return BooleanValue.FALSE;
   }
@@ -619,7 +619,7 @@ public class QuercusFileModule extends AbstractQuercusModule {
         String line;
 
         while ((line = file.readLine()) != null)
-          result.append(new StringValue(line));
+          result.append(new StringValueImpl(line));
 
         return result;
       } finally {
@@ -799,9 +799,9 @@ public class QuercusFileModule extends AbstractQuercusModule {
       return BooleanValue.FALSE;
     }
     else if (path.isDirectory())
-      return new StringValue("dir");
+      return new StringValueImpl("dir");
     else
-      return new StringValue("file");
+      return new StringValueImpl("file");
   }
 
   /**
@@ -847,7 +847,7 @@ public class QuercusFileModule extends AbstractQuercusModule {
 
       // XXX: handle offset and maxlen
 
-      return new StringValue(sb.toString());
+      return new StringValueImpl(sb.toString());
     } finally {
       file.close();
     }
@@ -1500,12 +1500,12 @@ public class QuercusFileModule extends AbstractQuercusModule {
 
     if (order == 1) {
       for (int i = 0; i < values.length; i++)
-        result.append(new LongValue(i), new StringValue(values[i]));
+        result.append(new LongValue(i), new StringValueImpl(values[i]));
     }
     else {
       for (int i = values.length - 1; i >= 0; i--) {
         result.append(new LongValue(values.length - i - 1),
-                      new StringValue(values[i]));
+                      new StringValueImpl(values[i]));
       }
     }
 
@@ -1529,7 +1529,7 @@ public class QuercusFileModule extends AbstractQuercusModule {
     // XXX: what if it doesn't exist?
     ArrayValue result = new ArrayValueImpl();
 
-    result.put(new StringValue("size"), new LongValue(path.getLength()));
+    result.put(new StringValueImpl("size"), new LongValue(path.getLength()));
 
     return result;
   }
@@ -1561,7 +1561,7 @@ public class QuercusFileModule extends AbstractQuercusModule {
       // XXX: remove on exit
 
       Path path = dir.createTempFile(prefix, ".tmp");
-      return new StringValue(path.getTail());
+      return new StringValueImpl(path.getTail());
     } catch (IOException e) {
       log.log(Level.FINE, e.toString(), e);
 

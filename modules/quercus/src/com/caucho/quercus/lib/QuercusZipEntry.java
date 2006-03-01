@@ -30,6 +30,7 @@ package com.caucho.quercus.lib;
 
 import com.caucho.quercus.env.BooleanValue;
 import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.StringValueImpl;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.module.NotNull;
 import com.caucho.quercus.module.Optional;
@@ -106,7 +107,7 @@ public class QuercusZipEntry {
     if (numBytes == 0)
       return BooleanValue.FALSE;
     else
-      return new StringValue(new String(buf));
+      return new StringValueImpl(new String(buf));
   }
 
   public long zip_entry_compressedsize()

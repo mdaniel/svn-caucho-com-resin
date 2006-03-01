@@ -31,6 +31,7 @@ package com.caucho.quercus.lib;
 
 import com.caucho.quercus.env.NullValue;
 import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.StringValueImpl;
 import com.caucho.quercus.env.Value;
 
 import org.w3c.dom.Entity;
@@ -48,17 +49,17 @@ public class DOMEntityValue extends DOMNodeValue {
       return NullValue.NULL;
     
     if ("publicId".equals(name)) {
-      return new StringValue(((Entity)_node).getPublicId());
+      return new StringValueImpl(((Entity)_node).getPublicId());
     } else if ("systemId".equals(name)) {
-      return new StringValue(((Entity)_node).getSystemId());
+      return new StringValueImpl(((Entity)_node).getSystemId());
     } else if ("notationName".equals(name)) {
-      return new StringValue(((Entity)_node).getNotationName());
+      return new StringValueImpl(((Entity)_node).getNotationName());
     } else if ("actualEncoding".equals(name)) {
-      return new StringValue(((Entity)_node).getInputEncoding());
+      return new StringValueImpl(((Entity)_node).getInputEncoding());
     } else if ("encoding".equals(name)) {
-      return new StringValue(((Entity)_node).getXmlEncoding());
+      return new StringValueImpl(((Entity)_node).getXmlEncoding());
     } else if ("version".equals(name)) {
-      return new StringValue(((Entity)_node).getXmlVersion());
+      return new StringValueImpl(((Entity)_node).getXmlVersion());
     }
     
     return NullValue.NULL;

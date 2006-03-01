@@ -320,7 +320,7 @@ abstract public class Marshall {
       if (value == null)
         return NullValue.NULL;
       else
-        return new StringValue((String) value);
+        return new StringValueImpl((String) value);
     }
 
     public void generate(PhpWriter out, Expr expr, Class argClass)
@@ -908,7 +908,7 @@ abstract public class Marshall {
       if (value == null)
         return NullValue.NULL;
       else
-        return new StringValue(value.toString());
+        return new StringValueImpl(value.toString());
     }
 
     public void generateResultStart(PhpWriter out)
@@ -945,7 +945,7 @@ abstract public class Marshall {
       if (value == null)
         return NullValue.NULL;
       else
-        return new StringValue(value.toString());
+        return new StringValueImpl(value.toString());
     }
 
     public void generateResultStart(PhpWriter out)

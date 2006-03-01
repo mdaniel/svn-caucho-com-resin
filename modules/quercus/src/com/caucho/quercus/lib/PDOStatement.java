@@ -401,7 +401,7 @@ public class PDOStatement
         String name = getMetaData().getColumnName(i + 1);
         Value value = getColumnValue(i);
 
-        array.put(new StringValue(name), value);
+        array.put(new StringValueImpl(name), value);
       }
 
       return array;
@@ -426,7 +426,7 @@ public class PDOStatement
         String name = getMetaData().getColumnName(i + 1);
         Value value = getColumnValue(i);
 
-        array.put(new StringValue(name), value);
+        array.put(new StringValueImpl(name), value);
         array.put(LongValue.create(i), value);
       }
 
@@ -611,7 +611,7 @@ public class PDOStatement
         if (value == null || _resultSet.wasNull())
           return NullValue.NULL;
         else
-          return new StringValue(value);
+          return new StringValueImpl(value);
       }
     }
 

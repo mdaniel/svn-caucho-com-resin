@@ -218,14 +218,14 @@ public class QuercusVariableModule extends AbstractQuercusModule {
     HashMap<String,Var> map = env.getEnv();
 
     for (Map.Entry<String,Var> entry : map.entrySet()) {
-      result.append(new StringValue(entry.getKey()),
+      result.append(new StringValueImpl(entry.getKey()),
 		    entry.getValue().toValue());
     }
 
     HashMap<String,Var> globalMap = env.getGlobalEnv();
     if (map != globalMap) {
       for (Map.Entry<String,Var> entry : globalMap.entrySet()) {
-	result.append(new StringValue(entry.getKey()),
+	result.append(new StringValueImpl(entry.getKey()),
 		      entry.getValue().toValue());
       }
     }
@@ -547,7 +547,7 @@ public class QuercusVariableModule extends AbstractQuercusModule {
     if (v instanceof StringValue)
       return (StringValue) v;
     else
-      return new StringValue(v.toString());
+      return new StringValueImpl(v.toString());
   }
 
   /**
@@ -608,7 +608,7 @@ public class QuercusVariableModule extends AbstractQuercusModule {
       return true;
     }
     else if ("string".equals(type)) {
-      var.set(new StringValue(value.toString()));
+      var.set(new StringValueImpl(value.toString()));
       return true;
     }
     else if ("int".equals(type) || "integer".equals(type)) {
@@ -665,7 +665,7 @@ public class QuercusVariableModule extends AbstractQuercusModule {
     v.varExport(sb);
 
     if (isReturn)
-      return new StringValue(sb.toString());
+      return new StringValueImpl(sb.toString());
     else {
       env.getOut().print(sb);
 

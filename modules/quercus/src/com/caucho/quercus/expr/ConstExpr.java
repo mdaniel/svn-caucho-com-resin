@@ -33,6 +33,7 @@ import java.io.IOException;
 
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.StringValueImpl;
 import com.caucho.quercus.env.Value;
 
 import com.caucho.quercus.program.AnalyzeInfo;
@@ -71,7 +72,7 @@ public class ConstExpr extends Expr {
     Value value = env.getConstant(_var);
 
     if (value == null)
-      value = new StringValue(_var);
+      value = new StringValueImpl(_var);
     
     return value;
   }

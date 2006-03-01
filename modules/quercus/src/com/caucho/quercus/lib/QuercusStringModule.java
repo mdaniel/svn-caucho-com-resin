@@ -228,7 +228,7 @@ public class QuercusStringModule extends AbstractQuercusModule {
       }
     }
 
-    return new StringValue(sb.toString());
+    return new StringValueImpl(sb.toString());
   }
 
   /**
@@ -373,7 +373,7 @@ public class QuercusStringModule extends AbstractQuercusModule {
       }
     }
 
-    return new StringValue(byteToChar.getConvertedString());
+    return new StringValueImpl(byteToChar.getConvertedString());
   }
 
   /**
@@ -419,7 +419,7 @@ public class QuercusStringModule extends AbstractQuercusModule {
     result.append((char) 0x60);
     result.append('\n');
 
-    return new StringValue(result.toString());
+    return new StringValueImpl(result.toString());
   }
   /**
    * Returns an array of information about the characters.
@@ -483,7 +483,7 @@ public class QuercusStringModule extends AbstractQuercusModule {
             sb.append((char) i);
         }
 
-        return new StringValue(sb.toString());
+        return new StringValueImpl(sb.toString());
       }
 
     case 4:
@@ -495,7 +495,7 @@ public class QuercusStringModule extends AbstractQuercusModule {
             sb.append((char) i);
         }
 
-        return new StringValue(sb.toString());
+        return new StringValueImpl(sb.toString());
       }
 
     default:
@@ -562,7 +562,7 @@ public class QuercusStringModule extends AbstractQuercusModule {
 
       LongValue key = new LongValue(i++);
 
-      StringValue chunk = new StringValue(string.substring(head, tail));
+      StringValue chunk = new StringValueImpl(string.substring(head, tail));
 
       array.put(key, chunk);
 
@@ -571,7 +571,7 @@ public class QuercusStringModule extends AbstractQuercusModule {
 
     LongValue key = new LongValue(i);
 
-    StringValue chunk = new StringValue(string.substring(head));
+    StringValue chunk = new StringValueImpl(string.substring(head));
 
     array.put(key, chunk);
 
@@ -637,7 +637,7 @@ public class QuercusStringModule extends AbstractQuercusModule {
       sb.append(entry.getValue().toString());
     }
 
-    return new StringValue(sb.toString());
+    return new StringValueImpl(sb.toString());
   }
 
   /**
@@ -740,7 +740,7 @@ public class QuercusStringModule extends AbstractQuercusModule {
       sb.append(toHexChar(d2));
     }
 
-    return new StringValue(sb.toString());
+    return new StringValueImpl(sb.toString());
   }
 
   /**
@@ -1273,9 +1273,9 @@ public class QuercusStringModule extends AbstractQuercusModule {
             }
             if (closeBracketIndex > openBracketIndex + 1) {
               String index = key.substring(key.indexOf('[') + 1,key.indexOf(']'));
-              v.put(new StringValue(index), new StringValue(value));
+              v.put(new StringValueImpl(index), new StringValueImpl(value));
             } else {
-              v.put(new StringValue(value));
+              v.put(new StringValueImpl(value));
             }
           } else {
             Post.addFormValue(result, key, new String[] { value }, env.getIniBoolean("magic_quotes_gpc"));
@@ -1330,13 +1330,13 @@ public class QuercusStringModule extends AbstractQuercusModule {
   {
     int p;
 
-    Value value = new StringValue(valueStr);
+    Value value = new StringValueImpl(valueStr);
 
     if ((p = key.indexOf('[')) > 0 && key.endsWith("]")) {
       String index = key.substring(p + 1, key.length() - 1);
       key = key.substring(0, p);
 
-      Value keyValue = new StringValue(key);
+      Value keyValue = new StringValueImpl(key);
 
       Value part;
 
@@ -1351,7 +1351,7 @@ public class QuercusStringModule extends AbstractQuercusModule {
       if (index.equals(""))
         part.put(value);
       else
-        part.put(new StringValue(index), value);
+        part.put(new StringValueImpl(index), value);
 
       if (array != null)
         array.put(keyValue, part);
@@ -1360,7 +1360,7 @@ public class QuercusStringModule extends AbstractQuercusModule {
     }
     else {
       if (array != null)
-        array.put(new StringValue(key), value);
+        array.put(new StringValueImpl(key), value);
       else
         env.setVar(key, value);
     }
@@ -1408,7 +1408,7 @@ public class QuercusStringModule extends AbstractQuercusModule {
       }
     }
 
-    return new StringValue(sb.toString());
+    return new StringValueImpl(sb.toString());
   }
 
   private static final boolean[]TRIM_WHITESPACE = new boolean[256];
@@ -1504,21 +1504,21 @@ public class QuercusStringModule extends AbstractQuercusModule {
         Locale locale = setLocale(localeInfo, category, value.toString());
 
         if (locale != null)
-          return new StringValue(locale.toString());
+          return new StringValueImpl(locale.toString());
       }
     }
     else {
       Locale locale = setLocale(localeInfo, category, localeArg.toString());
 
       if (locale != null)
-        return new StringValue(locale.toString());
+        return new StringValueImpl(locale.toString());
     }
 
     for (int i = 0; i < fallback.length; i++) {
       Locale locale = setLocale(localeInfo, category, fallback[i].toString());
 
       if (locale != null)
-        return new StringValue(locale.toString());
+        return new StringValueImpl(locale.toString());
     }
 
     return BooleanValue.FALSE;
@@ -1801,14 +1801,14 @@ public class QuercusStringModule extends AbstractQuercusModule {
       char ch = string.charAt(sIndex);
 
       if (isWhitespace(ch)) {
-        array.append(new StringValue(sb.toString()));
+        array.append(new StringValueImpl(sb.toString()));
         return sIndex;
       }
       else
         sb.append(ch);
     }
 
-    array.append(new StringValue(sb.toString()));
+    array.append(new StringValueImpl(sb.toString()));
 
     return sIndex;
   }
@@ -1870,7 +1870,7 @@ public class QuercusStringModule extends AbstractQuercusModule {
       result.append('0');
     }
 
-    return new StringValue(result.toString());
+    return new StringValueImpl(result.toString());
   }
 
   /**
@@ -2212,7 +2212,7 @@ public class QuercusStringModule extends AbstractQuercusModule {
     if (tail < head)
       return StringValue.EMPTY;
     else {
-      return new StringValue(string.substring(head, tail + 1));
+      return new StringValueImpl(string.substring(head, tail + 1));
     }
   }
 
@@ -2287,7 +2287,7 @@ public class QuercusStringModule extends AbstractQuercusModule {
     for (int i = 0; i < count; i++)
       sb.append(string);
 
-    return new StringValue(sb.toString());
+    return new StringValueImpl(sb.toString());
   }
 
   /**
@@ -2362,7 +2362,7 @@ public class QuercusStringModule extends AbstractQuercusModule {
       String searchString = search.toString();
 
       if (searchString.length() == 0)
-        return new StringValue(subject);
+        return new StringValueImpl(subject);
 
       if (replace instanceof ArrayValue) {
         env.warning(L.l("Array to string conversion"));
@@ -2411,7 +2411,7 @@ public class QuercusStringModule extends AbstractQuercusModule {
       }
     }
 
-    return new StringValue(subject);
+    return new StringValueImpl(subject);
   }
 
   /**
@@ -2490,7 +2490,7 @@ public class QuercusStringModule extends AbstractQuercusModule {
       }
     }
 
-    return new StringValue(sb.toString());
+    return new StringValueImpl(sb.toString());
   }
 
   /**
@@ -2531,9 +2531,9 @@ public class QuercusStringModule extends AbstractQuercusModule {
       Value value;
 
       if (i + chunk <= strLen) {
-        value = new StringValue(string.substring(i, i + chunk));
+        value = new StringValueImpl(string.substring(i, i + chunk));
       } else {
-        value = new StringValue(string.substring(i));
+        value = new StringValueImpl(string.substring(i));
       }
 
       array.put(new LongValue(i), value);
@@ -2594,7 +2594,7 @@ public class QuercusStringModule extends AbstractQuercusModule {
           isBetweenWords = true;
 
           if (format > 0) {
-            StringValue word = new StringValue(string.substring(lastWordStart, i));
+            StringValue word = new StringValueImpl(string.substring(lastWordStart, i));
 
             if (format == 1)
               resultArray.append(word);
@@ -3039,7 +3039,7 @@ public class QuercusStringModule extends AbstractQuercusModule {
     int i = haystackLower.indexOf(needleLower);
 
     if (i > 0)
-      return new StringValue(haystack.substring(i));
+      return new StringValueImpl(haystack.substring(i));
     else
       return BooleanValue.FALSE;
   }
@@ -3067,7 +3067,7 @@ public class QuercusStringModule extends AbstractQuercusModule {
     int i = haystack.lastIndexOf(needle);
 
     if (i > 0)
-      return new StringValue(haystack.substring(i));
+      return new StringValueImpl(haystack.substring(i));
     else
       return BooleanValue.FALSE;
   }
@@ -3085,7 +3085,7 @@ public class QuercusStringModule extends AbstractQuercusModule {
       sb.append(string.charAt(i));
     }
 
-    return new StringValue(sb.toString());
+    return new StringValueImpl(sb.toString());
   }
 
   /**
@@ -3259,7 +3259,7 @@ public class QuercusStringModule extends AbstractQuercusModule {
     int i = haystack.indexOf(needle);
 
     if (i >= 0)
-      return new StringValue(haystack.substring(i));
+      return new StringValueImpl(haystack.substring(i));
     else
       return BooleanValue.FALSE;
   }
@@ -3353,7 +3353,7 @@ public class QuercusStringModule extends AbstractQuercusModule {
           break;
       }
 
-      result = new StringValue(string.substring(start, offset));
+      result = new StringValueImpl(string.substring(start, offset));
     }
 
     env.setSpecialValue("caucho.strtok_offset", offset);
@@ -3497,7 +3497,7 @@ public class QuercusStringModule extends AbstractQuercusModule {
       return BooleanValue.FALSE;
 
     if (lenV instanceof DefaultValue) {
-      return new StringValue(string.substring(start));
+      return new StringValueImpl(string.substring(start));
     }
     else {
       int len = lenV.toInt();
@@ -3511,9 +3511,9 @@ public class QuercusStringModule extends AbstractQuercusModule {
       if (end <= start)
         return StringValue.EMPTY;
       else if (strLen <= end)
-        return new StringValue(string.substring(start));
+        return new StringValueImpl(string.substring(start));
       else
-        return new StringValue(string.substring(start, end));
+        return new StringValueImpl(string.substring(start, end));
     }
   }
 
@@ -3643,7 +3643,7 @@ public class QuercusStringModule extends AbstractQuercusModule {
 
     result = string.substring(0, start) + replacement +  string.substring(end);
 
-    return new StringValue(result);
+    return new StringValueImpl(result);
   }
 
   /**

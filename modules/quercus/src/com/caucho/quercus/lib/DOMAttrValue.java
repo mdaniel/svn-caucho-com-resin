@@ -33,6 +33,7 @@ import com.caucho.quercus.env.BooleanValue;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.NullValue;
 import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.StringValueImpl;
 import com.caucho.quercus.env.Value;
 
 import org.w3c.dom.Attr;
@@ -78,7 +79,7 @@ public class DOMAttrValue extends DOMNodeValue {
     
     if ("name".equals(index)) {
       
-      return new StringValue(((Attr) _node).getName());
+      return new StringValueImpl(((Attr) _node).getName());
       
     } else if ("ownerElement".equals(index)) {
       
@@ -97,7 +98,7 @@ public class DOMAttrValue extends DOMNodeValue {
       
     } else if ("value".equals(index)) {
       
-      return new StringValue(((Attr) _node).getValue());
+      return new StringValueImpl(((Attr) _node).getValue());
       
     }
     

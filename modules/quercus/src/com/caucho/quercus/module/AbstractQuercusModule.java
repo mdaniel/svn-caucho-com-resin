@@ -34,6 +34,7 @@ import java.util.HashMap;
 
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.StringValueImpl;
 
 /**
  * Represents a quercus module.
@@ -82,7 +83,7 @@ public class AbstractQuercusModule implements QuercusModule {
                                int code)
   {
     if (value != null)
-      map.put(name, new StringValue(value));
+      map.put(name, new StringValueImpl(value));
     else
       map.put(name, null);
   }

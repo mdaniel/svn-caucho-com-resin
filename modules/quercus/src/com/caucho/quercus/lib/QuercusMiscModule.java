@@ -50,7 +50,7 @@ import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.NullValue;
 import com.caucho.quercus.env.LongValue;
-import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.StringValueImpl;
 
 import com.caucho.quercus.program.PhpProgram;
 
@@ -151,14 +151,14 @@ public class QuercusMiscModule extends AbstractQuercusModule {
 	    line = sb.toString();
 	    sb.setLength(0);
 	    if (output != null)
-	      output.put(new StringValue(line));
+	      output.put(new StringValueImpl(line));
 	  }
 	  hasCr = false;
 	}
 	else if (ch == '\r') {
 	  line = sb.toString();
 	  sb.setLength(0);
-	  output.put(new StringValue(line));
+	  output.put(new StringValueImpl(line));
 	  hasCr = true;
 	}
 	else
@@ -168,7 +168,7 @@ public class QuercusMiscModule extends AbstractQuercusModule {
       if (sb.length() > 0) {
 	line = sb.toString();
 	sb.setLength(0);
-	output.put(new StringValue(line));
+	output.put(new StringValueImpl(line));
       }
 
       is.close();

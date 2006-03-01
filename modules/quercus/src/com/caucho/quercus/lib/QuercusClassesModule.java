@@ -42,6 +42,7 @@ import com.caucho.quercus.env.BooleanValue;
 import com.caucho.quercus.env.ArrayValue;
 import com.caucho.quercus.env.ArrayValueImpl;
 import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.StringValueImpl;
 import com.caucho.quercus.env.ObjectValue;
 
 import com.caucho.quercus.env.AbstractQuercusClass;
@@ -71,7 +72,7 @@ public class QuercusClassesModule extends AbstractQuercusModule {
     if (value instanceof ObjectValue) {
       ObjectValue obj = (ObjectValue) value;
 
-      return new StringValue(obj.getName());
+      return new StringValueImpl(obj.getName());
     }
     else
       return BooleanValue.FALSE;
@@ -130,7 +131,7 @@ public class QuercusClassesModule extends AbstractQuercusModule {
       String parent = obj.getParentName();
 
       if (parent != null)
-	return new StringValue(parent);
+	return new StringValueImpl(parent);
     }
     else if (value instanceof StringValue) {
       String className = value.toString();
@@ -141,7 +142,7 @@ public class QuercusClassesModule extends AbstractQuercusModule {
 	String parent = cl.getParentName();
 
 	if (parent != null)
-	  return new StringValue(parent);
+	  return new StringValueImpl(parent);
       }
     }
 

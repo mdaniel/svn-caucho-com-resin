@@ -34,6 +34,7 @@ import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.LongValue;
 import com.caucho.quercus.env.NullValue;
 import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.StringValueImpl;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.module.Optional;
 
@@ -43,6 +44,10 @@ import org.w3c.dom.Node;
 public class DOMNodeValue extends Value {
 
   protected Node _node;
+
+  public DOMNodeValue()
+  {
+  }
 
   public DOMNodeValue(Node node)
   {
@@ -127,9 +132,9 @@ public class DOMNodeValue extends Value {
   public Value getField(String name)
   {
     if ("nodeName".equals(name))
-      return new StringValue(_node.getNodeName());
+      return new StringValueImpl(_node.getNodeName());
     else if ("nodeValue".equals(name))
-      return new StringValue(_node.getNodeValue());
+      return new StringValueImpl(_node.getNodeValue());
     else if ("nodeType".equals(name))
       return new LongValue(getNodeType());
     else if ("parentNode".equals(name))
@@ -149,15 +154,15 @@ public class DOMNodeValue extends Value {
     else if ("ownerDocument".equals(name))
       return new DOMDocumentValue(_node.getOwnerDocument());
     else if ("namespaceURI".equals(name))
-      return new StringValue(_node.getNamespaceURI());
+      return new StringValueImpl(_node.getNamespaceURI());
     else if ("prefix".equals(name))
-      return new StringValue(_node.getPrefix());
+      return new StringValueImpl(_node.getPrefix());
     else if ("localName".equals(name))
-      return new StringValue(_node.getLocalName());
+      return new StringValueImpl(_node.getLocalName());
     else if ("baseURI".equals(name))
-      return new StringValue(_node.getBaseURI());
+      return new StringValueImpl(_node.getBaseURI());
     else if ("textContent".equals(name))
-      return new StringValue(_node.getTextContent());
+      return new StringValueImpl(_node.getTextContent());
     else
       return NullValue.NULL;
   }
@@ -421,7 +426,7 @@ public class DOMNodeValue extends Value {
     if ((_node == null) || (!(prefix instanceof StringValue)))
       return NullValue.NULL;
     
-    return new StringValue (_node.lookupNamespaceURI(prefix.toString()));
+    return new StringValueImpl(_node.lookupNamespaceURI(prefix.toString()));
   }
   
   public Value lookupPrefix(Value namespaceURI)
@@ -429,7 +434,7 @@ public class DOMNodeValue extends Value {
     if ((_node == null) ||(!(namespaceURI instanceof StringValue)))
       return NullValue.NULL;
     
-    return new StringValue(_node.lookupPrefix(namespaceURI.toString()));
+    return new StringValueImpl(_node.lookupPrefix(namespaceURI.toString()));
   }
   
   public Value normalize()
