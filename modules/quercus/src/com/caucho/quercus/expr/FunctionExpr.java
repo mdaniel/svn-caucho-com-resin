@@ -307,6 +307,13 @@ public class FunctionExpr extends Expr {
 	fun.generate(out, this, _args);
     }
     else {
+      if (void.class.equals(retType))
+	isRef = true;
+      else if (boolean.class.equals(retType))
+	isRef = true;
+      else if (! isCopy)
+	isRef = true;
+      
       // super.generate(out);
 
       // XXX: need to check where it's from
@@ -343,8 +350,10 @@ public class FunctionExpr extends Expr {
     
       if (boolean.class.equals(retType))
 	out.print(".toBoolean()");
+      /*
       else if (isCopy)
 	out.print(".copyReturn()");
+      */
     }
   }
 
