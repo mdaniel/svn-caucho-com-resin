@@ -38,12 +38,10 @@ import com.caucho.quercus.env.Value;
 import org.w3c.dom.CharacterData;
 
 public class DOMCharacterDataValue extends DOMNodeValue {
- 
-  public DOMCharacterDataValue() {}
   
   public DOMCharacterDataValue(CharacterData characterData)
   {
-    _node = characterData;
+    super(characterData);
   }
   
   @Override

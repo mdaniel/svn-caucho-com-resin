@@ -41,7 +41,7 @@ public class DOMTextValue extends DOMCharacterDataValue {
   
   public DOMTextValue(Text text)
   {
-    _node = text;
+    super(text);
   }
   
   @Override

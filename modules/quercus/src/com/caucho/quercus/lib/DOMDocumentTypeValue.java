@@ -39,7 +39,7 @@ public class DOMDocumentTypeValue extends DOMNodeValue {
 
   public DOMDocumentTypeValue(DocumentType docType)
   {
-    _node = docType;
+    super(docType);
   }
   
   public DocumentType getDocType()

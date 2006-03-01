@@ -68,7 +68,6 @@ public class DOMDocumentValue extends DOMNodeValue {
   private BooleanValue _recover;
   private BooleanValue _resolveExternals;
   private BooleanValue _substituteEntities;
-  private String _version;
 
   private InputStream _is;
   private DocumentBuilderFactory _documentBuilderFactory;
@@ -76,28 +75,26 @@ public class DOMDocumentValue extends DOMNodeValue {
 
   public DOMDocumentValue()
   {
-    _node = createDocument();
+    super(createDocument());
   }
 
   public DOMDocumentValue(String version)
   {
-    _version = version;
-    createDocument();
+    super(createDocument());
     ((Document) _node).setXmlVersion(version);
   }
 
   public DOMDocumentValue(String version,
                           String encoding)
   {
-    _version = version;
+    super(createDocument());
     _encoding = encoding; //Used when writing XML to a file
-    createDocument();
     ((Document) _node).setXmlVersion(version);
   }
 
   public DOMDocumentValue(Document document)
   {
-    _node = document;
+    super(document);
   }
 
   //helper for constructor

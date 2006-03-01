@@ -41,7 +41,7 @@ public class DOMElementValue extends DOMNodeValue {
   
   public DOMElementValue(Element element)
   {
-    _node = element;
+    super(element);
   }
   
   @Override

@@ -39,7 +39,7 @@ public class DOMNotationValue extends DOMNodeValue {
   
   public DOMNotationValue(Notation notation)
   {
-    _node = notation;
+    super(notation);
   }
   
   @Override

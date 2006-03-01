@@ -39,7 +39,7 @@ public class DOMEntityValue extends DOMNodeValue {
 
   public DOMEntityValue(Entity entity)
   {
-    _node = entity;
+    super(entity);
   }
   @Override
   public Value getField(String name)

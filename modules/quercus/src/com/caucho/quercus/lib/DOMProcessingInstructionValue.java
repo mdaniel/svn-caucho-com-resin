@@ -40,7 +40,7 @@ public class DOMProcessingInstructionValue extends DOMNodeValue {
   
   public DOMProcessingInstructionValue(ProcessingInstruction pi)
   {
-    _node = pi;
+    super(pi);
   }
   
   @Override

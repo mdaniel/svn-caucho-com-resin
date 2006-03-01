@@ -30,19 +30,17 @@
 package com.caucho.quercus.lib;
 
 import org.w3c.dom.Comment;
-import org.w3c.dom.Document;
 
 public class DOMCommentValue extends DOMCharacterDataValue {
   
   public DOMCommentValue(Comment comment)
   {
-    _node = comment;
+    super(comment);
   }
 
   public DOMCommentValue(String data)
   {
-    Document document = DOMDocumentValue.createDocument();
-    _node = document.createComment(data);
+    this(DOMDocumentValue.createDocument().createComment(data));
   }
   
 }

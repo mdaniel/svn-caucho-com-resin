@@ -36,7 +36,7 @@ public class DOMEntityReferenceValue extends DOMNodeValue {
 
   public DOMEntityReferenceValue(EntityReference reference)
   {
-    _node = reference;
+    super(reference);
   }
 
   public DOMEntityReferenceValue(String value)

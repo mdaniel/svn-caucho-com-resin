@@ -35,6 +35,6 @@ public class DOMCDATASectionValue extends DOMNodeValue {
   
   public DOMCDATASectionValue(CDATASection section)
   {
-    _node = section;
+    super(section);
   }
 }

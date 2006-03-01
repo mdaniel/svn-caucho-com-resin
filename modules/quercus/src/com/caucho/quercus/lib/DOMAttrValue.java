@@ -41,7 +41,7 @@ public class DOMAttrValue extends DOMNodeValue {
 
   public DOMAttrValue(Attr attr)
   {
-    _node = attr;
+    super(attr);
   }
   
   public Value isId()
