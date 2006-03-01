@@ -44,16 +44,17 @@ import com.caucho.quercus.program.AbstractFunction;
  * Represents a PHP variable value.
  */
 public class Var extends Value {
-  private Value _value = NullValue.NULL;
+  Value _value;
   private int _refCount;
 
   public Var()
   {
+    _value = NullValue.NULL;
   }
 
   public Var(Value value)
   {
-    _value = value.toValue();
+    _value = value;
   }
 
   /**

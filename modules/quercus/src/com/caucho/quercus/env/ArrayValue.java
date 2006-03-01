@@ -824,6 +824,7 @@ abstract public class ArrayValue extends Value {
     Entry _next;
 
     Value _key;
+    int _index;
 
     public Entry()
     {

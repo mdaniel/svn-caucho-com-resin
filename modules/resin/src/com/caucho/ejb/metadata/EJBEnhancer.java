@@ -40,7 +40,7 @@ import javax.transaction.UserTransaction;
 
 import javax.ejb.Stateless;
 import javax.ejb.Stateful;
-import javax.ejb.Entity;
+import javax.persistence.Entity;
 import javax.ejb.Local;
 import javax.ejb.Remote;
 import javax.ejb.MethodPermissions;

@@ -108,6 +108,29 @@ public class ArrayValueImpl extends ArrayValue {
     }
   }
 
+  public ArrayValueImpl(ArrayValueImpl copy)
+  {
+    _size = copy._size;
+    _entries = new Entry[copy._entries.length];
+    _hashMask = _entries.length - 1;
+
+    Entry prev = null;
+    for (Entry ptr = copy._head; ptr != null; ptr = ptr._next) {
+      Entry copy = new Entry(ptr.key, ptr._value.copyArray());
+      
+      _entries[ptr._index] = copy;
+
+      if (prev == null)
+	_head = _current = copy;
+      else {
+	prev._next = copy;
+	copy._prev = prev;
+      }
+
+      prev = copy;
+    }
+  }
+
   public ArrayValueImpl(Env env,
 			IdentityHashMap<Value,Value> map,
 			ArrayValue copy)
@@ -170,6 +193,14 @@ public class ArrayValueImpl extends ArrayValue {
    * Copy for assignment.
    */
   public Value copy()
+  {
+    return new ArrayValueImpl(this);
+  }
+  
+  /**
+   * Copy for assignment.
+   */
+  public Value copyReturn()
   {
     return new ArrayValueImpl(this);
   }
@@ -541,6 +572,7 @@ public class ArrayValueImpl extends ArrayValue {
 
     Entry newEntry = new Entry();
     _entries[hash] = newEntry;
+    newEntry._index = hash;
     
     newEntry._key = key;
 
@@ -587,6 +619,7 @@ public class ArrayValueImpl extends ArrayValue {
     for (int i = capacity; i >= 0; i--) {
       if (_entries[hash] == null) {
 	_entries[hash] = entry;
+	entry._index = hash;
 	return;
       }
 

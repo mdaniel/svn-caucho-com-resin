@@ -44,8 +44,7 @@ import java.util.IdentityHashMap;
 /**
  * Represents a PHP expression value.
  */
-abstract public class Value
-{
+abstract public class Value {
   protected static final L10N L = new L10N(Value.class);
 
   public static final StringValue SCALAR_V = new StringValue("scalar");
