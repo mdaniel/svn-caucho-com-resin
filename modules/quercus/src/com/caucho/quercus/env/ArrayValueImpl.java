@@ -116,19 +116,21 @@ public class ArrayValueImpl extends ArrayValue {
 
     Entry prev = null;
     for (Entry ptr = copy._head; ptr != null; ptr = ptr._next) {
-      Entry copy = new Entry(ptr.key, ptr._value.copyArray());
+      Entry ptrCopy = new Entry(ptr._key, ptr._value.copyArrayItem());
       
-      _entries[ptr._index] = copy;
+      _entries[ptr._index] = ptrCopy;
 
       if (prev == null)
-	_head = _current = copy;
+	_head = _current = ptrCopy;
       else {
-	prev._next = copy;
-	copy._prev = prev;
+	prev._next = ptrCopy;
+	ptrCopy._prev = prev;
       }
 
-      prev = copy;
+      prev = ptrCopy;
     }
+
+    _tail = prev;
   }
 
   public ArrayValueImpl(Env env,
