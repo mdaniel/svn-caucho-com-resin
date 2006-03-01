@@ -50,7 +50,8 @@ public class DOMElementValue extends DOMNodeValue {
     if (_node == null)
       return NullValue.NULL;
     
-    ((Element) _node).setNodeValue(value.toString());
+    _node.setNodeValue(value.toString());
+    
     return value;
   }
   
@@ -64,7 +65,7 @@ public class DOMElementValue extends DOMNodeValue {
        if (_node == null)
          return NullValue.NULL;
        
-       return new StringValue(((Element) _node).getNodeName());
+       return new StringValue(_node.getNodeName());
        
      } else
        return NullValue.NULL;

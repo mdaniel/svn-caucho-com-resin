@@ -67,7 +67,7 @@ public class DOMCharacterDataValue extends DOMNodeValue {
   @Override
   public Value putField(Env env, String key, Value value)
   {
-    if (((CharacterData) _node) == null)
+    if (_node == null)
       return NullValue.NULL;
     
     if ("data".equals(key)) {
@@ -82,7 +82,7 @@ public class DOMCharacterDataValue extends DOMNodeValue {
 
   public Value appendData(Value data)
   {
-    if (((CharacterData) _node) == null)
+    if (_node == null)
       return NullValue.NULL;
     
     ((CharacterData) _node).appendData(data.toString());
@@ -92,7 +92,7 @@ public class DOMCharacterDataValue extends DOMNodeValue {
   
   public Value deleteData(Value offset, Value count)
   {
-    if (((CharacterData) _node) == null)
+    if (_node == null)
       return NullValue.NULL;
     
     ((CharacterData) _node).deleteData(offset.toInt(), count.toInt());
@@ -102,7 +102,7 @@ public class DOMCharacterDataValue extends DOMNodeValue {
   
   public Value insertData(Value offset, Value data)
   {
-    if (((CharacterData) _node) == null)
+    if (_node == null)
       return NullValue.NULL;
     
     ((CharacterData) _node).insertData(offset.toInt(), data.toString());
@@ -112,7 +112,7 @@ public class DOMCharacterDataValue extends DOMNodeValue {
   
   public Value replaceData(Value offset, Value count, Value data)
   {
-    if (((CharacterData) _node) == null)
+    if (_node == null)
       return NullValue.NULL;
     
     ((CharacterData) _node).replaceData(offset.toInt(), count.toInt(), data.toString());
@@ -122,7 +122,7 @@ public class DOMCharacterDataValue extends DOMNodeValue {
   
   public Value substringData(Value offset, Value count)
   {
-    if (((CharacterData) _node) == null)
+    if (_node == null)
       return NullValue.NULL;
     
     return new StringValue(((CharacterData) _node).substringData(offset.toInt(), count.toInt()));

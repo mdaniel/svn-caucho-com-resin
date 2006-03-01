@@ -119,7 +119,7 @@ public class DOMNodeValue extends Value {
   
   //Used if user trys to set a read-only property
   //in putField
-  private Value errorReadOnly(String key)
+  protected Value errorReadOnly(String key)
   {
     return NullValue.NULL;
   }

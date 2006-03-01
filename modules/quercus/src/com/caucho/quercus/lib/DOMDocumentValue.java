@@ -72,19 +72,18 @@ public class DOMDocumentValue extends DOMNodeValue {
 
   private InputStream _is;
   private DocumentBuilderFactory _documentBuilderFactory;
-  private Document _document;
   private DOMConfiguration _DOMConfig;
 
   public DOMDocumentValue()
   {
-    _document = createDocument();
+    _node = createDocument();
   }
 
   public DOMDocumentValue(String version)
   {
     _version = version;
     createDocument();
-    _document.setXmlVersion(version);
+    ((Document) _node).setXmlVersion(version);
   }
 
   public DOMDocumentValue(String version,
@@ -93,12 +92,12 @@ public class DOMDocumentValue extends DOMNodeValue {
     _version = version;
     _encoding = encoding; //Used when writing XML to a file
     createDocument();
-    _document.setXmlVersion(version);
+    ((Document) _node).setXmlVersion(version);
   }
 
   public DOMDocumentValue(Document document)
   {
-    _document = document;
+    _node = document;
   }
 
   //helper for constructor
@@ -119,30 +118,30 @@ public class DOMDocumentValue extends DOMNodeValue {
   {
     if ("actualEncoding".equals(name))
 
-      return new StringValue(_document.getXmlEncoding());
+      return new StringValue(((Document) _node).getXmlEncoding());
 
     else if ("config".equals(name)) {
 
       if (_DOMConfig == null)
-        _DOMConfig = _document.getDomConfig();
+        _DOMConfig = ((Document) _node).getDomConfig();
 
       return new DOMConfigurationValue(_DOMConfig);
 
     } else if ("doctype".equals(name))
 
-      return new DOMDocumentTypeValue(_document.getDoctype());
+      return new DOMDocumentTypeValue(((Document) _node).getDoctype());
 
     else if ("_documentElementValue".equals(name))
 
-      return new DOMElementValue(_document.getDocumentElement());
+      return new DOMElementValue(((Document) _node).getDocumentElement());
 
     else if ("documentURI".equals(name))
 
-      return new StringValue(_document.getDocumentURI());
+      return new StringValue(((Document) _node).getDocumentURI());
 
     else if ("encoding".equals(name)) //XXX: actualencoding vs. encoding vs. actualEncoding???
 
-      return new StringValue(_document.getXmlEncoding());
+      return new StringValue(((Document) _node).getXmlEncoding());
 
     else if ("formatOutput".equals(name)) //XXX: what is formatOutput???
 
@@ -151,7 +150,7 @@ public class DOMDocumentValue extends DOMNodeValue {
     else if ("implementation".equals(name)) {
 
       if (_DOMImplementationValue == null)
-        _DOMImplementationValue = new DOMImplementationValue(_document.getImplementation());
+        _DOMImplementationValue = new DOMImplementationValue(((Document) _node).getImplementation());
 
       return _DOMImplementationValue;
 
@@ -169,14 +168,14 @@ public class DOMDocumentValue extends DOMNodeValue {
 
     else if ("standalone".equals(name)) {
 
-      if (_document.getXmlStandalone())
+      if (((Document) _node).getXmlStandalone())
         return BooleanValue.TRUE;
       else
         return BooleanValue.FALSE;
 
     } else if ("strictErrorChecking".equals(name)) {
 
-      if (_document.getStrictErrorChecking())
+      if (((Document) _node).getStrictErrorChecking())
         return BooleanValue.TRUE;
       else
         return BooleanValue.FALSE;
@@ -191,22 +190,22 @@ public class DOMDocumentValue extends DOMNodeValue {
 
     else if ("version".equals(name)) //XXX: version vs. xmlVersion
 
-      return new StringValue(_document.getXmlVersion());
+      return new StringValue(((Document) _node).getXmlVersion());
 
     else if ("xmlEncoding".equals(name))
 
-      return new StringValue(_document.getXmlEncoding());
+      return new StringValue(((Document) _node).getXmlEncoding());
 
     else if ("xmlStandalone".equals(name)) {
 
-      if (_document.getXmlStandalone())
+      if (((Document) _node).getXmlStandalone())
         return BooleanValue.TRUE;
       else
         return BooleanValue.FALSE;
 
     } else if ("xmlVersion".equals(name))
 
-     return new StringValue(_document.getXmlVersion());
+     return new StringValue(((Document) _node).getXmlVersion());
 
     else
 
@@ -262,6 +261,9 @@ public class DOMDocumentValue extends DOMNodeValue {
   @Override
   public Value putField(Env env, String key, Value value)
   {
+    if (_node == null)
+      return NullValue.NULL;
+    
     if ("actualEncoding".equals(key))
       return errorReadOnly(key);
     else if ("config".equals(key))
@@ -271,8 +273,9 @@ public class DOMDocumentValue extends DOMNodeValue {
     else if ("documentElement".equals(key))
       return errorReadOnly(key);
     else if ("documentURI".equals(key)) {
-      if (_document != null)
-        _document.setDocumentURI(value.toString());
+
+      ((Document) _node).setDocumentURI(value.toString());
+      
     } else if ("encoding".equals(key)) { //XXX: encoding vs. actualEncoding???
       _encoding = value.toString();
     } else if ("formatOutput".equals(key)) {
@@ -294,15 +297,15 @@ public class DOMDocumentValue extends DOMNodeValue {
     } else if ("standalone".equals(key)) {
 
       if (value instanceof BooleanValue) {
-        if (_document != null)
-          _document.setXmlStandalone(value.toBoolean());
+
+        ((Document) _node).setXmlStandalone(value.toBoolean());
       }
 
     } else if ("strictErrorChecking".equals(key)) {
 
       if (value instanceof BooleanValue) {
-        if (_document != null)
-          _document.setStrictErrorChecking(value.toBoolean());
+
+        ((Document) _node).setStrictErrorChecking(value.toBoolean());
       }
     } else if ("substituteEntities".equals(key)) {
 
@@ -316,92 +319,82 @@ public class DOMDocumentValue extends DOMNodeValue {
  
     } else if ("version".equals(key)) { //XXX: version vs. xmlVersion
 
-      if (_document != null)
-        _document.setXmlVersion(value.toString());
+        ((Document) _node).setXmlVersion(value.toString());
 
     } else if ("xmlEncoding".equals(key))
       return errorReadOnly(key);
     else if ("xmlStandalone".equals(key)) {
 
-      if (_document != null)
-        _document.setXmlStandalone(value.toBoolean());
+      ((Document) _node).setXmlStandalone(value.toBoolean());
 
     } else if ("xmlVersion".equals(key)) {
 
-      if (_document != null)
-        _document.setXmlVersion(value.toString());
+      ((Document) _node).setXmlVersion(value.toString());
 
     }
 
     return NullValue.NULL;
   }
 
-  //Used if user trys to set a read-only property
-  //in putField
-  private Value errorReadOnly(String key)
-  {
-    return NullValue.NULL;
-  }
-
   public Value createAttribute(Value name)
   {
-    if (_document == null)
+    if (_node == null)
       return BooleanValue.FALSE;
 
     //XXX: deal with DOMExceptions:
     //INVALID_CHARACTER_ERR
-    return new DOMAttrValue(_document.createAttribute(name.toString()));
+    return new DOMAttrValue(((Document) _node).createAttribute(name.toString()));
   }
 
   public Value createAttributeNS(Value namespaceURI,
                                  Value qualifiedName)
   {
-    if (_document == null)
+    if (_node == null)
       return BooleanValue.FALSE;
 
     //XXX: deal with DOMExpceitons:
     // INVALID_CHARACTER_ERR
     // NAMESPACE_ERR
 
-    return new DOMAttrValue(_document.createAttributeNS(namespaceURI.toString(), qualifiedName.toString()));
+    return new DOMAttrValue(((Document) _node).createAttributeNS(namespaceURI.toString(), qualifiedName.toString()));
   }
 
   public Value createCDATASection(Value data)
   {
-    if (_document == null)
+    if (_node == null)
       return BooleanValue.FALSE;
 
     //XXX: deal with DOMExceptions:
     // NOT_SUPPORTED_ERR
 
-    return new DOMCDATASectionValue(_document.createCDATASection(data.toString()));
+    return new DOMCDATASectionValue(((Document) _node).createCDATASection(data.toString()));
   }
 
   public Value createComment(Value data)
   {
-    if (_document == null)
+    if (_node == null)
       return BooleanValue.FALSE;
 
-    return new DOMCommentValue(_document.createComment(data.toString()));
+    return new DOMCommentValue(((Document) _node).createComment(data.toString()));
   }
 
  public Value createDocumentFragment()
  {
-   if (_document == null)
+   if (_node == null)
      return NullValue.NULL;
 
-   return new DOMDocumentFragmentValue(_document.createDocumentFragment());
+   return new DOMDocumentFragmentValue(((Document) _node).createDocumentFragment());
  }
 
  public Value createElement(Value name,
                             @Optional Value value)
   {
-    if (_document == null)
+    if (_node == null)
       return BooleanValue.FALSE;
 
     //XXX: handle DOM_INVALID_CHARACTER_ERR
 
-    DOMElementValue result = new DOMElementValue(_document.createElement(name.toString()));
+    DOMElementValue result = new DOMElementValue(((Document) _node).createElement(name.toString()));
 
     if (value != null)
       result.setNodeValue(value);
@@ -413,13 +406,13 @@ public class DOMDocumentValue extends DOMNodeValue {
                                Value qualifiedName,
                                @Optional Value value)
   {
-    if (_document == null)
+    if (_node == null)
       return BooleanValue.FALSE;
 
     //XXX: handle INVALID_CHARACTER_ERR,
     //NAMESPACE_ERR, NOT_SUPPORTED_ERR
 
-    DOMElementValue result = new DOMElementValue(_document.createElementNS(namespaceURI.toString(), qualifiedName.toString()));
+    DOMElementValue result = new DOMElementValue(((Document) _node).createElementNS(namespaceURI.toString(), qualifiedName.toString()));
 
     if (value != null)
       result.setNodeValue(value);
@@ -429,58 +422,58 @@ public class DOMDocumentValue extends DOMNodeValue {
 
   public Value createEntityReference(Value name)
   {
-    if (_document == null)
+    if (_node == null)
       return BooleanValue.FALSE;
 
     //XXX: handle INVALID_CHARACTER_ERR,
     //NOT_SUPPORTED_ERR
 
-    return new DOMEntityReferenceValue(_document.createEntityReference(name.toString()));
+    return new DOMEntityReferenceValue(((Document) _node).createEntityReference(name.toString()));
   }
 
   public Value createProcessingInstruction(Value target,
                                            @Optional Value data)
   {
-    if (_document == null)
+    if (_node == null)
       return BooleanValue.FALSE;
 
     if (data == null)
-      return new DOMProcessingInstructionValue(_document.createProcessingInstruction(target.toString(), ""));
+      return new DOMProcessingInstructionValue(((Document) _node).createProcessingInstruction(target.toString(), ""));
     else
-      return new DOMProcessingInstructionValue(_document.createProcessingInstruction(target.toString(), data.toString()));
+      return new DOMProcessingInstructionValue(((Document) _node).createProcessingInstruction(target.toString(), data.toString()));
   }
 
   public Value createTextNode(Value data)
   {
-    if (_document == null)
+    if (_node == null)
       return BooleanValue.FALSE;
 
-    return new DOMTextValue(_document.createTextNode(data.toString()));
+    return new DOMTextValue(((Document) _node).createTextNode(data.toString()));
   }
 
   public Value getElementById(Value elementId)
   {
-    if (_document == null)
+    if (_node == null)
       return NullValue.NULL;
 
-    return new DOMElementValue(_document.getElementById(elementId.toString()));
+    return new DOMElementValue(((Document) _node).getElementById(elementId.toString()));
   }
 
   public Value getElementsByTagName(Value tagname)
   {
-    if (_document == null)
+    if (_node == null)
       return NullValue.NULL;
 
-    return new DOMNodeListValue(_document.getElementsByTagName(tagname.toString()));
+    return new DOMNodeListValue(((Document) _node).getElementsByTagName(tagname.toString()));
   }
 
   public Value getElementsByTagNameNS(Value namespaceURI,
                                       Value localName)
   {
-    if (_document == null)
+    if (_node == null)
       return NullValue.NULL;
 
-    return new DOMNodeListValue(_document.getElementsByTagNameNS(namespaceURI.toString(), localName.toString()));
+    return new DOMNodeListValue(((Document) _node).getElementsByTagNameNS(namespaceURI.toString(), localName.toString()));
   }
 
   public Value importNode(Value node,
@@ -491,7 +484,7 @@ public class DOMDocumentValue extends DOMNodeValue {
     if (!(node instanceof DOMNodeValue))
       return NullValue.NULL;
     
-    if (_document == null)
+    if (_node == null)
       return NullValue.NULL;
 
     if (deep == null)
@@ -499,7 +492,7 @@ public class DOMDocumentValue extends DOMNodeValue {
     else
       isDeep = deep.toBoolean();
 
-    return new DOMNodeValue(_document.importNode(((DOMNodeValue)node).getNode(), isDeep));
+    return new DOMNodeValue(((Document) _node).importNode(((DOMNodeValue)node).getNode(), isDeep));
   }
 
   //XXX: need to implement static version which returns a DOMDocumentValue
@@ -512,7 +505,7 @@ public class DOMDocumentValue extends DOMNodeValue {
     try {
       DocumentBuilder builder = _documentBuilderFactory.newDocumentBuilder();
       _is = new BufferedInputStream(new FileInputStream(new File(filename.toString())));
-      _document = builder.parse(_is);
+      _node = builder.parse(_is);
       return BooleanValue.TRUE;
     } catch (Exception e) {
       log.log(Level.FINE, L.l(e.getMessage()), e);
@@ -529,7 +522,7 @@ public class DOMDocumentValue extends DOMNodeValue {
     try {
       DocumentBuilder builder = _documentBuilderFactory.newDocumentBuilder();
       _is = source.toInputStream();
-      _document = builder.parse(_is);
+      _node = builder.parse(_is);
       return BooleanValue.TRUE;
     } catch (Exception e) {
       log.log(Level.FINE, L.l(e.getMessage()), e);
@@ -540,8 +533,8 @@ public class DOMDocumentValue extends DOMNodeValue {
   @Override
   public Value normalize()
   {
-    if (_document != null)
-      _document.normalizeDocument();
+    if (_node != null)
+      ((Document) _node).normalizeDocument();
 
     return NullValue.NULL;
   }
@@ -575,7 +568,7 @@ public class DOMDocumentValue extends DOMNodeValue {
   private Value validateInputStream(InputStream is,
                                     String xmlConstant)
   {
-    if (_document == null)
+    if (_node == null)
       return BooleanValue.FALSE;
     
     SchemaFactory factory = SchemaFactory.newInstance(xmlConstant);
@@ -587,7 +580,7 @@ public class DOMDocumentValue extends DOMNodeValue {
       Validator validator = schema.newValidator();
       
       try {
-        validator.validate(new DOMSource(_document));
+        validator.validate(new DOMSource(_node));
         return BooleanValue.TRUE;
       } catch (Exception e) {
       log.log(Level.FINE, L.l(e.getMessage()), e);
@@ -607,7 +600,7 @@ public class DOMDocumentValue extends DOMNodeValue {
 
   public Value validate()
   {
-    if ((_document != null) && (_documentBuilderFactory != null) && (_documentBuilderFactory.isValidating()))
+    if ((_node != null) && (_documentBuilderFactory != null) && (_documentBuilderFactory.isValidating()))
       return BooleanValue.TRUE;
 
     //Need to re-parse with a validating parser
@@ -621,7 +614,7 @@ public class DOMDocumentValue extends DOMNodeValue {
     
     try {
       DocumentBuilder builder = _documentBuilderFactory.newDocumentBuilder();
-      _document = builder.parse(_is);
+      _node = builder.parse(_is);
       return BooleanValue.TRUE;
     } catch (Exception e) {
       log.log(Level.FINE, L.l(e.getMessage()), e);
@@ -636,7 +629,7 @@ public class DOMDocumentValue extends DOMNodeValue {
   {
     Value result = BooleanValue.FALSE;
     
-    if (_document == null)
+    if (_node == null)
       return result;
     
     BufferedWriter bw = null;
@@ -644,7 +637,7 @@ public class DOMDocumentValue extends DOMNodeValue {
     try {
       
       bw = new BufferedWriter (new FileWriter(new File(fileName.toString())));
-      SimpleXMLElementValue simpleXML = new SimpleXMLElementValue(_document, _document.getDocumentElement());
+      SimpleXMLElementValue simpleXML = new SimpleXMLElementValue(((Document) _node), ((Document) _node).getDocumentElement());
       String asXML = simpleXML.asXML().toString();
       bw.write(asXML);
       result = new LongValue(asXML.length());
@@ -672,7 +665,7 @@ public class DOMDocumentValue extends DOMNodeValue {
   public Value saveXML(@Optional Value node,
                        @Optional Value options)
   {  
-    if (_document == null)
+    if (_node == null)
       return BooleanValue.FALSE;
     
     SimpleXMLElementValue simpleXML;
@@ -682,12 +675,12 @@ public class DOMDocumentValue extends DOMNodeValue {
     
     if (node == null) {
       
-      simpleXML = new SimpleXMLElementValue(_document, _document.getDocumentElement());   
+      simpleXML = new SimpleXMLElementValue(((Document) _node), ((Document) _node).getDocumentElement());   
       return new StringValue(simpleXML.asXML().toString());
       
     } else {
       
-      simpleXML = new SimpleXMLElementValue(_document, (Element) ((DOMNodeValue) node).getNode());
+      simpleXML = new SimpleXMLElementValue(((Document) _node), (Element) ((DOMNodeValue) node).getNode());
       return new StringValue(simpleXML.generateXML().toString());
     }
   }
@@ -813,6 +806,6 @@ public class DOMDocumentValue extends DOMNodeValue {
   
   public Document getDocument()
   {
-    return _document;
+    return ((Document) _node);
   }
 }
