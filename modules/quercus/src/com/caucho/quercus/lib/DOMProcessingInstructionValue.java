@@ -36,9 +36,9 @@ import com.caucho.quercus.env.Value;
 
 import org.w3c.dom.ProcessingInstruction;
 
-public class DOMProcessingInstruction extends DOMNodeValue {
+public class DOMProcessingInstructionValue extends DOMNodeValue {
   
-  public DOMProcessingInstruction(ProcessingInstruction pi)
+  public DOMProcessingInstructionValue(ProcessingInstruction pi)
   {
     _node = pi;
   }

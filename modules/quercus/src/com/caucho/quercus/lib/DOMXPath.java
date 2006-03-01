@@ -29,12 +29,56 @@
 
 package com.caucho.quercus.lib;
 
-public class DOMXPath {
+import com.caucho.quercus.env.NullValue;
+import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.Value;
+
+import org.w3c.dom.NodeList;
+
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathException;
+import javax.xml.xpath.XPathFactory;
+
+public class DOMXPath{
+
+  XPath _xpath;
+  DOMDocumentValue _DOMDocument;
+
+  public DOMXPath(DOMDocumentValue DOMDocument)
+  {
+    XPathFactory factory = XPathFactory.newInstance();
+
+    _xpath = factory.newXPath();
+    _DOMDocument = DOMDocument;
+  }
+
+  public Value evaluate(Value expression,
+                        Value contextnode)
+    throws XPathException
+  {
+    return new StringValue(_xpath.evaluate(expression.toString(), ((DOMNodeValue) contextnode).getNode()));
+  }
+
+  public Value query(Value expression,
+                     Value contextnode)
+    throws XPathException
+  {
+    return new DOMNodeListValue((NodeList) _xpath.evaluate(expression.toString(),((DOMNodeValue)contextnode).getNode(), XPathConstants.NODESET));
+  }
   
-  //@todo document (field of type DOMDocumentValue)
+  //@todo
+  public Value registerNamespace(Value prefix,
+                                 Value namespaceURI)
+  {
+    throw new UnsupportedOperationException();
+  }
   
-  //@todo construct()
-  //@todo registerNamespace()
-  //@todo evaluate()
-  //@todo query()
+  public Value getField(String name)
+  {
+    if ("document".equals(name))
+      return _DOMDocument;
+    
+    return NullValue.NULL;
+  }
 }

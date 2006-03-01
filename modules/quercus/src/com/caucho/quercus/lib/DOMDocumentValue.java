@@ -445,9 +445,9 @@ public class DOMDocumentValue extends DOMNodeValue {
       return BooleanValue.FALSE;
 
     if (data == null)
-      return new DOMProcessingInstruction(_document.createProcessingInstruction(target.toString(), ""));
+      return new DOMProcessingInstructionValue(_document.createProcessingInstruction(target.toString(), ""));
     else
-      return new DOMProcessingInstruction(_document.createProcessingInstruction(target.toString(), data.toString()));
+      return new DOMProcessingInstructionValue(_document.createProcessingInstruction(target.toString(), data.toString()));
   }
 
   public Value createTextNode(Value data)
@@ -809,5 +809,10 @@ public class DOMDocumentValue extends DOMNodeValue {
   public Value xinclude(@Optional Value options)
   {
     throw new UnsupportedOperationException();
+  }
+  
+  public Document getDocument()
+  {
+    return _document;
   }
 }
