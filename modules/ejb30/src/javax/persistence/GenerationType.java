@@ -30,10 +30,8 @@
 package javax.persistence;
 
 /**
- * The type of the lock modes.
+ * The GenerationType enumeration
  */
-public enum TemporalType {
-  DATE,
-  TIME,
-  TIMESTAMP
+public enum GenerationType {
+  TABLE, SEQUENCE, IDENTITY, AUTO
 }

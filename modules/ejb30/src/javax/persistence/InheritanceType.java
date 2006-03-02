@@ -29,11 +29,16 @@
 
 package javax.persistence;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+import java.lang.annotation.ElementType;
+
 /**
- * The type of the lock modes.
+ * The InheritanceType enumeration
  */
-public enum TemporalType {
-  DATE,
-  TIME,
-  TIMESTAMP
+public enum InheritanceType {
+  SINGLE_TABLE,
+  JOINED,
+  TABLE_PER_CLASS
 }

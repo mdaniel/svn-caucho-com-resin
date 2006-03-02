@@ -35,7 +35,7 @@ import java.lang.annotation.Target;
 import java.lang.annotation.ElementType;
 
 /**
- * The @ManyToOne annotation.
+ * The @Transient annotation.
  */
 @Target({ElementType.METHOD,ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)

@@ -29,11 +29,20 @@
 
 package javax.persistence;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+import java.lang.annotation.ElementType;
+
 /**
- * The type of the lock modes.
+ * The @ManyToOne annotation.
  */
-public enum TemporalType {
-  DATE,
-  TIME,
-  TIMESTAMP
+@Target({ElementType.METHOD,ElementType.FIELD})
+@Retention(RetentionPolicy.RUNTIME)
+public @interface OneToOne {
+  Class targetEntity() default void.class;
+  CascadeType []cascade() default {};
+  FetchType fetch() default FetchType.EAGER;
+  boolean optional() default true;
+  String mappedBy() default "";
 }

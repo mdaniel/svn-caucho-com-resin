@@ -19,8 +19,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *
- *   Free Software Foundation, Inc.
+ *   Free SoftwareFoundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -29,11 +28,18 @@
 
 package javax.persistence;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+import java.lang.annotation.ElementType;
+
 /**
- * The type of the lock modes.
+ * The CascadeType enumeration
  */
-public enum TemporalType {
-  DATE,
-  TIME,
-  TIMESTAMP
+public enum CascadeType {
+  ALL,
+  PERSIST,
+  MERGE,
+  REMOVE,
+  REFRESH
 }

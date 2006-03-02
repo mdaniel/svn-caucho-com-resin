@@ -29,11 +29,15 @@
 
 package javax.persistence;
 
+import java.lang.annotation.Retention;
+import static java.lang.annotation.RetentionPolicy.*;
+import java.lang.annotation.Target;
+import static java.lang.annotation.ElementType.*;
+
 /**
- * The type of the lock modes.
+ * The @IdClass annotation.
  */
-public enum TemporalType {
-  DATE,
-  TIME,
-  TIMESTAMP
+@Target({METHOD, FIELD}) @Retention(RUNTIME)
+public @interface IdClass {
+  Class value();
 }

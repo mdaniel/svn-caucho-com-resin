@@ -29,11 +29,18 @@
 
 package javax.persistence;
 
+import java.lang.annotation.Retention;
+import static java.lang.annotation.RetentionPolicy.*;
+import java.lang.annotation.Target;
+import static java.lang.annotation.ElementType.*;
+
 /**
- * The type of the lock modes.
+ * The @SequenceGenerator annotation.
  */
-public enum TemporalType {
-  DATE,
-  TIME,
-  TIMESTAMP
+@Target({TYPE, METHOD, FIELD}) @Retention(RUNTIME)
+public @interface SequenceGenerator {
+  String name();
+  String sequenceName() default "";
+  int initialValue() default 0;
+  int allocationSize() default 50;
 }

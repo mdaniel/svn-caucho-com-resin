@@ -29,11 +29,17 @@
 
 package javax.persistence;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+import java.lang.annotation.ElementType;
+
 /**
- * The type of the lock modes.
+ * The @GeneratedValue annotation.
  */
-public enum TemporalType {
-  DATE,
-  TIME,
-  TIMESTAMP
+@Target(ElementType.TYPE) @Retention(RetentionPolicy.RUNTIME)
+public @interface GeneratedValue {
+  GenerationType strategy() default GenerationType.AUTO;
+
+  String generator();
 }

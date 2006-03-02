@@ -29,11 +29,18 @@
 
 package javax.persistence;
 
+import java.lang.annotation.Retention;
+import static java.lang.annotation.RetentionPolicy.*;
+import java.lang.annotation.Target;
+import static java.lang.annotation.ElementType.*;
+
 /**
- * The type of the lock modes.
+ * The @DiscriminatorColumn annotation.
  */
-public enum TemporalType {
-  DATE,
-  TIME,
-  TIMESTAMP
+@Target({METHOD, FIELD}) @Retention(RUNTIME)
+public @interface DiscriminatorColumn {
+  String name() default "";
+  DiscriminatorType discriminatorType() default DiscriminatorType.STRING;
+  String columnDefinition() default "";
+  int length() default 31;
 }

@@ -29,11 +29,15 @@
 
 package javax.persistence;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+import java.lang.annotation.ElementType;
+
 /**
- * The type of the lock modes.
+ * The @SecondaryTable annotation.
  */
-public enum TemporalType {
-  DATE,
-  TIME,
-  TIMESTAMP
+@Target(ElementType.TYPE) @Retention(RetentionPolicy.RUNTIME)
+public @interface SecondaryTables {
+  SecondaryTable[] value();
 }

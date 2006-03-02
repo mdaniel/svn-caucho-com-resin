@@ -29,11 +29,24 @@
 
 package javax.persistence;
 
+import java.lang.annotation.Retention;
+import static java.lang.annotation.RetentionPolicy.*;
+import java.lang.annotation.Target;
+import static java.lang.annotation.ElementType.*;
+
 /**
- * The type of the lock modes.
+ * The @TableGenerator annotation.
  */
-public enum TemporalType {
-  DATE,
-  TIME,
-  TIMESTAMP
+@Target({TYPE, METHOD, FIELD}) @Retention(RUNTIME)
+public @interface TableGenerator {
+  String name();
+  String table() default "";
+  String catalog() default "";
+  String schema() default "";
+  String pkColumnName() default "";
+  String valueColumnName() default "";
+  String pkColumnValue() default "";
+  int initialValue() default 0;
+  int allocationSize() default 50;
+  UniqueConstraint []uniqueConstraints() default {};
 }
