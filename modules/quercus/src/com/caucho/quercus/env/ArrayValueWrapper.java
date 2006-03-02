@@ -175,7 +175,7 @@ public class ArrayValueWrapper extends ArrayValue {
   /**
    * Returns the head.
    */
-  protected Entry getHead()
+  public Entry getHead()
   {
     return _array.getHead();
   }

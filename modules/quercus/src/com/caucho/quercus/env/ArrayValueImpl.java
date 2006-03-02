@@ -699,7 +699,7 @@ public class ArrayValueImpl extends ArrayValue {
       return BooleanValue.FALSE;
   }
 
-  protected Entry getHead()
+  public Entry getHead()
   {
     return _head;
   }
