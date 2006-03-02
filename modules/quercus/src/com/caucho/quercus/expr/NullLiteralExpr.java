@@ -99,7 +99,7 @@ public class NullLiteralExpr extends Expr {
   public void generate(PhpWriter out)
     throws IOException
   {
-    out.print("com.caucho.quercus.env.NullValue.NULL");
+    out.print("NullValue.NULL");
   }
 
   /**
@@ -110,7 +110,7 @@ public class NullLiteralExpr extends Expr {
   public void generateExpr(PhpWriter out)
     throws IOException
   {
-    out.print("com.caucho.quercus.expr.NullLiteralExpr.NULL");
+    out.print("NullLiteralExpr.NULL");
   }
   
   public String toString()

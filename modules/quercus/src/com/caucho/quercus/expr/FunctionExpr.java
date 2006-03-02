@@ -197,8 +197,9 @@ public class FunctionExpr extends Expr {
 
     // check for read-only and refs
     
-    if (fun != null)
+    if (fun != null) {
       fun.analyzeArguments(_args, info);
+    }
     else {
       for (int i = 0; i < _args.length; i++) {
 	_args[i].analyzeSetModified(info);

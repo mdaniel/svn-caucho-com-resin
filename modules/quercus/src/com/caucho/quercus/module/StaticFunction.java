@@ -455,9 +455,13 @@ public class StaticFunction extends AbstractFunction {
 
       if (isReadOnly(_paramAnn[i + env]) || marshall.isReadOnly()) {
       }
-      else {
+      else if (marshall.isReference()) {
 	args[i].analyzeSetModified(info);
 	args[i].analyzeSetReference(info);
+      }
+      else {
+	// possibly modified, but not reference
+	args[i].analyzeSetModified(info);
       }
     }
   }
@@ -485,7 +489,7 @@ public class StaticFunction extends AbstractFunction {
 
     generateImpl(out, funExpr, args);
 
-    out.print(")");
+    _unmarshallReturn.generateResultEnd(out);
   }
 
   /**

@@ -145,16 +145,13 @@ public class ForeachStatement extends Statement {
 
     if (_key != null) {
       _key.analyzeAssign(loopInfo);
-
-      // XXX: not necessarily true
-      _key.analyzeSetReference(loopInfo);
     }
 
     if (_value != null) {
       _value.analyzeAssign(loopInfo);
 
-      // XXX: not necessarily true
-      _value.analyzeSetReference(loopInfo);
+      if (_isRef)
+	_value.analyzeSetReference(loopInfo);
     }
 
     _block.analyze(loopInfo);
@@ -217,8 +214,8 @@ public class ForeachStatement extends Statement {
     String keyVar = keysVar + "[" + indexVar + "]";
 
     if (_key != null) {
-      _key.generate(out);
-      out.println(".set(" + keyVar + ");");
+      _key.generateAssign(out, new RawExpr(keyVar), true);
+      out.println(";");
     }
     
     if (_isRef) {
@@ -230,8 +227,8 @@ public class ForeachStatement extends Statement {
     else {
       String valueVar = valuesVar + "[" + indexVar + "]";
       
-      _value.generate(out);
-      out.println(".set(" + valueVar + ");");
+      _value.generateAssign(out, new RawExpr(valueVar), true);
+      out.println(";");
     }
 
     _block.generate(out);
@@ -243,6 +240,26 @@ public class ForeachStatement extends Statement {
   public String toString()
   {
     return "ForeachStatement[]";
+  }
+
+  static class RawExpr extends Expr {
+    private String _code;
+
+    RawExpr(String code)
+    {
+      _code = code;
+    }
+
+    public Value eval(Env env)
+    {
+      throw new UnsupportedOperationException();
+    }
+    
+    public void generate(PhpWriter out)
+      throws IOException
+    {
+      out.print(_code);
+    }
   }
 }
 

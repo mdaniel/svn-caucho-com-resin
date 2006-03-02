@@ -599,10 +599,9 @@ public class Function extends AbstractFunction {
     out.print(")");
 
     // php/3a5x, php/37a2
-    /*
+
     if (! _isReturnsReference)
-      out.print(".copyReturn()");
-    */
+      out.print(".toValue()");
     
     out.println(";");
 
@@ -723,10 +722,9 @@ public class Function extends AbstractFunction {
       out.print("return fun_" + _name + "(env, quercus_this, args)");
 
     // php/3a5x, php/37aq
-    /*
+
     if (! _isReturnsReference)
-      out.print(".copyReturn()"); // php/37aq
-    */
+      out.print(".toValue()"); // php/37aq
 
     out.println(";");
 

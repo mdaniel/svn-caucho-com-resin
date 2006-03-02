@@ -51,13 +51,13 @@ public class StringBuilderValue extends StringValue {
 
   public StringBuilderValue()
   {
-    _buffer = new char[64];
+    _buffer = new char[128];
   }
 
   public StringBuilderValue(int capacity)
   {
-    if (capacity < 32)
-      capacity = 64;
+    if (capacity < 64)
+      capacity = 128;
     else
       capacity = 2 * capacity;
 
@@ -79,8 +79,8 @@ public class StringBuilderValue extends StringValue {
   {
     int capacity;
 
-    if (length < 32)
-      capacity = 64;
+    if (length < 64)
+      capacity = 128;
     else
       capacity = 2 * length;
 
@@ -88,6 +88,11 @@ public class StringBuilderValue extends StringValue {
     _length = length;
     
     System.arraycopy(buffer, offset, _buffer, 0, length);
+  }
+
+  public StringBuilderValue(char []buffer)
+  {
+    this(buffer, 0, buffer.length);
   }
 
   public StringBuilderValue(char []buffer, int offset, int length,
@@ -536,6 +541,14 @@ public class StringBuilderValue extends StringValue {
     _length += length;
 
     return this;
+  }
+
+  /**
+   * Append a Java double to the value.
+   */
+  public final StringBuilderValue append(char []buf)
+  {
+    return append(buf, 0, buf.length);
   }
 
   /**

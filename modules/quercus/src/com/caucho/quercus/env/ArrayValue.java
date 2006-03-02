@@ -431,7 +431,7 @@ abstract public class ArrayValue extends Value {
   /**
    * Returns the head.
    */
-  abstract protected Entry getHead();
+  abstract public Entry getHead();
 
   /**
    * Returns the tail.

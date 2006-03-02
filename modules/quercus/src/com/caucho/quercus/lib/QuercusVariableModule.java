@@ -162,37 +162,34 @@ public class QuercusVariableModule extends AbstractQuercusModule {
   /**
    * Returns true for an empty variable.
    *
-   * @param env the calling environment
    * @param v the value to test
-   * @return the escaped stringPhp
+   *
+   * @return true if the value is empty
    */
-  public static Value empty(Env env, @ReadOnly Value v)
-    throws Throwable
+  public static boolean empty(@ReadOnly Value v)
   {
     v = v.toValue();
 
     if (v instanceof NullValue)
-      return BooleanValue.TRUE;
+      return true;
     else if (v instanceof StringValue) {
       String s = v.toString();
 
-      return (s.equals("") || s.equals("0")
-	      ? BooleanValue.TRUE
-	      : BooleanValue.FALSE);
+      return (s.equals("") || s.equals("0"));
     }
     else if (v instanceof LongValue) {
-      return v.toLong() == 0 ? BooleanValue.TRUE : BooleanValue.FALSE;
+      return v.toLong() == 0;
     }
     else if (v instanceof BooleanValue) {
-      return v.toBoolean() ? BooleanValue.FALSE : BooleanValue.TRUE;
+      return ! v.toBoolean();
     }
     else if (v instanceof ArrayValue) {
       ArrayValue array = (ArrayValue) v;
 
-      return array.getSize() == 0 ? BooleanValue.TRUE : BooleanValue.FALSE;
+      return array.getSize() == 0;
     }
     else
-      return BooleanValue.FALSE;
+      return false;
   }
 
   /**

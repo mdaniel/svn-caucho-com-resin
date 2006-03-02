@@ -239,8 +239,7 @@ public class InterpretedClassDef extends AbstractClassDef {
       out.print("value.putField(env, \"");
       out.printJavaString(key);
       out.print("\", ");
-      value.generateExpr(out);
-      out.print(".eval(env)");
+      value.generate(out);
       out.println(");");
     }
 

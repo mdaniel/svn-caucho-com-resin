@@ -109,7 +109,7 @@ public class StringLiteralExpr extends Expr {
     throws IOException
   {
     if (_value.toString().equals(""))
-      out.print("com.caucho.quercus.env.StringValue.EMPTY");
+      out.print("StringValue.EMPTY");
     else {
       String var = out.addValue(_value);
 

@@ -209,7 +209,7 @@ public class ArrayFunExpr extends Expr {
     throws IOException
   {
     // quercus/3724
-    out.print("new com.caucho.quercus.expr.ArrayFunExpr(");
+    out.print("new ArrayFunExpr(");
     
     out.print("new Expr[] {");
       

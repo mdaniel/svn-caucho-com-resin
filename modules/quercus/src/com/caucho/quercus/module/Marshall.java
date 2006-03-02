@@ -169,6 +169,14 @@ abstract public class Marshall {
     return true;
   }
 
+  /**
+   * Return true for a reference
+   */
+  public boolean isReference()
+  {
+    return false;
+  }
+
   abstract public Object marshall(Env env, Expr expr, Class argClass)
     throws Throwable;
 
@@ -191,6 +199,12 @@ abstract public class Marshall {
     throws IOException
   {
     throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  public void generateResultEnd(PhpWriter out)
+    throws IOException
+  {
+    out.print(")");
   }
 
   static final Marshall MARSHALL_VALUE = new Marshall() {
@@ -228,7 +242,11 @@ abstract public class Marshall {
     public void generateResultStart(PhpWriter out)
       throws IOException
     {
-      out.print("((Value) ");
+    }
+
+    public void generateResultEnd(PhpWriter out)
+      throws IOException
+    {
     }
   };
 
@@ -302,6 +320,11 @@ abstract public class Marshall {
       return true;
     }
 
+    public boolean isReadOnly()
+    {
+      return true;
+    }
+
     public Object marshall(Env env, Expr expr, Class expectedClass)
       throws Throwable
     {
@@ -338,6 +361,11 @@ abstract public class Marshall {
 
   static final Marshall MARSHALL_BOOLEAN = new Marshall() {
     public boolean isBoolean()
+    {
+      return true;
+    }
+
+    public boolean isReadOnly()
     {
       return true;
     }
@@ -379,6 +407,11 @@ abstract public class Marshall {
   };
 
   static final Marshall MARSHALL_BOOLEAN_OBJECT = new Marshall() {
+    public boolean isReadOnly()
+    {
+      return true;
+    }
+      
     public Object marshall(Env env, Expr expr, Class expectedClass)
       throws Throwable
     {
@@ -423,6 +456,11 @@ abstract public class Marshall {
       return true;
     }
 
+    public boolean isReadOnly()
+    {
+      return true;
+    }
+      
     public Object marshall(Env env, Expr expr, Class expectedClass)
       throws Throwable
     {
@@ -465,6 +503,11 @@ abstract public class Marshall {
       return new Byte((byte) expr.evalLong(env));
     }
 
+    public boolean isReadOnly()
+    {
+      return true;
+    }
+
     public Object marshall(Env env, Value value, Class expectedClass)
       throws Throwable
     {
@@ -497,6 +540,11 @@ abstract public class Marshall {
 
   static final Marshall MARSHALL_SHORT = new Marshall() {
     public boolean isLong()
+    {
+      return true;
+    }
+
+    public boolean isReadOnly()
     {
       return true;
     }
@@ -537,6 +585,11 @@ abstract public class Marshall {
   };
 
   static final Marshall MARSHALL_SHORT_OBJECT = new Marshall() {
+    public boolean isReadOnly()
+    {
+      return true;
+    }
+      
     public Object marshall(Env env, Expr expr, Class expectedClass)
       throws Throwable
     {
@@ -579,6 +632,11 @@ abstract public class Marshall {
       return true;
     }
 
+    public boolean isReadOnly()
+    {
+      return true;
+    }
+      
     public Object marshall(Env env, Expr expr, Class expectedClass)
       throws Throwable
     {
@@ -615,6 +673,11 @@ abstract public class Marshall {
   };
 
   static final Marshall MARSHALL_INTEGER_OBJECT = new Marshall() {
+    public boolean isReadOnly()
+    {
+      return true;
+    }
+      
     public Object marshall(Env env, Expr expr, Class expectedClass)
       throws Throwable
     {
@@ -657,6 +720,11 @@ abstract public class Marshall {
       return true;
     }
 
+    public boolean isReadOnly()
+    {
+      return true;
+    }
+      
     public Object marshall(Env env, Expr expr, Class expectedClass)
       throws Throwable
     {
@@ -692,6 +760,11 @@ abstract public class Marshall {
   };
 
   static final Marshall MARSHALL_LONG_OBJECT = new Marshall() {
+    public boolean isReadOnly()
+    {
+      return true;
+    }
+      
     public Object marshall(Env env, Expr expr, Class expectedClass)
       throws Throwable
     {
@@ -734,6 +807,11 @@ abstract public class Marshall {
       return true;
     }
 
+    public boolean isReadOnly()
+    {
+      return true;
+    }
+      
     public Object marshall(Env env, Expr expr, Class expectedClass)
       throws Throwable
     {
@@ -770,6 +848,11 @@ abstract public class Marshall {
   };
 
   static final Marshall MARSHALL_FLOAT_OBJECT = new Marshall() {
+    public boolean isReadOnly()
+    {
+      return true;
+    }
+      
     public Object marshall(Env env, Expr expr, Class expectedClass)
       throws Throwable
     {
@@ -812,6 +895,11 @@ abstract public class Marshall {
       return true;
     }
 
+    public boolean isReadOnly()
+    {
+      return true;
+    }
+      
     public Object marshall(Env env, Expr expr, Class expectedClass)
       throws Throwable
     {
@@ -847,6 +935,11 @@ abstract public class Marshall {
   };
 
   static final Marshall MARSHALL_DOUBLE_OBJECT = new Marshall() {
+    public boolean isReadOnly()
+    {
+      return true;
+    }
+      
     public Object marshall(Env env, Expr expr, Class expectedClass)
       throws Throwable
     {
@@ -884,6 +977,11 @@ abstract public class Marshall {
   };
 
   static final Marshall MARSHALL_CHARACTER = new Marshall() {
+    public boolean isReadOnly()
+    {
+      return true;
+    }
+      
     public Object marshall(Env env, Expr expr, Class expectedClass)
       throws Throwable
     {
@@ -919,6 +1017,11 @@ abstract public class Marshall {
   };
 
   static final Marshall MARSHALL_CHARACTER_OBJECT = new Marshall() {
+    public boolean isReadOnly()
+    {
+      return true;
+    }
+      
     public Object marshall(Env env, Expr expr, Class expectedClass)
       throws Throwable
     {
@@ -961,6 +1064,11 @@ abstract public class Marshall {
       return false;
     }
 
+    public boolean isReference()
+    {
+      return true;
+    }
+
     public Object marshall(Env env, Expr expr, Class expectedClass)
       throws Throwable
     {
@@ -988,6 +1096,11 @@ abstract public class Marshall {
   };
 
   static final Marshall MARSHALL_PATH = new Marshall() {
+    public boolean isReadOnly()
+    {
+      return true;
+    }
+      
     public Object marshall(Env env, Expr expr, Class expectedClass)
       throws Throwable
     {
@@ -1022,6 +1135,11 @@ abstract public class Marshall {
   };
 
   static final Marshall MARSHALL_CALLBACK = new Marshall() {
+    public boolean isReadOnly()
+    {
+      return true;
+    }
+      
     public Object marshall(Env env, Expr expr, Class expectedClass)
       throws Throwable
     {

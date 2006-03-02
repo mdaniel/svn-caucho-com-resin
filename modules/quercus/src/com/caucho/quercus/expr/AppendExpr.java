@@ -189,6 +189,16 @@ public class AppendExpr extends Expr {
   public void generateString(PhpWriter out)
     throws IOException
   {
+    out.print("new StringBuilderValue()");
+    
+    for (AppendExpr ptr = this; ptr != null; ptr = ptr._next) {
+      out.print(".append(");
+      ptr._value.generateAppend(out);
+      out.print(")");
+    }
+
+    out.print(".toString()");
+    /*
     out.print("(");
 
     _value.generateString(out);
@@ -199,6 +209,7 @@ public class AppendExpr extends Expr {
     }
     
     out.print(")");
+    */
   }
 
   /**

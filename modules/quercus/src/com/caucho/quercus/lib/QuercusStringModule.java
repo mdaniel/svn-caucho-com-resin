@@ -29,17 +29,6 @@
 
 package com.caucho.quercus.lib;
 
-import com.caucho.quercus.env.*;
-import com.caucho.quercus.module.AbstractQuercusModule;
-import com.caucho.quercus.module.NotNull;
-import com.caucho.quercus.module.Optional;
-import com.caucho.quercus.module.Reference;
-import com.caucho.quercus.module.UsesSymbolTable;
-import com.caucho.util.L10N;
-import com.caucho.util.RandomUtil;
-import com.caucho.vfs.ByteToChar;
-import com.caucho.vfs.Path;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.MessageDigest;
@@ -53,6 +42,18 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.zip.CRC32;
+
+import com.caucho.quercus.env.*;
+import com.caucho.quercus.module.AbstractQuercusModule;
+import com.caucho.quercus.module.NotNull;
+import com.caucho.quercus.module.ReadOnly;
+import com.caucho.quercus.module.Optional;
+import com.caucho.quercus.module.Reference;
+import com.caucho.quercus.module.UsesSymbolTable;
+import com.caucho.util.L10N;
+import com.caucho.util.RandomUtil;
+import com.caucho.vfs.ByteToChar;
+import com.caucho.vfs.Path;
 
 /**
  * PHP functions implemented from the string module
@@ -262,7 +263,7 @@ public class QuercusStringModule extends AbstractQuercusModule {
 
   /**
    * Alias of rtrim.  Removes trailing whitespace.
-   *
+v   *
    * @param env the quercus environment
    * @param str the string to be trimmed
    * @param charset optional set of characters to trim
@@ -325,9 +326,9 @@ public class QuercusStringModule extends AbstractQuercusModule {
    * This implementation does nothing, because quercus stores strings as
    * 16 bit unicode.
    */
-  public static Value convert_cyr_string(Value str,
-                                         Value from,
-                                         Value to)
+  public static String convert_cyr_string(String str,
+					  String from,
+					  String to)
   {
     return str;
   }
@@ -384,7 +385,7 @@ public class QuercusStringModule extends AbstractQuercusModule {
     if (source == null || source.length() == 0)
       return BooleanValue.FALSE;
 
-    StringBuilder result = new StringBuilder();
+    StringBuilderValue result = new StringBuilderValue();
 
     int i = 0;
     int length = source.length();
@@ -419,7 +420,7 @@ public class QuercusStringModule extends AbstractQuercusModule {
     result.append((char) 0x60);
     result.append('\n');
 
-    return new StringValueImpl(result.toString());
+    return result;
   }
   /**
    * Returns an array of information about the characters.
@@ -456,7 +457,7 @@ public class QuercusStringModule extends AbstractQuercusModule {
 
         for (int i = 0; i < count.length; i++) {
           if (count[i] > 0)
-            result.put(new LongValue(i), new LongValue(count[i]));
+            result.put(LongValue.create(i), new LongValue(count[i]));
         }
 
         return result;
@@ -604,7 +605,7 @@ public class QuercusStringModule extends AbstractQuercusModule {
    * @return a string of imploded values
    */
   public static Value implode(Env env,
-                              Value glueV,
+			      Value glueV,
                               Value piecesV)
     throws Throwable
   {
@@ -629,9 +630,12 @@ public class QuercusStringModule extends AbstractQuercusModule {
     StringBuilderValue sb = new StringBuilderValue();
     boolean isFirst = true;
 
-    for (Map.Entry<Value,Value> entry : pieces.entrySet()) {
+    for (ArrayValue.Entry entry = pieces.getHead();
+	 entry != null;
+	 entry = entry.getNext()) {
       if (! isFirst)
         sb.append(glue);
+      
       isFirst = false;
 
       entry.getValue().appendTo(sb);
@@ -2450,7 +2454,7 @@ public class QuercusStringModule extends AbstractQuercusModule {
     }
 
     if (count != 0) {
-      countV.set(new LongValue(count));
+      countV.set(LongValue.create(count));
 
       if (head > 0 && head < subject.length())
         result.append(subject, head, subject.length());
