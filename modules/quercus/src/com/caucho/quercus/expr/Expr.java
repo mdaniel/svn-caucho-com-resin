@@ -670,7 +670,7 @@ abstract public class Expr {
   public void generateAppend(PhpWriter out)
     throws IOException
   {
-    generateString(out);
+    generate(out);
   }
 
   /**

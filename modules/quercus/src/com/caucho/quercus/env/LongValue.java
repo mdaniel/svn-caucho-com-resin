@@ -43,8 +43,8 @@ public class LongValue extends Value {
   public static final LongValue ZERO = new LongValue(0);
   public static final LongValue ONE = new LongValue(1);
 
-  public static final int STATIC_MIN = -32;
-  public static final int STATIC_MAX = 32;
+  public static final int STATIC_MIN = -256;
+  public static final int STATIC_MAX = 256;
 
   public static final LongValue[]STATIC_VALUES;
 
@@ -167,7 +167,7 @@ public class LongValue extends Value {
   public Value preincr(int incr)
     throws Throwable
   {
-    return new LongValue(_value + incr);
+    return LongValue.create(_value + incr);
   }
 
   /**
@@ -176,7 +176,7 @@ public class LongValue extends Value {
   public Value postincr(int incr)
     throws Throwable
   {
-    return new LongValue(_value + incr);
+    return LongValue.create(_value + incr);
   }
 
   /**

@@ -44,6 +44,7 @@ import com.caucho.quercus.QuercusRuntimeException;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.BooleanValue;
 import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.StringBuilderValue;
 import com.caucho.quercus.env.StringValueImpl;
 import com.caucho.quercus.env.LongValue;
 import com.caucho.quercus.env.Value;
@@ -168,7 +169,7 @@ public class Mysqli {
   /**
    * Escapes the string
    */
-  public String escape_string(String str)
+  public Value escape_string(String str)
   {
     return real_escape_string(str);
   }
@@ -422,9 +423,9 @@ public class Mysqli {
   /**
    * Escapes the string
    */
-  public String real_escape_string(String str)
+  public Value real_escape_string(String str)
   {
-    StringBuilder buf = new StringBuilder();
+    StringBuilderValue buf = new StringBuilderValue(str.length());
 
     final int strLength = str.length();
 
@@ -466,7 +467,7 @@ public class Mysqli {
       }
     }
 
-    return buf.toString();
+    return buf;
   }
 
   /**

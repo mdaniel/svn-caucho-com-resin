@@ -29,9 +29,12 @@
 package com.caucho.quercus.lib;
 
 import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.IOException;
 import java.util.zip.DataFormatException;
 import java.util.zip.Deflater;
+import java.util.zip.DeflaterOutputStream;
 import java.util.zip.Inflater;
 import java.util.zip.InflaterInputStream;
 
@@ -45,8 +48,11 @@ import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.quercus.module.NotNull;
 import com.caucho.quercus.module.Optional;
 import com.caucho.util.ByteBuffer;
+
 import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.TempBuffer;
+import com.caucho.vfs.TempStream;
+import com.caucho.vfs.StreamImplOutputStream;
 import com.caucho.vfs.VfsStream;
 
 /**
@@ -270,7 +276,7 @@ public class QuercusZlibModule extends AbstractQuercusModule {
     if (length == 0)
       length = Long.MAX_VALUE;
     
-    ByteArrayInputStream is = data.toInputStream();
+    InputStream is = data.toInputStream();
     InflaterInputStream iis = new InflaterInputStream(is, new Inflater());
     
     StringBuilder uncompressed = new StringBuilder();
@@ -291,31 +297,38 @@ public class QuercusZlibModule extends AbstractQuercusModule {
    * @param level
    * @return compressed using DEFLATE algorithm
    */
-  public Value gzdeflate(String data,
+  public Value gzdeflate(Value value,
                          @Optional("-1") int level)
    throws DataFormatException, IOException
   {
     if (level == -1)
       level = Deflater.DEFAULT_COMPRESSION;
 
+    TempStream ts = new TempStream();
+    OutputStream os = new StreamImplOutputStream(ts);
+    
     Deflater deflater = new Deflater(level, true);
-    byte[] input = data.getBytes();
-    deflater.setInput(input);
-    deflater.finish();
+    
+    //DeflaterOutputStream out = new DeflaterOutputStream(os, deflater);
+    DeflaterOutputStream out = new DeflaterOutputStream(os);
 
-    byte[] output = new byte[input.length];
-    ByteBuffer buf = new ByteBuffer();
-    int compressedDataLength;
-    int fullCompressedDataLength = 0;
-    while (!deflater.finished()) {
-      compressedDataLength = deflater.deflate(output);
-      fullCompressedDataLength += compressedDataLength;
-      buf.append(output,0,compressedDataLength);
+    InputStream is = value.toInputStream();
+    
+    TempBuffer temp = TempBuffer.allocate();
+    byte []buf = temp.getBuffer();
+    int len;
+
+    while ((len = is.read(buf, 0, buf.length)) > 0) {
+      out.write(buf, 0, len);
     }
 
-    ByteArrayInputStream result = new ByteArrayInputStream(buf.getBuffer(),0,fullCompressedDataLength);
-    ReadStream readStream = new ReadStream(new VfsStream(result,null));
-    return new TempBufferStringValue(TempBuffer.copyFromStream(readStream));
+    out.close();
+
+    TempBuffer.free(temp);
+    
+    Value result = new TempBufferStringValue(ts.getHead());
+
+    return result;
   }
 
   /**
@@ -330,22 +343,27 @@ public class QuercusZlibModule extends AbstractQuercusModule {
     throws DataFormatException, IOException
   {
     try {
-      if (length == 0)
-	length = Long.MAX_VALUE;
+      InputStream is = data.toInputStream();
+
+      InflaterInputStream in = new InflaterInputStream(is);
+
+      TempStream os = new TempStream();
     
-      ByteArrayInputStream is = data.toInputStream();
-      InflaterInputStream iis = new InflaterInputStream(is, new Inflater(true));
-    
-      StringBuilder inflated = new StringBuilder();
-      int numChars = 0;
-      int ch;
-    
-      while ((numChars < length) && ((ch = iis.read()) != -1)) {
-	numChars++;
-	inflated.append((char) ch);
+      TempBuffer temp = TempBuffer.allocate();
+      byte []buf = temp.getBuffer();
+      int len;
+
+      while ((len = in.read(buf, 0, buf.length)) > 0) {
+	os.write(buf, 0, len, false);
       }
 
-      return new StringValueImpl(inflated.toString());
+      os.close();
+
+      TempBuffer.free(temp);
+    
+      Value result = new TempBufferStringValue(os.getHead());
+
+      return result;
     } catch (Exception e) {
       env.warning(e);
 

@@ -209,6 +209,14 @@ public class Var extends Value {
   }
 
   /**
+   * Append to a string builder.
+   */
+  public void appendTo(StringBuilderValue sb)
+  {
+    _value.appendTo(sb);
+  }
+
+  /**
    * Returns to the value value.
    */
   public final Value getRawValue()

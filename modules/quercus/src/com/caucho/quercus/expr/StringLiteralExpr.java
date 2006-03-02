@@ -169,6 +169,17 @@ public class StringLiteralExpr extends Expr {
   }
 
   /**
+   * Generates code to append to a string builder.
+   *
+   * @param out the writer to the Java source code.
+   */
+  public void generateAppend(PhpWriter out)
+    throws IOException
+  {
+    generateString(out);
+  }
+
+  /**
    * Generates code to recreate the expression.
    *
    * @param out the writer to the Java source code.

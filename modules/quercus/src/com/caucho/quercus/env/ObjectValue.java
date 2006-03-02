@@ -183,7 +183,7 @@ public class ObjectValue extends Value {
   {
     Entry entry = createEntry(index);
 
-    Value value = entry.getRawValue();
+    Value value = entry._value;
 
     if (value instanceof Var)
       return (Var) value;
@@ -274,19 +274,19 @@ public class ObjectValue extends Value {
   {
     Entry entry = createEntry(key);
 
-    Value oldValue = entry.getRawValue();
+    Value oldValue = entry._value;
 
     if (value instanceof Var) {
       Var var = (Var) value;
       var.setReference();
 
-      entry.setRaw(var);
+      entry._value = var;
     }
     else if (oldValue instanceof Var) {
       oldValue.set(value);
     }
     else {
-      entry.setRaw(value);
+      entry._value = value;
     }
 
     return value;
@@ -816,7 +816,7 @@ public class ObjectValue extends Value {
     for (Map.Entry<String,Value> mapEntry : sortedEntrySet()) {
       ObjectValue.Entry entry = (ObjectValue.Entry) mapEntry;
 
-      entry.varDump(env, out, depth + 1, valueSet);
+      entry.varDumpImpl(env, out, depth + 1, valueSet);
     }
 
     printDepth(out, 2 * depth);
@@ -839,7 +839,7 @@ public class ObjectValue extends Value {
     for (Map.Entry<String,Value> mapEntry : sortedEntrySet()) {
       ObjectValue.Entry entry = (ObjectValue.Entry) mapEntry;
 
-      entry.printR(env, out, depth + 1, valueSet);
+      entry.printRImpl(env, out, depth + 1, valueSet);
     }
 
     printDepth(out, 4 * depth);
@@ -898,11 +898,11 @@ public class ObjectValue extends Value {
   }
 
   public final static class Entry
-    extends Var
     implements Map.Entry<String,Value>,
                Comparable<Map.Entry<String, Value>>
   {
     private final String _key;
+    private Value _value;
 
     public Entry(String key)
     {
@@ -912,12 +912,12 @@ public class ObjectValue extends Value {
     public Entry(String key, Value value)
     {
       _key = key;
-      setValue(value);
+      _value = value;
     }
 
     public Value getValue()
     {
-      return getRawValue().toValue();
+      return _value.toValue();
     }
 
     public String getKey()
@@ -929,7 +929,7 @@ public class ObjectValue extends Value {
     {
       // The value may be a var
       // XXX: need test
-      return getRawValue().toValue();
+      return _value.toValue();
     }
 
     /**
@@ -937,14 +937,14 @@ public class ObjectValue extends Value {
      */
     public Var toRefVar()
     {
-      Value val = getRawValue();
+      Value val = _value;
 
       if (val instanceof Var)
         return (Var) val;
       else {
         Var var = new Var(val);
 
-        setRaw(var);
+        _value = var;
 
         return var;
       }
@@ -955,14 +955,14 @@ public class ObjectValue extends Value {
      */
     public Value toArgValue()
     {
-      return getRawValue().toValue();
+      return _value.toValue();
     }
 
     public Value setValue(Value value)
     {
       Value oldValue = toValue();
 
-      setRaw(value);
+      _value = value;
 
       return oldValue;
     }
@@ -972,12 +972,17 @@ public class ObjectValue extends Value {
      */
     public Value toRef()
     {
-      Value value = toValue();
+      Value value = _value;
 
       if (value instanceof Var)
         return new RefVar((Var) value);
-      else
-        return new RefVar(this);
+      else {
+	Var var = new Var(_value);
+	
+	_value = var;
+	
+        return new RefVar(var);
+      }
     }
 
     /**
@@ -985,22 +990,32 @@ public class ObjectValue extends Value {
      */
     public Value toArgRef()
     {
-      Value value = toValue();
+      Value value = _value;
 
       if (value instanceof Var)
         return new RefVar((Var) value);
-      else
-        return new RefVar(this);
+      else {
+	Var var = new Var(_value);
+	
+	_value = var;
+	
+        return new RefVar(var);
+      }
     }
 
     public Value toArg()
     {
-      Value value = getRawValue();
+      Value value = _value;
 
       if (value instanceof Var)
         return value;
-      else
-        return this;
+      else {
+	Var var = new Var(_value);
+	
+	_value = var;
+	
+        return var;
+      }
     }
 
     public int compareTo(Map.Entry<String, Value> other)
@@ -1030,8 +1045,9 @@ public class ObjectValue extends Value {
       out.println("[\"" + getKey() + "\"]=>");
 
       printDepth(out, 2 * depth);
-      super.toValue().varDump(env, out, depth, valueSet);
-
+      
+      _value.varDump(env, out, depth, valueSet);
+      
       out.println();
     }
 
@@ -1043,9 +1059,17 @@ public class ObjectValue extends Value {
     {
       printDepth(out, 4 * depth);
       out.print("[" + getKey() + "] => ");
-      super.toValue().printR(env, out, depth + 1, valueSet);
+      
+      _value.printR(env, out, depth + 1, valueSet);
 
       out.println();
+    }
+
+    private void printDepth(WriteStream out, int depth)
+      throws java.io.IOException
+    {
+      for (int i = 0; i < depth; i++)
+	out.print(' ');
     }
 
     public String toString()

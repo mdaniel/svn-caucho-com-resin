@@ -266,11 +266,11 @@ public class QuercusMysqliModule extends AbstractQuercusModule {
   /**
    * Alias for {@link #mysqli_real_escape_string}
    */
-  public static String mysqli_escape_string(@NotNull Mysqli conn,
+  public static Value mysqli_escape_string(@NotNull Mysqli conn,
                                             String unescapedString)
   {
     if (conn == null)
-      return null;
+      return NullValue.NULL;
 
     return conn.real_escape_string(unescapedString);
   }

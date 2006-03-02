@@ -50,15 +50,21 @@ import com.caucho.quercus.module.UsesSymbolTable;
 
 import com.caucho.quercus.env.*;
 
+import com.caucho.util.LruCache;
+
 import com.caucho.vfs.WriteStream;
 
 public final class UnserializeReader {
   private static final L10N L = new L10N(QuercusVariableModule.class);
+
+  private static final LruCache<StringKey,StringValue> _keyCache
+    = new LruCache<StringKey,StringValue>(4096);
   
   private final char []_buffer;
   private final int _length;
     
   private int _index;
+  private StringKey _key = new StringKey();
 
   public UnserializeReader(String s)
   {
@@ -88,12 +94,12 @@ public final class UnserializeReader {
 	expect(':');
 	expect('"');
 
-	String s = readString(len);
+	StringValue s = readStringValue(len);
 
 	expect('"');
 	expect(';');
 
-	return new StringValueImpl(s);
+	return s;
       }
       
     case 'i':
@@ -104,7 +110,7 @@ public final class UnserializeReader {
 	
 	expect(';');
 
-	return new LongValue(value);
+	return LongValue.create(value);
       }
       
     case 'd':
@@ -131,7 +137,7 @@ public final class UnserializeReader {
 
 	ArrayValue array = new ArrayValueImpl((int) len);
 	for (int i = 0; i < len; i++) {
-	  Value key = unserialize(env);
+	  Value key = unserializeKey(env);
 	  Value value = unserialize(env);
 
 	  array.put(key, value);
@@ -159,10 +165,10 @@ public final class UnserializeReader {
 
 	Value obj = env.getClass(className).evalNew(env, new Value[0]);
 	for (int i = 0; i < count; i++) {
-	  Value key = unserialize(env);
+	  String key = unserializeString();
 	  Value value = unserialize(env);
 
-	  obj.putField(env, key.toString(), value);
+	  obj.putField(env, key, value);
 	}
 
 	expect('}');
@@ -180,6 +186,82 @@ public final class UnserializeReader {
     default:
       return BooleanValue.FALSE;
     }
+  }
+
+  public Value unserializeKey(Env env)
+    throws Throwable
+  {
+    int ch = read();
+
+    switch (ch) {
+    case 's':
+      {
+	expect(':');
+	int len = (int) readInt();
+	expect(':');
+	expect('"');
+
+	StringValue v;
+
+	if (len < 32) {
+	  _key.init(_buffer, _index, len);
+
+	  v = _keyCache.get(_key);
+
+	  if (v != null) {
+	    _index += len;
+	  }
+	  else {
+	    StringKey key = new StringKey(_buffer, _index, len);
+	    
+	    String s = readString(len);
+	    v = new InternStringValue(s);
+
+	    _keyCache.put(key, v);
+	  }
+	}
+	else {
+	  String s = readString(len);
+	  v = new StringValueImpl(s);
+	}
+
+	expect('"');
+	expect(';');
+
+	return v;
+      }
+      
+    case 'i':
+      {
+	expect(':');
+	
+	long value = readInt();
+	
+	expect(';');
+
+	return LongValue.create(value);
+      }
+      
+    default:
+      return BooleanValue.FALSE;
+    }
+  }
+
+  private String unserializeString()
+    throws Throwable
+  {
+    expect('s');
+    expect(':');
+    int len = (int) readInt();
+    expect(':');
+    expect('"');
+
+    String s = readString(len);
+
+    expect('"');
+    expect(';');
+
+    return s;
   }
 
   public final void expect(int expectCh)
@@ -229,6 +311,15 @@ public final class UnserializeReader {
 
     return s;
   }
+
+  public final StringValue readStringValue(int len)
+  {
+    StringValue s = new StringBuilderValue(_buffer, _index, len, true);
+
+    _index += len;
+
+    return s;
+  }
     
   public final int read()
   {
@@ -251,5 +342,72 @@ public final class UnserializeReader {
   {
     _index--;
   }
+
+  public final static class StringKey {
+    char []_buffer;
+    int _offset;
+    int _length;
+
+    StringKey()
+    {
+    }
+    
+    StringKey(char []buffer, int offset, int length)
+    {
+      _buffer = new char[length];
+      System.arraycopy(buffer, offset, _buffer, 0, length);
+      _offset = 0;
+      _length = length;
+    }
+
+    void init(char []buffer, int offset, int length)
+    {
+      _buffer = buffer;
+      _offset = offset;
+      _length = length;
+    }
+
+    public int hashCode()
+    {
+      char []buffer = _buffer;
+      int offset = _offset;
+      int end = offset + _length;
+      int hash = 17;
+
+      for (; offset < end; offset++)
+	hash = 65521 * hash + buffer[offset];
+
+      return hash;
+    }
+
+    public boolean equals(Object o)
+    {
+      if (! (o instanceof StringKey))
+	return false;
+
+      StringKey key = (StringKey) o;
+
+      int length = _length;
+      
+      if (length != key._length)
+	return false;
+
+      char []aBuf = _buffer;
+      char []bBuf = key._buffer;
+
+      int aOffset = _offset;
+      int bOffset = key._offset;
+
+      int aEnd = aOffset + length;
+
+      while (aOffset < aEnd) {
+	if (aBuf[aOffset++] != bBuf[bOffset++])
+	  return false;
+      }
+
+      return true;
+    }
+  }
 }
+
 

@@ -560,7 +560,7 @@ public class QuercusStringModule extends AbstractQuercusModule {
       if (limit <= i + 1)
         break;
 
-      LongValue key = new LongValue(i++);
+      LongValue key = LongValue.create(i++);
 
       StringValue chunk = new StringValueImpl(string.substring(head, tail));
 
@@ -569,7 +569,7 @@ public class QuercusStringModule extends AbstractQuercusModule {
       head = tail + separator.length();
     }
 
-    LongValue key = new LongValue(i);
+    LongValue key = LongValue.create(i);
 
     StringValue chunk = new StringValueImpl(string.substring(head));
 
@@ -590,9 +590,9 @@ public class QuercusStringModule extends AbstractQuercusModule {
                               Value []args)
     throws Throwable
   {
-    String value = sprintf(format, args);
+    Value value = sprintf(format, args);
 
-    return QuercusFileModule.fwrite(env, fd, value, -1);
+    return QuercusFileModule.fwrite(env, fd, value.toString(), -1);
   }
 
   /**
@@ -626,7 +626,7 @@ public class QuercusStringModule extends AbstractQuercusModule {
       return BooleanValue.FALSE;
     }
 
-    StringBuilder sb = new StringBuilder();
+    StringBuilderValue sb = new StringBuilderValue();
     boolean isFirst = true;
 
     for (Map.Entry<Value,Value> entry : pieces.entrySet()) {
@@ -634,10 +634,10 @@ public class QuercusStringModule extends AbstractQuercusModule {
         sb.append(glue);
       isFirst = false;
 
-      sb.append(entry.getValue().toString());
+      entry.getValue().appendTo(sb);
     }
 
-    return new StringValueImpl(sb.toString());
+    return sb;
   }
 
   /**
@@ -1825,11 +1825,11 @@ public class QuercusStringModule extends AbstractQuercusModule {
   public static int printf(Env env, String format, Value []args)
     throws Throwable
   {
-    String str = sprintf(format, args);
+    Value str = sprintf(format, args);
 
-    env.getOut().print(str);
+    str.print(env);
 
-    return str.length();
+    return str.strlen();
   }
 
   private static final char[] SOUNDEX_VALUES = "01230120022455012623010202".toCharArray();
@@ -1881,17 +1881,17 @@ public class QuercusStringModule extends AbstractQuercusModule {
    *
    * @return the formatted string
    */
-  public static String sprintf(String format, Value []args)
+  public static Value sprintf(String format, Value []args)
     throws Throwable
   {
     ArrayList<PrintfSegment> segments = parsePrintfFormat(format);
 
-    StringBuilder sb = new StringBuilder();
+    StringBuilderValue sb = new StringBuilderValue();
 
     for (PrintfSegment segment : segments)
       segment.apply(sb, args);
 
-    return sb.toString();
+    return sb;
   }
 
   private static ArrayList<PrintfSegment> parsePrintfFormat(String format)
@@ -3725,8 +3725,8 @@ public class QuercusStringModule extends AbstractQuercusModule {
    * @param format the format string
    * @param array the arguments to apply to the format string
    */
-  public static String vsprintf(String format,
-                                @NotNull ArrayValue array)
+  public static Value vsprintf(String format,
+			       @NotNull ArrayValue array)
     throws Throwable
   {
     Value []args;
@@ -3853,7 +3853,7 @@ public class QuercusStringModule extends AbstractQuercusModule {
   }
 
   abstract static class PrintfSegment {
-    abstract public void apply(StringBuilder sb, Value []args);
+    abstract public void apply(StringBuilderValue sb, Value []args);
   }
 
   static class TextPrintfSegment extends PrintfSegment {
@@ -3866,7 +3866,7 @@ public class QuercusStringModule extends AbstractQuercusModule {
       text.getChars(0, _text.length, _text, 0);
     }
 
-    public void apply(StringBuilder sb, Value []args)
+    public void apply(StringBuilderValue sb, Value []args)
     {
       sb.append(_text, 0, _text.length);
     }
@@ -3882,7 +3882,7 @@ public class QuercusStringModule extends AbstractQuercusModule {
       _index = index;
     }
 
-    public void apply(StringBuilder sb, Value []args)
+    public void apply(StringBuilderValue sb, Value []args)
     {
       long value;
 
@@ -3905,7 +3905,7 @@ public class QuercusStringModule extends AbstractQuercusModule {
       _index = index;
     }
 
-    public void apply(StringBuilder sb, Value []args)
+    public void apply(StringBuilderValue sb, Value []args)
     {
       double value;
 
@@ -3965,7 +3965,7 @@ public class QuercusStringModule extends AbstractQuercusModule {
       _index = index;
     }
 
-    public void apply(StringBuilder sb, Value []args)
+    public void apply(StringBuilderValue sb, Value []args)
     {
       sb.append(_prefix, 0, _prefix.length);
 

@@ -974,7 +974,7 @@ public class JdbcResultResource extends ResourceValue {
         if (rs.wasNull())
           return NullValue.NULL;
         else
-          return new LongValue(value);
+          return LongValue.create(value);
       }
 
     case Types.DOUBLE:

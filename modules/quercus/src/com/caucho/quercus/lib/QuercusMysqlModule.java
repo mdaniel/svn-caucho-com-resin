@@ -223,7 +223,7 @@ public class QuercusMysqlModule extends AbstractQuercusModule {
     return conn.error();
   }
 
-  public String mysql_escape_string(Env env, String unescapedString)
+  public Value mysql_escape_string(Env env, String unescapedString)
   {
     return mysql_real_escape_string(env, unescapedString, null);
   }
@@ -236,7 +236,7 @@ public class QuercusMysqlModule extends AbstractQuercusModule {
    * @return the escaped string
    */
 
-  public String mysql_real_escape_string(Env env,
+  public Value mysql_real_escape_string(Env env,
                                          String unescapedString,
                                          @Optional Mysqli conn)
   {

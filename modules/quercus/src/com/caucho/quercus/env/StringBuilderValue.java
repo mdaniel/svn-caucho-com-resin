@@ -90,6 +90,15 @@ public class StringBuilderValue extends StringValue {
     System.arraycopy(buffer, offset, _buffer, 0, length);
   }
 
+  public StringBuilderValue(char []buffer, int offset, int length,
+			    boolean isExact)
+  {
+    _buffer = new char[length];
+    _length = length;
+    
+    System.arraycopy(buffer, offset, _buffer, 0, length);
+  }
+
   /**
    * Returns the value.
    */
@@ -333,6 +342,14 @@ public class StringBuilderValue extends StringValue {
   }
 
   /**
+   * Append to a string builder.
+   */
+  public void appendTo(StringBuilderValue sb)
+  {
+    sb.append(_buffer, 0, _length);
+  }
+
+  /**
    * Converts to a key.
    */
   public Value toKey()
@@ -475,7 +492,7 @@ public class StringBuilderValue extends StringValue {
   /**
    * Append a Java string to the value.
    */
-  public StringBuilderValue append(String s)
+  public final StringBuilderValue append(String s)
   {
     int len = s.length();
 
@@ -492,7 +509,7 @@ public class StringBuilderValue extends StringValue {
   /**
    * Append a Java string to the value.
    */
-  public StringBuilderValue append(String s, int start, int end)
+  public final StringBuilderValue append(String s, int start, int end)
   {
     int len = end - start;
 
@@ -509,7 +526,7 @@ public class StringBuilderValue extends StringValue {
   /**
    * Append a Java buffer to the value.
    */
-  public StringBuilderValue append(char []buf, int offset, int length)
+  public final StringBuilderValue append(char []buf, int offset, int length)
   {
     if (_buffer.length < _length + length)
       ensureCapacity(_length + length);
@@ -524,7 +541,7 @@ public class StringBuilderValue extends StringValue {
   /**
    * Append a Java char to the value.
    */
-  public StringBuilderValue append(char v)
+  public final StringBuilderValue append(char v)
   {
     if (_buffer.length < _length + 1)
       ensureCapacity(_length + 1);
@@ -537,7 +554,7 @@ public class StringBuilderValue extends StringValue {
   /**
    * Append a Java boolean to the value.
    */
-  public StringBuilderValue append(boolean v)
+  public final StringBuilderValue append(boolean v)
   {
     return append(v ? "true" : "false");
   }
@@ -545,7 +562,7 @@ public class StringBuilderValue extends StringValue {
   /**
    * Append a Java long to the value.
    */
-  public StringBuilderValue append(long v)
+  public final StringBuilderValue append(long v)
   {
     // XXX: change for perf
     return append(String.valueOf(v));
@@ -554,7 +571,7 @@ public class StringBuilderValue extends StringValue {
   /**
    * Append a Java double to the value.
    */
-  public StringBuilderValue append(double v)
+  public final StringBuilderValue append(double v)
   {
     return append(String.valueOf(v));
   }
@@ -562,9 +579,19 @@ public class StringBuilderValue extends StringValue {
   /**
    * Append a Java value to the value.
    */
-  public StringBuilderValue append(Object v)
+  public final StringBuilderValue append(Object v)
   {
     return append(v.toString());
+  }
+
+  /**
+   * Append a Java value to the value.
+   */
+  public final StringBuilderValue append(Value v)
+  {
+    v.appendTo(this);
+    
+    return this;
   }
 
   private void ensureCapacity(int newCapacity)

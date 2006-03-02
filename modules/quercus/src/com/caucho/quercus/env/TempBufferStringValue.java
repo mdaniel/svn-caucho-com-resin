@@ -29,10 +29,12 @@
 
 package com.caucho.quercus.env;
 
+import java.io.InputStream;
+
 import com.caucho.vfs.TempBuffer;
 import com.caucho.vfs.WriteStream;
-
-import java.io.ByteArrayInputStream;
+import com.caucho.vfs.TempReadStream;
+import com.caucho.vfs.StreamImplInputStream;
 
 /**
  * Represents a PHP string value implemented as a TempBuffer, with
@@ -52,9 +54,12 @@ public class TempBufferStringValue extends StringValue {
    * 
    * @return _head as inputstream
    */
-  public ByteArrayInputStream toInputStream()
+  public InputStream toInputStream()
   {
-    return new ByteArrayInputStream(_head.getBuffer());
+    TempReadStream ts = new TempReadStream(_head);
+    ts.setFreeWhenDone(false);
+    
+    return new StreamImplInputStream(ts);
   }
   
   /**

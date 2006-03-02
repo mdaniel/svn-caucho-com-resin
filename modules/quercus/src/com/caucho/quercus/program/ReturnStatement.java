@@ -80,7 +80,7 @@ public class ReturnStatement extends Statement {
   {
     _expr.analyze(info);
 
-    _expr.analyzeSetReference(info); // php/3783, php/3a5d
+    // _expr.analyzeSetReference(info); // php/3783, php/3a5d
 
     return false;
   }

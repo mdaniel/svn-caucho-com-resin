@@ -38,6 +38,7 @@ import java.lang.ref.SoftReference;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.IdentityHashMap;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -140,8 +141,10 @@ public class Env {
   private ArrayList<Shutdown> _shutdownList
     = new ArrayList<Shutdown>();
 
-  private HashMap<String, Var> _globalMap = new HashMap<String, Var>();
-  private HashMap<String, Var> _staticMap = new HashMap<String, Var>();
+  private HashMap<String, Var> _globalMap
+    = new HashMap<String, Var>();
+  private HashMap<String, Var> _staticMap
+    = new HashMap<String, Var>();
   private HashMap<String, Var> _map = _globalMap;
 
   private HashMap<String, Value> _constMap

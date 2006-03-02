@@ -278,6 +278,14 @@ public class StringValueImpl extends StringValue {
   }
 
   /**
+   * Append to a string builder.
+   */
+  public void appendTo(StringBuilderValue sb)
+  {
+    sb.append(_value);
+  }
+
+  /**
    * Converts to a key.
    */
   public Value toKey()
