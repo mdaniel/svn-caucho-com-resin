@@ -1,0 +1,100 @@
+<rewrites>
+
+  <rewrite pattern="${docUrl}/index.jsp" target="${wikiUrl}/Main_Page"/>
+  <rewrite pattern="${docUrl}/index.xtp" target="${wikiUrl}/Main_Page"/>
+  <rewrite pattern="${docUrl}/orientation-resin-ee.xtp" target="${wikiUrl}/Main_Page"/>
+  <rewrite pattern="${docUrl}/orientation-resin.xtp" target="${wikiUrl}/Main_Page"/>
+
+
+  <!-- admin -->
+  <!-- amber -->
+  <!-- cmp -->
+
+  <!-- config -->
+
+  <rewrite pattern="${docUrl}/index.xtp" target="${wikiUrl}/Configuration"/>
+  <rewrite pattern="${docUrl}/log.xtp" target="${wikiUrl}/Logging"/>
+
+  <!--
+  <rewrite pattern="${docUrl}/balance.xtp" target="${wikiUrl}/YYY"/>
+  <rewrite pattern="${docUrl}/commontasks.xtp" target="${wikiUrl}/YYY"/>
+  <rewrite pattern="${docUrl}/config-tags.xtp" target="${wikiUrl}/YYY"/>
+  <rewrite pattern="${docUrl}/config.xtp" target="${wikiUrl}/YYY"/>
+  <rewrite pattern="${docUrl}/control.xtp" target="${wikiUrl}/YYY"/>
+  <rewrite pattern="${docUrl}/el.xtp" target="${wikiUrl}/YYY"/>
+  <rewrite pattern="${docUrl}/env-schema.xtp" target="${wikiUrl}/YYY"/>
+  <rewrite pattern="${docUrl}/env.xtp" target="${wikiUrl}/YYY"/>
+  <rewrite pattern="${docUrl}/faq.xtp" target="${wikiUrl}/YYY"/>
+  <rewrite pattern="${docUrl}/howto.xtp" target="${wikiUrl}/YYY"/>
+  <rewrite pattern="${docUrl}/index-tags.xtp" target="${wikiUrl}/YYY"/>
+  <rewrite pattern="${docUrl}/init.xtp" target="${wikiUrl}/YYY"/>
+  <rewrite pattern="${docUrl}/isp.xtp" target="${wikiUrl}/YYY"/>
+  <rewrite pattern="${docUrl}/j2ee-schema.xtp" target="${wikiUrl}/YYY"/>
+  <rewrite pattern="${docUrl}/j2ee-web-xml-schema.xtp" target="${wikiUrl}/YYY"/>
+  <rewrite pattern="${docUrl}/old-config.xtp" target="${wikiUrl}/YYY"/>
+  <rewrite pattern="${docUrl}/resin-j2ee-schema.xtp" target="${wikiUrl}/YYY"/>
+  <rewrite pattern="${docUrl}/resin-schema.xtp" target="${wikiUrl}/YYY"/>
+  <rewrite pattern="${docUrl}/resin-web-xml-schema.xtp" target="${wikiUrl}/YYY"/>
+  <rewrite pattern="${docUrl}/resin.xtp" target="${wikiUrl}/YYY"/>
+  <rewrite pattern="${docUrl}/schema.xtp" target="${wikiUrl}/YYY"/>
+  <rewrite pattern="${docUrl}/scrapbook.xtp" target="${wikiUrl}/YYY"/>
+  <rewrite pattern="${docUrl}/sessions.xtp" target="${wikiUrl}/YYY"/>
+  <rewrite pattern="${docUrl}/tcp-sessions.xtp" target="${wikiUrl}/YYY"/>
+  <rewrite pattern="${docUrl}/toc.xml" target="${wikiUrl}/YYY"/>
+  <rewrite pattern="${docUrl}/topic.xtp" target="${wikiUrl}/YYY"/>
+  <rewrite pattern="${docUrl}/tuning.xtp" target="${wikiUrl}/YYY"/>
+  <rewrite pattern="${docUrl}/virtual-host.xtp" target="${wikiUrl}/YYY"/>
+  <rewrite pattern="${docUrl}/webapp.xtp" target="${wikiUrl}/YYY"/>
+  -->
+
+<!-- css -->
+<!-- db -->
+<!-- ejb -->
+<!-- ejb3 -->
+<!-- ejbc -->
+<!-- faq -->
+<!-- features -->
+<!-- images -->
+
+  <!-- install -->
+
+  <rewrite pattern="${docUrl}/cse-apache-unix.xtp" target="${wikiUrl}/Apache"/>
+  <rewrite pattern="${docUrl}/cse-apache-win.xtp" target="${wikiUrl}/Apache"/>
+  <rewrite pattern="${docUrl}/cse-apache.xtp" target="${wikiUrl}/Apache"/>
+  <rewrite pattern="${docUrl}/cse-iis.xtp" target="${wikiUrl}/IIS"/>
+  <rewrite pattern="${docUrl}/details.xtp" target="${wikiUrl}/Servlet_plugin"/>
+  <rewrite pattern="${docUrl}/faq.xtp" target="${wikiUrl}/Installation_FAQ"/>
+  <rewrite pattern="${docUrl}/hardcore.xtp" target="${wikiUrl}/Hardcore"/>
+  <rewrite pattern="${docUrl}/httpd.xtp" target="${wikiUrl}/Resin_web_server"/>
+  <rewrite pattern="${docUrl}/index.xtp" target="${wikiUrl}/Installation"/>
+  <rewrite pattern="${docUrl}/install.xtp" target="${wikiUrl}/Quick_start"/>
+  <rewrite pattern="${docUrl}/linux-boot.xtp" target="${wikiUrl}/Linux_service"/>
+  <rewrite pattern="${docUrl}/plugin-dispatch.xtp" target="${wikiUrl}/Servlet_plugin"/>
+  <rewrite pattern="${docUrl}/scrapbook.xtp" target="${wikiUrl}/Installation"/>
+
+<!-- ioc -->
+<!-- jms -->
+<!-- jmx -->
+<!-- jsp -->
+<!-- ormap -->
+<!-- pdf -->
+<!-- performance -->
+<!-- php -->
+<!-- portlet -->
+<!-- protocols -->
+<!-- reorg -->
+<!-- resource -->
+<!-- security -->
+<!-- servlet -->
+<!-- thirdparty -->
+<!-- troubleshoot -->
+<!-- webapp -->
+<!-- xml -->
+<!-- xtp -->
+
+  <!--
+  <rewrite pattern="${docUrl}/XXX" target="${wikiUrl}/YYY"/>
+  -->
+
+</rewrites>
+
