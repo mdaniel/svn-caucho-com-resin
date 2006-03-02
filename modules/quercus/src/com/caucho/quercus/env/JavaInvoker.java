@@ -29,52 +29,39 @@
 
 package com.caucho.quercus.env;
 
-import java.io.IOException;
-
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.lang.reflect.InvocationTargetException;
-
-import java.lang.annotation.Annotation;
-
 import com.caucho.quercus.Quercus;
-
+import com.caucho.quercus.expr.DefaultExpr;
 import com.caucho.quercus.expr.Expr;
 import com.caucho.quercus.expr.NullLiteralExpr;
-import com.caucho.quercus.expr.DefaultExpr;
-import com.caucho.quercus.expr.FunctionExpr;
-
-import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.Value;
-
-import com.caucho.quercus.parser.PhpParser;
-
-import com.caucho.quercus.program.AbstractFunction;
-
-import com.caucho.quercus.module.Marshall;
-import com.caucho.quercus.module.Reference;
-import com.caucho.quercus.module.Optional;
-import com.caucho.quercus.module.VariableArguments;
-import com.caucho.quercus.module.UsesSymbolTable;
-
 import com.caucho.quercus.gen.PhpWriter;
-
+import com.caucho.quercus.module.Marshall;
+import com.caucho.quercus.module.Optional;
+import com.caucho.quercus.module.Reference;
+import com.caucho.quercus.module.UsesSymbolTable;
+import com.caucho.quercus.module.VariableArguments;
+import com.caucho.quercus.parser.PhpParser;
+import com.caucho.quercus.program.AbstractFunction;
 import com.caucho.util.L10N;
+
+import java.lang.annotation.Annotation;
+import java.lang.reflect.InvocationTargetException;
 
 /**
  * Represents the introspected static function information.
  */
-abstract public class JavaInvoker extends AbstractFunction {
+abstract public class JavaInvoker
+  extends AbstractFunction
+{
   private static final L10N L = new L10N(JavaInvoker.class);
 
-  private static final Object []NULL_ARGS = new Object[0];
-  private static final Value []NULL_VALUES = new Value[0];
+  private static final Object [] NULL_ARGS = new Object[0];
+  private static final Value [] NULL_VALUES = new Value[0];
 
   private final String _name;
-  private final Class []_paramTypes;
+  private final Class [] _paramTypes;
   private final boolean _hasEnv;
-  private final Expr []_defaultExprs;
-  private final Marshall []_marshallArgs;
+  private final Expr [] _defaultExprs;
+  private final Marshall [] _marshallArgs;
   private final boolean _hasRestArgs;
   private final Marshall _unmarshallReturn;
 
@@ -87,14 +74,13 @@ abstract public class JavaInvoker extends AbstractFunction {
   /**
    * Creates the statically introspected function.
    *
-   * @param method the introspected method.
    */
   public JavaInvoker(Quercus quercus,
-		     String name,
-		     Class []param,
-		     Annotation [][]paramAnn,
-		     Annotation []methodAnn,
-		     Class retType)
+                     String name,
+                     Class []param,
+                     Annotation [][]paramAnn,
+                     Annotation []methodAnn,
+                     Class retType)
   {
     _name = name;
 
@@ -103,11 +89,11 @@ abstract public class JavaInvoker extends AbstractFunction {
 
     for (Annotation ann : methodAnn) {
       if (VariableArguments.class.isAssignableFrom(ann.annotationType())) {
-	callUsesVariableArgs = true;
+        callUsesVariableArgs = true;
       }
 
       if (UsesSymbolTable.class.isAssignableFrom(ann.annotationType())) {
-	callUsesSymbolTable = true;
+        callUsesSymbolTable = true;
       }
     }
 
@@ -125,8 +111,8 @@ abstract public class JavaInvoker extends AbstractFunction {
       hasRestArgs = true;
 
       for (Annotation ann : paramAnn[param.length - 1]) {
-	if (Reference.class.isAssignableFrom(ann.annotationType()))
-	  isRestReference = true;
+        if (Reference.class.isAssignableFrom(ann.annotationType()))
+          isRestReference = true;
       }
     }
 
@@ -149,27 +135,25 @@ abstract public class JavaInvoker extends AbstractFunction {
 
       for (Annotation ann : paramAnn[i + envOffset]) {
         if (Optional.class.isAssignableFrom(ann.annotationType())) {
-	  Optional opt = (Optional) ann;
+          Optional opt = (Optional) ann;
 
-	  if (! opt.value().equals("")) {
-	    Expr expr = PhpParser.parseDefault(opt.value());
+          if (! opt.value().equals("")) {
+            Expr expr = PhpParser.parseDefault(opt.value());
 
-	    _defaultExprs[i] = expr;
-	  }
-	  else
-	    _defaultExprs[i] = new DefaultExpr();
+            _defaultExprs[i] = expr;
+          } else
+            _defaultExprs[i] = new DefaultExpr();
+        } else if (Reference.class.isAssignableFrom(ann.annotationType())) {
+          isReference = true;
         }
-        else if (Reference.class.isAssignableFrom(ann.annotationType())) {
-	  isReference = true;
-	}
       }
 
       Class argType = param[i + envOffset];
 
       if (isReference)
-	_marshallArgs[i] = Marshall.MARSHALL_REFERENCE;
+        _marshallArgs[i] = Marshall.MARSHALL_REFERENCE;
       else
-	_marshallArgs[i] = Marshall.create(quercus, argType);
+        _marshallArgs[i] = Marshall.create(quercus, argType);
     }
 
     _unmarshallReturn = Marshall.create(quercus, retType);
@@ -235,30 +219,36 @@ abstract public class JavaInvoker extends AbstractFunction {
     if (_defaultExprs.length == args.length)
       return args;
 
-    int length = _defaultExprs.length;;
+    int length = _defaultExprs.length;
+    ;
 
     if (_defaultExprs.length < args.length) {
       if (_hasRestArgs)
-	length = args.length;
+        length = args.length;
       else {
-	env.warning(L.l("function '{0}' has {1} required arguments, but only {2} were provided",
-			_name, _defaultExprs.length, args.length));
+        env.warning(L.l(
+          "function '{0}' has {1} required arguments, but only {2} were provided",
+          _name,
+          _defaultExprs.length,
+          args.length));
 
-	return null;
+        return null;
       }
-    }
-    else if (_defaultExprs[args.length] == null) {
+    } else if (_defaultExprs[args.length] == null) {
       int required;
 
       for (required = args.length;
-	   required < _defaultExprs.length;
-	   required++) {
-	if (_defaultExprs[required] != null)
-	  break;
+           required < _defaultExprs.length;
+           required++) {
+        if (_defaultExprs[required] != null)
+          break;
       }
 
-      env.warning(L.l("function '{0}' has {1} required arguments, but only {2} were provided",
-		      _name, required, args.length));
+      env.warning(L.l(
+        "function '{0}' has {1} required arguments, but only {2} were provided",
+        _name,
+        required,
+        args.length));
 
       return null;
     }
@@ -269,12 +259,12 @@ abstract public class JavaInvoker extends AbstractFunction {
 
     if (args.length < expandedArgs.length) {
       for (int i = args.length; i < expandedArgs.length; i++) {
-	Expr defaultExpr = _defaultExprs[i];
+        Expr defaultExpr = _defaultExprs[i];
 
-	if (defaultExpr == null)
-	  defaultExpr = NullLiteralExpr.NULL;
+        if (defaultExpr == null)
+          defaultExpr = NullLiteralExpr.NULL;
 
-	expandedArgs[i] = defaultExpr;
+        expandedArgs[i] = defaultExpr;
       }
     }
 
@@ -302,12 +292,12 @@ abstract public class JavaInvoker extends AbstractFunction {
       Expr expr;
 
       if (i < exprs.length && exprs[i] != null)
-	expr = exprs[i];
+        expr = exprs[i];
       else {
-	expr = _defaultExprs[i];
+        expr = _defaultExprs[i];
 
-	if (expr == null)
-	  expr = new DefaultExpr();
+        if (expr == null)
+          expr = new DefaultExpr();
       }
 
       values[k] = _marshallArgs[i].marshall(env, expr, _paramTypes[k]);
@@ -343,9 +333,9 @@ abstract public class JavaInvoker extends AbstractFunction {
       return _unmarshallReturn.unmarshall(env, result);
     } catch (InvocationTargetException e) {
       if (e.getCause() != null)
-	throw e.getCause();
+        throw e.getCause();
       else
-	throw e;
+        throw e;
     }
   }
 
@@ -365,16 +355,15 @@ abstract public class JavaInvoker extends AbstractFunction {
       Value value;
 
       if (i < args.length && args[i] != null)
-	values[k] = _marshallArgs[i].marshall(env, args[i], _paramTypes[k]);
+        values[k] = _marshallArgs[i].marshall(env, args[i], _paramTypes[k]);
       else if (_defaultExprs[i] != null) {
-	values[k] = _marshallArgs[i].marshall(env,
-					      _defaultExprs[i],
-					      _paramTypes[k]);
-      }
-      else {
-	values[k] = _marshallArgs[i].marshall(env,
-					      NullValue.NULL,
-					      _paramTypes[k]);
+        values[k] = _marshallArgs[i].marshall(env,
+                                              _defaultExprs[i],
+                                              _paramTypes[k]);
+      } else {
+        values[k] = _marshallArgs[i].marshall(env,
+                                              NullValue.NULL,
+                                              _paramTypes[k]);
       }
 
       k++;
@@ -407,9 +396,9 @@ abstract public class JavaInvoker extends AbstractFunction {
       return _unmarshallReturn.unmarshall(env, result);
     } catch (InvocationTargetException e) {
       if (e.getCause() != null)
-	throw e.getCause();
+        throw e.getCause();
       else
-	throw e;
+        throw e;
     }
   }
 
@@ -422,33 +411,33 @@ abstract public class JavaInvoker extends AbstractFunction {
   public Value eval(Env env, Object obj, Value a1)
     throws Throwable
   {
-    return eval(env, obj, new Value[] { a1 });
+    return eval(env, obj, new Value[]{a1});
   }
 
   public Value eval(Env env, Object obj, Value a1, Value a2)
     throws Throwable
   {
-    return eval(env, obj, new Value[] { a1, a2 });
+    return eval(env, obj, new Value[]{a1, a2});
   }
 
   public Value eval(Env env, Object obj, Value a1, Value a2, Value a3)
     throws Throwable
   {
-    return eval(env, obj, new Value[] { a1, a2, a3 });
+    return eval(env, obj, new Value[]{a1, a2, a3});
   }
 
   public Value eval(Env env, Object obj,
-		    Value a1, Value a2, Value a3, Value a4)
+                    Value a1, Value a2, Value a3, Value a4)
     throws Throwable
   {
-    return eval(env, obj, new Value[] { a1, a2, a3, a4 });
+    return eval(env, obj, new Value[]{a1, a2, a3, a4});
   }
 
   public Value eval(Env env, Object obj,
-		    Value a1, Value a2, Value a3, Value a4, Value a5)
+                    Value a1, Value a2, Value a3, Value a4, Value a5)
     throws Throwable
   {
-    return eval(env, obj, new Value[] { a1, a2, a3, a4, a5 });
+    return eval(env, obj, new Value[]{a1, a2, a3, a4, a5});
   }
 
   public void generate(PhpWriter out, Expr funExpr, Expr []expr)

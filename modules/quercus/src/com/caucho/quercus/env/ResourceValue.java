@@ -43,7 +43,6 @@ public class ResourceValue extends Value {
 
   /**
    * Converts to a string.
-   * @param env
    */
   public String toString()
   {

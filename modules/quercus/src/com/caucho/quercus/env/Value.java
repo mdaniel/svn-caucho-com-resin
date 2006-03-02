@@ -29,18 +29,17 @@
 
 package com.caucho.quercus.env;
 
-import java.io.InputStream;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.util.Collection;
-import java.util.IdentityHashMap;
-
 import com.caucho.quercus.QuercusRuntimeException;
 import com.caucho.quercus.expr.Expr;
 import com.caucho.quercus.gen.PhpWriter;
 import com.caucho.quercus.program.AbstractFunction;
 import com.caucho.util.L10N;
 import com.caucho.vfs.WriteStream;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Collection;
+import java.util.IdentityHashMap;
 
 /**
  * Represents a PHP expression value.
@@ -1037,7 +1036,8 @@ abstract public class Value {
    */
   public InputStream toInputStream()
   {
-    return new StringInputStream(toString());
+    return null;
+    //return new StringInputStream(toString());
   }
 
   /**

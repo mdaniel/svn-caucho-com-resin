@@ -67,9 +67,12 @@ public class JavaClassDefinition
   private final HashMap<String, JavaMethod> _functionMap
     = new HashMap<String, JavaMethod>();
 
-  private final HashMap<String, Method> _fieldMap
+  private final HashMap<String, Method> _getMap
     = new HashMap<String, Method>();
 
+  private final HashMap<String, JavaMethod> _setMap
+    = new HashMap<String, JavaMethod>();
+  
   private JavaConstructor _cons;
 
   private Method _iterator;
@@ -97,21 +100,47 @@ public class JavaClassDefinition
    * @param name
    * @return Value attained through invoking getter
    */
-  public Value getField(String name)
+  public Value getField(String name, Object obj)
   {
-    Method getter = _fieldMap.get("get".concat(name));
+    Method getter = _getMap.get("get".concat(name));
 
-    if (getter != null)
+    if (getter != null) {
+      
       try {
-        return (Value) getter.invoke(this);
+        return new JavaValue(getter.invoke(obj), this);
       } catch (Exception e) {
         log.log(Level.FINE, L.l(e.getMessage()), e);
         return NullValue.NULL;
-      }
-    else
+      } 
+      
+    } else
       return NullValue.NULL;
   }
 
+  public Value putField(Env env,
+                        Object obj,
+                        String name,
+                        Value value)
+  {
+    JavaMethod setter = _setMap.get("set".concat(name));
+    
+    if (setter == null) {
+      
+      env.error("'" + name + "' is an unknown field.");
+      return NullValue.NULL;
+      
+    } else {
+      
+      try {
+        return setter.eval(env, obj, value);
+      } catch (Throwable e) {
+        log.log(Level.FINE,  L.l(e.getMessage()), e);
+        return NullValue.NULL;
+      }
+      
+    }
+  }
+  
   /**
    * Returns the marshall instance.
    */
@@ -295,7 +324,7 @@ public class JavaClassDefinition
   {
     introspectConstants(_type);
     introspectMethods(quercus, _type);
-    introspectFields(_type);
+    introspectFields(quercus, _type);
 
     _marshall = new JavaMarshall(this, false);
 
@@ -320,7 +349,7 @@ public class JavaClassDefinition
   /**
    * Introspects the Java class.
    */
-  private void introspectFields(Class type)
+  private void introspectFields(Quercus quercus, Class type)
   {
     if (type == null || type.equals(Object.class))
       return;
@@ -336,12 +365,20 @@ public class JavaClassDefinition
       if (methodName.length() > 3) {        
         String prefix = methodName.substring(0, 3);
         
-        if (("set".equals(prefix)) || ("get".equals(prefix))) {
-          if (_fieldMap.get(prefix) == null)
-            _fieldMap.put(methodName, method);
-        }       
+        if ("get".equals(prefix)) {
+          
+          _getMap.put(methodName, method);
+          
+        } else if ("set".equals(prefix)) {
+          
+          JavaMethod javaMethod = new JavaMethod(quercus, method);
+          _setMap.put(methodName, javaMethod);
+          
+        }
       }
     }
+    
+    introspectFields(quercus, type.getSuperclass());
   }
   
   /**
