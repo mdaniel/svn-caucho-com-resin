@@ -29,55 +29,46 @@
 
 package com.caucho.quercus.env;
 
-import java.lang.reflect.Method;
-import java.lang.reflect.Field;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Modifier;
-
-import java.util.HashMap;
-import java.util.ArrayList;
-import java.util.Map;
-import java.util.LinkedHashMap;
-import java.util.Iterator;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import java.io.IOException;
-
-import com.caucho.util.L10N;
-
 import com.caucho.quercus.Quercus;
 import com.caucho.quercus.QuercusRuntimeException;
-
-import com.caucho.quercus.program.AbstractFunction;
-import com.caucho.quercus.program.Function;
-
-import com.caucho.quercus.module.Marshall;
-import com.caucho.quercus.module.JavaMarshall;
-
 import com.caucho.quercus.expr.Expr;
+import com.caucho.quercus.module.JavaMarshall;
+import com.caucho.quercus.module.Marshall;
+import com.caucho.util.L10N;
 
-import com.caucho.quercus.gen.PhpWriter;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Represents an introspected Java class.
  */
-public class JavaClassDefinition extends AbstractQuercusClass {
+public class JavaClassDefinition
+  extends AbstractQuercusClass
+{
   private final static Logger log
     = Logger.getLogger(JavaClassDefinition.class.getName());
   private final static L10N L = new L10N(JavaClassDefinition.class);
-  
+
   private final Quercus _quercus;
-  
+
   private final String _name;
   private final Class _type;
-  
-  private final HashMap<String,Value> _constMap
-    = new HashMap<String,Value>();
-  
-  private final HashMap<String,JavaMethod> _functionMap
-    = new HashMap<String,JavaMethod>();
+
+  private final HashMap<String, Value> _constMap
+    = new HashMap<String, Value>();
+
+  private final HashMap<String, JavaMethod> _functionMap
+    = new HashMap<String, JavaMethod>();
+
+  private final HashMap<String, Method> _fieldMap
+    = new HashMap<String, Method>();
 
   private JavaConstructor _cons;
 
@@ -88,18 +79,37 @@ public class JavaClassDefinition extends AbstractQuercusClass {
   public JavaClassDefinition(Quercus quercus, String name, Class type)
   {
     _quercus = quercus;
-    
+
     _name = name;
 
     _type = type;
   }
-  
+
   /**
    * Returns the class name.
    */
   public String getName()
   {
     return _name;
+  }
+
+  /**
+   * @param name
+   * @return Value attained through invoking getter
+   */
+  public Value getField(String name)
+  {
+    Method getter = _fieldMap.get("get".concat(name));
+
+    if (getter != null)
+      try {
+        return (Value) getter.invoke(this);
+      } catch (Exception e) {
+        log.log(Level.FINE, L.l(e.getMessage()), e);
+        return NullValue.NULL;
+      }
+    else
+      return NullValue.NULL;
   }
 
   /**
@@ -116,7 +126,7 @@ public class JavaClassDefinition extends AbstractQuercusClass {
   public Value newInstance()
   {
     try {
-      Object obj = _type.newInstance();
+      //Object obj = _type.newInstance();
 
       return new JavaValue(_type.newInstance(), this);
     } catch (Exception e) {
@@ -152,14 +162,14 @@ public class JavaClassDefinition extends AbstractQuercusClass {
 
     if (method == null) {
       env.warning(env.getLocation() + L.l("{0}::{1} is an unknown method.",
-					  _name, name));
+                                          _name, name));
 
       return NullValue.NULL;
     }
 
     return method.eval(env, obj, args);
   }
-  
+
   /**
    * Eval a method
    */
@@ -191,7 +201,7 @@ public class JavaClassDefinition extends AbstractQuercusClass {
    * Eval a method
    */
   public Value evalMethod(Env env, Object obj, String name,
-			  Value a1, Value a2)
+                          Value a1, Value a2)
     throws Throwable
   {
     return getMethod(env, name).eval(env, obj, a1, a2);
@@ -201,7 +211,7 @@ public class JavaClassDefinition extends AbstractQuercusClass {
    * Eval a method
    */
   public Value evalMethod(Env env, Object obj, String name,
-			  Value a1, Value a2, Value a3)
+                          Value a1, Value a2, Value a3)
     throws Throwable
   {
     return getMethod(env, name).eval(env, obj, a1, a2, a3);
@@ -211,7 +221,7 @@ public class JavaClassDefinition extends AbstractQuercusClass {
    * Eval a method
    */
   public Value evalMethod(Env env, Object obj, String name,
-			  Value a1, Value a2, Value a3, Value a4)
+                          Value a1, Value a2, Value a3, Value a4)
     throws Throwable
   {
     return getMethod(env, name).eval(env, obj, a1, a2, a3, a4);
@@ -221,7 +231,7 @@ public class JavaClassDefinition extends AbstractQuercusClass {
    * Eval a method
    */
   public Value evalMethod(Env env, Object obj, String name,
-			  Value a1, Value a2, Value a3, Value a4, Value a5)
+                          Value a1, Value a2, Value a3, Value a4, Value a5)
     throws Throwable
   {
     return getMethod(env, name).eval(env, obj, a1, a2, a3, a4, a5);
@@ -234,19 +244,19 @@ public class JavaClassDefinition extends AbstractQuercusClass {
   {
     try {
       if (_iterator == null)
-	return new Value[0];
+        return new Value[0];
 
       Iterator iter = (Iterator) _iterator.invoke(obj);
 
       ArrayList<Value> values = new ArrayList<Value>();
 
       while (iter.hasNext()) {
-	Object objValue = iter.next();
+        Object objValue = iter.next();
 
-	if (objValue instanceof Value)
-	  values.add((Value) objValue);
-	else
-	  values.add(env.wrapJava(objValue));
+        if (objValue instanceof Value)
+          values.add((Value) objValue);
+        else
+          values.add(env.wrapJava(objValue));
       }
 
       Value []valueArray = new Value[values.size()];
@@ -283,8 +293,9 @@ public class JavaClassDefinition extends AbstractQuercusClass {
    */
   public void introspect(Quercus quercus)
   {
-    introspectConstants(quercus, _type);
+    introspectConstants(_type);
     introspectMethods(quercus, _type);
+    introspectFields(_type);
 
     _marshall = new JavaMarshall(this, false);
 
@@ -299,54 +310,80 @@ public class JavaClassDefinition extends AbstractQuercusClass {
       Method method = _type.getMethod("iterator", new Class[0]);
 
       if (method != null &&
-	  Iterator.class.isAssignableFrom(method.getReturnType()))
-	_iterator = method;
+          Iterator.class.isAssignableFrom(method.getReturnType()))
+        _iterator = method;
     } catch (Throwable e) {
+      log.log(Level.FINE, L.l(e.getMessage()), e);
     }
   }
 
   /**
    * Introspects the Java class.
    */
-  private void introspectConstants(Quercus quercus, Class type)
+  private void introspectFields(Class type)
+  {
+    if (type == null || type.equals(Object.class))
+      return;
+    
+    if (! Modifier.isPublic(type.getModifiers()))
+      return;
+    
+    Method[] methods = type.getMethods();
+    
+    for (Method method : methods) {     
+      String methodName = method.getName();    
+      
+      if (methodName.length() > 3) {        
+        String prefix = methodName.substring(0, 3);
+        
+        if (("set".equals(prefix)) || ("get".equals(prefix))) {
+          if (_fieldMap.get(prefix) == null)
+            _fieldMap.put(methodName, method);
+        }       
+      }
+    }
+  }
+  
+  /**
+   * Introspects the Java class.
+   */
+  private void introspectConstants(Class type)
   {
     if (type == null || type.equals(Object.class))
       return;
 
     if (! Modifier.isPublic(type.getModifiers()))
       return;
-    
+
     Class []ifcs = type.getInterfaces();
-    
-    for (int i = 0; i < ifcs.length; i++) {
-      introspectConstants(quercus, ifcs[i]);
+
+    for (Class ifc : ifcs) {
+      introspectConstants(ifc);
     }
 
     Field []fields = type.getDeclaredFields();
 
-    for (int i = 0; i < fields.length; i++) {
-      Field field = fields[i];
-
+    for (Field field : fields) {
       if (_constMap.get(field.getName()) != null)
-	continue;
+        continue;
       else if (! Modifier.isPublic(field.getModifiers()))
-	continue;
+        continue;
       else if (! Modifier.isStatic(field.getModifiers()))
-	continue;
+        continue;
       else if (! Modifier.isFinal(field.getModifiers()))
-	continue;
+        continue;
 
       try {
-	Value value = Quercus.objectToValue(field.get(null));
+        Value value = Quercus.objectToValue(field.get(null));
 
-	if (value != null)
-	  _constMap.put(field.getName(), value);
+        if (value != null)
+          _constMap.put(field.getName(), value);
       } catch (Throwable e) {
-	log.log(Level.FINER, e.toString(), e);
+        log.log(Level.FINER, e.toString(), e);
       }
     }
 
-    introspectConstants(quercus, type.getSuperclass());
+    introspectConstants(type.getSuperclass());
   }
 
   /**
@@ -356,22 +393,20 @@ public class JavaClassDefinition extends AbstractQuercusClass {
   {
     if (type == null || type.equals(Object.class))
       return;
-    
+
     Class []ifcs = type.getInterfaces();
-    
-    for (int i = 0; i < ifcs.length; i++) {
-      introspectMethods(quercus, ifcs[i]);
+
+    for (Class ifc : ifcs) {
+      introspectMethods(quercus, ifc);
     }
 
     Method []methods = type.getDeclaredMethods();
 
-    for (int i = 0; i < methods.length; i++) {
-      Method method = methods[i];
-
+    for (Method method : methods) {
       if (_functionMap.get(method.getName()) != null)
-	continue;
+        continue;
       else if (! Modifier.isPublic(method.getModifiers()))
-	continue;
+        continue;
 
       JavaMethod javaMethod = new JavaMethod(quercus, method);
 
