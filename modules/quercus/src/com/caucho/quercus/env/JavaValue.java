@@ -29,19 +29,6 @@
 
 package com.caucho.quercus.env;
 
-import java.io.IOException;
-
-import java.util.LinkedHashMap;
-import java.util.HashMap;
-import java.util.Set;
-import java.util.Map;
-import java.util.IdentityHashMap;
-
-import com.caucho.vfs.WriteStream;
-
-import com.caucho.quercus.program.Function;
-import com.caucho.quercus.program.AbstractFunction;
-
 import com.caucho.quercus.expr.Expr;
 
 /**
@@ -59,6 +46,16 @@ public class JavaValue extends ResourceValue {
     _object = object;
   }
 
+  /**
+   * 
+   * @param name
+   * @return the Value from getXXX
+   */
+  public Value getField(String name)
+  {
+    return _classDef.getField(name);
+  }
+  
   /**
    * Returns the class name.
    */
