@@ -32,6 +32,7 @@ package com.caucho.quercus.lib;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.ArrayValue;
 import com.caucho.quercus.env.ArrayValueImpl;
+import com.caucho.quercus.env.LongValue;
 import com.caucho.util.L10N;
 
 import java.util.logging.Level;
@@ -62,75 +63,13 @@ class PDOError {
   }
 
   /**
-   * Set's the error mode.
-   *
-   * <dl>
-   * <dt>{@link ERRMODE_SILENT}
-   * <dt>{@link ERRMODE_WARNING}
-   * <dt>{@link ERRMODE_EXCEPTION}
-   * </dl>
-   *
-   * @return true on success, false on error.
+   * Clear the error if there is one.
    */
-  public boolean setErrmode(int value)
+  public void clear()
   {
-    switch (value) {
-      case ERRMODE_SILENT:
-      case ERRMODE_WARNING:
-      case ERRMODE_EXCEPTION:
-        _errmode = value;
-        return true;
-
-      default:
-        warning(L.l("invalid error mode"));
-        return false;
-    }
-  }
-
-  public int getErrmode()
-  {
-    return _errmode;
-  }
-
-  public boolean isError()
-  {
-    return _isError;
-  }
-
-  public String errorCode()
-  {
-    return _errorCode;
-  }
-
-  public ArrayValue errorInfo()
-  {
-    if (_errorInfo == null) {
-      _errorInfo = new ArrayValueImpl();
-      _errorInfo.put(ERR_NONE);
-    }
-
-    return _errorInfo;
-  }
-
-  /**
-   * Show a warning and return a "HY000" general error for subsequent calls to
-   * {@link #errorCode} and {@link #errorInfo}.
-   */
-  public void warning(String message)
-  {
-    _isError = true;
-
-    _errorCode = ERR_GENERAL;
-
-    _errorInfo = new ArrayValueImpl();
-    _errorInfo.put(_errorCode);
-
-    if (_errmode == ERRMODE_EXCEPTION) {
-      // XXX: throw exception, or return exception object?
-    }
-    else {
-      _env.warning("SQLSTATE[" + _errorCode + "]: " + message);
-    }
+    _isError = false;
+    _errorCode = ERR_NONE;
+    _errorInfo = null;
   }
 
   /**
@@ -139,7 +78,7 @@ class PDOError {
    * and depending on the value of {@link #setErrmode}
    * show nothing, show a warning, or throw an exception.
    */
-  public void error(Exception exception)
+  public void error(Throwable exception)
   {
     log.log(Level.FINE, exception.toString(), exception);
 
@@ -178,4 +117,93 @@ class PDOError {
     }
   }
 
+  public String errorCode()
+  {
+    return _errorCode;
+  }
+
+  public ArrayValue errorInfo()
+  {
+    if (_errorInfo == null) {
+      _errorInfo = new ArrayValueImpl();
+      _errorInfo.put(ERR_NONE);
+    }
+
+    return _errorInfo;
+  }
+
+  public int getErrmode()
+  {
+    return _errmode;
+  }
+
+  public boolean isError()
+  {
+    return _isError;
+  }
+
+  /**
+   * Show a notice and return a "HY000" general error for subsequent calls to
+   * {@link #errorCode} and {@link #errorInfo}.
+   */
+  public void notice(String message)
+  {
+    _isError = true;
+
+    _errorCode = ERR_GENERAL;
+
+    _errorInfo = new ArrayValueImpl();
+    _errorInfo.put(_errorCode);
+    _errorInfo.put(2050);
+    _errorInfo.put("");
+
+    _env.notice(message);
+  }
+
+  /**
+   * Set's the error mode.
+   *
+   * <dl>
+   * <dt>{@link ERRMODE_SILENT}
+   * <dt>{@link ERRMODE_WARNING}
+   * <dt>{@link ERRMODE_EXCEPTION}
+   * </dl>
+   *
+   * @return true on success, false on error.
+   */
+  public boolean setErrmode(int value)
+  {
+    switch (value) {
+      case ERRMODE_SILENT:
+      case ERRMODE_WARNING:
+      case ERRMODE_EXCEPTION:
+        _errmode = value;
+        return true;
+
+      default:
+        warning(L.l("invalid error mode"));
+        return false;
+    }
+  }
+
+  /**
+   * Show a warning and return a "HY000" general error for subsequent calls to
+   * {@link #errorCode} and {@link #errorInfo}.
+   */
+  public void warning(String message)
+  {
+    _isError = true;
+
+    _errorCode = ERR_GENERAL;
+
+    _errorInfo = new ArrayValueImpl();
+    _errorInfo.put(_errorCode);
+
+    if (_errmode == ERRMODE_EXCEPTION) {
+      // XXX: throw exception, or return exception object?
+    }
+    else {
+      _env.warning("SQLSTATE[" + _errorCode + "]: " + message);
+    }
+  }
 }

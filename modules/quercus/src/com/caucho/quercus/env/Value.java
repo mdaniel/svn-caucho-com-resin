@@ -176,7 +176,6 @@ abstract public class Value {
    * Converts to a string value.
    */
   public Value toStringValue()
-    throws Throwable
   {
     Value value = toValue();
 
