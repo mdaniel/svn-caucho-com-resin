@@ -235,7 +235,7 @@ public class StringBuilderValue extends StringValue {
   {
     if (_length == 0)
       return false;
-    else if (_length == 1 && _buffer[9] == '0')
+    else if (_length == 1 && _buffer[0] == '0')
       return false;
     else
       return true;
