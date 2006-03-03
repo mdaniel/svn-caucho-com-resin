@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.amber.ejb3;
+package com.caucho.amber.manager;
 
 import java.sql.Connection;
 
@@ -51,15 +51,14 @@ public class EntityManagerProxy implements EntityManager {
   private static final L10N L = new L10N(EntityManagerProxy.class);
   private static final Logger log
     = Logger.getLogger(EntityManagerProxy.class.getName());
-  
-  private final ThreadLocal<EntityManagerImpl> _localManager
-    = new ThreadLocal<EntityManagerImpl>();
 
-  private AmberPersistenceUnit _amberPersistenceUnit;
+  private AmberPersistenceUnit _persistenceUnit;
+  private AmberConnection _aConn;
 
-  public EntityManagerProxy(AmberPersistenceUnit amberPersistenceUnit)
+  public EntityManagerProxy(AmberPersistenceUnit persistenceUnit)
   {
-    _amberPersistenceUnit = amberPersistenceUnit;
+    _persistenceUnit = persistenceUnit;
+    _aConn = _persistenceUnit.getThreadConnection();
   }
   
   /**
@@ -155,7 +154,7 @@ public class EntityManagerProxy implements EntityManager {
    */
   public void close()
   {
-    getCurrent().close();
+    _aConn = null; // doesn't affect the underlying context
   }
 
   /**
@@ -227,31 +226,22 @@ public class EntityManagerProxy implements EntityManager {
    */
   public boolean isOpen()
   {
-    return getCurrent().isOpen();
+    return _aConn != null && _aConn.isOpen();
   }
 
   /**
    * Returns the current entity manager.
    */
-  private EntityManagerImpl getCurrent()
+  private AmberConnection getCurrent()
   {
-    // XXX: reset at the end, for GC
-
-    EntityManagerImpl manager = _localManager.get();
-
-    if (manager == null) {
-      manager = new EntityManagerImpl(_amberPersistenceUnit, this);
-      
-      _localManager.set(manager);
-    }
-
-    manager.register();
-
-    return manager;
+    return _aConn;
   }
 
-  void unset(EntityManagerImpl manager)
+  public String toString()
   {
-    _localManager.set(null);
+    if (_aConn != null)
+      return "EntityManagerProxy[" + _aConn.getPersistenceUnit().getName() + "]";
+    else
+      return "EntityManagerProxy[closed]";
   }
 }

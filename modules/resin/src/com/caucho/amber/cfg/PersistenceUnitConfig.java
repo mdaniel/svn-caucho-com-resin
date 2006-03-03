@@ -34,13 +34,15 @@ import java.util.ArrayList;
 import com.caucho.amber.manager.AmberContainer;
 import com.caucho.amber.manager.AmberPersistenceUnit;
 
+import com.caucho.config.ConfigException;
+
 /**
  * <persistence-unit> tag in the persistence.xml
  */
 public class PersistenceUnitConfig {
   private String _name;
 
-  private ArrayList<Class> _classList = new ArrayList<Class>();;
+  private ArrayList<String> _classList = new ArrayList<String>();
 
   /**
    * Returns the unit name.
@@ -61,16 +63,22 @@ public class PersistenceUnitConfig {
   /**
    * Adds a configured class.
    */
-  public void addClass(Class cl)
+  public void addClass(String cl)
   {
     _classList.add(cl);
   }
 
   public AmberPersistenceUnit init(AmberContainer container)
+    throws Exception
   {
-    AmberPersistenceUnit unit = new AmberPersistenceUnit(container);
+    AmberPersistenceUnit unit = new AmberPersistenceUnit(container, _name);
+    unit.init();
 
-    unit.setName(getName());
+    for (String cl : _classList) {
+      unit.addEntityClass(cl);
+    }
+
+    unit.generate();
 
     return unit;
   }

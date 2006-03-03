@@ -50,6 +50,8 @@ import javax.sql.DataSource;
 import com.caucho.amber.AmberException;
 import com.caucho.amber.AmberRuntimeException;
 
+import com.caucho.amber.cfg.EntityIntrospector;
+
 import com.caucho.amber.entity.AmberCompletion;
 import com.caucho.amber.entity.AmberEntityHome;
 import com.caucho.amber.entity.EntityItem;
@@ -80,7 +82,9 @@ import com.caucho.jdbc.JdbcMetaData;
 
 import com.caucho.loader.DynamicClassLoader;
 import com.caucho.loader.enhancer.EnhancingClassLoader;
-import com.caucho.log.Log;
+
+import com.caucho.naming.Jndi;
+
 import com.caucho.util.L10N;
 import com.caucho.util.LruCache;
 
@@ -92,8 +96,9 @@ import com.caucho.util.LruCache;
  * configuration to configure the ManagecConnectionFactory.
  */
 public class AmberPersistenceUnit {
-  private static final Logger log = Log.open(AmberPersistenceUnit.class);
   private static final L10N L = new L10N(AmberPersistenceUnit.class);
+  private static final Logger log
+    = Logger.getLogger(AmberPersistenceUnit.class.getName());
 
   private String _name;
 
@@ -147,19 +152,30 @@ public class AmberPersistenceUnit {
     new ArrayList<AmberEntityHome>();
   private ArrayList<Table> _lazyTable = new ArrayList<Table>();
 
+  private EntityIntrospector _introspector;
   private AmberGenerator _generator;
 
   private CacheConnection _cacheConn;
 
   private boolean _supportsGetGeneratedKeys;
 
+  private ThreadLocal<AmberConnection> _threadConnection
+    = new ThreadLocal<AmberConnection>();
+
   private volatile boolean _isInit;
 
   private long _xid = 1;
 
-  public AmberPersistenceUnit(AmberContainer container)
+  public AmberPersistenceUnit(AmberContainer container, String name)
   {
     _amberContainer = container;
+    _name = name;
+
+    _dataSource = container.getDataSource();
+    _xaDataSource = container.getXADataSource();
+    _readDataSource = container.getReadDataSource();
+
+    _introspector = new EntityIntrospector(this);
 
     // needed to support JDK 1.4 compatibility
     try {
@@ -180,8 +196,13 @@ public class AmberPersistenceUnit {
   }
 
   private void bindProxy()
+    throws Exception
   {
-    // _entityManagerProxy = new EntityManagerProxy(this);
+    Jndi.bindDeep("java:comp/env/persistence/" + getName(),
+		    new FactoryProxy(this));
+    
+    Jndi.bindDeep("java:comp/env/entity-manager/" + getName(),
+		  new EntityManagerNamingProxy(this));
   }
 
   public EntityManager getEntityManager()
@@ -195,16 +216,6 @@ public class AmberPersistenceUnit {
   {
     return _amberContainer.getEnhancedLoader();
   }
-
-  /**
-   * Returns the env amber manager.
-   */
-  /*
-  public EnvAmberManager getEnvManager()
-  {
-    return _envAmberManager;
-  }
-  */
 
   /**
    * Sets the data source.
@@ -348,6 +359,33 @@ public class AmberPersistenceUnit {
     }
 
     return table;
+  }
+
+  /**
+   * Add an entity.
+   */
+  public void addEntityClass(String className)
+    throws ConfigException
+  {
+    JClass type = getJClassLoader().forName(className);
+
+    if (type == null) {
+      throw new ConfigException(L.l("'{0}' is an unknown type",
+				    className));
+    }
+      
+    if (type.getAnnotation(javax.persistence.Entity.class) == null) {
+      throw new ConfigException(L.l("'{0}' must implement javax.persistence.Entity",
+				    className));
+    }
+
+    try {
+      _introspector.introspect(type);
+    } catch (SQLException e) {
+      throw new ConfigException(e);
+    }
+
+    _amberContainer.addEntity(className, createEntity(type));
   }
 
   /**
@@ -504,12 +542,12 @@ public class AmberPersistenceUnit {
 
       type.init();
 
-      _generator.generate(type);
+      getGenerator().generate(type);
     }
 
     initTables();
 
-    _generator.compile();
+    getGenerator().compile();
   }
 
   /**
@@ -692,7 +730,7 @@ public class AmberPersistenceUnit {
       return _enhancer;
     */
     else {
-      _generator = new AmberGeneratorImpl(this);
+      _generator = _amberContainer.getGenerator();
 
       return _generator;
     }
@@ -806,6 +844,31 @@ public class AmberPersistenceUnit {
   public AmberConnection createAmberConnection()
   {
     return new AmberConnection(this);
+  }
+
+  /**
+   * Returns the thread's amber connection.
+   */
+  public AmberConnection getThreadConnection()
+  {
+    AmberConnection aConn = _threadConnection.get();
+
+    if (aConn == null) {
+      aConn = new AmberConnection(this);
+      aConn.initThreadConnection();
+      
+      _threadConnection.set(aConn);
+    }
+
+    return aConn;
+  }
+
+  /**
+   * Unset the thread's amber connection.
+   */
+  public void removeThreadConnection()
+  {
+    _threadConnection.set(null);
   }
 
   /**

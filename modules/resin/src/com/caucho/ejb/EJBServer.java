@@ -648,7 +648,7 @@ public class EJBServer
     
       _ejbManager.setJDBCIsolation(jdbcIsolation);
 
-      _entityIntrospector.init();
+      // _entityIntrospector.init();
 
       initAllEjbs();
 

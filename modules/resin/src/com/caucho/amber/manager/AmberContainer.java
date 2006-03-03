@@ -38,6 +38,8 @@ import java.util.HashMap;
 import java.util.logging.Logger;
 import java.util.logging.Level;
 
+import javax.sql.DataSource;
+
 import com.caucho.amber.AmberRuntimeException;
 
 import com.caucho.amber.cfg.PersistenceConfig;
@@ -46,6 +48,7 @@ import com.caucho.amber.cfg.PersistenceUnitConfig;
 import com.caucho.amber.type.EntityType;
 
 import com.caucho.amber.gen.AmberEnhancer;
+import com.caucho.amber.gen.AmberGenerator;
 
 import com.caucho.bytecode.JClassLoader;
 
@@ -77,19 +80,20 @@ public class AmberContainer {
 
   private AmberEnhancer _enhancer;
 
+  private DataSource _dataSource;
+  private DataSource _readDataSource;
+  private DataSource _xaDataSource;
+
   private HashMap<String,AmberPersistenceUnit> _unitMap
     = new HashMap<String,AmberPersistenceUnit>();
+
+  private HashMap<String,EntityType> _entityMap
+    = new HashMap<String,EntityType>();
 
   private AmberContainer()
   {
     _parentLoader = Thread.currentThread().getContextClassLoader();
     _jClassLoader = EnhancerManager.create(_parentLoader).getJavaClassLoader();
-
-    /*
-    _envAmberManager = EnvAmberManager.createLocal();
-
-    _envAmberManager.addAmberManager(this);
-    */
 
     _enhancer = new AmberEnhancer(this);
 
@@ -124,6 +128,54 @@ public class AmberContainer {
   }
 
   /**
+   * Sets the primary data source.
+   */
+  public void setDataSource(DataSource dataSource)
+  {
+    _dataSource = dataSource;
+  }
+
+  /**
+   * Gets the primary data source.
+   */
+  public DataSource getDataSource()
+  {
+    return _dataSource;
+  }
+
+  /**
+   * Sets the read data source.
+   */
+  public void setReadDataSource(DataSource dataSource)
+  {
+    _readDataSource = dataSource;
+  }
+
+  /**
+   * Gets the read data source.
+   */
+  public DataSource getReadDataSource()
+  {
+    return _readDataSource;
+  }
+
+  /**
+   * Sets the xa data source.
+   */
+  public void setXADataSource(DataSource dataSource)
+  {
+    _xaDataSource = dataSource;
+  }
+
+  /**
+   * Gets the XA data source.
+   */
+  public DataSource getXADataSource()
+  {
+    return _xaDataSource;
+  }
+
+  /**
    * Returns the parent loader
    */
   public ClassLoader getParentClassLoader()
@@ -140,6 +192,14 @@ public class AmberContainer {
   }
 
   /**
+   * Returns the enhancer.
+   */
+  public AmberGenerator getGenerator()
+  {
+    return _enhancer;
+  }
+
+  /**
    * Returns the JClassLoader.
    */
   public JClassLoader getJClassLoader()
@@ -152,7 +212,15 @@ public class AmberContainer {
    */
   public EntityType getEntity(String className)
   {
-    throw new UnsupportedOperationException();
+    return _entityMap.get(className);
+  }
+
+  /**
+   * Adds an entity for an introspected class.
+   */
+  public void addEntity(String className, EntityType type)
+  {
+    _entityMap.put(className, type);
   }
 
   /**
@@ -165,17 +233,9 @@ public class AmberContainer {
 
   public AmberPersistenceUnit createPersistenceUnit(String name)
   {
-    AmberPersistenceUnit unit = new AmberPersistenceUnit(this);
-    unit.setName(name);
+    AmberPersistenceUnit unit = new AmberPersistenceUnit(this, name);
 
     _unitMap.put(unit.getName(), unit);
-
-    try {
-      Jndi.bindDeep("java:comp/env/persistence/" + unit.getName(),
-		    new FactoryProxy(unit));
-    } catch (Exception e) {
-      throw new AmberRuntimeException(e);
-    }
 
     return unit;
   }

@@ -69,7 +69,7 @@ public class EntityIntrospector {
   private static HashSet<String> _propertyAnnotations
     = new HashSet<String>();
 
-  private AmberContainer _amberContainer;
+  private AmberPersistenceUnit _persistenceUnit;
 
   private HashMap<String,EntityType> _entityMap
     = new HashMap<String,EntityType>();
@@ -80,9 +80,9 @@ public class EntityIntrospector {
   /**
    * Creates the introspector.
    */
-  public EntityIntrospector(AmberContainer amberContainer)
+  public EntityIntrospector(AmberPersistenceUnit persistenceUnit)
   {
-    _amberContainer = amberContainer;
+    _persistenceUnit = persistenceUnit;
   }
 
   /**
@@ -130,10 +130,8 @@ public class EntityIntrospector {
       return entityType;
 
     ///entityType = _amberContainer.createEntity(entityName, type);
-    entityType = _amberContainer.getEntity(entityName);
+    entityType = _persistenceUnit.createEntity(entityName, type);
     _entityMap.put(entityName, entityType);
-
-    AmberPersistenceUnit persistenceUnit = entityType.getPersistenceUnit();
 
     if (isField)
       entityType.setFieldAccess(true);
@@ -152,9 +150,9 @@ public class EntityIntrospector {
       tableName = entityName;
 
     if (parentType == null)
-      entityType.setTable(persistenceUnit.createTable(tableName));
+      entityType.setTable(_persistenceUnit.createTable(tableName));
     else if (parentType.isJoinedSubClass())
-      entityType.setTable(persistenceUnit.createTable(tableName));
+      entityType.setTable(_persistenceUnit.createTable(tableName));
     else
       entityType.setTable(parentType.getTable());
 
@@ -171,12 +169,12 @@ public class EntityIntrospector {
     Table secondaryTable = null;
 
     if (inheritanceAnn != null)
-      introspectInheritance(persistenceUnit, entityType, type);
+      introspectInheritance(_persistenceUnit, entityType, type);
 
     if (secondaryTableAnn != null) {
       String secondaryName = (String) secondaryTableAnn.get("name");
 
-      secondaryTable = persistenceUnit.createTable(secondaryName);
+      secondaryTable = _persistenceUnit.createTable(secondaryName);
 
       entityType.addSecondaryTable(secondaryTable);
     }
@@ -184,14 +182,14 @@ public class EntityIntrospector {
     if (entityType.getId() != null) {
     }
     else if (isField)
-      introspectIdField(persistenceUnit, entityType, parentType, type);
+      introspectIdField(_persistenceUnit, entityType, parentType, type);
     else
-      introspectIdMethod(persistenceUnit, entityType, parentType, type);
+      introspectIdMethod(_persistenceUnit, entityType, parentType, type);
 
     if (isField)
-      introspectFields(persistenceUnit, entityType, parentType, type);
+      introspectFields(_persistenceUnit, entityType, parentType, type);
     else
-      introspectMethods(persistenceUnit, entityType, parentType, type);
+      introspectMethods(_persistenceUnit, entityType, parentType, type);
 
     for (JMethod method : type.getMethods()) {
       introspectCallbacks(entityType, method);

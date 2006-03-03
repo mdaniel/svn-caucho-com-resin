@@ -98,6 +98,7 @@ public class AmberConnection implements CloseResource {
   private AmberPersistenceUnit _persistenceUnit;
 
   private boolean _isRegistered;
+  private boolean _isThreadConnection;
   
   private ArrayList<Entity> _entities = new ArrayList<Entity>();
   
@@ -134,6 +135,25 @@ public class AmberConnection implements CloseResource {
   {
     _persistenceUnit = persistenceUnit;
   }
+
+  /**
+   * Returns the persistence unit.
+   */
+  public AmberPersistenceUnit getPersistenceUnit()
+  {
+    return _persistenceUnit;
+  }
+
+  /**
+   * Set true for a threaded connection.
+   */
+  public void initThreadConnection()
+  {
+    _isThreadConnection = true;
+
+    register();
+  }
+  
   
   /**
    * Makes the instance managed.
@@ -324,9 +344,16 @@ public class AmberConnection implements CloseResource {
    */
   public void close()
   {
-    _isRegistered = false;
-
+    AmberPersistenceUnit persistenceUnit = _persistenceUnit;
     _persistenceUnit = null;
+    
+    if (persistenceUnit == null)
+      return;
+
+    if (_isThreadConnection)
+      persistenceUnit.removeThreadConnection();
+    
+    _isRegistered = false;
 
     cleanup();
   }

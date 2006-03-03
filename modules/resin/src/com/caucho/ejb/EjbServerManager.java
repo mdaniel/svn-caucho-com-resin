@@ -120,6 +120,7 @@ public class EjbServerManager implements EJBServerInterface, EnvironmentListener
 
   private EjbConfig _ejbConfig;
   
+  private AmberContainer _amberContainer;
   private AmberPersistenceUnit _amberPersistenceUnit;
 
   protected ConnectionFactory _jmsConnectionFactory;
@@ -135,6 +136,8 @@ public class EjbServerManager implements EJBServerInterface, EnvironmentListener
   EjbServerManager()
   {
     try {
+      _amberContainer = AmberContainer.getLocalContainer();
+      
       _amberPersistenceUnit = AmberContainer.getLocalContainer().createPersistenceUnit("resin-ejb");
 
       _envServerManager = new EnvServerManager(_amberPersistenceUnit);
@@ -186,7 +189,7 @@ public class EjbServerManager implements EJBServerInterface, EnvironmentListener
    */
   public void setDataSource(DataSource dataSource)
   {
-    _amberPersistenceUnit.setDataSource(dataSource);
+    _amberContainer.setDataSource(dataSource);
   }
 
   /**
@@ -194,7 +197,7 @@ public class EjbServerManager implements EJBServerInterface, EnvironmentListener
    */
   public DataSource getDataSource()
   {
-    return _amberPersistenceUnit.getDataSource();
+    return _amberContainer.getDataSource();
   }
 
   /**
@@ -202,7 +205,7 @@ public class EjbServerManager implements EJBServerInterface, EnvironmentListener
    */
   public void setReadDataSource(DataSource dataSource)
   {
-    _amberPersistenceUnit.setReadDataSource(dataSource);
+    _amberContainer.setReadDataSource(dataSource);
   }
 
   /**
@@ -210,7 +213,7 @@ public class EjbServerManager implements EJBServerInterface, EnvironmentListener
    */
   public DataSource getReadDataSource()
   {
-    return _amberPersistenceUnit.getReadDataSource();
+    return _amberContainer.getReadDataSource();
   }
 
   /**
@@ -218,7 +221,7 @@ public class EjbServerManager implements EJBServerInterface, EnvironmentListener
    */
   public void setXADataSource(DataSource dataSource)
   {
-    _amberPersistenceUnit.setXADataSource(dataSource);
+    _amberContainer.setXADataSource(dataSource);
   }
 
   /**
@@ -226,7 +229,7 @@ public class EjbServerManager implements EJBServerInterface, EnvironmentListener
    */
   public DataSource getXADataSource()
   {
-    return _amberPersistenceUnit.getXADataSource();
+    return _amberContainer.getXADataSource();
   }
 
   /**

@@ -70,7 +70,7 @@ public class LoadGroupGenerator extends ClassComponent {
     throws IOException
   {
     out.println();
-    out.println("protected void __caucho_load_" + _index +  "(com.caucho.amber.connection.AmberConnection aConn)");
+    out.println("protected void __caucho_load_" + _index +  "(com.caucho.amber.manager.AmberConnection aConn)");
     out.println("{");
     out.pushDepth();
 
