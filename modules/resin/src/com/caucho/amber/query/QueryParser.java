@@ -42,10 +42,11 @@ import com.caucho.util.CharBuffer;
 
 import com.caucho.log.Log;
 
-import com.caucho.amber.AmberManager;
 import com.caucho.amber.AmberException;
 
 import com.caucho.amber.entity.AmberEntityHome;
+
+import com.caucho.amber.manager.AmberPersistenceUnit;
 
 import com.caucho.amber.table.Table;
 import com.caucho.amber.table.LinkColumns;
@@ -115,7 +116,7 @@ public class QueryParser {
 
   private static IntMap _reserved;
 
-  private AmberManager _amberManager;
+  private AmberPersistenceUnit _amberPersistenceUnit;
   
   // The query
   private String _sql;
@@ -165,9 +166,9 @@ public class QueryParser {
   /**
    * Sets the entity home manager.
    */
-  public void setAmberManager(AmberManager amberManager)
+  public void setAmberManager(AmberPersistenceUnit amberPersistenceUnit)
   {
-    _amberManager = amberManager;
+    _amberPersistenceUnit = amberPersistenceUnit;
   }
 
   /**
@@ -535,7 +536,7 @@ public class QueryParser {
     }
 
     /*
-    AmberEntityHome home = _amberManager.getHomeBySchema(schema);
+    AmberEntityHome home = _amberPersistenceUnitenceUnitenceUnit.getHomeBySchema(schema);
 
     if (home == null)
       throw error(L.l("`{0}' is an unknown persistent class.",
@@ -632,7 +633,7 @@ public class QueryParser {
     SchemaExpr schema = null;
 
     if (! isIn) {
-      AmberEntityHome home = _amberManager.getHomeBySchema(name);
+      AmberEntityHome home = _amberPersistenceUnit.getHomeBySchema(name);
 
       if (home != null) {
 	schema = new TableIdExpr(home.getEntityType(), name);
@@ -653,7 +654,7 @@ public class QueryParser {
 
 	name = name + '.' + segment;
 	
-	AmberEntityHome home = _amberManager.getHomeBySchema(name);
+	AmberEntityHome home = _amberPersistenceUnit.getHomeBySchema(name);
 
 	if (home != null) {
 	  schema = new TableIdExpr(home.getEntityType(), name);

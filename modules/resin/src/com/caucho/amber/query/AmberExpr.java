@@ -19,7 +19,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -37,7 +37,7 @@ import com.caucho.amber.type.Type;
 
 import com.caucho.amber.entity.EntityItem;
 
-import com.caucho.amber.connection.AmberConnectionImpl;
+import com.caucho.amber.manager.AmberConnection;
 
 /**
  * Represents an Amber query expression
@@ -100,20 +100,20 @@ public interface AmberExpr {
   /**
    * Returns the object for the expr.
    */
-  public Object getObject(AmberConnectionImpl aConn, ResultSet rs, int index)
+  public Object getObject(AmberConnection aConn, ResultSet rs, int index)
     throws SQLException;
 
   /**
    * Returns the cache object for the expr.
    */
-  public Object getCacheObject(AmberConnectionImpl aConn,
+  public Object getCacheObject(AmberConnection aConn,
 			       ResultSet rs, int index)
     throws SQLException;
 
   /**
    * Returns the object for the expr.
    */
-  public EntityItem findItem(AmberConnectionImpl aConn,
+  public EntityItem findItem(AmberConnection aConn,
 			     ResultSet rs, int index)
     throws SQLException;
 }

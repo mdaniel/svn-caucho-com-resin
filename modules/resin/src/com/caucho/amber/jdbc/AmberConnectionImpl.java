@@ -328,6 +328,6 @@ public class AmberConnectionImpl implements Connection {
 
   public String toString()
   {
-    return "AmberConnectionImpl[" + _conn + "]";
+    return "AmberConnection[" + _conn + "]";
   }
 }

@@ -33,8 +33,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import com.caucho.amber.manager.AmberConnection;
+
 import com.caucho.amber.type.EntityType;
-import com.caucho.amber.connection.AmberConnectionImpl;
 
 /**
  * An entity instance
@@ -50,14 +51,14 @@ public interface Entity {
   /**
    * Makes the entity persistent.
    */
-  public boolean __caucho_makePersistent(AmberConnectionImpl aConn,
+  public boolean __caucho_makePersistent(AmberConnection aConn,
 					 EntityType entityType)
     throws SQLException;
 
   /**
    * Makes the entity persistent.
    */
-  public void __caucho_makePersistent(AmberConnectionImpl aConn,
+  public void __caucho_makePersistent(AmberConnection aConn,
 				      EntityItem item)
     throws SQLException;
 
@@ -69,7 +70,7 @@ public interface Entity {
   /**
    * Creates the entity in the database, making it persistent-new.
    */
-  public boolean __caucho_create(AmberConnectionImpl aConn,
+  public boolean __caucho_create(AmberConnection aConn,
 				 EntityType entityType)
     throws SQLException;
   
@@ -91,7 +92,7 @@ public interface Entity {
   /**
    * Sets the connection.
    */
-  public void __caucho_setConnection(AmberConnectionImpl aConn);
+  public void __caucho_setConnection(AmberConnection aConn);
 
   /**
    * Returns true if the entity matches.
@@ -101,7 +102,7 @@ public interface Entity {
   /**
    * Loads the entity from the database.
    */
-  public EntityItem __caucho_home_find(AmberConnectionImpl aConn,
+  public EntityItem __caucho_home_find(AmberConnection aConn,
 				       AmberEntityHome home,
 				       ResultSet rs, int index)
     throws SQLException;
@@ -109,7 +110,7 @@ public interface Entity {
   /**
    * Returns a new entity.
    */
-  public Entity __caucho_home_new(AmberConnectionImpl aConn,
+  public Entity __caucho_home_new(AmberConnection aConn,
 				  AmberEntityHome home,
 				  Object key)
     throws SQLException;
@@ -117,18 +118,18 @@ public interface Entity {
   /**
    * Creates a new instance based the current entity
    */
-  public Entity __caucho_copy(AmberConnectionImpl aConn, EntityItem cacheItem);
+  public Entity __caucho_copy(AmberConnection aConn, EntityItem cacheItem);
 
   /**
    * Retrieves data from the data store.
    */
-  public void __caucho_retrieve(AmberConnectionImpl aConn)
+  public void __caucho_retrieve(AmberConnection aConn)
     throws SQLException;
 
   /**
    * Loads the entity from the database.
    */
-  public void __caucho_load(AmberConnectionImpl aConn, ResultSet rs, int index)
+  public void __caucho_load(AmberConnection aConn, ResultSet rs, int index)
     throws SQLException;
 
   /**

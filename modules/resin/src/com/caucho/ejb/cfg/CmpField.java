@@ -43,13 +43,13 @@ import com.caucho.config.ConfigException;
 
 import com.caucho.jdbc.JdbcMetaData;
 
-import com.caucho.amber.AmberManager;
-
 import com.caucho.amber.type.Type;
 import com.caucho.amber.type.EntityType;
 
 import com.caucho.amber.field.IdField;
 import com.caucho.amber.field.KeyPropertyField;
+
+import com.caucho.amber.manager.AmberPersistenceUnit;
 
 import com.caucho.amber.table.Column;
 
@@ -257,7 +257,7 @@ public class CmpField extends CmpProperty {
   /**
    * Amber creating the id field.
    */
-  public IdField createId(AmberManager amberManager, EntityType type)
+  public IdField createId(AmberPersistenceUnit amberPersistenceUnit, EntityType type)
     throws ConfigException
   {
     String fieldName = getName();
@@ -272,7 +272,7 @@ public class CmpField extends CmpProperty {
       throw new NullPointerException(L.l("'{0}' is an unknown field",
 					 fieldName));
 
-    Type amberType = amberManager.createType(dataType);
+    Type amberType = amberPersistenceUnit.createType(dataType);
     Column column = type.getTable().createColumn(sqlName, amberType);
 
     KeyPropertyField idField = new KeyPropertyField(type, fieldName, column);
@@ -283,7 +283,7 @@ public class CmpField extends CmpProperty {
 	"long".equals(dataType.getName()) ||
 	"java.lang.Integer".equals(dataType.getName()) ||
 	"java.lang.Long".equals(dataType.getName())) {
-      JdbcMetaData metaData = amberManager.getMetaData();
+      JdbcMetaData metaData = amberPersistenceUnit.getMetaData();
 
       if (metaData.supportsIdentity()) {
 	idField.setGenerator("identity");
@@ -295,7 +295,7 @@ public class CmpField extends CmpProperty {
 
 	String name = type.getTable().getName() + "_cseq";
 
-	type.setGenerator(idField.getName(), amberManager.createSequenceGenerator(name, 10));
+	type.setGenerator(idField.getName(), amberPersistenceUnit.createSequenceGenerator(name, 10));
       }
       else {
 	// XXX: should try table

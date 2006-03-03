@@ -45,17 +45,16 @@ import com.caucho.bytecode.JType;
 import com.caucho.bytecode.JClassWrapper;
 import com.caucho.bytecode.JField;
 
-import com.caucho.amber.AmberManager;
-
-import com.caucho.amber.connection.AmberConnectionImpl;
+import com.caucho.amber.manager.AmberPersistenceUnit;
+import com.caucho.amber.manager.AmberConnection;
 
 import com.caucho.amber.query.AmberExpr;
 import com.caucho.amber.query.PathExpr;
 import com.caucho.amber.query.QueryParser;
 
-import com.caucho.amber.type.EntityType;
-
 import com.caucho.amber.table.Table;
+
+import com.caucho.amber.type.EntityType;
 
 import com.caucho.config.ConfigException;
 
@@ -169,7 +168,7 @@ abstract public class AbstractField implements AmberField {
    */
   protected void setJavaType(Class type)
   {
-    setJavaType(new JClassWrapper(type, getAmberManager().getJClassLoader()));
+    setJavaType(new JClassWrapper(type, getPersistenceUnit().getJClassLoader()));
   }
   
   /**
@@ -183,9 +182,9 @@ abstract public class AbstractField implements AmberField {
   /**
    * Returns the amber manager.
    */
-  public AmberManager getAmberManager()
+  public AmberPersistenceUnit getPersistenceUnit()
   {
-    return getSourceType().getAmberManager();
+    return getSourceType().getPersistenceUnit();
   }
 
   /**
@@ -643,7 +642,7 @@ abstract public class AbstractField implements AmberField {
   /**
    * Generates the table create.
    */
-  public String generateCreateTableSQL(AmberManager manager)
+  public String generateCreateTableSQL(AmberPersistenceUnit manager)
   {
     return null;
   }
@@ -764,7 +763,7 @@ abstract public class AbstractField implements AmberField {
   /**
    * Deletes the children
    */
-  public void childDelete(AmberConnectionImpl aConn, Serializable primaryKey)
+  public void childDelete(AmberConnection aConn, Serializable primaryKey)
     throws SQLException
   {
   }

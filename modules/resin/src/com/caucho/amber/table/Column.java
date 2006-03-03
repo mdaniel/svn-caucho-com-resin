@@ -19,7 +19,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -45,7 +45,7 @@ import com.caucho.config.LineConfigException;
 
 import com.caucho.java.JavaWriter;
 
-import com.caucho.amber.AmberManager;
+import com.caucho.amber.manager.AmberPersistenceUnit;
 
 import com.caucho.amber.type.Type;
 
@@ -259,7 +259,7 @@ public class Column {
   /**
    * Generates the clause to create the column.
    */
-  String generateCreateTableSQL(AmberManager manager)
+  String generateCreateTableSQL(AmberPersistenceUnit manager)
   {
     CharBuffer cb = new CharBuffer();
     cb.append(_name + " ");
@@ -292,11 +292,11 @@ public class Column {
   /**
    * Creates the table if missing.
    */
-  void validateDatabase(AmberManager amberManager)
+  void validateDatabase(AmberPersistenceUnit amberPersistenceUnit)
     throws ConfigException
   {
     try {
-      DataSource ds = amberManager.getDataSource();
+      DataSource ds = amberPersistenceUnit.getDataSource();
       Connection conn = ds.getConnection();
       try {
 	Statement stmt = conn.createStatement();

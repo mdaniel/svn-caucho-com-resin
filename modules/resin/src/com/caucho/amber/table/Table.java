@@ -45,18 +45,18 @@ import com.caucho.util.CharBuffer;
 import com.caucho.config.ConfigException;
 import com.caucho.config.LineConfigException;
 
-import com.caucho.amber.AmberManager;
 import com.caucho.amber.AmberRuntimeException;
 
 import com.caucho.amber.type.Type;
 import com.caucho.amber.type.EntityType;
 
-import com.caucho.amber.connection.AmberConnectionImpl;
-
 import com.caucho.amber.entity.Entity;
 import com.caucho.amber.entity.AmberCompletion;
 import com.caucho.amber.entity.TableInvalidateCompletion;
 import com.caucho.amber.entity.EntityListener;
+
+import com.caucho.amber.manager.AmberConnection;
+import com.caucho.amber.manager.AmberPersistenceUnit;
 
 /**
  * Representation of a database table.
@@ -68,7 +68,7 @@ public class Table {
 
   private String _configLocation;
 
-  private AmberManager _manager;
+  private AmberPersistenceUnit _manager;
   
   // The entity type is used to generate primary keys for cascade deletes
   private EntityType _type;
@@ -89,7 +89,7 @@ public class Table {
 
   private TableInvalidateCompletion _invalidateCompletion;
   
-  public Table(AmberManager manager, String name)
+  public Table(AmberPersistenceUnit manager, String name)
   {
     _manager = manager;
     _name = name;
@@ -122,7 +122,7 @@ public class Table {
   /**
    * Returns the amber manager.
    */
-  public AmberManager getAmberManager()
+  public AmberPersistenceUnit getAmberManager()
   {
     return _manager;
   }
@@ -316,11 +316,11 @@ public class Table {
   /**
    * Creates the table if missing.
    */
-  public void createDatabaseTable(AmberManager amberManager)
+  public void createDatabaseTable(AmberPersistenceUnit amberPersistenceUnit)
     throws ConfigException
   {
     try {
-      DataSource ds = amberManager.getDataSource();
+      DataSource ds = amberPersistenceUnit.getDataSource();
       Connection conn = ds.getConnection();
       try {
 	Statement stmt = conn.createStatement();
@@ -336,7 +336,7 @@ public class Table {
 	} catch (SQLException e) {
 	}
 
-	String createSQL = generateCreateTableSQL(amberManager);
+	String createSQL = generateCreateTableSQL(amberPersistenceUnit);
 
 	stmt.executeUpdate(createSQL);
 
@@ -352,7 +352,7 @@ public class Table {
   /**
    * Generates the SQL to create the table.
    */
-  private String generateCreateTableSQL(AmberManager amberManager)
+  private String generateCreateTableSQL(AmberPersistenceUnit amberPersistenceUnit)
   {
     CharBuffer cb = new CharBuffer();
 
@@ -360,7 +360,7 @@ public class Table {
 
     boolean hasColumn = false;
     for (Column column : _columns) {
-      String columnSQL = column.generateCreateTableSQL(amberManager);
+      String columnSQL = column.generateCreateTableSQL(amberPersistenceUnit);
 
       if (columnSQL == null) {
       }
@@ -381,11 +381,11 @@ public class Table {
   /**
    * Creates the table if missing.
    */
-  public void validateDatabaseTable(AmberManager amberManager)
+  public void validateDatabaseTable(AmberPersistenceUnit amberPersistenceUnit)
     throws ConfigException
   {
     try {
-      DataSource ds = amberManager.getDataSource();
+      DataSource ds = amberPersistenceUnit.getDataSource();
       Connection conn = ds.getConnection();
       try {
 	Statement stmt = conn.createStatement();
@@ -411,7 +411,7 @@ public class Table {
     }
     
     for (Column column : _columns) {
-      column.validateDatabase(amberManager);
+      column.validateDatabase(amberPersistenceUnit);
     }
   }
 
@@ -486,7 +486,7 @@ public class Table {
   /**
    * Called before the entity is deleted.
    */
-  public void beforeEntityDelete(AmberConnectionImpl aConn, Entity entity)
+  public void beforeEntityDelete(AmberConnection aConn, Entity entity)
   {
     try {
       for (int i = 0; i < _entityListeners.size(); i++) {

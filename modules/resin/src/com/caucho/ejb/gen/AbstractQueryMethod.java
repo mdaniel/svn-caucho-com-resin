@@ -55,7 +55,7 @@ import com.caucho.ejb.cfg.EjbConfig;
 
 import com.caucho.ejb.ql.EjbSelectQuery;
 
-import com.caucho.amber.AmberManager;
+import com.caucho.amber.manager.AmberPersistenceUnit;
 
 import com.caucho.amber.type.EntityType;
 import com.caucho.amber.type.Type;
@@ -87,7 +87,7 @@ abstract public class AbstractQueryMethod extends BaseMethod {
     /*
     EjbConfig ejbConfig = beanType.getConfig();
 
-    AmberManager amberManager = beanType.getConfig().getEJBManager().getAmberManager();
+    AmberPersistenceUnit amberManager = beanType.getConfig().getEJBManager().getAmberManager();
     */
   }
 

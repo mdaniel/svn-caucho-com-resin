@@ -36,10 +36,10 @@ import javax.persistence.Query;
 import javax.persistence.LockModeType;
 import javax.persistence.FlushModeType;
 
-import com.caucho.amber.AmberManager;
 import com.caucho.amber.EnvAmberManager;
 
-import com.caucho.amber.connection.AmberConnectionImpl;
+import com.caucho.amber.manager.AmberConnection;
+import com.caucho.amber.manager.AmberPersistenceUnit;
 
 import com.caucho.amber.query.AbstractQuery;
 
@@ -58,17 +58,17 @@ public class EntityManagerImpl implements EntityManager, CloseResource {
 
   private EntityManagerProxy _entityManagerProxy;
   
-  private AmberManager _amberManager;
+  private AmberPersistenceUnit _amberPersistenceUnit;
 
   private boolean _isRegistered;
-  private AmberConnectionImpl _aConn;
+  private AmberConnection _aConn;
 
   /**
    * Creates a manager instance.
    */
-  EntityManagerImpl(AmberManager amberManager, EntityManagerProxy proxy)
+  EntityManagerImpl(AmberPersistenceUnit amberPersistenceUnit, EntityManagerProxy proxy)
   {
-    _amberManager = amberManager;
+    _amberPersistenceUnit = amberPersistenceUnit;
     _entityManagerProxy = proxy;
   }
   
@@ -78,7 +78,7 @@ public class EntityManagerImpl implements EntityManager, CloseResource {
   public void persist(Object entity)
   {
     try {
-      AmberConnectionImpl aConn = getAmberConnection();
+      AmberConnection aConn = getAmberConnection();
     
       aConn.create(entity);
     } catch (RuntimeException e) {
@@ -102,7 +102,7 @@ public class EntityManagerImpl implements EntityManager, CloseResource {
   public void remove(Object entity)
   {
     try {
-      AmberConnectionImpl aConn = getAmberConnection();
+      AmberConnection aConn = getAmberConnection();
     
       aConn.delete(entity);
     } catch (RuntimeException e) {
@@ -118,7 +118,7 @@ public class EntityManagerImpl implements EntityManager, CloseResource {
   public Object find(String entityName, Object primaryKey)
   {
     try {
-      AmberConnectionImpl aConn = getAmberConnection();
+      AmberConnection aConn = getAmberConnection();
 
       return aConn.load(entityName, primaryKey);
     } catch (RuntimeException e) {
@@ -134,7 +134,7 @@ public class EntityManagerImpl implements EntityManager, CloseResource {
   public <T> T find(Class<T> entityClass, Object primaryKey)
   {
     try {
-      AmberConnectionImpl aConn = getAmberConnection();
+      AmberConnection aConn = getAmberConnection();
     
       return (T) aConn.load(entityClass, primaryKey);
     } catch (RuntimeException e) {
@@ -158,7 +158,7 @@ public class EntityManagerImpl implements EntityManager, CloseResource {
   public void flush()
   {
     try {
-      AmberConnectionImpl aConn = getAmberConnection();
+      AmberConnection aConn = getAmberConnection();
     
       aConn.flush();
     } catch (RuntimeException e) {
@@ -174,7 +174,7 @@ public class EntityManagerImpl implements EntityManager, CloseResource {
   public void clear()
   {
     try {
-      AmberConnectionImpl aConn = getAmberConnection();
+      AmberConnection aConn = getAmberConnection();
     
       // aConn.clear();
     } catch (RuntimeException e) {
@@ -190,7 +190,7 @@ public class EntityManagerImpl implements EntityManager, CloseResource {
   public Query createQuery(String sql)
   {
     try {
-      AmberConnectionImpl aConn = getAmberConnection();
+      AmberConnection aConn = getAmberConnection();
 
       AbstractQuery queryProgram = aConn.parseQuery(sql, false);
       
@@ -277,7 +277,7 @@ public class EntityManagerImpl implements EntityManager, CloseResource {
   public boolean contains(Object entity)
   {
     try {
-      AmberConnectionImpl aConn = getAmberConnection();
+      AmberConnection aConn = getAmberConnection();
     
       return aConn.contains(entity);
     } catch (RuntimeException e) {
@@ -292,13 +292,13 @@ public class EntityManagerImpl implements EntityManager, CloseResource {
    */
   public boolean isOpen()
   {
-    return _amberManager != null;
+    return _amberPersistenceUnit != null;
   }
 
   /**
    * Returns the current amber connection.
    */
-  private AmberConnectionImpl getAmberConnection()
+  private AmberConnection getAmberConnection()
   {
     if (_aConn == null) {
       /*
@@ -306,7 +306,7 @@ public class EntityManagerImpl implements EntityManager, CloseResource {
 	throw new IllegalStateException(L.l("EntityContext required when using Entity beans."));
       */
 
-      _aConn = _amberManager.createAmberConnection();
+      _aConn = _amberPersistenceUnit.createAmberConnection();
     }
 
     return _aConn;
@@ -328,7 +328,7 @@ public class EntityManagerImpl implements EntityManager, CloseResource {
    */
   public void close()
   {
-    AmberConnectionImpl aConn = _aConn;
+    AmberConnection aConn = _aConn;
     _aConn = null;
     _isRegistered = false;
 

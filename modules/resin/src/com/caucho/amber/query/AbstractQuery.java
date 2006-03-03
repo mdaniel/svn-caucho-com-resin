@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -32,10 +33,10 @@ import java.util.ArrayList;
 
 import java.sql.SQLException;
 
+import com.caucho.amber.manager.AmberConnection;
+
 import com.caucho.amber.table.Table;
 import com.caucho.amber.table.LinkColumns;
-
-import com.caucho.amber.connection.AmberConnectionImpl;
 
 /**
  * Represents an amber query
@@ -150,7 +151,7 @@ abstract public class AbstractQuery {
   /**
    * Prepares before any update.
    */
-  public void prepare(UserQuery userQuery, AmberConnectionImpl aConn)
+  public void prepare(UserQuery userQuery, AmberConnection aConn)
     throws SQLException
   {
   }
@@ -158,7 +159,7 @@ abstract public class AbstractQuery {
   /**
    * Any post-sql completion
    */
-  public void complete(UserQuery userQuery, AmberConnectionImpl aConn)
+  public void complete(UserQuery userQuery, AmberConnection aConn)
     throws SQLException
   {
   }

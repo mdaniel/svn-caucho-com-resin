@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -50,13 +51,13 @@ import com.caucho.amber.type.DoubleType;
 import com.caucho.amber.type.SqlTimestampType;
 import com.caucho.amber.type.SqlDateType;
 
-import com.caucho.amber.connection.AmberConnectionImpl;
+import com.caucho.amber.manager.AmberConnection;
 
 /**
  * Represents the application's view of the query.
  */
 public class UserQuery implements AmberQuery {
-  private AmberConnectionImpl _aConn;
+  private AmberConnection _aConn;
   private AbstractQuery _query;
   private ResultSetImpl _rs;
 
@@ -94,17 +95,17 @@ public class UserQuery implements AmberQuery {
     return _query.getQueryString();
   }
 
-  public void setSession(AmberConnectionImpl aConn)
+  public void setSession(AmberConnection aConn)
   {
-    _aConn = (AmberConnectionImpl) aConn;
+    _aConn = (AmberConnection) aConn;
   }
 
-  public AmberConnectionImpl getSession()
+  public AmberConnection getSession()
   {
     return _aConn;
   }
 
-  public AmberConnectionImpl getConnection()
+  public AmberConnection getConnection()
   {
     return _aConn;
   }

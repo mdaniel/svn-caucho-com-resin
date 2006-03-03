@@ -44,8 +44,8 @@ import com.caucho.config.ConfigException;
 import com.caucho.java.gen.BaseMethod;
 import com.caucho.java.gen.CallChain;
 
+import com.caucho.amber.manager.AmberPersistenceUnit;
 import com.caucho.amber.type.Type;
-import com.caucho.amber.AmberManager;
 
 import com.caucho.ejb.EjbServerManager;
 
@@ -117,12 +117,12 @@ public class EjbAmberSelectMethod extends EjbBaseMethod {
     EjbServerManager ejbManager = ejbConfig.getEJBManager();
     EjbEntityBean retBean = (EjbEntityBean) ejbConfig.getBeanConfig(returnEJB);
     
-    AmberManager amberManager = ejbManager.getAmberManager();
+    AmberPersistenceUnit amberPersistenceUnit = ejbManager.getAmberManager();
 
     Type amberType = null;
 
     if (returnEJB != null) {
-      amberType = amberManager.getEntity(retBean.getAbstractSchemaName());
+      amberType = amberPersistenceUnit.getEntity(retBean.getAbstractSchemaName());
 
       if (amberType == null)
 	throw new NullPointerException("No amber entity for " + returnEJB);
@@ -139,10 +139,10 @@ public class EjbAmberSelectMethod extends EjbBaseMethod {
 				      retType.getName(), _query));
       }
 
-      amberType = amberManager.getEntity(targetBean.getAbstractSchemaName());
+      amberType = amberPersistenceUnit.getEntity(targetBean.getAbstractSchemaName());
     }
     else if (! retType.isAssignableTo(Collection.class))
-      amberType = amberManager.createType(retType);
+      amberType = amberPersistenceUnit.createType(retType);
 
     AbstractQueryMethod queryMethod;
     

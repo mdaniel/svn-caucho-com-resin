@@ -19,6 +19,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
+ *
  *   Free SoftwareFoundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
@@ -35,10 +36,10 @@ import javax.ejb.FinderException;
 import com.caucho.util.L10N;
 import com.caucho.util.Log;
 
-import com.caucho.amber.connection.AmberConnectionImpl;
-
 import com.caucho.amber.entity.EntityFactory;
 import com.caucho.amber.entity.EntityItem;
+
+import com.caucho.amber.manager.AmberConnection;
 
 /**
  * Manages the set of persistent beans.
@@ -57,7 +58,7 @@ public class AmberEntityFactory extends EntityFactory {
   /**
    * Gets the appropriate entity given the EntityItem.
    */
-  public Object getEntity(AmberConnectionImpl aConn, EntityItem item)
+  public Object getEntity(AmberConnection aConn, EntityItem item)
   {
     try {
       Object key = item.getEntity().__caucho_getPrimaryKey();
@@ -71,7 +72,7 @@ public class AmberEntityFactory extends EntityFactory {
   /**
    * Gets the appropriate entity given the EntityItem.
    */
-  public void delete(AmberConnectionImpl aConn, Object proxy)
+  public void delete(AmberConnection aConn, Object proxy)
   {
     try {
       EntityObject entity = (EntityObject) proxy;

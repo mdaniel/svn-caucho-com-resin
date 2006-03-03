@@ -37,7 +37,7 @@ import com.caucho.util.L10N;
 
 import com.caucho.java.JavaWriter;
 
-import com.caucho.amber.AmberManager;
+import com.caucho.amber.manager.AmberPersistenceUnit;
 
 /**
  * The type of a property.
@@ -87,7 +87,7 @@ public class PrimitiveBooleanType extends PrimitiveType {
   /**
    * Generates the type for the table.
    */
-  public String generateCreateColumnSQL(AmberManager manager, int length, int precision, int scale)
+  public String generateCreateColumnSQL(AmberPersistenceUnit manager, int length, int precision, int scale)
   {
     return manager.getCreateColumnSQL(Types.BOOLEAN, length, precision, scale);
   }

@@ -39,7 +39,7 @@ import java.sql.SQLException;
 
 import javax.ejb.Query;
 
-import com.caucho.amber.connection.AmberConnectionImpl;
+import com.caucho.amber.manager.AmberConnection;
 
 import com.caucho.amber.query.AbstractQuery;
 import com.caucho.amber.query.UserQuery;
@@ -57,14 +57,14 @@ public class EJBQueryImpl implements Query {
   private AbstractQuery _query;
   private UserQuery _userQuery;
     
-  private AmberConnectionImpl _aConn;
+  private AmberConnection _aConn;
   private int _firstResult;
   private int _maxResults = Integer.MAX_VALUE / 2;
 
   /**
    * Creates a manager instance.
    */
-  EJBQueryImpl(AbstractQuery query, AmberConnectionImpl aConn)
+  EJBQueryImpl(AbstractQuery query, AmberConnection aConn)
   {
     _query = query;
     _aConn = aConn;

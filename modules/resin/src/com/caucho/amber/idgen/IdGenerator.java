@@ -19,7 +19,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -35,7 +35,7 @@ import java.sql.SQLException;
 import com.caucho.util.L10N;
 import com.caucho.util.Log;
 
-import com.caucho.amber.connection.AmberConnectionImpl;
+import com.caucho.amber.manager.AmberConnection;
 
 /**
  * Generator table.
@@ -68,7 +68,7 @@ abstract public class IdGenerator {
   /**
    * Allocates the next id.
    */
-  public long allocate(AmberConnectionImpl aConn)
+  public long allocate(AmberConnection aConn)
     throws SQLException
   {
     synchronized (this) {
@@ -88,6 +88,6 @@ abstract public class IdGenerator {
   /**
    * Allocates the next group of ids.
    */
-  abstract public long allocateGroup(AmberConnectionImpl aConn)
+  abstract public long allocateGroup(AmberConnection aConn)
     throws SQLException;
 }

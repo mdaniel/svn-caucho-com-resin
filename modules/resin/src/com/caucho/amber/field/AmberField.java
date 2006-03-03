@@ -46,9 +46,8 @@ import com.caucho.config.ConfigException;
 
 import com.caucho.java.JavaWriter;
 
-import com.caucho.amber.AmberManager;
-
-import com.caucho.amber.connection.AmberConnectionImpl;
+import com.caucho.amber.manager.AmberConnection;
+import com.caucho.amber.manager.AmberPersistenceUnit;
 
 import com.caucho.amber.query.AmberExpr;
 import com.caucho.amber.query.PathExpr;
@@ -270,7 +269,7 @@ public interface AmberField {
   /**
    * Generates the table create.
    */
-  public String generateCreateTableSQL(AmberManager manager);
+  public String generateCreateTableSQL(AmberPersistenceUnit manager);
 
   /**
    * Generates the set clause.
@@ -352,7 +351,7 @@ public interface AmberField {
   /**
    * Deletes the children
    */
-  public void childDelete(AmberConnectionImpl aConn, Serializable primaryKey)
+  public void childDelete(AmberConnection aConn, Serializable primaryKey)
     throws SQLException;
 
   /**

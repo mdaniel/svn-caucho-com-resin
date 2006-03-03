@@ -42,8 +42,6 @@ import com.caucho.config.ConfigException;
 
 import com.caucho.java.JavaWriter;
 
-import com.caucho.amber.AmberManager;
-
 import com.caucho.amber.type.EntityType;
 
 import com.caucho.amber.field.EntityOneToManyField;
@@ -51,6 +49,8 @@ import com.caucho.amber.field.KeyManyToOneField;
 import com.caucho.amber.field.Id;
 import com.caucho.amber.field.IdField;
 import com.caucho.amber.field.AmberField;
+
+import com.caucho.amber.manager.AmberPersistenceUnit;
 
 import com.caucho.amber.table.ForeignColumn;
 import com.caucho.amber.table.Column;
@@ -165,7 +165,7 @@ public class CmrOneToMany extends CmrRelation {
   {
     EntityOneToManyField oneToMany = new EntityOneToManyField(type, getName());
 
-    AmberManager manager = type.getAmberManager();
+    AmberPersistenceUnit manager = type.getPersistenceUnit();
     
     EntityType targetType = _targetBean.getEntityType();
     oneToMany.setType(targetType);

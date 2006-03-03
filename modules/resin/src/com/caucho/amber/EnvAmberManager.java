@@ -58,8 +58,9 @@ import com.caucho.loader.enhancer.EnhancerManager;
 
 import com.caucho.jdbc.JdbcMetaData;
 
-import com.caucho.amber.connection.AmberConnectionImpl;
-import com.caucho.amber.connection.CacheConnectionImpl;
+import com.caucho.amber.manager.AmberConnection;
+import com.caucho.amber.manager.CacheConnection;
+import com.caucho.amber.manager.AmberPersistenceUnit;
 
 import com.caucho.amber.entity.AmberEntityHome;
 import com.caucho.amber.entity.EntityKey;
@@ -105,15 +106,15 @@ import com.caucho.util.L10N;
  * configuration to configure the ManagecConnectionFactory.
  */
 public class EnvAmberManager {
-  private static final Logger log = Log.open(AmberManager.class);
-  private static final L10N L = new L10N(AmberManager.class);
+  private static final Logger log = Log.open(AmberPersistenceUnit.class);
+  private static final L10N L = new L10N(AmberPersistenceUnit.class);
 
   private static EnvironmentLocal<EnvAmberManager> _localManager
     = new EnvironmentLocal<EnvAmberManager>();
 
   private ClassLoader _parentLoader;
 
-  private ArrayList<AmberManager> _managerList = new ArrayList<AmberManager>();
+  private ArrayList<AmberPersistenceUnit> _managerList = new ArrayList<AmberPersistenceUnit>();
 
   private AmberEnhancer _enhancer;
 
@@ -186,7 +187,7 @@ public class EnvAmberManager {
   /**
    * Adds an amber manager.
    */
-  public void addAmberManager(AmberManager manager)
+  public void addAmberManager(AmberPersistenceUnit manager)
   {
     _managerList.add(manager);
   }
@@ -317,7 +318,7 @@ public class EnvAmberManager {
   /**
    * Returns the cache connection.
    */
-  public AmberConnectionImpl createAmberConnection()
+  public AmberConnection createAmberConnection()
   {
     // XXX: needs to be an EnvAmberConnection
     return _managerList.get(0).createAmberConnection();
@@ -329,7 +330,7 @@ public class EnvAmberManager {
   public void initEntityHomes()
     throws Exception
   {
-    for (AmberManager manager : _managerList)
+    for (AmberPersistenceUnit manager : _managerList)
       manager.initEntityHomes();
   }
 

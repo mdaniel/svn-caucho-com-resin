@@ -48,7 +48,7 @@ import com.caucho.config.ConfigException;
 
 import com.caucho.java.JavaWriter;
 
-import com.caucho.amber.AmberManager;
+import com.caucho.amber.manager.AmberPersistenceUnit;
 
 import com.caucho.amber.table.Column;
 
@@ -320,7 +320,7 @@ public class Id {
   /**
    * Generates the where clause.
    */
-  public String generateCreateTableSQL(AmberManager manager)
+  public String generateCreateTableSQL(AmberPersistenceUnit manager)
   {
     String sql = getKey().generateCreateTableSQL(manager);
 

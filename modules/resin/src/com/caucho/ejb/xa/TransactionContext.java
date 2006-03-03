@@ -48,9 +48,8 @@ import com.caucho.log.Log;
 
 import com.caucho.transaction.TransactionImpl;
 
-import com.caucho.amber.AmberManager;
-
-import com.caucho.amber.connection.AmberConnectionImpl;
+import com.caucho.amber.manager.AmberConnection;
+import com.caucho.amber.manager.AmberPersistenceUnit;
 
 import com.caucho.ejb.AbstractEJBObject;
 import com.caucho.ejb.EJBExceptionWrapper;
@@ -70,7 +69,7 @@ public class TransactionContext implements Synchronization {
     new TransactionContext(null);
 
   private EjbTransactionManager _container;
-  private AmberConnectionImpl _amberConn;
+  private AmberConnection _amberConn;
 
   private UserTransaction _userTransaction;
   private Transaction _transaction;
@@ -315,7 +314,7 @@ public class TransactionContext implements Synchronization {
   /**
    * Returns the amber connection.
    */
-  public AmberConnectionImpl getAmberConnection()
+  public AmberConnection getAmberConnection()
   {
     if (_amberConn == null) {
       _amberConn = _container.getEJBManager().getAmberManager().createAmberConnection();
@@ -536,7 +535,7 @@ public class TransactionContext implements Synchronization {
     Throwable exn = null;
 
     try {
-      AmberConnectionImpl amberConn = _amberConn;
+      AmberConnection amberConn = _amberConn;
       _amberConn = null;
       if (amberConn != null) {
 	amberConn.afterCommit(wasCommitted);

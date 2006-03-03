@@ -19,7 +19,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -46,9 +46,9 @@ import com.caucho.config.ConfigException;
 
 import com.caucho.jdbc.JdbcMetaData;
 
-import com.caucho.amber.AmberManager;
+import com.caucho.amber.manager.AmberPersistenceUnit;
 
-import com.caucho.amber.connection.AmberConnectionImpl;
+import com.caucho.amber.manager.AmberConnection;
 
 /**
  * Generator table.
@@ -57,7 +57,7 @@ public class SequenceIdGenerator extends IdGenerator {
   private static final L10N L = new L10N(SequenceIdGenerator.class);
   private static final Logger log = Log.open(SequenceIdGenerator.class);
   
-  private AmberManager _manager;
+  private AmberPersistenceUnit _manager;
   private String _name;
   private int _size;
 
@@ -68,7 +68,7 @@ public class SequenceIdGenerator extends IdGenerator {
   /**
    * Creates the table generator.
    */
-  public SequenceIdGenerator(AmberManager manager,
+  public SequenceIdGenerator(AmberPersistenceUnit manager,
 			     String name,
 			     int size)
     throws ConfigException
@@ -81,7 +81,7 @@ public class SequenceIdGenerator extends IdGenerator {
   /**
    * Allocates the next group of ids.
    */
-  public long allocateGroup(AmberConnectionImpl aConn)
+  public long allocateGroup(AmberConnection aConn)
     throws SQLException
   {
     // XXX: should use non-XA
@@ -102,21 +102,21 @@ public class SequenceIdGenerator extends IdGenerator {
   /**
    * Initialize the table.
    */
-  public void init(AmberManager amberManager)
+  public void init(AmberPersistenceUnit amberPersistenceUnit)
     throws SQLException
   {
     if (_isInit)
       return;
     _isInit = true;
 
-    DataSource ds = amberManager.getDataSource();
+    DataSource ds = amberPersistenceUnit.getDataSource();
     Connection conn = ds.getConnection();
     try {
-      JdbcMetaData metaData = amberManager.getMetaData();
+      JdbcMetaData metaData = amberPersistenceUnit.getMetaData();
 
       _selectSQL = metaData.selectSequenceSQL(_name);
 
-      if (amberManager.getCreateDatabaseTables()) {
+      if (amberPersistenceUnit.getCreateDatabaseTables()) {
 	String sql = metaData.createSequenceSQL(_name, getGroupSize());
 
 	try {

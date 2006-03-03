@@ -37,14 +37,14 @@ import com.caucho.util.L10N;
 
 import com.caucho.config.ConfigException;
 
-import com.caucho.amber.AmberManager;
-
 import com.caucho.amber.type.EntityType;
 
 import com.caucho.amber.field.EntityMapField;
 import com.caucho.amber.field.Id;
 import com.caucho.amber.field.IdField;
 import com.caucho.amber.field.AmberField;
+
+import com.caucho.amber.manager.AmberPersistenceUnit;
 
 import com.caucho.amber.table.ForeignColumn;
 import com.caucho.amber.table.Column;

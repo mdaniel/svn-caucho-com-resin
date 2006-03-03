@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -37,7 +38,7 @@ import com.caucho.util.CharBuffer;
 import com.caucho.amber.entity.AmberEntityHome;
 import com.caucho.amber.entity.TableInvalidateCompletion;
 
-import com.caucho.amber.connection.AmberConnectionImpl;
+import com.caucho.amber.manager.AmberConnection;
 
 
 /**
@@ -155,7 +156,7 @@ public class UpdateQuery extends AbstractQuery {
   /**
    * Adds any completion info.
    */
-  public void prepare(UserQuery userQuery, AmberConnectionImpl aConn)
+  public void prepare(UserQuery userQuery, AmberConnection aConn)
     throws SQLException
   {
     aConn.flush();
@@ -164,7 +165,7 @@ public class UpdateQuery extends AbstractQuery {
   /**
    * Adds any completion info.
    */
-  public void complete(UserQuery userQuery, AmberConnectionImpl aConn)
+  public void complete(UserQuery userQuery, AmberConnection aConn)
     throws SQLException
   {
     aConn.expire();

@@ -19,7 +19,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -40,12 +40,12 @@ import com.caucho.util.CharBuffer;
 import com.caucho.util.L10N;
 import com.caucho.util.Log;
 
-import com.caucho.amber.type.EntityType;
-
-import com.caucho.amber.connection.AmberConnectionImpl;
-
 import com.caucho.amber.entity.Entity;
 import com.caucho.amber.entity.AmberCompletion;
+
+import com.caucho.amber.manager.AmberConnection;
+
+import com.caucho.amber.type.EntityType;
 
 /**
  * Represents a many-to-one link from one table to another.
@@ -328,7 +328,7 @@ public class LinkColumns {
   /**
    * Cleans up any fields from a delete.
    */
-  public void beforeTargetDelete(AmberConnectionImpl aConn, Entity entity)
+  public void beforeTargetDelete(AmberConnection aConn, Entity entity)
     throws SQLException
   {
     aConn.flush();
@@ -438,7 +438,7 @@ public class LinkColumns {
   /**
    * Cleans up any fields from a delete.
    */
-  public void afterSourceDelete(AmberConnectionImpl aConn, Entity entity)
+  public void afterSourceDelete(AmberConnection aConn, Entity entity)
     throws SQLException
   {
     // this should be handled programmatically

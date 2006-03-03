@@ -19,7 +19,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -55,7 +55,7 @@ import com.caucho.amber.entity.AmberEntityHome;
 import com.caucho.amber.entity.EntityItem;
 import com.caucho.amber.entity.Entity;
 
-import com.caucho.amber.connection.AmberConnectionImpl;
+import com.caucho.amber.manager.AmberConnection;
 
 /**
  * The JDBC statement implementation.
@@ -69,7 +69,7 @@ public class ResultSetImpl implements ResultSet {
   private ResultSet _rs;
   private ArrayList<FromItem> _fromList;
   private ArrayList<AmberExpr> _resultList;
-  private AmberConnectionImpl _session;
+  private AmberConnection _session;
 
   private QueryCacheKey _cacheKey;
   private ResultSetCacheChunk _cacheChunk;
@@ -111,7 +111,7 @@ public class ResultSetImpl implements ResultSet {
   /**
    * Sets the session.
    */
-  public void setSession(AmberConnectionImpl aConn)
+  public void setSession(AmberConnection aConn)
   {
     _session = aConn;
   }

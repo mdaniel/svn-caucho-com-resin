@@ -38,14 +38,14 @@ import com.caucho.util.L10N;
 
 import com.caucho.config.ConfigException;
 
-import com.caucho.amber.AmberManager;
-
 import com.caucho.amber.type.EntityType;
 
 import com.caucho.amber.field.EntityManyToManyField;
 import com.caucho.amber.field.Id;
 import com.caucho.amber.field.IdField;
 import com.caucho.amber.field.AmberField;
+
+import com.caucho.amber.manager.AmberPersistenceUnit;
 
 import com.caucho.amber.table.Table;
 import com.caucho.amber.table.ForeignColumn;
@@ -225,9 +225,9 @@ public class CmrManyToMany extends CmrRelation {
   public AmberField assembleAmber(EntityType type)
     throws ConfigException
   {
-    AmberManager manager = type.getAmberManager();
+    AmberPersistenceUnit persistenceUnit = type.getPersistenceUnit();
 
-    Table map = manager.createTable(getSQLTable());
+    Table map = persistenceUnit.createTable(getSQLTable());
 
     map.setConfigLocation(getLocation());
 

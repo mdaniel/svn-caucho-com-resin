@@ -57,10 +57,7 @@ import com.caucho.java.JavaWriter;
 
 import com.caucho.lifecycle.Lifecycle;
 
-import com.caucho.amber.AmberManager;
 import com.caucho.amber.AmberRuntimeException;
-
-import com.caucho.amber.connection.AmberConnectionImpl;
 
 import com.caucho.amber.entity.Entity;
 import com.caucho.amber.entity.EntityItem;
@@ -76,6 +73,9 @@ import com.caucho.amber.field.AmberFieldCompare;
 
 import com.caucho.amber.idgen.IdGenerator;
 
+import com.caucho.amber.manager.AmberPersistenceUnit;
+import com.caucho.amber.manager.AmberConnection;
+
 import com.caucho.amber.table.Table;
 import com.caucho.amber.table.Column;
 
@@ -86,7 +86,7 @@ public class EntityType extends Type {
   private static final Logger log = Logger.getLogger(EntityType.class.getName());
   private static final L10N L = new L10N(EntityType.class);
 
-  private AmberManager _amberManager;
+  private AmberPersistenceUnit _amberPersistenceUnit;
 
   private String _name;
   
@@ -144,17 +144,17 @@ public class EntityType extends Type {
   private volatile boolean _isConfigured;
   private volatile boolean _isGenerated;
   
-  public EntityType(AmberManager amberManager)
+  public EntityType(AmberPersistenceUnit amberPersistenceUnit)
   {
-    _amberManager = amberManager;
+    _amberPersistenceUnit = amberPersistenceUnit;
   }
 
   /**
    * Returns the manager.
    */
-  public AmberManager getAmberManager()
+  public AmberPersistenceUnit getPersistenceUnit()
   {
-    return _amberManager;
+    return _amberPersistenceUnit;
   }
 
   /**
@@ -163,7 +163,7 @@ public class EntityType extends Type {
   public Table getTable()
   {
     if (_table == null)
-      setTable(_amberManager.createTable(getName()));
+      setTable(_amberPersistenceUnit.createTable(getName()));
     
     return _table;
   }
@@ -347,7 +347,7 @@ public class EntityType extends Type {
 
       try {
 	if (_isEnhanced) {
-	  ClassLoader loader = getAmberManager().getEnhancedLoader();
+	  ClassLoader loader = getPersistenceUnit().getEnhancedLoader();
 
           if (log.isLoggable(Level.FINEST))
             log.finest(L.l("loading bean class `{0}' from `{1}'", getBeanClass().getName(), loader));
@@ -358,7 +358,7 @@ public class EntityType extends Type {
 	  ClassLoader loader = _instanceLoader;
 
 	  if (loader == null)
-	    loader = getAmberManager().getEnhancedLoader();
+	    loader = getPersistenceUnit().getEnhancedLoader();
 
           if (log.isLoggable(Level.FINEST))
             log.finest(L.l("loading instance class `{0}' from `{1}'", getInstanceClassName(), loader));
@@ -735,7 +735,7 @@ public class EntityType extends Type {
   public AmberEntityHome getHome()
   {
     if (_home == null) {
-      _home = getAmberManager().getEntityHome(getName());
+      _home = getPersistenceUnit().getEntityHome(getName());
     }
 
     return _home;
@@ -860,11 +860,11 @@ public class EntityType extends Type {
     getId().init();
 
     /*
-    if (_amberManager.getCreateDatabaseTables())
-     getTable().createDatabaseTable(_amberManager);
+    if (_amberPersistenceUnitenceUnitenceUnitenceUnitenceUnitenceUnitenceUnitenceUnitenceUnitenceUnitenceUnitenceUnit.getCreateDatabaseTables())
+     getTable().createDatabaseTable(_amberPersistenceUnitenceUnitenceUnitenceUnitenceUnitenceUnitenceUnitenceUnitenceUnitenceUnitenceUnitenceUnit);
 
-    if (_amberManager.getValidateDatabaseTables())
-      getTable().validateDatabaseTable(_amberManager);
+    if (_amberPersistenceUnitenceUnitenceUnitenceUnitenceUnitenceUnitenceUnitenceUnitenceUnitenceUnitenceUnitenceUnit.getValidateDatabaseTables())
+      getTable().validateDatabaseTable(_amberPersistenceUnitenceUnitenceUnitenceUnitenceUnitenceUnitenceUnitenceUnitenceUnitenceUnitenceUnitenceUnit);
     */
   }
 
@@ -957,7 +957,7 @@ public class EntityType extends Type {
   /**
    * Gets the value.
    */
-  public Object getObject(AmberConnectionImpl aConn, ResultSet rs, int index)
+  public Object getObject(AmberConnection aConn, ResultSet rs, int index)
     throws SQLException
   {
     return getHome().loadLazy(aConn, rs, index);
@@ -966,7 +966,7 @@ public class EntityType extends Type {
   /**
    * Finds the object
    */
-  public EntityItem findItem(AmberConnectionImpl aConn, ResultSet rs, int index)
+  public EntityItem findItem(AmberConnection aConn, ResultSet rs, int index)
     throws SQLException
   {
     return getHome().findItem(aConn, rs, index);
@@ -975,7 +975,7 @@ public class EntityType extends Type {
   /**
    * Gets the value.
    */
-  public Object getLoadObject(AmberConnectionImpl aConn,
+  public Object getLoadObject(AmberConnection aConn,
 			      ResultSet rs, int index)
     throws SQLException
   {
@@ -1001,7 +1001,7 @@ public class EntityType extends Type {
   /**
    * Gets the named generator.
    */
-  public long nextGeneratorId(AmberConnectionImpl aConn, String name)
+  public long nextGeneratorId(AmberConnection aConn, String name)
     throws SQLException
   {
     return _idGenMap.get(name).allocate(aConn);
@@ -1547,7 +1547,7 @@ public class EntityType extends Type {
   /**
    * Deletes by the primary key.
    */
-  public void delete(AmberConnectionImpl aConn, Object key)
+  public void delete(AmberConnection aConn, Object key)
     throws SQLException
   {
     getHome().delete(aConn, key);

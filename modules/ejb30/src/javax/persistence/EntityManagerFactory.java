@@ -29,8 +29,6 @@
 
 package javax.persistence;
 
-import java.util.Map;
-
 /**
  * Factory for getting an entity manager.
  */

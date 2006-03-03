@@ -43,7 +43,7 @@ import com.caucho.util.Alarm;
 import com.caucho.amber.type.Type;
 import com.caucho.amber.type.EntityType;
 
-import com.caucho.amber.connection.AmberConnectionImpl;
+import com.caucho.amber.manager.AmberConnection;
 
 /**
  * Represents the application's view of the query.
@@ -111,7 +111,7 @@ public class CachedQuery {
   /**
    * Executes the query, filling the list.
    */
-  public void list(List<Object> list, AmberConnectionImpl aConn, long maxAge)
+  public void list(List<Object> list, AmberConnection aConn, long maxAge)
     throws SQLException
   {
     Type type = _query.getResultType(0);
@@ -164,7 +164,7 @@ public class CachedQuery {
   /**
    * Executes the query returning a result set.
    */
-  private ResultSetImpl executeQuery(AmberConnectionImpl aConn)
+  private ResultSetImpl executeQuery(AmberConnection aConn)
     throws SQLException
   {
     if (_rs == null)

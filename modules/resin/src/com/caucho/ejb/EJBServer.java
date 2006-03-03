@@ -84,7 +84,7 @@ import com.caucho.ejb.admin.*;
 
 import com.caucho.ejb.metadata.Bean;
 
-import com.caucho.ejb.entity2.EntityIntrospector;
+import com.caucho.amber.cfg.EntityIntrospector;
 
 /**
  * Server containing all the EJBs for a given configuration.
@@ -166,7 +166,7 @@ public class EJBServer
     _mergePath.addMergePath(Vfs.lookup());
     _mergePath.addClassPath();
 
-    _entityIntrospector = new EntityIntrospector(_ejbManager);
+    // _entityIntrospector = new EntityIntrospector(_ejbManager);
 
     Environment.addChildEnvironmentListener(new PersistenceEnvironmentListener());
   }

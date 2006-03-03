@@ -216,7 +216,7 @@ public class EntityComponent extends ClassComponent {
       out.println();
       out.println("protected transient com.caucho.amber.type.EntityType __caucho_home;");
       out.println("public transient com.caucho.amber.entity.EntityItem __caucho_item;");
-      out.println("protected transient com.caucho.amber.connection.AmberConnectionImpl __caucho_session;");
+      out.println("protected transient com.caucho.amber.connection.AmberConnection __caucho_session;");
       out.println("protected transient int __caucho_state;");
 
       int loadCount = _entityType.getLoadGroupIndex();
@@ -292,7 +292,7 @@ public class EntityComponent extends ClassComponent {
     */
     
     out.println();
-    out.println("public void __caucho_setConnection(com.caucho.amber.connection.AmberConnectionImpl aConn)");
+    out.println("public void __caucho_setConnection(com.caucho.amber.connection.AmberConnection aConn)");
     out.println("{");
     out.pushDepth();
 
@@ -438,7 +438,7 @@ public class EntityComponent extends ClassComponent {
       return;
     
     out.println();
-    out.println("public boolean __caucho_makePersistent(com.caucho.amber.connection.AmberConnectionImpl aConn, com.caucho.amber.type.EntityType home)");
+    out.println("public boolean __caucho_makePersistent(com.caucho.amber.connection.AmberConnection aConn, com.caucho.amber.type.EntityType home)");
     out.println("  throws java.sql.SQLException");
     out.println("{");
     out.pushDepth();
@@ -467,7 +467,7 @@ public class EntityComponent extends ClassComponent {
     out.println("}");
 
     out.println();
-    out.println("public void __caucho_retrieve(com.caucho.amber.connection.AmberConnectionImpl aConn)");
+    out.println("public void __caucho_retrieve(com.caucho.amber.connection.AmberConnection aConn)");
     out.println("  throws java.sql.SQLException");
     out.println("{");
     out.pushDepth();
@@ -521,7 +521,7 @@ public class EntityComponent extends ClassComponent {
       return;
     
     out.println();
-    out.println("public void __caucho_load(com.caucho.amber.connection.AmberConnectionImpl aConn, java.sql.ResultSet rs, int index)");
+    out.println("public void __caucho_load(com.caucho.amber.connection.AmberConnection aConn, java.sql.ResultSet rs, int index)");
     out.println("  throws java.sql.SQLException");
     out.println("{");
     out.pushDepth();
@@ -850,7 +850,7 @@ public class EntityComponent extends ClassComponent {
     ArrayList<IdField> fields = _entityType.getId().getKeys();
     IdField idField = fields.size() > 0 ? fields.get(0) : null;
     
-    if (! _entityType.getAmberManager().hasReturnGeneratedKeys() &&
+    if (! _entityType.getPersistenceUnit().hasReturnGeneratedKeys() &&
 	idField != null && idField.getType().isAutoIncrement()) {
       out.println();
       out.println("private static com.caucho.amber.field.Generator __caucho_id_gen;");
@@ -865,7 +865,7 @@ public class EntityComponent extends ClassComponent {
     }
     
     out.println();
-    out.println("public boolean __caucho_create(com.caucho.amber.connection.AmberConnectionImpl aConn, com.caucho.amber.type.EntityType home)");
+    out.println("public boolean __caucho_create(com.caucho.amber.connection.AmberConnection aConn, com.caucho.amber.type.EntityType home)");
     out.println("  throws java.sql.SQLException");
     out.println("{");
     out.pushDepth();
@@ -1131,7 +1131,7 @@ public class EntityComponent extends ClassComponent {
     throws IOException
   {
     out.println();
-    out.println("public com.caucho.amber.entity.Entity __caucho_copy(com.caucho.amber.connection.AmberConnectionImpl aConn,");
+    out.println("public com.caucho.amber.entity.Entity __caucho_copy(com.caucho.amber.connection.AmberConnection aConn,");
     out.println("                                                    com.caucho.amber.entity.EntityItem item)");
     out.println("{");
     out.pushDepth();
@@ -1169,7 +1169,7 @@ public class EntityComponent extends ClassComponent {
     throws IOException
   {
     out.println();
-    out.println("public void __caucho_makePersistent(com.caucho.amber.connection.AmberConnectionImpl aConn,");
+    out.println("public void __caucho_makePersistent(com.caucho.amber.connection.AmberConnection aConn,");
     out.println("                                    com.caucho.amber.entity.EntityItem item)");
     out.println("{");
     out.pushDepth();
@@ -1213,7 +1213,7 @@ public class EntityComponent extends ClassComponent {
   {
     out.println();
     out.print("public com.caucho.amber.entity.EntityItem __caucho_home_find(");
-    out.print("com.caucho.amber.connection.AmberConnectionImpl aConn,");
+    out.print("com.caucho.amber.connection.AmberConnection aConn,");
     out.print("com.caucho.amber.entity.AmberEntityHome home,");
     out.println("java.sql.ResultSet rs, int index)");
     out.println("  throws java.sql.SQLException");
@@ -1246,7 +1246,7 @@ public class EntityComponent extends ClassComponent {
   {
     out.println();
     out.print("public com.caucho.amber.entity.Entity __caucho_home_new(");
-    out.print("com.caucho.amber.connection.AmberConnectionImpl aConn,");
+    out.print("com.caucho.amber.connection.AmberConnection aConn,");
     out.print("com.caucho.amber.entity.AmberEntityHome home,");
     out.print("Object key)");
     out.println("  throws java.sql.SQLException");

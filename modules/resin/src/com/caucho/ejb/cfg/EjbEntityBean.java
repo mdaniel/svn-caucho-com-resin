@@ -81,7 +81,7 @@ import com.caucho.ejb.gen.EntityCreateMethod;
 
 import com.caucho.ejb.amber.AmberConfig;
 
-import com.caucho.amber.AmberManager;
+import com.caucho.amber.manager.AmberPersistenceUnit;
 
 import com.caucho.amber.type.EntityType;
 
@@ -168,9 +168,9 @@ public class EjbEntityBean extends EjbBean {
    */
   public EntityType getEntityType()
   {
-    AmberManager amberManager = getConfig().getEJBManager().getAmberManager();
+    AmberPersistenceUnit amberPersistenceUnit = getConfig().getEJBManager().getAmberManager();
 
-    EntityType type = amberManager.createEntity(getAbstractSchemaName(),
+    EntityType type = amberPersistenceUnit.createEntity(getAbstractSchemaName(),
 						getEJBClassWrapper());
 
     type.setProxyClass(getLocal());

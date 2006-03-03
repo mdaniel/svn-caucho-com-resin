@@ -38,13 +38,25 @@ import java.util.HashMap;
 import java.util.logging.Logger;
 import java.util.logging.Level;
 
+import com.caucho.amber.AmberRuntimeException;
+
 import com.caucho.amber.cfg.PersistenceConfig;
 import com.caucho.amber.cfg.PersistenceUnitConfig;
+
+import com.caucho.amber.type.EntityType;
+
+import com.caucho.amber.gen.AmberEnhancer;
+
+import com.caucho.bytecode.JClassLoader;
 
 import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
 
+import com.caucho.loader.DynamicClassLoader;
 import com.caucho.loader.EnvironmentLocal;
+import com.caucho.loader.enhancer.EnhancerManager;
+
+import com.caucho.naming.Jndi;
 
 import com.caucho.vfs.Path;
 
@@ -58,8 +70,40 @@ public class AmberContainer {
   private static final EnvironmentLocal<AmberContainer> _localContainer
     = new EnvironmentLocal<AmberContainer>();
 
-  private HashMap<String,PersistenceUnitConfig> _unitMap
-    = new HashMap<String,PersistenceUnitConfig>();
+  private ClassLoader _parentLoader;
+  // private EnhancingClassLoader _enhancedLoader;
+
+  private JClassLoader _jClassLoader;
+
+  private AmberEnhancer _enhancer;
+
+  private HashMap<String,AmberPersistenceUnit> _unitMap
+    = new HashMap<String,AmberPersistenceUnit>();
+
+  private AmberContainer()
+  {
+    _parentLoader = Thread.currentThread().getContextClassLoader();
+    _jClassLoader = EnhancerManager.create(_parentLoader).getJavaClassLoader();
+
+    /*
+    _envAmberManager = EnvAmberManager.createLocal();
+
+    _envAmberManager.addAmberManager(this);
+    */
+
+    _enhancer = new AmberEnhancer(this);
+
+    EnhancerManager.create().addClassEnhancer(_enhancer);
+
+    try {
+      if (_parentLoader instanceof DynamicClassLoader)
+	((DynamicClassLoader) _parentLoader).make();
+    } catch (RuntimeException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+  }
 
   /**
    * Returns the local container.
@@ -77,6 +121,63 @@ public class AmberContainer {
 
       return container;
     }
+  }
+
+  /**
+   * Returns the parent loader
+   */
+  public ClassLoader getParentClassLoader()
+  {
+    return _parentLoader;
+  }
+
+  /**
+   * Returns the parent loader
+   */
+  public ClassLoader getEnhancedLoader()
+  {
+    return _parentLoader;
+  }
+
+  /**
+   * Returns the JClassLoader.
+   */
+  public JClassLoader getJClassLoader()
+  {
+    return _jClassLoader;
+  }
+
+  /**
+   * Returns the EntityType for an introspected class.
+   */
+  public EntityType getEntity(String className)
+  {
+    throw new UnsupportedOperationException();
+  }
+
+  /**
+   * Initialize the entity homes.
+   */
+  public void initEntityHomes()
+  {
+    throw new UnsupportedOperationException();
+  }
+
+  public AmberPersistenceUnit createPersistenceUnit(String name)
+  {
+    AmberPersistenceUnit unit = new AmberPersistenceUnit(this);
+    unit.setName(name);
+
+    _unitMap.put(unit.getName(), unit);
+
+    try {
+      Jndi.bindDeep("java:comp/env/persistence/" + unit.getName(),
+		    new FactoryProxy(unit));
+    } catch (Exception e) {
+      throw new AmberRuntimeException(e);
+    }
+
+    return unit;
   }
   
   /**
@@ -96,16 +197,21 @@ public class AmberContainer {
       new Config().configure(persistence, is,
 			     "com/caucho/amber/cfg/persistence-30.rnc");
 
-      for (PersistenceUnitConfig unit : persistence.getUnitList()) {
-	_unitMap.put(unit.getName(), unit);
-	
-	System.out.println(unit);
+      for (PersistenceUnitConfig unitConfig : persistence.getUnitList()) {
+	try {
+	  AmberPersistenceUnit unit = unitConfig.init(this);
+
+	  _unitMap.put(unit.getName(), unit);
+
+	  Jndi.bindDeep("java:comp/env/persistence/" + unit.getName(),
+			new FactoryProxy(unit));
+	} catch (Throwable e) {
+	  log.log(Level.WARNING, e.toString(), e);
+	}
       }
     } catch (ConfigException e) {
-      e.printStackTrace();
       log.warning(e.getMessage());
     } catch (Throwable e) {
-      e.printStackTrace();
       log.log(Level.WARNING, e.toString(), e);
     } finally {
       try {

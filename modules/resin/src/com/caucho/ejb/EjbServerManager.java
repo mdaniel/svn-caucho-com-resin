@@ -72,9 +72,10 @@ import com.caucho.config.types.FileSetType;
 
 import com.caucho.relaxng.CompactVerifierFactoryImpl;
 
-import com.caucho.amber.AmberManager;
-
 import com.caucho.amber.entity.AmberEntityHome;
+
+import com.caucho.amber.manager.AmberPersistenceUnit;
+import com.caucho.amber.manager.AmberContainer;
 
 import com.caucho.lifecycle.Lifecycle;
 
@@ -92,8 +93,6 @@ import com.caucho.ejb.entity.QEntityContext;
 import com.caucho.ejb.entity.EntityKey;
 
 import com.caucho.ejb.enhancer.EjbEnhancer;
-
-import com.caucho.ejb.entity2.EntityManagerProxy;
 
 /**
  * Manages the EJBs.
@@ -121,7 +120,7 @@ public class EjbServerManager implements EJBServerInterface, EnvironmentListener
 
   private EjbConfig _ejbConfig;
   
-  private AmberManager _amberManager;
+  private AmberPersistenceUnit _amberPersistenceUnit;
 
   protected ConnectionFactory _jmsConnectionFactory;
   private int _messageConsumerMax = 5;
@@ -136,9 +135,9 @@ public class EjbServerManager implements EJBServerInterface, EnvironmentListener
   EjbServerManager()
   {
     try {
-      _amberManager = new AmberManager();
+      _amberPersistenceUnit = AmberContainer.getLocalContainer().createPersistenceUnit("resin-ejb");
 
-      _envServerManager = new EnvServerManager(_amberManager);
+      _envServerManager = new EnvServerManager(_amberPersistenceUnit);
 
       _ejbConfig = new EjbConfig(this);
 
@@ -187,7 +186,7 @@ public class EjbServerManager implements EJBServerInterface, EnvironmentListener
    */
   public void setDataSource(DataSource dataSource)
   {
-    _amberManager.setDataSource(dataSource);
+    _amberPersistenceUnit.setDataSource(dataSource);
   }
 
   /**
@@ -195,7 +194,7 @@ public class EjbServerManager implements EJBServerInterface, EnvironmentListener
    */
   public DataSource getDataSource()
   {
-    return _amberManager.getDataSource();
+    return _amberPersistenceUnit.getDataSource();
   }
 
   /**
@@ -203,7 +202,7 @@ public class EjbServerManager implements EJBServerInterface, EnvironmentListener
    */
   public void setReadDataSource(DataSource dataSource)
   {
-    _amberManager.setReadDataSource(dataSource);
+    _amberPersistenceUnit.setReadDataSource(dataSource);
   }
 
   /**
@@ -211,7 +210,7 @@ public class EjbServerManager implements EJBServerInterface, EnvironmentListener
    */
   public DataSource getReadDataSource()
   {
-    return _amberManager.getReadDataSource();
+    return _amberPersistenceUnit.getReadDataSource();
   }
 
   /**
@@ -219,7 +218,7 @@ public class EjbServerManager implements EJBServerInterface, EnvironmentListener
    */
   public void setXADataSource(DataSource dataSource)
   {
-    _amberManager.setXADataSource(dataSource);
+    _amberPersistenceUnit.setXADataSource(dataSource);
   }
 
   /**
@@ -227,7 +226,7 @@ public class EjbServerManager implements EJBServerInterface, EnvironmentListener
    */
   public DataSource getXADataSource()
   {
-    return _amberManager.getXADataSource();
+    return _amberPersistenceUnit.getXADataSource();
   }
 
   /**
@@ -399,7 +398,7 @@ public class EjbServerManager implements EJBServerInterface, EnvironmentListener
   {
     _createDatabaseSchema = create;
 
-    _amberManager.setCreateDatabaseTables(create);
+    _amberPersistenceUnit.setCreateDatabaseTables(create);
   }
 
   /**
@@ -417,7 +416,7 @@ public class EjbServerManager implements EJBServerInterface, EnvironmentListener
   {
     _validateDatabaseSchema = validate;
     
-    _amberManager.setValidateDatabaseTables(validate);
+    _amberPersistenceUnit.setValidateDatabaseTables(validate);
   }
 
   /**
@@ -558,7 +557,7 @@ public class EjbServerManager implements EJBServerInterface, EnvironmentListener
     throws ConfigException
   {
     try {
-      _amberManager.init();
+      _amberPersistenceUnit.init();
 
       _ejbConfig.configure();
       
@@ -579,12 +578,12 @@ public class EjbServerManager implements EJBServerInterface, EnvironmentListener
 
   public AmberEntityHome getAmberEntityHome(String name)
   {
-    return _amberManager.getEntityHome(name);
+    return _amberPersistenceUnit.getEntityHome(name);
   }
 
-  public AmberManager getAmberManager()
+  public AmberPersistenceUnit getAmberManager()
   {
-    return _amberManager;
+    return _amberPersistenceUnit;
   }
 
   public JClassLoader getJClassLoader()

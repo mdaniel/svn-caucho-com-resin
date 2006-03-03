@@ -35,7 +35,7 @@ import java.sql.ResultSet;
 import java.sql.Types;
 import java.sql.SQLException;
 
-import com.caucho.amber.AmberManager;
+import com.caucho.amber.manager.AmberPersistenceUnit;
 
 import com.caucho.java.JavaWriter;
 
@@ -72,7 +72,7 @@ public class CharacterType extends Type {
   /**
    * Generates the type for the table.
    */
-  public String generateCreateColumnSQL(AmberManager manager, int length, int precision, int scale)
+  public String generateCreateColumnSQL(AmberPersistenceUnit manager, int length, int precision, int scale)
   {
     return manager.getCreateColumnSQL(Types.CHAR, 0, precision, scale);
   }

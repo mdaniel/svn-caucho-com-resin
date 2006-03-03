@@ -31,6 +31,9 @@ package com.caucho.amber.cfg;
 
 import java.util.ArrayList;
 
+import com.caucho.amber.manager.AmberContainer;
+import com.caucho.amber.manager.AmberPersistenceUnit;
+
 /**
  * <persistence-unit> tag in the persistence.xml
  */
@@ -61,6 +64,15 @@ public class PersistenceUnitConfig {
   public void addClass(Class cl)
   {
     _classList.add(cl);
+  }
+
+  public AmberPersistenceUnit init(AmberContainer container)
+  {
+    AmberPersistenceUnit unit = new AmberPersistenceUnit(container);
+
+    unit.setName(getName());
+
+    return unit;
   }
 
   public String toString()

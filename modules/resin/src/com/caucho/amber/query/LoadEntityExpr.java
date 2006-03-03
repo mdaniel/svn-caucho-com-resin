@@ -19,7 +19,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -33,11 +33,11 @@ import java.sql.SQLException;
 
 import java.util.ArrayList;
 
-import com.caucho.amber.connection.AmberConnectionImpl;
-
 import com.caucho.amber.entity.EntityItem;
 
 import com.caucho.amber.field.AmberField;
+
+import com.caucho.amber.manager.AmberConnection;
 
 import com.caucho.amber.table.Table;
 import com.caucho.amber.table.LinkColumns;
@@ -188,7 +188,7 @@ public class LoadEntityExpr extends AbstractAmberExpr {
   /**
    * Returns the object for the expr.
    */
-  public Object getObject(AmberConnectionImpl aConn, ResultSet rs, int index)
+  public Object getObject(AmberConnection aConn, ResultSet rs, int index)
     throws SQLException
   {
     return getEntityType().getLoadObject(aConn, rs, index);
@@ -197,7 +197,7 @@ public class LoadEntityExpr extends AbstractAmberExpr {
   /**
    * Returns the object for the expr.
    */
-  public Object getCacheObject(AmberConnectionImpl aConn,
+  public Object getCacheObject(AmberConnection aConn,
 			       ResultSet rs, int index)
     throws SQLException
   {
@@ -207,7 +207,7 @@ public class LoadEntityExpr extends AbstractAmberExpr {
   /**
    * Returns the object for the expr.
    */
-  public EntityItem findItem(AmberConnectionImpl aConn, ResultSet rs, int index)
+  public EntityItem findItem(AmberConnection aConn, ResultSet rs, int index)
     throws SQLException
   {
     EntityType entityType = getEntityType();

@@ -43,10 +43,11 @@ import com.caucho.java.gen.JavaClassGenerator;
 import com.caucho.java.gen.GenClass;
 import com.caucho.java.gen.DependencyComponent;
 
-import com.caucho.amber.AmberManager;
 import com.caucho.amber.type.EntityType;
 
 import com.caucho.amber.entity.Entity;
+
+import com.caucho.amber.manager.AmberPersistenceUnit;
 
 /**
  * Enhancing the java objects for Amber mapping.
@@ -55,14 +56,14 @@ public class AmberGeneratorImpl implements AmberGenerator {
   private static final L10N L = new L10N(AmberGeneratorImpl.class);
   private static final Logger log = Log.open(AmberGeneratorImpl.class);
 
-  private AmberManager _amberManager;
+  private AmberPersistenceUnit _amberPersistenceUnit;
 
   private ArrayList<String> _pendingClassNames =
     new ArrayList<String>();
   
-  public AmberGeneratorImpl(AmberManager manager)
+  public AmberGeneratorImpl(AmberPersistenceUnit manager)
   {
-    _amberManager = manager;
+    _amberPersistenceUnit = manager;
   }
 
   /**

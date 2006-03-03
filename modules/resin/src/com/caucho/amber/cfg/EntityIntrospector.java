@@ -27,28 +27,31 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.ejb.entity2;
+package com.caucho.amber.cfg;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 
-import javax.ejb.*;
+import javax.persistence.*;
 
-import javax.persistence.Entity;
-
-import com.caucho.amber.AmberManager;
 import com.caucho.amber.AmberTableCache;
+
 import com.caucho.amber.field.*;
-import com.caucho.amber.field.Id;
+
 import com.caucho.amber.idgen.IdGenerator;
+
+import com.caucho.amber.manager.AmberContainer;
+import com.caucho.amber.manager.AmberPersistenceUnit;
+
 import com.caucho.amber.table.Column;
 import com.caucho.amber.table.ForeignColumn;
 import com.caucho.amber.table.LinkColumns;
 import com.caucho.amber.table.Table;
-import com.caucho.amber.type.EntityType;
+
 import com.caucho.amber.type.*;
+
 import com.caucho.bytecode.*;
 import com.caucho.config.ConfigException;
 import com.caucho.config.types.Period;
@@ -66,10 +69,10 @@ public class EntityIntrospector {
   private static HashSet<String> _propertyAnnotations
     = new HashSet<String>();
 
-  private EjbServerManager _ejbManager;
+  private AmberContainer _amberContainer;
 
-  private HashMap<String,EntityType> _entityMap =
-    new HashMap<String,EntityType>();
+  private HashMap<String,EntityType> _entityMap
+    = new HashMap<String,EntityType>();
 
   private ArrayList<Completion> _linkCompletions = new ArrayList<Completion>();
   private ArrayList<Completion> _depCompletions = new ArrayList<Completion>();
@@ -77,9 +80,9 @@ public class EntityIntrospector {
   /**
    * Creates the introspector.
    */
-  public EntityIntrospector(EjbServerManager manager)
+  public EntityIntrospector(AmberContainer amberContainer)
   {
-    _ejbManager = manager;
+    _amberContainer = amberContainer;
   }
 
   /**
@@ -96,10 +99,8 @@ public class EntityIntrospector {
 
     validateType(type);
 
-    boolean isField = entityAnn.get("access") == AccessType.FIELD;
-
-    EjbServerManager serverManager = _ejbManager;
-    AmberManager amberManager = serverManager.getAmberManager();
+    // boolean isField = entityAnn.get("access") == AccessType.FIELD;
+    boolean isField = false;
 
     JAnnotation inheritanceAnn = type.getAnnotation(Inheritance.class);
 
@@ -128,8 +129,11 @@ public class EntityIntrospector {
     if (entityType != null)
       return entityType;
 
-    entityType = amberManager.createEntity(entityName, type);
+    ///entityType = _amberContainer.createEntity(entityName, type);
+    entityType = _amberContainer.getEntity(entityName);
     _entityMap.put(entityName, entityType);
+
+    AmberPersistenceUnit persistenceUnit = entityType.getPersistenceUnit();
 
     if (isField)
       entityType.setFieldAccess(true);
@@ -148,9 +152,9 @@ public class EntityIntrospector {
       tableName = entityName;
 
     if (parentType == null)
-      entityType.setTable(amberManager.createTable(tableName));
+      entityType.setTable(persistenceUnit.createTable(tableName));
     else if (parentType.isJoinedSubClass())
-      entityType.setTable(amberManager.createTable(tableName));
+      entityType.setTable(persistenceUnit.createTable(tableName));
     else
       entityType.setTable(parentType.getTable());
 
@@ -167,12 +171,12 @@ public class EntityIntrospector {
     Table secondaryTable = null;
 
     if (inheritanceAnn != null)
-      introspectInheritance(amberManager, entityType, type);
+      introspectInheritance(persistenceUnit, entityType, type);
 
     if (secondaryTableAnn != null) {
       String secondaryName = (String) secondaryTableAnn.get("name");
 
-      secondaryTable = amberManager.createTable(secondaryName);
+      secondaryTable = persistenceUnit.createTable(secondaryName);
 
       entityType.addSecondaryTable(secondaryTable);
     }
@@ -180,14 +184,14 @@ public class EntityIntrospector {
     if (entityType.getId() != null) {
     }
     else if (isField)
-      introspectIdField(amberManager, entityType, parentType, type);
+      introspectIdField(persistenceUnit, entityType, parentType, type);
     else
-      introspectIdMethod(amberManager, entityType, parentType, type);
+      introspectIdMethod(persistenceUnit, entityType, parentType, type);
 
     if (isField)
-      introspectFields(amberManager, entityType, parentType, type);
+      introspectFields(persistenceUnit, entityType, parentType, type);
     else
-      introspectMethods(amberManager, entityType, parentType, type);
+      introspectMethods(persistenceUnit, entityType, parentType, type);
 
     for (JMethod method : type.getMethods()) {
       introspectCallbacks(entityType, method);
@@ -316,7 +320,7 @@ public class EntityIntrospector {
   /**
    * Introspects the Inheritance
    */
-  private void introspectInheritance(AmberManager manager,
+  private void introspectInheritance(AmberPersistenceUnit persistenceUnit,
 				     EntityType entityType,
 				     JClass type)
     throws ConfigException, SQLException
@@ -341,7 +345,7 @@ public class EntityIntrospector {
 
       subType.getParentType().addSubClass(subType);
 
-      JAnnotation joinAnn = type.getAnnotation(InheritanceJoinColumn.class);
+      JAnnotation joinAnn = type.getAnnotation(JoinColumn.class);
 
       if (subType.isJoinedSubClass()) {
 	linkInheritanceTable(subType.getRootType().getTable(),
@@ -409,7 +413,7 @@ public class EntityIntrospector {
   /**
    * Introspects the fields.
    */
-  private void introspectIdMethod(AmberManager manager,
+  private void introspectIdMethod(AmberPersistenceUnit persistenceUnit,
 				  EntityType entityType,
 				  EntityType parentType,
 				  JClass type)
@@ -434,7 +438,7 @@ public class EntityIntrospector {
       if (id == null)
 	continue;
 
-      IdField idField = introspectId(manager,
+      IdField idField = introspectId(persistenceUnit,
 				     entityType,
 				     method,
 				     fieldName,
@@ -445,7 +449,7 @@ public class EntityIntrospector {
     }
 
     if (keys.size() == 1)
-      entityType.setId(new Id(entityType, keys));
+      entityType.setId(new com.caucho.amber.field.Id(entityType, keys));
     else
       entityType.setId(new CompositeId(entityType, keys));
   }
@@ -453,7 +457,7 @@ public class EntityIntrospector {
   /**
    * Introspects the fields.
    */
-  private void introspectIdField(AmberManager manager,
+  private void introspectIdField(AmberPersistenceUnit persistenceUnit,
 				 EntityType entityType,
 				 EntityType parentType,
 				 JClass type)
@@ -472,7 +476,7 @@ public class EntityIntrospector {
       if (id == null)
 	continue;
 
-      IdField idField = introspectId(manager,
+      IdField idField = introspectId(persistenceUnit,
 				     entityType,
 				     field,
 				     fieldName,
@@ -483,12 +487,12 @@ public class EntityIntrospector {
     }
 
     if (keys.size() == 1)
-      entityType.setId(new Id(entityType, keys));
+      entityType.setId(new com.caucho.amber.field.Id(entityType, keys));
     else
       entityType.setId(new CompositeId(entityType, keys));
   }
 
-  private IdField introspectId(AmberManager manager,
+  private IdField introspectId(AmberPersistenceUnit persistenceUnit,
 			       EntityType entityType,
 			       JAccessibleObject field,
 			       String fieldName,
@@ -498,16 +502,16 @@ public class EntityIntrospector {
     JAnnotation id = field.getAnnotation(javax.persistence.Id.class);
     JAnnotation column = field.getAnnotation(javax.persistence.Column.class);
 
-    Type amberType = manager.createType(fieldType);
+    Type amberType = persistenceUnit.createType(fieldType);
 
     Column keyColumn = createColumn(entityType, "ID", column, amberType);
 
     KeyPropertyField idField;
     idField = new KeyPropertyField(entityType, fieldName, keyColumn);
 
-    JdbcMetaData metaData = manager.getMetaData();
+    JdbcMetaData metaData = persistenceUnit.getMetaData();
 
-    if (GeneratorType.IDENTITY.equals(id.get("generate"))) {
+    if (GenerationType.IDENTITY.equals(id.get("generate"))) {
       if (! metaData.supportsIdentity())
 	throw new ConfigException(L.l("'{0}' does not support identity.",
 				      metaData.getDatabaseName()));
@@ -515,32 +519,32 @@ public class EntityIntrospector {
       keyColumn.setGeneratorType("identity");
       idField.setGenerator("identity");
     }
-    else if (GeneratorType.SEQUENCE.equals(id.get("generate"))) {
+    else if (GenerationType.SEQUENCE.equals(id.get("generate"))) {
       if (! metaData.supportsSequences())
 	throw new ConfigException(L.l("'{0}' does not support sequence.",
 				      metaData.getDatabaseName()));
 
-      addSequenceIdGenerator(manager, idField, id);
+      addSequenceIdGenerator(persistenceUnit, idField, id);
     }
-    else if (GeneratorType.TABLE.equals(id.get("generate"))) {
-      addTableIdGenerator(manager, idField, id);
+    else if (GenerationType.TABLE.equals(id.get("generate"))) {
+      addTableIdGenerator(persistenceUnit, idField, id);
     }
-    else if (GeneratorType.AUTO.equals(id.get("generate"))) {
+    else if (GenerationType.AUTO.equals(id.get("generate"))) {
       if (metaData.supportsIdentity()) {
 	keyColumn.setGeneratorType("identity");
 	idField.setGenerator("identity");
       }
       else if (metaData.supportsSequences()) {
-	addSequenceIdGenerator(manager, idField, id);
+	addSequenceIdGenerator(persistenceUnit, idField, id);
       }
       else
-	addTableIdGenerator(manager, idField, id);
+	addTableIdGenerator(persistenceUnit, idField, id);
     }
 
     return idField;
   }
 
-  private void addSequenceIdGenerator(AmberManager manager,
+  private void addSequenceIdGenerator(AmberPersistenceUnit persistenceUnit,
 				      KeyPropertyField idField,
 				      JAnnotation idAnn)
     throws ConfigException
@@ -552,12 +556,12 @@ public class EntityIntrospector {
     if (name == null || "".equals(name))
       name = idField.getSourceType().getTable().getName() + "_cseq";
 
-    IdGenerator gen = manager.createSequenceGenerator(name, 1);
+    IdGenerator gen = persistenceUnit.createSequenceGenerator(name, 1);
 
     idField.getSourceType().setGenerator(idField.getName(), gen);
   }
 
-  private void addTableIdGenerator(AmberManager manager,
+  private void addTableIdGenerator(AmberPersistenceUnit persistenceUnit,
 				   KeyPropertyField idField,
 				   JAnnotation idAnn)
     throws ConfigException
@@ -569,16 +573,17 @@ public class EntityIntrospector {
     if (name == null || "".equals(name))
       name = "caucho";
 
-    IdGenerator gen = manager.getTableGenerator(name);
+    IdGenerator gen = persistenceUnit.getTableGenerator(name);
 
     if (gen == null) {
       String genName = "GEN_TABLE";
 
-      GeneratorTableType genTable = manager.createGeneratorTable(genName);
+      GeneratorTableType genTable;
+      genTable = persistenceUnit.createGeneratorTable(genName);
 
       gen = genTable.createGenerator(name);
 
-      manager.putTableGenerator(name, gen);
+      persistenceUnit.putTableGenerator(name, gen);
     }
 
     idField.getSourceType().setGenerator(idField.getName(), gen);
@@ -678,7 +683,7 @@ public class EntityIntrospector {
   /**
    * Introspects the methods.
    */
-  private void introspectMethods(AmberManager manager,
+  private void introspectMethods(AmberPersistenceUnit persistenceUnit,
 				 EntityType entityType,
 				 EntityType parentType,
 				 JClass type)
@@ -738,14 +743,14 @@ public class EntityIntrospector {
 
       JClass fieldType = method.getReturnType();
 
-      introspectField(manager, entityType, method, fieldName, fieldType);
+      introspectField(persistenceUnit, entityType, method, fieldName, fieldType);
     }
   }
 
   /**
    * Introspects the fields.
    */
-  private void introspectFields(AmberManager manager,
+  private void introspectFields(AmberPersistenceUnit persistenceUnit,
 				EntityType entityType,
 				EntityType parentType,
 				JClass type)
@@ -765,11 +770,11 @@ public class EntityIntrospector {
 
       JClass fieldType = field.getType();
 
-      introspectField(manager, entityType, field, fieldName, fieldType);
+      introspectField(persistenceUnit, entityType, field, fieldName, fieldType);
     }
   }
 
-  private void introspectField(AmberManager manager,
+  private void introspectField(AmberPersistenceUnit persistenceUnit,
 			       EntityType sourceType,
 			       JAccessibleObject field,
 			       String fieldName,
@@ -818,12 +823,12 @@ public class EntityIntrospector {
 			JClass fieldType)
     throws ConfigException
   {
-    AmberManager manager = sourceType.getAmberManager();
+    AmberPersistenceUnit persistenceUnit = sourceType.getPersistenceUnit();
 
     JAnnotation basicAnn = field.getAnnotation(javax.persistence.Basic.class);
     JAnnotation columnAnn = field.getAnnotation(javax.persistence.Column.class);
 
-    Type amberType = manager.createType(fieldType);
+    Type amberType = persistenceUnit.createType(fieldType);
 
     Column fieldColumn = createColumn(sourceType, fieldName,
 				      columnAnn, amberType);
@@ -908,7 +913,7 @@ public class EntityIntrospector {
 			    JClass fieldType)
     throws ConfigException
   {
-    AmberManager manager = sourceType.getAmberManager();
+    AmberPersistenceUnit persistenceUnit = sourceType.getPersistenceUnit();
 
     JAnnotation manyToOneAnn = field.getAnnotation(ManyToOne.class);
 
@@ -932,7 +937,7 @@ public class EntityIntrospector {
     EntityManyToOneField manyToOneField;
     manyToOneField = new EntityManyToOneField(sourceType, fieldName);
 
-    EntityType targetType = manager.createEntity(targetName, fieldType);
+    EntityType targetType = persistenceUnit.createEntity(targetName, fieldType);
 
     manyToOneField.setType(targetType);
 
@@ -1021,7 +1026,7 @@ public class EntityIntrospector {
   {
     JAnnotation manyToManyAnn = field.getAnnotation(ManyToMany.class);
 
-    AmberManager manager = sourceType.getAmberManager();
+    AmberPersistenceUnit persistenceUnit = sourceType.getPersistenceUnit();
 
       JType retType;
 
@@ -1044,14 +1049,14 @@ public class EntityIntrospector {
 	throw new ConfigException(L.l("can't determine target name for {0}",
 				      fieldName));
 
-    EntityType targetType = manager.getEntity(targetName);
+    EntityType targetType = persistenceUnit.getEntity(targetName);
 
     EntityManyToManyField manyToManyField;
     manyToManyField = new EntityManyToManyField(sourceType, fieldName);
     manyToManyField.setType(targetType);
 
     JAnnotation associationTableAnn =
-      field.getAnnotation(AssociationTable.class);
+      field.getAnnotation(JoinTable.class);
 
     String sqlTable = sourceType.getTable().getName() + "_" + targetType.getTable().getName();
 
@@ -1066,7 +1071,7 @@ public class EntityIntrospector {
       if (! table.getString("name").equals(""))
 	sqlTable = table.getString("name");
 
-      mapTable = manager.createTable(sqlTable);
+      mapTable = persistenceUnit.createTable(sqlTable);
 
       sourceColumns = calculateColumns(mapTable,
 				       sourceType,
@@ -1077,7 +1082,7 @@ public class EntityIntrospector {
 				       (Object []) associationTableAnn.get("inverseJoinColumns"));
     }
     else {
-      mapTable = manager.createTable(sqlTable);
+      mapTable = persistenceUnit.createTable(sqlTable);
 
       sourceColumns = calculateColumns(mapTable, sourceType);
 
@@ -1206,7 +1211,7 @@ public class EntityIntrospector {
     {
       JAnnotation oneToManyAnn = _field.getAnnotation(OneToMany.class);
 
-      AmberManager manager = _entityType.getAmberManager();
+      AmberPersistenceUnit persistenceUnit = _entityType.getPersistenceUnit();
 
       JType retType;
 
@@ -1229,7 +1234,7 @@ public class EntityIntrospector {
 	throw new ConfigException(L.l("can't determine target name for {0}",
 				      _fieldName));
 
-      EntityType targetType = manager.getEntity(targetName);
+      EntityType targetType = persistenceUnit.getEntity(targetName);
       if (targetType == null)
 	throw new ConfigException(L.l("'{0}' is an unknown entity.",
 				      targetName));
@@ -1290,7 +1295,7 @@ public class EntityIntrospector {
     {
       JAnnotation oneToOneAnn = _field.getAnnotation(OneToOne.class);
 
-      AmberManager manager = _entityType.getAmberManager();
+      AmberPersistenceUnit persistenceUnit = _entityType.getPersistenceUnit();
 
       String targetName = oneToOneAnn.getString("targetEntity");
       String mappedBy =  oneToOneAnn.getString("mappedBy");
@@ -1298,7 +1303,7 @@ public class EntityIntrospector {
       EntityType targetType = null;
 
       if (targetName != null && ! targetName.equals("")) {
-	targetType = manager.getEntity(targetName);
+	targetType = persistenceUnit.getEntity(targetName);
 	
 	if (targetType == null)
 	  throw new ConfigException(L.l("{0}: '{1}' is an unknown entity for '{2}'.",
@@ -1307,7 +1312,7 @@ public class EntityIntrospector {
 					_field.getName()));
       }
       else {
-	targetType = manager.getEntity(_field.getReturnType().getName());
+	targetType = persistenceUnit.getEntity(_field.getReturnType().getName());
 
 	if (targetType == null)
 	  throw new ConfigException(L.l("{0} can't determine target name for '{1}'",

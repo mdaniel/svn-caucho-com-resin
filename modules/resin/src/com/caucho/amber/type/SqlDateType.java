@@ -19,7 +19,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -40,7 +40,7 @@ import java.sql.Date;
 import java.sql.Types;
 import java.sql.SQLException;
 
-import com.caucho.amber.AmberManager;
+import com.caucho.amber.manager.AmberPersistenceUnit;
 
 /**
  * The type of a property.
@@ -73,7 +73,7 @@ public class SqlDateType extends Type {
   /**
    * Generates the type for the table.
    */
-  public String generateCreateColumnSQL(AmberManager manager, int length, int precision, int scale)
+  public String generateCreateColumnSQL(AmberPersistenceUnit manager, int length, int precision, int scale)
   {
     return manager.getCreateColumnSQL(Types.DATE, length, precision, scale);
   }

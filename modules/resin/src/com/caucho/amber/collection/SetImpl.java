@@ -20,7 +20,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
  *
- *   Free SoftwareFoundation, Inc.
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -38,10 +38,9 @@ import java.sql.SQLException;
 import com.caucho.util.Alarm;
 
 import com.caucho.amber.AmberQuery;
-import com.caucho.amber.AmberConnection;
 import com.caucho.amber.AmberRuntimeException;
 
-import com.caucho.amber.connection.AmberConnectionImpl;
+import com.caucho.amber.manager.AmberConnection;
 
 import com.caucho.amber.query.UserQuery;
   
@@ -52,12 +51,12 @@ public class SetImpl<E> extends AbstractSet<E>
   implements AmberCollection {
   private AmberQuery _query;
 
-  private AmberConnectionImpl _aConn;
+  private AmberConnection _aConn;
 
   private ArrayList<E> _values = new ArrayList<E>();
   private long _expireTime;
 
-  public SetImpl(AmberConnectionImpl aConn, String query)
+  public SetImpl(AmberConnection aConn, String query)
   {
     _aConn = aConn;
     
@@ -78,7 +77,7 @@ public class SetImpl<E> extends AbstractSet<E>
   /**
    * Sets the session.
    */
-  public void setSession(AmberConnection aConn)
+  public void setSession(com.caucho.amber.AmberConnection aConn)
   {
     throw new UnsupportedOperationException();
     // setSession(((UserAmberConnection) aConn).getManagedConnection());
@@ -87,7 +86,7 @@ public class SetImpl<E> extends AbstractSet<E>
   /**
    * Sets the session.
    */
-  public void setSession(AmberConnectionImpl aConn)
+  public void setSession(AmberConnection aConn)
   {
     _aConn = aConn;
     

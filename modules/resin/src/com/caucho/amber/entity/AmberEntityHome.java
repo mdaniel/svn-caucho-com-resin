@@ -19,7 +19,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -46,12 +46,12 @@ import com.caucho.log.Log;
 
 import com.caucho.config.ConfigException;
 
-import com.caucho.amber.AmberManager;
 import com.caucho.amber.AmberException;
 
 import com.caucho.amber.type.EntityType;
 
-import com.caucho.amber.connection.AmberConnectionImpl;
+import com.caucho.amber.manager.AmberConnection;
+import com.caucho.amber.manager.AmberPersistenceUnit;
 
 import com.caucho.amber.query.CacheUpdate;
 
@@ -62,7 +62,7 @@ public class AmberEntityHome {
   private static final L10N L = new L10N(AmberEntityHome.class);
   private static final Logger log = Log.open(AmberEntityHome.class);
 
-  private AmberManager _manager;
+  private AmberPersistenceUnit _manager;
   private EntityType _entityType;
 
   private EntityFactory _entityFactory = new EntityFactory();
@@ -80,7 +80,7 @@ public class AmberEntityHome {
   
   private Method _cauchoGetBeanMethod;
 
-  public AmberEntityHome(AmberManager manager, EntityType type)
+  public AmberEntityHome(AmberPersistenceUnit manager, EntityType type)
   {
     _manager = manager;
     _entityType = type;
@@ -96,7 +96,7 @@ public class AmberEntityHome {
   /**
    * Returns the manager.
    */
-  public AmberManager getManager()
+  public AmberPersistenceUnit getManager()
   {
     return _manager;
   }  
@@ -203,7 +203,7 @@ public class AmberEntityHome {
   /**
    * Finds by the primary key.
    */
-  public Entity load(AmberConnectionImpl aConn, Object key)
+  public Entity load(AmberConnection aConn, Object key)
     throws AmberException
   {
     return find(aConn, key, true);
@@ -212,7 +212,7 @@ public class AmberEntityHome {
   /**
    * Finds by the primary key.
    */
-  public Entity loadLazy(AmberConnectionImpl aConn, Object key)
+  public Entity loadLazy(AmberConnection aConn, Object key)
     throws AmberException
   {
     return find(aConn, key, false);
@@ -221,7 +221,7 @@ public class AmberEntityHome {
   /**
    * Finds by the primary key.
    */
-  public EntityItem findItem(AmberConnectionImpl aConn,
+  public EntityItem findItem(AmberConnection aConn,
 			     ResultSet rs, int index)
     throws SQLException
   {
@@ -231,7 +231,7 @@ public class AmberEntityHome {
   /**
    * Finds by the primary key.
    */
-  public Object loadFull(AmberConnectionImpl aConn, ResultSet rs, int index)
+  public Object loadFull(AmberConnection aConn, ResultSet rs, int index)
     throws SQLException
   {
     EntityItem item = findItem(aConn, rs, index);
@@ -271,7 +271,7 @@ public class AmberEntityHome {
   /**
    * Finds by the primary key.
    */
-  public Object loadLazy(AmberConnectionImpl aConn, ResultSet rs, int index)
+  public Object loadLazy(AmberConnection aConn, ResultSet rs, int index)
     throws SQLException
   {
     EntityItem item = findItem(aConn, rs, index);
@@ -289,7 +289,7 @@ public class AmberEntityHome {
    * @param aConn the Amber connection to associate with the loaded item
    * @param isLoad if true, try to load the bean
    */
-  public Entity find(AmberConnectionImpl aConn, Object key, boolean isLoad)
+  public Entity find(AmberConnection aConn, Object key, boolean isLoad)
     throws AmberException
   {
     EntityItem item = findEntityItem(aConn, key, isLoad);
@@ -304,7 +304,7 @@ public class AmberEntityHome {
    * @param key the primary key
    * @param isLoad if true, try to load the bean
    */
-  public EntityItem findEntityItem(AmberConnectionImpl aConn,
+  public EntityItem findEntityItem(AmberConnection aConn,
 				   Object key,
 				   boolean isLoad)
     throws AmberException
@@ -367,7 +367,7 @@ public class AmberEntityHome {
    * @param key the primary key
    * @param discriminator the object's discriminator
    */
-  public EntityItem findDiscriminatorEntityItem(AmberConnectionImpl aConn,
+  public EntityItem findDiscriminatorEntityItem(AmberConnection aConn,
 						Object key,
 						String discriminator)
     throws SQLException
@@ -394,7 +394,7 @@ public class AmberEntityHome {
    * Finds by the primary key.
    */
   public Entity makePersistent(Entity entity,
-			       AmberConnectionImpl aConn,
+			       AmberConnection aConn,
 			       boolean isLazy)
     throws SQLException
   {
@@ -406,7 +406,7 @@ public class AmberEntityHome {
   /**
    * Saves based on the object.
    */
-  public void save(AmberConnectionImpl aConn, Entity entity)
+  public void save(AmberConnection aConn, Entity entity)
     throws AmberException
   {
     try {
@@ -419,7 +419,7 @@ public class AmberEntityHome {
   /**
    * Deletes by the primary key.
    */
-  public void delete(AmberConnectionImpl aConn, Object key)
+  public void delete(AmberConnection aConn, Object key)
     throws SQLException
   {
     _manager.removeEntity(getRootType(), key);
@@ -445,7 +445,7 @@ public class AmberEntityHome {
   /**
    * Deletes by the primary key.
    */
-  public void delete(AmberConnectionImpl aConn, long primaryKey)
+  public void delete(AmberConnection aConn, long primaryKey)
     throws SQLException
   {
     /*

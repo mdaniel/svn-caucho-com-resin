@@ -42,8 +42,6 @@ import com.caucho.util.Log;
 
 import com.caucho.config.ConfigException;
 
-import com.caucho.amber.AmberManager;
-
 import com.caucho.amber.type.Type;
 import com.caucho.amber.type.EntityType;
 
@@ -53,6 +51,8 @@ import com.caucho.amber.field.AmberField;
 import com.caucho.amber.field.EntityManyToOneField;
 import com.caucho.amber.field.DependentEntityOneToOneField;
 import com.caucho.amber.field.KeyManyToOneField;
+
+import com.caucho.amber.manager.AmberPersistenceUnit;
 
 import com.caucho.amber.table.ForeignColumn;
 import com.caucho.amber.table.LinkColumns;
@@ -207,7 +207,7 @@ public class CmrManyToOne extends CmrRelation {
   /**
    * Amber creating the id field.
    */
-  public IdField createId(AmberManager amberManager, EntityType type)
+  public IdField createId(AmberPersistenceUnit amberPersistenceUnit, EntityType type)
     throws ConfigException
   {
     String fieldName = getName();
@@ -235,7 +235,7 @@ public class CmrManyToOne extends CmrRelation {
   public AmberField assembleAmber(EntityType type)
     throws ConfigException
   {
-    AmberManager manager = type.getAmberManager();
+    AmberPersistenceUnit manager = type.getPersistenceUnit();
     EntityType targetType = getTargetBean().getEntityType();
 
     if (_isDependent) {

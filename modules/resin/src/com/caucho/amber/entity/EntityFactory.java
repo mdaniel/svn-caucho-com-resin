@@ -19,7 +19,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -35,7 +35,7 @@ import java.sql.SQLException;
 import com.caucho.util.L10N;
 import com.caucho.util.Log;
 
-import com.caucho.amber.connection.AmberConnectionImpl;
+import com.caucho.amber.manager.AmberConnection;
 
 /**
  * Manages the set of persistent beans.
@@ -47,7 +47,7 @@ public class EntityFactory {
   /**
    * Gets the appropriate entity given the EntityItem.
    */
-  public Object getEntity(AmberConnectionImpl aConn, EntityItem item)
+  public Object getEntity(AmberConnection aConn, EntityItem item)
   {
     return aConn.getEntity(item);
   }
@@ -55,7 +55,7 @@ public class EntityFactory {
   /**
    * Deletes the proxy.
    */
-  public void delete(AmberConnectionImpl aConn, Object proxy)
+  public void delete(AmberConnection aConn, Object proxy)
     throws SQLException
   {
     aConn.delete((Entity) proxy);

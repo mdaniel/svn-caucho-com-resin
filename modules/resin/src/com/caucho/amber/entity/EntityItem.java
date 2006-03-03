@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -28,7 +29,7 @@
 
 package com.caucho.amber.entity;
 
-import com.caucho.amber.connection.AmberConnectionImpl;
+import com.caucho.amber.manager.AmberConnection;
 
 /**
  * An entity item handles the living entities.
@@ -47,9 +48,9 @@ abstract public class EntityItem {
   
   abstract public void expire();
   
-  abstract public Entity copy(AmberConnectionImpl aConn);
+  abstract public Entity copy(AmberConnection aConn);
   
-  public Entity load(AmberConnectionImpl aConn)
+  public Entity load(AmberConnection aConn)
   {
     return aConn.getEntity(this);
   }

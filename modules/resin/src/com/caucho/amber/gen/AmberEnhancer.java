@@ -60,7 +60,6 @@ import com.caucho.java.gen.JavaClassGenerator;
 import com.caucho.java.gen.DependencyComponent;
 import com.caucho.java.gen.GenClass;
 
-import com.caucho.amber.AmberManager;
 import com.caucho.amber.AmberRuntimeException;
 
 import com.caucho.amber.type.EntityType;
@@ -68,7 +67,7 @@ import com.caucho.amber.type.SubEntityType;
 
 import com.caucho.amber.field.AmberField;
 
-import com.caucho.amber.hibernate.HibernateParser;
+import com.caucho.amber.manager.AmberContainer;
 
 import com.caucho.bytecode.ConstantPool;
 import com.caucho.bytecode.FieldRefConstant;
@@ -88,13 +87,13 @@ public class AmberEnhancer implements AmberGenerator, ClassEnhancer {
   private Path _configDirectory;
   private boolean _useHibernateFiles;
 
-  private AmberManager _amberManager;
+  private AmberContainer _amberContainer;
 
   private ArrayList<String> _pendingClassNames = new ArrayList<String>();
 
-  public AmberEnhancer(AmberManager manager)
+  public AmberEnhancer(AmberContainer amberContainer)
   {
-    _amberManager = manager;
+    _amberContainer = amberContainer;
   }
   
   /**
@@ -106,38 +105,11 @@ public class AmberEnhancer implements AmberGenerator, ClassEnhancer {
   }
 
   /**
-   * Sets true if should use hibernate files.
-   */
-  public void setUseHibernateFiles(boolean useHibernateFiles)
-  {
-    _useHibernateFiles = useHibernateFiles;
-  }
-
-  /**
    * Initialize the enhancer.
    */
   public void init()
     throws Exception
   {
-    if (_useHibernateFiles && _configDirectory != null) {
-      String []list = _configDirectory.list();
-
-      for (int i = 0; i < list.length; i++) {
-	String name = list[i];
-	if (! name.endsWith(".hbm.xml"))
-	  continue;
-
-	Path path = _configDirectory.lookup(name);
-
-	parseHibernateMapping(path);
-      }
-
-      // XXX: _amberManager.generate();
-
-      compile();
-
-      _amberManager.initEntityHomes();
-    }
   }
 
   /**
@@ -188,7 +160,7 @@ public class AmberEnhancer implements AmberGenerator, ClassEnhancer {
     if (p > 0)
       className = className.substring(0, p);
     
-    EntityType type = _amberManager.getEntity(className);
+    EntityType type = _amberContainer.getEntity(className);
 
     if (type != null && type.isEnhanced())
       return true;
@@ -228,7 +200,7 @@ public class AmberEnhancer implements AmberGenerator, ClassEnhancer {
 
       String className = cl.getName();
       
-      EntityType type = _amberManager.getEntity(className);
+      EntityType type = _amberContainer.getEntity(className);
 
       if (parentType == null)
 	parentType = type;
@@ -264,7 +236,7 @@ public class AmberEnhancer implements AmberGenerator, ClassEnhancer {
     try {
       parseHibernateMapping(path);
 
-      EntityType type = _amberManager.getEntity(className);
+      EntityType type = _amberContainer.getEntity(className);
       type.setInstanceClassName(className + "__ResinExt");
       type.setEnhanced(true);
 
@@ -280,7 +252,7 @@ public class AmberEnhancer implements AmberGenerator, ClassEnhancer {
   public void preEnhance(JavaClass baseClass)
     throws Exception
   {
-    EntityType type = _amberManager.getEntity(baseClass.getName());
+    EntityType type = _amberContainer.getEntity(baseClass.getName());
 
     if (type instanceof SubEntityType) {
       SubEntityType subType = (SubEntityType) type;
@@ -300,13 +272,13 @@ public class AmberEnhancer implements AmberGenerator, ClassEnhancer {
   {
     String className = baseClass.getName();
     
-    EntityType type = _amberManager.getEntity(className);
+    EntityType type = _amberContainer.getEntity(className);
 
     // Type can be null for subclasses and inner classes that need fixups
     if (type != null) {
       log.info("Amber enhancing class " + className);
 
-      // XXX: _amberManager.configure();
+      // XXX: _amberContainerenceUnitenceUnit.configure();
 
       type.init();
 
@@ -323,12 +295,12 @@ public class AmberEnhancer implements AmberGenerator, ClassEnhancer {
       DependencyComponent dependency = genClass.addDependencyComponent();
       dependency.addDependencyList(type.getDependencies());
     
-      //_amberManager.generate();
+      //_amberContainerenceUnitenceUnit.generate();
       // generate(type);
 
       // compile();
     
-      // XXX: _amberManager.initEntityHomes();
+      // XXX: _amberContainerenceUnitenceUnit.initEntityHomes();
     }
   }
   
@@ -436,10 +408,10 @@ public class AmberEnhancer implements AmberGenerator, ClassEnhancer {
     
     ArrayList<FieldMap> fieldMaps = new ArrayList<FieldMap>();
 
-    JClass thisClass = _amberManager.getJClassLoader().forName(className.replace('/', '.'));
+    JClass thisClass = _amberContainer.getJClassLoader().forName(className.replace('/', '.'));
 
     for (; thisClass != null; thisClass = thisClass.getSuperClass()) {
-      EntityType type = _amberManager.getEntity(thisClass.getName());
+      EntityType type = _amberContainer.getEntity(thisClass.getName());
 
       if (type == null || ! type.isFieldAccess())
 	continue;
@@ -511,7 +483,7 @@ public class AmberEnhancer implements AmberGenerator, ClassEnhancer {
       // XXX:
       // thread.setContextClassLoader(getRawLoader());
 
-      // HibernateParser.parse(_amberManager, path);
+      // HibernateParser.parse(_amberContainerenceUnitenceUnit, path);
     } finally {
       thread.setContextClassLoader(oldLoader);
     }

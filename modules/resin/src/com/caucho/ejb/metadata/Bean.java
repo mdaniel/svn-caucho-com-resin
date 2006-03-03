@@ -72,7 +72,7 @@ import com.caucho.ejb.cfg.MethodSignature;
 import com.caucho.ejb.cfg.EjbMethod;
 import com.caucho.ejb.cfg.EjbMethodPattern;
 
-import com.caucho.ejb.entity2.EntityIntrospector;
+import com.caucho.amber.cfg.EntityIntrospector;
 
 /**
  * Configuration for a new bean based on metadata.

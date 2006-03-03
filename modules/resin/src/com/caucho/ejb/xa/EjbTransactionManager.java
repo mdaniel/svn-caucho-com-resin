@@ -51,7 +51,7 @@ import com.caucho.log.Log;
 
 import com.caucho.transaction.TransactionManagerImpl;
 
-import com.caucho.amber.connection.AmberConnectionImpl;
+import com.caucho.amber.manager.AmberConnection;
 
 import com.caucho.ejb.EnvServerManager;
 import com.caucho.ejb.EJBExceptionWrapper;
@@ -186,7 +186,7 @@ public class EjbTransactionManager {
   /**
    * Returns a new AmberConnection.
    */
-  public AmberConnectionImpl getAmberConnection()
+  public AmberConnection getAmberConnection()
   {
     TransactionContext xaContext = _threadTransaction.get();
 

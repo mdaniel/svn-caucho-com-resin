@@ -19,7 +19,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -30,9 +30,9 @@ package com.caucho.amber.type;
 
 import com.caucho.util.L10N;
 
-import com.caucho.amber.AmberManager;
-
 import com.caucho.amber.field.Id;
+
+import com.caucho.amber.manager.AmberPersistenceUnit;
 
 import com.caucho.amber.table.Column;
 
@@ -47,9 +47,9 @@ public class SubEntityType extends EntityType {
 
   private Id _id;
 
-  public SubEntityType(AmberManager amberManager, EntityType parent)
+  public SubEntityType(AmberPersistenceUnit amberPersistenceUnit, EntityType parent)
   {
-    super(amberManager);
+    super(amberPersistenceUnit);
 
     _parent = parent;
     _root = parent.getRootType();

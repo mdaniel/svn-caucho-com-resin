@@ -35,7 +35,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import com.caucho.amber.AmberManager;
+import com.caucho.amber.manager.AmberPersistenceUnit;
 
 import com.caucho.util.L10N;
 
@@ -72,7 +72,7 @@ public class StringType extends Type {
   /**
    * Generates the type for the table.
    */
-  public String generateCreateColumnSQL(AmberManager manager, int length, int precision, int scale)
+  public String generateCreateColumnSQL(AmberPersistenceUnit manager, int length, int precision, int scale)
   {
     if (length == 0)
       length = 255;

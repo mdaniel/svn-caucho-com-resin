@@ -49,7 +49,7 @@ import com.caucho.ejb.cfg.EjbEntityBean;
 
 import com.caucho.ejb.ql.EjbSelectQuery;
 
-import com.caucho.amber.AmberManager;
+import com.caucho.amber.manager.AmberPersistenceUnit;
 
 import com.caucho.amber.type.EntityType;
 import com.caucho.amber.type.Type;

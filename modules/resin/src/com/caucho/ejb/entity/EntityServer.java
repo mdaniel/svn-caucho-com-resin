@@ -62,7 +62,7 @@ import com.caucho.config.ConfigException;
 
 import com.caucho.amber.AmberException;
 
-import com.caucho.amber.connection.AmberConnectionImpl;
+import com.caucho.amber.manager.AmberConnection;
 
 import com.caucho.amber.entity.AmberEntityHome;
 import com.caucho.amber.entity.EntityItem;
@@ -631,7 +631,7 @@ public class EntityServer extends AbstractServer {
 	EntityItem amberItem = null;
 	
 	if (_isCMP) {
-	  AmberConnectionImpl aConn;
+	  AmberConnection aConn;
 	  aConn = _amberEntityHome.getManager().getCacheConnection();
 	    
 	  try {

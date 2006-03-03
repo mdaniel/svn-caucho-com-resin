@@ -19,7 +19,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -36,7 +36,7 @@ import com.caucho.util.L10N;
 
 import com.caucho.config.ConfigException;
 
-import com.caucho.amber.AmberManager;
+import com.caucho.amber.manager.AmberPersistenceUnit;
 
 import com.caucho.amber.table.Table;
 import com.caucho.amber.table.Column;
@@ -49,7 +49,7 @@ import com.caucho.amber.idgen.AmberTableGenerator;
 public class GeneratorTableType extends Type {
   private static final L10N L = new L10N(GeneratorTableType.class);
 
-  private AmberManager _amberManager;
+  private AmberPersistenceUnit _amberPersistenceUnit;
 
   private Table _table;
 
@@ -59,19 +59,19 @@ public class GeneratorTableType extends Type {
   private HashMap<String,AmberTableGenerator> _genMap =
     new HashMap<String,AmberTableGenerator>();
 
-  public GeneratorTableType(AmberManager amberManager, String name)
+  public GeneratorTableType(AmberPersistenceUnit amberPersistenceUnit, String name)
   {
-    _amberManager = amberManager;
+    _amberPersistenceUnit = amberPersistenceUnit;
 
-    _table = amberManager.createTable(name);
+    _table = amberPersistenceUnit.createTable(name);
   }
 
   /**
    * Returns the amber manager.
    */
-  public AmberManager getAmberManager()
+  public AmberPersistenceUnit getAmberManager()
   {
-    return _amberManager;
+    return _amberPersistenceUnit;
   }
 
   /**

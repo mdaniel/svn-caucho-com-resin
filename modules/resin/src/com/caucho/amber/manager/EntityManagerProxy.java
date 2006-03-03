@@ -42,24 +42,24 @@ import javax.persistence.FlushModeType;
 
 import com.caucho.util.L10N;
 
-import com.caucho.amber.AmberManager;
+import com.caucho.amber.manager.AmberPersistenceUnit;
 
 /**
  * The Entity manager
  */
 public class EntityManagerProxy implements EntityManager {
-  private static final L10N L = new L10N(EntityManagerImpl.class);
+  private static final L10N L = new L10N(EntityManagerProxy.class);
   private static final Logger log
-    = Logger.getLogger(EntityManagerImpl.class.getName());
+    = Logger.getLogger(EntityManagerProxy.class.getName());
   
   private final ThreadLocal<EntityManagerImpl> _localManager
     = new ThreadLocal<EntityManagerImpl>();
 
-  private AmberManager _amberManager;
+  private AmberPersistenceUnit _amberPersistenceUnit;
 
-  public EntityManagerProxy(AmberManager amberManager)
+  public EntityManagerProxy(AmberPersistenceUnit amberPersistenceUnit)
   {
-    _amberManager = amberManager;
+    _amberPersistenceUnit = amberPersistenceUnit;
   }
   
   /**
@@ -240,7 +240,7 @@ public class EntityManagerProxy implements EntityManager {
     EntityManagerImpl manager = _localManager.get();
 
     if (manager == null) {
-      manager = new EntityManagerImpl(_amberManager, this);
+      manager = new EntityManagerImpl(_amberPersistenceUnit, this);
       
       _localManager.set(manager);
     }

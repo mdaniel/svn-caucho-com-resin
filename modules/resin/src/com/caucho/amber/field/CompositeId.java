@@ -45,7 +45,7 @@ import com.caucho.log.Log;
 
 import com.caucho.java.JavaWriter;
 
-import com.caucho.amber.AmberManager;
+import com.caucho.amber.manager.AmberPersistenceUnit;
 
 import com.caucho.amber.type.EntityType;
 
@@ -178,7 +178,7 @@ public class CompositeId extends Id {
     out.println();
     out.print("private static ");
     out.print(getForeignTypeName() + " " + loadName);
-    out.println("(com.caucho.amber.connection.AmberConnectionImpl aConn, java.sql.ResultSet rs, int index)");
+    out.println("(com.caucho.amber.connection.AmberConnection aConn, java.sql.ResultSet rs, int index)");
     out.println("  throws java.sql.SQLException");
     
     out.println("{");
@@ -385,7 +385,7 @@ public class CompositeId extends Id {
   /**
    * Generates the where clause.
    */
-  public String generateCreateTableSQL(AmberManager manager)
+  public String generateCreateTableSQL(AmberPersistenceUnit manager)
   {
     return null;
   }

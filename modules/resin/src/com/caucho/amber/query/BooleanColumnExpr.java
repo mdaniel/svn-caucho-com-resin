@@ -34,7 +34,7 @@ import com.caucho.util.CharBuffer;
 import com.caucho.amber.table.Column;
 import com.caucho.amber.table.LinkColumns;
 
-import com.caucho.amber.AmberManager;
+import com.caucho.amber.manager.AmberPersistenceUnit;
 
 import com.caucho.jdbc.JdbcMetaData;
 
@@ -141,7 +141,7 @@ public class BooleanColumnExpr extends AbstractAmberExpr {
       term.append(_column.getName());
     }
 
-    AmberManager manager = _column.getTable().getAmberManager();
+    AmberPersistenceUnit manager = _column.getTable().getAmberManager();
 
     JdbcMetaData metaData = manager.getMetaData();
 

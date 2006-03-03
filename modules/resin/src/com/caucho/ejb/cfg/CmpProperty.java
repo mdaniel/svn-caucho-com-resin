@@ -36,7 +36,7 @@ import com.caucho.util.CharBuffer;
 
 import com.caucho.config.ConfigException;
 
-import com.caucho.amber.AmberManager;
+import com.caucho.amber.manager.AmberPersistenceUnit;
 
 import com.caucho.amber.type.EntityType;
 
@@ -184,7 +184,7 @@ public class CmpProperty {
   /**
    * Amber creating the id field.
    */
-  public IdField createId(AmberManager amberManager, EntityType type)
+  public IdField createId(AmberPersistenceUnit amberPersistenceUnit, EntityType type)
     throws ConfigException
   {
     throw new UnsupportedOperationException(getClass().getName());

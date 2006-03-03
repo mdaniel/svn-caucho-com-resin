@@ -42,7 +42,7 @@ import javax.persistence.Query;
 import javax.persistence.TemporalType;
 import javax.persistence.FlushModeType;
 
-import com.caucho.amber.connection.AmberConnectionImpl;
+import com.caucho.amber.manager.AmberConnection;
 
 import com.caucho.amber.query.AbstractQuery;
 import com.caucho.amber.query.UserQuery;
@@ -60,14 +60,14 @@ public class QueryImpl implements Query {
   private AbstractQuery _query;
   private UserQuery _userQuery;
     
-  private AmberConnectionImpl _aConn;
+  private AmberConnection _aConn;
   private int _firstResult;
   private int _maxResults = Integer.MAX_VALUE / 2;
 
   /**
    * Creates a manager instance.
    */
-  QueryImpl(AbstractQuery query, AmberConnectionImpl aConn)
+  QueryImpl(AbstractQuery query, AmberConnection aConn)
   {
     _query = query;
     _aConn = aConn;

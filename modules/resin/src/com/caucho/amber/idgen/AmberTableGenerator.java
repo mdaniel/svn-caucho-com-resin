@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -41,11 +42,10 @@ import javax.sql.DataSource;
 import com.caucho.util.L10N;
 import com.caucho.util.Log;
 
-import com.caucho.amber.AmberManager;
-
 import com.caucho.amber.type.GeneratorTableType;
 
-import com.caucho.amber.connection.AmberConnectionImpl;
+import com.caucho.amber.manager.AmberConnection;
+import com.caucho.amber.manager.AmberPersistenceUnit;
 
 /**
  * Generator table.
@@ -54,7 +54,7 @@ public class AmberTableGenerator extends IdGenerator {
   private static final L10N L = new L10N(AmberTableGenerator.class);
   private static final Logger log = Log.open(AmberTableGenerator.class);
   
-  private AmberManager _manager;
+  private AmberPersistenceUnit _manager;
   private GeneratorTableType _table;
   private String _name;
 
@@ -66,7 +66,7 @@ public class AmberTableGenerator extends IdGenerator {
   /**
    * Creates the table generator.
    */
-  public AmberTableGenerator(AmberManager manager,
+  public AmberTableGenerator(AmberPersistenceUnit manager,
 			     GeneratorTableType table,
 			     String name)
   {
@@ -78,7 +78,7 @@ public class AmberTableGenerator extends IdGenerator {
   /**
    * Allocates the next group of ids.
    */
-  public long allocateGroup(AmberConnectionImpl aConn)
+  public long allocateGroup(AmberConnection aConn)
     throws SQLException
   {
     int groupSize = getGroupSize();
@@ -115,7 +115,7 @@ public class AmberTableGenerator extends IdGenerator {
   /**
    * Initialize the table.
    */
-  public void init(AmberManager amberManager)
+  public void init(AmberPersistenceUnit amberPersistenceUnit)
     throws SQLException
   {
     if (_isInit)
@@ -131,7 +131,7 @@ public class AmberTableGenerator extends IdGenerator {
 		  " WHERE " + _table.getKeyColumn() + "=? " +
 		  "  AND " + _table.getValueColumn() + "=?");
     
-    DataSource ds = amberManager.getDataSource();
+    DataSource ds = amberPersistenceUnit.getDataSource();
     Connection conn = ds.getConnection();
     try {
       try {

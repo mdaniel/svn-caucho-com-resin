@@ -40,7 +40,7 @@ import com.caucho.amber.type.StringType;
 
 import com.caucho.amber.entity.EntityItem;
 
-import com.caucho.amber.connection.AmberConnectionImpl;
+import com.caucho.amber.manager.AmberConnection;
 
 /**
  * Represents an Amber query expression
@@ -141,7 +141,7 @@ abstract public class AbstractAmberExpr implements AmberExpr {
   /**
    * Returns the object for the expr.
    */
-  public Object getObject(AmberConnectionImpl aConn, ResultSet rs, int index)
+  public Object getObject(AmberConnection aConn, ResultSet rs, int index)
     throws SQLException
   {
     return getType().getObject(aConn, rs, index);
@@ -150,7 +150,7 @@ abstract public class AbstractAmberExpr implements AmberExpr {
   /**
    * Returns the object for the expr.
    */
-  public Object getCacheObject(AmberConnectionImpl aConn,
+  public Object getCacheObject(AmberConnection aConn,
 			       ResultSet rs, int index)
     throws SQLException
   {
@@ -160,7 +160,7 @@ abstract public class AbstractAmberExpr implements AmberExpr {
   /**
    * Returns the object for the expr.
    */
-  public EntityItem findItem(AmberConnectionImpl aConn, ResultSet rs, int index)
+  public EntityItem findItem(AmberConnection aConn, ResultSet rs, int index)
     throws SQLException
   {
     return getType().findItem(aConn, rs, index);

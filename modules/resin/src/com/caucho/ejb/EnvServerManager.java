@@ -68,9 +68,9 @@ import com.caucho.loader.enhancer.EnhancingClassLoader;
 
 import com.caucho.config.ConfigException;
 
-import com.caucho.amber.AmberManager;
-
 import com.caucho.amber.entity.AmberEntityHome;
+
+import com.caucho.amber.manager.AmberPersistenceUnit;
 
 import com.caucho.lifecycle.Lifecycle;
 
@@ -88,9 +88,6 @@ import com.caucho.ejb.entity.QEntityContext;
 import com.caucho.ejb.entity.EntityKey;
 
 import com.caucho.ejb.enhancer.EjbEnhancer;
-
-import com.caucho.ejb.entity2.EntityManagerProxy;
-import com.caucho.ejb.entity2.EntityManagerImpl;
 
 /**
  * Manages the beans in an environment.
@@ -116,7 +113,7 @@ public class EnvServerManager implements EnvironmentListener {
   
   private EJBAdmin _ejbAdmin;
 
-  private AmberManager _amberManager;
+  private AmberPersistenceUnit _amberPersistenceUnit;
   
   private EjbTransactionManager _ejbTransactionManager;
   
@@ -141,12 +138,12 @@ public class EnvServerManager implements EnvironmentListener {
   /**
    * Create a server with the given prefix name.
    */
-  EnvServerManager(AmberManager amberManager)
+  EnvServerManager(AmberPersistenceUnit amberPersistenceUnit)
   {
     try {
-      _amberManager = amberManager;
-      _amberManager.initLoaders();
-      _amberManager.setTableCacheTimeout(_entityCacheTimeout);
+      _amberPersistenceUnit = amberPersistenceUnit;
+      _amberPersistenceUnit.initLoaders();
+      _amberPersistenceUnit.setTableCacheTimeout(_entityCacheTimeout);
       
       _classLoader = (EnvironmentClassLoader) Thread.currentThread().getContextClassLoader();
       _workPath = WorkDir.getLocalWorkDir(_classLoader).lookup("ejb");
@@ -301,7 +298,7 @@ public class EnvServerManager implements EnvironmentListener {
   public void setCacheTimeout(long cacheTimeout)
   {
     _entityCacheTimeout = cacheTimeout;
-    // _amberManager.setTableCacheTimeout(cacheTimeout);
+    // _amberPersistenceUnitenceUnitenceUnit.setTableCacheTimeout(cacheTimeout);
   }
 
   /**
@@ -354,7 +351,7 @@ public class EnvServerManager implements EnvironmentListener {
     throws ConfigException
   {
     try {
-      _amberManager.init();
+      _amberPersistenceUnit.init();
 
       /*
       for (EjbConfig cfg : _ejbConfigList)
@@ -393,12 +390,12 @@ public class EnvServerManager implements EnvironmentListener {
 
   public AmberEntityHome getAmberEntityHome(String name)
   {
-    return _amberManager.getEntityHome(name);
+    return _amberPersistenceUnit.getEntityHome(name);
   }
 
-  public AmberManager getAmberManager()
+  public AmberPersistenceUnit getAmberManager()
   {
-    return _amberManager;
+    return _amberPersistenceUnit;
   }
 
   public JClassLoader getJClassLoader()
@@ -559,7 +556,7 @@ public class EnvServerManager implements EnvironmentListener {
       _protocolManager = null;
       _ejbTransactionManager.destroy();
       _ejbTransactionManager = null;
-      _amberManager = null;
+      _amberPersistenceUnit = null;
     } catch (Throwable e) {
       log.log(Level.WARNING, e.toString(), e);
     }

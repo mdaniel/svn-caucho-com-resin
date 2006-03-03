@@ -47,14 +47,14 @@ import com.caucho.java.gen.JavaClassGenerator;
 
 import com.caucho.make.PersistentDependency;
 
-import com.caucho.amber.AmberManager;
-
 import com.caucho.amber.field.Id;
 import com.caucho.amber.field.CompositeId;
 import com.caucho.amber.field.IdField;
 import com.caucho.amber.field.AmberField;
 import com.caucho.amber.field.PropertyField;
 import com.caucho.amber.field.StubMethod;
+
+import com.caucho.amber.manager.AmberPersistenceUnit;
 
 import com.caucho.amber.table.Table;
 import com.caucho.amber.table.Column;
@@ -80,7 +80,7 @@ public class AmberConfig {
   private static final L10N L = new L10N(AmberConfig.class);
 
   private EjbConfig _ejbConfig;
-  private AmberManager _manager;
+  private AmberPersistenceUnit _manager;
 
   private ArrayList<EjbEntityBean> _beans = new ArrayList<EjbEntityBean>();
   
@@ -104,7 +104,7 @@ public class AmberConfig {
   /**
    * Returns the manager.
    */
-  public AmberManager getManager()
+  public AmberPersistenceUnit getManager()
   {
     return _manager;
   }
