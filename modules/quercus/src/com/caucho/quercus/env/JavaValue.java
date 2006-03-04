@@ -46,24 +46,12 @@ public class JavaValue extends ResourceValue {
     _object = object;
   }
 
-  /**
-   * 
-   * @param name
-   * @return the Value from getXXX
-   */
   @Override
   public Value getField(String name)
   {
     return _classDef.getField(name, _object);
   }
 
-  /**
-   * 
-   * @param env
-   * @param name
-   * @param value
-   * @return value from setXXX
-   */
   @Override
   public Value putField(Env env,
                         String name,
@@ -71,7 +59,7 @@ public class JavaValue extends ResourceValue {
   {
     return _classDef.putField(env, _object, name, value);
   }
-  
+
   /**
    * Returns the class name.
    */

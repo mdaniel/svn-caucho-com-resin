@@ -39,6 +39,7 @@ import com.caucho.quercus.module.Optional;
 import com.caucho.quercus.module.Reference;
 import com.caucho.quercus.module.UsesSymbolTable;
 import com.caucho.quercus.module.VariableArguments;
+import com.caucho.quercus.module.ReturnNullAsFalse;
 import com.caucho.quercus.parser.PhpParser;
 import com.caucho.quercus.program.AbstractFunction;
 import com.caucho.util.L10N;
@@ -86,6 +87,7 @@ abstract public class JavaInvoker
 
     boolean callUsesVariableArgs = false;
     boolean callUsesSymbolTable = false;
+    boolean returnNullAsFalse = false;
 
     for (Annotation ann : methodAnn) {
       if (VariableArguments.class.isAssignableFrom(ann.annotationType())) {
@@ -94,6 +96,10 @@ abstract public class JavaInvoker
 
       if (UsesSymbolTable.class.isAssignableFrom(ann.annotationType())) {
         callUsesSymbolTable = true;
+      }
+
+      if (ReturnNullAsFalse.class.isAssignableFrom(ann.annotationType())) {
+        returnNullAsFalse = true;
       }
     }
 
@@ -156,7 +162,7 @@ abstract public class JavaInvoker
         _marshallArgs[i] = Marshall.create(quercus, argType);
     }
 
-    _unmarshallReturn = Marshall.create(quercus, retType);
+    _unmarshallReturn = Marshall.create(quercus, retType, false, returnNullAsFalse);
   }
 
   /**

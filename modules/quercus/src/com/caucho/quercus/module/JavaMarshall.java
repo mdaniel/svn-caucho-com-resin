@@ -31,29 +31,16 @@ package com.caucho.quercus.module;
 
 import java.io.IOException;
 
-import java.lang.reflect.Method;
-import java.lang.annotation.Annotation;
-
 import com.caucho.quercus.expr.Expr;
-import com.caucho.quercus.expr.NullLiteralExpr;
-import com.caucho.quercus.expr.DefaultExpr;
 
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
-import com.caucho.quercus.env.NullValue;
-import com.caucho.quercus.env.StringValue;
-import com.caucho.quercus.env.BooleanValue;
-import com.caucho.quercus.env.LongValue;
-import com.caucho.quercus.env.DoubleValue;
 import com.caucho.quercus.env.JavaValue;
 import com.caucho.quercus.env.JavaClassDefinition;
-import com.caucho.quercus.env.Callback;
-
-import com.caucho.quercus.program.AbstractFunction;
+import com.caucho.quercus.env.BooleanValue;
+import com.caucho.quercus.env.NullValue;
 
 import com.caucho.quercus.gen.PhpWriter;
-
-import com.caucho.vfs.Path;
 
 import com.caucho.util.L10N;
 
@@ -62,14 +49,24 @@ import com.caucho.util.L10N;
  */
 public class JavaMarshall extends Marshall {
   private static final L10N L = new L10N(JavaMarshall.class);
-  
+
   private final JavaClassDefinition _def;
   private final boolean _isNotNull;
+  private final boolean _isUnmarshallNullAsFalse;
 
-  public JavaMarshall(JavaClassDefinition def, boolean isNotNull)
+  public JavaMarshall(JavaClassDefinition def,
+                      boolean isNotNull)
+  {
+    this(def, isNotNull, false);
+  }
+
+  public JavaMarshall(JavaClassDefinition def,
+                      boolean isNotNull,
+                      boolean isUnmarshallNullAsFalse)
   {
     _def = def;
     _isNotNull = isNotNull;
+    _isUnmarshallNullAsFalse = isUnmarshallNullAsFalse;
   }
 
   public Object marshall(Env env, Expr expr, Class argClass)
@@ -78,8 +75,8 @@ public class JavaMarshall extends Marshall {
     Value value = expr.eval(env);
 
     return marshall(env, value, argClass);
-  }  
-  
+  }
+
   public Object marshall(Env env, Value value, Class argClass)
     throws Throwable
   {
@@ -90,34 +87,42 @@ public class JavaMarshall extends Marshall {
 	env.warning(L.l("null is an unexpected argument, expected {0}",
 			shortName(argClass)));
       }
-	
+
       return null;
     }
     else if (! argClass.isAssignableFrom(obj.getClass()))
       env.error(L.l("Can't assign {0} to {1}", obj, argClass));
-    
+
     return obj;
   }
-  
+
   public void generate(PhpWriter out, Expr expr, Class argClass)
     throws IOException
   {
     out.print("(" + argClass.getName() + ") ");
     expr.generate(out);
     out.print(".toJavaObject()");
-
   }
-    
+
   public Value unmarshall(Env env, Object value)
     throws Throwable
   {
-    return new JavaValue(value, _def);
+    return env.wrapJava(value, _def, _isUnmarshallNullAsFalse);
   }
-    
+
   public void generateResultStart(PhpWriter out)
     throws IOException
   {
     out.print("env.wrapJava(");
+  }
+
+  public void generateResultEnd(PhpWriter out)
+    throws IOException
+  {
+    if (_isUnmarshallNullAsFalse)
+      out.print(", true");
+
+    out.print(")");
   }
 
   private static String shortName(Class cl)

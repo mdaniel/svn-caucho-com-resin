@@ -91,7 +91,10 @@ public class QuercusVariableModule extends AbstractQuercusModule {
   public static Value var_dump(Env env, @ReadOnly Value v)
     throws Throwable
   {
-    v.varDump(env, env.getOut(), 0,  new IdentityHashMap<Value,String>());
+    if (v == null)
+      env.getOut().print("NULL#java");
+    else
+      v.varDump(env, env.getOut(), 0,  new IdentityHashMap<Value,String>());
 
     env.getOut().println();
 

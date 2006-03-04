@@ -2011,12 +2011,36 @@ public class Env {
    */
   public Value wrapJava(Object obj)
   {
+    return wrapJava(obj, null, false);
+  }
+
+  /**
+   * Returns a PHP value for a Java object
+   *
+   * @param isNullAsFalse what to return if <i>obj</i> is null, if true return
+   * {@link BooleanValue.FALSE} otherwise return {@link NullValue.NULL)
+   */
+  public Value wrapJava(Object obj, boolean isNullAsFalse)
+  {
+    return wrapJava(obj, null, isNullAsFalse);
+  }
+
+  /**
+   * Returns a PHP value for a Java object
+   *
+   * @param isNullAsFalse what to return if <i>obj</i> is null, if true return
+   * {@link BooleanValue.FALSE} otherwise return {@link NullValue.NULL)
+   */
+  public Value wrapJava(Object obj, JavaClassDefinition def, boolean isNullAsFalse)
+  {
     if (obj == null)
-      return NullValue.NULL;
-    else if (obj instanceof Value)
+      return isNullAsFalse ? BooleanValue.FALSE : NullValue.NULL;
+
+    if (obj instanceof Value)
       return (Value) obj;
 
-    JavaClassDefinition def = getJavaClassDefinition(obj.getClass().getName());
+    if (def == null)
+      def = getJavaClassDefinition(obj.getClass().getName());
 
     return new JavaValue(obj, def);
   }

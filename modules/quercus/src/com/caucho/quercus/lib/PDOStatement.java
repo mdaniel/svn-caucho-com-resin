@@ -925,9 +925,9 @@ public class PDOStatement
         if (_env.findAbstractClass(args[0].toString()) == null)
           return false;
 
-        if (!args[1].isArray())
+        if (args.length == 2 && !(args[1].isArray()))
           return false;
-         
+
         break;
 
       case PDO.FETCH_COLUMN:

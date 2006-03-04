@@ -72,7 +72,7 @@ public class PhpMain extends ClassComponent {
     _functionInfo = functionInfo;
     _statement = statement;
   }
-  
+
   /**
    * Generates the code for the class component.
    *
@@ -106,18 +106,25 @@ public class PhpMain extends ClassComponent {
     out.println("  return _quercus_selfPath;");
     out.println("}");
 
+    out.println();
+    out.println("private static Value nullAsFalse(Value value)");
+    out.println("{");
+    out.println("  return value == null ? BooleanValue.FALSE : value;");
+    out.println("}");
+
     AnalyzeInfo info = new AnalyzeInfo(_functionInfo);
 
     boolean hasReturn = ! _statement.analyze(info);
-    
+
     for (Function fun : _program.getFunctions()) {
       fun.analyze();
     }
-    
+
     for (InterpretedClassDef cl : _program.getClasses()) {
       cl.analyze();
     }
-      
+
+    out.println();
     out.println("public Value execute(com.caucho.quercus.env.Env env)");
     out.println("  throws Throwable");
     out.println("{");
@@ -134,10 +141,10 @@ public class PhpMain extends ClassComponent {
     }
 
     _statement.generate(out);
-      
+
     if (! hasReturn)
       out.println("return NullValue.NULL;");
-    
+
     out.popDepth();
     out.println("}");
 
@@ -156,18 +163,18 @@ public class PhpMain extends ClassComponent {
     out.println("{");
 
     out.pushDepth();
-    
+
     for (Function fun : _program.getFunctions()) {
       fun.generateInit(out);
     }
-    
+
     for (InterpretedClassDef cl : _program.getClasses()) {
       cl.generateInit(out);
     }
 
     out.popDepth();
     out.println("}");
-    
+
     out.generateCoda();
 
     javaOut.generateSmap();

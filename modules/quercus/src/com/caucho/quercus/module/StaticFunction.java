@@ -77,17 +77,22 @@ public class StaticFunction extends AbstractFunction {
   {
     _quercusModule = quercusModule;
     _method = method;
-    
+
     boolean callUsesVariableArgs = false;
     boolean callUsesSymbolTable = false;
+    boolean returnNullAsFalse = false;
 
     for (Annotation ann : method.getAnnotations()) {
       if (VariableArguments.class.isAssignableFrom(ann.annotationType())) {
 	callUsesVariableArgs = true;
       }
-      
+
       if (UsesSymbolTable.class.isAssignableFrom(ann.annotationType())) {
 	callUsesSymbolTable = true;
+      }
+
+      if (ReturnNullAsFalse.class.isAssignableFrom(ann.annotationType())) {
+        returnNullAsFalse = true;
       }
     }
 
@@ -104,7 +109,7 @@ public class StaticFunction extends AbstractFunction {
 
     boolean hasRestArgs = false;
     boolean isRestReference = false;
-    
+
     if (param.length > 0 && param[param.length - 1].equals(Value[].class)) {
       hasRestArgs = true;
 
@@ -138,7 +143,7 @@ public class StaticFunction extends AbstractFunction {
 
 	  if (! opt.value().equals("")) {
 	    Expr expr = PhpParser.parseDefault(opt.value());
-	    
+
 	    _defaultExprs[i] = expr;
 	  }
 	  else
@@ -160,7 +165,10 @@ public class StaticFunction extends AbstractFunction {
 	_marshallArgs[i] = Marshall.create(quercus, argType, isNotNull);
     }
 
-    _unmarshallReturn = Marshall.create(quercus, method.getReturnType());
+    _unmarshallReturn = Marshall.create(quercus,
+                                        method.getReturnType(),
+                                        false,
+                                        returnNullAsFalse);
   }
 
   /**
@@ -320,7 +328,7 @@ public class StaticFunction extends AbstractFunction {
     throws Throwable
   {
     int len = _defaultExprs.length + (_hasEnv ? 1 : 0) + (_hasRestArgs ? 1 : 0);
-    
+
     Object []values = new Object[len];
 
     int k = 0;
@@ -368,7 +376,7 @@ public class StaticFunction extends AbstractFunction {
     throws Throwable
   {
     int len = _paramTypes.length;
-    
+
     Object []javaArgs = new Object[len];
 
     int k = 0;
@@ -394,20 +402,20 @@ public class StaticFunction extends AbstractFunction {
 
       k++;
     }
-    
+
     if (_hasRestArgs) {
       Value []rest = new Value[quercusArgs.length - _marshallArgs.length];
 
       for (int i = _marshallArgs.length; i < quercusArgs.length; i++) {
-	if (_isRestReference)
-	  rest[i - _marshallArgs.length] = quercusArgs[i];
-	else
-	  rest[i - _marshallArgs.length] = quercusArgs[i].toValue();
+        if (_isRestReference)
+          rest[i - _marshallArgs.length] = quercusArgs[i];
+        else
+          rest[i - _marshallArgs.length] = quercusArgs[i].toValue();
       }
 
       javaArgs[k++] = rest;
     }
-    
+
     Object result = _method.invoke(_quercusModule, javaArgs);
 
     return _unmarshallReturn.unmarshall(env, result);
@@ -441,7 +449,7 @@ public class StaticFunction extends AbstractFunction {
   public void analyzeArguments(Expr []args, AnalyzeInfo info)
   {
     int env = _hasEnv ? 1 : 0;
-    
+
     for (int i = 0; i < args.length; i++) {
       if (_marshallArgs.length <= i) {
 	// XXX: not quite true
@@ -475,7 +483,7 @@ public class StaticFunction extends AbstractFunction {
 
     return false;
   }
-    
+
 
   /**
    * Generates code to evaluate the expression.
@@ -558,7 +566,7 @@ public class StaticFunction extends AbstractFunction {
   {
     generateImpl(out, funExpr, args);
   }
-  
+
   /**
    * Generates code to evaluate as a double expression.
    *
@@ -579,7 +587,7 @@ public class StaticFunction extends AbstractFunction {
     throws IOException
   {
     String var = out.addModule(_quercusModule);
-    
+
     if (Modifier.isStatic(_method.getModifiers())) {
       String className = _method.getDeclaringClass().getName();
 
@@ -608,7 +616,7 @@ public class StaticFunction extends AbstractFunction {
       if (! isFirst)
 	out.print(", ");
       isFirst = false;
-	
+
       if (i < args.length)
 	_marshallArgs[i].generate(out, args[i], param[_hasEnv ? i + 1 : i]);
       else if (_defaultExprs[i] != null)

@@ -54,78 +54,164 @@ abstract public class Marshall {
                                 Class argType,
                                 boolean isNotNull)
   {
+    return create(quercus, argType, isNotNull, false);
+  }
+
+  public static Marshall create(Quercus quercus,
+                                Class argType,
+                                boolean isNotNull,
+                                boolean isNullAsFalse)
+  {
+    final Marshall marshall;
+
     if (argType.isAssignableFrom(Value.class)) {
-      return MARSHALL_VALUE;
+      marshall = MARSHALL_VALUE;
     }
     else if (String.class.equals(argType)) {
-      return MARSHALL_STRING;
+      marshall = MARSHALL_STRING;
     }
     else if (boolean.class.equals(argType)) {
-      return MARSHALL_BOOLEAN;
+      marshall = MARSHALL_BOOLEAN;
     }
     else if (Boolean.class.equals(argType)) {
-      return MARSHALL_BOOLEAN_OBJECT;
+      marshall = MARSHALL_BOOLEAN_OBJECT;
     }
     else if (byte.class.equals(argType)) {
-      return MARSHALL_BYTE;
+      marshall = MARSHALL_BYTE;
     }
     else if (Byte.class.equals(argType)) {
-      return MARSHALL_BYTE_OBJECT;
+      marshall = MARSHALL_BYTE_OBJECT;
     }
     else if (short.class.equals(argType)) {
-      return MARSHALL_SHORT;
+      marshall = MARSHALL_SHORT;
     }
     else if (Short.class.equals(argType)) {
-      return MARSHALL_SHORT_OBJECT;
+      marshall = MARSHALL_SHORT_OBJECT;
     }
     else if (int.class.equals(argType)) {
-      return MARSHALL_INTEGER;
+      marshall = MARSHALL_INTEGER;
     }
     else if (Integer.class.equals(argType)) {
-      return MARSHALL_INTEGER_OBJECT;
+      marshall = MARSHALL_INTEGER_OBJECT;
     }
     else if (long.class.equals(argType)) {
-      return MARSHALL_LONG;
+      marshall = MARSHALL_LONG;
     }
     else if (Long.class.equals(argType)) {
-      return MARSHALL_LONG_OBJECT;
+      marshall = MARSHALL_LONG_OBJECT;
     }
     else if (float.class.equals(argType)) {
-      return MARSHALL_FLOAT;
+      marshall = MARSHALL_FLOAT;
     }
     else if (Float.class.equals(argType)) {
-      return MARSHALL_FLOAT_OBJECT;
+      marshall = MARSHALL_FLOAT_OBJECT;
     }
     else if (double.class.equals(argType)) {
-      return MARSHALL_DOUBLE;
+      marshall = MARSHALL_DOUBLE;
     }
     else if (Double.class.equals(argType)) {
-      return MARSHALL_DOUBLE_OBJECT;
+      marshall = MARSHALL_DOUBLE_OBJECT;
     }
     else if (char.class.equals(argType)) {
-      return MARSHALL_CHARACTER;
+      marshall = MARSHALL_CHARACTER;
     }
     else if (Character.class.equals(argType)) {
-      return MARSHALL_CHARACTER_OBJECT;
+      marshall = MARSHALL_CHARACTER_OBJECT;
     }
     else if (Path.class.equals(argType)) {
-      return MARSHALL_PATH;
+      marshall = MARSHALL_PATH;
     }
     else if (Callback.class.equals(argType)) {
-      return MARSHALL_CALLBACK;
+      marshall = MARSHALL_CALLBACK;
     }
     else if (Value.class.equals(argType)) {
-      return MARSHALL_VALUE;
+      marshall = MARSHALL_VALUE;
     }
     else if (Value.class.isAssignableFrom(argType)) {
-      return MARSHALL_EXT_VALUE;
+      marshall = MARSHALL_EXT_VALUE;
     }
     else if (void.class.equals(argType)) {
-      return MARSHALL_VOID;
+      marshall = MARSHALL_VOID;
     }
     else {
       return new JavaMarshall(quercus.getJavaClassDefinition(argType.getName()),
-                              isNotNull);
+                              isNotNull, isNullAsFalse);
+    }
+
+    if (!isNullAsFalse)
+      return marshall;
+    else {
+      return new Marshall() {
+        public boolean isBoolean()
+        {
+          return marshall.isBoolean();
+        }
+
+        public boolean isString()
+        {
+          return marshall.isString();
+        }
+
+        public boolean isLong()
+        {
+          return marshall.isLong();
+        }
+
+        public boolean isDouble()
+        {
+          return marshall.isDouble();
+        }
+
+        public boolean isReadOnly()
+        {
+          return marshall.isReadOnly();
+        }
+
+        public boolean isReference()
+        {
+          return marshall.isReference();
+        }
+
+        public Object marshall(Env env, Expr expr, Class argClass)
+          throws Throwable
+        {
+          return marshall.marshall(env, expr, argClass);
+        }
+
+        public Object marshall(Env env, Value value, Class argClass)
+          throws Throwable
+        {
+          return marshall.marshall(env, value, argClass);
+        }
+
+        public void generate(PhpWriter out, Expr expr, Class argClass)
+          throws IOException
+        {
+          marshall.generate(out, expr, argClass);
+        }
+
+        public Value unmarshall(Env env, Object value)
+          throws Throwable
+        {
+          Value result = marshall.unmarshall(env, value);
+
+          return result == null ? BooleanValue.FALSE : result;
+        }
+
+        public void generateResultStart(PhpWriter out)
+          throws IOException
+        {
+          out.print("nullAsFalse(");
+          marshall.generateResultStart(out);
+        }
+
+        public void generateResultEnd(PhpWriter out)
+          throws IOException
+        {
+          marshall.generateResultEnd(out);
+          out.print(")");
+        }
+      };
     }
   }
 
@@ -411,7 +497,7 @@ abstract public class Marshall {
     {
       return true;
     }
-      
+
     public Object marshall(Env env, Expr expr, Class expectedClass)
       throws Throwable
     {
@@ -460,7 +546,7 @@ abstract public class Marshall {
     {
       return true;
     }
-      
+
     public Object marshall(Env env, Expr expr, Class expectedClass)
       throws Throwable
     {
@@ -589,7 +675,7 @@ abstract public class Marshall {
     {
       return true;
     }
-      
+
     public Object marshall(Env env, Expr expr, Class expectedClass)
       throws Throwable
     {
@@ -636,7 +722,7 @@ abstract public class Marshall {
     {
       return true;
     }
-      
+
     public Object marshall(Env env, Expr expr, Class expectedClass)
       throws Throwable
     {
@@ -677,7 +763,7 @@ abstract public class Marshall {
     {
       return true;
     }
-      
+
     public Object marshall(Env env, Expr expr, Class expectedClass)
       throws Throwable
     {
@@ -724,7 +810,7 @@ abstract public class Marshall {
     {
       return true;
     }
-      
+
     public Object marshall(Env env, Expr expr, Class expectedClass)
       throws Throwable
     {
@@ -764,7 +850,7 @@ abstract public class Marshall {
     {
       return true;
     }
-      
+
     public Object marshall(Env env, Expr expr, Class expectedClass)
       throws Throwable
     {
@@ -811,7 +897,7 @@ abstract public class Marshall {
     {
       return true;
     }
-      
+
     public Object marshall(Env env, Expr expr, Class expectedClass)
       throws Throwable
     {
@@ -852,7 +938,7 @@ abstract public class Marshall {
     {
       return true;
     }
-      
+
     public Object marshall(Env env, Expr expr, Class expectedClass)
       throws Throwable
     {
@@ -899,7 +985,7 @@ abstract public class Marshall {
     {
       return true;
     }
-      
+
     public Object marshall(Env env, Expr expr, Class expectedClass)
       throws Throwable
     {
@@ -939,7 +1025,7 @@ abstract public class Marshall {
     {
       return true;
     }
-      
+
     public Object marshall(Env env, Expr expr, Class expectedClass)
       throws Throwable
     {
@@ -981,7 +1067,7 @@ abstract public class Marshall {
     {
       return true;
     }
-      
+
     public Object marshall(Env env, Expr expr, Class expectedClass)
       throws Throwable
     {
@@ -1021,7 +1107,7 @@ abstract public class Marshall {
     {
       return true;
     }
-      
+
     public Object marshall(Env env, Expr expr, Class expectedClass)
       throws Throwable
     {
@@ -1100,7 +1186,7 @@ abstract public class Marshall {
     {
       return true;
     }
-      
+
     public Object marshall(Env env, Expr expr, Class expectedClass)
       throws Throwable
     {
@@ -1139,7 +1225,7 @@ abstract public class Marshall {
     {
       return true;
     }
-      
+
     public Object marshall(Env env, Expr expr, Class expectedClass)
       throws Throwable
     {
@@ -1152,7 +1238,7 @@ abstract public class Marshall {
       Callback cb = env.createCallback(value);
 
      // return env.createCallback(value);
-      
+
      if (cb != null)
         return cb;
      else if (value instanceof DefaultValue)
