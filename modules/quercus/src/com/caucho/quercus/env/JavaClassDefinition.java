@@ -367,6 +367,10 @@ public class JavaClassDefinition
     Method[] methods = type.getMethods();
     
     for (Method method : methods) {     
+      
+      if (Modifier.isStatic(method.getModifiers()))
+        continue;
+      
       String methodName = method.getName();    
       int length = methodName.length();
       
