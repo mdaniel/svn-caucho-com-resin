@@ -102,19 +102,26 @@ public class JavaClassDefinition
    */
   public Value getField(String name, Object obj)
   {
-    Method getter = _getMap.get("get".concat(name));
+    Method getter = _getMap.get(name);
 
     if (getter != null) {
       
       try {
-        return new JavaValue(getter.invoke(obj), this);
-      } catch (Exception e) {
+        
+        Object result = getter.invoke(obj);
+        Marshall marshall = Marshall.create(_quercus, getter.getReturnType(), false);
+        return marshall.unmarshall(null, result);
+ 
+      } catch (Throwable e) {
+        
         log.log(Level.FINE, L.l(e.getMessage()), e);
         return NullValue.NULL;
+        
       } 
       
-    } else
-      return NullValue.NULL;
+    }
+    
+    return NullValue.NULL;
   }
 
   public Value putField(Env env,
@@ -122,7 +129,7 @@ public class JavaClassDefinition
                         String name,
                         Value value)
   {
-    JavaMethod setter = _setMap.get("set".concat(name));
+    JavaMethod setter = _setMap.get(name);
     
     if (setter == null) {
       
@@ -361,24 +368,52 @@ public class JavaClassDefinition
     
     for (Method method : methods) {     
       String methodName = method.getName();    
+      int length = methodName.length();
       
-      if (methodName.length() > 3) {        
+      if (length > 3) {        
         String prefix = methodName.substring(0, 3);
         
         if ("get".equals(prefix)) {
           
-          _getMap.put(methodName, method);
+          _getMap.put(javaToPhpConvert(methodName.substring(3,length)), method);
           
         } else if ("set".equals(prefix)) {
           
           JavaMethod javaMethod = new JavaMethod(quercus, method);
-          _setMap.put(methodName, javaMethod);
+          _setMap.put(javaToPhpConvert(methodName.substring(3, length)), javaMethod);
           
         }
       }
     }
     
     introspectFields(quercus, type.getSuperclass());
+  }
+
+  /**
+   * helper for introspectFields
+   * 
+   * @param s (IE: Foo, URL)
+   * @return (foo, URL)
+   */
+  private String javaToPhpConvert(String s)
+  {
+    if (s.length() == 1) {
+      return new String(new char[] {Character.toLowerCase(s.charAt(0))});
+    }
+    
+    if (Character.isUpperCase(s.charAt(1)))
+      return s;
+    else {
+      StringBuilder sb = new StringBuilder();
+      sb.append(Character.toLowerCase(s.charAt(0)));
+      
+      int length = s.length();
+      for (int i = 1; i < length; i++) {
+        sb.append(s.charAt(i));
+      }
+      
+      return sb.toString();
+    }
   }
   
   /**

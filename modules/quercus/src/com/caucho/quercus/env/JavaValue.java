@@ -42,7 +42,6 @@ public class JavaValue extends ResourceValue {
   public JavaValue(Object object, JavaClassDefinition def)
   {
     _classDef = def;
-
     _object = object;
   }
 
