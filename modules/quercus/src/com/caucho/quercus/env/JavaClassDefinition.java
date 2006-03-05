@@ -49,9 +49,7 @@ import java.util.logging.Logger;
 /**
  * Represents an introspected Java class.
  */
-public class JavaClassDefinition
-  extends AbstractQuercusClass
-{
+public class JavaClassDefinition extends AbstractQuercusClass {
   private final static Logger log
     = Logger.getLogger(JavaClassDefinition.class.getName());
   private final static L10N L = new L10N(JavaClassDefinition.class);
@@ -106,6 +104,34 @@ public class JavaClassDefinition
     return _name;
   }
 
+  /**
+   * specifically designed for $foo["bar"]
+   * IE: SimpleXMLElement
+   * 
+   * @param name
+   * @return Value
+   */
+  public Value get(Value name, Object obj)
+  {
+    if (__getField != null) {
+      
+      try {
+        
+        Object result = __getField.invoke(obj, name.toString());
+        Marshall marshall = Marshall.create(_quercus, __getField.getReturnType(), false);
+        return marshall.unmarshall(null, result);
+        
+      } catch (Throwable e) {
+        
+        log.log(Level.FINE,  L.l(e.getMessage()), e);
+        return NullValue.NULL;
+        
+      }
+    }
+      
+    return NullValue.NULL;
+  }
+  
   /**
    * @param name
    * @return Value attained through invoking getter
@@ -162,22 +188,7 @@ public class JavaClassDefinition
         
       }
       
-    } else if (__getField != null) {
-      
-      try {
-        
-        result = __getField.invoke(obj);
-        marshall = Marshall.create(_quercus, __get.getReturnType(), false);
-        return marshall.unmarshall(null, result);
-        
-      } catch (Throwable e) {
-        
-        log.log(Level.FINE,  L.l(e.getMessage()), e);
-        return NullValue.NULL;
-        
-      }
-      
-    }
+    } 
     
     return NullValue.NULL;
   }

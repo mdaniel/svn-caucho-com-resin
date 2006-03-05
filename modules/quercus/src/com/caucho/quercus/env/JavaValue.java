@@ -46,6 +46,12 @@ public class JavaValue extends ResourceValue {
   }
 
   @Override
+  public Value get(Value name)
+  {
+    return _classDef.get(name, _object);
+  }
+  
+  @Override
   public Value getField(String name)
   {
     return _classDef.getField(name, _object);
