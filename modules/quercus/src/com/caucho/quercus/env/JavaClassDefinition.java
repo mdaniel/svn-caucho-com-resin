@@ -73,6 +73,16 @@ public class JavaClassDefinition
   private final HashMap<String, JavaMethod> _setMap
     = new HashMap<String, JavaMethod>();
   
+  // _fieldMap stores all public non-static fields
+  // used by getField and setField
+  private final HashMap<String, Field> _fieldMap
+    = new HashMap<String, Field> ();
+  
+  private Method __get = null;
+  private Method __getField = null;
+  private Method __set = null;
+  private Method __setField = null;
+  
   private JavaConstructor _cons;
 
   private Method _iterator;
@@ -102,14 +112,18 @@ public class JavaClassDefinition
    */
   public Value getField(String name, Object obj)
   {
+    Object result;
+    Marshall marshall;
+    
     Method getter = _getMap.get(name);
+    Field field = _fieldMap.get(name);
 
     if (getter != null) {
       
       try {
         
-        Object result = getter.invoke(obj);
-        Marshall marshall = Marshall.create(_quercus, getter.getReturnType(), false);
+        result = getter.invoke(obj);
+        marshall = Marshall.create(_quercus, getter.getReturnType(), false);
         return marshall.unmarshall(null, result);
  
       } catch (Throwable e) {
@@ -118,6 +132,50 @@ public class JavaClassDefinition
         return NullValue.NULL;
         
       } 
+      
+    } else if (field != null) {
+      
+      try {
+        
+        result = field.get(obj);
+        marshall = Marshall.create(_quercus, field.getType(), false);
+        return marshall.unmarshall(null, result);
+        
+      } catch (Throwable e) {
+        
+        log.log(Level.FINE,  L.l(e.getMessage()), e);
+        return NullValue.NULL;
+        
+      }
+      
+    } else if (__get != null) {
+      try {
+        
+        result = __get.invoke(obj);
+        marshall = Marshall.create(_quercus, __get.getReturnType(), false);
+        return marshall.unmarshall(null, result);
+        
+      } catch (Throwable e) {
+        
+        log.log(Level.FINE,  L.l(e.getMessage()), e);
+        return NullValue.NULL;
+        
+      }
+      
+    } else if (__getField != null) {
+      
+      try {
+        
+        result = __getField.invoke(obj);
+        marshall = Marshall.create(_quercus, __get.getReturnType(), false);
+        return marshall.unmarshall(null, result);
+        
+      } catch (Throwable e) {
+        
+        log.log(Level.FINE,  L.l(e.getMessage()), e);
+        return NullValue.NULL;
+        
+      }
       
     }
     
@@ -130,22 +188,73 @@ public class JavaClassDefinition
                         Value value)
   {
     JavaMethod setter = _setMap.get(name);
+    Field field = _fieldMap.get(name);
     
-    if (setter == null) {
+   /* if (setter == null) {
       
       log.log(Level.FINE,"'" + name + "' is an unknown field.");
-      return NullValue.NULL;
+      return NullValue.NULL;*/
       
-    } else {
+    if (setter != null) {
       
       try {
+        
         return setter.eval(env, obj, value);
+        
+      } catch (Throwable e) {
+        
+        log.log(Level.FINE,  L.l(e.getMessage()), e);
+        return NullValue.NULL;
+        
+      }
+      
+    } else if (field != null) {
+      
+      try {
+        
+        Class type = field.getType();
+        Marshall marshall = Marshall.create(_quercus, type, false);
+        Object marshalledValue = marshall.marshall(env, value, type);
+        field.set(obj, marshalledValue);
+        
+        return value;
+        
       } catch (Throwable e) {
         log.log(Level.FINE,  L.l(e.getMessage()), e);
         return NullValue.NULL;
       }
       
+    } else if (__set != null) {
+      
+      try {
+        
+        __set.invoke(obj, value);
+        return value;
+        
+      } catch (Throwable e) {
+        
+        log.log(Level.FINE,  L.l(e.getMessage()), e);
+        return NullValue.NULL;
+        
+      }
+      
+    } else if (__setField != null) {
+      
+      try {
+        
+        __setField.invoke(obj, value);
+        return value;
+        
+      } catch (Throwable e) {
+        
+        log.log(Level.FINE,  L.l(e.getMessage()), e);
+        return NullValue.NULL;
+        
+      }
     }
+    
+    return NullValue.NULL;
+    
   }
   
   /**
@@ -364,6 +473,8 @@ public class JavaClassDefinition
     if (! Modifier.isPublic(type.getModifiers()))
       return;
     
+    // Introspect getXXX and setXXX
+    // also register whether __get, __getField, __set, __setField exists
     Method[] methods = type.getMethods();
     
     for (Method method : methods) {     
@@ -386,9 +497,37 @@ public class JavaClassDefinition
           JavaMethod javaMethod = new JavaMethod(quercus, method);
           _setMap.put(javaToPhpConvert(methodName.substring(3, length)), javaMethod);
           
+        } else if ("__get".equals(methodName)) {
+          
+          __get = method;
+          
+        } else if ("__getField".equals(methodName)) {
+          
+          __getField = method;
+          
+        } else if ("__set".equals(methodName)) {
+          
+          __set = method;
+          
+        } else if ("__setField".equals(methodName)) {
+          
+          __setField = method;
+          
         }
       }
     }
+    
+    // Introspect public non-static fields
+    Field[] fields = type.getFields();
+    
+    for (Field field : fields) {
+      
+      if (Modifier.isStatic(field.getModifiers()))
+        continue;
+      
+      _fieldMap.put(field.getName(), field);
+    }
+    
     
    // introspectFields(quercus, type.getSuperclass());
   }
