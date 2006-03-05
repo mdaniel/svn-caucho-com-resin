@@ -133,7 +133,7 @@ public class JavaClassDefinition
     
     if (setter == null) {
       
-      env.error("'" + name + "' is an unknown field.");
+      log.log(Level.FINE,"'" + name + "' is an unknown field.");
       return NullValue.NULL;
       
     } else {
@@ -390,7 +390,7 @@ public class JavaClassDefinition
       }
     }
     
-    introspectFields(quercus, type.getSuperclass());
+   // introspectFields(quercus, type.getSuperclass());
   }
 
   /**
