@@ -105,7 +105,7 @@ public class JavaClassDefinition extends AbstractQuercusClass {
   }
 
   /**
-   * specifically designed for $foo["bar"]
+   * specifically designed for __get()
    * IE: SimpleXMLElement
    * 
    * @param name
@@ -113,12 +113,12 @@ public class JavaClassDefinition extends AbstractQuercusClass {
    */
   public Value get(Value name, Object obj)
   {
-    if (__getField != null) {
+    if (__get != null) {
       
       try {
         
-        Object result = __getField.invoke(obj, name.toString());
-        Marshall marshall = Marshall.create(_quercus, __getField.getReturnType(), false);
+        Object result = __get.invoke(obj, name.toString());
+        Marshall marshall = Marshall.create(_quercus, __get.getReturnType(), false);
         return marshall.unmarshall(null, result);
         
       } catch (Throwable e) {
@@ -142,7 +142,6 @@ public class JavaClassDefinition extends AbstractQuercusClass {
     Marshall marshall;
     
     Method getter = _getMap.get(name);
-    Field field = _fieldMap.get(name);
 
     if (getter != null) {
       
@@ -159,47 +158,94 @@ public class JavaClassDefinition extends AbstractQuercusClass {
         
       } 
       
-    } else if (field != null) {
+    } else {
       
-      try {
-        
-        result = field.get(obj);
-        marshall = Marshall.create(_quercus, field.getType(), false);
-        return marshall.unmarshall(null, result);
-        
-      } catch (Throwable e) {
-        
-        log.log(Level.FINE,  L.l(e.getMessage()), e);
-        return NullValue.NULL;
-        
-      }
+      Field field = _fieldMap.get(name);
+      if (field != null) {
       
-    } else if (__get != null) {
-      try {
         
-        result = __get.invoke(obj);
-        marshall = Marshall.create(_quercus, __get.getReturnType(), false);
-        return marshall.unmarshall(null, result);
+        try {
+          
+          result = field.get(obj);
+          marshall = Marshall.create(_quercus, field.getType(), false);
+          return marshall.unmarshall(null, result);
+          
+        } catch (Throwable e) {
+          
+          log.log(Level.FINE,  L.l(e.getMessage()), e);
+          return NullValue.NULL;
+          
+        }
         
-      } catch (Throwable e) {
+      } else if (__getField != null) {
+        try {
+          
+          result = __getField.invoke(obj);
+          marshall = Marshall.create(_quercus, __getField.getReturnType(), false);
+          return marshall.unmarshall(null, result);
+          
+        } catch (Throwable e) {
+          
+          log.log(Level.FINE,  L.l(e.getMessage()), e);
+          return NullValue.NULL;
+          
+        }
         
-        log.log(Level.FINE,  L.l(e.getMessage()), e);
-        return NullValue.NULL;
-        
-      }
-      
-    } 
+      } 
+    }
     
     return NullValue.NULL;
   }
 
+  /**
+   * specifically designed for __set()
+   * 
+   * @param env
+   * @param obj
+   * @param name
+   * @param value
+   * @return value
+   */
+  public Value put(Env env,
+                   Object obj,
+                   Value name,
+                   Value value)
+  {
+    if (__set != null) {
+      try {
+        Class type;
+        Marshall marshall;
+        Object marshalledName, marshalledValue;
+        
+        type = __set.getParameterTypes()[0];
+        marshall = Marshall.create(_quercus, type, false);
+        marshalledName = marshall.marshall(env, value,type);
+        
+        type = __set.getParameterTypes()[1];
+        marshall = Marshall.create(_quercus, type, false);
+        marshalledValue = marshall.marshall(env, value, type);
+        
+        __set.invoke(obj, marshalledName, marshalledValue);
+        
+        return value;
+        
+      } catch (Throwable e) {
+        
+        log.log(Level.FINE,  L.l(e.getMessage()), e);
+        return NullValue.NULL;
+        
+      }
+    }
+    
+    return NullValue.NULL;
+  }
+  
   public Value putField(Env env,
                         Object obj,
                         String name,
                         Value value)
   {
     JavaMethod setter = _setMap.get(name);
-    Field field = _fieldMap.get(name);
     
    /* if (setter == null) {
       
@@ -219,48 +265,38 @@ public class JavaClassDefinition extends AbstractQuercusClass {
         
       }
       
-    } else if (field != null) {
+    } else {
       
-      try {
+      Field field = _fieldMap.get(name);
+      if (field != null) {
         
-        Class type = field.getType();
-        Marshall marshall = Marshall.create(_quercus, type, false);
-        Object marshalledValue = marshall.marshall(env, value, type);
-        field.set(obj, marshalledValue);
+        try {
+          
+          Class type = field.getType();
+          Marshall marshall = Marshall.create(_quercus, type, false);
+          Object marshalledValue = marshall.marshall(env, value, type);
+          field.set(obj, marshalledValue);
+          
+          return value;
+          
+        } catch (Throwable e) {
+          log.log(Level.FINE,  L.l(e.getMessage()), e);
+          return NullValue.NULL;
+        }
         
-        return value;
+      } else if (__setField != null) {
         
-      } catch (Throwable e) {
-        log.log(Level.FINE,  L.l(e.getMessage()), e);
-        return NullValue.NULL;
-      }
-      
-    } else if (__set != null) {
-      
-      try {
-        
-        __set.invoke(obj, value);
-        return value;
-        
-      } catch (Throwable e) {
-        
-        log.log(Level.FINE,  L.l(e.getMessage()), e);
-        return NullValue.NULL;
-        
-      }
-      
-    } else if (__setField != null) {
-      
-      try {
-        
-        __setField.invoke(obj, value);
-        return value;
-        
-      } catch (Throwable e) {
-        
-        log.log(Level.FINE,  L.l(e.getMessage()), e);
-        return NullValue.NULL;
-        
+        try {
+          
+          __setField.invoke(obj, name, value);
+          return value;
+          
+        } catch (Throwable e) {
+          
+          log.log(Level.FINE,  L.l(e.getMessage()), e);
+          return NullValue.NULL;
+          
+        }
       }
     }
     
@@ -284,7 +320,7 @@ public class JavaClassDefinition extends AbstractQuercusClass {
     try {
       //Object obj = _type.newInstance();
 
-      return new JavaValue(_type.newInstance(), this);
+      return new JavaValue(null, _type.newInstance(), this);
     } catch (Exception e) {
       throw new QuercusRuntimeException(e);
     }

@@ -29,22 +29,6 @@
 
 package com.caucho.quercus.env;
 
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.sql.DataSource;
-import java.io.IOException;
-import java.lang.ref.SoftReference;
-import java.sql.Connection;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.IdentityHashMap;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import com.caucho.java.LineMap;
 import com.caucho.java.ScriptStackTrace;
 import com.caucho.java.WorkDir;
@@ -73,6 +57,21 @@ import com.caucho.vfs.Path;
 import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.Vfs;
 import com.caucho.vfs.WriteStream;
+
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.sql.DataSource;
+import java.io.IOException;
+import java.lang.ref.SoftReference;
+import java.sql.Connection;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Represents the Quercus environment.
@@ -2042,7 +2041,7 @@ public class Env {
     if (def == null)
       def = getJavaClassDefinition(obj.getClass().getName());
 
-    return new JavaValue(obj, def);
+    return new JavaValue(this, obj, def);
   }
 
   /**

@@ -39,8 +39,11 @@ public class JavaValue extends ResourceValue {
 
   private final Object _object;
 
-  public JavaValue(Object object, JavaClassDefinition def)
+  private final Env _env;
+  
+  public JavaValue(Env env, Object object, JavaClassDefinition def)
   {
+    _env = env;
     _classDef = def;
     _object = object;
   }
@@ -49,6 +52,12 @@ public class JavaValue extends ResourceValue {
   public Value get(Value name)
   {
     return _classDef.get(name, _object);
+  }
+  
+  @Override
+  public Value put(Value index, Value value)
+  {
+    return _classDef.put(_env, _object, index, value);
   }
   
   @Override
