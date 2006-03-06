@@ -85,8 +85,6 @@ import com.caucho.amber.type.TypeManager;
 import com.caucho.amber.idgen.IdGenerator;
 import com.caucho.amber.idgen.SequenceIdGenerator;
 
-import com.caucho.amber.ejb3.EntityManagerProxy;
-
 import com.caucho.config.ConfigException;
 
 import com.caucho.java.gen.JavaClassGenerator;
@@ -167,9 +165,11 @@ public class EnvAmberManager {
   private void bindProxy()
     throws Throwable
   {
+    /*
     EntityManagerProxy userManager = null;//new EntityManagerProxy(this);
 
     new InitialContext().rebind("java:comp/EntityManager", userManager);
+    */
   }
 
   public static EnvAmberManager createLocal()
