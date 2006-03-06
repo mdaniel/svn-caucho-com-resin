@@ -37,6 +37,7 @@ import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 
 import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * Code for marshalling arguments.
@@ -120,6 +121,9 @@ abstract public class Marshall {
     }
     else if (Path.class.equals(argType)) {
       marshall = MARSHALL_PATH;
+    }
+    else if (InputStream.class.equals(argType)) {
+      marshall = MARSHALL_INPUTSTREAM;
     }
     else if (Callback.class.equals(argType)) {
       marshall = MARSHALL_CALLBACK;
@@ -1211,6 +1215,44 @@ abstract public class Marshall {
       out.print("env.getPwd().lookup(");
       expr.generateString(out);
       out.print(")");
+    }
+
+    public void generateResultStart(PhpWriter out)
+      throws IOException
+    {
+      throw new UnsupportedOperationException();
+    }
+  };
+
+  static final Marshall MARSHALL_INPUTSTREAM = new Marshall() {
+    public boolean isReadOnly()
+    {
+      return true;
+    }
+
+    public Object marshall(Env env, Expr expr, Class expectedClass)
+      throws Throwable
+    {
+      return expr.eval(env).toInputStream();
+    }
+
+    public Object marshall(Env env, Value value, Class expectedClass)
+      throws Throwable
+    {
+      return value.toInputStream();
+    }
+
+    public Value unmarshall(Env env, Object value)
+      throws Throwable
+    {
+      throw new UnsupportedOperationException();
+    }
+
+    public void generate(PhpWriter out, Expr expr, Class argClass)
+      throws IOException
+    {
+      expr.generateValue(out);
+      out.print(".toInputStream()");
     }
 
     public void generateResultStart(PhpWriter out)
