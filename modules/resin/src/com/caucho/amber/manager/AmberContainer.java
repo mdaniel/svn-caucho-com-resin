@@ -83,12 +83,17 @@ public class AmberContainer {
   private DataSource _dataSource;
   private DataSource _readDataSource;
   private DataSource _xaDataSource;
+  
+  private boolean _createDatabaseTables;
 
   private HashMap<String,AmberPersistenceUnit> _unitMap
     = new HashMap<String,AmberPersistenceUnit>();
 
   private HashMap<String,EntityType> _entityMap
     = new HashMap<String,EntityType>();
+
+  private HashMap<String,Throwable> _entityExceptionMap
+    = new HashMap<String,Throwable>();
 
   private AmberContainer()
   {
@@ -176,6 +181,22 @@ public class AmberContainer {
   }
 
   /**
+   * True if database tables should be created automatically.
+   */
+  public boolean getCreateDatabaseTables()
+  {
+    return _createDatabaseTables;
+  }
+
+  /**
+   * True if database tables should be created automatically.
+   */
+  public void setCreateDatabaseTables(boolean isCreate)
+  {
+    _createDatabaseTables = isCreate;
+  }
+
+  /**
    * Returns the parent loader
    */
   public ClassLoader getParentClassLoader()
@@ -212,7 +233,20 @@ public class AmberContainer {
    */
   public EntityType getEntity(String className)
   {
+    Throwable e = _entityExceptionMap.get(className);
+
+    if (e != null)
+      throw new AmberRuntimeException(e);
+    
     return _entityMap.get(className);
+  }
+
+  /**
+   * Adds an entity for an introspected class.
+   */
+  public void addEntityException(String className, Throwable e)
+  {
+    _entityExceptionMap.put(className, e);
   }
 
   /**

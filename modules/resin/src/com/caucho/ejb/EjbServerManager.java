@@ -184,6 +184,11 @@ public class EjbServerManager implements EJBServerInterface, EnvironmentListener
     return _envServerManager.getTransactionManager();
   }
 
+  public AmberContainer getAmberContainer()
+  {
+    return _amberContainer;
+  }
+  
   /**
    * Sets the data source for the container.
    */

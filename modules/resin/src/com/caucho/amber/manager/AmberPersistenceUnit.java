@@ -175,6 +175,8 @@ public class AmberPersistenceUnit {
     _xaDataSource = container.getXADataSource();
     _readDataSource = container.getReadDataSource();
 
+    _createDatabaseTables = container.getCreateDatabaseTables();
+
     _introspector = new EntityIntrospector(this);
 
     // needed to support JDK 1.4 compatibility
@@ -381,7 +383,9 @@ public class AmberPersistenceUnit {
 
     try {
       _introspector.introspect(type);
-    } catch (SQLException e) {
+    } catch (Throwable e) {
+      _amberContainer.addEntityException(className, e);
+      
       throw new ConfigException(e);
     }
 

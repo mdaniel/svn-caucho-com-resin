@@ -129,80 +129,94 @@ public class EntityIntrospector {
     if (entityType != null)
       return entityType;
 
-    ///entityType = _amberContainer.createEntity(entityName, type);
-    entityType = _persistenceUnit.createEntity(entityName, type);
-    _entityMap.put(entityName, entityType);
+    try {
+      ///entityType = _amberContainer.createEntity(entityName, type);
+      entityType = _persistenceUnit.createEntity(entityName, type);
+      _entityMap.put(entityName, entityType);
 
-    if (isField)
-      entityType.setFieldAccess(true);
+      if (isField)
+	entityType.setFieldAccess(true);
 
-    entityType.setInstanceClassName(type.getName() + "__ResinExt");
-    entityType.setEnhanced(true);
+      entityType.setInstanceClassName(type.getName() + "__ResinExt");
+      entityType.setEnhanced(true);
 
-    Table table = null;
-    JAnnotation tableAnn = type.getAnnotation(javax.persistence.Table.class);
+      Table table = null;
+      JAnnotation tableAnn = type.getAnnotation(javax.persistence.Table.class);
 
-    String tableName = null;
-    if (tableAnn != null)
-      tableName = (String) tableAnn.get("name");
+      String tableName = null;
+      if (tableAnn != null)
+	tableName = (String) tableAnn.get("name");
 
-    if (tableName == null || tableName.equals(""))
-      tableName = entityName;
+      if (tableName == null || tableName.equals(""))
+	tableName = entityName;
 
-    if (parentType == null)
-      entityType.setTable(_persistenceUnit.createTable(tableName));
-    else if (parentType.isJoinedSubClass())
-      entityType.setTable(_persistenceUnit.createTable(tableName));
-    else
-      entityType.setTable(parentType.getTable());
+      if (parentType == null)
+	entityType.setTable(_persistenceUnit.createTable(tableName));
+      else if (parentType.isJoinedSubClass())
+	entityType.setTable(_persistenceUnit.createTable(tableName));
+      else
+	entityType.setTable(parentType.getTable());
 
-    JAnnotation tableCache = type.getAnnotation(AmberTableCache.class);
-    if (tableCache != null) {
-      entityType.getTable().setReadOnly(tableCache.getBoolean("readOnly"));
+      JAnnotation tableCache = type.getAnnotation(AmberTableCache.class);
+      if (tableCache != null) {
+	entityType.getTable().setReadOnly(tableCache.getBoolean("readOnly"));
 
-      long cacheTimeout = Period.toPeriod(tableCache.getString("timeout"));
-      entityType.getTable().setCacheTimeout(cacheTimeout);
-    }
+	long cacheTimeout = Period.toPeriod(tableCache.getString("timeout"));
+	entityType.getTable().setCacheTimeout(cacheTimeout);
+      }
       
-    JAnnotation secondaryTableAnn = type.getAnnotation(SecondaryTable.class);
+      JAnnotation secondaryTableAnn = type.getAnnotation(SecondaryTable.class);
 
-    Table secondaryTable = null;
+      Table secondaryTable = null;
 
-    if (inheritanceAnn != null)
-      introspectInheritance(_persistenceUnit, entityType, type);
+      if (inheritanceAnn != null)
+	introspectInheritance(_persistenceUnit, entityType, type);
 
-    if (secondaryTableAnn != null) {
-      String secondaryName = (String) secondaryTableAnn.get("name");
+      if (secondaryTableAnn != null) {
+	String secondaryName = (String) secondaryTableAnn.get("name");
 
-      secondaryTable = _persistenceUnit.createTable(secondaryName);
+	secondaryTable = _persistenceUnit.createTable(secondaryName);
 
-      entityType.addSecondaryTable(secondaryTable);
-    }
+	entityType.addSecondaryTable(secondaryTable);
+      }
 
-    if (entityType.getId() != null) {
-    }
-    else if (isField)
-      introspectIdField(_persistenceUnit, entityType, parentType, type);
-    else
-      introspectIdMethod(_persistenceUnit, entityType, parentType, type);
+      if (entityType.getId() != null) {
+      }
+      else if (isField)
+	introspectIdField(_persistenceUnit, entityType, parentType, type);
+      else
+	introspectIdMethod(_persistenceUnit, entityType, parentType, type);
 
-    if (isField)
-      introspectFields(_persistenceUnit, entityType, parentType, type);
-    else
-      introspectMethods(_persistenceUnit, entityType, parentType, type);
+      if (isField)
+	introspectFields(_persistenceUnit, entityType, parentType, type);
+      else
+	introspectMethods(_persistenceUnit, entityType, parentType, type);
 
-    for (JMethod method : type.getMethods()) {
-      introspectCallbacks(entityType, method);
-    }
+      for (JMethod method : type.getMethods()) {
+	introspectCallbacks(entityType, method);
+      }
 
-    if (secondaryTableAnn != null) {
-      Object []join = (Object []) secondaryTableAnn.get("join");
-      JAnnotation []joinAnn = new JAnnotation[join.length];
-      System.arraycopy(join, 0, joinAnn, 0, join.length);
+      if (secondaryTableAnn != null) {
+	Object []join = (Object []) secondaryTableAnn.get("join");
+	JAnnotation []joinAnn = new JAnnotation[join.length];
+	System.arraycopy(join, 0, joinAnn, 0, join.length);
 
-      linkSecondaryTable(entityType.getTable(),
-			 secondaryTable,
-			 joinAnn);
+	linkSecondaryTable(entityType.getTable(),
+			   secondaryTable,
+			   joinAnn);
+      }
+    } catch (ConfigException e) {
+      entityType.setConfigException(e);
+
+      throw e;
+    } catch (SQLException e) {
+      entityType.setConfigException(e);
+
+      throw e;
+    } catch (RuntimeException e) {
+      entityType.setConfigException(e);
+
+      throw e;
     }
 
     return entityType;

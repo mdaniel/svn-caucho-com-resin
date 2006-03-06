@@ -344,18 +344,19 @@ public class AmberConnection implements CloseResource {
    */
   public void close()
   {
-    AmberPersistenceUnit persistenceUnit = _persistenceUnit;
-    _persistenceUnit = null;
-    
-    if (persistenceUnit == null)
+    if (_persistenceUnit == null)
       return;
 
-    if (_isThreadConnection)
-      persistenceUnit.removeThreadConnection();
+    try {
+      if (_isThreadConnection)
+	_persistenceUnit.removeThreadConnection();
     
-    _isRegistered = false;
+      _isRegistered = false;
 
-    cleanup();
+      cleanup();
+    } finally {
+      _persistenceUnit = null;
+    }
   }
 
   /**

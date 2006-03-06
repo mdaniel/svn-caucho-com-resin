@@ -108,6 +108,8 @@ public class EntityType extends Type {
 
   private boolean _isFieldAccess;
 
+  private Throwable _exception;
+  
   private String _instanceClassName;
   private boolean _isEnhanced;
   private ClassLoader _instanceLoader;
@@ -334,6 +336,11 @@ public class EntityType extends Type {
   {
     _instanceLoader = loader;
   }
+
+  public void setConfigException(Throwable e)
+  {
+    _exception = e;
+  }
   
   /**
    * Gets the instance class.
@@ -370,6 +377,9 @@ public class EntityType extends Type {
       }
 
       if (! Entity.class.isAssignableFrom(_instanceClass)) {
+	if (_exception != null)
+	  throw new AmberRuntimeException(_exception);
+	
 	throw new AmberRuntimeException(L.l("'{0}' with classloader {1} is an illegal instance class",
 					    _instanceClass.getName(), _instanceClass.getClassLoader()));
       }
