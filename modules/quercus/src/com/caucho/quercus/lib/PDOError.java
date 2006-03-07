@@ -105,7 +105,7 @@ class PDOError {
     _errorCode = errorCode;
 
     _errorInfo = new ArrayValueImpl();
-    _errorInfo.put(_errorCode);
+    _errorInfo.put(errorCode);
     _errorInfo.put(driverError);
     _errorInfo.put(errorMessage);
 

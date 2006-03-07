@@ -36,7 +36,6 @@ import java.util.Map;
 import java.util.Collections;
 import java.util.Set;
 import java.util.ArrayList;
-import java.util.HashMap;
 
 import java.util.logging.Logger;
 import java.util.logging.Level;
@@ -290,28 +289,26 @@ public class PDOStatement
     closeCursor();
 
     try {
-      if (inputParameters != null) {
-        for (Map.Entry<Value, Value> entry : inputParameters.entrySet()) {
-          Value key = entry.getKey();
-          Value value = entry.getValue();
+      for (Map.Entry<Value, Value> entry : inputParameters.entrySet()) {
+        Value key = entry.getKey();
+        Value value = entry.getValue();
 
-          int index;
+        int index;
 
-          if (!key.isNumber())
-            throw new UnimplementedException("key " + key);
+        if (!key.isNumber())
+          throw new UnimplementedException("key " + key);
 
-          index = key.toInt() + 1;
+        index = key.toInt() + 1;
 
-          // XXX: handling of params and types needs improvement
-          if (value instanceof DoubleValue) {
-            _preparedStatement.setDouble(index, value.toDouble());
-          }
-          else if (value instanceof LongValue) {
-            _preparedStatement.setLong(index, value.toLong());
-          }
-          else if (value instanceof StringValue) {
-            _preparedStatement.setString(index, value.toString());
-          }
+        // XXX: handling of params and types needs improvement
+        if (value instanceof DoubleValue) {
+          _preparedStatement.setDouble(index, value.toDouble());
+        }
+        else if (value instanceof LongValue) {
+          _preparedStatement.setLong(index, value.toLong());
+        }
+        else if (value instanceof StringValue) {
+          _preparedStatement.setString(index, value.toString());
         }
       }
 
@@ -334,13 +331,29 @@ public class PDOStatement
    * @param fetchMode the mode, 0 to use the value set by {@link #setFetchMode}.
    * @return a value, BooleanValue.FALSE if there are no more rows or an error occurs.
    */
-  public Value fetch(@Optional int fetchMode, @Optional Value[] args)
+  public Value fetch(@Optional int fetchMode,
+                     @Optional("-1") int cursorOrientation,
+                     @Optional("-1") int cursorOffset)
+  {
+    if (cursorOrientation != -1)
+      throw new UnimplementedException("fetch with cursorOrientation");
+
+    if (cursorOffset != -1)
+      throw new UnimplementedException("fetch with cursorOffset");
+
+    return fetchImpl(fetchMode, -1);
+  }
+
+  /**
+   * Fetch the next row.
+   *
+   * @param fetchMode the mode, 0 to use the value set by {@link #setFetchMode}.
+   * @return a value, BooleanValue.FALSE if there are no more rows or an error occurs.
+   */
+  private Value fetchImpl(int fetchMode, int columnIndex)
   {
     if (fetchMode == 0) {
       fetchMode = _fetchMode;
-
-      if (args.length == 0)
-        args = _fetchModeArgs;
 
       fetchMode = fetchMode & (~(PDO.FETCH_GROUP | PDO.FETCH_UNIQUE));
     }
@@ -355,9 +368,6 @@ public class PDOStatement
       }
     }
 
-    if (args == null)
-      args = NULL_VALUES;
-
     boolean isClasstype = (fetchMode & PDO.FETCH_CLASSTYPE) != 0;
     boolean isSerialize = (fetchMode & PDO.FETCH_SERIALIZE) != 0;
 
@@ -365,37 +375,37 @@ public class PDOStatement
 
     switch (fetchMode) {
       case PDO.FETCH_ASSOC:
-        return fetchAssoc(args);
+        return fetchAssoc();
 
       case PDO.FETCH_BOTH:
-        return fetchBoth(args);
+        return fetchBoth();
 
       case PDO.FETCH_BOUND:
         return fetchBound();
 
       case PDO.FETCH_COLUMN:
-        return fetchColumn(args);
+        return fetchColumn(columnIndex);
 
       case PDO.FETCH_CLASS:
-        return fetchClass(args);
+        return fetchClass();
 
       case PDO.FETCH_FUNC:
         return fetchFunc();
 
       case PDO.FETCH_INTO:
-        return fetchInto(args);
+        return fetchInto();
 
       case PDO.FETCH_LAZY:
-        return fetchLazy(args);
+        return fetchLazy();
 
       case PDO.FETCH_NAMED:
-        return fetchNamed(args);
+        return fetchNamed();
 
       case PDO.FETCH_NUM:
-        return fetchNum(args);
+        return fetchNum();
 
       case PDO.FETCH_OBJ:
-        return fetchObject(args);
+        return fetchObject();
 
     default:
       _error.warning(L.l("invalid fetch mode {0}",  fetchMode));
@@ -404,15 +414,22 @@ public class PDOStatement
     }
   }
 
-  public Value fetchAll(@Optional int fetchMode, @Optional Value[] args)
+  /**
+   *
+   * @param fetchMode
+   * @param columnIndex 0-based column index when fetchMode is FETCH_BOTH
+   */
+  public Value fetchAll(@Optional("0") int fetchMode, @Optional("-1") int columnIndex)
   {
     _error.clear();
 
-    if (fetchMode == 0) {
-      fetchMode = _fetchMode;
+    int effectiveFetchMode;
 
-      if (args.length == 0)
-        args = _fetchModeArgs;
+    if (fetchMode == 0) {
+      effectiveFetchMode = _fetchMode;
+    }
+    else {
+      effectiveFetchMode = fetchMode;
     }
 
     boolean isGroup = (fetchMode & PDO.FETCH_GROUP) != 0;
@@ -424,17 +441,27 @@ public class PDOStatement
     if (isUnique)
       throw new UnimplementedException("PDO.FETCH_UNIQUE");
 
-    fetchMode = fetchMode & (~(PDO.FETCH_GROUP | PDO.FETCH_UNIQUE));
+    effectiveFetchMode = effectiveFetchMode & (~(PDO.FETCH_GROUP | PDO.FETCH_UNIQUE));
 
-    if (fetchMode == PDO.FETCH_LAZY) {
-      _error.warning(L.l("PDO::FETCH_LAZY can't be used with PDOStatement::fetchAll()"));
-      return BooleanValue.FALSE;
+    switch (effectiveFetchMode) {
+      case PDO.FETCH_COLUMN:
+        break;
+
+      case PDO.FETCH_LAZY:
+        _error.warning(L.l("PDO::FETCH_LAZY can't be used with PDOStatement::fetchAll()"));
+        return BooleanValue.FALSE;
+
+      default:
+        if (columnIndex != -1) {
+          _error.warning(L.l("unexpected arguments"));
+          return BooleanValue.FALSE;
+        }
     }
 
     ArrayValueImpl rows = new ArrayValueImpl();
 
     while (true) {
-      Value value = fetch(fetchMode, args);
+      Value value = fetchImpl(effectiveFetchMode, columnIndex);
 
       if (value == FETCH_FAILURE) {
         rows.clear();
@@ -453,17 +480,16 @@ public class PDOStatement
     return rows;
   }
 
-  private Value fetchAssoc(Value[] args)
+  private Value fetchAssoc()
   {
-    if (args.length > 0) {
-      closeCursor();
-      _error.notice(L.l("args unexpected"));
-      return FETCH_FAILURE;
-    }
-
     try {
       if (!advanceResultSet())
         return FETCH_EXHAUSTED;
+
+      if (_fetchModeArgs.length != 0) {
+        _error.notice(L.l("unexpected arguments"));
+        return FETCH_FAILURE;
+      }
 
       ArrayValueImpl array = new ArrayValueImpl();
 
@@ -484,22 +510,17 @@ public class PDOStatement
     }
   }
 
-  private Value fetchBoth(Value[] args)
-  {
-    if (args.length > 0) {
-      closeCursor();
-      _error.notice(L.l("args unexpected"));
-      return FETCH_FAILURE;
-    }
-
-    return fetchBoth();
-  }
-
   private Value fetchBoth()
   {
     try {
       if (!advanceResultSet())
         return FETCH_EXHAUSTED;
+
+      if (_fetchModeArgs.length != 0) {
+        _error.notice(L.l("unexpected arguments"));
+        return FETCH_FAILURE;
+      }
+
 
       ArrayValueImpl array = new ArrayValueImpl();
 
@@ -529,20 +550,20 @@ public class PDOStatement
     return FETCH_SUCCESS;
   }
 
-  private Value fetchClass(Value[] args)
+  private Value fetchClass()
   {
     String className;
     Value[] ctorArgs;
 
-    if (args.length == 0 || args.length > 2)
+    if (_fetchModeArgs.length == 0 || _fetchModeArgs.length > 2)
       return fetchBoth();
 
-    className = args[0].toString();
+    className = _fetchModeArgs[0].toString();
 
-    if (args.length == 2) {
-      if (args[1].isArray()) {
+    if (_fetchModeArgs.length == 2) {
+      if (_fetchModeArgs[1].isArray()) {
         // XXX: inefiicient, but args[1].getValueArray(_env) doesn't handle references
-        ArrayValue argsArray = (ArrayValue) args[1];
+        ArrayValue argsArray = (ArrayValue) _fetchModeArgs[1];
 
         ctorArgs = new Value[argsArray.getSize()];
 
@@ -560,16 +581,6 @@ public class PDOStatement
     return fetchObject(className, ctorArgs);
   }
 
-  private Value fetchColumn(@Optional Value[] args)
-  {
-    if (args.length != 1)
-      return fetchBoth();
-
-    Value arg = args[0];
-
-    return fetchColumn(arg.toInt());
-  }
-
   /**
    * @param column 0-based column number
    */
@@ -577,6 +588,9 @@ public class PDOStatement
   {
     if (!advanceResultSet())
       return FETCH_EXHAUSTED;
+
+    if (column < 0 && _fetchModeArgs.length > 0)
+      column = _fetchModeArgs[0].toInt();
 
     try {
       if (column < 0 || column >= getResultSetMetaData().getColumnCount())
@@ -592,18 +606,15 @@ public class PDOStatement
 
   private Value fetchFunc()
   {
-    return fetchBoth();
+    throw new UnimplementedException();
   }
 
-  private Value fetchInto(Value[] args)
+  private Value fetchInto()
   {
-    if (args.length != 1)
-      return fetchBoth();
+    assert _fetchModeArgs.length > 0;
+    assert _fetchModeArgs[0].isObject();
 
-    Value var = args[0];
-
-    if (!var.isObject())
-      return fetchBoth();
+    Value var = _fetchModeArgs[0];
 
     if (!advanceResultSet())
       return FETCH_EXHAUSTED;
@@ -626,18 +637,13 @@ public class PDOStatement
     return var;
   }
 
-  private Value fetchLazy(Value[] args)
-  {
-    return fetchLazy(null, NULL_VALUES);
-  }
-
-  private Value fetchLazy(String className, Value[] args)
+  private Value fetchLazy()
   {
     // XXX: need to check why lazy is no different than object
-    return fetchObject(className, args);
+    return fetchObject(null, NULL_VALUES);
   }
 
-  private Value fetchNamed(Value[] args)
+  private Value fetchNamed()
   {
     try {
       if (!advanceResultSet())
@@ -676,17 +682,16 @@ public class PDOStatement
     }
   }
 
-  private Value fetchNum(Value[] args)
+  private Value fetchNum()
   {
-    if (args.length > 0) {
-      closeCursor();
-      _error.notice(L.l("args unexpected"));
-      return FETCH_FAILURE;
-    }
-
     try {
       if (!advanceResultSet())
         return FETCH_EXHAUSTED;
+
+      if (_fetchModeArgs.length != 0) {
+        _error.notice(L.l("unexpected arguments"));
+        return FETCH_FAILURE;
+      }
 
       ArrayValueImpl array = new ArrayValueImpl();
 
@@ -706,7 +711,7 @@ public class PDOStatement
     }
   }
 
-  private Value fetchObject(Value[] args)
+  private Value fetchObject()
   {
     return fetchObject(null, NULL_VALUES);
   }
@@ -721,8 +726,15 @@ public class PDOStatement
       if (cl == null)
         return fetchBoth();
     }
-    else
+    else {
       cl = null;
+
+      if (args.length != 0) {
+        advanceResultSet();
+        _error.warning(L.l("unexpected arguments"));
+        return BooleanValue.FALSE;
+      }
+    }
 
     if (!advanceResultSet())
       return FETCH_EXHAUSTED;
@@ -848,7 +860,7 @@ public class PDOStatement
    */
   public Iterator<Value> iterator()
   {
-    Value value = fetchAll(0, NULL_VALUES);
+    Value value = fetchAll(0, -1);
 
     if (value instanceof ArrayValue)
       return ((ArrayValue) value).values().iterator();
@@ -899,6 +911,9 @@ public class PDOStatement
    */
   public boolean setFetchMode(int fetchMode, Value[] args)
   {
+    _fetchMode = PDO.FETCH_BOTH;
+    _fetchModeArgs = NULL_VALUES;
+
     int fetchStyle = fetchMode;
 
     boolean isGroup = (fetchMode & PDO.FETCH_GROUP) != 0;
@@ -918,6 +933,15 @@ public class PDOStatement
     fetchStyle = fetchStyle & (~(PDO.FETCH_CLASSTYPE | PDO.FETCH_SERIALIZE));
 
     switch (fetchStyle) {
+      case PDO.FETCH_ASSOC:
+      case PDO.FETCH_BOTH:
+      case PDO.FETCH_BOUND:
+      case PDO.FETCH_LAZY:
+      case PDO.FETCH_NAMED:
+      case PDO.FETCH_NUM:
+      case PDO.FETCH_OBJ:
+        break;
+
       case PDO.FETCH_CLASS:
         if (args.length < 1 || args.length > 2)
           return false;
@@ -925,14 +949,18 @@ public class PDOStatement
         if (_env.findAbstractClass(args[0].toString()) == null)
           return false;
 
-        if (args.length == 2 && !(args[1].isArray()))
+        if (args.length == 2 && !(args[1].isNull() || args[1].isArray())) {
+          _env.warning(L.l("constructor args must be an array"));
+
           return false;
+        }
 
         break;
 
       case PDO.FETCH_COLUMN:
         if (args.length != 1)
           return false;
+
         break;
 
      case PDO.FETCH_FUNC:
@@ -940,22 +968,20 @@ public class PDOStatement
        return false;
 
       case PDO.FETCH_INTO:
-        if (args.length != 1)
-          return false;
-
-        if (! args[0].isObject())
+        if (args.length != 1 || !args[0].isObject())
           return false;
 
         break;
 
       default:
+        _error.warning(L.l("invalid fetch mode"));
         break;
     }
 
-    _fetchMode = fetchMode;
     _fetchModeArgs = args;
-    return true;
+    _fetchMode = fetchMode;
 
+    return true;
   }
 
   public String toString()
