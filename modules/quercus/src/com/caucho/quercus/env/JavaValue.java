@@ -63,7 +63,7 @@ public class JavaValue extends ResourceValue {
   @Override
   public Value getField(String name)
   {
-    return _classDef.getField(name, _object);
+    return _classDef.getField(_env, name, _object);
   }
 
   @Override
@@ -210,7 +210,13 @@ public class JavaValue extends ResourceValue {
    */
   public String toString()
   {
-    return String.valueOf(_object);
+    String result = String.valueOf(_object);
+    int endOfClassName = result.indexOf("@");
+    
+    if (endOfClassName > 0)
+      return result.substring(0,endOfClassName);
+    else
+      return result;
   }
 
 

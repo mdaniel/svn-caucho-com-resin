@@ -136,7 +136,7 @@ public class JavaClassDefinition extends AbstractQuercusClass {
    * @param name
    * @return Value attained through invoking getter
    */
-  public Value getField(String name, Object obj)
+  public Value getField(Env env, String name, Object obj)
   {
     Object result;
     Marshall marshall;
@@ -149,7 +149,7 @@ public class JavaClassDefinition extends AbstractQuercusClass {
         
         result = getter.invoke(obj);
         marshall = Marshall.create(_quercus, getter.getReturnType(), false);
-        return marshall.unmarshall(null, result);
+        return marshall.unmarshall(env, result);
  
       } catch (Throwable e) {
         
@@ -168,7 +168,7 @@ public class JavaClassDefinition extends AbstractQuercusClass {
           
           result = field.get(obj);
           marshall = Marshall.create(_quercus, field.getType(), false);
-          return marshall.unmarshall(null, result);
+          return marshall.unmarshall(env, result);
           
         } catch (Throwable e) {
           
@@ -182,7 +182,7 @@ public class JavaClassDefinition extends AbstractQuercusClass {
           
           result = __getField.invoke(obj);
           marshall = Marshall.create(_quercus, __getField.getReturnType(), false);
-          return marshall.unmarshall(null, result);
+          return marshall.unmarshall(env, result);
           
         } catch (Throwable e) {
           
