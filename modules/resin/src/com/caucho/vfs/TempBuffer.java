@@ -30,6 +30,7 @@
 package com.caucho.vfs;
 
 import java.io.IOException;
+import java.io.InputStream;
 
 import com.caucho.util.FreeList;
 
@@ -133,7 +134,7 @@ public class TempBuffer {
   {
     byte []thisBuf = _buf;
     int thisLength = _length;
-    
+
     if (thisBuf.length - thisLength < length)
       length = thisBuf.length - thisLength;
 
@@ -149,7 +150,7 @@ public class TempBuffer {
   {
     TempBuffer head = TempBuffer.allocate();
     TempBuffer tail = head;
-    int len = 0;
+    int len;
 
     while ((len = is.readAll(tail._buf, 0, tail._buf.length)) == tail._buf.length) {
       TempBuffer buf = TempBuffer.allocate();
@@ -159,11 +160,11 @@ public class TempBuffer {
     }
 
     if (len == 0 && head == tail)
-      return null;
+      return null; // XXX: TempBuffer leak of _head?
     else if (len == 0) {
       for (TempBuffer ptr = head; ptr.getNext() != null; ptr = ptr.getNext()) {
         TempBuffer next = ptr.getNext();
-        
+
 	if (next.getNext() == null) {
 	  TempBuffer.free(next);
 	  ptr._next = null;

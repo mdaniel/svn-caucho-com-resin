@@ -59,6 +59,14 @@ public class FileReadValue extends FileValue {
   }
 
   /**
+   * Returns the number of bytes available to be read, 0 if no known.
+   */
+  public long getLength()
+  {
+    return getPath().getLength();
+  }
+
+  /**
    * Reads a character from a file, returning -1 on EOF.
    */
   public int read()
@@ -197,5 +205,6 @@ public class FileReadValue extends FileValue {
   {
     return "File[" + getPath() + "]";
   }
+
 }
 

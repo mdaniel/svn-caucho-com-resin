@@ -1035,8 +1035,7 @@ abstract public class Value {
    */
   public InputStream toInputStream()
   {
-    return null;
-    //return new StringInputStream(toString());
+    return new StringInputStream(toString());
   }
 
   /**
