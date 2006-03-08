@@ -180,7 +180,7 @@ public class JavaClassDefinition extends AbstractQuercusClass {
       } else if (__getField != null) {
         try {
           
-          result = __getField.invoke(obj);
+          result = __getField.invoke(obj, name);
           marshall = Marshall.create(_quercus, __getField.getReturnType(), false);
           return marshall.unmarshall(env, result);
           
@@ -288,7 +288,11 @@ public class JavaClassDefinition extends AbstractQuercusClass {
         
         try {
           
-          __setField.invoke(obj, name, value);
+          Class type = __setField.getParameterTypes()[1];
+          Marshall marshall = Marshall.create(_quercus, type, false);
+          Object marshalledValue = marshall.marshall(env, value, type);
+          __setField.invoke(obj, name, marshalledValue);
+          
           return value;
           
         } catch (Throwable e) {
