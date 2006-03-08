@@ -36,6 +36,7 @@ import org.w3c.dom.*;
 import com.caucho.util.*;
 import com.caucho.vfs.*;
 import com.caucho.xml.*;
+import com.caucho.loader.EnvironmentLocal;
 import com.caucho.log.Log;
 import com.caucho.xpath.expr.*;
 import com.caucho.xpath.pattern.*;
@@ -68,15 +69,16 @@ import com.caucho.xpath.pattern.*;
  * object.  Most applications will not need to use it. 
  */
 public class XPath {
-  static final Logger log = Log.open(XPath.class);
+  private static final Logger log = Log.open(XPath.class);
 
-  private static LruCache<String,Pattern> _matchCache =
-    new LruCache<String,Pattern>(128);
+  private static EnvironmentLocal<LruCache<String,Pattern>> _matchCache =
+    new EnvironmentLocal<LruCache<String,Pattern>>();
   
-  private static LruCache<String,Pattern> _selectCache =
-    new LruCache<String,Pattern>(128);
-  private static LruCache<String,Expr> exprCache =
-    new LruCache<String,Expr>(128);
+  private static EnvironmentLocal<LruCache<String,Pattern>> _selectCache =
+    new EnvironmentLocal<LruCache<String,Pattern>>();
+  
+  private static EnvironmentLocal<LruCache<String,Expr>> _exprCache =
+    new EnvironmentLocal<LruCache<String,Expr>>();
 
   private XPath()
   {
@@ -124,11 +126,15 @@ public class XPath {
   public static Pattern parseSelect(String query)
     throws XPathParseException
   {
-    Pattern pattern = _selectCache.get(query);
+    LruCache<String,Pattern> cache = _selectCache.get();
+    if (cache == null)
+      cache = new LruCache<String,Pattern>(128);
+    
+    Pattern pattern = cache.get(query);
 
     if (pattern == null) {
       pattern = parseSelect(query, null);
-      _selectCache.put(query, pattern);
+      cache.put(query, pattern);
     }
 
     return pattern;
@@ -171,11 +177,15 @@ public class XPath {
   public static Pattern parseMatch(String query)
     throws XPathParseException
   {
-    Pattern pattern = _matchCache.get(query);
+    LruCache<String,Pattern> cache = _matchCache.get();
+    if (cache == null)
+      cache = new LruCache<String,Pattern>(128);
+    
+    Pattern pattern = cache.get(query);
 
     if (pattern == null) {
       pattern = parseMatch(query, null);
-      _matchCache.put(query, pattern);
+      cache.put(query, pattern);
     }
 
     return pattern;
@@ -285,11 +295,15 @@ public class XPath {
   public static Expr parseExpr(String query)
     throws XPathParseException
   {
-    Expr expr = (Expr) exprCache.get(query);
+    LruCache<String,Expr> cache = _exprCache.get();
+    if (cache == null)
+      cache = new LruCache<String,Expr>(128);
+    
+    Expr expr = cache.get(query);
 
     if (expr == null) {
       expr = parseExpr(query, null);
-      exprCache.put(query, expr);
+      cache.put(query, expr);
     }
 
     return expr;

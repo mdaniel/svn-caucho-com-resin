@@ -174,17 +174,6 @@ public class ServletServer extends ProtocolDispatchServer
       } finally {
 	thread.setContextClassLoader(oldLoader);
       }
-
-      if (_enableSelectManager) {
-	try {
-	  Class cl = Class.forName("com.caucho.server.port.JniSelectManager");
-	  Method method = cl.getMethod("create", new Class[0]);
-
-	  setSelectManager((AbstractSelectManager) method.invoke(null, null));
-	} catch (Throwable e) {
-	  log.log(Level.FINER, e.toString());
-	}
-      }
     } catch (Throwable e) {
       log.log(Level.WARNING, e.toString(), e);
       
@@ -543,6 +532,17 @@ public class ServletServer extends ProtocolDispatchServer
   public void setEnableSelectManager(boolean enable)
   {
     _enableSelectManager = enable;
+
+    if (enable && getSelectManager() == null) {
+      try {
+	Class cl = Class.forName("com.caucho.server.port.JniSelectManager");
+	Method method = cl.getMethod("create", new Class[0]);
+
+	setSelectManager((AbstractSelectManager) method.invoke(null, null));
+      } catch (Throwable e) {
+	log.log(Level.FINER, e.toString());
+      }
+    }
   }
   
   /**

@@ -90,5 +90,7 @@ public class AmberEntityManager extends AmberConnection
   AmberEntityManager(AmberPersistenceUnit persistenceUnit)
   {
     super(persistenceUnit);
+
+    initThreadConnection(); // ejb/0q00
   }
 }

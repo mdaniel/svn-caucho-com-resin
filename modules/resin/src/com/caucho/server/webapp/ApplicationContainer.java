@@ -958,15 +958,18 @@ public class ApplicationContainer
       return controller;
     }
 
-    controller = _appDeploy.findController(subURI);
-
-    if (controller != null) {
-      _uriToAppCache.put(subURI, controller);
-
-      return controller;
-    }
-
+    int length = subURI.length();
     int p = subURI.lastIndexOf('/');
+
+    if (p < 0 || p < length - 1) { // server/26cf
+      controller = _appDeploy.findController(subURI);
+
+      if (controller != null) {
+	_uriToAppCache.put(subURI, controller);
+
+	return controller;
+      }
+    }
 
     if (p >= 0) {
       controller = findByURIImpl(subURI.substring(0, p));

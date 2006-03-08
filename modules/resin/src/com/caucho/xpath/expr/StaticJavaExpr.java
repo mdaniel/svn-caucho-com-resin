@@ -54,7 +54,7 @@ public class StaticJavaExpr extends Expr {
   private static final int J_OBJECT = J_STRING + 1;
   
   // Code of the expression defined in Expr
-  private Method method;
+  private Method _method;
   // Arguments for more than 3.
   private ArrayList args;
   private int []argTypes;
@@ -69,15 +69,15 @@ public class StaticJavaExpr extends Expr {
    */
   public StaticJavaExpr(Method method, ArrayList args)
   {
-    this.method = method;
+    _method = method;
     this.args = args;
 
     argTypes = new int[args.size()];
-    Class []paramClasses = method.getParameterTypes();
+    Class []paramClasses = _method.getParameterTypes();
     for (int i = 0; i < paramClasses.length; i++)
       argTypes[i] = classToType(paramClasses[i]);
     
-    retType = classToType(method.getReturnType());
+    retType = classToType(_method.getReturnType());
   }
 
   private int classToType(Class cl)
@@ -220,7 +220,7 @@ public class StaticJavaExpr extends Expr {
     }
 
     try {
-      return method.invoke(null, argArray);
+      return _method.invoke(null, argArray);
     } catch (Exception e) {
       throw new XPathException(e);
     }
@@ -235,9 +235,9 @@ public class StaticJavaExpr extends Expr {
   {
     CharBuffer cb = CharBuffer.allocate();
     cb.append("java:");
-    cb.append(method.getDeclaringClass().getName());
+    cb.append(_method.getDeclaringClass().getName());
     cb.append(".");
-    cb.append(method.getName());
+    cb.append(_method.getName());
 
     cb.append("(");
     for (int i = 0; i < args.size(); i++) {

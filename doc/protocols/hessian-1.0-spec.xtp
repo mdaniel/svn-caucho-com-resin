@@ -301,10 +301,10 @@ map.put(new Integer(256), "foe");
 M I x00 x00 x00 x01
   S x00 x03 fee
 
-  I x00 x00 x01 x00
+  I x00 x00 x00 x10
   S x00 x03 fie
 
-  I x00 x01 x00 x00
+  I x00 x00 x01 x00
   S x00 x03 foe
 
   z

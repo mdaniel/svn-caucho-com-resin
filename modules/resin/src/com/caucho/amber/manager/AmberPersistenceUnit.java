@@ -327,6 +327,17 @@ public class AmberPersistenceUnit {
   }
 
   /**
+   * Set false for EJB-style generation.
+   */
+  public void setBytecodeGenerator(boolean isBytecodeGenerator)
+  {
+    if (isBytecodeGenerator)
+      _generator = _amberContainer.getGenerator();
+    else
+      _generator = new AmberGeneratorImpl(this);
+  }
+
+  /**
    * Returns a new xid.
    */
   public long getXid()

@@ -1156,8 +1156,9 @@ abstract public class AbstractStylesheetFactory
     LruCache<String,SoftReference<StylesheetImpl>> cache;
 
     ClassLoader parentLoader = Thread.currentThread().getContextClassLoader();
-    
+
     cache = _stylesheetCache.getLevel(parentLoader);
+    
     if (cache == null) {
       cache = new LruCache<String,SoftReference<StylesheetImpl>>(256);
       _stylesheetCache.set(cache, parentLoader);

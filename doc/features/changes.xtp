@@ -2,8 +2,12 @@
 
 <a href='changes-2.xtp'>Resin 2.1 changes</a>
 
-<s2 title='3.0.snal - Feb 23, 2006'>
+<s2 title='3.0.snap - Feb 23, 2006'>
 <ul>
+<li>XPath cache was holding objects from old classloaders (#951, rep by Mattias Jiderhamn)
+<li>web-app merging for webapps/ROOT was improperly handling id="/" (rep by Keith Fetterman)
+<li>enable-select-manager had incorrect order in ServletServer (#967, rep by Rudy D'hauwe)
+<li>Amber: refactor for javax.persistence draft update
 <li>Hessian: use setChunkedStreamingMode when available (#955, rep by Alon Salant)
 <li>Use SoftReference to handle JSP memory issues with many pages (#600, rep by Uwe Schaefer)
 <li>Allow EL expression with missing web.xml (#941, rep by tinyspace)

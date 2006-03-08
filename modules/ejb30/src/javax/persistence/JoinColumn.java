@@ -35,7 +35,7 @@ import java.lang.annotation.Target;
 import static java.lang.annotation.ElementType.*;
 
 /**
- * The @Column annotation.
+ * The @JoinColumn annotation.
  */
 @Target({TYPE, METHOD, FIELD}) @Retention(RUNTIME)
 public @interface JoinColumn {

@@ -906,7 +906,7 @@ public class EntityType extends Type {
     throws IOException
   {
     // return generateLoad(out, rs, indexVar, index);
-
+    out.print("(" + getInstanceClassName() + ") ");
     out.print("aConn.loadProxy(\"" + getName() + "\", ");
 
     index = getId().generateLoadForeign(out, rs, indexVar, index);

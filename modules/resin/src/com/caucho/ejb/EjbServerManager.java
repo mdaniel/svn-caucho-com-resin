@@ -139,6 +139,7 @@ public class EjbServerManager implements EJBServerInterface, EnvironmentListener
       _amberContainer = AmberContainer.getLocalContainer();
       
       _amberPersistenceUnit = AmberContainer.getLocalContainer().createPersistenceUnit("resin-ejb");
+      _amberPersistenceUnit.setBytecodeGenerator(false);
 
       _envServerManager = new EnvServerManager(_amberPersistenceUnit);
 
@@ -195,6 +196,7 @@ public class EjbServerManager implements EJBServerInterface, EnvironmentListener
   public void setDataSource(DataSource dataSource)
   {
     _amberContainer.setDataSource(dataSource);
+    _amberPersistenceUnit.setDataSource(dataSource);
   }
 
   /**
