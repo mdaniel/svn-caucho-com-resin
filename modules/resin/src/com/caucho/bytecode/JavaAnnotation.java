@@ -142,7 +142,12 @@ public class JavaAnnotation extends JAnnotation {
       for (Method method : aClass.getDeclaredMethods()) {
 	Object value = method.getDefaultValue();
 
-	if (value != null)
+	if (value instanceof Class) {
+	  String className = ((Class) value).getName();
+	  
+	  ann.putValue(method.getName(), loader.forName(className));
+	}
+	else if (value != null)
 	  ann.putValue(method.getName(), value);
       }
     } catch (Exception e) {
@@ -252,7 +257,11 @@ public class JavaAnnotation extends JAnnotation {
       }
     case 'c':
       // class
-      return cp.getUtf8(readShort(is)).getValue();
+      {
+	String className = cp.getUtf8(readShort(is)).getValue();
+
+	return loader.descriptorToClass(className, 0);
+      }
     case '@':
       return parseAnnotation(is, cp, loader);
     case '[':

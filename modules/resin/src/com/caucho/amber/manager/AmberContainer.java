@@ -92,6 +92,8 @@ public class AmberContainer {
   private HashMap<String,EntityType> _entityMap
     = new HashMap<String,EntityType>();
 
+  private Throwable _exception;
+  
   private HashMap<String,Throwable> _entityExceptionMap
     = new HashMap<String,Throwable>();
 
@@ -237,6 +239,8 @@ public class AmberContainer {
 
     if (e != null)
       throw new AmberRuntimeException(e);
+    else if (_exception != null)
+      throw new AmberRuntimeException(_exception);
     
     return _entityMap.get(className);
   }
@@ -247,6 +251,15 @@ public class AmberContainer {
   public void addEntityException(String className, Throwable e)
   {
     _entityExceptionMap.put(className, e);
+  }
+
+  /**
+   * Adds an entity for an introspected class.
+   */
+  public void addException(Throwable e)
+  {
+    if (_exception == null)
+      _exception = e;
   }
 
   /**
@@ -300,12 +313,18 @@ public class AmberContainer {
 	  Jndi.bindDeep("java:comp/env/persistence/" + unit.getName(),
 			new FactoryProxy(unit));
 	} catch (Throwable e) {
+	  addException(e);
+      
 	  log.log(Level.WARNING, e.toString(), e);
 	}
       }
     } catch (ConfigException e) {
+      addException(e);
+      
       log.warning(e.getMessage());
     } catch (Throwable e) {
+      addException(e);
+      
       log.log(Level.WARNING, e.toString(), e);
     } finally {
       try {

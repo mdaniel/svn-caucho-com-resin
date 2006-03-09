@@ -72,13 +72,14 @@ public class PersistenceUnitConfig {
     throws Exception
   {
     AmberPersistenceUnit unit = new AmberPersistenceUnit(container, _name);
-    unit.init();
 
-    for (String cl : _classList) {
-      unit.addEntityClass(cl);
-    }
+      unit.init();
 
-    unit.generate();
+      for (String cl : _classList) {
+	unit.addEntityClass(cl);
+      }
+
+      unit.generate();
 
     return unit;
   }

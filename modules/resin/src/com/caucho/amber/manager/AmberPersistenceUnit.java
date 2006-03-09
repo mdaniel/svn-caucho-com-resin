@@ -555,9 +555,17 @@ public class AmberPersistenceUnit {
     while (_lazyGenerate.size() > 0) {
       EntityType type = _lazyGenerate.remove(0);
 
-      type.init();
+      try {
+	type.init();
 
-      getGenerator().generate(type);
+	getGenerator().generate(type);
+      } catch (Exception e) {
+	type.setConfigException(e);
+	
+	_amberContainer.addEntityException(type.getBeanClass().getName(), e);
+
+	throw e;
+      }
     }
 
     initTables();
@@ -609,13 +617,16 @@ public class AmberPersistenceUnit {
   public void configure()
     throws Exception
   {
+    _introspector.configure();
+
     while (_lazyConfigure.size() > 0) {
       EntityType type = _lazyConfigure.remove(0);
 
       if (type.startConfigure()) {
 	// getEnvManager().getGenerator().configure(type);
-	
       }
+
+      _introspector.configure();
 
       if (! _lazyGenerate.contains(type))
 	_lazyGenerate.add(type);

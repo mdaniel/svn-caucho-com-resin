@@ -69,6 +69,10 @@ public class EntityComponent extends ClassComponent {
 
   private ArrayList<PersistentDependency> _dependencies =
     new ArrayList<PersistentDependency>();
+
+  public EntityComponent()
+  {
+  }
   
   /**
    * Sets the bean info for the generator

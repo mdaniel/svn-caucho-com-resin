@@ -30,9 +30,13 @@
 package com.caucho.amber.cfg;
 
 import java.sql.SQLException;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+
+import java.util.logging.Logger;
+import java.util.logging.Level;
 
 import javax.persistence.*;
 
@@ -65,9 +69,20 @@ import com.caucho.util.L10N;
  */
 public class EntityIntrospector {
   private static final L10N L = new L10N(EntityIntrospector.class);
+  private static final Logger log
+    = Logger.getLogger(EntityIntrospector.class.getName());
 
   private static HashSet<String> _propertyAnnotations
     = new HashSet<String>();
+
+  // types allowed with a @Basic annotation
+  private static HashSet<String> _basicTypes = new HashSet<String>();
+
+  // annotations allowed with a @Basic annotation
+  private static HashSet<String> _basicAnnotations = new HashSet<String>();
+
+  // annotations allowed with a @ManyToOne annotation
+  private static HashSet<String> _manyToOneAnnotations = new HashSet<String>();
 
   private AmberPersistenceUnit _persistenceUnit;
 
@@ -311,22 +326,48 @@ public class EntityIntrospector {
   /**
    * Completes all partial bean introspection.
    */
-  public void init()
+  public void configure()
     throws ConfigException
   {
+    ConfigException exn = null;
+    
     while (_depCompletions.size() > 0 || _linkCompletions.size() > 0) {
       while (_linkCompletions.size() > 0) {
 	Completion completion = _linkCompletions.remove(0);
 
-	completion.complete();
+	try {
+	  completion.complete();
+	} catch (Exception e) {
+	  completion.getEntityType().setConfigException(e);
+
+	  if (exn == null)
+	    exn = new ConfigException(e);
+	  else
+	    log.log(Level.WARNING, e.toString(), e);
+	}
       }
 
       if (_depCompletions.size() > 0) {
 	Completion completion = _depCompletions.remove(0);
 
-	completion.complete();
+
+	try {
+	  completion.complete();
+	} catch (Exception e) {
+	  completion.getEntityType().setConfigException(e);
+
+	  log.log(Level.WARNING, e.toString(), e);
+
+	  if (exn == null)
+	    exn = new ConfigException(e);
+	  else
+	    log.log(Level.WARNING, e.toString(), e);
+	}
       }
     }
+
+    if (exn != null)
+      throw exn;
   }
 
   /**
@@ -516,7 +557,10 @@ public class EntityIntrospector {
 
     Type amberType = persistenceUnit.createType(fieldType);
 
-    Column keyColumn = createColumn(entityType, "ID", column, amberType);
+    Column keyColumn = createColumn(entityType,
+				    fieldName,
+				    column,
+				    amberType);
 
     KeyPropertyField idField;
     idField = new KeyPropertyField(entityType, fieldName, keyColumn);
@@ -796,27 +840,52 @@ public class EntityIntrospector {
     if (field.isAnnotationPresent(javax.persistence.Id.class)) {
     }
     else if (field.isAnnotationPresent(javax.persistence.Basic.class)) {
+      validateAnnotations(field, _basicAnnotations);
+      
       addBasic(sourceType, field, fieldName, fieldType);
     }
-    else if (field.isAnnotationPresent(javax.ejb.ManyToOne.class)) {
+    else if (field.isAnnotationPresent(javax.persistence.ManyToOne.class)) {
+      JAnnotation ann = field.getAnnotation(javax.persistence.ManyToOne.class);
+      
+      validateAnnotations(field, _manyToOneAnnotations);
+
+      JClass targetEntity = ann.getClass("targetEntity");
+
+      if (targetEntity == null ||
+	  targetEntity.getName().equals("void")) {
+	targetEntity = fieldType;
+      }
+      
+      if (! targetEntity.isAnnotationPresent(javax.persistence.Entity.class)) {
+	throw error(field, L.l("'{0}' is an illegal targetEntity for {1}.  @ManyToOne relations must target a valid @Entity.",
+			       targetEntity.getName(), field.getName()));
+      }
+
+      if (! fieldType.isAssignableFrom(targetEntity)) {
+	throw error(field, L.l("'{0}' is an illegal targetEntity for {1}.  @ManyToOne targetEntity must be assignable to the field type '{2}'.",
+			       targetEntity.getName(),
+			       field.getName(),
+			       fieldType.getName()));
+      }
+      
       _linkCompletions.add(new ManyToOneCompletion(sourceType,
 						   field,
 						   fieldName,
 						   fieldType));
     }
-    else if (field.isAnnotationPresent(javax.ejb.OneToMany.class)) {
+    else if (field.isAnnotationPresent(javax.persistence.OneToMany.class)) {
       _depCompletions.add(new OneToManyCompletion(sourceType,
 						  field,
 						  fieldName,
 						  fieldType));
     }
-    else if (field.isAnnotationPresent(javax.ejb.OneToOne.class)) {
+    else if (field.isAnnotationPresent(javax.persistence.OneToOne.class)) {
       _depCompletions.add(new OneToOneCompletion(sourceType,
 						  field,
 						  fieldName,
 						  fieldType));
     }
-    else if (field.isAnnotationPresent(javax.ejb.ManyToMany.class)) {
+    else if (field.isAnnotationPresent(javax.persistence.ManyToMany.class)) {
       _depCompletions.add(new ManyToManyCompletion(sourceType,
 						   field,
 						   fieldName,
@@ -839,6 +908,14 @@ public class EntityIntrospector {
 
     JAnnotation basicAnn = field.getAnnotation(javax.persistence.Basic.class);
     JAnnotation columnAnn = field.getAnnotation(javax.persistence.Column.class);
+
+    if (_basicTypes.contains(fieldType.getName())) {
+    }
+    else if (fieldType.isAssignableTo(java.io.Serializable.class)) {
+    }
+    else
+      throw error(field, L.l("{0} is an invalid @Basic type for {1}.",
+			     fieldType.getName(), field.getName()));
 
     Type amberType = persistenceUnit.createType(fieldType);
 
@@ -935,15 +1012,28 @@ public class EntityIntrospector {
     }
 
     JAnnotation joinColumns = field.getAnnotation(JoinColumns.class);
-    JAnnotation []joinColumnsAnn = null;
+    Object []joinColumnsAnn = null;
 
     if (joinColumns != null)
-      joinColumnsAnn = (JAnnotation []) joinColumns.get("value");
+      joinColumnsAnn = (Object []) joinColumns.get("value");
     JAnnotation joinColumnAnn = field.getAnnotation(JoinColumn.class);
 
-    String targetName = manyToOneAnn.getString("targetEntity");
+    if (joinColumnsAnn != null && joinColumnAnn != null) {
+      throw error(field, L.l("{0} may not have both @JoinColumn and @JoinColumns",
+			     field.getName()));
+    }
 
-    if (targetName == null || targetName.equals(""))
+    if (joinColumnAnn != null)
+      joinColumnsAnn = new Object[] { joinColumnAnn };
+
+    JClass targetClass = manyToOneAnn.getClass("targetEntity");
+    String targetName = null;
+    if (targetClass != null)
+      targetName = targetClass.getName();
+
+    if (targetName == null ||
+	targetName.equals("") ||
+	targetName.equals("void"))
       targetName = fieldType.getName();
 
     EntityManyToOneField manyToOneField;
@@ -959,13 +1049,13 @@ public class EntityIntrospector {
 
     Table sourceTable = sourceType.getTable();
 
+    validateJoinColumns(field, joinColumnsAnn, targetType);
+
     ArrayList<ForeignColumn> foreignColumns = new ArrayList<ForeignColumn>();
     for (Column keyColumn : targetType.getId().getColumns()) {
       JAnnotation joinAnn = getJoinColumn(joinColumnsAnn, keyColumn.getName());
-      if (joinAnn == null)
-	joinAnn = joinColumnAnn;
 
-      String columnName = keyColumn.getName();
+      String columnName = fieldName + '_' + keyColumn.getName();
       if (joinAnn != null)
 	columnName = joinAnn.getString("name");
 
@@ -995,19 +1085,66 @@ public class EntityIntrospector {
     if (joinColumns == null)
       return null;
 
-    return getJoinColumn((JAnnotation []) joinColumns.get("value"), keyName);
+    return getJoinColumn((Object []) joinColumns.get("value"), keyName);
   }
 
-  private JAnnotation getJoinColumn(JAnnotation []columnsAnn, String keyName)
+  private void validateJoinColumns(JAccessibleObject field,
+				   Object []columnsAnn,
+				   EntityType targetType)
+    throws ConfigException
+  {
+    if (columnsAnn == null || columnsAnn.length == 0)
+      return;
+
+    com.caucho.amber.field.Id id = targetType.getId();
+
+    if (id.getColumns().size() != columnsAnn.length) {
+      throw error(field, L.l("Number of @JoinColumns for '{1}' ({0}) does not match the number of primary key columns for '{3}' ({2}).",
+			     "" + columnsAnn.length,
+			     field.getName(),
+			     id.getColumns().size(),
+			     targetType.getName()));
+			     
+    }
+
+    for (int i = 0; i < columnsAnn.length; i++) {
+      JAnnotation ann = (JAnnotation) columnsAnn[i];
+      
+      String ref = ann.getString("referencedColumnName");
+      
+      if (ref.equals("") && columnsAnn.length > 1)
+	throw error(field, L.l("referencedColumnName is required when more than one @JoinColumn is specified."));
+
+      Column column = findColumn(id.getColumns(), ref);
+
+      if (column == null)
+	throw error(field, L.l("referencedColumnName '{0}' does not match any key column in '{1}'.",
+			       ref, targetType.getName()));
+    }
+  }
+
+  private Column findColumn(ArrayList<Column> columns, String ref)
+  {
+    for (Column column : columns) {
+      if (column.getName().equals(ref))
+	return column;
+    }
+
+    return null;
+  }
+
+  private JAnnotation getJoinColumn(Object []columnsAnn, String keyName)
   {
     if (columnsAnn == null || columnsAnn.length == 0)
       return null;
 
     for (int i = 0; i < columnsAnn.length; i++) {
-      String ref = columnsAnn[i].getString("referencedColumnName");
+      JAnnotation ann = (JAnnotation) columnsAnn[i];
+      
+      String ref = ann.getString("referencedColumnName");
 
       if (ref.equals("") || ref.equals(keyName))
-	return columnsAnn[i];
+	return ann;
     }
 
     return null;
@@ -1115,6 +1252,33 @@ public class EntityIntrospector {
     sourceType.addField(manyToManyField);
   }
 
+  private void validateAnnotations(JAccessibleObject field,
+				   HashSet<String> validAnnotations)
+    throws ConfigException
+  {
+    for (JAnnotation ann : field.getDeclaredAnnotations()) {
+      String name = ann.getType();
+      
+      if (! name.startsWith("javax.persistence"))
+	continue;
+
+      if (! validAnnotations.contains(name))
+	throw error(field, L.l("{0} may not have a @{1} annotation.",
+			       field.getName(),
+			       name));
+    }
+  }
+
+  private ConfigException error(JAccessibleObject field,
+				String msg)
+  {
+    // XXX: the field is for line numbers in the source, theoretically
+
+    String className = field.getDeclaringClass().getShortName();
+    
+    return new ConfigException(className + ": " + msg);
+  }
+
   static String toFieldName(String name)
   {
     if (Character.isLowerCase(name.charAt(0)))
@@ -1192,6 +1356,18 @@ public class EntityIntrospector {
    * completes for dependent
    */
   class Completion {
+    protected EntityType _entityType;
+
+    protected Completion(EntityType entityType)
+    {
+      _entityType = entityType;
+    }
+    
+    EntityType getEntityType()
+    {
+      return _entityType;
+    }
+    
     void complete()
       throws ConfigException
     {
@@ -1202,7 +1378,6 @@ public class EntityIntrospector {
    * completes for dependent
    */
   class OneToManyCompletion extends Completion {
-    private EntityType _entityType;
     private JAccessibleObject _field;
     private String _fieldName;
     private JClass _fieldType;
@@ -1212,7 +1387,8 @@ public class EntityIntrospector {
 			String fieldName,
 			JClass fieldType)
     {
-      _entityType = type;
+      super(type);
+      
       _field = field;
       _fieldName = fieldName;
       _fieldType = fieldType;
@@ -1286,7 +1462,6 @@ public class EntityIntrospector {
    * completes for dependent
    */
   class OneToOneCompletion extends Completion {
-    private EntityType _entityType;
     private JAccessibleObject _field;
     private String _fieldName;
     private JClass _fieldType;
@@ -1296,7 +1471,8 @@ public class EntityIntrospector {
 		       String fieldName,
 		       JClass fieldType)
     {
-      _entityType = type;
+      super(type);
+      
       _field = field;
       _fieldName = fieldName;
       _fieldType = fieldType;
@@ -1373,7 +1549,6 @@ public class EntityIntrospector {
    * completes for dependent
    */
   class ManyToManyCompletion extends Completion {
-    private EntityType _entityType;
     private JAccessibleObject _field;
     private String _fieldName;
     private JClass _fieldType;
@@ -1383,7 +1558,8 @@ public class EntityIntrospector {
 			 String fieldName,
 			 JClass fieldType)
     {
-      _entityType = type;
+      super(type);
+      
       _field = field;
       _fieldName = fieldName;
       _fieldType = fieldType;
@@ -1400,7 +1576,6 @@ public class EntityIntrospector {
    * completes for link
    */
   class ManyToOneCompletion extends Completion {
-    private EntityType _entityType;
     private JAccessibleObject _field;
     private String _fieldName;
     private JClass _fieldType;
@@ -1410,7 +1585,8 @@ public class EntityIntrospector {
 			String fieldName,
 			JClass fieldType)
     {
-      _entityType = type;
+      super(type);
+
       _field = field;
       _fieldName = fieldName;
       _fieldType = fieldType;
@@ -1424,15 +1600,40 @@ public class EntityIntrospector {
   }
 
   static {
+    // annotations allowed with a @Basic annotation
+    _basicAnnotations.add("javax.persistence.Basic");
+    _basicAnnotations.add("javax.persistence.Column");
+    _basicAnnotations.add("javax.persistence.Enumerated");
+    _basicAnnotations.add("javax.persistence.Lob");
+    _basicAnnotations.add("javax.persistence.Temporal");
+    
+    // non-serializable types allowed with a @Basic annotation
+    _basicTypes.add("boolean");
+    _basicTypes.add("byte");
+    _basicTypes.add("char");
+    _basicTypes.add("short");
+    _basicTypes.add("int");
+    _basicTypes.add("float");
+    _basicTypes.add("double");
+    _basicTypes.add("[byte");
+    _basicTypes.add("[char");
+    _basicTypes.add("[java.lang.Byte");
+    _basicTypes.add("[java.lang.Character");
+
+    // annotations allowed with a @ManyToOne annotation
+    _manyToOneAnnotations.add("javax.persistence.ManyToOne");
+    _manyToOneAnnotations.add("javax.persistence.JoinColumn");
+    _manyToOneAnnotations.add("javax.persistence.JoinColumns");
+    
+    // ??
     _propertyAnnotations.add("javax.persistence.Basic");
     _propertyAnnotations.add("javax.persistence.Column");
     _propertyAnnotations.add("javax.persistence.Id");
     _propertyAnnotations.add("javax.persistence.Transient");
-    _propertyAnnotations.add("javax.ejb.OneToOne");
-    _propertyAnnotations.add("javax.ejb.ManyToOne");
-    _propertyAnnotations.add("javax.ejb.OneToMany");
-    _propertyAnnotations.add("javax.ejb.ManyToMany");
-    _propertyAnnotations.add("javax.ejb.JoinColumn");
+    _propertyAnnotations.add("javax.persistence.OneToOne");
+    _propertyAnnotations.add("javax.persistence.ManyToOne");
+    _propertyAnnotations.add("javax.persistence.OneToMany");
+    _propertyAnnotations.add("javax.persistence.ManyToMany");
+    _propertyAnnotations.add("javax.persistence.JoinColumn");
   }
 }
-

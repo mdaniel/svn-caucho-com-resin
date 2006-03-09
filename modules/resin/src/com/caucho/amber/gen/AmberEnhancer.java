@@ -55,6 +55,7 @@ import com.caucho.loader.enhancer.ClassEnhancer;
 import com.caucho.config.ConfigException;
 
 import com.caucho.java.JavaCompiler;
+import com.caucho.java.WorkDir;
 
 import com.caucho.java.gen.JavaClassGenerator;
 import com.caucho.java.gen.DependencyComponent;
@@ -89,11 +90,14 @@ public class AmberEnhancer implements AmberGenerator, ClassEnhancer {
 
   private AmberContainer _amberContainer;
 
+  private Path _workDir;
+
   private ArrayList<String> _pendingClassNames = new ArrayList<String>();
 
   public AmberEnhancer(AmberContainer amberContainer)
   {
     _amberContainer = amberContainer;
+    _workDir = WorkDir.getLocalWorkDir().lookup("pre-enhance");
   }
   
   /**
@@ -102,6 +106,14 @@ public class AmberEnhancer implements AmberGenerator, ClassEnhancer {
   public void setConfigDirectory(Path dir)
   {
     _configDirectory = dir;
+  }
+
+  /**
+   * Returns the work directory.
+   */
+  public Path getWorkDir()
+  {
+    return _workDir;
   }
 
   /**
@@ -219,31 +231,7 @@ public class AmberEnhancer implements AmberGenerator, ClassEnhancer {
 
   protected EntityType loadEntityTypeImpl(Class cl, ClassLoader rawLoader)
   {
-    if (! _useHibernateFiles)
-      return null;
-    
-    String className = cl.getName();
-    
-    String xmlName = className.replace('.', '/') + ".hbm.xml";
-    
-    java.net.URL url = rawLoader.getResource(xmlName);
-
-    if (url == null)
-      return null;
-
-    Path path = Vfs.lookup(url.toString());
-
-    try {
-      parseHibernateMapping(path);
-
-      EntityType type = _amberContainer.getEntity(className);
-      type.setInstanceClassName(className + "__ResinExt");
-      type.setEnhanced(true);
-
-      return type;
-    } catch (Exception e) {
-      throw new AmberRuntimeException(e);
-    }
+    return null;
   }
 
   /**
@@ -311,6 +299,8 @@ public class AmberEnhancer implements AmberGenerator, ClassEnhancer {
     throws Exception
   {
     JavaClassGenerator javaGen = new JavaClassGenerator();
+
+    javaGen.setWorkDir(getWorkDir());
 
     String extClassName = type.getBeanClass().getName() + "__ResinExt";
     type.setInstanceClassName(extClassName);
@@ -386,6 +376,7 @@ public class AmberEnhancer implements AmberGenerator, ClassEnhancer {
 
     JavaCompiler compiler = gen.getCompiler();
 
+    compiler.setClassDir(getWorkDir());
     compiler.compileBatch(javaFiles);
 
     for (int i = 0; i < classNames.size(); i++) {
@@ -443,50 +434,6 @@ public class AmberEnhancer implements AmberGenerator, ClassEnhancer {
   public void configure(EntityType type)
     throws ConfigException, IOException
   {
-    String className = type.getName();
-
-    String xmlName = className.replace('.', '/') + ".hbm.xml";
-
-    // XXX: stub
-    // java.net.URL url = getRawLoader().getResource(xmlName);
-    java.net.URL url = null;
-
-    if (url == null)
-      return;
-
-    Path path = Vfs.lookup(url.toString());
-
-    if (type.getInstanceClassName() == null) {
-      type.setInstanceClassName(className + "__ResinExt");
-      type.setEnhanced(true);
-    }
-    
-    try {
-      parseHibernateMapping(path);
-    } catch (Exception e) {
-      throw new AmberRuntimeException(e);
-    }
-  }
-
-  /**
-   * Parses the configuration file.
-   */
-  public void parseHibernateMapping(Path path)
-    throws ConfigException, IOException
-  {
-    Environment.addDependency(new Depend(path));
-    
-    Thread thread = Thread.currentThread();
-    ClassLoader oldLoader = thread.getContextClassLoader();
-    
-    try {
-      // XXX:
-      // thread.setContextClassLoader(getRawLoader());
-
-      // HibernateParser.parse(_amberContainerenceUnitenceUnit, path);
-    } finally {
-      thread.setContextClassLoader(oldLoader);
-    }
   }
 
   static class FieldMap {

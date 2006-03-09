@@ -857,6 +857,10 @@ public class EntityType extends Type {
 
     // forces table lazy load
     getTable();
+
+    assert getId() != null : "null id for " + _name;
+
+    getId().init();
       
     for (AmberField field : _fields) {
       if (field.isUpdateable())
@@ -864,10 +868,6 @@ public class EntityType extends Type {
 
       field.init();
     }
-
-    assert getId() != null : "null id for " + _name;
-
-    getId().init();
 
     /*
     if (_amberPersistenceUnitenceUnitenceUnitenceUnitenceUnitenceUnitenceUnitenceUnitenceUnitenceUnitenceUnitenceUnit.getCreateDatabaseTables())

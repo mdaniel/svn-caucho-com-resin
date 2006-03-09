@@ -404,14 +404,20 @@ public class Table {
       } finally {
 	conn.close();
       }
+    
+      for (Column column : _columns) {
+	column.validateDatabase(amberPersistenceUnit);
+      }
     } catch (ConfigException e) {
+      if (_type != null)
+	_type.setConfigException(e);
+      
       throw e;
     } catch (Exception e) {
+      if (_type != null)
+	_type.setConfigException(e);
+      
       throw error(e);
-    }
-    
-    for (Column column : _columns) {
-      column.validateDatabase(amberPersistenceUnit);
     }
   }
 

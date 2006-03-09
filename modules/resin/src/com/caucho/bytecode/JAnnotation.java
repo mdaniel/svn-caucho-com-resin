@@ -64,6 +64,14 @@ abstract public class JAnnotation {
   /**
    * Returns the annotation value.
    */
+  public JClass getClass(String name)
+  {
+    return (JClass) get(name);
+  }
+
+  /**
+   * Returns the annotation value.
+   */
   public int getInt(String name)
   {
     Integer value = (Integer) get(name);
