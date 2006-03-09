@@ -42,11 +42,8 @@ import com.caucho.vfs.EnvironmentStream;
  * A generic pool of threads available for Alarms and Work tasks.
  */
 public class ThreadPool implements Runnable {
-  static private final Logger log = Log.open(ThreadPool.class);
-
-  // RING_SIZE must be a power of two for the RING_MASK to work
-  private static final int RING_SIZE = 4096;
-  private static final int RING_MASK = RING_SIZE - 1;
+  private static final Logger log
+    = Logger.getLogger(ThreadPool.class.getName());
   
   private static final long MAX_EXPIRE = Long.MAX_VALUE / 2;
 
@@ -58,26 +55,27 @@ public class ThreadPool implements Runnable {
 
   private static long _resetCount;
 
-  private final static ThreadPool []_idleRing = new ThreadPool[RING_SIZE];
+  private final static ArrayList<ThreadPool> _threads
+    = new ArrayList<ThreadPool>();
 
-  private final static ArrayList<ThreadPool> _threads =
-    new ArrayList<ThreadPool>();
+  private final static ArrayList<Runnable> _taskQueue
+    = new ArrayList<Runnable>();
 
-  private final static ArrayList<Runnable> _taskQueue =
-    new ArrayList<Runnable>();
-
-  private final static ArrayList<ClassLoader> _loaderQueue =
-    new ArrayList<ClassLoader>();
+  private final static ArrayList<ClassLoader> _loaderQueue
+    = new ArrayList<ClassLoader>();
 
   private final static ThreadLauncher _launcher = ThreadLauncher.create();
   private final static ScheduleThread _scheduler = ScheduleThread.create();
+  
   private static boolean _isQueuePriority;
 
+  private static final Object _idleLock = new Object();
+  
+  private static ThreadPool _idleHead;
+
   private static int _threadCount;
-
-  private static int _idleHead;
-  private static int _idleTail;
-
+  // number of threads in the idle stack
+  private static int _idleCount;
   // number of threads which are in the process of starting
   private static int _startCount;
 
@@ -90,6 +88,9 @@ public class ThreadPool implements Runnable {
 
   private Thread _thread;
   private Thread _queueThread;
+
+  private ThreadPool _prev;
+  private ThreadPool _next;
 
   private long _threadResetCount;
   
@@ -146,7 +147,7 @@ public class ThreadPool implements Runnable {
    */
   public static int getIdleThreadCount()
   {
-    return (_idleHead - _idleTail) & RING_MASK;
+    return _idleCount;
   }
 
   /**
@@ -270,10 +271,10 @@ public class ThreadPool implements Runnable {
    */
   public static void interrupt()
   {
-    synchronized (_idleRing) {
-      for (int i = 0; i < _threads.size(); i++) {
-	ThreadPool item = _threads.get(i);
-
+    synchronized (_idleLock) {
+      for (ThreadPool item = _idleHead;
+	   item != null;
+	   item = item._next) {
 	Thread thread = item.getThread();
 
 	if (thread != null) {
@@ -299,16 +300,20 @@ public class ThreadPool implements Runnable {
 
     while (poolItem == null) {
       try {
-	synchronized (_idleRing) {
-	  int idleCount = (_idleHead - _idleTail) & RING_MASK;
+	synchronized (_idleLock) {
+	  int idleCount = _idleCount;
 	  int freeCount = idleCount + _maxThreads - _threadCount;
 	  boolean startNew = false;
 
 	  if (idleCount > 0 && freeThreads < freeCount) {
-	    _idleHead = (_idleHead - 1) & RING_MASK;
-	    
-	    poolItem = _idleRing[_idleHead];
-	    _idleRing[_idleHead] = null;
+	    poolItem = _idleHead;
+	    _idleHead = poolItem._next;
+
+	    poolItem._next = null;
+	    if (_idleHead != null)
+	      _idleHead._prev = null;
+
+	    _idleCount--;
 
 	    if (idleCount < _minSpareThreads)
 	      startNew = true;
@@ -341,7 +346,7 @@ public class ThreadPool implements Runnable {
 		// clear interrupted flag
 		Thread.interrupted();
 		
-		_idleRing.wait(5000);
+		_idleLock.wait(5000);
 	      } finally {
 		_scheduleWaitCount--;
 	      }
@@ -410,7 +415,7 @@ public class ThreadPool implements Runnable {
   {
     _thread = Thread.currentThread();
     
-    synchronized (_idleRing) {
+    synchronized (_idleLock) {
       _threadCount++;
       _startCount--;
       _threads.add(this);
@@ -424,7 +429,7 @@ public class ThreadPool implements Runnable {
     try {
       runTasks();
     } finally {
-      synchronized (_idleRing) {
+      synchronized (_idleLock) {
 	_threadCount--;
 
 	_threads.remove(this);
@@ -454,12 +459,18 @@ public class ThreadPool implements Runnable {
 	  
 	  isIdle = true;
 	  
-	  synchronized (_idleRing) {
-	    _idleRing[_idleHead] = this;
-	    _idleHead = (_idleHead + 1) & RING_MASK;
+	  synchronized (_idleLock) {
+	    _next = _idleHead;
+	    _prev = null;
+
+	    if (_idleHead != null)
+	      _idleHead._prev = this;
+
+	    _idleHead = this;
+	    _idleCount++;
 
 	    if (_scheduleWaitCount > 0)
-	      _idleRing.notify();
+	      _idleLock.notify();
 	  }
 	}
 
@@ -500,15 +511,23 @@ public class ThreadPool implements Runnable {
 	  boolean isDead = false;
 
 	  // check to see if we're over the spare thread limit
-	  synchronized (_idleRing) {
-	    int idleCount = (_idleHead - _idleTail) & RING_MASK;
-
-	    if (_idleRing[_idleTail] == this &&
-		(_minSpareThreads + SPARE_GAP < idleCount ||
-		 _resetCount != _threadResetCount)) {
+	  synchronized (_idleLock) {
+	    if (_minSpareThreads + SPARE_GAP < _idleCount ||
+		_resetCount != _threadResetCount) {
 	      isDead = true;
-	      _idleRing[_idleTail] = null;
-	      _idleTail = (_idleTail + 1) % RING_MASK;
+	      
+	      ThreadPool next = _next;
+	      ThreadPool prev = _prev;
+
+	      if (next != null)
+		next._prev = prev;
+
+	      if (prev != null)
+		prev._next = next;
+	      else
+		_idleHead = next;
+
+	      _idleCount--;
 	    }
 	  }
 
@@ -548,8 +567,8 @@ public class ThreadPool implements Runnable {
     {
       boolean doStart = true;
       
-      synchronized (_idleRing) {
-	int idleCount = (_idleHead - _idleTail) & RING_MASK;
+      synchronized (_idleLock) {
+	int idleCount = _idleCount;
 
 	if (_maxThreads < _threadCount + _startCount)
 	  doStart = false;

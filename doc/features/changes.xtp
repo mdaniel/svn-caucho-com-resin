@@ -4,6 +4,8 @@
 
 <s2 title='3.0.snap - Feb 23, 2006'>
 <ul>
+<li>Update thread pool to use stack instead of ring to improve spike handling (#905, rep by Christopher Stach)
+<li>Add environment-system-properties flag for jinfo issues (#151, #411 rep by Kirk Rasmussen)
 <li>XPath cache was holding objects from old classloaders (#951, rep by Mattias Jiderhamn)
 <li>web-app merging for webapps/ROOT was improperly handling id="/" (rep by Keith Fetterman)
 <li>enable-select-manager had incorrect order in ServletServer (#967, rep by Rudy D'hauwe)

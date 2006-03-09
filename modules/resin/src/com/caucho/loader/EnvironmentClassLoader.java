@@ -530,8 +530,7 @@ public class EnvironmentClassLoader extends DynamicClassLoader {
 
       props.put("java.naming.factory.url.pkgs", "com.caucho.naming");
 
-      EnvironmentProperties contextProps = new EnvironmentProperties(props);
-      System.setProperties(contextProps);
+      EnvironmentProperties.enableEnvironmentSystemProperties(true);
 
       TransactionManagerImpl tm = TransactionManagerImpl.getInstance();
       // TransactionManagerImpl.setLocal(tm);

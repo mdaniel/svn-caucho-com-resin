@@ -230,6 +230,9 @@ r_resin-Basis =
 
   & r_boot?
 
+  & (attribute environment-system-properties { string }
+     | element environment-system-properties { string })?
+
   & (attribute group-name { string } | element group-name { string })?
 
   & r_min-free-memory?

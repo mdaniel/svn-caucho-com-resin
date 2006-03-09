@@ -57,6 +57,7 @@ import com.caucho.loader.Environment;
 import com.caucho.loader.EnvironmentBean;
 import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.loader.EnvironmentLocal;
+import com.caucho.loader.EnvironmentProperties;
 import com.caucho.server.dispatch.DispatchServer;
 import com.caucho.server.dispatch.ServerListener;
 import com.caucho.transaction.cfg.TransactionManagerConfig;
@@ -240,6 +241,15 @@ public class ResinServer
   public void setRestartOnClose(boolean isRestartOnClose)
   {
     _isRestartOnClose = isRestartOnClose;
+  }
+
+  /**
+   * Set true if the server should enable environment-based
+   * system properties.
+   */
+  public void setEnvironmentSystemProperties(boolean isEnable)
+  {
+    EnvironmentProperties.enableEnvironmentSystemProperties(isEnable);
   }
 
   /**

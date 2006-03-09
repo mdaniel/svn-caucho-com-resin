@@ -19,6 +19,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
+ *
  *   Free SoftwareFoundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
@@ -36,7 +37,10 @@ import java.util.*;
  * context ClassLoader.
  */
 public class EnvironmentProperties extends Properties {
-  private EnvironmentLocal<Properties> _envProps
+  private static Properties _origSystemProperties;
+  private static Properties _envSystemProperties;
+  
+  private transient EnvironmentLocal<Properties> _envProps
     = new EnvironmentLocal<Properties>();
 
   private Properties _global;
@@ -49,6 +53,19 @@ public class EnvironmentProperties extends Properties {
   public EnvironmentProperties()
   {
     this(new Properties());
+  }
+
+  public static void enableEnvironmentSystemProperties(boolean isEnable)
+  {
+    if (_origSystemProperties == null) {
+      _origSystemProperties = System.getProperties();
+      _envSystemProperties = new EnvironmentProperties(_origSystemProperties);
+    }
+
+    if (isEnable)
+      System.setProperties(_envSystemProperties);
+    else
+      System.setProperties(_origSystemProperties);
   }
 
   public Properties getGlobalProperties()
@@ -237,5 +254,10 @@ public class EnvironmentProperties extends Properties {
     }
     else
       return props;
+  }
+
+  public Object writeReplace() throws java.io.ObjectStreamException
+  {
+    return getEnvironmentProperties();
   }
 }
