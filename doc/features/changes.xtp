@@ -4,6 +4,7 @@
 
 <s2 title='3.0.snap - Feb 23, 2006'>
 <ul>
+<li>setTextContent needed on DOM Node (#985, rep by Bill Au)
 <li>Update thread pool to use stack instead of ring to improve spike handling (#905, rep by Christopher Stach)
 <li>Add environment-system-properties flag for jinfo issues (#151, #411 rep by Kirk Rasmussen)
 <li>XPath cache was holding objects from old classloaders (#951, rep by Mattias Jiderhamn)

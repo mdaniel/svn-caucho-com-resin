@@ -19,6 +19,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
+ *
  *   Free SoftwareFoundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
@@ -133,7 +134,7 @@ class DateColumn extends Column {
     if (isNull(block, rowOffset))
       return null;
     else
-      return QDate.formatGMT(getDate(block, rowOffset));
+      return QDate.formatISO8601(getDate(block, rowOffset));
   }
   
   /**
@@ -183,6 +184,53 @@ class DateColumn extends Column {
     value |= (block[offset++] & 0xffL);
 
     return value;
+  }
+  
+  /**
+   * Sets a long value in the column.
+   *
+   * @param block the block's buffer
+   * @param rowOffset the offset of the row in the block
+   * @param value the value to store
+   */
+  void setLong(Transaction xa, byte []block, int rowOffset, long value)
+  {
+    setDate(xa, block, rowOffset, value);
+  }
+  
+  /**
+   * Gets a long value in the column.
+   *
+   * @param block the block's buffer
+   * @param rowOffset the offset of the row in the block
+   */
+  public long getLong(byte []block, int rowOffset)
+  {
+    return getDate(block, rowOffset);
+  }
+  
+  /**
+   * Sets a long value in the column.
+   *
+   * @param block the block's buffer
+   * @param rowOffset the offset of the row in the block
+   * @param value the value to store
+   */
+  void setInteger(Transaction xa, byte []block, int rowOffset, int value)
+  {
+    setDate(xa, block, rowOffset, value);
+  }
+  
+  /**
+   * Sets a long value in the column.
+   *
+   * @param block the block's buffer
+   * @param rowOffset the offset of the row in the block
+   * @param value the value to store
+   */
+  public int getInteger(byte []block, int rowOffset)
+  {
+    return (int) getDate(block, rowOffset);
   }
 
   /**
@@ -247,6 +295,7 @@ class DateColumn extends Column {
   public boolean isEqual(byte []block1, int rowOffset1,
 			 byte []block2, int rowOffset2)
   {
+    System.out.println("EQ:");
     if (isNull(block1, rowOffset1) != isNull(block2, rowOffset2))
       return false;
 

@@ -81,6 +81,12 @@ public class EntityIntrospector {
   // annotations allowed with a @Basic annotation
   private static HashSet<String> _basicAnnotations = new HashSet<String>();
 
+  // types allowed with an @Id annotation
+  private static HashSet<String> _idTypes = new HashSet<String>();
+
+  // annotations allowed with an @Id annotation
+  private static HashSet<String> _idAnnotations = new HashSet<String>();
+
   // annotations allowed with a @ManyToOne annotation
   private static HashSet<String> _manyToOneAnnotations = new HashSet<String>();
 
@@ -114,9 +120,6 @@ public class EntityIntrospector {
 
     validateType(type);
 
-    // boolean isField = entityAnn.get("access") == AccessType.FIELD;
-    boolean isField = false;
-
     JAnnotation inheritanceAnn = type.getAnnotation(Inheritance.class);
 
     EntityType parentType = null;
@@ -148,6 +151,8 @@ public class EntityIntrospector {
       ///entityType = _amberContainer.createEntity(entityName, type);
       entityType = _persistenceUnit.createEntity(entityName, type);
       _entityMap.put(entityName, entityType);
+
+      boolean isField = isField(type);
 
       if (isField)
 	entityType.setFieldAccess(true);
@@ -195,12 +200,25 @@ public class EntityIntrospector {
 	entityType.addSecondaryTable(secondaryTable);
       }
 
+      JAnnotation idClassAnn = type.getAnnotation(IdClass.class);
+
+      JClass idClass = null;
+      if (idClassAnn != null)
+	idClass = idClassAnn.getClass("value");
+
+
       if (entityType.getId() != null) {
       }
       else if (isField)
-	introspectIdField(_persistenceUnit, entityType, parentType, type);
+	introspectIdField(_persistenceUnit, entityType, parentType,
+			  type, idClass);
       else
-	introspectIdMethod(_persistenceUnit, entityType, parentType, type);
+	introspectIdMethod(_persistenceUnit, entityType, parentType,
+			   type, idClass);
+
+      if (entityType.getId() == null)
+	throw new ConfigException(L.l("{0} does not have any primary keys.  Entities must have at least one @Id field.",
+				      entityType.getName()));
 
       if (isField)
 	introspectFields(_persistenceUnit, entityType, parentType, type);
@@ -469,7 +487,8 @@ public class EntityIntrospector {
   private void introspectIdMethod(AmberPersistenceUnit persistenceUnit,
 				  EntityType entityType,
 				  EntityType parentType,
-				  JClass type)
+				  JClass type,
+				  JClass idClass)
     throws ConfigException, SQLException
   {
     ArrayList<IdField> keys = new ArrayList<IdField>();
@@ -501,10 +520,20 @@ public class EntityIntrospector {
 	keys.add(idField);
     }
 
-    if (keys.size() == 1)
+    if (keys.size() == 0) {
+    }
+    else if (keys.size() == 1)
       entityType.setId(new com.caucho.amber.field.Id(entityType, keys));
-    else
-      entityType.setId(new CompositeId(entityType, keys));
+    else if (idClass == null) {
+      throw new ConfigException(L.l("{0} has multiple @Id methods, but no @IdClass.  Compound primary keys require an @IdClass.",
+				    entityType.getName()));
+    }
+    else {
+      CompositeId id = new CompositeId(entityType, keys);
+      id.setKeyClass(idClass);
+      
+      entityType.setId(id);
+    }
   }
 
   /**
@@ -513,7 +542,8 @@ public class EntityIntrospector {
   private void introspectIdField(AmberPersistenceUnit persistenceUnit,
 				 EntityType entityType,
 				 EntityType parentType,
-				 JClass type)
+				 JClass type,
+				 JClass idClass)
     throws ConfigException, SQLException
   {
     ArrayList<IdField> keys = new ArrayList<IdField>();
@@ -539,10 +569,36 @@ public class EntityIntrospector {
 	keys.add(idField);
     }
 
-    if (keys.size() == 1)
+    if (keys.size() == 0) {
+    }
+    else if (keys.size() == 1)
       entityType.setId(new com.caucho.amber.field.Id(entityType, keys));
-    else
-      entityType.setId(new CompositeId(entityType, keys));
+    else if (idClass == null) {
+      throw new ConfigException(L.l("{0} has multiple @Id fields, but no @IdClass.  Compound primary keys require an @IdClass.",
+				    entityType.getName()));
+    }
+    else {
+      CompositeId id = new CompositeId(entityType, keys);
+      id.setKeyClass(idClass);
+      
+      entityType.setId(id);
+    }
+  }
+
+  /**
+   * Check if it's field
+   */
+  private boolean isField(JClass type)
+    throws ConfigException
+  {
+    for (JField field : type.getDeclaredFields()) {
+      JAnnotation id = field.getAnnotation(javax.persistence.Id.class);
+
+      if (id != null)
+	return true;
+    }
+
+    return false;
   }
 
   private IdField introspectId(AmberPersistenceUnit persistenceUnit,
@@ -838,6 +894,12 @@ public class EntityIntrospector {
     throws ConfigException
   {
     if (field.isAnnotationPresent(javax.persistence.Id.class)) {
+      validateAnnotations(field, _idAnnotations);
+
+      if (! _idTypes.contains(fieldType.getName())) {
+	throw error(field, L.l("{0} is an invalid @Id type for {1}.",
+			       fieldType.getName(), field.getName()));
+      }
     }
     else if (field.isAnnotationPresent(javax.persistence.Basic.class)) {
       validateAnnotations(field, _basicAnnotations);
@@ -1613,6 +1675,7 @@ public class EntityIntrospector {
     _basicTypes.add("char");
     _basicTypes.add("short");
     _basicTypes.add("int");
+    _basicTypes.add("long");
     _basicTypes.add("float");
     _basicTypes.add("double");
     _basicTypes.add("[byte");
@@ -1620,6 +1683,34 @@ public class EntityIntrospector {
     _basicTypes.add("[java.lang.Byte");
     _basicTypes.add("[java.lang.Character");
 
+    // annotations allowed with an @Id annotation
+    _idAnnotations.add("javax.persistence.Column");
+    _idAnnotations.add("javax.persistence.GeneratedValue");
+    _idAnnotations.add("javax.persistence.Id");
+    _idAnnotations.add("javax.persistence.SequenceGenerator");
+    _idAnnotations.add("javax.persistence.TableGenerator");
+    
+    // allowed with a @Id annotation
+    _idTypes.add("boolean");
+    _idTypes.add("byte");
+    _idTypes.add("char");
+    _idTypes.add("short");
+    _idTypes.add("int");
+    _idTypes.add("long");
+    _idTypes.add("float");
+    _idTypes.add("double");
+    _idTypes.add("java.lang.Boolean");
+    _idTypes.add("java.lang.Byte");
+    _idTypes.add("java.lang.Character");
+    _idTypes.add("java.lang.Short");
+    _idTypes.add("java.lang.Integer");
+    _idTypes.add("java.lang.Long");
+    _idTypes.add("java.lang.Float");
+    _idTypes.add("java.lang.Double");
+    _idTypes.add("java.lang.String");
+    _idTypes.add("java.util.Date");
+    _idTypes.add("java.sql.Date");
+    
     // annotations allowed with a @ManyToOne annotation
     _manyToOneAnnotations.add("javax.persistence.ManyToOne");
     _manyToOneAnnotations.add("javax.persistence.JoinColumn");

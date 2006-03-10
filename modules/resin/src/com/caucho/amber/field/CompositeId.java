@@ -178,7 +178,7 @@ public class CompositeId extends Id {
     out.println();
     out.print("private static ");
     out.print(getForeignTypeName() + " " + loadName);
-    out.println("(com.caucho.amber.connection.AmberConnection aConn, java.sql.ResultSet rs, int index)");
+    out.println("(com.caucho.amber.manager.AmberConnection aConn, java.sql.ResultSet rs, int index)");
     out.println("  throws java.sql.SQLException");
     
     out.println("{");

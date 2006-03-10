@@ -239,8 +239,9 @@ public class AmberContainer {
 
     if (e != null)
       throw new AmberRuntimeException(e);
-    else if (_exception != null)
+    else if (_exception != null) {
       throw new AmberRuntimeException(_exception);
+    }
     
     return _entityMap.get(className);
   }
@@ -260,6 +261,11 @@ public class AmberContainer {
   {
     if (_exception == null)
       _exception = e;
+  }
+
+  public Throwable getConfigException()
+  {
+    return _exception;
   }
 
   /**
@@ -309,9 +315,6 @@ public class AmberContainer {
 	  AmberPersistenceUnit unit = unitConfig.init(this);
 
 	  _unitMap.put(unit.getName(), unit);
-
-	  Jndi.bindDeep("java:comp/env/persistence/" + unit.getName(),
-			new FactoryProxy(unit));
 	} catch (Throwable e) {
 	  addException(e);
       

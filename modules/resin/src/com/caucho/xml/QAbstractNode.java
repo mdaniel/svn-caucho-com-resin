@@ -352,7 +352,7 @@ public abstract class QAbstractNode implements CauchoNode, java.io.Serializable 
   public String getTextContent()
     throws DOMException
   {
-    throw new UnsupportedOperationException();
+    return XmlUtil.textValue(this);
   }
   
   public void setTextContent(String textContent)

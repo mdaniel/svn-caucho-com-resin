@@ -339,7 +339,8 @@ public class EntityType extends Type {
 
   public void setConfigException(Throwable e)
   {
-    _exception = e;
+    if (_exception == null)
+      _exception = e;
   }
   
   /**
@@ -379,6 +380,8 @@ public class EntityType extends Type {
       if (! Entity.class.isAssignableFrom(_instanceClass)) {
 	if (_exception != null)
 	  throw new AmberRuntimeException(_exception);
+	else if (_amberPersistenceUnit.getConfigException() != null)
+	  throw new AmberRuntimeException(_amberPersistenceUnit.getConfigException());
 	
 	throw new AmberRuntimeException(L.l("'{0}' with classloader {1} is an illegal instance class",
 					    _instanceClass.getName(), _instanceClass.getClassLoader()));
@@ -852,6 +855,9 @@ public class EntityType extends Type {
   public void init()
     throws ConfigException
   {
+    if (_exception != null)
+      return;
+    
     if (! _lifecycle.toInit())
       return;
 

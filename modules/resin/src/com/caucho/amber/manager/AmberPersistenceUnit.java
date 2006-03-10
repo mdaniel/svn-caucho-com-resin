@@ -178,7 +178,7 @@ public class AmberPersistenceUnit {
     _createDatabaseTables = container.getCreateDatabaseTables();
 
     _introspector = new EntityIntrospector(this);
-
+    
     // needed to support JDK 1.4 compatibility
     try {
       bindProxy();
@@ -374,6 +374,11 @@ public class AmberPersistenceUnit {
     return table;
   }
 
+  public Throwable getConfigException()
+  {
+    return _amberContainer.getConfigException();
+  }
+
   /**
    * Add an entity.
    */
@@ -399,8 +404,10 @@ public class AmberPersistenceUnit {
       
       throw new ConfigException(e);
     }
+    
+    EntityType entity = createEntity(type);
 
-    _amberContainer.addEntity(className, createEntity(type));
+    _amberContainer.addEntity(className, entity);
   }
 
   /**
@@ -568,9 +575,15 @@ public class AmberPersistenceUnit {
       }
     }
 
-    initTables();
+    try {
+      initTables();
 
-    getGenerator().compile();
+      getGenerator().compile();
+    } catch (Exception e) {
+      _amberContainer.addException(e);
+
+      throw e;
+    }
   }
 
   /**

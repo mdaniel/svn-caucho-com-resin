@@ -237,6 +237,14 @@ public abstract class QNode extends QAbstractNode {
     return _firstChild != null;
   }
 
+  public void setTextContent(String content)
+  {
+    QText text = new QText(content);
+    text._owner = _owner;
+
+    _firstChild = _lastChild = text;
+  }
+
   public void normalize()
   {
   }

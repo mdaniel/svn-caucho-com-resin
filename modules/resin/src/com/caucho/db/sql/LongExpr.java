@@ -79,6 +79,19 @@ class LongExpr extends Expr {
   }
 
   /**
+   * Evaluates the expression as a date
+   *
+   * @param row the current data tuple
+   *
+   * @return the date value
+   */
+  public long evalDate(QueryContext context)
+    throws SQLException
+  {
+    return _value;
+  }
+
+  /**
    * Evaluates the expression as a double
    *
    * @param row the current data tuple

@@ -37,7 +37,7 @@ import static java.lang.annotation.ElementType.*;
 /**
  * The @IdClass annotation.
  */
-@Target({METHOD, FIELD}) @Retention(RUNTIME)
+@Target({TYPE}) @Retention(RUNTIME)
 public @interface IdClass {
   Class value();
 }

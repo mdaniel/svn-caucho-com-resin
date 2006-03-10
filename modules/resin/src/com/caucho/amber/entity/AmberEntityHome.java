@@ -175,6 +175,8 @@ public class AmberEntityHome {
     try {
       _homeBean = (Entity) _entityType.getInstanceClass().newInstance();
     } catch (Exception e) {
+      _entityType.setConfigException(e);
+      
       _configException = new ConfigException(e);
       throw _configException;
     }
