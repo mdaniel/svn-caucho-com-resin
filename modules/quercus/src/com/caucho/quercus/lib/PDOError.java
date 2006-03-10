@@ -72,6 +72,26 @@ class PDOError {
     _errorInfo = null;
   }
 
+  private void error(String errorCode, int driverError, String errorMessage)
+  {
+    _isError = true;
+
+    int level = Math.max(_errmode, ERRMODE_SILENT);
+
+    _errorCode = errorCode;
+
+    _errorInfo = new ArrayValueImpl();
+    _errorInfo.put(errorCode);
+    _errorInfo.put(driverError);
+    _errorInfo.put(errorMessage);
+
+    if (level == ERRMODE_WARNING) {
+      _env.warning("SQLSTATE[" + _errorCode + "]: " + errorMessage);
+    }
+    else if (level == ERRMODE_EXCEPTION) {
+      // XXX: throw exception, or return exception object?
+    }
+  }
   /**
    * Save an error for subsequent calls to
    * {@link #errorCode} and {@link #errorInfo},
@@ -98,23 +118,7 @@ class PDOError {
       driverError = 0;
     }
 
-    _isError = true;
-
-    int level = Math.max(_errmode, ERRMODE_SILENT);
-
-    _errorCode = errorCode;
-
-    _errorInfo = new ArrayValueImpl();
-    _errorInfo.put(errorCode);
-    _errorInfo.put(driverError);
-    _errorInfo.put(errorMessage);
-
-    if (level == ERRMODE_WARNING) {
-      _env.warning("SQLSTATE[" + _errorCode + "]: " + errorMessage);
-    }
-    else if (level == ERRMODE_EXCEPTION) {
-      // XXX: throw exception, or return exception object?
-    }
+    error(errorCode, driverError, errorMessage);
   }
 
   public String errorCode()
@@ -205,5 +209,15 @@ class PDOError {
     else {
       _env.warning("SQLSTATE[" + _errorCode + "]: " + message);
     }
+  }
+
+  public void unsupportedAttribute(int attribute)
+  {
+    error("IM001", 0, L.l("attribute `{0}' is not supported", attribute));
+  }
+
+  public void unsupportedAttributeValue(Object value)
+  {
+    error("IM001", 0, L.l("attribute value `{0}' is not supported", value));
   }
 }

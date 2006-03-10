@@ -31,6 +31,7 @@ package com.caucho.quercus.lib;
 
 import java.util.logging.Logger;
 import java.util.logging.Level;
+import java.util.Map;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -124,11 +125,11 @@ public class PDO {
 
   private final PDOError _error;
 
-  private int _case;
-  private int _oracleNulls;
-  private boolean _stringifyFetches;
-
   private Connection _conn;
+
+  private Statement _lastStatement;
+  private PDOStatement _lastPDOStatement;
+  private String _lastInsertId;
 
   private boolean _inTransaction;
 
@@ -149,6 +150,12 @@ public class PDO {
         destroy();
       }
     });
+
+    if (options != null) {
+      // XXX: need test and confirmation that key => value is the way to set these
+      for (Map.Entry<Value,Value> entry : options.entrySet())
+        setAttribute(entry.getKey().toInt(), entry.getValue(), true);
+    }
 
     real_connect(env, user, password);
   }
@@ -174,6 +181,24 @@ public class PDO {
       _error.error(e);
       return false;
     }
+  }
+
+  private void closeStatements()
+  {
+    Statement lastStatement = _lastStatement;
+
+    _lastInsertId = null;
+    _lastStatement = null;
+    _lastPDOStatement = null;
+
+    try {
+      if (lastStatement != null)
+        lastStatement.close();
+    }
+    catch (Throwable t) {
+      log.log(Level.WARNING, t.toString(), t);
+    }
+
   }
 
   /**
@@ -203,6 +228,25 @@ public class PDO {
     return result;
   }
 
+  private void destroy()
+  {
+    Connection conn = _conn;
+
+    _conn = null;
+
+    closeStatements();
+
+    if (conn != null) {
+      try {
+        conn.close();
+      }
+      catch (SQLException e) {
+        if (log.isLoggable(Level.WARNING))
+          log.log(Level.WARNING, e.toString(), e);
+      }
+    }
+  }
+
   public String errorCode()
   {
     return _error.errorCode();
@@ -222,13 +266,18 @@ public class PDO {
     if (_conn == null)
       return -1;
 
+    closeStatements();
+
     Statement stmt = null;
+
+    int rowCount;
 
     try {
       stmt = _conn.createStatement();
       stmt.setEscapeProcessing(false);
 
       if (stmt.execute(query)) {
+
         ResultSet resultSet = null;
 
         try {
@@ -236,7 +285,11 @@ public class PDO {
 
           resultSet.last();
 
-          return resultSet.getRow();
+          rowCount = resultSet.getRow();
+
+          _lastStatement = stmt;
+
+          stmt = null;
         }
         finally {
           try {
@@ -249,7 +302,11 @@ public class PDO {
         }
       }
       else {
-        return stmt.getUpdateCount();
+        rowCount = stmt.getUpdateCount();
+
+        _lastStatement = stmt;
+
+        stmt = null;
       }
     } catch (SQLException e) {
       _error.error(e);
@@ -263,6 +320,8 @@ public class PDO {
 	log.log(Level.FINER, e.toString(), e);
       }
     }
+
+    return rowCount;
   }
 
   public Value getAttribute(int attribute)
@@ -283,21 +342,38 @@ public class PDO {
       case ATTR_ORACLE_NULLS:
         return LongValue.create(getOracleNulls());
       case ATTR_PERSISTENT:
-        throw new UnimplementedException();
+        return BooleanValue.create(getPersistent());
       case ATTR_PREFETCH:
-        throw new UnimplementedException();
+        return LongValue.create(getPrefetch());
       case ATTR_SERVER_INFO:
-        throw new UnimplementedException();
+        return StringValue.create(getServerInfo());
       case ATTR_SERVER_VERSION:
-        throw new UnimplementedException();
+        return StringValue.create(getServerVersion());
       case ATTR_TIMEOUT:
-        throw new UnimplementedException();
+        return LongValue.create(getTimeout());
 
       default:
-        /// XXX: check what PHP does
-        _error.warning(L.l("unknown attribute {0}", attribute));
-        return NullValue.NULL;
+        _error.unsupportedAttribute(attribute);
+        // XXX: check what php does
+        return BooleanValue.FALSE;
 
+    }
+  }
+
+  /**
+   * Returns the auto commit value for the connection.
+   */
+  private boolean getAutocommit()
+  {
+    if (_conn == null)
+      return true;
+
+    try {
+      return _conn.getAutoCommit();
+    }
+    catch (SQLException e) {
+      _error.error(e);
+      return true;
     }
   }
 
@@ -308,17 +384,78 @@ public class PDO {
 
   public int getCase()
   {
-    return _case;
+    throw new UnimplementedException();
   }
 
   public int getOracleNulls()
   {
-    return _oracleNulls;
+    throw new UnimplementedException();
+  }
+
+  private boolean getPersistent()
+  {
+    return true;
+  }
+
+  private int getPrefetch()
+  {
+    throw new UnimplementedException();
+  }
+
+  private String getServerInfo()
+  {
+    throw new UnimplementedException();
+  }
+
+  // XXX: might be int return
+  private String getServerVersion()
+  {
+    throw new UnimplementedException();
+  }
+
+  private int getTimeout()
+  {
+    throw new UnimplementedException();
   }
 
   public String lastInsertId(@Optional String name)
   {
-    throw new UnimplementedException();
+    if (!(name == null || name.length() == 0))
+      throw new UnimplementedException("lastInsertId with name");
+
+    if (_lastInsertId != null)
+      return _lastInsertId;
+
+    String lastInsertId = null;
+
+    if (_lastPDOStatement != null)
+      lastInsertId =  _lastPDOStatement.lastInsertId(name);
+    else if (_lastStatement != null) {
+      ResultSet resultSet = null;
+
+      try {
+        resultSet = _lastStatement.getGeneratedKeys();
+
+        if (resultSet.next())
+          lastInsertId = resultSet.getString(1);
+      }
+      catch (SQLException ex) {
+        _error.error(ex);
+      }
+      finally {
+        try {
+          if (resultSet != null)
+            resultSet.close();
+        }
+        catch (SQLException ex) {
+          log.log(Level.WARNING, ex.toString(), ex);
+        }
+      }
+    }
+
+    _lastInsertId = lastInsertId == null ? "0" : lastInsertId;
+
+    return _lastInsertId;
   }
 
   public Value prepare(String statement, ArrayValue driverOptions)
@@ -327,7 +464,11 @@ public class PDO {
       return BooleanValue.FALSE;
 
     try {
-      return _env.wrapJava(new PDOStatement(_env, _conn, statement, true));
+      closeStatements();
+
+      PDOStatement pdoStatement = new PDOStatement(_env, _conn, statement, true, driverOptions);
+      _lastPDOStatement = pdoStatement;
+      return _env.wrapJava(pdoStatement);
     } catch (SQLException e) {
       _error.error(e);
 
@@ -344,7 +485,11 @@ public class PDO {
       return BooleanValue.FALSE;
 
     try {
-      return _env.wrapJava(new PDOStatement(_env, _conn, query, false));
+      closeStatements();
+
+      PDOStatement pdoStatement = new PDOStatement(_env, _conn, query, false, null);
+      _lastPDOStatement = pdoStatement;
+      return _env.wrapJava(pdoStatement);
     } catch (SQLException e) {
       _error.error(e);
 
@@ -358,30 +503,6 @@ public class PDO {
   public String quote(String query, @Optional int parameterType)
   {
     return "'" + real_escape_string(query) + "'";
-  }
-
-  /**
-   * Rolls a transaction back.
-   */
-  public boolean rollBack()
-  {
-    if (_conn == null)
-      return false;
-
-    if (! _inTransaction)
-      return false;
-
-    _inTransaction = false;
-
-    try {
-      _conn.rollback();
-      _conn.setAutoCommit(true);
-      return true;
-    }
-    catch (SQLException e) {
-      _error.error(e);
-      return false;
-    }
   }
 
   /**
@@ -463,7 +584,36 @@ public class PDO {
     return buf.toString();
   }
 
+  /**
+   * Rolls a transaction back.
+   */
+  public boolean rollBack()
+  {
+    if (_conn == null)
+      return false;
+
+    if (! _inTransaction)
+      return false;
+
+    _inTransaction = false;
+
+    try {
+      _conn.rollback();
+      _conn.setAutoCommit(true);
+      return true;
+    }
+    catch (SQLException e) {
+      _error.error(e);
+      return false;
+    }
+  }
+
   public boolean setAttribute(int attribute, Value value)
+  {
+    return setAttribute(attribute, value, false);
+  }
+
+  private boolean setAttribute(int attribute, Value value, boolean isInit)
   {
     switch (attribute) {
       case ATTR_AUTOCOMMIT:
@@ -483,12 +633,22 @@ public class PDO {
 
       case ATTR_STATEMENT_CLASS:
         return setStatementClass(value);
-
-      default:
-        // XXX: check what PHP does
-        _error.warning(L.l("invalid attribute"));
-        return false;
     }
+
+    if (isInit) {
+      switch (attribute) {
+        // XXX: there may be more of these
+        case ATTR_TIMEOUT:
+          return setTimeout(value.toInt());
+
+        case ATTR_PERSISTENT:
+          return setPersistent(value.toBoolean());
+      }
+    }
+
+    // XXX: check what PHP does
+    _error.unsupportedAttribute(attribute);
+    return false;
   }
 
   /**
@@ -512,19 +672,25 @@ public class PDO {
   }
 
   /**
-   * Returns the auto commit value for the connection.
+   * Force column names to a specific case.
+   *
+   * <dl>
+   * <dt>{@link CASE_LOWER}
+   * <dt>{@link CASE_NATURAL}
+   * <dt>{@link CASE_UPPER}
+   * </dl>
    */
-  private boolean getAutocommit()
+  private boolean setCase(int value)
   {
-    if (_conn == null)
-      return true;
+    switch (value) {
+      case CASE_LOWER:
+      case CASE_NATURAL:
+      case CASE_UPPER:
+        throw new UnimplementedException();
 
-    try {
-      return _conn.getAutoCommit();
-    }
-    catch (SQLException e) {
-      _error.error(e);
-      return true;
+      default:
+        _error.unsupportedAttributeValue(value);
+        return false;
     }
   }
 
@@ -549,48 +715,22 @@ public class PDO {
       case NULL_NATURAL:
       case NULL_EMPTY_STRING:
       case NULL_TO_STRING:
-        _oracleNulls = value;
-        return true;
+        throw new UnimplementedException();
       default:
-        // XXX: check what PHP does
-        throw new IllegalArgumentException(L.l("Unknown case `{0}'", value));
+        _error.warning(L.l("unknown value `{0}'", value));
+        _error.unsupportedAttributeValue(value);
+        return false;
     }
   }
 
-  /**
-   * Force column names to a specific case.
-   *
-   * <dl>
-   * <dt>{@link CASE_LOWER}
-   * <dt>{@link CASE_NATURAL}
-   * <dt>{@link CASE_UPPER}
-   * </dl>
-   */
-  private boolean setCase(int value)
+  private boolean setPersistent(boolean isPersistent)
   {
-    switch (value) {
-      case CASE_LOWER:
-      case CASE_NATURAL:
-      case CASE_UPPER:
-        _case = value;
-        return true;
-
-      default:
-        // XXX: check what PHP does
-        throw new IllegalArgumentException(L.l("Unknown case `{0}'", value));
-    }
-  }
-
-  /**
-   * Convert numeric values to strings when fetching.
-   *
-   * @return true on success, false on error.
-   */
-  private boolean setStringifyFetches(boolean stringifyFetches)
-  {
-    _stringifyFetches = stringifyFetches;
-
     return true;
+  }
+
+  private boolean setPrefetch(int prefetch)
+  {
+    throw new UnimplementedException();
   }
 
   /**
@@ -605,25 +745,23 @@ public class PDO {
     throw new UnimplementedException("ATTR_STATEMENT_CLASS");
   }
 
+  /**
+   * Convert numeric values to strings when fetching.
+   *
+   * @return true on success, false on error.
+   */
+  private boolean setStringifyFetches(boolean stringifyFetches)
+  {
+    throw new UnimplementedException();
+  }
+
+  private boolean setTimeout(int timeoutSeconds)
+  {
+    throw new UnimplementedException();
+  }
+
   public String toString()
   {
     return "PDO[" + _dsn + "]";
-  }
-
-  private void destroy()
-  {
-    Connection conn = _conn;
-
-    _conn = null;
-
-    if (conn != null) {
-      try {
-        conn.close();
-      }
-      catch (SQLException e) {
-        if (log.isLoggable(Level.WARNING))
-          log.log(Level.WARNING, e.toString(), e);
-      }
-    }
   }
 }

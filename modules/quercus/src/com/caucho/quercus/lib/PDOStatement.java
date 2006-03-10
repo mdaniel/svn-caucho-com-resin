@@ -80,13 +80,14 @@ public class PDOStatement
   private ResultSet _resultSet;
   private ResultSetMetaData _resultSetMetaData;
   private boolean _resultSetExhausted = true;
+  private String _lastInsertId;
 
   private int _fetchMode = PDO.FETCH_BOTH;
   private Value[] _fetchModeArgs = NULL_VALUES;
   private ArrayList<BindColumn> _bindColumns;
   private ArrayList<BindParam> _bindParams;
 
-  PDOStatement(Env env, Connection conn, String query, boolean isPrepared)
+  PDOStatement(Env env, Connection conn, String query, boolean isPrepared, ArrayValue options)
     throws SQLException
 
   {
@@ -102,6 +103,10 @@ public class PDOStatement
         destroy();
       }
     });
+
+    if (options != null && options.getSize() > 0) {
+      _env.notice(L.l("PDOStatement options unsupported"));
+    }
 
     if (isPrepared) {
       _statement = null;
@@ -181,11 +186,6 @@ public class PDOStatement
     return true;
   }
 
-  public BindParam createBindParam(Value parameter, Value value, int dataType, int length, Value driverOptions)
-  {
-    return new BindParam(parameter, value, dataType, length, driverOptions);
-  }
-
   public boolean bindParam(Value parameter,
                            @Reference Value variable,
                            @Optional("-1") int dataType,
@@ -252,6 +252,7 @@ public class PDOStatement
     _resultSet = null;
     _resultSetMetaData = null;
     _resultSetExhausted = true;
+    _lastInsertId = null;
 
     try {
       resultSet.close();
@@ -283,6 +284,11 @@ public class PDOStatement
     }
   }
 
+  public BindParam createBindParam(Value parameter, Value value, int dataType, int length, Value driverOptions)
+  {
+    return new BindParam(parameter, value, dataType, length, driverOptions);
+  }
+
   private void destroy()
   {
     ResultSet resultSet = _resultSet;
@@ -292,6 +298,7 @@ public class PDOStatement
     _resultSet = null;
     _resultSetMetaData = null;
     _resultSetExhausted = true;
+    _lastInsertId = null;
     _statement = null;
     _preparedStatement = null;
 
@@ -300,7 +307,7 @@ public class PDOStatement
         resultSet.close();
       }
       catch (SQLException e) {
-        log.log(Level.FINE, e.toString(), e);
+        log.log(Level.WARNING, e.toString(), e);
       }
     }
 
@@ -309,7 +316,7 @@ public class PDOStatement
         statement.close();
       }
       catch (SQLException e) {
-        log.log(Level.FINE, e.toString(), e);
+        log.log(Level.WARNING, e.toString(), e);
       }
     }
 
@@ -318,7 +325,7 @@ public class PDOStatement
         preparedStatement.close();
       }
       catch (SQLException e) {
-        log.log(Level.FINE, e.toString(), e);
+        log.log(Level.WARNING, e.toString(), e);
       }
     }
   }
@@ -331,123 +338,6 @@ public class PDOStatement
   public ArrayValue errorInfo()
   {
     return _error.errorInfo();
-  }
-
-  private int resolveParameter(Value parameter)
-  {
-    int index;
-
-    if (!(parameter instanceof LongValue))
-      throw new UnimplementedException("key " + parameter);
-
-    index = parameter.toInt();
-    return index;
-  }
-
-  /**
-   * @param index 1-based position number
-   * @param value the value for the parameter
-   *
-   * @return true for success, false for failure
-   */
-  private boolean setParameter(int index, Value value, long length)
-  {
-    try {
-      if (value instanceof DoubleValue) {
-        _preparedStatement.setDouble(index, value.toDouble());
-      }
-      else if (value instanceof LongValue) {
-        _preparedStatement.setLong(index, value.toLong());
-      }
-      else if (value instanceof StringValue) {
-        String string = value.toString();
-
-        if (length >= 0)
-          string = string.substring(0, (int) length);
-
-        _preparedStatement.setString(index, string);
-      }
-      else if (value instanceof NullValue) {
-        _preparedStatement.setObject(index, null);
-      }
-      else {
-        _error.warning(L.l("unknown type {0} ({1}) for parameter index {2}", value.getType(), value.getClass(), index));
-        return false;
-      }
-    }
-    catch (SQLException ex) {
-      _error.error(ex);
-      return false;
-    }
-
-    return true;
-  }
-
-  /**
-   * @param index 1-based position number
-   * @param value the value for the parameter
-   *
-   * @return true for success, false for failure
-   */
-  private boolean setLobParameter(int index, Value value, long length)
-  {
-    try {
-      if (value == null || value.isNull()) {
-        _preparedStatement.setObject(index, null);
-      }
-      else if (value instanceof StringValue) {
-        if (length < 0) {
-          _preparedStatement.setBinaryStream(index, value.toInputStream(), value.toString().length());
-        }
-        else
-          _preparedStatement.setBinaryStream(index, value.toInputStream(), (int) length);
-      }
-      else {
-        InputStream inputStream = value.toInputStream();
-
-        if (inputStream == null) {
-          _error.warning(L.l("type {0} ({1}) for parameter index {2} cannot be used for lob", value.getType(), value.getClass(), index));
-          return false;
-        }
-
-        if (length < 0 && (value instanceof FileReadValue)) {
-          length = ((FileReadValue) value).getLength();
-
-          if (length <= 0)
-            length = -1;
-        }
-
-        if (length < 0) {
-          TempBuffer tempBuffer = TempBuffer.allocate();
-
-          try {
-            byte[] bytes = new byte[1024];
-
-            int len;
-
-            while ((len = inputStream.read(bytes, 0, 1024)) != -1)
-              tempBuffer.write(bytes, 0, len);
-          }
-          catch (IOException ex) {
-            _error.error(ex);
-            return false;
-          }
-
-          TempReadStream tempReadStream = new TempReadStream(tempBuffer);
-          tempReadStream.setFreeWhenDone(true);
-
-          _preparedStatement.setBinaryStream(index, new ReadStream(tempReadStream), tempBuffer.getLength());
-        }
-        else
-          _preparedStatement.setBinaryStream(index, inputStream, (int) length);
-      }
-    }
-    catch (SQLException ex) {
-      _error.error(ex);
-      return false;
-    }
-
-    return true;
   }
 
   /**
@@ -537,76 +427,6 @@ public class PDOStatement
       throw new UnimplementedException("fetch with cursorOffset");
 
     return fetchImpl(fetchMode, -1);
-  }
-
-  /**
-   * Fetch the next row.
-   *
-   * @param fetchMode the mode, 0 to use the value set by {@link #setFetchMode}.
-   * @return a value, BooleanValue.FALSE if there are no more rows or an error occurs.
-   */
-  private Value fetchImpl(int fetchMode, int columnIndex)
-  {
-    if (fetchMode == 0) {
-      fetchMode = _fetchMode;
-
-      fetchMode = fetchMode & (~(PDO.FETCH_GROUP | PDO.FETCH_UNIQUE));
-    }
-    else {
-      if ((fetchMode & PDO.FETCH_GROUP) != 0) {
-        _error.warning(L.l("FETCH_GROUP is not allowed"));
-        return BooleanValue.FALSE;
-      }
-      else if ((fetchMode & PDO.FETCH_UNIQUE) != 0) {
-        _error.warning(L.l("FETCH_UNIQUE is not allowed"));
-        return BooleanValue.FALSE;
-      }
-    }
-
-    boolean isClasstype = (fetchMode & PDO.FETCH_CLASSTYPE) != 0;
-    boolean isSerialize = (fetchMode & PDO.FETCH_SERIALIZE) != 0;
-
-    fetchMode = fetchMode & (~(PDO.FETCH_CLASSTYPE | PDO.FETCH_SERIALIZE));
-
-    switch (fetchMode) {
-      case PDO.FETCH_ASSOC:
-        return fetchAssoc();
-
-      case PDO.FETCH_BOTH:
-        return fetchBoth();
-
-      case PDO.FETCH_BOUND:
-        return fetchBound();
-
-      case PDO.FETCH_COLUMN:
-        return fetchColumn(columnIndex);
-
-      case PDO.FETCH_CLASS:
-        return fetchClass();
-
-      case PDO.FETCH_FUNC:
-        return fetchFunc();
-
-      case PDO.FETCH_INTO:
-        return fetchInto();
-
-      case PDO.FETCH_LAZY:
-        return fetchLazy();
-
-      case PDO.FETCH_NAMED:
-        return fetchNamed();
-
-      case PDO.FETCH_NUM:
-        return fetchNum();
-
-      case PDO.FETCH_OBJ:
-        return fetchObject();
-
-    default:
-      _error.warning(L.l("invalid fetch mode {0}",  fetchMode));
-      closeCursor();
-      return BooleanValue.FALSE;
-    }
   }
 
   /**
@@ -802,6 +622,76 @@ public class PDOStatement
     throw new UnimplementedException();
   }
 
+  /**
+   * Fetch the next row.
+   *
+   * @param fetchMode the mode, 0 to use the value set by {@link #setFetchMode}.
+   * @return a value, BooleanValue.FALSE if there are no more rows or an error occurs.
+   */
+  private Value fetchImpl(int fetchMode, int columnIndex)
+  {
+    if (fetchMode == 0) {
+      fetchMode = _fetchMode;
+
+      fetchMode = fetchMode & (~(PDO.FETCH_GROUP | PDO.FETCH_UNIQUE));
+    }
+    else {
+      if ((fetchMode & PDO.FETCH_GROUP) != 0) {
+        _error.warning(L.l("FETCH_GROUP is not allowed"));
+        return BooleanValue.FALSE;
+      }
+      else if ((fetchMode & PDO.FETCH_UNIQUE) != 0) {
+        _error.warning(L.l("FETCH_UNIQUE is not allowed"));
+        return BooleanValue.FALSE;
+      }
+    }
+
+    boolean isClasstype = (fetchMode & PDO.FETCH_CLASSTYPE) != 0;
+    boolean isSerialize = (fetchMode & PDO.FETCH_SERIALIZE) != 0;
+
+    fetchMode = fetchMode & (~(PDO.FETCH_CLASSTYPE | PDO.FETCH_SERIALIZE));
+
+    switch (fetchMode) {
+      case PDO.FETCH_ASSOC:
+        return fetchAssoc();
+
+      case PDO.FETCH_BOTH:
+        return fetchBoth();
+
+      case PDO.FETCH_BOUND:
+        return fetchBound();
+
+      case PDO.FETCH_COLUMN:
+        return fetchColumn(columnIndex);
+
+      case PDO.FETCH_CLASS:
+        return fetchClass();
+
+      case PDO.FETCH_FUNC:
+        return fetchFunc();
+
+      case PDO.FETCH_INTO:
+        return fetchInto();
+
+      case PDO.FETCH_LAZY:
+        return fetchLazy();
+
+      case PDO.FETCH_NAMED:
+        return fetchNamed();
+
+      case PDO.FETCH_NUM:
+        return fetchNum();
+
+      case PDO.FETCH_OBJ:
+        return fetchObject();
+
+    default:
+      _error.warning(L.l("invalid fetch mode {0}",  fetchMode));
+      closeCursor();
+      return BooleanValue.FALSE;
+    }
+  }
+
   private Value fetchInto()
   {
     assert _fetchModeArgs.length > 0;
@@ -960,7 +850,9 @@ public class PDOStatement
 
   public Value getAttribute(int attribute)
   {
-    throw new UnimplementedException();
+    _error.unsupportedAttribute(attribute);
+
+    return BooleanValue.FALSE;
   }
 
   /**
@@ -1063,9 +955,63 @@ public class PDOStatement
     }
   }
 
+  String lastInsertId(String name)
+  {
+    if (!(name == null || name.length() == 0))
+      throw new UnimplementedException("lastInsertId with name ");
+
+    if (_lastInsertId != null)
+      return _lastInsertId;
+
+    String lastInsertId = null;
+
+    Statement stmt;
+
+    if (_preparedStatement != null)
+      stmt = _preparedStatement;
+    else
+      stmt = _statement;
+
+    ResultSet resultSet = null;
+
+    try {
+      resultSet = stmt.getGeneratedKeys();
+
+      if (resultSet.next())
+        lastInsertId = resultSet.getString(1);
+    }
+    catch (SQLException ex) {
+      _error.error(ex);
+    }
+    finally {
+      try {
+        if (resultSet != null)
+          resultSet.close();
+      }
+      catch (SQLException ex) {
+        log.log(Level.WARNING, ex.toString(), ex);
+      }
+    }
+
+    _lastInsertId = lastInsertId == null ? "0" : lastInsertId;
+
+    return _lastInsertId;
+  }
+
   public boolean nextRowset()
   {
     throw new UnimplementedException();
+  }
+
+  private int resolveParameter(Value parameter)
+  {
+    int index;
+
+    if (!(parameter instanceof LongValue))
+      throw new UnimplementedException("key " + parameter);
+
+    index = parameter.toInt();
+    return index;
   }
 
   public int rowCount()
@@ -1096,8 +1042,38 @@ public class PDOStatement
 
   public boolean setAttribute(int attribute, Value value)
   {
-    throw new UnimplementedException();
+    return setAttribute(attribute, value, false);
   }
+
+  public boolean setAttribute(int attribute, Value value, boolean isFromConstructor)
+  {
+    if (isFromConstructor) {
+      switch (attribute) {
+        case PDO.CURSOR_FWDONLY:
+        case PDO.CURSOR_SCROLL:
+          return setCursor(attribute);
+      }
+    }
+
+    _error.unsupportedAttribute(attribute);
+
+    return false;
+  }
+
+  private boolean setCursor(int attribute)
+  {
+    switch (attribute) {
+      case PDO.CURSOR_FWDONLY:
+        throw new UnimplementedException();
+      case PDO.CURSOR_SCROLL:
+        throw new UnimplementedException();
+
+      default:
+        _error.unsupportedAttribute(attribute);
+        return false;
+    }
+  }
+
 
   /**
    * Sets the fetch mode, the default is {@link PDO.FETCH_BOTH}.
@@ -1173,6 +1149,112 @@ public class PDOStatement
 
     _fetchModeArgs = args;
     _fetchMode = fetchMode;
+
+    return true;
+  }
+
+  /**
+   * @param index 1-based position number
+   * @param value the value for the parameter
+   *
+   * @return true for success, false for failure
+   */
+  private boolean setLobParameter(int index, Value value, long length)
+  {
+    try {
+      if (value == null || value.isNull()) {
+        _preparedStatement.setObject(index, null);
+      }
+      else if (value instanceof StringValue) {
+        if (length < 0) {
+          _preparedStatement.setBinaryStream(index, value.toInputStream(), value.toString().length());
+        }
+        else
+          _preparedStatement.setBinaryStream(index, value.toInputStream(), (int) length);
+      }
+      else {
+        InputStream inputStream = value.toInputStream();
+
+        if (inputStream == null) {
+          _error.warning(L.l("type {0} ({1}) for parameter index {2} cannot be used for lob", value.getType(), value.getClass(), index));
+          return false;
+        }
+
+        if (length < 0 && (value instanceof FileReadValue)) {
+          length = ((FileReadValue) value).getLength();
+
+          if (length <= 0)
+            length = -1;
+        }
+
+        if (length < 0) {
+          TempBuffer tempBuffer = TempBuffer.allocate();
+
+          try {
+            byte[] bytes = new byte[1024];
+
+            int len;
+
+            while ((len = inputStream.read(bytes, 0, 1024)) != -1)
+              tempBuffer.write(bytes, 0, len);
+          }
+          catch (IOException ex) {
+            _error.error(ex);
+            return false;
+          }
+
+          TempReadStream tempReadStream = new TempReadStream(tempBuffer);
+          tempReadStream.setFreeWhenDone(true);
+
+          _preparedStatement.setBinaryStream(index, new ReadStream(tempReadStream), tempBuffer.getLength());
+        }
+        else
+          _preparedStatement.setBinaryStream(index, inputStream, (int) length);
+      }
+    }
+    catch (SQLException ex) {
+      _error.error(ex);
+      return false;
+    }
+
+    return true;
+  }
+
+  /**
+   * @param index 1-based position number
+   * @param value the value for the parameter
+   *
+   * @return true for success, false for failure
+   */
+  private boolean setParameter(int index, Value value, long length)
+  {
+    try {
+      if (value instanceof DoubleValue) {
+        _preparedStatement.setDouble(index, value.toDouble());
+      }
+      else if (value instanceof LongValue) {
+        _preparedStatement.setLong(index, value.toLong());
+      }
+      else if (value instanceof StringValue) {
+        String string = value.toString();
+
+        if (length >= 0)
+          string = string.substring(0, (int) length);
+
+        _preparedStatement.setString(index, string);
+      }
+      else if (value instanceof NullValue) {
+        _preparedStatement.setObject(index, null);
+      }
+      else {
+        _error.warning(L.l("unknown type {0} ({1}) for parameter index {2}", value.getType(), value.getClass(), index));
+        return false;
+      }
+    }
+    catch (SQLException ex) {
+      _error.error(ex);
+      return false;
+    }
 
     return true;
   }
