@@ -2611,6 +2611,11 @@ public class Env {
     return notice(msg);
   }
 
+  public static Value nullAsFalse(Value value)
+  {
+    return value == null ? BooleanValue.FALSE : value;
+  }
+
   /**
    * A parse error
    */

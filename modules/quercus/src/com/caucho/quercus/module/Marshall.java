@@ -145,6 +145,10 @@ abstract public class Marshall {
     if (!isNullAsFalse)
       return marshall;
     else {
+
+      if (Value.class.equals(argType))
+        throw new UnsupportedOperationException(ReturnNullAsFalse.class.getName() + " with return type `Value'");
+
       return new Marshall() {
         public boolean isBoolean()
         {
@@ -205,7 +209,7 @@ abstract public class Marshall {
         public void generateResultStart(PhpWriter out)
           throws IOException
         {
-          out.print("nullAsFalse(");
+          out.print("env.nullAsFalse(");
           marshall.generateResultStart(out);
         }
 

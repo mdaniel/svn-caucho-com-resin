@@ -106,12 +106,6 @@ public class PhpMain extends ClassComponent {
     out.println("  return _quercus_selfPath;");
     out.println("}");
 
-    out.println();
-    out.println("private static Value nullAsFalse(Value value)");
-    out.println("{");
-    out.println("  return value == null ? BooleanValue.FALSE : value;");
-    out.println("}");
-
     AnalyzeInfo info = new AnalyzeInfo(_functionInfo);
 
     boolean hasReturn = ! _statement.analyze(info);
