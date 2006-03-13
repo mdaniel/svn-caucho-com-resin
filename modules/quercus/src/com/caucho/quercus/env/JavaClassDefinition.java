@@ -254,7 +254,7 @@ public class JavaClassDefinition extends AbstractQuercusClass {
 
         type = __set.getParameterTypes()[0];
         marshall = Marshall.create(_quercus, type, false);
-        marshalledName = marshall.marshall(env, value,type);
+        marshalledName = marshall.marshall(env, name, type);
 
         type = __set.getParameterTypes()[1];
         marshall = Marshall.create(_quercus, type, false);

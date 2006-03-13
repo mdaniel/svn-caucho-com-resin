@@ -336,6 +336,19 @@ public class SimpleXMLElement {
 
     return result;
   }
+
+  /**
+   * $foo['name'] = value
+   * 
+   * @param name
+   * @param value
+   */
+  public void __set(String name, String value)
+  {
+    _element.setAttribute(name, value);
+    
+  }
+  
   /**
    * Converts to a string.
    */
@@ -519,8 +532,7 @@ public class SimpleXMLElement {
                                int depth)
     throws IOException
   {
-    if (_attributes == null)
-      attributes();
+    attributes();
 
     // Print attributes if not null
     if (_attributes != NullValue.NULL) {
