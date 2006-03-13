@@ -112,7 +112,7 @@ public class JavaClassDefinition extends AbstractQuercusClass {
    * For array dereferencing.
    * 
    * Also designed to call __get()
-   * IE: SimpleXMLElementValue
+   * IE: SimpleXMLElement
    * 
    * @param name
    * @return Value

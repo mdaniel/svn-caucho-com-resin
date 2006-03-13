@@ -55,7 +55,7 @@ import java.util.Set;
  * SimpleXMLElement object oriented API facade
  */
 
-public class SimpleXMLElementValue {
+public class SimpleXMLElement {
 
   private Env _env;
   private Document _document;
@@ -72,9 +72,9 @@ public class SimpleXMLElementValue {
    * @param document
    * @param element
    */
-  public SimpleXMLElementValue(Env env,
-                               Document document,
-                               Element element)
+  public SimpleXMLElement(Env env,
+                          Document document,
+                          Element element)
   {
     _env = env;
     _document = document;
@@ -248,15 +248,15 @@ public class SimpleXMLElementValue {
         // if not add to existing ArrayValueImpl
         ArrayValue childArray = (ArrayValue) _childMap.get(childTagName);
         if (childArray == null) {
-          childArray = new ArrayValueImpl();
+          childArray = new SimpleXMLElementArray();
           _childMap.put(childTagName, childArray);
         }
   
-        childArray.put(_env.wrapJava(new SimpleXMLElementValue(_env, _document, (Element) child)));
+        childArray.put(_env.wrapJava(new SimpleXMLElement(_env, _document, (Element) child)));
       }
   
       // Iterate over _childMap and replace all entries with only one
-      // element from ArrayValue to SimpleXMLElementValue
+      // element from ArrayValue to SimpleXMLElement
       Set keyValues = _childMap.entrySet();
       int keyLength = keyValues.size();
       Iterator keyIterator = keyValues.iterator();
@@ -287,7 +287,7 @@ public class SimpleXMLElementValue {
       if (child.getNodeType() == Node.TEXT_NODE)
         continue;
 
-      childArray.put(_env.wrapJava(new SimpleXMLElementValue(_env, _document, (Element) child)));
+      childArray.put(_env.wrapJava(new SimpleXMLElement(_env, _document, (Element) child)));
     }
 
     if (childArray.getSize() > 0)
@@ -349,39 +349,11 @@ public class SimpleXMLElementValue {
     return "SimpleXMLElement Object";
   }
 /*
-  public Value evalMethod(Env env, String methodName)
-    throws Throwable
-  {
-    if ("attributes".equals(methodName)) {
-      return attributes();
-    } else if ("children".equals(methodName)) {
-      return children();
-    } else if ("asXML".equals(methodName)) {
-      return asXML();
-    }
-
-    return super.evalMethod(env, methodName);
-  }
-
-  /**
-   * Evaluates a method with 1 arg.
-   * /
-  public Value evalMethod(Env env, String methodName, Value a0)
-    throws Throwable
-  {
-    if ("xpath".equals(methodName)) {
-      return xpath(a0.toString());
-    }
-
-    return super.evalMethod(env, methodName, a0);
-  }
-*/
-
   public Element getElement()
   {
     return _element;
   }
-
+*/
   /**
    * XXX: Currently does not work for $xml->inside->wayinside = "foo";
    * 
@@ -431,44 +403,6 @@ public class SimpleXMLElementValue {
     }
     
     return NullValue.NULL;
-    /*
-    // always recreated _childMap
-    fillChildMap();
-    
-    if (!_childMap.isEmpty()) {
-      Value result = _childMap.get(new StringValueImpl(name));
-      
-      if (result == null)
-        return BooleanValue.FALSE;
-
-      // Issue warning if array
-      if (result instanceof ArrayValue) {
-        //XXX: Need to put a warning here "Cannot assign to an array of nodes (duplicate subnodes or attr detected)"
-      } else {
-        /**
-         *  $foo = simplexml_load_string('<parent><child><sub1 /><sub2 /></child></parent>');
-         *  $foo->child = "bar";
-         * 
-         *  EQUIVALENT TO:
-         * 
-         *  $foo = simplexml_load_string('<parent><child>bar</child></parent>');
-         * 
-         * So remove all children first then add text node; 
-         * /
-        Element element = result.evalMethod(env, "getElement");
-        while (element.hasChildNodes()) {
-          element.removeChild(element.getFirstChild());
-        }
-
-        Text text = _document.createTextNode(value.toString());
-
-        element.appendChild(text);
-        
-        return value;
-      }
-    }
-    
-    return NullValue.NULL;*/
   }
 
   /**
@@ -541,7 +475,7 @@ public class SimpleXMLElementValue {
         sb.append(child.getNodeValue());
         continue;
       }
-      SimpleXMLElementValue simple = new SimpleXMLElementValue(_env, _document, (Element) child);
+      SimpleXMLElement simple = new SimpleXMLElement(_env, _document, (Element) child);
       sb.append(simple.generateXML());
     }
 
@@ -573,9 +507,9 @@ public class SimpleXMLElementValue {
       return NullValue.NULL;
 
     // There are matching nodes
-    Value result = new ArrayValueImpl();
+    Value result = new SimpleXMLElementArray();
     for (int i = 0; i < nodeLength; i++) {
-      result.put(_env.wrapJava(new SimpleXMLElementValue(_env, _document, (Element) nodes.item(i))));
+      result.put(_env.wrapJava(new SimpleXMLElement(_env, _document, (Element) nodes.item(i))));
     }
 
     return result;

@@ -62,8 +62,8 @@ public class QuercusSimpleXMLModule extends AbstractQuercusModule {
 
       DocumentBuilder builder = factory.newDocumentBuilder();
       Document document = builder.parse(new ByteArrayInputStream(data.getBytes()));
-      //return new SimpleXMLElementValue(env, document, document.getDocumentElement());
-      return env.wrapJava(new SimpleXMLElementValue(env, document, document.getDocumentElement()));
+      //return new SimpleXMLElement(env, document, document.getDocumentElement());
+      return env.wrapJava(new SimpleXMLElement(env, document, document.getDocumentElement()));
 
     } catch (Exception e) {
       log.log(Level.FINE, L.l(e.toString()), e);
@@ -81,7 +81,7 @@ public class QuercusSimpleXMLModule extends AbstractQuercusModule {
       
       DocumentBuilder builder = factory.newDocumentBuilder();
       Document document = builder.parse(file.openRead());
-      return env.wrapJava(new SimpleXMLElementValue(env, document, document.getDocumentElement()));
+      return env.wrapJava(new SimpleXMLElement(env, document, document.getDocumentElement()));
       
     } catch (Exception e) {
       log.log(Level.FINE, L.l(e.toString()), e);
