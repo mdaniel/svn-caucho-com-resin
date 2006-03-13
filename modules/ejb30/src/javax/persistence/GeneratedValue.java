@@ -37,9 +37,10 @@ import java.lang.annotation.ElementType;
 /**
  * The @GeneratedValue annotation.
  */
-@Target(ElementType.TYPE) @Retention(RetentionPolicy.RUNTIME)
+@Target({ElementType.FIELD,ElementType.METHOD})
+@Retention(RetentionPolicy.RUNTIME)
 public @interface GeneratedValue {
   GenerationType strategy() default GenerationType.AUTO;
 
-  String generator();
+  String generator() default "";
 }

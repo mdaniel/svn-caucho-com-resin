@@ -223,6 +223,22 @@ public class AmberContainer {
   }
 
   /**
+   * Returns the persistence unit JNDI context.
+   */
+  public String getPersistenceUnitJndiPrefix()
+  {
+    return "java:comp/env/persistence/PersistenceUnit/";
+  }
+
+  /**
+   * Returns the persistence unit JNDI context.
+   */
+  public String getPersistenceContextJndiPrefix()
+  {
+    return "java:comp/env/persistence/PersistenceContext/";
+  }
+
+  /**
    * Returns the JClassLoader.
    */
   public JClassLoader getJClassLoader()
@@ -291,6 +307,14 @@ public class AmberContainer {
     _unitMap.put(unit.getName(), unit);
 
     return unit;
+  }
+
+  public AmberPersistenceUnit getPersistenceUnit(String name)
+  {
+    if (_exception != null)
+      throw new AmberRuntimeException(_exception);
+    
+    return _unitMap.get(name);
   }
   
   /**

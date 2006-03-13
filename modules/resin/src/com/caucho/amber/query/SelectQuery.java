@@ -369,10 +369,10 @@ public class SelectQuery extends AbstractQuery {
   {
     CharBuffer cb = CharBuffer.allocate();
 
-    cb.append("SELECT ");
+    cb.append("select ");
 
     if (_isDistinct)
-      cb.append(" DISTINCT ");
+      cb.append(" distinct ");
 
     for (int i = 0; i < _resultList.size(); i++) {
       if (i != 0)
@@ -383,7 +383,7 @@ public class SelectQuery extends AbstractQuery {
       expr.generateSelect(cb);
     }
 
-    cb.append(" FROM ");
+    cb.append(" from ");
 
     boolean hasJoinExpr = false;
     for (int i = 0; i < _fromList.size(); i++) {
@@ -391,7 +391,7 @@ public class SelectQuery extends AbstractQuery {
       
       if (i != 0) {
 	if (item.isOuterJoin())
-	  cb.append(" LEFT OUTER JOIN ");
+	  cb.append(" left outer join ");
 	else {
 	  cb.append(", ");
 	  
@@ -405,7 +405,7 @@ public class SelectQuery extends AbstractQuery {
       cb.append(item.getName());
       
       if (item.getJoinExpr() != null && item.isOuterJoin()) {
-	cb.append(" ON ");
+	cb.append(" on ");
 	item.getJoinExpr().generateJoin(cb);
       }
     }
@@ -413,7 +413,7 @@ public class SelectQuery extends AbstractQuery {
     if (hasJoinExpr || _where != null) {
       boolean hasExpr = false;
       
-      cb.append(" WHERE ");
+      cb.append(" where ");
 
       for (int i = 0; i < _fromList.size(); i++) {
 	FromItem item = _fromList.get(i);
@@ -421,7 +421,7 @@ public class SelectQuery extends AbstractQuery {
 
 	if (expr != null && ! item.isOuterJoin()) {
 	  if (hasExpr)
-	    cb.append(" AND ");
+	    cb.append(" and ");
 	  hasExpr = true;
 
 	  expr.generateJoin(cb);
@@ -430,7 +430,7 @@ public class SelectQuery extends AbstractQuery {
       
       if (_where != null) {
 	if (hasExpr)
-	  cb.append(" AND ");
+	  cb.append(" and ");
 	hasExpr = true;
 
 	_where.generateWhere(cb);
@@ -438,7 +438,7 @@ public class SelectQuery extends AbstractQuery {
     }
 
     if (_groupList != null) {
-      cb.append(" GROUP BY ");
+      cb.append(" group by ");
 
       for (int i = 0; i < _groupList.size(); i++) {
 	if (i != 0)
@@ -449,7 +449,7 @@ public class SelectQuery extends AbstractQuery {
     }
 
     if (_orderList != null) {
-      cb.append(" ORDER BY ");
+      cb.append(" order by ");
 
       for (int i = 0; i < _orderList.size(); i++) {
 	if (i != 0)
@@ -458,7 +458,7 @@ public class SelectQuery extends AbstractQuery {
 	_orderList.get(i).generateSelect(cb);
 
 	if (Boolean.FALSE.equals(_ascList.get(i)))
-	  cb.append(" DESC");
+	  cb.append(" desc");
       }
     }
 

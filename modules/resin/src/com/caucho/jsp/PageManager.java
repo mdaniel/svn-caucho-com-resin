@@ -43,6 +43,8 @@ import com.caucho.util.*;
 import com.caucho.vfs.*;
 import com.caucho.java.*;
 
+import com.caucho.config.j2ee.InjectIntrospector;
+
 import com.caucho.log.Log;
 
 import com.caucho.server.webapp.Application;
@@ -252,6 +254,12 @@ abstract public class PageManager {
         page._caucho_setNeverModified(true);
 
       page._caucho_setUpdateInterval(_updateInterval);
+
+      try {
+	InjectIntrospector.configure(page);
+      } catch (Throwable e) {
+	throw new RuntimeException(e);
+      }
 
       entry.setPage(page);
 

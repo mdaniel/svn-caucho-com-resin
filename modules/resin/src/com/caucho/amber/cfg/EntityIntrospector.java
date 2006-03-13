@@ -168,7 +168,7 @@ public class EntityIntrospector {
 	tableName = (String) tableAnn.get("name");
 
       if (tableName == null || tableName.equals(""))
-	tableName = entityName;
+	tableName = entityName.toUpperCase();
 
       if (parentType == null)
 	entityType.setTable(_persistenceUnit.createTable(tableName));
@@ -610,6 +610,7 @@ public class EntityIntrospector {
   {
     JAnnotation id = field.getAnnotation(javax.persistence.Id.class);
     JAnnotation column = field.getAnnotation(javax.persistence.Column.class);
+    JAnnotation gen = field.getAnnotation(javax.persistence.GeneratedValue.class);
 
     Type amberType = persistenceUnit.createType(fieldType);
 
@@ -623,7 +624,9 @@ public class EntityIntrospector {
 
     JdbcMetaData metaData = persistenceUnit.getMetaData();
 
-    if (GenerationType.IDENTITY.equals(id.get("generate"))) {
+    if (gen == null) {
+    }
+    else if (GenerationType.IDENTITY.equals(gen.get("strategy"))) {
       if (! metaData.supportsIdentity())
 	throw new ConfigException(L.l("'{0}' does not support identity.",
 				      metaData.getDatabaseName()));
@@ -631,17 +634,17 @@ public class EntityIntrospector {
       keyColumn.setGeneratorType("identity");
       idField.setGenerator("identity");
     }
-    else if (GenerationType.SEQUENCE.equals(id.get("generate"))) {
+    else if (GenerationType.SEQUENCE.equals(gen.get("strategy"))) {
       if (! metaData.supportsSequences())
 	throw new ConfigException(L.l("'{0}' does not support sequence.",
 				      metaData.getDatabaseName()));
 
       addSequenceIdGenerator(persistenceUnit, idField, id);
     }
-    else if (GenerationType.TABLE.equals(id.get("generate"))) {
+    else if (GenerationType.TABLE.equals(gen.get("strategy"))) {
       addTableIdGenerator(persistenceUnit, idField, id);
     }
-    else if (GenerationType.AUTO.equals(id.get("generate"))) {
+    else if (GenerationType.AUTO.equals(gen.get("strategy"))) {
       if (metaData.supportsIdentity()) {
 	keyColumn.setGeneratorType("identity");
 	idField.setGenerator("identity");
@@ -998,14 +1001,16 @@ public class EntityIntrospector {
     sourceType.addField(property);
   }
 
-  private Column createColumn(EntityType entityType, String name,
+  private Column createColumn(EntityType entityType, String fieldName,
 			      JAnnotation columnAnn, Type amberType)
     throws ConfigException
   {
-    if (columnAnn == null) {
-    }
-    else if (! columnAnn.get("name").equals(""))
+    String name;
+    
+    if (columnAnn != null && ! columnAnn.get("name").equals(""))
       name = (String) columnAnn.get("name");
+    else
+      name = toSqlName(fieldName);
 
     Column column;
 
@@ -1089,13 +1094,11 @@ public class EntityIntrospector {
       joinColumnsAnn = new Object[] { joinColumnAnn };
 
     JClass targetClass = manyToOneAnn.getClass("targetEntity");
-    String targetName = null;
+    String targetName = "";
     if (targetClass != null)
       targetName = targetClass.getName();
 
-    if (targetName == null ||
-	targetName.equals("") ||
-	targetName.equals("void"))
+    if (targetName.equals("") || targetName.equals("void"))
       targetName = fieldType.getName();
 
     EntityManyToOneField manyToOneField;
@@ -1187,6 +1190,9 @@ public class EntityIntrospector {
 
   private Column findColumn(ArrayList<Column> columns, String ref)
   {
+    if (ref.equals("") && columns.size() == 1)
+      return columns.get(0);
+    
     for (Column column : columns) {
       if (column.getName().equals(ref))
 	return column;
@@ -1248,11 +1254,13 @@ public class EntityIntrospector {
 
       JType []typeArgs = retType.getActualTypeArguments();
 
-      String targetName;
+      JClass targetEntity = manyToManyAnn.getClass("targetEntity");
+      String targetName = "";
 
-      targetName = manyToManyAnn.getString("targetEntity");
+      if (targetEntity != null)
+	targetName = targetEntity.getName();
 
-      if (targetName != null && ! targetName.equals("")) {
+      if (! targetName.equals("") && ! targetName.equals("void")) {
       }
       else if (typeArgs.length > 0)
 	targetName = typeArgs[0].getName();
@@ -1390,6 +1398,8 @@ public class EntityIntrospector {
 
   static String toSqlName(String name)
   {
+    return name.toUpperCase();
+    /*
     CharBuffer cb = new CharBuffer();
 
     for (int i = 0; i < name.length(); i++) {
@@ -1412,6 +1422,7 @@ public class EntityIntrospector {
     }
 
     return cb.toString();
+    */
   }
 
   /**
@@ -1472,11 +1483,13 @@ public class EntityIntrospector {
 
       JType []typeArgs = retType.getActualTypeArguments();
 
-      String targetName;
+      JClass targetEntity = oneToManyAnn.getClass("targetEntity");
+      String targetName = "";
 
-      targetName = oneToManyAnn.getString("targetEntity");
+      if (targetEntity != null)
+	targetName = targetEntity.getName();
 
-      if (targetName != null && ! targetName.equals("")) {
+      if (! targetName.equals("") && ! targetName.equals("void")) {
       }
       else if (typeArgs.length > 0)
 	targetName = typeArgs[0].getName();

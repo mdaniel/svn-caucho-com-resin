@@ -194,6 +194,7 @@ public class AmberConnection implements CloseResource {
   /**
    * Find by the primary key.
    */
+  /*
   public Object find(String entityName, Object primaryKey)
   {
     try {
@@ -204,6 +205,7 @@ public class AmberConnection implements CloseResource {
       throw new EJBExceptionWrapper(e);
     }
   }
+  */
   
   /**
    * Find by the primary key.
@@ -423,7 +425,6 @@ public class AmberConnection implements CloseResource {
       }
       
       entity = entityHome.load(this, key);
-
       addEntity(entity);
 
       return entity;

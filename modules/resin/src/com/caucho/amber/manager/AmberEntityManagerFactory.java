@@ -55,7 +55,7 @@ public class AmberEntityManagerFactory implements EntityManagerFactory {
    */
   public EntityManager createEntityManager()
   {
-    return new AmberEntityManager(_unit);
+    return createEntityManager(PersistenceContextType.TRANSACTION);
   }
   
   /**
@@ -63,7 +63,7 @@ public class AmberEntityManagerFactory implements EntityManagerFactory {
    */
   public EntityManager createEntityManager(PersistenceContextType type)
   {
-    throw new UnsupportedOperationException();
+    return new AmberEntityManager(_unit);
   }
 
   /**
@@ -71,7 +71,7 @@ public class AmberEntityManagerFactory implements EntityManagerFactory {
    */
   public EntityManager getEntityManager()
   {
-    throw new UnsupportedOperationException();
+    return new EntityManagerProxy(_unit);
   }
 
   /**

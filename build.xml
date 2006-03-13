@@ -637,8 +637,10 @@
         <include name="lib/resin-jdk15.jar"/>
         <include name="lib/resin.jar"/>
         <include name="lib/resinboot.jar"/>
+	<!--
         <include name="lib/saaj.jar"/>
         <include name="lib/script-10.jar"/>
+	-->
         <include name="lib/webutil.jar"/>
 
         <include name="webapps/resin-doc.war"/>

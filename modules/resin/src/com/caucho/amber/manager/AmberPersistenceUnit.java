@@ -200,10 +200,10 @@ public class AmberPersistenceUnit {
   private void bindProxy()
     throws Exception
   {
-    Jndi.bindDeep("java:comp/env/persistence/" + getName(),
+    Jndi.bindDeep(_amberContainer.getPersistenceUnitJndiPrefix() + getName(),
 		    new FactoryProxy(this));
     
-    Jndi.bindDeep("java:comp/env/entity-manager/" + getName(),
+    Jndi.bindDeep(_amberContainer.getPersistenceContextJndiPrefix() + getName(),
 		  new EntityManagerNamingProxy(this));
   }
 

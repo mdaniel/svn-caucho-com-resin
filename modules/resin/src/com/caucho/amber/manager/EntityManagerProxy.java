@@ -53,12 +53,10 @@ public class EntityManagerProxy implements EntityManager {
     = Logger.getLogger(EntityManagerProxy.class.getName());
 
   private AmberPersistenceUnit _persistenceUnit;
-  private AmberConnection _aConn;
 
   public EntityManagerProxy(AmberPersistenceUnit persistenceUnit)
   {
     _persistenceUnit = persistenceUnit;
-    _aConn = _persistenceUnit.getThreadConnection();
   }
   
   /**
@@ -154,7 +152,7 @@ public class EntityManagerProxy implements EntityManager {
    */
   public void close()
   {
-    _aConn = null; // doesn't affect the underlying context
+    throw new IllegalStateException(L.l("Container-manager persistence context may not be closed."));
   }
 
   /**
@@ -226,7 +224,7 @@ public class EntityManagerProxy implements EntityManager {
    */
   public boolean isOpen()
   {
-    return _aConn != null && _aConn.isOpen();
+    return true;
   }
 
   /**
@@ -234,13 +232,15 @@ public class EntityManagerProxy implements EntityManager {
    */
   private AmberConnection getCurrent()
   {
-    return _aConn;
+    return _persistenceUnit.getThreadConnection();
   }
 
   public String toString()
   {
-    if (_aConn != null)
-      return "EntityManagerProxy[" + _aConn.getPersistenceUnit().getName() + "]";
+    AmberConnection aConn = getCurrent();
+    
+    if (aConn != null)
+      return "EntityManagerProxy[" + aConn.getPersistenceUnit().getName() + "]";
     else
       return "EntityManagerProxy[closed]";
   }

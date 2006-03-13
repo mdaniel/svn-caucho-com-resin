@@ -122,14 +122,14 @@ public class AmberTableGenerator extends IdGenerator {
       return;
     _isInit = true;
 
-    _selectSQL = ("SELECT " + _table.getValueColumn() +
-		  " FROM " + _table.getTable().getName() +
-		  " WHERE " + _table.getKeyColumn() + "=?");
+    _selectSQL = ("select " + _table.getValueColumn() +
+		  " from " + _table.getTable().getName() +
+		  " where " + _table.getKeyColumn() + "=?");
 
-    _updateSQL = ("UPDATE " + _table.getTable().getName() +
-		  " SET " + _table.getValueColumn() + "=?" +
-		  " WHERE " + _table.getKeyColumn() + "=? " +
-		  "  AND " + _table.getValueColumn() + "=?");
+    _updateSQL = ("update " + _table.getTable().getName() +
+		  " set " + _table.getValueColumn() + "=?" +
+		  " where " + _table.getKeyColumn() + "=? " +
+		  "  and " + _table.getValueColumn() + "=?");
     
     DataSource ds = amberPersistenceUnit.getDataSource();
     Connection conn = ds.getConnection();

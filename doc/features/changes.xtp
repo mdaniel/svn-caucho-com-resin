@@ -4,6 +4,8 @@
 
 <s2 title='3.0.snap - Feb 23, 2006'>
 <ul>
+<li>Refactored Amber to use javax.persistence (#943, rep by koreth)
+<li>JSP files can be injected with J2EE annotations
 <li>setTextContent needed on DOM Node (#985, rep by Bill Au)
 <li>Update thread pool to use stack instead of ring to improve spike handling (#905, rep by Christopher Stach)
 <li>Add environment-system-properties flag for jinfo issues (#151, #411 rep by Kirk Rasmussen)

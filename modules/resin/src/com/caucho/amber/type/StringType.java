@@ -77,7 +77,7 @@ public class StringType extends Type {
     if (length == 0)
       length = 255;
     
-    return "VARCHAR(" + length + ")";
+    return "varchar(" + length + ")";
     // return manager.getCreateColumnSQL(Types.VARCHAR, length);
   }
 

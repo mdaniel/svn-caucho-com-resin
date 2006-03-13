@@ -37,7 +37,8 @@ import java.lang.annotation.ElementType;
 /**
  * The @Table annotation.
  */
-@Target(ElementType.TYPE) @Retention(RetentionPolicy.RUNTIME)
+@Target({ElementType.METHOD,ElementType.FIELD})
+@Retention(RetentionPolicy.RUNTIME)
 public @interface JoinTable {
   String name() default "";
   String catalog() default "";

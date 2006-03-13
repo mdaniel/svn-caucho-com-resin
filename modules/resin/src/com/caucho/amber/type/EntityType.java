@@ -1202,9 +1202,9 @@ public class EntityType extends Type {
    */
   public String generateCreateSQL(Table table)
   {
-    CharBuffer sql = CharBuffer.allocate();
+    CharBuffer sql = new CharBuffer();
 
-    sql.append("INSERT INTO " + table.getName() + " (");
+    sql.append("insert into " + table.getName() + " (");
 
     boolean isFirst = true;
     
@@ -1247,7 +1247,7 @@ public class EntityType extends Type {
       sql.append(columnName);
     }
 
-    sql.append(") VALUES (");
+    sql.append(") values (");
 
     isFirst = true;
     for (int i = 0; i < idColumns.size(); i++) {
@@ -1427,7 +1427,7 @@ public class EntityType extends Type {
    */
   public void generateUpdateSQLPrefix(CharBuffer sql)
   {
-    sql.append("UPDATE " + getTable().getName() + " SET ");
+    sql.append("update " + getTable().getName() + " set ");
   }
 
   /**
@@ -1480,7 +1480,7 @@ public class EntityType extends Type {
    */
   public void generateUpdateSQLSuffix(CharBuffer sql)
   {
-    sql.append(" WHERE ");
+    sql.append(" where ");
 
     sql.append(getId().generateMatchArgWhere(null));
   }
@@ -1495,7 +1495,7 @@ public class EntityType extends Type {
     
     CharBuffer sql = CharBuffer.allocate();
 
-    sql.append("UPDATE " + getTable().getName() + " SET ");
+    sql.append("update " + getTable().getName() + " set ");
 
     boolean isFirst = true;
 
@@ -1531,7 +1531,7 @@ public class EntityType extends Type {
     if (isFirst)
       return null;
 
-    sql.append(" WHERE ");
+    sql.append(" where ");
 
     sql.append(getId().generateMatchArgWhere(null));
     

@@ -35,8 +35,11 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 
 import java.util.logging.Logger;
+import java.util.logging.Level;
 
 import javax.sql.DataSource;
+
+import javax.naming.*;
 
 import javax.transaction.UserTransaction;
 
@@ -44,6 +47,9 @@ import javax.ejb.Inject;
 import javax.ejb.Resource;
 import javax.ejb.EJB;
 import javax.ejb.EJBHome;
+
+import javax.persistence.PersistenceUnit;
+import javax.persistence.PersistenceContext;
 
 import com.caucho.util.L10N;
 import com.caucho.util.Log;
@@ -58,9 +64,11 @@ public class InjectIntrospector {
   private static final L10N L = new L10N(InjectIntrospector.class);
   private static final Logger log = Log.open(InjectIntrospector.class);
 
-  private static Class _injectClass;
-  private static Class _resourceClass;
-  private static Class _ejbClass;
+  private static final Class _injectClass;
+  private static final Class _resourceClass;
+  private static final Class _ejbClass;
+  private static final Class _persistenceUnitClass;
+  private static final Class _persistenceContextClass;
   
   /**
    * Analyzes a bean for @Inject tags, building an init program for them.
@@ -68,6 +76,9 @@ public class InjectIntrospector {
   public static void configure(Object obj)
     throws Throwable
   {
+    if (_injectClass == null)
+      return;
+    
     if (obj != null) {
       for (BuilderProgram program : introspect(obj.getClass())) {
 	program.configure(obj);
@@ -83,6 +94,9 @@ public class InjectIntrospector {
   {
     ArrayList<BuilderProgram> initList = new ArrayList<BuilderProgram>();
     
+    if (_injectClass == null)
+      return null;
+    
     try {
       introspectImpl(initList, type);
     } catch (ClassNotFoundException e) {
@@ -96,9 +110,13 @@ public class InjectIntrospector {
 				     Class type)
     throws ConfigException, ClassNotFoundException
   {
-    _injectClass = Class.forName("javax.ejb.Inject");
-    _resourceClass = Class.forName("javax.ejb.Resource");
-    _ejbClass = Class.forName("javax.ejb.EJB");
+    if (_injectClass == null)
+      return;
+
+    if (type == null || type.equals(Object.class))
+      return;
+
+    introspectImpl(initList, type.getSuperclass());
     
     for (Field field : type.getDeclaredFields()) {
       configure(initList, field, field.getName(), field.getType());
@@ -139,6 +157,10 @@ public class InjectIntrospector {
       configureResource(initList, field, fieldName, fieldType);
     else if (field.isAnnotationPresent(_ejbClass))
       configureEJB(initList, field, fieldName, fieldType);
+    else if (field.isAnnotationPresent(_persistenceUnitClass))
+      configurePersistenceUnit(initList, field, fieldName, fieldType);
+    else if (field.isAnnotationPresent(_persistenceContextClass))
+      configurePersistenceContext(initList, field, fieldName, fieldType);
   }
   
   private static void configureResource(ArrayList<BuilderProgram> initList,
@@ -179,6 +201,106 @@ public class InjectIntrospector {
 		      ejb.name(), "javax.ejb.EJBLocalObject", ejb.jndiName());
   }
   
+  private static void configurePersistenceUnit(ArrayList<BuilderProgram> initList,
+					       AccessibleObject field,
+					       String fieldName,
+					       Class fieldType)
+    throws ConfigException
+  {
+    PersistenceUnit pUnit = (PersistenceUnit) field.getAnnotation(_persistenceUnitClass);
+
+    String jndiPrefix = "java:comp/env/persistence/PersistenceUnit";
+
+    String jndiName = null;
+    String unitName = pUnit.unitName();
+
+    try {
+      if (! unitName.equals(""))
+	jndiName = jndiPrefix + '/' + unitName;
+      else {
+	InitialContext ic = new InitialContext();
+
+	NamingEnumeration<NameClassPair> iter = ic.list(jndiPrefix);
+
+	if (iter == null) {
+	  log.warning("Can't find configured PersistenceUnit");
+	  return; // XXX: error?
+	}
+
+	String ejbJndiName = null;
+	while (iter.hasMore()) {
+	  NameClassPair pair = iter.next();
+
+	  if (pair.getName().equals("resin-ejb"))
+	    ejbJndiName = jndiPrefix + '/' + pair.getName();
+	  else {
+	    jndiName = jndiPrefix + '/' + pair.getName();
+	    break;
+	  }
+	}
+
+	if (jndiName == null)
+	  jndiName = ejbJndiName;
+      }
+
+      configureResource(initList, field, fieldName, fieldType,
+			unitName, "javax.persistence.EntityManagerFactory",
+			jndiName);
+    } catch (Throwable e) {
+      log.log(Level.WARNING, e.toString(), e);
+    }
+  }
+  
+  private static void configurePersistenceContext(ArrayList<BuilderProgram> initList,
+					       AccessibleObject field,
+					       String fieldName,
+					       Class fieldType)
+    throws ConfigException
+  {
+    PersistenceContext pContext = (PersistenceContext) field.getAnnotation(_persistenceContextClass);
+
+    String jndiPrefix = "java:comp/env/persistence/PersistenceContext";
+
+    String jndiName = null;
+    String unitName = pContext.unitName();
+
+    try {
+      if (! unitName.equals(""))
+	jndiName = jndiPrefix + '/' + unitName;
+      else {
+	InitialContext ic = new InitialContext();
+
+	NamingEnumeration<NameClassPair> iter = ic.list(jndiPrefix);
+
+	if (iter == null) {
+	  log.warning("Can't find configured PersistenceContext");
+	  return; // XXX: error?
+	}
+
+	String ejbJndiName = null;
+	while (iter.hasMore()) {
+	  NameClassPair pair = iter.next();
+
+	  if (pair.getName().equals("resin-ejb"))
+	    ejbJndiName = jndiPrefix + '/' + pair.getName();
+	  else {
+	    jndiName = jndiPrefix + '/' + pair.getName();
+	    break;
+	  }
+	}
+
+	if (jndiName == null)
+	  jndiName = ejbJndiName;
+      }
+
+      configureResource(initList, field, fieldName, fieldType,
+			unitName, "javax.persistence.EntityManager",
+			jndiName);
+    } catch (Throwable e) {
+      log.log(Level.WARNING, e.toString(), e);
+    }
+  }
+  
   private static void configureResource(ArrayList<BuilderProgram> initList,
 					AccessibleObject field,
 					String fieldName,
@@ -212,9 +334,6 @@ public class InjectIntrospector {
     else if ("javax.transaction.UserTransaction".equals(resourceType)) {
       jndiName = "java:comp/UserTransaction";
     }
-    else if ("javax.ejb.EntityManager".equals(resourceType)) {
-      jndiName = "java:comp/EntityManager";
-    }
     else {
       jndiName = name;
     }
@@ -229,6 +348,29 @@ public class InjectIntrospector {
       initList.add(new JndiInjectProgram(jndiName, (Method) field));
     else
       initList.add(new JndiFieldInjectProgram(jndiName, (Field) field));
+  }
+
+  static {
+    Class injectClass = null;
+    Class resourceClass = null;
+    Class ejbClass = null;
+    Class persistenceUnitClass = null;
+    Class persistenceContextClass = null;
+    
+    try {
+      injectClass = Class.forName("javax.ejb.Inject");
+      resourceClass = Class.forName("javax.ejb.Resource");
+      ejbClass = Class.forName("javax.ejb.EJB");
+      persistenceUnitClass = Class.forName("javax.persistence.PersistenceUnit");
+      persistenceContextClass = Class.forName("javax.persistence.PersistenceContext");
+    } catch (Throwable e) {
+    }
+
+    _injectClass = injectClass;
+    _resourceClass = resourceClass;
+    _ejbClass = ejbClass;
+    _persistenceUnitClass = persistenceUnitClass;
+    _persistenceContextClass = persistenceContextClass;
   }
 }
 

@@ -278,12 +278,12 @@ public class Column {
     }
     
     if (isPrimaryKey()) {
-      cb.append(" PRIMARY KEY");
+      cb.append(" primary key");
     } else if (! "identity".equals(_generatorType)) {
       if (isNotNull())
-	cb.append(" NOT NULL");
+	cb.append(" not null");
       if (isUnique())
-	cb.append(" UNIQUE");
+	cb.append(" unique");
     }
 
     return cb.toString();
@@ -301,7 +301,7 @@ public class Column {
       try {
 	Statement stmt = conn.createStatement();
 
-	String sql = "SELECT " + getName() + " FROM " + _table.getName() + " WHERE 1=0";
+	String sql = "select " + getName() + " from " + _table.getName() + " where 1=0";
 
 	try {
 	  // If the table exists, return

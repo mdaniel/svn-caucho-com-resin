@@ -187,7 +187,7 @@ public class LoadGroupGenerator extends ClassComponent {
       where = _entityType.getId().generateMatchArgWhere("o");
     }
     
-    String sql = "SELECT " + select + " FROM " + from + " WHERE " + where;
+    String sql = "select " + select + " from " + from + " where " + where;
 
     out.println("String sql = \"" + sql + "\";");
 

@@ -328,7 +328,7 @@ public class Table {
 	try {
 	  // If the table exists, return
 	  
-	  String sql = "SELECT 1 FROM " + getName() + " o WHERE 1=0";
+	  String sql = "select 1 from " + getName() + " o where 1=0";
 
 	  ResultSet rs = stmt.executeQuery(sql);
 	  rs.close();
@@ -356,7 +356,7 @@ public class Table {
   {
     CharBuffer cb = new CharBuffer();
 
-    cb.append("CREATE TABLE " + getName() + "(");
+    cb.append("create table " + getName() + " (");
 
     boolean hasColumn = false;
     for (Column column : _columns) {
@@ -393,7 +393,7 @@ public class Table {
 	try {
 	  // If the table exists, return
 	  
-	  String sql = "SELECT 1 FROM " + getName() + " o WHERE 1=0";
+	  String sql = "select 1 from " + getName() + " o where 1=0";
 
 	  ResultSet rs = stmt.executeQuery(sql);
 	  rs.close();

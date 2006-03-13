@@ -1027,7 +1027,7 @@ public class EntityComponent extends ClassComponent {
     String table = _entityType.getTable().getName();
     String where = _entityType.getId().generateMatchArgWhere(null);
 
-    String sql = "DELETE FROM " + table + " WHERE " + where;
+    String sql = "delete from " + table + " where " + where;
 
     out.println("String sql = \"" + sql + "\";");
     
@@ -1268,9 +1268,9 @@ public class EntityComponent extends ClassComponent {
       out.println("return entity;");
     }
     else {
-      out.print("String sql = \"SELECT ");
+      out.print("String sql = \"select ");
       out.print(_entityType.generateLoadSelect("o"));
-      out.print(" FROM " + _entityType.getTable().getName() + " o WHERE ");
+      out.print(" from " + _entityType.getTable().getName() + " o where ");
       out.print(_entityType.getId().generateMatchArgWhere("o"));
       out.println("\";");
 
