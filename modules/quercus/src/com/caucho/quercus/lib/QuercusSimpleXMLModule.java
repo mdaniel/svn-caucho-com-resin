@@ -28,8 +28,8 @@
 
 package com.caucho.quercus.lib;
 
+import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.NullValue;
-import com.caucho.quercus.env.Value;
 import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.quercus.module.NotNull;
 import com.caucho.quercus.module.Optional;
@@ -52,16 +52,18 @@ public class QuercusSimpleXMLModule extends AbstractQuercusModule {
   private static final Logger log = Logger.getLogger(QuercusSimpleXMLModule.class.getName());
   private static final L10N L = new L10N(QuercusSimpleXMLModule.class);
 
-  public Value simplexml_load_string(@NotNull String data,
-                                     @Optional String className,
-                                     @Optional int options)
+  public Object simplexml_load_string(Env env,
+                                      @NotNull String data,
+                                      @Optional String className,
+                                      @Optional int options)
   {
     DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
     try {
 
       DocumentBuilder builder = factory.newDocumentBuilder();
       Document document = builder.parse(new ByteArrayInputStream(data.getBytes()));
-      return new SimpleXMLElementValue(document, document.getDocumentElement());
+      //return new SimpleXMLElementValue(env, document, document.getDocumentElement());
+      return env.wrapJava(new SimpleXMLElementValue(env, document, document.getDocumentElement()));
 
     } catch (Exception e) {
       log.log(Level.FINE, L.l(e.toString()), e);
@@ -69,16 +71,17 @@ public class QuercusSimpleXMLModule extends AbstractQuercusModule {
     }
   }
 
-  public Value simplexml_load_file(@NotNull Path file,
-                                   @Optional String className,
-                                   @Optional int options)
+  public Object simplexml_load_file(Env env,
+                                    @NotNull Path file,
+                                    @Optional String className,
+                                    @Optional int options)
   {
     DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
     try {
       
       DocumentBuilder builder = factory.newDocumentBuilder();
       Document document = builder.parse(file.openRead());
-      return new SimpleXMLElementValue(document, document.getDocumentElement());
+      return env.wrapJava(new SimpleXMLElementValue(env, document, document.getDocumentElement()));
       
     } catch (Exception e) {
       log.log(Level.FINE, L.l(e.toString()), e);

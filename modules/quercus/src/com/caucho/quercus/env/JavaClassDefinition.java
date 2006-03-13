@@ -35,13 +35,16 @@ import com.caucho.quercus.expr.Expr;
 import com.caucho.quercus.module.JavaMarshall;
 import com.caucho.quercus.module.Marshall;
 import com.caucho.util.L10N;
+import com.caucho.vfs.WriteStream;
 
+import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -70,17 +73,18 @@ public class JavaClassDefinition extends AbstractQuercusClass {
 
   private final HashMap<String, JavaMethod> _setMap
     = new HashMap<String, JavaMethod>();
-  
+
   // _fieldMap stores all public non-static fields
   // used by getField and setField
   private final HashMap<String, Field> _fieldMap
     = new HashMap<String, Field> ();
-  
+
   private Method __get = null;
   private Method __getField = null;
   private Method __set = null;
   private Method __setField = null;
-  
+  private Method _printRImpl = null;
+
   private JavaConstructor _cons;
 
   private Method _iterator;
@@ -105,33 +109,64 @@ public class JavaClassDefinition extends AbstractQuercusClass {
   }
 
   /**
-   * specifically designed for __get()
-   * IE: SimpleXMLElement
+   * For array dereferencing.
+   * 
+   * Also designed to call __get()
+   * IE: SimpleXMLElementValue
    * 
    * @param name
    * @return Value
    */
-  public Value get(Value name, Object obj)
+  public Value get(Env env, Object obj, Value name)
   {
+ /* Object result;
+
+    if (obj instanceof Map) {
+      Object index;
+      // Marshall the index
+      if (name instanceof LongValue) {
+        index = name.toInt();
+      } else if (name instanceof StringValueImpl) {
+        index = name.toString();
+      } else if (name instanceof JavaValue) {
+        index = name.toJavaObject();
+      } else {
+        //XXX: need to figure out what we should do if name is not 
+        //one of the above
+        index = name.toString();
+      }
+
+      result = ((Map) obj).get(index);
+      if (result != null)
+        return env.wrapJava(result);
+    }
+
+    if (obj instanceof List) {
+      int index = name.toInt();
+      result = ((List) obj).get(index);
+      if (result != null)
+        return env.wrapJava(result);
+    }
+    */
     if (__get != null) {
-      
+
       try {
-        
-        Object result = __get.invoke(obj, name.toString());
+       //__get needs to handle a Value $foo[5] vs. $foo['bar']
+        Object result = __get.invoke(obj, name);
         Marshall marshall = Marshall.create(_quercus, __get.getReturnType(), false);
         return marshall.unmarshall(null, result);
         
       } catch (Throwable e) {
-        
+
         log.log(Level.FINE,  L.l(e.getMessage()), e);
         return NullValue.NULL;
-        
+
       }
     }
-      
+
     return NullValue.NULL;
   }
-  
+
   /**
    * @param name
    * @return Value attained through invoking getter
@@ -140,60 +175,60 @@ public class JavaClassDefinition extends AbstractQuercusClass {
   {
     Object result;
     Marshall marshall;
-    
+
     Method getter = _getMap.get(name);
 
     if (getter != null) {
-      
+
       try {
-        
+
         result = getter.invoke(obj);
         marshall = Marshall.create(_quercus, getter.getReturnType(), false);
         return marshall.unmarshall(env, result);
- 
+
       } catch (Throwable e) {
-        
+
         log.log(Level.FINE, L.l(e.getMessage()), e);
         return NullValue.NULL;
-        
-      } 
-      
+
+      }
+
     } else {
-      
+
       Field field = _fieldMap.get(name);
       if (field != null) {
-      
-        
+
+
         try {
-          
+
           result = field.get(obj);
           marshall = Marshall.create(_quercus, field.getType(), false);
           return marshall.unmarshall(env, result);
-          
+
         } catch (Throwable e) {
-          
+
           log.log(Level.FINE,  L.l(e.getMessage()), e);
           return NullValue.NULL;
-          
+
         }
-        
+
       } else if (__getField != null) {
         try {
-          
+
           result = __getField.invoke(obj, name);
-          marshall = Marshall.create(_quercus, __getField.getReturnType(), false);
+          marshall = Marshall.create(_quercus, result.getClass(), false);
           return marshall.unmarshall(env, result);
-          
+
         } catch (Throwable e) {
-          
+
           log.log(Level.FINE,  L.l(e.getMessage()), e);
           return NullValue.NULL;
-          
+
         }
-        
-      } 
+
+      }
     }
-    
+
     return NullValue.NULL;
   }
 
@@ -216,98 +251,98 @@ public class JavaClassDefinition extends AbstractQuercusClass {
         Class type;
         Marshall marshall;
         Object marshalledName, marshalledValue;
-        
+
         type = __set.getParameterTypes()[0];
         marshall = Marshall.create(_quercus, type, false);
         marshalledName = marshall.marshall(env, value,type);
-        
+
         type = __set.getParameterTypes()[1];
         marshall = Marshall.create(_quercus, type, false);
         marshalledValue = marshall.marshall(env, value, type);
-        
+
         __set.invoke(obj, marshalledName, marshalledValue);
-        
+
         return value;
-        
+
       } catch (Throwable e) {
-        
+
         log.log(Level.FINE,  L.l(e.getMessage()), e);
         return NullValue.NULL;
-        
+
       }
     }
-    
+
     return NullValue.NULL;
   }
-  
+
   public Value putField(Env env,
                         Object obj,
                         String name,
                         Value value)
   {
     JavaMethod setter = _setMap.get(name);
-    
+
    /* if (setter == null) {
       
-      log.log(Level.FINE,"'" + name + "' is an unknown field.");
-      return NullValue.NULL;*/
-      
+  log.log(Level.FINE,"'" + name + "' is an unknown field.");
+  return NullValue.NULL;*/
+
     if (setter != null) {
-      
+
       try {
-        
+
         return setter.eval(env, obj, value);
-        
+
       } catch (Throwable e) {
-        
+
         log.log(Level.FINE,  L.l(e.getMessage()), e);
         return NullValue.NULL;
-        
+
       }
-      
+
     } else {
-      
+
       Field field = _fieldMap.get(name);
       if (field != null) {
-        
+
         try {
-          
+
           Class type = field.getType();
           Marshall marshall = Marshall.create(_quercus, type, false);
           Object marshalledValue = marshall.marshall(env, value, type);
           field.set(obj, marshalledValue);
-          
+
           return value;
-          
+
         } catch (Throwable e) {
           log.log(Level.FINE,  L.l(e.getMessage()), e);
           return NullValue.NULL;
         }
-        
+
       } else if (__setField != null) {
-        
+
         try {
-          
+
           Class type = __setField.getParameterTypes()[1];
           Marshall marshall = Marshall.create(_quercus, type, false);
           Object marshalledValue = marshall.marshall(env, value, type);
-          __setField.invoke(obj, name, marshalledValue);
-          
+          __setField.invoke(obj, env, name, marshalledValue);
+
           return value;
-          
+
         } catch (Throwable e) {
-          
+
           log.log(Level.FINE,  L.l(e.getMessage()), e);
           return NullValue.NULL;
-          
+
         }
       }
     }
-    
+
     return NullValue.NULL;
-    
+
   }
-  
+
   /**
    * Returns the marshall instance.
    */
@@ -520,66 +555,66 @@ public class JavaClassDefinition extends AbstractQuercusClass {
   {
     if (type == null || type.equals(Object.class))
       return;
-    
+
     if (! Modifier.isPublic(type.getModifiers()))
       return;
-    
+
     // Introspect getXXX and setXXX
     // also register whether __get, __getField, __set, __setField exists
     Method[] methods = type.getMethods();
-    
-    for (Method method : methods) {     
-      
+
+    for (Method method : methods) {
+
       if (Modifier.isStatic(method.getModifiers()))
         continue;
-      
-      String methodName = method.getName();    
+
+      String methodName = method.getName();
       int length = methodName.length();
-      
-      if (length > 3) {        
+
+      if (length > 3) {
         String prefix = methodName.substring(0, 3);
-        
+
         if ("get".equals(prefix)) {
-          
+
           _getMap.put(javaToPhpConvert(methodName.substring(3,length)), method);
-          
+
         } else if ("set".equals(prefix)) {
-          
+
           JavaMethod javaMethod = new JavaMethod(quercus, method);
           _setMap.put(javaToPhpConvert(methodName.substring(3, length)), javaMethod);
-          
+
         } else if ("__get".equals(methodName)) {
-          
+
           __get = method;
-          
+
         } else if ("__getField".equals(methodName)) {
-          
+
           __getField = method;
-          
+
         } else if ("__set".equals(methodName)) {
-          
+
           __set = method;
-          
+
         } else if ("__setField".equals(methodName)) {
-          
+
           __setField = method;
-          
+
         }
       }
     }
-    
+
     // Introspect public non-static fields
     Field[] fields = type.getFields();
-    
+
     for (Field field : fields) {
-      
+
       if (Modifier.isStatic(field.getModifiers()))
         continue;
-      
+
       _fieldMap.put(field.getName(), field);
     }
-    
-    
+
+
    // introspectFields(quercus, type.getSuperclass());
   }
 
@@ -594,22 +629,22 @@ public class JavaClassDefinition extends AbstractQuercusClass {
     if (s.length() == 1) {
       return new String(new char[] {Character.toLowerCase(s.charAt(0))});
     }
-    
+
     if (Character.isUpperCase(s.charAt(1)))
       return s;
     else {
       StringBuilder sb = new StringBuilder();
       sb.append(Character.toLowerCase(s.charAt(0)));
-      
+
       int length = s.length();
       for (int i = 1; i < length; i++) {
         sb.append(s.charAt(i));
       }
-      
+
       return sb.toString();
     }
   }
-  
+
   /**
    * Introspects the Java class.
    */
@@ -674,12 +709,31 @@ public class JavaClassDefinition extends AbstractQuercusClass {
       else if (! Modifier.isPublic(method.getModifiers()))
         continue;
 
-      JavaMethod javaMethod = new JavaMethod(quercus, method);
-
-      _functionMap.put(method.getName(), javaMethod);
+      if ("printRImpl".equals(method.getName())) {
+        _printRImpl = method;
+      } else {
+        JavaMethod javaMethod = new JavaMethod(quercus, method);
+  
+        _functionMap.put(method.getName(), javaMethod);
+      }
     }
 
     introspectMethods(quercus, type.getSuperclass());
+  }
+
+  public void printRImpl(Env env,
+                         Object obj,
+                         WriteStream out,
+                         int depth,
+                         IdentityHashMap<Value, String> valueSet)
+    throws IOException, Throwable
+  {
+    
+    if (_printRImpl == null) {
+      env.error("need to implement printRImpl(Env, WriteStream, int, IdentityHashMap<Value, String> in order to use print_r");
+    }
+    
+    _printRImpl.invoke(obj, env, out, depth, valueSet);
   }
 }
 

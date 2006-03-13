@@ -30,6 +30,9 @@
 package com.caucho.quercus.env;
 
 import com.caucho.quercus.expr.Expr;
+import com.caucho.vfs.WriteStream;
+
+import java.util.IdentityHashMap;
 
 /**
  * Represents a PHP java value.
@@ -40,7 +43,7 @@ public class JavaValue extends ResourceValue {
   private final Object _object;
 
   private final Env _env;
-  
+
   public JavaValue(Env env, Object object, JavaClassDefinition def)
   {
     _env = env;
@@ -49,17 +52,27 @@ public class JavaValue extends ResourceValue {
   }
 
   @Override
-  public Value get(Value name)
+    protected void printRImpl(Env env,
+                              WriteStream out,
+                              int depth,
+                              IdentityHashMap<Value, String> valueSet)
+    throws Throwable
   {
-    return _classDef.get(name, _object);
+    _classDef.printRImpl(env, _object, out, depth, valueSet);
   }
   
+  @Override
+  public Value get(Value name)
+  {
+    return _classDef.get(_env, _object, name);
+  }
+
   @Override
   public Value put(Value index, Value value)
   {
     return _classDef.put(_env, _object, index, value);
   }
-  
+
   @Override
   public Value getField(String name)
   {
@@ -171,7 +184,7 @@ public class JavaValue extends ResourceValue {
    * Evaluates a method.
    */
   public Value evalMethod(Env env, String methodName,
-			  Value a1, Value a2, Value a3)
+                          Value a1, Value a2, Value a3)
     throws Throwable
   {
     return _classDef.evalMethod(env, _object, methodName, a1, a2, a3);
@@ -181,7 +194,7 @@ public class JavaValue extends ResourceValue {
    * Evaluates a method.
    */
   public Value evalMethod(Env env, String methodName,
-			  Value a1, Value a2, Value a3, Value a4)
+                          Value a1, Value a2, Value a3, Value a4)
     throws Throwable
   {
     return _classDef.evalMethod(env, _object, methodName, a1, a2, a3, a4);
@@ -191,7 +204,7 @@ public class JavaValue extends ResourceValue {
    * Evaluates a method.
    */
   public Value evalMethod(Env env, String methodName,
-			  Value a1, Value a2, Value a3, Value a4, Value a5)
+                          Value a1, Value a2, Value a3, Value a4, Value a5)
     throws Throwable
   {
     return _classDef.evalMethod(env, _object, methodName, a1, a2, a3, a4, a5);
@@ -212,7 +225,7 @@ public class JavaValue extends ResourceValue {
   {
     String result = String.valueOf(_object);
     int endOfClassName = result.indexOf("@");
-    
+
     if (endOfClassName > 0)
       return result.substring(0,endOfClassName);
     else

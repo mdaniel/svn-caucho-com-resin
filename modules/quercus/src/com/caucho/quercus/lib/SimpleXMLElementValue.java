@@ -37,7 +37,6 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-import org.w3c.dom.Text;
 import org.xml.sax.InputSource;
 
 import javax.xml.xpath.XPath;
@@ -56,8 +55,9 @@ import java.util.Set;
  * SimpleXMLElement object oriented API facade
  */
 
-public class SimpleXMLElementValue extends Value {
+public class SimpleXMLElementValue {
 
+  private Env _env;
   private Document _document;
   private Element _element;
 
@@ -72,9 +72,11 @@ public class SimpleXMLElementValue extends Value {
    * @param document
    * @param element
    */
-  public SimpleXMLElementValue(Document document,
+  public SimpleXMLElementValue(Env env,
+                               Document document,
                                Element element)
   {
+    _env = env;
     _document = document;
     _element = element;
   }
@@ -118,8 +120,14 @@ public class SimpleXMLElementValue extends Value {
     return _attributes;
   }
 
-  @Override
-  protected void printRImpl(Env env,
+  protected void printDepth(WriteStream out, int depth)
+    throws IOException
+  {
+    for (int i = 0; i < depth; i++)
+      out.print(' ');
+  }
+  
+  public void printRImpl(Env env,
                          WriteStream out,
                          int depth,
                          IdentityHashMap<Value, String> valueSet)
@@ -244,7 +252,7 @@ public class SimpleXMLElementValue extends Value {
           _childMap.put(childTagName, childArray);
         }
   
-        childArray.put(new SimpleXMLElementValue(_document, (Element) child));
+        childArray.put(_env.wrapJava(new SimpleXMLElementValue(_env, _document, (Element) child)));
       }
   
       // Iterate over _childMap and replace all entries with only one
@@ -279,7 +287,7 @@ public class SimpleXMLElementValue extends Value {
       if (child.getNodeType() == Node.TEXT_NODE)
         continue;
 
-      childArray.put(new SimpleXMLElementValue(_document, (Element) child));
+      childArray.put(_env.wrapJava(new SimpleXMLElementValue(_env, _document, (Element) child)));
     }
 
     if (childArray.getSize() > 0)
@@ -293,7 +301,7 @@ public class SimpleXMLElementValue extends Value {
    * @param name
    * @return ArrayValue, SimpleXMLElement or null
    */
-  public Value getField(String name)
+  public Value __getField(String name)
   {
     Value result = null;
     
@@ -311,9 +319,9 @@ public class SimpleXMLElementValue extends Value {
    * @param name
    * @return StringValue or null
    */
-  public Value get(Value name)
+  public Value __get(Value name)
   {
-    Value result = null;
+    Value result = NullValue.NULL;
     
     // First check to see if there are attributes
     // If so and name is an attribute,
@@ -340,7 +348,7 @@ public class SimpleXMLElementValue extends Value {
 
     return "SimpleXMLElement Object";
   }
-
+/*
   public Value evalMethod(Env env, String methodName)
     throws Throwable
   {
@@ -357,7 +365,7 @@ public class SimpleXMLElementValue extends Value {
 
   /**
    * Evaluates a method with 1 arg.
-   */
+   * /
   public Value evalMethod(Env env, String methodName, Value a0)
     throws Throwable
   {
@@ -367,7 +375,7 @@ public class SimpleXMLElementValue extends Value {
 
     return super.evalMethod(env, methodName, a0);
   }
-
+*/
 
   public Element getElement()
   {
@@ -388,9 +396,42 @@ public class SimpleXMLElementValue extends Value {
    * Both are valid
    * 
    */
-  @Override
-  public Value putField(Env env, String name, Value value)
+
+  public Value __setField(Env env, String name, String value)
+    throws Throwable
   { 
+    // find Node name
+    // $xml->foo = "bar"; (NOT $xml["foo"] = "bar";)
+    NodeList children = _element.getChildNodes();
+    int length = children.getLength();
+    
+    if (length == 0)
+      return NullValue.NULL;
+    
+    // loop through all children.  If there is more than one
+    // env.warning
+    int indexOfFoundChild = -1;
+    for(int i = 0; i < length; i++) {
+      if (name.equals(children.item(i).getNodeName())) {
+        if (indexOfFoundChild != -1) {
+          env.warning("Cannot assign to an array of nodes (duplicate subnodes or attr detected)");
+          return NullValue.NULL;
+        }
+        indexOfFoundChild = i;
+      }
+    }
+    
+    if (indexOfFoundChild != -1) {
+      Node child = children.item(indexOfFoundChild);
+      
+      while (child.hasChildNodes())
+        child.removeChild(child.getFirstChild());
+      
+      child.appendChild(_document.createTextNode(value));
+    }
+    
+    return NullValue.NULL;
+    /*
     // always recreated _childMap
     fillChildMap();
     
@@ -413,8 +454,8 @@ public class SimpleXMLElementValue extends Value {
          *  $foo = simplexml_load_string('<parent><child>bar</child></parent>');
          * 
          * So remove all children first then add text node; 
-         */
-        Element element = ((SimpleXMLElementValue) result).getElement();
+         * /
+        Element element = result.evalMethod(env, "getElement");
         while (element.hasChildNodes()) {
           element.removeChild(element.getFirstChild());
         }
@@ -427,7 +468,7 @@ public class SimpleXMLElementValue extends Value {
       }
     }
     
-    return NullValue.NULL;
+    return NullValue.NULL;*/
   }
 
   /**
@@ -500,7 +541,7 @@ public class SimpleXMLElementValue extends Value {
         sb.append(child.getNodeValue());
         continue;
       }
-      SimpleXMLElementValue simple = new SimpleXMLElementValue(_document, (Element) child);
+      SimpleXMLElementValue simple = new SimpleXMLElementValue(_env, _document, (Element) child);
       sb.append(simple.generateXML());
     }
 
@@ -534,7 +575,7 @@ public class SimpleXMLElementValue extends Value {
     // There are matching nodes
     Value result = new ArrayValueImpl();
     for (int i = 0; i < nodeLength; i++) {
-      result.put(new SimpleXMLElementValue(_document, (Element) nodes.item(i)));
+      result.put(_env.wrapJava(new SimpleXMLElementValue(_env, _document, (Element) nodes.item(i))));
     }
 
     return result;
