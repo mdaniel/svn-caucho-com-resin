@@ -52,13 +52,25 @@ public class JavaValue extends ResourceValue {
   }
 
   @Override
-    protected void printRImpl(Env env,
-                              WriteStream out,
-                              int depth,
-                              IdentityHashMap<Value, String> valueSet)
+  protected void printRImpl(Env env,
+                            WriteStream out,
+                            int depth,
+                            IdentityHashMap<Value, String> valueSet)
     throws Throwable
   {
-    _classDef.printRImpl(env, _object, out, depth, valueSet);
+    if(!_classDef.printRImpl(env, _object, out, depth, valueSet))
+      super.printRImpl(env, out, depth, valueSet);
+  }
+  
+  @Override
+  protected void varDumpImpl(Env env,
+                            WriteStream out,
+                            int depth,
+                            IdentityHashMap<Value, String> valueSet)
+    throws Throwable
+  {
+    if (!_classDef.varDumpImpl(env, _object, out, depth, valueSet))
+      super.varDumpImpl(env, out, depth, valueSet);
   }
   
   @Override

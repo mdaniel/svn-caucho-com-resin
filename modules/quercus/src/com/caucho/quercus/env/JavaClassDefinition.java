@@ -80,18 +80,22 @@ public class JavaClassDefinition extends AbstractQuercusClass {
     = new HashMap<String, FieldMarshallPair> ();
 
   private Method __get = null;
+  private Marshall __getReturn = null;
+  
   private Method __getField = null;
+  private Marshall __getFieldReturn = null;
   
   private Method __set = null;
   private Marshall __setName = null;
   private Marshall __setValue = null;
   
   private Method __setField = null;
-  private Marshall __setFieldName = null;
+  //private Marshall __setFieldName = null;
   private Marshall __setFieldValue = null;
   
   private Method _printRImpl = null;
-
+  private Method _varDumpImpl = null;
+  
   private JavaConstructor _cons;
 
   private Method _iterator;
@@ -126,41 +130,11 @@ public class JavaClassDefinition extends AbstractQuercusClass {
    */
   public Value get(Env env, Object obj, Value name)
   {
- /* Object result;
-
-    if (obj instanceof Map) {
-      Object index;
-      // Marshall the index
-      if (name instanceof LongValue) {
-        index = name.toInt();
-      } else if (name instanceof StringValueImpl) {
-        index = name.toString();
-      } else if (name instanceof JavaValue) {
-        index = name.toJavaObject();
-      } else {
-        //XXX: need to figure out what we should do if name is not 
-        //one of the above
-        index = name.toString();
-      }
-
-      result = ((Map) obj).get(index);
-      if (result != null)
-        return env.wrapJava(result);
-    }
-
-    if (obj instanceof List) {
-      int index = name.toInt();
-      result = ((List) obj).get(index);
-      if (result != null)
-        return env.wrapJava(result);
-    }
-    */
     if (__get != null) {
       try {
        //__get needs to handle a Value $foo[5] vs. $foo['bar']
         Object result = __get.invoke(obj, name);
-        Marshall marshall = Marshall.create(_quercus, __get.getReturnType(), false);
-        return marshall.unmarshall(null, result);
+        return __getReturn.unmarshall(null, result);
         
       } catch (Throwable e) {
         log.log(Level.FINE,  L.l(e.getMessage()), e);
@@ -179,14 +153,13 @@ public class JavaClassDefinition extends AbstractQuercusClass {
   public Value getField(Env env, Object obj, String name)
   {
     Object result;
-    Marshall marshall;
+    //Marshall marshall;
 
     MethodMarshallPair methodPair = _getMap.get(name);
 
     if (methodPair != null) {
       try {
         result = methodPair._method.invoke(obj);
-        //marshall = Marshall.create(_quercus, getter.getReturnType(), false);
         return methodPair._marshall.unmarshall(env, result);
 
       } catch (Throwable e) {
@@ -200,7 +173,6 @@ public class JavaClassDefinition extends AbstractQuercusClass {
       if (fieldPair != null) {
         try {
           result = fieldPair._field.get(obj);
-          //marshall = fieldPair._marshall.create(_quercus, field.getType(), false);
           return fieldPair._marshall.unmarshall(env, result);
 
         } catch (Throwable e) {
@@ -212,8 +184,7 @@ public class JavaClassDefinition extends AbstractQuercusClass {
       } else if (__getField != null) {
         try {
           result = __getField.invoke(obj, name);
-          marshall = Marshall.create(_quercus, result.getClass(), false);
-          return marshall.unmarshall(env, result);
+          return __getFieldReturn.unmarshall(env, result);
 
         } catch (Throwable e) {
           log.log(Level.FINE,  L.l(e.getMessage()), e);
@@ -563,9 +534,11 @@ public class JavaClassDefinition extends AbstractQuercusClass {
 
         } else if ("__get".equals(methodName)) {
           __get = method;
+          __getReturn = Marshall.create(_quercus, __get.getReturnType(), false);
 
         } else if ("__getField".equals(methodName)) {
           __getField = method;
+          __getFieldReturn = Marshall.create(_quercus, __getField.getReturnType(), false);
 
         } else if ("__set".equals(methodName)) {
           __set = method;
@@ -574,7 +547,7 @@ public class JavaClassDefinition extends AbstractQuercusClass {
 
         } else if ("__setField".equals(methodName)) {
           __setField = method;
-          __setFieldName = Marshall.create(_quercus, __setField.getParameterTypes()[0], false);
+          //__setFieldName = Marshall.create(_quercus, __setField.getParameterTypes()[0], false);
           __setFieldValue = Marshall.create(_quercus, __setField.getParameterTypes()[1], false);
 
         }
@@ -690,7 +663,9 @@ public class JavaClassDefinition extends AbstractQuercusClass {
 
       if ("printRImpl".equals(method.getName())) {
         _printRImpl = method;
-      } else {
+      } else if ("varDumpImpl".equals(method.getName())) {
+        _varDumpImpl = method;
+      }else {
         JavaMethod javaMethod = new JavaMethod(quercus, method);
   
         _functionMap.put(method.getName(), javaMethod);
@@ -700,19 +675,48 @@ public class JavaClassDefinition extends AbstractQuercusClass {
     introspectMethods(quercus, type.getSuperclass());
   }
 
-  public void printRImpl(Env env,
-                         Object obj,
-                         WriteStream out,
-                         int depth,
-                         IdentityHashMap<Value, String> valueSet)
+  /**
+   * 
+   * @param env
+   * @param obj
+   * @param out
+   * @param depth
+   * @param valueSet
+   * @return false if printRImpl not implemented
+   * @throws IOException
+   * @throws Throwable
+   */
+  public boolean printRImpl(Env env,
+                            Object obj,
+                            WriteStream out,
+                            int depth,
+                            IdentityHashMap<Value, String> valueSet)
     throws IOException, Throwable
   {
     
     if (_printRImpl == null) {
-      env.error("need to implement printRImpl(Env, WriteStream, int, IdentityHashMap<Value, String> in order to use print_r");
+      return false;
+      //env.error("need to implement printRImpl(Env, WriteStream, int, IdentityHashMap<Value, String> in order to use print_r");
     }
     
     _printRImpl.invoke(obj, env, out, depth, valueSet);
+    return true;
+  }
+  
+  public boolean varDumpImpl(Env env,
+                             Object obj,
+                             WriteStream out,
+                             int depth,
+                             IdentityHashMap<Value, String> valueSet)
+    throws IOException, Throwable
+  {
+    if (_varDumpImpl == null) {
+      return false;
+      //env.error("need to implement varDumpImpl(Env, WriteStream, int, IdentityHashMap<Value, String> in order to use var_dump");
+    }
+    
+    _varDumpImpl.invoke(obj, env, out, depth, valueSet);
+    return true;
   }
   
   private class MethodMarshallPair {

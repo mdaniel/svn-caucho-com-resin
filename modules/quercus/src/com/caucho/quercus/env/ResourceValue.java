@@ -49,11 +49,22 @@ public class ResourceValue extends Value {
     return "ResourceValue[]";
   }
 
-  public void varDumpImpl(Env env,
-                          WriteStream out,
-                          int depth,
-                          IdentityHashMap<Value, String> valueSet)
+  @Override
+  protected void varDumpImpl(Env env,
+                             WriteStream out,
+                             int depth,
+                             IdentityHashMap<Value, String> valueSet)
     throws Throwable
+  {
+    out.print("resource(" + toString(env) + ")");
+  }
+  
+  @Override
+  protected void printRImpl(Env env,
+                            WriteStream out,
+                            int depth,
+                            IdentityHashMap<Value, String> valueSet)
+  throws Throwable
   {
     out.print("resource(" + toString(env) + ")");
   }
