@@ -68,21 +68,28 @@ public class JavaClassDefinition extends AbstractQuercusClass {
   private final HashMap<String, JavaMethod> _functionMap
     = new HashMap<String, JavaMethod>();
 
-  private final HashMap<String, Method> _getMap
-    = new HashMap<String, Method>();
+  private final HashMap<String, MethodMarshallPair> _getMap
+    = new HashMap<String, MethodMarshallPair>();
 
   private final HashMap<String, JavaMethod> _setMap
     = new HashMap<String, JavaMethod>();
 
   // _fieldMap stores all public non-static fields
   // used by getField and setField
-  private final HashMap<String, Field> _fieldMap
-    = new HashMap<String, Field> ();
+  private final HashMap<String, FieldMarshallPair> _fieldMap
+    = new HashMap<String, FieldMarshallPair> ();
 
   private Method __get = null;
   private Method __getField = null;
+  
   private Method __set = null;
+  private Marshall __setName = null;
+  private Marshall __setValue = null;
+  
   private Method __setField = null;
+  private Marshall __setFieldName = null;
+  private Marshall __setFieldValue = null;
+  
   private Method _printRImpl = null;
 
   private JavaConstructor _cons;
@@ -149,7 +156,6 @@ public class JavaClassDefinition extends AbstractQuercusClass {
     }
     */
     if (__get != null) {
-
       try {
        //__get needs to handle a Value $foo[5] vs. $foo['bar']
         Object result = __get.invoke(obj, name);
@@ -157,7 +163,6 @@ public class JavaClassDefinition extends AbstractQuercusClass {
         return marshall.unmarshall(null, result);
         
       } catch (Throwable e) {
-
         log.log(Level.FINE,  L.l(e.getMessage()), e);
         return NullValue.NULL;
 
@@ -171,42 +176,34 @@ public class JavaClassDefinition extends AbstractQuercusClass {
    * @param name
    * @return Value attained through invoking getter
    */
-  public Value getField(Env env, String name, Object obj)
+  public Value getField(Env env, Object obj, String name)
   {
     Object result;
     Marshall marshall;
 
-    Method getter = _getMap.get(name);
+    MethodMarshallPair methodPair = _getMap.get(name);
 
-    if (getter != null) {
-
+    if (methodPair != null) {
       try {
-
-        result = getter.invoke(obj);
-        marshall = Marshall.create(_quercus, getter.getReturnType(), false);
-        return marshall.unmarshall(env, result);
+        result = methodPair._method.invoke(obj);
+        //marshall = Marshall.create(_quercus, getter.getReturnType(), false);
+        return methodPair._marshall.unmarshall(env, result);
 
       } catch (Throwable e) {
-
         log.log(Level.FINE, L.l(e.getMessage()), e);
         return NullValue.NULL;
 
       }
 
     } else {
-
-      Field field = _fieldMap.get(name);
-      if (field != null) {
-
-
+      FieldMarshallPair fieldPair = _fieldMap.get(name);
+      if (fieldPair != null) {
         try {
-
-          result = field.get(obj);
-          marshall = Marshall.create(_quercus, field.getType(), false);
-          return marshall.unmarshall(env, result);
+          result = fieldPair._field.get(obj);
+          //marshall = fieldPair._marshall.create(_quercus, field.getType(), false);
+          return fieldPair._marshall.unmarshall(env, result);
 
         } catch (Throwable e) {
-
           log.log(Level.FINE,  L.l(e.getMessage()), e);
           return NullValue.NULL;
 
@@ -214,13 +211,11 @@ public class JavaClassDefinition extends AbstractQuercusClass {
 
       } else if (__getField != null) {
         try {
-
           result = __getField.invoke(obj, name);
           marshall = Marshall.create(_quercus, result.getClass(), false);
           return marshall.unmarshall(env, result);
 
         } catch (Throwable e) {
-
           log.log(Level.FINE,  L.l(e.getMessage()), e);
           return NullValue.NULL;
 
@@ -248,24 +243,16 @@ public class JavaClassDefinition extends AbstractQuercusClass {
   {
     if (__set != null) {
       try {
-        Class type;
-        Marshall marshall;
-        Object marshalledName, marshalledValue;
+        // XXX: make sure expected class is never used
+        Object marshalledName = __setName.marshall(env, name, null);
 
-        type = __set.getParameterTypes()[0];
-        marshall = Marshall.create(_quercus, type, false);
-        marshalledName = marshall.marshall(env, name, type);
-
-        type = __set.getParameterTypes()[1];
-        marshall = Marshall.create(_quercus, type, false);
-        marshalledValue = marshall.marshall(env, value, type);
+        Object marshalledValue = __setValue.marshall(env, value, null);
 
         __set.invoke(obj, marshalledName, marshalledValue);
 
         return value;
 
       } catch (Throwable e) {
-
         log.log(Level.FINE,  L.l(e.getMessage()), e);
         return NullValue.NULL;
 
@@ -288,7 +275,6 @@ public class JavaClassDefinition extends AbstractQuercusClass {
   return NullValue.NULL;*/
 
     if (setter != null) {
-
       try {
 
         return setter.eval(env, obj, value);
@@ -301,16 +287,13 @@ public class JavaClassDefinition extends AbstractQuercusClass {
       }
 
     } else {
-
-      Field field = _fieldMap.get(name);
-      if (field != null) {
+      FieldMarshallPair fieldPair = _fieldMap.get(name);
+      if (fieldPair != null) {
 
         try {
-
-          Class type = field.getType();
-          Marshall marshall = Marshall.create(_quercus, type, false);
-          Object marshalledValue = marshall.marshall(env, value, type);
-          field.set(obj, marshalledValue);
+          Class type = fieldPair._field.getType();
+          Object marshalledValue = fieldPair._marshall.marshall(env, value, type);
+          fieldPair._field.set(obj, marshalledValue);
 
           return value;
 
@@ -320,18 +303,14 @@ public class JavaClassDefinition extends AbstractQuercusClass {
         }
 
       } else if (__setField != null) {
-
         try {
-
-          Class type = __setField.getParameterTypes()[1];
-          Marshall marshall = Marshall.create(_quercus, type, false);
-          Object marshalledValue = marshall.marshall(env, value, type);
+          //XXX: make sure expected Class Type is never used
+          Object marshalledValue = __setFieldValue.marshall(env, value, null);
           __setField.invoke(obj, env, name, marshalledValue);
 
           return value;
 
         } catch (Throwable e) {
-
           log.log(Level.FINE,  L.l(e.getMessage()), e);
           return NullValue.NULL;
 
@@ -358,7 +337,6 @@ public class JavaClassDefinition extends AbstractQuercusClass {
   {
     try {
       //Object obj = _type.newInstance();
-
       return new JavaValue(null, _type.newInstance(), this);
     } catch (Exception e) {
       throw new QuercusRuntimeException(e);
@@ -575,29 +553,29 @@ public class JavaClassDefinition extends AbstractQuercusClass {
         String prefix = methodName.substring(0, 3);
 
         if ("get".equals(prefix)) {
-
-          _getMap.put(javaToPhpConvert(methodName.substring(3,length)), method);
+          Marshall marshall = Marshall.create(_quercus, method.getReturnType(), false);
+          MethodMarshallPair pair = new MethodMarshallPair(method, marshall);
+          _getMap.put(javaToPhpConvert(methodName.substring(3,length)), pair);
 
         } else if ("set".equals(prefix)) {
-
           JavaMethod javaMethod = new JavaMethod(quercus, method);
           _setMap.put(javaToPhpConvert(methodName.substring(3, length)), javaMethod);
 
         } else if ("__get".equals(methodName)) {
-
           __get = method;
 
         } else if ("__getField".equals(methodName)) {
-
           __getField = method;
 
         } else if ("__set".equals(methodName)) {
-
           __set = method;
+          __setName = Marshall.create(_quercus, __set.getParameterTypes()[0]);
+          __setValue = Marshall.create(_quercus, __set.getParameterTypes()[1]);
 
         } else if ("__setField".equals(methodName)) {
-
           __setField = method;
+          __setFieldName = Marshall.create(_quercus, __setField.getParameterTypes()[0], false);
+          __setFieldValue = Marshall.create(_quercus, __setField.getParameterTypes()[1], false);
 
         }
       }
@@ -610,8 +588,9 @@ public class JavaClassDefinition extends AbstractQuercusClass {
 
       if (Modifier.isStatic(field.getModifiers()))
         continue;
-
-      _fieldMap.put(field.getName(), field);
+      
+      Marshall marshall = Marshall.create(_quercus,field.getType(), false);
+      _fieldMap.put(field.getName(), new FieldMarshallPair(field, marshall));
     }
 
 
@@ -734,6 +713,30 @@ public class JavaClassDefinition extends AbstractQuercusClass {
     }
     
     _printRImpl.invoke(obj, env, out, depth, valueSet);
+  }
+  
+  private class MethodMarshallPair {
+    public Method _method;
+    public Marshall _marshall;
+    
+    public MethodMarshallPair(Method method,
+                              Marshall marshall)
+    {
+      _method = method;
+      _marshall = marshall;
+    }
+  }
+  
+  private class FieldMarshallPair {
+    public Field _field;
+    public Marshall _marshall;
+    
+    public FieldMarshallPair(Field field,
+                             Marshall marshall)
+    {
+      _field = field;
+      _marshall = marshall;
+    }
   }
 }
 

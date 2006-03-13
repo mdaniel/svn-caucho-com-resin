@@ -76,7 +76,7 @@ public class JavaValue extends ResourceValue {
   @Override
   public Value getField(String name)
   {
-    return _classDef.getField(_env, name, _object);
+    return _classDef.getField(_env, _object, name);
   }
 
   @Override
