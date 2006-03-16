@@ -72,7 +72,7 @@ public class ArrayType extends OpenType {
   /**
    * Returns the composite element type.
    */
-  public OpenType getElementType()
+  public OpenType getElementOpenType()
   {
     return this.elementType;
   }
@@ -117,5 +117,10 @@ public class ArrayType extends OpenType {
   public int hashCode()
   {
     return this.dimension + this.elementType.hashCode();
+  }
+
+  public String toString()
+  {
+    return "ArrayType[]";
   }
 }

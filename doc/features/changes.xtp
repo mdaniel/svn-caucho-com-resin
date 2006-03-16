@@ -4,6 +4,7 @@
 
 <s2 title='3.0.snap - Mar 17, 2006'>
 <ul>
+<li>JMX: ArrayType.getElementOpenType was not properly defined (#994, rep by duchene)
 <li>jvmti code needs to release jvmti instance 
 <li>welcome-file-list with unknown servlet causes nullpointer (#976, rep by marcelloh)
 <li>Refactored Amber to use javax.persistence (#943, rep by koreth)
