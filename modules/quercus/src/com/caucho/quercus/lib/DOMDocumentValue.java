@@ -33,7 +33,6 @@ import com.caucho.quercus.env.BooleanValue;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.LongValue;
 import com.caucho.quercus.env.NullValue;
-import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.StringValueImpl;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.module.Optional;
@@ -82,7 +81,7 @@ public class DOMDocumentValue extends DOMNodeValue {
   public DOMDocumentValue(String version)
   {
     super(createDocument());
-    ((Document) _node).setXmlVersion(version);
+    //((Document) _node).setXmlVersion(version);
   }
 
   public DOMDocumentValue(String version,
@@ -90,7 +89,7 @@ public class DOMDocumentValue extends DOMNodeValue {
   {
     super(createDocument());
     _encoding = encoding; //Used when writing XML to a file
-    ((Document) _node).setXmlVersion(version);
+    //((Document) _node).setXmlVersion(version);
   }
 
   public DOMDocumentValue(Document document)
@@ -635,7 +634,7 @@ public class DOMDocumentValue extends DOMNodeValue {
     try {
       
       bw = new BufferedWriter (new FileWriter(new File(fileName.toString())));
-      SimpleXMLElementValue simpleXML = new SimpleXMLElementValue(((Document) _node), ((Document) _node).getDocumentElement());
+      SimpleXMLElement simpleXML = new SimpleXMLElement(env, ((Document) _node), ((Document) _node).getDocumentElement());
       String asXML = simpleXML.asXML().toString();
       bw.write(asXML);
       result = new LongValue(asXML.length());
@@ -666,19 +665,19 @@ public class DOMDocumentValue extends DOMNodeValue {
     if (_node == null)
       return BooleanValue.FALSE;
     
-    SimpleXMLElementValue simpleXML;
+    SimpleXMLElement simpleXML;
   
     if ((node != null) && !(node instanceof DOMNodeValue))
       return BooleanValue.FALSE;
     
     if (node == null) {
       
-      simpleXML = new SimpleXMLElementValue(((Document) _node), ((Document) _node).getDocumentElement());   
+      simpleXML = new SimpleXMLElement(null, ((Document) _node), ((Document) _node).getDocumentElement());   
       return new StringValueImpl(simpleXML.asXML().toString());
       
     } else {
       
-      simpleXML = new SimpleXMLElementValue(((Document) _node), (Element) ((DOMNodeValue) node).getNode());
+      simpleXML = new SimpleXMLElement(null, ((Document) _node), (Element) ((DOMNodeValue) node).getNode());
       return new StringValueImpl(simpleXML.generateXML().toString());
     }
   }
@@ -706,6 +705,8 @@ public class DOMDocumentValue extends DOMNodeValue {
       return normalize();
     else if ("saveHTML".equals(methodName))
       return saveHTML();
+    else if ("saveXML".equals(methodName))
+      return saveXML(null, null);
     
     return super.evalMethod(env, methodName);
   }
@@ -738,6 +739,8 @@ public class DOMDocumentValue extends DOMNodeValue {
       return relaxNGValidateSource(a0);
     else if ("saveHTMLFile".equals(methodName))
       return saveHTMLFile(env, a0);
+    else if ("saveXML".equals(methodName))
+      return saveXML(a0, null);
     else if ("schemaValidate".equals(methodName))
       return schemaValidate(a0);
     else if ("schemaValidateSource".equals(methodName))
