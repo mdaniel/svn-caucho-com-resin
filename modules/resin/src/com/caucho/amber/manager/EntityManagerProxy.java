@@ -86,10 +86,12 @@ public class EntityManagerProxy implements EntityManager {
   /**
    * Find by the primary key.
    */
+  /*
   public Object find(String entityName, Object primaryKey)
   {
     return getCurrent().find(entityName, primaryKey);
   }
+  */
   
   /**
    * Find by the primary key.
