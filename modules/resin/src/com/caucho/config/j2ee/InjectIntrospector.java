@@ -117,7 +117,7 @@ public class InjectIntrospector {
       return;
 
     introspectImpl(initList, type.getSuperclass());
-    
+
     for (Field field : type.getDeclaredFields()) {
       configure(initList, field, field.getName(), field.getType());
     }

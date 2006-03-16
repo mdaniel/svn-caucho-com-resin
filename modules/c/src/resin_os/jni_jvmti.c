@@ -96,6 +96,8 @@ jvmti_can_reload_native(JNIEnv *env, jobject obj)
 
   (*jvmti)->RelinquishCapabilities(jvmti, &set_capabilities);
 
+  (*jvmti)->DisposeEnvironment(jvmti);
+
   return capabilities.can_redefine_classes;
 }
 
@@ -142,6 +144,8 @@ jvmti_reload_native(JNIEnv *env,
   }
   
   (*jvmti)->RelinquishCapabilities(jvmti, &capabilities);
+  
+  (*jvmti)->DisposeEnvironment(jvmti);
   
   return res;
 }

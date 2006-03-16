@@ -320,7 +320,8 @@ public class ServletMapper {
 
     ServletConfigImpl config = _servletManager.getServlet(servletName);
 
-    invocation.setSecurityRoleMap(config.getRoleMap());
+    if (config != null)
+      invocation.setSecurityRoleMap(config.getRoleMap());
 
     FilterChain chain = _servletManager.createServletChain(servletName);
 

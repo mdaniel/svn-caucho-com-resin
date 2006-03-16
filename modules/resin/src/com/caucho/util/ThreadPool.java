@@ -91,6 +91,7 @@ public class ThreadPool implements Runnable {
 
   private ThreadPool _prev;
   private ThreadPool _next;
+  private boolean _isIdle;
 
   private long _threadResetCount;
   
@@ -310,6 +311,8 @@ public class ThreadPool implements Runnable {
 	    _idleHead = poolItem._next;
 
 	    poolItem._next = null;
+	    poolItem._prev = null;
+	    poolItem._isIdle = false;
 	    if (_idleHead != null)
 	      _idleHead._prev = null;
 
@@ -462,6 +465,7 @@ public class ThreadPool implements Runnable {
 	  synchronized (_idleLock) {
 	    _next = _idleHead;
 	    _prev = null;
+	    _isIdle = true;
 
 	    if (_idleHead != null)
 	      _idleHead._prev = this;
@@ -509,15 +513,23 @@ public class ThreadPool implements Runnable {
 	}
 	else {
 	  boolean isDead = false;
+	  boolean isReset = false;
 
 	  // check to see if we're over the spare thread limit
 	  synchronized (_idleLock) {
-	    if (_minSpareThreads + SPARE_GAP < _idleCount ||
-		_resetCount != _threadResetCount) {
+	    if (_isIdle &&
+		(_minSpareThreads + SPARE_GAP < _idleCount ||
+		 _resetCount != _threadResetCount)) {
 	      isDead = true;
+
+	      isReset = _resetCount != _threadResetCount;
 	      
 	      ThreadPool next = _next;
 	      ThreadPool prev = _prev;
+
+	      _next = null;
+	      _prev = null;
+	      _isIdle = false;
 
 	      if (next != null)
 		next._prev = prev;
@@ -531,6 +543,12 @@ public class ThreadPool implements Runnable {
 	    }
 	  }
 
+	  if (isReset) {
+	    synchronized (_launcher) {
+	      _launcher.notify();
+	    }
+	  }
+	  
 	  if (isDead)
 	    return;
 	}

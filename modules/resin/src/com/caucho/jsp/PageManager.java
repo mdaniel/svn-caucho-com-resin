@@ -218,7 +218,7 @@ abstract public class PageManager {
 
     synchronized (entry) {
       Page page = entry.getPage();
-      
+
       if (page != null && ! page.cauchoIsModified())
         return page;
       else if (page != null && ! page.isDead()) {

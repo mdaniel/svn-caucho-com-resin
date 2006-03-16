@@ -30,6 +30,7 @@
 package com.caucho.log;
 
 import java.lang.ref.SoftReference;
+import java.lang.ref.WeakReference;
 
 import java.util.*;
 import java.util.logging.*;
@@ -70,13 +71,13 @@ class EnvironmentLogger extends Logger implements ClassLoaderListener {
   // The lowest level currently configured for this logger.
   private int _level = Level.OFF.intValue();
 
-  // Weak list of all the children
+  // Soft list of all the children
   private final ArrayList<SoftReference<EnvironmentLogger>> _children
     = new ArrayList<SoftReference<EnvironmentLogger>>();
   
   // Weak list of all the class loaders
-  private final ArrayList<SoftReference<ClassLoader>> _loaders
-    = new ArrayList<SoftReference<ClassLoader>>();
+  private final ArrayList<WeakReference<ClassLoader>> _loaders
+    = new ArrayList<WeakReference<ClassLoader>>();
   
   public EnvironmentLogger(String name, String resourceBundleName)
   {
@@ -117,7 +118,7 @@ class EnvironmentLogger extends Logger implements ClassLoaderListener {
 
     boolean hasLoader = false;
     for (int i = _loaders.size() - 1; i >= 0; i--) {
-      SoftReference<ClassLoader> ref = _loaders.get(i);
+      WeakReference<ClassLoader> ref = _loaders.get(i);
       ClassLoader refLoader = ref.get();
 
       if (refLoader == null)
@@ -131,7 +132,7 @@ class EnvironmentLogger extends Logger implements ClassLoaderListener {
     }
 
     if (! hasLoader) {
-      _loaders.add(new SoftReference<ClassLoader>(loader));
+      _loaders.add(new WeakReference<ClassLoader>(loader));
       addHandler(handler, loader);
       Environment.addClassLoaderListener(this, loader);
     }
@@ -191,7 +192,7 @@ class EnvironmentLogger extends Logger implements ClassLoaderListener {
 
     boolean hasLoader = false;
     for (int i = _loaders.size() - 1; i >= 0; i--) {
-      SoftReference<ClassLoader> ref = _loaders.get(i);
+      WeakReference<ClassLoader> ref = _loaders.get(i);
       ClassLoader refLoader = ref.get();
 
       if (refLoader == null)
@@ -353,7 +354,7 @@ class EnvironmentLogger extends Logger implements ClassLoaderListener {
     }
 
     for (int i = _loaders.size() - 1; i >= 0; i--) {
-      SoftReference<ClassLoader> ref = _loaders.get(i);
+      WeakReference<ClassLoader> ref = _loaders.get(i);
       ClassLoader loader = ref.get();
 
       if (loader == null)
@@ -417,7 +418,7 @@ class EnvironmentLogger extends Logger implements ClassLoaderListener {
 
     boolean hasLoader = false;
     for (int i = _loaders.size() - 1; i >= 0; i--) {
-      SoftReference<ClassLoader> ref = _loaders.get(i);
+      WeakReference<ClassLoader> ref = _loaders.get(i);
       ClassLoader refLoader = ref.get();
 
       if (refLoader == null)
@@ -427,7 +428,7 @@ class EnvironmentLogger extends Logger implements ClassLoaderListener {
         return;
     }
 
-    _loaders.add(new SoftReference<ClassLoader>(loader));
+    _loaders.add(new WeakReference<ClassLoader>(loader));
     Environment.addClassLoaderListener(this, loader);
   }
 
@@ -493,7 +494,7 @@ class EnvironmentLogger extends Logger implements ClassLoaderListener {
   {
     int i;
     for (i = _loaders.size() - 1; i >= 0; i--) {
-      SoftReference<ClassLoader> ref = _loaders.get(i);
+      WeakReference<ClassLoader> ref = _loaders.get(i);
       ClassLoader refLoader = ref.get();
 
       if (refLoader == null)

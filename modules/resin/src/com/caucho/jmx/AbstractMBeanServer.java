@@ -431,8 +431,9 @@ abstract public class AbstractMBeanServer implements MBeanServer {
 
     if (object instanceof IntrospectionMBean)
       object = ((IntrospectionMBean) object).getImplementation();
-    else if (object instanceof StandardMBean)
+    else if (object instanceof StandardMBean) {
       object = ((StandardMBean) object).getImplementation();
+    }
 
     MBeanWrapper mbean = new MBeanWrapper(context, name, object, dynMBean);
 

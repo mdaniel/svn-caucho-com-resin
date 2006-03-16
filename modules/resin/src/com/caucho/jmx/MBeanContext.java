@@ -118,7 +118,7 @@ public class MBeanContext {
     _mbeanServer = mbeanServer;
     _loader = loader;
     _delegate = delegate;
-    
+
     Environment.addClassLoaderListener(new WeakCloseListener(this), _loader);
     
     _classLoaderRepository.addClassLoader(_loader);

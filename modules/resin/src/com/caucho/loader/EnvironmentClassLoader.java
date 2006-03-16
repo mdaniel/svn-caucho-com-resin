@@ -242,7 +242,9 @@ public class EnvironmentClassLoader extends DynamicClassLoader {
       if (parent instanceof EnvironmentClassLoader) {
         EnvironmentClassLoader loader = (EnvironmentClassLoader) parent;
 
-	_stopListener = new WeakStopListener(this);
+	if (_stopListener == null)
+	  _stopListener = new WeakStopListener(this);
+	
         loader.addListener(_stopListener);
 
 	return;
@@ -456,6 +458,9 @@ public class EnvironmentClassLoader extends DynamicClassLoader {
   public void destroy()
   {
     try {
+      WeakStopListener stopListener = _stopListener;
+      _stopListener = null;
+      
       // make sure it's stopped first
       stop();
     
@@ -466,7 +471,7 @@ public class EnvironmentClassLoader extends DynamicClassLoader {
 	if (parent instanceof EnvironmentClassLoader) {
 	  EnvironmentClassLoader loader = (EnvironmentClassLoader) parent;
 
-	  loader.removeListener(_stopListener);
+	  loader.removeListener(stopListener);
 	}
       }
     } finally {

@@ -102,5 +102,10 @@ public class CloseListener implements ClassLoaderListener {
 
     return null;
   }
+
+  public String toString()
+  {
+    return "CloseListener[" + _resource + "]";
+  }
 }
 

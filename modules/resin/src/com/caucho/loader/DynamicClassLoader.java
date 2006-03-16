@@ -204,7 +204,6 @@ public class DynamicClassLoader extends java.net.URLClassLoader
     }
 
     if (System.getProperty("resin.verbose.classpath") != null) {
-
       _isVerbose = true;
 
       int depth = 0;
@@ -326,7 +325,7 @@ public class DynamicClassLoader extends java.net.URLClassLoader
     }
 
     if (loader instanceof ClassLoaderListener)
-      addListener((ClassLoaderListener) loader);
+      addListener(new WeakLoaderListener((ClassLoaderListener) loader));
   }
 
   public ArrayList<Loader> getLoaders()
@@ -582,7 +581,7 @@ public class DynamicClassLoader extends java.net.URLClassLoader
       if (_listeners == null) {
 	_listeners = new ArrayList<ClassLoaderListener>();
 	closeListener = new WeakCloseListener(this);
-	_closeListener = closeListener;
+	//_closeListener = closeListener;
       }
       listeners = _listeners;
     }
@@ -1020,7 +1019,8 @@ public class DynamicClassLoader extends java.net.URLClassLoader
       loaders.get(i).validate();
   }
 
-  public Class<?> loadClass(String name) throws ClassNotFoundException {
+  public Class<?> loadClass(String name) throws ClassNotFoundException
+  {
     // the Sun JDK implementation of ClassLoader delegates this call
     // to loadClass(name, false), but there is no guarantee that other
     // implementations do.
@@ -1082,7 +1082,6 @@ public class DynamicClassLoader extends java.net.URLClassLoader
 
       try {
 	cl = findClass(name);
-
       } catch (ClassNotFoundException e) {
         ClassLoader parent = getParent();
         if (parent != null)
@@ -1542,11 +1541,13 @@ public class DynamicClassLoader extends java.net.URLClassLoader
 	if (parent instanceof DynamicClassLoader) {
 	  DynamicClassLoader loader = (DynamicClassLoader) parent;
 
-	  loader.removeListener(_closeListener);
+	  if (_closeListener != null)
+	    loader.removeListener(_closeListener);
 	}
       }
 
-      ArrayList<ClassLoaderListener> listeners = getListeners();
+      ArrayList<ClassLoaderListener> listeners = _listeners;
+      _listeners = null;
 
       Thread thread = Thread.currentThread();
       ClassLoader oldLoader = thread.getContextClassLoader();
@@ -1578,6 +1579,7 @@ public class DynamicClassLoader extends java.net.URLClassLoader
 	}
       }
     } finally {
+      _closeListener = null;
       _listeners = null;
       _entryCache = null;
       _makeList = null;

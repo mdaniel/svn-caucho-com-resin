@@ -447,8 +447,12 @@ public class EntityIntrospector {
       columnName = "TYPE";
 
     Type columnType = null;
+    DiscriminatorType discType = DiscriminatorType.STRING;
 
-    switch ((DiscriminatorType) inheritanceAnn.get("discriminatorType")) {
+    if (discriminatorAnn != null)
+      discType = (DiscriminatorType) discriminatorAnn.get("discriminatorType");
+
+    switch (discType) {
     case STRING:
       columnType = StringType.create();
       break;
@@ -1120,7 +1124,7 @@ public class EntityIntrospector {
     for (Column keyColumn : targetType.getId().getColumns()) {
       JAnnotation joinAnn = getJoinColumn(joinColumnsAnn, keyColumn.getName());
 
-      String columnName = fieldName + '_' + keyColumn.getName();
+      String columnName = fieldName.toUpperCase() + '_' + keyColumn.getName();
       if (joinAnn != null)
 	columnName = joinAnn.getString("name");
 

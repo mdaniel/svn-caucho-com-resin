@@ -386,7 +386,7 @@ abstract public class
       configureInstanceVariables(instance);
 
       _jmxContext.put(getMBeanTypeName(), getMBeanId());
-	  
+
       Jmx.setContextProperties(_jmxContext, classLoader);
 
       try {

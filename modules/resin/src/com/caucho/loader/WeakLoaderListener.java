@@ -45,20 +45,20 @@ import com.caucho.loader.DynamicClassLoader;
 /**
  * Waits for the close event and calls a destroy() method.
  */
-public class WeakCloseListener implements ClassLoaderListener {
+public class WeakLoaderListener implements ClassLoaderListener {
   private static final L10N L = new L10N(CloseListener.class);
   private static final Logger log = Log.open(CloseListener.class);
 
-  private WeakReference<Object> _resourceRef;
+  private WeakReference<ClassLoaderListener> _listenerRef;
 
   /**
    * Creates the new close listener.
    *
    * @param resource the resource which needs closing
    */
-  public WeakCloseListener(Object resource)
+  public WeakLoaderListener(ClassLoaderListener listener)
   {
-    _resourceRef = new WeakReference<Object>(resource);
+    _listenerRef = new WeakReference<ClassLoaderListener>(listener);
   }
 
   /**
@@ -66,6 +66,10 @@ public class WeakCloseListener implements ClassLoaderListener {
    */
   public void classLoaderInit(DynamicClassLoader loader)
   {
+    ClassLoaderListener listener = _listenerRef.get();
+    
+    if (listener != null)
+      listener.classLoaderInit(loader);
   }
   
   /**
@@ -73,25 +77,10 @@ public class WeakCloseListener implements ClassLoaderListener {
    */
   public void classLoaderDestroy(DynamicClassLoader loader)
   {
-    Object resource = _resourceRef.get();
-    if (resource == null)
-      return;
+    ClassLoaderListener listener = _listenerRef.get();
     
-    Method destroy = CloseListener.getDestroyMethod(resource.getClass());
-
-    if (destroy == null)
-      return;
-    
-    try {
-      destroy.invoke(resource, (Object []) null);
-    } catch (Throwable e) {
-      log.log(Level.WARNING, e.toString(), e);
-    }
-  }
-
-  public String toString()
-  {
-    return "WeakCloseListener[" + _resourceRef.get() + "]";
+    if (listener != null)
+      listener.classLoaderDestroy(loader);
   }
 }
 
