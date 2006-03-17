@@ -31,16 +31,24 @@ package com.caucho.amber.cfg;
 
 import java.util.ArrayList;
 
+import javax.sql.DataSource;
+
 import com.caucho.amber.manager.AmberContainer;
 import com.caucho.amber.manager.AmberPersistenceUnit;
 
 import com.caucho.config.ConfigException;
+
+import com.caucho.vfs.Path;
 
 /**
  * <persistence-unit> tag in the persistence.xml
  */
 public class PersistenceUnitConfig {
   private String _name;
+  private String _provider;
+  private DataSource _jtaDataSource;
+  private DataSource _nonJtaDataSource;
+  private boolean _isExcludeUnlistedClasses;
 
   private ArrayList<String> _classList = new ArrayList<String>();
 
@@ -61,11 +69,79 @@ public class PersistenceUnitConfig {
   }
 
   /**
+   * Sets the transaction type.
+   */
+  public void setTransactionType(String type)
+  {
+  }
+
+  /**
+   * Sets the description.
+   */
+  public void setDescription(String description)
+  {
+  }
+
+  /**
+   * Sets the provider class name.
+   */
+  public void setProvider(String provider)
+  {
+    _provider = provider;
+  }
+
+  /**
+   * Sets the transactional data source.
+   */
+  public void setJtaDataSource(DataSource ds)
+  {
+    _jtaDataSource = ds;
+  }
+
+  /**
+   * Sets the non-transactional data source.
+   */
+  public void setNonJtaDataSource(DataSource ds)
+  {
+    _nonJtaDataSource = ds;
+  }
+
+  /**
+   * Sets the mapping file.
+   */
+  public void addMappingFile(Path file)
+  {
+  }
+
+  /**
+   * Sets the jars with classes.
+   */
+  public void addJarFile(Path file)
+  {
+  }
+
+  /**
    * Adds a configured class.
    */
   public void addClass(String cl)
   {
     _classList.add(cl);
+  }
+
+  /**
+   * Sets true if only listed classes should be used.
+   */
+  public void setExcludeUnlistedClasses(boolean isExclude)
+  {
+    _isExcludeUnlistedClasses = isExclude;
+  }
+
+  /**
+   * Adds the properties.
+   */
+  public PropertiesConfig createProperties()
+  {
+    return new PropertiesConfig();
   }
 
   public AmberPersistenceUnit init(AmberContainer container)
@@ -87,5 +163,22 @@ public class PersistenceUnitConfig {
   public String toString()
   {
     return "PersistenceUnitConfig[" + _name + "]";
+  }
+
+  public class PropertiesConfig {
+    public PropertyConfig createProperty()
+    {
+      return new PropertyConfig();
+    }
+  }
+
+  public class PropertyConfig {
+    public void setName(String name)
+    {
+    }
+    
+    public void setValue(String name)
+    {
+    }
   }
 }

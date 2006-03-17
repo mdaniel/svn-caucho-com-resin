@@ -1572,6 +1572,11 @@ public class Application extends ServletContextImpl
 
       _classLoader.start();
 
+      // configuration exceptions discovered by resources like
+      // the persistence manager
+      if (_configException == null)
+	_configException = Environment.getConfigException();
+
       try {
 	getSessionManager().start();
       } catch (Throwable e) {

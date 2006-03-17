@@ -569,6 +569,43 @@ public class Environment {
   }
 
   /**
+   * Sets a configuration exception.
+   */
+  public static void setConfigException(Throwable e)
+  {
+    ClassLoader loader = Thread.currentThread().getContextClassLoader();
+    
+    for (; loader != null; loader = loader.getParent()) {
+      if (loader instanceof EnvironmentClassLoader) {
+	EnvironmentClassLoader envLoader = (EnvironmentClassLoader) loader;
+
+	envLoader.setConfigException(e);
+
+	return;
+      }
+    }
+  }
+
+  /**
+   * Returns any configuration exception.
+   */
+  public static Throwable getConfigException()
+  {
+    ClassLoader loader = Thread.currentThread().getContextClassLoader();
+    
+    for (; loader != null; loader = loader.getParent()) {
+      if (loader instanceof EnvironmentClassLoader) {
+	EnvironmentClassLoader envLoader = (EnvironmentClassLoader) loader;
+
+	if (envLoader.getConfigException() != null)
+	  return envLoader.getConfigException();
+      }
+    }
+
+    return null;
+  }
+
+  /**
    * destroys the current environment.
    */
   public static void closeGlobal()

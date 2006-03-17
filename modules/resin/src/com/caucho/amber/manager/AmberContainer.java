@@ -56,6 +56,7 @@ import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
 
 import com.caucho.loader.DynamicClassLoader;
+import com.caucho.loader.Environment;
 import com.caucho.loader.EnvironmentLocal;
 import com.caucho.loader.enhancer.EnhancerManager;
 
@@ -275,8 +276,11 @@ public class AmberContainer {
    */
   public void addException(Throwable e)
   {
-    if (_exception == null)
+    if (_exception == null) {
       _exception = e;
+
+      Environment.setConfigException(e);
+    }
   }
 
   public Throwable getConfigException()

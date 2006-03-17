@@ -1564,7 +1564,12 @@ public class EntityIntrospector {
 
       AmberPersistenceUnit persistenceUnit = _entityType.getPersistenceUnit();
 
-      String targetName = oneToOneAnn.getString("targetEntity");
+      JClass targetEntity = oneToOneAnn.getClass("targetEntity");
+      String targetName = null;
+
+      if (targetEntity != null)
+	targetName = targetEntity.getName();
+      
       String mappedBy =  oneToOneAnn.getString("mappedBy");
 
       EntityType targetType = null;

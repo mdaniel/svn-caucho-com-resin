@@ -94,6 +94,8 @@ public class EnvironmentClassLoader extends DynamicClassLoader {
   
   // Returns true if the environment is stopped
   private volatile boolean _isStopped;
+
+  private Throwable _configException;
   
   /**
    * Creates a new environment class loader.
@@ -133,6 +135,23 @@ public class EnvironmentClassLoader extends DynamicClassLoader {
   public void setOwner(EnvironmentBean owner)
   {
     _owner = owner;
+  }
+
+  /**
+   * Sets the config exception.
+   */
+  public void setConfigException(Throwable e)
+  {
+    if (_configException == null)
+      _configException = e;
+  }
+
+  /**
+   * Gets the config exception.
+   */
+  public Throwable getConfigException()
+  {
+    return _configException;
   }
 
   /**
