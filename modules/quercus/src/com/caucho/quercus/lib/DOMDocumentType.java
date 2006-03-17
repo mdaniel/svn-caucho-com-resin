@@ -29,26 +29,80 @@
 
 package com.caucho.quercus.lib;
 
+import com.caucho.quercus.env.Env;
+
 import org.w3c.dom.DocumentType;
+import org.w3c.dom.Entity;
+import org.w3c.dom.NamedNodeMap;
+import org.w3c.dom.Notation;
 
-public class DOMDocumentType extends DOMNodeValue {
+public class DOMDocumentType extends DOMNode {
 
+  private Env _env;
   private DocumentType _docType;
-  //PROPERTIES
-  //@todo publicId (String)
-  //@todo systemId (String)
-  //@todo name (String)
-  //@todo entities (DOMNamedNodeMapValue)
-  //@todo notations (DOMNamedNodeMapValue)
-  //@todo internalSubset (String)
 
-  public DOMDocumentType(DocumentType docType)
+  public DOMDocumentType(Env env,
+                         DocumentType docType)
   {
+    _env = env;
     _docType = docType;
   }
-  
-  public DocumentType getDocType()
+
+  public DocumentType getNode()
   {
     return _docType;
+  }
+
+  public Env getEnv()
+  {
+    return _env;
+  }
+
+  public String getPublicId()
+  {
+    return _docType.getPublicId();
+  }
+
+  public String getSystemId()
+  {
+    return _docType.getSystemId();
+  }
+
+  public String getName()
+  {
+    return _docType.getName();
+  }
+
+  public DOMNamedNodeMap getEntities()
+  {
+    NamedNodeMap entities = _docType.getEntities();
+    int length = entities.getLength();
+
+    DOMNamedNodeMap result = new DOMNamedNodeMap(_env, entities);
+
+    for (int i = 0; i < length; i++) {
+      result.put(_env.wrapJava(new DOMEntity(_env, (Entity) entities.item(i))));
+    }
+
+    return result;
+  }
+
+  public DOMNamedNodeMap getNotations()
+  {
+    NamedNodeMap notations = _docType.getNotations();
+    int length = notations.getLength();
+
+    DOMNamedNodeMap result = new DOMNamedNodeMap(_env, notations);
+
+    for (int i = 0; i < length; i++) {
+      result.put(_env.wrapJava(new DOMNotation(_env, (Notation) notations.item(i))));
+    }
+
+    return result;
+  }
+ 
+  public String getInternalSubset()
+  {
+    return _docType.getInternalSubset();
   }
 }

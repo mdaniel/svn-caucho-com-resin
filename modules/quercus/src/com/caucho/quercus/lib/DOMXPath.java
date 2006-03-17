@@ -29,57 +29,68 @@
 
 package com.caucho.quercus.lib;
 
-import com.caucho.quercus.env.NullValue;
-import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.StringInputStream;
 import com.caucho.quercus.env.StringValueImpl;
 import com.caucho.quercus.env.Value;
+import com.caucho.quercus.module.Optional;
 
-import org.w3c.dom.NodeList;
+import org.w3c.dom.Element;
+import org.xml.sax.InputSource;
 
 import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathException;
 import javax.xml.xpath.XPathFactory;
 
 public class DOMXPath{
 
-  XPath _xpath;
-  DOMDocumentValue _DOMDocument;
+  private Env _env;
+  private XPath _xpath;
+  private DOMDocument _domDocument;
 
-  public DOMXPath(DOMDocumentValue DOMDocument)
+  public DOMXPath(Env env,
+                  DOMDocument DOMDocument)
   {
+    _env = env;
+    
     XPathFactory factory = XPathFactory.newInstance();
 
     _xpath = factory.newXPath();
-    _DOMDocument = DOMDocument;
+    _domDocument = DOMDocument;
   }
 
-  public Value evaluate(Value expression,
-                        Value contextnode)
+  public Value evaluate(String expression,
+                        @Optional DOMNode contextnode)
     throws XPathException
   {
-    return new StringValueImpl(_xpath.evaluate(expression.toString(), ((DOMNodeValue) contextnode).getNode()));
+    SimpleXMLElement simpleXML;
+    
+    //If contextnode == null, then use root element.
+    if (contextnode == null) {
+      simpleXML = new SimpleXMLElement(_env, _domDocument.getNode(), _domDocument.getNode().getDocumentElement());
+    } else {
+      simpleXML = new SimpleXMLElement(_env, _domDocument.getNode(), (Element) contextnode.getNode());
+    }
+    
+    return new StringValueImpl(_xpath.evaluate(expression, new InputSource(new StringInputStream(simpleXML.asXML().toString()))));
   }
 
-  public Value query(Value expression,
-                     Value contextnode)
+  public Value query(String expression,
+                     @Optional DOMNode contextnode)
     throws XPathException
   {
-    return new DOMNodeListValue((NodeList) _xpath.evaluate(expression.toString(),((DOMNodeValue)contextnode).getNode(), XPathConstants.NODESET));
+    throw new UnsupportedOperationException();
+    //return new DOMNodeListValue((NodeList) _xpath.evaluate(expression.toString(),((DOMNode)contextnode).getNode(), XPathConstants.NODESET));
   }
   
-  //@todo
   public Value registerNamespace(Value prefix,
                                  Value namespaceURI)
   {
     throw new UnsupportedOperationException();
   }
   
-  public Value getField(String name)
+  public DOMDocument getDocument()
   {
-    if ("document".equals(name))
-      return _DOMDocument;
-    
-    return NullValue.NULL;
+    return _domDocument;
   }
 }

@@ -30,44 +30,27 @@
 package com.caucho.quercus.lib;
 
 import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.NullValue;
-import com.caucho.quercus.env.StringValue;
-import com.caucho.quercus.env.StringValueImpl;
-import com.caucho.quercus.env.Value;
 
-import org.w3c.dom.ProcessingInstruction;
+import org.w3c.dom.CDATASection;
 
-public class DOMProcessingInstructionValue extends DOMNodeValue {
+public class DOMCDATASection extends DOMNode {
+  private Env _env;
+  private CDATASection _section;
   
-  public DOMProcessingInstructionValue(ProcessingInstruction pi)
+  public DOMCDATASection(Env env,
+                         CDATASection section)
   {
-    super(pi);
+    _env = env;
+    _section = section;
   }
   
-  @Override
-  public Value getField(String name)
+  public CDATASection getNode()
   {
-    if (_node == null)
-      return NullValue.NULL;
-    
-    if ("data".equals(name))
-      return new StringValueImpl(((ProcessingInstruction) _node).getData());
-    else if ("target".equals(name))
-      return new StringValueImpl(((ProcessingInstruction) _node).getTarget());
-    
-    return NullValue.NULL;
+    return _section;
   }
   
-  public Value putField(Env env, String key, Value value)
+  public Env getEnv()
   {
-    if (_node == null)
-      return NullValue.NULL;
-    
-    if ("data".equals(key)) {
-      ((ProcessingInstruction) _node).setData(value.toString());
-      return value;
-    }
-    
-    return NullValue.NULL;
+    return _env;
   }
 }

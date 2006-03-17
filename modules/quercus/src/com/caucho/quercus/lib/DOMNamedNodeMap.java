@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2004 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -29,21 +29,36 @@
 
 package com.caucho.quercus.lib;
 
-import com.caucho.quercus.env.Value;
+import com.caucho.quercus.env.ArrayValueImpl;
+import com.caucho.quercus.env.Env;
 
-import org.w3c.dom.TypeInfo;
+import org.w3c.dom.NamedNodeMap;
 
-public class DOMTypeInfoValue extends Value {
+public class DOMNamedNodeMap extends ArrayValueImpl {
 
-  TypeInfo _typeInfo;
+  private Env _env;
+  private NamedNodeMap _namedNodeMap;
   
-  public DOMTypeInfoValue(TypeInfo typeInfo)
+  public DOMNamedNodeMap(Env env,
+                         NamedNodeMap namedNodeMap)
   {
-    _typeInfo = typeInfo;
+    _env = env;
+    _namedNodeMap = namedNodeMap;
   }
   
-  public TypeInfo getTypeInfo()
+  public DOMNode getNamedItem(String name)
   {
-    return _typeInfo;
+    return DOMNodeFactory.createDOMNode(_env, _namedNodeMap.getNamedItem(name));
+  }
+  
+  public DOMNode getNamedItemNS(String namespaceURI,
+                                String localName)
+  {
+    return DOMNodeFactory.createDOMNode(_env, _namedNodeMap.getNamedItemNS(namespaceURI, localName));
+  }
+  
+  public DOMNode item(int index)
+  {
+    return DOMNodeFactory.createDOMNode(_env, _namedNodeMap.item(index));
   }
 }

@@ -31,37 +31,73 @@ package com.caucho.quercus.lib;
 
 import com.caucho.quercus.env.Env;
 
-import org.w3c.dom.Notation;
+import org.w3c.dom.Attr;
+import org.w3c.dom.Document;
 
-public class DOMNotation extends DOMNode {
+public class DOMAttr extends DOMNode {
 
+  private Attr _attr;
   private Env _env;
-  private Notation _notation;
 
-  public DOMNotation(Env env,
-                     Notation notation)
+  public DOMAttr(Env env,
+                 Attr attr)
   {
     _env = env;
-    _notation = notation;
+    _attr = attr;
   }
 
-  public Notation getNode()
+  public DOMAttr(Env env,
+                 String name,
+                 String value)
   {
-    return _notation;
+    _env = env;
+    Document doc = DOMDocument.createDocument();
+    _attr = doc.createAttribute(name);
+    _attr.setValue(value);
   }
   
+  public Attr getNode()
+  {
+    return _attr;
+  }
+
   public Env getEnv()
   {
     return _env;
   }
-  
-  public String getPublicId()
+
+  public boolean isId()
   {
-    return _notation.getPublicId();
+    return _attr.isId();
+  }
+
+  public String getName()
+  {
+    return _attr.getName();
   }
   
-  public String getSystemId()
+  public DOMNode getOwnerElement()
   {
-    return _notation.getSystemId();
+    return DOMNodeFactory.createDOMNode(_env, _attr.getOwnerElement());
+  }
+  
+  public DOMTypeInfo getSchemaTypeInfo()
+  {
+    return new DOMTypeInfo(_attr.getSchemaTypeInfo());
+  }
+  
+  public boolean getSpecified()
+  {
+    return _attr.getSpecified();
+  }
+  
+  public String getValue()
+  {
+    return _attr.getValue();
+  }
+  
+  public void setValue(String value)
+  {
+    _attr.setValue(value);
   }
 }

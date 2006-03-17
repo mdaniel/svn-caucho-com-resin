@@ -29,16 +29,39 @@
 
 package com.caucho.quercus.lib;
 
+import com.caucho.quercus.env.Env;
+
+import org.w3c.dom.Document;
 import org.w3c.dom.EntityReference;
 
-public class DOMEntityReference extends DOMNodeValue {
+public class DOMEntityReference extends DOMNode {
 
-  EntityReference _reference;
-  
-  public DOMEntityReference(EntityReference reference)
+  private Env _env;
+  private EntityReference _reference;
+
+  public DOMEntityReference(Env env,
+                            EntityReference reference)
   {
-    super(null);
-    
+    _env = env;
     _reference = reference;
+  }
+
+  public DOMEntityReference(Env env,
+                            String name)
+  {
+    _env = env;
+    
+    Document doc = DOMDocument.createDocument();
+    _reference = doc.createEntityReference(name);
+  }
+
+  public EntityReference getNode()
+  {
+    return _reference;
+  }
+
+  public Env getEnv()
+  {
+    return _env;
   }
 }

@@ -29,17 +29,67 @@
 
 package com.caucho.quercus.lib;
 
-public class DOMEntity extends DOMNodeValue {
-  DOMEntity()
+import com.caucho.quercus.env.Env;
+
+import org.w3c.dom.Entity;
+
+public class DOMEntity extends DOMNode {
+
+  private Env _env;
+  private Entity _entity;
+
+  private String _actualEncoding;
+  
+  DOMEntity(Env env,
+            Entity entity)
   {
-    super(null);
+    _env = env;
+    _entity = entity;
+  }
+
+  public Entity getNode()
+  {
+    return _entity;
   }
   
-  //PROPERTIES
-  //@todo publicId (String)
-  //@todo systemId (String)
-  //@todo notationName (String)
-  //@todo actualEncoding (String)
-  //@todo encoding (String)
-  //@todo version (String)
+  public Env getEnv()
+  {
+    return _env;
+  }
+  
+  public String getPublicId()
+  {
+    return _entity.getPublicId();
+  }
+  
+  public String getSystemId()
+  {
+    return _entity.getSystemId();
+  }
+  
+  public String getNotationName()
+  {
+    return _entity.getNotationName();
+  }
+  
+  //XXX: what is actualEncoding???
+  public String getActualEncoding()
+  {
+    return _actualEncoding;
+  }
+  
+  public void setActualEncoding(String actualEncoding)
+  {
+    _actualEncoding = actualEncoding;
+  }
+  
+  public String getEncoding()
+  {
+    return _entity.getXmlEncoding();
+  }
+  
+  public String getVersion()
+  {
+    return _entity.getXmlVersion();
+  }
 }

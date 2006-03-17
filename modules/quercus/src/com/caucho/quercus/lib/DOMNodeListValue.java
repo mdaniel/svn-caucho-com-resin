@@ -29,49 +29,31 @@
 
 package com.caucho.quercus.lib;
 
+import com.caucho.quercus.env.ArrayValueImpl;
 import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.LongValue;
-import com.caucho.quercus.env.NullValue;
 import com.caucho.quercus.env.Value;
 
 import org.w3c.dom.NodeList;
 
-public class DOMNodeListValue extends Value {
+public class DOMNodeListValue extends ArrayValueImpl {
 
+  private Env _env;
   private NodeList _nodeList;
   
-  public DOMNodeListValue(NodeList nodeList)
+  public DOMNodeListValue(Env env,
+                          NodeList nodeList)
   {
+    _env = env;
     _nodeList = nodeList;
   }
   
-  public Value item(Value index)
+  public DOMNode item(Value index)
   {
-    if (_nodeList == null)
-      return NullValue.NULL;
-    
-    return new DOMNodeValue(_nodeList.item(index.toInt()));
+    return DOMNodeFactory.createDOMNode(_env, _nodeList.item(index.toInt()));
   }
   
-  @Override
-  public Value evalMethod(Env env, String methodName, Value a0)
-    throws Throwable
+  public int getLength()
   {
-    if ("item".equals(methodName))
-      return item(a0);
-    
-    return super.evalMethod(env, methodName, a0);
-  }
-  
-  @Override
-  public Value getField(String name)
-  {
-    if (_nodeList == null)
-      return NullValue.NULL;
-    
-    if ("length".equals(name))
-      return new LongValue(_nodeList.getLength());
-    
-    return NullValue.NULL;
+    return _nodeList.getLength();
   }
 }

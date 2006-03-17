@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2004 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -29,31 +29,12 @@
 
 package com.caucho.quercus.lib;
 
-import com.caucho.quercus.env.NullValue;
-import com.caucho.quercus.env.StringValue;
-import com.caucho.quercus.env.StringValueImpl;
-import com.caucho.quercus.env.Value;
+public class DOMConfigurationClass {
 
-import org.w3c.dom.Notation;
+  DOMConfigurationClass _domConfigurationClass;
 
-public class DOMNotationValue extends DOMNodeValue {
-  
-  public DOMNotationValue(Notation notation)
+  public DOMConfigurationClass(DOMConfigurationClass domConfigurationClass)
   {
-    super(notation);
-  }
-  
-  @Override
-  public Value getField(String name)
-  {
-    if (_node == null)
-      return NullValue.NULL;
-    
-    if ("publicId".equals(name))
-      return new StringValueImpl(((Notation)_node).getPublicId());
-    else if ("systemId".equals(name))
-      return new StringValueImpl(((Notation)_node).getSystemId());
-    
-    return NullValue.NULL;
+    _domConfigurationClass = domConfigurationClass;
   }
 }

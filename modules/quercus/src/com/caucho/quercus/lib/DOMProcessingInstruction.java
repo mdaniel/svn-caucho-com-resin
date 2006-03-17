@@ -30,44 +30,49 @@
 package com.caucho.quercus.lib;
 
 import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.NullValue;
-import com.caucho.quercus.env.StringValue;
-import com.caucho.quercus.env.StringValueImpl;
-import com.caucho.quercus.env.Value;
 
 import org.w3c.dom.ProcessingInstruction;
 
-public class DOMProcessingInstruction extends DOMNodeValue {
-  
-  public DOMProcessingInstruction(ProcessingInstruction pi)
+public class DOMProcessingInstruction extends DOMNode {
+
+  private Env _env;
+  private ProcessingInstruction _pi;
+
+  public DOMProcessingInstruction(Env env,
+                                  ProcessingInstruction pi)
   {
-    super(pi);
+    _env = env;
+    _pi = pi;
   }
-  
-  @Override
-  public Value getField(String name)
+
+  public DOMProcessingInstruction(Env env)
   {
-    if (_node == null)
-      return NullValue.NULL;
-    
-    if ("data".equals(name))
-      return new StringValueImpl(((ProcessingInstruction) _node).getData());
-    else if ("target".equals(name))
-      return new StringValueImpl(((ProcessingInstruction) _node).getTarget());
-    
-    return NullValue.NULL;
+    _env = env;
+    _pi = DOMDocument.createDocument().createProcessingInstruction("","");
   }
-  
-  public Value putField(Env env, String key, Value value)
+
+  public ProcessingInstruction getNode()
   {
-    if (_node == null)
-      return NullValue.NULL;
-    
-    if ("data".equals(key)) {
-      ((ProcessingInstruction) _node).setData(value.toString());
-      return value;
-    }
-    
-    return NullValue.NULL;
+    return _pi;
+  }
+
+  public Env getEnv()
+  {
+    return _env;
+  }
+
+  public String getData()
+  {
+    return _pi.getData();
+  }
+
+  public String getTarget()
+  {
+    return _pi.getTarget();
+  }
+
+  public void setData(String data)
+  {
+    _pi.setData(data);
   }
 }

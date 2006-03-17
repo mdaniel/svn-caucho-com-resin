@@ -29,16 +29,40 @@
 
 package com.caucho.quercus.lib;
 
-import com.caucho.quercus.env.Value;
+import com.caucho.quercus.env.Env;
 
-import org.w3c.dom.DOMConfiguration;
+import org.w3c.dom.Comment;
 
-public class DOMConfigurationValue extends Value {
-
-  DOMConfiguration _domConfiguration;
+public class DOMComment extends DOMCharacterData {
   
-  public DOMConfigurationValue(DOMConfiguration domConfiguration)
+  private Comment _comment;
+  private Env _env;
+  
+  public DOMComment(Env env,
+                    Comment comment)
   {
-    _domConfiguration = domConfiguration;
+    _env = env;
+    _comment = comment;
+  }
+
+  public DOMComment(Env env,
+                    String data)
+  {
+    this(env, DOMDocument.createDocument().createComment(data));
+  }
+  
+  public Comment getCharacterDataNode()
+  {
+    return _comment;
+  }
+  
+  public Env getEnv()
+  {
+    return _env;
+  }
+  
+  public Comment getNode()
+  {
+    return _comment;
   }
 }

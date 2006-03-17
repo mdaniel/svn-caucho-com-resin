@@ -29,16 +29,55 @@
 
 package com.caucho.quercus.lib;
 
-public class DOMCharacterData extends DOMNodeValue {
+import org.w3c.dom.CharacterData;
+
+abstract public class DOMCharacterData extends DOMNode {
+
+  abstract CharacterData getCharacterDataNode();
+
+
+  public String getData()
+  {
+    return getCharacterDataNode().getData();
+  }
   
-  //PROPERTIES
-  //@todo data (String)
-  //@todo length (int)
+  public void setData(String data)
+  {
+    getCharacterDataNode().setData(data);
+  }
   
-  //METHODS
-  //@todo appendData()
-  //@todo deleteData()
-  //@todo insertData()
-  //@todo replaceData()
-  //@todo substringData()
+  public int getLength()
+  {
+    return getCharacterDataNode().getLength();
+  }
+
+  public void appendData(String arg)
+  {
+    getCharacterDataNode().appendData(arg);
+  }
+
+  public void deleteData(int offset,
+                         int count)
+  {
+    getCharacterDataNode().deleteData(offset, count);
+  }
+
+  public void insertData(int offset,
+                         String arg)
+  {
+    getCharacterDataNode().insertData(offset, arg);
+  }
+  
+  public void replaceData(int offset,
+                          int count,
+                          String arg)
+  {
+    getCharacterDataNode().replaceData(offset, count, arg);
+  }
+
+  public String substringData(int offset,
+                              int count)
+  {
+    return getCharacterDataNode().substringData(offset, count);
+  }
 }

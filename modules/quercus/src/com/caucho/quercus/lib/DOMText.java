@@ -29,20 +29,62 @@
 
 package com.caucho.quercus.lib;
 
+import com.caucho.quercus.env.Env;
+import com.caucho.quercus.module.Optional;
+
+import org.w3c.dom.Document;
 import org.w3c.dom.Text;
 
 public class DOMText extends DOMCharacterData {
+  private Env _env;
   private Text _text;
-  
-  public DOMText(Text text)
+
+  public DOMText(Env env,
+                 Text text)
   {
+    _env = env;
     _text = text;
   }
-  
-  //PROPERTIES
-  //@todo wholeText (String)
 
-  // METHODS
-  //@todo isWhitespaceInElementContent()
-  //@todo splitText()
+  public DOMText(Env env,
+                 @Optional String data)
+  {
+    String actualData = "";
+    if (data != null)
+      actualData = data;
+    
+    _env = env;
+    Document doc = DOMDocument.createDocument();
+    _text = doc.createTextNode(actualData);
+  }
+  
+  public Text getNode()
+  {
+    return _text;
+  }
+
+  public Env getEnv()
+  {
+    return _env;
+  }
+
+  public Text getCharacterDataNode()
+  {
+    return _text;
+  }
+
+  public String wholeText()
+  {
+    return _text.getWholeText();
+  }
+
+  public boolean isWhitespaceInElementContent()
+  {
+    return _text.isElementContentWhitespace();
+  }
+  
+  public DOMText splitText(int offset)
+  {
+    return new DOMText(_env, _text.splitText(offset));
+  }
 }

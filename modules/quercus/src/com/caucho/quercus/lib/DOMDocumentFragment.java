@@ -29,12 +29,29 @@
 
 package com.caucho.quercus.lib;
 
-import org.w3c.dom.CDATASection;
+import com.caucho.quercus.env.Env;
 
-public class DOMCDATASectionValue extends DOMNodeValue {
+import org.w3c.dom.DocumentFragment;
+
+public class DOMDocumentFragment extends DOMNode {
   
-  public DOMCDATASectionValue(CDATASection section)
+  private Env _env;
+  private DocumentFragment _fragment;
+  
+  public DOMDocumentFragment(Env env,
+                             DocumentFragment fragment)
   {
-    super(section);
+    _env = env;
+    _fragment = fragment;
+  }
+  
+  public DocumentFragment getNode()
+  {
+    return _fragment;
+  }
+  
+  public Env getEnv()
+  {
+    return _env;
   }
 }
