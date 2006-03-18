@@ -28,19 +28,8 @@
 
 package com.caucho.quercus.lib;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.IOException;
-import java.util.zip.DataFormatException;
-import java.util.zip.Deflater;
-import java.util.zip.DeflaterOutputStream;
-import java.util.zip.Inflater;
-import java.util.zip.InflaterInputStream;
-
 import com.caucho.quercus.env.BooleanValue;
 import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.StringValueImpl;
 import com.caucho.quercus.env.TempBufferStringValue;
 import com.caucho.quercus.env.Value;
@@ -48,12 +37,21 @@ import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.quercus.module.NotNull;
 import com.caucho.quercus.module.Optional;
 import com.caucho.util.ByteBuffer;
-
 import com.caucho.vfs.ReadStream;
+import com.caucho.vfs.StreamImplOutputStream;
 import com.caucho.vfs.TempBuffer;
 import com.caucho.vfs.TempStream;
-import com.caucho.vfs.StreamImplOutputStream;
 import com.caucho.vfs.VfsStream;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.zip.DataFormatException;
+import java.util.zip.Deflater;
+import java.util.zip.DeflaterOutputStream;
+import java.util.zip.Inflater;
+import java.util.zip.InflaterInputStream;
 
 /**
  * PHP ZLib
@@ -293,7 +291,6 @@ public class QuercusZlibModule extends AbstractQuercusModule {
 
   /**
    * 
-   * @param data
    * @param level
    * @return compressed using DEFLATE algorithm
    */
@@ -307,7 +304,7 @@ public class QuercusZlibModule extends AbstractQuercusModule {
     TempStream ts = new TempStream();
     OutputStream os = new StreamImplOutputStream(ts);
     
-    Deflater deflater = new Deflater(level, true);
+    //Deflater deflater = new Deflater(level, true);
     
     //DeflaterOutputStream out = new DeflaterOutputStream(os, deflater);
     DeflaterOutputStream out = new DeflaterOutputStream(os);
@@ -325,10 +322,8 @@ public class QuercusZlibModule extends AbstractQuercusModule {
     out.close();
 
     TempBuffer.free(temp);
-    
-    Value result = new TempBufferStringValue(ts.getHead());
 
-    return result;
+    return new TempBufferStringValue(ts.getHead());
   }
 
   /**
@@ -354,16 +349,14 @@ public class QuercusZlibModule extends AbstractQuercusModule {
       int len;
 
       while ((len = in.read(buf, 0, buf.length)) > 0) {
-	os.write(buf, 0, len, false);
+	      os.write(buf, 0, len, false);
       }
 
       os.close();
 
       TempBuffer.free(temp);
-    
-      Value result = new TempBufferStringValue(os.getHead());
 
-      return result;
+      return new TempBufferStringValue(os.getHead());
     } catch (Exception e) {
       env.warning(e);
 
