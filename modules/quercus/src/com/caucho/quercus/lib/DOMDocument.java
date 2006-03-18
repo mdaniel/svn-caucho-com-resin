@@ -66,14 +66,13 @@ public class DOMDocument extends DOMNode {
 
   private String _encoding;
   private boolean _formatOutput;
-  private DOMImplementationClass _DOMImplementationClass;
+  private DOMImplementationClass _domImplementation;
   private boolean _recover;
   private boolean _resolveExternals;
   private boolean _substituteEntities;
 
   private InputStream _is;
   private DocumentBuilderFactory _documentBuilderFactory;
-  //private org.w3c.dom.DOMConfigurationClass _DOMConfig;
   
   private Env _env;
   private Document _document;
@@ -183,10 +182,10 @@ public class DOMDocument extends DOMNode {
   
   public DOMImplementationClass getImplementation()
   {
-    if (_DOMImplementationClass == null)
-      _DOMImplementationClass = new DOMImplementationClass(_env, _document.getImplementation());
+    if (_domImplementation == null)
+      _domImplementation = new DOMImplementationClass(_env, _document.getImplementation());
     
-    return _DOMImplementationClass;
+    return _domImplementation;
   }
 
   /**
