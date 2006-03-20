@@ -48,9 +48,11 @@ public class DOMNodeFactory {
       return new DOMComment(env, (Comment) node);
     else if (node instanceof Text)
       return new DOMText(env, (Text) node);
-    else if (node instanceof Document)
-      return new DOMDocument(env, (Document) node);
-    else if (node instanceof DocumentType)
+    else if (node instanceof Document) {
+      DOMDocument result = new DOMDocument(env, "", "");
+      result.setDocument((Document) node);
+      return result;
+    } else if (node instanceof DocumentType)
       return new DOMDocumentType(env, (DocumentType) node);
     else if (node instanceof DocumentFragment)
       return new DOMDocumentFragment(env, (DocumentFragment) node);

@@ -29,27 +29,27 @@
 
 package com.caucho.quercus.program;
 
-import java.io.IOException;
-
+import com.caucho.quercus.env.BreakValue;
+import com.caucho.quercus.env.ContinueValue;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
-import com.caucho.quercus.env.ContinueValue;
-import com.caucho.quercus.env.BreakValue;
-
 import com.caucho.quercus.expr.Expr;
 import com.caucho.quercus.expr.VarExpr;
-
 import com.caucho.quercus.gen.PhpWriter;
+
+import java.io.IOException;
 
 /**
  * Represents a foreach statement.
  */
-public class ForeachStatement extends Statement {
+public class ForeachStatement
+  extends Statement
+{
   private final Expr _objExpr;
-  
+
   private final VarExpr _key;
   private final String _keyName;
-  
+
   private final VarExpr _value;
   private final String _valueName;
   private final boolean _isRef;
@@ -57,11 +57,11 @@ public class ForeachStatement extends Statement {
   private final Statement _block;
 
   public ForeachStatement(Expr objExpr,
-			  VarExpr key, VarExpr value, boolean isRef,
-			  Statement block)
+                          VarExpr key, VarExpr value, boolean isRef,
+                          Statement block)
   {
     _objExpr = objExpr;
-    
+
     _key = key;
     if (key != null)
       _keyName = key.getName();
@@ -71,10 +71,10 @@ public class ForeachStatement extends Statement {
     _value = value;
     _valueName = value.getName();
     _isRef = isRef;
-    
+
     _block = block;
   }
-  
+
   public Value execute(Env env)
     throws Throwable
   {
@@ -83,44 +83,40 @@ public class ForeachStatement extends Statement {
 
     if (_key == null && ! _isRef) {
       for (Value value : obj.getValueArray(env)) {
-	env.setValue(_valueName, value);
+        env.setValue(_valueName, value);
 
-	Value result = _block.execute(env);
+        Value result = _block.execute(env);
 
-	if (result == null || result instanceof ContinueValue) {
-	}
-	else if (result instanceof BreakValue)
-	  return null;
-	else
-	  return result;
+        if (result == null || result instanceof ContinueValue) {
+        } else if (result instanceof BreakValue)
+          return null;
+        else
+          return result;
       }
 
       return null;
-    }
-    else {
+    } else {
       for (Value key : obj.getKeyArray()) {
-	if (_keyName != null)
-	  env.setValue(_keyName, key);
+        if (_keyName != null)
+          env.setValue(_keyName, key);
 
-	if (_isRef) {
-	  Value value = origObj.getRef(key);
-	  
-	  env.setVar(_valueName, value);
-	}
-	else {
-	  Value value = obj.get(key).toValue();
-      
-	  env.setValue(_valueName, value);
-	}
+        if (_isRef) {
+          Value value = origObj.getRef(key);
 
-	Value result = _block.execute(env);
+          env.setVar(_valueName, value);
+        } else {
+          Value value = obj.get(key).toValue();
 
-	if (result == null || result instanceof ContinueValue) {
-	}
-	else if (result instanceof BreakValue)
-	  return null;
-	else
-	  return result;
+          env.setValue(_valueName, value);
+        }
+
+        Value result = _block.execute(env);
+
+        if (result == null || result instanceof ContinueValue) {
+        } else if (result instanceof BreakValue)
+          return null;
+        else
+          return result;
       }
     }
 
@@ -151,7 +147,7 @@ public class ForeachStatement extends Statement {
       _value.analyzeAssign(loopInfo);
 
       if (_isRef)
-	_value.analyzeSetReference(loopInfo);
+        _value.analyzeSetReference(loopInfo);
     }
 
     _block.analyze(loopInfo);
@@ -182,7 +178,7 @@ public class ForeachStatement extends Statement {
     throws IOException
   {
     int id = out.generateId();
-    
+
     String objVar = "quercus_obj_" + id;
     String keysVar = "quercus_keys_" + id;
     String valuesVar = "quercus_values_" + id;
@@ -196,17 +192,20 @@ public class ForeachStatement extends Statement {
       out.println("Value []" + keysVar + " = " + objVar + ".getKeyArray();");
 
     if (! _isRef)
-      out.println("Value []" + valuesVar + " = " + objVar + ".getValueArray(env);");
+      out.println("Value []" +
+                  valuesVar +
+                  " = " +
+                  objVar +
+                  ".getValueArray(env);");
 
     if (_key != null || _isRef) {
       out.println("for (int " + indexVar + " = 0; " +
-		  indexVar + " < " + keysVar + ".length; " +
-		  indexVar + "++) {");
-    }
-    else {
+                  indexVar + " < " + keysVar + ".length; " +
+                  indexVar + "++) {");
+    } else {
       out.println("for (int " + indexVar + " = 0; " +
-		  indexVar + " < " + valuesVar + ".length; " +
-		  indexVar + "++) {");
+                  indexVar + " < " + valuesVar + ".length; " +
+                  indexVar + "++) {");
     }
 
     out.pushDepth();
@@ -217,32 +216,33 @@ public class ForeachStatement extends Statement {
       _key.generateAssign(out, new RawExpr(keyVar), true);
       out.println(";");
     }
-    
+
     if (_isRef) {
       String valueVar = objVar + ".getRef(" + keyVar + ")";
-      
+
       _value.generateAssignRef(out, valueVar);
       out.println(";");
-    }
-    else {
+    } else {
       String valueVar = valuesVar + "[" + indexVar + "]";
-      
+
       _value.generateAssign(out, new RawExpr(valueVar), true);
       out.println(";");
     }
 
     _block.generate(out);
-    
+
     out.popDepth();
     out.println("}");
   }
-  
+
   public String toString()
   {
     return "ForeachStatement[]";
   }
 
-  static class RawExpr extends Expr {
+  static class RawExpr
+    extends Expr
+  {
     private String _code;
 
     RawExpr(String code)
@@ -254,7 +254,7 @@ public class ForeachStatement extends Statement {
     {
       throw new UnsupportedOperationException();
     }
-    
+
     public void generate(PhpWriter out)
       throws IOException
     {

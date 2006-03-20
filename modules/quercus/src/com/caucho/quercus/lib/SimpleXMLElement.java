@@ -437,6 +437,23 @@ public class SimpleXMLElement {
     return new StringValueImpl(result.toString());
   }
   
+  public Value asXMLVersionEncoding(String version,
+                                    String encoding)
+  {
+    StringBuilder result = new StringBuilder();
+    
+    result.append("<?xml version=\"").append(version).append("\"");
+    
+    if (!"".equals(encoding)) {
+      result.append(" encoding=\"").append(encoding).append("\"");
+    }
+    
+    result.append("?>\n");
+    result.append(generateXML().toString());
+    
+    return new StringValueImpl(result.toString());
+  }
+  
   /**
    * recursive helper function for asXML
    * @return XML in string buffer
@@ -445,6 +462,9 @@ public class SimpleXMLElement {
   {
     StringBuilder sb = new StringBuilder();
 
+    if (_element == null)
+        return sb;
+    
     // If this is a text node, then just return the text
     if (_element.getNodeType() == Node.TEXT_NODE) {
       sb.append(_element.getNodeValue());

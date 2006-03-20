@@ -64,7 +64,7 @@ public class DOMDocument extends DOMNode {
   private static final Logger log = Log.open(DOMDocument.class);
   private static final L10N L = new L10N(DOMDocument.class);
 
-  private String _encoding;
+  private String _encoding = "";
   private boolean _formatOutput;
   private DOMImplementationClass _domImplementation;
   private boolean _recover;
@@ -77,34 +77,36 @@ public class DOMDocument extends DOMNode {
   private Env _env;
   private Document _document;
 
-  public DOMDocument(Env env)
-  {
-    this(env,"","");
-  }
+  //XXX: replace this once setXmlVersion works
+  // 1.0 is default value;
+  private String _version = "1.0";
 
   public DOMDocument(Env env,
-                     String version)
-  {
-    this(env,version,"");
-  }
-
-  public DOMDocument(Env env,
-                     String version,
-                     String encoding)
+                     @Optional String version,
+                     @Optional String encoding)
   {
     _env = env;
     _document = createDocument();
+    // XXX: uncomment this line when setXmlVersion works
     //_document.setXmlVersion(version);
-    _encoding = encoding; //Used when writing XML to a file
+    if (!"".equals(version))
+      _version = version;
+    
+    if (!"".equals(encoding))
+      _encoding = encoding; //Used when writing XML to a file
   }
 
-  public DOMDocument(Env env,
-                     Document document)
+  // Procedure created to replace constructor that takes (Env, Document)
+  // Introspection can only handle one constructor
+  // Therefore, all calls to new DOMDocument(Env, Document) will be replaced by
+  // foo = new DOMDocument(Env, "" , "");
+  // foo.setDocument(document);
+  
+  public void setDocument(Document document)
   {
-    _env = env;
     _document = document;
   }
-
+  
   public Document getNode()
   {
     return _document;
@@ -586,8 +588,8 @@ public class DOMDocument extends DOMNode {
       node = domNode.getNode();
     
     if (node == null) {
-      simpleXML = new SimpleXMLElement(_env, _document, _document.getDocumentElement());   
-      return new StringValueImpl(simpleXML.asXML().toString());
+      simpleXML = new SimpleXMLElement(_env, _document, _document.getDocumentElement());
+      return new StringValueImpl(simpleXML.asXMLVersionEncoding(_version, _encoding).toString());
       
     } else {
       simpleXML = new SimpleXMLElement(_env, _document, ((Element) node));

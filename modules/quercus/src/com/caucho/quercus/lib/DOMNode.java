@@ -154,7 +154,9 @@ abstract public class DOMNode {
 
   public DOMDocument getOwnerDocument()
   {
-    return new DOMDocument(getEnv(), getNode().getOwnerDocument());
+    DOMDocument result = new DOMDocument(getEnv(), "", "");
+    result.setDocument(getNode().getOwnerDocument());
+    return result;
   }
 
   public String getNamespaceURI()
