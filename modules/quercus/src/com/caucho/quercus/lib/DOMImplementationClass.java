@@ -41,19 +41,17 @@ public class DOMImplementationClass {
   private DOMImplementation _domImplementation;
   private Env _env;
 
-  public DOMImplementationClass(Env env,
-                                DOMImplementation DOMImplementation)
-  {
-    _env = env;
-    _domImplementation = DOMImplementation;
-  }
-
   public DOMImplementationClass(Env env)
   {
     _env = env;
 
     Document doc = DOMDocument.createDocument();
     _domImplementation = doc.getImplementation();
+  }
+  
+  public void setDomImplementation(DOMImplementation domImplementation)
+  {
+    _domImplementation = domImplementation;
   }
   
   public DOMDocument createDocument(@Optional String namespaceURI,

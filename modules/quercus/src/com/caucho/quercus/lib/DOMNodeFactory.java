@@ -40,15 +40,23 @@ public class DOMNodeFactory {
     if (node == null)
       return null;
     
-    if (node instanceof Attr)
-      return new DOMAttr(env, (Attr) node);
-    else if (node instanceof Element)
-      return new DOMElement(env, (Element) node);
-    else if (node instanceof Comment)
-      return new DOMComment(env, (Comment) node);
-    else if (node instanceof Text)
-      return new DOMText(env, (Text) node);
-    else if (node instanceof Document) {
+    if (node instanceof Attr) {
+      DOMAttr result = new DOMAttr(env, "foo", "");
+      result.setAttr((Attr) node);
+      return result;
+    } else if (node instanceof Element) {
+      DOMElement result = new DOMElement(env, "foo", "", "");
+      result.setElement((Element) node);
+      return result;
+    } else if (node instanceof Comment) {
+      DOMComment result = new DOMComment(env, "foo");
+      result.setComment((Comment) node);
+      return result;
+    } else if (node instanceof Text) {
+      DOMText result = new DOMText(env, "foo");
+      result.setText((Text) node);
+      return result;
+    } else if (node instanceof Document) {
       DOMDocument result = new DOMDocument(env, "", "");
       result.setDocument((Document) node);
       return result;
@@ -58,13 +66,17 @@ public class DOMNodeFactory {
       return new DOMDocumentFragment(env, (DocumentFragment) node);
     else if (node instanceof Entity)
       return new DOMEntity(env, (Entity) node);
-    else if (node instanceof EntityReference)
-      return new DOMEntityReference(env, (EntityReference) node);
-    else if (node instanceof Notation)
+    else if (node instanceof EntityReference) {
+      DOMEntityReference result = new DOMEntityReference(env, "foo");
+      result.setEntityReference((EntityReference) node);
+      return result;
+    } else if (node instanceof Notation)
       return new DOMNotation(env, (Notation) node);
-    else if (node instanceof ProcessingInstruction)
-      return new DOMProcessingInstruction(env, (ProcessingInstruction) node);
-    else
+    else if (node instanceof ProcessingInstruction) {
+      DOMProcessingInstruction result = new DOMProcessingInstruction(env);
+      result.setProcessingInstruction((ProcessingInstruction) node);
+      return result;
+    } else
       return null;
   }
 }

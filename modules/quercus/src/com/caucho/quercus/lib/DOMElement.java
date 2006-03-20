@@ -62,6 +62,11 @@ public class DOMElement extends DOMNode {
     // XXX: deal with value and namespaceURI
   }
 
+  public void setElement(Element element)
+  {
+    _element = element;
+  }
+  
   public Node getNode()
   {
     return _element;

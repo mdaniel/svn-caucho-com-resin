@@ -40,22 +40,16 @@ public class DOMText extends DOMCharacterData {
   private Text _text;
 
   public DOMText(Env env,
-                 Text text)
-  {
-    _env = env;
-    _text = text;
-  }
-
-  public DOMText(Env env,
                  @Optional String data)
   {
-    String actualData = "";
-    if (data != null)
-      actualData = data;
-    
     _env = env;
     Document doc = DOMDocument.createDocument();
-    _text = doc.createTextNode(actualData);
+    _text = doc.createTextNode(data);
+  }
+  
+  public void setText(Text text)
+  {
+    _text = text;
   }
   
   public Text getNode()
@@ -85,6 +79,8 @@ public class DOMText extends DOMCharacterData {
   
   public DOMText splitText(int offset)
   {
-    return new DOMText(_env, _text.splitText(offset));
+    DOMText result = new DOMText(_env, "foo");
+    result.setText(_text.splitText(offset));
+    return result;
   }
 }

@@ -30,6 +30,7 @@
 package com.caucho.quercus.lib;
 
 import com.caucho.quercus.env.Env;
+import com.caucho.quercus.module.Optional;
 
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
@@ -40,20 +41,19 @@ public class DOMAttr extends DOMNode {
   private Env _env;
 
   public DOMAttr(Env env,
-                 Attr attr)
-  {
-    _env = env;
-    _attr = attr;
-  }
-
-  public DOMAttr(Env env,
                  String name,
-                 String value)
+                 @Optional String value)
   {
     _env = env;
     Document doc = DOMDocument.createDocument();
     _attr = doc.createAttribute(name);
-    _attr.setValue(value);
+    if (!"".equals(value))
+      _attr.setValue(value);
+  }
+  
+  public void setAttr(Attr attr)
+  {
+    _attr = attr;
   }
   
   public Attr getNode()

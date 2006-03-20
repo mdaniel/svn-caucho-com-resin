@@ -38,19 +38,17 @@ public class DOMProcessingInstruction extends DOMNode {
   private Env _env;
   private ProcessingInstruction _pi;
 
-  public DOMProcessingInstruction(Env env,
-                                  ProcessingInstruction pi)
-  {
-    _env = env;
-    _pi = pi;
-  }
-
   public DOMProcessingInstruction(Env env)
   {
     _env = env;
     _pi = DOMDocument.createDocument().createProcessingInstruction("","");
   }
 
+  public void setProcessingInstruction(ProcessingInstruction pi)
+  {
+    _pi = pi;
+  }
+  
   public ProcessingInstruction getNode()
   {
     return _pi;

@@ -40,13 +40,6 @@ public class DOMEntityReference extends DOMNode {
   private EntityReference _reference;
 
   public DOMEntityReference(Env env,
-                            EntityReference reference)
-  {
-    _env = env;
-    _reference = reference;
-  }
-
-  public DOMEntityReference(Env env,
                             String name)
   {
     _env = env;
@@ -55,6 +48,11 @@ public class DOMEntityReference extends DOMNode {
     _reference = doc.createEntityReference(name);
   }
 
+  public void setEntityReference(EntityReference reference)
+  {
+    _reference = reference;
+  }
+  
   public EntityReference getNode()
   {
     return _reference;

@@ -184,8 +184,10 @@ public class DOMDocument extends DOMNode {
   
   public DOMImplementationClass getImplementation()
   {
-    if (_domImplementation == null)
-      _domImplementation = new DOMImplementationClass(_env, _document.getImplementation());
+    if (_domImplementation == null) {
+      _domImplementation = new DOMImplementationClass(_env);
+      _domImplementation.setDomImplementation(_document.getImplementation());
+    }
     
     return _domImplementation;
   }
@@ -321,13 +323,17 @@ public class DOMDocument extends DOMNode {
 
   public DOMAttr createAttribute(String name)
   {
-    return new DOMAttr(_env, _document.createAttribute(name));
+    DOMAttr result = new DOMAttr(_env, name, "");
+    result.setAttr(_document.createAttribute(name));
+    return result;
   }
 
   public DOMAttr createAttributeNS(String namespaceURI,
                                    String qualifiedName)
   {
-    return new DOMAttr(_env, _document.createAttributeNS(namespaceURI, qualifiedName));
+    DOMAttr result = new DOMAttr(_env, "foo", "");
+    result.setAttr(_document.createAttributeNS(namespaceURI, qualifiedName));
+    return result;
   }
 
   public DOMNode createCDATASection(String data)
@@ -337,7 +343,9 @@ public class DOMDocument extends DOMNode {
 
   public DOMComment createComment(String data)
   {
-    return new DOMComment(_env, _document.createComment(data));
+    DOMComment result = new DOMComment(_env, "foo");
+    result.setComment( _document.createComment(data));
+    return result;
   }
 
  public DOMDocumentFragment createDocumentFragment()
@@ -348,7 +356,8 @@ public class DOMDocument extends DOMNode {
  public DOMElement createElement(String tagName,
                                  @Optional String value)
   {
-    DOMElement result = new DOMElement(_env,_document.createElement(tagName));
+    DOMElement result = new DOMElement(_env, tagName, value, "");
+    result.setElement(_document.createElement(tagName));
 
     if (value != null)
       result.setNodeValue(value);
@@ -365,21 +374,24 @@ public class DOMDocument extends DOMNode {
 
   public DOMEntityReference createEntityReference(String name)
   {
-    return new DOMEntityReference(_env, _document.createEntityReference(name));
+    DOMEntityReference result = new DOMEntityReference(_env, "foo");
+    result.setEntityReference(_document.createEntityReference(name));
+    return result;
   }
 
   public DOMProcessingInstruction createProcessingInstruction(String target,
                                                               @Optional String data)
   {
-    if (data == null)
-      data = "";
-    
-    return new DOMProcessingInstruction(_env, _document.createProcessingInstruction(target, data));
+    DOMProcessingInstruction result = new DOMProcessingInstruction(_env);
+    result.setProcessingInstruction(_document.createProcessingInstruction(target, data));
+    return result;
   }
 
   public DOMText createTextNode(String data)
   {
-    return new DOMText(_env, _document.createTextNode(data));
+    DOMText result = new DOMText(_env, data);
+    result.setText(_document.createTextNode(data));
+    return result;
   }
 
   public DOMNode getElementById(String elementId)

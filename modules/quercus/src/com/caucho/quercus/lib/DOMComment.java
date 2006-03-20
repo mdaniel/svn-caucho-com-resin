@@ -37,18 +37,17 @@ public class DOMComment extends DOMCharacterData {
   
   private Comment _comment;
   private Env _env;
-  
-  public DOMComment(Env env,
-                    Comment comment)
-  {
-    _env = env;
-    _comment = comment;
-  }
 
   public DOMComment(Env env,
                     String data)
   {
-    this(env, DOMDocument.createDocument().createComment(data));
+    _env = env;
+    _comment = DOMDocument.createDocument().createComment(data);
+  }
+  
+  public void setComment(Comment comment)
+  {
+    _comment = comment;
   }
   
   public Comment getCharacterDataNode()
