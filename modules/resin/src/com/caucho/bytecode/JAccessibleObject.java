@@ -49,6 +49,14 @@ abstract public class JAccessibleObject extends JAnnotationObject {
   abstract public JClass getDeclaringClass();
 
   /**
+   * Returns the source line number, if available.
+   */
+  public int getLine()
+  {
+    return 0;
+  }
+
+  /**
    * Returns true if equals.
    */
   public boolean equals(Object o)

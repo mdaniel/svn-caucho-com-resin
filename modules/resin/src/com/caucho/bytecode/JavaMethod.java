@@ -56,6 +56,7 @@ public class JavaMethod extends JMethod {
   private String _name;
   private String _descriptor;
   private JClass []_exceptions = NULL_CLASS;
+  private int _line = -1;
 
   private ArrayList<Attribute> _attributes = new ArrayList<Attribute>();
 
@@ -95,6 +96,27 @@ public class JavaMethod extends JMethod {
   public String getName()
   {
     return _name;
+  }
+
+  /**
+   * Returns the line number.
+   */
+  public int getLine()
+  {
+    if (_line >= 0)
+      return _line;
+
+    Attribute attr = getAttribute("LineNumberTable");
+
+    if (attr == null) {
+      _line = 0;
+      return _line;
+    }
+
+    System.out.println("ATTR: " + attr);
+
+    _line = 0;
+    return _line;
   }
 
   /**

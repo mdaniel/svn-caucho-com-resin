@@ -44,6 +44,8 @@ import com.caucho.amber.type.EntityType;
 import com.caucho.amber.table.Table;
 import com.caucho.amber.table.LinkColumns;
 
+import com.caucho.bytecode.JMethod;
+
 /**
  * Generates the Java code for the wrapped object.
  */
@@ -116,6 +118,7 @@ public class LoadGroupGenerator extends ClassComponent {
     _entityType.generateCopyLoadObject(out, "super", "item", _index);
 
     out.println("__caucho_loadMask_" + group + " |= " + mask + "L;");
+
     out.println();
     out.println("return;");
     
@@ -205,6 +208,15 @@ public class LoadGroupGenerator extends ClassComponent {
     _entityType.generateLoad(out, "rs", "", 1, _index);
     out.println("__caucho_loadMask_" + group + " |= " + mask + "L;");
 
+    ArrayList<JMethod> postLoadCallbacks = _entityType.getPostLoadCallbacks();
+    if (postLoadCallbacks.size() > 0 && _index == 0) {
+      out.println("if (__caucho_state == com.caucho.amber.entity.Entity.P_TRANSACTIONAL) {");
+      out.pushDepth();
+      generateCallbacks(out, postLoadCallbacks);
+      out.popDepth();
+      out.println("}");
+    }
+
     if (_entityType.getHasLoadCallback())
       out.println("__caucho_load_callback();");
     
@@ -238,6 +250,18 @@ public class LoadGroupGenerator extends ClassComponent {
     if (_index == 0 && _entityType.getHasLoadCallback()) {
       out.println();
       out.println("protected void __caucho_load_callback() {}");
+    }
+  }
+
+  private void generateCallbacks(JavaWriter out, ArrayList<JMethod> callbacks)
+    throws IOException
+  {
+    if (callbacks.size() == 0)
+      return;
+
+    out.println();
+    for (JMethod method : callbacks) {
+      out.println(method.getName() + "();");
     }
   }
 }

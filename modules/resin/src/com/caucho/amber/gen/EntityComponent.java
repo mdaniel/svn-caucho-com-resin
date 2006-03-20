@@ -626,8 +626,12 @@ public class EntityComponent extends ClassComponent {
 
     out.println("if (! isDirty)");
     out.println("  return true;");
+    
+    generateCallbacks(out, "this", _entityType.getPreUpdateCallbacks());
+    
     out.println();
     out.println("__caucho_flush_callback();");
+    
     out.println();
     out.println("com.caucho.util.CharBuffer cb = new com.caucho.util.CharBuffer();");
     out.println("__caucho_home.generateUpdateSQLPrefix(cb);");
@@ -656,6 +660,8 @@ public class EntityComponent extends ClassComponent {
     out.println();
     out.println("pstmt.executeUpdate();");
 
+    generateCallbacks(out, "this", _entityType.getPostUpdateCallbacks());
+    
     out.println();
     out.println("if (__caucho_log.isLoggable(java.util.logging.Level.FINE))");
     out.println("  __caucho_log.fine(\"amber update \" + this);");
@@ -1017,12 +1023,14 @@ public class EntityComponent extends ClassComponent {
     out.println("  throws java.sql.SQLException");
     out.println("{");
     out.pushDepth();
+    
+    generateCallbacks(out, "this", _entityType.getPreRemoveCallbacks());
 
     out.print("__caucho_home.delete(__caucho_session, ");
     out.print(id.toObject(id.generateGetProperty("this")));
     out.println(");");
 
-    out.print("__caucho_session.removeEntity(this);");
+    out.println("__caucho_session.removeEntity(this);");
     
     String table = _entityType.getTable().getName();
     String where = _entityType.getId().generateMatchArgWhere(null);
@@ -1040,6 +1048,8 @@ public class EntityComponent extends ClassComponent {
     out.println();
     out.println("pstmt.executeUpdate();");
     
+    generateCallbacks(out, "this", _entityType.getPostRemoveCallbacks());
+
     out.popDepth();
     out.println("}");
   }
@@ -1158,6 +1168,8 @@ public class EntityComponent extends ClassComponent {
     out.println("o.__caucho_session = aConn;");
     out.println("o.__caucho_state = com.caucho.amber.entity.Entity.P_NON_TRANSACTIONAL;");
     out.println("o.__caucho_loadMask_0 = __caucho_loadMask_0 & 1L;");
+
+    generateCallbacks(out, "o", _entityType.getPostLoadCallbacks());
 
     out.println();
     out.println("return o;");
@@ -1298,5 +1310,19 @@ public class EntityComponent extends ClassComponent {
     
     out.popDepth();
     out.println("}");
+  }
+
+  private void generateCallbacks(JavaWriter out,
+				 String object,
+				 ArrayList<JMethod> callbacks)
+    throws IOException
+  {
+    if (callbacks.size() == 0)
+      return;
+
+    out.println();
+    for (JMethod method : callbacks) {
+      out.println(object + "." + method.getName() + "();");
+    }
   }
 }

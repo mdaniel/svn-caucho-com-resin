@@ -90,6 +90,12 @@ public class EntityIntrospector {
   // annotations allowed with a @ManyToOne annotation
   private static HashSet<String> _manyToOneAnnotations = new HashSet<String>();
 
+  // annotations allowed with a @OneToMany annotation
+  private static HashSet<String> _oneToManyAnnotations = new HashSet<String>();
+  
+  // types allowed with a @OneToMany annotation
+  private static HashSet<String> _oneToManyTypes = new HashSet<String>();
+
   private AmberPersistenceUnit _persistenceUnit;
 
   private HashMap<String,EntityType> _entityMap
@@ -263,12 +269,46 @@ public class EntityIntrospector {
   {
     JClass []param = method.getParameterTypes();
 
+    if (method.getAnnotation(PostLoad.class) != null) {
+      validateCallback("PostLoad", method);
+      
+      type.addPostLoadCallback(method);
+    }
+
     if (method.getAnnotation(PrePersist.class) != null) {
+      validateCallback("PrePersist", method);
+      
       type.addPrePersistCallback(method);
     }
 
     if (method.getAnnotation(PostPersist.class) != null) {
+      validateCallback("PostPersist", method);
+      
       type.addPostPersistCallback(method);
+    }
+
+    if (method.getAnnotation(PreUpdate.class) != null) {
+      validateCallback("PreUpdate", method);
+      
+      type.addPreUpdateCallback(method);
+    }
+
+    if (method.getAnnotation(PostUpdate.class) != null) {
+      validateCallback("PostUpdate", method);
+      
+      type.addPostUpdateCallback(method);
+    }
+
+    if (method.getAnnotation(PreRemove.class) != null) {
+      validateCallback("PreRemove", method);
+      
+      type.addPreRemoveCallback(method);
+    }
+
+    if (method.getAnnotation(PostRemove.class) != null) {
+      validateCallback("PostRemove", method);
+      
+      type.addPostRemoveCallback(method);
     }
   }
 
@@ -292,6 +332,29 @@ public class EntityIntrospector {
       if (method.isFinal())
 	throw new ConfigException(L.l("'{0}' must not be final.  Entity beans methods may not be final.",
 				    method.getFullName()));
+    }
+  }
+
+  /**
+   * Validates a callback method
+   */
+  private void validateCallback(String callbackName, JMethod method)
+    throws ConfigException
+  {
+    if (method.isFinal())
+      throw new ConfigException(L.l("'{0}' must not be final.  @{1} methods may not be final.",
+				    method.getFullName(),
+				    callbackName));
+    
+    if (method.isStatic())
+      throw new ConfigException(L.l("'{0}' must not be static.  @{1} methods may not be static.",
+				    method.getFullName(),
+				    callbackName));
+
+    if (method.getParameterTypes().length != 0) {
+      throw new ConfigException(L.l("'{0}' must not have any arguments.  @{1} methods have zero arguments.",
+				    method.getFullName(),
+				    callbackName));
     }
   }
 
@@ -943,6 +1006,14 @@ public class EntityIntrospector {
 						   fieldType));
     }
     else if (field.isAnnotationPresent(javax.persistence.OneToMany.class)) {
+      validateAnnotations(field, _oneToManyAnnotations);
+      
+      if (! _oneToManyTypes.contains(fieldType.getName())) {
+	throw error(field, L.l("'{0}' is an illegal @OneToMany type for {1}.  @OneToMany must be a java.util.Collection or java.util.List.",
+			       fieldType.getName(),
+			       field.getName()));
+      }
+      
       _depCompletions.add(new OneToManyCompletion(sourceType,
 						  field,
 						  fieldName,
@@ -1349,8 +1420,13 @@ public class EntityIntrospector {
     // XXX: the field is for line numbers in the source, theoretically
 
     String className = field.getDeclaringClass().getShortName();
-    
-    return new ConfigException(className + ": " + msg);
+
+    int line = field.getLine();
+
+    if (line > 0)
+      return new ConfigException(className + ":" + line + ": " + msg);
+    else
+      return new ConfigException(className + ": " + msg);
   }
 
   static String toFieldName(String name)
@@ -1388,6 +1464,41 @@ public class EntityIntrospector {
     return columns;
   }
 
+  ArrayList<ForeignColumn>
+    calculateColumns(JAccessibleObject field,
+		     Table mapTable,
+		     String prefix,
+		     EntityType type,
+		     Object []joinColumnsAnn)
+    throws ConfigException
+  {
+    if (joinColumnsAnn == null || joinColumnsAnn.length == 0)
+      return calculateColumns(mapTable, prefix, type);
+
+    ArrayList<ForeignColumn> columns = new ArrayList<ForeignColumn>();
+
+    ArrayList<IdField> idFields = type.getId().getKeys();
+
+    if (joinColumnsAnn.length != idFields.size()) {
+      throw error(field, L.l("@JoinColumns for {0} do not match number of the primary key columns in {1}.  The foreign key columns must match the primary key columns.",
+			     field.getName(),
+			     type.getName()));
+    }
+
+    for (int i = 0; i < joinColumnsAnn.length; i++) {
+      ForeignColumn foreignColumn;
+      JAnnotation joinColumnAnn = (JAnnotation) joinColumnsAnn[i];
+
+      foreignColumn =
+	mapTable.createForeignColumn(joinColumnAnn.getString("name"),
+				     idFields.get(i).getColumns().get(0));
+
+      columns.add(foreignColumn);
+    }
+
+    return columns;
+  }
+
   static ArrayList<ForeignColumn> calculateColumns(Table mapTable,
 						   EntityType type)
   {
@@ -1395,6 +1506,19 @@ public class EntityIntrospector {
 
     for (Column key : type.getId().getColumns()) {
       columns.add(mapTable.createForeignColumn(key.getName(), key));
+    }
+
+    return columns;
+  }
+
+  static ArrayList<ForeignColumn> calculateColumns(Table mapTable,
+						   String prefix,
+						   EntityType type)
+  {
+    ArrayList<ForeignColumn> columns = new ArrayList<ForeignColumn>();
+
+    for (Column key : type.getId().getColumns()) {
+      columns.add(mapTable.createForeignColumn(prefix + key.getName(), key));
     }
 
     return columns;
@@ -1427,6 +1551,18 @@ public class EntityIntrospector {
 
     return cb.toString();
     */
+  }
+
+  private EntityManyToOneField getSourceField(EntityType targetType,
+					      String mappedBy)
+  {
+    for (AmberField field : targetType.getFields()) {
+      if (field.getName().equals(mappedBy)) {
+	return (EntityManyToOneField) field;
+      }
+    }
+
+    return null;
   }
 
   /**
@@ -1498,20 +1634,42 @@ public class EntityIntrospector {
       else if (typeArgs.length > 0)
 	targetName = typeArgs[0].getName();
       else
-	throw new ConfigException(L.l("can't determine target name for {0}",
-				      _fieldName));
+	throw error(_field, L.l("Can't determine targetEntity for {0}.  @OneToMany properties must target @Entity beans.",
+				_field.getName()));
 
       EntityType targetType = persistenceUnit.getEntity(targetName);
       if (targetType == null)
-	throw new ConfigException(L.l("'{0}' is an unknown entity.",
-				      targetName));
+	throw error(_field,
+		    L.l("targetEntity '{0}' is not an @Entity bean for {1}.  The targetEntity of a @OneToMany collection must be an @Entity bean.",
+			targetName,
+			_field.getName()));
 
+      String mappedBy = oneToManyAnn.getString("mappedBy");
+
+      if (mappedBy != null && ! mappedBy.equals("")) {
+      }
+      else {
+	oneToManyUnidirectional(targetType);
+      }
+    }
+    
+    private void oneToManyBidirectional(EntityType targetType,
+					String mappedBy)
+      throws ConfigException
+    {
+      if (_field.getAnnotation(JoinTable.class) != null) {
+	throw error(_field,
+		    L.l("Bidirectional @ManyToOne property {0} may not have a @JoinTable annotation.",
+			_field.getName()));
+      }
+	
       EntityManyToOneField sourceField = getSourceField(targetType,
-							_entityType);
+							mappedBy);
 
       if (sourceField == null)
-	throw new ConfigException(L.l("'{0}' does not have a matching ManyToOne relation.",
-				      targetType.getName()));
+	throw error(_field, L.l("'{0}' does not have matching field for @ManyToOne(mappedBy={1}).",
+				targetType.getName(),
+				mappedBy));
 
       EntityOneToManyField oneToMany;
 
@@ -1521,19 +1679,66 @@ public class EntityIntrospector {
       _entityType.addField(oneToMany);
     }
 
-    private EntityManyToOneField getSourceField(EntityType targetType,
-						EntityType entity)
+    private void oneToManyUnidirectional(EntityType targetType)
+      throws ConfigException
     {
-      for (AmberField field : targetType.getFields()) {
-	if (field instanceof EntityManyToOneField) {
-	  EntityManyToOneField manyToOne = (EntityManyToOneField) field;
+      EntityManyToManyField manyToManyField;
 
-	  if (manyToOne.getEntityType().equals(entity))
-	    return manyToOne;
-	}
+      manyToManyField = new EntityManyToManyField(_entityType, _fieldName);
+      manyToManyField.setType(targetType);
+
+      String sqlTable = _entityType.getTable().getName() + "_" + targetType.getTable().getName();
+
+      JAnnotation joinTableAnn =
+	_field.getAnnotation(JoinTable.class);
+
+      Table mapTable = null;
+
+      ArrayList<ForeignColumn> sourceColumns = null;
+      ArrayList<ForeignColumn> targetColumns = null;
+
+      if (joinTableAnn != null) {
+	if (! joinTableAnn.getString("name").equals(""))
+	  sqlTable = joinTableAnn.getString("name");
+
+	mapTable = _persistenceUnit.createTable(sqlTable);
+
+	sourceColumns = calculateColumns(_field,
+					 mapTable,
+					 _entityType.getTable().getName() + "_",
+					 _entityType,
+					 (Object []) joinTableAnn.get("joinColumns"));
+
+	targetColumns = calculateColumns(_field,
+					 mapTable,
+					 targetType.getTable().getName() + "_",
+					 targetType,
+					 (Object []) joinTableAnn.get("inverseJoinColumns"));
+      }
+      else {
+	mapTable = _persistenceUnit.createTable(sqlTable);
+
+	sourceColumns = calculateColumns(mapTable,
+					 _entityType.getTable().getName() + "_",
+					 _entityType);
+
+	targetColumns = calculateColumns(mapTable,
+					 targetType.getTable().getName() + "_",
+					 targetType);
       }
 
-      return null;
+      manyToManyField.setAssociationTable(mapTable);
+      manyToManyField.setTable(sqlTable);
+
+      manyToManyField.setSourceLink(new LinkColumns(mapTable,
+						    _entityType.getTable(),
+						    sourceColumns));
+
+      manyToManyField.setTargetLink(new LinkColumns(mapTable,
+						    targetType.getTable(),
+						    targetColumns));
+
+      _entityType.addField(manyToManyField);
     }
   }
 
@@ -1614,18 +1819,6 @@ public class EntityIntrospector {
 
 	_entityType.addField(oneToOne);
       }
-    }
-
-    private EntityManyToOneField getSourceField(EntityType targetType,
-						String mappedBy)
-    {
-      for (AmberField field : targetType.getFields()) {
-	if (field.getName().equals(mappedBy)) {
-	  return (EntityManyToOneField) field;
-	}
-      }
-
-      return null;
     }
   }
 
@@ -1738,7 +1931,17 @@ public class EntityIntrospector {
     _manyToOneAnnotations.add("javax.persistence.JoinColumn");
     _manyToOneAnnotations.add("javax.persistence.JoinColumns");
     
-    // ??
+    // annotations allowed with a @OneToMany annotation
+    _oneToManyAnnotations.add("javax.persistence.OneToMany");
+    _oneToManyAnnotations.add("javax.persistence.JoinTable");
+
+    // types allowed with a @OneToMany annotation
+    _oneToManyTypes.add("java.util.Collection");
+    _oneToManyTypes.add("java.util.List");
+    _oneToManyTypes.add("java.util.Set");
+    _oneToManyTypes.add("java.util.Map");
+    
+    // annotations allowed for a property
     _propertyAnnotations.add("javax.persistence.Basic");
     _propertyAnnotations.add("javax.persistence.Column");
     _propertyAnnotations.add("javax.persistence.Id");

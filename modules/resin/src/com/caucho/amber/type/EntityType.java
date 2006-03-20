@@ -135,10 +135,25 @@ public class EntityType extends Type {
   private ArrayList<PersistentDependency> _dependencies
     = new ArrayList<PersistentDependency>();
 
+  private ArrayList<JMethod> _postLoadCallbacks
+    = new ArrayList<JMethod>();
+
   private ArrayList<JMethod> _prePersistCallbacks
     = new ArrayList<JMethod>();
 
   private ArrayList<JMethod> _postPersistCallbacks
+    = new ArrayList<JMethod>();
+
+  private ArrayList<JMethod> _preUpdateCallbacks
+    = new ArrayList<JMethod>();
+
+  private ArrayList<JMethod> _postUpdateCallbacks
+    = new ArrayList<JMethod>();
+
+  private ArrayList<JMethod> _preRemoveCallbacks
+    = new ArrayList<JMethod>();
+
+  private ArrayList<JMethod> _postRemoveCallbacks
     = new ArrayList<JMethod>();
 
   private final Lifecycle _lifecycle = new Lifecycle();
@@ -650,6 +665,22 @@ public class EntityType extends Type {
   }
 
   /**
+   * Adds a @PostLoad callback.
+   */
+  public void addPostLoadCallback(JMethod callback)
+  {
+    _postLoadCallbacks.add(callback);
+  }
+
+  /**
+   * Gets the post-load callback.
+   */
+  public ArrayList<JMethod> getPostLoadCallbacks()
+  {
+    return _postLoadCallbacks;
+  }
+
+  /**
    * Adds a pre-persist callback.
    */
   public void addPrePersistCallback(JMethod callback)
@@ -679,6 +710,70 @@ public class EntityType extends Type {
   public ArrayList<JMethod> getPostPersistCallbacks()
   {
     return _postPersistCallbacks;
+  }
+
+  /**
+   * Adds a pre-update callback.
+   */
+  public void addPreUpdateCallback(JMethod callback)
+  {
+    _preUpdateCallbacks.add(callback);
+  }
+
+  /**
+   * Gets the pre-update callback.
+   */
+  public ArrayList<JMethod> getPreUpdateCallbacks()
+  {
+    return _preUpdateCallbacks;
+  }
+
+  /**
+   * Adds a post-update callback.
+   */
+  public void addPostUpdateCallback(JMethod callback)
+  {
+    _postUpdateCallbacks.add(callback);
+  }
+
+  /**
+   * Gets the post-update callback.
+   */
+  public ArrayList<JMethod> getPostUpdateCallbacks()
+  {
+    return _postUpdateCallbacks;
+  }
+
+  /**
+   * Adds a pre-remove callback.
+   */
+  public void addPreRemoveCallback(JMethod callback)
+  {
+    _preRemoveCallbacks.add(callback);
+  }
+
+  /**
+   * Gets the pre-remove callback.
+   */
+  public ArrayList<JMethod> getPreRemoveCallbacks()
+  {
+    return _preRemoveCallbacks;
+  }
+
+  /**
+   * Adds a post-remove callback.
+   */
+  public void addPostRemoveCallback(JMethod callback)
+  {
+    _postRemoveCallbacks.add(callback);
+  }
+
+  /**
+   * Gets the post-remove callback.
+   */
+  public ArrayList<JMethod> getPostRemoveCallbacks()
+  {
+    return _postRemoveCallbacks;
   }
 
   /**

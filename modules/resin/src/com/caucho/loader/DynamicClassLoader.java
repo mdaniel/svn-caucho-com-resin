@@ -1554,15 +1554,17 @@ public class DynamicClassLoader extends java.net.URLClassLoader
 
       try {
 	// Use reverse order so the last resources will be destroyed first.
-	for (int i = listeners.size() - 1; i >= 0; i--) {
-	  ClassLoaderListener listener = listeners.get(i);
+	if (listeners != null) {
+	  for (int i = listeners.size() - 1; i >= 0; i--) {
+	    ClassLoaderListener listener = listeners.get(i);
 
-	  try {
-	    thread.setContextClassLoader(this);
+	    try {
+	      thread.setContextClassLoader(this);
 
-	    listener.classLoaderDestroy(this);
-	  } catch (Throwable e) {
-	    log().log(Level.WARNING, e.toString(), e);
+	      listener.classLoaderDestroy(this);
+	    } catch (Throwable e) {
+	      log().log(Level.WARNING, e.toString(), e);
+	    }
 	  }
 	}
       } finally {
