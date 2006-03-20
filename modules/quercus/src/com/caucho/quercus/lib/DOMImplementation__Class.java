@@ -36,12 +36,12 @@ import org.w3c.dom.DOMImplementation;
 import org.w3c.dom.Document;
 import org.w3c.dom.DocumentType;
 
-public class DOMImplementationClass {
+public class DOMImplementation__Class {
 
   private DOMImplementation _domImplementation;
   private Env _env;
 
-  public DOMImplementationClass(Env env)
+  public DOMImplementation__Class(Env env)
   {
     _env = env;
 
