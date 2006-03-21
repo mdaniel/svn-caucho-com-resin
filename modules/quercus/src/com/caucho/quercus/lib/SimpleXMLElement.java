@@ -120,102 +120,6 @@ public class SimpleXMLElement {
     return _attributes;
   }
 
-  protected void printDepth(WriteStream out, int depth)
-    throws IOException
-  {
-    for (int i = 0; i < depth; i++)
-      out.print(' ');
-  }
-  
-  public void printRImpl(Env env,
-                         WriteStream out,
-                         int depth,
-                         IdentityHashMap<Value, String> valueSet)
-    throws IOException, Throwable
-  {
-    if (depth == 0) {
-      out.println("SimpleXMLElement Object");
-      out.println('(');
-    }
-    
-    // Need to refill _childMap because elements might have been
-    // replaced
-    fillChildMap();
-    
-    Set keyValues = _childMap.entrySet();
-    int keyLength = keyValues.size();
-    Iterator keyIterator = keyValues.iterator();
-    Map.Entry entry;
-    
-    if (keyIterator.hasNext()) {
-      entry = (Map.Entry) keyIterator.next();
-    
-      if (entry.getValue() instanceof StringValue) {
-        if (depth == 0) {
-          printDepth(out, 4);
-          out.print("[0] => ");
-        }
-        
-        out.println(entry.getValue().toString());
-      } else {
-        if (depth != 0) {
-          out.println("SimpleXMLElement Object");
-      
-          printDepth(out, 4 * depth);
-          out.println('(');
-        }
-   
-        printAttributes(out, depth);
-        
-        // loop through each element of _childMap
-        // but first reset iterator
-        keyIterator = keyValues.iterator();
-        for (int i = 0; i < keyLength; i++) {
-          entry = (Map.Entry) keyIterator.next();
-          printDepth(out, 4 * (depth + 1));
-          out.print("[" + entry.getKey() + "] => ");
-          if (entry.getValue() instanceof ArrayValue) {
-            out.println("Array");
-            printDepth(out, 4 * (depth + 2));
-            out.println('(');
-            // Iterate through each SimpleXMLElement
-            for (Map.Entry<Value, Value> mapEntry : ((ArrayValue) entry.getValue()).entrySet()) {
-              printDepth(out, 4 * (depth + 3));
-              out.print("[" + mapEntry.getKey().toString() + "] => ");
-              mapEntry.getValue().printR(env, out, depth + 4, valueSet);
-              out.println();
-            }
-            printDepth(out, 4 * (depth + 2));
-            out.println(')');
-          } else 
-            ((Value) entry.getValue()).printR(env, out, depth + 2, valueSet);
-          
-          out.println();
-        }
-  
-        //Print closing parenthesis
-        if (depth != 0) {
-          printDepth(out, 4 * depth);
-          out.println(")");
-        }
-      }
-    } else {
-      if (depth != 0) {
-        out.println("SimpleXMLElement Object");
-        
-        printDepth(out, 4 * depth);
-        out.println('(');
-        
-        printAttributes(out, depth);
-        printDepth(out, 4 * depth);
-        out.println(')');
-      }
-    }
-    
-    if (depth == 0)
-      out.println(')');
-  }
-
   /**
    * 
    */
@@ -572,4 +476,100 @@ public class SimpleXMLElement {
       out.println(')');
     }
   }
+  
+  public void printRImpl(Env env,
+                         WriteStream out,
+                         int depth,
+                         IdentityHashMap<Value, String> valueSet)
+    throws IOException, Throwable
+  {
+    if (depth == 0) {
+      out.println("SimpleXMLElement Object");
+      out.println('(');
+    }
+    
+    // Need to refill _childMap because elements might have been
+    // replaced
+    fillChildMap();
+    
+    Set keyValues = _childMap.entrySet();
+    int keyLength = keyValues.size();
+    Iterator keyIterator = keyValues.iterator();
+    Map.Entry entry;
+    
+    if (keyIterator.hasNext()) {
+      entry = (Map.Entry) keyIterator.next();
+    
+      if (entry.getValue() instanceof StringValue) {
+        if (depth == 0) {
+          printDepth(out, 4);
+          out.print("[0] => ");
+        }
+        
+        out.println(entry.getValue().toString());
+      } else {
+        if (depth != 0) {
+          out.println("SimpleXMLElement Object");
+      
+          printDepth(out, 4 * depth);
+          out.println('(');
+        }
+   
+        printAttributes(out, depth);
+        
+        // loop through each element of _childMap
+        // but first reset iterator
+        keyIterator = keyValues.iterator();
+        for (int i = 0; i < keyLength; i++) {
+          entry = (Map.Entry) keyIterator.next();
+          printDepth(out, 4 * (depth + 1));
+          out.print("[" + entry.getKey() + "] => ");
+          if (entry.getValue() instanceof ArrayValue) {
+            out.println("Array");
+            printDepth(out, 4 * (depth + 2));
+            out.println('(');
+            // Iterate through each SimpleXMLElement
+            for (Map.Entry<Value, Value> mapEntry : ((ArrayValue) entry.getValue()).entrySet()) {
+              printDepth(out, 4 * (depth + 3));
+              out.print("[" + mapEntry.getKey().toString() + "] => ");
+              mapEntry.getValue().printR(env, out, depth + 4, valueSet);
+              out.println();
+            }
+            printDepth(out, 4 * (depth + 2));
+            out.println(')');
+          } else 
+            ((Value) entry.getValue()).printR(env, out, depth + 2, valueSet);
+          
+          out.println();
+        }
+  
+        //Print closing parenthesis
+        if (depth != 0) {
+          printDepth(out, 4 * depth);
+          out.println(")");
+        }
+      }
+    } else {
+      if (depth != 0) {
+        out.println("SimpleXMLElement Object");
+        
+        printDepth(out, 4 * depth);
+        out.println('(');
+        
+        printAttributes(out, depth);
+        printDepth(out, 4 * depth);
+        out.println(')');
+      }
+    }
+    
+    if (depth == 0)
+      out.println(')');
+  }
+  
+  protected void printDepth(WriteStream out, int depth)
+    throws IOException
+  {
+    for (int i = 0; i < depth; i++)
+      out.print(' ');
+  }  
 }

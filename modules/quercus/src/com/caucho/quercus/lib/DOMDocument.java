@@ -66,7 +66,7 @@ public class DOMDocument extends DOMNode {
 
   private String _encoding = "";
   private boolean _formatOutput;
-  private DOMImplementation__Class _domImplementation;
+  private DOMImplementationClass _domImplementation;
   private boolean _recover;
   private boolean _resolveExternals;
   private boolean _substituteEntities;
@@ -182,10 +182,10 @@ public class DOMDocument extends DOMNode {
     _formatOutput = value;
   }
   
-  public DOMImplementation__Class getImplementation()
+  public DOMImplementationClass getImplementation()
   {
     if (_domImplementation == null) {
-      _domImplementation = new DOMImplementation__Class(_env);
+      _domImplementation = new DOMImplementationClass(_env);
       _domImplementation.setDomImplementation(_document.getImplementation());
     }
     

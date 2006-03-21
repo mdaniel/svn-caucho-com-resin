@@ -3,7 +3,7 @@ com.caucho.quercus.lib.DOMComment
 com.caucho.quercus.lib.DOMDocument
 com.caucho.quercus.lib.DOMElement
 com.caucho.quercus.lib.DOMEntityReference
-com.caucho.quercus.lib.DOMImplementation__Class
+com.caucho.quercus.lib.DOMImplementationClass DOMImplementation #DOMImplementation is how it is referred to within PHP
 com.caucho.quercus.lib.DOMProcessingInstruction
 com.caucho.quercus.lib.DOMText
 com.caucho.quercus.lib.DOMXPath

@@ -686,17 +686,17 @@ public class JavaClassDefinition extends AbstractQuercusClass {
    * @throws IOException
    * @throws Throwable
    */
-  public boolean printRImpl(Env env,
-                            Object obj,
-                            WriteStream out,
-                            int depth,
-                            IdentityHashMap<Value, String> valueSet)
+  protected boolean printRImpl(Env env,
+                               Object obj,
+                               WriteStream out,
+                               int depth,
+                               IdentityHashMap<Value, String> valueSet)
     throws IOException, Throwable
   {
     
     if (_printRImpl == null) {
       return false;
-      //env.error("need to implement printRImpl(Env, WriteStream, int, IdentityHashMap<Value, String> in order to use print_r");
+
     }
     
     _printRImpl.invoke(obj, env, out, depth, valueSet);
@@ -712,7 +712,7 @@ public class JavaClassDefinition extends AbstractQuercusClass {
   {
     if (_varDumpImpl == null) {
       return false;
-      //env.error("need to implement varDumpImpl(Env, WriteStream, int, IdentityHashMap<Value, String> in order to use var_dump");
+      
     }
     
     _varDumpImpl.invoke(obj, env, out, depth, valueSet);

@@ -29,62 +29,34 @@
 
 package com.caucho.quercus;
 
-import java.io.IOException;
-import java.io.InputStream;
-
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Enumeration;
-import java.util.Map;
-
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import java.net.URL;
-
-import javax.sql.DataSource;
-
 import com.caucho.config.ConfigException;
-
-import com.caucho.quercus.env.Value;
-import com.caucho.quercus.env.StringValue;
-import com.caucho.quercus.env.StringValueImpl;
-import com.caucho.quercus.env.InternStringValue;
-import com.caucho.quercus.env.NullValue;
-import com.caucho.quercus.env.BooleanValue;
-import com.caucho.quercus.env.ArrayValue;
-import com.caucho.quercus.env.ArrayValueImpl;
-import com.caucho.quercus.env.LongValue;
-import com.caucho.quercus.env.DoubleValue;
-import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.VarMap;
-import com.caucho.quercus.env.ChainedMap;
-import com.caucho.quercus.env.AbstractQuercusClass;
-import com.caucho.quercus.env.QuercusClass;
-import com.caucho.quercus.env.JavaClassDefinition;
-import com.caucho.quercus.env.SessionArrayValue;
-
+import com.caucho.quercus.env.*;
 import com.caucho.quercus.module.QuercusModule;
 import com.caucho.quercus.module.StaticFunction;
-
-import com.caucho.quercus.page.PhpPage;
 import com.caucho.quercus.page.PageManager;
-
+import com.caucho.quercus.page.PhpPage;
 import com.caucho.quercus.parser.PhpParser;
-
-import com.caucho.quercus.program.PhpProgram;
 import com.caucho.quercus.program.InterpretedClassDef;
-
+import com.caucho.quercus.program.PhpProgram;
+import com.caucho.util.Log;
+import com.caucho.util.LruCache;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.Vfs;
 
-import com.caucho.util.Log;
-import com.caucho.util.LruCache;
+import javax.sql.DataSource;
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.net.URL;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Facade for the PHP language.
@@ -94,47 +66,47 @@ public class Quercus {
 
   private final PageManager _pageManager;
 
-  private HashMap<String,InternStringValue> _internMap
-    = new HashMap<String,InternStringValue>();
+  private HashMap<String, InternStringValue> _internMap
+    = new HashMap<String, InternStringValue>();
 
-  private HashMap<String,QuercusModule> _modules
-    = new HashMap<String,QuercusModule>();
+  private HashMap<String, QuercusModule> _modules
+    = new HashMap<String, QuercusModule>();
 
-  private HashMap<String,Value> _constMap
-    = new HashMap<String,Value>();
+  private HashMap<String, Value> _constMap
+    = new HashMap<String, Value>();
 
-  private HashMap<String,StaticFunction> _staticFunctions
-    = new HashMap<String,StaticFunction>();
+  private HashMap<String, StaticFunction> _staticFunctions
+    = new HashMap<String, StaticFunction>();
 
   private QuercusClass _stdClass;
 
-  private HashMap<String,AbstractQuercusClass> _staticClasses
-    = new HashMap<String,AbstractQuercusClass>();
+  private HashMap<String, AbstractQuercusClass> _staticClasses
+    = new HashMap<String, AbstractQuercusClass>();
 
-  private HashMap<String,AbstractQuercusClass> _lowerStaticClasses
-    = new HashMap<String,AbstractQuercusClass>();
+  private HashMap<String, AbstractQuercusClass> _lowerStaticClasses
+    = new HashMap<String, AbstractQuercusClass>();
 
-  private HashMap<String,JavaClassDefinition> _javaClassWrappers
-    = new HashMap<String,JavaClassDefinition>();
+  private HashMap<String, JavaClassDefinition> _javaClassWrappers
+    = new HashMap<String, JavaClassDefinition>();
 
-  private HashMap<String,JavaClassDefinition> _lowerJavaClassWrappers
-    = new HashMap<String,JavaClassDefinition>();
+  private HashMap<String, JavaClassDefinition> _lowerJavaClassWrappers
+    = new HashMap<String, JavaClassDefinition>();
 
-  private HashMap<String,StringValue> _iniMap
-    = new HashMap<String,StringValue>();
+  private HashMap<String, StringValue> _iniMap
+    = new HashMap<String, StringValue>();
 
-  private LruCache<String,PhpProgram> _evalCache
-    = new LruCache<String,PhpProgram>(256);
+  private LruCache<String, PhpProgram> _evalCache
+    = new LruCache<String, PhpProgram>(256);
 
   private static HashSet<String> _superGlobals
     = new HashSet<String>();
 
   // XXX: needs to be a timed LRU
-  private HashMap<String,SessionArrayValue> _sessionMap
-    = new HashMap<String,SessionArrayValue>();
+  private HashMap<String, SessionArrayValue> _sessionMap
+    = new HashMap<String, SessionArrayValue>();
 
-  private HashMap<String,Object> _specialMap
-    = new HashMap<String,Object>();
+  private HashMap<String, Object> _specialMap
+    = new HashMap<String, Object>();
 
   private DataSource _database;
 
@@ -267,8 +239,7 @@ public class Quercus {
   {
     // XXX: s/b specified some other way
     if ("magic_quotes_sybase".equals(value.toString())
-        ||  "magic_quotes_runtime".equals(value.toString()))
-    {
+        || "magic_quotes_runtime".equals(value.toString())) {
       if (value.toBoolean())
         throw new UnsupportedOperationException(name);
     }
@@ -307,12 +278,11 @@ public class Quercus {
    * Parses a quercus program.
    *
    * @param path the source file path
-   *
    * @return the parsed program
-   *
    * @throws IOException
    */
-  public PhpPage parse(Path path) throws IOException
+  public PhpPage parse(Path path)
+    throws IOException
   {
     return _pageManager.parse(path);
   }
@@ -321,12 +291,11 @@ public class Quercus {
    * Parses a quercus string.
    *
    * @param code the source code
-   *
    * @return the parsed program
-   *
    * @throws IOException
    */
-  public PhpProgram parseCode(String code) throws IOException
+  public PhpProgram parseCode(String code)
+    throws IOException
   {
     PhpProgram program = _evalCache.get(code);
 
@@ -342,12 +311,11 @@ public class Quercus {
    * Parses a quercus string.
    *
    * @param code the source code
-   *
    * @return the parsed program
-   *
    * @throws IOException
    */
-  public PhpProgram parseEvalExpr(String code) throws IOException
+  public PhpProgram parseEvalExpr(String code)
+    throws IOException
   {
     // XXX: possible conflict with parse eval because of the
     // return value changes
@@ -366,12 +334,11 @@ public class Quercus {
    *
    * @param args the arguments
    * @param code the source code
-   *
    * @return the parsed program
-   *
    * @throws IOException
    */
-  public Value parseFunction(String args, String code) throws IOException
+  public Value parseFunction(String args, String code)
+    throws IOException
   {
     return PhpParser.parseFunction(this, args, code);
   }
@@ -430,7 +397,7 @@ public class Quercus {
   /**
    * Returns the class maps.
    */
-  public HashMap<String,AbstractQuercusClass> getClassMap()
+  public HashMap<String, AbstractQuercusClass> getClassMap()
   {
     return _staticClasses;
   }
@@ -450,7 +417,7 @@ public class Quercus {
   {
     for (QuercusModule module : _modules.values()) {
       if (module.isExtensionLoaded(name))
-	return true;
+        return true;
     }
 
     return false;
@@ -463,16 +430,16 @@ public class Quercus {
   {
     for (QuercusModule module : _modules.values()) {
       if (module.isExtensionLoaded(name)) {
-	// XXX:
+        // XXX:
 
-	return new ArrayValueImpl();
+        return new ArrayValueImpl();
       }
     }
 
     return BooleanValue.FALSE;
   }
 
-  public HashMap<String,Value> getConstMap()
+  public HashMap<String, Value> getConstMap()
   {
     return _constMap;
   }
@@ -486,10 +453,10 @@ public class Quercus {
       InternStringValue value = _internMap.get(name);
 
       if (value == null) {
-	name = name.intern();
+        name = name.intern();
 
-	value = new InternStringValue(name);
-	_internMap.put(name, value);
+        value = new InternStringValue(name);
+        _internMap.put(name, value);
       }
 
       return value;
@@ -564,14 +531,15 @@ public class Quercus {
     ClassLoader loader = thread.getContextClassLoader();
 
     try {
-      String quercusModule = "META-INF/services/com.caucho.quercus.QuercusModule";
+      String quercusModule
+        = "META-INF/services/com.caucho.quercus.QuercusModule";
       Enumeration<URL> urls = loader.getResources(quercusModule);
 
       while (urls.hasMoreElements()) {
         URL url = urls.nextElement();
 
         InputStream is = null;
-        ReadStream rs =  null;
+        ReadStream rs = null;
         try {
           is = url.openStream();
           rs = Vfs.openRead(is);
@@ -596,8 +564,8 @@ public class Quercus {
    * Parses the services file, looking for PHP services.
    */
   private void parseServicesModule(ReadStream in)
-          throws IOException, ClassNotFoundException,
-          IllegalAccessException, InstantiationException
+    throws IOException, ClassNotFoundException,
+           IllegalAccessException, InstantiationException
   {
     ClassLoader loader = Thread.currentThread().getContextClassLoader();
     String line;
@@ -613,14 +581,14 @@ public class Quercus {
       if (line.length() > 0) {
         String className = line;
 
-	try {
-	  Class cl = Class.forName(className, false, loader);
+        try {
+          Class cl = Class.forName(className, false, loader);
 
-	  introspectPhpModuleClass(cl);
-	} catch (Throwable e) {
-	  log.info("Failed loading " + className + "\n" + e.toString());
-	  log.log(Level.FINE, e.toString(), e);
-	}
+          introspectPhpModuleClass(cl);
+        } catch (Throwable e) {
+          log.info("Failed loading " + className + "\n" + e.toString());
+          log.log(Level.FINE, e.toString(), e);
+        }
       }
     }
   }
@@ -639,7 +607,7 @@ public class Quercus {
 
     _modules.put(module.getClass().getName(), module);
 
-    Map<String,Value> map = module.getConstMap();
+    Map<String, Value> map = module.getConstMap();
 
     if (map != null)
       _constMap.putAll(map);
@@ -659,10 +627,10 @@ public class Quercus {
       Value value = objectToValue(obj);
 
       if (value != null)
-	_constMap.put(field.getName(), value);
+        _constMap.put(field.getName(), value);
     }
 
-    Map<String,StringValue> iniMap = module.getDefaultIni();
+    Map<String, StringValue> iniMap = module.getDefaultIni();
 
     if (map != null)
       _iniMap.putAll(iniMap);
@@ -679,16 +647,16 @@ public class Quercus {
       Class []params = method.getParameterTypes();
 
       try {
-	StaticFunction function = new StaticFunction(this, module, method);
+        StaticFunction function = new StaticFunction(this, module, method);
 
-	String methodName = method.getName();
+        String methodName = method.getName();
 
-	if (methodName.startsWith("quercus_"))
-	  methodName = methodName.substring(8);
+        if (methodName.startsWith("quercus_"))
+          methodName = methodName.substring(8);
 
-	_staticFunctions.put(methodName, function);
+        _staticFunctions.put(methodName, function);
       } catch (Exception e) {
-	log.log(Level.FINE, e.toString(), e);
+        log.log(Level.FINE, e.toString(), e);
       }
     }
   }
@@ -698,19 +666,16 @@ public class Quercus {
     if (obj == null)
       return NullValue.NULL;
     else if (Byte.class.equals(obj.getClass()) ||
-	     Short.class.equals(obj.getClass()) ||
-	     Integer.class.equals(obj.getClass()) ||
-	     Long.class.equals(obj.getClass())) {
+             Short.class.equals(obj.getClass()) ||
+             Integer.class.equals(obj.getClass()) ||
+             Long.class.equals(obj.getClass())) {
       return LongValue.create(((Number) obj).longValue());
-    }
-    else if (Float.class.equals(obj.getClass()) ||
-	     Double.class.equals(obj.getClass())) {
+    } else if (Float.class.equals(obj.getClass()) ||
+               Double.class.equals(obj.getClass())) {
       return DoubleValue.create(((Number) obj).doubleValue());
-    }
-    else if (String.class.equals(obj.getClass())) {
+    } else if (String.class.equals(obj.getClass())) {
       return new StringValueImpl((String) obj);
-    }
-    else {
+    } else {
       // XXX: unknown types, e.g. Character?
 
       return null;
@@ -726,14 +691,15 @@ public class Quercus {
     ClassLoader loader = thread.getContextClassLoader();
 
     try {
-      String quercusModule = "META-INF/services/com.caucho.quercus.QuercusClass";
+      String quercusModule
+        = "META-INF/services/com.caucho.quercus.QuercusClass";
       Enumeration<URL> urls = loader.getResources(quercusModule);
 
       while (urls.hasMoreElements()) {
         URL url = urls.nextElement();
 
         InputStream is = null;
-        ReadStream rs =  null;
+        ReadStream rs = null;
         try {
           is = url.openStream();
           rs = Vfs.openRead(is);
@@ -758,8 +724,8 @@ public class Quercus {
    * Parses the services file, looking for PHP services.
    */
   private void parseClassServicesModule(ReadStream in)
-          throws IOException, ClassNotFoundException,
-          IllegalAccessException, InstantiationException
+    throws IOException, ClassNotFoundException,
+           IllegalAccessException, InstantiationException
   {
     ClassLoader loader = Thread.currentThread().getContextClassLoader();
     String line;
@@ -773,13 +739,23 @@ public class Quercus {
       line = line.trim();
 
       if (line.length() > 0) {
-        String className = line;
+        Class cl;
 
-        Class cl = Class.forName(className, false, loader);
+        String[] classNames = line.split(" ");
 
-	p = className.lastIndexOf('.');
-
-        introspectPhpJavaClass(className.substring(p + 1), cl);
+        cl = Class.forName(classNames[0], false, loader);
+        
+        String className;
+        
+        if (classNames.length > 1)
+          className = classNames[classNames.length - 1];
+        else {
+          className = classNames[0];
+          p = className.lastIndexOf('.');
+          className = className.substring(p + 1);
+        }
+        
+        introspectPhpJavaClass(className, cl);
       }
     }
   }

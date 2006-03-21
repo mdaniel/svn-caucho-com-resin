@@ -29,7 +29,6 @@
 package com.caucho.quercus.lib;
 
 import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.NullValue;
 import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.quercus.module.NotNull;
 import com.caucho.quercus.module.Optional;
@@ -40,52 +39,54 @@ import org.w3c.dom.Document;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
  * PHP SimpleXML
  */
-public class QuercusSimpleXMLModule extends AbstractQuercusModule {
-  
-  private static final Logger log = Logger.getLogger(QuercusSimpleXMLModule.class.getName());
+public class QuercusSimpleXMLModule
+  extends AbstractQuercusModule
+{
+
+  private static final Logger log
+    = Logger.getLogger(QuercusSimpleXMLModule.class.getName());
   private static final L10N L = new L10N(QuercusSimpleXMLModule.class);
 
-  public Object simplexml_load_string(Env env,
-                                      @NotNull String data,
-                                      @Optional String className,
-                                      @Optional int options)
+  public SimpleXMLElement simplexml_load_string(Env env,
+                                                InputStream data,
+                                                @Optional String className,
+                                                @Optional int options)
   {
     DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
     try {
 
       DocumentBuilder builder = factory.newDocumentBuilder();
-      Document document = builder.parse(new ByteArrayInputStream(data.getBytes()));
-      //return new SimpleXMLElement(env, document, document.getDocumentElement());
-      return env.wrapJava(new SimpleXMLElement(env, document, document.getDocumentElement()));
+      Document document = builder.parse(data);
+      return new SimpleXMLElement(env, document, document.getDocumentElement());
 
     } catch (Exception e) {
       log.log(Level.FINE, L.l(e.toString()), e);
-      return NullValue.NULL;
+      return null;
     }
   }
 
-  public Object simplexml_load_file(Env env,
-                                    @NotNull Path file,
-                                    @Optional String className,
-                                    @Optional int options)
+  public SimpleXMLElement simplexml_load_file(Env env,
+                                              @NotNull Path file,
+                                              @Optional String className,
+                                              @Optional int options)
   {
     DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
     try {
-      
+
       DocumentBuilder builder = factory.newDocumentBuilder();
       Document document = builder.parse(file.openRead());
-      return env.wrapJava(new SimpleXMLElement(env, document, document.getDocumentElement()));
-      
+      return new SimpleXMLElement(env, document, document.getDocumentElement());
+
     } catch (Exception e) {
       log.log(Level.FINE, L.l(e.toString()), e);
-      return NullValue.NULL;
+      return null;
     }
   }
 
