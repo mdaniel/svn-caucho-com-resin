@@ -207,15 +207,40 @@ public class SimpleXMLElement {
    */
   public Value __getField(String name)
   {
-    Value result = null;
+    Value simpleXMLElement = null;
+    SimpleXMLElementArray simpleArray = null;
+    boolean isArray = false;
     
-    // Always fillChildMap because an element may have been overwritten
-    fillChildMap();
+    NodeList children = _element.getChildNodes();
+    int length = children.getLength();
     
-    if (!_childMap.isEmpty())   
-      result = _childMap.get(new StringValueImpl(name));
-
-    return result;
+    for (int i=0; i < length; i++) {
+      Node child = children.item(i);
+      
+      if (child.getNodeType() == Node.TEXT_NODE)
+        continue;
+      
+      if (name.equals(child.getNodeName())) {
+        if (isArray) {
+          // Already more than 1 child
+          simpleArray.put(_env.wrapJava(new SimpleXMLElement(_env, _document, (Element) child)));
+        } else if (simpleXMLElement != null) {
+          // 2nd child found
+          isArray = true;
+          simpleArray = new SimpleXMLElementArray();
+          simpleArray.put(simpleXMLElement);
+          simpleArray.put(_env.wrapJava(new SimpleXMLElement(_env, _document, (Element) child)));
+        } else {
+          // first child found
+          simpleXMLElement = _env.wrapJava(new SimpleXMLElement(_env, _document, (Element) child));
+        }
+      }
+    }
+    
+    if (simpleArray != null)
+      return simpleArray;
+    else
+      return simpleXMLElement;
   }
 
   /**
@@ -329,7 +354,6 @@ public class SimpleXMLElement {
   public Value asXML()
   {
     return new StringValueImpl(DOMNodeUtil.asXML(_element).toString());
-    //return new StringValueImpl(DOMNodeUtil.asXMLVersion(_element,"1.0").toString());
   }
   
   /**
