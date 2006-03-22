@@ -39,44 +39,32 @@ public class DOMNodeFactory {
   {
     if (node == null)
       return null;
-    
-    if (node instanceof Attr) {
-      DOMAttr result = new DOMAttr(env, "foo", "");
-      result.setAttr((Attr) node);
-      return result;
-    } else if (node instanceof Element) {
-      DOMElement result = new DOMElement(env, "foo", "", "");
-      result.setElement((Element) node);
-      return result;
-    } else if (node instanceof Comment) {
-      DOMComment result = new DOMComment(env, "foo");
-      result.setComment((Comment) node);
-      return result;
-    } else if (node instanceof Text) {
-      DOMText result = new DOMText(env, "foo");
-      result.setText((Text) node);
-      return result;
-    } else if (node instanceof Document) {
-      DOMDocument result = new DOMDocument(env, "", "");
-      result.setDocument((Document) node);
-      return result;
-    } else if (node instanceof DocumentType)
-      return new DOMDocumentType(env, (DocumentType) node);
-    else if (node instanceof DocumentFragment)
-      return new DOMDocumentFragment(env, (DocumentFragment) node);
-    else if (node instanceof Entity)
-      return new DOMEntity(env, (Entity) node);
-    else if (node instanceof EntityReference) {
-      DOMEntityReference result = new DOMEntityReference(env, "foo");
-      result.setEntityReference((EntityReference) node);
-      return result;
-    } else if (node instanceof Notation)
-      return new DOMNotation(env, (Notation) node);
-    else if (node instanceof ProcessingInstruction) {
-      DOMProcessingInstruction result = new DOMProcessingInstruction(env);
-      result.setProcessingInstruction((ProcessingInstruction) node);
-      return result;
-    } else
-      return null;
+
+    switch (node.getNodeType()) {
+      case Node.ATTRIBUTE_NODE:
+        return new DOMAttr(env, (Attr) node);
+      case Node.ELEMENT_NODE:
+        return new DOMElement(env, (Element) node);
+      case Node.COMMENT_NODE:
+        return new DOMComment(env, (Comment) node);
+      case Node.TEXT_NODE:
+        return new DOMText(env, (Text) node);
+      case Node.DOCUMENT_NODE:
+        return new DOMDocument(env, (Document) node);
+      case Node.DOCUMENT_TYPE_NODE:
+        return new DOMDocumentType(env, (DocumentType) node);
+      case Node.DOCUMENT_FRAGMENT_NODE:
+        return new DOMDocumentFragment(env, (DocumentFragment) node);
+      case Node.ENTITY_NODE:
+        return new DOMEntity(env, (Entity) node);
+      case Node.ENTITY_REFERENCE_NODE:
+        return new DOMEntityReference(env, (EntityReference) node);
+      case Node.NOTATION_NODE:
+        return new DOMNotation(env, (Notation) node);
+      case Node.PROCESSING_INSTRUCTION_NODE:
+        return new DOMProcessingInstruction(env, (ProcessingInstruction) node);
+      default:
+        return null;
+    }
   }
 }

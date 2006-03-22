@@ -32,6 +32,7 @@ package com.caucho.quercus.env;
 import com.caucho.quercus.Quercus;
 import com.caucho.quercus.QuercusRuntimeException;
 import com.caucho.quercus.expr.Expr;
+import com.caucho.quercus.module.Construct;
 import com.caucho.quercus.module.JavaMarshall;
 import com.caucho.quercus.module.Marshall;
 import com.caucho.util.L10N;
@@ -481,9 +482,19 @@ public class JavaClassDefinition extends AbstractQuercusClass {
 
     Constructor []cons = _type.getConstructors();
 
-    if (cons.length > 0)
-      _cons = new JavaConstructor(_quercus, cons[0]);
-    else
+    if (cons.length > 0) {
+      int i;
+      for (i = 0; i < cons.length; i++) {
+        if (cons[i].isAnnotationPresent(Construct.class))
+          break;
+      }
+      
+      if (i < cons.length)
+        _cons = new JavaConstructor(_quercus, cons[i]);
+      else
+        _cons = new JavaConstructor(_quercus, cons[0]);
+      
+    } else
       _cons = null;
 
     try {

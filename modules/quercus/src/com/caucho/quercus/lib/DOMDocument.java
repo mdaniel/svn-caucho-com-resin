@@ -35,6 +35,7 @@ import com.caucho.quercus.env.LongValue;
 import com.caucho.quercus.env.StringInputStream;
 import com.caucho.quercus.env.StringValueImpl;
 import com.caucho.quercus.env.Value;
+import com.caucho.quercus.module.Construct;
 import com.caucho.quercus.module.Optional;
 import com.caucho.util.L10N;
 import com.caucho.util.Log;
@@ -81,6 +82,7 @@ public class DOMDocument extends DOMNode {
   // 1.0 is default value;
   private String _version = "1.0";
 
+  @Construct
   public DOMDocument(Env env,
                      @Optional String version,
                      @Optional String encoding)
@@ -96,14 +98,10 @@ public class DOMDocument extends DOMNode {
       _encoding = encoding; //Used when writing XML to a file
   }
 
-  // Procedure created to replace constructor that takes (Env, Document)
-  // Introspection can only handle one constructor
-  // Therefore, all calls to new DOMDocument(Env, Document) will be replaced by
-  // foo = new DOMDocument(Env, "" , "");
-  // foo.setDocument(document);
-  
-  public void setDocument(Document document)
+  public DOMDocument(Env env,
+                     Document document)
   {
+    _env = env;
     _document = document;
   }
   
@@ -323,17 +321,13 @@ public class DOMDocument extends DOMNode {
 
   public DOMAttr createAttribute(String name)
   {
-    DOMAttr result = new DOMAttr(_env, name, "");
-    result.setAttr(_document.createAttribute(name));
-    return result;
+    return new DOMAttr(_env, _document.createAttribute(name));
   }
 
   public DOMAttr createAttributeNS(String namespaceURI,
                                    String qualifiedName)
   {
-    DOMAttr result = new DOMAttr(_env, "foo", "");
-    result.setAttr(_document.createAttributeNS(namespaceURI, qualifiedName));
-    return result;
+    return new DOMAttr(_env, _document.createAttributeNS(namespaceURI, qualifiedName));
   }
 
   public DOMNode createCDATASection(String data)
@@ -343,9 +337,7 @@ public class DOMDocument extends DOMNode {
 
   public DOMComment createComment(String data)
   {
-    DOMComment result = new DOMComment(_env, "foo");
-    result.setComment( _document.createComment(data));
-    return result;
+    return new DOMComment(_env, _document.createComment(data));
   }
 
  public DOMDocumentFragment createDocumentFragment()
@@ -356,8 +348,7 @@ public class DOMDocument extends DOMNode {
  public DOMElement createElement(String tagName,
                                  @Optional String value)
   {
-    DOMElement result = new DOMElement(_env, tagName, value, "");
-    result.setElement(_document.createElement(tagName));
+    DOMElement result = new DOMElement(_env, _document.createElement(tagName));
 
     if (value != null)
       result.setNodeValue(value);
@@ -374,24 +365,18 @@ public class DOMDocument extends DOMNode {
 
   public DOMEntityReference createEntityReference(String name)
   {
-    DOMEntityReference result = new DOMEntityReference(_env, "foo");
-    result.setEntityReference(_document.createEntityReference(name));
-    return result;
+    return new DOMEntityReference(_env, _document.createEntityReference(name));
   }
 
   public DOMProcessingInstruction createProcessingInstruction(String target,
                                                               @Optional String data)
   {
-    DOMProcessingInstruction result = new DOMProcessingInstruction(_env);
-    result.setProcessingInstruction(_document.createProcessingInstruction(target, data));
-    return result;
+    return new DOMProcessingInstruction(_env, _document.createProcessingInstruction(target, data));
   }
 
   public DOMText createTextNode(String data)
   {
-    DOMText result = new DOMText(_env, data);
-    result.setText(_document.createTextNode(data));
-    return result;
+    return new DOMText(_env, _document.createTextNode(data));
   }
 
   public DOMNode getElementById(String elementId)

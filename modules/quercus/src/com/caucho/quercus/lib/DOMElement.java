@@ -31,6 +31,7 @@ package com.caucho.quercus.lib;
 
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
+import com.caucho.quercus.module.Construct;
 import com.caucho.quercus.module.Optional;
 
 import org.w3c.dom.DOMException;
@@ -51,6 +52,7 @@ public class DOMElement extends DOMNode {
     _element = element;
   }
 
+  @Construct
   public DOMElement(Env env,
                     String name,
                     @Optional String value,
@@ -62,11 +64,6 @@ public class DOMElement extends DOMNode {
     // XXX: deal with value and namespaceURI
   }
 
-  public void setElement(Element element)
-  {
-    _element = element;
-  }
-  
   public Node getNode()
   {
     return _element;

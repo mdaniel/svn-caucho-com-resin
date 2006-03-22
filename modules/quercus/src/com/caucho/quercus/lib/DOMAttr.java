@@ -30,6 +30,7 @@
 package com.caucho.quercus.lib;
 
 import com.caucho.quercus.env.Env;
+import com.caucho.quercus.module.Construct;
 import com.caucho.quercus.module.Optional;
 
 import org.w3c.dom.Attr;
@@ -40,6 +41,7 @@ public class DOMAttr extends DOMNode {
   private Attr _attr;
   private Env _env;
 
+  @Construct
   public DOMAttr(Env env,
                  String name,
                  @Optional String value)
@@ -51,8 +53,10 @@ public class DOMAttr extends DOMNode {
       _attr.setValue(value);
   }
   
-  public void setAttr(Attr attr)
+  public DOMAttr(Env env,
+                 Attr attr)
   {
+    _env = env;
     _attr = attr;
   }
   

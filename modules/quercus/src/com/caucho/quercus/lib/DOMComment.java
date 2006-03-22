@@ -30,6 +30,7 @@
 package com.caucho.quercus.lib;
 
 import com.caucho.quercus.env.Env;
+import com.caucho.quercus.module.Construct;
 
 import org.w3c.dom.Comment;
 
@@ -38,6 +39,7 @@ public class DOMComment extends DOMCharacterData {
   private Comment _comment;
   private Env _env;
 
+  @Construct
   public DOMComment(Env env,
                     String data)
   {
@@ -45,8 +47,10 @@ public class DOMComment extends DOMCharacterData {
     _comment = DOMDocument.createDocument().createComment(data);
   }
   
-  public void setComment(Comment comment)
+  public DOMComment(Env env,
+                    Comment comment)
   {
+    _env = env;
     _comment = comment;
   }
   

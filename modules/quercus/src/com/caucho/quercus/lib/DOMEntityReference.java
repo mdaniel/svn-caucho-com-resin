@@ -30,6 +30,7 @@
 package com.caucho.quercus.lib;
 
 import com.caucho.quercus.env.Env;
+import com.caucho.quercus.module.Construct;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.EntityReference;
@@ -39,6 +40,7 @@ public class DOMEntityReference extends DOMNode {
   private Env _env;
   private EntityReference _reference;
 
+  @Construct
   public DOMEntityReference(Env env,
                             String name)
   {
@@ -48,6 +50,13 @@ public class DOMEntityReference extends DOMNode {
     _reference = doc.createEntityReference(name);
   }
 
+  public DOMEntityReference(Env env,
+                            EntityReference reference)
+  {
+    _env = env;
+    _reference = reference;
+  }
+  
   public void setEntityReference(EntityReference reference)
   {
     _reference = reference;

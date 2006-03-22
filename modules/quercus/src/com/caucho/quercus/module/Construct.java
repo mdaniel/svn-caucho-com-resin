@@ -27,54 +27,19 @@
  * @author Charles Reich
  */
 
-package com.caucho.quercus.lib;
+package com.caucho.quercus.module;
 
-import com.caucho.quercus.env.Env;
-import com.caucho.quercus.module.Construct;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-import org.w3c.dom.ProcessingInstruction;
-
-public class DOMProcessingInstruction extends DOMNode {
-
-  private Env _env;
-  private ProcessingInstruction _pi;
-
-  @Construct
-  public DOMProcessingInstruction(Env env)
-  {
-    _env = env;
-    _pi = DOMDocument.createDocument().createProcessingInstruction("","");
-  }
-
-  public DOMProcessingInstruction(Env env,
-                                  ProcessingInstruction pi)
-  {
-    _env = env;
-    _pi = pi;
-  }
-  
-  public ProcessingInstruction getNode()
-  {
-    return _pi;
-  }
-
-  public Env getEnv()
-  {
-    return _env;
-  }
-
-  public String getData()
-  {
-    return _pi.getData();
-  }
-
-  public String getTarget()
-  {
-    return _pi.getTarget();
-  }
-
-  public void setData(String data)
-  {
-    _pi.setData(data);
-  }
+/**
+ * The @Construct annotation.
+ * Used to tell PHP introspection which constructor to use
+ * when $bar = new Foo(...); is called
+ */
+@Target({ElementType.CONSTRUCTOR})
+@Retention(RetentionPolicy.RUNTIME)
+public @interface Construct {
 }

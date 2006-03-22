@@ -30,6 +30,7 @@
 package com.caucho.quercus.lib;
 
 import com.caucho.quercus.env.Env;
+import com.caucho.quercus.module.Construct;
 import com.caucho.quercus.module.Optional;
 
 import org.w3c.dom.Document;
@@ -39,12 +40,20 @@ public class DOMText extends DOMCharacterData {
   private Env _env;
   private Text _text;
 
+  @Construct
   public DOMText(Env env,
                  @Optional String data)
   {
     _env = env;
     Document doc = DOMDocument.createDocument();
     _text = doc.createTextNode(data);
+  }
+  
+  public DOMText(Env env,
+                 Text text)
+  {
+    _env = env;
+    _text = text;
   }
   
   public void setText(Text text)
@@ -79,8 +88,6 @@ public class DOMText extends DOMCharacterData {
   
   public DOMText splitText(int offset)
   {
-    DOMText result = new DOMText(_env, "foo");
-    result.setText(_text.splitText(offset));
-    return result;
+    return new DOMText(_env, _text.splitText(offset));
   }
 }

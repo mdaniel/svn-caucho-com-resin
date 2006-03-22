@@ -29,13 +29,10 @@
 
 package com.caucho.quercus.lib;
 
-import com.caucho.util.L10N;
-
+import com.caucho.quercus.env.*;
 import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.quercus.module.Optional;
-
-import com.caucho.quercus.env.*;
-
+import com.caucho.util.L10N;
 import com.caucho.util.RandomUtil;
 
 /**
@@ -70,7 +67,7 @@ public class QuercusMathModule extends AbstractQuercusModule {
     return Math.log(v) / Math.log(2);
   }
 
-  public static Value abs(Env env, Value value)
+  public static Value abs(Value value)
   {
     if (value instanceof DoubleValue)
       return new DoubleValue(Math.abs(value.toDouble()));

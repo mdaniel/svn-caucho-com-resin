@@ -63,9 +63,7 @@ public class DOMImplementationClass {
     if (doctype != null)
       dt = doctype.getNode();
 
-    DOMDocument result = new DOMDocument(_env, "", "");
-    result.setDocument(_domImplementation.createDocument(namespaceURI, qualifiedName, dt));
-    return result;
+    return new DOMDocument(_env, _domImplementation.createDocument(namespaceURI, qualifiedName, dt));
   }
 
   public DOMDocumentType createDocumentType(@Optional String qualifiedName,
