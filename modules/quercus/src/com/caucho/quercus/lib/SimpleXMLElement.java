@@ -82,10 +82,10 @@ public class SimpleXMLElement {
   }
 
   /**
-   * helper function to fill _attributes if _element has
-   * any attributes.  If not sets _attributes to NullValue.NULL.
+   * 
+   * @return either ArrayValueImpl or NullValue.NULL
    */
-  private void setAttributes()
+  public Value attributes()
   {
     NamedNodeMap attrs = _element.getAttributes();
     int attrLength = attrs.getLength();
@@ -105,18 +105,7 @@ public class SimpleXMLElement {
       _attributes = NullValue.NULL;
 
     }
-  }
-
-  /**
-   * 
-   * @return either ArrayValueImpl or NullValue.NULL
-   */
-  public Value attributes()
-  {
-    if (_attributes == null) {
-      setAttributes();
-    }
-
+    
     return _attributes;
   }
 
@@ -250,20 +239,17 @@ public class SimpleXMLElement {
    */
   public Value __get(Value name)
   {
-    Value result = NullValue.NULL;
+    NamedNodeMap attrs = _element.getAttributes();
+    int attrLength = attrs.getLength();
+    String attrName = name.toString();
     
-    // First check to see if there are attributes
-    // If so and name is an attribute,
-    // then return the attribute value
-    attributes();
-
-    if (_attributes instanceof ArrayValue) {
-      result = _attributes.get(name);
-      if (result instanceof StringValue)
-        return result;
+    for (int i = 0; i < attrLength; i++) {
+      Node attr = attrs.item(i);
+      if (attrName.equals(attr.getNodeName()))
+        return new StringValueImpl(attr.getNodeValue());
     }
-
-    return result;
+    
+    return NullValue.NULL;
   }
 
   /**
