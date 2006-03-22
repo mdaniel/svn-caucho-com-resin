@@ -49,7 +49,7 @@ public class DOMNodeListValue extends ArrayValueImpl {
   
   public DOMNode item(Value index)
   {
-    return DOMNodeFactory.createDOMNode(_env, _nodeList.item(index.toInt()));
+    return DOMNodeUtil.createDOMNode(_env, _nodeList.item(index.toInt()));
   }
   
   public int getLength()

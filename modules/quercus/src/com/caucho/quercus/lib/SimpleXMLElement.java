@@ -328,100 +328,10 @@ public class SimpleXMLElement {
    */
   public Value asXML()
   {
-    return asXMLVersion("1.0");
-  }
-
-  public Value asXMLVersion(String version)
-  {
-    StringBuilder result = new StringBuilder();
-
-    result.append("<?xml version=\"").append(version).append("\"?>\n");
-    result.append(generateXML().toString());
-
-    return new StringValueImpl(result.toString());
+    return new StringValueImpl(DOMNodeUtil.asXML(_element).toString());
+    //return new StringValueImpl(DOMNodeUtil.asXMLVersion(_element,"1.0").toString());
   }
   
-  public Value asXMLVersionEncoding(String version,
-                                    String encoding)
-  {
-    StringBuilder result = new StringBuilder();
-    
-    result.append("<?xml version=\"").append(version).append("\"");
-    
-    if (!"".equals(encoding)) {
-      result.append(" encoding=\"").append(encoding).append("\"");
-    }
-    
-    result.append("?>\n");
-    result.append(generateXML().toString());
-    
-    return new StringValueImpl(result.toString());
-  }
-  
-  /**
-   * recursive helper function for asXML
-   * @return XML in string buffer
-   */
-  public StringBuilder generateXML()
-  {
-    StringBuilder sb = new StringBuilder();
-
-    if (_element == null)
-        return sb;
-    
-    // If this is a text node, then just return the text
-    if (_element.getNodeType() == Node.TEXT_NODE) {
-      sb.append(_element.getNodeValue());
-      return sb;
-    }
-
-    // not a text node
-    sb.append("<");
-
-    sb.append(_element.getNodeName());
-
-    // add attributes, if any
-    NamedNodeMap attrs = _element.getAttributes();
-    int attrLength = attrs.getLength();
-
-    for (int i=0; i < attrLength; i++) {
-      Node attribute = attrs.item(i);
-      sb.append(" ")
-        .append(attribute.getNodeName())
-        .append("=\"")
-        .append(attribute.getNodeValue())
-        .append("\"");
-    }
-
-    // recurse through children, if any
-    NodeList children = _element.getChildNodes();
-    int nodeLength = children.getLength();
-
-    if (nodeLength == 0) {
-      sb.append(" />");
-      return sb;
-    }
-
-    sb.append(">");
-
-    // there are children
-    for (int i=0; i < nodeLength; i++) {
-      Node child = children.item(i);
-
-      if (child.getNodeType() == Node.TEXT_NODE) {
-        sb.append(child.getNodeValue());
-        continue;
-      }
-      SimpleXMLElement simple = new SimpleXMLElement(_env, _document, (Element) child);
-      sb.append(simple.generateXML());
-    }
-
-    // add closing tag
-    sb.append("</").append(_element.getNodeName()).append(">");
-
-    return sb;
-  }
-
   /**
    * Does not support relative xpath
    * 

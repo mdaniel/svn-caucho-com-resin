@@ -98,7 +98,7 @@ abstract public class DOMNode {
 
   public DOMNode getParentNode()
   {
-    return DOMNodeFactory.createDOMNode(getEnv(), getNode().getParentNode());
+    return DOMNodeUtil.createDOMNode(getEnv(), getNode().getParentNode());
   }
 
   public ArrayValue getChildNodes()
@@ -112,7 +112,7 @@ abstract public class DOMNode {
     for (int i = 0; i < length; i++) {
       Node child = childList.item(i);
 
-      result.put(getEnv().wrapJava(DOMNodeFactory.createDOMNode(env, child)));
+      result.put(getEnv().wrapJava(DOMNodeUtil.createDOMNode(env, child)));
     }
 
     return result;
@@ -120,22 +120,22 @@ abstract public class DOMNode {
 
   public DOMNode getFirstChild()
   {
-    return DOMNodeFactory.createDOMNode(getEnv(), getNode().getFirstChild());
+    return DOMNodeUtil.createDOMNode(getEnv(), getNode().getFirstChild());
   }
 
   public DOMNode getLastChild()
   {
-    return DOMNodeFactory.createDOMNode(getEnv(), getNode().getLastChild());
+    return DOMNodeUtil.createDOMNode(getEnv(), getNode().getLastChild());
   }
 
   public DOMNode getPreviousSibling()
   {
-    return DOMNodeFactory.createDOMNode(getEnv(), getNode().getPreviousSibling());
+    return DOMNodeUtil.createDOMNode(getEnv(), getNode().getPreviousSibling());
   }
 
   public DOMNode getNextSibling()
   {
-    return DOMNodeFactory.createDOMNode(getEnv(), getNode().getNextSibling());
+    return DOMNodeUtil.createDOMNode(getEnv(), getNode().getNextSibling());
   }
 
   public DOMNamedNodeMap getAttributes()
@@ -146,7 +146,7 @@ abstract public class DOMNode {
     DOMNamedNodeMap result = new DOMNamedNodeMap(getEnv(), attributes);
     
     for (int i = 0; i < length; i++) {
-      result.put(getEnv().wrapJava(DOMNodeFactory.createDOMNode(getEnv(), attributes.item(i))));
+      result.put(getEnv().wrapJava(DOMNodeUtil.createDOMNode(getEnv(), attributes.item(i))));
     }
     
     return result;
@@ -199,7 +199,7 @@ abstract public class DOMNode {
 
   public DOMNode cloneNode(@Optional("false") boolean deep)
   {
-    return DOMNodeFactory.createDOMNode(getEnv(), getNode().cloneNode(deep));
+    return DOMNodeUtil.createDOMNode(getEnv(), getNode().cloneNode(deep));
   }
 
   public boolean hasAttributes()

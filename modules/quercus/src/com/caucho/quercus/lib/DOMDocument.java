@@ -42,7 +42,6 @@ import com.caucho.util.Log;
 
 import org.w3c.dom.DOMConfiguration;
 import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
@@ -140,12 +139,12 @@ public class DOMDocument extends DOMNode {
   
   public DOMNode getDoctype()
   {
-    return DOMNodeFactory.createDOMNode(_env, _document.getDoctype());
+    return DOMNodeUtil.createDOMNode(_env, _document.getDoctype());
   }
   
   public DOMNode getDocumentElement()
   {
-    return DOMNodeFactory.createDOMNode(_env, _document.getDocumentElement());
+    return DOMNodeUtil.createDOMNode(_env, _document.getDocumentElement());
   }
   
   public String getDocumentURI()
@@ -381,7 +380,7 @@ public class DOMDocument extends DOMNode {
 
   public DOMNode getElementById(String elementId)
   {
-    return DOMNodeFactory.createDOMNode(_env, _document.getElementById(elementId));
+    return DOMNodeUtil.createDOMNode(_env, _document.getElementById(elementId));
   }
 
   public DOMNodeListValue getElementsByTagName(String tagname)
@@ -391,7 +390,7 @@ public class DOMDocument extends DOMNode {
     int length = elements.getLength();
     
     for (int i=0; i < length; i++) {
-      result.put(_env.wrapJava(DOMNodeFactory.createDOMNode(_env, elements.item(i))));
+      result.put(_env.wrapJava(DOMNodeUtil.createDOMNode(_env, elements.item(i))));
     }
     
     return result;
@@ -405,7 +404,7 @@ public class DOMDocument extends DOMNode {
     int length = elements.getLength();
 
     for (int i=0; i < length; i++) {
-      result.put(_env.wrapJava(DOMNodeFactory.createDOMNode(_env, elements.item(i))));
+      result.put(_env.wrapJava(DOMNodeUtil.createDOMNode(_env, elements.item(i))));
     }
 
     return result;
@@ -414,7 +413,7 @@ public class DOMDocument extends DOMNode {
   public DOMNode importNode(DOMNode node,
                             @Optional("false") boolean deep)
   {
-    return DOMNodeFactory.createDOMNode(_env, _document.importNode(node.getNode(), deep));
+    return DOMNodeUtil.createDOMNode(_env, _document.importNode(node.getNode(), deep));
   }
 
   //XXX: need to implement static version which returns a DOMDocument
@@ -550,8 +549,9 @@ public class DOMDocument extends DOMNode {
     try {
       
       bw = new BufferedWriter (new FileWriter(new File(fileName)));
-      SimpleXMLElement simpleXML = new SimpleXMLElement(env, _document, _document.getDocumentElement());
-      String asXML = simpleXML.asXML().toString();
+      //SimpleXMLElement simpleXML = new SimpleXMLElement(env, _document, _document.getDocumentElement());
+      //String asXML = simpleXML.asXML().toString();
+      String asXML = DOMNodeUtil.asXML(_document.getDocumentElement()).toString();
       bw.write(asXML);
       result = new LongValue(asXML.length());
       
@@ -578,19 +578,22 @@ public class DOMDocument extends DOMNode {
   public Value saveXML(@Optional DOMNode domNode,
                        @Optional int options)
   {  
-    SimpleXMLElement simpleXML;
+    //SimpleXMLElement simpleXML;
     Node node = null;
     
     if (domNode != null)
       node = domNode.getNode();
     
     if (node == null) {
-      simpleXML = new SimpleXMLElement(_env, _document, _document.getDocumentElement());
-      return new StringValueImpl(simpleXML.asXMLVersionEncoding(_version, _encoding).toString());
+      //simpleXML = new SimpleXMLElement(_env, _document, _document.getDocumentElement());
+      return new StringValueImpl(DOMNodeUtil.asXMLVersionEncoding(_document.getDocumentElement(),_version, _encoding).toString());
+      //return new StringValueImpl(simpleXML.asXMLVersionEncoding(_version, _encoding).toString());
       
     } else {
-      simpleXML = new SimpleXMLElement(_env, _document, ((Element) node));
-      return new StringValueImpl(simpleXML.generateXML().toString());
+      //StringBuilder sb = new StringBuilder();
+      return new StringValueImpl(DOMNodeUtil.generateXML(node, new StringBuilder()).toString());
+      //simpleXML = new SimpleXMLElement(_env, _document, ((Element) node));
+      //return new StringValueImpl(simpleXML.generateXML().toString());
     }
   }
   

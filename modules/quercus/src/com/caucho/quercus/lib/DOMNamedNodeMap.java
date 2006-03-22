@@ -48,17 +48,17 @@ public class DOMNamedNodeMap extends ArrayValueImpl {
   
   public DOMNode getNamedItem(String name)
   {
-    return DOMNodeFactory.createDOMNode(_env, _namedNodeMap.getNamedItem(name));
+    return DOMNodeUtil.createDOMNode(_env, _namedNodeMap.getNamedItem(name));
   }
   
   public DOMNode getNamedItemNS(String namespaceURI,
                                 String localName)
   {
-    return DOMNodeFactory.createDOMNode(_env, _namedNodeMap.getNamedItemNS(namespaceURI, localName));
+    return DOMNodeUtil.createDOMNode(_env, _namedNodeMap.getNamedItemNS(namespaceURI, localName));
   }
   
   public DOMNode item(int index)
   {
-    return DOMNodeFactory.createDOMNode(_env, _namedNodeMap.item(index));
+    return DOMNodeUtil.createDOMNode(_env, _namedNodeMap.item(index));
   }
 }

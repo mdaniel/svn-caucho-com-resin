@@ -91,13 +91,13 @@ public class DOMElement extends DOMNode {
 
   public DOMNode getAttributeNode(String name)
   {
-    return DOMNodeFactory.createDOMNode(_env, _element.getAttributeNode(name));
+    return DOMNodeUtil.createDOMNode(_env, _element.getAttributeNode(name));
   }
 
   public DOMNode getAttributeNodeNS(String namespaceURI,
                                     String localName)
   {
-    return DOMNodeFactory.createDOMNode(_env, _element.getAttributeNodeNS(namespaceURI, localName));
+    return DOMNodeUtil.createDOMNode(_env, _element.getAttributeNodeNS(namespaceURI, localName));
   }
 
   public String getAttributeNS(String namespaceURI,
@@ -113,7 +113,7 @@ public class DOMElement extends DOMNode {
     int length = elements.getLength();
 
     for (int i=0; i < length; i++) {
-      result.put(_env.wrapJava(DOMNodeFactory.createDOMNode(_env, elements.item(i))));
+      result.put(_env.wrapJava(DOMNodeUtil.createDOMNode(_env, elements.item(i))));
     }
 
     return result;
@@ -127,7 +127,7 @@ public class DOMElement extends DOMNode {
     int length = elements.getLength();
 
     for (int i=0; i < length; i++) {
-      result.put(_env.wrapJava(DOMNodeFactory.createDOMNode(_env, elements.item(i))));
+      result.put(_env.wrapJava(DOMNodeUtil.createDOMNode(_env, elements.item(i))));
     }
 
     return result;
@@ -188,12 +188,12 @@ public class DOMElement extends DOMNode {
 
   public DOMNode setAttributeNode(DOMAttr newAttr)
   {
-    return DOMNodeFactory.createDOMNode(_env, _element.setAttributeNode(newAttr.getNode()));
+    return DOMNodeUtil.createDOMNode(_env, _element.setAttributeNode(newAttr.getNode()));
   }
 
   public DOMNode setAttributeNodeNS(DOMAttr newAttr)
   {
-    return DOMNodeFactory.createDOMNode(_env, _element.setAttributeNodeNS(newAttr.getNode()));
+    return DOMNodeUtil.createDOMNode(_env, _element.setAttributeNodeNS(newAttr.getNode()));
   }
 
   public void setAttributeNS(String namespaceURI,

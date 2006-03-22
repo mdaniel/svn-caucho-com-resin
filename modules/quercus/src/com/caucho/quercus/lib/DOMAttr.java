@@ -82,7 +82,7 @@ public class DOMAttr extends DOMNode {
   
   public DOMNode getOwnerElement()
   {
-    return DOMNodeFactory.createDOMNode(_env, _attr.getOwnerElement());
+    return DOMNodeUtil.createDOMNode(_env, _attr.getOwnerElement());
   }
   
   public DOMTypeInfo getSchemaTypeInfo()
