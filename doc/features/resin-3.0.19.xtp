@@ -8,6 +8,13 @@
 
 <summary objsummary='localtoc'/>
 
+<section title="select-manager">
+
+<p>The &lt;select-manager> tag replaces the &lt;enable-select-manager/>
+introduced in 3.0.18.</p>
+
+</section>
+
 <section title="JspServlet">
 
 <p>The number of JSP .class files cached can now be configured in the JSP

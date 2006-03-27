@@ -568,6 +568,19 @@ public class XmlParser extends AbstractParser {
 	      throw error("unknown declaration `" + name + "'");
 	  } else if (ch == '-')
 	    parseComment();
+	  else if (ch == '[') {
+	    ch = _reader.parseName(_text, read());
+	    String name = _text.toString();
+
+	    if (name.equals("IGNORE")) {
+	      parseIgnore();
+	    }
+	    else if (name.equals("INCLUDE")) {
+	      parseIgnore();
+	    }
+	    else
+	      throw error("unknown declaration `" + name + "'");
+	  }
 	} else if (ch == '?') {
 	  parsePI();
 	} else 
@@ -1810,6 +1823,25 @@ public class XmlParser extends AbstractParser {
     }
     else if (! _isCoalescing)
       appendText();
+  }
+
+  /**
+   * Ignores content to the ']]>'
+   */
+  private void parseIgnore()
+    throws IOException, SAXException
+  {
+    int ch = read();
+
+    while (ch >= 0) {
+      if (ch != ']') {
+	ch = read();
+      }
+      else if ((ch = read()) != ']') {
+      }
+      else if ((ch = read()) == '>')
+	return;
+    }
   }
 
   private int parseContentSpec(QElementDef def, int ch)

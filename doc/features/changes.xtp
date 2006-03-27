@@ -4,6 +4,14 @@
 
 <s2 title='3.0.snap - Mar 17, 2006'>
 <ul>
+<li>./configure needs to set apache_exe from apxs when available (#996, rep by pomo)
+<li>Add basic IGNORE support for XML (#962)
+<li>@EJB and @Inject need to work with inheritance (#952)
+<li>EJB 2.1 synchronization with the database is via java:comp/env/persistence/PersistenceContext/resin-ejb (#904, rep by koreth)
+<li>synchronization issues with access.log (#927, rep by Han)
+<li>jspx namespace with http: URI was causing exception while looking for tag (#993, rep by jrg745)
+<li>JSTL wasn't handling {0,number,currency} properly (#931, rep by Keith Fetterman)
+<li>use select-manager instead of enable-select-manager (#973)
 <li>rewrite-dispatch at &lt;host> level wasn't grabbing the application (#1010, rep by Bill Au)
 <li>JMX: ArrayType.getElementOpenType was not properly defined (#994, rep by duchene)
 <li>jvmti code needs to release jvmti instance 

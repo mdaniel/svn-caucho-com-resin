@@ -117,7 +117,7 @@ public class AccessLogWriter extends AbstractRolloverLog implements Runnable {
   void writeBuffer(byte []buffer, int offset, int length)
   {
     synchronized (_bufferLock) {
-      if (_buffer.length - _length < length) {
+      if (_buffer.length - _length < length || isRollover()) {
 	flush();
       }
 

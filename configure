@@ -8503,19 +8503,24 @@ if test -n "${apache_bin}"; then
   a=b
 elif test -x "${apxs}"; then
   apache_bin=`${apxs} -q SBINDIR`
+  apache_exe="${apache_bin}/`${apxs} -q TARGET`"
 elif test -n "${apache_dir}"; then
   apache_bin="${apache_dir}/bin"
 fi
 
-if test -z "${apache_bin}"; then
+if test -n "${apache_exe}"; then
+ a=b;
+elif test -z "${apache_bin}"; then
  a=b;
 elif test -x "${apache_bin}/httpd"; then
  apache_exe="${apache_bin}/httpd"
 elif test -x "${apache_bin}/httpd2"; then
  apache_exe="${apache_bin}/httpd2"
-else
-  { { echo "$as_me:$LINENO: error: Can't find Apache binary in directory ${apache_bin}" >&5
-echo "$as_me: error: Can't find Apache binary in directory ${apache_bin}" >&2;}
+fi
+
+if test -n "${apache_exe}" -a ! -x "${apache_exe}"; then
+  { { echo "$as_me:$LINENO: error: Can't find Apache binary in directory ${apache_exe}" >&5
+echo "$as_me: error: Can't find Apache binary in directory ${apache_exe}" >&2;}
    { (exit 1); exit 1; }; }
 fi
 

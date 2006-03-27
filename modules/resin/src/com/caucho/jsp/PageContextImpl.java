@@ -1262,8 +1262,11 @@ public class PageContextImpl extends PageContext
         lc = Config.find(this, Config.FMT_LOCALIZATION_CONTEXT);
     }
 
+    Locale locale = null;
+
     if (lc instanceof LocalizationContext) {
       ResourceBundle bundle = ((LocalizationContext) lc).getResourceBundle();
+      locale = ((LocalizationContext) lc).getLocale();
 
       try {
         if (bundle != null)
@@ -1273,6 +1276,7 @@ public class PageContextImpl extends PageContext
     }
     else if (lc instanceof String) {
       LocalizationContext loc = getBundle((String) lc);
+      locale = loc.getLocale();
       
       ResourceBundle bundle = loc.getResourceBundle();
       
@@ -1288,7 +1292,13 @@ public class PageContextImpl extends PageContext
     else if (args == null || args.length == 0)
       return bundleString;
 
-    return MessageFormat.format(bundleString, args);
+    if (locale == null)
+      locale = getLocale();
+
+    if (locale != null)
+      return new MessageFormat(bundleString, locale).format(args);
+    else
+      return new MessageFormat(bundleString).format(args);
   }
 
   /**
@@ -1365,6 +1375,18 @@ public class PageContextImpl extends PageContext
     Locale locale = null;
     if (lc != null)
       locale = lc.getLocale();
+
+    if (locale != null)
+      return locale;
+    
+    String acceptLanguage = getCauchoRequest().getHeader("Accept-Language");
+
+    if (acceptLanguage != null) {
+      Enumeration e = getCauchoRequest().getLocales();
+
+      if (e != null && e.hasMoreElements())
+	locale = (Locale) e.nextElement();
+    }
     
     return locale;
   }
