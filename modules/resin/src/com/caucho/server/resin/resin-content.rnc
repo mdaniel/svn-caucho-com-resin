@@ -34,6 +34,10 @@ r_cache = element cache {
   & (attribute disk-size { r_int } | element disk-size { r_int })?
 }
 
+r_enable =
+  attribute enable { r_boolean-Type }
+  | element enable { r_boolean-Type }
+
 r_host = element host {
   (attribute id { string }
    | attribute regexp { string }
@@ -273,6 +277,10 @@ r_root-directory =
   attribute root-directory { string }
   | element root-directory { string }
 
+r_select-manager = element select-manager {
+  r_enable?
+}
+
 r_server = element server {
   attribute id { string }?,
 
@@ -296,8 +304,7 @@ r_server-Basis =
 
   & r_ear-default*
 
-  & (attribute enable-select-manager { r_boolean-Type }
-     | element enable-select-manager { r_boolean-Type })?
+  & r_select-manager?
 
   & r_error-page*
 

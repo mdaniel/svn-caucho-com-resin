@@ -372,7 +372,7 @@ remote ::= r t b16 b8 type-name S b16 b8 url
 
 <results title='EJB Session Reference'>
 r t x00 x0c test.TestObj
-  S x00 x28 http://slytherin/ejbhome?id=69Xm8-zW
+  S x00 x24 http://slytherin/ejbhome?id=69Xm8-zW
 </results>
 
 </defun>

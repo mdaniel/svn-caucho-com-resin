@@ -321,7 +321,7 @@ public class AbstractRolloverLog {
   /**
    * Writes to the underlying log.
    */
-  protected void write(byte []buffer, int offset, int length)
+  protected synchronized void write(byte []buffer, int offset, int length)
     throws IOException
   {
     if (_os == null)
@@ -334,7 +334,7 @@ public class AbstractRolloverLog {
   /**
    * Writes to the underlying log.
    */
-  protected void flush()
+  protected synchronized void flush()
     throws IOException
   {
     if (_os != null)
@@ -346,7 +346,7 @@ public class AbstractRolloverLog {
    *
    * @param now current time in milliseconds.
    */
-  synchronized protected void rolloverLog(long now)
+  protected synchronized void rolloverLog(long now)
   {
     _nextRolloverCheckTime = now + _rolloverCheckPeriod;
 
@@ -604,7 +604,7 @@ public class AbstractRolloverLog {
   /**
    * Closes the log, flushing the results.
    */
-  public void close()
+  public synchronized void close()
     throws IOException
   {
     if (_os != null) {

@@ -96,6 +96,12 @@ public class EntityIntrospector {
   // types allowed with a @OneToMany annotation
   private static HashSet<String> _oneToManyTypes = new HashSet<String>();
 
+  // annotations allowed with a @ManyToMany annotation
+  private static HashSet<String> _manyToManyAnnotations = new HashSet<String>();
+  
+  // types allowed with a @ManyToMany annotation
+  private static HashSet<String> _manyToManyTypes = new HashSet<String>();
+
   private AmberPersistenceUnit _persistenceUnit;
 
   private HashMap<String,EntityType> _entityMap
@@ -1026,10 +1032,17 @@ public class EntityIntrospector {
 						  fieldType));
     }
     else if (field.isAnnotationPresent(javax.persistence.ManyToMany.class)) {
-      _depCompletions.add(new ManyToManyCompletion(sourceType,
-						   field,
-						   fieldName,
-						   fieldType));
+      Completion completion = new ManyToManyCompletion(sourceType,
+						       field,
+						       fieldName,
+						       fieldType);
+
+      JAnnotation ann = field.getAnnotation(ManyToMany.class);
+
+      if ("".equals(ann.getString("mappedBy")))
+	_linkCompletions.add(completion);
+      else
+	_depCompletions.add(completion);
     }
     else if (field.isAnnotationPresent(javax.persistence.Transient.class)) {
     }
@@ -1318,69 +1331,94 @@ public class EntityIntrospector {
   {
     JAnnotation manyToManyAnn = field.getAnnotation(ManyToMany.class);
 
-    AmberPersistenceUnit persistenceUnit = sourceType.getPersistenceUnit();
+    JType retType;
 
-      JType retType;
+    if (field instanceof JField)
+      retType = ((JField) field).getGenericType();
+    else
+      retType = ((JMethod) field).getGenericReturnType();
 
-      if (field instanceof JField)
-	retType = ((JField) field).getGenericType();
-      else
-	retType = ((JMethod) field).getGenericReturnType();
+    JType []typeArgs = retType.getActualTypeArguments();
 
-      JType []typeArgs = retType.getActualTypeArguments();
+    JClass targetEntity = manyToManyAnn.getClass("targetEntity");
+    String targetName = "";
 
-      JClass targetEntity = manyToManyAnn.getClass("targetEntity");
-      String targetName = "";
+    if (targetEntity != null)
+      targetName = targetEntity.getName();
 
-      if (targetEntity != null)
-	targetName = targetEntity.getName();
+    if (! targetName.equals("") && ! targetName.equals("void")) {
+    }
+    else if (typeArgs.length > 0)
+      targetName = typeArgs[0].getName();
+    else
+      throw error(field, L.l("Can't determine targetEntity for {0}.  @OneToMany properties must target @Entity beans.",
+			      field.getName()));
 
-      if (! targetName.equals("") && ! targetName.equals("void")) {
-      }
-      else if (typeArgs.length > 0)
-	targetName = typeArgs[0].getName();
-      else
-	throw new ConfigException(L.l("can't determine target name for {0}",
-				      fieldName));
+    EntityType targetType = _persistenceUnit.getEntity(targetName);
+    if (targetType == null)
+      throw error(field,
+		  L.l("targetEntity '{0}' is not an @Entity bean for {1}.  The targetEntity of a @ManyToMany collection must be an @Entity bean.",
+		      targetName,
+		      field.getName()));
 
-    EntityType targetType = persistenceUnit.getEntity(targetName);
+    String mappedBy = manyToManyAnn.getString("mappedBy");
 
+    if (! "".equals(mappedBy)) {
+      EntityManyToManyField sourceField
+	= (EntityManyToManyField) targetType.getField(mappedBy);
+
+      EntityManyToManyField manyToManyField;
+
+      manyToManyField = new EntityManyToManyField(sourceType,
+						  fieldName, sourceField);
+      manyToManyField.setType(targetType);
+      sourceType.addField(manyToManyField);
+
+      return;
+    }
+    
     EntityManyToManyField manyToManyField;
+
     manyToManyField = new EntityManyToManyField(sourceType, fieldName);
     manyToManyField.setType(targetType);
 
-    JAnnotation associationTableAnn =
-      field.getAnnotation(JoinTable.class);
-
     String sqlTable = sourceType.getTable().getName() + "_" + targetType.getTable().getName();
+
+    JAnnotation joinTableAnn = field.getAnnotation(JoinTable.class);
 
     Table mapTable = null;
 
     ArrayList<ForeignColumn> sourceColumns = null;
     ArrayList<ForeignColumn> targetColumns = null;
 
-    if (associationTableAnn != null) {
-      JAnnotation table = associationTableAnn.getAnnotation("table");
+    if (joinTableAnn != null) {
+      if (! joinTableAnn.getString("name").equals(""))
+	sqlTable = joinTableAnn.getString("name");
 
-      if (! table.getString("name").equals(""))
-	sqlTable = table.getString("name");
+      mapTable = _persistenceUnit.createTable(sqlTable);
 
-      mapTable = persistenceUnit.createTable(sqlTable);
-
-      sourceColumns = calculateColumns(mapTable,
+      sourceColumns = calculateColumns(field,
+				       mapTable,
+				       sourceType.getTable().getName() + "_",
 				       sourceType,
-				       (Object []) associationTableAnn.get("joinColumns"));
+				       (Object []) joinTableAnn.get("joinColumns"));
 
-      targetColumns = calculateColumns(mapTable,
+      targetColumns = calculateColumns(field,
+				       mapTable,
+				       targetType.getTable().getName() + "_",
 				       targetType,
-				       (Object []) associationTableAnn.get("inverseJoinColumns"));
+				       (Object []) joinTableAnn.get("inverseJoinColumns"));
     }
     else {
-      mapTable = persistenceUnit.createTable(sqlTable);
+      mapTable = _persistenceUnit.createTable(sqlTable);
 
-      sourceColumns = calculateColumns(mapTable, sourceType);
+      sourceColumns = calculateColumns(mapTable,
+				       sourceType.getTable().getName() + "_",
+				       sourceType);
 
-      targetColumns = calculateColumns(mapTable, targetType);
+      targetColumns = calculateColumns(mapTable,
+				       targetType.getTable().getName() + "_",
+				       targetType);
     }
 
     manyToManyField.setAssociationTable(mapTable);
@@ -1940,6 +1978,16 @@ public class EntityIntrospector {
     _oneToManyTypes.add("java.util.List");
     _oneToManyTypes.add("java.util.Set");
     _oneToManyTypes.add("java.util.Map");
+    
+    // annotations allowed with a @ManyToMany annotation
+    _manyToManyAnnotations.add("javax.persistence.ManyToMany");
+    _manyToManyAnnotations.add("javax.persistence.JoinTable");
+
+    // types allowed with a @ManyToMany annotation
+    _manyToManyTypes.add("java.util.Collection");
+    _manyToManyTypes.add("java.util.List");
+    _manyToManyTypes.add("java.util.Set");
+    _manyToManyTypes.add("java.util.Map");
     
     // annotations allowed for a property
     _propertyAnnotations.add("javax.persistence.Basic");

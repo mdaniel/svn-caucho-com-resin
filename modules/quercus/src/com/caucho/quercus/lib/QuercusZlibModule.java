@@ -81,8 +81,8 @@ public class QuercusZlibModule extends AbstractQuercusModule {
    * @return Zlib
    */
   public Value gzopen(Env env,
-                      @NotNull String fileName,
-                      @NotNull String mode,
+                      String fileName,
+                      String mode,
                       @Optional("0") int useIncludePath)
   {
     if (fileName == null)
@@ -100,7 +100,7 @@ public class QuercusZlibModule extends AbstractQuercusModule {
    * @return array of uncompressed lines from fileName
    */
   public Value gzfile(Env env,
-                      @NotNull String fileName,
+                      String fileName,
                       @Optional("0") int useIncludePath)
     throws IOException, DataFormatException
   {
@@ -122,7 +122,7 @@ public class QuercusZlibModule extends AbstractQuercusModule {
    * @throws DataFormatException
    */
   public boolean readgzfile(Env env,
-                            @NotNull String fileName,
+                            String fileName,
                             @Optional("0") int useIncludePath)
     throws IOException, DataFormatException
   {
@@ -136,7 +136,7 @@ public class QuercusZlibModule extends AbstractQuercusModule {
 
   public int gzwrite(Env env,
                      @NotNull Zlib zp,
-                     @NotNull String s,
+                     String s,
                      @Optional("0") int length)
   {
     if ((zp == null) || (s == null) || ("".equals(s)))
@@ -155,7 +155,7 @@ public class QuercusZlibModule extends AbstractQuercusModule {
    */
   public int gzputs(Env env,
                     @NotNull Zlib zp,
-                    @NotNull String s,
+                    String s,
                     @Optional("0") int length)
   {
     return gzwrite(env, zp, s, length);
@@ -267,14 +267,13 @@ public class QuercusZlibModule extends AbstractQuercusModule {
    * @param length (maximum length of string returned)
    * @return uncompressed string
    */
-  public Value gzuncompress(Value data,
+  public Value gzuncompress(InputStream is,
                             @Optional("0") long length)
     throws DataFormatException, IOException
   {
     if (length == 0)
       length = Long.MAX_VALUE;
     
-    InputStream is = data.toInputStream();
     InflaterInputStream iis = new InflaterInputStream(is, new Inflater());
     
     StringBuilder uncompressed = new StringBuilder();
@@ -294,7 +293,7 @@ public class QuercusZlibModule extends AbstractQuercusModule {
    * @param level
    * @return compressed using DEFLATE algorithm
    */
-  public Value gzdeflate(Value value,
+  public Value gzdeflate(InputStream is,
                          @Optional("-1") int level)
    throws DataFormatException, IOException
   {
@@ -309,8 +308,6 @@ public class QuercusZlibModule extends AbstractQuercusModule {
     //DeflaterOutputStream out = new DeflaterOutputStream(os, deflater);
     DeflaterOutputStream out = new DeflaterOutputStream(os);
 
-    InputStream is = value.toInputStream();
-    
     TempBuffer temp = TempBuffer.allocate();
     byte []buf = temp.getBuffer();
     int len;

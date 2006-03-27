@@ -94,12 +94,6 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener {
   private String _format;
   private Segment []_segments;
 
-  private AccessLogBuffer _logBuffer;
-  private byte []_buffer;
-  private int _length;
-
-  private Object _bufferLock = new Object();
-
   private boolean _isAutoFlush;
 
   private final CharBuffer _cb = new CharBuffer();
@@ -215,10 +209,6 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener {
 
     _logWriter.init();
 
-    _logBuffer = _logWriter.getLogBuffer();
-    _buffer = _logBuffer.getBuffer();
-    _length = 0;
-
     _alarm.queue(60000);
   }
 
@@ -303,18 +293,15 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener {
     AbstractHttpRequest request = (AbstractHttpRequest) req;
     AbstractHttpResponse response = (AbstractHttpResponse) res;
 
-    if (_logWriter.isRollover() || BUFFER_SIZE <= _length + BUFFER_GAP)
-      flush();
+    byte []buffer = request.getLogBuffer();
 
-    synchronized (_bufferLock) {
-      if (BUFFER_SIZE <= _length + BUFFER_GAP)
-	flush();
-      
-      _length = log(request, response, _buffer, _length, BUFFER_SIZE);
+    int length = log(request, response, buffer, 0, buffer.length);
+
+    if (_isAutoFlush) {
+      _logWriter.writeThrough(buffer, 0, length);
     }
-
-    if (_isAutoFlush)
-      flush();
+    else
+      _logWriter.writeBuffer(buffer, 0, length);
   }
   
   /**
@@ -600,21 +587,7 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener {
    */
   public void flush()
   {
-    // XXX: check locking vs log()
-    synchronized (_bufferLock) {
-      if (_length == 0)
-	return;
-
-      AccessLogBuffer logBuffer = _logBuffer;
-
-      logBuffer.setLength(_length);
-
-      logBuffer = _logWriter.write(logBuffer);
-
-      _logBuffer = logBuffer;
-      _buffer = _logBuffer.getBuffer();
-      _length = 0;
-    }
+    _logWriter.flush();
   }
 
   /**

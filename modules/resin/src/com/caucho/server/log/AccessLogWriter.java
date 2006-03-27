@@ -82,6 +82,11 @@ public class AccessLogWriter extends AbstractRolloverLog implements Runnable {
 
   private final AccessLog _log;
 
+  private final Object _bufferLock = new Object();
+  private AccessLogBuffer _logBuffer;
+  private byte []_buffer;
+  private int _length;
+
   private boolean _hasThread;
   private boolean _isFlushing;
  
@@ -93,9 +98,13 @@ public class AccessLogWriter extends AbstractRolloverLog implements Runnable {
   AccessLogWriter(AccessLog log)
   {
     _log = log;
+
+    _logBuffer = getLogBuffer();
+    _buffer = _logBuffer.getBuffer();
+    _length = 0;
   }
   
-  AccessLogBuffer getLogBuffer()
+  private AccessLogBuffer getLogBuffer()
   {
     AccessLogBuffer buffer = _freeBuffers.allocate();
 
@@ -105,7 +114,32 @@ public class AccessLogWriter extends AbstractRolloverLog implements Runnable {
     return buffer;
   }
 
-  AccessLogBuffer write(AccessLogBuffer logBuffer)
+  void writeBuffer(byte []buffer, int offset, int length)
+  {
+    synchronized (_bufferLock) {
+      if (_buffer.length - _length < length) {
+	flush();
+      }
+
+      if (_buffer.length < length)
+	length = _buffer.length;
+
+      System.arraycopy(buffer, offset, _buffer, _length, length);
+      _length += length;
+    }
+  }
+
+  void writeThrough(byte []buffer, int offset, int length)
+  {
+    try {
+      write(buffer, offset, length);
+      flush();
+    } catch (IOException e) {
+      log.log(Level.WARNING, e.toString(), e);
+    }
+  }
+
+  private AccessLogBuffer write(AccessLogBuffer logBuffer)
   {
     while (true) {
       synchronized (_writeQueue) {
@@ -145,6 +179,25 @@ public class AccessLogWriter extends AbstractRolloverLog implements Runnable {
     return buffer;
   }
 
+  // must be synchronized by _bufferLock.
+  protected void flush()
+  {
+    synchronized (_bufferLock) {
+      if (_length > 0) {
+	_logBuffer.setLength(_length);
+	_logBuffer = write(_logBuffer);
+	_buffer = _logBuffer.getBuffer();
+	_length = 0;
+      }
+    }
+
+    try {
+      super.flush();
+    } catch (IOException e) {
+      log.log(Level.WARNING, e.toString(), e);
+    }
+  }
+
   /**
    * Writes the buffer data to the output stream.
    */
@@ -154,7 +207,7 @@ public class AccessLogWriter extends AbstractRolloverLog implements Runnable {
     long now = Alarm.getCurrentTime();
 
     write(buffer.getBuffer(), 0, buffer.getLength());
-    flush();
+    super.flush();
     
     _freeBuffers.free(buffer);
     

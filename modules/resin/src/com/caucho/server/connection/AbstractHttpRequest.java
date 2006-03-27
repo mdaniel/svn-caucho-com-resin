@@ -181,9 +181,9 @@ public abstract class AbstractHttpRequest
   protected final CharBuffer _cb = new CharBuffer();
   // private final ArrayList<CharSegment> _arrayList = new ArrayList<CharSegment>();
 
-  private byte []_address = new byte[256];
+  private final byte []_address = new byte[256];
 
-  private byte []_logBuffer = new byte[8 * 1024];
+  private final byte []_logBuffer = new byte[8 * 1024];
 
   private ServletRequestAttributeListener []_attributeListeners;
   
@@ -2015,7 +2015,7 @@ public abstract class AbstractHttpRequest
     else if (path.charAt(0) == '/')
       return getApplication().getRequestDispatcher(path);
     else {
-      CharBuffer cb = CharBuffer.allocate();
+      CharBuffer cb = new CharBuffer();
       
       ServletContext app = getApplication();
 
@@ -2032,10 +2032,10 @@ public abstract class AbstractHttpRequest
       cb.append('/');
       cb.append(path);
 
-      if (app == null)
-        return getApplication().getRequestDispatcher(cb.close());
-      
-      return app.getRequestDispatcher(cb.close());
+      if (app != null)
+	return app.getRequestDispatcher(cb.toString());
+
+      return app.getRequestDispatcher(cb.toString());
     }
   }
   
@@ -2189,7 +2189,7 @@ public abstract class AbstractHttpRequest
   /**
    * Returns the log buffer.
    */
-  public byte []getLogBuffer()
+  public final byte []getLogBuffer()
   {
     return _logBuffer;
   }

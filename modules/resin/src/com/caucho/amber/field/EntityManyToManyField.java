@@ -87,6 +87,19 @@ public class EntityManyToManyField extends AssociationField {
     super(entityType);
   }
 
+  public EntityManyToManyField(EntityType entityType,
+			       String name,
+			       EntityManyToManyField source)
+    throws ConfigException
+  {
+    super(entityType, name);
+
+    _targetType = source.getSourceType();
+    _associationTable = source._associationTable;
+    _sourceLink = source._targetLink;
+    _targetLink = source._sourceLink;
+  }
+
   /**
    * Sets the target type.
    */

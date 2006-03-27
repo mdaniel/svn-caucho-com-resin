@@ -529,20 +529,9 @@ public class ServletServer extends ProtocolDispatchServer
   /**
    * Sets true if the select manager should be enabled
    */
-  public void setEnableSelectManager(boolean enable)
+  public SelectManagerConfig createSelectManager()
   {
-    _enableSelectManager = enable;
-
-    if (enable && getSelectManager() == null) {
-      try {
-	Class cl = Class.forName("com.caucho.server.port.JniSelectManager");
-	Method method = cl.getMethod("create", new Class[0]);
-
-	setSelectManager((AbstractSelectManager) method.invoke(null, null));
-      } catch (Throwable e) {
-	log.log(Level.FINER, e.toString());
-      }
-    }
+    return new SelectManagerConfig();
   }
   
   /**
@@ -863,6 +852,20 @@ public class ServletServer extends ProtocolDispatchServer
     _classLoader.init();
 
     super.init();
+
+    if (_enableSelectManager && getSelectManager() == null) {
+      try {
+	Class cl = Class.forName("com.caucho.server.port.JniSelectManager");
+	Method method = cl.getMethod("create", new Class[0]);
+
+	setSelectManager((AbstractSelectManager) method.invoke(null, null));
+      } catch (Throwable e) {
+	log.warning("Cannot enable select-manager");
+	
+	log.log(Level.FINER, e.toString());
+      }
+    }
+
   }
     
   /**
@@ -1341,5 +1344,12 @@ public class ServletServer extends ProtocolDispatchServer
   public String toString()
   {
     return "Server[" + _serverId + "]";
+  }
+
+  class SelectManagerConfig {
+    public void setEnable(boolean enable)
+    {
+      _enableSelectManager = enable;
+    }
   }
 }

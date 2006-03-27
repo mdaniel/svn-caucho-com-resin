@@ -504,7 +504,6 @@ public class JavaClassDefinition extends AbstractQuercusClass {
           Iterator.class.isAssignableFrom(method.getReturnType()))
         _iterator = method;
     } catch (Throwable e) {
-      log.log(Level.FINE, L.l(e.getMessage()), e);
     }
   }
 

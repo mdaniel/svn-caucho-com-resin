@@ -308,8 +308,9 @@ public class ApplicationContainer
    */
   public RewriteInvocation createRewriteDispatch()
   {
-    if (_rewriteInvocation == null)
+    if (_rewriteInvocation == null) {
       _rewriteInvocation = new RewriteInvocation();
+    }
 
     return _rewriteInvocation;
   }
@@ -696,6 +697,8 @@ public class ApplicationContainer
 						 invocation);
 
       if (chain != null) {
+	ServletServer servletServer = (ServletServer) _dispatchServer;
+	invocation.setApplication(servletServer.getErrorApplication());
 	invocation.setFilterChain(chain);
 	return;
       }
