@@ -858,7 +858,7 @@ public class ServletServer extends ProtocolDispatchServer
 	Class cl = Class.forName("com.caucho.server.port.JniSelectManager");
 	Method method = cl.getMethod("create", new Class[0]);
 
-	setSelectManager((AbstractSelectManager) method.invoke(null, null));
+	initSelectManager((AbstractSelectManager) method.invoke(null, null));
       } catch (Throwable e) {
 	log.warning("Cannot enable select-manager");
 	

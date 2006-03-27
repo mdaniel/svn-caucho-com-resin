@@ -304,8 +304,6 @@ r_server-Basis =
 
   & r_ear-default*
 
-  & r_select-manager?
-
   & r_error-page*
 
   & r_http*
@@ -335,6 +333,8 @@ r_server-Basis =
   & r_port*
 
   & r_redeploy-mode?
+
+  & r_select-manager?
 
   & (attribute server-header { string }
      | element server-header { string })?

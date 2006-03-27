@@ -70,7 +70,7 @@ public class ProtocolDispatchServer extends DispatchServer {
   /**
    * Sets the select manager.
    */
-  public void setSelectManager(AbstractSelectManager manager)
+  public void initSelectManager(AbstractSelectManager manager)
   {
     _selectManager = manager;
   }

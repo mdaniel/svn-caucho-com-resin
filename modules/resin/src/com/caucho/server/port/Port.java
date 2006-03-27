@@ -1057,7 +1057,7 @@ public class Port
 
     if (_server != null) {
       selectManager = _server.getSelectManager();
-      _server.setSelectManager(null);
+      _server.initSelectManager(null);
     }
 
     InetAddress localAddress = null;
