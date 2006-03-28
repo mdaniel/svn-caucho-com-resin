@@ -2,20 +2,20 @@
 
 CC=gcc
 CP=/bin/cp
-CFLAGS=-g -O2 -DPOLL -DHAS_JVMTI -DDARWIN -DUSE_HSREGEX -DUSE_EXPAT -I../lib/expat-lite -g -Os -pipe -DHARD_SERVER_LIMIT=2048 -DEAPI
-CFLAGS_SHLIB=-DSHARED_MODULE
+CFLAGS=-g -O2 -DPOLL -DHAS_JVMTI  -g -O2 -pthread  -DLINUX=2 -D_REENTRANT -D_GNU_SOURCE -D_LARGEFILE64_SOURCE
+CFLAGS_SHLIB=-fpic
 EGREP=grep -E
-LIBTOOL=EGREP="grep -E" /Users/ferg/ws/resin/libtool --silent
-LD=gcc
-LD_SHLIB=cc
+LIBTOOL=EGREP="grep -E" /home/ferg/ws/resin/libtool --silent
+LD=/usr/bin/ld
+LD_SHLIB=gcc
 LIBS_SHLIB=
 LDFLAGS=
-LDFLAGS_SHLIB=-bundle -undefined suppress -flat_namespace -Wl,-bind_at_load -L/usr/lib
-APACHE_INC=-I/usr/include/httpd
-apache_conf=/private/etc/httpd/httpd.conf
-apache_dir=
-apache_libexec=/usr/libexec/httpd
-resin_home=/Users/ferg/ws/resin
+LDFLAGS_SHLIB=-shared -L/usr/lib
+APACHE_INC=-I/usr/local/apache22/include
+apache_conf=/usr/local/apache22/conf/httpd.conf
+apache_dir=/usr/local/apache22
+apache_libexec=/usr/local/apache22/modules
+resin_home=/home/ferg/ws/resin
 INCLUDES = $(APACHE_INC) -DRESIN_HOME=\"$(resin_home)\" -I../common
 C=../common
 COMMON_OBJ=$C/stream.lo $C/config.lo $C/memory.lo

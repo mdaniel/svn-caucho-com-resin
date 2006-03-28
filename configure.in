@@ -360,14 +360,20 @@ fi
 if test -n "$apache" -a ! -r "${apache_conf}"; then
   AC_MSG_ERROR([Can't find Apache module configuration ${apache_conf}])
 fi
+	
 #
 # Apache CFLAGS
 #
 
-if test -z "$apache_cflags" -a -n "${apxs}"; then
-   apache_cflags=`${apxs} -q CFLAGS`
-fi
+if test -z "$apache_cflags" -a -x "${apxs}"; then
+   apache_cflags="`${apxs} -q CFLAGS` `${apxs} -q EXTRA_CFLAGS`"
 
+   apr_config=`${apxs} -q APR_CONFIG`
+   if test -x "${apr_config}"; then
+     apache_cflags="$apache_cflags `${apr_config} --cppflags`"
+   fi
+ fi
+	
 if test -z "$apache_cflags" -a -x "${apache_exe}"; then
    flags=`${apache_exe} -V | grep EAPI`
    if test -n "$flags"; then

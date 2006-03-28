@@ -1,7 +1,7 @@
 SHELL=/bin/sh
 srcdir = .
 top_srcdir = ../../..
-plugins=common apache1   resin_os
+plugins=common apache2 resin resinssl resin_os
 
 all	: plugins
 

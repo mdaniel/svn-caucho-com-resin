@@ -27,19 +27,17 @@
  * @author Scott Ferguson
  */
 
+#include <sys/types.h>
+#include <errno.h>
+#include <unistd.h>
+#include "ap_config.h"
 #include "httpd.h"
 #include "http_config.h"
 #include "http_core.h"
 #include "http_protocol.h"
-#include "ap_config.h"
-#include "apr_strings.h"
-#include "apr_thread_mutex.h"
-#include <stdlib.h>
-#include <errno.h>
+#include "http_connection.h"
 
 #ifdef DEBUG
-#include <sys/types.h>
-#include <unistd.h>
 #include <time.h>
 #endif
 
