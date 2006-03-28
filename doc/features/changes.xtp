@@ -4,6 +4,7 @@
 
 <s2 title='3.0.snap - Mar 17, 2006'>
 <ul>
+<li>./configure changes for Apache 2.2 (#869, rep by Leonid Kaminsky)
 <li>./configure needs to set apache_exe from apxs when available (#996, rep by pomo)
 <li>Add basic IGNORE support for XML (#962)
 <li>@EJB and @Inject need to work with inheritance (#952)
