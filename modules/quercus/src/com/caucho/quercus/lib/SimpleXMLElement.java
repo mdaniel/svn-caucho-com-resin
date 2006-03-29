@@ -131,7 +131,7 @@ public class SimpleXMLElement {
       for (int i=0; i < nodeLength; i++) {
         Node child = children.item(i);
   
-        if (child.getNodeType() == Node.TEXT_NODE)
+        if (child.getNodeType() != Node.ELEMENT_NODE)
           continue;
   
         StringValue childTagName = new StringValueImpl(child.getNodeName());
@@ -177,7 +177,7 @@ public class SimpleXMLElement {
     for (int i = 0; i < nodeLength; i++) {
       Node child = children.item(i);
 
-      if (child.getNodeType() == Node.TEXT_NODE)
+      if (child.getNodeType() != Node.ELEMENT_NODE)
         continue;
 
       childArray.put(_env.wrapJava(new SimpleXMLElement(_env, _document, (Element) child)));
@@ -206,7 +206,7 @@ public class SimpleXMLElement {
     for (int i=0; i < length; i++) {
       Node child = children.item(i);
       
-      if (child.getNodeType() == Node.TEXT_NODE)
+      if (child.getNodeType() != Node.ELEMENT_NODE)
         continue;
       
       if (name.equals(child.getNodeName())) {
