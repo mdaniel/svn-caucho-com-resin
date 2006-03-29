@@ -138,7 +138,7 @@ add_path(char *buf, char *path)
 	buf += strlen(buf);
 	*buf++ = ' ';
 
-	if (path[i] == '\'' || path[i] == '"')
+	if (path[0] == '\'' || path[0] == '"')
 	  needs_escape = 1;
 
 	for (i = 0; path[i]; i++) {
