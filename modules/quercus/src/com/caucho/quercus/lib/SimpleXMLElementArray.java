@@ -30,12 +30,13 @@
 package com.caucho.quercus.lib;
 
 import com.caucho.quercus.env.ArrayValueImpl;
+import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.LongValue;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.Value;
 
 public class SimpleXMLElementArray extends ArrayValueImpl {
-
+  
   /**
    * This class exists solely because in PHP
    * $xml->bar[0]['attrName'] is equiv. to $xml->bar['attrName']
@@ -54,4 +55,48 @@ public class SimpleXMLElementArray extends ArrayValueImpl {
       return super.get(key);
     }
   }
+
+  /**
+   * This is a field getter for the 0th entry in this array
+   * This is created to allow for:
+   * $foo->bar[0] and
+   * $foo->bar->someTag
+   */
+  @Override
+  public Value getField(String index)
+  {
+    return super.get(new LongValue(0)).getField(index);
+  }
+
+ /**
+  * Returns the field ref.
+  */
+ @Override
+ public Value putField(Env env, String index, Value object)
+ {
+   return super.get(new LongValue(0)).putField(env, index, object);
+ }
+  
+  /**
+   * Prints the value.
+   * @param env
+   */
+  @Override
+  public void print(Env env)
+    throws Throwable
+  {
+    super.get(new LongValue(0)).print(env);
+  }
+  
+  @Override
+  public Value toValue()
+  {
+    return super.get(new LongValue(0)).toValue();
+  }
+
+  public Value copy()
+  {  
+    return this;
+  }
+    
 }

@@ -192,13 +192,11 @@ public class SimpleXMLElement {
   /**
    * 
    * @param name
-   * @return ArrayValue, SimpleXMLElement or null
+   * @return ArrayValue or null
    */
   public Value __getField(String name)
   {
-    Value simpleXMLElement = null;
-    SimpleXMLElementArray simpleArray = null;
-    boolean isArray = false;
+    SimpleXMLElementArray simpleArray = new SimpleXMLElementArray();
     
     NodeList children = _element.getChildNodes();
     int length = children.getLength();
@@ -209,27 +207,14 @@ public class SimpleXMLElement {
       if (child.getNodeType() != Node.ELEMENT_NODE)
         continue;
       
+      //Need to always return SimpleXMLElementArray (even if only 1 element)
+      //because $foo->name[0] is valid
       if (name.equals(child.getNodeName())) {
-        if (isArray) {
-          // Already more than 1 child
-          simpleArray.put(_env.wrapJava(new SimpleXMLElement(_env, _document, (Element) child)));
-        } else if (simpleXMLElement != null) {
-          // 2nd child found
-          isArray = true;
-          simpleArray = new SimpleXMLElementArray();
-          simpleArray.put(simpleXMLElement);
-          simpleArray.put(_env.wrapJava(new SimpleXMLElement(_env, _document, (Element) child)));
-        } else {
-          // first child found
-          simpleXMLElement = _env.wrapJava(new SimpleXMLElement(_env, _document, (Element) child));
-        }
+        simpleArray.put(_env.wrapJava(new SimpleXMLElement(_env, _document, (Element) child)));
       }
     }
     
-    if (simpleArray != null)
-      return simpleArray;
-    else
-      return simpleXMLElement;
+    return simpleArray;
   }
 
   /**
