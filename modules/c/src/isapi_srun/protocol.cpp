@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2004 Caucho Technology.  All rights reserved.
+ * Copyright (c) 1999-2006 Caucho Technology.  All rights reserved.
  *
  * This file is part of Resin(R) Open Source
  *
@@ -442,6 +442,26 @@ write_headers(stream_t *s, EXTENSION_CONTROL_BLOCK *r)
 }
 
 static int
+write_client_buffer(EXTENSION_CONTROL_BLOCK *r, void *v_buf, int len)
+{
+	char *buffer = (char *) v_buf;
+
+	while (len > 0) {
+		unsigned long sentlen = len;
+
+		if (! r->WriteClient(r->ConnID, buffer, &sentlen, HSE_IO_SYNC) || 
+			sentlen <= 0) {
+			return -1;
+		}
+
+		len -= sentlen;
+		buffer += sentlen;
+	}
+
+	return 0;
+}
+
+static int
 cse_write_response(stream_t *s, unsigned long len, EXTENSION_CONTROL_BLOCK *r)
 {
 	while (len > 0) {
@@ -457,38 +477,51 @@ cse_write_response(stream_t *s, unsigned long len, EXTENSION_CONTROL_BLOCK *r)
 			sublen = len;
 
 		s->read_buf[s->read_length] = 0;
-		unsigned long writelen = sublen;
-		while (writelen > 0) {
-			unsigned long sentlen = writelen;
-
-			if (! r->WriteClient(r->ConnID, s->read_buf + s->read_offset, &sentlen, HSE_IO_SYNC) || 
-				sentlen <= 0) {
-				cse_close(s, "response");
-				return -1;
-			}
-
-			writelen -= sentlen;
-			s->read_offset += sentlen;
-		}
+		write_client_buffer(r, s->read_buf + s->read_offset, sublen);
 		len -= sublen;
+		s->read_offset += sublen;
 	}
 
 	return 1;
 }
 
+static char *
+fill_chunk(char *buf, int size)
+{
+	int i;
+
+	for (i = 12; i >= 0; i -= 4) {
+		int digit = (size >> i) & 0xf;
+
+		if (digit > 9)
+			*buf++ = 'a' + digit - 10;
+		else
+			*buf++ = '0' + digit;
+	}
+	*buf++ = '\r';
+	*buf++ = '\n';
+	*buf = 0;
+
+	return buf;
+}
+
 static int
-send_data(stream_t *s, EXTENSION_CONTROL_BLOCK *r, config_t *config, int ack)
+send_data(stream_t *s, EXTENSION_CONTROL_BLOCK *r, config_t *config, 
+		  int http11, int ack, int *p_is_first)
 {
 	char headers[32 * 1024];
 	char status[BUF_LENGTH];
+	char chunk[16];
 	char *status_ptr = status;
     char *header_ptr = headers;
     char *header_end = header_ptr + sizeof(headers) - 256;
 	int code;
 
+	chunk[0] = '\r';
+	chunk[1] = '\n';
+
 	*header_ptr = 0;
 	do {
-		int i;
 		int read_len;
 		unsigned long size;
 
@@ -509,6 +542,14 @@ send_data(stream_t *s, EXTENSION_CONTROL_BLOCK *r, config_t *config, int ack)
 
 		case HMUX_DATA:
 			read_len = hmux_read_len(s);
+			if (http11) {
+				char *tail = fill_chunk(chunk + 2, read_len);
+				if (*p_is_first)
+					write_client_buffer(r, chunk + 2, tail - chunk - 2);
+				else
+					write_client_buffer(r, chunk, tail - chunk);
+				*p_is_first = 0;
+			}
 			if (cse_write_response(s, read_len, r) < 0)
 				code = -1;
 			break;
@@ -542,9 +583,14 @@ send_data(stream_t *s, EXTENSION_CONTROL_BLOCK *r, config_t *config, int ack)
 		case CSE_SEND_HEADER:
 			read_len = hmux_read_len(s);
 			cse_skip(s, read_len);
-                        *header_ptr++ = '\r';
-                        *header_ptr++ = '\n';
-                        *header_ptr++ = 0;
+			if (http11) {
+				char chunked[] = "Transfer-Encoding: chunked\r\n";
+				strcpy(header_ptr, chunked);
+				header_ptr += sizeof(chunked) - 1;
+			}
+            *header_ptr++ = '\r';
+            *header_ptr++ = '\n';
+            *header_ptr++ = 0;
 			size = header_ptr - headers;
 			{
 				HSE_SEND_HEADER_EX_INFO info;
@@ -567,6 +613,9 @@ send_data(stream_t *s, EXTENSION_CONTROL_BLOCK *r, config_t *config, int ack)
 
 		case HMUX_QUIT:
 		case HMUX_EXIT:
+			if (http11) {
+				write_client_buffer(r, "\r\n0\r\n\r\n", 7);
+			}
 		  return code;
 
 		default:
@@ -688,6 +737,7 @@ write_request(stream_t *s, EXTENSION_CONTROL_BLOCK *r, config_t *config, char *h
 	unsigned long totalLen = 0;
 		
 	int code = HMUX_ACK;
+	int is_first = 1;
 
 	while (totalLen < r->cbTotalBytes) {
 		unsigned long len = BUF_LENGTH;
@@ -709,7 +759,7 @@ write_request(stream_t *s, EXTENSION_CONTROL_BLOCK *r, config_t *config, char *h
 		  send_length = 0;
 		  cse_write_byte(s, HMUX_YIELD);
 
-			code = send_data(s, r, config, CSE_ACK);
+			code = send_data(s, r, config, CSE_ACK, isHttp11, &is_first);
 
 			if (code < 0 || code == HMUX_QUIT || code == HMUX_EXIT)
 				break;
@@ -718,7 +768,7 @@ write_request(stream_t *s, EXTENSION_CONTROL_BLOCK *r, config_t *config, char *h
 
 	cse_write_byte(s, HMUX_QUIT);
 
-	code = send_data(s, r, config, HMUX_QUIT);
+	code = send_data(s, r, config, HMUX_QUIT, isHttp11, &is_first);
 
 	if (code == HMUX_QUIT)
 		cse_recycle(s, now);
