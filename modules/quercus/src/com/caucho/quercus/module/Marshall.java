@@ -65,10 +65,7 @@ abstract public class Marshall {
   {
     final Marshall marshall;
 
-    if (argType.isAssignableFrom(Value.class)) {
-      marshall = MARSHALL_VALUE;
-    }
-    else if (String.class.equals(argType)) {
+    if (String.class.equals(argType)) {
       marshall = MARSHALL_STRING;
     }
     else if (boolean.class.equals(argType)) {
