@@ -289,9 +289,8 @@ public class WebAppController
   /**
    * Returns the admin.
    */
-  public WebAppMBean getAdmin()
+  public WebAppAdmin getAdmin()
   {
-    // XXX: possibly return the proxy?
     return _admin;
   }
 

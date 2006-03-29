@@ -88,7 +88,7 @@ public class Application extends ServletContextImpl
   implements Dependency, EnvironmentBean, SchemaBean, DispatchBuilder,
 	     EnvironmentDeployInstance {
   private static final String DEFAULT_VERSION = "2.4";
-  
+
   private static final L10N L = new L10N(Application.class);
   private static final Logger log = Log.open(Application.class);
 
@@ -1534,6 +1534,11 @@ public class Application extends ServletContextImpl
     } finally {
       _lifecycle.toInit();
     }
+  }
+
+  public WebAppAdmin getAdmin()
+  {
+    return _controller.getAdmin();
   }
 
   public void start()

@@ -23,6 +23,7 @@ com.caucho.quercus.lib.QuercusOptionsModule
 com.caucho.quercus.lib.QuercusOutputModule
 com.caucho.quercus.pdflib.PDFModule
 com.caucho.quercus.lib.QuercusRegexpModule
+com.caucho.quercus.lib.QuercusResinModule
 com.caucho.quercus.lib.QuercusSessionModule
 com.caucho.quercus.lib.QuercusSimpleXMLModule
 com.caucho.quercus.lib.QuercusStreamModule
