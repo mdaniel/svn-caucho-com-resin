@@ -39,8 +39,12 @@ import java.util.logging.Logger;
 
 import java.net.InetAddress;
 
-import javax.naming.*;
-import javax.naming.directory.*;
+import javax.naming.NamingEnumeration;
+import javax.naming.NamingException;
+
+import javax.naming.directory.DirContext;
+import javax.naming.directory.InitialDirContext;
+import javax.naming.directory.Attributes;
 
 import com.caucho.util.L10N;
 
@@ -327,8 +331,8 @@ public class QuercusNetworkModule extends AbstractQuercusModule {
       ServiceNode node = entry.getValue();
   		
       if (node.getPort().toLong() == port &&
-	  node.protocolCheck(protocol))
-	return StringValue.create(entry.getKey());
+      		node.protocolCheck(protocol))
+      	return StringValue.create(entry.getKey());
     }
   	
     return BooleanValue.FALSE;
@@ -345,28 +349,60 @@ public class QuercusNetworkModule extends AbstractQuercusModule {
    * 
    * @return true if records are found, false otherwise
    */
-  public static boolean dns_get_mx(String hostname,
-				   ArrayValue mxhosts,
-				   @Optional("NULL") ArrayValue weight)
+  public static boolean dns_get_mx(Env env, 
+  				 String hostname,
+				   @Reference Value mxhosts,
+				   @Optional @Reference Value weight)
     throws NamingException
   {
     // php/1m08
   	
-    Attributes atrs = null;
-  	
     DirContext ictx = new InitialDirContext();          
-    atrs = ictx.getAttributes("dns:/" + hostname, new String[] {"MX"});
-
-    /*
-    for (Map.Entry<String, String> entry: atrs.entrySet()) {
-      mxhosts.put(entry.getKey());
-    	
-      if (weight != null)
-	weight.put(entry.getValue());
-    }
-    */
+    Attributes atrs = ictx.getAttributes("dns:/" + hostname, new String[] {"MX"});
     
-    return atrs.size() > 0;
+    ArrayValue hosts =  new ArrayValueImpl();
+    
+    ArrayValue weights = new ArrayValueImpl();
+
+    try {
+	    NamingEnumeration list = atrs.getAll();
+	    
+	    if (! (list.hasMore()))
+	    		return false;
+	    
+	    String[] tokens = list.next().toString().split("\\s");
+	    
+	    for (int k = 1; k < tokens.length; k++) {
+	    	int weightToInt = Integer.valueOf(tokens[k]).intValue();
+	    	
+	    	weights.append(LongValue.create(weightToInt));
+
+	    	k++;
+	    	
+	    	String uncleanHost = tokens[k];
+	    	
+	    	int numOfCharacters = 0;
+	    	
+	    	if (k < tokens.length - 1)
+	    		numOfCharacters = uncleanHost.length() - 2;
+	    	else
+	    	  numOfCharacters = uncleanHost.length() -1;
+	    	
+	      String cleanHost = uncleanHost.substring(0, numOfCharacters);
+	    	
+	    	hosts.append(StringValue.create(cleanHost));
+	    }
+    } 
+    catch(Exception e) {
+    	log.log(Level.WARNING, e.toString(), e);
+      env.warning("An error occurred while processing the records");
+
+      return false;
+    }
+    
+    mxhosts.set(hosts);
+    weight.set(weights);
+    return true;
   }
   
   /**
@@ -380,27 +416,60 @@ public class QuercusNetworkModule extends AbstractQuercusModule {
    * 
    * @return true if records are found, false otherwise
    */
-  public static boolean dns_check_record(String hostname, ArrayValue mxhosts,
-					 @Optional("NULL")  ArrayValue weight)
+  public static boolean dns_check_record(Env env,
+  				 String hostname, 
+  				 @Reference ArrayValue mxhosts,
+					 @Optional @Reference  ArrayValue weight)
     throws NamingException
   {
     // php/1m09
-  	
-    Attributes atrs = null;
-  	
-    DirContext ictx = new InitialDirContext();          
-    atrs = ictx.getAttributes("dns:/" + hostname, new String[] {"MX"});
-
-    /*
-    for (Map.Entry<String, String> entry: atrs.entrySet()) {
-      mxhosts.put(entry.getKey());
-    	
-      if (weight != null)
-	weight.put(entry.getValue());
-    }
-    */
+     
+  	DirContext ictx = new InitialDirContext();          
+    Attributes atrs = ictx.getAttributes("dns:/" + hostname);
     
-    return atrs.size() > 0;
+    ArrayValue hosts =  new ArrayValueImpl();
+    
+    ArrayValue weights = new ArrayValueImpl();
+
+    try {
+	    NamingEnumeration list = atrs.getAll();
+	    
+	    if (! (list.hasMore()))
+	    		return false;
+	    
+	    String[] tokens = list.next().toString().split("\\s");
+	    
+	    for (int k = 1; k < tokens.length; k++) {
+	    	int weightToInt = Integer.valueOf(tokens[k]).intValue();
+	    	
+	    	weights.append(LongValue.create(weightToInt));
+
+	    	k++;
+	    	
+	    	String uncleanHost = tokens[k];
+	    	
+	    	int numOfCharacters = 0;
+	    	
+	    	if (k < tokens.length - 1)
+	    		numOfCharacters = uncleanHost.length() - 2;
+	    	else
+	    	  numOfCharacters = uncleanHost.length() -1;
+	    	
+	      String cleanHost = uncleanHost.substring(0, numOfCharacters);
+	    	
+	    	hosts.append(StringValue.create(cleanHost));
+	    }
+    } 
+    catch(Exception e) {
+    	log.log(Level.WARNING, e.toString(), e);
+      env.warning("An error occurred while processing the records");
+
+      return false;
+    }
+    
+    mxhosts.set(hosts);
+    weight.set(weights);
+    return true;
   }
   
   private static class ServiceNode {
@@ -424,11 +493,11 @@ public class QuercusNetworkModule extends AbstractQuercusModule {
     public boolean protocolCheck(String protocol)
     {
       if (protocol.equals("tcp"))
-	return _isTCP;
+      	return _isTCP;
       else if (protocol.equals("udp"))
-	return _isUDP;
+      	return _isUDP;
       else
-	return false;
+      	return false;
     }
   	
     public boolean isTCP()
