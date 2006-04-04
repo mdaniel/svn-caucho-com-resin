@@ -29,8 +29,11 @@
 
 #include <sys/types.h>
 #include <errno.h>
+#ifndef WIN32
 #include <unistd.h>
+#endif
 #include "ap_config.h"
+#include "apr_strings.h"
 #include "httpd.h"
 #include "http_config.h"
 #include "http_core.h"
@@ -730,7 +733,6 @@ write_request(stream_t *s, request_rec *r, config_t *config,
   int len;
   int code = -1;
   unsigned int now = (unsigned int) (r->request_time / 1000000);
-  time_t new_time;
 
   hmux_start_channel(s, 1);
   write_env(s, r);
