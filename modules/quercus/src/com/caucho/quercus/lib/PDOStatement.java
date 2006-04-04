@@ -43,6 +43,7 @@ import java.io.InputStream;
 import java.io.IOException;
 
 import com.caucho.util.L10N;
+import com.caucho.util.IntMap;
 
 import com.caucho.quercus.env.*;
 
@@ -86,6 +87,7 @@ public class PDOStatement
   private Value[] _fetchModeArgs = NULL_VALUES;
   private ArrayList<BindColumn> _bindColumns;
   private ArrayList<BindParam> _bindParams;
+  private IntMap _parameterNameMap;
 
   PDOStatement(Env env, Connection conn, String query, boolean isPrepared, ArrayValue options)
     throws SQLException
@@ -107,6 +109,8 @@ public class PDOStatement
     if (options != null && options.getSize() > 0) {
       _env.notice(L.l("PDOStatement options unsupported"));
     }
+
+    query = parseQueryString(query);
 
     if (isPrepared) {
       _statement = null;
@@ -140,6 +144,59 @@ public class PDOStatement
         }
       }
     }
+  }
+
+  // side-effect, updates _parameterNameMap
+  private String parseQueryString(String query)
+  {
+    final int queryLength = query.length();
+    StringBuilder parsedQuery = new StringBuilder(queryLength);
+
+    int parameterCount = 0;
+    StringBuilder name = null;
+
+    int quote = 0;
+
+    for (int i = 0; i < queryLength + 1; i++) {
+      int ch = -1;
+
+      if (i < queryLength)
+        ch = query.charAt(i);
+
+      if (ch == '\'' || ch == '"') {
+        if (quote == 0)
+          quote = ch;
+        else if (quote == ch)
+          quote = 0;
+      }
+      else if (quote == 0 && ch == '?') {
+        parameterCount++;
+      }
+      else if (quote == 0 && ch == ':') {
+        parameterCount++;
+        name = new StringBuilder();
+        continue;
+      }
+      else if (name != null && (ch == -1 || !Character.isJavaIdentifierStart(ch))) {
+        if (_parameterNameMap == null)
+          _parameterNameMap = new IntMap();
+
+        _parameterNameMap.put(name.toString(), parameterCount);
+
+        parsedQuery.append('?');
+
+        name = null;
+      }
+
+      if (ch != -1) {
+        if (name != null)
+          name.append((char) ch);
+        else
+          parsedQuery.append((char) ch);
+      }
+    }
+
+    return parsedQuery.toString();
   }
 
   private boolean advanceResultSet()
@@ -373,7 +430,7 @@ public class PDOStatement
         for (Map.Entry<Value, Value> entry : parameters.entrySet()) {
           Value key = entry.getKey();
 
-          if (key instanceof LongValue) {
+          if (key.isNumber()) {
             if (! setParameter(key.toInt() + 1, entry.getValue(), -1))
               return false;
           }
@@ -874,7 +931,7 @@ public class PDOStatement
 
   /**
    * @param column 1-based column index
-   * @param jdbcType a Jdbc type, or -1 if it is unknonw
+   * @param jdbcType a jdbc type, or -1 if it is unknown
    * @param returnType a PDO.PARAM_* type, or -1
    */
   private Value getColumnValue(int column, int jdbcType, int returnType)
@@ -1005,12 +1062,24 @@ public class PDOStatement
 
   private int resolveParameter(Value parameter)
   {
-    int index;
+    int index = -1;
 
-    if (!(parameter instanceof LongValue))
-      throw new UnimplementedException("key " + parameter);
+    if (parameter instanceof LongValue) {
+      // slight optimization for normal case
+      index = parameter.toInt();
+    }
+    else {
+      String name = parameter.toString();
 
-    index = parameter.toInt();
+      if (name.length() > 1 && name.charAt(0) == ':') {
+        name = name.substring(1);
+        if (_parameterNameMap != null)
+          index = _parameterNameMap.get(name);
+      }
+      else
+        index = parameter.toInt();
+    }
+
     return index;
   }
 

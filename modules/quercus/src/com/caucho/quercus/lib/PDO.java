@@ -157,7 +157,20 @@ public class PDO {
         setAttribute(entry.getKey().toInt(), entry.getValue(), true);
     }
 
-    real_connect(env, user, password);
+    try {
+      String host = "localhost";
+      int port = 3306;
+      String dbname = "test";
+
+      String driver = "com.mysql.jdbc.jdbc2.optional.MysqlConnectionPoolDataSource";
+
+      String url = "jdbc:mysql://" + host + ":" + port + "/" + dbname;
+
+      _conn = env.getConnection(driver, url, user, password);
+    } catch (Exception e) {
+      env.warning("A link to the server could not be established.");
+      _error.error(e);
+    }
   }
 
   /**
@@ -503,35 +516,6 @@ public class PDO {
   public String quote(String query, @Optional int parameterType)
   {
     return "'" + real_escape_string(query) + "'";
-  }
-
-  /**
-   * Connects to the underlying database.
-   */
-  private boolean real_connect(Env env, String userName, String password)
-  {
-    if (_conn != null) {
-      env.warning(L.l("Connection is already opened to '{0}'", _conn));
-      return false;
-    }
-
-    try {
-      String host = "localhost";
-      int port = 3306;
-      String dbname = "test";
-
-      String driver = "com.mysql.jdbc.jdbc2.optional.MysqlConnectionPoolDataSource";
-
-      String url = "jdbc:mysql://" + host + ":" + port + "/" + dbname;
-
-      _conn = env.getConnection(driver, url, userName, password);
-
-      return true;
-    } catch (Exception e) {
-      env.warning("A link to the server could not be established.");
-      _error.error(e);
-      return false;
-    }
   }
 
   /**
