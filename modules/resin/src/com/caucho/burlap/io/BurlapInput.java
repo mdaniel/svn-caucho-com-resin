@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2001-2004 Caucho Technology, Inc.  All rights reserved.
+ * Copyright (c) 2001-2006 Caucho Technology, Inc.  All rights reserved.
  *
  * The Apache Software License, Version 1.1
  *
@@ -844,7 +844,7 @@ public class BurlapInput extends AbstractBurlapInput {
   public Object readObject(Class cl)
     throws IOException
   {
-    if (cl == null)
+    if (cl == null || cl.equals(Object.class))
       return readObject();
     
     int tag = parseTag();
@@ -905,7 +905,7 @@ public class BurlapInput extends AbstractBurlapInput {
       return remote;
     }
     }
-      
+    
     _peekTag = tag;
 
     Object value = _serializerFactory.getDeserializer(cl).readObject(this);

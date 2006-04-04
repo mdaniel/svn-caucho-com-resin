@@ -8,6 +8,27 @@
 
 <summary objsummary='localtoc'/>
 
+<section title="JaasAuthenticator">
+
+<p>The JaasAuthenticator will now look for <code>isUserInRole</code> and
+<code>getRoles</code> in the Principal returned by the authenticator
+to support the servlet <code>isUserInRole</code> call.
+
+</section>
+
+<section title="log/rollover-count">
+
+<p>rollover-count is now allowed for &lt;log></p>
+
+</section>
+
+<section title="log/path-format">
+
+<p>The path-format option to the logs, including access-log can now
+accept .gz extensions.  The logs will be compressed as they are written.</p>
+
+</section>
+
 <section title="select-manager">
 
 <p>The &lt;select-manager> tag replaces the &lt;enable-select-manager/>

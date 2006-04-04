@@ -243,20 +243,18 @@ if test -n "${apxs}"; then
   if test "$?" -ne 0; then
     AC_MSG_ERROR(bad apxs ${apxs})
   fi
-fi
-
-if test -z "${apxs}" -a -x "${apache_bin}/apxs"; then
+elif test -x "${apache_bin}/apxs"; then
   apxs=${apache_bin}/apxs 
-elif test -z "${apxs}" -a -x "${apache_dir}/bin/apxs"; then
+elif test -x "${apache_dir}/bin/apxs"; then
   apxs=${apache_dir}/bin/apxs 
-elif test -z "${apxs}" -a -x "${apache_dir}/sbin/apxs"; then
+elif test -x "${apache_dir}/sbin/apxs"; then
   apxs=${apache_dir}/sbin/apxs 
-elif test -z "${apxs}" -a -x "/sbin/apxs"; then
+elif test -x "/sbin/apxs"; then
   apxs=/sbin/apxs 
-elif test -z "${apxs}" -a -x "/usr/sbin/apxs"; then
+elif test -x "/usr/sbin/apxs"; then
   apxs=/usr/sbin/apxs 
 fi
-
+   
 #
 # heuristics for finding the Apache include directory
 #
@@ -360,17 +358,28 @@ fi
 if test -n "$apache" -a ! -r "${apache_conf}"; then
   AC_MSG_ERROR([Can't find Apache module configuration ${apache_conf}])
 fi
+
+#
+# check for apr
+#
+if test -x "${apxs}"; then
+   apr_bin=`${apxs} -q APR_BINDIR 2> /dev/null`
+   if test -x "${apr_bin}/apr-config"; then
+     apr_inc=`"${apr_bin}/apr-config" --includes`
+     APACHE_INC="${APACHE_INC} ${apr_inc}"
+   fi
+fi
 	
 #
 # Apache CFLAGS
 #
 
 if test -z "$apache_cflags" -a -x "${apxs}"; then
-   apache_cflags="`${apxs} -q CFLAGS` `${apxs} -q EXTRA_CFLAGS`"
-
-   apr_config=`${apxs} -q APR_CONFIG`
-   if test -x "${apr_config}"; then
-     apache_cflags="$apache_cflags `${apr_config} --cppflags`"
+   if test -x "${apr_bin}/apr-config"; then
+     apache_cflags="$apache_cflags `${apr_bin}/apr-config --cppflags`"
+     apache_cflags="$apache_cflags `${apr_bin}/apr-config --cflags`"
+   else
+     apache_cflags="`${apxs} -q CFLAGS`"
    fi
  fi
 	
@@ -383,17 +392,6 @@ fi
 
 if test -z "$apache_dir" -a -x "${apxs}"; then
    apache_dir=`${apxs} -q PREFIX`
-fi
-
-#
-# check for apr
-#
-if test -x "${apxs}"; then
-   apr_bin=`${apxs} -q APR_BINDIR 2> /dev/null`
-   if test -x "${apr_bin}/apr-config"; then
-     apr_inc=`"${apr_bin}/apr-config" --includes`
-     APACHE_INC="${APACHE_INC} ${apr_inc}"
-   fi
 fi
 
 AC_SUBST(APACHE_INC)
@@ -838,6 +836,10 @@ case "$target_os" in
 	  jni_os=hp-ux
         fi
 	;;
+
+  *aix*)
+        jni_os=aix
+	;;
 esac
 
 AC_SUBST(CPU)
@@ -896,6 +898,12 @@ if test -r "$JAVA_HOME/include/jvmti.h"; then
   echo "Using JVMTI for class reloading"
   
   CFLAGS="$CFLAGS -DHAS_JVMTI"
+fi
+
+if test -r "$JAVA_HOME/include/jvmdi.h"; then
+  echo "Using JVMDI for class reloading"
+  
+  CFLAGS="$CFLAGS -DHAS_JVMDI"
 fi
 	
 if test -n "$JNI"; then

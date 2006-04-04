@@ -716,10 +716,10 @@ public class AbstractAuthenticator implements ServletAuthenticator {
 	    sessions.remove(i);
 	    session.logout();
 	  }
-	  else if (session != null)
-	    isEmpty = false;
-	  else
+	  else if (session == null)
 	    sessions.remove(i);
+	  else
+	    isEmpty = false;
 	} catch (Throwable e) {
 	  log.log(Level.WARNING, e.toString(), e);
 	}
@@ -738,8 +738,10 @@ public class AbstractAuthenticator implements ServletAuthenticator {
 	SessionImpl session = ref.get();
 
 	try {
-	  if (session != null)
+	  if (session != null) {
 	    session.logout();
+	    session.invalidate();  // #599,  server/12i3
+	  }
 	} catch (Throwable e) {
 	  log.log(Level.WARNING, e.toString(), e);
 	}

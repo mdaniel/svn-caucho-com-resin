@@ -59,6 +59,7 @@ public class ClassEntry implements Dependency {
   private static final Logger log = Log.open(ClassEntry.class);
   
   private static boolean _hasJNIReload;
+  private static boolean _hasAnnotations;
 
   private DynamicClassLoader _loader;
   private String _name;
@@ -291,6 +292,9 @@ public class ClassEntry implements Dependency {
       if (cl == null) {
 	return false;
       }
+
+      if (_hasAnnotations && requireReload(cl))
+	return false;
 	    
       ReadStream is = _classPath.openRead();
 
@@ -381,6 +385,11 @@ public class ClassEntry implements Dependency {
     return _hasJNIReload;
   }
 
+  private static boolean requireReload(Class cl)
+  {
+    return cl.isAnnotationPresent(RequireReload.class);
+  }
+
   public String toString()
   {
     if (_sourcePath == null)
@@ -420,6 +429,13 @@ public class ClassEntry implements Dependency {
       
       log.log(Level.FINEST, e.toString(), e);
       // log.config("In-place class redefinition (HotSwap) is not available.\n" + e);
+    }
+    
+    try {
+      Object.class.getAnnotation(RequireReload.class);
+
+      _hasAnnotations = true;
+    } catch (Throwable e) {
     }
   }
 }

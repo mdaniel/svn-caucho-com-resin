@@ -246,26 +246,32 @@ public class ServletMapper {
         String file = _welcomeFileList.get(i);
 
         try {
+	  String welcomeURI;
+
+	  if (contextURI.endsWith("/"))
+	    welcomeURI = contextURI + file;
+	  else
+	    welcomeURI = contextURI + '/' + file;
+
           InputStream is;
-          is = _servletContext.getResourceAsStream(contextURI + "/" + file);
+          is = _servletContext.getResourceAsStream(welcomeURI);
 
           if (is != null)
             is.close();
           
           if (is == null) {
           }
-          else if (! contextURI.endsWith("/")) {
+          else if (! contextURI.endsWith("/") &&
+		   ! (invocation instanceof SubInvocation)) {
             String contextPath = invocation.getContextPath();
 
 	    return new RedirectFilterChain(contextPath + contextURI + "/");
           }
           else {
-            String uri = contextURI + file;
-
-            servletName = _servletMap.map(uri, vars);
+            servletName = _servletMap.map(welcomeURI, vars);
 
             if (servletName != null || _defaultServlet != null) {
-              contextURI = uri;
+              contextURI = welcomeURI;
               if (invocation instanceof Invocation) {
                 Invocation inv = (Invocation) invocation;
 

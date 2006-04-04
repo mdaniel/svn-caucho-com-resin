@@ -161,7 +161,8 @@ public class PageContextImpl extends PageContext
     Application app = (Application) config.getServletContext();
 
     initialize(servlet, app, request, response,
-	       errorPage, session, bufferSize, autoFlush);
+	       errorPage, session, bufferSize, autoFlush,
+	       false);
   }
 
   public void initialize(Servlet servlet,
@@ -171,7 +172,8 @@ public class PageContextImpl extends PageContext
 			 String errorPage,
 			 HttpSession session,
 			 int bufferSize,
-			 boolean autoFlush)
+			 boolean autoFlush,
+			 boolean isPrintNullAsBlank)
   {
     _servlet = servlet;
     _request = (HttpServletRequest) request;
@@ -191,6 +193,7 @@ public class PageContextImpl extends PageContext
     _topOut = _jspAdapter;
     _responseStream.setAutoFlush(autoFlush);
     _jspAdapter.init(null, _responseStream);
+    _jspAdapter.setPrintNullAsBlank(isPrintNullAsBlank);
 
     if (bufferSize != TempCharBuffer.SIZE) {
       try {

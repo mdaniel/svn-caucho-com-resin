@@ -68,10 +68,13 @@ import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
 import com.caucho.vfs.WriteStream;
 
+import com.caucho.server.resin.ServletServer;
+
 import com.caucho.server.e_app.EarConfig;
 
 import com.caucho.server.webapp.WebAppConfig;
 import com.caucho.server.webapp.Application;
+import com.caucho.server.webapp.RewriteInvocation;
 
 /**
  * Resin's host container implementation.
@@ -91,6 +94,9 @@ public class HostContainer implements DispatchBuilder {
   
   // The root directory.
   private Path _rootDir;
+
+  // dispatch mapping
+  private RewriteInvocation _rewriteInvocation;
 
   // List of default host configurations
   private ArrayList<HostConfig> _hostDefaultList = new ArrayList<HostConfig>();
@@ -285,6 +291,18 @@ public class HostContainer implements DispatchBuilder {
   }
 
   /**
+   * Adds rewrite-dispatch.
+   */
+  public RewriteInvocation createRewriteDispatch()
+  {
+    if (_rewriteInvocation == null) {
+      _rewriteInvocation = new RewriteInvocation();
+    }
+
+    return _rewriteInvocation;
+  }
+
+  /**
    * Clears the cache.
    */
   public void clearCache()
@@ -309,6 +327,21 @@ public class HostContainer implements DispatchBuilder {
       hostName = DomainName.fromAscii(rawHost);
 
     invocation.setHostName(hostName);
+
+    if (_rewriteInvocation != null) {
+      String url;
+
+      url = "http://" + hostName + invocation.getURI();
+      
+      FilterChain chain = _rewriteInvocation.map(url, invocation);
+
+      if (chain != null) {
+	ServletServer servletServer = (ServletServer) _dispatchServer;
+	invocation.setApplication(servletServer.getErrorApplication());
+	invocation.setFilterChain(chain);
+	return;
+      }
+    }
 
     Host host = getHost(hostName, rawPort);
 

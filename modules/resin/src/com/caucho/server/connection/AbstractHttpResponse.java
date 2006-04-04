@@ -1537,12 +1537,16 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
              _statusCode != SC_MOVED_TEMPORARILY && length < 512 &&
              (_contentType == null || _contentType.startsWith("text/html"))) {
     }
-    */
 
     if (canCache) {
     }
     else if (_statusCode == SC_OK && _request.getMethod().equals("HEAD")) {
       // length = 0;
+      _originalResponseStream.setHead();
+    }
+    */
+    
+    if (_request.getMethod().equals("HEAD")) {
       _originalResponseStream.setHead();
     }
 

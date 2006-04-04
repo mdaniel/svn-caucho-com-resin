@@ -161,6 +161,8 @@ public class HessianProxy implements InvocationHandler {
           } catch (FileNotFoundException e) {
             throw new HessianRuntimeException(String.valueOf(e));
           } catch (IOException e) {
+	    if (is == null)
+	      throw new HessianProtocolException(code + ": " + e, e);
           }
 
           if (is != null)

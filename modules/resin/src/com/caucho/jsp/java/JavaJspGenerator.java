@@ -824,6 +824,8 @@ public class JavaJspGenerator extends JspGenerator {
     out.print(_parseState.getBuffer());
     out.print(", ");
     out.print(_parseState.isAutoFlush());
+    out.print(", ");
+    out.print(_parseState.isPrintNullAsBlank());
     out.println(");");
     out.println("javax.servlet.jsp.JspWriter out = pageContext.getOut();");
     out.println("javax.servlet.ServletConfig config = getServletConfig();");

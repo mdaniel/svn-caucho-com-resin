@@ -68,6 +68,7 @@ import com.caucho.server.port.ProtocolDispatchServer;
 import com.caucho.server.webapp.Application;
 import com.caucho.server.webapp.ErrorPage;
 import com.caucho.server.webapp.WebAppConfig;
+import com.caucho.server.webapp.RewriteInvocation;
 import com.caucho.util.Alarm;
 import com.caucho.util.AlarmListener;
 import com.caucho.util.L10N;
@@ -361,6 +362,14 @@ public class ServletServer extends ProtocolDispatchServer
     throws Exception
   {
     _hostContainer.addHost(host);
+  }
+
+  /**
+   * Adds rewrite-dispatch.
+   */
+  public RewriteInvocation createRewriteDispatch()
+  {
+    return _hostContainer.createRewriteDispatch();
   }
 
   /**

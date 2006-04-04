@@ -30,9 +30,13 @@
 package com.caucho.vfs;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 import java.util.logging.Logger;
 import java.util.logging.Level;
+
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
 
 import java.util.zip.ZipOutputStream;
 import java.util.zip.GZIPOutputStream;
@@ -87,6 +91,9 @@ public class AbstractRolloverLog {
   // How often the rolloverSize should be checked
   private long _rolloverCheckPeriod = DEFAULT_ROLLOVER_CHECK_PERIOD;
 
+  // How many archives are allowed.
+  private int _rolloverCount;
+
   private QDate _calendar = QDate.createLocal();
 
   private Path _pwd = Vfs.lookup();
@@ -102,6 +109,7 @@ public class AbstractRolloverLog {
   private long _nextRolloverCheckTime = -1;
 
   private WriteStream _os;
+  private WriteStream _zipOut;
 
   /**
    * Returns the access-log's path.
@@ -139,8 +147,13 @@ public class AbstractRolloverLog {
    * Sets the formatted path.
    */
   public void setPathFormat(String pathFormat)
+    throws ConfigException
   {
     _pathFormat = pathFormat;
+    
+    if (pathFormat.endsWith(".zip")) {
+      throw new ConfigException(L.l(".zip extension to path-format is not supported."));
+    }
   }
 
   /**
@@ -246,6 +259,14 @@ public class AbstractRolloverLog {
   public long getRolloverCheckPeriod()
   {
     return _rolloverCheckPeriod;
+  }
+
+  /**
+   * Sets the max rollover files.
+   */
+  public void setRolloverCount(int count)
+  {
+    _rolloverCount = count;
   }
   
   /**
@@ -427,24 +448,23 @@ public class AbstractRolloverLog {
       }
     }
 
+    String pathName = path.getPath();
+
+    try {
+      if (pathName.endsWith(".gz")) {
+	_zipOut = _os;
+	_os = Vfs.openWrite(new GZIPOutputStream(_zipOut));
+      }
+      else if (pathName.endsWith(".zip")) {
+	throw new ConfigException("Can't support .zip in path-format");
+      }
+    } catch (Exception e) {
+      if (exn == null)
+	exn = e;
+    }
+
     if (exn != null)
       logWarning(L.l("Can't create log directory {0}", path), exn);
-  }
-
-  /**
-   * Tries to open the log.
-   */
-  private void closeLogStream()
-  {
-    try {
-      WriteStream os = _os;
-      _os = null;
-
-      if (os != null)
-	os.close();
-    } catch (Throwable e) {
-      // can't log in log routines
-    }
   }
 
   private void movePathToArchive(Path savedPath)
@@ -508,6 +528,73 @@ public class AbstractRolloverLog {
     } catch (Throwable e) {
       logWarning(L.l("Error rotating logs"), e);
     }
+
+    if (_rolloverCount > 0)
+      removeOldLogs();
+  }
+
+  /**
+   * Removes logs passing the rollover count.
+   */
+  private void removeOldLogs()
+  {
+    try {
+      Path path = getPath();
+      Path parent = path.getParent();
+
+      String []list = parent.list();
+
+      ArrayList<String> matchList = new ArrayList<String>();
+
+      Pattern archiveRegexp = getArchiveRegexp();
+      for (int i = 0; i < list.length; i++) {
+	Matcher matcher = archiveRegexp.matcher(list[i]);
+
+	if (matcher.matches())
+	  matchList.add(list[i]);
+      }
+
+      Collections.sort(matchList);
+
+      if (_rolloverCount <= 0 || matchList.size() < _rolloverCount)
+	return;
+
+      for (int i = 0; i + _rolloverCount < matchList.size(); i++) {
+	try {
+	  parent.lookup(matchList.get(i)).remove();
+	} catch (Throwable e) {
+	}
+      }
+    } catch (Throwable e) {
+    }
+  }
+
+  private Pattern getArchiveRegexp()
+  {
+    StringBuilder sb = new StringBuilder();
+
+    String archiveFormat = getArchiveFormat();
+
+    for (int i = 0; i < archiveFormat.length(); i++) {
+      char ch = archiveFormat.charAt(i);
+
+      switch (ch) {
+      case '.':  case '\\': case '*': case '?': case '+':
+      case '(': case ')': case '{': case '}': case '|':
+	sb.append("\\");
+	sb.append(ch);
+	break;
+      case '%':
+	sb.append(".+");
+	i++;
+	break;
+      default:
+	sb.append(ch);
+	break;
+      }
+    }
+
+    return Pattern.compile(sb.toString());
   }
 
   /**
@@ -607,11 +694,32 @@ public class AbstractRolloverLog {
   public synchronized void close()
     throws IOException
   {
-    if (_os != null) {
+    closeLogStream();
+  }
+
+  /**
+   * Tries to close the log.
+   */
+  private void closeLogStream()
+  {
+    try {
       WriteStream os = _os;
       _os = null;
-      
-      os.close();
+
+      if (os != null)
+	os.close();
+    } catch (Throwable e) {
+      // can't log in log routines
+    }
+
+    try {
+      WriteStream zipOut = _zipOut;
+      _zipOut = null;
+
+      if (zipOut != null)
+	zipOut.close();
+    } catch (Throwable e) {
+      // can't log in log routines
     }
   }
 }

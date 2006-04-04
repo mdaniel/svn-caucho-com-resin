@@ -19,6 +19,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
+ *
  *   Free SoftwareFoundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
@@ -65,6 +66,7 @@ public class JspPropertyGroup {
   private boolean _requireSource = false;
   private boolean _ignoreELException = true;
   private boolean _isValidateTaglibSchema = true;
+  private boolean _isPrintNullAsBlank = false;
 
   private int _jspMax = 0;
   private boolean _disableLog = true;
@@ -272,6 +274,22 @@ public class JspPropertyGroup {
   public boolean getRequireSource()
   {
     return _requireSource;
+  }
+
+  /**
+   * Set if nulls are printed as space
+   */
+  public void setPrintNullAsBlank(boolean enable)
+  {
+    _isPrintNullAsBlank = enable;
+  }
+
+  /**
+   * Set if nulls are printed as space
+   */
+  public boolean isPrintNullAsBlank()
+  {
+    return _isPrintNullAsBlank;
   }
 
   /**

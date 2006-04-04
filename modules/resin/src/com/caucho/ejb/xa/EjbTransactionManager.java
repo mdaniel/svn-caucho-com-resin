@@ -81,9 +81,9 @@ public class EjbTransactionManager {
   private Hashtable<String,TransactionContext> _foreignTransactionMap
     = new Hashtable<String,TransactionContext>();
   
-  private EnvServerManager _ejbManager;
+  private final EnvServerManager _ejbManager;
 
-  protected TransactionManager _transactionManager;
+  protected final TransactionManager _transactionManager;
   protected UserTransaction _userTransaction;
 
   private int _resinIsolation = -1;
@@ -99,18 +99,23 @@ public class EjbTransactionManager {
   public EjbTransactionManager(EnvServerManager ejbManager)
     throws ConfigException
   {
+    _ejbManager = ejbManager;
+
+    UserTransaction ut = null;
+    TransactionManager tm = null;
+    
     try {
-      _ejbManager = ejbManager;
       InitialContext ic = new InitialContext();
       
-      _userTransaction
-	= (UserTransaction) ic.lookup("java:comp/UserTransaction");
+      ut = (UserTransaction) ic.lookup("java:comp/UserTransaction");
       
-      _transactionManager
-	= (TransactionManager) ic.lookup("java:comp/TransactionManager");
+      tm = (TransactionManager) ic.lookup("java:comp/TransactionManager");
     } catch (NamingException e) {
       log.log(Level.WARNING, e.toString(), e);
     }
+
+    _userTransaction = ut;
+    _transactionManager = tm;
 
     if (_transactionManager == null)
       throw new ConfigException(L.l("Can't load TransactionManager."));
@@ -697,7 +702,6 @@ public class EjbTransactionManager {
     }
     
     _transactionMap = null;
-    _transactionManager = null;
   }
 }
 

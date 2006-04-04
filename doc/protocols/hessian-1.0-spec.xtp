@@ -685,7 +685,7 @@ same class name.</p>
 <var/header/>  ::= H b16 b8 header-string <var/object/>
 <var/method/>  ::= m b16 b8 method-string
 
-<var/fault/>   ::= f (<var/object/> <var/object/>)*
+<var/fault/>   ::= f (<var/object/> <var/object/>)* z
 
 <var/list/>    ::= V <var/type/>? <var/length/>? <var/object/>* z
 <var/map/>     ::= M <var/type/>? (<var/object/> <var/object/>)* z

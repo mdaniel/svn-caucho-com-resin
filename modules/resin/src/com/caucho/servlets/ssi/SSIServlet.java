@@ -180,7 +180,9 @@ public class SSIServlet extends HttpServlet {
       else if ((ch = is.read()) != '>') {
       }
 
-      if ("echo".equals(cmd))
+      if ("config".equals(cmd))
+	return ConfigStatement.create(attr, is.getPath());
+      else if ("echo".equals(cmd))
 	return EchoStatement.create(attr, is.getPath());
       else
 	return new ErrorStatement("['" + cmd + "' is an unknown command.]");

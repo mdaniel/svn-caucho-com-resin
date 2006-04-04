@@ -1097,7 +1097,7 @@ public class SessionManager implements ObjectManager, AlarmListener {
       handleCreateListeners(session);
     else
       session.setAccess(now);
-
+    
     return session;
   }
 
@@ -1133,8 +1133,9 @@ public class SessionManager implements ObjectManager, AlarmListener {
     if (! key.equals(session.getId()))
       throw new IllegalStateException(key + " != " + session.getId());
 
-    if (_sessionStore != null) {
-      ClusterObject clusterObject = _sessionStore.createClusterObject(key);
+    Store sessionStore = _sessionStore;
+    if (sessionStore != null) {
+      ClusterObject clusterObject = sessionStore.createClusterObject(key);
       session.setClusterObject(clusterObject);
     }
 

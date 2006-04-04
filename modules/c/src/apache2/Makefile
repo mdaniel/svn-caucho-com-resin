@@ -2,20 +2,20 @@
 
 CC=gcc
 CP=/bin/cp
-CFLAGS=-g -O2 -DPOLL -DHAS_JVMTI  -g -O2 -pthread  -DLINUX=2 -D_REENTRANT -D_GNU_SOURCE -D_LARGEFILE64_SOURCE
-CFLAGS_SHLIB=-fpic
+CFLAGS=-g -O2 -DPOLL -DHAS_JVMTI -DHAS_JVMDI   -DDARWIN -DSIGPROCMASK_SETS_THREAD_MASK -no-cpp-precomp
+CFLAGS_SHLIB=-DSHARED_MODULE
 EGREP=grep -E
-LIBTOOL=EGREP="grep -E" /home/ferg/ws/resin/libtool --silent
-LD=/usr/bin/ld
+LIBTOOL=EGREP="grep -E" /Users/ferg/ws/test-resin/libtool --silent
+LD=gcc
 LD_SHLIB=gcc
 LIBS_SHLIB=
 LDFLAGS=
-LDFLAGS_SHLIB=-shared -L/usr/lib
-APACHE_INC=-I/usr/local/apache22/include
+LDFLAGS_SHLIB=-bundle -undefined suppress -flat_namespace -L/usr/lib
+APACHE_INC=-I/usr/local/apache22/include  -I/usr/local/apache2/include 
 apache_conf=/usr/local/apache22/conf/httpd.conf
 apache_dir=/usr/local/apache22
 apache_libexec=/usr/local/apache22/modules
-resin_home=/home/ferg/ws/resin
+resin_home=/Users/ferg/ws/test-resin
 INCLUDES = $(APACHE_INC) -DRESIN_HOME=\"$(resin_home)\" -I../common
 C=../common
 COMMON_OBJ=$C/stream.lo $C/config.lo $C/memory.lo

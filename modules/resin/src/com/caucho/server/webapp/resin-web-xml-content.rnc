@@ -224,6 +224,9 @@ r_jsp = element jsp {
  & (attribute precompile { r_boolean-Type }
     | element precompile { r_boolean-Type })?
 
+ & (attribute print-null-as-blank { r_boolean-Type }
+    | element print-null-as-blank { r_boolean-Type })?
+
  & (attribute recompile-on-error { r_boolean-Type }
     | element recompile-on-error { r_boolean-Type })?
 

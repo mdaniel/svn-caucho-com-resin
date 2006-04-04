@@ -63,7 +63,11 @@
 /* probably system-dependent */
 #include <jni.h>
 
+#ifdef HAS_JVMDI
 #include <jvmdi.h>
+#endif
+
+#ifdef HAS_JVMDI
 
 jboolean
 jvmdi_can_reload_native(JNIEnv *env, jobject obj)
@@ -128,3 +132,24 @@ jvmdi_reload_native(JNIEnv *env,
   
   return res;
 }
+
+#else
+
+jboolean
+jvmdi_can_reload_native(JNIEnv *env, jobject obj)
+{
+  return 0;
+}
+
+jint
+jvmdi_reload_native(JNIEnv *env,
+		    jobject obj,
+		    jclass cl,
+		    jbyteArray buf,
+		    jint offset,
+		    jint length)
+{
+  return 0;
+}
+
+#endif

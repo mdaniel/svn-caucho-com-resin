@@ -30,6 +30,8 @@ package com.caucho.server.security;
 
 import java.io.IOException;
 
+import java.lang.reflect.Method;
+
 import java.util.HashMap;
 import java.util.Set;
 import java.util.Iterator;
@@ -87,6 +89,11 @@ public class JaasAuthenticator extends AbstractAuthenticator {
   }
 
   public void setInitParam(InitParam init)
+  {
+    _options.putAll(init.getParameters());
+  }
+
+  public void setOptions(InitParam init)
   {
     _options.putAll(init.getParameters());
   }
@@ -167,6 +174,33 @@ public class JaasAuthenticator extends AbstractAuthenticator {
                               Principal principal, String role)
     throws ServletException
   {
+    if (principal == null)
+      return false;
+
+    Class principalCl = principal.getClass();
+    
+    try {
+      Method isUserInRole = principalCl.getMethod("isUserInRole",
+						  new Class[] { String.class });
+
+      if (isUserInRole != null)
+	return Boolean.TRUE.equals(isUserInRole.invoke(principal, role));
+    } catch (Throwable e) {
+      log.log(Level.FINER, e.toString(), e);
+    }
+      
+    try {
+      Method getRoles = principalCl.getMethod("getRoles", new Class[] { });
+	
+      if (getRoles != null) {
+	Set roles = (Set) getRoles.invoke(principal);
+
+	return roles != null && roles.contains(role);
+      }
+    } catch (Throwable e) {
+      log.log(Level.FINER, e.toString(), e);
+    }
+      
     return principal != null;
   }
 

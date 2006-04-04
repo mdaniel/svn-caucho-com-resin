@@ -47,8 +47,6 @@ public abstract class JavaPage extends Page implements HttpJspPage {
   {
     super.init(config);
 
-    
-
     jspInit();
   }
 

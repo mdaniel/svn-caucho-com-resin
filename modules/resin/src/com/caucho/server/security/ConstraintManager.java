@@ -87,7 +87,7 @@ public class ConstraintManager extends FilterChainBuilder {
 
     if (lower.startsWith("/web-inf") ||
         lower.startsWith("/meta-inf")) {
-      return new ErrorFilterChain(HttpServletResponse.SC_FORBIDDEN);
+      return new ErrorFilterChain(HttpServletResponse.SC_NOT_FOUND);
     }
 
     ArrayList<AbstractConstraint> constraints;

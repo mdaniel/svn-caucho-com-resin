@@ -112,6 +112,7 @@ public class VarExpr {
   public String evalString(HttpServletRequest request,
 			   HttpServletResponse response)
   {
+    String fmt;
     String value = null;
     
     switch (_code) {
@@ -189,13 +190,18 @@ public class VarExpr {
       break;
 
     case DATE_GMT:
-      value = QDate.formatGMT(Alarm.getCurrentTime(),
-			      "%Y-%m-%d %H:%M:%S");
+      fmt = (String) request.getAttribute("caucho.ssi.timefmt");
+      if (fmt == null)
+	fmt = "%Y-%m-%d %H:%M:%S";
+      value = QDate.formatGMT(Alarm.getCurrentTime(), fmt);
       break;
 
     case DATE_LOCAL:
-      value = QDate.formatLocal(Alarm.getCurrentTime(),
-				"%Y-%m-%d %H:%M:%S");
+      fmt = (String) request.getAttribute("caucho.ssi.timefmt");
+      if (fmt == null)
+	fmt = "%Y-%m-%d %H:%M:%S";
+      
+      value = QDate.formatLocal(Alarm.getCurrentTime(), fmt);
       break;
 
     case DOCUMENT_NAME:
@@ -207,8 +213,11 @@ public class VarExpr {
       break;
 
     case LAST_MODIFIED:
-      value = QDate.formatLocal(_path.getLastModified(),
-				"%Y-%m-%d %H:%M:%S");
+      fmt = (String) request.getAttribute("caucho.ssi.timefmt");
+      if (fmt == null)
+	fmt = "%Y-%m-%d %H:%M:%S";
+      
+      value = QDate.formatLocal(_path.getLastModified(), fmt);
       break;
 
     case USER_NAME:

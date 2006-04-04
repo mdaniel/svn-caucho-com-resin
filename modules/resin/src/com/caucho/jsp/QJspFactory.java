@@ -85,14 +85,15 @@ public class QJspFactory extends JspFactory {
 						    String errorPageURL,
 						    HttpSession session,
 						    int buffer,
-						    boolean autoFlush)
+						    boolean autoFlush,
+						    boolean isPrintNullAsBlank)
   {
     PageContextImpl pc = _freePages.allocate();
     if (pc == null)
       pc = new PageContextImpl();
 
     pc.initialize(servlet, app, request, response, errorPageURL,
-		  session, buffer, autoFlush);
+		  session, buffer, autoFlush, isPrintNullAsBlank);
 
     return pc;
   }

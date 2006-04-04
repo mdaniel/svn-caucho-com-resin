@@ -478,6 +478,7 @@ cse_write_response(stream_t *s, unsigned long len, EXTENSION_CONTROL_BLOCK *r)
 
 		s->read_buf[s->read_length] = 0;
 		write_client_buffer(r, s->read_buf + s->read_offset, sublen);
+
 		len -= sublen;
 		s->read_offset += sublen;
 	}

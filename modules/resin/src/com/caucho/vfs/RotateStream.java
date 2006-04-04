@@ -42,6 +42,8 @@ import java.util.logging.Level;
 import java.util.zip.ZipOutputStream;
 import java.util.zip.GZIPOutputStream;
 
+import com.caucho.config.ConfigException;
+
 import com.caucho.util.AlarmListener;
 import com.caucho.util.Alarm;
 import com.caucho.util.WeakAlarm;
@@ -90,6 +92,7 @@ public class RotateStream extends StreamImpl implements AlarmListener {
    * @param path underlying log path
    */
   private RotateStream(String formatPath)
+    throws ConfigException
   {
     _rolloverLog.setPathFormat(formatPath);
   }
@@ -117,6 +120,7 @@ public class RotateStream extends StreamImpl implements AlarmListener {
    * Returns the rotate stream corresponding to this path
    */
   public static RotateStream create(String path)
+    throws ConfigException
   {
     synchronized (_formatStreams) {
       SoftReference<RotateStream> ref = _formatStreams.get(path);
@@ -179,7 +183,7 @@ public class RotateStream extends StreamImpl implements AlarmListener {
    */
   public void setMaxRolloverCount(int count)
   {
-    log.warning("max-rollover-count is no longer suported.");
+    _rolloverLog.setRolloverCount(count);
   }
 
   /**

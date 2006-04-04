@@ -267,11 +267,10 @@ public class JdbcMessage {
 	pstmt.setInt(i++, type);
 	pstmt.setLong(i++, expireTime);
 
-	if (header.getLength() > 0) {
+	if (header.getLength() > 0)
 	  pstmt.setBinaryStream(i++, header.openRead(), header.getLength());
-	}
 	else
-	  pstmt.setNull(i++, Types.VARCHAR);
+	  pstmt.setNull(i++, Types.BINARY);
 	
 	if (body != null) 
 	  pstmt.setBinaryStream(i++, body.openRead(), body.getLength());

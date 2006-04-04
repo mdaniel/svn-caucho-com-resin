@@ -57,7 +57,7 @@ public class RotateLog {
   
   private Period _rolloverPeriod;
   private Bytes _rolloverSize;
-  private int _rolloverCount = 10;
+  private int _rolloverCount = -1;
   
   private RotateStream _rotateStream;
   
@@ -198,6 +198,13 @@ public class RotateLog {
     else
       throw new ConfigException(L.l("`path' is a required attribute of <{0}>.  Each <{0}> must configure the destination stream.", getTagName()));
 
+    if (_path != null && ! _path.canRead() &&
+	(_rolloverPeriod != null ||
+	 _rolloverSize != null ||
+	 _archiveFormat != null)) {
+      throw new ConfigException(L.l("log path '{0}' is not readable and therefore cannot be rotated.", _path.getURL()));
+    }
+
     AbstractRolloverLog rolloverLog = _rotateStream.getRolloverLog();
 
     if (_rolloverPeriod != null)
@@ -205,7 +212,7 @@ public class RotateLog {
 
     if (_rolloverSize != null)
       rolloverLog.setRolloverSize(_rolloverSize);
-    //_rotateStream.setMaxRolloverCount(_rolloverCount);
+    _rotateStream.setMaxRolloverCount(_rolloverCount);
     if (_archiveFormat != null)
       rolloverLog.setArchiveFormat(_archiveFormat);
 

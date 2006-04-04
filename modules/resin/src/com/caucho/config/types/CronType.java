@@ -223,7 +223,12 @@ public class CronType {
       int month = cal.getMonth();
       int year = (int) cal.getYear();
       
-      return nextTime(year, month, day, hour, minute);
+      long nextTime = nextTime(year, month, day, hour, minute);
+
+      if (now < nextTime)
+	return nextTime;
+      else
+	return nextTime(now + 3600000L); // DST
     }
   }
 

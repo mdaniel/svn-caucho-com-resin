@@ -53,6 +53,13 @@ abstract class AbstractBodyContent extends AbstractJspWriter {
 
   private final char []_tempCharBuffer = new char[256];
 
+  private boolean _isPrintNullAsBlank;
+
+  public void setPrintNullAsBlank(boolean enable)
+  {
+    _isPrintNullAsBlank = enable;
+  }
+
   /**
    * Writes a character array to the writer.
    *
@@ -215,10 +222,12 @@ abstract class AbstractBodyContent extends AbstractJspWriter {
    */
   final public void print(String s) throws IOException
   {
-    if (s == null)
-      write(_nullChars, 0, _nullChars.length);
-    else
+    if (s != null)
       write(s, 0, s.length());
+    else if (_isPrintNullAsBlank) {
+    }
+    else
+      write(_nullChars, 0, _nullChars.length);
   }
 
   /**
@@ -226,13 +235,15 @@ abstract class AbstractBodyContent extends AbstractJspWriter {
    */
   final public void print(Object v) throws IOException
   {
-    if (v == null)
-      write(_nullChars, 0, _nullChars.length);
-    else {
+    if (v != null) {
       String s = v.toString();
       
       write(s, 0, s.length());
     }
+    else if (_isPrintNullAsBlank) {
+    }
+    else
+      write(_nullChars, 0, _nullChars.length);
   }
 
   /**
@@ -329,10 +340,12 @@ abstract class AbstractBodyContent extends AbstractJspWriter {
    */
   final public void println(String s) throws IOException
   {
-    if (s == null)
-      write(_nullChars, 0, _nullChars.length);
-    else
+    if (s != null)
       write(s, 0, s.length());
+    else if (_isPrintNullAsBlank) {
+    }
+    else
+      write(_nullChars, 0, _nullChars.length);
 
     println();
   }
@@ -342,13 +355,15 @@ abstract class AbstractBodyContent extends AbstractJspWriter {
    */
   final public void println(Object v) throws IOException
   {
-    if (v == null)
-      write(_nullChars, 0, _nullChars.length);
-    else {
+    if (v != null) {
       String s = String.valueOf(v);
 
       write(s, 0, s.length());
     }
+    else if (_isPrintNullAsBlank) {
+    }
+    else
+      write(_nullChars, 0, _nullChars.length);
     
     println();
   }

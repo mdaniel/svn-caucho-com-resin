@@ -19,53 +19,29 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
  * @author Scott Ferguson
  */
 
-package com.caucho.jsp;
+package com.caucho.server.dispatch;
 
-import java.util.*;
-import javax.servlet.*;
-import javax.servlet.http.*;
+import com.caucho.log.Log;
 
-import com.caucho.util.*;
-import com.caucho.vfs.*;
+import com.caucho.make.Dependency;
+import com.caucho.make.DependencyContainer;
 
-class JspServletConfig implements ServletConfig  {
-  private Hashtable init;
-  private ServletContext context;
-  private String name;
+import com.caucho.server.webapp.Application;
 
-  JspServletConfig(ServletContext context, Hashtable init, String name)
-  {
-    if (init == null)
-      init = new Hashtable();
-    this.init = init;
-    this.context = context;
-    this.name = name;
-  }
+import com.caucho.util.L10N;
 
-  public String getServletName()
-  {
-    return this.name;
-  }
+import java.util.logging.Logger;
 
-  public ServletContext getServletContext()
-  {
-    return context;
-  }
-  
-  public String getInitParameter(String name)
-  {
-    return (String) init.get(name);
-  }
-  
-  public Enumeration getInitParameterNames()
-  { 
-    return init.keys();
-  }
+/**
+ * A repository for request information gleaned from the uri.
+ */
+public class SubInvocation extends Invocation {
 }

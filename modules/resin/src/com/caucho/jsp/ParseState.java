@@ -454,6 +454,14 @@ public class ParseState {
   {
     _isXml = isXml;
   }
+
+  /**
+   * Returns true if the print-null-as-blank is enabled.
+   */
+  public boolean isPrintNullAsBlank()
+  {
+    return _jspPropertyGroup.isPrintNullAsBlank();
+  }
   
   /**
    * Gets the resource manager.

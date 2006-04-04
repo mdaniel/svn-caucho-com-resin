@@ -1921,9 +1921,9 @@ public class Application extends ServletContextImpl
     if (disp != null && ! disp.isModified())
       return disp;
 
-    Invocation includeInvocation = new Invocation();
-    Invocation forwardInvocation = new Invocation();
-    Invocation errorInvocation = new Invocation();
+    Invocation includeInvocation = new SubInvocation();
+    Invocation forwardInvocation = new SubInvocation();
+    Invocation errorInvocation = new SubInvocation();
     InvocationDecoder decoder = new InvocationDecoder();
 
     String rawURI = escapeURL(_contextPath + url);
@@ -2348,6 +2348,29 @@ public class Application extends ServletContextImpl
 			toString(), _requestCount));
       }
 
+      ServletContextEvent event = new ServletContextEvent(this);
+
+      SessionManager sessionManager = _sessionManager;
+      _sessionManager = null;
+
+      if (sessionManager != null &&
+	  (! _isInheritSession || _controller.getParent() == null))
+	sessionManager.close();
+
+      _servletManager.destroy();
+      _filterManager.destroy();
+
+      // server/10g8 -- application listeners after session
+      for (int i = _applicationListeners.size() - 1; i >= 0; i--) {
+        ServletContextListener listener = _applicationListeners.get(i);
+
+        try {
+          listener.contextDestroyed(event);
+        } catch (Exception e) {
+          log.log(Level.WARNING, e.toString(), e);
+        }
+      }
+
       try {
 	_classLoader.stop();
       } catch (Throwable e) {
@@ -2385,29 +2408,6 @@ public class Application extends ServletContextImpl
           _parent.removeWebAppDeploy(deploy);
 	  deploy.destroy();
         } catch (Throwable e) {
-          log.log(Level.WARNING, e.toString(), e);
-        }
-      }
-
-      ServletContextEvent event = new ServletContextEvent(this);
-
-      SessionManager sessionManager = _sessionManager;
-      _sessionManager = null;
-
-      if (sessionManager != null &&
-	  (! _isInheritSession || _controller.getParent() == null))
-	sessionManager.close();
-
-      _servletManager.destroy();
-      _filterManager.destroy();
-
-      // server/10g8 -- application listeners after session
-      for (int i = _applicationListeners.size() - 1; i >= 0; i--) {
-        ServletContextListener listener = _applicationListeners.get(i);
-
-        try {
-          listener.contextDestroyed(event);
-        } catch (Exception e) {
           log.log(Level.WARNING, e.toString(), e);
         }
       }

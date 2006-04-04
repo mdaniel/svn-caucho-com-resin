@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2004 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -19,53 +19,25 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
  * @author Scott Ferguson
  */
 
-package com.caucho.jsp;
+package com.caucho.loader;
 
-import java.util.*;
-import javax.servlet.*;
-import javax.servlet.http.*;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+import java.lang.annotation.ElementType;
 
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-
-class JspServletConfig implements ServletConfig  {
-  private Hashtable init;
-  private ServletContext context;
-  private String name;
-
-  JspServletConfig(ServletContext context, Hashtable init, String name)
-  {
-    if (init == null)
-      init = new Hashtable();
-    this.init = init;
-    this.context = context;
-    this.name = name;
-  }
-
-  public String getServletName()
-  {
-    return this.name;
-  }
-
-  public ServletContext getServletContext()
-  {
-    return context;
-  }
-  
-  public String getInitParameter(String name)
-  {
-    return (String) init.get(name);
-  }
-  
-  public Enumeration getInitParameterNames()
-  { 
-    return init.keys();
-  }
+/**
+ * Marks a class as requiring a reload for HotSwap.
+ */
+@Target(ElementType.TYPE)
+@Retention(RetentionPolicy.RUNTIME)
+public @interface RequireReload {
 }

@@ -97,6 +97,8 @@ public class ResinServer
 
   private boolean _isRestartOnClose;
 
+  private SecurityManager _securityManager;
+
   private HashMap<String,Object> _variableMap = new HashMap<String,Object>();
   
   private ArrayList<ServerController> _servers
@@ -367,16 +369,9 @@ public class ResinServer
     tm.start();
   }
 
-  /**
-   * Sets the security manager.
-   */
-  public void setSecurityManager(boolean useSecurityManager)
+  public SecurityManagerConfig createSecurityManager()
   {
-    if (useSecurityManager && System.getSecurityManager() == null) {
-      SecurityManager manager = new SecurityManager();
-
-      System.setSecurityManager(manager);
-    }
+    return new SecurityManagerConfig();
   }
 
   /**
@@ -476,6 +471,8 @@ public class ResinServer
   {
     if (! _lifecycle.toActive())
       return;
+
+    long start = Alarm.getCurrentTime();
     
     // force a GC on start
     System.gc();
@@ -494,6 +491,8 @@ public class ResinServer
       log.warning(L.l("-server \"{0}\" has no matching http or srun ports.  Check the resin.conf and -server values.",
 		      _serverId));
     }
+
+    log.info("Resin started in " + (Alarm.getCurrentTime() - start) + "ms");
   }
 
   /**
@@ -641,6 +640,41 @@ public class ResinServer
     public boolean isJava5()
     {
       return CauchoSystem.isJdk15();
+    }
+  }
+
+  class SecurityManagerConfig {
+    private boolean _isEnable;
+    
+    SecurityManagerConfig()
+    {
+      if (_securityManager == null)
+	_securityManager = new SecurityManager();
+    }
+    
+    public void setEnable(boolean enable)
+    {
+      _isEnable = enable;
+    }
+    
+    public void setValue(boolean enable)
+    {
+      setEnable(enable);
+    }
+
+    public void setPolicyFile(Path path)
+      throws ConfigException
+    {
+      if (! path.canRead())
+	throw new ConfigException(L.l("policy-file '{0}' must be readable.",
+				      path));
+
+    }
+
+    public void init()
+    {
+      if (_isEnable)
+	System.setSecurityManager(_securityManager);
     }
   }
 }
