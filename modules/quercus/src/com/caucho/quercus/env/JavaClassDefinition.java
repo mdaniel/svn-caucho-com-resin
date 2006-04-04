@@ -82,21 +82,21 @@ public class JavaClassDefinition extends AbstractQuercusClass {
 
   private Method __get = null;
   private Marshall __getReturn = null;
-  
+
   private Method __getField = null;
   private Marshall __getFieldReturn = null;
-  
+
   private Method __set = null;
   private Marshall __setName = null;
   private Marshall __setValue = null;
-  
+
   private Method __setField = null;
   //private Marshall __setFieldName = null;
   private Marshall __setFieldValue = null;
-  
+
   private Method _printRImpl = null;
   private Method _varDumpImpl = null;
-  
+
   private JavaConstructor _cons;
 
   private Method _iterator;
@@ -120,12 +120,17 @@ public class JavaClassDefinition extends AbstractQuercusClass {
     return _name;
   }
 
+  public Class getType()
+  {
+    return _type;
+  }
+
   /**
    * For array dereferencing.
-   * 
+   *
    * Also designed to call __get()
    * IE: SimpleXMLElement
-   * 
+   *
    * @param name
    * @return Value
    */
@@ -136,7 +141,7 @@ public class JavaClassDefinition extends AbstractQuercusClass {
        //__get needs to handle a Value $foo[5] vs. $foo['bar']
         Object result = __get.invoke(obj, name);
         return __getReturn.unmarshall(null, result);
-        
+
       } catch (Throwable e) {
         log.log(Level.FINE,  L.l(e.getMessage()), e);
         return NullValue.NULL;
@@ -201,7 +206,7 @@ public class JavaClassDefinition extends AbstractQuercusClass {
 
   /**
    * specifically designed for __set()
-   * 
+   *
    * @param env
    * @param obj
    * @param name
@@ -242,7 +247,7 @@ public class JavaClassDefinition extends AbstractQuercusClass {
     JavaMethod setter = _setMap.get(name);
 
    /* if (setter == null) {
-      
+
   log.log(Level.FINE,"'" + name + "' is an unknown field.");
   return NullValue.NULL;*/
 
@@ -488,12 +493,12 @@ public class JavaClassDefinition extends AbstractQuercusClass {
         if (cons[i].isAnnotationPresent(Construct.class))
           break;
       }
-      
+
       if (i < cons.length)
         _cons = new JavaConstructor(_quercus, cons[i]);
       else
         _cons = new JavaConstructor(_quercus, cons[0]);
-      
+
     } else
       _cons = null;
 
@@ -531,16 +536,20 @@ public class JavaClassDefinition extends AbstractQuercusClass {
       int length = methodName.length();
 
       if (length > 3) {
-        String prefix = methodName.substring(0, 3);
-
-        if ("get".equals(prefix)) {
+        if (methodName.startsWith("get")) {
           Marshall marshall = Marshall.create(_quercus, method.getReturnType(), false);
           MethodMarshallPair pair = new MethodMarshallPair(method, marshall);
-          _getMap.put(javaToPhpConvert(methodName.substring(3,length)), pair);
+          _getMap.put(javaToQuercusConvert(methodName.substring(3, length)), pair);
 
-        } else if ("set".equals(prefix)) {
+        }
+        else if (methodName.startsWith("is")) {
+          Marshall marshall = Marshall.create(_quercus, method.getReturnType(), false);
+          MethodMarshallPair pair = new MethodMarshallPair(method, marshall);
+          _getMap.put(javaToQuercusConvert(methodName.substring(2, length)), pair);
+        }
+        else if (methodName.startsWith("set")) {
           JavaMethod javaMethod = new JavaMethod(quercus, method);
-          _setMap.put(javaToPhpConvert(methodName.substring(3, length)), javaMethod);
+          _setMap.put(javaToQuercusConvert(methodName.substring(3, length)), javaMethod);
 
         } else if ("__get".equals(methodName)) {
           __get = method;
@@ -557,7 +566,6 @@ public class JavaClassDefinition extends AbstractQuercusClass {
 
         } else if ("__setField".equals(methodName)) {
           __setField = method;
-          //__setFieldName = Marshall.create(_quercus, __setField.getParameterTypes()[0], false);
           __setFieldValue = Marshall.create(_quercus, __setField.getParameterTypes()[1], false);
 
         }
@@ -571,7 +579,7 @@ public class JavaClassDefinition extends AbstractQuercusClass {
 
       if (Modifier.isStatic(field.getModifiers()))
         continue;
-      
+
       Marshall marshall = Marshall.create(_quercus,field.getType(), false);
       _fieldMap.put(field.getName(), new FieldMarshallPair(field, marshall));
     }
@@ -582,11 +590,11 @@ public class JavaClassDefinition extends AbstractQuercusClass {
 
   /**
    * helper for introspectFields
-   * 
+   *
    * @param s (IE: Foo, URL)
    * @return (foo, URL)
    */
-  private String javaToPhpConvert(String s)
+  private String javaToQuercusConvert(String s)
   {
     if (s.length() == 1) {
       return new String(new char[] {Character.toLowerCase(s.charAt(0))});
@@ -677,7 +685,7 @@ public class JavaClassDefinition extends AbstractQuercusClass {
         _varDumpImpl = method;
       }else {
         JavaMethod javaMethod = new JavaMethod(quercus, method);
-  
+
         _functionMap.put(method.getName(), javaMethod);
       }
     }
@@ -686,7 +694,7 @@ public class JavaClassDefinition extends AbstractQuercusClass {
   }
 
   /**
-   * 
+   *
    * @param env
    * @param obj
    * @param out
@@ -703,16 +711,16 @@ public class JavaClassDefinition extends AbstractQuercusClass {
                                IdentityHashMap<Value, String> valueSet)
     throws IOException, Throwable
   {
-    
+
     if (_printRImpl == null) {
       return false;
 
     }
-    
+
     _printRImpl.invoke(obj, env, out, depth, valueSet);
     return true;
   }
-  
+
   public boolean varDumpImpl(Env env,
                              Object obj,
                              WriteStream out,
@@ -722,17 +730,17 @@ public class JavaClassDefinition extends AbstractQuercusClass {
   {
     if (_varDumpImpl == null) {
       return false;
-      
+
     }
-    
+
     _varDumpImpl.invoke(obj, env, out, depth, valueSet);
     return true;
   }
-  
+
   private class MethodMarshallPair {
     public Method _method;
     public Marshall _marshall;
-    
+
     public MethodMarshallPair(Method method,
                               Marshall marshall)
     {
@@ -740,11 +748,11 @@ public class JavaClassDefinition extends AbstractQuercusClass {
       _marshall = marshall;
     }
   }
-  
+
   private class FieldMarshallPair {
     public Field _field;
     public Marshall _marshall;
-    
+
     public FieldMarshallPair(Field field,
                              Marshall marshall)
     {

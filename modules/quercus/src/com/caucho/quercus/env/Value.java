@@ -30,6 +30,7 @@
 package com.caucho.quercus.env;
 
 import com.caucho.quercus.QuercusRuntimeException;
+import com.caucho.quercus.module.Marshall;
 import com.caucho.quercus.expr.Expr;
 import com.caucho.quercus.gen.PhpWriter;
 import com.caucho.quercus.program.AbstractFunction;
@@ -1133,6 +1134,14 @@ abstract public class Value {
   public Value remove(Value index)
   {
     return UnsetValue.UNSET;
+  }
+  /**
+   * Takes the values of this array, unmarshalls them to objects of type
+   * <i>elementType</i>, and puts them in a java array.
+   */
+  public <T> T[] valuesToArray(Env env, Class<T> elementType)
+  {
+    return null;
   }
 
   /**

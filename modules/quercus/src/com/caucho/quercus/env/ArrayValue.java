@@ -30,9 +30,11 @@
 package com.caucho.quercus.env;
 
 import com.caucho.vfs.WriteStream;
+import com.caucho.quercus.module.Marshall;
 
 import java.util.*;
 import java.util.logging.Logger;
+import java.lang.reflect.Array;
 
 /**
  * Represents a PHP array value.
@@ -101,8 +103,8 @@ abstract public class ArrayValue extends Value {
       Value key = entry.getKey();
 
       if (key instanceof StringValue) {
-	// XXX: intern?
-	obj.putField(env, key.toString(), entry.getValue());
+        // XXX: intern?
+        obj.putField(env, key.toString(), entry.getValue());
       }
     }
 
@@ -821,7 +823,7 @@ abstract public class ArrayValue extends Value {
   public final static class Entry implements Map.Entry<Value,Value> {
     final Value _key;
     Value _value;
-    
+
     Entry _prev;
     Entry _next;
 
@@ -908,9 +910,9 @@ abstract public class ArrayValue extends Value {
       if (value instanceof Var)
         return new RefVar((Var) value);
       else {
-	_value = new Var(value);
-	
-	return new RefVar((Var) _value);
+        _value = new Var(value);
+
+        return new RefVar((Var) _value);
       }
     }
 
@@ -924,8 +926,8 @@ abstract public class ArrayValue extends Value {
       if (value instanceof Var)
         return new RefVar((Var) value);
       else {
-	_value = new Var(_value);
-	
+        _value = new Var(_value);
+
         return new RefVar((Var) _value);
       }
     }
@@ -939,8 +941,8 @@ abstract public class ArrayValue extends Value {
       if (value instanceof Var)
         return value;
       else {
-	_value = new Var(value);
-	
+        _value = new Var(value);
+
         return _value;
       }
     }
@@ -984,9 +986,9 @@ abstract public class ArrayValue extends Value {
       throws java.io.IOException
     {
       for (int i = depth; i > 0; i--)
-	out.print(' ');
+        out.print(' ');
     }
-    
+
     public String toString()
     {
       return "ArrayValue.Entry[" + getKey() + "]";
@@ -994,7 +996,7 @@ abstract public class ArrayValue extends Value {
   }
 
   /**
-   * Takes the values of this array and puts them in a vector
+   * Takes the values of this array and puts them in a java array
    */
   public Value[] valuesToArray()
   {
@@ -1006,6 +1008,33 @@ abstract public class ArrayValue extends Value {
     }
 
     return values;
+  }
+
+  /**
+   * Takes the values of this array, unmarshalls them to objects of type
+   * <i>elementType</i>, and puts them in a java array.
+   */
+  public <T> T[] valuesToArray(Env env, Class<T> elementType)
+  {
+    int size = getSize();
+
+    T[] array = (T[]) Array.newInstance(elementType, size);
+
+    Marshall elementMarshall = Marshall.create(env.getPhp(), elementType);
+
+    int i = 0;
+
+    try {
+      for (Entry ptr = getHead(); ptr != null; ptr = ptr.getNext()) {
+        array[i++] = (T) elementMarshall.marshall(env, ptr.getValue(), elementType);
+      }
+    }
+    catch (Throwable e) {
+      // XXX: why does marshall throw Throwable?
+      throw new RuntimeException(e);
+    }
+
+    return array;
   }
 
   public class EntrySet extends AbstractSet<Map.Entry<Value,Value>> {

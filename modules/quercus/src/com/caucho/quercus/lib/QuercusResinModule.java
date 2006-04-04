@@ -32,13 +32,18 @@ package com.caucho.quercus.lib;
 import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.quercus.module.Optional;
 import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.ArrayValue;
+import com.caucho.quercus.env.ArrayValueImpl;
+import com.caucho.quercus.env.JavaClassDefinition;
+import com.caucho.quercus.env.ObjectNameValue;
 import com.caucho.naming.Jndi;
 import com.caucho.jmx.Jmx;
 import com.caucho.util.L10N;
 import com.caucho.server.webapp.Application;
-import com.caucho.server.webapp.WebAppAdmin;
 
 import javax.management.MalformedObjectNameException;
+import javax.management.ObjectName;
+import java.util.Set;
 
 public class QuercusResinModule
   extends AbstractQuercusModule
@@ -86,5 +91,34 @@ public class QuercusResinModule
 
       return null;
     }
+  }
+
+  // XXX: need test, doc
+  public static ArrayValue mbean_query(Env env, String pattern)
+  {
+    ArrayValueImpl values = new ArrayValueImpl();
+
+    ObjectName patternObjectName;
+
+    try {
+      patternObjectName = new ObjectName(pattern);
+    }
+    catch (MalformedObjectNameException e) {
+      env.warning(L.l("Malformed object name `{0}'", pattern), e);
+
+      return null;
+    }
+
+    Set<ObjectName> objectNames;
+
+    if (pattern.indexOf(':') > 0)
+      objectNames = Jmx.getGlobalMBeanServer().queryNames(patternObjectName, null);
+    else
+      objectNames = Jmx.getMBeanServer().queryNames(patternObjectName, null);
+
+    for (ObjectName objectName : objectNames)
+      values.put(ObjectNameValue.create(objectName));
+
+    return values;
   }
 }

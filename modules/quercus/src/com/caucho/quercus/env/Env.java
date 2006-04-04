@@ -38,6 +38,7 @@ import com.caucho.quercus.QuercusException;
 import com.caucho.quercus.QuercusExitException;
 import com.caucho.quercus.QuercusLineRuntimeException;
 import com.caucho.quercus.QuercusRuntimeException;
+import com.caucho.quercus.module.Marshall;
 import com.caucho.quercus.expr.Expr;
 import com.caucho.quercus.lib.QuercusSessionModule;
 import com.caucho.quercus.lib.QuercusStringModule;
@@ -64,6 +65,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.sql.DataSource;
 import java.io.IOException;
 import java.lang.ref.SoftReference;
+import java.lang.reflect.Array;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -2006,6 +2008,34 @@ public class Env {
   }
 
   /**
+   * Returns a PHP value for a Java array.
+   */
+  public Value wrapArray(Object obj)
+  {
+    if (obj == null)
+      return NullValue.NULL;
+
+    ArrayValueImpl arrayValueImpl = new ArrayValueImpl();
+
+    Class componentClass = obj.getClass().getComponentType();
+
+    Marshall componentClassMarshall = Marshall.create(_quercus, componentClass);
+
+    Object[] objAsArray = (Object[]) obj;
+
+    try {
+      for (int i = 0; i < objAsArray.length; i++)
+        arrayValueImpl.put(componentClassMarshall.unmarshall(this, objAsArray[i]));
+    }
+    catch (Throwable e) {
+      // XXX: why does unmarshall throw Throwable?
+      throw new RuntimeException(e);
+    }
+
+    return arrayValueImpl;
+  }
+
+  /**
    * Returns a PHP value for a Java object
    */
   public Value wrapJava(Object obj)
@@ -2040,6 +2070,11 @@ public class Env {
 
     if (def == null)
       def = getJavaClassDefinition(obj.getClass().getName());
+    else if (def.getType() != obj.getClass()) {
+      // XXX: what if types are incompatible, does it matter?
+      // if it doesn;'t matter, simplikfy this to one if with no else
+      def = getJavaClassDefinition(obj.getClass().getName());
+    }
 
     return new JavaValue(this, obj, def);
   }
@@ -2613,7 +2648,7 @@ public class Env {
 
   public static Value nullAsFalse(Value value)
   {
-    return value == null ? BooleanValue.FALSE : value;
+    return value == null || value.isNull() ? BooleanValue.FALSE : value;
   }
 
   /**
@@ -3060,6 +3095,14 @@ public class Env {
   public String toString()
   {
     return "Env[]";
+  }
+
+  /**
+   * Returns ifNull if condition.isNull(), otherwise returns ifNotNull.
+   */
+  public Value ifNull(Value condition, Value ifNull, Value ifNotNull)
+  {
+    return condition.isNull() ? ifNull : ifNotNull;
   }
 
   /**

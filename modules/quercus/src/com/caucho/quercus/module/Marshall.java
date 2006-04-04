@@ -36,6 +36,7 @@ import com.caucho.quercus.gen.PhpWriter;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 
+import javax.management.ObjectName;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -120,7 +121,10 @@ abstract public class Marshall {
       marshall = MARSHALL_PATH;
     }
     else if (InputStream.class.equals(argType)) {
-      marshall = MARSHALL_INPUTSTREAM;
+      marshall = MARSHALL_INPUT_STREAM;
+    }
+    else if (ObjectName.class.equals(argType)) {
+      marshall = MARSHALL_OBJECT_NAME;
     }
     else if (Callback.class.equals(argType)) {
       marshall = MARSHALL_CALLBACK;
@@ -133,6 +137,9 @@ abstract public class Marshall {
     }
     else if (void.class.equals(argType)) {
       marshall = MARSHALL_VOID;
+    }
+    else if (argType.isArray()) {
+      marshall = MARSHALL_ARRAY;
     }
     else {
       return new JavaMarshall(quercus.getJavaClassDefinition(argType.getName()),
@@ -373,8 +380,8 @@ abstract public class Marshall {
         p = valueClassName.lastIndexOf('.');
         valueClassName = valueClassName.substring(p + 1);
 
-        env.warning(L.l("'{0}' is an unexpected argument, expected {1}",
-                        value, className));
+        env.warning(L.l("'{0}' of type `{1}' is an unexpected argument, expected {2}",
+                        value, valueClassName, className));
 
         return null;
       }
@@ -1225,7 +1232,7 @@ abstract public class Marshall {
     }
   };
 
-  static final Marshall MARSHALL_INPUTSTREAM = new Marshall() {
+  static final Marshall MARSHALL_INPUT_STREAM = new Marshall() {
     public boolean isReadOnly()
     {
       return true;
@@ -1260,6 +1267,51 @@ abstract public class Marshall {
       throws IOException
     {
       throw new UnsupportedOperationException();
+    }
+  };
+
+  static final Marshall MARSHALL_OBJECT_NAME = new Marshall() {
+    public boolean isReadOnly()
+    {
+      return true;
+    }
+
+    public Object marshall(Env env, Expr expr, Class expectedClass)
+      throws Throwable
+    {
+      return marshall(env, expr.eval(env), expectedClass);
+    }
+
+    public Object marshall(Env env, Value value, Class expectedClass)
+      throws Throwable
+    {
+      if (value instanceof ObjectNameValue)
+        return ((ObjectNameValue) value).getObjectName();
+      else
+        return new ObjectName(value.toString(env));
+    }
+
+    public Value unmarshall(Env env, Object value)
+      throws Throwable
+    {
+      if (value instanceof ObjectName)
+        return ObjectNameValue.create((ObjectName) value);
+      else
+        return NullValue.NULL;
+    }
+
+    public void generate(PhpWriter out, Expr expr, Class argClass)
+      throws IOException
+    {
+      out.print("(new javax.management.ObjectName(");
+      expr.generateValue(out);
+      out.print(".toString()))");
+    }
+
+    public void generateResultStart(PhpWriter out)
+      throws IOException
+    {
+      out.print("ObjectNameValue.create(");
     }
   };
 
@@ -1340,6 +1392,59 @@ abstract public class Marshall {
       throws IOException
     {
       throw new UnsupportedOperationException();
+    }
+  };
+
+  private static Marshall MARSHALL_ARRAY = new Marshall() {
+    public Object marshall(Env env, Expr expr, Class argClass)
+      throws Throwable
+    {
+      Value value = expr.eval(env);
+
+      return marshall(env, value, argClass);
+    }
+
+    public Object marshall(Env env, Value value, Class argClass)
+      throws Throwable
+    {
+      if (value.isNull())
+        return null;
+
+      Class<?> componentType = argClass.getComponentType();
+
+      if (componentType == null || ! value.isArray())
+        env.error(L.l("Can't assign {0} to {1}", value, argClass));
+
+      return value.valuesToArray(env, componentType);
+    }
+
+    public void generate(PhpWriter out, Expr expr, Class argClass)
+      throws IOException
+    {
+      Class<?> componentType = argClass.getComponentType();
+
+      expr.generate(out);
+      out.print(".valuesToArray(env, ");
+      out.print(componentType.getName());
+      out.print(".class)");
+    }
+
+    public Value unmarshall(Env env, Object value)
+      throws Throwable
+    {
+      return env.wrapArray(value);
+    }
+
+    public void generateResultStart(PhpWriter out)
+      throws IOException
+    {
+      out.print("env.wrapArray(");
+    }
+
+    public void generateResultEnd(PhpWriter out)
+      throws IOException
+    {
+      out.print(")");
     }
   };
 }
