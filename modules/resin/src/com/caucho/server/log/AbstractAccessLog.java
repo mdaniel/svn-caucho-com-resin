@@ -36,6 +36,7 @@ import java.util.logging.*;
 import javax.servlet.http.*;
 import javax.servlet.*;
 
+import com.caucho.config.ConfigException;
 import com.caucho.util.*;
 import com.caucho.log.Log;
 import com.caucho.config.types.InitProgram;
@@ -79,6 +80,7 @@ abstract public class AbstractAccessLog {
    * Sets the formatted path.
    */
   public void setPathFormat(String pathFormat)
+    throws ConfigException
   {
     _pathFormat = pathFormat;
   }

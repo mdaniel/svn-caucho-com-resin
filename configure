@@ -8595,8 +8595,9 @@ fi
 if test -z "$apache_cflags" -a -x "${apxs}"; then
    if test -x "${apr_bin}/apr-config"; then
      apache_cflags="$apache_cflags `${apr_bin}/apr-config --cppflags`"
+     apache_cflags="$apache_cflags `${apr_bin}/apr-config --cflags`"
    else
-     apache_cflags="`${apxs} -q CFLAGS` `${apxs} -q EXTRA_CFLAGS`"
+     apache_cflags="`${apxs} -q CFLAGS`"
    fi
  fi
 

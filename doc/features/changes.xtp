@@ -4,7 +4,7 @@
 
 <s2 title='3.0.snap - Mar 17, 2006'>
 <ul>
-<li>JSP: add print-null-as-blank (#899, rep by koreth)
+<li>(2006-04-03) JSP: add print-null-as-blank (#899, rep by koreth)
 <li>Hessian: Improve error reporting for 401 (#988, rep by igor)
 <li>possible sync issue on session shutdown (#974 rep by CHanan Bruanstein)
 <li>/WEB-INF needs to return 404 NOT FOUND (#1032)

@@ -132,6 +132,7 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener {
    * Sets the formatted path.
    */
   public void setPathFormat(String pathFormat)
+    throws ConfigException
   {
     super.setPathFormat(pathFormat);
     
