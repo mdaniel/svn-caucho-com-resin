@@ -34,15 +34,16 @@ import com.caucho.quercus.module.Optional;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.ArrayValue;
 import com.caucho.quercus.env.ArrayValueImpl;
-import com.caucho.quercus.env.JavaClassDefinition;
 import com.caucho.quercus.env.ObjectNameValue;
 import com.caucho.naming.Jndi;
 import com.caucho.jmx.Jmx;
 import com.caucho.util.L10N;
 import com.caucho.server.webapp.Application;
+import com.caucho.Version;
 
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
+import javax.management.ObjectInstance;
 import java.util.Set;
 
 public class QuercusResinModule
@@ -83,8 +84,10 @@ public class QuercusResinModule
     try {
       if (name == null || name.length() == 0)
         return Application.getLocal().getAdmin();
-
-      return Jmx.find(name);
+      else if (name.contains(":"))
+        return Jmx.findGlobal(name);
+      else
+        return Jmx.find(name);
     }
     catch (MalformedObjectNameException e) {
       env.warning(L.l("Malformed object name `{0}'", name), e);
@@ -93,7 +96,12 @@ public class QuercusResinModule
     }
   }
 
-  // XXX: need test, doc
+  /**
+   * Returns an array of names that match a JMX pattern.
+   * If the name contains a ":", it is a query in the global jmx namespace.
+   * If the name does not contain a ":", it is a search in the JMX namespace
+   * of the current web application.
+   */
   public static ArrayValue mbean_query(Env env, String pattern)
   {
     ArrayValueImpl values = new ArrayValueImpl();
@@ -120,5 +128,13 @@ public class QuercusResinModule
       values.put(ObjectNameValue.create(objectName));
 
     return values;
+  }
+
+  /**
+   * Returns the version of the Resin server software.
+   */
+  public String resin_version()
+  {
+    return Version.FULL_VERSION;
   }
 }
