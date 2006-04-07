@@ -70,13 +70,208 @@ public class UrlModule extends AbstractQuercusModule {
   }
 
   /**
+   * Creates a http string.
+   */
+  public String http_build_query(Value value,
+				 @Optional String prefix)
+  {
+    StringBuilder sb = new StringBuilder();
+
+    int index = 0;
+    if (value instanceof ArrayValue) {
+      ArrayValue array = (ArrayValue) value;
+
+      for (Map.Entry<Value,Value> entry : array.entrySet()) {
+	Value keyValue = entry.getKey();
+	Value v = entry.getValue();
+
+	String key;
+
+	if (keyValue.isLong())
+	  key = prefix + keyValue;
+	else
+	  key = keyValue.toString();
+
+	if (v instanceof ArrayValue)
+	  http_build_query(sb, key, (ArrayValue) v);
+	else {
+	  if (sb.length() > 0)
+	    sb.append('&');
+
+	  sb.append(key);
+	  sb.append('=');
+	  urlencode(sb, v.toString());
+	}
+      }
+    }
+
+    return sb.toString();
+  }
+
+  /**
+   * Creates a http string.
+   */
+  private void http_build_query(StringBuilder sb,
+				String prefix,
+				ArrayValue array)
+  {
+    for (Map.Entry<Value,Value> entry : array.entrySet()) {
+      Value keyValue = entry.getKey();
+      Value v = entry.getValue();
+
+      String key = prefix + '[' + keyValue + ']';
+
+      if (v instanceof ArrayValue)
+	http_build_query(sb, key, (ArrayValue) v);
+      else {
+	if (sb.length() > 0)
+	  sb.append('&');
+
+	sb.append(key);
+	sb.append('=');
+	urlencode(sb, v.toString());
+      }
+    }
+  }
+
+  /**
    * Gets the magic quotes value.
    */
   public static String urlencode(String str)
   {
-    // XXX: test
+    StringBuilder sb = new StringBuilder();
 
-    return str;
+    urlencode(sb, str);
+
+    return sb.toString();
+  }
+
+  /**
+   * Gets the magic quotes value.
+   */
+  private static void urlencode(StringBuilder sb, String str)
+  {
+    int len = str.length();
+
+    for (int i = 0; i < len; i++) {
+      char ch = str.charAt(i);
+
+      if ('a' <= ch && ch <= 'z')
+	sb.append(ch);
+      else if ('A' <= ch && ch <= 'Z')
+	sb.append(ch);
+      else if ('0' <= ch && ch <= '0')
+	sb.append(ch);
+      else if (ch == '-' || ch == '_' || ch == '.')
+	sb.append(ch);
+      else if (ch == ' ')
+	sb.append('+');
+      else {
+	sb.append('%');
+	sb.append(toHexDigit(ch / 16));
+	sb.append(toHexDigit(ch));
+      }
+    }
+  }
+
+  /**
+   * Returns the decoded string.
+   */
+  public static String urldecode(String s)
+  {
+    int len = s.length();
+    StringBuilder sb = new StringBuilder();
+
+    for (int i = 0; i < len; i++) {
+      char ch = s.charAt(i);
+
+      if (ch == '%' && i + 2 < len) {
+        int d1 = s.charAt(i + 1);
+        int d2 = s.charAt(i + 2);
+
+        int v = 0;
+
+        if ('0' <= d1 && d1 <= '9')
+          v = 16 * (d1 - '0');
+        else if ('a' <= d1 && d1 <= 'f')
+          v = 16 * (d1 - 'a' + 10);
+        else if ('A' <= d1 && d1 <= 'F')
+          v = 16 * (d1 - 'A' + 10);
+        else {
+          sb.append('%');
+          continue;
+        }
+
+        if ('0' <= d2 && d2 <= '9')
+          v += (d2 - '0');
+        else if ('a' <= d2 && d2 <= 'f')
+          v += (d2 - 'a' + 10);
+        else if ('A' <= d2 && d2 <= 'F')
+          v += (d2 - 'A' + 10);
+        else {
+          sb.append('%');
+          continue;
+        }
+
+        i += 2;
+        sb.append((char) v);
+      }
+      else if (ch == '+')
+	sb.append(' ');
+      else
+        sb.append(ch);
+    }
+
+    return sb.toString();
+  }
+
+  /**
+   * Returns the decoded string.
+   */
+  public static String rawurldecode(String s)
+  {
+    int len = s.length();
+    StringBuilder sb = new StringBuilder();
+
+    for (int i = 0; i < len; i++) {
+      char ch = s.charAt(i);
+
+      if (ch == '%' && i + 2 < len) {
+        int d1 = s.charAt(i + 1);
+        int d2 = s.charAt(i + 2);
+
+        int v = 0;
+
+        if ('0' <= d1 && d1 <= '9')
+          v = 16 * (d1 - '0');
+        else if ('a' <= d1 && d1 <= 'f')
+          v = 16 * (d1 - 'a' + 10);
+        else if ('A' <= d1 && d1 <= 'F')
+          v = 16 * (d1 - 'A' + 10);
+        else {
+          sb.append('%');
+          continue;
+        }
+
+        if ('0' <= d2 && d2 <= '9')
+          v += (d2 - '0');
+        else if ('a' <= d2 && d2 <= 'f')
+          v += (d2 - 'a' + 10);
+        else if ('A' <= d2 && d2 <= 'F')
+          v += (d2 - 'A' + 10);
+        else {
+          sb.append('%');
+          continue;
+        }
+
+        i += 2;
+        sb.append((char) v);
+      }
+      else
+        sb.append(ch);
+    }
+
+    return sb.toString();
   }
 
   /**
@@ -92,7 +287,7 @@ public class UrlModule extends AbstractQuercusModule {
       if ('a' <= ch && ch <= 'z' ||
           'A' <= ch && ch <= 'Z' ||
           '0' <= ch && ch <= '9' ||
-          ch == '-' || ch == '_') {
+          ch == '-' || ch == '_' || ch == '.' || ch == ' ') {
         sb.append(ch);
       }
       else {

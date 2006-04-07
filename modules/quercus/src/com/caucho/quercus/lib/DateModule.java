@@ -90,12 +90,73 @@ public class DateModule extends AbstractQuercusModule {
   }
 
   /**
+   * Returns the days in a given month.
+   */
+  public static boolean checkdate(int month, int day, int year)
+  {
+    if (! (1 <= year && year <= 32767))
+      return false;
+    
+    if (! (1 <= month && month <= 12))
+      return false;
+
+    return 1 <= day && day <= cal_days_in_month(0, month, year);
+  }
+
+
+  /**
    * Returns the formatted date.
    */
   public String date(String format,
 		     @Optional("time()") long time)
   {
     return date(format, time, false);
+  }
+
+  /**
+   * Returns the timestamp of easter.
+   */
+  public static long easter_date(@Optional("-1") int year)
+  {
+    QDate date = new QDate();
+    
+    if (year < 0) {
+      date.setGMTTime(Alarm.getCurrentTime());
+      
+      year = date.getYear();
+    }
+
+    int y = year;
+
+    int c = y / 100;
+    int n = y - 19 * (y / 19);
+    int k = (c - 17) / 25;
+    int i = c - c /4 - (c - k) / 3 + 19 * n + 15;
+    i = i - 30 * (i / 30);
+    i = i - (i / 28) * (1 - ((i / 28) *
+			     (29 / (i + 1)) *
+			     ((21 - n) / 11)));
+
+    int j = y + y / 4 + i + 2 - c + c / 4;
+    j = j - 7 * (j / 7);
+    int l = i - j;
+    int m = 3 + (l + 40) / 44;
+    int d = l + 28 - 31 * (m / 4);
+
+    date.setYear(year);
+    date.setMonth(m - 1);
+    date.setDayOfMonth(d);
+
+    return date.getGMTTime() / 1000;
+  }
+
+  /**
+   * Returns the timestamp of easter.
+   */
+  public static long easter_days(@Optional("-1") int year,
+				 @Optional int method)
+  {
+    return easter_date(year);
   }
 
   /**

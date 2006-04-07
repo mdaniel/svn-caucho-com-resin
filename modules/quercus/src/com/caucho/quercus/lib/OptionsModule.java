@@ -82,11 +82,27 @@ public class OptionsModule extends AbstractQuercusModule {
   /**
    * Returns true if the given extension is loaded
    */
-  public static boolean extension_loaded(Env env, String name)
+  public static Value get_loaded_extensions(Env env)
   {
-    return env.isExtensionLoaded(name);
+    ArrayValue value = new ArrayValueImpl();
+
+    for (String ext : env.getLoadedExtensions()) {
+      value.put(ext);
+    }
+
+    return value;
   }
 
+  /**
+   * Stubs the dl.
+   */
+  public static boolean dl(Env env, String dl)
+  {
+    env.stub("dl is stubbed for dl(" + dl + ")");
+    
+    return false;
+  }
+  
   /**
    * Returns the environment value.
    */
@@ -155,6 +171,47 @@ public class OptionsModule extends AbstractQuercusModule {
   {
     return LongValue.ZERO;
   }
+
+  /**
+   * Returns the gid for the script path.
+   */
+  public static Value getlastmod(Env env)
+  {
+    return FileModule.filemtime(env, env.getSelfPath());
+  }
+
+  /**
+   * Returns the gid for the script path.
+   */
+  public static Value getmygid(Env env)
+  {
+    return FileModule.filegroup(env, env.getSelfPath());
+  }
+
+  /**
+   * Returns the inode for the script path.
+   */
+  public static Value getmyinode(Env env)
+  {
+    return FileModule.fileinode(env, env.getSelfPath());
+  }
+
+  /**
+   * Returns the uid for the script path.
+   */
+  public static Value getmyuid(Env env)
+  {
+    return QuercusFileModule.fileowner(env, env.getSelfPath());
+  }
+
+  /**
+   * Returns the thread for the script.
+   */
+  public static long getmypid(Env env)
+  {
+    return Thread.currentThread().getId();
+  }
+
 
   /**
    * Sets an initialization value.

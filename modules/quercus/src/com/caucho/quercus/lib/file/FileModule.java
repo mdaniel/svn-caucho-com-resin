@@ -1284,7 +1284,14 @@ public class FileModule extends AbstractQuercusModule {
   }
 
   // XXX: linkinfo
-  // XXX: lstat
+
+  /**
+   * Returns file statistics
+   */
+  public static Value lstat(Env env, Path path)
+  {
+    return stat(env, path);
+  }
 
   /**
    * Makes the directory
@@ -1348,7 +1355,37 @@ public class FileModule extends AbstractQuercusModule {
   }
 
   // XXX: parse_ini_file
-  // XXX: pathinfo
+
+  /**
+   * Parses the path, splitting it into parts.
+   */
+  public static Value pathinfo(String path)
+  {
+    int p = path.lastIndexOf('/');
+
+    String dirname;
+    if (p >= 0) {
+      dirname = path.substring(0, p);
+      path = path.substring(p + 1);
+    }
+    else {
+      dirname = "";
+    }
+
+    p = path.indexOf('.');
+    String ext = "";
+    if (p > 0)
+      ext = path.substring(p + 1);
+
+    ArrayValueImpl value = new ArrayValueImpl();
+
+    value.put("dirname", dirname);
+    value.put("basename", path);
+    value.put("extension", ext);
+
+    return value;
+  }
+
   // XXX: pclose
   // XXX: popen
 
@@ -1398,7 +1435,14 @@ public class FileModule extends AbstractQuercusModule {
   }
 
   // XXX: readlink
-  // XXX: realpath
+
+  /**
+   * Returns the actual path name.
+   */
+  public static String realpath(Path path)
+  {
+    return path.getFullPath();
+  }
 
   /**
    * Renames a file
@@ -1628,9 +1672,9 @@ public class FileModule extends AbstractQuercusModule {
   /**
    * umask call
    */
-  public static int umask(int mask)
+  public static int umask(Env env, int mask)
   {
-    // XXX: stub
+    env.stub("umask(" + mask + ")");
 
     return mask;
   }

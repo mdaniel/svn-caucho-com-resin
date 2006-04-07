@@ -121,6 +121,14 @@ public class ArrayModule
     = new CompareNatural(ArrayValue.GET_VALUE, SORT_NORMAL, CASE_INSENSITIVE);
 
   /**
+   * Returns true for the mysql extension.
+   */
+  public String []getLoadedExtensions()
+  {
+    return new String[] { "standard" };
+  }
+
+  /**
    * Changes the key case
    */
   public Value array_change_key_case(ArrayValue array,
