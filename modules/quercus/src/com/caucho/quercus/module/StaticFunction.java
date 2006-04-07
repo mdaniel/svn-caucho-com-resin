@@ -30,7 +30,6 @@
 package com.caucho.quercus.module;
 
 import com.caucho.quercus.Quercus;
-import com.caucho.quercus.lib.QuercusResinModule;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.expr.DefaultExpr;

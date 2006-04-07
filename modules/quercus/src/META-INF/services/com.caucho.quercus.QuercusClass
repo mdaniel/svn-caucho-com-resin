@@ -1,15 +1,15 @@
-com.caucho.quercus.lib.DOMAttr
-com.caucho.quercus.lib.DOMComment
-com.caucho.quercus.lib.DOMDocument
-com.caucho.quercus.lib.DOMElement
-com.caucho.quercus.lib.DOMEntityReference
-com.caucho.quercus.lib.DOMImplementationClass DOMImplementation #DOMImplementation is how it is referred to within PHP
-com.caucho.quercus.lib.DOMProcessingInstruction
-com.caucho.quercus.lib.DOMText
-com.caucho.quercus.lib.DOMXPath
+com.caucho.quercus.lib.dom.DOMAttr
+com.caucho.quercus.lib.dom.DOMComment
+com.caucho.quercus.lib.dom.DOMDocument
+com.caucho.quercus.lib.dom.DOMElement
+com.caucho.quercus.lib.dom.DOMEntityReference
+com.caucho.quercus.lib.dom.DOMImplementationClass DOMImplementation
+com.caucho.quercus.lib.dom.DOMProcessingInstruction
+com.caucho.quercus.lib.dom.DOMText
+com.caucho.quercus.lib.dom.DOMXPath
 com.caucho.quercus.lib.Memcache
-com.caucho.quercus.lib.Mysqli
-com.caucho.quercus.pdflib.PDF
-com.caucho.quercus.lib.PDO
-com.caucho.quercus.lib.Xml
+com.caucho.quercus.lib.mysql.Mysqli
+com.caucho.quercus.lib.pdf.PDF
+com.caucho.quercus.lib.pdo.PDO
+com.caucho.quercus.lib.xml.Xml
 

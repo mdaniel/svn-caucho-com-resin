@@ -30,7 +30,7 @@
 package com.caucho.quercus.resources;
 
 import com.caucho.util.Log;
-import com.caucho.quercus.lib.QuercusMysqliModule;
+import com.caucho.quercus.lib.mysql.MysqliModule;
 import com.caucho.quercus.resources.JdbcConnectionResource;
 import com.caucho.quercus.env.*;
 
@@ -303,43 +303,43 @@ public class JdbcResultResource extends ResourceValue {
       long flags = 0;
 
       if (_rs.getString(4).indexOf("YES") == -1)
-        flags += QuercusMysqliModule.NOT_NULL_FLAG;
+        flags += MysqliModule.NOT_NULL_FLAG;
 
       if (_rs.getString(5).indexOf("PRI") != -1) {
-        flags += QuercusMysqliModule.PRI_KEY_FLAG;
-        flags += QuercusMysqliModule.PART_KEY_FLAG;
+        flags += MysqliModule.PRI_KEY_FLAG;
+        flags += MysqliModule.PART_KEY_FLAG;
       }
 
       if (_rs.getString(5).indexOf("MUL") != -1) {
-        flags += QuercusMysqliModule.MULTIPLE_KEY_FLAG;
-        flags += QuercusMysqliModule.PART_KEY_FLAG;
+        flags += MysqliModule.MULTIPLE_KEY_FLAG;
+        flags += MysqliModule.PART_KEY_FLAG;
       }
 
       if ((_rs.getString(2).indexOf("blob") != -1) ||
           (type == Types.LONGVARCHAR) ||
           (type == Types.LONGVARBINARY))
-        flags += QuercusMysqliModule.BLOB_FLAG;
+        flags += MysqliModule.BLOB_FLAG;
 
       if (_rs.getString(2).indexOf("unsigned") != -1)
-        flags += QuercusMysqliModule.UNSIGNED_FLAG;
+        flags += MysqliModule.UNSIGNED_FLAG;
 
       if (_rs.getString(2).indexOf("zerofill") != -1)
-        flags += QuercusMysqliModule.ZEROFILL_FLAG;
+        flags += MysqliModule.ZEROFILL_FLAG;
 
       if ((_rs.getString(3).indexOf("bin") != -1) ||
           (type == Types.LONGVARBINARY) ||
           (type == Types.DATE) ||
           (type == Types.TIMESTAMP))
-        flags += QuercusMysqliModule.BINARY_FLAG;
+        flags += MysqliModule.BINARY_FLAG;
 
       if (_rs.getString(2).indexOf("enum") != -1)
-        flags += QuercusMysqliModule.ENUM_FLAG;
+        flags += MysqliModule.ENUM_FLAG;
 
       if (_rs.getString(7).indexOf("auto") != -1)
-        flags += QuercusMysqliModule.AUTO_INCREMENT_FLAG;
+        flags += MysqliModule.AUTO_INCREMENT_FLAG;
 
       if (_rs.getString(2).indexOf("set") != -1)
-        flags += QuercusMysqliModule.SET_FLAG;
+        flags += MysqliModule.SET_FLAG;
 
       if ((type == Types.BIGINT) ||
           (type == Types.BIT) ||
@@ -349,56 +349,56 @@ public class JdbcResultResource extends ResourceValue {
           (type == Types.REAL) ||
           (type == Types.INTEGER) ||
           (type == Types.SMALLINT))
-        flags += QuercusMysqliModule.NUM_FLAG;
+        flags += MysqliModule.NUM_FLAG;
 
       result.put(new StringValueImpl("flags"), new LongValue(flags));
       //generate PHP type
       int quercusType = 0;
       switch (type) {
       case Types.DECIMAL:
-        quercusType = QuercusMysqliModule.MYSQL_TYPE_DECIMAL;
+        quercusType = MysqliModule.MYSQL_TYPE_DECIMAL;
         break;
       case Types.BIT:
-        quercusType = QuercusMysqliModule.MYSQL_TYPE_TINY;
+        quercusType = MysqliModule.MYSQL_TYPE_TINY;
         break;
       case Types.SMALLINT:
-        quercusType = QuercusMysqliModule.MYSQL_TYPE_SHORT;
+        quercusType = MysqliModule.MYSQL_TYPE_SHORT;
         break;
       case Types.INTEGER: {
         if (_rs.getString(2).indexOf("medium") == -1)
-          quercusType = QuercusMysqliModule.MYSQL_TYPE_LONG;
+          quercusType = MysqliModule.MYSQL_TYPE_LONG;
         else
-          quercusType = QuercusMysqliModule.MYSQL_TYPE_INT24;
+          quercusType = MysqliModule.MYSQL_TYPE_INT24;
         break;
       }
       case Types.REAL:
-        quercusType = QuercusMysqliModule.MYSQL_TYPE_FLOAT;
+        quercusType = MysqliModule.MYSQL_TYPE_FLOAT;
         break;
       case Types.DOUBLE:
-        quercusType = QuercusMysqliModule.MYSQL_TYPE_DOUBLE;
+        quercusType = MysqliModule.MYSQL_TYPE_DOUBLE;
         break;
       case Types.BIGINT:
-        quercusType = QuercusMysqliModule.MYSQL_TYPE_LONGLONG;
+        quercusType = MysqliModule.MYSQL_TYPE_LONGLONG;
         break;
       case Types.DATE:
-        quercusType = QuercusMysqliModule.MYSQL_TYPE_DATE;
+        quercusType = MysqliModule.MYSQL_TYPE_DATE;
         break;
       case Types.TIMESTAMP:
-        quercusType = QuercusMysqliModule.MYSQL_TYPE_DATETIME;
+        quercusType = MysqliModule.MYSQL_TYPE_DATETIME;
         break;
       case Types.LONGVARBINARY:
       case Types.LONGVARCHAR:
-        quercusType = QuercusMysqliModule.MYSQL_TYPE_BLOB;
+        quercusType = MysqliModule.MYSQL_TYPE_BLOB;
         break;
       case Types.CHAR:
-        quercusType = QuercusMysqliModule.MYSQL_TYPE_STRING;
+        quercusType = MysqliModule.MYSQL_TYPE_STRING;
         break;
       case Types.VARCHAR:
-        quercusType = QuercusMysqliModule.MYSQL_TYPE_VAR_STRING;
+        quercusType = MysqliModule.MYSQL_TYPE_VAR_STRING;
         break;
       // XXX: may need to revisit default
       default:
-        quercusType = QuercusMysqliModule.MYSQL_TYPE_NULL;
+        quercusType = MysqliModule.MYSQL_TYPE_NULL;
         break;
       }
       result.put(new StringValueImpl("type"), new LongValue(quercusType));

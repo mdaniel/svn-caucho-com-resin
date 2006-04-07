@@ -30,15 +30,10 @@
 package com.caucho.quercus.env;
 
 import java.io.IOException;
-import java.util.IdentityHashMap;
-
-import com.caucho.vfs.WriteStream;
 
 import com.caucho.quercus.Quercus;
 
 import com.caucho.quercus.gen.PhpWriter;
-
-import com.caucho.quercus.lib.QuercusStringModule;
 
 /**
  * Represents a PHP string value.
@@ -106,7 +101,7 @@ public class StringValueImpl extends StringValue {
   public boolean isLong()
   {
     String s = _value;
-    
+
     int len = s.length();
 
     if (len == 0)
@@ -116,7 +111,7 @@ public class StringValueImpl extends StringValue {
       char ch = s.charAt(i);
 
       if (! ('0' <= ch && ch <= '9'))
-	return false;
+        return false;
     }
 
     return true;
@@ -172,7 +167,7 @@ public class StringValueImpl extends StringValue {
 
     if (ch == '.') {
       for (i++; i < len && '0' <= (ch = s.charAt(i)) && ch <= '9'; i++) {
-	return IS_DOUBLE;
+        return IS_DOUBLE;
       }
 
       return IS_STRING;
@@ -187,15 +182,15 @@ public class StringValueImpl extends StringValue {
       return IS_LONG;
     else if (ch == '.' || ch == 'e' || ch == 'E') {
       for (i++;
-	   i < len && ('0' <= (ch = s.charAt(i)) && ch <= '9' ||
-		       ch == '+' || ch == '-' || ch == 'e' || ch == 'E');
-	   i++) {
+           i < len && ('0' <= (ch = s.charAt(i)) && ch <= '9' ||
+                       ch == '+' || ch == '-' || ch == 'e' || ch == 'E');
+           i++) {
       }
 
       if (i < len)
-	return IS_STRING;
+        return IS_STRING;
       else
-	return IS_DOUBLE;
+        return IS_DOUBLE;
     }
     else
       return IS_STRING;
@@ -242,14 +237,14 @@ public class StringValueImpl extends StringValue {
       int e = i++;
 
       if (i < len && (ch = _value.charAt(i)) == '+' || ch == '-') {
-	i++;
+        i++;
       }
 
       for (; i < len && '0' <= (ch = _value.charAt(i)) && ch <= '9'; i++) {
       }
 
       if (i == e + 1)
-	i = e;
+        i = e;
     }
 
     if (i == 0)
@@ -310,9 +305,9 @@ public class StringValueImpl extends StringValue {
       ch = s.charAt(i);
 
       if ('0' <= ch && ch <= '9')
-	value = 10 * value + ch - '0';
+        value = 10 * value + ch - '0';
       else
-	return this;
+        return this;
     }
 
     return new LongValue(sign * value);
@@ -326,7 +321,7 @@ public class StringValueImpl extends StringValue {
   public byte[] toBytes()
   {
     String s = _value;
-    
+
     final int len = s.length();
     byte[] bytes = new byte[len];
 
@@ -377,8 +372,8 @@ public class StringValueImpl extends StringValue {
       return this;
     else
       return new StringValueImpl(_value.substring(0, (int) index) +
-				 value +
-				 _value.substring((int) (index + 1)));
+                                 value +
+                                 _value.substring((int) (index + 1)));
   }
 
   /**
@@ -400,33 +395,33 @@ public class StringValueImpl extends StringValue {
       StringBuilder tail = new StringBuilder();
 
       for (int i = _value.length() - 1; i >= 0; i--) {
-	char ch = _value.charAt(i);
+        char ch = _value.charAt(i);
 
-	if (ch == 'z') {
-	  if (i == 0)
-	    return new StringValueImpl("aa" + tail);
-	  else
-	    tail.insert(0, 'a');
-	}
-	else if ('a' <= ch && ch < 'z') {
-	  return new StringValueImpl(_value.substring(0, i) +
-				     (char) (ch + 1) +
-				     tail);
-	}
-	else if (ch == 'Z') {
-	  if (i == 0)
-	    return new StringValueImpl("AA" + tail.toString());
-	  else
-	    tail.insert(0, 'A');
-	}
-	else if ('A' <= ch && ch < 'Z') {
-	  return new StringValueImpl(_value.substring(0, i) +
-				     (char) (ch + 1) +
-				     tail);
-	}
-	else if ('0' <= ch && ch <= '9' && i == _value.length() - 1) {
-	  return new LongValue(toLong() + 1);
-	}
+        if (ch == 'z') {
+          if (i == 0)
+            return new StringValueImpl("aa" + tail);
+          else
+            tail.insert(0, 'a');
+        }
+        else if ('a' <= ch && ch < 'z') {
+          return new StringValueImpl(_value.substring(0, i) +
+                                     (char) (ch + 1) +
+                                     tail);
+        }
+        else if (ch == 'Z') {
+          if (i == 0)
+            return new StringValueImpl("AA" + tail.toString());
+          else
+            tail.insert(0, 'A');
+        }
+        else if ('A' <= ch && ch < 'Z') {
+          return new StringValueImpl(_value.substring(0, i) +
+                                     (char) (ch + 1) +
+                                     tail);
+        }
+        else if ('0' <= ch && ch <= '9' && i == _value.length() - 1) {
+          return new LongValue(toLong() + 1);
+        }
       }
 
       return new StringValueImpl(tail.toString());
@@ -450,22 +445,22 @@ public class StringValueImpl extends StringValue {
       String v = toString();
 
       if (rValue.toBoolean())
-	return ! v.equals("") && ! v.equals("0");
+        return ! v.equals("") && ! v.equals("0");
       else
-	return v.equals("") || v.equals("0");
+        return v.equals("") || v.equals("0");
     }
 
     int type = getNumericType();
 
     if (type == IS_STRING) {
       if (rValue instanceof StringValue)
-	return _value.equals(rValue.toString());
+        return _value.equals(rValue.toString());
       else if (rValue.isLong())
-	return toLong() ==  rValue.toLong();
+        return toLong() ==  rValue.toLong();
       else if (rValue instanceof BooleanValue)
-	return toLong() == rValue.toLong();
+        return toLong() == rValue.toLong();
       else
-	return _value.equals(rValue.toString());
+        return _value.equals(rValue.toString());
     }
     else if (rValue.isNumber())
       return toDouble() == rValue.toDouble();
@@ -526,13 +521,13 @@ public class StringValueImpl extends StringValue {
 
       switch (ch) {
       case '\'':
-	sb.append("\\'");
-	break;
+        sb.append("\\'");
+        break;
       case '\\':
-	sb.append("\\\\");
-	break;
+        sb.append("\\\\");
+        break;
       default:
-	sb.append(ch);
+        sb.append(ch);
       }
     }
     sb.append("'");

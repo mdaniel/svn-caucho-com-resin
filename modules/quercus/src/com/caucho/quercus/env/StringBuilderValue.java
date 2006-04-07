@@ -30,15 +30,10 @@
 package com.caucho.quercus.env;
 
 import java.io.IOException;
-import java.util.IdentityHashMap;
-
-import com.caucho.vfs.WriteStream;
 
 import com.caucho.quercus.Quercus;
 
 import com.caucho.quercus.gen.PhpWriter;
-
-import com.caucho.quercus.lib.QuercusStringModule;
 
 /**
  * Represents a PHP string value.
@@ -46,7 +41,7 @@ import com.caucho.quercus.lib.QuercusStringModule;
 public class StringBuilderValue extends StringValue {
   private char []_buffer;
   private int _length;
-  
+
   private String _value;
 
   public StringBuilderValue()
@@ -69,7 +64,7 @@ public class StringBuilderValue extends StringValue {
     this(value.length());
 
     int length = value.length();
-    
+
     _length = length;
 
     value.getChars(0, length, _buffer, 0);
@@ -86,7 +81,7 @@ public class StringBuilderValue extends StringValue {
 
     _buffer = new char[capacity];
     _length = length;
-    
+
     System.arraycopy(buffer, offset, _buffer, 0, length);
   }
 
@@ -96,11 +91,11 @@ public class StringBuilderValue extends StringValue {
   }
 
   public StringBuilderValue(char []buffer, int offset, int length,
-			    boolean isExact)
+                            boolean isExact)
   {
     _buffer = new char[length];
     _length = length;
-    
+
     System.arraycopy(buffer, offset, _buffer, 0, length);
   }
 
@@ -143,7 +138,7 @@ public class StringBuilderValue extends StringValue {
       char ch = _buffer[i];
 
       if (! ('0' <= ch && ch <= '9'))
-	return false;
+        return false;
     }
 
     return true;
@@ -199,7 +194,7 @@ public class StringBuilderValue extends StringValue {
 
     if (ch == '.') {
       for (i++; i < len && '0' <= (ch = buffer[i]) && ch <= '9'; i++) {
-	return IS_DOUBLE;
+        return IS_DOUBLE;
       }
 
       return IS_STRING;
@@ -214,15 +209,15 @@ public class StringBuilderValue extends StringValue {
       return IS_LONG;
     else if (ch == '.' || ch == 'e' || ch == 'E') {
       for (i++;
-	   i < len && ('0' <= (ch = buffer[i]) && ch <= '9' ||
-		       ch == '+' || ch == '-' || ch == 'e' || ch == 'E');
-	   i++) {
+           i < len && ('0' <= (ch = buffer[i]) && ch <= '9' ||
+                       ch == '+' || ch == '-' || ch == 'e' || ch == 'E');
+           i++) {
       }
 
       if (i < len)
-	return IS_STRING;
+        return IS_STRING;
       else
-	return IS_DOUBLE;
+        return IS_DOUBLE;
     }
     else
       return IS_STRING;
@@ -272,9 +267,9 @@ public class StringBuilderValue extends StringValue {
       char ch = buffer[offset++];
 
       if ('0' <= ch && ch <= '9')
-	value = 10 * value + ch - '0';
+        value = 10 * value + ch - '0';
       else
-	return sign * value;
+        return sign * value;
     }
 
     return value;
@@ -306,14 +301,14 @@ public class StringBuilderValue extends StringValue {
       int e = i++;
 
       if (i < len && (ch = buffer[i]) == '+' || ch == '-') {
-	i++;
+        i++;
       }
 
       for (; i < len && '0' <= (ch = buffer[i]) && ch <= '9'; i++) {
       }
 
       if (i == e + 1)
-	i = e;
+        i = e;
     }
 
     if (i == 0)
@@ -331,7 +326,7 @@ public class StringBuilderValue extends StringValue {
   {
     if (_value == null)
       _value = new String(_buffer, 0, _length);
-    
+
     return _value;
   }
 
@@ -342,7 +337,7 @@ public class StringBuilderValue extends StringValue {
   {
     if (_value == null)
       _value = new String(_buffer, 0, _length);
-    
+
     return _value;
   }
 
@@ -379,9 +374,9 @@ public class StringBuilderValue extends StringValue {
       ch = buffer[i];
 
       if ('0' <= ch && ch <= '9')
-	value = 10 * value + ch - '0';
+        value = 10 * value + ch - '0';
       else
-	return this;
+        return this;
     }
 
     return new LongValue(sign * value);
@@ -395,7 +390,7 @@ public class StringBuilderValue extends StringValue {
   public byte[] toBytes()
   {
     char []buffer = _buffer;
-    
+
     final int len = _length;
     byte[] bytes = new byte[len];
 
@@ -603,7 +598,7 @@ public class StringBuilderValue extends StringValue {
   public final StringBuilderValue append(Value v)
   {
     v.appendTo(this);
-    
+
     return this;
   }
 

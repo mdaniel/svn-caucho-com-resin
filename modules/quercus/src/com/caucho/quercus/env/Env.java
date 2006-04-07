@@ -40,9 +40,9 @@ import com.caucho.quercus.QuercusLineRuntimeException;
 import com.caucho.quercus.QuercusRuntimeException;
 import com.caucho.quercus.module.Marshall;
 import com.caucho.quercus.expr.Expr;
-import com.caucho.quercus.lib.QuercusSessionModule;
-import com.caucho.quercus.lib.QuercusStringModule;
-import com.caucho.quercus.lib.QuercusVariableModule;
+import com.caucho.quercus.lib.session.SessionModule;
+import com.caucho.quercus.lib.string.StringModule;
+import com.caucho.quercus.lib.VariableModule;
 import com.caucho.quercus.page.PhpPage;
 import com.caucho.quercus.program.AbstractClassDef;
 import com.caucho.quercus.program.AbstractFunction;
@@ -65,7 +65,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.sql.DataSource;
 import java.io.IOException;
 import java.lang.ref.SoftReference;
-import java.lang.reflect.Array;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -266,7 +265,7 @@ public class Env {
     throws Throwable
   {
     if (getIniBoolean("session.auto_start"))
-      QuercusSessionModule.session_start(this);
+      SessionModule.session_start(this);
   }
 
   /**
@@ -576,7 +575,7 @@ public class Env {
       String value = callback.read(this, sessionId);
 
       if (value != null && ! value.equals("")) {
-        Value unserialize = QuercusVariableModule.unserialize(this, value);
+        Value unserialize = VariableModule.unserialize(this, value);
 
         if (unserialize instanceof ArrayValue) {
           ArrayValue arrayValue = (ArrayValue) unserialize;
@@ -1121,7 +1120,7 @@ public class Env {
           StringValue valueAsValue;
 
           if (getIniBoolean("magic_quotes_gpc"))
-            valueAsValue = QuercusStringModule.addslashes(value);
+            valueAsValue = StringModule.addslashes(value);
           else
             valueAsValue = new StringValueImpl(value);
 
@@ -3175,7 +3174,7 @@ public class Env {
       SessionCallback callback = getSessionCallback();
 
       if (callback != null) {
-        String value = QuercusVariableModule.serialize(session.getArray());
+        String value = VariableModule.serialize(session.getArray());
 
         callback.write(this, session.getId(), value);
 

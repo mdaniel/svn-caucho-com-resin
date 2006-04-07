@@ -39,7 +39,7 @@ import com.caucho.vfs.Path;
 import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.WriteStream;
 import com.caucho.vfs.MultipartStream;
-import com.caucho.quercus.lib.QuercusStringModule;
+import com.caucho.quercus.lib.string.StringModule;
 
 /**
  * Handling of POST requests.
@@ -145,11 +145,11 @@ public class Post {
   {
     // php/081b
     Value value = new StringValueImpl(formValueList[formValueList.length - 1]);
-    
+
     addFormValue(array, key,
-		 value,
-		 formValueList,
-		 addSlashesToValues);
+                 value,
+                 formValueList,
+                 addSlashesToValues);
   }
 
   public static void addFormValue(ArrayValue array,
@@ -235,7 +235,7 @@ public class Post {
   private static void put(ArrayValue array, Value key, Value value, boolean addSlashes)
   {
     if (addSlashes && (value instanceof StringValue)) {
-      value = QuercusStringModule.addslashes(value.toString());
+      value = StringModule.addslashes(value.toString());
     }
 
     if (key == null)

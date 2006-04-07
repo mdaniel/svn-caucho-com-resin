@@ -29,15 +29,7 @@
 
 package com.caucho.quercus.env;
 
-import java.io.IOException;
-
-import com.caucho.vfs.WriteStream;
-
 import com.caucho.quercus.Quercus;
-
-import com.caucho.quercus.gen.PhpWriter;
-
-import com.caucho.quercus.lib.QuercusStringModule;
 
 /**
  * Represents a PHP string value.
@@ -87,7 +79,7 @@ public final class InternStringValue extends StringValueImpl {
   {
     return _type != IS_STRING;
   }
-  
+
   /**
    * Converts to a double.
    */

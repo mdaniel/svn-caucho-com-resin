@@ -29,16 +29,9 @@
 
 package com.caucho.quercus.env;
 
-import java.io.IOException;
 import java.util.IdentityHashMap;
 
 import com.caucho.vfs.WriteStream;
-
-import com.caucho.quercus.Quercus;
-
-import com.caucho.quercus.gen.PhpWriter;
-
-import com.caucho.quercus.lib.QuercusStringModule;
 
 /**
  * Represents a PHP string value.
@@ -102,37 +95,37 @@ abstract public class StringValue extends Value {
   {
     if (incr > 0) {
       String s = toString();
-      
+
       StringBuilder tail = new StringBuilder();
 
       for (int i = s.length() - 1; i >= 0; i--) {
-	char ch = s.charAt(i);
+        char ch = s.charAt(i);
 
-	if (ch == 'z') {
-	  if (i == 0)
-	    return new StringValueImpl("aa" + tail);
-	  else
-	    tail.insert(0, 'a');
-	}
-	else if ('a' <= ch && ch < 'z') {
-	  return new StringValueImpl(s.substring(0, i) +
-				 (char) (ch + 1) +
-				 tail);
-	}
-	else if (ch == 'Z') {
-	  if (i == 0)
-	    return new StringValueImpl("AA" + tail.toString());
-	  else
-	    tail.insert(0, 'A');
-	}
-	else if ('A' <= ch && ch < 'Z') {
-	  return new StringValueImpl(s.substring(0, i) +
-				 (char) (ch + 1) +
-				 tail);
-	}
-	else if ('0' <= ch && ch <= '9' && i == s.length() - 1) {
-	  return new LongValue(toLong() + 1);
-	}
+        if (ch == 'z') {
+          if (i == 0)
+            return new StringValueImpl("aa" + tail);
+          else
+            tail.insert(0, 'a');
+        }
+        else if ('a' <= ch && ch < 'z') {
+          return new StringValueImpl(s.substring(0, i) +
+                                     (char) (ch + 1) +
+                                     tail);
+        }
+        else if (ch == 'Z') {
+          if (i == 0)
+            return new StringValueImpl("AA" + tail.toString());
+          else
+            tail.insert(0, 'A');
+        }
+        else if ('A' <= ch && ch < 'Z') {
+          return new StringValueImpl(s.substring(0, i) +
+                                     (char) (ch + 1) +
+                                     tail);
+        }
+        else if ('0' <= ch && ch <= '9' && i == s.length() - 1) {
+          return new LongValue(toLong() + 1);
+        }
       }
 
       return new StringValueImpl(tail.toString());
@@ -151,27 +144,27 @@ abstract public class StringValue extends Value {
   public boolean eq(Value rValue)
   {
     String v = toString();
-    
+
     rValue = rValue.toValue();
 
     if (rValue instanceof BooleanValue) {
       if (rValue.toBoolean())
-	return ! v.equals("") && ! v.equals("0");
+        return ! v.equals("") && ! v.equals("0");
       else
-	return v.equals("") || v.equals("0");
+        return v.equals("") || v.equals("0");
     }
 
     int type = getNumericType();
 
     if (type == IS_STRING) {
       if (rValue instanceof StringValueImpl)
-	return v.equals(rValue.toString());
+        return v.equals(rValue.toString());
       else if (rValue.isLong())
-	return toLong() ==  rValue.toLong();
+        return toLong() ==  rValue.toLong();
       else if (rValue instanceof BooleanValue)
-	return toLong() == rValue.toLong();
+        return toLong() == rValue.toLong();
       else
-	return v.equals(rValue.toString());
+        return v.equals(rValue.toString());
     }
     else if (rValue.isNumber())
       return toDouble() == rValue.toDouble();
@@ -205,7 +198,7 @@ abstract public class StringValue extends Value {
 
     if (ch == '.') {
       for (i++; i < len && '0' <= (ch = s.charAt(i)) && ch <= '9'; i++) {
-	return IS_DOUBLE;
+        return IS_DOUBLE;
       }
 
       return IS_STRING;
@@ -220,15 +213,15 @@ abstract public class StringValue extends Value {
       return IS_LONG;
     else if (ch == '.' || ch == 'e' || ch == 'E') {
       for (i++;
-	   i < len && ('0' <= (ch = s.charAt(i)) && ch <= '9' ||
-		       ch == '+' || ch == '-' || ch == 'e' || ch == 'E');
-	   i++) {
+           i < len && ('0' <= (ch = s.charAt(i)) && ch <= '9' ||
+                       ch == '+' || ch == '-' || ch == 'e' || ch == 'E');
+           i++) {
       }
 
       if (i < len)
-	return IS_STRING;
+        return IS_STRING;
       else
-	return IS_DOUBLE;
+        return IS_DOUBLE;
     }
     else
       return IS_STRING;
@@ -258,9 +251,9 @@ abstract public class StringValue extends Value {
       char ch = string.charAt(i);
 
       if ('0' <= ch && ch <= '9')
-	value = 10 * value + ch - '0';
+        value = 10 * value + ch - '0';
       else
-	return sign * value;
+        return sign * value;
     }
 
     return value;
@@ -280,13 +273,13 @@ abstract public class StringValue extends Value {
 
       switch (ch) {
       case '\'':
-	sb.append("\\'");
-	break;
+        sb.append("\\'");
+        break;
       case '\\':
-	sb.append("\\\\");
-	break;
+        sb.append("\\\\");
+        break;
       default:
-	sb.append(ch);
+        sb.append(ch);
       }
     }
     sb.append("'");
@@ -327,7 +320,7 @@ abstract public class StringValue extends Value {
 
     return toString().equals(o.toString());
   }
-  
+
   public void varDumpImpl(Env env,
                           WriteStream out,
                           int depth,

@@ -29,31 +29,24 @@
 
 package com.caucho.quercus.resources;
 
-import com.caucho.util.Log;
-import com.caucho.quercus.lib.QuercusMysqliModule;
-import com.caucho.quercus.resources.JdbcConnectionResource;
-import com.caucho.quercus.env.*;
-
 import java.sql.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Represents a JDBC column metadata
  */
 public class JdbcColumnMetaData {
   private final JdbcTableMetaData _table;
-  
+
   private final String _name;
-  
+
   private final int _jdbcType;
 
   private final int _length;
-  
+
   private final boolean _isNotNull;
   private final boolean _isUnsigned;
   private final boolean _isZeroFill;
-  
+
   private boolean _isPrimaryKey;
   private boolean _isIndex;
   private boolean _isUnique;
@@ -65,11 +58,11 @@ public class JdbcColumnMetaData {
     throws SQLException
   {
     _table = table;
-    
+
     _name = rs.getString("COLUMN_NAME");
     _jdbcType = rs.getInt("DATA_TYPE");
     _length = rs.getInt("COLUMN_SIZE");
-    
+
     _isNotNull = rs.getInt("NULLABLE") == DatabaseMetaData.columnNoNulls;
 
     String type = rs.getString("TYPE_NAME").toLowerCase();

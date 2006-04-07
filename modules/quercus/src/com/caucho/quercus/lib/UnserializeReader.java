@@ -31,38 +31,22 @@ package com.caucho.quercus.lib;
 
 import java.io.IOException;
 
-import java.util.Map;
-import java.util.HashMap;
-import java.util.IdentityHashMap;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
 import com.caucho.util.L10N;
 
-import com.caucho.vfs.Vfs;
-
-import com.caucho.quercus.module.AbstractQuercusModule;
-import com.caucho.quercus.module.Optional;
-import com.caucho.quercus.module.Reference;
-import com.caucho.quercus.module.ReadOnly;
-import com.caucho.quercus.module.UsesSymbolTable;
-
 import com.caucho.quercus.env.*;
+import com.caucho.quercus.lib.VariableModule;
 
 import com.caucho.util.LruCache;
 
-import com.caucho.vfs.WriteStream;
-
 public final class UnserializeReader {
-  private static final L10N L = new L10N(QuercusVariableModule.class);
+  private static final L10N L = new L10N(VariableModule.class);
 
   private static final LruCache<StringKey,StringValue> _keyCache
     = new LruCache<StringKey,StringValue>(4096);
-  
+
   private final char []_buffer;
   private final int _length;
-    
+
   private int _index;
   private StringKey _key = new StringKey();
 
@@ -80,109 +64,109 @@ public final class UnserializeReader {
     switch (ch) {
     case 'b':
       {
-	expect(':');
-	long v = readInt();
-	expect(';');
+        expect(':');
+        long v = readInt();
+        expect(';');
 
-	return v == 0 ? BooleanValue.FALSE : BooleanValue.TRUE;
+        return v == 0 ? BooleanValue.FALSE : BooleanValue.TRUE;
       }
-      
+
     case 's':
       {
-	expect(':');
-	int len = (int) readInt();
-	expect(':');
-	expect('"');
+        expect(':');
+        int len = (int) readInt();
+        expect(':');
+        expect('"');
 
-	StringValue s = readStringValue(len);
+        StringValue s = readStringValue(len);
 
-	expect('"');
-	expect(';');
+        expect('"');
+        expect(';');
 
-	return s;
+        return s;
       }
-      
+
     case 'i':
       {
-	expect(':');
-	
-	long value = readInt();
-	
-	expect(';');
+        expect(':');
 
-	return LongValue.create(value);
+        long value = readInt();
+
+        expect(';');
+
+        return LongValue.create(value);
       }
-      
+
     case 'd':
       {
-	expect(':');
+        expect(':');
 
-	StringBuilder sb = new StringBuilder();
-	for (ch = read(); ch >= 0 && ch != ';'; ch = read()) {
-	  sb.append((char) ch);
-	}
+        StringBuilder sb = new StringBuilder();
+        for (ch = read(); ch >= 0 && ch != ';'; ch = read()) {
+          sb.append((char) ch);
+        }
 
-	if (ch != ';')
-	  throw new IOException(L.l("expected ';'"));
+        if (ch != ';')
+          throw new IOException(L.l("expected ';'"));
 
-	return new DoubleValue(Double.parseDouble(sb.toString()));
+        return new DoubleValue(Double.parseDouble(sb.toString()));
       }
-      
+
     case 'a':
       {
-	expect(':');
-	long len = readInt();
-	expect(':');
-	expect('{');
+        expect(':');
+        long len = readInt();
+        expect(':');
+        expect('{');
 
-	ArrayValue array = new ArrayValueImpl((int) len);
-	for (int i = 0; i < len; i++) {
-	  Value key = unserializeKey(env);
-	  Value value = unserialize(env);
+        ArrayValue array = new ArrayValueImpl((int) len);
+        for (int i = 0; i < len; i++) {
+          Value key = unserializeKey(env);
+          Value value = unserialize(env);
 
-	  array.put(key, value);
-	}
+          array.put(key, value);
+        }
 
-	expect('}');
+        expect('}');
 
-	return array;
+        return array;
       }
-      
+
     case 'O':
       {
-	expect(':');
-	int len = (int) readInt();
-	expect(':');
-	expect('"');
+        expect(':');
+        int len = (int) readInt();
+        expect(':');
+        expect('"');
 
-	String className = readString(len);
+        String className = readString(len);
 
-	expect('"');
-	expect(':');
-	long count = readInt();
-	expect(':');
-	expect('{');
+        expect('"');
+        expect(':');
+        long count = readInt();
+        expect(':');
+        expect('{');
 
-	Value obj = env.getClass(className).evalNew(env, new Value[0]);
-	for (int i = 0; i < count; i++) {
-	  String key = unserializeString();
-	  Value value = unserialize(env);
+        Value obj = env.getClass(className).evalNew(env, new Value[0]);
+        for (int i = 0; i < count; i++) {
+          String key = unserializeString();
+          Value value = unserialize(env);
 
-	  obj.putField(env, key, value);
-	}
+          obj.putField(env, key, value);
+        }
 
-	expect('}');
+        expect('}');
 
-	return obj;
+        return obj;
       }
-      
+
     case 'N':
       {
-	expect(';');
+        expect(';');
 
-	return NullValue.NULL;
+        return NullValue.NULL;
       }
-      
+
     default:
       return BooleanValue.FALSE;
     }
@@ -196,52 +180,52 @@ public final class UnserializeReader {
     switch (ch) {
     case 's':
       {
-	expect(':');
-	int len = (int) readInt();
-	expect(':');
-	expect('"');
+        expect(':');
+        int len = (int) readInt();
+        expect(':');
+        expect('"');
 
-	StringValue v;
+        StringValue v;
 
-	if (len < 32) {
-	  _key.init(_buffer, _index, len);
+        if (len < 32) {
+          _key.init(_buffer, _index, len);
 
-	  v = _keyCache.get(_key);
+          v = _keyCache.get(_key);
 
-	  if (v != null) {
-	    _index += len;
-	  }
-	  else {
-	    StringKey key = new StringKey(_buffer, _index, len);
-	    
-	    String s = readString(len);
-	    v = new InternStringValue(s);
+          if (v != null) {
+            _index += len;
+          }
+          else {
+            StringKey key = new StringKey(_buffer, _index, len);
 
-	    _keyCache.put(key, v);
-	  }
-	}
-	else {
-	  String s = readString(len);
-	  v = new StringValueImpl(s);
-	}
+            String s = readString(len);
+            v = new InternStringValue(s);
 
-	expect('"');
-	expect(';');
+            _keyCache.put(key, v);
+          }
+        }
+        else {
+          String s = readString(len);
+          v = new StringValueImpl(s);
+        }
 
-	return v;
+        expect('"');
+        expect(';');
+
+        return v;
       }
-      
+
     case 'i':
       {
-	expect(':');
-	
-	long value = readInt();
-	
-	expect(';');
+        expect(':');
 
-	return LongValue.create(value);
+        long value = readInt();
+
+        expect(';');
+
+        return LongValue.create(value);
       }
-      
+
     default:
       return BooleanValue.FALSE;
     }
@@ -269,20 +253,20 @@ public final class UnserializeReader {
   {
     if (_length <= _index)
       throw new IOException(L.l("expected '{0}' at end of string",
-				String.valueOf((char) expectCh)));
-    
+                                String.valueOf((char) expectCh)));
+
     int ch = _buffer[_index++];
 
     if (ch != expectCh)
       throw new IOException(L.l("expected '{0}' at '{1}'",
-				String.valueOf((char) expectCh),
-				String.valueOf((char) ch)));
+                                String.valueOf((char) expectCh),
+                                String.valueOf((char) ch)));
   }
 
   public final long readInt()
   {
     int ch = read();
-      
+
     long sign = 1;
     long value = 0;
 
@@ -299,7 +283,7 @@ public final class UnserializeReader {
     }
 
     unread();
-    
+
     return sign * value;
   }
 
@@ -320,7 +304,7 @@ public final class UnserializeReader {
 
     return s;
   }
-    
+
   public final int read()
   {
     if (_index < _length)
@@ -328,7 +312,7 @@ public final class UnserializeReader {
     else
       return -1;
   }
-    
+
   public final int read(char []buffer, int offset, int length)
   {
     System.arraycopy(_buffer, _index, buffer, offset, length);
@@ -351,7 +335,7 @@ public final class UnserializeReader {
     StringKey()
     {
     }
-    
+
     StringKey(char []buffer, int offset, int length)
     {
       _buffer = new char[length];
@@ -375,7 +359,7 @@ public final class UnserializeReader {
       int hash = 17;
 
       for (; offset < end; offset++)
-	hash = 65521 * hash + buffer[offset];
+        hash = 65521 * hash + buffer[offset];
 
       return hash;
     }
@@ -383,14 +367,14 @@ public final class UnserializeReader {
     public boolean equals(Object o)
     {
       if (! (o instanceof StringKey))
-	return false;
+        return false;
 
       StringKey key = (StringKey) o;
 
       int length = _length;
-      
+
       if (length != key._length)
-	return false;
+        return false;
 
       char []aBuf = _buffer;
       char []bBuf = key._buffer;
@@ -401,8 +385,8 @@ public final class UnserializeReader {
       int aEnd = aOffset + length;
 
       while (aOffset < aEnd) {
-	if (aBuf[aOffset++] != bBuf[bOffset++])
-	  return false;
+        if (aBuf[aOffset++] != bBuf[bOffset++])
+          return false;
       }
 
       return true;
