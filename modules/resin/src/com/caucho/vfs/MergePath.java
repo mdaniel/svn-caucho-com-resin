@@ -335,6 +335,16 @@ public class MergePath extends FilesystemPath {
   }
 
   /**
+   * Returns the full native path name of the best path.
+   */
+  public String getNativePath()
+  {
+    Path path = getBestPath();
+
+    return path.getNativePath();
+  }
+
+  /**
    * Returns the URL of the best path.
    */
   public String getURL()
@@ -641,6 +651,19 @@ public class MergePath extends FilesystemPath {
         _bestPath = realPath;
         return realPath;
       }
+    }
+
+    if (pathList.size() > 0) {
+      Path path = pathList.get(0);
+
+      if (pathname.startsWith("/"))
+	pathname = "." + pathname;
+
+      Path realPath = path.lookup(pathname);
+
+      realPath.setUserPath(_userPath);
+      
+      return realPath;
     }
 
     return new NotFoundPath(_userPath);

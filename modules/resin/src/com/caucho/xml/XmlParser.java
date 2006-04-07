@@ -462,9 +462,9 @@ public class XmlParser extends AbstractParser {
     ch = skipWhitespace(ch);
 
     if (_dtd == null)
-      _dtd = new QDocumentType(null);
+      _dtd = new QDocumentType(name);
 
-    _dtd._name = name;
+    _dtd.setName(name);
 
     if (XmlChar.isNameStart(ch)) {
       ch = parseExternalID(ch);
@@ -1591,7 +1591,7 @@ public class XmlParser extends AbstractParser {
       if (_owner != null)
         _owner.setAttribute(name.getName(), value);
 
-      if (name.getName().equals("encoding") && ! _inDtd) {
+      if (name.getName().equals("encoding")) { // xml/00hb // && ! _inDtd) {
         String encoding = value;
 
         if (! _isStaticEncoding &&
@@ -2835,6 +2835,7 @@ public class XmlParser extends AbstractParser {
     }
 
     _filename = systemId;
+    /*
     XmlReader nextReader;
     if (_reader instanceof Utf8Reader)
       nextReader = new Utf8Reader(this, _is);
@@ -2842,18 +2843,21 @@ public class XmlParser extends AbstractParser {
       _is.setEncoding(_reader.getReadStream().getEncoding());
       nextReader = new XmlReader(this, _is);
     }
-    
-    nextReader.setSystemId(systemId);
-    nextReader.setFilename(systemId);
-    nextReader.setPublicId(publicId);
-
-    nextReader.setNext(_reader);
     _reader = nextReader;
-    
+    */
+
+    XmlReader oldReader = _reader;
+    _reader = null;
     
     _line = 1;
 
-    int ch = parseXMLDeclaration(nextReader);
+    int ch = parseXMLDeclaration(oldReader);
+    
+    _reader.setSystemId(systemId);
+    _reader.setFilename(systemId);
+    _reader.setPublicId(publicId);
+    _reader.setNext(oldReader);
+
     unread(ch);
   }
 

@@ -375,7 +375,7 @@ public class Store {
       _fileSize = file.getLength();
       _blockCount = ((_fileSize + BLOCK_SIZE - 1) / BLOCK_SIZE);
 
-      int allocCount = (int) (_blockCount / 2) + ALLOC_CHUNK_SIZE;
+      int allocCount = (int) (_blockCount * 2) + ALLOC_CHUNK_SIZE;
 
       allocCount -= allocCount % ALLOC_CHUNK_SIZE;
 
@@ -539,7 +539,7 @@ public class Store {
       long end = _blockCount;
 
       if (_allocationTable.length < 2 * end)
-	end = _allocationTable.length;
+	end = _allocationTable.length / 2;
 
       for (blockIndex = 0; blockIndex < end; blockIndex++) {
 	if (getAllocation(blockIndex) == ALLOC_FREE)

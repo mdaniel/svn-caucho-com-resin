@@ -68,6 +68,8 @@
 
     <rar-deploy>com.caucho.jca.ResourceDeploy</rar-deploy>
     
+    <resource-default>com.caucho.jca.ResourceDefault</resource-default>
+    
     <resource-deploy>com.caucho.jca.ResourceDeploy</resource-deploy>
 
     <resource-env-ref>com.caucho.config.types.ResourceEnvRef</resource-env-ref>

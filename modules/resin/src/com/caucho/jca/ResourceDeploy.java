@@ -38,6 +38,7 @@ import com.caucho.util.L10N;
 import com.caucho.util.CauchoSystem;
 
 import com.caucho.vfs.Path;
+import com.caucho.vfs.Vfs;
 
 import com.caucho.config.ConfigException;
 
@@ -151,11 +152,25 @@ public class ResourceDeploy {
 	rar.setRarPath(getPath().lookup(name + ".rar"));
 	rar.setRootDirectory(getExpandPath().lookup(getExpandPrefix() + name));
 
+	Path oldPwd = Vfs.getPwd();
+
+	try {
+	  Vfs.setPwd(rar.getRootDirectory());
+
+	  for (ResourceConfig config : ResourceDefault.getDefaultList()) {
+	    config.getBuilderProgram().configure(rar);
+	  }
+	} finally {
+	  Vfs.setPwd(oldPwd);
+	}
+
 	rar.init();
 
 	ResourceArchiveManager.addResourceArchive(rar);
       }
-    } catch (IOException e) {
+    } catch (ConfigException e) {
+      throw e;
+    } catch (Throwable e) {
       throw new ConfigException(e);
     }
   }

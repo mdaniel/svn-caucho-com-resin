@@ -42,6 +42,8 @@ import com.caucho.quercus.module.Optional;
 
 import com.caucho.quercus.program.PhpProgram;
 
+import com.caucho.quercus.lib.file.FileModule;
+
 import com.caucho.quercus.env.*;
 
 /**
@@ -201,7 +203,7 @@ public class OptionsModule extends AbstractQuercusModule {
    */
   public static Value getmyuid(Env env)
   {
-    return QuercusFileModule.fileowner(env, env.getSelfPath());
+    return FileModule.fileowner(env, env.getSelfPath());
   }
 
   /**

@@ -58,13 +58,60 @@ public class HostConfig extends DeployConfig {
   private ArrayList<Pattern> _hostAliasRegexps
     = new ArrayList<Pattern>();
 
+  private String _hostName;
+
   // The regexp pattern
   private Pattern _regexp;
+
+  public HostConfig()
+  {
+    super.setId(null);
+  }
 
   /**
    * Sets the host name.
    */
   public void setHostName(RawString name)
+    throws ConfigException
+  {
+    _hostName = cleanHostName(name);
+    String hostName = name.getValue();
+
+    if (hostName.indexOf("${") < 0) {
+      for (int i = 0; i < hostName.length(); i++) {
+	char ch = hostName.charAt(i);
+
+	if (ch == ' ' || ch == '\t' || ch == ',') {
+	  throw new ConfigException(L.l("Host name `{0}' must not contain multiple names.  Use <host-alias> to specify aliases for a host.",
+					hostName));
+	}
+      }
+    }
+
+    _hostName = hostName;
+  }
+  
+  /**
+   * Gets the host name.
+   */
+  public String getHostName()
+  {
+    return _hostName;
+  }
+
+  /**
+   * Sets the id.
+   */
+  public void setId(RawString id)
+    throws ConfigException
+  {
+    super.setId(cleanHostName(id));
+  }
+
+  /**
+   * Sets the host name.
+   */
+  private String cleanHostName(RawString name)
     throws ConfigException
   {
     String hostName = name.getValue();
@@ -80,24 +127,7 @@ public class HostConfig extends DeployConfig {
       }
     }
 
-    setId(hostName);
-  }
-  
-  /**
-   * Gets the host name.
-   */
-  public String getHostName()
-  {
-    return getId();
-  }
-
-  /**
-   * Sets the id.
-   */
-  public void setId(RawString id)
-    throws ConfigException
-  {
-    setHostName(id);
+    return hostName;
   }
 
   /**

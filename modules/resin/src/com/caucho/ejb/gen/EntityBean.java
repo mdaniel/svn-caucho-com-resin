@@ -515,6 +515,7 @@ public class EntityBean extends ClassComponent {
     out.println("_ejb_trans = null;");
     out.println("synchronized (this) {");
     out.println("  if (_ejb_context._ejb_free == null) {");
+    out.println("    __caucho_expire();"); // ejb/0aje
     out.println("    _ejb_context._ejb_free = this;");
     out.println("    return;");
     out.println("  }");

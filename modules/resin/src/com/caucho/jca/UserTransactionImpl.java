@@ -61,6 +61,8 @@ public class UserTransactionImpl implements UserTransaction {
 
   private ArrayList<UserPoolItem> _resources = new ArrayList<UserPoolItem>();
   private ArrayList<PoolItem> _poolItems = new ArrayList<PoolItem>();
+  private ArrayList<BeginResource> _beginResources
+    = new ArrayList<BeginResource>();
   private ArrayList<CloseResource> _closeResources
     = new ArrayList<CloseResource>();
 
@@ -163,6 +165,22 @@ public class UserTransactionImpl implements UserTransaction {
   void delistResource(UserPoolItem resource)
   {
     _resources.remove(resource);
+  }
+
+  /**
+   * Enlist a resource automatically called when a transaction begins
+   */
+  public void enlistBeginResource(BeginResource resource)
+  {
+    _beginResources.add(resource);
+
+    try {
+      Transaction xa = _transactionManager.getTransaction();
+      if (xa != null)
+	resource.begin(xa);
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
   }
 
   /**
@@ -293,6 +311,17 @@ public class UserTransactionImpl implements UserTransaction {
 	  xa.enlistResource(poolItem);
 	} catch (Exception e) {
 	  throw new SystemException(e);
+	}
+      }
+
+      // enlist begin resources
+      for (int i = 0; i < _beginResources.size(); i++) {
+	try {
+	  BeginResource resource = _beginResources.get(i);
+
+	  resource.begin(xa);
+	} catch (Throwable e) {
+	  log.log(Level.WARNING, e.toString(), e);
 	}
       }
 
@@ -435,6 +464,8 @@ public class UserTransactionImpl implements UserTransaction {
 
     }
 
+    _beginResources.clear();
+    
     while (_closeResources.size() > 0) {
       try {
 	CloseResource resource;

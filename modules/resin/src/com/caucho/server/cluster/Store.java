@@ -142,6 +142,14 @@ public class Store {
   }
 
   /**
+   * Returns the store manager.
+   */
+  public StoreManager getStoreManager()
+  {
+    return _storeManager;
+  }
+
+  /**
    * Returns a ClusterObject.
    */
   public ClusterObject createClusterObject(String objectId)

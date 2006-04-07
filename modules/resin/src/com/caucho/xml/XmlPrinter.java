@@ -245,7 +245,7 @@ public class XmlPrinter implements XMLWriter {
     throws IOException
   {
     _isAutomaticMethod = false;
-    
+
     ((QAbstractNode) node).print(this);
 
     flush();
@@ -714,7 +714,7 @@ public class XmlPrinter implements XMLWriter {
    *
    * @param top name of the top element
    */
-  private void printHeader(String top)
+  void printHeader(String top)
     throws IOException
   {
     _isTop = false;
@@ -794,7 +794,7 @@ public class XmlPrinter implements XMLWriter {
     else if (_currentDocument instanceof QDocument) {
       QDocumentType dtd = (QDocumentType) _currentDocument.getDoctype();
 
-      if (dtd != null && dtd.getName() != null) {
+      if (dtd != null && dtd.getName() != null && dtd.getParentNode() == null) {
         dtd.print(this);
         println();
       }

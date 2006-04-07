@@ -169,11 +169,9 @@ public class JavaDeserializer extends AbstractMapDeserializer {
 	  try {
 	    field.set(obj, value);
 	  } catch (Throwable e) {
-	    IOException e1 = new IOException("Failed setting: " + field + " with " + value + "\n" + e.toString());
-	    
-	    e1.initCause(e);
+	    throw new IOExceptionWrapper("Failed setting: " + field + " with " + value + "\n" + e.toString(),
+					 e);
 
-	    throw e1;
 	  }
         }
         else {

@@ -106,17 +106,17 @@ public class MysqliModule extends AbstractQuercusModule {
   public static final int MYSQL_TYPE_VAR_STRING = 0xFD;
   public static final int MYSQL_TYPE_STRING = 0xFE;
   public static final int MYSQL_TYPE_GEOMETRY = 0xFF;
+  
+  public MysqliModule()
+  {
+  }
 
   /**
    * Returns true for the mysql extension.
    */
-  public boolean isExtensionLoaded(String name)
+  public String []getLoadedExtensions()
   {
-    return "mysqli".equals(name);
-  }
-
-  public MysqliModule()
-  {
+    return new String[] { "mysqli" };
   }
 
   /**

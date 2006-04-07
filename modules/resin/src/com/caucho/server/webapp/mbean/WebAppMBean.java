@@ -50,4 +50,33 @@ public interface WebAppMBean extends DeployControllerMBean {
    */
   public int getActiveSessionCount();
 
+  /**
+   * Returns the session timeout
+   */
+  public long getSessionTimeout();
+
+  /**
+   * Returns the count of active sessions.
+   */
+  public long getSessionActiveCount();
+
+  /**
+   * Returns the count of sessions created
+   */
+  public long getSessionCreateCount();
+
+  /**
+   * Returns the count of sessions invalidated
+   */
+  public long getSessionInvalidateCount();
+
+  /**
+   * Returns the count of sessions timeout
+   */
+  public long getSessionTimeoutCount();
+
+  /**
+   * Returns the persistent store type.
+   */
+  public String getSessionStoreType();
 }

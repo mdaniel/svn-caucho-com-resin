@@ -113,14 +113,36 @@ public class HostSingleDeployGenerator
   public void init()
     throws Exception
   {
-    String rawHostName = _config.getId();
-
-    String hostName = Config.evalString(rawHostName);
-
-    if (hostName.equals("*"))  // server/1f20
-      hostName = "";
+    String hostName = null;
+    String id = null;
     
-    _controller = new HostController(hostName, _config, _container, null);
+    String rawId = _config.getId();
+    String rawHostName = _config.getHostName();
+
+    if (rawId != null) {
+      id = Config.evalString(rawId);
+
+      if (id.equals("*"))  // server/1f20
+	id = "";
+    }
+
+    if (rawHostName != null) {
+      hostName = Config.evalString(rawHostName);
+
+      if (rawHostName.equals("*"))  // server/1f20
+	hostName = "";
+    }
+
+    if (hostName != null) {
+      _controller = new HostController(hostName, _config, _container, null);
+
+      if (id != null)
+	_controller.addHostAlias(id);
+    }
+    else if (id != null)
+      _controller = new HostController(id, _config, _container, null);
+    else
+      _controller = new HostController("", _config, _container, null);
 
     // _controller.init();
   }

@@ -332,6 +332,16 @@ public class Cluster implements EnvironmentListener, ClusterMBean {
     return store;
   }
 
+  public StoreManager createPrivateFileStore()
+    throws ConfigException
+  {
+    StoreManager store = createFileStore();
+
+    setStore(null);
+
+    return store;
+  }
+
   public StoreManager createFileStore()
     throws ConfigException
   {

@@ -35,6 +35,7 @@ import com.caucho.config.ConfigException;
 import com.caucho.config.ObjectAttributeProgram;
 import com.caucho.config.types.PathBuilder;
 import com.caucho.config.types.RawString;
+import com.caucho.config.types.Period;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
 
@@ -63,6 +64,9 @@ public class DeployConfig {
 
   // redeploy mode
   private String _redeployMode;
+  
+  // redeploy period
+  private Period _redeployCheckInterval;
 
   // The configuration program
   private BuilderProgramContainer _program = new BuilderProgramContainer();
@@ -133,6 +137,22 @@ public class DeployConfig {
   }
 
   /**
+   * Sets the redeploy-check-interval
+   */
+  public void setRedeployCheckInterval(Period period)
+  {
+    _redeployCheckInterval = period;
+  }
+
+  /**
+   * Gets the redeploy check interval.
+   */
+  public Period getRedeployCheckInterval()
+  {
+    return _redeployCheckInterval;
+  }
+
+  /**
    * Sets the redeploy-mode
    */
   public void setRedeployMode(String mode)
@@ -147,6 +167,14 @@ public class DeployConfig {
   public String getRedeployMode()
   {
     return _redeployMode;
+  }
+
+  /**
+   * Returns the prologue.
+   */
+  public DeployConfig getPrologue()
+  {
+    return null;
   }
 
   /**

@@ -152,6 +152,15 @@ public class UserTransactionProxy implements UserTransaction {
   }
 
   /**
+   * Enlist a begin resource
+   */
+  public void enlistBeginResource(BeginResource resource)
+    throws IllegalStateException
+  {
+    getTransaction().enlistBeginResource(resource);
+  }
+
+  /**
    * Enlist a close resource
    */
   public void enlistCloseResource(CloseResource resource)

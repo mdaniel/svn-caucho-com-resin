@@ -213,6 +213,8 @@ public class WebAppSingleDeployGenerator
     // server/1h13
     _controller.addConfigDefault(_config);
 
+    _controller.setPrologue(_config.getPrologue());
+
     _controller.setSourceType("single");
 
     Environment.addEnvironmentListener(this, _parentLoader);

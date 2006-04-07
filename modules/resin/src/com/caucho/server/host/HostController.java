@@ -129,6 +129,7 @@ public class HostController extends EnvironmentDeployController<Host,HostConfig>
   {
     super(id, rootDirectory);
 
+    addHostAlias(id);
     setHostName(id);
 
     getVariableMap().put("name", id);

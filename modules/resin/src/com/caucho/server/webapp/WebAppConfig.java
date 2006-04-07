@@ -52,6 +52,8 @@ public class WebAppConfig extends DeployConfig {
   // The context path
   private String _contextPath;
 
+  private WebAppConfig _prologue;
+
   /**
    * Gets the context path
    */
@@ -152,5 +154,21 @@ public class WebAppConfig extends DeployConfig {
       setStartupMode("lazy");
     else
       setStartupMode("automatic");
+  }
+
+  /**
+   * Sets the prologue.
+   */
+  public void setPrologue(WebAppConfig prologue)
+  {
+    _prologue = prologue;
+  }
+
+  /**
+   * Gets the prologue.
+   */
+  public DeployConfig getPrologue()
+  {
+    return _prologue;
   }
 }

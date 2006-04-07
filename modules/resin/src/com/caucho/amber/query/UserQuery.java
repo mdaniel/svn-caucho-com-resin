@@ -95,9 +95,14 @@ public class UserQuery implements AmberQuery {
     return _query.getQueryString();
   }
 
+  public void init(AmberConnection aConn)
+  {
+    setSession(aConn);
+  }
+  
   public void setSession(AmberConnection aConn)
   {
-    _aConn = (AmberConnection) aConn;
+    _aConn = aConn;
   }
 
   public AmberConnection getSession()

@@ -149,10 +149,14 @@ public class EntityIntrospector {
       }
     }
 
-    String entityName = type.getName();
-    int p = entityName.lastIndexOf('.');
-    if (p > 0)
-      entityName = entityName.substring(p + 1);
+    String entityName = entityAnn.getString("name");
+
+    if (entityName.equals("")) {
+      entityName = type.getName();
+      int p = entityName.lastIndexOf('.');
+      if (p > 0)
+	entityName = entityName.substring(p + 1);
+    }
 
     EntityType entityType = _entityMap.get(entityName);
 

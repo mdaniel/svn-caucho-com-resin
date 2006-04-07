@@ -99,6 +99,7 @@ abstract public class
   
   // The primary configuration
   private C _config;
+  private DeployConfig _prologue;
 
   // The configuration variable resolver
   private VariableResolver _parentVariableResolver;
@@ -151,6 +152,9 @@ abstract public class
     addConfigMode(config);
     
     _config = config;
+    
+    if (_prologue == null)
+      setPrologue(config.getPrologue());
 
     /* XXX: config is at the end
     if (config != null) {
@@ -165,6 +169,22 @@ abstract public class
   public C getConfig()
   {
     return _config;
+  }
+
+  /**
+   * Gets the prologue configuration
+   */
+  public DeployConfig getPrologue()
+  {
+    return _prologue;
+  }
+
+  /**
+   * Sets the prologue configuration
+   */
+  public void setPrologue(DeployConfig prologue)
+  {
+    _prologue = prologue;
   }
 
   /**
@@ -199,6 +219,9 @@ abstract public class
   {
     if (config.getStartupMode() != null)
       setStartupMode(config.getStartupMode());
+
+    if (config.getRedeployCheckInterval() != null)
+      setRedeployCheckInterval(config.getRedeployCheckInterval());
 
     if (config.getRedeployMode() != null)
       setRedeployMode(config.getRedeployMode());
@@ -315,11 +338,21 @@ abstract public class
       setConfig(oldController.getConfig());
     }
 
+    if (getPrologue() == null)
+      setPrologue(oldController.getPrologue());
+    else if (oldController.getPrologue() != null) {
+      _configDefaults.add(0, (C) getPrologue()); // XXX: must be first
+      
+      setPrologue(oldController.getPrologue());
+    }
+
     if (oldController.getArchivePath() != null)
       setArchivePath(oldController.getArchivePath());
 
     mergeStartupMode(oldController.getStartupMode());
 
+    mergeRedeployCheckInterval(oldController.getRedeployCheckInterval());
+    
     mergeRedeployMode(oldController.getRedeployMode());
   }
   
@@ -400,6 +433,9 @@ abstract public class
       }
 
       ArrayList<DeployConfig> initList = new ArrayList<DeployConfig>();
+
+      if (getPrologue() != null)
+	initList.add(getPrologue());
 
       fillInitList(initList);
 

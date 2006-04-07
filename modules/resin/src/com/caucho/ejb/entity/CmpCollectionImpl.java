@@ -34,6 +34,7 @@ import java.util.Iterator;
 import java.util.ArrayList;
 
 import com.caucho.amber.AmberQuery;
+import com.caucho.amber.manager.AmberConnection;
   
 /**
  * Represents a lazy collection.
@@ -42,6 +43,11 @@ abstract public class CmpCollectionImpl extends AbstractList {
   private ArrayList _base = new ArrayList();
   private AmberQuery _query;
 
+  public void __caucho_init(AmberConnection aConn)
+  {
+    _query.init(aConn);
+  }
+  
   protected void fill(AmberQuery query)
   {
     try {

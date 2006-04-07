@@ -44,6 +44,10 @@ import java.sql.SQLException;
 
 import javax.sql.DataSource;
 
+import javax.transaction.Synchronization;
+import javax.transaction.Transaction;
+import javax.transaction.Status;
+
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
 import javax.persistence.Query;
@@ -82,6 +86,7 @@ import com.caucho.config.ConfigException;
 import com.caucho.ejb.EJBExceptionWrapper;
 
 import com.caucho.jca.UserTransactionProxy;
+import com.caucho.jca.BeginResource;
 import com.caucho.jca.CloseResource;
 
 import com.caucho.util.L10N;
@@ -90,7 +95,8 @@ import com.caucho.util.LruCache;
 /**
  * The entity manager from a entity manager proxy.
  */
-public class AmberConnection implements CloseResource {
+public class AmberConnection
+  implements BeginResource, CloseResource, Synchronization {
   private static final L10N L = new L10N(AmberConnection.class);
   private static final Logger log
     = Logger.getLogger(AmberConnection.class.getName());
@@ -335,8 +341,10 @@ public class AmberConnection implements CloseResource {
    */
   void register()
   {
-    if (! _isRegistered)
+    if (! _isRegistered) {
       UserTransactionProxy.getInstance().enlistCloseResource(this);
+      UserTransactionProxy.getInstance().enlistBeginResource(this);
+    }
     
     _isRegistered = true;
   }
@@ -731,6 +739,21 @@ public class AmberConnection implements CloseResource {
   }
 
   /**
+   * Callback when the user transaction begins
+   */
+  public void begin(Transaction xa)
+  {
+    try {
+      xa.registerSynchronization(this);
+
+      _isInTransaction = true;
+      _isXA = true;
+    } catch (Throwable e) {
+      log.log(Level.WARNING, e.toString(), e);
+    }
+  }
+
+  /**
    * Starts a transaction.
    */
   public void beginTransaction()
@@ -782,6 +805,28 @@ public class AmberConnection implements CloseResource {
     }
   }
 
+  /**
+   * Callback before a utrans commit.
+   */
+  public void beforeCompletion()
+  {
+    try {
+      beforeCommit();
+    } catch (Exception e) {
+      log.log(Level.WARNING, e.toString(), e);
+    }
+  }
+
+  /**
+   * Callback after a utrans commit.
+   */
+  public void afterCompletion(int status)
+  {
+    afterCommit(status == Status.STATUS_COMMITTED);
+    _isXA = false;
+    _isInTransaction = false;
+  }
+  
   /**
    * Commits a transaction.
    */

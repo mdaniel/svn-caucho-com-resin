@@ -4,6 +4,27 @@
 
 <s2 title='3.0.snap - Mar 17, 2006'>
 <ul>
+<li>Quercus: add APC API
+<li>Quercus: auto_prepend_file, auto_append_file (#616)
+<li>Quercus: JavaClass::foo, i.e. Java static functions (#584)
+<li>Quercus: print not properly parsed as expr (#1039, rep by THomas Moorer)
+<li>XML: external DTD not reading encoding (#916, rep by GreenEyed)
+<li>XML: DOMBuilder improperly adding DOCTYPE (#945, rep by Jim Spring)
+<li>incorrect initialization of allocation table for session (#999, rep by doughty)
+<li>win32 httpd.exe not properly clearing bind sockaddr_in (#1038, rep by wet745)
+<li>ProfileServlet now allows format=xml (#539, rep by Bill Au)
+<li>file-store with redeploy was sending warning message (#1020, rep by Mattias Jiderhamn)
+<li>&lt;host> with id="" and hostName treats id as host-alias (#1017, rep by tderouin)
+<li>add &lt;prologue> to &lt;web-app> for classloaders (#1027, rep by gwagenknect)
+<li>add resource-default for .rar files (#416, #662, #663 rep by George Cox)
+<li>Add basic session MBean information (#314, rep by Serge Knystautas)
+<li>MergePath was returning incorrect path for missing file (#281, rep by david)
+<li>Add redeploy-check-interval (#242, rep by pburleson)
+<li>Amber/CMP: get collection needs to reinitialize the AmberConnection (#997, rep by nquery)
+<li>Amber/CMP: CacheConnection cannot be reused. (#998, rep by nquery)
+<li>Hessian: Calendar needs special serialization (#1023, rep by R Mann)
+<li>CMP: cached entity beans were not rechecking the database on findByPrimaryKey (#1003, #1012, rep by Christian Amott)
+<li>Amber: create/update was not in XA properly (#971, #1013 rep by gzhu, P Budzik)
 <li>(2006-04-03) JSP: add print-null-as-blank (#899, rep by koreth)
 <li>Hessian: Improve error reporting for 401 (#988, rep by igor)
 <li>possible sync issue on session shutdown (#974 rep by CHanan Bruanstein)

@@ -368,6 +368,10 @@ r_persistent_store =
   attribute persistent-store { string }
   | element persistent-store { string }
 
+r_redeploy-check-interval =
+  attribute redeploy-check-interval { r_period-Type }
+  | element redeploy-check-interval { r_period-Type }
+
 r_redeploy-mode =
   attribute redeploy-mode { string }
   | element redeploy-mode { string }
@@ -691,8 +695,9 @@ r_web-app-deploy = element web-app-deploy {
   & (attribute startup-mode { string }
      | element startup-mode { string })?
 
-  & (attribute redeploy-mode { string }
-     | element redeploy-mode { string })?
+  & r_redeploy-check-interval?
+
+  & r_redeploy-mode?
 
   & r_web-app-default*
 
@@ -839,7 +844,13 @@ rc_web-app = element web-app {
 
   & r_document-directory?
 
+  & element prologue {
+      r_web-app-Content
+    }?
+
   & r_startup-mode?
+
+  & r_redeploy-check-interval?
 
   & r_redeploy-mode?),
 

@@ -79,7 +79,7 @@ public class DateModule extends AbstractQuercusModule {
   /**
    * Returns the days in a given month.
    */
-  public int cal_days_in_month(int cal, int month, int year)
+  public static int cal_days_in_month(int cal, int month, int year)
   {
     QDate date = new QDate();
 

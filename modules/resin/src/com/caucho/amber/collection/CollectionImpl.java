@@ -76,15 +76,6 @@ public class CollectionImpl<E> extends AbstractList<E>
   /**
    * Sets the session.
    */
-  public void setSession(com.caucho.amber.AmberConnection aConn)
-  {
-    // XXX:
-    // setSession(((UserAmberConnection) aConn).getManagedConnection());
-  }
-  
-  /**
-   * Sets the session.
-   */
   public void setSession(AmberConnection aConn)
   {
     _aConn = aConn;

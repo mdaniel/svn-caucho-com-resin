@@ -8,6 +8,31 @@
 
 <summary objsummary='localtoc'/>
 
+<section title="prologue">
+
+<p>Added a &lt;prologue> tag to the &lt;web-app>. The prologue is
+web-app configuration which is applied before any &lt;web-app-default>.</p>
+
+<p>The &lt;prologue> lets applications define custom &lt;class-loader>
+in the &lt;web-app> and lets it be applied before the &lt;web-app-default>
+or web.xml.</p>
+
+</section>
+
+<section title="resource-default">
+
+<p>Added &lt;resource-default> tag as a default configuration
+for .rar files, e.g. classpaths.</p>
+
+</section>
+
+<section title="redeploy-check-interval">
+
+<p>Added a redeploy-check-interval to configure how long Resin should
+wait to restart a failed web-app.</p>
+
+</web-app>
+
 <section title="JaasAuthenticator">
 
 <p>The JaasAuthenticator will now look for <code>isUserInRole</code> and

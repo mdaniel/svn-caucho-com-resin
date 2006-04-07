@@ -85,15 +85,30 @@ public class ProfilerServlet
                                 HttpServletResponse response)
     throws ServletException, IOException
   {
-    ProfilerNodeComparator comparator = new TimeComparator();
-
-    comparator.setDescending(true);
+    String format = request.getParameter("format");
+    boolean isXml = "xml".equals(format);
 
     response.setContentType("text/html");
 
     response.setHeader("Cache-Control", "no-cache, post-check=0, pre-check=0");
     response.setHeader("Pragma", "no-cache");
     response.setHeader("Expires", "Thu, 01 Dec 1994 16:00:00 GMT");
+
+    if (isXml)
+      writeXml(request, response);
+    else
+      writeHtml(request, response);
+  }
+
+  protected void writeHtml(HttpServletRequest request,
+			   HttpServletResponse response)
+    throws ServletException, IOException
+  {
+    response.setContentType("text/html");
+
+    ProfilerNodeComparator comparator = new TimeComparator();
+
+    comparator.setDescending(true);
 
     XmlWriter out = new XmlWriter(response.getWriter());
 
@@ -277,6 +292,79 @@ public class ProfilerServlet
     // All children
 
     displayChildren(children, comparator, out, depth + 1);
+  }
+
+  protected void writeXml(HttpServletRequest request,
+			   HttpServletResponse response)
+    throws ServletException, IOException
+  {
+    ProfilerNodeComparator comparator = new TimeComparator();
+
+    comparator.setDescending(true);
+
+    XmlWriter out = new XmlWriter(response.getWriter());
+
+    out.setStrategy(XmlWriter.XML);
+    out.setIndenting(false);
+
+    String contextPath = request.getContextPath();
+
+    if (contextPath == null || contextPath.length() == 0)
+      contextPath = "/";
+
+    out.startElement("profile");
+    out.writeLineElement("name", contextPath);
+
+    Collection<ProfilerNode> children
+      =  _profilerManager.getChildProfilerNodes(null, comparator);
+
+    for (ProfilerNode child : children)
+      displayXml(child, comparator, out);
+
+    out.endElement("profile");
+  }
+
+  private void displayXml(ProfilerNode node,
+			  ProfilerNodeComparator comparator,
+			  XmlWriter out)
+  {
+    Collection<ProfilerNode> children
+      = _profilerManager.getChildProfilerNodes(node, comparator);
+
+    long thisTime = node.getTime();
+    long minTime = node.getMinTime();
+    long maxTime = node.getMaxTime();
+
+    long childrenTime = 0;
+
+    for (ProfilerNode child : children) {
+      childrenTime += child.getTime();
+    }
+
+    long totalTime = childrenTime + thisTime;
+
+    long invocationCount = node.getInvocationCount();
+
+    out.startBlockElement("node");
+    out.writeLineElement("name", node.getName());
+
+    if (minTime < Long.MAX_VALUE)
+      out.writeLineElement("min-time", String.valueOf(minTime));
+    else
+      out.writeLineElement("min-time", "0");
+    if (maxTime >= 0)
+      out.writeLineElement("max-time", String.valueOf(maxTime));
+    else
+      out.writeLineElement("max-time", "0");
+    out.writeLineElement("time", String.valueOf(thisTime));
+    out.writeLineElement("total-time", String.valueOf(totalTime));
+    out.writeLineElement("children-time", String.valueOf(childrenTime));
+    out.writeLineElement("count", String.valueOf(invocationCount));
+
+    for (ProfilerNode child : children)
+      displayXml(child, comparator, out);
+    
+    out.endBlockElement("node");
   }
 
   private String createTimeString(long totalTime,

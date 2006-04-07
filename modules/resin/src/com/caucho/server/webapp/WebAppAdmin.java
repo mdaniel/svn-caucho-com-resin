@@ -34,6 +34,9 @@ import com.caucho.server.deploy.DeployControllerAdmin;
 import com.caucho.server.session.SessionManager;
 
 import com.caucho.server.webapp.mbean.WebAppMBean;
+
+import com.caucho.server.cluster.Store;
+
 import com.caucho.jmx.AdminAttributeCategory;
 import com.caucho.jmx.AdminInfo;
 import com.caucho.util.L10N;
@@ -97,6 +100,108 @@ public class WebAppAdmin extends DeployControllerAdmin<WebAppController>
     return manager.getActiveSessionCount();
   }
 
+  /**
+   * Returns the session timeout (in milliseconds)
+   */
+  public long getSessionTimeout()
+  {
+    SessionManager manager = getSessionManager();
+    
+    if (manager != null)
+      return manager.getSessionTimeout();
+    else
+      return 0;
+  }
+
+  /**
+   * Returns the active sessions.
+   */
+  public long getSessionActiveCount()
+  {
+    SessionManager manager = getSessionManager();
+    
+    if (manager != null)
+      return manager.getSessionActiveCount();
+    else
+      return 0;
+  }
+
+  /**
+   * Returns the session create count
+   */
+  public long getSessionCreateCount()
+  {
+    SessionManager manager = getSessionManager();
+    
+    if (manager != null)
+      return manager.getSessionCreateCount();
+    else
+      return 0;
+  }
+
+  /**
+   * Returns the session invalidate count
+   */
+  public long getSessionInvalidateCount()
+  {
+    SessionManager manager = getSessionManager();
+    
+    if (manager != null)
+      return manager.getSessionInvalidateCount();
+    else
+      return 0;
+  }
+
+  /**
+   * Returns the session timeout count
+   */
+  public long getSessionTimeoutCount()
+  {
+    SessionManager manager = getSessionManager();
+    
+    if (manager != null)
+      return manager.getSessionTimeoutCount();
+    else
+      return 0;
+  }
+
+  /**
+   * Returns the session store type
+   */
+  public String getSessionStoreType()
+  {
+    Store store = getSessionStore();
+
+    if (store == null)
+      return null;
+
+    String className = store.getStoreManager().getClass().getName();
+
+    int p = className.lastIndexOf('.');
+
+    return className.substring(p + 1);
+  }
+
+  private Store getSessionStore()
+  {
+    SessionManager manager = getSessionManager();
+
+    if (manager == null)
+      return null;
+
+    return manager.getSessionStore();
+  }
+
+
+  private SessionManager getSessionManager()
+  {
+    Application app = getApplication();
+
+    if (app == null)
+      return null;
+
+    return app.getSessionManager();
+  }
   /**
    * Returns the active application.
    */

@@ -60,9 +60,13 @@ public class QDocumentType extends QNode implements DocumentType {
     _entities.put("apos", new QEntity("apos", "'"));
   }
 
-  public String getNodeName() { return "#documenttype"; }
+  public String getNodeName() { return _name; }
   public String getTagName() { return "#documenttype"; }
   public short getNodeType() { return DOCUMENT_TYPE_NODE; }
+
+  public String getPrefix() { return null; }
+  public String getLocalName() { return null; }
+  public String getNamespaceURI() { return null; }
 
   public String getName() { return _name; }
   public void setName(String name) { _name = name; }
@@ -216,6 +220,8 @@ public class QDocumentType extends QNode implements DocumentType {
   {
     if (getName() == null)
       return;
+
+    os.printHeader(getName());
     
     os.print("<!DOCTYPE ");
     os.print(getName());
@@ -242,5 +248,10 @@ public class QDocumentType extends QNode implements DocumentType {
       os.print("]>");
     } else
       os.print(">");
+  }
+
+  public String toString()
+  {
+    return "QDocumentType[" + _name + "]";
   }
 }

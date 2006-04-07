@@ -38,6 +38,11 @@ import java.sql.SQLException;
  */
 public interface AmberQuery {
   /**
+   * Initialize with the connection.
+   */
+  public void init(com.caucho.amber.manager.AmberConnection aConn);
+  
+  /**
    * Returns the query string.
    */
   public String getQueryString();

@@ -71,7 +71,7 @@ class PackageExpr extends Expr {
 
       if (Modifier.isPublic(cl.getModifiers()))
         return new JavaClassExpr(block, cl);
-    } catch (ClassNotFoundException e) {
+    } catch (Throwable e) {
     }
 
     return new PackageExpr(block, rawExpr, name);

@@ -175,6 +175,12 @@ public class SessionManager implements ObjectManager, AlarmListener {
 
   private Alarm _alarm = new Alarm(this);
 
+  // statistics
+  private Object _statisticsLock = new Object();
+  private long _sessionCreateCount;
+  private long _sessionTimeoutCount;
+  private long _sessionInvalidateCount;
+
   /**
    * Creates and initializes a new session manager
    *
@@ -415,6 +421,38 @@ public class SessionManager implements ObjectManager, AlarmListener {
   }
 
   /**
+   * Returns the active sessions.
+   */
+  public int getSessionActiveCount()
+  {
+    return getActiveSessionCount();
+  }
+
+  /**
+   * Returns the created sessions.
+   */
+  public long getSessionCreateCount()
+  {
+    return _sessionCreateCount;
+  }
+
+  /**
+   * Returns the timeout sessions.
+   */
+  public long getSessionTimeoutCount()
+  {
+    return _sessionTimeoutCount;
+  }
+
+  /**
+   * Returns the invalidate sessions.
+   */
+  public long getSessionInvalidateCount()
+  {
+    return _sessionInvalidateCount;
+  }
+
+  /**
    * Adds a new HttpSessionListener.
    */
   public void addListener(HttpSessionListener listener)
@@ -580,7 +618,7 @@ public class SessionManager implements ObjectManager, AlarmListener {
     if (cluster.getStore() != null)
       throw new ConfigException(L.l("<file-store> may not be used with a defined <persistent-store>.  Use <use-persistent-store> instead."));
 
-    StoreManager fileStore = cluster.createFileStore();
+    StoreManager fileStore = cluster.createPrivateFileStore();
     
     _storeManager = fileStore;
 
@@ -904,7 +942,7 @@ public class SessionManager implements ObjectManager, AlarmListener {
   /**
    * Returns the session store.
    */
-  Store getSessionStore()
+  public Store getSessionStore()
   {
     return _sessionStore;
   }
@@ -933,6 +971,10 @@ public class SessionManager implements ObjectManager, AlarmListener {
       return null;
     
     handleCreateListeners(session);
+
+    synchronized (_statisticsLock) {
+      _sessionCreateCount++;
+    }
 
     synchronized (session) {
       if (_sessionStore != null && id.equals(oldId))
@@ -1245,6 +1287,10 @@ public class SessionManager implements ObjectManager, AlarmListener {
   {
     removeSession(session);
 
+    synchronized (_statisticsLock) {
+      _sessionInvalidateCount++;
+    }
+
     if (_sessionStore != null) {
       try {
 	_sessionStore.remove(session.getId());
@@ -1339,6 +1385,10 @@ public class SessionManager implements ObjectManager, AlarmListener {
 	  else
 	    liveSessions++;
 	}
+      }
+
+      synchronized (_statisticsLock) {
+	_sessionTimeoutCount += _sessionList.size();
       }
 
       for (int i = 0; i < _sessionList.size(); i++) {

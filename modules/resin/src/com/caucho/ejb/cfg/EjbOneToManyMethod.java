@@ -128,8 +128,10 @@ public class EjbOneToManyMethod extends CmpGetter {
       String listName = _oneToMany.getName() + "_List";
       String varName = "__caucho_" + _oneToMany.getName();
 
-      out.println("if (" + varName + " != null)");
+      out.println("if (" + varName + " != null) {");
+      out.println("  " + varName + ".__caucho_init(_ejb_trans.getAmberConnection());");
       out.println("  return " + varName + ";");
+      out.println("}");
 
       out.println();
       out.println("try {");

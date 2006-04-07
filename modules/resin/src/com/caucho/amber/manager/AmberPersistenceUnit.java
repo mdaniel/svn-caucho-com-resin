@@ -155,8 +155,6 @@ public class AmberPersistenceUnit {
   private EntityIntrospector _introspector;
   private AmberGenerator _generator;
 
-  private CacheConnection _cacheConn;
-
   private boolean _supportsGetGeneratedKeys;
 
   private ThreadLocal<AmberConnection> _threadConnection
@@ -864,17 +862,8 @@ public class AmberPersistenceUnit {
    */
   public CacheConnection getCacheConnection()
   {
-    CacheConnection conn;
-
-    synchronized (this) {
-      conn = _cacheConn;
-      _cacheConn = null;
-    }
-
-    if (conn == null)
-      conn = new CacheConnection(this);
-
-    return conn;
+    // cache connection cannot be reused (#998)
+    return new CacheConnection(this);
   }
 
   /**
@@ -908,14 +897,6 @@ public class AmberPersistenceUnit {
   public void removeThreadConnection()
   {
     _threadConnection.set(null);
-  }
-
-  /**
-   * Returns the cache connection.
-   */
-  public void freeCacheConnection(CacheConnection cacheConn)
-  {
-    _cacheConn = cacheConn;
   }
 
   /**

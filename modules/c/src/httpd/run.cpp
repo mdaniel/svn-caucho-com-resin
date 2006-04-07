@@ -164,6 +164,7 @@ spawn_java(char *exe, char **args)
 		sockaddr_in sin;
 		sin.sin_family = AF_INET;
 		sin.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+		memset(&sin, 0, sizeof(sin));
 
 		if (bind(sock, (sockaddr *) &sin, sizeof(sin)) < 0) {
 			fprintf(err, "can't bind socket\n");

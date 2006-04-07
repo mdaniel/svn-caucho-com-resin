@@ -163,6 +163,9 @@ public class SerializerFactory extends AbstractSerializerFactory {
 
     else if (Enumeration.class.isAssignableFrom(cl))
       serializer = EnumerationSerializer.create();
+    
+    else if (Calendar.class.isAssignableFrom(cl))
+      serializer = CalendarSerializer.create();
 
     if (serializer == null)
       serializer = getDefaultSerializer(cl);

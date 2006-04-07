@@ -42,6 +42,7 @@ import com.caucho.util.AlarmListener;
 import com.caucho.log.Log;
 
 import com.caucho.config.ConfigException;
+import com.caucho.config.types.Period;
 
 import com.caucho.loader.DynamicClassLoader;
 
@@ -67,6 +68,8 @@ abstract public class DeployController<I extends DeployInstance>
   public static final String REDEPLOY_AUTOMATIC = "automatic";
   public static final String REDEPLOY_LAZY = "lazy";
   public static final String REDEPLOY_MANUAL = "manual";
+  
+  public static final long REDEPLOY_CHECK_INTERVAL = 60000;
 
   private ClassLoader _parentLoader;
   
@@ -80,7 +83,7 @@ abstract public class DeployController<I extends DeployInstance>
   protected final Lifecycle _lifecycle;
 
   private Alarm _alarm = new WeakAlarm(this);
-  private long _redeployCheckInterval = 60000L;
+  private long _redeployCheckInterval = REDEPLOY_CHECK_INTERVAL;
 
   private long _startTime;
   private I _deployInstance;
@@ -225,6 +228,37 @@ abstract public class DeployController<I extends DeployInstance>
     else
       throw new ConfigException(L.l("'{0}' is an unknown redeploy-mode.  'automatic', 'lazy', and 'manual' are the acceptable values.",
 				    mode));
+  }
+
+  /**
+   * Sets the redeploy-check-interval
+   */
+  public void mergeRedeployCheckInterval(long interval)
+  {
+    if (interval != REDEPLOY_CHECK_INTERVAL)
+      _redeployCheckInterval = interval;
+  }
+
+  /**
+   * Sets the redeploy-check-interval
+   */
+  public void setRedeployCheckInterval(Period period)
+  {
+    _redeployCheckInterval = period.getPeriod();
+
+    if (_redeployCheckInterval < 0)
+      _redeployCheckInterval = Period.INFINITE;
+
+    if (_redeployCheckInterval < 5000)
+      _redeployCheckInterval = 5000;
+  }
+
+  /**
+   * Gets the redeploy-check-interval
+   */
+  public long getRedeployCheckInterval()
+  {
+    return _redeployCheckInterval;
   }
 
   /**

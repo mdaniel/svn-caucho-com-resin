@@ -102,8 +102,6 @@ public class DOMBuilder implements XMLWriter, ContentHandler, ErrorHandler {
       if (tdoc instanceof QDocument && dtd == null) {
 	dtd = new QDocumentType(null);
 	((QDocument) tdoc).setDoctype(dtd);
-
-	tdoc.appendChild(dtd);
       }
       
       if (dtd instanceof QDocumentType && dtd.getSystemId() == null)
@@ -347,6 +345,8 @@ public class DOMBuilder implements XMLWriter, ContentHandler, ErrorHandler {
   public void dtd(QDocumentType dtd)
   {
     ((QDocument) _doc).setDoctype(dtd);
+    
+    ((QDocument) _doc).appendChild(dtd);
   }
 
   public void attribute(String uri, String localName, String qName,

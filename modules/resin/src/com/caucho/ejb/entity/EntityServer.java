@@ -670,13 +670,18 @@ public class EntityServer extends AbstractServer {
       if (forceLoad &&
 	  ! _isLoadLazyOnTransaction &&
 	  getTransactionManager().getTransaction() != null) {
-        try {
-          cxt._caucho_load();
-        } catch (Exception e) {
-          throw e;
-        }
+	try {
+	  cxt._caucho_load();
+	} catch (Exception e) {
+	  throw e;
+	}
       }
       
+	try {
+	  cxt._caucho_load();
+	} catch (Exception e) {
+	  throw e;
+	}
       cxt = _ejbManager.putEntityIfNew(this, key, cxt);
 
       return cxt;

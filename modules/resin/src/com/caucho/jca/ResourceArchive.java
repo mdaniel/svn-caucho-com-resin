@@ -50,6 +50,7 @@ import com.caucho.log.Log;
 import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
 
+import com.caucho.loader.EnvironmentBean;
 import com.caucho.loader.DynamicClassLoader;
 
 import com.caucho.jca.cfg.ConnectorConfig;
@@ -61,7 +62,7 @@ import com.caucho.jca.cfg.MessageListenerConfig;
 /**
  * A resource archive (rar)
  */
-public class ResourceArchive {
+public class ResourceArchive implements EnvironmentBean {
   static final L10N L = new L10N(ResourceArchive.class);
   static final Logger log = Log.open(ResourceArchive.class);
 
@@ -87,6 +88,14 @@ public class ResourceArchive {
   public void setRootDirectory(Path rootDir)
   {
     _rootDir = rootDir;
+  }
+
+  /**
+   * Sets the root directory.
+   */
+  public Path getRootDirectory()
+  {
+    return _rootDir;
   }
 
   /**
