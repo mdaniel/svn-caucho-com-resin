@@ -106,6 +106,60 @@ abstract public class AbstractQuercusClass {
   }
 
   /**
+   * evaluates the function.
+   */
+  public Value evalMethod(Env env, Value thisValue, String name, Expr []args)
+    throws Throwable
+  {
+    return getFunction(name).evalMethod(env, thisValue, args);
+  }  
+
+  /**
+   * evaluates the function.
+   */
+  public Value evalMethod(Env env, Value thisValue, String name, Value []args)
+    throws Throwable
+  {
+    return getFunction(name).evalMethod(env, thisValue, args);
+  }  
+
+  /**
+   * Finds a function.
+   */
+  public AbstractFunction findStaticFunction(String name)
+  {
+    return null;
+  }
+
+  /**
+   * Finds a function.
+   */
+  public AbstractFunction findStaticFunctionLowerCase(String name)
+  {
+    return null;
+  }
+
+  /**
+   * Finds the matching function.
+   */
+  public final AbstractFunction getStaticFunction(String name)
+  {
+    AbstractFunction fun = findStaticFunction(name);
+
+    if (fun != null)
+      return fun;
+
+    fun = findStaticFunctionLowerCase(name.toLowerCase());
+    
+    if (fun != null)
+      return fun;
+    else {
+      throw new QuercusRuntimeException(L.l("{0}::{1} is an unknown method",
+					getName(), name));
+    }
+  }
+
+  /**
    * Finds the matching constant
    */
   public Value findConstant(Env env, String name)

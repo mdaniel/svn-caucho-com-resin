@@ -97,7 +97,7 @@ public class JavaClassDefinition extends AbstractQuercusClass {
   private Method _printRImpl = null;
   private Method _varDumpImpl = null;
 
-  private JavaConstructor _cons;
+  private JavaInvoker _cons;
 
   private Method _iterator;
 
@@ -359,6 +359,24 @@ public class JavaClassDefinition extends AbstractQuercusClass {
   /**
    * Eval a method
    */
+  public Value evalMethod(Env env, Value value, String name, Expr []args)
+    throws Throwable
+  {
+    return evalMethod(env, value.toJavaObject(), name, args);
+  }
+
+  /**
+   * Eval a method
+   */
+  public Value evalMethod(Env env, Value value, String name, Value []args)
+    throws Throwable
+  {
+    return evalMethod(env, value.toJavaObject(), name, args);
+  }
+
+  /**
+   * Eval a method
+   */
   public Value evalMethod(Env env, Object obj, String name, Value []args)
     throws Throwable
   {
@@ -485,22 +503,28 @@ public class JavaClassDefinition extends AbstractQuercusClass {
 
     _marshall = new JavaMarshall(this, false);
 
-    Constructor []cons = _type.getConstructors();
+    Method consMethod = getConsMethod(_type);
 
-    if (cons.length > 0) {
-      int i;
-      for (i = 0; i < cons.length; i++) {
-        if (cons[i].isAnnotationPresent(Construct.class))
-          break;
-      }
+    if (consMethod != null)
+      _cons = new JavaMethod(quercus, consMethod);
+    else {
+      Constructor []cons = _type.getConstructors();
 
-      if (i < cons.length)
-        _cons = new JavaConstructor(_quercus, cons[i]);
-      else
-        _cons = new JavaConstructor(_quercus, cons[0]);
+      if (cons.length > 0) {
+	int i;
+	for (i = 0; i < cons.length; i++) {
+	  if (cons[i].isAnnotationPresent(Construct.class))
+	    break;
+	}
 
-    } else
-      _cons = null;
+	if (i < cons.length)
+	  _cons = new JavaConstructor(_quercus, cons[i]);
+	else
+	  _cons = new JavaConstructor(_quercus, cons[0]);
+
+      } else
+	_cons = null;
+    }
 
     try {
       Method method = _type.getMethod("iterator", new Class[0]);
@@ -510,6 +534,26 @@ public class JavaClassDefinition extends AbstractQuercusClass {
         _iterator = method;
     } catch (Throwable e) {
     }
+  }
+
+  private Method getConsMethod(Class type)
+  {
+    Method []methods = type.getMethods();
+
+    for (int i = 0; i < methods.length; i++) {
+      Method method = methods[i];
+      
+      if (! method.getName().equals("__construct"))
+	continue;
+      if (! Modifier.isStatic(method.getModifiers()))
+	continue;
+      if (! Modifier.isPublic(method.getModifiers()))
+	continue;
+
+      return method;
+    }
+
+    return null;
   }
 
   /**

@@ -45,12 +45,20 @@ import com.caucho.vfs.Path;
  */
 public class IncludeExpr extends UnaryExpr {
   private Path _dir;
+  private boolean _isRequire;
   
   public IncludeExpr(Path sourceFile, Expr expr)
   {
     super(expr);
 
     _dir = sourceFile.getParent();
+  }
+  
+  public IncludeExpr(Path sourceFile, Expr expr, boolean isRequire)
+  {
+    this(sourceFile, expr);
+
+    _isRequire = isRequire;
   }
   
   /**
@@ -65,7 +73,7 @@ public class IncludeExpr extends UnaryExpr {
   {
     String name = _expr.evalString(env);
 
-    return env.include(_dir, name, false);
+    return env.include(_dir, name, _isRequire, false);
     // return env.include(name);
   }
 
@@ -84,7 +92,7 @@ public class IncludeExpr extends UnaryExpr {
     out.print("env.include(");
     out.print("env.getSelfDirectory(), ");
     _expr.generateString(out);
-    out.print(", false)");
+    out.print(", " + _isRequire + ", false)");
   }
   
   public String toString()

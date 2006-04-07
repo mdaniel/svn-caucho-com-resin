@@ -45,6 +45,7 @@ import com.caucho.vfs.Path;
  */
 public class IncludeOnceExpr extends UnaryExpr {
   private Path _dir;
+  private boolean _isRequire;
   
   public IncludeOnceExpr(Path sourceFile, Expr expr)
   {
@@ -53,6 +54,13 @@ public class IncludeOnceExpr extends UnaryExpr {
     // XXX: issues with eval
     if (! sourceFile.getScheme().equals("string"))
       _dir = sourceFile.getParent();
+  }
+  
+  public IncludeOnceExpr(Path sourceFile, Expr expr, boolean isRequire)
+  {
+    this(sourceFile, expr);
+
+    _isRequire = isRequire;
   }
   
   /**
@@ -69,7 +77,9 @@ public class IncludeOnceExpr extends UnaryExpr {
 
     // return env.include(_dir, name);
     if (_dir != null)
-      return env.include(_dir, name, true);
+      return env.include(_dir, name, _isRequire, true);
+    else if (_isRequire)
+      return env.require_once(name);
     else
       return env.include_once(name);
   }
@@ -89,7 +99,7 @@ public class IncludeOnceExpr extends UnaryExpr {
     out.print("env.include(");
     out.print("_quercus_selfPath.getParent(), ");
     _expr.generateString(out);
-    out.print(", true)");
+    out.print(", " + _isRequire + ", true)");
   }
   
   public String toString()

@@ -72,6 +72,9 @@ public class Quercus {
   private HashMap<String, QuercusModule> _modules
     = new HashMap<String, QuercusModule>();
 
+  private HashSet<String> _extensionSet
+    = new HashSet<String>();
+
   private HashMap<String, Value> _constMap
     = new HashMap<String, Value>();
 
@@ -415,12 +418,15 @@ public class Quercus {
    */
   public boolean isExtensionLoaded(String name)
   {
-    for (QuercusModule module : _modules.values()) {
-      if (module.isExtensionLoaded(name))
-        return true;
-    }
+    return _extensionSet.contains(name);
+  }
 
-    return false;
+  /**
+   * Returns true if an extension is loaded.
+   */
+  public HashSet<String> getLoadedExtensions()
+  {
+    return _extensionSet;
   }
 
   /**
@@ -428,15 +434,26 @@ public class Quercus {
    */
   public Value getExtensionFuncs(String name)
   {
+    ArrayValue value = null;
+    
     for (QuercusModule module : _modules.values()) {
-      if (module.isExtensionLoaded(name)) {
-        // XXX:
+      String []ext = module.getLoadedExtensions();
+      boolean hasExt = false;
 
-        return new ArrayValueImpl();
+      for (int i = 0; i < ext.length; i++) {
+	if (name.equals(ext[i]))
+	  hasExt = true;
+      }
+      
+      if (hasExt) {
+        value = new ArrayValueImpl();
       }
     }
 
-    return BooleanValue.FALSE;
+    if (value != null)
+      return value;
+    else
+      return BooleanValue.FALSE;
   }
 
   public HashMap<String, Value> getConstMap()
@@ -606,6 +623,10 @@ public class Quercus {
     QuercusModule module = (QuercusModule) cl.newInstance();
 
     _modules.put(module.getClass().getName(), module);
+
+    for (String ext : module.getLoadedExtensions()) {
+      _extensionSet.add(ext);
+    }
 
     Map<String, Value> map = module.getConstMap();
 

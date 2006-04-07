@@ -217,6 +217,14 @@ public class QuercusClass extends AbstractQuercusClass {
   }
 
   /**
+   * Finds the matching function.
+   */
+  public AbstractFunction findStaticFunction(String name)
+  {
+    return findFunction(name);
+  }
+
+  /**
    * Finds the matching constant.
    */
   public Expr findConstant(String name)

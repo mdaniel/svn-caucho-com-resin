@@ -39,6 +39,7 @@ import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.QuercusClass;
 import com.caucho.quercus.env.AbstractQuercusClass;
+import com.caucho.quercus.env.NullThisValue;
 
 import com.caucho.quercus.program.AbstractFunction;
 import com.caucho.quercus.program.AnalyzeInfo;
@@ -102,28 +103,14 @@ public class StaticMethodExpr extends Expr {
   public Value eval(Env env)
     throws Throwable
   {
-    if (_fun == null) {
-      AbstractQuercusClass cl = env.findClass(_className);
+    AbstractQuercusClass cl = env.findClass(_className);
 
-      if (cl == null) {
-        // XXX: change exception
-        throw new Exception(L.l("no matching class {0}", _className));
-      }
-      
-      _fun = cl.findFunction(_name);
-
-      if (_fun == null) {
-        // XXX: change exception
-        throw new Exception(L.l("no matching function {0}::{1}",
-				_className, _name));
-      }
-
-      _fullArgs = _fun.bindArguments(env, this, _args);
+    if (cl == null) {
+      // XXX: change exception
+      throw new Exception(L.l("no matching class {0}", _className));
     }
 
-    // quercus/0953
-    // return _fun.evalMethod(env, NullThisValue.NULL, _fullArgs);
-    return _fun.evalMethod(env, env.getThis(), _fullArgs);
+    return cl.evalMethod(env, NullThisValue.NULL, _name, _args);
   }
 
   //
@@ -180,10 +167,8 @@ public class StaticMethodExpr extends Expr {
     */
     Expr []args = _args;
 
-    out.print("env.findMethod(\"");
+    out.print("env.getClass(\"");
     out.printJavaString(_className);
-    out.print("\", \"");
-    out.printJavaString(_name);
     out.print("\").evalMethod(env, ");
 
     if (isMethod())
@@ -191,7 +176,11 @@ public class StaticMethodExpr extends Expr {
     else
       out.print("NullThisValue.NULL");
 
-    if (args.length <= 5) {
+    out.print(", \"");
+    out.printJavaString(_name);
+    out.print("\"");
+
+    if (false && args.length <= 5) {
       // XXX: check variable args
       
       for (int i = 0; i < args.length; i++) {

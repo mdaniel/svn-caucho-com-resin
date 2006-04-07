@@ -1480,6 +1480,14 @@ public class Env {
   /**
    * Returns true if an extension is loaded.
    */
+  public HashSet<String> getLoadedExtensions()
+  {
+    return getPhp().getLoadedExtensions();
+  }
+
+  /**
+   * Returns true if an extension is loaded.
+   */
   public Value getExtensionFuncs(String name)
   {
     return getPhp().getExtensionFuncs(name);
@@ -2314,7 +2322,7 @@ public class Env {
   public Value require_once(String include)
     throws Throwable
   {
-    return include(getSelfDirectory(), include, true);
+    return include(getSelfDirectory(), include, true, true);
   }
 
   /**
@@ -2323,7 +2331,7 @@ public class Env {
   public Value require(String include)
     throws Throwable
   {
-    return include(getSelfDirectory(), include, false);
+    return include(getSelfDirectory(), include, true, false);
   }
 
   /**
@@ -2332,7 +2340,7 @@ public class Env {
   public Value include(String include)
     throws Throwable
   {
-    return include(getSelfDirectory(), include, false);
+    return include(getSelfDirectory(), include, false, false);
   }
 
   /**
@@ -2341,13 +2349,14 @@ public class Env {
   public Value include_once(String include)
     throws Throwable
   {
-    return include(getSelfDirectory(), include, true);
+    return include(getSelfDirectory(), include, false, true);
   }
 
   /**
    * Evaluates an included file.
    */
-  public Value include(Path scriptPwd, String include, boolean isOnce)
+  public Value include(Path scriptPwd, String include,
+		       boolean isRequire, boolean isOnce)
     throws Throwable
   {
     // php/0b0g
@@ -2360,8 +2369,16 @@ public class Env {
       path = lookupInclude(scriptPwd, include);
     }
 
-    if (path == null)
-      throw errorException(L.l("'{0}' is not a valid path", include));
+    if (path != null) {
+    }
+    else if (isRequire) {
+      error(L.l("'{0}' is not a valid path", include));
+      return NullValue.NULL;
+    }
+    else {
+      warning(L.l("'{0}' is not a valid path", include));
+      return NullValue.NULL;
+    }
 
     if (isOnce && _includeSet.contains(path))
       return NullValue.NULL;
@@ -2373,6 +2390,14 @@ public class Env {
     page.importDefinitions(this);
 
     return page.execute(this);
+  }
+
+  /**
+   * Looks up the path.
+   */
+  public Path lookup(String relPath)
+  {
+    return lookupInclude(getSelfDirectory(), relPath);
   }
 
   /**
@@ -2645,6 +2670,17 @@ public class Env {
     return notice(msg);
   }
 
+  /**
+   * A stub notice.
+   */
+  public Value stub(String msg)
+  {
+    if (log.isLoggable(Level.FINE))
+      log.fine(getLocation() + msg);
+    
+    return NullValue.NULL;
+  }
+
   public static Value nullAsFalse(Value value)
   {
     return value == null || value.isNull() ? BooleanValue.FALSE : value;
@@ -2791,12 +2827,18 @@ public class Env {
 
     if ((mask & (E_ERROR | E_CORE_ERROR | E_COMPILE_ERROR | E_USER_ERROR)) != 0)
     {
-      if (! "".equals(getLocation()))
-        throw new QuercusLineRuntimeException(getLocation() +
+      if (! "".equals(getLocation())) {
+	/*
+        throw new QuercusLineExitException(getLocation() +
                                               getCodeName(mask) +
                                               msg);
+	*/
+        throw new QuercusExitException(getLocation() +
+                                       getCodeName(mask) +
+                                       msg);
+      }
       else
-        throw new QuercusRuntimeException(msg);
+        throw new QuercusExitException(msg);
     }
 
     return NullValue.NULL;

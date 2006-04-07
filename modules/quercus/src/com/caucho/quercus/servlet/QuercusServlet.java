@@ -186,8 +186,19 @@ public class QuercusServlet
       try {
         env.start();
 
+	String prepend = env.getIniString("auto_prepend_file");
+	if (prepend != null) {
+	  PhpPage prependPage = getQuercus().parse(env.lookup(prepend));
+	  prependPage.executeTop(env);
+	}
+
         page.executeTop(env);
 
+	String append = env.getIniString("auto_append_file");
+	if (append != null) {
+	  PhpPage appendPage = getQuercus().parse(env.lookup(append));
+	  appendPage.executeTop(env);
+	}
      //   return;
       }
       catch (QuercusExitException e) {

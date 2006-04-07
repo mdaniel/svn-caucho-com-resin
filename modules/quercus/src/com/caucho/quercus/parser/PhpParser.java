@@ -710,6 +710,18 @@ public class PhpParser {
     String fileName = getFileName();
     int line = getLine();
     
+    return new ExprStatement(parsePrintExpr()).setLocation(fileName, line);
+  }
+
+  /**
+   * Parses the print statement.
+   */
+  private Expr parsePrintExpr()
+    throws IOException
+  {
+    String fileName = getFileName();
+    int line = getLine();
+    
     int token = parseToken();
 
     ArrayList<Expr> args;
@@ -726,9 +738,9 @@ public class PhpParser {
     }
 
     FunctionExpr expr = new FunctionExpr("print", args);
-    expr.setLocation(getFileName(), getLine());
+    expr.setLocation(fileName, line);
 
-    return new ExprStatement(expr).setLocation(fileName, line);
+    return expr;
   }
 
   /**
@@ -2186,6 +2198,7 @@ public class PhpParser {
    * term ::= termBase
    *      ::= term '[' index ']'
    *      ::= term '{' index '}'
+   *      ::= term '(' index ')'
    * </pre>
    */
   private Expr parseTerm()
@@ -2273,6 +2286,24 @@ public class PhpParser {
     if (token == '$') {
       _peekToken = token;
       nameExpr = parseTermBase();
+
+      // php/09e0
+      token = parseToken();
+      switch (token) {
+      case '[':
+	Expr index = parseExpr();
+
+	token = parseToken();
+	if (token != ']')
+	  throw expect("']'", token);
+
+	nameExpr = new ArrayGetExpr(nameExpr, index);
+	break;
+	
+      default:
+	_peekToken = token;
+	break;
+      }
     }
     else if (token == '{') {
       nameExpr = parseExpr();
@@ -2451,14 +2482,19 @@ public class PhpParser {
       return parseNew();
 
     case INCLUDE:
-    case REQUIRE:
       return new IncludeExpr(_sourceFile, parseExpr());
+    case REQUIRE:
+      return new IncludeExpr(_sourceFile, parseExpr(), true);
     case INCLUDE_ONCE:
-    case REQUIRE_ONCE:
       return new IncludeOnceExpr(_sourceFile, parseExpr());
+    case REQUIRE_ONCE:
+      return new IncludeOnceExpr(_sourceFile, parseExpr(), true);
 
     case LIST:
       return parseList();
+
+    case PRINT:
+      return parsePrintExpr();
       
     case EXIT:
       return parseExit();
@@ -2895,8 +2931,9 @@ public class PhpParser {
 	while ((ch = read()) != '\n' && ch != '\r' && ch >= 0) {
 	  if (ch != '?') {
 	  }
-	  else if ((ch = read()) != '>')
+	  else if ((ch = read()) != '>') {
 	    _peek = ch;
+	  }
 	  else {
 	    ch = read();
 	    if (ch == '\r')
@@ -2992,6 +3029,15 @@ public class PhpParser {
 	ch = read();
 	if (ch == '=')
 	  return MOD_ASSIGN;
+	else if (ch == '>') {
+	  ch = read();
+	  if (ch == '\r')
+	    ch = read();
+	  if (ch != '\n')
+	    _peek = ch;
+    
+	  return parsePhpText();
+        }
 	else
 	  _peek = ch;
 
@@ -3229,6 +3275,18 @@ public class PhpParser {
 	    return TEXT;
 	  }
 	  ch = read();
+	}
+	else if (ch == '%') {
+	  if ((ch = read()) == '=') {
+	    _lexeme = sb.toString();
+
+	    return TEXT_ECHO;
+	  }
+	  else if (Character.isWhitespace(ch)) {
+	    _lexeme = sb.toString();
+
+	    return TEXT;
+	  }
 	}
 	else if (ch != '?') {
 	  sb.append('<');
@@ -3978,6 +4036,7 @@ public class PhpParser {
     case ENDSWITCH: return "'endswitch'";
       
     case ECHO: return "'echo'";
+    case PRINT: return "'print'";
       
     case LIST: return "'list'";
     case CASE: return "'case'";
@@ -4016,6 +4075,9 @@ public class PhpParser {
 
     case TEXT:
       return "TEXT (token " + token + ")";
+
+    case STRING:
+      return "string(" + _lexeme + ")";
 
     case TEXT_ECHO:
       return "<?=";

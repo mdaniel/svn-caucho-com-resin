@@ -65,13 +65,11 @@ public class AbstractQuercusModule implements QuercusModule {
   }
 
   /**
-   * Returns true if the named extension is implemented by the module.
-   *
-   * @param name the extension name
+   * Returns the extensions loaded by the module.
    */
-  public boolean isExtensionLoaded(String name)
+  public String []getLoadedExtensions()
   {
-    return false;
+    return new String[0];
   }
 
   /**

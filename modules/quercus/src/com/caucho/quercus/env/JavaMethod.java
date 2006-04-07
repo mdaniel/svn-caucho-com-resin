@@ -107,4 +107,9 @@ public class JavaMethod extends JavaInvoker {
   {
     throw new UnsupportedOperationException();
   }
+
+  public String toString()
+  {
+    return "JavaMethod[" + _method + "]";
+  }
 }

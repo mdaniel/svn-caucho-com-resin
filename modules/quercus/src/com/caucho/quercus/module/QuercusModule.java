@@ -42,11 +42,9 @@ public interface QuercusModule {
   public Map<String,Value> getConstMap();
 
   /**
-   * Returns true if the named extension is implemented by the module.
-   *
-   * @param name the extension name
+   * Returns the extensions implemented by the module.
    */
-  public boolean isExtensionLoaded(String name);
+  public String []getLoadedExtensions();
 
   /**
    * Returns the quercus.init default values.
