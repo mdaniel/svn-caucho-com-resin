@@ -2,20 +2,20 @@
 
 CC=gcc
 CP=/bin/cp
-CFLAGS=-g -O2 -DPOLL -DHAS_JVMTI -DHAS_JVMDI   -DDARWIN -DSIGPROCMASK_SETS_THREAD_MASK -no-cpp-precomp
-CFLAGS_SHLIB=-DSHARED_MODULE
+CFLAGS=-g -O2 -DPOLL -DHAS_JVMTI 
+CFLAGS_SHLIB=-fpic
 EGREP=grep -E
-LIBTOOL=EGREP="grep -E" /Users/ferg/ws/test-resin/libtool --silent
-LD=gcc
+LIBTOOL=EGREP="grep -E" /home/ferg/test/resin-pro/libtool --silent
+LD=/usr/bin/ld
 LD_SHLIB=gcc
 LIBS_SHLIB=
 LDFLAGS=
-LDFLAGS_SHLIB=-bundle -undefined suppress -flat_namespace -L/usr/lib
-APACHE_INC=-I/usr/local/apache22/include  -I/usr/local/apache2/include 
-apache_conf=/usr/local/apache22/conf/httpd.conf
-apache_dir=/usr/local/apache22
-apache_libexec=/usr/local/apache22/modules
-resin_home=/Users/ferg/ws/test-resin
+LDFLAGS_SHLIB=-shared -L/usr/lib
+APACHE_INC=-I/usr/local/apache2/include  -I/usr/local/apache2/include 
+apache_conf=/usr/local/apache2/conf/httpd.conf
+apache_dir=/usr/local/apache2
+apache_libexec=/usr/local/apache2/modules
+resin_home=/home/ferg/test/resin-pro
 INCLUDES = $(APACHE_INC) -DRESIN_HOME=\"$(resin_home)\" -I../common
 C=../common
 COMMON_OBJ=$C/stream.lo $C/config.lo $C/memory.lo
@@ -43,7 +43,7 @@ install	: mod_caucho.la
 	   -resin_home $(resin_home)
 
 clean	:
-	- rm *.o *.lo *.la *.so .libs
+	- rm -r *.o *.lo *.la *.so .libs
 
 $(OBJ_PICS)	: Makefile ../common/cse.h
 mod_caucho.lo	: Makefile ../common/cse.h

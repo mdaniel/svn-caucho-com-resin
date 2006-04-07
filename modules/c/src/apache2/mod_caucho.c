@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2004 Caucho Technology.  All rights reserved.
+ * Copyright (c) 1999-2006 Caucho Technology.  All rights reserved.
  *
  * This file is part of Resin(R) Open Source
  *
@@ -107,7 +107,7 @@ cse_create_lock(config_t *config)
 void
 cse_free_lock(config_t *config, void *vlock)
 {
-  apr_thread_mutex_t *lock = vlock;
+
 }
 
 int
@@ -464,8 +464,18 @@ write_env(stream_t *s, request_rec *r)
   
   conn_rec *c = r->connection;
   const char *host;
-  const char *uri = r->unparsed_uri; /* #937 */
+  const char *uri;
   int port;
+  int is_sub_request = 1; /* for mod_rewrite */
+
+  /*
+   * is_sub_request is always true, since we can't detect mod_rewrite
+   * and mod_rewrite doesn't change the unparsed_uri.
+   */
+  if (is_sub_request)
+    uri = r->uri;
+  else
+    uri = r->unparsed_uri; /* #937 */
   
   for (i = 0; (ch = uri[i]) && ch != '?' && i + 1 < sizeof(buf); i++) 
     buf[i] = ch;
@@ -733,7 +743,6 @@ write_request(stream_t *s, request_rec *r, config_t *config,
 {
   int len;
   int code = -1;
-  unsigned int now = (unsigned int) (r->request_time / 1000000);
 
   hmux_start_channel(s, 1);
   write_env(s, r);
@@ -815,8 +824,8 @@ caucho_request(request_rec *r, config_t *config, resin_host_t *host,
   else if (! cse_open_connection(&s, &host->cluster,
 				 session_index, backup_index,
 				 now, r->pool)) {
-    ERR(("%s:%d:caucho_request(): no connection: %p\n",
-	 __FILE__, __LINE__, host));
+    ERR(("%s:%d:caucho_request(): no connection: cluster(%p)\n",
+	 __FILE__, __LINE__, &host->cluster));
     return HTTP_SERVICE_UNAVAILABLE;
   }
 
@@ -1072,7 +1081,6 @@ cse_dispatch(request_rec *r)
  
   LOG(("%s:%d:cse_dispatch(): [%d] host %s\n",
        __FILE__, __LINE__, getpid(), host_name ? host_name : "null"));
-  
 
   len = strlen(uri);
 

@@ -285,6 +285,8 @@ exclude_expsyms="_GLOBAL_OFFSET_TABLE_"
 # Symbols that must always be exported.
 include_expsyms=""
 
+max_cmd_len=1024
+
 # ### END LIBTOOL CONFIG
 
 # ltmain.sh - Provide generalized library-building support services.

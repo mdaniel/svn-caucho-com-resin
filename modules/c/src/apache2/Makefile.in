@@ -43,7 +43,7 @@ install	: mod_caucho.la
 	   -resin_home $(resin_home)
 
 clean	:
-	- rm *.o *.lo *.la *.so .libs
+	- rm -r *.o *.lo *.la *.so .libs
 
 $(OBJ_PICS)	: Makefile ../common/cse.h
 mod_caucho.lo	: Makefile ../common/cse.h

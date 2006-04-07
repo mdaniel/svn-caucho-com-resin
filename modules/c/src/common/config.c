@@ -517,6 +517,7 @@ read_config(stream_t *s, config_t *config, resin_host_t *host,
       
       LOG(("%s:%d:read_config(); hmux no-change %s\n",
 	   __FILE__, __LINE__, host->etag));
+
       is_change = 0;
       break;
 	
@@ -607,7 +608,7 @@ read_config(stream_t *s, config_t *config, resin_host_t *host,
 
     case HMUX_EXIT:
     case HMUX_QUIT:
-      if (is_change > 0) {
+      if (is_change > 0 || ! host->etag || ! *host->etag) {
 	mem_pool_t *old_pool = host->pool;
 	g_update_count++;
 	host->applications = web_app;
@@ -619,12 +620,18 @@ read_config(stream_t *s, config_t *config, resin_host_t *host,
 
 	strncpy(host->etag, etag, sizeof(etag));
 	host->has_data = 1;
+	
+	ERR(("%s:%d:read_config(): updated host %s:%d etag=%s\n",
+	     __FILE__, __LINE__, host->name, host->port, etag));
       }
       else {
 	host->canonical = old_canonical;
 
 	if (pool)
 	  cse_free_pool(pool);
+	
+	ERR(("%s:%d:read_config(): no change for host %s:%d etag=%s\n",
+	     __FILE__, __LINE__, host->name, host->port, etag));
       }
 
       *p_is_change = is_change;

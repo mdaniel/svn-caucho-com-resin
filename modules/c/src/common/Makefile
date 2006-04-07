@@ -1,17 +1,17 @@
 .SUFFIXES: .o .lo
 
 CC=gcc
-CFLAGS=-g -O2 -DPOLL -DHAS_JVMTI -DHAS_JVMDI
-CFLAGS_SHLIB=-DSHARED_MODULE
-LIBTOOL=/Users/ferg/ws/test-resin/libtool --silent
+CFLAGS=-g -O2 -DPOLL -DHAS_JVMTI
+CFLAGS_SHLIB=-fpic
+LIBTOOL=/home/ferg/test/resin-pro/libtool --silent
 EGREP=grep -E
-LD=gcc
+LD=/usr/bin/ld
 LD_SHLIB=gcc
 LDFLAGS=
-LDFLAGS_SHLIB=-bundle -undefined suppress -flat_namespace -L/usr/lib
+LDFLAGS_SHLIB=-shared -L/usr/lib
 OBJ=stream.o config.o memory.o
 OBJ_PICS=stream.lo config.lo memory.lo
-INCLUDES= -I/usr/include
+INCLUDES= -I/usr/include -I/usr/kerberos/include
 
 all	: common.o $(OBJ_PICS)
 

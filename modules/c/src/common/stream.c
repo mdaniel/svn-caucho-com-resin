@@ -834,8 +834,8 @@ cse_add_srun(cluster_t *cluster, const char *hostname, int port, int ssl)
   srun_t *srun = 0;
   config_t *config = cluster->config;
 
-  LOG(("%s:%d:cse_add_srun(): adding host %s:%d\n",
-       __FILE__, __LINE__, hostname, port));
+  LOG(("%s:%d:cse_add_srun(): adding host %s:%d cluster=%p\n",
+       __FILE__, __LINE__, hostname, port, cluster));
   
   srun = malloc(sizeof(srun_t));
   memset(srun, 0, sizeof(srun_t));

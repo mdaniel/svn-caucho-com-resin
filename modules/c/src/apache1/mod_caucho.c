@@ -563,7 +563,17 @@ write_env(stream_t *s, request_rec *r, char *session_id)
   conn_rec *c = r->connection;
   const char *host;
   int port;
-  char *uri = r->unparsed_uri;
+  int is_sub_request = 1;
+  char *uri;
+
+  /*
+   * is_sub_request is always true, since we can't detect mod_rewrite
+   * and mod_rewrite doesn't change the unparsed_uri.
+   */
+  if (is_sub_request)
+    uri = r->uri; /* for mod_rewrite */
+  else
+    uri = r->unparsed_uri; /* #937 */
   
   for (i = 0; (ch = uri[i]) && ch != '?' && i + 1 < sizeof(buf); i++) 
     buf[i] = ch;
