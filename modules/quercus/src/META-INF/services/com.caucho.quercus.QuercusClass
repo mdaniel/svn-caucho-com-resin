@@ -7,6 +7,7 @@ com.caucho.quercus.lib.dom.DOMImplementationClass DOMImplementation
 com.caucho.quercus.lib.dom.DOMProcessingInstruction
 com.caucho.quercus.lib.dom.DOMText
 com.caucho.quercus.lib.dom.DOMXPath
+com.caucho.quercus.lib.Java
 com.caucho.quercus.lib.Memcache
 com.caucho.quercus.lib.mysql.Mysqli
 com.caucho.quercus.lib.pdf.PDF
