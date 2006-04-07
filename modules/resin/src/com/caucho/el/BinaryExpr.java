@@ -143,10 +143,7 @@ public class BinaryExpr extends Expr {
       }
     }
       
-    else if (aObj instanceof Float ||
-	     aObj instanceof Double ||
-	     bObj instanceof Float ||
-	     bObj instanceof Double) {
+    else if (isDouble(aObj) || isDouble(bObj)) {
       double a = toDouble(aObj, env);
       double b = toDouble(bObj, env);
       double dValue = 0;
@@ -175,7 +172,7 @@ public class BinaryExpr extends Expr {
     if (aObj == null && bObj == null)
       return new Integer(0);
 
-    if (bObj instanceof Double || bObj instanceof Double) {
+    if (bObj instanceof Double || bObj instanceof Float) {
       double a = toDouble(aObj, env);
       double b = ((Number) bObj).doubleValue();
       double dValue = 0;

@@ -348,6 +348,32 @@ public abstract class Expr {
   }
 
   /**
+   * Returns true for a double or double-equivalent.
+   */
+  public static boolean isDouble(Object o)
+  {
+    if (o instanceof Double)
+      return true;
+    else if (o instanceof Float)
+      return true;
+    else if (! (o instanceof String))
+      return false;
+    else {
+      String s = (String) o;
+      int len = s.length();
+
+      for (int i = 0; i < len; i++) {
+	char ch = s.charAt(i);
+
+	if (ch == '.' || ch == 'e' || ch == 'E')
+	  return true;
+      }
+
+      return false;
+    }
+  }
+
+  /**
    * Converts some unknown value to a string.
    *
    * @param value the value to be converted.

@@ -34,6 +34,8 @@ import java.util.*;
 import java.util.logging.Logger;
 import java.util.logging.Level;
 
+import java.lang.ref.WeakReference;
+
 import javax.transaction.*;
 import javax.transaction.xa.*;
 
@@ -69,6 +71,9 @@ public class TransactionManagerImpl
   // thread local is dependent on the transaction manager
   private ThreadLocal<TransactionImpl> _threadTransaction
     = new ThreadLocal<TransactionImpl>();
+
+  private ArrayList<WeakReference<TransactionImpl>> _transactionList
+    = new ArrayList<WeakReference<TransactionImpl>>();
 
   // listeners for transaction begin
   private ArrayList<TransactionListener> _transactionListeners
@@ -289,9 +294,23 @@ public class TransactionManagerImpl
     if (trans == null || trans.isDead()) {
       trans = new TransactionImpl(this);
       _threadTransaction.set(trans);
+
+      addTransaction(trans);
     }
 
     return trans;
+  }
+
+  private void addTransaction(TransactionImpl trans)
+  {
+    for (int i = _transactionList.size() - 1; i >= 0; i--) {
+      WeakReference<TransactionImpl> ref = _transactionList.get(i);
+
+      if (ref.get() == null)
+	_transactionList.remove(i);
+    }
+
+    _transactionList.add(new WeakReference<TransactionImpl>(trans));
   }
 
   /**
@@ -368,6 +387,19 @@ public class TransactionManagerImpl
       xaLogManager.close();
 
     _serverId = 0;
+
+    for (int i = _transactionList.size() - 1; i >= 0; i--) {
+      WeakReference<TransactionImpl> ref = _transactionList.get(i);
+      TransactionImpl xa = ref.get();
+
+      try {
+	if (xa != null) {
+	  xa.rollback();
+	}
+      } catch (Throwable e) {
+	log.log(Level.WARNING, e.toString(), e);
+      }
+    }
   }
 
   /**

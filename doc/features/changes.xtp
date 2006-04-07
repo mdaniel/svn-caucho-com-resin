@@ -4,6 +4,9 @@
 
 <s2 title='3.0.snap - Mar 17, 2006'>
 <ul>
+<li>SSL: added support for ca-revocation (#935, rep by YouchunChen)
+<li>Open transactions now closed on shutdown (#934, rep by Thomas Gennaro)
+<li>JSP: EL wasn't promoting "3.9" to double properly (#919, rep by m5)
 <li>Quercus: add APC API
 <li>Quercus: auto_prepend_file, auto_append_file (#616)
 <li>Quercus: JavaClass::foo, i.e. Java static functions (#584)
