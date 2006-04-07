@@ -563,7 +563,7 @@ write_env(stream_t *s, request_rec *r, char *session_id)
   conn_rec *c = r->connection;
   const char *host;
   int port;
-  char *uri = r->uri;
+  char *uri = r->unparsed_uri;
   
   for (i = 0; (ch = uri[i]) && ch != '?' && i + 1 < sizeof(buf); i++) 
     buf[i] = ch;

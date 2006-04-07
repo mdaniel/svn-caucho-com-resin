@@ -84,12 +84,12 @@ public abstract class Var {
   {
     Object obj = getObject();
 
-    if (obj instanceof NodeList)
+    if (obj instanceof Node)
+      return new SingleNodeIterator(env, (Node) obj);
+    else if (obj instanceof NodeList)
       return new NodeListIterator(env, (NodeList) obj);
     else if (obj instanceof ArrayList)
       return new NodeArrayListIterator(env, (ArrayList) obj);
-    else if (obj instanceof Node)
-      return new SingleNodeIterator(env, (Node) obj);
     else
       return new SingleNodeIterator(env, null);
   }

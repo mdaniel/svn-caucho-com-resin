@@ -4,6 +4,7 @@
 
 <s2 title='3.0.snap - Mar 17, 2006'>
 <ul>
+<li>JSTL: changes to support Xalan/Xerces with fast-jstl (#889)
 <li>SSL: added support for ca-revocation (#935, rep by YouchunChen)
 <li>Open transactions now closed on shutdown (#934, rep by Thomas Gennaro)
 <li>JSP: EL wasn't promoting "3.9" to double properly (#919, rep by m5)

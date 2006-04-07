@@ -74,9 +74,10 @@ public class AxisIterator extends NodeIterator {
     _axis = axis;
     _match = match;
 
-    if (parentIter != null)
+    if (parentIter != null && parentIter.hasNext()) {
       node = parentIter.nextNode();
-    
+    }
+
     if (node != null) {
       _lastNode = axis.lastNode(node);
       _node = findFirstMatchingNode(axis.firstNode(node, _env));

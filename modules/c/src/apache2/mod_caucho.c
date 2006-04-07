@@ -464,9 +464,10 @@ write_env(stream_t *s, request_rec *r)
   
   conn_rec *c = r->connection;
   const char *host;
+  const char *uri = r->unparsed_uri; /* #937 */
   int port;
   
-  for (i = 0; (ch = r->uri[i]) && ch != '?' && i + 1 < sizeof(buf); i++) 
+  for (i = 0; (ch = uri[i]) && ch != '?' && i + 1 < sizeof(buf); i++) 
     buf[i] = ch;
   buf[i] = 0;
   cse_write_string(s, HMUX_URL, buf);
