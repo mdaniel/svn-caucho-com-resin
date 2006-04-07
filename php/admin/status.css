@@ -1,0 +1,38 @@
+body {
+  font: small sans-serif;
+  background: #f9f9f9;
+  color: black;
+  margin: 0;
+  padding: 0;
+}   
+
+table {
+  font-size: 100%;
+  background: #eeccff;
+  color: black;
+  border-collapse: collapse;
+}
+
+h1 {
+  font-family : serif;
+  background-image: url(hbleed.gif);
+  padding-top : .3em;
+  padding-bottom : .3em;
+}
+
+td
+{
+  padding: 3px 4px 3px 4px;
+  border: thin solid grey;
+}
+
+th
+{
+  padding: 3px 4px 3px 4px;
+  background: #c78ae6;
+  text-align: center;
+  border: thin solid grey;
+}
+
+
+

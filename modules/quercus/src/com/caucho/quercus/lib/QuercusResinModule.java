@@ -29,21 +29,25 @@
 
 package com.caucho.quercus.lib;
 
-import com.caucho.quercus.module.AbstractQuercusModule;
-import com.caucho.quercus.module.Optional;
-import com.caucho.quercus.env.Env;
+import com.caucho.Version;
+import com.caucho.jmx.Jmx;
+import com.caucho.naming.Jndi;
 import com.caucho.quercus.env.ArrayValue;
 import com.caucho.quercus.env.ArrayValueImpl;
-import com.caucho.quercus.env.ObjectNameValue;
-import com.caucho.naming.Jndi;
-import com.caucho.jmx.Jmx;
-import com.caucho.util.L10N;
+import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.Value;
+import com.caucho.quercus.module.AbstractQuercusModule;
+import com.caucho.quercus.module.Optional;
+import com.caucho.quercus.module.NotNull;
+import com.caucho.quercus.module.ReadOnly;
 import com.caucho.server.webapp.Application;
-import com.caucho.Version;
+import com.caucho.util.L10N;
 
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
-import javax.management.ObjectInstance;
+import java.util.Hashtable;
+import java.util.Map;
 import java.util.Set;
 
 public class QuercusResinModule
@@ -64,6 +68,71 @@ public class QuercusResinModule
   }
 
   /**
+   * Explode an object name into an array with key value pairs that
+   * correspond to the keys and values in the object name.
+   * The domain is stored in the returned array under the key named ":".
+   */
+  public ArrayValue mbean_explode(@NotNull String name)
+    throws MalformedObjectNameException
+  {
+    ObjectName objectName = new ObjectName(name);
+
+    ArrayValueImpl exploded = new ArrayValueImpl();
+
+    exploded.put(":", objectName.getDomain());
+
+    Hashtable<String, String> entries = objectName.getKeyPropertyList();
+
+    for (Map.Entry<String, String> entry : entries.entrySet()) {
+      exploded.put(entry.getKey(), entry.getValue());
+    }
+
+    return exploded;
+  }
+
+  /**
+   * Implode an array into an object name.  The array contains key value pairs
+   * that become key vlaue pairs in the object name.  The key with the name
+   * ":" becomes the domain of the object name.
+   */
+  public String mbean_implode(@NotNull @ReadOnly ArrayValue exploded)
+    throws MalformedObjectNameException
+  {
+    if (exploded == null)
+      return null;
+
+    String domain;
+
+    Value domainValue = exploded.get(StringValue.create(":"));
+
+    if (domainValue.isNull())
+      domain = "*";
+    else
+      domain = domainValue.toString();
+
+    Hashtable<String, String> entries = new Hashtable<String, String>();
+
+    for (Map.Entry<Value, Value> entry : exploded.entrySet()) {
+      String key = entry.getKey().toString();
+      String value = entry.getValue().toString();
+
+      if (":".equals(key))
+        continue;
+
+      entries.put(key, value);
+    }
+
+    ObjectName objectName;
+
+    if (entries.isEmpty())
+      objectName = new ObjectName(domain + ":" + "*");
+    else
+      objectName = new ObjectName(domain, entries);
+
+    return objectName.getCanonicalName();
+  }
+
+  /**
    * Perform a jmx lookup to retrieve an mbean object.
    *
    * If the optional name is not provided, the mbean for the current web-app
@@ -80,20 +149,14 @@ public class QuercusResinModule
    * @return the mbean object, or null if it is not found.
    */
   public static Object mbean_lookup(Env env, @Optional String name)
+    throws MalformedObjectNameException
   {
-    try {
-      if (name == null || name.length() == 0)
-        return Application.getLocal().getAdmin();
-      else if (name.contains(":"))
-        return Jmx.findGlobal(name);
-      else
-        return Jmx.find(name);
-    }
-    catch (MalformedObjectNameException e) {
-      env.warning(L.l("Malformed object name `{0}'", name), e);
-
-      return null;
-    }
+    if (name == null || name.length() == 0)
+      return Application.getLocal().getAdmin();
+    else if (name.contains(":"))
+      return Jmx.findGlobal(name);
+    else
+      return Jmx.find(name);
   }
 
   /**
@@ -103,19 +166,13 @@ public class QuercusResinModule
    * of the current web application.
    */
   public static ArrayValue mbean_query(Env env, String pattern)
+    throws MalformedObjectNameException
   {
     ArrayValueImpl values = new ArrayValueImpl();
 
     ObjectName patternObjectName;
 
-    try {
-      patternObjectName = new ObjectName(pattern);
-    }
-    catch (MalformedObjectNameException e) {
-      env.warning(L.l("Malformed object name `{0}'", pattern), e);
-
-      return null;
-    }
+    patternObjectName = new ObjectName(pattern);
 
     Set<ObjectName> objectNames;
 
@@ -125,7 +182,7 @@ public class QuercusResinModule
       objectNames = Jmx.getMBeanServer().queryNames(patternObjectName, null);
 
     for (ObjectName objectName : objectNames)
-      values.put(ObjectNameValue.create(objectName));
+      values.put(objectName.toString());
 
     return values;
   }
@@ -137,4 +194,5 @@ public class QuercusResinModule
   {
     return Version.FULL_VERSION;
   }
+
 }

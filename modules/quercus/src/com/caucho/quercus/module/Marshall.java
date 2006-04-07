@@ -123,9 +123,6 @@ abstract public class Marshall {
     else if (InputStream.class.equals(argType)) {
       marshall = MARSHALL_INPUT_STREAM;
     }
-    else if (ObjectName.class.equals(argType)) {
-      marshall = MARSHALL_OBJECT_NAME;
-    }
     else if (Callback.class.equals(argType)) {
       marshall = MARSHALL_CALLBACK;
     }
@@ -1267,51 +1264,6 @@ abstract public class Marshall {
       throws IOException
     {
       throw new UnsupportedOperationException();
-    }
-  };
-
-  static final Marshall MARSHALL_OBJECT_NAME = new Marshall() {
-    public boolean isReadOnly()
-    {
-      return true;
-    }
-
-    public Object marshall(Env env, Expr expr, Class expectedClass)
-      throws Throwable
-    {
-      return marshall(env, expr.eval(env), expectedClass);
-    }
-
-    public Object marshall(Env env, Value value, Class expectedClass)
-      throws Throwable
-    {
-      if (value instanceof ObjectNameValue)
-        return ((ObjectNameValue) value).getObjectName();
-      else
-        return new ObjectName(value.toString(env));
-    }
-
-    public Value unmarshall(Env env, Object value)
-      throws Throwable
-    {
-      if (value instanceof ObjectName)
-        return ObjectNameValue.create((ObjectName) value);
-      else
-        return NullValue.NULL;
-    }
-
-    public void generate(PhpWriter out, Expr expr, Class argClass)
-      throws IOException
-    {
-      out.print("(new javax.management.ObjectName(");
-      expr.generateValue(out);
-      out.print(".toString()))");
-    }
-
-    public void generateResultStart(PhpWriter out)
-      throws IOException
-    {
-      out.print("ObjectNameValue.create(");
     }
   };
 
