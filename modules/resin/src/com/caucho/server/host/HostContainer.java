@@ -307,6 +307,7 @@ public class HostContainer implements DispatchBuilder {
    */
   public void clearCache()
   {
+    _hostMap.clear();
     _dispatchServer.clearCache();
   }
 

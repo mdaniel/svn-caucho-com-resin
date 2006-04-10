@@ -63,6 +63,82 @@ public class MiscModule extends AbstractQuercusModule {
     = Logger.getLogger(MiscModule.class.getName());
 
   /**
+   * Escapes characters in a string.
+   */
+  public static String escapeshellcmd(String command)
+  {
+    StringBuilder sb = new StringBuilder();
+    int len = command.length();
+    
+    boolean hasApos = false;
+    boolean hasQuot = false;
+
+    for (int i = 0; i < len; i++) {
+      char ch = command.charAt(i);
+
+      switch (ch) {
+      case '#': case '&': case ';': case '`': case '|':
+      case '*': case '?': case '~': case '<': case '>':
+      case '^': case '(': case ')': case '[': case ']':
+      case '{': case '}': case '$': case '\\': case ',':
+      case 0x0a: case 0xff:
+	sb.append('\\');
+	sb.append(ch);
+	break;
+      case '\'':
+	hasApos = ! hasApos;
+	sb.append(ch);
+	break;
+      case '\"':
+	hasQuot = ! hasQuot;
+	sb.append(ch);
+	break;
+      default:
+	sb.append(ch);
+      }
+    }
+
+    String result = sb.toString();
+
+    if (hasApos) {
+      int p = result.lastIndexOf('\'');
+      result = result.substring(0, p) + "\\" + result.substring(p);
+    }
+
+    if (hasQuot) {
+      int p = result.lastIndexOf('\"');
+      result = result.substring(0, p) + "\\" + result.substring(p);
+    }
+
+    return result;
+  }
+
+  /**
+   * Escapes characters in a string.
+   */
+  public static String escapeshellarg(String arg)
+  {
+    StringBuilder sb = new StringBuilder();
+
+    sb.append('\'');
+    
+    int len = arg.length();
+
+    for (int i = 0; i < len; i++) {
+      char ch = arg.charAt(i);
+
+      if (ch == '\'')
+	sb.append("\\\'");
+      else
+	sb.append(ch);
+    }
+
+    sb.append('\'');
+
+    return sb.toString();
+  }
+
+  /**
    * Comples and evaluates an expression.
    */
   public Value eval(Env env, String code)

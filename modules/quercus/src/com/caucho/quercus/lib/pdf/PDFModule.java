@@ -222,4 +222,16 @@ public class PDFModule extends AbstractQuercusModule {
     else
       return false;
   }
+
+  /**
+   * Strokes the path
+   */
+  public boolean pdf_stroke(@NotNull PDF pdf)
+    throws IOException
+  {
+    if (pdf != null)
+      return pdf.stroke();
+    else
+      return false;
+  }
 }

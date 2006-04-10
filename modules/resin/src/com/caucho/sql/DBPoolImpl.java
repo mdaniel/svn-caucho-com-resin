@@ -192,6 +192,8 @@ public class DBPoolImpl implements AlarmListener, EnvironmentListener {
   // The prepared statement cache size.
   private int _preparedStatementCacheSize = 0;
 
+  private boolean _isWrapStatements = true;
+  
   // The connections currently in the pool.
   // transient ArrayList<PoolItem> _connections = new ArrayList<PoolItem>();
 
@@ -478,6 +480,22 @@ public class DBPoolImpl implements AlarmListener, EnvironmentListener {
   public int getMaxCloseStatements()
   {
     return _maxCloseStatements;
+  }
+
+  /**
+   * Sets true if statements should be wrapped.
+   */
+  public void setWrapStatements(boolean isWrap)
+  {
+    _isWrapStatements = isWrap;
+  }
+
+  /**
+   * Sets true if statements should be wrapped.
+   */
+  public boolean isWrapStatements()
+  {
+    return _isWrapStatements;
   }
 
   /**

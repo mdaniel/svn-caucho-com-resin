@@ -118,7 +118,10 @@ public class UserConnection implements java.sql.Connection {
 
     addStatement(stmt);
 
-    return new UserStatement(this, stmt);
+    if (_mConn.isWrapStatements())
+      return new UserStatement(this, stmt);
+    else
+      return stmt;
   }
 
   /**
@@ -144,7 +147,10 @@ public class UserConnection implements java.sql.Connection {
 
     addStatement(stmt);
 
-    return new UserStatement(this, stmt);
+    if (_mConn.isWrapStatements())
+      return new UserStatement(this, stmt);
+    else
+      return stmt;
   }
 
   /**
@@ -170,7 +176,10 @@ public class UserConnection implements java.sql.Connection {
 
     addStatement(stmt);
 
-    return new UserStatement(this, stmt);
+    if (_mConn.isWrapStatements())
+      return new UserStatement(this, stmt);
+    else
+      return stmt;
   }
 
   /**
@@ -197,7 +206,10 @@ public class UserConnection implements java.sql.Connection {
 
     addStatement(stmt);
 
-    return new UserPreparedStatement(this, stmt);
+    if (_mConn.isWrapStatements())
+      return new UserPreparedStatement(this, stmt);
+    else
+      return stmt;
   }
 
   /**
@@ -226,7 +238,10 @@ public class UserConnection implements java.sql.Connection {
 
     addStatement(stmt);
 
-    return new UserPreparedStatement(this, stmt);
+    if (_mConn.isWrapStatements())
+      return new UserPreparedStatement(this, stmt);
+    else
+      return stmt;
   }
 
   /**
@@ -259,7 +274,10 @@ public class UserConnection implements java.sql.Connection {
 
     addStatement(stmt);
 
-    return new UserPreparedStatement(this, stmt);
+    if (_mConn.isWrapStatements())
+      return new UserPreparedStatement(this, stmt);
+    else
+      return stmt;
   }
   
   /**
@@ -287,7 +305,10 @@ public class UserConnection implements java.sql.Connection {
 
     addStatement(stmt);
 
-    return new UserPreparedStatement(this, stmt);
+    if (_mConn.isWrapStatements())
+      return new UserPreparedStatement(this, stmt);
+    else
+      return stmt;
   }
   
   /**
@@ -315,7 +336,10 @@ public class UserConnection implements java.sql.Connection {
 
     addStatement(stmt);
 
-    return new UserPreparedStatement(this, stmt);
+    if (_mConn.isWrapStatements())
+      return new UserPreparedStatement(this, stmt);
+    else
+      return stmt;
   }
   
   /**
@@ -343,7 +367,10 @@ public class UserConnection implements java.sql.Connection {
 
     addStatement(stmt);
 
-    return new UserPreparedStatement(this, stmt);
+    if (_mConn.isWrapStatements())
+      return new UserPreparedStatement(this, stmt);
+    else
+      return stmt;
   }
 
   public CallableStatement prepareCall(String sql, int resultSetType,
@@ -366,7 +393,10 @@ public class UserConnection implements java.sql.Connection {
 
     addStatement(stmt);
 
-    return new UserCallableStatement(this, stmt);
+    if (_mConn.isWrapStatements())
+      return new UserCallableStatement(this, stmt);
+    else
+      return stmt;
   }
 
   public CallableStatement prepareCall(String sql)
@@ -388,7 +418,10 @@ public class UserConnection implements java.sql.Connection {
 
     addStatement(stmt);
 
-    return new UserCallableStatement(this, stmt);
+    if (_mConn.isWrapStatements())
+      return new UserCallableStatement(this, stmt);
+    else
+      return stmt;
   }
 
   public CallableStatement prepareCall(String sql,
@@ -416,7 +449,10 @@ public class UserConnection implements java.sql.Connection {
 
     addStatement(stmt);
 
-    return new UserCallableStatement(this, stmt);
+    if (_mConn.isWrapStatements())
+      return new UserCallableStatement(this, stmt);
+    else
+      return stmt;
   }
 
   /**

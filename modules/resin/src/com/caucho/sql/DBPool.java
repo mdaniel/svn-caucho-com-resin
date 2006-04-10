@@ -508,6 +508,14 @@ public class DBPool implements DataSource {
   }
 
   /**
+   * Set true if statement should be wrapped.
+   */
+  public void setWrapStatements(boolean isWrap)
+  {
+    getPool().setWrapStatements(isWrap);
+  }
+
+  /**
    * Returns the transaction manager.
    */
   /*

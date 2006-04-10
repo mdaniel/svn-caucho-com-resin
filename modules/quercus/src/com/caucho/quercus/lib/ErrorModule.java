@@ -29,6 +29,9 @@
 
 package com.caucho.quercus.lib;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import java.util.logging.Logger;
 
 import com.caucho.util.L10N;
@@ -37,6 +40,7 @@ import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.BooleanValue;
 import com.caucho.quercus.env.DefaultValue;
+import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.Callback;
 
 import com.caucho.quercus.module.AbstractQuercusModule;
@@ -49,6 +53,9 @@ public class ErrorModule extends AbstractQuercusModule {
   private static final L10N L = new L10N(ErrorModule.class);
   private static final Logger log
     = Logger.getLogger(ErrorModule.class.getName());
+
+  private static final HashMap<String,StringValue> _iniMap
+    = new HashMap<String,StringValue>();
 
   public static final int E_ERROR = Env.E_ERROR;
   public static final int E_WARNING = Env.E_WARNING;
@@ -65,6 +72,14 @@ public class ErrorModule extends AbstractQuercusModule {
   public static final int E_STRICT = Env.E_STRICT;
 
   private long _errorReporting = Env.E_DEFAULT;
+
+  /**
+   * Returns the default quercus.ini values.
+   */
+  public Map<String,StringValue> getDefaultIni()
+  {
+    return _iniMap;
+  }
 
   /**
    * Exits
@@ -212,5 +227,23 @@ public class ErrorModule extends AbstractQuercusModule {
     return trigger_error(env, msg, code);
   }
 
+  static {
+    addIni(_iniMap, "error_reporing", null, PHP_INI_ALL);
+    addIni(_iniMap, "display_errors", "1", PHP_INI_ALL);
+    addIni(_iniMap, "display_startup_errors", "0", PHP_INI_ALL);
+    addIni(_iniMap, "log_errors", "0", PHP_INI_ALL);
+    addIni(_iniMap, "log_errors_max_len", "1024", PHP_INI_ALL);
+    addIni(_iniMap, "ignore_repeated_errors", "0", PHP_INI_ALL);
+    addIni(_iniMap, "ignore_repeated_source", "0", PHP_INI_ALL);
+    addIni(_iniMap, "report_memleaks", "1", PHP_INI_ALL);
+    addIni(_iniMap, "track_errors", "0", PHP_INI_ALL);
+    addIni(_iniMap, "html_errors", "1", PHP_INI_ALL);
+    addIni(_iniMap, "docref_root", "", PHP_INI_ALL);
+    addIni(_iniMap, "docref_ext", "", PHP_INI_ALL);
+    addIni(_iniMap, "error_prepend_string", null, PHP_INI_ALL);
+    addIni(_iniMap, "error_append_string", null, PHP_INI_ALL);
+    addIni(_iniMap, "error_log", null, PHP_INI_ALL);
+    addIni(_iniMap, "warn_plus_overloading", null, PHP_INI_ALL);
+  }
 }
 

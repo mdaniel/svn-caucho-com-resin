@@ -157,6 +157,14 @@ public class ManagedConnectionImpl
   }
 
   /**
+   * Returns true if statements should be wrapped.
+   */
+  boolean isWrapStatements()
+  {
+    return _dbPool.isWrapStatements();
+  }
+
+  /**
    * Returns the underlying connection.
    */
   public Object getConnection(Subject subject,

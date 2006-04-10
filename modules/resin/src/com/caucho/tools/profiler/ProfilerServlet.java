@@ -87,7 +87,7 @@ public class ProfilerServlet
   {
     String format = request.getParameter("format");
     boolean isXml = "xml".equals(format);
-
+    
     response.setContentType("text/html");
 
     response.setHeader("Cache-Control", "no-cache, post-check=0, pre-check=0");
@@ -106,7 +106,14 @@ public class ProfilerServlet
   {
     response.setContentType("text/html");
 
-    ProfilerNodeComparator comparator = new TimeComparator();
+    String sort = request.getParameter("sort");
+
+    ProfilerNodeComparator comparator;
+
+    if ("count".equals(sort))
+      comparator = new CountComparator();
+    else
+      comparator = new TimeComparator();
 
     comparator.setDescending(true);
 

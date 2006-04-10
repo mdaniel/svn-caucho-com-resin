@@ -1434,7 +1434,15 @@ public class FileModule extends AbstractQuercusModule {
     return result;
   }
 
-  // XXX: readlink
+  /**
+   * The readlink always fails.
+   */
+  public static boolean readlink(Env env, String path)
+  {
+    env.stub("readlink(" + path + ")");
+
+    return false;
+  }
 
   /**
    * Returns the actual path name.

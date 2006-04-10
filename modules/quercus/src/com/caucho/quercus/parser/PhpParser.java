@@ -67,6 +67,13 @@ import com.caucho.vfs.ReadStream;
 public class PhpParser {
   private final static L10N L = new L10N(PhpParser.class);
 
+  private final static int M_STATIC = 0x1;
+  private final static int M_PUBLIC = 0x2;
+  private final static int M_PROTECTED = 0x4;
+  private final static int M_PRIVATE = 0x8;
+  private final static int M_FINAL = 0x10;
+  private final static int M_ABSTRACT = 0x20;
+  
   private final static int IDENTIFIER = 256;
   private final static int STRING = 257;
   private final static int LONG = 258;
@@ -163,6 +170,8 @@ public class PhpParser {
   private final static int CLONE = 563;
   private final static int INSTANCEOF = 564;
   private final static int CONST = 565;
+  private final static int ABSTRACT = 566;
+  private final static int FINAL = 567;
   
   private final static int LAST_IDENTIFIER_LEXEME = 1024;
 
@@ -1524,20 +1533,24 @@ public class PhpParser {
       case PRIVATE:
       case PROTECTED:
       case STATIC:
+      case FINAL:
+      case ABSTRACT:
 	{
-	  boolean isStatic = token == STATIC;
+	  _peekToken = token;
+
+	  int modifiers = parseModifiers();
 	  
 	  int token2 = parseToken();
 
 	  if (token2 == FUNCTION) {
 	    Function fun = parseFunctionDefinition();
 
-	    fun.setStatic(isStatic);
+	    fun.setStatic((modifiers & M_STATIC) != 0);
 	  }
 	  else {
 	    _peekToken = token2;
 	    
-	    parseClassVarDefinition(isStatic);
+	    parseClassVarDefinition((modifiers & M_STATIC) != 0);
 	  }
 	}
 	break;
@@ -1617,6 +1630,47 @@ public class PhpParser {
     } while (token == ',');
 
     _peekToken = token;
+  }
+
+  private int parseModifiers()
+    throws IOException
+  {
+    int token;
+    int modifiers = 0;
+
+    while (true) {
+      token = parseToken();
+
+      switch (token) {
+      case PUBLIC:
+	modifiers |= M_PUBLIC;
+	break;
+
+      case PRIVATE:
+	modifiers |= M_PRIVATE;
+	break;
+
+      case PROTECTED:
+	modifiers |= M_PROTECTED;
+	break;
+
+      case FINAL:
+	modifiers |= M_FINAL;
+	break;
+
+      case STATIC:
+	modifiers |= M_STATIC;
+	break;
+
+      case ABSTRACT:
+	modifiers |= M_ABSTRACT;
+	break;
+
+      default:
+	_peekToken = token;
+	return modifiers;
+      }
+    }
   }
 
   /**
@@ -4057,6 +4111,9 @@ public class PhpParser {
     case PRIVATE: return "'private'";
     case PROTECTED: return "'protected'";
     case PUBLIC: return "'public'";
+    case STATIC: return "'static'";
+    case FINAL: return "'final'";
+    case ABSTRACT: return "'abstract'";
       
     case GLOBAL: return "'global'";
       
@@ -4148,5 +4205,7 @@ public class PhpParser {
     _insensitiveReserved.put("clone", CLONE);
     _insensitiveReserved.put("instanceof", INSTANCEOF);
     _insensitiveReserved.put("const", CONST);
+    _insensitiveReserved.put("final", FINAL);
+    _insensitiveReserved.put("abstract", ABSTRACT);
   }
 }

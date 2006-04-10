@@ -8,6 +8,13 @@
 
 <summary objsummary='localtoc'/>
 
+<section title="wrap-statements">
+
+<p>The &lt;database> tag now has a &lt;wrap-statements> tag (default true)
+allowing applications to use the native statement class.</p>
+
+</section>
+
 <section title="prologue">
 
 <p>Added a &lt;prologue> tag to the &lt;web-app>. The prologue is

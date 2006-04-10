@@ -385,6 +385,9 @@ public class Host extends ApplicationContainer
       super.start();
       
       loader.start();
+
+      if (_parent != null)
+	_parent.clearCache();
     } finally {
       _lifecycle.toActive();
       

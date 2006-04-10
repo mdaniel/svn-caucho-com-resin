@@ -4,6 +4,10 @@
 
 <s2 title='3.0.snap - Mar 17, 2006'>
 <ul>
+<li>Redeploy of Host was not clearing caches (#979, rep by sks)
+<li>Added database/wrap-statements (#957, rep by Shawn Laubach)
+<li>Profilers supports ?sort=count (#829, rep by T Moorer)
+<li>Quercus: "public static" wasn't getting parsed (rep by Patrick)
 <li>JSTL: changes to support Xalan/Xerces with fast-jstl (#889)
 <li>SSL: added support for ca-revocation (#935, rep by YouchunChen)
 <li>Open transactions now closed on shutdown (#934, rep by Thomas Gennaro)

@@ -854,37 +854,30 @@ public class RegexpModule
   }
 
   /**
-   * XXX: Does not handle setlocale
-   *
-   * @param string
-   * @return regex for case insensitive match
+   * Makes a regexp for a case-insensitive match.
    */
   public static String sql_regcase(String string)
   {
-    Pattern p = Pattern.compile("[a-zA-Z]");
-    Matcher m = p.matcher(string);
-
-    int head = 0;
     StringBuilder sb = new StringBuilder();
 
-    while (m.find()) {
-      sb.append(string.substring(head, m.start()));
-      //substitute [Aa] for a, etc...
-      sb.append('[');
-      char ch = m.group().charAt(0);
-      if ((ch >= 'A') && ('Z' >= ch)) {
-        sb.append(ch);
-        sb.append((char) ('a' + ch - 'A'));
-      } else {
-        sb.append((char) ('A' + ch - 'a'));
-        sb.append(ch);
-      }
-      sb.append(']');
-      head = m.end();
-    }
+    int len = string.length();
+    for (int i = 0; i < len; i++) {
+      char ch = string.charAt(i);
 
-    if (head < string.length()) {
-      sb.append(string.substring(head));
+      if (Character.isLowerCase(ch)) {
+	sb.append('[');
+	sb.append(Character.toUpperCase(ch));
+	sb.append(ch);
+	sb.append(']');
+      }
+      else if (Character.isUpperCase(ch)) {
+	sb.append('[');
+	sb.append(ch);
+	sb.append(Character.toLowerCase(ch));
+	sb.append(']');
+      }
+      else
+	sb.append(ch);
     }
 
     return sb.toString();

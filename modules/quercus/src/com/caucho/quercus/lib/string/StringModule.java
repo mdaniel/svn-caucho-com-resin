@@ -1416,6 +1416,46 @@ v   *
     return new StringValueImpl(sb.toString());
   }
 
+  /**
+   * Converts a RFC2045 quoted printable string to a string.
+   */
+  // XXX: i18n
+  public static String quoted_printable_decode(String str)
+  {
+    StringBuilder sb = new StringBuilder();
+
+    int length = str.length();
+
+    for (int i = 0; i < length; i++) {
+      char ch = str.charAt(i);
+
+      if (33 <= ch && ch <= 60)
+	sb.append(ch);
+      else if (62 <= ch && ch <= 126)
+	sb.append(ch);
+      else if (ch == ' ' || ch == '\t') {
+	if (i + 1 < str.length() &&
+	    (str.charAt(i + 1) == '\r' || str.charAt(i + 1) == '\n')) {
+	  sb.append('=');
+	  sb.append(toUpperHexChar(ch >> 4));
+	  sb.append(toUpperHexChar(ch));
+	}
+	else
+	  sb.append(ch);
+      }
+      else if (ch == '\r' || ch == '\n') {
+	sb.append(ch);
+      }
+      else {
+	sb.append('=');
+	sb.append(toUpperHexChar(ch >> 4));
+	sb.append(toUpperHexChar(ch));
+      }
+    }
+
+    return sb.toString();
+  }
+
   private static final boolean[]TRIM_WHITESPACE = new boolean[256];
 
   static {
@@ -3831,10 +3871,22 @@ v   *
 
   private static char toHexChar(int d)
   {
+    d &= 0xf;
+    
     if (d < 10)
       return (char) (d + '0');
     else
       return (char) (d - 10 + 'a');
+  }
+
+  private static char toUpperHexChar(int d)
+  {
+    d &= 0xf;
+    
+    if (d < 10)
+      return (char) (d + '0');
+    else
+      return (char) (d - 10 + 'A');
   }
 
   private static int hexToDigit(char ch)

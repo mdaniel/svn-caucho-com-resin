@@ -2818,7 +2818,16 @@ public class Env {
 
     if ((_errorMask & mask) != 0) {
       try {
-        getOut().println(getLocation() + getCodeName(mask) + msg);
+	String fullMsg = getLocation() + getCodeName(mask) + msg;
+
+	if (getIniBoolean("track_errors"))
+	  setGlobalValue("php_errormsg", new StringValueImpl(fullMsg));
+
+	if (getIniBoolean("display_errors"))
+	  getOut().println(fullMsg);
+	
+	if (getIniBoolean("log_errors"))
+	  log.info(fullMsg);
       }
       catch (IOException e) {
         log.log(Level.FINE, e.toString(), e);
