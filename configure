@@ -8719,12 +8719,6 @@ fi
 #   b64_jni=true
 #fi
 
-case "$target_cpu" in
-  x86_64)
-	b64_jni=true
-	;;
-esac
-
 if test -n "$b64_jni"; then
    echo "yes"
 else
@@ -8938,6 +8932,15 @@ if test -z "${LD_SHLIB}"; then
 	    CFLAGS_SHLIB="-fpic"
 	fi
 	LDFLAGS_SHLIB="-b"
+	;;
+  esac
+
+  case "$target_cpu" in
+    x86_64)
+           if test -z "$b64_jni"; then
+  	     CFLAGS_JNI="$CFLAGS_JNI -m32"
+  	     LDFLAGS_SHLIB="$CFLAGS_JNI -melf_i386"
+   	   fi
 	;;
   esac
 fi
