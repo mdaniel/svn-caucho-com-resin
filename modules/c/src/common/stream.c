@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2004 Caucho Technology.  All rights reserved.
+ * Copyright (c) 1999-2006 Caucho Technology.  All rights reserved.
  *
  * This file is part of Resin(R) Open Source
  *
@@ -69,12 +69,32 @@ std_open(stream_t *stream)
   return stream->socket >= 0;
 }
 
+static int
+poll_read(int fd, int s)
+{
+	fd_set read_set;
+	struct timeval timeout;
+
+	FD_ZERO(&read_set);
+	FD_SET(fd, &read_set);
+
+	timeout.tv_sec = s;
+	timeout.tv_usec = 0;
+
+	return select(fd + 1, &read_set, 0, 0, &timeout);
+}
+
 /**
  * Read for non-ssl.
  */
 static int
 std_read(stream_t *s, void *buf, int length)
 {
+#ifdef WIN32
+	if (poll_read(s->socket, 600) <= 0)
+		return -1;
+#endif
+
   return recv(s->socket, buf, length, 0);
 }
 

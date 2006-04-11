@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2005 Caucho Technology.  All rights reserved.
+ * Copyright (c) 1999-2006 Caucho Technology.  All rights reserved.
  *
  * This file is part of Resin(R) Open Source
  *
@@ -358,14 +358,6 @@ DWORD WINAPI HttpFilterProc(PHTTP_FILTER_CONTEXT pfc, DWORD notificationType,
 		  break;
 		
 		headers = (HTTP_FILTER_PREPROC_HEADERS *) pvNotification;
-		if (! pfc->pFilterContext) {
-		  pfc->pFilterContext = pfc->AllocMem(pfc, SCRIPT_URL_SIZE, 0);
-		  if (! pfc->pFilterContext ) {
-		    SetLastError(ERROR_NOT_ENOUGH_MEMORY);
-		    return SF_STATUS_REQ_ERROR;
-		  }
-		}
-		((char *) pfc->pFilterContext)[0] = 0;
 
 		size = sizeof(host);
 		host[0] = 0;
@@ -395,7 +387,16 @@ DWORD WINAPI HttpFilterProc(PHTTP_FILTER_CONTEXT pfc, DWORD notificationType,
 				g_config->enable_caucho_status &&
 				! strcmp(url, "/caucho-status")) {
 				char newurl[SCRIPT_URL_SIZE];
-	
+
+			if (! pfc->pFilterContext) {
+				pfc->pFilterContext = pfc->AllocMem(pfc, SCRIPT_URL_SIZE, 0);
+				if (! pfc->pFilterContext) {
+				  SetLastError(ERROR_NOT_ENOUGH_MEMORY);
+				  return SF_STATUS_REQ_ERROR;
+				}
+				((char *) pfc->pFilterContext)[0] = 0;
+			}
+
 				url[query_index] = query;
 				strcpy(newurl, ISAPI_SCRIPT);
 				strcat(newurl, url);
@@ -409,14 +410,6 @@ DWORD WINAPI HttpFilterProc(PHTTP_FILTER_CONTEXT pfc, DWORD notificationType,
 	case SF_NOTIFY_AUTH_COMPLETE:
 		LOG(("HttpFilterProc: SF_NOTIFY_AUTH_COMPLETE\n"));
 		AuthComp = (HTTP_FILTER_AUTH_COMPLETE_INFO *) pvNotification;
-		if (! pfc->pFilterContext)
-			pfc->pFilterContext = pfc->AllocMem(pfc, SCRIPT_URL_SIZE, 0);
-		if (! pfc->pFilterContext) {
-		  SetLastError(ERROR_NOT_ENOUGH_MEMORY);
-		  return SF_STATUS_REQ_ERROR;
-		}
-		((char *) pfc->pFilterContext)[0] = 0;
-
 		size = sizeof(host);
 		host[0] = 0;
 		pfc->GetServerVariable(pfc, "SERVER_NAME", host, &size);
@@ -440,15 +433,23 @@ DWORD WINAPI HttpFilterProc(PHTTP_FILTER_CONTEXT pfc, DWORD notificationType,
 
          DWORD request_time = GetTickCount() / 1000;
  
-			if (cse_match_request(g_config, host, port, url, 1, request_time) ||
-				g_config->enable_caucho_status &&
-				! strcmp(url, "/caucho-status")) {
-				char newurl[SCRIPT_URL_SIZE];
+		if (cse_match_request(g_config, host, port, url, 1, request_time) ||
+			g_config->enable_caucho_status &&
+			! strcmp(url, "/caucho-status")) {
+			char newurl[SCRIPT_URL_SIZE];
+			if (! pfc->pFilterContext) {
+				pfc->pFilterContext = pfc->AllocMem(pfc, SCRIPT_URL_SIZE, 0);
+				if (! pfc->pFilterContext) {
+				  SetLastError(ERROR_NOT_ENOUGH_MEMORY);
+				return SF_STATUS_REQ_ERROR;
+				}
+				((char *) pfc->pFilterContext)[0] = 0;
+			}
 	
 				url[query_index] = query;
 				strcpy(newurl, ISAPI_SCRIPT);
 				strcat(newurl, url);
-				AuthComp->SetHeader(pfc, "URL", newurl);  
+				AuthComp->SetHeader(pfc, "URL", newurl); 
 				strcpy((char *) pfc->pFilterContext, url);
 				((char *) pfc->pFilterContext)[query_index] = 0;
 			}
@@ -456,7 +457,7 @@ DWORD WINAPI HttpFilterProc(PHTTP_FILTER_CONTEXT pfc, DWORD notificationType,
       break;
 	
 	case SF_NOTIFY_LOG:
-		LOG(("NOTIFY-LOG\n"));
+		LOG(("NOTIFY-LOG %p\n", pfc->pFilterContext));
 		if (pfc->pFilterContext && ((char *) pfc->pFilterContext)[0]) {
 			char *pch = (char *) pfc->pFilterContext;
 			LOG(("NOTIFY_LOG %s\n", pch ? pch : "null"));

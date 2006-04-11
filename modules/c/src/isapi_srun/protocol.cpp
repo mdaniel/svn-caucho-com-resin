@@ -369,7 +369,6 @@ write_env(stream_t *s, EXTENSION_CONTROL_BLOCK *r)
 	}
 	else
 		uri[size] = 0;
-
 	hmux_start_channel(s, 1);
 	cse_write_string(s, HMUX_URL, uri);
 	write_var(s, r, "REQUEST_METHOD", HMUX_METHOD);
@@ -620,11 +619,15 @@ send_data(stream_t *s, EXTENSION_CONTROL_BLOCK *r, config_t *config,
 		  return code;
 
 		default:
-			if (code < 0 || read_len < 0 || read_len > BUF_LENGTH) {
+			if (code < 0) {
 				code = -1;
 				break;
 			}
 			read_len = hmux_read_len(s);
+			if (read_len < 0 || read_len > BUF_LENGTH) {
+				code = -1;
+				break;
+			}
 
 			cse_skip(s, read_len);
 			break;
