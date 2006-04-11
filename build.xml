@@ -526,6 +526,30 @@
 
   </target>
 
+  <target name="relaxng">
+    <mkdir dir="xsd"/>
+    
+    <java classname="com.thaiopensource.relaxng.translate.Driver" fork='true'>
+       <classpath>
+          <fileset dir="lib">
+            <include name="*.jar" />
+          </fileset>
+       </classpath>
+       <arg line="${modules}/resin/classes/com/caucho/server/resin/resin.rnc"/>
+       <arg line="xsd/resin.xsd"/>
+    </java>
+    
+    <java classname="com.thaiopensource.relaxng.translate.Driver" fork='true'>
+       <classpath>
+          <fileset dir="lib">
+            <include name="*.jar" />
+          </fileset>
+       </classpath>
+       <arg line="${modules}/resin/classes/com/caucho/server/webapp/resin-web-xml.rnc"/>
+       <arg line="xsd/resin-web-xml.xsd"/>
+    </java>
+  </target>
+
   <target name="jdk14-compat">
     <java classname="com.caucho.bytecode.compat.Jdk15Compat">
        <classpath>
@@ -580,7 +604,7 @@
   </target>
 
   <target name="dist.build" 
-          depends="compile, webapps, win32, configure, javadoc, jdk14-compat">
+          depends="compile, webapps, win32, configure, javadoc, jdk14-compat, relaxng">
     <property name="dist.name" value="${shortproduct}-${version}"/>
 
     <delete dir="${dist}/${dist.name}"/>
@@ -619,6 +643,7 @@
         <include name="modules/**/src/**"/>
         <include name="win32/**"/>
         <include name="bin/**"/>
+        <include name="xsd/**"/>
         <include name="automake/**"/>
 	
         <include name="lib/aopalliance.jar"/>

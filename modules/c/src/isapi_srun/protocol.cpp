@@ -199,7 +199,7 @@ connection_error(config_t *config, EXTENSION_CONTROL_BLOCK *r)
   char *hostname = 0;
   int port = 0;
 
-  if (config->error_page) {
+  if (config->error_page && config->error_page[0]) {
 	  DWORD size = strlen(config->error_page);
 	  DWORD type = 0;
 

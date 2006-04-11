@@ -4,6 +4,9 @@
 
 <s2 title='3.0.snap - Mar 17, 2006'>
 <ul>
+<li>Add build rule to convert .rnc to .xsd for Resin schema (#410)
+<li>JMS: postgres issue in creating ephemeral tables (#1034, #1041, rep by peden, Bryan Davis)
+<li>./configure changes for x86_64 (#915, rep by teemupo)
 <li>Redeploy of Host was not clearing caches (#979, rep by sks)
 <li>Added database/wrap-statements (#957, rep by Shawn Laubach)
 <li>Profilers supports ?sort=count (#829, rep by T Moorer)

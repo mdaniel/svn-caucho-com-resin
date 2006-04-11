@@ -1,9 +1,6 @@
 default namespace r = "http://caucho.com/ns/resin"
 namespace local = ""
 
-include "../resin/resin-j2ee.rnc"
-include "../resin/env.rnc"
-
 r_alt-dd = element alt-dd { string }
 
 r_application = element application {
@@ -24,7 +21,7 @@ r_application-Content =
   & r_security-role*
 
 ## path to rar connector
-r_connector = element connector { j2ee_path }
+ear_connector = element connector { j2ee_path }
 
 ## the context root of the web application
 r_context-root = element context-root { string }
@@ -38,7 +35,7 @@ r_java = element java { j2ee_path }
 r_module = element module {
   attribute id { string }?,
 
-  (r_connector
+  (ear_connector
 
   | r_ejb
 

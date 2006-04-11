@@ -431,6 +431,12 @@ public class HmuxDispatchRequest {
     writeString(os, HmuxRequest.HMUX_HEADER, "alt-session-url-prefix");
     writeString(os, HmuxRequest.HMUX_STRING,
 		_server.getAlternateSessionURLPrefix());
+
+    if (_server.getConnectionErrorPage() != null) {
+      writeString(os, HmuxRequest.HMUX_HEADER, "connection-error-page");
+      writeString(os, HmuxRequest.HMUX_STRING,
+		  _server.getConnectionErrorPage());
+    }
   }
 
   void writeString(WriteStream os, int code, String value)

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2004 Caucho Technology.  All rights reserved.
+ * Copyright (c) 1999-2006 Caucho Technology.  All rights reserved.
  *
  * This file is part of Resin(R) Open Source
  *
@@ -426,6 +426,7 @@ read_config(stream_t *s, config_t *config, resin_host_t *host,
   cluster_t cluster;
   int live_time = -1;
   int dead_time = -1;
+  char error_page[1024];
   char etag[sizeof(host->etag)];
   resin_host_t *old_canonical = host->canonical;
   
@@ -435,6 +436,8 @@ read_config(stream_t *s, config_t *config, resin_host_t *host,
 
   strncpy(etag, host->etag, sizeof(etag));
   etag[sizeof(etag) - 1] = 0;
+
+  error_page[0] = 0;
 
   host->canonical = host;
 
@@ -530,7 +533,14 @@ read_config(stream_t *s, config_t *config, resin_host_t *host,
 	   __FILE__, __LINE__, buffer, value));
       
       if (ch == HMUX_STRING) {
-	if (! strcmp(buffer, "live-time"))
+	if (! strcmp(buffer, "connection-error-page")) {
+	  int len = sizeof(host->config->error_page);
+	
+	  strncpy(host->config->error_page, value, len);
+	  
+	  host->config->error_page[len - 1] = 0;
+	}
+	else if (! strcmp(buffer, "live-time"))
 	  live_time = resin_atoi(value);
 	else if (! strcmp(buffer, "dead-time"))
 	  dead_time = resin_atoi(value);

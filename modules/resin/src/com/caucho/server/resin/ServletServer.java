@@ -125,6 +125,8 @@ public class ServletServer extends ProtocolDispatchServer
   private int _keepaliveMax = 256;
   private ArrayList<Port> _ports = new ArrayList<Port>();
 
+  private String _connectionErrorPage;
+
   private Alarm _alarm = new Alarm(this);
   private AbstractCache _cache;
 
@@ -206,6 +208,22 @@ public class ServletServer extends ProtocolDispatchServer
   public void setConfigException(Throwable exn)
   {
     _configException = exn;
+  }
+
+  /**
+   * Sets the connection error page.
+   */
+  public void setConnectionErrorPage(String errorPage)
+  {
+    _connectionErrorPage = errorPage;
+  }
+
+  /**
+   * Gets the connection error page.
+   */
+  public String getConnectionErrorPage()
+  {
+    return _connectionErrorPage;
   }
 
   /**
@@ -1355,10 +1373,15 @@ public class ServletServer extends ProtocolDispatchServer
     return "Server[" + _serverId + "]";
   }
 
-  class SelectManagerConfig {
+  public class SelectManagerConfig {
     public void setEnable(boolean enable)
     {
       _enableSelectManager = enable;
+    }
+    
+    public boolean getEnable()
+    {
+      return _enableSelectManager;
     }
   }
 }

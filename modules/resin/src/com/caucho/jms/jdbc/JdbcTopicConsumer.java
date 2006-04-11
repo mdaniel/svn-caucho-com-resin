@@ -141,6 +141,7 @@ public class JdbcTopicConsumer extends MessageConsumerImpl
     try {
       DataSource dataSource = _jdbcManager.getDataSource();
       String consumerTable = _jdbcManager.getConsumerTable();
+      String consumerSequence = _jdbcManager.getConsumerSequence();
       String messageTable = _jdbcManager.getMessageTable();
     
       Connection conn = dataSource.getConnection();
@@ -160,28 +161,62 @@ public class JdbcTopicConsumer extends MessageConsumerImpl
 	  max = rs.getLong(1);
 	rs.close();
 	
-	sql = ("INSERT INTO " + consumerTable +
-	       " (queue, expire, read_id, ack_id) VALUES (?,?,?,?)");
+	if (consumerSequence != null) {
+	  sql = _jdbcManager.getMetaData().selectSequenceSQL(consumerSequence);
 
-	pstmt = conn.prepareStatement(sql,
-				      PreparedStatement.RETURN_GENERATED_KEYS);
+	  pstmt = conn.prepareStatement(sql);
 
-	pstmt.setInt(1, _topic.getId());
-	pstmt.setLong(2, Alarm.getCurrentTime() + TOPIC_TIMEOUT);
-	pstmt.setLong(3, max);
-	pstmt.setLong(4, max);
+	  long id = 0;
 
-	pstmt.executeUpdate();
+	  rs = pstmt.executeQuery();
+	  if (rs.next())
+	    id = rs.getLong(1);
+	  else
+	    throw new IllegalStateException("no sequence value for consumer.");
 
-	ResultSet rsKeys = pstmt.getGeneratedKeys();
+	  rs.close();
+	  pstmt.close();
+	  
+	  sql = ("INSERT INTO " + consumerTable +
+		 " (s_id, queue, expire, read_id, ack_id) VALUES (?,?,?,?,?)");
 
-	if (rsKeys.next()) {
-	  _consumerId = rsKeys.getLong(1);
+	  pstmt = conn.prepareStatement(sql);
+
+	  pstmt.setLong(1, id);
+	  pstmt.setInt(2, _topic.getId());
+	  pstmt.setLong(3, Alarm.getCurrentTime() + TOPIC_TIMEOUT);
+	  pstmt.setLong(4, max);
+	  pstmt.setLong(5, max);
+
+	  pstmt.executeUpdate();
+	  
+	  _consumerId = id;
 	}
-	else
-	  throw new JMSException(L.l("consumer insert didn't create a key"));
+	else {
+	  sql = ("INSERT INTO " + consumerTable +
+		 " (queue, expire, read_id, ack_id) VALUES (?,?,?,?)");
 
-	rsKeys.close();
+	  pstmt = conn.prepareStatement(sql,
+					PreparedStatement.RETURN_GENERATED_KEYS);
+
+	  pstmt.setInt(1, _topic.getId());
+	  pstmt.setLong(2, Alarm.getCurrentTime() + TOPIC_TIMEOUT);
+	  pstmt.setLong(3, max);
+	  pstmt.setLong(4, max);
+
+	  pstmt.executeUpdate();
+
+	  ResultSet rsKeys = pstmt.getGeneratedKeys();
+
+	  if (rsKeys.next()) {
+	    _consumerId = rsKeys.getLong(1);
+	  }
+	  else
+	    throw new JMSException(L.l("consumer insert didn't create a key"));
+
+	  rsKeys.close();
+	}
+	
 	pstmt.close();
       } finally {
 	conn.close();
@@ -536,7 +571,7 @@ public class JdbcTopicConsumer extends MessageConsumerImpl
       Connection conn = dataSource.getConnection();
       try {
 	String sql = ("DELETE FROM " + consumerTable +
-		      " WHERE is_topic=1 AND expire<?");
+		      " WHERE expire<?");
 
 	PreparedStatement pstmt = conn.prepareStatement(sql);
 	pstmt.setLong(1, Alarm.getCurrentTime());

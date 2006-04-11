@@ -192,7 +192,7 @@ typedef struct config_t {
   char *work_dir;
   char *config_path;
   
-  char *error_page;
+  char error_page[1024];
   char session_url_prefix[256];
   char alt_session_url_prefix[256];
   char session_cookie[256];
