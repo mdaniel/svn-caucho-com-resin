@@ -257,10 +257,11 @@ public final class UnserializeReader {
 
     int ch = _buffer[_index++];
 
-    if (ch != expectCh)
+    if (ch != expectCh) {
       throw new IOException(L.l("expected '{0}' at '{1}'",
                                 String.valueOf((char) expectCh),
                                 String.valueOf((char) ch)));
+    }
   }
 
   public final long readInt()

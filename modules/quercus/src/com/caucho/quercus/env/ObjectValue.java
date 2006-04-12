@@ -772,6 +772,20 @@ public class ObjectValue extends Value {
   }
 
   /**
+   * Converts to an array.
+   */
+  public Value toArray()
+  {
+    ArrayValue array = new ArrayValueImpl();
+
+    for (Map.Entry<String,Value> entry : entrySet()) {
+      array.put(new StringValueImpl(entry.getKey()), entry.getValue());
+    }
+
+    return array;
+  }
+
+  /**
    * Converts to an object.
    */
   public Value toObject(Env env)
@@ -907,6 +921,7 @@ public class ObjectValue extends Value {
     public Entry(String key)
     {
       _key = key;
+      _value = NullValue.NULL;
     }
 
     public Entry(String key, Value value)

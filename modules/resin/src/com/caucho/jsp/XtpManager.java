@@ -97,6 +97,8 @@ public class XtpManager extends PageManager {
 
   void initApplication(Application context)
   {
+    super.initApplication(context);
+    
     if (JspFactory.getDefaultFactory() == null)
       JspFactory.setDefaultFactory(new QJspFactory());
     

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2004 Caucho Technology.  All rights reserved.
+ * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -23,13 +23,45 @@
  *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
+ *
+ * @author Scott Ferguson
  */
 
-#ifndef CSE_VERSION_H
-#define CSE_VERSION_H
+package com.caucho.servlets.ssi;
 
-#define VERSION "Resin/3.0.s060412"
-#define FULL_VERSION "Resin-3.0.s060412 (built Wed, 12 Apr 2006 10:11:07 PDT)"
+import java.io.IOException;
 
-#endif /* CSE_VERSION_H */
+import java.util.HashMap;
 
+import javax.servlet.ServletException;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import com.caucho.util.IntMap;
+import com.caucho.util.Alarm;
+import com.caucho.util.QDate;
+
+import com.caucho.vfs.WriteStream;
+import com.caucho.vfs.Path;
+
+/**
+ * Represents a SSI string expression
+ */
+public class StringExpr extends SSIExpr {
+  private final String _value;
+
+  StringExpr(String value)
+  {
+    _value = value;
+  }
+
+  /**
+   * Evaluate as a string.
+   */
+  public String evalString(HttpServletRequest request,
+			   HttpServletResponse response)
+  {
+    return _value;
+  }
+}

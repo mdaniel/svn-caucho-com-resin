@@ -231,8 +231,8 @@ abstract public class PageManager {
 
       if (log.isLoggable(Level.FINE)) {
         log.fine("uri:" + uri +
-                 "(cp:" + _application.getContextPath() + 
-                 ",app:" + _application.getAppDir() +
+                 "(cp:" + getApplication().getContextPath() + 
+                 ",app:" + getApplication().getAppDir() +
                  ") -> " + path);
       }
      

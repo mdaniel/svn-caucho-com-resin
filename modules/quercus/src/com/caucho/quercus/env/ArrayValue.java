@@ -95,6 +95,14 @@ abstract public class ArrayValue extends Value {
   /**
    * Converts to an object.
    */
+  public Value toArray()
+  {
+    return this;
+  }
+
+  /**
+   * Converts to an object.
+   */
   public Value toObject(Env env)
   {
     Value obj = env.createObject();
@@ -589,7 +597,7 @@ abstract public class ArrayValue extends Value {
    *
    * @return an object array of this array
    */
-  public Map.Entry<Value, Value>[] toArray()
+  public Map.Entry<Value, Value>[] toEntryArray()
   {
     ArrayList<Map.Entry<Value, Value>> array =
       new ArrayList<Map.Entry<Value, Value>>(getSize());

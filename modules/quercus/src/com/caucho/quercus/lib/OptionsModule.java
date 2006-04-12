@@ -84,6 +84,14 @@ public class OptionsModule extends AbstractQuercusModule {
   /**
    * Returns true if the given extension is loaded
    */
+  public static boolean extension_loaded(Env env, String ext)
+  {
+    return env.isExtensionLoaded(ext);
+  }
+
+  /**
+   * Returns true if the given extension is loaded
+   */
   public static Value get_loaded_extensions(Env env)
   {
     ArrayValue value = new ArrayValueImpl();

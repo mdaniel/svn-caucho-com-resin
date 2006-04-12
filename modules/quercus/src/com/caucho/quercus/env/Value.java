@@ -195,6 +195,14 @@ abstract public class Value {
   }
 
   /**
+   * Converts to an array.
+   */
+  public Value toArray()
+  {
+    return new ArrayValueImpl().append(this);
+  }
+
+  /**
    * Converts to an object.
    */
   public Value toObject(Env env)
@@ -1019,7 +1027,7 @@ abstract public class Value {
   {
     Value v = getField(index);
 
-    if (! v.isset()) {
+    if (! v.isset() || v == BooleanValue.FALSE) {
       v = new ArrayValueImpl();
 
       putField(env, index, v);

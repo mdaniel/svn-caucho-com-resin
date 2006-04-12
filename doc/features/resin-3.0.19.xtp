@@ -8,6 +8,12 @@
 
 <summary objsummary='localtoc'/>
 
+<section title="connection-error-page">
+
+<p>The server block now accepts &lt;connection-error-page> for IIS.</p>
+
+</section>
+
 <section title="wrap-statements">
 
 <p>The &lt;database> tag now has a &lt;wrap-statements> tag (default true)

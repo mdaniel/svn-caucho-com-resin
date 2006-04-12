@@ -117,6 +117,8 @@ public class JdbcConnectionResource extends ResourceValue {
    */
   public Value getCatalogs()
   {
+    clearErrors();
+    
     try {
       if (_dmd == null)
         _dmd = _conn.getMetaData();
@@ -142,6 +144,8 @@ public class JdbcConnectionResource extends ResourceValue {
    */
   public Value getCatalog()
   {
+    clearErrors();
+    
     try {
       return new StringValueImpl(_conn.getCatalog());
     } catch (SQLException e) {
@@ -349,6 +353,8 @@ public class JdbcConnectionResource extends ResourceValue {
    */
   public Value query(String sql)
   {
+    clearErrors();
+    
     // Empty _resultValues on new call to query
     // But DO NOT close the individual result sets.
     // They may still be in use.
@@ -409,6 +415,8 @@ public class JdbcConnectionResource extends ResourceValue {
   public Value metaQuery(String sql,
                          String catalog)
   {
+    clearErrors();
+    
     Value currentCatalog = getCatalog();
 
     try {
@@ -452,6 +460,8 @@ public class JdbcConnectionResource extends ResourceValue {
    */
   public boolean multiQuery(String sql)
   {
+    clearErrors();
+    
     // Empty _resultValues on new call to query
     // But DO NOT close the individual result sets.
     // They may still be in use.
@@ -507,6 +517,8 @@ public class JdbcConnectionResource extends ResourceValue {
    */
   public boolean setAutoCommit(boolean mode)
   {
+    clearErrors();
+    
     try {
       _conn.setAutoCommit(mode);
     } catch (SQLException e) {
@@ -525,6 +537,8 @@ public class JdbcConnectionResource extends ResourceValue {
    */
   public boolean commit()
   {
+    clearErrors();
+    
     try {
       _conn.commit();
     } catch (SQLException e) {
@@ -546,6 +560,8 @@ public class JdbcConnectionResource extends ResourceValue {
    */
   public boolean rollback()
   {
+    clearErrors();
+    
     try {
       _conn.rollback();
     } catch (SQLException e) {
@@ -564,6 +580,8 @@ public class JdbcConnectionResource extends ResourceValue {
   public void setCatalog(String name)
     throws SQLException
   {
+    clearErrors();
+    
     _conn.setCatalog(name);
   }
 
@@ -572,6 +590,8 @@ public class JdbcConnectionResource extends ResourceValue {
    */
   public Value stat()
   {
+    clearErrors();
+    
     StringBuilder str = new StringBuilder();
 
     try {
@@ -663,6 +683,13 @@ public class JdbcConnectionResource extends ResourceValue {
         return 0;
     } else
       return 0;
+  }
+
+  private void clearErrors()
+  {
+    _errorMessage = null;
+    _errorCode = 0;
+    _warnings = null;
   }
 
   static class TableKey {

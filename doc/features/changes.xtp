@@ -4,6 +4,10 @@
 
 <s2 title='3.0.snap - Mar 17, 2006'>
 <ul>
+<li>Basic SSI support with SSIServlet (#205)
+<li>JSP/tag file compilation issue (#1037, rep by Serge Knystautas)
+<li>ISAPI handling of 100-continue and flushing not properly reading 'f' response (#982, rep by assurone)
+<li>Added connection-error-page for IIS (#911, rep by mitch)
 <li>Add build rule to convert .rnc to .xsd for Resin schema (#410)
 <li>JMS: postgres issue in creating ephemeral tables (#1034, #1041, rep by peden, Bryan Davis)
 <li>./configure changes for x86_64 (#915, rep by teemupo)

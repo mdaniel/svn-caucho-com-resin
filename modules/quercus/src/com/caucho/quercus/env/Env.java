@@ -35,6 +35,7 @@ import com.caucho.java.WorkDir;
 import com.caucho.loader.SimpleLoader;
 import com.caucho.quercus.Quercus;
 import com.caucho.quercus.QuercusException;
+import com.caucho.quercus.QuercusDieException;
 import com.caucho.quercus.QuercusExitException;
 import com.caucho.quercus.QuercusLineRuntimeException;
 import com.caucho.quercus.QuercusRuntimeException;
@@ -2491,7 +2492,10 @@ public class Env {
    * Handles exit/die
    */
   public Value exit(String msg)
+    throws IOException
   {
+    getOut().print(msg);
+    
     throw new QuercusExitException(msg);
   }
 
@@ -2501,6 +2505,25 @@ public class Env {
   public Value exit()
   {
     throw new QuercusExitException();
+  }
+
+  /**
+   * Handles exit/die
+   */
+  public Value die(String msg)
+    throws IOException
+  {
+    getOut().print(msg);
+    
+    throw new QuercusDieException(msg);
+  }
+
+  /**
+   * Handles exit/die
+   */
+  public Value die()
+  {
+    throw new QuercusDieException();
   }
 
   /**

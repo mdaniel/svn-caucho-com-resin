@@ -36,6 +36,8 @@ import java.util.logging.Logger;
 
 import com.caucho.util.L10N;
 
+import com.caucho.quercus.QuercusDieException;
+
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.BooleanValue;
@@ -87,7 +89,13 @@ public class ErrorModule extends AbstractQuercusModule {
   public Value die(Env env, @Optional String msg)
     throws Exception
   {
-    return exit(env, msg);
+    if (msg != null) {
+      env.getOut().print(msg);
+
+      throw new QuercusDieException(msg);
+    }
+    else
+      throw new QuercusDieException(msg);
   }
 
   /**

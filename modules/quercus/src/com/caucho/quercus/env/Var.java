@@ -201,6 +201,14 @@ public class Var extends Value {
   }
 
   /**
+   * Converts to an array
+   */
+  public Value toArray()
+  {
+    return _value.toArray();
+  }
+
+  /**
    * Converts to an object.
    */
   public Value toObject(Env env)

@@ -48,7 +48,7 @@ import com.caucho.vfs.Path;
 /**
  * Represents a SSI variable
  */
-public class VarExpr {
+public class VarExpr extends SSIExpr {
   private static final int ATTRIBUTE = 0;
   private static final int HTTP_ = ATTRIBUTE + 1;
   

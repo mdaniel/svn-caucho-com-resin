@@ -184,6 +184,10 @@ public class SSIServlet extends HttpServlet {
 	return ConfigStatement.create(attr, is.getPath());
       else if ("echo".equals(cmd))
 	return EchoStatement.create(attr, is.getPath());
+      else if ("include".equals(cmd))
+	return IncludeStatement.create(attr, is.getPath());
+      else if ("set".equals(cmd))
+	return SetStatement.create(attr, is.getPath());
       else
 	return new ErrorStatement("['" + cmd + "' is an unknown command.]");
     }
@@ -220,8 +224,16 @@ public class SSIServlet extends HttpServlet {
 	  int end = ch;
 
 	  for (ch = is.read(); ch > 0 && ch != end; ch = is.read()) {
-	    if (ch == '\\')
-	      value.append((char) is.read());
+	    if (ch == '\\') {
+	      ch = is.read();
+
+	      if (ch == '\'' || ch == '\"')
+		value.append((char) ch);
+	      else {
+		value.append('\\');
+		is.unread();
+	      }
+	    }
 	    else
 	      value.append((char) ch);
 	  }

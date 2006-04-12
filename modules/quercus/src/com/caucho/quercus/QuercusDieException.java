@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2004 Caucho Technology.  All rights reserved.
+ * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -23,13 +23,33 @@
  *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
+ *
+ * @author Scott Ferguson
  */
 
-#ifndef CSE_VERSION_H
-#define CSE_VERSION_H
+package com.caucho.quercus;
 
-#define VERSION "Resin/3.0.s060412"
-#define FULL_VERSION "Resin-3.0.s060412 (built Wed, 12 Apr 2006 10:11:07 PDT)"
+/**
+ * Exception thrown by die() or exit()
+ */
+public class QuercusDieException extends QuercusExitException {
+  public QuercusDieException()
+  {
+  }
 
-#endif /* CSE_VERSION_H */
+  public QuercusDieException(String msg)
+  {
+    super(msg);
+  }
+
+  public QuercusDieException(Throwable cause)
+  {
+    super(cause);
+  }
+
+  public QuercusDieException(String msg, Throwable cause)
+  {
+    super(msg, cause);
+  }
+}
 

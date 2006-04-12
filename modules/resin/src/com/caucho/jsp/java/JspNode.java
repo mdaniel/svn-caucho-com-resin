@@ -882,7 +882,7 @@ public abstract class JspNode {
       cb.append(parentTag.getCustomTagName());
 
     if (_gen instanceof JavaTagGenerator)
-      cb.append(", _jspBody");
+      cb.append(", getJspBody()");
     else
       cb.append(", null");
       

@@ -1147,9 +1147,13 @@ public class RegexpModule
           program.add(new GroupReplacement(group));
 
           text.setLength(0);
-        } else if (ch == '\\') {
+        }
+	else if (ch == '\\') {
           i++;
 
+	  if (digit != '\\') {
+	    text.append('\\');
+	  }
           text.append(digit);
       // took out test for ch == '$' because must be true
       //} else if (ch == '$' && digit == '{') {

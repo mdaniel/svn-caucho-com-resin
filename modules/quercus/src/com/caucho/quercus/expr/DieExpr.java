@@ -31,22 +31,35 @@ package com.caucho.quercus.expr;
 
 import java.io.IOException;
 
+import java.util.HashSet;
+
 import com.caucho.java.JavaWriter;
 
+import com.caucho.quercus.QuercusDieException;
+
 import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.ArrayValue;
-import com.caucho.quercus.env.ArrayValueImpl;
+import com.caucho.quercus.env.NullValue;
 import com.caucho.quercus.env.Value;
 
 import com.caucho.quercus.gen.PhpWriter;
 
+import com.caucho.quercus.program.AnalyzeInfo;
+import com.caucho.quercus.program.ExprStatement;
+
 /**
- * Converts to an array
+ * Represents the die expression
  */
-public class ToArrayExpr extends UnaryExpr {
-  public ToArrayExpr(Expr expr)
+public class DieExpr extends Expr {
+  private final Expr _value;
+
+  public DieExpr(Expr value)
   {
-    super(expr);
+    _value = value;
+  }
+
+  public DieExpr()
+  {
+    _value = null;
   }
 
   /**
@@ -59,25 +72,15 @@ public class ToArrayExpr extends UnaryExpr {
   public Value eval(Env env)
     throws Throwable
   {
-    return _expr.eval(env).toArray();
-  }
+    if (_value != null) {
+      String msg = _value.evalString(env);
+      
+      env.getOut().print(msg);
 
-  /**
-   * Evaluates the expression.
-   *
-   * @param env the calling environment.
-   *
-   * @return the expression value.
-   */
-  public Value evalCopy(Env env)
-    throws Throwable
-  {
-    Value value = _expr.eval(env).toValue();
-
-    if (value instanceof ArrayValue)
-      return value.copy();
+      throw new QuercusDieException(msg);
+    }
     else
-      return value.toArray();
+      throw new QuercusDieException();
   }
 
   //
@@ -85,47 +88,30 @@ public class ToArrayExpr extends UnaryExpr {
   //
 
   /**
-   * Generates code to evaluate the expression.
+   * Analyze the expression
+   */
+  public void analyze(AnalyzeInfo info)
+  {
+    if (_value != null)
+      _value.analyze(info);
+  }
+
+  /**
+   * Generates code to evaluate the expression
    *
    * @param out the writer to the Java source code.
    */
   public void generate(PhpWriter out)
     throws IOException
   {
-    _expr.generate(out);
-
-    out.print(".toArray()");
-  }
-
-  /**
-   * Generates code to evaluate the expression.
-   *
-   * @param out the writer to the Java source code.
-   */
-  public void generateCopy(PhpWriter out)
-    throws IOException
-  {
-    _expr.generate(out);
-
-    out.print(".toArray().copy()");
-  }
-
-  /**
-   * Generates code to recreate the expression.
-   *
-   * @param out the writer to the Java source code.
-   */
-  public void generateExpr(PhpWriter out)
-    throws IOException
-  {
-    out.print("new com.caucho.quercus.expr.ToArrayExpr(");
-    _expr.generateExpr(out);
-    out.print(")");
-  }
-  
-  public String toString()
-  {
-    return "((array) " + _expr + ")";
+    if (_value != null) {
+      out.print("env.die(");
+      _value.generateString(out);
+      out.print(")");
+    }
+    else {
+      out.print("env.die()");
+    }
   }
 }
 

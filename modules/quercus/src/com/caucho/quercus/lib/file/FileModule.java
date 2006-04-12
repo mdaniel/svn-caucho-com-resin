@@ -1587,6 +1587,18 @@ public class FileModule extends AbstractQuercusModule {
 
     result.put(new StringValueImpl("size"), new LongValue(path.getLength()));
 
+    int mode = 0;
+    if (path.isDirectory())
+      mode |= 01000;
+    if (path.canRead())
+      mode |= 0444;
+    if (path.canWrite())
+      mode |= 0222;
+    if (path.canExecute())
+      mode |= 0111;
+    
+    result.put(new StringValueImpl("mode"), new LongValue(mode));
+
     return result;
   }
 

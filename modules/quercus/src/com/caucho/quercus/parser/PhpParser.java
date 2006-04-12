@@ -172,6 +172,7 @@ public class PhpParser {
   private final static int CONST = 565;
   private final static int ABSTRACT = 566;
   private final static int FINAL = 567;
+  private final static int DIE = 568;
   
   private final static int LAST_IDENTIFIER_LEXEME = 1024;
 
@@ -2552,6 +2553,8 @@ public class PhpParser {
       
     case EXIT:
       return parseExit();
+    case DIE:
+      return parseDie();
 
     case IDENTIFIER:
       {
@@ -2896,6 +2899,29 @@ public class PhpParser {
       _peekToken = token;
       
       return new ExitExpr();
+    }
+  }
+
+  /**
+   * Parses the exit/die expression
+   */
+  private Expr parseDie()
+    throws IOException
+  {
+    int token = parseToken();
+
+    if (token == '(') {
+      ArrayList<Expr> args = parseArgs();
+
+      if (args.size() > 0)
+	return new DieExpr(args.get(0));
+      else
+	return new DieExpr();
+    }
+    else {
+      _peekToken = token;
+      
+      return new DieExpr();
     }
   }
 
@@ -4099,6 +4125,9 @@ public class PhpParser {
     case CLASS: return "'class'";
     case RETURN: return "'return'";
       
+    case DIE: return "'die'";
+    case EXIT: return "'exit'";
+      
     case CLONE: return "'clone'";
     case INSTANCEOF: return "'instanceof'";
       
@@ -4189,7 +4218,7 @@ public class PhpParser {
     _insensitiveReserved.put("switch", SWITCH);
     _insensitiveReserved.put("case", CASE);
     _insensitiveReserved.put("default", DEFAULT);
-    _insensitiveReserved.put("die", EXIT);
+    _insensitiveReserved.put("die", DIE);
     _insensitiveReserved.put("exit", EXIT);
     _insensitiveReserved.put("global", GLOBAL);
     _insensitiveReserved.put("list", LIST);

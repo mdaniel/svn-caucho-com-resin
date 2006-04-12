@@ -2003,7 +2003,7 @@ v   *
 
           case '0': case '1': case '2': case '3': case '4':
           case '5': case '6': case '7': case '8': case '9':
-          case '.':
+          case '.': case '$':
             break;
 
           case 'b': case 'B':
@@ -3911,6 +3911,34 @@ v   *
 
   abstract static class PrintfSegment {
     abstract public void apply(StringBuilderValue sb, Value []args);
+    
+    static boolean hasIndex(String format)
+    {
+      return format.indexOf('$') >= 0;
+    }
+
+    static int getIndex(String format)
+    {
+      int value = 0;
+
+      for (int i = 0; i < format.length(); i++) {
+	char ch;
+	
+	if ('0' <= (ch = format.charAt(i)) && ch <= '9')
+	  value = 10 * value + ch - '0';
+	else
+	  break;
+      }
+
+      return value - 1;
+    }
+
+    static String getIndexFormat(String format)
+    {
+      int p = format.indexOf('$');
+
+      return format.substring(p + 1);
+    }
   }
 
   static class TextPrintfSegment extends PrintfSegment {
@@ -3935,8 +3963,14 @@ v   *
 
     LongPrintfSegment(String format, int index)
     {
-      _format = format;
-      _index = index;
+      if (hasIndex(format)) {
+	_index = getIndex(format);
+	_format = getIndexFormat(format);
+      }
+      else {
+	_format = format;
+	_index = index;
+      }
     }
 
     public void apply(StringBuilderValue sb, Value []args)
@@ -3958,8 +3992,14 @@ v   *
 
     DoublePrintfSegment(String format, int index)
     {
-      _format = format;
-      _index = index;
+      if (hasIndex(format)) {
+	_index = getIndex(format);
+	_format = getIndexFormat(format);
+      }
+      else {
+	_format = format;
+	_index = index;
+      }
     }
 
     public void apply(StringBuilderValue sb, Value []args)
@@ -3996,6 +4036,11 @@ v   *
       _pad = isZero ? '0' : ' ';
 
       prefix.getChars(0, _prefix.length, _prefix, 0);
+      
+      if (hasIndex(format)) {
+	index = getIndex(format);
+	format = getIndexFormat(format);
+      }
 
       int i = 0;
       int len = format.length();

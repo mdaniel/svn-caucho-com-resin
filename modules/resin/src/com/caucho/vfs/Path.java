@@ -534,6 +534,14 @@ public abstract class Path {
   }
 
   /**
+   * Tests if the file can be read.
+   */
+  public boolean canExecute()
+  {
+    return canRead();
+  }
+
+  /**
    * Changes the group
    */
   public boolean changeGroup(int gid)

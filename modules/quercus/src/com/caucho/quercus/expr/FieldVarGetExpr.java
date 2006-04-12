@@ -212,7 +212,7 @@ public class FieldVarGetExpr extends AbstractVarExpr {
     throws IOException
   {
     _objExpr.generateObject(out);
-    out.print(".getFieldRef(");
+    out.print(".getFieldRef(env, ");
     _nameExpr.generateString(out);
     out.print(")");
   }

@@ -569,7 +569,7 @@ public class DateModule extends AbstractQuercusModule {
 	  }
 
 	case '\\':
-	  sb.append(format.charAt(i++));
+	  sb.append(format.charAt(++i));
 	  break;
 
 	default:
