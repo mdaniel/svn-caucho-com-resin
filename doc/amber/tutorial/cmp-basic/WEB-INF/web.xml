@@ -2,9 +2,7 @@
   <!--
      - configuration for the JNDI server.
     -->
-  <ejb-server data-source="jdbc/resin" create-database-schema="true">
-    <bean type="example.CourseBean"/>
-  </ejb-server>
+  <ejb-server data-source="jdbc/resin" create-database-schema="true"/>
 
   <!--
      - configuration for the client.

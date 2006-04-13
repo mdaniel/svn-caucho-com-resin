@@ -9,20 +9,15 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import javax.ejb.EntityManager;
-import javax.ejb.Inject;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 
 /**
  * The basic CourseClient shows the basic flow of any Resin-CMP client.
  */
 public class CourseServlet extends HttpServlet {
+  @PersistenceContext(name="example")
   private EntityManager _manager;
-
-  @Inject
-  public void setEntityManager(EntityManager manager)
-  {
-    _manager = manager;
-  }
 
   /**
    * Illustrates how to interact with the Course EJB
@@ -33,7 +28,7 @@ public class CourseServlet extends HttpServlet {
     CourseBean course = null;
     
     try {
-      course = (CourseBean) _manager.find("CourseBean", new Integer(1));
+      course = _manager.find(CourseBean.class, new Integer(1));
       if (course != null)
 	return;
     } catch (Exception e) {
@@ -53,7 +48,7 @@ public class CourseServlet extends HttpServlet {
   }
 
   /**
-   * Illustrates how to interact with the Course EJB
+   * Illustrates how to interact with the Course Bean.
    */
   public void service(HttpServletRequest req, HttpServletResponse res)
     throws java.io.IOException, ServletException
@@ -64,8 +59,8 @@ public class CourseServlet extends HttpServlet {
 
     CourseBean []course = new CourseBean[2];
 
-    course[0] = (CourseBean) _manager.find("CourseBean", new Integer(1));
-    course[1] = (CourseBean) _manager.find("CourseBean", new Integer(2));
+    course[0] = _manager.find(CourseBean.class, new Integer(1));
+    course[1] = _manager.find(CourseBean.class, new Integer(2));
 
     out.println("<h3>Course Details</h3>");
 

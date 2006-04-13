@@ -1,11 +1,11 @@
 package example;
 
-import javax.ejb.Entity;
-import javax.ejb.Table;
-import javax.ejb.Id;
-import javax.ejb.Column;
-import javax.ejb.GeneratorType;
-import javax.ejb.Basic;
+import javax.persistence.Basic;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.Table;
 
 /**
  * Local interface for a course taught at Hogwarts, providing
@@ -31,8 +31,9 @@ public class CourseBean {
   /**
    * Returns the ID of the course.
    */
-  @Id(generate=GeneratorType.AUTO)
+  @Id
   @Column(name="id")
+  @GeneratedValue
   public int getId()
   {
     return _id;
