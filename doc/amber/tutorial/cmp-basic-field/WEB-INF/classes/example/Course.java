@@ -1,19 +1,13 @@
 package example;
 
-import javax.ejb.Entity;
-import javax.ejb.Table;
-import javax.ejb.Id;
-import javax.ejb.Column;
-import javax.ejb.Basic;
-import static javax.ejb.GeneratorType.AUTO;
-import static javax.ejb.AccessType.FIELD;
+import javax.persistence.*;
 
 /**
  * Local interface for a course taught at Hogwarts, providing
  * methods to view and change it.
  *
  * <code><pre>
- * CREATE TABLE ejb3_field_courses (
+ * CREATE TABLE amber_field_courses (
  *   id INTEGER
  *   course VARCHAR(250),
  *   teacher VARCHAR(250),
@@ -22,11 +16,12 @@ import static javax.ejb.AccessType.FIELD;
  * );
  * </pre></code>
  */
-@Entity(access=FIELD)
-@Table(name="ejb3_field_courses")
+@Entity
+@Table(name="amber_field_courses")
 public class Course {
-  @Id(generate=AUTO)
+  @Id
   @Column(name="id")
+  @GeneratedValue
   private int _id;
   
   @Basic

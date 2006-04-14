@@ -3,7 +3,7 @@
     <product>resin-ee</product>
     <title>Field-based Persistent Objects</title>
         <description>
-          <p>EJB 3.0 supports a field-based relational model: each
+          <p>Amber's persistence supports a field-based relational model: each
 Java field represents a database column.  The tutorial
 shows the configuration, classes, and client code for a single-table entity. </p>
         </description>
@@ -17,7 +17,7 @@ shows the configuration, classes, and client code for a single-table entity. </p
 <section title="Overview">
 
 <p>Amber provides a Java model for a relational database,
-following the EJB 3.0 persistence standard.</p>
+following the Java Persistence standard.</p>
 
 <p>A typical project starts planning with the
 relational database schema and matching the Java model to that schema.
@@ -25,7 +25,8 @@ This data-driven approach contrasts with a transparent persistent
 object approach which starts with Java classes and then tries to
 create storage to match the Java model, an approach more typical
 of object-oriented databases.  While the transparent persistence model
-may be appropriate for some applications, EJB 3.0 wisely leaves
+may be appropriate for some applications, the persistence specification
+wisely leaves
 transparent persistence to other products and specifications, and
 concentrates on the relational database model.</p>
 
@@ -44,8 +45,10 @@ Amber's entities are far simpler than the "EntityBean" of EJB 2.1.</p>
 
 <section title="Files in this tutorial">
 <deftable>
-<tr><td><viewfile-link file="WEB-INF/web.xml"/>
-    <td>web.xml configuration
+<tr><td><viewfile-link file="WEB-INF/resin-web.xml"/>
+    <td>resin-web.xml configuration
+<tr><td><viewfile-link file="WEB-INF/classes/META-INF/persistence.xml"/>
+    <td>persistence.xml configuration
 <tr><td><viewfile-link file="WEB-INF/classes/example/Course.java"/>
     <td>The course bean
 <tr><td><viewfile-link file="WEB-INF/classes/example/CourseServlet.java"/>
@@ -61,18 +64,18 @@ The table has an integer primary key "id" and two string data fields, "course"
 and "teacher".</p>
 
 <example title="course.sql">
-CREATE TABLE ejb3_basic_courses (
+CREATE TABLE amber_basic_courses (
   id INTEGER PRIMARY KEY auto_increment,
 
   course VARCHAR(250),
   teacher VARCHAR(250)
 );
 
-INSERT INTO ejb3_basic_courses VALUES('Potions', 'Severus Snape');
-INSERT INTO ejb3_basic_courses VALUES('Transfiguration', 'Minerva McGonagall');
+INSERT INTO amber_basic_courses VALUES('Potions', 'Severus Snape');
+INSERT INTO amber_basic_courses VALUES('Transfiguration', 'Minerva McGonagall');
 </example>
 
-<p>To judge the complexity of EJB 3.0, it's useful to compare the EJB
+<p>To judge the complexity of Amber, it's useful to compare the Amber
 Java model to the simplest possible Java model.  The simple model
 has a single class, <code>Course</code>, for the table and three fields for the
 table's columns.</p>
@@ -102,6 +105,30 @@ source itself to properly document and validate the Java code.</p>
 
 </section>
 
+<section title="Overview">
+
+<p>To find and enhance a persistent Java bean, Amber follows the following
+procedure.
+
+<ol>
+<li>&lt;ejb-server> in the resin-web.xml configures Amber to start looking for persistence.xml in the classpath.
+<li>The persistence.xml in WEB-INF/classes/META-INF tells Amber to create a persistence-unit named "example".
+<li>The "example" persistence-unit contains a class example.CourseBean
+<li>Amber enhances example.CourseBean as a persistent object.
+</ol>
+
+<p>By the end of initialization time, Amber has enhanced CourseBean and
+made it available to the application in the persistence-unit "example".</p>
+
+<p>A servlet will then lookup the CourseBean with the following procedure:</p>
+
+<ol>
+<li>Obtain an EntityManager for the persistence unit from JNDI either directly as java:comp/env/persistence/PersistenceContext/example, or using the @PersistenceUnit injection annotation.
+<li>Use the EntityManager to find the instance of the bean.
+</ol>
+
+</section>
+
 <section title="Persistent Object Implementation">
 
 <p>The minimal Java class needs the following annotations to
@@ -116,28 +143,31 @@ capability.
 <li>Annotations naming the columns for the table.
 </ul>
 
-<p>The following code shows the EJB 3.0 annotations for the course
+<p>The following code shows the Amber annotations for the course
 entity.  As a quick comparison with the minimal Java class shows,
-EJB 3.0 is close to the simplest possible implementation of the
+Amber is close to the simplest possible implementation of the
 Java model which provides the necessary annotations in the list.</p>
 
 
 <example title="Course.java">
 package example;
 
-<a href="ejb3|cmp-table.xtp#@Entity">@javax.ejb.Entity</a>(access=javax.ejb.AccessType.FIELD)
-<a href="ejb3|cmp-table.xtp#@Table">@javax.ejb.Table</a>(name="ejb3_basic_course")
+import javax.persistence.*;
+
+<a href="amber|amber-table.xtp#@Entity">@Entity</a>
+<a href="amber|amber-table.xtp#@Table">@Table</a>(name="amber_basic_course")
 public class Course {
-  <a href="ejb3|cmp-table.xtp#@Id">@javax.ejb.Id</a>(generator=javax.ejb.GeneratorType.AUTO)
-  <a href="ejb3|cmp-table.xtp#@Column">@javax.ejb.Column</a>(name="id")
+  <a href="amber|amber-table.xtp#@Id">@Id</a>
+  <a href="amber|amber-table.xtp#@Column">@Column</a>(name="id")
+  <a href="amber|amber-table.xtp#@GeneratedValue">@GeneratedValue</a>
   private int _id;
 
-  <a href="ejb3|cmp-table.xtp#@Basic">@javax.ejb.Basic</a>
-  <a href="ejb3|cmp-table.xtp#@Column">@javax.ejb.Column</a>(name="course")
+  <a href="amber|amber-table.xtp#@Basic">@Basic</a>
+  <a href="amber|amber-table.xtp#@Column">@Column</a>(name="course")
   private String _course;
 
-  <a href="ejb3|cmp-table.xtp#@Basic">@javax.ejb.Basic</a>
-  <a href="ejb3|cmp-table.xtp#@Column">@javax.ejb.Column</a>(name="teacher")
+  <a href="amber|amber-table.xtp#@Basic">@Basic</a>
+  <a href="amber|amber-table.xtp#@Column">@Column</a>(name="teacher")
   private String _teacher;
 
   public String course()
@@ -155,7 +185,7 @@ public class Course {
 <p>The example uses the <code>course()</code>
 and <code>teacher()</code> methods to emphasize that the
 field accesses to _course and _teacher are live, i.e. they
-read and write the database values directly.  (Under the covers, Resin
+read and write the database values directly.  (Under the covers, Amber
 uses bytecode enhancement to make this work.)</p>
 
 <section title="@Entity - marking the class as persistent">
@@ -164,67 +194,70 @@ uses bytecode enhancement to make this work.)</p>
 persistent object.</p>
 
 <example>
-@javax.ejb.Entity(access=FIELD)
+@javax.persistence.Entity
 </example>
 
-<p><a href="ejb3|cmp-table.xtp#@Entity">@javax.ejb.Entity</a> declares
+<p><a href="amber|amber-table.xtp#@Entity">@javax.persistence.Entity</a> declares
 a Java class as an entity bean.</p>
 
-<p>The <code>access=FIELD</code> value
-means the bean's fields are persistent, as in JDO.  Unlike JDO, only
+<p>Since the @Id annotation marks a field, the
+bean's fields are persistent, as in JDO.  Unlike JDO, only
 the bean itself or its children may access the fields.  Other classes
 must use the bean's methods, like getters or setters, to
-indirectly access the fields.  The default <code>access</code> value
-is <code>PROPERTY</code>, meaning method getters are enhanced. </p>
+indirectly access the fields.</p>
+
+<p>If the @Id annotation had marked a property method,
+the methods would be enhanced. </p>
 
 </section>
 
 <section title="@Table - naming the table">
 
-<p><a href="ejb3|cmp-table.xtp#@Table">@javax.ejb.Table</a> specifies
+<p><a href="amber|amber-table.xtp#@Table">@javax.persistence.Table</a> specifies
 the SQL database table name to be used.  If <code>@Table</code> is
-unspecified, Resin will use the class name as the table name.</p>
+unspecified, Amber will use the class name as the table name.</p>
 
 <example>
-@javax.ejb.Table(name="ejb3_basic_course")
+@javax.persistence.Table(name="amber_basic_course")
 </example>
 
 </section>
 
 <section title="@Id - marking the primary key">
 
-<p>The <a href="ejb3|cmp-table.xtp#@Id">@Id</a> attribute marks the
+<p>The <a href="amber|amber-table.xtp#@Id">@Id</a> attribute marks the
 bean's primary key.  The <code>EntityManager.find</code> method
 looks up a bean instance with the primary key, and relations use
 the primary key to link beans together.</p>
 
 <example>
-@javax.ejb.Id (generator=AUTO)
-@javax.ejb.Column (name="id")
+@Id
+@Column(name="id")
+@GeneratedValue
 private int _id;
 </example>
 
-<p>The optional <code>generator=AUTO</code> specifies automatic
+<p>The optional <code>@GeneratedValue</code> specifies automatic
 generation of primary keys when beans are created.  The default
-<code>NONE</code> does not automatically create primary keys.
-<code>AUTO</code> generates primary keys depending on the database.
+strategy <code>AUTO</code> generates primary keys depending on the database.
 Postgres, for example, will use a SEQUENCE, while Resin's built-in
 database will use an auto_increment IDENTITY.</p>
 
 <p>The optional <a
-href="ejb3|cmp-table.xtp#@Column">@Column</a> annotation specifies the
-SQL column name.  The default SQL column for an @Id is "ID".</p>
+href="amber|amber-table.xtp#@Column">@Column</a> annotation specifies the
+SQL column name.  The default SQL column for an @Id is
+the property name.</p>
 
 </section>
 
 <section title="@Basic - marking a persistent field">
 
-<p>The <a href="ejb3|cmp-table.xtp#@Basic">@Basic</a> attribute
+<p>The <a href="amber|amber-table.xtp#@Basic">@Basic</a> attribute
 marks a basic data column like a string or integer or double.</p>
 
 <example>
-@javax.ejb.Basic 
-@javax.ejb.Column (name="course")
+@Basic 
+@Column (name="course")
 private String _course;
 </example>
 
@@ -232,18 +265,18 @@ private String _course;
 
 <section title="@Column - naming the column">
 
-<p>The optional <a href="ejb3|cmp-table.xtp#@Column">@Column</a>
-annotation specifies SQL column name.  For an @Id, the default
-column name is "ID".  For a @Basic field, the
+<p>The optional <a href="amber|amber-table.xtp#@Column">@Column</a>
+annotation specifies SQL column name.
+For a @Basic field, the
 default column name is the field name.</p>
 
 </section>
 
 <section title="Under the covers: bytecode enhancement">
 
-<p>Resin processes the bean's class to implement field-enhancement.
+<p>Amber processes the bean's class to implement field-enhancement.
 In practice, this means replacing setting a field with a Resin setter
-and getting a field with a Resin getter.</p>
+and getting a field with an Amber getter.</p>
 
 <example>
 public String course()
@@ -263,45 +296,7 @@ public String course()
 </example>
 
 </section>
-<!--
-<section title="Draft notes: comparing to the simple model">
 
-<p>Although the entity implementation for the EJB draft is close to
-the minimal class, it could be simplified further.</p>
-
-<p>The draft separates "Java" annotations from "SQL" annotations.
-The class has both @Entity and @Table and a data field has @Basic and
-@Column.  These annotations could be merged into a single annotation
-per class or field.  In addition, the FIELD type could be
-make the default since it is likely to be more popular than
-PROPERTY.</p>
-
-<p>The simpler class would look as follows:</p>
-
-<results title="A simpler Course.java">
-package example;
-
-@Entity(tableName="ejb3_basic_course")
-public class Course {
-  @Id(columnName="id", generator=AUTO)
-  private int _id;
-
-  @Basic(columnName="course")
-  private String _course;
-
-  @Basic(columnName="teacher")
-  private String _teacher;
-}
-</results>
-
-<p>Now, one reason the EJB draft doesn't merge the @Column with @Basic
-and @Table with @Entity is because @Column can be used for both @Id
-and @Basic.  The advantage of a separate @Column is more clear with
-the @JoinColumn, which is used for @OneToMany and @ManyToMany (and
-potentially for a @Map).  However, since most of the 
-
-</section>
--->
 </section>
 
 <section title="Client Servlet">
@@ -313,12 +308,8 @@ them.  It uses the <code>EntityManager</code> API to create a
 
 <example title="CourseServlet.java">
 public class CourseServlet extends HttpServlet {
+  @PersistenceUnit(name="example")
   private EntityManager _manager;
-
-  public void setEntityManager(EntityManager manager)
-  {
-    _manager = manager;
-  }
 
   public void service(HttpServletRequest req, HttpServletResponse res)
     throws java.io.IOException, ServletException
@@ -352,27 +343,19 @@ instructor: Minerva McGonagall
 
 <p><code>EntityManager</code> is the primary interface for
 finding, querying, adding and deleting persistent beans.  It is stored
-in JNDI at java:comp/EntityManager.</p>
+in JNDI at java:comp/env/persistence/PersistenceContext/example.</p>
 
 <example>
-public void setEntityManager(EntityManager manager)
-{
-  _manager = manager;
-}
+@PersistenceContext(name="example")
 </example>
 
 <p>The example uses dependency injection to configure the entity
-manager.  The web.xml will find the EntityManager in JNDI and
-set it in the servlet before calling the <code>init()</code></p>
+manager.</p>
 
 <example title="web.xml configuration">
 &lt;servlet servlet-name="basic" servlet-class="example.CourseServlet">
-  &lt;init entity-manager="\${jndi:lookup('java:comp/EntityManager')}"/>
 &lt;/servlet>
 </example>
-
-<p>Of course, a servlet can also use JNDI directly in its
-<code>init()</code> method.</p>
 
 </section>
 
@@ -408,28 +391,36 @@ use <code>getSingleResult()</code>.</p>
 start the ejb-server, configure the JDBC data-source, and list the
 beans that will be used.</p>
 
-<example title='WEB-INF/web.xml'>
+<example title='WEB-INF/resin-web.xml'>
 &lt;web-app>
   &lt;!-- server configuration -->
-  &lt;ejb-server data-source="jdbc/resin">
-    &lt;bean type="example.Course"/>
-  &lt;/ejb-server>
+  &lt;ejb-server data-source="jdbc/resin"/>
 
-  &lt;servlet servlet-name="basic" servlet-class="example.CourseServlet">
-    &lt;init entity-manager="\${jndi:lookup('java:comp/EntityManager')}"/>
-  &lt;/servlet>
+  &lt;servlet servlet-name="basic" servlet-class="example.CourseServlet"/>
 
   &lt;servlet-mapping url-pattern="/basic" servlet-name="basic"/>
 &lt;/web-app>
 </example>
 
-<p>The &lt;ejb-server> configures Resin's EJB support.  Each &lt;bean>
-adds a new bean (entity, session or message-driven.)</p>
+<p>The &lt;ejb-server> configures Amber support.</p>
 
-<p>The servlet's &lt;init> method uses dependency injection to
-configure the servlet.  Some applications may want to call JNDI
-directly from within the servlet, although that removes some configuration
-flexibility.</p>
+</section>
+
+<section title="persistence.xml">
+
+<p>The persistence.xml lives in META-INF/persistence.xml.  Since
+we're developing in WEB-INF/classes, the file will be in
+WEB-INF/classes/persistence.xml.</p>
+
+<example title='WEB-INF/classes/META-INF/persistence.xml'>
+&lt;persistence xmlns="http://java.sun.com/xml/ns/persistence" version="1.0">
+  &lt;persistence-unit name="example">
+    &lt;class>example.CourseBean&lt;/class>
+
+    &lt;exclude-unlisted-classes/>
+  &lt;/persistence-unit>
+&lt;/persistence>
+</example>
 
 </section>
 
