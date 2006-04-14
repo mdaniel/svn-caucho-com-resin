@@ -2,21 +2,13 @@ package example;
 
 import java.util.Collection;
 
-import javax.ejb.Entity;
-import javax.ejb.Table;
-import javax.ejb.Id;
-import javax.ejb.Basic;
-import javax.ejb.Column;
-import javax.ejb.JoinColumn;
-import javax.ejb.ManyToOne;
-import static javax.ejb.AccessType.FIELD;
-import static javax.ejb.GeneratorType.AUTO;
+import javax.persistence.*;
 
 /**
  * Implementation class for the Student bean.
  *
  * <code><pre>
- * CREATE TABLE ejb3_one2many_student (
+ * CREATE TABLE amber_one2many_student (
  *   student_id INTEGER PRIMARY KEY auto_increment,
  *   name VARCHAR(250),
  *   gender VARCHAR(1),
@@ -24,11 +16,12 @@ import static javax.ejb.GeneratorType.AUTO;
  * );
  * </pre></code>
  */
-@Entity(access=FIELD)
-@Table(name="ejb3_one2many_student")
+@Entity
+@Table(name="amber_one2many_student")
 public class Student {
-  @Id(generate=AUTO)
+  @Id
   @Column(name="student_id")
+  @GeneratedValue
   private long _id;
   
   @Basic

@@ -11,31 +11,21 @@ import javax.servlet.http.HttpServletResponse;
 
 import javax.servlet.ServletException;
 
-import javax.ejb.Query;
-
-import com.caucho.amber.ejb3.EntityManagerProxy;
+import javax.persistence.*;
 
 /**
  * A client to illustrate the query.
  */
 public class OneToManyServlet extends HttpServlet {
-
-  private EntityManagerProxy _entityManager;
-
-  /**
-   * Sets the entity manager.
-   */
-  public void setEntityManager(EntityManagerProxy entityManager)
-  {
-    _entityManager = entityManager;
-  }
+  @PersistenceContext
+  private EntityManager _entityManager;
 
   public void init()
   {
     House house = null;
       
     try {
-      house = (House) _entityManager.find("House", new Long(1));
+      house = _entityManager.find(House.class, new Long(1));
     } catch (Throwable e) {
     }
 
@@ -85,15 +75,15 @@ public class OneToManyServlet extends HttpServlet {
     
     Query allHouse = _entityManager.createQuery("SELECT o FROM House o");
 
-    List houses = allHouse.listResults();
+    List houses = allHouse.getResultList();
 
     for (int i = 0; i < houses.size(); i++) {
       House house = (House) houses.get(i);
 
       out.println("<h3>" + house.getName() + "</h3>");
 
-      for ( Student student : house.getStudents() ) {
-        out.println( student.getName() + "<br>" );
+      for (Student student : house.getStudents()) {
+        out.println(student.getName() + "<br>");
       }
     }
   }

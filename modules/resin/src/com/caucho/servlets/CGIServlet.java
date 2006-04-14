@@ -194,8 +194,6 @@ public class CGIServlet extends GenericServlet {
 
       process = runtime.exec(args, env, dir);
 
-      PrintWriter out = res.getWriter();
-
       InputStream inputStream = process.getInputStream();
       InputStream errorStream = process.getErrorStream();
 
@@ -229,9 +227,9 @@ public class CGIServlet extends GenericServlet {
       try {
 	hasStatus = parseHeaders(req, res, rs);
 
-	int ch;
-	while ((ch = rs.read()) >= 0)
-	  out.print((char) ch);
+	OutputStream out = res.getOutputStream();
+
+	rs.writeToStream(out);
       } finally {
 	try {
 	  rs.close();

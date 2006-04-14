@@ -14,8 +14,10 @@ of persistent sessions.
 
 <section title="Files in this tutorial">
 <deftable>
-<tr><td><viewfile-link file="WEB-INF/web.xml"/>
-    <td>web.xml configuration
+<tr><td><viewfile-link file="WEB-INF/resin-web.xml"/>
+    <td>resin-web.xml configuration
+<tr><td><viewfile-link file="WEB-INF/classes/META-INF/persistence.xml"/>
+    <td>persistence.xml configuration
 <tr><td><viewfile-link file="WEB-INF/classes/example/User.java"/>
     <td>The user bean
 <tr><td><viewfile-link file="WEB-INF/classes/example/SessionServlet.java"/>

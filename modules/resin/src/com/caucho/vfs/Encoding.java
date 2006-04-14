@@ -415,6 +415,13 @@ public class Encoding {
     _mimeName.put("CSISOLATIN5", "ISO-8859-9");
     _mimeName.put("ISO8859-9", "ISO-8859-9");
     _javaName.put("ISO-8859-9", "ISO8859_9");
+    
+    _mimeName.put("ISO_8859-10:1992", "ISO-8859-10");
+    _mimeName.put("iso-ir-157", "ISO-8859-10");
+    _mimeName.put("I6", "ISO-8859-10");
+    _mimeName.put("cslSOLatin6", "ISO-8859-10");
+    _mimeName.put("latin6", "ISO-8859-10");
+    _javaName.put("ISO-8859-10", "ISO8859_10");
 
     _mimeName.put("UTF-7", "UTF-7");
     _mimeName.put("UTF7", "UTF-7");

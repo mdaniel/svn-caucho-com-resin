@@ -3,8 +3,6 @@
      - configuration for the EJB server.
     -->
   <ejb-server data-source="jdbc/resin" create-database-schema="true">
-    <bean type="example.Student"/>
-    <bean type="example.Prefect"/>
   </ejb-server>
 
   <!--

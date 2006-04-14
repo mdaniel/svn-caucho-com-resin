@@ -9,7 +9,7 @@ represents a collection of children belonging to a parent,
 like students in Gryffindor house at Hogwarts school.</p>
 
 <p>
-The <a href="ejb3|tutorial/cmp-many2one/index.xtp">Many-To-One tutorial</a>
+The <a href="amber|tutorial/cmp-many2one/index.xtp">Many-To-One tutorial</a>
 illustrated that a many-to-one relation links one source entity to another
 target entity.  A one-to-many relation links the target entity back to the
 source entity.
@@ -33,8 +33,10 @@ Student has a many-to-one relationship with House
 
 <section title="Files in this tutorial">
 <deftable>
-<tr><td><viewfile-link file="WEB-INF/web.xml"/>
+<tr><td><viewfile-link file="WEB-INF/resin-web.xml"/>
     <td>web.xml configuration
+<tr><td><viewfile-link file="WEB-INF/classes/META-INF/persistence.xml"/>
+    <td>persistence.xml configuration
 <tr><td><viewfile-link file="WEB-INF/classes/example/Student.java"/>
     <td>The student bean
 <tr><td><viewfile-link file="WEB-INF/classes/example/House.java"/>
@@ -50,7 +52,7 @@ Student has a many-to-one relationship with House
 
 <p>
 The database schema is unchanged from the
-<a href="ejb3|tutorial/cmp-many2one/index.xtp">Many-To-One tutorial</a>,
+<a href="amber|tutorial/cmp-many2one/index.xtp">Many-To-One tutorial</a>,
 and might look like:</p>
 
 <example title="SQL">
@@ -79,8 +81,7 @@ that is the <code>@ManyToOne</code> link.
 <example title="House.java"
          file="WEB-INF/classes/example/House.java"
          re-marker="Get the Student" re-start="Get the Student" re-end="^  }">
-  @<a href="ejb3|cmp-table.xtp#@OneToMany">javax.ejb.OneToMany</a>(targetEntity="Student")
-  @<a href="ejb3|cmp-table.xtp#@JoinColumn">javax.ejb.JoinColumn</a>(name="house")
+  @<a href="amber|amber-table.xtp#@OneToMany">OneToMany</a>(mappedBy="house")
   private Set&lt;Student&gt; _students;
 </example>
 </section>
@@ -97,8 +98,8 @@ unchanged from the
          file="WEB-INF/classes/example/Student.java"
          re-start="this Student belongs to" re-end="^  }">
 
-  <a href="ejb3|cmp-table.xtp#@ManyToOne">@javax.ejb.ManyToOne</a>
-  <a href="ejb3|cmp-table.xtp#@JoinColumn">@javax.ejb.JoinColumn</a>(name="house")
+  <a href="amber|amber-table.xtp#@ManyToOne">@ManyToOne</a>
+  <a href="amber|amber-table.xtp#@JoinColumn">@JoinColumn</a>(name="house")
   private House _house;
 </example>
 
@@ -124,8 +125,7 @@ time.
 <example title="House.java"
          file="WEB-INF/classes/example/House.java"
          re-start="FetchType">
-  @javax.ejb.OneToMany(targetEntity="Student", <b>fetch=@javax.ejb.FetchType.LAZY</b> )
-  @javax.ejb.JoinColumn(name="house")
+  @OneToMany(targetEntity=Student.class, mappedBy="house")
   public Set&lt;Student&gt; getStudents()
 </example>
 
@@ -160,7 +160,7 @@ private void doService(PrintWriter out)
     
     Query allHouse = _entityManager.createQuery("SELECT o FROM House o");
 
-    List houses = allHouse.listResults();
+    List houses = allHouse.getResultList();
 
     for (int i = 0; i &lt; houses.size(); i++) {
       House house = (House) houses.get(i);

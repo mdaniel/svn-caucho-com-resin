@@ -1,15 +1,6 @@
 package example;
 
-import javax.ejb.Entity;
-import javax.ejb.Table;
-import javax.ejb.Id;
-import javax.ejb.Column;
-import javax.ejb.GeneratorType;
-import javax.ejb.Basic;
-import javax.ejb.EntityManager;
-
-import static javax.ejb.GeneratorType.AUTO;
-import static javax.ejb.AccessType.FIELD;
+import javax.persistence.*;
 
 import javax.naming.InitialContext;
 import javax.naming.Context;
@@ -28,11 +19,12 @@ import javax.naming.Context;
  * );
  * </pre></code>
  */
-@Entity(access=FIELD)
+@Entity
 @Table(name="amber_session_user")
 public class User {
-  @Id(generate=GeneratorType.AUTO)
+  @Id
   @Column(name="id")
+  @GeneratedValue
   private int _id;
   
   @Basic
@@ -121,7 +113,7 @@ public class User {
 	Context ic = new InitialContext();
 	
 	EntityManager manager
-	  = (EntityManager) ic.lookup("java:comp/env/EntityManager");
+	  = (EntityManager) ic.lookup("java:comp/env/persistence/PersistenceContext/example");
 
 	// find the user object
 	return manager.find(User.class, _id);

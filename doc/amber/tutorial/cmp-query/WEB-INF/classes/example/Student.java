@@ -2,20 +2,13 @@ package example;
 
 import java.util.Collection;
 
-import javax.ejb.Entity;
-import javax.ejb.Table;
-import javax.ejb.Id;
-import javax.ejb.Basic;
-import javax.ejb.Column;
-import javax.ejb.JoinColumn;
-import javax.ejb.ManyToOne;
-import static javax.ejb.GeneratorType.AUTO;
+import javax.persistence.*;
 
 /**
  * Implementation class for the Student bean.
  *
  * <code><pre>
- * CREATE TABLE ejb3_query_student (
+ * CREATE TABLE amber_query_student (
  *   id INTEGER PRIMARY KEY auto_increment,
  *   name VARCHAR(250),
  *   gender VARCHAR(1),
@@ -24,7 +17,7 @@ import static javax.ejb.GeneratorType.AUTO;
  * </pre></code>
  */
 @Entity
-@Table(name="ejb3_query_student")
+@Table(name="amber_query_student")
 public class Student {
   private long _id;
   private String _name;
@@ -45,8 +38,9 @@ public class Student {
   /**
    * Gets the id.
    */
-  @Id(generate=AUTO)
+  @Id
   @Column(name="id")
+  @GeneratedValue
   public long getId()
   {
     return _id;

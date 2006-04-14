@@ -11,31 +11,21 @@ import javax.servlet.http.HttpServletResponse;
 
 import javax.servlet.ServletException;
 
-import javax.ejb.Query;
-
-import com.caucho.amber.ejb3.EntityManagerProxy;
+import javax.persistence.*;
 
 /**
  * A client to illustrate the services of the CourseBean CMP bean.
  */
 public class CreateServlet extends HttpServlet {
-
-  private EntityManagerProxy _entityManager;
-
-  /**
-   * Sets the entity manager.
-   */
-  public void setEntityManager(EntityManagerProxy entityManager)
-  {
-    _entityManager = entityManager;
-  }
+  @PersistenceContext(name="example")
+  private EntityManager _entityManager;
 
   public void init()
   {
     Course course = null;
       
     try {
-      course = (Course) _entityManager.find("Course", new Integer(1));
+      course = _entityManager.find(Course.class, new Integer(1));
     } catch (Throwable e) {
     }
 
@@ -106,7 +96,7 @@ public class CreateServlet extends HttpServlet {
   private void displayCourses(PrintWriter out, Query query)
     throws IOException
   {
-    List list = query.listResults();
+    List list = query.getResultList();
 
     for (int i = 0; i < list.size(); i++) {
       Course course = (Course) list.get(i);

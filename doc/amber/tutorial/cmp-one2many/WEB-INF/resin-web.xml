@@ -3,16 +3,13 @@
      - configuration for the JNDI server.
     -->
   <ejb-server data-source="jdbc/resin" create-database-schema="true">
-    <bean type="example.Course"/>
   </ejb-server>
-
-
+  
   <!--
      - configuration for the client.
     -->
-  <servlet servlet-name="create" servlet-class="example.CreateServlet">
-    <init entity-manager="${jndi:lookup('java:comp/EntityManager')}"/>
+  <servlet servlet-name="one2many" servlet-class="example.OneToManyServlet">
   </servlet>
 
-  <servlet-mapping url-pattern="/create" servlet-name="create"/>
+  <servlet-mapping url-pattern="/one2many" servlet-name="one2many"/>
 </web-app>

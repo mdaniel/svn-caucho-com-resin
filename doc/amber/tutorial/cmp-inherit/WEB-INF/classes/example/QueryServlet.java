@@ -11,21 +11,14 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import javax.ejb.EntityManager;
-import javax.ejb.Query;
-import javax.ejb.Inject;
+import javax.persistence.*;
 
 /**
  * The QueryServlet just displays the values.
  */
 public class QueryServlet extends HttpServlet {
+  @PersistenceContext(name="example")
   private EntityManager _manager;
-
-  @Inject
-  public void setEntityManager(EntityManager manager)
-  {
-    _manager = manager;
-  }
 
   /**
    * Illustrates how to interact with the Course EJB
@@ -36,7 +29,7 @@ public class QueryServlet extends HttpServlet {
     Student student = null;
     
     try {
-      student = (Student) _manager.find("Student", new Long(1));
+      student = _manager.find(Student.class, new Long(1));
       if (student != null)
 	return;
     } catch (Exception e) {
@@ -61,7 +54,7 @@ public class QueryServlet extends HttpServlet {
 
     Query query = _manager.createQuery("SELECT o FROM Student o");
     
-    for (Object student : query.listResults()) {
+    for (Object student : query.getResultList()) {
       out.println(student + "<br>");
     }
   }

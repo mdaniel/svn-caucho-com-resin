@@ -552,7 +552,12 @@ public class UserConnection implements java.sql.Connection {
     throws SQLException
   {
     try {
-      return getConnection().getWarnings();
+      Connection conn = getConnection();
+      
+      if (conn != null)
+	return conn.getWarnings();
+      else
+	return null;
     } catch (SQLException e) {
       fatalEvent();
       throw e;
@@ -563,7 +568,10 @@ public class UserConnection implements java.sql.Connection {
     throws SQLException
   {
     try {
-      getConnection().clearWarnings();
+      Connection conn = getConnection();
+      
+      if (conn != null)
+	conn.clearWarnings();
     } catch (SQLException e) {
       fatalEvent();
       throw e;

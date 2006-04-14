@@ -8,6 +8,11 @@
 
 <summary objsummary='localtoc'/>
 
+<section title="LdapAuthenticator">
+
+<p>dn-prefix, dn-suffix, jndi-dnv, user-attribute, password-attribute</p>
+
+</section>
 <section title="connection-error-page">
 
 <p>The server block now accepts &lt;connection-error-page> for IIS.</p>

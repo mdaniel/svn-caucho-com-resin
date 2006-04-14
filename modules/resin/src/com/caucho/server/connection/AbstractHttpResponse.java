@@ -44,6 +44,7 @@ import com.caucho.util.CaseInsensitiveIntMap;
 import com.caucho.vfs.WriteStream;
 import com.caucho.vfs.TempBuffer;
 import com.caucho.vfs.FlushBuffer;
+import com.caucho.vfs.ClientDisconnectException;
 
 import com.caucho.xml.XmlChar;
 
@@ -1977,6 +1978,13 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
 
 	cache.finishCaching(_statusCode == 200 && _allowCache);
       }
+    } catch (ClientDisconnectException e) {
+      _request.killKeepalive();
+
+      if (isIgnoreClientDisconnect())
+	log.fine(e.toString());
+      else
+	throw e;
     } catch (IOException e) {
       _request.killKeepalive();
       

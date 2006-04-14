@@ -11,31 +11,21 @@ import javax.servlet.http.HttpServletResponse;
 
 import javax.servlet.ServletException;
 
-import javax.ejb.Query;
-
-import com.caucho.amber.ejb3.EntityManagerProxy;
+import javax.persistence.*;
 
 /**
  * A client to illustrate the query.
  */
 public class QueryServlet extends HttpServlet {
-
-  private EntityManagerProxy _entityManager;
-
-  /**
-   * Sets the entity manager.
-   */
-  public void setEntityManager(EntityManagerProxy entityManager)
-  {
-    _entityManager = entityManager;
-  }
+  @PersistenceContext(name="example")
+  private EntityManager _entityManager;
 
   public void init()
   {
     House house = null;
       
     try {
-      house = (House) _entityManager.find("House", new Long(1));
+      house = _entityManager.find(House.class, new Long(1));
     } catch (Throwable e) {
     }
 
@@ -88,7 +78,7 @@ public class QueryServlet extends HttpServlet {
 		  " WHERE h.id=?1 AND s.gender='M'");
     Query boysInHouse = _entityManager.createQuery(sql);
     
-    List houses = allHouse.listResults();
+    List houses = allHouse.getResultList();
 
     for (int i = 0; i < houses.size(); i++) {
       House house = (House) houses.get(i);
@@ -96,7 +86,7 @@ public class QueryServlet extends HttpServlet {
       out.println("<H3>Boys living in " + house.getName() + ":</H3>");
 
       boysInHouse.setParameter(1, new Long(house.getId()));
-      List boys = boysInHouse.listResults();
+      List boys = boysInHouse.getResultList();
 
       if (boys.size() == 0)
 	out.println("No boys are living in " + house.getName());

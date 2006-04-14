@@ -154,9 +154,6 @@ public class Bean {
 	configureStateless(_type);
       else if (stateful != null)
 	configureStateful(_type);
-      else if (_type.getAnnotation(Entity.class) != null) {
-	_introspector.introspect(_type);
-      }
       else
 	throw new ConfigException(L.l("only stateless beans are currently supported."));
     } catch (RuntimeException e) {

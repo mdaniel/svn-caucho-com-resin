@@ -2,20 +2,13 @@ package example;
 
 import java.util.Collection;
 
-import javax.ejb.Entity;
-import javax.ejb.Table;
-import javax.ejb.Id;
-import javax.ejb.Basic;
-import javax.ejb.Column;
-import javax.ejb.JoinColumn;
-import javax.ejb.ManyToOne;
-import static javax.ejb.GeneratorType.AUTO;
+import javax.persistence.*;
 
 /**
  * Implementation class for the Student bean.
  *
  * <code><pre>
- * CREATE TABLE ejb3_many2many_map (
+ * CREATE TABLE amber_many2many_map (
  *   grade_id INTEGER PRIMARY KEY auto_increment,
  *
  *   student_id INTEGER REFERENCES Student(student_id)
@@ -24,7 +17,7 @@ import static javax.ejb.GeneratorType.AUTO;
  * </pre></code>
  */
 @Entity
-@Table(name="ejb3_many2many_map")
+@Table(name="amber_many2many_map")
 public class Grade {
   private long _id;
   private Student _student;
@@ -45,8 +38,9 @@ public class Grade {
   /**
    * Gets the id.
    */
-  @Id(generate=AUTO)
+  @Id
   @Column(name="grade_id")
+  @GeneratedValue
   public long getId()
   {
     return _id;

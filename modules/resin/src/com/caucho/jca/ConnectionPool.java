@@ -538,7 +538,7 @@ public class ConnectionPool
 
 	  return;
 	} catch (Throwable e) {
-	  log.log(Level.WARNING, e.toString(), e);
+	  log.log(Level.FINE, e.toString(), e);
 	}
       }
     }

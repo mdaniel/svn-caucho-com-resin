@@ -2,27 +2,20 @@ package example;
 
 import java.util.Collection;
 
-import javax.ejb.Entity;
-import javax.ejb.Table;
-import javax.ejb.Id;
-import javax.ejb.Basic;
-import javax.ejb.Column;
-import javax.ejb.JoinColumn;
-import javax.ejb.ManyToMany;
-import static javax.ejb.GeneratorType.AUTO;
+import javax.persistence.*;
 
 /**
  * Implementation class for the Course bean.
  *
  * <code><pre>
- * CREATE TABLE ejb3_many2many_course (
+ * CREATE TABLE amber_many2many_course (
  *   course_id INTEGER PRIMARY KEY auto_increment,
  *   name VARCHAR(250),
  * );
  * </pre></code>
  */
 @Entity
-@Table(name="ejb3_many2many_course")
+@Table(name="amber_many2many_course")
 public class Course {
   private long _id;
   private String _name;
@@ -39,8 +32,9 @@ public class Course {
   /**
    * Gets the id.
    */
-  @Id(generate=AUTO)
+  @Id
   @Column(name="course_id")
+  @GeneratedValue
   public long getId()
   {
     return _id;

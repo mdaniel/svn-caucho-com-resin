@@ -209,11 +209,13 @@ public class EntityIntrospector {
 	introspectInheritance(_persistenceUnit, entityType, type);
 
       if (secondaryTableAnn != null) {
-	String secondaryName = (String) secondaryTableAnn.get("name");
+	String secondaryName = secondaryTableAnn.getString("name");
 
 	secondaryTable = _persistenceUnit.createTable(secondaryName);
 
 	entityType.addSecondaryTable(secondaryTable);
+
+	// XXX: pk
       }
 
       JAnnotation idClassAnn = type.getAnnotation(IdClass.class);
@@ -246,9 +248,14 @@ public class EntityIntrospector {
       }
 
       if (secondaryTableAnn != null) {
-	Object []join = (Object []) secondaryTableAnn.get("join");
-	JAnnotation []joinAnn = new JAnnotation[join.length];
-	System.arraycopy(join, 0, joinAnn, 0, join.length);
+	Object []join = (Object []) secondaryTableAnn.get("pkJoinColumns");
+
+	JAnnotation []joinAnn = null;
+	
+	if (join != null) {
+	  joinAnn = new JAnnotation[join.length];
+	  System.arraycopy(join, 0, joinAnn, 0, join.length);
+	}
 
 	linkSecondaryTable(entityType.getTable(),
 			   secondaryTable,
@@ -1106,9 +1113,8 @@ public class EntityIntrospector {
 
     Column column;
 
-    /*
-    if (columnAnn != null && ! columnAnn.get("secondaryTable").equals("")) {
-      String tableName = columnAnn.getString("secondaryTable");
+    if (columnAnn != null && ! columnAnn.get("table").equals("")) {
+      String tableName = columnAnn.getString("table");
       Table table;
 
       table = entityType.getSecondaryTable(tableName);
@@ -1119,9 +1125,8 @@ public class EntityIntrospector {
 
       column = table.createColumn(name, amberType);
     }
-    */
-
-    column = entityType.getTable().createColumn(name, amberType);
+    else
+      column = entityType.getTable().createColumn(name, amberType);
 
     if (columnAnn != null) {
       // primaryKey = column.primaryKey();

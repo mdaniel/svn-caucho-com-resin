@@ -3,7 +3,7 @@
     <product>resin-ee</product>
     <title>Creating and Removing Entity Beans</title>
     <description>
-      <p>Describes the basic create/remove api for entity beans.
+      <p>Describes the basic create/remove api for persistent entities.
     </description>
     <type>tutorial</type>
     <tutorial-startpage>create</tutorial-startpage>
@@ -14,23 +14,25 @@
 
 <p>Almost all applications need to add and remove entities from the
 database.  Although most database accesses are reads, eventually we
-need to change the database.  With CMP, you create a new instance
+need to change the database.  With Amber, you create a new instance
 with the following steps:</p>
 
 <ol>
 <li>Instantiate the instance with "new"
 <li>Populate the values
-<li>Call the EntityManager create method
+<li>Call the EntityManager ersist method
 </ol>
 
 <section title="Files in this tutorial">
 <deftable>
-<tr><td><viewfile-link file="WEB-INF/web.xml"/>
-    <td>web.xml configuration
+<tr><td><viewfile-link file="WEB-INF/resin-web.xml"/>
+    <td>resin-web.xml configuration
+<tr><td><viewfile-link file="WEB-INF/classes/META-INF/persistence.xml"/>
+    <td>persistence.xml configuration
 <tr><td><viewfile-link file="WEB-INF/classes/example/Course.java"/>
     <td>The course bean
-<tr><td><viewfile-link file="WEB-INF/classes/example/CourseServlet.java"/>
-    <td>The course servlet
+<tr><td><viewfile-link file="WEB-INF/classes/example/CreateServlet.java"/>
+    <td>The create servlet
 </deftable>
 </section>
 
@@ -52,13 +54,13 @@ CREATE TABLE create_courses (
 
 <p>Clients create a new bean and populate the fields just like
 a normal Java object.  The client adds the entry to the database
-by calling the EntityManager's <code>create</code> method.</p>
+by calling the EntityManager's <code>persist</code> method.</p>
 
 <example title="Adding and Removing Courses">
 ...
 
 divination = new Course("Divination", "Sybil Trelawney");
-_entityManager.create(divination);
+_entityManager.persist(divination);
 
 ...
 

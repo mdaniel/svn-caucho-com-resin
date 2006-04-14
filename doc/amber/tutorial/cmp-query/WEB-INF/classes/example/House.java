@@ -1,12 +1,6 @@
 package example;
 
-import javax.ejb.Entity;
-import javax.ejb.Table;
-import javax.ejb.Id;
-import javax.ejb.Column;
-import javax.ejb.Basic;
-import javax.ejb.OneToMany;
-import static javax.ejb.GeneratorType.AUTO;
+import javax.persistence.*;
 
 import java.util.Collection;
 
@@ -14,14 +8,14 @@ import java.util.Collection;
  * Implementation class for the House bean.
  *
  * <code><pre>
- * CREATE TABLE ejb3_query_house (
+ * CREATE TABLE amber_query_house (
  *   id BIGINT PRIMARY KEY auto_increment,
  *   name VARCHAR(250) UNIQUE NOT NULL
  * );
  * </pre></code>
  */
 @Entity
-@Table(name="ejb3_query_house")
+@Table(name="amber_query_house")
 public class House {
   private long _id;
   private String _name;
@@ -40,8 +34,9 @@ public class House {
   /**
    * Returns the id of the house.
    */
-  @Id(generate=AUTO)
+  @Id
   @Column(name="id")
+  @GeneratedValue
   public long getId()
   {
     return _id;
@@ -76,7 +71,8 @@ public class House {
   /**
    * returns a <code>Collection</code> of all Students living in this House.
    */
-  @OneToMany(targetEntity="Student")
+  @OneToMany(targetEntity=Student.class,
+	     mappedBy="house")
   public Collection getStudentList()
   {
     return _studentList;

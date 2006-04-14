@@ -9,16 +9,17 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import javax.ejb.EntityManager;
 import javax.ejb.Inject;
 import javax.ejb.TransactionAttribute;
 import static javax.ejb.TransactionAttributeType.REQUIRED;
+
+import javax.persistence.*;
 
 /**
  * The SwapServlet swaps cources.
  */
 public class SwapServlet extends HttpServlet {
-  @Inject
+  @PersistenceContext(name="example")
   private EntityManager _manager;
 
   /**
@@ -30,7 +31,7 @@ public class SwapServlet extends HttpServlet {
     Course course = null;
     
     try {
-      course = (Course) _manager.find("Course", new Integer(1));
+      course = _manager.find(Course.class, new Integer(1));
       if (course != null)
 	return;
     } catch (Exception e) {
@@ -61,8 +62,8 @@ public class SwapServlet extends HttpServlet {
 
     Course []courses = new Course[2];
 
-    courses[0] = (Course) _manager.find("Course", new Integer(1));
-    courses[1] = (Course) _manager.find("Course", new Integer(2));
+    courses[0] = _manager.find(Course.class, new Integer(1));
+    courses[1] = _manager.find(Course.class, new Integer(2));
 
     printCourses(out, "Initial Teachers", courses);
 

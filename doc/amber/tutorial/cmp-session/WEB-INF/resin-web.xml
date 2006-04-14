@@ -3,16 +3,12 @@
      - Configuration for the ejb-server.
     -->
   <ejb-server data-source="jdbc/resin" create-database-schema="true">
-    <bean type="example.User"/>
   </ejb-server>
 
   <!--
      - configuration for the servlet.
     -->
   <servlet servlet-name="session" servlet-class="example.SessionServlet">
-    <init>
-      <entity-manager>${jndi("java:comp/EntityManager")}</entity-manager>
-    </init>
   </servlet>
 
   <servlet-mapping url-pattern="/session" servlet-name="session"/>

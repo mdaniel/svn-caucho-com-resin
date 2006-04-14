@@ -13,31 +13,21 @@ import javax.servlet.http.HttpServletResponse;
 
 import javax.servlet.ServletException;
 
-import javax.ejb.Query;
-
-import com.caucho.amber.ejb3.EntityManagerProxy;
+import javax.persistence.*;
 
 /**
  * A client to illustrate the many-to-many relation.
  */
 public class ManyToManyServlet extends HttpServlet {
-
-  private EntityManagerProxy _entityManager;
-
-  /**
-   * Sets the entity manager.
-   */
-  public void setEntityManager(EntityManagerProxy entityManager)
-  {
-    _entityManager = entityManager;
-  }
+  @PersistenceContext(name="example")
+  private EntityManager _entityManager;
 
   public void init()
   {
     Student student = null;
       
     try {
-      student = (Student) _entityManager.find("Student", new Long(1));
+      student = _entityManager.find(Student.class, new Long(1));
     } catch (Throwable e) {
     }
 
@@ -94,7 +84,7 @@ public class ManyToManyServlet extends HttpServlet {
 
     Query allStudent = _entityManager.createQuery("SELECT o FROM Student o");
     
-    List students = allStudent.listResults();
+    List students = allStudent.getResultList();
 
     for (int i = 0; i < students.size(); i++) {
       Student student = (Student) students.get(i);

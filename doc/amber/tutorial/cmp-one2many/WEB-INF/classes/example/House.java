@@ -1,14 +1,6 @@
 package example;
 
-import javax.ejb.Entity;
-import javax.ejb.Table;
-import javax.ejb.Id;
-import javax.ejb.Column;
-import javax.ejb.Basic;
-import javax.ejb.GeneratorType;
-import javax.ejb.OneToMany;
-import javax.ejb.JoinColumn;
-import javax.ejb.AccessType;
+import javax.persistence.*;
 
 import java.util.Set;
 
@@ -16,25 +8,25 @@ import java.util.Set;
  * Implementation class for the House bean.
  *
  * <code><pre>
- * CREATE TABLE ejb3_one2many_house (
+ * CREATE TABLE amber_one2many_house (
  *   house BIGINT PRIMARY KEY auto_increment,
  *   name VARCHAR(250) UNIQUE NOT NULL
  * );
  * </pre></code>
  */
-@Entity(access=AccessType.FIELD)
-@Table(name="ejb3_one2many_house")
+@Entity
+@Table(name="amber_one2many_house")
 public class House {
-  @Id(generate=GeneratorType.AUTO)
+  @Id
   @Column(name="house_id")
+  @GeneratedValue
   private long _id;
   
   @Basic
   @Column(name="name",unique=true)
   private String _name;
   
-  @OneToMany
-  @JoinColumn(name="house")
+  @OneToMany(mappedBy="house")
   private Set<Student> _students;
 
   public House()

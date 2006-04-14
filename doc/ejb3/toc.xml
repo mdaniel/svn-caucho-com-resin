@@ -1,7 +1,6 @@
 <navigation threaded="true" section="Resin : EJB 3.0 : " comment="true">
   <item title="EJB 3.0" link="index.xtp">
     <item title="Bean Annotation" link="bean-ann.xtp"/>
-    <item title="Table" link="cmp-table.xtp"/>
     <item title="Tutorials" link="tutorial/index.xtp" atoc-descend='1'/>
   </item>
 </navigation>

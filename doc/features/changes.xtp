@@ -4,6 +4,11 @@
 
 <s2 title='3.0.snap - Mar 17, 2006'>
 <ul>
+<li>ToCharResponseAdapter should not close the underlying writer on close (#989, rep by Tony Field)
+<li>CGI was sending output through PrintWriter instead of OutputStream (#1035, rep by mineral)
+<li>Added aliases and java type for ISO-8859-10 (rep by Michael Young)
+<li>AbstractHttpResponse.finish was not ignoring client disconnect (#1045, rep by Mattias )Jiderhamn
+<li>LdapAuthenticator (#666, rep by Rudy D'Hauwe);
 <li>Basic SSI support with SSIServlet (#205)
 <li>JSP/tag file compilation issue (#1037, rep by Serge Knystautas)
 <li>ISAPI handling of 100-continue and flushing not properly reading 'f' response (#982, rep by assurone)

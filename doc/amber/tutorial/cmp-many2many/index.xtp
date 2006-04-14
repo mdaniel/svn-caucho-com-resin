@@ -14,8 +14,10 @@
 
 <section title="Files in this tutorial">
 <deftable>
-<tr><td><viewfile-link file="WEB-INF/web.xml"/>
-    <td>web.xml configuration
+<tr><td><viewfile-link file="WEB-INF/resin-web.xml"/>
+    <td>resin-web.xml configuration
+<tr><td><viewfile-link file="WEB-INF/classes/META-INF/persistence.xml"/>
+    <td>persistence.xml configuration
 <tr><td><viewfile-link file="WEB-INF/classes/example/Student.java"/>
     <td>The student bean
 <tr><td><viewfile-link file="WEB-INF/classes/example/Course.java"/>
@@ -58,13 +60,13 @@ CREATE TABLE grade_map (
 <p>The Course has an @Id and a data column for the name.</p>
 
 <example title="Course.java">
-<a href="ejb3|cmp-table.xtp#@Entity">@javax.ejb.Entity</a>
+<a href="amber|amber-table.xtp#@Entity">@Entity</a>
 public class Course {
-  <a href="ejb3|cmp-table.xtp#@Id">@javax.ejb.Id</a>
-  <a href="ejb3|cmp-table.xtp#@Column">@javax.ejb.Column</a>(name="course_id")
+  <a href="amber|amber-table.xtp#@Id">@Id</a>
+  <a href="amber|amber-table.xtp#@Column">@Column</a>(name="course_id")
   public long getId()
 
-  <a href="ejb3|cmp-table.xtp#@Basic">@javax.ejb.Basic</a>
+  <a href="amber|amber-table.xtp#@Basic">@Basic</a>
   public String getName()
 }
 </example>
@@ -72,20 +74,20 @@ public class Course {
 <p>The Student includes the many-to-many relation in its definition.</p>
 
 <example title="Student.java">
-<a href="ejb3|cmp-table.xtp#@Entity">@javax.ejb.Entity</a>
+<a href="amber|amber-table.xtp#@Entity">@Entity</a>
 public class Student {
-  <a href="ejb3|cmp-table.xtp#@Id">@javax.ejb.Id</a>
-  <a href="ejb3|cmp-table.xtp#@Column">@javax.ejb.Column</a>(name="student_id")
+  <a href="amber|amber-table.xtp#@Id">@Id</a>
+  <a href="amber|amber-table.xtp#@Column">@Column</a>(name="student_id")
   public long getId()
 
-  <a href="ejb3|cmp-table.xtp#@Basic">@javax.ejb.Basic</a>
+  <a href="amber|amber-table.xtp#@Basic">@Basic</a>
   public String getName()
 
-  <a href="ejb3|cmp-table.xtp#@ManyToMany">@javax.ejb.ManyToMany(targetEntity="Course")</a>
-  <a href="ejb3|cmp-table.xtp#@AssociationTable">@javax.ejb.AssociationTable</a>(
-      table=<a href="ejb3|cmp-table.xtp#@Table">@javax.ejb.Table</a>(name="student_course_map"),
-      joinColumns=<a href="ejb3|cmp-table.xtp#@JoinColumn">@javax.ejb.JoinColumn</a>(name="student_id")",
-      inverseJoinColumns=<a href="ejb3|cmp-table.xtp#@JoinColumn">@javax.ejb.JoinColumn</a>(name="course_id")")
+  <a href="amber|amber-table.xtp#@ManyToMany">@ManyToMany(targetEntity="Course")</a>
+  <a href="amber|amber-table.xtp#@JoinTable">@JoinTable</a>(
+      table=<a href="amber|amber-table.xtp#@Table">@Table</a>(name="student_course_map"),
+      joinColumns=<a href="amber|amber-table.xtp#@JoinColumn">@JoinColumn</a>(name="student_id")",
+      inverseJoinColumns=<a href="amber|amber-table.xtp#@JoinColumn">@JoinColumn</a>(name="course_id")")
   public Collection getCourses()
 }
 </example>
@@ -93,7 +95,7 @@ public class Student {
 
 <section title="@ManyToMany">
 
-<p>The <a href="ejb3|cmp-table.xtp#@ManyToMany">@ManyToMany</a>
+<p>The <a href="amber|amber-table.xtp#@ManyToMany">@ManyToMany</a>
 annotation marks a collection-valued field as a many-to-many relation.
 The <code>targetEntity</code> value specifies the target of the
 relation.

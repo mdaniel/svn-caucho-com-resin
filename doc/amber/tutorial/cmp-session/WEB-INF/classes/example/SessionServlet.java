@@ -3,7 +3,7 @@ package example;
 import java.io.PrintWriter;
 import java.io.IOException;
 
-import javax.ejb.EntityManager;
+import javax.persistence.*;
 
 import javax.servlet.ServletException;
 
@@ -13,6 +13,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 public class SessionServlet extends HttpServlet {
+  @PersistenceContext(name="example")
   private EntityManager _manager;
 
   /**

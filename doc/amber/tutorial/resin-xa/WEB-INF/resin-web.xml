@@ -10,11 +10,9 @@
   </class-loader>
 
   <!--
-     - configuration for the JNDI server.
+     - Amber configuration
     -->
-  <ejb-server jndi-name="java:comp/env/ejb"
-              data-source="jdbc/resin" create-database-schema="true">
-    <bean type="example.Course"/>
+  <ejb-server data-source="jdbc/resin" create-database-schema="true">
   </ejb-server>
 
   <!--

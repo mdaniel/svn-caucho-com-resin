@@ -10,7 +10,7 @@ the database's locking capabilities for scalability.</p>
           <p>See also:</p>
           <ul>
             <li>The <a href="ejb3|bean-ann.xtp#@TransactionAttribute">@TransactionAttribute</a> reference.
-            <li>The <a href="../cmp-xa/index.xtp">CMP Transaction</a> example for the same example using session beans.
+            <li>The <a href="../cmp-xa/index.xtp">Amber Transaction</a> example for the same example using session beans.
           </ul>
         </description>
     <type>tutorial</type>
@@ -22,8 +22,10 @@ the database's locking capabilities for scalability.</p>
 
 <section title="Files in this tutorial">
 <deftable>
-<tr><td><viewfile-link file="WEB-INF/web.xml"/>
-    <td>web.xml configuration
+<tr><td><viewfile-link file="WEB-INF/resin-web.xml"/>
+    <td>resin-web.xml configuration
+<tr><td><viewfile-link file="WEB-INF/classes/META-INF/persistence.xml"/>
+    <td>persistence.xml configuration
 <tr><td><viewfile-link file="WEB-INF/classes/example/Course.java"/>
     <td>The course bean
 <tr><td><viewfile-link file="WEB-INF/classes/example/SwapServlet.java"/>
@@ -163,7 +165,7 @@ private void swap(Course a, Course b)
 <section title="Database Schema">
 
 <example title="course.sql">
-CREATE TABLE ejb3_xa_courses (
+CREATE TABLE amber_xa_courses (
   id INTEGER PRIMARY KEY auto_increment,
 
   course VARCHAR(250),
@@ -179,16 +181,16 @@ INSERT INTO basic_courses VALUES('Transfiguration', 'Minerva McGonagall');
 <section title="Course Entity Implementation">
 
 <p>The Course is identical to
-the <a href="../cmp-xa">CMP transaction bean</a>.  It uses
-FIELD enhancement to define the database columns.
+the <a href="../cmp-xa">EJB transaction bean</a>.  It uses
+field enhancement to define the database columns.
 
 <example title="Course.java">
-@Entity(access=FIELD)
-@Table(name="ejb3_xa_courses")
+@Entity
+@Table(name="amber_xa_courses")
 public class Course {
-
-  @Id(generate=AUTO)
+  @Id
   @Column(name="id")
+  @GeneratedValue
   private int _id;
 
   @Basic
@@ -207,11 +209,11 @@ public class Course {
 <section title="Swap Servlet">
 
 <example title="SwapServlet.java">
-import javax.ejb.EntityManager;
+import javax.persistence.*;
 import javax.transaction.UserTransaction;
 
 public class CourseServlet extends HttpServlet {
-  @javax.ejb.Inject
+  @PersistenceContext(name="example")
   private EntityManager _manager;
 
   ...
@@ -219,10 +221,10 @@ public class CourseServlet extends HttpServlet {
   private void doService(PrintWriter out)
     throws Exception
   {
-    CourseBean []course = new CourseBean[2];
+    Course []course = new Course[2];
 
-    course[0] = (CourseBean) _manager.find("CourseBean", new Integer(1));
-    course[1] = (CourseBean) _manager.find("CourseBean", new Integer(2));
+    course[0] = _manager.find(Course.class, new Integer(1));
+    course[1] = _manager.find(Course.class, new Integer(2));
 
     // swap the courses
     swap(course[0], course[1]);

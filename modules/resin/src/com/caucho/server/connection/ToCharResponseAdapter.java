@@ -138,8 +138,9 @@ public class ToCharResponseAdapter extends ResponseAdapter {
     {
       // jsp/1730
       flushBuffer();
-      
-      getResponse().getWriter().close();
+
+      // server/172q
+      // getResponse().getWriter().close();
     }
     
     protected void writeNext(char []buffer, int offset, int length)

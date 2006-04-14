@@ -37,7 +37,7 @@ import static java.lang.annotation.ElementType.*;
 /**
  * The @DiscriminatorValue annotation.
  */
-@Target({METHOD, FIELD}) @Retention(RUNTIME)
+@Target({TYPE}) @Retention(RUNTIME)
 public @interface DiscriminatorValue {
   String value() default "";
 }

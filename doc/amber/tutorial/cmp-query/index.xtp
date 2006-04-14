@@ -3,8 +3,8 @@
     <product>resin-ee</product>
     <title>Query CMP</title>
         <description>
-          <p>The EJB 3.0 Query API resembles the JDBC PreparedStatement with
-enhanced SQL and direct support for objects.0.</p>
+          <p>The Amber Query API resembles the JDBC PreparedStatement with
+enhanced SQL and direct support for objects.</p>
         </description>
     <type>tutorial</type>
     <tutorial-startpage>query</tutorial-startpage>
@@ -15,8 +15,10 @@ enhanced SQL and direct support for objects.0.</p>
 
 <section title="Files in this tutorial">
 <deftable>
-<tr><td><viewfile-link file="WEB-INF/web.xml"/>
-    <td>web.xml configuration
+<tr><td><viewfile-link file="WEB-INF/resin-web.xml"/>
+    <td>resin-web.xml configuration
+<tr><td><viewfile-link file="WEB-INF/classes/META-INF/persistence.xml"/>
+    <td>persistence.xml configuration
 <tr><td><viewfile-link file="WEB-INF/classes/example/Student.java"/>
     <td>The student bean
 <tr><td><viewfile-link file="WEB-INF/classes/example/House.java"/>
@@ -29,32 +31,33 @@ enhanced SQL and direct support for objects.0.</p>
 <section title="Database Schema">
 
 <example title="House.java">
-<a href="ejb3|cmp-table.xtp#@Entity">@javax.ejb.Entity</a>
+<a href="amber|amber-table.xtp#@Entity">@Entity</a>
 public class House {
-  <a href="ejb3|cmp-table.xtp#@Id">@javax.ejb.Id</a>
-  <a href="ejb3|cmp-table.xtp#@Column">@javax.ejb.Column</a>(name="id")
+  <a href="amber|amber-table.xtp#@Id">@Id</a>
+  <a href="amber|amber-table.xtp#@Column">@Column</a>(name="id")
   public long getId()
 
-  <a href="ejb3|cmp-table.xtp#@Basic">@javax.ejb.Basic</a>
+  <a href="amber|amber-table.xtp#@Basic">@Basic</a>
   public String getName()
 
-  <a href="ejb3|cmp-table.xtp#@OneToMany">@javax.ejb.OneToMany</a>(targetEntity="Student")
+  <a href="amber|amber-table.xtp#@OneToMany">@OneToMany</a>(targetEntity=Student.class,
+        mappedBy="house")
   public Collection getStudentList()
 }
 </example>
 
 <example title="Student.java">
-<a href="ejb3|cmp-table.xtp#@Entity">@javax.ejb.Entity</a>
+<a href="amber|amber-table.xtp#@Entity">@Entity</a>
 public class Student {
-  <a href="ejb3|cmp-table.xtp#@Id">@javax.ejb.Id</a>
-  <a href="ejb3|cmp-table.xtp#@Column">@javax.ejb.Column</a>(name="id")
+  <a href="amber|amber-table.xtp#@Id">@Id</a>
+  <a href="amber|amber-table.xtp#@Column">@Column</a>(name="id")
   public long getId()
 
-  <a href="ejb3|cmp-table.xtp#@Basic">@javax.ejb.Basic</a>
+  <a href="amber|amber-table.xtp#@Basic">@Basic</a>
   public String getName()
 
-  <a href="ejb3|cmp-table.xtp#@ManyToOne">@javax.ejb.ManyToOne</a>
-  <a href="ejb3|cmp-table.xtp#@JoinColumn">@javax.ejb.JoinColumn</a>(name="house")
+  <a href="amber|amber-table.xtp#@ManyToOne">@ManyToOne</a>
+  <a href="amber|amber-table.xtp#@JoinColumn">@JoinColumn</a>(name="house")
   public House getHouse()
 }
 </example>
@@ -74,7 +77,7 @@ public class Student {
 		  " WHERE h.id=?1 AND s.gender='M'");
     Query boysInHouse = _entityManager.createQuery(sql);
     
-    List houses = allHouse.listResults();
+    List houses = allHouse.getResultList();
 
     for (int i = 0; i &lt; houses.size(); i++) {
       House house = (House) houses.get(i);
@@ -82,7 +85,7 @@ public class Student {
       out.println("&lt;H3>Boys living in " + house.getName() + ":&lt;/H3>");
 
       boysInHouse.setParameter(1, new Long(house.getId()));
-      List boys = boysInHouse.listResults();
+      List boys = boysInHouse.getResultList();
 
       if (boys.size() == 0)
 	out.println("No boys are living in " + house.getName());

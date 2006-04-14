@@ -185,7 +185,7 @@ public class ContextImpl implements Context {
    *
    * @return the retrieved object
    */
-  private Object lookupImpl(String name)
+  protected Object lookupImpl(String name)
     throws NamingException
   {
     String tail = name;
