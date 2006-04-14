@@ -26,7 +26,7 @@ public class House {
   @Column(name="name",unique=true)
   private String _name;
   
-  @OneToMany(mappedBy="house")
+  @OneToMany(mappedBy="_house")
   private Set<Student> _students;
 
   public House()
