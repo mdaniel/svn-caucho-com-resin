@@ -1694,6 +1694,7 @@ public class EntityIntrospector {
       String mappedBy = oneToManyAnn.getString("mappedBy");
 
       if (mappedBy != null && ! mappedBy.equals("")) {
+	oneToManyBidirectional(targetType, mappedBy);
       }
       else {
 	oneToManyUnidirectional(targetType);
