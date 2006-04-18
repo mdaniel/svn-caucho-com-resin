@@ -13,4 +13,5 @@ com.caucho.quercus.lib.mysql.Mysqli
 com.caucho.quercus.lib.pdf.PDF
 com.caucho.quercus.lib.pdo.PDO
 com.caucho.quercus.lib.xml.Xml
+com.caucho.quercus.lib.resin.MBeanServer
 
