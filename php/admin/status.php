@@ -1,4 +1,6 @@
 <?php
+  $mbeanServer = new MBeanServer();
+
   $timeformat = "%a %b %e %H:%M:%S %Z %Y";
 
   function format_memory($memory)
@@ -6,8 +8,8 @@
     return sprintf("%.2fMeg", $memory / (1024 * 1024))
   }
 
-  $resin = mbean_lookup("resin:type=ResinServer");
-  $server = mbean_lookup("resin:name=default,type=Server");
+  $resin = $mbeanServer->lookup("resin:type=ResinServer");
+  $server = $mbeanServer->lookup("resin:name=default,type=Server");
 
   $title = "Resin status";
 
@@ -89,7 +91,7 @@ $hitRatio = (10000 * $invocationHitCount) / $totalCount;
 </table>
 
 <?php
-  $threadPool = mbean_lookup("resin:type=ThreadPool");
+  $threadPool = $mbeanServer->lookup("resin:type=ThreadPool");
 ?>
 
 <h2>Connections</h2>
@@ -118,7 +120,7 @@ $hitRatio = (10000 * $invocationHitCount) / $totalCount;
 <!-- Connection pools -->
 
 <?php
-  $poolObjectNames = mbean_query("resin:*,type=ConnectionPool");
+  $poolObjectNames = $mbeanServer->query("resin:*,type=ConnectionPool");
 
   if ($poolObjectNames) {
 ?>
@@ -142,7 +144,7 @@ $hitRatio = (10000 * $invocationHitCount) / $totalCount;
 
 <?php
     foreach ($poolObjectNames as $poolObjectName) {
-      $pool = mbean_lookup($poolObjectName);
+      $pool = $mbeanServer->lookup($poolObjectName);
 ?>
 
 <tr>
@@ -186,7 +188,7 @@ $hitRatio = (10000 * $invocationHitCount) / $totalCount;
 </tr>
 <?php
   foreach ($portObjectNames as $portObjectName) {
-    $port = mbean_lookup($portObjectName);
+    $port = $mbeanServer->lookup($portObjectName);
 ?>
 
 <tr>
@@ -208,7 +210,7 @@ $hitRatio = (10000 * $invocationHitCount) / $totalCount;
 
 <?php
   foreach ($server->clusterObjectNames as $clusterObjectName) {
-    $cluster = mbean_lookup($clusterObjectName);
+    $cluster = $mbeanServer->lookup($clusterObjectName);
 ?>
 
 <h2>Cluster <?= $clusterObjectName->name ?></h2>
@@ -222,8 +224,8 @@ $hitRatio = (10000 * $invocationHitCount) / $totalCount;
 </tr>
 <?php
   foreach ($cluster->clientObjectNames as $clientObjectName) {
-    $client = mbean_lookup($clientObjectName);
-    $clientParts = mbean_explode($clientObjectName);
+    $client = $mbeanServer->lookup($clientObjectName);
+    $clientParts = $mbeanServer->explode($clientObjectName);
 ?>
 
 <tr>
@@ -256,12 +258,12 @@ $hitRatio = (10000 * $invocationHitCount) / $totalCount;
     return strcmp($a->URL, $b->URL);
   }
 
-  $hostObjectNames = mbean_query("resin:*,type=Host");
+  $hostObjectNames = $mbeanServer->query("resin:*,type=Host");
 
   $hosts = array();
 
   foreach ($hostObjectNames as $hostObjectName) {
-    $hosts[] = mbean_lookup($hostObjectName);
+    $hosts[] = $mbeanServer->lookup($hostObjectName);
   }
 
   usort($hosts, "sort_host");
@@ -279,12 +281,12 @@ $hitRatio = (10000 * $invocationHitCount) / $totalCount;
 
   $webappPattern = "resin:*,Host=" . $hostName . ",type=WebApp";
 
-  $webappObjectNames = mbean_query($webappPattern);
+  $webappObjectNames = $mbeanServer->query($webappPattern);
 
   $webapps = array();
 
   foreach ($webappObjectNames as $webappObjectName) {
-    $webapps[] = mbean_lookup($webappObjectName);
+    $webapps[] = $mbeanServer->lookup($webappObjectName);
   }
 
   usort($webapps, "sort_webapp");
