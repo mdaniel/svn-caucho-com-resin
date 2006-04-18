@@ -66,6 +66,8 @@ abstract public class Marshall {
   {
     final Marshall marshall;
 
+    // optimized cases, new types should be added to JavaMarshall
+
     if (String.class.equals(argType)) {
       marshall = MARSHALL_STRING;
     }
@@ -134,9 +136,6 @@ abstract public class Marshall {
     }
     else if (void.class.equals(argType)) {
       marshall = MARSHALL_VOID;
-    }
-    else if (argType.isArray()) {
-      marshall = MARSHALL_ARRAY;
     }
     else {
       return new JavaMarshall(quercus.getJavaClassDefinition(argType.getName()),
@@ -1344,59 +1343,6 @@ abstract public class Marshall {
       throws IOException
     {
       throw new UnsupportedOperationException();
-    }
-  };
-
-  private static Marshall MARSHALL_ARRAY = new Marshall() {
-    public Object marshall(Env env, Expr expr, Class argClass)
-      throws Throwable
-    {
-      Value value = expr.eval(env);
-
-      return marshall(env, value, argClass);
-    }
-
-    public Object marshall(Env env, Value value, Class argClass)
-      throws Throwable
-    {
-      if (value.isNull())
-        return null;
-
-      Class<?> componentType = argClass.getComponentType();
-
-      if (componentType == null || ! value.isArray())
-        env.error(L.l("Can't assign {0} to {1}", value, argClass));
-
-      return value.valuesToArray(env, componentType);
-    }
-
-    public void generate(PhpWriter out, Expr expr, Class argClass)
-      throws IOException
-    {
-      Class<?> componentType = argClass.getComponentType();
-
-      expr.generate(out);
-      out.print(".valuesToArray(env, ");
-      out.print(componentType.getName());
-      out.print(".class)");
-    }
-
-    public Value unmarshall(Env env, Object value)
-      throws Throwable
-    {
-      return env.wrapArray(value);
-    }
-
-    public void generateResultStart(PhpWriter out)
-      throws IOException
-    {
-      out.print("env.wrapArray(");
-    }
-
-    public void generateResultEnd(PhpWriter out)
-      throws IOException
-    {
-      out.print(")");
     }
   };
 }

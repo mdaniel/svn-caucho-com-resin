@@ -80,6 +80,24 @@ public class JavaMarshall extends Marshall {
   public Object marshall(Env env, Value value, Class argClass)
     throws Throwable
   {
+    if (value.isNull()) {
+      if (_isNotNull) {
+        env.warning(L.l("null is an unexpected argument, expected {0}",
+                        shortName(argClass)));
+      }
+
+      return null;
+    }
+
+    if (argClass.isArray()) {
+      Class<?> componentType = argClass.getComponentType();
+
+      if (componentType == null || ! value.isArray())
+        env.error(L.l("Can't assign {0} with type {1} to {2}", value, value.getClass(), argClass));
+
+      return value.valuesToArray(env, componentType);
+    }
+
     Object obj = value.toJavaObject();
 
     if (obj == null) {
@@ -99,9 +117,19 @@ public class JavaMarshall extends Marshall {
   public void generate(PhpWriter out, Expr expr, Class argClass)
     throws IOException
   {
-    out.print("(" + argClass.getName() + ") ");
-    expr.generate(out);
-    out.print(".toJavaObject()");
+    if (argClass.isArray()) {
+      Class<?> componentType = argClass.getComponentType();
+
+      expr.generate(out);
+      out.print(".valuesToArray(env, ");
+      out.print(componentType.getName());
+      out.print(".class)");
+    }
+    else {
+      out.print("(" + argClass.getName() + ") ");
+      expr.generate(out);
+      out.print(".toJavaObject()");
+    }
   }
 
   public Value unmarshall(Env env, Object value)

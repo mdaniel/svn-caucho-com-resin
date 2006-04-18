@@ -2016,34 +2016,6 @@ public class Env {
   }
 
   /**
-   * Returns a PHP value for a Java array.
-   */
-  public Value wrapArray(Object obj)
-  {
-    if (obj == null)
-      return NullValue.NULL;
-
-    ArrayValueImpl arrayValueImpl = new ArrayValueImpl();
-
-    Class componentClass = obj.getClass().getComponentType();
-
-    Marshall componentClassMarshall = Marshall.create(_quercus, componentClass);
-
-    Object[] objAsArray = (Object[]) obj;
-
-    try {
-      for (int i = 0; i < objAsArray.length; i++)
-        arrayValueImpl.put(componentClassMarshall.unmarshall(this, objAsArray[i]));
-    }
-    catch (Throwable e) {
-      // XXX: why does unmarshall throw Throwable?
-      throw new RuntimeException(e);
-    }
-
-    return arrayValueImpl;
-  }
-
-  /**
    * Returns a PHP value for a Java object
    */
   public Value wrapJava(Object obj)
@@ -2084,7 +2056,29 @@ public class Env {
       def = getJavaClassDefinition(obj.getClass().getName());
     }
 
-    return new JavaValue(this, obj, def);
+    if (def.getType().isArray()) {
+      ArrayValueImpl arrayValueImpl = new ArrayValueImpl();
+
+      Class componentClass = def.getType().getComponentType();
+
+      Marshall componentClassMarshall = Marshall.create(_quercus, componentClass);
+
+      Object[] objAsArray = (Object[]) obj;
+
+      try {
+        for (int i = 0; i < objAsArray.length; i++)
+          arrayValueImpl.put(componentClassMarshall.unmarshall(this, objAsArray[i]));
+      }
+      catch (Throwable e) {
+        // XXX: why does unmarshall throw Throwable?
+        throw new RuntimeException(e);
+      }
+
+      return arrayValueImpl;
+    }
+    else {
+      return new JavaValue(this, obj, def);
+    }
   }
 
   /**
@@ -2495,7 +2489,7 @@ public class Env {
     throws IOException
   {
     getOut().print(msg);
-    
+
     throw new QuercusExitException(msg);
   }
 
@@ -2514,7 +2508,7 @@ public class Env {
     throws IOException
   {
     getOut().print(msg);
-    
+
     throw new QuercusDieException(msg);
   }
 
@@ -2700,7 +2694,7 @@ public class Env {
   {
     if (log.isLoggable(Level.FINE))
       log.fine(getLocation() + msg);
-    
+
     return NullValue.NULL;
   }
 
@@ -2848,7 +2842,7 @@ public class Env {
 
 	if (getIniBoolean("display_errors"))
 	  getOut().println(fullMsg);
-	
+
 	if (getIniBoolean("log_errors"))
 	  log.info(fullMsg);
       }
