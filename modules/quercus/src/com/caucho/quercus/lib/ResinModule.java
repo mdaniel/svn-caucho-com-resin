@@ -30,30 +30,30 @@
 package com.caucho.quercus.lib;
 
 import com.caucho.Version;
-import com.caucho.jmx.Jmx;
 import com.caucho.naming.Jndi;
-import com.caucho.quercus.env.ArrayValue;
-import com.caucho.quercus.env.ArrayValueImpl;
 import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.StringValue;
-import com.caucho.quercus.env.Value;
 import com.caucho.quercus.module.AbstractQuercusModule;
-import com.caucho.quercus.module.Optional;
-import com.caucho.quercus.module.NotNull;
-import com.caucho.quercus.module.ReadOnly;
-import com.caucho.server.webapp.Application;
 import com.caucho.util.L10N;
 
-import javax.management.MalformedObjectNameException;
-import javax.management.ObjectName;
-import java.util.Hashtable;
-import java.util.Map;
-import java.util.Set;
+import javax.transaction.UserTransaction;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
 
 public class ResinModule
   extends AbstractQuercusModule
 {
   private static final L10N L = new L10N(ResinModule.class);
+
+  public final static int XA_STATUS_ACTIVE = 0;
+  public final static int XA_STATUS_MARKED_ROLLBACK = 1;
+  public final static int XA_STATUS_PREPARED = 2;
+  public final static int XA_STATUS_COMMITTED = 3;
+  public final static int XA_STATUS_ROLLEDBACK = 4;
+  public final static int XA_STATUS_UNKNOWN = 5;
+  public final static int XA_STATUS_NO_TRANSACTION = 6;
+  public final static int XA_STATUS_PREPARING = 7;
+  public final static int XA_STATUS_COMMITTING = 8;
+  public final static int XA_STATUS_ROLLING_BACK = 9;
 
   /**
    * Perform a jndi lookup to retrieve an object.
@@ -71,9 +71,93 @@ public class ResinModule
   /**
    * Returns the version of the Resin server software.
    */
-  public String resin_version()
+  public static String resin_version()
   {
     return Version.FULL_VERSION;
   }
 
+  private static UserTransaction getUserTransaction()
+    throws NamingException
+  {
+    return ((UserTransaction) new InitialContext().lookup("java:comp/UserTransaction"));
+  }
+
+  public static boolean xa_begin(Env env)
+  {
+    try {
+      getUserTransaction().begin();
+
+      return true;
+    }
+    catch (Exception e) {
+      env.warning(e);
+      return false;
+    }
+  }
+
+  public static boolean xa_commit(Env env)
+  {
+    try {
+      getUserTransaction().commit();
+
+      return true;
+    }
+    catch (Exception e) {
+      env.warning(e);
+      return false;
+    }
+  }
+
+  public static boolean xa_rollback(Env env)
+  {
+    try {
+
+      getUserTransaction().rollback();
+
+      return true;
+    }
+    catch (Exception e) {
+      env.warning(e);
+      return false;
+    }
+  }
+
+  public static boolean xa_rollback_only(Env env)
+  {
+    try {
+
+      getUserTransaction().setRollbackOnly();
+
+      return true;
+    }
+    catch (Exception e) {
+      env.warning(e);
+      return false;
+    }
+  }
+
+  public static boolean xa_set_timeout(Env env, int timeoutSeconds)
+  {
+    try {
+
+      getUserTransaction().setTransactionTimeout(timeoutSeconds);
+
+      return true;
+    }
+    catch (Exception e) {
+      env.warning(e);
+      return false;
+    }
+  }
+
+  public static int xa_status(Env env)
+  {
+    try {
+      return getUserTransaction().getStatus();
+    }
+    catch (Exception e) {
+      env.warning(e);
+      return 0;
+    }
+  }
 }
