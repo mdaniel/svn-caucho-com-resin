@@ -35,6 +35,7 @@ import com.caucho.util.L10N;
 
 import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.quercus.module.ReadOnly;
+import com.caucho.quercus.module.Optional;
 
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.Env;
@@ -58,9 +59,9 @@ public class ClassesModule extends AbstractQuercusModule {
   /**
    * Returns true if the class exists.
    */
-  public boolean class_exists(Env env, String className)
+  public boolean class_exists(Env env, String className, @Optional("true") boolean useAutoload)
   {
-    return env.findClass(className) != null;
+    return env.findClass(className, useAutoload) != null;
   }
 
   /**

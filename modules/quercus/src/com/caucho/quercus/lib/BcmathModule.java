@@ -61,9 +61,9 @@ public class BcmathModule extends AbstractQuercusModule {
     addIni(_iniMap, "bcmath.scale", "0", PHP_INI_ALL);
   }
 
-  public boolean isExtensionLoaded(String name)
+  public String []getLoadedExtensions()
   {
-    return "bcmath".equals(name);
+    return new String[] {  "bcmath" };
   }
 
   public Map<String,StringValue> getDefaultIni()

@@ -121,10 +121,11 @@ public class MhashModule extends AbstractQuercusModule {
     addAlgorithm(MHASH_MD2, "MD2",  "MD2");
   }
 
-  public boolean isExtensionLoaded(String name)
+  public String []getLoadedExtensions()
   {
-    return "mhash".equals(name);
+    return new String[] {  "mhash" };
   }
+
 
   private void addAlgorithm(int ordinal, String name, String javaName)
   {

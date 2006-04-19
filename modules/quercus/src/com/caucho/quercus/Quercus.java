@@ -40,6 +40,7 @@ import com.caucho.quercus.program.InterpretedClassDef;
 import com.caucho.quercus.program.PhpProgram;
 import com.caucho.util.Log;
 import com.caucho.util.LruCache;
+import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.Vfs;
@@ -62,6 +63,7 @@ import java.util.logging.Logger;
  * Facade for the PHP language.
  */
 public class Quercus {
+  private static L10N L = new L10N(Quercus.class);
   private static final Logger log = Log.open(Quercus.class);
 
   private final PageManager _pageManager;
@@ -187,7 +189,7 @@ public class Quercus {
     throws ConfigException
   {
     try {
-      introspectPhpJavaClass(name, type);
+      introspectPhpJavaClass(name, type, null);
     } catch (Exception e) {
       throw new ConfigException(e);
     }
@@ -206,7 +208,15 @@ public class Quercus {
     try {
       ClassLoader loader = Thread.currentThread().getContextClassLoader();
 
-      Class type = Class.forName(className, false, loader);
+      Class type;
+
+      try {
+        type = Class.forName(className, false, loader);
+      }
+      catch (ClassNotFoundException e) {
+        throw new ClassNotFoundException(L.l("`{0}' not valid {1}", className, e.toString()));
+
+      }
 
       def = new JavaClassDefinition(this, className, type);
 
@@ -599,7 +609,13 @@ public class Quercus {
         String className = line;
 
         try {
-          Class cl = Class.forName(className, false, loader);
+          Class cl;
+          try {
+            cl = Class.forName(className, false, loader);
+          }
+          catch (ClassNotFoundException e) {
+            throw new ClassNotFoundException(L.l("`{0}' not valid {1}", className, e.toString()));
+          }
 
           introspectPhpModuleClass(cl);
         } catch (Throwable e) {
@@ -759,36 +775,68 @@ public class Quercus {
 
       line = line.trim();
 
-      if (line.length() > 0) {
-        Class cl;
+      if (line.length() == 0)
+        continue;
 
-        String[] classNames = line.split(" ");
+      String[] args = line.split(" ");
 
-        cl = Class.forName(classNames[0], false, loader);
-        
-        String className;
-        
-        if (classNames.length > 1)
-          className = classNames[classNames.length - 1];
-        else {
-          className = classNames[0];
-          p = className.lastIndexOf('.');
-          className = className.substring(p + 1);
-        }
-        
-        introspectPhpJavaClass(className, cl);
+      String className = args[0];
+
+      Class cl;
+
+      try {
+        cl = Class.forName(className, false, loader);
       }
+      catch (ClassNotFoundException e) {
+        throw new ClassNotFoundException(L.l("`{0}' not valid {1}", className, e.toString()));
+      }
+
+      String phpClassName = null;
+      String extension = null;
+
+      for (int i = 1; i < args.length; i++) {
+        if ("as".equals(args[i])) {
+          i++;
+          if (i >= args.length)
+            throw new IOException(L.l("expecting php class name after `{0}' in definition for class {1}", "as", className));
+
+          phpClassName = args[i];
+        }
+        else if ("provides".equals(args[i])) {
+          i++;
+          if (i >= args.length)
+            throw new IOException(L.l("expecting name of extension after `{0}' in definition for class {1}", "extension", className));
+
+          extension = args[i];
+        }
+        else {
+          throw new IOException(L.l("unknown token `{0}' in definition for class {1} ", args[i], className));
+        }
+      }
+      if (phpClassName == null)
+        phpClassName = className.substring(className.lastIndexOf('.') + 1);
+
+      introspectPhpJavaClass(phpClassName, cl, extension);
     }
   }
 
   /**
    * Introspects the module class for functions.
    *
-   * @param name the class to introspect.
+   * @param name the php class name
+   * @param type the class to introspect.
+   * @param extension the extension provided by the class, or null
    */
-  private void introspectPhpJavaClass(String name, Class type)
+  private void introspectPhpJavaClass(String name, Class type, String extension)
     throws IllegalAccessException, InstantiationException
   {
+    if (log.isLoggable(Level.FINEST)) {
+      if (extension == null)
+        log.finest(L.l("PHP loading class {0} with type {1}", name, type.getName()));
+      else
+        log.finest(L.l("PHP loading class {0} with type {1} providing extension {2}", name, type.getName(), extension));
+    }
+
     JavaClassDefinition def = new JavaClassDefinition(this, name, type);
 
     _javaClassWrappers.put(name, def);
@@ -798,6 +846,9 @@ public class Quercus {
     _lowerStaticClasses.put(name.toLowerCase(), def);
 
     def.introspect(this);
+
+    if (extension != null)
+      _extensionSet.add(extension);
   }
 
   /**

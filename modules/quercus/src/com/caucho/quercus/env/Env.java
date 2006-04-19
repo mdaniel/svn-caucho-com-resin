@@ -2089,6 +2089,20 @@ public class Env {
    */
   public AbstractQuercusClass findClass(String name)
   {
+    return findClass(name, true);
+  }
+
+  /**
+   * Finds the class with the given name.
+   *
+   * @param name the class name
+   * @param useAutoload use autoload to locate the class if necessary
+   * @return the found class or null if no class found.
+   */
+  public AbstractQuercusClass findClass(String name, boolean useAutoload)
+  {
+    // XXX: useAutoload not implemented
+
     AbstractQuercusClass cl = _classMap.get(name);
 
     if (cl != null)

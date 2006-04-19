@@ -282,7 +282,7 @@ public class StaticFunction
         length = args.length;
       else {
         env.warning(L.l(
-          "function '{0}' has {1} required arguments, but only {2} were provided",
+          "function '{0}' has {1} required arguments, but {2} were provided",
           _method.getName(),
           _defaultExprs.length,
           args.length));

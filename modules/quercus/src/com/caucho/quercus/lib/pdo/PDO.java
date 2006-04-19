@@ -152,12 +152,6 @@ public class PDO {
       }
     });
 
-    if (options != null) {
-      // XXX: need test and confirmation that key => value is the way to set these
-      for (Map.Entry<Value,Value> entry : options.entrySet())
-        setAttribute(entry.getKey().toInt(), entry.getValue(), true);
-    }
-
     try {
       String host = "localhost";
       int port = 3306;

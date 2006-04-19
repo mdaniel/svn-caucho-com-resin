@@ -3,6 +3,7 @@ com.caucho.quercus.lib.ApcModule
 com.caucho.quercus.lib.ArrayModule
 com.caucho.quercus.lib.BcmathModule
 com.caucho.quercus.lib.ClassesModule
+com.caucho.quercus.lib.CtypeModule
 com.caucho.quercus.lib.DateModule
 com.caucho.quercus.lib.ErrorModule
 com.caucho.quercus.lib.ExifModule

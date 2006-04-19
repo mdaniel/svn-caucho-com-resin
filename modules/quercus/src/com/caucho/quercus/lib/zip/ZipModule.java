@@ -54,12 +54,9 @@ public class ZipModule extends AbstractQuercusModule {
   private static final Logger log = Log.open(ZipModule.class);
   private static final L10N L = new L10N(ZipModule.class);
 
-  /**
-   * Returns true for the Zip extension.
-   */
-  public boolean isExtensionLoaded(String name)
+  public String []getLoadedExtensions()
   {
-    return "zip".equals(name);
+    return new String[] {  "zip" };
   }
 
   public Value zip_open(Env env,
