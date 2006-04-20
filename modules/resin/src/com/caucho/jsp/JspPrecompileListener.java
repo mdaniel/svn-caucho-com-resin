@@ -70,7 +70,7 @@ public class JspPrecompileListener extends JspPrecompileResource
     if (extension.startsWith("."))
       extension = extension.substring(1);
 
-    createFileSet().addInclude(new PathPatternType("**/*." + extension));
+    createFileset().addInclude(new PathPatternType("**/*." + extension));
   }
   
   public void contextInitialized(ServletContextEvent event)

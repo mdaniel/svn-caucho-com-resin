@@ -82,7 +82,7 @@ public class JspPrecompileResource {
   /**
    * Add a pattern.
    */
-  public FileSetType createFileSet()
+  public FileSetType createFileset()
   {
     if (_fileSet == null) {
       _fileSet = new FileSetType();
@@ -91,7 +91,15 @@ public class JspPrecompileResource {
 
     return _fileSet;
   }
-  
+
+  /**
+   * @deprecated
+   */
+  public FileSetType createFileSet()
+  {
+    return createFileset();
+  }
+
   /**
    * Initialize the resource.
    */
@@ -101,7 +109,7 @@ public class JspPrecompileResource {
     Path pwd = Vfs.lookup();
 
     if (_fileSet == null) {
-      createFileSet().addInclude(new PathPatternType("**/*.jsp"));
+      createFileset().addInclude(new PathPatternType("**/*.jsp"));
     }
 
     if (_application == null) {
