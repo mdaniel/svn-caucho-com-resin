@@ -19,10 +19,69 @@ complicated JSP files, compilation may cause unacceptable delays to users first
 accessing the JSP page.</p>
 
 <p>
-Resin provides a <code>JspCompiler</code> that is used to explicitly compile
-jsp files before they are accessed for the first time.
+Resin provides a <code>JspPrecompileListener</code> that causes jsp to be compiled when the web application starts.
+As an alternative, Resin also provides a <code>JspCompiler</code> that is used
+to explicitly compile jsp files before they are accessed for the first time.
 </p>
 
+<section name="precompile" title="JspPrecompileListener">
+
+<p><a href="javadoc|com.caucho.jsp.JspPrecompileListener|"/> is a <a
+href="javadoc|javax.servlet.ServletContextListener|">ServletContextListener</a>
+that compiles jsp files when the web-app starts.  It is activated using the 
+&lt;listener&gt; Servlet configuration tag in web.xml.</p>
+
+<p>The following configuration causes Resin to compile all files in the web-app
+that have an extension of .jsp or .jspx when the application first starts.</p>
+
+<example title="WEB-INF/web.xml">
+&lt;web-app xmlns="http://caucho.com/ns/resin"&gt;
+  &lt;listener&gt;
+    &lt;listener-class&gt;com.caucho.jsp.JspPrecompileListener&lt;/listener-class&gt;
+    &lt;init&gt;
+      &lt;extension&gt;jsp&lt;/extension&gt;
+      &lt;extension&gt;jspx&lt;/extension&gt;
+    &lt;/init&gt;
+  &lt;/listener&gt;
+&lt;/web-app&gt;
+</example>
+
+<p>It can also be configured in resin.conf to apply to all web-app's.</p>
+
+<example title="resin.conf">
+&lt;web-app-default&gt;
+  &lt;listener&gt;
+    &lt;listener-class&gt;com.caucho.jsp.JspPrecompileListener&lt;/listener-class&gt;
+    &lt;init&gt;
+      &lt;extension&gt;jsp&lt;/extension&gt;
+      &lt;extension&gt;jspx&lt;/extension&gt;
+      &lt;extension&gt;xtp&lt;/extension&gt;
+    &lt;/init&gt;
+  &lt;/listener&gt;
+&lt;/web-app-default&gt;
+</example>
+
+<p>You can also use a <a config-tag="fileset"/> for more control over which jsp are precompiled:</p>
+
+<example title="resin.conf">
+&lt;web-app&gt;
+  &lt;listener&gt;
+    &lt;listener-class&gt;com.caucho.jsp.JspPrecompileListener&lt;/listener-class&gt;
+    &lt;init&gt;
+      &lt;fileset&gt;
+        &lt;include&gt;**/*.jsp&lt;/include&gt;
+        &lt;exclude&gt;/a.jsp&lt;/exclude&gt;
+        &lt;exclude&gt;/foo/c.jsp&lt;/exclude&gt;
+      &lt;/fileset&gt;
+    &lt;/init&gt;
+  &lt;/listener&gt;
+&lt;/web-app&gt;
+</example>
+
+The first line includes all jsp's,  it's the same as specifying
+<extension>jsp</extension>. The following lines exclude specific jsp.
+
+</section>
 <section title="JspCompiler">
 
 <p><a href="javadoc|com.caucho.jsp.JspCompiler|"/> is used to compile JSP.</p>
@@ -35,8 +94,6 @@ jsp files before they are accessed for the first time.
 <tr><td>coda<td>add a coda include<td>none
 <tr><td>tag<td>classname specifying a tag to compile<td>none
 </deftable-parameters>
-
-</section>
 
 <section name="cmdline" title="Command line usage of JspCompile">
 
@@ -64,42 +121,6 @@ unix&gt; java com.caucho.jsp.JspCompiler -conf /opt/resin/compile-app.xml" test/
 
 </section>
 
-<section name="precompile" title="JspPrecompileListener">
-
-<p><a href="javadoc|com.caucho.jsp.JspPrecompileListener|"/> is a <a
-href="javadoc|javax.servlet.ServletContextListener|">ServletContextListener</a>
-that compiles jsp files when the web-app starts.  It is activated using the 
-&lt;listener&gt; Servlet configuration tag in web.xml.</p>
-
-<p>The following configuration causes Resin to compile all files in the web-app
-that have an extension of .jsp or .jspx when the application first starts.</p>
-
-<example title="WEB-INF/web.xml">
-&lt;web-app xmlns="http://caucho.com/ns/resin"&gt;
-  &lt;listener&gt;
-    &lt;listener-class&gt;com.caucho.jsp.JspPrecompileListener&lt;/listener-class&gt;
-    &lt;init&gt;
-      &lt;extension&gt;jsp&lt;/extension&gt;
-      &lt;extension&gt;jspx&lt;/extension&gt;
-    &lt;/init&gt;
-  &lt;/listener&gt;
-&lt;/web-app&gt;
-</example>
-
-<p>It can also be configured in resin.conf.</p>
-
-<example title="resin.conf">
-&lt;web-app id="foo" document-directory="/usr/local/webapps/foo"&gt;
-  &lt;listener&gt;
-    &lt;listener-class&gt;com.caucho.jsp.JspPrecompileListener&lt;/listener-class&gt;
-    &lt;init&gt;
-      &lt;extension&gt;jsp&lt;/extension&gt;
-      &lt;extension&gt;jspx&lt;/extension&gt;
-      &lt;extension&gt;xtp&lt;/extension&gt;
-    &lt;/init&gt;
-  &lt;/listener&gt;
-&lt;/web-app&gt;
-</example>
 </section>
 
 </body>
