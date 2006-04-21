@@ -4200,7 +4200,7 @@ public class PhpParser {
 
     public Location getLocation()
     {
-      String currentFunctionName = _function == null || _function.isPageMain( ? null : _function.getName();
+      String currentFunctionName = _function == null || _function.isPageMain() ? null : _function.getName();
       String currentClassName = _quercusClass == null ? null : _quercusClass.getName();
 
       if (_location != null) {

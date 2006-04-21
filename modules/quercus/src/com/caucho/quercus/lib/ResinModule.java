@@ -36,6 +36,11 @@ import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.util.L10N;
 
 import javax.transaction.UserTransaction;
+import javax.transaction.SystemException;
+import javax.transaction.NotSupportedException;
+import javax.transaction.HeuristicMixedException;
+import javax.transaction.HeuristicRollbackException;
+import javax.transaction.RollbackException;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
@@ -82,82 +87,40 @@ public class ResinModule
     return ((UserTransaction) new InitialContext().lookup("java:comp/UserTransaction"));
   }
 
-  public static boolean xa_begin(Env env)
+  public static void xa_begin()
+    throws NamingException, SystemException, NotSupportedException
   {
-    try {
-      getUserTransaction().begin();
-
-      return true;
-    }
-    catch (Exception e) {
-      env.warning(e);
-      return false;
-    }
+    getUserTransaction().begin();
   }
 
-  public static boolean xa_commit(Env env)
+  public static void xa_commit()
+    throws NamingException, HeuristicMixedException, SystemException,
+           HeuristicRollbackException, RollbackException
   {
-    try {
-      getUserTransaction().commit();
-
-      return true;
-    }
-    catch (Exception e) {
-      env.warning(e);
-      return false;
-    }
+    getUserTransaction().commit();
   }
 
-  public static boolean xa_rollback(Env env)
+  public static void xa_rollback()
+    throws NamingException, SystemException
   {
-    try {
-
-      getUserTransaction().rollback();
-
-      return true;
-    }
-    catch (Exception e) {
-      env.warning(e);
-      return false;
-    }
+    getUserTransaction().rollback();
   }
 
-  public static boolean xa_rollback_only(Env env)
+  public static void xa_rollback_only()
+    throws NamingException, SystemException
   {
-    try {
-
-      getUserTransaction().setRollbackOnly();
-
-      return true;
-    }
-    catch (Exception e) {
-      env.warning(e);
-      return false;
-    }
+    getUserTransaction().setRollbackOnly();
   }
 
-  public static boolean xa_set_timeout(Env env, int timeoutSeconds)
+  public static void xa_set_timeout(int timeoutSeconds)
+    throws NamingException, SystemException
   {
-    try {
-
-      getUserTransaction().setTransactionTimeout(timeoutSeconds);
-
-      return true;
-    }
-    catch (Exception e) {
-      env.warning(e);
-      return false;
-    }
+    getUserTransaction().setTransactionTimeout(timeoutSeconds);
   }
 
-  public static int xa_status(Env env)
+  public static int xa_status()
+    throws NamingException, SystemException
   {
-    try {
-      return getUserTransaction().getStatus();
-    }
-    catch (Exception e) {
-      env.warning(e);
-      return 0;
-    }
+    return getUserTransaction().getStatus();
   }
 }
