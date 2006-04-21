@@ -112,15 +112,20 @@ public class EchoStatement extends Statement {
    *
    * @param out the writer to the generated Java source.
    */
-  public void generateCoda(PhpWriter out)
-    throws IOException
-  {
-    /*
+  /*
+public void generateCoda(PhpWriter out)
+  throws IOException
+{
+  try {
     out.print("static com.caucho.quercus.expr.Expr " + _genId + " = ");
     _expr.generateExpr(out);
     out.println(";");
-    */
   }
+  catch (Throwable t) {
+    rethrow(t, IOException.class);
+  }
+  }
+  */
 
   /**
    * Disassembly.
@@ -129,11 +134,6 @@ public class EchoStatement extends Statement {
     throws IOException
   {
     out.println("echo " + _expr + ";");
-  }
-
-  public String toString()
-  {
-    return "EchoStatement[]";
   }
 }
 

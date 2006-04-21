@@ -182,8 +182,13 @@ public class BlockStatement extends Statement {
   public void generateCoda(PhpWriter out)
     throws IOException
   {
-    for (int i = 0; i < _statements.length; i++)
-      _statements[i].generateCoda(out);
+    try {
+      for (int i = 0; i < _statements.length; i++)
+        _statements[i].generateCoda(out);
+    }
+    catch (Throwable t) {
+      rethrow(t, IOException.class);
+    }
   }
 
   /**
@@ -200,9 +205,5 @@ public class BlockStatement extends Statement {
     out.println("}");
   }
 
-  public String toString()
-  {
-    return "BlockStatement[]";
-  }
 }
 

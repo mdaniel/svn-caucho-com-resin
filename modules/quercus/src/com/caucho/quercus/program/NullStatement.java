@@ -69,9 +69,5 @@ public class NullStatement extends Statement {
   {
   }
   
-  public String toString()
-  {
-    return "NullStatement[]";
-  }
 }
 

@@ -30,6 +30,8 @@
 package com.caucho.quercus.program;
 
 import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.caucho.java.JavaWriter;
 
@@ -46,6 +48,8 @@ import com.caucho.quercus.QuercusExecutionException;
  * Represents a PHP statement
  */
 abstract public class Statement {
+  private static final Logger log = Logger.getLogger(Statement.class.getName());
+
   public static final int FALL_THROUGH = 0;
   public static final int BREAK_FALL_THROUGH = 0x1;
   public static final int RETURN = 0x3;
@@ -68,6 +72,31 @@ abstract public class Statement {
   final protected void rethrow(Throwable t)
     throws Throwable
   {
+    rethrow(t, Throwable.class);
+  }
+
+  final protected <E extends Throwable> void rethrow(Throwable t, Class<E> cl)
+    throws E
+  {
+    E typedT;
+
+    if (!cl.isAssignableFrom(t.getClass())) {
+      try {
+        typedT = cl.newInstance();
+        typedT.initCause(t);
+      }
+      catch (InstantiationException e) {
+        log.log(Level.WARNING, t.toString(), t);
+        throw new RuntimeException(e);
+      }
+      catch (IllegalAccessException e) {
+        log.log(Level.WARNING, t.toString(), t);
+        throw new RuntimeException(e);
+      }
+    }
+    else
+      typedT = (E) t;
+
     // add stack information to the rootCause
     Throwable rootCause = t;
 
@@ -107,7 +136,7 @@ abstract public class Statement {
         && (functionName.equals(lastElement.getMethodName()))
         && (className.equals(lastElement.getClassName())))
     {
-      throw t;
+      throw typedT;
     }
 
     StackTraceElement[] elements = new StackTraceElement[len + 1];
@@ -121,7 +150,7 @@ abstract public class Statement {
 
     rootCause.setStackTrace(elements);
 
-    throw t;
+    throw typedT;
   }
 
   //
@@ -174,10 +203,30 @@ abstract public class Statement {
   public final void generate(PhpWriter out)
     throws IOException
   {
-    if (_location != null)
+    if (_location != null) {
       out.setLocation(_location.getFileName(), _location.getLineNumber());
 
-    generateImpl(out);
+      if (log.isLoggable(Level.FINE)) {
+        out.print("// ");
+        out.print(_location.getFileName());
+        out.print(":");
+        out.print(_location.getLineNumber());
+
+        if (log.isLoggable(Level.FINER)) {
+          out.print(" ");
+          out.print(toString());
+        }
+
+        out.println();
+      }
+    }
+
+    try {
+      generateImpl(out);
+    }
+    catch (Throwable t) {
+      rethrow(t, IOException.class);
+    }
   }
 
   /**
@@ -221,7 +270,7 @@ abstract public class Statement {
 
   public String toString()
   {
-    return "Statement[]";
+    return getClass().getSimpleName() + "[]";
   }
 }
 

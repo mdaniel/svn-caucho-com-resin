@@ -572,18 +572,19 @@ public class PhpParser {
     Location location = getLocation();
 
     int token = parseToken();
+
     switch (token) {
     case ';':
       return NullStatement.NULL;
 
     case '{':
-      {
-        ArrayList<Statement> statementList = parseStatementList();
+      location = getLocation();
 
-	expect('}');
+      ArrayList<Statement> statementList = parseStatementList();
 
-	return BlockStatement.create(location, statementList);
-      }
+      expect('}');
+
+      return BlockStatement.create(location, statementList);
 
     case IF:
       return parseIf();

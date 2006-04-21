@@ -91,10 +91,5 @@ public class ContinueStatement extends Statement {
     // the "if" test handles trailing values
     out.println("if (true) continue;");
   }
-  
-  public String toString()
-  {
-    return "ContinueStatement[]";
-  }
 }
 

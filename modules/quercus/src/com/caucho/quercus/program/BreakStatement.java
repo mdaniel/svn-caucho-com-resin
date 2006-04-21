@@ -105,9 +105,5 @@ public class BreakStatement extends Statement {
       out.println("if (true) break;");
   }
   
-  public String toString()
-  {
-    return "BreakStatement[]";
-  }
 }
 

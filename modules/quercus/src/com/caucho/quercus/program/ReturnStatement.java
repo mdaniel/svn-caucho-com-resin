@@ -134,9 +134,5 @@ public class ReturnStatement extends Statement {
       out.print("return NullValue.NULL;");
   }
   
-  public String toString()
-  {
-    return "ReturnStatement[]";
-  }
 }
 

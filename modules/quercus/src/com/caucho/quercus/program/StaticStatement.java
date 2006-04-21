@@ -124,19 +124,5 @@ public class StaticStatement extends Statement {
     }
   }
 
-  /**
-   * Generates static/initialization code code for the statement.
-   *
-   * @param out the writer to the generated Java source.
-   */
-  public void generateCoda(PhpWriter out)
-    throws IOException
-  {
-  }
-  
-  public String toString()
-  {
-    return "GlobalStatement[]";
-  }
 }
 

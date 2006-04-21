@@ -272,9 +272,5 @@ public class SwitchStatement extends Statement {
     out.setBreakVar(oldBreakVar);
   }
 
-  public String toString()
-  {
-    return "SwitchStatement[]";
-  }
 }
 

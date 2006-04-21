@@ -172,10 +172,5 @@ public class ForStatement extends Statement {
     out.popDepth();
     out.println("}");
   }
-
-  public String toString()
-  {
-    return "Statement[]";
-  }
 }
 

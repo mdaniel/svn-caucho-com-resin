@@ -246,11 +246,6 @@ public class ForeachStatement
     out.println("}");
   }
 
-  public String toString()
-  {
-    return "ForeachStatement[]";
-  }
-
   static class RawExpr
     extends Expr
   {

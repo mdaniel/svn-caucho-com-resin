@@ -131,9 +131,5 @@ public class ReturnRefStatement extends Statement {
     out.println("return-ref " + _expr + ";");
   }
   
-  public String toString()
-  {
-    return "ReturnStatement[]";
-  }
 }
 

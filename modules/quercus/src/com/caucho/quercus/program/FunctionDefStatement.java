@@ -104,9 +104,5 @@ public class FunctionDefStatement extends Statement {
     // XXX:
   }
   
-  public String toString()
-  {
-    return "FunctionDefStatement[]";
-  }
 }
 

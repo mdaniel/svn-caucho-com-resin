@@ -135,9 +135,5 @@ public class WhileStatement extends Statement {
     out.println("}");
   }
 
-  public String toString()
-  {
-    return "Statement[]";
-  }
 }
 

@@ -113,9 +113,5 @@ public class ClassDefStatement extends Statement {
     // XXX:
   }
   
-  public String toString()
-  {
-    return "ClassDefStatement[]";
-  }
 }
 

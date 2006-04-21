@@ -141,9 +141,5 @@ public class DoStatement extends Statement {
     out.println(");");
   }
 
-  public String toString()
-  {
-    return "DoStatement[]";
-  }
 }
 

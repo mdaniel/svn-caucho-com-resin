@@ -100,9 +100,5 @@ public class TextStatement extends Statement {
     out.println("\");");
   }
   
-  public String toString()
-  {
-    return "TextStatement[]";
-  }
 }
 

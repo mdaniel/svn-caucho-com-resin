@@ -151,9 +151,5 @@ public class IfStatement extends Statement {
     }
   }
 
-  public String toString()
-  {
-    return "Statement[]";
-  }
 }
 
