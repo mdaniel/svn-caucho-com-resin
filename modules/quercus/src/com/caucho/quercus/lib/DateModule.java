@@ -600,13 +600,18 @@ public class DateModule extends AbstractQuercusModule {
   /**
    * Returns the formatted date.
    */
-  public long mktime(int hour,
+  public long mktime(Env env,
+                     @Optional("-1") int hour,
 		     @Optional("-1") int minute,
 		     @Optional("-1") int second,
 		     @Optional("-1") int month,
 		     @Optional("-1") int day,
-		     @Optional("-1") int year)
+		     @Optional("-1") int year,
+                     @Optional("-1") int isDST)
   {
+    if (isDST != -1)
+      env.deprecatedArgument("isDST");
+
     QDate date = new QDate(false);
 
     long now = Alarm.getCurrentTime();

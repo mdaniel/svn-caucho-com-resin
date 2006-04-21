@@ -2676,11 +2676,33 @@ public class Env {
   }
 
   /**
+   * A runtime strict warning.
+   */
+  public Value strict(String msg)
+  {
+    if (log.isLoggable(Level.FINER)) {
+      QuercusException e = new QuercusException(msg);
+
+      log.log(Level.FINER, e.toString(), e);
+    }
+
+    return error(B_STRICT, msg + getFunctionLocation());
+  }
+
+  /**
    * A warning about an invalid argument passed to a function.
    */
   public Value invalidArgument(String name, Object value)
   {
     return warning(L.l("invalid value `{0}' for `{1}'", value, name));
+  }
+
+  /**
+   * A warning about an deprecated argument passed to a function.
+   */
+  public Value deprecatedArgument(String name)
+  {
+    return strict(L.l("argument `{1}' is deprecated", name));
   }
 
   /**
