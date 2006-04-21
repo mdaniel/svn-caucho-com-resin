@@ -42,6 +42,7 @@ import com.caucho.quercus.env.Value;
 import com.caucho.quercus.expr.VarExpr;
 
 import com.caucho.quercus.gen.PhpWriter;
+import com.caucho.quercus.Location;
 
 import com.caucho.vfs.WriteStream;
 
@@ -51,18 +52,25 @@ import com.caucho.vfs.WriteStream;
 public class FunctionDefStatement extends Statement {
   private Function _fun;
 
-  public FunctionDefStatement(Function fun)
+  public FunctionDefStatement(Location location, Function fun)
   {
+    super(location);
+    
     _fun = fun;
   }
   
   public Value execute(Env env)
     throws Throwable
   {
-    String name = _fun.getName().toLowerCase();
+    try {
+      String name = _fun.getName().toLowerCase();
 
-    if (env.findFunction(name) == null)
-      env.addFunction(name, _fun);
+      if (env.findFunction(name) == null)
+        env.addFunction(name, _fun);
+    }
+    catch (Throwable t) {
+      rethrow(t);
+    }
 
     return null;
   }

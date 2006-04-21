@@ -39,6 +39,7 @@ import com.caucho.quercus.env.ContinueValue;
 import com.caucho.quercus.expr.Expr;
 
 import com.caucho.quercus.gen.PhpWriter;
+import com.caucho.quercus.Location;
 
 /**
  * Represents a for statement.
@@ -49,35 +50,42 @@ public class ForStatement extends Statement {
   private final Expr _incr;
   private final Statement _block;
 
-  public ForStatement(Expr init, Expr test, Expr incr, Statement block)
+  public ForStatement(Location location, Expr init, Expr test, Expr incr, Statement block)
   {
+    super(location);
+
     _init = init;
     _test = test;
     _incr = incr;
-    
+
     _block = block;
   }
-  
+
   public Value execute(Env env)
     throws Throwable
   {
-    if (_init != null)
-      _init.eval(env);
-    
-    while (_test == null || _test.evalBoolean(env)) {
-      env.checkTimeout();
-      
-      Value value = _block.execute(env);
+    try {
+      if (_init != null)
+        _init.eval(env);
 
-      if (value == null || value instanceof ContinueValue) {
+      while (_test == null || _test.evalBoolean(env)) {
+        env.checkTimeout();
+
+        Value value = _block.execute(env);
+
+        if (value == null || value instanceof ContinueValue) {
+        }
+        else if (value instanceof BreakValue)
+          return null;
+        else
+          return value;
+
+        if (_incr != null)
+          _incr.eval(env);
       }
-      else if (value instanceof BreakValue)
-	return null;
-      else
-	return value;
-
-      if (_incr != null)
-	_incr.eval(env);
+    }
+    catch (Throwable t) {
+      rethrow(t);
     }
 
     return null;
@@ -102,7 +110,7 @@ public class ForStatement extends Statement {
     AnalyzeInfo breakInfo = info;
 
     AnalyzeInfo loopInfo = info.createLoop(contInfo, breakInfo);
-    
+
     _block.analyze(loopInfo);
 
     if (_incr != null)
@@ -114,7 +122,7 @@ public class ForStatement extends Statement {
     loopInfo.merge(contInfo);
 
     // handle loop values
-    
+
     _block.analyze(loopInfo);
 
     loopInfo.merge(contInfo);
@@ -144,7 +152,7 @@ public class ForStatement extends Statement {
 
     out.println(";");
     out.print("     ");
-    
+
     if (_test != null)
       _test.generateBoolean(out);
     else
@@ -159,12 +167,12 @@ public class ForStatement extends Statement {
     out.println(") {");
     out.pushDepth();
     out.println("env.checkTimeout();");
-    
+
     _block.generate(out);
     out.popDepth();
     out.println("}");
   }
-  
+
   public String toString()
   {
     return "Statement[]";

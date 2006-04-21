@@ -43,6 +43,7 @@ import com.caucho.quercus.env.QuercusClass;
 import com.caucho.quercus.expr.VarExpr;
 
 import com.caucho.quercus.gen.PhpWriter;
+import com.caucho.quercus.Location;
 
 import com.caucho.vfs.WriteStream;
 
@@ -52,16 +53,23 @@ import com.caucho.vfs.WriteStream;
 public class ClassDefStatement extends Statement {
   private InterpretedClassDef _cl;
 
-  public ClassDefStatement(InterpretedClassDef cl)
+  public ClassDefStatement(Location location, InterpretedClassDef cl)
   {
+    super(location);
+
     _cl = cl;
   }
   
   public Value execute(Env env)
     throws Throwable
   {
-    if (env.findClass(_cl.getName()) == null)
-      env.addClass(_cl.getName(), new QuercusClass(_cl, null));
+    try {
+      if (env.findClass(_cl.getName()) == null)
+        env.addClass(_cl.getName(), new QuercusClass(_cl, null));
+    }
+    catch (Throwable t) {
+      rethrow(t);
+    }
 
     return null;
   }

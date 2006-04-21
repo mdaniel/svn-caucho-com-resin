@@ -43,6 +43,7 @@ import com.caucho.quercus.program.AnalyzeInfo;
 import com.caucho.quercus.parser.PhpParser;
 
 import com.caucho.quercus.gen.PhpWriter;
+import com.caucho.quercus.Location;
 
 import com.caucho.util.L10N;
 
@@ -208,7 +209,7 @@ abstract public class Expr {
   /**
    * Creates a assignment
    */
-  public Statement createUnset()
+  public Statement createUnset(Location location)
     throws IOException
   {
     throw new IOException(L.l("{0} is an illegal value to unset",

@@ -44,6 +44,7 @@ import com.caucho.quercus.expr.VarExpr;
 import com.caucho.quercus.expr.VarState;
 
 import com.caucho.quercus.gen.PhpWriter;
+import com.caucho.quercus.Location;
 
 import com.caucho.vfs.WriteStream;
 
@@ -58,8 +59,10 @@ public class StaticStatement extends Statement {
   /**
    * Creates the echo statement.
    */
-  public StaticStatement(VarExpr var, Expr initValue)
+  public StaticStatement(Location location, VarExpr var, Expr initValue)
   {
+    super(location);
+
     _var = var;
     _initValue = initValue;
   }
@@ -67,15 +70,21 @@ public class StaticStatement extends Statement {
   public Value execute(Env env)
     throws Throwable
   {
-    if (_staticName == null)
-      _staticName = env.createStaticName();
+    try {
+      if (_staticName == null)
+        _staticName = env.createStaticName();
 
-    Var var = env.getStaticVar(_staticName);
+      Var var = env.getStaticVar(_staticName);
       
-    env.setValue(_var.getName(), var);
+      env.setValue(_var.getName(), var);
 
-    if (! var.isset() && _initValue != null)
-      var.set(_initValue.eval(env));
+      if (! var.isset() && _initValue != null)
+        var.set(_initValue.eval(env));
+
+    }
+    catch (Throwable t) {
+      rethrow(t);
+    }
 
     return null;
   }

@@ -39,6 +39,7 @@ import com.caucho.quercus.env.BreakValue;
 import com.caucho.quercus.expr.Expr;
 
 import com.caucho.quercus.gen.PhpWriter;
+import com.caucho.quercus.Location;
 
 /**
  * Represents a do ... while statement.
@@ -47,29 +48,37 @@ public class DoStatement extends Statement {
   private final Expr _test;
   private final Statement _block;
 
-  public DoStatement(Expr test, Statement block)
+  public DoStatement(Location location, Expr test, Statement block)
   {
+
+    super(location);
+
     _test = test;
     _block = block;
   }
-  
+
   public Value execute(Env env)
     throws Throwable
   {
-    do {
-      env.checkTimeout();
-      
-      Value value = _block.execute(env);
+    try {
+      do {
+        env.checkTimeout();
 
-      if (value == null) {
-      }
-      else if (value == BreakValue.BREAK)
-	return null;
-      else if (value == ContinueValue.CONTINUE) {
-      }
-      else
-	return value;
-    } while (_test.evalBoolean(env));
+        Value value = _block.execute(env);
+
+        if (value == null) {
+        }
+        else if (value == BreakValue.BREAK)
+          return null;
+        else if (value == ContinueValue.CONTINUE) {
+        }
+        else
+          return value;
+      } while (_test.evalBoolean(env));
+    }
+    catch (Throwable t) {
+      rethrow(t);
+    }
 
     return null;
   }
@@ -100,7 +109,7 @@ public class DoStatement extends Statement {
     info.merge(loopInfo);
 
     // handle loop values
-    
+
     _block.analyze(loopInfo);
 
     loopInfo.merge(contInfo);
@@ -124,14 +133,14 @@ public class DoStatement extends Statement {
     out.println("do {");
     out.pushDepth();
     out.println("env.checkTimeout();");
-    
+
     _block.generate(out);
     out.popDepth();
     out.print("} while (");
     _test.generateBoolean(out);
     out.println(");");
   }
-  
+
   public String toString()
   {
     return "DoStatement[]";

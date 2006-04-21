@@ -29,31 +29,12 @@
 
 package com.caucho.quercus.program;
 
-import java.io.IOException;
-
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
 
 import java.util.logging.Logger;
 
-import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.Value;
-
-import com.caucho.quercus.expr.Expr;
-import com.caucho.quercus.expr.VarExpr;
-import com.caucho.quercus.expr.VarInfo;
-import com.caucho.quercus.expr.VarState;
-import com.caucho.quercus.expr.ExprHandle;
-
 import com.caucho.util.L10N;
-
-import com.caucho.vfs.WriteStream;
-
-import com.caucho.quercus.env.Var;
-import com.caucho.quercus.env.NullValue;
-
-import com.caucho.quercus.gen.PhpWriter;
+import com.caucho.quercus.Location;
 
 /**
  * Represents sequence of statements.
@@ -64,24 +45,26 @@ public class ObjectMethod extends Function {
 
   private String _className;
 
-  ObjectMethod(InterpretedClassDef quercusClass,
-	       String name,
-	       FunctionInfo info,
-	       Arg []args,
-	       Statement []statements)
+  ObjectMethod(Location location,
+               InterpretedClassDef quercusClass,
+               String name,
+               FunctionInfo info,
+               Arg []args,
+               Statement []statements)
   {
-    super(name, info, args, statements);
+    super(location, name, info, args, statements);
 
     _className = quercusClass.getName();
   }
 
-  public ObjectMethod(InterpretedClassDef quercusClass,
-		      String name,
-		      FunctionInfo info,
-		      ArrayList<Arg> argList,
-		      ArrayList<Statement> statementList)
+  public ObjectMethod(Location location,
+                      InterpretedClassDef quercusClass,
+                      String name,
+                      FunctionInfo info,
+                      ArrayList<Arg> argList,
+                      ArrayList<Statement> statementList)
   {
-    super(name, info, argList, statementList);
+    super(location, name, info, argList, statementList);
 
     _className = quercusClass.getName();
   }

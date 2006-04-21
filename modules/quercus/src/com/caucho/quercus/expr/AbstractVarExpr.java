@@ -46,6 +46,7 @@ import com.caucho.quercus.gen.PhpWriter;
 import com.caucho.quercus.program.Statement;
 import com.caucho.quercus.program.AnalyzeInfo;
 import com.caucho.quercus.program.ExprStatement;
+import com.caucho.quercus.Location;
 
 /**
  * Represents an expression that is assignable
@@ -90,13 +91,13 @@ abstract public class AbstractVarExpr extends Expr {
   {
     return new CopyExpr(this);
   }
-  
+
   /**
    * Creates the assignment.
    */
-  public Statement createUnset()
+  public Statement createUnset(Location location)
   {
-    return new ExprStatement(new UnsetVarExpr(this));
+    return new ExprStatement(location, new UnsetVarExpr(this));
   }
 
   /**
@@ -183,8 +184,8 @@ abstract public class AbstractVarExpr extends Expr {
    * @param out the writer to the Java source code.
    */
   abstract public void generateAssignRef(PhpWriter out,
-					 Expr value,
-					 boolean isTop)
+                                         Expr value,
+                                         boolean isTop)
     throws IOException;
 
   /**

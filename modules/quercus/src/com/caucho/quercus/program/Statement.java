@@ -29,8 +29,6 @@
 
 package com.caucho.quercus.program;
 
-import java.util.HashSet;
-
 import java.io.IOException;
 
 import com.caucho.java.JavaWriter;
@@ -38,13 +36,10 @@ import com.caucho.java.JavaWriter;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
 
-import com.caucho.quercus.expr.Expr;
 import com.caucho.quercus.expr.VarExpr;
-import com.caucho.quercus.expr.VarState;
 
 import com.caucho.quercus.gen.PhpWriter;
-
-import com.caucho.vfs.WriteStream;
+import com.caucho.quercus.Location;
 
 /**
  * Represents a PHP statement
@@ -54,22 +49,72 @@ abstract public class Statement {
   public static final int BREAK_FALL_THROUGH = 0x1;
   public static final int RETURN = 0x3;
 
-  private String _fileName;
-  private int _line;
+  private final Location _location;
 
-  /**
-   * Sets the location of the statement in the source.
-   */
-  public Statement setLocation(String fileName, int line)
+  protected Statement(Location location)
   {
-    _fileName = fileName;
-    _line = line;
-
-    return this;
+    _location = location;
   }
-  
+
+  public Location getLocation()
+  {
+    return _location;
+  }
+
   abstract public Value execute(Env env)
     throws Throwable;
+
+  final protected void rethrow(Throwable t)
+    throws Throwable
+  {
+    // add stack information to the rootCause
+    Throwable rootCause = t;
+
+    while (rootCause.getCause() != null)
+      rootCause = t.getCause();
+
+    StackTraceElement[] existingElements = rootCause.getStackTrace();
+    int len = existingElements.length;
+
+    String className = _location.getClassName();
+    String functionName = _location.getFunctionName();
+    String fileName = _location.getFileName();
+    int lineNumber = _location.getLineNumber();
+
+    if (className == null)
+      className = "";
+
+    if (functionName == null)
+      functionName = "";
+
+    StackTraceElement lastElement;
+
+    if (len > 1)
+      lastElement = existingElements[len - 1];
+    else
+      lastElement = null;
+
+    // early return if function and class are same as last one
+    if (lastElement != null
+        && (functionName.equals(lastElement.getMethodName()))
+        && (className.equals(lastElement.getClassName())))
+    {
+      throw t;
+    }
+
+    StackTraceElement[] elements = new StackTraceElement[len + 1];
+
+    System.arraycopy(existingElements, 0, elements, 0, len);
+
+    elements[len] = new StackTraceElement(className,
+                                          functionName,
+                                          fileName,
+                                          lineNumber);
+
+    rootCause.setStackTrace(elements);
+
+    throw t;
+  }
 
   //
   // java generation code
@@ -121,9 +166,9 @@ abstract public class Statement {
   public final void generate(PhpWriter out)
     throws IOException
   {
-    if (_fileName != null)
-      out.setLocation(_fileName, _line);
-    
+    if (_location != null)
+      out.setLocation(_location.getFileName(), _location.getLineNumber());
+
     generateImpl(out);
   }
 
@@ -165,7 +210,7 @@ abstract public class Statement {
   {
     out.println("# unknown " + getClass().getName());
   }
-  
+
   public String toString()
   {
     return "Statement[]";

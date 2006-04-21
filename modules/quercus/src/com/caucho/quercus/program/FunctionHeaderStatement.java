@@ -44,6 +44,7 @@ import com.caucho.quercus.expr.VarExpr;
 import com.caucho.quercus.expr.VarState;
 
 import com.caucho.quercus.gen.PhpWriter;
+import com.caucho.quercus.Location;
 
 import com.caucho.vfs.WriteStream;
 
@@ -53,8 +54,10 @@ import com.caucho.vfs.WriteStream;
 public class FunctionHeaderStatement extends Statement {
   private ArrayList<Arg> _args;
 
-  public FunctionHeaderStatement(ArrayList<Arg> args)
+  public FunctionHeaderStatement(Location location, ArrayList<Arg> args)
   {
+    super(location);
+
     _args = args;
   }
   

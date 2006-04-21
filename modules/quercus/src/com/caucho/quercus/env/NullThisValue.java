@@ -57,7 +57,7 @@ public class NullThisValue extends NullValue {
   public Value evalMethod(Env env, String methodName, Value []args)
     throws Throwable
   {
-    throw new Exception(L.l("$this value of '{0}' cannot dispatch to method '{1}'.", this, methodName));
+    throw new Exception(L.l("$this value of NULL cannot dispatch to method '{0}'.", methodName));
   }
 }
 

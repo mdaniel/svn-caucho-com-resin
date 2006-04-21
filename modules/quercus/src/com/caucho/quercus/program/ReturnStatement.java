@@ -39,6 +39,7 @@ import com.caucho.quercus.expr.Expr;
 import com.caucho.quercus.expr.VarExpr;
 
 import com.caucho.quercus.gen.PhpWriter;
+import com.caucho.quercus.Location;
 
 import com.caucho.vfs.WriteStream;
 
@@ -51,8 +52,10 @@ public class ReturnStatement extends Statement {
   /**
    * Creates the echo statement.
    */
-  public ReturnStatement(Expr expr)
+  public ReturnStatement(Location location, Expr expr)
   {
+    super(location);
+
     _expr = expr;
   }
 
@@ -62,11 +65,18 @@ public class ReturnStatement extends Statement {
   public Value execute(Env env)
     throws Throwable
   {
-    if (_expr != null) {
-      return _expr.evalRef(env);
+    try {
+      if (_expr != null) {
+        return _expr.evalRef(env);
+      }
+      else
+        return NullValue.NULL;
     }
-    else
-      return NullValue.NULL;
+    catch (Throwable t) {
+      rethrow(t);
+    }
+    
+    return null;
   }
 
   //

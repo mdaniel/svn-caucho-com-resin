@@ -45,6 +45,7 @@ import com.caucho.quercus.program.PhpProgram;
 import com.caucho.quercus.lib.file.FileModule;
 
 import com.caucho.quercus.env.*;
+import com.caucho.Version;
 
 /**
  * PHP options
@@ -109,10 +110,10 @@ public class OptionsModule extends AbstractQuercusModule {
   public static boolean dl(Env env, String dl)
   {
     env.stub("dl is stubbed for dl(" + dl + ")");
-    
+
     return false;
   }
-  
+
   /**
    * Returns the environment value.
    */
@@ -395,12 +396,22 @@ public class OptionsModule extends AbstractQuercusModule {
       return cmp >= 0 ? BooleanValue.TRUE : BooleanValue.FALSE;
     else {
       if (cmp == 0)
-	return new LongValue(0);
+        return new LongValue(0);
       else if (cmp < 0)
-	return new LongValue(-1);
+        return new LongValue(-1);
       else
-	return new LongValue(1);
+        return new LongValue(1);
     }
+  }
+
+  public static String quercus_version()
+  {
+    return Version.VERSION;
+  }
+
+  public static String zend_version()
+  {
+    return "2.0.4";
   }
 
   private static ArrayList<Value> expandVersion(String version)
@@ -414,40 +425,40 @@ public class OptionsModule extends AbstractQuercusModule {
       char ch = version.charAt(i);
 
       if ('0' <= ch && ch <= '9') {
-	int value = 0;
+        int value = 0;
 
-	for (; i < len && '0' <= (ch = version.charAt(i)) && ch <= '9'; i++) {
-	  value = 10 * value + ch - '0';
-	}
+        for (; i < len && '0' <= (ch = version.charAt(i)) && ch <= '9'; i++) {
+          value = 10 * value + ch - '0';
+        }
 
-	expand.add(new LongValue(value));
+        expand.add(new LongValue(value));
       }
       else if (Character.isLetter((char) ch)) {
-	StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
 
-	for (; i < len && Character.isLetter(version.charAt(i)); i++) {
-	  sb.append((char) ch);
-	}
+        for (; i < len && Character.isLetter(version.charAt(i)); i++) {
+          sb.append((char) ch);
+        }
 
-	String s = sb.toString();
+        String s = sb.toString();
 
-	if (s.equals("dev"))
-	  s = "a";
-	else if (s.equals("alpha") || s.equals("a"))
-	  s = "b";
-	else if (s.equals("beta") || s.equals("b"))
-	  s = "c";
-	else if (s.equals("RC"))
-	  s = "d";
-	else if (s.equals("pl"))
-	  s = "e";
-	else
-	  s = "z" + s;
+        if (s.equals("dev"))
+          s = "a";
+        else if (s.equals("alpha") || s.equals("a"))
+          s = "b";
+        else if (s.equals("beta") || s.equals("b"))
+          s = "c";
+        else if (s.equals("RC"))
+          s = "d";
+        else if (s.equals("pl"))
+          s = "e";
+        else
+          s = "z" + s;
 
-	expand.add(new StringValueImpl(s));
+        expand.add(new StringValueImpl(s));
       }
       else
-	i++;
+        i++;
     }
 
     return expand;
@@ -459,16 +470,16 @@ public class OptionsModule extends AbstractQuercusModule {
 
     while (true) {
       if (a.size() <= i && b.size() <= i)
-	return 0;
+        return 0;
       else if (a.size() <= i)
-	return -1;
+        return -1;
       else if (b.size() <= i)
-	return 1;
+        return 1;
 
       int cmp = compareTo(a.get(i), b.get(i));
 
       if (cmp != 0)
-	return cmp;
+        return cmp;
 
       i++;
     }
@@ -535,7 +546,6 @@ public class OptionsModule extends AbstractQuercusModule {
   //@todo void    restore_include_path()
   //@todo string  set_include_path(string new_include_path)
   //@todo string  zend_logo_guid()
-  //@todo string  zend_version()
 
 
 }

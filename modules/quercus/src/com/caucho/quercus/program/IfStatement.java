@@ -40,6 +40,7 @@ import com.caucho.quercus.expr.Expr;
 import com.caucho.quercus.expr.VarExpr;
 
 import com.caucho.quercus.gen.PhpWriter;
+import com.caucho.quercus.Location;
 
 /**
  * Represents an if statement.
@@ -49,8 +50,10 @@ public class IfStatement extends Statement {
   private final Statement _trueBlock;
   private final Statement _falseBlock;
 
-  public IfStatement(Expr test, Statement trueBlock, Statement falseBlock)
+  public IfStatement(Location location, Expr test, Statement trueBlock, Statement falseBlock)
   {
+    super(location);
+
     _test = test;
     _trueBlock = trueBlock;
     _falseBlock = falseBlock;
@@ -62,14 +65,21 @@ public class IfStatement extends Statement {
   public Value execute(Env env)
     throws Throwable
   {
-    if (_test.evalBoolean(env)) {
-      return _trueBlock.execute(env);
+    try {
+      if (_test.evalBoolean(env)) {
+        return _trueBlock.execute(env);
+      }
+      else if (_falseBlock != null) {
+        return _falseBlock.execute(env);
+      }
+      else
+        return null;
     }
-    else if (_falseBlock != null) {
-      return _falseBlock.execute(env);
+    catch (Throwable t) {
+      rethrow(t);
     }
-    else
-      return null;
+
+    return null;
   }
 
   //
@@ -85,18 +95,18 @@ public class IfStatement extends Statement {
 
     AnalyzeInfo trueBlockInfo = info.copy();
     AnalyzeInfo falseBlockInfo = info.copy();
-    
+
     boolean isComplete = false;
 
     if (_trueBlock.analyze(trueBlockInfo)) {
       info.merge(trueBlockInfo);
       isComplete = true;
     }
-    
+
     if (_falseBlock != null) {
       if (_falseBlock.analyze(falseBlockInfo)) {
-	info.merge(falseBlockInfo);
-	isComplete = true;
+        info.merge(falseBlockInfo);
+        isComplete = true;
       }
     }
     else
@@ -140,7 +150,7 @@ public class IfStatement extends Statement {
       out.println("}");
     }
   }
-  
+
   public String toString()
   {
     return "Statement[]";

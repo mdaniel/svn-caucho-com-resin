@@ -39,6 +39,7 @@ import com.caucho.quercus.env.BreakValue;
 import com.caucho.quercus.expr.Expr;
 
 import com.caucho.quercus.gen.PhpWriter;
+import com.caucho.quercus.Location;
 
 /**
  * Represents a while statement.
@@ -47,28 +48,35 @@ public class WhileStatement extends Statement {
   private final Expr _test;
   private final Statement _block;
 
-  public WhileStatement(Expr test, Statement block)
+  public WhileStatement(Location location, Expr test, Statement block)
   {
+    super(location);
+
     _test = test;
     _block = block;
   }
-  
+
   public Value execute(Env env)
     throws Throwable
   {
-    while (_test.evalBoolean(env)) {
-      env.checkTimeout();
-      
-      Value value = _block.execute(env);
+    try {
+      while (_test.evalBoolean(env)) {
+        env.checkTimeout();
 
-      if (value == null) {
+        Value value = _block.execute(env);
+
+        if (value == null) {
+        }
+        else if (value == BreakValue.BREAK)
+          return null;
+        else if (value == ContinueValue.CONTINUE) {
+        }
+        else
+          return value;
       }
-      else if (value == BreakValue.BREAK)
-	return null;
-      else if (value == ContinueValue.CONTINUE) {
-      }
-      else
-	return value;
+    }
+    catch (Throwable t) {
+      rethrow(t);
     }
 
     return null;
@@ -86,7 +94,7 @@ public class WhileStatement extends Statement {
     AnalyzeInfo breakInfo = info;
 
     AnalyzeInfo loopInfo = info.createLoop(contInfo, breakInfo);
-    
+
     _block.analyze(loopInfo);
 
     if (_test != null)
@@ -95,7 +103,7 @@ public class WhileStatement extends Statement {
     loopInfo.merge(contInfo);
 
     // handle loop values
-    
+
     _block.analyze(loopInfo);
 
     loopInfo.merge(contInfo);
@@ -121,12 +129,12 @@ public class WhileStatement extends Statement {
     out.println(") {");
     out.pushDepth();
     out.println("env.checkTimeout();");
-    
+
     _block.generate(out);
     out.popDepth();
     out.println("}");
   }
-  
+
   public String toString()
   {
     return "Statement[]";

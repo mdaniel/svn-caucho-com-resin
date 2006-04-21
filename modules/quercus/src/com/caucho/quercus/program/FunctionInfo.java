@@ -81,6 +81,11 @@ public class FunctionInfo {
     return _quercus;
   }
 
+  public String getName()
+  {
+    return _name;
+  }
+
   /**
    * True for a global function (top-level script).
    */

@@ -42,6 +42,7 @@ import com.caucho.quercus.env.QuercusClass;
 import com.caucho.quercus.page.PhpPage;
 
 import com.caucho.quercus.Quercus;
+import com.caucho.quercus.Location;
 
 import com.caucho.make.PersistentDependency;
 import com.caucho.make.VersionDependency;
@@ -236,7 +237,7 @@ public class PhpProgram extends GenClass {
     if (_statement instanceof ExprStatement) {
       ExprStatement exprStmt = (ExprStatement) _statement;
 
-      _statement = new ReturnStatement(exprStmt.getExpr());
+      _statement = new ReturnStatement(Location.UNKNOWN, exprStmt.getExpr());
     }
     else if (_statement instanceof BlockStatement) {
       BlockStatement blockStmt = (BlockStatement) _statement;
@@ -248,7 +249,7 @@ public class PhpProgram extends GenClass {
 	ExprStatement exprStmt
 	  = (ExprStatement) statements[0];
 
-	_statement = new ReturnStatement(exprStmt.getExpr());
+	_statement = new ReturnStatement(Location.UNKNOWN, exprStmt.getExpr());
       }
     }
     

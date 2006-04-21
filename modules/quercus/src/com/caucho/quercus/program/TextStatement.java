@@ -36,6 +36,7 @@ import com.caucho.java.JavaWriter;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.gen.PhpWriter;
+import com.caucho.quercus.Location;
 
 import com.caucho.vfs.WriteStream;
 
@@ -48,15 +49,22 @@ public class TextStatement extends Statement {
   /**
    * Creates the text statement with its string.
    */
-  public TextStatement(String value)
+  public TextStatement(Location location, String value)
   {
+    super(location);
+
     _value = value;
   }
   
   public Value execute(Env env)
     throws Throwable
   {
-    env.getOut().print(_value);
+    try {
+      env.getOut().print(_value);
+    }
+    catch (Throwable t) {
+      rethrow(t);
+    }
 
     return null;
   }

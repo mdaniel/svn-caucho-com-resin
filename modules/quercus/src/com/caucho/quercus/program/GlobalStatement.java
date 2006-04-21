@@ -43,6 +43,7 @@ import com.caucho.quercus.expr.VarExpr;
 import com.caucho.quercus.expr.VarState;
 
 import com.caucho.quercus.gen.PhpWriter;
+import com.caucho.quercus.Location;
 
 import com.caucho.vfs.WriteStream;
 
@@ -55,15 +56,21 @@ public class GlobalStatement extends Statement {
   /**
    * Creates the echo statement.
    */
-  public GlobalStatement(VarExpr var)
+  public GlobalStatement(Location location, VarExpr var)
   {
+    super(location);
     _var = var;
   }
   
   public Value execute(Env env)
     throws Throwable
   {
-    env.setValue(_var.getName(), env.getGlobalVar(_var.getName()));
+    try {
+      env.setValue(_var.getName(), env.getGlobalVar(_var.getName()));
+    }
+    catch (Throwable t) {
+      rethrow(t);
+    }
 
     return null;
   }

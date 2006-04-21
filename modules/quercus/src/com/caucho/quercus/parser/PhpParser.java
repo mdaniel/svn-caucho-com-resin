@@ -42,6 +42,7 @@ import com.caucho.quercus.expr.*;
 import com.caucho.quercus.program.*;
 
 import com.caucho.quercus.Quercus;
+import com.caucho.quercus.Location;
 
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
@@ -183,8 +184,8 @@ public class PhpParser {
 
   private Path _sourceFile;
 
-  private String _file;
-  private int _line;
+  private ParserLocation _parserLocation = new ParserLocation();
+
   private boolean _hasCr;
 
   private int _peek = -1;
@@ -230,8 +231,8 @@ public class PhpParser {
     _sourceFile = sourceFile;
     _is = is;
 
-    _file = sourceFile.getPath();
-    _line = 1;
+    _parserLocation.setFileName(sourceFile.getPath());
+    _parserLocation.setLineNumber(1);
 
     _peek = -1;
     _peekToken = -1;
@@ -329,7 +330,7 @@ public class PhpParser {
    */
   public int getLine()
   {
-    return _line;
+    return _parserLocation.getLineNumber();
   }
 
   PhpProgram parse()
@@ -344,19 +345,18 @@ public class PhpParser {
     
     Statement stmt = parseTop();
 
-    PhpProgram program = new PhpProgram(_quercus, _sourceFile,
-					_globalScope.getFunctionMap(),
-					_globalScope.getClassMap(),
-					_function,
-					stmt);
+    return new PhpProgram(_quercus,
+                          _sourceFile,
+                          _globalScope.getFunctionMap(),
+                          _globalScope.getClassMap(),
+                          _function,
+                          stmt);
 
     /*
     com.caucho.vfs.WriteStream out = com.caucho.vfs.Vfs.lookup("stdout:").openWrite();
     out.setFlushOnNewline(true);
     stmt.debug(new JavaWriter(out));
     */
-
-    return program;
   }
 
   PhpProgram parseCode()
@@ -366,13 +366,15 @@ public class PhpParser {
     // XXX: need param or better function name for non-global?
     _function.setGlobal(false);
 
+    Location location = getLocation();
+
     ArrayList<Statement> stmtList = parseStatementList();
     
     return new PhpProgram(_quercus, _sourceFile,
 			  _globalScope.getFunctionMap(),
 			  _globalScope.getClassMap(),
 			  _function,
-			  BlockStatement.create(stmtList));
+			  BlockStatement.create(location, stmtList));
   }
 
   Function parseFunction(Path argPath, Path codePath)
@@ -389,13 +391,11 @@ public class PhpParser {
       
     init(codePath);
       
-    ArrayList<Statement> statementList = null;
+    ArrayList<Statement> statementList;
 
     statementList = parseStatementList();
 
-    Function function = new Function("anonymous", _function, args, statementList);
-
-    return function;
+    return new Function(Location.UNKNOWN, "anonymous", _function, args, statementList);
   }
 
   /**
@@ -408,10 +408,12 @@ public class PhpParser {
     
     ArrayList<Statement> statements = new ArrayList<Statement>();
 
+    Location location = getLocation();
+
     int token = parsePhpText();
 
     if (_lexeme.length() > 0)
-      statements.add(new TextStatement(_lexeme));
+      statements.add(new TextStatement(location, _lexeme));
 
     if (token == TEXT_ECHO) {
       parseEcho(statements);
@@ -419,7 +421,7 @@ public class PhpParser {
     
     statements.addAll(parseStatementList());
 
-    return BlockStatement.create(statements);
+    return BlockStatement.create(location, statements);
   }
 
   /**
@@ -431,6 +433,8 @@ public class PhpParser {
     ArrayList<Statement> statements = new ArrayList<Statement>();
 
     while (true) {
+      Location location = getLocation();
+
       int token = parseToken();
 
       switch (token) {
@@ -454,10 +458,12 @@ public class PhpParser {
 
       case FUNCTION:
 	{
-	  Function fun = parseFunctionDefinition();
+          Location functionLocation = getLocation();
+
+          Function fun = parseFunctionDefinition();
 
 	  if (! _isTop) {
-	    statements.add(new FunctionDefStatement(fun));
+	    statements.add(new FunctionDefStatement(functionLocation, fun));
 	  }
 	}
 	break;
@@ -539,13 +545,13 @@ public class PhpParser {
 
       case TEXT:
 	if (_lexeme.length() > 0) {
-	  statements.add(new TextStatement(_lexeme));
+	  statements.add(new TextStatement(location, _lexeme));
 	}
 	break;
 	
       case TEXT_ECHO:
 	if (_lexeme.length() > 0)
-	  statements.add(new TextStatement(_lexeme));
+	  statements.add(new TextStatement(location, _lexeme));
 
 	parseEcho(statements);
 
@@ -563,6 +569,8 @@ public class PhpParser {
   private Statement parseStatement()
     throws IOException
   {
+    Location location = getLocation();
+
     int token = parseToken();
     switch (token) {
     case ';':
@@ -570,11 +578,11 @@ public class PhpParser {
 
     case '{':
       {
-	ArrayList<Statement> statementList = parseStatementList();
+        ArrayList<Statement> statementList = parseStatementList();
 
 	expect('}');
 
-	return BlockStatement.create(statementList);
+	return BlockStatement.create(location, statementList);
       }
 
     case IF:
@@ -597,7 +605,7 @@ public class PhpParser {
 
     case TEXT:
       if (_lexeme.length() > 0) {
-	return new TextStatement(_lexeme);
+	return new TextStatement(location, _lexeme);
       }
       else
 	return parseStatement();
@@ -622,10 +630,12 @@ public class PhpParser {
     switch (token) {
     case ECHO:
       {
-	ArrayList<Statement> statementList = new ArrayList<Statement>();
+        Location location = getLocation();
+
+        ArrayList<Statement> statementList = new ArrayList<Statement>();
 	parseEcho(statementList);
 
-	return BlockStatement.create(statementList);
+	return BlockStatement.create(location, statementList);
       }
 
     case PRINT:
@@ -666,10 +676,12 @@ public class PhpParser {
   private void parseEcho(ArrayList<Statement> statements)
     throws IOException
   {
+    Location location = getLocation();
+
     while (true) {
       Expr expr = parseTopExpr();
 
-      createEchoStatements(statements, expr);
+      createEchoStatements(location, statements, expr);
 
       int token = parseToken();
 
@@ -683,7 +695,8 @@ public class PhpParser {
   /**
    * Creates echo statements from an expression.
    */
-  private void createEchoStatements(ArrayList<Statement> statements,
+  private void createEchoStatements(Location location,
+                                    ArrayList<Statement> statements,
 				    Expr expr)
   {
     if (expr == null) {
@@ -694,18 +707,18 @@ public class PhpParser {
 
       // XXX: children of append print differently?
 
-      createEchoStatements(statements, append.getValue());
-      createEchoStatements(statements, append.getNext());
+      createEchoStatements(location, statements, append.getValue());
+      createEchoStatements(location, statements, append.getNext());
     }
     else if (expr instanceof StringLiteralExpr) {
       StringLiteralExpr string = (StringLiteralExpr) expr;
       
-      Statement statement = new TextStatement(string.evalConstant().toString());
+      Statement statement = new TextStatement(location, string.evalConstant().toString());
 
       statements.add(statement);
     }
     else {
-      Statement statement = new EchoStatement(expr);
+      Statement statement = new EchoStatement(location, expr);
 
       statements.add(statement);
     }
@@ -717,10 +730,7 @@ public class PhpParser {
   private Statement parsePrint()
     throws IOException
   {
-    String fileName = getFileName();
-    int line = getLine();
-    
-    return new ExprStatement(parsePrintExpr()).setLocation(fileName, line);
+    return new ExprStatement(getLocation(), parsePrintExpr());
   }
 
   /**
@@ -729,9 +739,6 @@ public class PhpParser {
   private Expr parsePrintExpr()
     throws IOException
   {
-    String fileName = getFileName();
-    int line = getLine();
-    
     int token = parseToken();
 
     ArrayList<Expr> args;
@@ -747,10 +754,7 @@ public class PhpParser {
       args.add(parseTopExpr());
     }
 
-    FunctionExpr expr = new FunctionExpr("print", args);
-    expr.setLocation(fileName, line);
-
-    return expr;
+    return new FunctionExpr("print", args);
   }
 
   /**
@@ -760,7 +764,9 @@ public class PhpParser {
     throws IOException
   {
     ArrayList<Statement> statementList = new ArrayList<Statement>();
-    
+
+    Location location = getLocation();
+
     while (true) {
       Expr expr = parseTopExpr();
 
@@ -770,7 +776,7 @@ public class PhpParser {
 	// php/3a6g, php/3a58
 	var.getVarInfo().setReference();
 
-	statementList.add(new GlobalStatement(var));
+	statementList.add(new GlobalStatement(location, var));
       }
       else
 	throw error(L.l("unknown expr to global"));
@@ -781,7 +787,7 @@ public class PhpParser {
 
       if (token != ',') {
 	_peekToken = token;
-	return BlockStatement.create(statementList);
+	return BlockStatement.create(location, statementList);
       }
     }
   }
@@ -793,7 +799,9 @@ public class PhpParser {
     throws IOException
   {
     ArrayList<Statement> statementList = new ArrayList<Statement>();
-    
+
+    Location location = getLocation();
+
     while (true) {
       expect('$');
 
@@ -811,11 +819,11 @@ public class PhpParser {
       }
 
       var.getVarInfo().setReference();
-      statementList.add(new StaticStatement(var, init));
+      statementList.add(new StaticStatement(location, var, init));
       
       if (token != ',') {
 	_peekToken = token;
-	return BlockStatement.create(statementList);
+	return BlockStatement.create(location, statementList);
       }
     }
   }
@@ -826,10 +834,12 @@ public class PhpParser {
   private Statement parseUnset()
     throws IOException
   {
+    Location location = getLocation();
+
     ArrayList<Statement> statementList = new ArrayList<Statement>();
     parseUnset(statementList);
 
-    return BlockStatement.create(statementList);
+    return BlockStatement.create(location, statementList);
   }
 
   /**
@@ -838,18 +848,20 @@ public class PhpParser {
   private void parseUnset(ArrayList<Statement> statementList)
     throws IOException
   {
+    Location location = getLocation();
+
     int token = parseToken();
 
     if (token != '(') {
       _peekToken = token;
 
-      statementList.add(parseTopExpr().createUnset());
+      statementList.add(parseTopExpr().createUnset(location));
 
       return;
     }
 
     do {
-      statementList.add(parseTopExpr().createUnset());
+      statementList.add(parseTopExpr().createUnset(getLocation()));
     } while ((token = parseToken()) == ',');
 
     _peekToken = token;
@@ -862,13 +874,12 @@ public class PhpParser {
   private Statement parseIf()
     throws IOException
   {
-    String fileName = getFileName();
-    int line = getLine();
-    
     boolean oldTop = _isTop;
     _isTop = false;
 
     try {
+      Location location = getLocation();
+
       expect('(');
 
       Expr test = parseExpr();
@@ -878,7 +889,7 @@ public class PhpParser {
       int token = parseToken();
 
       if (token == ':')
-	return parseAlternateIf(test, fileName, line);
+	return parseAlternateIf(test, location);
       else
 	_peekToken = token;
 
@@ -896,11 +907,8 @@ public class PhpParser {
       else
 	_peekToken = token;
 
-      Statement stmt = new IfStatement(test, trueBlock, falseBlock);
+      return new IfStatement(location, test, trueBlock, falseBlock);
 
-      stmt.setLocation(fileName, line);
-
-      return stmt;
     } finally {
       _isTop = oldTop;
     }
@@ -909,28 +917,27 @@ public class PhpParser {
   /**
    * Parses the if statement
    */
-  private Statement parseAlternateIf(Expr test, String fileName, int line)
+  private Statement parseAlternateIf(Expr test, Location location)
     throws IOException
   {
-    Statement trueBlock = BlockStatement.create(parseStatementList());
+    Statement trueBlock = BlockStatement.create(location, parseStatementList());
 
     Statement falseBlock = null;
 
     int token = parseToken();
 
     if (token == ELSEIF) {
-      String subFileName = getFileName();
-      int subLine = getLine();
-      
+      Location subLocation = getLocation();
+
       Expr subTest = parseExpr();
       expect(':');
       
-      falseBlock = parseAlternateIf(subTest, subFileName, subLine);
+      falseBlock = parseAlternateIf(subTest, subLocation);
     }
     else if (token == ELSE) {
       expect(':');
       
-      falseBlock = BlockStatement.create(parseStatementList());
+      falseBlock = BlockStatement.create(getLocation(), parseStatementList());
 
       expect(ENDIF);
     }
@@ -939,11 +946,7 @@ public class PhpParser {
       expect(ENDIF);
     }
 
-    Statement stmt = new IfStatement(test, trueBlock, falseBlock);
-
-    stmt.setLocation(fileName, line);
-
-    return stmt;
+    return new IfStatement(location, test, trueBlock, falseBlock);
   }
 
   /**
@@ -952,9 +955,8 @@ public class PhpParser {
   private Statement parseSwitch()
     throws IOException
   {
-    String fileName = getFileName();
-    int line = getLine();
-    
+    Location location = getLocation();
+
     boolean oldTop = _isTop;
     _isTop = false;
 
@@ -986,17 +988,14 @@ public class PhpParser {
       BlockStatement defaultBlock = null;
 
       while ((token = parseToken()) == CASE || token == DEFAULT) {
+        Location caseLocation = getLocation();
+
 	ArrayList<Expr> valueList = new ArrayList<Expr>();
 	boolean isDefault = false;
       
 	while (token == CASE || token == DEFAULT) {
-	  if (token == CASE) {
-	    String caseFileName = getFileName();
-	    int caseLine = getLine();
-	    
+          if (token == CASE) {
 	    Expr value = parseExpr();
-
-	    value.setLocation(caseFileName, caseLine);
 
 	    valueList.add(value);
 	  }
@@ -1035,7 +1034,7 @@ public class PhpParser {
 	    defaultBlock = block;
 	}
       
-	BlockStatement block = new BlockStatement(newBlockList);
+	BlockStatement block = new BlockStatement(caseLocation, newBlockList);
 
 	if (values.length > 0) {
 	  caseList.add(values);
@@ -1063,13 +1062,7 @@ public class PhpParser {
       else
 	expect('}');
 
-      SwitchStatement stmt = new SwitchStatement(test,
-						 caseList, blockList,
-						 defaultBlock);
-      
-      stmt.setLocation(fileName, line);
-
-      return stmt;
+      return new SwitchStatement(location, test, caseList, blockList, defaultBlock);
     } finally {
       _isTop = oldTop;
     }
@@ -1085,9 +1078,8 @@ public class PhpParser {
     _isTop = false;
 
     try {
-      String fileName = getFileName();
-      int line = getLine();
-      
+      Location location = getLocation();
+
       expect('(');
 
       Expr test = parseExpr();
@@ -1099,7 +1091,7 @@ public class PhpParser {
       int token = parseToken();
 
       if (token == ':') {
-	block = BlockStatement.create(parseStatementList());
+	block = BlockStatement.create(getLocation(), parseStatementList());
 
 	expect(ENDWHILE);
       }
@@ -1109,7 +1101,7 @@ public class PhpParser {
 	block = parseStatement();
       }
 
-      return new WhileStatement(test, block).setLocation(fileName, line);
+      return new WhileStatement(location, test, block);
     } finally {
       _isTop = oldTop;
     }
@@ -1125,6 +1117,8 @@ public class PhpParser {
     _isTop = false;
 
     try {
+      Location location = getLocation();
+
       Statement block = parseStatement();
 
       expect(WHILE);
@@ -1134,7 +1128,7 @@ public class PhpParser {
 
       expect(')');
     
-      return new DoStatement(test, block);
+      return new DoStatement(location, test, block);
     } finally {
       _isTop = oldTop;
     }
@@ -1150,9 +1144,8 @@ public class PhpParser {
     _isTop = false;
 
     try {
-      String fileName = getFileName();
-      int line = getLine();
-      
+      Location location = getLocation();
+
       expect('(');
 
       Expr init = null;
@@ -1187,7 +1180,7 @@ public class PhpParser {
       token = parseToken();
 
       if (token == ':') {
-	block = BlockStatement.create(parseStatementList());
+	block = BlockStatement.create(getLocation(), parseStatementList());
 
 	expect(ENDFOR);
       }
@@ -1197,11 +1190,8 @@ public class PhpParser {
 	block = parseStatement();
       }
 
-      Statement stmt = new ForStatement(init, test, incr, block);
+      return new ForStatement(location, init, test, incr, block);
 
-      stmt.setLocation(fileName, line);
-
-      return stmt;
     } finally {
       _isTop = oldTop;
     }
@@ -1217,9 +1207,8 @@ public class PhpParser {
     _isTop = false;
 
     try {
-      String fileName = getFileName();
-      int line = getLine();
-      
+      Location location = getLocation();
+
       expect('(');
 
       Expr objExpr = parseTopExpr();
@@ -1240,7 +1229,7 @@ public class PhpParser {
       String name = parseIdentifier();
 
       VarExpr keyVar = null;
-      VarExpr valueVar = null;
+      VarExpr valueVar;
 
       token = parseToken();
 
@@ -1276,7 +1265,7 @@ public class PhpParser {
       token = parseToken();
 
       if (token == ':') {
-	block = BlockStatement.create(parseStatementList());
+	block = BlockStatement.create(getLocation(), parseStatementList());
 
 	expect(ENDFOREACH);
       }
@@ -1286,12 +1275,7 @@ public class PhpParser {
 	block = parseStatement();
       }
 
-      Statement stmt;
-      stmt = new ForeachStatement(objExpr, keyVar, valueVar, isRef, block);
-
-      stmt.setLocation(fileName, line);
-
-      return stmt;
+      return new ForeachStatement(location, objExpr, keyVar, valueVar, isRef, block);
     } finally {
       _isTop = oldTop;
     }
@@ -1311,7 +1295,7 @@ public class PhpParser {
 
     try {
       _returnsReference = false;
-    
+
       int token = parseToken();
 
       if (token == '&')
@@ -1327,6 +1311,8 @@ public class PhpParser {
       
       _function.setReturnsReference(_returnsReference);
 
+      Location location = getLocation();
+
       expect('(');
 
       ArrayList<Arg> args = parseFunctionArgDefinition();
@@ -1335,7 +1321,7 @@ public class PhpParser {
       
       expect('{');
       
-      ArrayList<Statement> statementList = null;
+      ArrayList<Statement> statementList;
 
       statementList = parseStatementList();
     
@@ -1344,12 +1330,13 @@ public class PhpParser {
       Function function;
 
       if (_quercusClass != null)
-	function = new ObjectMethod(_quercusClass,
+	function = new ObjectMethod(location, _quercusClass,
 				    name, _function,
 				    args, statementList);
       else
-	function = new Function(name, _function,
-				args, statementList);
+	function = new Function(location, name,
+                                _function, args,
+                                statementList);
 
       function.setGlobal(oldTop);
 
@@ -1373,7 +1360,6 @@ public class PhpParser {
     throws IOException
   {
     ArrayList<Arg> args = new ArrayList<Arg>();
-    int argIndex = 0;
 
     while (true) {
       int token = parseToken();
@@ -1426,16 +1412,15 @@ public class PhpParser {
   private Statement parseReturn()
     throws IOException
   {
-    String fileName = getFileName();
-    int line = getLine();
-    
+    Location location = getLocation();
+
     int token = parseToken();
 
     switch (token) {
     case ';':
       _peekToken = token;
 
-      return new ReturnStatement(NullLiteralExpr.NULL).setLocation(fileName, line);
+      return new ReturnStatement(location, NullLiteralExpr.NULL);
       
     default:
       _peekToken = token;
@@ -1450,9 +1435,9 @@ public class PhpParser {
       */
 
       if (_returnsReference)
-	return new ReturnRefStatement(expr).setLocation(fileName, line);
+	return new ReturnRefStatement(location, expr);
       else
-	return new ReturnStatement(expr).setLocation(fileName, line);
+	return new ReturnStatement(location, expr);
     }
   }
 
@@ -1500,8 +1485,6 @@ public class PhpParser {
   private void parseClassContents()
     throws IOException
   {
-    ArrayList<Statement> statements = new ArrayList<Statement>();
-
     while (true) {
       int token = parseToken();
 
@@ -1511,7 +1494,7 @@ public class PhpParser {
 
       case FUNCTION:
 	{
-	  Function fun = parseFunctionDefinition();
+          Function fun = parseFunctionDefinition();
 	  fun.setStatic(false);
 	  break;
 	}
@@ -1680,12 +1663,11 @@ public class PhpParser {
   private Statement parseExprStatement()
     throws IOException
   {
-    String fileName = getFileName();
-    int line = getLine();
-    
+    Location location = getLocation();
+
     Expr expr = parseTopExpr();
 
-    Statement statement = new ExprStatement(expr).setLocation(fileName, line);
+    Statement statement = new ExprStatement(location, expr);
 
     int token = parseToken();
     _peekToken = token;
@@ -1713,9 +1695,7 @@ public class PhpParser {
   private Expr parseTopExpr()
     throws IOException
   {
-    Expr expr = parseExpr();
-
-    return expr;
+    return parseExpr();
   }
 
   /**
@@ -2287,9 +2267,7 @@ public class PhpParser {
 	
       case '{':
         {
-          Expr index = null;
-	  
-	  index = parseExpr();
+          Expr index = parseExpr();
 
 	  expect('}');
 
@@ -2453,9 +2431,7 @@ public class PhpParser {
       return new LiteralExpr(BooleanValue.FALSE);
 
     case '$':
-      Expr var = parseVariable();
-
-      return var;
+      return parseVariable();
 
       /* quercus/0211
     case '&':
@@ -2680,11 +2656,8 @@ public class PhpParser {
 	return new EachExpr(args.get(0));
       }
 
-      FunctionExpr expr = new FunctionExpr(name, args);
+      return new FunctionExpr(name, args);
       
-      expr.setLocation(getFileName(), getLine());
-
-      return expr;
     }
     else if (className.equals("parent")) {
       className = _quercusClass.getParentName();
@@ -2705,14 +2678,13 @@ public class PhpParser {
    * Parses the next constant
    */
   private Expr parseConstant(String className, String name)
-    throws IOException
   {
     if (className != null)
       return new ClassConstExpr(className, name);
     else if (name.equals("__FILE__"))
-      return new StringLiteralExpr(_file);
+      return new StringLiteralExpr(_parserLocation.getFileName());
     else if (name.equals("__LINE__"))
-      return new LongLiteralExpr(_line);
+      return new LongLiteralExpr(_parserLocation.getLineNumber());
     else
       return new ConstExpr(name);
   }
@@ -3587,7 +3559,7 @@ public class PhpParser {
 	  if (ch == '[') {
 	    tail = parseSimpleArrayTail(tail);
 	  }
-	  else if (ch == '-') {
+	  else {
 	    if ((ch = read()) != '>') {
 	      tail = AppendExpr.create(tail, new StringLiteralExpr("-"));
 	    }
@@ -3704,13 +3676,13 @@ public class PhpParser {
           _sb.append((char) parseOctalEscape(ch));
           break;
         case 't':
-          _sb.append((char) '\t');
+          _sb.append('\t');
           break;
         case 'r':
-          _sb.append((char) '\r');
+          _sb.append('\r');
           break;
         case 'n':
-          _sb.append((char) '\n');
+          _sb.append('\n');
           break;
         case '\\':
         case '$':
@@ -4025,11 +3997,11 @@ public class PhpParser {
     int ch = _is.read();
 
     if (ch == '\r') {
-      _line++;
+      _parserLocation.incrementLineNumber();
       _hasCr = true;
     }
     else if (ch == '\n' && ! _hasCr)
-      _line++;
+      _parserLocation.incrementLineNumber();
     else
       _hasCr = false;
 
@@ -4049,28 +4021,37 @@ public class PhpParser {
    */
   public IOException error(String msg)
   {
-    String []sourceLines = Env.getSourceLine(_sourceFile, _line - 1, 3);
+    int lineNumber = _parserLocation.getLineNumber();
+
+    String []sourceLines = Env.getSourceLine(_sourceFile, lineNumber - 1, 3);
 
     if (sourceLines != null &&
 	sourceLines.length > 0 &&
 	sourceLines[0] != null) {
       StringBuilder sb = new StringBuilder();
 
-      String shortFile = _file;
+      String shortFile = _parserLocation.getFileName();
       int p = shortFile.lastIndexOf('/');
       if (p > 0)
 	shortFile = shortFile.substring(p + 1);
 
-      sb.append(getLocation() + msg + " in");
+      sb.append(_parserLocation.toString())
+        .append(msg)
+        .append(" in");
+
       for (int i = 0; i < sourceLines.length && sourceLines[i] != null; i++) {
 	sb.append("\n");
-	sb.append(shortFile +  ":" + (_line - 1 + i) + ": " + sourceLines[i]);
+        sb.append(shortFile)
+          .append(":")
+          .append(lineNumber - 1 + i)
+          .append(": ")
+          .append(sourceLines[i]);
       }
     
       return new PhpParseException(sb.toString());
     }
     else
-      return new PhpParseException(getLocation() + msg);
+      return new PhpParseException(_parserLocation.toString() + msg);
   }
 
   /**
@@ -4176,9 +4157,77 @@ public class PhpParser {
     }
   }
 
-  private String getLocation()
+  private Location getLocation()
   {
-    return _file + ":" + _line + ": ";
+    return _parserLocation.getLocation();
+  }
+
+  private class ParserLocation {
+    private int _lineNumber = 1;
+    private String _fileName;
+    private String _lastClassName;
+    private String _lastFunctionName;
+
+    private Location _location;
+
+    public int getLineNumber()
+    {
+      return _lineNumber;
+    }
+
+    public void setLineNumber(int lineNumber)
+    {
+      _lineNumber = lineNumber;
+      _location = null;
+    }
+
+    public void incrementLineNumber()
+    {
+      _lineNumber++;
+      _location = null;
+    }
+
+    public String getFileName()
+    {
+      return _fileName;
+    }
+
+    public void setFileName(String fileName)
+    {
+      _fileName = fileName;
+      _location = null;
+    }
+
+    public Location getLocation()
+    {
+      String currentFunctionName = _function == null || _function.isPageMain( ? null : _function.getName();
+      String currentClassName = _quercusClass == null ? null : _quercusClass.getName();
+
+      if (_location != null) {
+        if (!equals(currentFunctionName, _lastFunctionName))
+          _location = null;
+        else if (!equals(currentClassName, _lastClassName))
+          _location = null;
+      }
+
+      if (_location == null)
+        _location = new Location(_fileName, _lineNumber, currentClassName, currentFunctionName);
+
+      _lastFunctionName = currentFunctionName;
+      _lastClassName = currentClassName;
+
+      return _location;
+    }
+
+    private boolean equals(String s1, String s2)
+    {
+      return (s1 == null || s2 == null) ?  s1 == s2 : s1.equals(s2);
+    }
+
+    public String toString()
+    {
+      return _fileName + ":" + _lineNumber + ": ";
+    }
   }
 
   static {

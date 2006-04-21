@@ -36,6 +36,7 @@ import com.caucho.quercus.env.Value;
 import com.caucho.quercus.expr.Expr;
 import com.caucho.quercus.expr.VarExpr;
 import com.caucho.quercus.gen.PhpWriter;
+import com.caucho.quercus.Location;
 
 import java.io.IOException;
 
@@ -56,10 +57,15 @@ public class ForeachStatement
 
   private final Statement _block;
 
-  public ForeachStatement(Expr objExpr,
-                          VarExpr key, VarExpr value, boolean isRef,
+  public ForeachStatement(Location location,
+                          Expr objExpr,
+                          VarExpr key,
+                          VarExpr value,
+                          boolean isRef,
                           Statement block)
   {
+    super(location);
+
     _objExpr = objExpr;
 
     _key = key;
@@ -78,46 +84,51 @@ public class ForeachStatement
   public Value execute(Env env)
     throws Throwable
   {
-    Value origObj = _objExpr.eval(env);
-    Value obj = origObj.copy();
+    try {
+      Value origObj = _objExpr.eval(env);
+      Value obj = origObj.copy();
 
-    if (_key == null && ! _isRef) {
-      for (Value value : obj.getValueArray(env)) {
-        env.setValue(_valueName, value);
-
-        Value result = _block.execute(env);
-
-        if (result == null || result instanceof ContinueValue) {
-        } else if (result instanceof BreakValue)
-          return null;
-        else
-          return result;
-      }
-
-      return null;
-    } else {
-      for (Value key : obj.getKeyArray()) {
-        if (_keyName != null)
-          env.setValue(_keyName, key);
-
-        if (_isRef) {
-          Value value = origObj.getRef(key);
-
-          env.setVar(_valueName, value);
-        } else {
-          Value value = obj.get(key).toValue();
-
+      if (_key == null && ! _isRef) {
+        for (Value value : obj.getValueArray(env)) {
           env.setValue(_valueName, value);
+
+          Value result = _block.execute(env);
+
+          if (result == null || result instanceof ContinueValue) {
+          } else if (result instanceof BreakValue)
+            return null;
+          else
+            return result;
         }
 
-        Value result = _block.execute(env);
+        return null;
+      } else {
+        for (Value key : obj.getKeyArray()) {
+          if (_keyName != null)
+            env.setValue(_keyName, key);
 
-        if (result == null || result instanceof ContinueValue) {
-        } else if (result instanceof BreakValue)
-          return null;
-        else
-          return result;
+          if (_isRef) {
+            Value value = origObj.getRef(key);
+
+            env.setVar(_valueName, value);
+          } else {
+            Value value = obj.get(key).toValue();
+
+            env.setValue(_valueName, value);
+          }
+
+          Value result = _block.execute(env);
+
+          if (result == null || result instanceof ContinueValue) {
+          } else if (result instanceof BreakValue)
+            return null;
+          else
+            return result;
+        }
       }
+    }
+    catch (Throwable t) {
+      rethrow(t);
     }
 
     return null;

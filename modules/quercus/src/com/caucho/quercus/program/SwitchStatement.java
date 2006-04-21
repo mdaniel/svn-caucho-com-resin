@@ -41,28 +41,32 @@ import com.caucho.quercus.expr.Expr;
 import com.caucho.quercus.expr.VarExpr;
 
 import com.caucho.quercus.gen.PhpWriter;
+import com.caucho.quercus.Location;
 
 /**
  * Represents a switch statement.
  */
 public class SwitchStatement extends Statement {
   private final Expr _value;
-  
+
   private final Expr[][] _cases;
   private final BlockStatement[] _blocks;
 
   private final Statement _defaultBlock;
 
-  public SwitchStatement(Expr value,
-			 ArrayList<Expr[]> caseList,
-			 ArrayList<BlockStatement> blockList,
-			 Statement defaultBlock)
+  public SwitchStatement(Location location,
+                         Expr value,
+                         ArrayList<Expr[]> caseList,
+                         ArrayList<BlockStatement> blockList,
+                         Statement defaultBlock)
   {
+    super(location);
+
     _value = value;
 
     _cases = new Expr[caseList.size()][];
     caseList.toArray(_cases);
-    
+
     _blocks = new BlockStatement[blockList.size()];
     blockList.toArray(_blocks);
 
@@ -75,36 +79,42 @@ public class SwitchStatement extends Statement {
   public Value execute(Env env)
     throws Throwable
   {
-    Value testValue = _value.eval(env);
-    
-    int len = _cases.length;
+    try {
+      Value testValue = _value.eval(env);
 
-    for (int i = 0; i < len; i++) {
-      Expr []values = _cases[i];
+      int len = _cases.length;
 
-      for (int j = 0; j < values.length; j++) {
-	Value caseValue = values[j].eval(env);
+      for (int i = 0; i < len; i++) {
+        Expr []values = _cases[i];
 
-	if (testValue.eq(caseValue)) {
-	  Value retValue = _blocks[i].execute(env);
+        for (int j = 0; j < values.length; j++) {
+          Value caseValue = values[j].eval(env);
 
-	  if (retValue instanceof BreakValue)
-	    return null;
-	  else
-	    return retValue;
-	}
+          if (testValue.eq(caseValue)) {
+            Value retValue = _blocks[i].execute(env);
+
+            if (retValue instanceof BreakValue)
+              return null;
+            else
+              return retValue;
+          }
+        }
       }
+
+      if (_defaultBlock != null) {
+        Value retValue = _defaultBlock.execute(env);
+
+        if (retValue instanceof BreakValue)
+          return null;
+        else
+          return retValue;
+      }
+
+    }
+    catch (Throwable t) {
+      rethrow(t);
     }
 
-    if (_defaultBlock != null) {
-      Value retValue = _defaultBlock.execute(env);
-      
-      if (retValue instanceof BreakValue)
-	return null;
-      else
-	return retValue;
-    }
-    
     return null;
   }
 
@@ -120,9 +130,9 @@ public class SwitchStatement extends Statement {
     _value.analyze(info);
 
     AnalyzeInfo breakInfo = info;
-    
+
     AnalyzeInfo switchInfo = info.createLoop(null, breakInfo);
-    
+
     info.clear();
 
     boolean isFallThrough = false;
@@ -131,20 +141,20 @@ public class SwitchStatement extends Statement {
       Expr []cases = _cases[i];
 
       if (cases.length > 0)
-	cases[0].analyze(switchInfo);
+        cases[0].analyze(switchInfo);
 
       AnalyzeInfo topCase = switchInfo.copy();
-      
-      for (int j = 1; j < cases.length; j++) {
-	cases[j].analyze(switchInfo);
 
-	topCase.merge(switchInfo);
+      for (int j = 1; j < cases.length; j++) {
+        cases[j].analyze(switchInfo);
+
+        topCase.merge(switchInfo);
       }
 
       // XXX: need to handle internal breaks like the loops
 
       if (_blocks[i].analyze(topCase))
-	isFallThrough = true;
+        isFallThrough = true;
 
       info.merge(topCase);
     }
@@ -192,7 +202,7 @@ public class SwitchStatement extends Statement {
     String oldBreakVar = out.setBreakVar(breakVar);
 
     boolean oldSwitch = out.setSwitch(true);
-    
+
     String testVar = "quercus_test_" + out.generateId();
 
     out.print("Value " + testVar + " = ");
@@ -209,21 +219,21 @@ public class SwitchStatement extends Statement {
       Expr []values = _cases[i];
 
       if (values.length == 0)
-	continue;
+        continue;
 
       if (hasTest)
-	out.print("else ");
+        out.print("else ");
       hasTest = true;
 
       out.print("if (");
 
       for (int j = 0; j < values.length; j++) {
-	if (j != 0)
-	  out.print(" || ");
+        if (j != 0)
+          out.print(" || ");
 
-	out.print(testVar + ".eq(");
-	values[j].generate(out);
-	out.print(")");
+        out.print(testVar + ".eq(");
+        values[j].generate(out);
+        out.print(")");
       }
 
       out.println(") {");
@@ -232,10 +242,10 @@ public class SwitchStatement extends Statement {
       Statement []stmts = _blocks[i].getStatements();
 
       for (int j = 0; j < stmts.length; j++) {
-	stmts[j].generate(out);
+        stmts[j].generate(out);
 
-	if (stmts[j].fallThrough() != FALL_THROUGH)
-	  break;
+        if (stmts[j].fallThrough() != FALL_THROUGH)
+          break;
       }
 
       out.popDepth();
@@ -244,8 +254,8 @@ public class SwitchStatement extends Statement {
 
     if (_defaultBlock != null) {
       if (hasTest)
-	out.print("else ");
-      
+        out.print("else ");
+
       out.println("{");
       out.pushDepth();
 
@@ -254,14 +264,14 @@ public class SwitchStatement extends Statement {
       out.popDepth();
       out.println("}");
     }
-    
+
     out.popDepth();
     out.println("}");
-    
+
     out.setSwitch(oldSwitch);
     out.setBreakVar(oldBreakVar);
   }
-  
+
   public String toString()
   {
     return "SwitchStatement[]";

@@ -33,13 +33,10 @@ import java.io.IOException;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 
 import java.util.logging.Logger;
 
 import com.caucho.java.JavaWriter;
-
-import com.caucho.quercus.Quercus;
 
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
@@ -49,16 +46,14 @@ import com.caucho.quercus.expr.VarExpr;
 import com.caucho.quercus.expr.VarInfo;
 import com.caucho.quercus.expr.VarState;
 import com.caucho.quercus.expr.NullLiteralExpr;
-import com.caucho.quercus.expr.ExprHandle;
 
 import com.caucho.util.L10N;
-
-import com.caucho.vfs.WriteStream;
 
 import com.caucho.quercus.env.Var;
 import com.caucho.quercus.env.NullValue;
 
 import com.caucho.quercus.gen.PhpWriter;
+import com.caucho.quercus.Location;
 
 /**
  * Represents sequence of statements.
@@ -78,24 +73,26 @@ public class Function extends AbstractFunction {
 
   private boolean _hasReturn;
 
-  Function(String name,
-	   FunctionInfo info,
-	   Arg []args,
-	   Statement []statements)
+  Function(Location location,
+           String name,
+           FunctionInfo info,
+           Arg []args,
+           Statement []statements)
   {
     _name = name;
     _info = info;
     _isReturnsReference = info.isReturnsReference();
     _args = args;
-    _statement = new BlockStatement(statements);
+    _statement = new BlockStatement(location, statements);
 
     setGlobal(info.isPageStatic());
   }
 
-  public Function(String name,
-		  FunctionInfo info,
-		  ArrayList<Arg> argList,
-		  ArrayList<Statement> statementList)
+  public Function(Location location,
+                  String name,
+                  FunctionInfo info,
+                  ArrayList<Arg> argList,
+                  ArrayList<Statement> statementList)
   {
     _name = name;
     _info = info;
@@ -108,7 +105,7 @@ public class Function extends AbstractFunction {
 
     statementList.toArray(statements);
 
-    _statement = new BlockStatement(statements);
+    _statement = new BlockStatement(location, statements);
 
     setGlobal(info.isPageStatic());
   }
@@ -182,15 +179,15 @@ public class Function extends AbstractFunction {
 
     else {
       if (_args[args.length].getDefault() == null) {
-	int required = 0;
+        int required;
 
-	for (required = _args.length - 1; required >= 0; required--) {
-	  if (_args[required].getDefault() == null)
-	    break;
-	}
+        for (required = _args.length - 1; required >= 0; required--) {
+          if (_args[required].getDefault() == null)
+            break;
+        }
 
-	env.warning(L.l("function '{0}' has {1} required arguments, but {2} were provided",
-			_name, required + 1, args.length));
+        env.warning(L.l("function '{0}' has {1} required arguments, but {2} were provided",
+                        _name, required + 1, args.length));
       }
 
       expandedArgs = new Expr[_args.length];
@@ -198,12 +195,12 @@ public class Function extends AbstractFunction {
       System.arraycopy(args, 0, expandedArgs, 0, args.length);
 
       for (int i = args.length; i < expandedArgs.length; i++) {
-	Expr defaultExpr = _args[i].getDefault();
+        Expr defaultExpr = _args[i].getDefault();
 
-	if (defaultExpr != null)
-	  expandedArgs[i] = defaultExpr;
-	else
-	  expandedArgs[i] = NullLiteralExpr.NULL;
+        if (defaultExpr != null)
+          expandedArgs[i] = defaultExpr;
+        else
+          expandedArgs[i] = NullLiteralExpr.NULL;
       }
     }
 
@@ -237,44 +234,42 @@ public class Function extends AbstractFunction {
 
     for (int i = 0; i < args.length; i++) {
       Arg arg = null;
-      boolean isReference = false;
 
       if (i < _args.length) {
-	arg = _args[i];
+        arg = _args[i];
       }
 
       if (arg == null) {
-	values[i] = args[i].eval(env).copy();
+        values[i] = args[i].eval(env).copy();
       }
       else if (arg.isReference()) {
-	values[i] = args[i].evalRef(env);
+        values[i] = args[i].evalRef(env);
 
-	map.put(arg.getName(), values[i].toRefVar());
+        map.put(arg.getName(), values[i].toRefVar());
       }
       else {
-	// php/0d04
-	values[i] = args[i].eval(env);
+        // php/0d04
+        values[i] = args[i].eval(env);
 
-	Var var = values[i].toVar();
+        Var var = values[i].toVar();
 
-	map.put(arg.getName(), var);
+        map.put(arg.getName(), var);
 
-	values[i] = var.toValue();
+        values[i] = var.toValue();
       }
     }
 
     for (int i = args.length; i < _args.length; i++) {
       Arg arg = _args[i];
-      boolean isReference = false;
 
       Expr defaultExpr = arg.getDefault();
 
       if (defaultExpr == null)
-	return env.error("expected default expression");
+        return env.error("expected default expression");
       else if (arg.isReference())
-	map.put(arg.getName(), defaultExpr.evalRef(env).toVar());
+        map.put(arg.getName(), defaultExpr.evalRef(env).toVar());
       else {
-	map.put(arg.getName(), defaultExpr.eval(env).copy().toVar());
+        map.put(arg.getName(), defaultExpr.eval(env).copy().toVar());
       }
     }
 
@@ -285,11 +280,11 @@ public class Function extends AbstractFunction {
       Value value = _statement.execute(env);
 
       if (value == null)
-	return NullValue.NULL;
+        return NullValue.NULL;
       else if (_isReturnsReference && isRef)
-	return value;
+        return value;
       else
-	return value.copyReturn();
+        return value.copyReturn();
     } finally {
       env.restoreFunctionArgs(oldArgs);
       env.popEnv(oldMap);
@@ -321,34 +316,32 @@ public class Function extends AbstractFunction {
 
     for (int i = 0; i < args.length; i++) {
       Arg arg = null;
-      boolean isReference = false;
 
       if (i < _args.length) {
-	arg = _args[i];
+        arg = _args[i];
       }
 
       if (arg == null) {
       }
       else if (arg.isReference())
-	map.put(arg.getName(), args[i].toRefVar());
+        map.put(arg.getName(), args[i].toRefVar());
       else {
-	// quercus/0d04
-	map.put(arg.getName(), args[i].copy().toVar());
+        // quercus/0d04
+        map.put(arg.getName(), args[i].copy().toVar());
       }
     }
 
     for (int i = args.length; i < _args.length; i++) {
       Arg arg = _args[i];
-      boolean isReference = false;
 
       Expr defaultExpr = arg.getDefault();
 
       if (defaultExpr == null)
-	return env.error("expected default expression");
+        return env.error("expected default expression");
       else if (arg.isReference())
-	map.put(arg.getName(), defaultExpr.evalRef(env).toVar());
+        map.put(arg.getName(), defaultExpr.evalRef(env).toVar());
       else {
-	map.put(arg.getName(), defaultExpr.eval(env).copy().toVar());
+        map.put(arg.getName(), defaultExpr.eval(env).copy().toVar());
       }
     }
 
@@ -359,11 +352,11 @@ public class Function extends AbstractFunction {
       Value value = _statement.execute(env);
 
       if (value == null)
-	return NullValue.NULL;
+        return NullValue.NULL;
       else if (_isReturnsReference && isRef)
-	return value;
+        return value;
       else
-	return value.copyReturn();
+        return value.copyReturn();
     } finally {
       env.restoreFunctionArgs(oldArgs);
       env.popEnv(oldMap);
@@ -430,7 +423,7 @@ public class Function extends AbstractFunction {
    * @param out the writer to the Java source code.
    */
   private void generateImpl(PhpWriter out, Expr funExpr,
-			    Expr []args, boolean isRef)
+                            Expr []args, boolean isRef)
     throws IOException
   {
     out.print("fun_" + _name + "(env");
@@ -444,27 +437,27 @@ public class Function extends AbstractFunction {
 
     for (int i = 0; i < _args.length; i++) {
       if (i != 0 || ! isVariableArgs())
-	out.print(", ");
+        out.print(", ");
 
       if (i < args.length) {
-	Expr arg = args[i];
+        Expr arg = args[i];
 
-	if (_args[i].isReference()) {
-	  arg.generateRef(out);
-	}
-	else {
-	  arg.generateArg(out);
-	}
+        if (_args[i].isReference()) {
+          arg.generateRef(out);
+        }
+        else {
+          arg.generateArg(out);
+        }
       }
       else if (_args[i].getDefault() != null)
-	_args[i].getDefault().generateArg(out);
+        _args[i].getDefault().generateArg(out);
       else
-	out.print("NullValue.NULL");
+        out.print("NullValue.NULL");
     }
 
     for (int i = _args.length; i < args.length; i++) {
       if (i != 0)
-	out.print(", ");
+        out.print(", ");
       args[i].generateArg(out);
     }
 
@@ -602,7 +595,7 @@ public class Function extends AbstractFunction {
 
     if (! _isReturnsReference)
       out.print(".toValue()");
-    
+
     out.println(";");
 
     out.println("}");
@@ -675,14 +668,14 @@ public class Function extends AbstractFunction {
 
     for (int i = 0; i < _args.length; i++) {
       if (i != 0)
-	out.print(", ");
+        out.print(", ");
 
       Expr defaultExpr = _args[i].getDefault();
 
       if (defaultExpr != null)
-	defaultExpr.generateExpr(out);
+        defaultExpr.generateExpr(out);
       else
-	out.print("null");
+        out.print("null");
     }
     out.println("}");
     /*
@@ -745,45 +738,45 @@ public class Function extends AbstractFunction {
       String argName = varName;
 
       if (! var.isArgument())
-	out.print("Value ");
+        out.print("Value ");
       else if (isVariableArgs()) {
-	out.print("Value ");
+        out.print("Value ");
 
-	argName = "args[" + var.getArgumentIndex() + "]";
+        argName = "args[" + var.getArgumentIndex() + "]";
       }
 
       if (var.isArgument()) {
-	if (isVariableMap()) {
-	  // XXX: need to distinguish ref
-	  out.println(varName + " = " + argName + ".toVar();");
-	}
-	else if (var.isReadOnly() && var.isValue()) {
-	  // php/3a70, php/343k
-	  out.println(varName + " = " + argName + ".toArgValue();");
-	}
-	else if (var.isReadOnly()) {
-	  // php/3783
-	  out.println(varName + " = " + argName + ".toRefValue();");
-	}
-	else if (var.isRefArgument()) {
-	  // php/344r, 3a57
-	  out.println(varName + " = " + argName + ".toRefVar();");
-	}
-	else if (var.isAssigned() && var.isReference()) {
-	  out.println(varName + " = " + argName + ".toVar();");
-	}
-	else {
-	  // php/399j
-	  out.println(varName + " = " + argName + ".toArgValue();");
-	}
+        if (isVariableMap()) {
+          // XXX: need to distinguish ref
+          out.println(varName + " = " + argName + ".toVar();");
+        }
+        else if (var.isReadOnly() && var.isValue()) {
+          // php/3a70, php/343k
+          out.println(varName + " = " + argName + ".toArgValue();");
+        }
+        else if (var.isReadOnly()) {
+          // php/3783
+          out.println(varName + " = " + argName + ".toRefValue();");
+        }
+        else if (var.isRefArgument()) {
+          // php/344r, 3a57
+          out.println(varName + " = " + argName + ".toRefVar();");
+        }
+        else if (var.isAssigned() && var.isReference()) {
+          out.println(varName + " = " + argName + ".toVar();");
+        }
+        else {
+          // php/399j
+          out.println(varName + " = " + argName + ".toArgValue();");
+        }
       }
       else {
-	// local variable, i.e. not argument
+        // local variable, i.e. not argument
 
-	if (var.isValue())
-	  out.println(varName + " = NullValue.NULL;");
-	else
-	  out.println(varName + " = null;");
+        if (var.isValue())
+          out.println(varName + " = NullValue.NULL;");
+        else
+          out.println(varName + " = null;");
       }
     }
 
@@ -799,9 +792,9 @@ public class Function extends AbstractFunction {
       out.pushDepth();
 
       for (int i = 0; i < _args.length; i++) {
-	out.print("_quercus_map.put(\"");
-	out.printJavaString(_args[i].getName());
-	out.println("\", (Var) v_" + _args[i].getName() + ");");
+        out.print("_quercus_map.put(\"");
+        out.printJavaString(_args[i].getName());
+        out.println("\", (Var) v_" + _args[i].getName() + ");");
       }
     }
 

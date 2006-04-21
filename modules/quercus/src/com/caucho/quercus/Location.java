@@ -19,59 +19,63 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *
- *   Free Software Foundation, Inc.
+ *   Free SoftwareFoundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Scott Ferguson
+ * @author Sam
  */
 
-package com.caucho.quercus.program;
 
-import java.io.IOException;
-
-import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.Value;
-
-import com.caucho.quercus.gen.PhpWriter;
-import com.caucho.quercus.Location;
-
-import com.caucho.vfs.WriteStream;
+package com.caucho.quercus;
 
 /**
- * Represents a compiled PHP program.
+ * Records the source file location of a statement or expression.
  */
-public class NullStatement extends Statement {
-  public static final NullStatement NULL = new NullStatement();
+public class Location {
+  public static final Location UNKNOWN = new Location();
 
-  private NullStatement()
+  private final String _fileName;
+  private final int _lineNumber;
+  private final String _className;
+  private final String _functionName;
+
+  public Location(String fileName,
+                  int lineNumber,
+                  String className,
+                  String functionName)
   {
-    super(Location.UNKNOWN);
+    _fileName = fileName;
+    _lineNumber = lineNumber;
+    _className = className;
+    _functionName = functionName;
   }
 
-  /**
-   * The null statement does nothing.
-   */
-  public Value execute(Env env)
-    throws Throwable
+  private Location()
   {
-    return null;
+    _fileName = null;
+    _lineNumber = 0;
+    _className = null;
+    _functionName = null;
   }
 
-  /**
-   * Generates the Java code for the statement.
-   *
-   * @param out the writer to the generated Java source.
-   */
-  protected void generateImpl(PhpWriter out)
-    throws IOException
+  public String getFileName()
   {
+    return _fileName;
   }
-  
-  public String toString()
+
+  public int getLineNumber()
   {
-    return "NullStatement[]";
+    return _lineNumber;
+  }
+
+  public String getClassName()
+  {
+    return _className;
+  }
+
+  public String getFunctionName()
+  {
+    return _functionName;
   }
 }
-

@@ -38,6 +38,7 @@ import com.caucho.quercus.env.ContinueValue;
 import com.caucho.quercus.expr.Expr;
 
 import com.caucho.quercus.gen.PhpWriter;
+import com.caucho.quercus.Location;
 
 import com.caucho.vfs.WriteStream;
 
@@ -51,6 +52,7 @@ public class ContinueStatement extends Statement {
    */
   private ContinueStatement()
   {
+    super(Location.UNKNOWN);
   }
 
   /**

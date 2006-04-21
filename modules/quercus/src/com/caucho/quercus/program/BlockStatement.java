@@ -30,7 +30,6 @@
 package com.caucho.quercus.program;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 
 import java.io.IOException;
 
@@ -39,11 +38,8 @@ import com.caucho.java.JavaWriter;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
 
-import com.caucho.quercus.expr.VarExpr;
-
 import com.caucho.quercus.gen.PhpWriter;
-
-import com.caucho.vfs.WriteStream;
+import com.caucho.quercus.Location;
 
 /**
  * Represents sequence of statements.
@@ -51,18 +47,22 @@ import com.caucho.vfs.WriteStream;
 public class BlockStatement extends Statement {
   private Statement []_statements;
 
-  BlockStatement(Statement []statements)
+  BlockStatement(Location location, Statement []statements)
   {
+    super(location);
+
     _statements = statements;
   }
 
-  public BlockStatement(ArrayList<Statement> statementList)
+  public BlockStatement(Location location, ArrayList<Statement> statementList)
   {
+    super(location);
+
     _statements = new Statement[statementList.size()];
     statementList.toArray(_statements);
   }
 
-  public static Statement create(ArrayList<Statement> statementList)
+  public static Statement create(Location location, ArrayList<Statement> statementList)
   {
     if (statementList.size() == 1)
       return statementList.get(0);
@@ -71,10 +71,10 @@ public class BlockStatement extends Statement {
 
     statementList.toArray(statements);
 
-    return new BlockStatement(statements);
+    return new BlockStatement(location, statements);
   }
 
-  public static Statement create(Statement []statementList)
+  public static Statement create(Location location, Statement []statementList)
   {
     if (statementList.length == 1)
       return statementList[0];
@@ -83,7 +83,7 @@ public class BlockStatement extends Statement {
 
     System.arraycopy(statementList, 0, statements, 0, statementList.length);
 
-    return new BlockStatement(statements);
+    return new BlockStatement(location, statements);
   }
 
   public BlockStatement append(ArrayList<Statement> statementList)
@@ -96,7 +96,7 @@ public class BlockStatement extends Statement {
     for (int i = 0; i < statementList.size(); i++)
       statements[i + _statements.length] = statementList.get(i);
 
-    return new BlockStatement(statements);
+    return new BlockStatement(getLocation(), statements);
   }
 
   public Statement []getStatements()
@@ -107,14 +107,19 @@ public class BlockStatement extends Statement {
   public Value execute(Env env)
     throws Throwable
   {
-    for (int i = 0; i < _statements.length; i++) {
-      Statement statement = _statements[i];
-      
-      Value value = statement.execute(env);
+    try {
+      for (int i = 0; i < _statements.length; i++) {
+        Statement statement = _statements[i];
 
-      if (value != null) {
-	return value;
+        Value value = statement.execute(env);
+
+        if (value != null) {
+          return value;
+        }
       }
+    }
+    catch (Throwable t) {
+      rethrow(t);
     }
 
     return null;
@@ -131,7 +136,7 @@ public class BlockStatement extends Statement {
   {
     for (int i = 0; i < _statements.length; i++) {
       if (! _statements[i].analyze(info))
-	return false;
+        return false;
     }
 
     return true;
@@ -147,7 +152,7 @@ public class BlockStatement extends Statement {
       int fallThrough = _statements[i].fallThrough();
 
       if (fallThrough != FALL_THROUGH)
-	return fallThrough;
+        return fallThrough;
     }
 
     return FALL_THROUGH;
@@ -165,7 +170,7 @@ public class BlockStatement extends Statement {
       _statements[i].generate(out);
 
       if (_statements[i].fallThrough() != FALL_THROUGH)
-	return;
+        return;
     }
   }
 

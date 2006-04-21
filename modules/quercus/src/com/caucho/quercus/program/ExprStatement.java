@@ -43,6 +43,7 @@ import com.caucho.quercus.expr.VarExpr;
 import com.caucho.quercus.expr.VarState;
 
 import com.caucho.quercus.gen.PhpWriter;
+import com.caucho.quercus.Location;
 
 import com.caucho.vfs.WriteStream;
 
@@ -55,8 +56,10 @@ public class ExprStatement extends Statement {
   /**
    * Creates the expression statement.
    */
-  public ExprStatement(Expr expr)
+  public ExprStatement(Location location, Expr expr)
   {
+    super(location);
+
     _expr = expr;
   }
 
@@ -71,7 +74,12 @@ public class ExprStatement extends Statement {
   public Value execute(Env env)
     throws Throwable
   {
-    _expr.evalTop(env);
+    try {
+      _expr.evalTop(env);
+    }
+    catch (Throwable t) {
+      rethrow(t);
+    }
 
     return null;
   }
