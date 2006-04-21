@@ -40,6 +40,7 @@ import com.caucho.quercus.expr.VarExpr;
 
 import com.caucho.quercus.gen.PhpWriter;
 import com.caucho.quercus.Location;
+import com.caucho.quercus.QuercusExecutionException;
 
 /**
  * Represents a PHP statement
@@ -72,6 +73,13 @@ abstract public class Statement {
 
     while (rootCause.getCause() != null)
       rootCause = t.getCause();
+
+    if (!(rootCause instanceof QuercusExecutionException)) {
+      QuercusExecutionException ex = new QuercusExecutionException(t.getMessage());
+      ex.setStackTrace(new StackTraceElement[] {});
+      rootCause.initCause(ex);
+      rootCause = ex;
+    }
 
     StackTraceElement[] existingElements = rootCause.getStackTrace();
     int len = existingElements.length;
