@@ -52,7 +52,7 @@ import com.caucho.vfs.WriteStream;
 /**
  * Represents a compiled PHP program.
  */
-abstract public class PhpPage {
+abstract public class QuercusPage {
   private HashMap<String,AbstractFunction> _funMap
     = new HashMap<String,AbstractFunction>();
   
@@ -201,7 +201,7 @@ abstract public class PhpPage {
   
   public String toString()
   {
-    return "PhpPage[]";
+    return "QuercusPage[]";
   }
 }
 

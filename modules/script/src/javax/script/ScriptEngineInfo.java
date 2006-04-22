@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2004 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -78,6 +78,11 @@ public interface ScriptEngineInfo {
    *
    * Predefined keys include:
    * <ul>
+   * <li>ENGINE
+   * <li>ENGINE_VERSION
+   * <li>NAME
+   * <li>LANGUAGE
+   * <li>LANGUAGE_VERSION
    * <li>THREADING
    * </ul>
    */

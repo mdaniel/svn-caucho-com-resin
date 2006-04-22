@@ -231,14 +231,18 @@ public class PhpParser {
     _sourceFile = sourceFile;
     _is = is;
 
-    _parserLocation.setFileName(sourceFile.getPath());
+    if (sourceFile != null)
+      _parserLocation.setFileName(sourceFile.getPath());
+    else
+      _parserLocation.setFileName("eval:");
+
     _parserLocation.setLineNumber(1);
 
     _peek = -1;
     _peekToken = -1;
   }
   
-  public static PhpProgram parse(Quercus quercus, Path path)
+  public static QuercusProgram parse(Quercus quercus, Path path)
     throws IOException
   {
     ReadStream is = path.openRead();
@@ -253,14 +257,14 @@ public class PhpParser {
     }
   }
   
-  public static PhpProgram parse(Quercus quercus,
-                                 Path path, Reader is)
+  public static QuercusProgram parse(Quercus quercus,
+				     Path path, Reader is)
     throws IOException
   {
     return new PhpParser(quercus, path, is).parse();
   }
   
-  public static PhpProgram parseEval(Quercus quercus, String str)
+  public static QuercusProgram parseEval(Quercus quercus, String str)
     throws IOException
   {
     Path path = new StringPath(str);
@@ -270,7 +274,7 @@ public class PhpParser {
     return parser.parseCode();
   }
   
-  public static PhpProgram parseEvalExpr(Quercus quercus, String str)
+  public static QuercusProgram parseEvalExpr(Quercus quercus, String str)
     throws IOException
   {
     Path path = new StringPath(str);
@@ -333,7 +337,7 @@ public class PhpParser {
     return _parserLocation.getLineNumber();
   }
 
-  PhpProgram parse()
+  QuercusProgram parse()
     throws IOException
   {
     _function = new FunctionInfo(_quercus, "main");
@@ -345,12 +349,12 @@ public class PhpParser {
     
     Statement stmt = parseTop();
 
-    return new PhpProgram(_quercus,
-                          _sourceFile,
-                          _globalScope.getFunctionMap(),
-                          _globalScope.getClassMap(),
-                          _function,
-                          stmt);
+    QuercusProgram program = new QuercusProgram(_quercus, _sourceFile,
+						_globalScope.getFunctionMap(),
+						_globalScope.getClassMap(),
+						_function,
+						stmt);
+    return program;
 
     /*
     com.caucho.vfs.WriteStream out = com.caucho.vfs.Vfs.lookup("stdout:").openWrite();
@@ -359,7 +363,7 @@ public class PhpParser {
     */
   }
 
-  PhpProgram parseCode()
+  QuercusProgram parseCode()
     throws IOException
   {
     _function = new FunctionInfo(_quercus, "eval");
@@ -370,11 +374,11 @@ public class PhpParser {
 
     ArrayList<Statement> stmtList = parseStatementList();
     
-    return new PhpProgram(_quercus, _sourceFile,
-			  _globalScope.getFunctionMap(),
-			  _globalScope.getClassMap(),
-			  _function,
-			  BlockStatement.create(location, stmtList));
+    return new QuercusProgram(_quercus, _sourceFile,
+			      _globalScope.getFunctionMap(),
+			      _globalScope.getClassMap(),
+			      _function,
+			      BlockStatement.create(location, stmtList));
   }
 
   Function parseFunction(Path argPath, Path codePath)
@@ -740,20 +744,8 @@ public class PhpParser {
   private Expr parsePrintExpr()
     throws IOException
   {
-    int token = parseToken();
-
-    ArrayList<Expr> args;
-
-    if (token == '(') {
-      // quercus/112z
-      args = parseArgs();
-    }
-    else {
-      _peekToken = token;
-
-      args = new ArrayList<Expr>();
-      args.add(parseTopExpr());
-    }
+    ArrayList<Expr> args = new ArrayList<Expr>();
+    args.add(parseTopExpr());
 
     return new FunctionExpr("print", args);
   }
@@ -3065,7 +3057,24 @@ public class PhpParser {
 	if (ch == '=')
 	  return DIV_ASSIGN;
 	else if (ch == '/') {
-	  while ((ch = read()) != '\n' && ch != '\r' && ch >= 0) {
+	  while (ch >= 0) {
+	    if (ch == '\n' || ch == '\r') {
+	      break;
+	    }
+	    else if (ch == '?') {
+	      ch = read();
+
+	      if (ch == '>') {
+		if ((ch = read()) != '\r')
+		  _peek = ch;
+		else if ((ch = read()) != '\n')
+		  _peek = ch;
+		
+		return parsePhpText();
+	      }
+	    }
+	    else
+	      ch = read();
 	  }
 	  break;
 	}

@@ -59,6 +59,7 @@ public class CauchoSystem {
   static Path _resinHome;
   static Path _serverRoot;
   static boolean _isTesting;
+  static boolean _isTestWindows;
 
   static boolean _hasJni;
   
@@ -268,7 +269,7 @@ public class CauchoSystem {
 
   public static boolean isWindows()
   {
-    return separatorChar == '\\';
+    return separatorChar == '\\' || _isTestWindows;
   }
 
   public static boolean isTest()
@@ -297,10 +298,7 @@ public class CauchoSystem {
   public static void setWindowsTest(boolean windows)
   {
     _isTesting = true;
-    if (windows)
-      separatorChar = '\\';
-    else
-      separatorChar = File.separatorChar;
+    _isTestWindows = true;
   }
 
   public static String getLocalHost()

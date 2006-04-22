@@ -128,6 +128,22 @@ public class NullValue extends Value {
   }
 
   /**
+   * Converts to an array if null.
+   */
+  public Value toAutoArray()
+  {
+    return new ArrayValueImpl();
+  }
+
+  /**
+   * Converts to an object if null.
+   */
+  public Value toAutoObject(Env env)
+  {
+    return env.createObject();
+  }
+
+  /**
    * Converts to a key.
    */
   public Value toKey()

@@ -166,7 +166,6 @@ public class SwitchStatement extends Statement {
 
     info.merge(switchInfo);
 
-
     return isFallThrough;
   }
 
@@ -175,6 +174,8 @@ public class SwitchStatement extends Statement {
    */
   public int fallThrough()
   {
+    return FALL_THROUGH;
+    /* php/367t, php/367u
     if (_defaultBlock == null)
       return FALL_THROUGH;
 
@@ -188,6 +189,7 @@ public class SwitchStatement extends Statement {
       return 0;
     else
       return fallThrough;
+    */
   }
 
   /**
@@ -254,8 +256,8 @@ public class SwitchStatement extends Statement {
 
     if (_defaultBlock != null) {
       if (hasTest)
-        out.print("else ");
-
+	out.print("else if (true) ");
+      
       out.println("{");
       out.pushDepth();
 

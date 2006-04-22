@@ -167,18 +167,30 @@ public class VarExpr
     if (_var.isGlobal()) {
       value = env.getGlobalValue(_name);
 
-      if (value == null || ! value.isset()) {
+      if (value == null) {
         value = new ArrayValueImpl();
 
         env.setGlobalValue(_name, value);
       }
-    } else {
-      value = env.getValue(_name);
+      else {
+        Value array = value.toAutoArray();
 
-      if (value == null || ! value.isset()) {
+	if (array != value) {
+	  env.setGlobalValue(_name, array);
+
+	  value = array;
+	}
+      }
+    } else {
+      value = env.getVar(_name);
+
+      if (value == null) {
         value = new ArrayValueImpl();
 
         env.setValue(_name, value);
+      }
+      else {
+	value = value.toAutoArray();
       }
     }
 

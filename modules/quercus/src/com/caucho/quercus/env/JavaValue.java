@@ -29,15 +29,20 @@
 
 package com.caucho.quercus.env;
 
+import java.util.IdentityHashMap;
+
+import java.util.logging.Logger;
+
 import com.caucho.quercus.expr.Expr;
 import com.caucho.vfs.WriteStream;
-
-import java.util.IdentityHashMap;
 
 /**
  * Represents a PHP java value.
  */
 public class JavaValue extends ResourceValue {
+  private static final Logger log
+    = Logger.getLogger(JavaValue.class.getName());
+  
   private final JavaClassDefinition _classDef;
 
   private final Object _object;
@@ -228,6 +233,16 @@ public class JavaValue extends ResourceValue {
   public Value []getValueArray(Env env)
   {
     return _classDef.getValueArray(env, _object);
+  }
+
+  /**
+   * Serializes the value.
+   */
+  public void serialize(StringBuilder sb)
+  {
+    log.fine("Quercus: can't serialize " + _object.getClass());
+
+    sb.append("N;");
   }
 
   /**

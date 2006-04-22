@@ -144,13 +144,13 @@ public class HostExpandDeployGenerator extends ExpandDeployGenerator<HostControl
       return null;
     */
     
-    Path rootDirectory = getExpandDirectory().lookup(name);
+    Path rootDirectory = getExpandDirectory().lookup("./" + name);
 
     HostController controller
       = new HostController(name, rootDirectory, _container);
 
 
-    Path jarPath = getArchiveDirectory().lookup(name + ".jar");
+    Path jarPath = getArchiveDirectory().lookup("./" + name + ".jar");
     controller.setArchivePath(jarPath);
     
     if (rootDirectory.isDirectory() &&

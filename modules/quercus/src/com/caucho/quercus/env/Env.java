@@ -44,10 +44,10 @@ import com.caucho.quercus.expr.Expr;
 import com.caucho.quercus.lib.session.SessionModule;
 import com.caucho.quercus.lib.string.StringModule;
 import com.caucho.quercus.lib.VariableModule;
-import com.caucho.quercus.page.PhpPage;
+import com.caucho.quercus.page.QuercusPage;
 import com.caucho.quercus.program.AbstractClassDef;
 import com.caucho.quercus.program.AbstractFunction;
-import com.caucho.quercus.program.PhpProgram;
+import com.caucho.quercus.program.QuercusProgram;
 import com.caucho.quercus.resources.StreamContextResource;
 import com.caucho.sql.DatabaseManager;
 import com.caucho.util.Alarm;
@@ -133,7 +133,7 @@ public class Env {
     = new StringValueImpl("PHP_SELF");
 
   private Quercus _quercus;
-  private PhpPage _page;
+  private QuercusPage _page;
 
   private Value _this = NullValue.NULL;
 
@@ -220,7 +220,7 @@ public class Env {
   private int _objectId = 0;
 
   public Env(Quercus quercus,
-             PhpPage page,
+             QuercusPage page,
              WriteStream out,
              HttpServletRequest request,
              HttpServletResponse response)
@@ -249,7 +249,7 @@ public class Env {
 
     _selfPath = _page.getSelfPath(null);
 
-    if (_request.getMethod().equals("POST")) {
+    if (_request != null && _request.getMethod().equals("POST")) {
       _post = new ArrayValueImpl();
       _files = new ArrayValueImpl();
       Post.fillPost(this,
@@ -558,8 +558,16 @@ public class Env {
       setGlobalValue("HTTP_SESSION_VARS", session);
     }
     else {
-      unsetGlobalVar("_SESSION");
-      unsetGlobalVar("HTTP_SESSION_VARS");
+      // php/1k0v
+      Value v = getGlobalVar("_SESSION");
+
+      if (v != null)
+	v.set(UnsetValue.UNSET);
+      
+      v = getGlobalVar("HTTP_SESSION_VARS");
+      
+      if (v != null)
+	v.set(UnsetValue.UNSET);
     }
   }
 
@@ -585,8 +593,9 @@ public class Env {
         }
       }
     }
-    else
+    else {
       session = _quercus.loadSession(this, sessionId);
+    }
 
     if (session == null)
       session = new SessionArrayValue(this, sessionId);
@@ -1696,7 +1705,7 @@ public class Env {
 
     Quercus quercus = getPhp();
 
-    PhpProgram program = quercus.parseEvalExpr(code);
+    QuercusProgram program = quercus.parseEvalExpr(code);
 
     Value value = program.execute(this);
 
@@ -2394,7 +2403,7 @@ public class Env {
 
     _includeSet.add(path);
 
-    PhpPage page = _quercus.parse(path);
+    QuercusPage page = _quercus.parse(path);
 
     page.importDefinitions(this);
 

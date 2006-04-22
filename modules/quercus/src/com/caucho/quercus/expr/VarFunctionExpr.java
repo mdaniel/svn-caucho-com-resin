@@ -44,7 +44,6 @@ import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.Value;
 
 import com.caucho.quercus.program.AbstractFunction;
-import com.caucho.quercus.program.PhpProgram;
 import com.caucho.quercus.program.AnalyzeInfo;
 
 import com.caucho.util.L10N;

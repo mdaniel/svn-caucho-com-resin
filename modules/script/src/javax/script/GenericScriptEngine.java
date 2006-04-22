@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2004 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -83,7 +83,7 @@ abstract public class GenericScriptEngine implements ScriptEngine {
   {
     GenericScriptContext cxt = new GenericScriptContext();
 
-    getContext().setNamespace(namespace, ScriptContext.ENGINE_SCOPE);
+    cxt.setNamespace(namespace, ScriptContext.ENGINE_SCOPE);
 
     return eval(reader, cxt);
   }

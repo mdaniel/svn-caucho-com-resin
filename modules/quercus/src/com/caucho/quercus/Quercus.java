@@ -34,10 +34,10 @@ import com.caucho.quercus.env.*;
 import com.caucho.quercus.module.QuercusModule;
 import com.caucho.quercus.module.StaticFunction;
 import com.caucho.quercus.page.PageManager;
-import com.caucho.quercus.page.PhpPage;
+import com.caucho.quercus.page.QuercusPage;
 import com.caucho.quercus.parser.PhpParser;
 import com.caucho.quercus.program.InterpretedClassDef;
-import com.caucho.quercus.program.PhpProgram;
+import com.caucho.quercus.program.QuercusProgram;
 import com.caucho.util.Log;
 import com.caucho.util.LruCache;
 import com.caucho.util.L10N;
@@ -100,8 +100,8 @@ public class Quercus {
   private HashMap<String, StringValue> _iniMap
     = new HashMap<String, StringValue>();
 
-  private LruCache<String, PhpProgram> _evalCache
-    = new LruCache<String, PhpProgram>(256);
+  private LruCache<String, QuercusProgram> _evalCache
+    = new LruCache<String, QuercusProgram>(256);
 
   private static HashSet<String> _superGlobals
     = new HashSet<String>();
@@ -294,7 +294,7 @@ public class Quercus {
    * @return the parsed program
    * @throws IOException
    */
-  public PhpPage parse(Path path)
+  public QuercusPage parse(Path path)
     throws IOException
   {
     return _pageManager.parse(path);
@@ -307,10 +307,10 @@ public class Quercus {
    * @return the parsed program
    * @throws IOException
    */
-  public PhpProgram parseCode(String code)
+  public QuercusProgram parseCode(String code)
     throws IOException
   {
-    PhpProgram program = _evalCache.get(code);
+    QuercusProgram program = _evalCache.get(code);
 
     if (program == null) {
       program = PhpParser.parseEval(this, code);
@@ -327,12 +327,12 @@ public class Quercus {
    * @return the parsed program
    * @throws IOException
    */
-  public PhpProgram parseEvalExpr(String code)
+  public QuercusProgram parseEvalExpr(String code)
     throws IOException
   {
     // XXX: possible conflict with parse eval because of the
     // return value changes
-    PhpProgram program = _evalCache.get(code);
+    QuercusProgram program = _evalCache.get(code);
 
     if (program == null) {
       program = PhpParser.parseEvalExpr(this, code);

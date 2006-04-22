@@ -52,7 +52,7 @@ import com.caucho.quercus.gen.PhpGenerator;
 
 import com.caucho.quercus.parser.PhpParser;
 
-import com.caucho.quercus.program.PhpProgram;
+import com.caucho.quercus.program.QuercusProgram;
 
 import com.caucho.util.LruCache;
 
@@ -69,8 +69,8 @@ public class PageManager {
   private boolean _isLazyCompile;
   private boolean _isCompile;
 
-  private LruCache<Path,PhpProgram> _programCache
-    = new LruCache<Path,PhpProgram>(1024);
+  private LruCache<Path,QuercusProgram> _programCache
+    = new LruCache<Path,QuercusProgram>(1024);
 
   private ArrayList<Path> _pendingPages = new ArrayList<Path>();
   private boolean _isCompilerActive;
@@ -148,6 +148,9 @@ public class PageManager {
    */
   public String getClassName(Path path)
   {
+    if (path == null)
+      return "tmp.eval";
+    
     String pathName = path.getFullPath();
     String pwdName = getPwd().getFullPath();
 
@@ -170,11 +173,11 @@ public class PageManager {
    *
    * @throws IOException
    */
-  public PhpPage parse(Path path)
+  public QuercusPage parse(Path path)
     throws IOException
   {
     try {
-      PhpProgram program;
+      QuercusProgram program;
 
       program = _programCache.get(path);
 
@@ -224,10 +227,12 @@ public class PageManager {
     }
   }
 
-  private PhpPage createPage(Path path, PhpProgram program, Class pageClass)
+  private QuercusPage createPage(Path path,
+			     QuercusProgram program,
+			     Class pageClass)
     throws Throwable
   {
-    PhpPage page = (PhpPage) pageClass.newInstance();
+    QuercusPage page = (QuercusPage) pageClass.newInstance();
 
     page.init(_quercus);
 
@@ -261,7 +266,7 @@ public class PageManager {
 	  path = _pendingPages.remove(0);
 	}
 
-	PhpProgram program = _programCache.get(path);
+	QuercusProgram program = _programCache.get(path);
 
 	if (program == null || program.isModified())
 	  continue;

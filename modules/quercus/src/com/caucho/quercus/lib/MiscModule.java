@@ -52,7 +52,7 @@ import com.caucho.quercus.env.NullValue;
 import com.caucho.quercus.env.LongValue;
 import com.caucho.quercus.env.StringValueImpl;
 
-import com.caucho.quercus.program.PhpProgram;
+import com.caucho.quercus.program.QuercusProgram;
 
 /**
  * PHP mysql routines.
@@ -149,7 +149,7 @@ public class MiscModule extends AbstractQuercusModule {
 
     Quercus quercus = env.getPhp();
 
-    PhpProgram program = quercus.parseCode(code);
+    QuercusProgram program = quercus.parseCode(code);
 
     Value value = program.execute(env);
 

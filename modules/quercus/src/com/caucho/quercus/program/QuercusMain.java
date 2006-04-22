@@ -52,8 +52,8 @@ import com.caucho.quercus.program.InterpretedClassDef;
 /**
  * Represents the main method of a compiled PHP program.
  */
-public class PhpMain extends ClassComponent {
-  private PhpProgram _program;
+public class QuercusMain extends ClassComponent {
+  private QuercusProgram _program;
 
   private FunctionInfo _functionInfo;
   private Statement _statement;
@@ -64,9 +64,9 @@ public class PhpMain extends ClassComponent {
    * @param program the owning quercus program
    * @param statement the top-level statement
    */
-  public PhpMain(PhpProgram program,
-		 FunctionInfo functionInfo,
-		 Statement statement)
+  public QuercusMain(QuercusProgram program,
+		     FunctionInfo functionInfo,
+		     Statement statement)
   {
     _program = program;
     _functionInfo = functionInfo;

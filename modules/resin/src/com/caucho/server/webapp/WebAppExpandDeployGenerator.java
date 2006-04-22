@@ -261,8 +261,10 @@ public class WebAppExpandDeployGenerator extends ExpandDeployGenerator<WebAppCon
       rootDirectory = getExpandDirectory().lookup("." + archiveName);
       jarPath = null;
     }
-    else
-      rootDirectory = getExpandDirectory().lookup(expandName);
+    else {
+      // server/003j
+      rootDirectory = getExpandDirectory().lookup("./" + expandName);
+    }
 
     if (! rootDirectory.isDirectory() &&
 	(jarPath == null || ! jarPath.isFile()))

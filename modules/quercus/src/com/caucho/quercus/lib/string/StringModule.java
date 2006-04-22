@@ -1226,21 +1226,24 @@ v   *
    */
   @UsesSymbolTable
   public static Value parse_str(Env env, String str,
-                                @Optional ArrayValue array)
+                                @Optional @Reference Value ref)
     throws IOException
   {
     ByteToChar byteToChar = env.getByteToChar();
     int len = str.length();
 
-    ArrayValue result = array;
+    ArrayValue result = new ArrayValueImpl();
 
-    if (result == null)
-      result = new ArrayValueImpl();
+    if (ref != null)
+      ref.set(result);
 
     for (int i = 0; i < len; i++) {
       int ch = 0;
       byteToChar.clear();
 
+      for (; i < len && (ch = str.charAt(i)) == '&'; i++) {
+      }
+      
       for (; i < len && (ch = str.charAt(i)) != '='; i++) {
         i = addQueryChar(byteToChar, str, len, i, ch);
       }
@@ -1260,7 +1263,7 @@ v   *
       else
         value = "";
 
-      if (array != null) {
+      if (ref != null) {
         Post.addFormValue(result, key, new String[] { value }, env.getIniBoolean("magic_quotes_gpc"));
       } else {
         // If key is an exsiting array, then append this value to existing array
@@ -1291,10 +1294,10 @@ v   *
       }
     }
 
-    if (array == null) {
+    if (ref == null) {
       ArrayModule.extract(env, result,
-                                 ArrayModule.EXTR_OVERWRITE,
-                                 null);
+			  ArrayModule.EXTR_OVERWRITE,
+			  null);
     }
 
     return NullValue.NULL;
@@ -2834,6 +2837,37 @@ v   *
     throws Throwable
   {
     return strcmp(a, b);
+  }
+
+  /**
+   * Case-insensitive comparison
+   *
+   * @param a left value
+   * @param b right value
+   * @return -1, 0, or 1
+   */
+  public static int strncasecmp(String a, String b, int length)
+    throws Throwable
+  {
+    int aLen = a.length();
+    int bLen = b.length();
+
+    for (int i = 0; i < length; i++) {
+      if (aLen <= i)
+	return -1;
+      else if (bLen <= i)
+	return 1;
+
+      char aChar = Character.toUpperCase(a.charAt(i));
+      char bChar = Character.toUpperCase(b.charAt(i));
+
+      if (aChar < bChar)
+	return -1;
+      else if (bChar < aChar)
+	return 1;
+    }
+
+    return 0;
   }
 
   /**

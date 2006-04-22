@@ -43,7 +43,7 @@ import com.caucho.quercus.env.QuercusClass;
 import com.caucho.quercus.env.Value;
 
 import com.caucho.quercus.program.AbstractFunction;
-import com.caucho.quercus.program.PhpProgram;
+import com.caucho.quercus.program.QuercusProgram;
 import com.caucho.quercus.program.AbstractClassDef;
 import com.caucho.quercus.program.InterpretedClassDef;
 
@@ -51,12 +51,12 @@ import com.caucho.vfs.Path;
 import com.caucho.vfs.WriteStream;
 
 /**
- * Represents an interpreted PHP program.
+ * Represents an interpreted Quercus program.
  */
-public class InterpretedPage extends PhpPage {
-  private final PhpProgram _program;
+public class InterpretedPage extends QuercusPage {
+  private final QuercusProgram _program;
 
-  InterpretedPage(PhpProgram program)
+  public InterpretedPage(QuercusProgram program)
   {
     _program = program;
   }

@@ -36,7 +36,10 @@ import com.caucho.java.JavaWriter;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.NullValue;
 import com.caucho.quercus.env.Value;
+
 import com.caucho.quercus.gen.PhpWriter;
+
+import com.caucho.quercus.program.AnalyzeInfo;
 
 import com.caucho.vfs.Path;
 
@@ -80,6 +83,16 @@ public class IncludeExpr extends UnaryExpr {
   //
   // Java code generation
   //
+
+  /**
+   * Analyze the expression
+   */
+  public void analyze(AnalyzeInfo info)
+  {
+    super.analyze(info);
+
+    info.getFunction().setUsesSymbolTable(true);
+  }
 
   /**
    * Generates code to evaluate the expression.

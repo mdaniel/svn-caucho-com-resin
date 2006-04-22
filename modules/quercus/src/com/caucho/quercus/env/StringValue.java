@@ -301,6 +301,25 @@ abstract public class StringValue extends Value {
   }
 
   /**
+   * Converts to a Java object.
+   */
+  public Object toJavaObject()
+  {
+    return toString();
+  }
+
+  /**
+   * Converts to an array if null.
+   */
+  public Value toAutoArray()
+  {
+    if (strlen() == 0)
+      return new ArrayValueImpl();
+    else
+      return this;
+  }
+
+  /**
    * Returns the hash code.
    */
   public int hashCode()

@@ -27,30 +27,13 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.quercus.module;
+package javax.script.http;
 
-import java.util.Map;
-
-import com.caucho.quercus.env.Value;
-import com.caucho.quercus.env.StringValue;
-import com.caucho.quercus.env.VarMap;
+import javax.servlet.http.HttpServletRequest;
 
 /**
- * Represents a quercus module.
+ * Script extension of Http servlet request.
  */
-public interface PhpModule {
-  public Map<String,Value> getConstMap();
-
-  /**
-   * Returns true if the named extension is implemented by the module.
-   *
-   * @param name the extension name
-   */
-  public boolean isExtensionLoaded(String name);
-
-  /**
-   * Returns the quercus.init default values.
-   */
-  public Map<String,StringValue> getDefaultIni();
+public interface HttpScriptRequest extends HttpServletRequest {
 }
 

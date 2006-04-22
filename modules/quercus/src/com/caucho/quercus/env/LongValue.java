@@ -144,6 +144,14 @@ public class LongValue extends Value {
   }
 
   /**
+   * Converts to a java object.
+   */
+  public Object toJavaObject()
+  {
+    return new Long(_value);
+  }
+
+  /**
    * Negates the value.
    */
   public Value neg()

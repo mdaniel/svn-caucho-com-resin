@@ -35,13 +35,13 @@ import javax.script.ScriptEngineFactory;
 /**
  * Script engine factory
  */
-public class PhpScriptEngineFactory implements ScriptEngineFactory {
+public class QuercusScriptEngineFactory implements ScriptEngineFactory {
   /**
    * Returns the full name of the ScriptEngine.
    */
   public String getEngineName()
   {
-    return "Resin PHP Script Engine";
+    return "Caucho Quercus Script Engine";
   }
 
   /**
@@ -49,7 +49,7 @@ public class PhpScriptEngineFactory implements ScriptEngineFactory {
    */
   public String getEngineVersion()
   {
-    return "0.1";
+    return com.caucho.Version.VERSION;
   }
 
   /**
@@ -58,7 +58,7 @@ public class PhpScriptEngineFactory implements ScriptEngineFactory {
    */
   public String []getExtensions()
   {
-    return new String[] {};
+    return new String[] { "php" };
   }
 
   /**
@@ -75,7 +75,7 @@ public class PhpScriptEngineFactory implements ScriptEngineFactory {
    */
   public String []getNames()
   {
-    return new String[] {"resin-quercus"};
+    return new String[] {"quercus", "php"};
   }
 
   /**
@@ -83,7 +83,7 @@ public class PhpScriptEngineFactory implements ScriptEngineFactory {
    */
   public String getLanguageName()
   {
-    return "quercus";
+    return "php";
   }
 
   /**
@@ -91,7 +91,7 @@ public class PhpScriptEngineFactory implements ScriptEngineFactory {
    */
   public String getLanguageVersion()
   {
-    return "5.0";
+    return "5.0.0";
   }
 
   /**
@@ -104,7 +104,20 @@ public class PhpScriptEngineFactory implements ScriptEngineFactory {
    */
   public Object getParameter(String key)
   {
-    return null;
+    if ("THREADING".equals(key))
+      return "THREAD-ISOLATED";
+    else if (ScriptEngine.ENGINE.equals(key))
+      return getEngineName();
+    else if (ScriptEngine.ENGINE_VERSION.equals(key))
+      return getEngineVersion();
+    else if (ScriptEngine.NAME.equals(key))
+      return getEngineName();
+    else if (ScriptEngine.LANGUAGE.equals(key))
+      return getLanguageName();
+    else if (ScriptEngine.LANGUAGE_VERSION.equals(key))
+      return getLanguageVersion();
+    else
+      return null;
   }
 
   /**
@@ -112,7 +125,23 @@ public class PhpScriptEngineFactory implements ScriptEngineFactory {
    */
   public String getMethodCallSyntax(String obj, String m, String []args)
   {
-    return "";
+    StringBuilder sb = new StringBuilder();
+
+    sb.append("$");
+    sb.append(obj);
+    sb.append("->");
+    sb.append(m);
+    sb.append("(");
+    for (int i = 0; i < args.length; i++) {
+      if (i != 0)
+	sb.append(", ");
+
+      sb.append("$");
+      sb.append(args[i]);
+    }
+    sb.append(");");
+    
+    return sb.toString();
   }
 
   /**
@@ -120,7 +149,7 @@ public class PhpScriptEngineFactory implements ScriptEngineFactory {
    */
   public String getOutputStatement(String toDisplay)
   {
-    return "";
+    return "echo(\'" + toDisplay.replace("\'", "\\\'") + "\');";
   }
 
   /**
@@ -128,7 +157,18 @@ public class PhpScriptEngineFactory implements ScriptEngineFactory {
    */
   public String getProgram(String []statements)
   {
-    return "";
+    StringBuilder sb = new StringBuilder();
+
+    sb.append("<?php\n");
+
+    for (int i = 0; i < statements.length; i++) {
+      sb.append(statements[i]);
+      sb.append(";\n");
+    }
+    
+    sb.append("?>\n");
+    
+    return sb.toString();
   }
   
   /**
@@ -136,7 +176,12 @@ public class PhpScriptEngineFactory implements ScriptEngineFactory {
    */
   public ScriptEngine getScriptEngine()
   {
-    return new PhpScriptEngine(this);
+    return new QuercusScriptEngine(this);
+  }
+
+  public String toString()
+  {
+    return "QuercusScriptEngineFactory[]";
   }
 }
 

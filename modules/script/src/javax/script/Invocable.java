@@ -29,11 +29,37 @@
 
 package javax.script;
 
-import java.util.Map;
-
 /**
- * Modifies the script's global variables.
+ * Represents script engines that can invoke a previously executed method.
  */
-public interface Namespace extends Map {
+public interface Invocable {
+  /**
+   * Calls the named method.
+   *
+   * @param name the name of the function
+   * @param thisObject the class object
+   * @param args the arguments
+   */
+  public Object call(String name,
+		     Object thisObject,
+		     Object []args)
+    throws ScriptException, NoSuchMethodException;
+  
+  /**
+   * Calls the named method.
+   *
+   * @param name the name of the function
+   * @param args the arguments
+   */
+  public Object call(String name,
+		     Object []args)
+    throws ScriptException, NoSuchMethodException;
+  
+  /**
+   * Returns an implementation of an interface.
+   *
+   * @param proxyClass the name of the function
+   */
+  public Object getInterface(Class apiClass);
 }
 

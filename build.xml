@@ -663,8 +663,8 @@
         <include name="lib/resinboot.jar"/>
 	<!--
         <include name="lib/saaj.jar"/>
-        <include name="lib/script-10.jar"/>
 	-->
+        <include name="lib/script-10.jar"/>
         <include name="lib/webutil.jar"/>
 
         <include name="lib/eclipse-compiler.jar"/>

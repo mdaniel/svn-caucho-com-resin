@@ -39,10 +39,9 @@ import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.NullValue;
 import com.caucho.quercus.env.QuercusClass;
 
-import com.caucho.quercus.page.PhpPage;
+import com.caucho.quercus.page.QuercusPage;
 
 import com.caucho.quercus.Quercus;
-import com.caucho.quercus.Location;
 
 import com.caucho.make.PersistentDependency;
 import com.caucho.make.VersionDependency;
@@ -54,12 +53,12 @@ import com.caucho.vfs.Depend;
 import com.caucho.vfs.WriteStream;
 
 /**
- * Represents a compiled PHP program.
+ * Represents a compiled Quercus program.
  */
-public class PhpProgram extends GenClass {
+public class QuercusProgram extends GenClass {
   private Quercus _quercus;
 
-  private PhpPage _compiledPage;
+  private QuercusPage _compiledPage;
   
   private Path _sourceFile;
 
@@ -82,18 +81,19 @@ public class PhpProgram extends GenClass {
    * @param sourceFile the path to the source file
    * @param statement the top-level statement
    */
-  public PhpProgram(Quercus quercus, Path sourceFile,
-		    HashMap<String, Function> functionMap,
-		    HashMap<String, InterpretedClassDef> classMap,
-		    FunctionInfo functionInfo,
-		    Statement statement)
+  public QuercusProgram(Quercus quercus, Path sourceFile,
+			HashMap<String, Function> functionMap,
+			HashMap<String, InterpretedClassDef> classMap,
+			FunctionInfo functionInfo,
+			Statement statement)
   {
     super(quercus.getClassName(sourceFile));
     
     _quercus = quercus;
 
     _sourceFile = sourceFile;
-    addDepend(sourceFile);
+    if (sourceFile != null)
+      addDepend(sourceFile);
 
     _functionMap = functionMap;
 
@@ -108,7 +108,7 @@ public class PhpProgram extends GenClass {
     _statement = statement;
 
     // Java generation code
-    setSuperClassName("com.caucho.quercus.page.PhpPage");
+    setSuperClassName("com.caucho.quercus.page.QuercusPage");
 
     addImport("com.caucho.quercus.Quercus");
     addImport("com.caucho.quercus.env.*");
@@ -116,7 +116,7 @@ public class PhpProgram extends GenClass {
     addImport("com.caucho.quercus.program.*");
     addImport("com.caucho.quercus.lib.*");
     
-    PhpMain main = new PhpMain(this, functionInfo, statement);
+    QuercusMain main = new QuercusMain(this, functionInfo, statement);
     addComponent(main);
     
     addDependencyComponent().addDependency(new VersionDependency());
@@ -167,7 +167,7 @@ public class PhpProgram extends GenClass {
   /**
    * Returns the compiled page.
    */
-  public PhpPage getCompiledPage()
+  public QuercusPage getCompiledPage()
   {
     return _compiledPage;
   }
@@ -175,7 +175,7 @@ public class PhpProgram extends GenClass {
   /**
    * Sets the compiled page.
    */
-  public void setCompiledPage(PhpPage page)
+  public void setCompiledPage(QuercusPage page)
   {
     _compiledPage = page;
   }
@@ -230,14 +230,14 @@ public class PhpProgram extends GenClass {
   /**
    * Creates a return for the final expr.
    */
-  public PhpProgram createExprReturn()
+  public QuercusProgram createExprReturn()
   {
     // quercus/1515 - used to convert an eval string to return a value
     
     if (_statement instanceof ExprStatement) {
       ExprStatement exprStmt = (ExprStatement) _statement;
 
-      _statement = new ReturnStatement(Location.UNKNOWN, exprStmt.getExpr());
+      _statement = new ReturnStatement(exprStmt.getExpr());
     }
     else if (_statement instanceof BlockStatement) {
       BlockStatement blockStmt = (BlockStatement) _statement;
@@ -249,7 +249,7 @@ public class PhpProgram extends GenClass {
 	ExprStatement exprStmt
 	  = (ExprStatement) statements[0];
 
-	_statement = new ReturnStatement(Location.UNKNOWN, exprStmt.getExpr());
+	_statement = new ReturnStatement(exprStmt.getExpr());
       }
     }
     
@@ -310,7 +310,7 @@ public class PhpProgram extends GenClass {
   
   public String toString()
   {
-    return "PhpProgram[" + _sourceFile + "]";
+    return "QuercusProgram[" + _sourceFile + "]";
   }
 }
 

@@ -119,6 +119,14 @@ public class DoubleValue extends Value {
   }
 
   /**
+   * Converts to a java object.
+   */
+  public Object toJavaObject()
+  {
+    return new Double(_value);
+  }
+
+  /**
    * Negates the value.
    */
   public Value neg()

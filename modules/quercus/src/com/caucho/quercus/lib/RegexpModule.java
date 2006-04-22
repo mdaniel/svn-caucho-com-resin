@@ -1229,10 +1229,10 @@ public class RegexpModule
 
           ch = regexp.charAt(i);
 
-          if ('1' <= ch && ch <= '3') {
+          if ('0' <= ch && ch <= '3') {
             // Java's regexp requires \0 for octal
 
-            sb.append('\\');
+            // sb.append('\\');
             sb.append('0');
             sb.append(ch);
           }

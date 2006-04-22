@@ -29,7 +29,9 @@
 
 package com.caucho.quercus.script;
 
+import java.io.StringReader;
 import java.io.Reader;
+import java.io.Writer;
 
 import javax.script.GenericScriptEngine;
 import javax.script.Namespace;
@@ -39,20 +41,31 @@ import javax.script.ScriptEngineFactory;
 import javax.script.SimpleNamespace;
 import javax.script.ScriptException;
 
-import com.caucho.quercus.parser.PhpParser;
-
-import com.caucho.quercus.program.PhpProgram;
 import com.caucho.quercus.Quercus;
 
-/**
- * Script engine factory
- */
-public class PhpScriptEngine extends GenericScriptEngine {
-  private PhpScriptEngineFactory _factory;
+import com.caucho.quercus.env.Env;
 
-  PhpScriptEngine(PhpScriptEngineFactory factory)
+import com.caucho.quercus.page.QuercusPage;
+import com.caucho.quercus.page.InterpretedPage;
+
+import com.caucho.quercus.parser.PhpParser;
+
+import com.caucho.quercus.program.QuercusProgram;
+
+import com.caucho.vfs.Vfs;
+import com.caucho.vfs.WriteStream;
+
+/**
+ * Script engine
+ */
+public class QuercusScriptEngine extends GenericScriptEngine {
+  private QuercusScriptEngineFactory _factory;
+  private final Quercus _quercus;
+
+  QuercusScriptEngine(QuercusScriptEngineFactory factory)
   {
     _factory = factory;
+    _quercus = new Quercus();
   }
 
   /**
@@ -62,13 +75,22 @@ public class PhpScriptEngine extends GenericScriptEngine {
     throws ScriptException
   {
     try {
-      PhpProgram program = null; // new Quercus().parse(null, script);
+      QuercusProgram program = PhpParser.parse(_quercus, null, script);
 
-      System.out.println("PGM: " + program);
+      Writer writer = cxt.getWriter();
       
-      cxt.getWriter().write("HI");
-    
-      return null;
+      WriteStream out;
+
+      if (writer != null)
+	out = Vfs.openWrite(writer);
+      else
+	out = Vfs.lookup("null:").openWrite();
+
+      QuercusPage page = new InterpretedPage(program);
+
+      Env env = new Env(_quercus, page, out, null, null);
+
+      return program.execute(env).toJavaObject();
       /*
     } catch (ScriptException e) {
       throw e;
@@ -77,6 +99,8 @@ public class PhpScriptEngine extends GenericScriptEngine {
       throw e;
     } catch (Exception e) {
       throw new ScriptException(e);
+    } catch (Throwable e) {
+      throw new RuntimeException(e);
     }
   }
 
@@ -84,14 +108,15 @@ public class PhpScriptEngine extends GenericScriptEngine {
    * evaluates based on a script.
    */
   public Object eval(String script, ScriptContext cxt)
+    throws ScriptException
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    return eval(new StringReader(script), cxt);
   }
 
   /**
    * Returns the engine's factory.
    */
-  public PhpScriptEngineFactory getFactory()
+  public QuercusScriptEngineFactory getFactory()
   {
     return _factory;
   }
@@ -102,6 +127,11 @@ public class PhpScriptEngine extends GenericScriptEngine {
   public Namespace createNamespace()
   {
     return new SimpleNamespace();
+  }
+
+  public String toString()
+  {
+    return "QuercusScriptEngine[]";
   }
 }
 

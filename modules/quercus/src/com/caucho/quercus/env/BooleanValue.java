@@ -134,6 +134,17 @@ public class BooleanValue extends Value {
   }
 
   /**
+   * Converts to an array if null.
+   */
+  public Value toAutoArray()
+  {
+    if (! _value)
+      return new ArrayValueImpl();
+    else
+      return this;
+  }
+
+  /**
    * Converts to a key.
    */
   public Value toKey()

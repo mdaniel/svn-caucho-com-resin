@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2004 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -41,6 +41,9 @@ public interface ScriptContext {
 
   /**
    * Associates a namespace with a scope.
+   *
+   * @param namespace the namespace to assign
+   * @param scope the scope code
    */
   public void setNamespace(Namespace namespace, int scope);
 

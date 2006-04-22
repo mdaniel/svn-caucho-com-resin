@@ -36,7 +36,7 @@ import com.caucho.quercus.env.Value;
 import com.caucho.quercus.gen.PhpWriter;
 import com.caucho.quercus.program.AbstractFunction;
 import com.caucho.quercus.program.AnalyzeInfo;
-import com.caucho.quercus.program.PhpProgram;
+import com.caucho.quercus.program.QuercusProgram;
 import com.caucho.util.L10N;
 
 import java.io.IOException;
@@ -288,7 +288,7 @@ public class FunctionExpr extends Expr {
 
     // StaticFunction fun = quercus.findFunction(_name);
 
-    PhpProgram program = out.getProgram();
+    QuercusProgram program = out.getProgram();
 
     AbstractFunction fun = program.findFunction(_name);
     

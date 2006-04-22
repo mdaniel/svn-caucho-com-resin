@@ -2,9 +2,12 @@
 
 <a href='changes-2.xtp'>Resin 2.1 changes</a>
 
-<s2 title='3.0.snap - Mar 17, 2006'>
+<s2 title='3.0.snap - Apr 14, 2006'>
 <ul>
-<li>ToCharResponseAdapter should not close the underlying writer on close (#989, rep by Tony Field)
+<!--
+<li>Security issue involving web-app-deploy
+-->
+<li>(2006-04-14) ToCharResponseAdapter should not close the underlying writer on close (#989, rep by Tony Field)
 <li>CGI was sending output through PrintWriter instead of OutputStream (#1035, rep by mineral)
 <li>Added aliases and java type for ISO-8859-10 (rep by Michael Young)
 <li>AbstractHttpResponse.finish was not ignoring client disconnect (#1045, rep by Mattias )Jiderhamn

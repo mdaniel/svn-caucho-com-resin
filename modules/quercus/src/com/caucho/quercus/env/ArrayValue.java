@@ -177,8 +177,10 @@ abstract public class ArrayValue extends Value {
   {
     Value value = get(fieldName);
 
-    if (! value.isset()) {
-      value = new ArrayValueImpl();
+    Value array = value.toAutoArray();
+    
+    if (value != array) {
+      value = array;
 
       put(fieldName, value);
     }
@@ -198,8 +200,9 @@ abstract public class ArrayValue extends Value {
   {
     Value value = get(fieldName);
 
-    if (! value.isset()) {
-      value = env.createObject();
+    Value object = value.toAutoObject(env);
+    if (value != object) {
+      value = object;
 
       put(fieldName, value);
     }

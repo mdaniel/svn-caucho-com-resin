@@ -40,7 +40,7 @@ import com.caucho.quercus.Quercus;
 import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.quercus.module.Optional;
 
-import com.caucho.quercus.program.PhpProgram;
+import com.caucho.quercus.program.QuercusProgram;
 
 import com.caucho.quercus.lib.file.FileModule;
 
@@ -75,7 +75,7 @@ public class OptionsModule extends AbstractQuercusModule {
   {
     Quercus quercus = env.getPhp();
 
-    PhpProgram program = quercus.parseCode(code);
+    QuercusProgram program = quercus.parseCode(code);
 
     Value value = program.execute(env);
 
@@ -328,7 +328,7 @@ public class OptionsModule extends AbstractQuercusModule {
    */
   public static String phpversion(@Optional String module)
   {
-    return "5.0.0";
+    return "5.0.4";
   }
 
   /**

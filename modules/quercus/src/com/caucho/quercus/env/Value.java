@@ -203,6 +203,22 @@ abstract public class Value {
   }
 
   /**
+   * Converts to an array if null.
+   */
+  public Value toAutoArray()
+  {
+    return this;
+  }
+
+  /**
+   * Converts to an object if null.
+   */
+  public Value toAutoObject(Env env)
+  {
+    return this;
+  }
+
+  /**
    * Converts to an object.
    */
   public Value toObject(Env env)
@@ -1027,13 +1043,15 @@ abstract public class Value {
   {
     Value v = getField(index);
 
-    if (! v.isset() || v == BooleanValue.FALSE) {
-      v = new ArrayValueImpl();
+    Value array = v.toAutoArray();
 
-      putField(env, index, v);
+    if (v == array)
+      return v;
+    else {
+      putField(env, index, array);
+
+      return array;
     }
-
-    return v;
   }
 
   /**

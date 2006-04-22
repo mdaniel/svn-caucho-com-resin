@@ -27,13 +27,13 @@
  * @author Scott Ferguson
  */
 
-package javax.script;
+package javax.script.http;
 
-import java.util.Map;
+import javax.servlet.http.HttpServletResponse;
 
 /**
- * Modifies the script's global variables.
+ * Script extension of Http servlet response.
  */
-public interface Namespace extends Map {
+public interface HttpScriptResponse extends HttpServletResponse {
 }
 

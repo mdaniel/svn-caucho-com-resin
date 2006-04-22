@@ -36,7 +36,7 @@ import com.caucho.quercus.QuercusExitException;
 import com.caucho.quercus.QuercusLineRuntimeException;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.module.QuercusModule;
-import com.caucho.quercus.page.PhpPage;
+import com.caucho.quercus.page.QuercusPage;
 import com.caucho.server.connection.CauchoResponse;
 import com.caucho.util.CauchoSystem;
 import com.caucho.util.L10N;
@@ -166,7 +166,7 @@ public class QuercusServlet
     try {
       Path path = getPath(request);
 
-      PhpPage page = getQuercus().parse(path);
+      QuercusPage page = getQuercus().parse(path);
 
       // quercus/1b06
       response.setContentType("text/html");
@@ -189,7 +189,7 @@ public class QuercusServlet
 
 	String prepend = env.getIniString("auto_prepend_file");
 	if (prepend != null) {
-	  PhpPage prependPage = getQuercus().parse(env.lookup(prepend));
+	  QuercusPage prependPage = getQuercus().parse(env.lookup(prepend));
 	  prependPage.executeTop(env);
 	}
 
@@ -197,7 +197,7 @@ public class QuercusServlet
 
 	String append = env.getIniString("auto_append_file");
 	if (append != null) {
-	  PhpPage appendPage = getQuercus().parse(env.lookup(append));
+	  QuercusPage appendPage = getQuercus().parse(env.lookup(append));
 	  appendPage.executeTop(env);
 	}
      //   return;

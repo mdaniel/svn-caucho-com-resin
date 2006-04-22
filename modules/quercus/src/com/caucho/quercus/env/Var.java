@@ -209,6 +209,16 @@ public class Var extends Value {
   }
 
   /**
+   * Converts to an array
+   */
+  public Value toAutoArray()
+  {
+    _value = _value.toAutoArray();
+    
+    return _value;
+  }
+
+  /**
    * Converts to an object.
    */
   public Value toObject(Env env)
@@ -557,8 +567,7 @@ public class Var extends Value {
   public Value getArray(Value index)
   {
     // php/3d11
-    if (! _value.isset())
-      _value = new ArrayValueImpl();
+    _value = _value.toAutoArray();
 
     return _value.getArray(index);
   }
@@ -569,8 +578,7 @@ public class Var extends Value {
   public Value getObject(Env env, Value index)
   {
     // php/3d2p
-    if (! _value.isset())
-      _value = new ArrayValueImpl();
+    _value = _value.toAutoArray();
 
     return _value.getObject(env, index);
   }
@@ -580,12 +588,9 @@ public class Var extends Value {
    */
   public Value put(Value index, Value value)
   {
-    Value array = _value;
-
-    if (! array.isset())
-      _value = array = new ArrayValueImpl();
+    _value = _value.toAutoArray();
     
-    return array.put(index, value);
+    return _value.put(index, value);
   }
 
   /**
@@ -593,12 +598,9 @@ public class Var extends Value {
    */
   public Value put(Value value)
   {
-    Value array = _value;
-
-    if (! array.isset())
-      _value = array = new ArrayValueImpl();
+    _value = _value.toAutoArray();
     
-    return array.put(value);
+    return _value.put(value);
   }
 
   /**
@@ -606,12 +608,9 @@ public class Var extends Value {
    */
   public Value putRef()
   {
-    Value array = _value;
-
-    if (! array.isset())
-      _value = array = new ArrayValueImpl();
+    _value = _value.toAutoArray();
     
-    return array.putRef();
+    return _value.putRef();
   }
 
   /**
@@ -636,8 +635,7 @@ public class Var extends Value {
   public Value getFieldRef(Env env, String index)
   {
     // php/3a0r
-    if (! _value.isset())
-      _value = env.createObject();
+    _value = _value.toAutoObject(env);
     
     return _value.getFieldRef(env, index);
   }
@@ -659,8 +657,7 @@ public class Var extends Value {
   public Value getFieldArray(Env env, String index)
   {
     // php/3d1q
-    if (! _value.isset())
-      _value = env.createObject();
+    _value = _value.toAutoObject(env);
     
     return _value.getFieldArray(env, index);
   }
@@ -670,8 +667,7 @@ public class Var extends Value {
    */
   public Value getFieldObject(Env env, String index)
   {
-    if (! _value.isset())
-      _value = env.createObject();
+    _value = _value.toAutoObject(env);
     
     return _value.getFieldObject(env, index);
   }
@@ -682,8 +678,7 @@ public class Var extends Value {
   public Value putField(Env env, String index, Value value)
   {
     // php/3a0s
-    if (! _value.isset())
-      _value = env.createObject();
+    _value = _value.toAutoObject(env);
 
     return _value.putField(env, index, value);
   }

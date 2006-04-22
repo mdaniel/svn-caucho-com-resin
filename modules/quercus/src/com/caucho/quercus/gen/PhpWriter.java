@@ -47,14 +47,14 @@ import com.caucho.quercus.expr.Expr;
 
 import com.caucho.quercus.module.QuercusModule;
 
+import com.caucho.quercus.program.QuercusProgram;
 import com.caucho.quercus.program.InterpretedClassDef;
-import com.caucho.quercus.program.PhpProgram;
   
 /**
  * Writer which gathers additional info.
  */
 public class PhpWriter extends JavaWriterWrapper {
-  private PhpProgram _program;
+  private QuercusProgram _program;
   
   private HashMap<Value,String> _valueMap
     = new HashMap<Value,String>();
@@ -76,7 +76,7 @@ public class PhpWriter extends JavaWriterWrapper {
   private boolean _isSwitch;
   private String _breakVar;
   
-  public PhpWriter(JavaWriter writer, PhpProgram program)
+  public PhpWriter(JavaWriter writer, QuercusProgram program)
   {
     super(writer);
 
@@ -94,7 +94,7 @@ public class PhpWriter extends JavaWriterWrapper {
   /**
    * Returns the program
    */
-  public PhpProgram getProgram()
+  public QuercusProgram getProgram()
   {
     return _program;
   }
