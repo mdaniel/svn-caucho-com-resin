@@ -34,7 +34,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.AbstractQuercusClass;
 import com.caucho.quercus.env.QuercusClass;
 import com.caucho.quercus.env.Value;
 
@@ -84,7 +83,7 @@ public class ClassMethodExpr extends Expr {
   public Value eval(Env env)
     throws Throwable
   {
-    AbstractQuercusClass cl = env.findClass(_className);
+    QuercusClass cl = env.findClass(_className);
 
     if (cl == null)
       throw new Exception(L.l("{0} is an unknown class", _className));

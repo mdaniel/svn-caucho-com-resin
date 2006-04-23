@@ -31,15 +31,19 @@ package com.caucho.quercus.env;
 
 import java.util.ArrayList;
 
+import com.caucho.quercus.QuercusRuntimeException;
+
 import com.caucho.quercus.expr.Expr;
 import com.caucho.quercus.program.ClassDef;
 import com.caucho.quercus.program.AbstractFunction;
 
+import com.caucho.util.L10N;
+
 /**
- * Represents a PHP class.
+ * Represents a Quercus runtime class.
  */
-public class QuercusClass extends AbstractQuercusClass {
- // private final L10N L = new L10N(QuercusClass.class);
+public class QuercusClass {
+  private final L10N L = new L10N(QuercusClass.class);
 
   private final ClassDef _classDef;
   
@@ -264,6 +268,95 @@ public class QuercusClass extends AbstractQuercusClass {
     }
     
     return null;
+  }
+
+  /**
+   * Finds the matching function.
+   */
+  public final AbstractFunction getFunction(String name)
+  {
+    AbstractFunction fun = findFunction(name);
+
+    if (fun != null)
+      return fun;
+
+    fun = findFunctionLowerCase(name.toLowerCase());
+    
+    if (fun != null)
+      return fun;
+    else {
+      throw new QuercusRuntimeException(L.l("{0}::{1} is an unknown method",
+					getName(), name));
+    }
+  }
+
+  /**
+   * evaluates the function.
+   */
+  public Value evalMethod(Env env, Value thisValue, String name, Expr []args)
+    throws Throwable
+  {
+    return getFunction(name).evalMethod(env, thisValue, args);
+  }  
+
+  /**
+   * evaluates the function.
+   */
+  public Value evalMethod(Env env, Value thisValue, String name, Value []args)
+    throws Throwable
+  {
+    return getFunction(name).evalMethod(env, thisValue, args);
+  }  
+
+  /**
+   * Finds a function.
+   */
+  public AbstractFunction findStaticFunctionLowerCase(String name)
+  {
+    return null;
+  }
+
+  /**
+   * Finds the matching function.
+   */
+  public final AbstractFunction getStaticFunction(String name)
+  {
+    AbstractFunction fun = findStaticFunction(name);
+
+    if (fun != null)
+      return fun;
+
+    fun = findStaticFunctionLowerCase(name.toLowerCase());
+    
+    if (fun != null)
+      return fun;
+    else {
+      throw new QuercusRuntimeException(L.l("{0}::{1} is an unknown method",
+					getName(), name));
+    }
+  }
+
+  /**
+   * Finds the matching constant
+   */
+  public Value findConstant(Env env, String name)
+  {
+    return null;
+  }
+
+  /**
+   * Finds the matching constant
+   */
+  public final Value getConstant(Env env, String name)
+    throws Throwable
+  {
+    Value value = findConstant(env, name);
+
+    if (value != null)
+      return value;
+
+    throw new QuercusRuntimeException(L.l("{0}::{1} is an unknown constant",
+					getName(), name));
   }
 
   public String toString()

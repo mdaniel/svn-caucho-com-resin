@@ -36,7 +36,6 @@ import java.util.ArrayList;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.QuercusClass;
-import com.caucho.quercus.env.AbstractQuercusClass;
 
 import com.caucho.quercus.program.AnalyzeInfo;
 
@@ -80,7 +79,7 @@ public class VarNewExpr extends Expr {
   {
     String name = _name.evalString(env);
     
-    AbstractQuercusClass cl = env.findClass(name);
+    QuercusClass cl = env.findClass(name);
 
     if (cl == null) {
       // XXX: change exception

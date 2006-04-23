@@ -862,7 +862,7 @@ public class PDOStatement
 
   public Value fetchObject(@Optional String className, @Optional Value[] args)
   {
-    AbstractQuercusClass cl;
+    QuercusClass cl;
 
     if (className != null) {
       cl = _env.findAbstractClass(className);

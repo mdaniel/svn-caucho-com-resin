@@ -38,7 +38,6 @@ import com.caucho.quercus.gen.PhpWriter;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.QuercusClass;
-import com.caucho.quercus.env.AbstractQuercusClass;
 import com.caucho.quercus.env.NullThisValue;
 
 import com.caucho.quercus.program.AbstractFunction;
@@ -103,7 +102,7 @@ public class StaticMethodExpr extends Expr {
   public Value eval(Env env)
     throws Throwable
   {
-    AbstractQuercusClass cl = env.findClass(_className);
+    QuercusClass cl = env.findClass(_className);
 
     if (cl == null) {
       // XXX: change exception

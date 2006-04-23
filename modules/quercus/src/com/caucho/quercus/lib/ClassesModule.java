@@ -46,7 +46,7 @@ import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.StringValueImpl;
 import com.caucho.quercus.env.ObjectValue;
 
-import com.caucho.quercus.env.AbstractQuercusClass;
+import com.caucho.quercus.env.QuercusClass;
 
 /**
  * PHP class information
@@ -137,7 +137,7 @@ public class ClassesModule extends AbstractQuercusModule {
     else if (value instanceof StringValue) {
       String className = value.toString();
 
-      AbstractQuercusClass cl = env.findClass(className);
+      QuercusClass cl = env.findClass(className);
 
       if (cl != null) {
 	String parent = cl.getParentName();

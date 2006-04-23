@@ -365,7 +365,7 @@ public class VariableModule extends AbstractQuercusModule {
 	if (isSyntaxOnly)
 	  return true;
 
-	AbstractQuercusClass cl = env.findClass(obj.toString());
+	QuercusClass cl = env.findClass(obj.toString());
 	if (cl == null)
 	  return false;
 

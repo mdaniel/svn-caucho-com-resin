@@ -36,7 +36,6 @@ import java.util.ArrayList;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.QuercusClass;
-import com.caucho.quercus.env.AbstractQuercusClass;
 
 import com.caucho.quercus.program.AnalyzeInfo;
 
@@ -76,7 +75,7 @@ public class NewExpr extends Expr {
   public Value eval(Env env)
     throws Throwable
   {
-    AbstractQuercusClass cl = env.findAbstractClass(_name);
+    QuercusClass cl = env.findAbstractClass(_name);
 
     if (cl == null) {
       throw env.errorException(L.l("no matching class {0}", _name));

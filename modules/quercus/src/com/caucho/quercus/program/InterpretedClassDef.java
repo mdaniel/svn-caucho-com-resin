@@ -230,7 +230,7 @@ public class InterpretedClassDef extends ClassDef {
     out.addClass(this);
     
     out.println();
-    out.println("public static class quercus_" + getName() + " extends CompiledClass {");
+    out.println("public static class quercus_" + getName() + " extends CompiledClassDef {");
     out.pushDepth();
 
     out.println();

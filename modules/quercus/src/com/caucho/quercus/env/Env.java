@@ -172,8 +172,8 @@ public class Env {
   private HashMap<String, ClassDef> _classDefMap
     = new HashMap<String, ClassDef>();
 
-  private HashMap<String, AbstractQuercusClass> _classMap
-    = new HashMap<String, AbstractQuercusClass>();
+  private HashMap<String, QuercusClass> _classMap
+    = new HashMap<String, QuercusClass>();
 
   private HashMap<String, StringValue> _iniMap;
 
@@ -1679,7 +1679,7 @@ public class Env {
    */
   public AbstractFunction findMethod(String className, String methodName)
   {
-    AbstractQuercusClass cl = findClass(className);
+    QuercusClass cl = findClass(className);
 
     if (cl == null) {
       error(L.l("'{0}' is an unknown class.", className));
@@ -2105,7 +2105,7 @@ public class Env {
    * @param name the class name
    * @return the found class or null if no class found.
    */
-  public AbstractQuercusClass findClass(String name)
+  public QuercusClass findClass(String name)
   {
     return findClass(name, true);
   }
@@ -2117,11 +2117,11 @@ public class Env {
    * @param useAutoload use autoload to locate the class if necessary
    * @return the found class or null if no class found.
    */
-  public AbstractQuercusClass findClass(String name, boolean useAutoload)
+  public QuercusClass findClass(String name, boolean useAutoload)
   {
     // XXX: useAutoload not implemented
 
-    AbstractQuercusClass cl = _classMap.get(name);
+    QuercusClass cl = _classMap.get(name);
 
     if (cl != null)
       return cl;
@@ -2185,9 +2185,9 @@ public class Env {
    * @param name the class name
    * @return the found class or null if no class found.
    */
-  public AbstractQuercusClass findAbstractClass(String name)
+  public QuercusClass findAbstractClass(String name)
   {
-    AbstractQuercusClass cl = findClass(name);
+    QuercusClass cl = findClass(name);
 
     if (cl != null)
       return cl;
@@ -2203,9 +2203,9 @@ public class Env {
    * @param name the class name
    * @return the found class or null if no class found.
    */
-  public AbstractQuercusClass getClass(String name)
+  public QuercusClass getClass(String name)
   {
-    AbstractQuercusClass cl = findClass(name);
+    QuercusClass cl = findClass(name);
 
     if (cl != null)
       return cl;
@@ -2219,7 +2219,7 @@ public class Env {
    * @param name the class name
    * @return the found class or null if no class found.
    */
-  private AbstractQuercusClass findClassImpl(String name)
+  private QuercusClass findClassImpl(String name)
   {
     /*
     QuercusClass cl = null;
@@ -2256,7 +2256,7 @@ public class Env {
     if (classDef != null) {
       String parentName = classDef.getParentName();
 
-      AbstractQuercusClass parent = null;
+      QuercusClass parent = null;
 
       if (parentName != null)
         parent = getClass(parentName);
@@ -2296,7 +2296,7 @@ public class Env {
    */
   public AbstractFunction findFunction(String className, String methodName)
   {
-    AbstractQuercusClass cl = findClass(className);
+    QuercusClass cl = findClass(className);
 
     if (cl == null)
       throw new QuercusRuntimeException(L.l("'{0}' is an unknown class",
@@ -2329,7 +2329,7 @@ public class Env {
         throw new IllegalStateException(L.l("unknown callback name {0}", name));
 
       if (obj instanceof StringValue) {
-        AbstractQuercusClass cl = findClass(obj.toString());
+        QuercusClass cl = findClass(obj.toString());
 
         if (cl == null)
           throw new IllegalStateException(L.l("can't find class {0}",
