@@ -65,21 +65,14 @@ public class IfStatement extends Statement {
   public Value execute(Env env)
     throws Throwable
   {
-    try {
-      if (_test.evalBoolean(env)) {
-        return _trueBlock.execute(env);
-      }
-      else if (_falseBlock != null) {
-        return _falseBlock.execute(env);
-      }
-      else
-        return null;
+    if (_test.evalBoolean(env)) {
+      return _trueBlock.execute(env);
     }
-    catch (Throwable t) {
-      rethrow(t);
+    else if (_falseBlock != null) {
+      return _falseBlock.execute(env);
     }
-
-    return null;
+    else
+      return null;
   }
 
   //

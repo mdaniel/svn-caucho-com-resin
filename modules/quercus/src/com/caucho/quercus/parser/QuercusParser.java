@@ -65,8 +65,8 @@ import com.caucho.vfs.ReadStream;
 /**
  * Parses a PHP program.
  */
-public class PhpParser {
-  private final static L10N L = new L10N(PhpParser.class);
+public class QuercusParser {
+  private final static L10N L = new L10N(QuercusParser.class);
 
   private final static int M_STATIC = 0x1;
   private final static int M_PUBLIC = 0x2;
@@ -174,6 +174,7 @@ public class PhpParser {
   private final static int ABSTRACT = 566;
   private final static int FINAL = 567;
   private final static int DIE = 568;
+  private final static int THROW = 569;
   
   private final static int LAST_IDENTIFIER_LEXEME = 1024;
 
@@ -208,12 +209,12 @@ public class PhpParser {
   
   private boolean _isTop;
 
-  PhpParser(Quercus quercus)
+  QuercusParser(Quercus quercus)
   {
     _quercus = quercus;
   }
 
-  PhpParser(Quercus quercus, Path sourceFile, Reader is)
+  QuercusParser(Quercus quercus, Path sourceFile, Reader is)
   {
     _quercus = quercus;
 
@@ -248,8 +249,8 @@ public class PhpParser {
     ReadStream is = path.openRead();
 
     try {
-      PhpParser parser;
-      parser = new PhpParser(quercus, path, is.getReader());
+      QuercusParser parser;
+      parser = new QuercusParser(quercus, path, is.getReader());
 
       return parser.parse();
     } finally {
@@ -261,7 +262,7 @@ public class PhpParser {
 				     Path path, Reader is)
     throws IOException
   {
-    return new PhpParser(quercus, path, is).parse();
+    return new QuercusParser(quercus, path, is).parse();
   }
   
   public static QuercusProgram parseEval(Quercus quercus, String str)
@@ -269,7 +270,7 @@ public class PhpParser {
   {
     Path path = new StringPath(str);
 
-    PhpParser parser = new PhpParser(quercus, path, path.openRead().getReader());
+    QuercusParser parser = new QuercusParser(quercus, path, path.openRead().getReader());
 
     return parser.parseCode();
   }
@@ -279,7 +280,7 @@ public class PhpParser {
   {
     Path path = new StringPath(str);
 
-    PhpParser parser = new PhpParser(quercus, path, path.openRead().getReader());
+    QuercusParser parser = new QuercusParser(quercus, path, path.openRead().getReader());
 
     return parser.parseCode().createExprReturn();
   }
@@ -290,7 +291,7 @@ public class PhpParser {
     Path argPath = new StringPath(args);
     Path codePath = new StringPath(code);
 
-    PhpParser parser = new PhpParser(quercus);
+    QuercusParser parser = new QuercusParser(quercus);
 
     Function fun = parser.parseFunction(argPath, codePath);
 
@@ -302,7 +303,7 @@ public class PhpParser {
   {
     Path path = Vfs.lookup("string:");
     
-    return new PhpParser(quercus, path, new StringReader(str)).parseExpr();
+    return new QuercusParser(quercus, path, new StringReader(str)).parseExpr();
   }
   
   public static Expr parseDefault(String str)
@@ -310,7 +311,7 @@ public class PhpParser {
     try {
       Path path = Vfs.lookup("string:");
     
-      return new PhpParser(null, path, new StringReader(str)).parseExpr();
+      return new QuercusParser(null, path, new StringReader(str)).parseExpr();
     } catch (IOException e) {
       e.printStackTrace();
       
@@ -508,6 +509,10 @@ public class PhpParser {
 	statements.add(parseReturn());
 	break;
 
+      case THROW:
+	statements.add(parseThrow());
+	break;
+
       case BREAK:
 	statements.add(BreakStatement.BREAK);
 	break;
@@ -663,6 +668,9 @@ public class PhpParser {
 
     case RETURN:
       return parseReturn();
+
+    case THROW:
+      return parseThrow();
 
     default:
       _peekToken = token;
@@ -1435,6 +1443,20 @@ public class PhpParser {
   }
 
   /**
+   * Parses the 'throw' statement
+   */
+  private Statement parseThrow()
+    throws IOException
+  {
+    Location location = getLocation();
+    
+    Expr expr = parseExpr();
+    System.out.println("EXPR: " + expr);
+
+    return new ThrowStatement(location, NullLiteralExpr.NULL);
+  }
+
+  /**
    * Parses a class definition
    */
   private InterpretedClassDef parseClassDefinition()
@@ -2117,7 +2139,7 @@ public class PhpParser {
 	    _peekToken = token;
 	    expr = expr.createAssign(this, parseConditionalExpr());
 	  }
-	} catch (PhpParseException e) {
+	} catch (QuercusParseException e) {
 	  throw e;
 	} catch (IOException e) {
 	  throw error(e.getMessage());
@@ -2522,6 +2544,7 @@ public class PhpParser {
       
     case EXIT:
       return parseExit();
+      
     case DIE:
       return parseDie();
 
@@ -4058,10 +4081,10 @@ public class PhpParser {
           .append(sourceLines[i]);
       }
     
-      return new PhpParseException(sb.toString());
+      return new QuercusParseException(sb.toString());
     }
     else
-      return new PhpParseException(_parserLocation.toString() + msg);
+      return new QuercusParseException(_parserLocation.toString() + msg);
   }
 
   /**
@@ -4118,6 +4141,7 @@ public class PhpParser {
       
     case DIE: return "'die'";
     case EXIT: return "'exit'";
+    case THROW: return "'throw'";
       
     case CLONE: return "'clone'";
     case INSTANCEOF: return "'instanceof'";
@@ -4295,5 +4319,6 @@ public class PhpParser {
     _insensitiveReserved.put("const", CONST);
     _insensitiveReserved.put("final", FINAL);
     _insensitiveReserved.put("abstract", ABSTRACT);
+    _insensitiveReserved.put("throw", THROW);
   }
 }

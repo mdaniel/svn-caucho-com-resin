@@ -40,7 +40,7 @@ import com.caucho.quercus.env.Value;
 import com.caucho.quercus.program.Statement;
 import com.caucho.quercus.program.AnalyzeInfo;
 
-import com.caucho.quercus.parser.PhpParser;
+import com.caucho.quercus.parser.QuercusParser;
 
 import com.caucho.quercus.gen.PhpWriter;
 import com.caucho.quercus.Location;
@@ -119,7 +119,7 @@ abstract public class Expr {
     return true;
   }
 
-  public Expr createAssign(PhpParser parser, Expr value)
+  public Expr createAssign(QuercusParser parser, Expr value)
     throws IOException
   {
     String msg = (L.l("{0} is an invalid left-hand side of an assignment.",
@@ -134,7 +134,7 @@ abstract public class Expr {
   /**
    * Mark as an assignment for a list()
    */
-  public void assign(PhpParser parser)
+  public void assign(QuercusParser parser)
     throws IOException
   {
     String msg = L.l("{0} is an invalid left-hand side of an assignment.",
@@ -146,7 +146,7 @@ abstract public class Expr {
       throw new IOException(msg);
   }
 
-  public Expr createAssignRef(PhpParser parser, Expr value)
+  public Expr createAssignRef(QuercusParser parser, Expr value)
     throws IOException
   {
     // XXX: need real exception

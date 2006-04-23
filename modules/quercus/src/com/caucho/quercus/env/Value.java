@@ -29,6 +29,7 @@
 
 package com.caucho.quercus.env;
 
+import com.caucho.quercus.QuercusException;
 import com.caucho.quercus.QuercusRuntimeException;
 import com.caucho.quercus.module.Marshall;
 import com.caucho.quercus.expr.Expr;
@@ -232,6 +233,14 @@ abstract public class Value {
   public Object toJavaObject()
   {
     return null;
+  }
+
+  /**
+   * Converts to an exception.
+   */
+  public Exception toException()
+  {
+    return new QuercusValueException(toString());
   }
 
   /**

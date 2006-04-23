@@ -31,6 +31,8 @@ package com.caucho.quercus.program;
 
 import java.io.IOException;
 
+import java.util.ArrayList;
+
 import com.caucho.util.L10N;
 
 import com.caucho.quercus.QuercusRuntimeException;
@@ -66,13 +68,37 @@ abstract public class AbstractClassDef {
   {
     return _name;
   }
-  
+
   /**
    * Returns the parent name.
    */
   public String getParentName()
   {
     return _parentName;
+  }
+  
+  /**
+   * Returns the number of fields.
+   */
+  public int getFieldSize()
+  {
+    return 0;
+  }
+  
+  /**
+   * Returns the index for the field.
+   */
+  public int findFieldIndex(String name)
+  {
+    return -1;
+  }
+  
+  /**
+   * Returns the index for the field.
+   */
+  public ArrayList<String> getFieldNames()
+  {
+    return null;
   }
 
   /**

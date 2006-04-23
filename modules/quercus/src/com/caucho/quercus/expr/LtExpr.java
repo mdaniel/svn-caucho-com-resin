@@ -37,7 +37,7 @@ import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.BooleanValue;
 
-import com.caucho.quercus.parser.PhpParser;
+import com.caucho.quercus.parser.QuercusParser;
 
 import com.caucho.quercus.gen.PhpWriter;
 

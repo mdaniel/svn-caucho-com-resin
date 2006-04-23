@@ -1282,8 +1282,18 @@ public class RegexpModule
           else
             sb.append("\\[");
         }
+        else if (i + 1 < len && regexp.charAt(i + 1) == '[') {
+          sb.append("[\\[");
+	  i += 1;
+	}
+        else if (i + 2 < len &&
+		 regexp.charAt(i + 1) == '^' &&
+		 regexp.charAt(i + 2) == ']') {
+          sb.append("[^\\]");
+	  i += 2;
+	}
         else
-          sb.append(ch);
+          sb.append('[');
 
         if (quote == 0)
           quote = ch;

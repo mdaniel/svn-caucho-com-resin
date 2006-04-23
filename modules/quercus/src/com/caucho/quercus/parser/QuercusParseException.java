@@ -36,24 +36,24 @@ import com.caucho.util.LineCompileException;
 /**
  * PHP parse exception
  */
-public class PhpParseException
+public class QuercusParseException
   extends IOException
   implements LineCompileException {
-  public PhpParseException()
+  public QuercusParseException()
   {
   }
 
-  public PhpParseException(String msg)
+  public QuercusParseException(String msg)
   {
     super(msg);
   }
 
-  public PhpParseException(Throwable cause)
+  public QuercusParseException(Throwable cause)
   {
     initCause(cause);
   }
 
-  public PhpParseException(String msg, Throwable cause)
+  public QuercusParseException(String msg, Throwable cause)
   {
     super(msg);
 

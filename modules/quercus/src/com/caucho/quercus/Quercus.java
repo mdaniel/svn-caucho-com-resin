@@ -35,7 +35,7 @@ import com.caucho.quercus.module.QuercusModule;
 import com.caucho.quercus.module.StaticFunction;
 import com.caucho.quercus.page.PageManager;
 import com.caucho.quercus.page.QuercusPage;
-import com.caucho.quercus.parser.PhpParser;
+import com.caucho.quercus.parser.QuercusParser;
 import com.caucho.quercus.program.InterpretedClassDef;
 import com.caucho.quercus.program.QuercusProgram;
 import com.caucho.util.Log;
@@ -313,7 +313,7 @@ public class Quercus {
     QuercusProgram program = _evalCache.get(code);
 
     if (program == null) {
-      program = PhpParser.parseEval(this, code);
+      program = QuercusParser.parseEval(this, code);
       _evalCache.put(code, program);
     }
 
@@ -335,7 +335,7 @@ public class Quercus {
     QuercusProgram program = _evalCache.get(code);
 
     if (program == null) {
-      program = PhpParser.parseEvalExpr(this, code);
+      program = QuercusParser.parseEvalExpr(this, code);
       _evalCache.put(code, program);
     }
 
@@ -353,7 +353,7 @@ public class Quercus {
   public Value parseFunction(String args, String code)
     throws IOException
   {
-    return PhpParser.parseFunction(this, args, code);
+    return QuercusParser.parseFunction(this, args, code);
   }
 
   /**

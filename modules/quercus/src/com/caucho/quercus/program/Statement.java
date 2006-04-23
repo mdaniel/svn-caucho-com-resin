@@ -56,6 +56,11 @@ abstract public class Statement {
 
   private final Location _location;
 
+  protected Statement()
+  {
+    _location = Location.UNKNOWN;
+  }
+
   protected Statement(Location location)
   {
     _location = location;

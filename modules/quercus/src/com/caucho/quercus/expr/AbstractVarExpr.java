@@ -39,7 +39,7 @@ import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.NullValue;
 import com.caucho.quercus.env.Value;
 
-import com.caucho.quercus.parser.PhpParser;
+import com.caucho.quercus.parser.QuercusParser;
 
 import com.caucho.quercus.gen.PhpWriter;
 
@@ -55,7 +55,7 @@ abstract public class AbstractVarExpr extends Expr {
   /**
    * Marks the value as assigned
    */
-  public void assign(PhpParser parser)
+  public void assign(QuercusParser parser)
   {
     // XXX: used by list, e.g. quercus/03l8.  need further tests
   }
@@ -63,7 +63,7 @@ abstract public class AbstractVarExpr extends Expr {
   /**
    * Creates the assignment.
    */
-  public Expr createAssign(PhpParser parser, Expr value)
+  public Expr createAssign(QuercusParser parser, Expr value)
   {
     return new AssignExpr(this, value);
   }
@@ -71,7 +71,7 @@ abstract public class AbstractVarExpr extends Expr {
   /**
    * Creates the assignment.
    */
-  public Expr createAssignRef(PhpParser parser, Expr value)
+  public Expr createAssignRef(QuercusParser parser, Expr value)
   {
     return new AssignRefExpr(this, value);
   }

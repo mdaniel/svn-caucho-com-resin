@@ -174,7 +174,7 @@ public class Env {
 
   private String _prevIncludePath = ".";
   private String _includePath;
-  private ArrayList<Path> _includePathList;
+  private ArrayList<String> _includePathList;
 
   private HashSet<Path> _includeSet = new HashSet<Path>();
 
@@ -1988,7 +1988,7 @@ public class Env {
   /**
    * Creates a stdClass object.
    */
-  public ObjectValue createObject()
+  public Value createObject()
   {
     try {
       return _quercus.getStdClass().newInstance(this);
@@ -2378,13 +2378,22 @@ public class Env {
     throws Throwable
   {
     // php/0b0g
-    Path selfPath = getSelfDirectory();
+    //Path selfPath = getSelfDirectory();
+    Path pwd = getPwd();
 
-    Path path = lookupInclude(selfPath, include);
+    Path path = lookupInclude(pwd, include);
 
     if (path == null) {
       // php/0b0l
       path = lookupInclude(scriptPwd, include);
+    }
+
+    if (path == null) {
+      // php/0b21
+      path = scriptPwd.lookup(include);
+
+      if (! path.canRead())
+	path = null;
     }
 
     if (path != null) {
@@ -2423,10 +2432,10 @@ public class Env {
    */
   private Path lookupInclude(Path pwd, String relPath)
   {
-    ArrayList<Path> pathList = getIncludePath(pwd);
+    ArrayList<String> pathList = getIncludePath(pwd);
 
     for (int i = 0; i < pathList.size(); i++) {
-      Path path = pathList.get(i).lookup(relPath);
+      Path path = pwd.lookup(pathList.get(i)).lookup(relPath);
 
       if (path.canRead())
         return path;
@@ -2438,7 +2447,7 @@ public class Env {
   /**
    * Returns the include path.
    */
-  private ArrayList<Path> getIncludePath(Path pwd)
+  private ArrayList<String> getIncludePath(Path pwd)
   {
     String includePath = getIniString("include_path");
 
@@ -2446,23 +2455,23 @@ public class Env {
       includePath = ".";
 
     if (! includePath.equals(_includePath)) {
-      _includePathList = new ArrayList<Path>();
+      _includePathList = new ArrayList<String>();
 
       int head = 0;
       int tail;
       while ((tail = includePath.indexOf(':', head)) >= 0) {
         String subpath = includePath.substring(head, tail);
 
-        _includePathList.add(pwd.lookup(subpath));
+        _includePathList.add(subpath);
 
         head = tail + 1;
       }
 
       String subpath = includePath.substring(head);
 
-      _includePathList.add(pwd.lookup(subpath));
-      // XXX: can't change
-      // _includePath = includePath;
+      _includePathList.add(subpath);
+
+      _includePath = includePath;
     }
 
     return _includePathList;

@@ -47,16 +47,49 @@ import com.caucho.quercus.expr.Expr;
 
 import com.caucho.quercus.gen.PhpWriter;
 
+import com.caucho.util.IdentityIntMap;
+
 /**
  * Represents a PHP class value.
  */
 abstract public class CompiledClass extends AbstractClassDef {
+  private final ArrayList<String> _fieldNames
+    = new ArrayList<String>();
+  
+  private final IdentityIntMap _fieldMap
+    = new IdentityIntMap();
+  
   protected ArrayValue _extFields = new ArrayValueImpl();
   protected Value _parent;
   
   public CompiledClass(String name, String parent)
   {
     super(name, parent);
+  }
+
+  /**
+   * Returns the field index.
+   */
+  public int findFieldIndex(String name)
+  {
+    return _fieldMap.get(name);
+  }
+
+  /**
+   * Returns the key set.
+   */
+  public ArrayList<String> getFieldNames()
+  {
+    return _fieldNames;
+  }
+
+  /**
+   * Returns the field index.
+   */
+  protected void addFieldIndex(String name, int id)
+  {
+    _fieldMap.put(name, id);
+    _fieldNames.add(name);
   }
 
   /**

@@ -44,23 +44,15 @@ import com.caucho.quercus.Location;
 import com.caucho.vfs.WriteStream;
 
 /**
- * Represents a return expression statement in a PHP program.
+ * Represents a throw expression statement in a Quercus program.
  */
-public class ReturnStatement extends Statement {
+public class ThrowStatement extends Statement {
   private Expr _expr;
   
   /**
    * Creates the echo statement.
    */
-  public ReturnStatement(Expr expr)
-  {
-    _expr = expr;
-  }
-  
-  /**
-   * Creates the echo statement.
-   */
-  public ReturnStatement(Location location, Expr expr)
+  public ThrowStatement(Location location, Expr expr)
   {
     super(location);
 
@@ -73,18 +65,7 @@ public class ReturnStatement extends Statement {
   public Value execute(Env env)
     throws Throwable
   {
-    try {
-      if (_expr != null) {
-        return _expr.evalRef(env);
-      }
-      else
-        return NullValue.NULL;
-    }
-    catch (Throwable t) {
-      rethrow(t);
-    }
-    
-    return null;
+    throw _expr.eval(env).toException();
   }
 
   //
@@ -97,8 +78,6 @@ public class ReturnStatement extends Statement {
   public boolean analyze(AnalyzeInfo info)
   {
     _expr.analyze(info);
-
-    // _expr.analyzeSetReference(info); // php/3783, php/3a5d
 
     return false;
   }
@@ -119,28 +98,12 @@ public class ReturnStatement extends Statement {
   protected void generateImpl(PhpWriter out)
     throws IOException
   {
-    // the "if" test handles Java's issue with trailing statements
-    
-    if (_expr != null) {
-      out.print("return ");
+    out.print("throw ");
 
-      // php/3a5h
-      _expr.generate(out);
-      
-      /**
-      Expr copy = _expr.createCopy();
+    // php/3a5h
+    _expr.generate(out);
 
-      if (_expr instanceof VarExpr)
-	copy.generateReturn(out);
-      else
-	copy.generate(out);
-      */
-      
-      out.println(";");
-    }
-    else
-      out.print("return NullValue.NULL;");
+    out.println("toException();");
   }
-  
 }
 

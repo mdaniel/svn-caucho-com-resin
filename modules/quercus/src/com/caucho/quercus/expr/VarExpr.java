@@ -34,7 +34,7 @@ import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.NullValue;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.gen.PhpWriter;
-import com.caucho.quercus.parser.PhpParser;
+import com.caucho.quercus.parser.QuercusParser;
 import com.caucho.quercus.program.AnalyzeInfo;
 
 import java.io.IOException;
@@ -94,7 +94,7 @@ public class VarExpr
   /**
    * Creates the assignment.
    */
-  public Expr createAssign(PhpParser parser, Expr value)
+  public Expr createAssign(QuercusParser parser, Expr value)
   {
     _var.setAssigned();
 
@@ -104,7 +104,7 @@ public class VarExpr
   /**
    * Creates the assignment.
    */
-  public void assign(PhpParser parser)
+  public void assign(QuercusParser parser)
   {
     _var.setAssigned();
   }
@@ -112,7 +112,7 @@ public class VarExpr
   /**
    * Creates the assignment.
    */
-  public Expr createAssignRef(PhpParser parser, Expr value)
+  public Expr createAssignRef(QuercusParser parser, Expr value)
   {
     _var.setAssigned();
 

@@ -107,19 +107,14 @@ public class BlockStatement extends Statement {
   public Value execute(Env env)
     throws Throwable
   {
-    try {
-      for (int i = 0; i < _statements.length; i++) {
-        Statement statement = _statements[i];
+    for (int i = 0; i < _statements.length; i++) {
+      Statement statement = _statements[i];
 
-        Value value = statement.execute(env);
+      Value value = statement.execute(env);
 
-        if (value != null) {
-          return value;
-        }
+      if (value != null) {
+	return value;
       }
-    }
-    catch (Throwable t) {
-      rethrow(t);
     }
 
     return null;

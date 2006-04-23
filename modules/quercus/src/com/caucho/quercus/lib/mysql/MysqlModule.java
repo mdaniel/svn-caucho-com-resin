@@ -337,7 +337,8 @@ public class MysqlModule extends AbstractQuercusModule {
       if (columnMd == null)
         return BooleanValue.FALSE;
 
-      ObjectValue fieldResult = env.createObject();
+      // XXX: remove cast when value cleaned up
+      ObjectValue fieldResult = (ObjectValue) env.createObject();
 
       fieldResult.putField("name", columnMd.getName());
       fieldResult.putField("table", tableMd.getName());

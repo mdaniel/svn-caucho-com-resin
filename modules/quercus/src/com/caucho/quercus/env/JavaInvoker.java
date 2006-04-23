@@ -40,7 +40,7 @@ import com.caucho.quercus.module.Reference;
 import com.caucho.quercus.module.UsesSymbolTable;
 import com.caucho.quercus.module.VariableArguments;
 import com.caucho.quercus.module.ReturnNullAsFalse;
-import com.caucho.quercus.parser.PhpParser;
+import com.caucho.quercus.parser.QuercusParser;
 import com.caucho.quercus.program.AbstractFunction;
 import com.caucho.util.L10N;
 
@@ -144,7 +144,7 @@ abstract public class JavaInvoker
           Optional opt = (Optional) ann;
 
           if (! opt.value().equals("")) {
-            Expr expr = PhpParser.parseDefault(opt.value());
+            Expr expr = QuercusParser.parseDefault(opt.value());
 
             _defaultExprs[i] = expr;
           } else

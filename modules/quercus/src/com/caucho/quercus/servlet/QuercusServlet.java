@@ -35,6 +35,7 @@ import com.caucho.quercus.QuercusDieException;
 import com.caucho.quercus.QuercusExitException;
 import com.caucho.quercus.QuercusLineRuntimeException;
 import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.QuercusValueException;
 import com.caucho.quercus.module.QuercusModule;
 import com.caucho.quercus.page.QuercusPage;
 import com.caucho.server.connection.CauchoResponse;
@@ -207,6 +208,13 @@ public class QuercusServlet
       }
       catch (QuercusLineRuntimeException e) {
         log.log(Level.FINE, e.toString(), e);
+
+      //  return;
+      }
+      catch (QuercusValueException e) {
+        log.log(Level.FINE, e.toString(), e);
+	
+	ws.println(e.toString());
 
       //  return;
       }

@@ -518,7 +518,7 @@ public class Function extends AbstractFunction {
     out.print("(Env env");
 
     if (! isStatic())
-      out.print(", Value quercus_this");
+      out.print(", Value quercus_this_arg");
 
     for (int i = 0; i < _args.length; i++) {
       out.print(", ");
@@ -531,6 +531,10 @@ public class Function extends AbstractFunction {
     out.println("  throws Throwable");
     out.println("{");
     out.pushDepth();
+
+    if (! isStatic()) {
+      out.println("CompiledObjectValue q_this = (CompiledObjectValue) quercus_this_arg;");
+    }
 
     generateBody(out);
 

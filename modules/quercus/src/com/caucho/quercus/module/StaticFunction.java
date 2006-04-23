@@ -36,7 +36,7 @@ import com.caucho.quercus.expr.DefaultExpr;
 import com.caucho.quercus.expr.Expr;
 import com.caucho.quercus.expr.NullLiteralExpr;
 import com.caucho.quercus.gen.PhpWriter;
-import com.caucho.quercus.parser.PhpParser;
+import com.caucho.quercus.parser.QuercusParser;
 import com.caucho.quercus.program.AbstractFunction;
 import com.caucho.quercus.program.AnalyzeInfo;
 import com.caucho.util.L10N;
@@ -145,7 +145,7 @@ public class StaticFunction
           Optional opt = (Optional) ann;
 
           if (! opt.value().equals("")) {
-            Expr expr = PhpParser.parseDefault(opt.value());
+            Expr expr = QuercusParser.parseDefault(opt.value());
 
             _defaultExprs[i] = expr;
           } else

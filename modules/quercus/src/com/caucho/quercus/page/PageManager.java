@@ -50,7 +50,7 @@ import com.caucho.quercus.Quercus;
 
 import com.caucho.quercus.gen.PhpGenerator;
 
-import com.caucho.quercus.parser.PhpParser;
+import com.caucho.quercus.parser.QuercusParser;
 
 import com.caucho.quercus.program.QuercusProgram;
 
@@ -182,7 +182,7 @@ public class PageManager {
       program = _programCache.get(path);
 
       if (program == null || program.isModified()) {
-	program = PhpParser.parse(_quercus, path);
+	program = QuercusParser.parse(_quercus, path);
 	_programCache.put(path, program);
       }
 

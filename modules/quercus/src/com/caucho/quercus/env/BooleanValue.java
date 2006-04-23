@@ -145,6 +145,17 @@ public class BooleanValue extends Value {
   }
 
   /**
+   * Converts to an object if null.
+   */
+  public Value toAutoObject(Env env)
+  {
+    if (! _value)
+      return env.createObject();
+    else
+      return this;
+  }
+
+  /**
    * Converts to a key.
    */
   public Value toKey()

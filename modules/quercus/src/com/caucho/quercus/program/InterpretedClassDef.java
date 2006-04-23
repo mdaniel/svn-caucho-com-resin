@@ -83,6 +83,14 @@ public class InterpretedClassDef extends AbstractClassDef {
   }
 
   /**
+   * Returns the field count.
+   */
+  public int getFieldSize()
+  {
+    return _fieldMap.size();
+  }
+
+  /**
    * Adds a function.
    */
   public void addFunction(String name, Function fun)
@@ -155,6 +163,24 @@ public class InterpretedClassDef extends AbstractClassDef {
   }
 
   /**
+   * Returns the field index.
+   */
+  public int getFieldIndex(String name)
+  {
+    // XXX: inheritance
+    int index = 0;
+
+    for (String key : _fieldMap.keySet()) {
+      if (name.equals(key))
+	return index;
+
+      index++;
+    }
+
+    return -1;
+  }
+
+  /**
    * Initialize the class.
    */
   public void init(Env env)
@@ -223,24 +249,41 @@ public class InterpretedClassDef extends AbstractClassDef {
       out.print("null");
     }
     out.println(");");
+
+    int index = 0;
+    for (String key : _fieldMap.keySet()) {
+      out.println("addFieldIndex(\"" + key + "\", " + index + ");");
+
+      index++;
+    }
+    
     out.popDepth();
     out.println("}");
 
     out.println();
-    out.println("public void initInstance(Env env, Value value)");
+    out.println("public int getFieldSize()");
+    out.println("{");
+    out.println("  return " + getFieldSize() + ";");
+    out.println("}");
+
+    out.println();
+    out.println("public void initInstance(Env env, Value valueArg)");
     out.println("   throws Throwable");
     out.println("{");
     out.pushDepth();
-    
+
+    out.println("CompiledObjectValue value = (CompiledObjectValue) valueArg;");
+
+    index = 0;
     for (Map.Entry<String,Expr> entry : _fieldMap.entrySet()) {
       String key = entry.getKey();
       Expr value = entry.getValue();
 
-      out.print("value.putField(env, \"");
-      out.printJavaString(key);
-      out.print("\", ");
+      out.print("value._fields[" + index + "] = ");
       value.generate(out);
-      out.println(");");
+      out.println(";");
+
+      index++;
     }
 
     /*
@@ -277,7 +320,7 @@ public class InterpretedClassDef extends AbstractClassDef {
     out.println("_methodMap = new java.util.HashMap<String,AbstractFunction>();");
     out.println("_methodMapLowerCase = new java.util.HashMap<String,AbstractFunction>();");
     
-    int index = 0;
+    index = 0;
     
     for (String key : _functionMap.keySet()) {
       out.print("_methodMap.put(\"");

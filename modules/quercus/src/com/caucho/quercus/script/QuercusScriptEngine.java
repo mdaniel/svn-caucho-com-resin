@@ -48,7 +48,7 @@ import com.caucho.quercus.env.Env;
 import com.caucho.quercus.page.QuercusPage;
 import com.caucho.quercus.page.InterpretedPage;
 
-import com.caucho.quercus.parser.PhpParser;
+import com.caucho.quercus.parser.QuercusParser;
 
 import com.caucho.quercus.program.QuercusProgram;
 
@@ -75,7 +75,7 @@ public class QuercusScriptEngine extends GenericScriptEngine {
     throws ScriptException
   {
     try {
-      QuercusProgram program = PhpParser.parse(_quercus, null, script);
+      QuercusProgram program = QuercusParser.parse(_quercus, null, script);
 
       Writer writer = cxt.getWriter();
       

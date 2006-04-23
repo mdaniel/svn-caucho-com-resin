@@ -29,6 +29,8 @@
 
 package com.caucho.quercus.env;
 
+import java.util.ArrayList;
+
 import com.caucho.quercus.expr.Expr;
 import com.caucho.quercus.program.AbstractClassDef;
 import com.caucho.quercus.program.AbstractFunction;
@@ -84,12 +86,20 @@ public class QuercusClass extends AbstractQuercusClass {
   }
 
   /**
+   * Returns the number of fields.
+   */
+  public int getFieldSize()
+  {
+    return _classDefList[0].getFieldSize();
+  }
+
+  /**
    * Creates a new instance.
    */
   public Value evalNew(Env env, Expr []expr)
     throws Throwable
   {
-    ObjectValue object = newInstance(env);
+    Value object = newInstance(env);
 
     AbstractFunction fun = findConstructor();
 
@@ -109,7 +119,7 @@ public class QuercusClass extends AbstractQuercusClass {
   public Value evalNew(Env env, Value []args)
     throws Throwable
   {
-    ObjectValue object = newInstance(env);
+    Value object = newInstance(env);
 
     AbstractFunction fun = findConstructor();
 
@@ -146,10 +156,10 @@ public class QuercusClass extends AbstractQuercusClass {
   /**
    * Creates a new instance.
    */
-  public ObjectValue newInstance(Env env)
+  public Value newInstance(Env env)
     throws Throwable
   {
-    ObjectValue object = new ObjectValue(this);
+    CompiledObjectValue object = new CompiledObjectValue(this);
 
     for (int i = _classDefList.length - 1; i >= 0; i--) {
       _classDefList[i].initInstance(env, object);
@@ -214,6 +224,22 @@ public class QuercusClass extends AbstractQuercusClass {
     }
     
     return null;
+  }
+
+  /**
+   * Finds the matching function.
+   */
+  public int findFieldIndex(String name)
+  {
+    return _classDefList[0].findFieldIndex(name);
+  }
+
+  /**
+   * Finds the matching function.
+   */
+  public ArrayList<String> getFieldNames()
+  {
+    return _classDefList[0].getFieldNames();
   }
 
   /**

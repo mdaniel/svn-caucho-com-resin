@@ -194,21 +194,16 @@ public class ThisFieldExpr extends AbstractVarExpr {
   public void generate(PhpWriter out)
     throws IOException
   {
-    /*
-    if (_quercusClass.get(_name) != null) {
-      // quercus/3d80
-      
-      String var = "quercus_this._quercus_" + _name;
-    
-      out.print("(" + var + " != null ? " + var + " : NullValue.NULL)");
+    int index = _quercusClass.getFieldIndex(_name);
+
+    if (index >= 0) {
+      out.print("q_this._fields[" + index + "]");
     }
     else {
-      // quercus/3d8o
-      */
-      
-    out.print("quercus_this.getField(\"");
-    out.printJavaString(_name);
-    out.print("\")");
+      out.print("q_this.getField(\"");
+      out.printJavaString(_name);
+      out.print("\")");
+    }
   }
 
   /**
@@ -219,19 +214,7 @@ public class ThisFieldExpr extends AbstractVarExpr {
   public void generateRef(PhpWriter out)
     throws IOException
   {
-    /*
-    if (_quercusClass.get(_name) != null) {
-      // quercus/3d85
-      
-      String var = "quercus_this._quercus_" + _name;
-    
-      out.print("(" + var + " = (" + var + " != null ? " + var + ".toRefVar() : new Var()))");
-    }
-    else {
-      // quercus/3d8g
-      */
-      
-    out.print("quercus_this.getFieldRef(env, \"");
+    out.print("q_this.getFieldRef(env, \"");
     out.printJavaString(_name);
     out.print("\")");
   }
@@ -270,19 +253,7 @@ public class ThisFieldExpr extends AbstractVarExpr {
   public void generateArray(PhpWriter out)
     throws IOException
   {
-    /*
-    if (_quercusClass.get(_name) != null) {
-      // quercus/3d8c
-      
-      String var = "quercus_this._quercus_" + _name;
-    
-      out.print("(" + var + " = (" + var + " != null ? " + var + ".getArray() : new ArrayValue()))");
-    }
-    else {
-      // quercus/3d8i
-      */
-      
-    out.print("quercus_this.getFieldArray(env, \"");
+    out.print("q_this.getFieldArray(env, \"");
     out.printJavaString(_name);
     out.print("\")");
   }
@@ -296,19 +267,7 @@ public class ThisFieldExpr extends AbstractVarExpr {
   public void generateObject(PhpWriter out)
     throws IOException
   {
-    /*
-    if (_quercusClass.get(_name) != null) {
-      // quercus/3d8f
-      
-      String var = "quercus_this._quercus_" + _name;
-    
-      out.print("(" + var + " = (" + var + " != null ? " + var + ".getObject(env) : env.createObject()))");
-    }
-    else {
-      // quercus/3d8h
-      */
-      
-    out.print("quercus_this.getFieldObject(env, \"");
+    out.print("q_this.getFieldObject(env, \"");
     out.printJavaString(_name);
     out.print("\")");
   }
@@ -321,30 +280,29 @@ public class ThisFieldExpr extends AbstractVarExpr {
   public void generateAssign(PhpWriter out, Expr value, boolean isTop)
     throws IOException
   {
-    /*
-    if (_quercusClass.get(_name) != null) {
-      // quercus/3d81
-      
-      String var = "_quercus_" + _name;
+    int index = _quercusClass.getFieldIndex(_name);
 
+    if (index >= 0) {
       if (! isTop)
 	out.print("(");
-    
-      out.print("quercus_this." + var + " = ");
-      value.generate(out);
+      
+      out.print("q_this._fields[" + index + "] = ");
+      out.print("q_this._fields[" + index + "].set(");
 
+      value.generateCopy(out);
+
+      out.print(")");
+      
       if (! isTop)
 	out.print(")");
     }
     else {
-      // quercus/3d90
-      */
-      
-    out.print("quercus_this.putField(env, \"");
-    out.printJavaString(_name);
-    out.print("\", ");
-    value.generateCopy(out);
-    out.print(")");
+      out.print("q_this.putField(env, \"");
+      out.printJavaString(_name);
+      out.print("\", ");
+      value.generateCopy(out);
+      out.print(")");
+    }
   }
 
   /**
@@ -355,11 +313,27 @@ public class ThisFieldExpr extends AbstractVarExpr {
   public void generateAssignRef(PhpWriter out, Expr value, boolean isTop)
     throws IOException
   {
-    out.print("quercus_this.putField(env, \"");
-    out.printJavaString(_name);
-    out.print("\", ");
-    value.generateRef(out);
-    out.print(")");
+    int index = _quercusClass.getFieldIndex(_name);
+
+    if (index >= 0) {
+      // php/39f5
+      if (! isTop)
+	out.print("(");
+      
+      out.print("q_this._fields[" + index + "] = ");
+
+      value.generateRef(out);
+      
+      if (! isTop)
+	out.print(")");
+    }
+    else {
+      out.print("q_this.putField(env, \"");
+      out.printJavaString(_name);
+      out.print("\", ");
+      value.generateRef(out);
+      out.print(")");
+    }
   }
 
   /**
@@ -370,18 +344,7 @@ public class ThisFieldExpr extends AbstractVarExpr {
   public void generateUnset(PhpWriter out)
     throws IOException
   {
-    /*
-    // quercus/3d91
-    
-    if (_quercusClass.get(_name) != null) {
-      String var = "quercus_this._quercus_" + _name;
-    
-      out.print(var + " = null");
-    }
-    else {
-    */
-    
-    out.print("quercus_this.removeField(\"");
+    out.print("q_this.removeField(\"");
     out.printJavaString(_name);
     out.print("\")");
   }

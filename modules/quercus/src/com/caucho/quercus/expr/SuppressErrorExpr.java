@@ -36,7 +36,7 @@ import com.caucho.quercus.env.LongValue;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.DoubleValue;
 
-import com.caucho.quercus.parser.PhpParser;
+import com.caucho.quercus.parser.QuercusParser;
 
 import com.caucho.quercus.gen.PhpWriter;
 
@@ -52,7 +52,7 @@ public class SuppressErrorExpr extends UnaryExpr {
   /**
    * Creates the assignment.
    */
-  public Expr createAssign(PhpParser parser, Expr value)
+  public Expr createAssign(QuercusParser parser, Expr value)
     throws IOException
   {
     // php/03j2
@@ -63,7 +63,7 @@ public class SuppressErrorExpr extends UnaryExpr {
   /**
    * Creates the assignment.
    */
-  public Expr createAssignRef(PhpParser parser, Expr value)
+  public Expr createAssignRef(QuercusParser parser, Expr value)
     throws IOException
   {
     // php/03j2

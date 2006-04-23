@@ -41,7 +41,7 @@ import com.caucho.quercus.env.LongValue;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.gen.PhpWriter;
 
-import com.caucho.quercus.parser.PhpParser;
+import com.caucho.quercus.parser.QuercusParser;
 
 import com.caucho.quercus.program.AnalyzeInfo;
 
@@ -66,7 +66,7 @@ public class ListExpr extends Expr {
     _value = value;
   }
 
-  public static Expr create(PhpParser parser,
+  public static Expr create(QuercusParser parser,
 			    ArrayList<Expr> varList, Expr value)
     throws IOException
   {
