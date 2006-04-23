@@ -51,7 +51,7 @@ public class FunctionInfo {
   private final ArrayList<String> _tempVarList
     = new ArrayList<String>();
 
-  private AbstractClassDef _classDef;
+  private ClassDef _classDef;
 
   private boolean _isGlobal;
   
@@ -137,7 +137,7 @@ public class FunctionInfo {
   /**
    * Sets the owning class.
    */
-  public void setDeclaringClass(AbstractClassDef classDef)
+  public void setDeclaringClass(ClassDef classDef)
   {
     _classDef = classDef;
   }
@@ -145,7 +145,7 @@ public class FunctionInfo {
   /**
    * Gets the owning class.
    */
-  public AbstractClassDef getDeclaringClass()
+  public ClassDef getDeclaringClass()
   {
     return _classDef;
   }

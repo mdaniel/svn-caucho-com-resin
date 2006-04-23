@@ -40,14 +40,14 @@ import com.caucho.util.L10N;
 import com.caucho.quercus.QuercusRuntimeException;
 
 import com.caucho.quercus.program.AbstractFunction;
-import com.caucho.quercus.program.AbstractClassDef;
+import com.caucho.quercus.program.ClassDef;
 
 import com.caucho.quercus.expr.Expr;
 
 import com.caucho.quercus.gen.PhpWriter;
 
 /**
- * Represents a PHP class.
+ * Represents a Quercus class.
  */
 abstract public class AbstractQuercusClass {
   private static final L10N L = new L10N(AbstractQuercusClass.class);

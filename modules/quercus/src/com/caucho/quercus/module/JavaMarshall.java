@@ -36,11 +36,12 @@ import com.caucho.quercus.expr.Expr;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.JavaValue;
-import com.caucho.quercus.env.JavaClassDefinition;
 import com.caucho.quercus.env.BooleanValue;
 import com.caucho.quercus.env.NullValue;
 
 import com.caucho.quercus.gen.PhpWriter;
+
+import com.caucho.quercus.program.JavaClassDef;
 
 import com.caucho.util.L10N;
 
@@ -50,17 +51,17 @@ import com.caucho.util.L10N;
 public class JavaMarshall extends Marshall {
   private static final L10N L = new L10N(JavaMarshall.class);
 
-  private final JavaClassDefinition _def;
+  private final JavaClassDef _def;
   private final boolean _isNotNull;
   private final boolean _isUnmarshallNullAsFalse;
 
-  public JavaMarshall(JavaClassDefinition def,
+  public JavaMarshall(JavaClassDef def,
                       boolean isNotNull)
   {
     this(def, isNotNull, false);
   }
 
-  public JavaMarshall(JavaClassDefinition def,
+  public JavaMarshall(JavaClassDef def,
                       boolean isNotNull,
                       boolean isUnmarshallNullAsFalse)
   {

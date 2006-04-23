@@ -50,7 +50,7 @@ import com.caucho.quercus.gen.PhpWriter;
 /**
  * Represents an interpreted PHP class definition.
  */
-public class InterpretedClassDef extends AbstractClassDef {
+public class InterpretedClassDef extends ClassDef {
   private final HashMap<String,AbstractFunction> _functionMap
     = new HashMap<String,AbstractFunction>();
 

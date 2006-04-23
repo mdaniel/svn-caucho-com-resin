@@ -32,7 +32,7 @@ package com.caucho.quercus.env;
 import java.util.ArrayList;
 
 import com.caucho.quercus.expr.Expr;
-import com.caucho.quercus.program.AbstractClassDef;
+import com.caucho.quercus.program.ClassDef;
 import com.caucho.quercus.program.AbstractFunction;
 
 /**
@@ -41,21 +41,21 @@ import com.caucho.quercus.program.AbstractFunction;
 public class QuercusClass extends AbstractQuercusClass {
  // private final L10N L = new L10N(QuercusClass.class);
 
-  private final AbstractClassDef _classDef;
+  private final ClassDef _classDef;
   
-  private AbstractClassDef []_classDefList;
+  private ClassDef []_classDefList;
 
   private QuercusClass _parent;
 
-  public QuercusClass(AbstractClassDef classDef, QuercusClass parent)
+  public QuercusClass(ClassDef classDef, QuercusClass parent)
   {
     _classDef = classDef;
     _parent = parent;
 
-    AbstractClassDef []classDefList;
+    ClassDef []classDefList;
     
     if (_parent != null) {
-      classDefList = new AbstractClassDef[parent._classDefList.length + 1];
+      classDefList = new ClassDef[parent._classDefList.length + 1];
 
       System.arraycopy(parent._classDefList, 0, classDefList, 1,
 		       parent._classDefList.length);
@@ -63,7 +63,7 @@ public class QuercusClass extends AbstractQuercusClass {
       classDefList[0] = classDef;
     }
     else {
-      classDefList = new AbstractClassDef[] { classDef };
+      classDefList = new ClassDef[] { classDef };
     }
     
     _classDefList = classDefList;
@@ -174,7 +174,7 @@ public class QuercusClass extends AbstractQuercusClass {
   public AbstractFunction findConstructor()
   {
     // XXX: cache method
-    for (AbstractClassDef a_classDefList : _classDefList) {
+    for (ClassDef a_classDefList : _classDefList) {
       AbstractFunction fun = a_classDefList.findConstructor();
 
       if (fun != null)
@@ -190,7 +190,7 @@ public class QuercusClass extends AbstractQuercusClass {
   public AbstractFunction findFunction(String name)
   {
     // XXX: cache method
-    for (AbstractClassDef a_classDefList : _classDefList) {
+    for (ClassDef a_classDefList : _classDefList) {
       AbstractFunction fun = a_classDefList.findFunction(name);
 
       if (fun != null)
@@ -199,7 +199,7 @@ public class QuercusClass extends AbstractQuercusClass {
     }
 
     name = name.toLowerCase();
-    for (AbstractClassDef a_classDefList1 : _classDefList) {
+    for (ClassDef a_classDefList1 : _classDefList) {
       AbstractFunction fun = a_classDefList1.findFunctionLowerCase(name);
 
       if (fun != null)
@@ -216,7 +216,7 @@ public class QuercusClass extends AbstractQuercusClass {
   public AbstractFunction findFunctionLowerCase(String name)
   {
     // XXX: cache method
-    for (AbstractClassDef a_classDefList : _classDefList) {
+    for (ClassDef a_classDefList : _classDefList) {
       AbstractFunction fun = a_classDefList.findFunctionLowerCase(name);
 
       if (fun != null)
@@ -256,7 +256,7 @@ public class QuercusClass extends AbstractQuercusClass {
   public Expr findConstant(String name)
   {
     // XXX: cache constant
-    for (AbstractClassDef a_classDefList : _classDefList) {
+    for (ClassDef a_classDefList : _classDefList) {
       Expr expr = a_classDefList.findConstant(name);
 
       if (expr != null)

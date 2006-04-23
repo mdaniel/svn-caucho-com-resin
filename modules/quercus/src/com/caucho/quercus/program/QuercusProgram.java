@@ -222,9 +222,9 @@ public class QuercusProgram extends GenClass {
   /**
    * Finds a function.
    */
-  public HashMap<String,AbstractClassDef> getClassMap()
+  public HashMap<String,ClassDef> getClassMap()
   {
-    return new HashMap<String,AbstractClassDef>(_classMap);
+    return new HashMap<String,ClassDef>(_classMap);
   }
 
   /**

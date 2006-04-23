@@ -36,7 +36,9 @@ import com.caucho.quercus.module.StaticFunction;
 import com.caucho.quercus.page.PageManager;
 import com.caucho.quercus.page.QuercusPage;
 import com.caucho.quercus.parser.QuercusParser;
+import com.caucho.quercus.program.ClassDef;
 import com.caucho.quercus.program.InterpretedClassDef;
+import com.caucho.quercus.program.JavaClassDef;
 import com.caucho.quercus.program.QuercusProgram;
 import com.caucho.util.Log;
 import com.caucho.util.LruCache;
@@ -83,19 +85,20 @@ public class Quercus {
   private HashMap<String, StaticFunction> _staticFunctions
     = new HashMap<String, StaticFunction>();
 
+  private ClassDef _stdClassDef;
   private QuercusClass _stdClass;
 
-  private HashMap<String, AbstractQuercusClass> _staticClasses
-    = new HashMap<String, AbstractQuercusClass>();
+  private HashMap<String, ClassDef> _staticClasses
+    = new HashMap<String, ClassDef>();
 
-  private HashMap<String, AbstractQuercusClass> _lowerStaticClasses
-    = new HashMap<String, AbstractQuercusClass>();
+  private HashMap<String, ClassDef> _lowerStaticClasses
+    = new HashMap<String, ClassDef>();
 
-  private HashMap<String, JavaClassDefinition> _javaClassWrappers
-    = new HashMap<String, JavaClassDefinition>();
+  private HashMap<String, JavaClassDef> _javaClassWrappers
+    = new HashMap<String, JavaClassDef>();
 
-  private HashMap<String, JavaClassDefinition> _lowerJavaClassWrappers
-    = new HashMap<String, JavaClassDefinition>();
+  private HashMap<String, JavaClassDef> _lowerJavaClassWrappers
+    = new HashMap<String, JavaClassDef>();
 
   private HashMap<String, StringValue> _iniMap
     = new HashMap<String, StringValue>();
@@ -198,9 +201,9 @@ public class Quercus {
   /**
    * Adds a java class
    */
-  public JavaClassDefinition getJavaClassDefinition(String className)
+  public JavaClassDef getJavaClassDefinition(String className)
   {
-    JavaClassDefinition def = _javaClassWrappers.get(className);
+    JavaClassDef def = _javaClassWrappers.get(className);
 
     if (def != null)
       return def;
@@ -218,7 +221,7 @@ public class Quercus {
 
       }
 
-      def = new JavaClassDefinition(this, className, type);
+      def = new JavaClassDef(this, className, type);
 
       _javaClassWrappers.put(className, def);
 
@@ -235,9 +238,9 @@ public class Quercus {
   /**
    * Finds the java class wrapper.
    */
-  public AbstractQuercusClass findJavaClassWrapper(String name)
+  public ClassDef findJavaClassWrapper(String name)
   {
-    AbstractQuercusClass def = _javaClassWrappers.get(name);
+    ClassDef def = _javaClassWrappers.get(name);
 
     if (def != null)
       return def;
@@ -397,9 +400,9 @@ public class Quercus {
   /**
    * Returns the class with the given name.
    */
-  public AbstractQuercusClass findClass(String name)
+  public ClassDef findClass(String name)
   {
-    AbstractQuercusClass def = _staticClasses.get(name);
+    ClassDef def = _staticClasses.get(name);
 
     if (def == null)
       def = _lowerStaticClasses.get(name.toLowerCase());
@@ -410,7 +413,7 @@ public class Quercus {
   /**
    * Returns the class maps.
    */
-  public HashMap<String, AbstractQuercusClass> getClassMap()
+  public HashMap<String, ClassDef> getClassMap()
   {
     return _staticClasses;
   }
@@ -837,7 +840,7 @@ public class Quercus {
         log.finest(L.l("PHP loading class {0} with type {1} providing extension {2}", name, type.getName(), extension));
     }
 
-    JavaClassDefinition def = new JavaClassDefinition(this, name, type);
+    JavaClassDef def = new JavaClassDef(this, name, type);
 
     _javaClassWrappers.put(name, def);
     _lowerJavaClassWrappers.put(name.toLowerCase(), def);
@@ -856,12 +859,12 @@ public class Quercus {
    */
   private void initStaticClasses()
   {
-    InterpretedClassDef classDef = new InterpretedClassDef("stdClass", null);
+    _stdClassDef = new InterpretedClassDef("stdClass", null);
 
-    _stdClass = new QuercusClass(classDef, null);
+    _stdClass = new QuercusClass(_stdClassDef, null);
 
-    _staticClasses.put(_stdClass.getName(), _stdClass);
-    _lowerStaticClasses.put(_stdClass.getName().toLowerCase(), _stdClass);
+    _staticClasses.put(_stdClass.getName(), _stdClassDef);
+    _lowerStaticClasses.put(_stdClass.getName().toLowerCase(), _stdClassDef);
   }
 
   public void close()

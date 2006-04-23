@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.quercus.env;
+package com.caucho.quercus.program;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -39,10 +39,7 @@ import java.io.IOException;
 
 import com.caucho.quercus.QuercusRuntimeException;
 
-import com.caucho.quercus.program.AbstractFunction;
-import com.caucho.quercus.program.AbstractClassDef;
-import com.caucho.quercus.program.Function;
-
+import com.caucho.quercus.env.*;
 import com.caucho.quercus.expr.Expr;
 
 import com.caucho.quercus.gen.PhpWriter;
@@ -52,7 +49,7 @@ import com.caucho.util.IdentityIntMap;
 /**
  * Represents a PHP class value.
  */
-abstract public class CompiledClass extends AbstractClassDef {
+abstract public class CompiledClassDef extends ClassDef {
   private final ArrayList<String> _fieldNames
     = new ArrayList<String>();
   
@@ -62,7 +59,7 @@ abstract public class CompiledClass extends AbstractClassDef {
   protected ArrayValue _extFields = new ArrayValueImpl();
   protected Value _parent;
   
-  public CompiledClass(String name, String parent)
+  public CompiledClassDef(String name, String parent)
   {
     super(name, parent);
   }

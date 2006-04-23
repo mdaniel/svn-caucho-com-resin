@@ -47,15 +47,15 @@ import com.caucho.quercus.expr.Expr;
 import com.caucho.quercus.gen.PhpWriter;
 
 /**
- * Represents a PHP class definition
+ * Represents a Quercus class definition
  */
-abstract public class AbstractClassDef {
-  private final static L10N L = new L10N(AbstractClassDef.class);
+abstract public class ClassDef {
+  private final static L10N L = new L10N(ClassDef.class);
   
   private final String _name;
   private final String _parentName;
 
-  protected AbstractClassDef(String name, String parentName)
+  protected ClassDef(String name, String parentName)
   {
     _name = name;
     _parentName = parentName;

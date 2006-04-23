@@ -33,22 +33,31 @@ import com.caucho.java.LineMap;
 import com.caucho.java.ScriptStackTrace;
 import com.caucho.java.WorkDir;
 import com.caucho.loader.SimpleLoader;
+
 import com.caucho.quercus.Quercus;
 import com.caucho.quercus.QuercusException;
 import com.caucho.quercus.QuercusDieException;
 import com.caucho.quercus.QuercusExitException;
 import com.caucho.quercus.QuercusLineRuntimeException;
 import com.caucho.quercus.QuercusRuntimeException;
+
 import com.caucho.quercus.module.Marshall;
+
 import com.caucho.quercus.expr.Expr;
+
 import com.caucho.quercus.lib.session.SessionModule;
 import com.caucho.quercus.lib.string.StringModule;
 import com.caucho.quercus.lib.VariableModule;
 import com.caucho.quercus.page.QuercusPage;
-import com.caucho.quercus.program.AbstractClassDef;
+
+
+import com.caucho.quercus.program.ClassDef;
+import com.caucho.quercus.program.JavaClassDef;
 import com.caucho.quercus.program.AbstractFunction;
 import com.caucho.quercus.program.QuercusProgram;
+
 import com.caucho.quercus.resources.StreamContextResource;
+
 import com.caucho.sql.DatabaseManager;
 import com.caucho.util.Alarm;
 import com.caucho.util.IntMap;
@@ -160,8 +169,8 @@ public class Env {
   private HashMap<String, AbstractFunction> _lowerFunMap
     = new HashMap<String, AbstractFunction>();
 
-  private HashMap<String, AbstractClassDef> _classDefMap
-    = new HashMap<String, AbstractClassDef>();
+  private HashMap<String, ClassDef> _classDefMap
+    = new HashMap<String, ClassDef>();
 
   private HashMap<String, AbstractQuercusClass> _classMap
     = new HashMap<String, AbstractQuercusClass>();
@@ -1979,7 +1988,7 @@ public class Env {
   /**
    * Adds a class, e.g. from an include.
    */
-  public void addClassDef(String name, AbstractClassDef cl)
+  public void addClassDef(String name, ClassDef cl)
     throws Throwable
   {
     _classDefMap.put(name, cl);
@@ -2019,7 +2028,7 @@ public class Env {
   /**
    * Returns a Java class defintion.
    */
-  public JavaClassDefinition getJavaClassDefinition(String className)
+  public JavaClassDef getJavaClassDefinition(String className)
   {
     return _quercus.getJavaClassDefinition(className);
   }
@@ -2049,7 +2058,7 @@ public class Env {
    * @param isNullAsFalse what to return if <i>obj</i> is null, if true return
    * {@link BooleanValue.FALSE} otherwise return {@link NullValue.NULL)
    */
-  public Value wrapJava(Object obj, JavaClassDefinition def, boolean isNullAsFalse)
+  public Value wrapJava(Object obj, JavaClassDef def, boolean isNullAsFalse)
   {
     if (obj == null)
       return isNullAsFalse ? BooleanValue.FALSE : NullValue.NULL;
@@ -2183,7 +2192,9 @@ public class Env {
     if (cl != null)
       return cl;
 
-    return _quercus.findJavaClassWrapper(name);
+    // return _quercus.findJavaClassWrapper(name);
+
+    return null;
   }
 
   /**
@@ -2237,7 +2248,7 @@ public class Env {
       return _classMap.get(name);
     }
     */
-    AbstractClassDef classDef = _classDefMap.get(name);
+    ClassDef classDef = _classDefMap.get(name);
 
     if (classDef == null)
       classDef = _page.findClass(name);
@@ -2257,9 +2268,9 @@ public class Env {
         throw new IllegalStateException(parent.toString());
     }
 
-    AbstractQuercusClass staticClass = _quercus.findClass(name);
+    ClassDef staticClass = _quercus.findClass(name);
     if (staticClass != null)
-      return staticClass;
+      return new QuercusClass(staticClass, null); // XXX: cache
 
     if (_autoload == null)
       _autoload = findFunction("__autoload");

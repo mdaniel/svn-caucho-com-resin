@@ -44,7 +44,7 @@ import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.QuercusClass;
 
 import com.caucho.quercus.program.AbstractFunction;
-import com.caucho.quercus.program.AbstractClassDef;
+import com.caucho.quercus.program.ClassDef;
 
 import com.caucho.vfs.Path;
 import com.caucho.vfs.WriteStream;
@@ -59,8 +59,8 @@ abstract public class QuercusPage {
   private HashMap<String,AbstractFunction> _funMapLowerCase
     = new HashMap<String,AbstractFunction>();
   
-  private HashMap<String,AbstractClassDef> _classMap
-    = new HashMap<String,AbstractClassDef>();
+  private HashMap<String,ClassDef> _classMap
+    = new HashMap<String,ClassDef>();
 
   /**
    * Returns true if the page is modified.
@@ -93,7 +93,7 @@ abstract public class QuercusPage {
   /**
    * Finds a function.
    */
-  public AbstractClassDef findClass(String name)
+  public ClassDef findClass(String name)
   {
     return _classMap.get(name);
   }
@@ -101,7 +101,7 @@ abstract public class QuercusPage {
   /**
    * Returns the class map.
    */
-  public HashMap<String,AbstractClassDef> getClassMap()
+  public HashMap<String,ClassDef> getClassMap()
   {
     return _classMap;
   }
@@ -177,7 +177,7 @@ abstract public class QuercusPage {
 	env.addFunction(entry.getKey(), entry.getValue());
     }
     
-    for (Map.Entry<String,AbstractClassDef> entry : _classMap.entrySet()) {
+    for (Map.Entry<String,ClassDef> entry : _classMap.entrySet()) {
       env.addClassDef(entry.getKey(), entry.getValue());
     }
   }
@@ -194,7 +194,7 @@ abstract public class QuercusPage {
   /**
    * Adds a class.
    */
-  protected void addClass(String name, AbstractClassDef cl)
+  protected void addClass(String name, ClassDef cl)
   {
     _classMap.put(name, cl);
   }

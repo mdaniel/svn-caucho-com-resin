@@ -35,7 +35,8 @@ import com.caucho.util.L10N;
 
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
-import com.caucho.quercus.env.JavaClassDefinition;
+
+import com.caucho.quercus.program.JavaClassDef;
 
 import com.caucho.quercus.module.AbstractQuercusModule;
 
@@ -50,7 +51,7 @@ public class JavaModule extends AbstractQuercusModule {
 
   public static Value java(Env env, String className)
   {
-    JavaClassDefinition def = env.getJavaClassDefinition(className);
+    JavaClassDef def = env.getJavaClassDefinition(className);
 
     return def.newInstance();
   }

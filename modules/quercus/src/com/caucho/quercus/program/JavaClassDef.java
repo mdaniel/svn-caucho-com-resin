@@ -27,11 +27,12 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.quercus.env;
+package com.caucho.quercus.program;
 
 import com.caucho.quercus.Quercus;
 import com.caucho.quercus.QuercusRuntimeException;
 import com.caucho.quercus.expr.Expr;
+import com.caucho.quercus.env.*;
 import com.caucho.quercus.module.Construct;
 import com.caucho.quercus.module.JavaMarshall;
 import com.caucho.quercus.module.Marshall;
@@ -53,10 +54,10 @@ import java.util.logging.Logger;
 /**
  * Represents an introspected Java class.
  */
-public class JavaClassDefinition extends AbstractQuercusClass {
+public class JavaClassDef extends ClassDef {
   private final static Logger log
-    = Logger.getLogger(JavaClassDefinition.class.getName());
-  private final static L10N L = new L10N(JavaClassDefinition.class);
+    = Logger.getLogger(JavaClassDef.class.getName());
+  private final static L10N L = new L10N(JavaClassDef.class);
 
   private final Quercus _quercus;
 
@@ -103,8 +104,10 @@ public class JavaClassDefinition extends AbstractQuercusClass {
 
   private Marshall _marshall;
 
-  public JavaClassDefinition(Quercus quercus, String name, Class type)
+  public JavaClassDef(Quercus quercus, String name, Class type)
   {
+    super(name, null);
+    
     _quercus = quercus;
 
     _name = name;
@@ -490,6 +493,22 @@ public class JavaClassDefinition extends AbstractQuercusClass {
   public Value findConstant(Env env, String name)
   {
     return _constMap.get(name);
+  }
+
+  /**
+   * Creates a new instance.
+   */
+  public void initInstance(Env env, Value value)
+    throws Throwable
+  {
+  }
+
+  /**
+   * Returns the constructor
+   */
+  public AbstractFunction findConstructor()
+  {
+    return null;
   }
 
   /**

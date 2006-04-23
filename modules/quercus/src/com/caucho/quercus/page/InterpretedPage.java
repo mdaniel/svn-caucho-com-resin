@@ -44,7 +44,7 @@ import com.caucho.quercus.env.Value;
 
 import com.caucho.quercus.program.AbstractFunction;
 import com.caucho.quercus.program.QuercusProgram;
-import com.caucho.quercus.program.AbstractClassDef;
+import com.caucho.quercus.program.ClassDef;
 import com.caucho.quercus.program.InterpretedClassDef;
 
 import com.caucho.vfs.Path;
@@ -125,7 +125,7 @@ public class InterpretedPage extends QuercusPage {
   /**
    * Returns the class map.
    */
-  public HashMap<String,AbstractClassDef> getClassMap()
+  public HashMap<String,ClassDef> getClassMap()
   {
     return _program.getClassMap();
   }

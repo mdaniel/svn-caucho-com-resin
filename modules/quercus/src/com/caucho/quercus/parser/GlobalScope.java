@@ -35,7 +35,7 @@ import com.caucho.util.L10N;
 
 import com.caucho.quercus.program.Function;
 
-import com.caucho.quercus.program.AbstractClassDef;
+import com.caucho.quercus.program.ClassDef;
 import com.caucho.quercus.program.InterpretedClassDef;
 
 /**

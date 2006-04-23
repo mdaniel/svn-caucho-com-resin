@@ -34,22 +34,25 @@ import java.util.IdentityHashMap;
 import java.util.logging.Logger;
 
 import com.caucho.quercus.expr.Expr;
+
+import com.caucho.quercus.program.JavaClassDef;
+
 import com.caucho.vfs.WriteStream;
 
 /**
- * Represents a PHP java value.
+ * Represents a Quercus java value.
  */
 public class JavaValue extends ResourceValue {
   private static final Logger log
     = Logger.getLogger(JavaValue.class.getName());
   
-  private final JavaClassDefinition _classDef;
+  private final JavaClassDef _classDef;
 
   private final Object _object;
 
   private final Env _env;
 
-  public JavaValue(Env env, Object object, JavaClassDefinition def)
+  public JavaValue(Env env, Object object, JavaClassDef def)
   {
     _env = env;
     _classDef = def;
@@ -63,8 +66,8 @@ public class JavaValue extends ResourceValue {
                             IdentityHashMap<Value, String> valueSet)
     throws Throwable
   {
-    if(!_classDef.printRImpl(env, _object, out, depth, valueSet))
-      super.printRImpl(env, out, depth, valueSet);
+    // if (! _classDef.printRImpl(env, _object, out, depth, valueSet))
+    super.printRImpl(env, out, depth, valueSet);
   }
   
   @Override
