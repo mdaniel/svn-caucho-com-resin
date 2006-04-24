@@ -305,13 +305,6 @@ public class PhpWriter extends JavaWriterWrapper {
       println("private static " + moduleClass + " " + var + ";");
     }
     
-    for (InterpretedClassDef cl : _classList) {
-      String name = cl.getName();
-
-      println();
-      println("static final quercus_" + name + " __quercus_class_" + name + " = new quercus_" + name + "();");
-    }
-
     for (int i = 0; i < _staticVarList.size(); i++) {
       println("static String " + _staticVarList.get(i) + ";");
     }

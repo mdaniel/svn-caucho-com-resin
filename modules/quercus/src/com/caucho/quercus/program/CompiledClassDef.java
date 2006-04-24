@@ -29,6 +29,8 @@
 
 package com.caucho.quercus.program;
 
+import java.lang.reflect.Method;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Collection;
@@ -49,7 +51,10 @@ import com.caucho.util.IdentityIntMap;
 /**
  * Represents a PHP class value.
  */
-abstract public class CompiledClassDef extends ClassDef {
+public class CompiledClassDef extends ClassDef {
+  private final Class _compiledClass;
+  private final Method _init;
+  
   private final ArrayList<String> _fieldNames
     = new ArrayList<String>();
   
@@ -59,9 +64,29 @@ abstract public class CompiledClassDef extends ClassDef {
   protected ArrayValue _extFields = new ArrayValueImpl();
   protected Value _parent;
   
-  public CompiledClassDef(String name, String parent)
+  public CompiledClassDef(String name, String parent, Class compiledClass)
   {
     super(name, parent);
+
+    _compiledClass = compiledClass;
+    try {
+      _init = compiledClass.getMethod("init",
+				      new Class[] { QuercusClass.class });
+    } catch (Exception e) {
+      throw new QuercusRuntimeException(e);
+    }
+  }
+
+  /**
+   * Initialize the quercus class.
+   */
+  public void initClass(QuercusClass cl)
+  {
+    try {
+      _init.invoke(null, cl);
+    } catch (Exception e) {
+      throw new QuercusRuntimeException(e);
+    }
   }
 
   /**
@@ -90,15 +115,19 @@ abstract public class CompiledClassDef extends ClassDef {
   }
 
   /**
-   * Initialize the quercus class.
+   * Returns the constructor
    */
-  public void initClass(QuercusClass cl)
+  public AbstractFunction findConstructor()
   {
-    for (int i = 0; i < _fieldNames.size(); i++) {
-      String name = _fieldNames.get(i);
-      
-      cl.addField(name, _fieldMap.get(name));
-    }
+    return null;
+  }
+
+  /**
+   * Creates a new instance.
+   */
+  public void initInstance(Env env, Value value)
+    throws Throwable
+  {
   }
 
   /**

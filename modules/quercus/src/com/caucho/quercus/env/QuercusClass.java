@@ -30,12 +30,15 @@
 package com.caucho.quercus.env;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.IdentityHashMap;
 
 import com.caucho.quercus.QuercusRuntimeException;
 
 import com.caucho.quercus.expr.Expr;
 import com.caucho.quercus.program.ClassDef;
 import com.caucho.quercus.program.AbstractFunction;
+import com.caucho.quercus.program.InstanceInitializer;
 
 import com.caucho.util.L10N;
 import com.caucho.util.IdentityIntMap;
@@ -51,6 +54,9 @@ public class QuercusClass {
   private ClassDef []_classDefList;
 
   private QuercusClass _parent;
+
+  private final ArrayList<InstanceInitializer> _initializers
+    = new ArrayList<InstanceInitializer>();
   
   private final ArrayList<String> _fieldNames
     = new ArrayList<String>();
@@ -58,6 +64,11 @@ public class QuercusClass {
   private final IdentityIntMap _fieldMap
     = new IdentityIntMap();
   
+  private final IdentityHashMap<String,AbstractFunction> _methodMap
+    = new IdentityHashMap<String,AbstractFunction>();
+  
+  private final HashMap<String,AbstractFunction> _lowerMethodMap
+    = new HashMap<String,AbstractFunction>();
 
   public QuercusClass(ClassDef classDef, QuercusClass parent)
   {
@@ -102,12 +113,48 @@ public class QuercusClass {
   }
 
   /**
+   * Adds an initializer
+   */
+  public void addInitializer(InstanceInitializer init)
+  {
+    _initializers.add(init);
+  }
+
+  /**
    * Adds a field.
    */
   public void addField(String name, int index)
   {
     _fieldNames.add(name);
     _fieldMap.put(name, index);
+  }
+
+  /**
+   * Adds a field.
+   */
+  public int addFieldIndex(String name)
+  {
+    int index = _fieldMap.get(name);
+
+    if (index >= 0)
+      return index;
+    else {
+      index = _fieldNames.size();
+    
+      _fieldMap.put(name, index);
+      _fieldNames.add(name);
+
+      return index;
+    }
+  }
+
+  /**
+   * Adds a method.
+   */
+  public void addMethod(String name, AbstractFunction fun)
+  {
+    _methodMap.put(name, fun);
+    _lowerMethodMap.put(name.toLowerCase(), fun);
   }
 
   /**
@@ -202,10 +249,10 @@ public class QuercusClass {
   {
     CompiledObjectValue object = new CompiledObjectValue(this);
 
-    for (int i = _classDefList.length - 1; i >= 0; i--) {
-      _classDefList[i].initInstance(env, object);
+    for (int i = 0; i < _initializers.size(); i++) {
+      _initializers.get(i).initInstance(env, object);
     }
-
+    
     return object;
   }
 
@@ -230,25 +277,7 @@ public class QuercusClass {
    */
   public AbstractFunction findFunction(String name)
   {
-    // XXX: cache method
-    for (ClassDef a_classDefList : _classDefList) {
-      AbstractFunction fun = a_classDefList.findFunction(name);
-
-      if (fun != null)
-        return fun;
-
-    }
-
-    name = name.toLowerCase();
-    for (ClassDef a_classDefList1 : _classDefList) {
-      AbstractFunction fun = a_classDefList1.findFunctionLowerCase(name);
-
-      if (fun != null)
-        return fun;
-
-    }
-    
-    return null;
+    return _methodMap.get(name);
   }
 
   /**
@@ -256,15 +285,7 @@ public class QuercusClass {
    */
   public AbstractFunction findFunctionLowerCase(String name)
   {
-    // XXX: cache method
-    for (ClassDef a_classDefList : _classDefList) {
-      AbstractFunction fun = a_classDefList.findFunctionLowerCase(name);
-
-      if (fun != null)
-        return fun;
-    }
-    
-    return null;
+    return _lowerMethodMap.get(name.toLowerCase());
   }
 
   /**

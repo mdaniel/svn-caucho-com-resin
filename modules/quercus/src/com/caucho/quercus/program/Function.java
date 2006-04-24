@@ -534,7 +534,7 @@ public class Function extends AbstractFunction {
     out.pushDepth();
 
     if (! isStatic()) {
-      out.println("CompiledObjectValue q_this = (CompiledObjectValue) quercus_this_arg;");
+      out.println("final CompiledObjectValue q_this = (CompiledObjectValue) quercus_this_arg;");
     }
 
     generateBody(out);

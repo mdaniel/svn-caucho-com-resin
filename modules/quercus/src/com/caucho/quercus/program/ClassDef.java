@@ -77,30 +77,6 @@ abstract public class ClassDef {
   {
     return _parentName;
   }
-  
-  /**
-   * Returns the number of fields.
-   */
-  public int getFieldSize()
-  {
-    return 0;
-  }
-  
-  /**
-   * Returns the index for the field.
-   */
-  public int findFieldIndex(String name)
-  {
-    return -1;
-  }
-  
-  /**
-   * Returns the index for the field.
-   */
-  public ArrayList<String> getFieldNames()
-  {
-    return null;
-  }
 
   /**
    * Initialize the quercus class.
@@ -108,12 +84,6 @@ abstract public class ClassDef {
   public void initClass(QuercusClass cl)
   {
   }
-
-  /**
-   * Creates a new instance.
-   */
-  abstract public void initInstance(Env env, Value value)
-    throws Throwable;
 
   /**
    * Returns value for instanceof.
@@ -127,40 +97,6 @@ abstract public class ClassDef {
    * Returns the constructor
    */
   abstract public AbstractFunction findConstructor();
-
-  /**
-   * Finds the matching function.
-   */
-  public AbstractFunction findFunction(String name)
-  {
-    return null;
-  }
-
-  /**
-   * Finds the matching function.
-   */
-  public AbstractFunction findFunctionLowerCase(String name)
-  {
-    return null;
-  }
-
-  /**
-   * Finds the matching function.
-   */
-  public AbstractFunction getFunction(String name)
-  {
-    AbstractFunction fun = findFunction(name);
-
-    if (fun != null)
-      return fun;
-    
-    fun = findFunctionLowerCase(name.toLowerCase());
-
-    if (fun != null)
-      return fun;
-
-    throw new QuercusRuntimeException(L.l("no function " + name));
-  }
 
   /**
    * Finds the matching constant

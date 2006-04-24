@@ -38,10 +38,12 @@ import java.io.IOException;
 import com.caucho.quercus.QuercusRuntimeException;
 
 import com.caucho.quercus.program.AbstractFunction;
+import com.caucho.quercus.program.InstanceInitializer;
 import com.caucho.quercus.program.Function;
 
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.QuercusClass;
 
 import com.caucho.quercus.expr.Expr;
 
@@ -50,11 +52,9 @@ import com.caucho.quercus.gen.PhpWriter;
 /**
  * Represents an interpreted PHP class definition.
  */
-public class InterpretedClassDef extends ClassDef {
+public class InterpretedClassDef extends ClassDef
+  implements InstanceInitializer {
   private final HashMap<String,AbstractFunction> _functionMap
-    = new HashMap<String,AbstractFunction>();
-
-  private final HashMap<String,AbstractFunction> _functionMapLowerCase
     = new HashMap<String,AbstractFunction>();
 
   private final HashMap<String,Expr> _fieldMap
@@ -75,19 +75,15 @@ public class InterpretedClassDef extends ClassDef {
   }
 
   /**
-   * Returns the map.
+   * Initialize the quercus class.
    */
-  public HashMap<String,Expr> getFieldMap()
+  public void initClass(QuercusClass cl)
   {
-    return _fieldMap;
-  }
-
-  /**
-   * Returns the field count.
-   */
-  public int getFieldSize()
-  {
-    return _fieldMap.size();
+    cl.addInitializer(this);
+    
+    for (Map.Entry<String,AbstractFunction> entry : _functionMap.entrySet()) {
+      cl.addMethod(entry.getKey(), entry.getValue());
+    }
   }
 
   /**
@@ -96,7 +92,6 @@ public class InterpretedClassDef extends ClassDef {
   public void addFunction(String name, Function fun)
   {
     _functionMap.put(name, fun);
-    _functionMapLowerCase.put(name.toLowerCase(), fun);
 
     if (name.equals("__construct"))
       _constructor = fun;
@@ -104,22 +99,6 @@ public class InterpretedClassDef extends ClassDef {
       _destructor = fun;
     else if (name.equals(getName()) && _constructor == null)
       _constructor = fun;
-  }
-
-  /**
-   * Finds the matching function.
-   */
-  public AbstractFunction findFunction(String name)
-  {
-    return _functionMap.get(name);
-  }
-
-  /**
-   * Finds the matching function.
-   */
-  public AbstractFunction findFunctionLowerCase(String name)
-  {
-    return _functionMapLowerCase.get(name);
   }
 
   /**
@@ -163,21 +142,11 @@ public class InterpretedClassDef extends ClassDef {
   }
 
   /**
-   * Returns the field index.
+   * Return true for a declared field.
    */
-  public int getFieldIndex(String name)
+  public boolean isDeclaredField(String name)
   {
-    // XXX: inheritance
-    int index = 0;
-
-    for (String key : _fieldMap.keySet()) {
-      if (name.equals(key))
-	return index;
-
-      index++;
-    }
-
-    return -1;
+    return _fieldMap.get(name) != null;
   }
 
   /**
@@ -230,45 +199,45 @@ public class InterpretedClassDef extends ClassDef {
     out.addClass(this);
     
     out.println();
-    out.println("public static class quercus_" + getName() + " extends CompiledClassDef {");
+    out.println("public static class quercus_" + getName() + " implements InstanceInitializer {");
     out.pushDepth();
 
+    out.println();
     for (String key : _fieldMap.keySet()) {
       out.println("private final int _f_" + key + ";");
     }
 
     out.println();
-    out.println("public quercus_" + getName() + "()");
+    out.println("public quercus_" + getName() + "(QuercusClass cl)");
     out.println("{");
     out.pushDepth();
-    out.print("super(\"");
-    out.printJavaString(getName());
-    out.print("\", ");
-    if (getParentName() != null) {
-      out.print("\"");
-      out.printJavaString(getParentName());
-      out.print("\"");
-    }
-    else {
-      out.print("null");
-    }
-    out.println(");");
 
-    int index = 0;
+    out.println("cl.addInitializer(this);");
+    out.println();
+
     for (String key : _fieldMap.keySet()) {
-      out.println("_f_" + key + " = " + index + ";");
-      out.println("addFieldIndex(\"" + key + "\", _f_" + key + ");");
+      out.print("_f_" + key + " = ");
+      out.println("cl.addFieldIndex(\"" + key + "\");");
+    }
 
-      index++;
+    out.println();
+
+    for (String key : _functionMap.keySet()) {
+      out.print("cl.addMethod(\"");
+      out.printJavaString(key);
+      out.println("\", __quercus_fun_" + key + ");");
     }
     
     out.popDepth();
     out.println("}");
 
     out.println();
-    out.println("public int getFieldSize()");
+    out.println("public static void init(QuercusClass cl)");
     out.println("{");
-    out.println("  return " + getFieldSize() + ";");
+    out.pushDepth();
+    out.println("quercus_" + getName() + " def = new quercus_" + getName() +
+		"(cl);");
+    out.popDepth();
     out.println("}");
 
     out.println();
@@ -279,7 +248,6 @@ public class InterpretedClassDef extends ClassDef {
 
     out.println("CompiledObjectValue value = (CompiledObjectValue) valueArg;");
 
-    index = 0;
     for (Map.Entry<String,Expr> entry : _fieldMap.entrySet()) {
       String key = entry.getKey();
       Expr value = entry.getValue();
@@ -287,8 +255,6 @@ public class InterpretedClassDef extends ClassDef {
       out.print("value._fields[_f_" + key + "] = ");
       value.generate(out);
       out.println(";");
-
-      index++;
     }
 
     /*
@@ -314,51 +280,6 @@ public class InterpretedClassDef extends ClassDef {
     for (AbstractFunction fun : _functionMap.values()) {
       fun.generate(out);
     }
-
-    out.println("private final java.util.HashMap<String,AbstractFunction> _methodMap;");
-    out.println("private final java.util.HashMap<String,AbstractFunction> _methodMapLowerCase;");
-    out.println();
-    out.println("{");
-    out.pushDepth();
-
-    out.println();
-    out.println("_methodMap = new java.util.HashMap<String,AbstractFunction>();");
-    out.println("_methodMapLowerCase = new java.util.HashMap<String,AbstractFunction>();");
-    
-    index = 0;
-    
-    for (String key : _functionMap.keySet()) {
-      out.print("_methodMap.put(\"");
-      out.printJavaString(key);
-      out.println("\", __quercus_fun_" + key + ");");
-      
-      out.print("_methodMapLowerCase.put(\"");
-      out.printJavaString(key.toLowerCase());
-      out.println("\", __quercus_fun_" + key + ");");
-    }
-
-    out.popDepth();
-    out.println("}");
-    
-    out.println();
-    out.println("public AbstractFunction findFunction(String name)");
-    out.println("{");
-    out.pushDepth();
-
-    out.println("return _methodMap.get(name);");
-    
-    out.popDepth();
-    out.println("}");
-    
-    out.println();
-    out.println("public AbstractFunction findFunctionLowerCase(String name)");
-    out.println("{");
-    out.pushDepth();
-
-    out.println("return _methodMapLowerCase.get(name);");
-    
-    out.popDepth();
-    out.println("}");
 
     // XXX:
     out.println();
@@ -387,7 +308,18 @@ public class InterpretedClassDef extends ClassDef {
   {
     out.print("addClass(\"");
     out.printJavaString(getName());
-    out.println("\", __quercus_class_" + getName() + ");");
+    out.print("\", new CompiledClassDef(\"");
+    out.printJavaString(getName());
+    out.print("\", ");
+    if (getParentName() != null) {
+      out.print("\"");
+      out.printJavaString(getParentName());
+      out.print("\"");
+    }
+    else
+      out.print("null");
+    
+    out.println(", quercus_" + getName() + ".class));");
   }
 
   public String toString()
