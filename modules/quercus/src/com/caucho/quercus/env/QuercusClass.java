@@ -29,6 +29,8 @@
 
 package com.caucho.quercus.env;
 
+import java.util.Map;
+import java.util.Set;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.IdentityHashMap;
@@ -404,6 +406,24 @@ public class QuercusClass {
   public String toString()
   {
     return "QuercusClass[" + getName() + "]";
+  }
+  
+  /**
+   * Returns a set of the fields and their values
+   * @return a set of the fields and their values
+   */
+  public Set<Map.Entry<String, Expr>> getClassVars()
+  {
+  	return _classDef.fieldSet();
+  }
+  
+  /**
+   * Returns a set of the method names and their values
+   * @return a set of the method names and their values
+   */
+  public Set<Map.Entry<String, AbstractFunction>> getClassMethods()
+  {
+  	return _classDef.functionSet();
   }
 }
 

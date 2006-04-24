@@ -32,6 +32,8 @@ package com.caucho.quercus.program;
 import java.io.IOException;
 
 import java.util.ArrayList;
+import java.util.Map;
+import java.util.Set;
 
 import com.caucho.util.L10N;
 
@@ -109,6 +111,16 @@ abstract public class ClassDef {
   public String toString()
   {
     return "Class[" + getName() + "]";
+  }
+  
+  public Set<Map.Entry<String, Expr>> fieldSet()
+  {
+  	return null;
+  }
+  
+  public Set<Map.Entry<String, AbstractFunction>> functionSet()
+  {
+  	return null;
   }
 }
 

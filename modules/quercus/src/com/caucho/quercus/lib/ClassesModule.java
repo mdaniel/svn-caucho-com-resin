@@ -29,7 +29,9 @@
 
 package com.caucho.quercus.lib;
 
+import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.Map;
 
 import com.caucho.util.L10N;
 
@@ -37,6 +39,7 @@ import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.quercus.module.ReadOnly;
 import com.caucho.quercus.module.Optional;
 
+import com.caucho.quercus.env.NullValue;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.BooleanValue;
@@ -45,8 +48,13 @@ import com.caucho.quercus.env.ArrayValueImpl;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.StringValueImpl;
 import com.caucho.quercus.env.ObjectValue;
-
 import com.caucho.quercus.env.QuercusClass;
+
+import com.caucho.quercus.expr.Expr;
+
+import com.caucho.quercus.program.AbstractClassDef;
+import com.caucho.quercus.program.InterpretedClassDef;
+import com.caucho.quercus.program.AbstractFunction;
 
 /**
  * PHP class information
@@ -159,5 +167,78 @@ public class ClassesModule extends AbstractQuercusModule {
   public static boolean method_exists(Value obj, String methodName)
   {
     return obj.findFunction(methodName) != null;
+  }
+  
+  /**
+   * Returns an array of member names and values
+   *
+   * @param className the name of the class
+   * 
+   * @return an array of member names and values
+   * 
+   * @throws errorException
+   */
+  public static Value get_class_vars(Env env, String className)
+  throws Throwable
+  {
+  	//  php/1j10
+  	
+    QuercusClass cl = null;
+    
+    try{
+      cl = env.getClass(className);
+    }
+    catch(Throwable t) {
+    	log.log(Level.WARNING, t.toString(), t);
+    	
+      return NullValue.NULL;
+    }
+    
+    ArrayValue varArray = new ArrayValueImpl();
+    
+    for (Map.Entry<String, Expr> entry: cl.getClassVars()) {
+    	Value key = StringValue.create(entry.getKey());
+    	
+    	Value value = entry.getValue().eval(env);
+    	
+    	varArray.append(key, value);
+    }
+    
+    return varArray;
+  }
+  
+  /**
+   * Returns an array of method names and values
+   *
+   * @param className the name of the class
+   * 
+   * @return an array of method names and values
+   * 
+   * @throws errorException
+   */
+  public static Value get_class_methods(Env env, String className)
+  {
+  	// php/1j11
+  	
+    QuercusClass cl = null;
+    
+    try{
+      cl = env.getClass(className);
+    }
+    catch(Throwable t) {
+    	log.log(Level.WARNING, t.toString(), t);
+    	
+      return NullValue.NULL;
+    }
+    
+    ArrayValue methArray = new ArrayValueImpl();
+    
+    for (Map.Entry<String, AbstractFunction> entry: cl.getClassMethods()) 	{
+    	Value key = StringValue.create(entry.getKey());
+    	
+    	methArray.append(key);
+    }
+    
+    return methArray;
   }
 }

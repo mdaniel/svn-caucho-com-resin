@@ -32,6 +32,8 @@ package com.caucho.quercus.program;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.LinkedHashMap;
+import java.util.Iterator;
+import java.util.Set;
 
 import java.io.IOException;
 
@@ -325,6 +327,16 @@ public class InterpretedClassDef extends ClassDef
   public String toString()
   {
     return "Class[" + getName() + "]";
+  }
+  
+  public Set<Map.Entry<String, Expr>> fieldSet()
+  {
+  	return _fieldMap.entrySet();
+  }
+  
+  public Set<Map.Entry<String, AbstractFunction>> functionSet()
+  {
+  	return _functionMap.entrySet();
   }
 }
 
