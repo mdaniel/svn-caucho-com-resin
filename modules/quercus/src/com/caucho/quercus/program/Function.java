@@ -511,7 +511,8 @@ public class Function extends AbstractFunction {
     out.print("public ");
 
     // quercus/3960
-    out.print("static ");
+    if (isStatic())
+      out.print("static ");
 
     out.print("Value fun_");
     out.print(_name);
@@ -544,7 +545,12 @@ public class Function extends AbstractFunction {
     String funName = "__quercus_fun_" + _name;
 
     out.println();
-    out.println("final static AbstractFunction " + funName);
+    out.print("final ");
+
+    if (isStatic())
+      out.print("static ");
+
+    out.println("AbstractFunction " + funName);
 
     String ref = _isReturnsReference ? "Ref" : "";
 
@@ -657,7 +663,10 @@ public class Function extends AbstractFunction {
     out.println("}");
 
     out.println();
-    out.println("final static AbstractFunction __quercus_fun_" + _name);
+    if (isStatic())
+      out.println("final static AbstractFunction __quercus_fun_" + _name);
+    else
+      out.println("final AbstractFunction __quercus_fun_" + _name);
 
     String ref = _isReturnsReference ? "Ref" : "";
 

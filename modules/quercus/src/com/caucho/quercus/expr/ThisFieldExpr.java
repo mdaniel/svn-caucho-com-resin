@@ -197,7 +197,7 @@ public class ThisFieldExpr extends AbstractVarExpr {
     int index = _quercusClass.getFieldIndex(_name);
 
     if (index >= 0) {
-      out.print("q_this._fields[" + index + "]");
+      out.print("q_this._fields[_f_" + _name + "]");
     }
     else {
       out.print("q_this.getField(\"");
@@ -286,8 +286,8 @@ public class ThisFieldExpr extends AbstractVarExpr {
       if (! isTop)
 	out.print("(");
       
-      out.print("q_this._fields[" + index + "] = ");
-      out.print("q_this._fields[" + index + "].set(");
+      out.print("q_this._fields[_f_" + _name + "] = ");
+      out.print("q_this._fields[_f_" + _name + "].set(");
 
       value.generateCopy(out);
 
@@ -320,7 +320,7 @@ public class ThisFieldExpr extends AbstractVarExpr {
       if (! isTop)
 	out.print("(");
       
-      out.print("q_this._fields[" + index + "] = ");
+      out.print("q_this._fields[_f_" + _name + "] = ");
 
       value.generateRef(out);
       

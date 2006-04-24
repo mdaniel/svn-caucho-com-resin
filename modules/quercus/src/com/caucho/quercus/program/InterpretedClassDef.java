@@ -233,6 +233,10 @@ public class InterpretedClassDef extends ClassDef {
     out.println("public static class quercus_" + getName() + " extends CompiledClassDef {");
     out.pushDepth();
 
+    for (String key : _fieldMap.keySet()) {
+      out.println("private final int _f_" + key + ";");
+    }
+
     out.println();
     out.println("public quercus_" + getName() + "()");
     out.println("{");
@@ -252,7 +256,8 @@ public class InterpretedClassDef extends ClassDef {
 
     int index = 0;
     for (String key : _fieldMap.keySet()) {
-      out.println("addFieldIndex(\"" + key + "\", " + index + ");");
+      out.println("_f_" + key + " = " + index + ";");
+      out.println("addFieldIndex(\"" + key + "\", _f_" + key + ");");
 
       index++;
     }
@@ -279,7 +284,7 @@ public class InterpretedClassDef extends ClassDef {
       String key = entry.getKey();
       Expr value = entry.getValue();
 
-      out.print("value._fields[" + index + "] = ");
+      out.print("value._fields[_f_" + key + "] = ");
       value.generate(out);
       out.println(";");
 
@@ -310,10 +315,10 @@ public class InterpretedClassDef extends ClassDef {
       fun.generate(out);
     }
 
-    out.println("private static final java.util.HashMap<String,AbstractFunction> _methodMap;");
-    out.println("private static final java.util.HashMap<String,AbstractFunction> _methodMapLowerCase;");
+    out.println("private final java.util.HashMap<String,AbstractFunction> _methodMap;");
+    out.println("private final java.util.HashMap<String,AbstractFunction> _methodMapLowerCase;");
     out.println();
-    out.println("static {");
+    out.println("{");
     out.pushDepth();
 
     out.println();

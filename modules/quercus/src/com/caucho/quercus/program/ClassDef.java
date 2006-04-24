@@ -41,6 +41,7 @@ import com.caucho.quercus.program.AbstractFunction;
 
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
+import com.caucho.quercus.env.QuercusClass;
 
 import com.caucho.quercus.expr.Expr;
 
@@ -99,6 +100,13 @@ abstract public class ClassDef {
   public ArrayList<String> getFieldNames()
   {
     return null;
+  }
+
+  /**
+   * Initialize the quercus class.
+   */
+  public void initClass(QuercusClass cl)
+  {
   }
 
   /**

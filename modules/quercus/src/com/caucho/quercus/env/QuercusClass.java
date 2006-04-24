@@ -38,6 +38,7 @@ import com.caucho.quercus.program.ClassDef;
 import com.caucho.quercus.program.AbstractFunction;
 
 import com.caucho.util.L10N;
+import com.caucho.util.IdentityIntMap;
 
 /**
  * Represents a Quercus runtime class.
@@ -50,6 +51,13 @@ public class QuercusClass {
   private ClassDef []_classDefList;
 
   private QuercusClass _parent;
+  
+  private final ArrayList<String> _fieldNames
+    = new ArrayList<String>();
+  
+  private final IdentityIntMap _fieldMap
+    = new IdentityIntMap();
+  
 
   public QuercusClass(ClassDef classDef, QuercusClass parent)
   {
@@ -71,6 +79,10 @@ public class QuercusClass {
     }
     
     _classDefList = classDefList;
+
+    for (int i = classDefList.length - 1; i >= 0; i--) {
+      classDefList[i].initClass(this);
+    }
   }
 
   /**
@@ -90,11 +102,36 @@ public class QuercusClass {
   }
 
   /**
+   * Adds a field.
+   */
+  public void addField(String name, int index)
+  {
+    _fieldNames.add(name);
+    _fieldMap.put(name, index);
+  }
+
+  /**
    * Returns the number of fields.
    */
   public int getFieldSize()
   {
-    return _classDefList[0].getFieldSize();
+    return _fieldNames.size();
+  }
+
+  /**
+   * Returns the field index.
+   */
+  public int findFieldIndex(String name)
+  {
+    return _fieldMap.get(name);
+  }
+
+  /**
+   * Returns the key set.
+   */
+  public ArrayList<String> getFieldNames()
+  {
+    return _fieldNames;
   }
 
   /**
@@ -228,22 +265,6 @@ public class QuercusClass {
     }
     
     return null;
-  }
-
-  /**
-   * Finds the matching function.
-   */
-  public int findFieldIndex(String name)
-  {
-    return _classDefList[0].findFieldIndex(name);
-  }
-
-  /**
-   * Finds the matching function.
-   */
-  public ArrayList<String> getFieldNames()
-  {
-    return _classDefList[0].getFieldNames();
   }
 
   /**

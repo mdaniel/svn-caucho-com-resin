@@ -90,6 +90,18 @@ abstract public class CompiledClassDef extends ClassDef {
   }
 
   /**
+   * Initialize the quercus class.
+   */
+  public void initClass(QuercusClass cl)
+  {
+    for (int i = 0; i < _fieldNames.size(); i++) {
+      String name = _fieldNames.get(i);
+      
+      cl.addField(name, _fieldMap.get(name));
+    }
+  }
+
+  /**
    * Adds a value.
    */
   public Value get(Value name)
