@@ -120,6 +120,11 @@ public class LongLiteralExpr extends Expr {
     out.print("L)");
   }
   
+  public void generateStatement(PhpWriter out)
+    throws IOException
+  {
+  }
+
   public String toString()
   {
     return String.valueOf(_value);

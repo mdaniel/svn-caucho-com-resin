@@ -113,6 +113,11 @@ public class NullLiteralExpr extends Expr {
     out.print("NullLiteralExpr.NULL");
   }
   
+  public void generateStatement(PhpWriter out)
+    throws IOException
+  {
+  }
+
   public String toString()
   {
     return "null";

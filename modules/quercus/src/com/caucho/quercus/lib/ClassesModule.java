@@ -52,7 +52,6 @@ import com.caucho.quercus.env.QuercusClass;
 
 import com.caucho.quercus.expr.Expr;
 
-import com.caucho.quercus.program.AbstractClassDef;
 import com.caucho.quercus.program.InterpretedClassDef;
 import com.caucho.quercus.program.AbstractFunction;
 

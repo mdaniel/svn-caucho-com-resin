@@ -100,7 +100,12 @@ public class DoubleLiteralExpr extends Expr {
     out.print(_value);
     out.print(")");
   }
-  
+
+  public void generateStatement(PhpWriter out)
+    throws IOException
+  {
+  }
+
   public String toString()
   {
     return String.valueOf(_value);
