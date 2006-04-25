@@ -57,6 +57,8 @@ public class ConstantPool {
   public static final int CP_UTF8 = 1;
 
   private ArrayList<ConstantPoolEntry> _entries;
+  private HashMap<String,Utf8Constant> _utf8Map
+    = new HashMap<String,Utf8Constant>();
 
   ConstantPool()
   {
@@ -186,6 +188,12 @@ public class ConstantPool {
    */
   public void addConstant(ConstantPoolEntry entry)
   {
+    if (entry instanceof Utf8Constant) {
+      Utf8Constant utf8 = (Utf8Constant) entry;
+      
+      _utf8Map.put(utf8.getValue(), utf8);
+    }
+    
     _entries.add(entry);
   }
 
@@ -194,19 +202,7 @@ public class ConstantPool {
    */
   public Utf8Constant getUTF8(String value)
   {
-    for (int i = 0; i < _entries.size(); i++) {
-      ConstantPoolEntry entry = _entries.get(i);
-
-      if (! (entry instanceof Utf8Constant))
-	continue;
-
-      Utf8Constant utf8Entry = (Utf8Constant) entry;
-
-      if (utf8Entry.getValue().equals(value))
-	return utf8Entry;
-    }
-
-    return null;
+    return _utf8Map.get(value);
   }
 
   /**
@@ -221,7 +217,7 @@ public class ConstantPool {
 
     entry = new Utf8Constant(this, _entries.size(), value);
     
-    _entries.add(entry);
+    addConstant(entry);
 
     return entry;
   }
@@ -260,7 +256,7 @@ public class ConstantPool {
 
     entry = new StringConstant(this, _entries.size(), utf8.getIndex());
 
-    _entries.add(entry);
+    addConstant(entry);
 
     return entry;
   }
@@ -297,7 +293,7 @@ public class ConstantPool {
 
     entry = new IntegerConstant(this, _entries.size(), value);
     
-    _entries.add(entry);
+    addConstant(entry);
 
     return entry;
   }
@@ -334,8 +330,8 @@ public class ConstantPool {
 
     entry = new LongConstant(this, _entries.size(), value);
     
-    _entries.add(entry);
-    _entries.add(null);
+    addConstant(entry);
+    addConstant(null);
 
     return entry;
   }
@@ -372,7 +368,7 @@ public class ConstantPool {
 
     entry = new FloatConstant(this, _entries.size(), value);
     
-    _entries.add(entry);
+    addConstant(entry);
 
     return entry;
   }
@@ -409,8 +405,8 @@ public class ConstantPool {
 
     entry = new DoubleConstant(this, _entries.size(), value);
     
-    _entries.add(entry);
-    _entries.add(null);
+    addConstant(entry);
+    addConstant(null);
 
     return entry;
   }
@@ -449,7 +445,7 @@ public class ConstantPool {
 
     entry = new ClassConstant(this, _entries.size(), utf8.getIndex());
 
-    _entries.add(entry);
+    addConstant(entry);
 
     return entry;
   }
@@ -492,7 +488,7 @@ public class ConstantPool {
 				    nameEntry.getIndex(),
 				    typeEntry.getIndex());
 
-    _entries.add(entry);
+    addConstant(entry);
 
     return entry;
   }
@@ -560,7 +556,7 @@ public class ConstantPool {
 				 classEntry.getIndex(),
 				 typeEntry.getIndex());
 
-    _entries.add(entry);
+    addConstant(entry);
 
     return entry;
   }
@@ -608,7 +604,7 @@ public class ConstantPool {
 				  classEntry.getIndex(),
 				  typeEntry.getIndex());
 
-    _entries.add(entry);
+    addConstant(entry);
 
     return entry;
   }
@@ -657,7 +653,7 @@ public class ConstantPool {
 					   classEntry.getIndex(),
 					   typeEntry.getIndex());
 
-    _entries.add(entry);
+    addConstant(entry);
 
     return entry;
   }

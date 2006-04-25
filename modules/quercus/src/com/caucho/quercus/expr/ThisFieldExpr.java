@@ -195,7 +195,7 @@ public class ThisFieldExpr extends AbstractVarExpr {
     throws IOException
   {
     if (_quercusClass.isDeclaredField(_name)) {
-      out.print("q_this._fields[_f_" + _name + "]");
+      out.print("q_this._fields[_f_" + _name + "].toValue()");
     }
     else {
       out.print("q_this.getField(\"");
@@ -237,7 +237,7 @@ public class ThisFieldExpr extends AbstractVarExpr {
   public void generateArg(PhpWriter out)
     throws IOException
   {
-    out.print("quercus_this.getFieldArg(env, \"");
+    out.print("q_this.getFieldArg(env, \"");
     out.printJavaString(_name);
     out.print("\")");
   }

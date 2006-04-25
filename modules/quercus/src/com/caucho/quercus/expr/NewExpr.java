@@ -53,7 +53,7 @@ public class NewExpr extends Expr {
 
   public NewExpr(String name, ArrayList<Expr> args)
   {
-    _name = name;
+    _name = name.intern();
 
     _args = new Expr[args.size()];
     args.toArray(_args);
@@ -61,7 +61,7 @@ public class NewExpr extends Expr {
 
   public NewExpr(String name, Expr []args)
   {
-    _name = name;
+    _name = name.intern();
     _args = args;
   }
   

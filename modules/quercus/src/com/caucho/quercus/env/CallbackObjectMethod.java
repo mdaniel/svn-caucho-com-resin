@@ -43,7 +43,7 @@ public class CallbackObjectMethod extends Callback {
   public CallbackObjectMethod(Value obj, String methodName)
   {
     _obj = obj;
-    _methodName = methodName;
+    _methodName = methodName.intern();
     // XXX: should be able to cache actual method
   }
 

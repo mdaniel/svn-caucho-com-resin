@@ -227,6 +227,11 @@ abstract public class Value {
     return env.createObject();
   }
 
+  public CompiledObjectValue toObjectValue()
+  {
+    return null;
+  }
+
   /**
    * Converts to a java object.
    */

@@ -97,7 +97,7 @@ public class VarFunctionExpr extends Expr {
   public Value eval(Env env)
     throws Throwable
   {
-    return env.getFunction(_name.eval(env)).eval(env, _args);
+    return env.getFunction(_name.evalString(env).intern()).eval(env, _args);
   }
   
   /**
@@ -110,7 +110,7 @@ public class VarFunctionExpr extends Expr {
   public Value evalRef(Env env)
     throws Throwable
   {
-    return env.getFunction(_name.eval(env)).evalRef(env, _args);
+    return env.getFunction(_name.evalString(env).intern()).evalRef(env, _args);
   }
 
   //
@@ -171,8 +171,8 @@ public class VarFunctionExpr extends Expr {
     throws IOException
   {
     out.print("env.getFunction(");
-    _name.generate(out);
-    out.print(")");
+    _name.generateString(out);
+    out.print(".intern())");
 
     if (isRef)
       out.print(".evalRef(env");

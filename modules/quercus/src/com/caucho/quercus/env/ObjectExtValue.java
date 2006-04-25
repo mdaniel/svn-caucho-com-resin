@@ -43,28 +43,39 @@ import java.util.Set;
 import java.util.TreeSet;
 
 /**
- * Represents a compiled object value.
+ * Represents a PHP object value.
  */
-public class CompiledObjectValue extends ObjectValue {
+public class ObjectExtValue extends ObjectValue {
   private static final StringValue TO_STRING = new StringValueImpl("__toString");
-  private static final Value []NULL_FIELDS = new Value[0];
+
+  private static final int DEFAULT_SIZE = 16;
 
   private final QuercusClass _cl;
 
-  public final Value []_fields;
+  private Entry []_entries;
+  private int _hashMask;
 
-  private ObjectExtValue _object;
+  private int _size;
 
-  public CompiledObjectValue(QuercusClass cl)
+  public ObjectExtValue(QuercusClass cl)
   {
     _cl = cl;
 
-    int size = cl.getFieldSize();
-    if (size != 0)
-      _fields = new Value[cl.getFieldSize()];
-    else
-      _fields = NULL_FIELDS;
+    _entries = new Entry[DEFAULT_SIZE];
+    _hashMask = _entries.length - 1;
   }
+
+  /*
+  public ObjectExtValue(Env env, IdentityHashMap<Value,Value> map,
+                     QuercusClass cl, ArrayValue oldValue)
+  {
+    super(new ArrayValueImpl(env, map, oldValue));
+
+    _cl = cl;
+
+    // _cl.initFields(_map);
+  }
+  */
 
   /**
    * Returns the class name.
@@ -130,27 +141,12 @@ public class CompiledObjectValue extends ObjectValue {
     return toLong();
   }
 
-  public CompiledObjectValue toObjectValue()
-  {
-    return this;
-  }
-
   /**
    * Returns the number of entries.
    */
   public int getSize()
   {
-    int size = 0;
-
-    for (int i = 0; i < _fields.length; i++) {
-      if (_fields[i] != UnsetValue.UNSET)
-	size++;
-    }
-
-    if (_object != null)
-      size += _object.getSize();
-
-    return size;
+    return _size;
   }
 
   /**
@@ -158,128 +154,99 @@ public class CompiledObjectValue extends ObjectValue {
    */
   public Value getField(String key)
   {
-    if (_fields.length > 0) {
-      int index = _cl.findFieldIndex(key);
+    int capacity = _entries.length;
 
-      if (index >= 0)
-	return _fields[index].toValue();
+    int hashMask = _hashMask;
+    int hash = key.hashCode() & hashMask;
+
+    int count = capacity;
+    for (; count >= 0; count--) {
+      Entry entry = _entries[hash];
+
+      if (entry == null) {
+        return UnsetValue.UNSET;
+      }
+      else if (key.equals(entry.getKey())) {
+        return entry.getValue();
+      }
+
+      hash = (hash + 1) & hashMask;
     }
-    
-    if (_object != null)
-      return _object.getField(key);
-    else
-      return UnsetValue.UNSET;
+
+    return UnsetValue.UNSET;
   }
 
   /**
    * Returns the array ref.
    */
-  public Var getFieldRef(Env env, String key)
+  public Var getFieldRef(Env env, String index)
   {
-    if (_fields.length > 0) {
-      int index = _cl.findFieldIndex(key);
+    Entry entry = createEntry(index);
 
-      if (index >= 0) {
-	Var var = _fields[index].toRefVar();
-	
-	_fields[index] = var;
+    Value value = entry._value;
 
-	return var;
-      }
-    }
+    if (value instanceof Var)
+      return (Var) value;
 
-    if (_object == null)
-      _object = new ObjectExtValue(_cl);
-    
-    return _object.getFieldRef(env, key);
+    Var var = new Var(value);
+
+    entry.setValue(var);
+
+    return var;
   }
 
   /**
    * Returns the value as an argument which may be a reference.
    */
-  public Value getFieldArg(Env env, String key)
+  public Value getFieldArg(Env env, String index)
   {
-    if (_fields.length > 0) {
-      int index = _cl.findFieldIndex(key);
+    Entry entry = getEntry(index);
 
-      if (index >= 0) {
-	Var var = _fields[index].toRefVar();
-	
-	_fields[index] = var;
-
-	return var;
-      }
+    if (entry != null) {
+      return entry.toArg();
     }
-
-    if (_object == null)
-      _object = new ObjectExtValue(_cl);
-    
-    return _object.getFieldArg(env, key);
+    else {
+      return new ArgGetFieldValue(env, this, index);
+    }
   }
 
   /**
    * Returns the value as an argument which may be a reference.
    */
-  public Value getFieldArgRef(Env env, String key)
+  public Value getFieldArgRef(Env env, String index)
   {
-    if (_fields.length > 0) {
-      int index = _cl.findFieldIndex(key);
+    Entry entry = getEntry(index);
 
-      if (index >= 0) {
-	Var var = _fields[index].toRefVar();
-	
-	_fields[index] = var;
-
-	return var;
-      }
+    if (entry != null) {
+      return entry.toArg();
     }
-
-    if (_object == null)
-      _object = new ObjectExtValue(_cl);
-    
-    return _object.getFieldArgRef(env, key);
+    else {
+      return new ArgGetFieldValue(env, this, index);
+    }
   }
 
   /**
-   * Returns field as an array.
+   * Gets a new value.
    */
-  public Value getFieldArray(Env env, String key)
+  private Entry getEntry(String key)
   {
-    if (_fields.length > 0) {
-      int index = _cl.findFieldIndex(key);
+    int capacity = _entries.length;
 
-      if (index >= 0) {
-	_fields[index] = _fields[index].toAutoArray();
-	
-	return _fields[index];
-      }
+    int hash = key.hashCode() & _hashMask;
+
+    int count = capacity;
+    for (; count >= 0; count--) {
+      Entry entry = _entries[hash];
+
+      if (entry == null)
+        return null;
+      else if (key.equals(entry.getKey()))
+        return entry;
+
+      hash = (hash + 1) & _hashMask;
     }
 
-    if (_object == null)
-      _object = new ObjectExtValue(_cl);
-    
-    return _object.getFieldArray(env, key);
-  }
-
-  /**
-   * Returns field as an object.
-   */
-  public Value getFieldObject(Env env, String key)
-  {
-    if (_fields.length > 0) {
-      int index = _cl.findFieldIndex(key);
-
-      if (index >= 0) {
-	_fields[index] = _fields[index].toAutoObject(env);
-	
-	return _fields[index];
-      }
-    }
-
-    if (_object == null)
-      _object = new ObjectExtValue(_cl);
-    
-    return _object.getFieldObject(env, key);
+    return null;
   }
 
   /**
@@ -305,20 +272,24 @@ public class CompiledObjectValue extends ObjectValue {
    */
   public Value putField(Env env, String key, Value value)
   {
-    if (_fields.length > 0) {
-      int index = _cl.findFieldIndex(key);
+    Entry entry = createEntry(key);
 
-      if (index >= 0) {
-	_fields[index] = _fields[index].set(value);
+    Value oldValue = entry._value;
 
-	return value;
-      }
+    if (value instanceof Var) {
+      Var var = (Var) value;
+      var.setReference();
+
+      entry._value = var;
     }
-    
-    if (_object == null)
-      _object = new ObjectExtValue(_cl);
+    else if (oldValue instanceof Var) {
+      oldValue.set(value);
+    }
+    else {
+      entry._value = value;
+    }
 
-    return _object.putField(env, key, value);
+    return value;
   }
 
   /**
@@ -350,18 +321,111 @@ public class CompiledObjectValue extends ObjectValue {
    */
   public void removeField(String key)
   {
-    if (_fields.length > 0) {
-      int index = _cl.findFieldIndex(key);
+    int capacity = _entries.length;
 
-      if (index >= 0) {
-	_fields[index] = UnsetValue.UNSET;
+    int hash = key.hashCode() & _hashMask;
 
-	return;
+    int count = capacity;
+    for (; count >= 0; count--) {
+      Entry entry = _entries[hash];
+
+      if (entry == null)
+        return;
+      else if (key.equals(entry.getKey())) {
+        _size--;
+
+        _entries[hash] = null;
+        shiftEntries(hash + 1);
+
+        return;
       }
+
+      hash = (hash + 1) & _hashMask;
     }
-    
-    if (_object != null)
-      _object.removeField(key);
+  }
+
+  /**
+   * Shift entries after a delete.
+   */
+  private void shiftEntries(int index)
+  {
+    int capacity = _entries.length;
+
+    for (; index < capacity; index++) {
+      Entry entry = _entries[index];
+
+      if (entry == null)
+        return;
+
+      _entries[index] = null;
+
+      addEntry(entry);
+    }
+  }
+
+  /**
+   * Creates the entry for a key.
+   */
+  private Entry createEntry(String key)
+  {
+    int capacity = _entries.length;
+
+    int hashMask = _hashMask;
+
+    int hash = key.hashCode() & hashMask;
+
+    int count = capacity;
+    for (; count >= 0; count--) {
+      Entry entry = _entries[hash];
+
+      if (entry == null)
+        break;
+      else if (key.equals(entry.getKey()))
+        return entry;
+
+      hash = (hash + 1) & hashMask;
+    }
+
+    _size++;
+
+    Entry newEntry = new Entry(key);
+    _entries[hash] = newEntry;
+
+    if (_entries.length <= 2 * _size)
+      expand();
+
+    return newEntry;
+  }
+
+  private void expand()
+  {
+    Entry []entries = _entries;
+
+    _entries = new Entry[2 * entries.length];
+    _hashMask = _entries.length - 1;
+
+    for (int i = entries.length - 1; i >= 0; i--) {
+      Entry entry = entries[i];
+
+      if (entry != null)
+        addEntry(entry);
+    }
+  }
+
+  private void addEntry(Entry entry)
+  {
+    int capacity = _entries.length;
+
+    int hash = entry.getKey().hashCode() & _hashMask;
+
+    for (int i = capacity; i >= 0; i--) {
+      if (_entries[hash] == null) {
+        _entries[hash] = entry;
+        return;
+      }
+
+      hash = (hash + 1) & _hashMask;
+    }
   }
 
   /**
@@ -369,7 +433,17 @@ public class CompiledObjectValue extends ObjectValue {
    */
   public Value []getKeyArray()
   {
-    return new Value[0];
+    Value []keys = new Value[getSize()];
+
+    int k = 0;
+    for (int i = 0; i < _entries.length; i++) {
+      Entry entry = _entries[i];
+
+      if (entry != null)
+	keys[k++] = new StringValueImpl(entry.getKey());
+    }
+
+    return keys;
   }
 
   /**
@@ -377,7 +451,17 @@ public class CompiledObjectValue extends ObjectValue {
    */
   public Value []getValueArray(Env env)
   {
-    return new Value[0];
+    Value []values = new Value[getSize()];
+
+    int k = 0;
+    for (int i = 0; i < _entries.length; i++) {
+      Entry entry = _entries[i];
+
+      if (entry != null)
+	values[k++] = entry.getValue().toValue();
+    }
+
+    return values;
   }
 
   /**
@@ -386,6 +470,13 @@ public class CompiledObjectValue extends ObjectValue {
   public Collection<Value> getIndices()
   {
     ArrayList<Value> indices = new ArrayList<Value>();
+
+    for (int i = 0; i < _entries.length; i++) {
+      Entry entry = _entries[i];
+
+      if (entry != null)
+	indices.add(new StringValueImpl(entry.getKey()));
+    }
 
     return indices;
   }
@@ -617,7 +708,12 @@ public class CompiledObjectValue extends ObjectValue {
    */
   public Value clone()
   {
-    throw new UnsupportedOperationException();
+    ObjectExtValue newObject = new ObjectExtValue(_cl);
+
+    for (Map.Entry<String,Value> entry : entrySet())
+      newObject.putField(null, entry.getKey(), entry.getValue());
+
+    return newObject;
   }
 
   // XXX: need to check the other copy, e.g. for sessions
@@ -635,41 +731,16 @@ public class CompiledObjectValue extends ObjectValue {
     sb.append(getSize());
     sb.append(":{");
 
-    ArrayList<String> names = _cl.getFieldNames();
-    
-    if (names != null) {
-      int index = 0;
+    for (Map.Entry<String,Value> entry : entrySet()) {
+      String key = entry.getKey();
 
-      for (int i = 0; i < names.size(); i++) {
-	String key = names.get(i);
-	
-	if (_fields[i] == UnsetValue.UNSET)
-	  continue;
-	
-	sb.append("s:");
-	sb.append(key.length());
-	sb.append(":\"");
-	sb.append(key);
-	sb.append("\";");
+      sb.append("s:");
+      sb.append(key.length());
+      sb.append(":\"");
+      sb.append(key);
+      sb.append("\";");
 
-	_fields[i].serialize(sb);
-      }
-    }
-
-    if (_object != null) {
-      for (Map.Entry<String,Value> mapEntry : _object.sortedEntrySet()) {
-	ObjectExtValue.Entry entry = (ObjectExtValue.Entry) mapEntry;
-
-	String key = entry.getKey();
-	
-	sb.append("s:");
-	sb.append(key.length());
-	sb.append(":\"");
-	sb.append(key);
-	sb.append("\";");
-
-	entry.getValue().serialize(sb);
-      }
+      entry.getValue().serialize(sb);
     }
 
     sb.append("}");
@@ -732,8 +803,7 @@ public class CompiledObjectValue extends ObjectValue {
 
   public Set<Map.Entry<String,Value>> entrySet()
   {
-    throw new UnsupportedOperationException();
-    // return new EntrySet();
+    return new EntrySet();
   }
 
   /**
@@ -741,13 +811,12 @@ public class CompiledObjectValue extends ObjectValue {
    */
   public Set<Map.Entry<String,Value>> sortedEntrySet()
   {
-    throw new UnsupportedOperationException();
-    //return new TreeSet<Map.Entry<String, Value>>(entrySet());
+    return new TreeSet<Map.Entry<String, Value>>(entrySet());
   }
 
   public String toString()
   {
-    return "CompiledObjectValue@" + System.identityHashCode(this) +  "[" + _cl.getName() + "]";
+    return "ObjectExtValue@" + System.identityHashCode(this) +  "[" + _cl.getName() + "]";
   }
 
   public void varDumpImpl(Env env,
@@ -758,29 +827,10 @@ public class CompiledObjectValue extends ObjectValue {
   {
     out.println("object(" + getName() + ") (" + getSize() + ") {");
 
-    ArrayList<String> names = _cl.getFieldNames();
-    
-    if (names != null) {
-      int index = 0;
+    for (Map.Entry<String,Value> mapEntry : sortedEntrySet()) {
+      ObjectExtValue.Entry entry = (ObjectExtValue.Entry) mapEntry;
 
-      for (int i = 0; i < names.size(); i++) {
-	if (_fields[i] == UnsetValue.UNSET)
-	  continue;
-
-	printDepth(out, 2 * depth + 2);
-	out.println("[\"" + names.get(i) + "\"]=>");
-	printDepth(out, 2 * depth + 2);
-	_fields[i].varDumpImpl(env, out, depth + 1, valueSet);
-	out.println();
-      }
-    }
-
-    if (_object != null) {
-      for (Map.Entry<String,Value> mapEntry : _object.sortedEntrySet()) {
-	ObjectExtValue.Entry entry = (ObjectExtValue.Entry) mapEntry;
-
-	entry.varDumpImpl(env, out, depth + 1, valueSet);
-      }
+      entry.varDumpImpl(env, out, depth + 1, valueSet);
     }
 
     printDepth(out, 2 * depth);
@@ -800,16 +850,247 @@ public class CompiledObjectValue extends ObjectValue {
     printDepth(out, 4 * depth);
     out.println("(");
 
-    /*
     for (Map.Entry<String,Value> mapEntry : sortedEntrySet()) {
-      ObjectValue.Entry entry = (ObjectValue.Entry) mapEntry;
+      ObjectExtValue.Entry entry = (ObjectExtValue.Entry) mapEntry;
 
       entry.printRImpl(env, out, depth + 1, valueSet);
     }
-    */
 
     printDepth(out, 4 * depth);
     out.println(")");
+  }
+
+  public class EntrySet extends AbstractSet<Map.Entry<String,Value>> {
+    EntrySet()
+    {
+    }
+
+    public int size()
+    {
+      return ObjectExtValue.this.getSize();
+    }
+
+    public Iterator<Map.Entry<String,Value>> iterator()
+    {
+      return new EntryIterator(ObjectExtValue.this._entries);
+    }
+  }
+
+  public static class EntryIterator
+    implements Iterator<Map.Entry<String,Value>> {
+    private final Entry []_list;
+    private int _index;
+
+    EntryIterator(Entry []list)
+    {
+      _list = list;
+    }
+
+    public boolean hasNext()
+    {
+      for (; _index < _list.length && _list[_index] == null; _index++) {
+      }
+
+      return _index < _list.length;
+    }
+
+    public Map.Entry<String,Value> next()
+    {
+      for (; _index < _list.length && _list[_index] == null; _index++) {
+      }
+
+      if (_list.length <= _index)
+        return null;
+
+      return _list[_index++];
+    }
+
+    public void remove()
+    {
+      throw new UnsupportedOperationException();
+    }
+  }
+
+  public final static class Entry
+    implements Map.Entry<String,Value>,
+               Comparable<Map.Entry<String, Value>>
+  {
+    private final String _key;
+    private Value _value;
+
+    public Entry(String key)
+    {
+      _key = key;
+      _value = NullValue.NULL;
+    }
+
+    public Entry(String key, Value value)
+    {
+      _key = key;
+      _value = value;
+    }
+
+    public Value getValue()
+    {
+      return _value.toValue();
+    }
+
+    public String getKey()
+    {
+      return _key;
+    }
+
+    public Value toValue()
+    {
+      // The value may be a var
+      // XXX: need test
+      return _value.toValue();
+    }
+
+    /**
+     * Argument used/declared as a ref.
+     */
+    public Var toRefVar()
+    {
+      Value val = _value;
+
+      if (val instanceof Var)
+        return (Var) val;
+      else {
+        Var var = new Var(val);
+
+        _value = var;
+
+        return var;
+      }
+    }
+
+    /**
+     * Converts to an argument value.
+     */
+    public Value toArgValue()
+    {
+      return _value.toValue();
+    }
+
+    public Value setValue(Value value)
+    {
+      Value oldValue = toValue();
+
+      _value = value;
+
+      return oldValue;
+    }
+
+    /**
+     * Converts to a variable reference (for function  arguments)
+     */
+    public Value toRef()
+    {
+      Value value = _value;
+
+      if (value instanceof Var)
+        return new RefVar((Var) value);
+      else {
+	Var var = new Var(_value);
+	
+	_value = var;
+	
+        return new RefVar(var);
+      }
+    }
+
+    /**
+     * Converts to a variable reference (for function  arguments)
+     */
+    public Value toArgRef()
+    {
+      Value value = _value;
+
+      if (value instanceof Var)
+        return new RefVar((Var) value);
+      else {
+	Var var = new Var(_value);
+	
+	_value = var;
+	
+        return new RefVar(var);
+      }
+    }
+
+    public Value toArg()
+    {
+      Value value = _value;
+
+      if (value instanceof Var)
+        return value;
+      else {
+	Var var = new Var(_value);
+	
+	_value = var;
+	
+        return var;
+      }
+    }
+
+    public int compareTo(Map.Entry<String, Value> other)
+    {
+      if (other == null)
+        return 1;
+
+      String thisKey = getKey();
+      String otherKey = other.getKey();
+
+      if (thisKey == null)
+        return otherKey == null ? 0 : -1;
+
+      if (otherKey == null)
+        return 1;
+
+      return thisKey.compareTo(otherKey);
+    }
+
+    public void varDumpImpl(Env env,
+                            WriteStream out,
+                            int depth,
+                            IdentityHashMap<Value, String> valueSet)
+      throws Throwable
+    {
+      printDepth(out, 2 * depth);
+      out.println("[\"" + getKey() + "\"]=>");
+
+      printDepth(out, 2 * depth);
+      
+      _value.varDump(env, out, depth, valueSet);
+      
+      out.println();
+    }
+
+    protected void printRImpl(Env env,
+                              WriteStream out,
+                              int depth,
+                              IdentityHashMap<Value, String> valueSet)
+      throws Throwable
+    {
+      printDepth(out, 4 * depth);
+      out.print("[" + getKey() + "] => ");
+      
+      _value.printR(env, out, depth + 1, valueSet);
+
+      out.println();
+    }
+
+    private void printDepth(WriteStream out, int depth)
+      throws java.io.IOException
+    {
+      for (int i = 0; i < depth; i++)
+	out.print(' ');
+    }
+
+    public String toString()
+    {
+      return "ObjectExtValue.Entry[" + getKey() + "]";
+    }
   }
 }
 

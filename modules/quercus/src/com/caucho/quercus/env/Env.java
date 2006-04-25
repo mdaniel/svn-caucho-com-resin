@@ -29,6 +29,9 @@
 
 package com.caucho.quercus.env;
 
+import java.lang.ref.WeakReference;
+import java.lang.ref.SoftReference;
+
 import com.caucho.java.LineMap;
 import com.caucho.java.ScriptStackTrace;
 import com.caucho.java.WorkDir;
@@ -50,7 +53,6 @@ import com.caucho.quercus.lib.string.StringModule;
 import com.caucho.quercus.lib.VariableModule;
 import com.caucho.quercus.page.QuercusPage;
 
-
 import com.caucho.quercus.program.ClassDef;
 import com.caucho.quercus.program.JavaClassDef;
 import com.caucho.quercus.program.AbstractFunction;
@@ -61,6 +63,7 @@ import com.caucho.quercus.resources.StreamContextResource;
 import com.caucho.sql.DatabaseManager;
 import com.caucho.util.Alarm;
 import com.caucho.util.IntMap;
+import com.caucho.util.LruCache;
 import com.caucho.util.L10N;
 import com.caucho.util.Log;
 import com.caucho.vfs.ByteToChar;
@@ -140,6 +143,10 @@ public class Env {
 
   private static final StringValue PHP_SELF_STRING
     = new StringValueImpl("PHP_SELF");
+
+  private static final
+    LruCache<ClassKey,SoftReference<QuercusClass>> _classCache
+    = new LruCache<ClassKey,SoftReference<QuercusClass>>(4096);
 
   private Quercus _quercus;
   private QuercusPage _page;
@@ -2261,16 +2268,15 @@ public class Env {
       if (parentName != null)
         parent = getClass(parentName);
 
-
       if (parent == null || parent instanceof QuercusClass)
-        return new QuercusClass(classDef, (QuercusClass) parent);
+        return createQuercusClass(classDef, (QuercusClass) parent);
       else
         throw new IllegalStateException(parent.toString());
     }
 
     ClassDef staticClass = _quercus.findClass(name);
     if (staticClass != null)
-      return new QuercusClass(staticClass, null); // XXX: cache
+      return createQuercusClass(staticClass, null); // XXX: cache
 
     if (_autoload == null)
       _autoload = findFunction("__autoload");
@@ -2285,6 +2291,27 @@ public class Env {
     }
 
     return null;
+  }
+
+  private QuercusClass createQuercusClass(ClassDef def, QuercusClass parent)
+  {
+    ClassKey key = new ClassKey(def, parent);
+
+    SoftReference<QuercusClass> qClassRef = _classCache.get(key);
+    QuercusClass qClass;
+
+    if (qClassRef != null) {
+      qClass = qClassRef.get();
+
+      if (qClass != null)
+	return qClass;
+    }
+
+    qClass = new QuercusClass(def, parent);
+
+    _classCache.put(key, new SoftReference<QuercusClass>(qClass));
+
+    return qClass;
   }
 
   /**
@@ -3316,6 +3343,60 @@ public class Env {
       else {
         _quercus.saveSession(this, session.getId(), session);
       }
+    }
+  }
+
+  static class ClassKey {
+    private final WeakReference<ClassDef> _defRef;
+    private final WeakReference<QuercusClass> _parentRef;
+
+    ClassKey(ClassDef def, QuercusClass parent)
+    {
+      _defRef = new WeakReference<ClassDef>(def);
+
+      if (parent != null)
+	_parentRef = new WeakReference<QuercusClass>(parent);
+      else
+	_parentRef = null;
+    }
+
+    public int hashCode()
+    {
+      int hash = 37;
+
+      ClassDef def = _defRef.get();
+      
+      QuercusClass parent = null;
+      if (_parentRef != null)
+	parent = _parentRef.get();
+
+      if (def != null)
+	hash = 65521 * hash + def.hashCode();
+
+      if (parent != null)
+	hash = 65521 * hash + parent.hashCode();
+
+      return hash;
+    }
+
+    public boolean equals(Object o)
+    {
+      ClassKey key = (ClassKey) o;
+
+      ClassDef aDef = _defRef.get();
+      ClassDef bDef = key._defRef.get();
+
+      if (aDef != bDef)
+	return false;
+
+      if (_parentRef == key._parentRef)
+	return true;
+      
+      else if (_parentRef != null && key._parentRef != null)
+	return _parentRef.get() == key._parentRef.get();
+
+      else
+	return false;
     }
   }
 

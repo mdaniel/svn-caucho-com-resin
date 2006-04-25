@@ -146,7 +146,7 @@ public class ThisExpr extends AbstractVarExpr {
   public void generate(PhpWriter out)
     throws IOException
   {
-    out.print("quercus_this");
+    out.print("q_this");
   }
 
   /**

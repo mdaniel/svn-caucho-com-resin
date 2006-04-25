@@ -57,6 +57,8 @@ public class QuercusClass {
 
   private QuercusClass _parent;
 
+  private AbstractFunction _constructor;
+  
   private final ArrayList<InstanceInitializer> _initializers
     = new ArrayList<InstanceInitializer>();
   
@@ -112,6 +114,14 @@ public class QuercusClass {
   public QuercusClass getParent()
   {
     return _parent;
+  }
+
+  /**
+   * Sets the constructor.
+   */
+  public void setConstructor(AbstractFunction fun)
+  {
+    _constructor = fun;
   }
 
   /**
@@ -236,7 +246,7 @@ public class QuercusClass {
   public boolean isA(String name)
   {
     for (int i = _classDefList.length - 1; i >= 0; i--) {
-      if (_classDefList[i].isA(name))
+      if (_classDefList[i].getName().equals(name))
 	return true;
     }
 
@@ -263,15 +273,7 @@ public class QuercusClass {
    */
   public AbstractFunction findConstructor()
   {
-    // XXX: cache method
-    for (ClassDef a_classDefList : _classDefList) {
-      AbstractFunction fun = a_classDefList.findConstructor();
-
-      if (fun != null)
-        return fun;
-    }
-    
-    return null;
+    return _constructor;
   }
 
   /**
@@ -350,6 +352,65 @@ public class QuercusClass {
     throws Throwable
   {
     return getFunction(name).evalMethod(env, thisValue, args);
+  }  
+
+  /**
+   * evaluates the function.
+   */
+  public Value evalMethod(Env env, Value thisValue, String name)
+    throws Throwable
+  {
+    return getFunction(name).evalMethod(env, thisValue);
+  }  
+
+  /**
+   * evaluates the function.
+   */
+  public Value evalMethod(Env env, Value thisValue, String name,
+			  Value a1)
+    throws Throwable
+  {
+    return getFunction(name).evalMethod(env, thisValue, a1);
+  }  
+
+  /**
+   * evaluates the function.
+   */
+  public Value evalMethod(Env env, Value thisValue, String name,
+			  Value a1, Value a2)
+    throws Throwable
+  {
+    return getFunction(name).evalMethod(env, thisValue, a1, a2);
+  }  
+
+  /**
+   * evaluates the function.
+   */
+  public Value evalMethod(Env env, Value thisValue, String name,
+			  Value a1, Value a2, Value a3)
+    throws Throwable
+  {
+    return getFunction(name).evalMethod(env, thisValue, a1, a2, a3);
+  }  
+
+  /**
+   * evaluates the function.
+   */
+  public Value evalMethod(Env env, Value thisValue, String name,
+			  Value a1, Value a2, Value a3, Value a4)
+    throws Throwable
+  {
+    return getFunction(name).evalMethod(env, thisValue, a1, a2, a3, a4);
+  }  
+
+  /**
+   * evaluates the function.
+   */
+  public Value evalMethod(Env env, Value thisValue, String name,
+			  Value a1, Value a2, Value a3, Value a4, Value a5)
+    throws Throwable
+  {
+    return getFunction(name).evalMethod(env, thisValue, a1, a2, a3, a4, a5);
   }  
 
   /**

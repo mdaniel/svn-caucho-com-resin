@@ -61,8 +61,8 @@ public class StaticMethodExpr extends Expr {
 
   public StaticMethodExpr(String className, String name, ArrayList<Expr> args)
   {
-    _className = className;
-    _name = name;
+    _className = className.intern();
+    _name = name.intern();
 
     _args = new Expr[args.size()];
     args.toArray(_args);
@@ -70,8 +70,8 @@ public class StaticMethodExpr extends Expr {
 
   public StaticMethodExpr(String className, String name, Expr []args)
   {
-    _className = className;
-    _name = name;
+    _className = className.intern();
+    _name = name.intern();
 
     _args = args;
   }
@@ -171,7 +171,7 @@ public class StaticMethodExpr extends Expr {
     out.print("\").evalMethod(env, ");
 
     if (isMethod())
-      out.print("quercus_this");
+      out.print("q_this");
     else
       out.print("NullThisValue.NULL");
 
@@ -179,7 +179,7 @@ public class StaticMethodExpr extends Expr {
     out.printJavaString(_name);
     out.print("\"");
 
-    if (false && args.length <= 5) {
+    if (args.length <= 5) {
       // XXX: check variable args
       
       for (int i = 0; i < args.length; i++) {

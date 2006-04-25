@@ -77,7 +77,7 @@ public class VarNewExpr extends Expr {
   public Value eval(Env env)
     throws Throwable
   {
-    String name = _name.evalString(env);
+    String name = _name.evalString(env).intern();
     
     QuercusClass cl = env.findClass(name);
 
@@ -117,7 +117,7 @@ public class VarNewExpr extends Expr {
   {
     out.print("env.findClass(");
     _name.generateString(out);
-    out.print(").evalNew(env, new Value[] {");
+    out.print(".intern()).evalNew(env, new Value[] {");
 
     for (int i = 0; i < _args.length; i++) {
       if (i != 0)

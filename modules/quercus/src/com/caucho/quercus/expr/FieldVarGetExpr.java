@@ -68,7 +68,7 @@ public class FieldVarGetExpr extends AbstractVarExpr {
   {
     Value value = _objExpr.evalArg(env);
 
-    return value.getFieldArg(env, _nameExpr.evalString(env));
+    return value.getFieldArg(env, _nameExpr.evalString(env).intern());
   }
 
   /**
@@ -84,7 +84,7 @@ public class FieldVarGetExpr extends AbstractVarExpr {
     // quercus/0d1k
     Value value = _objExpr.evalObject(env);
 
-    return value.getFieldRef(env, _nameExpr.evalString(env));
+    return value.getFieldRef(env, _nameExpr.evalString(env).intern());
   }
   
   /**
@@ -99,7 +99,7 @@ public class FieldVarGetExpr extends AbstractVarExpr {
   {
     Value obj = _objExpr.eval(env);
 
-    return obj.getField(_nameExpr.evalString(env));
+    return obj.getField(_nameExpr.evalString(env).intern());
   }
   
   /**
@@ -114,7 +114,7 @@ public class FieldVarGetExpr extends AbstractVarExpr {
   {
     Value obj = _objExpr.evalObject(env);
 
-    obj.putField(env, _nameExpr.evalString(env), value);
+    obj.putField(env, _nameExpr.evalString(env).intern(), value);
   }
 
   /**
@@ -129,7 +129,7 @@ public class FieldVarGetExpr extends AbstractVarExpr {
   {
     Value obj = _objExpr.evalObject(env);
 
-    return obj.getFieldArray(env, _nameExpr.evalString(env));
+    return obj.getFieldArray(env, _nameExpr.evalString(env).intern());
   }
 
   /**
@@ -144,7 +144,7 @@ public class FieldVarGetExpr extends AbstractVarExpr {
   {
     Value obj = _objExpr.evalObject(env);
 
-    return obj.getFieldObject(env, _nameExpr.evalString(env));
+    return obj.getFieldObject(env, _nameExpr.evalString(env).intern());
   }
   
   /**
@@ -159,7 +159,7 @@ public class FieldVarGetExpr extends AbstractVarExpr {
   {
     Value obj = _objExpr.eval(env);
 
-    obj.remove(_nameExpr.eval(env));
+    obj.removeField(_nameExpr.evalString(env).intern());
   }
 
   //
@@ -186,7 +186,7 @@ public class FieldVarGetExpr extends AbstractVarExpr {
     _objExpr.generate(out);
     out.print(".getField(");
     _nameExpr.generateString(out);
-    out.print(")");
+    out.print(".intern())");
   }
 
   /**
@@ -200,7 +200,7 @@ public class FieldVarGetExpr extends AbstractVarExpr {
     _objExpr.generateArg(out);
     out.print(".getFieldArg(");
     _nameExpr.generateString(out);
-    out.print(")");
+    out.print(".intern())");
   }
 
   /**
@@ -214,7 +214,7 @@ public class FieldVarGetExpr extends AbstractVarExpr {
     _objExpr.generateObject(out);
     out.print(".getFieldRef(env, ");
     _nameExpr.generateString(out);
-    out.print(")");
+    out.print(".intern())");
   }
 
   /**
@@ -228,7 +228,7 @@ public class FieldVarGetExpr extends AbstractVarExpr {
     _objExpr.generateObject(out);
     out.print(".putField(env, ");
     _nameExpr.generateString(out);
-    out.print(", ");
+    out.print(".intern(), ");
     value.generateCopy(out); // php/3a85
     out.print(")");
   }
@@ -244,7 +244,7 @@ public class FieldVarGetExpr extends AbstractVarExpr {
     _objExpr.generateObject(out);
     out.print(".putField(env, ");
     _nameExpr.generateString(out);
-    out.print(", ");
+    out.print(".intern(), ");
     value.generateRef(out);
     out.print(")");
   }
@@ -260,7 +260,7 @@ public class FieldVarGetExpr extends AbstractVarExpr {
     _objExpr.generateObject(out);
     out.print(".getFieldObject(env, ");
     _nameExpr.generateString(out);
-    out.print(")");
+    out.print(".intern())");
   }
 
   /**
@@ -274,7 +274,7 @@ public class FieldVarGetExpr extends AbstractVarExpr {
     _objExpr.generateObject(out);
     out.print(".getFieldArray(");
     _nameExpr.generateString(out);
-    out.print(")");
+    out.print(".intern())");
   }
 
   /**
@@ -288,7 +288,7 @@ public class FieldVarGetExpr extends AbstractVarExpr {
     _objExpr.generate(out);
     out.print(".removeField(");
     _nameExpr.generateString(out);
-    out.print(")");
+    out.print(".intern())");
   }
   
   public String toString()

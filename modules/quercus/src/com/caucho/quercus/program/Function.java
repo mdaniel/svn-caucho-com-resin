@@ -534,7 +534,7 @@ public class Function extends AbstractFunction {
     out.pushDepth();
 
     if (! isStatic()) {
-      out.println("final CompiledObjectValue q_this = (CompiledObjectValue) quercus_this_arg;");
+      out.println("final CompiledObjectValue q_this = (quercus_this_arg != null ? quercus_this_arg.toObjectValue() : null);");
     }
 
     generateBody(out);
@@ -614,7 +614,7 @@ public class Function extends AbstractFunction {
 
     if (! isGlobal()) {
       out.println();
-      out.println("static { " + funName + ".setGlobal(false); }");
+      out.println("{ " + funName + ".setGlobal(false); }");
     }
   }
 
@@ -627,19 +627,26 @@ public class Function extends AbstractFunction {
     throws IOException
   {
     out.println();
-    out.print("public static ");
+    out.print("public ");
+
+    if (isStatic())
+      out.print("static ");
+    
     out.print("Value fun_");
     out.print(_name);
 
     if (isStatic())
       out.println("(Env env, Value []args)");
     else
-      out.println("(Env env, Value quercus_this, Value []args)");
+      out.println("(Env env, Value q_this_arg, Value []args)");
 
     out.println("  throws Throwable");
     out.println("{");
     out.pushDepth();
 
+    if (! isStatic())
+      out.println("CompiledObjectValue q_this = q_this_arg.toObjectValue();");
+    
     // XXX: try to optimize-away the map
 
     if (_info.isVariableArgs()) {

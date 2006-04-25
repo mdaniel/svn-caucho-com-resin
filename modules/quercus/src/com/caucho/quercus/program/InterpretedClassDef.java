@@ -81,6 +81,9 @@ public class InterpretedClassDef extends ClassDef
    */
   public void initClass(QuercusClass cl)
   {
+    if (_constructor != null)
+      cl.setConstructor(_constructor);
+    
     cl.addInitializer(this);
     
     for (Map.Entry<String,AbstractFunction> entry : _functionMap.entrySet()) {
@@ -93,7 +96,7 @@ public class InterpretedClassDef extends ClassDef
    */
   public void addFunction(String name, Function fun)
   {
-    _functionMap.put(name, fun);
+    _functionMap.put(name.intern(), fun);
 
     if (name.equals("__construct"))
       _constructor = fun;
@@ -108,7 +111,7 @@ public class InterpretedClassDef extends ClassDef
    */
   public void addStaticValue(Value name, Expr value)
   {
-    _staticFieldMap.put(name.toString(), value);
+    _staticFieldMap.put(name.toString().intern(), value);
   }
 
   /**
@@ -116,7 +119,7 @@ public class InterpretedClassDef extends ClassDef
    */
   public void addConstant(String name, Expr value)
   {
-    _constMap.put(name, value);
+    _constMap.put(name.intern(), value);
   }
 
   /**
@@ -132,7 +135,7 @@ public class InterpretedClassDef extends ClassDef
    */
   public void addValue(Value name, Expr value)
   {
-    _fieldMap.put(name.toString(), value);
+    _fieldMap.put(name.toString().intern(), value);
   }
 
   /**
@@ -140,7 +143,7 @@ public class InterpretedClassDef extends ClassDef
    */
   public Expr get(Value name)
   {
-    return _fieldMap.get(name.toString());
+    return _fieldMap.get(name.toString().intern());
   }
 
   /**
@@ -160,7 +163,7 @@ public class InterpretedClassDef extends ClassDef
     for (Map.Entry<String,Expr> var : _staticFieldMap.entrySet()) {
       String name = getName() + "::" + var.getKey();
 
-      env.setGlobalValue(name, var.getValue().eval(env).copy());
+      env.setGlobalValue(name.intern(), var.getValue().eval(env).copy());
     }
   }
 
@@ -216,6 +219,11 @@ public class InterpretedClassDef extends ClassDef
 
     out.println("cl.addInitializer(this);");
     out.println();
+    
+    if (_constructor != null) {
+      out.println("cl.setConstructor(__quercus_fun_" + _constructor.getName() + ");");
+      out.println();
+    }
 
     for (String key : _fieldMap.keySet()) {
       out.print("_f_" + key + " = ");

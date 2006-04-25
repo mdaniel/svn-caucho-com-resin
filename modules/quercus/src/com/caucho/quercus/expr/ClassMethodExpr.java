@@ -56,9 +56,9 @@ public class ClassMethodExpr extends Expr {
 
   public ClassMethodExpr(String className, String name, ArrayList<Expr> args)
   {
-    _className = className;
+    _className = className.intern();
     
-    _name = name;
+    _name = name.intern();
 
     _args = new Expr[args.size()];
     args.toArray(_args);
@@ -66,9 +66,9 @@ public class ClassMethodExpr extends Expr {
 
   public ClassMethodExpr(String className, String name, Expr []args)
   {
-    _className = className;
+    _className = className.intern();
     
-    _name = name;
+    _name = name.intern();
 
     _args = args;
   }
@@ -86,12 +86,12 @@ public class ClassMethodExpr extends Expr {
     QuercusClass cl = env.findClass(_className);
 
     if (cl == null)
-      throw new Exception(L.l("{0} is an unknown class", _className));
+      throw env.errorException(L.l("{0} is an unknown class", _className));
 
     AbstractFunction fun = cl.findFunction(_name);
       
     if (fun == null)
-      throw new Exception(L.l("{0} is an unknown method", _name));
+      throw env.errorException(L.l("{0} is an unknown method", _name));
     
     Value []values = new Value[_args.length];
 
@@ -127,7 +127,7 @@ public class ClassMethodExpr extends Expr {
     out.printJavaString(_className);
     out.print("\").getFunction(\"");
     out.printJavaString(_name);
-    out.print("\").evalMethod(env, quercus_this");
+    out.print("\").evalMethod(env, q_this");
       
     if (_args.length <= 5) {
       for (int i = 0; i < _args.length; i++) {

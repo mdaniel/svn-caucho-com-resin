@@ -71,8 +71,6 @@ final public class ProfilerNode {
    */
   void update(long totalTime)
   {
-    System.out.println("UPDATE: " + _invocationCount + " " + this);
-    
     synchronized (this) {
       _invocationCount++;
 

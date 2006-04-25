@@ -70,7 +70,7 @@ public class VarVarExpr extends AbstractVarExpr {
   public Value eval(Env env)
     throws Throwable
   {
-    String varName = _var.evalString(env);
+    String varName = _var.evalString(env).intern();
 
     Value value = env.getValue(varName);
 
@@ -90,7 +90,7 @@ public class VarVarExpr extends AbstractVarExpr {
   public Value evalCopy(Env env)
     throws Throwable
   {
-    String varName = _var.evalString(env);
+    String varName = _var.evalString(env).intern();
 
     Value value = env.getValue(varName);
 
@@ -110,7 +110,7 @@ public class VarVarExpr extends AbstractVarExpr {
   public void evalAssign(Env env, Value value)
     throws Throwable
   {
-    String varName = _var.evalString(env);
+    String varName = _var.evalString(env).intern();
 
     env.setVar(varName, value);
   }
@@ -125,7 +125,7 @@ public class VarVarExpr extends AbstractVarExpr {
   public void evalUnset(Env env)
     throws Throwable
   {
-    String varName = _var.evalString(env);
+    String varName = _var.evalString(env).intern();
 
     env.unsetVar(varName);
   }
@@ -140,7 +140,7 @@ public class VarVarExpr extends AbstractVarExpr {
   public Value evalRef(Env env)
     throws Throwable
   {
-    String varName = _var.evalString(env);
+    String varName = _var.evalString(env).intern();
 
     Value value = env.getVar(varName);
 
@@ -160,7 +160,7 @@ public class VarVarExpr extends AbstractVarExpr {
   public Value evalArg(Env env)
     throws Throwable
   {
-    String varName = _var.evalString(env);
+    String varName = _var.evalString(env).intern();
 
     Value value = env.getVar(varName);
 
@@ -180,7 +180,7 @@ public class VarVarExpr extends AbstractVarExpr {
   public Value evalArray(Env env)
     throws Throwable
   {
-    String varName = _var.evalString(env);
+    String varName = _var.evalString(env).intern();
 
     Value value = env.getVar(varName);
 
@@ -231,7 +231,7 @@ public class VarVarExpr extends AbstractVarExpr {
   {
     out.print("env.getValue(");
     _var.generateString(out);
-    out.print(")");
+    out.print(".intern())");
   }
 
   /**
@@ -244,7 +244,7 @@ public class VarVarExpr extends AbstractVarExpr {
   {
     out.print("env.getVar(");
     _var.generateString(out);
-    out.print(")");
+    out.print(".intern())");
   }
 
   /**
@@ -269,7 +269,7 @@ public class VarVarExpr extends AbstractVarExpr {
   {
     out.print("env.getVar(");
     _var.generateString(out);
-    out.print(").set(");
+    out.print(".intern()).set(");
     value.generateCopy(out); // php/3a84
     out.print(")");
   }
@@ -284,7 +284,7 @@ public class VarVarExpr extends AbstractVarExpr {
   {
     out.print("env.setVar(");
     _var.generateString(out);
-    out.print(", ");
+    out.print(".intern(), ");
     value.generateRef(out);
     out.print(")");
   }
@@ -299,7 +299,7 @@ public class VarVarExpr extends AbstractVarExpr {
   {
     out.print("env.unsetVar(");
     _var.generateString(out);
-    out.print(")");
+    out.print(".intern())");
   }
   
   public String toString()
