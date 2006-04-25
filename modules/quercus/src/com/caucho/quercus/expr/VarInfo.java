@@ -52,7 +52,7 @@ public class VarInfo {
 
   public VarInfo(String name, FunctionInfo function)
   {
-    _name = name;
+    _name = name.intern();
     _function = function;
 
     if (function != null && function.isPageMain())

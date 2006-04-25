@@ -33,6 +33,7 @@ import java.io.IOException;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.IdentityHashMap;
 
 import java.util.logging.Logger;
 
@@ -79,7 +80,7 @@ public class Function extends AbstractFunction {
            Arg []args,
            Statement []statements)
   {
-    _name = name;
+    _name = name.intern();
     _info = info;
     _isReturnsReference = info.isReturnsReference();
     _args = args;
@@ -94,7 +95,7 @@ public class Function extends AbstractFunction {
                   ArrayList<Arg> argList,
                   ArrayList<Statement> statementList)
   {
-    _name = name;
+    _name = name.intern();
     _info = info;
     _isReturnsReference = info.isReturnsReference();
 
@@ -228,7 +229,7 @@ public class Function extends AbstractFunction {
   private Value evalImpl(Env env, Expr []args, boolean isRef)
     throws Throwable
   {
-    HashMap<String,Var> map = new HashMap<String,Var>();
+    IdentityHashMap<String,Var> map = new IdentityHashMap<String,Var>();
 
     Value []values = new Value[args.length];
 
@@ -273,7 +274,7 @@ public class Function extends AbstractFunction {
       }
     }
 
-    HashMap<String,Var> oldMap = env.pushEnv(map);
+    IdentityHashMap<String,Var> oldMap = env.pushEnv(map);
     Value []oldArgs = env.setFunctionArgs(values); // php/0476
 
     try {
@@ -312,7 +313,7 @@ public class Function extends AbstractFunction {
   private Value evalImpl(Env env, Value []args, boolean isRef)
     throws Throwable
   {
-    HashMap<String,Var> map = new HashMap<String,Var>();
+    IdentityHashMap<String,Var> map = new IdentityHashMap<String,Var>();
 
     for (int i = 0; i < args.length; i++) {
       Arg arg = null;
@@ -345,7 +346,7 @@ public class Function extends AbstractFunction {
       }
     }
 
-    HashMap<String,Var> oldMap = env.pushEnv(map);
+    IdentityHashMap<String,Var> oldMap = env.pushEnv(map);
     Value []oldArgs = env.setFunctionArgs(args);
 
     try {
@@ -805,8 +806,8 @@ public class Function extends AbstractFunction {
     }
 
     if (isVariableMap()) {
-      out.println("java.util.HashMap<String,Var> _quercus_map = new java.util.HashMap<String,Var>();");
-      out.println("java.util.HashMap<String,Var> _quercus_oldMap = env.pushEnv(_quercus_map);");
+      out.println("java.util.IdentityHashMap<String,Var> _quercus_map = new java.util.IdentityHashMap<String,Var>();");
+      out.println("java.util.IdentityHashMap<String,Var> _quercus_oldMap = env.pushEnv(_quercus_map);");
 
       out.println("try {");
       out.pushDepth();

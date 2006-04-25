@@ -56,7 +56,7 @@ import com.caucho.quercus.program.InterpretedClassDef;
 import com.caucho.quercus.program.AbstractFunction;
 
 /**
- * PHP class information
+ * Quercus class information
  */
 public class ClassesModule extends AbstractQuercusModule {
   private static final L10N L = new L10N(ClassesModule.class);

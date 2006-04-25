@@ -881,13 +881,16 @@ public class ServletServer extends ProtocolDispatchServer
     super.init();
 
     if (_enableSelectManager && getSelectManager() == null) {
+      if (! 
       try {
 	Class cl = Class.forName("com.caucho.server.port.JniSelectManager");
 	Method method = cl.getMethod("create", new Class[0]);
 
 	initSelectManager((AbstractSelectManager) method.invoke(null, null));
+      } catch (ClassNotFoundException e) {
+	throw new ConfigException(L.l("'select-manager' requires Resin Professional.  See http://www.caucho.com for information and licensing."));
       } catch (Throwable e) {
-	log.warning("Cannot enable select-manager");
+	log.warning(L.l("Cannot enable select-manager {0}", e.toString()));
 	
 	log.log(Level.FINER, e.toString());
       }

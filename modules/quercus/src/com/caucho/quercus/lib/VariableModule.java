@@ -215,14 +215,14 @@ public class VariableModule extends AbstractQuercusModule {
   {
     ArrayValue result = new ArrayValueImpl();
 
-    HashMap<String,Var> map = env.getEnv();
+    IdentityHashMap<String,Var> map = env.getEnv();
 
     for (Map.Entry<String,Var> entry : map.entrySet()) {
       result.append(new StringValueImpl(entry.getKey()),
 		    entry.getValue().toValue());
     }
 
-    HashMap<String,Var> globalMap = env.getGlobalEnv();
+    IdentityHashMap<String,Var> globalMap = env.getGlobalEnv();
     if (map != globalMap) {
       for (Map.Entry<String,Var> entry : globalMap.entrySet()) {
 	result.append(new StringValueImpl(entry.getKey()),

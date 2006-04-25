@@ -53,7 +53,7 @@ public class FunctionExpr extends Expr {
   public FunctionExpr(String name, ArrayList<Expr> args)
   {
     // quercus/120o
-    _name = name.toLowerCase();
+    _name = name.intern();
 
     _args = new Expr[args.size()];
     args.toArray(_args);
@@ -62,7 +62,7 @@ public class FunctionExpr extends Expr {
   public FunctionExpr(String name, Expr []args)
   {
     // quercus/120o
-    _name = name.toLowerCase();
+    _name = name.intern();
 
     _args = args;
   }

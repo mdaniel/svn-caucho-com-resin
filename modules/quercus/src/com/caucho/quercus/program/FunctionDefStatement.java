@@ -63,7 +63,7 @@ public class FunctionDefStatement extends Statement {
     throws Throwable
   {
     try {
-      String name = _fun.getName().toLowerCase();
+      String name = _fun.getName();
 
       if (env.findFunction(name) == null)
         env.addFunction(name, _fun);

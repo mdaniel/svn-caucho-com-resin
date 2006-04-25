@@ -29,6 +29,23 @@
 
 package com.caucho.quercus.env;
 
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.sql.DataSource;
+import java.io.IOException;
+import java.lang.ref.SoftReference;
+import java.sql.Connection;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.IdentityHashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import java.lang.ref.WeakReference;
 import java.lang.ref.SoftReference;
 
@@ -71,21 +88,6 @@ import com.caucho.vfs.Path;
 import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.Vfs;
 import com.caucho.vfs.WriteStream;
-
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.sql.DataSource;
-import java.io.IOException;
-import java.lang.ref.SoftReference;
-import java.sql.Connection;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Represents the Quercus environment.
@@ -158,11 +160,11 @@ public class Env {
   private ArrayList<Shutdown> _shutdownList
     = new ArrayList<Shutdown>();
 
-  private HashMap<String, Var> _globalMap
-    = new HashMap<String, Var>();
+  private IdentityHashMap<String, Var> _globalMap
+    = new IdentityHashMap<String, Var>();
   private HashMap<String, Var> _staticMap
     = new HashMap<String, Var>();
-  private HashMap<String, Var> _map = _globalMap;
+  private IdentityHashMap<String, Var> _map = _globalMap;
 
   private HashMap<String, Value> _constMap
     = new HashMap<String, Value>();
@@ -170,8 +172,8 @@ public class Env {
   private HashMap<String, Value> _lowerConstMap
     = new HashMap<String, Value>();
 
-  private HashMap<String, AbstractFunction> _funMap
-    = new HashMap<String, AbstractFunction>();
+  private IdentityHashMap<String, AbstractFunction> _funMap
+    = new IdentityHashMap<String, AbstractFunction>();
 
   private HashMap<String, AbstractFunction> _lowerFunMap
     = new HashMap<String, AbstractFunction>();
@@ -805,24 +807,28 @@ public class Env {
    * @param name the variable name
    * @param var the current value of the variable
    */
-  public final Var getVar(String name, Value var)
+  public final Var getVar(String name, Value value)
   {
+    if (value != null)
+      return (Var) value;
+    
+    Var var = _map.get(name);
+
     if (var != null)
-      return (Var) var;
+      return var;
 
     var = getRef(name);
 
     if (var == null) {
-      Var newVar = new Var();
-      var = newVar;
+      var = new Var();
 
       if (_map == _globalMap)
-        newVar.setGlobal();
+        var.setGlobal();
 
-      _map.put(name, newVar);
+      _map.put(name, var);
     }
 
-    return (Var) var;
+    return var;
   }
 
   /**
@@ -1336,9 +1342,9 @@ public class Env {
   /**
    * Pushes a new environment.
    */
-  public HashMap<String, Var> pushEnv(HashMap<String, Var> map)
+  public IdentityHashMap<String, Var> pushEnv(IdentityHashMap<String, Var> map)
   {
-    HashMap<String, Var> oldEnv = _map;
+    IdentityHashMap<String, Var> oldEnv = _map;
 
     _map = map;
 
@@ -1348,7 +1354,7 @@ public class Env {
   /**
    * Restores the old environment.
    */
-  public void popEnv(HashMap<String, Var> oldEnv)
+  public void popEnv(IdentityHashMap<String, Var> oldEnv)
   {
     _map = oldEnv;
   }
@@ -1356,7 +1362,7 @@ public class Env {
   /**
    * Returns the current environment.
    */
-  public HashMap<String, Var> getEnv()
+  public IdentityHashMap<String, Var> getEnv()
   {
     return _map;
   }
@@ -1364,7 +1370,7 @@ public class Env {
   /**
    * Returns the current environment.
    */
-  public HashMap<String, Var> getGlobalEnv()
+  public IdentityHashMap<String, Var> getGlobalEnv()
   {
     return _globalMap;
   }
