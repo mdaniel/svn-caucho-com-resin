@@ -109,7 +109,10 @@ public class StaticMethodExpr extends Expr {
       throw new Exception(L.l("no matching class {0}", _className));
     }
 
-    return cl.evalMethod(env, NullThisValue.NULL, _name, _args);
+    // qa/0954 - what appears to be a static call may be a call to a super constructor
+    Value thisValue = env.getThis();
+
+    return cl.evalMethod(env, thisValue, _name, _args);
   }
 
   //

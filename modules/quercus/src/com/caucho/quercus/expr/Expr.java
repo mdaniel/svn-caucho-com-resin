@@ -288,17 +288,6 @@ abstract public class Expr {
     throws Throwable;
 
   /**
-   * Evaluates the expression, discarding the result.
-   *
-   * @param env the calling environment.
-   */
-  public void evalTop(Env env)
-    throws Throwable
-  {
-    eval(env);
-  }
-
-  /**
    * Evaluates the expression, creating an array for unassigned values.
    *
    * @param env the calling environment.

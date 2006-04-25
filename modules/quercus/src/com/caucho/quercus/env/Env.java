@@ -153,7 +153,7 @@ public class Env {
   private Quercus _quercus;
   private QuercusPage _page;
 
-  private Value _this = NullValue.NULL;
+  private Value _this = NullThisValue.NULL;
 
   private ArrayList<SoftReference<ResourceValue>> _resourceList
     = new ArrayList<SoftReference<ResourceValue>>();

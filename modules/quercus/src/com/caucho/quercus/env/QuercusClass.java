@@ -34,6 +34,7 @@ import java.util.Set;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.IdentityHashMap;
+import java.util.logging.Logger;
 
 import com.caucho.quercus.QuercusRuntimeException;
 
@@ -50,6 +51,7 @@ import com.caucho.util.IdentityIntMap;
  */
 public class QuercusClass {
   private final L10N L = new L10N(QuercusClass.class);
+  private final Logger log = Logger.getLogger(QuercusClass.class.getName());
 
   private final ClassDef _classDef;
   

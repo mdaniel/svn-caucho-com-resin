@@ -75,7 +75,7 @@ public class ExprStatement extends Statement {
     throws Throwable
   {
     try {
-      _expr.evalTop(env);
+      _expr.eval(env);
     }
     catch (Throwable t) {
       rethrow(t);
