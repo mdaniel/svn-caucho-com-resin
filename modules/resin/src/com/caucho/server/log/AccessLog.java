@@ -311,7 +311,8 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener {
 	byte []buffer = _logWriter.getBuffer(BUFFER_GAP);
 	int length = _logWriter.getLength();
 
-	length = log(request, response, buffer, 0, length);
+	length = log(request, response,
+		     buffer, length, buffer.length - length);
 
 	_logWriter.setLength(length);
       }
