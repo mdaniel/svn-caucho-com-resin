@@ -72,16 +72,16 @@ std_open(stream_t *stream)
 static int
 poll_read(int fd, int s)
 {
-	fd_set read_set;
-	struct timeval timeout;
+  fd_set read_set;
+  struct timeval timeout;
 
-	FD_ZERO(&read_set);
-	FD_SET(fd, &read_set);
+  FD_ZERO(&read_set);
+  FD_SET(fd, &read_set);
 
-	timeout.tv_sec = s;
-	timeout.tv_usec = 0;
+  timeout.tv_sec = s;
+  timeout.tv_usec = 0;
 
-	return select(fd + 1, &read_set, 0, 0, &timeout);
+  return select(fd + 1, &read_set, 0, 0, &timeout);
 }
 
 /**
@@ -91,8 +91,8 @@ static int
 std_read(stream_t *s, void *buf, int length)
 {
 #ifdef WIN32
-	if (poll_read(s->socket, 600) <= 0)
-		return -1;
+  if (poll_read(s->socket, 600) <= 0)
+    return -1;
 #endif
 
   return recv(s->socket, buf, length, 0);
@@ -848,14 +848,56 @@ cse_session_from_string(char *source, char *cookie, int *backup)
 }
 
 static srun_t *
+cse_find_config_srun(config_t *config, const char *hostname, int port, int ssl)
+{
+  int i;
+  srun_t *srun;
+  
+  for (i = 0; i < config->srun_capacity; i++) {
+    srun = config->srun_list[i];
+    
+    if (! strcmp(srun->hostname, hostname) &&
+	srun->port == port &&
+	(srun->ssl != 0) == ssl) {
+      return srun;
+    }
+  }
+
+  return 0;
+}
+
+static void
+cse_add_config_srun(config_t *config, srun_t *srun)
+{
+  int size;
+  srun_t **srun_list;
+
+  size = config->srun_capacity;
+
+  srun_list = malloc((size + 1) * sizeof(srun_t *));
+
+  memcpy(srun_list, config->srun_list, size * sizeof(srun_t *));
+
+  srun_list[size] = srun;
+
+  config->srun_list = srun_list;
+  config->srun_capacity = size + 1;
+}
+
+static srun_t *
 cse_add_srun(cluster_t *cluster, const char *hostname, int port, int ssl)
 {
   struct hostent *hostent = 0;
   srun_t *srun = 0;
   config_t *config = cluster->config;
+  int i;
 
   LOG(("%s:%d:cse_add_srun(): adding host %s:%d cluster=%p\n",
        __FILE__, __LINE__, hostname, port, cluster));
+
+  srun = cse_find_config_srun(config, hostname, port, ssl);
+  if (srun)
+    return srun;
   
   srun = malloc(sizeof(srun_t));
   memset(srun, 0, sizeof(srun_t));
@@ -906,6 +948,8 @@ cse_add_srun(cluster_t *cluster, const char *hostname, int port, int ssl)
     srun->lock = cse_create_lock(config);
     LOG(("%s:%d:cse_add_srun(): srun lock %x\n",
 	 __FILE__, __LINE__, srun->lock));
+
+    cse_add_config_srun(config, srun);
     
     return srun;
   }
