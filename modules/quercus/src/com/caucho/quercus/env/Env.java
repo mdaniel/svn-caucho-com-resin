@@ -157,13 +157,16 @@ public class Env {
 
   private ArrayList<SoftReference<ResourceValue>> _resourceList
     = new ArrayList<SoftReference<ResourceValue>>();
+  
   private ArrayList<Shutdown> _shutdownList
     = new ArrayList<Shutdown>();
 
   private IdentityHashMap<String, Var> _globalMap
     = new IdentityHashMap<String, Var>();
+  
   private HashMap<String, Var> _staticMap
     = new HashMap<String, Var>();
+  
   private IdentityHashMap<String, Var> _map = _globalMap;
 
   private HashMap<String, Value> _constMap
@@ -193,6 +196,7 @@ public class Env {
   private String _prevIncludePath = ".";
   private String _includePath;
   private ArrayList<String> _includePathList;
+  private HashMap<Path,ArrayList<Path>> _includePathMap;
 
   private HashSet<Path> _includeSet = new HashSet<Path>();
 
@@ -2476,10 +2480,10 @@ public class Env {
    */
   private Path lookupInclude(Path pwd, String relPath)
   {
-    ArrayList<String> pathList = getIncludePath(pwd);
+    ArrayList<Path> pathList = getIncludePath(pwd);
 
     for (int i = 0; i < pathList.size(); i++) {
-      Path path = pwd.lookup(pathList.get(i)).lookup(relPath);
+      Path path = pathList.get(i).lookup(relPath);
 
       if (path.canRead())
         return path;
@@ -2491,7 +2495,7 @@ public class Env {
   /**
    * Returns the include path.
    */
-  private ArrayList<String> getIncludePath(Path pwd)
+  private ArrayList<Path> getIncludePath(Path pwd)
   {
     String includePath = getIniString("include_path");
 
@@ -2500,6 +2504,7 @@ public class Env {
 
     if (! includePath.equals(_includePath)) {
       _includePathList = new ArrayList<String>();
+      _includePathMap = new HashMap<Path,ArrayList<Path>>();
 
       int head = 0;
       int tail;
@@ -2518,7 +2523,19 @@ public class Env {
       _includePath = includePath;
     }
 
-    return _includePathList;
+    ArrayList<Path> pathList = _includePathMap.get(pwd);
+
+    if (pathList == null) {
+      pathList = new ArrayList<Path>();
+
+      for (int i = 0; i < _includePathList.size(); i++) {
+	pathList.add(pwd.lookup(_includePathList.get(i)));
+      }
+
+      _includePathMap.put(pwd, pathList);
+    }
+
+    return pathList;
   }
 
   /**

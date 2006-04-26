@@ -149,6 +149,8 @@ public class OutputBuffer {
 	out = _env.getOriginalOut();
 
       rs.writeToStream(out);
+      
+      rs.close();
     } catch (IOException e) {
       _env.error(e.toString(), e);
     }

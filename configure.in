@@ -1052,9 +1052,9 @@ fi
 SSL_OBJ=ssl_stub.o
 
 if test "${ENABLE_SSL}" = false; then	
-  foo=bar
+  echo "Openssl is not enabled"
 elif test -z "${OPENSSL_LIB}"; then
-  foo=bar
+  echo "Openssl library was not found"
 elif test ! -r "${OPENSSL_LIB}/libcrypto.so" -a \
           ! -r "${OPENSSL_LIB}/libcrypto.dylib" -a \
           ! -r "${OPENSSL_LIB}/libcrypto.a" ; then

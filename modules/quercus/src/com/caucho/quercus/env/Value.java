@@ -355,7 +355,7 @@ abstract public class Value {
    */
   public Var toVar()
   {
-    return new Var(copy());
+    return new Var(toArgValue());
   }
 
   /**

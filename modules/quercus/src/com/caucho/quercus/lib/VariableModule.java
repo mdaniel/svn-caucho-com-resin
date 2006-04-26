@@ -36,6 +36,7 @@ import com.caucho.quercus.module.ReadOnly;
 import com.caucho.quercus.module.Reference;
 import com.caucho.quercus.module.UsesSymbolTable;
 import com.caucho.util.L10N;
+import com.caucho.util.LruCache;
 import com.caucho.vfs.Vfs;
 import com.caucho.vfs.WriteStream;
 
@@ -53,6 +54,9 @@ public class VariableModule extends AbstractQuercusModule {
   private static final Logger log
     = Logger.getLogger(VariableModule.class.getName());
   private static final L10N L = new L10N(VariableModule.class);
+
+  private static final LruCache<String,Value> _unserializeCache
+    = new LruCache<String,Value>(256);
 
   /**
    * Returns a constant
@@ -637,19 +641,28 @@ public class VariableModule extends AbstractQuercusModule {
   /**
    * Unserializes the value from a string.
    */
-  public static Value unserialize(Env env, String v)
+  public static Value unserialize(Env env, String s)
   {
-    try {
-      UnserializeReader is = new UnserializeReader(v);
+    Value v = _unserializeCache.get(s);
 
-      return is.unserialize(env);
+    if (v != null)
+      return v.copy(env);
+    
+    try {
+      UnserializeReader is = new UnserializeReader(s);
+
+      v = is.unserialize(env);
     } catch (Throwable e) {
       log.log(Level.FINE, e.toString(), e);
 
       env.notice(e.toString());
 
-      return BooleanValue.FALSE;
+      v = BooleanValue.FALSE;
     }
+
+    _unserializeCache.put(s, v.copy(env));
+
+    return v;
   }
 
   /**

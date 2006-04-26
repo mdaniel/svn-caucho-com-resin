@@ -273,7 +273,7 @@ public class Var extends Value {
   public Var toVar()
   {
     // php/3d04
-    return new Var(toArgValue());
+    return new Var(_value.toArgValue());
   }
 
   /**

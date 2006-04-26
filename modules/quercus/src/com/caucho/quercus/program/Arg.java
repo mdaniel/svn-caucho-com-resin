@@ -62,7 +62,7 @@ public class Arg {
 
   public Arg(String name, Expr defaultExpr, boolean isReference)
   {
-    _name = name;
+    _name = name.intern();
     _default = defaultExpr;
     _isReference = isReference;
 

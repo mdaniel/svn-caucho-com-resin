@@ -48,8 +48,8 @@ import com.caucho.config.BeanConfigException;
  * JARV Verifier factory.
  */
 public class CompactVerifierFactoryImpl implements VerifierFactory {
-  private static HashMap<String,SoftReference<Schema>> _schemaMap =
-    new HashMap<String,SoftReference<Schema>>();
+  private static HashMap<Path,SoftReference<Schema>> _schemaMap =
+    new HashMap<Path,SoftReference<Schema>>();
 			 
   /**
    * Reads the schema from the classpath.
@@ -82,7 +82,7 @@ public class CompactVerifierFactoryImpl implements VerifierFactory {
   {
     String nativePath = path.getNativePath();
     
-    SoftReference<Schema> schemaRef = _schemaMap.get(nativePath);
+    SoftReference<Schema> schemaRef = _schemaMap.get(path);
     Schema schema = null;
 
     if (schemaRef != null && (schema = schemaRef.get()) != null) {
@@ -100,7 +100,7 @@ public class CompactVerifierFactoryImpl implements VerifierFactory {
       schema = compileSchema(source);
 
       if (schema != null)
-	_schemaMap.put(nativePath, new SoftReference<Schema>(schema));
+	_schemaMap.put(path, new SoftReference<Schema>(schema));
     } finally {
       is.close();
     }

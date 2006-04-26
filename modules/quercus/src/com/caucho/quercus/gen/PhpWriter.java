@@ -255,7 +255,7 @@ public class PhpWriter extends JavaWriterWrapper {
       Expr expr = entry.getKey();
       String var = entry.getValue();
 
-      println("private static final com.caucho.quercus.expr.Expr " + var);
+      println("static final com.caucho.quercus.expr.Expr " + var);
       print("  = ");
       expr.generateExpr(this);
       println(";");
@@ -268,7 +268,7 @@ public class PhpWriter extends JavaWriterWrapper {
       Expr []exprArray = entry.getKey();
       String var = entry.getValue();
 
-      println("private static final com.caucho.quercus.expr.Expr []" + var);
+      println("static final com.caucho.quercus.expr.Expr []" + var);
       print("  = new Expr[] {");
 
       for (int i = 0; i < exprArray.length; i++) {
@@ -287,7 +287,7 @@ public class PhpWriter extends JavaWriterWrapper {
       Value value = entry.getKey();
       String var = entry.getValue();
 
-      println("private static final com.caucho.quercus.env.Value " + var);
+      println("static final com.caucho.quercus.env.Value " + var);
       print("  = ");
       value.generate(this);
       println(";");
@@ -302,7 +302,7 @@ public class PhpWriter extends JavaWriterWrapper {
 
       String moduleClass = module.getClass().getName();
 
-      println("private static " + moduleClass + " " + var + ";");
+      println("static " + moduleClass + " " + var + ";");
     }
     
     for (int i = 0; i < _staticVarList.size(); i++) {

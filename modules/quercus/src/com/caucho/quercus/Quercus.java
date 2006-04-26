@@ -503,7 +503,7 @@ public class Quercus {
 
   public String createStaticName()
   {
-    return "s" + _staticId++;
+    return ("s" + _staticId++).intern();
   }
 
   /**
