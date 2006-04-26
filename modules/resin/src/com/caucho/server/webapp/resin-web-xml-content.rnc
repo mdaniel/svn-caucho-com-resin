@@ -29,6 +29,9 @@ r_access-log = element access-log {
   & (attribute format { string }
      | element format { string })?
 
+  & (attribute shared-buffer { r_boolean-Type }
+     | element shared-buffer { r_boolean-Type })?
+
   & r_init?
 }
 

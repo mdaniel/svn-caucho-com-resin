@@ -114,6 +114,42 @@ public class AccessLogWriter extends AbstractRolloverLog implements Runnable {
     return buffer;
   }
 
+  Object getBufferLock()
+  {
+    return _bufferLock;
+  }
+
+  /**
+   * Returns the current buffer for shared-buffer.  _bufferLock
+   * must be synchronized.
+   */
+  byte []getBuffer(int requiredLength)
+  {
+    if (_buffer.length - _length < requiredLength || isRollover()) {
+      flush();
+    }
+
+    return _buffer;
+  }
+
+  /**
+   * Returns the current buffer length for shared-buffer.  _bufferLock
+   * must be synchronized.
+   */
+  int getLength()
+  {
+    return _length;
+  }
+
+  /**
+   * Returns the current buffer length for shared-buffer.  _bufferLock
+   * must be synchronized.
+   */
+  void setLength(int length)
+  {
+    _length = length;
+  }
+
   void writeBuffer(byte []buffer, int offset, int length)
   {
     synchronized (_bufferLock) {

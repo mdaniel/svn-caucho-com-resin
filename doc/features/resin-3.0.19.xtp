@@ -8,6 +8,16 @@
 
 <summary objsummary='localtoc'/>
 
+<section title="AccessLog shared-buffer">
+
+<p>The access-log has a new attribute, shared-buffer.  The default
+behavior is to use the shared buffer (the current behavior.)  If
+shared-buffer is disabled, each request will use its own buffer
+for logging requests.  In some situations, the separate buffer may
+reduce locking times.</p>
+
+</section>
+
 <section title="LdapAuthenticator">
 
 <p>dn-prefix, dn-suffix, jndi-dnv, user-attribute, password-attribute</p>
