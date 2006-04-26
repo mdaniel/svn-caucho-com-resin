@@ -846,16 +846,21 @@ public class Env {
     if (value != null)
       return (Var) value;
 
-    value = getGlobalRef(name);
+    Var var = _globalMap.get(name);
 
-    if (value == null) {
-      Var var = new Var();
+    if (var != null)
+      return var;
+
+    var = getSpecialRef(name);
+
+    if (var == null) {
+      var = new Var();
       var.setGlobal();
-      _globalMap.put(name, var);
-      value = var;
     }
+    
+    _globalMap.put(name, var);
 
-    return (Var) value;
+    return var;
   }
 
   /**
@@ -1237,7 +1242,12 @@ public class Env {
    */
   public Var getVar(String name)
   {
-    Var var = getRef(name);
+    Var var = _map.get(name);
+
+    if (var != null)
+      return var;
+    
+    var = getRef(name);
 
     if (var == null) {
       var = new Var();
@@ -1613,7 +1623,12 @@ public class Env {
    */
   public AbstractFunction getFunction(String name)
   {
-    AbstractFunction fun = findFunction(name);
+    AbstractFunction fun = _funMap.get(name);
+
+    if (fun != null)
+      return fun;
+    
+    fun = findFunction(name);
 
     if (fun != null)
       return fun;

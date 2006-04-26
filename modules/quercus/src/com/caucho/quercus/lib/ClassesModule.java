@@ -105,7 +105,7 @@ public class ClassesModule extends AbstractQuercusModule {
     ArrayValue result = new ArrayValueImpl();
 
     for (Value name : obj.getIndices()) {
-      result.put(name, obj.getField(name.toString()));
+      result.put(name, obj.getField(name.toString().intern()));
     }
 
     return result;
@@ -165,7 +165,7 @@ public class ClassesModule extends AbstractQuercusModule {
    */
   public static boolean method_exists(Value obj, String methodName)
   {
-    return obj.findFunction(methodName) != null;
+    return obj.findFunction(methodName.intern()) != null;
   }
   
   /**

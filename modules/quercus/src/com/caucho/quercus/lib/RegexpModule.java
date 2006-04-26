@@ -631,12 +631,15 @@ public class RegexpModule
 
     Matcher matcher = pattern.matcher(subject);
 
-    StringBuilderValue result = new StringBuilderValue();
+    StringBuilderValue result = null;
     int tail = 0;
 
     int replacementLen = replacementList.size();
 
     while (matcher.find() && limit-- > 0) {
+      if (result == null)
+	result = new StringBuilderValue();
+      
       // Increment countV (note: if countV != null, then it should be a Var)
       if ((countV != null) && (countV instanceof Var)) {
         long count = ((Var) countV).getRawValue().toLong();
@@ -670,6 +673,9 @@ public class RegexpModule
       tail = matcher.end();
     }
 
+    if (tail == 0)
+      return new StringValueImpl(subject);
+    
     if (tail < length)
       result.append(subject, tail, length);
 

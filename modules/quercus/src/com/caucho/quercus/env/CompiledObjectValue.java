@@ -387,6 +387,14 @@ public class CompiledObjectValue extends ObjectValue {
   {
     ArrayList<Value> indices = new ArrayList<Value>();
 
+    for (int i = 0; i < _fields.length; i++) {
+      if (_fields[i] != UnsetValue.UNSET)
+	indices.add(_fields[i]);
+    }
+
+    if (_object != null)
+      indices.addAll(_object.getIndices());
+
     return indices;
   }
 

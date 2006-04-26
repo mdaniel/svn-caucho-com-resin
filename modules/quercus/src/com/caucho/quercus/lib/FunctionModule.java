@@ -172,7 +172,7 @@ public class FunctionModule extends AbstractQuercusModule {
    */
   public static boolean function_exists(Env env, String name)
   {
-    return env.findFunction(name) != null;
+    return env.findFunction(name.intern()) != null;
   }
 
   /**

@@ -742,7 +742,7 @@ public class ArrayModule
     if (array == null)
       return NullValue.NULL;
 
-    AbstractFunction func = env.findFunction(callback);
+    AbstractFunction func = env.findFunction(callback.intern());
 
     if (func == null) {
       env.warning("The second argument, '" + callback +
@@ -1190,7 +1190,7 @@ public class ArrayModule
       return false;
     }
 
-    AbstractFunction callback = env.findFunction(call.toString());
+    AbstractFunction callback = env.findFunction(call.toString().intern());
 
     if (callback == null)
       return true;
@@ -1251,7 +1251,7 @@ public class ArrayModule
       return false;
     }
 
-    AbstractFunction callback = env.findFunction(call.toString());
+    AbstractFunction callback = env.findFunction(call.toString().intern());
 
     if (callback == null)
       return true;
@@ -2047,7 +2047,7 @@ public class ArrayModule
     }
 
     AbstractFunction func =
-      env.findFunction(arrays[arrays.length - 1].toString());
+      env.findFunction(arrays[arrays.length - 1].toString().intern());
 
     if (func == null) {
       env.warning("Invalid comparison function");
@@ -2108,7 +2108,7 @@ public class ArrayModule
     }
 
     AbstractFunction func =
-      env.findFunction(arrays[arrays.length - 1].toString());
+      env.findFunction(arrays[arrays.length - 1].toString().intern());
 
     if (func == null) {
       env.warning("Invalid comparison function");
@@ -2328,7 +2328,7 @@ public class ArrayModule
     }
 
     AbstractFunction func =
-      env.findFunction(arrays[arrays.length - 1].toString());
+      env.findFunction(arrays[arrays.length - 1].toString().intern());
 
     if (func == null) {
       env.warning("Invalid comparison function");
@@ -2394,7 +2394,7 @@ public class ArrayModule
     }
 
     AbstractFunction func =
-      env.findFunction(arrays[arrays.length - 1].toString());
+      env.findFunction(arrays[arrays.length - 1].toString().intern());
 
     if (func == null) {
       env.warning("Invalid comparison function");
