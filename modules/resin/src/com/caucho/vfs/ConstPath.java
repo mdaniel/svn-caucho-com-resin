@@ -76,6 +76,11 @@ class ConstPath extends Path {
     _path = path;
   }
 
+  public boolean exists()
+  {
+    return true;
+  }
+
   public StreamImpl openReadImpl() throws IOException
   {
     return _stream;

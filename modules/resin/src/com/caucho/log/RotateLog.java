@@ -198,7 +198,7 @@ public class RotateLog {
     else
       throw new ConfigException(L.l("`path' is a required attribute of <{0}>.  Each <{0}> must configure the destination stream.", getTagName()));
 
-    if (_path != null && ! _path.canRead() &&
+    if (_path != null && _path.exists() && ! _path.canRead() &&
 	(_rolloverPeriod != null ||
 	 _rolloverSize != null ||
 	 _archiveFormat != null)) {
