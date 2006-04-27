@@ -170,10 +170,10 @@ public class CronType {
   {
     QDate cal = _localCalendar;
 
-    now = now + 60000 - now % 60000;
+    long time = now + 60000 - now % 60000;
     
     synchronized (cal) {
-      cal.setGMTTime(now);
+      cal.setGMTTime(time);
 
       int minute = nextInterval(_minutes, cal.getMinute());
 

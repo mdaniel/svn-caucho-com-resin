@@ -229,7 +229,7 @@ public class Function extends AbstractFunction {
   private Value evalImpl(Env env, Expr []args, boolean isRef)
     throws Throwable
   {
-    IdentityHashMap<String,Var> map = new IdentityHashMap<String,Var>();
+    HashMap<String,Var> map = new HashMap<String,Var>();
 
     Value []values = new Value[args.length];
 
@@ -274,7 +274,7 @@ public class Function extends AbstractFunction {
       }
     }
 
-    IdentityHashMap<String,Var> oldMap = env.pushEnv(map);
+    HashMap<String,Var> oldMap = env.pushEnv(map);
     Value []oldArgs = env.setFunctionArgs(values); // php/0476
 
     try {
@@ -313,7 +313,7 @@ public class Function extends AbstractFunction {
   private Value evalImpl(Env env, Value []args, boolean isRef)
     throws Throwable
   {
-    IdentityHashMap<String,Var> map = new IdentityHashMap<String,Var>();
+    HashMap<String,Var> map = new HashMap<String,Var>();
 
     for (int i = 0; i < args.length; i++) {
       Arg arg = null;
@@ -346,7 +346,7 @@ public class Function extends AbstractFunction {
       }
     }
 
-    IdentityHashMap<String,Var> oldMap = env.pushEnv(map);
+    HashMap<String,Var> oldMap = env.pushEnv(map);
     Value []oldArgs = env.setFunctionArgs(args);
 
     try {
@@ -806,8 +806,8 @@ public class Function extends AbstractFunction {
     }
 
     if (isVariableMap()) {
-      out.println("java.util.IdentityHashMap<String,Var> _quercus_map = new java.util.IdentityHashMap<String,Var>();");
-      out.println("java.util.IdentityHashMap<String,Var> _quercus_oldMap = env.pushEnv(_quercus_map);");
+      out.println("java.util.HashMap<String,Var> _quercus_map = new java.util.HashMap<String,Var>();");
+      out.println("java.util.HashMap<String,Var> _quercus_oldMap = env.pushEnv(_quercus_map);");
 
       out.println("try {");
       out.pushDepth();

@@ -298,7 +298,7 @@ public class CauchoSystem {
   public static void setWindowsTest(boolean windows)
   {
     _isTesting = true;
-    _isTestWindows = true;
+    _isTestWindows = windows;
   }
 
   public static String getLocalHost()

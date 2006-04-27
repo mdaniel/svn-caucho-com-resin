@@ -161,13 +161,13 @@ public class Env {
   private ArrayList<Shutdown> _shutdownList
     = new ArrayList<Shutdown>();
 
-  private IdentityHashMap<String, Var> _globalMap
-    = new IdentityHashMap<String, Var>();
+  private HashMap<String, Var> _globalMap
+    = new HashMap<String, Var>();
   
   private HashMap<String, Var> _staticMap
     = new HashMap<String, Var>();
   
-  private IdentityHashMap<String, Var> _map = _globalMap;
+  private HashMap<String, Var> _map = _globalMap;
 
   private HashMap<String, Value> _constMap
     = new HashMap<String, Value>();
@@ -175,8 +175,8 @@ public class Env {
   private HashMap<String, Value> _lowerConstMap
     = new HashMap<String, Value>();
 
-  private IdentityHashMap<String, AbstractFunction> _funMap
-    = new IdentityHashMap<String, AbstractFunction>();
+  private HashMap<String, AbstractFunction> _funMap
+    = new HashMap<String, AbstractFunction>();
 
   private HashMap<String, AbstractFunction> _lowerFunMap
     = new HashMap<String, AbstractFunction>();
@@ -1356,9 +1356,9 @@ public class Env {
   /**
    * Pushes a new environment.
    */
-  public IdentityHashMap<String, Var> pushEnv(IdentityHashMap<String, Var> map)
+  public HashMap<String, Var> pushEnv(HashMap<String, Var> map)
   {
-    IdentityHashMap<String, Var> oldEnv = _map;
+    HashMap<String, Var> oldEnv = _map;
 
     _map = map;
 
@@ -1368,7 +1368,7 @@ public class Env {
   /**
    * Restores the old environment.
    */
-  public void popEnv(IdentityHashMap<String, Var> oldEnv)
+  public void popEnv(HashMap<String, Var> oldEnv)
   {
     _map = oldEnv;
   }
@@ -1376,7 +1376,7 @@ public class Env {
   /**
    * Returns the current environment.
    */
-  public IdentityHashMap<String, Var> getEnv()
+  public HashMap<String, Var> getEnv()
   {
     return _map;
   }
@@ -1384,7 +1384,7 @@ public class Env {
   /**
    * Returns the current environment.
    */
-  public IdentityHashMap<String, Var> getGlobalEnv()
+  public HashMap<String, Var> getGlobalEnv()
   {
     return _globalMap;
   }
