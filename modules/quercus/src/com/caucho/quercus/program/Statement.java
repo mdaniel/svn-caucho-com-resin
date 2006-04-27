@@ -115,21 +115,41 @@ abstract public class Statement {
 
       if (causes.containsKey(cause))
         break;
-      
+
       causes.put(cause, Boolean.TRUE);
 
       rootCause = cause;
     }
 
     if (!(rootCause instanceof QuercusExecutionException)) {
-      QuercusExecutionException ex = new QuercusExecutionException(t.getMessage());
-      ex.setStackTrace(new StackTraceElement[] {});
-      rootCause.initCause(ex);
-      rootCause = ex;
-    }
+      QuercusExecutionException quercusEx = new QuercusExecutionException(t.getMessage());
 
-    StackTraceElement[] existingElements = rootCause.getStackTrace();
-    int len = existingElements.length;
+      StackTraceElement[] quercusExStackTrace = quercusEx.getStackTrace();
+      StackTraceElement[] rootCauseStackTrace = rootCause.getStackTrace();
+
+      int quercusExIndex = quercusExStackTrace.length - 1;
+      int rootCauseIndex = rootCauseStackTrace.length - 1;
+
+      while (rootCauseIndex >= 0 &&  quercusExIndex >= 0) {
+        StackTraceElement rootCauseElement = rootCauseStackTrace[rootCauseIndex];
+        StackTraceElement quercusExElement = quercusExStackTrace[quercusExIndex];
+
+        if (! quercusExElement.equals(rootCauseElement))
+          break;
+
+        rootCauseIndex--;
+        quercusExIndex--;
+      }
+
+      int len = rootCauseIndex + 1;
+
+      StackTraceElement[] trimmedElements = new StackTraceElement[len];
+      System.arraycopy(rootCauseStackTrace, 0, trimmedElements, 0, len);
+
+      quercusEx.setStackTrace(trimmedElements);
+      rootCause.initCause(quercusEx);
+      rootCause = quercusEx;
+    }
 
     String className = _location.getClassName();
     String functionName = _location.getFunctionName();
@@ -142,6 +162,8 @@ abstract public class Statement {
     if (functionName == null)
       functionName = "";
 
+    StackTraceElement[] existingElements = rootCause.getStackTrace();
+    int len = existingElements.length;
     StackTraceElement lastElement;
 
     if (len > 1)
