@@ -122,7 +122,20 @@ abstract public class Statement {
     }
 
     if (!(rootCause instanceof QuercusExecutionException)) {
-      QuercusExecutionException quercusEx = new QuercusExecutionException(t.getMessage());
+      String rootCauseName = rootCause.getClass().getName();
+      String rootCauseMessage = rootCause.getMessage();
+
+      StringBuilder quercusExMessage = new StringBuilder();
+
+      quercusExMessage.append(rootCauseName);
+
+      if (rootCauseMessage != null && rootCauseMessage.length() > 0) {
+        quercusExMessage.append(" ");
+        quercusExMessage.append(rootCauseMessage);
+      }
+
+      QuercusExecutionException quercusEx
+        = new QuercusExecutionException(quercusExMessage.toString());
 
       StackTraceElement[] quercusExStackTrace = quercusEx.getStackTrace();
       StackTraceElement[] rootCauseStackTrace = rootCause.getStackTrace();
