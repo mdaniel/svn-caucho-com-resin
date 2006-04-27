@@ -32,6 +32,7 @@ package com.caucho.quercus.lib;
 import com.caucho.Version;
 import com.caucho.naming.Jndi;
 import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.NullValue;
 import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.util.L10N;
 
@@ -87,35 +88,45 @@ public class ResinModule
     return ((UserTransaction) new InitialContext().lookup("java:comp/UserTransaction"));
   }
 
-  public static void xa_begin()
+  public static NullValue xa_begin()
     throws NamingException, SystemException, NotSupportedException
   {
     getUserTransaction().begin();
+
+    return NullValue.NULL;
   }
 
-  public static void xa_commit()
+  public static NullValue xa_commit()
     throws NamingException, HeuristicMixedException, SystemException,
            HeuristicRollbackException, RollbackException
   {
     getUserTransaction().commit();
+
+    return NullValue.NULL;
   }
 
-  public static void xa_rollback()
+  public static NullValue xa_rollback()
     throws NamingException, SystemException
   {
     getUserTransaction().rollback();
+
+    return NullValue.NULL;
   }
 
-  public static void xa_rollback_only()
+  public static NullValue xa_rollback_only()
     throws NamingException, SystemException
   {
     getUserTransaction().setRollbackOnly();
+
+    return NullValue.NULL;
   }
 
-  public static void xa_set_timeout(int timeoutSeconds)
+  public static NullValue xa_set_timeout(int timeoutSeconds)
     throws NamingException, SystemException
   {
     getUserTransaction().setTransactionTimeout(timeoutSeconds);
+
+    return NullValue.NULL;
   }
 
   public static int xa_status()

@@ -404,7 +404,7 @@ public class OptionsModule extends AbstractQuercusModule {
     }
   }
 
-  public static String quercus_version()
+  public static String quercus_quercus_version()
   {
     return Version.VERSION;
   }

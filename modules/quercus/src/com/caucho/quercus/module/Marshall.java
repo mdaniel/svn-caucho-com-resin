@@ -1342,7 +1342,13 @@ abstract public class Marshall {
     public void generateResultStart(PhpWriter out)
       throws IOException
     {
-      throw new UnsupportedOperationException();
+      // php/3c2o
+      // throw new UnsupportedOperationException();
+    }
+
+    public void generateResultEnd(PhpWriter out)
+      throws IOException
+    {
     }
   };
 }

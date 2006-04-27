@@ -679,10 +679,13 @@ public class Quercus {
       if (! Modifier.isPublic(method.getModifiers()))
         continue;
 
-      Class retType = method.getReturnType();
+      // XXX: removed for php/0c2o.qa
+      /**
+       Class retType = method.getReturnType();
 
       if (void.class.isAssignableFrom(retType))
         continue;
+       */
 
       Class []params = method.getParameterTypes();
 

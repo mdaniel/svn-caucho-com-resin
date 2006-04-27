@@ -32,6 +32,7 @@ package com.caucho.quercus.program;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.IdentityHashMap;
 
 import com.caucho.java.JavaWriter;
 
@@ -102,11 +103,23 @@ abstract public class Statement {
     else
       typedT = (E) t;
 
-    // add stack information to the rootCause
     Throwable rootCause = t;
 
-    while (rootCause.getCause() != null)
-      rootCause = t.getCause();
+    // guard against circular cause
+    IdentityHashMap<Throwable, Boolean> causes = new IdentityHashMap<Throwable, Boolean>();
+
+    causes.put(rootCause, Boolean.TRUE);
+
+    while (rootCause.getCause() != null) {
+      Throwable cause = rootCause.getCause();
+
+      if (causes.containsKey(cause))
+        break;
+      
+      causes.put(cause, Boolean.TRUE);
+
+      rootCause = cause;
+    }
 
     if (!(rootCause instanceof QuercusExecutionException)) {
       QuercusExecutionException ex = new QuercusExecutionException(t.getMessage());

@@ -51,7 +51,7 @@ import com.caucho.quercus.env.NullValue;
 import com.caucho.quercus.gen.PhpWriter;
 
 /**
- * Represents a compiled function with 1 arg
+ * Represents a compiled function
  */
 abstract public class CompiledFunction extends AbstractFunction {
   private static final Logger log
