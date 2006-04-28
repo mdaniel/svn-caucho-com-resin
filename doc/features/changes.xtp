@@ -7,6 +7,7 @@
 <!--
 <li>Security issue involving web-app-deploy
 -->
+<li>Quercus: eval() needs access to the symbol table and "this" (rep by Jack Zhang)
 <li>(2006-04-14) ToCharResponseAdapter should not close the underlying writer on close (#989, rep by Tony Field)
 <li>CGI was sending output through PrintWriter instead of OutputStream (#1035, rep by mineral)
 <li>Added aliases and java type for ISO-8859-10 (rep by Michael Young)

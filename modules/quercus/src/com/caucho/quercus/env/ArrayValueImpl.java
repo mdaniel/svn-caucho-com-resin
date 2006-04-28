@@ -396,7 +396,7 @@ public class ArrayValueImpl extends ArrayValue {
   /**
    * Add
    */
-  public ArrayValue put(Value value)
+  public Value put(Value value)
   {
     if (_isDirty) 
       copyOnWrite();
@@ -405,7 +405,7 @@ public class ArrayValueImpl extends ArrayValue {
 
     put(key, value);
 
-    return this;
+    return value;
   }
 
   /**

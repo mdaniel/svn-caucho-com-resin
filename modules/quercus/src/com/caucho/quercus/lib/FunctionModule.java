@@ -80,7 +80,7 @@ public class FunctionModule extends AbstractQuercusModule {
     if (arg instanceof ArrayValue)
       argArray = (ArrayValue) arg;
     else
-      argArray = new ArrayValueImpl().put(arg);
+      argArray = new ArrayValueImpl().append(arg);
 
     Value []args;
 

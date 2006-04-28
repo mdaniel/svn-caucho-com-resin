@@ -163,7 +163,7 @@ abstract public class ArrayValue extends Value {
   /**
    * Add
    */
-  abstract public ArrayValue put(Value value);
+  abstract public Value put(Value value);
 
   /**
    * Add to front.

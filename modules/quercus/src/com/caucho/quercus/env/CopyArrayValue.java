@@ -130,9 +130,9 @@ public class CopyArrayValue extends ArrayValue {
   /**
    * Add
    */
-  public ArrayValue append(Value value)
+  public Value put(Value value)
   {
-    return getCopyArray().append(value);
+    return getCopyArray().put(value);
   }
 
   /**
@@ -168,14 +168,6 @@ public class CopyArrayValue extends ArrayValue {
   }
 
   /**
-   * Add
-   */
-  public ArrayValue put(Value value)
-  {
-    return getCopyArray().put(value);
-  }
-
-  /**
    * Sets the array ref.
    */
   public Value putRef()
@@ -191,6 +183,14 @@ public class CopyArrayValue extends ArrayValue {
     put(key, value.toArgValue());
 
     return this;
+  }
+
+  /**
+   * Add
+   */
+  public ArrayValue append(Value value)
+  {
+    return getCopyArray().append(value);
   }
 
   /**

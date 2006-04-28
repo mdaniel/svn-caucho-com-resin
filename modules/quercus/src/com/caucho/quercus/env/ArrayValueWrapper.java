@@ -95,7 +95,7 @@ public class ArrayValueWrapper extends ArrayValue {
   /**
    * Add
    */
-  public ArrayValue put(Value value)
+  public Value put(Value value)
   {
     return _array.put(value);
   }

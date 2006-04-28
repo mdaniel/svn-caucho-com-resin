@@ -124,7 +124,7 @@ public class ServerArrayValue extends ArrayValueImpl {
   /**
    * Adds a new value.
    */
-  public ArrayValue put(Value value)
+  public Value put(Value value)
   {
     if (! _isFilled)
       fillMap();

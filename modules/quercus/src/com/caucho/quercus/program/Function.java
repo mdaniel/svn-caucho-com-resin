@@ -809,6 +809,9 @@ public class Function extends AbstractFunction {
       out.println("java.util.HashMap<String,Var> _quercus_map = new java.util.HashMap<String,Var>();");
       out.println("java.util.HashMap<String,Var> _quercus_oldMap = env.pushEnv(_quercus_map);");
 
+      if (! isStatic())
+	out.println("Value q_oldThis = env.setThis(quercus_this_arg);");
+      
       out.println("try {");
       out.pushDepth();
 
@@ -830,6 +833,10 @@ public class Function extends AbstractFunction {
       out.pushDepth();
       // out.println("env.setFunctionArgs(_quercus_oldArgs);");
       out.println("env.popEnv(_quercus_oldMap);");
+
+      if (! isStatic())
+	out.println("env.setThis(q_oldThis);");
+      
       out.popDepth();
       out.println("}");
     }

@@ -45,6 +45,7 @@ import com.caucho.quercus.Quercus;
 import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.quercus.module.Optional;
 import com.caucho.quercus.module.Reference;
+import com.caucho.quercus.module.UsesSymbolTable;
 
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.Env;
@@ -141,6 +142,7 @@ public class MiscModule extends AbstractQuercusModule {
   /**
    * Comples and evaluates an expression.
    */
+  @UsesSymbolTable
   public Value eval(Env env, String code)
     throws Throwable
   {
