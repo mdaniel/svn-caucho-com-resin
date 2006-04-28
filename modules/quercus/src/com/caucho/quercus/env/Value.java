@@ -695,8 +695,9 @@ abstract public class Value {
       return toLong() < rValue.toLong();
     else if (isNumber() || rValue.isNumber())
       return toDouble() < rValue.toDouble();
-    else
+    else {
       return toString().compareTo(rValue.toString()) < 0;
+    }
   }
 
   /**
