@@ -29,11 +29,16 @@
 
 package com.caucho.quercus.lib;
 
+import java.io.InputStream;
+import java.io.IOException;
+
 import java.util.Map;
 
 import com.caucho.util.L10N;
 import com.caucho.util.Base64;
 import com.caucho.util.CharBuffer;
+
+import com.caucho.vfs.TempBuffer;
 
 import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.quercus.module.Optional;
@@ -54,13 +59,33 @@ public class UrlModule extends AbstractQuercusModule {
   /**
    * Encodes base64
    */
-  public static String base64_encode(String str)
+  public static String base64_encode(InputStream is)
   {
     CharBuffer cb = new CharBuffer();
 
-    byte []bytes = str.getBytes();
+    TempBuffer tb = TempBuffer.allocate();
+    byte []buffer = tb.getBuffer();
 
-    Base64.encode(cb, bytes, 0, bytes.length);
+    int len;
+    int offset = 0;
+
+    try {
+      while ((len = is.read(buffer, offset, buffer.length)) >= 0) {
+	int tail = len % 3;
+	
+	Base64.encode(cb, buffer, 0, len - tail);
+
+	System.arraycopy(buffer, len - tail, buffer, 0, tail);
+	offset = tail;
+      }
+
+      if (offset > 0)
+	Base64.encode(cb, buffer, 0, offset);
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+
+    TempBuffer.free(tb);
 
     return cb.toString();
   }

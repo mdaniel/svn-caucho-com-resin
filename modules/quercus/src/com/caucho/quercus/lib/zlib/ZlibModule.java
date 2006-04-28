@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -27,6 +28,13 @@
  */
 
 package com.caucho.quercus.lib.zlib;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+
+import java.util.zip.*;
 
 import com.caucho.quercus.env.BooleanValue;
 import com.caucho.quercus.env.Env;
@@ -38,21 +46,8 @@ import com.caucho.quercus.module.NotNull;
 import com.caucho.quercus.module.Optional;
 import com.caucho.quercus.lib.zlib.Zlib;
 import com.caucho.util.ByteBuffer;
-import com.caucho.vfs.ReadStream;
-import com.caucho.vfs.StreamImplOutputStream;
-import com.caucho.vfs.TempBuffer;
-import com.caucho.vfs.TempStream;
-import com.caucho.vfs.VfsStream;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.zip.DataFormatException;
-import java.util.zip.Deflater;
-import java.util.zip.DeflaterOutputStream;
-import java.util.zip.Inflater;
-import java.util.zip.InflaterInputStream;
+import com.caucho.vfs.*;
 
 /**
  * PHP ZLib
@@ -67,7 +62,7 @@ public class ZlibModule extends AbstractQuercusModule {
 
   public String []getLoadedExtensions()
   {
-    return new String[] {  "zlib" };
+    return new String[] { "zlib" };
   }
 
   /**
@@ -78,16 +73,12 @@ public class ZlibModule extends AbstractQuercusModule {
    * @param useIncludePath always on
    * @return Zlib
    */
-  public Value gzopen(Env env,
-                      String fileName,
-                      String mode,
-                      @Optional("0") int useIncludePath)
+  public Zlib gzopen(Env env,
+		     String fileName,
+		     String mode,
+		     @Optional("0") int useIncludePath)
   {
-    if (fileName == null)
-      return BooleanValue.FALSE;
-
-    Zlib zlib = new Zlib(env, fileName, mode, useIncludePath);
-    return env.wrapJava(zlib);
+    return new Zlib(env, fileName, mode, useIncludePath);
   }
 
   /**
@@ -97,16 +88,12 @@ public class ZlibModule extends AbstractQuercusModule {
    * @param useIncludePath
    * @return array of uncompressed lines from fileName
    */
-  public Value gzfile(Env env,
-                      String fileName,
-                      @Optional("0") int useIncludePath)
+  public Zlib gzfile(Env env,
+		     String fileName,
+		     @Optional("0") int useIncludePath)
     throws IOException, DataFormatException
   {
-    if (fileName == null)
-      return BooleanValue.FALSE;
-
-    Zlib zlib = new Zlib(env,fileName,"r",useIncludePath);
-    return zlib.gzfile();
+    return new Zlib(env, fileName, "r", useIncludePath);
   }
 
   /**
@@ -124,9 +111,6 @@ public class ZlibModule extends AbstractQuercusModule {
                             @Optional("0") int useIncludePath)
     throws IOException, DataFormatException
   {
-    if (fileName == null)
-      return false;
-
     Zlib zlib = new Zlib(env, fileName,"r",useIncludePath);
     env.getOut().writeStream(zlib.readgzfile());
     return true;
@@ -137,7 +121,7 @@ public class ZlibModule extends AbstractQuercusModule {
                      String s,
                      @Optional("0") int length)
   {
-    if ((zp == null) || (s == null) || ("".equals(s)))
+    if (zp == null || "".equals(s))
       return 0;
 
     return zp.gzwrite(env, s,length);
@@ -232,31 +216,64 @@ public class ZlibModule extends AbstractQuercusModule {
    * @param level (default is Deflater.DEFAULT_COMPRESSION)
    * @return compressed string
    */
-  public Value gzcompress(String data,
-                          @Optional("-1") int level)
+  public Value gzcompress(InputStream data,
+                          @Optional("6") int level)
     throws DataFormatException, IOException
   {
-    if (level == -1)
-      level = Deflater.DEFAULT_COMPRESSION;
+    Deflater deflater = new Deflater(level, true);
+    Adler32 crc = new Adler32();
 
-    Deflater deflater = new Deflater(level);
-    byte[] input = data.getBytes();
-    deflater.setInput(input);
-    deflater.finish();
+    TempBuffer buf = TempBuffer.allocate();
+    byte []buffer = buf.getBuffer();
+    boolean isFinished = false;
+    TempStream out = new TempStream();
 
-    byte[] output = new byte[input.length];
-    ByteBuffer buf = new ByteBuffer();
-    int compressedDataLength;
-    int fullCompressedDataLength = 0;
-    while (!deflater.finished()) {
-      compressedDataLength = deflater.deflate(output);
-      fullCompressedDataLength += compressedDataLength;
-      buf.append(output,0,compressedDataLength);
+    buffer[0] = (byte) 0x78;
+
+    if (level <= 1)
+      buffer[1] = (byte) 0x01;
+    else if (level < 6)
+      buffer[1] = (byte) 0x5e;
+    else if (level == 6)
+      buffer[1] = (byte) 0x9c;
+    else
+      buffer[1] = (byte) 0xda;
+
+    out.write(buffer, 0, 2, false);
+
+    while (! isFinished) {
+      while (! isFinished && deflater.needsInput()) {
+	int len = data.read(buffer, 0, buffer.length);
+
+	if (len > 0) {
+	  crc.update(buffer, 0, len);
+	  deflater.setInput(buffer, 0, len);
+	}
+	else {
+	  isFinished = true;
+	  deflater.finish();
+	}
+      }
+
+      int len;
+
+      while ((len = deflater.deflate(buffer, 0, buffer.length)) > 0) {
+	out.write(buffer, 0, len, false);
+      }
     }
 
-    ByteArrayInputStream result = new ByteArrayInputStream(buf.getBuffer(),0,fullCompressedDataLength);
-    ReadStream readStream = new ReadStream(new VfsStream(result,null));
-    return new TempBufferStringValue(TempBuffer.copyFromStream(readStream));
+    long value = crc.getValue();
+    
+    buffer[0] = (byte) (value >> 24);
+    buffer[1] = (byte) (value >> 16);
+    buffer[2] = (byte) (value >> 8);
+    buffer[3] = (byte) (value >> 0);
+    
+    out.write(buffer, 0, 4, true);
+    
+    TempBuffer.free(buf);
+
+    return new TempBufferStringValue(out.getHead());
   }
 
   /**
@@ -272,18 +289,24 @@ public class ZlibModule extends AbstractQuercusModule {
     if (length == 0)
       length = Long.MAX_VALUE;
 
-    InflaterInputStream iis = new InflaterInputStream(is, new Inflater());
+    //    is.skip(2);
 
-    StringBuilder uncompressed = new StringBuilder();
-    int numChars = 0;
-    int ch;
+    InflaterInputStream in = new InflaterInputStream(is);
 
-    while ((numChars < length) && ((ch = iis.read()) != -1)) {
-      numChars++;
-      uncompressed.append((char) ch);
+    TempStream out = new TempStream();
+
+    TempBuffer tempBuf = TempBuffer.allocate();
+    byte []buffer = tempBuf.getBuffer();
+
+    int len;
+    while ((len = in.read(buffer, 0, buffer.length)) >= 0) {
+      out.write(buffer, 0, len, false);
     }
 
-    return new StringValueImpl(uncompressed.toString());
+    TempBuffer.free(tempBuf);
+    in.close();
+
+    return new TempBufferStringValue(out.getHead());
   }
 
   /**
@@ -291,67 +314,87 @@ public class ZlibModule extends AbstractQuercusModule {
    * @param level
    * @return compressed using DEFLATE algorithm
    */
-  public Value gzdeflate(InputStream is,
-                         @Optional("-1") int level)
+  public Value gzdeflate(InputStream data,
+                         @Optional("6") int level)
    throws DataFormatException, IOException
   {
-    if (level == -1)
-      level = Deflater.DEFAULT_COMPRESSION;
+    Deflater deflater = new Deflater(level, true);
 
-    TempStream ts = new TempStream();
-    OutputStream os = new StreamImplOutputStream(ts);
+    TempBuffer buf = TempBuffer.allocate();
+    byte []buffer = buf.getBuffer();
+    boolean isFinished = false;
+    TempStream out = new TempStream();
 
-    //Deflater deflater = new Deflater(level, true);
+    while (! isFinished) {
+      while (! isFinished && deflater.needsInput()) {
+	int len = data.read(buffer, 0, buffer.length);
 
-    //DeflaterOutputStream out = new DeflaterOutputStream(os, deflater);
-    DeflaterOutputStream out = new DeflaterOutputStream(os);
+	if (len > 0) {
+	  deflater.setInput(buffer, 0, len);
+	}
+	else {
+	  isFinished = true;
+	  deflater.finish();
+	}
+      }
 
-    TempBuffer temp = TempBuffer.allocate();
-    byte []buf = temp.getBuffer();
-    int len;
+      int len;
 
-    while ((len = is.read(buf, 0, buf.length)) > 0) {
-      out.write(buf, 0, len);
+      while ((len = deflater.deflate(buffer, 0, buffer.length)) > 0) {
+	out.write(buffer, 0, len, false);
+      }
     }
 
-    out.close();
+    deflater.end();
 
-    TempBuffer.free(temp);
+    TempBuffer.free(buf);
 
-    return new TempBufferStringValue(ts.getHead());
+    return new TempBufferStringValue(out.getHead());
   }
 
   /**
-   *
    * @param data compressed using Deflate algorithm
    * @param length (maximum length of string returned)
+   *
    * @return uncompressed string
    */
   public Value gzinflate(Env env,
-			 Value data,
+			 InputStream data,
                          @Optional("0") long length)
     throws DataFormatException, IOException
   {
     try {
-      InputStream is = data.toInputStream();
+      Inflater inflater = new Inflater(true);
 
-      InflaterInputStream in = new InflaterInputStream(is);
+      TempBuffer buf = TempBuffer.allocate();
+      byte []buffer = buf.getBuffer();
+      boolean isFinished = false;
+      TempStream out = new TempStream();
 
-      TempStream os = new TempStream();
+      while (! isFinished) {
+	while (! isFinished && inflater.needsInput()) {
+	  int len = data.read(buffer, 0, buffer.length);
 
-      TempBuffer temp = TempBuffer.allocate();
-      byte []buf = temp.getBuffer();
-      int len;
+	  if (len > 0) {
+	    inflater.setInput(buffer, 0, len);
+	  }
+	  else {
+	    isFinished = true;
+	  }
+	}
 
-      while ((len = in.read(buf, 0, buf.length)) > 0) {
-	      os.write(buf, 0, len, false);
+	int len;
+
+	while ((len = inflater.inflate(buffer, 0, buffer.length)) > 0) {
+	  out.write(buffer, 0, len, false);
+	}
       }
 
-      os.close();
+      inflater.end();
 
-      TempBuffer.free(temp);
+      TempBuffer.free(buf);
 
-      return new TempBufferStringValue(os.getHead());
+      return new TempBufferStringValue(out.getHead());
     } catch (Exception e) {
       env.warning(e);
 
@@ -368,7 +411,7 @@ public class ZlibModule extends AbstractQuercusModule {
    * @param encodingMode XXX:ignored for now
    * @return gzcompress
    */
-  public Value gzencode(String data,
+  public Value gzencode(InputStream data,
                         @Optional("-1") int level,
                         @Optional int encodingMode)
     throws DataFormatException, IOException
