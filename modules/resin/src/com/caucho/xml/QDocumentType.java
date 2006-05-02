@@ -245,9 +245,9 @@ public class QDocumentType extends QNode implements DocumentType {
 	node.print(os);
       }
 
-      os.println("]>");
+      os.print("]>");
     } else
-      os.println(">");
+      os.print(">");
   }
 
   public String toString()

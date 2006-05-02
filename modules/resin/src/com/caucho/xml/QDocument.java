@@ -1016,7 +1016,7 @@ public class QDocument extends QDocumentFragment implements CauchoDocument {
     String topElt = _element == null ? "XXX:top" : _element.getNodeName();
 
     if (_dtd == null)
-      return "[Document[" + topElt + "]";
+      return "Document[" + topElt + "]";
 
     if (_dtd.getPublicId() != null && _dtd.getSystemId() != null)
       return ("Document[" + topElt + " PUBLIC '" + _dtd.getPublicId() + "' '" +

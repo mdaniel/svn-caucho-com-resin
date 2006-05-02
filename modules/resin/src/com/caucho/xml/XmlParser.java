@@ -193,7 +193,7 @@ public class XmlParser extends AbstractParser {
 
     if (_systemId == null) {
       _systemId = _is.getPath().getURL();
-      if ("null:".equals(_systemId))
+      if ("null:".equals(_systemId) || "string:".equals(_systemId))
 	_systemId = "stream";
     }
 
@@ -213,7 +213,8 @@ public class XmlParser extends AbstractParser {
       _dtd.setSystemId(_systemId);
     
     if (_builder != null) {
-      _builder.setSystemId(_systemId);
+      if (! "string:".equals(_systemId) && ! "stream".equals(_systemId))
+	_builder.setSystemId(_systemId);
       _builder.setFilename(_is.getPath().getURL());
     }
 
@@ -566,7 +567,8 @@ public class XmlParser extends AbstractParser {
 	      parseEntityDecl(doctype);
 	    else
 	      throw error("unknown declaration `" + name + "'");
-	  } else if (ch == '-')
+	  }
+	  else if (ch == '-')
 	    parseComment();
 	  else if (ch == '[') {
 	    ch = _reader.parseName(_text, read());
@@ -581,9 +583,11 @@ public class XmlParser extends AbstractParser {
 	    else
 	      throw error("unknown declaration `" + name + "'");
 	  }
-	} else if (ch == '?') {
+	}
+	else if (ch == '?') {
 	  parsePI();
-	} else 
+	}
+	else 
 	  throw error(L.l("expected markup at {0}", badChar(ch)));
       } else if (ch == '%') {
 	ch = _reader.parseName(_buf, read());
@@ -2852,11 +2856,16 @@ public class XmlParser extends AbstractParser {
     _line = 1;
 
     int ch = parseXMLDeclaration(oldReader);
+
+    XmlReader reader = _reader;
+
+    if (reader instanceof MacroReader)
+      reader = reader.getNext();
     
-    _reader.setSystemId(systemId);
-    _reader.setFilename(systemId);
-    _reader.setPublicId(publicId);
-    _reader.setNext(oldReader);
+    reader.setSystemId(systemId);
+    reader.setFilename(systemId);
+    reader.setPublicId(publicId);
+    reader.setNext(oldReader);
 
     unread(ch);
   }
@@ -2903,6 +2912,7 @@ public class XmlParser extends AbstractParser {
       popInclude();
       ch = _reader.read();
     }
+    
     return ch;
   }
     
