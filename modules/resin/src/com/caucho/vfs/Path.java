@@ -671,6 +671,21 @@ public abstract class Path {
   }
 
   /**
+   * Sets the length of the file to zero.
+   *
+   * @return true if successful
+   */
+  public boolean truncate()
+    throws IOException
+  {
+    StreamImpl os = openWriteImpl();
+
+    os.close();
+
+    return true;
+  }
+
+  /**
    * Renames the file or directory to the name given by the path.
    * @return true if successful
    */

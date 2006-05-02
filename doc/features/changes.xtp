@@ -4,6 +4,7 @@
 
 <s2 title='3.0.snap - Apr 24, 2006'>
 <ul>
+<li>stdout.log rotation file name for size overflow uses incorrect time (rep by Bill Au, #1054)
 <!--
 <li>Security issue involving web-app-deploy
 -->

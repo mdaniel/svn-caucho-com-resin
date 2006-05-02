@@ -375,7 +375,7 @@ public class AbstractRolloverLog {
     _nextPeriodEnd = Period.periodEnd(now, getRolloverPeriod());
 
     Path path = getPath();
-      
+
     if (lastPeriodEnd < now) {
       closeLogStream();
       
@@ -395,7 +395,7 @@ public class AbstractRolloverLog {
       closeLogStream();
       
       if (getPathFormat() == null) {
-	Path savedPath = getArchivePath(_nextRolloverCheckTime - 1);
+	Path savedPath = getArchivePath(now);
 	movePathToArchive(savedPath);
       }
     }
@@ -472,6 +472,8 @@ public class AbstractRolloverLog {
     if (savedPath == null)
       return;
     
+    closeLogStream();
+    
     Path path = getPath();
     
     String savedName = savedPath.getTail();
@@ -522,8 +524,15 @@ public class AbstractRolloverLog {
 	} catch (Throwable e) {
 	  // can't log in log rotation routines
 	}
-	  
-	path.remove();
+
+	try {
+	  if (! path.truncate())
+	    path.remove();
+	} catch (IOException e) {
+	  path.remove();
+
+	  throw e;
+	}
       }
     } catch (Throwable e) {
       logWarning(L.l("Error rotating logs"), e);

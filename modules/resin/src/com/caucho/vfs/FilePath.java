@@ -335,6 +335,22 @@ public class FilePath extends FilesystemPath {
     return false;
   }
   
+  public boolean truncate()
+    throws IOException
+  {
+    File file = getFile();
+
+    FileOutputStream fos = new FileOutputStream(file);
+
+    try {
+      fos.getChannel().truncate(0);
+
+      return true;
+    } finally {
+      fos.close();
+    }
+  }
+  
   public boolean renameTo(Path path)
   {
     if (! (path instanceof FilePath))
