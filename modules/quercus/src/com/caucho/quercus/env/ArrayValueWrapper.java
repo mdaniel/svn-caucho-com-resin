@@ -109,6 +109,14 @@ public class ArrayValueWrapper extends ArrayValue {
   }
 
   /**
+   * Splices values
+   */
+  public ArrayValue splice(int start, int end, ArrayValue replace)
+  {
+    return _array.splice(start, end, replace);
+  }
+
+  /**
    * Returns the value as an argument which may be a reference.
    */
   public Value getArg(Value index)

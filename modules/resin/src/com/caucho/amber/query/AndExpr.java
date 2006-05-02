@@ -177,7 +177,7 @@ public class AndExpr extends AbstractAmberExpr {
 
     for (int i = 0; i < _components.size(); i++) {
       if (i != 0)
-	cb.append(" AND ");
+	cb.append(" and ");
 	
       AmberExpr expr = _components.get(i);
 
@@ -196,7 +196,7 @@ public class AndExpr extends AbstractAmberExpr {
 
     for (int i = 0; i < _components.size(); i++) {
       if (i != 0)
-	cb.append(" AND ");
+	cb.append(" and ");
 	
       AmberExpr expr = _components.get(i);
 

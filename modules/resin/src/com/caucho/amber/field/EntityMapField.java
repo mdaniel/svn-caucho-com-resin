@@ -263,7 +263,7 @@ public class EntityMapField extends AbstractField {
       for (int i = 0; i < keys.size(); i++) {
 	IdField key = keys.get(i);
 	
-	out.print(" AND ");
+	out.print(" and ");
 
 	out.print("o." + _id.getName() + "." + key.getName() + "=?" + (i + 2));
       }

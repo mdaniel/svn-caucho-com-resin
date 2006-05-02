@@ -274,12 +274,7 @@ abstract public class Statement {
       }
     }
 
-    try {
-      generateImpl(out);
-    }
-    catch (Throwable t) {
-      rethrow(t, IOException.class);
-    }
+    generateImpl(out);
   }
 
   /**

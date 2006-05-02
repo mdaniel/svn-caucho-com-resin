@@ -374,7 +374,7 @@ public class CompositeId extends Id {
 
     for (int i = 0; i < keys.size(); i++) {
       if (i != 0)
-	cb.append(" AND ");
+	cb.append(" and ");
 
       cb.append(keys.get(i).generateWhere(id));
     }

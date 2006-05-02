@@ -193,7 +193,7 @@ public class SubId extends Id {
 
     for (int i = 0; i < keys.size(); i++) {
       if (i != 0)
-	cb.append(" AND ");
+	cb.append(" and ");
 
       generateMatchArgWhere(cb, keys.get(i), id);
     }
@@ -215,7 +215,7 @@ public class SubId extends Id {
       Column column = columns.get(i);
 
       if (i != 0)
-	cb.append(" AND ");
+	cb.append(" and ");
 
       cb.append(id);
       cb.append('.');

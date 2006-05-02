@@ -949,33 +949,22 @@ public class ArrayModule
    * @return the part of the arrayV removed from input
    */
   public Value array_splice(Env env,
-                            @Reference Value array, //array gets spliced at offset
-                            long offset,
+			    ArrayValue array, //array gets spliced at offset
+                            int offset,
                             @Optional("NULL") Value length,
-                            @Optional("NULL") Value replace)
+                            @Optional ArrayValue replace)
   {
-    Value arrayV;
+    int size = array.getSize();
 
-    if (array != null) {
-      arrayV = array.toValue();
-      if (!(arrayV instanceof ArrayValue)) {
-        env.warning(L.l("'" + arrayV.toString() + "' is an unexpected argument, expected ArrayValue"));
-        return NullValue.NULL;
-      }
-    } else
-      return NullValue.NULL;
-
-    long size = arrayV.getSize();
-
-    long startIndex = offset;
+    int startIndex = offset;
 
     if (startIndex < 0)
       startIndex += size;
 
-    long endIndex = size;
+    int endIndex = size;
 
     if (length != NullValue.NULL) {
-      endIndex = length.toLong();
+      endIndex = length.toInt();
 
       if (endIndex < 0)
         endIndex += size;
@@ -983,71 +972,7 @@ public class ArrayModule
         endIndex += startIndex;
     }
 
-    ArrayValue replacement = new ArrayValueImpl();
-
-    if (replace != NullValue.NULL) {
-      if (replace instanceof ArrayValue)
-        replacement = (ArrayValue) replace;
-      else
-        replacement.put(replace);
-    }
-    else if (endIndex <= startIndex)
-      return new ArrayValueImpl();
-
-    ArrayValue returnArray = new ArrayValueImpl();
-
-    ArrayValue splicedArray = new ArrayValueImpl();
-
-    long index = 0;
-
-    /*// DEBUG
-   if (offset == 2 && length == NullValue.NULL && replace == NullValue.NULL) {
-     ArrayValue testArray = new ArrayValueImpl();
-
-     testArray.put(new StringValueImpl("b"), new LongValue(2));
-     testArray.put(new LongValue(3));
-     testArray.put(new LongValue(4));
-
-     return testArray;
-   }
-   // DEBUG*/
-
-    /*// DEBUG
-   env.warning("startIndex = " + startIndex);
-   env.warning("endIndex = " + endIndex);
-   // DEBUG*/
-
-    if (size == 0)
-      for (Map.Entry<Value, Value> rEntry : replacement.entrySet())
-        splicedArray.put(rEntry.getValue());
-    else {
-      for (Map.Entry<Value, Value> entry : ((ArrayValue) arrayV).entrySet()) {
-        Value entryKey = entry.getKey();
-
-        Value entryValue = entry.getValue();
-
-        if (index == startIndex)
-          for (Map.Entry<Value, Value> rEntry : replacement.entrySet())
-            splicedArray.put(rEntry.getValue());
-
-        if (index >= startIndex && index < endIndex) {
-          if (entryKey instanceof StringValue)
-            returnArray.put(entryKey, entryValue);
-          else
-            returnArray.put(entryValue);
-        }
-        else {
-          if (entryKey instanceof StringValue)
-            splicedArray.put(entryKey, entryValue);
-          else
-            splicedArray.put(entryValue);
-        }
-
-        index++;
-      }
-    }
-    array.set(splicedArray);
-    return returnArray;
+    return array.splice(startIndex, endIndex, replace);
   }
 
   /**

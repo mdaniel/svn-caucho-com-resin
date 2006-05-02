@@ -36,6 +36,7 @@ import com.caucho.quercus.env.*;
 import com.caucho.quercus.module.Construct;
 import com.caucho.quercus.module.JavaMarshall;
 import com.caucho.quercus.module.Marshall;
+import com.caucho.quercus.module.ModuleContext;
 import com.caucho.util.L10N;
 import com.caucho.vfs.WriteStream;
 
@@ -59,7 +60,7 @@ public class JavaClassDef extends ClassDef {
     = Logger.getLogger(JavaClassDef.class.getName());
   private final static L10N L = new L10N(JavaClassDef.class);
 
-  private final Quercus _quercus;
+  private final ModuleContext _moduleContext;
 
   private final String _name;
   private final Class _type;
@@ -104,11 +105,11 @@ public class JavaClassDef extends ClassDef {
 
   private Marshall _marshall;
 
-  public JavaClassDef(Quercus quercus, String name, Class type)
+  public JavaClassDef(ModuleContext moduleContext, String name, Class type)
   {
     super(name, null);
     
-    _quercus = quercus;
+    _moduleContext = moduleContext;
 
     _name = name;
 
@@ -514,18 +515,18 @@ public class JavaClassDef extends ClassDef {
   /**
    * Introspects the Java class.
    */
-  public void introspect(Quercus quercus)
+  public void introspect(ModuleContext moduleContext)
   {
     introspectConstants(_type);
-    introspectMethods(quercus, _type);
-    introspectFields(quercus, _type);
+    introspectMethods(moduleContext, _type);
+    introspectFields(moduleContext, _type);
 
     _marshall = new JavaMarshall(this, false);
 
     Method consMethod = getConsMethod(_type);
 
     if (consMethod != null)
-      _cons = new JavaMethod(quercus, consMethod);
+      _cons = new JavaMethod(moduleContext, consMethod);
     else {
       Constructor []cons = _type.getConstructors();
 
@@ -537,9 +538,9 @@ public class JavaClassDef extends ClassDef {
 	}
 
 	if (i < cons.length)
-	  _cons = new JavaConstructor(_quercus, cons[i]);
+	  _cons = new JavaConstructor(moduleContext, cons[i]);
 	else
-	  _cons = new JavaConstructor(_quercus, cons[0]);
+	  _cons = new JavaConstructor(moduleContext, cons[0]);
 
       } else
 	_cons = null;
@@ -578,7 +579,7 @@ public class JavaClassDef extends ClassDef {
   /**
    * Introspects the Java class.
    */
-  private void introspectFields(Quercus quercus, Class type)
+  private void introspectFields(ModuleContext moduleContext, Class type)
   {
     if (type == null || type.equals(Object.class))
       return;
@@ -600,36 +601,43 @@ public class JavaClassDef extends ClassDef {
 
       if (length > 3) {
         if (methodName.startsWith("get")) {
-          Marshall marshall = Marshall.create(_quercus, method.getReturnType(), false);
+          Marshall marshall = Marshall.create(moduleContext,
+					      method.getReturnType(), false);
           MethodMarshallPair pair = new MethodMarshallPair(method, marshall);
           _getMap.put(javaToQuercusConvert(methodName.substring(3, length)), pair);
 
         }
         else if (methodName.startsWith("is")) {
-          Marshall marshall = Marshall.create(_quercus, method.getReturnType(), false);
+          Marshall marshall = Marshall.create(moduleContext,
+					      method.getReturnType(), false);
           MethodMarshallPair pair = new MethodMarshallPair(method, marshall);
           _getMap.put(javaToQuercusConvert(methodName.substring(2, length)), pair);
         }
         else if (methodName.startsWith("set")) {
-          JavaMethod javaMethod = new JavaMethod(quercus, method);
+          JavaMethod javaMethod = new JavaMethod(moduleContext, method);
           _setMap.put(javaToQuercusConvert(methodName.substring(3, length)), javaMethod);
 
         } else if ("__get".equals(methodName)) {
           __get = method;
-          __getReturn = Marshall.create(_quercus, __get.getReturnType(), false);
+          __getReturn = Marshall.create(moduleContext,
+					__get.getReturnType(), false);
 
         } else if ("__getField".equals(methodName)) {
           __getField = method;
-          __getFieldReturn = Marshall.create(_quercus, __getField.getReturnType(), false);
+          __getFieldReturn = Marshall.create(moduleContext,
+					     __getField.getReturnType(), false);
 
         } else if ("__set".equals(methodName)) {
           __set = method;
-          __setName = Marshall.create(_quercus, __set.getParameterTypes()[0]);
-          __setValue = Marshall.create(_quercus, __set.getParameterTypes()[1]);
+          __setName = Marshall.create(moduleContext,
+				      __set.getParameterTypes()[0]);
+          __setValue = Marshall.create(moduleContext,
+				       __set.getParameterTypes()[1]);
 
         } else if ("__setField".equals(methodName)) {
           __setField = method;
-          __setFieldValue = Marshall.create(_quercus, __setField.getParameterTypes()[1], false);
+          __setFieldValue = Marshall.create(moduleContext,
+					    __setField.getParameterTypes()[1], false);
 
         }
       }
@@ -639,11 +647,11 @@ public class JavaClassDef extends ClassDef {
     Field[] fields = type.getFields();
 
     for (Field field : fields) {
-
       if (Modifier.isStatic(field.getModifiers()))
         continue;
 
-      Marshall marshall = Marshall.create(_quercus,field.getType(), false);
+      Marshall marshall = Marshall.create(moduleContext,
+					  field.getType(), false);
       _fieldMap.put(field.getName(), new FieldMarshallPair(field, marshall));
     }
 
@@ -723,7 +731,7 @@ public class JavaClassDef extends ClassDef {
   /**
    * Introspects the Java class.
    */
-  private void introspectMethods(Quercus quercus, Class type)
+  private void introspectMethods(ModuleContext moduleContext, Class type)
   {
     if (type == null || type.equals(Object.class))
       return;
@@ -731,7 +739,7 @@ public class JavaClassDef extends ClassDef {
     Class []ifcs = type.getInterfaces();
 
     for (Class ifc : ifcs) {
-      introspectMethods(quercus, ifc);
+      introspectMethods(moduleContext, ifc);
     }
 
     Method []methods = type.getDeclaredMethods();
@@ -747,13 +755,13 @@ public class JavaClassDef extends ClassDef {
       } else if ("varDumpImpl".equals(method.getName())) {
         _varDumpImpl = method;
       }else {
-        JavaMethod javaMethod = new JavaMethod(quercus, method);
+        JavaMethod javaMethod = new JavaMethod(moduleContext, method);
 
         _functionMap.put(method.getName(), javaMethod);
       }
     }
 
-    introspectMethods(quercus, type.getSuperclass());
+    introspectMethods(moduleContext, type.getSuperclass());
   }
 
   /**

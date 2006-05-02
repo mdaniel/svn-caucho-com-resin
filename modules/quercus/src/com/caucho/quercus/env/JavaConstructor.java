@@ -49,6 +49,7 @@ import com.caucho.quercus.env.Value;
 
 import com.caucho.quercus.program.AbstractFunction;
 
+import com.caucho.quercus.module.ModuleContext;
 import com.caucho.quercus.module.Marshall;
 import com.caucho.quercus.module.Reference;
 import com.caucho.quercus.module.Optional;
@@ -70,10 +71,10 @@ public class JavaConstructor extends JavaInvoker {
    *
    * @param method the introspected method.
    */
-  public JavaConstructor(Quercus quercus,
+  public JavaConstructor(ModuleContext moduleContext,
 			 Constructor cons)
   {
-    super(quercus,
+    super(moduleContext,
 	  cons.getDeclaringClass().getName(),
 	  cons.getParameterTypes(),
 	  cons.getParameterAnnotations(),

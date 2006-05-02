@@ -171,6 +171,11 @@ abstract public class ArrayValue extends Value {
   abstract public ArrayValue unshift(Value value);
 
   /**
+   * Splices.
+   */
+  abstract public ArrayValue splice(int begin, int end, ArrayValue replace);
+
+  /**
    * Returns the value as an array.
    */
   public Value getArray(Value fieldName)
@@ -1031,7 +1036,8 @@ abstract public class ArrayValue extends Value {
 
     T[] array = (T[]) Array.newInstance(elementType, size);
 
-    Marshall elementMarshall = Marshall.create(env.getPhp(), elementType);
+    Marshall elementMarshall = Marshall.create(env.getModuleContext(),
+					       elementType);
 
     int i = 0;
 

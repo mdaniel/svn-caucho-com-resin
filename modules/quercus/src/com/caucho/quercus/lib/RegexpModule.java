@@ -83,7 +83,7 @@ public class RegexpModule
   public static Value ereg(Env env,
                            String pattern,
                            String string,
-                           @Optional Value regsV)
+                           @Optional @Reference Value regsV)
     throws Throwable
   {
     return ereg(env, pattern, string, regsV, 0);
@@ -97,7 +97,7 @@ public class RegexpModule
   public static Value eregi(Env env,
                             String pattern,
                             String string,
-                            @Optional Value regsV)
+                            @Optional @Reference Value regsV)
     throws Throwable
   {
     return ereg(env, pattern, string, regsV, Pattern.CASE_INSENSITIVE);
@@ -120,14 +120,13 @@ public class RegexpModule
     Pattern pattern = Pattern.compile(cleanPattern, flags);
     Matcher matcher = pattern.matcher(string);
 
-    if (! (matcher.find()))
+    if (! (matcher.find())) {
       return BooleanValue.FALSE;
+    }
 
-    if (regsV != null)
-      regsV = regsV.toValue();
-
-    if (regsV instanceof ArrayValue) {
-      ArrayValue regs = (ArrayValue) regsV;
+    if (regsV != null && ! regsV.equals(NullValue.NULL)) {
+      ArrayValue regs = new ArrayValueImpl();
+      regsV.set(regs);
 
       regs.put(LongValue.ZERO, new StringValueImpl(matcher.group()));
       int count = matcher.groupCount();
@@ -542,12 +541,13 @@ public class RegexpModule
 
     // check for e modifier in patternString
     int patternFlags = regexpFlags(patternString);
+    boolean isEval = (patternFlags & REGEXP_EVAL) != 0;
 
     ArrayList<Replacement> replacementProgram
       = _replacementCache.get(replacement);
 
     if (replacementProgram == null) {
-      replacementProgram = compileReplacement(env, replacement);
+      replacementProgram = compileReplacement(env, replacement, isEval);
       _replacementCache.put(replacement, replacementProgram);
     }
 
@@ -557,7 +557,7 @@ public class RegexpModule
                                  subject,
                                  limit,
                                  countV,
-                                 (patternFlags & REGEXP_EVAL) != 0);
+				 isEval);
   }
 
   /**
@@ -575,7 +575,7 @@ public class RegexpModule
       = _replacementCache.get(replacement);
 
     if (replacementProgram == null) {
-      replacementProgram = compileReplacement(env, replacement);
+      replacementProgram = compileReplacement(env, replacement, false);
       _replacementCache.put(replacement, replacementProgram);
     }
 
@@ -604,7 +604,7 @@ public class RegexpModule
       = _replacementCache.get(replacement);
 
     if (replacementProgram == null) {
-      replacementProgram = compileReplacement(env, replacement);
+      replacementProgram = compileReplacement(env, replacement, false);
       _replacementCache.put(replacement, replacementProgram);
     }
 
@@ -1040,6 +1040,8 @@ public class RegexpModule
       delim = '}';
     else if (delim == '[')
       delim = ']';
+    else if (delim == '(')
+      delim = ')';
 
     int tail = rawRegexp.lastIndexOf(delim);
 
@@ -1125,7 +1127,7 @@ public class RegexpModule
   }
 
   private static ArrayList<Replacement>
-    compileReplacement(Env env, String replacement)
+    compileReplacement(Env env, String replacement, boolean isEval)
     throws Exception
   {
     ArrayList<Replacement> program = new ArrayList<Replacement>();
@@ -1150,7 +1152,10 @@ public class RegexpModule
           if (text.length() > 0)
             program.add(new TextReplacement(text));
 
-          program.add(new GroupReplacement(group));
+	  if (isEval)
+	    program.add(new GroupEscapeReplacement(group));
+	  else
+	    program.add(new GroupReplacement(group));
 
           text.setLength(0);
         }
@@ -1183,7 +1188,11 @@ public class RegexpModule
           if (text.length() > 0)
             program.add(new TextReplacement(text));
 
-          program.add(new GroupReplacement(group));
+	  if (isEval)
+	    program.add(new GroupEscapeReplacement(group));
+	  else
+	    program.add(new GroupReplacement(group));
+	  
           text.setLength(0);
         }
         else
@@ -1288,7 +1297,10 @@ public class RegexpModule
           else
             sb.append("\\[");
         }
-        else if (i + 1 < len && regexp.charAt(i + 1) == '[') {
+        else if (i + 1 < len && regexp.charAt(i + 1) == '['
+		 && ! (i + 2 < len && regexp.charAt(i + 2) == ':')) {
+	  // XXX: check regexp grammar
+	  // php/151n
           sb.append("[\\[");
 	  i += 1;
 	}
@@ -1302,7 +1314,7 @@ public class RegexpModule
           sb.append('[');
 
         if (quote == 0)
-          quote = ch;
+          quote = '[';
         break;
 
       case '#':
@@ -1445,6 +1457,36 @@ public class RegexpModule
     {
       if (_group <= matcher.groupCount())
         sb.append(matcher.group(_group));
+    }
+  }
+
+  static class GroupEscapeReplacement
+    extends Replacement
+  {
+    private int _group;
+
+    GroupEscapeReplacement(int group)
+    {
+      _group = group;
+    }
+
+    void eval(StringBuilderValue sb, Matcher matcher)
+    {
+      if (_group <= matcher.groupCount()) {
+	String group = matcher.group(_group);
+	int len = group.length();
+
+	for (int i = 0; i < len; i++) {
+	  char ch = group.charAt(i);
+
+	  if (ch == '\'')
+	    sb.append("\\\'");
+	  else if (ch == '\"')
+	    sb.append("\\\"");
+	  else
+	    sb.append(ch);
+	}
+      }
     }
   }
 

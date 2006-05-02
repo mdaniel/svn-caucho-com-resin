@@ -85,12 +85,12 @@ public class Memcache {
 
     String name = "memcache::" + host + ":" + port;
 
-    _cache = (Cache) env.getPhp().getSpecial(name);
+    _cache = (Cache) env.getQuercus().getSpecial(name);
 
     if (_cache == null) {
       _cache = new Cache();
 
-      env.getPhp().setSpecial(name, _cache);
+      env.getQuercus().setSpecial(name, _cache);
     }
 
     return true;

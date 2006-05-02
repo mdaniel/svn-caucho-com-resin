@@ -128,25 +128,25 @@ class UnaryExpr extends AbstractAmberExpr {
 	ArrayList<ForeignColumn> keys = path.getLinkColumns().getColumns();
 	for (int i = 0; i < keys.size(); i++) {
 	  if (i != 0)
-	    cb.append(" AND ");
+	    cb.append(" and ");
 
 	  cb.append(path.getFromItem().getName());
 	  cb.append(".");
 	  cb.append(keys.get(i).getName());
 	  
 	  if (_token == QueryParser.NULL)
-	    cb.append(" IS NULL");
+	    cb.append(" is null");
 	  else
-	    cb.append(" IS NOT NULL");
+	    cb.append(" is not null");
 	}
 	cb.append(')');
       }
       else {
 	_expr.generateWhere(cb);
 	if (_token == QueryParser.NULL)
-	  cb.append(" IS NULL");
+	  cb.append(" is null");
 	else
-	  cb.append(" IS NOT NULL");
+	  cb.append(" is not null");
       }
       return;
     }
@@ -166,12 +166,12 @@ class UnaryExpr extends AbstractAmberExpr {
       str = "+";
       break;
     case QueryParser.NOT:
-      str = "NOT";
+      str = "not";
       break;
     case QueryParser.NULL:
-      return _expr + " IS NULL";
+      return _expr + " is null";
     case QueryParser.NOT_NULL:
-      return _expr + " IS NOT NULL";
+      return _expr + " is not null";
     }
 
     return str + " " + _expr;

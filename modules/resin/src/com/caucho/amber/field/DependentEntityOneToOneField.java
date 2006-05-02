@@ -259,7 +259,7 @@ public class DependentEntityOneToOneField extends AbstractField {
     ArrayList<IdField> sourceKeys = getSourceType().getId().getKeys();
     for (int i = 0; i < sourceKeys.size(); i++) {
       if (i != 0)
-	out.print(" AND ");
+	out.print(" and ");
       
       IdField key = sourceKeys.get(i);
       

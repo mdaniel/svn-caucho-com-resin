@@ -144,6 +144,14 @@ public class CopyArrayValue extends ArrayValue {
   }
 
   /**
+   * Add
+   */
+  public ArrayValue splice(int start, int end, ArrayValue replace)
+  {
+    return getCopyArray().splice(start, end, replace);
+  }
+
+  /**
    * Returns the value as an array.
    */
   public Value getArray(Value fieldName)

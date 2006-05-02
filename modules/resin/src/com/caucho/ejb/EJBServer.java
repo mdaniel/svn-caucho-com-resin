@@ -356,7 +356,9 @@ public class EJBServer
    */
   public void setCreateDatabaseSchema(boolean create)
   {
+    _createDatabaseSchema = create;
     _ejbManager.getAmberContainer().setCreateDatabaseTables(create);
+    _ejbManager.getAmberManager().setCreateDatabaseTables(create);
   }
 
   /**

@@ -268,6 +268,22 @@ public class DateModule extends AbstractQuercusModule {
   /**
    * Returns the formatted date.
    */
+  public String gmstrftime(String format,
+			   @Optional("-1") long phpTime)
+  {
+    long time;
+
+    if (phpTime == -1)
+      time = Alarm.getCurrentTime();
+    else
+      time = 1000 * phpTime;
+
+    return QDate.formatGMT(time, format);
+  }
+
+  /**
+   * Returns the formatted date.
+   */
   private String date(String format,
 		      long time,
 		      boolean isGMT)

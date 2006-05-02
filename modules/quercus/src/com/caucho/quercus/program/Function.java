@@ -520,7 +520,7 @@ public class Function extends AbstractFunction {
     out.print("(Env env");
 
     if (! isStatic())
-      out.print(", Value quercus_this_arg");
+      out.print(", Value q_this_arg");
 
     for (int i = 0; i < _args.length; i++) {
       out.print(", ");
@@ -535,7 +535,9 @@ public class Function extends AbstractFunction {
     out.pushDepth();
 
     if (! isStatic()) {
-      out.println("final CompiledObjectValue q_this = (quercus_this_arg != null ? quercus_this_arg.toObjectValue() : null);");
+      //out.println("final CompiledObjectValue q_this = (q_this_arg != null ? q_this_arg.toObjectValue() : null);");
+      
+      out.println("final Value q_this = q_this_arg;");
     }
 
     generateBody(out);
@@ -580,7 +582,7 @@ public class Function extends AbstractFunction {
     if (isStatic())
       out.print("public Value eval" + ref + "(Env env");
     else
-      out.print("public Value evalMethod" + ref + "(Env env, Value quercus_this");
+      out.print("public Value evalMethod" + ref + "(Env env, Value q_this");
 
     for (int i = 0; i < _args.length; i++) {
       out.print(", Value a" + i);
@@ -595,7 +597,7 @@ public class Function extends AbstractFunction {
     out.print("fun_" + _name + "(env");
 
     if (! isStatic())
-      out.print(", quercus_this");
+      out.print(", q_this");
 
     for (int i = 0; i < _args.length; i++) {
       out.print(", a" + i);
@@ -645,8 +647,10 @@ public class Function extends AbstractFunction {
     out.println("{");
     out.pushDepth();
 
-    if (! isStatic())
-      out.println("CompiledObjectValue q_this = q_this_arg.toObjectValue();");
+    if (! isStatic()) {
+      // out.println("CompiledObjectValue q_this = q_this_arg.toObjectValue();");
+      out.println("Value q_this = q_this_arg;");
+    }
     
     // XXX: try to optimize-away the map
 
@@ -724,7 +728,7 @@ public class Function extends AbstractFunction {
     if (isStatic())
       out.println("public Value eval" + ref + "Impl(Env env, Value []args)");
     else
-      out.println("public Value evalMethod" + ref + "Impl(Env env, Value quercus_this, Value []args)");
+      out.println("public Value evalMethod" + ref + "Impl(Env env, Value q_this, Value []args)");
 
     out.println("  throws Throwable");
     out.println("{");
@@ -733,7 +737,7 @@ public class Function extends AbstractFunction {
     if (isStatic())
       out.print("return fun_" + _name + "(env, args)");
     else
-      out.print("return fun_" + _name + "(env, quercus_this, args)");
+      out.print("return fun_" + _name + "(env, q_this, args)");
 
     // php/3a5x, php/37aq
 
@@ -768,8 +772,12 @@ public class Function extends AbstractFunction {
 
       if (var.isArgument()) {
         if (isVariableMap()) {
-          // XXX: need to distinguish ref
-          out.println(varName + " = " + argName + ".toVar();");
+	  if (var.isRefArgument()) {
+	    // php/3214
+	    out.println(varName + " = " + argName + ".toRefVar();");
+	  }
+	  else
+	    out.println(varName + " = " + argName + ".toVar();");
         }
         else if (var.isReadOnly() && var.isValue()) {
           // php/3a70, php/343k
@@ -810,7 +818,7 @@ public class Function extends AbstractFunction {
       out.println("java.util.HashMap<String,Var> _quercus_oldMap = env.pushEnv(_quercus_map);");
 
       if (! isStatic())
-	out.println("Value q_oldThis = env.setThis(quercus_this_arg);");
+	out.println("Value q_oldThis = env.setThis(q_this_arg);");
       
       out.println("try {");
       out.pushDepth();

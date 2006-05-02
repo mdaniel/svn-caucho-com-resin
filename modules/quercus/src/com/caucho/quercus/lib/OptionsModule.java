@@ -56,6 +56,12 @@ public class OptionsModule extends AbstractQuercusModule {
   // XXX: get real value
   public static final String PHP_OS = "Linux";
 
+  public static final int ASSERT_ACTIVE = 1;
+  public static final int ASSERT_CALLBACK = 2;
+  public static final int ASSERT_BAIL = 3;
+  public static final int ASSERT_WARNING = 4;
+  public static final int ASSERT_QUIET_EVAL = 5;
+
   private static final HashMap<String,StringValue> _iniMap
     = new HashMap<String,StringValue>();
 
@@ -73,13 +79,73 @@ public class OptionsModule extends AbstractQuercusModule {
   public static boolean quercus_assert(Env env, String code)
     throws Throwable
   {
-    Quercus quercus = env.getPhp();
+    Quercus quercus = env.getQuercus();
 
     QuercusProgram program = quercus.parseCode(code);
 
     Value value = program.execute(env);
 
     return value.toBoolean();
+  }
+
+  /**
+   * Checks the assertion
+   */
+  public static Value assert_options(Env env,
+				     int code,
+				     @Optional("-1") Value value)
+  {
+    Value result = NullValue.NULL;
+    
+    if (value.equals(LongValue.MINUS_ONE)) {
+      switch (code) {
+      case ASSERT_ACTIVE:
+	result = env.getIni("assert.active");
+	break;
+      case ASSERT_WARNING:
+	result = env.getIni("assert.warning");
+	break;
+      case ASSERT_BAIL:
+	result = env.getIni("assert.bail");
+	break;
+      case ASSERT_QUIET_EVAL:
+	result = env.getIni("assert.quiet_eval");
+	break;
+      case ASSERT_CALLBACK:
+	result = env.getIni("assert.callback");
+	break;
+      default:
+	result = BooleanValue.FALSE;
+	break;
+      }
+    }
+    else {
+      switch (code) {
+      case ASSERT_ACTIVE:
+	result = env.setIni("assert.active", value.toString());
+	break;
+      case ASSERT_WARNING:
+	result = env.setIni("assert.warning", value.toString());
+	break;
+      case ASSERT_BAIL:
+	result = env.setIni("assert.bail", value.toString());
+	break;
+      case ASSERT_QUIET_EVAL:
+	result = env.setIni("assert.quiet_eval", value.toString());
+	break;
+      case ASSERT_CALLBACK:
+	result = env.setIni("assert.callback", value.toString());
+	break;
+      default:
+	result = BooleanValue.FALSE;
+	break;
+      }
+    }
+
+    if (result == null)
+      result = NullValue.NULL;
+
+    return result;
   }
 
   /**

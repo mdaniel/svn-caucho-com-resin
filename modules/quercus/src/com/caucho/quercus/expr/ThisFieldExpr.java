@@ -194,7 +194,7 @@ public class ThisFieldExpr extends AbstractVarExpr {
   public void generate(PhpWriter out)
     throws IOException
   {
-    if (_quercusClass.isDeclaredField(_name)) {
+    if (false && _quercusClass.isDeclaredField(_name)) {
       out.print("q_this._fields[_f_" + _name + "].toValue()");
     }
     else {
@@ -278,7 +278,7 @@ public class ThisFieldExpr extends AbstractVarExpr {
   public void generateAssign(PhpWriter out, Expr value, boolean isTop)
     throws IOException
   {
-    if (_quercusClass.isDeclaredField(_name)) {
+    if (false && _quercusClass.isDeclaredField(_name)) {
       if (! isTop)
 	out.print("(");
       
@@ -309,7 +309,7 @@ public class ThisFieldExpr extends AbstractVarExpr {
   public void generateAssignRef(PhpWriter out, Expr value, boolean isTop)
     throws IOException
   {
-    if (_quercusClass.isDeclaredField(_name)) {
+    if (false && _quercusClass.isDeclaredField(_name)) {
       // php/39f5
       if (! isTop)
 	out.print("(");

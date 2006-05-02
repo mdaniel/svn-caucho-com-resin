@@ -207,9 +207,11 @@ public class InterpretedClassDef extends ClassDef
     out.println("public static class quercus_" + getName() + " implements InstanceInitializer {");
     out.pushDepth();
 
-    out.println();
-    for (String key : _fieldMap.keySet()) {
-      out.println("private final int _f_" + key + ";");
+    if (false) {
+      out.println();
+      for (String key : _fieldMap.keySet()) {
+	out.println("private final int _f_" + key + ";");
+      }
     }
 
     out.println();
@@ -225,9 +227,11 @@ public class InterpretedClassDef extends ClassDef
       out.println();
     }
 
-    for (String key : _fieldMap.keySet()) {
-      out.print("_f_" + key + " = ");
-      out.println("cl.addFieldIndex(\"" + key + "\");");
+    if (false) {
+      for (String key : _fieldMap.keySet()) {
+	out.print("_f_" + key + " = ");
+	out.println("cl.addFieldIndex(\"" + key + "\");");
+      }
     }
 
     out.println();
@@ -256,15 +260,24 @@ public class InterpretedClassDef extends ClassDef
     out.println("{");
     out.pushDepth();
 
-    out.println("CompiledObjectValue value = (CompiledObjectValue) valueArg;");
+    //out.println("CompiledObjectValue value = (CompiledObjectValue) valueArg;");
+    out.println("ObjectValue value = (ObjectValue) valueArg;");
 
     for (Map.Entry<String,Expr> entry : _fieldMap.entrySet()) {
       String key = entry.getKey();
       Expr value = entry.getValue();
 
-      out.print("value._fields[_f_" + key + "] = ");
-      value.generate(out);
-      out.println(";");
+      if (false) {
+	out.print("value._fields[_f_" + key + "] = ");
+	value.generate(out);
+	out.println(";");
+      }
+      else {
+	out.print("value.putField(env, \"" + key + "\", ");
+	value.generate(out);
+	out.println(");");
+      }
+	
     }
 
     /*
@@ -339,12 +352,12 @@ public class InterpretedClassDef extends ClassDef
   
   public Set<Map.Entry<String, Expr>> fieldSet()
   {
-  	return _fieldMap.entrySet();
+    return _fieldMap.entrySet();
   }
   
   public Set<Map.Entry<String, AbstractFunction>> functionSet()
   {
-  	return _functionMap.entrySet();
+    return _functionMap.entrySet();
   }
 }
 

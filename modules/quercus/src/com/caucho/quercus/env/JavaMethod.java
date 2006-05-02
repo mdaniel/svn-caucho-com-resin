@@ -52,6 +52,7 @@ import com.caucho.quercus.program.AbstractFunction;
 import com.caucho.quercus.module.Marshall;
 import com.caucho.quercus.module.Reference;
 import com.caucho.quercus.module.Optional;
+import com.caucho.quercus.module.ModuleContext;
 
 import com.caucho.quercus.gen.PhpWriter;
 
@@ -70,9 +71,10 @@ public class JavaMethod extends JavaInvoker {
    *
    * @param method the introspected method.
    */
-  public JavaMethod(Quercus quercus, Method method)
+  public JavaMethod(ModuleContext moduleContext, Method method)
   {
-    super(quercus, method.getName(),
+    super(moduleContext,
+	  method.getName(),
 	  method.getParameterTypes(),
 	  method.getParameterAnnotations(),
 	  method.getAnnotations(),

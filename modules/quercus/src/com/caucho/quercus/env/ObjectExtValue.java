@@ -659,15 +659,7 @@ public class ObjectExtValue extends ObjectValue {
   public Value evalClassMethod(Env env, AbstractFunction fun, Value []args)
     throws Throwable
   {
-    Value oldThis = env.getThis();
-
-    try {
-      env.setThis(this);
-
-      return fun.eval(env, args);
-    } finally {
-      env.setThis(oldThis);
-    }
+    return fun.evalMethod(env, this, args);
   }
 
   /**

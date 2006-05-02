@@ -261,7 +261,9 @@ public class QuercusClass {
   public Value newInstance(Env env)
     throws Throwable
   {
-    CompiledObjectValue object = new CompiledObjectValue(this);
+    // CompiledObjectValue object = new CompiledObjectValue(this);
+    ObjectValue object = new ObjectExtValue(this);
+    
 
     for (int i = 0; i < _initializers.size(); i++) {
       _initializers.get(i).initInstance(env, object);

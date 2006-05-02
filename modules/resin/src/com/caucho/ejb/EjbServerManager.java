@@ -570,7 +570,6 @@ public class EjbServerManager implements EJBServerInterface, EnvironmentListener
       _amberPersistenceUnit.init();
 
       _ejbConfig.configure();
-      
 
       // initJdbc();
     } catch (ConfigException e) {

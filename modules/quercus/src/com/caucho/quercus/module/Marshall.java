@@ -33,6 +33,7 @@ import com.caucho.quercus.Quercus;
 import com.caucho.quercus.env.*;
 import com.caucho.quercus.expr.Expr;
 import com.caucho.quercus.gen.PhpWriter;
+import com.caucho.quercus.program.JavaClassDef;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 
@@ -46,20 +47,20 @@ import java.io.InputStream;
 abstract public class Marshall {
   private static final L10N L = new L10N(Marshall.class);
 
-  public static Marshall create(Quercus quercus,
+  public static Marshall create(ModuleContext moduleContext,
                                 Class argType)
   {
-    return create(quercus, argType, false);
+    return create(moduleContext, argType, false);
   }
 
-  public static Marshall create(Quercus quercus,
+  public static Marshall create(ModuleContext moduleContext,
                                 Class argType,
                                 boolean isNotNull)
   {
-    return create(quercus, argType, isNotNull, false);
+    return create(moduleContext, argType, isNotNull, false);
   }
 
-  public static Marshall create(Quercus quercus,
+  public static Marshall create(ModuleContext moduleContext,
                                 Class argType,
                                 boolean isNotNull,
                                 boolean isNullAsFalse)
@@ -138,8 +139,11 @@ abstract public class Marshall {
       marshall = MARSHALL_VOID;
     }
     else {
-      return new JavaMarshall(quercus.getJavaClassDefinition(argType.getName()),
-                              isNotNull, isNullAsFalse);
+      String typeName = argType.getName();
+      
+      JavaClassDef javaDef = moduleContext.getJavaClassDefinition(typeName);
+      
+      return new JavaMarshall(javaDef, isNotNull, isNullAsFalse);
     }
 
     if (!isNullAsFalse)

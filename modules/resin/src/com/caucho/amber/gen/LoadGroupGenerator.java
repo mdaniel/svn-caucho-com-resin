@@ -176,7 +176,7 @@ public class LoadGroupGenerator extends ClassComponent {
       if (where != null) {
 	LinkColumns link = subTable.getDependentIdLink();
 	
-	where = where + " AND " + link.generateJoin("o" + i, "o");
+	where = where + " and " + link.generateJoin("o" + i, "o");
       }
       else
 	throw new IllegalStateException();

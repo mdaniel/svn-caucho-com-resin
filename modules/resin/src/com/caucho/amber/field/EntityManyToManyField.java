@@ -477,7 +477,7 @@ public class EntityManyToManyField extends AssociationField {
     /*
     for (int i = 0; i < columns.size(); i++) {
       if (i != 0)
-	out.print(" AND ");
+	out.print(" and ");
       
       out.print(columns.get(i).getName());
       out.print("=?");
@@ -541,7 +541,7 @@ public class EntityManyToManyField extends AssociationField {
     ArrayList<Column> columns = getKeyColumns();
     for (int i = 0; i < columns.size(); i++) {
       if (i != 0)
-	out.print(" AND ");
+	out.print(" and ");
       
       out.print("o." + columns.get(i).getName());
       out.print("=?");
@@ -673,7 +673,7 @@ public class EntityManyToManyField extends AssociationField {
 
     out.print(_sourceLink.generateMatchArgSQL(null));
 
-    out.print(" AND ");
+    out.print(" and ");
 
     out.print(_targetLink.generateMatchArgSQL(null));
 

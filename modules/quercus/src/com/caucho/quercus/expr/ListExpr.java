@@ -49,36 +49,21 @@ import com.caucho.quercus.program.AnalyzeInfo;
  * Represents a PHP list assignment expression.
  */
 public class ListExpr extends Expr {
-  private final Expr []_varList;
-  private final Value []_keyList;
+  private final ListHeadExpr _listHead;
   private final Expr _value;
 
-  private ListExpr(Expr []varList, Expr value)
+  private ListExpr(ListHeadExpr head, Expr value)
     throws IOException
   {
-    _varList = varList;
-
-    _keyList = new Value[varList.length];
-
-    for (int i = 0; i < varList.length; i++)
-      _keyList[i] = new LongValue(i);
+    _listHead = head;
 
     _value = value;
   }
 
   public static Expr create(QuercusParser parser,
-			    ArrayList<Expr> varList, Expr value)
+			    ListHeadExpr head, Expr value)
     throws IOException
   {
-    Expr []vars = new Expr[varList.size()];
-
-    varList.toArray(vars);
-
-    for (int i = 0; i < vars.length; i++) {
-      if (vars[i] != null)
-	vars[i].assign(parser);
-    }
-
     boolean isSuppress = value instanceof SuppressErrorExpr;
 
     if (isSuppress) {
@@ -88,11 +73,12 @@ public class ListExpr extends Expr {
     }
 
     Expr expr;
-    
-    if (value instanceof EachExpr)
-      expr = new ListEachExpr(vars, (EachExpr) value);
+
+    if (value instanceof EachExpr) {
+      expr = new ListEachExpr(head.getVarList(), (EachExpr) value);
+    }
     else
-      expr = new ListExpr(vars, value);
+      expr = new ListExpr(head, value);
 
     if (isSuppress)
       return new SuppressErrorExpr(expr);
@@ -112,12 +98,7 @@ public class ListExpr extends Expr {
   {
     Value value = _value.eval(env);
 
-    int len = _varList.length;
-    
-    for (int i = 0; i < len; i++) {
-      if (_varList[i] != null)
-	_varList[i].evalAssign(env, value.get(_keyList[i]).copy());
-    }
+    _listHead.evalAssign(env, value);
     
     return value;
   }
@@ -149,10 +130,7 @@ public class ListExpr extends Expr {
     
     _value.analyze(info);
 
-    for (int i = 0; i < _varList.length; i++) {
-      if (_varList[i] != null)
-	_varList[i].analyzeAssign(info);
-    }
+    _listHead.analyze(info);
   }
 
   /**
@@ -163,37 +141,7 @@ public class ListExpr extends Expr {
   public void generate(PhpWriter out)
     throws IOException
   {
-    String var = "_quercus_list";
-
-    int count = 1;
-    
-    out.print("env.first(" + var + " = ");
-    _value.generate(out);
-
-    VarInfo varInfo = new VarInfo(var, null);
-    VarExpr varExpr = new PhpVarExpr(varInfo);
-
-    varExpr.setVarState(VarState.VALID);
-
-    for (int i = 0; i < _varList.length; i++) {
-      if (_varList[i] == null)
-	continue;
-      
-      out.print(", ");
-
-      if (i > 0 && i % 4 == 0) {
-	out.print("env.first(");
-	count++;
-      }
-
-      Expr refExpr = new ArrayGetExpr(varExpr, new LongLiteralExpr(i));
-      Expr assign = _varList[i].createAssign(null, refExpr);
-
-      assign.generate(out);
-    }
-
-    for (; count > 0; count--)
-      out.print(")");
+    _listHead.generateAssign(out, _value);
   }
 }
 

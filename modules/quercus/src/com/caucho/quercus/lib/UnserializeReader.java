@@ -29,6 +29,8 @@
 
 package com.caucho.quercus.lib;
 
+import java.util.logging.*;
+
 import java.io.IOException;
 
 import com.caucho.util.L10N;
@@ -39,7 +41,9 @@ import com.caucho.quercus.lib.VariableModule;
 import com.caucho.util.LruCache;
 
 public final class UnserializeReader {
-  private static final L10N L = new L10N(VariableModule.class);
+  private static final L10N L = new L10N(UnserializeReader.class);
+  private static final Logger log
+    = Logger.getLogger(UnserializeReader.class.getName());
 
   private static final LruCache<StringKey,StringValue> _keyCache
     = new LruCache<StringKey,StringValue>(4096);
@@ -147,7 +151,21 @@ public final class UnserializeReader {
         expect(':');
         expect('{');
 
-        Value obj = env.getClass(className).evalNew(env, new Value[0]);
+	QuercusClass qClass = env.findClass(className);
+	Value obj;
+
+	if (qClass != null)
+	  obj = qClass.evalNew(env, new Value[0]);
+	else {
+	  log.fine(L.l("{0} is an undefined class in unserialize",
+		       className));
+	  
+	  obj = env.createObject();
+	  obj.putField(env,
+		       "__Quercus_Incomplete_Class_name",
+		       new StringValueImpl(className));
+	}
+	
         for (int i = 0; i < count; i++) {
           String key = unserializeString();
           Value value = unserialize(env);

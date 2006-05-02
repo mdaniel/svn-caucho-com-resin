@@ -58,6 +58,17 @@ public class FileWriteValue extends FileValue {
     _os = path.openWrite();
   }
 
+  public FileWriteValue(Path path, boolean isAppend)
+    throws IOException
+  {
+    super(path);
+
+    if (isAppend)
+      _os = path.openAppend();
+    else
+      _os = path.openWrite();
+  }
+
   /**
    * Prints a string to a file.
    */

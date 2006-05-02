@@ -2314,6 +2314,75 @@ public class QuercusParser {
     }
   }
 
+  /**
+   * Parses a basic term.
+   *
+   * <pre>
+   * term ::= termBase
+   *      ::= term '[' index ']'
+   *      ::= term '{' index '}'
+   *      ::= term '->' field;
+   * </pre>
+   *
+   * No function, though.
+   */
+  private Expr parseTermDeref()
+    throws IOException
+  {
+    Expr term = parseTermBase();
+
+    while (true) {
+      int token = parseToken();
+
+      switch (token) {
+      case '[':
+        {
+	  token = parseToken();
+	  
+	  if (token == ']') {
+	    term = new ArrayTailExpr(term);
+	  }
+	  else {
+	    _peekToken = token;
+	    Expr index = parseExpr();
+	    token = parseToken();
+
+	    term = new ArrayGetExpr(term, index);
+	  }
+
+          if (token != ']')
+            throw expect("']'", token);
+        }
+        break;
+	
+      case '{':
+        {
+          Expr index = parseExpr();
+
+	  expect('}');
+
+          term = new CharAtExpr(term, index);
+        }
+        break;
+
+      case INCR:
+	term = new PostIncrementExpr(term, 1);
+	break;
+
+      case DECR:
+	term = new PostIncrementExpr(term, -1);
+	break;
+
+      case DEREF:
+	term = parseDeref(term);
+        break;
+
+      default:
+        _peekToken = token;
+        return term;
+      }
+    }
+  }
   
   /**
    * Parses a deref
@@ -2785,7 +2854,8 @@ public class QuercusParser {
     else {
       _peekToken = token;
       
-      nameExpr = parseTermBase();
+      // nameExpr = parseTermBase();
+      nameExpr = parseTermDeref();
     }
 
     token = parseToken();
@@ -2831,6 +2901,21 @@ public class QuercusParser {
   private Expr parseList()
     throws IOException
   {
+    ListHeadExpr leftVars = parseListHead();
+
+    expect('=');
+
+    Expr value = parseConditionalExpr();
+
+    return ListExpr.create(this, leftVars, value);
+  }
+
+  /**
+   * Parses the list(...) expression
+   */
+  private ListHeadExpr parseListHead()
+    throws IOException
+  {
     expect('(');
 
     int peek = parseToken();
@@ -2838,12 +2923,19 @@ public class QuercusParser {
     ArrayList<Expr> leftVars = new ArrayList<Expr>();
 
     while (peek > 0 && peek != ')') {
-      if (peek != ',') {
+      if (peek == LIST) {
+	leftVars.add(parseListHead());
+
+	peek = parseToken();
+      }
+      else if (peek != ',') {
 	_peekToken = peek;
 
 	Expr left = parseTerm();
 
 	leftVars.add(left);
+
+	left.assign(this);
 
 	peek = parseToken();
       }
@@ -2860,11 +2952,7 @@ public class QuercusParser {
     if (peek != ')')
       throw error(L.l("expected ')'"));
 
-    expect('=');
-
-    Expr value = parseConditionalExpr();
-
-    return ListExpr.create(this, leftVars, value);
+    return new ListHeadExpr(leftVars);
   }
 
   /**

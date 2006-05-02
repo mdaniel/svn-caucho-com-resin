@@ -106,7 +106,7 @@ public class FunctionModule extends AbstractQuercusModule {
     if (log.isLoggable(Level.FINER))
       log.finer(code);
 
-    Quercus quercus = env.getPhp();
+    Quercus quercus = env.getQuercus();
 
     return quercus.parseFunction(args, code);
   }

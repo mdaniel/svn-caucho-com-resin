@@ -125,6 +125,7 @@ public class QuercusMain extends ClassComponent {
     out.pushDepth();
 
     out.println("com.caucho.vfs.WriteStream _quercus_out = env.getOut();");
+    out.println("Value q_this = env.getThis();");
 
     for (VarInfo var : _functionInfo.getVariables()) {
       out.println("Value v_" + var.getName() + " = null;");

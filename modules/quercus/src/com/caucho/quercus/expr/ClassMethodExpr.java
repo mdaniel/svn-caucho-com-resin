@@ -98,7 +98,7 @@ public class ClassMethodExpr extends Expr {
     for (int i = 0; i < values.length; i++)
       values[i] = _args[i].eval(env);
     
-    return env.getThis().evalClassMethod(env, fun, values);
+    return fun.evalMethod(env, env.getThis(), values);
   }
 
   //

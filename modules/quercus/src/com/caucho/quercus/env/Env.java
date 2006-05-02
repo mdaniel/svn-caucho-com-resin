@@ -62,6 +62,7 @@ import com.caucho.quercus.QuercusLineRuntimeException;
 import com.caucho.quercus.QuercusRuntimeException;
 
 import com.caucho.quercus.module.Marshall;
+import com.caucho.quercus.module.ModuleContext;
 
 import com.caucho.quercus.expr.Expr;
 
@@ -184,7 +185,13 @@ public class Env {
   private HashMap<String, ClassDef> _classDefMap
     = new HashMap<String, ClassDef>();
 
+  private HashMap<String, ClassDef> _lowerClassDefMap
+    = new HashMap<String, ClassDef>();
+
   private HashMap<String, QuercusClass> _classMap
+    = new HashMap<String, QuercusClass>();
+
+  private HashMap<String, QuercusClass> _lowerClassMap
     = new HashMap<String, QuercusClass>();
 
   private HashMap<String, StringValue> _iniMap;
@@ -321,9 +328,17 @@ public class Env {
   /**
    * Returns the owning PHP engine.
    */
-  public Quercus getPhp()
+  public Quercus getQuercus()
   {
     return _quercus;
+  }
+
+  /**
+   * Returns the owning PHP engine.
+   */
+  public ModuleContext getModuleContext()
+  {
+    return _quercus.getModuleContext();
   }
 
   /**
@@ -1520,7 +1535,7 @@ public class Env {
    */
   public boolean isExtensionLoaded(String name)
   {
-    return getPhp().isExtensionLoaded(name);
+    return getQuercus().isExtensionLoaded(name);
   }
 
   /**
@@ -1528,7 +1543,7 @@ public class Env {
    */
   public HashSet<String> getLoadedExtensions()
   {
-    return getPhp().getLoadedExtensions();
+    return getQuercus().getLoadedExtensions();
   }
 
   /**
@@ -1536,7 +1551,7 @@ public class Env {
    */
   public Value getExtensionFuncs(String name)
   {
-    return getPhp().getExtensionFuncs(name);
+    return getQuercus().getExtensionFuncs(name);
   }
 
   /**
@@ -1744,7 +1759,7 @@ public class Env {
     if (log.isLoggable(Level.FINER))
       log.finer(code);
 
-    Quercus quercus = getPhp();
+    Quercus quercus = getQuercus();
 
     QuercusProgram program = quercus.parseEvalExpr(code);
 
@@ -2015,6 +2030,7 @@ public class Env {
     */
 
     _classMap.put(name, cl);
+    _lowerClassMap.put(name.toLowerCase(), cl);
   }
 
   /**
@@ -2024,6 +2040,7 @@ public class Env {
     throws Throwable
   {
     _classDefMap.put(name, cl);
+    _lowerClassDefMap.put(name.toLowerCase(), cl);
   }
 
   /**
@@ -2111,7 +2128,8 @@ public class Env {
 
       Class componentClass = def.getType().getComponentType();
 
-      Marshall componentClassMarshall = Marshall.create(_quercus, componentClass);
+      Marshall componentClassMarshall = Marshall.create(_quercus.getModuleContext(),
+							componentClass);
 
       Object[] objAsArray = (Object[]) obj;
 
@@ -2158,10 +2176,16 @@ public class Env {
     if (cl != null)
       return cl;
 
-    cl = findClassImpl(name);
+    cl = _lowerClassMap.get(name.toLowerCase());
+
+    if (cl != null)
+      return cl;
+
+    cl = createClassImpl(name);
 
     if (cl != null) {
       _classMap.put(name, cl);
+      _lowerClassMap.put(name.toLowerCase(), cl);
 
       return cl;
     }
@@ -2251,7 +2275,7 @@ public class Env {
    * @param name the class name
    * @return the found class or null if no class found.
    */
-  private QuercusClass findClassImpl(String name)
+  private QuercusClass createClassImpl(String name)
   {
     /*
     QuercusClass cl = null;
@@ -2282,6 +2306,9 @@ public class Env {
     */
     ClassDef classDef = _classDefMap.get(name);
 
+    if (classDef == null)
+      classDef = _lowerClassDefMap.get(name.toLowerCase());
+    
     if (classDef == null)
       classDef = _page.findClass(name);
 
@@ -2459,7 +2486,7 @@ public class Env {
 	path = null;
     }
 
-    if (path != null) {
+    if (path != null && path.canRead() && ! path.isDirectory()) {
     }
     else if (isRequire) {
       error(L.l("'{0}' is not a valid path", include));
@@ -2475,7 +2502,9 @@ public class Env {
 
     _includeSet.add(path);
 
-    QuercusPage page = _quercus.parse(path);
+    QuercusPage page;
+
+    page = _quercus.parse(path);
 
     page.importDefinitions(this);
 
@@ -2500,8 +2529,9 @@ public class Env {
     for (int i = 0; i < pathList.size(); i++) {
       Path path = pathList.get(i).lookup(relPath);
 
-      if (path.canRead())
+      if (path.canRead()) {
         return path;
+      }
     }
 
     return null;

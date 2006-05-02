@@ -33,6 +33,7 @@ import com.caucho.config.ConfigException;
 import com.caucho.quercus.env.*;
 import com.caucho.quercus.module.QuercusModule;
 import com.caucho.quercus.module.StaticFunction;
+import com.caucho.quercus.module.ModuleContext;
 import com.caucho.quercus.page.PageManager;
 import com.caucho.quercus.page.QuercusPage;
 import com.caucho.quercus.parser.QuercusParser;
@@ -69,6 +70,8 @@ public class Quercus {
   private static final Logger log = Log.open(Quercus.class);
 
   private final PageManager _pageManager;
+
+  private ModuleContext _moduleContext = new ModuleContext();
 
   private HashMap<String, InternStringValue> _internMap
     = new HashMap<String, InternStringValue>();
@@ -130,6 +133,14 @@ public class Quercus {
     initStaticClassServices();
 
     _pageManager = new PageManager(this);
+  }
+
+  /**
+   * Returns the module context.
+   */
+  public ModuleContext getModuleContext()
+  {
+    return _moduleContext;
   }
 
   /**
@@ -221,11 +232,11 @@ public class Quercus {
 
       }
 
-      def = new JavaClassDef(this, className, type);
+      def = new JavaClassDef(getModuleContext(), className, type);
 
       _javaClassWrappers.put(className, def);
 
-      def.introspect(this);
+      def.introspect(getModuleContext());
 
       return def;
     } catch (RuntimeException e) {
@@ -690,7 +701,8 @@ public class Quercus {
       Class []params = method.getParameterTypes();
 
       try {
-        StaticFunction function = new StaticFunction(this, module, method);
+        StaticFunction function = new StaticFunction(getModuleContext(),
+						     module, method);
 
         String methodName = method.getName();
 
@@ -843,7 +855,7 @@ public class Quercus {
         log.finest(L.l("PHP loading class {0} with type {1} providing extension {2}", name, type.getName(), extension));
     }
 
-    JavaClassDef def = new JavaClassDef(this, name, type);
+    JavaClassDef def = new JavaClassDef(getModuleContext(), name, type);
 
     _javaClassWrappers.put(name, def);
     _lowerJavaClassWrappers.put(name.toLowerCase(), def);
@@ -851,7 +863,7 @@ public class Quercus {
     _staticClasses.put(name, def);
     _lowerStaticClasses.put(name.toLowerCase(), def);
 
-    def.introspect(this);
+    def.introspect(getModuleContext());
 
     if (extension != null)
       _extensionSet.add(extension);

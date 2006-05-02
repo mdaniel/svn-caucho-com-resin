@@ -347,8 +347,8 @@ public class EntityIntrospector {
 
     for (JMethod method : type.getMethods()) {
       if (method.isFinal())
-	throw new ConfigException(L.l("'{0}' must not be final.  Entity beans methods may not be final.",
-				    method.getFullName()));
+	throw error(method, L.l("'{0}' must not be final.  Entity beans methods may not be final.",
+				method.getFullName()));
     }
   }
 
@@ -388,7 +388,7 @@ public class EntityIntrospector {
 	return;
     }
 
-    throw new ConfigException(L.l("'{0}' needs a public, no-arg constructor.",
+    throw new ConfigException(L.l("'{0}' needs a public, no-arg constructor.  Entity beans must have public, no-arg constructors.",
 				  type.getName()));
   }
 
@@ -401,8 +401,9 @@ public class EntityIntrospector {
     JAnnotation ann = isAnnotatedMethod(method);
     
     if (ann != null) {
-      throw new ConfigException(L.l("'{0}' is not a valid annotation for {1}.  Only public getters and fields may have property annotations.",
-				    ann.getType(), method.getFullName()));
+      throw error(method,
+		  L.l("'{0}' is not a valid annotation for {1}.  Only public getters and fields may have property annotations.",
+		      ann.getType(), method.getFullName()));
     }
   }
 
@@ -1466,7 +1467,7 @@ public class EntityIntrospector {
   {
     // XXX: the field is for line numbers in the source, theoretically
 
-    String className = field.getDeclaringClass().getShortName();
+    String className = field.getDeclaringClass().getName();
 
     int line = field.getLine();
 

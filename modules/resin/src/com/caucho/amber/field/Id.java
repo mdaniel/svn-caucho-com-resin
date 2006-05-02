@@ -288,7 +288,7 @@ public class Id {
     for (IdField field : getKeys()) {
       for (Column column : field.getColumns()) {
 	if (! isFirst)
-	  cb.append(" AND ");
+	  cb.append(" and ");
 	isFirst = false;
 
 	cb.append(column.generateMatchArgWhere(id));
@@ -309,7 +309,7 @@ public class Id {
 
     for (int i = 0; i < keys.size(); i++) {
       if (i != 0)
-	cb.append(" AND ");
+	cb.append(" and ");
 
       cb.append(keys.get(i).generateRawWhere(id));
     }

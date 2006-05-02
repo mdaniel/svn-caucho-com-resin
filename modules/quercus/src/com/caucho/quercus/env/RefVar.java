@@ -29,6 +29,7 @@
 
 package com.caucho.quercus.env;
 
+import com.caucho.quercus.expr.Expr;
 import com.caucho.quercus.program.AbstractFunction;
 import com.caucho.vfs.WriteStream;
 
@@ -371,6 +372,15 @@ public class RefVar extends Value {
   /**
    * Evaluates a method.
    */
+  public Value evalMethod(Env env, String methodName, Expr []args)
+    throws Throwable
+  {
+    return _var.evalMethod(env, methodName, args);
+  }
+
+  /**
+   * Evaluates a method.
+   */
   public Value evalMethod(Env env, String methodName, Value []args)
     throws Throwable
   {
@@ -393,6 +403,120 @@ public class RefVar extends Value {
     throws Throwable
   {
     return _var.evalMethod(env, methodName, a0);
+  }
+
+  /**
+   * Evaluates a method.
+   */
+  public Value evalMethod(Env env, String methodName, Value a0, Value a1)
+    throws Throwable
+  {
+    return _var.evalMethod(env, methodName, a0, a1);
+  }
+
+  /**
+   * Evaluates a method with 3 args.
+   */
+  public Value evalMethod(Env env, String methodName,
+			  Value a0, Value a1, Value a2)
+    throws Throwable
+  {
+    return _var.evalMethod(env, methodName, a0, a1, a2);
+  }
+
+  /**
+   * Evaluates a method with 4 args.
+   */
+  public Value evalMethod(Env env, String methodName,
+			  Value a0, Value a1, Value a2, Value a3)
+    throws Throwable
+  {
+    return _var.evalMethod(env, methodName, a0, a1, a2, a3);
+  }
+
+  /**
+   * Evaluates a method with 5 args.
+   */
+  public Value evalMethod(Env env, String methodName,
+			  Value a0, Value a1, Value a2, Value a3, Value a4)
+    throws Throwable
+  {
+    return _var.evalMethod(env, methodName, a0, a1, a2, a3, a4);
+  }
+
+  /**
+   * Evaluates a method.
+   */
+  public Value evalMethodRef(Env env, String methodName, Expr []args)
+    throws Throwable
+  {
+    return _var.evalMethodRef(env, methodName, args);
+  }
+
+  /**
+   * Evaluates a method.
+   */
+  public Value evalMethodRef(Env env, String methodName, Value []args)
+    throws Throwable
+  {
+    return _var.evalMethodRef(env, methodName, args);
+  }
+
+  /**
+   * Evaluates a method.
+   */
+  public Value evalMethodRef(Env env, String methodName)
+    throws Throwable
+  {
+    return _var.evalMethodRef(env, methodName);
+  }
+
+  /**
+   * Evaluates a method.
+   */
+  public Value evalMethodRef(Env env, String methodName, Value a0)
+    throws Throwable
+  {
+    return _var.evalMethodRef(env, methodName, a0);
+  }
+
+  /**
+   * Evaluates a method.
+   */
+  public Value evalMethodRef(Env env, String methodName, Value a0, Value a1)
+    throws Throwable
+  {
+    return _var.evalMethodRef(env, methodName, a0, a1);
+  }
+
+  /**
+   * Evaluates a method with 3 args.
+   */
+  public Value evalMethodRef(Env env, String methodName,
+			  Value a0, Value a1, Value a2)
+    throws Throwable
+  {
+    return _var.evalMethodRef(env, methodName, a0, a1, a2);
+  }
+
+  /**
+   * Evaluates a method with 4 args.
+   */
+  public Value evalMethodRef(Env env, String methodName,
+			  Value a0, Value a1, Value a2, Value a3)
+    throws Throwable
+  {
+    return _var.evalMethodRef(env, methodName, a0, a1, a2, a3);
+  }
+
+  /**
+   * Evaluates a method with 5 args.
+   */
+  public Value evalMethodRef(Env env, String methodName,
+			  Value a0, Value a1, Value a2, Value a3, Value a4)
+    throws Throwable
+  {
+    return _var.evalMethodRef(env, methodName, a0, a1, a2, a3, a4);
   }
 
   /**

@@ -951,6 +951,15 @@ public class FileModule extends AbstractQuercusModule {
 
         return new FileWriteValue(path);
       }
+      else if (mode.startsWith("a")) {
+        if (path.exists() && !path.canWrite()) {
+          env.warning(L.l("{0} cannot be written", path.getFullPath()));
+
+          return BooleanValue.FALSE;
+        }
+
+        return new FileWriteValue(path, true);
+      }
       else if (mode.startsWith("x") && ! path.exists())
         return new FileWriteValue(path);
 
@@ -959,6 +968,9 @@ public class FileModule extends AbstractQuercusModule {
       return NullValue.NULL;
     } catch (IOException e) {
       log.log(Level.FINE, e.toString(), e);
+      
+      env.warning(L.l("{0} can't be opened.\n{1}",
+		      filename, e.toString()));
 
       return BooleanValue.FALSE;
     }
@@ -1174,7 +1186,7 @@ public class FileModule extends AbstractQuercusModule {
 
     file.print(value);
 
-    return BooleanValue.TRUE;
+    return LongValue.create(value.length());
   }
 
   // XXX: glob

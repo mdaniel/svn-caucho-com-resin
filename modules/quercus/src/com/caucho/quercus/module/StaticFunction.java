@@ -29,31 +29,33 @@
 
 package com.caucho.quercus.module;
 
+import java.io.IOException;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.util.logging.Logger;
+
 import com.caucho.quercus.Quercus;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.expr.DefaultExpr;
 import com.caucho.quercus.expr.Expr;
 import com.caucho.quercus.expr.NullLiteralExpr;
+import com.caucho.quercus.expr.RequiredExpr;
 import com.caucho.quercus.gen.PhpWriter;
 import com.caucho.quercus.parser.QuercusParser;
 import com.caucho.quercus.program.AbstractFunction;
 import com.caucho.quercus.program.AnalyzeInfo;
 import com.caucho.util.L10N;
 
-import java.io.IOException;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-
 /**
  * Represents the introspected static function information.
  */
-public class StaticFunction
-  extends AbstractFunction
-{
+public class StaticFunction extends AbstractFunction {
   private static final L10N L = new L10N(StaticFunction.class);
+  private static final Logger log =
+    Logger.getLogger(StaticFunction.class.getName());
 
   private final QuercusModule _quercusModule;
 
@@ -74,7 +76,7 @@ public class StaticFunction
    *
    * @param method the introspected method.
    */
-  public StaticFunction(Quercus quercus,
+  public StaticFunction(ModuleContext moduleContext,
                         QuercusModule quercusModule,
                         Method method)
   {
@@ -162,10 +164,10 @@ public class StaticFunction
       if (isReference)
         _marshallArgs[i] = Marshall.MARSHALL_REFERENCE;
       else
-        _marshallArgs[i] = Marshall.create(quercus, argType, isNotNull);
+        _marshallArgs[i] = Marshall.create(moduleContext, argType, isNotNull);
     }
 
-    _unmarshallReturn = Marshall.create(quercus,
+    _unmarshallReturn = Marshall.create(moduleContext,
                                         method.getReturnType(),
                                         false,
                                         returnNullAsFalse);
@@ -626,10 +628,15 @@ public class StaticFunction
         _marshallArgs[i].generate(out,
                                   _defaultExprs[i],
                                   param[_hasEnv ? i + 1 : i]);
-      else if (! _hasRestArgs)
-        throw new IOException(L.l(funExpr.getLocation() +
-                                  "argument length mismatch for '{0}'",
-                                  _method.getName()));
+      else if (! _hasRestArgs) {
+	// XXX: error?
+	log.warning(L.l(funExpr.getLocation() +
+			"argument length mismatch for '{0}'",
+			_method.getName()));
+	_marshallArgs[i].generate(out,
+				  RequiredExpr.REQUIRED,
+                                  param[_hasEnv ? i + 1 : i]);
+      }
     }
 
     if (_hasRestArgs) {

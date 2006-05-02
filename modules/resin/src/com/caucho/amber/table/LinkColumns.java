@@ -232,7 +232,7 @@ public class LinkColumns {
     
     for (int i = 0; i < _columns.size(); i++) {
       if (i != 0)
-	cb.append(" AND ");
+	cb.append(" and ");
 
       if (table != null) {
 	cb.append(table);
@@ -263,7 +263,7 @@ public class LinkColumns {
       ForeignColumn column = _columns.get(i);
 
       if (i != 0)
-	cb.append(" AND ");
+	cb.append(" and ");
 
       cb.append(sourceTable);
       cb.append('.');
@@ -298,16 +298,16 @@ public class LinkColumns {
       ForeignColumn column = _columns.get(i);
 
       if (i != 0)
-	cb.append(" AND ");
+	cb.append(" and ");
 
       if (! column.isNotNull()) {
 	cb.append(sourceTable);
 	cb.append('.');
 	cb.append(column.getName());
-	cb.append(" IS NOT NULL ");
+	cb.append(" is not null ");
       }
 
-      cb.append(" AND ");
+      cb.append(" and ");
 
       cb.append(sourceTable);
       cb.append('.');
@@ -338,7 +338,7 @@ public class LinkColumns {
     if (! isSourceCascadeDelete()) {
       CharBuffer cb = new CharBuffer();
       
-      cb.append("UPDATE " + sourceTable + " SET ");
+      cb.append("update " + sourceTable + " set ");
 
       ArrayList<ForeignColumn> columns = getColumns();
 
@@ -346,14 +346,14 @@ public class LinkColumns {
 	if (i != 0)
 	  cb.append (", ");
 	
-	cb.append(columns.get(i).getName() + "=NULL");
+	cb.append(columns.get(i).getName() + "=null");
       }
 	
-      cb.append(" WHERE ");
+      cb.append(" where ");
 
       for (int i = 0; i < columns.size(); i++) {
 	if (i != 0)
-	  cb.append (" AND ");
+	  cb.append (" and ");
 	
 	cb.append(columns.get(i).getName() + "=?");
       }
@@ -378,16 +378,16 @@ public class LinkColumns {
 
       CharBuffer cb = new CharBuffer();
       
-      cb.append("SELECT ");
+      cb.append("select ");
       cb.append(entityType.getId().generateSelect("o"));
-      cb.append(" FROM " + sourceTable + " o");
-      cb.append(" WHERE ");
+      cb.append(" from " + sourceTable + " o");
+      cb.append(" where ");
 
       ArrayList<ForeignColumn> columns = getColumns();
 
       for (int i = 0; i < columns.size(); i++) {
 	if (i != 0)
-	  cb.append (" AND ");
+	  cb.append (" and ");
 	
 	cb.append(columns.get(i).getName() + "=?");
       }
@@ -411,14 +411,14 @@ public class LinkColumns {
     else {
       CharBuffer cb = new CharBuffer();
       
-      cb.append("DELETE FROM " + sourceTable +
-		" WHERE ");
+      cb.append("delete from " + sourceTable +
+		" where ");
 
       ArrayList<ForeignColumn> columns = getColumns();
 
       for (int i = 0; i < columns.size(); i++) {
 	if (i != 0)
-	  cb.append (" AND ");
+	  cb.append (" and ");
 	
 	cb.append(columns.get(i).getName() + "=?");
       }

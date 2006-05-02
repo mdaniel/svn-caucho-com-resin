@@ -301,6 +301,11 @@ public class FunctionInfo {
     return _tempVarList;
   }
 
+  public int getTempIndex()
+  {
+    return _tempVarList.size();
+  }
+
   public String toString()
   {
     return "FunctionInfo[" + _name + "]";

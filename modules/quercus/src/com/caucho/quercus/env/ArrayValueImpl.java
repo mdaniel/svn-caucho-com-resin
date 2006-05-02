@@ -358,6 +358,87 @@ public class ArrayValueImpl extends ArrayValue {
   }
 
   /**
+   * Replace a section of the array.
+   */
+  public ArrayValue splice(int start, int end, ArrayValue replace)
+  {
+    if (_isDirty)
+      copyOnWrite();
+
+    int index = 0;
+
+    ArrayValueImpl result = new ArrayValueImpl();
+
+    Entry ptr = _head;
+    Entry next = null;
+    for (; ptr != null; ptr = next) {
+      next = ptr._next;
+      
+      if (index < start) {
+      }
+      else if (index < end) {
+	_size--;
+	
+	if (ptr._prev != null)
+	  ptr._prev._next = ptr._next;
+	else
+	  _head = ptr._next;
+	
+	if (ptr._next != null)
+	  ptr._next._prev = ptr._prev;
+	else
+	  _tail = ptr._prev;
+
+	if (ptr.getKey() instanceof StringValue)
+	  result.put(ptr.getKey(), ptr.getValue());
+	else
+	  result.put(ptr.getValue());
+      }
+      else if (replace == null) {
+	return result;
+      }
+      else {
+	for (Entry replaceEntry = replace.getHead();
+	     replaceEntry != null;
+	     replaceEntry = replaceEntry._next) {
+	  _size++;
+	  
+	  if (_entries.length <= 2 * _size)
+	    expand();
+
+	  Entry entry = new Entry(createTailKey(), replaceEntry.getValue());
+
+	  addEntry(entry);
+
+	  entry._next = ptr;
+	  entry._prev = ptr._prev;
+
+	  if (ptr._prev != null)
+	    ptr._prev._next = entry;
+	  else
+	    _head = entry;
+
+	  ptr._prev = entry;
+	}
+
+	return result;
+      }
+
+      index++;
+    }
+
+    if (replace != null) {
+      for (Entry replaceEntry = replace.getHead();
+	   replaceEntry != null;
+	   replaceEntry = replaceEntry._next) {
+	put(replaceEntry.getValue());
+      }
+    }
+
+    return result;
+  }
+
+  /**
    * Returns the value as an argument which may be a reference.
    */
   public Value getArg(Value index)

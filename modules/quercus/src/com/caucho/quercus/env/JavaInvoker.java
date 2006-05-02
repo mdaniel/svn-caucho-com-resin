@@ -34,6 +34,7 @@ import com.caucho.quercus.expr.DefaultExpr;
 import com.caucho.quercus.expr.Expr;
 import com.caucho.quercus.expr.NullLiteralExpr;
 import com.caucho.quercus.gen.PhpWriter;
+import com.caucho.quercus.module.ModuleContext;
 import com.caucho.quercus.module.Marshall;
 import com.caucho.quercus.module.Optional;
 import com.caucho.quercus.module.Reference;
@@ -76,7 +77,7 @@ abstract public class JavaInvoker
    * Creates the statically introspected function.
    *
    */
-  public JavaInvoker(Quercus quercus,
+  public JavaInvoker(ModuleContext moduleContext,
                      String name,
                      Class []param,
                      Annotation [][]paramAnn,
@@ -159,10 +160,11 @@ abstract public class JavaInvoker
       if (isReference)
         _marshallArgs[i] = Marshall.MARSHALL_REFERENCE;
       else
-        _marshallArgs[i] = Marshall.create(quercus, argType);
+        _marshallArgs[i] = Marshall.create(moduleContext, argType);
     }
 
-    _unmarshallReturn = Marshall.create(quercus, retType, false, returnNullAsFalse);
+    _unmarshallReturn = Marshall.create(moduleContext, retType, false,
+					returnNullAsFalse);
   }
 
   /**
