@@ -34,6 +34,7 @@ import com.caucho.quercus.env.*;
 import com.caucho.quercus.module.QuercusModule;
 import com.caucho.quercus.module.StaticFunction;
 import com.caucho.quercus.module.ModuleContext;
+import com.caucho.quercus.module.ModuleInfo;
 import com.caucho.quercus.page.PageManager;
 import com.caucho.quercus.page.QuercusPage;
 import com.caucho.quercus.parser.QuercusParser;
@@ -646,73 +647,30 @@ public class Quercus {
    * @param cl the class to introspect.
    */
   private void introspectPhpModuleClass(Class cl)
-    throws IllegalAccessException, InstantiationException
+    throws IllegalAccessException, InstantiationException, ConfigException
   {
     log.fine("PHP loading module " + cl.getName());
 
     QuercusModule module = (QuercusModule) cl.newInstance();
 
-    _modules.put(module.getClass().getName(), module);
+    ModuleInfo info = ModuleContext.addModule(module.getClass().getName(),
+					      module);
 
-    for (String ext : module.getLoadedExtensions()) {
+    _modules.put(info.getName(), info.getModule());
+
+    for (String ext : info.getLoadedExtensions())
       _extensionSet.add(ext);
-    }
 
-    Map<String, Value> map = module.getConstMap();
+    Map<String, Value> map = info.getConstMap();
 
     if (map != null)
       _constMap.putAll(map);
+    
+    Map<String, StringValue> iniMap = info.getDefaultIni();
+    _iniMap.putAll(iniMap);
 
-    for (Field field : cl.getFields()) {
-      if (! Modifier.isPublic(field.getModifiers()))
-        continue;
-
-      if (! Modifier.isStatic(field.getModifiers()))
-        continue;
-
-      if (! Modifier.isFinal(field.getModifiers()))
-        continue;
-
-      Object obj = field.get(null);
-
-      Value value = objectToValue(obj);
-
-      if (value != null)
-        _constMap.put(field.getName(), value);
-    }
-
-    Map<String, StringValue> iniMap = module.getDefaultIni();
-
-    if (map != null)
-      _iniMap.putAll(iniMap);
-
-    for (Method method : cl.getMethods()) {
-      if (! Modifier.isPublic(method.getModifiers()))
-        continue;
-
-      // XXX: removed for php/0c2o.qa
-      /**
-       Class retType = method.getReturnType();
-
-      if (void.class.isAssignableFrom(retType))
-        continue;
-       */
-
-      Class []params = method.getParameterTypes();
-
-      try {
-        StaticFunction function = new StaticFunction(getModuleContext(),
-						     module, method);
-
-        String methodName = method.getName();
-
-        if (methodName.startsWith("quercus_"))
-          methodName = methodName.substring(8);
-
-        _staticFunctions.put(methodName, function);
-      } catch (Exception e) {
-        log.log(Level.FINE, e.toString(), e);
-      }
+    for (Map.Entry<String, StaticFunction> entry : info.getFunctions().entrySet()) {
+      _staticFunctions.put(entry.getKey(), entry.getValue());
     }
   }
 
@@ -780,7 +738,8 @@ public class Quercus {
    */
   private void parseClassServicesModule(ReadStream in)
     throws IOException, ClassNotFoundException,
-           IllegalAccessException, InstantiationException
+           IllegalAccessException, InstantiationException,
+	   ConfigException
   {
     ClassLoader loader = Thread.currentThread().getContextClassLoader();
     String line;
@@ -846,7 +805,7 @@ public class Quercus {
    * @param extension the extension provided by the class, or null
    */
   private void introspectPhpJavaClass(String name, Class type, String extension)
-    throws IllegalAccessException, InstantiationException
+    throws IllegalAccessException, InstantiationException, ConfigException
   {
     if (log.isLoggable(Level.FINEST)) {
       if (extension == null)
@@ -855,15 +814,13 @@ public class Quercus {
         log.finest(L.l("PHP loading class {0} with type {1} providing extension {2}", name, type.getName(), extension));
     }
 
-    JavaClassDef def = new JavaClassDef(getModuleContext(), name, type);
+    JavaClassDef def = ModuleContext.addClass(name, type, extension);
 
     _javaClassWrappers.put(name, def);
     _lowerJavaClassWrappers.put(name.toLowerCase(), def);
 
     _staticClasses.put(name, def);
     _lowerStaticClasses.put(name.toLowerCase(), def);
-
-    def.introspect(getModuleContext());
 
     if (extension != null)
       _extensionSet.add(extension);
