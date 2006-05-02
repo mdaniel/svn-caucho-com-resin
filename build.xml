@@ -667,8 +667,6 @@
         <include name="lib/script-10.jar"/>
         <include name="lib/webutil.jar"/>
 
-        <include name="lib/eclipse-compiler.jar"/>
-
         <include name="webapps/resin-doc.war"/>
         <include name="webapps/ROOT/index.jsp"/>
 

@@ -409,6 +409,8 @@ public class BeanTypeStrategy extends TypeStrategy {
         cb.append(Character.toUpperCase(name.charAt(++i)));
       else if (ch == ':')
 	cb.clear();
+      else if (ch == '.')
+        cb.append('_');
       else
         cb.append(ch);
     }
