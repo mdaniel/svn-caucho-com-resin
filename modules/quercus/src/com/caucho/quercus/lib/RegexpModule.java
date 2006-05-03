@@ -791,14 +791,14 @@ public class RegexpModule
     int head = 0;
     Matcher matcher = pattern.matcher(string);
     long count = 0;
+    
+    boolean isAllowEmpty = (flags & PREG_SPLIT_NO_EMPTY) == 0;
 
     while ((matcher.find()) && (count < limit)) {
       // If empty and we are to skip empty strings, then skip
-      if ((flags & PREG_SPLIT_NO_EMPTY) != 0) {
-        if (head == matcher.start()) {
-          head = matcher.end();
-          continue;
-        }
+      if (! isAllowEmpty && head == matcher.start()) {
+	head = matcher.end();
+	continue;
       }
 
       String value;
@@ -815,7 +815,6 @@ public class RegexpModule
       }
 
       if ((flags & PREG_SPLIT_OFFSET_CAPTURE) != 0) {
-
         ArrayValue part = new ArrayValueImpl();
         part.put(new StringValueImpl(value));
         part.put(new LongValue(startPosition));
@@ -828,7 +827,7 @@ public class RegexpModule
       count++;
 
       if ((flags & PREG_SPLIT_DELIM_CAPTURE) != 0) {
-       for (int i = 1; i <= matcher.groupCount(); i++) {
+	for (int i = 1; i <= matcher.groupCount(); i++) {
           if ((flags & PREG_SPLIT_OFFSET_CAPTURE) != 0) {
             ArrayValue part = new ArrayValueImpl();
             part.put(new StringValueImpl(matcher.group(i)));
@@ -842,10 +841,10 @@ public class RegexpModule
       }
     }
 
-    if ((head <= string.length()) && (count != limit)) {
-
+    if (head == string.length() && ! isAllowEmpty) {
+    }
+    else if ((head <= string.length()) && (count != limit)) {
       if ((flags & PREG_SPLIT_OFFSET_CAPTURE) != 0) {
-
         ArrayValue part = new ArrayValueImpl();
         part.put(new StringValueImpl(string.substring(head)));
         part.put(new LongValue(head));

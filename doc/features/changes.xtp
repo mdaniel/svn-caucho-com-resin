@@ -2,8 +2,9 @@
 
 <a href='changes-2.xtp'>Resin 2.1 changes</a>
 
-<s2 title='3.0.snap - Apr 24, 2006'>
+<s2 title='3.0.snap - May 2, 2006'>
 <ul>
+<li>(2006-05-02) AbstractRotateLog uses truncate instead of remove for old file
 <li>stdout.log rotation file name for size overflow uses incorrect time (rep by Bill Au, #1054)
 <!--
 <li>Security issue involving web-app-deploy

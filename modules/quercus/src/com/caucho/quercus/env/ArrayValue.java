@@ -862,6 +862,11 @@ abstract public class ArrayValue extends Value {
       return _next;
     }
 
+    public Value getRawValue()
+    {
+      return _value;
+    }
+    
     public Value getValue()
     {
       return _value.toValue();

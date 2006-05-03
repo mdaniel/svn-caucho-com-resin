@@ -87,7 +87,12 @@ public class FunctionModule extends AbstractQuercusModule {
     if (argArray != null) {
       args = new Value[argArray.getSize()];
 
-      argArray.values().toArray(args);
+      int i = 0;
+      for (ArrayValue.Entry head = argArray.getHead();
+	   head != null;
+	   head = head.getNext()) {
+	args[i++] = head.getRawValue(); // php/1c09
+      }
     }
     else
       args = new Value[0];

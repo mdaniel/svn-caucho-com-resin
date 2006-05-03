@@ -1310,10 +1310,16 @@ public class FileModule extends AbstractQuercusModule {
    *
    * @param path the directory to make
    */
-  public static boolean mkdir(Env env, Path path)
+  public static boolean mkdir(Env env, Path path,
+			      @Optional int mode,
+			      @Optional boolean recursive,
+			      @Optional Value context)
   {
     try {
-      return path.mkdir();
+      if (recursive)
+	return path.mkdirs();
+      else
+	return path.mkdir();
     } catch (IOException e) {
       log.log(Level.FINE, e.toString(), e);
 
@@ -1597,19 +1603,50 @@ public class FileModule extends AbstractQuercusModule {
     // XXX: what if it doesn't exist?
     ArrayValue result = new ArrayValueImpl();
 
-    result.put(new StringValueImpl("size"), new LongValue(path.getLength()));
-
     int mode = 0;
     if (path.isDirectory())
-      mode |= 01000;
+      mode |= 0040111; // S_IFDIR
+    else
+      mode |= 0100000; // S_IFREG
+    
     if (path.canRead())
       mode |= 0444;
     if (path.canWrite())
-      mode |= 0222;
+      mode |= 0220;
     if (path.canExecute())
-      mode |= 0111;
+      mode |= 0110;
+
+    result.put(0); // dev
+    result.put(0); // ino
+    result.put(mode);
+    result.put(1); // nlink
+    result.put(501); // uid
+    result.put(501); // gid
+    result.put(0); // rdev
+    result.put(path.getLength()); // size
+
+    result.put(path.getLastModified() / 1000); // atime
+    result.put(path.getLastModified() / 1000); // mtime
+    result.put(path.getLastModified() / 1000); // ctime
+    result.put(4096); // blksize
+    result.put((path.getLength() + 4095) / 4096); // blocks
+
+    result.put("dev", 0);
+    result.put("ino", 0);
     
-    result.put(new StringValueImpl("mode"), new LongValue(mode));
+    result.put("mode", mode);
+    result.put("nlink", 1);
+    result.put("uid", 501);
+    result.put("gid", 501);
+    result.put("rdev", 0);
+    
+    result.put(new StringValueImpl("size"), new LongValue(path.getLength()));
+
+    result.put("atime", path.getLastModified() / 1000);
+    result.put("mtime", path.getLastModified() / 1000);
+    result.put("ctime", path.getLastModified() / 1000);
+    result.put("blksize", 4096);
+    result.put("blocks", (path.getLength() + 4095) / 4096);
 
     return result;
   }

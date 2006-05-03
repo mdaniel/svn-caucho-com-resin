@@ -59,7 +59,7 @@ for .rar files, e.g. classpaths.</p>
 <p>Added a redeploy-check-interval to configure how long Resin should
 wait to restart a failed web-app.</p>
 
-</web-app>
+</section>
 
 <section title="JaasAuthenticator">
 
@@ -93,7 +93,6 @@ introduced in 3.0.18.</p>
 
 <p>The number of JSP .class files cached can now be configured in the JSP
 servlet.  This affects the memory usage in the permanent memory space.</p>
-</p>
 
 <example>
 &lt;servlet servlet-name="resin-jsp"
