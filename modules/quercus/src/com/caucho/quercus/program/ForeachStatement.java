@@ -35,6 +35,7 @@ import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.expr.Expr;
 import com.caucho.quercus.expr.VarExpr;
+import com.caucho.quercus.expr.AbstractVarExpr;
 import com.caucho.quercus.gen.PhpWriter;
 import com.caucho.quercus.Location;
 
@@ -48,19 +49,17 @@ public class ForeachStatement
 {
   private final Expr _objExpr;
 
-  private final VarExpr _key;
-  private final String _keyName;
+  private final AbstractVarExpr _key;
 
-  private final VarExpr _value;
-  private final String _valueName;
+  private final AbstractVarExpr _value;
   private final boolean _isRef;
 
   private final Statement _block;
 
   public ForeachStatement(Location location,
                           Expr objExpr,
-                          VarExpr key,
-                          VarExpr value,
+                          AbstractVarExpr key,
+                          AbstractVarExpr value,
                           boolean isRef,
                           Statement block)
   {
@@ -69,13 +68,7 @@ public class ForeachStatement
     _objExpr = objExpr;
 
     _key = key;
-    if (key != null)
-      _keyName = key.getName();
-    else
-      _keyName = null;
-
     _value = value;
-    _valueName = value.getName();
     _isRef = isRef;
 
     _block = block;
@@ -84,51 +77,46 @@ public class ForeachStatement
   public Value execute(Env env)
     throws Throwable
   {
-    try {
-      Value origObj = _objExpr.eval(env);
-      Value obj = origObj.copy();
+    Value origObj = _objExpr.eval(env);
+    Value obj = origObj.copy();
 
-      if (_key == null && ! _isRef) {
-        for (Value value : obj.getValueArray(env)) {
-          env.setValue(_valueName, value);
+    if (_key == null && ! _isRef) {
+      for (Value value : obj.getValueArray(env)) {
+	_value.evalAssign(env, value);
 
-          Value result = _block.execute(env);
+	Value result = _block.execute(env);
 
-          if (result == null || result instanceof ContinueValue) {
-          } else if (result instanceof BreakValue)
-            return null;
-          else
-            return result;
-        }
-
-        return null;
-      } else {
-        for (Value key : obj.getKeyArray()) {
-          if (_keyName != null)
-            env.setValue(_keyName, key);
-
-          if (_isRef) {
-            Value value = origObj.getRef(key);
-
-            env.setVar(_valueName, value);
-          } else {
-            Value value = obj.get(key).toValue();
-
-            env.setValue(_valueName, value);
-          }
-
-          Value result = _block.execute(env);
-
-          if (result == null || result instanceof ContinueValue) {
-          } else if (result instanceof BreakValue)
-            return null;
-          else
-            return result;
-        }
+	if (result == null || result instanceof ContinueValue) {
+	} else if (result instanceof BreakValue)
+	  return null;
+	else
+	  return result;
       }
-    }
-    catch (Throwable t) {
-      rethrow(t);
+
+      return null;
+    } else {
+      for (Value key : obj.getKeyArray()) {
+	if (_key != null)
+	  _key.evalAssign(env, key);
+
+	if (_isRef) {
+	  Value value = origObj.getRef(key);
+
+	  _value.evalAssign(env, value);
+	} else {
+	  Value value = obj.get(key).toValue();
+
+	  _value.evalAssign(env, value);
+	}
+
+	Value result = _block.execute(env);
+
+	if (result == null || result instanceof ContinueValue) {
+	} else if (result instanceof BreakValue)
+	  return null;
+	else
+	  return result;
+      }
     }
 
     return null;
@@ -150,9 +138,8 @@ public class ForeachStatement
 
     AnalyzeInfo loopInfo = info.createLoop(contInfo, breakInfo);
 
-    if (_key != null) {
+    if (_key != null)
       _key.analyzeAssign(loopInfo);
-    }
 
     if (_value != null) {
       _value.analyzeAssign(loopInfo);
@@ -231,7 +218,7 @@ public class ForeachStatement
     if (_isRef) {
       String valueVar = objVar + ".getRef(" + keyVar + ")";
 
-      _value.generateAssignRef(out, valueVar);
+      _value.generateAssignRef(out, new RawExpr(valueVar), true);
       out.println(";");
     } else {
       String valueVar = valuesVar + "[" + indexVar + "]";

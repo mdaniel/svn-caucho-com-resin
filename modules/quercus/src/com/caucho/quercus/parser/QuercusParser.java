@@ -1219,18 +1219,18 @@ public class QuercusParser {
       boolean isRef = false;
 
       int token = parseToken();
-      if (token == '&') {
+      if (token == '&')
 	isRef = true;
-	token = parseToken();
-      }
+      else
+	_peekToken = token;
 
       if (token != '$')
 	throw error(L.l("expected variable in foreach"));
 
-      String name = parseIdentifier();
+      AbstractVarExpr valueExpr = (AbstractVarExpr) parseLeftHandSide();
 
-      VarExpr keyVar = null;
-      VarExpr valueVar;
+      AbstractVarExpr keyVar = null;
+      AbstractVarExpr valueVar;
 
       token = parseToken();
 
@@ -1238,27 +1238,27 @@ public class QuercusParser {
 	if (isRef)
 	  throw error(L.l("key reference is forbidden in foreach"));
 	
-	keyVar = new VarExpr(_function.createVar(name));
+	keyVar = valueExpr;
 
 	token = parseToken();
 
-	if (token == '&') {
+	if (token == '&')
 	  isRef = true;
-	  token = parseToken();
-	}
+	else
+	  _peekToken = token;
 
 	if (token != '$')
 	  throw error(L.l("expected variable in foreach"));
 
-	name = parseIdentifier();
+	valueVar = (AbstractVarExpr) parseLeftHandSide();
 
 	token = parseToken();
       }
-
-      if (token == ')') {
-	valueVar = new VarExpr(_function.createVar(name));
-      }
       else
+	valueVar = valueExpr;
+      
+
+      if (token != ')')
 	throw error(L.l("expected ')' in foreach"));
     
       Statement block;
@@ -2133,8 +2133,10 @@ public class QuercusParser {
 	token = parseToken();
 	
 	try {
-	  if (token == '&')
-	    expr = expr.createAssignRef(this, parseConditionalExpr());
+	  if (token == '&') {
+	    // php/03d6
+	    expr = expr.createAssignRef(this, parseBitOrExpr());
+	  }
 	  else {
 	    _peekToken = token;
 	    expr = expr.createAssign(this, parseConditionalExpr());
@@ -2683,6 +2685,74 @@ public class QuercusParser {
       throw error(L.l("{0} is an unexpected token, expected an expression.",
 		      tokenName(token)));
     }
+  }
+  
+  /**
+   * Parses a basic term.
+   *
+   * <pre>
+   * lhs ::= VARIABLE
+   *     ::= lhs '[' expr ']'
+   *     ::= lhs -> FIELD
+   * </pre>
+   */
+  private Expr parseLeftHandSide()
+    throws IOException
+  {
+    int token = parseToken();
+    Expr lhs = null;
+
+    if (token == '$')
+      lhs = parseVariable();
+    else
+      throw error(L.l("expected variable at {0} as left-hand-side",
+		      tokenName(token)));
+
+    while (true) {
+      token = parseToken();
+
+      switch (token) {
+      case '[':
+        {
+	  token = parseToken();
+	  
+	  if (token == ']') {
+	    lhs = new ArrayTailExpr(lhs);
+	  }
+	  else {
+	    _peekToken = token;
+	    Expr index = parseExpr();
+	    token = parseToken();
+
+	    lhs = new ArrayGetExpr(lhs, index);
+	  }
+
+          if (token != ']')
+            throw expect("']'", token);
+        }
+        break;
+	
+      case '{':
+        {
+          Expr index = parseExpr();
+
+	  expect('}');
+
+          lhs = new CharAtExpr(lhs, index);
+        }
+        break;
+
+      case DEREF:
+	lhs = parseDeref(lhs);
+        break;
+	
+      default:
+	_peekToken = token;
+	return lhs;
+      }
+    }
+    
+      
   }
 
   /**
