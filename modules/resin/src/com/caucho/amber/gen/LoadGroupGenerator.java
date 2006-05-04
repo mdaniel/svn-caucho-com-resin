@@ -124,10 +124,6 @@ public class LoadGroupGenerator extends ClassComponent {
     
     out.popDepth();
     out.println("}");
-
-    out.println();
-    out.println("if (__caucho_log.isLoggable(java.util.logging.Level.FINE))");
-    out.println("  __caucho_log.fine(\"amber load-" + _index + " \" + this);");
     
     out.println();
     out.println("try {");
@@ -238,11 +234,10 @@ public class LoadGroupGenerator extends ClassComponent {
     out.println("  throw new com.caucho.amber.AmberRuntimeException(e);");
     out.println("}");
 
-    /*
+    // needs to be after load to prevent loop if toString() expects data
     out.println();
     out.println("if (__caucho_log.isLoggable(java.util.logging.Level.FINE))");
-    out.println("  __caucho_log.fine(\"load-" + _index + " \" + this);");
-    */
+    out.println("  __caucho_log.fine(\"amber loaded-" + _index + " \" + this);");
 
     out.popDepth();
     out.println("}");

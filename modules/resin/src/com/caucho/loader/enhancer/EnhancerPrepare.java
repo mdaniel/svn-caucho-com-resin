@@ -155,7 +155,7 @@ public class EnhancerPrepare {
   /**
    * Moves the old class.
    */
-  protected void renameClass(String sourceClass, String targetClass)
+  public void renameClass(String sourceClass, String targetClass)
   {
     Path source = getSource(sourceClass);
 

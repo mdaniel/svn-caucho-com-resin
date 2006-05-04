@@ -478,8 +478,13 @@ public class EntityIntrospector {
     throws ConfigException, SQLException
   {
     JAnnotation inheritanceAnn = type.getAnnotation(Inheritance.class);
+    
+    JAnnotation discValueAnn = type.getAnnotation(DiscriminatorValue.class);
 
-    String discriminatorValue = inheritanceAnn.getString("discriminatorValue");
+    String discriminatorValue = null;
+
+    if (discValueAnn != null)
+      discriminatorValue = discValueAnn.getString("value");
 
     if (discriminatorValue == null || discriminatorValue.equals("")) {
       String name = entityType.getBeanClass().getName();

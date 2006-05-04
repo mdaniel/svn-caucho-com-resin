@@ -3,7 +3,7 @@
     <product>resin-ee</product>
     <title>CMP Inheritance</title>
         <description>
-          <p>EJB 3.0 supports database-backed inheritance, allowing
+          <p>Amber supports database-backed inheritance, allowing
 for persistent-backed polymorphism and more sophisticated
 object-oriented modelling.</p>
 
@@ -20,8 +20,10 @@ select the proper type.</p>
 
 <section title="Files in this tutorial">
 <deftable>
-<tr><td><viewfile-link file="WEB-INF/web.xml"/>
-    <td>web.xml configuration
+<tr><td><viewfile-link file="WEB-INF/resin-web.xml"/>
+    <td>resin-web.xml configuration
+<tr><td><viewfile-link file="WEB-INF/classes/META-INF/persistence.xml"/>
+    <td>META-INF/persistence.xml configuration
 <tr><td><viewfile-link file="WEB-INF/classes/example/Student.java"/>
     <td>The student bean
 <tr><td><viewfile-link file="WEB-INF/classes/example/Prefect.java"/>
@@ -34,17 +36,17 @@ select the proper type.</p>
 <section title="Database Schema">
 
 <example title="student.sql">
-CREATE TABLE ejb3_inherit_student (
-  id BITINT PRIMARY KEY auto_increment,
+CREATE TABLE amber_inherit_student (
+  id BIGINT PRIMARY KEY auto_increment,
 
   type VARCHAR(10),
 
   name VARCHAR(250)
 );
 
-INSERT INTO ejb3_inherit_student VALUES(1, 'student', 'Harry Potter')
-INSERT INTO ejb3_inherit_student VALUES(2, 'prefect', 'Ron Weasley')
-INSERT INTO ejb3_inherit_student VALUES(1, 'prefect', 'Hermione Granger')
+INSERT INTO amber_inherit_student VALUES(1, 'student', 'Harry Potter')
+INSERT INTO amber_inherit_student VALUES(2, 'prefect', 'Ron Weasley')
+INSERT INTO amber_inherit_student VALUES(1, 'prefect', 'Hermione Granger')
 </example>
 
 </section>
@@ -63,13 +65,10 @@ Student bean and a <var>type</var> of "prefect" creates a Prefect bean.</p>
 <example title="Student.java">
 package example;
 
-import static javax.ejb.AccessType.FIELD;
-import static javax.ejb.GeneratorType.AUTO;
-
-<a href="ejb3|cmp-table.xtp#@Entity">@javax.ejb.Entity</a>(access=FIELD)
-<a href="ejb3|cmp-table.xtp#@Table">@javax.ejb.Table</a>(name="ejb3_inherit_student")
-<a href="ejb3|cmp-table.xtp#@Inheritance">@javax.ejb.Inheritance</a>(discriminatorValue="student")
-<a href="ejb3|cmp-table.xtp#@DiscriminatorColumn">@javax.ejb.DiscriminatorColumn</a>(name="type")
+<a href="amber|cmp-table.xtp#@Entity">@javax.ejb.Entity</a>(access=FIELD)
+<a href="amber|cmp-table.xtp#@Table">@javax.ejb.Table</a>(name="ejb3_inherit_student")
+<a href="amber|cmp-table.xtp#@Inheritance">@javax.ejb.Inheritance</a>(discriminatorValue="student")
+<a href="amber|cmp-table.xtp#@DiscriminatorColumn">@javax.ejb.DiscriminatorColumn</a>(name="type")
 public class Student {
   <a href="ejb3|cmp-table.xtp#@Id">@javax.ejb.Id</a>(generator=AUTO)
   <a href="ejb3|cmp-table.xtp#@Column">@javax.ejb.Column</a>(name="id")
@@ -102,10 +101,10 @@ public class Student {
 
 <section title="@Inheritance">
 
-<p>The <a href="cmp3|cmp-table.xtp#@Inheritance">@Inheritance</a>
+<p>The <a href="amber|cmp-table.xtp#@Inheritance">@Inheritance</a>
 annotation marks the entity bean as supporting inheritance.</p>
 
-<p>Resin supports two inheritance types: SINGLE_TABLE and JOINED.
+<p>Amber supports two inheritance types: SINGLE_TABLE and JOINED.
 SINGLE_TABLE uses a single table for all classes and JOINED adds
 additional tables for child classes.  Both types use a discriminator
 column in the base table to mark the Java type of the database entry.

@@ -1,7 +1,5 @@
 package example;
 
-import java.util.Collection;
-
 import javax.persistence.*;
 
 /**

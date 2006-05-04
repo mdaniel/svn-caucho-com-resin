@@ -51,6 +51,7 @@ import com.caucho.log.Log;
 import com.caucho.loader.Environment;
 
 import com.caucho.loader.enhancer.ClassEnhancer;
+import com.caucho.loader.enhancer.EnhancerPrepare;
 
 import com.caucho.config.ConfigException;
 
@@ -90,6 +91,7 @@ public class AmberEnhancer implements AmberGenerator, ClassEnhancer {
 
   private AmberContainer _amberContainer;
 
+  private EnhancerPrepare _prepare;
   private Path _workDir;
 
   private ArrayList<String> _pendingClassNames = new ArrayList<String>();
@@ -98,6 +100,11 @@ public class AmberEnhancer implements AmberGenerator, ClassEnhancer {
   {
     _amberContainer = amberContainer;
     _workDir = WorkDir.getLocalWorkDir().lookup("pre-enhance");
+
+    _prepare = new EnhancerPrepare();
+    _prepare.setClassLoader(Thread.currentThread().getContextClassLoader());
+    _prepare.setWorkPath(WorkDir.getLocalWorkDir());
+    _prepare.addEnhancer(this);
   }
   
   /**
@@ -321,6 +328,9 @@ public class AmberEnhancer implements AmberGenerator, ClassEnhancer {
       return;
 
     type.setGenerated(true);
+
+    _prepare.renameClass(type.getBeanClass().getName(),
+			 type.getBeanClass().getName());
     
     GenClass javaClass = new GenClass(type.getInstanceClassName());
 
