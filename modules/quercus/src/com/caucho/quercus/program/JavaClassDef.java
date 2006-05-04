@@ -489,6 +489,21 @@ public class JavaClassDef extends ClassDef {
   }
 
   /**
+   * Initialize the quercus class.
+   */
+  public void initClass(QuercusClass cl)
+  {
+    
+    if (_cons != null)
+      cl.setConstructor(_cons);
+    
+    for (String key : _functionMap.keySet()) {
+      cl.addMethod(key, _functionMap.get(key));
+    }
+
+  }
+
+  /**
    * Finds the matching constant
    */
   public Value findConstant(Env env, String name)
