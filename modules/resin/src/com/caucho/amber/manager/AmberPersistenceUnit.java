@@ -121,7 +121,8 @@ public class AmberPersistenceUnit {
   private boolean _createDatabaseTables;
   private boolean _validateDatabaseTables = true;
 
-  private long _tableCacheTimeout = 250;
+  // private long _tableCacheTimeout = 250;
+  private long _tableCacheTimeout = 2000;
 
   private TypeManager _typeManager = new TypeManager();
 

@@ -88,7 +88,6 @@ public class CacheableEntityItem extends EntityItem {
 
     if (_expireTime < now) {
       _expireTime = now + _home.getCacheTimeout();
-      
       _cacheItem.__caucho_expire();
     }
 

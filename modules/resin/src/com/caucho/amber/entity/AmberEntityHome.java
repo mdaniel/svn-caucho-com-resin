@@ -323,7 +323,7 @@ public class AmberEntityHome {
 	
 	Entity cacheEntity;
 	cacheEntity = (Entity) _homeBean.__caucho_home_new(aConn, this, key);
-	
+
 	if (isLoad)
 	  cacheEntity.__caucho_retrieve(aConn);
 
