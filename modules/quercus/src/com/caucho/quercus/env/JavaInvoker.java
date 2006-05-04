@@ -149,7 +149,7 @@ abstract public class JavaInvoker
 
             _defaultExprs[i] = expr;
           } else
-            _defaultExprs[i] = new DefaultExpr();
+            _defaultExprs[i] = new DefaultExpr(getLocation());
         } else if (Reference.class.isAssignableFrom(ann.annotationType())) {
           isReference = true;
         }
@@ -305,7 +305,7 @@ abstract public class JavaInvoker
         expr = _defaultExprs[i];
 
         if (expr == null)
-          expr = new DefaultExpr();
+          expr = new DefaultExpr(getLocation());
       }
 
       values[k] = _marshallArgs[i].marshall(env, expr, _paramTypes[k]);

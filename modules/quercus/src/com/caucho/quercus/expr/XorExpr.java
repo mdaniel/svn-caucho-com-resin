@@ -31,21 +31,20 @@ package com.caucho.quercus.expr;
 
 import java.io.IOException;
 
-import com.caucho.java.JavaWriter;
-
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.BooleanValue;
 
 import com.caucho.quercus.gen.PhpWriter;
+import com.caucho.quercus.Location;
 
 /**
  * Represents a logical xor expression.
  */
 public class XorExpr extends BinaryExpr {
-  public XorExpr(Expr left, Expr right)
+  public XorExpr(Location location, Expr left, Expr right)
   {
-    super(left, right);
+    super(location, left, right);
   }
 
   /**
@@ -144,7 +143,7 @@ public class XorExpr extends BinaryExpr {
     generateBoolean(out);
     out.println(") {}");
   }
-  
+
   public String toString()
   {
     return "(" + _left + " xor " + _right + ")";

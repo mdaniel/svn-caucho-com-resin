@@ -38,11 +38,11 @@ import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.ArrayValue;
 import com.caucho.quercus.env.ArrayValueImpl;
 import com.caucho.quercus.env.ConstArrayValue;
-import com.caucho.quercus.env.LongValue;
 
 import com.caucho.quercus.program.AnalyzeInfo;
 
 import com.caucho.quercus.gen.PhpWriter;
+import com.caucho.quercus.Location;
 
 /**
  * Represents the array function
@@ -51,17 +51,19 @@ public class ArrayFunExpr extends Expr {
   private final Expr []_keys;
   private final Expr []_values;
 
-  public ArrayFunExpr(ArrayList<Expr> keyList, ArrayList<Expr> valueList)
+  public ArrayFunExpr(Location location, ArrayList<Expr> keyList, ArrayList<Expr> valueList)
   {
+    super(location);
     _keys = new Expr[keyList.size()];
     keyList.toArray(_keys);
-    
+
     _values = new Expr[valueList.size()];
     valueList.toArray(_values);
   }
 
-  public ArrayFunExpr(Expr []keys, Expr []values)
+  public ArrayFunExpr(Location location, Expr []keys, Expr []values)
   {
+    super(location);
     _keys = keys;
     _values = values;
   }
@@ -73,12 +75,12 @@ public class ArrayFunExpr extends Expr {
   {
     for (int i = 0; i < _keys.length; i++) {
       if (_keys[i] != null && ! _keys[i].isLiteral())
-	return false;
+        return false;
     }
-    
+
     for (int i = 0; i < _values.length; i++) {
       if (_values[i] != null && ! _values[i].isLiteral())
-	return false;
+        return false;
     }
 
     return true;
@@ -103,12 +105,12 @@ public class ArrayFunExpr extends Expr {
       value = value.toArgValue();
 
       if (keyExpr != null) {
-	Value key = keyExpr.evalArg(env).toArgValue();
-	
-	array.put(key, value);
+        Value key = keyExpr.evalArg(env).toArgValue();
+
+        array.put(key, value);
       }
       else
-	array.put(value);
+        array.put(value);
     }
 
     return array;
@@ -126,7 +128,7 @@ public class ArrayFunExpr extends Expr {
     for (int i = 0; i < _values.length; i++) {
       if (_keys[i] != null)
         _keys[i].analyze(info);
-      
+
       _values[i].analyze(info);
     }
   }
@@ -143,63 +145,63 @@ public class ArrayFunExpr extends Expr {
       ConstArrayValue array = new ConstArrayValue();
 
       try {
-	for (int i = 0; i < _keys.length; i++) {
-	  if (_keys[i] != null)
-	    array.put(_keys[i].eval(null), _values[i].eval(null));
-	  else
-	    array.put(_values[i].eval(null));
-	}
+        for (int i = 0; i < _keys.length; i++) {
+          if (_keys[i] != null)
+            array.put(_keys[i].eval(null), _values[i].eval(null));
+          else
+            array.put(_values[i].eval(null));
+        }
       } catch (RuntimeException e) {
-	throw e;
+        throw e;
       } catch (Throwable e) {
-	throw new RuntimeException(e);
+        throw new RuntimeException(e);
       }
 
       out.print(array);
       out.print(".copy()");
     }
-    
+
     else if (_keys.length < 16) {
       out.print("new ArrayValueImpl()");
 
       for (int i = 0; i < _keys.length; i++) {
-	out.print(".");
-	out.print("append(");
-	if (_keys[i] != null) {
-	  _keys[i].generateCopy(out);
-	  out.print(", ");
-	}
-	_values[i].generateCopy(out);
-	out.print(")");
+        out.print(".");
+        out.print("append(");
+        if (_keys[i] != null) {
+          _keys[i].generateCopy(out);
+          out.print(", ");
+        }
+        _values[i].generateCopy(out);
+        out.print(")");
       }
     }
     else {
       out.print("new ArrayValueImpl(");
       out.print("new Value[] {");
-      
+
       for (int i = 0; i < _keys.length; i++) {
-	if (i != 0)
-	  out.print(", ");
-	    
-	if (_keys[i] != null)
-	  _keys[i].generateCopy(out);
-	else
-	  out.print("null");
+        if (i != 0)
+          out.print(", ");
+
+        if (_keys[i] != null)
+          _keys[i].generateCopy(out);
+        else
+          out.print("null");
       }
-      
+
       out.print("}, new Value[] {");
-	
+
       for (int i = 0; i < _values.length; i++) {
-	if (i != 0)
-	  out.print(", ");
-	    
-	_values[i].generateCopy(out);
+        if (i != 0)
+          out.print(", ");
+
+        _values[i].generateCopy(out);
       }
 
       out.print("})");
     }
   }
-  
+
   /**
    * Generates code to recreate the expression.
    *
@@ -210,31 +212,31 @@ public class ArrayFunExpr extends Expr {
   {
     // quercus/3724
     out.print("new ArrayFunExpr(");
-    
+
     out.print("new Expr[] {");
-      
+
     for (int i = 0; i < _keys.length; i++) {
       if (i != 0)
-	out.print(", ");
-	    
+        out.print(", ");
+
       if (_keys[i] != null)
-	_keys[i].generateExpr(out);
+        _keys[i].generateExpr(out);
       else
-	out.print("null");
+        out.print("null");
     }
-      
+
     out.print("}, new Expr[] {");
-	
+
     for (int i = 0; i < _values.length; i++) {
       if (i != 0)
-	out.print(", ");
-	    
+        out.print(", ");
+
       _values[i].generateExpr(out);
     }
 
     out.print("})");
   }
-  
+
   public String toString()
   {
     return "array()";

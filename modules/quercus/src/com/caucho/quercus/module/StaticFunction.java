@@ -151,7 +151,7 @@ public class StaticFunction extends AbstractFunction {
 
             _defaultExprs[i] = expr;
           } else
-            _defaultExprs[i] = new DefaultExpr();
+            _defaultExprs[i] = new DefaultExpr(getLocation());
         } else if (Reference.class.isAssignableFrom(ann.annotationType())) {
           isReference = true;
         } else if (NotNull.class.isAssignableFrom(ann.annotationType())) {
@@ -630,7 +630,7 @@ public class StaticFunction extends AbstractFunction {
                                   param[_hasEnv ? i + 1 : i]);
       else if (! _hasRestArgs) {
 	// XXX: error?
-	log.warning(L.l(funExpr.getLocation() +
+	log.warning(L.l(funExpr.getLocation().getMessagePrefix() +
 			"argument length mismatch for '{0}'",
 			_method.getName()));
 	_marshallArgs[i].generate(out,

@@ -31,21 +31,20 @@ package com.caucho.quercus.expr;
 
 import java.io.IOException;
 
-import java.util.HashSet;
-
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.BooleanValue;
 
 import com.caucho.quercus.gen.PhpWriter;
+import com.caucho.quercus.Location;
 
 /**
  * Represents a PHP boolean negation
  */
 public final class NotExpr extends UnaryExpr {
-  public NotExpr(Expr expr)
+  public NotExpr(Location location, Expr expr)
   {
-    super(expr);
+    super(location, expr);
   }
 
   /**
@@ -115,7 +114,7 @@ public final class NotExpr extends UnaryExpr {
     _expr.generateExpr(out);
     out.print(")");
   }
-  
+
   public String toString()
   {
     return "! " + _expr;

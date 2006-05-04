@@ -31,15 +31,13 @@ package com.caucho.quercus.expr;
 
 import java.io.IOException;
 
-import com.caucho.java.JavaWriter;
-
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
-import com.caucho.quercus.env.BooleanValue;
 
 import com.caucho.quercus.program.AnalyzeInfo;
 
 import com.caucho.quercus.gen.PhpWriter;
+import com.caucho.quercus.Location;
 
 /**
  * Represents a conditional expression.
@@ -49,10 +47,11 @@ public class ConditionalExpr extends Expr {
   private final Expr _trueExpr;
   private final Expr _falseExpr;
 
-  public ConditionalExpr(Expr test, Expr trueExpr, Expr falseExpr)
+  public ConditionalExpr(Location location, Expr test, Expr trueExpr, Expr falseExpr)
   {
+    super(location);
     _test = test;
-    
+
     _trueExpr = trueExpr;
     _falseExpr = falseExpr;
   }
@@ -117,9 +116,9 @@ public class ConditionalExpr extends Expr {
     _test.analyze(info);
 
     AnalyzeInfo falseExprInfo = info.copy();
-    
+
     _trueExpr.analyze(info);
-    
+
     _falseExpr.analyze(falseExprInfo);
 
     info.merge(falseExprInfo);
@@ -264,7 +263,7 @@ public class ConditionalExpr extends Expr {
     _falseExpr.generateExpr(out);
     out.print(")");
   }
-  
+
   public String toString()
   {
     return "(" + _test + " ? " + _trueExpr + " : " + _falseExpr + ")";

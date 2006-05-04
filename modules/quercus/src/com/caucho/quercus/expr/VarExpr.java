@@ -36,6 +36,7 @@ import com.caucho.quercus.env.Value;
 import com.caucho.quercus.gen.PhpWriter;
 import com.caucho.quercus.parser.QuercusParser;
 import com.caucho.quercus.program.AnalyzeInfo;
+import com.caucho.quercus.Location;
 
 import java.io.IOException;
 import java.util.HashSet;
@@ -53,8 +54,9 @@ public class VarExpr
 
   private VarState _varState = VarState.INIT;
 
-  public VarExpr(VarInfo var)
+  public VarExpr(Location location, VarInfo var)
   {
+    super(location);
     _var = var;
     _name = var.getName();
   }
@@ -85,10 +87,11 @@ public class VarExpr
 
   /**
    * Copy for things like $a .= "test";
+   * @param location
    */
-  public Expr copy()
+  public Expr copy(Location location)
   {
-    return new VarExpr(_var);
+    return new VarExpr(location, _var);
   }
 
   /**
@@ -112,7 +115,9 @@ public class VarExpr
   /**
    * Creates the assignment.
    */
-  public Expr createAssignRef(QuercusParser parser, Expr value)
+  public Expr createAssignRef(QuercusParser parser,
+                              Expr value
+  )
   {
     _var.setAssigned();
 
@@ -304,7 +309,7 @@ public class VarExpr
     if (var == null) {
       setVarState(VarState.UNSET);
 
-      var = new VarExpr(_var);
+      var = new VarExpr(getLocation(), _var);
       var.setVarState(VarState.VALID);
     } else
       setVarState(var.getVarState());
@@ -324,7 +329,7 @@ public class VarExpr
     if (infoVar == null) {
       setVarState(VarState.UNSET);
 
-      infoVar = new VarExpr(getVarInfo());
+      infoVar = new VarExpr(getLocation(), getVarInfo());
       infoVar.setVarState(VarState.VALID);
     } else if (_varState == VarState.INIT ||
                _varState == infoVar.getVarState()) {
@@ -408,7 +413,7 @@ public class VarExpr
     if (_varState == state)
       return this;
     else {
-      VarExpr var = new VarExpr(_var);
+      VarExpr var = new VarExpr(getLocation(), _var);
       var.setVarState(state);
 
       return var;

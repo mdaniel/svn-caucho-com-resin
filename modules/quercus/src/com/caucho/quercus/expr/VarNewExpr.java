@@ -40,6 +40,7 @@ import com.caucho.quercus.env.QuercusClass;
 import com.caucho.quercus.program.AnalyzeInfo;
 
 import com.caucho.quercus.gen.PhpWriter;
+import com.caucho.quercus.Location;
 
 import com.caucho.util.L10N;
 
@@ -53,16 +54,18 @@ public class VarNewExpr extends Expr {
 
   private Expr []_fullArgs;
 
-  public VarNewExpr(Expr name, ArrayList<Expr> args)
+  public VarNewExpr(Location location, Expr name, ArrayList<Expr> args)
   {
+    super(location);
     _name = name;
 
     _args = new Expr[args.size()];
     args.toArray(_args);
   }
 
-  public VarNewExpr(Expr name, Expr []args)
+  public VarNewExpr(Location location, Expr name, Expr []args)
   {
+    super(location);
     _name = name;
     _args = args;
   }

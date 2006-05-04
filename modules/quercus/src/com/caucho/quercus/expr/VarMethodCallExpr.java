@@ -40,6 +40,7 @@ import com.caucho.quercus.program.AbstractFunction;
 import com.caucho.quercus.program.AnalyzeInfo;
 
 import com.caucho.quercus.gen.PhpWriter;
+import com.caucho.quercus.Location;
 
 import com.caucho.util.L10N;
 
@@ -58,8 +59,9 @@ public class VarMethodCallExpr extends Expr {
 
   private AbstractFunction _fun;
 
-  public VarMethodCallExpr(Expr objExpr, Expr name, ArrayList<Expr> args)
+  public VarMethodCallExpr(Location location, Expr objExpr, Expr name, ArrayList<Expr> args)
   {
+    super(location);
     _objExpr = objExpr;
     
     _name = name;
@@ -68,8 +70,9 @@ public class VarMethodCallExpr extends Expr {
     args.toArray(_args);
   }
 
-  public VarMethodCallExpr(Expr objExpr, Expr name, Expr []args)
+  public VarMethodCallExpr(Location location, Expr objExpr, Expr name, Expr []args)
   {
+    super(location);
     _objExpr = objExpr;
     
     _name = name;

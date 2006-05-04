@@ -31,22 +31,20 @@ package com.caucho.quercus.expr;
 
 import java.io.IOException;
 
-import com.caucho.java.JavaWriter;
-
 import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.NullValue;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.gen.PhpWriter;
+import com.caucho.quercus.Location;
 
 /**
  * Represents a PHP clone
  */
 public class CloneExpr extends UnaryExpr {
-  public CloneExpr(Expr expr)
+  public CloneExpr(Location location, Expr expr)
   {
-    super(expr);
+    super(location, expr);
   }
-  
+
   /**
    * Evaluates the expression.
    *
@@ -75,7 +73,7 @@ public class CloneExpr extends UnaryExpr {
     _expr.generate(out);
     out.print(".clone()");
   }
-  
+
   public String toString()
   {
     return "clone " + _expr.toString();

@@ -31,19 +31,14 @@ package com.caucho.quercus.expr;
 
 import java.io.IOException;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-
-import com.caucho.java.JavaWriter;
-
 import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.LongValue;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.gen.PhpWriter;
 
 import com.caucho.quercus.parser.QuercusParser;
 
 import com.caucho.quercus.program.AnalyzeInfo;
+import com.caucho.quercus.Location;
 
 /**
  * Represents a PHP list assignment expression.
@@ -52,16 +47,17 @@ public class ListExpr extends Expr {
   private final ListHeadExpr _listHead;
   private final Expr _value;
 
-  private ListExpr(ListHeadExpr head, Expr value)
+  private ListExpr(Location location, ListHeadExpr head, Expr value)
     throws IOException
   {
+    super(location);
     _listHead = head;
 
     _value = value;
   }
 
   public static Expr create(QuercusParser parser,
-			    ListHeadExpr head, Expr value)
+                            ListHeadExpr head, Expr value)
     throws IOException
   {
     boolean isSuppress = value instanceof SuppressErrorExpr;
@@ -75,13 +71,13 @@ public class ListExpr extends Expr {
     Expr expr;
 
     if (value instanceof EachExpr) {
-      expr = new ListEachExpr(head.getVarList(), (EachExpr) value);
+      expr = new ListEachExpr(parser.getLocation(), head.getVarList(), (EachExpr) value);
     }
     else
-      expr = new ListExpr(head, value);
+      expr = new ListExpr(parser.getLocation(), head, value);
 
     if (isSuppress)
-      return new SuppressErrorExpr(expr);
+      return new SuppressErrorExpr(expr.getLocation(), expr);
     else
       return expr;
   }
@@ -99,7 +95,7 @@ public class ListExpr extends Expr {
     Value value = _value.eval(env);
 
     _listHead.evalAssign(env, value);
-    
+
     return value;
   }
 
@@ -127,7 +123,7 @@ public class ListExpr extends Expr {
   {
     // XXX: should be unique (?)
     info.getFunction().addTempVar("_quercus_list");
-    
+
     _value.analyze(info);
 
     _listHead.analyze(info);

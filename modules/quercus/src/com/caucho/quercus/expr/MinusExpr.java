@@ -32,21 +32,20 @@ package com.caucho.quercus.expr;
 import java.io.IOException;
 
 import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.LongValue;
 import com.caucho.quercus.env.Value;
-import com.caucho.quercus.env.DoubleValue;
 
 import com.caucho.quercus.gen.PhpWriter;
+import com.caucho.quercus.Location;
 
 /**
  * Represents a PHP unary minus.
  */
 public class MinusExpr extends UnaryExpr {
-  public MinusExpr(Expr expr)
+  public MinusExpr(Location location, Expr expr)
   {
-    super(expr);
+    super(location, expr);
   }
-  
+
   /**
    * Evaluates the expression.
    *
@@ -112,7 +111,7 @@ public class MinusExpr extends UnaryExpr {
     _expr.generateExpr(out);
     out.print(")");
   }
-  
+
   public String toString()
   {
     return "-" + _expr;

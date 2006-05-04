@@ -31,10 +31,6 @@ package com.caucho.quercus.expr;
 
 import java.io.IOException;
 
-import java.util.HashSet;
-
-import com.caucho.java.JavaWriter;
-
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.NullValue;
 import com.caucho.quercus.env.Value;
@@ -42,7 +38,7 @@ import com.caucho.quercus.env.Value;
 import com.caucho.quercus.gen.PhpWriter;
 
 import com.caucho.quercus.program.AnalyzeInfo;
-import com.caucho.quercus.program.ExprStatement;
+import com.caucho.quercus.Location;
 
 /**
  * Represents unsetting a PHP variable
@@ -50,8 +46,9 @@ import com.caucho.quercus.program.ExprStatement;
 public class UnsetVarExpr extends Expr {
   private final AbstractVarExpr _var;
 
-  public UnsetVarExpr(AbstractVarExpr var)
+  public UnsetVarExpr(Location location, AbstractVarExpr var)
   {
+    super(location);
     _var = var;
   }
 
@@ -92,7 +89,7 @@ public class UnsetVarExpr extends Expr {
   {
     _var.generateUnset(out);
   }
-  
+
   public int hashCode()
   {
     return _var.hashCode();
@@ -109,7 +106,7 @@ public class UnsetVarExpr extends Expr {
 
     return _var == expr._var;
   }
-  
+
   public String toString()
   {
     return "unset(" + _var + ")";

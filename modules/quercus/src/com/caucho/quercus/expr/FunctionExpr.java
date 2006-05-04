@@ -30,6 +30,7 @@
 package com.caucho.quercus.expr;
 
 import com.caucho.quercus.Quercus;
+import com.caucho.quercus.Location;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.NullValue;
 import com.caucho.quercus.env.Value;
@@ -50,18 +51,20 @@ public class FunctionExpr extends Expr {
   private final String _name;
   private final Expr []_args;
 
-  public FunctionExpr(String name, ArrayList<Expr> args)
+  public FunctionExpr(Location location, String name, ArrayList<Expr> args)
   {
     // quercus/120o
+    super(location);
     _name = name.intern();
 
     _args = new Expr[args.size()];
     args.toArray(_args);
   }
 
-  public FunctionExpr(String name, Expr []args)
+  public FunctionExpr(Location location, String name, Expr []args)
   {
     // quercus/120o
+    super(location);
     _name = name.intern();
 
     _args = args;
@@ -77,16 +80,18 @@ public class FunctionExpr extends Expr {
 
   /**
    * Returns the reference of the value.
+   * @param location
    */
-  public Expr createRef()
+  public Expr createRef(Location location)
   {
-    return new RefExpr(this);
+    return new RefExpr(location, this);
   }
 
   /**
    * Returns the copy of the value.
+   * @param location
    */
-  public Expr createCopy()
+  public Expr createCopy(Location location)
   {
     return this;
   }

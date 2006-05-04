@@ -31,14 +31,12 @@ package com.caucho.quercus.expr;
 
 import java.io.IOException;
 
-import com.caucho.java.JavaWriter;
-
 import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.NullValue;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.gen.PhpWriter;
 
 import com.caucho.quercus.program.AnalyzeInfo;
+import com.caucho.quercus.Location;
 
 import com.caucho.vfs.Path;
 
@@ -49,18 +47,18 @@ public class IncludeOnceExpr extends UnaryExpr {
   private Path _dir;
   private boolean _isRequire;
   
-  public IncludeOnceExpr(Path sourceFile, Expr expr)
+  public IncludeOnceExpr(Location location, Path sourceFile, Expr expr)
   {
-    super(expr);
+    super(location, expr);
 
     // XXX: issues with eval
     if (! sourceFile.getScheme().equals("string"))
       _dir = sourceFile.getParent();
   }
   
-  public IncludeOnceExpr(Path sourceFile, Expr expr, boolean isRequire)
+  public IncludeOnceExpr(Location location, Path sourceFile, Expr expr, boolean isRequire)
   {
-    this(sourceFile, expr);
+    this(location, sourceFile, expr);
 
     _isRequire = isRequire;
   }

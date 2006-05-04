@@ -35,14 +35,15 @@ import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.BooleanValue;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.gen.PhpWriter;
+import com.caucho.quercus.Location;
 
 /**
  * Converts to a boolean
  */
 public class ToBooleanExpr extends UnaryExpr {
-  public ToBooleanExpr(Expr expr)
+  public ToBooleanExpr(Location location, Expr expr)
   {
-    super(expr);
+    super(location, expr);
   }
 
   /**
@@ -71,7 +72,7 @@ public class ToBooleanExpr extends UnaryExpr {
     throws IOException
   {
     out.print('(');
-    
+
     _expr.generateBoolean(out);
 
     out.print(" ? com.caucho.quercus.env.BooleanValue.TRUE : com.caucho.quercus.env.BooleanValue.FALSE)");
@@ -100,7 +101,7 @@ public class ToBooleanExpr extends UnaryExpr {
     _expr.generateExpr(out);
     out.print(")");
   }
-  
+
   public String toString()
   {
     return "((boolean) " + _expr + ")";

@@ -31,15 +31,13 @@ package com.caucho.quercus.expr;
 
 import java.io.IOException;
 
-import com.caucho.java.JavaWriter;
-
 import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.Value;
 
 import com.caucho.quercus.program.AnalyzeInfo;
 
 import com.caucho.quercus.gen.PhpWriter;
+import com.caucho.quercus.Location;
 
 /**
  * Represents a literal expression.
@@ -47,8 +45,15 @@ import com.caucho.quercus.gen.PhpWriter;
 public class LiteralExpr extends Expr {
   private final Value _value;
 
+  public LiteralExpr(Location location, Value value)
+  {
+    super(location);
+    _value = value;
+  }
+
   public LiteralExpr(Value value)
   {
+    super(Location.UNKNOWN); // acceptable, for compiled code
     _value = value;
   }
 
@@ -75,7 +80,7 @@ public class LiteralExpr extends Expr {
   {
     return _value.isDouble();
   }
-  
+
   /**
    * Evaluates the expression as a constant.
    *
@@ -209,7 +214,7 @@ public class LiteralExpr extends Expr {
 
     out.print(")");
   }
-  
+
   public String toString()
   {
     return _value.toString();

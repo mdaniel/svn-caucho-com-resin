@@ -29,17 +29,8 @@
 
 package com.caucho.quercus.expr;
 
-import java.io.IOException;
-
-import java.util.HashSet;
-
-import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.Value;
-import com.caucho.quercus.env.BooleanValue;
-
 import com.caucho.quercus.program.AnalyzeInfo;
-
-import com.caucho.quercus.gen.PhpWriter;
+import com.caucho.quercus.Location;
 
 /**
  * Represents a PHP boolean negation
@@ -47,8 +38,9 @@ import com.caucho.quercus.gen.PhpWriter;
 abstract public class UnaryExpr extends Expr {
   protected final Expr _expr;
 
-  protected UnaryExpr(Expr expr)
+  protected UnaryExpr(Location location, Expr expr)
   {
+    super(location);
     _expr = expr;
   }
 

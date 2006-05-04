@@ -31,15 +31,12 @@ package com.caucho.quercus.expr;
 
 import java.io.IOException;
 
-import java.util.HashSet;
-
-import com.caucho.java.JavaWriter;
-
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.gen.PhpWriter;
 
 import com.caucho.quercus.program.AnalyzeInfo;
+import com.caucho.quercus.Location;
 
 /**
  * Represents a PHP assignment expression.
@@ -48,8 +45,9 @@ public class AssignRefExpr extends Expr {
   private final AbstractVarExpr _var;
   private final Expr _value;
 
-  public AssignRefExpr(AbstractVarExpr var, Expr value)
+  public AssignRefExpr(Location location, AbstractVarExpr var, Expr value)
   {
+    super(location);
     _var = var;
     _value = value;
   }
@@ -67,7 +65,7 @@ public class AssignRefExpr extends Expr {
     Value value = _value.evalRef(env);
 
     _var.evalAssign(env, value);
-    
+
     return value;
   }
 
@@ -84,7 +82,7 @@ public class AssignRefExpr extends Expr {
     Value value = _value.evalRef(env);
 
     _var.evalAssign(env, value);
-    
+
     return value.copy();
   }
 
@@ -137,7 +135,7 @@ public class AssignRefExpr extends Expr {
     generate(out);
     out.print(".copy()");  // php/3a5r
   }
-  
+
   public String toString()
   {
     return "(" + _var + " =& " + _value + ")";

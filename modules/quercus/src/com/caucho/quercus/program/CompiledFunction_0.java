@@ -29,11 +29,6 @@
 
 package com.caucho.quercus.program;
 
-import java.io.IOException;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-
 import java.util.logging.Logger;
 
 import com.caucho.quercus.env.Env;
@@ -42,13 +37,6 @@ import com.caucho.quercus.env.Value;
 import com.caucho.quercus.expr.Expr;
 
 import com.caucho.util.L10N;
-
-import com.caucho.vfs.WriteStream;
-
-import com.caucho.quercus.env.Var;
-import com.caucho.quercus.env.NullValue;
-
-import com.caucho.quercus.gen.PhpWriter;
 
 /**
  * Represents a compiled function with 0 args
@@ -64,7 +52,7 @@ abstract public class CompiledFunction_0 extends CompiledFunction {
   {
     _name = name;
   }
-  
+
   /**
    * Binds the user's arguments to the actual arguments.
    *
@@ -75,7 +63,7 @@ abstract public class CompiledFunction_0 extends CompiledFunction {
     throws Exception
   {
     if (args.length > 0)
-      log.fine(L.l(env.getLocation() + "too many arguments" + env.getFunctionLocation()));
+      log.fine(L.l(env.getLocation().getMessagePrefix() + "too many arguments" + env.getFunctionLocation()));
 
     return args;
   }
@@ -85,7 +73,7 @@ abstract public class CompiledFunction_0 extends CompiledFunction {
   {
     return eval(env);
   }
-  
+
   public String toString()
   {
     return "CompiledFunction_0[" + _name + "]";

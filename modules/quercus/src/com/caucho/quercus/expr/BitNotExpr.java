@@ -31,20 +31,19 @@ package com.caucho.quercus.expr;
 
 import java.io.IOException;
 
-import com.caucho.java.JavaWriter;
-
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.LongValue;
 import com.caucho.quercus.gen.PhpWriter;
+import com.caucho.quercus.Location;
 
 /**
  * Represents a PHP bitwise not expression.
  */
 public class BitNotExpr extends UnaryExpr {
-  public BitNotExpr(Expr expr)
+  public BitNotExpr(Location location, Expr expr)
   {
-    super(expr);
+    super(location, expr);
   }
 
   /**
@@ -112,7 +111,7 @@ public class BitNotExpr extends UnaryExpr {
     _expr.generateExpr(out);
     out.print(")");
   }
-  
+
   public String toString()
   {
     return "(~ " + _expr + ")";

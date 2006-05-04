@@ -31,22 +31,20 @@ package com.caucho.quercus.expr;
 
 import java.io.IOException;
 
-import com.caucho.java.JavaWriter;
-
 import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.DoubleValue;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.StringValueImpl;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.gen.PhpWriter;
+import com.caucho.quercus.Location;
 
 /**
  * Converts to an string
  */
 public class ToStringExpr extends UnaryExpr {
-  public ToStringExpr(Expr expr)
+  public ToStringExpr(Location location, Expr expr)
   {
-    super(expr);
+    super(location, expr);
   }
 
   /**
@@ -96,7 +94,7 @@ public class ToStringExpr extends UnaryExpr {
     _expr.generateExpr(out);
     out.print(")");
   }
-  
+
   public String toString()
   {
     return "((string) " + _expr + ")";

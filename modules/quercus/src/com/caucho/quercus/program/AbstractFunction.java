@@ -40,6 +40,7 @@ import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
 
 import com.caucho.quercus.gen.PhpWriter;
+import com.caucho.quercus.Location;
 
 import com.caucho.util.L10N;
 
@@ -52,7 +53,15 @@ abstract public class AbstractFunction {
   private static final Arg []NULL_ARGS = new Arg[0];
   private static final Value []NULL_ARG_VALUES = new Value[0];
 
+  private final Location _location;
+
   private boolean _isGlobal = true;
+
+  public AbstractFunction()
+  {
+    // XXX:
+    _location = Location.UNKNOWN;
+  }
 
   /**
    * Returns true for a global function.
@@ -60,6 +69,11 @@ abstract public class AbstractFunction {
   public final boolean isGlobal()
   {
     return _isGlobal;
+  }
+
+  public final Location getLocation()
+  {
+    return _location;
   }
 
   /**

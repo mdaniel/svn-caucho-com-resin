@@ -37,6 +37,7 @@ import com.caucho.quercus.env.Value;
 import com.caucho.quercus.program.AnalyzeInfo;
 
 import com.caucho.quercus.gen.PhpWriter;
+import com.caucho.quercus.Location;
 
 import com.caucho.util.L10N;
 
@@ -49,8 +50,9 @@ public class FieldVarGetExpr extends AbstractVarExpr {
   private final Expr _objExpr;
   private final Expr _nameExpr;
 
-  public FieldVarGetExpr(Expr objExpr, Expr nameExpr)
+  public FieldVarGetExpr(Location location, Expr objExpr, Expr nameExpr)
   {
+    super(location);
     _objExpr = objExpr;
     
     _nameExpr = nameExpr;

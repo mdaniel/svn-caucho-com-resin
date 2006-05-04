@@ -32,6 +32,7 @@ package com.caucho.quercus.expr;
 import java.util.ArrayList;
 
 import com.caucho.util.L10N;
+import com.caucho.quercus.Location;
 
 /**
  * Represents a PHP method call expression from $this.
@@ -39,15 +40,15 @@ import com.caucho.util.L10N;
 public class ThisMethodCallExpr extends MethodCallExpr {
   private static final L10N L = new L10N(ThisMethodCallExpr.class);
 
-  public ThisMethodCallExpr(Expr objExpr, String name, ArrayList<Expr> args)
+  public ThisMethodCallExpr(Location location, Expr objExpr, String name, ArrayList<Expr> args)
   {
-    super(objExpr, name, args);
+    super(location, objExpr, name, args);
   }
 
   //
   // java code generation
   //
-  
+
   public String toString()
   {
     return "$this->" + _name + "()";

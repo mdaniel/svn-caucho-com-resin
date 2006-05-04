@@ -31,10 +31,7 @@ package com.caucho.quercus.expr;
 
 import java.io.IOException;
 
-import com.caucho.java.JavaWriter;
-
 import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.NullValue;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.Var;
 import com.caucho.quercus.env.RefVar;
@@ -42,14 +39,15 @@ import com.caucho.quercus.env.RefVar;
 import com.caucho.quercus.gen.PhpWriter;
 
 import com.caucho.quercus.program.AnalyzeInfo;
+import com.caucho.quercus.Location;
 
 /**
  * Represents a PHP reference argument.
  */
 public class RefExpr extends UnaryExpr {
-  public RefExpr(Expr expr)
+  public RefExpr(Location location, Expr expr)
   {
-    super(expr);
+    super(location, expr);
   }
 
   /**
@@ -59,7 +57,7 @@ public class RefExpr extends UnaryExpr {
   {
     return true;
   }
-  
+
   /**
    * Evaluates the expression.
    *
@@ -78,7 +76,7 @@ public class RefExpr extends UnaryExpr {
     else
       return value;
   }
-  
+
   /**
    * Evaluates the expression.
    *
@@ -104,7 +102,7 @@ public class RefExpr extends UnaryExpr {
   //
   // Java code generation
   //
-  
+
   /**
    * Analyze the expression
    */
@@ -136,7 +134,7 @@ public class RefExpr extends UnaryExpr {
     // php/3c1q
     _expr.generateRef(out);
   }
-  
+
   public String toString()
   {
     return _expr.toString();

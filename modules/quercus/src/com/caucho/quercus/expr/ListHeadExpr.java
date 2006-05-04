@@ -32,18 +32,14 @@ package com.caucho.quercus.expr;
 import java.io.IOException;
 
 import java.util.ArrayList;
-import java.util.HashSet;
-
-import com.caucho.java.JavaWriter;
 
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.LongValue;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.gen.PhpWriter;
 
-import com.caucho.quercus.parser.QuercusParser;
-
 import com.caucho.quercus.program.AnalyzeInfo;
+import com.caucho.quercus.Location;
 
 /**
  * Represents a list assignment expression.
@@ -54,9 +50,10 @@ public class ListHeadExpr extends Expr {
 
   private String _varName;
 
-  public ListHeadExpr(ArrayList<Expr> varList)
+  public ListHeadExpr(Location location, ArrayList<Expr> varList)
     throws IOException
   {
+    super(location);
     _varList = new Expr[varList.size()];
     varList.toArray(_varList);
 
@@ -95,10 +92,10 @@ public class ListHeadExpr extends Expr {
     throws Throwable
   {
     int len = _varList.length;
-    
+
     for (int i = 0; i < len; i++) {
       if (_varList[i] != null)
-	_varList[i].evalAssign(env, value.get(_keyList[i]).copy());
+        _varList[i].evalAssign(env, value.get(_keyList[i]).copy());
     }
   }
 
@@ -117,7 +114,7 @@ public class ListHeadExpr extends Expr {
 
     for (int i = 0; i < _varList.length; i++) {
       if (_varList[i] != null)
-	_varList[i].analyzeAssign(info);
+        _varList[i].analyzeAssign(info);
     }
   }
 
@@ -135,29 +132,29 @@ public class ListHeadExpr extends Expr {
     value.generate(out);
 
     VarInfo varInfo = new VarInfo(var, null);
-    VarExpr varExpr = new PhpVarExpr(varInfo);
+    VarExpr varExpr = new PhpVarExpr(getLocation(), varInfo);
 
     varExpr.setVarState(VarState.VALID);
 
     int count = 1;
-    
+
     for (int i = 0; i < _varList.length; i++) {
       if (_varList[i] == null)
-	continue;
-      
+        continue;
+
       out.print(", ");
 
       if (i > 0 && i % 4 == 0) {
-	out.print("env.first(");
-	count++;
+        out.print("env.first(");
+        count++;
       }
 
-      AbstractVarExpr refExpr = new ArrayGetExpr(varExpr, new LongLiteralExpr(i));
+      AbstractVarExpr refExpr = new ArrayGetExpr(getLocation(), varExpr, new LongLiteralExpr(getLocation(), i));
 
       if (_varList[i] instanceof AbstractVarExpr)
-	((AbstractVarExpr) _varList[i]).generateAssign(out, refExpr, false);
+        ((AbstractVarExpr) _varList[i]).generateAssign(out, refExpr, false);
       else
-	((ListHeadExpr) _varList[i]).generateAssign(out, refExpr);
+        ((ListHeadExpr) _varList[i]).generateAssign(out, refExpr);
     }
 
     for (; count > 0; count--)

@@ -31,8 +31,6 @@ package com.caucho.quercus.expr;
 
 import java.io.IOException;
 
-import com.caucho.java.JavaWriter;
-
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.LongValue;
 import com.caucho.quercus.env.Value;
@@ -40,6 +38,7 @@ import com.caucho.quercus.env.Value;
 import com.caucho.quercus.gen.PhpWriter;
 
 import com.caucho.quercus.program.AnalyzeInfo;
+import com.caucho.quercus.Location;
 
 /**
  * Represents a PHP long literal expression.
@@ -48,8 +47,9 @@ public class LongLiteralExpr extends Expr {
   private final long _value;
   private final LongValue _objValue;
 
-  public LongLiteralExpr(long value)
+  public LongLiteralExpr(Location location, long value)
   {
+    super(location);
     _value = value;
     _objValue = new LongValue(_value);
   }
@@ -119,7 +119,7 @@ public class LongLiteralExpr extends Expr {
     out.print(_value);
     out.print("L)");
   }
-  
+
   public void generateStatement(PhpWriter out)
     throws IOException
   {

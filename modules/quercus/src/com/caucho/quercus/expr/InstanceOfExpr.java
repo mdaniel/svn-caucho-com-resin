@@ -31,25 +31,22 @@ package com.caucho.quercus.expr;
 
 import java.io.IOException;
 
-import java.util.HashSet;
-
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.BooleanValue;
 
-import com.caucho.quercus.parser.QuercusParser;
-
 import com.caucho.quercus.gen.PhpWriter;
+import com.caucho.quercus.Location;
 
 /**
  * Represents a PHP instanceof expression.
  */
 public final class InstanceOfExpr extends UnaryExpr {
   private final String _right;
-  
-  public InstanceOfExpr(Expr left, String right)
+
+  public InstanceOfExpr(Location location, Expr left, String right)
   {
-    super(left);
+    super(location, left);
 
     _right = right;
   }
@@ -112,7 +109,7 @@ public final class InstanceOfExpr extends UnaryExpr {
     out.printJavaString(_right);
     out.print("\")");
   }
-  
+
   public String toString()
   {
     return "(" + _expr + " instanceof " + _right + ")";

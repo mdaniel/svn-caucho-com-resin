@@ -31,21 +31,19 @@ package com.caucho.quercus.expr;
 
 import java.io.IOException;
 
-import com.caucho.java.JavaWriter;
-
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.LongValue;
-import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.gen.PhpWriter;
+import com.caucho.quercus.Location;
 
 /**
  * Converts to a long
  */
 public class ToLongExpr extends UnaryExpr {
-  public ToLongExpr(Expr expr)
+  public ToLongExpr(Location location, Expr expr)
   {
-    super(expr);
+    super(location, expr);
   }
 
   /**
@@ -74,7 +72,7 @@ public class ToLongExpr extends UnaryExpr {
     throws IOException
   {
     out.print("new com.caucho.quercus.env.LongValue(");
-    
+
     _expr.generate(out);
 
     out.print(".toLong())");
@@ -92,7 +90,7 @@ public class ToLongExpr extends UnaryExpr {
     _expr.generateExpr(out);
     out.print(")");
   }
-  
+
   public String toString()
   {
     return "((long) " + _expr + ")";

@@ -78,4 +78,16 @@ public class Location {
   {
     return _functionName;
   }
+
+  /**
+   * Returns a prefix of the form "filename:linenumber: ", or the empty string
+   * if the filename is not known.
+   */
+  public String getMessagePrefix()
+  {
+    if (_fileName == null)
+      return "";
+    else
+      return _fileName + ":" + _lineNumber + ": ";
+  }
 }

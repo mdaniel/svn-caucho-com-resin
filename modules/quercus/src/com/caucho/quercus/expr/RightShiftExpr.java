@@ -31,21 +31,19 @@ package com.caucho.quercus.expr;
 
 import java.io.IOException;
 
-import java.util.HashSet;
-
 import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.LongValue;
 import com.caucho.quercus.env.Value;
 
 import com.caucho.quercus.gen.PhpWriter;
+import com.caucho.quercus.Location;
 
 /**
  * Represents a PHP right shift expression.
  */
 public class RightShiftExpr extends BinaryExpr {
-  public RightShiftExpr(Expr left, Expr right)
+  public RightShiftExpr(Location location, Expr left, Expr right)
   {
-    super(left, right);
+    super(location, left, right);
   }
 
   /**
@@ -55,7 +53,7 @@ public class RightShiftExpr extends BinaryExpr {
   {
     return true;
   }
-  
+
   /**
    * Evaluates the expression.
    *
@@ -68,10 +66,10 @@ public class RightShiftExpr extends BinaryExpr {
   {
     Value lValue = _left.eval(env);
     Value rValue = _right.eval(env);
-    
+
     return lValue.rshift(rValue);
   }
-  
+
   /**
    * Evaluates the expression as a long.
    *
@@ -84,7 +82,7 @@ public class RightShiftExpr extends BinaryExpr {
   {
     Value lValue = _left.eval(env);
     Value rValue = _right.eval(env);
-    
+
     return lValue.toLong() >> rValue.toLong();
   }
 
@@ -101,7 +99,7 @@ public class RightShiftExpr extends BinaryExpr {
   public VarState getVarState(VarExpr var, VarExpr owner)
   {
     return combineBinaryVarState(_left.getVarState(var, owner),
-				 _right.getVarState(var, owner));
+                                 _right.getVarState(var, owner));
   }
 
   /**
@@ -147,7 +145,7 @@ public class RightShiftExpr extends BinaryExpr {
     _right.generateExpr(out);
     out.print(")");
   }
-  
+
   public String toString()
   {
     return "(" + _left + " >> " + _right + ")";

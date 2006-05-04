@@ -351,7 +351,7 @@ public class JavaClassDef extends ClassDef {
     JavaMethod method = _functionMap.get(name);
 
     if (method == null) {
-      env.warning(env.getLocation() + L.l("{0}::{1} is an unknown method.",
+      env.warning(env.getLocation().getMessagePrefix() + L.l("{0}::{1} is an unknown method.",
                                           _name, name));
 
       return NullValue.NULL;

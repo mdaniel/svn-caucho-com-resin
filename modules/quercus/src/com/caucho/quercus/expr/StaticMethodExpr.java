@@ -38,10 +38,10 @@ import com.caucho.quercus.gen.PhpWriter;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.QuercusClass;
-import com.caucho.quercus.env.NullThisValue;
 
 import com.caucho.quercus.program.AbstractFunction;
 import com.caucho.quercus.program.AnalyzeInfo;
+import com.caucho.quercus.Location;
 
 import com.caucho.util.L10N;
 
@@ -59,8 +59,9 @@ public class StaticMethodExpr extends Expr {
   private AbstractFunction _fun;
   private boolean _isMethod;
 
-  public StaticMethodExpr(String className, String name, ArrayList<Expr> args)
+  public StaticMethodExpr(Location location, String className, String name, ArrayList<Expr> args)
   {
+    super(location);
     _className = className.intern();
     _name = name.intern();
 
@@ -68,8 +69,9 @@ public class StaticMethodExpr extends Expr {
     args.toArray(_args);
   }
 
-  public StaticMethodExpr(String className, String name, Expr []args)
+  public StaticMethodExpr(Location location, String className, String name, Expr []args)
   {
+    super(location);
     _className = className.intern();
     _name = name.intern();
 
@@ -78,18 +80,20 @@ public class StaticMethodExpr extends Expr {
 
   /**
    * Returns the reference of the value.
+   * @param location
    */
-  public Expr createRef()
+  public Expr createRef(Location location)
   {
-    return new RefExpr(this);
+    return new RefExpr(location, this);
   }
 
   /**
    * Returns the copy of the value.
+   * @param location
    */
-  public Expr createCopy()
+  public Expr createCopy(Location location)
   {
-    return new CopyExpr(this);
+    return new CopyExpr(location, this);
   }
   
   /**

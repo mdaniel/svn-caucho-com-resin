@@ -37,6 +37,7 @@ import com.caucho.quercus.env.Value;
 import com.caucho.quercus.program.AnalyzeInfo;
 
 import com.caucho.quercus.gen.PhpWriter;
+import com.caucho.quercus.Location;
 
 import com.caucho.util.L10N;
 
@@ -49,8 +50,9 @@ public class CharAtExpr extends AbstractVarExpr {
   private final Expr _objExpr;
   private final Expr _indexExpr;
 
-  public CharAtExpr(Expr objExpr, Expr indexExpr)
+  public CharAtExpr(Location location, Expr objExpr, Expr indexExpr)
   {
+    super(location);
     _objExpr = objExpr;
     _indexExpr = indexExpr;
   }
@@ -166,7 +168,8 @@ public class CharAtExpr extends AbstractVarExpr {
     if (_objExpr instanceof AbstractVarExpr) {
       AbstractVarExpr varExpr = (AbstractVarExpr) _objExpr;
 
-      varExpr.generateAssign(out, new SetCharAtExpr(_objExpr,
+      varExpr.generateAssign(out, new SetCharAtExpr(getLocation(),
+                                                    _objExpr,
 						    _indexExpr,
 						    valueExpr),
 			     isTop);

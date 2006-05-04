@@ -40,14 +40,12 @@ import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.IdentityHashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import java.lang.ref.WeakReference;
-import java.lang.ref.SoftReference;
 
 import com.caucho.java.LineMap;
 import com.caucho.java.ScriptStackTrace;
@@ -58,8 +56,8 @@ import com.caucho.quercus.Quercus;
 import com.caucho.quercus.QuercusException;
 import com.caucho.quercus.QuercusDieException;
 import com.caucho.quercus.QuercusExitException;
-import com.caucho.quercus.QuercusLineRuntimeException;
 import com.caucho.quercus.QuercusRuntimeException;
+import com.caucho.quercus.Location;
 
 import com.caucho.quercus.module.Marshall;
 import com.caucho.quercus.module.ModuleContext;
@@ -2853,7 +2851,7 @@ public class Env {
   public Value stub(String msg)
   {
     if (log.isLoggable(Level.FINE))
-      log.fine(getLocation() + msg);
+      log.fine(getLocation().getMessagePrefix() + msg);
 
     return NullValue.NULL;
   }
@@ -2957,6 +2955,10 @@ public class Env {
   {
     int mask = 1 << code;
 
+    Location location = getLocation();
+
+    String locationMessagePrefix = location.getMessagePrefix();
+
     if (code >= 0 && code < _errorHandlers.length &&
         _errorHandlers[code] != null) {
       Callback handler = _errorHandlers[code];
@@ -2966,12 +2968,13 @@ public class Env {
 
         Value fileNameV = NullValue.NULL;
 
-        String fileName = getFileName();
+        String fileName = location.getFileName();
+
         if (fileName != null)
           fileNameV = new StringValueImpl(fileName);
 
         Value lineV = NullValue.NULL;
-        int line = getLine();
+        int line = location.getLineNumber();
         if (line > 0)
           lineV = new LongValue(line);
 
@@ -2995,7 +2998,7 @@ public class Env {
 
     if ((_errorMask & mask) != 0) {
       try {
-	String fullMsg = getLocation() + getCodeName(mask) + msg;
+	String fullMsg = locationMessagePrefix + getCodeName(mask) + msg;
 
 	if (getIniBoolean("track_errors"))
 	  setGlobalValue("php_errormsg", new StringValueImpl(fullMsg));
@@ -3013,13 +3016,13 @@ public class Env {
 
     if ((mask & (E_ERROR | E_CORE_ERROR | E_COMPILE_ERROR | E_USER_ERROR)) != 0)
     {
-      if (! "".equals(getLocation())) {
+      if (! "".equals(locationMessagePrefix)) {
 	/*
         throw new QuercusLineExitException(getLocation() +
                                               getCodeName(mask) +
                                               msg);
 	*/
-        throw new QuercusExitException(getLocation() +
+        throw new QuercusExitException(locationMessagePrefix +
                                        getCodeName(mask) +
                                        msg);
       }
@@ -3145,38 +3148,13 @@ public class Env {
     return null;
   }
 
-  private String getFileName()
-  {
-    String loc = getLocation();
-
-    if (loc == null || loc.equals(""))
-      return null;
-
-    int p = loc.indexOf(':');
-
-    return loc.substring(0, p);
-  }
-
-  private int getLine()
-  {
-    String loc = getLocation();
-
-    if (loc == null || loc.equals(""))
-      return -1;
-
-    int p = loc.indexOf(':');
-    int q = loc.lastIndexOf(':');
-
-    if (p < q)
-      return Integer.parseInt(loc.substring(p + 1, q));
-    else
-      return -1;
-  }
-
   /**
-   * Returns the current location.
+   * Returns the current execution location.
+   *
+   * Use with care, for compiled code this can be a relatively expensive
+   * operation.
    */
-  public String getLocation()
+  public Location getLocation()
   {
     Expr call = peekCall(0);
 
@@ -3205,14 +3183,14 @@ public class Env {
           if (line != null) {
             int sourceLine = line.getSourceLine(trace[i].getLineNumber());
 
-            return line.getSourceFilename() + ":" + sourceLine + ": ";
+            // XXX: need className and functionName info
+            return new Location(line.getSourceFilename(), sourceLine, null, null);
           }
-
         }
       }
-
-      return "";
     }
+
+    return Location.UNKNOWN;
   }
 
   /**

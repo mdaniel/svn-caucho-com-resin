@@ -31,8 +31,6 @@ package com.caucho.quercus.expr;
 
 import java.io.IOException;
 
-import com.caucho.java.JavaWriter;
-
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.InternStringValue;
@@ -41,6 +39,7 @@ import com.caucho.quercus.env.Value;
 import com.caucho.quercus.program.AnalyzeInfo;
 
 import com.caucho.quercus.gen.PhpWriter;
+import com.caucho.quercus.Location;
 
 /**
  * Represents a PHP string literal expression.
@@ -48,13 +47,15 @@ import com.caucho.quercus.gen.PhpWriter;
 public class StringLiteralExpr extends Expr {
   private final StringValue _value;
 
-  public StringLiteralExpr(String value)
+  public StringLiteralExpr(Location location, String value)
   {
+    super(location);
     _value = new InternStringValue(value);
   }
-  
-  public StringLiteralExpr(StringValue value)
+
+  public StringLiteralExpr(Location location, StringValue value)
   {
+    super(location);
     _value = value;
   }
 
@@ -65,7 +66,7 @@ public class StringLiteralExpr extends Expr {
   {
     return true;
   }
-  
+
   /**
    * Evaluates the expression as a constant.
    *
@@ -149,7 +150,7 @@ public class StringLiteralExpr extends Expr {
       return;
 
     generateGetOut(out);
-    
+
     out.print(".print(\"");
     out.printJavaString(_value.toString());
     out.print("\")");
@@ -191,7 +192,7 @@ public class StringLiteralExpr extends Expr {
     out.printJavaString(_value.toString());
     out.print("\")");
   }
-  
+
   public String toString()
   {
     return "\"" + _value + "\"";

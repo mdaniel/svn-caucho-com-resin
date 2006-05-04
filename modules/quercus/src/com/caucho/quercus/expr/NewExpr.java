@@ -40,6 +40,7 @@ import com.caucho.quercus.env.QuercusClass;
 import com.caucho.quercus.program.AnalyzeInfo;
 
 import com.caucho.quercus.gen.PhpWriter;
+import com.caucho.quercus.Location;
 
 import com.caucho.util.L10N;
 
@@ -51,16 +52,18 @@ public class NewExpr extends Expr {
   private final String _name;
   private final Expr []_args;
 
-  public NewExpr(String name, ArrayList<Expr> args)
+  public NewExpr(Location location, String name, ArrayList<Expr> args)
   {
+    super(location);
     _name = name.intern();
 
     _args = new Expr[args.size()];
     args.toArray(_args);
   }
 
-  public NewExpr(String name, Expr []args)
+  public NewExpr(Location location, String name, Expr []args)
   {
+    super(location);
     _name = name.intern();
     _args = args;
   }

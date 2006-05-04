@@ -32,21 +32,20 @@ package com.caucho.quercus.expr;
 import java.io.IOException;
 
 import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.LongValue;
 import com.caucho.quercus.env.Value;
-import com.caucho.quercus.env.DoubleValue;
 
 import com.caucho.quercus.gen.PhpWriter;
+import com.caucho.quercus.Location;
 
 /**
  * Represents a PHP unary plus.
  */
 public class PlusExpr extends UnaryExpr {
-  public PlusExpr(Expr expr)
+  public PlusExpr(Location location, Expr expr)
   {
-    super(expr);
+    super(location, expr);
   }
-  
+
   /**
    * Evaluates the expression.
    *
@@ -97,7 +96,7 @@ public class PlusExpr extends UnaryExpr {
   {
     _expr.generateDouble(out);
   }
-  
+
   public String toString()
   {
     return "+" + _expr;

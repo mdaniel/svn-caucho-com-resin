@@ -32,8 +32,7 @@ package com.caucho.quercus.expr;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.BooleanValue;
-
-import com.caucho.quercus.parser.QuercusParser;
+import com.caucho.quercus.Location;
 
 /**
  * Represents a PHP comparison expression.
@@ -42,8 +41,9 @@ public final class CmpExpr extends Expr {
   private final Expr _left;
   private final Expr _right;
 
-  public CmpExpr(int code, Expr left, Expr right)
+  public CmpExpr(Location location, int code, Expr left, Expr right)
   {
+    super(location);
     _left = left;
     _right = right;
   }
@@ -68,7 +68,7 @@ public final class CmpExpr extends Expr {
 
     return lValue.toDouble() < (rValue.toDouble());
   }
-  
+
   public String toString()
   {
     return "(" + _left + " + " + _right + ")";

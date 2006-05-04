@@ -39,6 +39,7 @@ import com.caucho.quercus.env.Value;
 import com.caucho.quercus.program.AnalyzeInfo;
 
 import com.caucho.quercus.gen.PhpWriter;
+import com.caucho.quercus.Location;
 
 import com.caucho.util.L10N;
 
@@ -53,8 +54,9 @@ public class MethodCallExpr extends Expr {
   protected final String _name;
   protected final Expr []_args;
 
-  public MethodCallExpr(Expr objExpr, String name, ArrayList<Expr> args)
+  public MethodCallExpr(Location location, Expr objExpr, String name, ArrayList<Expr> args)
   {
+    super(location);
     _objExpr = objExpr;
     
     _name = name;

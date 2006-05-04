@@ -31,21 +31,19 @@ package com.caucho.quercus.expr;
 
 import java.io.IOException;
 
-import com.caucho.java.JavaWriter;
-
 import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.ArrayValue;
 import com.caucho.quercus.env.Value;
 
 import com.caucho.quercus.gen.PhpWriter;
+import com.caucho.quercus.Location;
 
 /**
  * Converts to an object
  */
 public class ToObjectExpr extends UnaryExpr {
-  public ToObjectExpr(Expr expr)
+  public ToObjectExpr(Location location, Expr expr)
   {
-    super(expr);
+    super(location, expr);
   }
 
   /**
@@ -76,7 +74,7 @@ public class ToObjectExpr extends UnaryExpr {
     _expr.generate(out);
     out.print(".toObject(env)");
   }
-  
+
   public String toString()
   {
     return "((object) " + _expr + ")";

@@ -32,13 +32,13 @@ package com.caucho.quercus.expr;
 import java.io.IOException;
 
 import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.StringValueImpl;
 import com.caucho.quercus.env.Value;
 
 import com.caucho.quercus.program.AnalyzeInfo;
 
 import com.caucho.quercus.gen.PhpWriter;
+import com.caucho.quercus.Location;
 
 /**
  * Represents a PHP constant expression.
@@ -46,8 +46,9 @@ import com.caucho.quercus.gen.PhpWriter;
 public class ConstExpr extends Expr {
   private final String _var;
 
-  public ConstExpr(String var)
+  public ConstExpr(Location location, String var)
   {
+    super(location);
     _var = var;
   }
 
@@ -58,7 +59,7 @@ public class ConstExpr extends Expr {
   {
     return _var;
   }
-  
+
   /**
    * Evaluates the expression.
    *
@@ -73,7 +74,7 @@ public class ConstExpr extends Expr {
 
     if (value == null)
       value = new StringValueImpl(_var);
-    
+
     return value;
   }
 
@@ -113,7 +114,7 @@ public class ConstExpr extends Expr {
     out.printJavaString(_var);
     out.print("\")");
   }
-  
+
   public String toString()
   {
     return _var;

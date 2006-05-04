@@ -32,21 +32,20 @@ package com.caucho.quercus.expr;
 import java.io.IOException;
 
 import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.LongValue;
 import com.caucho.quercus.env.Value;
-import com.caucho.quercus.env.DoubleValue;
 
 import com.caucho.quercus.parser.QuercusParser;
 
 import com.caucho.quercus.gen.PhpWriter;
+import com.caucho.quercus.Location;
 
 /**
  * Represents a PHP error suppression
  */
 public class SuppressErrorExpr extends UnaryExpr {
-  public SuppressErrorExpr(Expr expr)
+  public SuppressErrorExpr(Location location, Expr expr)
   {
-    super(expr);
+    super(location, expr);
   }
 
   /**
@@ -56,21 +55,25 @@ public class SuppressErrorExpr extends UnaryExpr {
     throws IOException
   {
     // php/03j2
-    
-    return new SuppressErrorExpr(getExpr().createAssign(parser, value));
+
+    return new SuppressErrorExpr(parser.getLocation(),
+                                 getExpr().createAssign(parser, value));
   }
 
   /**
    * Creates the assignment.
    */
-  public Expr createAssignRef(QuercusParser parser, Expr value)
+  public Expr createAssignRef(QuercusParser parser,
+                              Expr value
+  )
     throws IOException
   {
     // php/03j2
-    
-    return new SuppressErrorExpr(getExpr().createAssignRef(parser, value));
+
+    return new SuppressErrorExpr(parser.getLocation(),
+                                 getExpr().createAssignRef(parser, value));
   }
-  
+
   /**
    * Evaluates the expression.
    *
@@ -89,7 +92,7 @@ public class SuppressErrorExpr extends UnaryExpr {
       env.setErrorMask(oldErrorMask);
     }
   }
-  
+
   /**
    * Evaluates the expression as a boolean.
    *
@@ -108,7 +111,7 @@ public class SuppressErrorExpr extends UnaryExpr {
       env.setErrorMask(oldErrorMask);
     }
   }
-  
+
   /**
    * Evaluates the expression as a string.
    *
@@ -127,7 +130,7 @@ public class SuppressErrorExpr extends UnaryExpr {
       env.setErrorMask(oldErrorMask);
     }
   }
-  
+
   /**
    * Evaluates the expression, copying the results as necessary
    *
@@ -191,7 +194,7 @@ public class SuppressErrorExpr extends UnaryExpr {
     _expr.generateCopy(out);
     out.println(")");
   }
-  
+
   public String toString()
   {
     return "@" + _expr;

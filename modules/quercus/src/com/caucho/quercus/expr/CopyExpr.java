@@ -31,23 +31,20 @@ package com.caucho.quercus.expr;
 
 import java.io.IOException;
 
-import com.caucho.java.JavaWriter;
-
 import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.NullValue;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.gen.PhpWriter;
+import com.caucho.quercus.Location;
 
 /**
  * Represents a PHP variable assignment
  */
 public class CopyExpr extends UnaryExpr {
-  public CopyExpr(Expr expr)
+  public CopyExpr(Location location, Expr expr)
   {
-    super(expr);
-    Thread.dumpStack();
+    super(location, expr);
   }
-  
+
   /**
    * Evaluates the expression.
    *
@@ -60,7 +57,7 @@ public class CopyExpr extends UnaryExpr {
   {
     return _expr.eval(env).copy();
   }
-  
+
   /**
    * Evaluates the expression.
    *
@@ -114,7 +111,7 @@ public class CopyExpr extends UnaryExpr {
     _expr.generateExpr(out);
     out.print(")");
   }
-  
+
   public String toString()
   {
     return _expr.toString();

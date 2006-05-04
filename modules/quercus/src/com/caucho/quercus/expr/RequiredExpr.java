@@ -32,20 +32,21 @@ package com.caucho.quercus.expr;
 import java.io.IOException;
 
 import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.DefaultValue;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.NullValue;
 
 import com.caucho.quercus.gen.PhpWriter;
+import com.caucho.quercus.Location;
 
 /**
  * Represents a PHP required expression.
  */
 public class RequiredExpr extends Expr {
-  public static final RequiredExpr REQUIRED = new RequiredExpr();
-  
-  public RequiredExpr()
+  public static final RequiredExpr REQUIRED = new RequiredExpr(Location.UNKNOWN);
+
+  public RequiredExpr(Location location)
   {
+    super(location);
   }
 
   /**
@@ -73,7 +74,7 @@ public class RequiredExpr extends Expr {
   {
     out.print("RequiredExpr.REQUIRED");
   }
-  
+
   public String toString()
   {
     return "required";

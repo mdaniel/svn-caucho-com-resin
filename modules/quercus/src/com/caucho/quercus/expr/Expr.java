@@ -56,27 +56,22 @@ abstract public class Expr {
 
   public static final int COMPILE_ARG_MAX = 5;
 
+  private final Location _location;
+
   private String _fileName;
   private int _line;
 
-  /**
-   * Sets the location.
-   */
-  public void setLocation(String fileName, int line)
+  public Expr(Location location)
   {
-    _fileName = fileName;
-    _line = line;
+    _location = location;
   }
 
   /**
-   * Returns the location if known.
+   * Returns the location.
    */
-  public String getLocation()
+  final public Location getLocation()
   {
-    if (_fileName == null)
-      return "";
-    else
-      return _fileName + ":" + _line + ": ";
+    return _location;
   }
 
   /**
@@ -161,8 +156,9 @@ abstract public class Expr {
 
   /**
    * Creates a reference.
+   * @param location
    */
-  public Expr createRef()
+  public Expr createRef(Location location)
     throws IOException
   {
     return this;
@@ -176,16 +172,18 @@ abstract public class Expr {
 
   /**
    * Creates a assignment
+   * @param location
    */
-  public Expr createCopy()
+  public Expr createCopy(Location location)
   {
     return this;
   }
 
   /**
    * Copy for things like $a .= "test";
+   * @param location
    */
-  public Expr copy()
+  public Expr copy(Location location)
   {
     return this;
   }
@@ -193,17 +191,17 @@ abstract public class Expr {
   /**
    * Creates a field ref
    */
-  public Expr createFieldGet(String name)
+  public Expr createFieldGet(Location location, String name)
   {
-    return new FieldGetExpr(this, name);
+    return new FieldGetExpr(location, this, name);
   }
 
   /**
    * Creates a field ref
    */
-  public Expr createFieldGet(Expr name)
+  public Expr createFieldGet(Location location, Expr name)
   {
-    return new FieldVarGetExpr(this, name);
+    return new FieldVarGetExpr(location, this, name);
   }
 
   /**

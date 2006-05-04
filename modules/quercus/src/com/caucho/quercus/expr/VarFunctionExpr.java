@@ -33,18 +33,13 @@ import java.io.IOException;
 
 import java.util.ArrayList;
 
-import java.lang.reflect.Method;
-
-import com.caucho.quercus.Quercus;
-
 import com.caucho.quercus.gen.PhpWriter;
 
 import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.Value;
 
-import com.caucho.quercus.program.AbstractFunction;
 import com.caucho.quercus.program.AnalyzeInfo;
+import com.caucho.quercus.Location;
 
 import com.caucho.util.L10N;
 
@@ -56,16 +51,18 @@ public class VarFunctionExpr extends Expr {
   private final Expr _name;
   private final Expr []_args;
 
-  public VarFunctionExpr(Expr name, ArrayList<Expr> args)
+  public VarFunctionExpr(Location location, Expr name, ArrayList<Expr> args)
   {
+    super(location);
     _name = name;
 
     _args = new Expr[args.size()];
     args.toArray(_args);
   }
 
-  public VarFunctionExpr(Expr name, Expr []args)
+  public VarFunctionExpr(Location location, Expr name, Expr []args)
   {
+    super(location);
     _name = name;
 
     _args = args;
@@ -73,16 +70,18 @@ public class VarFunctionExpr extends Expr {
 
   /**
    * Returns the reference of the value.
+   * @param location
    */
-  public Expr createRef()
+  public Expr createRef(Location location)
   {
-    return new RefExpr(this);
+    return new RefExpr(location, this);
   }
 
   /**
    * Returns the copy of the value.
+   * @param location
    */
-  public Expr createCopy()
+  public Expr createCopy(Location location)
   {
     return this;
   }

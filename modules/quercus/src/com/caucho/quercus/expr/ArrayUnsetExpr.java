@@ -33,13 +33,9 @@ import java.io.IOException;
 
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
-import com.caucho.quercus.env.ArrayValue;
-import com.caucho.quercus.env.BooleanValue;
-import com.caucho.quercus.env.UnsetValue;
-
-import com.caucho.quercus.program.AnalyzeInfo;
 
 import com.caucho.quercus.gen.PhpWriter;
+import com.caucho.quercus.Location;
 
 /**
  * Represents a PHP array unset expression.
@@ -48,8 +44,9 @@ public class ArrayUnsetExpr extends Expr {
   private final Expr _expr;
   private final Expr _index;
 
-  public ArrayUnsetExpr(Expr expr, Expr index)
+  public ArrayUnsetExpr(Location location, Expr expr, Expr index)
   {
+    super(location);
     _expr = expr;
     _index = index;
   }
@@ -73,7 +70,7 @@ public class ArrayUnsetExpr extends Expr {
   //
   // java code generation
   //
-  
+
   /**
    * Analyze the expression
    */
@@ -98,7 +95,7 @@ public class ArrayUnsetExpr extends Expr {
     _index.generate(out);
     out.print(")");
   }
-  
+
   public String toString()
   {
     return "unset(" + _expr + "[" + _index + "])";

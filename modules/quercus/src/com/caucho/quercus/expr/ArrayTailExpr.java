@@ -38,10 +38,9 @@ import com.caucho.quercus.env.ArrayValueImpl;
 import com.caucho.quercus.env.NullValue;
 
 import com.caucho.quercus.program.AnalyzeInfo;
-import com.caucho.quercus.program.Statement;
-import com.caucho.quercus.program.ExprStatement;
 
 import com.caucho.quercus.gen.PhpWriter;
+import com.caucho.quercus.Location;
 
 /**
  * Represents a PHP array[] reference expression.
@@ -49,8 +48,9 @@ import com.caucho.quercus.gen.PhpWriter;
 public class ArrayTailExpr extends AbstractVarExpr {
   private final Expr _expr;
 
-  public ArrayTailExpr(Expr expr)
+  public ArrayTailExpr(Location location, Expr expr)
   {
+    super(location);
     _expr = expr;
   }
 
@@ -111,7 +111,7 @@ public class ArrayTailExpr extends AbstractVarExpr {
     if (obj instanceof ArrayValue) {
       ArrayValue array = (ArrayValue) obj;
       Value key = array.createTailKey();
-      
+
       return array.getRef(key);
     }
     else
@@ -294,7 +294,7 @@ public class ArrayTailExpr extends AbstractVarExpr {
   {
     throw new UnsupportedOperationException();
   }
-  
+
   public String toString()
   {
     return _expr + "[]";

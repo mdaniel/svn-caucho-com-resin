@@ -31,21 +31,19 @@ package com.caucho.quercus.expr;
 
 import java.io.IOException;
 
-import java.util.HashSet;
-
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
-import com.caucho.quercus.env.LongValue;
 
 import com.caucho.quercus.gen.PhpWriter;
+import com.caucho.quercus.Location;
 
 /**
  * Represents a PHP subtract expression.
  */
 public class SubExpr extends BinaryExpr {
-  public SubExpr(Expr left, Expr right)
+  public SubExpr(Location location, Expr left, Expr right)
   {
-    super(left, right);
+    super(location, left, right);
   }
 
   /**
@@ -154,7 +152,7 @@ public class SubExpr extends BinaryExpr {
     _right.generateExpr(out);
     out.print(")");
   }
-  
+
   public String toString()
   {
     return "(" + _left + " + " + _right + ")";

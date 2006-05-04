@@ -378,7 +378,7 @@ public class Function extends AbstractFunction {
     for (int i = 0; i < _args.length; i++) {
       Arg arg = _args[i];
 
-      VarExpr var = new VarExpr(_info.createVar(arg.getName()));
+      VarExpr var = new VarExpr(getLocation(), _info.createVar(arg.getName()));
       var.setVarState(VarState.VALID);
 
       info.addVar(var);

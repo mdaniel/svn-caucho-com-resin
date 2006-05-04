@@ -33,14 +33,11 @@ import java.io.IOException;
 
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
-import com.caucho.quercus.env.ArrayValue;
-import com.caucho.quercus.env.NullValue;
 
 import com.caucho.quercus.program.AnalyzeInfo;
-import com.caucho.quercus.program.Statement;
-import com.caucho.quercus.program.ExprStatement;
 
 import com.caucho.quercus.gen.PhpWriter;
+import com.caucho.quercus.Location;
 
 /**
  * Represents a PHP array reference expression.
@@ -49,8 +46,9 @@ public class ArrayGetExpr extends AbstractVarExpr {
   private final Expr _expr;
   private final Expr _index;
 
-  public ArrayGetExpr(Expr expr, Expr index)
+  public ArrayGetExpr(Location location, Expr expr, Expr index)
   {
+    super(location);
     _expr = expr;
     _index = index;
   }
@@ -165,7 +163,7 @@ public class ArrayGetExpr extends AbstractVarExpr {
     throws Throwable
   {
     Value value = _expr.evalArray(env);
-    
+
     return value.getRef(_index.eval(env));
   }
 
@@ -368,7 +366,7 @@ public class ArrayGetExpr extends AbstractVarExpr {
     _index.generate(out);
     out.print(")");
   }
-  
+
   public String toString()
   {
     return _expr + "[" + _index + "]";

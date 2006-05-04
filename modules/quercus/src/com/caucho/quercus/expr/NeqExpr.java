@@ -31,21 +31,20 @@ package com.caucho.quercus.expr;
 
 import java.io.IOException;
 
-import java.util.HashSet;
-
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.BooleanValue;
 
 import com.caucho.quercus.gen.PhpWriter;
+import com.caucho.quercus.Location;
 
 /**
  * Represents a PHP equality testing expression.
  */
 public final class NeqExpr extends BinaryExpr {
-  public NeqExpr(Expr left, Expr right)
+  public NeqExpr(Location location, Expr left, Expr right)
   {
-    super(left, right);
+    super(location, left, right);
   }
 
   /**
@@ -116,7 +115,7 @@ public final class NeqExpr extends BinaryExpr {
       out.print(")");
     }
   }
-  
+
   public String toString()
   {
     return "(" + _left + " != " + _right + ")";

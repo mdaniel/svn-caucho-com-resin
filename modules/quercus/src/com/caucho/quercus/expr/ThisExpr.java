@@ -38,6 +38,7 @@ import com.caucho.quercus.program.AnalyzeInfo;
 import com.caucho.quercus.program.InterpretedClassDef;
 
 import com.caucho.quercus.gen.PhpWriter;
+import com.caucho.quercus.Location;
 
 import com.caucho.util.L10N;
 
@@ -49,17 +50,18 @@ public class ThisExpr extends AbstractVarExpr {
 
   private final InterpretedClassDef _quercusClass;
   
-  public ThisExpr(InterpretedClassDef quercusClass)
+  public ThisExpr(Location location, InterpretedClassDef quercusClass)
   {
+    super(location);
     _quercusClass = quercusClass;
   }
 
   /**
    * Creates a field ref
    */
-  public Expr createFieldGet(String name)
+  public Expr createFieldGet(Location location, String name)
   {
-    return new ThisFieldExpr(_quercusClass, name);
+    return new ThisFieldExpr(location, _quercusClass, name);
   }
   
   /**

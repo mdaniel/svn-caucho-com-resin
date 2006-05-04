@@ -36,13 +36,15 @@ import com.caucho.quercus.env.DefaultValue;
 import com.caucho.quercus.env.Value;
 
 import com.caucho.quercus.gen.PhpWriter;
+import com.caucho.quercus.Location;
 
 /**
  * Represents a PHP default expression.
  */
 public class DefaultExpr extends Expr {
-  public DefaultExpr()
+  public DefaultExpr(Location location)
   {
+    super(location);
   }
 
   /**
@@ -90,7 +92,7 @@ public class DefaultExpr extends Expr {
   {
     out.print("\"\"");
   }
-  
+
   public String toString()
   {
     return "default";

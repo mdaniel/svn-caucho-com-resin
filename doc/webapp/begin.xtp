@@ -229,7 +229,7 @@ expressions, or specially marked scripting code (Java code).   The special xml
 tags, EL expressions and Java code are used to generate dynamic ouput.
 </p>
 
-<section name="jsp-translation"title="JSP's are translated into Servlets">
+<section name="jsp-translation" title="JSP's are translated into Servlets">
 <p>
 It is helpful to understand what it is that Resin does with a
 JSP page.  Basically, it takes the JSP page and turns it into the Java
@@ -330,19 +330,19 @@ more information.
 pageContext.setAttribute("x",new Integer(5));
 %&gt;
 
-The value of x is <b>${'${'} x }</b>
-The value of x + 2 is <b>${'${'} x + 2 }</b>
+The value of x is ${'${'} x }
+The value of x + 2 is ${'${'} x + 2 }
 Is x
 less than 6?
-<b>&lt;c:if test="${'${'} x &lt; 6 }"&gt;</b>
+&lt;c:if test="${'${'} x &lt; 6 }"&gt;
 &lt;%@include file="y.jsp" %&gt;
-<b>&lt;/c:if&gt;</b>
+&lt;/c:if&gt;
 &lt;/body&gt;
 </example>
 
 <example title="y.jsp - Example java code in JSP file to be included">
 Yes, it is true that x is less than 6, 
-with a value of <b>${'${'} x }</b>
+with a value of ${'${'} x }
 </example>
 
 <results title="x.jsp output - The result of a call to x.jsp">
@@ -912,7 +912,7 @@ discussed later.
 
 <p>
 The Servlet implementation class usually obtains the ServletContext in the
-<init>init()</init> method. The request and response object are passed in the
+<code>init()</code> method. The request and response object are passed in the
 <code>doXXXX()</code> method.  The request object is used to obtain the
 <a href="#session">Session</a>.
 </p>

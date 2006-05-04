@@ -29,18 +29,8 @@
 
 package com.caucho.quercus.expr;
 
-import java.io.IOException;
-
-import java.util.HashSet;
-
-import com.caucho.java.JavaWriter;
-
-import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.Value;
-
 import com.caucho.quercus.program.AnalyzeInfo;
-
-import com.caucho.quercus.gen.PhpWriter;
+import com.caucho.quercus.Location;
 
 /**
  * Common analysis for a PHP binary expression.
@@ -49,8 +39,9 @@ abstract public class BinaryExpr extends Expr {
   protected final Expr _left;
   protected final Expr _right;
 
-  protected BinaryExpr(Expr left, Expr right)
+  protected BinaryExpr(Location location, Expr left, Expr right)
   {
+    super(location);
     _left = left;
     _right = right;
   }
@@ -93,7 +84,7 @@ abstract public class BinaryExpr extends Expr {
   public VarState getVarState(VarExpr var, VarExpr owner)
   {
     return combineBinaryVarState(_left.getVarState(var, owner),
-				 _right.getVarState(var, owner));
+                                 _right.getVarState(var, owner));
   }
 
   /**

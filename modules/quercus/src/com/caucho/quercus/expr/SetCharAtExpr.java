@@ -35,6 +35,7 @@ import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
 
 import com.caucho.quercus.gen.PhpWriter;
+import com.caucho.quercus.Location;
 
 import com.caucho.util.L10N;
 
@@ -48,8 +49,9 @@ public class SetCharAtExpr extends Expr {
   private final Expr _indexExpr;
   private final Expr _valueExpr;
 
-  public SetCharAtExpr(Expr objExpr, Expr indexExpr, Expr valueExpr)
+  public SetCharAtExpr(Location location, Expr objExpr, Expr indexExpr, Expr valueExpr)
   {
+    super(location);
     _objExpr = objExpr;
     _indexExpr = indexExpr;
     _valueExpr = valueExpr;

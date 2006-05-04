@@ -31,21 +31,19 @@ package com.caucho.quercus.expr;
 
 import java.io.IOException;
 
-import com.caucho.java.JavaWriter;
-
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.DoubleValue;
-import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.gen.PhpWriter;
+import com.caucho.quercus.Location;
 
 /**
  * Converts to a double
  */
 public class ToDoubleExpr extends UnaryExpr {
-  public ToDoubleExpr(Expr expr)
+  public ToDoubleExpr(Location location, Expr expr)
   {
-    super(expr);
+    super(location, expr);
   }
 
   /**
@@ -74,7 +72,7 @@ public class ToDoubleExpr extends UnaryExpr {
     throws IOException
   {
     out.print("new com.caucho.quercus.env.DoubleValue(");
-    
+
     _expr.generate(out);
 
     out.print(".toDouble())");
@@ -92,7 +90,7 @@ public class ToDoubleExpr extends UnaryExpr {
     _expr.generateExpr(out);
     out.print(")");
   }
-  
+
   public String toString()
   {
     return "((float) " + _expr + ")";

@@ -31,10 +31,6 @@ package com.caucho.quercus.expr;
 
 import java.io.IOException;
 
-import java.util.HashSet;
-
-import com.caucho.java.JavaWriter;
-
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.NullValue;
 import com.caucho.quercus.env.ArrayValue;
@@ -43,20 +39,20 @@ import com.caucho.quercus.env.Value;
 
 import com.caucho.quercus.gen.PhpWriter;
 
-import com.caucho.quercus.program.Statement;
 import com.caucho.quercus.program.AnalyzeInfo;
-import com.caucho.quercus.program.ExprStatement;
+import com.caucho.quercus.Location;
 
 /**
  * Represents a PHP variable expression.
  */
 public class VarVarExpr extends AbstractVarExpr {
   private static final NullValue NULL = NullValue.create();
-  
+
   private final Expr _var;
 
-  public VarVarExpr(Expr var)
+  public VarVarExpr(Location location, Expr var)
   {
+    super(location);
     _var = var;
   }
 
@@ -190,7 +186,7 @@ public class VarVarExpr extends AbstractVarExpr {
       ArrayValue array = new ArrayValueImpl();
 
       env.setVar(varName, array);
-      
+
       return array;
     }
   }
@@ -205,7 +201,7 @@ public class VarVarExpr extends AbstractVarExpr {
   public void analyze(AnalyzeInfo info)
   {
     info.getFunction().setVariableVar(true);
-    
+
     _var.analyze(info);
   }
   /**
@@ -214,7 +210,7 @@ public class VarVarExpr extends AbstractVarExpr {
   public void analyzeAssign(AnalyzeInfo info)
   {
     info.getFunction().setVariableVar(true);
-    
+
     _var.analyzeAssign(info);
 
     // php/3253
@@ -301,7 +297,7 @@ public class VarVarExpr extends AbstractVarExpr {
     _var.generateString(out);
     out.print(".intern())");
   }
-  
+
   public String toString()
   {
     return "$" + _var;

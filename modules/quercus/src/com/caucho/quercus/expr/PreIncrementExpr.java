@@ -31,14 +31,12 @@ package com.caucho.quercus.expr;
 
 import java.io.IOException;
 
-import com.caucho.java.JavaWriter;
-
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
-import com.caucho.quercus.env.LongValue;
 
 import com.caucho.quercus.gen.PhpWriter;
 import com.caucho.quercus.program.AnalyzeInfo;
+import com.caucho.quercus.Location;
 
 /**
  * Represents a PHP pre increment expression.
@@ -46,15 +44,15 @@ import com.caucho.quercus.program.AnalyzeInfo;
 public class PreIncrementExpr extends UnaryExpr {
   private final int _incr;
 
-  public PreIncrementExpr(Expr expr, int incr)
+  public PreIncrementExpr(Location location, Expr expr, int incr)
     throws IOException
   {
     // super(expr.createRef());
-    super(expr);
-    
+    super(location, expr);
+
     _incr = incr;
   }
-  
+
   public Value eval(Env env)
     throws Throwable
   {
@@ -62,7 +60,7 @@ public class PreIncrementExpr extends UnaryExpr {
 
     return var.preincr(_incr);
   }
-  
+
   /**
    * Return true for a double value
    */
@@ -131,7 +129,7 @@ public class PreIncrementExpr extends UnaryExpr {
     out.print(_incr);
     out.print(")");
   }
-  
+
   public String toString()
   {
     if (_incr > 0)

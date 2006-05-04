@@ -36,6 +36,7 @@ import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
 
 import com.caucho.quercus.gen.PhpWriter;
+import com.caucho.quercus.Location;
 
 /**
  * Represents a PHP double literal expression.
@@ -44,8 +45,9 @@ public class DoubleLiteralExpr extends Expr {
   private final double _value;
   private final DoubleValue _objValue;
 
-  public DoubleLiteralExpr(double value)
+  public DoubleLiteralExpr(Location location, double value)
   {
+    super(location);
     _value = value;
     _objValue = new DoubleValue(_value);
   }

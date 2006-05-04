@@ -31,29 +31,21 @@ package com.caucho.quercus.expr;
 
 import java.io.IOException;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-
-import com.caucho.java.JavaWriter;
-
 import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.LongValue;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.BooleanValue;
 import com.caucho.quercus.env.ArrayValue;
-import com.caucho.quercus.gen.PhpWriter;
-
-import com.caucho.quercus.program.AnalyzeInfo;
+import com.caucho.quercus.Location;
 
 /**
  * Represents a PHP each expression.
  */
 public class EachExpr extends UnaryExpr {
 
-  public EachExpr(Expr expr)
+  public EachExpr(Location location, Expr expr)
     throws IOException
   {
-    super(expr);
+    super(location, expr);
   }
 
   /**
@@ -67,7 +59,7 @@ public class EachExpr extends UnaryExpr {
     throws Throwable
   {
     Value value = getExpr().eval(env);
-    
+
     if (value instanceof ArrayValue) {
       ArrayValue array = (ArrayValue) value;
 

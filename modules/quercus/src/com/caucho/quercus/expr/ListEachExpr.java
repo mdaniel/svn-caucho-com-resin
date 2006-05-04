@@ -31,19 +31,14 @@ package com.caucho.quercus.expr;
 
 import java.io.IOException;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-
-import com.caucho.java.JavaWriter;
-
 import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.LongValue;
 import com.caucho.quercus.env.ArrayValue;
 import com.caucho.quercus.env.BooleanValue;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.gen.PhpWriter;
 
 import com.caucho.quercus.program.AnalyzeInfo;
+import com.caucho.quercus.Location;
 
 /**
  * Represents a PHP list() = each() assignment expression.
@@ -53,9 +48,10 @@ public class ListEachExpr extends Expr {
   private final AbstractVarExpr _valueVar;
   private final Expr _value;
 
-  public ListEachExpr(Expr []varList, EachExpr each)
+  public ListEachExpr(Location location, Expr []varList, EachExpr each)
     throws IOException
   {
+    super(location);
     if (varList.length > 0) {
       // XXX: need test
       _keyVar = (AbstractVarExpr) varList[0];
@@ -144,7 +140,7 @@ public class ListEachExpr extends Expr {
   {
     // XXX: should be unique (?)
     info.getFunction().addTempVar("_quercus_list");
-    
+
     _value.analyze(info);
 
     if (_keyVar != null)
@@ -167,17 +163,17 @@ public class ListEachExpr extends Expr {
     out.print("((" + var + " = ");
     _value.generate(out);
     out.print(").hasCurrent() ? ");
-	      
+
     out.print("env.first(BooleanValue.TRUE");
 
     if (_keyVar != null) {
       out.print(", ");
-      _keyVar.generateAssign(out, new EachKeyExpr(var), false);
+      _keyVar.generateAssign(out, new EachKeyExpr(getLocation(), var), false);
     }
 
     if (_valueVar != null) {
       out.print(", ");
-      _valueVar.generateAssign(out, new EachValueExpr(var), false);
+      _valueVar.generateAssign(out, new EachValueExpr(getLocation(), var), false);
     }
 
     out.print(", " + var + ".next()");
@@ -199,14 +195,14 @@ public class ListEachExpr extends Expr {
     _value.generate(out);
     out.println(").hasCurrent()) {");
     out.pushDepth();
-	      
+
     if (_keyVar != null) {
-      _keyVar.generateAssign(out, new EachKeyExpr(var), true);
+      _keyVar.generateAssign(out, new EachKeyExpr(getLocation(), var), true);
       out.println(";");
     }
 
     if (_valueVar != null) {
-      _valueVar.generateAssign(out, new EachValueExpr(var), true);
+      _valueVar.generateAssign(out, new EachValueExpr(getLocation(), var), true);
       out.println(";");
     }
 
@@ -219,8 +215,9 @@ public class ListEachExpr extends Expr {
   static class EachKeyExpr extends Expr {
     private String _var;
 
-    EachKeyExpr(String var)
+    EachKeyExpr(Location location, String var)
     {
+      super(location);
       _var = var;
     }
 
@@ -240,8 +237,9 @@ public class ListEachExpr extends Expr {
   static class EachValueExpr extends Expr {
     private String _var;
 
-    EachValueExpr(String var)
+    EachValueExpr(Location location, String var)
     {
+      super(location);
       _var = var;
     }
 

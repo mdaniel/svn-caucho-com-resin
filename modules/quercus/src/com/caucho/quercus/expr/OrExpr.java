@@ -31,8 +31,6 @@ package com.caucho.quercus.expr;
 
 import java.io.IOException;
 
-import com.caucho.java.JavaWriter;
-
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.BooleanValue;
@@ -40,14 +38,15 @@ import com.caucho.quercus.env.BooleanValue;
 import com.caucho.quercus.gen.PhpWriter;
 
 import com.caucho.quercus.program.AnalyzeInfo;
+import com.caucho.quercus.Location;
 
 /**
  * Represents a logical or expression.
  */
 public class OrExpr extends BinaryExpr {
-  public OrExpr(Expr left, Expr right)
+  public OrExpr(Location location, Expr left, Expr right)
   {
-    super(left, right);
+    super(location, left, right);
   }
 
   /**
@@ -100,7 +99,7 @@ public class OrExpr extends BinaryExpr {
     _left.analyze(info);
 
     AnalyzeInfo copy = info.copy();
-    
+
     _right.analyze(copy);
 
     info.merge(copy);
@@ -161,7 +160,7 @@ public class OrExpr extends BinaryExpr {
     generateBoolean(out);
     out.println(") {}");
   }
-  
+
   public String toString()
   {
     return "(" + _left + " || " + _right + ")";

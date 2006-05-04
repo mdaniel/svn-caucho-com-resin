@@ -31,20 +31,15 @@ package com.caucho.quercus.expr;
 
 import java.io.IOException;
 
-import java.util.HashSet;
-
-import com.caucho.java.JavaWriter;
-
 import com.caucho.quercus.QuercusDieException;
+import com.caucho.quercus.Location;
 
 import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.NullValue;
 import com.caucho.quercus.env.Value;
 
 import com.caucho.quercus.gen.PhpWriter;
 
 import com.caucho.quercus.program.AnalyzeInfo;
-import com.caucho.quercus.program.ExprStatement;
 
 /**
  * Represents the die expression
@@ -52,13 +47,15 @@ import com.caucho.quercus.program.ExprStatement;
 public class DieExpr extends Expr {
   private final Expr _value;
 
-  public DieExpr(Expr value)
+  public DieExpr(Location location, Expr value)
   {
+    super(location);
     _value = value;
   }
 
-  public DieExpr()
+  public DieExpr(Location location)
   {
+    super(location);
     _value = null;
   }
 
@@ -74,7 +71,7 @@ public class DieExpr extends Expr {
   {
     if (_value != null) {
       String msg = _value.evalString(env);
-      
+
       env.getOut().print(msg);
 
       throw new QuercusDieException(msg);

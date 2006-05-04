@@ -31,21 +31,19 @@ package com.caucho.quercus.expr;
 
 import java.io.IOException;
 
-import com.caucho.java.JavaWriter;
-
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
-import com.caucho.quercus.env.BooleanValue;
 
 import com.caucho.quercus.gen.PhpWriter;
+import com.caucho.quercus.Location;
 
 /**
  * Represents a comma expression.
  */
 public class CommaExpr extends BinaryExpr {
-  public CommaExpr(Expr left, Expr right)
+  public CommaExpr(Location location, Expr left, Expr right)
   {
-    super(left, right);
+    super(location, left, right);
   }
 
   /**
@@ -123,7 +121,7 @@ public class CommaExpr extends BinaryExpr {
     _right.generateExpr(out);
     out.print(")");
   }
-  
+
   public String toString()
   {
     return "(" + _left + ", " + _right + ")";

@@ -45,14 +45,15 @@ import com.caucho.quercus.gen.PhpWriter;
 import com.caucho.quercus.program.Statement;
 import com.caucho.quercus.program.AnalyzeInfo;
 import com.caucho.quercus.program.ExprStatement;
+import com.caucho.quercus.Location;
 
 /**
  * Represents a temp PHP variable expression.
  */
 public class PhpVarExpr extends VarExpr {
-  public PhpVarExpr(VarInfo var)
+  public PhpVarExpr(Location location, VarInfo var)
   {
-    super(var);
+    super(location, var);
   }
 
   /**
@@ -62,7 +63,7 @@ public class PhpVarExpr extends VarExpr {
   {
     return getName();
   }
-  
+
   public String toString()
   {
     return "$quercus_" + getName();

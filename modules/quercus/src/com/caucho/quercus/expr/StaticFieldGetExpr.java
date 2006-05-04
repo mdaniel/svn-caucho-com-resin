@@ -36,9 +36,8 @@ import com.caucho.quercus.env.Value;
 
 import com.caucho.quercus.program.AnalyzeInfo;
 
-import com.caucho.quercus.parser.QuercusParser;
-
 import com.caucho.quercus.gen.PhpWriter;
+import com.caucho.quercus.Location;
 
 import com.caucho.util.L10N;
 
@@ -52,8 +51,9 @@ public class StaticFieldGetExpr extends AbstractVarExpr {
   private final String _varName;
   private final String _envName;
 
-  public StaticFieldGetExpr(String className, String varName)
+  public StaticFieldGetExpr(Location location, String className, String varName)
   {
+    super(location);
     _className = className;
     
     _varName = varName;

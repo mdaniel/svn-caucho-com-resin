@@ -31,16 +31,14 @@ package com.caucho.quercus.expr;
 
 import java.io.IOException;
 
-import com.caucho.java.JavaWriter;
-
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
-import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.StringValueImpl;
 
 import com.caucho.quercus.program.AnalyzeInfo;
 
 import com.caucho.quercus.gen.PhpWriter;
+import com.caucho.quercus.Location;
 
 /**
  * Represents a PHP append ('.') expression.
@@ -48,9 +46,10 @@ import com.caucho.quercus.gen.PhpWriter;
 public class AppendExpr extends Expr {
   private final Expr _value;
   private AppendExpr _next;
-  
-  private AppendExpr(Expr value, AppendExpr next)
+
+  private AppendExpr(Location location, Expr value, AppendExpr next)
   {
+    super(location);
     _value = value;
     _next = next;
   }
@@ -78,14 +77,14 @@ public class AppendExpr extends Expr {
     if (right instanceof AppendExpr)
       next = (AppendExpr) right;
     else
-      next = new AppendExpr(right, null);
+      next = new AppendExpr(right.getLocation(), right, null);
 
     AppendExpr leftAppend;
-    
+
     if (left instanceof AppendExpr)
       leftAppend = (AppendExpr) left;
     else
-      leftAppend = new AppendExpr(left, null);
+      leftAppend = new AppendExpr(left.getLocation(), left, null);
 
     AppendExpr result = append(leftAppend, next);
 
@@ -107,14 +106,15 @@ public class AppendExpr extends Expr {
     tail = append(left._next, tail);
 
     if (left._value instanceof StringLiteralExpr &&
-	tail._value instanceof StringLiteralExpr) {
+        tail._value instanceof StringLiteralExpr) {
       StringLiteralExpr leftString = (StringLiteralExpr) left._value;
       StringLiteralExpr rightString = (StringLiteralExpr) tail._value;
 
-      Expr value = new StringLiteralExpr(leftString.evalConstant().toString() +
-					 rightString.evalConstant().toString());
+      Expr value = new StringLiteralExpr(leftString.getLocation(),
+                                         leftString.evalConstant().toString() +
+                                         rightString.evalConstant().toString());
 
-      return new AppendExpr(value, tail._next);
+      return new AppendExpr(value.getLocation(), value, tail._next);
     }
     else {
       left._next = tail;
@@ -130,13 +130,13 @@ public class AppendExpr extends Expr {
   {
     return true;
   }
-  
+
   public Value eval(Env env)
     throws Throwable
   {
     return new StringValueImpl(evalString(env));
   }
-  
+
   public String evalString(Env env)
     throws Throwable
   {
@@ -173,7 +173,7 @@ public class AppendExpr extends Expr {
     throws IOException
   {
     out.print("new StringBuilderValue()");
-    
+
     for (AppendExpr ptr = this; ptr != null; ptr = ptr._next) {
       out.print(".append(");
       ptr._value.generateAppend(out);
@@ -190,7 +190,7 @@ public class AppendExpr extends Expr {
     throws IOException
   {
     out.print("new StringBuilderValue()");
-    
+
     for (AppendExpr ptr = this; ptr != null; ptr = ptr._next) {
       out.print(".append(");
       ptr._value.generateAppend(out);
@@ -224,7 +224,7 @@ public class AppendExpr extends Expr {
       ptr._value.generatePrint(out);
     }
   }
-  
+
   public String toString()
   {
     if (_next != null)

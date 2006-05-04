@@ -32,13 +32,13 @@ package com.caucho.quercus.expr;
 import java.io.IOException;
 
 import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.Value;
 
 import com.caucho.quercus.program.AnalyzeInfo;
 import com.caucho.quercus.program.InterpretedClassDef;
 
 import com.caucho.quercus.gen.PhpWriter;
+import com.caucho.quercus.Location;
 
 import com.caucho.util.L10N;
 
@@ -52,8 +52,9 @@ public class ThisFieldExpr extends AbstractVarExpr {
   
   private final String _name;
 
-  public ThisFieldExpr(InterpretedClassDef quercusClass, String name)
+  public ThisFieldExpr(Location location, InterpretedClassDef quercusClass, String name)
   {
+    super(location);
     _quercusClass = quercusClass;
     
     _name = name.intern();

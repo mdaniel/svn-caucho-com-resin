@@ -34,7 +34,6 @@ import com.caucho.quercus.env.ContinueValue;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.expr.Expr;
-import com.caucho.quercus.expr.VarExpr;
 import com.caucho.quercus.expr.AbstractVarExpr;
 import com.caucho.quercus.gen.PhpWriter;
 import com.caucho.quercus.Location;
@@ -211,19 +210,19 @@ public class ForeachStatement
     String keyVar = keysVar + "[" + indexVar + "]";
 
     if (_key != null) {
-      _key.generateAssign(out, new RawExpr(keyVar), true);
+      _key.generateAssign(out, new RawExpr(getLocation(), keyVar), true);
       out.println(";");
     }
 
     if (_isRef) {
       String valueVar = objVar + ".getRef(" + keyVar + ")";
 
-      _value.generateAssignRef(out, new RawExpr(valueVar), true);
+      _value.generateAssignRef(out, new RawExpr(getLocation(), valueVar), true);
       out.println(";");
     } else {
       String valueVar = valuesVar + "[" + indexVar + "]";
 
-      _value.generateAssign(out, new RawExpr(valueVar), true);
+      _value.generateAssign(out, new RawExpr(getLocation(), valueVar), true);
       out.println(";");
     }
 
@@ -238,8 +237,9 @@ public class ForeachStatement
   {
     private String _code;
 
-    RawExpr(String code)
+    RawExpr(Location location, String code)
     {
+      super(location);
       _code = code;
     }
 

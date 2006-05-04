@@ -32,11 +32,17 @@ package com.caucho.quercus.expr;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.LongValue;
 import com.caucho.quercus.env.Value;
+import com.caucho.quercus.Location;
 
 /**
  * Represents a PHP expression.
  */
 abstract public class LongValuedExpr extends Expr {
+  public LongValuedExpr(Location location)
+  {
+    super(location);
+  }
+
   /**
    * Evaluates the expression as a value.
    *
@@ -49,7 +55,7 @@ abstract public class LongValuedExpr extends Expr {
   {
     return new LongValue(evalLong(env));
   }
-  
+
   /**
    * Evaluates the expression as a boolean.
    *
@@ -62,7 +68,7 @@ abstract public class LongValuedExpr extends Expr {
   {
     return evalLong(env) != 0;
   }
-  
+
   /**
    * Evaluates the expression as double
    *
@@ -75,7 +81,7 @@ abstract public class LongValuedExpr extends Expr {
   {
     return evalLong(env);
   }
-  
+
   /**
    * Evaluates the expression as a long.
    *

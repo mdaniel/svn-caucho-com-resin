@@ -31,22 +31,21 @@ package com.caucho.quercus.expr;
 
 import java.io.IOException;
 
-import com.caucho.java.JavaWriter;
-
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.BooleanValue;
 
 import com.caucho.quercus.gen.PhpWriter;
 import com.caucho.quercus.program.AnalyzeInfo;
+import com.caucho.quercus.Location;
 
 /**
  * Represents a logical and expression.
  */
 public class AndExpr extends BinaryExpr {
-  public AndExpr(Expr left, Expr right)
+  public AndExpr(Location location, Expr left, Expr right)
   {
-    super(left, right);
+    super(location, left, right);
   }
 
   /**
@@ -96,11 +95,11 @@ public class AndExpr extends BinaryExpr {
   public void analyze(AnalyzeInfo info)
   {
     // quercus/3a0y
-    
+
     _left.analyze(info);
 
     AnalyzeInfo copy = info.copy();
-    
+
     _right.analyze(copy);
 
     info.merge(copy);
@@ -165,7 +164,7 @@ public class AndExpr extends BinaryExpr {
     out.popDepth();
     out.println("}");
   }
-  
+
   public String toString()
   {
     return "(" + _left + " && " + _right + ")";

@@ -38,17 +38,19 @@ import com.caucho.quercus.env.Value;
 import com.caucho.quercus.gen.PhpWriter;
 
 import com.caucho.quercus.program.AnalyzeInfo;
+import com.caucho.quercus.Location;
 
 /**
  * Represents a PHP null expression.
  */
 public class NullLiteralExpr extends Expr {
-  public static final NullLiteralExpr NULL = new NullLiteralExpr();
-  
-  private NullLiteralExpr()
+  public static final NullLiteralExpr NULL = new NullLiteralExpr(Location.UNKNOWN);
+
+  private NullLiteralExpr(Location location)
   {
+    super(location);
   }
-  
+
   /**
    * Evaluates the expression as a constant.
    *
@@ -112,7 +114,7 @@ public class NullLiteralExpr extends Expr {
   {
     out.print("NullLiteralExpr.NULL");
   }
-  
+
   public void generateStatement(PhpWriter out)
     throws IOException
   {

@@ -41,6 +41,7 @@ import com.caucho.quercus.program.AbstractFunction;
 import com.caucho.quercus.program.AnalyzeInfo;
 
 import com.caucho.quercus.gen.PhpWriter;
+import com.caucho.quercus.Location;
 
 import com.caucho.util.L10N;
 
@@ -54,8 +55,9 @@ public class ClassMethodExpr extends Expr {
   private final String _name;
   private final Expr []_args;
 
-  public ClassMethodExpr(String className, String name, ArrayList<Expr> args)
+  public ClassMethodExpr(Location location, String className, String name, ArrayList<Expr> args)
   {
+    super(location);
     _className = className.intern();
     
     _name = name.intern();
@@ -64,8 +66,9 @@ public class ClassMethodExpr extends Expr {
     args.toArray(_args);
   }
 
-  public ClassMethodExpr(String className, String name, Expr []args)
+  public ClassMethodExpr(Location location, String className, String name, Expr []args)
   {
+    super(location);
     _className = className.intern();
     
     _name = name.intern();

@@ -31,12 +31,7 @@ package com.caucho.quercus.expr;
 
 import java.io.IOException;
 
-import java.util.HashSet;
-
-import com.caucho.java.JavaWriter;
-
 import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.NullValue;
 import com.caucho.quercus.env.Value;
 
 import com.caucho.quercus.parser.QuercusParser;
@@ -52,6 +47,10 @@ import com.caucho.quercus.Location;
  * Represents an expression that is assignable
  */
 abstract public class AbstractVarExpr extends Expr {
+  public AbstractVarExpr(Location location)
+  {
+    super(location);
+  }
   /**
    * Marks the value as assigned
    */
@@ -65,31 +64,35 @@ abstract public class AbstractVarExpr extends Expr {
    */
   public Expr createAssign(QuercusParser parser, Expr value)
   {
-    return new AssignExpr(this, value);
+    return new AssignExpr(parser.getLocation(), this, value);
   }
 
   /**
    * Creates the assignment.
    */
-  public Expr createAssignRef(QuercusParser parser, Expr value)
+  public Expr createAssignRef(QuercusParser parser,
+                              Expr value
+  )
   {
-    return new AssignRefExpr(this, value);
+    return new AssignRefExpr(parser.getLocation(), this, value);
   }
 
   /**
    * Creates the reference
+   * @param location
    */
-  public Expr createRef()
+  public Expr createRef(Location location)
   {
-    return new RefExpr(this);
+    return new RefExpr(location, this);
   }
 
   /**
    * Creates the copy.
+   * @param location
    */
-  public Expr createCopy()
+  public Expr createCopy(Location location)
   {
-    return new CopyExpr(this);
+    return new CopyExpr(location, this);
   }
 
   /**
@@ -97,7 +100,7 @@ abstract public class AbstractVarExpr extends Expr {
    */
   public Statement createUnset(Location location)
   {
-    return new ExprStatement(location, new UnsetVarExpr(this));
+    return new ExprStatement(location, new UnsetVarExpr(location, this));
   }
 
   /**
