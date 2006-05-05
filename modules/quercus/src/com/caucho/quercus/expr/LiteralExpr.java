@@ -53,8 +53,7 @@ public class LiteralExpr extends Expr {
 
   public LiteralExpr(Value value)
   {
-    super(Location.UNKNOWN); // acceptable, for compiled code
-    _value = value;
+    this(Location.UNKNOWN, value);// acceptable, for compiled code
   }
 
   /**

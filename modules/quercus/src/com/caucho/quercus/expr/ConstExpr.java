@@ -52,6 +52,11 @@ public class ConstExpr extends Expr {
     _var = var;
   }
 
+  public ConstExpr(String var)
+  {
+    this(Location.UNKNOWN, var);// acceptable, for compiled code
+  }
+
   /**
    * Returns the variable.
    */
