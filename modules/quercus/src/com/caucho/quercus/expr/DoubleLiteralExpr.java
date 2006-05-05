@@ -52,6 +52,10 @@ public class DoubleLiteralExpr extends Expr {
     _objValue = new DoubleValue(_value);
   }
 
+  public DoubleLiteralExpr(double value)
+  {
+    this(Location.UNKNOWN, value);
+  }
   /**
    * Returns true for a literal expression.
    */

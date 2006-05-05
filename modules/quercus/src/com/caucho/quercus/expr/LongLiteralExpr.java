@@ -54,6 +54,11 @@ public class LongLiteralExpr extends Expr {
     _objValue = new LongValue(_value);
   }
 
+  public LongLiteralExpr(long value)
+  {
+    this(Location.UNKNOWN, value);
+  }
+
   /**
    * Returns true for a literal expression.
    */

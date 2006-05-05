@@ -59,6 +59,16 @@ public class StringLiteralExpr extends Expr {
     _value = value;
   }
 
+  public StringLiteralExpr(String value)
+  {
+    this(Location.UNKNOWN, value);
+  }
+
+  public StringLiteralExpr(StringValue value)
+  {
+    this(Location.UNKNOWN, value);
+  }
+
   /**
    * Returns true for a literal expression.
    */
