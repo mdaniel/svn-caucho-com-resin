@@ -52,6 +52,7 @@ import java.io.*;
 import java.util.*;
 
 import java.net.URL;
+import java.net.HttpURLConnection;
 import java.net.URLConnection;
 import java.net.MalformedURLException;
 
@@ -230,10 +231,26 @@ public class BurlapProxyFactory implements ServiceProxyFactory, ObjectFactory {
    *
    * @return a proxy to the object with the specified interface.
    */
-  public Object create(Class api, String url)
+  public Object create(Class api, String urlName)
     throws MalformedURLException
   {
-    BurlapProxy handler = new BurlapProxy(this, new URL(url));
+    URL url = new URL(urlName);
+
+    try {
+      // clear old keepalive connections
+      HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+
+      conn.setRequestProperty("Connection", "close");
+
+      InputStream is = conn.getInputStream();
+
+      is.close();
+
+      conn.disconnect();
+    } catch (IOException e) {
+    }
+    
+    BurlapProxy handler = new BurlapProxy(this, url);
 
     return Proxy.newProxyInstance(api.getClassLoader(),
                                   new Class[] { api,

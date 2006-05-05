@@ -243,12 +243,16 @@ public class QuercusParser {
     _peekToken = -1;
   }
   
-  public static QuercusProgram parse(Quercus quercus, Path path)
+  public static QuercusProgram parse(Quercus quercus,
+				     Path path,
+				     String encoding)
     throws IOException
   {
     ReadStream is = path.openRead();
 
     try {
+      is.setEncoding(encoding);
+      
       QuercusParser parser;
       parser = new QuercusParser(quercus, path, is.getReader());
 

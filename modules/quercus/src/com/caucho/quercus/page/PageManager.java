@@ -182,7 +182,9 @@ public class PageManager {
       program = _programCache.get(path);
 
       if (program == null || program.isModified()) {
-	program = QuercusParser.parse(_quercus, path);
+	program = QuercusParser.parse(_quercus,
+				      path,
+				      _quercus.getScriptEncoding());
 	_programCache.put(path, program);
       }
 

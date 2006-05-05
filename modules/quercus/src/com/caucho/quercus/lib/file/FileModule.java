@@ -53,6 +53,7 @@ import com.caucho.quercus.lib.StreamModule;
 import com.caucho.util.Alarm;
 
 import com.caucho.vfs.WriteStream;
+import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.TempBuffer;
 import com.caucho.vfs.Path;
 
@@ -1372,7 +1373,147 @@ public class FileModule extends AbstractQuercusModule {
     }
   }
 
-  // XXX: parse_ini_file
+  /**
+   * Parses the ini file.
+   */
+  public static Value parse_ini_file(Env env,
+				     Path path,
+				     @Optional boolean processSections)
+  {
+    ReadStream is = null;
+    
+    try {
+      is = path.openRead();
+      is.setEncoding(env.getScriptEncoding());
+
+      return parseIni(env, is, processSections);
+    } catch (IOException e) {
+      env.warning(e);
+
+      return BooleanValue.FALSE;
+    } finally {
+      try {
+	if (is != null)
+	  is.close();
+      } catch (IOException e) {
+      }
+    }
+  }
+
+  private static ArrayValue parseIni(Env env,
+				     ReadStream is,
+				     boolean processSections)
+    throws IOException
+  {
+    ArrayValue top = new ArrayValueImpl();
+    ArrayValue section = top;
+    
+    int ch;
+
+    while ((ch = is.read()) >= 0) {
+      if (Character.isWhitespace(ch)) {
+      }
+      else if (ch == ';') {
+	for (; ch >= 0 && ch != '\r' && ch != '\n'; ch = is.read()) {
+	}
+      }
+      else if (ch == '[') {
+	StringBuilder sb = new StringBuilder();
+
+	for (ch = is.read(); ch >= 0 && ch != ']'; ch = is.read()) {
+	  sb.append((char) ch);
+	}
+
+	String name = sb.toString().trim();
+
+	if (processSections) {
+	  section = new ArrayValueImpl();
+	  top.put(new StringValueImpl(name), section);
+	}
+      }
+      else if (Character.isJavaIdentifierStart((char) ch)) {
+	StringBuilder sb = new StringBuilder();
+
+	for (; Character.isJavaIdentifierPart((char) ch); ch = is.read()) {
+	  sb.append((char) ch);
+	}
+
+	String key = sb.toString().trim();
+
+	for (; ch >= 0 && ch != '='; ch = is.read()) {
+	}
+
+	for (ch = is.read(); ch == ' ' || ch == '\t'; ch = is.read()) {
+	}
+
+	Value value = parseIniValue(env, ch, is);
+
+	section.put(new StringValueImpl(key), value);
+      }
+    }
+
+    return top;
+  }
+
+  private static Value parseIniValue(Env env, int ch, ReadStream is)
+    throws IOException
+  {
+    if (ch == '\r' || ch == '\n')
+      return NullValue.NULL;
+
+    if (ch == '"') {
+      StringBuilder sb = new StringBuilder();
+      
+      for (ch = is.read(); ch >= 0 && ch != '"'; ch = is.read()) {
+	sb.append((char) ch);
+      }
+
+      skipToEndOfLine(ch, is);
+
+      return new StringValueImpl(sb.toString());
+    }
+    else if (ch == '\'') {
+      StringBuilder sb = new StringBuilder();
+      
+      for (ch = is.read(); ch >= 0 && ch != '\''; ch = is.read()) {
+	sb.append((char) ch);
+      }
+
+      skipToEndOfLine(ch, is);
+
+      return new StringValueImpl(sb.toString());
+    }
+    else {
+      StringBuilder sb = new StringBuilder();
+
+      for (; ch >= 0 && ch != '\r' && ch != '\n'; ch = is.read()) {
+	sb.append((char) ch);
+      }
+
+      String value = sb.toString().trim();
+
+      if (value.equalsIgnoreCase("null"))
+	return StringValue.EMPTY;
+      else if (value.equalsIgnoreCase("true") ||
+	       value.equalsIgnoreCase("yes"))
+	return new StringValueImpl("1");
+      else if (value.equalsIgnoreCase("false") ||
+	       value.equalsIgnoreCase("no"))
+	return StringValue.EMPTY;
+
+      if (env.isDefined(value))
+	return new StringValueImpl(env.getConstant(value).toString());
+      else
+	return new StringValueImpl(value);
+    }
+  }
+  
+  private static void skipToEndOfLine(int ch, ReadStream is)
+    throws IOException
+  {
+    for (; ch > 0 && ch != '\r' && ch != '\n'; ch = is.read()) {
+    }
+  }
 
   /**
    * Parses the path, splitting it into parts.

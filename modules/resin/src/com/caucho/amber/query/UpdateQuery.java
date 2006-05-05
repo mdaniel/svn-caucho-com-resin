@@ -38,6 +38,8 @@ import com.caucho.util.CharBuffer;
 import com.caucho.amber.entity.AmberEntityHome;
 import com.caucho.amber.entity.TableInvalidateCompletion;
 
+import com.caucho.amber.field.AmberField;
+
 import com.caucho.amber.manager.AmberConnection;
 
 
@@ -45,7 +47,7 @@ import com.caucho.amber.manager.AmberConnection;
  * Represents an Amber select query
  */
 public class UpdateQuery extends AbstractQuery {
-  private ArrayList<String> _fieldList;
+  private ArrayList<AmberField> _fieldList;
   private ArrayList<AmberExpr> _valueList;
   private AmberExpr _where;
 
@@ -59,7 +61,7 @@ public class UpdateQuery extends AbstractQuery {
   /**
    * Sets the field list.
    */
-  void setFieldList(ArrayList<String> fieldList)
+  void setFieldList(ArrayList<AmberField> fieldList)
   {
     _fieldList = fieldList;
   }
@@ -67,7 +69,7 @@ public class UpdateQuery extends AbstractQuery {
   /**
    * Returns the field list.
    */
-  public ArrayList<String> getFieldList()
+  public ArrayList<AmberField> getFieldList()
   {
     return _fieldList;
   }
@@ -109,28 +111,28 @@ public class UpdateQuery extends AbstractQuery {
    */
   void init()
   {
-    CharBuffer cb = CharBuffer.allocate();
+    CharBuffer cb = new CharBuffer();
 
-    cb.append("UPDATE ");
+    cb.append("update ");
 
     FromItem item = _fromList.get(0);
 
     cb.append(item.getTable().getName());
 
-    cb.append(" SET ");
+    cb.append(" set ");
 
     for (int i = 0; i < _fieldList.size(); i++) {
       if (i != 0)
 	cb.append(", ");
 
-      cb.append(_fieldList.get(i));
+      cb.append(_fieldList.get(i).generateSelect(null));
       cb.append("=");
 
       _valueList.get(i).generateWhere(cb);
     }
 
     if (_where != null) {
-      cb.append(" WHERE ");
+      cb.append(" where ");
       _where.generateWhere(cb);
     }
     

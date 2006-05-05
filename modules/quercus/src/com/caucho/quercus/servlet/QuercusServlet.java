@@ -133,6 +133,15 @@ public class QuercusServlet
   }
 
   /**
+   * Sets the script encoding.
+   */
+  public void setScriptEncoding(String encoding)
+    throws ConfigException
+  {
+    getQuercus().setScriptEncoding(encoding);
+  }
+
+  /**
    * Gets the script manager.
    */
   public void init()
@@ -170,7 +179,11 @@ public class QuercusServlet
       QuercusPage page = getQuercus().parse(path);
 
       // quercus/1b06
-      response.setContentType("text/html");
+      String encoding = getQuercus().getScriptEncoding();
+      if (encoding != null)
+	response.setContentType("text/html; charset=" + encoding);
+      else
+	response.setContentType("text/html");
 
       WriteStream ws;
 
@@ -183,6 +196,7 @@ public class QuercusServlet
 
         ws = Vfs.openWrite(out);
       }
+      ws.setEncoding(encoding);
 
       Env env = new Env(getQuercus(), page, ws, request, response);
       try {

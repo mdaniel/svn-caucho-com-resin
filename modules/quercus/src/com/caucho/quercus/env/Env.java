@@ -289,6 +289,11 @@ public class Env {
     _startTime = Alarm.getCurrentTime();
   }
 
+  public String getScriptEncoding()
+  {
+    return getQuercus().getScriptEncoding();
+  }
+  
   public void start()
     throws Throwable
   {

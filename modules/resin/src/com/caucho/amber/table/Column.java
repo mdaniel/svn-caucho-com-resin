@@ -332,7 +332,10 @@ public class Column {
    */
   public String generateSelect(String id)
   {
-    return id + "." + _name;
+    if (id != null)
+      return id + "." + _name;
+    else
+      return _name;
   }
 
   /**

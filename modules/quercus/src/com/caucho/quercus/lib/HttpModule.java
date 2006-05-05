@@ -89,13 +89,16 @@ public class HttpModule extends AbstractQuercusModule {
       String key = header.substring(0, p).trim();
       String value = header.substring(p + 1).trim();
 
-      if (key.equalsIgnoreCase("Location")) {
+      if (key.equalsIgnoreCase("Location"))
         res.sendRedirect(value);
-      }
       else if (replace)
         res.setHeader(key, value);
       else
         res.addHeader(key, value);
+
+      if (key.equalsIgnoreCase("Content-Type")) {
+	env.getOut().setEncoding(res.getCharacterEncoding());
+      }
     }
 
     return NullValue.NULL;

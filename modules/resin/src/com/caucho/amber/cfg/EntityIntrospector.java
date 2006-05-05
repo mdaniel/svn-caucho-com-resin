@@ -705,6 +705,7 @@ public class EntityIntrospector {
     Type amberType = persistenceUnit.createType(fieldType);
 
     Column keyColumn = createColumn(entityType,
+				    field,
 				    fieldName,
 				    column,
 				    amberType);
@@ -936,7 +937,8 @@ public class EntityIntrospector {
 	    */
       }
 
-      if (method.isStatic() || ! method.isPublic()) {
+      // ejb/0g03 for private
+      if (method.isStatic()) { // || ! method.isPublic()) {
 	validateNonGetter(method);
 	continue;
       }
@@ -1089,7 +1091,7 @@ public class EntityIntrospector {
 
     Type amberType = persistenceUnit.createType(fieldType);
 
-    Column fieldColumn = createColumn(sourceType, fieldName,
+    Column fieldColumn = createColumn(sourceType, field, fieldName,
 				      columnAnn, amberType);
 
     PropertyField property = new PropertyField(sourceType, fieldName);
@@ -1106,7 +1108,9 @@ public class EntityIntrospector {
     sourceType.addField(property);
   }
 
-  private Column createColumn(EntityType entityType, String fieldName,
+  private Column createColumn(EntityType entityType,
+			      JAccessibleObject field,
+			      String fieldName,
 			      JAnnotation columnAnn, Type amberType)
     throws ConfigException
   {
@@ -1126,8 +1130,9 @@ public class EntityIntrospector {
       table = entityType.getSecondaryTable(tableName);
 
       if (table == null)
-	throw new ConfigException(L.l("'{0}' is an unknown secondary table.",
-				      tableName));
+	throw error(field, L.l("{0} @Column(table='{1}') is an unknown secondary table.",
+			       fieldName,
+			       tableName));
 
       column = table.createColumn(name, amberType);
     }
@@ -1145,19 +1150,25 @@ public class EntityIntrospector {
       column.setLength(columnAnn.getInt("length"));
       int precision = columnAnn.getInt("precision");
       if (precision < 0) {
-        throw new ConfigException(L.l("precision cannot be less than 0."));
+        throw error(field, L.l("{0} @Column precision cannot be less than 0.",
+			       fieldName));
       }
+      
       int scale = columnAnn.getInt("scale");
       if (scale < 0) {
-        throw new ConfigException(L.l("scale cannot be less than 0."));
+        throw error(field, L.l("{0} @Column scale cannot be less than 0.",
+			       fieldName));
       }
+      
       // this test implicitly works for case where
       // precision is not set explicitly (ie: set to 0 by default)
       // and scale is set
       if (scale > precision) {
-        throw new ConfigException(L.l("Scale cannot be greater than precision. Must set precision to a non-zero value before setting scale."));
+        throw error(field, L.l("{0} @Column scale cannot be greater than precision. Must set precision to a non-zero value before setting scale.",
+			       fieldName));
       }
-      if (precision > 0){
+      
+      if (precision > 0) {
         column.setPrecision(precision);
         column.setScale(scale);
       }
@@ -1261,7 +1272,7 @@ public class EntityIntrospector {
 				   EntityType targetType)
     throws ConfigException
   {
-    if (columnsAnn == null || columnsAnn.length == 0)
+    if (columnsAnn == null) // || columnsAnn.length == 0)
       return;
 
     com.caucho.amber.field.Id id = targetType.getId();
@@ -1824,10 +1835,16 @@ public class EntityIntrospector {
       AmberPersistenceUnit persistenceUnit = _entityType.getPersistenceUnit();
 
       JClass targetEntity = oneToOneAnn.getClass("targetEntity");
-      String targetName = null;
 
-      if (targetEntity != null)
-	targetName = targetEntity.getName();
+      if (targetEntity == null || targetEntity.getName().equals("void"))
+	targetEntity = _fieldType;
+      
+      if (! targetEntity.isAnnotationPresent(javax.persistence.Entity.class)) {
+	throw error(_field, L.l("'{0}' is an illegal targetEntity for {1}.  @OneToOne relations must target a valid @Entity.",
+			       targetEntity.getName(), _field.getName()));
+      }
+      
+      String targetName = targetEntity.getName();
       
       String mappedBy =  oneToOneAnn.getString("mappedBy");
 

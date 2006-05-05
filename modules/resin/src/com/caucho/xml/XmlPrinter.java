@@ -717,6 +717,9 @@ public class XmlPrinter implements XMLWriter {
   void printHeader(String top)
     throws IOException
   {
+    if (! _isTop)
+      return;
+    
     _isTop = false;
     
     String encoding = _encoding;

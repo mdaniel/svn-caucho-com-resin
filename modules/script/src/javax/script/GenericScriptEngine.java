@@ -43,6 +43,8 @@ abstract public class GenericScriptEngine implements ScriptEngine {
   public GenericScriptEngine()
   {
     this.context = new GenericScriptContext();
+    this.context.setNamespace(createNamespace(),
+			      GenericScriptContext.ENGINE_SCOPE);
   }
 
   /**

@@ -51,6 +51,10 @@ import com.caucho.amber.manager.AmberPersistenceUnit;
 import com.caucho.amber.table.Table;
 import com.caucho.amber.table.LinkColumns;
 
+import com.caucho.amber.type.EntityType;
+
+import com.caucho.amber.field.AmberField;
+
 /**
  * Contains the parser for EJB 3.0 style queries and stores
  * the parsed expressions.
@@ -421,21 +425,17 @@ public class QueryParser {
     if (token != SET)
       throw error(L.l("expected 'SET' at {0}", tokenName(token)));
 
-    ArrayList<String> fields = new ArrayList<String>();
+    ArrayList<AmberField> fields = new ArrayList<AmberField>();
     ArrayList<AmberExpr> values = new ArrayList<AmberExpr>();
 
-    parseSetValues(fields, values);
+    parseSetValues(fromItem, fields, values);
 
     query.setFieldList(fields);
     query.setValueList(values);
 
     token = scanToken();
     if (token == WHERE) {
-      AmberExpr where = parseExpr();
-
-      where = where.bindSelect(this);
-
-      query.setWhere(where);
+      query.setWhere(parseExpr().createBoolean().bindSelect(this));
       
       token = scanToken();
     }
@@ -486,14 +486,23 @@ public class QueryParser {
   /**
    * Parses the set values.
    */
-  private void parseSetValues(ArrayList<String> fields,
+  private void parseSetValues(FromItem fromItem,
+			      ArrayList<AmberField> fields,
 			      ArrayList<AmberExpr> values)
     throws QueryParseException
   {
+    EntityType entity = fromItem.getEntityType();
+    
     int token;
     
     do {
-      String field = parseIdentifier();
+      String fieldName = parseIdentifier();
+
+      AmberField field = entity.getField(fieldName);
+
+      if (field == null)
+	throw error(L.l("'{0}' is an unknown field in entity {1}.",
+			fieldName, entity.getName()));
 
       token = scanToken();
       if (token != EQ)
@@ -636,7 +645,10 @@ public class QueryParser {
       AmberEntityHome home = _amberPersistenceUnit.getHomeBySchema(name);
 
       if (home != null) {
-	schema = new TableIdExpr(home.getEntityType(), name);
+	EntityType type = home.getEntityType();
+	
+	schema = new TableIdExpr(home.getEntityType(),
+				 type.getTable().getName());
       }
     }
 

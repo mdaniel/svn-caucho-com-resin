@@ -120,6 +120,8 @@ public class Quercus {
   private HashMap<String, Object> _specialMap
     = new HashMap<String, Object>();
 
+  private String _scriptEncoding = "utf-8";
+  
   private DataSource _database;
 
   private long _staticId;
@@ -166,6 +168,16 @@ public class Quercus {
   public void setLazyCompile(boolean isCompile)
   {
     _pageManager.setLazyCompile(isCompile);
+  }
+
+  public String getScriptEncoding()
+  {
+    return _scriptEncoding;
+  }
+
+  public void setScriptEncoding(String encoding)
+  {
+    _scriptEncoding = encoding;
   }
 
   /**

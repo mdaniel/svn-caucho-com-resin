@@ -193,7 +193,10 @@ public class QueryImpl implements Query {
    */
   public Query setParameter(int index, Object value)
   {
-    _userQuery.setObject(index, value);
+    if (value instanceof Double)
+      _userQuery.setDouble(index, ((Double) value).doubleValue());
+    else
+      _userQuery.setObject(index, value);
     
     return this;
   }

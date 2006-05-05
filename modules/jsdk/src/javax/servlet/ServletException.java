@@ -44,6 +44,8 @@ import java.io.*;
  * </code></pre>
  */
 public class ServletException extends Exception {
+  private Throwable _rootCause;
+  
   /**
    * Basic exception constructor.
    */
@@ -64,7 +66,9 @@ public class ServletException extends Exception {
    */
   public ServletException(String message, Throwable cause)
   {
-    super(message, cause);
+    super(message);
+
+    _rootCause = cause;
   }
 
 
@@ -73,14 +77,26 @@ public class ServletException extends Exception {
    */
   public ServletException(Throwable cause)
   {
-    super(cause);
+    _rootCause = cause;
   }
 
+  public Throwable getRootCause()
+  {
+    return _rootCause;
+  }
+
+  public Throwable initCause(Throwable cause)
+  {
+    _rootCause = cause;
+
+    return cause;
+  }
+  
   /**
    * Returns any wrapped exception.
    */
-  public Throwable getRootCause()
+  public Throwable getCause()
   {
-    return getCause();
+    return getRootCause();
   }
 }
