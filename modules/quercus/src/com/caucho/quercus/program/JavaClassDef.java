@@ -314,6 +314,12 @@ public class JavaClassDef extends ClassDef {
   /**
    * Creates a new instance.
    */
+  public Value newInstance(Env env, QuercusClass qcl)
+    throws Throwable
+  {
+    return newInstance();
+  }
+
   public Value newInstance()
   {
     try {

@@ -41,9 +41,7 @@ import com.caucho.quercus.QuercusRuntimeException;
 
 import com.caucho.quercus.program.AbstractFunction;
 
-import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.Value;
-import com.caucho.quercus.env.QuercusClass;
+import com.caucho.quercus.env.*;
 
 import com.caucho.quercus.expr.Expr;
 
@@ -85,6 +83,15 @@ abstract public class ClassDef {
    */
   public void initClass(QuercusClass cl)
   {
+  }
+
+  /**
+   * Creates a new instance.
+   */
+  public Value newInstance(Env env, QuercusClass qcl)
+    throws Throwable
+  {
+    return new ObjectExtValue(qcl);
   }
 
   /**

@@ -280,8 +280,9 @@ abstract public class JavaInvoker
   }
 
   public Value eval(Env env, Value []value)
+    throws Throwable
   {
-    throw new UnsupportedOperationException();
+    return eval(env, env.getThis(), value);
   }
 
   public Value eval(Env env, Object obj, Expr []exprs)
