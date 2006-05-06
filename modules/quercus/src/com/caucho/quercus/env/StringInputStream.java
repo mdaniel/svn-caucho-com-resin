@@ -49,7 +49,6 @@ public class StringInputStream extends InputStream {
 
   public int read()
   {
-    System.out.println("READ: " + _index);
     if (_index < _length)
       return _string.charAt(_index++);
     else

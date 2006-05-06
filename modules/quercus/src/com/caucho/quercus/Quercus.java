@@ -86,7 +86,10 @@ public class Quercus {
   private HashMap<String, Value> _constMap
     = new HashMap<String, Value>();
 
-  private HashMap<String, StaticFunction> _staticFunctions
+  private HashMap<String, StaticFunction> _funMap
+    = new HashMap<String, StaticFunction>();
+
+  private HashMap<String, StaticFunction> _lowerFunMap
     = new HashMap<String, StaticFunction>();
 
   private ClassDef _stdClassDef;
@@ -388,7 +391,12 @@ public class Quercus {
    */
   public StaticFunction findFunction(String name)
   {
-    return _staticFunctions.get(name);
+    StaticFunction fun = _funMap.get(name);
+
+    if (fun == null)
+      fun = _lowerFunMap.get(name.toLowerCase());
+
+    return fun;
   }
 
   /**
@@ -398,7 +406,7 @@ public class Quercus {
   {
     ArrayValue internal = new ArrayValueImpl();
 
-    for (String name : _staticFunctions.keySet()) {
+    for (String name : _funMap.keySet()) {
       internal.put(name);
     }
 
@@ -682,7 +690,8 @@ public class Quercus {
     _iniMap.putAll(iniMap);
 
     for (Map.Entry<String, StaticFunction> entry : info.getFunctions().entrySet()) {
-      _staticFunctions.put(entry.getKey(), entry.getValue());
+      _funMap.put(entry.getKey(), entry.getValue());
+      _lowerFunMap.put(entry.getKey().toLowerCase(), entry.getValue());
     }
   }
 

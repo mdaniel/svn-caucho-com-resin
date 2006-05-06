@@ -97,6 +97,9 @@ public class HttpModule extends AbstractQuercusModule {
         res.addHeader(key, value);
 
       if (key.equalsIgnoreCase("Content-Type")) {
+	if (value.indexOf("charset") < 0 && value.indexOf("text/") < 0)
+	  res.setCharacterEncoding("iso-8859-1");
+	
 	env.getOut().setEncoding(res.getCharacterEncoding());
       }
     }

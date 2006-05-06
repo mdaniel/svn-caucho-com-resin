@@ -77,6 +77,8 @@ public class ServletException extends Exception {
    */
   public ServletException(Throwable cause)
   {
+    super(String.valueOf(cause));
+    
     _rootCause = cause;
   }
 

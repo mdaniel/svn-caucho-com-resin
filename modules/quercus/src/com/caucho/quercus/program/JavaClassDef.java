@@ -47,6 +47,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.logging.Level;
@@ -314,20 +315,24 @@ public class JavaClassDef extends ClassDef {
   /**
    * Creates a new instance.
    */
-  public Value newInstance(Env env, QuercusClass qcl)
+  public Value newInstance(Env env, QuercusClass qClass)
     throws Throwable
   {
-    return newInstance();
+    // return newInstance();
+    return null;
   }
 
   public Value newInstance()
   {
+    return null;
+    /*
     try {
       //Object obj = _type.newInstance();
       return new JavaValue(null, _type.newInstance(), this);
     } catch (Exception e) {
       throw new QuercusRuntimeException(e);
     }
+    */
   }
 
   /**
@@ -499,14 +504,16 @@ public class JavaClassDef extends ClassDef {
    */
   public void initClass(QuercusClass cl)
   {
-    
     if (_cons != null)
       cl.setConstructor(_cons);
     
-    for (String key : _functionMap.keySet()) {
-      cl.addMethod(key, _functionMap.get(key));
+    for (Map.Entry<String,JavaMethod> entry : _functionMap.entrySet()) {
+      cl.addMethod(entry.getKey(), entry.getValue());
     }
 
+    for (Map.Entry<String,Value> entry : _constMap.entrySet()) {
+      cl.addConstant(entry.getKey(), entry.getValue());
+    }
   }
 
   /**
@@ -740,7 +747,7 @@ public class JavaClassDef extends ClassDef {
         Value value = Quercus.objectToValue(field.get(null));
 
         if (value != null)
-          _constMap.put(field.getName(), value);
+          _constMap.put(field.getName().intern(), value);
       } catch (Throwable e) {
         log.log(Level.FINER, e.toString(), e);
       }

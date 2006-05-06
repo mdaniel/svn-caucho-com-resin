@@ -178,16 +178,16 @@ abstract public class ArrayValue extends Value {
   /**
    * Returns the value as an array.
    */
-  public Value getArray(Value fieldName)
+  public Value getArray(Value index)
   {
-    Value value = get(fieldName);
+    Value value = get(index);
 
     Value array = value.toAutoArray();
     
     if (value != array) {
       value = array;
 
-      put(fieldName, value);
+      put(index, value);
     }
 
     return value;

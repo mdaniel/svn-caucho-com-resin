@@ -190,7 +190,8 @@ abstract public class AbstractFunction {
     Value oldThis = env.getThis();
 
     try {
-      env.setThis(obj);
+      if (obj != null)
+	env.setThis(obj);
 
       return eval(env, args);
     } finally {

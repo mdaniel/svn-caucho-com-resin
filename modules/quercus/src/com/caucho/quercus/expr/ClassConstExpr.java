@@ -53,8 +53,9 @@ public class ClassConstExpr extends Expr {
   public ClassConstExpr(Location location, String className, String name)
   {
     super(location);
-    _className = className;
-    _name = name;
+    
+    _className = className.intern();
+    _name = name.intern();
   }
   
   /**

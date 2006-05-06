@@ -316,7 +316,7 @@ public class UrlModule extends AbstractQuercusModule {
       if ('a' <= ch && ch <= 'z' ||
           'A' <= ch && ch <= 'Z' ||
           '0' <= ch && ch <= '9' ||
-          ch == '-' || ch == '_' || ch == '.' || ch == ' ') {
+          ch == '-' || ch == '_' || ch == '.') {
         sb.append(ch);
       }
       else {

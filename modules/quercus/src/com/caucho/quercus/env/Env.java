@@ -293,7 +293,7 @@ public class Env {
   {
     return getQuercus().getScriptEncoding();
   }
-
+  
   public void start()
     throws Throwable
   {
@@ -603,9 +603,9 @@ public class Env {
 
       if (v != null)
 	v.set(UnsetValue.UNSET);
-
+      
       v = getGlobalVar("HTTP_SESSION_VARS");
-
+      
       if (v != null)
 	v.set(UnsetValue.UNSET);
     }
@@ -833,7 +833,7 @@ public class Env {
   {
     if (value != null)
       return (Var) value;
-
+    
     Var var = _map.get(name);
 
     if (var != null)
@@ -869,13 +869,13 @@ public class Env {
     if (var != null)
       return var;
 
-    var = createSpecialRef(name);
+    var = getSpecialRef(name);
 
     if (var == null) {
       var = new Var();
       var.setGlobal();
     }
-
+    
     _globalMap.put(name, var);
 
     return var;
@@ -1016,7 +1016,7 @@ public class Env {
     Var var = _map.get(name);
 
     if (var == null) {
-      var = createSpecialRef(name);
+      var = getSpecialRef(name);
 
       if (var != null) {
         var.setGlobal();
@@ -1037,14 +1037,9 @@ public class Env {
     Var var = _globalMap.get(name);
 
     if (var == null) {
-      var = createSpecialRef(name);
-    }
-
-    // php/0236
-    if (var == null) {
-      var = new Var();
-      var.setGlobal();
-      _globalMap.put(name, var);
+      var = getSpecialRef(name);
+      if (var != null)
+        _globalMap.put(name, var);
     }
 
     return var;
@@ -1053,149 +1048,163 @@ public class Env {
   /**
    * Gets a value.
    */
-  private Var createSpecialRef(String name)
+  public Var getSpecialRef(String name)
   {
-    Var var;
+    Var var = null;
 
     switch (SPECIAL_VARS.get(name)) {
-      case _ENV: {
-        var = new Var();
-        var.set(new ArrayValueImpl());
-        break;
-      }
+    case _ENV: {
+      var = new Var();
 
-      case HTTP_POST_VARS:
-      case _POST: {
-        var = new Var();
+      _globalMap.put(name, var);
 
-        ArrayValue post = new ArrayValueImpl();
+      var.set(new ArrayValueImpl());
 
-        if (_post != null) {
-          for (Map.Entry<Value, Value> entry : _post.entrySet()) {
-            post.put(entry.getKey(), entry.getValue());
-          }
-        }
-
-        var.set(post);
-
-        ArrayList<String> keys = new ArrayList<String>();
-        keys.addAll(_request.getParameterMap().keySet());
-
-        Collections.sort(keys);
-
-        for (String key : keys) {
-          String []value = _request.getParameterValues(key);
-
-          Post.addFormValue(post, key, value, getIniBoolean("magic_quotes_gpc"));
-        }
-
-        break;
-      }
-
-      case HTTP_POST_FILES:
-      case _FILES: {
-        var = new Var();
-
-        ArrayValue files = new ArrayValueImpl();
-
-        if (_files != null) {
-          for (Map.Entry<Value, Value> entry : _files.entrySet()) {
-            files.put(entry.getKey(), entry.getValue());
-          }
-        }
-
-        var.set(files);
-
-        break;
-      }
-
-      case _GET:
-      case _REQUEST:
-      case HTTP_GET_VARS: {
-        var = new Var();
-
-        ArrayValue array = new ArrayValueImpl();
-
-        var.set(array);
-
-        ArrayList<String> keys = new ArrayList<String>();
-        keys.addAll(_request.getParameterMap().keySet());
-
-        Collections.sort(keys);
-
-        for (String key : keys) {
-          String []value = _request.getParameterValues(key);
-
-          Post.addFormValue(array, key, value, getIniBoolean("magic_quotes_gpc"));
-        }
-
-        if (name.equals("_REQUEST") && _post != null) {
-          for (Map.Entry<Value, Value> entry : _post.entrySet()) {
-            array.put(entry.getKey(), entry.getValue().copy());
-          }
-        }
-
-        break;
-      }
-
-      case HTTP_SERVER_VARS:
-      case _SERVER: {
-        var = new Var();
-        var.set(new ServerArrayValue(this));
-        break;
-      }
-
-      case _GLOBAL: {
-        var = new Var();
-
-        var.set(new GlobalArrayValue(this));
-        break;
-      }
-
-      case _COOKIE:
-      case HTTP_COOKIE_VARS: {
-        var = new Var();
-
-        ArrayValue array = new ArrayValueImpl();
-
-        Cookie []cookies = _request.getCookies();
-        if (cookies != null) {
-          for (int i = 0; i < cookies.length; i++) {
-            Cookie cookie = cookies[i];
-
-            String value = decodeValue(cookie.getValue());
-
-            StringValue valueAsValue;
-
-            if (getIniBoolean("magic_quotes_gpc"))
-              valueAsValue = StringModule.addslashes(value);
-            else
-              valueAsValue = new StringValueImpl(value);
-
-            array.append(new StringValueImpl(cookie.getName()), valueAsValue);
-          }
-        }
-
-        var.set(array);
-
-        break;
-      }
-
-      case PHP_SELF: {
-        var = new Var();
-
-        var.set(getGlobalVar("_SERVER").get(PHP_SELF_STRING));
-        break;
-      }
-
-      default: {
-        var = null;
-        break;
-      }
+      return var;
     }
 
-    if (var != null)
+    case HTTP_POST_VARS:
+    case _POST: {
+      var = new Var();
+
       _globalMap.put(name, var);
+
+      ArrayValue post = new ArrayValueImpl();
+
+      if (_post != null) {
+        for (Map.Entry<Value, Value> entry : _post.entrySet()) {
+          post.put(entry.getKey(), entry.getValue());
+        }
+      }
+
+      var.set(post);
+
+      ArrayList<String> keys = new ArrayList<String>();
+      keys.addAll(_request.getParameterMap().keySet());
+
+      Collections.sort(keys);
+
+      for (String key : keys) {
+        String []value = _request.getParameterValues(key);
+
+        Post.addFormValue(post, key, value, getIniBoolean("magic_quotes_gpc"));
+      }
+    }
+    break;
+
+    case HTTP_POST_FILES:
+    case _FILES: {
+      var = new Var();
+
+      _globalMap.put(name, var);
+
+      ArrayValue files = new ArrayValueImpl();
+
+      if (_files != null) {
+        for (Map.Entry<Value, Value> entry : _files.entrySet()) {
+          files.put(entry.getKey(), entry.getValue());
+        }
+      }
+
+      var.set(files);
+    }
+    break;
+
+    case _GET:
+    case _REQUEST:
+    case HTTP_GET_VARS: {
+      var = new Var();
+
+      ArrayValue array = new ArrayValueImpl();
+
+      var.set(array);
+
+      _globalMap.put(name, var);
+
+      ArrayList<String> keys = new ArrayList<String>();
+      keys.addAll(_request.getParameterMap().keySet());
+
+      Collections.sort(keys);
+
+      for (String key : keys) {
+        String []value = _request.getParameterValues(key);
+
+        Post.addFormValue(array, key, value, getIniBoolean("magic_quotes_gpc"));
+      }
+
+      if (name.equals("_REQUEST") && _post != null) {
+        for (Map.Entry<Value, Value> entry : _post.entrySet()) {
+          array.put(entry.getKey(), entry.getValue().copy());
+        }
+      }
+
+      return var;
+    }
+
+    case HTTP_SERVER_VARS:
+    case _SERVER: {
+      var = new Var();
+
+      _globalMap.put(name, var);
+
+      var.set(new ServerArrayValue(this));
+
+      return var;
+    }
+
+    case _GLOBAL: {
+      var = new Var();
+
+      _globalMap.put(name, var);
+
+      var.set(new GlobalArrayValue(this));
+
+      return var;
+    }
+
+    case _COOKIE:
+    case HTTP_COOKIE_VARS: {
+      var = new Var();
+      _globalMap.put(name, var);
+
+      ArrayValue array = new ArrayValueImpl();
+
+      Cookie []cookies = _request.getCookies();
+      if (cookies != null) {
+        for (int i = 0; i < cookies.length; i++) {
+          Cookie cookie = cookies[i];
+
+          String value = decodeValue(cookie.getValue());
+
+          StringValue valueAsValue;
+
+          if (getIniBoolean("magic_quotes_gpc"))
+            valueAsValue = StringModule.addslashes(value);
+          else
+            valueAsValue = new StringValueImpl(value);
+
+          array.append(new StringValueImpl(cookie.getName()), valueAsValue);
+        }
+      }
+
+      var.set(array);
+
+      _globalMap.put(name, var);
+
+      return var;
+    }
+
+    case PHP_SELF: {
+      var = new Var();
+      _globalMap.put(name, var);
+
+      var.set(getGlobalVar("_SERVER").get(PHP_SELF_STRING));
+
+      _globalMap.put(name, var);
+
+      return var;
+    }
+    }
 
     return var;
   }
@@ -1255,7 +1264,7 @@ public class Env {
 
     if (var != null)
       return var;
-
+    
     var = getRef(name);
 
     if (var == null) {
@@ -1638,7 +1647,7 @@ public class Env {
       return fun;
     
     fun = findFunction(name);
-
+    
     if (fun != null)
       return fun;
 
@@ -1675,15 +1684,6 @@ public class Env {
   private AbstractFunction findFunctionImpl(String name)
   {
     AbstractFunction fun = null;
-
-    /*
-    if (_page != null) {
-      fun = _page.findFunction(name);
-
-      if (fun != null)
-	return fun;
-    }
-    */
 
     fun = _quercus.findFunction(name);
     if (fun != null) {

@@ -124,7 +124,7 @@ public class RegexpModule
       return BooleanValue.FALSE;
     }
 
-    if (regsV != null && ! regsV.equals(NullValue.NULL)) {
+    if (regsV != null && ! (regsV instanceof NullValue)) {
       ArrayValue regs = new ArrayValueImpl();
       regsV.set(regs);
 

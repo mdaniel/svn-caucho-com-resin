@@ -1232,10 +1232,20 @@ v   *
     ByteToChar byteToChar = env.getByteToChar();
     int len = str.length();
 
-    ArrayValue result = new ArrayValueImpl();
+    boolean isRef = ref instanceof Var;
 
-    if (ref != null)
+    ArrayValue result = null;
+
+    if (isRef) {
+      result = new ArrayValueImpl();
       ref.set(result);
+    }
+    else if (ref instanceof ArrayValue) {
+      result = (ArrayValue) ref;
+      isRef = true;
+    }
+    else
+      result = new ArrayValueImpl();
 
     for (int i = 0; i < len; i++) {
       int ch = 0;
@@ -1263,7 +1273,7 @@ v   *
       else
         value = "";
 
-      if (ref != null) {
+      if (isRef) {
         Post.addFormValue(result, key, new String[] { value }, env.getIniBoolean("magic_quotes_gpc"));
       } else {
         // If key is an exsiting array, then append this value to existing array
@@ -1294,7 +1304,7 @@ v   *
       }
     }
 
-    if (ref == null) {
+    if (! isRef) {
       ArrayModule.extract(env, result,
 			  ArrayModule.EXTR_OVERWRITE,
 			  null);

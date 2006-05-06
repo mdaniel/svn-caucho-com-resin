@@ -76,6 +76,9 @@ public class QuercusClass {
   private final HashMap<String,AbstractFunction> _lowerMethodMap
     = new HashMap<String,AbstractFunction>();
 
+  private final IdentityHashMap<String,Value> _constMap
+    = new IdentityHashMap<String,Value>();
+  
   public QuercusClass(ClassDef classDef, QuercusClass parent)
   {
     _classDef = classDef;
@@ -205,7 +208,11 @@ public class QuercusClass {
 
     AbstractFunction fun = findConstructor();
 
-    if (fun != null) {
+    if (object == null) {
+      // for Java objects
+      object = fun.evalMethod(env, null, expr);
+    }
+    else if (fun != null) {
       fun.evalMethod(env, object, expr);
     }
     else {
@@ -261,11 +268,13 @@ public class QuercusClass {
   public Value newInstance(Env env)
     throws Throwable
   {
-    Value ret = _classDef.newInstance(env, this);
+    Value obj = _classDef.newInstance(env, this);
+    
     for (int i = 0; i < _initializers.size(); i++) {
-      _initializers.get(i).initInstance(env, ret);
+      _initializers.get(i).initInstance(env, obj);
     }
-    return ret;
+    
+    return obj;
   }
 
   /**
@@ -303,17 +312,17 @@ public class QuercusClass {
   /**
    * Finds the matching constant.
    */
-  public Expr findConstant(String name)
+  public Value findConstant(String name)
   {
-    // XXX: cache constant
-    for (ClassDef a_classDefList : _classDefList) {
-      Expr expr = a_classDefList.findConstant(name);
+    return _constMap.get(name);
+  }
 
-      if (expr != null)
-        return expr;
-    }
-    
-    return null;
+  /**
+   * Finds the matching constant.
+   */
+  public void addConstant(String name, Value value)
+  {
+    _constMap.put(name, value);
   }
 
   /**
@@ -444,18 +453,10 @@ public class QuercusClass {
   /**
    * Finds the matching constant
    */
-  public Value findConstant(Env env, String name)
-  {
-    return null;
-  }
-
-  /**
-   * Finds the matching constant
-   */
   public final Value getConstant(Env env, String name)
     throws Throwable
   {
-    Value value = findConstant(env, name);
+    Value value = findConstant(name);
 
     if (value != null)
       return value;
@@ -475,7 +476,7 @@ public class QuercusClass {
    */
   public Set<Map.Entry<String, Expr>> getClassVars()
   {
-  	return _classDef.fieldSet();
+    return _classDef.fieldSet();
   }
   
   /**
@@ -484,7 +485,7 @@ public class QuercusClass {
    */
   public Set<Map.Entry<String, AbstractFunction>> getClassMethods()
   {
-  	return _classDef.functionSet();
+    return _classDef.functionSet();
   }
 }
 

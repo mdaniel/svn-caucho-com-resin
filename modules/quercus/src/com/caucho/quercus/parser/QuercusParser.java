@@ -1228,9 +1228,6 @@ public class QuercusParser {
       else
 	_peekToken = token;
 
-      if (token != '$')
-	throw error(L.l("expected variable in foreach"));
-
       AbstractVarExpr valueExpr = (AbstractVarExpr) parseLeftHandSide();
 
       AbstractVarExpr keyVar = null;
@@ -1250,9 +1247,6 @@ public class QuercusParser {
 	  isRef = true;
 	else
 	  _peekToken = token;
-
-	if (token != '$')
-	  throw error(L.l("expected variable in foreach"));
 
 	valueVar = (AbstractVarExpr) parseLeftHandSide();
 

@@ -475,6 +475,27 @@ public class ArrayValueImpl extends ArrayValue {
   }
 
   /**
+   * Returns the value as an array.
+   */
+  public Value getArray(Value index)
+  {
+    if (_isDirty)
+      copyOnWrite();
+    
+    Value value = get(index);
+
+    Value array = value.toAutoArray();
+    
+    if (value != array) {
+      value = array;
+
+      put(index, value);
+    }
+
+    return value;
+  }
+
+  /**
    * Add
    */
   public Value put(Value value)
