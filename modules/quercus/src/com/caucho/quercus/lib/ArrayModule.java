@@ -3503,7 +3503,7 @@ public class ArrayModule
 	}
 
 	Value v1 = av.get(index1);
-	Value v2 = av.get(index1);
+	Value v2 = av.get(index2);
 
 	if (mode==SORT_STRING) {
 	  v1 = v1.toStringValue();
