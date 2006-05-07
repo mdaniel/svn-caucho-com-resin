@@ -680,7 +680,8 @@ abstract public class Value {
   }
 
   /**
-   * Returns a negative/positive integer if this Value is lessthan/greaterthan rValue.
+   * Returns a negative/positive integer if this Value is
+   * lessthan/greaterthan rValue.
    */
   public int cmp(Value rValue)
   {
