@@ -38,7 +38,7 @@ import java.util.IdentityHashMap;
 /**
  * Represents a PHP long value.
  */
-public class LongValue extends Value {
+public class LongValue extends NumberValue {
   public static final LongValue MINUS_ONE = new LongValue(-1);
   public static final LongValue ZERO = new LongValue(0);
   public static final LongValue ONE = new LongValue(1);

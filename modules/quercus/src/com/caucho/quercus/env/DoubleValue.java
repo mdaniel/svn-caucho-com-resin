@@ -39,7 +39,7 @@ import com.caucho.quercus.gen.PhpWriter;
 /**
  * Represents a PHP double value.
  */
-public class DoubleValue extends Value {
+public class DoubleValue extends NumberValue {
   public static final DoubleValue ZERO = new DoubleValue(0);
 
   private final double _value;
