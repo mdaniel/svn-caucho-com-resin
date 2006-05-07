@@ -137,9 +137,9 @@ public class Var extends Value {
   /**
    * True to a double.
    */
-  public boolean isDouble()
+  public boolean isDoubleConvertible()
   {
-    return _value.isDouble();
+    return _value.isDoubleConvertible();
   }
 
   /**

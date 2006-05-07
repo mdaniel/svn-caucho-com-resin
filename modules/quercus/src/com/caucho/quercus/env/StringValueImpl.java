@@ -120,7 +120,7 @@ public class StringValueImpl extends StringValue {
   /**
    * Returns true for a double
    */
-  public boolean isDouble()
+  public boolean isDoubleConvertible()
   {
     return getNumericType() == IS_DOUBLE;
   }

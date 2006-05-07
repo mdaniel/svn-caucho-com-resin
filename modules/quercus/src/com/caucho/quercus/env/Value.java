@@ -73,7 +73,7 @@ abstract public class Value {
   /**
    * Returns true for a double-value.
    */
-  public boolean isDouble()
+  public boolean isDoubleConvertible()
   {
     return false;
   }
@@ -99,7 +99,7 @@ abstract public class Value {
    */
   public boolean isNumber()
   {
-    return isLongConvertible() || isDouble();
+    return isLongConvertible() || isDoubleConvertible();
   }
 
   /**

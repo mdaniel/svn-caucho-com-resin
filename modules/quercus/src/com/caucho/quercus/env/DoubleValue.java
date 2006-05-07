@@ -73,7 +73,7 @@ public class DoubleValue extends Value {
   /**
    * Returns true for a double.
    */
-  public boolean isDouble()
+  public boolean isDoubleConvertible()
   {
     return true;
   }

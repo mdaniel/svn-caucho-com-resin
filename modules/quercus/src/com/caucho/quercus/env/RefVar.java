@@ -66,9 +66,9 @@ public class RefVar extends Value {
   /**
    * True to a double.
    */
-  public boolean isDouble()
+  public boolean isDoubleConvertible()
   {
-    return _var.isDouble();
+    return _var.isDoubleConvertible();
   }
 
   /**

@@ -126,7 +126,7 @@ public class StringBuilderValue extends StringValue {
   /**
    * Returns true for a long
    */
-  public boolean isLong()
+  public boolean isLongConvertible()
   {
     char []buffer = _buffer;
     int len = _length;
