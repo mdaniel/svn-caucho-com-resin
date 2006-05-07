@@ -680,58 +680,65 @@ abstract public class Value {
   }
 
   /**
+   * Returns a negative/positive integer if this Value is lessthan/greaterthan rValue.
+   */
+  public int cmp(Value rValue)
+  {
+    if (isLongConvertible() && rValue.isLongConvertible()) {
+      long rValueLong = rValue.toLong();
+      long thisLong = toLong();
+      if (rValueLong < thisLong)
+	return -1;
+      if (rValueLong > thisLong)
+	return 1;
+      return 0;
+    }
+    else if (isNumberConvertible() || rValue.isNumberConvertible()) {
+      double rValueDouble = rValue.toDouble();
+      double thisDouble = toDouble();
+      if (rValueDouble < thisDouble)
+	return -1;
+      if (rValueDouble > thisDouble)
+	return 1;
+      return 0;
+    }
+    else {
+      return toString().compareTo(rValue.toString());
+    }
+  }
+
+  /**
    * Returns true for less than
    */
-  public boolean lt(Value rValue)
+  public final boolean lt(Value rValue)
   {
-    if (isLongConvertible() && rValue.isLongConvertible())
-      return toLong() < rValue.toLong();
-    else if (isNumberConvertible() || rValue.isNumberConvertible())
-      return toDouble() < rValue.toDouble();
-    else {
-      return toString().compareTo(rValue.toString()) < 0;
-    }
+    return cmp(rValue)<0;
   }
 
   /**
    * Returns true for less than or equal to
    */
-  public boolean leq(Value rValue)
+  public final boolean leq(Value rValue)
     throws Throwable
   {
-    if (isLongConvertible() && rValue.isLongConvertible())
-      return toLong() <= rValue.toLong();
-    else if (isNumberConvertible() || rValue.isNumberConvertible())
-      return toDouble() <= rValue.toDouble();
-    else
-      return toString().compareTo(rValue.toString()) <= 0;
+    return cmp(rValue)<=0;
   }
 
   /**
    * Returns true for greater than
    */
-  public boolean gt(Value rValue)
+  public final boolean gt(Value rValue)
   {
-    if (isLongConvertible() && rValue.isLongConvertible())
-      return toLong() > rValue.toLong();
-    else if (isNumberConvertible() || rValue.isNumberConvertible())
-      return toDouble() > rValue.toDouble();
-    else
-      return toString().compareTo(rValue.toString()) > 0;
+    return cmp(rValue)>0;
   }
 
   /**
    * Returns true for greater than or equal to
    */
-  public boolean geq(Value rValue)
+  public final boolean geq(Value rValue)
     throws Throwable
   {
-    if (isLongConvertible() && rValue.isLongConvertible())
-      return toLong() >= rValue.toLong();
-    else if (isNumberConvertible() || rValue.isNumberConvertible())
-      return toDouble() >= rValue.toDouble();
-    else
-      return toString().compareTo(rValue.toString()) >= 0;
+    return cmp(rValue)>=0;
   }
 
   /**
