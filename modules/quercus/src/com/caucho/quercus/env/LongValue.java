@@ -82,7 +82,7 @@ public class LongValue extends NumberValue {
   /**
    * Returns true for a long.
    */
-  public boolean isLong()
+  public boolean isLongConvertible()
   {
     return true;
   }
