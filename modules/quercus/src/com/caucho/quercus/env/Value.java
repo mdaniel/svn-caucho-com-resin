@@ -711,7 +711,6 @@ abstract public class Value {
    * Returns true for greater than
    */
   public boolean gt(Value rValue)
-    throws Throwable
   {
     if (isLongConvertible() && rValue.isLongConvertible())
       return toLong() > rValue.toLong();
