@@ -81,7 +81,7 @@ abstract public class Value {
   /**
    * Returns true for a long-value.
    */
-  public boolean isLong()
+  public boolean isLongConvertible()
   {
     return false;
   }
@@ -99,7 +99,7 @@ abstract public class Value {
    */
   public boolean isNumber()
   {
-    return isLong() || isDouble();
+    return isLongConvertible() || isDouble();
   }
 
   /**
@@ -670,7 +670,7 @@ abstract public class Value {
    */
   public boolean eq(Value rValue)
   {
-    if (isLong() && rValue.isLong())
+    if (isLongConvertible() && rValue.isLongConvertible())
       return toLong() == rValue.toLong();
     else if (isNumber() || rValue.isNumber())
       return toDouble() == rValue.toDouble();
@@ -692,7 +692,7 @@ abstract public class Value {
    */
   public boolean lt(Value rValue)
   {
-    if (isLong() && rValue.isLong())
+    if (isLongConvertible() && rValue.isLongConvertible())
       return toLong() < rValue.toLong();
     else if (isNumber() || rValue.isNumber())
       return toDouble() < rValue.toDouble();
@@ -707,7 +707,7 @@ abstract public class Value {
   public boolean leq(Value rValue)
     throws Throwable
   {
-    if (isLong() && rValue.isLong())
+    if (isLongConvertible() && rValue.isLongConvertible())
       return toLong() <= rValue.toLong();
     else if (isNumber() || rValue.isNumber())
       return toDouble() <= rValue.toDouble();
@@ -721,7 +721,7 @@ abstract public class Value {
   public boolean gt(Value rValue)
     throws Throwable
   {
-    if (isLong() && rValue.isLong())
+    if (isLongConvertible() && rValue.isLongConvertible())
       return toLong() > rValue.toLong();
     else if (isNumber() || rValue.isNumber())
       return toDouble() > rValue.toDouble();
@@ -735,7 +735,7 @@ abstract public class Value {
   public boolean geq(Value rValue)
     throws Throwable
   {
-    if (isLong() && rValue.isLong())
+    if (isLongConvertible() && rValue.isLongConvertible())
       return toLong() >= rValue.toLong();
     else if (isNumber() || rValue.isNumber())
       return toDouble() >= rValue.toDouble();

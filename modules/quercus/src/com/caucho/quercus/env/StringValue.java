@@ -130,7 +130,7 @@ abstract public class StringValue extends Value {
 
       return new StringValueImpl(tail.toString());
     }
-    else if (isLong()) {
+    else if (isLongConvertible()) {
       return new LongValue(toLong() - 1);
     }
     else {
@@ -159,7 +159,7 @@ abstract public class StringValue extends Value {
     if (type == IS_STRING) {
       if (rValue instanceof StringValueImpl)
         return v.equals(rValue.toString());
-      else if (rValue.isLong())
+      else if (rValue.isLongConvertible())
         return toLong() ==  rValue.toLong();
       else if (rValue instanceof BooleanValue)
         return toLong() == rValue.toLong();

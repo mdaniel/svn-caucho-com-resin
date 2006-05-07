@@ -116,7 +116,7 @@ public class UrlModule extends AbstractQuercusModule {
 
 	String key;
 
-	if (keyValue.isLong())
+	if (keyValue.isLongConvertible())
 	  key = prefix + keyValue;
 	else
 	  key = keyValue.toString();

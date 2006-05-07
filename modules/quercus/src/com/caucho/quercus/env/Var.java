@@ -129,9 +129,9 @@ public class Var extends Value {
   /**
    * True for a long
    */
-  public boolean isLong()
+  public boolean isLongConvertible()
   {
-    return _value.isLong();
+    return _value.isLongConvertible();
   }
 
   /**

@@ -98,7 +98,7 @@ public class StringValueImpl extends StringValue {
   /**
    * Returns true for a long
    */
-  public boolean isLong()
+  public boolean isLongConvertible()
   {
     String s = _value;
 
@@ -426,7 +426,7 @@ public class StringValueImpl extends StringValue {
 
       return new StringValueImpl(tail.toString());
     }
-    else if (isLong()) {
+    else if (isLongConvertible()) {
       return new LongValue(toLong() - 1);
     }
     else {
@@ -455,7 +455,7 @@ public class StringValueImpl extends StringValue {
     if (type == IS_STRING) {
       if (rValue instanceof StringValue)
         return _value.equals(rValue.toString());
-      else if (rValue.isLong())
+      else if (rValue.isLongConvertible())
         return toLong() ==  rValue.toLong();
       else if (rValue instanceof BooleanValue)
         return toLong() == rValue.toLong();

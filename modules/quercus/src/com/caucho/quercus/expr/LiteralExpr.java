@@ -67,9 +67,9 @@ public class LiteralExpr extends Expr {
   /**
    * Returns true for a long value.
    */
-  public boolean isLong()
+  public boolean isLongConvertible()
   {
-    return _value.isLong();
+    return _value.isLongConvertible();
   }
 
   /**

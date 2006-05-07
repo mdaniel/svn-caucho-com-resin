@@ -58,9 +58,9 @@ public class RefVar extends Value {
   /**
    * True for a long
    */
-  public boolean isLong()
+  public boolean isLongConvertible()
   {
-    return _var.isLong();
+    return _var.isLongConvertible();
   }
 
   /**

@@ -555,9 +555,9 @@ public class OptionsModule extends AbstractQuercusModule {
   {
     if (a.equals(b))
       return 0;
-    else if (a.isLong() && ! b.isLong())
+    else if (a.isLongConvertible() && ! b.isLongConvertible())
       return -1;
-    else if (b.isLong() && ! a.isLong())
+    else if (b.isLongConvertible() && ! a.isLongConvertible())
       return 1;
     else if (a.lt(b))
       return -1;

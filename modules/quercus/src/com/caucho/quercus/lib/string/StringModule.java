@@ -4166,7 +4166,7 @@ v   *
 
       Value v = args[_index];
 
-      if (v.isLong())
+      if (v.isLongConvertible())
         return String.valueOf((char) v.toLong());
       else
         return v.charAt(0).toString();
