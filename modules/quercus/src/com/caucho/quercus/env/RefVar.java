@@ -80,14 +80,6 @@ public class RefVar extends Value {
   }
 
   /**
-   * Returns true for a scalar
-   */
-  public boolean isScalar()
-  {
-    return _var.isScalar();
-  }
-
-  /**
    * Converts to a boolean.
    */
   public boolean toBoolean()

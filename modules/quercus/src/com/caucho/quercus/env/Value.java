@@ -110,14 +110,7 @@ abstract public class Value {
     return false;
   }
 
-  /**
-   * Returns true for a scalar.
-   */
-  public boolean isScalar()
-  {
-    return false;
-  }
-
+  */
   /**
    * Converts to a boolean.
    */

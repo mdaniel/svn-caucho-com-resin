@@ -153,10 +153,12 @@ public class Var extends Value {
   /**
    * Returns true for a scalar
    */
+  /*
   public boolean isScalar()
   {
     return _value.isScalar();
   }
+  */
 
   /**
    * Converts to a boolean.

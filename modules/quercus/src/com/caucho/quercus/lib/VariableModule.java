@@ -335,7 +335,15 @@ public class VariableModule extends AbstractQuercusModule {
   public static boolean is_scalar(@ReadOnly Value v)
          throws IOException
   {
-    return v.isScalar();
+    if (v==null)
+      return false;
+
+    Value value = v.toValue();
+    return
+      value instanceof DoubleValue ||
+      value instanceof StringValue ||
+      value instanceof LongValue ||
+      value instanceof BooleanValue;
   }
 
   /**
