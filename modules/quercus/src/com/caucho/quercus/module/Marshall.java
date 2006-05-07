@@ -42,7 +42,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 /**
- * Code for marshalling arguments.
+ * Code for marshalling (PHP to Java) and unmarshalling (Java to PHP) arguments.
  */
 abstract public class Marshall {
   private static final L10N L = new L10N(Marshall.class);
