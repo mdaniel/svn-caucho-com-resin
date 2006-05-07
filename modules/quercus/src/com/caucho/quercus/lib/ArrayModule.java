@@ -72,6 +72,9 @@ public class ArrayModule
   public static final int SORT_NORMAL = 1;
   public static final int SORT_REVERSE = -1;
 
+  public static final int SORT_DESC = 3;
+  public static final int SORT_ASC = 4;
+  
   public static final int EXTR_OVERWRITE = 0;
   public static final int EXTR_SKIP = 1;
   public static final int EXTR_PREFIX_SAME = 2;
@@ -2506,144 +2509,48 @@ public class ArrayModule
 
   /**
    * Sort the arrays like rows in a database.
-   *
-   * @return true
-   */
-  public static Value array_multisort(@Reference Value []args)
-  {
-    return BooleanValue.TRUE;
-  }
-
-  /**
-   * Sorts the given arrays.
    * @param arrays  arrays to sort
    *
    * @return true on success, and false on failure
    */
-  /*
   public boolean array_multisort(Env env, Value[] arrays)
     throws Throwable
   {
-    if (arrays.length < 1) {
-      env.warning("Wrong parameter count");
+    int maxsize = 0;
+    for(int i=0; i<arrays.length; i++)
+      if (arrays[i] instanceof ArrayValue)
+	maxsize = Math.max(maxsize,
+			   ((ArrayValue)arrays[i]).getSize());
 
-      return false;
-    }
+    // create the identity permutation [1..n]
+    LongValue []rows = new LongValue[maxsize];
+    for(int i=0; i<rows.length; i++)
+      rows[i] = LongValue.create(i);
 
-    if (! (arrays[0] instanceof ArrayValue)) {
-      env.warning("Argument #1 is expected to be an array or a sort flag that" +
-        " has not already been specified");
+    java.util.Arrays.sort(rows, new MultiSortComparator(env, arrays));
 
-      return false;
-    }
+    // apply the permuation
+    for(int i=0; i<arrays.length; i++)
+      if (arrays[i] instanceof ArrayValue)
+	permute(env, (ArrayValue)arrays[i], rows);
 
-    int inputCtr = 0;
-
-    while(inputCtr < arrays.length) {
-
-      Value currentArray = arrays[inputCtr];
-
-      if (! (currentArray instanceof ArrayValue)) {
-        env.warning("Argument #" + (inputCtr + 1) +
-            " is expected to be an array or a sort flag");
-
-        return false;
-      }
-
-      boolean firstFlagSet = false;
-      boolean secondFlagSet = false;
-
-      while(inputCtr++ < arrays.length &&
-            ! (currentArray instanceof ArrayValue)) {
-        Value currentFlag = arrays[inputCtr];
-
-        if (! (currentFlag instanceof LongValue)) {
-          env.warning("Argument #" + (inputCtr + 1) +
-            " is expected to be an array or a sort flag");
-
-          return false;
-        }
-
-        long currentFlagValue = currentFlag.toLong();
-
-        if (currentFlagValue == SORT_DESC || currentFlagValue == SORT_ASC) {
-          if (firstFlagSet) {
-            env.warning("Argument #" + (inputCtr + 1) + " is expected to be" +
-                " an array or a sort flag that has not already been specified");
-
-            return false;
-          }
-          else
-            firstFlagSet =  true;
-        }
-        else if (currentFlagValue == SORT_REGULAR ||
-                 currentFlagValue == SORT_NUMERIC ||
-                 currentFlagValue == SORT_STRING) {
-          if (secondFlagSet) {
-            env.warning("Argument #" + (inputCtr + 1) + " is expected to be" +
-                " an array or a sort flag that has not already been specified");
-
-            return false;
-          }
-          else
-            secondFlagSet = true;
-        }
-        else {
-          env.warning("Argument #" + (inputCtr + 1) +
-            " is an unknown sort flag");
-
-          return false;
-        }
-      }
-    }
-
-    inputCtr = 0;
-
-    ArrayValue keyArray = new ArrayValue();
-
-    ArrayValue duplicateArray = new ArrayValue();
-
-    boolean keyArrayInit = false;
-
-    ArrayValue currentArray = (ArrayValue) arrays[inputCtr];
-
-    for (int k = 0; k < currentArray.size(); k++)
-      duplicateArray.append(NullValue.NULL);
-
-    while (inputCtr < arrays.length) {
-      currentArray = (ArrayValue) arrays[inputCtr];
-
-      int flag1 = SORT_ASC;
-      int flag2 = SORT_REGULAR;
-
-      Value possibleFlag = arrays[inputCtr++];
-
-      while (! (possibleFlag instanceof ArrayValue)) {
-        int flagValue = (int) possibleFlag.toLong();
-
-        if (flagValue == SORT_DESC || flagValue == SORT_ASC)
-          flag1 = flagValue;
-        else
-          flag2 = flagValue;
-
-        possibleFlag = arrays[inputCtr++];
-      }
-
-      if (flag1 == SORT_ASC)
-        sort(env, currentArray, flag2);
-      else
-        rsort(env, currentArray, flag2);
-
-      if (! keyArrayInit)
-        for (Value key: currentArray.keySet())
-          keyArray.append(key);
-
-      for (Map.Entry<Value, Value> entry: currentArray.entrySet()) {
-
-      }
-    }
     return true;
-  }*/
+  }
+
+  /*
+   *  Apply a permutation to an array; on return, each element of
+   *  array[i] holds the value that was in array[permutation[i]]
+   *  before the call.
+   */
+  private static void permute(Env env, ArrayValue array,
+			      LongValue[] permutation)
+  {
+    Value[] values = array.getValueArray(env);
+    for(int i=0; i<permutation.length; i++)
+      array.put(LongValue.create(i),
+		values[(int)permutation[i].toLong()]);
+  }
+
 
   // XXX: Performance Test asort
   /**
@@ -3549,6 +3456,68 @@ public class ArrayModule
       catch (Throwable e) {
         throw new RuntimeException(e);
       }
+    }
+  }
+
+  /*
+   *  A comparator used to sort a permutation based on a set of
+   *  column-arrays.
+   */
+  private static class MultiSortComparator
+    implements Comparator<LongValue>
+  {
+
+    private final Env _env;
+    private final Value[] _arrays;
+
+    public MultiSortComparator(Env env, Value[] arrays)
+    {
+      this._env = env;
+      this._arrays = arrays;
+    }
+
+    /*
+     *  Examine the "row" consisting of arrays[x][index1] and
+     *  arrays[x][index2] for all indices "x"; the permutation will be
+     *  sorted according to this comparison.
+     */
+    public int compare(LongValue index1, LongValue index2)
+    {
+      for(int i=0; i<_arrays.length; i++) {
+
+	// reset direction/mode for each array (per the php.net spec)
+	int direction = SORT_ASC;
+	int mode      = SORT_REGULAR;
+	ArrayValue av = (ArrayValue)_arrays[i];
+
+	// process all flags appearing *after* an array but before the next one
+	while((i+1)<_arrays.length && _arrays[i+1] instanceof LongValue) {
+	  switch(_arrays[++i].toInt()) {
+	    case SORT_ASC:      direction = SORT_ASC; break;
+	    case SORT_DESC:     direction = SORT_DESC; break;
+	    case SORT_REGULAR:  mode      = SORT_REGULAR; break;
+	    case SORT_STRING:   mode      = SORT_STRING; break;
+	    case SORT_NUMERIC:  mode      = SORT_NUMERIC; break;
+	    default: _env.warning("Unknown sort flag: " + _arrays[i]);
+	  }
+	}
+
+	Value v1 = av.get(index1);
+	Value v2 = av.get(index1);
+
+	if (mode==SORT_STRING) {
+	  v1 = v1.toStringValue();
+	  v2 = v2.toStringValue();
+	} else if (mode==SORT_NUMERIC) {
+	  v1 = LongValue.create(v1.toLong());
+	  v2 = LongValue.create(v2.toLong());
+	}
+
+	if (v1.lt(v2)) return direction==SORT_ASC ? -1 : 1;
+	if (v1.gt(v2)) return direction==SORT_ASC ? 1 : -1;
+
+      }
+      return 0;
     }
   }
 
