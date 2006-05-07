@@ -33,6 +33,7 @@ import java.io.IOException;
 
 import javax.rmi.CORBA.ValueHandler;
 import javax.rmi.CORBA.Util;
+import javax.rmi.CORBA.ClassDesc;
 
 import org.omg.CORBA.Any;
 import org.omg.CORBA.Context;
@@ -475,6 +476,12 @@ abstract public class IiopWriter extends org.omg.CORBA_2_3.portable.OutputStream
       write_string("IDL:omg.org/CORBA/WStringValue:1.0");
       write_wstring((String) obj);
     }
+    else if (obj instanceof Class) {
+      write_long(VALUE_TAG | VALUE_ONE_REP_ID);
+      write_string(valueHandler.getRMIRepositoryID(ClassDesc.class));
+      write_value(valueHandler.getRMIRepositoryID((Class) obj));
+      write_value(valueHandler.getRMIRepositoryID((Class) obj));
+    }
     else {
       int oldValue = _refMap.get(obj);
 
@@ -482,8 +489,6 @@ abstract public class IiopWriter extends org.omg.CORBA_2_3.portable.OutputStream
 	_out.align(4);
 	_refMap.put(obj, _out.getOffset());
 
-	System.out.println("WRITE-OFFSET: " + _out.getOffset());
-	
 	write_long(VALUE_TAG | VALUE_ONE_REP_ID);
 	write_string(valueHandler.getRMIRepositoryID(obj.getClass()));
 	valueHandler.writeValue(this, obj);
@@ -493,7 +498,6 @@ abstract public class IiopWriter extends org.omg.CORBA_2_3.portable.OutputStream
 
 	write_long(0xffffffff);
 	int delta = oldValue - _out.getOffset();
-	System.out.println("DELTA: " + delta + " " + oldValue + " " + _out.getOffset());
 	
 	write_long(delta);
       }

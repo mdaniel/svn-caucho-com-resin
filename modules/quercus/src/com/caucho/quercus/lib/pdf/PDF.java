@@ -151,6 +151,16 @@ public class PDF {
       return false;
   }
 
+  public boolean set_parameter(String key, String value)
+  {
+    return false;
+  }
+
+  public boolean set_value(String key, double value)
+  {
+    return false;
+  }
+
   /**
    * Returns the result as a string.
    */
@@ -184,7 +194,7 @@ public class PDF {
   /**
    * Returns the value for a parameter.
    */
-  public String get_parameter(String name)
+  public String get_parameter(String name, @Optional double modifier)
   {
     if ("fontname".equals(name)) {
       PDFFont font = _stream.getFont();
@@ -201,7 +211,7 @@ public class PDF {
   /**
    * Returns the value for a parameter.
    */
-  public double get_value(String name)
+  public double get_value(String name, @Optional double modifier)
   {
     if ("ascender".equals(name)) {
       PDFFont font = _stream.getFont();
@@ -232,6 +242,13 @@ public class PDF {
     }
     else
       return 0;
+  }
+
+  public boolean initgraphics(Env env)
+  {
+    env.stub("initgraphics");
+    
+    return false;
   }
 
   /**
@@ -293,6 +310,52 @@ public class PDF {
   }
 
   /**
+   * Sets the dashing
+   */
+  public boolean setdashpattern(Env env, @Optional String optlist)
+    throws IOException
+  {
+    env.stub("setdashpattern");
+
+    return false;
+  }
+
+  /**
+   * Sets the flatness
+   */
+  public boolean setflat(Env env, double flatness)
+    throws IOException
+  {
+    env.stub("setflat");
+
+    return false;
+  }
+
+  /**
+   * Sets the linecap style
+   */
+  public boolean setlinecap(Env env,
+			    int cap)
+    throws IOException
+  {
+    env.stub("setlinecap");
+    
+    return false;
+  }
+
+  /**
+   * Sets the linejoin style
+   */
+  public boolean setlinejoin(Env env,
+			     int linejoin)
+    throws IOException
+  {
+    env.stub("setlinejoin");
+    
+    return false;
+  }
+
+  /**
    * Sets the current font
    *
    * @param name the font name, e.g. Helvetica
@@ -310,6 +373,80 @@ public class PDF {
     _page.addResource(font.getResource());
 
     return true;
+  }
+
+  /**
+   * Sets the matrix style
+   */
+  public boolean setmatrix(Env env,
+			   double a,
+			   double b,
+			   double c,
+			   double d,
+			   double e,
+			   double f)
+    throws IOException
+  {
+    env.stub("setmatrix");
+    
+    return false;
+  }
+
+  /**
+   * Sets the miter limit
+   */
+  public boolean setmiterlimit(Env env, double v)
+    throws IOException
+  {
+    env.stub("setmiterlimit");
+    
+    return false;
+  }
+
+  /**
+   * Sets the shading pattern
+   */
+  public boolean shading_pattern(Env env,
+				 int shading,
+				 @Optional String optlist)
+    throws IOException
+  {
+    env.stub("shading_pattern");
+    
+    return false;
+  }
+
+  /**
+   * Define a blend
+   */
+  public int shading(Env env,
+		     String type,
+		     double x1,
+		     double y1,
+		     double x2,
+		     double y2,
+		     double c1,
+		     double c2,
+		     double c3,
+		     double c4,
+		     @Optional String optlist)
+    throws IOException
+  {
+    env.stub("shading");
+    
+    return 0;
+  }
+
+  /**
+   * Fill with a shading object.
+   */
+  public boolean shfill(Env env,
+			int shading)
+    throws IOException
+  {
+    env.stub("shfill");
+    
+    return false;
   }
 
   /**
@@ -736,6 +873,23 @@ public class PDF {
     return img;
   }
 
+  /**
+   * open image
+   */
+  public PDFImage load_image(String type,
+			     Path file,
+			     @Optional String optlist)
+    throws IOException
+  {
+    PDFImage img = new PDFImage(file);
+
+    img.setId(_out.allocateId(1));
+
+    _out.addPendingObject(img);
+
+    return img;
+  }
+
   public boolean fit_image(PDFImage img, double x, double y,
 			   @Optional String opt)
     throws IOException
@@ -828,10 +982,38 @@ public class PDF {
   /**
    * Displays text
    */
-  public void show(String text)
+  public boolean show(String text)
     throws IOException
   {
     _stream.show(text);
+
+    return true;
+  }
+
+  /**
+   * Displays text
+   */
+  public boolean show_boxed(String text, double x, double y,
+			    double width, double height,
+			    String mode, @Optional String feature)
+    throws IOException
+  {
+    set_text_pos(x, y);
+    _stream.show(text);
+
+    return true;
+  }
+
+  /**
+   * Displays text
+   */
+  public boolean show_xy(String text, double x, double y)
+    throws IOException
+  {
+    set_text_pos(x, y);
+    _stream.show(text);
+
+    return true;
   }
 
   /**
@@ -877,7 +1059,7 @@ public class PDF {
     return end_page();
   }
 
-  public boolean end_document(Env env, @Optional String optList)
+  public boolean end_document(@Optional String optList)
     throws IOException
   {
     if (_pageGroup.size() > 0) {
@@ -898,10 +1080,10 @@ public class PDF {
     return true;
   }
 
-  public boolean close(Env env)
+  public boolean close()
     throws IOException
   {
-    return end_document(env, "");
+    return end_document("");
   }
 
   public boolean delete()

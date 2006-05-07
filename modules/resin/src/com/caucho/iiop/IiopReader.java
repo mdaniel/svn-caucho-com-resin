@@ -1252,8 +1252,6 @@ public class IiopReader extends org.omg.CORBA_2_3.portable.InputStream {
   {
     align8();
 
-    _offset += 8;
-    
     int ch1 = _buffer[_offset++];
     int ch2 = _buffer[_offset++];
     int ch3 = _buffer[_offset++];

@@ -169,13 +169,13 @@ public class StreamMessageWriter extends MessageWriter {
   /**
    * Writes a short
    */
-  public void writeShort(int v)
+  public final void writeShort(int v)
   {
     if (_bufferLength <= _length + 1)
       flushBuffer();
 
     _offset += 2;
-    
+
     _buffer[_length++] = (byte) (v >> 8);
     _buffer[_length++] = (byte) (v);
   }

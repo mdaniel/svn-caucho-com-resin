@@ -85,6 +85,10 @@ public class MarshallObject {
   private Method readHelper;
   private Method writeHelper;
 
+  private MarshallObject()
+  {
+  }
+
   private MarshallObject(int code)
   {
     _code = code;
@@ -114,13 +118,13 @@ public class MarshallObject {
     else if (byte.class.equals(cl) || Byte.class.equals(cl))
       return new MarshallObject(BYTE);
     else if (short.class.equals(cl) || Short.class.equals(cl))
-      return new MarshallObject(SHORT);
+      return MARSHALL_SHORT;
     else if (char.class.equals(cl) || Character.class.equals(cl))
       return new MarshallObject(CHAR);
     else if (int.class.equals(cl) || Integer.class.equals(cl))
       return new MarshallObject(INT);
     else if (long.class.equals(cl) || Long.class.equals(cl))
-      return new MarshallObject(LONG);
+      return MARSHALL_LONG;
     else if (float.class.equals(cl) || Float.class.equals(cl))
       return new MarshallObject(FLOAT);
     else if (double.class.equals(cl) || Double.class.equals(cl))
@@ -375,4 +379,32 @@ public class MarshallObject {
       break;
     }
   }
+
+  private static final MarshallObject MARSHALL_SHORT = new MarshallObject() {
+      public Object unmarshall(IiopReader reader)
+	throws Exception
+      {
+	return new Short(reader.read_short());
+      }
+
+      public void marshall(Object obj, IiopWriter writer)
+	throws Exception
+      {
+	writer.write_short(((Number) obj).shortValue());
+      }
+    };
+
+  private static final MarshallObject MARSHALL_LONG = new MarshallObject() {
+      public Object unmarshall(IiopReader reader)
+	throws Exception
+      {
+	return new Long(reader.read_longlong());
+      }
+
+      public void marshall(Object obj, IiopWriter writer)
+	throws Exception
+      {
+	writer.write_longlong(((Long) obj).longValue());
+      }
+    };
 }
