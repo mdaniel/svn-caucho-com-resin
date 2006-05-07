@@ -434,7 +434,7 @@ public class PDOStatement
         for (Map.Entry<Value, Value> entry : parameters.entrySet()) {
           Value key = entry.getKey();
 
-          if (key.isNumber()) {
+          if (key.isNumberConvertible()) {
             if (! setParameter(key.toInt() + 1, entry.getValue(), -1))
               return false;
           }
@@ -1362,7 +1362,7 @@ public class PDOStatement
       assert column != null;
       assert var != null;
 
-      if (column.isNumber()) {
+      if (column.isNumberConvertible()) {
         _column = column.toInt();
         _columnAsName = null;
       }

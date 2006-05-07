@@ -462,7 +462,7 @@ public class StringValueImpl extends StringValue {
       else
         return _value.equals(rValue.toString());
     }
-    else if (rValue.isNumber())
+    else if (rValue.isNumberConvertible())
       return toDouble() == rValue.toDouble();
     else
       return toString().equals(rValue.toString());

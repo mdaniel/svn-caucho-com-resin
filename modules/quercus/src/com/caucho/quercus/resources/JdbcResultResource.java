@@ -135,7 +135,7 @@ public class JdbcResultResource extends ResourceValue {
 
       int colNumber;
 
-      if (field.isNumber())
+      if (field.isNumberConvertible())
         colNumber = field.toInt();
       else
         colNumber = getColumnNumber(field.toString(), _metaData);
@@ -1054,7 +1054,7 @@ public class JdbcResultResource extends ResourceValue {
   {
     // throw error if rowNumber is after last row
     Value numRows = getNumRows(rs);
-    if (!numRows.isNumber() || numRows.toLong() <= rowNumber || rowNumber < 0) {
+    if (!numRows.isNumberConvertible() || numRows.toLong() <= rowNumber || rowNumber < 0) {
       return false;
     }
 

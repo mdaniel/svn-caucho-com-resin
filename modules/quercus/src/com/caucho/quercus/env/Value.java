@@ -97,7 +97,7 @@ abstract public class Value {
   /**
    * Returns true for a number.
    */
-  public boolean isNumber()
+  public boolean isNumberConvertible()
   {
     return isLongConvertible() || isDoubleConvertible();
   }
@@ -664,7 +664,7 @@ abstract public class Value {
   {
     if (isLongConvertible() && rValue.isLongConvertible())
       return toLong() == rValue.toLong();
-    else if (isNumber() || rValue.isNumber())
+    else if (isNumberConvertible() || rValue.isNumberConvertible())
       return toDouble() == rValue.toDouble();
     else
       return toString().equals(rValue.toString());
@@ -686,7 +686,7 @@ abstract public class Value {
   {
     if (isLongConvertible() && rValue.isLongConvertible())
       return toLong() < rValue.toLong();
-    else if (isNumber() || rValue.isNumber())
+    else if (isNumberConvertible() || rValue.isNumberConvertible())
       return toDouble() < rValue.toDouble();
     else {
       return toString().compareTo(rValue.toString()) < 0;
@@ -701,7 +701,7 @@ abstract public class Value {
   {
     if (isLongConvertible() && rValue.isLongConvertible())
       return toLong() <= rValue.toLong();
-    else if (isNumber() || rValue.isNumber())
+    else if (isNumberConvertible() || rValue.isNumberConvertible())
       return toDouble() <= rValue.toDouble();
     else
       return toString().compareTo(rValue.toString()) <= 0;
@@ -715,7 +715,7 @@ abstract public class Value {
   {
     if (isLongConvertible() && rValue.isLongConvertible())
       return toLong() > rValue.toLong();
-    else if (isNumber() || rValue.isNumber())
+    else if (isNumberConvertible() || rValue.isNumberConvertible())
       return toDouble() > rValue.toDouble();
     else
       return toString().compareTo(rValue.toString()) > 0;
@@ -729,7 +729,7 @@ abstract public class Value {
   {
     if (isLongConvertible() && rValue.isLongConvertible())
       return toLong() >= rValue.toLong();
-    else if (isNumber() || rValue.isNumber())
+    else if (isNumberConvertible() || rValue.isNumberConvertible())
       return toDouble() >= rValue.toDouble();
     else
       return toString().compareTo(rValue.toString()) >= 0;

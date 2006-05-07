@@ -74,9 +74,9 @@ public class RefVar extends Value {
   /**
    * True for a number
    */
-  public boolean isNumber()
+  public boolean isNumberConvertible()
   {
-    return _var.isNumber();
+    return _var.isNumberConvertible();
   }
 
   /**

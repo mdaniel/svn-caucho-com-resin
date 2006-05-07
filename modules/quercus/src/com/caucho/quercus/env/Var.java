@@ -145,9 +145,9 @@ public class Var extends Value {
   /**
    * True for a number
    */
-  public boolean isNumber()
+  public boolean isNumberConvertible()
   {
-    return _value.isNumber();
+    return _value.isNumberConvertible();
   }
 
   /**

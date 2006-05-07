@@ -2431,7 +2431,7 @@ public class ArrayModule
         Value key = entry.getKey();
         Value value = entry.getValue();
 
-        if (key.isNumber())
+        if (key.isNumberConvertible())
           result.put(value);
         else
           result.put(key, value);
@@ -2471,7 +2471,7 @@ public class ArrayModule
       Value key = entry.getKey();
       Value value = entry.getValue().toValue();
 
-      if (key.isNumber()) {
+      if (key.isNumberConvertible()) {
         result.put(value);
       }
       else {
