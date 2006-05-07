@@ -711,35 +711,14 @@ abstract public class Value {
     if (lVal instanceof ObjectValue && rVal instanceof ObjectValue)
       return ((ObjectValue)lVal).cmpObject((ObjectValue)rVal);
 
-    if ((lVal instanceof StringValue || lVal instanceof LongValue ||
-	 lVal instanceof ResourceValue || lVal instanceof DoubleValue) &&
-	(rVal instanceof StringValue || rVal instanceof LongValue ||
-	 rVal instanceof ResourceValue || rVal instanceof DoubleValue)) {
+    if ((lVal instanceof StringValue || lVal instanceof NumberValue ||
+	 lVal instanceof ResourceValue) &&
+	(rVal instanceof StringValue || rVal instanceof NumberValue ||
+	 rVal instanceof ResourceValue))
+      return NumberValue.compareNum(lVal, rVal);
 
-      if (lVal instanceof DoubleValue || rVal instanceof DoubleValue) {
-	double lDouble = lVal.toDouble();
-	double rDouble = rVal.toDouble();
-	if (lDouble < rDouble) return -1;
-	if (lDouble > rDouble) return 1;
-	return 0;
-      }
-
-      long lLong = lVal.toLong();
-      long rLong = rVal.toLong();
-      if (lLong < rLong) return -1;
-      if (lLong > rLong) return 1;
-      return 0;
-    }
-
-    if (lVal instanceof ArrayValue && rVal instanceof ArrayValue) {
-      // XXX: "if key from operand 1 is not found in operand 2 then
-      // arrays are uncomparable, otherwise - compare value by value"
-      int lArraySize = ((ArrayValue)lVal).getSize();
-      int rArraySize = ((ArrayValue)rVal).getSize();
-      if (lArraySize < rArraySize) return -1;
-      if (lArraySize > rArraySize) return 1;
-      return 0;
-    }
+    if (lVal instanceof ArrayValue && rVal instanceof ArrayValue)
+      ((ArrayValue)lVal).compareArray((ArrayValue)rVal);
 
     if (lVal instanceof ArrayValue) return 1;
     if (rVal instanceof ArrayValue) return -1;

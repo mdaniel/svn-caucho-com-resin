@@ -33,4 +33,26 @@ package com.caucho.quercus.env;
  * Represents a PHP number value (double or long).
  */
 public abstract class NumberValue extends Value {
+
+  /**
+   *  Compare two numbers.
+   */
+  public static int compareNum(Value lValue, Value rValue) {
+    Value lVal = lValue.toValue();
+    Value rVal = rValue.toValue();
+
+    if (lVal instanceof DoubleValue || rVal instanceof DoubleValue) {
+      double lDouble = lVal.toDouble();
+      double rDouble = rVal.toDouble();
+      if (lDouble < rDouble) return -1;
+      if (lDouble > rDouble) return 1;
+      return 0;
+    }
+    long lLong = lVal.toLong();
+    long rLong = rVal.toLong();
+    if (lLong < rLong) return -1;
+    if (lLong > rLong) return 1;
+    return 0;
+  }
+
 }

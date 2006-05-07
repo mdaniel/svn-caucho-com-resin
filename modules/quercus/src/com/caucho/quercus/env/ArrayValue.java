@@ -427,6 +427,20 @@ abstract public class ArrayValue extends Value {
   }
 
   /**
+   * Compare two arrays.
+   */
+  public int compareArray(ArrayValue rValue)
+  {
+    // XXX: "if key from operand 1 is not found in operand 2 then
+    // arrays are uncomparable, otherwise - compare value by value"
+    int lArraySize = this.getSize();
+    int rArraySize = rValue.getSize();
+    if (lArraySize < rArraySize) return -1;
+    if (lArraySize > rArraySize) return 1;
+    return 0;
+  }
+
+  /**
    * Prints the value.
    * @param env
    */
