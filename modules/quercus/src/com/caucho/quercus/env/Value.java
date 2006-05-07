@@ -110,7 +110,6 @@ abstract public class Value {
     return false;
   }
 
-  */
   /**
    * Converts to a boolean.
    */
