@@ -683,29 +683,72 @@ abstract public class Value {
    * Returns a negative/positive integer if this Value is
    * lessthan/greaterthan rValue.
    */
-  public int cmp(Value rValue)
+  public final int cmp(Value rValue)
   {
-    if (isLongConvertible() && rValue.isLongConvertible()) {
-      long rValueLong = rValue.toLong();
-      long thisLong = toLong();
-      if (rValueLong < thisLong)
-	return -1;
-      if (rValueLong > thisLong)
-	return 1;
+    // This is tricky: implemented according to Table 15-5 of
+    // http://us2.php.net/manual/en/language.operators.comparison.php
+    
+    Value lVal = this.toValue();
+    Value rVal = rValue.toValue();
+
+    if (lVal instanceof StringValue && rVal instanceof NullValue)
+      return ((StringValue)lVal).cmpString(StringValue.EMPTY);
+    if (lVal instanceof NullValue && rVal instanceof StringValue)
+      return StringValue.EMPTY.cmpString((StringValue)rVal);
+    if (lVal instanceof StringValue && rVal instanceof StringValue)
+      return ((StringValue)lVal).cmpString((StringValue)rVal);
+
+    if (lVal instanceof NullValue || lVal instanceof BooleanValue ||
+	rVal instanceof NullValue || rVal instanceof BooleanValue) {
+      boolean thisBool = toBoolean();
+      boolean rBool    = rValue.toBoolean();
+      if (!thisBool && rBool) return -1;
+      if (thisBool && !rBool) return 1;
       return 0;
     }
-    else if (isNumberConvertible() || rValue.isNumberConvertible()) {
-      double rValueDouble = rValue.toDouble();
-      double thisDouble = toDouble();
-      if (rValueDouble < thisDouble)
-	return -1;
-      if (rValueDouble > thisDouble)
-	return 1;
+
+    // XXX: check if values belong to same class; if not, incomparable
+    if (lVal instanceof ObjectValue && rVal instanceof ObjectValue)
+      return ((ObjectValue)lVal).cmpObject((ObjectValue)rVal);
+
+    if ((lVal instanceof StringValue || lVal instanceof LongValue ||
+	 lVal instanceof ResourceValue || lVal instanceof DoubleValue) &&
+	(rVal instanceof StringValue || rVal instanceof LongValue ||
+	 rVal instanceof ResourceValue || rVal instanceof DoubleValue)) {
+
+      if (lVal instanceof DoubleValue || rVal instanceof DoubleValue) {
+	double lDouble = lVal.toDouble();
+	double rDouble = rVal.toDouble();
+	if (lDouble < rDouble) return -1;
+	if (lDouble > rDouble) return 1;
+	return 0;
+      }
+
+      long lLong = lVal.toLong();
+      long rLong = rVal.toLong();
+      if (lLong < rLong) return -1;
+      if (lLong > rLong) return 1;
       return 0;
     }
-    else {
-      return toString().compareTo(rValue.toString());
+
+    if (lVal instanceof ArrayValue && rVal instanceof ArrayValue) {
+      // XXX: "if key from operand 1 is not found in operand 2 then
+      // arrays are uncomparable, otherwise - compare value by value"
+      int lArraySize = ((ArrayValue)lVal).getSize();
+      int rArraySize = ((ArrayValue)rVal).getSize();
+      if (lArraySize < rArraySize) return -1;
+      if (lArraySize > rArraySize) return 1;
+      return 0;
     }
+
+    if (lVal instanceof ArrayValue) return 1;
+    if (rVal instanceof ArrayValue) return -1;
+    if (lVal instanceof ObjectValue) return 1;
+    if (rVal instanceof ObjectValue) return -1;
+
+    // XXX: proper default case?
+    throw new RuntimeException("values are incomparable: " +
+			       lVal + " <=> " + rVal);
   }
 
   /**

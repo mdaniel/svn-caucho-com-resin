@@ -66,5 +66,14 @@ abstract public class ObjectValue extends Value {
   {
     return putField(null, key, DoubleValue.create(value));
   }
+
+  /**
+   * Compare two objects
+   */
+  public int cmpObject(ObjectValue rValue)
+  {
+    throw new RuntimeException("not implemented");
+  }
+
 }
 

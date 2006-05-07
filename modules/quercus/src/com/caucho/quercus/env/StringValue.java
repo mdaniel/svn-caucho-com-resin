@@ -301,6 +301,21 @@ abstract public class StringValue extends Value {
   }
 
   /**
+   * Compare two strings
+   */
+  public int cmpString(StringValue rValue)
+  {
+    if (isNumberConvertible() && rValue.isNumberConvertible()) {
+      double thisDouble = toDouble();
+      double rDouble = rValue.toDouble();
+      if (thisDouble < rDouble) return -1;
+      if (thisDouble > rDouble) return 1;
+      return 0;
+    }
+    return toString().compareTo(rValue.toString());
+  }
+
+  /**
    * Converts to a Java object.
    */
   public Object toJavaObject()
