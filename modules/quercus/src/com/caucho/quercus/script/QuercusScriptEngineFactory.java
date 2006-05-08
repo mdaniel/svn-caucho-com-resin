@@ -29,13 +29,17 @@
 
 package com.caucho.quercus.script;
 
+import javax.script.Namespace;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineFactory;
+import javax.script.SimpleNamespace;
 
 /**
  * Script engine factory
  */
 public class QuercusScriptEngineFactory implements ScriptEngineFactory {
+  private Namespace _globalNamespace = new SimpleNamespace();
+  
   /**
    * Returns the full name of the ScriptEngine.
    */
@@ -91,7 +95,7 @@ public class QuercusScriptEngineFactory implements ScriptEngineFactory {
    */
   public String getLanguageVersion()
   {
-    return "5.0.0";
+    return "5.0.4";
   }
 
   /**

@@ -51,7 +51,7 @@ public class ScriptEngineManager {
 
   protected HashSet engineSpis = new HashSet();
   protected HashMap extensionAssociations = new HashMap();
-  protected Namespace globalScope;
+  protected Namespace globalScope = new SimpleNamespace();
   protected HashMap mimeTypeAssociations = new HashMap();
   protected HashMap nameAssociations = new HashMap();
 
@@ -268,8 +268,14 @@ public class ScriptEngineManager {
   {
     ScriptEngineFactory factory = getFactoryByClass(cl);
 
-    if (factory != null)
-      return factory.getScriptEngine();
+    if (factory != null) {
+      ScriptEngine engine = factory.getScriptEngine();
+      
+      ScriptContext cxt = engine.getContext();
+      cxt.setNamespace(this.globalScope, ScriptContext.GLOBAL_SCOPE);
+      
+      return engine;
+    }
     else
       return null;
   }

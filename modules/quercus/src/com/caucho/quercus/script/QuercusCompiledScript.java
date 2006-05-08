@@ -33,14 +33,9 @@ import java.io.StringReader;
 import java.io.Reader;
 import java.io.Writer;
 
-import javax.script.Compilable;
 import javax.script.CompiledScript;
-import javax.script.GenericScriptEngine;
-import javax.script.Namespace;
 import javax.script.ScriptContext;
 import javax.script.ScriptEngine;
-import javax.script.ScriptEngineFactory;
-import javax.script.SimpleNamespace;
 import javax.script.ScriptException;
 
 import com.caucho.quercus.Quercus;
@@ -60,37 +55,25 @@ import com.caucho.vfs.WriteStream;
 /**
  * Script engine
  */
-public class QuercusScriptEngine
-  extends GenericScriptEngine
-  implements Compilable {
-  private QuercusScriptEngineFactory _factory;
-  private final Quercus _quercus;
+public class QuercusCompiledScript extends CompiledScript {
+  private final QuercusScriptEngine _engine;
+  private final QuercusProgram _program;
 
-  QuercusScriptEngine(QuercusScriptEngineFactory factory)
+  QuercusCompiledScript(QuercusScriptEngine engine, QuercusProgram program)
   {
-    _factory = factory;
-    _quercus = new Quercus();
-  }
-
-  /**
-   * Returns the Quercus object.
-   */
-  Quercus getQuercus()
-  {
-    return _quercus;
+    _engine = engine;
+    _program = program;
   }
 
   /**
    * evaluates based on a reader.
    */
-  public Object eval(Reader script, ScriptContext cxt)
+  public Object eval(ScriptContext cxt)
     throws ScriptException
   {
     try {
-      QuercusProgram program = QuercusParser.parse(_quercus, null, script);
-
       Writer writer = cxt.getWriter();
-      
+
       WriteStream out;
 
       if (writer != null)
@@ -98,19 +81,18 @@ public class QuercusScriptEngine
       else
 	out = Vfs.lookup("null:").openWrite();
 
-      QuercusPage page = new InterpretedPage(program);
+      QuercusPage page = new InterpretedPage(_program);
 
-      Env env = new Env(_quercus, page, out, null, null);
+      Env env = new Env(_engine.getQuercus(), page, out, null, null);
 
       env.setScriptContext(cxt);
 
-      Object value = program.execute(env).toJavaObject();
+      Object value = _program.execute(env).toJavaObject();
 
       out.flushBuffer();
       out.free();
 
       return value;
-      
       /*
     } catch (ScriptException e) {
       throw e;
@@ -125,61 +107,16 @@ public class QuercusScriptEngine
   }
 
   /**
-   * evaluates based on a script.
+   * Returns the script engine.
    */
-  public Object eval(String script, ScriptContext cxt)
-    throws ScriptException
+  public ScriptEngine getEngine()
   {
-    return eval(new StringReader(script), cxt);
-  }
-
-  /**
-   * compiles based on a reader.
-   */
-  public CompiledScript compile(Reader script)
-    throws ScriptException
-  {
-    try {
-      QuercusProgram program = QuercusParser.parse(_quercus, null, script);
-
-      return new QuercusCompiledScript(this, program);
-    } catch (RuntimeException e) {
-      throw e;
-    } catch (Exception e) {
-      throw new ScriptException(e);
-    } catch (Throwable e) {
-      throw new RuntimeException(e);
-    }
-  }
-
-  /**
-   * evaluates based on a script.
-   */
-  public CompiledScript compile(String script)
-    throws ScriptException
-  {
-    return compile(new StringReader(script));
-  }
-
-  /**
-   * Returns the engine's factory.
-   */
-  public QuercusScriptEngineFactory getFactory()
-  {
-    return _factory;
-  }
-
-  /**
-   * Creates a namespace.
-   */
-  public Namespace createNamespace()
-  {
-    return new SimpleNamespace();
+    return _engine;
   }
 
   public String toString()
   {
-    return "QuercusScriptEngine[]";
+    return "QuercusCompiledScript[]";
   }
 }
 

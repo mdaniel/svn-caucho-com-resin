@@ -144,7 +144,7 @@ abstract public class IiopWriter extends org.omg.CORBA_2_3.portable.OutputStream
   public void startRequest(byte []oid, int off, int len, String operation)
     throws IOException
   {
-    startRequest(oid,off, len, operation, (int) Alarm.getCurrentTime());
+    startRequest(oid, off, len, operation, (int) Alarm.getCurrentTime());
   }
   
   /**
@@ -214,7 +214,6 @@ abstract public class IiopWriter extends org.omg.CORBA_2_3.portable.OutputStream
     byte []bytes = ior.getByteArray();
 
     _out.align(4);
-
     _out.write(bytes, 0, bytes.length);
   }
 
@@ -256,7 +255,6 @@ abstract public class IiopWriter extends org.omg.CORBA_2_3.portable.OutputStream
    */
   public void write_boolean_array(boolean []value, int offset, int length)
   {
-    write_long(length);
     for (int i = 0; i < length; i++)
       _out.write(value[i + offset] ? 1 : 0);
   }
@@ -266,7 +264,6 @@ abstract public class IiopWriter extends org.omg.CORBA_2_3.portable.OutputStream
    */
   public void write_char_array(char []value, int offset, int length)
   {
-    write_long(length);
     for (int i = 0; i < length; i++)
       _out.write((int) value[i + offset]);
   }
@@ -276,7 +273,6 @@ abstract public class IiopWriter extends org.omg.CORBA_2_3.portable.OutputStream
    */
   public void write_wchar_array(char []value, int offset, int length)
   {
-    write_long(length);
     for (int i = 0; i < length; i++)
       _out.writeShort((int) value[i + offset]);
   }
@@ -286,7 +282,6 @@ abstract public class IiopWriter extends org.omg.CORBA_2_3.portable.OutputStream
    */
   public void write_octet_array(byte []value, int offset, int length)
   {
-    write_long(length);
     for (int i = 0; i < length; i++)
       _out.write((int) value[i + offset]);
   }
@@ -296,7 +291,6 @@ abstract public class IiopWriter extends org.omg.CORBA_2_3.portable.OutputStream
    */
   public void write_short_array(short []value, int offset, int length)
   {
-    write_long(length);
     for (int i = 0; i < length; i++)
       _out.writeShort((int) value[i + offset]);
   }
@@ -306,7 +300,6 @@ abstract public class IiopWriter extends org.omg.CORBA_2_3.portable.OutputStream
    */
   public void write_ushort_array(short []value, int offset, int length)
   {
-    write_long(length);
     for (int i = 0; i < length; i++)
       _out.writeShort((int) value[i + offset]);
   }
@@ -316,7 +309,6 @@ abstract public class IiopWriter extends org.omg.CORBA_2_3.portable.OutputStream
    */
   public void write_long_array(int []value, int offset, int length)
   {
-    write_long(length);
     for (int i = 0; i < length; i++)
       _out.writeInt(value[i + offset]);
   }
@@ -326,7 +318,6 @@ abstract public class IiopWriter extends org.omg.CORBA_2_3.portable.OutputStream
    */
   public void write_ulong_array(int []value, int offset, int length)
   {
-    write_long(length);
     for (int i = 0; i < length; i++)
       _out.writeInt(value[i + offset]);
   }
@@ -336,7 +327,7 @@ abstract public class IiopWriter extends org.omg.CORBA_2_3.portable.OutputStream
    */
   public void write_longlong_array(long []value, int offset, int length)
   {
-    write_long(length);
+    _out.align(8);
     for (int i = 0; i < length; i++)
       _out.writeLong(value[i + offset]);
   }
@@ -346,7 +337,7 @@ abstract public class IiopWriter extends org.omg.CORBA_2_3.portable.OutputStream
    */
   public void write_ulonglong_array(long []value, int offset, int length)
   {
-    write_long(length);
+    _out.align(8);
     for (int i = 0; i < length; i++)
       _out.writeLong(value[i + offset]);
   }
@@ -356,9 +347,8 @@ abstract public class IiopWriter extends org.omg.CORBA_2_3.portable.OutputStream
    */
   public void write_float_array(float []value, int offset, int length)
   {
-    write_long(length);
     for (int i = 0; i < length; i++) {
-      float v = value[i];
+      float v = value[i + offset];
       int bits = Float.floatToIntBits(v);
       
       _out.writeInt(bits);
@@ -370,9 +360,9 @@ abstract public class IiopWriter extends org.omg.CORBA_2_3.portable.OutputStream
    */
   public void write_double_array(double []value, int offset, int length)
   {
-    write_long(length);
+    _out.align(8);
     for (int i = 0; i < length; i++) {
-      double v = value[i];
+      double v = value[i + offset];
       long bits = Double.doubleToLongBits(v);
       
       _out.writeLong(bits);
@@ -487,6 +477,7 @@ abstract public class IiopWriter extends org.omg.CORBA_2_3.portable.OutputStream
 
       if (oldValue == _refMap.NULL) {
 	_out.align(4);
+	
 	_refMap.put(obj, _out.getOffset());
 
 	write_long(VALUE_TAG | VALUE_ONE_REP_ID);

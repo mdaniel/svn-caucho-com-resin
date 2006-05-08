@@ -83,8 +83,14 @@ abstract public class GenericScriptEngine implements ScriptEngine {
   public Object eval(Reader reader, Namespace namespace)
     throws ScriptException
   {
-    GenericScriptContext cxt = new GenericScriptContext();
+    ScriptContext engineCxt = getContext();
+    ScriptContext cxt = new GenericScriptContext();
 
+    cxt.setReader(engineCxt.getReader());
+    cxt.setWriter(engineCxt.getWriter());
+    cxt.setErrorWriter(engineCxt.getErrorWriter());
+    cxt.setNamespace(engineCxt.getNamespace(ScriptContext.GLOBAL_SCOPE),
+		     ScriptContext.GLOBAL_SCOPE);
     cxt.setNamespace(namespace, ScriptContext.ENGINE_SCOPE);
 
     return eval(reader, cxt);
@@ -99,9 +105,15 @@ abstract public class GenericScriptEngine implements ScriptEngine {
   public Object eval(String script, Namespace namespace)
     throws ScriptException
   {
-    GenericScriptContext cxt = new GenericScriptContext();
+    ScriptContext engineCxt = getContext();
+    ScriptContext cxt = new GenericScriptContext();
 
-    getContext().setNamespace(namespace, ScriptContext.ENGINE_SCOPE);
+    cxt.setReader(engineCxt.getReader());
+    cxt.setWriter(engineCxt.getWriter());
+    cxt.setErrorWriter(engineCxt.getErrorWriter());
+    cxt.setNamespace(engineCxt.getNamespace(ScriptContext.GLOBAL_SCOPE),
+		     ScriptContext.GLOBAL_SCOPE);
+    cxt.setNamespace(namespace, ScriptContext.ENGINE_SCOPE);
 
     return eval(script, cxt);
   }

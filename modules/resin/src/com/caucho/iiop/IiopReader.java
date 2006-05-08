@@ -1028,8 +1028,9 @@ public class IiopReader extends org.omg.CORBA_2_3.portable.InputStream {
    */
   public void read_double_array(double []v, int offset, int length)
   {
-    for (int i = 0; i < length; i++)
+    for (int i = 0; i < length; i++) {
       v[i + offset] = read_double();
+    }
   }
 
   /**

@@ -45,6 +45,8 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.script.ScriptContext;
+
 import java.lang.ref.WeakReference;
 
 import com.caucho.java.LineMap;
@@ -227,6 +229,8 @@ public class Env {
   private ArrayValue _files;
   private SessionArrayValue _session;
 
+  private ScriptContext _scriptContext;
+
   private WriteStream _originalOut;
   private OutputBuffer _outputBuffer;
 
@@ -292,6 +296,11 @@ public class Env {
   public String getScriptEncoding()
   {
     return getQuercus().getScriptEncoding();
+  }
+
+  public void setScriptContext(ScriptContext context)
+  {
+    _scriptContext = context;
   }
   
   public void start()
@@ -1200,9 +1209,22 @@ public class Env {
 
       var.set(getGlobalVar("_SERVER").get(PHP_SELF_STRING));
 
-      _globalMap.put(name, var);
-
       return var;
+    }
+
+    default: {
+      if (_scriptContext != null) {
+	Object value = _scriptContext.getAttribute(name);
+
+	if (value != null) {
+	  var = new Var();
+	  _globalMap.put(name, var);
+
+	  var.set(wrapJava(value));
+
+	  return var;
+	}
+      }
     }
     }
 

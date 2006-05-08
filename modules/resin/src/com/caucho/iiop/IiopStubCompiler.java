@@ -187,11 +187,30 @@ public class IiopStubCompiler extends AbstractGenerator {
       // Note that if sender/receiver have mismatched types, one
       // possible result is a Java OOM
       // ejb/114t
-      print("(" + type.getName() + ") is.read_Object(" + type.getName() + ".class)");
+      print("(");
+      printJavaClass(type);
+      print(") is.read_Object(");
+      printJavaClass(type);
+      print(".class)");
     }
     else {
-      print("(" + type.getName() + ") is.read_value(" + type.getName() + ".class)");
+      print("(");
+      printJavaClass(type);
+      print(") is.read_value(");
+      printJavaClass(type);
+      print(".class)");
     }
+  }
+
+  void printJavaClass(Class type)
+    throws IOException
+  {
+    if (type.isArray()) {
+      printJavaClass(type.getComponentType());
+      print("[]");
+    }
+    else
+      print(type.getName());
   }
 
   private void printSetValue(Class type, String value)

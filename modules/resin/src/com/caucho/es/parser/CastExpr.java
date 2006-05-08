@@ -132,11 +132,15 @@ class CastExpr extends Expr {
    */
   void printJavaImpl() throws IOException
   {
-    if (! typeExpr.getJavaClass().isAssignableFrom(lhs.getJavaClass()))
-      cl.print("(" + typeExpr.getJavaClass().getName() + ") ");
+    if (! typeExpr.getJavaClass().isAssignableFrom(lhs.getJavaClass())) {
+      cl.print("(");
+      printJavaClass(typeExpr.getJavaClass());
+      cl.print(") ");
+    }
 
     lhs.printJava();    
   }
+    
 
   /**
    * Marks the value as being used.

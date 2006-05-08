@@ -39,6 +39,7 @@ abstract public class CompiledScript {
    * Evaluates the script.
    */
   public Object eval()
+    throws ScriptException
   {
     return eval(getEngine().getContext());
   }
@@ -47,14 +48,26 @@ abstract public class CompiledScript {
    * Evaluates the script with the given namespace.
    */
   public Object eval(Namespace namespace)
+    throws ScriptException
   {
-    throw new UnsupportedOperationException();
+    ScriptContext engineCxt = getEngine().getContext();
+    ScriptContext cxt = new GenericScriptContext();
+
+    cxt.setReader(engineCxt.getReader());
+    cxt.setWriter(engineCxt.getWriter());
+    cxt.setErrorWriter(engineCxt.getErrorWriter());
+    cxt.setNamespace(engineCxt.getNamespace(ScriptContext.GLOBAL_SCOPE),
+		     ScriptContext.GLOBAL_SCOPE);
+    cxt.setNamespace(namespace, ScriptContext.ENGINE_SCOPE);
+
+    return eval(cxt);
   }
   
   /**
    * Evaluates the script with the given context.
    */
-  abstract public Object eval(ScriptContext context);
+  abstract public Object eval(ScriptContext context)
+    throws ScriptException;
   
   /**
    * Returns the owning engine.

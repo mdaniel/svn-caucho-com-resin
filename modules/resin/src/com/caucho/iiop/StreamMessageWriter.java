@@ -39,6 +39,7 @@ public class StreamMessageWriter extends MessageWriter {
   private int _bufferLength;
   
   private int _offset;
+  private int _align;
   private int _length;
 
   private int _version;
@@ -60,6 +61,7 @@ public class StreamMessageWriter extends MessageWriter {
     _out = out;
     _buffer = _out.getBuffer();
     _bufferLength = _buffer.length;
+    _align = 0;
     
     _buffer[0] = 'G';
     _buffer[1] = 'I';
@@ -75,6 +77,7 @@ public class StreamMessageWriter extends MessageWriter {
     _version = 0;
     
     _offset = 0;
+    _align = 0;
     _length = 12;
 
     _buffer[4] = 1;
@@ -92,6 +95,7 @@ public class StreamMessageWriter extends MessageWriter {
     
     _offset = 0;
     _length = 12;
+    _align = 0;
 
     _buffer[4] = 1;
     _buffer[5] = 1;
@@ -108,6 +112,7 @@ public class StreamMessageWriter extends MessageWriter {
     
     _offset = 4;
     _length = 16;
+    _align = 0;
 
     _buffer[4] = 1;
     _buffer[5] = 2;

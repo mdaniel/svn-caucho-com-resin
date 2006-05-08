@@ -36,8 +36,8 @@ import java.io.Reader;
  * Basic implementation of a script context.
  */
 public class GenericScriptContext implements ScriptContext {
-  protected Namespace engineScope;
-  protected Namespace globalScope;
+  protected Namespace engineScope = new SimpleNamespace();
+  protected Namespace globalScope = new SimpleNamespace();
   
   protected Reader reader;
   protected Writer writer;
@@ -80,12 +80,16 @@ public class GenericScriptContext implements ScriptContext {
    */
   public Object getAttribute(String name)
   {
-    Object v = this.engineScope.get(name);
+    Object v = null;
+
+    if (this.engineScope != null)
+      v = this.engineScope.get(name);
 
     if (v != null)
       return v;
 
-    v = this.globalScope.get(name);
+    if (this.globalScope != null)
+      v = this.globalScope.get(name);
 
     return v;
   }
@@ -177,7 +181,7 @@ public class GenericScriptContext implements ScriptContext {
    */
   public void setErrorWriter(Writer writer)
   {
-    this.writer = writer;
+    this.errorWriter = writer;
   }
 }
 

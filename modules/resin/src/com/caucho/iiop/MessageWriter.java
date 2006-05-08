@@ -31,7 +31,6 @@ package com.caucho.iiop;
 import java.io.IOException;
 
 abstract public class MessageWriter {
-
   /**
    * Starts a 1.0 message.
    */
