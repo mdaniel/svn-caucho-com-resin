@@ -31,6 +31,8 @@ package com.caucho.quercus.lib.mysql;
 
 import java.sql.*;
 
+import java.util.Vector;
+import java.util.Hashtable;
 import java.util.logging.Logger;
 import java.util.logging.Level;
 
@@ -57,20 +59,29 @@ public class Mysqli {
 
   private Env _env;
   private String _host;
+  private String _dbname;
+  private int _port;
 
   private JdbcConnectionResource _conn;
 
+  // postgres asynchronous queries
+  private Vector threadList = new Vector();
+  // named prepared statements for postgres
+  private Hashtable stmtTable = new Hashtable();
+
   public Mysqli(Env env,
-		@Optional("localhost") String host,
-		@Optional String user,
-		@Optional String password,
-		@Optional String db,
-		@Optional("3306") int port,
-		@Optional String socket)
+				@Optional("localhost") String host,
+				@Optional String user,
+				@Optional String password,
+				@Optional String db,
+				@Optional("3306") int port,
+				@Optional String socket,
+				@Optional String driver,
+				@Optional String url)
   {
     _env = env;
 
-    real_connect(env, host, user, password, db, port, socket, 0);
+    real_connect(env, host, user, password, db, port, socket, 0, driver, url);
   }
 
   public Mysqli(Env env)
@@ -111,7 +122,9 @@ public class Mysqli {
 
     close(_env);
 
-    return real_connect(_env, host, user, password, db, port, socket, flags);
+	//@todo driver and url for postgres (see null below)
+
+    return real_connect(_env, host, user, password, db, port, socket, flags, null, null);
   }
 
   /**
@@ -180,11 +193,35 @@ public class Mysqli {
   }
 
   /**
+   * Returns the database name.
+   */
+  public String get_dbname()
+  {
+    return _dbname;
+  }
+
+  /**
    * Returns the host information.
    */
   public String get_host_info()
   {
     return _host + " via TCP socket";
+  }
+
+  /**
+   * Returns the host name.
+   */
+  public String get_host_name()
+  {
+    return _host;
+  }
+
+  /**
+   * Returns the port number.
+   */
+  public int get_port_number()
+  {
+    return _port;
   }
 
   /**
@@ -348,7 +385,7 @@ public class Mysqli {
    * @return a {@link JdbcResultResource}, or BooleanValue.FALSE for failure
    */
   public Value query(String sql,
-		     @Optional("MYSQLI_STORE_RESULT") int resultMode)
+					 @Optional("MYSQLI_STORE_RESULT") int resultMode)
   {
     // XXX: resultMode = MYSQLI_USE_RESULT is an unbuffered query, not supported.
     JdbcConnectionResource conn = validateConnection();
@@ -370,13 +407,15 @@ public class Mysqli {
    * Connects to the underlying database.
    */
   public boolean real_connect(Env env,
-			      @Optional("localhost") String host,
-			      @Optional String userName,
-			      @Optional String password,
-			      @Optional String dbname,
-			      @Optional("3306") int port,
-			      @Optional String socket,
-			      @Optional int flags)
+							  @Optional("localhost") String host,
+							  @Optional String userName,
+							  @Optional String password,
+							  @Optional String dbname,
+							  @Optional("3306") int port,
+							  @Optional String socket,
+							  @Optional int flags,
+							  @Optional String driver,
+							  @Optional String url)
   {
     if (_conn != null) {
       env.warning(L.l("Connection is already opened to '{0}'", _conn));
@@ -384,14 +423,20 @@ public class Mysqli {
     }
 
     _host = host;
+    _port = port;
+	_dbname = dbname;
 
     try {
       if (host == null || host.equals(""))
-	host = "localhost";
+        host = "localhost";
 
-      String driver = "com.mysql.jdbc.jdbc2.optional.MysqlConnectionPoolDataSource";
+	  if (driver == null || driver.equals("")) {
+		  driver = "com.mysql.jdbc.jdbc2.optional.MysqlConnectionPoolDataSource";
+	  }
 
-      String url = "jdbc:mysql://" + host + ":" + port + "/" + dbname;
+	  if (url == null || url.equals("")) {
+		  url = "jdbc:mysql://" + host + ":" + port + "/" + dbname;
+	  }
 
       Connection jConn = env.getConnection(driver, url, userName, password);
 
@@ -658,7 +703,7 @@ public class Mysqli {
       return false;
   }
 
-  JdbcConnectionResource validateConnection()
+  public JdbcConnectionResource validateConnection()
   {
     JdbcConnectionResource conn = _conn;
 
@@ -667,6 +712,42 @@ public class Mysqli {
     }
 
     return conn;
+  }
+
+  public void addThread(Thread t)
+  {
+    threadList.add(t);
+  }
+
+  public Thread firstThread()
+  {
+    if (threadList.size() > 0)
+      return (Thread)threadList.get(0);
+
+    return null;
+  }
+
+  public Thread removeFirstThread()
+  {
+    if (threadList.size() > 0)
+      return (Thread)threadList.remove(0);
+
+    return null;
+  }
+
+  public void putStatement(String name, MysqliStatement stmt)
+  {
+    stmtTable.put(name, stmt);
+  }
+
+  public MysqliStatement getStatement(String name)
+  {
+    return (MysqliStatement)stmtTable.get(name);
+  }
+
+  public MysqliStatement removeStatement(String name)
+  {
+    return (MysqliStatement)stmtTable.remove(name);
   }
 
   public String toString()

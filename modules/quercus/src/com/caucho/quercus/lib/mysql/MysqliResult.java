@@ -255,7 +255,7 @@ public class MysqliResult {
     }
   }
 
-  JdbcResultResource validateResult()
+  public JdbcResultResource validateResult()
   {
     return _rs;
   }

@@ -165,9 +165,14 @@ public class JdbcResultResource extends ResourceValue {
   }
 
   // XXX: s/b removed
-  ResultSet getResultSet()
+  public ResultSet getResultSet()
   {
     return _rs;
+  }
+
+  public Statement getStatement()
+  {
+    return _stmt;
   }
 
   /**

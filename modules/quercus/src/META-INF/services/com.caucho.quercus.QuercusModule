@@ -24,6 +24,7 @@ com.caucho.quercus.lib.NetworkModule
 com.caucho.quercus.lib.OptionsModule
 com.caucho.quercus.lib.OutputModule
 com.caucho.quercus.lib.pdf.PDFModule
+com.caucho.quercus.lib.postgres.PostgresModule
 com.caucho.quercus.lib.RegexpModule
 com.caucho.quercus.lib.ResinModule
 com.caucho.quercus.lib.session.SessionModule

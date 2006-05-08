@@ -375,9 +375,16 @@ public class JdbcConnectionResource extends ResourceValue {
         _resultValues.add(_rs);
         _warnings = stmt.getWarnings();
       } else {
+		  // php/4310 should return a result set
+		  // for update statements. It is always
+		  // null though. So keep the stmt for
+		  // future reference (PostgresModule.pg_last_oid)
+	_rs = new JdbcResultResource(stmt, null, this);
+        _affectedRows = 0;
+        _resultValues.add(_rs);
         _affectedRows = stmt.getUpdateCount();
         _warnings = stmt.getWarnings();
-	stmt.close();
+		//commented out (for php/4310) stmt.close();
       }
     } catch (DataTruncation truncationError) {
       try {
