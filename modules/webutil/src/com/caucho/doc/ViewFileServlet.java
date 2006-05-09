@@ -53,7 +53,6 @@ public class ViewFileServlet extends GenericServlet {
     Logger.getLogger(ViewFileServlet.class.getName());
   static final L10N L = new L10N(ViewFileServlet.class);
 
-  static private final String PARAM_CONTEXTPATH = "contextpath";
   static private final String PARAM_SERVLETPATH = "servletpath";
   static private final String PARAM_FILE = "file";
   static private final String PARAM_RE_MARKER = "re-marker";
@@ -124,7 +123,7 @@ public class ViewFileServlet extends GenericServlet {
       try {
         is = path.openRead();
       } catch (java.io.FileNotFoundException ex) {
-        out.println("<font color='red'><b>File not found " + path + "</b></font>");
+        out.println("<font color='red'><b>File not found " + request.getRequestURI() + "</b></font>");
         out.println("</body>");
         out.println("</html>");
         return;
@@ -198,17 +197,13 @@ public class ViewFileServlet extends GenericServlet {
 
   private Path getFilePath(ServletRequest request)
   {
-    String cp = request.getParameter(PARAM_CONTEXTPATH);
     String sp = request.getParameter(PARAM_SERVLETPATH);
     String f = getFileName(request);
 
     if (f != null) {
       ServletContext ctx = _context;
-      if (cp != null && cp.length() > 0) {
-        ctx = ctx.getContext(cp);
-      }
 
-      CharBuffer cb = CharBuffer.allocate();
+      CharBuffer cb = new CharBuffer();
 
       if (sp != null && sp.length() > 0) {
         cb.append(sp);
@@ -220,7 +215,7 @@ public class ViewFileServlet extends GenericServlet {
       cb.append('/');
       cb.append(f);
 
-      return Vfs.lookup(ctx.getRealPath(cb.close()));
+      return Vfs.lookup(ctx.getRealPath(cb.toString()()));
     }
 
     return null;
