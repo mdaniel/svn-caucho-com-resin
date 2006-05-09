@@ -123,7 +123,7 @@ public class ViewFileServlet extends GenericServlet {
       try {
         is = path.openRead();
       } catch (java.io.FileNotFoundException ex) {
-        out.println("<font color='red'><b>File not found " + request.getRequestURI() + "</b></font>");
+        out.println("<font color='red'><b>File not found " + ((HttpServletRequest) request).getServletPath() + "</b></font>");
         out.println("</body>");
         out.println("</html>");
         return;
@@ -215,7 +215,7 @@ public class ViewFileServlet extends GenericServlet {
       cb.append('/');
       cb.append(f);
 
-      return Vfs.lookup(ctx.getRealPath(cb.toString()()));
+      return Vfs.lookup(ctx.getRealPath(cb.toString()));
     }
 
     return null;

@@ -70,14 +70,14 @@ public class Mysqli {
   private Hashtable stmtTable = new Hashtable();
 
   public Mysqli(Env env,
-				@Optional("localhost") String host,
-				@Optional String user,
-				@Optional String password,
-				@Optional String db,
-				@Optional("3306") int port,
-				@Optional String socket,
-				@Optional String driver,
-				@Optional String url)
+		@Optional("localhost") String host,
+		@Optional String user,
+		@Optional String password,
+		@Optional String db,
+		@Optional("3306") int port,
+		@Optional String socket,
+		@Optional String driver,
+		@Optional String url)
   {
     _env = env;
 
