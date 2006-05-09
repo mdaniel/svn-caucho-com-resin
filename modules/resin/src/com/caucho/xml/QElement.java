@@ -224,6 +224,16 @@ public class QElement extends QAttributedNode implements CauchoElement {
       if (name.getNamespace() != "") {
         addNamespace(name);
       }
+
+      for (QAttr attr = (QAttr) elt.getFirstAttribute();
+	   attr != null;
+	   attr = (QAttr) attr.getNextSibling()) {
+	name = attr._name;
+
+	if (name.getNamespace() != "") {
+	  addNamespace(name);
+	}
+      }
     }
 
     return result;

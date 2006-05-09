@@ -4,6 +4,8 @@
 
 <s2 title='3.0.snap - May 2, 2006'>
 <ul>
+<li>el-ignored with tagx and el-ignored check in attribute vs body (rep by Gary Doughty)
+<li>Static JSP taglib was generating incorrect fragment code (rep by Bryan Davis)
 <li>ServletException should implement getCause() in terms of getRootCause() (#1076, rep by J Dane)
 <li>(2006-05-02) AbstractRotateLog uses truncate instead of remove for old file
 <li>stdout.log rotation file name for size overflow uses incorrect time (rep by Bill Au, #1054)

@@ -881,8 +881,14 @@ public abstract class JspNode {
     else
       cb.append(parentTag.getCustomTagName());
 
-    if (_gen instanceof JavaTagGenerator)
-      cb.append(", getJspBody()");
+    if (_gen instanceof JavaTagGenerator) {
+      JavaTagGenerator tagGen = (JavaTagGenerator) _gen;
+      
+      if (tagGen.isStaticDoTag()) // jsp/1025
+	cb.append(", _jspBody");
+      else
+	cb.append(", getJspBody()");
+    }
     else
       cb.append(", null");
       
@@ -969,7 +975,7 @@ public abstract class JspNode {
       else if (rtexpr && hasRuntimeAttribute(value)) {
         return getRuntimeAttribute(value);
       }
-      else if (rtexpr && containsELAttribute(value)) {
+      else if (rtexpr && hasELAttribute(value)) { // jsp/0138
         return generateELValue(type, value);
       }
       else if (type.equals(boolean.class))

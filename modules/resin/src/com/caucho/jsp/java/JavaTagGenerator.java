@@ -196,12 +196,17 @@ public class JavaTagGenerator extends JavaJspGenerator {
 
     generateDoTag(out, _rootNode);
 
-    if (! hasScripting())
+    if (isStaticDoTag())
       generateStaticDoTag(out, _rootNode);
 
     generateTagInfo(out);
     
     generateClassFooter(out);
+  }
+
+  protected boolean isStaticDoTag()
+  {
+    return ! hasScripting();
   }
 
   /**

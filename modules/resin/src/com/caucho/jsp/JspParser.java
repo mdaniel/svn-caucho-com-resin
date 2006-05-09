@@ -476,6 +476,7 @@ public class JspParser {
 	    if (_isTop && name.equals("jsp:root")) {
               _text.clear();
               _isXml = true;
+	      _parseState.setELIgnoredDefault(false);
             }
             _isTop = false;
 	    parseOpenTag(name, ch, tagCode == TAG_UNKNOWN);

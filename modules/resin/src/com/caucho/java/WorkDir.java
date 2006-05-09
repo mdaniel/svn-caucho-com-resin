@@ -80,7 +80,7 @@ public class WorkDir {
    */
   public static void setLocalWorkDir(Path path)
   {
-    _localWorkDir.set(path);
+    setLocalWorkDir(path, Thread.currentThread().getContextClassLoader());
   }
 
   /**

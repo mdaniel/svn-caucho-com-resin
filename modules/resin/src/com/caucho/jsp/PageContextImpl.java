@@ -941,7 +941,7 @@ public class PageContextImpl extends PageContext
     else
       relativeUrl = relativeUrl + '?' + query;
 
-    include(relativeUrl);
+    forward(relativeUrl);
   }
 
   /**

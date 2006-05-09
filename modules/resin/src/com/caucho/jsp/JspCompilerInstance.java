@@ -241,7 +241,7 @@ public class JspCompilerInstance {
       appDir = app.getAppDir();
 
     if (app != null && app.has23Config())
-      _parseState.setELIgnored(true);
+      _parseState.setELIgnoredDefault(true);
 
     JspConfig jspConfig = null;
 
@@ -329,7 +329,6 @@ public class JspCompilerInstance {
     }
     else {
     }
-
     _parseState.setResourceManager(resourceManager);
     LineMap lineMap = null;
 
@@ -446,6 +445,8 @@ public class JspCompilerInstance {
       _parser.getParseState().setXml(isXml);
       
       if (isXml) {
+	_parseState.setELIgnoredDefault(false);
+	
 	Xml xml = new Xml();
 	xml.setContentHandler(new JspContentHandler(_jspBuilder));
 	_jspPath.setUserPath(_uri);
@@ -543,7 +544,7 @@ public class JspCompilerInstance {
 	isXml = _jspPropertyGroup.isXml();
 
       _parseState.setXml(isXml);
-      
+
       if (_jspCompiler.addTag(_className)) {
 	_isPrototype = true;
 	_jspBuilder.setPrototype(true);
@@ -553,6 +554,8 @@ public class JspCompilerInstance {
       _isXml = isXml;
       
       if (isXml) {
+	_parseState.setELIgnoredDefault(false);
+	
 	Xml xml = new Xml();
 	xml.setContentHandler(new JspContentHandler(_jspBuilder));
 	_jspPath.setUserPath(_uri);

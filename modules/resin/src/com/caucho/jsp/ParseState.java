@@ -62,6 +62,7 @@ public class ParseState {
   private JspPropertyGroup _jspPropertyGroup = new JspPropertyGroup();
 
   private boolean _isELIgnored = false;
+  private boolean _isELIgnoredSet = false;
   private boolean _isScriptingInvalid = false;
   
   private boolean _isVelocityEnabled;
@@ -144,6 +145,16 @@ public class ParseState {
   public void setELIgnored(boolean isELIgnored)
   {
     _isELIgnored = isELIgnored;
+    _isELIgnoredSet = true;
+  }
+
+  /**
+   * Set if JSP EL is ignored.
+   */
+  public void setELIgnoredDefault(boolean isELIgnored)
+  {
+    if (! _isELIgnoredSet)
+      _isELIgnored = isELIgnored;
   }
 
   /**
