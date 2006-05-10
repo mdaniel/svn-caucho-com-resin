@@ -549,7 +549,7 @@ public class XmlParser extends AbstractParser {
     int ch = 0;
 
     for (ch = skipWhitespace(read()); 
-	 ch != -1 && ch != ']'; 
+	 ch >= 0 && ch != ']'; 
 	 ch = skipWhitespace(read())) {
       if (ch == '<') {
 	if ((ch = read()) == '!') {
@@ -589,15 +589,18 @@ public class XmlParser extends AbstractParser {
 	}
 	else 
 	  throw error(L.l("expected markup at {0}", badChar(ch)));
-      } else if (ch == '%') {
+      }
+      else if (ch == '%') {
 	ch = _reader.parseName(_buf, read());
 
 	if (ch != ';')
 	  throw error(L.l("`%{0};' expects `;' at {1}.  Parameter entities have a `%name;' syntax.", _buf, badChar(ch)));
 
 	addPEReference(_text, _buf.toString());
-      } else
+      }
+      else {
 	throw error(L.l("expected '<' at {0}", badChar(ch)));
+      }
 
       _text.clear();
     }
@@ -2919,7 +2922,10 @@ public class XmlParser extends AbstractParser {
 
   public void unread(int ch)
   {
-    if (_reader == _macro) {
+    if (ch < 0) {
+      return;
+    }
+    else if (_reader == _macro) {
     }
     else if (_macro.getNext() == null) {
       _macro.init(this, _reader);
