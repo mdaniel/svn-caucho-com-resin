@@ -56,6 +56,14 @@ public class ConditionalExpr extends Expr {
     _falseExpr = falseExpr;
   }
 
+  public ConditionalExpr(Expr test, Expr trueExpr, Expr falseExpr)
+  {
+    _test = test;
+
+    _trueExpr = trueExpr;
+    _falseExpr = falseExpr;
+  }
+
   /**
    * Evaluates the expression.
    *

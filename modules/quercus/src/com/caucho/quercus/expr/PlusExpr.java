@@ -45,6 +45,11 @@ public class PlusExpr extends UnaryExpr {
   {
     super(location, expr);
   }
+  
+  public PlusExpr(Expr expr)
+  {
+    super(expr);
+  }
 
   /**
    * Evaluates the expression.

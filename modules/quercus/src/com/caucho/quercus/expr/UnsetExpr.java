@@ -46,6 +46,11 @@ public class UnsetExpr extends Expr {
     _var = var;
   }
 
+  public UnsetExpr(AbstractVarExpr var)
+  {
+    _var = var;
+  }
+
   /**
    * Evaluates the expression.
    *

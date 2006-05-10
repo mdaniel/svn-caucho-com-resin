@@ -67,6 +67,16 @@ public class NewExpr extends Expr {
     _name = name.intern();
     _args = args;
   }
+
+  public NewExpr(String name, ArrayList<Expr> args)
+  {
+    this(Location.UNKNOWN, name, args);
+  }
+
+  public NewExpr(String name, Expr []args)
+  {
+    this(Location.UNKNOWN, name, args);
+  }
   
   /**
    * Evaluates the expression.

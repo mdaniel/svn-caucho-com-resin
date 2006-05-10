@@ -66,6 +66,11 @@ abstract public class Expr {
     _location = location;
   }
 
+  public Expr()
+  {
+    _location = Location.UNKNOWN;
+  }
+
   /**
    * Returns the location.
    */

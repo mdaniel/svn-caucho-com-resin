@@ -63,6 +63,16 @@ public class IncludeOnceExpr extends UnaryExpr {
     _isRequire = isRequire;
   }
   
+  public IncludeOnceExpr(Path sourceFile, Expr expr)
+  {
+    this(Location.UNKNOWN, sourceFile, expr);
+  }
+  
+  public IncludeOnceExpr(Path sourceFile, Expr expr, boolean isRequire)
+  {
+    this(Location.UNKNOWN, sourceFile, expr, isRequire);
+  }
+  
   /**
    * Evaluates the expression.
    *

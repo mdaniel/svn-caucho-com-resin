@@ -50,6 +50,11 @@ public class RefExpr extends UnaryExpr {
     super(location, expr);
   }
 
+  public RefExpr(Expr expr)
+  {
+    super(expr);
+  }
+
   /**
    * Returns true for a reference.
    */

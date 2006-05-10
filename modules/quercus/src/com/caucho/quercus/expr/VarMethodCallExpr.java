@@ -79,6 +79,16 @@ public class VarMethodCallExpr extends Expr {
 
     _args = args;
   }
+
+  public VarMethodCallExpr(Expr objExpr, Expr name, ArrayList<Expr> args)
+  {
+    this(Location.UNKNOWN, objExpr, name, args);
+  }
+
+  public VarMethodCallExpr(Expr objExpr, Expr name, Expr []args)
+  {
+    this(Location.UNKNOWN, objExpr, name, args);
+  }
   
   /**
    * Evaluates the expression.

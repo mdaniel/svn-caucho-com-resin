@@ -48,6 +48,11 @@ public class AndExpr extends BinaryExpr {
     super(location, left, right);
   }
 
+  public AndExpr(Expr left, Expr right)
+  {
+    super(left, right);
+  }
+
   /**
    * Returns true for a boolean.
    */

@@ -46,6 +46,11 @@ public class ToObjectExpr extends UnaryExpr {
     super(location, expr);
   }
 
+  public ToObjectExpr(Expr expr)
+  {
+    super(expr);
+  }
+
   /**
    * Evaluates the expression.
    *

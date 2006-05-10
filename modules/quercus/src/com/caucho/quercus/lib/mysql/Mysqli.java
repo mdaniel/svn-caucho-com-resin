@@ -385,7 +385,7 @@ public class Mysqli {
    * @return a {@link JdbcResultResource}, or BooleanValue.FALSE for failure
    */
   public Value query(String sql,
-					 @Optional("MYSQLI_STORE_RESULT") int resultMode)
+		     @Optional("MYSQLI_STORE_RESULT") int resultMode)
   {
     // XXX: resultMode = MYSQLI_USE_RESULT is an unbuffered query, not supported.
     JdbcConnectionResource conn = validateConnection();
@@ -407,15 +407,15 @@ public class Mysqli {
    * Connects to the underlying database.
    */
   public boolean real_connect(Env env,
-							  @Optional("localhost") String host,
-							  @Optional String userName,
-							  @Optional String password,
-							  @Optional String dbname,
-							  @Optional("3306") int port,
-							  @Optional String socket,
-							  @Optional int flags,
-							  @Optional String driver,
-							  @Optional String url)
+			      @Optional("localhost") String host,
+			      @Optional String userName,
+			      @Optional String password,
+			      @Optional String dbname,
+			      @Optional("3306") int port,
+			      @Optional String socket,
+			      @Optional int flags,
+			      @Optional String driver,
+			      @Optional String url)
   {
     if (_conn != null) {
       env.warning(L.l("Connection is already opened to '{0}'", _conn));
@@ -430,13 +430,13 @@ public class Mysqli {
       if (host == null || host.equals(""))
         host = "localhost";
 
-	  if (driver == null || driver.equals("")) {
-		  driver = "com.mysql.jdbc.jdbc2.optional.MysqlConnectionPoolDataSource";
-	  }
+      if (driver == null || driver.equals("")) {
+	driver = "com.mysql.jdbc.jdbc2.optional.MysqlConnectionPoolDataSource";
+      }
 
-	  if (url == null || url.equals("")) {
-		  url = "jdbc:mysql://" + host + ":" + port + "/" + dbname;
-	  }
+      if (url == null || url.equals("")) {
+	url = "jdbc:mysql://" + host + ":" + port + "/" + dbname;
+      }
 
       Connection jConn = env.getConnection(driver, url, userName, password);
 

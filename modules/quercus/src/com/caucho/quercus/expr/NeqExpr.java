@@ -47,6 +47,11 @@ public final class NeqExpr extends BinaryExpr {
     super(location, left, right);
   }
 
+  public NeqExpr(Expr left, Expr right)
+  {
+    super(left, right);
+  }
+
   /**
    * Evaluates the equality as a boolean.
    */

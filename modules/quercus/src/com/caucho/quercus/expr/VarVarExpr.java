@@ -56,6 +56,11 @@ public class VarVarExpr extends AbstractVarExpr {
     _var = var;
   }
 
+  public VarVarExpr(Expr var)
+  {
+    _var = var;
+  }
+
   /**
    * Evaluates the expression.
    *

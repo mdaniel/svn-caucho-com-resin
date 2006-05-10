@@ -45,6 +45,11 @@ public class ModExpr extends BinaryExpr {
     super(location, left, right);
   }
 
+  public ModExpr(Expr left, Expr right)
+  {
+    super(left, right);
+  }
+
   /**
    * Return true for a double.
    */

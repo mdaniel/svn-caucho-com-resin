@@ -45,6 +45,11 @@ public class CopyExpr extends UnaryExpr {
     super(location, expr);
   }
 
+  public CopyExpr(Expr expr)
+  {
+    super(expr);
+  }
+
   /**
    * Evaluates the expression.
    *

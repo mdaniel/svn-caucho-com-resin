@@ -57,6 +57,7 @@ import javax.persistence.FlushModeType;
 import com.caucho.amber.AmberQuery;
 import com.caucho.amber.AmberException;
 import com.caucho.amber.AmberRuntimeException;
+import com.caucho.amber.AmberObjectNotFoundException;
 
 import com.caucho.amber.entity.Entity;
 import com.caucho.amber.entity.AmberEntityHome;
@@ -220,6 +221,11 @@ public class AmberConnection
   {
     try {
       return (T) load(entityClass, primaryKey);
+    } catch (AmberObjectNotFoundException e) {
+      // XXX: shouldn't be throwing at all?
+      log.log(Level.FINER, e.toString(), e);
+
+      return null;
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {

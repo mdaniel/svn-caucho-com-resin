@@ -62,6 +62,20 @@ public class IncludeExpr extends UnaryExpr {
     _isRequire = isRequire;
   }
   
+  public IncludeExpr(Path sourceFile, Expr expr)
+  {
+    super(expr);
+
+    _dir = sourceFile.getParent();
+  }
+  
+  public IncludeExpr(Path sourceFile, Expr expr, boolean isRequire)
+  {
+    this(sourceFile, expr);
+
+    _isRequire = isRequire;
+  }
+  
   /**
    * Evaluates the expression.
    *

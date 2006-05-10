@@ -53,6 +53,12 @@ public class ArrayIsSetExpr extends Expr {
     _index = index;
   }
 
+  public ArrayIsSetExpr(Expr expr, Expr index)
+  {
+    _expr = expr;
+    _index = index;
+  }
+
   public boolean isBoolean()
   {
     return true;

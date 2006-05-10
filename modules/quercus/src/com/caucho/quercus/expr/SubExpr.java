@@ -46,6 +46,11 @@ public class SubExpr extends BinaryExpr {
     super(location, left, right);
   }
 
+  public SubExpr(Expr left, Expr right)
+  {
+    super(left, right);
+  }
+
   /**
    * Evaluates the expression returning the expression value.
    *

@@ -47,6 +47,11 @@ public final class NotExpr extends UnaryExpr {
     super(location, expr);
   }
 
+  public NotExpr(Expr expr)
+  {
+    super(expr);
+  }
+
   /**
    * Return true as a boolean.
    */

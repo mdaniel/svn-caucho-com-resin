@@ -30,6 +30,9 @@
 package com.caucho.quercus.lib.file;
 
 import java.io.IOException;
+
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Arrays;
 
 import java.util.logging.Logger;
@@ -78,6 +81,17 @@ public class FileModule extends AbstractQuercusModule {
   public static final int UPLOAD_ERR_PARTIAL = 3;
   public static final int UPLOAD_ERR_NO_FILE = 4;
 
+  private static final HashMap<String,StringValue> _iniMap
+    = new HashMap<String,StringValue>();
+
+  /**
+   * Returns the default quercus.ini values.
+   */
+  public Map<String,StringValue> getDefaultIni()
+  {
+    return _iniMap;
+  }
+  
   /**
    * Returns the base name of a string.
    */
@@ -1908,6 +1922,14 @@ public class FileModule extends AbstractQuercusModule {
 
       return false;
     }
+  }
+
+  static {
+    addIni(_iniMap, "allow_url_fopen", "1", PHP_INI_SYSTEM);
+    addIni(_iniMap, "user_agent", null, PHP_INI_ALL);
+    addIni(_iniMap, "default_socket_timeout", "60", PHP_INI_ALL);
+    addIni(_iniMap, "from", "", PHP_INI_ALL);
+    addIni(_iniMap, "auto_detect_line_endings", "0", PHP_INI_ALL);
   }
 }
 

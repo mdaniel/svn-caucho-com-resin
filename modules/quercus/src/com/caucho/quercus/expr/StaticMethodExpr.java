@@ -78,6 +78,17 @@ public class StaticMethodExpr extends Expr {
     _args = args;
   }
 
+
+  public StaticMethodExpr(String className, String name, ArrayList<Expr> args)
+  {
+    this(Location.UNKNOWN, className, name, args);
+  }
+
+  public StaticMethodExpr(String className, String name, Expr []args)
+  {
+    this(Location.UNKNOWN, className, name, args);
+  }
+
   /**
    * Returns the reference of the value.
    * @param location

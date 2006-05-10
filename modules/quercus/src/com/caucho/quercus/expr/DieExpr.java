@@ -59,6 +59,16 @@ public class DieExpr extends Expr {
     _value = null;
   }
 
+  public DieExpr(Expr value)
+  {
+    _value = value;
+  }
+
+  public DieExpr()
+  {
+    _value = null;
+  }
+
   /**
    * Evaluates the expression.
    *

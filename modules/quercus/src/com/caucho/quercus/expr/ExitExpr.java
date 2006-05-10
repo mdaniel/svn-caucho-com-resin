@@ -59,6 +59,16 @@ public class ExitExpr extends Expr {
     _value = null;
   }
 
+  public ExitExpr(Expr value)
+  {
+    _value = value;
+  }
+
+  public ExitExpr()
+  {
+    _value = null;
+  }
+
   /**
    * Evaluates the expression.
    *

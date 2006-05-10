@@ -46,6 +46,11 @@ public class ToBooleanExpr extends UnaryExpr {
     super(location, expr);
   }
 
+  public ToBooleanExpr(Expr expr)
+  {
+    super(expr);
+  }
+
   /**
    * Evaluates the expression.
    *

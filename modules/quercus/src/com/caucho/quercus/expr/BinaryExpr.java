@@ -46,6 +46,12 @@ abstract public class BinaryExpr extends Expr {
     _right = right;
   }
 
+  protected BinaryExpr(Expr left, Expr right)
+  {
+    _left = left;
+    _right = right;
+  }
+
   /**
    * Returns the left expression.
    */

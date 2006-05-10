@@ -577,6 +577,31 @@ public class OptionsModule extends AbstractQuercusModule {
     //    addIni(_iniMap, "magic_quotes_gpc", "1", PHP_INI_PERDIR);
     addIni(_iniMap, "magic_quotes_gpc", "0", PHP_INI_PERDIR);
     addIni(_iniMap, "magic_quotes_runtime", "0", PHP_INI_ALL);
+
+    // basic
+    addIni(_iniMap, "track_vars", "On", PHP_INI_ALL);
+    addIni(_iniMap, "arg_separator.output", "&", PHP_INI_ALL);
+    addIni(_iniMap, "arg_separator.input", "&", PHP_INI_ALL);
+    addIni(_iniMap, "variables_order", "EGPCS", PHP_INI_ALL);
+    addIni(_iniMap, "auto_globals_jit", "1", PHP_INI_ALL);
+    addIni(_iniMap, "register_globals", "0", PHP_INI_ALL);
+    addIni(_iniMap, "register_argc_argv", "1", PHP_INI_ALL);
+    addIni(_iniMap, "register_long_arrays", "1", PHP_INI_ALL);
+    addIni(_iniMap, "post_max_size", "8M", PHP_INI_ALL);
+    addIni(_iniMap, "gpc_order", "GPC", PHP_INI_ALL);
+    addIni(_iniMap, "auto_prepend_file", null, PHP_INI_ALL);
+    addIni(_iniMap, "auto_append_file", null, PHP_INI_ALL);
+    addIni(_iniMap, "default_mimetype", "text/html", PHP_INI_ALL);
+    addIni(_iniMap, "default_charset", "", PHP_INI_ALL);
+    addIni(_iniMap, "always_populate_raw_post_data", "0", PHP_INI_ALL);
+    addIni(_iniMap, "allow_webdav_methods", "0", PHP_INI_ALL);
+
+    // file uploads
+    addIni(_iniMap, "file_uploads", "1", PHP_INI_SYSTEM);
+    addIni(_iniMap, "upload_tmp_dir", null, PHP_INI_SYSTEM);
+    addIni(_iniMap, "upload_max_filesize", "2M", PHP_INI_SYSTEM);
+    
+    addIni(_iniMap, "memory_limit", "-1", PHP_INI_ALL);
   }
 
   //@todo mixed   assert_options(int what [, mixed value])

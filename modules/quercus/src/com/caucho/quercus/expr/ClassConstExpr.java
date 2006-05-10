@@ -57,6 +57,12 @@ public class ClassConstExpr extends Expr {
     _className = className.intern();
     _name = name.intern();
   }
+
+  public ClassConstExpr(String className, String name)
+  {
+    _className = className.intern();
+    _name = name.intern();
+  }
   
   /**
    * Evaluates the expression.

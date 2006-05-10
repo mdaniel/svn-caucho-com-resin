@@ -47,6 +47,11 @@ public final class GeqExpr extends BinaryExpr {
     super(location, left, right);
   }
 
+  public GeqExpr(Expr left, Expr right)
+  {
+    super(left, right);
+  }
+
   /**
    * Returns true for a boolean.
    */

@@ -45,6 +45,11 @@ public class ThisMethodCallExpr extends MethodCallExpr {
     super(location, objExpr, name, args);
   }
 
+  public ThisMethodCallExpr(Expr objExpr, String name, ArrayList<Expr> args)
+  {
+    super(objExpr, name, args);
+  }
+
   //
   // java code generation
   //

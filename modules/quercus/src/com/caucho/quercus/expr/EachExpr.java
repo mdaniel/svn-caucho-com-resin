@@ -41,11 +41,16 @@ import com.caucho.quercus.Location;
  * Represents a PHP each expression.
  */
 public class EachExpr extends UnaryExpr {
-
   public EachExpr(Location location, Expr expr)
     throws IOException
   {
     super(location, expr);
+  }
+
+  public EachExpr(Expr expr)
+    throws IOException
+  {
+    super(expr);
   }
 
   /**

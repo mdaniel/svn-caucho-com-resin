@@ -58,6 +58,13 @@ public class FieldGetExpr extends AbstractVarExpr {
     _name = name.intern();
   }
 
+  public FieldGetExpr(Expr objExpr, String name)
+  {
+    _objExpr = objExpr;
+
+    _name = name.intern();
+  }
+
   /**
    * Evaluates the expression.
    *

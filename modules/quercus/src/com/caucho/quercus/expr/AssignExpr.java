@@ -52,6 +52,12 @@ public class AssignExpr extends Expr {
     _value = value;
   }
 
+  public AssignExpr(AbstractVarExpr var, Expr value)
+  {
+    _var = var;
+    _value = value;
+  }
+
   /**
    * Creates a assignment
    * @param location

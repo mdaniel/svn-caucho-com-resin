@@ -4,6 +4,8 @@
 
 <s2 title='3.0.snap - May 2, 2006'>
 <ul>
+<li>Amber: EntityManager.find should return null if no object (#1080, rep by fbertra)
+<li>Amber: CMP 2.1 loading was improperly casting (#1071, rep by Christian Amott)
 <li>el-ignored with tagx and el-ignored check in attribute vs body (rep by Gary Doughty)
 <li>Static JSP taglib was generating incorrect fragment code (rep by Bryan Davis)
 <li>ServletException should implement getCause() in terms of getRootCause() (#1076, rep by J Dane)
@@ -16,7 +18,7 @@
 <li>(2006-04-14) ToCharResponseAdapter should not close the underlying writer on close (#989, rep by Tony Field)
 <li>CGI was sending output through PrintWriter instead of OutputStream (#1035, rep by mineral)
 <li>Added aliases and java type for ISO-8859-10 (rep by Michael Young)
-<li>AbstractHttpResponse.finish was not ignoring client disconnect (#1045, rep by Mattias )Jiderhamn
+<li>AbstractHttpResponse.finish was not ignoring client disconnect (#1045, rep by Mattias Jiderhamn)
 <li>LdapAuthenticator (#666, rep by Rudy D'Hauwe);
 <li>Basic SSI support with SSIServlet (#205)
 <li>JSP/tag file compilation issue (#1037, rep by Serge Knystautas)

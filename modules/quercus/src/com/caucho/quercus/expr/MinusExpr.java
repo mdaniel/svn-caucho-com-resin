@@ -46,6 +46,11 @@ public class MinusExpr extends UnaryExpr {
     super(location, expr);
   }
 
+  public MinusExpr(Expr expr)
+  {
+    super(expr);
+  }
+
   /**
    * Evaluates the expression.
    *

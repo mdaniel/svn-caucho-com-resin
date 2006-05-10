@@ -81,6 +81,8 @@ public class AmberException extends SQLException {
   {
     if (e instanceof AmberException)
       return (AmberException) e;
+    else if (e instanceof AmberRuntimeException)
+      throw (AmberRuntimeException) e;
     else
       return new AmberException(e);
   }

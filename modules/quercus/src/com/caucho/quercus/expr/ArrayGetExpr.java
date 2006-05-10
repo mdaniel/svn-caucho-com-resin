@@ -53,6 +53,12 @@ public class ArrayGetExpr extends AbstractVarExpr {
     _index = index;
   }
 
+  public ArrayGetExpr(Expr expr, Expr index)
+  {
+    _expr = expr;
+    _index = index;
+  }
+
   /**
    * Returns the expr.
    */

@@ -69,6 +69,16 @@ public class VarNewExpr extends Expr {
     _name = name;
     _args = args;
   }
+
+  public VarNewExpr(Expr name, ArrayList<Expr> args)
+  {
+    this(Location.UNKNOWN, name, args);
+  }
+
+  public VarNewExpr(Expr name, Expr []args)
+  {
+    this(Location.UNKNOWN, name, args);
+  }
   
   /**
    * Evaluates the expression.

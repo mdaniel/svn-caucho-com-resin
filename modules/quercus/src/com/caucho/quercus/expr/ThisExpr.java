@@ -55,6 +55,11 @@ public class ThisExpr extends AbstractVarExpr {
     super(location);
     _quercusClass = quercusClass;
   }
+  
+  public ThisExpr(InterpretedClassDef quercusClass)
+  {
+    _quercusClass = quercusClass;
+  }
 
   /**
    * Creates a field ref

@@ -45,6 +45,11 @@ public class MulExpr extends BinaryExpr {
     super(location, left, right);
   }
 
+  public MulExpr(Expr left, Expr right)
+  {
+    super(left, right);
+  }
+
   /**
    * Return true for a double value
    */

@@ -47,6 +47,11 @@ public final class GtExpr extends BinaryExpr {
     super(location, left, right);
   }
 
+  public GtExpr(Expr left, Expr right)
+  {
+    super(left, right);
+  }
+
   /**
    * Returns true for a boolean.
    */

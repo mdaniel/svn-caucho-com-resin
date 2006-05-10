@@ -46,6 +46,11 @@ public class BitOrExpr extends BinaryExpr {
     super(location, left, right);
   }
 
+  public BitOrExpr(Expr left, Expr right)
+  {
+    super(left, right);
+  }
+
   /**
    * Returns true for a long.
    */

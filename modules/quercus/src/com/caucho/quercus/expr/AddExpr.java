@@ -46,6 +46,11 @@ public class AddExpr extends BinaryExpr {
     super(location, left, right);
   }
 
+  public AddExpr(Expr left, Expr right)
+  {
+    super(left, right);
+  }
+
   public Value eval(Env env)
     throws Throwable
   {

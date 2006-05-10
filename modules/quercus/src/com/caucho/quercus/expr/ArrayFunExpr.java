@@ -68,6 +68,16 @@ public class ArrayFunExpr extends Expr {
     _values = values;
   }
 
+  public ArrayFunExpr(ArrayList<Expr> keyList, ArrayList<Expr> valueList)
+  {
+    this(Location.UNKNOWN, keyList, valueList);
+  }
+
+  public ArrayFunExpr(Expr []keys, Expr []values)
+  {
+    this(Location.UNKNOWN, keys, values);
+  }
+
   /**
    * Returns true for a constant array.
    */

@@ -56,6 +56,13 @@ public class SetCharAtExpr extends Expr {
     _indexExpr = indexExpr;
     _valueExpr = valueExpr;
   }
+
+  public SetCharAtExpr(Expr objExpr, Expr indexExpr, Expr valueExpr)
+  {
+    _objExpr = objExpr;
+    _indexExpr = indexExpr;
+    _valueExpr = valueExpr;
+  }
   
   /**
    * Evaluates the expression.

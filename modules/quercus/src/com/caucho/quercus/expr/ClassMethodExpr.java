@@ -75,6 +75,16 @@ public class ClassMethodExpr extends Expr {
 
     _args = args;
   }
+
+  public ClassMethodExpr(String className, String name, ArrayList<Expr> args)
+  {
+    this(Location.UNKNOWN, className, name, args);
+  }
+
+  public ClassMethodExpr(String className, String name, Expr []args)
+  {
+    this(Location.UNKNOWN, className, name, args);
+  }
   
   /**
    * Evaluates the expression.

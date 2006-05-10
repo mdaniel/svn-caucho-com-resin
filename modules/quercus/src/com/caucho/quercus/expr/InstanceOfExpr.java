@@ -51,6 +51,13 @@ public final class InstanceOfExpr extends UnaryExpr {
     _right = right;
   }
 
+  public InstanceOfExpr(Expr left, String right)
+  {
+    super(left);
+
+    _right = right;
+  }
+
   /**
    * Returns true for a boolean.
    */

@@ -46,6 +46,11 @@ public class CommaExpr extends BinaryExpr {
     super(location, left, right);
   }
 
+  public CommaExpr(Expr left, Expr right)
+  {
+    super(left, right);
+  }
+
   /**
    * Evaluates the expression.
    *

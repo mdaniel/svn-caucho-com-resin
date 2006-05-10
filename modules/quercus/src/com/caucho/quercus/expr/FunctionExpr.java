@@ -69,6 +69,16 @@ public class FunctionExpr extends Expr {
 
     _args = args;
   }
+
+  public FunctionExpr(String name, ArrayList<Expr> args)
+  {
+    this(Location.UNKNOWN, name, args);
+  }
+
+  public FunctionExpr(String name, Expr []args)
+  {
+    this(Location.UNKNOWN, name, args);
+  }
   
   /**
    * Returns the location if known.

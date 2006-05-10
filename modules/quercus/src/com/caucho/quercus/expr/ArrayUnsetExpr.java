@@ -51,6 +51,12 @@ public class ArrayUnsetExpr extends Expr {
     _index = index;
   }
 
+  public ArrayUnsetExpr(Expr expr, Expr index)
+  {
+    _expr = expr;
+    _index = index;
+  }
+
   /**
    * Evaluates the expression.
    *

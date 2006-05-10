@@ -60,6 +60,15 @@ public class StaticFieldGetExpr extends AbstractVarExpr {
 
     _envName = className + "::" + varName;
   }
+
+  public StaticFieldGetExpr(String className, String varName)
+  {
+    _className = className;
+    
+    _varName = varName;
+
+    _envName = className + "::" + varName;
+  }
   
   /**
    * Evaluates the expression.

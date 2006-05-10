@@ -44,6 +44,11 @@ public class CloneExpr extends UnaryExpr {
   {
     super(location, expr);
   }
+  
+  public CloneExpr(Expr expr)
+  {
+    super(expr);
+  }
 
   /**
    * Evaluates the expression.

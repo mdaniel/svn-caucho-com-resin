@@ -51,6 +51,10 @@ abstract public class AbstractVarExpr extends Expr {
   {
     super(location);
   }
+  
+  public AbstractVarExpr()
+  {
+  }
   /**
    * Marks the value as assigned
    */

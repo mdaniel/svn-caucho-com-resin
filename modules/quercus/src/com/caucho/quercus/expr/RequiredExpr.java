@@ -49,6 +49,11 @@ public class RequiredExpr extends Expr {
     super(location);
   }
 
+  public RequiredExpr()
+  {
+    super();
+  }
+
   /**
    * Evaluates the expression.
    *

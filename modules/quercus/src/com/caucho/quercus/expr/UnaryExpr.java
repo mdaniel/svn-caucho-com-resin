@@ -44,6 +44,11 @@ abstract public class UnaryExpr extends Expr {
     _expr = expr;
   }
 
+  protected UnaryExpr(Expr expr)
+  {
+    _expr = expr;
+  }
+
   /**
    * Returns the child expression.
    */

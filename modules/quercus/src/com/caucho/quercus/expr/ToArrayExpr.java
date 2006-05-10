@@ -47,6 +47,11 @@ public class ToArrayExpr extends UnaryExpr {
     super(location, expr);
   }
 
+  public ToArrayExpr(Expr expr)
+  {
+    super(expr);
+  }
+
   /**
    * Evaluates the expression.
    *

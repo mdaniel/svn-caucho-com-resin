@@ -133,6 +133,14 @@ public class QuercusServlet
   }
 
   /**
+   * Adds a quercus.ini configuration
+   */
+  public void setIniFile(Path path)
+  {
+    getQuercus().setIniFile(path);
+  }
+
+  /**
    * Sets the script encoding.
    */
   public void setScriptEncoding(String encoding)

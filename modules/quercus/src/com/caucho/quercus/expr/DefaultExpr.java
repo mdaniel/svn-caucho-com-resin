@@ -47,6 +47,11 @@ public class DefaultExpr extends Expr {
     super(location);
   }
 
+  public DefaultExpr()
+  {
+    super();
+  }
+
   /**
    * Evaluates the expression.
    *

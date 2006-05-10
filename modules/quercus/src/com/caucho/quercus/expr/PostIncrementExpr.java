@@ -54,6 +54,14 @@ public class PostIncrementExpr extends UnaryExpr {
     _incr = incr;
   }
 
+  public PostIncrementExpr(Expr expr, int incr)
+    throws IOException
+  {
+    super(expr);
+
+    _incr = incr;
+  }
+
   public Value eval(Env env)
     throws Throwable
   {

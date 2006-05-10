@@ -57,6 +57,12 @@ public class CharAtExpr extends AbstractVarExpr {
     _indexExpr = indexExpr;
   }
   
+  public CharAtExpr(Expr objExpr, Expr indexExpr)
+  {
+    _objExpr = objExpr;
+    _indexExpr = indexExpr;
+  }
+  
   /**
    * Evaluates the expression.
    *

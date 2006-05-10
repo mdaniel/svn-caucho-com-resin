@@ -684,6 +684,9 @@ public class JdbcResultResource extends ResourceValue {
    */
   public static Value getNumRows(ResultSet rs)
   {
+    if (rs == null)
+      return BooleanValue.FALSE;
+    
     try {
       int currentRow = rs.getRow();
 
@@ -1108,7 +1111,7 @@ public class JdbcResultResource extends ResourceValue {
   private ResultSetMetaData getMetaData()
     throws SQLException
   {
-    if (_metaData == null)
+    if (_metaData == null && _rs != null)
       _metaData = _rs.getMetaData();
 
     return _metaData;

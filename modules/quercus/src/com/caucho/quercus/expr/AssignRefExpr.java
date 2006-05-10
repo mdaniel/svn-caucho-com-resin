@@ -52,6 +52,12 @@ public class AssignRefExpr extends Expr {
     _value = value;
   }
 
+  public AssignRefExpr(AbstractVarExpr var, Expr value)
+  {
+    _var = var;
+    _value = value;
+  }
+
   /**
    * Evaluates the expression.
    *

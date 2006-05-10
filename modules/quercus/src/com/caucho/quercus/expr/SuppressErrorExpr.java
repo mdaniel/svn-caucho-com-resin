@@ -48,6 +48,11 @@ public class SuppressErrorExpr extends UnaryExpr {
     super(location, expr);
   }
 
+  public SuppressErrorExpr(Expr expr)
+  {
+    super(expr);
+  }
+
   /**
    * Creates the assignment.
    */

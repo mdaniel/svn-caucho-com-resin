@@ -47,6 +47,11 @@ public class XorExpr extends BinaryExpr {
     super(location, left, right);
   }
 
+  public XorExpr(Expr left, Expr right)
+  {
+    super(left, right);
+  }
+
   /**
    * Returns true for a boolean.
    */

@@ -200,6 +200,8 @@ public class ViewFileServlet extends GenericServlet {
     String sp = request.getParameter(PARAM_SERVLETPATH);
     String f = getFileName(request);
 
+    Path pwd = Vfs.lookup().createRoot();
+
     if (f != null) {
       ServletContext ctx = _context;
 
@@ -215,7 +217,8 @@ public class ViewFileServlet extends GenericServlet {
       cb.append('/');
       cb.append(f);
 
-      return Vfs.lookup(ctx.getRealPath(cb.toString()));
+      // return pwd.lookup(ctx.getRealPath(cb.toString()));
+      return pwd.lookup(cb.toString());
     }
 
     return null;

@@ -61,6 +61,12 @@ public class VarExpr
     _name = var.getName();
   }
 
+  public VarExpr(VarInfo var)
+  {
+    _var = var;
+    _name = var.getName();
+  }
+
   /**
    * Returns the variable info.
    */

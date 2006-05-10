@@ -54,6 +54,11 @@ public class ArrayTailExpr extends AbstractVarExpr {
     _expr = expr;
   }
 
+  public ArrayTailExpr(Expr expr)
+  {
+    _expr = expr;
+  }
+
   /**
    * Returns true for an expression that can be read (only $a[] uses this)
    */

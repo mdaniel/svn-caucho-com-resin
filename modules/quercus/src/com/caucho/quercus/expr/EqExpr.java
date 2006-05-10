@@ -47,6 +47,11 @@ public final class EqExpr extends BinaryExpr {
     super(location, left, right);
   }
 
+  public EqExpr(Expr left, Expr right)
+  {
+    super(left, right);
+  }
+
   /**
    * Evaluates the equality as a boolean.
    */

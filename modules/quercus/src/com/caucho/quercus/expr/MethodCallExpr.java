@@ -64,6 +64,11 @@ public class MethodCallExpr extends Expr {
     _args = new Expr[args.size()];
     args.toArray(_args);
   }
+
+  public MethodCallExpr(Expr objExpr, String name, ArrayList<Expr> args)
+  {
+    this(Location.UNKNOWN, objExpr, name, args);
+  }
   
   /**
    * Evaluates the expression.

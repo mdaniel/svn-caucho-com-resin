@@ -43,6 +43,10 @@ abstract public class LongValuedExpr extends Expr {
     super(location);
   }
 
+  public LongValuedExpr()
+  {
+  }
+
   /**
    * Evaluates the expression as a value.
    *

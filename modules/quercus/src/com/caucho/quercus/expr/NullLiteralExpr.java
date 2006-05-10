@@ -50,6 +50,10 @@ public class NullLiteralExpr extends Expr {
   {
     super(location);
   }
+  
+  private NullLiteralExpr()
+  {
+  }
 
   /**
    * Evaluates the expression as a constant.

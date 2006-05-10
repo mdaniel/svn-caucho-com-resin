@@ -58,6 +58,13 @@ public class FieldVarGetExpr extends AbstractVarExpr {
     _nameExpr = nameExpr;
   }
 
+  public FieldVarGetExpr(Expr objExpr, Expr nameExpr)
+  {
+    _objExpr = objExpr;
+    
+    _nameExpr = nameExpr;
+  }
+
   /**
    * Evaluates the expression.
    *

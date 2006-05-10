@@ -42,12 +42,18 @@ import com.caucho.quercus.program.ClassDef;
 import com.caucho.quercus.program.InterpretedClassDef;
 import com.caucho.quercus.program.JavaClassDef;
 import com.caucho.quercus.program.QuercusProgram;
+
+import com.caucho.quercus.lib.file.FileModule;
+
+import com.caucho.loader.Environment;
+
 import com.caucho.util.Log;
 import com.caucho.util.LruCache;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.Vfs;
+import com.caucho.vfs.Depend;
 
 import javax.sql.DataSource;
 import java.io.IOException;
@@ -273,6 +279,28 @@ public class Quercus {
       return def;
 
     return _lowerJavaClassWrappers.get(name.toLowerCase());
+  }
+
+  /**
+   * Sets an ini file.
+   */
+  public void setIniFile(Path path)
+  {
+    Environment.addDependency(new Depend(path));
+    
+    if (path.canRead()) {
+      Env env = new Env(this);
+
+      Value result = FileModule.parse_ini_file(env, path, false);
+
+      if (result instanceof ArrayValue) {
+	ArrayValue array = (ArrayValue) result;
+
+	for (Map.Entry<Value,Value> entry : array.entrySet()) {
+	  setIni(entry.getKey().toString(), entry.getValue().toString());
+	}
+      }
+    }
   }
 
   /**

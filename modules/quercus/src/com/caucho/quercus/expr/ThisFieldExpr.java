@@ -59,6 +59,13 @@ public class ThisFieldExpr extends AbstractVarExpr {
     
     _name = name.intern();
   }
+
+  public ThisFieldExpr(InterpretedClassDef quercusClass, String name)
+  {
+    _quercusClass = quercusClass;
+    
+    _name = name.intern();
+  }
   
   /**
    * Evaluates the expression.

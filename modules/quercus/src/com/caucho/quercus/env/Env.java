@@ -268,17 +268,20 @@ public class Env {
 
     _constMap = new HashMap<String, Value>();
 
-    _page.init(this);
-    try {
-      _page.importDefinitions(this);
-    }
-    catch (Throwable e) {
-      throw new RuntimeException(e);
+    if (page != null) {
+      _page.init(this);
+      try {
+	_page.importDefinitions(this);
+      }
+      catch (Throwable e) {
+	throw new RuntimeException(e);
+      }
     }
 
     setPwd(Vfs.lookup());
 
-    _selfPath = _page.getSelfPath(null);
+    if (_page != null)
+      _selfPath = _page.getSelfPath(null);
 
     if (_request != null && _request.getMethod().equals("POST")) {
       _post = new ArrayValueImpl();
@@ -291,6 +294,11 @@ public class Env {
     }
 
     _startTime = Alarm.getCurrentTime();
+  }
+
+  public Env(Quercus quercus)
+  {
+    this(quercus, null, null, null, null);
   }
 
   public String getScriptEncoding()

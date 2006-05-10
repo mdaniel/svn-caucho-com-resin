@@ -68,6 +68,16 @@ public class VarFunctionExpr extends Expr {
     _args = args;
   }
 
+  public VarFunctionExpr(Expr name, ArrayList<Expr> args)
+  {
+    this(Location.UNKNOWN, name, args);
+  }
+
+  public VarFunctionExpr(Expr name, Expr []args)
+  {
+    this(Location.UNKNOWN, name, args);
+  }
+
   /**
    * Returns the reference of the value.
    * @param location

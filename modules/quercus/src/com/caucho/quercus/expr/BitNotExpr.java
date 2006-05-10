@@ -46,6 +46,11 @@ public class BitNotExpr extends UnaryExpr {
     super(location, expr);
   }
 
+  public BitNotExpr(Expr expr)
+  {
+    super(expr);
+  }
+
   /**
    * Returns true for a long.
    */

@@ -56,6 +56,11 @@ public class PhpVarExpr extends VarExpr {
     super(location, var);
   }
 
+  public PhpVarExpr(VarInfo var)
+  {
+    super(var);
+  }
+
   /**
    * Returns the java variable name.
    */

@@ -45,6 +45,11 @@ public class LeftShiftExpr extends BinaryExpr {
     super(location, left, right);
   }
 
+  public LeftShiftExpr(Expr left, Expr right)
+  {
+    super(left, right);
+  }
+
   /**
    * Returns true for a long.
    */

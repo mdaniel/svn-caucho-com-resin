@@ -53,6 +53,15 @@ public class PreIncrementExpr extends UnaryExpr {
     _incr = incr;
   }
 
+  public PreIncrementExpr(Expr expr, int incr)
+    throws IOException
+  {
+    // super(expr.createRef());
+    super(expr);
+
+    _incr = incr;
+  }
+
   public Value eval(Env env)
     throws Throwable
   {

@@ -48,6 +48,12 @@ public final class CmpExpr extends Expr {
     _right = right;
   }
 
+  public CmpExpr(int code, Expr left, Expr right)
+  {
+    _left = left;
+    _right = right;
+  }
+
   /**
    * Evaluates the equality as a boolean.
    */

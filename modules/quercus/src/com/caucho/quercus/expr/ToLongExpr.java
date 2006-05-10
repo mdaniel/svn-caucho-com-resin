@@ -46,6 +46,11 @@ public class ToLongExpr extends UnaryExpr {
     super(location, expr);
   }
 
+  public ToLongExpr(Expr expr)
+  {
+    super(expr);
+  }
+
   /**
    * Evaluates the expression.
    *

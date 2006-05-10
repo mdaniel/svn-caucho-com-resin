@@ -46,6 +46,11 @@ public class ToDoubleExpr extends UnaryExpr {
     super(location, expr);
   }
 
+  public ToDoubleExpr(Expr expr)
+  {
+    super(expr);
+  }
+
   /**
    * Evaluates the expression.
    *
