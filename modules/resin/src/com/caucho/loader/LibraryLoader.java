@@ -345,7 +345,6 @@ public class LibraryLoader extends Loader implements Dependency {
       Path path = jarEntry.getJarPath();
 
       Path filePath = path.lookup(pathName);
-      System.out.println("FP: " + filePath + " " + path + " " + path.getClass() + " " + filePath.exists());
 
       if (filePath.exists())
 	return filePath;
