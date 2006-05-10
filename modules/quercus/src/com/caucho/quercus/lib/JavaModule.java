@@ -49,11 +49,13 @@ public class JavaModule extends AbstractQuercusModule {
 
   private static final L10N L = new L10N(JavaModule.class);
 
-  public static Value java(Env env, String className)
+  public static Value java(Env env, String className,
+			   Value []args)
+    throws Throwable
   {
     JavaClassDef def = env.getJavaClassDefinition(className);
 
-    return def.newInstance();
+    return def.evalNew(env, args);
   }
 }
 

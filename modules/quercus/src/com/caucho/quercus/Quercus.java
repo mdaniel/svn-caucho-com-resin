@@ -254,7 +254,7 @@ public class Quercus {
 
       }
 
-      def = new JavaClassDef(getModuleContext(), className, type);
+      def = JavaClassDef.create(getModuleContext(), className, type);
 
       _javaClassWrappers.put(className, def);
 

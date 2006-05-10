@@ -95,6 +95,15 @@ abstract public class ClassDef {
   }
 
   /**
+   * Creates a new instance.
+   */
+  public Value evalNew(Env env, Value []args)
+    throws Throwable
+  {
+    return null;
+  }
+
+  /**
    * Returns value for instanceof.
    */
   public boolean isA(String name)
@@ -122,12 +131,12 @@ abstract public class ClassDef {
   
   public Set<Map.Entry<String, Expr>> fieldSet()
   {
-  	return null;
+    return null;
   }
   
   public Set<Map.Entry<String, AbstractFunction>> functionSet()
   {
-  	return null;
+    return null;
   }
 }
 

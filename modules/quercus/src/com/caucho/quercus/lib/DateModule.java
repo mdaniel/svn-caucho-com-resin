@@ -732,7 +732,7 @@ public class DateModule extends AbstractQuercusModule {
     private static final int UNIT_SECOND = 8;
     private static final int UNIT_NOW = 9;
     
-    private static final int NULL_VALUE = Integer.MIN_VALUE;
+    private static final int NULL_VALUE = Integer.MAX_VALUE;
 
     private QDate _date;
     

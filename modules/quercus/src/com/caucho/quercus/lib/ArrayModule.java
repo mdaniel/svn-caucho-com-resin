@@ -957,6 +957,9 @@ public class ArrayModule
                             @Optional("NULL") Value length,
                             @Optional ArrayValue replace)
   {
+    if (array == null)
+      return NullValue.NULL;
+    
     int size = array.getSize();
 
     int startIndex = offset;

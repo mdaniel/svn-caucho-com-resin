@@ -61,6 +61,10 @@ public class QuercusClass {
 
   private AbstractFunction _constructor;
   
+  private AbstractFunction _get;
+  private AbstractFunction _set;
+  private AbstractFunction _call;
+  
   private final ArrayList<InstanceInitializer> _initializers
     = new ArrayList<InstanceInitializer>();
   
@@ -127,6 +131,30 @@ public class QuercusClass {
   public void setConstructor(AbstractFunction fun)
   {
     _constructor = fun;
+  }
+
+  /**
+   * Sets the __get
+   */
+  public void setGet(AbstractFunction fun)
+  {
+    _get = fun;
+  }
+
+  /**
+   * Sets the __set
+   */
+  public void setSet(AbstractFunction fun)
+  {
+    _set = fun;
+  }
+
+  /**
+   * Sets the __call
+   */
+  public void setCall(AbstractFunction fun)
+  {
+    _call = fun;
   }
 
   /**
@@ -213,13 +241,16 @@ public class QuercusClass {
       object = fun.evalMethod(env, null, expr);
     }
     else if (fun != null) {
-      fun.evalMethod(env, object, expr);
+      object = fun.evalMethod(env, object, expr);
     }
     else {
       //  if expr
     }
 
-    return object;
+    if (object != null)
+      return object;
+    else
+      return NullValue.NULL;
   }
 
   /**
@@ -228,7 +259,12 @@ public class QuercusClass {
   public Value evalNew(Env env, Value []args)
     throws Throwable
   {
-    Value object = newInstance(env);
+    Value object = _classDef.evalNew(env, args);
+
+    if (object != null)
+      return object;
+    
+    object = newInstance(env);
 
     AbstractFunction fun = findConstructor();
 

@@ -1055,8 +1055,10 @@ public class Env {
 
     if (var == null) {
       var = getSpecialRef(name);
-      if (var != null)
-        _globalMap.put(name, var);
+      if (var == null)
+	var = new Var();
+      
+      _globalMap.put(name, var);
     }
 
     return var;
@@ -2169,7 +2171,7 @@ public class Env {
       return arrayValueImpl;
     }
     else {
-      return new JavaValue(this, obj, def);
+      return def.wrap(this, obj);
     }
   }
 

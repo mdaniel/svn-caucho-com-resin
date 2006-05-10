@@ -2,9 +2,9 @@
 
 <a href='changes-2.xtp'>Resin 2.1 changes</a>
 
-<s2 title='3.0.snap - May 2, 2006'>
+<s2 title='3.0.snap - May 10, 2006'>
 <ul>
-<li>Amber: EntityManager.find should return null if no object (#1080, rep by fbertra)
+<li>(2006-05-10) Amber: EntityManager.find should return null if no object (#1080, rep by fbertra)
 <li>Amber: CMP 2.1 loading was improperly casting (#1071, rep by Christian Amott)
 <li>el-ignored with tagx and el-ignored check in attribute vs body (rep by Gary Doughty)
 <li>Static JSP taglib was generating incorrect fragment code (rep by Bryan Davis)

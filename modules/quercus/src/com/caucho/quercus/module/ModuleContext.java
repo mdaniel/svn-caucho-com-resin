@@ -207,7 +207,7 @@ public class ModuleContext {
 
       }
 
-      def = new JavaClassDef(this, className, type);
+      def = JavaClassDef.create(this, className, type);
 
       _javaClassWrappers.put(className, def);
 
@@ -344,7 +344,7 @@ public class ModuleContext {
         log.finest(L.l("PHP loading class {0} with type {1} providing extension {2}", name, type.getName(), extension));
     }
 
-    JavaClassDef def = new JavaClassDef(this, name, type);
+    JavaClassDef def = JavaClassDef.create(this, name, type);
 
     _javaClassWrappers.put(name, def);
     _lowerJavaClassWrappers.put(name.toLowerCase(), def);

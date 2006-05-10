@@ -673,14 +673,25 @@ write_config(config_t *config)
   int fd;
   char temp[1024];
   char buffer[1024];
+  char *tail;
 
   if (! config->config_path)
     return;
 
-  if (! tmpnam(temp))
-    return;
+  strncpy(temp, config->config_path, sizeof(temp));
 
-  fd = creat(temp, 0664);
+  tail = strrchr(temp, '/');
+  if (! tail)
+    tail = strrchr(temp, '\\');
+  if (! tail)
+    tail = "/tmp";
+
+  if (tail)
+    *tail = 0;
+
+  strcat(temp, "/resintmp-XXXXXX");
+  
+  fd = mkstemp(temp);
 
   if (fd < 0)
     return;

@@ -327,7 +327,7 @@ public class CompiledClassDef extends ClassDef {
   public Value evalNew(Env env, Expr []args)
     throws Throwable
   {
-    throw new UnsupportedOperationException();
+    return null;
   }
 
   /**
@@ -336,8 +336,7 @@ public class CompiledClassDef extends ClassDef {
   public Value evalNew(Env env, Value []args)
     throws Throwable
   {
-    throw new UnsupportedOperationException();
-    // return this;
+    return null;
   }
 }
 

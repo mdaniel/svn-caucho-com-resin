@@ -72,8 +72,8 @@ public class JavaClassDef extends ClassDef {
   private final HashMap<String, JavaMethod> _functionMap
     = new HashMap<String, JavaMethod>();
 
-  private final HashMap<String, MethodMarshallPair> _getMap
-    = new HashMap<String, MethodMarshallPair>();
+  private final HashMap<String, JavaMethod> _getMap
+    = new HashMap<String, JavaMethod>();
 
   private final HashMap<String, JavaMethod> _setMap
     = new HashMap<String, JavaMethod>();
@@ -83,19 +83,13 @@ public class JavaClassDef extends ClassDef {
   private final HashMap<String, FieldMarshallPair> _fieldMap
     = new HashMap<String, FieldMarshallPair> ();
 
-  private Method __get = null;
-  private Marshall __getReturn = null;
+  private JavaMethod __get = null;
 
-  private Method __getField = null;
-  private Marshall __getFieldReturn = null;
+  private JavaMethod __getField = null;
 
-  private Method __set = null;
-  private Marshall __setName = null;
-  private Marshall __setValue = null;
+  private JavaMethod __set = null;
 
-  private Method __setField = null;
-  //private Marshall __setFieldName = null;
-  private Marshall __setFieldValue = null;
+  private JavaMethod __setField = null;
 
   private Method _printRImpl = null;
   private Method _varDumpImpl = null;
@@ -106,15 +100,32 @@ public class JavaClassDef extends ClassDef {
 
   private Marshall _marshall;
 
-  public JavaClassDef(ModuleContext moduleContext, String name, Class type)
+  private JavaClassDef(ModuleContext moduleContext, String name, Class type)
   {
     super(name, null);
-    
+
     _moduleContext = moduleContext;
 
     _name = name;
 
     _type = type;
+  }
+
+  public static JavaClassDef create(ModuleContext moduleContext,
+				    String name, Class type)
+  {
+    if (Double.class.isAssignableFrom(type) ||
+	Float.class.isAssignableFrom(type))
+      return new DoubleClassDef(moduleContext);
+    else if (Number.class.isAssignableFrom(type))
+      return new LongClassDef(moduleContext);
+    else if (String.class.isAssignableFrom(type) ||
+	     Character.class.isAssignableFrom(type))
+      return new StringClassDef(moduleContext);
+    else if (Boolean.class.isAssignableFrom(type))
+      return new BooleanClassDef(moduleContext);
+    else
+      return new JavaClassDef(moduleContext, name, type);
   }
 
   /**
@@ -128,6 +139,11 @@ public class JavaClassDef extends ClassDef {
   public Class getType()
   {
     return _type;
+  }
+
+  public Value wrap(Env env, Object obj)
+  {
+    return new JavaValue(env, obj, this);
   }
 
   /**
@@ -144,13 +160,10 @@ public class JavaClassDef extends ClassDef {
     if (__get != null) {
       try {
        //__get needs to handle a Value $foo[5] vs. $foo['bar']
-        Object result = __get.invoke(obj, name);
-        return __getReturn.unmarshall(null, result);
-
+        return __get.eval(env, obj, name);
       } catch (Throwable e) {
         log.log(Level.FINE,  L.l(e.getMessage()), e);
         return NullValue.NULL;
-
       }
     }
 
@@ -164,45 +177,33 @@ public class JavaClassDef extends ClassDef {
   public Value getField(Env env, Object obj, String name)
   {
     Object result;
-    //Marshall marshall;
 
-    MethodMarshallPair methodPair = _getMap.get(name);
+    JavaMethod get = _getMap.get(name);
 
-    if (methodPair != null) {
+    if (get != null) {
       try {
-        result = methodPair._method.invoke(obj);
-        return methodPair._marshall.unmarshall(env, result);
-
+        return get.eval(env, obj);
       } catch (Throwable e) {
         log.log(Level.FINE, L.l(e.getMessage()), e);
         return NullValue.NULL;
-
       }
-
     } else {
       FieldMarshallPair fieldPair = _fieldMap.get(name);
       if (fieldPair != null) {
         try {
           result = fieldPair._field.get(obj);
           return fieldPair._marshall.unmarshall(env, result);
-
         } catch (Throwable e) {
           log.log(Level.FINE,  L.l(e.getMessage()), e);
           return NullValue.NULL;
-
         }
-
       } else if (__getField != null) {
         try {
-          result = __getField.invoke(obj, name);
-          return __getFieldReturn.unmarshall(env, result);
-
+          return __getField.eval(env, obj, new StringValueImpl(name));
         } catch (Throwable e) {
           log.log(Level.FINE,  L.l(e.getMessage()), e);
           return NullValue.NULL;
-
         }
-
       }
     }
 
@@ -225,15 +226,7 @@ public class JavaClassDef extends ClassDef {
   {
     if (__set != null) {
       try {
-        // XXX: make sure expected class is never used
-        Object marshalledName = __setName.marshall(env, name, null);
-
-        Object marshalledValue = __setValue.marshall(env, value, null);
-
-        __set.invoke(obj, marshalledName, marshalledValue);
-
-        return value;
-
+        return __set.eval(env, obj, name, value);
       } catch (Throwable e) {
         log.log(Level.FINE,  L.l(e.getMessage()), e);
         return NullValue.NULL;
@@ -251,27 +244,16 @@ public class JavaClassDef extends ClassDef {
   {
     JavaMethod setter = _setMap.get(name);
 
-   /* if (setter == null) {
-
-  log.log(Level.FINE,"'" + name + "' is an unknown field.");
-  return NullValue.NULL;*/
-
     if (setter != null) {
       try {
-
         return setter.eval(env, obj, value);
-
       } catch (Throwable e) {
-
         log.log(Level.FINE,  L.l(e.getMessage()), e);
         return NullValue.NULL;
-
       }
-
     } else {
       FieldMarshallPair fieldPair = _fieldMap.get(name);
       if (fieldPair != null) {
-
         try {
           Class type = fieldPair._field.getType();
           Object marshalledValue = fieldPair._marshall.marshall(env, value, type);
@@ -283,15 +265,9 @@ public class JavaClassDef extends ClassDef {
           log.log(Level.FINE,  L.l(e.getMessage()), e);
           return NullValue.NULL;
         }
-
       } else if (__setField != null) {
         try {
-          //XXX: make sure expected Class Type is never used
-          Object marshalledValue = __setFieldValue.marshall(env, value, null);
-          __setField.invoke(obj, env, name, marshalledValue);
-
-          return value;
-
+          return __setField.eval(env, obj, new StringValueImpl(name), value);
         } catch (Throwable e) {
           log.log(Level.FINE,  L.l(e.getMessage()), e);
           return NullValue.NULL;
@@ -506,6 +482,9 @@ public class JavaClassDef extends ClassDef {
   {
     if (_cons != null)
       cl.setConstructor(_cons);
+
+    if (__get != null)
+      cl.setGet(__get);
     
     for (Map.Entry<String,JavaMethod> entry : _functionMap.entrySet()) {
       cl.addMethod(entry.getKey(), entry.getValue());
@@ -629,44 +608,27 @@ public class JavaClassDef extends ClassDef {
 
       if (length > 3) {
         if (methodName.startsWith("get")) {
-          Marshall marshall = Marshall.create(moduleContext,
-					      method.getReturnType(), false);
-          MethodMarshallPair pair = new MethodMarshallPair(method, marshall);
-          _getMap.put(javaToQuercusConvert(methodName.substring(3, length)), pair);
+          _getMap.put(javaToQuercusConvert(methodName.substring(3, length)),
+		      new JavaMethod(moduleContext, method));
 
         }
         else if (methodName.startsWith("is")) {
-          Marshall marshall = Marshall.create(moduleContext,
-					      method.getReturnType(), false);
-          MethodMarshallPair pair = new MethodMarshallPair(method, marshall);
-          _getMap.put(javaToQuercusConvert(methodName.substring(2, length)), pair);
+          _getMap.put(javaToQuercusConvert(methodName.substring(2, length)),
+		      new JavaMethod(moduleContext, method));
         }
         else if (methodName.startsWith("set")) {
           JavaMethod javaMethod = new JavaMethod(moduleContext, method);
-          _setMap.put(javaToQuercusConvert(methodName.substring(3, length)), javaMethod);
+          _setMap.put(javaToQuercusConvert(methodName.substring(3, length)),
+		      new JavaMethod(moduleContext, method));
 
         } else if ("__get".equals(methodName)) {
-          __get = method;
-          __getReturn = Marshall.create(moduleContext,
-					__get.getReturnType(), false);
-
+          __get = new JavaMethod(moduleContext, method);
         } else if ("__getField".equals(methodName)) {
-          __getField = method;
-          __getFieldReturn = Marshall.create(moduleContext,
-					     __getField.getReturnType(), false);
-
+          __getField = new JavaMethod(moduleContext, method);
         } else if ("__set".equals(methodName)) {
-          __set = method;
-          __setName = Marshall.create(moduleContext,
-				      __set.getParameterTypes()[0]);
-          __setValue = Marshall.create(moduleContext,
-				       __set.getParameterTypes()[1]);
-
+          __set = new JavaMethod(moduleContext, method);
         } else if ("__setField".equals(methodName)) {
-          __setField = method;
-          __setFieldValue = Marshall.create(moduleContext,
-					    __setField.getParameterTypes()[1], false);
-
+          __setField = new JavaMethod(moduleContext, method);
         }
       }
     }
@@ -857,6 +819,57 @@ public class JavaClassDef extends ClassDef {
     {
       _field = field;
       _marshall = marshall;
+    }
+  }
+  
+  private static class LongClassDef extends JavaClassDef {
+    LongClassDef(ModuleContext module)
+    {
+      super(module, "Long", Long.class);
+    }
+
+    public Value wrap(Env env, Object obj)
+    {
+      return LongValue.create(((Number) obj).longValue());
+    }
+  }
+  
+  private static class DoubleClassDef extends JavaClassDef {
+    DoubleClassDef(ModuleContext module)
+    {
+      super(module, "Double", Double.class);
+    }
+
+    public Value wrap(Env env, Object obj)
+    {
+      return new DoubleValue(((Number) obj).doubleValue());
+    }
+  }
+  
+  private static class StringClassDef extends JavaClassDef {
+    StringClassDef(ModuleContext module)
+    {
+      super(module, "String", String.class);
+    }
+
+    public Value wrap(Env env, Object obj)
+    {
+      return new StringValueImpl((String) obj);
+    }
+  }
+  
+  private static class BooleanClassDef extends JavaClassDef {
+    BooleanClassDef(ModuleContext module)
+    {
+      super(module, "Boolean", Boolean.class);
+    }
+
+    public Value wrap(Env env, Object obj)
+    {
+      if (Boolean.TRUE.equals(obj))
+	return BooleanValue.TRUE;
+      else
+	return BooleanValue.FALSE;
     }
   }
 }
