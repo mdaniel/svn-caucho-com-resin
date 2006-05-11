@@ -229,28 +229,23 @@ public class QuercusClass {
   /**
    * Creates a new instance.
    */
-  public Value evalNew(Env env, Expr []expr)
+  public Value evalNew(Env env, Expr []args)
     throws Throwable
   {
-    Value object = newInstance(env);
-
-    AbstractFunction fun = findConstructor();
-
-    if (object == null) {
-      // for Java objects
-      object = fun.evalMethod(env, null, expr);
-    }
-    else if (fun != null) {
-      object = fun.evalMethod(env, object, expr);
-    }
-    else {
-      //  if expr
-    }
+    Value object = _classDef.evalNew(env, args);
 
     if (object != null)
       return object;
-    else
-      return NullValue.NULL;
+    
+    object = newInstance(env);
+
+    AbstractFunction fun = findConstructor();
+
+    if (fun != null) {
+      fun.evalMethod(env, object, args);
+    }
+
+    return object;
   }
 
   /**

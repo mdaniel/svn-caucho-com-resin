@@ -97,6 +97,15 @@ abstract public class ClassDef {
   /**
    * Creates a new instance.
    */
+  public Value evalNew(Env env, Expr []args)
+    throws Throwable
+  {
+    return null;
+  }
+
+  /**
+   * Creates a new instance.
+   */
   public Value evalNew(Env env, Value []args)
     throws Throwable
   {

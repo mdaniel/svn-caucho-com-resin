@@ -115,7 +115,7 @@ public class ReturnRefStatement extends Statement {
     
     if (_expr != null) {
       out.print("return ");
-      _expr.generate(out);
+      _expr.generateRef(out);
       out.println(";");
     }
     else
