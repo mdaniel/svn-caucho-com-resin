@@ -1367,6 +1367,9 @@ public class ServletServer extends ProtocolDispatchServer
       _cache = null;
     } finally {
       DynamicClassLoader.setOldLoader(thread, oldLoader);
+
+      if (_controller.getResinServer() != null)
+	_controller.getResinServer().closeEvent(this);
     }
   }
 

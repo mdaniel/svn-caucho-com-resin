@@ -51,6 +51,7 @@ import com.caucho.hessian.io.HessianOutput;
 
 import com.caucho.log.Log;
 
+import com.caucho.loader.Environment;
 import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.loader.TreeLoader;
 import com.caucho.loader.SimpleLoader;
@@ -334,8 +335,12 @@ public class Resin implements ResinServerListener {
     Config config = new Config();
     // server/10hc
     // config.setResinInclude(true);
+
+    Path path = Vfs.lookup(_resinConf);
+
+    Environment.addDependency(new Depend(path));
     
-    config.configure(server, Vfs.lookup(_resinConf), server.getSchema());
+    config.configure(server, path, server.getSchema());
     
     _server = server;
     server.start();

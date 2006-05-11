@@ -109,6 +109,14 @@ public class ServerController
   }
 
   /**
+   * Sets the resin server.
+   */
+  public ResinServer getResinServer()
+  {
+    return _resinServer;
+  }
+
+  /**
    * Sets the cluster server id.
    */
   public void setServerId(String serverId)
