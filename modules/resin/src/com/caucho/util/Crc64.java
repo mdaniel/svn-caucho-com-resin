@@ -65,7 +65,6 @@ public class Crc64 {
 	crc = next(crc, (ch >> 8));
       
       crc = next(crc, ch);
-
     }
 
     return crc;
@@ -77,13 +76,12 @@ public class Crc64 {
   public static long generate(long crc, char []buffer, int offset, int len)
   {
     for (int i = 0; i < len; i++) {
-      char ch = buffer[i];
-      
+      char ch = buffer[offset + i];
+
       if (ch > 0xff)
 	crc = next(crc, (ch >> 8));
       
       crc = next(crc, ch);
-
     }
 
     return crc;

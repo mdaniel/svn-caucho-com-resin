@@ -336,11 +336,7 @@ public class Resin implements ResinServerListener {
     // server/10hc
     // config.setResinInclude(true);
 
-    Path path = Vfs.lookup(_resinConf);
-
-    Environment.addDependency(new Depend(path));
-    
-    config.configure(server, path, server.getSchema());
+    config.configure(server, Vfs.lookup(_resinConf), server.getSchema());
     
     _server = server;
     server.start();
