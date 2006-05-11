@@ -321,9 +321,10 @@ public class LibraryLoader extends Loader implements Dependency {
 
       path = path.lookup(name);
 
-      if (path.canRead()) {
+      if (path.canRead() || path.isDirectory()) {
 	try {
 	  vector.add(new URL(path.getURL()));
+	  return;
 	} catch (Exception e) {
 	  log.log(Level.WARNING, e.toString(), e);
 	}

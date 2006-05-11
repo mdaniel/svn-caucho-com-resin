@@ -34,6 +34,8 @@ import java.util.logging.*;
 import java.util.jar.Manifest;
 import java.util.jar.Attributes;
 
+import java.net.URL;
+
 import com.caucho.util.CauchoSystem;
 import com.caucho.util.CharBuffer;
 
@@ -204,6 +206,28 @@ public class TreeLoader extends Loader implements Dependency {
 
     _jarList.add(jarEntry);
     _dependencyList.add(jarPath.getDepend());
+  }
+  
+  /**
+   * Adds resources to the enumeration.
+   */
+  public void getResources(Vector<URL> vector, String name)
+  {
+    for (int i = 0; i < _jarList.size(); i++) {
+      JarEntry jarEntry = _jarList.get(i);
+      Path path = jarEntry.getJarPath();
+
+      path = path.lookup(name);
+
+      if (path.canRead() || path.isDirectory()) {
+	try {
+	  vector.add(new URL(path.getURL()));
+	  return;
+	} catch (Exception e) {
+	  log.log(Level.WARNING, e.toString(), e);
+	}
+      }
+    }
   }
 
   /**
