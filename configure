@@ -8585,6 +8585,9 @@ if test -x "${apxs}"; then
    if test -x "${apr_bin}/apr-config"; then
      apr_inc=`"${apr_bin}/apr-config" --includes`
      APACHE_INC="${APACHE_INC} ${apr_inc}"
+   elif test -x "${apr_bin}/apr-1-config"; then
+     apr_inc=`"${apr_bin}/apr-1-config" --includes`
+     APACHE_INC="${APACHE_INC} ${apr_inc}"
    fi
 fi
 
@@ -8596,6 +8599,9 @@ if test -z "$apache_cflags" -a -x "${apxs}"; then
    if test -x "${apr_bin}/apr-config"; then
      apache_cflags="$apache_cflags `${apr_bin}/apr-config --cppflags`"
      apache_cflags="$apache_cflags `${apr_bin}/apr-config --cflags`"
+   elif test -x "${apr_bin}/apr-1-config"; then
+     apache_cflags="$apache_cflags `${apr_bin}/apr-1-config --cppflags`"
+     apache_cflags="$apache_cflags `${apr_bin}/apr-1-config --cflags`"
    else
      apache_cflags="`${apxs} -q CFLAGS`"
    fi

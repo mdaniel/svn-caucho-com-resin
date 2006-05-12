@@ -11,10 +11,10 @@ LD_SHLIB=gcc
 LIBS_SHLIB=
 LDFLAGS=
 LDFLAGS_SHLIB=-bundle -undefined suppress -flat_namespace -L/usr/lib
-APACHE_INC=-I/usr/local/apache2/include  -I/usr/local/apache2/include 
-apache_conf=/usr/local/apache2/conf/httpd.conf
-apache_dir=/usr/local/apache2
-apache_libexec=/usr/local/apache2/modules
+APACHE_INC=-I/usr/local/apache22/include  -I/usr/local/apache2/include 
+apache_conf=/usr/local/apache22/conf/httpd.conf
+apache_dir=/usr/local/apache22
+apache_libexec=/usr/local/apache22/modules
 resin_home=/Users/ferg/ws/resin
 INCLUDES = $(APACHE_INC) -DRESIN_HOME=\"$(resin_home)\" -I../common
 C=../common
