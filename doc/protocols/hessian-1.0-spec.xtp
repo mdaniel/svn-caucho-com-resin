@@ -2,8 +2,8 @@
   <header>
     <product>resin</product>
     <resin-2.0>$resin/ref/hessian.xtp</resin-2.0>
-    <title>Hessian 1.0.1 Specification</title>
-    <date>May 22, 2004</date>
+    <title>Hessian 1.0.2 Specification</title>
+    <date>May 12, 2006</date>
     <description>
       <p>Hessian is a compact binary protocol for connecting web
       services.</p>
@@ -167,6 +167,9 @@ Strings are encoded in chunks.  <var/'S'/> represents the final chunk
 and <var/'s'/> represents any initial chunk.  Each chunk has a 16-bit
 length value.</p>
 
+<p>The length is the number of characters, which may be different than
+the number of bytes.</p>
+
 <def>
 string ::= (s b16 b8 utf-8-data)* S b16 b8 utf-8-data
 </def>
@@ -180,8 +183,11 @@ S x00 x05 hello
 <p>An XML document encoded as a 16-bit unicode character
 string encoded in UTF-8.
 XML data is encoded in chunks.  <var/'X'/> represents the final chunk
-and <var/'x'/> represents any initial chunk.  Each chunk has a 16-bit
-length value.</p>
+and <var/'x'/> represents any initial chunk.</p>
+
+<p>Each chunk has a 16-bit
+length value.  The length is the number of characters, which may
+be different than the number of bytes.</p>
 
 <def>
 xml ::= (x b16 b8 utf-8-data)* X b16 b8 utf-8-data
@@ -737,6 +743,13 @@ WARRANTIES OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.</p>
 </section>
 
 <section title="Changes">
+
+<s3 title="changes in 1.0.2">
+
+<ul>
+<li>Clarified that length of XML and strings is in characters (Petr Gladkikh)
+</ul>
+</s3>
 
 <s3 title="changes in 1.0">
 
