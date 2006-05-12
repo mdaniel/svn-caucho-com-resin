@@ -85,6 +85,7 @@
   <mime-mapping extension=".doc" mime-type="application/msword"/>
   <mime-mapping extension=".dcr" mime-type="application/x-director"/>
   <mime-mapping extension=".dir" mime-type="application/x-director"/>
+  <mime-mapping extension=".dll" mime-type="application/x-msdownload"/>
   <mime-mapping extension=".dxr" mime-type="application/x-director"/>
   <mime-mapping extension=".dvi" mime-type="application/x-dvi"/>
     
