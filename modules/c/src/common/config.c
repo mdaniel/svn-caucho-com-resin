@@ -683,15 +683,18 @@ write_config(config_t *config)
   tail = strrchr(temp, '/');
   if (! tail)
     tail = strrchr(temp, '\\');
-  if (! tail)
-    tail = "/tmp";
 
   if (tail)
     *tail = 0;
 
+#ifdef WIN32
+  tail = tempnam("c:/temp", "resin-");
+  fd = open(tail, O_WRONLY, 0644);
+#else
   strcat(temp, "/resintmp-XXXXXX");
-  
+
   fd = mkstemp(temp);
+#endif
 
   if (fd < 0)
     return;
