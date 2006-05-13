@@ -507,7 +507,7 @@ fill_chunk(char *buf, int size)
 
 static int
 send_data(stream_t *s, EXTENSION_CONTROL_BLOCK *r, config_t *config, 
-		  int http11, int ack, int *p_is_first)
+		  int ack, int http11, int *p_is_first)
 {
 	char headers[32 * 1024];
 	char status[BUF_LENGTH];
@@ -743,7 +743,8 @@ write_request(stream_t *s, EXTENSION_CONTROL_BLOCK *r, config_t *config, char *h
 	int code = HMUX_ACK;
 	int is_first = 1;
 
-	while (totalLen < r->cbTotalBytes) {
+	//while (totalLen < r->cbTotalBytes) {
+	while (true) {
 		unsigned long len = BUF_LENGTH;
 
 		if (r->cbAvailable > 0) {
@@ -752,11 +753,14 @@ write_request(stream_t *s, EXTENSION_CONTROL_BLOCK *r, config_t *config, char *h
 			memcpy(buf, r->lpbData + totalLen, len);
 			r->cbAvailable -= len;
 		}
+		else if (r->cbTotalBytes > 0 && r->cbTotalBytes <= totalLen)
+			break;
 		else if (! r->ReadClient(r->ConnID, buf, &len) || len <= 0)
 			break;
 
 		totalLen += len;
 		send_length += len;
+		LOG(("send-post %d\n", len));
 		cse_write_packet(s, CSE_DATA, buf, len);
 
 		if (ack_size <= send_length) {
@@ -770,6 +774,7 @@ write_request(stream_t *s, EXTENSION_CONTROL_BLOCK *r, config_t *config, char *h
 		}
 	}	
 
+	LOG(("quit\n"));
 	cse_write_byte(s, HMUX_QUIT);
 
 	code = send_data(s, r, config, HMUX_QUIT, isHttp11, &is_first);
