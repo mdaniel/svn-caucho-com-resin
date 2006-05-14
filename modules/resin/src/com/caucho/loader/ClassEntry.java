@@ -432,7 +432,9 @@ public class ClassEntry implements Dependency {
     }
     
     try {
-      Object.class.getAnnotation(RequireReload.class);
+      Class reloadClass = Class.forName("com.caucho.loader.RequireReload");
+      
+      Object.class.getAnnotation(reloadClass);
 
       _hasAnnotations = true;
     } catch (Throwable e) {

@@ -507,7 +507,7 @@ fill_chunk(char *buf, int size)
 
 static int
 send_data(stream_t *s, EXTENSION_CONTROL_BLOCK *r, config_t *config, 
-		  int ack, int http11, int *p_is_first)
+	  int ack, int http11, int *p_is_first)
 {
 	char headers[32 * 1024];
 	char status[BUF_LENGTH];
@@ -532,6 +532,9 @@ send_data(stream_t *s, EXTENSION_CONTROL_BLOCK *r, config_t *config,
 		LOG(("code %c(%d)\n", code, code));
 
 		switch (code) {
+		case HMUX_YIELD:
+		  break;
+		  
 		case HMUX_CHANNEL:
 			read_len = hmux_read_len(s);
 			break;
