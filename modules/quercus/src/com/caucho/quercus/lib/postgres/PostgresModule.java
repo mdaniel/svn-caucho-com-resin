@@ -37,6 +37,7 @@ import java.util.logging.Logger;
 
 import com.caucho.util.Log;
 
+import com.caucho.quercus.UnimplementedException;
 import com.caucho.quercus.env.*;
 import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.quercus.module.Optional;
@@ -243,7 +244,7 @@ public class PostgresModule extends AbstractQuercusModule {
   public boolean pg_connection_busy(Env env,
 									@NotNull Mysqli conn)
   {
-    return false;
+    throw new UnimplementedException("pg_connection_busy");
   }
 
   /**
@@ -252,7 +253,7 @@ public class PostgresModule extends AbstractQuercusModule {
   public boolean pg_connection_reset(Env env,
 									 @NotNull Mysqli conn)
   {
-    return false;
+    throw new UnimplementedException("pg_connection_reset");
   }
 
   /**
@@ -261,8 +262,6 @@ public class PostgresModule extends AbstractQuercusModule {
   public Value pg_connection_status(Env env,
 									@NotNull Mysqli conn)
   {
-    //@todo return int
-
     Value result = conn.stat(env);
 
     return result == BooleanValue.FALSE ? NullValue.NULL : result;
@@ -277,7 +276,7 @@ public class PostgresModule extends AbstractQuercusModule {
 						  @NotNull Value assocArray, 
 						  @Optional int options)
   {
-    return BooleanValue.FALSE;
+    throw new UnimplementedException("pg_convert");
   }
 
   /**
@@ -291,6 +290,11 @@ public class PostgresModule extends AbstractQuercusModule {
 							  @Optional String nullAs)
   {
     //@todo use nullAs and Postgres constants
+
+    if ( ! ( nullAs == null || nullAs.length() == 0 ) )
+    {
+      throw new UnimplementedException("pg_copy_from with nullAs");
+	}
 
     if (delimiter.equals("")) {
 		delimiter = "\t";
@@ -389,21 +393,21 @@ public class PostgresModule extends AbstractQuercusModule {
 	  // may change without notice in a future release of PHP. 
 	  // Use this function at your own risk.
 
-    return BooleanValue.FALSE;
+    throw new UnimplementedException("pg_delete");
   }
 
   /**
    * Sync with PostgreSQL backend
    */
   public boolean pg_end_copy(Env env, @Optional Mysqli conn) {
-    return false;
+    throw new UnimplementedException("pg_end_copy");
   }
 
   /**
    * Escape a string for insertion into a bytea field
    */
   public String pg_escape_bytea(Env env, @NotNull String data) {
-    return "";
+    throw new UnimplementedException("pg_escape_bytea");
   }
 
   /**
@@ -601,7 +605,7 @@ public class PostgresModule extends AbstractQuercusModule {
 							  @Optional("0") int row, 
 							  @NotNull Value mixedField)
   {
-    return 0;
+    throw new UnimplementedException("pg_field_is_null");
   }
 
   /**
@@ -622,7 +626,7 @@ public class PostgresModule extends AbstractQuercusModule {
 						  @NotNull MysqliResult result, 
 						  @NotNull String fieldName)
   {
-    return 0;
+    throw new UnimplementedException("pg_field_num");
   }
 
   /**
@@ -633,17 +637,7 @@ public class PostgresModule extends AbstractQuercusModule {
 							 @NotNull int rowNumber, 
 							 @NotNull Value mixedFieldNameOrNumber)
   {
-    return 0;
-  }
-
-  /**
-   * Returns the printed length
-   */
-  public int pg_field_prtlen(Env env, 
-							 @NotNull MysqliResult result, 
-							 @NotNull Value mixedFieldNameOrNumber)
-  {
-    return 0;
+    throw new UnimplementedException("pg_field_prtlen");
   }
 
   /**
@@ -667,7 +661,7 @@ public class PostgresModule extends AbstractQuercusModule {
 							   @NotNull MysqliResult result, 
 							   @NotNull int fieldNumber)
   {
-    return 0;
+    throw new UnimplementedException("pg_field_type_oid");
   }
 
   /**
@@ -687,7 +681,7 @@ public class PostgresModule extends AbstractQuercusModule {
   public boolean pg_free_result(Env env, 
 								@NotNull MysqliResult result)
   {
-    return false;
+    throw new UnimplementedException("pg_free_result");
   }
 
   /**
@@ -697,7 +691,7 @@ public class PostgresModule extends AbstractQuercusModule {
 							 @NotNull Mysqli conn, 
 							 @Optional int resultType)
   {
-    return BooleanValue.FALSE;
+    throw new UnimplementedException("pg_get_notify");
   }
 
   /**
@@ -706,7 +700,7 @@ public class PostgresModule extends AbstractQuercusModule {
   public int pg_get_pid(Env env, 
 						@NotNull Mysqli conn)
   {
-    return 0;
+    throw new UnimplementedException("pg_get_pid");
   }
 
   /**
@@ -799,7 +793,7 @@ public class PostgresModule extends AbstractQuercusModule {
   public String pg_last_notice(Env env, 
 							   @NotNull Mysqli conn)
   {
-    return "";
+    throw new UnimplementedException("pg_last_notice");
   }
 
   /**
@@ -888,6 +882,9 @@ public class PostgresModule extends AbstractQuercusModule {
       Object spyconn = ((com.caucho.sql.UserConnection)userconn).getConnection();
 
       Object pgconn = ((com.caucho.sql.spy.SpyConnection)spyconn).getConnection();
+
+      // Large Objects may not be used in auto-commit mode.
+	  ((java.sql.Connection)pgconn).setAutoCommit(false);
 
       lobManager = m.invoke(pgconn, new Object[]{});
       // lobManager = ((org.postgresql.PGConnection)conn).getLargeObjectAPI();
@@ -1097,15 +1094,17 @@ public class PostgresModule extends AbstractQuercusModule {
 
   /**
    * Reads an entire large object and send straight to browser
-   *
+   */
   public int pg_lo_read_all(Env env, 
-							@NotNull LargeObject largeObject)
+							@NotNull Value largeObject)
   {
     //@todo pg_lo_read_all() reads a large object and passes it straight through 
     // to the browser after sending all pending headers. Mainly intended for sending 
     // binary data like images or sound.
 
-	  
+    throw new UnimplementedException("pg_lo_read_all");
+
+	/*	  
     InputStream in = largeObject.getInputStream();
 
     byte buf[] = new byte[2048];
@@ -1117,7 +1116,8 @@ public class PostgresModule extends AbstractQuercusModule {
 	  }
 
 	  return 0;
-	  }*/
+	*/
+  }
 
   /**
    * Read a large object
@@ -1287,6 +1287,8 @@ public class PostgresModule extends AbstractQuercusModule {
 							@NotNull Mysqli conn, 
 							@NotNull String tableName)
   {
+    // @todo: check this with test case php/4313
+
     String metaQuery = "SELECT a.attnum,t.typname,a.attlen,t.typnotnull,t.typdefault,a.attndims FROM pg_class c, pg_attribute a, pg_type t WHERE c.relname='"+tableName+"' AND a.attnum > 0 AND a.attrelid = c.oid AND a.atttypid = t.oid ORDER BY a.attnum";
 
     Value value = pg_query(env, conn, metaQuery);
@@ -1322,7 +1324,7 @@ public class PostgresModule extends AbstractQuercusModule {
   public String pg_options(Env env, 
 						   @Optional Mysqli conn)
   {
-    return "";
+    throw new UnimplementedException("pg_options");
   }
 
   /**
@@ -1332,16 +1334,7 @@ public class PostgresModule extends AbstractQuercusModule {
 									@NotNull Mysqli conn, 
 									@NotNull String paramName)
   {
-    return "";
-  }
-
-  /**
-   * Looks up a current parameter setting of the server
-   */
-  public String pg_parameter_status(Env env, 
-									@NotNull String paramName)
-  {
-    return "";
+    throw new UnimplementedException("pg_parameter_status");
   }
 
   /**
@@ -1387,10 +1380,12 @@ public class PostgresModule extends AbstractQuercusModule {
 						  @NotNull String stmtName, 
 						  @NotNull String query)
   {
+    // @todo: check this with test case php/4315
+
     try
     {
       // Make the PHP query a JDBC like query replacing ($1 -> ?) with question marks.
-      query = query.replaceAll("\\$[0-9]{+}", "?");
+      query = query.replaceAll("\\$[0-9]+", "?");
       MysqliStatement pstmt = conn.prepare(env, query);
       conn.putStatement(stmtName, pstmt);
       return env.wrapJava(pstmt);
@@ -1409,16 +1404,7 @@ public class PostgresModule extends AbstractQuercusModule {
 							 @NotNull Mysqli conn, 
 							 @NotNull String data)
   {
-    return false;
-  }
-  
-  /**
-   * Send a NULL-terminated string to PostgreSQL backend
-   */
-  public boolean pg_put_line(Env env, 
-							 @NotNull String data)
-  {
-    return false;
+    throw new UnimplementedException("pg_put_line");
   }
   
   /**
@@ -1471,7 +1457,7 @@ public class PostgresModule extends AbstractQuercusModule {
 									  @NotNull MysqliResult result, 
 									  @NotNull int fieldCode)
   {
-    return "";
+    throw new UnimplementedException("pg_result_error_field");
   }
 
   /**
@@ -1480,7 +1466,7 @@ public class PostgresModule extends AbstractQuercusModule {
   public String pg_result_error(Env env, 
 								@NotNull MysqliResult result)
   {
-    return "";
+    throw new UnimplementedException("pg_result_error");
   }
 
   /**
@@ -1500,7 +1486,7 @@ public class PostgresModule extends AbstractQuercusModule {
 								@NotNull MysqliResult result, 
 								@Optional int type)
   {
-    return BooleanValue.FALSE;
+    throw new UnimplementedException("pg_result_status");
   }
 
   /**
@@ -1512,7 +1498,7 @@ public class PostgresModule extends AbstractQuercusModule {
 						 @NotNull Value assocArray, 
 						 @Optional int options)
   {
-    return BooleanValue.FALSE;
+    throw new UnimplementedException("pg_select");
   }
 
   /**
@@ -1524,7 +1510,7 @@ public class PostgresModule extends AbstractQuercusModule {
 								 @NotNull String stmtName, 
 								 @NotNull Value params)
   {
-    return false;
+    throw new UnimplementedException("pg_send_execute");
   }
 
   /**
@@ -1536,7 +1522,7 @@ public class PostgresModule extends AbstractQuercusModule {
 								 @NotNull String stmtName, 
 								 @NotNull String query)
   {
-    return false;
+    throw new UnimplementedException("pg_send_prepare");
   }
 
   /**
@@ -1659,7 +1645,7 @@ public class PostgresModule extends AbstractQuercusModule {
 						  @Optional String mode, 
 						  @Optional Mysqli conn)
   {
-    return false;
+    throw new UnimplementedException("pg_trace");
   }
 
   /**
@@ -1668,7 +1654,7 @@ public class PostgresModule extends AbstractQuercusModule {
   public int pg_transaction_status(Env env, 
 								   @Optional Mysqli conn)
   {
-    return 0;
+    throw new UnimplementedException("pg_transaction_status");
   }
 
   /**
@@ -1677,7 +1663,7 @@ public class PostgresModule extends AbstractQuercusModule {
   public String pg_tty(Env env, 
 					   @Optional Mysqli conn)
   {
-    return "";
+    throw new UnimplementedException("pg_tty");
   }
 
   /**
@@ -1686,7 +1672,7 @@ public class PostgresModule extends AbstractQuercusModule {
   public String pg_unescape_bytea(Env env, 
 								  @NotNull String data)
   {
-    return "";
+    throw new UnimplementedException("pg_unescape_bytea");
   }
 
   /**
@@ -1697,9 +1683,7 @@ public class PostgresModule extends AbstractQuercusModule {
   {
     // Always returns TRUE
 
-    
-
-    return BooleanValue.TRUE;
+    throw new UnimplementedException("pg_untrace");
   }
 
   /**
@@ -1718,7 +1702,7 @@ public class PostgresModule extends AbstractQuercusModule {
     // anything else documented about this function may change without 
     // notice in a future release of PHP. Use this function at your own risk.
 
-    return BooleanValue.FALSE;
+    throw new UnimplementedException("pg_update");
   }
 
   /**

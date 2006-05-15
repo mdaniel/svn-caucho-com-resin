@@ -21,6 +21,7 @@ com.caucho.quercus.lib.MiscModule
 com.caucho.quercus.lib.mysql.MysqlModule
 com.caucho.quercus.lib.mysql.MysqliModule
 com.caucho.quercus.lib.NetworkModule
+com.caucho.quercus.lib.oracle.OracleModule
 com.caucho.quercus.lib.OptionsModule
 com.caucho.quercus.lib.OutputModule
 com.caucho.quercus.lib.pdf.PDFModule

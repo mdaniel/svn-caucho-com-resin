@@ -33,6 +33,8 @@ import java.sql.*;
 
 import java.util.logging.Logger;
 import java.util.logging.Level;
+import java.util.Hashtable;
+import java.util.StringTokenizer;
 
 import com.caucho.util.L10N;
 
@@ -68,6 +70,37 @@ public class MysqliStatement {
 
   private String _errorMessage;
   private int _errorCode;
+
+  // Oracle Statement type:
+  // (SELECT, UPDATE, DELETE, INSERT, CREATE, DROP, ALTER, BEGIN, DECLARE, UNKNOWN)
+  private String _stmtType;
+
+  // Binding variables for oracle statements
+  private Hashtable bindingVariables = new Hashtable();
+
+  // Oracle internal result buffer
+  private Value _resultBuffer;
+
+  // Binding variables for oracle statements with define_by_name (TOTALLY DIFFERENT FROM ?)
+  //
+  // Example:
+  //
+  // $stmt = oci_parse($conn, "SELECT empno, ename FROM emp");
+  // 
+  // /* the define MUST be done BEFORE oci_execute! */
+  // 
+  // oci_define_by_name($stmt, "EMPNO", $empno);
+  // oci_define_by_name($stmt, "ENAME", $ename);
+  // 
+  // oci_execute($stmt);
+  // 
+  // while (oci_fetch($stmt)) {
+  //    echo "empno:" . $empno . "\n";
+  //    echo "ename:" . $ename . "\n";
+  // }
+  // 
+  private Hashtable byNameVariables = new Hashtable();
+
 
   MysqliStatement(JdbcConnectionResource conn)
   {
@@ -334,6 +367,19 @@ public class MysqliStatement {
 
       _pstmt = _conn.getConnection().prepareStatement(query);
 
+      // Oracle Statement type:
+      // (SELECT, UPDATE, DELETE, INSERT, CREATE, DROP, ALTER, BEGIN, DECLARE, UNKNOWN)
+
+      StringTokenizer tokenizer = new StringTokenizer(query.trim());
+      if (tokenizer.hasMoreTokens())
+      {
+        _stmtType = tokenizer.nextToken();
+      }
+      else
+      {
+        _stmtType = "UNKNOWN";
+      }
+
       return true;
     } catch (SQLException e) {
       log.log(Level.FINE, e.toString(), e);
@@ -443,9 +489,19 @@ public class MysqliStatement {
     }
   }
 
-  private JdbcConnectionResource validateConnection()
+  public JdbcConnectionResource validateConnection()
   {
     return _conn;
+  }
+
+  public ResultSet getResultSet()
+  {
+    return _rs;
+  }
+
+  public PreparedStatement getPreparedStatement()
+  {
+    return _pstmt;
   }
 
   private ResultSetMetaData getMetaData()
@@ -455,6 +511,71 @@ public class MysqliStatement {
       _rsMetaData = _rs.getMetaData();
 
     return _rsMetaData;
+  }
+
+  public String getStatementType()
+  {
+    return _stmtType;
+  }
+
+  public void putBindingVariable(Object name, Object value)
+  {
+    bindingVariables.put(name, value);
+  }
+
+  public Object getBindingVariable(Object name)
+  {
+    return bindingVariables.get(name);
+  }
+
+  public Object removeBindingVariable(Object name)
+  {
+    return bindingVariables.remove(name);
+  }
+
+  public Hashtable getBindingVariables()
+  {
+    return bindingVariables;
+  }
+
+  public void resetBindingVariables()
+  {
+    bindingVariables = new Hashtable();
+  }
+
+  public void setResultBuffer(Value resultBuffer)
+  {
+    _resultBuffer = resultBuffer;
+  }
+
+  public Value getResultBuffer()
+  {
+    return _resultBuffer;
+  }
+
+  public void putByNameVariable(Object name, Object value)
+  {
+    byNameVariables.put(name, value);
+  }
+
+  public Object getByNameVariable(Object name)
+  {
+    return byNameVariables.get(name);
+  }
+
+  public Object removeByNameVariable(Object name)
+  {
+    return byNameVariables.remove(name);
+  }
+
+  public Hashtable getByNameVariables()
+  {
+    return byNameVariables;
+  }
+
+  public void resetByNameVariables()
+  {
+    byNameVariables = new Hashtable();
   }
 
   public String toString()
