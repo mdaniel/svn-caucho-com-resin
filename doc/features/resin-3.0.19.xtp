@@ -8,6 +8,20 @@
 
 <summary objsummary='localtoc'/>
 
+<section title="Windows Security Update">
+
+<p>Windows users of Resin 3.0.17 or 3.0.18 should upgrade to 3.0.19
+as soon as possible.</p>
+
+</section>
+
+<section title="Quercus: New PHP Applications">
+
+<p>Quercus now starts up <a href="http://www.wordpress.com">Wordpress</a> and
+<a href="http://gallery.menalto.com">Gallery</a>.</p>
+
+</section>
+
 <section title="AccessLog shared-buffer">
 
 <p>The access-log has a new attribute, shared-buffer.  The default
