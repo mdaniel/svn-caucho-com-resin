@@ -1,7 +1,7 @@
 <?php
   $mbeanServer = new MBeanServer();
 
-  $timeformat = "%a %b %e %H:%M:%S %Z %Y";
+  $timeformat = "%a %b %d %H:%M:%S %Z %Y";
 
   function format_memory($memory)
   {
@@ -46,12 +46,12 @@
 
 <tr>
 <th>Server start:</th>
-<td><?= strftime($timeformat, $resin->initialStartTime->time) ?></td>
+<td><?= strftime($timeformat, $resin->initialStartTime->time / 1000) ?></td>
 </tr>
 
 <tr>
 <th>Server reload:</th>
-<td><?= strftime($timeformat, $resin->startTime->time) ?></td>
+<td><?= strftime($timeformat, $resin->startTime->time/ 1000) ?></td>
 </tr>
 
 <tr>
