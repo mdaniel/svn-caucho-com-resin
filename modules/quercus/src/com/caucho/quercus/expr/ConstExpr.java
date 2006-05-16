@@ -73,7 +73,6 @@ public class ConstExpr extends Expr {
    * @return the expression value.
    */
   public Value eval(Env env)
-    throws Throwable
   {
     Value value = env.getConstant(_var);
 

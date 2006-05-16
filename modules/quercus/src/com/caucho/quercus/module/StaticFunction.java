@@ -37,6 +37,7 @@ import java.lang.reflect.Modifier;
 import java.util.logging.Logger;
 
 import com.caucho.quercus.Quercus;
+import com.caucho.quercus.QuercusException;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.expr.DefaultExpr;
@@ -272,7 +273,6 @@ public class StaticFunction extends AbstractFunction {
    * @return the user arguments augmented by any defaults
    */
   public Expr []bindArguments(Env env, Expr fun, Expr []args)
-    throws Exception
   {
     if (_defaultExprs.length == args.length)
       return args;
@@ -332,7 +332,6 @@ public class StaticFunction extends AbstractFunction {
    * Evalutes the function.
    */
   public Value eval(Env env, Expr []exprs)
-    throws Throwable
   {
     int len = _defaultExprs.length + (_hasEnv ? 1 : 0) + (_hasRestArgs ? 1 : 0);
 
@@ -368,11 +367,8 @@ public class StaticFunction extends AbstractFunction {
       Object result = _method.invoke(_quercusModule, values);
 
       return _unmarshallReturn.unmarshall(env, result);
-    } catch (InvocationTargetException e) {
-      if (e.getCause() != null)
-        throw e.getCause();
-      else
-        throw e;
+    } catch (Exception e) {
+      throw new QuercusException(e);
     }
   }
 
@@ -380,7 +376,6 @@ public class StaticFunction extends AbstractFunction {
    * Evalutes the function.
    */
   public Value eval(Env env, Value []quercusArgs)
-    throws Throwable
   {
     int len = _paramTypes.length;
 
@@ -425,16 +420,19 @@ public class StaticFunction extends AbstractFunction {
       javaArgs[k++] = rest;
     }
 
-    Object result = _method.invoke(_quercusModule, javaArgs);
-
-    return _unmarshallReturn.unmarshall(env, result);
+    try {
+      Object result = _method.invoke(_quercusModule, javaArgs);
+      
+      return _unmarshallReturn.unmarshall(env, result);
+    } catch (Exception e) {
+      throw new QuercusException(e);
+    }
   }
 
   /**
    * Evaluates the function.
    */
   public Value evalCopy(Env env, Expr []exprs)
-    throws Throwable
   {
     return eval(env, exprs);
   }
@@ -443,7 +441,6 @@ public class StaticFunction extends AbstractFunction {
    * Evaluates the function, returning a copy
    */
   public Value evalCopy(Env env, Value []args)
-    throws Throwable
   {
     return eval(env, args);
   }

@@ -60,7 +60,6 @@ abstract public class CompiledFunction_0 extends CompiledFunction {
    * @return the user arguments augmented by any defaults
    */
   public Expr []bindArguments(Env env, Expr fun, Expr []args)
-    throws Exception
   {
     if (args.length > 0)
       log.fine(L.l(env.getLocation().getMessagePrefix() + "too many arguments" + env.getFunctionLocation()));
@@ -69,7 +68,6 @@ abstract public class CompiledFunction_0 extends CompiledFunction {
   }
 
   public Value eval(Env env, Value []argValues)
-    throws Throwable
   {
     return eval(env);
   }

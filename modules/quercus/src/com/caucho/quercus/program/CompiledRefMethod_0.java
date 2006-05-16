@@ -72,7 +72,6 @@ abstract public class CompiledRefMethod_0 extends CompiledMethodRef {
    * @return the user arguments augmented by any defaults
    */
   public Expr []bindArguments(Env env, Expr fun, Expr []args)
-    throws Exception
   {
     if (args.length != 0)
       env.warning(L.l("too many arguments"));
@@ -81,7 +80,6 @@ abstract public class CompiledRefMethod_0 extends CompiledMethodRef {
   }
 
   public Value evalMethod(Env env, Value obj, Value []argValues)
-    throws Throwable
   {
     return evalMethodRef(env, obj, argValues).copy();
   }
@@ -90,7 +88,6 @@ abstract public class CompiledRefMethod_0 extends CompiledMethodRef {
    * Evalautes the method.
    */
   public Value evalMethodRef(Env env, Value obj, Value []argValues)
-    throws Throwable
   {
     if (argValues.length > 0)
       env.warning(L.l("too many arguments in {0}", _name));
@@ -102,7 +99,6 @@ abstract public class CompiledRefMethod_0 extends CompiledMethodRef {
    * Evaluates the method as a static function
    */
   public Value eval(Env env, Value []argValues)
-    throws Throwable
   {
     env.error(L.l("can't call {0} as a static function",
 		  _name));
@@ -114,7 +110,6 @@ abstract public class CompiledRefMethod_0 extends CompiledMethodRef {
    * Evaluates the method as a static function
    */
   public Value evalMethod(Env env)
-    throws Throwable
   {
     return evalMethodRef(env).copy();
   }
@@ -122,8 +117,7 @@ abstract public class CompiledRefMethod_0 extends CompiledMethodRef {
   /**
    * Evaluates the method as a static function
    */
-  abstract public Value evalMethodRef(Env env)
-    throws Throwable;
+  abstract public Value evalMethodRef(Env env);
   
   public String toString()
   {

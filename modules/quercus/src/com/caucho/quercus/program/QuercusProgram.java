@@ -261,10 +261,8 @@ public class QuercusProgram extends GenClass {
    *
    * @param env the calling environment
    *
-   * @throws Throwable
    */
   public Value execute(Env env)
-    throws Throwable
   {
     Value value = _statement.execute(env);
 
@@ -290,7 +288,6 @@ public class QuercusProgram extends GenClass {
    * Imports the page definitions.
    */
   public void importDefinitions(Env env)
-    throws Throwable
   {
     for (Map.Entry<String,Function> entry : _functionMap.entrySet()) {
       Function fun = entry.getValue();

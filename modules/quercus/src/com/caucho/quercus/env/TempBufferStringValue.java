@@ -82,7 +82,7 @@ public class TempBufferStringValue extends StringValue {
    * @param env
    */
   public void print(Env env)
-    throws Throwable
+    throws java.io.IOException
   {
     WriteStream out = env.getOut();
 

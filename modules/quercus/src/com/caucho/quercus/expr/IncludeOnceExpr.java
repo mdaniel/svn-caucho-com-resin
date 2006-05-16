@@ -31,6 +31,7 @@ package com.caucho.quercus.expr;
 
 import java.io.IOException;
 
+import com.caucho.quercus.QuercusException;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.gen.PhpWriter;
@@ -81,17 +82,20 @@ public class IncludeOnceExpr extends UnaryExpr {
    * @return the expression value.
    */
   public Value eval(Env env)
-    throws Throwable
   {
-    String name = _expr.evalString(env);
-
-    // return env.include(_dir, name);
-    if (_dir != null)
-      return env.include(_dir, name, _isRequire, true);
-    else if (_isRequire)
-      return env.require_once(name);
-    else
-      return env.include_once(name);
+    try {
+      String name = _expr.evalString(env);
+      
+      // return env.include(_dir, name);
+      if (_dir != null)
+	return env.include(_dir, name, _isRequire, true);
+      else if (_isRequire)
+	return env.require_once(name);
+      else
+	return env.include_once(name);
+    } catch (IOException e) {
+      throw new QuercusException(e);
+    }
   }
 
   //

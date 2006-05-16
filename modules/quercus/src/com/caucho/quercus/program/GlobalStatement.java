@@ -63,13 +63,12 @@ public class GlobalStatement extends Statement {
   }
   
   public Value execute(Env env)
-    throws Throwable
   {
     try {
       env.setValue(_var.getName(), env.getGlobalVar(_var.getName()));
     }
-    catch (Throwable t) {
-      rethrow(t);
+    catch (RuntimeException e) {
+      rethrow(e, RuntimeException.class);
     }
 
     return null;

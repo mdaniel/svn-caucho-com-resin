@@ -78,7 +78,6 @@ public class StaticFieldGetExpr extends AbstractVarExpr {
    * @return the expression value.
    */
   public Value eval(Env env)
-    throws Throwable
   {
     return env.getGlobalValue(_envName);
   }
@@ -91,7 +90,6 @@ public class StaticFieldGetExpr extends AbstractVarExpr {
    * @return the expression value.
    */
   public Value evalArg(Env env)
-    throws Throwable
   {
     return env.getGlobalRef(_envName);
   }
@@ -104,7 +102,6 @@ public class StaticFieldGetExpr extends AbstractVarExpr {
    * @return the expression value.
    */
   public Value evalRef(Env env)
-    throws Throwable
   {
     return env.getGlobalVar(_envName);
   }
@@ -117,7 +114,6 @@ public class StaticFieldGetExpr extends AbstractVarExpr {
    * @return the expression value.
    */
   public void evalAssign(Env env, Value value)
-    throws Throwable
   {
     env.setGlobalValue(_envName, value);
   }
@@ -130,7 +126,6 @@ public class StaticFieldGetExpr extends AbstractVarExpr {
    * @return the expression value.
    */
   public void evalUnset(Env env)
-    throws Throwable
   {
     // env.removeGlobal(_envName);
   }

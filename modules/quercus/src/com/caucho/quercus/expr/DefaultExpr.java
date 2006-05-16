@@ -60,7 +60,6 @@ public class DefaultExpr extends Expr {
    * @return the expression value.
    */
   public Value eval(Env env)
-    throws Throwable
   {
     return DefaultValue.DEFAULT;
   }

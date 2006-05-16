@@ -32,10 +32,12 @@ package com.caucho.quercus.lib;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.ArrayList;
+import java.io.IOException;
 
 import com.caucho.util.L10N;
 
 import com.caucho.quercus.Quercus;
+import com.caucho.quercus.QuercusException;
 
 import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.quercus.module.Optional;
@@ -77,15 +79,18 @@ public class OptionsModule extends AbstractQuercusModule {
    * Checks the assertion
    */
   public static boolean quercus_assert(Env env, String code)
-    throws Throwable
   {
-    Quercus quercus = env.getQuercus();
-
-    QuercusProgram program = quercus.parseCode(code);
-
-    Value value = program.execute(env);
-
-    return value.toBoolean();
+    try {
+      Quercus quercus = env.getQuercus();
+      
+      QuercusProgram program = quercus.parseCode(code);
+      
+      Value value = program.execute(env);
+      
+      return value.toBoolean();
+    } catch (IOException e) {
+      throw new QuercusException(e);
+    }
   }
 
   /**

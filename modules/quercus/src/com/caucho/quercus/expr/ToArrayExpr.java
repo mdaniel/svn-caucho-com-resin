@@ -60,7 +60,6 @@ public class ToArrayExpr extends UnaryExpr {
    * @return the expression value.
    */
   public Value eval(Env env)
-    throws Throwable
   {
     return _expr.eval(env).toArray();
   }
@@ -73,7 +72,6 @@ public class ToArrayExpr extends UnaryExpr {
    * @return the expression value.
    */
   public Value evalCopy(Env env)
-    throws Throwable
   {
     Value value = _expr.eval(env).toValue();
 

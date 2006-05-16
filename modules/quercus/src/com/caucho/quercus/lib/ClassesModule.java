@@ -75,7 +75,6 @@ public class ClassesModule extends AbstractQuercusModule {
    * Returns the object's class name
    */
   public Value get_class(Value value)
-    throws Throwable
   {
     if (value instanceof ObjectValue) {
       ObjectValue obj = (ObjectValue) value;
@@ -90,7 +89,6 @@ public class ClassesModule extends AbstractQuercusModule {
    * Returns the declared classes
    */
   public static Value get_declared_classes(Env env)
-    throws Throwable
   {
     return env.getDeclaredClasses();
   }
@@ -99,7 +97,6 @@ public class ClassesModule extends AbstractQuercusModule {
    * Returns the object's variables
    */
   public Value get_object_vars(Value obj)
-    throws Throwable
   {
     //
     ArrayValue result = new ArrayValueImpl();
@@ -131,7 +128,6 @@ public class ClassesModule extends AbstractQuercusModule {
    * Returns the object's class name
    */
   public Value get_parent_class(Env env, @ReadOnly Value value)
-    throws Throwable
   {
     if (value instanceof ObjectValue) {
       ObjectValue obj = (ObjectValue) value;
@@ -178,7 +174,6 @@ public class ClassesModule extends AbstractQuercusModule {
    * @throws errorException
    */
   public static Value get_class_vars(Env env, String className)
-  throws Throwable
   {
   	//  php/1j10
   	

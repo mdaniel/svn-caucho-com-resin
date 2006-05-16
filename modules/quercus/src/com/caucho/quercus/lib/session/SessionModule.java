@@ -126,7 +126,7 @@ public class SessionModule extends AbstractQuercusModule {
    * Encodes the session values.
    */
   public static boolean session_decode(Env env, String value)
-    throws Throwable
+    throws java.io.IOException
   {
     Value session = env.getGlobalValue("_SESSION");
 
@@ -186,7 +186,6 @@ public class SessionModule extends AbstractQuercusModule {
    * Destroys the session
    */
   public static boolean session_destroy(Env env)
-    throws Throwable
   {
     SessionArrayValue session = env.getSession();
 
@@ -273,7 +272,6 @@ public class SessionModule extends AbstractQuercusModule {
    */
   public static boolean session_regenerate_id(Env env,
                                               @Optional boolean deleteOld)
-    throws Throwable
   {
     SessionArrayValue session = env.getSession();
 
@@ -301,7 +299,6 @@ public class SessionModule extends AbstractQuercusModule {
    * Registers global variables in the session.
    */
   public boolean session_register(Env env, Value []values)
-    throws Throwable
   {
     Value session = env.getGlobalValue("_SESSION");
 
@@ -357,7 +354,6 @@ public class SessionModule extends AbstractQuercusModule {
                                          @Optional Value path,
                                          @Optional Value domain,
                                          @Optional Value secure)
-    throws Throwable
   {
     env.setIni("session.cookie_lifetime", String.valueOf(lifetime));
 
@@ -384,7 +380,6 @@ public class SessionModule extends AbstractQuercusModule {
                                           Callback directory,
                                           Callback gc)
 
-    throws Throwable
   {
     SessionCallback cb = new SessionCallback(open,
                                              close,
@@ -402,7 +397,6 @@ public class SessionModule extends AbstractQuercusModule {
    * Start the session
    */
   public static boolean session_start(Env env)
-    throws Throwable
   {
     if (env.getSession() != null) {
       env.notice(L.l("session has already been started"));

@@ -107,7 +107,6 @@ public class HtmlModule extends AbstractQuercusModule {
 				       Value stringV,
                                        @Optional Value quoteStyleV,
                                        @Optional Value charsetV)
-    throws Throwable
   {
       // XXX: quotestyle and charset
     String string = stringV.toString();
@@ -155,7 +154,6 @@ public class HtmlModule extends AbstractQuercusModule {
 				   Value stringV,
                                    @Optional Value quoteStyleV,
                                    @Optional Value charsetV)
-    throws Throwable
   {
     // XXX: other entities
     return htmlspecialchars(env, stringV, quoteStyleV, charsetV);
@@ -173,7 +171,6 @@ public class HtmlModule extends AbstractQuercusModule {
                                           String string,
 	                              				  @Optional int quoteStyle,
 					                                @Optional String charset)
-    throws Throwable
   {
     if (string == null)
       return "";
@@ -217,7 +214,6 @@ public class HtmlModule extends AbstractQuercusModule {
    * @param env the calling environment
    */
   public static Value nl2br(Env env, Value stringV)
-    throws Throwable
   {
     String string = stringV.toString();
 

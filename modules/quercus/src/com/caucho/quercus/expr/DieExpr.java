@@ -77,17 +77,18 @@ public class DieExpr extends Expr {
    * @return the expression value.
    */
   public Value eval(Env env)
-    throws Throwable
   {
-    if (_value != null) {
-      String msg = _value.evalString(env);
-
-      env.getOut().print(msg);
-
-      throw new QuercusDieException(msg);
+    try {
+      if (_value != null) {
+	String msg = _value.evalString(env);
+	
+	env.getOut().print(msg);
+	
+	throw new QuercusDieException(msg);
+      }
+    } catch (IOException e) {
     }
-    else
-      throw new QuercusDieException();
+    throw new QuercusDieException();
   }
 
   //

@@ -156,7 +156,6 @@ public class Function extends AbstractFunction {
   }
 
   public Value execute(Env env)
-    throws Throwable
   {
     return null;
   }
@@ -168,7 +167,6 @@ public class Function extends AbstractFunction {
    * @return the user arguments augmented by any defaults
    */
   public Expr []bindArguments(Env env, Expr fun, Expr []args)
-    throws Exception
   {
     Expr []expandedArgs;
 
@@ -209,25 +207,21 @@ public class Function extends AbstractFunction {
   }
 
   public Value eval(Env env, Expr []args)
-    throws Throwable
   {
     return evalImpl(env, args, false);
   }
 
   public Value evalCopy(Env env, Expr []args)
-    throws Throwable
   {
     return evalImpl(env, args, false);
   }
 
   public Value evalRef(Env env, Expr []args)
-    throws Throwable
   {
     return evalImpl(env, args, true);
   }
 
   private Value evalImpl(Env env, Expr []args, boolean isRef)
-    throws Throwable
   {
     HashMap<String,Var> map = new HashMap<String,Var>();
 
@@ -293,25 +287,21 @@ public class Function extends AbstractFunction {
   }
 
   public Value eval(Env env, Value []args)
-    throws Throwable
   {
     return evalImpl(env, args, false);
   }
 
   public Value evalCopy(Env env, Value []args)
-    throws Throwable
   {
     return evalImpl(env, args, false);
   }
 
   public Value evalRef(Env env, Value []args)
-    throws Throwable
   {
     return evalImpl(env, args, true);
   }
 
   private Value evalImpl(Env env, Value []args, boolean isRef)
-    throws Throwable
   {
     HashMap<String,Var> map = new HashMap<String,Var>();
 
@@ -530,7 +520,7 @@ public class Function extends AbstractFunction {
     }
     out.println(")");
 
-    out.println("  throws Throwable");
+    //out.println("  throws Throwable");
     out.println("{");
     out.pushDepth();
 
@@ -589,7 +579,7 @@ public class Function extends AbstractFunction {
     }
     out.println(")");
 
-    out.println("  throws Throwable");
+    //out.println("  throws Throwable");
     out.println("{");
 
     out.print("  return ");
@@ -643,7 +633,7 @@ public class Function extends AbstractFunction {
     else
       out.println("(Env env, Value q_this_arg, Value []args)");
 
-    out.println("  throws Throwable");
+    //out.println("  throws Throwable");
     out.println("{");
     out.pushDepth();
 
@@ -730,7 +720,7 @@ public class Function extends AbstractFunction {
     else
       out.println("public Value evalMethod" + ref + "Impl(Env env, Value q_this, Value []args)");
 
-    out.println("  throws Throwable");
+    //out.println("  throws Throwable");
     out.println("{");
     out.pushDepth();
 

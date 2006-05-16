@@ -77,7 +77,6 @@ public class ThisExpr extends AbstractVarExpr {
    * @return the expression value.
    */
   public Value eval(Env env)
-    throws Throwable
   {
     return env.getThis();
   }
@@ -90,7 +89,6 @@ public class ThisExpr extends AbstractVarExpr {
    * @return the expression value.
    */
   public Value evalArg(Env env)
-    throws Throwable
   {
     return env.getThis();
   }
@@ -103,7 +101,6 @@ public class ThisExpr extends AbstractVarExpr {
    * @return the expression value.
    */
   public Value evalRef(Env env)
-    throws Throwable
   {
     return env.getThis();
   }
@@ -116,7 +113,6 @@ public class ThisExpr extends AbstractVarExpr {
    * @return the expression value.
    */
   public void evalAssign(Env env, Value value)
-    throws Throwable
   {
     env.error("can't assign $this");
   }
@@ -129,7 +125,6 @@ public class ThisExpr extends AbstractVarExpr {
    * @return the expression value.
    */
   public void evalUnset(Env env)
-    throws Throwable
   {
     env.error("can't unset $this");
   }

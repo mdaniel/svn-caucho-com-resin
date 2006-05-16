@@ -65,7 +65,6 @@ public class UnsetVarExpr extends Expr {
    * @return the expression value.
    */
   public Value eval(Env env)
-    throws Throwable
   {
     _var.evalUnset(env);
 

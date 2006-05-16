@@ -64,7 +64,6 @@ public class ReturnRefStatement extends Statement {
    * Executes the statement, returning the expression value.
    */
   public Value execute(Env env)
-    throws Throwable
   {
     try {
       if (_expr != null) {
@@ -74,8 +73,8 @@ public class ReturnRefStatement extends Statement {
       else
         return NullValue.NULL;
     }
-    catch (Throwable t) {
-      rethrow(t);
+    catch (RuntimeException e) {
+      rethrow(e, RuntimeException.class);
     }
 
     return null;

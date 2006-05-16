@@ -98,7 +98,6 @@ public class VarMethodCallExpr extends Expr {
    * @return the expression value.
    */
   public Value eval(Env env)
-    throws Throwable
   {
     Value []values = new Value[_args.length];
 

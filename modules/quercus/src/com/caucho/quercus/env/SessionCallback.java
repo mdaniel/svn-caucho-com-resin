@@ -66,7 +66,6 @@ public class SessionCallback extends Value {
   }
 
   public void open(Env env, String savePath, String sessionName)
-    throws Throwable
   {
     _open.eval(env, new StringValueImpl(savePath), new StringValueImpl(sessionName));
   }

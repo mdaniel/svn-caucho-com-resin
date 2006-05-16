@@ -35,6 +35,7 @@ import java.util.HashSet;
 
 import com.caucho.java.JavaWriter;
 
+import com.caucho.quercus.QuercusException;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
 
@@ -65,15 +66,17 @@ public class EchoStatement extends Statement {
   }
   
   public Value execute(Env env)
-    throws Throwable
   {
     try {
       Value value = _expr.eval(env);
 
       value.print(env);
     }
-    catch (Throwable t) {
-      rethrow(t);
+    catch (RuntimeException e) {
+      rethrow(e, RuntimeException.class);
+    }
+    catch (IOException e) {
+      throw new QuercusException(e);
     }
 
     return null;

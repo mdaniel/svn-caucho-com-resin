@@ -83,7 +83,6 @@ public class ArrayTailExpr extends AbstractVarExpr {
    * @return the expression value.
    */
   public Value eval(Env env)
-    throws Throwable
   {
     return env.error("Cannot use [] as a read-value.");
   }
@@ -96,7 +95,6 @@ public class ArrayTailExpr extends AbstractVarExpr {
    * @return the expression value.
    */
   public Value evalArg(Env env)
-    throws Throwable
   {
     return evalRef(env);
   }
@@ -109,7 +107,6 @@ public class ArrayTailExpr extends AbstractVarExpr {
    * @return the expression value.
    */
   public Value evalRef(Env env)
-    throws Throwable
   {
     Value obj = _expr.evalArray(env);
 
@@ -131,7 +128,6 @@ public class ArrayTailExpr extends AbstractVarExpr {
    * @return the expression value.
    */
   public Value evalArray(Env env)
-    throws Throwable
   {
     Value obj = _expr.evalArray(env);
 
@@ -150,7 +146,6 @@ public class ArrayTailExpr extends AbstractVarExpr {
    * @return the expression value.
    */
   public Value evalObject(Env env)
-    throws Throwable
   {
     Value array = _expr.evalArray(env);
 
@@ -169,7 +164,6 @@ public class ArrayTailExpr extends AbstractVarExpr {
    * @return the expression value.
    */
   public void evalAssign(Env env, Value value)
-    throws Throwable
   {
     Value array = _expr.evalArray(env);
 
@@ -184,7 +178,6 @@ public class ArrayTailExpr extends AbstractVarExpr {
    * @return the expression value.
    */
   public void evalUnset(Env env)
-    throws Throwable
   {
     throw new UnsupportedOperationException();
   }

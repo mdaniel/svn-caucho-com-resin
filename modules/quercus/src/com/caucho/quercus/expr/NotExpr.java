@@ -64,7 +64,6 @@ public final class NotExpr extends UnaryExpr {
    * Evaluates the equality as a boolean.
    */
   public Value eval(Env env)
-    throws Throwable
   {
     return _expr.evalBoolean(env) ? BooleanValue.FALSE : BooleanValue.TRUE;
   }
@@ -73,7 +72,6 @@ public final class NotExpr extends UnaryExpr {
    * Evaluates the equality as a boolean.
    */
   public boolean evalBoolean(Env env)
-    throws Throwable
   {
     return ! _expr.evalBoolean(env);
   }

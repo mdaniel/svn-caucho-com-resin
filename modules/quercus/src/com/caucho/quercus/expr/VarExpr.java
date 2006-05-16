@@ -137,7 +137,6 @@ public class VarExpr
    * @return the expression value.
    */
   public Value eval(Env env)
-    throws Throwable
   {
     Value value;
 
@@ -159,7 +158,6 @@ public class VarExpr
    * @return the expression value.
    */
   public Value evalCopy(Env env)
-    throws Throwable
   {
     return eval(env).copy();
   }
@@ -171,7 +169,6 @@ public class VarExpr
    * @return the expression value.
    */
   public Value evalArray(Env env)
-    throws Throwable
   {
     Value value;
 
@@ -215,7 +212,6 @@ public class VarExpr
    * @return the expression value.
    */
   public Value evalObject(Env env)
-    throws Throwable
   {
     Value value;
 
@@ -247,7 +243,6 @@ public class VarExpr
    * @return the expression value.
    */
   public Value evalRef(Env env)
-    throws Throwable
   {
     if (getVarInfo().isGlobal())
       return env.getGlobalVar(_name);
@@ -262,7 +257,6 @@ public class VarExpr
    * @return the expression value.
    */
   public Value evalArg(Env env)
-    throws Throwable
   {
     // quercus/043k
     // quercus/0443
@@ -279,7 +273,6 @@ public class VarExpr
    * @param env the calling environment.
    */
   public void evalAssign(Env env, Value value)
-    throws Throwable
   {
     if (getVarInfo().isGlobal())
       env.setGlobalValue(_name, value);
@@ -293,7 +286,6 @@ public class VarExpr
    * @param env the calling environment.
    */
   public void evalUnset(Env env)
-    throws Throwable
   {
     if (getVarInfo().isGlobal())
       env.unsetGlobalVar(_name);

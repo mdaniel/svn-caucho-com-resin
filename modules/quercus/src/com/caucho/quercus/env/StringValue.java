@@ -31,6 +31,8 @@ package com.caucho.quercus.env;
 
 import java.util.IdentityHashMap;
 
+import java.io.IOException;
+
 import com.caucho.vfs.WriteStream;
 
 /**
@@ -82,7 +84,6 @@ abstract public class StringValue extends Value {
    * Pre-increment the following value.
    */
   public Value preincr(int incr)
-    throws Throwable
   {
     return postincr(incr);
   }
@@ -91,7 +92,6 @@ abstract public class StringValue extends Value {
    * Post-increment the following value.
    */
   public Value postincr(int incr)
-    throws Throwable
   {
     if (incr > 0) {
       String s = toString();
@@ -359,7 +359,7 @@ abstract public class StringValue extends Value {
                           WriteStream out,
                           int depth,
                           IdentityHashMap<Value, String> valueSet)
-    throws Throwable
+    throws IOException
   {
     String s = toString();
 

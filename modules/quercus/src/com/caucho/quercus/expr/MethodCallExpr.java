@@ -83,7 +83,6 @@ public class MethodCallExpr extends Expr {
    * @return the expression value.
    */
   public Value eval(Env env)
-    throws Throwable
   {
     env.checkTimeout();
 
@@ -108,7 +107,6 @@ public class MethodCallExpr extends Expr {
    * @return the expression value.
    */
   public Value evalRef(Env env)
-    throws Throwable
   {
     env.checkTimeout();
 

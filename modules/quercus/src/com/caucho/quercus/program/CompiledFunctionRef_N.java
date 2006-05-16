@@ -74,13 +74,11 @@ abstract public class CompiledFunctionRef_N extends CompiledFunctionRef {
    * @return the user arguments augmented by any defaults
    */
   public Expr []bindArguments(Env env, Expr fun, Expr []args)
-    throws Exception
   {
     return args;
   }
 
   public final Value evalRef(Env env, Value []argValues)
-    throws Throwable
   {
     Value []args = argValues;
 
@@ -102,8 +100,7 @@ abstract public class CompiledFunctionRef_N extends CompiledFunctionRef {
     return evalRefImpl(env, args);
   }
 
-  abstract public Value evalRefImpl(Env env, Value []args)
-    throws Throwable;
+  abstract public Value evalRefImpl(Env env, Value []args);
   
   public String toString()
   {

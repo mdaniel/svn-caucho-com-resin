@@ -59,7 +59,6 @@ public class CommaExpr extends BinaryExpr {
    * @return the expression value.
    */
   public Value eval(Env env)
-    throws Throwable
   {
     _left.eval(env);
 
@@ -74,7 +73,6 @@ public class CommaExpr extends BinaryExpr {
    * @return the expression value.
    */
   public boolean evalBoolean(Env env)
-    throws Throwable
   {
     _left.eval(env);
 

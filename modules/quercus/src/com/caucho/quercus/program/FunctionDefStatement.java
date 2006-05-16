@@ -60,7 +60,6 @@ public class FunctionDefStatement extends Statement {
   }
   
   public Value execute(Env env)
-    throws Throwable
   {
     try {
       String name = _fun.getName();
@@ -68,8 +67,8 @@ public class FunctionDefStatement extends Statement {
       if (env.findFunction(name) == null)
         env.addFunction(name, _fun);
     }
-    catch (Throwable t) {
-      rethrow(t);
+    catch (RuntimeException e) {
+      rethrow(e, RuntimeException.class);
     }
 
     return null;

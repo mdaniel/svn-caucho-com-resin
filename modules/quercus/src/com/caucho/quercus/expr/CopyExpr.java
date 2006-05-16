@@ -58,7 +58,6 @@ public class CopyExpr extends UnaryExpr {
    * @return the expression value.
    */
   public Value eval(Env env)
-    throws Throwable
   {
     return _expr.eval(env).copy();
   }
@@ -71,7 +70,6 @@ public class CopyExpr extends UnaryExpr {
    * @return the expression value.
    */
   public Value evalArg(Env env)
-    throws Throwable
   {
     return eval(env);
   }

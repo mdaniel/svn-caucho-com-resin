@@ -74,13 +74,11 @@ abstract public class CompiledFunction_N extends CompiledFunction {
    * @return the user arguments augmented by any defaults
    */
   public Expr []bindArguments(Env env, Expr fun, Expr []args)
-    throws Exception
   {
     return args;
   }
 
   public final Value eval(Env env, Value []argValues)
-    throws Throwable
   {
     Value []args = argValues;
 
@@ -102,8 +100,7 @@ abstract public class CompiledFunction_N extends CompiledFunction {
     return evalImpl(env, args);
   }
 
-  abstract public Value evalImpl(Env env, Value []args)
-    throws Throwable;
+  abstract public Value evalImpl(Env env, Value []args);
   
   public String toString()
   {

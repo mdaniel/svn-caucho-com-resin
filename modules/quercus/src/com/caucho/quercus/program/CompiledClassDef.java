@@ -126,7 +126,6 @@ public class CompiledClassDef extends ClassDef {
    * Creates a new instance.
    */
   public void initInstance(Env env, Value value)
-    throws Throwable
   {
   }
 
@@ -325,7 +324,6 @@ public class CompiledClassDef extends ClassDef {
    * Eval new
    */
   public Value evalNew(Env env, Expr []args)
-    throws Throwable
   {
     return null;
   }
@@ -334,7 +332,6 @@ public class CompiledClassDef extends ClassDef {
    * Eval new
    */
   public Value evalNew(Env env, Value []args)
-    throws Throwable
   {
     return null;
   }

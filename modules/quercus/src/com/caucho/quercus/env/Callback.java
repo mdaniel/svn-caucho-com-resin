@@ -38,32 +38,28 @@ abstract public class Callback extends Value {
    *
    * @param env the calling environment
    */
-  abstract public Value eval(Env env)
-    throws Throwable;
+  abstract public Value eval(Env env);
 
   /**
    * Evaluates the callback with 1 arguments.
    *
    * @param env the calling environment
    */
-  abstract public Value eval(Env env, Value a1)
-    throws Throwable;
+  abstract public Value eval(Env env, Value a1);
 
   /**
    * Evaluates the callback with 2 arguments.
    *
    * @param env the calling environment
    */
-  abstract public Value eval(Env env, Value a1, Value a2)
-    throws Throwable;
+  abstract public Value eval(Env env, Value a1, Value a2);
 
   /**
    * Evaluates the callback with 3 arguments.
    *
    * @param env the calling environment
    */
-  abstract public Value eval(Env env, Value a1, Value a2, Value a3)
-    throws Throwable;
+  abstract public Value eval(Env env, Value a1, Value a2, Value a3);
 
   /**
    * Evaluates the callback with 4 arguments.
@@ -71,8 +67,7 @@ abstract public class Callback extends Value {
    * @param env the calling environment
    */
   abstract public Value eval(Env env, Value a1, Value a2, Value a3,
-                             Value a4)
-    throws Throwable;
+                             Value a4);
 
   /**
    * Evaluates the callback with 5 arguments.
@@ -80,16 +75,14 @@ abstract public class Callback extends Value {
    * @param env the calling environment
    */
   abstract public Value eval(Env env, Value a1, Value a2, Value a3,
-                             Value a4, Value a5)
-    throws Throwable;
+                             Value a4, Value a5);
 
   /**
    * Evaluates the callback with variable arguments.
    *
    * @param env the calling environment
    */
-  abstract public Value eval(Env env, Value []args)
-    throws Throwable;
+  abstract public Value eval(Env env, Value []args);
 
   /**
    * 

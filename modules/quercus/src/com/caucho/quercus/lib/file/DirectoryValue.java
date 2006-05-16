@@ -82,7 +82,6 @@ public class DirectoryValue extends ResourceValue {
    * Calls the given method.
    */
   public Value evalMethod(Env env, String method)
-    throws Throwable
   {
     if ("read".equals(method))
       return readdir();

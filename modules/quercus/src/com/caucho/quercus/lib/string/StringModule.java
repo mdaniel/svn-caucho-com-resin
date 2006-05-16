@@ -43,6 +43,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.zip.CRC32;
 
+import com.caucho.quercus.QuercusException;
 import com.caucho.quercus.env.*;
 import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.quercus.module.NotNull;
@@ -238,7 +239,6 @@ public class StringModule extends AbstractQuercusModule {
    * Converts a binary value to a hex value.
    */
   public static String bin2hex(String strValue)
-    throws Throwable
   {
     StringBuffer sb = new StringBuffer();
 
@@ -273,7 +273,6 @@ v   *
    */
   public static String chop(Env env, String str,
                             @Optional String charset)
-    throws Throwable
   {
     return rtrim(env, str, charset);
   }
@@ -300,7 +299,6 @@ v   *
   public static String chunk_split(String body,
                                    @Optional("76") int chunkLen,
                                    @Optional("\"\\r\\n\"") String end)
-    throws Throwable
   {
     if (chunkLen < 1) // XXX: real exn
       throw new IllegalArgumentException(L.l("bad value {0}", chunkLen));
@@ -514,7 +512,6 @@ v   *
    * @return the crc32 hash
    */
   public static int crc32(String str)
-    throws Throwable
   {
     CRC32 crc = new CRC32();
 
@@ -548,7 +545,6 @@ v   *
   public static Value explode(String separator,
                               String string,
                               @Optional("0x7fffffff") long limit)
-    throws Throwable
   {
     if (separator.equals(""))
       return BooleanValue.FALSE;
@@ -591,7 +587,7 @@ v   *
                               @NotNull StreamResource fd,
                               String format,
                               Value []args)
-    throws Throwable
+    throws java.io.IOException
   {
     Value value = sprintf(format, args);
 
@@ -609,7 +605,6 @@ v   *
   public static Value implode(Env env,
 			      Value glueV,
                               Value piecesV)
-    throws Throwable
   {
     String glue;
     ArrayValue pieces;
@@ -657,7 +652,6 @@ v   *
   public static Value join(Env env,
                            Value glueV,
                            Value piecesV)
-    throws Throwable
   {
     return implode(env, glueV, piecesV);
   }
@@ -672,30 +666,33 @@ v   *
    */
   public static String md5(String source,
                            @Optional boolean rawOutput)
-    throws Throwable
   {
-    MessageDigest md = MessageDigest.getInstance("MD5");
-
-    // XXX: iso-8859-1
-
-    for (int i = 0; i < source.length(); i++) {
-      char ch = source.charAt(i);
-
-      md.update((byte) ch);
+    try {
+      MessageDigest md = MessageDigest.getInstance("MD5");
+      
+      // XXX: iso-8859-1
+      
+      for (int i = 0; i < source.length(); i++) {
+	char ch = source.charAt(i);
+	
+	md.update((byte) ch);
+      }
+      
+      byte []digest = md.digest();
+      
+      StringBuilder sb = new StringBuilder();
+      for (int i = 0; i < digest.length; i++) {
+	int d1 = (digest[i] >> 4) & 0xf;
+	int d2 = (digest[i] & 0xf);
+	
+	sb.append(toHexChar(d1));
+	sb.append(toHexChar(d2));
+      }
+      
+      return sb.toString();
+    } catch (Exception e) {
+      throw new QuercusException(e);
     }
-
-    byte []digest = md.digest();
-
-    StringBuilder sb = new StringBuilder();
-    for (int i = 0; i < digest.length; i++) {
-      int d1 = (digest[i] >> 4) & 0xf;
-      int d2 = (digest[i] & 0xf);
-
-      sb.append(toHexChar(d1));
-      sb.append(toHexChar(d2));
-    }
-
-    return sb.toString();
   }
 
   /**
@@ -708,30 +705,33 @@ v   *
    */
   public static Value md5_file(Path source,
                                @Optional boolean rawOutput)
-    throws Throwable
   {
-    MessageDigest md = MessageDigest.getInstance("MD5");
-    InputStream is = null;
-
     try {
-      is = source.openRead();
-      int d;
-
-      while ((d = is.read()) >= 0) {
-        md.update((byte) d);
-      }
-
-      return digestToString(md.digest());
-    } catch (IOException e) {
-      log.log(Level.FINE, e.toString(), e);
-
-      return BooleanValue.FALSE;
-    } finally {
+      MessageDigest md = MessageDigest.getInstance("MD5");
+      InputStream is = null;
+      
       try {
-        if (is != null)
-          is.close();
+	is = source.openRead();
+	int d;
+	
+	while ((d = is.read()) >= 0) {
+	  md.update((byte) d);
+	}
+	
+	return digestToString(md.digest());
       } catch (IOException e) {
+	log.log(Level.FINE, e.toString(), e);
+	
+	return BooleanValue.FALSE;
+      } finally {
+	try {
+	  if (is != null)
+	    is.close();
+	} catch (IOException e) {
+	}
       }
+    } catch (Exception e) {
+      throw new QuercusException(e);
     }
   }
 
@@ -1210,7 +1210,6 @@ v   *
    * @return the integer value
    */
   public static long ord(String string)
-    throws Throwable
   {
     if (string.length() == 0)
       return 0;
@@ -1392,7 +1391,7 @@ v   *
    * @param value the string to print
    */
   public static long print(Env env, Value value)
-    throws Throwable
+    throws IOException
   {
     env.getOut().print(value.toString(env));
 
@@ -1407,7 +1406,6 @@ v   *
    * @return the quoted
    */
   public static Value quotemeta(String string)
-    throws Throwable
   {
     StringBuilder sb = new StringBuilder();
 
@@ -1491,7 +1489,6 @@ v   *
   public static String ltrim(Env env,
                              String string,
                              @Optional String characters)
-    throws Throwable
   {
     boolean []trim;
 
@@ -1525,7 +1522,6 @@ v   *
   public static String rtrim(Env env,
                              String string,
                              @Optional String characters)
-    throws Throwable
   {
     boolean []trim;
 
@@ -1694,30 +1690,33 @@ v   *
    */
   public static String sha1(String source,
                             @Optional boolean rawOutput)
-    throws Throwable
   {
-    MessageDigest md = MessageDigest.getInstance("SHA1");
-
-    // XXX: iso-8859-1
-
-    for (int i = 0; i < source.length(); i++) {
-      char ch = source.charAt(i);
-
-      md.update((byte) ch);
+    try {
+      MessageDigest md = MessageDigest.getInstance("SHA1");
+      
+      // XXX: iso-8859-1
+      
+      for (int i = 0; i < source.length(); i++) {
+	char ch = source.charAt(i);
+	
+	md.update((byte) ch);
+      }
+      
+      byte []digest = md.digest();
+      
+      StringBuilder sb = new StringBuilder();
+      for (int i = 0; i < digest.length; i++) {
+	int d1 = (digest[i] >> 4) & 0xf;
+	int d2 = (digest[i] & 0xf);
+	
+	sb.append(toHexChar(d1));
+	sb.append(toHexChar(d2));
+      }
+      
+      return sb.toString();
+    } catch (Exception e) {
+      throw new QuercusException(e);
     }
-
-    byte []digest = md.digest();
-
-    StringBuilder sb = new StringBuilder();
-    for (int i = 0; i < digest.length; i++) {
-      int d1 = (digest[i] >> 4) & 0xf;
-      int d2 = (digest[i] & 0xf);
-
-      sb.append(toHexChar(d1));
-      sb.append(toHexChar(d2));
-    }
-
-    return sb.toString();
   }
 
   /**
@@ -1730,30 +1729,33 @@ v   *
    */
   public static Value sha1_file(Path source,
                                 @Optional boolean rawOutput)
-    throws Throwable
   {
-    MessageDigest md = MessageDigest.getInstance("SHA1");
-    InputStream is = null;
-
     try {
-      is = source.openRead();
-      int d;
-
-      while ((d = is.read()) >= 0) {
-        md.update((byte) d);
-      }
-
-      return digestToString(md.digest());
-    } catch (IOException e) {
-      log.log(Level.FINE, e.toString(), e);
-
-      return BooleanValue.FALSE;
-    } finally {
+      MessageDigest md = MessageDigest.getInstance("SHA1");
+      InputStream is = null;
+      
       try {
-        if (is != null)
-          is.close();
+	is = source.openRead();
+	int d;
+	
+	while ((d = is.read()) >= 0) {
+	  md.update((byte) d);
+	}
+	
+	return digestToString(md.digest());
       } catch (IOException e) {
+	log.log(Level.FINE, e.toString(), e);
+	
+	return BooleanValue.FALSE;
+      } finally {
+	try {
+	  if (is != null)
+	    is.close();
+	} catch (IOException e) {
+	}
       }
+    } catch (Exception e) {
+      throw new QuercusException(e);
     }
   }
 
@@ -1882,7 +1884,7 @@ v   *
    * @return the formatted string
    */
   public static int printf(Env env, String format, Value []args)
-    throws Throwable
+    throws IOException
   {
     Value str = sprintf(format, args);
 
@@ -1941,7 +1943,6 @@ v   *
    * @return the formatted string
    */
   public static Value sprintf(String format, Value []args)
-    throws Throwable
   {
     ArrayList<PrintfSegment> segments = parsePrintfFormat(format);
 
@@ -2239,7 +2240,6 @@ v   *
    * @return the trimmed string
    */
   public static Value trim(String string, @Optional String characters)
-    throws Throwable
   {
     boolean []trim;
 
@@ -2289,7 +2289,6 @@ v   *
                                int length,
                                @Optional("' '") String pad,
                                @Optional("STR_PAD_RIGHT") int type)
-    throws Throwable
   {
     int strLen = string.length();
     int padLen = length - strLen;
@@ -2339,7 +2338,6 @@ v   *
    * @param count number of times to repeat
    */
   public static Value str_repeat(String string, int count)
-    throws Throwable
   {
     StringBuilder sb = new StringBuilder();
 
@@ -2362,7 +2360,6 @@ v   *
                                   Value replace,
                                   Value subject,
                                   @Reference @Optional Value count)
-    throws Throwable
   {
     count.set(LongValue.ZERO);
 
@@ -2415,7 +2412,6 @@ v   *
                                         Value replace,
                                         String subject,
                                         Value count)
-    throws Throwable
   {
     if (! search.isArray()) {
       String searchString = search.toString();
@@ -2526,7 +2522,6 @@ v   *
    * @param string string to convert
    */
   public static Value str_rot13(String string)
-    throws Throwable
   {
     StringBuilder sb = new StringBuilder();
 
@@ -2580,7 +2575,6 @@ v   *
    */
   public static Value str_split(String string,
                                 @Optional("1") int chunk)
-    throws Throwable
   {
     ArrayValue array = new ArrayValueImpl();
 
@@ -2604,7 +2598,6 @@ v   *
   public static Value str_word_count(String string,
                                      @Optional int format,
                                      @Optional String additionalWordCharacters)
-    throws Throwable
   {
     if (format < 0 || format > 2)
       return NullValue.NULL;
@@ -2675,7 +2668,6 @@ v   *
    * @return -1, 0, or 1
    */
   public static int strcasecmp(String a, String b)
-    throws Throwable
   {
     int aLen = a.length();
     int bLen = b.length();
@@ -2717,7 +2709,6 @@ v   *
    * @return -1, 0, or 1
    */
   public static int strcmp(String a, String b)
-    throws Throwable
   {
     int cmp = a.compareTo(b);
 
@@ -2735,7 +2726,6 @@ v   *
    * @param env the calling environment
    */
   public static Value strchr(Env env, String haystack, Value needle)
-    throws Throwable
   {
     return strstr(env, haystack, needle);
   }
@@ -2749,7 +2739,6 @@ v   *
    * @return -1, 0, or 1
    */
   public static Value strcoll(String a, String b)
-    throws Throwable
   {
     int cmp = a.compareTo(b);
 
@@ -2832,7 +2821,6 @@ v   *
    * @return -1, 0, or 1
    */
   public static int strnatcasecmp(String a, String b)
-    throws Throwable
   {
     return strcasecmp(a, b);
   }
@@ -2845,7 +2833,6 @@ v   *
    * @return -1, 0, or 1
    */
   public static int strnatcmp(String a, String b)
-    throws Throwable
   {
     return strcmp(a, b);
   }
@@ -2858,7 +2845,6 @@ v   *
    * @return -1, 0, or 1
    */
   public static int strncasecmp(String a, String b, int length)
-    throws Throwable
   {
     int aLen = a.length();
     int bLen = b.length();
@@ -2889,7 +2875,6 @@ v   *
    * @return -1, 0, or 1
    */
   public static int strncmp(String a, String b, int length)
-    throws Throwable
   {
     if (length < a.length())
       a = a.substring(0, length);
@@ -2916,7 +2901,6 @@ v   *
   public static Value strpos(String haystack,
                              Value needleV,
                              @Optional Value offsetV)
-    throws Throwable
   {
     String needle;
 
@@ -2945,7 +2929,6 @@ v   *
   public static Value stripos(String haystack,
                               Value needleV,
                               @Optional Value offsetV)
-    throws Throwable
   {
     String needle;
 
@@ -3084,7 +3067,6 @@ v   *
    * @param string the string to clean
    */
   public static String stripslashes(String string)
-    throws Throwable
   {
     StringBuilder sb = new StringBuilder();
     int len = string.length();
@@ -3112,7 +3094,6 @@ v   *
    */
   public static Value stristr(String haystack,
                               Value needleV)
-    throws Throwable
   {
     String needle;
 
@@ -3143,7 +3124,6 @@ v   *
    */
   public static Value strrchr(String haystack,
                               Value needleV)
-    throws Throwable
   {
     String needle;
 
@@ -3167,7 +3147,6 @@ v   *
    *
    */
   public static Value strrev(String string)
-    throws Throwable
   {
     StringBuilder sb = new StringBuilder();
 
@@ -3187,7 +3166,6 @@ v   *
   public static Value strrpos(String haystack,
                               Value needleV,
                               @Optional Value offsetV)
-    throws Throwable
   {
     String needle;
 
@@ -3221,7 +3199,6 @@ v   *
   public static Value strripos(String haystack,
                                Value needleV,
                                @Optional Value offsetV)
-    throws Throwable
   {
     String needle;
 
@@ -3263,7 +3240,6 @@ v   *
                              String characters,
                              @Optional int offset,
                              @Optional("-2147483648") int length)
-    throws Throwable
   {
     return strspnImpl(string, characters, offset, length, true);
   }
@@ -3330,7 +3306,6 @@ v   *
   public static Value strstr(Env env,
                              String haystack,
                              Value needleV)
-    throws Throwable
   {
     String needle;
 
@@ -3577,7 +3552,6 @@ v   *
                              String string,
                              int start,
                              @Optional Value lenV)
-    throws Throwable
   {
     int strLen = string.length();
     if (start < 0)
@@ -3742,7 +3716,6 @@ v   *
    * @param string the input string
    */
   public static String ucfirst(String string)
-    throws Throwable
   {
     if (string.length() == 0)
       return string;
@@ -3756,7 +3729,6 @@ v   *
    * @param string the input string
    */
   public static String ucwords(String string)
-    throws Throwable
   {
     int strLen = string.length();
 
@@ -3793,7 +3765,7 @@ v   *
   public static int vprintf(Env env,
                             String format,
                             @NotNull ArrayValue array)
-    throws Throwable
+    throws IOException
   {
     Value []args;
 
@@ -3817,7 +3789,6 @@ v   *
    */
   public static Value vsprintf(String format,
 			       @NotNull ArrayValue array)
-    throws Throwable
   {
     Value []args;
 

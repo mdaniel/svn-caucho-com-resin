@@ -62,7 +62,6 @@ abstract public class CompiledFunctionRef_1 extends CompiledFunctionRef {
    * @return the user arguments augmented by any defaults
    */
   public Expr []bindArguments(Env env, Expr fun, Expr []args)
-    throws Exception
   {
     if (args.length > 1)
       log.fine(L.l(env.getLocation().getMessagePrefix() + "incorrect number of arguments" + env.getFunctionLocation()));
@@ -71,7 +70,6 @@ abstract public class CompiledFunctionRef_1 extends CompiledFunctionRef {
   }
 
   public Value evalRef(Env env, Value []argValues)
-    throws Throwable
   {
     switch (argValues.length) {
     case 0:
@@ -82,8 +80,7 @@ abstract public class CompiledFunctionRef_1 extends CompiledFunctionRef {
     }
   }
 
-  abstract public Value evalRef(Env env, Value arg)
-    throws Throwable;
+  abstract public Value evalRef(Env env, Value arg);
 
   public String toString()
   {

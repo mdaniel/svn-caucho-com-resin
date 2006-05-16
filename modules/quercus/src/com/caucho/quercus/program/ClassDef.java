@@ -89,7 +89,6 @@ abstract public class ClassDef {
    * Creates a new instance.
    */
   public Value newInstance(Env env, QuercusClass qcl)
-    throws Throwable
   {
     return new ObjectExtValue(qcl);
   }
@@ -98,7 +97,6 @@ abstract public class ClassDef {
    * Creates a new instance.
    */
   public Value evalNew(Env env, Expr []args)
-    throws Throwable
   {
     return null;
   }
@@ -107,7 +105,6 @@ abstract public class ClassDef {
    * Creates a new instance.
    */
   public Value evalNew(Env env, Value []args)
-    throws Throwable
   {
     return null;
   }

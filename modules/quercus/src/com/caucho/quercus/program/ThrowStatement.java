@@ -63,7 +63,6 @@ public class ThrowStatement extends Statement {
    * Executes the statement, returning the expression value.
    */
   public Value execute(Env env)
-    throws Throwable
   {
     throw _expr.eval(env).toException();
   }

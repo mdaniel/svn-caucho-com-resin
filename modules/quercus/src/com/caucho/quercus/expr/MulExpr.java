@@ -82,7 +82,6 @@ public class MulExpr extends BinaryExpr {
    * @return the expression value.
    */
   public Value eval(Env env)
-    throws Throwable
   {
     Value lValue = _left.eval(env);
     Value rValue = _right.eval(env);

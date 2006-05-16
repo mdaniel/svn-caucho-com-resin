@@ -232,7 +232,7 @@ public class NullValue extends Value {
                           WriteStream out,
                           int depth,
                           IdentityHashMap<Value, String> valueSet)
-    throws Throwable
+    throws IOException
   {
     out.print("NULL");
   }

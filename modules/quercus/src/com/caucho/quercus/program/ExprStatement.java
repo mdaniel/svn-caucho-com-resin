@@ -72,13 +72,12 @@ public class ExprStatement extends Statement {
   }
   
   public Value execute(Env env)
-    throws Throwable
   {
     try {
       _expr.eval(env);
     }
-    catch (Throwable t) {
-      rethrow(t);
+    catch (RuntimeException t) {
+      rethrow(t, RuntimeException.class);
     }
 
     return null;

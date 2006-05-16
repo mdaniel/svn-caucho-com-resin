@@ -76,7 +76,6 @@ public class ListHeadExpr extends Expr {
    * @return the expression value.
    */
   public Value eval(Env env)
-    throws Throwable
   {
     throw new UnsupportedOperationException();
   }
@@ -89,7 +88,6 @@ public class ListHeadExpr extends Expr {
    * @return the expression value.
    */
   public void evalAssign(Env env, Value value)
-    throws Throwable
   {
     int len = _varList.length;
 

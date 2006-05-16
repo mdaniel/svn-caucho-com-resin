@@ -76,7 +76,6 @@ public class AssignExpr extends Expr {
    * @return the expression value.
    */
   public Value eval(Env env)
-    throws Throwable
   {
     Value value = _value.evalCopy(env);
 
@@ -93,7 +92,6 @@ public class AssignExpr extends Expr {
    * @return the expression value.
    */
   public Value evalCopy(Env env)
-    throws Throwable
   {
     // php/0d9e
     return eval(env).copy();
@@ -107,7 +105,6 @@ public class AssignExpr extends Expr {
    * @return the expression value.
    */
   public Value evalRef(Env env)
-    throws Throwable
   {
     Value value = _value.eval(env);
 

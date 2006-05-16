@@ -33,6 +33,7 @@ import java.io.IOException;
 
 import java.util.ArrayList;
 
+import com.caucho.quercus.QuercusException;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.QuercusClass;
@@ -88,15 +89,13 @@ public class VarNewExpr extends Expr {
    * @return the expression value.
    */
   public Value eval(Env env)
-    throws Throwable
   {
     String name = _name.evalString(env).intern();
     
     QuercusClass cl = env.findClass(name);
 
     if (cl == null) {
-      // XXX: change exception
-      throw new Exception(L.l("no matching class {0}", name));
+      throw new QuercusException(L.l("no matching class {0}", name));
     }
 
     _fullArgs = _args;

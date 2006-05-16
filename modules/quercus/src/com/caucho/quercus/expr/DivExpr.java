@@ -67,7 +67,6 @@ public class DivExpr extends BinaryExpr {
    * @return the expression value.
    */
   public Value eval(Env env)
-    throws Throwable
   {
     double lValue = _left.evalDouble(env);
     double rValue = _right.evalDouble(env);

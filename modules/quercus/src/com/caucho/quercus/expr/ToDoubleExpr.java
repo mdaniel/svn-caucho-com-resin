@@ -59,7 +59,6 @@ public class ToDoubleExpr extends UnaryExpr {
    * @return the expression value.
    */
   public Value eval(Env env)
-    throws Throwable
   {
     return new DoubleValue(_expr.evalDouble(env));
   }

@@ -54,7 +54,6 @@ public class NullStatement extends Statement {
    * The null statement does nothing.
    */
   public Value execute(Env env)
-    throws Throwable
   {
     return null;
   }

@@ -67,7 +67,6 @@ public class BitNotExpr extends UnaryExpr {
    * @return the expression value.
    */
   public Value eval(Env env)
-    throws Throwable
   {
     long lValue = _expr.evalLong(env);
 

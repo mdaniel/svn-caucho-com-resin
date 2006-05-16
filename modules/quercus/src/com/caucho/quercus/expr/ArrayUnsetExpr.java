@@ -65,7 +65,6 @@ public class ArrayUnsetExpr extends Expr {
    * @return the expression value.
    */
   public Value eval(Env env)
-    throws Throwable
   {
     Value array = _expr.eval(env);
     Value index = _index.eval(env);

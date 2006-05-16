@@ -62,7 +62,6 @@ abstract public class CompiledMethod extends CompiledFunction {
    * Evaluates the method as a static function
    */
   public Value eval(Env env)
-    throws Throwable
   {
     return evalMethod(env, NullValue.NULL);
   }
@@ -71,7 +70,6 @@ abstract public class CompiledMethod extends CompiledFunction {
    * Evaluates the method as a static function
    */
   public Value eval(Env env, Value a0)
-    throws Throwable
   {
     return evalMethod(env, NullValue.NULL, a0);
   }
@@ -80,7 +78,6 @@ abstract public class CompiledMethod extends CompiledFunction {
    * Evaluates the method as a static function
    */
   public Value eval(Env env, Value a0, Value a1)
-    throws Throwable
   {
     return evalMethod(env, NullValue.NULL, a0, a1);
   }
@@ -89,7 +86,6 @@ abstract public class CompiledMethod extends CompiledFunction {
    * Evaluates the method as a static function
    */
   public Value eval(Env env, Value a0, Value a1, Value a2)
-    throws Throwable
   {
     return evalMethod(env, NullValue.NULL, a0, a1, a2);
   }
@@ -98,7 +94,6 @@ abstract public class CompiledMethod extends CompiledFunction {
    * Evaluates the method as a static function
    */
   public Value eval(Env env, Value a0, Value a1, Value a2, Value a3)
-    throws Throwable
   {
     return evalMethod(env, NullValue.NULL, a0, a1, a2, a3);
   }
@@ -107,7 +102,6 @@ abstract public class CompiledMethod extends CompiledFunction {
    * Evaluates the method as a static function
    */
   public Value eval(Env env, Value a0, Value a1, Value a2, Value a3, Value a4)
-    throws Throwable
   {
     return evalMethod(env, NullValue.NULL, a0, a1, a2, a3, a4);
   }
@@ -116,7 +110,6 @@ abstract public class CompiledMethod extends CompiledFunction {
    * Evaluates the method as a static function
    */
   public Value eval(Env env, Value []argValues)
-    throws Throwable
   {
     return evalMethod(env, NullValue.NULL, argValues);
   }

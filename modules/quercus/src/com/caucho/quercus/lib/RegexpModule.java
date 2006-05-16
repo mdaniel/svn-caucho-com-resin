@@ -29,6 +29,7 @@
 
 package com.caucho.quercus.lib;
 
+import com.caucho.quercus.QuercusException;
 import com.caucho.quercus.QuercusRuntimeException;
 import com.caucho.quercus.env.*;
 import com.caucho.quercus.module.AbstractQuercusModule;
@@ -43,6 +44,8 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import java.io.IOException;
 
 /**
  * PHP regexp routines.
@@ -84,7 +87,6 @@ public class RegexpModule
                            String pattern,
                            String string,
                            @Optional @Reference Value regsV)
-    throws Throwable
   {
     return ereg(env, pattern, string, regsV, 0);
   }
@@ -98,7 +100,6 @@ public class RegexpModule
                             String pattern,
                             String string,
                             @Optional @Reference Value regsV)
-    throws Throwable
   {
     return ereg(env, pattern, string, regsV, Pattern.CASE_INSENSITIVE);
   }
@@ -113,7 +114,6 @@ public class RegexpModule
                             String string,
                             Value regsV,
                             int flags)
-    throws Throwable
   {
     String cleanPattern = cleanRegexp(rawPattern, false);
 
@@ -158,7 +158,6 @@ public class RegexpModule
                                @Optional @Reference Value matchRef,
                                @Optional int flags,
                                @Optional int offset)
-    throws Throwable
   {
     if (patternString.length() < 2) {
       env.warning(L.l("Pattern must have at least opening and closing delimiters"));
@@ -230,7 +229,6 @@ public class RegexpModule
                                    @Reference Value matchRef,
                                    @Optional("PREG_PATTERN_ORDER") int flags,
                                    @Optional int offset)
-    throws Throwable
   {
     if (patternString.length() < 2) {
       env.warning(L.l("Pattern must have at least opening and closing delimiters"));
@@ -330,7 +328,6 @@ public class RegexpModule
    */
   public static String preg_quote(String string,
                                   @Optional String delim)
-    throws Throwable
   {
     StringBuilder sb = new StringBuilder();
 
@@ -374,7 +371,6 @@ public class RegexpModule
    * @param limit
    * @param count
    * @return
-   * @throws Throwable
    */
   public static Value preg_replace(Env env,
                                    Value pattern,
@@ -382,7 +378,6 @@ public class RegexpModule
                                    Value subject,
                                    @Optional("-1") long limit,
                                    @Optional @Reference Value count)
-    throws Throwable
   {
     if (subject instanceof ArrayValue) {
       ArrayValue result = new ArrayValueImpl();
@@ -414,7 +409,6 @@ public class RegexpModule
                                    String subject,
                                    @Optional("-1") long limit,
                                    Value countV)
-    throws Throwable
   {
     String string = subject;
 
@@ -475,7 +469,6 @@ public class RegexpModule
                                                 String subject,
                                                 long limit,
                                                 Value countV)
-    throws Throwable
   {
 
     long numberOfMatches = 0;
@@ -535,7 +528,6 @@ public class RegexpModule
 					 String subject,
 					 long limit,
 					 Value countV)
-    throws Throwable
   {
     Pattern pattern = compileRegexp(patternString);
 
@@ -567,7 +559,6 @@ public class RegexpModule
                                    String patternString,
                                    String replacement,
                                    String subject)
-    throws Throwable
   {
     Pattern pattern = Pattern.compile(cleanRegexp(patternString, false));
 
@@ -595,7 +586,6 @@ public class RegexpModule
                                     String patternString,
                                     String replacement,
                                     String subject)
-    throws Throwable
   {
     Pattern pattern = Pattern.compile(cleanRegexp(patternString, false),
                                       Pattern.CASE_INSENSITIVE);
@@ -622,7 +612,6 @@ public class RegexpModule
 					     long limit,
 					     Value countV,
 					     boolean isEval)
-    throws Throwable
   {
     if (limit < 0)
       limit = Long.MAX_VALUE;
@@ -661,7 +650,11 @@ public class RegexpModule
           replacement.eval(evalString, matcher);
         }
 
-        result.append(env.evalCode(evalString.toString()));
+	try {
+	  result.append(env.evalCode(evalString.toString()));
+	} catch (IOException e) {
+	  throw new QuercusException(e);
+	}
       } else {
         for (int i = 0; i < replacementLen; i++) {
           Replacement replacement = replacementList.get(i);
@@ -692,7 +685,6 @@ public class RegexpModule
    * @param limit
    * @param count
    * @return
-   * @throws Throwable
    */
   public static Value preg_replace_callback(Env env,
                                             Value pattern,
@@ -700,7 +692,6 @@ public class RegexpModule
                                             Value subject,
                                             @Optional("-1") long limit,
                                             @Optional @Reference Value count)
-    throws Throwable
   {
     if (subject instanceof ArrayValue) {
       ArrayValue result = new ArrayValueImpl();
@@ -737,7 +728,6 @@ public class RegexpModule
                                            String subject,
                                            @Optional("-1") long limit,
                                            @Optional @Reference Value countV)
-    throws Throwable
   {
     if (limit < 0)
       limit = Long.MAX_VALUE;
@@ -780,7 +770,6 @@ public class RegexpModule
                                  String string,
                                  @Optional("-1") long limit,
                                  @Optional int flags)
-    throws Throwable
   {
     if (limit < 0)
       limit = Long.MAX_VALUE;
@@ -897,7 +886,6 @@ public class RegexpModule
                             String patternString,
                             String string,
                             @Optional("-1") long limit)
-    throws Throwable
   {
     if (limit < 0)
       limit = Long.MAX_VALUE;
@@ -948,7 +936,6 @@ public class RegexpModule
                                      String patternString,
                                      ArrayValue input,
                                      @Optional("0") int flag)
-    throws Throwable
   {
     // php/151b
 
@@ -1127,7 +1114,6 @@ public class RegexpModule
 
   private static ArrayList<Replacement>
     compileReplacement(Env env, String replacement, boolean isEval)
-    throws Exception
   {
     ArrayList<Replacement> program = new ArrayList<Replacement>();
     StringBuilder text = new StringBuilder();
@@ -1181,7 +1167,7 @@ public class RegexpModule
 
           if (digit != '}') {
             env.warning(L.l("bad regexp {0}", replacement));
-            throw new Exception("bad regexp");
+            throw new QuercusException("bad regexp");
           }
 
           if (text.length() > 0)

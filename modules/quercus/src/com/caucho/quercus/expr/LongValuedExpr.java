@@ -55,7 +55,6 @@ abstract public class LongValuedExpr extends Expr {
    * @return the expression value.
    */
   public Value eval(Env env)
-    throws Throwable
   {
     return new LongValue(evalLong(env));
   }
@@ -68,7 +67,6 @@ abstract public class LongValuedExpr extends Expr {
    * @return the expression value.
    */
   public boolean evalBoolean(Env env)
-    throws Throwable
   {
     return evalLong(env) != 0;
   }
@@ -81,7 +79,6 @@ abstract public class LongValuedExpr extends Expr {
    * @return the expression value.
    */
   public double evalDouble(Env env)
-    throws Throwable
   {
     return evalLong(env);
   }
@@ -93,7 +90,6 @@ abstract public class LongValuedExpr extends Expr {
    *
    * @return the expression value.
    */
-  abstract public long evalLong(Env env)
-    throws Throwable;
+  abstract public long evalLong(Env env);
 }
 

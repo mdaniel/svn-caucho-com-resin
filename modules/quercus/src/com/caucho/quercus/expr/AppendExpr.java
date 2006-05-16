@@ -132,13 +132,11 @@ public class AppendExpr extends Expr {
   }
 
   public Value eval(Env env)
-    throws Throwable
   {
     return new StringValueImpl(evalString(env));
   }
 
   public String evalString(Env env)
-    throws Throwable
   {
     StringBuilder sb = new StringBuilder();
 

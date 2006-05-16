@@ -70,7 +70,6 @@ public class OrExpr extends BinaryExpr {
    * @return the expression value.
    */
   public Value eval(Env env)
-    throws Throwable
   {
     if (_left.evalBoolean(env) || _right.evalBoolean(env))
       return BooleanValue.TRUE;
@@ -86,7 +85,6 @@ public class OrExpr extends BinaryExpr {
    * @return the expression value.
    */
   public boolean evalBoolean(Env env)
-    throws Throwable
   {
     return _left.evalBoolean(env) || _right.evalBoolean(env);
   }

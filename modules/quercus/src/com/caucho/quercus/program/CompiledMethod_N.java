@@ -75,13 +75,11 @@ abstract public class CompiledMethod_N extends CompiledMethod {
    * @return the user arguments augmented by any defaults
    */
   public Expr []bindArguments(Env env, Expr fun, Expr []args)
-    throws Exception
   {
     return args;
   }
 
   public final Value evalMethod(Env env, Value obj, Value []argValues)
-    throws Throwable
   {
     Value []args;
 
@@ -104,14 +102,12 @@ abstract public class CompiledMethod_N extends CompiledMethod {
     return evalMethodImpl(env, obj, args);
   }
 
-  abstract public Value evalMethodImpl(Env env, Value obj, Value []argValues)
-    throws Throwable;
+  abstract public Value evalMethodImpl(Env env, Value obj, Value []argValues);
 
   /**
    * Evaluates the method as a static function
    */
   public Value eval(Env env, Value []argValues)
-    throws Throwable
   {
     env.error(L.l("can't call {0} as a static function",
 		  _name));

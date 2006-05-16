@@ -313,7 +313,6 @@ public class Env {
   }
   
   public void start()
-    throws Throwable
   {
     if (getIniBoolean("session.auto_start"))
       SessionModule.session_start(this);
@@ -1758,12 +1757,11 @@ public class Env {
    * Adds a function, e.g. from an include.
    */
   public Value addFunction(String name, AbstractFunction fun)
-    throws Throwable
   {
     AbstractFunction oldFun = findFunction(name);
 
     if (oldFun != null) {
-      throw new Exception(L.l("can't redefine function {0}", name));
+      throw new QuercusException(L.l("can't redefine function {0}", name));
     }
 
     _funMap.put(name, fun);
@@ -1809,7 +1807,7 @@ public class Env {
    * @return the result
    */
   public Value evalCode(String code)
-    throws Throwable
+    throws IOException
   {
     if (log.isLoggable(Level.FINER))
       log.finer(code);
@@ -1830,7 +1828,6 @@ public class Env {
    * @return the function value
    */
   public Value eval(String name)
-    throws Throwable
   {
     AbstractFunction fun = findFunction(name);
 
@@ -1848,7 +1845,6 @@ public class Env {
    * @return the function value
    */
   public Value eval(String name, Value a0)
-    throws Throwable
   {
     AbstractFunction fun = findFunction(name);
 
@@ -1867,7 +1863,6 @@ public class Env {
    * @return the function value
    */
   public Value eval(String name, Value a0, Value a1)
-    throws Throwable
   {
     return getFunction(name).eval(this, a0, a1);
   }
@@ -1882,7 +1877,6 @@ public class Env {
    * @return the function value
    */
   public Value eval(String name, Value a0, Value a1, Value a2)
-    throws Throwable
   {
     return getFunction(name).eval(this, a0, a1, a2);
   }
@@ -1898,7 +1892,6 @@ public class Env {
    * @return the function value
    */
   public Value eval(String name, Value a0, Value a1, Value a2, Value a3)
-    throws Throwable
   {
     return getFunction(name).eval(this, a0, a1, a2, a3);
   }
@@ -1916,7 +1909,6 @@ public class Env {
    */
   public Value eval(String name, Value a0, Value a1,
                     Value a2, Value a3, Value a4)
-    throws Throwable
   {
     return getFunction(name).eval(this, a0, a1, a2, a3, a4);
   }
@@ -1929,7 +1921,6 @@ public class Env {
    * @return the function value
    */
   public Value eval(String name, Value []args)
-    throws Throwable
   {
     return getFunction(name).eval(this, args);
   }
@@ -1941,7 +1932,6 @@ public class Env {
    * @return the function value
    */
   public Value evalRef(String name)
-    throws Throwable
   {
     AbstractFunction fun = findFunction(name);
 
@@ -1959,7 +1949,6 @@ public class Env {
    * @return the function value
    */
   public Value evalRef(String name, Value a0)
-    throws Throwable
   {
     AbstractFunction fun = findFunction(name);
 
@@ -1978,7 +1967,6 @@ public class Env {
    * @return the function value
    */
   public Value evalRef(String name, Value a0, Value a1)
-    throws Throwable
   {
     AbstractFunction fun = findFunction(name);
 
@@ -1998,7 +1986,6 @@ public class Env {
    * @return the function value
    */
   public Value evalRef(String name, Value a0, Value a1, Value a2)
-    throws Throwable
   {
     AbstractFunction fun = findFunction(name);
 
@@ -2019,7 +2006,6 @@ public class Env {
    * @return the function value
    */
   public Value evalRef(String name, Value a0, Value a1, Value a2, Value a3)
-    throws Throwable
   {
     AbstractFunction fun = findFunction(name);
 
@@ -2042,7 +2028,6 @@ public class Env {
    */
   public Value evalRef(String name, Value a0, Value a1,
                        Value a2, Value a3, Value a4)
-    throws Throwable
   {
     AbstractFunction fun = findFunction(name);
 
@@ -2060,7 +2045,6 @@ public class Env {
    * @return the function value
    */
   public Value evalRef(String name, Value []args)
-    throws Throwable
   {
     AbstractFunction fun = findFunction(name);
 
@@ -2074,7 +2058,6 @@ public class Env {
    * Adds a class, e.g. from an include.
    */
   public void addClass(String name, QuercusClass cl)
-    throws Throwable
   {
     /*
     QuercusClass oldClass = findClass(name);
@@ -2092,7 +2075,6 @@ public class Env {
    * Adds a class, e.g. from an include.
    */
   public void addClassDef(String name, ClassDef cl)
-    throws Throwable
   {
     _classDefMap.put(name, cl);
     _lowerClassDefMap.put(name.toLowerCase(), cl);
@@ -2483,7 +2465,7 @@ public class Env {
    * Evaluates an included file.
    */
   public Value require_once(String include)
-    throws Throwable
+    throws IOException
   {
     return include(getSelfDirectory(), include, true, true);
   }
@@ -2492,7 +2474,7 @@ public class Env {
    * Evaluates an included file.
    */
   public Value require(String include)
-    throws Throwable
+    throws IOException
   {
     return include(getSelfDirectory(), include, true, false);
   }
@@ -2501,7 +2483,7 @@ public class Env {
    * Evaluates an included file.
    */
   public Value include(String include)
-    throws Throwable
+    throws IOException
   {
     return include(getSelfDirectory(), include, false, false);
   }
@@ -2510,7 +2492,7 @@ public class Env {
    * Evaluates an included file.
    */
   public Value include_once(String include)
-    throws Throwable
+    throws IOException
   {
     return include(getSelfDirectory(), include, false, true);
   }
@@ -2520,7 +2502,7 @@ public class Env {
    */
   public Value include(Path scriptPwd, String include,
 		       boolean isRequire, boolean isOnce)
-    throws Throwable
+    throws IOException
   {
     // php/0b0g
     //Path selfPath = getSelfDirectory();

@@ -59,87 +59,73 @@ abstract public class CompiledFunctionRef extends AbstractFunction {
   private static final L10N L = new L10N(CompiledFunctionRef.class);
 
   public Value eval(Env env, Value []argValues)
-    throws Throwable
   {
     return evalRef(env, argValues).copy();
   }
 
   public Value eval(Env env)
-    throws Throwable
   {
     return evalRef(env).copy();
   }
 
   public Value eval(Env env, Value arg)
-    throws Throwable
   {
     return evalRef(env, arg).copy();
   }
 
   public Value eval(Env env, Value a1, Value a2)
-    throws Throwable
   {
     return evalRef(env, a1, a2).copy();
   }
 
   public Value eval(Env env, Value a1, Value a2, Value a3)
-    throws Throwable
   {
     return evalRef(env, a1, a2, a3).copy();
   }
 
   public Value eval(Env env, Value a1, Value a2, Value a3, Value a4)
-    throws Throwable
   {
     return evalRef(env, a1, a2, a3, a4).copy();
   }
 
   public Value eval(Env env, Value a1, Value a2, Value a3, Value a4, Value a5)
-    throws Throwable
   {
     return evalRef(env, a1, a2, a3, a4, a5).copy();
   }
 
   public Value evalMethod(Env env, Value obj, Value []argValues)
-    throws Throwable
   {
     return evalMethodRef(env, obj, argValues).copyReturn();
   }
 
   public Value evalMethod(Env env, Value obj)
-    throws Throwable
   {
     return evalMethodRef(env, obj).copyReturn();
   }
 
   public Value evalMethod(Env env, Value obj, Value arg)
-    throws Throwable
   {
     return evalMethodRef(env, obj, arg).copyReturn();
   }
 
   public Value evalMethod(Env env, Value obj, Value a1, Value a2)
-    throws Throwable
   {
     return evalMethodRef(env, obj, a1, a2).copyReturn();
   }
 
   public Value evalMethod(Env env, Value obj, Value a1, Value a2, Value a3)
-    throws Throwable
   {
     return evalMethodRef(env, obj, a1, a2, a3).copyReturn();
   }
 
   public Value evalMethod(Env env, Value obj, Value a1,
 			  Value a2, Value a3, Value a4)
-    throws Throwable
   {
     return evalMethodRef(env, obj, a1, a2, a3, a4).copyReturn();
   }
 
   public Value evalMethod(Env env, Value obj, Value a1, Value a2,
 			  Value a3, Value a4, Value a5)
-    throws Throwable
   {
     return evalMethodRef(env, obj, a1, a2, a3, a4, a5).copyReturn();
   }

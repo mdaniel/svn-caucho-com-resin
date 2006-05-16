@@ -94,7 +94,6 @@ public class ClassMethodExpr extends Expr {
    * @return the expression value.
    */
   public Value eval(Env env)
-    throws Throwable
   {
     QuercusClass cl = env.findClass(_className);
 

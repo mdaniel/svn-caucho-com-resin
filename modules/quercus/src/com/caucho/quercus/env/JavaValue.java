@@ -37,6 +37,8 @@ import com.caucho.quercus.expr.Expr;
 
 import com.caucho.quercus.program.JavaClassDef;
 
+import java.io.IOException;
+
 import com.caucho.vfs.WriteStream;
 
 /**
@@ -64,7 +66,7 @@ public class JavaValue extends ResourceValue {
                             WriteStream out,
                             int depth,
                             IdentityHashMap<Value, String> valueSet)
-    throws Throwable
+    throws IOException
   {
     // if (! _classDef.printRImpl(env, _object, out, depth, valueSet))
     super.printRImpl(env, out, depth, valueSet);
@@ -75,7 +77,7 @@ public class JavaValue extends ResourceValue {
                             WriteStream out,
                             int depth,
                             IdentityHashMap<Value, String> valueSet)
-    throws Throwable
+    throws IOException
   {
     if (!_classDef.varDumpImpl(env, _object, out, depth, valueSet))
       super.varDumpImpl(env, out, depth, valueSet);
@@ -159,7 +161,6 @@ public class JavaValue extends ResourceValue {
    * Evaluates a method.
    */
   public Value evalMethod(Env env, String methodName, Expr []args)
-    throws Throwable
   {
     return _classDef.evalMethod(env, _object, methodName, args);
   }
@@ -168,7 +169,6 @@ public class JavaValue extends ResourceValue {
    * Evaluates a method.
    */
   public Value evalMethod(Env env, String methodName, Value []args)
-    throws Throwable
   {
     return _classDef.evalMethod(env, _object, methodName, args);
   }
@@ -177,7 +177,6 @@ public class JavaValue extends ResourceValue {
    * Evaluates a method.
    */
   public Value evalMethod(Env env, String methodName)
-    throws Throwable
   {
     return _classDef.evalMethod(env, _object, methodName);
   }
@@ -186,7 +185,6 @@ public class JavaValue extends ResourceValue {
    * Evaluates a method.
    */
   public Value evalMethod(Env env, String methodName, Value a1)
-    throws Throwable
   {
     return _classDef.evalMethod(env, _object, methodName, a1);
   }
@@ -195,7 +193,6 @@ public class JavaValue extends ResourceValue {
    * Evaluates a method.
    */
   public Value evalMethod(Env env, String methodName, Value a1, Value a2)
-    throws Throwable
   {
     return _classDef.evalMethod(env, _object, methodName, a1, a2);
   }
@@ -205,7 +202,6 @@ public class JavaValue extends ResourceValue {
    */
   public Value evalMethod(Env env, String methodName,
                           Value a1, Value a2, Value a3)
-    throws Throwable
   {
     return _classDef.evalMethod(env, _object, methodName, a1, a2, a3);
   }
@@ -215,7 +211,6 @@ public class JavaValue extends ResourceValue {
    */
   public Value evalMethod(Env env, String methodName,
                           Value a1, Value a2, Value a3, Value a4)
-    throws Throwable
   {
     return _classDef.evalMethod(env, _object, methodName, a1, a2, a3, a4);
   }
@@ -225,7 +220,6 @@ public class JavaValue extends ResourceValue {
    */
   public Value evalMethod(Env env, String methodName,
                           Value a1, Value a2, Value a3, Value a4, Value a5)
-    throws Throwable
   {
     return _classDef.evalMethod(env, _object, methodName, a1, a2, a3, a4, a5);
   }

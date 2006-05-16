@@ -120,7 +120,7 @@ public class QuercusMain extends ClassComponent {
 
     out.println();
     out.println("public Value execute(com.caucho.quercus.env.Env env)");
-    out.println("  throws Throwable");
+    //out.println("  throws Throwable");
     out.println("{");
     out.pushDepth();
 

@@ -58,7 +58,6 @@ public class DoStatement extends Statement {
   }
 
   public Value execute(Env env)
-    throws Throwable
   {
     try {
       do {
@@ -76,8 +75,8 @@ public class DoStatement extends Statement {
           return value;
       } while (_test.evalBoolean(env));
     }
-    catch (Throwable t) {
-      rethrow(t);
+    catch (RuntimeException e) {
+      rethrow(e, RuntimeException.class);
     }
 
     return null;

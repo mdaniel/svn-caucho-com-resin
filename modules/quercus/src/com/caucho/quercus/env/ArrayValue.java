@@ -36,6 +36,8 @@ import java.util.*;
 import java.util.logging.Logger;
 import java.lang.reflect.Array;
 
+import java.io.IOException;
+
 /**
  * Represents a PHP array value.
  */
@@ -233,7 +235,6 @@ abstract public class ArrayValue extends Value {
    * To append a value to this ArrayValue use the {@link #put(Value)} method.
    */
   public Value add(Value rValue)
-    throws Throwable
   {
     rValue = rValue.toValue();
 
@@ -445,7 +446,7 @@ abstract public class ArrayValue extends Value {
    * @param env
    */
   public void print(Env env)
-    throws Throwable
+    throws IOException
   {
     env.getOut().print("Array");
   }
@@ -592,7 +593,6 @@ abstract public class ArrayValue extends Value {
    * @throws NullPointerException
    */
   public Value containsStrict(Value value)
-    throws Throwable
   {
     for (Entry entry = getHead(); entry != null; entry = entry._next) {
       if (entry.getValue().eql(value))
@@ -641,7 +641,6 @@ abstract public class ArrayValue extends Value {
    */
   public void sort(Comparator<Map.Entry<Value, Value>> comparator,
                    boolean resetKeys, boolean strict)
-    throws Throwable
   {
     Entry []entries;
 
@@ -775,7 +774,6 @@ abstract public class ArrayValue extends Value {
    * @return true if this is equal to rValue, false otherwise
    */
   public boolean eql(Value rValue)
-    throws Throwable
   {
     if (rValue == null)
       return false;
@@ -813,7 +811,7 @@ abstract public class ArrayValue extends Value {
                           WriteStream out,
                           int depth,
                           IdentityHashMap<Value, String> valueSet)
-    throws Throwable
+    throws IOException
   {
     out.println("array(" + getSize() + ") {");
 
@@ -834,7 +832,7 @@ abstract public class ArrayValue extends Value {
                             WriteStream out,
                             int depth,
                             IdentityHashMap<Value, String> valueSet)
-    throws Throwable
+    throws IOException
   {
     out.println("Array");
     printDepth(out, 8 * depth);
@@ -986,7 +984,7 @@ abstract public class ArrayValue extends Value {
                             WriteStream out,
                             int depth,
                             IdentityHashMap<Value, String> valueSet)
-      throws Throwable
+      throws IOException
     {
       printDepth(out, 2 * depth);
       out.print("[");
@@ -1007,7 +1005,7 @@ abstract public class ArrayValue extends Value {
                               WriteStream out,
                               int depth,
                               IdentityHashMap<Value, String> valueSet)
-      throws Throwable
+      throws IOException
     {
       printDepth(out, 8 * depth);
       out.print("    [");

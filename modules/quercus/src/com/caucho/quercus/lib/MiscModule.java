@@ -31,6 +31,7 @@ package com.caucho.quercus.lib;
 
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.IOException;
 
 import java.util.logging.Logger;
 import java.util.logging.Level;
@@ -41,6 +42,7 @@ import com.caucho.util.RandomUtil;
 import com.caucho.java.ScriptStackTrace;
 
 import com.caucho.quercus.Quercus;
+import com.caucho.quercus.QuercusException;
 
 import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.quercus.module.Optional;
@@ -144,25 +146,27 @@ public class MiscModule extends AbstractQuercusModule {
    */
   @UsesSymbolTable
   public Value eval(Env env, String code)
-    throws Throwable
   {
-    if (log.isLoggable(Level.FINER))
-      log.finer(code);
-
-    Quercus quercus = env.getQuercus();
-
-    QuercusProgram program = quercus.parseCode(code);
-
-    Value value = program.execute(env);
-
-    return value;
+    try {
+      if (log.isLoggable(Level.FINER))
+	log.finer(code);
+      
+      Quercus quercus = env.getQuercus();
+      
+      QuercusProgram program = quercus.parseCode(code);
+      
+      Value value = program.execute(env);
+      
+      return value;
+    } catch (IOException e) {
+      throw new QuercusException(e);
+    }
   }
 
   /**
    * Comples and evaluates an expression.
    */
   public Value resin_debug(String code)
-    throws Throwable
   {
     log.info(code);
 
@@ -173,7 +177,6 @@ public class MiscModule extends AbstractQuercusModule {
    * Comples and evaluates an expression.
    */
   public Value resin_thread_dump()
-    throws Throwable
   {
     Thread.dumpStack();
 
@@ -184,7 +187,7 @@ public class MiscModule extends AbstractQuercusModule {
    * Dumps the stack.
    */
   public static Value dump_stack()
-    throws Throwable
+    throws IOException
   {
     Exception e = new Exception("Stack trace");
     e.fillInStackTrace();

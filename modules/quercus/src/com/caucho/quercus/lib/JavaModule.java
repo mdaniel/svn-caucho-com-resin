@@ -51,7 +51,6 @@ public class JavaModule extends AbstractQuercusModule {
 
   public static Value java(Env env, String className,
 			   Value []args)
-    throws Throwable
   {
     JavaClassDef def = env.getJavaClassDefinition(className);
 

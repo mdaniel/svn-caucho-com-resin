@@ -71,7 +71,6 @@ public class JavaMarshall extends Marshall {
   }
 
   public Object marshall(Env env, Expr expr, Class argClass)
-    throws Throwable
   {
     Value value = expr.eval(env);
 
@@ -79,7 +78,6 @@ public class JavaMarshall extends Marshall {
   }
 
   public Object marshall(Env env, Value value, Class argClass)
-    throws Throwable
   {
     if (value.isNull()) {
       if (_isNotNull) {
@@ -134,7 +132,6 @@ public class JavaMarshall extends Marshall {
   }
 
   public Value unmarshall(Env env, Object value)
-    throws Throwable
   {
     return env.wrapJava(value, _def, _isUnmarshallNullAsFalse);
   }

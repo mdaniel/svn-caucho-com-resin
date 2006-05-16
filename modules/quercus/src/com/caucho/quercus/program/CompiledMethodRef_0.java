@@ -72,25 +72,21 @@ abstract public class CompiledMethodRef_0 extends CompiledMethodRef {
    * @return the user arguments augmented by any defaults
    */
   public Expr []bindArguments(Env env, Expr fun, Expr []args)
-    throws Exception
   {
     return args;
   }
 
   public Value evalMethodRef(Env env, Value obj, Value []argValues)
-    throws Throwable
   {
     return evalMethodRef(env, obj);
   }
 
-  abstract public Value evalMethodRef(Env env, Value obj)
-    throws Throwable;
+  abstract public Value evalMethodRef(Env env, Value obj);
   
   /**
    * Evaluates the method as a static function
    */
   public Value eval(Env env, Value []argValues)
-    throws Throwable
   {
     return evalMethod(env, NullValue.NULL, argValues);
   }

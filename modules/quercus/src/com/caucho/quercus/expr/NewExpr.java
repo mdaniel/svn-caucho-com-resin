@@ -86,7 +86,6 @@ public class NewExpr extends Expr {
    * @return the expression value.
    */
   public Value eval(Env env)
-    throws Throwable
   {
     QuercusClass cl = env.findAbstractClass(_name);
 

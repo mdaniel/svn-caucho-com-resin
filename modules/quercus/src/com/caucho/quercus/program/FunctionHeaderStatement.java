@@ -62,7 +62,6 @@ public class FunctionHeaderStatement extends Statement {
   }
   
   public Value execute(Env env)
-    throws Throwable
   {
     return null;
   }

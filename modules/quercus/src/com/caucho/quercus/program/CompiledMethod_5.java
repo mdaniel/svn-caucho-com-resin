@@ -87,7 +87,6 @@ abstract public class CompiledMethod_5 extends CompiledMethod {
    * @return the user arguments augmented by any defaults
    */
   public Expr []bindArguments(Env env, Expr fun, Expr []args)
-    throws Exception
   {
     if (args.length != 5)
       env.warning(L.l("incorrect"));
@@ -99,7 +98,6 @@ abstract public class CompiledMethod_5 extends CompiledMethod {
    * Evaluates the method with the given variable arguments.
    */
   public Value evalMethod(Env env, Value obj, Value []argValues)
-    throws Throwable
   {
     switch (argValues.length) {
     case 0:
@@ -160,14 +158,12 @@ abstract public class CompiledMethod_5 extends CompiledMethod {
 				   Value a2,
 				   Value a3,
 				   Value a4,
-				   Value a5)
-    throws Throwable;
+				   Value a5);
 
   /**
    * Evaluates the method as a static function
    */
   public Value eval(Env env, Value []argValues)
-    throws Throwable
   {
     env.warning(L.l("can't call '{0}' as a static function", _name));
 

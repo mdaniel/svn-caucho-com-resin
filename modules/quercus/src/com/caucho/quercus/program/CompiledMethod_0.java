@@ -72,7 +72,6 @@ abstract public class CompiledMethod_0 extends CompiledMethod {
    * @return the user arguments augmented by any defaults
    */
   public Expr []bindArguments(Env env, Expr fun, Expr []args)
-    throws Exception
   {
     if (args.length != 0)
       env.warning(L.l("too many arguments"));
@@ -81,13 +80,11 @@ abstract public class CompiledMethod_0 extends CompiledMethod {
   }
 
   public Value evalMethod(Env env, Value obj, Value []argValues)
-    throws Throwable
   {
     return evalMethod(env, obj);
   }
 
-  abstract public Value evalMethod(Env env, Value obj)
-    throws Throwable;
+  abstract public Value evalMethod(Env env, Value obj);
   
   public String toString()
   {

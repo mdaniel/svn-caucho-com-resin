@@ -303,8 +303,7 @@ abstract public class Expr {
    *
    * @return the expression value.
    */
-  abstract public Value eval(Env env)
-    throws Throwable;
+  abstract public Value eval(Env env);
 
   /**
    * Evaluates the expression, creating an array for unassigned values.
@@ -314,7 +313,6 @@ abstract public class Expr {
    * @return the expression value.
    */
   public Value evalArray(Env env)
-    throws Throwable
   {
     return eval(env);
   }
@@ -327,7 +325,6 @@ abstract public class Expr {
    * @return the expression value.
    */
   public Value evalObject(Env env)
-    throws Throwable
   {
     return eval(env);
   }
@@ -340,7 +337,6 @@ abstract public class Expr {
    * @return the expression value.
    */
   public Value evalRef(Env env)
-    throws Throwable
   {
     return eval(env);
   }
@@ -353,7 +349,6 @@ abstract public class Expr {
    * @return the expression value.
    */
   public Value evalCopy(Env env)
-    throws Throwable
   {
     return eval(env);
   }
@@ -367,7 +362,6 @@ abstract public class Expr {
    * @return the expression value.
    */
   public Value evalArg(Env env)
-    throws Throwable
   {
     return eval(env);
   }
@@ -376,7 +370,6 @@ abstract public class Expr {
    * Needed to handle list.
    */
   public void evalAssign(Env env, Value value)
-    throws Throwable
   {
     throw new RuntimeException(L.l("{0} is an invalid left-hand side of an assignment.",
 				   this));
@@ -390,7 +383,6 @@ abstract public class Expr {
    * @return the expression value.
    */
   public String evalString(Env env)
-    throws Throwable
   {
     return eval(env).toString();
   }
@@ -403,7 +395,6 @@ abstract public class Expr {
    * @return the expression value.
    */
   public char evalChar(Env env)
-    throws Throwable
   {
     return eval(env).toChar();
   }
@@ -416,7 +407,6 @@ abstract public class Expr {
    * @return the expression value.
    */
   public boolean evalBoolean(Env env)
-    throws Throwable
   {
     return eval(env).toBoolean();
   }
@@ -429,7 +419,6 @@ abstract public class Expr {
    * @return the expression value.
    */
   public long evalLong(Env env)
-    throws Throwable
   {
     return eval(env).toLong();
   }
@@ -442,7 +431,6 @@ abstract public class Expr {
    * @return the expression value.
    */
   public double evalDouble(Env env)
-    throws Throwable
   {
     return eval(env).toDouble();
   }
@@ -451,7 +439,7 @@ abstract public class Expr {
    * Prints to the output as an echo.
    */
   public void print(Env env)
-    throws Throwable
+    throws IOException
   {
     eval(env).print(env);
   }

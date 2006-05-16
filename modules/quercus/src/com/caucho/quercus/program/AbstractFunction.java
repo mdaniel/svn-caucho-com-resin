@@ -154,20 +154,17 @@ abstract public class AbstractFunction {
    * @param args the user's arguments
    * @return the user arguments augmented by any defaults
    */
-  abstract public Expr []bindArguments(Env env, Expr fun, Expr []args)
-    throws Exception;
+  abstract public Expr []bindArguments(Env env, Expr fun, Expr []args);
 
   /**
    * Evaluates the function.
    */
-  abstract public Value eval(Env env, Value []args)
-    throws Throwable;
+  abstract public Value eval(Env env, Value []args);
 
   /**
    * Evaluates the function, returning a reference.
    */
   public Value evalRef(Env env, Value []args)
-    throws Throwable
   {
     return eval(env, args);
   }
@@ -176,7 +173,6 @@ abstract public class AbstractFunction {
    * Evaluates the function, returning a copy
    */
   public Value evalCopy(Env env, Value []args)
-    throws Throwable
   {
     return eval(env, args).copyReturn();
   }
@@ -185,7 +181,6 @@ abstract public class AbstractFunction {
    * Evaluates the function as a method call.
    */
   public Value evalMethod(Env env, Value obj, Value []args)
-    throws Throwable
   {
     Value oldThis = env.getThis();
 
@@ -203,7 +198,6 @@ abstract public class AbstractFunction {
    * Evaluates the function as a method call, returning a reference.
    */
   public Value evalMethodRef(Env env, Value obj, Value []args)
-    throws Throwable
   {
     Value oldThis = env.getThis();
 
@@ -220,7 +214,6 @@ abstract public class AbstractFunction {
    * Evaluates the function.
    */
   public Value eval(Env env)
-    throws Throwable
   {
     return eval(env, NULL_ARG_VALUES);
   }
@@ -229,7 +222,6 @@ abstract public class AbstractFunction {
    * Evaluates the function with an argument .
    */
   public Value eval(Env env, Value a1)
-    throws Throwable
   {
     return eval(env, new Value[] { a1 });
   }
@@ -238,7 +230,6 @@ abstract public class AbstractFunction {
    * Evaluates the function with arguments
    */
   public Value eval(Env env, Value a1, Value a2)
-    throws Throwable
   {
     return eval(env, new Value[] { a1, a2 });
   }
@@ -247,7 +238,6 @@ abstract public class AbstractFunction {
    * Evaluates the function with arguments
    */
   public Value eval(Env env, Value a1, Value a2, Value a3)
-    throws Throwable
   {
     return eval(env, new Value[] { a1, a2, a3 });
   }
@@ -256,7 +246,6 @@ abstract public class AbstractFunction {
    * Evaluates the function with arguments
    */
   public Value eval(Env env, Value a1, Value a2, Value a3, Value a4)
-    throws Throwable
   {
     return eval(env, new Value[] { a1, a2, a3, a4 });
   }
@@ -265,7 +254,6 @@ abstract public class AbstractFunction {
    * Evaluates the function with arguments
    */
   public Value eval(Env env, Value a1, Value a2, Value a3, Value a4, Value a5)
-    throws Throwable
   {
     return eval(env, new Value[] { a1, a2, a3, a4, a5 });
   }
@@ -274,7 +262,6 @@ abstract public class AbstractFunction {
    * Evaluates the function.
    */
   public Value eval(Env env, Expr []exprs)
-    throws Throwable
   {
     Value []argValues = new Value[exprs.length];
     Arg []args = getArgs();
@@ -294,7 +281,6 @@ abstract public class AbstractFunction {
    * Evaluates the function.
    */
   public Value evalCopy(Env env, Expr []exprs)
-    throws Throwable
   {
     return eval(env, exprs).copy();
   }
@@ -303,7 +289,6 @@ abstract public class AbstractFunction {
    * Evaluates the function.
    */
   public Value evalRef(Env env)
-    throws Throwable
   {
     return evalRef(env, NULL_ARG_VALUES);
   }
@@ -312,7 +297,6 @@ abstract public class AbstractFunction {
    * Evaluates the function with an argument .
    */
   public Value evalRef(Env env, Value a1)
-    throws Throwable
   {
     return evalRef(env, new Value[] { a1 });
   }
@@ -321,7 +305,6 @@ abstract public class AbstractFunction {
    * Evaluates the function with arguments
    */
   public Value evalRef(Env env, Value a1, Value a2)
-    throws Throwable
   {
     return evalRef(env, new Value[] { a1, a2 });
   }
@@ -330,7 +313,6 @@ abstract public class AbstractFunction {
    * Evaluates the function with arguments
    */
   public Value evalRef(Env env, Value a1, Value a2, Value a3)
-    throws Throwable
   {
     return evalRef(env, new Value[] { a1, a2, a3 });
   }
@@ -339,7 +321,6 @@ abstract public class AbstractFunction {
    * Evaluates the function with arguments
    */
   public Value evalRef(Env env, Value a1, Value a2, Value a3, Value a4)
-    throws Throwable
   {
     return evalRef(env, new Value[] { a1, a2, a3, a4 });
   }
@@ -349,7 +330,6 @@ abstract public class AbstractFunction {
    */
   public Value evalRef(Env env,
 		       Value a1, Value a2, Value a3, Value a4, Value a5)
-    throws Throwable
   {
     return evalRef(env, new Value[] { a1, a2, a3, a4, a5 });
   }
@@ -358,7 +338,6 @@ abstract public class AbstractFunction {
    * Evaluates the function.
    */
   public Value evalRef(Env env, Expr []exprs)
-    throws Throwable
   {
     Value []argValues = new Value[exprs.length];
     Arg []args = getArgs();
@@ -378,7 +357,6 @@ abstract public class AbstractFunction {
    * Evaluates the function as a method call.
    */
   public Value evalMethod(Env env, Value obj)
-    throws Throwable
   {
     return evalMethod(env, obj, NULL_ARG_VALUES);
   }
@@ -387,7 +365,6 @@ abstract public class AbstractFunction {
    * Evaluates the function as a method call.
    */
   public Value evalMethod(Env env, Value obj, Value a1)
-    throws Throwable
   {
     return evalMethod(env, obj, new Value[] { a1 });
   }
@@ -396,7 +373,6 @@ abstract public class AbstractFunction {
    * Evaluates the function as a method call.
    */
   public Value evalMethod(Env env, Value obj, Value a1, Value a2)
-    throws Throwable
   {
     return evalMethod(env, obj, new Value[] { a1, a2 });
   }
@@ -406,7 +382,6 @@ abstract public class AbstractFunction {
    */
   public Value evalMethod(Env env, Value obj,
 			  Value a1, Value a2, Value a3)
-    throws Throwable
   {
     return evalMethod(env, obj, new Value[] { a1, a2, a3 });
   }
@@ -416,7 +391,6 @@ abstract public class AbstractFunction {
    */
   public Value evalMethod(Env env, Value obj,
 			  Value a1, Value a2, Value a3, Value a4)
-    throws Throwable
   {
     return evalMethod(env, obj, new Value[] { a1, a2, a3, a4 });
   }
@@ -426,7 +400,6 @@ abstract public class AbstractFunction {
    */
   public Value evalMethod(Env env, Value obj,
 			  Value a1, Value a2, Value a3, Value a4, Value a5)
-    throws Throwable
   {
     return evalMethod(env, obj, new Value[] { a1, a2, a3, a4, a5 });
   }
@@ -435,7 +408,6 @@ abstract public class AbstractFunction {
    * Evaluates the function.
    */
   public Value evalMethod(Env env, Value obj, Expr []exprs)
-    throws Throwable
   {
     Value []argValues = new Value[exprs.length];
     Arg []args = getArgs();
@@ -455,7 +427,6 @@ abstract public class AbstractFunction {
    * Evaluates the function as a method call.
    */
   public Value evalMethodRef(Env env, Value obj)
-    throws Throwable
   {
     return evalMethodRef(env, obj, NULL_ARG_VALUES);
   }
@@ -464,7 +435,6 @@ abstract public class AbstractFunction {
    * Evaluates the function as a method call.
    */
   public Value evalMethodRef(Env env, Value obj, Value a1)
-    throws Throwable
   {
     return evalMethodRef(env, obj, new Value[] { a1 });
   }
@@ -473,7 +443,6 @@ abstract public class AbstractFunction {
    * Evaluates the function as a method call.
    */
   public Value evalMethodRef(Env env, Value obj, Value a1, Value a2)
-    throws Throwable
   {
     return evalMethodRef(env, obj, new Value[] { a1, a2 });
   }
@@ -483,7 +452,6 @@ abstract public class AbstractFunction {
    */
   public Value evalMethodRef(Env env, Value obj,
 			     Value a1, Value a2, Value a3)
-    throws Throwable
   {
     return evalMethodRef(env, obj, new Value[] { a1, a2, a3 });
   }
@@ -493,7 +461,6 @@ abstract public class AbstractFunction {
    */
   public Value evalMethodRef(Env env, Value obj,
 			     Value a1, Value a2, Value a3, Value a4)
-    throws Throwable
   {
     return evalMethodRef(env, obj, new Value[] { a1, a2, a3, a4 });
   }
@@ -503,7 +470,6 @@ abstract public class AbstractFunction {
    */
   public Value evalMethodRef(Env env, Value obj,
 			     Value a1, Value a2, Value a3, Value a4, Value a5)
-    throws Throwable
   {
     return evalMethodRef(env, obj, new Value[] { a1, a2, a3, a4, a5 });
   }
@@ -512,7 +478,6 @@ abstract public class AbstractFunction {
    * Evaluates the function.
    */
   public Value evalMethodRef(Env env, Value obj, Expr []exprs)
-    throws Throwable
   {
     Value []argValues = new Value[exprs.length];
     Arg []args = getArgs();

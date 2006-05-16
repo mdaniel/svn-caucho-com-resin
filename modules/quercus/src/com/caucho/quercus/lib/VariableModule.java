@@ -65,7 +65,6 @@ public class VariableModule extends AbstractQuercusModule {
    * @param name the constant name
    */
   public static Value constant(Env env, String name)
-    throws Throwable
   {
     return env.getConstant(name);
   }
@@ -78,7 +77,7 @@ public class VariableModule extends AbstractQuercusModule {
    * @return the escaped stringPhp
    */
   public static Value debug_zval_dump(Env env, @ReadOnly Value v)
-    throws Throwable
+    throws IOException
   {
     debug_impl(env, v, 0);
 
@@ -93,7 +92,7 @@ public class VariableModule extends AbstractQuercusModule {
    * @return the escaped stringPhp
    */
   public static Value var_dump(Env env, @ReadOnly Value v)
-    throws Throwable
+    throws IOException
   {
     if (v == null)
       env.getOut().print("NULL#java");
@@ -113,7 +112,7 @@ public class VariableModule extends AbstractQuercusModule {
    * @return the escaped stringPhp
    */
   public static Value resin_var_dump(Env env, @ReadOnly Value v)
-    throws Throwable
+    throws IOException
   {
     WriteStream out = Vfs.openWrite("stdout:");
 
@@ -137,7 +136,6 @@ public class VariableModule extends AbstractQuercusModule {
 			     String name,
 			     Value value,
 			     @Optional boolean isCaseInsensitive)
-    throws Throwable
   {
     return env.addConstant(name, value, isCaseInsensitive);
   }
@@ -149,7 +147,6 @@ public class VariableModule extends AbstractQuercusModule {
    * @param name the constant name
    */
   public static boolean defined(Env env, String name)
-    throws Throwable
   {
     return env.isDefined(name);
   }
@@ -554,7 +551,6 @@ public class VariableModule extends AbstractQuercusModule {
    * @return the double value
    */
   public static Value strval(Env env, @ReadOnly Value v)
-    throws Throwable
   {
     if (v instanceof StringValue)
       return (StringValue) v;
@@ -572,7 +568,7 @@ public class VariableModule extends AbstractQuercusModule {
   public static Value print_r(Env env,
 			      @ReadOnly Value v,
 			      @Optional Value isRet)
-    throws Throwable
+    throws IOException
   {
     // XXX: isRet is ignored
 
@@ -695,7 +691,7 @@ public class VariableModule extends AbstractQuercusModule {
   }
 
   private static void debug_impl(Env env, Value v, int depth)
-    throws Throwable
+    throws IOException
   {
     WriteStream out = env.getOut();
 

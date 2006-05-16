@@ -69,7 +69,6 @@ public class VarVarExpr extends AbstractVarExpr {
    * @return the expression value.
    */
   public Value eval(Env env)
-    throws Throwable
   {
     String varName = _var.evalString(env).intern();
 
@@ -89,7 +88,6 @@ public class VarVarExpr extends AbstractVarExpr {
    * @return the expression value.
    */
   public Value evalCopy(Env env)
-    throws Throwable
   {
     String varName = _var.evalString(env).intern();
 
@@ -109,7 +107,6 @@ public class VarVarExpr extends AbstractVarExpr {
    * @return the expression value.
    */
   public void evalAssign(Env env, Value value)
-    throws Throwable
   {
     String varName = _var.evalString(env).intern();
 
@@ -124,7 +121,6 @@ public class VarVarExpr extends AbstractVarExpr {
    * @return the expression value.
    */
   public void evalUnset(Env env)
-    throws Throwable
   {
     String varName = _var.evalString(env).intern();
 
@@ -139,7 +135,6 @@ public class VarVarExpr extends AbstractVarExpr {
    * @return the expression value.
    */
   public Value evalRef(Env env)
-    throws Throwable
   {
     String varName = _var.evalString(env).intern();
 
@@ -159,7 +154,6 @@ public class VarVarExpr extends AbstractVarExpr {
    * @return the expression value.
    */
   public Value evalArg(Env env)
-    throws Throwable
   {
     String varName = _var.evalString(env).intern();
 
@@ -179,7 +173,6 @@ public class VarVarExpr extends AbstractVarExpr {
    * @return the expression value.
    */
   public Value evalArray(Env env)
-    throws Throwable
   {
     String varName = _var.evalString(env).intern();
 

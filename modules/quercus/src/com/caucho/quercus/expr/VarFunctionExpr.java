@@ -104,7 +104,6 @@ public class VarFunctionExpr extends Expr {
    * @return the expression value.
    */
   public Value eval(Env env)
-    throws Throwable
   {
     return env.getFunction(_name.eval(env)).eval(env, _args);
   }
@@ -117,7 +116,6 @@ public class VarFunctionExpr extends Expr {
    * @return the expression value.
    */
   public Value evalRef(Env env)
-    throws Throwable
   {
     return env.getFunction(_name.eval(env)).evalRef(env, _args);
   }

@@ -77,7 +77,6 @@ public class ListEachExpr extends Expr {
    * @return the expression value.
    */
   public Value eval(Env env)
-    throws Throwable
   {
     Value value = _value.eval(env);
 
@@ -106,7 +105,6 @@ public class ListEachExpr extends Expr {
    * @return the expression value.
    */
   public boolean evalBoolean(Env env)
-    throws Throwable
   {
     Value value = _value.eval(env);
 
@@ -222,7 +220,6 @@ public class ListEachExpr extends Expr {
     }
 
     public Value eval(Env env)
-      throws Throwable
     {
       throw new UnsupportedOperationException();
     }
@@ -244,7 +241,6 @@ public class ListEachExpr extends Expr {
     }
 
     public Value eval(Env env)
-      throws Throwable
     {
       throw new UnsupportedOperationException();
     }

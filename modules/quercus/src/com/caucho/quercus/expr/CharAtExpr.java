@@ -71,7 +71,6 @@ public class CharAtExpr extends AbstractVarExpr {
    * @return the expression value.
    */
   public Value eval(Env env)
-    throws Throwable
   {
     Value obj = _objExpr.eval(env);
 
@@ -86,7 +85,6 @@ public class CharAtExpr extends AbstractVarExpr {
    * @return the expression value.
    */
   public void evalAssign(Env env, Value value)
-    throws Throwable
   {
     Value obj = _objExpr.eval(env);
 
@@ -103,7 +101,6 @@ public class CharAtExpr extends AbstractVarExpr {
    * @return the expression value.
    */
   public void evalUnset(Env env)
-    throws Throwable
   {
     throw new UnsupportedOperationException();
   }
@@ -116,7 +113,6 @@ public class CharAtExpr extends AbstractVarExpr {
    * @return the expression value.
    */
   public Value evalArg(Env env)
-    throws Throwable
   {
     return eval(env);
   }
@@ -129,7 +125,6 @@ public class CharAtExpr extends AbstractVarExpr {
    * @return the expression value.
    */
   public Value evalRef(Env env)
-    throws Throwable
   {
     return eval(env);
   }

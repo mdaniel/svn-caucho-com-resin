@@ -81,7 +81,6 @@ abstract public class CompiledMethod_3 extends CompiledMethod {
    * @return the user arguments augmented by any defaults
    */
   public Expr []bindArguments(Env env, Expr fun, Expr []args)
-    throws Exception
   {
     if (args.length != 3)
       env.warning(L.l("incorrect"));
@@ -93,7 +92,6 @@ abstract public class CompiledMethod_3 extends CompiledMethod {
    * Evaluates the method with the given variable arguments.
    */
   public Value evalMethod(Env env, Value obj, Value []argValues)
-    throws Throwable
   {
     switch (argValues.length) {
     case 0:
@@ -125,7 +123,6 @@ abstract public class CompiledMethod_3 extends CompiledMethod {
   }
   
   public Value evalMethod(Env env, Value obj, Value a1, Value a2)
-    throws Throwable
   {
     return evalMethod(env, obj, a1, a2, _default_2.eval(env));
   }
@@ -134,8 +131,7 @@ abstract public class CompiledMethod_3 extends CompiledMethod {
 				   Value obj,
 				   Value a1,
 				   Value a2,
-				   Value a3)
-    throws Throwable;
+				   Value a3);
   
   public String toString()
   {

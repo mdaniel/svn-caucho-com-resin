@@ -63,7 +63,6 @@ public class PreIncrementExpr extends UnaryExpr {
   }
 
   public Value eval(Env env)
-    throws Throwable
   {
     Value var = _expr.evalRef(env);
 

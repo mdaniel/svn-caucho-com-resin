@@ -61,14 +61,13 @@ public class ClassDefStatement extends Statement {
   }
   
   public Value execute(Env env)
-    throws Throwable
   {
     try {
       if (env.findClass(_cl.getName()) == null)
         env.addClass(_cl.getName(), new QuercusClass(_cl, null));
     }
-    catch (Throwable t) {
-      rethrow(t);
+    catch (RuntimeException e) {
+      rethrow(e, RuntimeException.class);
     }
 
     return null;

@@ -32,6 +32,7 @@ package com.caucho.quercus.env;
 import com.caucho.vfs.WriteStream;
 
 import java.util.IdentityHashMap;
+import java.io.IOException;
 
 /**
  * Represents a call to an object's method
@@ -53,7 +54,6 @@ public class CallbackObjectMethod extends Callback {
    * @param env the calling environment
    */
   public Value eval(Env env)
-    throws Throwable
   {
     return _obj.evalMethod(env, _methodName);
   }
@@ -64,7 +64,6 @@ public class CallbackObjectMethod extends Callback {
    * @param env the calling environment
    */
   public Value eval(Env env, Value a1)
-    throws Throwable
   {
     return _obj.evalMethod(env, _methodName, a1);
   }
@@ -75,7 +74,6 @@ public class CallbackObjectMethod extends Callback {
    * @param env the calling environment
    */
   public Value eval(Env env, Value a1, Value a2)
-    throws Throwable
   {
     return _obj.evalMethod(env, _methodName, a1, a2);
   }
@@ -86,7 +84,6 @@ public class CallbackObjectMethod extends Callback {
    * @param env the calling environment
    */
   public Value eval(Env env, Value a1, Value a2, Value a3)
-    throws Throwable
   {
     return _obj.evalMethod(env, _methodName, a1, a2, a3);
   }
@@ -98,7 +95,6 @@ public class CallbackObjectMethod extends Callback {
    */
   public Value eval(Env env, Value a1, Value a2, Value a3,
 			     Value a4)
-    throws Throwable
   {
     return _obj.evalMethod(env, _methodName, a1, a2, a3, a4);
   }
@@ -110,13 +106,11 @@ public class CallbackObjectMethod extends Callback {
    */
   public Value eval(Env env, Value a1, Value a2, Value a3,
 		    Value a4, Value a5)
-    throws Throwable
   {
     return _obj.evalMethod(env, _methodName, a1, a2, a3, a4, a5);
   }
 
   public Value eval(Env env, Value []args)
-    throws Throwable
   {
     return _obj.evalMethod(env, _methodName, args);
   }
@@ -125,7 +119,7 @@ public class CallbackObjectMethod extends Callback {
                           WriteStream out,
                           int depth,
                           IdentityHashMap<Value, String> valueSet)
-    throws Throwable
+    throws IOException
   {
     out.print(getClass().getName());
     out.print('[');

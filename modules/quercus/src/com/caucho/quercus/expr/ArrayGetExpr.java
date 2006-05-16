@@ -83,7 +83,6 @@ public class ArrayGetExpr extends AbstractVarExpr {
    * @return the expression value.
    */
   public Value eval(Env env)
-    throws Throwable
   {
     Value array = _expr.eval(env);
 
@@ -100,7 +99,6 @@ public class ArrayGetExpr extends AbstractVarExpr {
    * @return the expression value.
    */
   public Value evalCopy(Env env)
-    throws Throwable
   {
     Value array = _expr.eval(env);
 
@@ -117,7 +115,6 @@ public class ArrayGetExpr extends AbstractVarExpr {
    * @return the expression value.
    */
   public Value evalArray(Env env)
-    throws Throwable
   {
     Value array = _expr.evalArray(env);
 
@@ -134,7 +131,6 @@ public class ArrayGetExpr extends AbstractVarExpr {
    * @return the expression value.
    */
   public Value evalObject(Env env)
-    throws Throwable
   {
     Value array = _expr.evalArray(env);
 
@@ -151,7 +147,6 @@ public class ArrayGetExpr extends AbstractVarExpr {
    * @return the expression value.
    */
   public Value evalArg(Env env)
-    throws Throwable
   {
     Value value = _expr.evalArg(env); // php/0d2t
 
@@ -166,7 +161,6 @@ public class ArrayGetExpr extends AbstractVarExpr {
    * @return the expression value.
    */
   public Value evalRef(Env env)
-    throws Throwable
   {
     Value value = _expr.evalArray(env);
 
@@ -181,7 +175,6 @@ public class ArrayGetExpr extends AbstractVarExpr {
    * @return the expression value.
    */
   public void evalAssign(Env env, Value value)
-    throws Throwable
   {
     Value array = _expr.evalArray(env);
 
@@ -198,7 +191,6 @@ public class ArrayGetExpr extends AbstractVarExpr {
    * @return the expression value.
    */
   public void evalUnset(Env env)
-    throws Throwable
   {
     Value array = _expr.eval(env);
 

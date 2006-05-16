@@ -61,7 +61,7 @@ public final class UnserializeReader {
   }
 
   public Value unserialize(Env env)
-    throws Throwable
+    throws IOException
   {
     int ch = read();
 
@@ -191,7 +191,7 @@ public final class UnserializeReader {
   }
 
   public Value unserializeKey(Env env)
-    throws Throwable
+    throws IOException
   {
     int ch = read();
 
@@ -250,7 +250,7 @@ public final class UnserializeReader {
   }
 
   private String unserializeString()
-    throws Throwable
+    throws IOException
   {
     expect('s');
     expect(':');

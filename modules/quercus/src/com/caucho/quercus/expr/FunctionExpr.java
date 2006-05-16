@@ -122,7 +122,6 @@ public class FunctionExpr extends Expr {
    * @return the expression value.
    */
   public Value eval(Env env)
-    throws Throwable
   {
     return evalImpl(env, false, false);
   }
@@ -135,7 +134,6 @@ public class FunctionExpr extends Expr {
    * @return the expression value.
    */
   public Value evalRef(Env env)
-    throws Throwable
   {
     return evalImpl(env, true, false);
   }
@@ -148,7 +146,6 @@ public class FunctionExpr extends Expr {
    * @return the expression value.
    */
   public Value evalCopy(Env env)
-    throws Throwable
   {
     return evalImpl(env, false, true);
   }
@@ -161,7 +158,6 @@ public class FunctionExpr extends Expr {
    * @return the expression value.
    */
   private Value evalImpl(Env env, boolean isRef, boolean isCopy)
-    throws Throwable
   {
     env.pushCall(this, NullValue.NULL);
     

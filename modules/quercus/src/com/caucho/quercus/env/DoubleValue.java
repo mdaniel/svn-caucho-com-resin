@@ -130,7 +130,6 @@ public class DoubleValue extends NumberValue {
    * Negates the value.
    */
   public Value neg()
-    throws Throwable
   {
     return new DoubleValue(- _value);
   }
@@ -139,7 +138,6 @@ public class DoubleValue extends NumberValue {
    * Returns the value
    */
   public Value pos()
-    throws Throwable
   {
     return this;
   }
@@ -148,7 +146,6 @@ public class DoubleValue extends NumberValue {
    * Multiplies to the following value.
    */
   public Value add(Value rValue)
-    throws Throwable
   {
     return new DoubleValue(_value + rValue.toDouble());
   }
@@ -157,7 +154,6 @@ public class DoubleValue extends NumberValue {
    * Multiplies to the following value.
    */
   public Value add(long lValue)
-    throws Throwable
   {
     return new DoubleValue(lValue * _value);
   }
@@ -166,7 +162,6 @@ public class DoubleValue extends NumberValue {
    * Pre-increment the following value.
    */
   public Value preincr(int incr)
-    throws Throwable
   {
     return new DoubleValue(_value + incr);
   }
@@ -175,7 +170,6 @@ public class DoubleValue extends NumberValue {
    * Post-increment the following value.
    */
   public Value postincr(int incr)
-    throws Throwable
   {
     return new DoubleValue(_value + incr);
   }
@@ -184,7 +178,6 @@ public class DoubleValue extends NumberValue {
    * Multiplies to the following value.
    */
   public Value mul(Value rValue)
-    throws Throwable
   {
     return new DoubleValue(_value * rValue.toDouble());
   }
@@ -193,7 +186,6 @@ public class DoubleValue extends NumberValue {
    * Multiplies to the following value.
    */
   public Value mul(long lValue)
-    throws Throwable
   {
     return new DoubleValue(lValue * _value);
   }
@@ -313,7 +305,7 @@ public class DoubleValue extends NumberValue {
                           WriteStream out,
                           int depth,
                           IdentityHashMap<Value, String> valueSet)
-    throws Throwable
+    throws IOException
   {
     out.print("float(" + toDouble() + ")");
   }

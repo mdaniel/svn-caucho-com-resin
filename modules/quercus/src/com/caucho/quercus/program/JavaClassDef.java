@@ -30,6 +30,7 @@
 package com.caucho.quercus.program;
 
 import com.caucho.quercus.Quercus;
+import com.caucho.quercus.QuercusException;
 import com.caucho.quercus.QuercusRuntimeException;
 import com.caucho.quercus.expr.Expr;
 import com.caucho.quercus.env.*;
@@ -292,7 +293,6 @@ public class JavaClassDef extends ClassDef {
    * Creates a new instance.
    */
   public Value newInstance(Env env, QuercusClass qClass)
-    throws Throwable
   {
     // return newInstance();
     return null;
@@ -315,7 +315,6 @@ public class JavaClassDef extends ClassDef {
    * Eval new
    */
   public Value evalNew(Env env, Expr []args)
-    throws Throwable
   {
     return _cons.eval(env, null, args);
   }
@@ -324,7 +323,6 @@ public class JavaClassDef extends ClassDef {
    * Eval new
    */
   public Value evalNew(Env env, Value []args)
-    throws Throwable
   {
     return _cons.eval(env, null, args);
   }
@@ -333,7 +331,6 @@ public class JavaClassDef extends ClassDef {
    * Eval a method
    */
   public Value evalMethod(Env env, Object obj, String name, Expr []args)
-    throws Throwable
   {
     JavaMethod method = _functionMap.get(name);
 
@@ -351,7 +348,6 @@ public class JavaClassDef extends ClassDef {
    * Eval a method
    */
   public Value evalMethod(Env env, Value value, String name, Expr []args)
-    throws Throwable
   {
     return evalMethod(env, value.toJavaObject(), name, args);
   }
@@ -360,7 +356,6 @@ public class JavaClassDef extends ClassDef {
    * Eval a method
    */
   public Value evalMethod(Env env, Value value, String name, Value []args)
-    throws Throwable
   {
     return evalMethod(env, value.toJavaObject(), name, args);
   }
@@ -369,7 +364,6 @@ public class JavaClassDef extends ClassDef {
    * Eval a method
    */
   public Value evalMethod(Env env, Object obj, String name, Value []args)
-    throws Throwable
   {
     return getMethod(env, name).eval(env, obj, args);
   }
@@ -378,7 +372,6 @@ public class JavaClassDef extends ClassDef {
    * Eval a method
    */
   public Value evalMethod(Env env, Object obj, String name)
-    throws Throwable
   {
     return getMethod(env, name).eval(env, obj);
   }
@@ -387,7 +380,6 @@ public class JavaClassDef extends ClassDef {
    * Eval a method
    */
   public Value evalMethod(Env env, Object obj, String name, Value a1)
-    throws Throwable
   {
     return getMethod(env, name).eval(env, obj, a1);
   }
@@ -397,7 +389,6 @@ public class JavaClassDef extends ClassDef {
    */
   public Value evalMethod(Env env, Object obj, String name,
                           Value a1, Value a2)
-    throws Throwable
   {
     return getMethod(env, name).eval(env, obj, a1, a2);
   }
@@ -407,7 +398,6 @@ public class JavaClassDef extends ClassDef {
    */
   public Value evalMethod(Env env, Object obj, String name,
                           Value a1, Value a2, Value a3)
-    throws Throwable
   {
     return getMethod(env, name).eval(env, obj, a1, a2, a3);
   }
@@ -417,7 +407,6 @@ public class JavaClassDef extends ClassDef {
    */
   public Value evalMethod(Env env, Object obj, String name,
                           Value a1, Value a2, Value a3, Value a4)
-    throws Throwable
   {
     return getMethod(env, name).eval(env, obj, a1, a2, a3, a4);
   }
@@ -427,7 +416,6 @@ public class JavaClassDef extends ClassDef {
    */
   public Value evalMethod(Env env, Object obj, String name,
                           Value a1, Value a2, Value a3, Value a4, Value a5)
-    throws Throwable
   {
     return getMethod(env, name).eval(env, obj, a1, a2, a3, a4, a5);
   }
@@ -507,7 +495,6 @@ public class JavaClassDef extends ClassDef {
    * Creates a new instance.
    */
   public void initInstance(Env env, Value value)
-    throws Throwable
   {
   }
 
@@ -763,23 +750,26 @@ public class JavaClassDef extends ClassDef {
    * @param valueSet
    * @return false if printRImpl not implemented
    * @throws IOException
-   * @throws Throwable
    */
   protected boolean printRImpl(Env env,
                                Object obj,
                                WriteStream out,
                                int depth,
                                IdentityHashMap<Value, String> valueSet)
-    throws IOException, Throwable
+    throws IOException
   {
 
-    if (_printRImpl == null) {
-      return false;
-
+    try {
+      if (_printRImpl == null) {
+	return false;
+	
+      }
+      
+      _printRImpl.invoke(obj, env, out, depth, valueSet);
+      return true;
+    } catch (Exception e) {
+      throw new QuercusException(e);
     }
-
-    _printRImpl.invoke(obj, env, out, depth, valueSet);
-    return true;
   }
 
   public boolean varDumpImpl(Env env,
@@ -787,15 +777,19 @@ public class JavaClassDef extends ClassDef {
                              WriteStream out,
                              int depth,
                              IdentityHashMap<Value, String> valueSet)
-    throws IOException, Throwable
+    throws IOException
   {
-    if (_varDumpImpl == null) {
-      return false;
-
+    try {
+      if (_varDumpImpl == null) {
+	return false;
+	
+      }
+      
+      _varDumpImpl.invoke(obj, env, out, depth, valueSet);
+      return true;
+    } catch (Exception e) {
+      throw new QuercusException(e);
     }
-
-    _varDumpImpl.invoke(obj, env, out, depth, valueSet);
-    return true;
   }
 
   private class MethodMarshallPair {

@@ -71,7 +71,6 @@ public class RefExpr extends UnaryExpr {
    * @return the expression value.
    */
   public Value eval(Env env)
-    throws Throwable
   {
     // quercus/0d28
     Value value = getExpr().evalRef(env);
@@ -90,7 +89,6 @@ public class RefExpr extends UnaryExpr {
    * @return the expression value.
    */
   public Value evalRef(Env env)
-    throws Throwable
   {
     Value value = getExpr().evalRef(env);
 

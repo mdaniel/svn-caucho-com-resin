@@ -39,7 +39,6 @@ public interface InstanceInitializer {
   /**
    * Creates a new instance.
    */
-  public void initInstance(Env env, Value value)
-    throws Throwable;
+  public void initInstance(Env env, Value value);
 }
 

@@ -56,10 +56,8 @@ public class SubExpr extends BinaryExpr {
    *
    * @param env the quercus environment
    * @return the resulting value
-   * @throws Throwable
    */
   public Value eval(Env env)
-    throws Throwable
   {
     Value lValue = _left.eval(env);
     Value rValue = _right.eval(env);

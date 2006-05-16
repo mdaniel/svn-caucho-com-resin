@@ -38,6 +38,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.annotation.Annotation;
 
 import com.caucho.quercus.Quercus;
+import com.caucho.quercus.QuercusException;
 
 import com.caucho.quercus.expr.Expr;
 import com.caucho.quercus.expr.NullLiteralExpr;
@@ -85,10 +86,13 @@ public class JavaConstructor extends JavaInvoker {
   }
 
   public Object invoke(Object obj, Object []args)
-    throws Throwable
   {
-    obj = _constructor.newInstance(args);
-
-    return obj;
+    try {
+      obj = _constructor.newInstance(args);
+      
+      return obj;
+    } catch (Exception e) {
+      throw new QuercusException(e);
+    }
   }
 }

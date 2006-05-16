@@ -114,8 +114,7 @@ abstract public class AbstractVarExpr extends Expr {
    *
    * @return the expression value.
    */
-  abstract public Value eval(Env env)
-    throws Throwable;
+  abstract public Value eval(Env env);
 
   /**
    * Evaluates the expression as a reference (by RefExpr).
@@ -124,8 +123,7 @@ abstract public class AbstractVarExpr extends Expr {
    *
    * @return the expression value.
    */
-  abstract public Value evalRef(Env env)
-    throws Throwable;
+  abstract public Value evalRef(Env env);
 
   /**
    * Evaluates the expression as an argument.
@@ -134,8 +132,7 @@ abstract public class AbstractVarExpr extends Expr {
    *
    * @return the expression value.
    */
-  abstract public Value evalArg(Env env)
-    throws Throwable;
+  abstract public Value evalArg(Env env);
 
   /**
    * Evaluates the expression as an argument.
@@ -144,8 +141,7 @@ abstract public class AbstractVarExpr extends Expr {
    *
    * @return the expression value.
    */
-  abstract public void evalUnset(Env env)
-    throws Throwable;
+  abstract public void evalUnset(Env env);
 
   /**
    * Evaluates the expression.
@@ -154,8 +150,7 @@ abstract public class AbstractVarExpr extends Expr {
    *
    * @return the expression value.
    */
-  abstract public void evalAssign(Env env, Value value)
-    throws Throwable;
+  abstract public void evalAssign(Env env, Value value);
 
   //
   // Java code generation

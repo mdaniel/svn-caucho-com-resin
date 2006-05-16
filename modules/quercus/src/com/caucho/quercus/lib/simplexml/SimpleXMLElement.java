@@ -284,7 +284,6 @@ public class SimpleXMLElement {
    */
 
   public Value __setField(Env env, String name, String value)
-    throws Throwable
   {
     // find Node name
     // $xml->foo = "bar"; (NOT $xml["foo"] = "bar";)

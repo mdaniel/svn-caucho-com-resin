@@ -62,7 +62,6 @@ public class ForStatement extends Statement {
   }
 
   public Value execute(Env env)
-    throws Throwable
   {
     try {
       if (_init != null)
@@ -84,8 +83,8 @@ public class ForStatement extends Statement {
           _incr.eval(env);
       }
     }
-    catch (Throwable t) {
-      rethrow(t);
+    catch (RuntimeException t) {
+      rethrow(t, RuntimeException.class);
     }
 
     return null;

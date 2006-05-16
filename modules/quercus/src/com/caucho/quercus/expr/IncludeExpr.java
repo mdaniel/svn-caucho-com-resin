@@ -31,6 +31,7 @@ package com.caucho.quercus.expr;
 
 import java.io.IOException;
 
+import com.caucho.quercus.QuercusException;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
 
@@ -84,12 +85,15 @@ public class IncludeExpr extends UnaryExpr {
    * @return the expression value.
    */
   public Value eval(Env env)
-    throws Throwable
   {
-    String name = _expr.evalString(env);
-
-    return env.include(_dir, name, _isRequire, false);
-    // return env.include(name);
+    try {
+      String name = _expr.evalString(env);
+      
+      return env.include(_dir, name, _isRequire, false);
+      // return env.include(name);
+    } catch (IOException e) {
+      throw new QuercusException(e);
+    }
   }
 
   //

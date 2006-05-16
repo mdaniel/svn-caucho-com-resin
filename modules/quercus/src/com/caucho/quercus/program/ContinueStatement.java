@@ -59,7 +59,6 @@ public class ContinueStatement extends Statement {
    * Executes the statement, returning the expression value.
    */
   public Value execute(Env env)
-    throws Throwable
   {
     return ContinueValue.CONTINUE;
   }

@@ -105,7 +105,6 @@ public class BlockStatement extends Statement {
   }
 
   public Value execute(Env env)
-    throws Throwable
   {
     for (int i = 0; i < _statements.length; i++) {
       Statement statement = _statements[i];

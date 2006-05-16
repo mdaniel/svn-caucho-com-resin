@@ -57,7 +57,6 @@ public class WhileStatement extends Statement {
   }
 
   public Value execute(Env env)
-    throws Throwable
   {
     try {
       while (_test.evalBoolean(env)) {
@@ -75,8 +74,8 @@ public class WhileStatement extends Statement {
           return value;
       }
     }
-    catch (Throwable t) {
-      rethrow(t);
+    catch (RuntimeException e) {
+      rethrow(e, RuntimeException.class);
     }
 
     return null;

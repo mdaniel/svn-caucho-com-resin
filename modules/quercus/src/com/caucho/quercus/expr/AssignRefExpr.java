@@ -66,7 +66,6 @@ public class AssignRefExpr extends Expr {
    * @return the expression value.
    */
   public Value eval(Env env)
-    throws Throwable
   {
     Value value = _value.evalRef(env);
 
@@ -83,7 +82,6 @@ public class AssignRefExpr extends Expr {
    * @return the expression value.
    */
   public Value evalCopy(Env env)
-    throws Throwable
   {
     Value value = _value.evalRef(env);
 

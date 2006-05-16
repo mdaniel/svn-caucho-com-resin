@@ -158,7 +158,6 @@ public class InterpretedClassDef extends ClassDef
    * Initialize the class.
    */
   public void init(Env env)
-    throws Throwable
   {
     for (Map.Entry<String,Expr> var : _staticFieldMap.entrySet()) {
       String name = getName() + "::" + var.getKey();
@@ -171,7 +170,6 @@ public class InterpretedClassDef extends ClassDef
    * Initialize the fields
    */
   public void initInstance(Env env, Value object)
-    throws Throwable
   {
     for (Map.Entry<String,Expr> entry : _fieldMap.entrySet())
       object.putField(env, entry.getKey(), entry.getValue().eval(env).copy());
@@ -256,7 +254,7 @@ public class InterpretedClassDef extends ClassDef
 
     out.println();
     out.println("public void initInstance(Env env, Value valueArg)");
-    out.println("   throws Throwable");
+    //out.println("   throws Throwable");
     out.println("{");
     out.pushDepth();
 

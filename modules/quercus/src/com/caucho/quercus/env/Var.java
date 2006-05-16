@@ -189,7 +189,6 @@ public class Var extends Value {
    * @param env
    */
   public String toString(Env env)
-    throws Throwable
   {
     return _value.toString(env);
   }
@@ -349,7 +348,6 @@ public class Var extends Value {
    * Negates the value.
    */
   public Value neg()
-    throws Throwable
   {
     return _value.neg();
   }
@@ -358,7 +356,6 @@ public class Var extends Value {
    * Adds to the following value.
    */
   public Value add(Value rValue)
-    throws Throwable
   {
     return _value.add(rValue);
   }
@@ -367,7 +364,6 @@ public class Var extends Value {
    * Adds to the following value.
    */
   public Value add(long rValue)
-    throws Throwable
   {
     return _value.add(rValue);
   }
@@ -376,7 +372,6 @@ public class Var extends Value {
    * Pre-increment the following value.
    */
   public Value preincr(int incr)
-    throws Throwable
   {
     _value = _value.preincr(incr);
 
@@ -387,7 +382,6 @@ public class Var extends Value {
    * Post-increment the following value.
    */
   public Value postincr(int incr)
-    throws Throwable
   {
     Value value = _value;
 
@@ -400,7 +394,6 @@ public class Var extends Value {
    * Subtracts to the following value.
    */
   public Value sub(Value rValue)
-    throws Throwable
   {
     return _value.sub(rValue);
   }
@@ -409,7 +402,6 @@ public class Var extends Value {
    * Multiplies to the following value.
    */
   public Value mul(Value rValue)
-    throws Throwable
   {
     return _value.mul(rValue);
   }
@@ -418,7 +410,6 @@ public class Var extends Value {
    * Multiplies to the following value.
    */
   public Value mul(long lValue)
-    throws Throwable
   {
     return _value.mul(lValue);
   }
@@ -427,7 +418,6 @@ public class Var extends Value {
    * Divides the following value.
    */
   public Value div(Value rValue)
-    throws Throwable
   {
     return _value.div(rValue);
   }
@@ -436,7 +426,6 @@ public class Var extends Value {
    * Shifts left by the value.
    */
   public Value lshift(Value rValue)
-    throws Throwable
   {
     return _value.lshift(rValue);
   }
@@ -445,7 +434,6 @@ public class Var extends Value {
    * Shifts right by the value.
    */
   public Value rshift(Value rValue)
-    throws Throwable
   {
     return _value.rshift(rValue);
   }
@@ -462,7 +450,6 @@ public class Var extends Value {
    * Returns true for equality
    */
   public boolean eql(Value rValue)
-    throws Throwable
   {
     return _value.eql(rValue);
   }
@@ -745,7 +732,6 @@ public class Var extends Value {
    * Evaluates a method.
    */
   public Value evalMethod(Env env, String methodName, Expr []args)
-    throws Throwable
   {
     return _value.evalMethod(env, methodName, args);
   }
@@ -754,7 +740,6 @@ public class Var extends Value {
    * Evaluates a method.
    */
   public Value evalMethod(Env env, String methodName, Value []args)
-    throws Throwable
   {
     return _value.evalMethod(env, methodName, args);
   }
@@ -763,7 +748,6 @@ public class Var extends Value {
    * Evaluates a method.
    */
   public Value evalMethod(Env env, String methodName)
-    throws Throwable
   {
     return _value.evalMethod(env, methodName);
   }
@@ -772,7 +756,6 @@ public class Var extends Value {
    * Evaluates a method.
    */
   public Value evalMethod(Env env, String methodName, Value a0)
-    throws Throwable
   {
     return _value.evalMethod(env, methodName, a0);
   }
@@ -781,7 +764,6 @@ public class Var extends Value {
    * Evaluates a method.
    */
   public Value evalMethod(Env env, String methodName, Value a0, Value a1)
-    throws Throwable
   {
     return _value.evalMethod(env, methodName, a0, a1);
   }
@@ -791,7 +773,6 @@ public class Var extends Value {
    */
   public Value evalMethod(Env env, String methodName,
 			  Value a0, Value a1, Value a2)
-    throws Throwable
   {
     return _value.evalMethod(env, methodName, a0, a1, a2);
   }
@@ -801,7 +782,6 @@ public class Var extends Value {
    */
   public Value evalMethod(Env env, String methodName,
 			  Value a0, Value a1, Value a2, Value a3)
-    throws Throwable
   {
     return _value.evalMethod(env, methodName, a0, a1, a2, a3);
   }
@@ -811,7 +791,6 @@ public class Var extends Value {
    */
   public Value evalMethod(Env env, String methodName,
 			  Value a0, Value a1, Value a2, Value a3, Value a4)
-    throws Throwable
   {
     return _value.evalMethod(env, methodName, a0, a1, a2, a3, a4);
   }
@@ -820,7 +799,6 @@ public class Var extends Value {
    * Evaluates a method.
    */
   public Value evalMethodRef(Env env, String methodName, Expr []args)
-    throws Throwable
   {
     return _value.evalMethodRef(env, methodName, args);
   }
@@ -829,7 +807,6 @@ public class Var extends Value {
    * Evaluates a method.
    */
   public Value evalMethodRef(Env env, String methodName, Value []args)
-    throws Throwable
   {
     return _value.evalMethodRef(env, methodName, args);
   }
@@ -838,7 +815,6 @@ public class Var extends Value {
    * Evaluates a method.
    */
   public Value evalMethodRef(Env env, String methodName)
-    throws Throwable
   {
     return _value.evalMethodRef(env, methodName);
   }
@@ -847,7 +823,6 @@ public class Var extends Value {
    * Evaluates a method.
    */
   public Value evalMethodRef(Env env, String methodName, Value a0)
-    throws Throwable
   {
     return _value.evalMethodRef(env, methodName, a0);
   }
@@ -856,7 +831,6 @@ public class Var extends Value {
    * Evaluates a method.
    */
   public Value evalMethodRef(Env env, String methodName, Value a0, Value a1)
-    throws Throwable
   {
     return _value.evalMethodRef(env, methodName, a0, a1);
   }
@@ -866,7 +840,6 @@ public class Var extends Value {
    */
   public Value evalMethodRef(Env env, String methodName,
 			  Value a0, Value a1, Value a2)
-    throws Throwable
   {
     return _value.evalMethodRef(env, methodName, a0, a1, a2);
   }
@@ -876,7 +849,6 @@ public class Var extends Value {
    */
   public Value evalMethodRef(Env env, String methodName,
 			  Value a0, Value a1, Value a2, Value a3)
-    throws Throwable
   {
     return _value.evalMethodRef(env, methodName, a0, a1, a2, a3);
   }
@@ -886,7 +858,6 @@ public class Var extends Value {
    */
   public Value evalMethodRef(Env env, String methodName,
 			  Value a0, Value a1, Value a2, Value a3, Value a4)
-    throws Throwable
   {
     return _value.evalMethodRef(env, methodName, a0, a1, a2, a3, a4);
   }
@@ -895,7 +866,6 @@ public class Var extends Value {
    * Evaluates a method.
    */
   public Value evalClassMethod(Env env, AbstractFunction fun, Value []args)
-    throws Throwable
   {
     return _value.evalClassMethod(env, fun, args);
   }
@@ -905,7 +875,7 @@ public class Var extends Value {
    * @param env
    */
   public void print(Env env)
-    throws Throwable
+    throws IOException
   {
     _value.print(env);
   }
@@ -927,7 +897,7 @@ public class Var extends Value {
                           WriteStream out,
                           int depth,
                           IdentityHashMap<Value, String> valueSet)
-    throws Throwable
+    throws IOException
   {
     out.print("&");
     _value.varDump(env, out, depth, valueSet);

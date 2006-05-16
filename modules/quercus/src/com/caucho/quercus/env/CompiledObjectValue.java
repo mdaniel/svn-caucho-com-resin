@@ -41,6 +41,7 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import java.io.IOException;
 
 /**
  * Represents a compiled object value.
@@ -410,7 +411,6 @@ public class CompiledObjectValue extends ObjectValue {
    * Evaluates a method.
    */
   public Value evalMethod(Env env, String methodName, Expr []args)
-    throws Throwable
   {
     return _cl.getFunction(methodName).evalMethod(env, this, args);
   }
@@ -419,7 +419,6 @@ public class CompiledObjectValue extends ObjectValue {
    * Evaluates a method.
    */
   public Value evalMethod(Env env, String methodName, Value []args)
-    throws Throwable
   {
     AbstractFunction fun = _cl.findFunction(methodName);
 
@@ -434,7 +433,6 @@ public class CompiledObjectValue extends ObjectValue {
    * Evaluates a method.
    */
   public Value evalMethod(Env env, String methodName)
-    throws Throwable
   {
     return _cl.getFunction(methodName).evalMethod(env, this);
   }
@@ -443,7 +441,6 @@ public class CompiledObjectValue extends ObjectValue {
    * Evaluates a method.
    */
   public Value evalMethod(Env env, String methodName, Value a0)
-    throws Throwable
   {
     return _cl.getFunction(methodName).evalMethod(env, this, a0);
   }
@@ -453,7 +450,6 @@ public class CompiledObjectValue extends ObjectValue {
    */
   public Value evalMethod(Env env, String methodName,
                           Value a0, Value a1)
-    throws Throwable
   {
     return _cl.getFunction(methodName).evalMethod(env, this, a0, a1);
   }
@@ -463,7 +459,6 @@ public class CompiledObjectValue extends ObjectValue {
    */
   public Value evalMethod(Env env, String methodName,
                           Value a0, Value a1, Value a2)
-    throws Throwable
   {
     return _cl.getFunction(methodName).evalMethod(env, this,
                                                   a0, a1, a2);
@@ -474,7 +469,6 @@ public class CompiledObjectValue extends ObjectValue {
    */
   public Value evalMethod(Env env, String methodName,
                           Value a0, Value a1, Value a2, Value a3)
-    throws Throwable
   {
     return _cl.getFunction(methodName).evalMethod(env, this,
                                                   a0, a1, a2, a3);
@@ -485,7 +479,6 @@ public class CompiledObjectValue extends ObjectValue {
    */
   public Value evalMethod(Env env, String methodName,
                           Value a0, Value a1, Value a2, Value a3, Value a4)
-    throws Throwable
   {
     return _cl.getFunction(methodName).evalMethod(env, this,
                                                   a0, a1, a2, a3, a4);
@@ -495,7 +488,6 @@ public class CompiledObjectValue extends ObjectValue {
    * Evaluates a method.
    */
   public Value evalMethodRef(Env env, String methodName, Expr []args)
-    throws Throwable
   {
     return _cl.getFunction(methodName).evalMethodRef(env, this, args);
   }
@@ -504,7 +496,6 @@ public class CompiledObjectValue extends ObjectValue {
    * Evaluates a method.
    */
   public Value evalMethodRef(Env env, String methodName, Value []args)
-    throws Throwable
   {
     return _cl.getFunction(methodName).evalMethodRef(env, this, args);
   }
@@ -513,7 +504,6 @@ public class CompiledObjectValue extends ObjectValue {
    * Evaluates a method.
    */
   public Value evalMethodRef(Env env, String methodName)
-    throws Throwable
   {
     return _cl.getFunction(methodName).evalMethodRef(env, this);
   }
@@ -522,7 +512,6 @@ public class CompiledObjectValue extends ObjectValue {
    * Evaluates a method.
    */
   public Value evalMethodRef(Env env, String methodName, Value a0)
-    throws Throwable
   {
     return _cl.getFunction(methodName).evalMethodRef(env, this, a0);
   }
@@ -532,7 +521,6 @@ public class CompiledObjectValue extends ObjectValue {
    */
   public Value evalMethodRef(Env env, String methodName,
                              Value a0, Value a1)
-    throws Throwable
   {
     return _cl.getFunction(methodName).evalMethodRef(env, this, a0, a1);
   }
@@ -542,7 +530,6 @@ public class CompiledObjectValue extends ObjectValue {
    */
   public Value evalMethodRef(Env env, String methodName,
                              Value a0, Value a1, Value a2)
-    throws Throwable
   {
     return _cl.getFunction(methodName).evalMethodRef(env, this,
                                                      a0, a1, a2);
@@ -553,7 +540,6 @@ public class CompiledObjectValue extends ObjectValue {
    */
   public Value evalMethodRef(Env env, String methodName,
                              Value a0, Value a1, Value a2, Value a3)
-    throws Throwable
   {
     return _cl.getFunction(methodName).evalMethodRef(env, this,
                                                      a0, a1, a2, a3);
@@ -564,7 +550,6 @@ public class CompiledObjectValue extends ObjectValue {
    */
   public Value evalMethodRef(Env env, String methodName,
                              Value a0, Value a1, Value a2, Value a3, Value a4)
-    throws Throwable
   {
     return _cl.getFunction(methodName).evalMethodRef(env, this,
                                                      a0, a1, a2, a3, a4);
@@ -574,7 +559,6 @@ public class CompiledObjectValue extends ObjectValue {
    * Evaluates a method.
    */
   public Value evalClassMethod(Env env, AbstractFunction fun, Value []args)
-    throws Throwable
   {
     Value oldThis = env.getThis();
 
@@ -688,7 +672,6 @@ public class CompiledObjectValue extends ObjectValue {
    * @param env
    */
   public String toString(Env env)
-    throws Throwable
   {
     AbstractFunction fun = _cl.findFunction("__toString");
 
@@ -703,7 +686,7 @@ public class CompiledObjectValue extends ObjectValue {
    * @param env
    */
   public void print(Env env)
-    throws Throwable
+    throws IOException
   {
     env.getOut().print(toString(env));
   }
@@ -762,7 +745,7 @@ public class CompiledObjectValue extends ObjectValue {
                           WriteStream out,
                           int depth,
                           IdentityHashMap<Value, String> valueSet)
-    throws Throwable
+    throws IOException
   {
     out.println("object(" + getName() + ") (" + getSize() + ") {");
 
@@ -800,7 +783,7 @@ public class CompiledObjectValue extends ObjectValue {
                             WriteStream out,
                             int depth,
                             IdentityHashMap<Value, String> valueSet)
-    throws Throwable
+    throws IOException
   {
     out.print(_cl.getName());
     out.print(' ');

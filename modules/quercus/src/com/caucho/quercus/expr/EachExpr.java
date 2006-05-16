@@ -61,7 +61,6 @@ public class EachExpr extends UnaryExpr {
    * @return the expression value.
    */
   public Value eval(Env env)
-    throws Throwable
   {
     Value value = getExpr().eval(env);
 

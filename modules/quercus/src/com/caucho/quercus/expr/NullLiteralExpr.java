@@ -81,7 +81,6 @@ public class NullLiteralExpr extends Expr {
    * @return the expression value.
    */
   public Value eval(Env env)
-    throws Throwable
   {
     return NullValue.create();
   }

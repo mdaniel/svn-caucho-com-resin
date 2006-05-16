@@ -230,7 +230,6 @@ public class QuercusClass {
    * Creates a new instance.
    */
   public Value evalNew(Env env, Expr []args)
-    throws Throwable
   {
     Value object = _classDef.evalNew(env, args);
 
@@ -252,7 +251,6 @@ public class QuercusClass {
    * Creates a new instance.
    */
   public Value evalNew(Env env, Value []args)
-    throws Throwable
   {
     Value object = _classDef.evalNew(env, args);
 
@@ -297,7 +295,6 @@ public class QuercusClass {
    * Creates a new instance.
    */
   public Value newInstance(Env env)
-    throws Throwable
   {
     Value obj = _classDef.newInstance(env, this);
     
@@ -380,7 +377,6 @@ public class QuercusClass {
    * evaluates the function.
    */
   public Value evalMethod(Env env, Value thisValue, String name, Expr []args)
-    throws Throwable
   {
     return getFunction(name).evalMethod(env, thisValue, args);
   }  
@@ -389,7 +385,6 @@ public class QuercusClass {
    * evaluates the function.
    */
   public Value evalMethod(Env env, Value thisValue, String name, Value []args)
-    throws Throwable
   {
     return getFunction(name).evalMethod(env, thisValue, args);
   }  
@@ -398,7 +393,6 @@ public class QuercusClass {
    * evaluates the function.
    */
   public Value evalMethod(Env env, Value thisValue, String name)
-    throws Throwable
   {
     return getFunction(name).evalMethod(env, thisValue);
   }  
@@ -408,7 +402,6 @@ public class QuercusClass {
    */
   public Value evalMethod(Env env, Value thisValue, String name,
 			  Value a1)
-    throws Throwable
   {
     return getFunction(name).evalMethod(env, thisValue, a1);
   }  
@@ -418,7 +411,6 @@ public class QuercusClass {
    */
   public Value evalMethod(Env env, Value thisValue, String name,
 			  Value a1, Value a2)
-    throws Throwable
   {
     return getFunction(name).evalMethod(env, thisValue, a1, a2);
   }  
@@ -428,7 +420,6 @@ public class QuercusClass {
    */
   public Value evalMethod(Env env, Value thisValue, String name,
 			  Value a1, Value a2, Value a3)
-    throws Throwable
   {
     return getFunction(name).evalMethod(env, thisValue, a1, a2, a3);
   }  
@@ -438,7 +429,6 @@ public class QuercusClass {
    */
   public Value evalMethod(Env env, Value thisValue, String name,
 			  Value a1, Value a2, Value a3, Value a4)
-    throws Throwable
   {
     return getFunction(name).evalMethod(env, thisValue, a1, a2, a3, a4);
   }  
@@ -448,7 +438,6 @@ public class QuercusClass {
    */
   public Value evalMethod(Env env, Value thisValue, String name,
 			  Value a1, Value a2, Value a3, Value a4, Value a5)
-    throws Throwable
   {
     return getFunction(name).evalMethod(env, thisValue, a1, a2, a3, a4, a5);
   }  
@@ -485,7 +474,6 @@ public class QuercusClass {
    * Finds the matching constant
    */
   public final Value getConstant(Env env, String name)
-    throws Throwable
   {
     Value value = findConstant(name);
 

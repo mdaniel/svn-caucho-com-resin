@@ -72,7 +72,6 @@ public class SetCharAtExpr extends Expr {
    * @return the expression value.
    */
   public Value eval(Env env)
-    throws Throwable
   {
     throw new UnsupportedOperationException();
   }

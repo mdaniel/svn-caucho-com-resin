@@ -59,7 +59,6 @@ public class BreakStatement extends Statement {
    * Executes the statement, returning the expression value.
    */
   public Value execute(Env env)
-    throws Throwable
   {
     return BreakValue.BREAK;
   }

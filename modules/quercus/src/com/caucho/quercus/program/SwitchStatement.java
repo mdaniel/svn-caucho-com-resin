@@ -77,7 +77,6 @@ public class SwitchStatement extends Statement {
    * Executes the 'switch' statement, returning any value.
    */
   public Value execute(Env env)
-    throws Throwable
   {
     try {
       Value testValue = _value.eval(env);
@@ -111,8 +110,8 @@ public class SwitchStatement extends Statement {
       }
 
     }
-    catch (Throwable t) {
-      rethrow(t);
+    catch (RuntimeException e) {
+      rethrow(e, RuntimeException.class);
     }
 
     return null;

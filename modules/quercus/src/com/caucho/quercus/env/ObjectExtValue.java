@@ -41,6 +41,7 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import java.io.IOException;
 
 /**
  * Represents a PHP object value.
@@ -501,7 +502,6 @@ public class ObjectExtValue extends ObjectValue {
    * Evaluates a method.
    */
   public Value evalMethod(Env env, String methodName, Expr []args)
-    throws Throwable
   {
     return _cl.getFunction(methodName).evalMethod(env, this, args);
   }
@@ -510,7 +510,6 @@ public class ObjectExtValue extends ObjectValue {
    * Evaluates a method.
    */
   public Value evalMethod(Env env, String methodName, Value []args)
-    throws Throwable
   {
     AbstractFunction fun = _cl.findFunction(methodName);
 
@@ -525,7 +524,6 @@ public class ObjectExtValue extends ObjectValue {
    * Evaluates a method.
    */
   public Value evalMethod(Env env, String methodName)
-    throws Throwable
   {
     return _cl.getFunction(methodName).evalMethod(env, this);
   }
@@ -534,7 +532,6 @@ public class ObjectExtValue extends ObjectValue {
    * Evaluates a method.
    */
   public Value evalMethod(Env env, String methodName, Value a0)
-    throws Throwable
   {
     return _cl.getFunction(methodName).evalMethod(env, this, a0);
   }
@@ -544,7 +541,6 @@ public class ObjectExtValue extends ObjectValue {
    */
   public Value evalMethod(Env env, String methodName,
                           Value a0, Value a1)
-    throws Throwable
   {
     return _cl.getFunction(methodName).evalMethod(env, this, a0, a1);
   }
@@ -554,7 +550,6 @@ public class ObjectExtValue extends ObjectValue {
    */
   public Value evalMethod(Env env, String methodName,
                           Value a0, Value a1, Value a2)
-    throws Throwable
   {
     return _cl.getFunction(methodName).evalMethod(env, this,
                                                   a0, a1, a2);
@@ -565,7 +560,6 @@ public class ObjectExtValue extends ObjectValue {
    */
   public Value evalMethod(Env env, String methodName,
                           Value a0, Value a1, Value a2, Value a3)
-    throws Throwable
   {
     return _cl.getFunction(methodName).evalMethod(env, this,
                                                   a0, a1, a2, a3);
@@ -576,7 +570,6 @@ public class ObjectExtValue extends ObjectValue {
    */
   public Value evalMethod(Env env, String methodName,
                           Value a0, Value a1, Value a2, Value a3, Value a4)
-    throws Throwable
   {
     return _cl.getFunction(methodName).evalMethod(env, this,
                                                   a0, a1, a2, a3, a4);
@@ -586,7 +579,6 @@ public class ObjectExtValue extends ObjectValue {
    * Evaluates a method.
    */
   public Value evalMethodRef(Env env, String methodName, Expr []args)
-    throws Throwable
   {
     return _cl.getFunction(methodName).evalMethodRef(env, this, args);
   }
@@ -595,7 +587,6 @@ public class ObjectExtValue extends ObjectValue {
    * Evaluates a method.
    */
   public Value evalMethodRef(Env env, String methodName, Value []args)
-    throws Throwable
   {
     return _cl.getFunction(methodName).evalMethodRef(env, this, args);
   }
@@ -604,7 +595,6 @@ public class ObjectExtValue extends ObjectValue {
    * Evaluates a method.
    */
   public Value evalMethodRef(Env env, String methodName)
-    throws Throwable
   {
     return _cl.getFunction(methodName).evalMethodRef(env, this);
   }
@@ -613,7 +603,6 @@ public class ObjectExtValue extends ObjectValue {
    * Evaluates a method.
    */
   public Value evalMethodRef(Env env, String methodName, Value a0)
-    throws Throwable
   {
     return _cl.getFunction(methodName).evalMethodRef(env, this, a0);
   }
@@ -623,7 +612,6 @@ public class ObjectExtValue extends ObjectValue {
    */
   public Value evalMethodRef(Env env, String methodName,
                              Value a0, Value a1)
-    throws Throwable
   {
     return _cl.getFunction(methodName).evalMethodRef(env, this, a0, a1);
   }
@@ -633,7 +621,6 @@ public class ObjectExtValue extends ObjectValue {
    */
   public Value evalMethodRef(Env env, String methodName,
                              Value a0, Value a1, Value a2)
-    throws Throwable
   {
     return _cl.getFunction(methodName).evalMethodRef(env, this,
                                                      a0, a1, a2);
@@ -644,7 +631,6 @@ public class ObjectExtValue extends ObjectValue {
    */
   public Value evalMethodRef(Env env, String methodName,
                              Value a0, Value a1, Value a2, Value a3)
-    throws Throwable
   {
     return _cl.getFunction(methodName).evalMethodRef(env, this,
                                                      a0, a1, a2, a3);
@@ -655,7 +641,6 @@ public class ObjectExtValue extends ObjectValue {
    */
   public Value evalMethodRef(Env env, String methodName,
                              Value a0, Value a1, Value a2, Value a3, Value a4)
-    throws Throwable
   {
     return _cl.getFunction(methodName).evalMethodRef(env, this,
                                                      a0, a1, a2, a3, a4);
@@ -665,7 +650,6 @@ public class ObjectExtValue extends ObjectValue {
    * Evaluates a method.
    */
   public Value evalClassMethod(Env env, AbstractFunction fun, Value []args)
-    throws Throwable
   {
     return fun.evalMethod(env, this, args);
   }
@@ -751,7 +735,6 @@ public class ObjectExtValue extends ObjectValue {
    * @param env
    */
   public String toString(Env env)
-    throws Throwable
   {
     AbstractFunction fun = _cl.findFunction("__toString");
 
@@ -766,7 +749,7 @@ public class ObjectExtValue extends ObjectValue {
    * @param env
    */
   public void print(Env env)
-    throws Throwable
+    throws IOException
   {
     env.getOut().print(toString(env));
   }
@@ -823,7 +806,7 @@ public class ObjectExtValue extends ObjectValue {
                           WriteStream out,
                           int depth,
                           IdentityHashMap<Value, String> valueSet)
-    throws Throwable
+    throws IOException
   {
     out.println("object(" + getName() + ") (" + getSize() + ") {");
 
@@ -842,7 +825,7 @@ public class ObjectExtValue extends ObjectValue {
                             WriteStream out,
                             int depth,
                             IdentityHashMap<Value, String> valueSet)
-    throws Throwable
+    throws IOException
   {
     out.print(_cl.getName());
     out.print(' ');
@@ -1054,7 +1037,7 @@ public class ObjectExtValue extends ObjectValue {
                             WriteStream out,
                             int depth,
                             IdentityHashMap<Value, String> valueSet)
-      throws Throwable
+      throws IOException
     {
       printDepth(out, 2 * depth);
       out.println("[\"" + getKey() + "\"]=>");
@@ -1070,7 +1053,7 @@ public class ObjectExtValue extends ObjectValue {
                               WriteStream out,
                               int depth,
                               IdentityHashMap<Value, String> valueSet)
-      throws Throwable
+      throws IOException
     {
       printDepth(out, 4 * depth);
       out.print("[" + getKey() + "] => ");

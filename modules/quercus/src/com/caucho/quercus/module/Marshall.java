@@ -185,13 +185,11 @@ abstract public class Marshall {
         }
 
         public Object marshall(Env env, Expr expr, Class argClass)
-          throws Throwable
         {
           return marshall.marshall(env, expr, argClass);
         }
 
         public Object marshall(Env env, Value value, Class argClass)
-          throws Throwable
         {
           return marshall.marshall(env, value, argClass);
         }
@@ -203,7 +201,6 @@ abstract public class Marshall {
         }
 
         public Value unmarshall(Env env, Object value)
-          throws Throwable
         {
           Value result = marshall.unmarshall(env, value);
 
@@ -275,11 +272,9 @@ abstract public class Marshall {
     return false;
   }
 
-  abstract public Object marshall(Env env, Expr expr, Class argClass)
-    throws Throwable;
+  abstract public Object marshall(Env env, Expr expr, Class argClass);
 
   public Object marshall(Env env, Value value, Class argClass)
-    throws Throwable
   {
     return value;
   }
@@ -288,7 +283,6 @@ abstract public class Marshall {
     throws IOException;
 
   public Value unmarshall(Env env, Object value)
-    throws Throwable
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
@@ -312,19 +306,16 @@ abstract public class Marshall {
     }
 
     public Object marshall(Env env, Expr expr, Class expectedClass)
-      throws Throwable
     {
       return expr.eval(env);
     }
 
     public Object marshall(Env env, Value value, Class expectedClass)
-      throws Throwable
     {
       return value;
     }
 
     public Value unmarshall(Env env, Object value)
-      throws Throwable
     {
       return (Value) value;
     }
@@ -355,13 +346,11 @@ abstract public class Marshall {
     }
 
     public Object marshall(Env env, Expr expr, Class expectedClass)
-      throws Throwable
     {
       return marshall(env, expr.eval(env), expectedClass);
     }
 
     public Object marshall(Env env, Value value, Class expectedClass)
-      throws Throwable
     {
       if (value == null || ! value.isset())
         return null;
@@ -388,7 +377,6 @@ abstract public class Marshall {
     }
 
     public Value unmarshall(Env env, Object value)
-      throws Throwable
     {
       return (Value) value;
     }
@@ -424,19 +412,16 @@ abstract public class Marshall {
     }
 
     public Object marshall(Env env, Expr expr, Class expectedClass)
-      throws Throwable
     {
       return expr.evalString(env);
     }
 
     public Object marshall(Env env, Value value, Class expectedClass)
-      throws Throwable
     {
       return value.toString();
     }
 
     public Value unmarshall(Env env, Object value)
-      throws Throwable
     {
       if (value == null)
         return NullValue.NULL;
@@ -469,13 +454,11 @@ abstract public class Marshall {
     }
 
     public Object marshall(Env env, Expr expr, Class expectedClass)
-      throws Throwable
     {
       return expr.evalBoolean(env) ? Boolean.TRUE : Boolean.FALSE;
     }
 
     public Object marshall(Env env, Value value, Class expectedClass)
-      throws Throwable
     {
       return value.toBoolean() ? Boolean.TRUE : Boolean.FALSE;
     }
@@ -487,7 +470,6 @@ abstract public class Marshall {
     }
 
     public Value unmarshall(Env env, Object value)
-      throws Throwable
     {
       if (value == null)
         return NullValue.NULL;
@@ -511,13 +493,11 @@ abstract public class Marshall {
     }
 
     public Object marshall(Env env, Expr expr, Class expectedClass)
-      throws Throwable
     {
       return expr.evalBoolean(env) ? Boolean.TRUE : Boolean.FALSE;
     }
 
     public Object marshall(Env env, Value value, Class expectedClass)
-      throws Throwable
     {
       return value.toBoolean() ? Boolean.TRUE : Boolean.FALSE;
     }
@@ -531,7 +511,6 @@ abstract public class Marshall {
     }
 
     public Value unmarshall(Env env, Object value)
-      throws Throwable
     {
       if (value == null)
         return NullValue.NULL;
@@ -560,13 +539,11 @@ abstract public class Marshall {
     }
 
     public Object marshall(Env env, Expr expr, Class expectedClass)
-      throws Throwable
     {
       return new Byte((byte) expr.evalLong(env));
     }
 
     public Object marshall(Env env, Value value, Class expectedClass)
-      throws Throwable
     {
       return new Byte((byte) value.toLong());
     }
@@ -579,7 +556,6 @@ abstract public class Marshall {
     }
 
     public Value unmarshall(Env env, Object value)
-      throws Throwable
     {
       if (value == null)
         return LongValue.ZERO;
@@ -596,7 +572,6 @@ abstract public class Marshall {
 
   static final Marshall MARSHALL_BYTE_OBJECT = new Marshall() {
     public Object marshall(Env env, Expr expr, Class expectedClass)
-      throws Throwable
     {
       return new Byte((byte) expr.evalLong(env));
     }
@@ -607,7 +582,6 @@ abstract public class Marshall {
     }
 
     public Object marshall(Env env, Value value, Class expectedClass)
-      throws Throwable
     {
       return new Byte((byte) value.toLong());
     }
@@ -621,7 +595,6 @@ abstract public class Marshall {
     }
 
     public Value unmarshall(Env env, Object value)
-      throws Throwable
     {
       if (value == null)
         return LongValue.ZERO;
@@ -648,13 +621,11 @@ abstract public class Marshall {
     }
 
     public Object marshall(Env env, Expr expr, Class expectedClass)
-      throws Throwable
     {
       return new Short((short) expr.evalLong(env));
     }
 
     public Object marshall(Env env, Value value, Class expectedClass)
-      throws Throwable
     {
       return new Short((short) value.toLong());
     }
@@ -667,7 +638,6 @@ abstract public class Marshall {
     }
 
     public Value unmarshall(Env env, Object value)
-      throws Throwable
     {
       if (value == null)
         return LongValue.ZERO;
@@ -689,13 +659,11 @@ abstract public class Marshall {
     }
 
     public Object marshall(Env env, Expr expr, Class expectedClass)
-      throws Throwable
     {
       return new Short((short) expr.evalLong(env));
     }
 
     public Object marshall(Env env, Value value, Class expectedClass)
-      throws Throwable
     {
       return new Short((short) value.toLong());
     }
@@ -709,7 +677,6 @@ abstract public class Marshall {
     }
 
     public Value unmarshall(Env env, Object value)
-      throws Throwable
     {
       if (value == null)
         return LongValue.ZERO;
@@ -736,13 +703,11 @@ abstract public class Marshall {
     }
 
     public Object marshall(Env env, Expr expr, Class expectedClass)
-      throws Throwable
     {
       return new Integer((int) expr.evalLong(env));
     }
 
     public Object marshall(Env env, Value value, Class expectedClass)
-      throws Throwable
     {
       return new Integer((int) value.toLong());
     }
@@ -755,7 +720,6 @@ abstract public class Marshall {
     }
 
     public Value unmarshall(Env env, Object value)
-      throws Throwable
     {
       if (value == null)
         return LongValue.ZERO;
@@ -777,13 +741,11 @@ abstract public class Marshall {
     }
 
     public Object marshall(Env env, Expr expr, Class expectedClass)
-      throws Throwable
     {
       return new Integer((int) expr.evalLong(env));
     }
 
     public Object marshall(Env env, Value value, Class expectedClass)
-      throws Throwable
     {
       return new Integer((int) value.toLong());
     }
@@ -797,7 +759,6 @@ abstract public class Marshall {
     }
 
     public Value unmarshall(Env env, Object value)
-      throws Throwable
     {
       if (value == null)
         return LongValue.ZERO;
@@ -824,13 +785,11 @@ abstract public class Marshall {
     }
 
     public Object marshall(Env env, Expr expr, Class expectedClass)
-      throws Throwable
     {
       return new Long(expr.evalLong(env));
     }
 
     public Object marshall(Env env, Value value, Class expectedClass)
-      throws Throwable
     {
       return new Long(value.toLong());
     }
@@ -842,7 +801,6 @@ abstract public class Marshall {
     }
 
     public Value unmarshall(Env env, Object value)
-      throws Throwable
     {
       if (value == null)
         return LongValue.ZERO;
@@ -864,13 +822,11 @@ abstract public class Marshall {
     }
 
     public Object marshall(Env env, Expr expr, Class expectedClass)
-      throws Throwable
     {
       return new Long(expr.evalLong(env));
     }
 
     public Object marshall(Env env, Value value, Class expectedClass)
-      throws Throwable
     {
       return new Long(value.toLong());
     }
@@ -884,7 +840,6 @@ abstract public class Marshall {
     }
 
     public Value unmarshall(Env env, Object value)
-      throws Throwable
     {
       if (value == null)
         return LongValue.ZERO;
@@ -911,13 +866,11 @@ abstract public class Marshall {
     }
 
     public Object marshall(Env env, Expr expr, Class expectedClass)
-      throws Throwable
     {
       return new Float((float) expr.evalDouble(env));
     }
 
     public Object marshall(Env env, Value value, Class expectedClass)
-      throws Throwable
     {
       return new Float((float) value.toDouble());
     }
@@ -930,7 +883,6 @@ abstract public class Marshall {
     }
 
     public Value unmarshall(Env env, Object value)
-      throws Throwable
     {
       if (value == null)
         return DoubleValue.ZERO;
@@ -952,13 +904,11 @@ abstract public class Marshall {
     }
 
     public Object marshall(Env env, Expr expr, Class expectedClass)
-      throws Throwable
     {
       return new Float((float) expr.evalDouble(env));
     }
 
     public Object marshall(Env env, Value value, Class expectedClass)
-      throws Throwable
     {
       return new Float((float) value.toDouble());
     }
@@ -972,7 +922,6 @@ abstract public class Marshall {
     }
 
     public Value unmarshall(Env env, Object value)
-      throws Throwable
     {
       if (value == null)
         return DoubleValue.ZERO;
@@ -999,13 +948,11 @@ abstract public class Marshall {
     }
 
     public Object marshall(Env env, Expr expr, Class expectedClass)
-      throws Throwable
     {
       return new Double(expr.evalDouble(env));
     }
 
     public Object marshall(Env env, Value value, Class expectedClass)
-      throws Throwable
     {
       return new Double(value.toDouble());
     }
@@ -1017,7 +964,6 @@ abstract public class Marshall {
     }
 
     public Value unmarshall(Env env, Object value)
-      throws Throwable
     {
       if (value == null)
         return DoubleValue.ZERO;
@@ -1039,13 +985,11 @@ abstract public class Marshall {
     }
 
     public Object marshall(Env env, Expr expr, Class expectedClass)
-      throws Throwable
     {
       return new Double(expr.evalDouble(env));
     }
 
     public Object marshall(Env env, Value value, Class expectedClass)
-      throws Throwable
     {
       return new Double(value.toDouble());
     }
@@ -1059,7 +1003,6 @@ abstract public class Marshall {
     }
 
     public Value unmarshall(Env env, Object value)
-      throws Throwable
     {
       if (value == null)
         return DoubleValue.ZERO;
@@ -1081,13 +1024,11 @@ abstract public class Marshall {
     }
 
     public Object marshall(Env env, Expr expr, Class expectedClass)
-      throws Throwable
     {
       return new Character(expr.evalChar(env));
     }
 
     public Object marshall(Env env, Value value, Class expectedClass)
-      throws Throwable
     {
       return new Character(value.toChar());
     }
@@ -1099,7 +1040,6 @@ abstract public class Marshall {
     }
 
     public Value unmarshall(Env env, Object value)
-      throws Throwable
     {
       if (value == null)
         return NullValue.NULL;
@@ -1121,13 +1061,11 @@ abstract public class Marshall {
     }
 
     public Object marshall(Env env, Expr expr, Class expectedClass)
-      throws Throwable
     {
       return new Character(expr.evalChar(env));
     }
 
     public Object marshall(Env env, Value value, Class expectedClass)
-      throws Throwable
     {
       return new Character(value.toChar());
     }
@@ -1141,7 +1079,6 @@ abstract public class Marshall {
     }
 
     public Value unmarshall(Env env, Object value)
-      throws Throwable
     {
       if (value == null)
         return NullValue.NULL;
@@ -1168,14 +1105,12 @@ abstract public class Marshall {
     }
 
     public Object marshall(Env env, Expr expr, Class expectedClass)
-      throws Throwable
     {
       // quercus/0d1k
       return expr.evalRef(env);
     }
 
     public Value unmarshall(Env env, Object value)
-      throws Throwable
     {
       throw new UnsupportedOperationException();
     }
@@ -1200,19 +1135,16 @@ abstract public class Marshall {
     }
 
     public Object marshall(Env env, Expr expr, Class expectedClass)
-      throws Throwable
     {
       return env.getPwd().lookup(expr.evalString(env));
     }
 
     public Object marshall(Env env, Value value, Class expectedClass)
-      throws Throwable
     {
       return env.getPwd().lookup(value.toString());
     }
 
     public Value unmarshall(Env env, Object value)
-      throws Throwable
     {
       throw new UnsupportedOperationException();
     }
@@ -1239,19 +1171,16 @@ abstract public class Marshall {
     }
 
     public Object marshall(Env env, Expr expr, Class expectedClass)
-      throws Throwable
     {
       return expr.eval(env).toInputStream();
     }
 
     public Object marshall(Env env, Value value, Class expectedClass)
-      throws Throwable
     {
       return value.toInputStream();
     }
 
     public Value unmarshall(Env env, Object value)
-      throws Throwable
     {
       throw new UnsupportedOperationException();
     }
@@ -1277,13 +1206,11 @@ abstract public class Marshall {
     }
 
     public Object marshall(Env env, Expr expr, Class expectedClass)
-      throws Throwable
     {
       return marshall(env, expr.eval(env), expectedClass);
     }
 
     public Object marshall(Env env, Value value, Class expectedClass)
-      throws Throwable
     {
       Callback cb = env.createCallback(value);
 
@@ -1298,7 +1225,6 @@ abstract public class Marshall {
     }
 
     public Value unmarshall(Env env, Object value)
-      throws Throwable
     {
       throw new UnsupportedOperationException();
     }
@@ -1320,19 +1246,16 @@ abstract public class Marshall {
 
   static final Marshall MARSHALL_VOID = new Marshall() {
     public Object marshall(Env env, Expr expr, Class expectedClass)
-      throws Throwable
     {
       throw new UnsupportedOperationException();
     }
 
     public Object marshall(Env env, Value value, Class expectedClass)
-      throws Throwable
     {
       throw new UnsupportedOperationException();
     }
 
     public Value unmarshall(Env env, Object value)
-      throws Throwable
     {
       return NullValue.NULL;
     }

@@ -72,7 +72,6 @@ abstract public class CompiledFunction_4 extends CompiledFunction {
    * @return the user arguments augmented by any defaults
    */
   public Expr []bindArguments(Env env, Expr fun, Expr []args)
-    throws Exception
   {
     if (args.length > 4)
       log.fine(L.l(env.getLocation().getMessagePrefix() + "incorrect number of arguments" + env.getFunctionLocation()));
@@ -81,7 +80,6 @@ abstract public class CompiledFunction_4 extends CompiledFunction {
   }
 
   public Value eval(Env env, Value []argValues)
-    throws Throwable
   {
     switch (argValues.length) {
     case 0:
@@ -122,8 +120,7 @@ abstract public class CompiledFunction_4 extends CompiledFunction {
   /**
    * Evaluates the function with arguments
    */
-  abstract public Value eval(Env env, Value a1, Value a2, Value a3, Value a4)
-    throws Throwable;
+  abstract public Value eval(Env env, Value a1, Value a2, Value a3, Value a4);
 
   public String toString()
   {

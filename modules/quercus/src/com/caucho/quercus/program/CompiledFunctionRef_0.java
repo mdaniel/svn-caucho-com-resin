@@ -72,7 +72,6 @@ abstract public class CompiledFunctionRef_0 extends CompiledFunctionRef {
    * @return the user arguments augmented by any defaults
    */
   public Expr []bindArguments(Env env, Expr fun, Expr []args)
-    throws Exception
   {
     if (args.length != 0)
       env.warning(L.l("too many arguments"));
@@ -81,13 +80,11 @@ abstract public class CompiledFunctionRef_0 extends CompiledFunctionRef {
   }
 
   public Value evalRef(Env env, Value []argValues)
-    throws Throwable
   {
     return evalRef(env);
   }
 
-  abstract public Value evalRef(Env env)
-    throws Throwable;
+  abstract public Value evalRef(Env env);
   
   public String toString()
   {

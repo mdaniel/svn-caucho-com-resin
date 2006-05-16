@@ -63,7 +63,6 @@ public class IfStatement extends Statement {
    * Executes the 'if' statement, returning any value.
    */
   public Value execute(Env env)
-    throws Throwable
   {
     if (_test.evalBoolean(env)) {
       return _trueBlock.execute(env);

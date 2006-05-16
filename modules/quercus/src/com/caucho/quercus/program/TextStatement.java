@@ -33,6 +33,7 @@ import java.io.IOException;
 
 import com.caucho.java.JavaWriter;
 
+import com.caucho.quercus.QuercusException;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.gen.PhpWriter;
@@ -57,13 +58,15 @@ public class TextStatement extends Statement {
   }
   
   public Value execute(Env env)
-    throws Throwable
   {
     try {
       env.getOut().print(_value);
     }
-    catch (Throwable t) {
-      rethrow(t);
+    catch (RuntimeException e) {
+      rethrow(e, RuntimeException.class);
+    }
+    catch (IOException e) {
+      throw new QuercusException(e);
     }
 
     return null;

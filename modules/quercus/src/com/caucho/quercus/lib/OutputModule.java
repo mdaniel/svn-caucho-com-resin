@@ -55,7 +55,7 @@ public class OutputModule extends AbstractQuercusModule {
    * Sets the implicit flush.
    */
   public Value flush(Env env)
-    throws Throwable
+    throws java.io.IOException
   {
     env.getOut().flush();
 
@@ -66,7 +66,6 @@ public class OutputModule extends AbstractQuercusModule {
    * Clears the output buffer
    */
   public static Value ob_clean(Env env)
-    throws Throwable
   {
     OutputBuffer ob = env.getOutputBuffer();
 
@@ -83,7 +82,6 @@ public class OutputModule extends AbstractQuercusModule {
    * Pops the output buffer
    */
   public static boolean ob_end_clean(Env env)
-    throws Throwable
   {
     OutputBuffer ob = env.getOutputBuffer();
 
@@ -97,7 +95,6 @@ public class OutputModule extends AbstractQuercusModule {
    * Pops the output buffer
    */
   public static boolean ob_end_flush(Env env)
-    throws Throwable
   {
     return env.popOutputBuffer();
   }
@@ -106,7 +103,6 @@ public class OutputModule extends AbstractQuercusModule {
    * Returns the contents of the output buffer
    */
   public static Value ob_get_clean(Env env)
-    throws Throwable
   {
     OutputBuffer ob = env.getOutputBuffer();
 
@@ -125,7 +121,6 @@ public class OutputModule extends AbstractQuercusModule {
    * Pushes the output buffer
    */
   public static Value ob_get_contents(Env env)
-    throws Throwable
   {
     OutputBuffer ob = env.getOutputBuffer();
 
@@ -139,7 +134,6 @@ public class OutputModule extends AbstractQuercusModule {
    * Pushes the output buffer
    */
   public static Value ob_get_length(Env env)
-    throws Throwable
   {
     OutputBuffer ob = env.getOutputBuffer();
 
@@ -153,7 +147,6 @@ public class OutputModule extends AbstractQuercusModule {
    * Clears the output buffer
    */
   public static Value ob_implicit_flush(Env env, @Optional int flag)
-    throws Throwable
   {
     // XXX: stubbed out
 
@@ -167,7 +160,6 @@ public class OutputModule extends AbstractQuercusModule {
                           @Optional Callback callback,
                           @Optional int chunkSize,
                           @Optional boolean erase)
-    throws Throwable
   {
     env.pushOutputBuffer(callback, chunkSize, erase);
 

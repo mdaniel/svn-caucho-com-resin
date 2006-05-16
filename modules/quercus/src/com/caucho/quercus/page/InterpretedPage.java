@@ -65,10 +65,8 @@ public class InterpretedPage extends QuercusPage {
    * Execute the program
    *
    * @param env the calling environment
-   * @throws Throwable
    */
   public Value execute(Env env)
-    throws Throwable
   {
     return _program.execute(env);
   }
@@ -101,7 +99,6 @@ public class InterpretedPage extends QuercusPage {
    * Imports the page definitions.
    */
   public void importDefinitions(Env env)
-    throws Throwable
   {
     _program.importDefinitions(env);
   }

@@ -33,6 +33,7 @@ import java.io.IOException;
 
 import java.util.ArrayList;
 
+import com.caucho.quercus.QuercusException;
 import com.caucho.quercus.gen.PhpWriter;
 
 import com.caucho.quercus.env.Env;
@@ -115,13 +116,11 @@ public class StaticMethodExpr extends Expr {
    * @return the expression value.
    */
   public Value eval(Env env)
-    throws Throwable
   {
     QuercusClass cl = env.findClass(_className);
 
     if (cl == null) {
-      // XXX: change exception
-      throw new Exception(L.l("no matching class {0}", _className));
+      throw new QuercusException(L.l("no matching class {0}", _className));
     }
 
     // qa/0954 - what appears to be a static call may be a call to a super constructor

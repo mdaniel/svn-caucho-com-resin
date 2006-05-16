@@ -83,7 +83,7 @@ public class SimpleXMLElementArray extends ArrayValueImpl {
    */
   @Override
   public void print(Env env)
-    throws Throwable
+    throws java.io.IOException
   {
     super.get(new LongValue(0)).print(env);
   }

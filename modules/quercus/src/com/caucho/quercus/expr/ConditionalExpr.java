@@ -72,7 +72,6 @@ public class ConditionalExpr extends Expr {
    * @return the expression value.
    */
   public Value eval(Env env)
-    throws Throwable
   {
     if (_test.evalBoolean(env))
       return _trueExpr.eval(env);
@@ -88,7 +87,6 @@ public class ConditionalExpr extends Expr {
    * @return the expression value.
    */
   public boolean evalBoolean(Env env)
-    throws Throwable
   {
     if (_test.evalBoolean(env))
       return _trueExpr.evalBoolean(env);
@@ -104,7 +102,6 @@ public class ConditionalExpr extends Expr {
    * @return the expression value.
    */
   public Value evalCopy(Env env)
-    throws Throwable
   {
     if (_test.evalBoolean(env))
       return _trueExpr.evalCopy(env);

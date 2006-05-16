@@ -46,7 +46,6 @@ public class Shutdown {
    * Evaluate the shutdown function
    */
   public void eval(Env env)
-    throws Throwable
   {
     _callback.eval(env, _args);
   }

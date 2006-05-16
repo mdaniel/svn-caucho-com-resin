@@ -240,7 +240,6 @@ public class ArrayModule
    * Counts the values
    */
   public Value array_count_values(Env env, ArrayValue array)
-    throws Throwable
   {
     if (array == null)
       return NullValue.NULL;
@@ -449,7 +448,6 @@ public class ArrayModule
                           @ReadOnly ArrayValue array,
                           @Optional @ReadOnly Value searchValue,
                           @Optional boolean isStrict)
-    throws Throwable
   {
     if (array == null)
       return NullValue.NULL;
@@ -678,7 +676,6 @@ public class ArrayModule
   public Value array_rand(Env env,
                           ArrayValue array,
                           @Optional("1") long num)
-    throws Throwable
   {
     if (array == null)
       return NullValue.NULL;
@@ -826,7 +823,6 @@ public class ArrayModule
                             @ReadOnly Value needle,
                             @ReadOnly ArrayValue array,
                             @Optional("false") boolean strict)
-    throws Throwable
   {
     if (array == null)
       return BooleanValue.FALSE;
@@ -857,7 +853,6 @@ public class ArrayModule
    */
   public Value array_shift(Env env,
                            ArrayValue array)
-    throws Throwable
   {
     if (array == null)
       return NullValue.NULL;
@@ -1018,7 +1013,6 @@ public class ArrayModule
    */
   public Value array_unique(Env env,
                             ArrayValue array)
-    throws Throwable
   {
     if (array == null)
       return BooleanValue.FALSE;
@@ -1063,7 +1057,6 @@ public class ArrayModule
   public Value array_unshift(Env env,
                              ArrayValue array,
                              Value []values)
-    throws Throwable
   {
     if (array == null)
       return NullValue.NULL;
@@ -1155,7 +1148,6 @@ public class ArrayModule
    */
   private void arrayWalkImpl(Env env, Map.Entry<Value, Value> entry,
                              Value extra, AbstractFunction callback)
-    throws Throwable
   {
     callback.eval(env, entry.getValue(), entry.getKey(), extra);
   }
@@ -1213,7 +1205,6 @@ public class ArrayModule
    */
   public boolean arsort(Env env, ArrayValue array,
                         @Optional long sortFlag)
-    throws Throwable
   {
     if (array == null)
       return false;
@@ -1249,7 +1240,6 @@ public class ArrayModule
    */
   public boolean asort(Env env, ArrayValue array,
                        @Optional long sortFlag)
-    throws Throwable
   {
     if (array == null)
       return false;
@@ -1285,7 +1275,6 @@ public class ArrayModule
    */
   public boolean ksort(Env env, ArrayValue array,
                        @Optional long sortFlag)
-    throws Throwable
   {
     if (array == null)
       return false;
@@ -1321,7 +1310,6 @@ public class ArrayModule
    */
   public boolean krsort(Env env, ArrayValue array,
                         @Optional long sortFlag)
-    throws Throwable
   {
     if (array == null)
       return false;
@@ -1356,7 +1344,6 @@ public class ArrayModule
    * @throws ClassCastException if the elements are not mutually comparable
    */
   public Value natsort(ArrayValue array)
-    throws Throwable
   {
     if (array == null)
       return NullValue.NULL;
@@ -1377,7 +1364,6 @@ public class ArrayModule
    * @throws ClassCastException if the elements are not mutually comparable
    */
   public Value natcasesort(ArrayValue array)
-    throws Throwable
   {
     if (array == null)
       return NullValue.NULL;
@@ -1421,7 +1407,6 @@ public class ArrayModule
   public boolean in_array(@ReadOnly Value needle,
                           @ReadOnly ArrayValue stack,
                           @Optional("false") boolean strict)
-    throws Throwable
   {
     if (stack == null)
       return false;
@@ -1441,7 +1426,6 @@ public class ArrayModule
    * @throws ClassCastException if the elements are not mutually comparable
    */
   public boolean sort(Env env, ArrayValue array, @Optional long sortFlag)
-    throws Throwable
   {
     if (array == null)
       return false;
@@ -1476,7 +1460,6 @@ public class ArrayModule
    * @throws ClassCastException if the elements are not mutually comparable
    */
   public boolean rsort(Env env, ArrayValue array, @Optional long sortFlag)
-    throws Throwable
   {
     if (array == null)
       return false;
@@ -1516,7 +1499,6 @@ public class ArrayModule
                        ArrayValue array,
                        Callback func,
                        @Optional long sortFlag)
-    throws Throwable
   {
     if (array == null)
       return false;
@@ -1549,7 +1531,6 @@ public class ArrayModule
                         ArrayValue array,
                         Callback func,
                         @Optional long sortFlag)
-    throws Throwable
   {
     if (array == null)
       return false;
@@ -1579,7 +1560,6 @@ public class ArrayModule
                         ArrayValue array,
                         Callback func,
                         @Optional long sortFlag)
-    throws Throwable
   {
     if (array == null)
       return false;
@@ -1611,7 +1591,6 @@ public class ArrayModule
                      @ReadOnly Value start,
                      @ReadOnly Value end,
                      @Optional("1") long step)
-    throws Throwable
   {
     if (step < 1)
       step = 1;
@@ -1820,7 +1799,6 @@ public class ArrayModule
    *         not in the other arrays
    */
   public Value array_diff(Env env, ArrayValue array, Value []arrays)
-    throws Throwable
   {
     if (array == null)
       return NullValue.NULL;
@@ -1870,7 +1848,6 @@ public class ArrayModule
    *         not in the other arrays
    */
   public Value array_diff_assoc(Env env, ArrayValue array, Value []arrays)
-    throws Throwable
   {
     if (array == null)
       return NullValue.NULL;
@@ -1919,7 +1896,6 @@ public class ArrayModule
    *         not in the other arrays
    */
   public Value array_diff_key(Env env, ArrayValue array, Value []arrays)
-    throws Throwable
   {
     if (array == null)
       return NullValue.NULL;
@@ -1966,7 +1942,6 @@ public class ArrayModule
    *         not in the other arrays
    */
   public Value array_diff_uassoc(Env env, ArrayValue array, Value []arrays)
-    throws Throwable
   {
     if (array == null)
       return NullValue.NULL;
@@ -2027,7 +2002,6 @@ public class ArrayModule
    *         not in the other arrays
    */
   public Value array_diff_ukey(Env env, ArrayValue array, Value []arrays)
-    throws Throwable
   {
     if (array == null)
       return NullValue.NULL;
@@ -2090,7 +2064,6 @@ public class ArrayModule
    *         in the other arrays
    */
   public Value array_intersect(Env env, ArrayValue array, Value []arrays)
-    throws Throwable
   {
     if (array == null)
       return NullValue.NULL;
@@ -2140,7 +2113,6 @@ public class ArrayModule
    *         in the other arrays
    */
   public Value array_intersect_assoc(Env env, ArrayValue array, Value []arrays)
-    throws Throwable
   {
     if (array == null)
       return NullValue.NULL;
@@ -2196,7 +2168,6 @@ public class ArrayModule
    *         in the other arrays
    */
   public Value array_intersect_key(Env env, ArrayValue array, Value []arrays)
-    throws Throwable
   {
     if (array == null)
       return NullValue.NULL;
@@ -2247,7 +2218,6 @@ public class ArrayModule
    *         in the other arrays
    */
   public Value array_intersect_uassoc(Env env, ArrayValue array, Value []arrays)
-    throws Throwable
   {
     if (array == null)
       return NullValue.NULL;
@@ -2313,7 +2283,6 @@ public class ArrayModule
    *         in the other arrays
    */
   public Value array_intersect_ukey(Env env, ArrayValue array, Value []arrays)
-    throws Throwable
   {
     if (array == null)
       return NullValue.NULL;
@@ -2378,7 +2347,6 @@ public class ArrayModule
    */
   public Value array_map(Env env, Callback fun,
                          ArrayValue arg, Value []args)
-    throws Throwable
   {
     // quercus/1730
     Iterator<Map.Entry<Value, Value>> argIter = arg.entrySet().iterator();
@@ -2421,7 +2389,6 @@ public class ArrayModule
    * @return an array with all of the mapped values
    */
   public Value array_merge(Value []args)
-    throws Throwable
   {
     // quercus/1731
 
@@ -2457,7 +2424,6 @@ public class ArrayModule
    * @return an array with all of the mapped values
    */
   public Value array_merge_recursive(Value []args)
-    throws Throwable
   {
     // quercus/173a
 
@@ -2520,7 +2486,6 @@ public class ArrayModule
    * @return true on success, and false on failure
    */
   public boolean array_multisort(Env env, Value[] arrays)
-    throws Throwable
   {
     int maxsize = 0;
     for(int i=0; i<arrays.length; i++)
@@ -2565,7 +2530,6 @@ public class ArrayModule
   /*public Value asort(Env env,
 		     Value value,
 		     @Optional int mode)
-    throws Throwable
   {
     if (! (value instanceof ArrayValue)) {
       env.warning(L.l("asort requires array at '{0}'", value));
@@ -2586,7 +2550,6 @@ public class ArrayModule
   /*public Value ksort(Env env,
 		     Value value,
 		     @Optional int mode)
-    throws Throwable
   {
     if (! (value instanceof ArrayValue)) {
       env.warning(L.l("asort requires array at '{0}'", value));

@@ -60,7 +60,6 @@ public class ToStringExpr extends UnaryExpr {
    * @return the expression value.
    */
   public Value eval(Env env)
-    throws Throwable
   {
     Value value = _expr.eval(env).toValue();
 

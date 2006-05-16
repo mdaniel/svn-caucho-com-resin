@@ -70,7 +70,6 @@ public final class InstanceOfExpr extends UnaryExpr {
    * Evaluates the equality as a boolean.
    */
   public Value eval(Env env)
-    throws Throwable
   {
     return evalBoolean(env) ? BooleanValue.TRUE : BooleanValue.FALSE;
   }
@@ -79,7 +78,6 @@ public final class InstanceOfExpr extends UnaryExpr {
    * Evaluates the equality as a boolean.
    */
   public boolean evalBoolean(Env env)
-    throws Throwable
   {
     Value lValue = _expr.eval(env);
 

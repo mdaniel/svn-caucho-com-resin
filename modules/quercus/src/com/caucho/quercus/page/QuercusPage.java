@@ -110,10 +110,8 @@ abstract public class QuercusPage {
    * Execute the program as top-level, i.e. not included.
    *
    * @param env the calling environment
-   * @throws Throwable
    */
   public Value executeTop(Env env)
-    throws Throwable
   {
     Path oldPwd = env.getPwd();
 
@@ -140,10 +138,8 @@ abstract public class QuercusPage {
    * Execute the program
    *
    * @param env the calling environment
-   * @throws Throwable
    */
-  abstract public Value execute(Env env)
-    throws Throwable;
+  abstract public Value execute(Env env);
 
   /**
    * Initialize the program
@@ -151,7 +147,6 @@ abstract public class QuercusPage {
    * @param quercus the owning engine
    */
   public void init(Quercus quercus)
-    throws Throwable
   {
   }
 
@@ -168,7 +163,6 @@ abstract public class QuercusPage {
    * Imports the page definitions.
    */
   public void importDefinitions(Env env)
-    throws Throwable
   {
     for (Map.Entry<String,AbstractFunction> entry : _funMap.entrySet()) {
       AbstractFunction fun = entry.getValue();

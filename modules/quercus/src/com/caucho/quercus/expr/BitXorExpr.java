@@ -67,7 +67,6 @@ public class BitXorExpr extends BinaryExpr {
    * @return the expression value.
    */
   public Value eval(Env env)
-    throws Throwable
   {
     long lValue = _left.evalLong(env);
     long rValue = _right.evalLong(env);

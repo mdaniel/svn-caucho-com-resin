@@ -47,6 +47,7 @@ import com.caucho.util.ThreadPool;
 import com.caucho.java.JavaCompiler;
 
 import com.caucho.quercus.Quercus;
+import com.caucho.quercus.QuercusException;
 
 import com.caucho.quercus.gen.PhpGenerator;
 
@@ -232,20 +233,23 @@ public class PageManager {
   private QuercusPage createPage(Path path,
 			     QuercusProgram program,
 			     Class pageClass)
-    throws Throwable
   {
-    QuercusPage page = (QuercusPage) pageClass.newInstance();
-
-    page.init(_quercus);
-
-    Method selfPath = pageClass.getMethod("quercus_setSelfPath",
-					  new Class[] { Path.class });
-
-    selfPath.invoke(null, path);
-
-    program.setCompiledPage(page);
-
-    return page;
+    try {
+      QuercusPage page = (QuercusPage) pageClass.newInstance();
+      
+      page.init(_quercus);
+      
+      Method selfPath = pageClass.getMethod("quercus_setSelfPath",
+					    new Class[] { Path.class });
+      
+      selfPath.invoke(null, path);
+      
+      program.setCompiledPage(page);
+      
+      return page;
+    } catch (Exception e) {
+      throw new QuercusException(e);
+    }
   }
 
   public void close()

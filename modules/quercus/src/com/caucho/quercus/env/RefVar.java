@@ -35,6 +35,7 @@ import com.caucho.vfs.WriteStream;
 
 import java.util.Collection;
 import java.util.IdentityHashMap;
+import java.io.IOException;
 
 /**
  * Represents a reference to a PHP variable in a function call.
@@ -108,7 +109,6 @@ public class RefVar extends Value {
    * @param env
    */
   public String toString(Env env)
-    throws Throwable
   {
     return _var.toString(env);
   }
@@ -183,7 +183,6 @@ public class RefVar extends Value {
    * Negates the value.
    */
   public Value neg()
-    throws Throwable
   {
     return _var.neg();
   }
@@ -192,7 +191,6 @@ public class RefVar extends Value {
    * Adds to the following value.
    */
   public Value add(Value rValue)
-    throws Throwable
   {
     return _var.add(rValue);
   }
@@ -201,7 +199,6 @@ public class RefVar extends Value {
    * Adds to the following value.
    */
   public Value add(long rValue)
-    throws Throwable
   {
     return _var.add(rValue);
   }
@@ -210,7 +207,6 @@ public class RefVar extends Value {
    * Pre-increment the following value.
    */
   public Value preincr(int incr)
-    throws Throwable
   {
     return _var.preincr(incr);
   }
@@ -219,7 +215,6 @@ public class RefVar extends Value {
    * Post-increment the following value.
    */
   public Value postincr(int incr)
-    throws Throwable
   {
     return _var.postincr(incr);
   }
@@ -228,7 +223,6 @@ public class RefVar extends Value {
    * Subtracts to the following value.
    */
   public Value sub(Value rValue)
-    throws Throwable
   {
     return _var.sub(rValue);
   }
@@ -237,7 +231,6 @@ public class RefVar extends Value {
    * Multiplies to the following value.
    */
   public Value mul(Value rValue)
-    throws Throwable
   {
     return _var.mul(rValue);
   }
@@ -246,7 +239,6 @@ public class RefVar extends Value {
    * Multiplies to the following value.
    */
   public Value mul(long lValue)
-    throws Throwable
   {
     return _var.mul(lValue);
   }
@@ -255,7 +247,6 @@ public class RefVar extends Value {
    * Divides the following value.
    */
   public Value div(Value rValue)
-    throws Throwable
   {
     return _var.div(rValue);
   }
@@ -264,7 +255,6 @@ public class RefVar extends Value {
    * Shifts left by the value.
    */
   public Value lshift(Value rValue)
-    throws Throwable
   {
     return _var.lshift(rValue);
   }
@@ -273,7 +263,6 @@ public class RefVar extends Value {
    * Shifts right by the value.
    */
   public Value rshift(Value rValue)
-    throws Throwable
   {
     return _var.rshift(rValue);
   }
@@ -282,7 +271,6 @@ public class RefVar extends Value {
    * Returns true for equality
    */
   public boolean eql(Value rValue, Env env)
-    throws Throwable
   {
     return _var.equals(rValue.toValue());
   }
@@ -365,7 +353,6 @@ public class RefVar extends Value {
    * Evaluates a method.
    */
   public Value evalMethod(Env env, String methodName, Expr []args)
-    throws Throwable
   {
     return _var.evalMethod(env, methodName, args);
   }
@@ -374,7 +361,6 @@ public class RefVar extends Value {
    * Evaluates a method.
    */
   public Value evalMethod(Env env, String methodName, Value []args)
-    throws Throwable
   {
     return _var.evalMethod(env, methodName, args);
   }
@@ -383,7 +369,6 @@ public class RefVar extends Value {
    * Evaluates a method.
    */
   public Value evalMethod(Env env, String methodName)
-    throws Throwable
   {
     return _var.evalMethod(env, methodName);
   }
@@ -392,7 +377,6 @@ public class RefVar extends Value {
    * Evaluates a method.
    */
   public Value evalMethod(Env env, String methodName, Value a0)
-    throws Throwable
   {
     return _var.evalMethod(env, methodName, a0);
   }
@@ -401,7 +385,6 @@ public class RefVar extends Value {
    * Evaluates a method.
    */
   public Value evalMethod(Env env, String methodName, Value a0, Value a1)
-    throws Throwable
   {
     return _var.evalMethod(env, methodName, a0, a1);
   }
@@ -411,7 +394,6 @@ public class RefVar extends Value {
    */
   public Value evalMethod(Env env, String methodName,
 			  Value a0, Value a1, Value a2)
-    throws Throwable
   {
     return _var.evalMethod(env, methodName, a0, a1, a2);
   }
@@ -421,7 +403,6 @@ public class RefVar extends Value {
    */
   public Value evalMethod(Env env, String methodName,
 			  Value a0, Value a1, Value a2, Value a3)
-    throws Throwable
   {
     return _var.evalMethod(env, methodName, a0, a1, a2, a3);
   }
@@ -431,7 +412,6 @@ public class RefVar extends Value {
    */
   public Value evalMethod(Env env, String methodName,
 			  Value a0, Value a1, Value a2, Value a3, Value a4)
-    throws Throwable
   {
     return _var.evalMethod(env, methodName, a0, a1, a2, a3, a4);
   }
@@ -440,7 +420,6 @@ public class RefVar extends Value {
    * Evaluates a method.
    */
   public Value evalMethodRef(Env env, String methodName, Expr []args)
-    throws Throwable
   {
     return _var.evalMethodRef(env, methodName, args);
   }
@@ -449,7 +428,6 @@ public class RefVar extends Value {
    * Evaluates a method.
    */
   public Value evalMethodRef(Env env, String methodName, Value []args)
-    throws Throwable
   {
     return _var.evalMethodRef(env, methodName, args);
   }
@@ -458,7 +436,6 @@ public class RefVar extends Value {
    * Evaluates a method.
    */
   public Value evalMethodRef(Env env, String methodName)
-    throws Throwable
   {
     return _var.evalMethodRef(env, methodName);
   }
@@ -467,7 +444,6 @@ public class RefVar extends Value {
    * Evaluates a method.
    */
   public Value evalMethodRef(Env env, String methodName, Value a0)
-    throws Throwable
   {
     return _var.evalMethodRef(env, methodName, a0);
   }
@@ -476,7 +452,6 @@ public class RefVar extends Value {
    * Evaluates a method.
    */
   public Value evalMethodRef(Env env, String methodName, Value a0, Value a1)
-    throws Throwable
   {
     return _var.evalMethodRef(env, methodName, a0, a1);
   }
@@ -486,7 +461,6 @@ public class RefVar extends Value {
    */
   public Value evalMethodRef(Env env, String methodName,
 			  Value a0, Value a1, Value a2)
-    throws Throwable
   {
     return _var.evalMethodRef(env, methodName, a0, a1, a2);
   }
@@ -496,7 +470,6 @@ public class RefVar extends Value {
    */
   public Value evalMethodRef(Env env, String methodName,
 			  Value a0, Value a1, Value a2, Value a3)
-    throws Throwable
   {
     return _var.evalMethodRef(env, methodName, a0, a1, a2, a3);
   }
@@ -506,7 +479,6 @@ public class RefVar extends Value {
    */
   public Value evalMethodRef(Env env, String methodName,
 			  Value a0, Value a1, Value a2, Value a3, Value a4)
-    throws Throwable
   {
     return _var.evalMethodRef(env, methodName, a0, a1, a2, a3, a4);
   }
@@ -515,7 +487,6 @@ public class RefVar extends Value {
    * Evaluates a method.
    */
   public Value evalClassMethod(Env env, AbstractFunction fun, Value []args)
-    throws Throwable
   {
     return _var.evalClassMethod(env, fun, args);
   }
@@ -525,7 +496,7 @@ public class RefVar extends Value {
    * @param env
    */
   public void print(Env env)
-    throws Throwable
+    throws IOException
   {
     _var.print(env);
   }
@@ -534,7 +505,7 @@ public class RefVar extends Value {
                           WriteStream out,
                           int depth,
                           IdentityHashMap<Value,String> valueSet)
-    throws Throwable
+    throws IOException
   {
     out.print("&");
     toValue().varDumpImpl(env, out, depth, valueSet);
@@ -544,7 +515,7 @@ public class RefVar extends Value {
                             WriteStream out,
                             int depth,
                             IdentityHashMap<Value, String> valueSet)
-    throws Throwable
+    throws IOException
   {
     toValue().printRImpl(env, out, depth, valueSet);
   }

@@ -30,6 +30,7 @@
 package com.caucho.quercus.env;
 
 import com.caucho.vfs.WriteStream;
+import java.io.IOException;
 
 import java.util.IdentityHashMap;
 
@@ -54,7 +55,7 @@ public class ResourceValue extends Value {
                              WriteStream out,
                              int depth,
                              IdentityHashMap<Value, String> valueSet)
-    throws Throwable
+    throws IOException
   {
     out.print("resource(" + toString(env) + ")");
   }
@@ -64,7 +65,7 @@ public class ResourceValue extends Value {
                             WriteStream out,
                             int depth,
                             IdentityHashMap<Value, String> valueSet)
-  throws Throwable
+    throws IOException
   {
     out.print("resource(" + toString(env) + ")");
   }

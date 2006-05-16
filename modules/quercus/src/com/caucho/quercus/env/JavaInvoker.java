@@ -30,6 +30,7 @@
 package com.caucho.quercus.env;
 
 import com.caucho.quercus.Quercus;
+import com.caucho.quercus.QuercusException;
 import com.caucho.quercus.expr.DefaultExpr;
 import com.caucho.quercus.expr.Expr;
 import com.caucho.quercus.expr.NullLiteralExpr;
@@ -222,7 +223,6 @@ abstract public class JavaInvoker
    * @return the user arguments augmented by any defaults
    */
   public Expr []bindArguments(Env env, Expr fun, Expr []args)
-    throws Exception
   {
     if (_defaultExprs.length == args.length)
       return args;
@@ -280,13 +280,11 @@ abstract public class JavaInvoker
   }
 
   public Value eval(Env env, Value []value)
-    throws Throwable
   {
     return eval(env, env.getThis(), value);
   }
 
   public Value eval(Env env, Object obj, Expr []exprs)
-    throws Throwable
   {
     int len = _defaultExprs.length + (_hasEnv ? 1 : 0) + (_hasRestArgs ? 1 : 0);
 
@@ -336,20 +334,11 @@ abstract public class JavaInvoker
       values[values.length - 1] = rest;
     }
 
-    try {
-      Object result = invoke(obj, values);
-
-      return _unmarshallReturn.unmarshall(env, result);
-    } catch (InvocationTargetException e) {
-      if (e.getCause() != null)
-        throw e.getCause();
-      else
-        throw e;
-    }
+    Object result = invoke(obj, values);
+    return _unmarshallReturn.unmarshall(env, result);
   }
 
   public Value eval(Env env, Object obj, Value []args)
-    throws Throwable
   {
     int len = _defaultExprs.length + (_hasEnv ? 1 : 0) + (_hasRestArgs ? 1 : 0);
 
@@ -399,52 +388,38 @@ abstract public class JavaInvoker
       values[values.length - 1] = rest;
     }
 
-    try {
-      Object result = invoke(obj, values);
-
-      return _unmarshallReturn.unmarshall(env, result);
-    } catch (InvocationTargetException e) {
-      if (e.getCause() != null)
-        throw e.getCause();
-      else
-        throw e;
-    }
+    Object result = invoke(obj, values);
+    return _unmarshallReturn.unmarshall(env, result);
   }
 
   public Value eval(Env env, Object obj)
-    throws Throwable
   {
     return eval(env, obj, new Value[0]);
   }
 
   public Value eval(Env env, Object obj, Value a1)
-    throws Throwable
   {
     return eval(env, obj, new Value[]{a1});
   }
 
   public Value eval(Env env, Object obj, Value a1, Value a2)
-    throws Throwable
   {
     return eval(env, obj, new Value[]{a1, a2});
   }
 
   public Value eval(Env env, Object obj, Value a1, Value a2, Value a3)
-    throws Throwable
   {
     return eval(env, obj, new Value[]{a1, a2, a3});
   }
 
   public Value eval(Env env, Object obj,
                     Value a1, Value a2, Value a3, Value a4)
-    throws Throwable
   {
     return eval(env, obj, new Value[]{a1, a2, a3, a4});
   }
 
   public Value eval(Env env, Object obj,
                     Value a1, Value a2, Value a3, Value a4, Value a5)
-    throws Throwable
   {
     return eval(env, obj, new Value[]{a1, a2, a3, a4, a5});
   }
@@ -454,6 +429,5 @@ abstract public class JavaInvoker
     throw new UnsupportedOperationException();
   }
 
-  abstract public Object invoke(Object obj, Object []args)
-    throws Throwable;
+  abstract public Object invoke(Object obj, Object []args);
 }

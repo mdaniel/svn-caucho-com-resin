@@ -270,7 +270,7 @@ public class BooleanValue extends Value {
                           WriteStream out,
                           int depth,
                           IdentityHashMap<Value,String> valueSet)
-    throws Throwable
+    throws IOException
   {
     if (toBoolean())
       out.print("bool(true)");

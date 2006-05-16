@@ -29,6 +29,7 @@
 
 package com.caucho.quercus.env;
 
+import com.caucho.quercus.QuercusException;
 import java.io.IOException;
 
 import com.caucho.vfs.WriteStream;
@@ -55,9 +56,8 @@ public class NullThisValue extends NullValue {
    * Evaluates a method.
    */
   public Value evalMethod(Env env, String methodName, Value []args)
-    throws Throwable
   {
-    throw new Exception(L.l("$this value of NULL cannot dispatch to method '{0}'.", methodName));
+    throw new QuercusException(L.l("$this value of NULL cannot dispatch to method '{0}'.", methodName));
   }
 }
 

@@ -38,6 +38,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.annotation.Annotation;
 
 import com.caucho.quercus.Quercus;
+import com.caucho.quercus.QuercusException;
 
 import com.caucho.quercus.expr.Expr;
 import com.caucho.quercus.expr.NullLiteralExpr;
@@ -94,12 +95,11 @@ public class JavaMethod extends JavaInvoker {
   }
 
   public Object invoke(Object obj, Object []args)
-    throws Throwable
   {
     try {
       return _method.invoke(obj, args);
-    } catch (IllegalArgumentException e) {
-      throw new IllegalArgumentException(_method.getName() + ": " + e.getMessage());
+    } catch (Exception e) {
+      throw new QuercusException(_method.getName() + ": " + e.getMessage());
     }
   }
 

@@ -77,7 +77,6 @@ public class CallbackFunction extends Callback {
    * @param env the calling environment
    */
   public Value eval(Env env)
-    throws Throwable
   {
     return getFunction().eval(env);
   }
@@ -88,7 +87,6 @@ public class CallbackFunction extends Callback {
    * @param env the calling environment
    */
   public Value eval(Env env, Value a1)
-    throws Throwable
   {
     return getFunction().eval(env, a1);
   }
@@ -99,7 +97,6 @@ public class CallbackFunction extends Callback {
    * @param env the calling environment
    */
   public Value eval(Env env, Value a1, Value a2)
-    throws Throwable
   {
     return getFunction().eval(env, a1, a2);
   }
@@ -110,7 +107,6 @@ public class CallbackFunction extends Callback {
    * @param env the calling environment
    */
   public Value eval(Env env, Value a1, Value a2, Value a3)
-    throws Throwable
   {
     return getFunction().eval(env, a1, a2, a3);
   }
@@ -122,7 +118,6 @@ public class CallbackFunction extends Callback {
    */
   public Value eval(Env env, Value a1, Value a2, Value a3,
 			     Value a4)
-    throws Throwable
   {
     return getFunction().eval(env, a1, a2, a3, a4);
   }
@@ -134,13 +129,11 @@ public class CallbackFunction extends Callback {
    */
   public Value eval(Env env, Value a1, Value a2, Value a3,
 		    Value a4, Value a5)
-    throws Throwable
   {
     return getFunction().eval(env, a1, a2, a3, a4, a5);
   }
 
   public Value eval(Env env, Value []args)
-    throws Throwable
   {
     return getFunction().eval(env, args);
   }

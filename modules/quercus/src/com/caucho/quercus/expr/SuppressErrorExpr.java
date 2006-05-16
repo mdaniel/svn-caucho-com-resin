@@ -87,7 +87,6 @@ public class SuppressErrorExpr extends UnaryExpr {
    * @return the expression value.
    */
   public Value eval(Env env)
-    throws Throwable
   {
     int oldErrorMask = env.setErrorMask(0);
 
@@ -106,7 +105,6 @@ public class SuppressErrorExpr extends UnaryExpr {
    * @return the expression value.
    */
   public boolean evalBoolean(Env env)
-    throws Throwable
   {
     int oldErrorMask = env.setErrorMask(0);
 
@@ -125,7 +123,6 @@ public class SuppressErrorExpr extends UnaryExpr {
    * @return the expression value.
    */
   public String evalString(Env env)
-    throws Throwable
   {
     int oldErrorMask = env.setErrorMask(0);
 
@@ -144,7 +141,6 @@ public class SuppressErrorExpr extends UnaryExpr {
    * @return the expression value.
    */
   public Value evalCopy(Env env)
-    throws Throwable
   {
     int oldErrorMask = env.setErrorMask(0);
 

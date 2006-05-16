@@ -72,7 +72,6 @@ public class ArrayIsSetExpr extends Expr {
    * @return the expression value.
    */
   public Value eval(Env env)
-    throws Throwable
   {
     return evalBoolean(env) ? BooleanValue.TRUE : BooleanValue.FALSE;
   }
@@ -85,7 +84,6 @@ public class ArrayIsSetExpr extends Expr {
    * @return the expression value.
    */
   public boolean evalBoolean(Env env)
-    throws Throwable
   {
     Value array = _expr.evalArg(env);
     Value index = _index.eval(env);

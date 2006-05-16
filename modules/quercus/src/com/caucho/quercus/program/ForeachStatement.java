@@ -74,7 +74,6 @@ public class ForeachStatement
   }
 
   public Value execute(Env env)
-    throws Throwable
   {
     Value origObj = _objExpr.eval(env);
     Value obj = origObj.copy();

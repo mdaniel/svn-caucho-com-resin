@@ -68,7 +68,6 @@ public class StaticStatement extends Statement {
   }
   
   public Value execute(Env env)
-    throws Throwable
   {
     try {
       if (_staticName == null)
@@ -82,8 +81,8 @@ public class StaticStatement extends Statement {
         var.set(_initValue.eval(env));
 
     }
-    catch (Throwable t) {
-      rethrow(t);
+    catch (RuntimeException e) {
+      rethrow(e, RuntimeException.class);
     }
 
     return null;

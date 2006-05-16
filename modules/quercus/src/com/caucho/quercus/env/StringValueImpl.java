@@ -380,7 +380,6 @@ public class StringValueImpl extends StringValue {
    * Pre-increment the following value.
    */
   public Value preincr(int incr)
-    throws Throwable
   {
     return postincr(incr);
   }
@@ -389,7 +388,6 @@ public class StringValueImpl extends StringValue {
    * Post-increment the following value.
    */
   public Value postincr(int incr)
-    throws Throwable
   {
     if (incr > 0) {
       StringBuilder tail = new StringBuilder();

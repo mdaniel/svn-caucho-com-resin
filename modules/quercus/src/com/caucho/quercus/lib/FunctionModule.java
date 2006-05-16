@@ -31,10 +31,12 @@ package com.caucho.quercus.lib;
 
 import java.util.logging.Logger;
 import java.util.logging.Level;
+import java.io.IOException;
 
 import com.caucho.util.L10N;
 
 import com.caucho.quercus.Quercus;
+import com.caucho.quercus.QuercusException;
 
 import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.quercus.module.VariableArguments;
@@ -62,7 +64,6 @@ public class FunctionModule extends AbstractQuercusModule {
   public static Value call_user_func(Env env,
                                      Callback function,
                                      Value []args)
-    throws Throwable
   {
     return function.eval(env, args).copyReturn();
   }
@@ -73,7 +74,6 @@ public class FunctionModule extends AbstractQuercusModule {
   public static Value call_user_func_array(Env env,
                                            Callback function,
                                            Value arg)
-    throws Throwable
   {
     ArrayValue argArray;
 
@@ -106,14 +106,17 @@ public class FunctionModule extends AbstractQuercusModule {
   public static Value create_function(Env env,
                                       String args,
                                       String code)
-    throws Throwable
   {
     if (log.isLoggable(Level.FINER))
       log.finer(code);
 
-    Quercus quercus = env.getQuercus();
-
-    return quercus.parseFunction(args, code);
+    try {
+      Quercus quercus = env.getQuercus();
+      
+      return quercus.parseFunction(args, code);
+    } catch (IOException e) {
+      throw new QuercusException(e);
+    }
   }
 
   /**

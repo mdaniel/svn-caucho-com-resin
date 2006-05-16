@@ -59,7 +59,6 @@ public class ToBooleanExpr extends UnaryExpr {
    * @return the expression value.
    */
   public Value eval(Env env)
-    throws Throwable
   {
     return _expr.evalBoolean(env) ? BooleanValue.TRUE : BooleanValue.FALSE;
   }

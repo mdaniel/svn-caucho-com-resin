@@ -161,7 +161,6 @@ abstract public class Value {
    * @param env
    */
   public String toString(Env env)
-    throws Throwable
   {
     return toString();
   }
@@ -427,7 +426,6 @@ abstract public class Value {
    * Evaluates a method.
    */
   public Value evalMethod(Env env, String methodName, Expr []args)
-    throws Throwable
   {
     Value []value = new Value[args.length];
 
@@ -442,7 +440,6 @@ abstract public class Value {
    * Evaluates a method.
    */
   public Value evalMethod(Env env, String methodName, Value []args)
-    throws Throwable
   {
     switch (args.length) {
     case 0:
@@ -474,7 +471,6 @@ abstract public class Value {
    * Evaluates a method with 0 args.
    */
   public Value evalMethod(Env env, String methodName)
-    throws Throwable
   {
     return errorNoMethod(env, methodName);
   }
@@ -483,7 +479,6 @@ abstract public class Value {
    * Evaluates a method with 1 arg.
    */
   public Value evalMethod(Env env, String methodName, Value a0)
-    throws Throwable
   {
     return errorNoMethod(env, methodName);
   }
@@ -492,7 +487,6 @@ abstract public class Value {
    * Evaluates a method with 1 arg.
    */
   public Value evalMethod(Env env, String methodName, Value a0, Value a1)
-    throws Throwable
   {
     return errorNoMethod(env, methodName);
   }
@@ -502,7 +496,6 @@ abstract public class Value {
    */
   public Value evalMethod(Env env, String methodName,
 			  Value a0, Value a1, Value a2)
-    throws Throwable
   {
     return errorNoMethod(env, methodName);
   }
@@ -512,7 +505,6 @@ abstract public class Value {
    */
   public Value evalMethod(Env env, String methodName,
 			  Value a0, Value a1, Value a2, Value a3)
-    throws Throwable
   {
     return errorNoMethod(env, methodName);
   }
@@ -522,7 +514,6 @@ abstract public class Value {
    */
   public Value evalMethod(Env env, String methodName,
 			  Value a0, Value a1, Value a2, Value a3, Value a5)
-    throws Throwable
   {
     return errorNoMethod(env, methodName);
   }
@@ -537,7 +528,6 @@ abstract public class Value {
    * Evaluates a method.
    */
   public Value evalMethodRef(Env env, String methodName, Expr []args)
-    throws Throwable
   {
     Value []value = new Value[args.length];
 
@@ -552,7 +542,6 @@ abstract public class Value {
    * Evaluates a method.
    */
   public Value evalMethodRef(Env env, String methodName, Value []args)
-    throws Throwable
   {
     switch (args.length) {
     case 0:
@@ -585,7 +574,6 @@ abstract public class Value {
    * Evaluates a method with 0 args.
    */
   public Value evalMethodRef(Env env, String methodName)
-    throws Throwable
   {
     return env.error(L.l("{0}: '{1}' is an unknown method.",
 			 toString(), methodName));
@@ -595,7 +583,6 @@ abstract public class Value {
    * Evaluates a method with 1 arg.
    */
   public Value evalMethodRef(Env env, String methodName, Value a0)
-    throws Throwable
   {
     return env.error(L.l("{0}: '{1}' is an unknown method.",
 			 toString(), methodName));
@@ -605,7 +592,6 @@ abstract public class Value {
    * Evaluates a method with 1 arg.
    */
   public Value evalMethodRef(Env env, String methodName, Value a0, Value a1)
-    throws Throwable
   {
     return env.error(L.l("{0}: '{1}' is an unknown method.",
 			 toString(), methodName));
@@ -616,7 +602,6 @@ abstract public class Value {
    */
   public Value evalMethodRef(Env env, String methodName,
 			  Value a0, Value a1, Value a2)
-    throws Throwable
   {
     return env.error(L.l("{0}: '{1}' is an unknown method.",
 			 toString(), methodName));
@@ -627,7 +612,6 @@ abstract public class Value {
    */
   public Value evalMethodRef(Env env, String methodName,
 			  Value a0, Value a1, Value a2, Value a3)
-    throws Throwable
   {
     return env.error(L.l("{0}: '{1}' is an unknown method.",
 			 toString(), methodName));
@@ -638,7 +622,6 @@ abstract public class Value {
    */
   public Value evalMethodRef(Env env, String methodName,
 			  Value a0, Value a1, Value a2, Value a3, Value a5)
-    throws Throwable
   {
     return env.error(L.l("{0}: '{1}' is an unknown method.",
 			 toString(), methodName));
@@ -648,7 +631,6 @@ abstract public class Value {
    * Evaluates a method.
    */
   public Value evalClassMethod(Env env, AbstractFunction fun, Value []args)
-    throws Throwable
   {
     return NullValue.NULL;
   }
@@ -657,7 +639,6 @@ abstract public class Value {
    * Returns true for equality
    */
   public Value eqValue(Value rValue)
-    throws Throwable
   {
     return eq(rValue) ? BooleanValue.TRUE : BooleanValue.FALSE;
   }
@@ -679,7 +660,6 @@ abstract public class Value {
    * Returns true for equality
    */
   public boolean eql(Value rValue)
-    throws Throwable
   {
     return this == rValue.toValue();
   }
@@ -747,7 +727,6 @@ abstract public class Value {
    * Returns true for less than or equal to
    */
   public final boolean leq(Value rValue)
-    throws Throwable
   {
     return cmp(rValue)<=0;
   }
@@ -764,7 +743,6 @@ abstract public class Value {
    * Returns true for greater than or equal to
    */
   public final boolean geq(Value rValue)
-    throws Throwable
   {
     return cmp(rValue)>=0;
   }
@@ -773,7 +751,6 @@ abstract public class Value {
    * Negates the value.
    */
   public Value neg()
-    throws Throwable
   {
     return new LongValue(- toLong());
   }
@@ -782,7 +759,6 @@ abstract public class Value {
    * Negates the value.
    */
   public Value pos()
-    throws Throwable
   {
     return new LongValue(toLong());
   }
@@ -791,7 +767,6 @@ abstract public class Value {
    * Adds to the following value.
    */
   public Value add(Value rValue)
-    throws Throwable
   {
     return new DoubleValue(toDouble() + rValue.toDouble());
   }
@@ -800,7 +775,6 @@ abstract public class Value {
    * Multiplies to the following value.
    */
   public Value add(long lLong)
-    throws Throwable
   {
     return new DoubleValue(lLong + toDouble());
   }
@@ -809,7 +783,6 @@ abstract public class Value {
    * Pre-increment the following value.
    */
   public Value preincr(int incr)
-    throws Throwable
   {
     long lValue = toLong();
 
@@ -820,7 +793,6 @@ abstract public class Value {
    * Post-increment the following value.
    */
   public Value postincr(int incr)
-    throws Throwable
   {
     long lValue = toLong();
 
@@ -831,7 +803,6 @@ abstract public class Value {
    * Subtracts to the following value.
    */
   public Value sub(Value rValue)
-    throws Throwable
   {
     double lDouble = toDouble();
     double rDouble = rValue.toDouble();
@@ -843,7 +814,6 @@ abstract public class Value {
    * Subtracts
    */
   public Value sub(long rLong)
-    throws Throwable
   {
     return new DoubleValue(toDouble() - rLong);
   }
@@ -852,7 +822,6 @@ abstract public class Value {
    * Substracts from the previous value.
    */
   public Value sub_rev(long lLong)
-    throws Throwable
   {
     return new DoubleValue(lLong - toDouble());
   }
@@ -861,7 +830,6 @@ abstract public class Value {
    * Multiplies to the following value.
    */
   public Value mul(Value rValue)
-    throws Throwable
   {
     return new DoubleValue(toDouble() * rValue.toDouble());
   }
@@ -870,7 +838,6 @@ abstract public class Value {
    * Multiplies to the following value.
    */
   public Value mul(long lLong)
-    throws Throwable
   {
     return new DoubleValue(toDouble() * lLong);
   }
@@ -879,7 +846,6 @@ abstract public class Value {
    * Divides the following value.
    */
   public Value div(Value rValue)
-    throws Throwable
   {
     double lDouble = toDouble();
     double rDouble = rValue.toDouble();
@@ -891,7 +857,6 @@ abstract public class Value {
    * modulo the following value.
    */
   public Value mod(Value rValue)
-    throws Throwable
   {
     double lDouble = toDouble();
     double rDouble = rValue.toDouble();
@@ -903,7 +868,6 @@ abstract public class Value {
    * Shifts left by the value.
    */
   public Value lshift(Value rValue)
-    throws Throwable
   {
     long lLong = toLong();
     long rLong = rValue.toLong();
@@ -915,7 +879,6 @@ abstract public class Value {
    * Shifts right by the value.
    */
   public Value rshift(Value rValue)
-    throws Throwable
   {
     long lLong = toLong();
     long rLong = rValue.toLong();
@@ -1222,7 +1185,7 @@ abstract public class Value {
    * @param env
    */
   public void print(Env env)
-    throws Throwable
+    throws IOException
   {
     env.getOut().print(toString(env));
   }
@@ -1275,7 +1238,7 @@ abstract public class Value {
                             WriteStream out,
                             int depth,
                             IdentityHashMap<Value, String> valueSet)
-    throws Throwable
+    throws IOException
   {
     if (valueSet.get(this) != null) {
        out.print("#recursion#");
@@ -1296,7 +1259,7 @@ abstract public class Value {
                              WriteStream out,
                              int depth,
                              IdentityHashMap<Value, String> valueSet)
-    throws Throwable
+    throws IOException
   {
     out.print(toString());
   }
@@ -1305,7 +1268,7 @@ abstract public class Value {
                            WriteStream out,
                            int depth,
                            IdentityHashMap<Value, String> valueSet)
-    throws Throwable
+    throws IOException
   {
     if (valueSet.get(this) != null) {
       out.print("#recursion#");
@@ -1326,7 +1289,7 @@ abstract public class Value {
                             WriteStream out,
                             int depth,
                             IdentityHashMap<Value, String> valueSet)
-    throws Throwable
+    throws IOException
   {
     out.print(toString());
   }

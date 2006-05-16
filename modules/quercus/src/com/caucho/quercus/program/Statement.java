@@ -72,8 +72,7 @@ abstract public class Statement {
     return _location;
   }
 
-  abstract public Value execute(Env env)
-    throws Throwable;
+  abstract public Value execute(Env env);
 
   final protected void rethrow(Throwable t)
     throws Throwable

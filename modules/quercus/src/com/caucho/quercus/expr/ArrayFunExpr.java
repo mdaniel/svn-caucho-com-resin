@@ -104,7 +104,6 @@ public class ArrayFunExpr extends Expr {
    * @return the expression value.
    */
   public Value eval(Env env)
-    throws Throwable
   {
     ArrayValue array = new ArrayValueImpl();
 

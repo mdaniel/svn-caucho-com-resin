@@ -74,7 +74,6 @@ abstract public class CompiledMethodRef_1 extends CompiledMethodRef {
    * @return the user arguments augmented by any defaults
    */
   public Expr []bindArguments(Env env, Expr fun, Expr []args)
-    throws Exception
   {
     if (args.length != 1)
       env.warning(L.l("incorrect"));
@@ -86,7 +85,6 @@ abstract public class CompiledMethodRef_1 extends CompiledMethodRef {
    * Evaluates the method with the given variable arguments.
    */
   public Value evalMethodRef(Env env, Value obj, Value []argValues)
-    throws Throwable
   {
     switch (argValues.length) {
     case 0:
@@ -97,14 +95,12 @@ abstract public class CompiledMethodRef_1 extends CompiledMethodRef {
     }
   }
 
-  abstract public Value evalMethodRef(Env env, Value obj, Value a1)
-    throws Throwable;
+  abstract public Value evalMethodRef(Env env, Value obj, Value a1);
 
   /**
    * Evaluates the method as a static function
    */
   public Value eval(Env env, Value []argValues)
-    throws Throwable
   {
     env.warning(L.l("can't call '{0}' as a static function", _name));
 
