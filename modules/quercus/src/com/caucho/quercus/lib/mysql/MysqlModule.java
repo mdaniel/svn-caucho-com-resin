@@ -200,7 +200,7 @@ public class MysqlModule extends AbstractQuercusModule {
     if (databaseName == null)
       return false;
 
-    return mysql_query(env, "DROP DATABASE " + databaseName, conn) != BooleanValue.FALSE;
+    return mysql_query(env, "DROP DATABASE " + databaseName, conn) != null;
   }
 
   /**
@@ -369,7 +369,7 @@ public class MysqlModule extends AbstractQuercusModule {
   /**
    * Executes a query and returns a result set.
    */
-  public Value mysql_query(Env env, String sql, @Optional Mysqli conn)
+  public Object mysql_query(Env env, String sql, @Optional Mysqli conn)
   {
     if (conn == null)
       conn = getConnection(env);
@@ -450,10 +450,10 @@ public class MysqlModule extends AbstractQuercusModule {
 
     Mysqli conn = getConnection(env);
 
-    Value metaResult = conn.validateConnection().query(sql);
+    Object metaResult = conn.validateConnection().query(sql);
 
-    if (metaResult instanceof JdbcResultResource)
-      return ((JdbcResultResource) metaResult).getFieldFlags();
+    if (metaResult instanceof MysqliResult) // JdbcResultResource)
+      return (((MysqliResult) metaResult).validateResult()).getFieldFlags();
 
     return BooleanValue.FALSE;
   }
@@ -619,16 +619,16 @@ public class MysqlModule extends AbstractQuercusModule {
   /**
    * Retrieves information about the given table name
    */
-  public Value mysql_list_fields(Env env,
-                                 @NotNull String databaseName,
-                                 @NotNull String tableName,
-                                 @Optional Mysqli conn)
+  public Object mysql_list_fields(Env env,
+                                  @NotNull String databaseName,
+                                  @NotNull String tableName,
+                                  @Optional Mysqli conn)
   {
     if (databaseName == null)
-      return BooleanValue.FALSE;
+      return null; // BooleanValue.FALSE;
 
     if (tableName == null)
-      return BooleanValue.FALSE;
+      return null; // BooleanValue.FALSE;
 
     return mysql_db_query(env,
                           databaseName,
@@ -639,22 +639,22 @@ public class MysqlModule extends AbstractQuercusModule {
   /**
    * Returns result set or false on error
    */
-  public Value mysql_db_query(Env env,
-                              @NotNull String databaseName,
-                              @NotNull String query,
-                              @Optional Mysqli conn)
+  public Object mysql_db_query(Env env,
+                               @NotNull String databaseName,
+                               @NotNull String query,
+                               @Optional Mysqli conn)
   {
     if (databaseName == null)
-      return BooleanValue.FALSE;
+      return null; // BooleanValue.FALSE;
 
     if (query == null)
-      return BooleanValue.FALSE;
+      return null; // BooleanValue.FALSE;
 
     if (conn == null)
       conn = getConnection(env);
 
     if (!conn.select_db(databaseName))
-      return BooleanValue.FALSE;
+      return null; // BooleanValue.FALSE;
 
     return conn.query(query, 0);
   }
@@ -678,12 +678,12 @@ public class MysqlModule extends AbstractQuercusModule {
   /**
    * Retrieves a list of table names from a MySQL database.
    */
-  public Value mysql_list_tables(Env env,
-                                 @NotNull String databaseName,
-                                 @Optional Mysqli conn)
+  public Object mysql_list_tables(Env env,
+                                  @NotNull String databaseName,
+                                  @Optional Mysqli conn)
   {
     if (databaseName == null)
-      return BooleanValue.FALSE;
+      return null; // BooleanValue.FALSE;
 
     return mysql_query(env, "SHOW TABLES FROM " + databaseName, conn);
   }
@@ -731,7 +731,7 @@ public class MysqlModule extends AbstractQuercusModule {
                              @Optional Value flagsV)
   {
     Mysqli mysqli = new Mysqli(env, host, userName, password, "", 3306, "",
-			       null, null);
+             null, null);
 
     Value value = env.wrapJava(mysqli);
 
@@ -782,9 +782,9 @@ public class MysqlModule extends AbstractQuercusModule {
   /**
    * Queries the database.
    */
-  public Value mysql_unbuffered_query(Env env,
-                                      @NotNull String name,
-                                      @Optional Mysqli conn)
+  public Object mysql_unbuffered_query(Env env,
+                                       @NotNull String name,
+                                       @Optional Mysqli conn)
   {
     return mysql_query(env, name, conn);
   }

@@ -47,6 +47,7 @@ import com.caucho.quercus.env.StringBuilderValue;
 import com.caucho.quercus.env.StringValueImpl;
 import com.caucho.quercus.env.LongValue;
 import com.caucho.quercus.env.Value;
+import com.caucho.quercus.env.JavaValue;
 
 import com.caucho.quercus.module.Optional;
 
@@ -65,19 +66,20 @@ public class Mysqli {
   private JdbcConnectionResource _conn;
 
   // postgres asynchronous queries
-  private Vector threadList = new Vector();
+  // private Vector threadList = new Vector();
+  MysqliResult _asyncResult;
   // named prepared statements for postgres
-  private Hashtable stmtTable = new Hashtable();
+  private Hashtable _stmtTable = new Hashtable();
 
   public Mysqli(Env env,
-		@Optional("localhost") String host,
-		@Optional String user,
-		@Optional String password,
-		@Optional String db,
-		@Optional("3306") int port,
-		@Optional String socket,
-		@Optional String driver,
-		@Optional String url)
+                @Optional("localhost") String host,
+                @Optional String user,
+                @Optional String password,
+                @Optional String db,
+                @Optional("3306") int port,
+                @Optional String socket,
+                @Optional String driver,
+                @Optional String url)
   {
     _env = env;
 
@@ -122,7 +124,7 @@ public class Mysqli {
 
     close(_env);
 
-	//@todo driver and url for postgres (see null below)
+    //@todo driver and url for postgres (see null below)
 
     return real_connect(_env, host, user, password, db, port, socket, flags, null, null);
   }
@@ -384,8 +386,8 @@ public class Mysqli {
    *
    * @return a {@link JdbcResultResource}, or BooleanValue.FALSE for failure
    */
-  public Value query(String sql,
-		     @Optional("MYSQLI_STORE_RESULT") int resultMode)
+  public Object query(String sql,
+                      @Optional("MYSQLI_STORE_RESULT") int resultMode)
   {
     // XXX: resultMode = MYSQLI_USE_RESULT is an unbuffered query, not supported.
     JdbcConnectionResource conn = validateConnection();
@@ -394,12 +396,12 @@ public class Mysqli {
       Value result = conn.query(sql);
 
       if (result instanceof JdbcResultResource)
-	return _env.wrapJava(new MysqliResult((JdbcResultResource) result));
+        return new MysqliResult((JdbcResultResource) result);
       else
-	return result;
+        return ((JavaValue)result).toJavaObject();
     } catch (Throwable e) {
       log.log(Level.FINE, e.toString(), e);
-      return BooleanValue.FALSE;
+      return null;
     }
   }
 
@@ -407,15 +409,15 @@ public class Mysqli {
    * Connects to the underlying database.
    */
   public boolean real_connect(Env env,
-			      @Optional("localhost") String host,
-			      @Optional String userName,
-			      @Optional String password,
-			      @Optional String dbname,
-			      @Optional("3306") int port,
-			      @Optional String socket,
-			      @Optional int flags,
-			      @Optional String driver,
-			      @Optional String url)
+                              @Optional("localhost") String host,
+                              @Optional String userName,
+                              @Optional String password,
+                              @Optional String dbname,
+                              @Optional("3306") int port,
+                              @Optional String socket,
+                              @Optional int flags,
+                              @Optional String driver,
+                              @Optional String url)
   {
     if (_conn != null) {
       env.warning(L.l("Connection is already opened to '{0}'", _conn));
@@ -424,23 +426,25 @@ public class Mysqli {
 
     _host = host;
     _port = port;
-	_dbname = dbname;
+    _dbname = dbname;
 
     try {
       if (host == null || host.equals(""))
         host = "localhost";
 
       if (driver == null || driver.equals("")) {
-	driver = "com.mysql.jdbc.jdbc2.optional.MysqlConnectionPoolDataSource";
+        driver = "com.mysql.jdbc.jdbc2.optional.MysqlConnectionPoolDataSource";
       }
 
       if (url == null || url.equals("")) {
-	url = "jdbc:mysql://" + host + ":" + port + "/" + dbname;
+        url = "jdbc:mysql://" + host + ":" + port + "/" + dbname;
       }
 
       Connection jConn = env.getConnection(driver, url, userName, password);
 
-      _conn = new JdbcConnectionResource(jConn);
+      boolean pgconn = url.indexOf("postgres") > 0;
+
+      _conn = new JdbcConnectionResource(jConn, pgconn);
 
       env.addResource(_conn);
 
@@ -529,12 +533,12 @@ public class Mysqli {
   {
     try {
       if (_conn != null) {
-	validateConnection().setCatalog(dbname);
+        validateConnection().setCatalog(dbname);
 
-	return true;
+        return true;
       }
       else
-	return false;
+        return false;
     } catch (SQLException e) {
       log.log(Level.FINE, e.toString(), e);
       _env.warning(e.getMessage());
@@ -714,40 +718,20 @@ public class Mysqli {
     return conn;
   }
 
-  public void addThread(Thread t)
+  public void putStatement(String name,
+                           MysqliStatement stmt)
   {
-    threadList.add(t);
-  }
-
-  public Thread firstThread()
-  {
-    if (threadList.size() > 0)
-      return (Thread)threadList.get(0);
-
-    return null;
-  }
-
-  public Thread removeFirstThread()
-  {
-    if (threadList.size() > 0)
-      return (Thread)threadList.remove(0);
-
-    return null;
-  }
-
-  public void putStatement(String name, MysqliStatement stmt)
-  {
-    stmtTable.put(name, stmt);
+    _stmtTable.put(name, stmt);
   }
 
   public MysqliStatement getStatement(String name)
   {
-    return (MysqliStatement)stmtTable.get(name);
+    return (MysqliStatement) _stmtTable.get(name);
   }
 
   public MysqliStatement removeStatement(String name)
   {
-    return (MysqliStatement)stmtTable.remove(name);
+    return (MysqliStatement) _stmtTable.remove(name);
   }
 
   public String toString()
@@ -756,5 +740,15 @@ public class Mysqli {
       return "Mysqli[" + _host + "]";
     else
       return "Mysqli[]";
+  }
+
+  public void setAsynchronousResult(MysqliResult asyncResult)
+  {
+    _asyncResult = asyncResult;
+  }
+
+  public MysqliResult getAsynchronousResult()
+  {
+    return _asyncResult;
   }
 }

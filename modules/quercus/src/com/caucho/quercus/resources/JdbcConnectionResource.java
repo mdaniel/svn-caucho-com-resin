@@ -83,9 +83,17 @@ public class JdbcConnectionResource extends ResourceValue {
   private int _nextResultValue = 0;
   private boolean _hasBeenUsed = true;
 
+  private boolean _pgconn = false;
+
   public JdbcConnectionResource(Connection conn)
   {
     _conn = conn;
+  }
+
+  public JdbcConnectionResource(Connection conn, boolean pgconn)
+  {
+    _conn = conn;
+    _pgconn = pgconn;
   }
 
   /**
@@ -106,10 +114,11 @@ public class JdbcConnectionResource extends ResourceValue {
    */
   public int getFieldCount()
   {
-    if (_rs == null)
+    if (_rs == null) {
       return 0;
-    else
+    } else {
       return _rs.getFieldCount();
+    }
   }
 
   /**
@@ -118,7 +127,7 @@ public class JdbcConnectionResource extends ResourceValue {
   public Value getCatalogs()
   {
     clearErrors();
-    
+
     try {
       if (_dmd == null)
         _dmd = _conn.getMetaData();
@@ -145,7 +154,7 @@ public class JdbcConnectionResource extends ResourceValue {
   public Value getCatalog()
   {
     clearErrors();
-    
+
     try {
       return new StringValueImpl(_conn.getCatalog());
     } catch (SQLException e) {
@@ -229,8 +238,8 @@ public class JdbcConnectionResource extends ResourceValue {
    * Returns the table metadata.
    */
   public JdbcTableMetaData getTableMetaData(String catalog,
-					    String schema,
-					    String table)
+              String schema,
+              String table)
     throws SQLException
   {
     TableKey key = new TableKey(catalog, schema, table);
@@ -354,7 +363,7 @@ public class JdbcConnectionResource extends ResourceValue {
   public Value query(String sql)
   {
     clearErrors();
-    
+
     // Empty _resultValues on new call to query
     // But DO NOT close the individual result sets.
     // They may still be in use.
@@ -368,25 +377,30 @@ public class JdbcConnectionResource extends ResourceValue {
       stmt.setEscapeProcessing(false); // php/1406
 
       if (stmt.execute(sql)) {
-	ResultSet rs = stmt.getResultSet();
+        ResultSet rs = stmt.getResultSet();
 
-	_rs = new JdbcResultResource(stmt, rs, this);
+        _rs = new JdbcResultResource(stmt, rs, this);
         _affectedRows = 0;
         _resultValues.add(_rs);
         _warnings = stmt.getWarnings();
       } else {
-	// php/4310 should return a result set
-	// for update statements. It is always
-	// null though. So keep the stmt for
-	// future reference (PostgresModule.pg_last_oid)
-	
-	// php/1f33
-	//_rs = new JdbcResultResource(stmt, null, this);
-        //_resultValues.add(_rs);
+        // php/4310 should return a result set
+        // for update statements. It is always
+        // null though. So keep the stmt for
+        // future reference (PostgresModule.pg_last_oid)
+
+        // php/1f33
+        if (_pgconn) {
+          _rs = new JdbcResultResource(stmt, null, this);
+          _resultValues.add(_rs);
+        }
         _affectedRows = 0;
         _affectedRows = stmt.getUpdateCount();
         _warnings = stmt.getWarnings();
-	//commented out (for php/4310) stmt.close();
+        // for php/4310
+        if (!_pgconn) {
+          stmt.close();
+        }
       }
     } catch (DataTruncation truncationError) {
       try {
@@ -425,7 +439,7 @@ public class JdbcConnectionResource extends ResourceValue {
                          String catalog)
   {
     clearErrors();
-    
+
     Value currentCatalog = getCatalog();
 
     try {
@@ -470,7 +484,7 @@ public class JdbcConnectionResource extends ResourceValue {
   public boolean multiQuery(String sql)
   {
     clearErrors();
-    
+
     // Empty _resultValues on new call to query
     // But DO NOT close the individual result sets.
     // They may still be in use.
@@ -488,7 +502,7 @@ public class JdbcConnectionResource extends ResourceValue {
         stmt.setEscapeProcessing(false);
         if (stmt.execute(s)) {
           _affectedRows = 0;
-	  _rs = new JdbcResultResource(stmt, stmt.getResultSet(), this);
+          _rs = new JdbcResultResource(stmt, stmt.getResultSet(), this);
           _resultValues.add(_rs);
           _warnings = stmt.getWarnings();
         } else {
@@ -527,7 +541,7 @@ public class JdbcConnectionResource extends ResourceValue {
   public boolean setAutoCommit(boolean mode)
   {
     clearErrors();
-    
+
     try {
       _conn.setAutoCommit(mode);
     } catch (SQLException e) {
@@ -547,7 +561,7 @@ public class JdbcConnectionResource extends ResourceValue {
   public boolean commit()
   {
     clearErrors();
-    
+
     try {
       _conn.commit();
     } catch (SQLException e) {
@@ -570,7 +584,7 @@ public class JdbcConnectionResource extends ResourceValue {
   public boolean rollback()
   {
     clearErrors();
-    
+
     try {
       _conn.rollback();
     } catch (SQLException e) {
@@ -590,7 +604,7 @@ public class JdbcConnectionResource extends ResourceValue {
     throws SQLException
   {
     clearErrors();
-    
+
     _conn.setCatalog(name);
   }
 
@@ -600,7 +614,7 @@ public class JdbcConnectionResource extends ResourceValue {
   public Value stat()
   {
     clearErrors();
-    
+
     StringBuilder str = new StringBuilder();
 
     try {
@@ -718,13 +732,13 @@ public class JdbcConnectionResource extends ResourceValue {
       int hash = 37;
 
       if (_catalog != null)
-	hash = 65537 * hash + _catalog.hashCode();
+        hash = 65537 * hash + _catalog.hashCode();
 
       if (_schema != null)
-	hash = 65537 * hash + _schema.hashCode();
+        hash = 65537 * hash + _schema.hashCode();
 
       if (_table != null)
-	hash = 65537 * hash + _table.hashCode();
+        hash = 65537 * hash + _table.hashCode();
 
       return hash;
     }
@@ -732,26 +746,26 @@ public class JdbcConnectionResource extends ResourceValue {
     public boolean equals(Object o)
     {
       if (this == o)
-	return true;
+        return true;
       else if (! (o instanceof TableKey))
-	return false;
+        return false;
 
       TableKey key = (TableKey) o;
 
       if ((_catalog == null) != (key._catalog == null))
-	return false;
+        return false;
       else if (_catalog != null && ! _catalog.equals(key._catalog))
-	return false;
+        return false;
 
       if ((_schema == null) != (key._schema == null))
-	return false;
+        return false;
       else if (_schema != null && ! _schema.equals(key._schema))
-	return false;
+        return false;
 
       if ((_table == null) != (key._table == null))
-	return false;
+        return false;
       else if (_table != null && ! _table.equals(key._table))
-	return false;
+        return false;
 
       return true;
     }

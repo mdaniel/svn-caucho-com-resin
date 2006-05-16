@@ -52,8 +52,7 @@ import com.caucho.quercus.lib.mysql.MysqliResult;
  * mysqli object oriented API facade
  */
 public class MysqliStatement {
-  private static final Logger log
-    = Logger.getLogger(MysqliStatement.class.getName());
+  private static final Logger log = Logger.getLogger(MysqliStatement.class.getName());
   private static final L10N L = new L10N(MysqliStatement.class);
 
   private JdbcConnectionResource _conn;
@@ -86,19 +85,19 @@ public class MysqliStatement {
   // Example:
   //
   // $stmt = oci_parse($conn, "SELECT empno, ename FROM emp");
-  // 
+  //
   // /* the define MUST be done BEFORE oci_execute! */
-  // 
+  //
   // oci_define_by_name($stmt, "EMPNO", $empno);
   // oci_define_by_name($stmt, "ENAME", $ename);
-  // 
+  //
   // oci_execute($stmt);
-  // 
+  //
   // while (oci_fetch($stmt)) {
   //    echo "empno:" . $empno . "\n";
   //    echo "ename:" . $ename . "\n";
   // }
-  // 
+  //
   private Hashtable byNameVariables = new Hashtable();
 
 
