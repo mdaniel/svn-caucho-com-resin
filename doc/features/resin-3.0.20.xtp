@@ -1,0 +1,28 @@
+<document>
+  <header>
+    <product>resin</product>
+    <title>Resin 3.0.20 Release Notes</title>
+  </header>
+
+<body>
+
+<summary objsummary='localtoc'/>
+
+<section title="Quercus">
+
+<p>The QuercusServlet now allows &lt;server-env> to define environment
+variables for $_SERVER.</p>
+
+<example>
+&lt;servlet servlet-name="php"
+            servlet-class="com.caucho.quercus.servlet.QuercusServlet">
+  &lt;init>
+    &lt;servlet-env foo="bar"/>
+  &lt;/init>
+&lt;/servlet>
+</example>
+
+</section>
+
+</body>
+</document>

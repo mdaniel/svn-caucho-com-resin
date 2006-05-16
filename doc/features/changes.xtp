@@ -2,7 +2,23 @@
 
 <a href='changes-2.xtp'>Resin 2.1 changes</a>
 
-<s2 title='3.0.snap - May 11, 2006'>
+<s2 title='3.0.snap - May 15, 2006'>
+<ul>
+<li>Quercus: fsockopen (#1104, rep by koreth)
+<li>(2006-05-15) Quercus: add server-name to &lt;init> to populate $_SERVER (#1105, rep by koreth)
+<li>Quercus: debug_backtrace for interpreted mode (#1124, rep by koreth)
+<li>Quercus: compilation problems in basic throw statement (#1098, rep by koreth)
+<li>Quercus: static function called from static function (#1099, rep by koreth)
+<li>Quercus: &lt;?PHP is case-insensitive (#1107, rep by koreth)
+<li>Quercus: '-' and '+' sometimes converted double to long (#1093, rep by koreth)
+<li>Quercus: double array references should be converted to integer (#1100, rep by koreth)
+<li>Quercus: '%' always returns an integer (#1106, rep by koreth)
+<li>Quercus: array_merge should return null on null argument (#1103, rep by koreth)
+<li>Quercus: null.toArray should return empty array (#1103, rep by koreth)
+</ul>
+</s2>
+
+<s2 title='3.0.19 - May 15, 2006'>
 <ul>
 <li>(2006-05-11) getResources for library-loader and tree-loader weren't picking up directories like META-INF/ (#1052, #1095)
 <li>Cache: vary crc64 regression
@@ -16,9 +32,7 @@
 <li>ServletException should implement getCause() in terms of getRootCause() (#1076, rep by J Dane)
 <li>(2006-05-02) AbstractRotateLog uses truncate instead of remove for old file
 <li>stdout.log rotation file name for size overflow uses incorrect time (rep by Bill Au, #1054)
-<!--
-<li>Security issue involving web-app-deploy
--->
+<li>Important security issue on windows involving web-app-deploy (affects 3.0.17 and 3.0.18)
 <li>Quercus: eval() needs access to the symbol table and "this" (rep by Jack Zhang)
 <li>(2006-04-14) ToCharResponseAdapter should not close the underlying writer on close (#989, rep by Tony Field)
 <li>CGI was sending output through PrintWriter instead of OutputStream (#1035, rep by mineral)
