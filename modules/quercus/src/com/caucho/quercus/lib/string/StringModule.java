@@ -51,6 +51,7 @@ import com.caucho.quercus.module.Reference;
 import com.caucho.quercus.module.UsesSymbolTable;
 import com.caucho.quercus.lib.file.FileModule;
 import com.caucho.quercus.lib.ArrayModule;
+import com.caucho.quercus.resources.StreamResource;
 import com.caucho.util.L10N;
 import com.caucho.util.RandomUtil;
 import com.caucho.vfs.ByteToChar;
@@ -587,7 +588,7 @@ v   *
    * @param args the valujes to apply to the format string
    */
   public static Value fprintf(Env env,
-                              Value fd,
+                              @NotNull StreamResource fd,
                               String format,
                               Value []args)
     throws Throwable
