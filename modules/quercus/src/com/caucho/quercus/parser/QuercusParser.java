@@ -1449,9 +1449,8 @@ public class QuercusParser {
     Location location = getLocation();
     
     Expr expr = parseExpr();
-    System.out.println("EXPR: " + expr);
 
-    return new ThrowStatement(location, NullLiteralExpr.NULL);
+    return new ThrowStatement(location, expr);
   }
 
   /**
@@ -3532,6 +3531,9 @@ public class QuercusParser {
     int ch = read();
     while (ch > 0) {
       if (ch == '<') {
+	int ch2;
+	int ch3;
+	
 	if ((ch = read()) == 's' || ch == 'S') {
 	  _peek = ch;
 	  if (parseScriptBegin(sb)) {
@@ -3564,17 +3566,27 @@ public class QuercusParser {
 
 	  return TEXT;
 	}
-	else if (ch != 'p') {
+	else if (ch != 'p' && ch != 'P') {
 	  sb.append("<?");
 	}
-	else if ((ch = read()) != 'h') {
-	  sb.append("<?p");
+	else if ((ch2 = read()) != 'h' && ch2 != 'H') {
+	  sb.append("<?");
+	  sb.append((char) ch);
+
+	  ch = ch2;
 	}
-	else if ((ch = read()) != 'p') {
-	  sb.append("<?ph");
+	else if ((ch3 = read()) != 'p' && ch3 != 'P') {
+	  sb.append("<?");
+	  sb.append((char) ch);
+	  sb.append((char) ch2);
+
+	  ch = ch3;
 	}
 	else if (! Character.isWhitespace((ch = read()))) {
-	  sb.append("<?php");
+	  sb.append("<?");
+	  sb.append((char) ch);
+	  sb.append((char) ch2);
+	  sb.append((char) ch3);
 	}
 	else {
 	  _lexeme = sb.toString();

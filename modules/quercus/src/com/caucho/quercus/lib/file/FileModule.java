@@ -53,6 +53,8 @@ import com.caucho.quercus.lib.file.FileWriteValue;
 import com.caucho.quercus.lib.string.StringModule;
 import com.caucho.quercus.lib.StreamModule;
 
+import com.caucho.quercus.module.NotNull;
+
 import com.caucho.util.Alarm;
 
 import com.caucho.vfs.WriteStream;
@@ -573,15 +575,15 @@ public class FileModule extends AbstractQuercusModule {
   /**
    * Returns the next line
    */
-  public Value fgets(Env env, StreamResource file, @Optional long length)
+  public Value fgets(Env env,
+		     @NotNull StreamResource file,
+		     @Optional long length)
     throws IOException
   {
     // quercus/1615
 
-    if (file == null) {
-      env.warning(L.l("{0} is null", "handle"));
+    if (file == null)
       return BooleanValue.FALSE;
-    }
 
     String value = file.readLine();
 
@@ -1102,10 +1104,13 @@ public class FileModule extends AbstractQuercusModule {
   /**
    * Writes a string to the file.
    */
-  public static Value fputs(Env env, Value fileV, String value, @Optional("-1") int length)
+  public static Value fputs(Env env,
+			    StreamResource file,
+			    String value,
+			    @Optional("-1") int length)
     throws IOException
   {
-    return fwrite(env, fileV, value, length);
+    return fwrite(env, file, value, length);
   }
 
   /**
@@ -1113,15 +1118,13 @@ public class FileModule extends AbstractQuercusModule {
    *
    * @param fileValue the file
    */
-  public static Value fread(Env env, Value fileValue, int length)
+  public static Value fread(Env env,
+			    @NotNull StreamResource file,
+			    int length)
     throws IOException
   {
-    if (! (fileValue instanceof FileValue)) {
-      env.warning(L.l("bad {0}", "handle"));
+    if (file == null)
       return BooleanValue.FALSE;
-    }
-
-    FileValue file = (FileValue) fileValue;
 
     TempBuffer tempBuf = TempBuffer.allocate();
     byte []buffer = tempBuf.getBuffer();
@@ -1189,15 +1192,14 @@ public class FileModule extends AbstractQuercusModule {
   /**
    * Writes a string to the file.
    */
-  public static Value fwrite(Env env, Value fileV, String value,  @Optional("-1") int length)
+  public static Value fwrite(Env env,
+			     @NotNull StreamResource file,
+			     String value,
+			     @Optional("-1") int length)
     throws IOException
   {
-    if (! (fileV instanceof FileValue)) {
-      env.warning(L.l("bad {0}", "handle"));
+    if (file == null)
       return BooleanValue.FALSE;
-    }
-
-    FileValue file = (FileValue) fileV;
 
     file.print(value);
 

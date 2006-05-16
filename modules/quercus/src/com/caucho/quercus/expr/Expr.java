@@ -58,9 +58,6 @@ abstract public class Expr {
 
   private final Location _location;
 
-  private String _fileName;
-  private int _line;
-
   public Expr(Location location)
   {
     _location = location;
@@ -77,6 +74,25 @@ abstract public class Expr {
   final public Location getLocation()
   {
     return _location;
+  }
+
+  /**
+   * Returns the filename.
+   */
+  public String getFileName()
+  {
+    if (_location != Location.UNKNOWN)
+      return _location.getFileName();
+    else
+      return null;
+  }
+
+  /**
+   * Returns the filename.
+   */
+  public int getLine()
+  {
+    return _location.getLineNumber();
   }
 
   /**

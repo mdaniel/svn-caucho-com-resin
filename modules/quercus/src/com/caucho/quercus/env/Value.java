@@ -224,6 +224,11 @@ abstract public class Value {
     return null;
   }
 
+  public QuercusClass getQuercusClass()
+  {
+    return null;
+  }
+
   /**
    * Converts to a java object.
    */
@@ -235,9 +240,9 @@ abstract public class Value {
   /**
    * Converts to an exception.
    */
-  public Exception toException()
+  public QuercusException toException()
   {
-    return new QuercusValueException(toString());
+    return new QuercusLanguageException(this);
   }
 
   /**
@@ -788,10 +793,7 @@ abstract public class Value {
   public Value add(Value rValue)
     throws Throwable
   {
-    long lLong = toLong();
-    long rLong = rValue.toLong();
-
-    return new LongValue(lLong + rLong);
+    return new DoubleValue(toDouble() + rValue.toDouble());
   }
 
   /**
@@ -800,9 +802,7 @@ abstract public class Value {
   public Value add(long lLong)
     throws Throwable
   {
-    long rLong = toLong();
-
-    return new LongValue(lLong + rLong);
+    return new DoubleValue(lLong + toDouble());
   }
 
   /**
@@ -833,10 +833,10 @@ abstract public class Value {
   public Value sub(Value rValue)
     throws Throwable
   {
-    long lLong = toLong();
-    long rLong = rValue.toLong();
+    double lDouble = toDouble();
+    double rDouble = rValue.toDouble();
 
-    return new LongValue(lLong - rLong);
+    return new DoubleValue(toDouble() - rValue.toDouble());
   }
 
   /**
@@ -845,9 +845,7 @@ abstract public class Value {
   public Value sub(long rLong)
     throws Throwable
   {
-    long lLong = toLong();
-
-    return new LongValue(lLong - rLong);
+    return new DoubleValue(toDouble() - rLong);
   }
 
   /**
@@ -856,9 +854,7 @@ abstract public class Value {
   public Value sub_rev(long lLong)
     throws Throwable
   {
-    long rLong = toLong();
-
-    return new LongValue(lLong - rLong);
+    return new DoubleValue(lLong - toDouble());
   }
 
   /**
@@ -867,7 +863,7 @@ abstract public class Value {
   public Value mul(Value rValue)
     throws Throwable
   {
-    return rValue.mul(toLong());
+    return new DoubleValue(toDouble() * rValue.toDouble());
   }
 
   /**
@@ -876,9 +872,7 @@ abstract public class Value {
   public Value mul(long lLong)
     throws Throwable
   {
-    long rLong = toLong();
-
-    return new LongValue(lLong * rLong);
+    return new DoubleValue(toDouble() * lLong);
   }
 
   /**
@@ -902,7 +896,7 @@ abstract public class Value {
     double lDouble = toDouble();
     double rDouble = rValue.toDouble();
 
-    return new DoubleValue(lDouble % rDouble);
+    return LongValue.create((long) lDouble % rDouble);
   }
 
   /**

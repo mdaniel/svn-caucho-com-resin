@@ -115,7 +115,7 @@ public class DoubleValue extends NumberValue {
    */
   public Value toKey()
   {
-    return this;
+    return LongValue.create((long) _value);
   }
 
   /**

@@ -94,6 +94,14 @@ public class ObjectExtValue extends ObjectValue {
   }
 
   /**
+   * Returns the quercus class.
+   */
+  public QuercusClass getQuercusClass()
+  {
+    return _cl;
+  }
+
+  /**
    * Returns the type.
    */
   public String getType()

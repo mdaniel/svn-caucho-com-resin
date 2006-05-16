@@ -213,6 +213,7 @@ public class Env {
   private long _timeLimit = 600000L;
 
   private Expr [] _callStack = new Expr[256];
+  private Value [] _callThisStack = new Value[256];
   private int _callStackTop;
 
   private Value [] _functionArgs;
@@ -1373,15 +1374,24 @@ public class Env {
   /**
    * Sets the calling function expression.
    */
-  public void pushCall(Expr call)
+  public void pushCall(Expr call, Value obj)
   {
     if (_callStack.length <= _callStackTop) {
       Expr []newStack = new Expr[2 * _callStack.length];
       System.arraycopy(_callStack, 0, newStack, 0, _callStack.length);
       _callStack = newStack;
+      
+      Value []newThisStack = new Value[2 * _callThisStack.length];
+      System.arraycopy(_callThisStack,
+		       0, newThisStack,
+		       0, _callThisStack.length);
+      _callThisStack = newThisStack;
     }
 
-    _callStack[_callStackTop++] = call;
+    _callStack[_callStackTop] = call;
+    _callThisStack[_callStackTop] = obj;
+
+    _callStackTop++;
   }
 
   /**
@@ -1393,12 +1403,31 @@ public class Env {
   }
 
   /**
+   * Returns the stack depth.
+   */
+  public int getCallDepth()
+  {
+    return _callStackTop;
+  }
+  
+  /**
    * Pops the top call.
    */
   public Expr peekCall(int depth)
   {
     if (_callStackTop - depth > 0)
       return _callStack[_callStackTop - depth - 1];
+    else
+      return null;
+  }
+  
+  /**
+   * Pops the top call.
+   */
+  public Value peekCallThis(int depth)
+  {
+    if (_callStackTop - depth > 0)
+      return _callThisStack[_callStackTop - depth - 1];
     else
       return null;
   }

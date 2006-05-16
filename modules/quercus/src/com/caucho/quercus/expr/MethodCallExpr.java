@@ -69,6 +69,11 @@ public class MethodCallExpr extends Expr {
   {
     this(Location.UNKNOWN, objExpr, name, args);
   }
+
+  public String getName()
+  {
+    return _name;
+  }
   
   /**
    * Evaluates the expression.
@@ -82,7 +87,17 @@ public class MethodCallExpr extends Expr {
   {
     env.checkTimeout();
 
-    return _objExpr.eval(env).evalMethod(env, _name, _args);
+    Value obj = _objExpr.eval(env);
+    
+    env.pushCall(this, obj);
+    
+    try {
+      env.checkTimeout();
+
+      return obj.evalMethod(env, _name, _args);
+    } finally {
+      env.popCall();
+    }
   }
   
   /**
@@ -96,8 +111,16 @@ public class MethodCallExpr extends Expr {
     throws Throwable
   {
     env.checkTimeout();
+
+    Value obj = _objExpr.eval(env);
     
-    return _objExpr.eval(env).evalMethodRef(env, _name, _args);
+    env.pushCall(this, obj);
+    
+    try {
+      return obj.evalMethodRef(env, _name, _args);
+    } finally {
+      env.popCall();
+    }
   }
 
   //

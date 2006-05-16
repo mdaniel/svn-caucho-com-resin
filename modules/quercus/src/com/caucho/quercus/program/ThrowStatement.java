@@ -102,8 +102,9 @@ public class ThrowStatement extends Statement {
 
     // php/3a5h
     _expr.generate(out);
+    System.out.println("EXPR: " + _expr);
 
-    out.println("toException();");
+    out.println(".toException();");
   }
 }
 

@@ -161,7 +161,7 @@ public class RegexpModule
     throws Throwable
   {
     if (patternString.length() < 2) {
-      env.warning(L.l("  Pattern must have at least opening and closing delimiters"));
+      env.warning(L.l("Pattern must have at least opening and closing delimiters"));
       return 0;
     }
 
@@ -232,7 +232,7 @@ public class RegexpModule
                                    @Optional int offset)
     throws Throwable
   {
-     if (patternString.length() < 2) {
+    if (patternString.length() < 2) {
       env.warning(L.l("Pattern must have at least opening and closing delimiters"));
       return 0;
     }
@@ -1243,7 +1243,8 @@ public class RegexpModule
 
           ch = regexp.charAt(i);
 
-          if ('0' <= ch && ch <= '3') {
+          if (ch == '0' ||
+	      '1' <= ch && ch <= '3' && i + 1 < len && '0' <= regexp.charAt(i + 1) && ch <= '7') {
             // Java's regexp requires \0 for octal
 
             // sb.append('\\');

@@ -116,6 +116,9 @@ public class Quercus {
   private HashMap<String, StringValue> _iniMap
     = new HashMap<String, StringValue>();
 
+  private HashMap<Value, Value> _serverEnvMap
+    = new HashMap<Value, Value>();
+
   private LruCache<String, QuercusProgram> _evalCache
     = new LruCache<String, QuercusProgram>(256);
 
@@ -316,6 +319,23 @@ public class Quercus {
     }
 
     _iniMap.put(name, value);
+  }
+
+  /**
+   * Sets a server env value.
+   */
+  public void setServerEnv(String name, String value)
+  {
+    _serverEnvMap.put(new StringValueImpl(name),
+		      new StringValueImpl(value));
+  }
+
+  /**
+   * Returns the server env map.
+   */
+  public HashMap<Value,Value> getServerEnvMap()
+  {
+    return _serverEnvMap;
   }
 
   /**
@@ -881,11 +901,16 @@ public class Quercus {
   private void initStaticClasses()
   {
     _stdClassDef = new InterpretedClassDef("stdClass", null);
-
     _stdClass = new QuercusClass(_stdClassDef, null);
 
     _staticClasses.put(_stdClass.getName(), _stdClassDef);
     _lowerStaticClasses.put(_stdClass.getName().toLowerCase(), _stdClassDef);
+    
+    ClassDef exn = new InterpretedClassDef("Exception", null);
+    // QuercusClass exnCl = new QuercusClass(exn, null);
+
+    _staticClasses.put(exn.getName(), exn);
+    _lowerStaticClasses.put(exn.getName().toLowerCase(), exn);
   }
 
   public void close()

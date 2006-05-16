@@ -133,6 +133,15 @@ public class QuercusServlet
   }
 
   /**
+   * Adds a $_SERVER configuration
+   */
+  public ServerEnv createServerEnv()
+    throws ConfigException
+  {
+    return new ServerEnv(getQuercus());
+  }
+
+  /**
    * Adds a quercus.ini configuration
    */
   public void setIniFile(Path path)
@@ -328,6 +337,23 @@ public class QuercusServlet
     public void put(String key, String value)
     {
       _quercus.setIni(key, value);
+    }
+  }
+
+  public static class ServerEnv {
+    private Quercus _quercus;
+
+    ServerEnv(Quercus quercus)
+    {
+      _quercus = quercus;
+    }
+
+    /**
+     * Sets an arbitrary property.
+     */
+    public void put(String key, String value)
+    {
+      _quercus.setServerEnv(key, value);
     }
   }
 }

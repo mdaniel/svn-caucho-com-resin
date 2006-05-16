@@ -202,6 +202,10 @@ public class ServerArrayValue extends ArrayValueImpl {
    */
   private void fillMap()
   {
+    for (Map.Entry<Value,Value> entry : _env.getQuercus().getServerEnvMap().entrySet()) {
+      super.put(entry.getKey(), entry.getValue());
+    }
+    
     HttpServletRequest request = _env.getRequest();
 
     super.put(SERVER_NAME_V,

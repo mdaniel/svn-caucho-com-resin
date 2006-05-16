@@ -79,6 +79,14 @@ public class FunctionExpr extends Expr {
   {
     this(Location.UNKNOWN, name, args);
   }
+
+  /**
+   * Returns the name.
+   */
+  public String getName()
+  {
+    return _name;
+  }
   
   /**
    * Returns the location if known.
@@ -155,7 +163,7 @@ public class FunctionExpr extends Expr {
   private Value evalImpl(Env env, boolean isRef, boolean isCopy)
     throws Throwable
   {
-    env.pushCall(this);
+    env.pushCall(this, NullValue.NULL);
     
     try {
       env.checkTimeout();

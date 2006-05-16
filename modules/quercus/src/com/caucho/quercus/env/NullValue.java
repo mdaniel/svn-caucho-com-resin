@@ -128,6 +128,14 @@ public class NullValue extends Value {
   }
 
   /**
+   * Converts to an array
+   */
+  public Value toArray()
+  {
+    return new ArrayValueImpl();
+  }
+
+  /**
    * Converts to an array if null.
    */
   public Value toAutoArray()

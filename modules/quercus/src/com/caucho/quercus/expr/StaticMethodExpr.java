@@ -188,10 +188,12 @@ public class StaticMethodExpr extends Expr {
     out.printJavaString(_className);
     out.print("\").evalMethod(env, ");
 
+    /*
     if (isMethod())
       out.print("q_this");
     else
-      out.print("NullThisValue.NULL");
+    */
+    out.print("NullThisValue.NULL");
 
     out.print(", \"");
     out.printJavaString(_name);

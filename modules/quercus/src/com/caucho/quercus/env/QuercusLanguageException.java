@@ -27,28 +27,26 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.quercus;
+package com.caucho.quercus.env;
+
+import com.caucho.quercus.QuercusException;
 
 /**
  * Parent of PHP exceptions
  */
-public class QuercusException extends RuntimeException {
-  public QuercusException()
+public class QuercusLanguageException extends QuercusException {
+  private Value _value;
+  
+  public QuercusLanguageException(Value value)
   {
+    super(value.toString());
   }
 
-  public QuercusException(String msg)
+  /**
+   * Returns the value.
+   */
+  public Value getValue()
   {
-    super(msg);
-  }
-
-  public QuercusException(Throwable cause)
-  {
-    super(cause);
-  }
-
-  public QuercusException(String msg, Throwable cause)
-  {
-    super(msg, cause);
+    return _value;
   }
 }

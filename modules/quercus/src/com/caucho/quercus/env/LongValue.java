@@ -188,6 +188,22 @@ public class LongValue extends NumberValue {
   }
 
   /**
+   * Adds to the following value.
+   */
+  public Value add(long lLong)
+  {
+    return LongValue.create(lLong + _value);
+  }
+
+  /**
+   * Subtracts the following value.
+   */
+  public Value sub(long rLong)
+  {
+    return LongValue.create(_value - rLong);
+  }
+
+  /**
    * Returns true for equality
    */
   public boolean eql(Value rValue)

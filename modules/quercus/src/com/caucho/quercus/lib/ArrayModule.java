@@ -2428,6 +2428,9 @@ public class ArrayModule
     ArrayValue result = new ArrayValueImpl();
 
     for (Value arg : args) {
+      if (arg.isNull())
+	return NullValue.NULL;
+      
       if (! (arg.toValue() instanceof ArrayValue))
         continue;
 

@@ -43,7 +43,14 @@ import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.BooleanValue;
 import com.caucho.quercus.env.DefaultValue;
 import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.StringValueImpl;
+import com.caucho.quercus.env.ArrayValue;
+import com.caucho.quercus.env.ArrayValueImpl;
 import com.caucho.quercus.env.Callback;
+
+import com.caucho.quercus.expr.Expr;
+import com.caucho.quercus.expr.FunctionExpr;
+import com.caucho.quercus.expr.MethodCallExpr;
 
 import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.quercus.module.Optional;
@@ -96,6 +103,53 @@ public class ErrorModule extends AbstractQuercusModule {
     }
     else
       throw new QuercusDieException(msg);
+  }
+  /**
+   * Produces a backtrace
+   */
+  public static Value debug_backtrace(Env env)
+    throws Exception
+  {
+    ArrayValue result = new ArrayValueImpl();
+
+    for (int i = 1; i < env.getCallDepth(); i++) {
+      Expr expr = env.peekCall(i);
+
+      ArrayValue call = new ArrayValueImpl();
+      result.put(call);
+
+      if (expr instanceof FunctionExpr) {
+	FunctionExpr callExpr = (FunctionExpr) expr;
+
+	if (callExpr.getFileName() != null) {
+	  call.put("file", callExpr.getFileName());
+	  call.put("line", callExpr.getLine());
+	}
+	
+	call.put("function", callExpr.getName());
+
+	call.put(new StringValueImpl("args"), new ArrayValueImpl());
+      }
+      else if (expr instanceof MethodCallExpr) {
+	MethodCallExpr callExpr = (MethodCallExpr) expr;
+
+	if (callExpr.getFileName() != null) {
+	  call.put("file", callExpr.getFileName());
+	  call.put("line", callExpr.getLine());
+	}
+	
+	call.put("function", callExpr.getName());
+
+	call.put("class",
+		 env.peekCallThis(i).getQuercusClass().getName());
+
+	call.put("type", "->");
+
+	call.put(new StringValueImpl("args"), new ArrayValueImpl());
+      }
+    }
+
+    return result;
   }
 
   /**

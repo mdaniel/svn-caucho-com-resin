@@ -51,9 +51,17 @@ public class ModExpr extends BinaryExpr {
   }
 
   /**
-   * Return true for a double.
+   * Return true for a long.
    */
-  public boolean isDouble()
+  public boolean isLong()
+  {
+    return true;
+  }
+
+  /**
+   * Return true for a long.
+   */
+  public boolean isNumber()
   {
     return true;
   }
@@ -86,8 +94,8 @@ public class ModExpr extends BinaryExpr {
   public void generate(PhpWriter out)
     throws IOException
   {
-    out.print("new com.caucho.quercus.env.DoubleValue(");
-    generateDouble(out);
+    out.print("LongValue.create(");
+    generateLong(out);
     out.print(")");
   }
 
@@ -100,17 +108,6 @@ public class ModExpr extends BinaryExpr {
     throws IOException
   {
     out.print("(long) ");
-    generateDouble(out);
-  }
-
-  /**
-   * Generates code to evaluate the expression directly.
-   *
-   * @param out the writer to the Java source code.
-   */
-  public void generateDouble(PhpWriter out)
-    throws IOException
-  {
     out.print("(");
     _left.generateDouble(out);
     out.print(" % ");
@@ -123,14 +120,25 @@ public class ModExpr extends BinaryExpr {
    *
    * @param out the writer to the Java source code.
    */
+  public void generateDouble(PhpWriter out)
+    throws IOException
+  {
+    generateLong(out);
+  }
+
+  /**
+   * Generates code to evaluate the expression directly.
+   *
+   * @param out the writer to the Java source code.
+   */
   public void generatePrint(PhpWriter out)
     throws IOException
   {
-    out.print("env.getOut().print(");
+    out.print("env.getOut().print((long) (");
     _left.generateDouble(out);
     out.print(" % ");
     _right.generateDouble(out);
-    out.print(")");
+    out.print("))");
   }
 
   /**

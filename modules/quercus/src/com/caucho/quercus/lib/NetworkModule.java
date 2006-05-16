@@ -29,6 +29,8 @@
 
 package com.caucho.quercus.lib;
 
+import java.io.IOException;
+
 import java.util.Map;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -38,6 +40,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import java.net.InetAddress;
+import java.net.Socket;
 
 import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
@@ -47,6 +50,8 @@ import javax.naming.directory.InitialDirContext;
 import javax.naming.directory.Attributes;
 
 import com.caucho.util.L10N;
+
+import com.caucho.quercus.QuercusException;
 
 import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.quercus.module.Optional;
@@ -61,6 +66,12 @@ import com.caucho.quercus.env.LongValue;
 import com.caucho.quercus.env.ArrayValue;
 import com.caucho.quercus.env.ArrayValueImpl;
 import com.caucho.quercus.env.Env;
+
+import com.caucho.quercus.resources.StreamReadWrite;
+
+import com.caucho.vfs.ReadStream;
+import com.caucho.vfs.WriteStream;
+import com.caucho.vfs.SocketStream;
 
 /**
  * Information about PHP network
@@ -90,13 +101,25 @@ public class NetworkModule extends AbstractQuercusModule {
   /**
    * Opens a socket
    */
-  public static Value fsockopen(String url,
-                                @Optional int port,
+  public static Value fsockopen(Env env,
+				String host,
+                                @Optional("80") int port,
                                 @Optional @Reference Value errno,
                                 @Optional @Reference Value errstr,
                                 @Optional double timeout)
   {
-    return NullValue.NULL;
+    try {
+      Socket s = new Socket(host, port);
+
+      SocketStream sock = new SocketStream(s);
+
+      WriteStream os = new WriteStream(sock);
+      ReadStream is = new ReadStream(sock, os);
+
+      return new StreamReadWrite(env, is, os);
+    } catch (IOException e) {
+      throw new QuercusException(e);
+    }
   }
 
   /**
