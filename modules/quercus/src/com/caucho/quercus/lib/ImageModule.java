@@ -36,6 +36,7 @@ import java.util.logging.Level;
 
 import com.caucho.util.L10N;
 
+import com.caucho.quercus.QuercusException;
 import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.quercus.module.Optional;
 
@@ -306,5 +307,518 @@ public class ImageModule extends AbstractQuercusModule {
 
     String _mime;
   }
+
+  /** Retrieve information about the currently installed GD library */
+  public static Value gd_info()
+  {
+    Value[] keys = new Value[] {
+      StringValue.create("GD Version"), // ] => 2.0 or higher
+      StringValue.create("FreeType Support"), // ] => 1
+      StringValue.create("FreeType Linkage"), // ] => with freetype
+      StringValue.create("T1Lib Support"), // ] => 1
+      StringValue.create("GIF Read Support"), // ] => 1
+      StringValue.create("GIF Create Support"), // ] => 1
+      StringValue.create("JPG Support"), // ] => 1
+      StringValue.create("PNG Support"), // ] => 1
+      StringValue.create("WBMP Support"), // ] => 1
+      StringValue.create("XPM Support"), // ] => 
+      StringValue.create("XBM Support"), // ] => 
+      StringValue.create("JIS-mapped Japanese Font Support"), // ] => 
+    };
+    Value[] vals = new Value[] {
+      StringValue.create("2.0 or higher"),
+      BooleanValue.TRUE,
+      StringValue.create("with freetype"),
+      BooleanValue.TRUE,
+      BooleanValue.TRUE,
+      BooleanValue.TRUE,
+      BooleanValue.TRUE,
+      BooleanValue.TRUE,
+      BooleanValue.TRUE,
+      BooleanValue.FALSE,
+      BooleanValue.FALSE,
+    };
+    return new ArrayValueImpl(keys, vals);
+  }
+
+  /**  Get file extension for image type */
+  public static Value image_type_to_extension(int imageType, boolean dot)
+  {
+    switch(imageType) {
+      case IMAGETYPE_GIF:     return StringValue.create(dot ? ".gif" : "gif");
+      case IMAGETYPE_JPG:     return StringValue.create(dot ? ".jpg" : "jpg");
+      case IMAGETYPE_PNG:     return StringValue.create(dot ? ".png" : "png");
+      case IMAGETYPE_SWF:     return StringValue.create(dot ? ".swf" : "swf");
+      case IMAGETYPE_PSD:     return StringValue.create(dot ? ".psd" : "psd");
+      case IMAGETYPE_BMP:     return StringValue.create(dot ? ".bmp" : "bmp");
+      case IMAGETYPE_TIFF_II: return StringValue.create(dot ? ".tiff" : "tiff");
+      case IMAGETYPE_TIFF_MM: return StringValue.create(dot ? ".tiff" : "tiff");
+      case IMAGETYPE_JPC:     return StringValue.create(dot ? ".jpc" : "jpc");
+      case IMAGETYPE_JP2:     return StringValue.create(dot ? ".jp2" : "jp2");
+      case IMAGETYPE_JPX:     return StringValue.create(dot ? ".jpf" : "jpf");
+      case IMAGETYPE_JB2:     return StringValue.create(dot ? ".jb2" : "jb2");
+      case IMAGETYPE_SWC:     return StringValue.create(dot ? ".swc" : "swc");
+      case IMAGETYPE_IFF:     return StringValue.create(dot ? ".iff" : "iff");
+      case IMAGETYPE_WBMP:    return StringValue.create(dot ? ".wbmp" : "wbmp");
+      case IMAGETYPE_XBM:     return StringValue.create(dot ? ".xbm" : "xbm");
+    }
+    throw new QuercusException("unknown imagetype " + imageType);
+  }
+
+  /** Get Mime-Type for image-type returned by getimagesize, exif_read_data,
+   *  exif_thumbnail, exif_imagetype */
+  public static Value image_type_to_mime_type(int imageType)
+  {
+    switch(imageType) {
+      case IMAGETYPE_GIF:     return StringValue.create("image/gif");
+      case IMAGETYPE_JPG:     return StringValue.create("image/jpeg");
+      case IMAGETYPE_PNG:     return StringValue.create("image/png");
+      case IMAGETYPE_SWF:     return StringValue.create("application/x-shockwave-flash");
+      case IMAGETYPE_PSD:     return StringValue.create("image/psd");
+      case IMAGETYPE_BMP:     return StringValue.create("image/bmp");
+      case IMAGETYPE_TIFF_II: return StringValue.create("image/tiff");
+      case IMAGETYPE_TIFF_MM: return StringValue.create("image/tiff");
+      case IMAGETYPE_JPC:     return StringValue.create("application/octet-stream");
+      case IMAGETYPE_JP2:     return StringValue.create("image/jp2");
+      case IMAGETYPE_JPX:     return StringValue.create("application/octet-stream");
+      case IMAGETYPE_JB2:     return StringValue.create("application/octet-stream");
+      case IMAGETYPE_SWC:     return StringValue.create("application/x-shockwave-flash");
+      case IMAGETYPE_IFF:     return StringValue.create("image/iff");
+      case IMAGETYPE_WBMP:    return StringValue.create("image/vnd.wap.wbmp");
+      case IMAGETYPE_XBM:     return StringValue.create("image/xbm");
+    }
+    throw new QuercusException("unknown imageType " + imageType);
+  }
+
+
+  /** Output image to browser or file */
+  public static void image2wbmp()
+  {
+  }
+
+  /** Set the blending mode for an image */
+  public static void imagealphablending()
+  {
+  }
+
+  /**  Should antialias functions be used or not */
+  public static void imageantialias()
+  {
+  }
+
+  /** Draw a partial ellipse */
+  public static void imagearc()
+  {
+  }
+
+  /** Draw a character horizontally */
+  public static void imagechar()
+  {
+  }
+
+  /** Draw a character vertically */
+  public static void imagecharup()
+  {
+  }
+
+  /** Allocate a color for an image */
+  public static void imagecolorallocate()
+  {
+  }
+
+  /** Allocate a color for an image */
+  public static void imagecolorallocatealpha()
+  {
+  }
+
+  /** Get the index of the color of a pixel */
+  public static void imagecolorat()
+  {
+  }
+
+  /** Get the index of the closest color to the specified color */
+  public static void imagecolorclosest()
+  {
+  }
+
+  /** Get the index of the closest color to the specified color + alpha */
+  public static void imagecolorclosestalpha()
+  {
+  }
+
+  /**  Get the index of the color which has the hue, white and blackness
+   *   nearest to the given color */
+  public static void imagecolorclosesthwb()
+  {
+  }
+
+  /** De-allocate a color for an image */
+  public static void imagecolordeallocate()
+  {
+  }
+
+  /** Get the index of the specified color */
+  public static void imagecolorexact()
+  {
+  }
+
+  /** Get the index of the specified color + alpha */
+  public static void imagecolorexactalpha()
+  {
+  }
+
+  /**  Makes the colors of the palette version of an image more closely
+   *   match the true color version */
+  public static void imagecolormatch()
+  {
+  }
+
+  /** Get the index of the specified color or its closest possible alternative*/
+  public static void imagecolorresolve()
+  {
+  }
+
+  /** Get the index of the specified color + alpha or its closest possible
+   *  alternative */
+  public static void imagecolorresolvealpha()
+  {
+  }
+
+  /** Set the color for the specified palette index */
+  public static void imagecolorset()
+  {
+  }
+
+  /** Get the colors for an index */
+  public static void imagecolorsforindex()
+  {
+  }
+
+  /** Find out the number of colors in an image's palette */
+  public static void imagecolorstotal()
+  {
+  }
+
+  /** Define a color as transparent */
+  public static void imagecolortransparent()
+  {
+  }
+
+  /**  Apply a 3x3 convolution matrix, using coefficient div and offset */
+  public static void imageconvolution()
+  {
+  }
+
+  /** Copy part of an image */
+  public static void imagecopy()
+  {
+  }
+
+  /** Copy and merge part of an image */
+  public static void imagecopymerge()
+  {
+  }
+
+  /** Copy and merge part of an image with gray scale */
+  public static void imagecopymergegray()
+  {
+  }
+
+  /** Copy and resize part of an image with resampling */
+  public static void imagecopyresampled()
+  {
+  }
+
+  /** Copy and resize part of an image */
+  public static void imagecopyresized()
+  {
+  }
+
+  /** Create a new palette based image */
+  public static void imagecreate()
+  {
+  }
+
+  /** Create a new image from GD2 file or URL */
+  public static void imagecreatefromgd2()
+  {
+  }
+
+  /** Create a new image from a given part of GD2 file or URL */
+  public static void imagecreatefromgd2part()
+  {
+  }
+
+  /** Create a new image from GD file or URL */
+  public static void imagecreatefromgd()
+  {
+  }
+
+  /** Create a new image from file or URL */
+  public static void imagecreatefromgif()
+  {
+  }
+
+  /** Create a new image from file or URL */
+  public static void imagecreatefromjpeg()
+  {
+  }
+
+  /** Create a new image from file or URL */
+  public static void imagecreatefrompng()
+  {
+  }
+
+  /** Create a new image from the image stream in the string */
+  public static void imagecreatefromstring()
+  {
+  }
+
+  /** Create a new image from file or URL */
+  public static void imagecreatefromwbmp()
+  {
+  }
+
+  /** Create a new image from file or URL */
+  public static void imagecreatefromxbm()
+  {
+  }
+
+  /** Create a new image from file or URL */
+  public static void imagecreatefromxpm()
+  {
+  }
+
+  /** Create a new true color image */
+  public static void imagecreatetruecolor()
+  {
+  }
+
+  /** Draw a dashed line */
+  public static void imagedashedline()
+  {
+  }
+
+  /** Destroy an image */
+  public static void imagedestroy()
+  {
+  }
+
+  /** Draw an ellipse */
+  public static void imageellipse()
+  {
+  }
+
+  /** Flood fill */
+  public static void imagefill()
+  {
+  }
+
+  /** Draw a partial ellipse and fill it */
+  public static void imagefilledarc()
+  {
+  }
+
+  /** Draw a filled ellipse */
+  public static void imagefilledellipse()
+  {
+  }
+
+  /** Draw a filled polygon */
+  public static void imagefilledpolygon()
+  {
+  }
+
+  /** Draw a filled rectangle */
+  public static void imagefilledrectangle()
+  {
+  }
+
+  /** Flood fill to specific color */
+  public static void imagefilltoborder()
+  {
+  }
+
+  /**  Applies a filter to an image */
+  public static void imagefilter()
+  {
+  }
+
+  /** Get font height */
+  public static void imagefontheight()
+  {
+  }
+
+  /** Get font width */
+  public static void imagefontwidth()
+  {
+  }
+
+  /** Give the bounding box of a text using fonts via freetype2 */
+  public static void imageftbbox()
+  {
+  }
+
+  /** Write text to the image using fonts using FreeType 2 */
+  public static void imagefttext()
+  {
+  }
+
+  /** Apply a gamma correction to a GD image */
+  public static void imagegammacorrect()
+  {
+  }
+
+  /** Output GD2 image to browser or file */
+  public static void imagegd2()
+  {
+  }
+
+  /** Output GD image to browser or file */
+  public static void imagegd()
+  {
+  }
+
+  /** Output image to browser or file */
+  public static void imagegif()
+  {
+  }
+
+  /** Enable or disable interlace */
+  public static void imageinterlace()
+  {
+  }
+
+  /** Finds whether an image is a truecolor image */
+  public static void imageistruecolor()
+  {
+  }
+
+  /** Output image to browser or file */
+  public static void imagejpeg()
+  {
+  }
+
+  /**  Set the alpha blending flag to use the bundled libgd layering effects */
+  public static void imagelayereffect()
+  {
+  }
+
+  /** Draw a line */
+  public static void imageline()
+  {
+  }
+
+  /** Load a new font */
+  public static void imageloadfont()
+  {
+  }
+
+  /** Copy the palette from one image to another */
+  public static void imagepalettecopy()
+  {
+  }
+
+  /** Output a PNG image to either the browser or a file */
+  public static void imagepng()
+  {
+  }
+
+  /** Draw a polygon */
+  public static void imagepolygon()
+  {
+  }
+
+  /**  Give the bounding box of a text rectangle using PostScript Type1 fonts */
+  public static void imagepsbbox()
+  {
+  }
+
+  /**  Make a copy of an already loaded font for further modification */
+  public static void imagepscopyfont()
+  {
+  }
+
+  /** Change the character encoding vector of a font */
+  public static void imagepsencodefont()
+  {
+  }
+
+  /** Extend or condense a font */
+  public static void imagepsextendfont()
+  {
+  }
+
+  /** Free memory used by a PostScript Type 1 font */
+  public static void imagepsfreefont()
+  {
+  }
+
+  /** Load a PostScript Type 1 font from file */
+  public static void imagepsloadfont()
+  {
+  }
+
+  /** Slant a font */
+  public static void imagepsslantfont()
+  {
+  }
+
+  /** To draw a text string over an image using PostScript Type1 fonts */
+  public static void imagepstext()
+  {
+  }
+
+  /** Draw a rectangle */
+  public static void imagerectangle()
+  {
+  }
+
+  /** Rotate an image with a given angle */
+  public static void imagerotate()
+  {
+  }
+
+  /** Set the flag to save full alpha channel information (as opposed to
+   *  single-color transparency) when saving PNG images */
+  public static void imagesavealpha()
+  {
+  }
+
+  /** Set the brush image for line drawing */
+  public static void imagesetbrush()
+  {
+  }
+
+  /** Set a single pixel */
+  public static void imagesetpixel()
+  {
+  }
+
+  /** Set the style for line drawing */
+  public static void imagesetstyle()
+  {
+  }
+
+  /** Set the thickness for lineowser or file */
+  public static void imagesetthickness()
+  {
+  }
+
+  /** Embe into single tags. */
+  public static void iptcembed()
+  {
+  }
+
+  /** Convert JPEG image file to WBMP image file */
+  public static void jpeg2wbmp()
+  {
+  }
+
+  /** Convert PNG image file to WBM */
+  public static void png2wbmp()
+  {
+  }
+
 }
 
