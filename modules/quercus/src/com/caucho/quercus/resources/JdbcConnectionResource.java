@@ -373,7 +373,8 @@ public class JdbcConnectionResource extends ResourceValue {
     Statement stmt = null;
 
     try {
-      stmt = _conn.createStatement();
+      stmt = _conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
+                                   ResultSet.CONCUR_READ_ONLY);
       stmt.setEscapeProcessing(false); // php/1406
 
       if (stmt.execute(sql)) {

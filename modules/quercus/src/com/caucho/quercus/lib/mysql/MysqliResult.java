@@ -65,7 +65,7 @@ public class MysqliResult {
     if (validateResult().setRowNumber(rowNumber))
       return true;
     else {
-      env.warning(L.l("Offset {0} is invalid for MySQL (or the query data is unbuffered)", rowNumber));
+      env.warning(L.l("Offset {0} is invalid (or the query data is unbuffered)", rowNumber));
 
       return false;
     }

@@ -511,12 +511,12 @@ public class JdbcResultResource extends ResourceValue {
         return BooleanValue.FALSE;
       }
       else {
-	String tableName = _metaData.getTableName(fieldOffset + 1);
+  String tableName = _metaData.getTableName(fieldOffset + 1);
 
-	if (tableName == null || tableName.equals(""))
-	  return BooleanValue.FALSE;
-	else
-	  return new StringValueImpl(tableName);
+  if (tableName == null || tableName.equals(""))
+    return BooleanValue.FALSE;
+  else
+    return new StringValueImpl(tableName);
       }
     } catch (SQLException e) {
       log.log(Level.FINE, e.toString(), e);
@@ -686,14 +686,13 @@ public class JdbcResultResource extends ResourceValue {
   {
     if (rs == null)
       return BooleanValue.FALSE;
-    
+
     try {
       int currentRow = rs.getRow();
 
       try {
         rs.last();
         int count = rs.getRow();
-
         return new LongValue((long) count);
       } catch (Exception e) {
         log.log(Level.FINE, e.toString(), e);
@@ -1108,7 +1107,7 @@ public class JdbcResultResource extends ResourceValue {
     }
   }
 
-  private ResultSetMetaData getMetaData()
+  public ResultSetMetaData getMetaData()
     throws SQLException
   {
     if (_metaData == null && _rs != null)

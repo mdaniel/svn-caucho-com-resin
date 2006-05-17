@@ -30,10 +30,12 @@
 package com.caucho.quercus.lib.postgres;
 
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.Statement;
 import java.sql.SQLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.StringTokenizer;
 
 import com.caucho.util.Log;
 
@@ -53,8 +55,6 @@ import com.caucho.quercus.resources.JdbcColumnMetaData;
 import com.caucho.quercus.lib.mysql.Mysqli;
 import com.caucho.quercus.lib.mysql.MysqliResult;
 import com.caucho.quercus.lib.mysql.MysqliStatement;
-//@todo remove (still using MYSQL_xxx constants)
-import com.caucho.quercus.lib.mysql.MysqlModule;
 
 // Do not add new compile dependencies (using reflection instead)
 // import org.postgresql.largeobject.*;
@@ -289,24 +289,40 @@ public class PostgresModule extends AbstractQuercusModule {
                               @Optional("") String delimiter,
                               @Optional String nullAs)
   {
-    //@todo use nullAs and Postgres constants
+    try {
+      if (delimiter.equals("")) {
+        delimiter = "\t";
+      }
 
-    if (!(nullAs == null || nullAs.length() == 0)) {
-      throw new UnimplementedException("pg_copy_from with nullAs");
-    }
+      if (nullAs.equals("")) {
+        nullAs = "\n";
+      }
 
-    if (delimiter.equals("")) {
-      delimiter = "\t";
-    }
+      ArrayValueImpl newArray = (ArrayValueImpl) rows;
+      int nasize = newArray.size();
 
-    ArrayValueImpl newArray = (ArrayValueImpl) rows;
-    int nasize = newArray.size();
+      for (int i=0; i<nasize; i++) {
+        String values = newArray.get(LongValue.create(i)).toString();
+        StringBuffer stringBuffer = new StringBuffer();
+        //String values = "\n\tNUMBER1stcolumn\t\n\t\n\tNUMBER2ndcolumn\tNUMBER3rdcolumn\tNUMBER4thcolumn\t\n";
+        StringTokenizer tokenizer = new StringTokenizer(values, delimiter, true);
+        while (tokenizer.hasMoreTokens()) {
+          String token = tokenizer.nextToken();
+          if (token.equals(delimiter)) {
+            stringBuffer.append(",");
+          } else if (token.equals(nullAs)) {
+            stringBuffer.append("NULL");
+          } else {
+            stringBuffer.append("'"+token+"'");
+          }
+        }
 
-    for (int i=0; i<nasize; i++) {
-      String values = newArray.get(LongValue.create(i)).toString();
-      values = values.replace(delimiter, "\',\'");
-      String query = "INSERT INTO "+tableName+" VALUES('"+values+"')";
-      pg_query(env, conn, query);
+        values = stringBuffer.toString();
+
+        String query = "INSERT INTO "+tableName+" VALUES("+values+")";
+        pg_query(env, conn, query);
+      }
+    } catch (Exception ex) {
     }
 
     return true;
@@ -319,12 +335,14 @@ public class PostgresModule extends AbstractQuercusModule {
                           @NotNull Mysqli conn,
                           String tableName,
                           @Optional("") String delimiter,
-                          @Optional String nullAs)
+                          @Optional("") String nullAs)
   {
-    //@todo use nullAs and Postgres constants
-
     if (delimiter.equals("")) {
       delimiter = "\t";
+    }
+
+    if (nullAs.equals("")) {
+      nullAs = "\n";
     }
 
     Object value = pg_query(env, conn, "SELECT * FROM " + tableName);
@@ -333,7 +351,7 @@ public class PostgresModule extends AbstractQuercusModule {
 
     ArrayValueImpl newArray = new ArrayValueImpl();
 
-    value = result.fetch_array(MysqlModule.MYSQL_BOTH);
+    value = result.fetch_array(PGSQL_BOTH);
 
     if (value != NullValue.NULL) {
       int curr = 0;
@@ -347,13 +365,20 @@ public class PostgresModule extends AbstractQuercusModule {
             v = StringValue.create(v.toString() + delimiter);
           }
           LongValue lv = LongValue.create(i);
+          Value fieldValue = arr.get(lv);
+          String fieldString;
+          if (fieldValue instanceof NullValue) {
+            fieldString = nullAs;
+          } else {
+            fieldString = fieldValue.toString();
+          }
           newArray.put(LongValue.create(curr),
-                       StringValue.create(v.toString() + arr.get(lv).toString()));
+                       StringValue.create(v.toString() + fieldString));
         }
 
         curr++;
 
-        value = result.fetch_array(MysqlModule.MYSQL_BOTH);
+        value = result.fetch_array(PGSQL_BOTH);
       } while (value != NullValue.NULL);
     }
 
@@ -518,15 +543,28 @@ public class PostgresModule extends AbstractQuercusModule {
    */
   public Value pg_fetch_array(Env env,
                               @NotNull MysqliResult result,
-                              @Optional("0") int row,
-                              @Optional("MYSQL_BOTH") int resultType)
+                              @Optional("-1") Value row,
+                              @Optional("PGSQL_BOTH") int resultType)
   {
-    //@todo consider the case row > 0
-    //@todo use Postgres constants
-    if (result == null)
-      return BooleanValue.FALSE;
+    Value value = BooleanValue.FALSE;
 
-    return result.fetch_array(resultType);
+    try {
+      if (result == null)
+        return value;
+
+      if ((row != null) && (!row.equals(NullValue.NULL)) && (row.toInt() >= 0)) {
+        result.data_seek(env, row.toInt());
+      }
+
+      value = result.fetch_array(resultType);
+
+      if (value.equals(NullValue.NULL)) {
+        value = BooleanValue.FALSE;
+      }
+    } catch (Exception ex) {
+    }
+
+    return value;
   }
 
   /**
@@ -534,9 +572,11 @@ public class PostgresModule extends AbstractQuercusModule {
    */
   public Value pg_fetch_assoc(Env env,
                               @NotNull MysqliResult result,
-                              @Optional("0") int row)
+                              @Optional("-1") Value row)
   {
-    //@todo consider the case row > 0
+    if ((row != null) && (!row.equals(NullValue.NULL)) && (row.toInt() >= 0)) {
+      result.data_seek(env, row.toInt());
+    }
 
     return result.fetch_assoc();
   }
@@ -546,10 +586,14 @@ public class PostgresModule extends AbstractQuercusModule {
    */
   public Value pg_fetch_object(Env env,
                                @NotNull MysqliResult result,
-                               @Optional int row,
+                               @Optional("-1") Value row,
                                @Optional int resultType)
   {
-    //@todo use optional row and resultType
+    //@todo use optional resultType
+    if ((row != null) && (!row.equals(NullValue.NULL)) && (row.toInt() >= 0)) {
+      result.data_seek(env, row.toInt());
+    }
+
     return result.fetch_object(env);
   }
 
@@ -562,10 +606,16 @@ public class PostgresModule extends AbstractQuercusModule {
                                 @Optional("-1") int fieldNumber)
   {
     Value fetRow = result.fetch_row();
+
+    // Handle the case: optional row with mandatory fieldNumber.
     if (fieldNumber < 0) {
       fieldNumber = row;
-      row = 0;
+      row = -1;
     }
+
+    if (row >= 0)
+      result.data_seek(env, row);
+
     return ((ArrayValueImpl)fetRow).get(LongValue.create(fieldNumber)).toString();
   }
 
@@ -574,19 +624,22 @@ public class PostgresModule extends AbstractQuercusModule {
    */
   public Value pg_fetch_row(Env env,
                             @NotNull MysqliResult result,
-                            @Optional int row)
+                            @Optional("-1") Value row)
   {
-    // @todo use optional row
+    if ((row != null) && (!row.equals(NullValue.NULL)) && (row.toInt() >= 0)) {
+      result.data_seek(env, row.toInt());
+    }
+
     return result.fetch_row();
   }
 
   /**
    * Test if a field is SQL NULL
    */
-  public int pg_field_is_null(Env env,
-                              @NotNull MysqliResult result,
-                              @Optional("0") int row,
-                              Value mixedField)
+  public Value pg_field_is_null(Env env,
+                                @NotNull MysqliResult result,
+                                @Optional("-1") int row,
+                                Value mixedField)
   {
     throw new UnimplementedException("pg_field_is_null");
   }
@@ -598,7 +651,6 @@ public class PostgresModule extends AbstractQuercusModule {
                              @NotNull MysqliResult result,
                              int fieldNumber)
   {
-    //@todo return String
     return result.fetch_field_name(env, fieldNumber);
   }
 
@@ -609,7 +661,22 @@ public class PostgresModule extends AbstractQuercusModule {
                           @NotNull MysqliResult result,
                           String fieldName)
   {
-    throw new UnimplementedException("pg_field_num");
+    int columnNumber = -1;
+
+    try {
+      ResultSetMetaData metaData = result.validateResult().getMetaData();
+
+      int n = metaData.getColumnCount();
+
+      for (int i=1; i<=n; i++) {
+        if (metaData.getColumnName(i).equals(fieldName)) {
+          columnNumber = i;
+        }
+      }
+    } catch (Exception ex) {
+    }
+
+    return columnNumber;
   }
 
   /**
@@ -630,10 +697,6 @@ public class PostgresModule extends AbstractQuercusModule {
                              @NotNull MysqliResult result,
                              int fieldNumber)
   {
-    // ERRATUM: Returns 10 for datatypes DEC and NUMERIC instead of 11
-
-    //@todo return int
-
     return result.fetch_field_length(env, fieldNumber);
   }
 
@@ -654,7 +717,6 @@ public class PostgresModule extends AbstractQuercusModule {
                              @NotNull MysqliResult result,
                              int fieldNumber)
   {
-    //@todo return String
     return result.fetch_field_type(env, fieldNumber);
   }
 
@@ -1240,8 +1302,6 @@ public class PostgresModule extends AbstractQuercusModule {
   public Value pg_num_rows(Env env,
                            @NotNull MysqliResult result)
   {
-    //@todo return int
-
     return result.num_rows();
   }
 
@@ -1339,7 +1399,7 @@ public class PostgresModule extends AbstractQuercusModule {
                                                    String query,
                                                    Value params)
   {
-    return conn.query(query, MysqlModule.MYSQL_STORE_RESULT);
+    return conn.query(query);
   }
 
   /**
@@ -1353,7 +1413,7 @@ public class PostgresModule extends AbstractQuercusModule {
     //@todo
     Mysqli conn = getConnection(env);
 
-    return conn.query(query, MysqlModule.MYSQL_STORE_RESULT);
+    return conn.query(query);
   }
 
   /**
@@ -1364,11 +1424,10 @@ public class PostgresModule extends AbstractQuercusModule {
                                             String query)
   {
     //@todo conn should be optional
-    //@todo use Postgres constants
     if (conn == null)
       conn = getConnection(env);
 
-    return conn.query(query, MysqlModule.MYSQL_STORE_RESULT);
+    return conn.query(query);
   }
 
   /**
@@ -1397,7 +1456,11 @@ public class PostgresModule extends AbstractQuercusModule {
                                 @NotNull MysqliResult result,
                                 int offset)
   {
-    return result.data_seek(env, offset);
+    try {
+      return result.data_seek(env, offset);
+    } catch (Exception ex) {
+      return false;
+    }
   }
 
   /**
@@ -1514,7 +1577,7 @@ public class PostgresModule extends AbstractQuercusModule {
 
     Object value = pg_query(env, conn, "SHOW log_error_verbosity");
 
-    Value row = pg_fetch_row(env, (MysqliResult)value, 0);
+    Value row = pg_fetch_row(env, (MysqliResult)value, LongValue.create(0));
 
     ArrayValueImpl arr = (ArrayValueImpl)row;
 

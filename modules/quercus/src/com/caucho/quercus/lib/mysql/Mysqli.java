@@ -405,6 +405,11 @@ public class Mysqli {
     }
   }
 
+  public Object query(String sql)
+  {
+    return query(sql, MysqliModule.MYSQLI_STORE_RESULT);
+  }
+
   /**
    * Connects to the underlying database.
    */
