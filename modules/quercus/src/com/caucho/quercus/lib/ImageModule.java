@@ -45,6 +45,9 @@ import com.caucho.quercus.env.*;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.ReadStream;
 
+import java.awt.image.*;
+import javax.imageio.*;
+
 /**
  * PHP image
  */
@@ -308,6 +311,24 @@ public class ImageModule extends AbstractQuercusModule {
     String _mime;
   }
 
+  static class QuercusImage extends ResourceValue {
+    private int width;
+    private int height;
+    private BufferedImage bufferedImage;
+
+    public QuercusImage(int width, int height)
+    {
+      this.width = width;
+      this.height = height;
+      this.bufferedImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+    }
+
+    public String toString()
+    {
+      return "resource(Image)";
+    }
+  }
+
   /** Retrieve information about the currently installed GD library */
   public static Value gd_info()
   {
@@ -535,8 +556,9 @@ public class ImageModule extends AbstractQuercusModule {
   }
 
   /** Create a new palette based image */
-  public static void imagecreate()
+  public static Value imagecreate(int width, int height)
   {
+    return new QuercusImage(width, height);
   }
 
   /** Create a new image from GD2 file or URL */
@@ -590,8 +612,9 @@ public class ImageModule extends AbstractQuercusModule {
   }
 
   /** Create a new true color image */
-  public static void imagecreatetruecolor()
+  public static Value imagecreatetruecolor(int width, int height)
   {
+    return new QuercusImage(width, height);
   }
 
   /** Draw a dashed line */
@@ -600,8 +623,9 @@ public class ImageModule extends AbstractQuercusModule {
   }
 
   /** Destroy an image */
-  public static void imagedestroy()
+  public static void imagedestroy(QuercusImage image)
   {
+    // no-op
   }
 
   /** Draw an ellipse */
@@ -695,8 +719,14 @@ public class ImageModule extends AbstractQuercusModule {
   }
 
   /** Output image to browser or file */
-  public static void imagejpeg()
+  public static void imagejpeg(Env env, QuercusImage image)
   {
+    try {
+      ImageIO.write(image.bufferedImage, "jpeg", env.getOut());
+    }
+    catch (IOException e) {
+      throw new QuercusException(e);
+    }
   }
 
   /**  Set the alpha blending flag to use the bundled libgd layering effects */
@@ -720,8 +750,14 @@ public class ImageModule extends AbstractQuercusModule {
   }
 
   /** Output a PNG image to either the browser or a file */
-  public static void imagepng()
+  public static void imagepng(Env env, QuercusImage image)
   {
+    try {
+      ImageIO.write(image.bufferedImage, "png", env.getOut());
+    }
+    catch (IOException e) {
+      throw new QuercusException(e);
+    }
   }
 
   /** Draw a polygon */
