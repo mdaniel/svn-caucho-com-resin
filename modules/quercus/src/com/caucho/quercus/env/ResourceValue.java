@@ -43,6 +43,14 @@ public class ResourceValue extends Value {
   }
 
   /**
+   * Converts to a key.
+   */
+  public Value toKey()
+  {
+    return new LongValue(System.identityHashCode(this));
+  }
+
+  /**
    * Converts to a string.
    */
   public String toString()

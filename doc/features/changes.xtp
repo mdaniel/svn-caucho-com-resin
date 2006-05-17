@@ -4,6 +4,8 @@
 
 <s2 title='3.0.snap - May 15, 2006'>
 <ul>
+<li>Quercus: resources should be usable as keys (#1114, rep by koreth)
+<li>Quercus: fsockopen and fgets needs to return cr-lf (#1115, rep by koreth)
 <li>Quercus: fsockopen (#1104, rep by koreth)
 <li>(2006-05-15) Quercus: add server-name to &lt;init> to populate $_SERVER (#1105, rep by koreth)
 <li>Quercus: debug_backtrace for interpreted mode (#1124, rep by koreth)

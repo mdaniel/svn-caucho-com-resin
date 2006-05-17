@@ -84,7 +84,19 @@ public class StreamReadWrite extends StreamResource {
   public boolean readOptionalLinefeed()
     throws IOException
   {
-    return false;
+    if (_is != null) {
+      int ch = _is.read();
+
+      if (ch == '\n') {
+        return true;
+      }
+      else {
+        _is.unread();
+        return false;
+      }
+    }
+    else
+      return false;
   }
   
   /**
@@ -94,7 +106,7 @@ public class StreamReadWrite extends StreamResource {
     throws IOException
   {
     if (_is != null)
-      return _is.readLine();
+      return _is.readLineNoChop();
     else
       return "";
   }
