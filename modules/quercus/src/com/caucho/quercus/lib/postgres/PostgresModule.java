@@ -450,10 +450,10 @@ public class PostgresModule extends AbstractQuercusModule {
    * Sends a request to execute a prepared statement with given parameters,
    * and waits for the result
    */
-  public Value pg_execute(Env env,
-                          @NotNull Mysqli conn,
-                          String stmtName,
-                          Value params)
+  public @ReturnNullAsFalse Object pg_execute(Env env,
+                                              @NotNull Mysqli conn,
+                                              String stmtName,
+                                              Value params)
   {
     try {
       MysqliStatement pstmt = conn.getStatement(stmtName);
@@ -474,11 +474,17 @@ public class PostgresModule extends AbstractQuercusModule {
       Value value[] = arr.getValueArray(env);
       pstmt.bind_param(env, types, value);
 
-      pstmt.execute(env);
+      if (!pstmt.execute(env))
+        return null;
 
-      return BooleanValue.TRUE;
+      if (pstmt.getStatementType().equals("SELECT")) {
+        return new MysqliResult(new JdbcResultResource(null, pstmt.getResultSet(), null));
+      } else {
+        return pstmt;
+      }
+
     } catch (Exception ex) {
-      return BooleanValue.FALSE;
+      return null;
     }
   }
 
@@ -1367,8 +1373,6 @@ public class PostgresModule extends AbstractQuercusModule {
                           String stmtName,
                           String query)
   {
-    // @todo: check this with test case php/4315
-
     try {
       // Make the PHP query a JDBC like query replacing ($1 -> ?) with question marks.
       query = query.replaceAll("\\$[0-9]+", "?");

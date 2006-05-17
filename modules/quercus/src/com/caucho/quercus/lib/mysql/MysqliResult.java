@@ -50,7 +50,7 @@ public class MysqliResult {
 
   private JdbcResultResource _rs;
 
-  MysqliResult(JdbcResultResource rs)
+  public MysqliResult(JdbcResultResource rs)
   {
     _rs = rs;
   }
