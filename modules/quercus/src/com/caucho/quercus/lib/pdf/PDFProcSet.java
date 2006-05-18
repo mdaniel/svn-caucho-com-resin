@@ -65,7 +65,6 @@ public class PDFProcSet {
   }
 
   String getResource()
-    throws IOException
   {
     return ("/ProcSet [" + _set + "]");
   }

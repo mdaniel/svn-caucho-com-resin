@@ -300,7 +300,7 @@ public class Zlib {
    * @throws IOException
    * @throws DataFormatException
    */
-  private InputStream readgzfile()
+  InputStream readgzfile()
     throws IOException, DataFormatException
   {
     return new InflaterInputStream(_path.openRead(), new Inflater());

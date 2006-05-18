@@ -49,6 +49,7 @@ import com.caucho.config.ConfigException;
 
 import com.caucho.loader.EnvironmentLocal;
 
+import com.caucho.quercus.QuercusException;
 import com.caucho.quercus.QuercusRuntimeException;
 
 import com.caucho.quercus.env.*;
@@ -189,6 +190,12 @@ public class ModuleInfo {
       _iniMap.putAll(iniMap);
 
     for (Method method : cl.getMethods()) {
+      if (method.getDeclaringClass().equals(Object.class))
+	continue;
+      
+      if (method.getDeclaringClass().isAssignableFrom(AbstractQuercusModule.class))
+	continue;
+      
       if (! Modifier.isPublic(method.getModifiers()))
         continue;
 
@@ -199,6 +206,13 @@ public class ModuleInfo {
       if (void.class.isAssignableFrom(retType))
         continue;
        */
+
+      if (hasCheckedException(method)) {
+	log.warning(L.l("Module method '{0}.{1}' may not throw checked exceptions",
+			method.getDeclaringClass().getName(),
+			method.getName()));
+	continue;
+      }
 
       Class []params = method.getParameterTypes();
 
@@ -217,6 +231,16 @@ public class ModuleInfo {
         log.log(Level.FINE, e.toString(), e);
       }
     }
+  }
+
+  private static boolean hasCheckedException(Method method)
+  {
+    for (Class exnCl : method.getExceptionTypes()) {
+      if (! RuntimeException.class.isAssignableFrom(exnCl))
+	return true;
+    }
+
+    return false;
   }
 
   public static Value objectToValue(Object obj)

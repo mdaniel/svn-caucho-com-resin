@@ -196,52 +196,51 @@ public class StreamModule extends AbstractQuercusModule {
    * Copies from an input stream to an output stream
    */
   public long stream_copy_to_stream(Env env,
-                                    StreamResource in,
-                                    StreamResource out,
+                                    @NotNull StreamResource in,
+                                    @NotNull StreamResource out,
                                     @Optional("-1") int length,
                                     @Optional int offset)
-    throws IOException
   {
-    if (in == null) {
-      env.warning("first argument must be an input stream");
-      return -1;
+    try {
+      if (in == null)
+	return -1;
+
+      if (out == null)
+	return -1;
+
+      TempBuffer temp = TempBuffer.allocate();
+      byte []buffer = temp.getBuffer();
+
+      while (offset-- > 0)
+	in.read();
+
+      if (length < 0)
+	length = Integer.MAX_VALUE;
+
+      long bytesWritten = 0;
+
+      while (length > 0) {
+	int sublen = buffer.length;
+
+	if (length < sublen)
+	  sublen = (int) length;
+
+	sublen = in.read(buffer, 0, sublen);
+	if (sublen < 0)
+	  return bytesWritten;
+
+	out.write(buffer, 0, sublen);
+
+	bytesWritten += sublen;
+	length -= sublen;
+      }
+
+      TempBuffer.free(temp);
+
+      return bytesWritten;
+    } catch (IOException e) {
+      throw new QuercusModuleException(e);
     }
-
-    if (out == null) {
-      env.warning("second argument must be an output stream");
-      return -1;
-    }
-
-    TempBuffer temp = TempBuffer.allocate();
-    byte []buffer = temp.getBuffer();
-
-    while (offset-- > 0)
-      in.read();
-
-    if (length < 0)
-      length = Integer.MAX_VALUE;
-
-    long bytesWritten = 0;
-
-    while (length > 0) {
-      int sublen = buffer.length;
-
-      if (length < sublen)
-        sublen = (int) length;
-
-      sublen = in.read(buffer, 0, sublen);
-      if (sublen < 0)
-        return bytesWritten;
-
-      out.write(buffer, 0, sublen);
-
-      bytesWritten += sublen;
-      length -= sublen;
-    }
-
-    TempBuffer.free(temp);
-
-    return bytesWritten;
   }
 
   /**

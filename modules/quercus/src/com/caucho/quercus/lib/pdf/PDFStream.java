@@ -39,6 +39,8 @@ import com.caucho.vfs.WriteStream;
 import com.caucho.vfs.TempStream;
 import com.caucho.vfs.TempBuffer;
 
+import com.caucho.quercus.QuercusModuleException;
+
 /**
  * pdf object oriented API facade
  */
@@ -114,46 +116,42 @@ public class PDFStream {
   }
 
   public void stroke()
-    throws IOException
   {
     flushToGraph();
 
-    _out.println("S");
+    println("S");
   }
 
   public void closepath()
-    throws IOException
   {
     flushToGraph();
 
-    _out.println("h");
+    println("h");
   }
 
   public void clip()
-    throws IOException
   {
     flushToGraph();
 
-    _out.println("W");
+    println("W");
   }
 
   public void curveTo(double x1, double y1,
 		      double x2, double y2,
 		      double x3, double y3)
-    throws IOException
   {
     flushToGraph();
 
     if (x1 == x2 && y1 == y2) {
-      _out.println(x1 + " " + y1 + " " +
+      println(x1 + " " + y1 + " " +
 		   x3 + " " + y3 + " y");
     }
     else if (x2 == x3 && y2 == y3) {
-      _out.println(x1 + " " + y1 + " " +
+      println(x1 + " " + y1 + " " +
 		   x2 + " " + y2 + " v");
     }
     else {
-      _out.println(x1 + " " + y1 + " " +
+      println(x1 + " " + y1 + " " +
 		   x2 + " " + y2 + " " +
 		   x3 + " " + y3 + " c");
     }
@@ -164,52 +162,46 @@ public class PDFStream {
   }
 
   public void endpath()
-    throws IOException
   {
     flushToGraph();
 
-    _out.println("n");
+    println("n");
   }
 
   public void closepathStroke()
-    throws IOException
   {
     flushToGraph();
 
-    _out.println("s");
+    println("s");
   }
 
   public void closepathFillStroke()
-    throws IOException
   {
     flushToGraph();
 
-    _out.println("b");
+    println("b");
   }
 
   public void fill()
-    throws IOException
   {
     flushToGraph();
 
-    _out.println("f");
+    println("f");
   }
 
   public void fillStroke()
-    throws IOException
   {
     flushToGraph();
 
-    _out.println("B");
+    println("B");
   }
 
   public void lineTo(double x, double y)
-    throws IOException
   {
     flushToGraph();
 
     if (x != _x || y != _y || ! _hasGraphicsPos)
-      _out.println(x + " " + y + " l");
+      println(x + " " + y + " l");
 
     _x = x;
     _y = y;
@@ -217,15 +209,13 @@ public class PDFStream {
   }
 
   public void rect(double x, double y, double w, double h)
-    throws IOException
   {
     flushToGraph();
 
-    _out.println(x + " " + y + " " + w + " " + h + " re");
+    println(x + " " + y + " " + w + " " + h + " re");
   }
 
   public void moveTo(double x, double y)
-    throws IOException
   {
     if (_x != x || _y != y) {
       _x = x;
@@ -240,7 +230,6 @@ public class PDFStream {
 
   public boolean setcolor(String fstype, String colorspace,
 			  double c1, double c2, double c3, double c4)
-    throws IOException
   {
     flushToGraph();
 
@@ -256,25 +245,25 @@ public class PDFStream {
 
     if ("gray".equals(colorspace)) {
       if ((type & STROKE) != 0)
-	_out.println(c1 + " G");
+	println(c1 + " G");
       if ((type & FILL) != 0)
-	_out.println(c1 + " g");
+	println(c1 + " g");
 
       return true;
     }
     else if ("rgb".equals(colorspace)) {
       if ((type & STROKE) != 0)
-	_out.println(c1 + " " + c2 + " " + c3 + " RG");
+	println(c1 + " " + c2 + " " + c3 + " RG");
       if ((type & FILL) != 0)
-	_out.println(c1 + " " + c2 + " " + c3 + " rg");
+	println(c1 + " " + c2 + " " + c3 + " rg");
 
       return true;
     }
     else if ("cmyk".equals(colorspace)) {
       if ((type & STROKE) != 0)
-	_out.println(c1 + " " + c2 + " " + c3 + " " + c4 + " K");
+	println(c1 + " " + c2 + " " + c3 + " " + c4 + " K");
       if ((type & FILL) != 0)
-	_out.println(c1 + " " + c2 + " " + c3 + " " + c4 + " k");
+	println(c1 + " " + c2 + " " + c3 + " " + c4 + " k");
 
       return true;
     }
@@ -286,15 +275,13 @@ public class PDFStream {
   }
 
   public void setDash(double b, double w)
-    throws IOException
   {
-    _out.println("[" + b + " " + w + "] 0 d");
+    println("[" + b + " " + w + "] 0 d");
   }
 
   public boolean setlinewidth(double w)
-    throws IOException
   {
-    _out.println(w + " w");
+    println(w + " w");
 
     return true;
   }
@@ -303,9 +290,8 @@ public class PDFStream {
    * Saves the graphics state
    */
   public boolean save()
-    throws IOException
   {
-    _out.println("q");
+    println("q");
 
     return true;
   }
@@ -314,88 +300,94 @@ public class PDFStream {
    * Restores the graphics state
    */
   public boolean restore()
-    throws IOException
   {
-    _out.println("Q");
+    println("Q");
 
     return true;
   }
 
   public boolean concat(double a, double b, double c,
 			double d, double e, double f)
-    throws IOException
   {
-    _out.println(String.format("%.4f %.4f %.4f %.4f %.4f %.4f cm",
-			       a, b, c, d, e, f));
+    println(String.format("%.4f %.4f %.4f %.4f %.4f %.4f cm",
+			  a, b, c, d, e, f));
 
     return true;
   }
 
   public void show(String text)
-    throws IOException
   {
     _procSet.add("/Text");
 
     if (! _inText) {
-      _out.println("BT");
+      println("BT");
       _inText = true;
     }
 
     if (! _hasFont && _font != null) {
-      _out.println("/" + _font.getPDFName() + " " + _fontSize + " Tf");
+      println("/" + _font.getPDFName() + " " + _fontSize + " Tf");
       _hasFont = true;
     }
 
     if (! _hasTextPos) {
-      _out.println(_textX + " " + _textY + " Td");
+      println(_textX + " " + _textY + " Td");
       _hasTextPos = true;
     }
 
-    _out.print("(");
-    _out.print(text);
-    _out.println(") Tj");
+    println("(" + text + ") Tj");
   }
 
   public void continue_text(String text)
-    throws IOException
   {
-    _out.print("(");
-    _out.print(text);
-    _out.println(") T*");
+    println("(" + text + ") T*");
   }
 
   public boolean fit_image(PDFImage img)
-    throws IOException
   {
     _procSet.add("/ImageB");
     _procSet.add("/ImageC");
     _procSet.add("/ImageI");
 
-    _out.println("/I" + img.getId() + " Do");
+    println("/I" + img.getId() + " Do");
 
     return true;
   }
 
   public void flushToGraph()
-    throws IOException
   {
-    flush();
+    try {
+      flush();
 
-    if (! _hasGraphicsPos) {
-      _out.println(_x + " " + _y + " m");
-      _hasGraphicsPos = true;
+      if (! _hasGraphicsPos) {
+	_out.println(_x + " " + _y + " m");
+	_hasGraphicsPos = true;
+      }
+    } catch (IOException e) {
+      throw new QuercusModuleException(e);
+    }
+  }
+
+  private void println(String s)
+  {
+    try {
+      _out.println(s);
+    } catch (IOException e) {
+      throw new QuercusModuleException(e);
     }
   }
 
   public void flush()
-    throws IOException
   {
-    if (_inText) {
-      _out.println("ET");
-      _inText = false;
-    }
+    try {
+      if (_inText) {
+	_out.println("ET");
+	_inText = false;
+      }
 
-    _out.flush();
+      _out.flush();
+    } catch (IOException e) {
+      throw new QuercusModuleException(e);
+    }
   }
 
   public PDFProcSet getProcSet()
@@ -404,11 +396,14 @@ public class PDFStream {
   }
 
   public int getLength()
-    throws IOException
   {
-    _out.flush();
+    try {
+      _out.flush();
 
-    return _tempStream.getLength();
+      return _tempStream.getLength();
+    } catch (IOException e) {
+      throw new QuercusModuleException(e);
+    }
   }
 
   public void write(PDFWriter out)

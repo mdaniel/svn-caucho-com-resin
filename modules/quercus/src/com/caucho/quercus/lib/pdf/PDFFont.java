@@ -103,7 +103,6 @@ public class PDFFont extends PDFObject {
   }
 
   String getResource()
-    throws IOException
   {
     return("/Font << /F" + _id + " " + _id + " 0 R>>");
   }

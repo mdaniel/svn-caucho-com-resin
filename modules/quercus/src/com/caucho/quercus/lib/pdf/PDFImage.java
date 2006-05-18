@@ -268,9 +268,8 @@ public class PDFImage extends PDFObject {
   }
 
   String getResource()
-    throws IOException
   {
-    return("/XObject << /I" + _id + " " + _id + " 0 R >>");
+    return ("/XObject << /I" + _id + " " + _id + " 0 R >>");
   }
 
   /**

@@ -28,6 +28,7 @@
 
 package com.caucho.quercus.lib.zip;
 
+import com.caucho.quercus.QuercusModuleException;
 import com.caucho.quercus.env.BooleanValue;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.LongValue;
@@ -50,7 +51,6 @@ import java.util.logging.Logger;
  */
 
 public class ZipModule extends AbstractQuercusModule {
-
   private static final Logger log = Log.open(ZipModule.class);
   private static final L10N L = new L10N(ZipModule.class);
 
@@ -61,7 +61,6 @@ public class ZipModule extends AbstractQuercusModule {
 
   public Value zip_open(Env env,
                         @NotNull Path path)
-    throws IOException
   {
     if (path == null)
       return BooleanValue.FALSE;
@@ -76,12 +75,15 @@ public class ZipModule extends AbstractQuercusModule {
 
   public Value zip_read(Env env,
                         @NotNull Zip zipFile)
-    throws IOException
   {
-    if (zipFile == null)
-      return NullValue.NULL;
+    try {
+      if (zipFile == null)
+	return NullValue.NULL;
 
-    return zipFile.zip_read(env);
+      return zipFile.zip_read(env);
+    } catch (IOException e) {
+      throw new QuercusModuleException(e);
+    }
   }
 
   /**
@@ -111,12 +113,15 @@ public class ZipModule extends AbstractQuercusModule {
   }
 
   public boolean zip_close(@NotNull Zip zipFile)
-    throws IOException
   {
-    if (zipFile != null)
-      zipFile.zip_close();
+    try {
+      if (zipFile != null)
+	zipFile.zip_close();
 
-    return true;
+      return true;
+    } catch (IOException e) {
+      throw new QuercusModuleException(e);
+    }
   }
 
   /**

@@ -1888,7 +1888,6 @@ v   *
    * @return the formatted string
    */
   public static int printf(Env env, String format, Value []args)
-    throws IOException
   {
     Value str = sprintf(format, args);
 
@@ -3642,7 +3641,6 @@ v   *
   public static int vprintf(Env env,
                             String format,
                             @NotNull ArrayValue array)
-    throws IOException
   {
     Value []args;
 

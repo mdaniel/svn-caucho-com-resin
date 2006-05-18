@@ -311,7 +311,6 @@ public class VariableModule extends AbstractQuercusModule {
    * @return true for an array
    */
   public static boolean is_array(@ReadOnly Value v)
-         throws IOException
   {
     return v.isArray();
   }

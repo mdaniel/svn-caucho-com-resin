@@ -29,6 +29,7 @@
 
 package com.caucho.quercus.lib.xml;
 
+import com.caucho.quercus.QuercusModuleException;
 import com.caucho.quercus.env.BooleanValue;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.StringValueImpl;
@@ -121,14 +122,17 @@ public class XmlModule extends AbstractQuercusModule {
    * @throws Exception
    */
   public boolean xml_parse(@NotNull Xml parser,
-                           @NotNull String data,
+                           String data,
                            @Optional("true") boolean isFinal)
-    throws Exception
   {
     if (parser == null)
       return false;
 
-    return parser.xml_parse(data, isFinal);
+    try {
+      return parser.xml_parse(data, isFinal);
+    } catch (Exception e) {
+      throw QuercusModuleException.create(e);
+    }
   }
 
   /**
@@ -331,12 +335,15 @@ public class XmlModule extends AbstractQuercusModule {
                                    @NotNull String data,
                                    @Reference Value valueArray,
                                    @Optional @Reference Value indexArray)
-    throws Exception
   {
-    if (parser == null)
-      return 0;
+    try {
+      if (parser == null)
+	return 0;
 
-    return parser.xml_parse_into_struct(data, valueArray, indexArray);
+      return parser.xml_parse_into_struct(data, valueArray, indexArray);
+    } catch (Exception e) {
+      throw QuercusModuleException.create(e);
+    }
   }
 
   /**

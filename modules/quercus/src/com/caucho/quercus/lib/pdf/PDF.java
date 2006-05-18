@@ -85,7 +85,6 @@ public class PDF {
   private PDFStream _stream;
 
   public PDF(Env env)
-    throws IOException
   {
     _out = new PDFWriter(env.getOut());
   }
@@ -302,7 +301,6 @@ public class PDF {
    * @param w which length
    */
   public boolean setdash(double b, double w)
-    throws IOException
   {
     _stream.setDash(b, w);
 
@@ -313,7 +311,6 @@ public class PDF {
    * Sets the dashing
    */
   public boolean setdashpattern(Env env, @Optional String optlist)
-    throws IOException
   {
     env.stub("setdashpattern");
 
@@ -324,7 +321,6 @@ public class PDF {
    * Sets the flatness
    */
   public boolean setflat(Env env, double flatness)
-    throws IOException
   {
     env.stub("setflat");
 
@@ -336,7 +332,6 @@ public class PDF {
    */
   public boolean setlinecap(Env env,
 			    int cap)
-    throws IOException
   {
     env.stub("setlinecap");
     
@@ -348,7 +343,6 @@ public class PDF {
    */
   public boolean setlinejoin(Env env,
 			     int linejoin)
-    throws IOException
   {
     env.stub("setlinejoin");
     
@@ -385,7 +379,6 @@ public class PDF {
 			   double d,
 			   double e,
 			   double f)
-    throws IOException
   {
     env.stub("setmatrix");
     
@@ -396,7 +389,6 @@ public class PDF {
    * Sets the miter limit
    */
   public boolean setmiterlimit(Env env, double v)
-    throws IOException
   {
     env.stub("setmiterlimit");
     
@@ -409,7 +401,6 @@ public class PDF {
   public boolean shading_pattern(Env env,
 				 int shading,
 				 @Optional String optlist)
-    throws IOException
   {
     env.stub("shading_pattern");
     
@@ -430,7 +421,6 @@ public class PDF {
 		     double c3,
 		     double c4,
 		     @Optional String optlist)
-    throws IOException
   {
     env.stub("shading");
     
@@ -442,7 +432,6 @@ public class PDF {
    */
   public boolean shfill(Env env,
 			int shading)
-    throws IOException
   {
     env.stub("shfill");
     
@@ -475,7 +464,6 @@ public class PDF {
    * Fills
    */
   public boolean fill()
-    throws IOException
   {
     _stream.fill();
 
@@ -486,7 +474,6 @@ public class PDF {
    * Closes the path
    */
   public boolean closepath()
-    throws IOException
   {
     _stream.closepath();
 
@@ -497,7 +484,6 @@ public class PDF {
    * Appends the current path to the clipping path.
    */
   public boolean clip()
-    throws IOException
   {
     _stream.clip();
 
@@ -508,7 +494,6 @@ public class PDF {
    * Closes the path strokes
    */
   public boolean closepath_stroke()
-    throws IOException
   {
     _stream.closepathStroke();
 
@@ -519,7 +504,6 @@ public class PDF {
    * Closes the path strokes
    */
   public boolean closepath_fill_stroke()
-    throws IOException
   {
     _stream.closepathFillStroke();
 
@@ -530,7 +514,6 @@ public class PDF {
    * Fills
    */
   public boolean fill_stroke()
-    throws IOException
   {
     _stream.fillStroke();
 
@@ -541,7 +524,6 @@ public class PDF {
    * Ends the path
    */
   public boolean endpath()
-    throws IOException
   {
     _stream.endpath();
 
@@ -554,7 +536,6 @@ public class PDF {
   public boolean curveto(double x1, double y1,
 			 double x2, double y2,
 			 double x3, double y3)
-    throws IOException
   {
     _stream.curveTo(x1, y1, x2, y2, x3, y3);
 
@@ -566,7 +547,6 @@ public class PDF {
    */
   public boolean curveto_b(double x1, double y1,
 			   double x2, double y2)
-    throws IOException
   {
     _stream.curveTo(x1, y1, x1, y1, x2, y2);
 
@@ -578,7 +558,6 @@ public class PDF {
    */
   public boolean curveto_e(double x1, double y1,
 			   double x2, double y2)
-    throws IOException
   {
     _stream.curveTo(x1, y1, x2, y2, x2, y2);
 
@@ -589,7 +568,6 @@ public class PDF {
    * Creates a counterclockwise arg
    */
   public boolean arc(double x1, double y1, double r, double a, double b)
-    throws IOException
   {
     a = a % 360;
     if (a < 0)
@@ -624,7 +602,6 @@ public class PDF {
    * Creates a clockwise arc
    */
   public boolean arcn(double x1, double y1, double r, double a, double b)
-    throws IOException
   {
     a = a % 360;
     if (a < 0)
@@ -660,7 +637,6 @@ public class PDF {
    */
   private boolean clockwiseArc(double x, double y, double r,
 			       double aDeg, double bDeg)
-    throws IOException
   {
     double a = aDeg * Math.PI / 180.0;
     double b = bDeg * Math.PI / 180.0;
@@ -692,7 +668,6 @@ public class PDF {
    */
   private boolean counterClockwiseArc(double x, double y, double r,
 				      double aDeg, double bDeg)
-    throws IOException
   {
     double a = aDeg * Math.PI / 180.0;
     double b = bDeg * Math.PI / 180.0;
@@ -723,7 +698,6 @@ public class PDF {
    * Creates a circle
    */
   public boolean circle(double x1, double y1, double r)
-    throws IOException
   {
     double l = r * KAPPA;
 
@@ -744,7 +718,6 @@ public class PDF {
    * Sets the graphics position.
    */
   public boolean lineto(double x, double y)
-    throws IOException
   {
     _stream.lineTo(x, y);
 
@@ -755,7 +728,6 @@ public class PDF {
    * Sets the graphics position.
    */
   public boolean moveto(double x, double y)
-    throws IOException
   {
     _stream.moveTo(x, y);
 
@@ -766,7 +738,6 @@ public class PDF {
    * Creates a rectangle
    */
   public boolean rect(double x, double y, double width, double height)
-    throws IOException
   {
     _stream.rect(x, y, width, height);
 
@@ -777,7 +748,6 @@ public class PDF {
    * Sets the color to a grayscale
    */
   public boolean setgray_stroke(double g)
-    throws IOException
   {
     return _stream.setcolor("stroke", "gray", g, 0, 0, 0);
   }
@@ -786,7 +756,6 @@ public class PDF {
    * Sets the color to a grayscale
    */
   public boolean setgray_fill(double g)
-    throws IOException
   {
     return _stream.setcolor("fill", "gray", g, 0, 0, 0);
   }
@@ -795,7 +764,6 @@ public class PDF {
    * Sets the color to a grayscale
    */
   public boolean setgray(double g)
-    throws IOException
   {
     return _stream.setcolor("both", "gray", g, 0, 0, 0);
   }
@@ -804,7 +772,6 @@ public class PDF {
    * Sets the color to a rgb
    */
   public boolean setrgbcolor_stroke(double r, double g, double b)
-    throws IOException
   {
     return _stream.setcolor("stroke", "rgb", r, g, b, 0);
   }
@@ -813,7 +780,6 @@ public class PDF {
    * Sets the fill color to a rgb
    */
   public boolean setrgbcolor_fill(double r, double g, double b)
-    throws IOException
   {
     return _stream.setcolor("fill", "rgb", r, g, b, 0);
   }
@@ -822,7 +788,6 @@ public class PDF {
    * Sets the color to a rgb
    */
   public boolean setrgbcolor(double r, double g, double b)
-    throws IOException
   {
     return _stream.setcolor("both", "rgb", r, g, b, 0);
   }
@@ -832,7 +797,6 @@ public class PDF {
    */
   public boolean setcolor(String fstype, String colorspace,
 			  double c1, double c2, double c3, double c4)
-    throws IOException
   {
     return _stream.setcolor(fstype, colorspace, c1, c2, c3, c4);
   }
@@ -841,7 +805,6 @@ public class PDF {
    * Sets the line width
    */
   public boolean setlinewidth(double w)
-    throws IOException
   {
     return _stream.setlinewidth(w);
   }
@@ -851,7 +814,6 @@ public class PDF {
    */
   public boolean concat(double a, double b, double c,
 			double d, double e, double f)
-    throws IOException
   {
     return _stream.concat(a, b, c, d, e, f);
   }
@@ -892,7 +854,6 @@ public class PDF {
 
   public boolean fit_image(PDFImage img, double x, double y,
 			   @Optional String opt)
-    throws IOException
   {
     _page.addResource(img.getResource());
 
@@ -914,7 +875,6 @@ public class PDF {
    * @param b degrees to skew the y axis
    */
   public boolean skew(double aDeg, double bDeg)
-    throws IOException
   {
     double a = aDeg * Math.PI / 180;
     double b = bDeg * Math.PI / 180;
@@ -929,7 +889,6 @@ public class PDF {
    * @param sy amount to scale the y axis
    */
   public boolean scale(double sx, double sy)
-    throws IOException
   {
     return _stream.concat(sx, 0, 0, sy, 0, 0);
   }
@@ -941,7 +900,6 @@ public class PDF {
    * @param ty amount to translate the y axis
    */
   public boolean translate(double tx, double ty)
-    throws IOException
   {
     return _stream.concat(1, 0, 0, 1, tx, ty);
   }
@@ -952,7 +910,6 @@ public class PDF {
    * @param p amount to rotate
    */
   public boolean rotate(double pDeg)
-    throws IOException
   {
     double p = pDeg * Math.PI / 180;
 
@@ -965,7 +922,6 @@ public class PDF {
    * Saves the graphics state.
    */
   public boolean save()
-    throws IOException
   {
     return _stream.save();
   }
@@ -974,7 +930,6 @@ public class PDF {
    * Restores the graphics state.
    */
   public boolean restore()
-    throws IOException
   {
     return _stream.restore();
   }
@@ -983,7 +938,6 @@ public class PDF {
    * Displays text
    */
   public boolean show(String text)
-    throws IOException
   {
     _stream.show(text);
 
@@ -996,7 +950,6 @@ public class PDF {
   public boolean show_boxed(String text, double x, double y,
 			    double width, double height,
 			    String mode, @Optional String feature)
-    throws IOException
   {
     set_text_pos(x, y);
     _stream.show(text);
@@ -1008,7 +961,6 @@ public class PDF {
    * Displays text
    */
   public boolean show_xy(String text, double x, double y)
-    throws IOException
   {
     set_text_pos(x, y);
     _stream.show(text);
@@ -1020,7 +972,6 @@ public class PDF {
    * Draws the graph
    */
   public boolean stroke()
-    throws IOException
   {
     _stream.stroke();
 
@@ -1031,7 +982,6 @@ public class PDF {
    * Displays text
    */
   public boolean continue_text(String text)
-    throws IOException
   {
     _stream.continue_text(text);
 
@@ -1039,7 +989,6 @@ public class PDF {
   }
 
   public boolean end_page()
-    throws IOException
   {
     _stream.flush();
 
@@ -1054,7 +1003,6 @@ public class PDF {
   }
 
   public boolean end_page_ext(String optlist)
-    throws IOException
   {
     return end_page();
   }
