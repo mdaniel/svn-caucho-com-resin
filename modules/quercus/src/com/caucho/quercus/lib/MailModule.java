@@ -60,6 +60,9 @@ public class MailModule extends AbstractQuercusModule {
 
   private static final L10N L = new L10N(MailModule.class);
 
+  /**
+   * Send mail using JavaMail.
+   */
   public static boolean mail(Env env,
 			     String to,
 			     String subject,
@@ -68,8 +71,6 @@ public class MailModule extends AbstractQuercusModule {
 			     @Optional String additionalParameters)
   {
     Transport smtp = null;
-
-    System.out.println("MAILING: " + to);
 
     try {
       Properties props = new Properties();

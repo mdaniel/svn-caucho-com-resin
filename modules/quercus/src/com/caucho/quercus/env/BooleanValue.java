@@ -187,9 +187,8 @@ public class BooleanValue extends Value {
    * @param env
    */
   public void print(Env env)
-    throws IOException
   {
-    env.getOut().print(_value ? "1" : "");
+    env.print(_value ? "1" : "");
   }
 
   //

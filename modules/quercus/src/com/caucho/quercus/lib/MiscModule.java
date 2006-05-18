@@ -33,6 +33,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.IOException;
 
+import java.util.ArrayList;
+
 import java.util.logging.Logger;
 import java.util.logging.Level;
 
@@ -43,6 +45,7 @@ import com.caucho.java.ScriptStackTrace;
 
 import com.caucho.quercus.Quercus;
 import com.caucho.quercus.QuercusException;
+import com.caucho.quercus.QuercusModuleException;
 
 import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.quercus.module.Optional;
@@ -53,6 +56,8 @@ import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.NullValue;
 import com.caucho.quercus.env.LongValue;
+import com.caucho.quercus.env.StringBuilderValue;
+import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.StringValueImpl;
 
 import com.caucho.quercus.program.QuercusProgram;
@@ -164,6 +169,23 @@ public class MiscModule extends AbstractQuercusModule {
   }
 
   /**
+   * packs the format into a binary.
+   */
+  public Value pack(Env env, String format, Value []args)
+  {
+    ArrayList<PackSegment> segments = parsePackFormat(format);
+
+    StringBuilderValue sb = new StringBuilderValue();
+
+    int i = 0;
+    for (PackSegment segment : segments) {
+      i = segment.apply(env, sb, i, args);
+    }
+
+    return sb;
+  }
+
+  /**
    * Comples and evaluates an expression.
    */
   public Value resin_debug(String code)
@@ -187,19 +209,22 @@ public class MiscModule extends AbstractQuercusModule {
    * Dumps the stack.
    */
   public static Value dump_stack()
-    throws IOException
   {
-    Exception e = new Exception("Stack trace");
-    e.fillInStackTrace();
-
-    com.caucho.vfs.WriteStream out = com.caucho.vfs.Vfs.openWrite("stderr:");
     try {
-      ScriptStackTrace.printStackTrace(e, out.getPrintWriter());
-    } finally {
-      out.close();
-    }
+      Exception e = new Exception("Stack trace");
+      e.fillInStackTrace();
 
-    return NullValue.NULL;
+      com.caucho.vfs.WriteStream out = com.caucho.vfs.Vfs.openWrite("stderr:");
+      try {
+	ScriptStackTrace.printStackTrace(e, out.getPrintWriter());
+      } finally {
+	out.close();
+      }
+
+      return NullValue.NULL;
+    } catch (IOException e) {
+      throw new QuercusModuleException(e);
+    }
   }
 
   /**
@@ -373,6 +398,79 @@ public class MiscModule extends AbstractQuercusModule {
       env.warning(e.getMessage(), e);
 
       return null;
+    }
+  }
+
+  private static ArrayList<PackSegment> parsePackFormat(String format)
+  {
+    ArrayList<PackSegment> segments = new ArrayList<PackSegment>();
+
+    int length = format.length();
+    for (int i = 0; i < length; i++) {
+      char ch = format.charAt(i);
+      
+      int count = 0;
+      char ch1;
+      for (i++;
+	   i < length && '0' <= (ch1 = format.charAt(i)) && ch1 <= '9';
+	   i++) {
+	count = 10 * count + ch1 - '0';
+      }
+
+      if (count == 0)
+	count = 1;
+
+      if (i < length)
+	i--;
+
+      switch (ch) {
+      case 'a':
+	segments.add(new NullSpacePackSegment(count));
+	break;
+      }
+    }
+
+    return segments;
+  }
+
+  abstract static class PackSegment {
+    abstract public int apply(Env env, StringBuilderValue sb,
+			      int i, Value []args);
+  }
+
+  static class NullSpacePackSegment extends PackSegment {
+    private final int _length;
+
+    NullSpacePackSegment(int length)
+    {
+      _length = length;
+    }
+    
+    public int apply(Env env, StringBuilderValue sb, int i, Value []args)
+    {
+      Value arg;
+
+      if (i < args.length) {
+	arg = args[i];
+	i++;
+      }
+      else {
+	env.warning("a: not enough arguments");
+
+	return i;
+      }
+
+      String value = arg.toString();
+      int valueLength = value.length();
+
+      for (int j = 0; j < _length; j++) {
+	if (j < valueLength)
+	  sb.append(value.charAt(j));
+	else
+	  sb.append('\0');
+      }
+
+      return i;
     }
   }
 }

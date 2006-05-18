@@ -875,7 +875,6 @@ public class Var extends Value {
    * @param env
    */
   public void print(Env env)
-    throws IOException
   {
     _value.print(env);
   }

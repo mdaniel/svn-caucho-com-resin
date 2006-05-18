@@ -327,9 +327,8 @@ public class CtypeModule
 
   public static boolean isxdigit(int ch)
   {
-    return
-      (ch >= '0' && ch <= '9')
-      || (ch >= 'a' && ch <= 'f')
-      || (ch >= 'A' && ch <= 'F');
+    return ((ch >= '0' && ch <= '9')
+	    || (ch >= 'a' && ch <= 'f')
+	    || (ch >= 'A' && ch <= 'F'));
   }
 }

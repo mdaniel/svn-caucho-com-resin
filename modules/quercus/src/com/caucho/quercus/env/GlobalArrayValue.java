@@ -115,9 +115,8 @@ public class GlobalArrayValue extends ArrayValueImpl {
    * @param env
    */
   public void print(Env env)
-    throws IOException
   {
-    env.getOut().print("Array");
+    env.print("Array");
   }
 }
 

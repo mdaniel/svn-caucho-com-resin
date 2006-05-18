@@ -192,9 +192,8 @@ public class ServerArrayValue extends ArrayValueImpl {
    * @param env
    */
   public void print(Env env)
-    throws IOException
   {
-    env.getOut().print("Array");
+    env.print("Array");
   }
 
   /**
@@ -202,6 +201,11 @@ public class ServerArrayValue extends ArrayValueImpl {
    */
   private void fillMap()
   {
+    if (_isFilled)
+      return;
+
+    _isFilled = true;
+    
     for (Map.Entry<Value,Value> entry : _env.getQuercus().getServerEnvMap().entrySet()) {
       super.put(entry.getKey(), entry.getValue());
     }

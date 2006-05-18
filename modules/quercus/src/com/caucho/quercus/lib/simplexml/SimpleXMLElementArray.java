@@ -50,7 +50,7 @@ public class SimpleXMLElementArray extends ArrayValueImpl {
   public Value get(Value key)
   {
     if (key instanceof StringValue) {
-      return super.get(new LongValue(0)).get(key);
+      return super.get(LongValue.ZERO).get(key);
     } else {
       return super.get(key);
     }
@@ -65,7 +65,7 @@ public class SimpleXMLElementArray extends ArrayValueImpl {
   @Override
   public Value getField(String index)
   {
-    return super.get(new LongValue(0)).getField(index);
+    return super.get(LongValue.ZERO).getField(index);
   }
 
  /**
@@ -74,7 +74,7 @@ public class SimpleXMLElementArray extends ArrayValueImpl {
  @Override
  public Value putField(Env env, String index, Value object)
  {
-   return super.get(new LongValue(0)).putField(env, index, object);
+   return super.get(LongValue.ZERO).putField(env, index, object);
  }
 
   /**
@@ -83,15 +83,14 @@ public class SimpleXMLElementArray extends ArrayValueImpl {
    */
   @Override
   public void print(Env env)
-    throws java.io.IOException
   {
-    super.get(new LongValue(0)).print(env);
+    super.get(LongValue.ZERO).print(env);
   }
 
   @Override
   public Value toValue()
   {
-    return super.get(new LongValue(0)).toValue();
+    return super.get(LongValue.ZERO).toValue();
   }
 
   public Value copy()

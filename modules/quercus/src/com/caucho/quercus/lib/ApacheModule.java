@@ -42,6 +42,8 @@ import com.caucho.util.L10N;
 
 import com.caucho.server.connection.CauchoResponse;
 
+import com.caucho.quercus.QuercusModuleException;
+
 import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.quercus.module.Optional;
 
@@ -139,17 +141,22 @@ public class ApacheModule extends AbstractQuercusModule {
    * Include request.
    */
   public boolean virtual(Env env, String url)
-    throws IOException, ServletException
   {
-    HttpServletRequest req = env.getRequest();
-    CauchoResponse res = (CauchoResponse) env.getResponse();
+    try {
+      HttpServletRequest req = env.getRequest();
+      CauchoResponse res = (CauchoResponse) env.getResponse();
 
-    // XXX: need to put the output, so the included stream gets the
-    // buffer, too
-    env.getOut().flushBuffer();
+      // XXX: need to put the output, so the included stream gets the
+      // buffer, too
+      env.getOut().flushBuffer();
 
-    req.getRequestDispatcher(url).include(req, res);
+      req.getRequestDispatcher(url).include(req, res);
 
-    return true;
+      return true;
+    } catch (RuntimeException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new QuercusModuleException(e);
+    }
   }
 }

@@ -496,7 +496,6 @@ public class RefVar extends Value {
    * @param env
    */
   public void print(Env env)
-    throws IOException
   {
     _var.print(env);
   }

@@ -442,7 +442,6 @@ public class ArrayModule
    * @param array the array to obtain the keys for
    * @param searchValue the corresponding value of the returned key array
    * @return an array containing the keys
-   * @throws NullPointerException
    */
   public Value array_keys(Env env,
                           @ReadOnly ArrayValue array,
@@ -671,7 +670,6 @@ public class ArrayModule
    * @param array the array from which the keys will come from
    * @param num the number of random keys to return
    * @return the produce of the array's elements
-   * @throws NullPointerException
    */
   public Value array_rand(Env env,
                           ArrayValue array,
@@ -817,7 +815,6 @@ public class ArrayModule
    * @param array the array to search
    * @param strict checks for type aswell
    * @return the key of the needle
-   * @throws NullPointerException
    */
   public Value array_search(Env env,
                             @ReadOnly Value needle,
@@ -1009,7 +1006,6 @@ public class ArrayModule
    *
    * @param array the array to get rid of the duplicates from
    * @return an array without duplicates
-   * @throws ClassCastException
    */
   public Value array_unique(Env env,
                             ArrayValue array)

@@ -37,8 +37,11 @@ import java.util.logging.Logger;
 
 import com.caucho.util.L10N;
 
+import com.caucho.quercus.QuercusModuleException;
+
 import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.quercus.module.Optional;
+import com.caucho.quercus.module.NotNull;
 
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.Env;
@@ -249,60 +252,64 @@ public class StreamModule extends AbstractQuercusModule {
    * @param context the resource context
    */
   public static Value stream_get_contents(Env env,
-                                          StreamResource in,
+                                          @NotNull StreamResource in,
                                           @Optional("-1") long maxLen,
                                           @Optional long offset)
-    throws IOException
   {
-    if (in == null) {
-      env.warning("first argument must be an open stream");
-      return BooleanValue.FALSE;
+    try {
+      if (in == null)
+	return BooleanValue.FALSE;
+
+      StringBuilder sb = new StringBuilder();
+
+      int ch;
+
+      if (maxLen < 0)
+	maxLen = Integer.MAX_VALUE;
+
+      while (offset-- > 0)
+	in.read();
+
+      while (maxLen-- > 0 && (ch = in.read()) >= 0) {
+	sb.append((char) ch);
+      }
+
+      // XXX: handle offset and maxlen
+
+      return new StringValueImpl(sb.toString());
+    } catch (IOException e) {
+      throw new QuercusModuleException(e);
     }
-
-    StringBuilder sb = new StringBuilder();
-
-    int ch;
-
-    if (maxLen < 0)
-      maxLen = Integer.MAX_VALUE;
-
-    while (offset-- > 0)
-      in.read();
-
-    while (maxLen-- > 0 && (ch = in.read()) >= 0) {
-      sb.append((char) ch);
-    }
-
-    // XXX: handle offset and maxlen
-
-    return new StringValueImpl(sb.toString());
   }
 
   /**
    * Returns the next line
    */
-  public Value stream_get_line(StreamResource file,
+  public Value stream_get_line(@NotNull StreamResource file,
                                @Optional("-1") long length)
-    throws IOException
   {
-    if (file == null)
-      return BooleanValue.FALSE;
+    try {
+      if (file == null)
+	return BooleanValue.FALSE;
 
-    if (length < 0)
-      length = Integer.MAX_VALUE;
+      if (length < 0)
+	length = Integer.MAX_VALUE;
 
-    String line = file.readLine();
+      String line = file.readLine();
 
-    if (line == null)
-      return BooleanValue.FALSE;
-    else if (line.endsWith("\r\n"))
-      return new StringValueImpl(line.substring(0, line.length() - 2));
-    else if (line.endsWith("\r"))
-      return new StringValueImpl(line.substring(0, line.length() - 1));
-    else if (line.endsWith("\n"))
-      return new StringValueImpl(line.substring(0, line.length() - 1));
-    else
-      return new StringValueImpl(line);
+      if (line == null)
+	return BooleanValue.FALSE;
+      else if (line.endsWith("\r\n"))
+	return new StringValueImpl(line.substring(0, line.length() - 2));
+      else if (line.endsWith("\r"))
+	return new StringValueImpl(line.substring(0, line.length() - 1));
+      else if (line.endsWith("\n"))
+	return new StringValueImpl(line.substring(0, line.length() - 1));
+      else
+	return new StringValueImpl(line);
+    } catch (IOException e) {
+      throw new QuercusModuleException(e);
+    }
   }
 
   /**

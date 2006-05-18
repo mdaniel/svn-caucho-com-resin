@@ -96,9 +96,7 @@ public class TextStatement extends Statement {
   protected void generateImpl(PhpWriter out)
     throws IOException
   {
-    generateGetOut(out);
-    
-    out.print(".print(\"");
+    out.print("env.print(\"");
     out.printJavaString(_value);
     out.println("\");");
   }

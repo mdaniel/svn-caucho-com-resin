@@ -27,38 +27,36 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.quercus.lib;
-
-import java.util.logging.Logger;
-
-import com.caucho.util.L10N;
-
-import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.Value;
-
-import com.caucho.quercus.program.JavaClassDef;
-
-import com.caucho.quercus.module.AbstractQuercusModule;
+package com.caucho.quercus;
 
 /**
- * Java functions
+ * Java exception caught and rethrown by modules.
  */
-public class JavaModule extends AbstractQuercusModule {
-  private static final Logger log =
-    Logger.getLogger(JavaModule.class.getName());
-
-  private static final L10N L = new L10N(JavaModule.class);
-
-  /**
-   * Call the Java contructor and return the wrapped Java object.
-   */
-  public static Value java(Env env,
-			   String className,
-			   Value []args)
+public class QuercusModuleException extends QuercusException {
+  public QuercusModuleException()
   {
-    JavaClassDef def = env.getJavaClassDefinition(className);
+  }
 
-    return def.evalNew(env, args);
+  public QuercusModuleException(String msg)
+  {
+    super(msg);
+  }
+
+  public QuercusModuleException(Throwable cause)
+  {
+    super(cause);
+  }
+
+  public QuercusModuleException(String msg, Throwable cause)
+  {
+    super(msg, cause);
+  }
+
+  public static RuntimeException create(Exception e)
+  {
+    if (e instanceof RuntimeException)
+      return (RuntimeException) e;
+    else
+      return new QuercusModuleException(e);
   }
 }
-

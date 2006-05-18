@@ -37,6 +37,8 @@ import java.util.logging.Level;
 import com.caucho.util.L10N;
 
 import com.caucho.quercus.QuercusException;
+import com.caucho.quercus.QuercusModuleException;
+
 import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.quercus.module.Optional;
 
@@ -725,7 +727,7 @@ public class ImageModule extends AbstractQuercusModule {
       ImageIO.write(image.bufferedImage, "jpeg", env.getOut());
     }
     catch (IOException e) {
-      throw new QuercusException(e);
+      throw new QuercusModuleException(e);
     }
   }
 
@@ -756,7 +758,7 @@ public class ImageModule extends AbstractQuercusModule {
       ImageIO.write(image.bufferedImage, "png", env.getOut());
     }
     catch (IOException e) {
-      throw new QuercusException(e);
+      throw new QuercusModuleException(e);
     }
   }
 
@@ -855,7 +857,5 @@ public class ImageModule extends AbstractQuercusModule {
   public static void png2wbmp()
   {
   }
-
-
 }
 

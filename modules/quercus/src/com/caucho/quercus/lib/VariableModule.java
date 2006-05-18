@@ -29,6 +29,8 @@
 
 package com.caucho.quercus.lib;
 
+import com.caucho.quercus.QuercusModuleException;
+
 import com.caucho.quercus.env.*;
 import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.quercus.module.Optional;
@@ -77,11 +79,14 @@ public class VariableModule extends AbstractQuercusModule {
    * @return the escaped stringPhp
    */
   public static Value debug_zval_dump(Env env, @ReadOnly Value v)
-    throws IOException
   {
-    debug_impl(env, v, 0);
+    try {
+      debug_impl(env, v, 0);
 
-    return NullValue.NULL;
+      return NullValue.NULL;
+    } catch (IOException e) {
+      throw new QuercusModuleException(e);
+    }
   }
 
   /**
@@ -92,16 +97,19 @@ public class VariableModule extends AbstractQuercusModule {
    * @return the escaped stringPhp
    */
   public static Value var_dump(Env env, @ReadOnly Value v)
-    throws IOException
   {
-    if (v == null)
-      env.getOut().print("NULL#java");
-    else
-      v.varDump(env, env.getOut(), 0,  new IdentityHashMap<Value,String>());
+    try {
+      if (v == null)
+	env.getOut().print("NULL#java");
+      else
+	v.varDump(env, env.getOut(), 0,  new IdentityHashMap<Value,String>());
 
-    env.getOut().println();
+      env.getOut().println();
 
-    return NullValue.NULL;
+      return NullValue.NULL;
+    } catch (IOException e) {
+      throw new QuercusModuleException(e);
+    }
   }
 
   /**
@@ -112,17 +120,20 @@ public class VariableModule extends AbstractQuercusModule {
    * @return the escaped stringPhp
    */
   public static Value resin_var_dump(Env env, @ReadOnly Value v)
-    throws IOException
   {
-    WriteStream out = Vfs.openWrite("stdout:");
+    try {
+      WriteStream out = Vfs.openWrite("stdout:");
 
-    v.varDump(env, out, 0, new IdentityHashMap<Value,String>());
+      v.varDump(env, out, 0, new IdentityHashMap<Value,String>());
 
-    out.println();
+      out.println();
 
-    out.close();
+      out.close();
 
-    return NullValue.NULL;
+      return NullValue.NULL;
+    } catch (IOException e) {
+      throw new QuercusModuleException(e);
+    }
   }
 
   /**
@@ -158,7 +169,6 @@ public class VariableModule extends AbstractQuercusModule {
    * @return the double value
    */
   public static Value doubleval(@ReadOnly Value v)
-         throws IOException
   {
     return floatval(v);
   }
@@ -203,7 +213,6 @@ public class VariableModule extends AbstractQuercusModule {
    * @return the double value
    */
   public static Value floatval(@ReadOnly Value v)
-         throws IOException
   {
     return new DoubleValue(v.toDouble());
   }
@@ -315,7 +324,6 @@ public class VariableModule extends AbstractQuercusModule {
    * @return true for a boolean
    */
   public static Value is_bool(@ReadOnly Value v)
-         throws IOException
   {
     return (v.toValue() instanceof BooleanValue
 	    ? BooleanValue.TRUE
@@ -330,7 +338,6 @@ public class VariableModule extends AbstractQuercusModule {
    * @return true for a scalar
    */
   public static boolean is_scalar(@ReadOnly Value v)
-         throws IOException
   {
     if (v==null)
       return false;
@@ -401,7 +408,6 @@ public class VariableModule extends AbstractQuercusModule {
    * @return true for a double
    */
   public static boolean is_double(@ReadOnly Value v)
-         throws IOException
   {
     return is_float(v);
   }
@@ -414,7 +420,6 @@ public class VariableModule extends AbstractQuercusModule {
    * @return true for a double
    */
   public static boolean is_float(@ReadOnly Value v)
-         throws IOException
   {
     return (v.toValue() instanceof DoubleValue);
   }
@@ -427,7 +432,6 @@ public class VariableModule extends AbstractQuercusModule {
    * @return true for a double
    */
   public static Value is_int(@ReadOnly Value v)
-         throws IOException
   {
     return (v.toValue() instanceof LongValue
 	    ? BooleanValue.TRUE
@@ -442,7 +446,6 @@ public class VariableModule extends AbstractQuercusModule {
    * @return true for a double
    */
   public static Value is_integer(@ReadOnly Value v)
-         throws IOException
   {
     return is_int(v);
   }
@@ -455,7 +458,6 @@ public class VariableModule extends AbstractQuercusModule {
    * @return true for a double
    */
   public static Value is_long(@ReadOnly Value v)
-         throws IOException
   {
     return is_int(v);
   }
@@ -468,7 +470,6 @@ public class VariableModule extends AbstractQuercusModule {
    * @return true for null
    */
   public static boolean is_null(@ReadOnly Value v)
-         throws IOException
   {
     return v.isNull();
   }
@@ -482,7 +483,6 @@ public class VariableModule extends AbstractQuercusModule {
    * @return true for numeric
    */
   public static boolean is_numeric(Env env, @ReadOnly Value v)
-    throws IOException
   {
     v = v.toValue();
 
@@ -512,7 +512,6 @@ public class VariableModule extends AbstractQuercusModule {
    * @return true for a real
    */
   public static boolean is_real(@ReadOnly Value v)
-         throws IOException
   {
     return is_float(v);
   }
@@ -568,15 +567,18 @@ public class VariableModule extends AbstractQuercusModule {
   public static Value print_r(Env env,
 			      @ReadOnly Value v,
 			      @Optional Value isRet)
-    throws IOException
   {
     // XXX: isRet is ignored
 
-    WriteStream out = env.getOut();
+    try {
+      WriteStream out = env.getOut();
 
-    v.printR(env, out, 0, new IdentityHashMap<Value, String>());
+      v.printR(env, out, 0, new IdentityHashMap<Value, String>());
 
-    return BooleanValue.FALSE;
+      return BooleanValue.FALSE;
+    } catch (IOException e) {
+      throw new QuercusModuleException(e);
+    }
   }
 
   private static void printDepth(WriteStream out, int depth)
@@ -675,7 +677,6 @@ public class VariableModule extends AbstractQuercusModule {
   public static Value var_export(Env env,
 				 @ReadOnly Value v,
 				 @Optional boolean isReturn)
-    throws IOException
   {
     StringBuilder sb = new StringBuilder();
 
@@ -684,7 +685,7 @@ public class VariableModule extends AbstractQuercusModule {
     if (isReturn)
       return new StringValueImpl(sb.toString());
     else {
-      env.getOut().print(sb);
+      env.print(sb);
 
       return NullValue.NULL;
     }

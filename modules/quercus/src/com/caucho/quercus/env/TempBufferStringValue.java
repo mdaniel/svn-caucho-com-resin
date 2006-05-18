@@ -82,12 +82,9 @@ public class TempBufferStringValue extends StringValue {
    * @param env
    */
   public void print(Env env)
-    throws java.io.IOException
   {
-    WriteStream out = env.getOut();
-
     for (TempBuffer ptr = _head; ptr != null; ptr = ptr.getNext()) {
-      out.write(ptr.getBuffer(), 0, ptr.getLength());
+      env.write(ptr.getBuffer(), 0, ptr.getLength());
     }
   }
 

@@ -40,6 +40,8 @@ import java.util.logging.Level;
 
 import com.caucho.util.L10N;
 
+import com.caucho.quercus.QuercusModuleException;
+
 import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.quercus.module.Optional;
 
@@ -304,19 +306,22 @@ public class FileModule extends AbstractQuercusModule {
    * @param path the path to change to
    */
   public static Value dir(Env env, Path path)
-    throws IOException
   {
-    if (!path.isDirectory()) {
-      env.warning(L.l("{0} is not a directory", path.getFullPath()));
+    try {
+      if (! path.isDirectory()) {
+	env.warning(L.l("{0} is not a directory", path.getFullPath()));
 
-      return BooleanValue.FALSE;
+	return BooleanValue.FALSE;
+      }
+
+      DirectoryValue dir = new DirectoryValue(path);
+
+      env.addResource(dir);
+
+      return dir;
+    } catch (IOException e) {
+      throw new QuercusModuleException(e);
     }
-
-    DirectoryValue dir = new DirectoryValue(path);
-
-    env.addResource(dir);
-
-    return dir;
   }
 
   /**
@@ -400,10 +405,9 @@ public class FileModule extends AbstractQuercusModule {
    * Closes a file.
    */
   public boolean fclose(Env env, StreamResource file)
-    throws IOException
   {
     // quercus/1611
-
+    
     if (file == null) {
       env.warning(L.l("{0} is null", "handle"));
       return false;
@@ -433,7 +437,6 @@ public class FileModule extends AbstractQuercusModule {
    * Flushes a file.
    */
   public boolean fflush(Env env, StreamResource file)
-    throws IOException
   {
     // quercus/1619
 
@@ -452,20 +455,23 @@ public class FileModule extends AbstractQuercusModule {
    * Returns the next character
    */
   public Value fgetc(Env env, StreamResource file)
-    throws IOException
   {
-    if (file == null) {
-      env.warning(L.l("{0} is null", "handle"));
-      return BooleanValue.FALSE;
+    try {
+      if (file == null) {
+	env.warning(L.l("{0} is null", "handle"));
+	return BooleanValue.FALSE;
+      }
+
+      // quercus/1612
+      int ch = file.read();
+
+      if (ch >= 0)
+	return new StringValueImpl(String.valueOf((char) ch));
+      else
+	return BooleanValue.FALSE;
+    } catch (IOException e) {
+      throw new QuercusModuleException(e);
     }
-
-    // quercus/1612
-    int ch = file.read();
-
-    if (ch >= 0)
-      return new StringValueImpl(String.valueOf((char) ch));
-    else
-      return BooleanValue.FALSE;
   }
 
   /**
@@ -477,98 +483,99 @@ public class FileModule extends AbstractQuercusModule {
    * @param enclosure optional quote replacement
    */
   public Value fgetcsv(Env env,
-                       StreamResource file,
+                       @NotNull StreamResource file,
                        @Optional int length,
                        @Optional String delimiter,
                        @Optional String enclosure)
-    throws IOException
   {
-    // quercus/1619
+    // php/1619
 
-    if (file == null) {
-      env.warning(L.l("{0} is null", "handle"));
-      return BooleanValue.FALSE;
-    }
+    try {
+      if (file == null)
+	return BooleanValue.FALSE;
 
-    // XXX: length is never used
-    if (length <= 0)
-      length = Integer.MAX_VALUE;
+      // XXX: length is never used
+      if (length <= 0)
+	length = Integer.MAX_VALUE;
 
-    int comma = ',';
+      int comma = ',';
 
-    if (delimiter != null && delimiter.length() > 0)
-      comma = delimiter.charAt(0);
+      if (delimiter != null && delimiter.length() > 0)
+	comma = delimiter.charAt(0);
 
-    int quote = '"';
+      int quote = '"';
 
-    if (enclosure != null && enclosure.length() > 0)
-      quote = enclosure.charAt(0);
+      if (enclosure != null && enclosure.length() > 0)
+	quote = enclosure.charAt(0);
 
-    ArrayValue array = new ArrayValueImpl();
+      ArrayValue array = new ArrayValueImpl();
 
-    int ch;
+      int ch;
 
-    while (true) {
-      // scan whitespace
       while (true) {
-        ch = file.read();
+	// scan whitespace
+	while (true) {
+	  ch = file.read();
 
-        if (ch < 0 || ch == '\n')
-          return array;
-        else if (ch == '\r') {
-          file.readOptionalLinefeed();
-          return array;
-        }
-        else if (ch == ' ' || ch == '\t')
-          continue;
-        else
-          break;
+	  if (ch < 0 || ch == '\n')
+	    return array;
+	  else if (ch == '\r') {
+	    file.readOptionalLinefeed();
+	    return array;
+	  }
+	  else if (ch == ' ' || ch == '\t')
+	    continue;
+	  else
+	    break;
+	}
+
+	StringBuilder sb = new StringBuilder();
+
+	if (ch == quote) {
+	  for (ch = file.read(); ch >= 0; ch = file.read()) {
+	    if (ch == quote) {
+	      ch = file.read();
+
+	      if (ch == quote)
+		sb.append((char) ch);
+	      else
+		break;
+	    }
+	    else
+	      sb.append((char) ch);
+	  }
+
+	  array.append(new StringValueImpl(sb.toString()));
+
+	  for (; ch >= 0 && ch == ' ' || ch == '\t'; ch = file.read()) {
+	  }
+	}
+	else {
+	  for (;
+	       ch >= 0 && ch != comma && ch != '\r' && ch != '\n';
+	       ch = file.read()) {
+	    sb.append((char) ch);
+	  }
+
+	  array.append(new StringValueImpl(sb.toString()));
+	}
+
+	if (ch < 0)
+	  return array;
+	else if (ch == '\n')
+	  return array;
+	else if (ch == '\r') {
+	  file.readOptionalLinefeed();
+	  return array;
+	}
+	else if (ch == comma) {
+	}
+	else {
+	  env.warning("expected comma");
+	}
       }
-
-      StringBuilder sb = new StringBuilder();
-
-      if (ch == quote) {
-        for (ch = file.read(); ch >= 0; ch = file.read()) {
-          if (ch == quote) {
-            ch = file.read();
-
-            if (ch == quote)
-              sb.append((char) ch);
-            else
-              break;
-          }
-          else
-            sb.append((char) ch);
-        }
-
-        array.append(new StringValueImpl(sb.toString()));
-
-        for (; ch >= 0 && ch == ' ' || ch == '\t'; ch = file.read()) {
-        }
-      }
-      else {
-        for (;
-             ch >= 0 && ch != comma && ch != '\r' && ch != '\n';
-             ch = file.read()) {
-          sb.append((char) ch);
-        }
-
-        array.append(new StringValueImpl(sb.toString()));
-      }
-
-      if (ch < 0)
-        return array;
-      else if (ch == '\n')
-        return array;
-      else if (ch == '\r') {
-        file.readOptionalLinefeed();
-        return array;
-      }
-      else if (ch == comma) {
-      }
-      else {
-        env.warning("expected comma");
-      }
+    } catch (IOException e) {
+      throw new QuercusModuleException(e);
     }
   }
 
@@ -578,19 +585,22 @@ public class FileModule extends AbstractQuercusModule {
   public Value fgets(Env env,
 		     @NotNull StreamResource file,
 		     @Optional long length)
-    throws IOException
   {
-    // quercus/1615
+    // php/1615
 
-    if (file == null)
-      return BooleanValue.FALSE;
+    try {
+      if (file == null)
+	return BooleanValue.FALSE;
 
-    String value = file.readLine();
+      String value = file.readLine();
 
-    if (value != null)
-      return new StringValueImpl(value);
-    else
-      return BooleanValue.FALSE;
+      if (value != null)
+	return new StringValueImpl(value);
+      else
+	return BooleanValue.FALSE;
+    } catch (IOException e) {
+      throw new QuercusModuleException(e);
+    }
   }
 
   /**
@@ -600,21 +610,24 @@ public class FileModule extends AbstractQuercusModule {
                       StreamResource file,
                       @Optional long length,
                       @Optional String allowedTags)
-    throws IOException
   {
-    // quercus/161a
+    // php/161a
 
-    if (file == null) {
-      env.warning(L.l("{0} is null", "handle"));
-      return BooleanValue.FALSE;
+    try {
+      if (file == null) {
+	env.warning(L.l("{0} is null", "handle"));
+	return BooleanValue.FALSE;
+      }
+
+      String value = file.readLine();
+
+      if (value != null)
+	return new StringValueImpl(StringModule.strip_tags(value, allowedTags));
+      else
+	return BooleanValue.FALSE;
+    } catch (IOException e) {
+      throw new QuercusModuleException(e);
     }
-
-    String value = file.readLine();
-
-    if (value != null)
-      return new StringValueImpl(StringModule.strip_tags(value, allowedTags));
-    else
-      return BooleanValue.FALSE;
   }
 
   /**
@@ -628,27 +641,30 @@ public class FileModule extends AbstractQuercusModule {
                            String filename,
                            @Optional int useIncludePath,
                            @Optional Value context)
-    throws IOException
   {
-    Value fileValue = fopen(env, filename, "r", useIncludePath == 1, context);
+    try {
+      Value fileValue = fopen(env, filename, "r", useIncludePath == 1, context);
 
-    if (fileValue instanceof FileValue) {
-      FileValue file = (FileValue) fileValue;
+      if (fileValue instanceof FileValue) {
+	FileValue file = (FileValue) fileValue;
 
-      try {
-        ArrayValue result = new ArrayValueImpl();
-        String line;
+	try {
+	  ArrayValue result = new ArrayValueImpl();
+	  String line;
 
-        while ((line = file.readLine()) != null)
-          result.append(new StringValueImpl(line));
+	  while ((line = file.readLine()) != null)
+	    result.append(new StringValueImpl(line));
 
-        return result;
-      } finally {
-        file.close();
+	  return result;
+	} finally {
+	  file.close();
+	}
       }
-    }
 
-    return BooleanValue.FALSE;
+      return BooleanValue.FALSE;
+    } catch (IOException e) {
+      throw new QuercusModuleException(e);
+    }
   }
 
   /**
@@ -848,29 +864,32 @@ public class FileModule extends AbstractQuercusModule {
                                         @Optional Value context,
                                         @Optional long offset,
                                         @Optional("4294967296") long maxLen)
-    throws IOException
   {
-    Value fileValue = fopen(env, filename, "r", useIncludePath, context);
-
-    if (! (fileValue instanceof FileValue))
-      return BooleanValue.FALSE;
-
-    FileValue file = (FileValue) fileValue;
-
     try {
-      StringBuilder sb = new StringBuilder();
+      Value fileValue = fopen(env, filename, "r", useIncludePath, context);
 
-      int ch;
+      if (! (fileValue instanceof FileValue))
+	return BooleanValue.FALSE;
 
-      while ((ch = file.read()) >= 0) {
-        sb.append((char) ch);
+      FileValue file = (FileValue) fileValue;
+
+      try {
+	StringBuilder sb = new StringBuilder();
+
+	int ch;
+
+	while ((ch = file.read()) >= 0) {
+	  sb.append((char) ch);
+	}
+
+	// XXX: handle offset and maxlen
+
+	return new StringValueImpl(sb.toString());
+      } finally {
+	file.close();
       }
-
-      // XXX: handle offset and maxlen
-
-      return new StringValueImpl(sb.toString());
-    } finally {
-      file.close();
+    } catch (IOException e) {
+      throw new QuercusModuleException(e);
     }
   }
 
@@ -882,33 +901,36 @@ public class FileModule extends AbstractQuercusModule {
                                  Value data,
                                  @Optional int flags,
                                  @Optional Value context)
-    throws IOException
   {
-    // quercus/1634
-
-    // XXX: bug862, flags check for FILE_USE_INCLUDE_PATH, FILE_APPEND, LOCK_EX
-    Value fileV = fopen(env, filename, "w", false, context);
-
-    if (! (fileV instanceof StreamResource))
-      return fileV;
-
-    StreamResource file = (StreamResource) fileV;
-
-    long dataWritten = 0;
+    // php/1634
 
     try {
-      if (data instanceof ArrayValue) {
-        for (Value item : ((ArrayValue) data).values()) {
-          file.print(item.toString());
-        }
-      }
-      else
-        file.print(data.toString());
-    } finally {
-      file.close();
-    }
+      // XXX: bug862, flags check for FILE_USE_INCLUDE_PATH, FILE_APPEND, LOCK_EX
+      Value fileV = fopen(env, filename, "w", false, context);
 
-    return new LongValue(dataWritten);
+      if (! (fileV instanceof StreamResource))
+	return fileV;
+
+      StreamResource file = (StreamResource) fileV;
+
+      long dataWritten = 0;
+
+      try {
+	if (data instanceof ArrayValue) {
+	  for (Value item : ((ArrayValue) data).values()) {
+	    file.print(item.toString());
+	  }
+	}
+	else
+	  file.print(data.toString());
+      } finally {
+	file.close();
+      }
+
+      return new LongValue(dataWritten);
+    } catch (IOException e) {
+      throw new QuercusModuleException(e);
+    }
   }
 
   /**
@@ -922,7 +944,6 @@ public class FileModule extends AbstractQuercusModule {
                               Value fileV,
                               int operation,
                               @Optional Value wouldBlock)
-    throws IOException
   {
     // XXX: stubbed,  also wouldblock is a ref
 
@@ -997,33 +1018,35 @@ public class FileModule extends AbstractQuercusModule {
    * Output the filepointer data to the output stream.
    */
   public Value fpassthru(Env env,
-                         StreamResource is)
-    throws IOException
+                         @NotNull StreamResource is)
   {
-    // quercus/1635
-    if (is == null) {
-      env.warning(L.l("{0} is null", "handle"));
-      return BooleanValue.FALSE;
+    // php/1635
+
+    try {
+      if (is == null)
+	return BooleanValue.FALSE;
+
+      TempBuffer temp = TempBuffer.allocate();
+      byte []buffer = temp.getBuffer();
+
+      int len;
+
+      WriteStream out = env.getOut();
+
+      long writeLength = 0;
+
+      while ((len = is.read(buffer, 0, buffer.length)) > 0) {
+	out.write(buffer, 0, len);
+
+	writeLength += len;
+      }
+
+      TempBuffer.free(temp);
+
+      return new LongValue(writeLength);
+    } catch (IOException e) {
+      throw new QuercusModuleException(e);
     }
-
-    TempBuffer temp = TempBuffer.allocate();
-    byte []buffer = temp.getBuffer();
-
-    int len;
-
-    WriteStream out = env.getOut();
-
-    long writeLength = 0;
-
-    while ((len = is.read(buffer, 0, buffer.length)) > 0) {
-      out.write(buffer, 0, len);
-
-      writeLength += len;
-    }
-
-    TempBuffer.free(temp);
-
-    return new LongValue(writeLength);
   }
 
   /**
@@ -1034,71 +1057,70 @@ public class FileModule extends AbstractQuercusModule {
    * @param enclosure optional quote replacement
    */
   public Value fputcsv(Env env,
-                       StreamResource file,
-                       ArrayValue value,
+                       @NotNull StreamResource file,
+                       @NotNull ArrayValue value,
                        @Optional String delimiter,
                        @Optional String enclosure)
-    throws IOException
   {
-    // quercus/1636
+    // php/1636
 
-    if (file == null) {
-      env.warning(L.l("{0} is null", "handle"));
-      return BooleanValue.FALSE;
-    }
+    try {
+      if (file == null)
+	return BooleanValue.FALSE;
 
-    if (value == null) {
-      env.warning(L.l("{0} is null", "array"));
-      return BooleanValue.FALSE;
-    }
+      if (value == null)
+	return BooleanValue.FALSE;
 
-    char comma = ',';
-    char quote = '\"';
+      char comma = ',';
+      char quote = '\"';
 
-    if (delimiter != null && delimiter.length() > 0)
-      comma = delimiter.charAt(0);
+      if (delimiter != null && delimiter.length() > 0)
+	comma = delimiter.charAt(0);
 
-    if (enclosure != null && enclosure.length() > 0)
-      quote = enclosure.charAt(0);
+      if (enclosure != null && enclosure.length() > 0)
+	quote = enclosure.charAt(0);
 
-    int writeLength = 0;
-    boolean isFirst = true;
+      int writeLength = 0;
+      boolean isFirst = true;
 
-    for (Value data : value.values()) {
-      if (! isFirst) {
-        file.print(comma);
-        writeLength++;
+      for (Value data : value.values()) {
+	if (! isFirst) {
+	  file.print(comma);
+	  writeLength++;
+	}
+	isFirst = false;
+
+	String s = data.toString();
+	int strlen = s.length();
+
+	writeLength++;
+	file.print(quote);
+
+	for (int i = 0; i < strlen; i++) {
+	  char ch = s.charAt(i);
+
+	  if (ch != quote) {
+	    file.print(ch);
+	    writeLength++;
+	  }
+	  else {
+	    file.print(quote);
+	    file.print(quote);
+	    writeLength += 2;
+	  }
+	}
+
+	file.print(quote);
+	writeLength++;
       }
-      isFirst = false;
 
-      String s = data.toString();
-      int strlen = s.length();
-
+      file.print("\n");
       writeLength++;
-      file.print(quote);
 
-      for (int i = 0; i < strlen; i++) {
-        char ch = s.charAt(i);
-
-        if (ch != quote) {
-          file.print(ch);
-          writeLength++;
-        }
-        else {
-          file.print(quote);
-          file.print(quote);
-          writeLength += 2;
-        }
-      }
-
-      file.print(quote);
-      writeLength++;
+      return LongValue.create(writeLength);
+    } catch (IOException e) {
+      throw new QuercusModuleException(e);
     }
-
-    file.print("\n");
-    writeLength++;
-
-    return LongValue.create(writeLength);
   }
 
   /**
@@ -1108,7 +1130,6 @@ public class FileModule extends AbstractQuercusModule {
 			    StreamResource file,
 			    String value,
 			    @Optional("-1") int length)
-    throws IOException
   {
     return fwrite(env, file, value, length);
   }
@@ -1121,52 +1142,55 @@ public class FileModule extends AbstractQuercusModule {
   public static Value fread(Env env,
 			    @NotNull StreamResource file,
 			    int length)
-    throws IOException
   {
-    if (file == null)
-      return BooleanValue.FALSE;
+    try {
+      if (file == null)
+	return BooleanValue.FALSE;
 
-    TempBuffer tempBuf = TempBuffer.allocate();
-    byte []buffer = tempBuf.getBuffer();
+      TempBuffer tempBuf = TempBuffer.allocate();
+      byte []buffer = tempBuf.getBuffer();
 
-    if (buffer.length < length)
-      length = buffer.length;
+      if (buffer.length < length)
+	length = buffer.length;
 
-    length = file.read(buffer, 0, length);
+      length = file.read(buffer, 0, length);
 
-    Value s;
+      Value s;
 
-    if (length > 0)
-      s = env.createString(buffer, 0, length);
-    else
-      s = BooleanValue.FALSE;
+      if (length > 0)
+	s = env.createString(buffer, 0, length);
+      else
+	s = BooleanValue.FALSE;
 
-    TempBuffer.free(tempBuf);
+      TempBuffer.free(tempBuf);
 
-    return s;
+      return s;
+    } catch (IOException e) {
+      throw new QuercusModuleException(e);
+    }
   }
 
   /**
    * Reads and parses a line.
    */
   public static Value fscanf(Env env,
-                             StreamResource file,
+                             @NotNull StreamResource file,
                              String format,
                              @Optional Value []args)
-    throws IOException
   {
+    try {
+      if (file == null)
+	return BooleanValue.FALSE;
 
-    if (file == null) {
-      env.warning(L.l("{0} is null", "handle"));
-      return BooleanValue.FALSE;
+      String value = file.readLine();
+
+      if (value == null)
+	return BooleanValue.FALSE;
+
+      return StringModule.sscanf(value, format, args);
+    } catch (IOException e) {
+      throw new QuercusModuleException(e);
     }
-
-    String value = file.readLine();
-
-    if (value == null)
-      return BooleanValue.FALSE;
-
-    return StringModule.sscanf(value, format, args);
   }
 
   // XXX: fseek
@@ -1177,14 +1201,13 @@ public class FileModule extends AbstractQuercusModule {
    *
    * @param file the stream to test
    */
-  public static Value ftell(Env env, StreamResource file)
+  public static Value ftell(Env env,
+			    @NotNull StreamResource file)
   {
-    if (file == null) {
-      env.warning(L.l("{0} is null", "handle"));
+    if (file == null)
       return BooleanValue.FALSE;
-    }
-    else
-      return new LongValue(file.getPosition());
+
+    return new LongValue(file.getPosition());
   }
 
   // XXX: ftruncate
@@ -1196,14 +1219,17 @@ public class FileModule extends AbstractQuercusModule {
 			     @NotNull StreamResource file,
 			     String value,
 			     @Optional("-1") int length)
-    throws IOException
   {
-    if (file == null)
-      return BooleanValue.FALSE;
+    try {
+      if (file == null)
+	return BooleanValue.FALSE;
 
-    file.print(value);
+      file.print(value);
 
-    return LongValue.create(value.length());
+      return LongValue.create(value.length());
+    } catch (IOException e) {
+      throw new QuercusModuleException(e);
+    }
   }
 
   // XXX: glob
@@ -1375,17 +1401,20 @@ public class FileModule extends AbstractQuercusModule {
    */
   public static Value opendir(Env env, String pathName,
                               @Optional Value context)
-    throws IOException
   {
-    Path path = env.getPwd().lookup(pathName);
+    try {
+      Path path = env.getPwd().lookup(pathName);
 
-    if (path.isDirectory()) {
-      return new DirectoryValue(path);
-    }
-    else {
-      env.warning(L.l("{0} is not a directory", path.getFullPath()));
+      if (path.isDirectory()) {
+	return new DirectoryValue(path);
+      }
+      else {
+	env.warning(L.l("{0} is not a directory", path.getFullPath()));
 
-      return BooleanValue.FALSE;
+	return BooleanValue.FALSE;
+      }
+    } catch (IOException e) {
+      throw new QuercusModuleException(e);
     }
   }
 
@@ -1569,15 +1598,11 @@ public class FileModule extends AbstractQuercusModule {
    *
    * @param dirV the directory resource
    */
-  public static Value readdir(Env env, Value dirV)
-    throws Exception
+  public static Value readdir(Env env,
+			      @NotNull DirectoryValue dir)
   {
-    if (! (dirV instanceof DirectoryValue)) {
-      env.warning(L.l("{0} is not a directory", dirV));
+    if (dir == null)
       return BooleanValue.FALSE;
-    }
-
-    DirectoryValue dir = (DirectoryValue) dirV;
 
     return dir.readdir();
   }
@@ -1594,16 +1619,11 @@ public class FileModule extends AbstractQuercusModule {
 
     Value result = BooleanValue.FALSE;
 
-    try {
-      if (fileValue instanceof StreamResource) {
-        StreamResource streamValue = (StreamResource) fileValue;
+    if (fileValue instanceof StreamResource) {
+      StreamResource streamValue = (StreamResource) fileValue;
 
-        result = fpassthru(env, streamValue);
-        fclose(env, streamValue);
-      }
-    }
-    catch (IOException e) {
-      log.log(Level.FINE, e.toString(), e);
+      result = fpassthru(env, streamValue);
+      fclose(env, streamValue);
     }
 
     return result;
@@ -1656,15 +1676,11 @@ public class FileModule extends AbstractQuercusModule {
    *
    * @param dirV the directory resource
    */
-  public static Value rewinddir(Env env, Value dirV)
-    throws Exception
+  public static Value rewinddir(Env env,
+				@NotNull DirectoryValue dir)
   {
-    if (! (dirV instanceof DirectoryValue)) {
-      env.warning(L.l("{0} is not a directory", dirV));
+    if (dir == null)
       return BooleanValue.FALSE;
-    }
-
-    DirectoryValue dir = (DirectoryValue) dirV;
 
     return dir.rewinddir();
   }
@@ -1701,7 +1717,6 @@ public class FileModule extends AbstractQuercusModule {
    * @param dirV the directory resource
    */
   public static Value closedir(Env env, Value dirV)
-    throws IOException
   {
     return BooleanValue.TRUE;
   }
@@ -1714,33 +1729,36 @@ public class FileModule extends AbstractQuercusModule {
   public static Value scandir(Env env, String fileName,
                               @Optional("1") int order,
                               @Optional Value context)
-    throws IOException
   {
-    Path path = env.getPwd().lookup(fileName);
+    try {
+      Path path = env.getPwd().lookup(fileName);
 
-    if (!path.isDirectory()) {
-      env.warning(L.l("{0} is not a directory", path.getFullPath()));
-      return BooleanValue.FALSE;
-    }
-
-    String []values = path.list();
-
-    Arrays.sort(values);
-
-    ArrayValue result = new ArrayValueImpl();
-
-    if (order == 1) {
-      for (int i = 0; i < values.length; i++)
-        result.append(new LongValue(i), new StringValueImpl(values[i]));
-    }
-    else {
-      for (int i = values.length - 1; i >= 0; i--) {
-        result.append(new LongValue(values.length - i - 1),
-                      new StringValueImpl(values[i]));
+      if (!path.isDirectory()) {
+	env.warning(L.l("{0} is not a directory", path.getFullPath()));
+	return BooleanValue.FALSE;
       }
-    }
 
-    return result;
+      String []values = path.list();
+
+      Arrays.sort(values);
+
+      ArrayValue result = new ArrayValueImpl();
+
+      if (order == 1) {
+	for (int i = 0; i < values.length; i++)
+	  result.append(new LongValue(i), new StringValueImpl(values[i]));
+      }
+      else {
+	for (int i = values.length - 1; i >= 0; i--) {
+	  result.append(new LongValue(values.length - i - 1),
+			new StringValueImpl(values[i]));
+	}
+      }
+
+      return result;
+    } catch (IOException e) {
+      throw new QuercusModuleException(e);
+    }
   }
 
   /**

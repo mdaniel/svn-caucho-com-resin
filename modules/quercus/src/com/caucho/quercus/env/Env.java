@@ -59,6 +59,7 @@ import com.caucho.quercus.QuercusException;
 import com.caucho.quercus.QuercusDieException;
 import com.caucho.quercus.QuercusExitException;
 import com.caucho.quercus.QuercusRuntimeException;
+import com.caucho.quercus.QuercusModuleException;
 import com.caucho.quercus.Location;
 
 import com.caucho.quercus.module.Marshall;
@@ -422,6 +423,103 @@ public class Env {
   public WriteStream getOriginalOut()
   {
     return _originalOut;
+  }
+
+  /**
+   * Flushes the output buffer.
+   */
+  public final void flush()
+  {
+    try {
+      getOut().flush();
+    } catch (IOException e) {
+      throw new QuercusModuleException(e);
+    }
+  }
+
+  /**
+   * Prints a string
+   */
+  public final void print(String v)
+  {
+    try {
+      getOut().print(v);
+    } catch (IOException e) {
+      throw new QuercusModuleException(e);
+    }
+  }
+
+  /**
+   * Prints a character buffer.
+   */
+  public final void print(char []buffer, int offset, int length)
+  {
+    try {
+      getOut().print(buffer, offset, length);
+    } catch (IOException e) {
+      throw new QuercusModuleException(e);
+    }
+  }
+
+  /**
+   * Prints a long
+   */
+  public final void print(long v)
+  {
+    try {
+      getOut().print(v);
+    } catch (IOException e) {
+      throw new QuercusModuleException(e);
+    }
+  }
+
+  /**
+   * Prints a double
+   */
+  public final void print(double v)
+  {
+    try {
+      long longV = (long) v;
+      
+      if (v == longV)
+	getOut().print(longV);
+      else
+	getOut().print(v);
+    } catch (IOException e) {
+      throw new QuercusModuleException(e);
+    }
+  }
+
+  /**
+   * Prints an object
+   */
+  public final void print(Object v)
+  {
+    try {
+      getOut().print(v);
+    } catch (IOException e) {
+      throw new QuercusModuleException(e);
+    }
+  }
+
+  /**
+   * Prints a value
+   */
+  public final void print(Value v)
+  {
+    v.print(this);
+  }
+
+  /**
+   * Prints a byte buffer.
+   */
+  public final void write(byte []buffer, int offset, int length)
+  {
+    try {
+      getOut().write(buffer, offset, length);
+    } catch (IOException e) {
+      throw new QuercusModuleException(e);
+    }
   }
 
   /**
@@ -2661,9 +2759,12 @@ public class Env {
    * Handles exit/die
    */
   public Value exit(String msg)
-    throws IOException
   {
-    getOut().print(msg);
+    try {
+      getOut().print(msg);
+    } catch (IOException e) {
+      log.log(Level.WARNING, e.toString(), e);
+    }
 
     throw new QuercusExitException(msg);
   }
@@ -2680,9 +2781,12 @@ public class Env {
    * Handles exit/die
    */
   public Value die(String msg)
-    throws IOException
   {
-    getOut().print(msg);
+    try {
+      getOut().print(msg);
+    } catch (IOException e) {
+      log.log(Level.WARNING, e.toString(), e);
+    }
 
     throw new QuercusDieException(msg);
   }

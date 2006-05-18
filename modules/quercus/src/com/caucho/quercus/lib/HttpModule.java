@@ -37,6 +37,8 @@ import javax.servlet.http.Cookie;
 import com.caucho.util.L10N;
 import com.caucho.util.Alarm;
 
+import com.caucho.quercus.QuercusModuleException;
+
 import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.quercus.module.Optional;
 import com.caucho.quercus.module.Reference;
@@ -55,56 +57,59 @@ public class HttpModule extends AbstractQuercusModule {
   public static Value header(Env env, String header,
                              @Optional("true") boolean replace,
                              @Optional long httpResponseCode)
-    throws IOException
   {
-    HttpServletResponse res = env.getResponse();
+    try {
+      HttpServletResponse res = env.getResponse();
 
-    int len = header.length();
+      int len = header.length();
 
-    if (header.startsWith("HTTP/")) {
-      int p = header.indexOf(' ');
-      int status = 0;
-      int ch;
+      if (header.startsWith("HTTP/")) {
+	int p = header.indexOf(' ');
+	int status = 0;
+	int ch;
 
-      for (; p < len && header.charAt(p) == ' '; p++) {
+	for (; p < len && header.charAt(p) == ' '; p++) {
+	}
+
+	for (; p < len && '0' <= (ch = header.charAt(p)) && ch <= '9'; p++) {
+	  status = 10 * status + ch - '0';
+	}
+
+	for (; p < len && header.charAt(p) == ' '; p++) {
+	}
+
+	if (status > 0) {
+	  res.setStatus(status, header.substring(p));
+
+	  return NullValue.NULL;
+	}
       }
 
-      for (; p < len && '0' <= (ch = header.charAt(p)) && ch <= '9'; p++) {
-	status = 10 * status + ch - '0';
-      }
+      int p = header.indexOf(':');
 
-      for (; p < len && header.charAt(p) == ' '; p++) {
-      }
+      if (p > 0) {
+	String key = header.substring(0, p).trim();
+	String value = header.substring(p + 1).trim();
 
-      if (status > 0) {
-	res.setStatus(status, header.substring(p));
+	if (key.equalsIgnoreCase("Location"))
+	  res.sendRedirect(value);
+	else if (replace)
+	  res.setHeader(key, value);
+	else
+	  res.addHeader(key, value);
 
-	return NullValue.NULL;
-      }
-    }
-
-    int p = header.indexOf(':');
-
-    if (p > 0) {
-      String key = header.substring(0, p).trim();
-      String value = header.substring(p + 1).trim();
-
-      if (key.equalsIgnoreCase("Location"))
-        res.sendRedirect(value);
-      else if (replace)
-        res.setHeader(key, value);
-      else
-        res.addHeader(key, value);
-
-      if (key.equalsIgnoreCase("Content-Type")) {
-	if (value.indexOf("charset") < 0 && value.indexOf("text/") < 0)
-	  res.setCharacterEncoding("iso-8859-1");
+	if (key.equalsIgnoreCase("Content-Type")) {
+	  if (value.indexOf("charset") < 0 && value.indexOf("text/") < 0)
+	    res.setCharacterEncoding("iso-8859-1");
 	
-	env.getOut().setEncoding(res.getCharacterEncoding());
+	  env.getOut().setEncoding(res.getCharacterEncoding());
+	}
       }
-    }
 
-    return NullValue.NULL;
+      return NullValue.NULL;
+    } catch (IOException e) {
+      throw new QuercusModuleException(e);
+    }
   }
 
   /**
@@ -113,7 +118,6 @@ public class HttpModule extends AbstractQuercusModule {
   public static boolean headers_sent(Env env,
                                      @Optional @Reference Value file,
                                      @Optional @Reference Value line)
-    throws IOException
   {
     HttpServletResponse res = env.getResponse();
 
@@ -130,7 +134,6 @@ public class HttpModule extends AbstractQuercusModule {
                                   @Optional String path,
                                   @Optional String domain,
                                   @Optional boolean secure)
-    throws IOException
   {
     if (value == null || value.equals(""))
       value = "";

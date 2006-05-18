@@ -488,9 +488,8 @@ public class StringValueImpl extends StringValue {
    * @param env
    */
   public void print(Env env)
-    throws IOException
   {
-    env.getOut().print(_value);
+    env.print(_value);
   }
 
   /**

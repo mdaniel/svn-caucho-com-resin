@@ -66,7 +66,9 @@ public class ClassesModule extends AbstractQuercusModule {
   /**
    * Returns true if the class exists.
    */
-  public boolean class_exists(Env env, String className, @Optional("true") boolean useAutoload)
+  public boolean class_exists(Env env,
+			      String className,
+			      @Optional("true") boolean useAutoload)
   {
     return env.findClass(className, useAutoload) != null;
   }
@@ -212,25 +214,25 @@ public class ClassesModule extends AbstractQuercusModule {
    */
   public static Value get_class_methods(Env env, String className)
   {
-  	// php/1j11
+    // php/1j11
   	
     QuercusClass cl = null;
     
-    try{
+    try {
       cl = env.getClass(className);
     }
-    catch(Throwable t) {
-    	log.log(Level.WARNING, t.toString(), t);
+    catch (Throwable t) {
+      log.log(Level.WARNING, t.toString(), t);
     	
       return NullValue.NULL;
     }
     
     ArrayValue methArray = new ArrayValueImpl();
     
-    for (Map.Entry<String, AbstractFunction> entry: cl.getClassMethods()) 	{
-    	Value key = StringValue.create(entry.getKey());
+    for (Map.Entry<String, AbstractFunction> entry: cl.getClassMethods()) {
+      Value key = StringValue.create(entry.getKey());
     	
-    	methArray.append(key);
+      methArray.append(key);
     }
     
     return methArray;

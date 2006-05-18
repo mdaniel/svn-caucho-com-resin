@@ -29,21 +29,30 @@
 
 package com.caucho.quercus.lib;
 
-import com.caucho.Version;
-import com.caucho.naming.Jndi;
-import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.NullValue;
-import com.caucho.quercus.module.AbstractQuercusModule;
-import com.caucho.util.L10N;
-
 import javax.transaction.UserTransaction;
 import javax.transaction.SystemException;
 import javax.transaction.NotSupportedException;
 import javax.transaction.HeuristicMixedException;
 import javax.transaction.HeuristicRollbackException;
 import javax.transaction.RollbackException;
+
+import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
+
+import com.caucho.Version;
+
+import com.caucho.naming.Jndi;
+
+import com.caucho.quercus.QuercusModuleException;
+
+import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.NullValue;
+import com.caucho.quercus.env.Value;
+import com.caucho.quercus.module.AbstractQuercusModule;
+
+import com.caucho.util.L10N;
+
 
 public class ResinModule
   extends AbstractQuercusModule
@@ -64,8 +73,9 @@ public class ResinModule
   /**
    * Perform a jndi lookup to retrieve an object.
    *
-   * @param name a fully qualified name "java:comp/env/foo", or a short-form "foo".
-   *
+   * @param name a fully qualified name "java:comp/env/foo",
+   * or a short-form "foo".
+
    * @return the object, or null if it is not found.
    */
   public static Object jndi_lookup(String name)
@@ -82,56 +92,103 @@ public class ResinModule
     return Version.FULL_VERSION;
   }
 
-  private static UserTransaction getUserTransaction()
-    throws NamingException
+  /**
+   * Starts a new distributed transaction.
+   */
+  public static Value xa_begin()
   {
-    return ((UserTransaction) new InitialContext().lookup("java:comp/UserTransaction"));
+    try {
+      getUserTransaction().begin();
+
+      return NullValue.NULL;
+    } catch (Exception e) {
+      throw new QuercusModuleException(e);
+    }
   }
 
-  public static NullValue xa_begin()
-    throws NamingException, SystemException, NotSupportedException
+  /**
+   * Commits the current transaction.
+   */
+  public static Value xa_commit()
   {
-    getUserTransaction().begin();
+    try {
+      getUserTransaction().commit();
 
-    return NullValue.NULL;
+      return NullValue.NULL;
+    } catch (Exception e) {
+      throw new QuercusModuleException(e);
+    }
   }
 
-  public static NullValue xa_commit()
-    throws NamingException, HeuristicMixedException, SystemException,
-           HeuristicRollbackException, RollbackException
+  /**
+   * Complets the current transaction by rolling it back.
+   */
+  public static Value xa_rollback()
   {
-    getUserTransaction().commit();
+    try {
+      getUserTransaction().rollback();
 
-    return NullValue.NULL;
+      return NullValue.NULL;
+    } catch (Exception e) {
+      throw new QuercusModuleException(e);
+    }
   }
 
-  public static NullValue xa_rollback()
-    throws NamingException, SystemException
+  /**
+   * Sets the rollback_only status for the current transaction.
+   */
+  public static Value xa_rollback_only(String msg)
   {
-    getUserTransaction().rollback();
+    try {
+      getUserTransaction().setRollbackOnly();
 
-    return NullValue.NULL;
+      return NullValue.NULL;
+    } catch (Exception e) {
+      throw new QuercusModuleException(e);
+    }
   }
 
-  public static NullValue xa_rollback_only()
-    throws NamingException, SystemException
+  /**
+   * Sets the timeout for the current distribued transaction.
+   */
+  public static Value xa_set_timeout(int timeoutSeconds)
   {
-    getUserTransaction().setRollbackOnly();
+    try {
+      getUserTransaction().setTransactionTimeout(timeoutSeconds);
 
-    return NullValue.NULL;
+      return NullValue.NULL;
+    } catch (Exception e) {
+      throw new QuercusModuleException(e);
+    }
   }
 
-  public static NullValue xa_set_timeout(int timeoutSeconds)
-    throws NamingException, SystemException
-  {
-    getUserTransaction().setTransactionTimeout(timeoutSeconds);
-
-    return NullValue.NULL;
-  }
-
+  /**
+   * Returns the JTA status code for the current transation.
+   */
   public static int xa_status()
-    throws NamingException, SystemException
   {
-    return getUserTransaction().getStatus();
+    // XXX: should return a string
+    try {
+      return getUserTransaction().getStatus();
+    } catch (Exception e) {
+      throw new QuercusModuleException(e);
+    }
+  }
+
+  /**
+   * Returns the UserTransaction object.
+   */
+  private static UserTransaction getUserTransaction()
+  {
+    try {
+      // XXX: this could be cached, since it's a constant for the
+      // current environment
+      
+      Context ic = new InitialContext();
+      
+      return ((UserTransaction) ic.lookup("java:comp/UserTransaction"));
+    } catch (NamingException e) {
+      throw new QuercusModuleException(e);
+    }
   }
 }

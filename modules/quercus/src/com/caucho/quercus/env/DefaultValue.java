@@ -100,7 +100,6 @@ public class DefaultValue extends NullValue {
    * @param env
    */
   public void print(Env env)
-    throws IOException
   {
   }
 

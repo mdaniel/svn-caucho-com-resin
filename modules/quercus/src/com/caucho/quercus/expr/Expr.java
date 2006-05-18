@@ -715,7 +715,8 @@ abstract public class Expr {
     // quercus/1l07
     // out.print("_quercus_out");
 
-    out.print("env.getOut()");
+    // out.print("env.getOut()");
+    out.print("env");
   }
 
   /**

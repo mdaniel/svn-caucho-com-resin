@@ -470,9 +470,8 @@ public class StringBuilderValue extends StringValue {
    * @param env
    */
   public void print(Env env)
-    throws IOException
   {
-    env.getOut().print(_buffer, 0, _length);
+    env.print(_buffer, 0, _length);
   }
 
   /**

@@ -51,7 +51,7 @@ import javax.naming.directory.Attributes;
 
 import com.caucho.util.L10N;
 
-import com.caucho.quercus.QuercusException;
+import com.caucho.quercus.QuercusModuleException;
 
 import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.quercus.module.Optional;
@@ -118,7 +118,7 @@ public class NetworkModule extends AbstractQuercusModule {
 
       return new StreamReadWrite(env, is, os);
     } catch (IOException e) {
-      throw new QuercusException(e);
+      throw new QuercusModuleException(e);
     }
   }
 
@@ -167,13 +167,13 @@ public class NetworkModule extends AbstractQuercusModule {
 
   	InetAddress ip = null;
 
-  	try{
-  		ip = InetAddress.getByName(hostname);
+  	try {
+	  ip = InetAddress.getByName(hostname);
   	}
   	catch (Exception e) {
-  		log.log(Level.WARNING, e.toString(), e);
+	  log.log(Level.WARNING, e.toString(), e);
 
-  		return StringValue.create(hostname);
+	  return StringValue.create(hostname);
   	}
 
   	return StringValue.create(ip.getHostAddress());
@@ -190,30 +190,30 @@ public class NetworkModule extends AbstractQuercusModule {
    */
   public static Value gethostbynamel(String hostname)
   {
-  	// php/1m02
+    // php/1m02
 
-  	InetAddress ip[] = null;
+    InetAddress ip[] = null;
 
-  	try{
-  		ip = InetAddress.getAllByName(hostname);
-  	}
-  	catch (Exception e) {
-  		log.log(Level.WARNING, e.toString(), e);
+    try{
+      ip = InetAddress.getAllByName(hostname);
+    }
+    catch (Exception e) {
+      log.log(Level.WARNING, e.toString(), e);
 
-  		return BooleanValue.FALSE;
-  	}
+      return BooleanValue.FALSE;
+    }
 
-  	ArrayValue ipArray = new ArrayValueImpl();
+    ArrayValue ipArray = new ArrayValueImpl();
 
-  	for (int k = 0; k < ip.length; k++) {
-  		String currentIPString = ip[k].getHostAddress();
+    for (int k = 0; k < ip.length; k++) {
+      String currentIPString = ip[k].getHostAddress();
 
-  		StringValue currentIP = new StringValueImpl((currentIPString));
+      StringValue currentIP = new StringValueImpl((currentIPString));
 
-  		ipArray.append(currentIP);
-  	}
+      ipArray.append(currentIP);
+    }
 
-  	return ipArray;
+    return ipArray;
   }
 
   /**
@@ -227,54 +227,54 @@ public class NetworkModule extends AbstractQuercusModule {
    */
   public static Value gethostbyaddr(Env env, String ip)
   {
-  	// php/1m03
+    // php/1m03
 
-  	String formIPv4 = "(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\." +
-  			"(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\." +
-  			"(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\." +
-  			"(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)";
+    String formIPv4 = "(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\." +
+      "(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\." +
+      "(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\." +
+      "(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)";
 
-  	CharSequence ipToCS = ip.subSequence(0, ip.length());
+    CharSequence ipToCS = ip.subSequence(0, ip.length());
 
-  	if (! (Pattern.matches(formIPv4, ipToCS))) {
-  		env.warning("Address is not in a.b.c.d form");
+    if (! (Pattern.matches(formIPv4, ipToCS))) {
+      env.warning("Address is not in a.b.c.d form");
 
-  		return BooleanValue.FALSE;
-  	}
+      return BooleanValue.FALSE;
+    }
 
-  	String splitIP[] = null;
+    String splitIP[] = null;
 
-  	try {
-  	  splitIP = ip.split("\\.");
-  	}
-  	catch (Exception e) {
-  		log.log(Level.WARNING, e.toString(), e);
+    try {
+      splitIP = ip.split("\\.");
+    }
+    catch (Exception e) {
+      log.log(Level.WARNING, e.toString(), e);
 
-  		env.warning("Regex expression invalid");
+      env.warning("Regex expression invalid");
 
-  		return StringValue.create(ip);
-  	}
+      return StringValue.create(ip);
+    }
 
-  	byte addr[] = new byte[splitIP.length];
+    byte addr[] = new byte[splitIP.length];
 
-  	for (int k = 0; k < splitIP.length; k++) {
-  		Integer intForm = new Integer(splitIP[k]);
+    for (int k = 0; k < splitIP.length; k++) {
+      Integer intForm = new Integer(splitIP[k]);
 
-  		addr[k] = intForm.byteValue();
-  	}
+      addr[k] = intForm.byteValue();
+    }
 
-  	InetAddress host = null;
+    InetAddress host = null;
 
-  	try{
-  		host = InetAddress.getByAddress(addr);
-  	}
-  	catch (Exception e) {
-  		log.log(Level.WARNING, e.toString(), e);
+    try{
+      host = InetAddress.getByAddress(addr);
+    }
+    catch (Exception e) {
+      log.log(Level.WARNING, e.toString(), e);
 
-  		return StringValue.create(ip);
-  	}
+      return StringValue.create(ip);
+    }
 
-  	return StringValue.create(host.getHostName());
+    return StringValue.create(host.getHostName());
   }
 
   /**
@@ -286,12 +286,12 @@ public class NetworkModule extends AbstractQuercusModule {
    */
   public static Value getprotobyname(String protoName)
   {
-  	// php/1m04
+    // php/1m04
 
-  	if (! (_protoToNum.containsKey(protoName)))
-  		return BooleanValue.FALSE;
+    if (! (_protoToNum.containsKey(protoName)))
+      return BooleanValue.FALSE;
 
-  	return LongValue.create((_protoToNum.get(protoName).toLong()));
+    return LongValue.create((_protoToNum.get(protoName).toLong()));
   }
 
   /**
@@ -303,13 +303,13 @@ public class NetworkModule extends AbstractQuercusModule {
    */
   public static Value getprotobynumber(int protoNumber)
   {
-  	// php/1m05
+    // php/1m05
 
-  	for (Map.Entry<String, LongValue> entry: _protoToNum.entrySet())
-  		if (entry.getValue().toLong() == protoNumber)
-  			return StringValue.create(entry.getKey());
+    for (Map.Entry<String, LongValue> entry: _protoToNum.entrySet())
+      if (entry.getValue().toLong() == protoNumber)
+	return StringValue.create(entry.getKey());
 
-  	return BooleanValue.FALSE;
+    return BooleanValue.FALSE;
   }
 
   /**
@@ -373,59 +373,62 @@ public class NetworkModule extends AbstractQuercusModule {
    * @return true if records are found, false otherwise
    */
   public static boolean dns_get_mx(Env env,
-  				 String hostname,
+				   String hostname,
 				   @Reference Value mxhosts,
 				   @Optional @Reference Value weight)
-    throws NamingException
   {
-    // php/1m08
-
-    DirContext ictx = new InitialDirContext();
-    Attributes atrs = ictx.getAttributes("dns:/" + hostname, new String[] {"MX"});
-
-    ArrayValue hosts =  new ArrayValueImpl();
-
-    ArrayValue weights = new ArrayValueImpl();
-
     try {
-	    NamingEnumeration list = atrs.getAll();
+      // php/1m08
 
-	    if (! (list.hasMore()))
-	    		return false;
+      DirContext ictx = new InitialDirContext();
+      Attributes atrs = ictx.getAttributes("dns:/" + hostname, new String[] {"MX"});
 
-	    String[] tokens = list.next().toString().split("\\s");
+      ArrayValue hosts =  new ArrayValueImpl();
 
-	    for (int k = 1; k < tokens.length; k++) {
-	    	int weightToInt = Integer.valueOf(tokens[k]).intValue();
+      ArrayValue weights = new ArrayValueImpl();
 
-	    	weights.append(LongValue.create(weightToInt));
+      try {
+	NamingEnumeration list = atrs.getAll();
 
-	    	k++;
+	if (! (list.hasMore()))
+	  return false;
 
-	    	String uncleanHost = tokens[k];
+	String[] tokens = list.next().toString().split("\\s");
 
-	    	int numOfCharacters = 0;
+	for (int k = 1; k < tokens.length; k++) {
+	  int weightToInt = Integer.valueOf(tokens[k]).intValue();
 
-	    	if (k < tokens.length - 1)
-	    		numOfCharacters = uncleanHost.length() - 2;
-	    	else
-	    	  numOfCharacters = uncleanHost.length() -1;
+	  weights.append(LongValue.create(weightToInt));
 
-	      String cleanHost = uncleanHost.substring(0, numOfCharacters);
+	  k++;
 
-	    	hosts.append(StringValue.create(cleanHost));
-	    }
-    }
-    catch(Exception e) {
+	  String uncleanHost = tokens[k];
+
+	  int numOfCharacters = 0;
+
+	  if (k < tokens.length - 1)
+	    numOfCharacters = uncleanHost.length() - 2;
+	  else
+	    numOfCharacters = uncleanHost.length() -1;
+
+	  String cleanHost = uncleanHost.substring(0, numOfCharacters);
+
+	  hosts.append(StringValue.create(cleanHost));
+	}
+      }
+      catch (Exception e) {
     	log.log(Level.WARNING, e.toString(), e);
-      env.warning("An error occurred while processing the records");
+	env.warning("An error occurred while processing the records");
 
-      return false;
+	return false;
+      }
+
+      mxhosts.set(hosts);
+      weight.set(weights);
+      return true;
+    } catch (NamingException e) {
+      throw new QuercusModuleException(e);
     }
-
-    mxhosts.set(hosts);
-    weight.set(weights);
-    return true;
   }
 
   /**
@@ -440,59 +443,63 @@ public class NetworkModule extends AbstractQuercusModule {
    * @return true if records are found, false otherwise
    */
   public static boolean dns_check_record(Env env,
-  				 String hostname,
-  				 @Reference ArrayValue mxhosts,
+					 String hostname,
+					 @Reference ArrayValue mxhosts,
 					 @Optional @Reference  ArrayValue weight)
-    throws NamingException
   {
     // php/1m09
 
-  	DirContext ictx = new InitialDirContext();
-    Attributes atrs = ictx.getAttributes("dns:/" + hostname);
-
-    ArrayValue hosts =  new ArrayValueImpl();
-
-    ArrayValue weights = new ArrayValueImpl();
-
     try {
-	    NamingEnumeration list = atrs.getAll();
+      DirContext ictx = new InitialDirContext();
+      Attributes atrs = ictx.getAttributes("dns:/" + hostname);
 
-	    if (! (list.hasMore()))
-	    		return false;
+      ArrayValue hosts =  new ArrayValueImpl();
 
-	    String[] tokens = list.next().toString().split("\\s");
+      ArrayValue weights = new ArrayValueImpl();
 
-	    for (int k = 1; k < tokens.length; k++) {
-	    	int weightToInt = Integer.valueOf(tokens[k]).intValue();
+      try {
+	NamingEnumeration list = atrs.getAll();
 
-	    	weights.append(LongValue.create(weightToInt));
+	if (! (list.hasMore()))
+	  return false;
 
-	    	k++;
+	String[] tokens = list.next().toString().split("\\s");
 
-	    	String uncleanHost = tokens[k];
+	for (int k = 1; k < tokens.length; k++) {
+	  int weightToInt = Integer.valueOf(tokens[k]).intValue();
 
-	    	int numOfCharacters = 0;
+	  weights.append(LongValue.create(weightToInt));
 
-	    	if (k < tokens.length - 1)
-	    		numOfCharacters = uncleanHost.length() - 2;
-	    	else
-	    	  numOfCharacters = uncleanHost.length() -1;
+	  k++;
 
-	      String cleanHost = uncleanHost.substring(0, numOfCharacters);
+	  String uncleanHost = tokens[k];
 
-	    	hosts.append(StringValue.create(cleanHost));
-	    }
-    }
-    catch(Exception e) {
+	  int numOfCharacters = 0;
+
+	  if (k < tokens.length - 1)
+	    numOfCharacters = uncleanHost.length() - 2;
+	  else
+	    numOfCharacters = uncleanHost.length() -1;
+
+	  String cleanHost = uncleanHost.substring(0, numOfCharacters);
+
+	  hosts.append(StringValue.create(cleanHost));
+	}
+      }
+      catch(Exception e) {
     	log.log(Level.WARNING, e.toString(), e);
-      env.warning("An error occurred while processing the records");
+	env.warning("An error occurred while processing the records");
 
-      return false;
+	return false;
+      }
+
+      mxhosts.set(hosts);
+      weight.set(weights);
+      
+      return true;
+    } catch (NamingException e) {
+      throw new QuercusModuleException(e);
     }
-
-    mxhosts.set(hosts);
-    weight.set(weights);
-    return true;
   }
 
   private static class ServiceNode {

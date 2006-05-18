@@ -232,14 +232,8 @@ public class DoubleValue extends NumberValue {
    * @param env
    */
   public void print(Env env)
-    throws IOException
   {
-    long longValue = (long) _value;
-
-    if (longValue == _value)
-      env.getOut().print(longValue);
-    else
-      env.getOut().print(_value);
+    env.print(_value);
   }
 
   /**

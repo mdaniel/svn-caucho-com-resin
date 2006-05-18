@@ -33,16 +33,19 @@ import java.sql.*;
 
 import java.util.logging.Logger;
 import java.util.logging.Level;
-import java.util.Hashtable;
+import java.util.HashMap;
 import java.util.StringTokenizer;
 
 import com.caucho.util.L10N;
+
+import com.caucho.quercus.QuercusModuleException;
 
 import com.caucho.quercus.resources.JdbcConnectionResource;
 import com.caucho.quercus.resources.JdbcResultResource;
 
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
+import com.caucho.quercus.env.Var;
 import com.caucho.quercus.env.BooleanValue;
 
 import com.caucho.quercus.module.Reference;
@@ -75,7 +78,8 @@ public class MysqliStatement {
   private String _stmtType;
 
   // Binding variables for oracle statements
-  private Hashtable bindingVariables = new Hashtable();
+  private HashMap<String,Integer> _bindingVariables
+    = new HashMap<String,Integer>();
 
   // Oracle internal result buffer
   private Value _resultBuffer;
@@ -98,7 +102,8 @@ public class MysqliStatement {
   //    echo "ename:" . $ename . "\n";
   // }
   //
-  private Hashtable byNameVariables = new Hashtable();
+  private HashMap<String,Value> _byNameVariables
+    = new HashMap<String,Value>();
 
 
   MysqliStatement(JdbcConnectionResource conn)
@@ -438,17 +443,20 @@ public class MysqliStatement {
    * by a prepared statement.
    */
   public Value result_metadata(Env env)
-    throws SQLException
   {
-    if (_rs != null) {
-      JdbcResultResource result;
+    try {
+      if (_rs != null) {
+	JdbcResultResource result;
 
-      result = new JdbcResultResource(_rs.getMetaData(), _conn);
+	result = new JdbcResultResource(_rs.getMetaData(), _conn);
 
-      return env.wrapJava(new MysqliResult(result));
+	return env.wrapJava(new MysqliResult(result));
+      }
+      else
+	return null;
+    } catch (SQLException e) {
+      throw new QuercusModuleException(e);
     }
-    else
-      return null;
   }
 
   /**
@@ -504,12 +512,15 @@ public class MysqliStatement {
   }
 
   private ResultSetMetaData getMetaData()
-    throws SQLException
   {
-    if (_rsMetaData == null)
-      _rsMetaData = _rs.getMetaData();
+    try {
+      if (_rsMetaData == null)
+	_rsMetaData = _rs.getMetaData();
 
-    return _rsMetaData;
+      return _rsMetaData;
+    } catch (SQLException e) {
+      throw new QuercusModuleException(e);
+    }
   }
 
   public String getStatementType()
@@ -517,29 +528,29 @@ public class MysqliStatement {
     return _stmtType;
   }
 
-  public void putBindingVariable(Object name, Object value)
+  public void putBindingVariable(String name, Integer value)
   {
-    bindingVariables.put(name, value);
+    _bindingVariables.put(name, value);
   }
 
-  public Object getBindingVariable(Object name)
+  public Integer getBindingVariable(String name)
   {
-    return bindingVariables.get(name);
+    return _bindingVariables.get(name);
   }
 
-  public Object removeBindingVariable(Object name)
+  public Integer removeBindingVariable(String name)
   {
-    return bindingVariables.remove(name);
+    return _bindingVariables.remove(name);
   }
 
-  public Hashtable getBindingVariables()
+  public HashMap<String,Integer> getBindingVariables()
   {
-    return bindingVariables;
+    return _bindingVariables;
   }
 
   public void resetBindingVariables()
   {
-    bindingVariables = new Hashtable();
+    _bindingVariables = new HashMap<String,Integer>();
   }
 
   public void setResultBuffer(Value resultBuffer)
@@ -552,29 +563,29 @@ public class MysqliStatement {
     return _resultBuffer;
   }
 
-  public void putByNameVariable(Object name, Object value)
+  public void putByNameVariable(String name, Value value)
   {
-    byNameVariables.put(name, value);
+    _byNameVariables.put(name, value);
   }
 
-  public Object getByNameVariable(Object name)
+  public Value getByNameVariable(String name)
   {
-    return byNameVariables.get(name);
+    return _byNameVariables.get(name);
   }
 
-  public Object removeByNameVariable(Object name)
+  public Value removeByNameVariable(String name)
   {
-    return byNameVariables.remove(name);
+    return _byNameVariables.remove(name);
   }
 
-  public Hashtable getByNameVariables()
+  public HashMap<String,Value> getByNameVariables()
   {
-    return byNameVariables;
+    return _byNameVariables;
   }
 
   public void resetByNameVariables()
   {
-    byNameVariables = new Hashtable();
+    _byNameVariables = new HashMap<String,Value>();
   }
 
   public String toString()

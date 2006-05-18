@@ -34,14 +34,19 @@ import java.sql.SQLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.caucho.quercus.QuercusModuleException;
+
 import com.caucho.quercus.env.*;
+
 import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.quercus.module.Optional;
 import com.caucho.quercus.module.NotNull;
 import com.caucho.quercus.module.Reference;
+
 import com.caucho.quercus.lib.mysql.Mysqli;
 import com.caucho.quercus.lib.mysql.MysqliResult;
 import com.caucho.quercus.lib.mysql.MysqliStatement;
+
 import com.caucho.util.Log;
 import com.caucho.util.L10N;
 
@@ -291,7 +296,6 @@ public class MysqliModule extends AbstractQuercusModule {
   public static Value mysqli_fetch_field_direct(Env env,
                                                 @NotNull MysqliResult result,
                                                 int fieldOffset)
-    throws Exception
   {
     if (result == null)
       return BooleanValue.FALSE;
@@ -304,7 +308,6 @@ public class MysqliModule extends AbstractQuercusModule {
    */
   public static Value mysqli_fetch_field(Env env,
                                          @NotNull MysqliResult result)
-    throws Exception
   {
     if (result == null)
       return BooleanValue.FALSE;
@@ -317,7 +320,6 @@ public class MysqliModule extends AbstractQuercusModule {
    */
   public static Value mysqli_fetch_fields(Env env,
                                           @NotNull MysqliResult result)
-    throws Exception
   {
     if (result == null)
       return BooleanValue.FALSE;
@@ -330,7 +332,6 @@ public class MysqliModule extends AbstractQuercusModule {
    * FALSE if an error occurred.
    */
   public static Value mysqli_fetch_lengths(@NotNull MysqliResult result)
-    throws Exception
   {
     if (result == null)
       return BooleanValue.FALSE;
@@ -347,7 +348,6 @@ public class MysqliModule extends AbstractQuercusModule {
   public static boolean mysqli_field_seek(Env env,
                                           @NotNull MysqliResult result,
                                           int fieldOffset)
-    throws Exception
   {
     if (result == null)
       return false;
@@ -363,8 +363,7 @@ public class MysqliModule extends AbstractQuercusModule {
    * argument to mysqli_field_seek()
    */
   public static int mysqli_field_tell(Env env,
-              @NotNull MysqliResult result)
-    throws Exception
+				      @NotNull MysqliResult result)
   {
     if (result == null)
       return -1;
@@ -631,8 +630,8 @@ public class MysqliModule extends AbstractQuercusModule {
    * Sets the options for a connection.
    */
   public static boolean mysqli_options(@NotNull Mysqli mysqli,
-               int option,
-               Value value)
+				       int option,
+				       Value value)
   {
     if (mysqli == null)
       return false;
@@ -664,7 +663,8 @@ public class MysqliModule extends AbstractQuercusModule {
   /**
    * Sets the character set for a conneciton.
    */
-  public static boolean mysqli_set_charset(@NotNull Mysqli mysqli, String charset)
+  public static boolean mysqli_set_charset(@NotNull Mysqli mysqli,
+					   String charset)
   {
     if (mysqli == null)
       return false;
@@ -676,8 +676,8 @@ public class MysqliModule extends AbstractQuercusModule {
    * Sets the options for a connection.
    */
   public static boolean mysqli_set_opt(@NotNull Mysqli mysqli,
-               int option,
-               Value value)
+				       int option,
+				       Value value)
   {
     return mysqli_options(mysqli, option, value);
   }
@@ -730,18 +730,13 @@ public class MysqliModule extends AbstractQuercusModule {
   /**
    * Returns result information for metadata
    */
-  public static Value mysqli_stmt_result_metadata(Env env, @NotNull MysqliStatement stmt)
+  public static Value mysqli_stmt_result_metadata(Env env,
+						  @NotNull MysqliStatement stmt)
   {
     if (stmt == null)
       return BooleanValue.FALSE;
 
-    try {
-      return stmt.result_metadata(env);
-    }
-    catch (SQLException e) {
-      log.log(Level.FINE, e.toString(), e);
-      return BooleanValue.FALSE;
-    }
+    return stmt.result_metadata(env);
   }
 
   /**
@@ -841,20 +836,19 @@ public class MysqliModule extends AbstractQuercusModule {
    * Connects to the database.
    */
   public static boolean mysqli_real_connect(Env env,
-              @NotNull Mysqli mysqli,
-              @Optional("localhost") String host,
-              @Optional String userName,
-              @Optional String password,
-              @Optional String dbname,
-              @Optional("3306") int port,
-              @Optional String socket,
-              @Optional int flags)
-
+					    @NotNull Mysqli mysqli,
+					    @Optional("localhost") String host,
+					    @Optional String userName,
+					    @Optional String password,
+					    @Optional String dbname,
+					    @Optional("3306") int port,
+					    @Optional String socket,
+					    @Optional int flags)
   {
     if (mysqli != null)
       return mysqli.real_connect(env, host, userName, password,
-         dbname, port, socket, flags,
-         null, null);
+				 dbname, port, socket, flags,
+				 null, null);
     else
       return false;
   }
@@ -1084,7 +1078,7 @@ public class MysqliModule extends AbstractQuercusModule {
    * @return true on success or false on failure
    */
   public static boolean mysqli_stmt_execute(Env env,
-              @NotNull MysqliStatement stmt)
+					    @NotNull MysqliStatement stmt)
   {
     if (stmt == null)
       return false;
@@ -1162,8 +1156,8 @@ public class MysqliModule extends AbstractQuercusModule {
    * Prepares a statement.
    */
   public static MysqliStatement mysqli_prepare(Env env,
-                 @NotNull Mysqli conn,
-                 String query)
+					       @NotNull Mysqli conn,
+					       String query)
   {
     if (conn == null)
       return null;

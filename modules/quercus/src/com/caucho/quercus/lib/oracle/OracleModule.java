@@ -34,9 +34,11 @@ import java.sql.ResultSetMetaData;
 import java.sql.Statement;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.Enumeration;
+
+import java.util.Map;
 
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
@@ -460,19 +462,18 @@ public class OracleModule extends AbstractQuercusModule {
 
       stmt.setResultBuffer(result);
 
-      if (!(result instanceof ArrayValueImpl)) {
+      if (!(result instanceof ArrayValue)) {
         return BooleanValue.FALSE;
       }
 
-      ArrayValueImpl arrayValue = (ArrayValueImpl)result;
+      ArrayValue arrayValue = (ArrayValue) result;
 
-      Enumeration e = stmt.getByNameVariables().keys();
-
-      while (e.hasMoreElements()) {
-        String fieldName = (String)e.nextElement();
-        Value variable = (Value)stmt.getByNameVariable(fieldName);
+      for (Map.Entry<String,Value> entry : stmt.getByNameVariables().entrySet()) {
+        String fieldName = entry.getKey();
+        Value var = entry.getValue();
+	
         Value newValue = arrayValue.get(StringValue.create(fieldName));
-        variable.set(newValue);
+        var.set(newValue);
       }
 
       return BooleanValue.TRUE;
@@ -798,7 +799,7 @@ public class OracleModule extends AbstractQuercusModule {
    */
   public Value oci_parse(Env env,
                          @NotNull Mysqli conn,
-                         @NotNull String query)
+			 String query)
   {
     try {
       // Make the PHP query a JDBC like query replacing (:mydata -> ?) with question marks.

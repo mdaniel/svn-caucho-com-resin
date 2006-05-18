@@ -686,9 +686,8 @@ public class CompiledObjectValue extends ObjectValue {
    * @param env
    */
   public void print(Env env)
-    throws IOException
   {
-    env.getOut().print(toString(env));
+    env.print(toString(env));
   }
 
   /**

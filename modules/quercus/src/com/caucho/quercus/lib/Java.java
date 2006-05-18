@@ -53,9 +53,12 @@ import com.caucho.quercus.env.Value;
 import com.caucho.quercus.module.Optional;
 
 /**
- * mysqli object oriented API facade
+ * Java object facade.
  */
 public class Java {
+  /**
+   * Create a new Java API object.
+   */
   public static Object __construct(Env env,
 				   String className, Object []args)
   {

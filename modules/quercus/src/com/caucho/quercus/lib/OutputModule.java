@@ -33,6 +33,8 @@ import java.util.logging.Logger;
 
 import com.caucho.util.L10N;
 
+import com.caucho.quercus.QuercusModuleException;
+
 import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.quercus.module.Optional;
 
@@ -55,9 +57,8 @@ public class OutputModule extends AbstractQuercusModule {
    * Sets the implicit flush.
    */
   public Value flush(Env env)
-    throws java.io.IOException
   {
-    env.getOut().flush();
+    env.flush();
 
     return NullValue.NULL;
   }

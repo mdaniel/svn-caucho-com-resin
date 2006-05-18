@@ -67,17 +67,9 @@ public class EchoStatement extends Statement {
   
   public Value execute(Env env)
   {
-    try {
-      Value value = _expr.eval(env);
+    Value value = _expr.eval(env);
 
-      value.print(env);
-    }
-    catch (RuntimeException e) {
-      rethrow(e, RuntimeException.class);
-    }
-    catch (IOException e) {
-      throw new QuercusException(e);
-    }
+    value.print(env);
 
     return null;
   }

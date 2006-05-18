@@ -29,6 +29,8 @@
 
 package com.caucho.quercus.lib;
 
+import java.io.IOException;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -37,6 +39,7 @@ import java.util.logging.Logger;
 import com.caucho.util.L10N;
 
 import com.caucho.quercus.QuercusDieException;
+import com.caucho.quercus.QuercusModuleException;
 
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.Env;
@@ -94,21 +97,24 @@ public class ErrorModule extends AbstractQuercusModule {
    * Exits
    */
   public Value die(Env env, @Optional String msg)
-    throws Exception
   {
-    if (msg != null) {
-      env.getOut().print(msg);
+    try {
+      if (msg != null) {
+	env.getOut().print(msg);
 
-      throw new QuercusDieException(msg);
+	throw new QuercusDieException(msg);
+      }
+      else
+	throw new QuercusDieException(msg);
+    } catch (IOException e) {
+      throw new QuercusModuleException(e);
     }
-    else
-      throw new QuercusDieException(msg);
   }
+  
   /**
    * Produces a backtrace
    */
   public static Value debug_backtrace(Env env)
-    throws Exception
   {
     ArrayValue result = new ArrayValueImpl();
 
@@ -170,17 +176,20 @@ public class ErrorModule extends AbstractQuercusModule {
    * Exits
    */
   public Value exit(Env env, @Optional String msg)
-    throws Exception
   {
-    if (msg != null) {
-      env.getOut().print(msg);
+    try {
+      if (msg != null) {
+	env.getOut().print(msg);
 
-      env.exit(msg);
+	env.exit(msg);
+      }
+      else
+	env.exit();
+
+      throw new IllegalStateException();
+    } catch (IOException e) {
+      throw new QuercusModuleException(e);
     }
-    else
-      env.exit();
-
-    throw new IllegalStateException();
   }
 
   /**
@@ -190,7 +199,6 @@ public class ErrorModule extends AbstractQuercusModule {
                                   @Optional int type,
                                   @Optional String destination,
                                   @Optional String extraHeaders)
-    throws Exception
   {
     log.warning(message);
 
@@ -205,7 +213,6 @@ public class ErrorModule extends AbstractQuercusModule {
    */
   public static long error_reporting(Env env,
                                      @Optional Value levelV)
-    throws Exception
   {
     if (levelV instanceof DefaultValue)
       return env.getErrorMask();
@@ -251,7 +258,6 @@ public class ErrorModule extends AbstractQuercusModule {
   public static Value trigger_error(Env env,
                                     String msg,
                                     @Optional("E_USER_NOTICE") int code)
-    throws Exception
   {
     switch (code) {
     case Env.E_USER_NOTICE:
@@ -284,7 +290,6 @@ public class ErrorModule extends AbstractQuercusModule {
   public Value user_error(Env env,
                           String msg,
                           @Optional("E_USER_NOTICE") int code)
-    throws Exception
   {
     return trigger_error(env, msg, code);
   }

@@ -172,7 +172,6 @@ public class NullValue extends Value {
    * @param env
    */
   public void print(Env env)
-    throws IOException
   {
   }
 

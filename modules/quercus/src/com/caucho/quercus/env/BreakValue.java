@@ -90,7 +90,6 @@ public class BreakValue extends Value {
    * @param env
    */
   public void print(Env env)
-    throws IOException
   {
   }
 

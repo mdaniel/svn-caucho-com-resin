@@ -293,7 +293,8 @@ abstract public class Statement {
     // quercus/1l07
     // out.print("_quercus_out");
 
-    out.print("env.getOut()");
+    //out.print("env.getOut()");
+    out.print("env");
   }
 
   /**

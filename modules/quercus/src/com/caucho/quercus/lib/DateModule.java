@@ -30,6 +30,9 @@
 package com.caucho.quercus.lib;
 
 import java.util.TimeZone;
+import java.util.Date;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 
 import java.util.logging.Logger;
 import java.util.logging.Level;
@@ -279,6 +282,25 @@ public class DateModule extends AbstractQuercusModule {
       time = 1000 * phpTime;
 
     return QDate.formatGMT(time, format);
+  }
+
+  /**
+   * Convert from a gregorian date to a julian day.
+   */
+  public double gregoriantojd(int month, int day, int year)
+  {
+    if (month <= 2) {
+      year -= 1;
+      month += 12;
+    }
+
+    long a = year / 100;
+    long b = a / 4;
+    long c = 2 - a + b;
+    long e = (long) (365.25 * (year + 4716));
+    long f = (long) (30.6001 * (month + 1));
+
+    return (c + day + e + f - 1524.5);
   }
 
   /**
@@ -710,6 +732,42 @@ public class DateModule extends AbstractQuercusModule {
   public static long time()
   {
     return Alarm.getCurrentTime() / 1000L;
+  }
+
+  /**
+   * Convert from a julian day to unix
+   */
+  public long jdtounix(double jd)
+  {
+    long z = (long) (jd + 0.5);
+    long w = (long) ((z - 1867216.25) / 36524.25);
+    long x = (long) (w / 4);
+    long a = (long) (z + 1 + w - x);
+    long b = (long) (a + 1524);
+    long c = (long) ((b - 122.1) / 365.25);
+    long d = (long) (365.25 * c);
+    long e = (long) ((b - d) / 30.6001);
+    long f = (long) (30.6001 * e);
+
+    long day = b - d - f;
+    long month = e - 1;
+    long year = c - 4716;
+
+    if (month > 12) {
+      month -= 12;
+      year += 1;
+    }
+    
+    synchronized (_localCalendar) {
+      _localCalendar.setHour(0);
+      _localCalendar.setMinute(0);
+      _localCalendar.setSecond(0);
+      _localCalendar.setDayOfMonth((int) day);
+      _localCalendar.setMonth((int) (month - 1));
+      _localCalendar.setYear((int) year);
+
+      return _localCalendar.getLocalTime() / 1000L;
+    }
   }
 
   class DateParser {
