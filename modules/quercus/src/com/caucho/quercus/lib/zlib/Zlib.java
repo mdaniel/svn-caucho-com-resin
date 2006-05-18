@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -27,6 +28,21 @@
  */
 
 package com.caucho.quercus.lib.zlib;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.zip.DataFormatException;
+import java.util.zip.Deflater;
+import java.util.zip.Inflater;
+import java.util.zip.InflaterInputStream;
+
+import com.caucho.quercus.QuercusModuleException;
 
 import com.caucho.quercus.env.ArrayValue;
 import com.caucho.quercus.env.ArrayValueImpl;
@@ -42,19 +58,6 @@ import com.caucho.quercus.lib.string.StringModule;
 import com.caucho.util.ByteBuffer;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
-
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.zip.DataFormatException;
-import java.util.zip.Deflater;
-import java.util.zip.Inflater;
-import java.util.zip.InflaterInputStream;
 
 /**
  * Zlib object oriented API facade
@@ -126,7 +129,7 @@ public class Zlib {
    * @return # of uncompressed bytes
    */
   public int gzwrite(Env env,
-                     @NotNull String s,
+		     String s,
                      @Optional("0") int length)
   {
     if ((_fileValue == null) || (_fileValue == BooleanValue.FALSE)) {
@@ -199,17 +202,20 @@ public class Zlib {
    * @return the next character or BooleanValue.FALSE
    */
   public Value gzgetc()
-    throws IOException, DataFormatException
   {
-    if (_bufferedReader == null) {
-      getBufferedReader();
-    }
-    int ch = _bufferedReader.read();
+    try {
+      if (_bufferedReader == null) {
+	getBufferedReader();
+      }
+      int ch = _bufferedReader.read();
 
-    if (ch >= 0)
-      return new StringValueImpl(Character.toString((char) ch));
-    else
-      return BooleanValue.FALSE;
+      if (ch >= 0)
+	return new StringValueImpl(Character.toString((char) ch));
+      else
+	return BooleanValue.FALSE;
+    } catch (IOException e) {
+      throw QuercusModuleException.create(e);
+    }
   }
 
   /**
@@ -221,27 +227,30 @@ public class Zlib {
    * @return StringValue
    */
   public Value gzgets(int length)
-    throws IOException, DataFormatException
   {
-    if (_bufferedReader == null) {
-      getBufferedReader();
-    }
+    try {
+      if (_bufferedReader == null) {
+	getBufferedReader();
+      }
 
-    StringBuffer sb = new StringBuffer();
-    int readChar;
-    for (int i=0; i < length - 1; i++) {
-      readChar = _bufferedReader.read();
-      if (readChar >= 0) {
-        sb.append(Character.toString((char) readChar));
-        if ((((char) readChar) == '\n') || (((char) readChar) == '\r'))
-          break;
-      } else
-        break;
+      StringBuffer sb = new StringBuffer();
+      int readChar;
+      for (int i=0; i < length - 1; i++) {
+	readChar = _bufferedReader.read();
+	if (readChar >= 0) {
+	  sb.append(Character.toString((char) readChar));
+	  if ((((char) readChar) == '\n') || (((char) readChar) == '\r'))
+	    break;
+	} else
+	  break;
+      }
+      if (sb.length() > 0)
+	return new StringValueImpl(sb.toString());
+      else
+	return BooleanValue.FALSE;
+    } catch (Exception e) {
+      throw QuercusModuleException.create(e);
     }
-    if (sb.length() > 0)
-      return new StringValueImpl(sb.toString());
-    else
-      return BooleanValue.FALSE;
   }
 
   /**
@@ -253,31 +262,34 @@ public class Zlib {
    * @throws DataFormatException
    */
   public Value gzfile()
-    throws IOException, DataFormatException
   {
-    ArrayValue array = new ArrayValueImpl();
+    try {
+      ArrayValue array = new ArrayValueImpl();
 
-    if (_bufferedReader == null) {
-      getBufferedReader();
+      if (_bufferedReader == null) {
+	getBufferedReader();
+      }
+
+      StringBuffer sb = new StringBuffer();
+      int readChar;
+      while (true) {
+	readChar = _bufferedReader.read();
+	if (readChar >= 0) {
+	  sb.append(Character.toString((char) readChar));
+	  if ((((char) readChar) == '\n') || (((char) readChar) == '\r')) {
+	    array.put(sb.toString());
+	    sb = new StringBuffer();
+	  }
+	} else
+	  break;
+      }
+
+      array.put(sb.toString());
+
+      return array;
+    } catch (Exception e) {
+      throw QuercusModuleException.create(e);
     }
-
-    StringBuffer sb = new StringBuffer();
-    int readChar;
-    while (true) {
-      readChar = _bufferedReader.read();
-      if (readChar >= 0) {
-        sb.append(Character.toString((char) readChar));
-        if ((((char) readChar) == '\n') || (((char) readChar) == '\r')) {
-          array.put(sb.toString());
-          sb = new StringBuffer();
-        }
-      } else
-        break;
-    }
-
-    array.put(sb.toString());
-
-    return array;
   }
 
   /**
@@ -288,7 +300,7 @@ public class Zlib {
    * @throws IOException
    * @throws DataFormatException
    */
-  public InputStream readgzfile()
+  private InputStream readgzfile()
     throws IOException, DataFormatException
   {
     return new InflaterInputStream(_path.openRead(), new Inflater());
@@ -302,25 +314,28 @@ public class Zlib {
    * @throws DataFormatException
    */
   public Value gzread(int length)
-    throws IOException, DataFormatException
    {
-     if (_bufferedReader == null) {
-       getBufferedReader();
-     }
+     try {
+       if (_bufferedReader == null) {
+	 getBufferedReader();
+       }
 
-     StringBuffer sb = new StringBuffer();
-     int readChar;
-     for (int i=0; i < length - 1; i++) {
-       readChar = _bufferedReader.read();
-       if (readChar >= 0) {
-         sb.append(Character.toString((char) readChar));
-       } else
-         break;
+       StringBuffer sb = new StringBuffer();
+       int readChar;
+       for (int i=0; i < length - 1; i++) {
+	 readChar = _bufferedReader.read();
+	 if (readChar >= 0) {
+	   sb.append(Character.toString((char) readChar));
+	 } else
+	   break;
+       }
+       if (sb.length() > 0)
+	 return new StringValueImpl(sb.toString());
+       else
+	 return BooleanValue.FALSE;
+     } catch (Exception e) {
+       throw QuercusModuleException.create(e);
      }
-     if (sb.length() > 0)
-       return new StringValueImpl(sb.toString());
-     else
-       return BooleanValue.FALSE;
    }
 
   /**
@@ -328,17 +343,20 @@ public class Zlib {
    * @return true if eof
    */
   public boolean gzeof()
-    throws IOException
   {
-    if (_bufferedReader == null) {
-      getBufferedReader();
+    try {
+      if (_bufferedReader == null) {
+	getBufferedReader();
+      }
+
+      _bufferedReader.mark(1);
+      int result = _bufferedReader.read();
+      _bufferedReader.reset();
+
+      return (result == -1);
+    } catch (IOException e) {
+      throw new QuercusModuleException(e);
     }
-
-    _bufferedReader.mark(1);
-    int result = _bufferedReader.read();
-    _bufferedReader.reset();
-
-    return (result == -1);
   }
 
   /**
@@ -351,27 +369,30 @@ public class Zlib {
    */
   public Value gzgetss(int length,
                        @Optional String allowedTags)
-    throws IOException, DataFormatException
   {
-    if (_bufferedReader == null) {
-      getBufferedReader();
-    }
+    try {
+      if (_bufferedReader == null) {
+	getBufferedReader();
+      }
 
-    StringBuffer sb = new StringBuffer();
-    int readChar;
-    for (int i=0; i < length - 1; i++) {
-      readChar = _bufferedReader.read();
-      if (readChar >= 0) {
-        sb.append(Character.toString((char) readChar));
-        if ((((char) readChar) == '\n') || (((char) readChar) == '\r'))
-          break;
-      } else
-        break;
+      StringBuffer sb = new StringBuffer();
+      int readChar;
+      for (int i=0; i < length - 1; i++) {
+	readChar = _bufferedReader.read();
+	if (readChar >= 0) {
+	  sb.append(Character.toString((char) readChar));
+	  if ((((char) readChar) == '\n') || (((char) readChar) == '\r'))
+	    break;
+	} else
+	  break;
+      }
+      if (sb.length() > 0)
+	return new StringValueImpl(StringModule.strip_tags(sb.toString(), allowedTags));
+      else
+	return BooleanValue.FALSE;
+    } catch (Exception e) {
+      throw QuercusModuleException.create(e);
     }
-    if (sb.length() > 0)
-      return new StringValueImpl(StringModule.strip_tags(sb.toString(), allowedTags));
-    else
-      return BooleanValue.FALSE;
   }
 
   /**
@@ -381,9 +402,9 @@ public class Zlib {
    * @throws IOException
    */
   public boolean gzrewind()
-    throws IOException
   {
-    getBufferedReader();
+    //getBufferedReader();
+    
     return true;
   }
 

@@ -139,6 +139,14 @@ abstract public class StringValue extends Value {
   }
 
   /**
+   * Converts to a string value.
+   */
+  public StringValue toStringValue()
+  {
+    return this;
+  }
+
+  /**
    * Returns true for equality
    */
   public boolean eq(Value rValue)

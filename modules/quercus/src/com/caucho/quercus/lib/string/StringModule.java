@@ -44,6 +44,7 @@ import java.util.logging.Logger;
 import java.util.zip.CRC32;
 
 import com.caucho.quercus.QuercusException;
+import com.caucho.quercus.QuercusModuleException;
 import com.caucho.quercus.env.*;
 import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.quercus.module.NotNull;
@@ -334,47 +335,50 @@ v   *
   }
 
   public static Value convert_uudecode(Env env, String source)
-    throws java.io.IOException
   {
-    if (source == null || source.length() == 0)
-      return BooleanValue.FALSE;
+    try {
+      if (source == null || source.length() == 0)
+	return BooleanValue.FALSE;
 
-    ByteToChar byteToChar = env.getByteToChar();
+      ByteToChar byteToChar = env.getByteToChar();
 
-    int length = source.length();
+      int length = source.length();
 
-    int i = 0;
-    while (i < length) {
-      int ch1 = source.charAt(i++);
+      int i = 0;
+      while (i < length) {
+	int ch1 = source.charAt(i++);
 
-      if (ch1 == 0x60 || ch1 == 0x20)
-        break;
-      else if (ch1 < 0x20 || 0x5f < ch1)
-        continue;
+	if (ch1 == 0x60 || ch1 == 0x20)
+	  break;
+	else if (ch1 < 0x20 || 0x5f < ch1)
+	  continue;
 
-      int sublen = ch1 - 0x20;
+	int sublen = ch1 - 0x20;
 
-      while (sublen > 0) {
-        int code;
+	while (sublen > 0) {
+	  int code;
 
-        code = ((source.charAt(i++) - 0x20) & 0x3f) << 18;
-        code += ((source.charAt(i++) - 0x20) & 0x3f) << 12;
-        code += ((source.charAt(i++) - 0x20) & 0x3f) << 6;
-        code += ((source.charAt(i++) - 0x20) & 0x3f);
+	  code = ((source.charAt(i++) - 0x20) & 0x3f) << 18;
+	  code += ((source.charAt(i++) - 0x20) & 0x3f) << 12;
+	  code += ((source.charAt(i++) - 0x20) & 0x3f) << 6;
+	  code += ((source.charAt(i++) - 0x20) & 0x3f);
 
-        byteToChar.addByte(code >> 16);
+	  byteToChar.addByte(code >> 16);
 
-        if (sublen > 1)
-          byteToChar.addByte(code >> 8);
+	  if (sublen > 1)
+	    byteToChar.addByte(code >> 8);
 
-        if (sublen > 2)
-          byteToChar.addByte(code);
+	  if (sublen > 2)
+	    byteToChar.addByte(code);
 
-        sublen -= 3;
+	  sublen -= 3;
+	}
       }
-    }
 
-    return new StringValueImpl(byteToChar.getConvertedString());
+      return new StringValueImpl(byteToChar.getConvertedString());
+    } catch (IOException e) {
+      throw new QuercusModuleException(e);
+    }
   }
 
   /**
@@ -525,7 +529,6 @@ v   *
   }
 
   public static String crypt(String string, @Optional String salt)
-    throws Exception
   {
     if (salt == null || salt.equals("")) {
       salt = ("" + Crypt.resultToChar(RandomUtil.nextInt(0x40)) +
@@ -587,7 +590,6 @@ v   *
                               @NotNull StreamResource fd,
                               String format,
                               Value []args)
-    throws java.io.IOException
   {
     Value value = sprintf(format, args);
 
@@ -731,7 +733,7 @@ v   *
 	}
       }
     } catch (Exception e) {
-      throw new QuercusException(e);
+      throw new QuercusModuleException(e);
     }
   }
 
@@ -1227,90 +1229,93 @@ v   *
   @UsesSymbolTable
   public static Value parse_str(Env env, String str,
                                 @Optional @Reference Value ref)
-    throws IOException
   {
-    ByteToChar byteToChar = env.getByteToChar();
-    int len = str.length();
+    try {
+      ByteToChar byteToChar = env.getByteToChar();
+      int len = str.length();
 
-    boolean isRef = ref instanceof Var;
+      boolean isRef = ref instanceof Var;
 
-    ArrayValue result = null;
-
-    if (isRef) {
-      result = new ArrayValueImpl();
-      ref.set(result);
-    }
-    else if (ref instanceof ArrayValue) {
-      result = (ArrayValue) ref;
-      isRef = true;
-    }
-    else
-      result = new ArrayValueImpl();
-
-    for (int i = 0; i < len; i++) {
-      int ch = 0;
-      byteToChar.clear();
-
-      for (; i < len && (ch = str.charAt(i)) == '&'; i++) {
-      }
-      
-      for (; i < len && (ch = str.charAt(i)) != '='; i++) {
-        i = addQueryChar(byteToChar, str, len, i, ch);
-      }
-
-      String key = byteToChar.getConvertedString();
-
-      byteToChar.clear();
-
-      String value;
-      if (ch == '=') {
-        for (i++; i < len && (ch = str.charAt(i)) != '&'; i++) {
-          i = addQueryChar(byteToChar, str, len, i, ch);
-        }
-
-        value = byteToChar.getConvertedString();
-      }
-      else
-        value = "";
+      ArrayValue result = null;
 
       if (isRef) {
-        Post.addFormValue(result, key, new String[] { value }, env.getIniBoolean("magic_quotes_gpc"));
-      } else {
-        // If key is an exsiting array, then append this value to existing array
-        // Only use extract(EXTR_OVERWRITE) on non-array variables or
-        // non-existing arrays
-        int openBracketIndex = key.indexOf('[');
-        int closeBracketIndex = key.indexOf(']');
-        if (openBracketIndex > 0) {
-          Value v = env.getVar(key.substring(0,openBracketIndex)).getRawValue();
-          if (v instanceof ArrayValue) {
-            //Check to make sure valid string (ie: foo[...])
-            if (closeBracketIndex < 0) {
-              env.warning(L.l("invalid array " + key));
-              return NullValue.NULL;
-            }
-            if (closeBracketIndex > openBracketIndex + 1) {
-              String index = key.substring(key.indexOf('[') + 1,key.indexOf(']'));
-              v.put(new StringValueImpl(index), new StringValueImpl(value));
-            } else {
-              v.put(new StringValueImpl(value));
-            }
-          } else {
-            Post.addFormValue(result, key, new String[] { value }, env.getIniBoolean("magic_quotes_gpc"));
-          }
-        } else {
-          Post.addFormValue(result, key, new String[] { value }, env.getIniBoolean("magic_quotes_gpc"));
-        }
+	result = new ArrayValueImpl();
+	ref.set(result);
       }
-    }
+      else if (ref instanceof ArrayValue) {
+	result = (ArrayValue) ref;
+	isRef = true;
+      }
+      else
+	result = new ArrayValueImpl();
 
-    if (! isRef) {
-      ArrayModule.extract(env, result,
-			  ArrayModule.EXTR_OVERWRITE,
-			  null);
-    }
+      for (int i = 0; i < len; i++) {
+	int ch = 0;
+	byteToChar.clear();
 
-    return NullValue.NULL;
+	for (; i < len && (ch = str.charAt(i)) == '&'; i++) {
+	}
+      
+	for (; i < len && (ch = str.charAt(i)) != '='; i++) {
+	  i = addQueryChar(byteToChar, str, len, i, ch);
+	}
+
+	String key = byteToChar.getConvertedString();
+
+	byteToChar.clear();
+
+	String value;
+	if (ch == '=') {
+	  for (i++; i < len && (ch = str.charAt(i)) != '&'; i++) {
+	    i = addQueryChar(byteToChar, str, len, i, ch);
+	  }
+
+	  value = byteToChar.getConvertedString();
+	}
+	else
+	  value = "";
+
+	if (isRef) {
+	  Post.addFormValue(result, key, new String[] { value }, env.getIniBoolean("magic_quotes_gpc"));
+	} else {
+	  // If key is an exsiting array, then append this value to existing array
+	  // Only use extract(EXTR_OVERWRITE) on non-array variables or
+	  // non-existing arrays
+	  int openBracketIndex = key.indexOf('[');
+	  int closeBracketIndex = key.indexOf(']');
+	  if (openBracketIndex > 0) {
+	    Value v = env.getVar(key.substring(0,openBracketIndex)).getRawValue();
+	    if (v instanceof ArrayValue) {
+	      //Check to make sure valid string (ie: foo[...])
+	      if (closeBracketIndex < 0) {
+		env.warning(L.l("invalid array " + key));
+		return NullValue.NULL;
+	      }
+	      if (closeBracketIndex > openBracketIndex + 1) {
+		String index = key.substring(key.indexOf('[') + 1,key.indexOf(']'));
+		v.put(new StringValueImpl(index), new StringValueImpl(value));
+	      } else {
+		v.put(new StringValueImpl(value));
+	      }
+	    } else {
+	      Post.addFormValue(result, key, new String[] { value }, env.getIniBoolean("magic_quotes_gpc"));
+	    }
+	  } else {
+	    Post.addFormValue(result, key, new String[] { value }, env.getIniBoolean("magic_quotes_gpc"));
+	  }
+	}
+      }
+
+      if (! isRef) {
+	ArrayModule.extract(env, result,
+			    ArrayModule.EXTR_OVERWRITE,
+			    null);
+      }
+
+      return NullValue.NULL;
+    } catch (IOException e) {
+      throw new QuercusModuleException(e);
+    }
   }
 
   private static int addQueryChar(ByteToChar byteToChar, String str, int len,
@@ -1391,9 +1396,8 @@ v   *
    * @param value the string to print
    */
   public static long print(Env env, Value value)
-    throws IOException
   {
-    env.getOut().print(value.toString(env));
+    env.print(value.toString(env));
 
     return 1;
   }
@@ -2103,133 +2107,6 @@ v   *
       segments.add(new TextPrintfSegment(sb));
 
     return segments;
-  }
-
-  // XXX: dead code?
-  private static String cleanPrintfFormat(String format)
-  {
-    StringBuilder sb = new StringBuilder();
-    StringBuilder flags = new StringBuilder();
-
-    int length = format.length();
-
-    for (int i = 0; i < length; i++) {
-      char ch = format.charAt(i);
-
-      if (i + 1 < length && ch == '%') {
-        // The C printf silently ignores invalid flags, so we need to
-        // remove them if present.
-
-        sb.append(ch);
-
-        boolean isLeft = false;
-        boolean isAlt = false;
-
-        flags.setLength(0);
-
-        int j = i + 1;
-
-        loop:
-        for (; j < length; j++) {
-          ch = format.charAt(j);
-
-          switch (ch) {
-          case '-':
-            isLeft = true;
-            break;
-          case '#':
-            isAlt = true;
-            break;
-          case '+': case ' ': case '0': case ',': case '(':
-            flags.append(ch);
-            break;
-          default:
-            break loop;
-          }
-        }
-
-        int head = j;
-        loop:
-        for (; j < length; j++) {
-          ch = format.charAt(j);
-
-          switch (ch) {
-          case '%':
-            sb.append(ch);
-            break loop;
-
-          case '0': case '1': case '2': case '3': case '4':
-          case '5': case '6': case '7': case '8': case '9':
-          case '.':
-            break;
-
-          case 'b': case 'B': case 's': case 'S': case 'c':
-            if (isLeft)
-              sb.append('-');
-            if (isAlt)
-              sb.append('#');
-            sb.append(format, head, j);
-            sb.append(ch);
-            i = j;
-            break loop;
-
-          default:
-            if (isLeft)
-              sb.append('-');
-            if (isAlt)
-              sb.append('#');
-            sb.append(flags);
-            sb.append(format, head, j);
-            sb.append(ch);
-            i = j;
-            break loop;
-          }
-        }
-      }
-      else
-        sb.append(ch);
-    }
-
-    return sb.toString();
-  }
-
-  // XXX: dead code?
-  private static void parsePrintfFormat(String format,
-                                        Value []args,
-                                        Object []values)
-  {
-    int k = 0;
-    int strlen = format.length();
-
-    for (int i = 0; i < strlen; i++) {
-      char ch = format.charAt(i);
-
-      if (ch == '%') {
-        loop:
-        for (i++; i < strlen; i++) {
-          ch = format.charAt(i);
-
-          switch (ch) {
-          case '%':
-            break loop;
-          case 's': case 'c':
-            values[k] = args[k].toString();
-            k++;
-            break loop;
-          case 'd': case 'x': case 'o': case 'X':
-            values[k] = args[k].toLong();
-            k++;
-            break loop;
-          case 'e': case 'f': case 'g':
-            values[k] = args[k].toDouble();
-            k++;
-            break loop;
-          default:
-            break;
-          }
-        }
-      }
-    }
   }
 
   /**

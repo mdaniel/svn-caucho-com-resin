@@ -29,6 +29,13 @@
 
 package com.caucho.quercus.lib.resin;
 
+import javax.management.MalformedObjectNameException;
+import javax.management.ObjectName;
+import java.util.Map;
+import java.util.Hashtable;
+import java.util.Set;
+
+import com.caucho.quercus.QuercusModuleException;
 import com.caucho.quercus.env.ArrayValue;
 import com.caucho.quercus.env.ArrayValueImpl;
 import com.caucho.quercus.env.Value;
@@ -40,12 +47,6 @@ import com.caucho.quercus.module.Optional;
 import com.caucho.server.webapp.Application;
 import com.caucho.jmx.Jmx;
 
-import javax.management.MalformedObjectNameException;
-import javax.management.ObjectName;
-import java.util.Map;
-import java.util.Hashtable;
-import java.util.Set;
-
 public class MBeanServer {
   public MBeanServer()
   {
@@ -56,22 +57,25 @@ public class MBeanServer {
    * correspond to the keys and values in the object name.
    * The domain is stored in the returned array under the key named ":".
    */
-  public ArrayValue explode(@NotNull String name)
-    throws MalformedObjectNameException
+  public ArrayValue explode(String name)
   {
-    ObjectName objectName = new ObjectName(name);
+    try {
+      ObjectName objectName = new ObjectName(name);
 
-    ArrayValueImpl exploded = new ArrayValueImpl();
+      ArrayValueImpl exploded = new ArrayValueImpl();
 
-    exploded.put(":", objectName.getDomain());
+      exploded.put(":", objectName.getDomain());
 
-    Hashtable<String, String> entries = objectName.getKeyPropertyList();
+      Hashtable<String, String> entries = objectName.getKeyPropertyList();
 
-    for (Map.Entry<String, String> entry : entries.entrySet()) {
-      exploded.put(entry.getKey(), entry.getValue());
+      for (Map.Entry<String, String> entry : entries.entrySet()) {
+	exploded.put(entry.getKey(), entry.getValue());
+      }
+
+      return exploded;
+    } catch (MalformedObjectNameException e) {
+      throw new QuercusModuleException(e);
     }
-
-    return exploded;
   }
 
   /**
@@ -80,40 +84,43 @@ public class MBeanServer {
    * ":" becomes the domain of the object name.
    */
   public String implode(@NotNull @ReadOnly ArrayValue exploded)
-    throws MalformedObjectNameException
   {
-    if (exploded == null)
-      return null;
+    try {
+      if (exploded == null)
+	return null;
 
-    String domain;
+      String domain;
 
-    Value domainValue = exploded.get(StringValue.create(":"));
+      Value domainValue = exploded.get(StringValue.create(":"));
 
-    if (domainValue.isNull())
-      domain = "*";
-    else
-      domain = domainValue.toString();
+      if (domainValue.isNull())
+	domain = "*";
+      else
+	domain = domainValue.toString();
 
-    Hashtable<String, String> entries = new Hashtable<String, String>();
+      Hashtable<String, String> entries = new Hashtable<String, String>();
 
-    for (Map.Entry<Value, Value> entry : exploded.entrySet()) {
-      String key = entry.getKey().toString();
-      String value = entry.getValue().toString();
+      for (Map.Entry<Value, Value> entry : exploded.entrySet()) {
+	String key = entry.getKey().toString();
+	String value = entry.getValue().toString();
 
-      if (":".equals(key))
-        continue;
+	if (":".equals(key))
+	  continue;
 
-      entries.put(key, value);
+	entries.put(key, value);
+      }
+
+      ObjectName objectName;
+
+      if (entries.isEmpty())
+	objectName = new ObjectName(domain + ":" + "*");
+      else
+	objectName = new ObjectName(domain, entries);
+
+      return objectName.getCanonicalName();
+    } catch (MalformedObjectNameException e) {
+      throw new QuercusModuleException(e);
     }
-
-    ObjectName objectName;
-
-    if (entries.isEmpty())
-      objectName = new ObjectName(domain + ":" + "*");
-    else
-      objectName = new ObjectName(domain, entries);
-
-    return objectName.getCanonicalName();
   }
 
   /**
@@ -133,14 +140,17 @@ public class MBeanServer {
    * @return the mbean object, or null if it is not found.
    */
   public Object lookup(Env env, @Optional String name)
-    throws MalformedObjectNameException
   {
-    if (name == null || name.length() == 0)
-      return Application.getLocal().getAdmin();
-    else if (name.contains(":"))
-      return Jmx.findGlobal(name);
-    else
-      return Jmx.find(name);
+    try {
+      if (name == null || name.length() == 0)
+	return Application.getLocal().getAdmin();
+      else if (name.contains(":"))
+	return Jmx.findGlobal(name);
+      else
+	return Jmx.find(name);
+    } catch (MalformedObjectNameException e) {
+      throw new QuercusModuleException(e);
+    }
   }
 
   /**
@@ -150,24 +160,27 @@ public class MBeanServer {
    * of the current web application.
    */
   public ArrayValue query(Env env, String pattern)
-    throws MalformedObjectNameException
   {
-    ArrayValueImpl values = new ArrayValueImpl();
+    try {
+      ArrayValueImpl values = new ArrayValueImpl();
 
-    ObjectName patternObjectName;
+      ObjectName patternObjectName;
 
-    patternObjectName = new ObjectName(pattern);
+      patternObjectName = new ObjectName(pattern);
 
-    Set<ObjectName> objectNames;
+      Set<ObjectName> objectNames;
 
-    if (pattern.indexOf(':') > 0)
-      objectNames = Jmx.getGlobalMBeanServer().queryNames(patternObjectName, null);
-    else
-      objectNames = Jmx.getMBeanServer().queryNames(patternObjectName, null);
+      if (pattern.indexOf(':') > 0)
+	objectNames = Jmx.getGlobalMBeanServer().queryNames(patternObjectName, null);
+      else
+	objectNames = Jmx.getMBeanServer().queryNames(patternObjectName, null);
 
-    for (ObjectName objectName : objectNames)
-      values.put(objectName.toString());
+      for (ObjectName objectName : objectNames)
+	values.put(objectName.toString());
 
-    return values;
+      return values;
+    } catch (MalformedObjectNameException e) {
+      throw new QuercusModuleException(e);
+    }
   }
 }

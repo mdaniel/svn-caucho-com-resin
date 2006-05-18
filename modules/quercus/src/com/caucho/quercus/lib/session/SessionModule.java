@@ -29,6 +29,8 @@
 
 package com.caucho.quercus.lib.session;
 
+import java.io.IOException;
+
 import java.util.Map;
 import java.util.HashMap;
 
@@ -42,6 +44,8 @@ import com.caucho.util.RandomUtil;
 import com.caucho.util.Alarm;
 
 import com.caucho.java.WorkDir;
+
+import com.caucho.quercus.QuercusModuleException;
 
 import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.quercus.module.Optional;
@@ -59,7 +63,7 @@ import com.caucho.quercus.env.SessionCallback;
 import com.caucho.quercus.lib.UnserializeReader;
 
 /**
- * PHP class information
+ * Quercus session handling
  */
 public class SessionModule extends AbstractQuercusModule {
   private static final L10N L = new L10N(SessionModule.class);
@@ -70,7 +74,7 @@ public class SessionModule extends AbstractQuercusModule {
     = new HashMap<String,StringValue>();
 
   /**
-   * Returns the default quercus.ini values.
+   * Returns the default php.ini values.
    */
   public Map<String,StringValue> getDefaultIni()
   {
@@ -126,34 +130,37 @@ public class SessionModule extends AbstractQuercusModule {
    * Encodes the session values.
    */
   public static boolean session_decode(Env env, String value)
-    throws java.io.IOException
   {
-    Value session = env.getGlobalValue("_SESSION");
+    try {
+      Value session = env.getGlobalValue("_SESSION");
 
-    if (! session.isArray()) {
-      env.warning(L.l("session_decode requires valid session"));
-      return false;
-    }
-
-    UnserializeReader is = new UnserializeReader(value);
-
-    StringBuilder sb = new StringBuilder();
-
-    while (true) {
-      int ch;
-
-      sb.setLength(0);
-
-      while ((ch = is.read()) > 0 && ch != '|') {
-        sb.append((char) ch);
+      if (! session.isArray()) {
+	env.warning(L.l("session_decode requires valid session"));
+	return false;
       }
 
-      if (sb.length() == 0)
-        return true;
+      UnserializeReader is = new UnserializeReader(value);
 
-      String key = sb.toString();
+      StringBuilder sb = new StringBuilder();
 
-      session.put(new StringValueImpl(key), is.unserialize(env));
+      while (true) {
+	int ch;
+
+	sb.setLength(0);
+
+	while ((ch = is.read()) > 0 && ch != '|') {
+	  sb.append((char) ch);
+	}
+
+	if (sb.length() == 0)
+	  return true;
+
+	String key = sb.toString();
+
+	session.put(new StringValueImpl(key), is.unserialize(env));
+      }
+    } catch (IOException e) {
+      throw new QuercusModuleException(e);
     }
   }
 
