@@ -30,6 +30,8 @@
 package com.caucho.quercus.lib;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.ByteArrayInputStream;
 
 import java.util.logging.Logger;
 import java.util.logging.Level;
@@ -314,20 +316,50 @@ public class ImageModule extends AbstractQuercusModule {
   }
 
   static class QuercusImage extends ResourceValue {
-    private int width;
-    private int height;
-    private BufferedImage bufferedImage;
+    private int _width;
+    private int _height;
+    BufferedImage _bufferedImage;
 
     public QuercusImage(int width, int height)
     {
-      this.width = width;
-      this.height = height;
-      this.bufferedImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+      _width = width;
+      _height = height;
+      _bufferedImage =
+	new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+    }
+
+    public QuercusImage(InputStream inputStream)
+    {
+      try {
+	_bufferedImage = ImageIO.read(inputStream);
+	_width = _bufferedImage.getWidth(null);
+	_height = _bufferedImage.getHeight(null);
+      }
+      catch (IOException e) {
+	throw new QuercusException(e);
+      }
+    }
+
+    public QuercusImage(Env env, String filename)
+    {
+      try {
+	_bufferedImage = ImageIO.read(env.getPwd().lookup(filename).openRead());
+	_width = _bufferedImage.getWidth(null);
+	_height = _bufferedImage.getHeight(null);
+      }
+      catch (IOException e) {
+	throw new QuercusException(e);
+      }
     }
 
     public String toString()
     {
       return "resource(Image)";
+    }
+
+    public int getPixel(int x, int y)
+    {
+      return _bufferedImage.getRGB(x, y);
     }
   }
 
@@ -393,30 +425,63 @@ public class ImageModule extends AbstractQuercusModule {
   public static Value image_type_to_mime_type(int imageType)
   {
     switch(imageType) {
-      case IMAGETYPE_GIF:     return StringValue.create("image/gif");
-      case IMAGETYPE_JPG:     return StringValue.create("image/jpeg");
-      case IMAGETYPE_PNG:     return StringValue.create("image/png");
-      case IMAGETYPE_SWF:     return StringValue.create("application/x-shockwave-flash");
-      case IMAGETYPE_PSD:     return StringValue.create("image/psd");
-      case IMAGETYPE_BMP:     return StringValue.create("image/bmp");
-      case IMAGETYPE_TIFF_II: return StringValue.create("image/tiff");
-      case IMAGETYPE_TIFF_MM: return StringValue.create("image/tiff");
-      case IMAGETYPE_JPC:     return StringValue.create("application/octet-stream");
-      case IMAGETYPE_JP2:     return StringValue.create("image/jp2");
-      case IMAGETYPE_JPX:     return StringValue.create("application/octet-stream");
-      case IMAGETYPE_JB2:     return StringValue.create("application/octet-stream");
-      case IMAGETYPE_SWC:     return StringValue.create("application/x-shockwave-flash");
-      case IMAGETYPE_IFF:     return StringValue.create("image/iff");
-      case IMAGETYPE_WBMP:    return StringValue.create("image/vnd.wap.wbmp");
-      case IMAGETYPE_XBM:     return StringValue.create("image/xbm");
+      case IMAGETYPE_GIF:
+	return StringValue.create("image/gif");
+      case IMAGETYPE_JPG:
+	return StringValue.create("image/jpeg");
+      case IMAGETYPE_PNG:
+	return StringValue.create("image/png");
+      case IMAGETYPE_SWF:
+	return StringValue.create("application/x-shockwave-flash");
+      case IMAGETYPE_PSD:
+	return StringValue.create("image/psd");
+      case IMAGETYPE_BMP:
+	return StringValue.create("image/bmp");
+      case IMAGETYPE_TIFF_II:
+	return StringValue.create("image/tiff");
+      case IMAGETYPE_TIFF_MM:
+	return StringValue.create("image/tiff");
+      case IMAGETYPE_JPC:
+	return StringValue.create("application/octet-stream");
+      case IMAGETYPE_JP2:
+	return StringValue.create("image/jp2");
+      case IMAGETYPE_JPX:
+	return StringValue.create("application/octet-stream");
+      case IMAGETYPE_JB2:
+	return StringValue.create("application/octet-stream");
+      case IMAGETYPE_SWC:
+	return StringValue.create("application/x-shockwave-flash");
+      case IMAGETYPE_IFF:
+	return StringValue.create("image/iff");
+      case IMAGETYPE_WBMP:
+	return StringValue.create("image/vnd.wap.wbmp");
+      case IMAGETYPE_XBM:
+	return StringValue.create("image/xbm");
     }
     throw new QuercusException("unknown imageType " + imageType);
   }
 
 
-  /** Output image to browser or file */
-  public static void image2wbmp()
+  /** Output a PNG image to either the browser or a file */
+  public static void imagepng(Env env, QuercusImage image)
   {
+    try {
+      ImageIO.write(image._bufferedImage, "png", env.getOut());
+    }
+    catch (IOException e) {
+      throw new QuercusModuleException(e);
+    }
+  }
+
+  /** Output image to browser or file */
+  public static void imagejpeg(Env env, QuercusImage image)
+  {
+    try {
+      ImageIO.write(image._bufferedImage, "jpeg", env.getOut());
+    }
+    catch (IOException e) {
+      throw new QuercusModuleException(e);
+    }
   }
 
   /** Set the blending mode for an image */
@@ -445,71 +510,98 @@ public class ImageModule extends AbstractQuercusModule {
   }
 
   /** Allocate a color for an image */
-  public static void imagecolorallocate()
+  public static Value imagecolorallocate(QuercusImage image,
+					 int r, int g, int b)
   {
+    return LongValue.create(( 0xff      << 24) |
+			    ((r & 0xff) << 16) |
+			    ((g & 0xff) <<  8) |
+			    ((b & 0xff) <<  0) );
   }
 
   /** Allocate a color for an image */
-  public static void imagecolorallocatealpha()
+  public static Value imagecolorallocatealpha(QuercusImage image,
+					      int r, int g, int b, int a)
   {
+    // don't forget: PHP alpha channel is only 7 bits!
+    return LongValue.create(((a & 0xff) << 24) |
+			    ((r & 0xff) << 16) |
+			    ((g & 0xff) <<  8) |
+			    ((b & 0xff) <<  0) );
+  }
+
+  /** De-allocate a color for an image */
+  public static Value imagecolordeallocate(QuercusImage image, int rgb)
+  {
+    // no-op
+    return BooleanValue.TRUE;
   }
 
   /** Get the index of the color of a pixel */
-  public static void imagecolorat()
+  public static Value imagecolorat(QuercusImage image, int x, int y)
   {
+    return LongValue.create(image.getPixel(x, y));
   }
 
   /** Get the index of the closest color to the specified color */
-  public static void imagecolorclosest()
+  public static Value imagecolorclosest(QuercusImage image, int r, int g, int b)
   {
+    return imagecolorallocate(image, r, g, b);
   }
 
   /** Get the index of the closest color to the specified color + alpha */
-  public static void imagecolorclosestalpha()
+  public static Value imagecolorclosestalpha(QuercusImage image,
+					     int r, int g, int b, int a)
   {
+    return imagecolorallocatealpha(image, r, g, b, a);
   }
 
   /**  Get the index of the color which has the hue, white and blackness
    *   nearest to the given color */
   public static void imagecolorclosesthwb()
   {
-  }
-
-  /** De-allocate a color for an image */
-  public static void imagecolordeallocate()
-  {
+    throw new QuercusException("imagecolorclosesthwb is not supported");
   }
 
   /** Get the index of the specified color */
-  public static void imagecolorexact()
+  public static Value imagecolorexact(QuercusImage image, int r, int g, int b)
   {
+    return imagecolorallocate(image, r, g, b);
   }
 
   /** Get the index of the specified color + alpha */
-  public static void imagecolorexactalpha()
+  public static Value imagecolorexactalpha(QuercusImage image,
+					   int r, int g, int b, int a)
   {
+    return imagecolorallocatealpha(image, r, g, b, a);
   }
 
   /**  Makes the colors of the palette version of an image more closely
    *   match the true color version */
-  public static void imagecolormatch()
+  public static Value imagecolormatch(QuercusImage image1, QuercusImage image2)
   {
+    // no-op
+    return BooleanValue.TRUE;
   }
 
   /** Get the index of the specified color or its closest possible alternative*/
-  public static void imagecolorresolve()
+  public static Value imagecolorresolve(QuercusImage image, int r, int g, int b)
   {
+    return imagecolorallocate(image, r, g, b);
   }
 
   /** Get the index of the specified color + alpha or its closest possible
    *  alternative */
-  public static void imagecolorresolvealpha()
+  public static Value imagecolorresolvealpha(QuercusImage image,
+					     int r, int g, int b, int a)
   {
+    return imagecolorallocatealpha(image, r, g, b, a);
   }
 
   /** Set the color for the specified palette index */
   public static void imagecolorset()
   {
+    throw new QuercusException("not implemented");
   }
 
   /** Get the colors for an index */
@@ -518,8 +610,9 @@ public class ImageModule extends AbstractQuercusModule {
   }
 
   /** Find out the number of colors in an image's palette */
-  public static void imagecolorstotal()
+  public static Value imagecolorstotal()
   {
+    return LongValue.create(0);
   }
 
   /** Define a color as transparent */
@@ -527,9 +620,21 @@ public class ImageModule extends AbstractQuercusModule {
   {
   }
 
-  /**  Apply a 3x3 convolution matrix, using coefficient div and offset */
-  public static void imageconvolution()
+  /** Apply a 3x3 convolution matrix, using coefficient div and offset */
+  public static void imageconvolution(QuercusImage image, ArrayValue matrix,
+				      double div, double offset)
   {
+    float[] kernelValues = new float[9];
+    ArrayValue.Entry entry = matrix.getHead();
+    for(int i=0; i<9; i++)
+      {
+	kernelValues[i] = (float)entry.getValue().toDouble();
+	entry = entry.getNext();
+      }
+    ConvolveOp convolveOp = new ConvolveOp(new Kernel(3, 3, kernelValues));
+    BufferedImage bufferedImage =
+      convolveOp.filter(image._bufferedImage, null);
+    // XXX: finish this
   }
 
   /** Copy part of an image */
@@ -564,53 +669,59 @@ public class ImageModule extends AbstractQuercusModule {
   }
 
   /** Create a new image from GD2 file or URL */
-  public static void imagecreatefromgd2()
+  public static void imagecreatefromgd2(String filename)
   {
+    throw new QuercusException(".gd images are not supported");
   }
 
   /** Create a new image from a given part of GD2 file or URL */
-  public static void imagecreatefromgd2part()
+  public static void imagecreatefromgd2part(String filename,
+					    int srcX, int srcY,
+					    int width, int height)
   {
+    throw new QuercusException(".gd images are not supported");
   }
 
   /** Create a new image from GD file or URL */
   public static void imagecreatefromgd()
   {
+    throw new QuercusException(".gd images are not supported");
   }
 
   /** Create a new image from file or URL */
-  public static void imagecreatefromgif()
+  public static QuercusImage imagecreatefromgif(Env env, String filename)
   {
+    return new QuercusImage(env, filename);
   }
 
   /** Create a new image from file or URL */
-  public static void imagecreatefromjpeg()
+  public static QuercusImage imagecreatefromjpeg(Env env, String filename)
   {
+    return new QuercusImage(env, filename);
   }
 
   /** Create a new image from file or URL */
-  public static void imagecreatefrompng()
+  public static QuercusImage imagecreatefrompng(Env env, String filename)
   {
+    return new QuercusImage(env, filename);
+  }
+
+  /** Create a new image from file or URL */
+  public static Value imagecreatefromxbm(Env env, String filename)
+  {
+    return new QuercusImage(env, filename);
+  }
+
+  /** Create a new image from file or URL */
+  public static QuercusImage imagecreatefromxpm(Env env, String filename)
+  {
+    return new QuercusImage(env, filename);
   }
 
   /** Create a new image from the image stream in the string */
-  public static void imagecreatefromstring()
+  public static QuercusImage imagecreatefromstring(Env env, String data)
   {
-  }
-
-  /** Create a new image from file or URL */
-  public static void imagecreatefromwbmp()
-  {
-  }
-
-  /** Create a new image from file or URL */
-  public static void imagecreatefromxbm()
-  {
-  }
-
-  /** Create a new image from file or URL */
-  public static void imagecreatefromxpm()
-  {
+    return new QuercusImage(new ByteArrayInputStream(data.getBytes()));
   }
 
   /** Create a new true color image */
@@ -619,15 +730,17 @@ public class ImageModule extends AbstractQuercusModule {
     return new QuercusImage(width, height);
   }
 
-  /** Draw a dashed line */
-  public static void imagedashedline()
-  {
-  }
-
   /** Destroy an image */
   public static void imagedestroy(QuercusImage image)
   {
     // no-op
+  }
+
+  // Shapes ///////////////////////////////////////////////////////////
+
+  /** Draw a dashed line */
+  public static void imagedashedline()
+  {
   }
 
   /** Draw an ellipse */
@@ -670,6 +783,8 @@ public class ImageModule extends AbstractQuercusModule {
   {
   }
 
+  // Text ///////////////////////////////////////////////////////////
+
   /** Get font height */
   public static void imagefontheight()
   {
@@ -695,6 +810,8 @@ public class ImageModule extends AbstractQuercusModule {
   {
   }
 
+  // Output ///////////////////////////////////////////////////////////
+
   /** Output GD2 image to browser or file */
   public static void imagegd2()
   {
@@ -710,6 +827,8 @@ public class ImageModule extends AbstractQuercusModule {
   {
   }
 
+  // Other ///////////////////////////////////////////////////////////
+
   /** Enable or disable interlace */
   public static void imageinterlace()
   {
@@ -718,17 +837,6 @@ public class ImageModule extends AbstractQuercusModule {
   /** Finds whether an image is a truecolor image */
   public static void imageistruecolor()
   {
-  }
-
-  /** Output image to browser or file */
-  public static void imagejpeg(Env env, QuercusImage image)
-  {
-    try {
-      ImageIO.write(image.bufferedImage, "jpeg", env.getOut());
-    }
-    catch (IOException e) {
-      throw new QuercusModuleException(e);
-    }
   }
 
   /**  Set the alpha blending flag to use the bundled libgd layering effects */
@@ -749,17 +857,6 @@ public class ImageModule extends AbstractQuercusModule {
   /** Copy the palette from one image to another */
   public static void imagepalettecopy()
   {
-  }
-
-  /** Output a PNG image to either the browser or a file */
-  public static void imagepng(Env env, QuercusImage image)
-  {
-    try {
-      ImageIO.write(image.bufferedImage, "png", env.getOut());
-    }
-    catch (IOException e) {
-      throw new QuercusModuleException(e);
-    }
   }
 
   /** Draw a polygon */
@@ -845,6 +942,18 @@ public class ImageModule extends AbstractQuercusModule {
 
   /** Embe into single tags. */
   public static void iptcembed()
+  {
+  }
+
+  // stuff below is strictly for WAP
+
+  /** Output image to browser or file */
+  public static void image2wbmp()
+  {
+  }
+
+  /** Create a new image from file or URL */
+  public static void imagecreatefromwbmp()
   {
   }
 
