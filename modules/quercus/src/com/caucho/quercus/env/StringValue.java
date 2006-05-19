@@ -181,6 +181,26 @@ abstract public class StringValue extends Value {
   }
 
   /**
+   * Returns true for equality
+   */
+  public int cmp(Value rValue)
+  {
+    if (isNumberConvertible() || rValue.isNumberConvertible()) {
+      double l = toDouble();
+      double r = rValue.toDouble();
+
+      if (l == r)
+	return 0;
+      else if (l < r)
+	return -1;
+      else
+	return 1;
+    }
+    else
+      return toString().compareTo(rValue.toString());
+  }
+
+  /**
    * Converts to a double.
    */
   protected int getNumericType()

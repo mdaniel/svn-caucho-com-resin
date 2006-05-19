@@ -4,6 +4,8 @@
 
 <s2 title='3.0.snap - May 16, 2006'>
 <ul>
+<li>Quercus: return ref evaluation for Java calls weren't calling methods (#1123, rep by koreth)
+<li>Quercus: complete module exception refactoring (#1122, rep by koreth)
 <li>Quercus: gregoriantojd (#1116)
 <li>Quercus: ServerArrayValue lazy fill was filling each time (rep by koreth)
 <li>(2006-05-16) Quercus: resources should be usable as keys (#1114, rep by koreth)

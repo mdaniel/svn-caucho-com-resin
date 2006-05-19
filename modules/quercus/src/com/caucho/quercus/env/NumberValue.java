@@ -33,11 +33,27 @@ package com.caucho.quercus.env;
  * Represents a PHP number value (double or long).
  */
 public abstract class NumberValue extends Value {
+  /**
+   * Returns true for equality
+   */
+  public int cmp(Value rValue)
+  {
+    double l = toDouble();
+    double r = rValue.toDouble();
+
+    if (l == r)
+      return 0;
+    else if (l < r)
+      return -1;
+    else
+      return 1;
+  }
 
   /**
    *  Compare two numbers.
    */
-  public static int compareNum(Value lValue, Value rValue) {
+  public static int compareNum(Value lValue, Value rValue)
+  {
     Value lVal = lValue.toValue();
     Value rVal = rValue.toValue();
 

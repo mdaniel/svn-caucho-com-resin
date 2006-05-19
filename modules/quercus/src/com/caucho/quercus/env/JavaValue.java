@@ -225,6 +225,73 @@ public class JavaValue extends ResourceValue {
   }
 
   /**
+   * Evaluates a method.
+   */
+  public Value evalMethodRef(Env env, String methodName, Expr []args)
+  {
+    return _classDef.evalMethod(env, _object, methodName, args);
+  }
+
+  /**
+   * Evaluates a method.
+   */
+  public Value evalMethodRef(Env env, String methodName, Value []args)
+  {
+    return _classDef.evalMethod(env, _object, methodName, args);
+  }
+
+  /**
+   * Evaluates a method.
+   */
+  public Value evalMethodRef(Env env, String methodName)
+  {
+    return _classDef.evalMethod(env, _object, methodName);
+  }
+
+  /**
+   * Evaluates a method.
+   */
+  public Value evalMethodRef(Env env, String methodName, Value a1)
+  {
+    return _classDef.evalMethod(env, _object, methodName, a1);
+  }
+
+  /**
+   * Evaluates a method.
+   */
+  public Value evalMethodRef(Env env, String methodName, Value a1, Value a2)
+  {
+    return _classDef.evalMethod(env, _object, methodName, a1, a2);
+  }
+
+  /**
+   * Evaluates a method.
+   */
+  public Value evalMethodRef(Env env, String methodName,
+                          Value a1, Value a2, Value a3)
+  {
+    return _classDef.evalMethod(env, _object, methodName, a1, a2, a3);
+  }
+
+  /**
+   * Evaluates a method.
+   */
+  public Value evalMethodRef(Env env, String methodName,
+                          Value a1, Value a2, Value a3, Value a4)
+  {
+    return _classDef.evalMethod(env, _object, methodName, a1, a2, a3, a4);
+  }
+
+  /**
+   * Evaluates a method.
+   */
+  public Value evalMethodRef(Env env, String methodName,
+                          Value a1, Value a2, Value a3, Value a4, Value a5)
+  {
+    return _classDef.evalMethod(env, _object, methodName, a1, a2, a3, a4, a5);
+  }
+
+  /**
    * Returns the iterator values.
    */
   public Value []getValueArray(Env env)

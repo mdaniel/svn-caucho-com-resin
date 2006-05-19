@@ -72,18 +72,10 @@ public class ReturnStatement extends Statement {
    */
   public Value execute(Env env)
   {
-    try {
-      if (_expr != null) {
-        return _expr.evalRef(env);
-      }
-      else
-        return NullValue.NULL;
-    }
-    catch (RuntimeException e) {
-      rethrow(e, RuntimeException.class);
-    }
-    
-    return null;
+    if (_expr != null)
+      return _expr.eval(env);
+    else
+      return NullValue.NULL;
   }
 
   //

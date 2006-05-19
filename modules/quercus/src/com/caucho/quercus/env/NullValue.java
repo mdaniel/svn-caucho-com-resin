@@ -168,6 +168,34 @@ public class NullValue extends Value {
   }
 
   /**
+   * Returns true for equality
+   */
+  public int cmp(Value rValue)
+  {
+    rValue = rValue.toValue();
+
+    if (! (rValue instanceof StringValue)) {
+      int l = 0;
+      int r = rValue.toBoolean() ? 1 : 0;
+
+      return r - l;
+    }
+    else if (rValue.isNumberConvertible()) {
+      double l = 0;
+      double r = rValue.toDouble();
+
+      if (l == r)
+	return 0;
+      else if (l < r)
+	return -1;
+      else
+	return 1;
+    }
+    else
+      return "".compareTo(rValue.toString());
+  }
+
+  /**
    * Prints the value.
    * @param env
    */

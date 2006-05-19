@@ -668,12 +668,12 @@ abstract public class Value {
    * Returns a negative/positive integer if this Value is
    * lessthan/greaterthan rValue.
    */
-  public final int cmp(Value rValue)
+  public int cmp(Value rValue)
   {
     // This is tricky: implemented according to Table 15-5 of
     // http://us2.php.net/manual/en/language.operators.comparison.php
     
-    Value lVal = this.toValue();
+    Value lVal = toValue();
     Value rVal = rValue.toValue();
 
     if (lVal instanceof StringValue && rVal instanceof NullValue)

@@ -455,6 +455,14 @@ public class Var extends Value {
   }
 
   /**
+   * Compares the two values
+   */
+  public int cmp(Value rValue)
+  {
+    return _value.cmp(rValue);
+  }
+
+  /**
    * Returns the array/object size
    */
   public int getSize()
