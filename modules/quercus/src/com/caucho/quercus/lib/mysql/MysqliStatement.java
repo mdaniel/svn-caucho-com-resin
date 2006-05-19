@@ -34,7 +34,6 @@ import java.sql.*;
 import java.util.logging.Logger;
 import java.util.logging.Level;
 import java.util.HashMap;
-import java.util.StringTokenizer;
 
 import com.caucho.util.L10N;
 
@@ -45,7 +44,6 @@ import com.caucho.quercus.resources.JdbcResultResource;
 
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
-import com.caucho.quercus.env.Var;
 import com.caucho.quercus.env.BooleanValue;
 
 import com.caucho.quercus.module.Reference;
@@ -78,8 +76,7 @@ public class MysqliStatement {
   private String _stmtType;
 
   // Binding variables for oracle statements
-  private HashMap<String,Integer> _bindingVariables
-    = new HashMap<String,Integer>();
+  private HashMap<String,Integer> _bindingVariables = new HashMap<String,Integer>();
 
   // Oracle internal result buffer
   private Value _resultBuffer;
@@ -102,9 +99,7 @@ public class MysqliStatement {
   //    echo "ename:" . $ename . "\n";
   // }
   //
-  private HashMap<String,Value> _byNameVariables
-    = new HashMap<String,Value>();
-
+  private HashMap<String,Value> _byNameVariables = new HashMap<String,Value>();
 
   MysqliStatement(JdbcConnectionResource conn)
   {
@@ -371,19 +366,6 @@ public class MysqliStatement {
 
       _pstmt = _conn.getConnection().prepareStatement(query);
 
-      // Oracle Statement type:
-      // (SELECT, UPDATE, DELETE, INSERT, CREATE, DROP, ALTER, BEGIN, DECLARE, UNKNOWN)
-
-      StringTokenizer tokenizer = new StringTokenizer(query.trim());
-      if (tokenizer.hasMoreTokens())
-      {
-        _stmtType = tokenizer.nextToken();
-      }
-      else
-      {
-        _stmtType = "UNKNOWN";
-      }
-
       return true;
     } catch (SQLException e) {
       log.log(Level.FINE, e.toString(), e);
@@ -446,14 +428,14 @@ public class MysqliStatement {
   {
     try {
       if (_rs != null) {
-	JdbcResultResource result;
+        JdbcResultResource result;
 
-	result = new JdbcResultResource(_rs.getMetaData(), _conn);
+        result = new JdbcResultResource(_rs.getMetaData(), _conn);
 
-	return env.wrapJava(new MysqliResult(result));
+        return env.wrapJava(new MysqliResult(result));
       }
       else
-	return null;
+        return null;
     } catch (SQLException e) {
       throw new QuercusModuleException(e);
     }
@@ -515,7 +497,7 @@ public class MysqliStatement {
   {
     try {
       if (_rsMetaData == null)
-	_rsMetaData = _rs.getMetaData();
+        _rsMetaData = _rs.getMetaData();
 
       return _rsMetaData;
     } catch (SQLException e) {
@@ -525,6 +507,20 @@ public class MysqliStatement {
 
   public String getStatementType()
   {
+    // Oracle Statement type:
+    // (SELECT, UPDATE, DELETE, INSERT, CREATE, DROP, ALTER, BEGIN, DECLARE, UNKNOWN)
+
+    _stmtType = _query;
+    _stmtType = _stmtType.replaceAll("\\s+.*", "");
+    if (_stmtType.equals("")) {
+      _stmtType = "UNKNOWN";
+    } else {
+      String s = _stmtType.replaceAll("(SELECT|UPDATE|DELETE|INSERT|CREATE|DROP|ALTER|BEGIN|DECLARE)", "");
+      if (!s.equals("")) {
+        _stmtType = "UNKNOWN";
+      }
+    }
+
     return _stmtType;
   }
 

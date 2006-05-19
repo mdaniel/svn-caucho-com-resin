@@ -35,7 +35,8 @@ import java.sql.Statement;
 import java.sql.SQLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.StringTokenizer;
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
 
 import com.caucho.util.Log;
 
@@ -287,15 +288,37 @@ public class PostgresModule extends AbstractQuercusModule {
                               String tableName,
                               Value rows,
                               @Optional("") String delimiter,
-                              @Optional String nullAs)
+                              @Optional("") String nullAs)
   {
     try {
+      // The character that makes the special char: '\u0009' .. '\u001F'
+      String stringMap[] = new String[] {"t",  // u0009
+                                         "n",  // u000A
+                                         "\u000Bverticaltab",      //@todo
+                                         "\u000Cformfeed",         //@todo
+                                         "r",  // u000D
+                                         "\u000E-\u001B",          //@todo
+                                         "\u001Cfileseparator",    //@todo
+                                         "\u001Dgroupseparator",   //@todo
+                                         "\u001Erecordseparator",  //@todo
+                                         "\u001Funitseparator"};   //@todo
+
+      Pattern pattern = Pattern.compile("(\\p{Cntrl}|\\\\|\\.|\\-|\\*|\\+|\\?|\\]|\\[|\\^|\\{|\\}|\\(|\\)|\\|)");
+
+      String delimiterRegex;
       if (delimiter.equals("")) {
         delimiter = "\t";
+        delimiterRegex = "\\t";
+      } else {
+        delimiterRegex = escapeCharsToRegex(stringMap, pattern, delimiter);
       }
 
+      String nullAsRegex;
       if (nullAs.equals("")) {
         nullAs = "\n";
+        nullAsRegex = "\\n";
+      } else {
+        nullAsRegex = escapeCharsToRegex(stringMap, pattern, nullAs);
       }
 
       ArrayValueImpl newArray = (ArrayValueImpl) rows;
@@ -304,25 +327,21 @@ public class PostgresModule extends AbstractQuercusModule {
       for (int i=0; i<nasize; i++) {
         String values = newArray.get(LongValue.create(i)).toString();
         StringBuffer stringBuffer = new StringBuffer();
-        //String values = "\n\tNUMBER1stcolumn\t\n\t\n\tNUMBER2ndcolumn\tNUMBER3rdcolumn\tNUMBER4thcolumn\t\n";
-        StringTokenizer tokenizer = new StringTokenizer(values, delimiter, true);
-        while (tokenizer.hasMoreTokens()) {
-          String token = tokenizer.nextToken();
-          if (token.equals(delimiter)) {
-            stringBuffer.append(",");
-          } else if (token.equals(nullAs)) {
-            stringBuffer.append("NULL");
-          } else {
-            stringBuffer.append("'"+token+"'");
-          }
-        }
-
-        values = stringBuffer.toString();
+        // For testing only:
+        // String values = "\n\tNUMBER1stcolumn\t\n\t\n\tNUMBER2ndcolumn\tNUMBER3rdcolumn\tNUMBER4thcolumn\t\n";
+        values = "'"+values.replaceAll(delimiterRegex, "','")+"'";
+        values = values.replaceAll(",'"+nullAsRegex+"',", ",NULL,");
+        // We need to call it twice because the replaceAll(regexp) would not
+        // replace adjacent ",'\\n'," matches.
+        values = values.replaceAll(",'"+nullAsRegex+"',", ",NULL,");
+        values = values.replaceAll("^'"+nullAsRegex+"',", "NULL,");
+        values = values.replaceAll(",'"+nullAsRegex+"'$", ",NULL");
 
         String query = "INSERT INTO "+tableName+" VALUES("+values+")";
         pg_query(env, conn, query);
       }
     } catch (Exception ex) {
+      log.log(Level.FINE, ex.toString(), ex);
     }
 
     return true;
@@ -484,6 +503,7 @@ public class PostgresModule extends AbstractQuercusModule {
       }
 
     } catch (Exception ex) {
+      log.log(Level.FINE, ex.toString(), ex);
       return null;
     }
   }
@@ -511,6 +531,7 @@ public class PostgresModule extends AbstractQuercusModule {
         row = result.fetch_row();
       }
     } catch (Exception ex) {
+      log.log(Level.FINE, ex.toString(), ex);
       return BooleanValue.FALSE;
     }
 
@@ -538,6 +559,7 @@ public class PostgresModule extends AbstractQuercusModule {
         value = result.fetch_assoc();
       }
     } catch (Exception ex) {
+      log.log(Level.FINE, ex.toString(), ex);
       return BooleanValue.FALSE;
     }
 
@@ -568,6 +590,7 @@ public class PostgresModule extends AbstractQuercusModule {
         value = BooleanValue.FALSE;
       }
     } catch (Exception ex) {
+      log.log(Level.FINE, ex.toString(), ex);
     }
 
     return value;
@@ -680,6 +703,7 @@ public class PostgresModule extends AbstractQuercusModule {
         }
       }
     } catch (Exception ex) {
+      log.log(Level.FINE, ex.toString(), ex);
     }
 
     return columnNumber;
@@ -866,6 +890,7 @@ public class PostgresModule extends AbstractQuercusModule {
       else
         return BooleanValue.FALSE;
     } catch (Exception ex) {
+      log.log(Level.FINE, ex.toString(), ex);
       return BooleanValue.FALSE;
     }
   }
@@ -884,6 +909,7 @@ public class PostgresModule extends AbstractQuercusModule {
       m.invoke(((JavaValue)largeObject).toJavaObject(), new Object[]{});
       // largeObject.close();
     } catch (Exception ex) {
+      log.log(Level.FINE, ex.toString(), ex);
     }
 
     return true;
@@ -932,6 +958,7 @@ public class PostgresModule extends AbstractQuercusModule {
 
       // oid = lobManager.create();
     } catch (Exception ex) {
+      log.log(Level.FINE, ex.toString(), ex);
     }
 
     return oid;
@@ -1003,6 +1030,7 @@ public class PostgresModule extends AbstractQuercusModule {
 
       return true;
     } catch (Exception ex) {
+      log.log(Level.FINE, ex.toString(), ex);
       return false;
     }
   }
@@ -1035,6 +1063,7 @@ public class PostgresModule extends AbstractQuercusModule {
 
       fis.close();
     } catch (Exception ex) {
+      log.log(Level.FINE, ex.toString(), ex);
       return -1;
     }
 
@@ -1102,6 +1131,7 @@ public class PostgresModule extends AbstractQuercusModule {
 
       // LargeObject lobj = lobManager.open(oid, mode);
     } catch (Exception ex) {
+      log.log(Level.FINE, ex.toString(), ex);
     }
 
     return value;
@@ -1150,6 +1180,7 @@ public class PostgresModule extends AbstractQuercusModule {
 
       return new String(data);
     } catch (Exception ex) {
+      log.log(Level.FINE, ex.toString(), ex);
       return "";
     }
   }
@@ -1186,6 +1217,7 @@ public class PostgresModule extends AbstractQuercusModule {
 
       return true;
     } catch (Exception ex) {
+      log.log(Level.FINE, ex.toString(), ex);
       return false;
     }
   }
@@ -1205,6 +1237,7 @@ public class PostgresModule extends AbstractQuercusModule {
 
       return Integer.parseInt(obj.toString());
     } catch (Exception ex) {
+      log.log(Level.FINE, ex.toString(), ex);
       return -1;
     }
   }
@@ -1243,6 +1276,7 @@ public class PostgresModule extends AbstractQuercusModule {
 
       return true;
     } catch (Exception ex) {
+      log.log(Level.FINE, ex.toString(), ex);
       return false;
     }
   }
@@ -1270,6 +1304,7 @@ public class PostgresModule extends AbstractQuercusModule {
       m.invoke(((JavaValue)largeObject).toJavaObject(), new Object[]{data.getBytes(), 0, len});
       // largeObject.write(data.getBytes(), 0, len);
     } catch (Exception ex) {
+      log.log(Level.FINE, ex.toString(), ex);
     }
 
     return written;
@@ -1380,6 +1415,7 @@ public class PostgresModule extends AbstractQuercusModule {
       conn.putStatement(stmtName, pstmt);
       return env.wrapJava(pstmt);
     } catch (Exception ex) {
+      log.log(Level.FINE, ex.toString(), ex);
       return BooleanValue.FALSE;
     }
   }
@@ -1463,6 +1499,7 @@ public class PostgresModule extends AbstractQuercusModule {
     try {
       return result.data_seek(env, offset);
     } catch (Exception ex) {
+      log.log(Level.FINE, ex.toString(), ex);
       return false;
     }
   }
@@ -1535,6 +1572,7 @@ public class PostgresModule extends AbstractQuercusModule {
 
       return BooleanValue.TRUE;
     } catch (Exception ex) {
+      log.log(Level.FINE, ex.toString(), ex);
       return BooleanValue.FALSE;
     }
   }
@@ -1704,5 +1742,27 @@ public class PostgresModule extends AbstractQuercusModule {
     env.setSpecialValue("caucho.postgres", conn);
 
     return conn;
+  }
+
+  private String escapeCharsToRegex(String []stringMap,
+                                    Pattern pattern,
+                                    String chars)
+  {
+    StringBuffer stringBuffer = new StringBuffer();
+    // For testing only:
+    // String delimiter = "\n\tNUMBER\r1stco*lumn\t\n\t\n\tNUM|BER(2nd)column\tNUMBER\\3rdcolumn\tNUMBER4thcolumn\t\naa";
+    Matcher matcher = pattern.matcher(chars);
+    if (matcher.find()) {
+      String replacement = matcher.group();
+      char c = replacement.charAt(0);
+      if (c < 32) {
+        replacement = stringMap[c-9];
+      } else if (c == '\\') {
+        replacement = "\\\\";
+      }
+      matcher.appendReplacement(stringBuffer, "\\\\"+replacement);
+    }
+    matcher.appendTail(stringBuffer);
+    return stringBuffer.toString();
   }
 }
