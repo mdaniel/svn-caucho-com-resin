@@ -94,7 +94,7 @@ import com.caucho.vfs.WriteStream;
 /**
  * Represents the Quercus environment.
  */
-public class Env {
+public final class Env {
   private static final L10N L = new L10N(Env.class);
   private static final Logger log = Log.open(Env.class);
 
@@ -2563,7 +2563,6 @@ public class Env {
    * Evaluates an included file.
    */
   public Value require_once(String include)
-    throws IOException
   {
     return include(getSelfDirectory(), include, true, true);
   }
@@ -2572,7 +2571,6 @@ public class Env {
    * Evaluates an included file.
    */
   public Value require(String include)
-    throws IOException
   {
     return include(getSelfDirectory(), include, true, false);
   }
@@ -2581,7 +2579,6 @@ public class Env {
    * Evaluates an included file.
    */
   public Value include(String include)
-    throws IOException
   {
     return include(getSelfDirectory(), include, false, false);
   }
@@ -2590,7 +2587,6 @@ public class Env {
    * Evaluates an included file.
    */
   public Value include_once(String include)
-    throws IOException
   {
     return include(getSelfDirectory(), include, false, true);
   }
@@ -2600,50 +2596,53 @@ public class Env {
    */
   public Value include(Path scriptPwd, String include,
 		       boolean isRequire, boolean isOnce)
-    throws IOException
   {
-    // php/0b0g
-    //Path selfPath = getSelfDirectory();
-    Path pwd = getPwd();
+    try {
+      // php/0b0g
+      //Path selfPath = getSelfDirectory();
+      Path pwd = getPwd();
 
-    Path path = lookupInclude(pwd, include);
+      Path path = lookupInclude(pwd, include);
 
-    if (path == null) {
-      // php/0b0l
-      path = lookupInclude(scriptPwd, include);
+      if (path == null) {
+	// php/0b0l
+	path = lookupInclude(scriptPwd, include);
+      }
+
+      if (path == null) {
+	// php/0b21
+	path = scriptPwd.lookup(include);
+
+	if (! path.canRead())
+	  path = null;
+      }
+
+      if (path != null && path.canRead() && ! path.isDirectory()) {
+      }
+      else if (isRequire) {
+	error(L.l("'{0}' is not a valid path", include));
+	return NullValue.NULL;
+      }
+      else {
+	warning(L.l("'{0}' is not a valid path", include));
+	return NullValue.NULL;
+      }
+
+      if (isOnce && _includeSet.contains(path))
+	return NullValue.NULL;
+
+      _includeSet.add(path);
+
+      QuercusPage page;
+
+      page = _quercus.parse(path);
+
+      page.importDefinitions(this);
+
+      return page.execute(this);
+    } catch (IOException e) {
+      throw new QuercusModuleException(e);
     }
-
-    if (path == null) {
-      // php/0b21
-      path = scriptPwd.lookup(include);
-
-      if (! path.canRead())
-	path = null;
-    }
-
-    if (path != null && path.canRead() && ! path.isDirectory()) {
-    }
-    else if (isRequire) {
-      error(L.l("'{0}' is not a valid path", include));
-      return NullValue.NULL;
-    }
-    else {
-      warning(L.l("'{0}' is not a valid path", include));
-      return NullValue.NULL;
-    }
-
-    if (isOnce && _includeSet.contains(path))
-      return NullValue.NULL;
-
-    _includeSet.add(path);
-
-    QuercusPage page;
-
-    page = _quercus.parse(path);
-
-    page.importDefinitions(this);
-
-    return page.execute(this);
   }
 
   /**

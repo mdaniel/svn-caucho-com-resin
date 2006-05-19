@@ -239,8 +239,11 @@ abstract public class Value {
   /**
    * Converts to an exception.
    */
-  public QuercusException toException()
+  public QuercusException toException(Env env, String file, int line)
   {
+    putField(env, "file", new StringValueImpl(file));
+    putField(env, "line", LongValue.create(line));
+    
     return new QuercusLanguageException(this);
   }
 

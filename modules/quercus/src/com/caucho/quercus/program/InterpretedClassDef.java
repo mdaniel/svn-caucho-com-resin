@@ -68,7 +68,7 @@ public class InterpretedClassDef extends ClassDef
   private final HashMap<String,Expr> _constMap
     = new HashMap<String,Expr>();
 
-  private Function _constructor;
+  private AbstractFunction _constructor;
   private AbstractFunction _destructor;
 
   public InterpretedClassDef(String name, String parentName)
@@ -91,6 +91,14 @@ public class InterpretedClassDef extends ClassDef
     }
   }
 
+  /**
+   * Sets the constructor.
+   */
+  public void setConstructor(AbstractFunction fun)
+  {
+    _constructor = fun;
+  }
+  
   /**
    * Adds a function.
    */

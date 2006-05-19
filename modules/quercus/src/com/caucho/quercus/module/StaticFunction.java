@@ -40,6 +40,7 @@ import com.caucho.quercus.Quercus;
 import com.caucho.quercus.QuercusException;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
+import com.caucho.quercus.env.NullValue;
 import com.caucho.quercus.expr.DefaultExpr;
 import com.caucho.quercus.expr.Expr;
 import com.caucho.quercus.expr.NullLiteralExpr;
@@ -375,6 +376,18 @@ public class StaticFunction extends AbstractFunction {
   /**
    * Evalutes the function.
    */
+  public Value evalMethod(Env env, Value obj, Value []quercusArgs)
+  {
+    Value []args = new Value[quercusArgs.length + 1];
+    args[0] = obj;
+    System.arraycopy(quercusArgs, 0, args, 1, quercusArgs.length);
+
+    return eval(env, args);
+  }
+
+  /**
+   * Evalutes the function.
+   */
   public Value eval(Env env, Value []quercusArgs)
   {
     int len = _paramTypes.length;
@@ -400,7 +413,12 @@ public class StaticFunction extends AbstractFunction {
 
     for (int i = sublen; i < _marshallArgs.length; i++) {
       // XXX: need QA
-      Value value = _defaultExprs[i].eval(env);
+      Value value;
+
+      if (_defaultExprs[i] != null)
+	value = _defaultExprs[i].eval(env);
+      else
+	value = NullValue.NULL;
 
       javaArgs[k] = _marshallArgs[i].marshall(env, value, _paramTypes[k]);
 

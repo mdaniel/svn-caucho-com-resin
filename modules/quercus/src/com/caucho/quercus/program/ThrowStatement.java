@@ -64,7 +64,9 @@ public class ThrowStatement extends Statement {
    */
   public Value execute(Env env)
   {
-    throw _expr.eval(env).toException();
+    throw _expr.eval(env).toException(env,
+				      getLocation().getFileName(),
+				      getLocation().getLineNumber());
   }
 
   //
@@ -97,13 +99,11 @@ public class ThrowStatement extends Statement {
   protected void generateImpl(PhpWriter out)
     throws IOException
   {
-    out.print("throw ");
+    out.print("if (true) throw ");
 
     // php/3a5h
     _expr.generate(out);
-    System.out.println("EXPR: " + _expr);
 
-    out.println(".toException();");
+    out.println(".toException(env, \"" + getLocation().getFileName() + "\", " + getLocation().getLineNumber() + ");");
   }
 }
-

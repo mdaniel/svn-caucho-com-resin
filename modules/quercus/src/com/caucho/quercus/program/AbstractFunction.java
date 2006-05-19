@@ -63,6 +63,11 @@ abstract public class AbstractFunction {
     _location = Location.UNKNOWN;
   }
 
+  public String getName()
+  {
+    return "unknown";
+  }
+
   /**
    * Returns true for a global function.
    */

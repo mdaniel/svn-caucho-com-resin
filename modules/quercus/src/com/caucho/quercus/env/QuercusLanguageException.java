@@ -40,6 +40,8 @@ public class QuercusLanguageException extends QuercusException {
   public QuercusLanguageException(Value value)
   {
     super(value.toString());
+
+    _value = value;
   }
 
   /**

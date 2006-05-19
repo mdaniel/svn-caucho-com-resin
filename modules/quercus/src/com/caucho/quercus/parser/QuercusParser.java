@@ -175,6 +175,8 @@ public class QuercusParser {
   private final static int FINAL = 567;
   private final static int DIE = 568;
   private final static int THROW = 569;
+  private final static int TRY = 570;
+  private final static int CATCH = 571;
   
   private final static int LAST_IDENTIFIER_LEXEME = 1024;
 
@@ -532,6 +534,10 @@ public class QuercusParser {
       case STATIC:
 	statements.add(parseStatic());
 	break;
+	
+      case TRY:
+	statements.add(parseTry());
+	break;
 
       case '{':
 	{
@@ -617,6 +623,9 @@ public class QuercusParser {
     case FOREACH:
       return parseForeach();
 
+    case TRY:
+      return parseTry();
+
     case TEXT:
       if (_lexeme.length() > 0) {
 	return new TextStatement(location, _lexeme);
@@ -675,6 +684,9 @@ public class QuercusParser {
 
     case THROW:
       return parseThrow();
+
+    case TRY:
+      return parseTry();
 
     default:
       _peekToken = token;
@@ -1275,6 +1287,48 @@ public class QuercusParser {
       }
 
       return new ForeachStatement(location, objExpr, keyVar, valueVar, isRef, block);
+    } finally {
+      _isTop = oldTop;
+    }
+  }
+
+  /**
+   * Parses the try statement
+   */
+  private Statement parseTry()
+    throws IOException
+  {
+    boolean oldTop = _isTop;
+    _isTop = false;
+
+    try {
+      Location location = getLocation();
+
+      Statement block = parseStatement();
+
+      TryStatement stmt = new TryStatement(location, block);
+      
+      int token = parseToken();
+
+      while (token == CATCH) {
+	expect('(');
+	
+	String id = parseIdentifier();
+
+	AbstractVarExpr lhs = parseLeftHandSide();
+	
+	expect(')');
+
+	block = parseStatement();
+
+	stmt.addCatch(id, lhs, block);
+
+	token = parseToken();
+      }
+
+      _peekToken = token;
+
+      return stmt;
     } finally {
       _isTop = oldTop;
     }
@@ -2715,11 +2769,11 @@ public class QuercusParser {
    *     ::= lhs -> FIELD
    * </pre>
    */
-  private Expr parseLeftHandSide()
+  private AbstractVarExpr parseLeftHandSide()
     throws IOException
   {
     int token = parseToken();
-    Expr lhs = null;
+    AbstractVarExpr lhs = null;
 
     if (token == '$')
       lhs = parseVariable();
@@ -2762,7 +2816,7 @@ public class QuercusParser {
         break;
 
       case DEREF:
-	lhs = parseDeref(lhs);
+	lhs = (AbstractVarExpr) parseDeref(lhs);
         break;
 	
       default:
@@ -2777,7 +2831,7 @@ public class QuercusParser {
   /**
    * Parses the next variable
    */
-  private Expr parseVariable()
+  private AbstractVarExpr parseVariable()
     throws IOException
   {
     int token = parseToken();
@@ -2792,7 +2846,7 @@ public class QuercusParser {
       return new VarVarExpr(getLocation(), parseTerm());
     }
     else if (token == '{') {
-      Expr expr = new VarVarExpr(getLocation(), parseExpr());
+      AbstractVarExpr expr = new VarVarExpr(getLocation(), parseExpr());
 
       expect('}');
 
@@ -4514,5 +4568,7 @@ public class QuercusParser {
     _insensitiveReserved.put("final", FINAL);
     _insensitiveReserved.put("abstract", ABSTRACT);
     _insensitiveReserved.put("throw", THROW);
+    _insensitiveReserved.put("try", TRY);
+    _insensitiveReserved.put("catch", CATCH);
   }
 }

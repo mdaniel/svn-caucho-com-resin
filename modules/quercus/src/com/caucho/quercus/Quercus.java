@@ -906,7 +906,16 @@ public class Quercus {
     _staticClasses.put(_stdClass.getName(), _stdClassDef);
     _lowerStaticClasses.put(_stdClass.getName().toLowerCase(), _stdClassDef);
     
-    ClassDef exn = new InterpretedClassDef("Exception", null);
+    InterpretedClassDef exn = new InterpretedClassDef("Exception", null);
+
+    try {
+      exn.setConstructor(new StaticFunction(_moduleContext,
+					    null,
+					    Quercus.class.getMethod("exnConstructor", new Class[] { Env.class, Value.class, String.class })));
+    } catch (Exception e) {
+      throw new QuercusException(e);
+    }
+    
     // QuercusClass exnCl = new QuercusClass(exn, null);
 
     _staticClasses.put(exn.getName(), exn);
@@ -916,6 +925,16 @@ public class Quercus {
   public void close()
   {
     _pageManager.close();
+  }
+
+  public static Value exnConstructor(Env env, Value obj, String msg)
+  {
+    if (obj != null) {
+      obj.putField(env, "message", new StringValueImpl(msg));
+    }
+    
+    return NullValue.NULL;
+    
   }
 
   static {
