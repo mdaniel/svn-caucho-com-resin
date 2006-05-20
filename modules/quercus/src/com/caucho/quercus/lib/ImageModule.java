@@ -80,6 +80,8 @@ public class ImageModule extends AbstractQuercusModule {
   public static final int IMAGETYPE_WBMP = 15;
   public static final int IMAGETYPE_XBM = 16;
 
+  public static final int IMG_COLOR_BRUSHED = -3;
+
   private static final int PNG_IHDR = pngCode("IHDR");
 
   public static final int IMG_ARC_PIE = 0;
@@ -485,7 +487,7 @@ public class ImageModule extends AbstractQuercusModule {
   public static Value imagecolorallocate(QuercusImage image,
 					 int r, int g, int b)
   {
-    return LongValue.create(( 0xff      << 24) |
+    return LongValue.create(( 0x7f      << 24) |
 			    ((r & 0xff) << 16) |
 			    ((g & 0xff) <<  8) |
 			    ((b & 0xff) <<  0) );
@@ -610,9 +612,11 @@ public class ImageModule extends AbstractQuercusModule {
   /**
    * Define a color as transparent
    */
-  public static void imagecolortransparent()
+  public static void imagecolortransparent(QuercusImage image, int color)
   {
     // XXX: implement
+    image.getGraphics().setColor(new Color(0, 0, 0, 0));
+    image.getGraphics().fillRect(0, 0, image.getWidth(), image.getHeight());
   }
 
   /**
@@ -758,19 +762,13 @@ public class ImageModule extends AbstractQuercusModule {
 			      double cx, double cy,
 			      double width, double height,
 			      double start, double end,
-			      int style,
 			      int color)
   {
     Graphics2D g = image.getGraphics();
     g.setColor(intToColor(color));
-    int type;
-    switch(style) {
-      case IMG_ARC_CHORD: type = Arc2D.CHORD; break;
-      case IMG_ARC_PIE:   type = Arc2D.PIE;   break;
-      case IMG_ARC_EDGED: type = Arc2D.OPEN;  break;
-      default:            type = Arc2D.PIE;   break;
-    }
-    g.draw(new Arc2D.Double(cx, cy, width, height, start, end, type));
+    g.draw(new Arc2D.Double(cx-width/2, cy-height/2,
+			    width, height, -1 * start, -1 *(end-start),
+			    Arc2D.OPEN));
   }
 
   /**
@@ -780,8 +778,8 @@ public class ImageModule extends AbstractQuercusModule {
 				    double cx, double cy,
 				    double width, double height,
 				    double start, double end,
-				    int style,
-				    int color)
+				    int color,
+				    int style)
   {
     Graphics2D g = image.getGraphics();
     g.setColor(intToColor(color));
@@ -792,7 +790,8 @@ public class ImageModule extends AbstractQuercusModule {
       case IMG_ARC_EDGED: type = Arc2D.OPEN;  break;
       default:            type = Arc2D.PIE;   break;
     }
-    g.fill(new Arc2D.Double(cx, cy, width, height, start, end, type));
+    g.fill(new Arc2D.Double(cx-width/2, cy-height/2,
+			    width, height, -1 * start, -1 *(end-start), type));
   }
 
   /**
@@ -804,8 +803,13 @@ public class ImageModule extends AbstractQuercusModule {
 				  int color)
   {
     Graphics2D g = image.getGraphics();
-    g.setColor(intToColor(color));
-    g.draw(new Ellipse2D.Double(cx, cy, width, height));
+    Shape shape = new Ellipse2D.Double(cx-width/2, cy-height/2, width, height);
+    if (color != IMG_COLOR_BRUSHED) {
+      g.setColor(intToColor(color));
+      g.draw(shape);
+    } else {
+      image.brush(shape);
+    }
   }
 
   /**
@@ -1006,7 +1010,7 @@ public class ImageModule extends AbstractQuercusModule {
    */
   public static void imagesetbrush(QuercusImage image, QuercusImage brush)
   {
-    // XXX: implement
+    image.setBrush(brush);
   }
 
   /**
@@ -1269,7 +1273,7 @@ public class ImageModule extends AbstractQuercusModule {
     return new Color((argb >> 16) & 0xff,
 		     (argb >>  8) & 0xff,
 		     (argb >>  0) & 0xff,
-		     (argb >> 24) & 0xff);
+		     ((argb >> 24) & 0xff) << 1);
   }
 
   // Inner Classes ////////////////////////////////////////////////////////
@@ -1289,6 +1293,7 @@ public class ImageModule extends AbstractQuercusModule {
     private int _height;
     BufferedImage _bufferedImage;
     private Graphics2D _graphics;
+    private BufferedImage _brush;
 
     public QuercusImage(int width, int height)
     {
@@ -1344,6 +1349,55 @@ public class ImageModule extends AbstractQuercusModule {
     {
       // XXX: sync font sizes to mod_php implementation
       return new Font("sansserif", 0, 12);
+    }
+
+    public int getWidth()
+    {
+      return _bufferedImage.getWidth(null);
+    }
+
+    public int getHeight()
+    {
+      return _bufferedImage.getHeight(null);
+    }
+
+    public void setBrush(QuercusImage image)
+    {
+      _brush = image._bufferedImage;
+    }
+
+    public BufferedImage getBrush()
+    {
+      return _brush;
+    }
+
+    public void brush(Shape shape)
+    {
+      Graphics2D g = _graphics;
+      FlatteningPathIterator fpi =
+	new FlatteningPathIterator(shape.getPathIterator(g.getTransform()), 1);
+      float[] floats = new float[6];
+      fpi.currentSegment(floats);
+      float last_x = floats[0];
+      float last_y = floats[1];
+      while(! fpi.isDone())
+	{
+	  fpi.currentSegment(floats);
+	  int distance = (int)Math.sqrt((floats[0]-last_x)*(floats[0]-last_x)+
+					(floats[1]-last_y)*(floats[1]-last_y));
+	  if (distance <= 1) distance = 1;
+	  for(int i=1; i<=distance; i++)
+	    {
+	      int x = (int)(floats[0]*i+last_x*(distance-i))/distance;
+	      x -= _brush.getWidth() / 2;
+	      int y = (int)(floats[1]*i+last_y*(distance-i))/distance;
+	      y -= _brush.getHeight() / 2;
+	      g.drawImage(_brush, x, y, null);
+	    }
+	  last_x = floats[0];
+	  last_y = floats[1];
+	  fpi.next();
+	}
     }
   }
 
