@@ -311,15 +311,15 @@ public class Var extends Value {
   }
 
   @Override
-  public BinaryValue toBinaryValue(String encoding)
+  public BinaryValue toBinaryValue(Env env)
   {
-    return _value.toBinaryValue(encoding);
+    return _value.toBinaryValue(env);
   }
 
   @Override
-  public UnicodeValue toUnicodeValue(String encoding)
+  public UnicodeValue toUnicodeValue(Env env)
   {
-    return _value.toUnicodeValue(encoding);
+    return _value.toUnicodeValue(env);
   }
 
   //

@@ -43,7 +43,7 @@ abstract public class BinaryValue extends StringValue {
    * Convert to a binary value.
    */
   @Override
-  public BinaryValue toBinaryValue(String encoding)
+  public BinaryValue toBinaryValue(Env env)
   {
     return this;
   }

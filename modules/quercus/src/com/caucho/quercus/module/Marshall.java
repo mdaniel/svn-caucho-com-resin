@@ -123,14 +123,20 @@ abstract public class Marshall {
     else if (Path.class.equals(argType)) {
       marshall = MARSHALL_PATH;
     }
-    else if (InputStream.class.equals(argType)) {
-      marshall = MARSHALL_INPUT_STREAM;
-    }
     else if (Callback.class.equals(argType)) {
       marshall = MARSHALL_CALLBACK;
     }
     else if (StringValue.class.equals(argType)) {
       marshall = MARSHALL_STRING_VALUE;
+    }
+    else if (UnicodeValue.class.equals(argType)) {
+      marshall = MARSHALL_UNICODE_VALUE;
+    }
+    else if (BinaryValue.class.equals(argType)) {
+      marshall = MARSHALL_BINARY_VALUE;
+    }
+    else if (InputStream.class.equals(argType)) {
+      marshall = MARSHALL_INPUT_STREAM;
     }
     else if (Value.class.equals(argType)) {
       marshall = MARSHALL_VALUE;
@@ -1162,6 +1168,94 @@ abstract public class Marshall {
     {
       expr.generateValue(out);
       out.print(".toStringValue()");
+    }
+
+    public void generateResultStart(PhpWriter out)
+      throws IOException
+    {
+    }
+      
+    public void generateResultEnd(PhpWriter out)
+      throws IOException
+      {
+      }
+  };
+
+  static final Marshall MARSHALL_UNICODE_VALUE = new Marshall() {
+    public boolean isReadOnly()
+    {
+      return true;
+    }
+
+    public Object marshall(Env env, Expr expr, Class expectedClass)
+    {
+      return expr.eval(env).toUnicodeValue(env);
+    }
+
+    public Object marshall(Env env, Value value, Class expectedClass)
+    {
+      return value.toUnicodeValue(env);
+    }
+
+    public Value unmarshall(Env env, Object value)
+    {
+      if (value instanceof UnicodeValue)
+	return (UnicodeValue) value;
+      else if (value instanceof Value)
+	return ((Value) value).toUnicodeValue(env);
+      else
+	return new StringValueImpl(String.valueOf(value));
+    }
+
+    public void generate(PhpWriter out, Expr expr, Class argClass)
+      throws IOException
+    {
+      expr.generateValue(out);
+      out.print(".toUnicodeValue(env)");
+    }
+
+    public void generateResultStart(PhpWriter out)
+      throws IOException
+    {
+    }
+      
+    public void generateResultEnd(PhpWriter out)
+      throws IOException
+      {
+      }
+  };
+
+  static final Marshall MARSHALL_BINARY_VALUE = new Marshall() {
+    public boolean isReadOnly()
+    {
+      return true;
+    }
+
+    public Object marshall(Env env, Expr expr, Class expectedClass)
+    {
+      return expr.eval(env).toBinaryValue(env);
+    }
+
+    public Object marshall(Env env, Value value, Class expectedClass)
+    {
+      return value.toBinaryValue(env);
+    }
+
+    public Value unmarshall(Env env, Object value)
+    {
+      if (value instanceof BinaryValue)
+	return (BinaryValue) value;
+      else if (value instanceof Value)
+	return ((Value) value).toBinaryValue(env);
+      else
+	return new StringValueImpl(String.valueOf(value));
+    }
+
+    public void generate(PhpWriter out, Expr expr, Class argClass)
+      throws IOException
+    {
+      expr.generateValue(out);
+      out.print(".toBinaryValue(env)");
     }
 
     public void generateResultStart(PhpWriter out)

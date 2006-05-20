@@ -449,7 +449,7 @@ abstract public class Value {
   /**
    * Converts to a UnicodeValue.
    */
-  public UnicodeValue toUnicodeValue(String encoding)
+  public UnicodeValue toUnicodeValue(Env env)
   {
     return new StringValueImpl(toString());
   }
@@ -457,7 +457,7 @@ abstract public class Value {
   /**
    * Converts to a BinaryValue.
    */
-  public BinaryValue toBinaryValue(String encoding)
+  public BinaryValue toBinaryValue(Env env)
   {
     try {
       InputStream is = toInputStream();

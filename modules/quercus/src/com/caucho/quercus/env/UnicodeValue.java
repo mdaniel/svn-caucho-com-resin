@@ -37,7 +37,7 @@ abstract public class UnicodeValue extends StringValue {
    * Convert to a unicode value.
    */
   @Override
-  public UnicodeValue toUnicodeValue(String encoding)
+  public UnicodeValue toUnicodeValue(Env env)
   {
     return this;
   }
