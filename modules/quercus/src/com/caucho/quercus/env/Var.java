@@ -160,6 +160,15 @@ public class Var extends Value {
   }
   */
 
+  //
+  // Conversions
+  //
+
+  public String toString()
+  {
+    return _value.toString();
+  }
+
   /**
    * Converts to a boolean.
    */
@@ -294,6 +303,28 @@ public class Var extends Value {
   {
     return _value.toKey();
   }
+
+  @Override
+  public StringValue toStringValue()
+  {
+    return _value.toStringValue();
+  }
+
+  @Override
+  public BinaryValue toBinaryValue(String encoding)
+  {
+    return _value.toBinaryValue(encoding);
+  }
+
+  @Override
+  public UnicodeValue toUnicodeValue(String encoding)
+  {
+    return _value.toUnicodeValue(encoding);
+  }
+
+  //
+  // Operations
+  //
 
   /**
    * Copy the value.
@@ -691,17 +722,19 @@ public class Var extends Value {
   /**
    * Returns the character at an index
    */
-  public Value charAt(long index)
+  @Override
+  public Value charValueAt(long index)
   {
-    return _value.charAt(index);
+    return _value.charValueAt(index);
   }
 
   /**
    * Sets the character at an index
    */
-  public Value setCharAt(long index, String value)
+  @Override
+  public Value setCharValueAt(long index, String value)
   {
-    return _value.setCharAt(index, value);
+    return _value.setCharValueAt(index, value);
   }
 
   /**
@@ -893,11 +926,6 @@ public class Var extends Value {
   public void serialize(StringBuilder sb)
   {
     _value.serialize(sb);
-  }
-
-  public String toString()
-  {
-    return _value.toString();
   }
 
   public void varDumpImpl(Env env,

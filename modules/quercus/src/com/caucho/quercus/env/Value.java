@@ -54,6 +54,19 @@ abstract public class Value {
   public static final Value []NULL_VALUE_ARRAY = new Value[0];
   public static final Value []NULL_ARGS = new Value[0];
 
+  //
+  // Properties
+  //
+  
+  public QuercusClass getQuercusClass()
+  {
+    return null;
+  }
+
+  //
+  // Predicates and Relations
+  //
+  
   /**
    * Returns true for an implementation of a class
    */
@@ -111,6 +124,138 @@ abstract public class Value {
   }
 
   /**
+   * Returns true for a set type.
+   */
+  public boolean isset()
+  {
+    return true;
+  }
+
+  /**
+   * Returns true if there are more elements.
+   */
+  public boolean hasCurrent()
+  {
+    return false;
+  }
+
+  /**
+   * Returns true for equality
+   */
+  public Value eqValue(Value rValue)
+  {
+    return eq(rValue) ? BooleanValue.TRUE : BooleanValue.FALSE;
+  }
+
+  /**
+   * Returns true for equality
+   */
+  public boolean eq(Value rValue)
+  {
+    if (isLongConvertible() && rValue.isLongConvertible())
+      return toLong() == rValue.toLong();
+    else if (isNumberConvertible() || rValue.isNumberConvertible())
+      return toDouble() == rValue.toDouble();
+    else
+      return toString().equals(rValue.toString());
+  }
+
+  /**
+   * Returns true for equality
+   */
+  public boolean eql(Value rValue)
+  {
+    return this == rValue.toValue();
+  }
+
+  /**
+   * Returns a negative/positive integer if this Value is
+   * lessthan/greaterthan rValue.
+   */
+  public int cmp(Value rValue)
+  {
+    // This is tricky: implemented according to Table 15-5 of
+    // http://us2.php.net/manual/en/language.operators.comparison.php
+    
+    Value lVal = toValue();
+    Value rVal = rValue.toValue();
+
+    if (lVal instanceof StringValue && rVal instanceof NullValue)
+      return ((StringValue)lVal).cmpString(StringValue.EMPTY);
+    if (lVal instanceof NullValue && rVal instanceof StringValue)
+      return StringValue.EMPTY.cmpString((StringValue)rVal);
+    if (lVal instanceof StringValue && rVal instanceof StringValue)
+      return ((StringValue)lVal).cmpString((StringValue)rVal);
+
+    if (lVal instanceof NullValue || lVal instanceof BooleanValue ||
+	rVal instanceof NullValue || rVal instanceof BooleanValue) {
+      boolean thisBool = toBoolean();
+      boolean rBool    = rValue.toBoolean();
+      if (!thisBool && rBool) return -1;
+      if (thisBool && !rBool) return 1;
+      return 0;
+    }
+
+    // XXX: check if values belong to same class; if not, incomparable
+    if (lVal instanceof ObjectValue && rVal instanceof ObjectValue)
+      return ((ObjectValue)lVal).cmpObject((ObjectValue)rVal);
+
+    if ((lVal instanceof StringValue || lVal instanceof NumberValue ||
+	 lVal instanceof ResourceValue) &&
+	(rVal instanceof StringValue || rVal instanceof NumberValue ||
+	 rVal instanceof ResourceValue))
+      return NumberValue.compareNum(lVal, rVal);
+
+    if (lVal instanceof ArrayValue && rVal instanceof ArrayValue)
+      ((ArrayValue)lVal).compareArray((ArrayValue)rVal);
+
+    if (lVal instanceof ArrayValue) return 1;
+    if (rVal instanceof ArrayValue) return -1;
+    if (lVal instanceof ObjectValue) return 1;
+    if (rVal instanceof ObjectValue) return -1;
+
+    // XXX: proper default case?
+    throw new RuntimeException("values are incomparable: " +
+			       lVal + " <=> " + rVal);
+  }
+
+  /**
+   * Returns true for less than
+   */
+  public final boolean lt(Value rValue)
+  {
+    return cmp(rValue)<0;
+  }
+
+  /**
+   * Returns true for less than or equal to
+   */
+  public final boolean leq(Value rValue)
+  {
+    return cmp(rValue)<=0;
+  }
+
+  /**
+   * Returns true for greater than
+   */
+  public final boolean gt(Value rValue)
+  {
+    return cmp(rValue)>0;
+  }
+
+  /**
+   * Returns true for greater than or equal to
+   */
+  public final boolean geq(Value rValue)
+  {
+    return cmp(rValue)>=0;
+  }
+
+  //
+  // Conversions
+  //
+
+  /**
    * Converts to a boolean.
    */
   public boolean toBoolean()
@@ -166,27 +311,6 @@ abstract public class Value {
   }
 
   /**
-   * Converts to a string value.
-   */
-  public Value toStringValue()
-  {
-    Value value = toValue();
-
-    if (value instanceof StringValue)
-      return value;
-    else
-      return new StringValueImpl(value.toString());
-  }
-
-  /**
-   * Append to a string builder.
-   */
-  public void appendTo(StringBuilderValue sb)
-  {
-    sb.append(toString());
-  }
-
-  /**
    * Converts to an array.
    */
   public Value toArray()
@@ -219,11 +343,6 @@ abstract public class Value {
   }
 
   public CompiledObjectValue toObjectValue()
-  {
-    return null;
-  }
-
-  public QuercusClass getQuercusClass()
   {
     return null;
   }
@@ -261,56 +380,6 @@ abstract public class Value {
   public Value toKey()
   {
     throw new QuercusRuntimeException(L.l("{0} is not a valid key", this));
-  }
-
-  /**
-   * Copy for assignment.
-   */
-  public Value copy()
-  {
-    return this;
-  }
-
-  /**
-   * Copy as an array item
-   */
-  public Value copyArrayItem()
-  {
-    return copy();
-  }
-
-  /**
-   * Copy as a return value
-   */
-  public Value copyReturn()
-  {
-    // php/3a5d
-
-    return this;
-  }
-
-  /**
-   * Copy for serialization
-   */
-  public final Value copy(Env env)
-  {
-    return copy(env, new IdentityHashMap<Value,Value>());
-  }
-
-  /**
-   * Copy for serialization
-   */
-  public Value copy(Env env, IdentityHashMap<Value,Value> map)
-  {
-    return this;
-  }
-
-  /**
-   * Clone for the clone keyword
-   */
-  public Value clone()
-  {
-    return this;
   }
 
   /**
@@ -370,27 +439,127 @@ abstract public class Value {
   }
 
   /**
+   * Converts to a StringValue.
+   */
+  public StringValue toStringValue()
+  {
+    return new StringValueImpl(toString());
+  }
+
+  /**
+   * Converts to a UnicodeValue.
+   */
+  public UnicodeValue toUnicodeValue(String encoding)
+  {
+    return new StringValueImpl(toString());
+  }
+
+  /**
+   * Converts to a BinaryValue.
+   */
+  public BinaryValue toBinaryValue(String encoding)
+  {
+    try {
+      InputStream is = toInputStream();
+
+      BinaryBuilderValue bb = new BinaryBuilderValue();
+
+      while (true) {
+	bb.prepareReadBuffer();
+      
+	int len = is.read(bb.getBuffer(),
+			  bb.getOffset(),
+			  bb.getLength() - bb.getOffset());
+
+	if (len <= 0)
+	  return bb;
+	else
+	  bb.setOffset(len);
+      }
+    } catch (IOException e) {
+      throw new QuercusException(e);
+    }
+  }
+
+  /**
+   * Returns a byteArrayInputStream for the value.
+   * See TempBufferStringValue for how this can be overriden
+   *
+   * @return InputStream
+   */
+  public InputStream toInputStream()
+  {
+    return new StringInputStream(toString());
+  }
+
+  //
+  // Operations
+  //
+
+  /**
+   * Append to a string builder.
+   */
+  public void appendTo(StringBuilderValue sb)
+  {
+    sb.append(toString());
+  }
+
+  /**
+   * Copy for assignment.
+   */
+  public Value copy()
+  {
+    return this;
+  }
+
+  /**
+   * Copy as an array item
+   */
+  public Value copyArrayItem()
+  {
+    return copy();
+  }
+
+  /**
+   * Copy as a return value
+   */
+  public Value copyReturn()
+  {
+    // php/3a5d
+
+    return this;
+  }
+
+  /**
+   * Copy for serialization
+   */
+  public final Value copy(Env env)
+  {
+    return copy(env, new IdentityHashMap<Value,Value>());
+  }
+
+  /**
+   * Copy for serialization
+   */
+  public Value copy(Env env, IdentityHashMap<Value,Value> map)
+  {
+    return this;
+  }
+
+  /**
+   * Clone for the clone keyword
+   */
+  public Value clone()
+  {
+    return this;
+  }
+
+  /**
    * Returns the type.
    */
   public String getType()
   {
     return "value";
-  }
-
-  /**
-   * Returns true for a set type.
-   */
-  public boolean isset()
-  {
-    return true;
-  }
-
-  /**
-   * Returns true if there are more elements.
-   */
-  public boolean hasCurrent()
-  {
-    return false;
   }
 
   /**
@@ -638,117 +807,9 @@ abstract public class Value {
     return NullValue.NULL;
   }
 
-  /**
-   * Returns true for equality
-   */
-  public Value eqValue(Value rValue)
-  {
-    return eq(rValue) ? BooleanValue.TRUE : BooleanValue.FALSE;
-  }
-
-  /**
-   * Returns true for equality
-   */
-  public boolean eq(Value rValue)
-  {
-    if (isLongConvertible() && rValue.isLongConvertible())
-      return toLong() == rValue.toLong();
-    else if (isNumberConvertible() || rValue.isNumberConvertible())
-      return toDouble() == rValue.toDouble();
-    else
-      return toString().equals(rValue.toString());
-  }
-
-  /**
-   * Returns true for equality
-   */
-  public boolean eql(Value rValue)
-  {
-    return this == rValue.toValue();
-  }
-
-  /**
-   * Returns a negative/positive integer if this Value is
-   * lessthan/greaterthan rValue.
-   */
-  public int cmp(Value rValue)
-  {
-    // This is tricky: implemented according to Table 15-5 of
-    // http://us2.php.net/manual/en/language.operators.comparison.php
-    
-    Value lVal = toValue();
-    Value rVal = rValue.toValue();
-
-    if (lVal instanceof StringValue && rVal instanceof NullValue)
-      return ((StringValue)lVal).cmpString(StringValue.EMPTY);
-    if (lVal instanceof NullValue && rVal instanceof StringValue)
-      return StringValue.EMPTY.cmpString((StringValue)rVal);
-    if (lVal instanceof StringValue && rVal instanceof StringValue)
-      return ((StringValue)lVal).cmpString((StringValue)rVal);
-
-    if (lVal instanceof NullValue || lVal instanceof BooleanValue ||
-	rVal instanceof NullValue || rVal instanceof BooleanValue) {
-      boolean thisBool = toBoolean();
-      boolean rBool    = rValue.toBoolean();
-      if (!thisBool && rBool) return -1;
-      if (thisBool && !rBool) return 1;
-      return 0;
-    }
-
-    // XXX: check if values belong to same class; if not, incomparable
-    if (lVal instanceof ObjectValue && rVal instanceof ObjectValue)
-      return ((ObjectValue)lVal).cmpObject((ObjectValue)rVal);
-
-    if ((lVal instanceof StringValue || lVal instanceof NumberValue ||
-	 lVal instanceof ResourceValue) &&
-	(rVal instanceof StringValue || rVal instanceof NumberValue ||
-	 rVal instanceof ResourceValue))
-      return NumberValue.compareNum(lVal, rVal);
-
-    if (lVal instanceof ArrayValue && rVal instanceof ArrayValue)
-      ((ArrayValue)lVal).compareArray((ArrayValue)rVal);
-
-    if (lVal instanceof ArrayValue) return 1;
-    if (rVal instanceof ArrayValue) return -1;
-    if (lVal instanceof ObjectValue) return 1;
-    if (rVal instanceof ObjectValue) return -1;
-
-    // XXX: proper default case?
-    throw new RuntimeException("values are incomparable: " +
-			       lVal + " <=> " + rVal);
-  }
-
-  /**
-   * Returns true for less than
-   */
-  public final boolean lt(Value rValue)
-  {
-    return cmp(rValue)<0;
-  }
-
-  /**
-   * Returns true for less than or equal to
-   */
-  public final boolean leq(Value rValue)
-  {
-    return cmp(rValue)<=0;
-  }
-
-  /**
-   * Returns true for greater than
-   */
-  public final boolean gt(Value rValue)
-  {
-    return cmp(rValue)>0;
-  }
-
-  /**
-   * Returns true for greater than or equal to
-   */
-  public final boolean geq(Value rValue)
-  {
-    return cmp(rValue)>=0;
-  }
+  //
+  // Arithmetic operations
+  //
 
   /**
    * Negates the value.
@@ -889,17 +950,21 @@ abstract public class Value {
     return new LongValue(lLong >> rLong);
   }
 
+  //
   // string functions
+  //
 
   /**
    * Returns the length as a string.
    */
-  public int strlen()
+  public int length()
   {
     return toString().length();
   }
 
-  // array functions
+  //
+  // Array functions
+  //
 
   /**
    * Returns the array size.
@@ -983,6 +1048,10 @@ abstract public class Value {
     return NullValue.NULL;
   }
 
+  //
+  // Object operations
+  //
+
   /**
    * Returns the field ref.
    */
@@ -1049,17 +1118,6 @@ abstract public class Value {
 
       return array;
     }
-  }
-
-  /**
-   * Returns a byteArrayInputStream for the value.
-   * See TempBufferStringValue for how this can be overriden
-   *
-   * @return InputStream
-   */
-  public InputStream toInputStream()
-  {
-    return new StringInputStream(toString());
   }
 
   /**
@@ -1170,7 +1228,7 @@ abstract public class Value {
   /**
    * Returns the character at the named index.
    */
-  public Value charAt(long index)
+  public Value charValueAt(long index)
   {
     return NullValue.NULL;
   }
@@ -1178,7 +1236,7 @@ abstract public class Value {
   /**
    * Sets the character at the named index.
    */
-  public Value setCharAt(long index, String value)
+  public Value setCharValueAt(long index, String value)
   {
     return NullValue.NULL;
   }

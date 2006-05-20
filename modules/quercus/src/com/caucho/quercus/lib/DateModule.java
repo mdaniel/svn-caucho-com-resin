@@ -625,13 +625,13 @@ public class DateModule extends AbstractQuercusModule {
    */
   public static Value microtime(@Optional boolean getAsFloat)
   {
-    long now = Alarm.getCurrentTime();
+    long now = Alarm.getExactTimeNanoseconds() / 1000;
 
     if (getAsFloat) {
-      return new DoubleValue((double) now / 1000.0);
+      return new DoubleValue(((double) now) / 1e6);
     }
     else {
-      return new StringValueImpl((now % 1000 * 1000) + " " + (now / 1000));
+      return new StringValueImpl(now % 1000000L / 1e6 + " " + now / 1000000L);
     }
   }
 

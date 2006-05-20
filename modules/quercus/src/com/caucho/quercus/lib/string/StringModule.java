@@ -239,29 +239,32 @@ public class StringModule extends AbstractQuercusModule {
   /**
    * Converts a binary value to a hex value.
    */
-  public static String bin2hex(String strValue)
+  public static StringValue bin2hex(InputStream is)
   {
-    StringBuffer sb = new StringBuffer();
+    try {
+      StringBuilderValue sb = new StringBuilderValue();
 
-    for (int i = 0; i < strValue.length(); i++) {
-      char ch = strValue.charAt(i);
+      int ch;
+      while ((ch = is.read()) >= 0) {
+	int d = (ch >> 4) & 0xf;
 
-      int d = (ch >> 4) & 0xf;
+	if (d < 10)
+	  sb.append((char) (d + '0'));
+	else
+	  sb.append((char) (d + 'a' - 10));
 
-      if (d < 10)
-        sb.append((char) (d + '0'));
-      else
-        sb.append((char) (d + 'a' - 10));
+	d = (ch) & 0xf;
 
-      d = (ch) & 0xf;
+	if (d < 10)
+	  sb.append((char) (d + '0'));
+	else
+	  sb.append((char) (d + 'a' - 10));
+      }
 
-      if (d < 10)
-        sb.append((char) (d + '0'));
-      else
-        sb.append((char) (d + 'a' - 10));
+      return sb;
+    } catch (IOException e) {
+      throw new QuercusModuleException(e);
     }
-
-    return sb.toString();
   }
 
   /**
@@ -1893,7 +1896,7 @@ v   *
 
     str.print(env);
 
-    return str.strlen();
+    return str.length();
   }
 
   private static final char[] SOUNDEX_VALUES = "01230120022455012623010202".toCharArray();
@@ -2686,7 +2689,7 @@ v   *
    */
   public static long strlen(Value value)
   {
-    return value.strlen();
+    return value.length();
   }
 
   /**
@@ -4016,7 +4019,7 @@ v   *
       if (v.isLongConvertible())
         return String.valueOf((char) v.toLong());
       else
-        return v.charAt(0).toString();
+        return v.charValueAt(0).toString();
     }
   }
 

@@ -36,9 +36,9 @@ import com.caucho.quercus.Quercus;
 import com.caucho.quercus.gen.PhpWriter;
 
 /**
- * Represents a PHP string value.
+ * Represents a unicode string value.
  */
-public class StringValueImpl extends StringValue {
+public class StringValueImpl extends UnicodeValue {
   protected static final int IS_STRING = 0;
   protected static final int IS_LONG = 1;
   protected static final int IS_DOUBLE = 2;
@@ -71,6 +71,8 @@ public class StringValueImpl extends StringValue {
     _value = new String(chars);
   }
 
+  // Properties
+
   /**
    * Returns the value.
    */
@@ -86,6 +88,8 @@ public class StringValueImpl extends StringValue {
   {
     return "string";
   }
+
+  // Predicates and relations
 
   /**
    * Interns the string.
@@ -142,6 +146,40 @@ public class StringValueImpl extends StringValue {
   }
 
   /**
+   * Returns true for equality
+   */
+  public boolean eq(Value rValue)
+  {
+    rValue = rValue.toValue();
+
+    if (rValue instanceof BooleanValue) {
+      String v = toString();
+
+      if (rValue.toBoolean())
+        return ! v.equals("") && ! v.equals("0");
+      else
+        return v.equals("") || v.equals("0");
+    }
+
+    int type = getNumericType();
+
+    if (type == IS_STRING) {
+      if (rValue instanceof StringValue)
+        return _value.equals(rValue.toString());
+      else if (rValue.isLongConvertible())
+        return toLong() ==  rValue.toLong();
+      else if (rValue instanceof BooleanValue)
+        return toLong() == rValue.toLong();
+      else
+        return _value.equals(rValue.toString());
+    }
+    else if (rValue.isNumberConvertible())
+      return toDouble() == rValue.toDouble();
+    else
+      return toString().equals(rValue.toString());
+  }
+
+  /**
    * Converts to a double.
    */
   protected int getNumericType()
@@ -195,6 +233,8 @@ public class StringValueImpl extends StringValue {
     else
       return IS_STRING;
   }
+
+  // Conversions
 
   /**
    * Converts to a boolean.
@@ -273,14 +313,6 @@ public class StringValueImpl extends StringValue {
   }
 
   /**
-   * Append to a string builder.
-   */
-  public void appendTo(StringBuilderValue sb)
-  {
-    sb.append(_value);
-  }
-
-  /**
    * Converts to a key.
    */
   public Value toKey()
@@ -332,12 +364,24 @@ public class StringValueImpl extends StringValue {
     return bytes;
   }
 
+  //
+  // Operations
+  //
+
+  /**
+   * Append to a string builder.
+   */
+  public void appendTo(StringBuilderValue sb)
+  {
+    sb.append(_value);
+  }
+
   /**
    * Returns the character at an index
    */
   public Value get(Value key)
   {
-    return charAt(key.toLong());
+    return charValueAt(key.toLong());
   }
 
   /**
@@ -345,13 +389,14 @@ public class StringValueImpl extends StringValue {
    */
   public Value getRef(Value key)
   {
-    return charAt(key.toLong());
+    return charValueAt(key.toLong());
   }
 
   /**
    * Returns the character at an index
    */
-  public Value charAt(long index)
+  @Override
+  public Value charValueAt(long index)
   {
     int len = _value.length();
 
@@ -364,7 +409,8 @@ public class StringValueImpl extends StringValue {
   /**
    * sets the character at an index
    */
-  public Value setCharAt(long index, String value)
+  @Override
+  public Value setCharValueAt(long index, String value)
   {
     int len = _value.length();
 
@@ -432,38 +478,35 @@ public class StringValueImpl extends StringValue {
     }
   }
 
+  //
+  // CharSequence
+  //
+
   /**
-   * Returns true for equality
+   * Returns the length of the string.
    */
-  public boolean eq(Value rValue)
+  @Override
+  public int length()
   {
-    rValue = rValue.toValue();
+    return _value.length();
+  }
 
-    if (rValue instanceof BooleanValue) {
-      String v = toString();
+  /**
+   * Returns the character at a particular location
+   */
+  @Override
+  public char charAt(int index)
+  {
+    return _value.charAt(index);
+  }
 
-      if (rValue.toBoolean())
-        return ! v.equals("") && ! v.equals("0");
-      else
-        return v.equals("") || v.equals("0");
-    }
-
-    int type = getNumericType();
-
-    if (type == IS_STRING) {
-      if (rValue instanceof StringValue)
-        return _value.equals(rValue.toString());
-      else if (rValue.isLongConvertible())
-        return toLong() ==  rValue.toLong();
-      else if (rValue instanceof BooleanValue)
-        return toLong() == rValue.toLong();
-      else
-        return _value.equals(rValue.toString());
-    }
-    else if (rValue.isNumberConvertible())
-      return toDouble() == rValue.toDouble();
-    else
-      return toString().equals(rValue.toString());
+  /**
+   * Returns a subsequence
+   */
+  @Override
+  public CharSequence subSequence(int start, int end)
+  {
+    return new StringValueImpl(_value.substring(start, end));
   }
 
   //

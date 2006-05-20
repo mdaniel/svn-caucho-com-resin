@@ -38,7 +38,7 @@ import com.caucho.vfs.WriteStream;
 /**
  * Represents a PHP string value.
  */
-abstract public class StringValue extends Value {
+abstract public class StringValue extends Value implements CharSequence {
   public static final StringValue EMPTY = new StringValueImpl("");
 
   private final static StringValue []CHAR_STRINGS;
@@ -79,6 +79,210 @@ abstract public class StringValue extends Value {
     else
       return new StringValueImpl(value.toString());
   }
+
+  // Predicates and relations
+
+  /**
+   * Returns true for equality
+   */
+  public boolean eq(Value rValue)
+  {
+    String v = toString();
+
+    rValue = rValue.toValue();
+
+    if (rValue instanceof BooleanValue) {
+      if (rValue.toBoolean())
+        return ! v.equals("") && ! v.equals("0");
+      else
+        return v.equals("") || v.equals("0");
+    }
+
+    int type = getNumericType();
+
+    if (type == IS_STRING) {
+      if (rValue instanceof StringValue)
+        return v.equals(rValue.toString());
+      else if (rValue.isLongConvertible())
+        return toLong() ==  rValue.toLong();
+      else if (rValue instanceof BooleanValue)
+        return toLong() == rValue.toLong();
+      else
+        return v.equals(rValue.toString());
+    }
+    else if (rValue.isNumberConvertible())
+      return toDouble() == rValue.toDouble();
+    else
+      return toString().equals(rValue.toString());
+  }
+
+  /**
+   * Returns true for equality
+   */
+  public int cmp(Value rValue)
+  {
+    if (isNumberConvertible() || rValue.isNumberConvertible()) {
+      double l = toDouble();
+      double r = rValue.toDouble();
+
+      if (l == r)
+	return 0;
+      else if (l < r)
+	return -1;
+      else
+	return 1;
+    }
+    else
+      return toString().compareTo(rValue.toString());
+  }
+
+  /**
+   * Returns true for equality
+   */
+  public boolean eql(Value rValue)
+  {
+    rValue = rValue.toValue();
+
+    if (! (rValue instanceof StringValue))
+      return false;
+
+    String rString = rValue.toString();
+
+    return toString().equals(rString);
+  }
+
+  /**
+   * Compare two strings
+   */
+  public int cmpString(StringValue rValue)
+  {
+    if (isNumberConvertible() && rValue.isNumberConvertible()) {
+      double thisDouble = toDouble();
+      double rDouble = rValue.toDouble();
+      if (thisDouble < rDouble) return -1;
+      if (thisDouble > rDouble) return 1;
+      return 0;
+    }
+    return toString().compareTo(rValue.toString());
+  }
+
+  /**
+   * Returns a code for the numeric type of the string
+   */
+  protected int getNumericType()
+  {
+    String s = toString();
+    int len = s.length();
+
+    if (len == 0)
+      return IS_STRING;
+
+    int i = 0;
+    int ch = 0;
+    boolean hasPoint = false;
+
+    if (i < len && ((ch = s.charAt(i)) == '+' || ch == '-')) {
+      i++;
+    }
+
+    if (len <= i)
+      return IS_STRING;
+
+    ch = s.charAt(i);
+
+    if (ch == '.') {
+      for (i++; i < len && '0' <= (ch = s.charAt(i)) && ch <= '9'; i++) {
+        return IS_DOUBLE;
+      }
+
+      return IS_STRING;
+    }
+    else if (! ('0' <= ch && ch <= '9'))
+      return IS_STRING;
+
+    for (; i < len && '0' <= (ch = s.charAt(i)) && ch <= '9'; i++) {
+    }
+
+    if (len <= i)
+      return IS_LONG;
+    else if (ch == '.' || ch == 'e' || ch == 'E') {
+      for (i++;
+           i < len && ('0' <= (ch = s.charAt(i)) && ch <= '9' ||
+                       ch == '+' || ch == '-' || ch == 'e' || ch == 'E');
+           i++) {
+      }
+
+      if (i < len)
+        return IS_STRING;
+      else
+        return IS_DOUBLE;
+    }
+    else
+      return IS_STRING;
+  }
+
+  // Conversions
+
+  /**
+   * Converts to a string value.
+   */
+  public StringValue toStringValue()
+  {
+    return this;
+  }
+
+  /**
+   * Converts to a long.
+   */
+  public static long toLong(String string)
+  {
+    if (string.equals(""))
+      return 0;
+
+    int len = string.length();
+
+    long value = 0;
+    long sign = 1;
+
+    int i = 0;
+
+    if (string.charAt(0) == '-') {
+      sign = -1;
+      i = 1;
+    }
+
+    for (; i < len; i++) {
+      char ch = string.charAt(i);
+
+      if ('0' <= ch && ch <= '9')
+        value = 10 * value + ch - '0';
+      else
+        return sign * value;
+    }
+
+    return value;
+  }
+
+  /**
+   * Converts to a Java object.
+   */
+  public Object toJavaObject()
+  {
+    return toString();
+  }
+
+  /**
+   * Converts to an array if null.
+   */
+  public Value toAutoArray()
+  {
+    if (length() == 0)
+      return new ArrayValueImpl();
+    else
+      return this;
+  }
+
+  // Operations
 
   /**
    * Pre-increment the following value.
@@ -139,155 +343,6 @@ abstract public class StringValue extends Value {
   }
 
   /**
-   * Converts to a string value.
-   */
-  public StringValue toStringValue()
-  {
-    return this;
-  }
-
-  /**
-   * Returns true for equality
-   */
-  public boolean eq(Value rValue)
-  {
-    String v = toString();
-
-    rValue = rValue.toValue();
-
-    if (rValue instanceof BooleanValue) {
-      if (rValue.toBoolean())
-        return ! v.equals("") && ! v.equals("0");
-      else
-        return v.equals("") || v.equals("0");
-    }
-
-    int type = getNumericType();
-
-    if (type == IS_STRING) {
-      if (rValue instanceof StringValueImpl)
-        return v.equals(rValue.toString());
-      else if (rValue.isLongConvertible())
-        return toLong() ==  rValue.toLong();
-      else if (rValue instanceof BooleanValue)
-        return toLong() == rValue.toLong();
-      else
-        return v.equals(rValue.toString());
-    }
-    else if (rValue.isNumberConvertible())
-      return toDouble() == rValue.toDouble();
-    else
-      return toString().equals(rValue.toString());
-  }
-
-  /**
-   * Returns true for equality
-   */
-  public int cmp(Value rValue)
-  {
-    if (isNumberConvertible() || rValue.isNumberConvertible()) {
-      double l = toDouble();
-      double r = rValue.toDouble();
-
-      if (l == r)
-	return 0;
-      else if (l < r)
-	return -1;
-      else
-	return 1;
-    }
-    else
-      return toString().compareTo(rValue.toString());
-  }
-
-  /**
-   * Converts to a double.
-   */
-  protected int getNumericType()
-  {
-    String s = toString();
-    int len = s.length();
-
-    if (len == 0)
-      return IS_STRING;
-
-    int i = 0;
-    int ch = 0;
-    boolean hasPoint = false;
-
-    if (i < len && ((ch = s.charAt(i)) == '+' || ch == '-')) {
-      i++;
-    }
-
-    if (len <= i)
-      return IS_STRING;
-
-    ch = s.charAt(i);
-
-    if (ch == '.') {
-      for (i++; i < len && '0' <= (ch = s.charAt(i)) && ch <= '9'; i++) {
-        return IS_DOUBLE;
-      }
-
-      return IS_STRING;
-    }
-    else if (! ('0' <= ch && ch <= '9'))
-      return IS_STRING;
-
-    for (; i < len && '0' <= (ch = s.charAt(i)) && ch <= '9'; i++) {
-    }
-
-    if (len <= i)
-      return IS_LONG;
-    else if (ch == '.' || ch == 'e' || ch == 'E') {
-      for (i++;
-           i < len && ('0' <= (ch = s.charAt(i)) && ch <= '9' ||
-                       ch == '+' || ch == '-' || ch == 'e' || ch == 'E');
-           i++) {
-      }
-
-      if (i < len)
-        return IS_STRING;
-      else
-        return IS_DOUBLE;
-    }
-    else
-      return IS_STRING;
-  }
-
-  /**
-   * Converts to a long.
-   */
-  public static long toLong(String string)
-  {
-    if (string.equals(""))
-      return 0;
-
-    int len = string.length();
-
-    long value = 0;
-    long sign = 1;
-
-    int i = 0;
-
-    if (string.charAt(0) == '-') {
-      sign = -1;
-      i = 1;
-    }
-
-    for (; i < len; i++) {
-      char ch = string.charAt(i);
-
-      if ('0' <= ch && ch <= '9')
-        value = 10 * value + ch - '0';
-      else
-        return sign * value;
-    }
-
-    return value;
-  }
-
-  /**
    * Exports the value.
    */
   public void varExport(StringBuilder sb)
@@ -313,54 +368,33 @@ abstract public class StringValue extends Value {
     sb.append("'");
   }
 
+  // CharSequence
+
   /**
-   * Returns true for equality
+   * Returns the length of the string.
    */
-  public boolean eql(Value rValue)
+  public int length()
   {
-    rValue = rValue.toValue();
-
-    if (! (rValue instanceof StringValue))
-      return false;
-
-    String rString = rValue.toString();
-
-    return toString().equals(rString);
+    return toString().length();
   }
 
   /**
-   * Compare two strings
+   * Returns the character at a particular location
    */
-  public int cmpString(StringValue rValue)
+  public char charAt(int index)
   {
-    if (isNumberConvertible() && rValue.isNumberConvertible()) {
-      double thisDouble = toDouble();
-      double rDouble = rValue.toDouble();
-      if (thisDouble < rDouble) return -1;
-      if (thisDouble > rDouble) return 1;
-      return 0;
-    }
-    return toString().compareTo(rValue.toString());
+    return toString().charAt(index);
   }
 
   /**
-   * Converts to a Java object.
+   * Returns a subsequence
    */
-  public Object toJavaObject()
+  public CharSequence subSequence(int start, int end)
   {
-    return toString();
+    return new StringValueImpl(toString().substring(start, end));
   }
 
-  /**
-   * Converts to an array if null.
-   */
-  public Value toAutoArray()
-  {
-    if (strlen() == 0)
-      return new ArrayValueImpl();
-    else
-      return this;
-  }
+  // java.lang.Object methods
 
   /**
    * Returns the hash code.

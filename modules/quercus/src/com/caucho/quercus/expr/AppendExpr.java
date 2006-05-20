@@ -34,6 +34,7 @@ import java.io.IOException;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.StringValueImpl;
+import com.caucho.quercus.env.StringBuilderValue;
 
 import com.caucho.quercus.program.AnalyzeInfo;
 
@@ -133,7 +134,13 @@ public class AppendExpr extends Expr {
 
   public Value eval(Env env)
   {
-    return new StringValueImpl(evalString(env));
+    StringBuilderValue sb = new StringBuilderValue();
+
+    for (AppendExpr ptr = this; ptr != null; ptr = ptr._next) {
+      sb.append(ptr._value.eval(env));
+    }
+
+    return sb;
   }
 
   public String evalString(Env env)

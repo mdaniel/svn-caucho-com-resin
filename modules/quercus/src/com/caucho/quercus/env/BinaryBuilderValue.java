@@ -29,6 +29,8 @@
 
 package com.caucho.quercus.env;
 
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.IOException;
 
 import com.caucho.quercus.Quercus;
@@ -36,41 +38,30 @@ import com.caucho.quercus.Quercus;
 import com.caucho.quercus.gen.PhpWriter;
 
 /**
- * Represents a PHP string value.
+ * Represents a 8-bit binary builder
  */
-public class StringBuilderValue extends UnicodeValue {
-  private char []_buffer;
+public class BinaryBuilderValue extends BinaryValue {
+  private byte []_buffer;
   private int _length;
 
   private String _value;
 
-  public StringBuilderValue()
+  public BinaryBuilderValue()
   {
-    _buffer = new char[128];
+    _buffer = new byte[128];
   }
 
-  public StringBuilderValue(int capacity)
+  public BinaryBuilderValue(int capacity)
   {
     if (capacity < 64)
       capacity = 128;
     else
       capacity = 2 * capacity;
 
-    _buffer = new char[capacity];
+    _buffer = new byte[capacity];
   }
 
-  public StringBuilderValue(String value)
-  {
-    this(value.length());
-
-    int length = value.length();
-
-    _length = length;
-
-    value.getChars(0, length, _buffer, 0);
-  }
-
-  public StringBuilderValue(char []buffer, int offset, int length)
+  public BinaryBuilderValue(byte []buffer, int offset, int length)
   {
     int capacity;
 
@@ -79,24 +70,15 @@ public class StringBuilderValue extends UnicodeValue {
     else
       capacity = 2 * length;
 
-    _buffer = new char[capacity];
+    _buffer = new byte[capacity];
     _length = length;
 
     System.arraycopy(buffer, offset, _buffer, 0, length);
   }
 
-  public StringBuilderValue(char []buffer)
+  public BinaryBuilderValue(byte []buffer)
   {
     this(buffer, 0, buffer.length);
-  }
-
-  public StringBuilderValue(char []buffer, int offset, int length,
-                            boolean isExact)
-  {
-    _buffer = new char[length];
-    _length = length;
-
-    System.arraycopy(buffer, offset, _buffer, 0, length);
   }
 
   /**
@@ -116,26 +98,18 @@ public class StringBuilderValue extends UnicodeValue {
   }
 
   /**
-   * Interns the string.
-   */
-  public InternStringValue intern(Quercus quercus)
-  {
-    return quercus.intern(toString());
-  }
-
-  /**
    * Returns true for a long
    */
   public boolean isLongConvertible()
   {
-    char []buffer = _buffer;
+    byte []buffer = _buffer;
     int len = _length;
 
     if (len == 0)
       return false;
 
     for (int i = 0; i < len; i++) {
-      char ch = _buffer[i];
+      int ch = _buffer[i];
 
       if (! ('0' <= ch && ch <= '9'))
         return false;
@@ -173,7 +147,7 @@ public class StringBuilderValue extends UnicodeValue {
    */
   protected int getNumericType()
   {
-    char []buffer = _buffer;
+    byte []buffer = _buffer;
     int len = _length;
 
     if (len == 0)
@@ -245,42 +219,11 @@ public class StringBuilderValue extends UnicodeValue {
   }
 
   /**
-   * Converts to a long.
-   */
-  public static long toLong(char []buffer, int offset, int len)
-  {
-    if (len == 0)
-      return 0;
-
-    long value = 0;
-    long sign = 1;
-
-    int i = 0;
-    int end = offset + len;
-
-    if (buffer[offset] == '-') {
-      sign = -1;
-      offset++;
-    }
-
-    while (offset < end) {
-      char ch = buffer[offset++];
-
-      if ('0' <= ch && ch <= '9')
-        value = 10 * value + ch - '0';
-      else
-        return sign * value;
-    }
-
-    return value;
-  }
-
-  /**
    * Converts to a double.
    */
   public double toDouble()
   {
-    char []buffer = _buffer;
+    byte []buffer = _buffer;
     int len = _length;
     int i = 0;
     int ch = 0;
@@ -324,6 +267,7 @@ public class StringBuilderValue extends UnicodeValue {
    */
   public String toString()
   {
+    // XXX: encoding
     if (_value == null)
       _value = new String(_buffer, 0, _length);
 
@@ -344,9 +288,9 @@ public class StringBuilderValue extends UnicodeValue {
   /**
    * Append to a string builder.
    */
-  public void appendTo(StringBuilderValue sb)
+  public void appendTo(BinaryBuilderValue bb)
   {
-    sb.append(_buffer, 0, _length);
+    bb.append(_buffer, 0, _length);
   }
 
   /**
@@ -354,7 +298,7 @@ public class StringBuilderValue extends UnicodeValue {
    */
   public Value toKey()
   {
-    char []buffer = _buffer;
+    byte []buffer = _buffer;
     int len = _length;
 
     if (len == 0)
@@ -364,7 +308,7 @@ public class StringBuilderValue extends UnicodeValue {
     long value = 0;
 
     int i = 0;
-    char ch = buffer[i];
+    int ch = buffer[i];
     if (ch == '-') {
       sign = -1;
       i++;
@@ -389,17 +333,18 @@ public class StringBuilderValue extends UnicodeValue {
    */
   public byte[] toBytes()
   {
-    char []buffer = _buffer;
+    byte []buffer = _buffer;
 
-    final int len = _length;
-    byte[] bytes = new byte[len];
-
-    for (int i = 0; i < len; i++) {
-      bytes[i] = (byte) buffer[i];
-    }
+    int len = _length;
+    byte[] bytes = new byte[_length];
+    System.arraycopy(_buffer, 0, bytes, 0, _length);
 
     return bytes;
   }
+
+  //
+  // Operations
+  //
 
   /**
    * Returns the character at an index
@@ -434,8 +379,8 @@ public class StringBuilderValue extends UnicodeValue {
   /**
    * sets the character at an index
    */
-  @Override
-  public Value setCharValueAt(long index, String value)
+  /*
+  public Value setCharAt(long index, String value)
   {
     int len = _length;
 
@@ -449,6 +394,7 @@ public class StringBuilderValue extends UnicodeValue {
       return sb;
     }
   }
+  */
 
   //
   // CharSequence
@@ -469,7 +415,7 @@ public class StringBuilderValue extends UnicodeValue {
   @Override
   public char charAt(int index)
   {
-    return _buffer[index];
+    return (char) (_buffer[index] & 0xff);
   }
 
   /**
@@ -481,11 +427,11 @@ public class StringBuilderValue extends UnicodeValue {
     if (end <= start)
       return StringValue.EMPTY;
     
-    char []newBuffer = new char[end - start];
+    byte []newBuffer = new byte[end - start];
     
     System.arraycopy(_buffer, start, newBuffer, 0, end - start);
 		     
-    return new StringBuilderValue(newBuffer, 0, end - start);
+    return new BinaryBuilderValue(newBuffer, 0, end - start);
   }
 
   //
@@ -493,25 +439,12 @@ public class StringBuilderValue extends UnicodeValue {
   //
 
   /**
-   * Generates code to recreate the expression.
-   *
-   * @param out the writer to the Java source code.
-   */
-  public void generate(PhpWriter out)
-    throws IOException
-  {
-    out.print("new InternStringValue(\"");
-    out.printJavaString(toString());
-    out.print("\")");
-  }
-
-  /**
    * Prints the value.
    * @param env
    */
   public void print(Env env)
   {
-    env.print(_buffer, 0, _length);
+    env.write(_buffer, 0, _length);
   }
 
   /**
@@ -522,50 +455,16 @@ public class StringBuilderValue extends UnicodeValue {
     sb.append("s:");
     sb.append(_length);
     sb.append(":\"");
-    sb.append(_buffer, 0, _length);
+    sb.append(toString());
     sb.append("\";");
   }
 
   // append code
 
   /**
-   * Append a Java string to the value.
+   * Append a buffer to the value.
    */
-  public final StringBuilderValue append(String s)
-  {
-    int len = s.length();
-
-    if (_buffer.length < _length + len)
-      ensureCapacity(_length + len);
-
-    s.getChars(0, len, _buffer, _length);
-
-    _length += len;
-
-    return this;
-  }
-
-  /**
-   * Append a Java string to the value.
-   */
-  public final StringBuilderValue append(String s, int start, int end)
-  {
-    int len = end - start;
-
-    if (_buffer.length < _length + len)
-      ensureCapacity(_length + len);
-
-    s.getChars(start, end, _buffer, _length);
-
-    _length += len;
-
-    return this;
-  }
-
-  /**
-   * Append a Java buffer to the value.
-   */
-  public final StringBuilderValue append(char []buf, int offset, int length)
+  public final BinaryBuilderValue append(byte []buf, int offset, int length)
   {
     if (_buffer.length < _length + length)
       ensureCapacity(_length + length);
@@ -578,67 +477,72 @@ public class StringBuilderValue extends UnicodeValue {
   }
 
   /**
-   * Append a Java double to the value.
+   * Append a double to the value.
    */
-  public final StringBuilderValue append(char []buf)
+  public final BinaryBuilderValue append(byte []buf)
   {
     return append(buf, 0, buf.length);
   }
 
   /**
-   * Append a Java char to the value.
+   * Append a byte to the value.
    */
-  public final StringBuilderValue append(char v)
+  public final BinaryBuilderValue append(int v)
   {
     if (_buffer.length < _length + 1)
       ensureCapacity(_length + 1);
 
-    _buffer[_length++] = v;
+    _buffer[_length++] = (byte) v;
 
     return this;
   }
 
   /**
-   * Append a Java boolean to the value.
+   * Prepares for reading.
    */
-  public final StringBuilderValue append(boolean v)
+  public void prepareReadBuffer()
   {
-    return append(v ? "true" : "false");
+    ensureCapacity(_buffer.length + 1);
   }
 
   /**
-   * Append a Java long to the value.
+   * Returns the buffer.
    */
-  public final StringBuilderValue append(long v)
+  public byte []getBuffer()
   {
-    // XXX: change for perf
-    return append(String.valueOf(v));
+    return _buffer;
   }
 
   /**
-   * Append a Java double to the value.
+   * Returns the offset.
    */
-  public final StringBuilderValue append(double v)
+  public int getOffset()
   {
-    return append(String.valueOf(v));
+    return _length;
   }
 
   /**
-   * Append a Java value to the value.
+   * Sets the offset.
    */
-  public final StringBuilderValue append(Object v)
+  public void setOffset(int offset)
   {
-    return append(v.toString());
+    _length = offset;
   }
 
   /**
-   * Append a Java value to the value.
+   * Returns the current capacity.
    */
-  public final StringBuilderValue append(Value v)
+  public int getLength()
   {
-    v.appendTo(this);
+    return _buffer.length;
+  }
 
-    return this;
+  /**
+   * Returns an OutputStream.
+   */
+  public OutputStream getOutputStream()
+  {
+    return new BuilderOutputStream();
   }
 
   private void ensureCapacity(int newCapacity)
@@ -646,14 +550,67 @@ public class StringBuilderValue extends UnicodeValue {
     if (newCapacity <= _buffer.length)
       return;
     else if (newCapacity < 4096)
-      newCapacity = 2 * newCapacity;
+      newCapacity = 4 * newCapacity;
     else
       newCapacity = newCapacity + 4096;
 
-    char []buffer = new char[newCapacity];
+    byte []buffer = new byte[newCapacity];
     System.arraycopy(_buffer, 0, buffer, 0, _length);
 
     _buffer = buffer;
+  }
+
+  class BinaryInputStream extends InputStream {
+    private int _offset;
+
+    /**
+     * Reads the next byte.
+     */
+    public int read()
+    {
+      if (_offset < _length)
+	return _buffer[_offset++];
+      else
+	return -1;
+    }
+
+    /**
+     * Reads into a buffer.
+     */
+    public int read(byte []buffer, int offset, int length)
+    {
+      int sublen = _length - _offset;
+
+      if (length < sublen)
+	sublen = length;
+
+      if (sublen <= 0)
+	return -1;
+
+      System.arraycopy(_buffer, _offset, buffer, offset, sublen);
+
+      _offset += sublen;
+
+      return sublen;
+    }
+  }
+
+  class BuilderOutputStream extends OutputStream {
+    /**
+     * Writes the next byte.
+     */
+    public void write(int ch)
+    {
+      append(ch);
+    }
+
+    /**
+     * Reads into a buffer.
+     */
+    public void write(byte []buffer, int offset, int length)
+    {
+      append(buffer, offset, length);
+    }
   }
 }
 

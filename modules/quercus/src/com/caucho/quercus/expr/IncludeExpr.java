@@ -86,14 +86,9 @@ public class IncludeExpr extends UnaryExpr {
    */
   public Value eval(Env env)
   {
-    try {
-      String name = _expr.evalString(env);
+    String name = _expr.evalString(env);
       
-      return env.include(_dir, name, _isRequire, false);
-      // return env.include(name);
-    } catch (IOException e) {
-      throw new QuercusException(e);
-    }
+    return env.include(_dir, name, _isRequire, false);
   }
 
   //

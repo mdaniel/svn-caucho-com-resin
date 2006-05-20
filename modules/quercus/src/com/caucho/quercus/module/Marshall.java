@@ -129,6 +129,9 @@ abstract public class Marshall {
     else if (Callback.class.equals(argType)) {
       marshall = MARSHALL_CALLBACK;
     }
+    else if (StringValue.class.equals(argType)) {
+      marshall = MARSHALL_STRING_VALUE;
+    }
     else if (Value.class.equals(argType)) {
       marshall = MARSHALL_VALUE;
     }
@@ -1126,6 +1129,50 @@ abstract public class Marshall {
     {
       throw new UnsupportedOperationException();
     }
+  };
+
+  static final Marshall MARSHALL_STRING_VALUE = new Marshall() {
+    public boolean isReadOnly()
+    {
+      return true;
+    }
+
+    public Object marshall(Env env, Expr expr, Class expectedClass)
+    {
+      return expr.eval(env).toStringValue();
+    }
+
+    public Object marshall(Env env, Value value, Class expectedClass)
+    {
+      return value.toStringValue();
+    }
+
+    public Value unmarshall(Env env, Object value)
+    {
+      if (value instanceof StringValue)
+	return (StringValue) value;
+      else if (value instanceof Value)
+	return ((Value) value).toStringValue();
+      else
+	return new StringValueImpl(String.valueOf(value));
+    }
+
+    public void generate(PhpWriter out, Expr expr, Class argClass)
+      throws IOException
+    {
+      expr.generateValue(out);
+      out.print(".toStringValue()");
+    }
+
+    public void generateResultStart(PhpWriter out)
+      throws IOException
+    {
+    }
+      
+    public void generateResultEnd(PhpWriter out)
+      throws IOException
+      {
+      }
   };
 
   static final Marshall MARSHALL_PATH = new Marshall() {

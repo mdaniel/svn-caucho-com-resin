@@ -40,7 +40,7 @@ import com.caucho.vfs.StreamImplInputStream;
  * Represents a PHP string value implemented as a TempBuffer, with
  * encoding iso-8859-1..
  */
-public class TempBufferStringValue extends StringValue {
+public class TempBufferStringValue extends BinaryValue {
   private TempBuffer _head;
 
   private String _string;

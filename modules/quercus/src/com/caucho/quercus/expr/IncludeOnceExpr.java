@@ -83,19 +83,15 @@ public class IncludeOnceExpr extends UnaryExpr {
    */
   public Value eval(Env env)
   {
-    try {
-      String name = _expr.evalString(env);
+    String name = _expr.evalString(env);
       
-      // return env.include(_dir, name);
-      if (_dir != null)
-	return env.include(_dir, name, _isRequire, true);
-      else if (_isRequire)
-	return env.require_once(name);
-      else
-	return env.include_once(name);
-    } catch (IOException e) {
-      throw new QuercusException(e);
-    }
+    // return env.include(_dir, name);
+    if (_dir != null)
+      return env.include(_dir, name, _isRequire, true);
+    else if (_isRequire)
+      return env.require_once(name);
+    else
+      return env.include_once(name);
   }
 
   //

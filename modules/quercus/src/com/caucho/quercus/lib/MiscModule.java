@@ -57,6 +57,7 @@ import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.NullValue;
 import com.caucho.quercus.env.LongValue;
 import com.caucho.quercus.env.StringBuilderValue;
+import com.caucho.quercus.env.BinaryBuilderValue;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.StringValueImpl;
 
@@ -173,16 +174,20 @@ public class MiscModule extends AbstractQuercusModule {
    */
   public Value pack(Env env, String format, Value []args)
   {
-    ArrayList<PackSegment> segments = parsePackFormat(format);
+    try {
+      ArrayList<PackSegment> segments = parsePackFormat(format);
 
-    StringBuilderValue sb = new StringBuilderValue();
+      BinaryBuilderValue bb = new BinaryBuilderValue();
 
-    int i = 0;
-    for (PackSegment segment : segments) {
-      i = segment.apply(env, sb, i, args);
+      int i = 0;
+      for (PackSegment segment : segments) {
+	i = segment.apply(env, bb, i, args);
+      }
+
+      return bb;
+    } catch (IOException e) {
+      throw new QuercusModuleException(e);
     }
-
-    return sb;
   }
 
   /**
@@ -410,14 +415,18 @@ public class MiscModule extends AbstractQuercusModule {
       char ch = format.charAt(i);
       
       int count = 0;
-      char ch1;
+      char ch1 = ' ';
       for (i++;
 	   i < length && '0' <= (ch1 = format.charAt(i)) && ch1 <= '9';
 	   i++) {
 	count = 10 * count + ch1 - '0';
       }
 
-      if (count == 0)
+      if (ch1 == '*' && count == 0) {
+	i++;
+	count = Integer.MAX_VALUE;
+      }
+      else if (count == 0)
 	count = 1;
 
       if (i < length)
@@ -425,7 +434,10 @@ public class MiscModule extends AbstractQuercusModule {
 
       switch (ch) {
       case 'a':
-	segments.add(new NullSpacePackSegment(count));
+	segments.add(new SpacePackSegment(count, (byte) 0));
+	break;
+      case 'A':
+	segments.add(new SpacePackSegment(count, (byte) 0x20));
 	break;
       }
     }
@@ -434,19 +446,23 @@ public class MiscModule extends AbstractQuercusModule {
   }
 
   abstract static class PackSegment {
-    abstract public int apply(Env env, StringBuilderValue sb,
-			      int i, Value []args);
+    abstract public int apply(Env env, BinaryBuilderValue bb,
+			      int i, Value []args)
+      throws IOException;
   }
 
-  static class NullSpacePackSegment extends PackSegment {
+  static class SpacePackSegment extends PackSegment {
     private final int _length;
+    private final byte _pad;
 
-    NullSpacePackSegment(int length)
+    SpacePackSegment(int length, byte pad)
     {
       _length = length;
+      _pad = pad;
     }
     
-    public int apply(Env env, StringBuilderValue sb, int i, Value []args)
+    public int apply(Env env, BinaryBuilderValue bb, int i, Value []args)
+      throws IOException
     {
       Value arg;
 
@@ -460,17 +476,23 @@ public class MiscModule extends AbstractQuercusModule {
 	return i;
       }
 
-      String value = arg.toString();
-      int valueLength = value.length();
+      InputStream is = arg.toInputStream();
 
-      for (int j = 0; j < _length; j++) {
-	if (j < valueLength)
-	  sb.append(value.charAt(j));
+      int length = _length;
+
+      for (int j = 0; j < length; j++) {
+	int ch = is.read();
+	
+	if (ch >= 0)
+	  bb.append(ch);
+	else if (length == Integer.MAX_VALUE)
+	  return i;
 	else
-	  sb.append('\0');
+	  bb.append(_pad);
       }
 
       return i;
     }
   }
+
 }

@@ -511,6 +511,31 @@ public final class Env {
   }
 
   /**
+   * Prints a string
+   */
+  public final void println(String v)
+  {
+    try {
+      getOut().println(v);
+    } catch (IOException e) {
+      throw new QuercusModuleException(e);
+    }
+  }
+
+  /**
+   * Prints a string
+   */
+  public final void println(Value v)
+  {
+    try {
+      v.print(this);
+      getOut().println();
+    } catch (IOException e) {
+      throw new QuercusModuleException(e);
+    }
+  }
+
+  /**
    * Prints a byte buffer.
    */
   public final void write(byte []buffer, int offset, int length)

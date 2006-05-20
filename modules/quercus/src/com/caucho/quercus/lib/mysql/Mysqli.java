@@ -397,6 +397,8 @@ public class Mysqli {
 
       if (result instanceof JdbcResultResource)
         return new MysqliResult((JdbcResultResource) result);
+      else if (result instanceof BooleanValue)
+	return result;
       else
         return ((JavaValue)result).toJavaObject();
     } catch (Throwable e) {

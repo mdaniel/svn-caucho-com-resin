@@ -74,7 +74,7 @@ public class CharAtExpr extends AbstractVarExpr {
   {
     Value obj = _objExpr.eval(env);
 
-    return obj.charAt(_indexExpr.evalLong(env));
+    return obj.charValueAt(_indexExpr.evalLong(env));
   }
   
   /**
@@ -88,7 +88,7 @@ public class CharAtExpr extends AbstractVarExpr {
   {
     Value obj = _objExpr.eval(env);
 
-    Value result = obj.setCharAt(_indexExpr.evalLong(env), value.toString());
+    Value result = obj.setCharValueAt(_indexExpr.evalLong(env), value.toString());
 
     _objExpr.evalAssign(env, result);
   }
@@ -153,7 +153,7 @@ public class CharAtExpr extends AbstractVarExpr {
     throws IOException
   {
     _objExpr.generate(out);
-    out.print(".charAt(");
+    out.print(".charValueAt(");
     _indexExpr.generateLong(out);
     out.print(")");
   }
@@ -177,7 +177,7 @@ public class CharAtExpr extends AbstractVarExpr {
     }
     else {
       _objExpr.generate(out);
-      out.print(".setCharAt(");
+      out.print(".setCharValueAt(");
       _indexExpr.generateLong(out);
       out.print(", ");
       valueExpr.generateString(out);
