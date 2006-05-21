@@ -208,6 +208,10 @@ public class InterpretedClassDef extends ClassDef
     throws IOException
   {
     out.addClass(this);
+
+    out.println();
+    out.print("private ClassDef q_cl_" + getName() + " = ");
+    out.println("new CompiledClassDef(\"" + getName() + "\", null, quercus_" + getName() + ".class);");
     
     out.println();
     out.println("public static class quercus_" + getName() + " implements InstanceInitializer {");

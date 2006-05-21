@@ -1897,6 +1897,26 @@ public final class Env {
   }
 
   /**
+   * Adds a function, e.g. from an include.
+   */
+  public Value addFunction(String name, String lowerName, AbstractFunction fun)
+  {
+    AbstractFunction oldFun = findFunctionImpl(name);
+
+    if (oldFun == null)
+      oldFun = findFunctionImpl(lowerName);
+
+    if (oldFun != null) {
+      throw new QuercusException(L.l("can't redefine function {0}", name));
+    }
+
+    _funMap.put(name, fun);
+    _lowerFunMap.put(lowerName, fun);
+
+    return BooleanValue.TRUE;
+  }
+
+  /**
    * Finds the java reflection method for the function with the given name.
    *
    * @param className the class name

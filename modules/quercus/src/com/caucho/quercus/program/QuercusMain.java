@@ -30,6 +30,7 @@
 package com.caucho.quercus.program;
 
 import java.util.HashSet;
+import java.util.Map;
 
 import java.io.IOException;
 
@@ -170,9 +171,44 @@ public class QuercusMain extends ClassComponent {
     out.popDepth();
     out.println("}");
 
+    generateImport(out);
+
     out.generateCoda();
 
     javaOut.generateSmap();
+  }
+
+  /**
+   * Generates the import code.
+   *
+   * @param out the writer to the output stream.
+   */
+  protected void generateImport(PhpWriter out)
+    throws IOException
+  {
+    out.println();
+    out.println("public void importDefinitions(Env env)");
+    out.println("{");
+    out.pushDepth();
+    
+    for (Function fun : _program.getFunctions()) {
+      if (fun.isGlobal()) {
+	out.print("env.addFunction(\"");
+	out.printJavaString(fun.getName());
+	out.print("\", \"");
+	out.printJavaString(fun.getName().toLowerCase());
+	out.print("\", ");
+	out.print("__quercus_fun_" + fun.getName());
+	out.println(");");
+      }
+    }
+
+    for (InterpretedClassDef clDef : _program.getClasses()) {
+      out.println("env.addClassDef(\"" + clDef.getName() + "\", q_cl_" + clDef.getName() + ");");
+    }
+
+    out.popDepth();
+    out.println("}");
   }
 }
 
