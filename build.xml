@@ -16,7 +16,7 @@
   <property name="dist" location="${install}/dist"/>
 
 
-  <property name="javac.verbose" value="no"/>
+  <property name="javac.verbose" value="off"/>
   <property name="javac.debug" value="on"/>
   <property name="javac.optimize" value="off"/>
   <property name="javac.deprecation" value="off"/>
@@ -168,7 +168,7 @@
     </antcall>
   </target>
 
-  <target name="resin" depends="init, ejb, ejb30, jca, jms, jmx, jsdk, jstl, jta, j2eedeploy, jaf, saaj, jaxrpc, portlet, script, resin-jdk15">
+  <target name="resin-dev" depends="init, ejb, ejb30, jca, jms, jmx, jsdk, jstl, jta, j2eedeploy, jaf, saaj, jaxrpc, portlet, script, resin-jdk15">
 
     <!-- filter to insert version -->
 
@@ -200,9 +200,9 @@
       <param name="module.name" value="resin"/>
       <param name="javac.source" value="1.5"/>
     </antcall>
-
-    
   </target>
+  
+  <target name="resin" depends="resin-dev"/>
 
   <target name="jaf" depends="init">
     <antcall target="module" inheritRefs="true">
@@ -225,12 +225,14 @@
     </antcall>
   </target>
 
-  <target name="quercus" depends="init, resin">
+  <target name="quercus-dev" depends="init">
     <antcall target="module" inheritRefs="true">
       <param name="module.name" value="quercus"/>
       <param name="javac.source" value="1.5"/>
     </antcall>
   </target>
+
+  <target name="quercus" depends="quercus-dev"/>
 
   <target name="module">
     <property name="module.src" value="${modules}/${module.name}/src"/>

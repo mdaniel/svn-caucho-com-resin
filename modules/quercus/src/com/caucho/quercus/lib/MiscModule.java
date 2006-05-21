@@ -439,6 +439,16 @@ public class MiscModule extends AbstractQuercusModule {
       case 'A':
 	segments.add(new SpacePackSegment(count, (byte) 0x20));
 	break;
+      case 'h':
+	segments.add(new RevHexPackSegment(count));
+	break;
+      case 'H':
+	segments.add(new HexPackSegment(count));
+	break;
+      case 'c':
+      case 'C':
+	segments.add(new BigEndianPackSegment(count, 1));
+	break;
       }
     }
 
@@ -495,4 +505,183 @@ public class MiscModule extends AbstractQuercusModule {
     }
   }
 
+  static class HexPackSegment extends PackSegment {
+    private final int _length;
+
+    HexPackSegment(int length)
+    {
+      _length = length;
+    }
+    
+    public int apply(Env env, BinaryBuilderValue bb, int i, Value []args)
+      throws IOException
+    {
+      Value arg;
+
+      if (i < args.length) {
+	arg = args[i];
+	i++;
+      }
+      else {
+	env.warning("a: not enough arguments");
+
+	return i;
+      }
+
+      StringValue s = arg.toStringValue();
+
+      int strlen = s.length();
+
+      if (_length == Integer.MAX_VALUE) {
+      }
+      else if (strlen < _length) {
+	env.warning("not enough characters in hex string");
+
+	return i;
+      }
+      else if (_length < strlen)
+	strlen = _length;
+      
+      int tail = strlen / 2;
+      for (int j = 0; j < tail; j++) {
+	int d = 0;
+	
+	char ch = s.charAt(2 * j);
+
+	d += 16 * hexToDigit(env, ch);
+	
+	ch = s.charAt(2 * j + 1);
+
+	d += hexToDigit(env, ch);
+
+	bb.append(d);
+      }
+      
+      if ((strlen & 1) == 1) {
+	int d = 16 * hexToDigit(env, s.charAt(strlen - 1));
+
+	bb.append(d);
+      }
+
+      return i;
+    }
+  }
+
+  static class RevHexPackSegment extends PackSegment {
+    private final int _length;
+
+    RevHexPackSegment(int length)
+    {
+      _length = length;
+    }
+    
+    public int apply(Env env, BinaryBuilderValue bb, int i, Value []args)
+      throws IOException
+    {
+      Value arg;
+
+      if (i < args.length) {
+	arg = args[i];
+	i++;
+      }
+      else {
+	env.warning("a: not enough arguments");
+
+	return i;
+      }
+
+      StringValue s = arg.toStringValue();
+
+      int strlen = s.length();
+
+      if (_length == Integer.MAX_VALUE) {
+      }
+      else if (strlen < _length) {
+	env.warning("not enough characters in hex string");
+
+	return i;
+      }
+      else if (_length < strlen)
+	strlen = _length;
+      
+      int tail = strlen / 2;
+      for (int j = 0; j < tail; j++) {
+	int d = 0;
+	
+	char ch = s.charAt(2 * j);
+
+	d += hexToDigit(env, ch);
+	
+	ch = s.charAt(2 * j + 1);
+
+	d += 16 * hexToDigit(env, ch);
+
+	bb.append(d);
+      }
+      
+      if ((strlen & 1) == 1) {
+	int d = hexToDigit(env, s.charAt(strlen - 1));
+
+	bb.append(d);
+      }
+
+      return i;
+    }
+  }
+
+  static class BigEndianPackSegment extends PackSegment {
+    private final int _length;
+    private final int _bytes;
+
+    BigEndianPackSegment(int length, int bytes)
+    {
+      _length = length;
+      _bytes = bytes;
+    }
+    
+    public int apply(Env env, BinaryBuilderValue bb, int i, Value []args)
+      throws IOException
+    {
+      for (int j = 0; j < _length; j++) {
+	Value arg;
+
+	if (i < args.length) {
+	  arg = args[i];
+	  i++;
+	}
+	else if (_length == Integer.MAX_VALUE)
+	  return i;
+	else {
+	  env.warning("a: not enough arguments");
+
+	  return i;
+	}
+ 
+	long v = arg.toLong();
+
+	for (int k = _bytes - 1; k >= 0; k--) {
+	  bb.append((byte) v);
+
+	  v /= 256;
+	}
+      }
+
+      return i;
+    }
+  }
+
+  static int hexToDigit(Env env, char ch)
+  {
+    if ('0' <= ch && ch <= '9')
+      return (ch - '0');
+    else if ('a' <= ch && ch <= 'f')
+      return (ch - 'a' + 10);
+    else if ('A' <= ch && ch <= 'F')
+      return (ch - 'A' + 10);
+    else {
+      env.warning("pack: non hex digit: " + (char) ch);
+
+      return 0;
+    }
+  }
 }

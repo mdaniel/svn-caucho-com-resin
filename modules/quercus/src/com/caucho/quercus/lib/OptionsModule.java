@@ -244,7 +244,7 @@ public class OptionsModule extends AbstractQuercusModule {
    */
   public static Value get_magic_quotes_gpc(Env env)
   {
-    return LongValue.create(env.getIni("magic_quotes_gpc").toLong());
+    return BooleanValue.FALSE; // PHP 6 removes, so we don't support
   }
 
   /**
@@ -252,7 +252,15 @@ public class OptionsModule extends AbstractQuercusModule {
    */
   public static Value get_magic_quotes_runtime(Env env)
   {
-    return LongValue.ZERO;
+    return BooleanValue.FALSE; // PHP 6 removes, so we don't support
+  }
+
+  /**
+   * Gets the magic quotes value.
+   */
+  public static Value magic_quotes_runtime(Env env)
+  {
+    return BooleanValue.FALSE; // PHP 6 removes, so we don't support
   }
 
   /**
@@ -344,14 +352,6 @@ public class OptionsModule extends AbstractQuercusModule {
   }
 
   /**
-   * Gets the magic quotes value.
-   */
-  public static Value magic_quotes_runtime(Env env)
-  {
-    return env.getIni("magic_quotes_runtime");
-  }
-
-  /**
    * Returns the sapi type.
    */
   public static String php_sapi_name()
@@ -426,10 +426,7 @@ public class OptionsModule extends AbstractQuercusModule {
    */
   public static Value set_magic_quotes_runtime(Env env, Value value)
   {
-    if (value.toBoolean())
-      throw new UnsupportedOperationException("magic_quotes_runtime");
-
-    return BooleanValue.FALSE;
+    return BooleanValue.FALSE; // PHP 6 removes magic_quotes
   }
 
   /**
@@ -580,7 +577,7 @@ public class OptionsModule extends AbstractQuercusModule {
     addIni(_iniMap, "enable_dl", "1", PHP_INI_SYSTEM);
     addIni(_iniMap, "max_execution_time", "30", PHP_INI_ALL);
     addIni(_iniMap, "max_input_time", "-1", PHP_INI_PERDIR);
-    //    addIni(_iniMap, "magic_quotes_gpc", "1", PHP_INI_PERDIR);
+    // magic_quotes is ignored in PHP 6
     addIni(_iniMap, "magic_quotes_gpc", "0", PHP_INI_PERDIR);
     addIni(_iniMap, "magic_quotes_runtime", "0", PHP_INI_ALL);
 
@@ -590,6 +587,7 @@ public class OptionsModule extends AbstractQuercusModule {
     addIni(_iniMap, "arg_separator.input", "&", PHP_INI_ALL);
     addIni(_iniMap, "variables_order", "EGPCS", PHP_INI_ALL);
     addIni(_iniMap, "auto_globals_jit", "1", PHP_INI_ALL);
+    // register_globals is ignored in PHP 6
     addIni(_iniMap, "register_globals", "0", PHP_INI_ALL);
     addIni(_iniMap, "register_argc_argv", "1", PHP_INI_ALL);
     addIni(_iniMap, "register_long_arrays", "1", PHP_INI_ALL);
