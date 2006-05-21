@@ -80,6 +80,7 @@ public class ImageModule extends AbstractQuercusModule {
   public static final int IMAGETYPE_WBMP = 15;
   public static final int IMAGETYPE_XBM = 16;
 
+  public static final int IMG_COLOR_STYLED = -2;
   public static final int IMG_COLOR_BRUSHED = -3;
 
   private static final int PNG_IHDR = pngCode("IHDR");
@@ -499,7 +500,6 @@ public class ImageModule extends AbstractQuercusModule {
   public static Value imagecolorallocatealpha(QuercusImage image,
 					      int r, int g, int b, int a)
   {
-    // don't forget: PHP alpha channel is only 7 bits!
     return LongValue.create(((a & 0xff) << 24) |
 			    ((r & 0xff) << 16) |
 			    ((g & 0xff) <<  8) |
@@ -596,9 +596,18 @@ public class ImageModule extends AbstractQuercusModule {
   /**
    * Get the colors for an index
    */
-  public static void imagecolorsforindex()
+  public static ArrayValue imagecolorsforindex(QuercusImage image, int argb)
   {
-    // XXX: implement
+    ArrayValue arrayValue = new ArrayValueImpl();
+    arrayValue.put(StringValue.create("red"),
+		   LongValue.create((argb >> 16) & 0xff));
+    arrayValue.put(StringValue.create("green"),
+		   LongValue.create((argb >>  8) & 0xff));
+    arrayValue.put(StringValue.create("blue"),
+		   LongValue.create((argb >>  0) & 0xff));
+    arrayValue.put(StringValue.create("alpha"),
+		   LongValue.create((argb >> 24) & 0xff));
+    return arrayValue;
   }
 
   /**
@@ -612,30 +621,14 @@ public class ImageModule extends AbstractQuercusModule {
   /**
    * Define a color as transparent
    */
-  public static void imagecolortransparent(QuercusImage image, int color)
+  public static int imagecolortransparent(QuercusImage image, int color)
   {
     // XXX: implement
     image.getGraphics().setColor(new Color(0, 0, 0, 0));
     image.getGraphics().fillRect(0, 0, image.getWidth(), image.getHeight());
-  }
 
-  /**
-   * Apply a 3x3 convolution matrix, using coefficient div and offset
-   */
-  public static void imageconvolution(QuercusImage image, ArrayValue matrix,
-				      double div, double offset)
-  {
-    float[] kernelValues = new float[9];
-    ArrayValue.Entry entry = matrix.getHead();
-    for(int i=0; i<9; i++)
-      {
-	kernelValues[i] = (float)entry.getValue().toDouble();
-	entry = entry.getNext();
-      }
-    ConvolveOp convolveOp = new ConvolveOp(new Kernel(3, 3, kernelValues));
-    BufferedImage bufferedImage =
-      convolveOp.filter(image._bufferedImage, null);
-    // XXX: finish this
+    // total transparency
+    return 0xff000000;
   }
 
   /**
@@ -718,6 +711,14 @@ public class ImageModule extends AbstractQuercusModule {
     return true;
   }
 
+  /**
+   * Enable or disable interlace
+   */
+  public static void imageinterlace(QuercusImage image, boolean enable)
+  {
+    // no-op, can safely ignore (just makes slightly bigger images)
+  }
+
 
   // Shapes ///////////////////////////////////////////////////////////
 
@@ -726,9 +727,7 @@ public class ImageModule extends AbstractQuercusModule {
    */
   public static void imagesetpixel(QuercusImage image, int x, int y, int color)
   {
-    Graphics2D g = image.getGraphics();
-    g.setColor(intToColor(color));
-    g.drawRect(x, y, 1, 1);
+    image._bufferedImage.setRGB(x, y, color);
   }
 
   /**
@@ -737,9 +736,7 @@ public class ImageModule extends AbstractQuercusModule {
   public static void imageline(QuercusImage image,
 			       int x1, int y1, int x2, int y2, int color)
   {
-    Graphics2D g = image.getGraphics();
-    g.setColor(intToColor(color));
-    g.drawLine(x1, y1, x2, y2);
+    image.stroke(new Line2D.Float(x1, y1, x2, y2), color);
   }
 
   /**
@@ -749,10 +746,13 @@ public class ImageModule extends AbstractQuercusModule {
 				     int x1, int y1, int x2, int y2, int color)
   {
     Graphics2D g = image.getGraphics();
-    g.setStroke(new BasicStroke(1, 0, 0, 0, new float[] { 1, 1 }, 0));
+    Stroke stroke = g.getStroke();
     g.setColor(intToColor(color));
-    g.drawLine(x1, y1, x2, y2);
-    g.setStroke(null);
+    g.setStroke(new BasicStroke(1, BasicStroke.JOIN_ROUND,
+				BasicStroke.CAP_ROUND, 1,
+				new float[] { 5, 5 }, 0));
+    g.draw(new Line2D.Float(x1, y1, x2, y2));
+    g.setStroke(stroke);
   }
 
   /**
@@ -764,11 +764,10 @@ public class ImageModule extends AbstractQuercusModule {
 			      double start, double end,
 			      int color)
   {
-    Graphics2D g = image.getGraphics();
-    g.setColor(intToColor(color));
-    g.draw(new Arc2D.Double(cx-width/2, cy-height/2,
-			    width, height, -1 * start, -1 *(end-start),
-			    Arc2D.OPEN));
+    Arc2D arc = new Arc2D.Double(cx-width/2, cy-height/2,
+				 width, height, -1 * start, -1 *(end-start),
+				 Arc2D.OPEN);
+    image.stroke(arc, color);
   }
 
   /**
@@ -781,17 +780,15 @@ public class ImageModule extends AbstractQuercusModule {
 				    int color,
 				    int style)
   {
-    Graphics2D g = image.getGraphics();
-    g.setColor(intToColor(color));
-    int type;
-    switch(style) {
-      case IMG_ARC_CHORD: type = Arc2D.CHORD; break;
-      case IMG_ARC_PIE:   type = Arc2D.PIE;   break;
-      case IMG_ARC_EDGED: type = Arc2D.OPEN;  break;
-      default:            type = Arc2D.PIE;   break;
-    }
-    g.fill(new Arc2D.Double(cx-width/2, cy-height/2,
-			    width, height, -1 * start, -1 *(end-start), type));
+    int type = Arc2D.PIE;
+    if ((style & IMG_ARC_CHORD)!=0) type = Arc2D.CHORD;
+    if ((style & IMG_ARC_PIE)!=0)   type = Arc2D.PIE;
+    Arc2D arc =
+      new Arc2D.Double(cx-width/2, cy-height/2,
+		       width, height, -1 * start,
+		       -1 *(end-start), type);
+    if ((style & IMG_ARC_NOFILL)==0) image.fill(arc, color);
+    if ((style & IMG_ARC_EDGED)!=0)  image.stroke(arc, color);
   }
 
   /**
@@ -802,14 +799,8 @@ public class ImageModule extends AbstractQuercusModule {
 				  double width, double height,
 				  int color)
   {
-    Graphics2D g = image.getGraphics();
     Shape shape = new Ellipse2D.Double(cx-width/2, cy-height/2, width, height);
-    if (color != IMG_COLOR_BRUSHED) {
-      g.setColor(intToColor(color));
-      g.draw(shape);
-    } else {
-      image.brush(shape);
-    }
+    image.stroke(shape, color);
   }
 
   /**
@@ -820,9 +811,23 @@ public class ImageModule extends AbstractQuercusModule {
 					double width, double height,
 					int color)
   {
-    Graphics2D g = image.getGraphics();
-    g.setColor(intToColor(color));
-    g.fill(new Ellipse2D.Double(cx, cy, width, height));
+    Ellipse2D ellipse =
+      new Ellipse2D.Double(cx-width/2, cy-height/2, width, height);
+    image.fill(ellipse, color);
+  }
+
+  private static Polygon arrayToPolygon(ArrayValue points, int numPoints)
+  {
+    Polygon polygon = new Polygon();
+    ArrayValue.Entry entry = points.getHead();
+    for(int i=0; i<numPoints; i++) {
+      int x = entry.getValue().toInt();
+      entry = entry.getNext();
+      int y = entry.getValue().toInt();
+      entry = entry.getNext();
+      polygon.addPoint(x, y);
+    }
+    return polygon;
   }
 
   /**
@@ -831,18 +836,7 @@ public class ImageModule extends AbstractQuercusModule {
   public static void imagepolygon(QuercusImage image, ArrayValue points,
 				  int numPoints, int color)
   {
-    Graphics2D g = image.getGraphics();
-    g.setColor(intToColor(color));
-    Polygon polygon = new Polygon();
-    ArrayValue.Entry entry = points.getHead();
-    for(int i=0; i<numPoints; i++) {
-      int x = entry.getValue().toInt();
-      entry = entry.getNext();
-      int y = entry.getValue().toInt();
-      entry = entry.getNext();
-      polygon.addPoint(x, y);
-    }
-    g.drawPolygon(polygon);
+    image.stroke(arrayToPolygon(points, numPoints), color);
   }
 
   /**
@@ -851,29 +845,18 @@ public class ImageModule extends AbstractQuercusModule {
   public static void imagefilledpolygon(QuercusImage image, ArrayValue points,
 					int numPoints, int color)
   {
-    Graphics2D g = image.getGraphics();
-    g.setColor(intToColor(color));
-    Polygon polygon = new Polygon();
-    ArrayValue.Entry entry = points.getHead();
-    for(int i=0; i<numPoints; i++) {
-      int x = entry.getValue().toInt();
-      entry = entry.getNext();
-      int y = entry.getValue().toInt();
-      entry = entry.getNext();
-      polygon.addPoint(x, y);
-    }
-    g.fillPolygon(polygon);
+    image.fill(arrayToPolygon(points, numPoints), color);
   }
 
   /**
    * Draw a rectangle
    */
   public static void imagerectangle(QuercusImage image, int x1, int y1,
-					  int x2, int y2, int color)
+				    int x2, int y2, int color)
   {
-    Graphics2D g = image.getGraphics();
-    g.setColor(intToColor(color));
-    g.drawRect(x1, y1, x2-x1+1, y2-y1+1);
+    if (x2 < x1) { int tmp = x1; x1 = x2; x2 = tmp; }
+    if (y2 < y1) { int tmp = y1; y1 = y2; y2 = tmp; }
+    image.stroke(new Rectangle2D.Float(x1, y1, x2-x1, y2-y1), color);
   }
 
   /**
@@ -882,9 +865,7 @@ public class ImageModule extends AbstractQuercusModule {
   public static void imagefilledrectangle(QuercusImage image, int x1, int y1,
 					  int x2, int y2, int color)
   {
-    Graphics2D g = image.getGraphics();
-    g.setColor(intToColor(color));
-    g.fillRect(x1, y1, x2-x1+1, y2-y1+1);
+    image.fill(new Rectangle2D.Float(x1, y1, x2-x1, y2-y1), color);
   }
 
 
@@ -898,8 +879,10 @@ public class ImageModule extends AbstractQuercusModule {
   {
     Graphics2D g = image.getGraphics();
     g.setColor(intToColor(color));
-    g.setFont(image.getFont(font));
-    g.drawString(c.substring(0, 1), x, y);
+    Font awtfont = image.getFont(font);
+    int height = image.getGraphics().getFontMetrics(awtfont).getHeight();
+    g.setFont(awtfont);
+    g.drawString(c.substring(0, 1), x, y+height);
   }
 
   /**
@@ -910,10 +893,11 @@ public class ImageModule extends AbstractQuercusModule {
   {
     Graphics2D g = (Graphics2D)image.getGraphics().create();
     g.rotate(-1 * Math.PI / 2);
-    g.translate(x, y);
     g.setColor(intToColor(color));
-    g.setFont(image.getFont(font));
-    g.drawString(c.substring(0, 1), 0, 0);
+    Font awtfont = image.getFont(font);
+    int height = image.getGraphics().getFontMetrics(awtfont).getHeight();
+    g.setFont(awtfont);
+    g.drawString(c.substring(0, 1), -1 * y, x+height);
   }
 
   /**
@@ -1018,7 +1002,7 @@ public class ImageModule extends AbstractQuercusModule {
    */
   public static void imagesetstyle(QuercusImage image, ArrayValue style)
   {
-    // XXX: implement
+    image.setStyle(style);
   }
 
   /**
@@ -1026,7 +1010,35 @@ public class ImageModule extends AbstractQuercusModule {
    */
   public static void imagesetthickness(QuercusImage image, int thickness)
   {
-    image.getGraphics().setStroke(new BasicStroke(thickness));
+    image.setThickness(thickness);
+  }
+
+
+  // Palette Management //////////////////////////////////////////////////
+
+  /**
+   * Copy the palette from one image to another
+   */
+  public static void imagepalettecopy()
+  {
+  }
+
+
+  // Alpha Blending ///////////////////////////////////////////////////////
+
+  /**
+   * Set the flag to save full alpha channel information (as opposed to
+   * single-color transparency) when saving PNG images
+   */
+  public static void imagesavealpha()
+  {
+  }
+
+  /**
+   * Set the alpha blending flag to use the bundled libgd layering effects
+   */
+  public static void imagelayereffect()
+  {
   }
 
 
@@ -1047,7 +1059,27 @@ public class ImageModule extends AbstractQuercusModule {
   }
 
 
-  // Other ///////////////////////////////////////////////////////////
+  // Filters /////////////////////////////////////////////////////////
+
+
+  /**
+   * Apply a 3x3 convolution matrix, using coefficient div and offset
+   */
+  public static void imageconvolution(QuercusImage image, ArrayValue matrix,
+				      double div, double offset)
+  {
+    float[] kernelValues = new float[9];
+    ArrayValue.Entry entry = matrix.getHead();
+    for(int i=0; i<9; i++)
+      {
+	kernelValues[i] = (float)entry.getValue().toDouble();
+	entry = entry.getNext();
+      }
+    ConvolveOp convolveOp = new ConvolveOp(new Kernel(3, 3, kernelValues));
+    BufferedImage bufferedImage =
+      convolveOp.filter(image._bufferedImage, null);
+    // XXX: finish this
+  }
 
   /**
    * Applies a filter to an image
@@ -1055,6 +1087,8 @@ public class ImageModule extends AbstractQuercusModule {
   public static void imagefilter()
   {
   }
+
+  // Other ///////////////////////////////////////////////////////////
 
   /**
    * Get the index of the color which has the hue, white and blackness
@@ -1068,36 +1102,20 @@ public class ImageModule extends AbstractQuercusModule {
   /**
    * Embe into single tags.
    */
-  public static void iptcembed()
+  public static void iptcembed(String iptcdata, String jpegFileName,
+			       @Optional int spool)
   {
+    throw new QuercusException("iptcembed is not [yet] supported");
   }
 
   /**
    * Apply a gamma correction to a GD image
    */
-  public static void imagegammacorrect()
+  public static void imagegammacorrect(QuercusImage image,
+				       float gammaBefore, float gammaAfter)
   {
-  }
-
-  /**
-   * Enable or disable interlace
-   */
-  public static void imageinterlace()
-  {
-  }
-
-  /**
-   * Set the alpha blending flag to use the bundled libgd layering effects
-   */
-  public static void imagelayereffect()
-  {
-  }
-
-  /**
-   * Copy the palette from one image to another
-   */
-  public static void imagepalettecreate()
-  {
+    // this is a no-op in PHP; apparently the GD library dropped
+    // support for gamma correction between v1.8 and v2.0
   }
 
   /**
@@ -1105,14 +1123,9 @@ public class ImageModule extends AbstractQuercusModule {
    */
   public static void imagerotate()
   {
-  }
-
-  /**
-   * Set the flag to save full alpha channel information (as opposed to
-   * single-color transparency) when saving PNG images
-   */
-  public static void imagesavealpha()
-  {
+    // this function is broken on most PHP installs: "Note: This
+    // function is only available if PHP is compiled with the bundled
+    // version of the GD library."
   }
 
 
@@ -1270,10 +1283,12 @@ public class ImageModule extends AbstractQuercusModule {
 
   public static Color intToColor(int argb)
   {
+    // don't forget: PHP alpha channel is only 7 bits and is polarity-reversed!
     return new Color((argb >> 16) & 0xff,
 		     (argb >>  8) & 0xff,
 		     (argb >>  0) & 0xff,
 		     ((argb >> 24) & 0xff) << 1);
+    //(0xff - (((argb >> 24) & 0x7f) << 1)));
   }
 
   // Inner Classes ////////////////////////////////////////////////////////
@@ -1293,7 +1308,10 @@ public class ImageModule extends AbstractQuercusModule {
     private int _height;
     BufferedImage _bufferedImage;
     private Graphics2D _graphics;
+
     private BufferedImage _brush;
+    private int[] _style;
+    private int _thickness;
 
     public QuercusImage(int width, int height)
     {
@@ -1361,18 +1379,47 @@ public class ImageModule extends AbstractQuercusModule {
       return _bufferedImage.getHeight(null);
     }
 
-    public void setBrush(QuercusImage image)
+    public void fill(Shape shape, int color)
     {
-      _brush = image._bufferedImage;
+      _graphics.setColor(intToColor(color));
+      _graphics.fill(shape);
     }
 
-    public BufferedImage getBrush()
+    public void stroke(Shape shape, int color)
     {
-      return _brush;
+      switch(color)
+	{
+	  case IMG_COLOR_STYLED:
+	    strokeStyled(shape);
+	    break;
+	  case IMG_COLOR_BRUSHED:
+	    strokeBrushed(shape);
+	    break;
+	  default:
+	    _graphics.setColor(intToColor(color));
+	    _graphics.draw(shape);
+	    break;
+	}
+    }
+    
+    private void strokeStyled(Shape shape)
+    {
+      // XXX: this is slightly off... by a pixel or two somewhere
+      for(int i=0; i<_style.length; i++)
+	{
+	  _graphics.setColor(intToColor(_style[i]));
+	  Stroke stroke =
+	    new BasicStroke(1, BasicStroke.JOIN_ROUND, BasicStroke.CAP_ROUND, 1,
+			    new float[] { 1, _style.length-1 },
+			    i);
+	  _graphics.setStroke(stroke);
+	  _graphics.draw(shape);
+	}
     }
 
-    public void brush(Shape shape)
+    private void strokeBrushed(Shape shape)
     {
+      // XXX: support "styled brushes" (see imagesetstyle() example on php.net)
       Graphics2D g = _graphics;
       FlatteningPathIterator fpi =
 	new FlatteningPathIterator(shape.getPathIterator(g.getTransform()), 1);
@@ -1399,6 +1446,34 @@ public class ImageModule extends AbstractQuercusModule {
 	  fpi.next();
 	}
     }
+
+    public void setThickness(int thickness)
+    {
+      _style = null;
+      _thickness = thickness;
+    }
+
+    public void setStyle(ArrayValue colors)
+    {
+      _style = new int[colors.getSize()];
+      ArrayValue.Entry e = colors.getHead();
+      for(int i=0; i<_style.length; i++)
+	{
+	  _style[i] = e.getValue().toInt();
+	  e = e.getNext();
+	}
+    }
+
+    public void setBrush(QuercusImage image)
+    {
+      _brush = image._bufferedImage;
+    }
+
+    public BufferedImage getBrush()
+    {
+      return _brush;
+    }
+
   }
 
 
