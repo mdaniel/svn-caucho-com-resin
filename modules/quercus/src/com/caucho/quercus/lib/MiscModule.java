@@ -56,6 +56,9 @@ import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.NullValue;
 import com.caucho.quercus.env.LongValue;
+import com.caucho.quercus.env.DoubleValue;
+import com.caucho.quercus.env.ArrayValue;
+import com.caucho.quercus.env.ArrayValueImpl;
 import com.caucho.quercus.env.StringBuilderValue;
 import com.caucho.quercus.env.BinaryBuilderValue;
 import com.caucho.quercus.env.StringValue;
@@ -181,10 +184,30 @@ public class MiscModule extends AbstractQuercusModule {
 
       int i = 0;
       for (PackSegment segment : segments) {
-	i = segment.apply(env, bb, i, args);
+	i = segment.pack(env, bb, i, args);
       }
 
       return bb;
+    } catch (IOException e) {
+      throw new QuercusModuleException(e);
+    }
+  }
+
+  /**
+   * packs the format into a binary.
+   */
+  public Value unpack(Env env, String format, InputStream is)
+  {
+    try {
+      ArrayList<PackSegment> segments = parseUnpackFormat(format);
+
+      ArrayValue array = new ArrayValueImpl();
+
+      for (PackSegment segment : segments) {
+	segment.unpack(env, array, is);
+      }
+
+      return array;
     } catch (IOException e) {
       throw new QuercusModuleException(e);
     }
@@ -449,6 +472,129 @@ public class MiscModule extends AbstractQuercusModule {
       case 'C':
 	segments.add(new BigEndianPackSegment(count, 1));
 	break;
+      case 's':
+      case 'n':
+      case 'S':
+	segments.add(new BigEndianPackSegment(count, 2));
+	break;
+      case 'v':
+	segments.add(new LittleEndianPackSegment(count, 2));
+	break;
+      case 'l':
+      case 'L':
+      case 'N':
+	segments.add(new BigEndianPackSegment(count, 4));
+	break;
+      case 'V':
+	segments.add(new LittleEndianPackSegment(count, 4));
+	break;
+      case 'i':
+      case 'I':
+	segments.add(new BigEndianPackSegment(count, 8));
+	break;
+      case 'd':
+	segments.add(new DoublePackSegment(count));
+	break;
+      case 'f':
+	segments.add(new FloatPackSegment(count));
+	break;
+      case 'x':
+	segments.add(new NullPackSegment(count));
+	break;
+      case '@':
+	segments.add(new PositionPackSegment(count));
+	break;
+      }
+    }
+
+    return segments;
+  }
+
+  private static ArrayList<PackSegment> parseUnpackFormat(String format)
+  {
+    ArrayList<PackSegment> segments = new ArrayList<PackSegment>();
+
+    int length = format.length();
+    for (int i = 0; i < length; i++) {
+      char ch = format.charAt(i);
+      
+      int count = 0;
+      char ch1 = ' ';
+      for (i++;
+	   i < length && '0' <= (ch1 = format.charAt(i)) && ch1 <= '9';
+	   i++) {
+	count = 10 * count + ch1 - '0';
+      }
+      
+      if (count == 0)
+	count = 1;
+
+      if (i < length)
+	i--;
+
+      StringBuilder sb = new StringBuilder();
+      
+      for (i++; i < length && (ch1 = format.charAt(i)) != '/'; i++) {
+	sb.append(ch1);
+      }
+
+      String name = sb.toString();
+
+      switch (ch) {
+      case 'a':
+	segments.add(new SpacePackSegment(name, count, (byte) 0));
+	break;
+      case 'A':
+	segments.add(new SpacePackSegment(name, count, (byte) 0x20));
+	break;
+      case 'h':
+	segments.add(new RevHexPackSegment(name, count));
+	break;
+      case 'H':
+	segments.add(new HexPackSegment(name, count));
+	break;
+      case 'c':
+	segments.add(new BigEndianPackSegment(name, count, 1, true));
+	break;
+      case 'C':
+	segments.add(new BigEndianPackSegment(name, count, 1, false));
+	break;
+      case 's':
+	segments.add(new BigEndianPackSegment(name, count, 2, true));
+	break;
+      case 'n':
+      case 'S':
+	segments.add(new BigEndianPackSegment(name, count, 2, false));
+	break;
+      case 'v':
+	segments.add(new LittleEndianPackSegment(name, count, 2));
+	break;
+      case 'l':
+	segments.add(new BigEndianPackSegment(name, count, 4, true));
+	break;
+      case 'L':
+      case 'N':
+	segments.add(new BigEndianPackSegment(name, count, 4, false));
+	break;
+      case 'V':
+	segments.add(new LittleEndianPackSegment(name, count, 4));
+	break;
+      case 'i':
+      case 'I':
+	segments.add(new BigEndianPackSegment(name, count, 8, false));
+	break;
+      case 'd':
+	segments.add(new DoublePackSegment(name, count));
+	break;
+      case 'f':
+	segments.add(new FloatPackSegment(name, count));
+	break;
+      case 'x':
+	segments.add(new NullPackSegment(name, count));
+	break;
+      case '@':
+	segments.add(new PositionPackSegment(name, count));
+	break;
       }
     }
 
@@ -456,22 +602,32 @@ public class MiscModule extends AbstractQuercusModule {
   }
 
   abstract static class PackSegment {
-    abstract public int apply(Env env, BinaryBuilderValue bb,
+    abstract public int pack(Env env, BinaryBuilderValue bb,
 			      int i, Value []args)
+      throws IOException;
+    
+    abstract public void unpack(Env env, ArrayValue array, InputStream is)
       throws IOException;
   }
 
   static class SpacePackSegment extends PackSegment {
+    private final StringValue _name;
     private final int _length;
     private final byte _pad;
 
     SpacePackSegment(int length, byte pad)
     {
+      this("", length, pad);
+    }
+
+    SpacePackSegment(String name, int length, byte pad)
+    {
+      _name = new StringValueImpl(name);
       _length = length;
       _pad = pad;
     }
     
-    public int apply(Env env, BinaryBuilderValue bb, int i, Value []args)
+    public int pack(Env env, BinaryBuilderValue bb, int i, Value []args)
       throws IOException
     {
       Value arg;
@@ -492,7 +648,7 @@ public class MiscModule extends AbstractQuercusModule {
 
       for (int j = 0; j < length; j++) {
 	int ch = is.read();
-	
+
 	if (ch >= 0)
 	  bb.append(ch);
 	else if (length == Integer.MAX_VALUE)
@@ -503,17 +659,42 @@ public class MiscModule extends AbstractQuercusModule {
 
       return i;
     }
+    
+    public void unpack(Env env, ArrayValue result, InputStream is)
+      throws IOException
+    {
+      BinaryBuilderValue bb = new BinaryBuilderValue();
+      for (int i = 0; i < _length; i++) {
+	int ch = is.read();
+
+	if (ch == _pad) {
+	}
+	else if (ch >= 0)
+	  bb.append(ch);
+	else
+	  break;
+      }
+
+      result.put(_name, bb);
+    }
   }
 
   static class HexPackSegment extends PackSegment {
+    private final StringValue _name;
     private final int _length;
 
     HexPackSegment(int length)
     {
+      this("", length);
+    }
+
+    HexPackSegment(String name, int length)
+    {
+      _name = new StringValueImpl(name);
       _length = length;
     }
     
-    public int apply(Env env, BinaryBuilderValue bb, int i, Value []args)
+    public int pack(Env env, BinaryBuilderValue bb, int i, Value []args)
       throws IOException
     {
       Value arg;
@@ -565,17 +746,38 @@ public class MiscModule extends AbstractQuercusModule {
 
       return i;
     }
+    
+    public void unpack(Env env, ArrayValue result, InputStream is)
+      throws IOException
+    {
+      StringBuilderValue sb = new StringBuilderValue();
+      for (int i = _length / 2 - 1; i >= 0; i--) {
+	int ch = is.read();
+
+	sb.append(digitToHex(ch >> 4));
+	sb.append(digitToHex(ch));
+      }
+
+      result.put(_name, sb);
+    }
   }
 
   static class RevHexPackSegment extends PackSegment {
+    private final StringValue _name;
     private final int _length;
 
     RevHexPackSegment(int length)
     {
+      this("", length);
+    }
+
+    RevHexPackSegment(String name, int length)
+    {
+      _name = new StringValueImpl(name);
       _length = length;
     }
     
-    public int apply(Env env, BinaryBuilderValue bb, int i, Value []args)
+    public int pack(Env env, BinaryBuilderValue bb, int i, Value []args)
       throws IOException
     {
       Value arg;
@@ -627,19 +829,45 @@ public class MiscModule extends AbstractQuercusModule {
 
       return i;
     }
+    
+    public void unpack(Env env, ArrayValue result, InputStream is)
+      throws IOException
+    {
+      StringBuilderValue sb = new StringBuilderValue();
+      for (int i = _length / 2 - 1; i >= 0; i--) {
+	int ch = is.read();
+
+	sb.append(digitToHex(ch));
+	sb.append(digitToHex(ch >> 4));
+      }
+
+      result.put(_name, sb);
+    }
   }
 
   static class BigEndianPackSegment extends PackSegment {
+    private final String _name;
     private final int _length;
     private final int _bytes;
+    private final boolean _isSigned;
 
     BigEndianPackSegment(int length, int bytes)
     {
+      _name = "";
       _length = length;
       _bytes = bytes;
+      _isSigned = false;
+    }
+
+    BigEndianPackSegment(String name, int length, int bytes, boolean isSigned)
+    {
+      _name = name;
+      _length = length;
+      _bytes = bytes;
+      _isSigned = isSigned;
     }
     
-    public int apply(Env env, BinaryBuilderValue bb, int i, Value []args)
+    public int pack(Env env, BinaryBuilderValue bb, int i, Value []args)
       throws IOException
     {
       for (int j = 0; j < _length; j++) {
@@ -660,13 +888,354 @@ public class MiscModule extends AbstractQuercusModule {
 	long v = arg.toLong();
 
 	for (int k = _bytes - 1; k >= 0; k--) {
-	  bb.append((byte) v);
-
-	  v /= 256;
+	  bb.append((int) (v >> (8 * k)));
 	}
       }
 
       return i;
+    }
+    
+    public void unpack(Env env, ArrayValue result, InputStream is)
+      throws IOException
+    {
+      for (int j = 0; j < _length; j++) {
+	Value key;
+
+	if (_name == "")
+	  key = LongValue.create(j);
+	else if (_length == 1)
+	  key = new StringValueImpl(_name);
+	else {
+	  StringBuilderValue sb = new StringBuilderValue();
+	  sb.append(_name);
+	  sb.append(j);
+
+	  key = sb;
+	}
+	
+	long v = 0;
+
+	for (int k = 0; k < _bytes; k++) {
+	  long d = is.read() & 0xff;
+
+	  v = 256 * v + d;
+	}
+
+	if (_isSigned) {
+	  switch (_bytes) {
+	  case 1:
+	    v = (byte) v;
+	    break;
+	  case 2:
+	    v = (short) v;
+	    break;
+	  case 4:
+	    v = (int) v;
+	    break;
+	  }
+	}
+
+	result.put(key, LongValue.create(v));
+      }
+    }
+  }
+
+  static class LittleEndianPackSegment extends PackSegment {
+    private final String _name;
+    private final int _length;
+    private final int _bytes;
+
+    LittleEndianPackSegment(int length, int bytes)
+    {
+      _name = "";
+      _length = length;
+      _bytes = bytes;
+    }
+
+    LittleEndianPackSegment(String name, int length, int bytes)
+    {
+      _name = name;
+      _length = length;
+      _bytes = bytes;
+    }
+    
+    public int pack(Env env, BinaryBuilderValue bb, int i, Value []args)
+      throws IOException
+    {
+      for (int j = 0; j < _length; j++) {
+	Value arg;
+
+	if (i < args.length) {
+	  arg = args[i];
+	  i++;
+	}
+	else if (_length == Integer.MAX_VALUE)
+	  return i;
+	else {
+	  env.warning("a: not enough arguments");
+
+	  return i;
+	}
+ 
+	long v = arg.toLong();
+
+	for (int k = 0; k < _bytes; k++) {
+	  bb.append((int) (v >> (8 * k)));
+	}
+      }
+
+      return i;
+    }
+    
+    public void unpack(Env env, ArrayValue result, InputStream is)
+      throws IOException
+    {
+      for (int j = 0; j < _length; j++) {
+	Value key;
+
+	if (_name == "")
+	  key = LongValue.create(j);
+	else if (_length == 1)
+	  key = new StringValueImpl(_name);
+	else {
+	  StringBuilderValue sb = new StringBuilderValue();
+	  sb.append(_name);
+	  sb.append(j);
+
+	  key = sb;
+	}
+	
+	long v = 0;
+
+	for (int k = 0; k < _bytes; k++) {
+	  long d = is.read() & 0xff;
+
+	  v |= d << 8 * k;
+	}
+
+	result.put(key, LongValue.create(v));
+      }
+    }
+  }
+
+  static class DoublePackSegment extends PackSegment {
+    private final String _name;
+    private final int _length;
+
+    DoublePackSegment(int length)
+    {
+      this("", length);
+    }
+
+    DoublePackSegment(String name, int length)
+    {
+      _name = name;
+      _length = length;
+    }
+    
+    public int pack(Env env, BinaryBuilderValue bb, int i, Value []args)
+      throws IOException
+    {
+      for (int j = 0; j < _length; j++) {
+	Value arg;
+
+	if (i < args.length) {
+	  arg = args[i];
+	  i++;
+	}
+	else if (_length == Integer.MAX_VALUE)
+	  return i;
+	else {
+	  env.warning("a: not enough arguments");
+
+	  return i;
+	}
+ 
+	double d = arg.toDouble();
+	long v = Double.doubleToLongBits(d);
+
+	for (int k = 7; k >= 0; k--) {
+	  bb.append((int) (v >> (8 * k)));
+	}
+      }
+
+      return i;
+    }
+    
+    public void unpack(Env env, ArrayValue result, InputStream is)
+      throws IOException
+    {
+      for (int j = 0; j < _length; j++) {
+	Value key;
+
+	if (_name == "")
+	  key = LongValue.create(j);
+	else if (_length == 1)
+	  key = new StringValueImpl(_name);
+	else {
+	  StringBuilderValue sb = new StringBuilderValue();
+	  sb.append(_name);
+	  sb.append(j);
+
+	  key = sb;
+	}
+	
+	long v = 0;
+
+	for (int k = 0; k < 8; k++) {
+	  long d = is.read() & 0xff;
+
+	  v = 256 * v + d;
+	}
+
+	result.put(key, new DoubleValue(Double.longBitsToDouble(v)));
+      }
+    }
+  }
+
+  static class FloatPackSegment extends PackSegment {
+    private final String _name;
+    private final int _length;
+
+    FloatPackSegment(int length)
+    {
+      this("", length);
+    }
+
+    FloatPackSegment(String name, int length)
+    {
+      _name = name;
+      _length = length;
+    }
+    
+    public int pack(Env env, BinaryBuilderValue bb, int i, Value []args)
+      throws IOException
+    {
+      for (int j = 0; j < _length; j++) {
+	Value arg;
+
+	if (i < args.length) {
+	  arg = args[i];
+	  i++;
+	}
+	else if (_length == Integer.MAX_VALUE)
+	  return i;
+	else {
+	  env.warning("a: not enough arguments");
+
+	  return i;
+	}
+ 
+	double d = arg.toDouble();
+	int v = Float.floatToIntBits((float) d);
+
+	for (int k = 3; k >= 0; k--) {
+	  bb.append((int) (v >> (8 * k)));
+	}
+      }
+
+      return i;
+    }
+    
+    public void unpack(Env env, ArrayValue result, InputStream is)
+      throws IOException
+    {
+      for (int j = 0; j < _length; j++) {
+	Value key;
+
+	if (_name == "")
+	  key = LongValue.create(j);
+	else if (_length == 1)
+	  key = new StringValueImpl(_name);
+	else {
+	  StringBuilderValue sb = new StringBuilderValue();
+	  sb.append(_name);
+	  sb.append(j);
+
+	  key = sb;
+	}
+	
+	int v = 0;
+
+	for (int k = 0; k < 4; k++) {
+	  int d = is.read() & 0xff;
+
+	  v = 256 * v + d;
+	}
+
+	result.put(key, new DoubleValue(Float.intBitsToFloat(v)));
+      }
+    }
+  }
+
+  static class NullPackSegment extends PackSegment {
+    private final String _name;
+    private final int _length;
+
+    NullPackSegment(int length)
+    {
+      this("", length);
+    }
+
+    NullPackSegment(String name, int length)
+    {
+      _name = name;
+      
+      if (length == Integer.MAX_VALUE)
+	length = 0;
+      
+      _length = length;
+    }
+    
+    public int pack(Env env, BinaryBuilderValue bb, int i, Value []args)
+      throws IOException
+    {
+      for (int j = 0; j < _length; j++) {
+	bb.append(0);
+      }
+
+      return i;
+    }
+    
+    public void unpack(Env env, ArrayValue result, InputStream is)
+      throws IOException
+    {
+      System.out.println("LE:N" + _length);
+      for (int i = 0; i < _length; i++)
+	is.read();
+    }
+  }
+
+  static class PositionPackSegment extends PackSegment {
+    private final int _length;
+
+    PositionPackSegment(int length)
+    {
+      this("", length);
+    }
+
+    PositionPackSegment(String name, int length)
+    {
+      if (length == Integer.MAX_VALUE)
+	length = 0;
+      
+      _length = length;
+    }
+    
+    public int pack(Env env, BinaryBuilderValue bb, int i, Value []args)
+      throws IOException
+    {
+      while (bb.length() < _length) {
+	bb.append(0);
+      }
+
+      return i;
+    }
+    
+    public void unpack(Env env, ArrayValue result, InputStream is)
+      throws IOException
+    {
+      throw new UnsupportedOperationException("'@' skip to position");
     }
   }
 
@@ -683,5 +1252,15 @@ public class MiscModule extends AbstractQuercusModule {
 
       return 0;
     }
+  }
+
+  static char digitToHex(int d)
+  {
+    d &= 0xf;
+    
+    if (d < 10)
+      return (char) ('0' + d);
+    else
+      return (char) ('a' + d - 10);
   }
 }
