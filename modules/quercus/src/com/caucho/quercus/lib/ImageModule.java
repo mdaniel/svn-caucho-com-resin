@@ -500,7 +500,9 @@ public class ImageModule extends AbstractQuercusModule {
   public static Value imagecolorallocatealpha(QuercusImage image,
 					      int r, int g, int b, int a)
   {
-    return LongValue.create(((a & 0xff) << 24) |
+    // PHP's alpha values are inverted and only 7 bits.
+    int alpha = 0x7f - (a & 0xff);
+    return LongValue.create((alpha      << 24) |
 			    ((r & 0xff) << 16) |
 			    ((g & 0xff) <<  8) |
 			    ((b & 0xff) <<  0) );
@@ -605,8 +607,11 @@ public class ImageModule extends AbstractQuercusModule {
 		   LongValue.create((argb >>  8) & 0xff));
     arrayValue.put(StringValue.create("blue"),
 		   LongValue.create((argb >>  0) & 0xff));
+
+    // PHP's alpha is backwards from the rest of the world...
+    int alpha = 0x7f - ((argb >> 24) & 0xff);
     arrayValue.put(StringValue.create("alpha"),
-		   LongValue.create((argb >> 24) & 0xff));
+		   LongValue.create(alpha));
     return arrayValue;
   }
 
@@ -865,7 +870,7 @@ public class ImageModule extends AbstractQuercusModule {
   public static void imagefilledrectangle(QuercusImage image, int x1, int y1,
 					  int x2, int y2, int color)
   {
-    image.fill(new Rectangle2D.Float(x1, y1, x2-x1, y2-y1), color);
+    image.fill(new Rectangle2D.Float(x1, y1, x2-x1+1, y2-y1+1), color);
   }
 
 
@@ -1284,12 +1289,15 @@ public class ImageModule extends AbstractQuercusModule {
 
   public static Color intToColor(int argb)
   {
-    // don't forget: PHP alpha channel is only 7 bits and is polarity-reversed!
+    // don't forget: PHP alpha channel is only 7 bits
+    int alpha = argb >> 24;
+    alpha <<= 1;
+    alpha |= ((alpha & 0x2) >> 1);  // copy bit #2 to LSB
+
     return new Color((argb >> 16) & 0xff,
 		     (argb >>  8) & 0xff,
 		     (argb >>  0) & 0xff,
-		     ((argb >> 24) & 0xff) << 1);
-    //(0xff - (((argb >> 24) & 0x7f) << 1)));
+		     alpha);
   }
 
   // Inner Classes ////////////////////////////////////////////////////////
@@ -1398,6 +1406,7 @@ public class ImageModule extends AbstractQuercusModule {
 	    break;
 	  default:
 	    _graphics.setColor(intToColor(color));
+	    _graphics.setStroke(new BasicStroke(_thickness));
 	    _graphics.draw(shape);
 	    break;
 	}
@@ -1405,12 +1414,12 @@ public class ImageModule extends AbstractQuercusModule {
     
     private void strokeStyled(Shape shape)
     {
-      // XXX: this is slightly off... by a pixel or two somewhere
       for(int i=0; i<_style.length; i++)
 	{
 	  _graphics.setColor(intToColor(_style[i]));
 	  Stroke stroke =
-	    new BasicStroke(1, BasicStroke.JOIN_ROUND, BasicStroke.CAP_ROUND, 1,
+	    new BasicStroke(_thickness,
+			    BasicStroke.JOIN_ROUND, BasicStroke.CAP_ROUND, 1,
 			    new float[] { 1, _style.length-1 },
 			    i);
 	  _graphics.setStroke(stroke);
