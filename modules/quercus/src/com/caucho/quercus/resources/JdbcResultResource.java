@@ -1031,16 +1031,6 @@ public class JdbcResultResource extends ResourceValue {
   }
 
   /**
-   * Converts to a string.
-   *
-   * @param env
-   */
-  public String toString(Env env)
-  {
-    return "ResultSet[]";
-  }
-
-  /**
    * created so tests will pass
    */
   public String toString()

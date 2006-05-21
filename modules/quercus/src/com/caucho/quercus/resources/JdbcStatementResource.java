@@ -347,11 +347,6 @@ public class JdbcStatementResource extends ResourceValue {
     }
   }
 
-  public String toString(Env env)
-  {
-    return "JdbcStatementResource[]";
-  }
-
   public boolean dataSeek(int offset)
   {
     return JdbcResultResource.setRowNumber(_rs, offset);

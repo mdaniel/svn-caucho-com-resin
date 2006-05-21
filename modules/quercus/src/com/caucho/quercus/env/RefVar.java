@@ -108,7 +108,7 @@ public class RefVar extends Value {
    * Converts to a string.
    * @param env
    */
-  public String toString(Env env)
+  public StringValue toString(Env env)
   {
     return _var.toString(env);
   }

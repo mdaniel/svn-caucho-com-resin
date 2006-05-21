@@ -35,8 +35,10 @@ import java.io.IOException;
 
 import com.caucho.vfs.WriteStream;
 
+import com.caucho.quercus.Quercus;
+
 /**
- * Represents a PHP string value.
+ * Represents a Quercus string value.
  */
 abstract public class StringValue extends Value implements CharSequence {
   public static final StringValue EMPTY = new StringValueImpl("");
@@ -80,7 +82,61 @@ abstract public class StringValue extends Value implements CharSequence {
       return new StringValueImpl(value.toString());
   }
 
+  //
   // Predicates and relations
+  //
+
+  /**
+   * Returns the type.
+   */
+  public String getType()
+  {
+    return "string";
+  }
+
+  /**
+   * Returns true for a long
+   */
+  public boolean isLongConvertible()
+  {
+    int len = length();
+
+    if (len == 0)
+      return false;
+
+    for (int i = 0; i < len; i++) {
+      char ch = charAt(i);
+
+      if (! ('0' <= ch && ch <= '9'))
+        return false;
+    }
+
+    return true;
+  }
+
+  /**
+   * Returns true for a double
+   */
+  public boolean isDoubleConvertible()
+  {
+    return getNumericType() == IS_DOUBLE;
+  }
+
+  /**
+   * Returns true for a number
+   */
+  public boolean isNumber()
+  {
+    return getNumericType() != IS_STRING;
+  }
+
+  /**
+   * Returns true for a scalar
+   */
+  public boolean isScalar()
+  {
+    return true;
+  }
 
   /**
    * Returns true for equality
@@ -171,8 +227,7 @@ abstract public class StringValue extends Value implements CharSequence {
    */
   protected int getNumericType()
   {
-    String s = toString();
-    int len = s.length();
+    int len = length();
 
     if (len == 0)
       return IS_STRING;
@@ -181,17 +236,17 @@ abstract public class StringValue extends Value implements CharSequence {
     int ch = 0;
     boolean hasPoint = false;
 
-    if (i < len && ((ch = s.charAt(i)) == '+' || ch == '-')) {
+    if (i < len && ((ch = charAt(i)) == '+' || ch == '-')) {
       i++;
     }
 
     if (len <= i)
       return IS_STRING;
 
-    ch = s.charAt(i);
+    ch = charAt(i);
 
     if (ch == '.') {
-      for (i++; i < len && '0' <= (ch = s.charAt(i)) && ch <= '9'; i++) {
+      for (i++; i < len && '0' <= (ch = charAt(i)) && ch <= '9'; i++) {
         return IS_DOUBLE;
       }
 
@@ -200,14 +255,14 @@ abstract public class StringValue extends Value implements CharSequence {
     else if (! ('0' <= ch && ch <= '9'))
       return IS_STRING;
 
-    for (; i < len && '0' <= (ch = s.charAt(i)) && ch <= '9'; i++) {
+    for (; i < len && '0' <= (ch = charAt(i)) && ch <= '9'; i++) {
     }
 
     if (len <= i)
       return IS_LONG;
     else if (ch == '.' || ch == 'e' || ch == 'E') {
       for (i++;
-           i < len && ('0' <= (ch = s.charAt(i)) && ch <= '9' ||
+           i < len && ('0' <= (ch = charAt(i)) && ch <= '9' ||
                        ch == '+' || ch == '-' || ch == 'e' || ch == 'E');
            i++) {
       }
@@ -264,6 +319,96 @@ abstract public class StringValue extends Value implements CharSequence {
   }
 
   /**
+   * Converts to a double.
+   */
+  public double toDouble()
+  {
+    int len = length();
+    int i = 0;
+    int ch = 0;
+
+    if (i < len && ((ch = charAt(i)) == '+' || ch == '-')) {
+      i++;
+    }
+
+    for (; i < len && '0' <= (ch = charAt(i)) && ch <= '9'; i++) {
+    }
+
+    if (ch == '.') {
+      for (i++; i < len && '0' <= (ch = charAt(i)) && ch <= '9'; i++) {
+      }
+    }
+
+    if (ch == 'e' || ch == 'E') {
+      int e = i++;
+
+      if (i < len && (ch = charAt(i)) == '+' || ch == '-') {
+        i++;
+      }
+
+      for (; i < len && '0' <= (ch = charAt(i)) && ch <= '9'; i++) {
+      }
+
+      if (i == e + 1)
+        i = e;
+    }
+
+    if (i == 0)
+      return 0;
+    else if (i == len)
+      return Double.parseDouble(toString());
+    else
+      return Double.parseDouble(substring(0, i).toString());
+  }
+
+  /**
+   * Converts to a boolean.
+   */
+  public boolean toBoolean()
+  {
+    int length = length();
+
+    if (length == 0)
+      return false;
+    else if (length > 1)
+      return true;
+    else
+      return charAt(0) != '0';
+  }
+
+  /**
+   * Converts to a key.
+   */
+  public Value toKey()
+  {
+    int len = length();
+
+    if (len == 0)
+      return this;
+
+    int sign = 1;
+    long value = 0;
+
+    int i = 0;
+    char ch = charAt(i);
+    if (ch == '-') {
+      sign = -1;
+      i++;
+    }
+
+    for (; i < len; i++) {
+      ch = charAt(i);
+
+      if ('0' <= ch && ch <= '9')
+        value = 10 * value + ch - '0';
+      else
+        return this;
+    }
+
+    return LongValue.create(sign * value);
+  }
+
+  /**
    * Converts to a Java object.
    */
   public Object toJavaObject()
@@ -285,6 +430,54 @@ abstract public class StringValue extends Value implements CharSequence {
   // Operations
 
   /**
+   * Returns the character at an index
+   */
+  public Value get(Value key)
+  {
+    return charValueAt(key.toLong());
+  }
+
+  /**
+   * Returns the character at an index
+   */
+  public Value getRef(Value key)
+  {
+    return charValueAt(key.toLong());
+  }
+
+  /**
+   * Returns the character at an index
+   */
+  @Override
+  public Value charValueAt(long index)
+  {
+    int len = length();
+
+    if (index < 0 || len <= index)
+      return StringValue.EMPTY;
+    else
+      return StringValue.create(charAt((int) index));
+  }
+
+  /**
+   * sets the character at an index
+   */
+  @Override
+  public Value setCharValueAt(long index, String value)
+  {
+    int len = length();
+
+    if (index < 0 || len <= index)
+      return this;
+    else {
+      return (new StringBuilderValue()
+	      .append(this, 0, (int) index)
+	      .append(value)
+	      .append(this, (int) (index + 1), length()));
+    }
+  }
+
+  /**
    * Pre-increment the following value.
    */
   public Value preincr(int incr)
@@ -298,48 +491,60 @@ abstract public class StringValue extends Value implements CharSequence {
   public Value postincr(int incr)
   {
     if (incr > 0) {
-      String s = toString();
-
       StringBuilder tail = new StringBuilder();
 
-      for (int i = s.length() - 1; i >= 0; i--) {
-        char ch = s.charAt(i);
+      for (int i = length() - 1; i >= 0; i--) {
+        char ch = charAt(i);
 
         if (ch == 'z') {
           if (i == 0)
-            return new StringValueImpl("aa" + tail);
+            return new StringBuilderValue().append("aa").append(tail);
           else
             tail.insert(0, 'a');
         }
         else if ('a' <= ch && ch < 'z') {
-          return new StringValueImpl(s.substring(0, i) +
-                                     (char) (ch + 1) +
-                                     tail);
+          return (new StringBuilderValue()
+		  .append(this, 0, i)
+		  .append((char) (ch + 1))
+		  .append(tail));
         }
         else if (ch == 'Z') {
           if (i == 0)
-            return new StringValueImpl("AA" + tail.toString());
+            return new StringBuilderValue().append("AA").append(tail);
           else
             tail.insert(0, 'A');
         }
         else if ('A' <= ch && ch < 'Z') {
-          return new StringValueImpl(s.substring(0, i) +
-                                     (char) (ch + 1) +
-                                     tail);
+          return (new StringBuilderValue()
+		  .append(this, 0, i)
+		  .append((char) (ch + 1))
+		  .append(tail));
         }
-        else if ('0' <= ch && ch <= '9' && i == s.length() - 1) {
-          return new LongValue(toLong() + 1);
+        else if ('0' <= ch && ch <= '9' && i == length() - 1) {
+          return LongValue.create(toLong() + 1);
         }
       }
 
-      return new StringValueImpl(tail.toString());
+      return new StringBuilderValue(tail.toString());
     }
     else if (isLongConvertible()) {
-      return new LongValue(toLong() - 1);
+      return LongValue.create(toLong() - 1);
     }
     else {
       return this;
     }
+  }
+
+  /**
+   * Serializes the value.
+   */
+  public void serialize(StringBuilder sb)
+  {
+    sb.append("s:");
+    sb.append(length());
+    sb.append(":\"");
+    sb.append(toString());
+    sb.append("\";");
   }
 
   /**
@@ -366,6 +571,14 @@ abstract public class StringValue extends Value implements CharSequence {
       }
     }
     sb.append("'");
+  }
+
+  /**
+   * Interns the string.
+   */
+  public InternStringValue intern(Quercus quercus)
+  {
+    return quercus.intern(toString());
   }
 
   //

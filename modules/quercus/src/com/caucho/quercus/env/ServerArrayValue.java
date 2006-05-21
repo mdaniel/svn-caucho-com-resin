@@ -94,15 +94,6 @@ public class ServerArrayValue extends ArrayValueImpl {
   }
   
   /**
-   * Converts to a string.
-   * @param env
-   */
-  public String toString(Env env)
-  {
-    return "Array";
-  }
-  
-  /**
    * Converts to an object.
    */
   public Object toObject()

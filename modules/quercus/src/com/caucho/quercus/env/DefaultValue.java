@@ -79,15 +79,6 @@ public class DefaultValue extends NullValue {
   }
   
   /**
-   * Converts to a string.
-   * @param env
-   */
-  public String toString(Env env)
-  {
-    return "";
-  }
-  
-  /**
    * Converts to an object.
    */
   public Object toObject()
@@ -101,6 +92,15 @@ public class DefaultValue extends NullValue {
    */
   public void print(Env env)
   {
+  }
+  
+  /**
+   * Converts to a string.
+   * @param env
+   */
+  public String toString()
+  {
+    return "";
   }
 
   /**

@@ -156,7 +156,7 @@ public class LiteralExpr extends Expr {
   {
     try {
       out.print("\"");
-      out.printJavaString(_value.toString(null));
+      out.printJavaString(_value.toString());
       out.print("\"");
     } catch (IOException e) {
       throw e;

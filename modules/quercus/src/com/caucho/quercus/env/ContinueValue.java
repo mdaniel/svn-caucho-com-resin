@@ -69,15 +69,6 @@ public class ContinueValue extends Value {
   }
 
   /**
-   * Converts to a string.
-   * @param env
-   */
-  public String toString(Env env)
-  {
-    return "";
-  }
-
-  /**
    * Converts to an object.
    */
   public Object toObject()

@@ -671,14 +671,14 @@ public class CompiledObjectValue extends ObjectValue {
    * Converts to a string.
    * @param env
    */
-  public String toString(Env env)
+  public StringValue toString(Env env)
   {
     AbstractFunction fun = _cl.findFunction("__toString");
 
     if (fun != null)
       return fun.evalMethod(env, this, new Expr[0]).toString(env);
     else
-      return _cl.getName() + "[]";
+      return new StringBuilderValue().append(_cl.getName()).append("[]");
   }
 
   /**
