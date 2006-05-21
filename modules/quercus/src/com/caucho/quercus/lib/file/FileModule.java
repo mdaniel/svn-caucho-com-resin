@@ -874,17 +874,21 @@ public class FileModule extends AbstractQuercusModule {
       FileValue file = (FileValue) fileValue;
 
       try {
-	StringBuilder sb = new StringBuilder();
+	BinaryBuilderValue bb = new BinaryBuilderValue();
 
-	int ch;
+	int len;
 
-	while ((ch = file.read()) >= 0) {
-	  sb.append((char) ch);
-	}
+	do {
+	  bb.prepareReadBuffer();
 
-	// XXX: handle offset and maxlen
+	  len = file.read(bb.getBuffer(), bb.getOffset(),
+			  bb.getLength() - bb.getOffset());
 
-	return new StringValueImpl(sb.toString());
+	  if (len > 0)
+	    bb.setOffset(bb.getOffset() + len);
+	} while (len > 0);
+
+	return bb;
       } finally {
 	file.close();
       }

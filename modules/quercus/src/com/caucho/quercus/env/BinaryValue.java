@@ -94,6 +94,8 @@ abstract public class BinaryValue extends StringValue {
 
       if (0x20 <= ch && ch < 0x7f)
 	out.print(charAt(i));
+      else if (ch == '\r' || ch == '\n' || ch == '\t')
+	out.print(charAt(i));
       else
 	out.print("\\x" + Integer.toHexString(ch >> 4) + Integer.toHexString(ch % 16));
     }

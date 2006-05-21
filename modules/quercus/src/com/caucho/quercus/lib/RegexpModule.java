@@ -242,7 +242,6 @@ public class RegexpModule
     }
 
     Pattern pattern = compileRegexp(patternString);
-    Matcher matcher = pattern.matcher(subject);
 
     ArrayValue matches;
 
@@ -255,15 +254,91 @@ public class RegexpModule
 
     matchRef.set(matches);
 
-    ArrayValue []matchList = new ArrayValue[matcher.groupCount() + 1];
-
     if ((flags & PREG_PATTERN_ORDER) != 0) {
-      for (int j = 0; j <= matcher.groupCount(); j++) {
-        ArrayValue values = new ArrayValueImpl();
-        matches.put(values);
-        matchList[j] = values;
-      }
+      return pregMatchAllPatternOrder(env, pattern, subject,
+				      matches, flags, offset);
     }
+    else if ((flags & PREG_SET_ORDER) != 0) {
+      return pregMatchAllSetOrder(env, pattern, subject,
+				  matches, flags, offset);
+    }
+    else
+      throw new UnsupportedOperationException();
+  }
+
+  /**
+   * Returns the index of the first match.
+   *
+   * @param env the calling environment
+   */
+  public static int pregMatchAllPatternOrder(Env env,
+					     Pattern pattern,
+					     StringValue subject,
+					     ArrayValue matches,
+					     int flags,
+					     int offset)
+  {
+    Matcher matcher = pattern.matcher(subject);
+
+    if (! (matcher.find())) {
+      return 0;
+    }
+
+    int groupCount = matcher.groupCount();
+
+    ArrayValue []matchList = new ArrayValue[groupCount + 1];
+
+    for (int j = 0; j <= groupCount; j++) {
+      ArrayValue values = new ArrayValueImpl();
+      matches.put(values);
+      matchList[j] = values;
+    }
+
+    int count = 0;
+
+    do {
+      count++;
+
+      for (int j = 0; j <= groupCount; j++) {
+	ArrayValue values = matchList[j];
+
+	int start = matcher.start(j);
+	int end = matcher.end(j);
+	  
+	StringValue groupValue = subject.substring(start, end);
+
+	Value result = NullValue.NULL;
+
+	if (groupValue != null) {
+	  if ((flags & PREG_OFFSET_CAPTURE) != 0) {
+	    result = new ArrayValueImpl();
+	    result.put(groupValue);
+	    result.put(LongValue.create(start));
+	  } else {
+	    result = groupValue;
+	  }
+	}
+
+	values.put(result);
+      }
+    } while (matcher.find());
+
+    return count;
+  }
+
+  /**
+   * Returns the index of the first match.
+   *
+   * @param env the calling environment
+   */
+  private static int pregMatchAllSetOrder(Env env,
+					  Pattern pattern,
+					  StringValue subject,
+					  ArrayValue matches,
+					  int flags,
+					  int offset)
+  {
+    Matcher matcher = pattern.matcher(subject);
 
     if (! (matcher.find())) {
       return 0;
@@ -274,56 +349,27 @@ public class RegexpModule
     do {
       count++;
 
-      if ((flags & PREG_PATTERN_ORDER) != 0) {
-        for (int j = 0; j <= matcher.groupCount(); j++) {
-          ArrayValue values = matchList[j];
+      ArrayValue matchResult = new ArrayValueImpl();
+      matches.put(matchResult);
 
-	  int start = matcher.start(j);
-	  int end = matcher.end(j);
+      for (int j = 0; j <= matcher.groupCount(); j++) {
+	int start = matcher.start(j);
+	int end = matcher.end(j);
 	  
-          StringValue groupValue = subject.substring(start, end);
+	StringValue groupValue = subject.substring(start, end);
 
-          Value result = NullValue.NULL;
+	Value result = NullValue.NULL;
 
-          if (groupValue != null) {
-            if ((flags & PREG_OFFSET_CAPTURE) != 0) {
-              result = new ArrayValueImpl();
-              result.put(groupValue);
-              result.put(LongValue.create(start));
-            } else {
-	      result = groupValue;
-            }
-          }
-
-          values.put(result);
-        }
-      }
-      else if ((flags & PREG_SET_ORDER) != 0) {
-        ArrayValue matchResult = new ArrayValueImpl();
-        matches.put(matchResult);
-
-        for (int j = 0; j <= matcher.groupCount(); j++) {
-	  int start = matcher.start(j);
-	  int end = matcher.end(j);
-	  
-          StringValue groupValue = subject.substring(start, end);
-
-          Value result = NullValue.NULL;
-
-          if (groupValue != null) {
-            if ((flags & PREG_OFFSET_CAPTURE) != 0) {
-              result = new ArrayValueImpl();
-              result.put(groupValue);
-              result.put(LongValue.create(start));
-            } else {
-              result = groupValue;
-            }
-          }
-          matchResult.put(result);
-        }
-      }
-      else {
-        throw new UnsupportedOperationException();
+	if (groupValue != null) {
+	  if ((flags & PREG_OFFSET_CAPTURE) != 0) {
+	    result = new ArrayValueImpl();
+	    result.put(groupValue);
+	    result.put(LongValue.create(start));
+	  } else {
+	    result = groupValue;
+	  }
+	}
+	matchResult.put(result);
       }
     } while (matcher.find());
 
@@ -639,8 +685,7 @@ public class RegexpModule
       
       // Increment countV (note: if countV != null, then it should be a Var)
       if ((countV != null) && (countV instanceof Var)) {
-        long count = ((Var) countV).getRawValue().toLong();
-        countV.set(LongValue.create(count + 1));
+        countV.set(LongValue.create(countV.toLong() + 1));
       }
 
       // append all text up to match
@@ -655,7 +700,7 @@ public class RegexpModule
         for (int i = 0; i < replacementLen; i++) {
           Replacement replacement = replacementList.get(i);
 
-          replacement.eval(evalString, matcher);
+          replacement.eval(evalString, subject, matcher);
         }
 
 	try {
@@ -667,14 +712,14 @@ public class RegexpModule
         for (int i = 0; i < replacementLen; i++) {
           Replacement replacement = replacementList.get(i);
 
-          replacement.eval(result, matcher);
+          replacement.eval(result, subject, matcher);
         }
       }
 
       tail = matcher.end();
     }
 
-    if (tail == 0)
+    if (result == null)
       return subject;
     
     if (tail < length)
@@ -1412,7 +1457,7 @@ public class RegexpModule
   }
 
   static class Replacement {
-    void eval(StringBuilderValue sb, Matcher matcher)
+    void eval(StringBuilderValue sb, StringValue subject, Matcher matcher)
     {
     }
   }
@@ -1431,7 +1476,7 @@ public class RegexpModule
       text.getChars(0, length, _text, 0);
     }
 
-    void eval(StringBuilderValue sb, Matcher matcher)
+    void eval(StringBuilderValue sb, StringValue subject, Matcher matcher)
     {
       sb.append(_text, 0, _text.length);
     }
@@ -1447,10 +1492,11 @@ public class RegexpModule
       _group = group;
     }
 
-    void eval(StringBuilderValue sb, Matcher matcher)
+    void eval(StringBuilderValue sb, StringValue subject, Matcher matcher)
     {
       if (_group <= matcher.groupCount())
-        sb.append(matcher.group(_group));
+        sb.append(subject.substring(matcher.start(_group),
+				    matcher.end(_group)));
     }
   }
 
@@ -1464,10 +1510,11 @@ public class RegexpModule
       _group = group;
     }
 
-    void eval(StringBuilderValue sb, Matcher matcher)
+    void eval(StringBuilderValue sb, StringValue subject, Matcher matcher)
     {
       if (_group <= matcher.groupCount()) {
-	String group = matcher.group(_group);
+	StringValue group = subject.substring(matcher.start(_group),
+					      matcher.end(_group));;
 	int len = group.length();
 
 	for (int i = 0; i < len; i++) {

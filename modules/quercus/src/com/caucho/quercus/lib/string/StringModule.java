@@ -555,8 +555,8 @@ v   *
    * @param limit the max number of elements
    * @return an array of exploded values
    */
-  public static Value explode(String separator,
-                              String string,
+  public static Value explode(StringValue separator,
+                              StringValue string,
                               @Optional("0x7fffffff") long limit)
   {
     if (separator.equals(""))
@@ -574,7 +574,7 @@ v   *
 
       LongValue key = LongValue.create(i++);
 
-      StringValue chunk = new StringValueImpl(string.substring(head, tail));
+      StringValue chunk = string.substring(head, tail);
 
       array.put(key, chunk);
 
@@ -583,7 +583,7 @@ v   *
 
     LongValue key = LongValue.create(i);
 
-    StringValue chunk = new StringValueImpl(string.substring(head));
+    StringValue chunk = string.substring(head);
 
     array.put(key, chunk);
 
@@ -2259,7 +2259,7 @@ v   *
       ArrayValue resultArray = new ArrayValueImpl();
 
       for (Value value : subjectArray.values()) {
-        Value result = str_replace_impl(env,
+        Value result = strReplaceImpl(env,
                                         search,
                                         replace,
                                         value.toStringValue(),
@@ -2276,7 +2276,7 @@ v   *
       if (subjectString.length() == 0)
         return StringValue.EMPTY;
 
-      return str_replace_impl(env,
+      return strReplaceImpl(env,
                               search,
                               replace,
                               subjectString,
@@ -2292,7 +2292,7 @@ v   *
    * @param subject replacement
    * @param count return value
    */
-  private static Value str_replace_impl(Env env,
+  private static Value strReplaceImpl(Env env,
                                         Value search,
                                         Value replace,
                                         StringValue subject,
@@ -2308,7 +2308,7 @@ v   *
         env.warning(L.l("Array to string conversion"));
       }
 
-      subject = str_replace_impl(env,
+      subject = strReplaceImpl(env,
                                  searchString,
                                  replace.toStringValue(),
                                  subject,
@@ -2328,7 +2328,7 @@ v   *
         if (replaceItem == null)
           replaceItem = NullValue.NULL;
 
-        subject = str_replace_impl(env,
+        subject = strReplaceImpl(env,
                                    searchItem.toStringValue(),
                                    replaceItem.toStringValue(),
                                    subject,
@@ -2343,7 +2343,7 @@ v   *
       while (searchIter.hasNext()) {
         Value searchItem = searchIter.next();
 
-        subject = str_replace_impl(env,
+        subject = strReplaceImpl(env,
                                    searchItem.toStringValue(),
                                    replace.toStringValue(),
                                    subject,
@@ -2362,7 +2362,7 @@ v   *
    * @param subject replacement
    * @param countV return value
    */
-  private static StringValue str_replace_impl(Env env,
+  private static StringValue strReplaceImpl(Env env,
                                          StringValue search,
                                          StringValue replace,
                                          StringValue subject,
@@ -2375,9 +2375,12 @@ v   *
 
     int searchLen = search.length();
 
-    StringBuilderValue result = new StringBuilderValue();
+    StringBuilderValue result = null;
 
     while ((next = subject.indexOf(search, head)) >= head) {
+      if (result == null)
+	result = new StringBuilderValue();
+	
       result.append(subject, head, next);
       result.append(replace);
 
@@ -3554,7 +3557,7 @@ v   *
         if (startIterator != null && startIterator.hasNext())
           start = startIterator.next().toInt();
 
-        Value result = substr_replace_impl(value.toString(), replacement, start, length);
+        Value result = substrReplaceImpl(value.toString(), replacement, start, length);
 
         resultArray.append(result);
       }
@@ -3568,11 +3571,11 @@ v   *
       if (startIterator != null && startIterator.hasNext())
         start = startIterator.next().toInt();
 
-      return substr_replace_impl(subjectV.toString(), replacement, start, length);
+      return substrReplaceImpl(subjectV.toString(), replacement, start, length);
     }
   }
 
-  private static Value substr_replace_impl(String string, String replacement, int start, int len)
+  private static Value substrReplaceImpl(String string, String replacement, int start, int len)
   {
     int strLen = string.length();
 

@@ -93,6 +93,15 @@ public class ArgGetValue extends Value {
   }
 
   /**
+   * Converts to a value.
+   */
+  @Override
+  public Value toArgValue()
+  {
+    return toValue();
+  }
+
+  /**
    * Converts to a variable.
    */
   public Var toVar()

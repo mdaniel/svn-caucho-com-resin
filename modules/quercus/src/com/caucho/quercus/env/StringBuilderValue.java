@@ -668,6 +668,24 @@ public class StringBuilderValue extends UnicodeValue {
   }
 
   /**
+   * Append a Java buffer to the value.
+   */
+  public final StringBuilderValue append(StringBuilderValue sb,
+					 int head, int tail)
+  {
+    int length = tail - head;
+    
+    if (_buffer.length < _length + length)
+      ensureCapacity(_length + length);
+
+    System.arraycopy(sb._buffer, head, _buffer, _length, tail - head);
+
+    _length += tail - head;
+
+    return this;
+  }
+
+  /**
    * Append a Java char to the value.
    */
   public final StringBuilderValue append(char v)

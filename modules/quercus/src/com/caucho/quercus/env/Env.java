@@ -164,7 +164,7 @@ public final class Env {
     = new ArrayList<Shutdown>();
 
   private HashMap<String, Var> _globalMap
-    = new HashMap<String, Var>();
+    = new HashMap<String, Var>(1024);
   
   private HashMap<String, Var> _staticMap
     = new HashMap<String, Var>();
@@ -172,16 +172,16 @@ public final class Env {
   private HashMap<String, Var> _map = _globalMap;
 
   private HashMap<String, Value> _constMap
-    = new HashMap<String, Value>();
+    = new HashMap<String, Value>(1024);
 
   private HashMap<String, Value> _lowerConstMap
-    = new HashMap<String, Value>();
+    = new HashMap<String, Value>(1024);
 
   private HashMap<String, AbstractFunction> _funMap
-    = new HashMap<String, AbstractFunction>();
+    = new HashMap<String, AbstractFunction>(8192, 0.5F);
 
   private HashMap<String, AbstractFunction> _lowerFunMap
-    = new HashMap<String, AbstractFunction>();
+    = new HashMap<String, AbstractFunction>(8192, 0.5F);
 
   private HashMap<String, ClassDef> _classDefMap
     = new HashMap<String, ClassDef>();

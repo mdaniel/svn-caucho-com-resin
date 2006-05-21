@@ -85,7 +85,7 @@ public class SetCharAtExpr extends Expr {
     throws IOException
   {
     _objExpr.generate(out);
-    out.print(".setCharAt(");
+    out.print(".setCharValueAt(");
     _indexExpr.generateLong(out);
     out.print(",");
     _valueExpr.generateString(out);
