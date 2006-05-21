@@ -368,7 +368,9 @@ abstract public class StringValue extends Value implements CharSequence {
     sb.append("'");
   }
 
+  //
   // CharSequence
+  //
 
   /**
    * Returns the length of the string.
@@ -394,14 +396,133 @@ abstract public class StringValue extends Value implements CharSequence {
     return new StringValueImpl(toString().substring(start, end));
   }
 
+  //
+  // java.lang.String methods
+  //
+
+  /**
+   * Returns the first index of the match string, starting from the head.
+   */
+  public final int indexOf(CharSequence match)
+  {
+    return indexOf(match, 0);
+  }
+    
+  /**
+   * Returns the first index of the match string, starting from the head.
+   */
+  public int indexOf(CharSequence match, int head)
+  {
+    int length = length();
+    int matchLength = match.length();
+
+    if (matchLength <= 0)
+      return -1;
+    else if (head < 0)
+      return -1;
+    
+    int end = length - matchLength;
+    char first = match.charAt(0);
+
+    loop:
+    for (; head <= end; head++) {
+      if (charAt(head) != first)
+	continue;
+
+      for (int i = 1; i < matchLength; i++) {
+	if (charAt(head + i) != match.charAt(i))
+	  continue loop;
+      }
+
+      return head;
+    }
+
+    return -1;
+  }
+    
+  /**
+   * Returns the last index of the match string, starting from the head.
+   */
+  public int indexOf(char match)
+  {
+    return lastIndexOf(match, 0);
+  }
+    
+  /**
+   * Returns the last index of the match string, starting from the head.
+   */
+  public int indexOf(char match, int head)
+  {
+    int length = length();
+    
+    for (; head < length; head++) {
+      if (charAt(head) == match)
+	return head;
+    }
+
+    return -1;
+  }
+    
+  /**
+   * Returns the last index of the match string, starting from the head.
+   */
+  public final int lastIndexOf(char match)
+  {
+    return lastIndexOf(match, Integer.MAX_VALUE);
+  }
+    
+  /**
+   * Returns the last index of the match string, starting from the head.
+   */
+  public int lastIndexOf(char match, int tail)
+  {
+    int length = length();
+
+    if (length < tail)
+      tail = length - 1;
+    
+    for (; tail >= 0; tail--) {
+      if (charAt(tail) == match)
+	return tail;
+    }
+
+    return -1;
+  }
+
+  /**
+   * Returns a StringValue substring.
+   */
+  public StringValue substring(int head)
+  {
+    return (StringValue) subSequence(head, length());
+  }
+
+  /**
+   * Returns a StringValue substring.
+   */
+  public StringValue substring(int begin, int end)
+  {
+    return (StringValue) subSequence(begin, end);
+  }
+
+  //
   // java.lang.Object methods
+  //
 
   /**
    * Returns the hash code.
    */
   public int hashCode()
   {
-    return toString().hashCode();
+    int hash = 37;
+
+    int length = length();
+
+    for (int i = 0; i < length; i++) {
+      hash = 65521 * hash + charAt(i);
+    }
+
+    return hash;
   }
 
   /**
@@ -414,7 +535,20 @@ abstract public class StringValue extends Value implements CharSequence {
     else if (! (o instanceof StringValue))
       return false;
 
-    return toString().equals(o.toString());
+    StringValue s = (StringValue) o;
+
+    int aLength = length();
+    int bLength = s.length();
+
+    if (aLength != bLength)
+      return false;
+
+    for (int i = aLength - 1; i >= 0; i--) {
+      if (charAt(i) != s.charAt(i))
+	return false;
+    }
+
+    return true;
   }
 
   public void varDumpImpl(Env env,

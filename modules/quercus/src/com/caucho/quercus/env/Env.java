@@ -1320,10 +1320,13 @@ public final class Env {
 
           StringValue valueAsValue;
 
+	  // PHP 6 removes magic_quotes
+	  /*
           if (getIniBoolean("magic_quotes_gpc"))
             valueAsValue = StringModule.addslashes(value);
           else
-            valueAsValue = new StringValueImpl(value);
+	  */
+	  valueAsValue = new StringValueImpl(value);
 
           array.append(new StringValueImpl(cookie.getName()), valueAsValue);
         }

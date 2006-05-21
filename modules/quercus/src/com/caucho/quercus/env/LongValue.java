@@ -278,9 +278,11 @@ public class LongValue extends NumberValue {
   /**
    * Returns the hash code
    */
-  public int hashCode()
+  public final int hashCode()
   {
-    return (int) (37 + 65537 * _value);
+    long v = _value;
+    
+    return (int) (17 * v + 65537 * (v >> 32));
   }
 
   /**

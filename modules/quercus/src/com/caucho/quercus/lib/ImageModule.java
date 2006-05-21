@@ -1121,11 +1121,12 @@ public class ImageModule extends AbstractQuercusModule {
   /**
    * Rotate an image with a given angle
    */
-  public static void imagerotate()
+  public static boolean imagerotate()
   {
     // this function is broken on most PHP installs: "Note: This
     // function is only available if PHP is compiled with the bundled
     // version of the GD library."
+    return false;
   }
 
 
@@ -1303,7 +1304,7 @@ public class ImageModule extends AbstractQuercusModule {
     String _mime;
   }
 
-  static class QuercusImage extends ResourceValue {
+  public static class QuercusImage extends ResourceValue {
     private int _width;
     private int _height;
     BufferedImage _bufferedImage;

@@ -34,6 +34,7 @@ import com.caucho.quercus.env.ConstArrayValue;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.StringValueImpl;
 import com.caucho.quercus.env.Value;
+import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.quercus.module.Optional;
 import com.caucho.util.L10N;
@@ -167,13 +168,13 @@ public class HtmlModule extends AbstractQuercusModule {
    * @param charset optional charset style
    * @return the trimmed string
    */
-  public static String html_entity_decode(Env env,
-                                          String string,
-	                              				  @Optional int quoteStyle,
-					                                @Optional String charset)
+  public static StringValue html_entity_decode(Env env,
+					       StringValue string,
+					       @Optional int quoteStyle,
+					       @Optional String charset)
   {
-    if (string == null)
-      return "";
+    if (string.length() == 0)
+      return StringValue.EMPTY;
 
    // StringBuilder result = new StringBuilder();
 
@@ -186,14 +187,12 @@ public class HtmlModule extends AbstractQuercusModule {
 
     Value[] keys = HTML_SPECIALCHARS_ARRAY.getKeyArray();
     Value[] values = HTML_SPECIALCHARS_ARRAY.getValueArray(env);
-    Value value = null;
     int length = keys.length;
     for (int i = 0; i < length; i++) {
-       value = RegexpModule.ereg_replace(env,
-                                                      values[i].toString(),
-                                                      keys[i].toString(),
-                                                      string);
-      string = value.toString();
+      string = RegexpModule.ereg_replace(env,
+					 values[i].toStringValue(),
+					 keys[i].toStringValue(),
+					 string).toStringValue();
     }
     /*
     Value value = QuercusRegexpModule.preg_replace(env,
@@ -202,10 +201,7 @@ public class HtmlModule extends AbstractQuercusModule {
                                                    new StringValueImpl(string),
                                                    -1,
                                                    null);*/
-    if (value != null)
-      return value.toString();
-    else
-      return string;
+    return string;
   }
 
   /**

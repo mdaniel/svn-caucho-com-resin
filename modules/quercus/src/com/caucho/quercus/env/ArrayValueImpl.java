@@ -105,7 +105,7 @@ public class ArrayValueImpl extends ArrayValue {
 
     for (Entry ptr = copy.getHead(); ptr != null; ptr = ptr._next) {
       // php/0662 for copy
-      put(ptr.getKey(), ptr._value.copyArrayItem());
+      put(ptr._key, ptr._value.copyArrayItem());
     }
   }
 
@@ -164,7 +164,7 @@ public class ArrayValueImpl extends ArrayValue {
     map.put(copy, this);
 
     for (Entry ptr = copy.getHead(); ptr != null; ptr = ptr._next) {
-      put(ptr.getKey(), ptr.getValue().copy(env, map));
+      put(ptr._key, ptr._value.toValue().copy(env, map));
     }
   }
 
@@ -550,8 +550,8 @@ public class ArrayValueImpl extends ArrayValue {
 
       if (entry == null) 
 	return UnsetValue.UNSET;
-      else if (key.equals(entry.getKey()))
-	return entry.getValue(); // quercus/39a1
+      else if (key.equals(entry._key))
+	return entry._value.toValue(); // quercus/39a1
 
       hash = (hash + 1) & hashMask;
     }
@@ -589,7 +589,7 @@ public class ArrayValueImpl extends ArrayValue {
 
       if (entry == null) 
 	return null;
-      else if (key.equals(entry.getKey()))
+      else if (key.equals(entry._key))
 	return entry;
 
       hash = (hash + 1) & _hashMask;
@@ -618,7 +618,7 @@ public class ArrayValueImpl extends ArrayValue {
 
       if (entry == null)
 	return UnsetValue.UNSET;
-      else if (key.equals(entry.getKey())) {
+      else if (key.equals(entry._key)) {
 	if (entry._prev != null)
 	  entry._prev._next = entry._next;
 	else
@@ -721,7 +721,7 @@ public class ArrayValueImpl extends ArrayValue {
 
       if (entry == null)
 	break;
-      else if (key.equals(entry.getKey()))
+      else if (key.equals(entry._key))
 	return entry;
 
       hash = (hash + 1) & hashMask;
@@ -771,7 +771,7 @@ public class ArrayValueImpl extends ArrayValue {
   {
     int capacity = _entries.length;
 
-    int hash = entry.getKey().hashCode() & _hashMask;
+    int hash = entry._key.hashCode() & _hashMask;
 
     for (int i = capacity; i >= 0; i--) {
       if (_entries[hash] == null) {
@@ -793,7 +793,7 @@ public class ArrayValueImpl extends ArrayValue {
       copyOnWrite();
     
     if (_tail != null) {
-      Value value = remove(_tail.getKey());
+      Value value = remove(_tail._key);
       
       return value;
     }

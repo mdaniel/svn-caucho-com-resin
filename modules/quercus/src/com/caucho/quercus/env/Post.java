@@ -235,7 +235,7 @@ public class Post {
   private static void put(ArrayValue array, Value key, Value value, boolean addSlashes)
   {
     if (addSlashes && (value instanceof StringValue)) {
-      value = StringModule.addslashes(value.toString());
+      value = StringModule.addslashes(value.toStringValue());
     }
 
     if (key == null)

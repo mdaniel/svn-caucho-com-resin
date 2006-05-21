@@ -578,7 +578,47 @@ public class StringValueImpl extends UnicodeValue {
    */
   public int hashCode()
   {
-    return _value.hashCode();
+    int hash = 37;
+
+    int length = _value.length();
+
+    for (int i = 0; i < length; i++) {
+      hash = 65521 * hash + _value.charAt(i);
+    }
+
+    return hash;
+  }
+
+  /**
+   * Test for equality
+   */
+  public boolean equals(Object o)
+  {
+    if (this == o)
+      return true;
+    else if (o instanceof StringValueImpl) {
+      StringValueImpl s = (StringValueImpl) o;
+
+      return _value.equals(s._value);
+    }
+    else if (o instanceof StringValue) {
+      StringValue s = (StringValue) o;
+
+      int aLength = length();
+      int bLength = s.length();
+
+      if (aLength != bLength)
+	return false;
+
+      for (int i = aLength - 1; i >= 0; i--) {
+	if (charAt(i) != s.charAt(i))
+	  return false;
+      }
+
+      return true;
+    } else {
+      return false;
+    }
   }
 
   public String toString()

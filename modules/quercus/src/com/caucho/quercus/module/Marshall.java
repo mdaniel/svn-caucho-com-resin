@@ -395,8 +395,11 @@ abstract public class Marshall {
     {
       String className = expectedClass.getName();
 
-      out.print("((" + className + ") env.cast(" +
-                className + ".class, ");
+      out.print("((");
+      out.printClass(expectedClass);
+      out.print(") env.cast(");
+      out.printClass(expectedClass);
+      out.print(".class, ");
 
       expr.generateValue(out);
       out.print("))");

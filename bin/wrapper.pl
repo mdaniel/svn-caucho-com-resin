@@ -38,6 +38,7 @@ $JAVA_ARGS="";
 #
 $EXTRA_JAVA_ARGS="-Djava.util.logging.manager=com.caucho.log.LogManagerImpl";
 $EXTRA_JAVA_ARGS.=" -Djavax.management.builder.initial=com.caucho.jmx.MBeanServerBuilderImpl";
+$EXTRA_JAVA_ARGS.=" -Djava.awt.headless=true";
 
 #
 # Default stack size.  The 1m is a good tradeoff between stack size and

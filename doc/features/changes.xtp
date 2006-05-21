@@ -4,7 +4,8 @@
 
 <s2 title='3.0.snap - May 19, 2006'>
 <ul>
-<li>Quercus: pack/unpack (#
+<li>Quercus: crc32 returns unsigned (#1133, rep by koreth)
+<li>Quercus: pack/unpack (#1102, rep by koreth)
 <li>Quercus: microtime fixes (#1119, fixed! by koreth)
 <li>Quercus: basic try .. catch support (#1120, 1121, 1062, rep by koreth)
 <li>(2006-05-19) Quercus: string comparison issues (#1125, rep by koreth)

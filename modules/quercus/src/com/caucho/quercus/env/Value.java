@@ -305,9 +305,9 @@ abstract public class Value {
    *
    * @param env
    */
-  public String toString(Env env)
+  public StringValue toString(Env env)
   {
-    return toString();
+    return toStringValue();
   }
 
   /**
@@ -399,7 +399,7 @@ abstract public class Value {
    */
   public Value toArgValue()
   {
-    return toValue();
+    return this;
   }
 
   /**
@@ -411,7 +411,7 @@ abstract public class Value {
    */
   public Value toRefValue()
   {
-    return toValue();
+    return this;
   }
 
   /**

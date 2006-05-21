@@ -52,22 +52,22 @@ public class StringBuilderValue extends UnicodeValue {
   public StringBuilderValue(int capacity)
   {
     if (capacity < 64)
-      capacity = 128;
-    else
-      capacity = 2 * capacity;
+      capacity = 64;
 
     _buffer = new char[capacity];
   }
 
   public StringBuilderValue(String value)
   {
-    this(value.length());
-
     int length = value.length();
+    
+    _buffer = new char[length];
 
     _length = length;
 
     value.getChars(0, length, _buffer, 0);
+
+    _value = value;
   }
 
   public StringBuilderValue(char []buffer, int offset, int length)
@@ -467,7 +467,7 @@ public class StringBuilderValue extends UnicodeValue {
    * Returns the character at a particular location
    */
   @Override
-  public char charAt(int index)
+  public final char charAt(int index)
   {
     return _buffer[index];
   }
@@ -489,20 +489,76 @@ public class StringBuilderValue extends UnicodeValue {
   }
 
   //
-  // Java generator code
+  // java.lang.String
   //
-
+  
   /**
-   * Generates code to recreate the expression.
-   *
-   * @param out the writer to the Java source code.
+   * Returns the last index of the match string, starting from the head.
    */
-  public void generate(PhpWriter out)
-    throws IOException
+  @Override
+  public int indexOf(char match)
   {
-    out.print("new InternStringValue(\"");
-    out.printJavaString(toString());
-    out.print("\")");
+    int length = _length;
+    char []buffer = _buffer;
+    
+    for (int head = 0; head < length; head++) {
+      if (buffer[head] == match)
+	return head;
+    }
+
+    return -1;
+  }
+    
+  /**
+   * Returns the last index of the match string, starting from the head.
+   */
+  @Override
+  public int indexOf(char match, int head)
+  {
+    int length = _length;
+    char []buffer = _buffer;
+    
+    for (; head < length; head++) {
+      if (buffer[head] == match)
+	return head;
+    }
+
+    return -1;
+  }
+    
+  /**
+   * Returns the first index of the match string, starting from the head.
+   */
+  @Override
+  public int indexOf(CharSequence match, int head)
+  {
+    int length = _length;
+    int matchLength = match.length();
+
+    if (matchLength <= 0)
+      return -1;
+    else if (head < 0)
+      return -1;
+    
+    int end = length - matchLength;
+    char first = match.charAt(0);
+
+    char []buffer = _buffer;
+    
+    loop:
+    for (; head <= end; head++) {
+      if (buffer[head] != first)
+	continue;
+
+      for (int i = 1; i < matchLength; i++) {
+	if (buffer[head + i] != match.charAt(i))
+	  continue loop;
+      }
+
+      return head;
+    }
+
+    return -1;
   }
 
   /**
@@ -526,7 +582,9 @@ public class StringBuilderValue extends UnicodeValue {
     sb.append("\";");
   }
 
+  //
   // append code
+  //
 
   /**
    * Append a Java string to the value.
@@ -586,6 +644,30 @@ public class StringBuilderValue extends UnicodeValue {
   }
 
   /**
+   * Append a Java buffer to the value.
+   */
+  public final StringBuilderValue append(CharSequence buf, int head, int tail)
+  {
+    int length = tail - head;
+    
+    if (_buffer.length < _length + length)
+      ensureCapacity(_length + length);
+
+    if (buf instanceof StringBuilderValue) {
+      StringBuilderValue sb = (StringBuilderValue) buf;
+      
+      System.arraycopy(sb._buffer, head, _buffer, _length, tail - head);
+
+      _length += tail - head;
+    } else {
+      for (; head < tail; head++)
+	_buffer[_length++] = buf.charAt(head);
+    }
+
+    return this;
+  }
+
+  /**
    * Append a Java char to the value.
    */
   public final StringBuilderValue append(char v)
@@ -641,14 +723,102 @@ public class StringBuilderValue extends UnicodeValue {
     return this;
   }
 
-  private void ensureCapacity(int newCapacity)
+  //
+  // java.lang.Object methods
+  //
+
+  /**
+   * Returns the hash code.
+   */
+  public int hashCode()
   {
-    if (newCapacity <= _buffer.length)
+    int hash = 37;
+
+    int length = _length;
+    char []buffer = _buffer;
+
+    for (int i = 0; i < length; i++) {
+      hash = 65521 * hash + buffer[i];
+    }
+
+    return hash;
+  }
+
+  /**
+   * Test for equality
+   */
+  public boolean equals(Object o)
+  {
+    if (this == o)
+      return true;
+    else if (o instanceof StringBuilderValue) {
+      StringBuilderValue s = (StringBuilderValue) o;
+
+      int aLength = _length;
+      int bLength = s._length;
+
+      if (aLength != bLength)
+	return false;
+
+      for (int i = aLength - 1; i >= 0; i--) {
+	if (_buffer[i] != s._buffer[i])
+	  return false;
+      }
+
+      return true;
+    }
+    else if (o instanceof StringValue) {
+      StringValue s = (StringValue) o;
+
+      int aLength = length();
+      int bLength = s.length();
+
+      if (aLength != bLength)
+	return false;
+
+      for (int i = aLength - 1; i >= 0; i--) {
+	if (charAt(i) != s.charAt(i))
+	  return false;
+      }
+
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  //
+  // Java generator code
+  //
+
+  /**
+   * Generates code to recreate the expression.
+   *
+   * @param out the writer to the Java source code.
+   */
+  public void generate(PhpWriter out)
+    throws IOException
+  {
+    out.print("new InternStringValue(\"");
+    out.printJavaString(toString());
+    out.print("\")");
+  }
+
+  private void ensureCapacity(int capacity)
+  {
+    if (capacity <= _buffer.length)
       return;
-    else if (newCapacity < 4096)
-      newCapacity = 2 * newCapacity;
+
+    int newCapacity;
+    
+    if (capacity < 4096) {
+      newCapacity = _buffer.length;
+
+      while (newCapacity < capacity)
+	newCapacity = 4 * newCapacity;
+    }
     else
-      newCapacity = newCapacity + 4096;
+      newCapacity = (capacity + 4096) & ~4095;
 
     char []buffer = new char[newCapacity];
     System.arraycopy(_buffer, 0, buffer, 0, _length);

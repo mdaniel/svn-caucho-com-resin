@@ -99,13 +99,13 @@ public class StringModule extends AbstractQuercusModule {
    * @param characters the set of characters to convert
    * @return the escaped string
    */
-  public static String addcslashes(String source, String characters)
+  public static StringValue addcslashes(StringValue source, String characters)
   {
     boolean []bitmap = parseCharsetBitmap(characters);
 
     int length = source.length();
 
-    StringBuilder sb = new StringBuilder(length * 5 / 4);
+    StringBuilderValue sb = new StringBuilderValue(length * 5 / 4);
 
     for (int i = 0; i < length; i++) {
       char ch = source.charAt(i);
@@ -154,7 +154,7 @@ public class StringModule extends AbstractQuercusModule {
       }
     }
 
-    return sb.toString();
+    return sb;
   }
 
   /**
@@ -207,9 +207,9 @@ public class StringModule extends AbstractQuercusModule {
    * @param source the source string to convert
    * @return the escaped string
    */
-  public static StringValue addslashes(String source)
+  public static StringValue addslashes(StringValue source)
   {
-    StringBuilder sb = new StringBuilder();
+    StringBuilderValue sb = new StringBuilderValue();
     int length = source.length();
     for (int i = 0; i < length; i++) {
       char ch = source.charAt(i);
@@ -275,8 +275,9 @@ v   *
    * @param charset optional set of characters to trim
    * @return the trimmed string
    */
-  public static String chop(Env env, String str,
-                            @Optional String charset)
+  public static StringValue chop(Env env,
+				 StringValue str,
+				 @Optional String charset)
   {
     return rtrim(env, str, charset);
   }
@@ -330,10 +331,13 @@ v   *
    * This implementation does nothing, because quercus stores strings as
    * 16 bit unicode.
    */
-  public static String convert_cyr_string(String str,
+  public static String convert_cyr_string(Env env,
+					  String str,
 					  String from,
 					  String to)
   {
+    env.stub("convert_cyr_string");
+    
     return str;
   }
 
@@ -432,11 +436,11 @@ v   *
   /**
    * Returns an array of information about the characters.
    */
-  public static Value count_chars(String data,
+  public static Value count_chars(StringValue data,
                                   @Optional("0") int mode)
   {
     if (data == null)
-      data = "";
+      data = StringValue.EMPTY;
 
     int []count = new int[256];
 
@@ -452,7 +456,7 @@ v   *
         ArrayValue result = new ArrayValueImpl();
 
         for (int i = 0; i < count.length; i++) {
-          result.put(new LongValue(i), new LongValue(count[i]));
+          result.put(LongValue.create(i), LongValue.create(count[i]));
         }
 
         return result;
@@ -518,17 +522,20 @@ v   *
    *
    * @return the crc32 hash
    */
-  public static int crc32(String str)
+  public static long crc32(InputStream is)
   {
-    CRC32 crc = new CRC32();
+    try {
+      CRC32 crc = new CRC32();
 
-    for (int i = 0; i < str.length(); i++) {
-      char ch = str.charAt(i);
-
-      crc.update((byte) ch);
+      int ch;
+      while ((ch = is.read()) >= 0) {
+	crc.update((byte) ch);
+      }
+      
+      return crc.getValue() & 0xffffffff;
+    } catch (IOException e) {
+      throw new QuercusModuleException(e);
     }
-
-    return (int) crc.getValue();
   }
 
   public static String crypt(String string, @Optional String salt)
@@ -611,16 +618,16 @@ v   *
 			      Value glueV,
                               Value piecesV)
   {
-    String glue;
+    StringValue glue;
     ArrayValue pieces;
 
     if (piecesV instanceof ArrayValue) {
       pieces = (ArrayValue) piecesV;
-      glue = glueV.toString();
+      glue = glueV.toStringValue();
     }
     else if (glueV instanceof ArrayValue) {
       pieces = (ArrayValue) glueV;
-      glue = piecesV.toString();
+      glue = piecesV.toStringValue();
     }
     else {
       env.error(L.l("neither argument to implode is an array: {0}, {1}",
@@ -669,23 +676,22 @@ v   *
    *
    * @return a string of imploded values
    */
-  public static String md5(String source,
-                           @Optional boolean rawOutput)
+  public static StringValue md5(InputStream is,
+				@Optional boolean rawOutput)
   {
     try {
       MessageDigest md = MessageDigest.getInstance("MD5");
       
       // XXX: iso-8859-1
-      
-      for (int i = 0; i < source.length(); i++) {
-	char ch = source.charAt(i);
-	
+
+      int ch;
+      while ((ch = is.read()) >= 0) {
 	md.update((byte) ch);
       }
       
       byte []digest = md.digest();
       
-      StringBuilder sb = new StringBuilder();
+      StringBuilderValue sb = new StringBuilderValue();
       for (int i = 0; i < digest.length; i++) {
 	int d1 = (digest[i] >> 4) & 0xf;
 	int d2 = (digest[i] & 0xf);
@@ -694,9 +700,9 @@ v   *
 	sb.append(toHexChar(d2));
       }
       
-      return sb.toString();
+      return sb;
     } catch (Exception e) {
-      throw new QuercusException(e);
+      throw new QuercusModuleException(e);
     }
   }
 
@@ -740,9 +746,9 @@ v   *
     }
   }
 
-  private static Value digestToString(byte []digest)
+  private static StringValue digestToString(byte []digest)
   {
-    StringBuilder sb = new StringBuilder();
+    StringBuilderValue sb = new StringBuilderValue();
     for (int i = 0; i < digest.length; i++) {
       int d1 = (digest[i] >> 4) & 0xf;
       int d2 = (digest[i] & 0xf);
@@ -751,7 +757,7 @@ v   *
       sb.append(toHexChar(d2));
     }
 
-    return new StringValueImpl(sb.toString());
+    return sb;
   }
 
   /**
@@ -1400,7 +1406,7 @@ v   *
    */
   public static long print(Env env, Value value)
   {
-    env.print(value.toString(env));
+    value.print(env);
 
     return 1;
   }
@@ -1526,9 +1532,9 @@ v   *
    * @param characters optional set of characters to trim
    * @return the trimmed string
    */
-  public static String rtrim(Env env,
-                             String string,
-                             @Optional String characters)
+  public static StringValue rtrim(Env env,
+				  StringValue string,
+				  @Optional String characters)
   {
     boolean []trim;
 
@@ -1544,11 +1550,11 @@ v   *
         if (i == string.length())
           return string;
         else
-          return string.substring(0, i + 1);
+          return (StringValue) string.subSequence(0, i + 1);
       }
     }
 
-    return "";
+    return StringValue.EMPTY;
   }
 
   /**
@@ -2118,7 +2124,7 @@ v   *
    * @param characters optional set of characters to trim
    * @return the trimmed string
    */
-  public static Value trim(String string, @Optional String characters)
+  public static Value trim(StringValue string, @Optional String characters)
   {
     boolean []trim;
 
@@ -2150,7 +2156,7 @@ v   *
     if (tail < head)
       return StringValue.EMPTY;
     else {
-      return new StringValueImpl(string.substring(head, tail + 1));
+      return (StringValue) string.subSequence(head, tail + 1);
     }
   }
 
@@ -2164,10 +2170,10 @@ v   *
    * @param pad padding string
    * @param type padding type
    */
-  public static String str_pad(String string,
-                               int length,
-                               @Optional("' '") String pad,
-                               @Optional("STR_PAD_RIGHT") int type)
+  public static StringValue str_pad(StringValue string,
+				    int length,
+				    @Optional("' '") String pad,
+				    @Optional("STR_PAD_RIGHT") int type)
   {
     int strLen = string.length();
     int padLen = length - strLen;
@@ -2195,7 +2201,7 @@ v   *
       break;
     }
 
-    StringBuilder sb = new StringBuilder();
+    StringBuilderValue sb = new StringBuilderValue();
 
     int padStringLen = pad.length();
 
@@ -2207,7 +2213,7 @@ v   *
     for (int i = 0; i < rightPad; i++)
       sb.append(pad.charAt(i % padStringLen));
 
-    return sb.toString();
+    return sb;
   }
 
   /**
@@ -2256,7 +2262,7 @@ v   *
         Value result = str_replace_impl(env,
                                         search,
                                         replace,
-                                        value.toString(),
+                                        value.toStringValue(),
                                         count);
 
         resultArray.append(result);
@@ -2265,7 +2271,7 @@ v   *
       return resultArray;
     }
     else {
-      String subjectString = subject.toString();
+      StringValue subjectString = subject.toStringValue();
 
       if (subjectString.length() == 0)
         return StringValue.EMPTY;
@@ -2289,14 +2295,14 @@ v   *
   private static Value str_replace_impl(Env env,
                                         Value search,
                                         Value replace,
-                                        String subject,
+                                        StringValue subject,
                                         Value count)
   {
     if (! search.isArray()) {
-      String searchString = search.toString();
+      StringValue searchString = search.toStringValue();
 
       if (searchString.length() == 0)
-        return new StringValueImpl(subject);
+        return subject;
 
       if (replace instanceof ArrayValue) {
         env.warning(L.l("Array to string conversion"));
@@ -2304,7 +2310,7 @@ v   *
 
       subject = str_replace_impl(env,
                                  searchString,
-                                 replace.toString(),
+                                 replace.toStringValue(),
                                  subject,
                                  count);
     }
@@ -2323,8 +2329,8 @@ v   *
           replaceItem = NullValue.NULL;
 
         subject = str_replace_impl(env,
-                                   searchItem.toString(),
-                                   replaceItem.toString(),
+                                   searchItem.toStringValue(),
+                                   replaceItem.toStringValue(),
                                    subject,
                                    count);
       }
@@ -2338,14 +2344,14 @@ v   *
         Value searchItem = searchIter.next();
 
         subject = str_replace_impl(env,
-                                   searchItem.toString(),
-                                   replace.toString(),
+                                   searchItem.toStringValue(),
+                                   replace.toStringValue(),
                                    subject,
                                    count);
       }
     }
 
-    return new StringValueImpl(subject);
+    return subject;
   }
 
   /**
@@ -2356,10 +2362,10 @@ v   *
    * @param subject replacement
    * @param countV return value
    */
-  private static String str_replace_impl(Env env,
-                                         String search,
-                                         String replace,
-                                         String subject,
+  private static StringValue str_replace_impl(Env env,
+                                         StringValue search,
+                                         StringValue replace,
+                                         StringValue subject,
                                          Value countV)
   {
     long count = countV.toLong();
@@ -2369,7 +2375,7 @@ v   *
 
     int searchLen = search.length();
 
-    StringBuilder result = new StringBuilder();
+    StringBuilderValue result = new StringBuilderValue();
 
     while ((next = subject.indexOf(search, head)) >= head) {
       result.append(subject, head, next);
@@ -2389,7 +2395,7 @@ v   *
       if (head > 0 && head < subject.length())
         result.append(subject, head, subject.length());
 
-      return result.toString();
+      return result;
     }
     else
       return subject;

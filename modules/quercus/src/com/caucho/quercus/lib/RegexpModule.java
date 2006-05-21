@@ -70,11 +70,11 @@ public class RegexpModule
 
   public static final boolean [] PREG_QUOTE = new boolean[256];
 
-  private static final LruCache<String, Pattern> _patternCache
-    = new LruCache<String, Pattern>(1024);
+  private static final LruCache<StringValue, Pattern> _patternCache
+    = new LruCache<StringValue, Pattern>(1024);
 
-  private static final LruCache<String, ArrayList<Replacement>> _replacementCache
-    = new LruCache<String, ArrayList<Replacement>>(1024);
+  private static final LruCache<StringValue, ArrayList<Replacement>> _replacementCache
+    = new LruCache<StringValue, ArrayList<Replacement>>(1024);
 
   private static final HashMap<String, Value> _constMap
     = new HashMap<String, Value>();
@@ -85,8 +85,8 @@ public class RegexpModule
    * @param env the calling environment
    */
   public static Value ereg(Env env,
-                           String pattern,
-                           String string,
+                           StringValue pattern,
+                           StringValue string,
                            @Optional @Reference Value regsV)
   {
     return ereg(env, pattern, string, regsV, 0);
@@ -98,8 +98,8 @@ public class RegexpModule
    * @param env the calling environment
    */
   public static Value eregi(Env env,
-                            String pattern,
-                            String string,
+                            StringValue pattern,
+                            StringValue string,
                             @Optional @Reference Value regsV)
   {
     return ereg(env, pattern, string, regsV, Pattern.CASE_INSENSITIVE);
@@ -111,8 +111,8 @@ public class RegexpModule
    * @param env the calling environment
    */
   private static Value ereg(Env env,
-                            String rawPattern,
-                            String string,
+                            StringValue rawPattern,
+                            StringValue string,
                             Value regsV,
                             int flags)
   {
@@ -154,8 +154,8 @@ public class RegexpModule
    * @param env the calling environment
    */
   public static int preg_match(Env env,
-                               String patternString,
-                               String string,
+                               StringValue patternString,
+                               StringValue string,
                                @Optional @Reference Value matchRef,
                                @Optional int flags,
                                @Optional int offset)
@@ -225,8 +225,8 @@ public class RegexpModule
    * @param env the calling environment
    */
   public static int preg_match_all(Env env,
-                                   String patternString,
-                                   String subject,
+                                   StringValue patternString,
+                                   StringValue subject,
                                    @Reference Value matchRef,
                                    @Optional("PREG_PATTERN_ORDER") int flags,
                                    @Optional int offset)
@@ -278,17 +278,20 @@ public class RegexpModule
         for (int j = 0; j <= matcher.groupCount(); j++) {
           ArrayValue values = matchList[j];
 
-          String groupValue = matcher.group(j);
+	  int start = matcher.start(j);
+	  int end = matcher.end(j);
+	  
+          StringValue groupValue = subject.substring(start, end);
 
           Value result = NullValue.NULL;
 
           if (groupValue != null) {
             if ((flags & PREG_OFFSET_CAPTURE) != 0) {
               result = new ArrayValueImpl();
-              result.put(new StringValueImpl(groupValue));
-              result.put(LongValue.create(matcher.start(j)));
+              result.put(groupValue);
+              result.put(LongValue.create(start));
             } else {
-	      result = new StringValueImpl(groupValue);
+	      result = groupValue;
             }
           }
 
@@ -300,17 +303,20 @@ public class RegexpModule
         matches.put(matchResult);
 
         for (int j = 0; j <= matcher.groupCount(); j++) {
-          String groupValue = matcher.group(j);
+	  int start = matcher.start(j);
+	  int end = matcher.end(j);
+	  
+          StringValue groupValue = subject.substring(start, end);
 
           Value result = NullValue.NULL;
 
           if (groupValue != null) {
             if ((flags & PREG_OFFSET_CAPTURE) != 0) {
               result = new ArrayValueImpl();
-              result.put(new StringValueImpl(groupValue));
-              result.put(new LongValue(matcher.start(j)));
+              result.put(groupValue);
+              result.put(LongValue.create(start));
             } else {
-              result = new StringValueImpl(groupValue);
+              result = groupValue;
             }
           }
           matchResult.put(result);
@@ -387,7 +393,7 @@ public class RegexpModule
         result.put(pregReplace(env,
                                pattern,
                                replacement,
-                               value.toString(),
+                               value.toStringValue(),
                                limit,
                                count));
       }
@@ -395,7 +401,8 @@ public class RegexpModule
       return result;
 
     } else if (subject instanceof StringValue) {
-      return pregReplace(env, pattern, replacement, subject.toString(), limit, count);
+      return pregReplace(env, pattern, replacement, subject.toStringValue(),
+			 limit, count);
     } else
       return NullValue.NULL;
 
@@ -407,11 +414,11 @@ public class RegexpModule
   private static Value pregReplace(Env env,
                                    Value patternValue,
                                    Value replacement,
-                                   String subject,
+                                   StringValue subject,
                                    @Optional("-1") long limit,
                                    Value countV)
   {
-    String string = subject;
+    StringValue string = subject;
 
     if (limit < 0)
       limit = Long.MAX_VALUE;
@@ -425,33 +432,33 @@ public class RegexpModule
 
       while (patternIter.hasNext() && replacementIter.hasNext()) {
         string = pregReplaceString(env,
-                                   patternIter.next().toString(),
-                                   replacementIter.next().toString(),
+                                   patternIter.next().toStringValue(),
+                                   replacementIter.next().toStringValue(),
                                    string,
                                    limit,
-                                   countV).toString();
+                                   countV);
       }
     } else if (patternValue.isArray()) {
       ArrayValue patternArray = (ArrayValue) patternValue;
 
       for (Value value : patternArray.values()) {
         string = pregReplaceString(env,
-                                   value.toString(),
-                                   replacement.toString(),
+                                   value.toStringValue(),
+                                   replacement.toStringValue(),
                                    string,
                                    limit,
-                                   countV).toString();
+                                   countV);
       }
     } else {
       return pregReplaceString(env,
-			       patternValue.toString(),
-			       replacement.toString(),
+			       patternValue.toStringValue(),
+			       replacement.toStringValue(),
 			       string,
 			       limit,
 			       countV);
     }
 
-    return new StringValueImpl(string);
+    return string;
   }
 
   /**
@@ -464,12 +471,12 @@ public class RegexpModule
    * @param countV
    * @return subject with everything replaced
    */
-  private static String pregReplaceCallbackImpl(Env env,
-                                                String patternString,
-                                                Callback fun,
-                                                String subject,
-                                                long limit,
-                                                Value countV)
+  private static StringValue pregReplaceCallbackImpl(Env env,
+						     StringValue patternString,
+						     Callback fun,
+						     StringValue subject,
+						     long limit,
+						     Value countV)
   {
 
     long numberOfMatches = 0;
@@ -481,14 +488,14 @@ public class RegexpModule
 
     Matcher matcher = pattern.matcher(subject);
 
-    StringBuilder result = new StringBuilder();
+    StringBuilderValue result = new StringBuilderValue();
     int tail = 0;
 
     while (matcher.find() && numberOfMatches < limit) {
       // Increment countV (note: if countV != null, then it should be a Var)
       if ((countV != null) && (countV instanceof Var)) {
         long count = ((Var) countV).getRawValue().toLong();
-        countV.set(new LongValue(count + 1));
+        countV.set(LongValue.create(count + 1));
       }
 
       if (tail < matcher.start())
@@ -517,18 +524,18 @@ public class RegexpModule
     if (tail < subject.length())
       result.append(subject.substring(tail));
 
-    return result.toString();
+    return result;
   }
 
   /**
    * Replaces values using regexps
    */
-  private static Value pregReplaceString(Env env,
-					 String patternString,
-					 String replacement,
-					 String subject,
-					 long limit,
-					 Value countV)
+  private static StringValue pregReplaceString(Env env,
+					       StringValue patternString,
+					       StringValue replacement,
+					       StringValue subject,
+					       long limit,
+					       Value countV)
   {
     Pattern pattern = compileRegexp(patternString);
 
@@ -557,9 +564,9 @@ public class RegexpModule
    * Replaces values using regexps
    */
   public static Value ereg_replace(Env env,
-                                   String patternString,
-                                   String replacement,
-                                   String subject)
+                                   StringValue patternString,
+                                   StringValue replacement,
+                                   StringValue subject)
   {
     Pattern pattern = Pattern.compile(cleanRegexp(patternString, false));
 
@@ -584,9 +591,9 @@ public class RegexpModule
    * Replaces values using regexps
    */
   public static Value eregi_replace(Env env,
-                                    String patternString,
-                                    String replacement,
-                                    String subject)
+                                    StringValue patternString,
+                                    StringValue replacement,
+                                    StringValue subject)
   {
     Pattern pattern = Pattern.compile(cleanRegexp(patternString, false),
                                       Pattern.CASE_INSENSITIVE);
@@ -606,13 +613,13 @@ public class RegexpModule
   /**
    * Replaces values using regexps
    */
-  private static Value pregReplaceStringImpl(Env env,
-					     Pattern pattern,
-					     ArrayList<Replacement> replacementList,
-					     String subject,
-					     long limit,
-					     Value countV,
-					     boolean isEval)
+  private static StringValue pregReplaceStringImpl(Env env,
+						   Pattern pattern,
+						   ArrayList<Replacement> replacementList,
+						   StringValue subject,
+						   long limit,
+						   Value countV,
+						   boolean isEval)
   {
     if (limit < 0)
       limit = Long.MAX_VALUE;
@@ -633,7 +640,7 @@ public class RegexpModule
       // Increment countV (note: if countV != null, then it should be a Var)
       if ((countV != null) && (countV instanceof Var)) {
         long count = ((Var) countV).getRawValue().toLong();
-        countV.set(new LongValue(count + 1));
+        countV.set(LongValue.create(count + 1));
       }
 
       // append all text up to match
@@ -668,7 +675,7 @@ public class RegexpModule
     }
 
     if (tail == 0)
-      return new StringValueImpl(subject);
+      return subject;
     
     if (tail < length)
       result.append(subject, tail, length);
@@ -699,9 +706,9 @@ public class RegexpModule
 
       for (Value value : ((ArrayValue) subject).values()) {
         result.put(pregReplaceCallback(env,
-                                       pattern,
+                                       pattern.toStringValue(),
                                        fun,
-                                       value.toString(),
+                                       value.toStringValue(),
                                        limit,
                                        count));
       }
@@ -710,9 +717,9 @@ public class RegexpModule
 
     } else if (subject instanceof StringValue) {
       return pregReplaceCallback(env,
-                                 pattern,
+                                 pattern.toStringValue(),
                                  fun,
-                                 subject.toString(),
+                                 subject.toStringValue(),
                                  limit,
                                  count);
     } else {
@@ -726,7 +733,7 @@ public class RegexpModule
   private static Value pregReplaceCallback(Env env,
                                            Value patternValue,
                                            Callback fun,
-                                           String subject,
+                                           StringValue subject,
                                            @Optional("-1") long limit,
                                            @Optional @Reference Value countV)
   {
@@ -738,22 +745,22 @@ public class RegexpModule
 
       for (Value value : patternArray.values()) {
         subject = pregReplaceCallbackImpl(env,
-                                          value.toString(),
+                                          value.toStringValue(),
                                           fun,
                                           subject,
                                           limit,
                                           countV);
       }
 
-      return new StringValueImpl(subject);
+      return subject;
 
     } else if (patternValue instanceof StringValue) {
-      return new StringValueImpl(pregReplaceCallbackImpl(env,
-                                                     patternValue.toString(),
-                                                     fun,
-                                                     subject,
-                                                     limit,
-                                                     countV));
+      return pregReplaceCallbackImpl(env,
+				     patternValue.toStringValue(),
+				     fun,
+				     subject,
+				     limit,
+				     countV);
     } else {
       return NullValue.NULL;
     }
@@ -767,8 +774,8 @@ public class RegexpModule
    * @param env the calling environment
    */
   public static Value preg_split(Env env,
-                                 String patternString,
-                                 String string,
+                                 StringValue patternString,
+                                 StringValue string,
                                  @Optional("-1") long limit,
                                  @Optional int flags)
   {
@@ -791,7 +798,7 @@ public class RegexpModule
 	continue;
       }
 
-      String value;
+      StringValue value;
 
       int startPosition = head;
 
@@ -806,12 +813,12 @@ public class RegexpModule
 
       if ((flags & PREG_SPLIT_OFFSET_CAPTURE) != 0) {
         ArrayValue part = new ArrayValueImpl();
-        part.put(new StringValueImpl(value));
-        part.put(new LongValue(startPosition));
+        part.put(value);
+        part.put(LongValue.create(startPosition));
 
         result.put(part);
       } else {
-        result.put(new StringValueImpl(value));
+        result.put(value);
       }
 
       count++;
@@ -821,7 +828,7 @@ public class RegexpModule
           if ((flags & PREG_SPLIT_OFFSET_CAPTURE) != 0) {
             ArrayValue part = new ArrayValueImpl();
             part.put(new StringValueImpl(matcher.group(i)));
-            part.put(new LongValue(matcher.start()));
+            part.put(LongValue.create(matcher.start()));
 
             result.put(part);
           } else {
@@ -836,12 +843,12 @@ public class RegexpModule
     else if ((head <= string.length()) && (count != limit)) {
       if ((flags & PREG_SPLIT_OFFSET_CAPTURE) != 0) {
         ArrayValue part = new ArrayValueImpl();
-        part.put(new StringValueImpl(string.substring(head)));
-        part.put(new LongValue(head));
+        part.put(string.substring(head));
+        part.put(LongValue.create(head));
 
         result.put(part);
       } else {
-        result.put(new StringValueImpl(string.substring(head)));
+        result.put(string.substring(head));
       }
     }
 
@@ -884,16 +891,16 @@ public class RegexpModule
    * @param env the calling environment
    */
   public static Value split(Env env,
-                            String patternString,
-                            String string,
+                            StringValue patternString,
+                            StringValue string,
                             @Optional("-1") long limit)
   {
     if (limit < 0)
       limit = Long.MAX_VALUE;
 
-    patternString = cleanRegexp(patternString, false);
+    String cleanRegexp = cleanRegexp(patternString, false);
 
-    Pattern pattern = Pattern.compile(patternString);
+    Pattern pattern = Pattern.compile(cleanRegexp);
 
     ArrayValue result = new ArrayValueImpl();
 
@@ -902,7 +909,7 @@ public class RegexpModule
     int head = 0;
 
     while ((matcher.find()) && (count < limit)) {
-      String value;
+      StringValue value;
       if (count == limit - 1) {
         value = string.substring(head);
         head = string.length();
@@ -911,13 +918,13 @@ public class RegexpModule
         head = matcher.end();
       }
 
-      result.put(new StringValueImpl(value));
+      result.put(value);
 
       count++;
     }
 
     if ((head <= string.length() && (count != limit))) {
-      result.put(new StringValueImpl(string.substring(head)));
+      result.put(string.substring(head));
     }
 
     return result;
@@ -934,7 +941,7 @@ public class RegexpModule
    * @return an array of either matching elements are non-matching elements
    */
   public static ArrayValue preg_grep(Env env,
-                                     String patternString,
+                                     StringValue patternString,
                                      ArrayValue input,
                                      @Optional("0") int flag)
   {
@@ -973,8 +980,8 @@ public class RegexpModule
    * @return an array of strings split around the pattern string
    */
   public static ArrayValue spliti(Env env,
-                                  String patternString,
-                                  String string,
+                                  StringValue patternString,
+                                  StringValue string,
                                   @Optional("-1") long limit)
   {
     if (limit < 0)
@@ -982,9 +989,9 @@ public class RegexpModule
 
     // php/151c
 
-    patternString = cleanRegexp(patternString, false);
+    String cleanRegexp = cleanRegexp(patternString, false);
 
-    Pattern pattern = Pattern.compile(patternString, Pattern.CASE_INSENSITIVE);
+    Pattern pattern = Pattern.compile(cleanRegexp, Pattern.CASE_INSENSITIVE);
 
     ArrayValue result = new ArrayValueImpl();
 
@@ -993,7 +1000,7 @@ public class RegexpModule
     int head = 0;
 
     while ((matcher.find()) && (count < limit)) {
-      String value;
+      StringValue value;
       if (count == limit - 1) {
         value = string.substring(head);
         head = string.length();
@@ -1002,19 +1009,19 @@ public class RegexpModule
         head = matcher.end();
       }
 
-      result.put(new StringValueImpl(value));
+      result.put(value);
 
       count++;
     }
 
     if ((head <= string.length()) && (count != limit)) {
-      result.put(new StringValueImpl(string.substring(head)));
+      result.put(string.substring(head));
     }
 
     return result;
   }
 
-  private static Pattern compileRegexp(String rawRegexp)
+  private static Pattern compileRegexp(StringValue rawRegexp)
   {
     Pattern pattern = _patternCache.get(rawRegexp);
 
@@ -1066,21 +1073,21 @@ public class RegexpModule
       }
     }
 
-    String regexp = rawRegexp.substring(1, tail);
+    StringValue regexp = rawRegexp.substring(1, tail);
 
-    regexp = cleanRegexp(regexp, (flags & Pattern.COMMENTS) != 0);
+    String cleanRegexp = cleanRegexp(regexp, (flags & Pattern.COMMENTS) != 0);
 
     if (! isGreedy)
-      regexp = toNonGreedy(regexp);
+      cleanRegexp = toNonGreedy(cleanRegexp);
 
-    pattern = Pattern.compile(regexp, flags);
+    pattern = Pattern.compile(cleanRegexp, flags);
 
     _patternCache.put(rawRegexp, pattern);
 
     return pattern;
   }
 
-  private static int regexpFlags(String rawRegexp)
+  private static int regexpFlags(StringValue rawRegexp)
   {
     char delim = rawRegexp.charAt(0);
     if (delim == '{')
@@ -1114,7 +1121,7 @@ public class RegexpModule
   }
 
   private static ArrayList<Replacement>
-    compileReplacement(Env env, String replacement, boolean isEval)
+    compileReplacement(Env env, StringValue replacement, boolean isEval)
   {
     ArrayList<Replacement> program = new ArrayList<Replacement>();
     StringBuilder text = new StringBuilder();
@@ -1211,7 +1218,7 @@ public class RegexpModule
    * Currently "+?".
    */
   // XXX: not handling '['
-  private static String cleanRegexp(String regexp, boolean isComments)
+  private static String cleanRegexp(StringValue regexp, boolean isComments)
   {
     int len = regexp.length();
 
@@ -1242,7 +1249,7 @@ public class RegexpModule
             int tail = regexp.indexOf('}', i + 1);
 
             if (tail > 0) {
-              String hex = regexp.substring(i + 2, tail);
+              StringValue hex = regexp.substring(i + 2, tail);
 
               if (hex.length() == 2)
                 sb.append("x" + hex);
@@ -1265,7 +1272,7 @@ public class RegexpModule
       case '[':
         if (quote == '[') {
           if (i + 1 < len && regexp.charAt(i + 1) == ':') {
-            String test = regexp.substring(i);
+            String test = regexp.substring(i).toString();
             boolean hasMatch = false;
 
             for (int j = 0; j < POSIX_CLASSES.length; j++) {
