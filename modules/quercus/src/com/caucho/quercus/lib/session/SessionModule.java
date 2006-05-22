@@ -129,7 +129,7 @@ public class SessionModule extends AbstractQuercusModule {
   /**
    * Encodes the session values.
    */
-  public static boolean session_decode(Env env, String value)
+  public static boolean session_decode(Env env, StringValue value)
   {
     try {
       Value session = env.getGlobalValue("_SESSION");
