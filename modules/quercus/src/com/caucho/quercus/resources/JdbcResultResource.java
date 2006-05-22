@@ -63,6 +63,8 @@ public class JdbcResultResource extends ResourceValue {
   private ResultSetMetaData _metaData;
   private Value[] _columnNames;
 
+  private int _affectedRows;
+
   public JdbcResultResource(Statement stmt,
                             ResultSet rs,
                             JdbcConnectionResource conn)
@@ -1051,7 +1053,7 @@ public class JdbcResultResource extends ResourceValue {
   {
     // throw error if rowNumber is after last row
     Value numRows = getNumRows(rs);
-    if (!numRows.isNumberConvertible() || numRows.toLong() <= rowNumber || rowNumber < 0) {
+    if (!numRows.isNumberConvertible() || numRows.toLong() < rowNumber || rowNumber < 0) {
       return false;
     }
 
@@ -1104,6 +1106,14 @@ public class JdbcResultResource extends ResourceValue {
       _metaData = _rs.getMetaData();
 
     return _metaData;
+  }
+
+  public void setAffectedRows(int affectedRows) {
+    _affectedRows = affectedRows;
+  }
+
+  public int getAffectedRows() {
+    return _affectedRows;
   }
 }
 

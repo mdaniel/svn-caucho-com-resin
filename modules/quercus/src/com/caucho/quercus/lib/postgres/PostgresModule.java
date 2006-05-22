@@ -126,33 +126,52 @@ public class PostgresModule extends AbstractQuercusModule {
   /**
    * Returns number of affected records (tuples)
    */
-  public Value pg_affected_rows(Env env,
-                                @NotNull MysqliResult result)
+  public int pg_affected_rows(Env env,
+                              @NotNull MysqliResult result)
   {
-    return result.num_rows();
+    try {
+
+      return result.validateResult().getAffectedRows(); // num_rows().toInt();
+
+    } catch (Exception ex) {
+      log.log(Level.FINE, ex.toString(), ex);
+      return 0;
+    }
   }
 
   /**
    * Cancel an asynchronous query
    */
-  public Value pg_cancel_query(Env env,
-                               @NotNull Mysqli conn)
+  public boolean pg_cancel_query(Env env,
+                                 @NotNull Mysqli conn)
   {
-    conn.setAsynchronousResult(null);
+    try {
+      conn.setAsynchronousResult(null);
 
-    return BooleanValue.TRUE;
+      return true;
+
+    } catch (Exception ex) {
+      log.log(Level.FINE, ex.toString(), ex);
+      return false;
+    }
   }
 
   /**
    * Gets the client encoding
    */
-  public String pg_client_encoding(Env env,
-                                   @Optional Mysqli conn)
+  public @ReturnNullAsFalse Object pg_client_encoding(Env env,
+                                                      @Optional Mysqli conn)
   {
-    if (conn == null)
-      conn = getConnection(env);
+    try {
+      if (conn == null)
+        conn = getConnection(env);
 
-    return conn.client_encoding();
+      return conn.client_encoding();
+
+    } catch (Exception ex) {
+      log.log(Level.FINE, ex.toString(), ex);
+      return null;
+    }
   }
 
   /**
@@ -161,82 +180,88 @@ public class PostgresModule extends AbstractQuercusModule {
   public boolean pg_close(Env env,
                           @Optional Mysqli conn)
   {
-    if (conn == null)
-      conn = getConnection(env);
+    try {
+      if (conn == null)
+        conn = getConnection(env);
 
-    if (conn != null) {
+      if (conn != null) {
 
-      if (conn == getConnection(env))
-        env.removeSpecialValue("caucho.postgres");
+        if (conn == getConnection(env))
+          env.removeSpecialValue("caucho.postgres");
 
-      conn.close(env);
+        conn.close(env);
 
-      return true;
+        return true;
+      }
 
-    } else {
-
-      return false;
-
+    } catch (Exception ex) {
+      log.log(Level.FINE, ex.toString(), ex);
     }
+
+    return false;
   }
 
   /**
    * Open a PostgreSQL connection
    */
-  public Value pg_connect(Env env,
-                          String connectionString,
-                          @Optional int connectionType)
+  public @ReturnNullAsFalse Object pg_connect(Env env,
+                                              String connectionString,
+                                              @Optional int connectionType)
   {
-    String host = "localhost";
-    int port = 5432;
-    String dbName = "";
-    String userName = "";
-    String password = "";
+    try {
+      String host = "localhost";
+      int port = 5432;
+      String dbName = "";
+      String userName = "";
+      String password = "";
 
-    String s = connectionString.trim();
+      String s = connectionString.trim();
 
-    String sp[];
+      String sp[];
 
-    sp = s.split("(host=)");
+      sp = s.split("(host=)");
 
-    if (sp.length >= 2)
-      host = sp[1].replaceAll("\\s(.*)$", "");
+      if (sp.length >= 2)
+        host = sp[1].replaceAll("\\s(.*)$", "");
 
-    sp = s.split("(port=)");
+      sp = s.split("(port=)");
 
-    if (sp.length >= 2) {
-      String portS = sp[1].replaceAll("\\s(.*)$", "");
-      try {
-        port = Integer.parseInt(portS);
-      } catch (Exception ex) {
+      if (sp.length >= 2) {
+        String portS = sp[1].replaceAll("\\s(.*)$", "");
+        try {
+          port = Integer.parseInt(portS);
+        } catch (Exception ex) {
+        }
       }
+
+      sp = s.split("(dbname=)");
+
+      if (sp.length >= 2)
+        dbName = sp[1].replaceAll("\\s(.*)$", "");
+
+      sp = s.split("(user=)");
+
+      if (sp.length >= 2)
+        userName = sp[1].replaceAll("\\s(.*)$", "");
+
+      sp = s.split("(password=)");
+
+      if (sp.length >= 2)
+        password = sp[1].replaceAll("\\s(.*)$", "");
+
+      String driver = "org.postgresql.Driver";
+      String url = "jdbc:postgresql://" + host + ":" + port + "/" + dbName;
+
+      Mysqli mysqli = new Mysqli(env, host, userName, password, dbName, port, "", driver, url);
+
+      env.setSpecialValue("caucho.postgres", mysqli);
+
+      return mysqli;
+
+    } catch (Exception ex) {
+      log.log(Level.FINE, ex.toString(), ex);
+      return null;
     }
-
-    sp = s.split("(dbname=)");
-
-    if (sp.length >= 2)
-      dbName = sp[1].replaceAll("\\s(.*)$", "");
-
-    sp = s.split("(user=)");
-
-    if (sp.length >= 2)
-      userName = sp[1].replaceAll("\\s(.*)$", "");
-
-    sp = s.split("(password=)");
-
-    if (sp.length >= 2)
-      password = sp[1].replaceAll("\\s(.*)$", "");
-
-    String driver = "org.postgresql.Driver";
-    String url = "jdbc:postgresql://" + host + ":" + port + "/" + dbName;
-
-    Mysqli mysqli = new Mysqli(env, host, userName, password, dbName, port, "", driver, url);
-
-    Value value = env.wrapJava(mysqli);
-
-    env.setSpecialValue("caucho.postgres", mysqli);
-
-    return value;
   }
 
   /**
@@ -260,12 +285,19 @@ public class PostgresModule extends AbstractQuercusModule {
   /**
    * Get connection status
    */
-  public Value pg_connection_status(Env env,
-                                    @NotNull Mysqli conn)
+  public int pg_connection_status(Env env,
+                                  @NotNull Mysqli conn)
   {
-    Value result = conn.stat(env);
+    try {
 
-    return result == BooleanValue.FALSE ? NullValue.NULL : result;
+      boolean ping = pg_ping(env, conn);
+
+      return ping ? PGSQL_CONNECTION_OK : PGSQL_CONNECTION_BAD;
+
+    } catch (Exception ex) {
+      log.log(Level.FINE, ex.toString(), ex);
+      return PGSQL_CONNECTION_BAD;
+    }
   }
 
   /**
@@ -292,11 +324,11 @@ public class PostgresModule extends AbstractQuercusModule {
   {
     try {
       // The character that makes the special char: '\u0009' .. '\u001F'
-      String stringMap[] = new String[] {"t",  // u0009
-                                         "n",  // u000A
-                                         "\u000Bverticaltab",      //@todo
-                                         "\u000Cformfeed",         //@todo
-                                         "r",  // u000D
+      String stringMap[] = new String[] {"t",  // u0009 (horizontal tab)
+                                         "n",  // u000A (new line)
+                                         "v",  // u000B (vertical tab)
+                                         "f",  // u000C (form feed)
+                                         "r",  // u000D (carriage return)
                                          "\u000E-\u001B",          //@todo
                                          "\u001Cfileseparator",    //@todo
                                          "\u001Dgroupseparator",   //@todo
@@ -340,11 +372,13 @@ public class PostgresModule extends AbstractQuercusModule {
         String query = "INSERT INTO "+tableName+" VALUES("+values+")";
         pg_query(env, conn, query);
       }
+
+      return true;
+
     } catch (Exception ex) {
       log.log(Level.FINE, ex.toString(), ex);
+      return false;
     }
-
-    return true;
   }
 
   /**
@@ -356,64 +390,76 @@ public class PostgresModule extends AbstractQuercusModule {
                           @Optional("") String delimiter,
                           @Optional("") String nullAs)
   {
-    if (delimiter.equals("")) {
-      delimiter = "\t";
-    }
+    try {
+      if (delimiter.equals("")) {
+        delimiter = "\t";
+      }
 
-    if (nullAs.equals("")) {
-      nullAs = "\n";
-    }
+      if (nullAs.equals("")) {
+        nullAs = "\n";
+      }
 
-    Object value = pg_query(env, conn, "SELECT * FROM " + tableName);
+      Object value = pg_query(env, conn, "SELECT * FROM " + tableName);
 
-    MysqliResult result = (MysqliResult) value;
+      MysqliResult result = (MysqliResult) value;
 
-    ArrayValueImpl newArray = new ArrayValueImpl();
+      ArrayValueImpl newArray = new ArrayValueImpl();
 
-    value = result.fetch_array(PGSQL_BOTH);
+      value = result.fetch_array(PGSQL_BOTH);
 
-    if (value != NullValue.NULL) {
-      int curr = 0;
+      if (value != NullValue.NULL) {
+        int curr = 0;
 
-      do {
-        ArrayValueImpl arr = (ArrayValueImpl)value;
-        int count = arr.size() / 2;
-        for(int i=0; i<count; i++) {
-          Value v = newArray.get(LongValue.create(curr));
-          if (!v.toString().equals("")) {
-            v = StringValue.create(v.toString() + delimiter);
+        do {
+          ArrayValueImpl arr = (ArrayValueImpl)value;
+          int count = arr.size() / 2;
+          for(int i=0; i<count; i++) {
+            Value v = newArray.get(LongValue.create(curr));
+            if (!v.toString().equals("")) {
+              v = StringValue.create(v.toString() + delimiter);
+            }
+            LongValue lv = LongValue.create(i);
+            Value fieldValue = arr.get(lv);
+            String fieldString;
+            if (fieldValue instanceof NullValue) {
+              fieldString = nullAs;
+            } else {
+              fieldString = fieldValue.toString();
+            }
+            newArray.put(LongValue.create(curr),
+                         StringValue.create(v.toString() + fieldString));
           }
-          LongValue lv = LongValue.create(i);
-          Value fieldValue = arr.get(lv);
-          String fieldString;
-          if (fieldValue instanceof NullValue) {
-            fieldString = nullAs;
-          } else {
-            fieldString = fieldValue.toString();
-          }
-          newArray.put(LongValue.create(curr),
-                       StringValue.create(v.toString() + fieldString));
-        }
 
-        curr++;
+          curr++;
 
-        value = result.fetch_array(PGSQL_BOTH);
-      } while (value != NullValue.NULL);
+          value = result.fetch_array(PGSQL_BOTH);
+        } while (value != NullValue.NULL);
+      }
+
+      return newArray;
+
+    } catch (Exception ex) {
+      log.log(Level.FINE, ex.toString(), ex);
+      return BooleanValue.FALSE;
     }
-
-    return newArray;
   }
 
   /**
    * Get the database name
    */
-  public String pg_dbname(Env env,
-                          @Optional Mysqli conn)
+  public Value pg_dbname(Env env,
+                         @Optional Mysqli conn)
   {
-    if (conn == null)
-      conn = getConnection(env);
+    try {
+      if (conn == null)
+        conn = getConnection(env);
 
-    return conn.get_dbname();
+      return StringValue.create(conn.get_dbname());
+
+    } catch (Exception ex) {
+      log.log(Level.FINE, ex.toString(), ex);
+      return BooleanValue.FALSE;
+    }
   }
 
   /**
@@ -457,12 +503,18 @@ public class PostgresModule extends AbstractQuercusModule {
   public Value pg_escape_string(Env env,
                                 String data)
   {
-    Mysqli conn = getConnection(env);
+    try {
+      Mysqli conn = getConnection(env);
 
-    if (conn == null)
+      if (conn == null)
+        return BooleanValue.FALSE;
+
+      return conn.real_escape_string(data);
+
+    } catch (Exception ex) {
+      log.log(Level.FINE, ex.toString(), ex);
       return BooleanValue.FALSE;
-
-    return conn.real_escape_string(data);
+    }
   }
 
   /**
@@ -515,9 +567,9 @@ public class PostgresModule extends AbstractQuercusModule {
                                     @NotNull MysqliResult result,
                                     @Optional("0") int column)
   {
-    ArrayValueImpl newArray = new ArrayValueImpl();
-
     try {
+      ArrayValueImpl newArray = new ArrayValueImpl();
+
       Value row = result.fetch_row();
 
       int curr = 0;
@@ -530,12 +582,13 @@ public class PostgresModule extends AbstractQuercusModule {
 
         row = result.fetch_row();
       }
+
+      return newArray;
+
     } catch (Exception ex) {
       log.log(Level.FINE, ex.toString(), ex);
       return BooleanValue.FALSE;
     }
-
-    return newArray;
   }
 
   /**
@@ -544,9 +597,9 @@ public class PostgresModule extends AbstractQuercusModule {
   public Value pg_fetch_all(Env env,
                             @NotNull MysqliResult result)
   {
-    ArrayValueImpl newArray = new ArrayValueImpl();
-
     try {
+      ArrayValueImpl newArray = new ArrayValueImpl();
+
       Value value = result.fetch_assoc();
 
       int curr = 0;
@@ -558,12 +611,13 @@ public class PostgresModule extends AbstractQuercusModule {
 
         value = result.fetch_assoc();
       }
+
+      return newArray;
+
     } catch (Exception ex) {
       log.log(Level.FINE, ex.toString(), ex);
       return BooleanValue.FALSE;
     }
-
-    return newArray;
   }
 
   /**
@@ -574,9 +628,9 @@ public class PostgresModule extends AbstractQuercusModule {
                               @Optional("-1") Value row,
                               @Optional("PGSQL_BOTH") int resultType)
   {
-    Value value = BooleanValue.FALSE;
-
     try {
+      Value value = BooleanValue.FALSE;
+
       if (result == null)
         return value;
 
@@ -589,11 +643,13 @@ public class PostgresModule extends AbstractQuercusModule {
       if (value.equals(NullValue.NULL)) {
         value = BooleanValue.FALSE;
       }
+
+      return value;
+
     } catch (Exception ex) {
       log.log(Level.FINE, ex.toString(), ex);
+      return BooleanValue.FALSE;
     }
-
-    return value;
   }
 
   /**
@@ -603,11 +659,18 @@ public class PostgresModule extends AbstractQuercusModule {
                               @NotNull MysqliResult result,
                               @Optional("-1") Value row)
   {
-    if ((row != null) && (!row.equals(NullValue.NULL)) && (row.toInt() >= 0)) {
-      result.data_seek(env, row.toInt());
-    }
+    try {
 
-    return result.fetch_assoc();
+      if ((row != null) && (!row.equals(NullValue.NULL)) && (row.toInt() >= 0)) {
+        result.data_seek(env, row.toInt());
+      }
+
+      return result.fetch_assoc();
+
+    } catch (Exception ex) {
+      log.log(Level.FINE, ex.toString(), ex);
+      return BooleanValue.FALSE;
+    }
   }
 
   /**
@@ -618,34 +681,49 @@ public class PostgresModule extends AbstractQuercusModule {
                                @Optional("-1") Value row,
                                @Optional int resultType)
   {
-    //@todo use optional resultType
-    if ((row != null) && (!row.equals(NullValue.NULL)) && (row.toInt() >= 0)) {
-      result.data_seek(env, row.toInt());
-    }
+    try {
 
-    return result.fetch_object(env);
+      //@todo use optional resultType
+      if ((row != null) && (!row.equals(NullValue.NULL)) && (row.toInt() >= 0)) {
+        result.data_seek(env, row.toInt());
+      }
+
+      return result.fetch_object(env);
+
+    } catch (Exception ex) {
+      log.log(Level.FINE, ex.toString(), ex);
+      return BooleanValue.FALSE;
+    }
   }
 
   /**
    * Returns values from a result resource
    */
-  public String pg_fetch_result(Env env,
-                                @NotNull MysqliResult result,
-                                int row,
-                                @Optional("-1") int fieldNumber)
+  public @ReturnNullAsFalse Object pg_fetch_result(Env env,
+                                                   @NotNull MysqliResult result,
+                                                   int row,
+                                                   @Optional("-1") int fieldNumber)
   {
-    Value fetRow = result.fetch_row();
+    try {
 
-    // Handle the case: optional row with mandatory fieldNumber.
-    if (fieldNumber < 0) {
-      fieldNumber = row;
-      row = -1;
+      // Handle the case: optional row with mandatory fieldNumber.
+      if (fieldNumber < 0) {
+        fieldNumber = row;
+        row = -1;
+      }
+
+      if (row >= 0) {
+        result.data_seek(env, row);
+      }
+
+      Value fetchRow = result.fetch_row();
+
+      return ((ArrayValueImpl)fetchRow).get(LongValue.create(fieldNumber)).toString();
+
+    } catch (Exception ex) {
+      log.log(Level.FINE, ex.toString(), ex);
+      return null;
     }
-
-    if (row >= 0)
-      result.data_seek(env, row);
-
-    return ((ArrayValueImpl)fetRow).get(LongValue.create(fieldNumber)).toString();
   }
 
   /**
@@ -655,11 +733,18 @@ public class PostgresModule extends AbstractQuercusModule {
                             @NotNull MysqliResult result,
                             @Optional("-1") Value row)
   {
-    if ((row != null) && (!row.equals(NullValue.NULL)) && (row.toInt() >= 0)) {
-      result.data_seek(env, row.toInt());
-    }
+    try {
 
-    return result.fetch_row();
+      if ((row != null) && (!row.equals(NullValue.NULL)) && (row.toInt() >= 0)) {
+        result.data_seek(env, row.toInt());
+      }
+
+      return result.fetch_row();
+
+    } catch (Exception ex) {
+      log.log(Level.FINE, ex.toString(), ex);
+      return BooleanValue.FALSE;
+    }
   }
 
   /**
@@ -680,7 +765,14 @@ public class PostgresModule extends AbstractQuercusModule {
                              @NotNull MysqliResult result,
                              int fieldNumber)
   {
-    return result.fetch_field_name(env, fieldNumber);
+    try {
+
+      return result.fetch_field_name(env, fieldNumber);
+
+    } catch (Exception ex) {
+      log.log(Level.FINE, ex.toString(), ex);
+      return BooleanValue.FALSE;
+    }
   }
 
   /**
@@ -693,15 +785,17 @@ public class PostgresModule extends AbstractQuercusModule {
     int columnNumber = -1;
 
     try {
+
       ResultSetMetaData metaData = result.validateResult().getMetaData();
 
       int n = metaData.getColumnCount();
 
       for (int i=1; i<=n; i++) {
         if (metaData.getColumnName(i).equals(fieldName)) {
-          columnNumber = i;
+          columnNumber = i-1;
         }
       }
+
     } catch (Exception ex) {
       log.log(Level.FINE, ex.toString(), ex);
     }
@@ -712,12 +806,42 @@ public class PostgresModule extends AbstractQuercusModule {
   /**
    * Returns the printed length
    */
-  public int pg_field_prtlen(Env env,
-                             @NotNull MysqliResult result,
-                             int rowNumber,
-                             Value mixedFieldNameOrNumber)
+  public @ReturnNullAsFalse Object pg_field_prtlen(Env env,
+                                                   @NotNull MysqliResult result,
+                                                   Value rowNumber,
+                                                   @Optional("-1") Value fieldNameOrNumber)
   {
-    throw new UnimplementedException("pg_field_prtlen");
+    try {
+      int row = rowNumber.toInt();
+
+      if (fieldNameOrNumber.toString().equals("-1")) {
+        fieldNameOrNumber = rowNumber;
+        row = -1;
+      }
+
+      int fieldNumber = -1;
+
+      try {
+        fieldNumber = Integer.parseInt(fieldNameOrNumber.toString());
+      } catch (Exception ex) {
+      }
+
+      if (fieldNumber < 0) {
+        fieldNumber = pg_field_num(env, result, fieldNameOrNumber.toString());
+      }
+
+      Object object = pg_fetch_result(env, result, row, fieldNumber);
+
+      // Step the cursor back to the original position
+      // See php/4325
+      result.validateResult().getResultSet().relative(-1);
+
+      return object.toString().length();
+
+    } catch (Exception ex) {
+      log.log(Level.FINE, ex.toString(), ex);
+      return -1;
+    }
   }
 
   /**
@@ -727,7 +851,33 @@ public class PostgresModule extends AbstractQuercusModule {
                              @NotNull MysqliResult result,
                              int fieldNumber)
   {
-    return result.fetch_field_length(env, fieldNumber);
+    try {
+
+      Value value = pg_field_type(env, result, fieldNumber);
+
+      if (value.toString().equals("varchar")) {
+        value = LongValue.create(-1);
+      } else {
+        value = result.fetch_field_length(env, fieldNumber);
+      }
+
+      return value;
+
+    } catch (Exception ex) {
+      log.log(Level.FINE, ex.toString(), ex);
+      return BooleanValue.FALSE;
+    }
+  }
+
+  /**
+   * Returns the name or oid of the tables field
+   */
+  public int pg_field_table(Env env,
+                            @NotNull MysqliResult result,
+                            int fieldNumber,
+                            boolean oidOnly)
+  {
+    throw new UnimplementedException("pg_field_table");
   }
 
   /**
@@ -747,7 +897,22 @@ public class PostgresModule extends AbstractQuercusModule {
                              @NotNull MysqliResult result,
                              int fieldNumber)
   {
-    return result.fetch_field_type(env, fieldNumber);
+    try {
+
+      Value value = result.fetch_field_type(env, fieldNumber);
+
+      if (value instanceof StringValue) {
+        if (value.toString().equals("string")) {
+          value = StringValue.create("varchar");
+        }
+      }
+
+      return value;
+
+    } catch (Exception ex) {
+      log.log(Level.FINE, ex.toString(), ex);
+      return BooleanValue.FALSE;
+    }
   }
 
   /**
@@ -756,7 +921,15 @@ public class PostgresModule extends AbstractQuercusModule {
   public boolean pg_free_result(Env env,
                                 @NotNull MysqliResult result)
   {
-    throw new UnimplementedException("pg_free_result");
+    try {
+
+      result.close();
+      return true;
+
+    } catch (Exception ex) {
+      log.log(Level.FINE, ex.toString(), ex);
+      return false;
+    }
   }
 
   /**
@@ -781,29 +954,43 @@ public class PostgresModule extends AbstractQuercusModule {
   /**
    * Get asynchronous query result
    */
-  public Value pg_get_result(Env env,
-                             @Optional Mysqli conn)
+  public @ReturnNullAsFalse Object pg_get_result(Env env,
+                                                 @Optional Mysqli conn)
   {
-    if (conn == null)
-      conn = getConnection(env);
+    try {
 
-    MysqliResult result = conn.getAsynchronousResult();
+      if (conn == null)
+        conn = getConnection(env);
 
-    conn.setAsynchronousResult(null);
+      MysqliResult result = conn.getAsynchronousResult();
 
-    return env.wrapJava(result);
+      conn.setAsynchronousResult(null);
+
+      return result;
+
+    } catch (Exception ex) {
+      log.log(Level.FINE, ex.toString(), ex);
+      return null;
+    }
   }
 
   /**
    * Returns the host name associated with the connection
    */
-  public String pg_host(Env env,
-                        @Optional Mysqli conn)
+  public @ReturnNullAsFalse Object pg_host(Env env,
+                                           @Optional Mysqli conn)
   {
-    if (conn == null)
-      conn = getConnection(env);
+    try {
 
-    return conn.get_host_name();
+      if (conn == null)
+        conn = getConnection(env);
+
+      return conn.get_host_name();
+
+    } catch (Exception ex) {
+      log.log(Level.FINE, ex.toString(), ex);
+      return null;
+    }
   }
 
   /**
@@ -815,51 +1002,72 @@ public class PostgresModule extends AbstractQuercusModule {
                            Value assocArray,
                            @Optional int options)
   {
-    //@todo use options
+    try {
 
-    ArrayValueImpl newArray = (ArrayValueImpl) assocArray;
-    int nasize = newArray.size();
+      //@todo use options
 
-    Value keyArr[] = newArray.getKeyArray();
+      ArrayValueImpl newArray = (ArrayValueImpl) assocArray;
+      int nasize = newArray.size();
 
-    String names = "";
-    String values = "";
-    for (int i=0; i<nasize; i++) {
-      Value k = keyArr[i];
-      Value v = newArray.get(k);
-      values = values + "','" + v.toString();
-      names = names + "," + k.toString();
+      Value keyArr[] = newArray.getKeyArray();
+
+      String names = "";
+      String values = "";
+      for (int i=0; i<nasize; i++) {
+        Value k = keyArr[i];
+        Value v = newArray.get(k);
+        values = values + "','" + v.toString();
+        names = names + "," + k.toString();
+      }
+
+      names = names.substring(1);
+      values = values.substring(2) + "'";
+
+      String query = "INSERT INTO "+tableName+"("+names+") VALUES("+values+")";
+
+      pg_query(env, conn, query);
+
+      return true;
+
+    } catch (Exception ex) {
+      log.log(Level.FINE, ex.toString(), ex);
+      return false;
     }
-
-    names = names.substring(1);
-    values = values.substring(2) + "'";
-
-    String query = "INSERT INTO "+tableName+"("+names+") VALUES("+values+")";
-
-    pg_query(env, conn, query);
-
-    return true;
   }
 
   /**
    * Get the last error message string of a connection
    */
-  public String pg_last_error(Env env,
-                              @Optional Mysqli conn)
+  public @ReturnNullAsFalse Object pg_last_error(Env env,
+                                                 @Optional Mysqli conn)
   {
-    if (conn == null)
-      conn = getConnection(env);
+    try {
 
-    return conn.error();
+      if (conn == null)
+        conn = getConnection(env);
+
+      return conn.error();
+
+    } catch (Exception ex) {
+      log.log(Level.FINE, ex.toString(), ex);
+      return null;
+    }
   }
 
   /**
    * Returns the last notice message from PostgreSQL server
    */
-  public String pg_last_notice(Env env,
-                               @NotNull Mysqli conn)
+  public @ReturnNullAsFalse Object pg_last_notice(Env env,
+                                                  @NotNull Mysqli conn)
   {
-    throw new UnimplementedException("pg_last_notice");
+    try {
+
+      return conn.validateConnection().getWarnings().toString();
+
+    } catch (Exception ex) {
+      log.log(Level.FINE, ex.toString(), ex);
+      return null;
+    }
   }
 
   /**
@@ -870,10 +1078,11 @@ public class PostgresModule extends AbstractQuercusModule {
    * - MySql's "mysql_insert_id" receives the conection handler as argument but
    * PostgreSQL's "pg_last_oid" uses the result handler.
    */
-  public Value pg_last_oid(Env env,
-                           MysqliResult result)
+  public @ReturnNullAsFalse Object pg_last_oid(Env env,
+                                               MysqliResult result)
   {
     try {
+
       Statement stmt = result.validateResult().getStatement();
 
       stmt = ((com.caucho.sql.UserStatement)stmt).getStatement();
@@ -885,45 +1094,49 @@ public class PostgresModule extends AbstractQuercusModule {
       Method m = c.getDeclaredMethod("getLastOID", null);
 
       int oid = Integer.parseInt(m.invoke(stmt, new Object[]{}).toString());
+
       if (oid > 0)
-        return LongValue.create(oid);
-      else
-        return BooleanValue.FALSE;
+        return ""+oid;
+
     } catch (Exception ex) {
       log.log(Level.FINE, ex.toString(), ex);
-      return BooleanValue.FALSE;
     }
+
+    return null;
   }
 
   /**
    * Close a large object
    */
   public boolean pg_lo_close(Env env,
-                             Value largeObject)
+                             Object largeObject)
   {
     try {
+
       Class c = Class.forName("org.postgresql.largeobject.LargeObject");
 
       Method m = c.getDeclaredMethod("close", null);
 
-      m.invoke(((JavaValue)largeObject).toJavaObject(), new Object[]{});
+      m.invoke(largeObject, new Object[]{});
       // largeObject.close();
+
+      return true;
+
     } catch (Exception ex) {
       log.log(Level.FINE, ex.toString(), ex);
+      return false;
     }
-
-    return true;
   }
 
   /**
    * Create a large object
    */
-  public int pg_lo_create(Env env,
-                          @Optional Mysqli conn)
+  public @ReturnNullAsFalse Object pg_lo_create(Env env,
+                                                @Optional Mysqli conn)
   {
-    int oid = -1;
-
     try {
+
+      int oid = -1;
 
       if (conn == null)
         conn = getConnection(env);
@@ -954,14 +1167,17 @@ public class PostgresModule extends AbstractQuercusModule {
       m = c.getDeclaredMethod("create", null);
 
       Object oidObj = m.invoke(lobManager, new Object[]{});
+
       oid = Integer.parseInt(oidObj.toString());
 
       // oid = lobManager.create();
+
+      return new Integer(oid);
+
     } catch (Exception ex) {
       log.log(Level.FINE, ex.toString(), ex);
+      return null;
     }
-
-    return oid;
   }
 
   /**
@@ -972,9 +1188,10 @@ public class PostgresModule extends AbstractQuercusModule {
                               int oid,
                               String pathName)
   {
-    //@todo conn should be optional
-
     try {
+
+      //@todo conn should be optional
+
       // LargeObjectManager lobManager;
       Object lobManager;
 
@@ -1029,6 +1246,7 @@ public class PostgresModule extends AbstractQuercusModule {
       //lobj.close();
 
       return true;
+
     } catch (Exception ex) {
       log.log(Level.FINE, ex.toString(), ex);
       return false;
@@ -1038,18 +1256,19 @@ public class PostgresModule extends AbstractQuercusModule {
   /**
    * Import a large object from file
    */
-  public int pg_lo_import(Env env,
-                          @NotNull Mysqli conn,
-                          String pathName)
+  public @ReturnNullAsFalse Object pg_lo_import(Env env,
+                                                @NotNull Mysqli conn,
+                                                String pathName)
   {
-    //@todo conn should be optional
-
-    int oid = pg_lo_create(env, conn);
-    Value lobjValue = pg_lo_open(env, conn, oid, "w");
-
-    String data = "";
-
     try {
+
+      //@todo conn should be optional
+
+      int oid = ((Integer)pg_lo_create(env, conn)).intValue();
+      Object largeObject = pg_lo_open(env, conn, oid, "w");
+
+      String data = "";
+
       // Open the file
       File file = new File(pathName);
       DataInputStream fis = new DataInputStream(new FileInputStream(file));
@@ -1062,30 +1281,29 @@ public class PostgresModule extends AbstractQuercusModule {
       data = new String(buf);
 
       fis.close();
+
+      pg_lo_write(env, largeObject, data, 0);
+      pg_lo_close(env, largeObject);
+
+      return new Integer(oid);
+
     } catch (Exception ex) {
       log.log(Level.FINE, ex.toString(), ex);
-      return -1;
+      return null;
     }
-
-    pg_lo_write(env, lobjValue, data, 0);
-    pg_lo_close(env, lobjValue);
-
-    return oid;
   }
 
   /**
    * Open a large object
    */
-  public Value pg_lo_open(Env env,
-                          @NotNull Mysqli conn,
-                          int oid,
-                          String mode)
+  public @ReturnNullAsFalse Object pg_lo_open(Env env,
+                                              @NotNull Mysqli conn,
+                                              int oid,
+                                              String mode)
   {
-    Value value = null;
-
     try {
 
-      Object lobj = null;
+      Object largeObject = null;
 
       // LargeObjectManager lobManager;
       Object lobManager;
@@ -1126,22 +1344,22 @@ public class PostgresModule extends AbstractQuercusModule {
         intMode = modeWRITE;
       }
 
-      lobj = m.invoke(lobManager, new Object[]{oid, intMode});
-      value = env.wrapJava(lobj);
+      largeObject = m.invoke(lobManager, new Object[]{oid, intMode});
+      // LargeObject largeObject = lobManager.open(oid, mode);
 
-      // LargeObject lobj = lobManager.open(oid, mode);
+      return largeObject;
+
     } catch (Exception ex) {
       log.log(Level.FINE, ex.toString(), ex);
+      return null;
     }
-
-    return value;
   }
 
   /**
    * Reads an entire large object and send straight to browser
    */
   public int pg_lo_read_all(Env env,
-                            Value largeObject)
+                            Object largeObject)
   {
     //@todo pg_lo_read_all() reads a large object and passes it straight through
     // to the browser after sending all pending headers. Mainly intended for sending
@@ -1167,21 +1385,23 @@ public class PostgresModule extends AbstractQuercusModule {
   /**
    * Read a large object
    */
-  public String pg_lo_read(Env env,
-                           Value largeObject,
-                           @Optional("8192") int len)
+  public @ReturnNullAsFalse Object pg_lo_read(Env env,
+                                              Object largeObject,
+                                              @Optional("8192") int len)
   {
     try {
+
       Class c = Class.forName("org.postgresql.largeobject.LargeObject");
 
       Method m = c.getDeclaredMethod("read", new Class[]{Integer.TYPE});
 
-      byte data[] = (byte[])m.invoke(((JavaValue)largeObject).toJavaObject(), new Object[]{len});
+      byte data[] = (byte[])m.invoke(largeObject, new Object[]{len});
 
       return new String(data);
+
     } catch (Exception ex) {
       log.log(Level.FINE, ex.toString(), ex);
-      return "";
+      return null;
     }
   }
 
@@ -1189,11 +1409,12 @@ public class PostgresModule extends AbstractQuercusModule {
    * Seeks position within a large object
    */
   public boolean pg_lo_seek(Env env,
-                            Value largeObject,
+                            Object largeObject,
                             int offset,
                             @Optional int whence)
   {
     try {
+
       Class c = Class.forName("org.postgresql.largeobject.LargeObject");
 
       int seekSET = c.getDeclaredField("SEEK_SET").getInt(null);
@@ -1213,9 +1434,10 @@ public class PostgresModule extends AbstractQuercusModule {
 
       Method m = c.getDeclaredMethod("seek", new Class[]{Integer.TYPE,Integer.TYPE});
 
-      m.invoke(((JavaValue)largeObject).toJavaObject(), new Object[]{offset,whence});
+      m.invoke(largeObject, new Object[]{offset,whence});
 
       return true;
+
     } catch (Exception ex) {
       log.log(Level.FINE, ex.toString(), ex);
       return false;
@@ -1226,16 +1448,18 @@ public class PostgresModule extends AbstractQuercusModule {
    * Returns current seek position a of large object
    */
   public int pg_lo_tell(Env env,
-                        Value largeObject)
+                        Object largeObject)
   {
     try {
+
       Class c = Class.forName("org.postgresql.largeobject.LargeObject");
 
       Method m = c.getDeclaredMethod("tell", null);
 
-      Object obj = m.invoke(((JavaValue)largeObject).toJavaObject(), new Object[]{});
+      Object obj = m.invoke(largeObject, new Object[]{});
 
       return Integer.parseInt(obj.toString());
+
     } catch (Exception ex) {
       log.log(Level.FINE, ex.toString(), ex);
       return -1;
@@ -1250,6 +1474,7 @@ public class PostgresModule extends AbstractQuercusModule {
                               int oid)
   {
     try {
+
       // LargeObjectManager lobManager;
       Object lobManager;
 
@@ -1275,6 +1500,7 @@ public class PostgresModule extends AbstractQuercusModule {
       m.invoke(lobManager, new Object[]{oid});
 
       return true;
+
     } catch (Exception ex) {
       log.log(Level.FINE, ex.toString(), ex);
       return false;
@@ -1284,30 +1510,33 @@ public class PostgresModule extends AbstractQuercusModule {
   /**
    * Write to a large object
    */
-  public int pg_lo_write(Env env,
-                         @NotNull Value largeObject,
-                         String data,
-                         @Optional int len)
+  public @ReturnNullAsFalse Object pg_lo_write(Env env,
+                                               @NotNull Object largeObject,
+                                               String data,
+                                               @Optional int len)
   {
-    if (len <= 0) {
-      len = data.length();
-    }
-
-    int written = len;
-
     try {
+
+      if (len <= 0) {
+        len = data.length();
+      }
+
+      int written = len;
+
       Class c = Class.forName("org.postgresql.largeobject.LargeObject");
 
       Method m = c.getDeclaredMethod("write",
                                      new Class[]{byte[].class, Integer.TYPE, Integer.TYPE});
 
-      m.invoke(((JavaValue)largeObject).toJavaObject(), new Object[]{data.getBytes(), 0, len});
+      m.invoke(largeObject, new Object[]{data.getBytes(), 0, len});
       // largeObject.write(data.getBytes(), 0, len);
+
+      return new Integer(written);
+
     } catch (Exception ex) {
       log.log(Level.FINE, ex.toString(), ex);
+      return null;
     }
-
-    return written;
   }
 
   /**
@@ -1317,15 +1546,20 @@ public class PostgresModule extends AbstractQuercusModule {
                             @NotNull Mysqli conn,
                             String tableName)
   {
-    // @todo: check this with test case php/4313
+    try {
 
-    String metaQuery = "SELECT a.attnum,t.typname,a.attlen,t.typnotnull,t.typdefault,a.attndims FROM pg_class c, pg_attribute a, pg_type t WHERE c.relname='"+tableName+"' AND a.attnum > 0 AND a.attrelid = c.oid AND a.atttypid = t.oid ORDER BY a.attnum";
+      String metaQuery = "SELECT a.attnum,t.typname,a.attlen,t.typnotnull,t.typdefault,a.attndims FROM pg_class c, pg_attribute a, pg_type t WHERE c.relname='"+tableName+"' AND a.attnum > 0 AND a.attrelid = c.oid AND a.atttypid = t.oid ORDER BY a.attnum";
 
-    Object value = pg_query(env, conn, metaQuery);
+      Object value = pg_query(env, conn, metaQuery);
 
-    MysqliResult result = (MysqliResult) value;
+      MysqliResult result = (MysqliResult) value;
 
-    return pg_fetch_all(env, result);
+      return pg_fetch_all(env, result);
+
+    } catch (Exception ex) {
+      log.log(Level.FINE, ex.toString(), ex);
+      return BooleanValue.FALSE;
+    }
   }
 
   /**
@@ -1334,16 +1568,30 @@ public class PostgresModule extends AbstractQuercusModule {
   public int pg_num_fields(Env env,
                            @NotNull MysqliResult result)
   {
-    return result.num_fields();
+    try {
+
+      return result.num_fields();
+
+    } catch (Exception ex) {
+      log.log(Level.FINE, ex.toString(), ex);
+      return -1;
+    }
   }
 
   /**
    * Returns the number of rows in a result
    */
-  public Value pg_num_rows(Env env,
-                           @NotNull MysqliResult result)
+  public int pg_num_rows(Env env,
+                         @NotNull MysqliResult result)
   {
-    return result.num_rows();
+    try {
+
+      return result.num_rows().toInt();
+
+    } catch (Exception ex) {
+      log.log(Level.FINE, ex.toString(), ex);
+      return -1;
+    }
   }
 
   /**
@@ -1358,19 +1606,32 @@ public class PostgresModule extends AbstractQuercusModule {
   /**
    * Looks up a current parameter setting of the server
    */
-  public String pg_parameter_status(Env env,
-                                    @NotNull Mysqli conn,
-                                    String paramName)
+  public @ReturnNullAsFalse Object pg_parameter_status(Env env,
+                                                       @NotNull Mysqli conn,
+                                                       String paramName)
   {
-    throw new UnimplementedException("pg_parameter_status");
+    try {
+
+      Object object = pg_query(env, conn, "SHOW "+paramName);
+
+      MysqliResult result = (MysqliResult) object;
+
+      object = pg_fetch_result(env, result, 0, 0);
+
+      return object;
+
+    } catch (Exception ex) {
+      log.log(Level.FINE, ex.toString(), ex);
+      return null;
+    }
   }
 
   /**
    * Open a persistent PostgreSQL connection
    */
-  public Value pg_pconnect(Env env,
-                           String connectionString,
-                           @Optional int connectType)
+  public @ReturnNullAsFalse Object pg_pconnect(Env env,
+                                               String connectionString,
+                                               @Optional int connectType)
   {
     return pg_connect(env, connectionString, connectType);
   }
@@ -1381,42 +1642,58 @@ public class PostgresModule extends AbstractQuercusModule {
   public boolean pg_ping(Env env,
                          @Optional Mysqli conn)
   {
-    if (conn == null)
-      conn = getConnection(env);
+    try {
 
-    return conn.ping();
+      if (conn == null)
+        conn = getConnection(env);
+
+      return conn.ping();
+
+    } catch (Exception ex) {
+      log.log(Level.FINE, ex.toString(), ex);
+      return false;
+    }
   }
 
   /**
    * Return the port number associated with the connection
    */
-  public int pg_port(Env env,
-                     @Optional Mysqli conn)
+  public @ReturnNullAsFalse Object pg_port(Env env,
+                                           @Optional Mysqli conn)
   {
-    if (conn == null)
-      conn = getConnection(env);
+    try {
 
-    return conn.get_port_number();
+      if (conn == null)
+        conn = getConnection(env);
+
+      return new Integer(conn.get_port_number());
+
+    } catch (Exception ex) {
+      log.log(Level.FINE, ex.toString(), ex);
+      return null;
+    }
   }
 
   /**
    * Submits a request to create a prepared statement with the given parameters,
    * and waits for completion
    */
-  public Value pg_prepare(Env env,
-                          @NotNull Mysqli conn,
-                          String stmtName,
-                          String query)
+  public @ReturnNullAsFalse Object pg_prepare(Env env,
+                                              @NotNull Mysqli conn,
+                                              String stmtName,
+                                              String query)
   {
     try {
+
       // Make the PHP query a JDBC like query replacing ($1 -> ?) with question marks.
       query = query.replaceAll("\\$[0-9]+", "?");
       MysqliStatement pstmt = conn.prepare(env, query);
       conn.putStatement(stmtName, pstmt);
-      return env.wrapJava(pstmt);
+      return pstmt;
+
     } catch (Exception ex) {
       log.log(Level.FINE, ex.toString(), ex);
-      return BooleanValue.FALSE;
+      return null;
     }
   }
 
@@ -1437,23 +1714,20 @@ public class PostgresModule extends AbstractQuercusModule {
   public @ReturnNullAsFalse Object pg_query_params(Env env,
                                                    @NotNull Mysqli conn,
                                                    String query,
-                                                   Value params)
+                                                   ArrayValue params)
   {
-    return conn.query(query);
-  }
+    try {
 
-  /**
-   * Submits a command to the server and waits for the result,
-   * with the ability to pass parameters separately from the SQL command text
-   */
-  public @ReturnNullAsFalse Object pg_query_params(Env env,
-                                                   String query,
-                                                   Value params)
-  {
-    //@todo
-    Mysqli conn = getConnection(env);
+      if (pg_send_query_params(env, conn, query, params)) {
+        return conn.getAsynchronousResult();
+      }
 
-    return conn.query(query);
+      return null;
+
+    } catch (Exception ex) {
+      log.log(Level.FINE, ex.toString(), ex);
+      return null;
+    }
   }
 
   /**
@@ -1463,11 +1737,18 @@ public class PostgresModule extends AbstractQuercusModule {
                                             @NotNull Mysqli conn,
                                             String query)
   {
-    //@todo conn should be optional
-    if (conn == null)
-      conn = getConnection(env);
+    try {
 
-    return conn.query(query);
+      //@todo conn should be optional
+      if (conn == null)
+        conn = getConnection(env);
+
+      return conn.query(query);
+
+    } catch (Exception ex) {
+      log.log(Level.FINE, ex.toString(), ex);
+      return null;
+    }
   }
 
   /**
@@ -1497,7 +1778,9 @@ public class PostgresModule extends AbstractQuercusModule {
                                 int offset)
   {
     try {
+
       return result.data_seek(env, offset);
+
     } catch (Exception ex) {
       log.log(Level.FINE, ex.toString(), ex);
       return false;
@@ -1553,27 +1836,30 @@ public class PostgresModule extends AbstractQuercusModule {
   /**
    * Submits a command and separate parameters to the server without waiting for the result(s)
    */
-  public Value pg_send_query_params(Env env,
-                                    @NotNull Mysqli conn,
-                                    String query,
-                                    ArrayValue params)
+  public boolean pg_send_query_params(Env env,
+                                      @NotNull Mysqli conn,
+                                      String query,
+                                      ArrayValue params)
   {
     try {
+
       ArrayValueImpl arrayImpl = (ArrayValueImpl)params;
       int sz = arrayImpl.size();
 
       for (int i=0; i<sz; i++) {
         String p = arrayImpl.get(LongValue.create(i)).toString();
         String pi = conn.real_escape_string(p).toString();
-        query = query.replaceAll("\\$"+(i+1), pi);
+        pi = pi.replaceAll("\\\\", "\\\\\\\\");
+        query = query.replaceAll("\\$"+(i+1), "\\'"+pi+"\\'");
       }
 
       pg_send_query(env, conn, query);
 
-      return BooleanValue.TRUE;
+      return true;
+
     } catch (Exception ex) {
       log.log(Level.FINE, ex.toString(), ex);
-      return BooleanValue.FALSE;
+      return false;
     }
   }
 
@@ -1584,11 +1870,17 @@ public class PostgresModule extends AbstractQuercusModule {
                                @NotNull Mysqli conn,
                                String query)
   {
-    Object result = pg_query(env, conn, query);
+    try {
 
-    if ((result != null) && (result instanceof MysqliResult)) {
-      conn.setAsynchronousResult((MysqliResult)result);
-      return true;
+      Object result = pg_query(env, conn, query);
+
+      if ((result != null) && (result instanceof MysqliResult)) {
+        conn.setAsynchronousResult((MysqliResult)result);
+        return true;
+      }
+
+    } catch (Exception ex) {
+      log.log(Level.FINE, ex.toString(), ex);
     }
 
     return false;
@@ -1597,13 +1889,17 @@ public class PostgresModule extends AbstractQuercusModule {
   /**
    * Set the client encoding
    */
-  public Object pg_set_client_encoding(Env env,
-                                       @NotNull Mysqli conn,
-                                       String encoding)
+  public int pg_set_client_encoding(Env env,
+                                    @NotNull Mysqli conn,
+                                    String encoding)
   {
     //@todo conn should be optional
 
-    return pg_query(env, conn, "SET CLIENT_ENCODING TO '" + encoding +"'");
+    if (pg_query(env, conn, "SET CLIENT_ENCODING TO '" + encoding +"'") == null) {
+      return -1;
+    }
+
+    return 0;
   }
 
   /**
@@ -1613,37 +1909,44 @@ public class PostgresModule extends AbstractQuercusModule {
                                     @NotNull Mysqli conn,
                                     int intVerbosity)
   {
-    //@todo conn should be optional
+    try {
 
-    String verbosity;
+      //@todo conn should be optional
 
-    Object value = pg_query(env, conn, "SHOW log_error_verbosity");
+      String verbosity;
 
-    Value row = pg_fetch_row(env, (MysqliResult)value, LongValue.create(0));
+      Object value = pg_query(env, conn, "SHOW log_error_verbosity");
 
-    ArrayValueImpl arr = (ArrayValueImpl)row;
+      Value row = pg_fetch_row(env, (MysqliResult)value, LongValue.create(0));
 
-    String prevVerbosity = arr.get(LongValue.create(0)).toString();
+      ArrayValueImpl arr = (ArrayValueImpl)row;
 
-    switch (intVerbosity) {
-    case PGSQL_ERRORS_TERSE:
-      verbosity = "TERSE";
-      break;
-    case PGSQL_ERRORS_VERBOSE:
-      verbosity = "VERBOSE";
-      break;
-    default:
-      verbosity = "DEFAULT";
-    }
+      String prevVerbosity = arr.get(LongValue.create(0)).toString();
 
-    pg_query(env, conn, "SET log_error_verbosity TO '"+verbosity+"'");
+      switch (intVerbosity) {
+      case PGSQL_ERRORS_TERSE:
+        verbosity = "TERSE";
+        break;
+      case PGSQL_ERRORS_VERBOSE:
+        verbosity = "VERBOSE";
+        break;
+      default:
+        verbosity = "DEFAULT";
+      }
 
-    if (prevVerbosity.equals("TERSE")) {
-      return PGSQL_ERRORS_TERSE;
-    } else if (prevVerbosity.equals("VERBOSE")) {
-      return PGSQL_ERRORS_VERBOSE;
-    } else {
-      return PGSQL_ERRORS_DEFAULT;
+      pg_query(env, conn, "SET log_error_verbosity TO '"+verbosity+"'");
+
+      if (prevVerbosity.equals("TERSE")) {
+        return PGSQL_ERRORS_TERSE;
+      } else if (prevVerbosity.equals("VERBOSE")) {
+        return PGSQL_ERRORS_VERBOSE;
+      } else {
+        return PGSQL_ERRORS_DEFAULT;
+      }
+
+    } catch (Exception ex) {
+      log.log(Level.FINE, ex.toString(), ex);
+      return -1;
     }
   }
 
@@ -1718,13 +2021,22 @@ public class PostgresModule extends AbstractQuercusModule {
   /**
    * Returns an array with client, protocol and server version (when available)
    */
-  public String pg_version(Env env,
-                           @Optional Mysqli conn)
+  public @ReturnNullAsFalse Object pg_version(Env env,
+                                              @Optional Mysqli conn)
   {
-    if (conn == null)
-      conn = getConnection(env);
+    try {
 
-    return conn.get_server_info();
+      //@todo return an array
+
+      if (conn == null)
+        conn = getConnection(env);
+
+      return conn.get_server_info();
+
+    } catch (Exception ex) {
+      log.log(Level.FINE, ex.toString(), ex);
+      return null;
+    }
   }
 
   private Mysqli getConnection(Env env)
@@ -1763,6 +2075,7 @@ public class PostgresModule extends AbstractQuercusModule {
       matcher.appendReplacement(stringBuffer, "\\\\"+replacement);
     }
     matcher.appendTail(stringBuffer);
+
     return stringBuffer.toString();
   }
 }

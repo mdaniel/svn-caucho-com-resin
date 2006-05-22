@@ -408,6 +408,7 @@ public class JdbcConnectionResource extends ResourceValue {
         }
         _affectedRows = 0;
         _affectedRows = stmt.getUpdateCount();
+        _rs.setAffectedRows(_affectedRows);
         _warnings = stmt.getWarnings();
         // for php/4310
         if (!_pgconn) {
@@ -718,6 +719,16 @@ public class JdbcConnectionResource extends ResourceValue {
         return 0;
     } else
       return 0;
+  }
+
+  /**
+   * This function was added for PostgreSQL pg_last_notice
+   *
+   * @return warning messages
+   */
+  public SQLWarning getWarnings()
+  {
+    return _warnings;
   }
 
   private void clearErrors()
