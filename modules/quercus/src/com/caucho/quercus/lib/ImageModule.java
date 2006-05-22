@@ -588,14 +588,6 @@ public class ImageModule extends AbstractQuercusModule {
   }
 
   /**
-   * Set the color for the specified palette index
-   */
-  public static void imagecolorset()
-  {
-    throw new QuercusException("not implemented");
-  }
-
-  /**
    * Get the colors for an index
    */
   public static ArrayValue imagecolorsforindex(QuercusImage image, int argb)
@@ -626,12 +618,8 @@ public class ImageModule extends AbstractQuercusModule {
   /**
    * Define a color as transparent
    */
-  public static int imagecolortransparent(QuercusImage image, int color)
+  public static int imagecolortransparent(QuercusImage image)
   {
-    // XXX: implement
-    image.getGraphics().setColor(new Color(0, 0, 0, 0));
-    image.getGraphics().fillRect(0, 0, image.getWidth(), image.getHeight());
-
     // total transparency
     return 0xff000000;
   }
@@ -685,6 +673,14 @@ public class ImageModule extends AbstractQuercusModule {
   }
 
   /**
+   * Create a new image from file or URL
+   */
+  public static QuercusImage imagecreatefromwbmp(Env env, String filename)
+  {
+    return new QuercusImage(env, filename);
+  }
+
+  /**
    * Create a new image from the image stream in the string
    */
   public static QuercusImage imagecreatefromstring(Env env, InputStream data)
@@ -721,7 +717,7 @@ public class ImageModule extends AbstractQuercusModule {
    */
   public static void imageinterlace(QuercusImage image, boolean enable)
   {
-    // no-op, can safely ignore (just makes slightly bigger images)
+    // no-op, can safely ignore (just makes images that load top-down)
   }
 
 
@@ -885,7 +881,7 @@ public class ImageModule extends AbstractQuercusModule {
     Graphics2D g = image.getGraphics();
     g.setColor(intToColor(color));
     Font awtfont = image.getFont(font);
-    int height = image.getGraphics().getFontMetrics(awtfont).getHeight();
+    int height = image.getGraphics().getFontMetrics(awtfont).getAscent();
     g.setFont(awtfont);
     g.drawString(c.substring(0, 1), x, y+height);
   }
@@ -900,7 +896,7 @@ public class ImageModule extends AbstractQuercusModule {
     g.rotate(-1 * Math.PI / 2);
     g.setColor(intToColor(color));
     Font awtfont = image.getFont(font);
-    int height = image.getGraphics().getFontMetrics(awtfont).getHeight();
+    int height = image.getGraphics().getFontMetrics(awtfont).getAscent();
     g.setFont(awtfont);
     g.drawString(c.substring(0, 1), -1 * y, x+height);
   }
@@ -943,9 +939,19 @@ public class ImageModule extends AbstractQuercusModule {
 				    int dx, int dy, int sx, int sy,
 				    int w, int h, int pct)
   {
+    BufferedImage rgba =
+      new BufferedImage(dest.getWidth(), dest.getHeight(),
+			BufferedImage.TYPE_INT_ARGB);
+    rgba.getGraphics().drawImage(src._bufferedImage, 0, 0, null);
+    BufferedImageOp rescaleOp = 
+      new RescaleOp(new float[] { 1, 1, 1, ((float)pct)/100 },
+		    new float[] { 0, 0, 0, 0 },
+		    null);
+    BufferedImage rescaledImage =
+      rescaleOp.filter(rgba, null);
     Graphics2D g = (Graphics2D)dest.getGraphics().create();
-    // XXX: use LookupOp here
-    g.drawImage(src._bufferedImage,
+    g.setComposite(AlphaComposite.SrcOver);
+    g.drawImage(rescaledImage,
 		dx, dy, dx+w, dy+h,
 		sx, sy, sx+w, sy+h, null);
   }
@@ -957,9 +963,24 @@ public class ImageModule extends AbstractQuercusModule {
 					int dx, int dy, int sx, int sy,
 					int w, int h, int pct)
   {
+    BufferedImage rgba =
+      new BufferedImage(dest.getWidth(), dest.getHeight(),
+			BufferedImage.TYPE_INT_ARGB);
+    rgba.getGraphics().drawImage(src._bufferedImage, 0, 0, null);
+    BufferedImageOp rescaleOp = 
+      new RescaleOp(new float[] { 1, 1, 1, ((float)pct)/100 },
+		    new float[] { 0, 0, 0, 0 },
+		    null);
+    BufferedImage rescaledImage =
+      rescaleOp.filter(rgba, null);
+
+    ColorConvertOp colorConvertOp =
+      new ColorConvertOp(ColorSpace.getInstance(ColorSpace.CS_GRAY), null);
+    colorConvertOp.filter(dest._bufferedImage, dest._bufferedImage);
+
     Graphics2D g = (Graphics2D)dest.getGraphics().create();
-    // XXX: use BufferedImageOp here
-    g.drawImage(src._bufferedImage,
+    g.setComposite(AlphaComposite.SrcOver);
+    g.drawImage(rescaledImage,
 		dx, dy, dx+w, dy+h,
 		sx, sy, sx+w, sy+h, null);
   }
@@ -972,10 +993,13 @@ public class ImageModule extends AbstractQuercusModule {
 					int sx, int sy, int sw, int sh)
   {
     Graphics2D g = (Graphics2D)dest.getGraphics().create();
-    // XXX: switch to high-quality interpoloation here
+    g.setRenderingHint(RenderingHints.KEY_RENDERING,
+		       RenderingHints.VALUE_RENDER_QUALITY);
     g.drawImage(src._bufferedImage,
 		dx, dy, dx+dw, dy+dh,
 		sx, sy, sx+sw, sy+sh, null);
+    g.setRenderingHint(RenderingHints.KEY_RENDERING,
+		       RenderingHints.VALUE_RENDER_DEFAULT);
   }
 
   /**
@@ -1029,21 +1053,34 @@ public class ImageModule extends AbstractQuercusModule {
   }
 
 
-  // Alpha Blending ///////////////////////////////////////////////////////
+  // Non-TrueColor / Full-Channel-Alpha ////////////////////////////////////
 
   /**
    * Set the flag to save full alpha channel information (as opposed to
    * single-color transparency) when saving PNG images
    */
-  public static void imagesavealpha()
+  public static boolean imagesavealpha(QuercusImage image, boolean set)
   {
+    // no-op since we currently only support true-color, full-alpha channel
+    return true;
   }
 
   /**
-   * Set the alpha blending flag to use the bundled libgd layering effects
+   * Set the color for the specified palette index
    */
-  public static void imagelayereffect()
+  public static void imagecolorset(QuercusImage image, int index,
+				   int r, int g, int b)
   {
+    // no-op since we currently only support true-color, full-alpha channel
+  }
+
+  /**
+   * Define a color as transparent
+   */
+  public static int imagecolortransparent(QuercusImage image, int color)
+  {
+    // no-op since we currently only support true-color, full-alpha channel
+    return 0xFF000000;
   }
 
 
@@ -1052,20 +1089,24 @@ public class ImageModule extends AbstractQuercusModule {
   /**
    * Flood fill
    */
-  public static void imagefill()
+  public static boolean imagefill(QuercusImage image, int x, int y, int color)
   {
+    // XXX: not yet implemented
+    return true;
   }
 
   /**
    * Flood fill to specific color
    */
-  public static void imagefilltoborder()
+  public static boolean imagefilltoborder(QuercusImage image, int x, int y,
+					  int border, int color)
   {
+    // XXX: not yet implemented
+    return true;
   }
 
 
   // Filters /////////////////////////////////////////////////////////
-
 
   /**
    * Apply a 3x3 convolution matrix, using coefficient div and offset
@@ -1083,7 +1124,7 @@ public class ImageModule extends AbstractQuercusModule {
     ConvolveOp convolveOp = new ConvolveOp(new Kernel(3, 3, kernelValues));
     BufferedImage bufferedImage =
       convolveOp.filter(image._bufferedImage, null);
-    // XXX: finish this
+    image._bufferedImage.getGraphics().drawImage(bufferedImage, 0, 0, null);
   }
 
   /**
@@ -1091,18 +1132,11 @@ public class ImageModule extends AbstractQuercusModule {
    */
   public static void imagefilter()
   {
+    // XXX: not yet implemented
   }
+
 
   // Other ///////////////////////////////////////////////////////////
-
-  /**
-   * Get the index of the color which has the hue, white and blackness
-   * nearest to the given color
-   */
-  public static void imagecolorclosesthwb()
-  {
-    throw new QuercusException("imagecolorclosesthwb is not supported");
-  }
 
   /**
    * Embe into single tags.
@@ -1132,6 +1166,27 @@ public class ImageModule extends AbstractQuercusModule {
     // function is only available if PHP is compiled with the bundled
     // version of the GD library."
     return false;
+  }
+
+
+  // PHP Documentation Lacking /////////////////////////////////////////
+
+  /**
+   * Get the index of the color which has the hue, white and blackness
+   * nearest to the given color
+   */
+  public static void imagecolorclosesthwb()
+  {
+    throw new QuercusException("imagecolorclosesthwb is not supported");
+  }
+
+  /**
+   * Set the alpha blending flag to use the bundled libgd layering effects
+   */
+  public static void imagelayereffect()
+  {
+    // XXX: there is no documentation for how this function ought to work
+    // http://us3.php.net/manual/en/function.imagelayereffect.php
   }
 
 
@@ -1215,6 +1270,44 @@ public class ImageModule extends AbstractQuercusModule {
   }
 
 
+  // WBMP Images ////////////////////////////////////////////////////////////
+
+  /**
+   * Output image to browser or file
+   */
+  public static void image2wbmp(QuercusImage image,
+				@Optional String filename,
+				@Optional int threshhold)
+  {
+    throw new QuercusException("not supported");
+  }
+
+  /**
+   * Convert JPEG image file to WBMP image file
+   */
+  public static void jpeg2wbmp(String jpegFilename,
+			       String wbmpName,
+			       int d_height,
+			       int d_width,
+			       int threshhold)
+  {
+    throw new QuercusException("not supported");
+  }
+
+  /**
+   * Convert PNG image file to WBM
+   */
+  public static void png2wbmp(String pngFilename,
+			      String wbmpName,
+			      int d_height,
+			      int d_width,
+			      int threshhold)
+  {
+    throw new QuercusException("not supported");
+  }
+
+
+
   // [Currently] Unsupported Image Formats //////////////////////////////////
 
   /**
@@ -1257,33 +1350,6 @@ public class ImageModule extends AbstractQuercusModule {
   {
   }
 
-  /**
-   * Output image to browser or file
-   */
-  public static void image2wbmp()
-  {
-  }
-
-  /**
-   * Create a new image from file or URL
-   */
-  public static void imagecreatefromwbmp()
-  {
-  }
-
-  /**
-   * Convert JPEG image file to WBMP image file
-   */
-  public static void jpeg2wbmp()
-  {
-  }
-
-  /**
-   * Convert PNG image file to WBM
-   */
-  public static void png2wbmp()
-  {
-  }
 
   // Private Helpers ////////////////////////////////////////////////////////
 
@@ -1374,8 +1440,15 @@ public class ImageModule extends AbstractQuercusModule {
 
     public Font getFont(int font)
     {
-      // XXX: sync font sizes to mod_php implementation
-      return new Font("sansserif", 0, 12);
+      if (font <= 1)
+	return new Font("sansserif", 0, 8);
+      switch(font) {
+	case 2: return new Font("sansserif", 0, 10);
+	case 3: return new Font("sansserif", 0, 11);
+	case 4: return new Font("sansserif", 0, 12);
+	default:
+	  return new Font("sansserif", 0, 14);
+      }
     }
 
     public int getWidth()
