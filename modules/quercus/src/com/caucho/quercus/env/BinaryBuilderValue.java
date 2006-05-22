@@ -63,14 +63,7 @@ public class BinaryBuilderValue extends BinaryValue {
 
   public BinaryBuilderValue(byte []buffer, int offset, int length)
   {
-    int capacity;
-
-    if (length < 64)
-      capacity = 128;
-    else
-      capacity = 2 * length;
-
-    _buffer = new byte[capacity];
+    _buffer = new byte[length];
     _length = length;
 
     System.arraycopy(buffer, offset, _buffer, 0, length);

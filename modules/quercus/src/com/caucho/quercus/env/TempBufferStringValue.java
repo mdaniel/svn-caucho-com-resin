@@ -61,11 +61,15 @@ public class TempBufferStringValue extends BinaryValue {
     
     return new StreamImplInputStream(ts);
   }
+
+  //
+  // CharSegment
+  //
   
   /**
    * Returns the length as a string.
    */
-  public int strlen()
+  public int length()
   {
     int len = 0;
 
@@ -94,7 +98,7 @@ public class TempBufferStringValue extends BinaryValue {
   public String toString()
   {
     if (_string == null) {
-      char []cbuf = new char[strlen()];
+      char []cbuf = new char[length()];
 
       int i = 0;
       for (TempBuffer ptr = _head; ptr != null; ptr = ptr.getNext()) {

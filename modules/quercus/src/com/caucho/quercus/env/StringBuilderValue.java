@@ -562,6 +562,15 @@ public class StringBuilderValue extends UnicodeValue {
   }
 
   /**
+   * Returns a character array
+   */
+  @Override
+  public char []toCharArray()
+  {
+    return _buffer;
+  }
+
+  /**
    * Prints the value.
    * @param env
    */
@@ -778,8 +787,11 @@ public class StringBuilderValue extends UnicodeValue {
       if (aLength != bLength)
 	return false;
 
+      char []aBuffer = _buffer;
+      char []bBuffer = s._buffer;
+
       for (int i = aLength - 1; i >= 0; i--) {
-	if (_buffer[i] != s._buffer[i])
+	if (aBuffer[i] != bBuffer[i])
 	  return false;
       }
 

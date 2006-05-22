@@ -1161,14 +1161,15 @@ public class FileModule extends AbstractQuercusModule {
 
       Value s;
 
-      if (length > 0)
-	s = env.createString(buffer, 0, length);
-      else
-	s = BooleanValue.FALSE;
-
-      TempBuffer.free(tempBuf);
-
-      return s;
+      if (length > 0) {
+	BinaryBuilderValue bb = new BinaryBuilderValue(buffer, 0, length);
+	TempBuffer.free(tempBuf);
+	return bb;
+      }
+      else {
+	TempBuffer.free(tempBuf);
+	return BooleanValue.FALSE;
+      }
     } catch (IOException e) {
       throw new QuercusModuleException(e);
     }

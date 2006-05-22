@@ -38,6 +38,8 @@ import java.util.logging.Logger;
 import java.sql.*;
 
 import com.caucho.quercus.env.*;
+import com.caucho.sql.UserConnection;
+import com.caucho.util.LruCache;
 
 /**
  * Represents a JDBC Connection value.
@@ -46,14 +48,14 @@ public class JdbcConnectionResource extends ResourceValue {
   private static final Logger log
     = Logger.getLogger(JdbcConnectionResource.class.getName());
 
+  private static LruCache<TableKey,JdbcTableMetaData> _tableMetadataMap
+    = new LruCache<TableKey,JdbcTableMetaData>(256);
+
   private Connection _conn;
   // cached statement
   private Statement _stmt;
 
   private DatabaseMetaData _dmd;
-
-  private HashMap<TableKey,JdbcTableMetaData> _tableMetadataMap
-    = new HashMap<TableKey,JdbcTableMetaData>();
 
   private JdbcResultResource _rs;
   private int _affectedRows;
@@ -193,6 +195,14 @@ public class JdbcConnectionResource extends ResourceValue {
   }
 
   /**
+   * Returns the data source.
+   */
+  public String getURL()
+  {
+    return ((UserConnection) _conn).getURL();
+  }
+
+  /**
    * Returns the last error code.
    */
   public int getErrorCode()
@@ -238,15 +248,16 @@ public class JdbcConnectionResource extends ResourceValue {
    * Returns the table metadata.
    */
   public JdbcTableMetaData getTableMetaData(String catalog,
-              String schema,
-              String table)
+					    String schema,
+					    String table)
     throws SQLException
   {
-    TableKey key = new TableKey(catalog, schema, table);
+    TableKey key = new TableKey(getURL(), catalog, schema, table);
 
+    // XXX: needs invalidation on DROP or ALTER
     JdbcTableMetaData tableMd = _tableMetadataMap.get(key);
 
-    if (tableMd != null)
+    if (tableMd != null && tableMd.isValid())
       return tableMd;
 
     tableMd = new JdbcTableMetaData(catalog, schema, table, getMetaData());
@@ -717,12 +728,14 @@ public class JdbcConnectionResource extends ResourceValue {
   }
 
   static class TableKey {
+    private final String _url;
     private final String _catalog;
     private final String _schema;
     private final String _table;
 
-    TableKey(String catalog, String schema, String table)
+    TableKey(String url, String catalog, String schema, String table)
     {
+      _url = url;
       _catalog = catalog;
       _schema = schema;
       _table = table;
@@ -752,6 +765,9 @@ public class JdbcConnectionResource extends ResourceValue {
         return false;
 
       TableKey key = (TableKey) o;
+
+      if (_url != key._url)
+	return false;
 
       if ((_catalog == null) != (key._catalog == null))
         return false;

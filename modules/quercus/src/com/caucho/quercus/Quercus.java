@@ -63,6 +63,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.net.URL;
 import java.util.Enumeration;
+import java.util.IdentityHashMap;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -443,6 +444,26 @@ public class Quercus {
 
     if (fun == null)
       fun = _lowerFunMap.get(name.toLowerCase());
+
+    return fun;
+  }
+
+  /**
+   * Returns the function with the given name.
+   */
+  public StaticFunction findFunctionImpl(String name)
+  {
+    StaticFunction fun = _funMap.get(name);
+
+    return fun;
+  }
+
+  /**
+   * Returns the function with the given name.
+   */
+  public StaticFunction findLowerFunctionImpl(String lowerName)
+  {
+    StaticFunction fun = _lowerFunMap.get(lowerName);
 
     return fun;
   }

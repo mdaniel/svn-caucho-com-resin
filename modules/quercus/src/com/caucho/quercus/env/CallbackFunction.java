@@ -47,7 +47,7 @@ public class CallbackFunction extends Callback {
   public CallbackFunction(Env env, String funName)
   {
     _env = env;
-    _funName = funName.intern();
+    _funName = funName;
   }
 
   public CallbackFunction(AbstractFunction fun)

@@ -57,8 +57,8 @@ public class VariableModule extends AbstractQuercusModule {
     = Logger.getLogger(VariableModule.class.getName());
   private static final L10N L = new L10N(VariableModule.class);
 
-  private static final LruCache<String,Value> _unserializeCache
-    = new LruCache<String,Value>(256);
+  private static final LruCache<StringValue,Value> _unserializeCache
+    = new LruCache<StringValue,Value>(256);
 
   /**
    * Returns a constant
@@ -646,7 +646,7 @@ public class VariableModule extends AbstractQuercusModule {
   /**
    * Unserializes the value from a string.
    */
-  public static Value unserialize(Env env, String s)
+  public static Value unserialize(Env env, StringValue s)
   {
     Value v = _unserializeCache.get(s);
 

@@ -228,6 +228,11 @@ public class DBPoolImpl implements AlarmListener, EnvironmentListener {
     _name = name;
   }
 
+  public String getURL()
+  {
+    return _driverList.get(0).getURL();
+  }
+
   /**
    * Returns the driver config.
    */

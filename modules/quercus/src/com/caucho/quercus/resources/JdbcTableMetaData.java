@@ -37,6 +37,7 @@ import java.util.logging.Logger;
 import java.sql.*;
 
 import com.caucho.util.Log;
+import com.caucho.util.Alarm;
 
 import com.caucho.quercus.resources.JdbcConnectionResource;
 import com.caucho.quercus.env.*;
@@ -48,6 +49,8 @@ public class JdbcTableMetaData {
   private final String _catalog;
   private final String _schema;
   private final String _name;
+  
+  private final long _lastModified;
 
   private final HashMap<String,JdbcColumnMetaData> _columnMap
     = new HashMap<String,JdbcColumnMetaData>();
@@ -61,6 +64,7 @@ public class JdbcTableMetaData {
     _catalog = catalog;
     _schema = schema;
     _name = name;
+    _lastModified = Alarm.getCurrentTime();
 
     ResultSet rs = md.getColumns(_catalog, _schema, _name, null);
     try {
@@ -119,6 +123,11 @@ public class JdbcTableMetaData {
   public JdbcColumnMetaData getColumn(String name)
   {
     return _columnMap.get(name);
+  }
+
+  public boolean isValid()
+  {
+    return Alarm.getCurrentTime() - _lastModified < 1000L;
   }
 
   public String toString()

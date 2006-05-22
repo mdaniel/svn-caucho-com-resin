@@ -538,6 +538,7 @@ abstract public class StringValue extends Value implements CharSequence {
   /**
    * Serializes the value.
    */
+  @Override
   public void serialize(StringBuilder sb)
   {
     sb.append("s:");
@@ -547,9 +548,23 @@ abstract public class StringValue extends Value implements CharSequence {
     sb.append("\";");
   }
 
+
+  /**
+   * Append to a string builder.
+   */
+  @Override
+  public void appendTo(StringBuilderValue sb)
+  {
+    int length = length();
+
+    for (int i = 0; i < length; i++)
+      sb.append(charAt(i));
+  }
+
   /**
    * Exports the value.
    */
+  @Override
   public void varExport(StringBuilder sb)
   {
     sb.append("'");
@@ -716,6 +731,29 @@ abstract public class StringValue extends Value implements CharSequence {
   public StringValue substring(int begin, int end)
   {
     return (StringValue) subSequence(begin, end);
+  }
+
+  /**
+   * Returns a character array
+   */
+  public char []toCharArray()
+  {
+    int length = length();
+    
+    char []array = new char[length()];
+
+    getChars(0, array, 0, length);
+
+    return array;
+  }
+
+  /**
+   * Copies the chars
+   */
+  public void getChars(int stringOffset, char []buffer, int offset, int length)
+  {
+    for (int i = 0; i < length; i++)
+      buffer[offset + i] = charAt(stringOffset + i);
   }
 
   //

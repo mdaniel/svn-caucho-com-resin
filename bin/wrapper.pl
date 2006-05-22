@@ -521,7 +521,7 @@ if ($JAVA_EXE) {
     $JAVA_ARGS .= " -Xrunhprof:format=b,cpu=samples $thread";
 } elsif ($VMTYPE eq "cpuprof-ascii") {
     $JAVA_EXE="$JAVA_HOME/bin/java";
-    $JAVA_ARGS .= "  -Xrunhprof:cpu=samples,heap=sites,depth=$depth $thread";
+    $JAVA_ARGS .= "  -agentlib:hprof=cpu=samples,depth=$depth $thread";
 #    $JAVA_EXE="$JAVA_HOME/bin/java -Xrunhprof:cpu=samples,depth=$depth $thread";
 } elsif (-x "$JAVA_HOME/sh/java") {        # hack for AIX
     $JAVA_EXE="$JAVA_HOME/sh/java";

@@ -94,10 +94,23 @@ abstract public class ArrayValue extends Value {
     return null;
   }
 
+  //
+  // Conversions
+  //
+  
   /**
    * Converts to an object.
    */
   public Value toArray()
+  {
+    return this;
+  }
+  
+  /**
+   * Converts to an array value
+   */
+  @Override
+  public ArrayValue toArrayValue(Env env)
   {
     return this;
   }

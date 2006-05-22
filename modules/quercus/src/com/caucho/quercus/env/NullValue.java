@@ -144,6 +144,15 @@ public class NullValue extends Value {
   }
 
   /**
+   * Casts to an array.
+   */
+  @Override
+  public ArrayValue toArrayValue(Env env)
+  {
+    return null;
+  }
+
+  /**
    * Converts to an object if null.
    */
   public Value toAutoObject(Env env)

@@ -138,6 +138,9 @@ abstract public class Marshall {
     else if (InputStream.class.equals(argType)) {
       marshall = MARSHALL_INPUT_STREAM;
     }
+    else if (ArrayValue.class.equals(argType)) {
+      marshall = MARSHALL_ARRAY_VALUE;
+    }
     else if (Value.class.equals(argType)) {
       marshall = MARSHALL_VALUE;
     }
@@ -1280,12 +1283,12 @@ abstract public class Marshall {
 
     public Object marshall(Env env, Expr expr, Class expectedClass)
     {
-      return env.getPwd().lookup(expr.evalString(env));
+      return env.lookupPwd(expr.eval(env).toStringValue());
     }
 
     public Object marshall(Env env, Value value, Class expectedClass)
     {
-      return env.getPwd().lookup(value.toString());
+      return env.lookupPwd(value.toStringValue());
     }
 
     public Value unmarshall(Env env, Object value)
@@ -1296,9 +1299,9 @@ abstract public class Marshall {
     public void generate(PhpWriter out, Expr expr, Class argClass)
       throws IOException
     {
-      out.print("env.getPwd().lookup(");
-      expr.generateString(out);
-      out.print(")");
+      out.print("env.lookupPwd(");
+      expr.generate(out);
+      out.print(".toStringValue())");
     }
 
     public void generateResultStart(PhpWriter out)
@@ -1341,6 +1344,45 @@ abstract public class Marshall {
     {
       throw new UnsupportedOperationException();
     }
+  };
+
+  static final Marshall MARSHALL_ARRAY_VALUE = new Marshall() {
+    public Object marshall(Env env, Expr expr, Class expectedClass)
+    {
+      return expr.eval(env).toArrayValue(env);
+    }
+
+    public Object marshall(Env env, Value value, Class expectedClass)
+    {
+      return value.toArrayValue(env);
+    }
+
+    public Value unmarshall(Env env, Object value)
+    {
+      if (value instanceof ArrayValue)
+	return (ArrayValue) value;
+      else if (value instanceof Value)
+	return ((Value) value).toArrayValue(env);
+      else
+	return NullValue.NULL;
+    }
+
+    public void generate(PhpWriter out, Expr expr, Class argClass)
+      throws IOException
+    {
+      expr.generateValue(out);
+      out.print(".toArrayValue(env)");
+    }
+
+    public void generateResultStart(PhpWriter out)
+      throws IOException
+    {
+    }
+      
+    public void generateResultEnd(PhpWriter out)
+      throws IOException
+      {
+      }
   };
 
   static final Marshall MARSHALL_CALLBACK = new Marshall() {

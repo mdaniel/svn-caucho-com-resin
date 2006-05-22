@@ -54,10 +54,10 @@ public final class UnserializeReader {
   private int _index;
   private StringKey _key = new StringKey();
 
-  public UnserializeReader(String s)
+  public UnserializeReader(StringValue s)
   {
     _buffer = s.toCharArray();
-    _length = _buffer.length;
+    _length = s.length();
   }
 
   public Value unserialize(Env env)

@@ -70,13 +70,13 @@ public class SessionCallback extends Value {
     _open.eval(env, new StringValueImpl(savePath), new StringValueImpl(sessionName));
   }
 
-  public String read(Env env, String id)
+  public StringValue read(Env env, String id)
   {
     try {
       Value value = _read.eval(env, new StringValueImpl(id));
 
       if (value instanceof StringValue)
-        return value.toString();
+        return (StringValue) value;
       else
         return null;
     } catch (RuntimeException e) {

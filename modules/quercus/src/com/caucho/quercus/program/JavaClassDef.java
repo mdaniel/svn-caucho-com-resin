@@ -66,6 +66,8 @@ public class JavaClassDef extends ClassDef {
 
   private final String _name;
   private final Class _type;
+  private final boolean _isArray;
+  private JavaClassDef _componentDef;
 
   private final HashMap<String, Value> _constMap
     = new HashMap<String, Value>();
@@ -110,6 +112,8 @@ public class JavaClassDef extends ClassDef {
     _name = name;
 
     _type = type;
+
+    _isArray = type.isArray();
   }
 
   public static JavaClassDef create(ModuleContext moduleContext,
@@ -140,6 +144,21 @@ public class JavaClassDef extends ClassDef {
   public Class getType()
   {
     return _type;
+  }
+
+  public boolean isArray()
+  {
+    return _isArray;
+  }
+
+  public JavaClassDef getComponentDef()
+  {
+    if (_componentDef == null) {
+      Class compType = getType().getComponentType();
+      _componentDef = _moduleContext.getJavaClassDefinition(compType.getName());
+    }
+    
+    return _componentDef;
   }
 
   public Value wrap(Env env, Object obj)

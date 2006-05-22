@@ -327,6 +327,17 @@ abstract public class Value {
   }
 
   /**
+   * Casts to an array.
+   */
+  public ArrayValue toArrayValue(Env env)
+  {
+    env.error(L.l("{0} ({1}) is not assignable to ArrayValue",
+		  this, getClass().getName()));
+
+    return null;
+  }
+
+  /**
    * Converts to an object if null.
    */
   public Value toAutoObject(Env env)

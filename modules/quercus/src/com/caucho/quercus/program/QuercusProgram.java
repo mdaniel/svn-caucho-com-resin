@@ -45,6 +45,7 @@ import com.caucho.quercus.Quercus;
 
 import com.caucho.make.PersistentDependency;
 import com.caucho.make.VersionDependency;
+import com.caucho.make.DependencyContainer;
 
 import com.caucho.java.gen.GenClass;
 
@@ -73,6 +74,8 @@ public class QuercusProgram extends GenClass {
 
   private ArrayList<PersistentDependency> _dependList
     = new ArrayList<PersistentDependency>();
+  private DependencyContainer _depend
+    = new DependencyContainer();
 
   /**
    * Creates a new quercus program
@@ -147,6 +150,7 @@ public class QuercusProgram extends GenClass {
     
     _dependList.add(depend);
     addDependencyComponent().addDependency(depend);
+    _depend.add(depend);
   }
 
   /**
@@ -154,14 +158,7 @@ public class QuercusProgram extends GenClass {
    */
   public boolean isModified()
   {
-    for (int i = _dependList.size() - 1; i >= 0; i--) {
-      PersistentDependency depend = _dependList.get(i);
-
-      if (depend.isModified())
-	return true;
-    }
-
-    return false;
+    return _depend.isModified();
   }
 
   /**

@@ -221,6 +221,15 @@ public class Var extends Value {
   /**
    * Converts to an array
    */
+  @Override
+  public ArrayValue toArrayValue(Env env)
+  {
+    return _value.toArrayValue(env);
+  }
+
+  /**
+   * Converts to an array
+   */
   public Value toAutoArray()
   {
     _value = _value.toAutoArray();

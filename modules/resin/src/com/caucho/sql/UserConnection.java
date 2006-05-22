@@ -36,6 +36,7 @@ import java.sql.*;
 import java.util.*;
 import java.util.logging.*;
 
+import javax.sql.*;
 import javax.transaction.*;
 import javax.transaction.xa.*;
 
@@ -85,6 +86,11 @@ public class UserConnection implements java.sql.Connection {
     throws SQLException
   {
     return getMConn().getDriverConnection();
+  }
+
+  public String getURL()
+  {
+    return getMConn().getDBPool().getURL();
   }
 
   /**

@@ -207,6 +207,9 @@ public final class Env {
   private HashMap<Path,ArrayList<Path>> _includePathMap;
 
   private HashSet<Path> _includeSet = new HashSet<Path>();
+  
+  private HashMap<StringValue,Path> _lookupCache
+    = new HashMap<StringValue,Path>();
 
   private AbstractFunction _autoload;
 
@@ -600,6 +603,7 @@ public final class Env {
   public void setPwd(Path path)
   {
     _pwd = path;
+    _lookupCache.clear();
   }
 
   /**
@@ -761,9 +765,9 @@ public final class Env {
     SessionArrayValue session = null;
 
     if (callback != null) {
-      String value = callback.read(this, sessionId);
+      StringValue value = callback.read(this, sessionId);
 
-      if (value != null && ! value.equals("")) {
+      if (value != null && value.length() != 0) {
         Value unserialize = VariableModule.unserialize(this, value);
 
         if (unserialize instanceof ArrayValue) {
@@ -1872,9 +1876,8 @@ public final class Env {
     AbstractFunction fun = null;
 
     fun = _quercus.findFunction(name);
-    if (fun != null) {
+    if (fun != null)
       return fun;
-    }
 
     return fun;
   }
@@ -1897,18 +1900,25 @@ public final class Env {
   }
 
   /**
-   * Adds a function, e.g. from an include.
+   * Adds a function from a compiled include
+   *
+   * @param name the function name, must be an intern() string
+   * @param lowerName the function name, must be an intern() string
    */
   public Value addFunction(String name, String lowerName, AbstractFunction fun)
   {
-    AbstractFunction oldFun = findFunctionImpl(name);
+    // XXX: skip the old function check since the include for compiled
+    // pages is already verified.  Might have a switch here?
+    /*
+    AbstractFunction oldFun = _lowerFunMap.get(lowerName);
 
     if (oldFun == null)
-      oldFun = findFunctionImpl(lowerName);
+      oldFun = _quercus.findLowerFunctionImpl(lowerName);
 
     if (oldFun != null) {
       throw new QuercusException(L.l("can't redefine function {0}", name));
     }
+    */
 
     _funMap.put(name, fun);
     _lowerFunMap.put(lowerName, fun);
@@ -2306,7 +2316,7 @@ public final class Env {
       def = getJavaClassDefinition(obj.getClass().getName());
     }
 
-    if (def.getType().isArray()) {
+    if (def.isArray()) {
       ArrayValueImpl arrayValueImpl = new ArrayValueImpl();
 
       Class componentClass = def.getType().getComponentType();
@@ -2691,6 +2701,21 @@ public final class Env {
     } catch (IOException e) {
       throw new QuercusModuleException(e);
     }
+  }
+
+  /**
+   * Looks up based on the pwd.
+   */
+  public Path lookupPwd(StringValue relPath)
+  {
+    Path path = _lookupCache.get(relPath);
+
+    if (path == null) {
+      path = getPwd().lookup(relPath.toString());
+      _lookupCache.put(relPath, path);
+    }
+
+    return path;
   }
 
   /**
