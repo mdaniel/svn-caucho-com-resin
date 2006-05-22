@@ -63,6 +63,11 @@ abstract public class AbstractFunction {
     _location = Location.UNKNOWN;
   }
 
+  public AbstractFunction(Location location)
+  {
+    _location = location;
+  }
+
   public String getName()
   {
     return "unknown";
@@ -74,6 +79,14 @@ abstract public class AbstractFunction {
   public final boolean isGlobal()
   {
     return _isGlobal;
+  }
+
+  /**
+   * Returns true for an abstract function.
+   */
+  public boolean isAbstract()
+  {
+    return false;
   }
 
   public final Location getLocation()

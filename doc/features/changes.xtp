@@ -2,9 +2,11 @@
 
 <a href='changes-2.xtp'>Resin 2.1 changes</a>
 
-<s2 title='3.0.snap - May 19, 2006'>
+<s2 title='3.0.snap - May 22, 2006'>
 <ul>
-<li>Quercus: crc32 returns unsigned (#1133, rep by koreth)
+<li>Quercus: define(FOO, 1) was defining FOO as "FOO" (#1140, rep by koreth)
+<li>Quercus: basic abstract, interface implementation
+<li>(2006-05-22) Quercus: crc32 returns unsigned (#1133, rep by koreth)
 <li>Quercus: pack/unpack (#1102, rep by koreth)
 <li>Quercus: microtime fixes (#1119, fixed! by koreth)
 <li>Quercus: basic try .. catch support (#1120, 1121, 1062, rep by koreth)

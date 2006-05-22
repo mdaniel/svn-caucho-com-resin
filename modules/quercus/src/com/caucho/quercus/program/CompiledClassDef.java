@@ -64,9 +64,10 @@ public class CompiledClassDef extends ClassDef {
   protected ArrayValue _extFields = new ArrayValueImpl();
   protected Value _parent;
   
-  public CompiledClassDef(String name, String parent, Class compiledClass)
+  public CompiledClassDef(String name, String parent, String []ifaceList,
+			  Class compiledClass)
   {
-    super(name, parent);
+    super(name, parent, ifaceList);
 
     _compiledClass = compiledClass;
     try {

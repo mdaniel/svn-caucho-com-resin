@@ -105,7 +105,7 @@ public class JavaClassDef extends ClassDef {
 
   private JavaClassDef(ModuleContext moduleContext, String name, Class type)
   {
-    super(name, null);
+    super(name, null, new String[0]);
 
     _moduleContext = moduleContext;
 

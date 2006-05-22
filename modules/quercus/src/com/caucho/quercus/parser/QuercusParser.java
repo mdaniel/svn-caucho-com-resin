@@ -33,6 +33,8 @@ import java.io.StringReader;
 import java.io.Reader;
 import java.io.IOException;
 
+import java.lang.reflect.Modifier;
+
 import java.util.ArrayList;
 
 import com.caucho.quercus.QuercusRuntimeException;
@@ -50,8 +52,6 @@ import com.caucho.quercus.env.BooleanValue;
 import com.caucho.quercus.env.LongValue;
 import com.caucho.quercus.env.DoubleValue;
 import com.caucho.quercus.env.CallbackFunction;
-
-import com.caucho.quercus.program.InterpretedClassDef;
 
 import com.caucho.util.IntMap;
 import com.caucho.util.L10N;
@@ -74,6 +74,7 @@ public class QuercusParser {
   private final static int M_PRIVATE = 0x8;
   private final static int M_FINAL = 0x10;
   private final static int M_ABSTRACT = 0x20;
+  private final static int M_INTERFACE = 0x40;
   
   private final static int IDENTIFIER = 256;
   private final static int STRING = 257;
@@ -177,6 +178,8 @@ public class QuercusParser {
   private final static int THROW = 569;
   private final static int TRY = 570;
   private final static int CATCH = 571;
+  private final static int INTERFACE = 572;
+  private final static int IMPLEMENTS = 573;
   
   private final static int LAST_IDENTIFIER_LEXEME = 1024;
 
@@ -467,11 +470,38 @@ public class QuercusParser {
 	parseUnset(statements);
 	break;
 
+      case ABSTRACT:
+      case FINAL:
+	{
+	  _peekToken = token;
+
+	  int modifiers = 0;
+	  do {
+	    token = parseToken();
+
+	    switch (token) {
+	    case ABSTRACT:
+	      modifiers |= M_ABSTRACT;
+	      break;
+	    case FINAL:
+	      modifiers |= M_FINAL;
+	      break;
+	    case CLASS:
+	      parseClassDefinition(modifiers);
+	      break;
+	    default:
+	      throw error(L.l("expected 'class' at {0}",
+			      tokenName(token)));
+	    }
+	  } while (token != CLASS);
+	}
+	break;
+
       case FUNCTION:
 	{
           Location functionLocation = getLocation();
 
-          Function fun = parseFunctionDefinition();
+          Function fun = parseFunctionDefinition(0);
 
 	  if (! _isTop) {
 	    statements.add(new FunctionDefStatement(functionLocation, fun));
@@ -480,7 +510,12 @@ public class QuercusParser {
 	break;
 
       case CLASS:
-	parseClassDefinition();
+	parseClassDefinition(0);
+	// statements.add(new ClassDefStatement(parseClassDefinition()));
+	break;
+
+      case INTERFACE:
+	parseClassDefinition(M_INTERFACE);
 	// statements.add(new ClassDefStatement(parseClassDefinition()));
 	break;
 
@@ -1337,7 +1372,7 @@ public class QuercusParser {
   /**
    * Parses a function definition
    */
-  private Function parseFunctionDefinition()
+  private Function parseFunctionDefinition(int modifiers)
     throws IOException
   {
     boolean oldTop = _isTop;
@@ -1345,6 +1380,11 @@ public class QuercusParser {
     
     boolean oldReturnsReference = _returnsReference;
     FunctionInfo oldFunction = _function;
+
+    boolean isAbstract = (modifiers & M_ABSTRACT) != 0;
+
+    if (_quercusClass != null && _quercusClass.isInterface())
+      isAbstract = true;
 
     try {
       _returnsReference = false;
@@ -1357,6 +1397,15 @@ public class QuercusParser {
 	_peekToken = token;
 
       String name = parseIdentifier();
+
+      if (isAbstract && ! _scope.isAbstract()) {
+	if (_quercusClass != null)
+	  throw error(L.l("'{0}' may not be abstract because class {1} is not abstract.",
+			  name, _quercusClass.getName()));
+	else
+	  throw error(L.l("'{0}' may not be abstract.  Abstract functions are only allowed in abstract classes.",
+			  name));
+      }
 
       _function = new FunctionInfo(_quercus, name);
       _function.setDeclaringClass(_quercusClass);
@@ -1372,26 +1421,36 @@ public class QuercusParser {
       
       expect(')');
       
-      expect('{');
-      
-      ArrayList<Statement> statementList;
-
-      statementList = parseStatementList();
-    
-      expect('}');
-
       Function function;
+      
+      if (isAbstract) {
+	expect(';');
 
-      if (_quercusClass != null)
-	function = new ObjectMethod(location, _quercusClass,
-				    name, _function,
-				    args, statementList);
-      else
-	function = new Function(location, name,
-                                _function, args,
-                                statementList);
+	function = new MethodDeclaration(location,
+					 _quercusClass, name,
+					 _function, args);
+      }
+      else {
+	expect('{');
+      
+	ArrayList<Statement> statementList;
+
+	statementList = parseStatementList();
+    
+	expect('}');
+	
+	if (_quercusClass != null)
+	  function = new ObjectMethod(location, _quercusClass,
+				      name, _function,
+				      args, statementList);
+	else
+	  function = new Function(location, name,
+				  _function, args,
+				  statementList);
+      }
 
       function.setGlobal(oldTop);
+      function.setStatic((modifiers & M_STATIC) != 0);
 
       _scope.addFunction(name, function);
 
@@ -1510,7 +1569,7 @@ public class QuercusParser {
   /**
    * Parses a class definition
    */
-  private InterpretedClassDef parseClassDefinition()
+  private InterpretedClassDef parseClassDefinition(int modifiers)
     throws IOException
   {
     String name = parseIdentifier();
@@ -1520,15 +1579,31 @@ public class QuercusParser {
     int token = parseToken();
     if (token == EXTENDS) {
       parentName = parseIdentifier();
+      token = parseToken();
     }
-    else
-      _peekToken = token;
+
+    ArrayList<String> ifaceList = new ArrayList<String>();
+
+    if (token == IMPLEMENTS) {
+      do {
+	ifaceList.add(parseIdentifier());
+
+	token = parseToken();
+      } while (token == ',');
+    }
+
+    _peekToken = token;
 
     InterpretedClassDef oldClass = _quercusClass;
     Scope oldScope = _scope;
 
     try {
-      _quercusClass = oldScope.addClass(name, parentName);
+      _quercusClass = oldScope.addClass(name, parentName, ifaceList);
+
+      if ((modifiers & M_ABSTRACT) != 0)
+	_quercusClass.setAbstract(true);
+      if ((modifiers & M_INTERFACE) != 0)
+	_quercusClass.setInterface(true);
     
       _scope = new ClassScope(_quercusClass);
 
@@ -1560,13 +1635,13 @@ public class QuercusParser {
 
       case FUNCTION:
 	{
-          Function fun = parseFunctionDefinition();
+          Function fun = parseFunctionDefinition(0);
 	  fun.setStatic(false);
 	  break;
 	}
 
       case CLASS:
-	parseClassDefinition();
+	parseClassDefinition(0);
 	break;
 
 	/* quercus/0260
@@ -1593,9 +1668,7 @@ public class QuercusParser {
 	  int token2 = parseToken();
 
 	  if (token2 == FUNCTION) {
-	    Function fun = parseFunctionDefinition();
-
-	    fun.setStatic((modifiers & M_STATIC) != 0);
+	    Function fun = parseFunctionDefinition(modifiers);
 	  }
 	  else {
 	    _peekToken = token2;
@@ -4381,6 +4454,9 @@ public class QuercusParser {
       
     case DEFAULT: return "'default'";
     case CLASS: return "'class'";
+    case INTERFACE: return "'interface'";
+    case EXTENDS: return "'extends'";
+    case IMPLEMENTS: return "'implements'";
     case RETURN: return "'return'";
       
     case DIE: return "'die'";
@@ -4570,5 +4646,7 @@ public class QuercusParser {
     _insensitiveReserved.put("throw", THROW);
     _insensitiveReserved.put("try", TRY);
     _insensitiveReserved.put("catch", CATCH);
+    _insensitiveReserved.put("interface", INTERFACE);
+    _insensitiveReserved.put("implements", IMPLEMENTS);
   }
 }

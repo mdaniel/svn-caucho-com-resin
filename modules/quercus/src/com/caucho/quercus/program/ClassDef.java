@@ -56,10 +56,13 @@ abstract public class ClassDef {
   private final String _name;
   private final String _parentName;
 
-  protected ClassDef(String name, String parentName)
+  private final String []_ifaceList;
+
+  protected ClassDef(String name, String parentName, String []ifaceList)
   {
     _name = name;
     _parentName = parentName;
+    _ifaceList = ifaceList;
   }
   
   /**
@@ -79,6 +82,30 @@ abstract public class ClassDef {
   }
 
   /**
+   * Returns the interfaces.
+   */
+  public String []getInterfaces()
+  {
+    return _ifaceList;
+  }
+
+  /**
+   * Return true for an abstract class.
+   */
+  public boolean isAbstract()
+  {
+    return false;
+  }
+
+  /**
+   * Return true for an interface class.
+   */
+  public boolean isInterface()
+  {
+    return false;
+  }
+
+  /**
    * Initialize the quercus class.
    */
   public void initClass(QuercusClass cl)
@@ -90,6 +117,15 @@ abstract public class ClassDef {
    */
   public Value newInstance(Env env, QuercusClass qcl)
   {
+    if (isAbstract()) {
+      throw env.errorException(L.l("abstract class '{0}' cannot be instantiated.",
+				   getName()));
+    }
+    else if (isInterface()) {
+      throw env.errorException(L.l("interface '{0}' cannot be instantiated.",
+				   getName()));
+    }
+    
     return new ObjectExtValue(qcl);
   }
 
@@ -114,7 +150,15 @@ abstract public class ClassDef {
    */
   public boolean isA(String name)
   {
-    return _name.equals(name);
+    if (_name.equals(name))
+      return true;
+
+    for (int i = 0; i < _ifaceList.length; i++) {
+      if (_ifaceList[i].equals(name))
+	return true;
+    }
+
+    return false;
   }
 
   /**

@@ -1673,9 +1673,6 @@ public final class Env {
 
     value = new StringValueImpl(name);
 
-    // XXX:
-    _constMap.put(name, value);
-
     return value;
   }
 
@@ -2553,6 +2550,7 @@ public final class Env {
     }
 
     qClass = new QuercusClass(def, parent);
+    qClass.validate(this);
 
     _classCache.put(key, new SoftReference<QuercusClass>(qClass));
 
@@ -2973,7 +2971,10 @@ public final class Env {
    */
   public RuntimeException errorException(String msg)
   {
-    String fullMsg = msg + getFunctionLocation();
+    Location location = getLocation();
+    String prefix = location.getMessagePrefix();
+    
+    String fullMsg = prefix + msg + getFunctionLocation();
 
     error(B_ERROR, fullMsg);
 

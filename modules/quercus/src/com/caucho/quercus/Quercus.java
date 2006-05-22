@@ -921,13 +921,15 @@ public class Quercus {
    */
   private void initStaticClasses()
   {
-    _stdClassDef = new InterpretedClassDef("stdClass", null);
+    _stdClassDef = new InterpretedClassDef("stdClass", null, new String[0]);
     _stdClass = new QuercusClass(_stdClassDef, null);
 
     _staticClasses.put(_stdClass.getName(), _stdClassDef);
     _lowerStaticClasses.put(_stdClass.getName().toLowerCase(), _stdClassDef);
     
-    InterpretedClassDef exn = new InterpretedClassDef("Exception", null);
+    InterpretedClassDef exn = new InterpretedClassDef("Exception",
+						      null,
+						      new String[0]);
 
     try {
       exn.setConstructor(new StaticFunction(_moduleContext,

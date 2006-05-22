@@ -56,6 +56,9 @@ import com.caucho.quercus.gen.PhpWriter;
  */
 public class InterpretedClassDef extends ClassDef
   implements InstanceInitializer {
+  private boolean _isAbstract;
+  private boolean _isInterface;
+  
   private final HashMap<String,AbstractFunction> _functionMap
     = new HashMap<String,AbstractFunction>();
 
@@ -71,9 +74,43 @@ public class InterpretedClassDef extends ClassDef
   private AbstractFunction _constructor;
   private AbstractFunction _destructor;
 
-  public InterpretedClassDef(String name, String parentName)
+  public InterpretedClassDef(String name,
+			     String parentName,
+			     String []ifaceList)
   {
-    super(name, parentName);
+    super(name, parentName, ifaceList);
+  }
+
+  /**
+   * true for an abstract class.
+   */
+  public void setAbstract(boolean isAbstract)
+  {
+    _isAbstract = isAbstract;
+  }
+
+  /**
+   * True for an abstract class.
+   */
+  public boolean isAbstract()
+  {
+    return _isAbstract;
+  }
+
+  /**
+   * true for an interface class.
+   */
+  public void setInterface(boolean isInterface)
+  {
+    _isInterface = isInterface;
+  }
+
+  /**
+   * True for an interface class.
+   */
+  public boolean isInterface()
+  {
+    return _isInterface;
   }
 
   /**
@@ -216,7 +253,19 @@ public class InterpretedClassDef extends ClassDef
       out.print("\"" + getParentName() + "\"");
     else
       out.print("null");
-    out.print(", quercus_" + getName() + ".class);");
+
+    out.print(", new String[] {");
+    String []ifaceList = getInterfaces();
+    for (int i = 0; i < ifaceList.length; i++) {
+      if (i != 0)
+	out.print(", ");
+
+      out.print("\"");
+      out.print(ifaceList[i]);
+      out.print("\"");
+    }
+    
+    out.print("}, quercus_" + getName() + ".class);");
     
     out.println();
     out.println("public static class quercus_" + getName() + " implements InstanceInitializer {");
@@ -356,8 +405,19 @@ public class InterpretedClassDef extends ClassDef
     }
     else
       out.print("null");
+
+    out.print(", new String[] {");
+    String []ifaceList = getInterfaces();
+    for (int i = 0; i < ifaceList.length; i++) {
+      if (i != 0)
+	out.print(", ");
+
+      out.print("\"");
+      out.print(ifaceList[i]);
+      out.print("\"");
+    }
     
-    out.println(", quercus_" + getName() + ".class));");
+    out.println("}, quercus_" + getName() + ".class));");
   }
 
   public String toString()

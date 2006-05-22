@@ -80,6 +80,8 @@ public class Function extends AbstractFunction {
            Arg []args,
            Statement []statements)
   {
+    super(location);
+    
     _name = name.intern();
     _info = info;
     _isReturnsReference = info.isReturnsReference();
@@ -95,6 +97,8 @@ public class Function extends AbstractFunction {
                   ArrayList<Arg> argList,
                   ArrayList<Statement> statementList)
   {
+    super(location);
+    
     _name = name.intern();
     _info = info;
     _isReturnsReference = info.isReturnsReference();
@@ -103,7 +107,6 @@ public class Function extends AbstractFunction {
     argList.toArray(_args);
 
     Statement []statements = new Statement[statementList.size()];
-
     statementList.toArray(statements);
 
     _statement = new BlockStatement(location, statements);

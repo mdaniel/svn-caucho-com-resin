@@ -41,6 +41,7 @@ import com.caucho.quercus.QuercusRuntimeException;
 import com.caucho.quercus.expr.Expr;
 import com.caucho.quercus.program.ClassDef;
 import com.caucho.quercus.program.AbstractFunction;
+import com.caucho.quercus.program.Function;
 import com.caucho.quercus.program.InstanceInitializer;
 
 import com.caucho.util.L10N;
@@ -226,6 +227,26 @@ public class QuercusClass {
     return _fieldNames;
   }
 
+  public void validate(Env env)
+  {
+    if (! _classDef.isAbstract() && ! _classDef.isInterface()) {
+      for (AbstractFunction absFun : _methodMap.values()) {
+	if (! (absFun instanceof Function))
+	  continue;
+
+	Function fun = (Function) absFun;
+
+	if (fun.isAbstract())
+	  throw env.errorException(L.l("Abstract function '{0}' must be implemented in concrete class {1}.",
+			      fun.getName(), getName()));
+      }
+    }
+  }
+
+  //
+  // Constructors
+  //
+  
   /**
    * Creates a new instance.
    */
@@ -284,7 +305,7 @@ public class QuercusClass {
   public boolean isA(String name)
   {
     for (int i = _classDefList.length - 1; i >= 0; i--) {
-      if (_classDefList[i].getName().equals(name))
+      if (_classDefList[i].isA(name))
 	return true;
     }
 

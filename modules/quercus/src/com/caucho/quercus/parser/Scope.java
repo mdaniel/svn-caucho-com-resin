@@ -29,6 +29,8 @@
 
 package com.caucho.quercus.parser;
 
+import java.util.ArrayList;
+
 import com.caucho.quercus.program.Function;
 
 import com.caucho.quercus.env.QuercusClass;
@@ -40,6 +42,15 @@ import com.caucho.quercus.program.InterpretedClassDef;
  */
 abstract public class Scope {
   /**
+   * Returns true for an abstract scope, e.g. an abstract class or an
+   * interface.
+   */
+  public boolean isAbstract()
+  {
+    return false;
+  }
+  
+  /**
    * Adds a function.
    */
   abstract public void addFunction(String name, Function function);
@@ -47,6 +58,8 @@ abstract public class Scope {
   /**
    * Adds a class
    */
-  abstract public InterpretedClassDef addClass(String name, String parent);
+  abstract public InterpretedClassDef addClass(String name,
+					       String parent,
+					       ArrayList<String> ifaceList);
 }
 
