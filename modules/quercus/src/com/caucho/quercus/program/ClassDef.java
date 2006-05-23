@@ -132,7 +132,7 @@ abstract public class ClassDef {
   /**
    * Creates a new instance.
    */
-  public Value evalNew(Env env, Expr []args)
+  public Value callNew(Env env, Expr []args)
   {
     return null;
   }
@@ -140,7 +140,7 @@ abstract public class ClassDef {
   /**
    * Creates a new instance.
    */
-  public Value evalNew(Env env, Value []args)
+  public Value callNew(Env env, Value []args)
   {
     return null;
   }

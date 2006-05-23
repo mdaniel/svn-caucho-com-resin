@@ -61,57 +61,57 @@ abstract public class CompiledMethod extends CompiledFunction {
   /**
    * Evaluates the method as a static function
    */
-  public Value eval(Env env)
+  public Value call(Env env)
   {
-    return evalMethod(env, NullValue.NULL);
+    return callMethod(env, NullValue.NULL);
   }
   
   /**
    * Evaluates the method as a static function
    */
-  public Value eval(Env env, Value a0)
+  public Value call(Env env, Value a0)
   {
-    return evalMethod(env, NullValue.NULL, a0);
+    return callMethod(env, NullValue.NULL, a0);
   }
   
   /**
    * Evaluates the method as a static function
    */
-  public Value eval(Env env, Value a0, Value a1)
+  public Value call(Env env, Value a0, Value a1)
   {
-    return evalMethod(env, NullValue.NULL, a0, a1);
+    return callMethod(env, NullValue.NULL, a0, a1);
   }
   
   /**
    * Evaluates the method as a static function
    */
-  public Value eval(Env env, Value a0, Value a1, Value a2)
+  public Value call(Env env, Value a0, Value a1, Value a2)
   {
-    return evalMethod(env, NullValue.NULL, a0, a1, a2);
+    return callMethod(env, NullValue.NULL, a0, a1, a2);
   }
   
   /**
    * Evaluates the method as a static function
    */
-  public Value eval(Env env, Value a0, Value a1, Value a2, Value a3)
+  public Value call(Env env, Value a0, Value a1, Value a2, Value a3)
   {
-    return evalMethod(env, NullValue.NULL, a0, a1, a2, a3);
+    return callMethod(env, NullValue.NULL, a0, a1, a2, a3);
   }
   
   /**
    * Evaluates the method as a static function
    */
-  public Value eval(Env env, Value a0, Value a1, Value a2, Value a3, Value a4)
+  public Value call(Env env, Value a0, Value a1, Value a2, Value a3, Value a4)
   {
-    return evalMethod(env, NullValue.NULL, a0, a1, a2, a3, a4);
+    return callMethod(env, NullValue.NULL, a0, a1, a2, a3, a4);
   }
   
   /**
    * Evaluates the method as a static function
    */
-  public Value eval(Env env, Value []argValues)
+  public Value call(Env env, Value []argValues)
   {
-    return evalMethod(env, NullValue.NULL, argValues);
+    return callMethod(env, NullValue.NULL, argValues);
   }
   
   public String toString()

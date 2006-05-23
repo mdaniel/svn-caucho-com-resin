@@ -1954,9 +1954,9 @@ public final class Env {
   }
 
   /**
-   * Compiles and evaluates the given code
+   * Compiles and calluates the given code
    *
-   * @param code the code to evaluate
+   * @param code the code to calluate
    * @return the result
    */
   public Value evalCode(String code)
@@ -1980,14 +1980,14 @@ public final class Env {
    * @param name the function name
    * @return the function value
    */
-  public Value eval(String name)
+  public Value call(String name)
   {
     AbstractFunction fun = findFunction(name);
 
     if (fun == null)
       return error(L.l("'{0}' is an unknown function.", name));
 
-    return fun.eval(this);
+    return fun.call(this);
   }
 
   /**
@@ -1997,14 +1997,14 @@ public final class Env {
    * @param a0 the first argument
    * @return the function value
    */
-  public Value eval(String name, Value a0)
+  public Value call(String name, Value a0)
   {
     AbstractFunction fun = findFunction(name);
 
     if (fun == null)
       return error(L.l("'{0}' is an unknown function.", name));
 
-    return fun.eval(this, a0);
+    return fun.call(this, a0);
   }
 
   /**
@@ -2015,9 +2015,9 @@ public final class Env {
    * @param a1 the second argument
    * @return the function value
    */
-  public Value eval(String name, Value a0, Value a1)
+  public Value call(String name, Value a0, Value a1)
   {
-    return getFunction(name).eval(this, a0, a1);
+    return getFunction(name).call(this, a0, a1);
   }
 
   /**
@@ -2029,9 +2029,9 @@ public final class Env {
    * @param a2 the third argument
    * @return the function value
    */
-  public Value eval(String name, Value a0, Value a1, Value a2)
+  public Value call(String name, Value a0, Value a1, Value a2)
   {
-    return getFunction(name).eval(this, a0, a1, a2);
+    return getFunction(name).call(this, a0, a1, a2);
   }
 
   /**
@@ -2044,9 +2044,9 @@ public final class Env {
    * @param a3 the fourth argument
    * @return the function value
    */
-  public Value eval(String name, Value a0, Value a1, Value a2, Value a3)
+  public Value call(String name, Value a0, Value a1, Value a2, Value a3)
   {
-    return getFunction(name).eval(this, a0, a1, a2, a3);
+    return getFunction(name).call(this, a0, a1, a2, a3);
   }
 
   /**
@@ -2060,10 +2060,10 @@ public final class Env {
    * @param a4 the fifth argument
    * @return the function value
    */
-  public Value eval(String name, Value a0, Value a1,
+  public Value call(String name, Value a0, Value a1,
                     Value a2, Value a3, Value a4)
   {
-    return getFunction(name).eval(this, a0, a1, a2, a3, a4);
+    return getFunction(name).call(this, a0, a1, a2, a3, a4);
   }
 
   /**
@@ -2073,9 +2073,9 @@ public final class Env {
    * @param args the arguments
    * @return the function value
    */
-  public Value eval(String name, Value []args)
+  public Value call(String name, Value []args)
   {
-    return getFunction(name).eval(this, args);
+    return getFunction(name).call(this, args);
   }
 
   /**
@@ -2084,14 +2084,14 @@ public final class Env {
    * @param name the function name
    * @return the function value
    */
-  public Value evalRef(String name)
+  public Value callRef(String name)
   {
     AbstractFunction fun = findFunction(name);
 
     if (fun == null)
       return error(L.l("'{0}' is an unknown function.", name));
 
-    return fun.evalRef(this);
+    return fun.callRef(this);
   }
 
   /**
@@ -2101,14 +2101,14 @@ public final class Env {
    * @param a0 the first argument
    * @return the function value
    */
-  public Value evalRef(String name, Value a0)
+  public Value callRef(String name, Value a0)
   {
     AbstractFunction fun = findFunction(name);
 
     if (fun == null)
       return error(L.l("'{0}' is an unknown function.", name));
 
-    return fun.evalRef(this, a0);
+    return fun.callRef(this, a0);
   }
 
   /**
@@ -2119,14 +2119,14 @@ public final class Env {
    * @param a1 the second argument
    * @return the function value
    */
-  public Value evalRef(String name, Value a0, Value a1)
+  public Value callRef(String name, Value a0, Value a1)
   {
     AbstractFunction fun = findFunction(name);
 
     if (fun == null)
       return error(L.l("'{0}' is an unknown function.", name));
 
-    return fun.evalRef(this, a0, a1);
+    return fun.callRef(this, a0, a1);
   }
 
   /**
@@ -2138,14 +2138,14 @@ public final class Env {
    * @param a2 the third argument
    * @return the function value
    */
-  public Value evalRef(String name, Value a0, Value a1, Value a2)
+  public Value callRef(String name, Value a0, Value a1, Value a2)
   {
     AbstractFunction fun = findFunction(name);
 
     if (fun == null)
       return error(L.l("'{0}' is an unknown function.", name));
 
-    return fun.evalRef(this, a0, a1, a2);
+    return fun.callRef(this, a0, a1, a2);
   }
 
   /**
@@ -2158,14 +2158,14 @@ public final class Env {
    * @param a3 the fourth argument
    * @return the function value
    */
-  public Value evalRef(String name, Value a0, Value a1, Value a2, Value a3)
+  public Value callRef(String name, Value a0, Value a1, Value a2, Value a3)
   {
     AbstractFunction fun = findFunction(name);
 
     if (fun == null)
       return error(L.l("'{0}' is an unknown function.", name));
 
-    return fun.evalRef(this, a0, a1, a2, a3);
+    return fun.callRef(this, a0, a1, a2, a3);
   }
 
   /**
@@ -2179,7 +2179,7 @@ public final class Env {
    * @param a4 the fifth argument
    * @return the function value
    */
-  public Value evalRef(String name, Value a0, Value a1,
+  public Value callRef(String name, Value a0, Value a1,
                        Value a2, Value a3, Value a4)
   {
     AbstractFunction fun = findFunction(name);
@@ -2187,7 +2187,7 @@ public final class Env {
     if (fun == null)
       return error(L.l("'{0}' is an unknown function.", name));
 
-    return fun.evalRef(this, a0, a1, a2, a3, a4);
+    return fun.callRef(this, a0, a1, a2, a3, a4);
   }
 
   /**
@@ -2197,14 +2197,14 @@ public final class Env {
    * @param args the arguments
    * @return the function value
    */
-  public Value evalRef(String name, Value []args)
+  public Value callRef(String name, Value []args)
   {
     AbstractFunction fun = findFunction(name);
 
     if (fun == null)
       return error(L.l("'{0}' is an unknown function.", name));
 
-    return fun.evalRef(this, args);
+    return fun.callRef(this, args);
   }
 
   /**
@@ -2485,7 +2485,7 @@ public final class Env {
 
       if (_autoload != null) {
 	try {
-	  _autoload.eval(this, new StringValueImpl(name));
+	  _autoload.call(this, new StringValueImpl(name));
 	} catch (Throwable e) {
 	  throw new RuntimeException(e);
 	}
@@ -2525,7 +2525,7 @@ public final class Env {
 
     if (_autoload != null) {
       try {
-        _autoload.eval(this, new StringValueImpl(name));
+        _autoload.call(this, new StringValueImpl(name));
       }
       catch (Throwable e) {
         throw new RuntimeException(e);
@@ -3196,7 +3196,7 @@ public final class Env {
 
         Value context = NullValue.NULL;
 
-        handler.eval(this, new LongValue(mask), new StringValueImpl(msg),
+        handler.call(this, new LongValue(mask), new StringValueImpl(msg),
                      fileNameV, lineV, context);
 
         return NullValue.NULL;
@@ -3555,7 +3555,7 @@ public final class Env {
 
     try {
       for (int i = 0; i < _shutdownList.size(); i++)
-        _shutdownList.get(i).eval(this);
+        _shutdownList.get(i).call(this);
     }
     catch (Throwable e) {
       log.log(Level.FINE, e.toString(), e);

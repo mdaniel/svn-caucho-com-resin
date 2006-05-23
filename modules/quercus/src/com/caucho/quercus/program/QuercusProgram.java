@@ -229,7 +229,7 @@ public class QuercusProgram extends GenClass {
    */
   public QuercusProgram createExprReturn()
   {
-    // quercus/1515 - used to convert an eval string to return a value
+    // quercus/1515 - used to convert an call string to return a value
     
     if (_statement instanceof ExprStatement) {
       ExprStatement exprStmt = (ExprStatement) _statement;

@@ -79,12 +79,12 @@ abstract public class CompiledFunctionRef_0 extends CompiledFunctionRef {
     return args;
   }
 
-  public Value evalRef(Env env, Value []argValues)
+  public Value callRef(Env env, Value []argValues)
   {
-    return evalRef(env);
+    return callRef(env);
   }
 
-  abstract public Value evalRef(Env env);
+  abstract public Value callRef(Env env);
   
   public String toString()
   {

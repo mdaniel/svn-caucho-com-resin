@@ -100,7 +100,7 @@ public class VarNewExpr extends Expr {
 
     _fullArgs = _args;
 
-    return cl.evalNew(env, _args);
+    return cl.callNew(env, _args);
   }
 
   //
@@ -129,7 +129,7 @@ public class VarNewExpr extends Expr {
   {
     out.print("env.findClass(");
     _name.generateString(out);
-    out.print(".intern()).evalNew(env, new Value[] {");
+    out.print(".intern()).callNew(env, new Value[] {");
 
     for (int i = 0; i < _args.length; i++) {
       if (i != 0)

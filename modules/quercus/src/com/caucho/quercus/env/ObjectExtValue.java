@@ -29,10 +29,6 @@
 
 package com.caucho.quercus.env;
 
-import com.caucho.quercus.expr.Expr;
-import com.caucho.quercus.program.AbstractFunction;
-import com.caucho.vfs.WriteStream;
-
 import java.util.AbstractSet;
 import java.util.IdentityHashMap;
 import java.util.Iterator;
@@ -42,6 +38,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import java.io.IOException;
+
+import com.caucho.quercus.expr.Expr;
+import com.caucho.quercus.expr.StringLiteralExpr;
+import com.caucho.quercus.program.AbstractFunction;
+import com.caucho.vfs.WriteStream;
 
 /**
  * Represents a PHP object value.
@@ -159,9 +160,10 @@ public class ObjectExtValue extends ObjectValue {
   }
 
   /**
-   * Gets a new value.
+   * Gets a field value.
    */
-  public Value getField(String key)
+  @Override
+  public Value getField(Env env, String key)
   {
     int capacity = _entries.length;
 
@@ -173,7 +175,7 @@ public class ObjectExtValue extends ObjectValue {
       Entry entry = _entries[hash];
 
       if (entry == null) {
-        return UnsetValue.UNSET;
+        return _cl.getField(env, this, key);
       }
       else if (key.equals(entry.getKey())) {
         return entry.getValue();
@@ -182,7 +184,7 @@ public class ObjectExtValue extends ObjectValue {
       hash = (hash + 1) & hashMask;
     }
 
-    return UnsetValue.UNSET;
+    return _cl.getField(env, this, key);
   }
 
   /**
@@ -211,12 +213,10 @@ public class ObjectExtValue extends ObjectValue {
   {
     Entry entry = getEntry(index);
 
-    if (entry != null) {
+    if (entry != null)
       return entry.toArg();
-    }
-    else {
+    else
       return new ArgGetFieldValue(env, this, index);
-    }
   }
 
   /**
@@ -226,12 +226,10 @@ public class ObjectExtValue extends ObjectValue {
   {
     Entry entry = getEntry(index);
 
-    if (entry != null) {
+    if (entry != null)
       return entry.toArg();
-    }
-    else {
+    else
       return new ArgGetFieldValue(env, this, index);
-    }
   }
 
   /**
@@ -263,7 +261,7 @@ public class ObjectExtValue extends ObjectValue {
    */
   public Value get(Value key)
   {
-    return getField(key.toString());
+    throw new UnsupportedOperationException();
   }
 
   public Value put(Value index, Value value)
@@ -279,9 +277,30 @@ public class ObjectExtValue extends ObjectValue {
   /**
    * Adds a new value.
    */
+  public Value putFieldInit(Env env, String key, Value value)
+  {
+    createEntry(key);
+
+    return putField(env, key, value);
+  }
+
+  /**
+   * Adds a new value.
+   */
+  @Override
   public Value putField(Env env, String key, Value value)
   {
-    Entry entry = createEntry(key);
+    Entry entry = null;
+
+    AbstractFunction setField = _cl.getSetField();
+    if (setField != null) {
+      entry = getEntry(key);
+
+      if (entry == null)
+	return setField.callMethod(env, this, new StringValueImpl(key), value);
+    }
+    else
+      entry = createEntry(key);
 
     Value oldValue = entry._value;
 
@@ -501,20 +520,33 @@ public class ObjectExtValue extends ObjectValue {
   /**
    * Evaluates a method.
    */
-  public Value evalMethod(Env env, String methodName, Expr []args)
+  public Value callMethod(Env env, String methodName, Expr []args)
   {
-    return _cl.getFunction(methodName).evalMethod(env, this, args);
+    AbstractFunction fun = _cl.findFunction(methodName);
+
+    if (fun != null)
+      return fun.callMethod(env, this, args);
+    else if (_cl.getCall() != null) {
+      Expr []newArgs = new Expr[args.length + 1];
+      newArgs[0] = new StringLiteralExpr(methodName);
+      System.arraycopy(args, 0, newArgs, 1, args.length);
+      
+      return _cl.getCall().callMethod(env, this, newArgs);
+    }
+    else
+      return env.error(L.l("Call to undefined method {0}::{1}",
+                           _cl.getName(), methodName));
   }
 
   /**
    * Evaluates a method.
    */
-  public Value evalMethod(Env env, String methodName, Value []args)
+  public Value callMethod(Env env, String methodName, Value []args)
   {
     AbstractFunction fun = _cl.findFunction(methodName);
 
     if (fun != null)
-      return fun.evalMethod(env, this, args);
+      return fun.callMethod(env, this, args);
     else
       return env.error(L.l("Call to undefined method {0}::{1}()",
                            _cl.getName(), methodName));
@@ -523,135 +555,135 @@ public class ObjectExtValue extends ObjectValue {
   /**
    * Evaluates a method.
    */
-  public Value evalMethod(Env env, String methodName)
+  public Value callMethod(Env env, String methodName)
   {
-    return _cl.getFunction(methodName).evalMethod(env, this);
+    return _cl.getFunction(methodName).callMethod(env, this);
   }
 
   /**
    * Evaluates a method.
    */
-  public Value evalMethod(Env env, String methodName, Value a0)
+  public Value callMethod(Env env, String methodName, Value a0)
   {
-    return _cl.getFunction(methodName).evalMethod(env, this, a0);
+    return _cl.getFunction(methodName).callMethod(env, this, a0);
   }
 
   /**
    * Evaluates a method.
    */
-  public Value evalMethod(Env env, String methodName,
+  public Value callMethod(Env env, String methodName,
                           Value a0, Value a1)
   {
-    return _cl.getFunction(methodName).evalMethod(env, this, a0, a1);
+    return _cl.getFunction(methodName).callMethod(env, this, a0, a1);
   }
 
   /**
    * Evaluates a method.
    */
-  public Value evalMethod(Env env, String methodName,
+  public Value callMethod(Env env, String methodName,
                           Value a0, Value a1, Value a2)
   {
-    return _cl.getFunction(methodName).evalMethod(env, this,
+    return _cl.getFunction(methodName).callMethod(env, this,
                                                   a0, a1, a2);
   }
 
   /**
    * Evaluates a method.
    */
-  public Value evalMethod(Env env, String methodName,
+  public Value callMethod(Env env, String methodName,
                           Value a0, Value a1, Value a2, Value a3)
   {
-    return _cl.getFunction(methodName).evalMethod(env, this,
+    return _cl.getFunction(methodName).callMethod(env, this,
                                                   a0, a1, a2, a3);
   }
 
   /**
    * Evaluates a method.
    */
-  public Value evalMethod(Env env, String methodName,
+  public Value callMethod(Env env, String methodName,
                           Value a0, Value a1, Value a2, Value a3, Value a4)
   {
-    return _cl.getFunction(methodName).evalMethod(env, this,
+    return _cl.getFunction(methodName).callMethod(env, this,
                                                   a0, a1, a2, a3, a4);
   }
 
   /**
    * Evaluates a method.
    */
-  public Value evalMethodRef(Env env, String methodName, Expr []args)
+  public Value callMethodRef(Env env, String methodName, Expr []args)
   {
-    return _cl.getFunction(methodName).evalMethodRef(env, this, args);
+    return _cl.getFunction(methodName).callMethodRef(env, this, args);
   }
 
   /**
    * Evaluates a method.
    */
-  public Value evalMethodRef(Env env, String methodName, Value []args)
+  public Value callMethodRef(Env env, String methodName, Value []args)
   {
-    return _cl.getFunction(methodName).evalMethodRef(env, this, args);
+    return _cl.getFunction(methodName).callMethodRef(env, this, args);
   }
 
   /**
    * Evaluates a method.
    */
-  public Value evalMethodRef(Env env, String methodName)
+  public Value callMethodRef(Env env, String methodName)
   {
-    return _cl.getFunction(methodName).evalMethodRef(env, this);
+    return _cl.getFunction(methodName).callMethodRef(env, this);
   }
 
   /**
    * Evaluates a method.
    */
-  public Value evalMethodRef(Env env, String methodName, Value a0)
+  public Value callMethodRef(Env env, String methodName, Value a0)
   {
-    return _cl.getFunction(methodName).evalMethodRef(env, this, a0);
+    return _cl.getFunction(methodName).callMethodRef(env, this, a0);
   }
 
   /**
    * Evaluates a method.
    */
-  public Value evalMethodRef(Env env, String methodName,
+  public Value callMethodRef(Env env, String methodName,
                              Value a0, Value a1)
   {
-    return _cl.getFunction(methodName).evalMethodRef(env, this, a0, a1);
+    return _cl.getFunction(methodName).callMethodRef(env, this, a0, a1);
   }
 
   /**
    * Evaluates a method.
    */
-  public Value evalMethodRef(Env env, String methodName,
+  public Value callMethodRef(Env env, String methodName,
                              Value a0, Value a1, Value a2)
   {
-    return _cl.getFunction(methodName).evalMethodRef(env, this,
+    return _cl.getFunction(methodName).callMethodRef(env, this,
                                                      a0, a1, a2);
   }
 
   /**
    * Evaluates a method.
    */
-  public Value evalMethodRef(Env env, String methodName,
+  public Value callMethodRef(Env env, String methodName,
                              Value a0, Value a1, Value a2, Value a3)
   {
-    return _cl.getFunction(methodName).evalMethodRef(env, this,
+    return _cl.getFunction(methodName).callMethodRef(env, this,
                                                      a0, a1, a2, a3);
   }
 
   /**
    * Evaluates a method.
    */
-  public Value evalMethodRef(Env env, String methodName,
+  public Value callMethodRef(Env env, String methodName,
                              Value a0, Value a1, Value a2, Value a3, Value a4)
   {
-    return _cl.getFunction(methodName).evalMethodRef(env, this,
+    return _cl.getFunction(methodName).callMethodRef(env, this,
                                                      a0, a1, a2, a3, a4);
   }
 
   /**
    * Evaluates a method.
    */
-  public Value evalClassMethod(Env env, AbstractFunction fun, Value []args)
+  public Value callClassMethod(Env env, AbstractFunction fun, Value []args)
   {
-    return fun.evalMethod(env, this, args);
+    return fun.callMethod(env, this, args);
   }
 
   /**
@@ -739,7 +771,7 @@ public class ObjectExtValue extends ObjectValue {
     AbstractFunction fun = _cl.findFunction("__toString");
 
     if (fun != null)
-      return fun.evalMethod(env, this, new Expr[0]).toStringValue();
+      return fun.callMethod(env, this, new Expr[0]).toStringValue();
     else
       return new StringValueImpl(_cl.getName() + "[]");
   }

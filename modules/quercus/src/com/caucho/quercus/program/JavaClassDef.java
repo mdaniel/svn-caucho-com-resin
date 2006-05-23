@@ -180,7 +180,7 @@ public class JavaClassDef extends ClassDef {
     if (__get != null) {
       try {
        //__get needs to handle a Value $foo[5] vs. $foo['bar']
-        return __get.eval(env, obj, name);
+        return __get.call(env, obj, name);
       } catch (Throwable e) {
         log.log(Level.FINE,  L.l(e.getMessage()), e);
         return NullValue.NULL;
@@ -202,7 +202,7 @@ public class JavaClassDef extends ClassDef {
 
     if (get != null) {
       try {
-        return get.eval(env, obj);
+        return get.call(env, obj);
       } catch (Throwable e) {
         log.log(Level.FINE, L.l(e.getMessage()), e);
         return NullValue.NULL;
@@ -219,7 +219,7 @@ public class JavaClassDef extends ClassDef {
         }
       } else if (__getField != null) {
         try {
-          return __getField.eval(env, obj, new StringValueImpl(name));
+          return __getField.call(env, obj, new StringValueImpl(name));
         } catch (Throwable e) {
           log.log(Level.FINE,  L.l(e.getMessage()), e);
           return NullValue.NULL;
@@ -246,7 +246,7 @@ public class JavaClassDef extends ClassDef {
   {
     if (__set != null) {
       try {
-        return __set.eval(env, obj, name, value);
+        return __set.call(env, obj, name, value);
       } catch (Throwable e) {
         log.log(Level.FINE,  L.l(e.getMessage()), e);
         return NullValue.NULL;
@@ -266,7 +266,7 @@ public class JavaClassDef extends ClassDef {
 
     if (setter != null) {
       try {
-        return setter.eval(env, obj, value);
+        return setter.call(env, obj, value);
       } catch (Throwable e) {
         log.log(Level.FINE,  L.l(e.getMessage()), e);
         return NullValue.NULL;
@@ -287,7 +287,7 @@ public class JavaClassDef extends ClassDef {
         }
       } else if (__setField != null) {
         try {
-          return __setField.eval(env, obj, new StringValueImpl(name), value);
+          return __setField.call(env, obj, new StringValueImpl(name), value);
         } catch (Throwable e) {
           log.log(Level.FINE,  L.l(e.getMessage()), e);
           return NullValue.NULL;
@@ -333,23 +333,23 @@ public class JavaClassDef extends ClassDef {
   /**
    * Eval new
    */
-  public Value evalNew(Env env, Expr []args)
+  public Value callNew(Env env, Expr []args)
   {
-    return _cons.eval(env, null, args);
+    return _cons.call(env, null, args);
   }
 
   /**
    * Eval new
    */
-  public Value evalNew(Env env, Value []args)
+  public Value callNew(Env env, Value []args)
   {
-    return _cons.eval(env, null, args);
+    return _cons.call(env, null, args);
   }
 
   /**
    * Eval a method
    */
-  public Value evalMethod(Env env, Object obj, String name, Expr []args)
+  public Value callMethod(Env env, Object obj, String name, Expr []args)
   {
     JavaMethod method = _functionMap.get(name);
 
@@ -360,83 +360,83 @@ public class JavaClassDef extends ClassDef {
       return NullValue.NULL;
     }
 
-    return method.eval(env, obj, args);
+    return method.call(env, obj, args);
   }
 
   /**
    * Eval a method
    */
-  public Value evalMethod(Env env, Value value, String name, Expr []args)
+  public Value callMethod(Env env, Value value, String name, Expr []args)
   {
-    return evalMethod(env, value.toJavaObject(), name, args);
+    return callMethod(env, value.toJavaObject(), name, args);
   }
 
   /**
    * Eval a method
    */
-  public Value evalMethod(Env env, Value value, String name, Value []args)
+  public Value callMethod(Env env, Value value, String name, Value []args)
   {
-    return evalMethod(env, value.toJavaObject(), name, args);
+    return callMethod(env, value.toJavaObject(), name, args);
   }
 
   /**
    * Eval a method
    */
-  public Value evalMethod(Env env, Object obj, String name, Value []args)
+  public Value callMethod(Env env, Object obj, String name, Value []args)
   {
-    return getMethod(env, name).eval(env, obj, args);
+    return getMethod(env, name).call(env, obj, args);
   }
 
   /**
    * Eval a method
    */
-  public Value evalMethod(Env env, Object obj, String name)
+  public Value callMethod(Env env, Object obj, String name)
   {
-    return getMethod(env, name).eval(env, obj);
+    return getMethod(env, name).call(env, obj);
   }
 
   /**
    * Eval a method
    */
-  public Value evalMethod(Env env, Object obj, String name, Value a1)
+  public Value callMethod(Env env, Object obj, String name, Value a1)
   {
-    return getMethod(env, name).eval(env, obj, a1);
+    return getMethod(env, name).call(env, obj, a1);
   }
 
   /**
    * Eval a method
    */
-  public Value evalMethod(Env env, Object obj, String name,
+  public Value callMethod(Env env, Object obj, String name,
                           Value a1, Value a2)
   {
-    return getMethod(env, name).eval(env, obj, a1, a2);
+    return getMethod(env, name).call(env, obj, a1, a2);
   }
 
   /**
    * Eval a method
    */
-  public Value evalMethod(Env env, Object obj, String name,
+  public Value callMethod(Env env, Object obj, String name,
                           Value a1, Value a2, Value a3)
   {
-    return getMethod(env, name).eval(env, obj, a1, a2, a3);
+    return getMethod(env, name).call(env, obj, a1, a2, a3);
   }
 
   /**
    * Eval a method
    */
-  public Value evalMethod(Env env, Object obj, String name,
+  public Value callMethod(Env env, Object obj, String name,
                           Value a1, Value a2, Value a3, Value a4)
   {
-    return getMethod(env, name).eval(env, obj, a1, a2, a3, a4);
+    return getMethod(env, name).call(env, obj, a1, a2, a3, a4);
   }
 
   /**
    * Eval a method
    */
-  public Value evalMethod(Env env, Object obj, String name,
+  public Value callMethod(Env env, Object obj, String name,
                           Value a1, Value a2, Value a3, Value a4, Value a5)
   {
-    return getMethod(env, name).eval(env, obj, a1, a2, a3, a4, a5);
+    return getMethod(env, name).call(env, obj, a1, a2, a3, a4, a5);
   }
 
   /**

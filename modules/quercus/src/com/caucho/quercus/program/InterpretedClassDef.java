@@ -44,6 +44,7 @@ import com.caucho.quercus.program.InstanceInitializer;
 import com.caucho.quercus.program.Function;
 
 import com.caucho.quercus.env.Value;
+import com.caucho.quercus.env.ObjectValue;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.QuercusClass;
 
@@ -73,6 +74,9 @@ public class InterpretedClassDef extends ClassDef
 
   private AbstractFunction _constructor;
   private AbstractFunction _destructor;
+  private AbstractFunction _getField;
+  private AbstractFunction _setField;
+  private AbstractFunction _call;
 
   public InterpretedClassDef(String name,
 			     String parentName,
@@ -121,6 +125,15 @@ public class InterpretedClassDef extends ClassDef
     if (_constructor != null)
       cl.setConstructor(_constructor);
     
+    if (_getField != null)
+      cl.setGet(_getField);
+    
+    if (_setField != null)
+      cl.setSet(_setField);
+    
+    if (_call != null)
+      cl.setCall(_call);
+    
     cl.addInitializer(this);
     
     for (Map.Entry<String,AbstractFunction> entry : _functionMap.entrySet()) {
@@ -147,6 +160,12 @@ public class InterpretedClassDef extends ClassDef
       _constructor = fun;
     else if (name.equals("__destruct"))
       _destructor = fun;
+    else if (name.equals("__get"))
+      _getField = fun;
+    else if (name.equals("__set"))
+      _setField = fun;
+    else if (name.equals("__call"))
+      _call = fun;
     else if (name.equals(getName()) && _constructor == null)
       _constructor = fun;
   }
@@ -214,10 +233,12 @@ public class InterpretedClassDef extends ClassDef
   /**
    * Initialize the fields
    */
-  public void initInstance(Env env, Value object)
+  public void initInstance(Env env, Value value)
   {
+    ObjectValue object = (ObjectValue) value;
+    
     for (Map.Entry<String,Expr> entry : _fieldMap.entrySet())
-      object.putField(env, entry.getKey(), entry.getValue().eval(env).copy());
+      object.putFieldInit(env, entry.getKey(), entry.getValue().eval(env).copy());
   }
 
   /**
@@ -290,6 +311,21 @@ public class InterpretedClassDef extends ClassDef
       out.println("cl.setConstructor(__quercus_fun_" + _constructor.getName() + ");");
       out.println();
     }
+    
+    if (_getField != null) {
+      out.println("cl.setGet(__quercus_fun_" + _getField.getName() + ");");
+      out.println();
+    }
+    
+    if (_setField != null) {
+      out.println("cl.setSet(__quercus_fun_" + _setField.getName() + ");");
+      out.println();
+    }
+    
+    if (_call != null) {
+      out.println("cl.setCall(__quercus_fun_" + _call.getName() + ");");
+      out.println();
+    }
 
     if (false) {
       for (String key : _fieldMap.keySet()) {
@@ -337,7 +373,7 @@ public class InterpretedClassDef extends ClassDef
 	out.println(";");
       }
       else {
-	out.print("value.putField(env, \"" + key + "\", ");
+	out.print("value.putFieldInit(env, \"" + key + "\", ");
 	value.generate(out);
 	out.println(");");
       }
@@ -351,17 +387,6 @@ public class InterpretedClassDef extends ClassDef
     */
     
     out.popDepth();
-    out.println("}");
-
-    out.println();
-    out.println("public AbstractFunction findConstructor()");
-    out.println("{");
-
-    if (_constructor != null)
-      out.println("  return __quercus_fun_" + _constructor.getName() + ";");
-    else
-      out.println("  return null;");
-      
     out.println("}");
 
     for (AbstractFunction fun : _functionMap.values()) {

@@ -79,26 +79,26 @@ abstract public class CompiledRefMethod_0 extends CompiledMethodRef {
     return args;
   }
 
-  public Value evalMethod(Env env, Value obj, Value []argValues)
+  public Value callMethod(Env env, Value obj, Value []argValues)
   {
-    return evalMethodRef(env, obj, argValues).copy();
+    return callMethodRef(env, obj, argValues).copy();
   }
 
   /**
    * Evalautes the method.
    */
-  public Value evalMethodRef(Env env, Value obj, Value []argValues)
+  public Value callMethodRef(Env env, Value obj, Value []argValues)
   {
     if (argValues.length > 0)
       env.warning(L.l("too many arguments in {0}", _name));
 
-    return evalMethodRef(env, obj);
+    return callMethodRef(env, obj);
   }
 
   /**
    * Evaluates the method as a static function
    */
-  public Value eval(Env env, Value []argValues)
+  public Value call(Env env, Value []argValues)
   {
     env.error(L.l("can't call {0} as a static function",
 		  _name));
@@ -109,15 +109,15 @@ abstract public class CompiledRefMethod_0 extends CompiledMethodRef {
   /**
    * Evaluates the method as a static function
    */
-  public Value evalMethod(Env env)
+  public Value callMethod(Env env)
   {
-    return evalMethodRef(env).copy();
+    return callMethodRef(env).copy();
   }
 
   /**
    * Evaluates the method as a static function
    */
-  abstract public Value evalMethodRef(Env env);
+  abstract public Value callMethodRef(Env env);
   
   public String toString()
   {

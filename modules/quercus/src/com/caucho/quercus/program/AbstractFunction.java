@@ -177,28 +177,28 @@ abstract public class AbstractFunction {
   /**
    * Evaluates the function.
    */
-  abstract public Value eval(Env env, Value []args);
+  abstract public Value call(Env env, Value []args);
 
   /**
    * Evaluates the function, returning a reference.
    */
-  public Value evalRef(Env env, Value []args)
+  public Value callRef(Env env, Value []args)
   {
-    return eval(env, args);
+    return call(env, args);
   }
 
   /**
    * Evaluates the function, returning a copy
    */
-  public Value evalCopy(Env env, Value []args)
+  public Value callCopy(Env env, Value []args)
   {
-    return eval(env, args).copyReturn();
+    return call(env, args).copyReturn();
   }
   
   /**
    * Evaluates the function as a method call.
    */
-  public Value evalMethod(Env env, Value obj, Value []args)
+  public Value callMethod(Env env, Value obj, Value []args)
   {
     Value oldThis = env.getThis();
 
@@ -206,7 +206,7 @@ abstract public class AbstractFunction {
       if (obj != null)
 	env.setThis(obj);
 
-      return eval(env, args);
+      return call(env, args);
     } finally {
       env.setThis(oldThis);
     }
@@ -215,14 +215,14 @@ abstract public class AbstractFunction {
   /**
    * Evaluates the function as a method call, returning a reference.
    */
-  public Value evalMethodRef(Env env, Value obj, Value []args)
+  public Value callMethodRef(Env env, Value obj, Value []args)
   {
     Value oldThis = env.getThis();
 
     try {
       env.setThis(obj);
 
-      return evalRef(env, args);
+      return callRef(env, args);
     } finally {
       env.setThis(oldThis);
     }
@@ -231,55 +231,55 @@ abstract public class AbstractFunction {
   /**
    * Evaluates the function.
    */
-  public Value eval(Env env)
+  public Value call(Env env)
   {
-    return eval(env, NULL_ARG_VALUES);
+    return call(env, NULL_ARG_VALUES);
   }
 
   /**
    * Evaluates the function with an argument .
    */
-  public Value eval(Env env, Value a1)
+  public Value call(Env env, Value a1)
   {
-    return eval(env, new Value[] { a1 });
+    return call(env, new Value[] { a1 });
   }
 
   /**
    * Evaluates the function with arguments
    */
-  public Value eval(Env env, Value a1, Value a2)
+  public Value call(Env env, Value a1, Value a2)
   {
-    return eval(env, new Value[] { a1, a2 });
+    return call(env, new Value[] { a1, a2 });
   }
 
   /**
    * Evaluates the function with arguments
    */
-  public Value eval(Env env, Value a1, Value a2, Value a3)
+  public Value call(Env env, Value a1, Value a2, Value a3)
   {
-    return eval(env, new Value[] { a1, a2, a3 });
+    return call(env, new Value[] { a1, a2, a3 });
   }
 
   /**
    * Evaluates the function with arguments
    */
-  public Value eval(Env env, Value a1, Value a2, Value a3, Value a4)
+  public Value call(Env env, Value a1, Value a2, Value a3, Value a4)
   {
-    return eval(env, new Value[] { a1, a2, a3, a4 });
+    return call(env, new Value[] { a1, a2, a3, a4 });
   }
 
   /**
    * Evaluates the function with arguments
    */
-  public Value eval(Env env, Value a1, Value a2, Value a3, Value a4, Value a5)
+  public Value call(Env env, Value a1, Value a2, Value a3, Value a4, Value a5)
   {
-    return eval(env, new Value[] { a1, a2, a3, a4, a5 });
+    return call(env, new Value[] { a1, a2, a3, a4, a5 });
   }
 
   /**
    * Evaluates the function.
    */
-  public Value eval(Env env, Expr []exprs)
+  public Value call(Env env, Expr []exprs)
   {
     Value []argValues = new Value[exprs.length];
     Arg []args = getArgs();
@@ -292,70 +292,70 @@ abstract public class AbstractFunction {
 	argValues[i] = exprs[i].eval(env);
     }
 
-    return eval(env, argValues);
+    return call(env, argValues);
   }
 
   /**
    * Evaluates the function.
    */
-  public Value evalCopy(Env env, Expr []exprs)
+  public Value callCopy(Env env, Expr []exprs)
   {
-    return eval(env, exprs).copy();
+    return call(env, exprs).copy();
   }
 
   /**
    * Evaluates the function.
    */
-  public Value evalRef(Env env)
+  public Value callRef(Env env)
   {
-    return evalRef(env, NULL_ARG_VALUES);
+    return callRef(env, NULL_ARG_VALUES);
   }
 
   /**
    * Evaluates the function with an argument .
    */
-  public Value evalRef(Env env, Value a1)
+  public Value callRef(Env env, Value a1)
   {
-    return evalRef(env, new Value[] { a1 });
+    return callRef(env, new Value[] { a1 });
   }
 
   /**
    * Evaluates the function with arguments
    */
-  public Value evalRef(Env env, Value a1, Value a2)
+  public Value callRef(Env env, Value a1, Value a2)
   {
-    return evalRef(env, new Value[] { a1, a2 });
+    return callRef(env, new Value[] { a1, a2 });
   }
 
   /**
    * Evaluates the function with arguments
    */
-  public Value evalRef(Env env, Value a1, Value a2, Value a3)
+  public Value callRef(Env env, Value a1, Value a2, Value a3)
   {
-    return evalRef(env, new Value[] { a1, a2, a3 });
+    return callRef(env, new Value[] { a1, a2, a3 });
   }
 
   /**
    * Evaluates the function with arguments
    */
-  public Value evalRef(Env env, Value a1, Value a2, Value a3, Value a4)
+  public Value callRef(Env env, Value a1, Value a2, Value a3, Value a4)
   {
-    return evalRef(env, new Value[] { a1, a2, a3, a4 });
+    return callRef(env, new Value[] { a1, a2, a3, a4 });
   }
 
   /**
    * Evaluates the function with arguments
    */
-  public Value evalRef(Env env,
+  public Value callRef(Env env,
 		       Value a1, Value a2, Value a3, Value a4, Value a5)
   {
-    return evalRef(env, new Value[] { a1, a2, a3, a4, a5 });
+    return callRef(env, new Value[] { a1, a2, a3, a4, a5 });
   }
 
   /**
    * Evaluates the function.
    */
-  public Value evalRef(Env env, Expr []exprs)
+  public Value callRef(Env env, Expr []exprs)
   {
     Value []argValues = new Value[exprs.length];
     Arg []args = getArgs();
@@ -368,64 +368,64 @@ abstract public class AbstractFunction {
 	argValues[i] = exprs[i].eval(env);
     }
 
-    return evalRef(env, argValues);
+    return callRef(env, argValues);
   }
 
   /**
    * Evaluates the function as a method call.
    */
-  public Value evalMethod(Env env, Value obj)
+  public Value callMethod(Env env, Value obj)
   {
-    return evalMethod(env, obj, NULL_ARG_VALUES);
+    return callMethod(env, obj, NULL_ARG_VALUES);
   }
 
   /**
    * Evaluates the function as a method call.
    */
-  public Value evalMethod(Env env, Value obj, Value a1)
+  public Value callMethod(Env env, Value obj, Value a1)
   {
-    return evalMethod(env, obj, new Value[] { a1 });
+    return callMethod(env, obj, new Value[] { a1 });
   }
 
   /**
    * Evaluates the function as a method call.
    */
-  public Value evalMethod(Env env, Value obj, Value a1, Value a2)
+  public Value callMethod(Env env, Value obj, Value a1, Value a2)
   {
-    return evalMethod(env, obj, new Value[] { a1, a2 });
+    return callMethod(env, obj, new Value[] { a1, a2 });
   }
 
   /**
    * Evaluates the function as a method call.
    */
-  public Value evalMethod(Env env, Value obj,
+  public Value callMethod(Env env, Value obj,
 			  Value a1, Value a2, Value a3)
   {
-    return evalMethod(env, obj, new Value[] { a1, a2, a3 });
+    return callMethod(env, obj, new Value[] { a1, a2, a3 });
   }
 
   /**
    * Evaluates the function as a method call.
    */
-  public Value evalMethod(Env env, Value obj,
+  public Value callMethod(Env env, Value obj,
 			  Value a1, Value a2, Value a3, Value a4)
   {
-    return evalMethod(env, obj, new Value[] { a1, a2, a3, a4 });
+    return callMethod(env, obj, new Value[] { a1, a2, a3, a4 });
   }
 
   /**
    * Evaluates the function as a method call.
    */
-  public Value evalMethod(Env env, Value obj,
+  public Value callMethod(Env env, Value obj,
 			  Value a1, Value a2, Value a3, Value a4, Value a5)
   {
-    return evalMethod(env, obj, new Value[] { a1, a2, a3, a4, a5 });
+    return callMethod(env, obj, new Value[] { a1, a2, a3, a4, a5 });
   }
 
   /**
    * Evaluates the function.
    */
-  public Value evalMethod(Env env, Value obj, Expr []exprs)
+  public Value callMethod(Env env, Value obj, Expr []exprs)
   {
     Value []argValues = new Value[exprs.length];
     Arg []args = getArgs();
@@ -438,64 +438,64 @@ abstract public class AbstractFunction {
 	argValues[i] = exprs[i].eval(env);
     }
 
-    return evalMethod(env, obj, argValues);
+    return callMethod(env, obj, argValues);
   }
 
   /**
    * Evaluates the function as a method call.
    */
-  public Value evalMethodRef(Env env, Value obj)
+  public Value callMethodRef(Env env, Value obj)
   {
-    return evalMethodRef(env, obj, NULL_ARG_VALUES);
+    return callMethodRef(env, obj, NULL_ARG_VALUES);
   }
 
   /**
    * Evaluates the function as a method call.
    */
-  public Value evalMethodRef(Env env, Value obj, Value a1)
+  public Value callMethodRef(Env env, Value obj, Value a1)
   {
-    return evalMethodRef(env, obj, new Value[] { a1 });
+    return callMethodRef(env, obj, new Value[] { a1 });
   }
 
   /**
    * Evaluates the function as a method call.
    */
-  public Value evalMethodRef(Env env, Value obj, Value a1, Value a2)
+  public Value callMethodRef(Env env, Value obj, Value a1, Value a2)
   {
-    return evalMethodRef(env, obj, new Value[] { a1, a2 });
+    return callMethodRef(env, obj, new Value[] { a1, a2 });
   }
 
   /**
    * Evaluates the function as a method call.
    */
-  public Value evalMethodRef(Env env, Value obj,
+  public Value callMethodRef(Env env, Value obj,
 			     Value a1, Value a2, Value a3)
   {
-    return evalMethodRef(env, obj, new Value[] { a1, a2, a3 });
+    return callMethodRef(env, obj, new Value[] { a1, a2, a3 });
   }
 
   /**
    * Evaluates the function as a method call.
    */
-  public Value evalMethodRef(Env env, Value obj,
+  public Value callMethodRef(Env env, Value obj,
 			     Value a1, Value a2, Value a3, Value a4)
   {
-    return evalMethodRef(env, obj, new Value[] { a1, a2, a3, a4 });
+    return callMethodRef(env, obj, new Value[] { a1, a2, a3, a4 });
   }
 
   /**
    * Evaluates the function as a method call.
    */
-  public Value evalMethodRef(Env env, Value obj,
+  public Value callMethodRef(Env env, Value obj,
 			     Value a1, Value a2, Value a3, Value a4, Value a5)
   {
-    return evalMethodRef(env, obj, new Value[] { a1, a2, a3, a4, a5 });
+    return callMethodRef(env, obj, new Value[] { a1, a2, a3, a4, a5 });
   }
 
   /**
    * Evaluates the function.
    */
-  public Value evalMethodRef(Env env, Value obj, Expr []exprs)
+  public Value callMethodRef(Env env, Value obj, Expr []exprs)
   {
     Value []argValues = new Value[exprs.length];
     Arg []args = getArgs();
@@ -507,7 +507,7 @@ abstract public class AbstractFunction {
 	argValues[i] = exprs[i].eval(env);
     }
 
-    return evalMethodRef(env, obj, argValues);
+    return callMethodRef(env, obj, argValues);
   }
 
   /**
@@ -537,7 +537,7 @@ abstract public class AbstractFunction {
   }
 
   /**
-   * Generates code to evaluate the expression.
+   * Generates code to calluate the expression.
    *
    * @param out the writer to the Java source code.
    */
@@ -545,7 +545,7 @@ abstract public class AbstractFunction {
     throws IOException;
 
   /**
-   * Generates code to evaluate the expression.
+   * Generates code to calluate the expression.
    *
    * @param out the writer to the Java source code.
    */
@@ -556,7 +556,7 @@ abstract public class AbstractFunction {
   }
   
   /**
-   * Generates code to evaluate as a top-level expression.
+   * Generates code to calluate as a top-level expression.
    *
    * @param out the writer to the Java source code.
    */
@@ -567,7 +567,7 @@ abstract public class AbstractFunction {
   }
   
   /**
-   * Generates code to evaluate as a boolean expression.
+   * Generates code to calluate as a boolean expression.
    *
    * @param out the writer to the Java source code.
    */
@@ -579,7 +579,7 @@ abstract public class AbstractFunction {
   }
   
   /**
-   * Generates code to evaluate as a string expression.
+   * Generates code to calluate as a string expression.
    *
    * @param out the writer to the Java source code.
    */
@@ -591,7 +591,7 @@ abstract public class AbstractFunction {
   }
   
   /**
-   * Generates code to evaluate as a long expression.
+   * Generates code to calluate as a long expression.
    *
    * @param out the writer to the Java source code.
    */
@@ -603,7 +603,7 @@ abstract public class AbstractFunction {
   }
   
   /**
-   * Generates code to evaluate as a double expression.
+   * Generates code to calluate as a double expression.
    *
    * @param out the writer to the Java source code.
    */
@@ -615,7 +615,7 @@ abstract public class AbstractFunction {
   }
   
   /**
-   * Generates code to evaluate as a double expression.
+   * Generates code to calluate as a double expression.
    *
    * @param out the writer to the Java source code.
    */

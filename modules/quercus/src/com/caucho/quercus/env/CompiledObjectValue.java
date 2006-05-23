@@ -157,7 +157,8 @@ public class CompiledObjectValue extends ObjectValue {
   /**
    * Gets a new value.
    */
-  public Value getField(String key)
+  @Override
+  public Value getField(Env env, String key)
   {
     if (_fields.length > 0) {
       int index = _cl.findFieldIndex(key);
@@ -167,7 +168,7 @@ public class CompiledObjectValue extends ObjectValue {
     }
     
     if (_object != null)
-      return _object.getField(key);
+      return _object.getField(env, key);
     else
       return UnsetValue.UNSET;
   }
@@ -286,9 +287,10 @@ public class CompiledObjectValue extends ObjectValue {
   /**
    * Gets a new value.
    */
+  @Override
   public Value get(Value key)
   {
-    return getField(key.toString());
+    throw new UnsupportedOperationException();
   }
 
   public Value put(Value index, Value value)
@@ -410,20 +412,20 @@ public class CompiledObjectValue extends ObjectValue {
   /**
    * Evaluates a method.
    */
-  public Value evalMethod(Env env, String methodName, Expr []args)
+  public Value callMethod(Env env, String methodName, Expr []args)
   {
-    return _cl.getFunction(methodName).evalMethod(env, this, args);
+    return _cl.getFunction(methodName).callMethod(env, this, args);
   }
 
   /**
    * Evaluates a method.
    */
-  public Value evalMethod(Env env, String methodName, Value []args)
+  public Value callMethod(Env env, String methodName, Value []args)
   {
     AbstractFunction fun = _cl.findFunction(methodName);
 
     if (fun != null)
-      return fun.evalMethod(env, this, args);
+      return fun.callMethod(env, this, args);
     else
       return env.error(L.l("Call to undefined method {0}::{1}()",
                            _cl.getName(), methodName));
@@ -432,140 +434,140 @@ public class CompiledObjectValue extends ObjectValue {
   /**
    * Evaluates a method.
    */
-  public Value evalMethod(Env env, String methodName)
+  public Value callMethod(Env env, String methodName)
   {
-    return _cl.getFunction(methodName).evalMethod(env, this);
+    return _cl.getFunction(methodName).callMethod(env, this);
   }
 
   /**
    * Evaluates a method.
    */
-  public Value evalMethod(Env env, String methodName, Value a0)
+  public Value callMethod(Env env, String methodName, Value a0)
   {
-    return _cl.getFunction(methodName).evalMethod(env, this, a0);
+    return _cl.getFunction(methodName).callMethod(env, this, a0);
   }
 
   /**
    * Evaluates a method.
    */
-  public Value evalMethod(Env env, String methodName,
+  public Value callMethod(Env env, String methodName,
                           Value a0, Value a1)
   {
-    return _cl.getFunction(methodName).evalMethod(env, this, a0, a1);
+    return _cl.getFunction(methodName).callMethod(env, this, a0, a1);
   }
 
   /**
    * Evaluates a method.
    */
-  public Value evalMethod(Env env, String methodName,
+  public Value callMethod(Env env, String methodName,
                           Value a0, Value a1, Value a2)
   {
-    return _cl.getFunction(methodName).evalMethod(env, this,
+    return _cl.getFunction(methodName).callMethod(env, this,
                                                   a0, a1, a2);
   }
 
   /**
    * Evaluates a method.
    */
-  public Value evalMethod(Env env, String methodName,
+  public Value callMethod(Env env, String methodName,
                           Value a0, Value a1, Value a2, Value a3)
   {
-    return _cl.getFunction(methodName).evalMethod(env, this,
+    return _cl.getFunction(methodName).callMethod(env, this,
                                                   a0, a1, a2, a3);
   }
 
   /**
    * Evaluates a method.
    */
-  public Value evalMethod(Env env, String methodName,
+  public Value callMethod(Env env, String methodName,
                           Value a0, Value a1, Value a2, Value a3, Value a4)
   {
-    return _cl.getFunction(methodName).evalMethod(env, this,
+    return _cl.getFunction(methodName).callMethod(env, this,
                                                   a0, a1, a2, a3, a4);
   }
 
   /**
    * Evaluates a method.
    */
-  public Value evalMethodRef(Env env, String methodName, Expr []args)
+  public Value callMethodRef(Env env, String methodName, Expr []args)
   {
-    return _cl.getFunction(methodName).evalMethodRef(env, this, args);
+    return _cl.getFunction(methodName).callMethodRef(env, this, args);
   }
 
   /**
    * Evaluates a method.
    */
-  public Value evalMethodRef(Env env, String methodName, Value []args)
+  public Value callMethodRef(Env env, String methodName, Value []args)
   {
-    return _cl.getFunction(methodName).evalMethodRef(env, this, args);
+    return _cl.getFunction(methodName).callMethodRef(env, this, args);
   }
 
   /**
    * Evaluates a method.
    */
-  public Value evalMethodRef(Env env, String methodName)
+  public Value callMethodRef(Env env, String methodName)
   {
-    return _cl.getFunction(methodName).evalMethodRef(env, this);
+    return _cl.getFunction(methodName).callMethodRef(env, this);
   }
 
   /**
    * Evaluates a method.
    */
-  public Value evalMethodRef(Env env, String methodName, Value a0)
+  public Value callMethodRef(Env env, String methodName, Value a0)
   {
-    return _cl.getFunction(methodName).evalMethodRef(env, this, a0);
+    return _cl.getFunction(methodName).callMethodRef(env, this, a0);
   }
 
   /**
    * Evaluates a method.
    */
-  public Value evalMethodRef(Env env, String methodName,
+  public Value callMethodRef(Env env, String methodName,
                              Value a0, Value a1)
   {
-    return _cl.getFunction(methodName).evalMethodRef(env, this, a0, a1);
+    return _cl.getFunction(methodName).callMethodRef(env, this, a0, a1);
   }
 
   /**
    * Evaluates a method.
    */
-  public Value evalMethodRef(Env env, String methodName,
+  public Value callMethodRef(Env env, String methodName,
                              Value a0, Value a1, Value a2)
   {
-    return _cl.getFunction(methodName).evalMethodRef(env, this,
+    return _cl.getFunction(methodName).callMethodRef(env, this,
                                                      a0, a1, a2);
   }
 
   /**
    * Evaluates a method.
    */
-  public Value evalMethodRef(Env env, String methodName,
+  public Value callMethodRef(Env env, String methodName,
                              Value a0, Value a1, Value a2, Value a3)
   {
-    return _cl.getFunction(methodName).evalMethodRef(env, this,
+    return _cl.getFunction(methodName).callMethodRef(env, this,
                                                      a0, a1, a2, a3);
   }
 
   /**
    * Evaluates a method.
    */
-  public Value evalMethodRef(Env env, String methodName,
+  public Value callMethodRef(Env env, String methodName,
                              Value a0, Value a1, Value a2, Value a3, Value a4)
   {
-    return _cl.getFunction(methodName).evalMethodRef(env, this,
+    return _cl.getFunction(methodName).callMethodRef(env, this,
                                                      a0, a1, a2, a3, a4);
   }
 
   /**
    * Evaluates a method.
    */
-  public Value evalClassMethod(Env env, AbstractFunction fun, Value []args)
+  public Value callClassMethod(Env env, AbstractFunction fun, Value []args)
   {
     Value oldThis = env.getThis();
 
     try {
       env.setThis(this);
 
-      return fun.eval(env, args);
+      return fun.call(env, args);
     } finally {
       env.setThis(oldThis);
     }
@@ -676,7 +678,7 @@ public class CompiledObjectValue extends ObjectValue {
     AbstractFunction fun = _cl.findFunction("__toString");
 
     if (fun != null)
-      return fun.evalMethod(env, this, new Expr[0]).toString(env);
+      return fun.callMethod(env, this, new Expr[0]).toString(env);
     else
       return new StringBuilderValue().append(_cl.getName()).append("[]");
   }

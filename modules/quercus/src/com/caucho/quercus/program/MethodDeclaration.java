@@ -100,13 +100,13 @@ public class MethodDeclaration extends Function {
   /**
    * Evaluates the function.
    */
-  public Value eval(Env env, Value []args)
+  public Value call(Env env, Value []args)
   {
     throw new UnsupportedOperationException();
   }
 
   /**
-   * Generates code to evaluate the expression.
+   * Generates code to calluate the expression.
    *
    * @param out the writer to the Java source code.
    */

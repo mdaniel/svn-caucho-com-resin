@@ -79,7 +79,7 @@ abstract public class CompiledMethod_N extends CompiledMethod {
     return args;
   }
 
-  public final Value evalMethod(Env env, Value obj, Value []argValues)
+  public final Value callMethod(Env env, Value obj, Value []argValues)
   {
     Value []args;
 
@@ -99,15 +99,15 @@ abstract public class CompiledMethod_N extends CompiledMethod {
       }
     }
 
-    return evalMethodImpl(env, obj, args);
+    return callMethodImpl(env, obj, args);
   }
 
-  abstract public Value evalMethodImpl(Env env, Value obj, Value []argValues);
+  abstract public Value callMethodImpl(Env env, Value obj, Value []argValues);
 
   /**
    * Evaluates the method as a static function
    */
-  public Value eval(Env env, Value []argValues)
+  public Value call(Env env, Value []argValues)
   {
     env.error(L.l("can't call {0} as a static function",
 		  _name));

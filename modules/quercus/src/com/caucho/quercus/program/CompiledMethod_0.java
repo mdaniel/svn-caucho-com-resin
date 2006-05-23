@@ -79,12 +79,12 @@ abstract public class CompiledMethod_0 extends CompiledMethod {
     return args;
   }
 
-  public Value evalMethod(Env env, Value obj, Value []argValues)
+  public Value callMethod(Env env, Value obj, Value []argValues)
   {
-    return evalMethod(env, obj);
+    return callMethod(env, obj);
   }
 
-  abstract public Value evalMethod(Env env, Value obj);
+  abstract public Value callMethod(Env env, Value obj);
   
   public String toString()
   {

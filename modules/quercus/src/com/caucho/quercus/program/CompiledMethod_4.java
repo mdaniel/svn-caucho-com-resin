@@ -94,32 +94,32 @@ abstract public class CompiledMethod_4 extends CompiledMethod {
   /**
    * Evaluates the method with the given variable arguments.
    */
-  public Value evalMethod(Env env, Value obj, Value []argValues)
+  public Value callMethod(Env env, Value obj, Value []argValues)
   {
     switch (argValues.length) {
     case 0:
-      return evalMethod(env,
+      return callMethod(env,
 			obj,
 			_default_0.eval(env),
 			_default_1.eval(env),
 			_default_2.eval(env),
 			_default_3.eval(env));
     case 1:
-      return evalMethod(env,
+      return callMethod(env,
 			obj,
 			argValues[0],
 			_default_1.eval(env),
 			_default_2.eval(env),
 			_default_3.eval(env));
     case 2:
-      return evalMethod(env,
+      return callMethod(env,
 			obj,
 			argValues[0],
 			argValues[1],
 			_default_2.eval(env),
 			_default_3.eval(env));
     case 3:
-      return evalMethod(env,
+      return callMethod(env,
 			obj,
 			argValues[0],
 			argValues[1],
@@ -127,7 +127,7 @@ abstract public class CompiledMethod_4 extends CompiledMethod {
 			_default_3.eval(env));
     case 4:
     default:
-      return evalMethod(env,
+      return callMethod(env,
 			obj,
 			argValues[0],
 			argValues[1],
@@ -136,7 +136,7 @@ abstract public class CompiledMethod_4 extends CompiledMethod {
     }
   }
 
-  abstract public Value evalMethod(Env env,
+  abstract public Value callMethod(Env env,
 				   Value obj,
 				   Value a1,
 				   Value a2,
@@ -146,7 +146,7 @@ abstract public class CompiledMethod_4 extends CompiledMethod {
   /**
    * Evaluates the method as a static function
    */
-  public Value eval(Env env, Value []argValues)
+  public Value call(Env env, Value []argValues)
   {
     env.warning(L.l("can't call '{0}' as a static function", _name));
 

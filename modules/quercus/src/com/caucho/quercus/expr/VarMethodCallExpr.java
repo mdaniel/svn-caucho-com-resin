@@ -105,7 +105,7 @@ public class VarMethodCallExpr extends Expr {
       values[i] = _args[i].evalArg(env);
     }
     
-    return _objExpr.eval(env).evalMethod(env, _name.evalString(env), values);
+    return _objExpr.eval(env).callMethod(env, _name.evalString(env), values);
   }
 
   //
@@ -134,7 +134,7 @@ public class VarMethodCallExpr extends Expr {
     throws IOException
   {
     _objExpr.generate(out);
-    out.print(".evalMethod(env, ");
+    out.print(".callMethod(env, ");
     _name.generateString(out);
 
     if (_args.length <= 5) {

@@ -45,9 +45,9 @@ public class Shutdown {
   /**
    * Evaluate the shutdown function
    */
-  public void eval(Env env)
+  public void call(Env env)
   {
-    _callback.eval(env, _args);
+    _callback.call(env, _args);
   }
 }
 

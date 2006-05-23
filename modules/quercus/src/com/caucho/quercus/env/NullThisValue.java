@@ -55,7 +55,7 @@ public class NullThisValue extends NullValue {
   /**
    * Evaluates a method.
    */
-  public Value evalMethod(Env env, String methodName, Value []args)
+  public Value callMethod(Env env, String methodName, Value []args)
   {
     throw new QuercusException(L.l("$this value of NULL cannot dispatch to method '{0}'.", methodName));
   }

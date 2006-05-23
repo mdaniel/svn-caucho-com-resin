@@ -82,11 +82,11 @@ abstract public class CompiledFunctionRef_5 extends CompiledFunctionRef {
     return args;
   }
 
-  public Value evalRef(Env env, Value []argValues)
+  public Value callRef(Env env, Value []argValues)
   {
     switch (argValues.length) {
     case 0:
-      return evalRef(env,
+      return callRef(env,
                      _default_0.eval(env),
                      _default_1.eval(env),
                      _default_2.eval(env),
@@ -94,28 +94,28 @@ abstract public class CompiledFunctionRef_5 extends CompiledFunctionRef {
                      _default_4.eval(env));
 
     case 1:
-      return evalRef(env,
+      return callRef(env,
                      argValues[0],
                      _default_1.eval(env),
                      _default_2.eval(env),
                      _default_3.eval(env),
                      _default_4.eval(env));
     case 2:
-      return evalRef(env,
+      return callRef(env,
                      argValues[0],
                      argValues[1],
                      _default_2.eval(env),
                      _default_3.eval(env),
                      _default_4.eval(env));
     case 3:
-      return evalRef(env,
+      return callRef(env,
                      argValues[0],
                      argValues[1],
                      argValues[2],
                      _default_3.eval(env),
                      _default_4.eval(env));
     case 4:
-      return evalRef(env,
+      return callRef(env,
                      argValues[0],
                      argValues[1],
                      argValues[2],
@@ -123,7 +123,7 @@ abstract public class CompiledFunctionRef_5 extends CompiledFunctionRef {
                      _default_4.eval(env));
     case 5:
     default:
-      return evalRef(env,
+      return callRef(env,
                      argValues[0],
                      argValues[1],
                      argValues[2],
@@ -135,7 +135,7 @@ abstract public class CompiledFunctionRef_5 extends CompiledFunctionRef {
   /**
    * Evaluates the function with arguments
    */
-  abstract public Value evalRef(Env env, Value a1, Value a2, Value a3, Value a4,
+  abstract public Value callRef(Env env, Value a1, Value a2, Value a3, Value a4,
                                 Value a5);
 
   public String toString()

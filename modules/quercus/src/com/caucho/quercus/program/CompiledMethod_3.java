@@ -91,30 +91,30 @@ abstract public class CompiledMethod_3 extends CompiledMethod {
   /**
    * Evaluates the method with the given variable arguments.
    */
-  public Value evalMethod(Env env, Value obj, Value []argValues)
+  public Value callMethod(Env env, Value obj, Value []argValues)
   {
     switch (argValues.length) {
     case 0:
-      return evalMethod(env,
+      return callMethod(env,
 			obj,
 			_default_0.eval(env),
 			_default_1.eval(env),
 			_default_2.eval(env));
     case 1:
-      return evalMethod(env,
+      return callMethod(env,
 			obj,
 			argValues[0],
 			_default_1.eval(env),
 			_default_2.eval(env));
     case 2:
-      return evalMethod(env,
+      return callMethod(env,
 			obj,
 			argValues[0],
 			argValues[1],
 			_default_2.eval(env));
     case 3:
     default:
-      return evalMethod(env,
+      return callMethod(env,
 			obj,
 			argValues[0],
 			argValues[1],
@@ -122,12 +122,12 @@ abstract public class CompiledMethod_3 extends CompiledMethod {
     }
   }
   
-  public Value evalMethod(Env env, Value obj, Value a1, Value a2)
+  public Value callMethod(Env env, Value obj, Value a1, Value a2)
   {
-    return evalMethod(env, obj, a1, a2, _default_2.eval(env));
+    return callMethod(env, obj, a1, a2, _default_2.eval(env));
   }
 
-  abstract public Value evalMethod(Env env,
+  abstract public Value callMethod(Env env,
 				   Value obj,
 				   Value a1,
 				   Value a2,

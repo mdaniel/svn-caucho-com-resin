@@ -78,24 +78,24 @@ abstract public class CompiledFunction_3 extends CompiledFunction {
     return args;
   }
 
-  public Value eval(Env env, Value []argValues)
+  public Value call(Env env, Value []argValues)
   {
     switch (argValues.length) {
     case 0:
-      return eval(env, NullValue.NULL, NullValue.NULL);
+      return call(env, NullValue.NULL, NullValue.NULL);
     case 1:
-      return eval(env,
+      return call(env,
                   argValues[0],
                   _default_1.eval(env),
                   _default_2.eval(env));
     case 2:
-      return eval(env,
+      return call(env,
                   argValues[0],
                   argValues[1],
                   _default_2.eval(env));
     case 3:
     default:
-      return eval(env,
+      return call(env,
                   argValues[0],
                   argValues[1],
                   argValues[2]);
@@ -105,7 +105,7 @@ abstract public class CompiledFunction_3 extends CompiledFunction {
   /**
    * Evaluates the function with arguments
    */
-  abstract public Value eval(Env env, Value a1, Value a2, Value a3);
+  abstract public Value call(Env env, Value a1, Value a2, Value a3);
 
   public String toString()
   {

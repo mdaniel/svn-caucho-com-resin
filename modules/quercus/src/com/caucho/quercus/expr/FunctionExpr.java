@@ -179,11 +179,11 @@ public class FunctionExpr extends Expr {
       if (fullArgs == null)
 	return NullValue.NULL;
       else if (isRef)
-	return fun.evalRef(env, fullArgs);
+	return fun.callRef(env, fullArgs);
       else if (isCopy)
-	return fun.evalCopy(env, fullArgs);
+	return fun.callCopy(env, fullArgs);
       else
-	return fun.eval(env, fullArgs);
+	return fun.call(env, fullArgs);
     } finally {
       env.popCall();
     }
@@ -342,9 +342,9 @@ public class FunctionExpr extends Expr {
       out.printJavaString(_name);
 
       if (isRef)
-	out.print("\").evalRef(env");
+	out.print("\").callRef(env");
       else
-	out.print("\").eval(env");
+	out.print("\").call(env");
 
       if (_args.length <= COMPILE_ARG_MAX) {
 	for (int i = 0; i < _args.length; i++) {

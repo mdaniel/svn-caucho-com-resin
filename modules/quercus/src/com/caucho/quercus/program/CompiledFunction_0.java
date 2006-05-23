@@ -67,9 +67,9 @@ abstract public class CompiledFunction_0 extends CompiledFunction {
     return args;
   }
 
-  public Value eval(Env env, Value []argValues)
+  public Value call(Env env, Value []argValues)
   {
-    return eval(env);
+    return call(env);
   }
 
   public String toString()

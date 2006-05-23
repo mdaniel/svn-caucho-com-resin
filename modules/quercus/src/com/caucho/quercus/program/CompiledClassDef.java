@@ -324,7 +324,7 @@ public class CompiledClassDef extends ClassDef {
   /**
    * Eval new
    */
-  public Value evalNew(Env env, Expr []args)
+  public Value callNew(Env env, Expr []args)
   {
     return null;
   }
@@ -332,7 +332,7 @@ public class CompiledClassDef extends ClassDef {
   /**
    * Eval new
    */
-  public Value evalNew(Env env, Value []args)
+  public Value callNew(Env env, Value []args)
   {
     return null;
   }

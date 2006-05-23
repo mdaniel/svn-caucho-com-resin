@@ -69,18 +69,18 @@ abstract public class CompiledFunctionRef_1 extends CompiledFunctionRef {
     return args;
   }
 
-  public Value evalRef(Env env, Value []argValues)
+  public Value callRef(Env env, Value []argValues)
   {
     switch (argValues.length) {
     case 0:
-      return evalRef(env, _default_0.eval(env));
+      return callRef(env, _default_0.eval(env));
     case 1:
     default:
-      return evalRef(env, argValues[0]);
+      return callRef(env, argValues[0]);
     }
   }
 
-  abstract public Value evalRef(Env env, Value arg);
+  abstract public Value callRef(Env env, Value arg);
 
   public String toString()
   {

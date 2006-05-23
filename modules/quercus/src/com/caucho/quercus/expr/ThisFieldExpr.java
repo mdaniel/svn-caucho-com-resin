@@ -78,7 +78,7 @@ public class ThisFieldExpr extends AbstractVarExpr {
   {
     Value obj = env.getThis();
 
-    return obj.getField(_name);
+    return obj.getField(env, _name);
   }
   
   /**
@@ -92,7 +92,7 @@ public class ThisFieldExpr extends AbstractVarExpr {
   {
     Value obj = env.getThis();
 
-    return obj.getField(_name).copy();
+    return obj.getField(env, _name).copy();
   }
   
   /**
@@ -198,7 +198,7 @@ public class ThisFieldExpr extends AbstractVarExpr {
       out.print("q_this._fields[_f_" + _name + "].toValue()");
     }
     else {
-      out.print("q_this.getField(\"");
+      out.print("q_this.getField(env, \"");
       out.printJavaString(_name);
       out.print("\")");
     }

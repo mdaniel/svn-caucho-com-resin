@@ -53,9 +53,9 @@ public class CallbackObjectMethod extends Callback {
    *
    * @param env the calling environment
    */
-  public Value eval(Env env)
+  public Value call(Env env)
   {
-    return _obj.evalMethod(env, _methodName);
+    return _obj.callMethod(env, _methodName);
   }
 
   /**
@@ -63,9 +63,9 @@ public class CallbackObjectMethod extends Callback {
    *
    * @param env the calling environment
    */
-  public Value eval(Env env, Value a1)
+  public Value call(Env env, Value a1)
   {
-    return _obj.evalMethod(env, _methodName, a1);
+    return _obj.callMethod(env, _methodName, a1);
   }
 
   /**
@@ -73,9 +73,9 @@ public class CallbackObjectMethod extends Callback {
    *
    * @param env the calling environment
    */
-  public Value eval(Env env, Value a1, Value a2)
+  public Value call(Env env, Value a1, Value a2)
   {
-    return _obj.evalMethod(env, _methodName, a1, a2);
+    return _obj.callMethod(env, _methodName, a1, a2);
   }
 
   /**
@@ -83,9 +83,9 @@ public class CallbackObjectMethod extends Callback {
    *
    * @param env the calling environment
    */
-  public Value eval(Env env, Value a1, Value a2, Value a3)
+  public Value call(Env env, Value a1, Value a2, Value a3)
   {
-    return _obj.evalMethod(env, _methodName, a1, a2, a3);
+    return _obj.callMethod(env, _methodName, a1, a2, a3);
   }
 
   /**
@@ -93,10 +93,10 @@ public class CallbackObjectMethod extends Callback {
    *
    * @param env the calling environment
    */
-  public Value eval(Env env, Value a1, Value a2, Value a3,
+  public Value call(Env env, Value a1, Value a2, Value a3,
 			     Value a4)
   {
-    return _obj.evalMethod(env, _methodName, a1, a2, a3, a4);
+    return _obj.callMethod(env, _methodName, a1, a2, a3, a4);
   }
 
   /**
@@ -104,15 +104,15 @@ public class CallbackObjectMethod extends Callback {
    *
    * @param env the calling environment
    */
-  public Value eval(Env env, Value a1, Value a2, Value a3,
+  public Value call(Env env, Value a1, Value a2, Value a3,
 		    Value a4, Value a5)
   {
-    return _obj.evalMethod(env, _methodName, a1, a2, a3, a4, a5);
+    return _obj.callMethod(env, _methodName, a1, a2, a3, a4, a5);
   }
 
-  public Value eval(Env env, Value []args)
+  public Value call(Env env, Value []args)
   {
-    return _obj.evalMethod(env, _methodName, args);
+    return _obj.callMethod(env, _methodName, args);
   }
 
   public void varDumpImpl(Env env,

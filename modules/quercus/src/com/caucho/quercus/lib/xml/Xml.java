@@ -648,7 +648,7 @@ public class Xml {
 
       try {
         if (_startElementHandler != null)
-          _startElementHandler.eval(_env,args);
+          _startElementHandler.call(_env,args);
         else
           throw new Throwable("start element handler is not set");
       } catch (Throwable t) {
@@ -676,7 +676,7 @@ public class Xml {
         if (_xmlOptionCaseFolding) eName = eName.toUpperCase();
 
         if (_endElementHandler != null)
-          _endElementHandler.eval(_env, _parser, new StringValueImpl(eName));
+          _endElementHandler.call(_env, _parser, new StringValueImpl(eName));
         else
           throw new Throwable("end element handler is not set");
       } catch (Throwable t) {
@@ -702,9 +702,9 @@ public class Xml {
 
       try {
         if (_characterDataHandler != null)
-          _characterDataHandler.eval(_env, _parser, new StringValueImpl(s));
+          _characterDataHandler.call(_env, _parser, new StringValueImpl(s));
         else if (_defaultHandler != null)
-          _defaultHandler.eval(_env, _parser, new StringValueImpl(s));
+          _defaultHandler.call(_env, _parser, new StringValueImpl(s));
         else
           throw new Throwable("neither character data handler nor default handler is set");
       } catch (Throwable t) {
@@ -725,7 +725,7 @@ public class Xml {
     {
       try {
         if (_processingInstructionHandler != null)
-          _processingInstructionHandler.eval(_env, _parser, new StringValueImpl(target), new StringValueImpl(data));
+          _processingInstructionHandler.call(_env, _parser, new StringValueImpl(target), new StringValueImpl(data));
         else
           throw new Throwable("processing instruction handler is not set");
       } catch (Throwable t) {
@@ -746,7 +746,7 @@ public class Xml {
     {
       try {
         if (_startNamespaceDeclHandler != null)
-          _startNamespaceDeclHandler.eval(_env, new StringValueImpl(prefix), new StringValueImpl(uri));
+          _startNamespaceDeclHandler.call(_env, new StringValueImpl(prefix), new StringValueImpl(uri));
         else
           throw new Throwable("start namespace decl handler is not set");
       } catch (Throwable t) {
@@ -766,7 +766,7 @@ public class Xml {
     {
       try {
         if (_endNamespaceDeclHandler != null)
-          _endNamespaceDeclHandler.eval(_env, new StringValueImpl(prefix));
+          _endNamespaceDeclHandler.call(_env, new StringValueImpl(prefix));
         else
           throw new Throwable("end namespace decl handler is not set");
       } catch (Throwable t) {
@@ -782,7 +782,7 @@ public class Xml {
     {
       try {
         if (_notationDeclHandler != null)
-          _notationDeclHandler.eval(_env,
+          _notationDeclHandler.call(_env,
                                     _parser,
                                     new StringValueImpl(name),
                                     new StringValueImpl(""),
@@ -822,9 +822,9 @@ public class Xml {
 
       try {
         if (_unparsedEntityDeclHandler != null)
-          _unparsedEntityDeclHandler.eval(_env, args);
+          _unparsedEntityDeclHandler.call(_env, args);
         else
-          throw new Throwable("unparsed entity declaration handler is not set");
+          throw new Exception("unparsed entity declaration handler is not set");
       } catch (Throwable t) {
         log.log(Level.FINE, t.toString(), t);
         throw new SAXException(L.l(t.getMessage()));

@@ -78,7 +78,7 @@ abstract public class CompiledFunction_N extends CompiledFunction {
     return args;
   }
 
-  public final Value eval(Env env, Value []argValues)
+  public final Value call(Env env, Value []argValues)
   {
     Value []args = argValues;
 
@@ -97,10 +97,10 @@ abstract public class CompiledFunction_N extends CompiledFunction {
       }
     }
 
-    return evalImpl(env, args);
+    return callImpl(env, args);
   }
 
-  abstract public Value evalImpl(Env env, Value []args);
+  abstract public Value callImpl(Env env, Value []args);
   
   public String toString()
   {

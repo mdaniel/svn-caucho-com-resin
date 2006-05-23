@@ -76,19 +76,19 @@ abstract public class CompiledMethodRef_0 extends CompiledMethodRef {
     return args;
   }
 
-  public Value evalMethodRef(Env env, Value obj, Value []argValues)
+  public Value callMethodRef(Env env, Value obj, Value []argValues)
   {
-    return evalMethodRef(env, obj);
+    return callMethodRef(env, obj);
   }
 
-  abstract public Value evalMethodRef(Env env, Value obj);
+  abstract public Value callMethodRef(Env env, Value obj);
   
   /**
    * Evaluates the method as a static function
    */
-  public Value eval(Env env, Value []argValues)
+  public Value call(Env env, Value []argValues)
   {
-    return evalMethod(env, NullValue.NULL, argValues);
+    return callMethod(env, NullValue.NULL, argValues);
   }
   
   public String toString()

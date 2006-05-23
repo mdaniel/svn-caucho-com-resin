@@ -78,7 +78,7 @@ abstract public class CompiledFunctionRef_N extends CompiledFunctionRef {
     return args;
   }
 
-  public final Value evalRef(Env env, Value []argValues)
+  public final Value callRef(Env env, Value []argValues)
   {
     Value []args = argValues;
 
@@ -97,10 +97,10 @@ abstract public class CompiledFunctionRef_N extends CompiledFunctionRef {
       }
     }
 
-    return evalRefImpl(env, args);
+    return callRefImpl(env, args);
   }
 
-  abstract public Value evalRefImpl(Env env, Value []args);
+  abstract public Value callRefImpl(Env env, Value []args);
   
   public String toString()
   {

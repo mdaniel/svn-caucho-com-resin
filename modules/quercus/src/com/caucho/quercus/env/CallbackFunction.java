@@ -76,9 +76,9 @@ public class CallbackFunction extends Callback {
    *
    * @param env the calling environment
    */
-  public Value eval(Env env)
+  public Value call(Env env)
   {
-    return getFunction().eval(env);
+    return getFunction().call(env);
   }
 
   /**
@@ -86,9 +86,9 @@ public class CallbackFunction extends Callback {
    *
    * @param env the calling environment
    */
-  public Value eval(Env env, Value a1)
+  public Value call(Env env, Value a1)
   {
-    return getFunction().eval(env, a1);
+    return getFunction().call(env, a1);
   }
 
   /**
@@ -96,9 +96,9 @@ public class CallbackFunction extends Callback {
    *
    * @param env the calling environment
    */
-  public Value eval(Env env, Value a1, Value a2)
+  public Value call(Env env, Value a1, Value a2)
   {
-    return getFunction().eval(env, a1, a2);
+    return getFunction().call(env, a1, a2);
   }
 
   /**
@@ -106,9 +106,9 @@ public class CallbackFunction extends Callback {
    *
    * @param env the calling environment
    */
-  public Value eval(Env env, Value a1, Value a2, Value a3)
+  public Value call(Env env, Value a1, Value a2, Value a3)
   {
-    return getFunction().eval(env, a1, a2, a3);
+    return getFunction().call(env, a1, a2, a3);
   }
 
   /**
@@ -116,10 +116,10 @@ public class CallbackFunction extends Callback {
    *
    * @param env the calling environment
    */
-  public Value eval(Env env, Value a1, Value a2, Value a3,
+  public Value call(Env env, Value a1, Value a2, Value a3,
 			     Value a4)
   {
-    return getFunction().eval(env, a1, a2, a3, a4);
+    return getFunction().call(env, a1, a2, a3, a4);
   }
 
   /**
@@ -127,15 +127,15 @@ public class CallbackFunction extends Callback {
    *
    * @param env the calling environment
    */
-  public Value eval(Env env, Value a1, Value a2, Value a3,
+  public Value call(Env env, Value a1, Value a2, Value a3,
 		    Value a4, Value a5)
   {
-    return getFunction().eval(env, a1, a2, a3, a4, a5);
+    return getFunction().call(env, a1, a2, a3, a4, a5);
   }
 
-  public Value eval(Env env, Value []args)
+  public Value call(Env env, Value []args)
   {
-    return getFunction().eval(env, args);
+    return getFunction().call(env, args);
   }
 
   public String getFunctionName()

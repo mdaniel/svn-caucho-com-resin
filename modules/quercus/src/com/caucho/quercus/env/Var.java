@@ -661,9 +661,10 @@ public class Var extends Value {
   /**
    * Returns the field ref.
    */
-  public Value getField(String index)
+  @Override
+  public Value getField(Env env, String index)
   {
-    return _value.getField(index);
+    return _value.getField(env, index);
   }
 
   /**
@@ -781,143 +782,143 @@ public class Var extends Value {
   /**
    * Evaluates a method.
    */
-  public Value evalMethod(Env env, String methodName, Expr []args)
+  public Value callMethod(Env env, String methodName, Expr []args)
   {
-    return _value.evalMethod(env, methodName, args);
+    return _value.callMethod(env, methodName, args);
   }
 
   /**
    * Evaluates a method.
    */
-  public Value evalMethod(Env env, String methodName, Value []args)
+  public Value callMethod(Env env, String methodName, Value []args)
   {
-    return _value.evalMethod(env, methodName, args);
+    return _value.callMethod(env, methodName, args);
   }
 
   /**
    * Evaluates a method.
    */
-  public Value evalMethod(Env env, String methodName)
+  public Value callMethod(Env env, String methodName)
   {
-    return _value.evalMethod(env, methodName);
+    return _value.callMethod(env, methodName);
   }
 
   /**
    * Evaluates a method.
    */
-  public Value evalMethod(Env env, String methodName, Value a0)
+  public Value callMethod(Env env, String methodName, Value a0)
   {
-    return _value.evalMethod(env, methodName, a0);
+    return _value.callMethod(env, methodName, a0);
   }
 
   /**
    * Evaluates a method.
    */
-  public Value evalMethod(Env env, String methodName, Value a0, Value a1)
+  public Value callMethod(Env env, String methodName, Value a0, Value a1)
   {
-    return _value.evalMethod(env, methodName, a0, a1);
+    return _value.callMethod(env, methodName, a0, a1);
   }
 
   /**
    * Evaluates a method with 3 args.
    */
-  public Value evalMethod(Env env, String methodName,
+  public Value callMethod(Env env, String methodName,
 			  Value a0, Value a1, Value a2)
   {
-    return _value.evalMethod(env, methodName, a0, a1, a2);
+    return _value.callMethod(env, methodName, a0, a1, a2);
   }
 
   /**
    * Evaluates a method with 4 args.
    */
-  public Value evalMethod(Env env, String methodName,
+  public Value callMethod(Env env, String methodName,
 			  Value a0, Value a1, Value a2, Value a3)
   {
-    return _value.evalMethod(env, methodName, a0, a1, a2, a3);
+    return _value.callMethod(env, methodName, a0, a1, a2, a3);
   }
 
   /**
    * Evaluates a method with 5 args.
    */
-  public Value evalMethod(Env env, String methodName,
+  public Value callMethod(Env env, String methodName,
 			  Value a0, Value a1, Value a2, Value a3, Value a4)
   {
-    return _value.evalMethod(env, methodName, a0, a1, a2, a3, a4);
+    return _value.callMethod(env, methodName, a0, a1, a2, a3, a4);
   }
 
   /**
    * Evaluates a method.
    */
-  public Value evalMethodRef(Env env, String methodName, Expr []args)
+  public Value callMethodRef(Env env, String methodName, Expr []args)
   {
-    return _value.evalMethodRef(env, methodName, args);
+    return _value.callMethodRef(env, methodName, args);
   }
 
   /**
    * Evaluates a method.
    */
-  public Value evalMethodRef(Env env, String methodName, Value []args)
+  public Value callMethodRef(Env env, String methodName, Value []args)
   {
-    return _value.evalMethodRef(env, methodName, args);
+    return _value.callMethodRef(env, methodName, args);
   }
 
   /**
    * Evaluates a method.
    */
-  public Value evalMethodRef(Env env, String methodName)
+  public Value callMethodRef(Env env, String methodName)
   {
-    return _value.evalMethodRef(env, methodName);
+    return _value.callMethodRef(env, methodName);
   }
 
   /**
    * Evaluates a method.
    */
-  public Value evalMethodRef(Env env, String methodName, Value a0)
+  public Value callMethodRef(Env env, String methodName, Value a0)
   {
-    return _value.evalMethodRef(env, methodName, a0);
+    return _value.callMethodRef(env, methodName, a0);
   }
 
   /**
    * Evaluates a method.
    */
-  public Value evalMethodRef(Env env, String methodName, Value a0, Value a1)
+  public Value callMethodRef(Env env, String methodName, Value a0, Value a1)
   {
-    return _value.evalMethodRef(env, methodName, a0, a1);
+    return _value.callMethodRef(env, methodName, a0, a1);
   }
 
   /**
    * Evaluates a method with 3 args.
    */
-  public Value evalMethodRef(Env env, String methodName,
+  public Value callMethodRef(Env env, String methodName,
 			  Value a0, Value a1, Value a2)
   {
-    return _value.evalMethodRef(env, methodName, a0, a1, a2);
+    return _value.callMethodRef(env, methodName, a0, a1, a2);
   }
 
   /**
    * Evaluates a method with 4 args.
    */
-  public Value evalMethodRef(Env env, String methodName,
+  public Value callMethodRef(Env env, String methodName,
 			  Value a0, Value a1, Value a2, Value a3)
   {
-    return _value.evalMethodRef(env, methodName, a0, a1, a2, a3);
+    return _value.callMethodRef(env, methodName, a0, a1, a2, a3);
   }
 
   /**
    * Evaluates a method with 5 args.
    */
-  public Value evalMethodRef(Env env, String methodName,
+  public Value callMethodRef(Env env, String methodName,
 			  Value a0, Value a1, Value a2, Value a3, Value a4)
   {
-    return _value.evalMethodRef(env, methodName, a0, a1, a2, a3, a4);
+    return _value.callMethodRef(env, methodName, a0, a1, a2, a3, a4);
   }
 
   /**
    * Evaluates a method.
    */
-  public Value evalClassMethod(Env env, AbstractFunction fun, Value []args)
+  public Value callClassMethod(Env env, AbstractFunction fun, Value []args)
   {
-    return _value.evalClassMethod(env, fun, args);
+    return _value.callClassMethod(env, fun, args);
   }
 
   /**

@@ -79,7 +79,7 @@ abstract public class CompiledMethodRef_N extends CompiledMethodRef {
     return args;
   }
 
-  public final Value evalMethodRef(Env env, Value obj, Value []argValues)
+  public final Value callMethodRef(Env env, Value obj, Value []argValues)
   {
     Value []args;
 
@@ -99,15 +99,15 @@ abstract public class CompiledMethodRef_N extends CompiledMethodRef {
       }
     }
 
-    return evalMethodRefImpl(env, obj, args);
+    return callMethodRefImpl(env, obj, args);
   }
 
-  abstract public Value evalMethodRefImpl(Env env, Value obj, Value []argValues);
+  abstract public Value callMethodRefImpl(Env env, Value obj, Value []argValues);
 
   /**
    * Evaluates the method as a static function
    */
-  public Value eval(Env env, Value []argValues)
+  public Value call(Env env, Value []argValues)
   {
     env.error(L.l("can't call {0} as a static function",
 		  _name));

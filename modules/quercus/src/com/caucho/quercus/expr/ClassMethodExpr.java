@@ -110,7 +110,7 @@ public class ClassMethodExpr extends Expr {
     for (int i = 0; i < values.length; i++)
       values[i] = _args[i].eval(env);
     
-    return fun.evalMethod(env, env.getThis(), values);
+    return fun.callMethod(env, env.getThis(), values);
   }
 
   //
@@ -139,7 +139,7 @@ public class ClassMethodExpr extends Expr {
     out.printJavaString(_className);
     out.print("\").getFunction(\"");
     out.printJavaString(_name);
-    out.print("\").evalMethod(env, q_this");
+    out.print("\".callMethod(env, q_this");
       
     if (_args.length <= 5) {
       for (int i = 0; i < _args.length; i++) {

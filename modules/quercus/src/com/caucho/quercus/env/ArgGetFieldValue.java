@@ -86,9 +86,10 @@ public class ArgGetFieldValue extends Value {
   /**
    * Converts to a value.
    */
+  @Override
   public Value toValue()
   {
-    return _obj.getField(_index);
+    return _obj.getField(_env, _index);
   }
 
   /**

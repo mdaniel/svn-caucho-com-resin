@@ -85,11 +85,11 @@ abstract public class CompiledFunction_5 extends CompiledFunction {
     return args;
   }
 
-  public Value eval(Env env, Value []argValues)
+  public Value call(Env env, Value []argValues)
   {
     switch (argValues.length) {
     case 0:
-      return eval(env,
+      return call(env,
                   _default_0.eval(env),
                   _default_1.eval(env),
                   _default_2.eval(env),
@@ -97,28 +97,28 @@ abstract public class CompiledFunction_5 extends CompiledFunction {
                   _default_4.eval(env));
 
     case 1:
-      return eval(env,
+      return call(env,
                   argValues[0],
                   _default_1.eval(env),
                   _default_2.eval(env),
                   _default_3.eval(env),
                   _default_4.eval(env));
     case 2:
-      return eval(env,
+      return call(env,
                   argValues[0],
                   argValues[1],
                   _default_2.eval(env),
                   _default_3.eval(env),
                   _default_4.eval(env));
     case 3:
-      return eval(env,
+      return call(env,
                   argValues[0],
                   argValues[1],
                   argValues[2],
                   _default_3.eval(env),
                   _default_4.eval(env));
     case 4:
-      return eval(env,
+      return call(env,
                   argValues[0],
                   argValues[1],
                   argValues[2],
@@ -126,7 +126,7 @@ abstract public class CompiledFunction_5 extends CompiledFunction {
                   _default_4.eval(env));
     case 5:
     default:
-      return eval(env,
+      return call(env,
                   argValues[0],
                   argValues[1],
                   argValues[2],
@@ -138,7 +138,7 @@ abstract public class CompiledFunction_5 extends CompiledFunction {
   /**
    * Evaluates the function with arguments
    */
-  abstract public Value eval(Env env, Value a1, Value a2, Value a3, Value a4,
+  abstract public Value call(Env env, Value a1, Value a2, Value a3, Value a4,
                              Value a5);
 
   public String toString()

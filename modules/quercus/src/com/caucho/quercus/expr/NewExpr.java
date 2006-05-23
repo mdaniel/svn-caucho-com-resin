@@ -95,7 +95,7 @@ public class NewExpr extends Expr {
 
     // _fullArgs = _cl.bindArguments(_args);
 
-    return cl.evalNew(env, _args);
+    return cl.callNew(env, _args);
   }
 
   //
@@ -122,7 +122,7 @@ public class NewExpr extends Expr {
   {
     /*
     if (out.getProgram().findClass(_name) != null) {
-      out.print("__quercus_class_" + _name + ".evalNew(env, new Value[] {");
+      out.print("__quercus_class_" + _name + ".callNew(env, new Value[] {");
 
       for (int i = 0; i < _args.length; i++) {
 	if (i != 0)
@@ -136,7 +136,7 @@ public class NewExpr extends Expr {
     */
     out.print("env.findAbstractClass(\"");
     out.printJavaString(_name);
-    out.print("\").evalNew(env, new Value[] {");
+    out.print("\").callNew(env, new Value[] {");
 
     for (int i = 0; i < _args.length; i++) {
       if (i != 0)

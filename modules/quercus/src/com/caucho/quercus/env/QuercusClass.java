@@ -151,11 +151,27 @@ public class QuercusClass {
   }
 
   /**
+   * Sets the __set
+   */
+  public AbstractFunction getSetField()
+  {
+    return _set;
+  }
+
+  /**
    * Sets the __call
    */
   public void setCall(AbstractFunction fun)
   {
     _call = fun;
+  }
+
+  /**
+   * Sets the __call
+   */
+  public AbstractFunction getCall()
+  {
+    return _call;
   }
 
   /**
@@ -250,9 +266,9 @@ public class QuercusClass {
   /**
    * Creates a new instance.
    */
-  public Value evalNew(Env env, Expr []args)
+  public Value callNew(Env env, Expr []args)
   {
-    Value object = _classDef.evalNew(env, args);
+    Value object = _classDef.callNew(env, args);
 
     if (object != null)
       return object;
@@ -262,7 +278,7 @@ public class QuercusClass {
     AbstractFunction fun = findConstructor();
 
     if (fun != null) {
-      fun.evalMethod(env, object, args);
+      fun.callMethod(env, object, args);
     }
 
     return object;
@@ -271,9 +287,9 @@ public class QuercusClass {
   /**
    * Creates a new instance.
    */
-  public Value evalNew(Env env, Value []args)
+  public Value callNew(Env env, Value []args)
   {
-    Value object = _classDef.evalNew(env, args);
+    Value object = _classDef.callNew(env, args);
 
     if (object != null)
       return object;
@@ -283,7 +299,7 @@ public class QuercusClass {
     AbstractFunction fun = findConstructor();
 
     if (fun != null)
-      fun.evalMethod(env, object, args);
+      fun.callMethod(env, object, args);
     else {
       //  if expr
     }
@@ -332,6 +348,30 @@ public class QuercusClass {
   public AbstractFunction findConstructor()
   {
     return _constructor;
+  }
+
+  //
+  // Fields
+  //
+
+  /**
+   * Implements the __get method call.
+   */
+  public Value getField(Env env, Value qThis, String field)
+  {
+    if (_get != null)
+      return _get.callMethod(env, qThis, new StringValueImpl(field));
+    else
+      return UnsetValue.UNSET;
+  }
+
+  /**
+   * Implements the __set method call.
+   */
+  public void setField(Env env, Value qThis, String field, Value value)
+  {
+    if (_set != null)
+      _set.callMethod(env, qThis, new StringValueImpl(field), value);
   }
 
   /**
@@ -395,72 +435,72 @@ public class QuercusClass {
   }
 
   /**
-   * evaluates the function.
+   * calluates the function.
    */
-  public Value evalMethod(Env env, Value thisValue, String name, Expr []args)
+  public Value callMethod(Env env, Value thisValue, String name, Expr []args)
   {
-    return getFunction(name).evalMethod(env, thisValue, args);
+    return getFunction(name).callMethod(env, thisValue, args);
   }  
 
   /**
-   * evaluates the function.
+   * calluates the function.
    */
-  public Value evalMethod(Env env, Value thisValue, String name, Value []args)
+  public Value callMethod(Env env, Value thisValue, String name, Value []args)
   {
-    return getFunction(name).evalMethod(env, thisValue, args);
+    return getFunction(name).callMethod(env, thisValue, args);
   }  
 
   /**
-   * evaluates the function.
+   * calluates the function.
    */
-  public Value evalMethod(Env env, Value thisValue, String name)
+  public Value callMethod(Env env, Value thisValue, String name)
   {
-    return getFunction(name).evalMethod(env, thisValue);
+    return getFunction(name).callMethod(env, thisValue);
   }  
 
   /**
-   * evaluates the function.
+   * calluates the function.
    */
-  public Value evalMethod(Env env, Value thisValue, String name,
+  public Value callMethod(Env env, Value thisValue, String name,
 			  Value a1)
   {
-    return getFunction(name).evalMethod(env, thisValue, a1);
+    return getFunction(name).callMethod(env, thisValue, a1);
   }  
 
   /**
-   * evaluates the function.
+   * calluates the function.
    */
-  public Value evalMethod(Env env, Value thisValue, String name,
+  public Value callMethod(Env env, Value thisValue, String name,
 			  Value a1, Value a2)
   {
-    return getFunction(name).evalMethod(env, thisValue, a1, a2);
+    return getFunction(name).callMethod(env, thisValue, a1, a2);
   }  
 
   /**
-   * evaluates the function.
+   * calluates the function.
    */
-  public Value evalMethod(Env env, Value thisValue, String name,
+  public Value callMethod(Env env, Value thisValue, String name,
 			  Value a1, Value a2, Value a3)
   {
-    return getFunction(name).evalMethod(env, thisValue, a1, a2, a3);
+    return getFunction(name).callMethod(env, thisValue, a1, a2, a3);
   }  
 
   /**
-   * evaluates the function.
+   * calluates the function.
    */
-  public Value evalMethod(Env env, Value thisValue, String name,
+  public Value callMethod(Env env, Value thisValue, String name,
 			  Value a1, Value a2, Value a3, Value a4)
   {
-    return getFunction(name).evalMethod(env, thisValue, a1, a2, a3, a4);
+    return getFunction(name).callMethod(env, thisValue, a1, a2, a3, a4);
   }  
 
   /**
-   * evaluates the function.
+   * calluates the function.
    */
-  public Value evalMethod(Env env, Value thisValue, String name,
+  public Value callMethod(Env env, Value thisValue, String name,
 			  Value a1, Value a2, Value a3, Value a4, Value a5)
   {
-    return getFunction(name).evalMethod(env, thisValue, a1, a2, a3, a4, a5);
+    return getFunction(name).callMethod(env, thisValue, a1, a2, a3, a4, a5);
   }  
 
   /**

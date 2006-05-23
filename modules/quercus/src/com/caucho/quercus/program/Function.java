@@ -209,22 +209,22 @@ public class Function extends AbstractFunction {
     return expandedArgs;
   }
 
-  public Value eval(Env env, Expr []args)
+  public Value call(Env env, Expr []args)
   {
-    return evalImpl(env, args, false);
+    return callImpl(env, args, false);
   }
 
-  public Value evalCopy(Env env, Expr []args)
+  public Value callCopy(Env env, Expr []args)
   {
-    return evalImpl(env, args, false);
+    return callImpl(env, args, false);
   }
 
-  public Value evalRef(Env env, Expr []args)
+  public Value callRef(Env env, Expr []args)
   {
-    return evalImpl(env, args, true);
+    return callImpl(env, args, true);
   }
 
-  private Value evalImpl(Env env, Expr []args, boolean isRef)
+  private Value callImpl(Env env, Expr []args, boolean isRef)
   {
     HashMap<String,Var> map = new HashMap<String,Var>();
 
@@ -289,22 +289,22 @@ public class Function extends AbstractFunction {
     }
   }
 
-  public Value eval(Env env, Value []args)
+  public Value call(Env env, Value []args)
   {
-    return evalImpl(env, args, false);
+    return callImpl(env, args, false);
   }
 
-  public Value evalCopy(Env env, Value []args)
+  public Value callCopy(Env env, Value []args)
   {
-    return evalImpl(env, args, false);
+    return callImpl(env, args, false);
   }
 
-  public Value evalRef(Env env, Value []args)
+  public Value callRef(Env env, Value []args)
   {
-    return evalImpl(env, args, true);
+    return callImpl(env, args, true);
   }
 
-  private Value evalImpl(Env env, Value []args, boolean isRef)
+  private Value callImpl(Env env, Value []args, boolean isRef)
   {
     HashMap<String,Var> map = new HashMap<String,Var>();
 
@@ -390,7 +390,7 @@ public class Function extends AbstractFunction {
   }
 
   /**
-   * Generates code to evaluate the expression.
+   * Generates code to calluate the expression.
    *
    * @param out the writer to the Java source code.
    */
@@ -401,7 +401,7 @@ public class Function extends AbstractFunction {
   }
 
   /**
-   * Generates code to evaluate the expression.
+   * Generates code to calluate the expression.
    *
    * @param out the writer to the Java source code.
    */
@@ -412,7 +412,7 @@ public class Function extends AbstractFunction {
   }
 
   /**
-   * Generates code to evaluate the expression.
+   * Generates code to calluate the expression.
    *
    * @param out the writer to the Java source code.
    */
@@ -573,9 +573,9 @@ public class Function extends AbstractFunction {
     out.pushDepth();
 
     if (isStatic())
-      out.print("public Value eval" + ref + "(Env env");
+      out.print("public Value call" + ref + "(Env env");
     else
-      out.print("public Value evalMethod" + ref + "(Env env, Value q_this");
+      out.print("public Value callMethod" + ref + "(Env env, Value q_this");
 
     for (int i = 0; i < _args.length; i++) {
       out.print(", Value a" + i);
@@ -719,9 +719,9 @@ public class Function extends AbstractFunction {
     */
 
     if (isStatic())
-      out.println("public Value eval" + ref + "Impl(Env env, Value []args)");
+      out.println("public Value call" + ref + "Impl(Env env, Value []args)");
     else
-      out.println("public Value evalMethod" + ref + "Impl(Env env, Value q_this, Value []args)");
+      out.println("public Value callMethod" + ref + "Impl(Env env, Value q_this, Value []args)");
 
     //out.println("  throws Throwable");
     out.println("{");

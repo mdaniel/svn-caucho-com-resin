@@ -105,7 +105,7 @@ public class FieldVarGetExpr extends AbstractVarExpr {
   {
     Value obj = _objExpr.eval(env);
 
-    return obj.getField(_nameExpr.evalString(env).intern());
+    return obj.getField(env, _nameExpr.evalString(env).intern());
   }
   
   /**

@@ -92,7 +92,7 @@ public class DirectoryValue extends ResourceValue {
       return NullValue.NULL;
     }
     else
-      return super.evalMethod(env, method);
+      return super.callMethod(env, method);
   }
 
   /**

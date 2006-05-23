@@ -29,6 +29,15 @@
 
 package com.caucho.quercus.lib;
 
+import java.text.Collator;
+import java.util.Comparator;
+import java.util.Iterator;
+import java.util.Locale;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import com.caucho.quercus.QuercusModuleException;
 import com.caucho.quercus.env.*;
 import com.caucho.quercus.env.ArrayValue.AbstractGet;
 import com.caucho.quercus.env.ArrayValue.GetKey;
@@ -42,14 +51,6 @@ import com.caucho.quercus.module.UsesSymbolTable;
 import com.caucho.quercus.program.AbstractFunction;
 import com.caucho.util.L10N;
 import com.caucho.util.RandomUtil;
-
-import java.text.Collator;
-import java.util.Comparator;
-import java.util.Iterator;
-import java.util.Locale;
-import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * PHP array routines.
@@ -433,7 +434,7 @@ public class ArrayModule
     if (searchArray instanceof ArrayValue)
       return ! ((ArrayValue) searchArray).containsKey(key).isNull();
     else
-      return ! searchArray.getField(key.toString()).isNull();
+      return ! searchArray.getField(env, key.toString()).isNull();
   }
 
   /**
@@ -603,7 +604,7 @@ public class ArrayModule
 
       for (Map.Entry<Value, Value> entry : array.entrySet()) {
         try {
-          boolean isMatch = callback.eval(env, entry.getValue()).toBoolean();
+          boolean isMatch = callback.call(env, entry.getValue()).toBoolean();
 
           if (isMatch)
             filteredArray.put(entry.getKey(), entry.getValue());
@@ -753,7 +754,7 @@ public class ArrayModule
 
     for (Map.Entry<Value, Value> entry : array.entrySet()) {
       try {
-        result = func.eval(env, result, entry.getValue());
+        result = func.call(env, result, entry.getValue());
       }
       catch (Throwable t) {
         // XXX: may be used for error checking later
@@ -1145,7 +1146,7 @@ public class ArrayModule
   private void arrayWalkImpl(Env env, Map.Entry<Value, Value> entry,
                              Value extra, AbstractFunction callback)
   {
-    callback.eval(env, entry.getValue(), entry.getKey(), extra);
+    callback.call(env, entry.getValue(), entry.getKey(), extra);
   }
 
   /**
@@ -1976,7 +1977,7 @@ public class ArrayModule
         Value searchKey = ((ArrayValue) arrays[k]).contains(entryValue);
 
         if (searchKey != NullValue.NULL)
-          ValueFound = ((int) func.eval(env, searchKey, entryKey).toLong()) ==
+          ValueFound = ((int) func.call(env, searchKey, entryKey).toLong()) ==
                        0;
       }
 
@@ -2038,7 +2039,7 @@ public class ArrayModule
         while (keyItr.hasNext() && ! keyFound) {
           Value currentKey = keyItr.next();
 
-          keyFound = ((int) func.eval(env, entryKey, currentKey).toLong()) == 0;
+          keyFound = ((int) func.call(env, entryKey, currentKey).toLong()) == 0;
         }
       }
 
@@ -2255,7 +2256,7 @@ public class ArrayModule
         Value searchValue = ((ArrayValue) arrays[k]).containsKey(entryKey);
 
         if (searchValue != NullValue.NULL)
-          valueFound = func.eval(env, searchValue, entryValue).toLong() == 0;
+          valueFound = func.call(env, searchValue, entryValue).toLong() == 0;
         else
           valueFound = false;
       }
@@ -2322,7 +2323,7 @@ public class ArrayModule
         while (keyItr.hasNext() && ! keyFound) {
           Value currentKey = keyItr.next();
 
-          keyFound = ((int) func.eval(env, entryKey, currentKey).toLong()) == 0;
+          keyFound = ((int) func.call(env, entryKey, currentKey).toLong()) == 0;
         }
 
       }
@@ -2372,7 +2373,7 @@ public class ArrayModule
           param[i + 1] = NullValue.NULL;
       }
 
-      resultArray.put(entry.getKey(), fun.eval(env, param));
+      resultArray.put(entry.getKey(), fun.call(env, param));
     }
 
     return resultArray;
@@ -2624,7 +2625,7 @@ public class ArrayModule
 
         for (Map.Entry<Value, Value> entry : checkArray.entrySet()) {
           try {
-            isFound = cmp.eval(env, entryValue, entry.getValue()).toLong() == 0;
+            isFound = cmp.call(env, entryValue, entry.getValue()).toLong() == 0;
           }
           catch (Throwable t) {
             log.log(Level.WARNING, t.toString(), t);
@@ -2719,7 +2720,7 @@ public class ArrayModule
             boolean valueFound = false;
 
             if (keyFound)
-              valueFound = cmp.eval(env, entryValue, entry.getValue())
+              valueFound = cmp.call(env, entryValue, entry.getValue())
                 .toLong() == 0;
 
             isFound = keyFound && valueFound;
@@ -2834,12 +2835,12 @@ public class ArrayModule
         for (Map.Entry<Value, Value> entry : checkArray.entrySet()) {
           try {
             boolean valueFound =
-              cmpValue.eval(env, entryValue, entry.getValue()).toLong() == 0;
+              cmpValue.call(env, entryValue, entry.getValue()).toLong() == 0;
 
             boolean keyFound = false;
 
             if (valueFound)
-              keyFound = cmpKey.eval(env, entryKey, entry.getKey()).toLong() ==
+              keyFound = cmpKey.call(env, entryKey, entry.getKey()).toLong() ==
                          0;
 
             isFound = valueFound && keyFound;
@@ -2931,7 +2932,7 @@ public class ArrayModule
 
         for (Map.Entry<Value, Value> entry : checkArray.entrySet()) {
           try {
-            isFound = cmp.eval(env, entryValue, entry.getValue()).toLong() == 0;
+            isFound = cmp.call(env, entryValue, entry.getValue()).toLong() == 0;
           }
           catch (Throwable t) {
             log.log(Level.WARNING, t.toString(), t);
@@ -3024,7 +3025,7 @@ public class ArrayModule
             boolean valueFound = false;
 
             if (keyFound)
-              valueFound = cmp.eval(env, entryValue, entry.getValue())
+              valueFound = cmp.call(env, entryValue, entry.getValue())
                 .toLong() == 0;
 
             isFound = keyFound && valueFound;
@@ -3137,12 +3138,12 @@ public class ArrayModule
         for (Map.Entry<Value, Value> entry : checkArray.entrySet()) {
           try {
             boolean valueFound =
-              cmpValue.eval(env, entryValue, entry.getValue()).toLong() == 0;
+              cmpValue.call(env, entryValue, entry.getValue()).toLong() == 0;
 
             boolean keyFound = false;
 
             if (valueFound)
-              keyFound = cmpKey.eval(env, entryKey, entry.getKey()).toLong() ==
+              keyFound = cmpKey.call(env, entryKey, entry.getKey()).toLong() ==
                          0;
 
             isFound = valueFound && keyFound;
@@ -3416,10 +3417,10 @@ public class ArrayModule
         Value aElement = _getter.get(aEntry);
         Value bElement = _getter.get(bEntry);
 
-        return (int) _func.eval(_env, aElement, bElement).toLong();
+        return (int) _func.call(_env, aElement, bElement).toLong();
       }
-      catch (Throwable e) {
-        throw new RuntimeException(e);
+      catch (Exception e) {
+        throw new QuercusModuleException(e);
       }
     }
   }

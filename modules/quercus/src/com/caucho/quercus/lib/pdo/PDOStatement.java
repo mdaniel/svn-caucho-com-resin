@@ -887,7 +887,7 @@ public class PDOStatement
       Value object;
 
       if (cl != null)
-        object = cl.evalNew(_env, args);
+        object = cl.callNew(_env, args);
       else
         object = _env.createObject();
 

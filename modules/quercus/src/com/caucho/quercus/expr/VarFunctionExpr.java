@@ -105,7 +105,7 @@ public class VarFunctionExpr extends Expr {
    */
   public Value eval(Env env)
   {
-    return env.getFunction(_name.eval(env)).eval(env, _args);
+    return env.getFunction(_name.eval(env)).call(env, _args);
   }
   
   /**
@@ -117,7 +117,7 @@ public class VarFunctionExpr extends Expr {
    */
   public Value evalRef(Env env)
   {
-    return env.getFunction(_name.eval(env)).evalRef(env, _args);
+    return env.getFunction(_name.eval(env)).callRef(env, _args);
   }
 
   //
@@ -182,9 +182,9 @@ public class VarFunctionExpr extends Expr {
     out.print(")");
 
     if (isRef)
-      out.print(".evalRef(env");
+      out.print(".callRef(env");
     else
-      out.print(".eval(env");
+      out.print(".call(env");
     
     if (_args.length <= 5) {
       for (int i = 0; i < _args.length; i++) {

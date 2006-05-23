@@ -67,7 +67,7 @@ public class ReturnRefStatement extends Statement {
   {
     try {
       if (_expr != null) {
-        // quercus/0750
+        // php/0750
         return _expr.evalRef(env);
       }
       else

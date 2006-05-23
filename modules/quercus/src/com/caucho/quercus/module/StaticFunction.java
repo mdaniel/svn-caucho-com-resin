@@ -332,7 +332,7 @@ public class StaticFunction extends AbstractFunction {
   /**
    * Evalutes the function.
    */
-  public Value eval(Env env, Expr []exprs)
+  public Value call(Env env, Expr []exprs)
   {
     int len = _defaultExprs.length + (_hasEnv ? 1 : 0) + (_hasRestArgs ? 1 : 0);
 
@@ -376,19 +376,19 @@ public class StaticFunction extends AbstractFunction {
   /**
    * Evalutes the function.
    */
-  public Value evalMethod(Env env, Value obj, Value []quercusArgs)
+  public Value callMethod(Env env, Value obj, Value []quercusArgs)
   {
     Value []args = new Value[quercusArgs.length + 1];
     args[0] = obj;
     System.arraycopy(quercusArgs, 0, args, 1, quercusArgs.length);
 
-    return eval(env, args);
+    return call(env, args);
   }
 
   /**
    * Evalutes the function.
    */
-  public Value eval(Env env, Value []quercusArgs)
+  public Value call(Env env, Value []quercusArgs)
   {
     int len = _paramTypes.length;
 
@@ -450,17 +450,17 @@ public class StaticFunction extends AbstractFunction {
   /**
    * Evaluates the function.
    */
-  public Value evalCopy(Env env, Expr []exprs)
+  public Value callCopy(Env env, Expr []exprs)
   {
-    return eval(env, exprs);
+    return call(env, exprs);
   }
 
   /**
    * Evaluates the function, returning a copy
    */
-  public Value evalCopy(Env env, Value []args)
+  public Value callCopy(Env env, Value []args)
   {
-    return eval(env, args);
+    return call(env, args);
   }
 
   //

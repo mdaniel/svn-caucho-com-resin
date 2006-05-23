@@ -98,13 +98,13 @@ public class ClassesModule extends AbstractQuercusModule {
   /**
    * Returns the object's variables
    */
-  public Value get_object_vars(Value obj)
+  public static Value get_object_vars(Env env, Value obj)
   {
     //
     ArrayValue result = new ArrayValueImpl();
 
     for (Value name : obj.getIndices()) {
-      result.put(name, obj.getField(name.toString().intern()));
+      result.put(name, obj.getField(env, name.toString().intern()));
     }
 
     return result;

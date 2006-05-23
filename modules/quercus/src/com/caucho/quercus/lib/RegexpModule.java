@@ -558,7 +558,7 @@ public class RegexpModule
           regs.put(StringValue.EMPTY);
       }
 
-      Value replacement = fun.eval(env, regs);
+      Value replacement = fun.call(env, regs);
 
       result.append(replacement);
 

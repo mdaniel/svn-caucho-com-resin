@@ -126,7 +126,7 @@ public class StaticMethodExpr extends Expr {
     // qa/0954 - what appears to be a static call may be a call to a super constructor
     Value thisValue = env.getThis();
 
-    return cl.evalMethod(env, thisValue, _name, _args);
+    return cl.callMethod(env, thisValue, _name, _args);
   }
 
   //
@@ -185,7 +185,7 @@ public class StaticMethodExpr extends Expr {
 
     out.print("env.getClass(\"");
     out.printJavaString(_className);
-    out.print("\").evalMethod(env, ");
+    out.print("\").callMethod(env, ");
 
     /*
     if (isMethod())

@@ -93,7 +93,7 @@ public class MethodCallExpr extends Expr {
     try {
       env.checkTimeout();
 
-      return obj.evalMethod(env, _name, _args);
+      return obj.callMethod(env, _name, _args);
     } finally {
       env.popCall();
     }
@@ -115,7 +115,7 @@ public class MethodCallExpr extends Expr {
     env.pushCall(this, obj);
     
     try {
-      return obj.evalMethodRef(env, _name, _args);
+      return obj.callMethodRef(env, _name, _args);
     } finally {
       env.popCall();
     }
@@ -182,7 +182,7 @@ public class MethodCallExpr extends Expr {
     String ref = isRef ? "Ref" : "";
     
     _objExpr.generate(out);
-    out.print(".evalMethod" + ref + "(env, \"");
+    out.print(".callMethod" + ref + "(env, \"");
     out.printJavaString(_name);
     out.print("\"");
 

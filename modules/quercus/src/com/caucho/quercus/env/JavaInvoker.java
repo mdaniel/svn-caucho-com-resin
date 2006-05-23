@@ -279,12 +279,12 @@ abstract public class JavaInvoker
     return expandedArgs;
   }
 
-  public Value eval(Env env, Value []value)
+  public Value call(Env env, Value []value)
   {
-    return eval(env, env.getThis(), value);
+    return call(env, env.getThis(), value);
   }
 
-  public Value eval(Env env, Object obj, Expr []exprs)
+  public Value call(Env env, Object obj, Expr []exprs)
   {
     int len = _defaultExprs.length + (_hasEnv ? 1 : 0) + (_hasRestArgs ? 1 : 0);
 
@@ -338,7 +338,7 @@ abstract public class JavaInvoker
     return _unmarshallReturn.unmarshall(env, result);
   }
 
-  public Value eval(Env env, Object obj, Value []args)
+  public Value call(Env env, Object obj, Value []args)
   {
     int len = _defaultExprs.length + (_hasEnv ? 1 : 0) + (_hasRestArgs ? 1 : 0);
 
@@ -392,36 +392,36 @@ abstract public class JavaInvoker
     return _unmarshallReturn.unmarshall(env, result);
   }
 
-  public Value eval(Env env, Object obj)
+  public Value call(Env env, Object obj)
   {
-    return eval(env, obj, new Value[0]);
+    return call(env, obj, new Value[0]);
   }
 
-  public Value eval(Env env, Object obj, Value a1)
+  public Value call(Env env, Object obj, Value a1)
   {
-    return eval(env, obj, new Value[]{a1});
+    return call(env, obj, new Value[]{a1});
   }
 
-  public Value eval(Env env, Object obj, Value a1, Value a2)
+  public Value call(Env env, Object obj, Value a1, Value a2)
   {
-    return eval(env, obj, new Value[]{a1, a2});
+    return call(env, obj, new Value[]{a1, a2});
   }
 
-  public Value eval(Env env, Object obj, Value a1, Value a2, Value a3)
+  public Value call(Env env, Object obj, Value a1, Value a2, Value a3)
   {
-    return eval(env, obj, new Value[]{a1, a2, a3});
+    return call(env, obj, new Value[]{a1, a2, a3});
   }
 
-  public Value eval(Env env, Object obj,
+  public Value call(Env env, Object obj,
                     Value a1, Value a2, Value a3, Value a4)
   {
-    return eval(env, obj, new Value[]{a1, a2, a3, a4});
+    return call(env, obj, new Value[]{a1, a2, a3, a4});
   }
 
-  public Value eval(Env env, Object obj,
+  public Value call(Env env, Object obj,
                     Value a1, Value a2, Value a3, Value a4, Value a5)
   {
-    return eval(env, obj, new Value[]{a1, a2, a3, a4, a5});
+    return call(env, obj, new Value[]{a1, a2, a3, a4, a5});
   }
 
   public void generate(PhpWriter out, Expr funExpr, Expr []expr)

@@ -63,9 +63,9 @@ public class SimpleXMLElementArray extends ArrayValueImpl {
    * $foo->bar->someTag
    */
   @Override
-  public Value getField(String index)
+  public Value getField(Env env, String index)
   {
-    return super.get(LongValue.ZERO).getField(index);
+    return super.get(LongValue.ZERO).getField(env, index);
   }
 
  /**

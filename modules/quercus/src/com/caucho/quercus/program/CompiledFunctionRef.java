@@ -58,80 +58,80 @@ abstract public class CompiledFunctionRef extends AbstractFunction {
     = Logger.getLogger(CompiledFunctionRef.class.getName());
   private static final L10N L = new L10N(CompiledFunctionRef.class);
 
-  public Value eval(Env env, Value []argValues)
+  public Value call(Env env, Value []argValues)
   {
-    return evalRef(env, argValues).copy();
+    return callRef(env, argValues).copy();
   }
 
-  public Value eval(Env env)
+  public Value call(Env env)
   {
-    return evalRef(env).copy();
+    return callRef(env).copy();
   }
 
-  public Value eval(Env env, Value arg)
+  public Value call(Env env, Value arg)
   {
-    return evalRef(env, arg).copy();
+    return callRef(env, arg).copy();
   }
 
-  public Value eval(Env env, Value a1, Value a2)
+  public Value call(Env env, Value a1, Value a2)
   {
-    return evalRef(env, a1, a2).copy();
+    return callRef(env, a1, a2).copy();
   }
 
-  public Value eval(Env env, Value a1, Value a2, Value a3)
+  public Value call(Env env, Value a1, Value a2, Value a3)
   {
-    return evalRef(env, a1, a2, a3).copy();
+    return callRef(env, a1, a2, a3).copy();
   }
 
-  public Value eval(Env env, Value a1, Value a2, Value a3, Value a4)
+  public Value call(Env env, Value a1, Value a2, Value a3, Value a4)
   {
-    return evalRef(env, a1, a2, a3, a4).copy();
+    return callRef(env, a1, a2, a3, a4).copy();
   }
 
-  public Value eval(Env env, Value a1, Value a2, Value a3, Value a4, Value a5)
+  public Value call(Env env, Value a1, Value a2, Value a3, Value a4, Value a5)
   {
-    return evalRef(env, a1, a2, a3, a4, a5).copy();
+    return callRef(env, a1, a2, a3, a4, a5).copy();
   }
 
-  public Value evalMethod(Env env, Value obj, Value []argValues)
+  public Value callMethod(Env env, Value obj, Value []argValues)
   {
-    return evalMethodRef(env, obj, argValues).copyReturn();
+    return callMethodRef(env, obj, argValues).copyReturn();
   }
 
-  public Value evalMethod(Env env, Value obj)
+  public Value callMethod(Env env, Value obj)
   {
-    return evalMethodRef(env, obj).copyReturn();
+    return callMethodRef(env, obj).copyReturn();
   }
 
-  public Value evalMethod(Env env, Value obj, Value arg)
+  public Value callMethod(Env env, Value obj, Value arg)
   {
-    return evalMethodRef(env, obj, arg).copyReturn();
+    return callMethodRef(env, obj, arg).copyReturn();
   }
 
-  public Value evalMethod(Env env, Value obj, Value a1, Value a2)
+  public Value callMethod(Env env, Value obj, Value a1, Value a2)
   {
-    return evalMethodRef(env, obj, a1, a2).copyReturn();
+    return callMethodRef(env, obj, a1, a2).copyReturn();
   }
 
-  public Value evalMethod(Env env, Value obj, Value a1, Value a2, Value a3)
+  public Value callMethod(Env env, Value obj, Value a1, Value a2, Value a3)
   {
-    return evalMethodRef(env, obj, a1, a2, a3).copyReturn();
+    return callMethodRef(env, obj, a1, a2, a3).copyReturn();
   }
 
-  public Value evalMethod(Env env, Value obj, Value a1,
+  public Value callMethod(Env env, Value obj, Value a1,
 			  Value a2, Value a3, Value a4)
   {
-    return evalMethodRef(env, obj, a1, a2, a3, a4).copyReturn();
+    return callMethodRef(env, obj, a1, a2, a3, a4).copyReturn();
   }
 
-  public Value evalMethod(Env env, Value obj, Value a1, Value a2,
+  public Value callMethod(Env env, Value obj, Value a1, Value a2,
 			  Value a3, Value a4, Value a5)
   {
-    return evalMethodRef(env, obj, a1, a2, a3, a4, a5).copyReturn();
+    return callMethodRef(env, obj, a1, a2, a3, a4, a5).copyReturn();
   }
 
   /**
-   * Generates code to evaluate the expression.
+   * Generates code to calluate the expression.
    *
    * @param out the writer to the Java source code.
    */

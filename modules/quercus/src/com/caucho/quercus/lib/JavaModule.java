@@ -58,7 +58,7 @@ public class JavaModule extends AbstractQuercusModule {
   {
     JavaClassDef def = env.getJavaClassDefinition(className);
 
-    return def.evalNew(env, args);
+    return def.callNew(env, args);
   }
 }
 

@@ -94,32 +94,32 @@ abstract public class CompiledMethodRef_4 extends CompiledMethodRef {
   /**
    * Evaluates the method with the given variable arguments.
    */
-  public Value evalMethodRef(Env env, Value obj, Value []argValues)
+  public Value callMethodRef(Env env, Value obj, Value []argValues)
   {
     switch (argValues.length) {
     case 0:
-      return evalMethodRef(env,
+      return callMethodRef(env,
 			obj,
 			_default_0.eval(env),
 			_default_1.eval(env),
 			_default_2.eval(env),
 			_default_3.eval(env));
     case 1:
-      return evalMethodRef(env,
+      return callMethodRef(env,
 			obj,
 			argValues[0],
 			_default_1.eval(env),
 			_default_2.eval(env),
 			_default_3.eval(env));
     case 2:
-      return evalMethodRef(env,
+      return callMethodRef(env,
 			obj,
 			argValues[0],
 			argValues[1],
 			_default_2.eval(env),
 			_default_3.eval(env));
     case 3:
-      return evalMethodRef(env,
+      return callMethodRef(env,
 			obj,
 			argValues[0],
 			argValues[1],
@@ -127,7 +127,7 @@ abstract public class CompiledMethodRef_4 extends CompiledMethodRef {
 			_default_3.eval(env));
     case 4:
     default:
-      return evalMethodRef(env,
+      return callMethodRef(env,
 			obj,
 			argValues[0],
 			argValues[1],
@@ -136,7 +136,7 @@ abstract public class CompiledMethodRef_4 extends CompiledMethodRef {
     }
   }
 
-  abstract public Value evalMethodRef(Env env,
+  abstract public Value callMethodRef(Env env,
 				   Value obj,
 				   Value a1,
 				   Value a2,
@@ -146,7 +146,7 @@ abstract public class CompiledMethodRef_4 extends CompiledMethodRef {
   /**
    * Evaluates the method as a static function
    */
-  public Value eval(Env env, Value []argValues)
+  public Value call(Env env, Value []argValues)
   {
     env.warning(L.l("can't call '{0}' as a static function", _name));
 

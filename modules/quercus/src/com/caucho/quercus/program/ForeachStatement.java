@@ -242,11 +242,13 @@ public class ForeachStatement
       _code = code;
     }
 
+    @Override
     public Value eval(Env env)
     {
       throw new UnsupportedOperationException();
     }
 
+    @Override
     public void generate(PhpWriter out)
       throws IOException
     {

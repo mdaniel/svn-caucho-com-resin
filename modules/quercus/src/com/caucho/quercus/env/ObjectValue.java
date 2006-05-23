@@ -58,6 +58,14 @@ abstract public class ObjectValue extends Value {
   {
     return putField(null, key, LongValue.create(value));
   }
+  
+  /**
+   * Adds a new value.
+   */
+  public Value putFieldInit(Env env, String key, Value value)
+  {
+    return putField(env, key, value);
+  }
 
   /**
    * Adds a new value.

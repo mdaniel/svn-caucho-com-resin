@@ -608,7 +608,7 @@ abstract public class Value {
   /**
    * Evaluates a method.
    */
-  public Value evalMethod(Env env, String methodName, Expr []args)
+  public Value callMethod(Env env, String methodName, Expr []args)
   {
     Value []value = new Value[args.length];
 
@@ -616,33 +616,33 @@ abstract public class Value {
       value[i] = args[i].eval(env);
     }
 
-    return evalMethod(env, methodName, value);
+    return callMethod(env, methodName, value);
   }
 
   /**
    * Evaluates a method.
    */
-  public Value evalMethod(Env env, String methodName, Value []args)
+  public Value callMethod(Env env, String methodName, Value []args)
   {
     switch (args.length) {
     case 0:
-      return evalMethod(env, methodName);
+      return callMethod(env, methodName);
 
     case 1:
-      return evalMethod(env, methodName, args[0]);
+      return callMethod(env, methodName, args[0]);
 
     case 2:
-      return evalMethod(env, methodName, args[0], args[1]);
+      return callMethod(env, methodName, args[0], args[1]);
 
     case 3:
-      return evalMethod(env, methodName, args[0], args[1], args[2]);
+      return callMethod(env, methodName, args[0], args[1], args[2]);
 
     case 4:
-      return evalMethod(env, methodName, args[0], args[1], args[2],
+      return callMethod(env, methodName, args[0], args[1], args[2],
 			args[3]);
 
     case 5:
-      return evalMethod(env, methodName, args[0], args[1], args[2],
+      return callMethod(env, methodName, args[0], args[1], args[2],
 			args[3], args[4]);
 
     default:
@@ -653,7 +653,7 @@ abstract public class Value {
   /**
    * Evaluates a method with 0 args.
    */
-  public Value evalMethod(Env env, String methodName)
+  public Value callMethod(Env env, String methodName)
   {
     return errorNoMethod(env, methodName);
   }
@@ -661,7 +661,7 @@ abstract public class Value {
   /**
    * Evaluates a method with 1 arg.
    */
-  public Value evalMethod(Env env, String methodName, Value a0)
+  public Value callMethod(Env env, String methodName, Value a0)
   {
     return errorNoMethod(env, methodName);
   }
@@ -669,7 +669,7 @@ abstract public class Value {
   /**
    * Evaluates a method with 1 arg.
    */
-  public Value evalMethod(Env env, String methodName, Value a0, Value a1)
+  public Value callMethod(Env env, String methodName, Value a0, Value a1)
   {
     return errorNoMethod(env, methodName);
   }
@@ -677,7 +677,7 @@ abstract public class Value {
   /**
    * Evaluates a method with 3 args.
    */
-  public Value evalMethod(Env env, String methodName,
+  public Value callMethod(Env env, String methodName,
 			  Value a0, Value a1, Value a2)
   {
     return errorNoMethod(env, methodName);
@@ -686,7 +686,7 @@ abstract public class Value {
   /**
    * Evaluates a method with 4 args.
    */
-  public Value evalMethod(Env env, String methodName,
+  public Value callMethod(Env env, String methodName,
 			  Value a0, Value a1, Value a2, Value a3)
   {
     return errorNoMethod(env, methodName);
@@ -695,7 +695,7 @@ abstract public class Value {
   /**
    * Evaluates a method with 5 args.
    */
-  public Value evalMethod(Env env, String methodName,
+  public Value callMethod(Env env, String methodName,
 			  Value a0, Value a1, Value a2, Value a3, Value a5)
   {
     return errorNoMethod(env, methodName);
@@ -710,7 +710,7 @@ abstract public class Value {
   /**
    * Evaluates a method.
    */
-  public Value evalMethodRef(Env env, String methodName, Expr []args)
+  public Value callMethodRef(Env env, String methodName, Expr []args)
   {
     Value []value = new Value[args.length];
 
@@ -718,33 +718,33 @@ abstract public class Value {
       value[i] = args[i].eval(env);
     }
 
-    return evalMethodRef(env, methodName, value);
+    return callMethodRef(env, methodName, value);
   }
 
   /**
    * Evaluates a method.
    */
-  public Value evalMethodRef(Env env, String methodName, Value []args)
+  public Value callMethodRef(Env env, String methodName, Value []args)
   {
     switch (args.length) {
     case 0:
-      return evalMethodRef(env, methodName);
+      return callMethodRef(env, methodName);
 
     case 1:
-      return evalMethodRef(env, methodName, args[0]);
+      return callMethodRef(env, methodName, args[0]);
 
     case 2:
-      return evalMethodRef(env, methodName, args[0], args[1]);
+      return callMethodRef(env, methodName, args[0], args[1]);
 
     case 3:
-      return evalMethodRef(env, methodName, args[0], args[1], args[2]);
+      return callMethodRef(env, methodName, args[0], args[1], args[2]);
 
     case 4:
-      return evalMethodRef(env, methodName, args[0], args[1], args[2],
+      return callMethodRef(env, methodName, args[0], args[1], args[2],
 			args[3]);
 
     case 5:
-      return evalMethodRef(env, methodName, args[0], args[1], args[2],
+      return callMethodRef(env, methodName, args[0], args[1], args[2],
 			args[3], args[4]);
 
     default:
@@ -756,7 +756,7 @@ abstract public class Value {
   /**
    * Evaluates a method with 0 args.
    */
-  public Value evalMethodRef(Env env, String methodName)
+  public Value callMethodRef(Env env, String methodName)
   {
     return env.error(L.l("{0}: '{1}' is an unknown method.",
 			 toString(), methodName));
@@ -765,7 +765,7 @@ abstract public class Value {
   /**
    * Evaluates a method with 1 arg.
    */
-  public Value evalMethodRef(Env env, String methodName, Value a0)
+  public Value callMethodRef(Env env, String methodName, Value a0)
   {
     return env.error(L.l("{0}: '{1}' is an unknown method.",
 			 toString(), methodName));
@@ -774,7 +774,7 @@ abstract public class Value {
   /**
    * Evaluates a method with 1 arg.
    */
-  public Value evalMethodRef(Env env, String methodName, Value a0, Value a1)
+  public Value callMethodRef(Env env, String methodName, Value a0, Value a1)
   {
     return env.error(L.l("{0}: '{1}' is an unknown method.",
 			 toString(), methodName));
@@ -783,7 +783,7 @@ abstract public class Value {
   /**
    * Evaluates a method with 3 args.
    */
-  public Value evalMethodRef(Env env, String methodName,
+  public Value callMethodRef(Env env, String methodName,
 			  Value a0, Value a1, Value a2)
   {
     return env.error(L.l("{0}: '{1}' is an unknown method.",
@@ -793,7 +793,7 @@ abstract public class Value {
   /**
    * Evaluates a method with 4 args.
    */
-  public Value evalMethodRef(Env env, String methodName,
+  public Value callMethodRef(Env env, String methodName,
 			  Value a0, Value a1, Value a2, Value a3)
   {
     return env.error(L.l("{0}: '{1}' is an unknown method.",
@@ -803,7 +803,7 @@ abstract public class Value {
   /**
    * Evaluates a method with 5 args.
    */
-  public Value evalMethodRef(Env env, String methodName,
+  public Value callMethodRef(Env env, String methodName,
 			  Value a0, Value a1, Value a2, Value a3, Value a5)
   {
     return env.error(L.l("{0}: '{1}' is an unknown method.",
@@ -813,7 +813,7 @@ abstract public class Value {
   /**
    * Evaluates a method.
    */
-  public Value evalClassMethod(Env env, AbstractFunction fun, Value []args)
+  public Value callClassMethod(Env env, AbstractFunction fun, Value []args)
   {
     return NullValue.NULL;
   }
@@ -1066,7 +1066,7 @@ abstract public class Value {
   /**
    * Returns the field ref.
    */
-  public Value getField(String index)
+  public Value getField(Env env, String index)
   {
     return NullValue.NULL;
   }
@@ -1076,7 +1076,7 @@ abstract public class Value {
    */
   public Value getFieldRef(Env env, String index)
   {
-    return getField(index);
+    return getField(env, index);
   }
 
   /**
@@ -1101,7 +1101,7 @@ abstract public class Value {
    */
   public Value getFieldObject(Env env, String index)
   {
-    Value v = getField(index);
+    Value v = getField(env, index);
 
     if (! v.isset()) {
       v = env.createObject();
@@ -1118,7 +1118,7 @@ abstract public class Value {
    */
   public Value getFieldArray(Env env, String index)
   {
-    Value v = getField(index);
+    Value v = getField(env, index);
 
     Value array = v.toAutoArray();
 

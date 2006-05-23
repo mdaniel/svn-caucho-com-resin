@@ -1,4 +1,4 @@
-/*
+ /*
  * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
@@ -71,20 +71,20 @@ abstract public class CompiledFunctionRef_2 extends CompiledFunctionRef {
     return args;
   }
 
-  public Value evalRef(Env env, Value []argValues)
+  public Value callRef(Env env, Value []argValues)
   {
     switch (argValues.length) {
     case 0:
-      return evalRef(env, _default_0.eval(env), _default_1.eval(env));
+      return callRef(env, _default_0.eval(env), _default_1.eval(env));
     case 1:
-      return evalRef(env, argValues[0], _default_1.eval(env));
+      return callRef(env, argValues[0], _default_1.eval(env));
     case 2:
     default:
-      return evalRef(env, argValues[0], argValues[1]);
+      return callRef(env, argValues[0], argValues[1]);
     }
   }
 
-  abstract public Value evalRef(Env env, Value a1, Value a2);
+  abstract public Value callRef(Env env, Value a1, Value a2);
 
   public String toString()
   {
