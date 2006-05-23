@@ -27,13 +27,13 @@
  * @author Charles Reich
  */
 
-package com.caucho.quercus.lib.mysql;
+package com.caucho.quercus.lib.db.mysql;
 
 import java.util.logging.Logger;
 
 import com.caucho.util.L10N;
 
-import com.caucho.quercus.resources.JdbcResultResource;
+import com.caucho.quercus.lib.db.JdbcResultResource;
 
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;

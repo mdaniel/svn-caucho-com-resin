@@ -27,12 +27,12 @@
  * @author Charles Reich
  */
 
-package com.caucho.quercus.resources;
+package com.caucho.quercus.lib.db;
 
 import com.caucho.util.Log;
 import com.caucho.util.L10N;
-import com.caucho.quercus.resources.JdbcConnectionResource;
-import com.caucho.quercus.resources.JdbcResultResource;
+import com.caucho.quercus.lib.db.JdbcConnectionResource;
+import com.caucho.quercus.lib.db.JdbcResultResource;
 import com.caucho.quercus.env.*;
 
 import java.sql.PreparedStatement;

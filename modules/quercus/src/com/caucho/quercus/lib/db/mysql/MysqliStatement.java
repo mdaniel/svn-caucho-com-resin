@@ -27,7 +27,7 @@
  * @author Charles Reich
  */
 
-package com.caucho.quercus.lib.mysql;
+package com.caucho.quercus.lib.db.mysql;
 
 import java.sql.*;
 
@@ -39,15 +39,15 @@ import com.caucho.util.L10N;
 
 import com.caucho.quercus.QuercusModuleException;
 
-import com.caucho.quercus.resources.JdbcConnectionResource;
-import com.caucho.quercus.resources.JdbcResultResource;
+import com.caucho.quercus.lib.db.JdbcConnectionResource;
+import com.caucho.quercus.lib.db.JdbcResultResource;
 
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.BooleanValue;
 
 import com.caucho.quercus.module.Reference;
-import com.caucho.quercus.lib.mysql.MysqliResult;
+import com.caucho.quercus.lib.db.mysql.MysqliResult;
 
 /**
  * mysqli object oriented API facade

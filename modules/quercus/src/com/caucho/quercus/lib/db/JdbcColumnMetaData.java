@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.quercus.resources;
+package com.caucho.quercus.lib.db;
 
 import java.sql.*;
 

@@ -27,7 +27,7 @@
  * @author Rodrigo Westrupp
  */
 
-package com.caucho.quercus.lib.oracle;
+package com.caucho.quercus.lib.db.oracle;
 
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -51,18 +51,18 @@ import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.quercus.module.Optional;
 import com.caucho.quercus.module.Reference;
 import com.caucho.quercus.module.NotNull;
-import com.caucho.quercus.resources.JdbcConnectionResource;
+import com.caucho.quercus.lib.db.JdbcConnectionResource;
 
-import com.caucho.quercus.resources.JdbcResultResource;
-import com.caucho.quercus.resources.JdbcTableMetaData;
-import com.caucho.quercus.resources.JdbcColumnMetaData;
+import com.caucho.quercus.lib.db.JdbcResultResource;
+import com.caucho.quercus.lib.db.JdbcTableMetaData;
+import com.caucho.quercus.lib.db.JdbcColumnMetaData;
 
 //@todo create a Oraclei and OracleiResult instead
-import com.caucho.quercus.lib.mysql.Mysqli;
-import com.caucho.quercus.lib.mysql.MysqliResult;
-import com.caucho.quercus.lib.mysql.MysqliStatement;
+import com.caucho.quercus.lib.db.mysql.Mysqli;
+import com.caucho.quercus.lib.db.mysql.MysqliResult;
+import com.caucho.quercus.lib.db.mysql.MysqliStatement;
 //@todo remove (still using MYSQL_xxx constants)
-import com.caucho.quercus.lib.mysql.MysqlModule;
+import com.caucho.quercus.lib.db.mysql.MysqlModule;
 
 import java.lang.reflect.*;
 import java.io.*;

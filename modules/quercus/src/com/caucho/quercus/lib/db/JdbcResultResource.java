@@ -27,11 +27,11 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.quercus.resources;
+package com.caucho.quercus.lib.db;
 
 import com.caucho.util.Log;
-import com.caucho.quercus.lib.mysql.MysqliModule;
-import com.caucho.quercus.resources.JdbcConnectionResource;
+import com.caucho.quercus.lib.db.mysql.MysqliModule;
+import com.caucho.quercus.lib.db.JdbcConnectionResource;
 import com.caucho.quercus.env.*;
 
 import java.sql.*;

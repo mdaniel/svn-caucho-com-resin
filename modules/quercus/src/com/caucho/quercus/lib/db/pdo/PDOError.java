@@ -27,12 +27,12 @@
  */
 
 
-package com.caucho.quercus.lib.pdo;
+package com.caucho.quercus.lib.db.pdo;
 
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.ArrayValue;
 import com.caucho.quercus.env.ArrayValueImpl;
-import com.caucho.quercus.lib.pdo.PDO;
+import com.caucho.quercus.lib.db.pdo.PDO;
 import com.caucho.util.L10N;
 
 import java.util.logging.Level;

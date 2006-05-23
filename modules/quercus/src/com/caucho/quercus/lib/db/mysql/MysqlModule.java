@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.quercus.lib.mysql;
+package com.caucho.quercus.lib.db.mysql;
 
 import java.sql.Statement;
 import java.sql.SQLException;
@@ -41,13 +41,13 @@ import com.caucho.quercus.env.*;
 import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.quercus.module.Optional;
 import com.caucho.quercus.module.NotNull;
-import com.caucho.quercus.resources.JdbcConnectionResource;
+import com.caucho.quercus.lib.db.JdbcConnectionResource;
 
-import com.caucho.quercus.resources.JdbcResultResource;
-import com.caucho.quercus.resources.JdbcTableMetaData;
-import com.caucho.quercus.resources.JdbcColumnMetaData;
-import com.caucho.quercus.lib.mysql.Mysqli;
-import com.caucho.quercus.lib.mysql.MysqliResult;
+import com.caucho.quercus.lib.db.JdbcResultResource;
+import com.caucho.quercus.lib.db.JdbcTableMetaData;
+import com.caucho.quercus.lib.db.JdbcColumnMetaData;
+import com.caucho.quercus.lib.db.mysql.Mysqli;
+import com.caucho.quercus.lib.db.mysql.MysqliResult;
 
 /**
  * PHP mysql routines.

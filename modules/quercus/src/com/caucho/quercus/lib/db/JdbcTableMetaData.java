@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.quercus.resources;
+package com.caucho.quercus.lib.db;
 
 import java.util.HashMap;
 
@@ -39,7 +39,7 @@ import java.sql.*;
 import com.caucho.util.Log;
 import com.caucho.util.Alarm;
 
-import com.caucho.quercus.resources.JdbcConnectionResource;
+import com.caucho.quercus.lib.db.JdbcConnectionResource;
 import com.caucho.quercus.env.*;
 
 /**

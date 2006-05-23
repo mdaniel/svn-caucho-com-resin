@@ -27,7 +27,7 @@
  * @author Rodrigo Westrupp
  */
 
-package com.caucho.quercus.lib.postgres;
+package com.caucho.quercus.lib.db.postgres;
 
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -46,16 +46,16 @@ import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.quercus.module.Optional;
 import com.caucho.quercus.module.NotNull;
 import com.caucho.quercus.module.ReturnNullAsFalse;
-import com.caucho.quercus.resources.JdbcConnectionResource;
+import com.caucho.quercus.lib.db.JdbcConnectionResource;
 
-import com.caucho.quercus.resources.JdbcResultResource;
-import com.caucho.quercus.resources.JdbcTableMetaData;
-import com.caucho.quercus.resources.JdbcColumnMetaData;
+import com.caucho.quercus.lib.db.JdbcResultResource;
+import com.caucho.quercus.lib.db.JdbcTableMetaData;
+import com.caucho.quercus.lib.db.JdbcColumnMetaData;
 
 //@todo create a Postgresi and PostgresqliResult instead
-import com.caucho.quercus.lib.mysql.Mysqli;
-import com.caucho.quercus.lib.mysql.MysqliResult;
-import com.caucho.quercus.lib.mysql.MysqliStatement;
+import com.caucho.quercus.lib.db.mysql.Mysqli;
+import com.caucho.quercus.lib.db.mysql.MysqliResult;
+import com.caucho.quercus.lib.db.mysql.MysqliStatement;
 
 // Do not add new compile dependencies (using reflection instead)
 // import org.postgresql.largeobject.*;
@@ -1800,13 +1800,42 @@ public class PostgresModule extends AbstractQuercusModule {
   /**
    * Select records
    */
-  public Value pg_select(Env env,
-                         @NotNull Mysqli conn,
-                         String tableName,
-                         Value assocArray,
-                         @Optional int options)
+  public @ReturnNullAsFalse Object pg_select(Env env,
+                                             @NotNull Mysqli conn,
+                                             String tableName,
+                                             Value assocArray,
+                                             @Optional("-1") int options)
   {
-    throw new UnimplementedException("pg_select");
+    try {
+
+      String where = "";
+
+      System.out.println("assocArray: "+assocArray);
+
+      ArrayValueImpl arrayImpl = (ArrayValueImpl)assocArray;
+      int size = arrayImpl.size();
+
+      for (int i=0; i<size; i++) {
+        String p = arrayImpl.get(LongValue.create(i)).toString();
+        String pi = conn.real_escape_string(p).toString();
+        pi = pi.replaceAll("\\\\", "\\\\\\\\");
+        where += "\\'"+pi+"\\' AND";
+      }
+
+      String query = "SELECT * FROM " + tableName;
+
+      if (!where.equals("")) {
+        query = " WHERE " + query;
+      }
+
+      pg_query(env, conn, query);
+
+      return null;
+
+    } catch (Exception ex) {
+      log.log(Level.FINE, ex.toString(), ex);
+      return null;
+    }
   }
 
   /**
@@ -1818,7 +1847,21 @@ public class PostgresModule extends AbstractQuercusModule {
                                  String stmtName,
                                  Value params)
   {
-    throw new UnimplementedException("pg_send_execute");
+    try {
+
+      // Note: for now, this is the same as pg_execute.
+
+      Object object = pg_execute(env, conn, stmtName, params);
+
+      if (object != null) {
+        return true;
+      }
+
+    } catch (Exception ex) {
+      log.log(Level.FINE, ex.toString(), ex);
+    }
+
+    return false;
   }
 
   /**
@@ -1830,7 +1873,21 @@ public class PostgresModule extends AbstractQuercusModule {
                                  String stmtName,
                                  String query)
   {
-    throw new UnimplementedException("pg_send_prepare");
+    try {
+
+      // Note: for now, this is the same as pg_prepare.
+
+      Object object = pg_prepare(env, conn, stmtName, query);
+
+      if (object != null) {
+        return true;
+      }
+
+    } catch (Exception ex) {
+      log.log(Level.FINE, ex.toString(), ex);
+    }
+
+    return false;
   }
 
   /**
