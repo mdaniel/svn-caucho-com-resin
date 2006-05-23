@@ -59,7 +59,7 @@ public class MethodCallExpr extends Expr {
     super(location);
     _objExpr = objExpr;
     
-    _name = name;
+    _name = name.intern();
 
     _args = new Expr[args.size()];
     args.toArray(_args);

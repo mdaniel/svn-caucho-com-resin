@@ -4,6 +4,7 @@
 
 <s2 title='3.0.snap - May 22, 2006'>
 <ul>
+<li>Quercus: __get, __set, __call (#638, #645)
 <li>Quercus: define(FOO, 1) was defining FOO as "FOO" (#1140, rep by koreth)
 <li>Quercus: basic abstract, interface implementation
 <li>(2006-05-22) Quercus: crc32 returns unsigned (#1133, rep by koreth)
