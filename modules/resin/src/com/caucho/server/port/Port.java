@@ -61,7 +61,7 @@ import com.caucho.jmx.AdminAttributeCategory;
 import com.caucho.jmx.AdminInfo;
 import com.caucho.jmx.AdminInfoFactory;
 
-import com.caucho.server.port.mbean.PortMBean;
+import com.caucho.mbeans.PortMBean;
 
 /**
  * Represents a protocol connection.
@@ -672,9 +672,9 @@ public class Port
 
     try {
       if (_host == null)
-	_objectName = Jmx.getObjectName("type=Port,port=" + _port);
+        _objectName = Jmx.getObjectName("type=Port,port=" + _port);
       else
-	_objectName = Jmx.getObjectName("type=Port,port=" + _port +",host=" + _host);
+        _objectName = Jmx.getObjectName("type=Port,port=" + _port +",host=" + _host);
 
       Jmx.register(this, _objectName);
     } catch (Exception e) {
@@ -685,9 +685,9 @@ public class Port
       if (_port == 0) {
       }
       else if (_host != null)
-	log.info("listening to " + _host + ":" + _port);
+        log.info("listening to " + _host + ":" + _port);
       else
-	log.info("listening to " + _port);
+        log.info("listening to " + _port);
     }
     else if (_sslFactory != null && _socketAddress != null) {
       _serverSocket = _sslFactory.create(_socketAddress, _port);
@@ -696,20 +696,20 @@ public class Port
     }
     else if (_sslFactory != null) {
       if (_host == null) {
-	_serverSocket = _sslFactory.create(null, _port);
-	log.info(_protocol.getProtocolName() + "s listening to *:" + _port);
+        _serverSocket = _sslFactory.create(null, _port);
+        log.info(_protocol.getProtocolName() + "s listening to *:" + _port);
       }
       else {
-	InetAddress addr = InetAddress.getByName(_host);
+        InetAddress addr = InetAddress.getByName(_host);
 
-	_serverSocket = _sslFactory.create(addr, _port);
+        _serverSocket = _sslFactory.create(addr, _port);
 
-	log.info(_protocol.getProtocolName() + "s listening to " + _host + ":" + _port);
+        log.info(_protocol.getProtocolName() + "s listening to " + _host + ":" + _port);
       }
     }
     else if (_socketAddress != null) {
       _serverSocket = QJniServerSocket.create(_socketAddress, _port,
-					      _listenBacklog);
+                                              _listenBacklog);
 
       log.info(_protocol.getProtocolName() + " listening to " + _socketAddress.getHostName() + ":" + _port);
     }
@@ -739,18 +739,18 @@ public class Port
       bind();
 
       if (_serverSocket.isJNI() && _server.isEnableSelectManager()) {
-	_selectManager = _server.getSelectManager();
+        _selectManager = _server.getSelectManager();
 
-	if (_selectManager == null) {
-	  throw new IllegalStateException(L.l("Cannot load select manager"));
-	}
+        if (_selectManager == null) {
+          throw new IllegalStateException(L.l("Cannot load select manager"));
+        }
       }
 
       if (_keepaliveMax < 0)
-	_keepaliveMax = _server.getKeepaliveMax();
+        _keepaliveMax = _server.getKeepaliveMax();
 
       if (_keepaliveMax < 0)
-	_keepaliveMax = 256;
+        _keepaliveMax = 256;
 
       String name = "resin-port-" + _serverSocket.getLocalPort();
       _thread = new Thread(this, name);
@@ -797,7 +797,7 @@ public class Port
   {
     return _selectManager;
   }
-  
+
   /**
    * Returns the number of connections in the select.
    */
@@ -816,48 +816,48 @@ public class Port
   {
     try {
       synchronized (this) {
-	_idleThreadCount++;
+        _idleThreadCount++;
 
-	if (isFirst) {
-	  _startThreadCount--;
+        if (isFirst) {
+          _startThreadCount--;
 
-	  if (_startThreadCount < 0) {
-	    Thread.dumpStack();
-	  }
-	}
+          if (_startThreadCount < 0) {
+            Thread.dumpStack();
+          }
+        }
 
-	if (_maxSpareListen < _idleThreadCount) {
-	  return false;
-	}
+        if (_maxSpareListen < _idleThreadCount) {
+          return false;
+        }
       }
 
       while (_lifecycle.isActive()) {
-	QSocket socket = conn.startSocket();
+        QSocket socket = conn.startSocket();
 
-	Thread.interrupted();
-	if (_serverSocket.accept(socket)) {
-	  conn.initSocket();
+        Thread.interrupted();
+        if (_serverSocket.accept(socket)) {
+          conn.initSocket();
 
-	  return true;
-	}
-	else {
-	  if (_maxSpareListen < _idleThreadCount) {
-	    return false;
-	  }
-	}
+          return true;
+        }
+        else {
+          if (_maxSpareListen < _idleThreadCount) {
+            return false;
+          }
+        }
       }
     } catch (Throwable e) {
       if (_lifecycle.isActive() && log.isLoggable(Level.FINER))
-	log.log(Level.FINER, e.toString(), e);
+        log.log(Level.FINER, e.toString(), e);
     } finally {
       boolean newConn = false;
 
       synchronized (this) {
-	_idleThreadCount--;
+        _idleThreadCount--;
 
-	if (_idleThreadCount + _startThreadCount < _minSpareListen) {
-	  notify();
-	}
+        if (_idleThreadCount + _startThreadCount < _minSpareListen) {
+          notify();
+        }
       }
     }
 
@@ -901,9 +901,9 @@ public class Port
   {
     synchronized (_keepaliveCountLock) {
       if (_keepaliveMax <= _keepaliveCount)
-	return false;
+        return false;
       else if (_connectionMax <= _connectionCount + _minSpareConnection)
-	return false;
+        return false;
 
       _keepaliveCount++;
 
@@ -920,10 +920,10 @@ public class Port
       _keepaliveCount--;
 
       if (_keepaliveCount < 0) {
-	int count = _keepaliveCount;
-	_keepaliveCount = 0;
+        int count = _keepaliveCount;
+        _keepaliveCount = 0;
 
-	log.warning("internal error: negative keepalive count " + count);
+        log.warning("internal error: negative keepalive count " + count);
       }
     }
   }
@@ -945,38 +945,38 @@ public class Port
       boolean isStart = false;
 
       try {
-	// need delay to avoid spawing too many threads over a short time,
-	// when the load doesn't justify it
-	Thread.yield();
-	Thread.sleep(10);
+        // need delay to avoid spawing too many threads over a short time,
+        // when the load doesn't justify it
+        Thread.yield();
+        Thread.sleep(10);
 
-	synchronized (this) {
-	  isStart = _startThreadCount + _idleThreadCount < _minSpareListen;
-	  if (_connectionMax <= _connectionCount)
-	    isStart = false;
+        synchronized (this) {
+          isStart = _startThreadCount + _idleThreadCount < _minSpareListen;
+          if (_connectionMax <= _connectionCount)
+            isStart = false;
 
-	  if (! isStart) {
-	    Thread.interrupted();
-	    wait(60000);
-	  }
+          if (! isStart) {
+            Thread.interrupted();
+            wait(60000);
+          }
 
-	  if (isStart) {
-	    _connectionCount++;
-	    _startThreadCount++;
-	  }
-	}
+          if (isStart) {
+            _connectionCount++;
+            _startThreadCount++;
+          }
+        }
 
-	if (isStart && _lifecycle.isActive()) {
-	  TcpConnection conn = _freeConn.allocate();
-	  if (conn == null) {
-	    conn = new TcpConnection(this, _serverSocket.createSocket());
-	    conn.setRequest(_protocol.createRequest(conn));
-	  }
+        if (isStart && _lifecycle.isActive()) {
+          TcpConnection conn = _freeConn.allocate();
+          if (conn == null) {
+            conn = new TcpConnection(this, _serverSocket.createSocket());
+            conn.setRequest(_protocol.createRequest(conn));
+          }
 
-	  ThreadPool.schedule(conn);
-	}
+          ThreadPool.schedule(conn);
+        }
       } catch (Throwable e) {
-	e.printStackTrace();
+        e.printStackTrace();
       }
     }
 
@@ -1027,10 +1027,10 @@ public class Port
   {
     synchronized (this) {
       if (_connectionCount-- == _connectionMax) {
-	try {
-	  notify();
-	} catch (Throwable e) {
-	}
+        try {
+          notify();
+        } catch (Throwable e) {
+        }
       }
     }
   }
@@ -1091,7 +1091,7 @@ public class Port
 
     try {
       if (_objectName != null)
-	Jmx.unregister(_objectName);
+        Jmx.unregister(_objectName);
     } catch (Throwable e) {
     }
 
@@ -1112,23 +1112,23 @@ public class Port
       int idleCount = _idleThreadCount + _startThreadCount;
 
       for (int i = 0; i < idleCount + 10; i++) {
-	try {
-	  Socket socket = new Socket();
-	  InetSocketAddress addr;
+        try {
+          Socket socket = new Socket();
+          InetSocketAddress addr;
 
-	  if (localAddress == null ||
-	      localAddress.getHostAddress().startsWith("0."))
-	    addr = new InetSocketAddress("127.0.0.1", localPort);
-	  else
-	    addr = new InetSocketAddress(localAddress, localPort);
+          if (localAddress == null ||
+              localAddress.getHostAddress().startsWith("0."))
+            addr = new InetSocketAddress("127.0.0.1", localPort);
+          else
+            addr = new InetSocketAddress(localAddress, localPort);
 
-	  socket.connect(addr, 100);
+          socket.connect(addr, 100);
 
-	  socket.close();
-	} catch (ConnectException e) {
-	} catch (Throwable e) {
-	  log.log(Level.FINEST, e.toString(), e);
-	}
+          socket.close();
+        } catch (ConnectException e) {
+        } catch (Throwable e) {
+          log.log(Level.FINEST, e.toString(), e);
+        }
       }
     }
 

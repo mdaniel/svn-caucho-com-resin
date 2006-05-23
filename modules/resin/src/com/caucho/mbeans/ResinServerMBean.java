@@ -1,44 +1,26 @@
-/*
- * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
- *
- * This file is part of Resin(R) Open Source
- *
- * Each copy or derived work must preserve the copyright notice and this
- * notice unmodified.
- *
- * Resin Open Source is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * Resin Open Source is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE, or any warranty
- * of NON-INFRINGEMENT.  See the GNU General Public License for more
- * details.
- *
- * You should have received a copy of the GNU General Public License
- * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
- *   59 Temple Place, Suite 330
- *   Boston, MA 02111-1307  USA
- *
- * @author Scott Ferguson
+/**
+ * Created by IntelliJ IDEA.
+ * User: sam
+ * Date: May 16, 2006
+ * Time: 12:01:52 PM
+ * To change this template use File | Settings | File Templates.
  */
 
-package com.caucho.server.resin.mbean;
-
-import java.util.Date;
-
-import com.caucho.server.resin.ResinServer;
+package com.caucho.mbeans;
 
 import javax.management.ObjectName;
+import java.util.Date;
 
 /**
  * Management interface for the server.
  * There is one ResinServer global for the entire JVM.
  */
 public interface ResinServerMBean {
+  /**
+   * Returns the {@link ObjectName} of the mbean.
+   */
+  public ObjectName getObjectName();
+
   /**
    * Returns the ip address of the machine that is running this ResinServer.
    */
@@ -77,9 +59,19 @@ public interface ResinServerMBean {
   public Date getInitialStartTime();
 
   /**
-   * Returns the last restart time.
+   * Returns the last start time.
    */
   public Date getStartTime();
+
+  /**
+   * Returns the current total amount of memory available for the JVM, in bytes.
+   */
+  public long getTotalMemory();
+
+  /**
+   * Returns the current free amount of memory available for the JVM, in bytes.
+   */
+  public long getFreeMemory();
 
   /**
    * Restart this Resin server.

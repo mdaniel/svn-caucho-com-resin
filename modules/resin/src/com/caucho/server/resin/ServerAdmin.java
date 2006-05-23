@@ -39,7 +39,7 @@ import com.caucho.jmx.AdminInfo;
 
 import com.caucho.server.deploy.DeployControllerAdmin;
 
-import com.caucho.server.resin.mbean.ServletServerMBean;
+import com.caucho.mbeans.ServletServerMBean;
 
 public class ServerAdmin extends DeployControllerAdmin<ServerController>
   implements ServletServerMBean

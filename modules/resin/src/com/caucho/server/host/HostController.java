@@ -31,7 +31,6 @@
 package com.caucho.server.host;
 
 import java.util.*;
-import java.util.LinkedHashMap;
 
 import java.util.logging.Logger;
 import java.util.logging.Level;
@@ -39,30 +38,21 @@ import java.util.logging.Level;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 
-import javax.servlet.jsp.el.VariableResolver;
-import javax.servlet.jsp.el.ELException;
-
-import javax.management.ObjectName;
-import javax.management.MalformedObjectNameException;
 import javax.management.JMException;
 
 import com.caucho.config.ConfigException;
 import com.caucho.config.types.PathBuilder;
 
 import com.caucho.util.L10N;
-import com.caucho.util.Alarm;
-import com.caucho.util.CompileException;
 
 import com.caucho.vfs.Vfs;
 import com.caucho.vfs.Path;
-import com.caucho.vfs.MergePath;
 import com.caucho.vfs.Depend;
 
 import com.caucho.log.Log;
 
 import com.caucho.make.Dependency;
 
-import com.caucho.jmx.Jmx;
 import com.caucho.jmx.IntrospectionMBean;
 
 import com.caucho.el.EL;
@@ -74,7 +64,7 @@ import com.caucho.server.e_app.EarConfig;
 import com.caucho.server.deploy.DeployController;
 import com.caucho.server.deploy.EnvironmentDeployController;
 
-import com.caucho.server.host.mbean.HostMBean;
+import com.caucho.mbeans.HostMBean;
 
 /**
  * A configuration entry for a host

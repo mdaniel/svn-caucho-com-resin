@@ -27,53 +27,56 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.server.deploy.mbean;
+package com.caucho.mbeans;
 
-import java.util.Date;
-
-import javax.management.ObjectName;
+import com.caucho.mbeans.DeployControllerMBean;
 
 /**
- * Management interface for the deploy controller.
+ * MBean API for the WebApp.
  */
-public interface DeployControllerMBean
-{
+public interface WebAppMBean extends DeployControllerMBean {
   /**
-   * Returns the ObjectName.
+   * Returns the root directory.
    */
-  public ObjectName getObjectName();
+  public String getRootDirectory();
 
   /**
-   * Returns the controller's state.
+   * Returns the application's context path.
    */
-  public String getState();
+  public String getContextPath();
 
   /**
-   * Returns the time the controller was last started
+   * Returns the count of active sessions.
    */
-  public Date getStartTime();
+  public int getActiveSessionCount();
 
   /**
-   * Starts the instance.
+   * Returns the session timeout
    */
-  public void start()
-    throws Exception;
+  public long getSessionTimeout();
 
   /**
-   * Stops the instance.
+   * Returns the count of active sessions.
    */
-  public void stop()
-    throws Exception;
+  public long getSessionActiveCount();
 
   /**
-   * Restarts the instance.
+   * Returns the count of sessions created
    */
-  public void restart()
-    throws Exception;
+  public long getSessionCreateCount();
 
   /**
-   * Restarts the instance if any changes are detected.
+   * Returns the count of sessions invalidated
    */
-  public void update()
-    throws Exception;
+  public long getSessionInvalidateCount();
+
+  /**
+   * Returns the count of sessions timeout
+   */
+  public long getSessionTimeoutCount();
+
+  /**
+   * Returns the persistent store type.
+   */
+  public String getSessionStoreType();
 }

@@ -27,15 +27,9 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.server.resin.mbean;
+package com.caucho.mbeans;
 
 import javax.management.ObjectName;
-
-import com.caucho.server.port.mbean.PortMBean;
-
-import com.caucho.server.deploy.mbean.DeployControllerMBean;
-
-import com.caucho.server.resin.ServletServer;
 
 /**
  * Management interface for the server.
@@ -65,12 +59,12 @@ public interface ServletServerMBean extends DeployControllerMBean {
    * Returns the array of ports.
    */
   public ObjectName []getPortObjectNames();
-  
+
   /**
    * Returns the array of cluster.
    */
   public ObjectName []getClusterObjectNames();
-  
+
   /**
    * Returns the array of hosts.
    */
@@ -80,7 +74,7 @@ public interface ServletServerMBean extends DeployControllerMBean {
    * Clears the cache.
    */
   public void clearCache();
-  
+
   /**
    * Clears the cache by regexp patterns.
    *

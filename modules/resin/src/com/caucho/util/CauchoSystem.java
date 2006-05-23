@@ -29,8 +29,6 @@
 
 package com.caucho.util;
 
-import java.util.*;
-
 import java.util.logging.Logger;
 import java.util.logging.Level;
 
@@ -38,10 +36,8 @@ import java.util.regex.Pattern;
 import java.io.*;
 import java.net.*;
 
-import com.caucho.log.Log;
 import com.caucho.vfs.*;
 import com.caucho.java.WorkDir;
-import com.caucho.loader.EnvironmentLocal;
 
 /**
  * A wrapper for Caucho system variables, allowing tests to override
@@ -50,7 +46,7 @@ import com.caucho.loader.EnvironmentLocal;
 public class CauchoSystem {
   private static Logger log
     = Logger.getLogger("com.caucho.util.CauchoSystem");
-  
+
   static char separatorChar = File.separatorChar;
   static char pathSeparatorChar = File.pathSeparatorChar;
   static String _localHost;
@@ -62,15 +58,16 @@ public class CauchoSystem {
   static boolean _isTestWindows;
 
   static boolean _hasJni;
-  
+
   private static int isUnix = -1;
   private static String newline;
   private static long _version;
 
+  private static boolean _isDetailedStatistics;
   private static String _user;
   private static String _group;
   private static String _classPath;
-  
+
   static CpuUsage cpuUsage;
 
   private CauchoSystem()
@@ -115,7 +112,7 @@ public class CauchoSystem {
     String classpath = System.getProperty("java.class.path");
     int head = 0;
     char sep = getFileSeparatorChar();
-    char pathSep = sep == '/' ? ':' : ';'; 
+    char pathSep = sep == '/' ? ':' : ';';
     while (path == null) {
       int p = classpath.indexOf(pathSep, head);
       String subpath;
@@ -124,25 +121,25 @@ public class CauchoSystem {
       else
         subpath = classpath.substring(head, p);
 
-      if (subpath.endsWith(sep + "lib" + sep + "resin.jar") || 
-	  subpath.equals("lib" + sep + "resin.jar")) {
-	path = subpath.substring(0, subpath.length() - 
-				 ("lib" + sep + "resin.jar").length());
+      if (subpath.endsWith(sep + "lib" + sep + "resin.jar") ||
+          subpath.equals("lib" + sep + "resin.jar")) {
+        path = subpath.substring(0, subpath.length() -
+                                    ("lib" + sep + "resin.jar").length());
       }
 
       else if (subpath.endsWith(sep + "classes") ||
-	       subpath.equals("classes")) {
-	Path resinPath = Vfs.lookupNative(subpath);
-	resinPath = resinPath.lookup("com/caucho/util/CauchoSystem.class");
-	if (resinPath.exists()) {
-	  path = subpath.substring(0, subpath.length() - "classes".length());
-	}
+               subpath.equals("classes")) {
+        Path resinPath = Vfs.lookupNative(subpath);
+        resinPath = resinPath.lookup("com/caucho/util/CauchoSystem.class");
+        if (resinPath.exists()) {
+          path = subpath.substring(0, subpath.length() - "classes".length());
+        }
       }
 
       if (p < 0)
-	break;
+        break;
       else
-	head = p + 1;
+        head = p + 1;
     }
 
     if (path != null)
@@ -194,7 +191,7 @@ public class CauchoSystem {
     if (_version == 0) {
       _version = Crc64.generate(com.caucho.Version.FULL_VERSION);
     }
-    
+
     return _version;
   }
 
@@ -218,7 +215,7 @@ public class CauchoSystem {
       return workPath;
 
     String workDir;
-    
+
     // Windows uses /temp as a work dir
     if (CauchoSystem.isWindows())
       workDir = "file:/c:/tmp/caucho";
@@ -263,7 +260,7 @@ public class CauchoSystem {
       if (newline == null)
         newline = "\n";
     }
-    
+
     return newline;
   }
 
@@ -333,6 +330,25 @@ public class CauchoSystem {
     return _userName;
   }
 
+  /**
+   * Set true to cause the tracking of detailed statistcs, default false.
+   * Detailed statistics cause various parts of Resin to keep more detailed
+   * statistics at the possible expense of some performance.
+   */
+  public static void setDetailedStatistics(boolean isVerboseStatistics)
+  {
+    _isDetailedStatistics = isVerboseStatistics;
+  }
+
+  /**
+   * Detailed statistics cause various parts of Resin to keep more detailed
+   * statistics at the possible expense of some performance.
+   */
+  public static boolean isDetailedStatistics()
+  {
+    return _isDetailedStatistics;
+  }
+
   public static CpuUsage getCpuUsage()
   {
     return CpuUsage.create();
@@ -350,7 +366,7 @@ public class CauchoSystem {
   {
     return loadClass(name, false, null);
   }
-  
+
   /**
    * Loads a class from a classloader.  If the loader is null, uses the
    * context class loader.
@@ -380,15 +396,15 @@ public class CauchoSystem {
   {
     if (_classPath != null)
       return _classPath;
-    
+
     String cp = System.getProperty("java.class.path");
-    
+
     String boot = System.getProperty("sun.boot.class.path");
     if (boot != null && ! boot.equals(""))
       cp = cp + File.pathSeparatorChar + boot;
 
     Pattern pattern = Pattern.compile("" + File.pathSeparatorChar);
-    
+
     String []path = pattern.split(cp);
 
     CharBuffer cb = new CharBuffer();
@@ -397,10 +413,10 @@ public class CauchoSystem {
       Path subpath = Vfs.lookup(path[i]);
 
       if (subpath.canRead() || subpath.isDirectory()) {
-	if (cb.length() > 0)
-	  cb.append(File.pathSeparatorChar);
+        if (cb.length() > 0)
+          cb.append(File.pathSeparatorChar);
 
-	cb.append(path[i]);
+        cb.append(path[i]);
       }
     }
 
@@ -423,7 +439,7 @@ public class CauchoSystem {
     else
       return -1;
   }
-  
+
   private static native int setUserNative(String user, String group)
     throws IOException;
 

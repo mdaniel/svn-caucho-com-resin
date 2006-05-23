@@ -27,56 +27,41 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.server.webapp.mbean;
+package com.caucho.mbeans;
 
-import com.caucho.server.deploy.mbean.DeployControllerMBean;
+import javax.management.ObjectName;
 
 /**
- * MBean API for the WebApp.
+ * Admin for a cluster.
  */
-public interface WebAppMBean extends DeployControllerMBean {
+public interface ClusterClientMBean {
   /**
-   * Returns the root directory.
+   * Returns the cluster client's object name.
    */
-  public String getRootDirectory();
+  public ObjectName getObjectName();
+  
+  /**
+   * Returns true if active.
+   */
+  public boolean isActive();
 
   /**
-   * Returns the application's context path.
+   * Returns the active count.
    */
-  public String getContextPath();
+  public int getActiveCount();
+  
+  /**
+   * Check if can connect.
+   */
+  public boolean canConnect();
 
   /**
-   * Returns the count of active sessions.
+   * enable the client
    */
-  public int getActiveSessionCount();
+  public void enable();
 
   /**
-   * Returns the session timeout
+   * disable the client
    */
-  public long getSessionTimeout();
-
-  /**
-   * Returns the count of active sessions.
-   */
-  public long getSessionActiveCount();
-
-  /**
-   * Returns the count of sessions created
-   */
-  public long getSessionCreateCount();
-
-  /**
-   * Returns the count of sessions invalidated
-   */
-  public long getSessionInvalidateCount();
-
-  /**
-   * Returns the count of sessions timeout
-   */
-  public long getSessionTimeoutCount();
-
-  /**
-   * Returns the persistent store type.
-   */
-  public String getSessionStoreType();
+  public void disable();
 }

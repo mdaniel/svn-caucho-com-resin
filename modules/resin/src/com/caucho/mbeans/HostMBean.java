@@ -27,15 +27,13 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.server.host.mbean;
+package com.caucho.mbeans;
 
 import java.util.Date;
 
 import javax.management.ObjectName;
 
-import com.caucho.server.deploy.mbean.DeployControllerMBean;
-
-import com.caucho.server.webapp.mbean.WebAppMBean;
+import com.caucho.mbeans.DeployControllerMBean;
 
 /**
  * Management interface for the host.

@@ -33,7 +33,7 @@ import com.caucho.server.deploy.DeployControllerAdmin;
 
 import com.caucho.server.session.SessionManager;
 
-import com.caucho.server.webapp.mbean.WebAppMBean;
+import com.caucho.mbeans.WebAppMBean;
 
 import com.caucho.server.cluster.Store;
 
@@ -106,7 +106,7 @@ public class WebAppAdmin extends DeployControllerAdmin<WebAppController>
   public long getSessionTimeout()
   {
     SessionManager manager = getSessionManager();
-    
+
     if (manager != null)
       return manager.getSessionTimeout();
     else
@@ -119,7 +119,7 @@ public class WebAppAdmin extends DeployControllerAdmin<WebAppController>
   public long getSessionActiveCount()
   {
     SessionManager manager = getSessionManager();
-    
+
     if (manager != null)
       return manager.getSessionActiveCount();
     else
@@ -132,7 +132,7 @@ public class WebAppAdmin extends DeployControllerAdmin<WebAppController>
   public long getSessionCreateCount()
   {
     SessionManager manager = getSessionManager();
-    
+
     if (manager != null)
       return manager.getSessionCreateCount();
     else
@@ -145,7 +145,7 @@ public class WebAppAdmin extends DeployControllerAdmin<WebAppController>
   public long getSessionInvalidateCount()
   {
     SessionManager manager = getSessionManager();
-    
+
     if (manager != null)
       return manager.getSessionInvalidateCount();
     else
@@ -158,7 +158,7 @@ public class WebAppAdmin extends DeployControllerAdmin<WebAppController>
   public long getSessionTimeoutCount()
   {
     SessionManager manager = getSessionManager();
-    
+
     if (manager != null)
       return manager.getSessionTimeoutCount();
     else

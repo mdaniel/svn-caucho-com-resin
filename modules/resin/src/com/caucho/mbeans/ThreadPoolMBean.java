@@ -26,7 +26,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.server.resin.mbean;
+package com.caucho.mbeans;
 
 /**
  * Management interface for the thread pool.

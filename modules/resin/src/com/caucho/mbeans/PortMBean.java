@@ -26,7 +26,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.server.port.mbean;
+package com.caucho.mbeans;
 
 /**
  * Represents a protocol connection.

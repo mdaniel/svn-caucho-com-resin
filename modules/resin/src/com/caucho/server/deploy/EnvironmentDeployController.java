@@ -37,8 +37,6 @@ import java.util.ArrayList;
 import java.util.logging.Logger;
 import java.util.logging.Level;
 
-import java.io.IOException;
-
 import javax.management.ObjectName;
 import javax.management.MalformedObjectNameException;
 import javax.management.JMException;
@@ -51,7 +49,6 @@ import com.caucho.log.Log;
 import com.caucho.loader.Environment;
 import com.caucho.loader.EnvironmentClassLoader;
 
-import com.caucho.config.Config;
 import com.caucho.config.BuilderProgram;
 import com.caucho.config.ConfigException;
 
@@ -72,21 +69,21 @@ import com.caucho.vfs.Vfs;
 
 import com.caucho.server.deploy.ExpandDeployController;
 
-import com.caucho.server.deploy.mbean.DeployControllerMBean;
+import com.caucho.mbeans.DeployControllerMBean;
 
 /**
  * A deploy controller for an environment.
  */
 abstract public class
   EnvironmentDeployController<I extends EnvironmentDeployInstance,
-					C extends DeployConfig>
+                                        C extends DeployConfig>
   extends ExpandDeployController<I>
   implements EnvironmentListener {
-  
+
   private static final L10N L = new L10N(EnvironmentDeployController.class);
   private static final Logger log
     = Log.open(EnvironmentDeployController.class);
-  
+
   // The JMX identity
   private LinkedHashMap<String,String> _jmxContext;
 
@@ -96,7 +93,7 @@ abstract public class
 
   // The default configurations
   private ArrayList<C> _configDefaults =  new ArrayList<C>();
-  
+
   // The primary configuration
   private C _config;
   private DeployConfig _prologue;
@@ -132,7 +129,7 @@ abstract public class
   public EnvironmentDeployController(String id, Path rootDirectory)
   {
     super(id, null, rootDirectory);
-    
+
     _parentVariableResolver = EL.getEnvironment(getParentClassLoader());
 
     _jmxContext = Jmx.copyContextProperties(getParentClassLoader());
@@ -148,11 +145,11 @@ abstract public class
 
     if (_config != null && ! _configDefaults.contains(_config))
       addConfigDefault(_config);
-    
+
     addConfigMode(config);
-    
+
     _config = config;
-    
+
     if (_prologue == null)
       setPrologue(config.getPrologue());
 
@@ -265,7 +262,7 @@ abstract public class
   protected void initEnd()
   {
     super.initEnd();
-    
+
     try {
       LinkedHashMap<String,String> properties;
 
@@ -274,9 +271,9 @@ abstract public class
       _mbeanName = createObjectName(properties);
 
       if (_mbeanName != null) {
-	_mbean = createMBean();
-      
-	Jmx.register(_mbean, _mbeanName);
+        _mbean = createMBean();
+
+        Jmx.register(_mbean, _mbeanName);
       }
     } catch (Exception e) {
       // XXX: thrown?
@@ -295,7 +292,7 @@ abstract public class
 
     properties.put("type", getMBeanTypeName());
     properties.put("name", getMBeanId());
-      
+
     return Jmx.getObjectName("resin", properties);
   }
 
@@ -306,7 +303,7 @@ abstract public class
     throws JMException
   {
     return new IntrospectionMBean(new DeployControllerAdmin(this),
-				  DeployControllerMBean.class);
+                                  DeployControllerMBean.class);
   }
 
   /**
@@ -334,7 +331,7 @@ abstract public class
       setConfig(oldController.getConfig());
     else if (oldController.getConfig() != null) {
       _configDefaults.add(getConfig());
-      
+
       setConfig(oldController.getConfig());
     }
 
@@ -342,7 +339,7 @@ abstract public class
       setPrologue(oldController.getPrologue());
     else if (oldController.getPrologue() != null) {
       _configDefaults.add(0, (C) getPrologue()); // XXX: must be first
-      
+
       setPrologue(oldController.getPrologue());
     }
 
@@ -352,10 +349,10 @@ abstract public class
     mergeStartupMode(oldController.getStartupMode());
 
     mergeRedeployCheckInterval(oldController.getRedeployCheckInterval());
-    
+
     mergeRedeployMode(oldController.getRedeployMode());
   }
-  
+
   /**
    * Returns the application object.
    */
@@ -363,7 +360,7 @@ abstract public class
   {
     if (! super.destroy())
       return false;
-    
+
     Environment.removeEnvironmentListener(this, getParentClassLoader());
 
     Thread thread = Thread.currentThread();
@@ -371,15 +368,15 @@ abstract public class
 
     try {
       thread.setContextClassLoader(getParentClassLoader());
-    
-      try {
-	ObjectName mbeanName = _mbeanName;
-	_mbeanName = null;
 
-	if (mbeanName != null)
-	  Jmx.unregister(mbeanName);
+      try {
+        ObjectName mbeanName = _mbeanName;
+        _mbeanName = null;
+
+        if (mbeanName != null)
+          Jmx.unregister(mbeanName);
       } catch (Exception e) {
-	log.log(Level.FINER, e.toString(), e);
+        log.log(Level.FINER, e.toString(), e);
       }
     } finally {
       thread.setContextClassLoader(oldLoader);
@@ -399,19 +396,19 @@ abstract public class
 
     try {
       ClassLoader classLoader = instance.getClassLoader();
-      
+
       thread.setContextClassLoader(classLoader);
 
       log.fine(instance + " initializing");
 
       // set from external error, like .ear
       instance.setConfigException(_configException);
-      
+
       HashMap<String,Object> varMap = new HashMap<String,Object>();
       varMap.putAll(_variableMap);
 
       VariableResolver variableResolver
-	= new MapVariableResolver(varMap, _parentVariableResolver);
+        = new MapVariableResolver(varMap, _parentVariableResolver);
 
       EL.setVariableMap(varMap, classLoader);
       EL.setEnvironment(variableResolver, classLoader);
@@ -423,19 +420,19 @@ abstract public class
       Jmx.setContextProperties(_jmxContext, classLoader);
 
       try {
-	String typeName = "Current" + getMBeanTypeName();
-	
-	Jmx.register(getMBean(),
-		     new ObjectName("resin:type=" + typeName),
-		     classLoader);
+        String typeName = "Current" + getMBeanTypeName();
+
+        Jmx.register(getMBean(),
+                     new ObjectName("resin:type=" + typeName),
+                     classLoader);
       } catch (Exception e) {
-	log.log(Level.FINER, e.toString(), e);
+        log.log(Level.FINER, e.toString(), e);
       }
 
       ArrayList<DeployConfig> initList = new ArrayList<DeployConfig>();
 
       if (getPrologue() != null)
-	initList.add(getPrologue());
+        initList.add(getPrologue());
 
       fillInitList(initList);
 
@@ -443,13 +440,13 @@ abstract public class
       Vfs.setPwd(getRootDirectory());
 
       if (getArchivePath() != null)
-	Environment.addDependency(getArchivePath());
+        Environment.addDependency(getArchivePath());
 
       for (DeployConfig config : initList) {
-	BuilderProgram program = config.getBuilderProgram();
+        BuilderProgram program = config.getBuilderProgram();
 
-	if (program != null)
-	  program.configure(instance);
+        if (program != null)
+          program.configure(instance);
       }
 
       instance.init();
@@ -470,20 +467,20 @@ abstract public class
     throws Throwable
   {
     Path rootDirectory = getRootDirectory();
-    
+
     if (rootDirectory == null)
       throw new NullPointerException("Null root directory");
 
     if (! rootDirectory.isFile()) {
     }
     else if (rootDirectory.getPath().endsWith(".jar") ||
-	     rootDirectory.getPath().endsWith(".war")) {
+             rootDirectory.getPath().endsWith(".war")) {
       throw new ConfigException(L.l("root-directory `{0}' must specify a directory.  It may not be a .jar or .war.",
-				    rootDirectory.getPath()));
+                                    rootDirectory.getPath()));
     }
     else
       throw new ConfigException(L.l("root-directory `{0}' may not be a file.  root-directory must specify a directory.",
-				    rootDirectory.getPath()));
+                                    rootDirectory.getPath()));
     Vfs.setPwd(rootDirectory);
 
     if (log.isLoggable(Level.FINE))
@@ -498,16 +495,16 @@ abstract public class
 
     if (path != null)
       return path;
-    
+
     if (_config != null) {
       String pathString = _config.getArchivePath();
-      
+
       if (pathString != null) {
-	try {
-	  path = PathBuilder.lookupPath(pathString);
-	} catch (ELException e) {
-	  throw new RuntimeException(e);
-	}
+        try {
+          path = PathBuilder.lookupPath(pathString);
+        } catch (ELException e) {
+          throw new RuntimeException(e);
+        }
       }
 
       setArchivePath(path);
@@ -527,7 +524,7 @@ abstract public class
       log.log(Level.WARNING, e.toString(), e);
     }
   }
-  
+
   /**
    * Handles the case where the environment is stopping
    */
@@ -535,7 +532,7 @@ abstract public class
   {
     stop();
   }
-  
+
   /**
    * Returns a printable view.
    */
@@ -544,7 +541,7 @@ abstract public class
     String name = getClass().getName();
 
     name = name.substring(name.lastIndexOf('.') + 1);
-    
+
     return name + "" + System.identityHashCode(this) + "[" + getId() + "]";
   }
 }

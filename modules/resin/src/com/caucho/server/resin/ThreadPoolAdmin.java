@@ -35,7 +35,7 @@ import com.caucho.util.ThreadPool;
 
 import com.caucho.log.Log;
 
-import com.caucho.server.resin.mbean.ThreadPoolMBean;
+import com.caucho.mbeans.ThreadPoolMBean;
 import com.caucho.jmx.AdminAttributeCategory;
 import com.caucho.jmx.AdminInfo;
 import com.caucho.jmx.AdminInfoFactory;

@@ -37,7 +37,6 @@ import java.util.logging.Level;
 import javax.management.ObjectName;
 
 import com.caucho.util.*;
-import com.caucho.vfs.*;
 
 import com.caucho.log.Log;
 
@@ -52,11 +51,8 @@ import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.loader.EnvironmentListener;
 
 import com.caucho.jmx.Jmx;
-import com.caucho.jmx.AdminAttributeCategory;
 
-import com.caucho.server.resin.SrunPort;
-
-import com.caucho.server.cluster.mbean.ClusterMBean;
+import com.caucho.mbeans.ClusterMBean;
 
 /**
  * Defines a set of clustered servers.
@@ -67,16 +63,16 @@ public class Cluster implements EnvironmentListener, ClusterMBean {
 
   static protected final EnvironmentLocal<String> _serverIdLocal
     = new EnvironmentLocal<String>("caucho.server-id");
-  
+
   static protected final EnvironmentLocal<Cluster> _clusterLocal
     = new EnvironmentLocal<Cluster>("caucho.cluster");
 
   private String _id = "";
-  
+
   private String _serverId = "";
 
   private ObjectName _objectName;
-  
+
   private ClusterServer []_serverList = new ClusterServer[0];
 
   private ClusterGroup _defaultGroup;
@@ -92,29 +88,29 @@ public class Cluster implements EnvironmentListener, ClusterMBean {
   private String _ref;
 
   private volatile boolean _isClosed;
-  
+
   public Cluster()
   {
     Environment.addEnvironmentListener(this);
   }
-  
+
   /**
    * Returns the currently active local cluster.
    */
   public static Cluster getLocal()
   {
     Cluster cluster = _clusterLocal.get();
-    
+
     return cluster;
   }
-  
+
   /**
    * Returns the currently active local cluster.
    */
   public static Cluster getCluster(ClassLoader loader)
   {
     Cluster cluster = _clusterLocal.get(loader);
-    
+
     return cluster;
   }
 
@@ -151,7 +147,7 @@ public class Cluster implements EnvironmentListener, ClusterMBean {
       ClusterServer server = _serverList[i];
 
       if (server != null && server.getId().equals(id))
-	return server;
+        return server;
     }
 
     return null;
@@ -167,7 +163,7 @@ public class Cluster implements EnvironmentListener, ClusterMBean {
 
     if (oldServer != null)
       log.warning(L.l("duplicate <srun> with server-id='{0}'",
-		      server.getId()));
+                      server.getId()));
 
     if (_serverList.length <= server.getIndex()) {
       int newLength = server.getIndex() + 1;
@@ -180,7 +176,7 @@ public class Cluster implements EnvironmentListener, ClusterMBean {
 
     if (_serverList[server.getIndex()] != null)
       throw new ConfigException(L.l("Cluster server `{0}' conflicts with a previous server.", server.getIndex()));
-    
+
     _serverList[server.getIndex()] = server;
   }
 
@@ -311,12 +307,12 @@ public class Cluster implements EnvironmentListener, ClusterMBean {
   {
     if (getStore() != null)
       throw new ConfigException(L.l("multiple jdbc stores are not allowed in a cluster."));
-      
+
     StoreManager store = null;
-    
+
     try {
       Class cl = Class.forName("com.caucho.server.cluster.JdbcStore");
-	
+
       store = (StoreManager) cl.newInstance();
 
       store.setCluster(this);
@@ -347,12 +343,12 @@ public class Cluster implements EnvironmentListener, ClusterMBean {
   {
     if (getStore() != null)
       throw new ConfigException(L.l("multiple file stores are not allowed in a cluster."));
-      
+
     StoreManager store = null;
-    
+
     try {
       Class cl = Class.forName("com.caucho.server.cluster.FileStore");
-	
+
       store = (StoreManager) cl.newInstance();
 
       store.setCluster(this);
@@ -373,16 +369,16 @@ public class Cluster implements EnvironmentListener, ClusterMBean {
   {
     if (getStore() != null)
       throw new ConfigException(L.l("multiple cluster stores are not allowed in a cluster."));
-      
+
     StoreManager store = null;
-    
+
     try {
       Class cl = Class.forName("com.caucho.server.cluster.ClusterStore");
-	
+
       store = (StoreManager) cl.newInstance();
 
       store.setCluster(this);
-      
+
       setStore(store);
     } catch (Throwable e) {
       log.log(Level.FINER, e.toString(), e);
@@ -406,14 +402,14 @@ public class Cluster implements EnvironmentListener, ClusterMBean {
       ClusterServer server = _serverList[i];
 
       if (server == null)
-	continue;
-      
+        continue;
+
       ClusterPort port = server.getClusterPort();
-      
+
       if (port.getReadTimeout() < getClientLiveTime()) {
-	throw new ConfigException(L.l("client-live-time '{0}s' must be less than the read-timeout '{1}s'.",
-				      getClientLiveTime() / 1000L,
-				      port.getReadTimeout() / 1000L));
+        throw new ConfigException(L.l("client-live-time '{0}s' must be less than the read-timeout '{1}s'.",
+                                      getClientLiveTime() / 1000L,
+                                      port.getReadTimeout() / 1000L));
       }
     }
 
@@ -426,8 +422,8 @@ public class Cluster implements EnvironmentListener, ClusterMBean {
       Cluster cluster = container.findCluster(_ref);
 
       if (cluster == null)
-	throw new ConfigException(L.l("'{0}' is an unknown cluster-ref.",
-				      _ref));
+        throw new ConfigException(L.l("'{0}' is an unknown cluster-ref.",
+                                      _ref));
 
       _clusterLocal.set(cluster);
     }
@@ -437,19 +433,19 @@ public class Cluster implements EnvironmentListener, ClusterMBean {
       ClusterServer self = findServer(serverId);
 
       if (self != null)
-	_clusterLocal.set(this);
+        _clusterLocal.set(this);
       else if (_clusterLocal.get() == null && _serverList.length == 0) {
-	// if it's the empty cluster, add it
-	_clusterLocal.set(this);
+        // if it's the empty cluster, add it
+        _clusterLocal.set(this);
       }
     }
 
     try {
       String name = _id;
-      
+
       if (name == null || name.equals(""))
-	name = "default";
-      
+        name = "default";
+
       _objectName = Jmx.getObjectName("type=Cluster,name=" + name);
 
       Jmx.register(this, _objectName);
@@ -519,7 +515,7 @@ public class Cluster implements EnvironmentListener, ClusterMBean {
       if (server != null && server.getId().equals(serverId))
         return server;
     }
-    
+
     return null;
   }
 
@@ -534,7 +530,7 @@ public class Cluster implements EnvironmentListener, ClusterMBean {
       if (server != null && server.getIndex() == index)
         return server;
     }
-    
+
     return null;
   }
 
@@ -544,13 +540,13 @@ public class Cluster implements EnvironmentListener, ClusterMBean {
   public ArrayList<ClusterPort> getServerPorts(String serverId)
   {
     ArrayList<ClusterPort> ports = new ArrayList<ClusterPort>();
-    
+
     for (int i = 0; i < _serverList.length; i++) {
       ClusterServer server = _serverList[i];
 
       if (server != null) {
         ClusterPort port = server.getClusterPort();
-      
+
         if (port.getServerId().equals(serverId))
           ports.add(port);
       }
@@ -558,21 +554,21 @@ public class Cluster implements EnvironmentListener, ClusterMBean {
 
     return ports;
   }
-  
+
   /**
    * Handles the case where a class loader has completed initialization
    */
   public void classLoaderInit(DynamicClassLoader loader)
   {
   }
-  
+
   /**
    * Handles the case where a class loader is dropped.
    */
   public void classLoaderDestroy(DynamicClassLoader loader)
   {
   }
-  
+
   /**
    * Handles the case where the environment is starting (after init).
    */
@@ -580,12 +576,12 @@ public class Cluster implements EnvironmentListener, ClusterMBean {
   {
     try {
       if (_clusterStore != null)
-	_clusterStore.start();
+        _clusterStore.start();
     } catch (Throwable e) {
       log.log(Level.WARNING, e.toString(), e);
     }
   }
-  
+
   /**
    * Handles the case where the environment is stopping
    */
@@ -609,7 +605,7 @@ public class Cluster implements EnvironmentListener, ClusterMBean {
 
       _isClosed = true;
     }
-    
+
     for (int i = 0; i < _serverList.length; i++) {
       ClusterServer server = _serverList[i];
 

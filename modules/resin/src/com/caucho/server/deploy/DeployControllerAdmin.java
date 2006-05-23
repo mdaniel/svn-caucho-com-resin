@@ -40,7 +40,6 @@ import javax.management.NotificationListener;
 import javax.management.NotificationFilter;
 import javax.management.ListenerNotFoundException;
 import javax.management.MBeanNotificationInfo;
-import javax.management.AttributeChangeNotification;
 import javax.management.NotificationEmitter;
 import javax.management.MBeanOperationInfo;
 
@@ -50,7 +49,7 @@ import com.caucho.jmx.AdminInfoFactory;
 import com.caucho.jmx.AdminInfo;
 import com.caucho.jmx.AdminOperationInfo;
 
-import com.caucho.server.deploy.mbean.DeployControllerMBean;
+import com.caucho.mbeans.DeployControllerMBean;
 
 import com.caucho.lifecycle.Lifecycle;
 import com.caucho.lifecycle.LifecycleListener;
@@ -255,8 +254,8 @@ public class DeployControllerAdmin<C extends EnvironmentDeployController>
     if (newState == Lifecycle.IS_ACTIVE) {
       LifecycleNotification notif;
       notif = new LifecycleNotification(LifecycleNotification.AFTER_START,
-					this, _sequence++, timestamp,
-					toString () + " started");
+                                        this, _sequence++, timestamp,
+                                        toString () + " started");
 
       _broadcaster.sendNotification(notif);
     }
@@ -264,8 +263,8 @@ public class DeployControllerAdmin<C extends EnvironmentDeployController>
     if (oldState == Lifecycle.IS_ACTIVE) {
       LifecycleNotification notif;
       notif = new LifecycleNotification(LifecycleNotification.BEFORE_STOP,
-					this, _sequence++, timestamp,
-					toString() + " stopping");
+                                        this, _sequence++, timestamp,
+                                        toString() + " stopping");
 
       _broadcaster.sendNotification(notif);
     }

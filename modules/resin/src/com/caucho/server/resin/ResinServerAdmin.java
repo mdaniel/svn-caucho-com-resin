@@ -28,12 +28,12 @@
 
 package com.caucho.server.resin;
 
-import com.caucho.server.resin.mbean.ResinServerMBean;
 import com.caucho.util.CauchoSystem;
 import com.caucho.util.L10N;
 import com.caucho.jmx.AdminAttributeCategory;
 import com.caucho.jmx.AdminInfoFactory;
 import com.caucho.jmx.AdminInfo;
+import com.caucho.mbeans.ResinServerMBean;
 
 import javax.management.ObjectName;
 import javax.management.MBeanOperationInfo;
@@ -42,7 +42,7 @@ import java.util.Date;
 import java.util.ArrayList;
 
 public class ResinServerAdmin
-  implements ResinServerMBean, AdminInfoFactory
+  implements ResinServerMBean
 {
   private static final L10N L = new L10N(ResinServerAdmin.class);
 
@@ -64,58 +64,9 @@ public class ResinServerAdmin
     _resinServer = resinServer;
   }
 
-  public AdminInfo getAdminInfo()
+  public ObjectName getObjectName()
   {
-    AdminInfo descriptor = new AdminInfo();
-
-    descriptor.setTitle(L.l("ResinServer"));
-    descriptor.setDescription(L.l("An instance of Resin running in a JVM"));
-
-    descriptor.createAdminAttributeInfo("LocalHost")
-      .setCategory(AdminAttributeCategory.CONFIGURATION)
-      .setDescription(L.l("The ip address of the machine that is running this instance of Resin."));
-
-    descriptor.createAdminAttributeInfo("ServerId")
-      .setCategory(AdminAttributeCategory.CONFIGURATION)
-      .setDescription(L.l("The server id used when starting this version of Resin, the value of `-server id'."));
-
-    descriptor.createAdminAttributeInfo("ConfigFile")
-      .setCategory(AdminAttributeCategory.CONFIGURATION)
-      .setDescription(L.l("The configuration file used when starting this instance of Resin, the value of `-config file'."));
-
-    descriptor.createAdminAttributeInfo("ResinHome")
-      .setCategory(AdminAttributeCategory.CONFIGURATION)
-      .setDescription(L.l("The Resin home directory used when starting this instance of Resin. This is the location of the Resin program files."));
-
-    descriptor.createAdminAttributeInfo("ServerRoot")
-      .setCategory(AdminAttributeCategory.CONFIGURATION)
-      .setDescription(L.l("The server root directory used when starting this instance of Resin. This is the root directory of the web server files."));
-
-    descriptor.createAdminAttributeInfo("State")
-      .setCategory(AdminAttributeCategory.STATISTIC)
-      .setDescription(L.l("The current lifecycle state."));
-
-    descriptor.createAdminAttributeInfo("InitialStartTime")
-      .setCategory(AdminAttributeCategory.STATISTIC)
-      .setDescription(L.l("The time that this instance was first started."));
-
-    descriptor.createAdminAttributeInfo("StartTime")
-      .setCategory(AdminAttributeCategory.STATISTIC)
-      .setDescription(L.l("The time that this instance was last started or restarted."));
-
-    descriptor.createAdminAttributeInfo("ThreadPoolObjectName")
-      .setCategory(AdminAttributeCategory.CHILD)
-      .setDescription(L.l("The ThreadPool manages all threads used by Resin."));
-
-    descriptor.createAdminAttributeInfo("ServerObjectNames")
-      .setCategory(AdminAttributeCategory.CHILD)
-      .setDescription(L.l("The servers that are active within this JVM."));
-
-    descriptor.createAdminOperationInfo("Restart")
-      .setImpact(MBeanOperationInfo.ACTION)
-      .setDescription(L.l("Exit this instance cleanly and allow the wrapper script to start a new JVM."));
-
-    return descriptor;
+    return null;  // XXX:
   }
 
   public String getLocalHost()
@@ -169,6 +120,16 @@ public class ResinServerAdmin
   public ObjectName getThreadPoolObjectName()
   {
     return THREADPOOL_OBJECTNAME;
+  }
+
+  public long getTotalMemory()
+  {
+    return Runtime.getRuntime().totalMemory();
+  }
+
+  public long getFreeMemory()
+  {
+    return Runtime.getRuntime().freeMemory();
   }
 
   public ObjectName[] getServerObjectNames()

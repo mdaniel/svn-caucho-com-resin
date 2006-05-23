@@ -43,8 +43,6 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.ServletException;
 
-import javax.naming.InitialContext;
-
 import javax.management.ObjectName;
 
 import javax.enterprise.deploy.spi.TargetModuleID;
@@ -63,14 +61,13 @@ import com.caucho.log.Log;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.WriteStream;
 
-import com.caucho.config.NodeBuilder;
 import com.caucho.config.Config;
 
 import com.caucho.jmx.Jmx;
 
 import com.caucho.xml.XmlPrinter;
 
-import com.caucho.server.host.mbean.HostMBean;
+import com.caucho.mbeans.HostMBean;
 
 import com.caucho.hessian.io.HessianInput;
 import com.caucho.hessian.io.HessianOutput;

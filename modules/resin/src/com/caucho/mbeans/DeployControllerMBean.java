@@ -19,28 +19,61 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
  * @author Scott Ferguson
  */
 
-package com.caucho.server.webapp.mbean;
+package com.caucho.mbeans;
 
-import com.caucho.server.webapp.Application;
+import java.util.Date;
+
+import javax.management.ObjectName;
 
 /**
- * MBean API for the Application.
+ * Management interface for the deploy controller.
  */
-public interface ApplicationMBean {
+public interface DeployControllerMBean
+{
   /**
-   * Returns the application's context path.
+   * Returns the ObjectName.
    */
-  public String getContextPath();
-  
+  public ObjectName getObjectName();
+
   /**
-   * Returns the count of active sessions.
+   * Returns the controller's state.
    */
-  public int getActiveSessionCount();
+  public String getState();
+
+  /**
+   * Returns the time the controller was last started
+   */
+  public Date getStartTime();
+
+  /**
+   * Starts the instance.
+   */
+  public void start()
+    throws Exception;
+
+  /**
+   * Stops the instance.
+   */
+  public void stop()
+    throws Exception;
+
+  /**
+   * Restarts the instance.
+   */
+  public void restart()
+    throws Exception;
+
+  /**
+   * Restarts the instance if any changes are detected.
+   */
+  public void update()
+    throws Exception;
 }

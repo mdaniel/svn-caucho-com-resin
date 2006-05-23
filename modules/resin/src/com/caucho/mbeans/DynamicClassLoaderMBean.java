@@ -26,7 +26,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.loader;
+package com.caucho.mbeans;
 
 /**
  * MBean interface for the dynamic class loader.

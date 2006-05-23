@@ -2,7 +2,7 @@ body {
   font: small sans-serif;
   background: #f9f9f9;
   color: black;
-  margin: 0;
+  margin: 1em;
   padding: 0;
 }   
 
@@ -20,19 +20,20 @@ h1 {
   padding-bottom : .3em;
 }
 
-td
-{
+td {
   padding: 3px 4px 3px 4px;
   border: thin solid grey;
 }
 
-th
-{
+th {
   padding: 3px 4px 3px 4px;
   background: #c78ae6;
   text-align: center;
   border: thin solid grey;
 }
 
-
+div.description {
+  margin: 1em 0;
+  font-style: italic;
+}
 

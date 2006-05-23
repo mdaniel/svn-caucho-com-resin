@@ -37,10 +37,10 @@ import com.caucho.vfs.Path;
 
 import com.caucho.server.deploy.DeployControllerAdmin;
 
-import com.caucho.server.host.mbean.HostMBean;
+import com.caucho.mbeans.HostMBean;
+import com.caucho.mbeans.WebAppMBean;
 
 import com.caucho.server.webapp.WebAppController;
-import com.caucho.server.webapp.mbean.WebAppMBean;
 import com.caucho.jmx.AdminAttributeCategory;
 import com.caucho.jmx.AdminInfo;
 import com.caucho.util.L10N;

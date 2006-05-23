@@ -45,8 +45,6 @@ import java.util.logging.Level;
 import java.util.regex.Pattern;
 
 
-import java.lang.ref.WeakReference;
-
 import java.net.URL;
 
 import java.security.Permission;
@@ -59,8 +57,6 @@ import com.caucho.util.ByteBuffer;
 import com.caucho.util.TimedCache;
 
 import com.caucho.vfs.*;
-
-import com.caucho.log.Log;
 
 import com.caucho.config.ConfigException;
 
@@ -75,7 +71,7 @@ import com.caucho.lifecycle.Lifecycle;
 import com.caucho.loader.enhancer.ByteCodeEnhancer;
 import com.caucho.loader.enhancer.EnhancerRuntimeException;
 
-import com.caucho.config.types.Period;
+import com.caucho.mbeans.DynamicClassLoaderMBean;
 
 /**
  * Class loader which checks for changes in class files and automatically
@@ -92,7 +88,7 @@ public class DynamicClassLoader extends java.net.URLClassLoader
 
   private final static URL NULL_URL;
   private final static URL []NULL_URL_ARRAY = new URL[0];
-  
+
   private static long _globalDependencyCheckInterval = 2000L;
 
   private String _id;
@@ -114,14 +110,14 @@ public class DynamicClassLoader extends java.net.URLClassLoader
   // Dependencies
   private DependencyContainer _dependencies = new DependencyContainer();
   private boolean _isEnableDependencyCheck = false;
-  
+
   // Makes
   private MakeContainer _makeList;
 
   // If true, use the servlet spec's hack to give the parent priority
   // for some classes, but the child priority for other classes.
   private boolean _useServletHack;
-  
+
   // List of packages where the parent has priority.
   private String []_parentPriorityPackages;
 
@@ -138,7 +134,7 @@ public class DynamicClassLoader extends java.net.URLClassLoader
 
   // The security manager for the loader
   private SecurityManager _securityManager;
-  
+
   // List of permissions allowed in this context
   private ArrayList<Permission> _permissions;
 
@@ -294,7 +290,7 @@ public class DynamicClassLoader extends java.net.URLClassLoader
       Loader oldLoader = _loaders.get(p);
 
       if (oldLoader != loader)
-	addLoader(loader, p);
+        addLoader(loader, p);
     }
     else
       addLoader(loader, _loaders.size());
@@ -319,7 +315,7 @@ public class DynamicClassLoader extends java.net.URLClassLoader
 
     if (loader instanceof Make) {
       if (_makeList == null)
-	_makeList = new MakeContainer();
+        _makeList = new MakeContainer();
 
       _makeList.add((Make) loader);
     }
@@ -345,19 +341,19 @@ public class DynamicClassLoader extends java.net.URLClassLoader
     if (manifestPath.canRead()) {
       ReadStream is = manifestPath.openRead();
       try {
-	Manifest manifest = new Manifest(is);
-	
-	Attributes main = manifest.getMainAttributes();
-    
-	String classPath = main.getValue("Class-Path");
+        Manifest manifest = new Manifest(is);
 
-	addManifestClassPath(classPath, path.getParent());
+        Attributes main = manifest.getMainAttributes();
+
+        String classPath = main.getValue("Class-Path");
+
+        addManifestClassPath(classPath, path.getParent());
       } catch (IOException e) {
-	log().log(Level.WARNING, e.toString(), e);
+        log().log(Level.WARNING, e.toString(), e);
 
-	return;
+        return;
       } finally {
-	is.close();
+        is.close();
       }
     }
   }
@@ -369,16 +365,16 @@ public class DynamicClassLoader extends java.net.URLClassLoader
   {
     if (classPath == null)
       return;
-    
+
     String []urls = Pattern.compile("[\\s,]+").split(classPath);
     if (urls == null)
       return;
 
     for (int i = 0; i < urls.length; i++) {
       String url = urls[i];
-      
+
       if (url.equals(""))
-	continue;
+        continue;
 
       addJar(pwd.lookup(url));
     }
@@ -399,8 +395,8 @@ public class DynamicClassLoader extends java.net.URLClassLoader
     }
     else {
       if (_jarLoader == null) {
-	_jarLoader = new JarLoader();
-	addLoader(_jarLoader);
+        _jarLoader = new JarLoader();
+        addLoader(_jarLoader);
       }
 
       _jarLoader.addJar(jar);
@@ -428,10 +424,10 @@ public class DynamicClassLoader extends java.net.URLClassLoader
   {
     try {
       if (path.getScheme().equals("memory"))
-	return;
-      
+        return;
+
       if (! path.getScheme().equals("jar") && ! path.getURL().endsWith("/"))
-	path = path.lookup("./");
+        path = path.lookup("./");
 
       addURL(new URL(path.getURL()));
     } catch (Exception e) {
@@ -453,14 +449,14 @@ public class DynamicClassLoader extends java.net.URLClassLoader
   public void addURL(int index, URL url)
   {
     super.addURL(url);
-    
+
     URL []newURLs = new URL[_urls.length + 1];
 
     for (int i = 0; i < index; i++)
       newURLs[i] = _urls[i];
 
     newURLs[index] = url;
-    
+
     for (int i = index + 1; i < newURLs.length; i++)
       newURLs[i] = _urls[i - 1];
 
@@ -535,7 +531,7 @@ public class DynamicClassLoader extends java.net.URLClassLoader
   {
     if (perms == null)
       return;
-    
+
     if (_permissions == null)
       _permissions = new ArrayList<Permission>();
 
@@ -568,7 +564,7 @@ public class DynamicClassLoader extends java.net.URLClassLoader
   {
     if (_lifecycle.isDestroyed()) {
       IllegalStateException e = new IllegalStateException(L().l("attempted to add listener to a closed classloader {0}", this));
-      
+
       log().log(Level.WARNING, e.toString(), e);
 
       return;
@@ -576,36 +572,36 @@ public class DynamicClassLoader extends java.net.URLClassLoader
 
     ArrayList<ClassLoaderListener> listeners;
     WeakCloseListener closeListener = null;
-    
+
     synchronized (this) {
       if (_listeners == null) {
-	_listeners = new ArrayList<ClassLoaderListener>();
-	closeListener = new WeakCloseListener(this);
-	//_closeListener = closeListener;
+        _listeners = new ArrayList<ClassLoaderListener>();
+        closeListener = new WeakCloseListener(this);
+        //_closeListener = closeListener;
       }
       listeners = _listeners;
     }
 
     if (closeListener != null) {
       for (ClassLoader parent = getParent();
-	   parent != null;
-	   parent = parent.getParent()) {
-	if (parent instanceof DynamicClassLoader) {
-	  ((DynamicClassLoader) parent).addListener(closeListener);
-	  break;
-	}
+           parent != null;
+           parent = parent.getParent()) {
+        if (parent instanceof DynamicClassLoader) {
+          ((DynamicClassLoader) parent).addListener(closeListener);
+          break;
+        }
       }
     }
-    
+
     synchronized (listeners) {
       for (int i = listeners.size() - 1; i >= 0; i--) {
-	ClassLoaderListener oldListener = listeners.get(i);
+        ClassLoaderListener oldListener = listeners.get(i);
 
-	if (listener == oldListener) {
-	  return;
-	}
-	else if (oldListener == null)
-	  listeners.remove(i);
+        if (listener == oldListener) {
+          return;
+        }
+        else if (oldListener == null)
+          listeners.remove(i);
       }
 
       listeners.add(listener);
@@ -624,17 +620,17 @@ public class DynamicClassLoader extends java.net.URLClassLoader
 
     if (listeners == null)
       return;
-    
+
     synchronized (listeners) {
       for (int i = listeners.size() - 1; i >= 0; i--) {
-	ClassLoaderListener oldListener = listeners.get(i);
+        ClassLoaderListener oldListener = listeners.get(i);
 
-	if (listener == oldListener) {
-	  listeners.remove(i);
-	  return;
-	}
-	else if (oldListener == null)
-	  listeners.remove(i);
+        if (listener == oldListener) {
+          listeners.remove(i);
+          return;
+        }
+        else if (oldListener == null)
+          listeners.remove(i);
       }
     }
   }
@@ -652,16 +648,16 @@ public class DynamicClassLoader extends java.net.URLClassLoader
 
     if (listenerList != null) {
       synchronized (listenerList) {
-	for (int i = 0; i < listenerList.size(); i++) {
-	  ClassLoaderListener listener = listenerList.get(i);
+        for (int i = 0; i < listenerList.size(); i++) {
+          ClassLoaderListener listener = listenerList.get(i);
 
-	  if (listener != null)
-	    listeners.add(listener);
-	  else {
-	    listenerList.remove(i);
-	    i--;
-	  }
-	}
+          if (listener != null)
+            listeners.add(listener);
+          else {
+            listenerList.remove(i);
+            i--;
+          }
+        }
       }
     }
 
@@ -693,7 +689,7 @@ public class DynamicClassLoader extends java.net.URLClassLoader
 
     if (! pkg.endsWith("."))
       pkg = pkg + '.';
-    
+
     newPkgs[oldLength] = pkg;
     _parentPriorityPackages = newPkgs;
   }
@@ -726,7 +722,7 @@ public class DynamicClassLoader extends java.net.URLClassLoader
     PermissionCollection perms = super.getPermissions(codeSource);
 
     ArrayList<Permission> permissions = _permissions;
-    
+
     for (int i = 0; permissions != null && i < permissions.size(); i++) {
       Permission permission = permissions.get(i);
 
@@ -735,7 +731,7 @@ public class DynamicClassLoader extends java.net.URLClassLoader
 
     return perms;
   }
-  
+
   protected void addCodeBasePath(String path)
   {
   }
@@ -875,7 +871,7 @@ public class DynamicClassLoader extends java.net.URLClassLoader
 
     if (enable) {
       boolean isModified = dependencies.isModified();
-      
+
       return isModified;
     }
     else {
@@ -940,7 +936,7 @@ public class DynamicClassLoader extends java.net.URLClassLoader
   {
     for (; loader != null; loader = loader.getParent()) {
       if (loader instanceof DynamicClassLoader)
-	return ((DynamicClassLoader) loader).isModified();
+        return ((DynamicClassLoader) loader).isModified();
     }
 
     return false;
@@ -953,18 +949,18 @@ public class DynamicClassLoader extends java.net.URLClassLoader
     throws Exception
   {
     for (ClassLoader loader = getParent();
-	 loader != null;
-	 loader = loader.getParent()) {
+         loader != null;
+         loader = loader.getParent()) {
       if (loader instanceof Make) {
-	((Make) loader).make();
-	break;
+        ((Make) loader).make();
+        break;
       }
     }
-    
+
     if (_makeList != null)
       _makeList.make();
   }
-  
+
   /**
    * Defines a new package.
    */
@@ -993,11 +989,11 @@ public class DynamicClassLoader extends java.net.URLClassLoader
       ArrayList<ClassLoaderListener> listeners = getListeners();
 
       if (listeners != null) {
-	for (int i = 0; i < listeners.size(); i++) {
-	  ClassLoaderListener listener = listeners.get(i);
+        for (int i = 0; i < listeners.size(); i++) {
+          ClassLoaderListener listener = listeners.get(i);
 
-	  listener.classLoaderInit(this);
-	}
+          listener.classLoaderInit(this);
+        }
       }
     } catch (Throwable e) {
       log().log(Level.WARNING, e.toString(), e);
@@ -1014,7 +1010,7 @@ public class DynamicClassLoader extends java.net.URLClassLoader
 
     if (loaders == null)
       throw new IllegalStateException(_L.l("Class loader {0} is closed during initialization.", this));
-    
+
     for (int i = 0; i < loaders.size(); i++)
       loaders.get(i).validate();
   }
@@ -1036,7 +1032,7 @@ public class DynamicClassLoader extends java.net.URLClassLoader
    * @return the loaded classes
    */
   // XXX: added synchronized for RSN-373
-  protected synchronized Class loadClass(String name, boolean resolve) 
+  protected synchronized Class loadClass(String name, boolean resolve)
     throws ClassNotFoundException
   {
     /*
@@ -1051,14 +1047,14 @@ public class DynamicClassLoader extends java.net.URLClassLoader
 
     if (cl != null) {
       if (resolve)
-	resolveClass(cl);
+        resolveClass(cl);
       return cl;
     }
-    
+
     if (_lifecycle.isDestroyed()) {
       log().fine(L().l("Loading class {0} when class loader {1} has been closed.",
-		   name, this));
-      
+                       name, this));
+
       return super.loadClass(name, resolve);
     }
 
@@ -1072,21 +1068,21 @@ public class DynamicClassLoader extends java.net.URLClassLoader
         ClassLoader parent = getParent();
         if (parent != null)
           cl = Class.forName(name, false, parent);
-	else
+        else
           cl = findSystemClass(name);
       } catch (ClassNotFoundException e) {
-	cl = findClass(name);
+        cl = findClass(name);
       }
     }
     else {
 
       try {
-	cl = findClass(name);
+        cl = findClass(name);
       } catch (ClassNotFoundException e) {
         ClassLoader parent = getParent();
         if (parent != null)
           cl = Class.forName(name, false, parent);
-	else
+        else
           cl = findSystemClass(name);
       }
     }
@@ -1121,33 +1117,33 @@ public class DynamicClassLoader extends java.net.URLClassLoader
     if (! _lifecycle.isActive())
       return super.findClass(name);
     */
-    
+
     name = name.replace('/', '.');
 
     ClassEntry entry = null;
-    
+
     synchronized (this) {
       entry = _entryCache == null ? null : _entryCache.get(name);
 
       if (entry == null)
-	entry = getClassEntry(name);
+        entry = getClassEntry(name);
 
       if (entry == null)
-	throw new ClassNotFoundException(name);
+        throw new ClassNotFoundException(name);
 
       if (entry != null && _isVerbose)
         verbose(name, (isNormalJdkOrder(name) ? "found" : "found (took priority from parent)"));
 
       if (_isEnableDependencyCheck)
-	entry.addDependencies(_dependencies);
-      
+        entry.addDependencies(_dependencies);
+
       // Currently, the entry must be in the entry cache for synchronization
       // to work.  The same entry must be returned for two separate threads
       // trying to load the class at the same time.
-      
+
       if (_entryCache == null)
-	_entryCache = new Hashtable<String,ClassEntry>(8);
-	
+        _entryCache = new Hashtable<String,ClassEntry>(8);
+
       _entryCache.put(name, entry);
     }
 
@@ -1176,7 +1172,7 @@ public class DynamicClassLoader extends java.net.URLClassLoader
       ClassEntry entry = loader.getClassEntry(name);
 
       if (entry != null)
-	return entry;
+        return entry;
     }
 
     return null;
@@ -1191,44 +1187,44 @@ public class DynamicClassLoader extends java.net.URLClassLoader
   {
     synchronized (entry) {
       Class cl = entry.getEntryClass();
-    
+
       if (cl != null)
-	return cl;
+        return cl;
 
       entry.preLoad();
 
       String name = entry.getName();
       int p = name.lastIndexOf('.');
       if (p > 0) {
-	String packageName = name.substring(0, p);
-	Package pkg = getPackage(packageName);
+        String packageName = name.substring(0, p);
+        Package pkg = getPackage(packageName);
 
-	ClassPackage classPackage = entry.getClassPackage();
-      
-	if (pkg != null) {
-	}
-	else if (classPackage != null) {
-	  definePackage(packageName,
-			classPackage.getSpecificationTitle(),
-			classPackage.getSpecificationVersion(),
-			classPackage.getSpecificationVendor(),
-			classPackage.getImplementationTitle(),
-			classPackage.getImplementationVersion(),
-			classPackage.getImplementationVendor(),
-			null);
-	}
-	else {
-	  definePackage(packageName,
-			null,
-			null,
-			null,
-			null,
-			null,
-			null,
-			null);
-	}
+        ClassPackage classPackage = entry.getClassPackage();
+
+        if (pkg != null) {
+        }
+        else if (classPackage != null) {
+          definePackage(packageName,
+                        classPackage.getSpecificationTitle(),
+                        classPackage.getSpecificationVersion(),
+                        classPackage.getSpecificationVendor(),
+                        classPackage.getImplementationTitle(),
+                        classPackage.getImplementationVersion(),
+                        classPackage.getImplementationVendor(),
+                        null);
+        }
+        else {
+          definePackage(packageName,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null);
+        }
       }
-      
+
       ByteBuffer buffer = new ByteBuffer();
 
       entry.load(buffer);
@@ -1237,49 +1233,49 @@ public class DynamicClassLoader extends java.net.URLClassLoader
       int bLen = buffer.length();
 
       if (_byteCodeEnhancer != null) {
-	try {
-	  byte []enhancedBuffer = _byteCodeEnhancer.enhance(name,
-							    bBuf, 0, bLen);
+        try {
+          byte []enhancedBuffer = _byteCodeEnhancer.enhance(name,
+                                                            bBuf, 0, bLen);
 
-	  if (enhancedBuffer != null) {
-	    bBuf = enhancedBuffer;
-	    bLen = enhancedBuffer.length;
+          if (enhancedBuffer != null) {
+            bBuf = enhancedBuffer;
+            bLen = enhancedBuffer.length;
 
             if (_isVerbose)
               verbose(name, String.valueOf(_byteCodeEnhancer));
-	  }
-	  /* RSN-109
-	} catch (RuntimeException e) {
-	  throw e;
-	} catch (Error e) {
-	  throw e;
-	  */
-	} catch (EnhancerRuntimeException e) {
-	  throw e;
-	} catch (Throwable e) {
-	  log().log(Level.WARNING, e.toString(), e);
-	}
+          }
+          /* RSN-109
+         } catch (RuntimeException e) {
+           throw e;
+         } catch (Error e) {
+           throw e;
+           */
+        } catch (EnhancerRuntimeException e) {
+          throw e;
+        } catch (Throwable e) {
+          log().log(Level.WARNING, e.toString(), e);
+        }
       }
 
       try {
-	cl = defineClass(entry.getName(), bBuf, 0, bLen, entry.getCodeSource());
+        cl = defineClass(entry.getName(), bBuf, 0, bLen, entry.getCodeSource());
       } catch (Throwable e) {
-	log().log(Level.FINE, e.toString(), e);
+        log().log(Level.FINE, e.toString(), e);
 
         ClassNotFoundException exn;
-	exn = new ClassNotFoundException(entry.getName() + " [" + e + "]", e);
-	//exn.initCause(e);
+        exn = new ClassNotFoundException(entry.getName() + " [" + e + "]", e);
+        //exn.initCause(e);
 
-	throw exn;
+        throw exn;
       }
 
       entry.setEntryClass(cl);
 
       if (entry.postLoad()) {
-	_dependencies.add(AlwaysModified.create());
-	_dependencies.setModified(true);
+        _dependencies.add(AlwaysModified.create());
+        _dependencies.setModified(true);
       }
-      
+
       return cl;
     }
   }
@@ -1293,24 +1289,24 @@ public class DynamicClassLoader extends java.net.URLClassLoader
   {
     if (_resourceCache == null) {
       long expireInterval = getDependencyCheckInterval();
-      
+
       _resourceCache = new TimedCache<String,URL>(256, expireInterval);
     }
-    
+
     URL url = _resourceCache.get(name);
 
     if (url == NULL_URL)
       return null;
     else if (url != null)
       return url;
-    
+
     boolean isNormalJdkOrder = isNormalJdkOrder(name);
 
     if (isNormalJdkOrder) {
       url = getParentResource(name);
 
       if (url != null)
-	return url;
+        return url;
     }
 
     ArrayList<Loader> loaders = _loaders;
@@ -1321,8 +1317,8 @@ public class DynamicClassLoader extends java.net.URLClassLoader
       url = loader.getResource(name);
 
       if (url != null) {
-	_resourceCache.put(name, url);
-	
+        _resourceCache.put(name, url);
+
         return url;
       }
     }
@@ -1331,45 +1327,45 @@ public class DynamicClassLoader extends java.net.URLClassLoader
       url = getParentResource(name);
 
       if (url != null)
-	return url;
+        return url;
     }
 
     _resourceCache.put(name, NULL_URL);
-    
+
     return null;
   }
 
   private URL getParentResource(String name)
   {
     ClassLoader parent = getParent();
-    
+
     ClassLoader systemLoader = ClassLoader.getSystemClassLoader();
 
     URL url;
-    
+
     if (parent != null) {
       url = parent.getResource(name);
 
       if (url != null) {
-	_resourceCache.put(name, url);
-	
-	return url;
+        _resourceCache.put(name, url);
+
+        return url;
       }
     }
     else if (this != systemLoader) {
       url = getSystemResource(name);
-      
+
       if (url != null) {
-	_resourceCache.put(name, url);
-	
-	return url;
+        _resourceCache.put(name, url);
+
+        return url;
       }
     }
 
     return null;
   }
 
-  
+
   /**
    * Opens a stream to a resource somewhere in the classpath
    *
@@ -1386,7 +1382,7 @@ public class DynamicClassLoader extends java.net.URLClassLoader
       is = getParentResourceAsStream(name);
 
       if (is != null)
-	return is;
+        return is;
     }
 
     ArrayList<Loader> loaders = _loaders;
@@ -1397,41 +1393,41 @@ public class DynamicClassLoader extends java.net.URLClassLoader
       is = loader.getResourceAsStream(name);
 
       if (is != null)
-	return is;
+        return is;
     }
 
     if (! isNormalJdkOrder) {
       is = getParentResourceAsStream(name);
     }
-    
+
     return is;
   }
 
   private InputStream getParentResourceAsStream(String name)
   {
     ClassLoader parent = getParent();
-    
+
     ClassLoader systemLoader = ClassLoader.getSystemClassLoader();
 
     InputStream is;
-    
+
     if (parent != null) {
       is = parent.getResourceAsStream(name);
 
       if (is != null)
-	return is;
+        return is;
     }
     else if (this != systemLoader) {
       is = getSystemResourceAsStream(name);
-      
+
       if (is != null) {
-	return is;
+        return is;
       }
     }
 
     return null;
   }
-  
+
   /**
    * Returns an enumeration of matching resources.
    */
@@ -1441,10 +1437,10 @@ public class DynamicClassLoader extends java.net.URLClassLoader
 
     for (int i = 0; i < _loaders.size(); i++) {
       Loader loader = _loaders.get(i);
-        
+
       loader.getResources(resources, name);
     }
-    
+
     return resources.elements();
   }
 
@@ -1457,7 +1453,7 @@ public class DynamicClassLoader extends java.net.URLClassLoader
 
     for (int i = 0; i < _loaders.size(); i++) {
       Loader loader = _loaders.get(i);
-        
+
       Path path = loader.getPath(systemName);
 
       if (path != null && path.canRead()) {
@@ -1475,7 +1471,7 @@ public class DynamicClassLoader extends java.net.URLClassLoader
   {
     for (int i = 0; i < _loaders.size(); i++) {
       Loader loader = _loaders.get(i);
-        
+
       Path path = loader.getPath(name);
 
       if (path != null && path.canRead()) {
@@ -1503,7 +1499,7 @@ public class DynamicClassLoader extends java.net.URLClassLoader
 
     if (! _useServletHack)
       return true;
-    
+
     String canonName = className.replace('/', '.');
     String []pkgs = _parentPriorityPackages;
 
@@ -1538,12 +1534,12 @@ public class DynamicClassLoader extends java.net.URLClassLoader
     try {
       ClassLoader parent = getParent();
       for (; parent != null; parent = parent.getParent()) {
-	if (parent instanceof DynamicClassLoader) {
-	  DynamicClassLoader loader = (DynamicClassLoader) parent;
+        if (parent instanceof DynamicClassLoader) {
+          DynamicClassLoader loader = (DynamicClassLoader) parent;
 
-	  if (_closeListener != null)
-	    loader.removeListener(_closeListener);
-	}
+          if (_closeListener != null)
+            loader.removeListener(_closeListener);
+        }
       }
 
       ArrayList<ClassLoaderListener> listeners = _listeners;
@@ -1553,32 +1549,32 @@ public class DynamicClassLoader extends java.net.URLClassLoader
       ClassLoader oldLoader = thread.getContextClassLoader();
 
       try {
-	// Use reverse order so the last resources will be destroyed first.
-	if (listeners != null) {
-	  for (int i = listeners.size() - 1; i >= 0; i--) {
-	    ClassLoaderListener listener = listeners.get(i);
+        // Use reverse order so the last resources will be destroyed first.
+        if (listeners != null) {
+          for (int i = listeners.size() - 1; i >= 0; i--) {
+            ClassLoaderListener listener = listeners.get(i);
 
-	    try {
-	      thread.setContextClassLoader(this);
+            try {
+              thread.setContextClassLoader(this);
 
-	      listener.classLoaderDestroy(this);
-	    } catch (Throwable e) {
-	      log().log(Level.WARNING, e.toString(), e);
-	    }
-	  }
-	}
+              listener.classLoaderDestroy(this);
+            } catch (Throwable e) {
+              log().log(Level.WARNING, e.toString(), e);
+            }
+          }
+        }
       } finally {
-	thread.setContextClassLoader(oldLoader);
+        thread.setContextClassLoader(oldLoader);
       }
 
       for (int i = _loaders.size() - 1; i >= 0; i--) {
-	Loader loader = _loaders.get(i);
+        Loader loader = _loaders.get(i);
 
-	try {
-	  loader.destroy();
-	} catch (Throwable e) {
-	  log().log(Level.WARNING, e.toString(), e);
-	}
+        try {
+          loader.destroy();
+        } catch (Throwable e) {
+          log().log(Level.WARNING, e.toString(), e);
+        }
       }
     } finally {
       _closeListener = null;
@@ -1633,17 +1629,17 @@ public class DynamicClassLoader extends java.net.URLClassLoader
 
     if (source._listeners != null) {
       if (_listeners == null)
-	_listeners = new ArrayList<ClassLoaderListener>();
-      
+        _listeners = new ArrayList<ClassLoaderListener>();
+
       _listeners.addAll(source._listeners);
       source._listeners.clear();
     }
-    
+
     _securityManager = source._securityManager;
     if (source._permissions != null) {
       if (_permissions == null)
-	_permissions = new ArrayList<Permission>();
-      
+        _permissions = new ArrayList<Permission>();
+
       _permissions.addAll(source._permissions);
     }
 
@@ -1664,7 +1660,7 @@ public class DynamicClassLoader extends java.net.URLClassLoader
   {
     if (_L == null)
       _L = new L10N(DynamicClassLoader.class);
-    
+
     return _L;
   }
 
@@ -1672,7 +1668,7 @@ public class DynamicClassLoader extends java.net.URLClassLoader
   {
     if (_log == null)
       _log = Logger.getLogger(DynamicClassLoader.class.getName());
-    
+
     return _log;
   }
 
@@ -1686,7 +1682,7 @@ public class DynamicClassLoader extends java.net.URLClassLoader
 
   static {
     URL url = null;
-    
+
     try {
       url = new URL("file:/caucho/null");
     } catch (Throwable e) {

@@ -35,9 +35,6 @@ import java.util.logging.Logger;
 
 import javax.management.JMException;
 
-import javax.servlet.jsp.el.VariableResolver;
-import javax.servlet.jsp.el.ELException;
-
 import com.caucho.util.*;
 import com.caucho.vfs.*;
 
@@ -49,12 +46,10 @@ import com.caucho.config.ConfigException;
 
 import com.caucho.jmx.IntrospectionMBean;
 
-import com.caucho.server.cluster.Cluster;
-
 import com.caucho.server.deploy.EnvironmentDeployController;
 import com.caucho.server.deploy.DeployControllerAdmin;
 
-import com.caucho.server.resin.mbean.ServletServerMBean;
+import com.caucho.mbeans.ServletServerMBean;
 
 /**
  * Controls the server.
@@ -87,14 +82,14 @@ public class ServerController
   public ServerController(String id, Path rootDirectory)
   {
     super(id, rootDirectory);
-    
+
     _admin = new ServerAdmin(this);
-      
+
     getVariableMap().put("server", new Var());
 
     try {
       Method method = Jndi.class.getMethod("lookup",
-					   new Class[] { String.class });
+                                           new Class[] { String.class });
       getVariableMap().put("jndi:lookup", method);
     } catch (Throwable e) {
     }
@@ -122,7 +117,7 @@ public class ServerController
   public void setServerId(String serverId)
   {
     _serverId = serverId;
-    
+
     getVariableMap().put("serverId", serverId);
   }
 
@@ -140,7 +135,7 @@ public class ServerController
   public boolean hasListeningPort()
   {
     ServletServer server = getDeployInstance();
-    
+
     return server != null && server.hasListeningPort();
   }
 
@@ -159,7 +154,7 @@ public class ServerController
     throws JMException
   {
     return new IntrospectionMBean(getDeployAdmin(),
-				  ServletServerMBean.class);
+                                  ServletServerMBean.class);
   }
 
   /**
@@ -182,7 +177,7 @@ public class ServerController
     Path rootDirectory = null;
     try {
       thread.setContextClassLoader(server.getClassLoader());
-      
+
       getVariableMap().put("root-dir", getRootDirectory());
       getVariableMap().put("server-root", getRootDirectory());
 
@@ -193,18 +188,18 @@ public class ServerController
       rootDirectory = getRootDirectory();
 
       if (rootDirectory == null)
-	throw new NullPointerException("Null root directory");
+        throw new NullPointerException("Null root directory");
 
       if (! rootDirectory.isFile()) {
       }
       else if (rootDirectory.getPath().endsWith(".jar") ||
-	       rootDirectory.getPath().endsWith(".war")) {
-	throw new ConfigException(L.l("root-directory `{0}' must specify a directory.  It may not be a .jar or .war.",
-				      rootDirectory.getPath()));
+               rootDirectory.getPath().endsWith(".war")) {
+        throw new ConfigException(L.l("root-directory `{0}' must specify a directory.  It may not be a .jar or .war.",
+                                      rootDirectory.getPath()));
       }
       else
-	throw new ConfigException(L.l("root-directory `{0}' may not be a file.  root-directory must specify a directory.",
-				      rootDirectory.getPath()));
+        throw new ConfigException(L.l("root-directory `{0}' may not be a file.  root-directory must specify a directory.",
+                                      rootDirectory.getPath()));
 
 
       server.init();
@@ -226,7 +221,7 @@ public class ServerController
   {
     return "Server";
   }
-  
+
   /**
    * Returns a printable view.
    */
@@ -243,22 +238,22 @@ public class ServerController
     {
       return ServerController.this.getServerId();
     }
-    
+
     public Path getRoot()
     {
       return ServerController.this.getRootDirectory();
     }
-    
+
     public Path getRootDir()
     {
       return getRoot();
     }
-    
+
     public Path getRootDirectory()
     {
       return getRoot();
     }
-    
+
     public String toString()
     {
       return "Server[" + getId() + "]";

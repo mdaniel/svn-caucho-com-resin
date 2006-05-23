@@ -1,11 +1,24 @@
 <?php
   $mbeanServer = new MBeanServer();
 
-  $timeformat = "%a %b %d %H:%M:%S %Z %Y";
+  function format_datetime($date)
+  {
+    return strftime("%a %b %d %H:%M:%S %Z %Y", $date->time / 1000);
+  }
 
   function format_memory($memory)
   {
     return sprintf("%.2fMeg", $memory / (1024 * 1024))
+  }
+
+  function format_hit_ratio($hit, $miss)
+  {
+    $total = $hit + $miss;
+
+    if ($total == 0)
+      return "0.00% (0 / 0)";
+    else
+      return sprintf("%.2f%% (%d / %d)", 100 * $hit / $total, $hit, $total);
   }
 
   $resin = $mbeanServer->lookup("resin:type=ResinServer");
@@ -34,58 +47,69 @@
 
 <h2>Server <?= $resin->serverId ?></h2>
 
-<tr>
+
+ <?php if (! empty($resin->serverId)) {  ?>
+<tr title="The server id used when starting this instance of Resin, the value of `-server'.">
 <th>Server id:</th>
 <td><?= $resin->serverId ?></td>
 </tr>
+<? } ?>
 
-<tr>
-<th>Conf file:</th>
+<tr title="The configuration file used when starting this instance of Resin, the value of `-conf'.">
+<th>Config file:</th>
 <td><?= $resin->configFile ?></td>
 </tr>
 
-<tr>
-<th>Server start:</th>
-<td><?= strftime($timeformat, $resin->initialStartTime->time / 1000) ?></td>
+<tr title="The Resin home directory used when starting this instance of Resin. This is the location of the Resin program files.">
+<th>Resin home:</th>
+<td><?= $resin->resinHome ?></td>
 </tr>
 
-<tr>
-<th>Server reload:</th>
-<td><?= strftime($timeformat, $resin->startTime->time/ 1000) ?></td>
+<tr title="The server root directory used when starting this instance of Resin. This is the root directory of the web server files.">
+<th>Server root:</th>
+<td><?= $resin->serverRoot ?></td>
 </tr>
 
-<tr>
+<tr title="The ip address of the machine that is running this instance of Resin.">
+<th>Local host:</th>
+<td><?= $resin->localHost ?></td>
+</tr>
+
+<tr title="The current lifecycle state">
+<th>State:</th>
+<td><?= $resin->state ?></td>
+</tr>
+
+<tr title="The time that this instance was first started.">
+<th>Inital start time:</th>
+<td><?= format_datetime($resin->initialStartTime) ?></td>
+</tr>
+
+<tr title="The time that this instance was last started or restarted.">
+<th>Start time:</th>
+<td><?= format_datetime($resin->startTime) ?></td>
+</tr>
+
+<tr title="The current total amount of memory available for the JVM, in bytes.">
 <th>Total memory:</th>
 <td><?= format_memory($resin->totalMemory) ?></td>
 </tr>
 
-<tr>
+<tr title="The current free amount of memory available for the JVM, in bytes.">
 <th>Free memory:</th>
 <td><?= format_memory($resin->freeMemory) ?></td>
 </tr>
 
-<?php
-$proxyHitCount = $server->proxyCacheHitCount;
-$proxyMissCount = $server->proxyCacheMissCount;
-$totalCount = max(1, $proxyHitCount + $proxyMissCount);
-$hitRatio = (10000 * $proxyHitCount) / $totalCount;
-?>
-
-<tr>
+<tr title="Percentage of requests that have been served from the proxy cache:">
 <th>Proxy cache hit ratio:</th>
-<td><?= sprintf("%.2f%% (%d / %d)", $hitRatio / 100, $proxyHitCount, $totalCount) ?></td>
+<td><?= format_hit_ratio($server->$proxyHitCount, $server->$proxyMissCount) ?></td>
 </tr>
 
-<?php
-$invocationHitCount = $server->invocationCacheHitCount;
-$invocationMissCount = $server->invocationCacheMissCount;
-$totalCount = max(1, $invocationHitCount + $invocationMissCount);
-$hitRatio = (10000 * $invocationHitCount) / $totalCount;
-?>
+<!-- XXX: show how cacheable apps are: cacheable/non-cacheable -->
 
 <tr>
 <th>Invocation hit ratio:</th>
-<td><?= sprintf("%.2f%% (%d / %d)", $hitRatio / 100, $invocationHitCount, $totalCount) ?></td>
+<td><?= format_hit_ratio($server->invocationCacheHitCount, $server->invocationCacheMissCount) ?></td>
 </tr>
 
 </table>
@@ -94,26 +118,34 @@ $hitRatio = (10000 * $invocationHitCount) / $totalCount;
   $threadPool = $mbeanServer->lookup("resin:type=ThreadPool");
 ?>
 
-<h2>Connections</h2>
+<!--
+"Restart" - "Exit this instance cleanly and allow the wrapper script to start a new JVM."
+-->
+
+<h2>Thread pool</h2>
+
+<div class="description">
+The ThreadPool manages all threads used by Resin.
+</div>
 
 <table>
 <tr>
-<th colspan='3'>Threads</th>
 <th colspan='2'>Config</th>
+<th colspan='3'>Threads</th>
 </tr>
 <tr>
-<th>Active count</th>
-<th>Idle count</th>
-<th>Total count</th>
 <th>thread-max</th>
 <th>spare-thread-min</th>
+<th>Active thread count</th>
+<th>Idle thread count</th>
+<th>Total count</th>
 </tr>
 <tr align='right'>
+<td><?= $threadPool->threadMax ?></td>
+<td><?= $threadPool->spareThreadMin ?></td>
 <td><?= $threadPool->activeThreadCount ?></td>
 <td><?= $threadPool->idleThreadCount ?></td>
 <td><?= $threadPool->threadCount ?></td>
-<td><?= $threadPool->threadMax ?></td>
-<td><?= $threadPool->spareThreadMin ?></td>
 </tr>
 </table>
 

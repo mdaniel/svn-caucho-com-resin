@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.log.mbean;
+package com.caucho.mbeans;
 
 import com.caucho.config.ConfigException;
 

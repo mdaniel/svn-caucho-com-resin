@@ -36,9 +36,6 @@ import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Formatter;
 
-import java.io.IOException;
-
-import com.caucho.vfs.Path;
 import com.caucho.vfs.WriteStream;
 import com.caucho.vfs.TimestampFilter;
 
@@ -48,12 +45,9 @@ import com.caucho.config.types.RawString;
 import com.caucho.jmx.Jmx;
 
 import com.caucho.loader.Environment;
-import com.caucho.loader.EnvironmentLocal;
-import com.caucho.loader.ClassLoaderListener;
-import com.caucho.loader.DynamicClassLoader;
 import com.caucho.loader.CloseListener;
 
-import com.caucho.log.mbean.LogMBean;
+import com.caucho.mbeans.LogMBean;
 
 import com.caucho.util.L10N;
 

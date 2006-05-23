@@ -34,7 +34,7 @@ import com.caucho.jmx.IntrospectionMBean;
 import com.caucho.log.Log;
 import com.caucho.server.deploy.DeployConfig;
 import com.caucho.server.deploy.EnvironmentDeployController;
-import com.caucho.server.webapp.mbean.WebAppMBean;
+import com.caucho.mbeans.WebAppMBean;
 import com.caucho.util.CauchoSystem;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
