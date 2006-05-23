@@ -27,7 +27,7 @@
  * @author Rodrigo Westrupp
  */
 
-package com.caucho.quercus.lib.db.oracle;
+package com.caucho.quercus.lib.db;
 
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -58,11 +58,11 @@ import com.caucho.quercus.lib.db.JdbcTableMetaData;
 import com.caucho.quercus.lib.db.JdbcColumnMetaData;
 
 //@todo create a Oraclei and OracleiResult instead
-import com.caucho.quercus.lib.db.mysql.Mysqli;
-import com.caucho.quercus.lib.db.mysql.MysqliResult;
-import com.caucho.quercus.lib.db.mysql.MysqliStatement;
+import com.caucho.quercus.lib.db.Mysqli;
+import com.caucho.quercus.lib.db.MysqliResult;
+import com.caucho.quercus.lib.db.MysqliStatement;
 //@todo remove (still using MYSQL_xxx constants)
-import com.caucho.quercus.lib.db.mysql.MysqlModule;
+import com.caucho.quercus.lib.db.MysqlModule;
 
 import java.lang.reflect.*;
 import java.io.*;

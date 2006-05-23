@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.quercus.lib.db.pdo;
+package com.caucho.quercus.lib.db;
 
 import java.util.logging.Logger;
 import java.util.logging.Level;

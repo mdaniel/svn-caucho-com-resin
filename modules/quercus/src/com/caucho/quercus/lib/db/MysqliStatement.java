@@ -27,7 +27,7 @@
  * @author Charles Reich
  */
 
-package com.caucho.quercus.lib.db.mysql;
+package com.caucho.quercus.lib.db;
 
 import java.sql.*;
 
@@ -47,7 +47,7 @@ import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.BooleanValue;
 
 import com.caucho.quercus.module.Reference;
-import com.caucho.quercus.lib.db.mysql.MysqliResult;
+import com.caucho.quercus.lib.db.MysqliResult;
 
 /**
  * mysqli object oriented API facade

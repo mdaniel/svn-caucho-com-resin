@@ -30,7 +30,7 @@
 package com.caucho.quercus.lib.db;
 
 import com.caucho.util.Log;
-import com.caucho.quercus.lib.db.mysql.MysqliModule;
+import com.caucho.quercus.lib.db.MysqliModule;
 import com.caucho.quercus.lib.db.JdbcConnectionResource;
 import com.caucho.quercus.env.*;
 

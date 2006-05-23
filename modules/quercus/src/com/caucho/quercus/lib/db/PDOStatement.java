@@ -27,7 +27,7 @@
  * @author Sam
  */
 
-package com.caucho.quercus.lib.db.pdo;
+package com.caucho.quercus.lib.db;
 
 import java.sql.*;
 
@@ -50,8 +50,8 @@ import com.caucho.quercus.env.*;
 import com.caucho.quercus.module.Optional;
 import com.caucho.quercus.module.Reference;
 import com.caucho.quercus.module.ReadOnly;
-import com.caucho.quercus.lib.db.pdo.PDO;
-import com.caucho.quercus.lib.db.pdo.PDOError;
+import com.caucho.quercus.lib.db.PDO;
+import com.caucho.quercus.lib.db.PDOError;
 import com.caucho.quercus.UnimplementedException;
 import com.caucho.quercus.lib.file.FileReadValue;
 import com.caucho.vfs.TempBuffer;

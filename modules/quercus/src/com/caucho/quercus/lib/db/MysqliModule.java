@@ -27,7 +27,7 @@
  * @author Charles Reich
  */
 
-package com.caucho.quercus.lib.db.mysql;
+package com.caucho.quercus.lib.db;
 
 import java.sql.SQLException;
 
@@ -43,9 +43,9 @@ import com.caucho.quercus.module.Optional;
 import com.caucho.quercus.module.NotNull;
 import com.caucho.quercus.module.Reference;
 
-import com.caucho.quercus.lib.db.mysql.Mysqli;
-import com.caucho.quercus.lib.db.mysql.MysqliResult;
-import com.caucho.quercus.lib.db.mysql.MysqliStatement;
+import com.caucho.quercus.lib.db.Mysqli;
+import com.caucho.quercus.lib.db.MysqliResult;
+import com.caucho.quercus.lib.db.MysqliStatement;
 
 import com.caucho.util.Log;
 import com.caucho.util.L10N;

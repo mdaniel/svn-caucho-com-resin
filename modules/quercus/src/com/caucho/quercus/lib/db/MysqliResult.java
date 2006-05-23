@@ -27,7 +27,7 @@
  * @author Charles Reich
  */
 
-package com.caucho.quercus.lib.db.mysql;
+package com.caucho.quercus.lib.db;
 
 import java.util.logging.Logger;
 

@@ -27,7 +27,7 @@
  * @author Rodrigo Westrupp
  */
 
-package com.caucho.quercus.lib.db.postgres;
+package com.caucho.quercus.lib.db;
 
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -53,9 +53,9 @@ import com.caucho.quercus.lib.db.JdbcTableMetaData;
 import com.caucho.quercus.lib.db.JdbcColumnMetaData;
 
 //@todo create a Postgresi and PostgresqliResult instead
-import com.caucho.quercus.lib.db.mysql.Mysqli;
-import com.caucho.quercus.lib.db.mysql.MysqliResult;
-import com.caucho.quercus.lib.db.mysql.MysqliStatement;
+import com.caucho.quercus.lib.db.Mysqli;
+import com.caucho.quercus.lib.db.MysqliResult;
+import com.caucho.quercus.lib.db.MysqliStatement;
 
 // Do not add new compile dependencies (using reflection instead)
 // import org.postgresql.largeobject.*;
