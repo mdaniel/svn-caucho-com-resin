@@ -52,7 +52,7 @@ public class QuercusModuleException extends QuercusException {
     super(msg, cause);
   }
 
-  public static RuntimeException create(Exception e)
+  public static RuntimeException create(Throwable e)
   {
     if (e instanceof RuntimeException)
       return (RuntimeException) e;

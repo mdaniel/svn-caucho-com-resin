@@ -29,6 +29,11 @@
 
 package com.caucho.quercus.env;
 
+import java.io.IOException;
+
+import java.lang.annotation.Annotation;
+import java.lang.reflect.InvocationTargetException;
+
 import com.caucho.quercus.Quercus;
 import com.caucho.quercus.QuercusException;
 import com.caucho.quercus.expr.DefaultExpr;
@@ -46,9 +51,6 @@ import com.caucho.quercus.parser.QuercusParser;
 import com.caucho.quercus.program.AbstractFunction;
 import com.caucho.util.L10N;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.InvocationTargetException;
-
 /**
  * Represents the introspected static function information.
  */
@@ -62,21 +64,22 @@ abstract public class JavaInvoker
 
   private final String _name;
   private final Class [] _paramTypes;
-  private final boolean _hasEnv;
-  private final Expr [] _defaultExprs;
-  private final Marshall [] _marshallArgs;
-  private final boolean _hasRestArgs;
-  private final Marshall _unmarshallReturn;
+  private final Annotation [][] _paramAnn;
+  
+  private boolean _hasEnv;
+  private Expr [] _defaultExprs;
+  private Marshall [] _marshallArgs;
+  private boolean _hasRestArgs;
+  private Marshall _unmarshallReturn;
 
-  private final boolean _isRestReference;
+  private boolean _isRestReference;
 
-  private final boolean _isCallUsesVariableArgs;
-  private final boolean _isCallUsesSymbolTable;
+  private boolean _isCallUsesVariableArgs;
+  private boolean _isCallUsesSymbolTable;
 
 
   /**
    * Creates the statically introspected function.
-   *
    */
   public JavaInvoker(ModuleContext moduleContext,
                      String name,
@@ -86,7 +89,18 @@ abstract public class JavaInvoker
                      Class retType)
   {
     _name = name;
+    _paramTypes = param;
+    _paramAnn = paramAnn;
 
+    init(moduleContext, param, paramAnn, methodAnn, retType);
+  }
+
+  private void init(ModuleContext moduleContext,
+		    Class []param,
+		    Annotation [][]paramAnn,
+		    Annotation []methodAnn,
+		    Class retType)
+  {
     boolean callUsesVariableArgs = false;
     boolean callUsesSymbolTable = false;
     boolean returnNullAsFalse = false;
@@ -107,8 +121,6 @@ abstract public class JavaInvoker
 
     _isCallUsesVariableArgs = callUsesVariableArgs;
     _isCallUsesSymbolTable = callUsesSymbolTable;
-
-    _paramTypes = param;
 
     _hasEnv = param.length > 0 && param[0].equals(Env.class);
 
@@ -185,6 +197,22 @@ abstract public class JavaInvoker
   }
 
   /**
+   * Returns true if the rest argument is a reference.
+   */
+  public boolean isRestReference()
+  {
+    return _isRestReference;
+  }
+
+  /**
+   * Returns the unmarshaller for the return
+   */
+  public Marshall getUnmarshallReturn()
+  {
+    return _unmarshallReturn;
+  }
+
+  /**
    * Returns true if the result is a boolean.
    */
   public boolean isBoolean()
@@ -214,6 +242,30 @@ abstract public class JavaInvoker
   public boolean isDouble()
   {
     return _unmarshallReturn.isDouble();
+  }
+
+  /**
+   * Returns the marshall arguments.
+   */
+  protected Marshall []getMarshallArgs()
+  {
+    return _marshallArgs;
+  }
+
+  /**
+   * Returns the parameter annotations.
+   */
+  protected Annotation [][]getParamAnn()
+  {
+    return _paramAnn;
+  }
+
+  /**
+   * Returns the default expressions.
+   */
+  protected Expr []getDefaultExprs()
+  {
+    return _defaultExprs;
   }
 
   /**
@@ -335,6 +387,7 @@ abstract public class JavaInvoker
     }
 
     Object result = invoke(obj, values);
+    
     return _unmarshallReturn.unmarshall(env, result);
   }
 
@@ -425,6 +478,7 @@ abstract public class JavaInvoker
   }
 
   public void generate(PhpWriter out, Expr funExpr, Expr []expr)
+    throws IOException
   {
     throw new UnsupportedOperationException();
   }

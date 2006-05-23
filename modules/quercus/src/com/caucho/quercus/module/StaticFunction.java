@@ -38,9 +38,11 @@ import java.util.logging.Logger;
 
 import com.caucho.quercus.Quercus;
 import com.caucho.quercus.QuercusException;
+import com.caucho.quercus.QuercusModuleException;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.NullValue;
+import com.caucho.quercus.env.JavaInvoker;
 import com.caucho.quercus.expr.DefaultExpr;
 import com.caucho.quercus.expr.Expr;
 import com.caucho.quercus.expr.NullLiteralExpr;
@@ -54,24 +56,13 @@ import com.caucho.util.L10N;
 /**
  * Represents the introspected static function information.
  */
-public class StaticFunction extends AbstractFunction {
+public class StaticFunction extends JavaInvoker {
   private static final L10N L = new L10N(StaticFunction.class);
   private static final Logger log =
     Logger.getLogger(StaticFunction.class.getName());
 
   private final QuercusModule _quercusModule;
-
   private final Method _method;
-  private final Class [] _paramTypes;
-  private final Annotation [][] _paramAnn;
-  private final boolean _hasEnv;
-  private final Expr [] _defaultExprs;
-  private final Marshall [] _marshallArgs;
-  private final boolean _hasRestArgs;
-  private final boolean _isCallUsesVariableArgs;
-  private final boolean _isCallUsesSymbolTable;
-  private final boolean _isRestReference;
-  private final Marshall _unmarshallReturn;
 
   /**
    * Creates the statically introspected function.
@@ -82,97 +73,15 @@ public class StaticFunction extends AbstractFunction {
                         QuercusModule quercusModule,
                         Method method)
   {
-    _quercusModule = quercusModule;
+    super(moduleContext,
+	  method.getName(),
+	  method.getParameterTypes(),
+	  method.getParameterAnnotations(),
+	  method.getAnnotations(),
+	  method.getReturnType());
+    
     _method = method;
-
-    boolean callUsesVariableArgs = false;
-    boolean callUsesSymbolTable = false;
-    boolean returnNullAsFalse = false;
-
-    for (Annotation ann : method.getAnnotations()) {
-      if (VariableArguments.class.isAssignableFrom(ann.annotationType())) {
-        callUsesVariableArgs = true;
-      }
-
-      if (UsesSymbolTable.class.isAssignableFrom(ann.annotationType())) {
-        callUsesSymbolTable = true;
-      }
-
-      if (ReturnNullAsFalse.class.isAssignableFrom(ann.annotationType())) {
-        returnNullAsFalse = true;
-      }
-    }
-
-    _isCallUsesVariableArgs = callUsesVariableArgs;
-    _isCallUsesSymbolTable = callUsesSymbolTable;
-
-    Class []param = method.getParameterTypes();
-
-    _paramTypes = param;
-
-    _hasEnv = param.length > 0 && param[0].equals(Env.class);
-
-    _paramAnn = method.getParameterAnnotations();
-
-    boolean hasRestArgs = false;
-    boolean isRestReference = false;
-
-    if (param.length > 0 && param[param.length - 1].equals(Value[].class)) {
-      hasRestArgs = true;
-
-      for (Annotation ann : _paramAnn[param.length - 1]) {
-        if (Reference.class.isAssignableFrom(ann.annotationType()))
-          isRestReference = true;
-      }
-    }
-
-    _hasRestArgs = hasRestArgs;
-    _isRestReference = isRestReference;
-
-    int argLength = _paramAnn.length;
-
-    if (_hasRestArgs)
-      argLength -= 1;
-
-    int envOffset = _hasEnv ? 1 : 0;
-
-    _defaultExprs = new Expr[argLength - envOffset];
-
-    _marshallArgs = new Marshall[argLength - envOffset];
-
-    for (int i = 0; i < argLength - envOffset; i++) {
-      boolean isReference = false;
-      boolean isNotNull = false;
-
-      for (Annotation ann : _paramAnn[i + envOffset]) {
-        if (Optional.class.isAssignableFrom(ann.annotationType())) {
-          Optional opt = (Optional) ann;
-
-          if (! opt.value().equals("")) {
-            Expr expr = QuercusParser.parseDefault(opt.value());
-
-            _defaultExprs[i] = expr;
-          } else
-            _defaultExprs[i] = new DefaultExpr(getLocation());
-        } else if (Reference.class.isAssignableFrom(ann.annotationType())) {
-          isReference = true;
-        } else if (NotNull.class.isAssignableFrom(ann.annotationType())) {
-          isNotNull = true;
-        }
-      }
-
-      Class argType = param[i + envOffset];
-
-      if (isReference)
-        _marshallArgs[i] = Marshall.MARSHALL_REFERENCE;
-      else
-        _marshallArgs[i] = Marshall.create(moduleContext, argType, isNotNull);
-    }
-
-    _unmarshallReturn = Marshall.create(moduleContext,
-                                        method.getReturnType(),
-                                        false,
-                                        returnNullAsFalse);
+    _quercusModule = quercusModule;
   }
 
   /**
@@ -196,271 +105,20 @@ public class StaticFunction extends AbstractFunction {
   }
 
   /**
-   * Returns true if the environment is an argument.
-   */
-  public boolean getHasEnv()
-  {
-    return _hasEnv;
-  }
-
-  /**
-   * Returns true if the environment has rest-style arguments.
-   */
-  public boolean getHasRestArgs()
-  {
-    return _hasRestArgs;
-  }
-
-  /**
-   * Returns true if the function uses variable args.
-   */
-  public boolean isCallUsesVariableArgs()
-  {
-    return _isCallUsesVariableArgs;
-  }
-
-  /**
-   * Returns true if the function uses the symbol table.
-   */
-  public boolean isCallUsesSymbolTable()
-  {
-    return _isCallUsesSymbolTable;
-  }
-
-  /**
-   * Returns true if the rest-arguments are a reference.
-   */
-  public boolean isRestReference()
-  {
-    return _isRestReference;
-  }
-
-  /**
-   * Returns true if the result is a boolean.
-   */
-  public boolean isBoolean()
-  {
-    return _unmarshallReturn.isBoolean();
-  }
-
-  /**
-   * Returns true if the result is a string.
-   */
-  public boolean isString()
-  {
-    return _unmarshallReturn.isString();
-  }
-
-  /**
-   * Returns true if the result is a long.
-   */
-  public boolean isLong()
-  {
-    return _unmarshallReturn.isLong();
-  }
-
-  /**
-   * Returns true if the result is a double.
-   */
-  public boolean isDouble()
-  {
-    return _unmarshallReturn.isDouble();
-  }
-
-  /**
-   * Binds the user's arguments to the actual arguments.
-   *
-   * @param args the user's arguments
-   * @return the user arguments augmented by any defaults
-   */
-  public Expr []bindArguments(Env env, Expr fun, Expr []args)
-  {
-    if (_defaultExprs.length == args.length)
-      return args;
-
-    int length = _defaultExprs.length;
-
-    if (_defaultExprs.length < args.length) {
-      if (_hasRestArgs)
-        length = args.length;
-      else {
-        env.warning(L.l(
-          "function '{0}' has {1} required arguments, but {2} were provided",
-          _method.getName(),
-          _defaultExprs.length,
-          args.length));
-
-        return null;
-      }
-    } else if (_defaultExprs[args.length] == null) {
-      int required;
-
-      for (required = args.length;
-           required < _defaultExprs.length;
-           required++) {
-        if (_defaultExprs[required] != null)
-          break;
-      }
-
-      env.warning(L.l(
-        "function '{0}' has {1} required arguments, but only {2} were provided",
-        _method.getName(),
-        required,
-        args.length));
-
-      return null;
-    }
-
-    Expr []expandedArgs = new Expr[length];
-
-    System.arraycopy(args, 0, expandedArgs, 0, args.length);
-
-    if (args.length < expandedArgs.length) {
-      for (int i = args.length; i < expandedArgs.length; i++) {
-        Expr defaultExpr = _defaultExprs[i];
-
-        if (defaultExpr == null)
-          defaultExpr = NullLiteralExpr.NULL;
-
-        expandedArgs[i] = defaultExpr;
-      }
-    }
-
-    return expandedArgs;
-  }
-
-  /**
    * Evalutes the function.
    */
-  public Value call(Env env, Expr []exprs)
+  @Override
+  public Object invoke(Object obj, Object []javaArgs)
   {
-    int len = _defaultExprs.length + (_hasEnv ? 1 : 0) + (_hasRestArgs ? 1 : 0);
-
-    Object []values = new Object[len];
-
-    int k = 0;
-
-    if (_hasEnv)
-      values[k++] = env;
-
-    for (int i = 0; i < _marshallArgs.length; i++) {
-      if (exprs[i] != null) {
-        values[k] = _marshallArgs[i].marshall(env, exprs[i], _paramTypes[k]);
-      }
-
-      k++;
-    }
-
-    if (_hasRestArgs) {
-      Value []rest = new Value[exprs.length - _marshallArgs.length];
-
-      for (int i = _marshallArgs.length; i < exprs.length; i++) {
-        if (_isRestReference)
-          rest[i - _marshallArgs.length] = exprs[i].evalRef(env);
-        else
-          rest[i - _marshallArgs.length] = exprs[i].eval(env).toValue();
-      }
-
-      values[values.length - 1] = rest;
-    }
-
     try {
-      Object result = _method.invoke(_quercusModule, values);
-
-      return _unmarshallReturn.unmarshall(env, result);
+      return _method.invoke(_quercusModule, javaArgs);
+    } catch (RuntimeException e) {
+      throw e;
+    } catch (InvocationTargetException e) {
+      throw QuercusModuleException.create(e.getCause());
     } catch (Exception e) {
-      throw new QuercusException(e);
+      throw QuercusModuleException.create(e);
     }
-  }
-
-  /**
-   * Evalutes the function.
-   */
-  public Value callMethod(Env env, Value obj, Value []quercusArgs)
-  {
-    Value []args = new Value[quercusArgs.length + 1];
-    args[0] = obj;
-    System.arraycopy(quercusArgs, 0, args, 1, quercusArgs.length);
-
-    return call(env, args);
-  }
-
-  /**
-   * Evalutes the function.
-   */
-  public Value call(Env env, Value []quercusArgs)
-  {
-    int len = _paramTypes.length;
-
-    Object []javaArgs = new Object[len];
-
-    int k = 0;
-
-    if (_hasEnv)
-      javaArgs[k++] = env;
-
-    int sublen = _marshallArgs.length;
-    if (quercusArgs.length < sublen)
-      sublen = quercusArgs.length;
-
-    for (int i = 0; i < sublen; i++) {
-      javaArgs[k] = _marshallArgs[i].marshall(env,
-                                              quercusArgs[i],
-                                              _paramTypes[k]);
-
-      k++;
-    }
-
-    for (int i = sublen; i < _marshallArgs.length; i++) {
-      // XXX: need QA
-      Value value;
-
-      if (_defaultExprs[i] != null)
-	value = _defaultExprs[i].eval(env);
-      else
-	value = NullValue.NULL;
-
-      javaArgs[k] = _marshallArgs[i].marshall(env, value, _paramTypes[k]);
-
-      k++;
-    }
-
-    if (_hasRestArgs) {
-      Value []rest = new Value[quercusArgs.length - _marshallArgs.length];
-
-      for (int i = _marshallArgs.length; i < quercusArgs.length; i++) {
-        if (_isRestReference)
-          rest[i - _marshallArgs.length] = quercusArgs[i];
-        else
-          rest[i - _marshallArgs.length] = quercusArgs[i].toValue();
-      }
-
-      javaArgs[k++] = rest;
-    }
-
-    try {
-      Object result = _method.invoke(_quercusModule, javaArgs);
-      
-      return _unmarshallReturn.unmarshall(env, result);
-    } catch (Exception e) {
-      throw new QuercusException(e);
-    }
-  }
-
-  /**
-   * Evaluates the function.
-   */
-  public Value callCopy(Env env, Expr []exprs)
-  {
-    return call(env, exprs);
-  }
-
-  /**
-   * Evaluates the function, returning a copy
-   */
-  public Value callCopy(Env env, Value []args)
-  {
-    return call(env, args);
   }
 
   //
@@ -472,10 +130,11 @@ public class StaticFunction extends AbstractFunction {
    */
   public void analyzeArguments(Expr []args, AnalyzeInfo info)
   {
-    int env = _hasEnv ? 1 : 0;
+    int env = getHasEnv() ? 1 : 0;
 
+    Marshall []marshallArgs = getMarshallArgs();
     for (int i = 0; i < args.length; i++) {
-      if (_marshallArgs.length <= i) {
+      if (marshallArgs.length <= i) {
         // XXX: not quite true
         args[i].analyzeSetModified(info);
         args[i].analyzeSetReference(info);
@@ -483,9 +142,10 @@ public class StaticFunction extends AbstractFunction {
         continue;
       }
 
-      Marshall marshall = _marshallArgs[i];
+      Marshall marshall = marshallArgs[i];
+      Annotation [][]paramAnn = getParamAnn();
 
-      if (isReadOnly(_paramAnn[i + env]) || marshall.isReadOnly()) {
+      if (isReadOnly(paramAnn[i + env]) || marshall.isReadOnly()) {
       } else if (marshall.isReference()) {
         args[i].analyzeSetModified(info);
         args[i].analyzeSetReference(info);
@@ -515,11 +175,11 @@ public class StaticFunction extends AbstractFunction {
   public void generate(PhpWriter out, Expr funExpr, Expr []args)
     throws IOException
   {
-    _unmarshallReturn.generateResultStart(out);
+    getUnmarshallReturn().generateResultStart(out);
 
     generateImpl(out, funExpr, args);
 
-    _unmarshallReturn.generateResultEnd(out);
+    getUnmarshallReturn().generateResultEnd(out);
   }
 
   /**
@@ -530,8 +190,13 @@ public class StaticFunction extends AbstractFunction {
   public void generateBoolean(PhpWriter out, Expr funExpr, Expr []args)
     throws IOException
   {
-    if (_unmarshallReturn.isBoolean())
+    if (isBoolean())
       generateImpl(out, funExpr, args);
+    else if (isLong() || isDouble()) {
+      out.print("(");
+      generateImpl(out, funExpr, args);
+      out.print(" != 0)");
+    }
     else
       super.generateBoolean(out, funExpr, args);
   }
@@ -544,7 +209,7 @@ public class StaticFunction extends AbstractFunction {
   public void generateLong(PhpWriter out, Expr funExpr, Expr []args)
     throws IOException
   {
-    if (_unmarshallReturn.isLong())
+    if (isLong())
       generateImpl(out, funExpr, args);
     else
       super.generateLong(out, funExpr, args);
@@ -558,7 +223,7 @@ public class StaticFunction extends AbstractFunction {
   public void generateDouble(PhpWriter out, Expr funExpr, Expr []args)
     throws IOException
   {
-    if (_unmarshallReturn.isLong() || _unmarshallReturn.isDouble())
+    if (isLong() || isDouble())
       generateImpl(out, funExpr, args);
     else
       super.generateDouble(out, funExpr, args);
@@ -572,7 +237,7 @@ public class StaticFunction extends AbstractFunction {
   public void generateString(PhpWriter out, Expr funExpr, Expr []args)
     throws IOException
   {
-    if (_unmarshallReturn.isString())
+    if (isString())
       generateImpl(out, funExpr, args);
     else
       super.generateString(out, funExpr, args);
@@ -624,45 +289,49 @@ public class StaticFunction extends AbstractFunction {
     out.print("." + _method.getName() + "(");
 
     Class []param = _method.getParameterTypes();
-
+    Marshall []marshallArgs = getMarshallArgs();
+    
     boolean isFirst = true;
 
-    if (_hasEnv) {
+    boolean hasEnv = getHasEnv();
+
+    if (hasEnv) {
       out.print("env");
       isFirst = false;
     }
 
-    for (int i = 0; i < _defaultExprs.length; i++) {
+    Expr []defaultExprs = getDefaultExprs();
+    for (int i = 0; i < defaultExprs.length; i++) {
       if (! isFirst)
         out.print(", ");
       isFirst = false;
 
       if (i < args.length)
-        _marshallArgs[i].generate(out, args[i], param[_hasEnv ? i + 1 : i]);
-      else if (_defaultExprs[i] != null)
-        _marshallArgs[i].generate(out,
-                                  _defaultExprs[i],
-                                  param[_hasEnv ? i + 1 : i]);
-      else if (! _hasRestArgs) {
+        marshallArgs[i].generate(out, args[i], param[hasEnv ? i + 1 : i]);
+      else if (defaultExprs[i] != null)
+        marshallArgs[i].generate(out,
+				 defaultExprs[i],
+				 param[hasEnv ? i + 1 : i]);
+      else if (! getHasRestArgs()) {
 	// XXX: error?
 	log.warning(L.l(funExpr.getLocation().getMessagePrefix() +
 			"argument length mismatch for '{0}'",
 			_method.getName()));
-	_marshallArgs[i].generate(out,
-				  RequiredExpr.REQUIRED,
-                                  param[_hasEnv ? i + 1 : i]);
+	marshallArgs[i].generate(out,
+				 RequiredExpr.REQUIRED,
+				 param[hasEnv ? i + 1 : i]);
       }
     }
 
-    if (_hasRestArgs) {
+    if (getHasRestArgs()) {
       if (! isFirst)
         out.print(", ");
       isFirst = false;
 
       out.print("new Value[] {");
 
-      for (int i = _marshallArgs.length; i < args.length; i++) {
-        if (_isRestReference)
+      for (int i = marshallArgs.length; i < args.length; i++) {
+        if (isRestReference())
           args[i].generateRef(out);
         else {
           args[i].generate(out);
