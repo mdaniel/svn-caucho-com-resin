@@ -171,6 +171,14 @@ public class Quercus {
   }
 
   /**
+   * Sets the working directory.
+   */
+  public void setPwd(Path path)
+  {
+    _pageManager.setPwd(path);
+  }
+
+  /**
    * Set true if pages should be compiled.
    */
   public void setCompile(boolean isCompile)
