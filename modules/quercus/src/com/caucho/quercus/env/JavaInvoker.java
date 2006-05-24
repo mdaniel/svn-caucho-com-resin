@@ -44,6 +44,7 @@ import com.caucho.quercus.module.ModuleContext;
 import com.caucho.quercus.module.Marshall;
 import com.caucho.quercus.module.Optional;
 import com.caucho.quercus.module.Reference;
+import com.caucho.quercus.module.This;
 import com.caucho.quercus.module.UsesSymbolTable;
 import com.caucho.quercus.module.VariableArguments;
 import com.caucho.quercus.module.ReturnNullAsFalse;
@@ -67,6 +68,7 @@ abstract public class JavaInvoker
   private final Annotation [][] _paramAnn;
   
   private boolean _hasEnv;
+  private boolean _hasThis;
   private Expr [] _defaultExprs;
   private Marshall [] _marshallArgs;
   private boolean _hasRestArgs;
@@ -123,6 +125,15 @@ abstract public class JavaInvoker
     _isCallUsesSymbolTable = callUsesSymbolTable;
 
     _hasEnv = param.length > 0 && param[0].equals(Env.class);
+    int envOffset = _hasEnv ? 1 : 0;
+
+    if (envOffset < param.length)
+      _hasThis = hasThis(param[envOffset], paramAnn[envOffset]);
+    else
+      _hasThis = false;
+
+    if (_hasThis)
+      envOffset++;
 
     boolean hasRestArgs = false;
     boolean isRestReference = false;
@@ -143,8 +154,6 @@ abstract public class JavaInvoker
 
     if (_hasRestArgs)
       argLength -= 1;
-
-    int envOffset = _hasEnv ? 1 : 0;
 
     _defaultExprs = new Expr[argLength - envOffset];
 
@@ -280,7 +289,6 @@ abstract public class JavaInvoker
       return args;
 
     int length = _defaultExprs.length;
-    ;
 
     if (_defaultExprs.length < args.length) {
       if (_hasRestArgs)
@@ -338,7 +346,10 @@ abstract public class JavaInvoker
 
   public Value call(Env env, Object obj, Expr []exprs)
   {
-    int len = _defaultExprs.length + (_hasEnv ? 1 : 0) + (_hasRestArgs ? 1 : 0);
+    int len = (_defaultExprs.length +
+	       (_hasEnv ? 1 : 0) +
+	       (_hasThis ? 1 : 0) +
+	       (_hasRestArgs ? 1 : 0));
 
     Object []values = new Object[len];
 
@@ -346,6 +357,10 @@ abstract public class JavaInvoker
 
     if (_hasEnv)
       values[k++] = env;
+    if (_hasThis) {
+      values[k++] = (ObjectValue) obj;
+      obj = null;
+    }
 
     for (int i = 0; i < _marshallArgs.length; i++) {
       Expr expr;
@@ -393,28 +408,32 @@ abstract public class JavaInvoker
 
   public Value call(Env env, Object obj, Value []args)
   {
-    int len = _defaultExprs.length + (_hasEnv ? 1 : 0) + (_hasRestArgs ? 1 : 0);
+    int len = _paramTypes.length;
 
-    Object []values = new Object[len];
+    Object []javaArgs = new Object[len];
 
     int k = 0;
 
     if (_hasEnv)
-      values[k++] = env;
+      javaArgs[k++] = env;
+    if (_hasThis) {
+      javaArgs[k++] = (ObjectValue) obj;
+      obj = null;
+    }
 
     for (int i = 0; i < _marshallArgs.length; i++) {
       Value value;
 
       if (i < args.length && args[i] != null)
-        values[k] = _marshallArgs[i].marshall(env, args[i], _paramTypes[k]);
+        javaArgs[k] = _marshallArgs[i].marshall(env, args[i], _paramTypes[k]);
       else if (_defaultExprs[i] != null) {
-        values[k] = _marshallArgs[i].marshall(env,
+        javaArgs[k] = _marshallArgs[i].marshall(env,
                                               _defaultExprs[i],
                                               _paramTypes[k]);
       } else {
-        values[k] = _marshallArgs[i].marshall(env,
-                                              NullValue.NULL,
-                                              _paramTypes[k]);
+        javaArgs[k] = _marshallArgs[i].marshall(env,
+						NullValue.NULL,
+						_paramTypes[k]);
       }
 
       k++;
@@ -438,10 +457,11 @@ abstract public class JavaInvoker
         }
       }
 
-      values[values.length - 1] = rest;
+      javaArgs[k++] = rest;
     }
 
-    Object result = invoke(obj, values);
+    Object result = invoke(obj, javaArgs);
+    
     return _unmarshallReturn.unmarshall(env, result);
   }
 
@@ -484,4 +504,20 @@ abstract public class JavaInvoker
   }
 
   abstract public Object invoke(Object obj, Object []args);
+
+  //
+  // Utility methods
+  //
+  private boolean hasThis(Class param, Annotation[]ann)
+  {
+    if (! param.isAssignableFrom(ObjectValue.class))
+      return false;
+
+    for (int i = 0; i < ann.length; i++) {
+      if (This.class.isAssignableFrom(ann[i].annotationType()))
+	return true;
+    }
+
+    return false;
+  }
 }

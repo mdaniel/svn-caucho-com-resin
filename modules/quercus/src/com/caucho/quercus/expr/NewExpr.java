@@ -35,6 +35,7 @@ import java.util.ArrayList;
 
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
+import com.caucho.quercus.env.NullValue;
 import com.caucho.quercus.env.QuercusClass;
 
 import com.caucho.quercus.program.AnalyzeInfo;
@@ -93,9 +94,20 @@ public class NewExpr extends Expr {
       throw env.errorException(L.l("no matching class {0}", _name));
     }
 
-    // _fullArgs = _cl.bindArguments(_args);
+      
+    Value []args = new Value[_args.length];
 
-    return cl.callNew(env, _args);
+    for (int i = 0; i < args.length; i++)
+      args[i] = _args[i].eval(env);
+
+    env.pushCall(this, NullValue.NULL);
+    try {
+      env.checkTimeout();
+	
+      return cl.callNew(env, args);
+    } finally {
+      env.popCall();
+    }
   }
 
   //

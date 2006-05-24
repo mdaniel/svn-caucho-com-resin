@@ -99,7 +99,7 @@ public class JavaMethod extends JavaInvoker {
     try {
       return _method.invoke(obj, args);
     } catch (Exception e) {
-      throw new QuercusException(_method.getName() + ": " + e.getMessage());
+      throw new QuercusException(_method.getName() + ": " + e.getMessage(), e);
     }
   }
 

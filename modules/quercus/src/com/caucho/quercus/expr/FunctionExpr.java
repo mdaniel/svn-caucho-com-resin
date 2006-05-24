@@ -159,31 +159,29 @@ public class FunctionExpr extends Expr {
    */
   private Value evalImpl(Env env, boolean isRef, boolean isCopy)
   {
+    AbstractFunction fun = env.findFunction(_name);
+
+    if (fun == null) {
+      env.error(L.l("'{0}' is an unknown function.", _name));
+
+      return NullValue.NULL;
+    }
+      
+    Value []args = new Value[_args.length];
+
+    for (int i = 0; i < args.length; i++)
+      args[i] = _args[i].eval(env);
+
     env.pushCall(this, NullValue.NULL);
-    
     try {
       env.checkTimeout();
-      
-      // System.out.println("EVAL: " + getLocation() + " " + _name);
-    
-      AbstractFunction fun = env.findFunction(_name);
-
-      if (fun == null) {
-	env.error(L.l("'{0}' is an unknown function.", _name));
-
-	return NullValue.NULL;
-      }
 	
-      Expr []fullArgs = fun.bindArguments(env, this, _args);
-
-      if (fullArgs == null)
-	return NullValue.NULL;
-      else if (isRef)
-	return fun.callRef(env, fullArgs);
+      if (isRef)
+	return fun.callRef(env, args);
       else if (isCopy)
-	return fun.callCopy(env, fullArgs);
+	return fun.callCopy(env, args);
       else
-	return fun.call(env, fullArgs);
+	return fun.call(env, args);
     } finally {
       env.popCall();
     }

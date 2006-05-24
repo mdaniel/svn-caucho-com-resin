@@ -35,12 +35,14 @@ import com.caucho.quercus.module.QuercusModule;
 import com.caucho.quercus.module.StaticFunction;
 import com.caucho.quercus.module.ModuleContext;
 import com.caucho.quercus.module.ModuleInfo;
+import com.caucho.quercus.module.ClassImplementation;
 import com.caucho.quercus.page.PageManager;
 import com.caucho.quercus.page.QuercusPage;
 import com.caucho.quercus.parser.QuercusParser;
 import com.caucho.quercus.program.ClassDef;
 import com.caucho.quercus.program.InterpretedClassDef;
 import com.caucho.quercus.program.JavaClassDef;
+import com.caucho.quercus.program.JavaImplClassDef;
 import com.caucho.quercus.program.QuercusProgram;
 
 import com.caucho.quercus.lib.file.FileModule;
@@ -229,7 +231,23 @@ public class Quercus {
     throws ConfigException
   {
     try {
-      introspectPhpJavaClass(name, type, null);
+      if (type.isAnnotationPresent(ClassImplementation.class))
+	introspectJavaImplClass(name, type, null);
+      else
+	introspectJavaClass(name, type, null);
+    } catch (Exception e) {
+      throw new ConfigException(e);
+    }
+  }
+
+  /**
+   * Adds a impl class
+   */
+  public void addImplClass(String name, Class type)
+    throws ConfigException
+  {
+    try {
+      introspectJavaImplClass(name, type, null);
     } catch (Exception e) {
       throw new ConfigException(e);
     }
@@ -738,7 +756,7 @@ public class Quercus {
   private void introspectPhpModuleClass(Class cl)
     throws IllegalAccessException, InstantiationException, ConfigException
   {
-    log.fine("PHP loading module " + cl.getName());
+    log.fine("Quercus loading module " + cl.getName());
 
     QuercusModule module = (QuercusModule) cl.newInstance();
 
@@ -865,7 +883,7 @@ public class Quercus {
         if ("as".equals(args[i])) {
           i++;
           if (i >= args.length)
-            throw new IOException(L.l("expecting php class name after `{0}' in definition for class {1}", "as", className));
+            throw new IOException(L.l("expecting Quercus class name after `{0}' in definition for class {1}", "as", className));
 
           phpClassName = args[i];
         }
@@ -883,7 +901,7 @@ public class Quercus {
       if (phpClassName == null)
         phpClassName = className.substring(className.lastIndexOf('.') + 1);
 
-      introspectPhpJavaClass(phpClassName, cl, extension);
+      introspectJavaClass(phpClassName, cl, extension);
     }
   }
 
@@ -894,26 +912,59 @@ public class Quercus {
    * @param type the class to introspect.
    * @param extension the extension provided by the class, or null
    */
-  private void introspectPhpJavaClass(String name, Class type, String extension)
+  private void introspectJavaClass(String name, Class type, String extension)
     throws IllegalAccessException, InstantiationException, ConfigException
   {
     if (log.isLoggable(Level.FINEST)) {
       if (extension == null)
-        log.finest(L.l("PHP loading class {0} with type {1}", name, type.getName()));
+        log.finest(L.l("Quercus loading class {0} with type {1}", name, type.getName()));
       else
-        log.finest(L.l("PHP loading class {0} with type {1} providing extension {2}", name, type.getName(), extension));
+        log.finest(L.l("Quercus loading class {0} with type {1} providing extension {2}", name, type.getName(), extension));
     }
+    
+    if (type.isAnnotationPresent(ClassImplementation.class)) {
+      ClassDef def = ModuleContext.addClassImpl(name, type, extension);
 
-    JavaClassDef def = ModuleContext.addClass(name, type, extension);
+      _staticClasses.put(name, def);
+      _lowerStaticClasses.put(name.toLowerCase(), def);
+    }
+    else {
+      JavaClassDef def = ModuleContext.addClass(name, type, extension);
 
-    _javaClassWrappers.put(name, def);
-    _lowerJavaClassWrappers.put(name.toLowerCase(), def);
+      _javaClassWrappers.put(name, def);
+      _lowerJavaClassWrappers.put(name.toLowerCase(), def);
 
-    _staticClasses.put(name, def);
-    _lowerStaticClasses.put(name.toLowerCase(), def);
+      _staticClasses.put(name, def);
+      _lowerStaticClasses.put(name.toLowerCase(), def);
+    }
 
     if (extension != null)
       _extensionSet.add(extension);
+  }
+
+  /**
+   * Introspects the module class for functions.
+   *
+   * @param name the php class name
+   * @param type the class to introspect.
+   * @param extension the extension provided by the class, or null
+   */
+  private void introspectJavaImplClass(String name,
+				       Class type,
+				       String extension)
+    throws IllegalAccessException, InstantiationException, ConfigException
+  {
+    if (log.isLoggable(Level.FINEST)) {
+      if (extension == null)
+        log.finest(L.l("Quercus loading class {0} with type {1}", name, type.getName()));
+      else
+        log.finest(L.l("Quercus loading class {0} with type {1} providing extension {2}", name, type.getName(), extension));
+    }
+
+    JavaImplClassDef def = ModuleContext.addClassImpl(name, type, extension);
+
+    _staticClasses.put(name, def);
+    _lowerStaticClasses.put(name.toLowerCase(), def);
   }
 
   /**
@@ -926,7 +977,8 @@ public class Quercus {
 
     _staticClasses.put(_stdClass.getName(), _stdClassDef);
     _lowerStaticClasses.put(_stdClass.getName().toLowerCase(), _stdClassDef);
-    
+
+    /*
     InterpretedClassDef exn = new InterpretedClassDef("Exception",
 						      null,
 						      new String[0]);
@@ -943,6 +995,7 @@ public class Quercus {
 
     _staticClasses.put(exn.getName(), exn);
     _lowerStaticClasses.put(exn.getName().toLowerCase(), exn);
+    */
   }
 
   public void close()

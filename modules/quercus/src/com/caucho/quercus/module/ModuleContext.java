@@ -55,6 +55,7 @@ import com.caucho.quercus.env.*;
 
 import com.caucho.quercus.program.ClassDef;
 import com.caucho.quercus.program.JavaClassDef;
+import com.caucho.quercus.program.JavaImplClassDef;
 
 import com.caucho.util.L10N;
 
@@ -157,6 +158,19 @@ public class ModuleContext {
 
     return context.addClassInfo(name, type, ext);
   }
+  
+  /**
+   * Adds a class
+   */
+  public static JavaImplClassDef addClassImpl(String name, Class type, String ext)
+    throws ConfigException, IllegalAccessException, InstantiationException
+  {
+    ClassLoader loader = type.getClassLoader();
+
+    ModuleContext context = getLocalContext(loader);
+
+    return context.addClassImplInfo(name, type, ext);
+  }
 
   /**
    * Adds module info.
@@ -180,8 +194,21 @@ public class ModuleContext {
   {
     JavaClassDef def = _javaClassWrappers.get(name);
 
-    if (def == null)
+    if (def == null) {
       def = addJavaClass(name, type, extension);
+    }
+
+    return def;
+  }
+  
+  private JavaImplClassDef addClassImplInfo(String name, Class type,
+					    String extension)
+    throws IllegalAccessException, InstantiationException
+  {
+    JavaImplClassDef def = (JavaImplClassDef) _staticClasses.get(name);
+
+    if (def == null)
+      def = addJavaImplClass(name, type, extension);
 
     return def;
   }
@@ -348,6 +375,38 @@ public class ModuleContext {
 
     _javaClassWrappers.put(name, def);
     _lowerJavaClassWrappers.put(name.toLowerCase(), def);
+
+    _staticClasses.put(name, def);
+    _lowerStaticClasses.put(name.toLowerCase(), def);
+
+    def.introspect(this);
+
+    if (extension != null)
+      _extensionSet.add(extension);
+
+    return def;
+  }
+
+  /**
+   * Introspects the module class for functions.
+   *
+   * @param name the php class name
+   * @param type the class to introspect.
+   * @param extension the extension provided by the class, or null
+   */
+  private JavaImplClassDef addJavaImplClass(String name,
+					    Class type,
+					    String extension)
+    throws IllegalAccessException, InstantiationException
+  {
+    if (log.isLoggable(Level.FINEST)) {
+      if (extension == null)
+        log.finest(L.l("Quercus loading class {0} with type {1}", name, type.getName()));
+      else
+        log.finest(L.l("Quercus loading class {0} with type {1} providing extension {2}", name, type.getName(), extension));
+    }
+
+    JavaImplClassDef def = new JavaImplClassDef(this, name, type);
 
     _staticClasses.put(name, def);
     _lowerStaticClasses.put(name.toLowerCase(), def);

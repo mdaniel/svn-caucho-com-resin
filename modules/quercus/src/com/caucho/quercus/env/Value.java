@@ -331,8 +331,8 @@ abstract public class Value {
    */
   public ArrayValue toArrayValue(Env env)
   {
-    env.error(L.l("{0} ({1}) is not assignable to ArrayValue",
-		  this, getClass().getName()));
+    env.warning(L.l("{0} ({1}) is not assignable to ArrayValue",
+		  this, getType()));
 
     return null;
   }

@@ -465,6 +465,18 @@ public final class Env {
   }
 
   /**
+   * Prints a char
+   */
+  public final void print(char v)
+  {
+    try {
+      getOut().print(v);
+    } catch (IOException e) {
+      throw new QuercusModuleException(e);
+    }
+  }
+
+  /**
    * Prints a long
    */
   public final void print(long v)
@@ -511,6 +523,18 @@ public final class Env {
   public final void print(Value v)
   {
     v.print(this);
+  }
+
+  /**
+   * Prints a string
+   */
+  public final void println()
+  {
+    try {
+      getOut().println();
+    } catch (IOException e) {
+      throw new QuercusModuleException(e);
+    }
   }
 
   /**

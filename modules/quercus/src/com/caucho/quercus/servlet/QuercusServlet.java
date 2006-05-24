@@ -124,6 +124,15 @@ public class QuercusServlet
   }
 
   /**
+   * Adds a quercus class.
+   */
+  public void addImplClass(PhpClassConfig classConfig)
+    throws ConfigException
+  {
+    getQuercus().addImplClass(classConfig.getName(), classConfig.getType());
+  }
+
+  /**
    * Adds a quercus.ini configuration
    */
   public PhpIni createPhpIni()
