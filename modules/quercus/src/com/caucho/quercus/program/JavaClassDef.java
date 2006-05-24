@@ -67,7 +67,10 @@ public class JavaClassDef extends ClassDef {
   private final String _name;
   private final Class _type;
   private final boolean _isArray;
+  
   private JavaClassDef _componentDef;
+
+  private volatile boolean _isInit;
 
   private final HashMap<String, Value> _constMap
     = new HashMap<String, Value>();
@@ -487,6 +490,8 @@ public class JavaClassDef extends ClassDef {
    */
   public void initClass(QuercusClass cl)
   {
+    init();
+    
     if (_cons != null)
       cl.setConstructor(_cons);
 
@@ -525,47 +530,59 @@ public class JavaClassDef extends ClassDef {
     return null;
   }
 
+  public void init()
+  {
+    introspect();
+  }
+  
   /**
    * Introspects the Java class.
    */
-  public void introspect(ModuleContext moduleContext)
+  public synchronized void introspect()
   {
-    introspectConstants(_type);
-    introspectMethods(moduleContext, _type);
-    introspectFields(moduleContext, _type);
-
-    _marshall = new JavaMarshall(this, false);
-
-    Method consMethod = getConsMethod(_type);
-
-    if (consMethod != null)
-      _cons = new JavaMethod(moduleContext, consMethod);
-    else {
-      Constructor []cons = _type.getConstructors();
-
-      if (cons.length > 0) {
-	int i;
-	for (i = 0; i < cons.length; i++) {
-	  if (cons[i].isAnnotationPresent(Construct.class))
-	    break;
-	}
-
-	if (i < cons.length)
-	  _cons = new JavaConstructor(moduleContext, cons[i]);
-	else
-	  _cons = new JavaConstructor(moduleContext, cons[0]);
-
-      } else
-	_cons = null;
-    }
+    if (_isInit)
+      return;
 
     try {
-      Method method = _type.getMethod("iterator", new Class[0]);
+      introspectConstants(_type);
+      introspectMethods(_moduleContext, _type);
+      introspectFields(_moduleContext, _type);
 
-      if (method != null &&
-          Iterator.class.isAssignableFrom(method.getReturnType()))
-        _iterator = method;
-    } catch (Throwable e) {
+      _marshall = new JavaMarshall(this, false);
+
+      Method consMethod = getConsMethod(_type);
+
+      if (consMethod != null)
+	_cons = new JavaMethod(_moduleContext, consMethod);
+      else {
+	Constructor []cons = _type.getConstructors();
+
+	if (cons.length > 0) {
+	  int i;
+	  for (i = 0; i < cons.length; i++) {
+	    if (cons[i].isAnnotationPresent(Construct.class))
+	      break;
+	  }
+
+	  if (i < cons.length)
+	    _cons = new JavaConstructor(_moduleContext, cons[i]);
+	  else
+	    _cons = new JavaConstructor(_moduleContext, cons[0]);
+
+	} else
+	  _cons = null;
+      }
+
+      try {
+	Method method = _type.getMethod("iterator", new Class[0]);
+
+	if (method != null &&
+	    Iterator.class.isAssignableFrom(method.getReturnType()))
+	  _iterator = method;
+      } catch (Throwable e) {
+      }
+    } finally {
+      _isInit = true;
     }
   }
 

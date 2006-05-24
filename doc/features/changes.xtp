@@ -4,6 +4,7 @@
 
 <s2 title='3.0.snap - May 22, 2006'>
 <ul>
+<li>Quercus: Exception.getMessage() support (#1142, rep by koreth)
 <li>Quercus: __get, __set, __call (#638, #645)
 <li>Quercus: define(FOO, 1) was defining FOO as "FOO" (#1140, rep by koreth)
 <li>Quercus: basic abstract, interface implementation

@@ -38,6 +38,7 @@ import com.caucho.quercus.module.ModuleInfo;
 import com.caucho.quercus.module.ClassImplementation;
 import com.caucho.quercus.page.PageManager;
 import com.caucho.quercus.page.QuercusPage;
+import com.caucho.quercus.page.InterpretedPage;
 import com.caucho.quercus.parser.QuercusParser;
 import com.caucho.quercus.program.ClassDef;
 import com.caucho.quercus.program.InterpretedClassDef;
@@ -280,7 +281,7 @@ public class Quercus {
 
       _javaClassWrappers.put(className, def);
 
-      def.introspect(getModuleContext());
+      // def.introspect(getModuleContext());
 
       return def;
     } catch (RuntimeException e) {
@@ -395,6 +396,19 @@ public class Quercus {
     throws IOException
   {
     return _pageManager.parse(path);
+  }
+
+  /**
+   * Parses a quercus program.
+   *
+   * @param path the source file path
+   * @return the parsed program
+   * @throws IOException
+   */
+  public QuercusPage parse(ReadStream is)
+    throws IOException
+  {
+    return new InterpretedPage(QuercusParser.parse(this, is));
   }
 
   /**

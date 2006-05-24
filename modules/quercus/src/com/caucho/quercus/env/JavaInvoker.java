@@ -63,9 +63,14 @@ abstract public class JavaInvoker
   private static final Object [] NULL_ARGS = new Object[0];
   private static final Value [] NULL_VALUES = new Value[0];
 
+  private final ModuleContext _moduleContext;
   private final String _name;
-  private final Class [] _paramTypes;
+  private final Class [] _param;
+  private final Class _retType;
   private final Annotation [][] _paramAnn;
+  private final Annotation []_methodAnn;
+
+  private volatile boolean _isInit;
   
   private boolean _hasEnv;
   private boolean _hasThis;
@@ -79,7 +84,6 @@ abstract public class JavaInvoker
   private boolean _isCallUsesVariableArgs;
   private boolean _isCallUsesSymbolTable;
 
-
   /**
    * Creates the statically introspected function.
    */
@@ -90,103 +94,110 @@ abstract public class JavaInvoker
                      Annotation []methodAnn,
                      Class retType)
   {
+    _moduleContext = moduleContext;
     _name = name;
-    _paramTypes = param;
+    _param = param;
     _paramAnn = paramAnn;
-
-    init(moduleContext, param, paramAnn, methodAnn, retType);
+    _methodAnn = methodAnn;
+    _retType = retType;
+    
+    // init();
   }
 
-  private void init(ModuleContext moduleContext,
-		    Class []param,
-		    Annotation [][]paramAnn,
-		    Annotation []methodAnn,
-		    Class retType)
+  public synchronized void init()
   {
-    boolean callUsesVariableArgs = false;
-    boolean callUsesSymbolTable = false;
-    boolean returnNullAsFalse = false;
+    if (_isInit)
+      return;
 
-    for (Annotation ann : methodAnn) {
-      if (VariableArguments.class.isAssignableFrom(ann.annotationType())) {
-        callUsesVariableArgs = true;
+    try {
+      boolean callUsesVariableArgs = false;
+      boolean callUsesSymbolTable = false;
+      boolean returnNullAsFalse = false;
+
+      for (Annotation ann : _methodAnn) {
+	if (VariableArguments.class.isAssignableFrom(ann.annotationType())) {
+	  callUsesVariableArgs = true;
+	}
+
+	if (UsesSymbolTable.class.isAssignableFrom(ann.annotationType())) {
+	  callUsesSymbolTable = true;
+	}
+
+	if (ReturnNullAsFalse.class.isAssignableFrom(ann.annotationType())) {
+	  returnNullAsFalse = true;
+	}
       }
 
-      if (UsesSymbolTable.class.isAssignableFrom(ann.annotationType())) {
-        callUsesSymbolTable = true;
-      }
+      _isCallUsesVariableArgs = callUsesVariableArgs;
+      _isCallUsesSymbolTable = callUsesSymbolTable;
 
-      if (ReturnNullAsFalse.class.isAssignableFrom(ann.annotationType())) {
-        returnNullAsFalse = true;
-      }
-    }
+      _hasEnv = _param.length > 0 && _param[0].equals(Env.class);
+      int envOffset = _hasEnv ? 1 : 0;
 
-    _isCallUsesVariableArgs = callUsesVariableArgs;
-    _isCallUsesSymbolTable = callUsesSymbolTable;
-
-    _hasEnv = param.length > 0 && param[0].equals(Env.class);
-    int envOffset = _hasEnv ? 1 : 0;
-
-    if (envOffset < param.length)
-      _hasThis = hasThis(param[envOffset], paramAnn[envOffset]);
-    else
-      _hasThis = false;
-
-    if (_hasThis)
-      envOffset++;
-
-    boolean hasRestArgs = false;
-    boolean isRestReference = false;
-
-    if (param.length > 0 && param[param.length - 1].equals(Value[].class)) {
-      hasRestArgs = true;
-
-      for (Annotation ann : paramAnn[param.length - 1]) {
-        if (Reference.class.isAssignableFrom(ann.annotationType()))
-          isRestReference = true;
-      }
-    }
-
-    _hasRestArgs = hasRestArgs;
-    _isRestReference = isRestReference;
-
-    int argLength = param.length;
-
-    if (_hasRestArgs)
-      argLength -= 1;
-
-    _defaultExprs = new Expr[argLength - envOffset];
-
-    _marshallArgs = new Marshall[argLength - envOffset];
-
-    for (int i = 0; i < argLength - envOffset; i++) {
-      boolean isReference = false;
-
-      for (Annotation ann : paramAnn[i + envOffset]) {
-        if (Optional.class.isAssignableFrom(ann.annotationType())) {
-          Optional opt = (Optional) ann;
-
-          if (! opt.value().equals("")) {
-            Expr expr = QuercusParser.parseDefault(opt.value());
-
-            _defaultExprs[i] = expr;
-          } else
-            _defaultExprs[i] = new DefaultExpr(getLocation());
-        } else if (Reference.class.isAssignableFrom(ann.annotationType())) {
-          isReference = true;
-        }
-      }
-
-      Class argType = param[i + envOffset];
-
-      if (isReference)
-        _marshallArgs[i] = Marshall.MARSHALL_REFERENCE;
+      if (envOffset < _param.length)
+	_hasThis = hasThis(_param[envOffset], _paramAnn[envOffset]);
       else
-        _marshallArgs[i] = Marshall.create(moduleContext, argType);
-    }
+	_hasThis = false;
 
-    _unmarshallReturn = Marshall.create(moduleContext, retType, false,
-					returnNullAsFalse);
+      if (_hasThis)
+	envOffset++;
+
+      boolean hasRestArgs = false;
+      boolean isRestReference = false;
+
+      if (_param.length > 0 &&
+	  _param[_param.length - 1].equals(Value[].class)) {
+	hasRestArgs = true;
+
+	for (Annotation ann : _paramAnn[_param.length - 1]) {
+	  if (Reference.class.isAssignableFrom(ann.annotationType()))
+	    isRestReference = true;
+	}
+      }
+
+      _hasRestArgs = hasRestArgs;
+      _isRestReference = isRestReference;
+
+      int argLength = _param.length;
+
+      if (_hasRestArgs)
+	argLength -= 1;
+
+      _defaultExprs = new Expr[argLength - envOffset];
+
+      _marshallArgs = new Marshall[argLength - envOffset];
+
+      for (int i = 0; i < argLength - envOffset; i++) {
+	boolean isReference = false;
+
+	for (Annotation ann : _paramAnn[i + envOffset]) {
+	  if (Optional.class.isAssignableFrom(ann.annotationType())) {
+	    Optional opt = (Optional) ann;
+
+	    if (! opt.value().equals("")) {
+	      Expr expr = QuercusParser.parseDefault(opt.value());
+
+	      _defaultExprs[i] = expr;
+	    } else
+	      _defaultExprs[i] = new DefaultExpr(getLocation());
+	  } else if (Reference.class.isAssignableFrom(ann.annotationType())) {
+	    isReference = true;
+	  }
+	}
+
+	Class argType = _param[i + envOffset];
+
+	if (isReference)
+	  _marshallArgs[i] = Marshall.MARSHALL_REFERENCE;
+	else
+	  _marshallArgs[i] = Marshall.create(_moduleContext, argType);
+      }
+
+      _unmarshallReturn = Marshall.create(_moduleContext, _retType, false,
+					  returnNullAsFalse);
+    } finally {
+      _isInit = true;
+    }
   }
 
   /**
@@ -285,6 +296,8 @@ abstract public class JavaInvoker
    */
   public Expr []bindArguments(Env env, Expr fun, Expr []args)
   {
+    init();
+    
     if (_defaultExprs.length == args.length)
       return args;
 
@@ -346,6 +359,9 @@ abstract public class JavaInvoker
 
   public Value call(Env env, Object obj, Expr []exprs)
   {
+    if (! _isInit)
+      init();
+    
     int len = (_defaultExprs.length +
 	       (_hasEnv ? 1 : 0) +
 	       (_hasThis ? 1 : 0) +
@@ -374,7 +390,7 @@ abstract public class JavaInvoker
           expr = new DefaultExpr(getLocation());
       }
 
-      values[k] = _marshallArgs[i].marshall(env, expr, _paramTypes[k]);
+      values[k] = _marshallArgs[i].marshall(env, expr, _param[k]);
 
       k++;
     }
@@ -408,7 +424,10 @@ abstract public class JavaInvoker
 
   public Value call(Env env, Object obj, Value []args)
   {
-    int len = _paramTypes.length;
+    if (! _isInit)
+      init();
+    
+    int len = _param.length;
 
     Object []javaArgs = new Object[len];
 
@@ -425,15 +444,15 @@ abstract public class JavaInvoker
       Value value;
 
       if (i < args.length && args[i] != null)
-        javaArgs[k] = _marshallArgs[i].marshall(env, args[i], _paramTypes[k]);
+        javaArgs[k] = _marshallArgs[i].marshall(env, args[i], _param[k]);
       else if (_defaultExprs[i] != null) {
         javaArgs[k] = _marshallArgs[i].marshall(env,
                                               _defaultExprs[i],
-                                              _paramTypes[k]);
+                                              _param[k]);
       } else {
         javaArgs[k] = _marshallArgs[i].marshall(env,
 						NullValue.NULL,
-						_paramTypes[k]);
+						_param[k]);
       }
 
       k++;

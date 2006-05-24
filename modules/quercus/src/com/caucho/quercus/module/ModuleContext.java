@@ -238,7 +238,7 @@ public class ModuleContext {
 
       _javaClassWrappers.put(className, def);
 
-      def.introspect(this);
+      // def.introspect();
 
       return def;
     } catch (RuntimeException e) {
@@ -379,7 +379,7 @@ public class ModuleContext {
     _staticClasses.put(name, def);
     _lowerStaticClasses.put(name.toLowerCase(), def);
 
-    def.introspect(this);
+    // def.introspect();
 
     if (extension != null)
       _extensionSet.add(extension);

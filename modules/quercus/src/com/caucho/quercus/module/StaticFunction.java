@@ -130,6 +130,8 @@ public class StaticFunction extends JavaInvoker {
    */
   public void analyzeArguments(Expr []args, AnalyzeInfo info)
   {
+    init();
+    
     int env = getHasEnv() ? 1 : 0;
 
     Marshall []marshallArgs = getMarshallArgs();
@@ -175,6 +177,8 @@ public class StaticFunction extends JavaInvoker {
   public void generate(PhpWriter out, Expr funExpr, Expr []args)
     throws IOException
   {
+    init();
+    
     getUnmarshallReturn().generateResultStart(out);
 
     generateImpl(out, funExpr, args);
@@ -190,6 +194,8 @@ public class StaticFunction extends JavaInvoker {
   public void generateBoolean(PhpWriter out, Expr funExpr, Expr []args)
     throws IOException
   {
+    init();
+    
     if (isBoolean())
       generateImpl(out, funExpr, args);
     else if (isLong() || isDouble()) {
@@ -209,6 +215,8 @@ public class StaticFunction extends JavaInvoker {
   public void generateLong(PhpWriter out, Expr funExpr, Expr []args)
     throws IOException
   {
+    init();
+    
     if (isLong())
       generateImpl(out, funExpr, args);
     else
@@ -223,6 +231,8 @@ public class StaticFunction extends JavaInvoker {
   public void generateDouble(PhpWriter out, Expr funExpr, Expr []args)
     throws IOException
   {
+    init();
+    
     if (isLong() || isDouble())
       generateImpl(out, funExpr, args);
     else
@@ -237,6 +247,8 @@ public class StaticFunction extends JavaInvoker {
   public void generateString(PhpWriter out, Expr funExpr, Expr []args)
     throws IOException
   {
+    init();
+    
     if (isString())
       generateImpl(out, funExpr, args);
     else
@@ -251,6 +263,8 @@ public class StaticFunction extends JavaInvoker {
   public void generateTop(PhpWriter out, Expr funExpr, Expr []args)
     throws IOException
   {
+    init();
+    
     generateImpl(out, funExpr, args);
   }
 
@@ -262,6 +276,8 @@ public class StaticFunction extends JavaInvoker {
   public void generateCopy(PhpWriter out, Expr funExpr, Expr []args)
     throws IOException
   {
+    init();
+    
     generate(out, funExpr, args);
   }
 
@@ -273,6 +289,8 @@ public class StaticFunction extends JavaInvoker {
   private void generateImpl(PhpWriter out, Expr funExpr, Expr []args)
     throws IOException
   {
+    init();
+    
     String var = out.addModule(_quercusModule);
 
     if (Modifier.isStatic(_method.getModifiers())) {

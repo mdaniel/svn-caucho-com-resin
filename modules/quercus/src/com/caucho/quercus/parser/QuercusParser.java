@@ -268,6 +268,16 @@ public class QuercusParser {
   }
   
   public static QuercusProgram parse(Quercus quercus,
+				     ReadStream is)
+    throws IOException
+  {
+    QuercusParser parser;
+    parser = new QuercusParser(quercus, is.getPath(), is.getReader());
+
+    return parser.parse();
+  }
+  
+  public static QuercusProgram parse(Quercus quercus,
 				     Path path, Reader is)
     throws IOException
   {
