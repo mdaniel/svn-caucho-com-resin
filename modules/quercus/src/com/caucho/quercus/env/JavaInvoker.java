@@ -233,6 +233,24 @@ abstract public class JavaInvoker
   }
 
   /**
+   * Returns true if the call uses variable arguments.
+   */
+  @Override
+  public boolean isCallUsesVariableArgs()
+  {
+    return _isCallUsesVariableArgs;
+  }
+
+  /**
+   * Returns true if the call uses the symbol table
+   */
+  @Override
+  public boolean isCallUsesSymbolTable()
+  {
+    return _isCallUsesSymbolTable;
+  }
+
+  /**
    * Returns true if the result is a boolean.
    */
   public boolean isBoolean()

@@ -2295,8 +2295,6 @@ public final class Env {
   {
     JavaClassDef def = _quercus.getJavaClassDefinition(className);
 
-    def.init();
-
     return def;
   }
 

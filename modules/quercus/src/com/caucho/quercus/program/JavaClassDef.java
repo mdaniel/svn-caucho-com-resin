@@ -166,6 +166,9 @@ public class JavaClassDef extends ClassDef {
 
   public Value wrap(Env env, Object obj)
   {
+    if (! _isInit)
+      init();
+    
     return new JavaValue(env, obj, this);
   }
 
