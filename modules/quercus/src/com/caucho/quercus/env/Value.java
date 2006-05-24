@@ -843,7 +843,9 @@ abstract public class Value {
    */
   public Value add(Value rValue)
   {
-    return new DoubleValue(toDouble() + rValue.toDouble());
+    if (isLongConvertible() && rValue.isLongConvertible())
+      return LongValue.create(toLong() + rValue.toLong());
+    return DoubleValue.create(toDouble() + rValue.toDouble());
   }
 
   /**
@@ -879,10 +881,9 @@ abstract public class Value {
    */
   public Value sub(Value rValue)
   {
-    double lDouble = toDouble();
-    double rDouble = rValue.toDouble();
-
-    return new DoubleValue(toDouble() - rValue.toDouble());
+    if (isLongConvertible() && rValue.isLongConvertible())
+      return LongValue.create(toLong() - rValue.toLong());
+    return DoubleValue.create(toDouble() - rValue.toDouble());
   }
 
   /**
@@ -892,6 +893,7 @@ abstract public class Value {
   {
     return new DoubleValue(toDouble() - rLong);
   }
+
 
   /**
    * Substracts from the previous value.

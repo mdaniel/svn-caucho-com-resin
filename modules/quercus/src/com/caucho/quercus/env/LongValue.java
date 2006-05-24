@@ -200,16 +200,6 @@ public class LongValue extends NumberValue {
   }
 
   /**
-   * Subtracts the following value.
-   */
-  public Value sub(Value rValue)
-  {
-    if (rValue.isLongConvertible())
-      return LongValue.create(_value - rValue.toLong());
-    return super.sub(rValue);
-  }
-
-  /**
    * Returns true for equality
    */
   public boolean eql(Value rValue)
