@@ -76,7 +76,7 @@ public class ArrayValueImpl extends ArrayValue {
   private int _hashMask;
 
   private int _size;
-  private long _index;
+  private long _nextAvailableIndex;
   private boolean _isDirty;
 
   private Entry _head;
@@ -121,7 +121,7 @@ public class ArrayValueImpl extends ArrayValue {
     _head = copy._head;
     _current = copy._current;
     _tail = copy._tail;
-    _index = copy._index;
+    _nextAvailableIndex = copy._nextAvailableIndex;
   }
 
   private void copyOnWrite()
@@ -282,7 +282,8 @@ public class ArrayValueImpl extends ArrayValue {
     
     _size = 0;
     _head = _tail = _current = null;
-    
+
+    _nextAvailableIndex = 0;
     for (int j = _entries.length - 1; j >= 0; j--) {
       _entries[j] = null;
     }
@@ -529,7 +530,7 @@ public class ArrayValueImpl extends ArrayValue {
    */
   public Value createTailKey()
   {
-    return LongValue.create(_index++);
+    return LongValue.create(_nextAvailableIndex);
   }
 
   /**
@@ -656,7 +657,10 @@ public class ArrayValueImpl extends ArrayValue {
   private void shiftEntries(int index)
   {
     int capacity = _entries.length;
-    
+
+    // we'll be re-addEntry()ing all entries, so it's safe to reset this
+    _nextAvailableIndex = 0;
+
     for (; index < capacity; index++) {
       Entry entry = _entries[index];
 
@@ -696,6 +700,13 @@ public class ArrayValueImpl extends ArrayValue {
    */
   private Entry createEntry(Value key)
   {
+    // XXX: "A key may be either an integer or a string. If a key is
+    //       the standard representation of an integer, it will be
+    //       interpreted as such (i.e. "8" will be interpreted as 8,
+    //       while "08" will be interpreted as "08")."
+    //
+    //            http://us3.php.net/types.array
+
     if (_isDirty)
       copyOnWrite();
     
@@ -703,14 +714,6 @@ public class ArrayValueImpl extends ArrayValue {
 
     key = key.toKey();
     
-    // XXX: check for long only (?) for perf
-    if (key instanceof LongValue) {
-      long index = key.toLong();
-
-      if (_index <= index)
-	_index = index + 1;
-    }
-
     int hashMask = _hashMask;
 
     int hash = key.hashCode() & hashMask;
@@ -730,6 +733,7 @@ public class ArrayValueImpl extends ArrayValue {
     _size++;
 
     Entry newEntry = new Entry(key);
+    updateNextAvailableIndex(newEntry);
     _entries[hash] = newEntry;
     newEntry._index = hash;
 
@@ -776,6 +780,7 @@ public class ArrayValueImpl extends ArrayValue {
     for (int i = capacity; i >= 0; i--) {
       if (_entries[hash] == null) {
 	_entries[hash] = entry;
+	updateNextAvailableIndex(entry);
 	entry._index = hash;
 	return;
       }
@@ -783,6 +788,20 @@ public class ArrayValueImpl extends ArrayValue {
       hash = (hash + 1) & _hashMask;
     }
   }
+
+  /**
+   * Updates _nextAvailableIndex; this must be invoked for every insertion
+   */
+  private void updateNextAvailableIndex(Entry entry)
+  {
+    if (entry._key instanceof LongValue)
+      {
+	long key = entry._key.toLong();
+	if (key >= _nextAvailableIndex)
+	  _nextAvailableIndex = key+1;
+      }
+  }
+
 
   /**
    * Pops the top value.
