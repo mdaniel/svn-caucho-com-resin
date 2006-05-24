@@ -34,6 +34,7 @@ import java.io.InputStream;
 
 import java.util.logging.Logger;
 import java.util.logging.Level;
+import java.util.LinkedList;
 
 import com.caucho.util.L10N;
 
@@ -728,7 +729,7 @@ public class ImageModule extends AbstractQuercusModule {
    */
   public static void imagesetpixel(QuercusImage image, int x, int y, int color)
   {
-    image._bufferedImage.setRGB(x, y, color);
+    image.setPixel(x, y, color);
   }
 
   /**
@@ -1091,7 +1092,7 @@ public class ImageModule extends AbstractQuercusModule {
    */
   public static boolean imagefill(QuercusImage image, int x, int y, int color)
   {
-    // XXX: not yet implemented
+    image.flood(x, y, color);
     return true;
   }
 
@@ -1101,7 +1102,7 @@ public class ImageModule extends AbstractQuercusModule {
   public static boolean imagefilltoborder(QuercusImage image, int x, int y,
 					  int border, int color)
   {
-    // XXX: not yet implemented
+    image.flood(x, y, color, border);
     return true;
   }
 
@@ -1433,6 +1434,11 @@ public class ImageModule extends AbstractQuercusModule {
       return _bufferedImage.getRGB(x, y);
     }
 
+    public void setPixel(int x, int y, int color)
+    {
+      _bufferedImage.setRGB(x, y, color);
+    }
+
     public Graphics2D getGraphics()
     {
       return _graphics;
@@ -1555,6 +1561,58 @@ public class ImageModule extends AbstractQuercusModule {
     public BufferedImage getBrush()
     {
       return _brush;
+    }
+
+    public void flood(int x, int y, int color)
+    {
+      flood(x, y, color, 0, false);
+    }
+
+    public void flood(int x, int y, int color, int border)
+    {
+      flood(x, y, color, border, true);
+    }
+
+    private void flood(int startx, int starty, int color, int border, boolean useBorder)
+    {
+      java.util.Queue<Integer> xq = new LinkedList<Integer>();
+      java.util.Queue<Integer> yq = new LinkedList<Integer>();
+      xq.add(startx);
+      yq.add(starty);
+      color &= 0x00ffffff;
+      border &= 0x00ffffff;
+      while(xq.size() > 0)
+	{
+	  int x = xq.poll();
+	  int y = yq.poll();
+	  int p = (getPixel(x, y) & 0x00ffffff);
+	  if (useBorder ? (p==border||p==color) : (p != 0)) continue;
+	  setPixel(x, y, color);
+	  for(int i=x-1; i>=0; i--)
+	    {
+	      p = (getPixel(i, y) & 0x00ffffff);
+	      if (useBorder ? (p==border||p==color) : (p!= 0)) break;
+	      setPixel(i, y, color);
+	      xq.add(i);
+	      yq.add(y+1);
+	      xq.add(i);
+	      yq.add(y-1);
+	    }
+	  for(int i=x+1; i<getWidth(); i++)
+	    {
+	      p = (getPixel(i, y) & 0x00ffffff);
+	      if (useBorder ? (p==border||p==color) : (p != 0)) break;
+	      setPixel(i, y, color);
+	      xq.add(i);
+	      yq.add(y+1);
+	      xq.add(i);
+	      yq.add(y-1);
+	    }
+	  xq.add(x);
+	  yq.add(y+1);
+	  xq.add(x);
+	  yq.add(y-1);
+	}
     }
 
   }
