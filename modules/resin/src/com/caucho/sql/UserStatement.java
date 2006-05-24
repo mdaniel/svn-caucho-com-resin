@@ -43,16 +43,17 @@ import com.caucho.log.Log;
 
 import com.caucho.sql.SQLExceptionWrapper;
 
+
 /**
  * User-view of a statement;
  */
 public class UserStatement implements Statement {
   protected final static Logger log = Log.open(UserStatement.class);
   protected final static L10N L = new L10N(UserStatement.class);
-  
+
   // The connection
   protected UserConnection _conn;
-  
+
   // The underlying connection
   protected Statement _stmt;
 
@@ -78,7 +79,13 @@ public class UserStatement implements Statement {
    */
   public Statement getStatement()
   {
-    return _stmt;
+    Statement stmt = _stmt;
+
+    if (stmt instanceof com.caucho.sql.spy.SpyStatement) {
+      stmt = ((com.caucho.sql.spy.SpyStatement)stmt).getStatement();
+    }
+
+    return stmt;
   }
 
   public void addBatch(String sql)
@@ -116,7 +123,7 @@ public class UserStatement implements Statement {
 
     if (stmt != null) {
       _conn.closeStatement(stmt);
-    
+
       stmt.close();
     }
   }
@@ -256,7 +263,7 @@ public class UserStatement implements Statement {
     throws SQLException
   {
     _isChanged = true;
-    
+
     _stmt.setFetchDirection(direction);
   }
 
@@ -276,7 +283,7 @@ public class UserStatement implements Statement {
     throws SQLException
   {
     _isChanged = true;
-    
+
     _stmt.setFetchSize(rows);
   }
 
@@ -296,7 +303,7 @@ public class UserStatement implements Statement {
     throws SQLException
   {
     _isChanged = true;
-    
+
     _stmt.setMaxFieldSize(max);
   }
 
@@ -316,7 +323,7 @@ public class UserStatement implements Statement {
     throws SQLException
   {
     _isChanged = true;
-    
+
     _stmt.setMaxRows(max);
   }
 
@@ -345,7 +352,7 @@ public class UserStatement implements Statement {
     throws SQLException
   {
     _isChanged = true;
-    
+
     _stmt.setQueryTimeout(seconds);
   }
 
@@ -383,7 +390,7 @@ public class UserStatement implements Statement {
     throws SQLException
   {
     _isChanged = true;
-    
+
     _stmt.setCursorName(name);
   }
 
@@ -394,7 +401,7 @@ public class UserStatement implements Statement {
     throws SQLException
   {
     _isChanged = true;
-    
+
     _stmt.setEscapeProcessing(enable);
   }
 

@@ -881,7 +881,7 @@ public class JdbcResultResource extends ResourceValue {
   /**
    * Fetch the next line as an array.
    */
-  public Value fetchArray(int type)
+  public ArrayValue fetchArray(int type)
   {
     try {
       if (_rs.next()) {
@@ -911,11 +911,11 @@ public class JdbcResultResource extends ResourceValue {
 
         return array;
       } else {
-        return NullValue.NULL;
+        return null;
       }
     } catch (SQLException e) {
       log.log(Level.FINE, e.toString(), e);
-      return BooleanValue.FALSE;
+      return null;
     }
   }
 

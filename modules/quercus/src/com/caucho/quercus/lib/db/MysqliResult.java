@@ -37,8 +37,10 @@ import com.caucho.quercus.lib.db.JdbcResultResource;
 
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
+import com.caucho.quercus.env.ArrayValue;
 
 import com.caucho.quercus.module.Optional;
+import com.caucho.quercus.module.ReturnNullAsFalse;
 
 /**
  * mysqli object oriented API facade
@@ -74,7 +76,7 @@ public class MysqliResult {
   /**
    * Returns an array representing the row.
    */
-  public Value fetch_array(@Optional("MYSQLI_BOTH") int type)
+  public ArrayValue fetch_array(@Optional("MYSQLI_BOTH") int type)
   {
     return validateResult().fetchArray(type);
   }
@@ -82,9 +84,9 @@ public class MysqliResult {
   /**
    * Returns an associative array representing the row.
    */
-  public Value fetch_assoc()
+  public ArrayValue fetch_assoc()
   {
-    return validateResult().fetchArray(JdbcResultResource.FETCH_ASSOC);
+    return (ArrayValue) validateResult().fetchArray(JdbcResultResource.FETCH_ASSOC);
   }
 
   /**
@@ -170,9 +172,9 @@ public class MysqliResult {
   /**
    * Returns an object representing the row.
    */
-  public Value fetch_row()
+  public ArrayValue fetch_row()
   {
-    return validateResult().fetchArray(JdbcResultResource.FETCH_NUM);
+    return (ArrayValue) validateResult().fetchArray(JdbcResultResource.FETCH_NUM);
   }
 
   /**

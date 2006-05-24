@@ -41,13 +41,7 @@ import com.caucho.quercus.env.*;
 import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.quercus.module.Optional;
 import com.caucho.quercus.module.NotNull;
-import com.caucho.quercus.lib.db.JdbcConnectionResource;
-
-import com.caucho.quercus.lib.db.JdbcResultResource;
-import com.caucho.quercus.lib.db.JdbcTableMetaData;
-import com.caucho.quercus.lib.db.JdbcColumnMetaData;
-import com.caucho.quercus.lib.db.Mysqli;
-import com.caucho.quercus.lib.db.MysqliResult;
+import com.caucho.quercus.module.ReturnNullAsFalse;
 
 /**
  * PHP mysql routines.
@@ -369,12 +363,19 @@ public class MysqlModule extends AbstractQuercusModule {
   /**
    * Executes a query and returns a result set.
    */
-  public Object mysql_query(Env env, String sql, @Optional Mysqli conn)
+  @ReturnNullAsFalse
+  public MysqliResult mysql_query(Env env, String sql, @Optional Mysqli conn)
   {
     if (conn == null)
       conn = getConnection(env);
 
-    return conn.query(sql, MYSQL_STORE_RESULT);
+    JdbcResultResource resultResource = conn.query(sql, MYSQL_STORE_RESULT);
+
+    if (resultResource != null) {
+      return new MysqliResult(resultResource);
+    }
+
+    return null;
   }
 
   /**
@@ -639,10 +640,11 @@ public class MysqlModule extends AbstractQuercusModule {
   /**
    * Returns result set or false on error
    */
-  public Object mysql_db_query(Env env,
-                               @NotNull String databaseName,
-                               @NotNull String query,
-                               @Optional Mysqli conn)
+  @ReturnNullAsFalse
+  public MysqliResult mysql_db_query(Env env,
+                                     @NotNull String databaseName,
+                                     @NotNull String query,
+                                     @Optional Mysqli conn)
   {
     if (databaseName == null)
       return null; // BooleanValue.FALSE;
@@ -656,7 +658,13 @@ public class MysqlModule extends AbstractQuercusModule {
     if (!conn.select_db(databaseName))
       return null; // BooleanValue.FALSE;
 
-    return conn.query(query, 0);
+    JdbcResultResource resultResource = conn.query(query, 0);
+
+    if (resultResource != null) {
+      return new MysqliResult(resultResource);
+    }
+
+    return null;
   }
 
   /**

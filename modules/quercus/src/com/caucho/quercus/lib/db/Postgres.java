@@ -24,7 +24,7 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Charles Reich
+ * @author Rodrigo Westrupp
  */
 
 package com.caucho.quercus.lib.db;
@@ -40,30 +40,25 @@ import com.caucho.quercus.env.*;
 import com.caucho.quercus.module.Optional;
 
 /**
- * mysqli object oriented API facade
+ * postgres object oriented API facade
  */
-public class Mysqli extends JdbcConnectionResource {
+public class Postgres extends JdbcConnectionResource {
   private static final Logger log = Logger.getLogger(Mysqli.class.getName());
   private static final L10N L = new L10N(Mysqli.class);
 
-  public Mysqli(Env env,
-                @Optional("localhost") String host,
-                @Optional String user,
-                @Optional String password,
-                @Optional String db,
-                @Optional("3306") int port,
-                @Optional String socket,
-                @Optional String driver,
-                @Optional String url)
+  public Postgres(Env env,
+                  @Optional("localhost") String host,
+                  @Optional String user,
+                  @Optional String password,
+                  @Optional String db,
+                  @Optional("5432") int port,
+                  @Optional String socket,
+                  @Optional String driver,
+                  @Optional String url)
   {
     super(env);
 
     real_connect(env, host, user, password, db, port, socket, 0, driver, url);
-  }
-
-  public Mysqli(Env env)
-  {
-    super(env);
   }
 
   /**
@@ -74,7 +69,7 @@ public class Mysqli extends JdbcConnectionResource {
                               @Optional String userName,
                               @Optional String password,
                               @Optional String dbname,
-                              @Optional("3306") int port,
+                              @Optional("5432") int port,
                               @Optional String socket,
                               @Optional int flags,
                               @Optional String driver,
@@ -91,7 +86,7 @@ public class Mysqli extends JdbcConnectionResource {
         host = "localhost";
 
       if (driver == null || driver.equals("")) {
-        driver = "com.mysql.jdbc.jdbc2.optional.MysqlConnectionPoolDataSource";
+        driver = "org.postgresql.Driver";
       }
 
       if (url == null || url.equals("")) {
@@ -100,7 +95,7 @@ public class Mysqli extends JdbcConnectionResource {
 
       Connection jConn = env.getConnection(driver, url, userName, password);
 
-      setConnection(host, port, dbname, jConn, false);
+      setConnection(host, port, dbname, jConn, true);
 
       env.addResource(this);
 
@@ -108,15 +103,15 @@ public class Mysqli extends JdbcConnectionResource {
 
     } catch (SQLException e) {
       env.warning("A link to the server could not be established. " + e.toString());
-      env.setSpecialValue("mysqli.connectErrno",new LongValue(e.getErrorCode()));
-      env.setSpecialValue("mysqli.connectError", new StringValueImpl(e.getMessage()));
+      env.setSpecialValue("postgres.connectErrno",new LongValue(e.getErrorCode()));
+      env.setSpecialValue("postgres.connectError", new StringValueImpl(e.getMessage()));
 
       log.log(Level.FINE, e.toString(), e);
 
       return false;
     } catch (Exception e) {
       env.warning("A link to the server could not be established. " + e.toString());
-      env.setSpecialValue("mysqli.connectError", new StringValueImpl(e.getMessage()));
+      env.setSpecialValue("postgres.connectError", new StringValueImpl(e.getMessage()));
 
       log.log(Level.FINE, e.toString(), e);
       return false;
@@ -126,8 +121,8 @@ public class Mysqli extends JdbcConnectionResource {
   public String toString()
   {
     if (isConnected())
-      return "Mysqli[" + get_host_name() + "]";
+      return "Postgres[" + get_host_name() + "]";
     else
-      return "Mysqli[]";
+      return "Postgres[]";
   }
 }

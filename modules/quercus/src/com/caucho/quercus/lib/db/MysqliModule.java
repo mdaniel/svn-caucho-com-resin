@@ -43,10 +43,6 @@ import com.caucho.quercus.module.Optional;
 import com.caucho.quercus.module.NotNull;
 import com.caucho.quercus.module.Reference;
 
-import com.caucho.quercus.lib.db.Mysqli;
-import com.caucho.quercus.lib.db.MysqliResult;
-import com.caucho.quercus.lib.db.MysqliStatement;
-
 import com.caucho.util.Log;
 import com.caucho.util.L10N;
 
@@ -363,7 +359,7 @@ public class MysqliModule extends AbstractQuercusModule {
    * argument to mysqli_field_seek()
    */
   public static int mysqli_field_tell(Env env,
-				      @NotNull MysqliResult result)
+              @NotNull MysqliResult result)
   {
     if (result == null)
       return -1;
@@ -630,8 +626,8 @@ public class MysqliModule extends AbstractQuercusModule {
    * Sets the options for a connection.
    */
   public static boolean mysqli_options(@NotNull Mysqli mysqli,
-				       int option,
-				       Value value)
+               int option,
+               Value value)
   {
     if (mysqli == null)
       return false;
@@ -664,7 +660,7 @@ public class MysqliModule extends AbstractQuercusModule {
    * Sets the character set for a conneciton.
    */
   public static boolean mysqli_set_charset(@NotNull Mysqli mysqli,
-					   String charset)
+             String charset)
   {
     if (mysqli == null)
       return false;
@@ -676,8 +672,8 @@ public class MysqliModule extends AbstractQuercusModule {
    * Sets the options for a connection.
    */
   public static boolean mysqli_set_opt(@NotNull Mysqli mysqli,
-				       int option,
-				       Value value)
+               int option,
+               Value value)
   {
     return mysqli_options(mysqli, option, value);
   }
@@ -731,7 +727,7 @@ public class MysqliModule extends AbstractQuercusModule {
    * Returns result information for metadata
    */
   public static Value mysqli_stmt_result_metadata(Env env,
-						  @NotNull MysqliStatement stmt)
+              @NotNull MysqliStatement stmt)
   {
     if (stmt == null)
       return BooleanValue.FALSE;
@@ -809,17 +805,23 @@ public class MysqliModule extends AbstractQuercusModule {
    * Executes a query and returns the result.
    *
    */
-  public static Object mysqli_query(@NotNull Mysqli conn,
-                                    String sql,
-                                    @Optional("MYSQLI_STORE_RESULT") int resultMode)
+  public static MysqliResult mysqli_query(@NotNull Mysqli conn,
+                                          String sql,
+                                          @Optional("MYSQLI_STORE_RESULT") int resultMode)
   {
     // ERRATUM: <i>resultMode</i> is ignored, MYSQLI_USE_RESULT would represent
     //  an unbuffered query, but that is not supported.
-    return query(conn, sql);
+    JdbcResultResource resultResource = query(conn, sql);
+
+    if (resultResource != null) {
+      return new MysqliResult(resultResource);
+    }
+
+    return null;
   }
 
-  private static Object query(Mysqli conn,
-                              String sql)
+  private static JdbcResultResource query(Mysqli conn,
+                                          String sql)
   {
     if (conn == null)
       return null; // BooleanValue.FALSE;
@@ -836,19 +838,19 @@ public class MysqliModule extends AbstractQuercusModule {
    * Connects to the database.
    */
   public static boolean mysqli_real_connect(Env env,
-					    @NotNull Mysqli mysqli,
-					    @Optional("localhost") String host,
-					    @Optional String userName,
-					    @Optional String password,
-					    @Optional String dbname,
-					    @Optional("3306") int port,
-					    @Optional String socket,
-					    @Optional int flags)
+              @NotNull Mysqli mysqli,
+              @Optional("localhost") String host,
+              @Optional String userName,
+              @Optional String password,
+              @Optional String dbname,
+              @Optional("3306") int port,
+              @Optional String socket,
+              @Optional int flags)
   {
     if (mysqli != null)
       return mysqli.real_connect(env, host, userName, password,
-				 dbname, port, socket, flags,
-				 null, null);
+         dbname, port, socket, flags,
+         null, null);
     else
       return false;
   }
@@ -1078,7 +1080,7 @@ public class MysqliModule extends AbstractQuercusModule {
    * @return true on success or false on failure
    */
   public static boolean mysqli_stmt_execute(Env env,
-					    @NotNull MysqliStatement stmt)
+              @NotNull MysqliStatement stmt)
   {
     if (stmt == null)
       return false;
@@ -1156,8 +1158,8 @@ public class MysqliModule extends AbstractQuercusModule {
    * Prepares a statement.
    */
   public static MysqliStatement mysqli_prepare(Env env,
-					       @NotNull Mysqli conn,
-					       String query)
+                 @NotNull Mysqli conn,
+                 String query)
   {
     if (conn == null)
       return null;
