@@ -1283,12 +1283,12 @@ abstract public class Marshall {
 
     public Object marshall(Env env, Expr expr, Class expectedClass)
     {
-      return env.lookupPwd(expr.eval(env).toStringValue());
+      return env.lookupPwd(expr.eval(env));
     }
 
     public Object marshall(Env env, Value value, Class expectedClass)
     {
-      return env.lookupPwd(value.toStringValue());
+      return env.lookupPwd(value);
     }
 
     public Value unmarshall(Env env, Object value)
@@ -1301,7 +1301,7 @@ abstract public class Marshall {
     {
       out.print("env.lookupPwd(");
       expr.generate(out);
-      out.print(".toStringValue())");
+      out.print(")");
     }
 
     public void generateResultStart(PhpWriter out)

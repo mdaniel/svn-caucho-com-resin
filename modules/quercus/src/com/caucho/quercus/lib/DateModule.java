@@ -650,7 +650,7 @@ public class DateModule extends AbstractQuercusModule {
     if (isDST != -1)
       env.deprecatedArgument("isDST");
 
-    QDate date = new QDate(false);
+    QDate date = new QDate(true);
 
     long now = Alarm.getCurrentTime();
 
@@ -674,7 +674,7 @@ public class DateModule extends AbstractQuercusModule {
     if (year > 0)
       date.setYear(year);
 
-    return date.getLocalTime() / 1000L;
+    return date.getGMTTime() / 1000L;
   }
 
   /**

@@ -128,6 +128,14 @@ abstract public class Expr {
   }
 
   /**
+   * Returns true if a static true value.
+   */
+  public boolean isTrue()
+  {
+    return false;
+  }
+
+  /**
    * Returns true for an expression that can be read (only $a[] uses this)
    */
   public boolean canRead()
@@ -728,23 +736,17 @@ abstract public class Expr {
     throws IOException
   {
     if (isLong()) {
-      generateGetOut(out);
-
-      out.print(".print(");
+      out.print("env.print(");
       generateLong(out);
       out.print(")");
     }
     else if (isDouble()) {
-      generateGetOut(out);
-
-      out.print(".print(");
+      out.print("env.print(");
       generateDouble(out);
       out.print(")");
     }
     else if (isString()) {
-      generateGetOut(out);
-
-      out.print(".print(");
+      out.print("env.print(");
       generateString(out);
       out.print(")");
     }

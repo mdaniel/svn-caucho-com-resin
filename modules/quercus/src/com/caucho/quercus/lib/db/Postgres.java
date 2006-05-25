@@ -97,8 +97,6 @@ public class Postgres extends JdbcConnectionResource {
 
       setConnection(host, port, dbname, jConn, true);
 
-      env.addResource(this);
-
       return true;
 
     } catch (SQLException e) {

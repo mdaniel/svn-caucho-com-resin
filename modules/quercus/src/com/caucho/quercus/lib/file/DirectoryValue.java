@@ -81,7 +81,7 @@ public class DirectoryValue extends ResourceValue {
   /**
    * Calls the given method.
    */
-  public Value evalMethod(Env env, String method)
+  public Value callMethod(Env env, String method)
   {
     if ("read".equals(method))
       return readdir();

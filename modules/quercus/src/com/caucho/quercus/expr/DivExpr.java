@@ -128,7 +128,7 @@ public class DivExpr extends BinaryExpr {
   public void generatePrint(PhpWriter out)
     throws IOException
   {
-    out.print("env.getOut().print(");
+    out.print("env.print(");
     _left.generateDouble(out);
     out.print(" / ");
     _right.generateDouble(out);

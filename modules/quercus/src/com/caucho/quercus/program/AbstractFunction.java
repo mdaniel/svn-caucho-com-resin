@@ -172,7 +172,15 @@ abstract public class AbstractFunction {
    * @param args the user's arguments
    * @return the user arguments augmented by any defaults
    */
-  abstract public Expr []bindArguments(Env env, Expr fun, Expr []args);
+  public Value []evalArguments(Env env, Expr fun, Expr []args)
+  {
+    Value[]values = new Value[args.length];
+
+    for (int i = 0; i < args.length; i++)
+      values[i] = args[i].eval(env);
+
+    return values;
+  }
 
   /**
    * Evaluates the function.

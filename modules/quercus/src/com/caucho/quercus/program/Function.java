@@ -164,49 +164,30 @@ public class Function extends AbstractFunction {
   }
 
   /**
-   * Binds the user's arguments to the actual arguments.
-   *
-   * @param args the user's arguments
-   * @return the user arguments augmented by any defaults
+   * Evaluates a function's argument, handling ref vs non-ref
    */
-  public Expr []bindArguments(Env env, Expr fun, Expr []args)
+  @Override
+  public Value []evalArguments(Env env, Expr fun, Expr []args)
   {
-    Expr []expandedArgs;
+    Value []values = new Value[args.length];
 
-    if (_args.length == args.length)
-      expandedArgs = args;
+    for (int i = 0; i < args.length; i++) {
+      Arg arg = null;
 
-    else if (_args.length < args.length)
-      expandedArgs = args;
+      if (i < _args.length)
+        arg = _args[i];
 
-    else {
-      if (_args[args.length].getDefault() == null) {
-        int required;
-
-        for (required = _args.length - 1; required >= 0; required--) {
-          if (_args[required].getDefault() == null)
-            break;
-        }
-
-        env.warning(L.l("function '{0}' has {1} required arguments, but {2} were provided",
-                        _name, required + 1, args.length));
-      }
-
-      expandedArgs = new Expr[_args.length];
-
-      System.arraycopy(args, 0, expandedArgs, 0, args.length);
-
-      for (int i = args.length; i < expandedArgs.length; i++) {
-        Expr defaultExpr = _args[i].getDefault();
-
-        if (defaultExpr != null)
-          expandedArgs[i] = defaultExpr;
-        else
-          expandedArgs[i] = NullLiteralExpr.NULL;
+      if (arg == null)
+        values[i] = args[i].eval(env).copy();
+      else if (arg.isReference())
+        values[i] = args[i].evalRef(env);
+      else {
+        // php/0d04
+        values[i] = args[i].eval(env);
       }
     }
 
-    return expandedArgs;
+    return values;
   }
 
   public Value call(Env env, Expr []args)

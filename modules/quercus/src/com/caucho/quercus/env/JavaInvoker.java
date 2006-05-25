@@ -205,6 +205,9 @@ abstract public class JavaInvoker
    */
   public boolean getHasEnv()
   {
+    if (! _isInit)
+      init();
+    
     return _hasEnv;
   }
 
@@ -213,6 +216,9 @@ abstract public class JavaInvoker
    */
   public boolean getHasRestArgs()
   {
+    if (! _isInit)
+      init();
+    
     return _hasRestArgs;
   }
 
@@ -221,6 +227,9 @@ abstract public class JavaInvoker
    */
   public boolean isRestReference()
   {
+    if (! _isInit)
+      init();
+    
     return _isRestReference;
   }
 
@@ -229,6 +238,9 @@ abstract public class JavaInvoker
    */
   public Marshall getUnmarshallReturn()
   {
+    if (! _isInit)
+      init();
+    
     return _unmarshallReturn;
   }
 
@@ -238,6 +250,9 @@ abstract public class JavaInvoker
   @Override
   public boolean isCallUsesVariableArgs()
   {
+    if (! _isInit)
+      init();
+    
     return _isCallUsesVariableArgs;
   }
 
@@ -247,6 +262,9 @@ abstract public class JavaInvoker
   @Override
   public boolean isCallUsesSymbolTable()
   {
+    if (! _isInit)
+      init();
+    
     return _isCallUsesSymbolTable;
   }
 
@@ -255,6 +273,9 @@ abstract public class JavaInvoker
    */
   public boolean isBoolean()
   {
+    if (! _isInit)
+      init();
+    
     return _unmarshallReturn.isBoolean();
   }
 
@@ -263,6 +284,9 @@ abstract public class JavaInvoker
    */
   public boolean isString()
   {
+    if (! _isInit)
+      init();
+    
     return _unmarshallReturn.isString();
   }
 
@@ -271,6 +295,9 @@ abstract public class JavaInvoker
    */
   public boolean isLong()
   {
+    if (! _isInit)
+      init();
+    
     return _unmarshallReturn.isLong();
   }
 
@@ -279,6 +306,9 @@ abstract public class JavaInvoker
    */
   public boolean isDouble()
   {
+    if (! _isInit)
+      init();
+    
     return _unmarshallReturn.isDouble();
   }
 
@@ -287,6 +317,9 @@ abstract public class JavaInvoker
    */
   protected Marshall []getMarshallArgs()
   {
+    if (! _isInit)
+      init();
+    
     return _marshallArgs;
   }
 
@@ -295,6 +328,9 @@ abstract public class JavaInvoker
    */
   protected Annotation [][]getParamAnn()
   {
+    if (! _isInit)
+      init();
+    
     return _paramAnn;
   }
 
@@ -303,71 +339,40 @@ abstract public class JavaInvoker
    */
   protected Expr []getDefaultExprs()
   {
+    if (! _isInit)
+      init();
+    
     return _defaultExprs;
   }
 
   /**
-   * Binds the user's arguments to the actual arguments.
-   *
-   * @param args the user's arguments
-   * @return the user arguments augmented by any defaults
+   * Evaluates a function's argument, handling ref vs non-ref
    */
-  public Expr []bindArguments(Env env, Expr fun, Expr []args)
+  @Override
+  public Value []evalArguments(Env env, Expr fun, Expr []args)
   {
-    init();
+    if (! _isInit)
+      init();
     
-    if (_defaultExprs.length == args.length)
-      return args;
+    Value []values = new Value[args.length];
 
-    int length = _defaultExprs.length;
+    for (int i = 0; i < args.length; i++) {
+      Marshall arg = null;
 
-    if (_defaultExprs.length < args.length) {
-      if (_hasRestArgs)
-        length = args.length;
+      if (i < _marshallArgs.length)
+        arg = _marshallArgs[i];
+
+      if (arg == null)
+        values[i] = args[i].eval(env).copy();
+      else if (arg.isReference())
+        values[i] = args[i].evalRef(env);
       else {
-        env.warning(L.l(
-          "function '{0}' has {1} required arguments, but only {2} were provided",
-          _name,
-          _defaultExprs.length,
-          args.length));
-
-        return null;
-      }
-    } else if (_defaultExprs[args.length] == null) {
-      int required;
-
-      for (required = args.length;
-           required < _defaultExprs.length;
-           required++) {
-        if (_defaultExprs[required] != null)
-          break;
-      }
-
-      env.warning(L.l(
-        "function '{0}' has {1} required arguments, but only {2} were provided",
-        _name,
-        required,
-        args.length));
-
-      return null;
-    }
-
-    Expr []expandedArgs = new Expr[length];
-
-    System.arraycopy(args, 0, expandedArgs, 0, args.length);
-
-    if (args.length < expandedArgs.length) {
-      for (int i = args.length; i < expandedArgs.length; i++) {
-        Expr defaultExpr = _defaultExprs[i];
-
-        if (defaultExpr == null)
-          defaultExpr = NullLiteralExpr.NULL;
-
-        expandedArgs[i] = defaultExpr;
+        // php/0d04
+        values[i] = args[i].eval(env);
       }
     }
 
-    return expandedArgs;
+    return values;
   }
 
   public Value call(Env env, Value []value)

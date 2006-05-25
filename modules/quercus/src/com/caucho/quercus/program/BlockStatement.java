@@ -141,7 +141,6 @@ public class BlockStatement extends Statement {
    */
   public int fallThrough()
   {
-
     for (int i = 0; i < _statements.length; i++) {
       int fallThrough = _statements[i].fallThrough();
 

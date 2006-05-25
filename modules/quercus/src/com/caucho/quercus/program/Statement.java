@@ -53,7 +53,7 @@ abstract public class Statement {
 
   public static final int FALL_THROUGH = 0;
   public static final int BREAK_FALL_THROUGH = 0x1;
-  public static final int RETURN = 0x3;
+  public static final int RETURN = 0x2;
 
   private final Location _location;
 

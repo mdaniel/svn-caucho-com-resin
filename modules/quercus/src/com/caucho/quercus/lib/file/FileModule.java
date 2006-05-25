@@ -316,7 +316,7 @@ public class FileModule extends AbstractQuercusModule {
 
       DirectoryValue dir = new DirectoryValue(path);
 
-      env.addResource(dir);
+      env.addClose(dir);
 
       return dir;
     } catch (IOException e) {

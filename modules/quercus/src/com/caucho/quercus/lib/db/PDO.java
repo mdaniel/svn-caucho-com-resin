@@ -47,7 +47,7 @@ import com.caucho.quercus.UnimplementedException;
 /**
  * PDO object oriented API facade.
  */
-public class PDO {
+public class PDO implements java.io.Closeable {
   private static final Logger log = Logger.getLogger(PDO.class.getName());
   private static final L10N L = new L10N(PDO.class);
 
@@ -145,12 +145,7 @@ public class PDO {
     _error = new PDOError(_env);
 
     // XXX: following would be better as annotation on destroy() method
-    _env.addResource(new ResourceValue() {
-      public void close()
-      {
-        destroy();
-      }
-    });
+    _env.addClose(this);
 
     try {
       String host = "localhost";
@@ -236,7 +231,7 @@ public class PDO {
     return result;
   }
 
-  private void destroy()
+  public void close()
   {
     Connection conn = _conn;
 
@@ -249,8 +244,7 @@ public class PDO {
         conn.close();
       }
       catch (SQLException e) {
-        if (log.isLoggable(Level.WARNING))
-          log.log(Level.WARNING, e.toString(), e);
+	log.log(Level.WARNING, e.toString(), e);
       }
     }
   }

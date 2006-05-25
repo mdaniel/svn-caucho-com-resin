@@ -61,6 +61,11 @@ public class HttpModule extends AbstractQuercusModule {
     try {
       HttpServletResponse res = env.getResponse();
 
+      if (res == null) {
+	env.error(L.l("header requires a http context"));
+	return NullValue.NULL;
+      }
+
       int len = header.length();
 
       if (header.startsWith("HTTP/")) {

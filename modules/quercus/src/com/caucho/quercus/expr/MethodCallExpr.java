@@ -87,13 +87,18 @@ public class MethodCallExpr extends Expr {
     env.checkTimeout();
 
     Value obj = _objExpr.eval(env);
+
+    Value []args = new Value[_args.length];
+
+    for (int i = 0; i < args.length; i++)
+      args[i] = _args[i].eval(env);
     
     env.pushCall(this, obj);
     
     try {
       env.checkTimeout();
 
-      return obj.callMethod(env, _name, _args);
+      return obj.callMethod(env, _name, args);
     } finally {
       env.popCall();
     }

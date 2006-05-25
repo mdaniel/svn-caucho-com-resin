@@ -413,6 +413,19 @@ public class Quercus {
    * @return the parsed program
    * @throws IOException
    */
+  public QuercusPage parse(Path path, String fileName, int line)
+    throws IOException
+  {
+    return _pageManager.parse(path, fileName, line);
+  }
+
+  /**
+   * Parses a quercus program.
+   *
+   * @param path the source file path
+   * @return the parsed program
+   * @throws IOException
+   */
   public QuercusPage parse(ReadStream is)
     throws IOException
   {

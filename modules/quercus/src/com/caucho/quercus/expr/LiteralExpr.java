@@ -33,6 +33,8 @@ import java.io.IOException;
 
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
+import com.caucho.quercus.env.BooleanValue;
+import com.caucho.quercus.env.LongValue;
 
 import com.caucho.quercus.program.AnalyzeInfo;
 
@@ -62,6 +64,19 @@ public class LiteralExpr extends Expr {
   public boolean isLiteral()
   {
     return true;
+  }
+
+  /**
+   * Returns true if a static true value.
+   */
+  public boolean isTrue()
+  {
+    if (_value == BooleanValue.TRUE)
+      return true;
+    else if (_value instanceof LongValue)
+      return _value.toLong() != 0;
+    else
+      return false;
   }
 
   /**

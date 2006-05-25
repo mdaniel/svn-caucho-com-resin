@@ -124,7 +124,10 @@ public class WhileStatement extends Statement {
     throws IOException
   {
     out.print("while (");
-    _test.generateBoolean(out);
+    if (_test.isTrue())
+      out.print("BooleanValue.TRUE.toBoolean()");
+    else
+      _test.generateBoolean(out);
     out.println(") {");
     out.pushDepth();
     out.println("env.checkTimeout();");

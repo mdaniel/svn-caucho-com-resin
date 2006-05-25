@@ -177,6 +177,21 @@ public class PageManager {
   public QuercusPage parse(Path path)
     throws IOException
   {
+    return parse(path, null, -1);
+  }
+  
+  /**
+   * Returns a parsed or compiled quercus program.
+   *
+   * @param path the source file path
+   *
+   * @return the parsed program
+   *
+   * @throws IOException
+   */
+  public QuercusPage parse(Path path, String fileName, int line)
+    throws IOException
+  {
     try {
       QuercusProgram program;
 
@@ -185,7 +200,9 @@ public class PageManager {
       if (program == null || program.isModified()) {
 	program = QuercusParser.parse(_quercus,
 				      path,
-				      _quercus.getScriptEncoding());
+				      _quercus.getScriptEncoding(),
+				      fileName,
+				      line);
 	_programCache.put(path, program);
       }
 

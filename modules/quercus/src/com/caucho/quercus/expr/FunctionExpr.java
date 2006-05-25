@@ -166,11 +166,8 @@ public class FunctionExpr extends Expr {
 
       return NullValue.NULL;
     }
-      
-    Value []args = new Value[_args.length];
 
-    for (int i = 0; i < args.length; i++)
-      args[i] = _args[i].eval(env);
+    Value []args = fun.evalArguments(env, this, _args);
 
     env.pushCall(this, NullValue.NULL);
     try {
@@ -198,7 +195,7 @@ public class FunctionExpr extends Expr {
   {
     Quercus quercus = info.getFunction().getPhp();
     AbstractFunction fun = quercus.findFunction(_name);
-    
+
     if (fun != null && fun.isCallUsesVariableArgs())
       info.getFunction().setVariableArgs(true);
     

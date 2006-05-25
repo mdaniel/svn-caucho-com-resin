@@ -1200,7 +1200,6 @@ public class MiscModule extends AbstractQuercusModule {
     public void unpack(Env env, ArrayValue result, InputStream is)
       throws IOException
     {
-      System.out.println("LE:N" + _length);
       for (int i = 0; i < _length; i++)
 	is.read();
     }

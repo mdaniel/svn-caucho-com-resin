@@ -133,7 +133,7 @@ public class ModExpr extends BinaryExpr {
   public void generatePrint(PhpWriter out)
     throws IOException
   {
-    out.print("env.getOut().print((long) (");
+    out.print("env.print((long) (");
     _left.generateDouble(out);
     out.print(" % ");
     _right.generateDouble(out);

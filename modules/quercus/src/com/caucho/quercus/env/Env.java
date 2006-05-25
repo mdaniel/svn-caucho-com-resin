@@ -29,10 +29,7 @@
 
 package com.caucho.quercus.env;
 
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.sql.DataSource;
+import java.io.Closeable;
 import java.io.IOException;
 import java.lang.ref.SoftReference;
 import java.sql.Connection;
@@ -44,6 +41,11 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.sql.DataSource;
 
 import javax.script.ScriptContext;
 
@@ -157,8 +159,8 @@ public final class Env {
 
   private Value _this = NullThisValue.NULL;
 
-  private ArrayList<SoftReference<ResourceValue>> _resourceList
-    = new ArrayList<SoftReference<ResourceValue>>();
+  private ArrayList<SoftReference<Closeable>> _closeList
+    = new ArrayList<SoftReference<Closeable>>();
   
   private ArrayList<Shutdown> _shutdownList
     = new ArrayList<Shutdown>();
@@ -323,11 +325,11 @@ public final class Env {
   }
 
   /**
-   * add resource to _resourceList
+   * add resource to _closeList
    */
-  public void addResource(ResourceValue resource)
+  public void addClose(Closeable closeable)
   {
-    _resourceList.add(new SoftReference<ResourceValue>(resource));
+    _closeList.add(new SoftReference<Closeable>(closeable));
   }
 
   /**
@@ -335,15 +337,15 @@ public final class Env {
    *
    * @param resource
    */
-  public void removeResource(ResourceValue resource)
+  public void removeClose(Closeable closeable)
   {
-    for (int i = _resourceList.size() - 1; i >= 0; i--) {
-      SoftReference<ResourceValue> ref = _resourceList.get(i);
+    for (int i = _closeList.size() - 1; i >= 0; i--) {
+      SoftReference<Closeable> ref = _closeList.get(i);
 
-      ResourceValue res = ref.get();
+      Closeable res = ref.get();
 
-      if (resource.equals(res)) {
-        _resourceList.remove(i);
+      if (closeable.equals(res)) {
+        _closeList.remove(i);
         break;
       }
     }
@@ -2295,6 +2297,8 @@ public final class Env {
   {
     JavaClassDef def = _quercus.getJavaClassDefinition(className);
 
+    def.init();
+
     return def;
   }
 
@@ -2730,8 +2734,13 @@ public final class Env {
   /**
    * Looks up based on the pwd.
    */
-  public Path lookupPwd(StringValue relPath)
+  public Path lookupPwd(Value relPathV)
   {
+    if (! relPathV.isset())
+      return null;
+
+    StringValue relPath = relPathV.toStringValue();
+    
     Path path = _lookupCache.get(relPath);
 
     if (path == null) {
@@ -3589,12 +3598,12 @@ public final class Env {
 
     sessionWriteClose();
 
-    for (SoftReference<ResourceValue> ref : _resourceList) {
+    for (SoftReference<Closeable> ref : _closeList) {
       try {
-        ResourceValue resource = ref.get();
+        Closeable close = ref.get();
 
-        if (resource != null)
-          resource.close();
+        if (close != null)
+          close.close();
       }
       catch (Throwable e) {
         log.log(Level.FINER, e.toString(), e);

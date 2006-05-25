@@ -186,14 +186,14 @@ public class MulExpr extends BinaryExpr {
     throws IOException
   {
     if (_left.isDouble() || _right.isDouble()) {
-      out.print("env.getOut().print(");
+      out.print("env.print(");
       _left.generateDouble(out);
       out.print(" * ");
       _right.generateDouble(out);
       out.print(")");
     }
     else if (_left.isLong() && _right.isLong()) {
-      out.print("env.getOut().print(");
+      out.print("env.print(");
       _left.generateLong(out);
       out.print(" * ");
       _right.generateLong(out);

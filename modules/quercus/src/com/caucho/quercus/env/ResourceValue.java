@@ -29,15 +29,17 @@
 
 package com.caucho.quercus.env;
 
-import com.caucho.vfs.WriteStream;
+import java.io.Closeable;
 import java.io.IOException;
 
 import java.util.IdentityHashMap;
 
+import com.caucho.vfs.WriteStream;
+
 /**
  * Represents a PHP resource
  */
-public class ResourceValue extends Value {
+public class ResourceValue extends Value implements Closeable {
   public void close()
   {
   }

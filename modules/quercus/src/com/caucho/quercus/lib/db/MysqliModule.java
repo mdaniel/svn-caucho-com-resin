@@ -41,6 +41,7 @@ import com.caucho.quercus.env.*;
 import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.quercus.module.Optional;
 import com.caucho.quercus.module.NotNull;
+import com.caucho.quercus.module.ReturnNullAsFalse;
 import com.caucho.quercus.module.Reference;
 
 import com.caucho.util.Log;
@@ -513,10 +514,11 @@ public class MysqliModule extends AbstractQuercusModule {
   /**
    * Returns an associative array from the result.
    */
-  public static Value mysqli_fetch_assoc(@NotNull MysqliResult result)
+  @ReturnNullAsFalse
+  public static ArrayValue mysqli_fetch_assoc(@NotNull MysqliResult result)
   {
     if (result == null)
-      return BooleanValue.FALSE;
+      return null;
 
     return result.fetch_assoc();
   }

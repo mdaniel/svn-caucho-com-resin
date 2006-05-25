@@ -35,18 +35,23 @@ import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import java.io.Closeable;
+
 import java.sql.*;
 
 import com.caucho.quercus.env.*;
 import com.caucho.sql.UserConnection;
 import com.caucho.util.LruCache;
+import com.caucho.util.L10N;
 
 import com.caucho.quercus.module.Optional;
+import com.caucho.quercus.module.ReturnNullAsFalse;
 
 /**
  * Represents a JDBC Connection value.
  */
-public abstract class JdbcConnectionResource extends ResourceValue {
+public abstract class JdbcConnectionResource implements Closeable {
+  private static final L10N L = new L10N(JdbcConnectionResource.class);
   private static final Logger log
     = Logger.getLogger(JdbcConnectionResource.class.getName());
 
@@ -136,6 +141,8 @@ public abstract class JdbcConnectionResource extends ResourceValue {
 
     if (conn != null) {
       _connected = true;
+
+      _env.addClose(this);
     }
 
     _pgconn = pgconn;
@@ -443,7 +450,7 @@ public abstract class JdbcConnectionResource extends ResourceValue {
   /**
    * Escapes the string
    */
-  public Value escape_string(String str)
+  public Value escape_string(StringValue str)
   {
     return real_escape_string(str);
   }
@@ -651,10 +658,9 @@ public abstract class JdbcConnectionResource extends ResourceValue {
    * @return a {@link JdbcResultResource}, or null for failure
    */
   public JdbcResultResource query(String sql,
-                                  @Optional("MYSQLI_STORE_RESULT") int resultMode)
+				  @Optional("MYSQLI_STORE_RESULT") int resultMode)
   {
     try {
-
       Value value = real_query(sql);
 
       if (value instanceof JdbcResultResource)
@@ -667,15 +673,17 @@ public abstract class JdbcConnectionResource extends ResourceValue {
     return null;
   }
 
+  /*
   public JdbcResultResource query(String sql)
   {
     return query(sql, MysqliModule.MYSQLI_STORE_RESULT);
   }
+  */
 
   /**
    * Escapes the string
    */
-  public Value real_escape_string(String str)
+  public Value real_escape_string(StringValue str)
   {
     StringBuilderValue buf = new StringBuilderValue(str.length());
 
@@ -895,7 +903,7 @@ public abstract class JdbcConnectionResource extends ResourceValue {
     if (_connected) {
 
       _connected = false;
-      env.removeResource(this);
+      env.removeClose(this);
       this.close();
       return true;
 

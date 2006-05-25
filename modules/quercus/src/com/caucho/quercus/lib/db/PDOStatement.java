@@ -62,7 +62,7 @@ import com.caucho.vfs.ReadStream;
  * PDO object oriented API facade.
  */
 public class PDOStatement
-  implements Iterable<Value>
+  implements Iterable<Value>, java.io.Closeable
 {
   private static final Logger log = Logger.getLogger(PDOStatement.class.getName());
   private static final L10N L = new L10N(PDOStatement.class);
@@ -102,13 +102,7 @@ public class PDOStatement
 
     _query = query;
 
-    // XXX: following would be better as annotation on destroy() method
-    env.addResource(new ResourceValue() {
-      public void close()
-      {
-        destroy();
-      }
-    });
+    env.addClose(this);
 
     if (options != null && options.getSize() > 0) {
       _env.notice(L.l("PDOStatement options unsupported"));
@@ -350,7 +344,7 @@ public class PDOStatement
     return new BindParam(parameter, value, dataType, length, driverOptions);
   }
 
-  private void destroy()
+  public void close()
   {
     ResultSet resultSet = _resultSet;
     Statement statement = _statement;

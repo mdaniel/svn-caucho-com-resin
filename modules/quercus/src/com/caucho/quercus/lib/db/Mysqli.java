@@ -102,8 +102,6 @@ public class Mysqli extends JdbcConnectionResource {
 
       setConnection(host, port, dbname, jConn, false);
 
-      env.addResource(this);
-
       return true;
 
     } catch (SQLException e) {

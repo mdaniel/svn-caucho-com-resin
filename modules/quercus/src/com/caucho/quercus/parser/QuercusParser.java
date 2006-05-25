@@ -219,7 +219,7 @@ public class QuercusParser {
     _quercus = quercus;
   }
 
-  QuercusParser(Quercus quercus, Path sourceFile, Reader is)
+  public QuercusParser(Quercus quercus, Path sourceFile, Reader is)
   {
     _quercus = quercus;
 
@@ -247,6 +247,12 @@ public class QuercusParser {
     _peek = -1;
     _peekToken = -1;
   }
+
+  public void setLocation(String fileName, int line)
+  {
+    _parserLocation.setFileName(fileName);
+    _parserLocation.setLineNumber(line);
+  }
   
   public static QuercusProgram parse(Quercus quercus,
 				     Path path,
@@ -260,6 +266,30 @@ public class QuercusParser {
       
       QuercusParser parser;
       parser = new QuercusParser(quercus, path, is.getReader());
+
+      return parser.parse();
+    } finally {
+      is.close();
+    }
+  }
+  
+  public static QuercusProgram parse(Quercus quercus,
+				     Path path,
+				     String encoding,
+				     String fileName,
+				     int line)
+    throws IOException
+  {
+    ReadStream is = path.openRead();
+
+    try {
+      is.setEncoding(encoding);
+      
+      QuercusParser parser;
+      parser = new QuercusParser(quercus, path, is.getReader());
+
+      if (fileName != null && line >= 0)
+	parser.setLocation(fileName, line);
 
       return parser.parse();
     } finally {
@@ -357,7 +387,7 @@ public class QuercusParser {
     return _parserLocation.getLineNumber();
   }
 
-  QuercusProgram parse()
+  public QuercusProgram parse()
     throws IOException
   {
     _function = new FunctionInfo(_quercus, "main");
@@ -511,7 +541,7 @@ public class QuercusParser {
 	{
           Location functionLocation = getLocation();
 
-          Function fun = parseFunctionDefinition(0);
+          Function fun = parseFunctionDefinition(M_STATIC);
 
 	  if (! _isTop) {
 	    statements.add(new FunctionDefStatement(functionLocation, fun));

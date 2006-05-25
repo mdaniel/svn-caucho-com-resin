@@ -48,7 +48,7 @@ public class StreamReadWrite extends StreamResource {
 
   public StreamReadWrite(Env env, ReadStream is, WriteStream os)
   {
-    env.addResource(this);
+    env.addClose(this);
     
     _is = is;
     _os = os;
