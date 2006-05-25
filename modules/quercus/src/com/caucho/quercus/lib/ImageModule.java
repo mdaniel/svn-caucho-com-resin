@@ -91,6 +91,18 @@ public class ImageModule extends AbstractQuercusModule {
   public static final int IMG_ARC_NOFILL = 2;
   public static final int IMG_ARC_EDGED = 4;
 
+  public static final int IMG_FILTER_NEGATE = 0;
+  public static final int IMG_FILTER_GRAYSCALE = 1;
+  public static final int IMG_FILTER_BRIGHTNESS = 2;
+  public static final int IMG_FILTER_CONTRAST = 3;
+  public static final int IMG_FILTER_COLORIZE = 4;
+  public static final int IMG_FILTER_EDGEDETECT = 5;
+  public static final int IMG_FILTER_EMBOSS = 6;
+  public static final int IMG_FILTER_GAUSSIAN_BLUR = 7;
+  public static final int IMG_FILTER_SELECTIVE_BLUR = 8;
+  public static final int IMG_FILTER_MEAN_REMOVAL = 9;
+  public static final int IMG_FILTER_SMOOTH = 10;
+
   /**
    * Returns the environment value.
    */
@@ -1139,29 +1151,98 @@ public class ImageModule extends AbstractQuercusModule {
   public static boolean imageconvolution(QuercusImage image, ArrayValue matrix,
 					 double div, double offset)
   {
+    // XXX: implement div and offset
     float[] kernelValues = new float[9];
     ArrayValue.Entry entry = matrix.getHead();
-    for(int i=0; i<9; i++)
-      {
-	kernelValues[i] = (float)entry.getValue().toDouble();
-	entry = entry.getNext();
-      }
-    ConvolveOp convolveOp = new ConvolveOp(new Kernel(3, 3, kernelValues));
+    for(int y=0; y<3; y++)
+      for(int x=0; x<3; x++)
+	{
+	  kernelValues[x+y*3] =
+	    (float)matrix
+	    .get(LongValue.create(y))
+	    .get(LongValue.create(x)).toDouble();
+	}
+    ConvolveOp convolveOp =
+      new ConvolveOp(new Kernel(3, 3, kernelValues),
+		     ConvolveOp.EDGE_NO_OP, null);
     BufferedImage bufferedImage =
       convolveOp.filter(image._bufferedImage, null);
-    image._bufferedImage.getGraphics().drawImage(bufferedImage, 0, 0, null);
+    image._bufferedImage.getGraphics().drawImage(bufferedImage, 1, 0, null);
     return true;
   }
 
   /**
    * Applies a filter to an image
    */
-  public static boolean imagefilter(QuercusImage image, int filterType,
+  public static boolean imagefilter(Env env, QuercusImage image, int filterType,
 				    @Optional int arg1, @Optional int arg2,
 				    @Optional int arg3)
   {
-    // this isn't implemented in most PHP installations
-    throw new QuercusException("imagefilter() not implemented");
+    switch(filterType)
+      {
+	case IMG_FILTER_NEGATE:
+	  // Reverses all colors of the image.
+	  env.warning(L.l("imagefilter(IMG_FILTER_NEGATE) unimplemented"));
+	  return false;
+
+	case IMG_FILTER_GRAYSCALE:
+	  // Converts the image into grayscale.
+	  env.warning(L.l("imagefilter(IMG_FILTER_GRAYSCALE) unimplemented"));
+	  return false;
+
+	case IMG_FILTER_BRIGHTNESS:
+	  // Changes brightness of the image. Arg1 sets level of brightness.
+	  env.warning(L.l("imagefilter(IMG_FILTER_BRIGHTNESS) unimplementetd"));
+	  return false;
+
+	case IMG_FILTER_CONTRAST:
+	  // Changes contrast of the image. Use arg1 to set level of contrast.
+	  env.warning(L.l("imagefilter(IMG_FILTER_CONTRAST) unimplementetd"));
+	  return false;
+
+	case IMG_FILTER_COLORIZE:
+	  // Like IMG_FILTER_GRAYSCALE, except you can specify the color. Use
+	  // arg1, arg2 and arg3 in the form of red, blue, green. The range
+	  // for each color is 0 to 255.
+	  env.warning(L.l("imagefilter(IMG_FILTER_COLORIZE) unimplemented"));
+	  return false;
+
+	case IMG_FILTER_EDGEDETECT:
+	  // Uses edge detection to highlight the edges in the image.
+	  env.warning(L.l("imagefilter(IMG_FILTER_EDGEDETECT) unimplemented"));
+	  return false;
+
+	case IMG_FILTER_EMBOSS:
+	  // Embosses the image.
+	  env.warning(L.l("imagefilter(IMG_FILTER_EMBOSS) unimplemented"));
+	  return false;
+
+	case IMG_FILTER_GAUSSIAN_BLUR:
+	  // Blurs the image using the Gaussian method.
+	  env.warning(L.l("imagefilter(IMG_FILTER_GAUSSIAN_BLUR) "+
+			  "unimplemented"));
+	  return false;
+
+	case IMG_FILTER_SELECTIVE_BLUR:
+	  // Blurs the image.
+	  env.warning(L.l("imagefilter(IMG_FILTER_SELECTIVE_BLUR) "+
+			  "unimplemented"));
+	  return false;
+
+	case IMG_FILTER_MEAN_REMOVAL:
+	  // Uses mean removal to achieve a "sketchy" effect.
+	  env.warning(L.l("imagefilter(IMG_FILTER_MEAN_REMOVAL) "+
+			  "unimplemented"));
+	  return false;
+
+	case IMG_FILTER_SMOOTH:
+	  // Makes the image smoother. Use arg1 to set the level of smoothness.
+	  env.warning(L.l("imagefilter(IMG_FILTER_SMOOTH) unimplemented"));
+	  return false;
+
+	default:
+	  throw new QuercusException("unknown filterType in imagefilter()");
+      }
   }
 
 
