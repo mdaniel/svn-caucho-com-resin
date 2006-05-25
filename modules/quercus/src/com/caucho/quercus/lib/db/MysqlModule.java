@@ -219,7 +219,7 @@ public class MysqlModule extends AbstractQuercusModule {
     return conn.error();
   }
 
-  public Value mysql_escape_string(Env env, String unescapedString)
+  public Value mysql_escape_string(Env env, StringValue unescapedString)
   {
     return mysql_real_escape_string(env, unescapedString, null);
   }
@@ -233,7 +233,7 @@ public class MysqlModule extends AbstractQuercusModule {
    */
 
   public Value mysql_real_escape_string(Env env,
-                                        String unescapedString,
+                                        StringValue unescapedString,
                                         @Optional Mysqli conn)
   {
     if (conn == null)
@@ -451,7 +451,7 @@ public class MysqlModule extends AbstractQuercusModule {
 
     Mysqli conn = getConnection(env);
 
-    Object metaResult = conn.validateConnection().query(sql);
+    Object metaResult = conn.validateConnection().query(sql, 1);
 
     if (metaResult instanceof MysqliResult) // JdbcResultResource)
       return (((MysqliResult) metaResult).validateResult()).getFieldFlags();

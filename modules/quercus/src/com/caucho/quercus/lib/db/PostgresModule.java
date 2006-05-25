@@ -499,7 +499,7 @@ public class PostgresModule extends AbstractQuercusModule {
    * Escape a string for insertion into a text field
    */
   public Value pg_escape_string(Env env,
-                                String data)
+                                StringValue data)
   {
     try {
       Postgres conn = getConnection(env);
@@ -1761,12 +1761,15 @@ public class PostgresModule extends AbstractQuercusModule {
       if (conn == null)
         conn = getConnection(env);
 
-      JdbcResultResource resultResource = conn.query(query);
+      Value queryV = conn.query(query, 1);
 
-      if (resultResource != null) {
-        return new MysqliResult(resultResource);
+      if (queryV instanceof JdbcResultResource) {
+	JdbcResultResource resultResource = (JdbcResultResource) queryV;
+
+	if (resultResource != null) {
+	  return new MysqliResult(resultResource);
+	}
       }
-
     } catch (Exception ex) {
       log.log(Level.FINE, ex.toString(), ex);
     }
@@ -1838,7 +1841,7 @@ public class PostgresModule extends AbstractQuercusModule {
       int size = arrayImpl.size();
 
       for (int i=0; i<size; i++) {
-        String p = arrayImpl.get(LongValue.create(i)).toString();
+        StringValue p = arrayImpl.get(LongValue.create(i)).toStringValue();
         String pi = conn.real_escape_string(p).toString();
         pi = pi.replaceAll("\\\\", "\\\\\\\\");
         where += "\\'"+pi+"\\' AND";
@@ -1926,7 +1929,7 @@ public class PostgresModule extends AbstractQuercusModule {
       int sz = arrayImpl.size();
 
       for (int i=0; i<sz; i++) {
-        String p = arrayImpl.get(LongValue.create(i)).toString();
+        StringValue p = arrayImpl.get(LongValue.create(i)).toStringValue();
         String pi = conn.real_escape_string(p).toString();
         pi = pi.replaceAll("\\\\", "\\\\\\\\");
         query = query.replaceAll("\\$"+(i+1), "\\'"+pi+"\\'");
