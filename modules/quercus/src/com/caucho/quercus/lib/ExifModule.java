@@ -29,14 +29,20 @@
 
 package com.caucho.quercus.lib;
 
+import com.caucho.quercus.QuercusException;
 import com.caucho.util.L10N;
 
 import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.quercus.module.Optional;
+import com.caucho.quercus.module.Reference;
 
 import com.caucho.quercus.env.*;
 
 import com.caucho.vfs.Path;
+import javax.imageio.*;
+import java.util.*;
+import java.io.*;
+
 
 /**
  * PHP exif
@@ -45,7 +51,7 @@ public class ExifModule extends AbstractQuercusModule {
   private static final L10N L = new L10N(ExifModule.class);
 
   /**
-   * Returns the environment value.
+   *  Reads the EXIF headers from JPEG or TIFF
    */
   public static Value exif_read_data(Env env, Path file,
 				     @Optional String sections,
@@ -54,5 +60,101 @@ public class ExifModule extends AbstractQuercusModule {
   {
     return BooleanValue.FALSE;
   }
+
+  /**
+   *  Alias of exif_read_data()
+   */
+  public static Value read_exif_data(Env env, Path file,
+				     @Optional String sections,
+				     @Optional boolean arrays,
+				     @Optional boolean thumbs)
+  {
+    return exif_read_data(env, file, sections, arrays, thumbs);
+  }
+
+  /**
+   *  Retrieve the embedded thumbnail of a TIFF or JPEG image
+   *  @param filename the name of the image file being read.
+   *  @param width the width of the returned thumbnail
+   *  @param height the height of the returned thumbnail
+   *  @param imagetype either TIFF or JPEG
+   *  @return either the thumbnail or FALSE
+   */
+  public static Value exif_thumbnail(Env env, Path file,
+				     @Optional @Reference int width,
+				     @Optional @Reference int height,
+				     @Optional @Reference int imageType)
+  {
+    return BooleanValue.FALSE;
+  }
+
+  /**
+   *  Get the header name for an index
+   */
+  public static String exif_tagname(String index)
+  {
+    return null;
+  }
+
+  /**
+   *  Determine the type of an image
+   */
+  public static Value exif_imagetype(Env env, Path file)
+  {
+    try {
+      Iterator it = ImageIO.getImageReaders(file.openRead());
+      if (!it.hasNext())
+	return BooleanValue.FALSE;
+      ImageReader imageReader = (ImageReader)it.next();
+      if (it.hasNext())
+	throw new QuercusException("ImageIO returned two ImageReaders:\n  "+
+				   imageReader+"\n  "+it.next());
+      String formatName = imageReader.getFormatName();
+      if (formatName.equals("jpeg") || formatName.equals("jpg"))
+	return LongValue.create(ImageModule.IMAGETYPE_JPG);
+      if (formatName.equals("gif"))
+	return LongValue.create(ImageModule.IMAGETYPE_GIF);
+      if (formatName.equals("png"))
+	return LongValue.create(ImageModule.IMAGETYPE_PNG);
+      if (formatName.equals("swf"))
+	return LongValue.create(ImageModule.IMAGETYPE_SWF);
+      if (formatName.equals("psd"))
+	return LongValue.create(ImageModule.IMAGETYPE_PSD);
+      if (formatName.equals("bmp"))
+	return LongValue.create(ImageModule.IMAGETYPE_BMP);
+      if (formatName.equals("tiff"))
+	return LongValue.create(ImageModule.IMAGETYPE_TIFF_II);
+      /*
+      // XXX: check byte order
+      if (formatName.equals("tiff"))
+      return ImageModule.IMAGETYPE_TIFF_MM;
+      */
+      if (formatName.equals("jpc"))
+	return LongValue.create(ImageModule.IMAGETYPE_JPC);
+      if (formatName.equals("jp2"))
+	return LongValue.create(ImageModule.IMAGETYPE_JP2);
+      if (formatName.equals("jpf"))
+	return LongValue.create(ImageModule.IMAGETYPE_JPX);
+      if (formatName.equals("jb2"))
+	return LongValue.create(ImageModule.IMAGETYPE_JB2);
+      if (formatName.equals("swc"))
+	return LongValue.create(ImageModule.IMAGETYPE_SWC);
+      if (formatName.equals("iff"))
+	return LongValue.create(ImageModule.IMAGETYPE_IFF);
+      if (formatName.equals("wbmp"))
+	return LongValue.create(ImageModule.IMAGETYPE_WBMP);
+      if (formatName.equals("xbm"))
+	return LongValue.create(ImageModule.IMAGETYPE_XBM);
+      env.warning(L.l("ImageIO returned unknown image type: " + formatName));
+      return BooleanValue.FALSE;
+    }
+    catch (IOException e)
+      {
+	throw new QuercusException(e);
+      }
+  }
+
+
+
 }
 
