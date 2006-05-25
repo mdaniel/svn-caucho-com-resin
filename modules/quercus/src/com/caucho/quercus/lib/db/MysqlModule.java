@@ -743,8 +743,7 @@ public class MysqlModule extends AbstractQuercusModule {
                              @Optional Value newLinkV,
                              @Optional Value flagsV)
   {
-    Mysqli mysqli = new Mysqli(env, host, userName, password, "", 3306, "",
-             null, null);
+    Mysqli mysqli = new Mysqli(env, host, userName, password, "", 3306, "", 0, null, null);
 
     Value value = env.wrapJava(mysqli);
 
@@ -814,7 +813,7 @@ public class MysqlModule extends AbstractQuercusModule {
     if (conn != null)
       return conn;
 
-    conn = new Mysqli(env, "localhost", "", "", "", 3306, "", null, null);
+    conn = new Mysqli(env, "localhost", "", "", "", 3306, "", 0, null, null);
 
     env.setSpecialValue("caucho.mysql", conn);
 

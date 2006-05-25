@@ -252,7 +252,7 @@ public class PostgresModule extends AbstractQuercusModule {
       String url = "jdbc:postgresql://" + host + ":" + port + "/" + dbName;
 
       Postgres postgres
-        = new Postgres(env, host, userName, password, dbName, port, "", driver, url);
+        = new Postgres(env, host, userName, password, dbName, port, driver, url);
 
       env.setSpecialValue("caucho.postgres", postgres);
 
@@ -270,7 +270,11 @@ public class PostgresModule extends AbstractQuercusModule {
   public boolean pg_connection_busy(Env env,
                                     @NotNull Postgres conn)
   {
-    throw new UnimplementedException("pg_connection_busy");
+    // Always return false, for now (pg_send_xxxx are not asynchronous)
+    // so there should be no reason for a connection to become busy in
+    // between different pg_xxx calls.
+
+    return false;
   }
 
   /**
@@ -279,7 +283,27 @@ public class PostgresModule extends AbstractQuercusModule {
   public boolean pg_connection_reset(Env env,
                                      @NotNull Postgres conn)
   {
-    throw new UnimplementedException("pg_connection_reset");
+    try {
+
+      conn.close(env);
+
+      conn = new Postgres(env,
+                          conn.getHost(),
+                          conn.getUserName(),
+                          conn.getPassword(),
+                          conn.getDbName(),
+                          conn.getPort(),
+                          conn.getDriver(),
+                          conn.getUrl());
+
+      env.setSpecialValue("caucho.postgres", conn);
+
+      return true;
+
+    } catch (Exception ex) {
+      log.log(Level.FINE, ex.toString(), ex);
+      return false;
+    }
   }
 
   /**
@@ -303,13 +327,36 @@ public class PostgresModule extends AbstractQuercusModule {
   /**
    * Convert associative array values into suitable for SQL statement
    */
-  public Value pg_convert(Env env,
-                          @NotNull Postgres conn,
-                          String tableName,
-                          Value assocArray,
-                          @Optional int options)
+  @ReturnNullAsFalse
+  public ArrayValue pg_convert(Env env,
+                               @NotNull Postgres conn,
+                               String tableName,
+                               ArrayValue assocArray,
+                               @Optional("-1") int options)
   {
-    throw new UnimplementedException("pg_convert");
+    try {
+
+      if (options > 0) {
+        throw new UnimplementedException("pg_convert with options");
+      }
+
+      ArrayValueImpl newArray = new ArrayValueImpl();
+
+      ArrayValueImpl assocArrayImpl = (ArrayValueImpl) assocArray;
+
+      for (Map.Entry<Value,Value> entry : assocArrayImpl.entrySet()) {
+        Value k = entry.getKey();
+        Value v = entry.getValue();
+
+        newArray.put(k, StringValue.create("'"+v+"'"));
+      }
+
+      return newArray;
+
+    } catch (Exception ex) {
+      log.log(Level.FINE, ex.toString(), ex);
+      return null;
+    }
   }
 
   /**
@@ -463,19 +510,58 @@ public class PostgresModule extends AbstractQuercusModule {
   /**
    * Deletes records
    */
-  public Value pg_delete(Env env,
-                         @NotNull Postgres conn,
-                         String tableName,
-                         Value assocArray,
-                         @Optional int options)
+  public boolean pg_delete(Env env,
+                           @NotNull Postgres conn,
+                           String tableName,
+                           Value assocArray,
+                           @Optional("-1") int options)
   {
-    // @todo from php.net: this function is EXPERIMENTAL.
-    // @This function is EXPERIMENTAL. The behaviour of this function,
+    // From php.net: this function is EXPERIMENTAL.
+    // This function is EXPERIMENTAL. The behaviour of this function,
     // the name of this function, and anything else documented about this function
     // may change without notice in a future release of PHP.
     // Use this function at your own risk.
 
-    throw new UnimplementedException("pg_delete");
+    try {
+
+      if (options > 0) {
+        throw new UnimplementedException("pg_delete with options");
+      }
+
+      ArrayValueImpl assocArrayImpl = (ArrayValueImpl) assocArray;
+
+      StringBuilder condition = new StringBuilder();
+
+      boolean isFirst = true;
+
+      for (Map.Entry<Value,Value> entry : assocArrayImpl.entrySet()) {
+        Value k = entry.getKey();
+        Value v = entry.getValue();
+        if (isFirst) {
+          isFirst = false;
+        } else {
+          condition.append(" AND ");
+        }
+        condition.append(k.toString());
+        condition.append("='");
+        condition.append(v.toString());
+        condition.append("'");
+      }
+
+      StringBuilder query = new StringBuilder();
+      query.append("DELETE FROM ");
+      query.append(tableName);
+      query.append(" WHERE ");
+      query.append(condition);
+
+      pg_query(env, conn, query.toString());
+
+      return true;
+
+    } catch (Exception ex) {
+      log.log(Level.FINE, ex.toString(), ex);
+      return false;
+    }
   }
 
   /**
@@ -999,7 +1085,7 @@ public class PostgresModule extends AbstractQuercusModule {
   public boolean pg_insert(Env env,
                            @NotNull Postgres conn,
                            String tableName,
-                           Value assocArray,
+                           ArrayValue assocArray,
                            @Optional int options)
   {
     try {
@@ -1764,11 +1850,11 @@ public class PostgresModule extends AbstractQuercusModule {
       Value queryV = conn.query(query, 1);
 
       if (queryV instanceof JdbcResultResource) {
-	JdbcResultResource resultResource = (JdbcResultResource) queryV;
+  JdbcResultResource resultResource = (JdbcResultResource) queryV;
 
-	if (resultResource != null) {
-	  return new MysqliResult(resultResource);
-	}
+  if (resultResource != null) {
+    return new MysqliResult(resultResource);
+  }
       }
     } catch (Exception ex) {
       log.log(Level.FINE, ex.toString(), ex);
@@ -2132,7 +2218,7 @@ public class PostgresModule extends AbstractQuercusModule {
     String driver = "org.postgresql.Driver";
     String url = "jdbc:postgresql://localhost:5432/";
 
-    conn = new Postgres(env, "localhost", "", "", "", 5432, "", driver, url);
+    conn = new Postgres(env, "localhost", "", "", "", 5432, driver, url);
 
     env.setSpecialValue("caucho.postgres", conn);
 

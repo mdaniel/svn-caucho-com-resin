@@ -53,12 +53,13 @@ public class Mysqli extends JdbcConnectionResource {
                 @Optional String db,
                 @Optional("3306") int port,
                 @Optional String socket,
+                @Optional int flags,
                 @Optional String driver,
                 @Optional String url)
   {
     super(env);
 
-    real_connect(env, host, user, password, db, port, socket, 0, driver, url);
+    real_connect(env, host, user, password, db, port, socket, flags, driver, url);
   }
 
   public Mysqli(Env env)
@@ -100,7 +101,7 @@ public class Mysqli extends JdbcConnectionResource {
 
       Connection jConn = env.getConnection(driver, url, userName, password);
 
-      setConnection(host, port, dbname, jConn, false);
+      setConnection(host, userName, password, dbname, port, jConn, driver, url, false);
 
       return true;
 

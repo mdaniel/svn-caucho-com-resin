@@ -52,13 +52,12 @@ public class Postgres extends JdbcConnectionResource {
                   @Optional String password,
                   @Optional String db,
                   @Optional("5432") int port,
-                  @Optional String socket,
                   @Optional String driver,
                   @Optional String url)
   {
     super(env);
 
-    real_connect(env, host, user, password, db, port, socket, 0, driver, url);
+    real_connect(env, host, user, password, db, port, "", 0, driver, url);
   }
 
   /**
@@ -95,7 +94,7 @@ public class Postgres extends JdbcConnectionResource {
 
       Connection jConn = env.getConnection(driver, url, userName, password);
 
-      setConnection(host, port, dbname, jConn, true);
+      setConnection(host, userName, password, dbname, port, jConn, driver, url, true);
 
       return true;
 

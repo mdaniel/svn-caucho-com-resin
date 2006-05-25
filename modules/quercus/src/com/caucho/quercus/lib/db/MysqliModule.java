@@ -212,7 +212,7 @@ public class MysqliModule extends AbstractQuercusModule {
               @Optional String socket)
     throws IllegalStateException
   {
-    return new Mysqli(env, host, userName, password, dbname, port, socket,
+    return new Mysqli(env, host, userName, password, dbname, port, socket, 0,
           null, null);
   }
 
@@ -552,7 +552,7 @@ public class MysqliModule extends AbstractQuercusModule {
   public static String mysqli_get_client_info(Env env)
   {
     Mysqli mysqli = new Mysqli(env, "localhost", null, null, null, 3306,
-             null, null, null);
+             null, 0, null, null);
 
     return mysqli.get_client_info();
   }

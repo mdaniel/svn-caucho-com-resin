@@ -76,6 +76,10 @@ public abstract class JdbcConnectionResource implements Closeable {
   private String _host;
   private String _dbname;
   private int _port;
+  private String _userName;
+  private String _password;
+  private String _driver;
+  private String _url;
 
   private boolean _connected;
 
@@ -118,6 +122,41 @@ public abstract class JdbcConnectionResource implements Closeable {
     return _connected;
   }
 
+  public String getHost()
+  {
+    return _host;
+  }
+
+  public String getUserName()
+  {
+    return _userName;
+  }
+
+  public String getPassword()
+  {
+    return _password;
+  }
+
+  public String getDbName()
+  {
+    return _dbname;
+  }
+
+  public int getPort()
+  {
+    return _port;
+  }
+
+  public String getDriver()
+  {
+    return _driver;
+  }
+
+  public String getUrl()
+  {
+    return _url;
+  }
+
   /**
    * Set the current underlying connection and
    * corresponding information: host, port and
@@ -128,16 +167,26 @@ public abstract class JdbcConnectionResource implements Closeable {
    * @param dbname database name
    */
   public void setConnection(String host,
-                            int port,
+                            String userName,
+                            String password,
                             String dbname,
+                            int port,
                             Connection conn,
+                            String driver,
+                            String url,
                             boolean pgconn)
   {
     _host = host;
-    _port = port;
+    _userName = userName;
+    _password = password;
     _dbname = dbname;
+    _port = port;
 
     _conn = conn;
+
+    _driver = driver;
+
+    _url = url;
 
     if (conn != null) {
       _connected = true;
@@ -393,17 +442,9 @@ public abstract class JdbcConnectionResource implements Closeable {
    */
   public boolean change_user(String user, String password, String db)
   {
-    // XXX: these need to be saved
-    String host = "localhost";
-    int port = 3306;
-    String socket = null;
-    int flags = 0;
-
     close(_env);
 
-    //@todo driver and url for postgres (see null below)
-
-    return real_connect(_env, host, user, password, db, port, socket, flags, null, null);
+    return real_connect(_env, _host, user, password, db, _port, "", 0, _driver, _url);
   }
 
   /**
