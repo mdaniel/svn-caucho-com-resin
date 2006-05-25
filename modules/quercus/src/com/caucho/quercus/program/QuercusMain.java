@@ -198,7 +198,7 @@ public class QuercusMain extends ClassComponent {
 	out.print("\", \"");
 	out.printJavaString(fun.getName().toLowerCase());
 	out.print("\", ");
-	out.print("__quercus_fun_" + fun.getName());
+	out.print("fun_" + fun.getName());
 	out.println(");");
       }
     }

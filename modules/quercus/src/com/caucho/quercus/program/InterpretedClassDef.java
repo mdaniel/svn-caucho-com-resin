@@ -308,22 +308,22 @@ public class InterpretedClassDef extends ClassDef
     out.println();
     
     if (_constructor != null) {
-      out.println("cl.setConstructor(__quercus_fun_" + _constructor.getName() + ");");
+      out.println("cl.setConstructor(fun_" + _constructor.getName() + ");");
       out.println();
     }
     
     if (_getField != null) {
-      out.println("cl.setGet(__quercus_fun_" + _getField.getName() + ");");
+      out.println("cl.setGet(fun_" + _getField.getName() + ");");
       out.println();
     }
     
     if (_setField != null) {
-      out.println("cl.setSet(__quercus_fun_" + _setField.getName() + ");");
+      out.println("cl.setSet(fun_" + _setField.getName() + ");");
       out.println();
     }
     
     if (_call != null) {
-      out.println("cl.setCall(__quercus_fun_" + _call.getName() + ");");
+      out.println("cl.setCall(fun_" + _call.getName() + ");");
       out.println();
     }
 
@@ -339,7 +339,7 @@ public class InterpretedClassDef extends ClassDef
     for (String key : _functionMap.keySet()) {
       out.print("cl.addMethod(\"");
       out.printJavaString(key);
-      out.println("\", __quercus_fun_" + key + ");");
+      out.println("\", fun_" + key + ");");
     }
     
     out.popDepth();

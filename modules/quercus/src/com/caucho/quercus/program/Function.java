@@ -401,7 +401,14 @@ public class Function extends AbstractFunction {
                             Expr []args, boolean isRef)
     throws IOException
   {
-    out.print("fun_" + _name + "(env");
+    String ref;
+
+    if (! _isReturnsReference)
+      ref = "";
+    else
+      ref = "Ref";
+    
+    out.print("fun_" + _name + ".call" + ref + "(env");
 
     if (! isVariableArgs()) {
     }
@@ -441,6 +448,9 @@ public class Function extends AbstractFunction {
 
     out.print(")");
 
+    if (_isReturnsReference && ! isRef)
+      out.print(".toValue()");
+    
     /* php/3a70 - should only be generated from generateCopy
     if (! (isRef && _isReturnsReference))
       out.print(".copyReturn()");
@@ -482,63 +492,25 @@ public class Function extends AbstractFunction {
     throws IOException
   {
     out.println();
-
-    out.print("public ");
-
-    // quercus/3960
-    if (isStatic())
-      out.print("static ");
-
-    out.print("Value fun_");
-    out.print(_name);
-    out.print("(Env env");
-
-    if (! isStatic())
-      out.print(", Value q_this_arg");
-
-    for (int i = 0; i < _args.length; i++) {
-      out.print(", ");
-
-      out.print("Value v_");
-      out.print(_args[i].getName());
-    }
-    out.println(")");
-
-    //out.println("  throws Throwable");
-    out.println("{");
-    out.pushDepth();
-
-    if (! isStatic()) {
-      //out.println("final CompiledObjectValue q_this = (q_this_arg != null ? q_this_arg.toObjectValue() : null);");
-      
-      out.println("final Value q_this = q_this_arg;");
-    }
-
-    generateBody(out);
-
-    out.popDepth();
-    out.println("}");
-
-    String funName = "__quercus_fun_" + _name;
-
-    out.println();
-    out.print("final ");
-
-    if (isStatic())
-      out.print("static ");
-
-    out.println("AbstractFunction " + funName);
+    out.print("public static final fun_" + _name + " fun_" + _name);
+    out.println(" = new fun_" + _name + "();");
 
     String ref = _isReturnsReference ? "Ref" : "";
 
-    if (isStatic()) {
-      out.print(" = new CompiledFunction" + ref + "_" + _args.length);
-    }
-    else {
-      out.print(" = new CompiledMethod" + ref + "_" + _args.length);
-    }
+    out.println();
+    out.print("final static class fun_" + _name + " extends ");
+    
+    if (isStatic())
+      out.print("CompiledFunction" + ref + "_" + _args.length);
+    else
+      out.print("CompiledMethod" + ref + "_" + _args.length);
 
-    out.print("(\"");
+    out.println(" {");
+    out.pushDepth();
+    
+    out.println("fun_" + _name + "()");
+    out.println("{");
+    out.print("  super(\"");
     out.printJavaString(_name);
     out.print("\"");
 
@@ -549,49 +521,38 @@ public class Function extends AbstractFunction {
 
       defaultExpr.generateExpr(out);
     }
-    out.println(") {");
-
-    out.pushDepth();
-
+    out.println(");");
+    out.println("}");
+        
+    out.println();
     if (isStatic())
       out.print("public Value call" + ref + "(Env env");
     else
       out.print("public Value callMethod" + ref + "(Env env, Value q_this");
 
     for (int i = 0; i < _args.length; i++) {
-      out.print(", Value a" + i);
+      out.print(", ");
+
+      out.print("Value v_");
+      out.print(_args[i].getName());
     }
     out.println(")");
 
-    //out.println("  throws Throwable");
     out.println("{");
 
-    out.print("  return ");
+    out.pushDepth();
 
-    out.print("fun_" + _name + "(env");
+    generateBody(out);
 
-    if (! isStatic())
-      out.print(", q_this");
-
-    for (int i = 0; i < _args.length; i++) {
-      out.print(", a" + i);
-    }
-    out.print(")");
-
-    // php/3a5x, php/37a2
-
-    if (! _isReturnsReference)
-      out.print(".toValue()");
-
-    out.println(";");
+    out.popDepth();
 
     out.println("}");
     out.popDepth();
-    out.println("};");
+    out.println("}");
 
     if (! isGlobal()) {
       out.println();
-      out.println("{ " + funName + ".setGlobal(false); }");
+      out.println("static { fun_" + _name + ".setGlobal(false); }");
     }
   }
 
@@ -604,29 +565,49 @@ public class Function extends AbstractFunction {
     throws IOException
   {
     out.println();
-    out.print("public ");
-
-    if (isStatic())
-      out.print("static ");
+    out.print("public static final fun_" + _name + " fun_" + _name);
+    out.println(" = new fun_" + _name + "();");
     
-    out.print("Value fun_");
-    out.print(_name);
+    out.println();
+    out.print("public static final class fun_" + _name + " extends ");
+
+    String ref = _isReturnsReference ? "Ref" : "";
 
     if (isStatic())
-      out.println("(Env env, Value []args)");
+      out.println(" CompiledFunction" + ref + "_N {");
     else
-      out.println("(Env env, Value q_this_arg, Value []args)");
+      out.println(" CompiledMethod" + ref + "_N {");
 
-    //out.println("  throws Throwable");
+    out.pushDepth();
+    out.println("fun_" + _name + "()");
+    out.println("{");
+    out.print("  super(\"");
+    out.printJavaString(_name);
+    out.print("\", new Expr[] {");
+
+    for (int i = 0; i < _args.length; i++) {
+      if (i != 0)
+        out.print(", ");
+
+      Expr defaultExpr = _args[i].getDefault();
+
+      if (defaultExpr != null)
+        defaultExpr.generateExpr(out);
+      else
+        out.print("null");
+    }
+    out.println("});");
+    out.println("}");
+    
+
+    out.println();
+    if (isStatic())
+      out.println("public Value call" + ref + "Impl(Env env, Value []args)");
+    else
+      out.println("public Value callMethod" + ref + "Impl(Env env, Value q_this, Value []args)");
+
     out.println("{");
     out.pushDepth();
-
-    if (! isStatic()) {
-      // out.println("CompiledObjectValue q_this = q_this_arg.toObjectValue();");
-      out.println("Value q_this = q_this_arg;");
-    }
-    
-    // XXX: try to optimize-away the map
 
     if (_info.isVariableArgs()) {
       out.println("Value []quercus_oldArgs = env.setFunctionArgs(args);");
@@ -648,82 +629,8 @@ public class Function extends AbstractFunction {
     out.popDepth();
     out.println("}");
 
-    out.println();
-    if (isStatic())
-      out.println("final static AbstractFunction __quercus_fun_" + _name);
-    else
-      out.println("final AbstractFunction __quercus_fun_" + _name);
-
-    String ref = _isReturnsReference ? "Ref" : "";
-
-    if (isStatic())
-      out.print(" = new CompiledFunction" + ref + "_N(");
-    else
-      out.print(" = new CompiledMethod" + ref + "_N(");
-
-    out.print("\"");
-    out.printJavaString(_name);
-    out.print("\", new Expr[] {");
-
-    for (int i = 0; i < _args.length; i++) {
-      if (i != 0)
-        out.print(", ");
-
-      Expr defaultExpr = _args[i].getDefault();
-
-      if (defaultExpr != null)
-        defaultExpr.generateExpr(out);
-      else
-        out.print("null");
-    }
-    out.println("}");
-    /*
-    out.print(", new boolean [] {");
-
-    for (int i = 0; i < _args.length; i++) {
-      if (i != 0)
-	out.print(", ");
-
-      out.print(_args[i].isReference());
-    }
-    out.print("}");
-    */
-    out.println(") {");
-
-    out.pushDepth();
-
-    /*
-    if (! isGlobal()) {
-      out.println();
-      out.println("boolean isGlobal() { return false; }");
-    }
-    */
-
-    if (isStatic())
-      out.println("public Value call" + ref + "Impl(Env env, Value []args)");
-    else
-      out.println("public Value callMethod" + ref + "Impl(Env env, Value q_this, Value []args)");
-
-    //out.println("  throws Throwable");
-    out.println("{");
-    out.pushDepth();
-
-    if (isStatic())
-      out.print("return fun_" + _name + "(env, args)");
-    else
-      out.print("return fun_" + _name + "(env, q_this, args)");
-
-    // php/3a5x, php/37aq
-
-    if (! _isReturnsReference)
-      out.print(".toValue()"); // php/37aq
-
-    out.println(";");
-
     out.popDepth();
     out.println("}");
-    out.popDepth();
-    out.println("};");
   }
 
   private void generateBody(PhpWriter out)
@@ -804,9 +711,6 @@ public class Function extends AbstractFunction {
       }
     }
 
-    if (_info.isOutUsed())
-      out.println("com.caucho.vfs.WriteStream _quercus_out = env.getOut();");
-
     _statement.generate(out);
 
     if (isVariableMap()) {
@@ -838,7 +742,7 @@ public class Function extends AbstractFunction {
     out.println();
     out.print("addFunction(\"");
     out.printJavaString(_name.toLowerCase());
-    out.println("\", __quercus_fun_" + _name + ");");
+    out.println("\", fun_" + _name + ");");
   }
 
   /**
