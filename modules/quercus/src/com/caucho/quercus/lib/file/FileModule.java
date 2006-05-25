@@ -976,31 +976,37 @@ public class FileModule extends AbstractQuercusModule {
       Path path = env.getPwd().lookup(filename);
 
       if (mode.startsWith("r")) {
-        if (!path.canRead()) {
+	try {
+	  return new FileReadValue(path);
+	} catch (IOException e) {
+	  log.log(Level.FINE, e.toString(), e);
+
           env.warning(L.l("{0} cannot be read", path.getFullPath()));
 
           return BooleanValue.FALSE;
         }
-
-        return new FileReadValue(path);
       }
       else if (mode.startsWith("w")) {
-        if (path.exists() && !path.canWrite()) {
+	try {
+	  return new FileWriteValue(path);
+	} catch (IOException e) {
+	  log.log(Level.FINE, e.toString(), e);
+
           env.warning(L.l("{0} cannot be written", path.getFullPath()));
 
           return BooleanValue.FALSE;
         }
-
-        return new FileWriteValue(path);
       }
       else if (mode.startsWith("a")) {
-        if (path.exists() && !path.canWrite()) {
+	try {
+	  return new FileWriteValue(path, true);
+	} catch (IOException e) {
+	  log.log(Level.FINE, e.toString(), e);
+
           env.warning(L.l("{0} cannot be written", path.getFullPath()));
 
           return BooleanValue.FALSE;
         }
-
-        return new FileWriteValue(path, true);
       }
       else if (mode.startsWith("x") && ! path.exists())
         return new FileWriteValue(path);

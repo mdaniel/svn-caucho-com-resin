@@ -186,7 +186,7 @@ public class FieldVarGetExpr extends AbstractVarExpr {
     throws IOException
   {
     _objExpr.generate(out);
-    out.print(".getField(");
+    out.print(".getField(env, ");
     _nameExpr.generateString(out);
     out.print(".intern())");
   }
@@ -200,7 +200,7 @@ public class FieldVarGetExpr extends AbstractVarExpr {
     throws IOException
   {
     _objExpr.generateArg(out);
-    out.print(".getFieldArg(");
+    out.print(".getFieldArg(env, ");
     _nameExpr.generateString(out);
     out.print(".intern())");
   }
@@ -274,7 +274,7 @@ public class FieldVarGetExpr extends AbstractVarExpr {
     throws IOException
   {
     _objExpr.generateObject(out);
-    out.print(".getFieldArray(");
+    out.print(".getFieldArray(env, ");
     _nameExpr.generateString(out);
     out.print(".intern())");
   }

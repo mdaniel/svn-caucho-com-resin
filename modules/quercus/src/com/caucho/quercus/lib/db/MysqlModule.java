@@ -252,7 +252,12 @@ public class MysqlModule extends AbstractQuercusModule {
     if (result == null)
       return BooleanValue.FALSE;
 
-    return result.fetch_array(type);
+    Value value = result.fetch_array(type);
+
+    if (value != null)
+      return value;
+    else
+      return BooleanValue.FALSE;
   }
 
   /**

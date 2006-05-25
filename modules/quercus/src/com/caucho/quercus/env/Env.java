@@ -2684,26 +2684,11 @@ public final class Env {
 		       boolean isRequire, boolean isOnce)
   {
     try {
-      // php/0b0g
-      //Path selfPath = getSelfDirectory();
       Path pwd = getPwd();
+      
+      Path path = lookupInclude(include, pwd, scriptPwd);
 
-      Path path = lookupInclude(pwd, include);
-
-      if (path == null) {
-	// php/0b0l
-	path = lookupInclude(scriptPwd, include);
-      }
-
-      if (path == null) {
-	// php/0b21
-	path = scriptPwd.lookup(include);
-
-	if (! path.canRead())
-	  path = null;
-      }
-
-      if (path != null && path.canRead() && ! path.isDirectory()) {
+      if (path != null) {
       }
       else if (isRequire) {
 	error(L.l("'{0}' is not a valid path", include));
@@ -2759,6 +2744,47 @@ public final class Env {
     return lookupInclude(getSelfDirectory(), relPath);
   }
 
+  private Path lookupInclude(String include, Path pwd, Path scriptPwd)
+  {
+    String includePath = getIniString("include_path");
+
+    if (includePath == null)
+      includePath = ".";
+    
+    Path path = _quercus.getIncludeCache(include, includePath, pwd, scriptPwd);
+
+    if (path == null) {
+      path = lookupIncludeImpl(include, pwd, scriptPwd);
+
+      if (path != null)
+	_quercus.putIncludeCache(include, includePath, pwd, scriptPwd, path);
+    }
+    
+    return path;
+  }
+    
+  private Path lookupIncludeImpl(String include, Path pwd, Path scriptPwd)
+  {
+    // php/0b0g
+
+    Path path = lookupInclude(pwd, include);
+
+    if (path == null) {
+      // php/0b0l
+      path = lookupInclude(scriptPwd, include);
+    }
+
+    if (path == null) {
+      // php/0b21
+      path = scriptPwd.lookup(include);
+
+      if (! path.canRead() || path.isDirectory())
+	path = null;
+    }
+
+    return path;
+  }
+
   /**
    * Looks up the path.
    */
@@ -2769,7 +2795,7 @@ public final class Env {
     for (int i = 0; i < pathList.size(); i++) {
       Path path = pathList.get(i).lookup(relPath);
 
-      if (path.canRead()) {
+      if (path.canRead() && ! path.isDirectory()) {
         return path;
       }
     }

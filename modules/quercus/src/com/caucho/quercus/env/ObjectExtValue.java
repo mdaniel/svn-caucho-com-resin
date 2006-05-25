@@ -257,11 +257,11 @@ public class ObjectExtValue extends ObjectValue {
   }
 
   /**
-   * Gets a new value.
+   * XXX: to handle foreach
    */
   public Value get(Value key)
   {
-    throw new UnsupportedOperationException();
+    return getField(null, key.toString());
   }
 
   public Value put(Value index, Value value)

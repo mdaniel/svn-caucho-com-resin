@@ -52,6 +52,7 @@ import com.caucho.loader.Environment;
 
 import com.caucho.util.Log;
 import com.caucho.util.LruCache;
+import com.caucho.util.TimedCache;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.ReadStream;
@@ -125,6 +126,9 @@ public class Quercus {
 
   private LruCache<String, QuercusProgram> _evalCache
     = new LruCache<String, QuercusProgram>(256);
+
+  private TimedCache<IncludeKey, Path> _includeCache
+    = new TimedCache<IncludeKey, Path>(4096, 10000);
 
   private static HashSet<String> _superGlobals
     = new HashSet<String>();
@@ -393,6 +397,33 @@ public class Quercus {
     return _pageManager.getClassName(path);
   }
 
+  /**
+   * Returns an include path.
+   */
+  public Path getIncludeCache(String include,
+			      String includePath,
+			      Path pwd,
+			      Path scriptPwd)
+  {
+    IncludeKey key = new IncludeKey(include, includePath, pwd, scriptPwd);
+    
+    return _includeCache.get(key);
+  }
+
+  /**
+   * Adds an include path.
+   */
+  public void putIncludeCache(String include,
+			      String includePath,
+			      Path pwd,
+			      Path scriptPwd,
+			      Path path)
+  {
+    IncludeKey key = new IncludeKey(include, includePath, pwd, scriptPwd);
+    
+    _includeCache.put(key, path);
+  }
+  
   /**
    * Parses a quercus program.
    *
@@ -1046,6 +1077,46 @@ public class Quercus {
     
     return NullValue.NULL;
     
+  }
+
+  static class IncludeKey {
+    private final String _include;
+    private final String _includePath;
+    private final Path _pwd;
+    private final Path _scriptPwd;
+
+    IncludeKey(String include, String includePath, Path pwd, Path scriptPwd)
+    {
+      _include = include;
+      _includePath = includePath;
+      _pwd = pwd;
+      _scriptPwd = scriptPwd;
+    }
+
+    public int hashCode()
+    {
+      int hash = 37;
+
+      hash = 65537 * hash + _include.hashCode();
+      hash = 65537 * hash + _includePath.hashCode();
+      hash = 65537 * hash + _pwd.hashCode();
+      hash = 65537 * hash + _scriptPwd.hashCode();
+
+      return hash;
+    }
+
+    public boolean equals(Object o)
+    {
+      if (! (o instanceof IncludeKey))
+	return false;
+
+      IncludeKey key = (IncludeKey) o;
+
+      return (_include.equals(key._include) &&
+	      _includePath.equals(key._includePath) &&
+	      _pwd.equals(key._pwd) &&
+	      _scriptPwd.equals(key._scriptPwd));
+    }
   }
 
   static {
