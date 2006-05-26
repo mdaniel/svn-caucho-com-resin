@@ -37,6 +37,7 @@ import java.lang.reflect.InvocationTargetException;
 import com.caucho.quercus.Quercus;
 import com.caucho.quercus.QuercusException;
 import com.caucho.quercus.expr.DefaultExpr;
+import com.caucho.quercus.expr.RequiredExpr;
 import com.caucho.quercus.expr.Expr;
 import com.caucho.quercus.expr.NullLiteralExpr;
 import com.caucho.quercus.gen.PhpWriter;
@@ -361,6 +362,14 @@ abstract public class JavaInvoker
 
       if (i < _marshallArgs.length)
         arg = _marshallArgs[i];
+      else if (_isRestReference) {
+        values[i] = args[i].evalRef(env);
+	continue;
+      }
+      else {
+        values[i] = args[i].eval(env);
+	continue;
+      }
 
       if (arg == null)
         values[i] = args[i].eval(env).copy();
@@ -424,7 +433,7 @@ abstract public class JavaInvoker
         expr = _defaultExprs[i];
 
         if (expr == null)
-          expr = new DefaultExpr(getLocation());
+          expr = new RequiredExpr(getLocation());
       }
 
       values[k] = _marshallArgs[i].marshall(env, expr, _param[k]);
@@ -441,7 +450,6 @@ abstract public class JavaInvoker
         rest = NULL_VALUES;
       else {
         rest = new Value[restLen];
-
 
         for (int i = _marshallArgs.length; i < exprs.length; i++) {
           if (_isRestReference)
@@ -487,6 +495,9 @@ abstract public class JavaInvoker
                                               _defaultExprs[i],
                                               _param[k]);
       } else {
+	env.warning(L.l("function '{0}' has {1} required arguments, but only {2} were provided",
+			_name, _marshallArgs.length, args.length));
+	
         javaArgs[k] = _marshallArgs[i].marshall(env,
 						NullValue.NULL,
 						_param[k]);

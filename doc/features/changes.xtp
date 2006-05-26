@@ -2,9 +2,10 @@
 
 <a href='changes-2.xtp'>Resin 2.1 changes</a>
 
-<s2 title='3.0.snap - May 22, 2006'>
+<s2 title='3.0.snap - May 26, 2006'>
 <ul>
-<li>Quercus: while (1) must handle java "statement not reached" (#1139, rep by koreth)
+<li>max-close-statements was not in the .rnc (rep by Takahir Fukuda)
+<li>(2006-05-22) Quercus: while (1) must handle java "statement not reached" (#1139, rep by koreth)
 <li>Quercus: mktime timezone issues (#1132, rep by koreth)
 <li>Quercus: Exception.getMessage() support (#1142, rep by koreth)
 <li>Quercus: __get, __set, __call (#638, #645)

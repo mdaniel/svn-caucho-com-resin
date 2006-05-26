@@ -3270,7 +3270,7 @@ public final class Env {
     String locationMessagePrefix = loc;
 
     if (loc.equals(""))
-      loc = location.getMessagePrefix();
+      locationMessagePrefix = location.getMessagePrefix();
 
     if (code >= 0 && code < _errorHandlers.length &&
         _errorHandlers[code] != null) {
