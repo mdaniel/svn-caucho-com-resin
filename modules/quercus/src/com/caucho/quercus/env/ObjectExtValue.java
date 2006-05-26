@@ -39,6 +39,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.io.IOException;
 
+import com.caucho.quercus.QuercusException;
 import com.caucho.quercus.expr.Expr;
 import com.caucho.quercus.expr.StringLiteralExpr;
 import com.caucho.quercus.program.AbstractFunction;
@@ -261,17 +262,20 @@ public class ObjectExtValue extends ObjectValue {
    */
   public Value get(Value key)
   {
+    // php/0d92 - expects exception
     return getField(null, key.toString());
   }
 
   public Value put(Value index, Value value)
   {
-    throw new UnsupportedOperationException();
+    throw new QuercusException(L.l("Object of type '{0}' cannot be used as an array",
+				   getClassName()));
   }
 
   public Value put(Value value)
   {
-    throw new UnsupportedOperationException();
+    throw new QuercusException(L.l("Object of type '{0}' cannot be used as an array",
+				   getClassName()));
   }
 
   /**

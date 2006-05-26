@@ -99,7 +99,7 @@ public class FunctionDefStatement extends Statement {
     out.println("\") == null)");
     out.print("  env.addFunction(\"");
     out.printJavaString(_fun.getName().toLowerCase());
-    out.println("\", __quercus_fun_" + _fun.getName() + ");");
+    out.println("\", fun_" + _fun.getName() + ");");
     // XXX:
   }
   

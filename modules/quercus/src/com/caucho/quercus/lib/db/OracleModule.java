@@ -1440,7 +1440,7 @@ public class OracleModule extends AbstractQuercusModule {
     String driver = "oracle.jdbc.driver.OracleDriver";
     String url = "jdbc:oracle:thin:@localhost:1521";
 
-    conn = new Mysqli(env, "localhost", "", "", "", 1521, "", driver, url);
+    conn = new Mysqli(env, "localhost", "", "", "", 1521, "", 0, driver, url);
 
     env.setSpecialValue("caucho.oracle", conn);
 
@@ -1478,7 +1478,8 @@ public class OracleModule extends AbstractQuercusModule {
       // Reuse the cached connection
       mysqli = (Mysqli) connectionInfo[1];
     } else {
-      mysqli = new Mysqli(env, host, username, password, db, port, "", driver, url);
+      mysqli = new Mysqli(env, host, username, password, db, port, "", 0,
+			  driver, url);
 
       connectionInfo = new Object[2];
       connectionInfo[0] = url;

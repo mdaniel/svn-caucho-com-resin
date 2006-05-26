@@ -263,10 +263,11 @@ public class MysqlModule extends AbstractQuercusModule {
   /**
    * Returns a row from the connection
    */
-  public Value mysql_fetch_assoc(Env env, @NotNull MysqliResult result)
+  @ReturnNullAsFalse
+  public ArrayValue mysql_fetch_assoc(Env env, @NotNull MysqliResult result)
   {
     if (result == null)
-      return BooleanValue.FALSE;
+      return null;
 
     return result.fetch_array(MYSQL_ASSOC);
   }
@@ -367,20 +368,16 @@ public class MysqlModule extends AbstractQuercusModule {
 
   /**
    * Executes a query and returns a result set.
+   *
+   * Returns true on update success, false on failture, and a result set
+   * for a successful select
    */
-  @ReturnNullAsFalse
-  public MysqliResult mysql_query(Env env, String sql, @Optional Mysqli conn)
+  public Value mysql_query(Env env, String sql, @Optional Mysqli conn)
   {
     if (conn == null)
       conn = getConnection(env);
 
-    JdbcResultResource resultResource = conn.query(sql, MYSQL_STORE_RESULT);
-
-    if (resultResource != null) {
-      return new MysqliResult(resultResource);
-    }
-
-    return null;
+    return conn.query(sql, MYSQL_STORE_RESULT);
   }
 
   /**
@@ -409,10 +406,11 @@ public class MysqlModule extends AbstractQuercusModule {
   /**
    * Returns a row from the connection
    */
-  public Value mysql_fetch_row(Env env, @NotNull MysqliResult result)
+  @ReturnNullAsFalse
+  public ArrayValue mysql_fetch_row(Env env, @NotNull MysqliResult result)
   {
     if (result == null)
-      return BooleanValue.FALSE;
+      return null;
 
     return result.fetch_row();
   }
@@ -545,12 +543,12 @@ public class MysqlModule extends AbstractQuercusModule {
   /**
    * Frees a mysql result.
    */
-  public boolean mysql_free_result(@NotNull MysqliResult result)
+  public boolean mysql_free_result(MysqliResult result)
   {
-    if (result == null)
-      return false;
+    if (result != null)
+      result.close();
 
-    return result.close();
+    return true;
   }
 
   /**
@@ -663,10 +661,10 @@ public class MysqlModule extends AbstractQuercusModule {
     if (!conn.select_db(databaseName))
       return null; // BooleanValue.FALSE;
 
-    JdbcResultResource resultResource = conn.query(query, 0);
+    Value value = conn.query(query, 1);
 
-    if (resultResource != null) {
-      return new MysqliResult(resultResource);
+    if (value instanceof MysqliResult) {
+      return (MysqliResult) value;
     }
 
     return null;

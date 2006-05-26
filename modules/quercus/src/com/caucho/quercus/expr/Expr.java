@@ -96,11 +96,22 @@ abstract public class Expr {
   }
 
   /**
-   * Returns the location if known.
+   * Returns the function name.
    */
   public String getFunctionLocation()
   {
     return "";
+  }
+  
+  /**
+   * Returns the location if known.
+   */
+  public String getLocationLine()
+  {
+    if (_location != Location.UNKNOWN)
+      return _location.getFileName() + ":" + getLine() + ": ";
+    else
+      return "";
   }
 
   /**

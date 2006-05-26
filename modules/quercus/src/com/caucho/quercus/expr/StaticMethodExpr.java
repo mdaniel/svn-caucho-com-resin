@@ -187,12 +187,11 @@ public class StaticMethodExpr extends Expr {
     out.printJavaString(_className);
     out.print("\").callMethod(env, ");
 
-    /*
+    // XXX: needed for mediawiki
     if (isMethod())
       out.print("q_this");
     else
-    */
-    out.print("NullThisValue.NULL");
+      out.print("NullThisValue.NULL");
 
     out.print(", \"");
     out.printJavaString(_name);

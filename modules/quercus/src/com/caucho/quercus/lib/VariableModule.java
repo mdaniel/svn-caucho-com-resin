@@ -483,22 +483,7 @@ public class VariableModule extends AbstractQuercusModule {
    */
   public static boolean is_numeric(Env env, @ReadOnly Value v)
   {
-    v = v.toValue();
-
-    if (v instanceof LongValue)
-      return true;
-    else if (v instanceof DoubleValue)
-      return true;
-    else if (v instanceof StringValue) {
-      try {
-	Double.parseDouble(v.toString());
-	return true;
-      } catch (Throwable e) {
-	return false;
-      }
-    }
-    else
-      return false;
+    return v.isLongConvertible() || v.isDoubleConvertible();
   }
 
   // XXX: is_object

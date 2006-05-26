@@ -31,6 +31,10 @@ package com.caucho.quercus.lib.db;
 
 import java.util.logging.Logger;
 
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.Statement;
+
 import com.caucho.util.L10N;
 
 import com.caucho.quercus.lib.db.JdbcResultResource;
@@ -45,16 +49,21 @@ import com.caucho.quercus.module.ReturnNullAsFalse;
 /**
  * mysqli object oriented API facade
  */
-public class MysqliResult {
+public class MysqliResult extends JdbcResultResource {
   private static final Logger log
     = Logger.getLogger(MysqliResult.class.getName());
   private static final L10N L = new L10N(MysqliResult.class);
 
-  private JdbcResultResource _rs;
-
-  public MysqliResult(JdbcResultResource rs)
+  public MysqliResult(Statement stmt,
+		      ResultSet rs,
+		      Mysqli conn)
   {
-    _rs = rs;
+    super(stmt, rs, conn);
+  }
+
+  public MysqliResult(ResultSetMetaData md, JdbcConnectionResource conn)
+  {
+    super(md, conn);
   }
 
   /**
@@ -240,33 +249,13 @@ public class MysqliResult {
     return validateResult().getResultField(env, row, field);
   }
 
-  /**
-   * Closes the result.
-   */
-  public boolean close()
-  {
-    JdbcResultResource rs = _rs;
-    _rs = null;
-
-    if (rs != null) {
-      rs.close();
-      return true;
-    }
-    else {
-      return false;
-    }
-  }
-
   public JdbcResultResource validateResult()
   {
-    return _rs;
+    return this;
   }
 
   public String toString()
   {
-    if (_rs != null)
-      return "MysqliResult[" + _rs + "]";
-    else
-      return "MysqliResult[closed]";
+    return "MysqliResult[" + super.toString() + "]";
   }
 }

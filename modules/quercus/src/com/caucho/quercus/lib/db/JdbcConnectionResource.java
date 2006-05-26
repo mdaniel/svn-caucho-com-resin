@@ -633,12 +633,7 @@ public abstract class JdbcConnectionResource implements Closeable {
 
   public Value list_dbs()
   {
-    Value result = validateConnection().getCatalogs();
-
-    if (result instanceof JdbcResultResource)
-      return _env.wrapJava(new MysqliResult((JdbcResultResource) result));
-    else
-      return result;
+    return validateConnection().getCatalogs();
   }
 
   /**
@@ -698,20 +693,17 @@ public abstract class JdbcConnectionResource implements Closeable {
    *
    * @return a {@link JdbcResultResource}, or null for failure
    */
-  public JdbcResultResource query(String sql,
-				  @Optional("MYSQLI_STORE_RESULT") int resultMode)
+  protected Value query(String sql,
+                     @Optional("MYSQLI_STORE_RESULT") int resultMode)
   {
+  // XXX: the query can return true for successful update, e.g. mysql
     try {
-      Value value = real_query(sql);
-
-      if (value instanceof JdbcResultResource)
-        return (JdbcResultResource) value;
-
+      return real_query(sql);
     } catch (Exception e) {
       log.log(Level.FINE, e.toString(), e);
     }
 
-    return null;
+    return BooleanValue.FALSE;
   }
 
   /*
@@ -885,12 +877,7 @@ public abstract class JdbcConnectionResource implements Closeable {
    */
   public Value store_result(Env env)
   {
-    Value value = validateConnection().storeResult();
-
-    if (value instanceof JdbcResultResource)
-      return env.wrapJava(new MysqliResult((JdbcResultResource) value));
-    else
-      return value;
+    return validateConnection().storeResult();
   }
 
   /**
@@ -901,12 +888,7 @@ public abstract class JdbcConnectionResource implements Closeable {
    */
   public Value use_result(Env env)
   {
-    Value value = validateConnection().storeResult();
-
-    if (value instanceof JdbcResultResource)
-      return env.wrapJava(new MysqliResult((JdbcResultResource) value));
-    else
-      return value;
+    return validateConnection().storeResult();
   }
 
   /**
@@ -942,15 +924,12 @@ public abstract class JdbcConnectionResource implements Closeable {
   public boolean close(Env env)
   {
     if (_connected) {
-
       _connected = false;
       env.removeClose(this);
-      this.close();
-      return true;
-
-    } else {
-      return false;
+      close();
     }
+    
+    return true;
   }
 
   public JdbcConnectionResource validateConnection()
@@ -1075,7 +1054,7 @@ public abstract class JdbcConnectionResource implements Closeable {
       if (stmt.execute(sql)) {
         ResultSet rs = stmt.getResultSet();
 
-        _rs = new JdbcResultResource(stmt, rs, this);
+        _rs = createResult(stmt, rs);
         _affectedRows = 0;
         _resultValues.add(_rs);
         _warnings = stmt.getWarnings();
@@ -1087,12 +1066,13 @@ public abstract class JdbcConnectionResource implements Closeable {
 
         // php/1f33
         if (_pgconn) {
-          _rs = new JdbcResultResource(stmt, null, this);
+          _rs = createResult(stmt, null);
           _resultValues.add(_rs);
         }
         _affectedRows = 0;
         _affectedRows = stmt.getUpdateCount();
-        _rs.setAffectedRows(_affectedRows);
+	if (_rs != null)
+	  _rs.setAffectedRows(_affectedRows);
         _warnings = stmt.getWarnings();
         // for php/4310
         if (!_pgconn) {
@@ -1122,6 +1102,15 @@ public abstract class JdbcConnectionResource implements Closeable {
       return _resultValues.get(0);
     } else
       return BooleanValue.TRUE;
+  }
+
+  /**
+   * Creates a database-specific result.
+   */
+  protected JdbcResultResource createResult(Statement stmt,
+					      ResultSet rs)
+  {
+    return new JdbcResultResource(stmt, rs, this);
   }
 
   /**

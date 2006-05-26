@@ -448,8 +448,8 @@ public class Function extends AbstractFunction {
 
     out.print(")");
 
-    if (_isReturnsReference && ! isRef)
-      out.print(".toValue()");
+    //if (_isReturnsReference && ! isRef)
+    //  out.print(".toValue()");
     
     /* php/3a70 - should only be generated from generateCopy
     if (! (isRef && _isReturnsReference))
@@ -526,9 +526,9 @@ public class Function extends AbstractFunction {
         
     out.println();
     if (isStatic())
-      out.print("public Value call" + ref + "(Env env");
+      out.print("public final Value call" + ref + "(Env env");
     else
-      out.print("public Value callMethod" + ref + "(Env env, Value q_this");
+      out.print("public final Value callMethod" + ref + "(Env env, Value q_this");
 
     for (int i = 0; i < _args.length; i++) {
       out.print(", ");
@@ -699,7 +699,7 @@ public class Function extends AbstractFunction {
       out.println("java.util.HashMap<String,Var> _quercus_oldMap = env.pushEnv(_quercus_map);");
 
       if (! isStatic())
-	out.println("Value q_oldThis = env.setThis(q_this_arg);");
+	out.println("Value q_oldThis = env.setThis(q_this);");
       
       out.println("try {");
       out.pushDepth();

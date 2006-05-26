@@ -33,6 +33,7 @@ import com.caucho.quercus.Quercus;
 import com.caucho.quercus.QuercusException;
 import com.caucho.quercus.QuercusRuntimeException;
 import com.caucho.quercus.expr.Expr;
+import com.caucho.quercus.expr.LiteralExpr;
 import com.caucho.quercus.env.*;
 import com.caucho.quercus.module.Construct;
 import com.caucho.quercus.module.JavaMarshall;
@@ -67,8 +68,8 @@ public class JavaImplClassDef extends ClassDef {
   private final String _name;
   private final Class _type;
 
-  private final HashMap<String, Value> _constMap
-    = new HashMap<String, Value>();
+  private final HashMap<String, Expr> _constMap
+    = new HashMap<String, Expr>();
 
   private final HashMap<String, JavaMethod> _functionMap
     = new HashMap<String, JavaMethod>();
@@ -209,17 +210,9 @@ public class JavaImplClassDef extends ClassDef {
       cl.addMethod(entry.getKey(), entry.getValue());
     }
 
-    for (Map.Entry<String,Value> entry : _constMap.entrySet()) {
+    for (Map.Entry<String,Expr> entry : _constMap.entrySet()) {
       cl.addConstant(entry.getKey(), entry.getValue());
     }
-  }
-
-  /**
-   * Finds the matching constant
-   */
-  public Value findConstant(Env env, String name)
-  {
-    return _constMap.get(name);
   }
 
   /**
@@ -339,7 +332,7 @@ public class JavaImplClassDef extends ClassDef {
         Value value = Quercus.objectToValue(field.get(null));
 
         if (value != null)
-          _constMap.put(field.getName().intern(), value);
+          _constMap.put(field.getName().intern(), new LiteralExpr(value));
       } catch (Throwable e) {
         log.log(Level.FINER, e.toString(), e);
       }

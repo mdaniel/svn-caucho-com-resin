@@ -807,22 +807,25 @@ public class MysqliModule extends AbstractQuercusModule {
    * Executes a query and returns the result.
    *
    */
-  public static MysqliResult mysqli_query(@NotNull Mysqli conn,
+  public static Value mysqli_query(Env env,
+				   @NotNull Mysqli conn,
                                           String sql,
                                           @Optional("MYSQLI_STORE_RESULT") int resultMode)
   {
     // ERRATUM: <i>resultMode</i> is ignored, MYSQLI_USE_RESULT would represent
     //  an unbuffered query, but that is not supported.
-    JdbcResultResource resultResource = query(conn, sql);
+    Value value = query(conn, sql);
 
-    if (resultResource != null) {
-      return new MysqliResult(resultResource);
+    if (value instanceof JdbcResultResource) {
+      JdbcResultResource resultResource = (JdbcResultResource) value;
+
+      return env.wrapJava(resultResource);
     }
-
-    return null;
+    else
+      return value;
   }
 
-  private static JdbcResultResource query(Mysqli conn,
+  private static Value query(Mysqli conn,
                                           String sql)
   {
     if (conn == null)

@@ -139,6 +139,14 @@ public class InterpretedClassDef extends ClassDef
     for (Map.Entry<String,AbstractFunction> entry : _functionMap.entrySet()) {
       cl.addMethod(entry.getKey(), entry.getValue());
     }
+
+    for (Map.Entry<String,Expr> entry : _staticFieldMap.entrySet()) {
+      cl.addStaticField(entry.getKey(), entry.getValue());
+    }
+
+    for (Map.Entry<String,Expr> entry : _constMap.entrySet()) {
+      cl.addConstant(entry.getKey(), entry.getValue());
+    }
   }
 
   /**
@@ -175,7 +183,7 @@ public class InterpretedClassDef extends ClassDef
    */
   public void addStaticValue(Value name, Expr value)
   {
-    _staticFieldMap.put(name.toString().intern(), value);
+    _staticFieldMap.put(getName() + "::" + name.toString(), value);
   }
 
   /**
@@ -340,6 +348,22 @@ public class InterpretedClassDef extends ClassDef
       out.print("cl.addMethod(\"");
       out.printJavaString(key);
       out.println("\", fun_" + key + ");");
+    }
+
+    for (Map.Entry<String,Expr> entry : _staticFieldMap.entrySet()) {
+      out.print("cl.addStaticField(\"");
+      out.printJavaString(entry.getKey());
+      out.print("\", ");
+      entry.getValue().generateExpr(out);
+      out.println(");");
+    }
+
+    for (Map.Entry<String,Expr> entry : _constMap.entrySet()) {
+      out.print("cl.addConstant(\"");
+      out.printJavaString(entry.getKey());
+      out.print("\", ");
+      entry.getValue().generateExpr(out);
+      out.println(");");
     }
     
     out.popDepth();

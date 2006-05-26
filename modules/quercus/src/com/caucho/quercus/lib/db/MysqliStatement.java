@@ -428,11 +428,7 @@ public class MysqliStatement {
   {
     try {
       if (_rs != null) {
-        JdbcResultResource result;
-
-        result = new JdbcResultResource(_rs.getMetaData(), _conn);
-
-        return env.wrapJava(new MysqliResult(result));
+        return new MysqliResult(_rs.getMetaData(), _conn);
       }
       else
         return null;

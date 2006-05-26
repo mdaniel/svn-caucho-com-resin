@@ -35,7 +35,9 @@ import java.util.ArrayList;
 
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
+import com.caucho.quercus.env.NullValue;
 
+import com.caucho.quercus.program.AbstractFunction;
 import com.caucho.quercus.program.AnalyzeInfo;
 
 import com.caucho.quercus.gen.PhpWriter;
@@ -88,17 +90,24 @@ public class MethodCallExpr extends Expr {
 
     Value obj = _objExpr.eval(env);
 
-    Value []args = new Value[_args.length];
+    AbstractFunction fun = obj.findFunction(_name);
 
-    for (int i = 0; i < args.length; i++)
-      args[i] = _args[i].eval(env);
+    if (fun == null) {
+      env.error(getLocationLine(),
+		L.l("'{0}::{1}' is an unknown function.",
+		    obj.getClassName(), _name));
+
+      return NullValue.NULL;
+    }
+
+    Value []args = fun.evalArguments(env, this, _args);
     
     env.pushCall(this, obj);
     
     try {
       env.checkTimeout();
 
-      return obj.callMethod(env, _name, args);
+      return fun.callMethod(env, obj, args);
     } finally {
       env.popCall();
     }
@@ -116,11 +125,25 @@ public class MethodCallExpr extends Expr {
     env.checkTimeout();
 
     Value obj = _objExpr.eval(env);
+
+    AbstractFunction fun = obj.findFunction(_name);
+
+    if (fun == null) {
+      env.error(getLocationLine(),
+		L.l("'{0}::{1}' is an unknown function.",
+		    obj.getClassName(), _name));
+
+      return NullValue.NULL;
+    }
+
+    Value []args = fun.evalArguments(env, this, _args);
     
     env.pushCall(this, obj);
     
     try {
-      return obj.callMethodRef(env, _name, _args);
+      env.checkTimeout();
+
+      return fun.callMethodRef(env, obj, args);
     } finally {
       env.popCall();
     }

@@ -35,6 +35,7 @@ import java.util.logging.Logger;
 
 import com.caucho.quercus.expr.Expr;
 
+import com.caucho.quercus.program.AbstractFunction;
 import com.caucho.quercus.program.JavaClassDef;
 
 import java.io.IOException;
@@ -155,6 +156,14 @@ public class JavaValue extends ResourceValue {
   public Value toKey()
   {
     return new LongValue(System.identityHashCode(this));
+  }
+
+  /**
+   * Returns the method.
+   */
+  public AbstractFunction findFunction(String methodName)
+  {
+    return _classDef.findFunction(methodName);
   }
 
   /**

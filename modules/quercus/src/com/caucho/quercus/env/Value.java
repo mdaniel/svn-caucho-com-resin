@@ -63,6 +63,19 @@ abstract public class Value {
     return null;
   }
 
+  /**
+   * Returns the value's class name.
+   */
+  public String getClassName()
+  {
+    QuercusClass qClass = getQuercusClass();
+
+    if (qClass != null)
+      return qClass.getName();
+
+    return getType();
+  }
+
   //
   // Predicates and Relations
   //

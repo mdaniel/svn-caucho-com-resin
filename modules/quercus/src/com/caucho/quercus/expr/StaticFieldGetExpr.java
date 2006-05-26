@@ -149,6 +149,17 @@ public class StaticFieldGetExpr extends AbstractVarExpr {
   public void generate(PhpWriter out)
     throws IOException
   {
+    out.print("env.getGlobalValue(\"" + _envName + "\")");
+  }
+
+  /**
+   * Generates code to evaluate the expression.
+   *
+   * @param out the writer to the Java source code.
+   */
+  public void generateRef(PhpWriter out)
+    throws IOException
+  {
     out.print("env.getGlobalVar(\"" + _envName + "\")");
   }
 

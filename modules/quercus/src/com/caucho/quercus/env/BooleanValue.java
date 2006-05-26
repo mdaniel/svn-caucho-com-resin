@@ -134,6 +134,14 @@ public class BooleanValue extends Value {
   }
 
   /**
+   * Converts to a java object.
+   */
+  public Object toJavaObject()
+  {
+    return _value ? Boolean.TRUE : Boolean.FALSE;
+  }
+
+  /**
    * Converts to an array if null.
    */
   public Value toAutoArray()

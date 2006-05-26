@@ -630,6 +630,7 @@ v   *
       glue = piecesV.toStringValue();
     }
     else {
+      Thread.dumpStack();
       env.error(L.l("neither argument to implode is an array: {0}, {1}",
 		    glueV.getClass().getName(), piecesV.getClass().getName()));
 

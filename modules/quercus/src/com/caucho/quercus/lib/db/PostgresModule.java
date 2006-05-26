@@ -634,7 +634,7 @@ public class PostgresModule extends AbstractQuercusModule {
         return null;
 
       if (pstmt.getStatementType().equals("SELECT")) {
-        return new MysqliResult(new JdbcResultResource(null, pstmt.getResultSet(), null));
+        return new MysqliResult(null, pstmt.getResultSet(), null);
       } else {
         return pstmt;
       }
@@ -1837,7 +1837,7 @@ public class PostgresModule extends AbstractQuercusModule {
    * Execute a query
    */
   @ReturnNullAsFalse
-  public MysqliResult pg_query(Env env,
+  public JdbcResultResource pg_query(Env env,
                                @NotNull Postgres conn,
                                String query)
   {
@@ -1853,7 +1853,7 @@ public class PostgresModule extends AbstractQuercusModule {
   JdbcResultResource resultResource = (JdbcResultResource) queryV;
 
   if (resultResource != null) {
-    return new MysqliResult(resultResource);
+    return resultResource;
   }
       }
     } catch (Exception ex) {

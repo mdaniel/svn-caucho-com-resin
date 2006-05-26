@@ -84,6 +84,16 @@ abstract public class CompiledFunction_2 extends CompiledFunction {
     }
   }
 
+  public Value call(Env env)
+  {
+    return call(env, _default_0.eval(env), _default_1.eval(env));
+  }
+
+  public Value call(Env env, Value a0)
+  {
+    return call(env, a0, _default_1.eval(env));
+  }
+
   public String toString()
   {
     return "CompiledFunction_1[" + _name + "]";

@@ -116,7 +116,7 @@ public class ReturnStatement extends Statement {
       out.print("return ");
 
       // php/3a5h
-      _expr.generate(out);
+      _expr.generateValue(out);
       
       /**
       Expr copy = _expr.createCopy();

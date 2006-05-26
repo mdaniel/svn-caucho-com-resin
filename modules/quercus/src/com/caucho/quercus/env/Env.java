@@ -382,17 +382,26 @@ public final class Env {
                                   String userName, String password)
     throws Exception
   {
-    DataSource database = _quercus.getDatabase();
-
-    if (database != null)
-      return database.getConnection();
-
-    database = DatabaseManager.findDatabase(driver, url);
+    DataSource database = getDataSource(driver, url);
 
     if (userName == null || userName.equals(""))
       return database.getConnection();
     else
       return database.getConnection(userName, password);
+  }
+
+  /**
+   * Returns the configured database.
+   */
+  public DataSource getDataSource(String driver, String url)
+    throws Exception
+  {
+    DataSource database = _quercus.getDatabase();
+
+    if (database != null)
+      return database;
+    else
+      return DatabaseManager.findDatabase(driver, url);
   }
 
   /**
@@ -559,6 +568,18 @@ public final class Env {
     try {
       v.print(this);
       getOut().println();
+    } catch (IOException e) {
+      throw new QuercusModuleException(e);
+    }
+  }
+
+  /**
+   * Prints and object.
+   */
+  public final void println(Object v)
+  {
+    try {
+      getOut().println(v);
     } catch (IOException e) {
       throw new QuercusModuleException(e);
     }
@@ -2575,14 +2596,18 @@ public final class Env {
     if (qClassRef != null) {
       qClass = qClassRef.get();
 
-      if (qClass != null)
+      if (qClass != null) {
+	qClass.init(this);
 	return qClass;
+      }
     }
 
     qClass = new QuercusClass(def, parent);
     qClass.validate(this);
 
     _classCache.put(key, new SoftReference<QuercusClass>(qClass));
+
+    qClass.init(this);
 
     return qClass;
   }
@@ -3004,7 +3029,15 @@ public final class Env {
    */
   public Value error(String msg)
   {
-    return error(B_ERROR, msg + getFunctionLocation());
+    return error(B_ERROR, "", msg + getFunctionLocation());
+  }
+
+  /**
+   * A fatal runtime error.
+   */
+  public Value error(String loc, String msg)
+  {
+    return error(B_ERROR, loc, msg + getFunctionLocation());
   }
 
   /**
@@ -3037,7 +3070,7 @@ public final class Env {
     
     String fullMsg = prefix + msg + getFunctionLocation();
 
-    error(B_ERROR, fullMsg);
+    error(B_ERROR, "", fullMsg);
 
     throw new QuercusRuntimeException(fullMsg);
   }
@@ -3053,7 +3086,7 @@ public final class Env {
       log.log(Level.FINER, e.toString(), e);
     }
 
-    return error(B_WARNING, msg + getFunctionLocation());
+    return error(B_WARNING, "", msg + getFunctionLocation());
   }
 
   /**
@@ -3085,7 +3118,7 @@ public final class Env {
       log.log(Level.FINER, e.toString(), e);
     }
 
-    return error(B_STRICT, msg + getFunctionLocation());
+    return error(B_STRICT, "", msg + getFunctionLocation());
   }
 
   /**
@@ -3109,7 +3142,7 @@ public final class Env {
    */
   public Value notice(String msg)
   {
-    return error(B_NOTICE, msg + getFunctionLocation());
+    return error(B_NOTICE, "", msg + getFunctionLocation());
   }
 
   /**
@@ -3144,7 +3177,7 @@ public final class Env {
   public Value parse(String msg)
     throws Exception
   {
-    return error(B_PARSE, msg);
+    return error(B_PARSE, "", msg);
   }
 
   /**
@@ -3152,7 +3185,7 @@ public final class Env {
    */
   public Value compileError(String msg)
   {
-    return error(B_COMPILE_ERROR, msg);
+    return error(B_COMPILE_ERROR, "", msg);
   }
 
   /**
@@ -3160,7 +3193,7 @@ public final class Env {
    */
   public Value compileWarning(String msg)
   {
-    return error(B_COMPILE_WARNING, msg);
+    return error(B_COMPILE_WARNING, "", msg);
   }
 
   /**
@@ -3228,13 +3261,16 @@ public final class Env {
   /**
    * Writes an error.
    */
-  public Value error(int code, String msg)
+  public Value error(int code, String loc, String msg)
   {
     int mask = 1 << code;
 
     Location location = getLocation();
 
-    String locationMessagePrefix = location.getMessagePrefix();
+    String locationMessagePrefix = loc;
+
+    if (loc.equals(""))
+      loc = location.getMessagePrefix();
 
     if (code >= 0 && code < _errorHandlers.length &&
         _errorHandlers[code] != null) {

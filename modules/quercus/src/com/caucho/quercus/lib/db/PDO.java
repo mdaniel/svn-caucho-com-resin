@@ -32,10 +32,14 @@ package com.caucho.quercus.lib.db;
 import java.util.logging.Logger;
 import java.util.logging.Level;
 import java.util.Map;
+import java.util.HashMap;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.ResultSet;
+
+import javax.sql.DataSource;
+import javax.naming.*;
 
 import com.caucho.util.L10N;
 
@@ -123,6 +127,8 @@ public class PDO implements java.io.Closeable {
 
   private final Env _env;
   private final String _dsn;
+  private String _user;
+  private String _password;
 
   private final PDOError _error;
 
@@ -142,21 +148,23 @@ public class PDO implements java.io.Closeable {
   {
     _env = env;
     _dsn = dsn;
+    _user = user;
+    _password = password;
     _error = new PDOError(_env);
 
     // XXX: following would be better as annotation on destroy() method
     _env.addClose(this);
 
     try {
-      String host = "localhost";
-      int port = 3306;
-      String dbname = "test";
+      DataSource ds = getDataSource(env, dsn);
 
-      String driver = "com.mysql.jdbc.jdbc2.optional.MysqlConnectionPoolDataSource";
-
-      String url = "jdbc:mysql://" + host + ":" + port + "/" + dbname;
-
-      _conn = env.getConnection(driver, url, user, password);
+      if (ds == null) {
+	env.warning(L.l("'{0}' is an unknown PDO data source.", dsn));
+      }
+      else
+	_conn = ds.getConnection(_user, _password);
+    } catch (RuntimeException e) {
+      throw e;
     } catch (Exception e) {
       env.warning("A link to the server could not be established.");
       _error.error(e);
@@ -731,6 +739,136 @@ public class PDO implements java.io.Closeable {
   private boolean setTimeout(int timeoutSeconds)
   {
     throw new UnimplementedException();
+  }
+
+  /**
+   * Opens a connection based on the dsn.
+   */
+  private DataSource getDataSource(Env env, String dsn)
+    throws Exception
+  {
+    if (dsn.startsWith("mysql:"))
+      return getMysqlDataSource(env, dsn);
+    else if (dsn.startsWith("java:"))
+      return getJndiDataSource(env, dsn);
+    else if (dsn.startsWith("resin:"))
+      return getResinDataSource(env, dsn);
+    else {
+      env.error(L.l("'{0}' is an unknown PDO data source.",
+		    dsn));
+
+      return null;
+    }
+  }
+
+  /**
+   * Opens a mysql connection based on the dsn.
+   */
+  private DataSource getMysqlDataSource(Env env, String dsn)
+    throws Exception
+  {
+    HashMap<String,String> attr = parseAttr(dsn, dsn.indexOf(':'));
+    
+    String host = attr.get("host");
+    String port = attr.get("port");
+    String dbname = attr.get("dbname");
+    String unixSocket = attr.get("unix_socket");
+
+    if (unixSocket != null) {
+      env.error(L.l("PDO mysql: does not support unix_socket"));
+      return null;
+    }
+
+    if (host == null)
+      host = "localhost";
+
+    if (port == null)
+      port = "3306";
+
+    if (dbname == null)
+      dbname = "test";
+
+    String user = attr.get("user");
+    if (user != null && _user == null)
+      _user = user;
+
+    String password = attr.get("password");
+    if (password != null && _password == null)
+      _password = password;
+
+    String driver = "com.mysql.jdbc.jdbc2.optional.MysqlConnectionPoolDataSource";
+
+    String url = "jdbc:mysql://" + host + ":" + port + "/" + dbname;
+
+    return env.getDataSource(driver, url);
+  }
+
+  /**
+   * Opens a resin connection based on the dsn.
+   */
+  private DataSource getResinDataSource(Env env, String dsn)
+    throws Exception
+  {
+    String driver = "com.caucho.db.jdbc.ConnectionPoolDataSourceImpl";
+
+    String url = "jdbc:" + dsn;
+
+    return env.getDataSource(driver, url);
+  }
+
+  /**
+   * Opens a connection based on the dsn.
+   */
+  private DataSource getJndiDataSource(Env env, String dsn)
+  {
+    DataSource ds = null;
+    
+    try {
+      Context ic = new InitialContext();
+
+      ds = (DataSource) ic.lookup(dsn);
+    } catch (NamingException e) {
+      log.log(Level.FINE, e.toString(), e);
+    }
+
+    if (ds == null)
+      env.error(L.l("'{0}' is an unknown PDO JNDI data source.",
+		    dsn));
+
+    return ds;
+  }
+
+  private HashMap<String,String> parseAttr(String dsn, int i)
+  {
+    HashMap<String,String> attr = new HashMap<String,String>();
+    
+    int length = dsn.length();
+
+    for (; i < length; i++) {
+      char ch = dsn.charAt(i);
+      
+      if (! Character.isJavaIdentifierStart(ch))
+	continue;
+
+      StringBuilder name = new StringBuilder();
+      for (;
+	   i < length && Character.isJavaIdentifierPart((ch = dsn.charAt(i)));
+	   i++) {
+	name.append(ch);
+      }
+      
+      for (; i < length && ((ch = dsn.charAt(i)) == ' ' || ch == '='); i++) {
+      }
+
+      StringBuilder value = new StringBuilder();
+      for (; i < length && (ch = dsn.charAt(i)) != ' ' && ch != ';'; i++) {
+	value.append(ch);
+      }
+
+      attr.put(name.toString(), value.toString());
+    }
+
+    return attr;
   }
 
   public String toString()

@@ -162,7 +162,7 @@ public class FunctionExpr extends Expr {
     AbstractFunction fun = env.findFunction(_name);
 
     if (fun == null) {
-      env.error(L.l("'{0}' is an unknown function.", _name));
+      env.error(getLocationLine(), L.l("'{0}' is an unknown function.", _name));
 
       return NullValue.NULL;
     }

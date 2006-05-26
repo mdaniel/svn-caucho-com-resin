@@ -79,9 +79,11 @@ public class ConnectionPoolDataSourceImpl implements ConnectionPoolDataSource {
    */
   public void setURL(String url)
   {
+    if (url.startsWith("jdbc:"))
+      url = url.substring(5);
     if (url.startsWith("resin:"))
       url = url.substring(6);
-    
+
     _database.setPath(Vfs.lookup(url));
   }
 

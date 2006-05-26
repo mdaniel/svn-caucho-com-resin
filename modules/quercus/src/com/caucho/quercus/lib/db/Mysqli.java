@@ -122,6 +122,15 @@ public class Mysqli extends JdbcConnectionResource {
     }
   }
 
+  /**
+   * Creates a database-specific result.
+   */
+  protected JdbcResultResource createResult(Statement stmt,
+					    ResultSet rs)
+  {
+    return new MysqliResult(stmt, rs, this);
+  }
+
   public String toString()
   {
     if (isConnected())

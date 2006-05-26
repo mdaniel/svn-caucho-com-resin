@@ -33,6 +33,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.IdentityHashMap;
 import java.util.logging.Logger;
 
@@ -81,8 +82,11 @@ public class QuercusClass {
   private final HashMap<String,AbstractFunction> _lowerMethodMap
     = new HashMap<String,AbstractFunction>();
 
-  private final IdentityHashMap<String,Value> _constMap
-    = new IdentityHashMap<String,Value>();
+  private final IdentityHashMap<String,Expr> _constMap
+    = new IdentityHashMap<String,Expr>();
+
+  private final HashMap<String,Expr> _staticFieldMap
+    = new LinkedHashMap<String,Expr>();
   
   public QuercusClass(ClassDef classDef, QuercusClass parent)
   {
@@ -220,6 +224,22 @@ public class QuercusClass {
   }
 
   /**
+   * Adds a static field
+   */
+  public void addStaticField(String name, Expr expr)
+  {
+    _staticFieldMap.put(name, expr);
+  }
+
+  /**
+   * Adds a constant definition
+   */
+  public void addConstant(String name, Expr expr)
+  {
+    _constMap.put(name, expr);
+  }
+
+  /**
    * Returns the number of fields.
    */
   public int getFieldSize()
@@ -256,6 +276,13 @@ public class QuercusClass {
 	  throw env.errorException(L.l("Abstract function '{0}' must be implemented in concrete class {1}.",
 			      fun.getName(), getName()));
       }
+    }
+  }
+
+  public void init(Env env)
+  {
+    for (Map.Entry<String,Expr> entry : _staticFieldMap.entrySet()) {
+      env.setGlobalValue(entry.getKey(), entry.getValue().eval(env));
     }
   }
 
@@ -379,6 +406,19 @@ public class QuercusClass {
    */
   public AbstractFunction findFunction(String name)
   {
+    AbstractFunction fun = _methodMap.get(name);
+
+    if (fun == null)
+      fun = _lowerMethodMap.get(name.toLowerCase());
+
+    return fun;
+  }
+
+  /**
+   * Finds the matching function.
+   */
+  public AbstractFunction findFunctionExact(String name)
+  {
     return _methodMap.get(name);
   }
 
@@ -396,22 +436,6 @@ public class QuercusClass {
   public AbstractFunction findStaticFunction(String name)
   {
     return findFunction(name);
-  }
-
-  /**
-   * Finds the matching constant.
-   */
-  public Value findConstant(String name)
-  {
-    return _constMap.get(name);
-  }
-
-  /**
-   * Finds the matching constant.
-   */
-  public void addConstant(String name, Value value)
-  {
-    _constMap.put(name, value);
   }
 
   /**
@@ -536,10 +560,10 @@ public class QuercusClass {
    */
   public final Value getConstant(Env env, String name)
   {
-    Value value = findConstant(name);
+    Expr expr = _constMap.get(name);
 
-    if (value != null)
-      return value;
+    if (expr != null)
+      return expr.eval(env);
 
     throw new QuercusRuntimeException(L.l("{0}::{1} is an unknown constant",
 					getName(), name));

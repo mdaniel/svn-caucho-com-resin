@@ -33,6 +33,7 @@ import com.caucho.quercus.Quercus;
 import com.caucho.quercus.QuercusException;
 import com.caucho.quercus.QuercusRuntimeException;
 import com.caucho.quercus.expr.Expr;
+import com.caucho.quercus.expr.LiteralExpr;
 import com.caucho.quercus.env.*;
 import com.caucho.quercus.module.Construct;
 import com.caucho.quercus.module.JavaMarshall;
@@ -341,7 +342,7 @@ public class JavaClassDef extends ClassDef {
    */
   public Value callNew(Env env, Expr []args)
   {
-    return _cons.call(env, null, args);
+    return _cons.call(env, (Object) null, args);
   }
 
   /**
@@ -349,7 +350,15 @@ public class JavaClassDef extends ClassDef {
    */
   public Value callNew(Env env, Value []args)
   {
-    return _cons.call(env, null, args);
+    return _cons.call(env, (Object) null, args);
+  }
+
+  /**
+   * Returns the matching method.
+   */
+  public AbstractFunction findFunction(String name)
+  {
+    return _functionMap.get(name);
   }
 
   /**
@@ -506,7 +515,7 @@ public class JavaClassDef extends ClassDef {
     }
 
     for (Map.Entry<String,Value> entry : _constMap.entrySet()) {
-      cl.addConstant(entry.getKey(), entry.getValue());
+      cl.addConstant(entry.getKey(), new LiteralExpr(entry.getValue()));
     }
   }
 

@@ -159,7 +159,9 @@ public class VarExpr
    */
   public Value evalCopy(Env env)
   {
-    return eval(env).copy();
+    Value v = eval(env);
+    
+    return v.copy();
   }
 
   /**

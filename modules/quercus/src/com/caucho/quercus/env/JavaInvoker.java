@@ -380,6 +380,20 @@ abstract public class JavaInvoker
     return call(env, env.getThis(), value);
   }
 
+  /**
+   * Evaluates the function, returning a copy.  Java methods don't
+   * need the copy.
+   */
+  public Value callCopy(Env env, Value []args)
+  {
+    return call(env, args);
+  }
+
+  public Value call(Env env, Value obj, Value []value)
+  {
+    return call(env, obj.toJavaObject(), value);
+  }
+
   public Value call(Env env, Object obj, Expr []exprs)
   {
     if (! _isInit)

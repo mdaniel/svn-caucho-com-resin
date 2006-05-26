@@ -261,15 +261,15 @@ public class ErrorModule extends AbstractQuercusModule {
   {
     switch (code) {
     case Env.E_USER_NOTICE:
-      env.error(Env.B_USER_NOTICE, msg);
+      env.error(Env.B_USER_NOTICE, "", msg);
       return BooleanValue.TRUE;
 
     case Env.E_USER_WARNING:
-      env.error(Env.B_USER_WARNING, msg);
+      env.error(Env.B_USER_WARNING, "", msg);
       return BooleanValue.TRUE;
 
     case Env.E_USER_ERROR:
-      env.error(Env.B_USER_ERROR, msg);
+      env.error(Env.B_USER_ERROR, "", msg);
       return BooleanValue.TRUE;
 
     default:
