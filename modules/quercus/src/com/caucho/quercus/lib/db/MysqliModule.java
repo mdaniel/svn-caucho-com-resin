@@ -1042,7 +1042,9 @@ public class MysqliModule extends AbstractQuercusModule {
     if (stmt == null)
       return false;
 
-    return stmt.close();
+    stmt.close();
+    
+    return true;
   }
 
   /**
@@ -1181,7 +1183,9 @@ public class MysqliModule extends AbstractQuercusModule {
     if (stmt == null)
       return false;
 
-    return stmt.close();
+    stmt.close();
+    
+    return true;
   }
 
   /**
