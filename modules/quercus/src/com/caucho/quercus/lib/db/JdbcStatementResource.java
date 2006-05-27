@@ -29,16 +29,17 @@
 
 package com.caucho.quercus.lib.db;
 
+import com.caucho.quercus.QuercusModuleException;
+
 import com.caucho.util.Log;
 import com.caucho.util.L10N;
-import com.caucho.quercus.lib.db.JdbcConnectionResource;
-import com.caucho.quercus.lib.db.JdbcResultResource;
 import com.caucho.quercus.env.*;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -62,6 +63,10 @@ public class JdbcStatementResource extends ResourceValue {
 
   private String _errorMessage = "";
   private int _errorCode;
+
+  // Statement type
+  // (SELECT, UPDATE, DELETE, INSERT, CREATE, DROP, ALTER, BEGIN, DECLARE, UNKNOWN)
+  private String _stmtType;
 
   public JdbcStatementResource(JdbcConnectionResource connV,
                                String query)
@@ -195,12 +200,9 @@ public class JdbcStatementResource extends ResourceValue {
     int numColumns;
 
     try {
+      ResultSetMetaData md = getMetaData();
 
-      if (_metaData == null)
-        _metaData = _rs.getMetaData();
-
-      numColumns = _metaData.getColumnCount();
-
+      numColumns = md.getColumnCount();
     } catch (SQLException e) {
       log.log(Level.FINE, e.toString(), e);
       return false;
@@ -213,9 +215,7 @@ public class JdbcStatementResource extends ResourceValue {
 
     _results = new Value[size];
 
-    for (int i = 0; i < size; i++) {
-      _results[i] = outParams[i];
-    }
+    System.arraycopy(outParams, 0, _results, 0, size);
 
     return true;
   }
@@ -226,16 +226,18 @@ public class JdbcStatementResource extends ResourceValue {
    * <p/>
    * XXX: THIS HELPER FUNCTION SO FAR IS NEVER USED
    */
-  public Value getMetaData()
+  public ResultSetMetaData getMetaData()
   {
     try {
+
       if (_metaData != null)
         _metaData = _rs.getMetaData();
+
     } catch (SQLException e) {
       log.log(Level.FINE, e.toString(), e);
-      return BooleanValue.FALSE;
     }
-    return BooleanValue.TRUE;
+
+    return null;
   }
 
   /**
@@ -310,7 +312,7 @@ public class JdbcStatementResource extends ResourceValue {
    * <p/>
    * returns true on success, false on error null if no more rows
    */
-  public Value fetch()
+  public boolean fetch()
   {
     try {
       if (_rs.next()) {
@@ -321,13 +323,13 @@ public class JdbcStatementResource extends ResourceValue {
         for (int i = 0; i < size; i++) {
           _results[i].set(JdbcResultResource.getColumnValue(_rs, _metaData, i + 1));
         }
-        return BooleanValue.TRUE;
+        return true;
       } else
-        return NullValue.NULL;
+        return false;
 
     } catch (SQLException e) {
       log.log(Level.FINE, e.toString(), e);
-      return BooleanValue.FALSE;
+      return false;
     }
   }
 
@@ -355,9 +357,15 @@ public class JdbcStatementResource extends ResourceValue {
   public Value getNumRows()
     throws SQLException
   {
-    return JdbcResultResource.getNumRows(_rs);
+    if (_rs != null)
+      return JdbcResultResource.getNumRows(_rs);
+    else
+      return BooleanValue.FALSE;
   }
 
+  /**
+   * Frees the associated result
+   */
   public boolean freeResult()
   {
     if (_rs == null)
@@ -377,6 +385,26 @@ public class JdbcStatementResource extends ResourceValue {
       log.log(Level.FINE, e.toString(), e);
       return false;
     }
+  }
+
+  public String getStatementType()
+  {
+    // Oracle Statement type
+    // Also used internally in Postgres (see PostgresModule)
+    // (SELECT, UPDATE, DELETE, INSERT, CREATE, DROP, ALTER, BEGIN, DECLARE, UNKNOWN)
+
+    _stmtType = _query;
+    _stmtType = _stmtType.replaceAll("\\s+.*", "");
+    if (_stmtType.equals("")) {
+      _stmtType = "UNKNOWN";
+    } else {
+      String s = _stmtType.replaceAll("(SELECT|UPDATE|DELETE|INSERT|CREATE|DROP|ALTER|BEGIN|DECLARE)", "");
+      if (!s.equals("")) {
+        _stmtType = "UNKNOWN";
+      }
+    }
+
+    return _stmtType;
   }
 
   /**
@@ -406,6 +434,109 @@ public class JdbcStatementResource extends ResourceValue {
 
     _resultResource = new JdbcResultResource(_stmt, _rs, _conn);
     return _resultResource;
+  }
+
+  /**
+   * Returns the error number
+   */
+  public int errorCode()
+  {
+    return _errorCode;
+  }
+
+  /**
+   * Returns the error message
+   */
+  public String errorMessage()
+  {
+    return _errorMessage;
+  }
+
+  /**
+   * counts the number of markers in the query string
+   */
+  public int paramCount()
+  {
+    if (_query == null)
+      return -1;
+
+    int count = 0;
+    int length = _query.length();
+    boolean inQuotes = false;
+    char c;
+
+    for (int i = 0; i < length; i++) {
+      c = _query.charAt(i);
+
+      if (c == '\\') {
+        if (i < length - 1)
+          i++;
+        continue;
+      }
+
+      if (inQuotes) {
+        if (c == '\'')
+          inQuotes = false;
+        continue;
+      }
+
+      if (c == '\'') {
+        inQuotes = true;
+        continue;
+      }
+
+      if (c == '?') {
+        count++;
+      }
+    }
+
+    return count;
+  }
+
+  /**
+   * prepares statement for query
+   *
+   * @param query SQL query
+   *
+   * @return true on success or false on failure
+   */
+  public boolean prepare(String query)
+  {
+    try {
+      if (_stmt != null)
+        _stmt.close();
+
+      _query = query;
+
+      _stmt = _conn.getConnection().prepareStatement(query);
+
+      return true;
+    } catch (SQLException e) {
+      log.log(Level.FINE, e.toString(), e);
+      _errorMessage = e.getMessage();
+      _errorCode = e.getErrorCode();
+      return false;
+    }
+  }
+
+  public JdbcConnectionResource validateConnection()
+  {
+    return _conn;
+  }
+
+  public ResultSet getResultSet()
+  {
+    return _rs;
+  }
+
+  public PreparedStatement getPreparedStatement()
+  {
+    return _stmt;
+  }
+
+  public String toString()
+  {
+    return getClass().getName() + "[" + _conn + "]";
   }
 }
 

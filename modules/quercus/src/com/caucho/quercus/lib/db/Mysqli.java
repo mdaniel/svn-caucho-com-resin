@@ -101,7 +101,7 @@ public class Mysqli extends JdbcConnectionResource {
 
       Connection jConn = env.getConnection(driver, url, userName, password);
 
-      setConnection(host, userName, password, dbname, port, jConn, driver, url, false);
+      setConnection(host, userName, password, dbname, port, jConn, driver, url);
 
       return true;
 
@@ -123,10 +123,31 @@ public class Mysqli extends JdbcConnectionResource {
   }
 
   /**
+   * returns a statement for use with
+   * mysqli_stmt_prepare
+   */
+  public MysqliStatement stmt_init(Env env)
+  {
+    return new MysqliStatement((Mysqli)validateConnection());
+  }
+
+  /**
+   * returns a prepared statement
+   */
+  public MysqliStatement prepare(Env env, String query)
+  {
+    MysqliStatement stmt = new MysqliStatement((Mysqli)validateConnection());
+
+    stmt.prepare(query);
+
+    return stmt;
+  }
+
+  /**
    * Creates a database-specific result.
    */
   protected JdbcResultResource createResult(Statement stmt,
-					    ResultSet rs)
+                                            ResultSet rs)
   {
     return new MysqliResult(stmt, rs, this);
   }

@@ -808,12 +808,13 @@ public class MysqliModule extends AbstractQuercusModule {
    *
    */
   public static Value mysqli_query(Env env,
-				   @NotNull Mysqli conn,
-                                          String sql,
-                                          @Optional("MYSQLI_STORE_RESULT") int resultMode)
+                                   @NotNull Mysqli conn,
+                                   String sql,
+                                   @Optional("MYSQLI_STORE_RESULT") int resultMode)
   {
     // ERRATUM: <i>resultMode</i> is ignored, MYSQLI_USE_RESULT would represent
     //  an unbuffered query, but that is not supported.
+
     Value value = query(conn, sql);
 
     if (value instanceof JdbcResultResource) {
@@ -826,7 +827,7 @@ public class MysqliModule extends AbstractQuercusModule {
   }
 
   private static Value query(Mysqli conn,
-                                          String sql)
+                             String sql)
   {
     if (conn == null)
       return null; // BooleanValue.FALSE;

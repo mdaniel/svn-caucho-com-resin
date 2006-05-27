@@ -30,9 +30,6 @@
 package com.caucho.quercus.lib.db;
 
 import java.sql.*;
-
-import java.util.HashMap;
-
 import java.util.logging.Logger;
 import java.util.logging.Level;
 
@@ -43,26 +40,20 @@ import com.caucho.quercus.env.*;
 import com.caucho.quercus.module.Optional;
 
 /**
- * postgres connection class (postgres has NO object oriented API)
+ * oracle connection class (oracle has NO object oriented API)
  */
-public class Postgres extends JdbcConnectionResource {
-  private static final Logger log = Logger.getLogger(Postgres.class.getName());
-  private static final L10N L = new L10N(Postgres.class);
+public class Oracle extends JdbcConnectionResource {
+  private static final Logger log = Logger.getLogger(Oracle.class.getName());
+  private static final L10N L = new L10N(Oracle.class);
 
-  PostgresResult _asyncResult;
-
-  // named prepared statements for postgres
-  private HashMap<String,PostgresStatement> _stmtTable
-    = new HashMap<String,PostgresStatement>();
-
-  public Postgres(Env env,
-                  @Optional("localhost") String host,
-                  @Optional String user,
-                  @Optional String password,
-                  @Optional String db,
-                  @Optional("5432") int port,
-                  @Optional String driver,
-                  @Optional String url)
+  public Oracle(Env env,
+                @Optional("localhost") String host,
+                @Optional String user,
+                @Optional String password,
+                @Optional String db,
+                @Optional("1521") int port,
+                @Optional String driver,
+                @Optional String url)
   {
     super(env);
 
@@ -127,9 +118,9 @@ public class Postgres extends JdbcConnectionResource {
   /**
    * returns a prepared statement
    */
-  public PostgresStatement prepare(Env env, String query)
+  public OracleStatement prepare(Env env, String query)
   {
-    PostgresStatement stmt = new PostgresStatement((Postgres)validateConnection());
+    OracleStatement stmt = new OracleStatement((Oracle)validateConnection());
 
     stmt.prepare(query);
 
@@ -142,59 +133,7 @@ public class Postgres extends JdbcConnectionResource {
   protected JdbcResultResource createResult(Statement stmt,
                                             ResultSet rs)
   {
-    return new PostgresResult(stmt, rs, this);
+    return new OracleResult(stmt, rs, this);
   }
 
-  public void setAsynchronousResult(PostgresResult asyncResult)
-  {
-    _asyncResult = asyncResult;
-  }
-
-  public PostgresResult getAsynchronousResult()
-  {
-    return _asyncResult;
-  }
-
-  public void putStatement(String name,
-                           PostgresStatement stmt)
-  {
-    _stmtTable.put(name, stmt);
-  }
-
-  public PostgresStatement getStatement(String name)
-  {
-    return (PostgresStatement) _stmtTable.get(name);
-  }
-
-  public PostgresStatement removeStatement(String name)
-  {
-    return (PostgresStatement) _stmtTable.remove(name);
-  }
-
-  /**
-   * This function is overriden in Postgres to keep
-   * result set references for php/4310 (see also php/1f33)
-   */
-  protected void keepResourceValues(Statement stmt)
-  {
-    setResultResource(createResult(stmt, null));
-    addResultValue(getResultResource());
-  }
-
-  /**
-   * This function is overriden in Postgres to keep
-   * statement references for php/4310
-   */
-  protected boolean keepStatementOpen()
-  {
-    return true;
-  }
-
-  public String toString()
-  {
-    if (isConnected())
-      return "Postgres[" + get_host_name() + "]";
-    else
-      return "Postgres[]";
-  }
 }

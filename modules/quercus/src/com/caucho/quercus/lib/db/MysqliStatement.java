@@ -39,37 +39,18 @@ import com.caucho.util.L10N;
 
 import com.caucho.quercus.QuercusModuleException;
 
-import com.caucho.quercus.lib.db.JdbcConnectionResource;
-import com.caucho.quercus.lib.db.JdbcResultResource;
-
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.BooleanValue;
 
 import com.caucho.quercus.module.Reference;
-import com.caucho.quercus.lib.db.MysqliResult;
 
 /**
  * mysqli object oriented API facade
  */
-public class MysqliStatement {
+public class MysqliStatement extends JdbcStatementResource {
   private static final Logger log = Logger.getLogger(MysqliStatement.class.getName());
   private static final L10N L = new L10N(MysqliStatement.class);
-
-  private JdbcConnectionResource _conn;
-
-  private String _query;
-
-  private PreparedStatement _pstmt;
-  private ResultSet _rs;
-  private ResultSetMetaData _rsMetaData;
-
-  private char[] _types;
-  private Value[] _params;
-  private Value[] _results;
-
-  private String _errorMessage;
-  private int _errorCode;
 
   // Oracle Statement type:
   // (SELECT, UPDATE, DELETE, INSERT, CREATE, DROP, ALTER, BEGIN, DECLARE, UNKNOWN)
@@ -101,9 +82,9 @@ public class MysqliStatement {
   //
   private HashMap<String,Value> _byNameVariables = new HashMap<String,Value>();
 
-  MysqliStatement(JdbcConnectionResource conn)
+  MysqliStatement(Mysqli conn)
   {
-    _conn = conn;
+    super(conn);
   }
 
   /**
@@ -125,60 +106,16 @@ public class MysqliStatement {
                             String types,
                             @Reference Value[] params)
   {
-    final int size = types.length();
-
-    // Check to see that types and params have the same length
-    if (size != params.length) {
-      env.warning(L.l("number of types does not match number of parameters"));
-      return false;
-    }
-
-    // Check to see that types only contains i,d,s,b
-    for (int i = 0; i < size; i++) {
-      if ("idsb".indexOf(types.charAt(i)) < 0) {
-        env.warning(L.l("invalid type string {0}", types));
-        return false;
-      }
-    }
-
-    _types = new char[size];
-    _params = new Value[size];
-
-    for (int i = 0; i < size; i++) {
-      _types[i] = types.charAt(i);
-      _params[i] = params[i];
-    }
-
-    return true;
+    return bindParams(env, types, params);
   }
 
   /**
    * binds outparams to result set
    */
-  public boolean bind_result(Env env, @Reference Value[] outParams)
+  public boolean bind_result(Env env,
+                             @Reference Value[] outParams)
   {
-    int size = outParams.length;
-    int numColumns;
-
-    try {
-      ResultSetMetaData md = getMetaData();
-
-      numColumns = md.getColumnCount();
-    } catch (SQLException e) {
-      log.log(Level.FINE, e.toString(), e);
-      return false;
-    }
-
-    if (size != numColumns) {
-      env.warning(L.l("number of bound variables does not equal number of columns"));
-      return false;
-    }
-
-    _results = new Value[size];
-
-    System.arraycopy(outParams, 0, _results, 0, size);
-
-    return true;
+    return bindResults(env, outParams);
   }
 
   /**
@@ -186,7 +123,7 @@ public class MysqliStatement {
    */
   public void data_seek(int offset)
   {
-    JdbcResultResource.setRowNumber(_rs, offset);
+    dataSeek(offset);
   }
 
   /**
@@ -194,7 +131,7 @@ public class MysqliStatement {
    */
   public int errno()
   {
-    return _errorCode;
+    return errorCode();
   }
 
   /**
@@ -202,82 +139,7 @@ public class MysqliStatement {
    */
   public String error()
   {
-    return _errorMessage;
-  }
-
-  /**
-   * executes statement stored in resultV. The statement has been prepared using mysqli_prepare.
-   * <p/>
-   * returns true on success or false on failure
-   */
-  public boolean execute(Env env)
-  {
-    try {
-      if (_types != null) {
-        int size = _types.length;
-        for (int i = 0; i < size; i++) {
-          switch (_types[i]) {
-          case 'i':
-            _pstmt.setInt(i + 1, _params[i].toInt());
-            break;
-          case 'd':
-            _pstmt.setDouble(i + 1, _params[i].toDouble());
-            break;
-            // XXX: blob needs to be redone
-            // Currently treated as a string
-          case 'b':
-            _pstmt.setString(i + 1, _params[i].toString());
-            break;
-          case 's':
-            _pstmt.setString(i + 1, _params[i].toString());
-            break;
-          default:
-            break;
-          }
-        }
-      }
-
-      if (_pstmt.execute()) {
-        _conn.setAffectedRows(0);
-        _rs = _pstmt.getResultSet();
-      } else {
-        _conn.setAffectedRows(_pstmt.getUpdateCount());
-      }
-
-    } catch (SQLException e) {
-      env.warning(L.l(e.toString()));
-      log.log(Level.FINE, e.toString(), e);
-      _errorMessage = e.getMessage();
-      _errorCode = e.getErrorCode();
-      return false;
-    }
-
-    return true;
-  }
-
-  /**
-   * Fetch results from a prepared statement into bound variables.
-   * <p/>
-   * returns true on success, false on error null if no more rows
-   */
-  public boolean fetch()
-  {
-    try {
-      if (_rs.next()) {
-        ResultSetMetaData md = getMetaData();
-
-        int size = _results.length;
-        for (int i = 0; i < size; i++) {
-          _results[i].set(JdbcResultResource.getColumnValue(_rs, md, i + 1));
-        }
-
-        return true;
-      } else
-        return false;
-    } catch (SQLException e) {
-      log.log(Level.FINE, e.toString(), e);
-      return false;
-    }
+    return errorMessage();
   }
 
   /**
@@ -285,16 +147,7 @@ public class MysqliStatement {
    */
   public void free_result()
   {
-    try {
-      ResultSet rs = _rs;
-      _rs = null;
-      _rsMetaData = null;
-
-      if (rs != null)
-        rs.close();
-    } catch (SQLException e) {
-      log.log(Level.FINER, e.toString(), e);
-    }
+    freeResult();
   }
 
   /**
@@ -302,8 +155,8 @@ public class MysqliStatement {
    */
   public Value num_rows()
   {
-    if (_rs != null)
-      return JdbcResultResource.getNumRows(_rs);
+    if (getResultSet() != null)
+      return JdbcResultResource.getNumRows(getResultSet());
     else
       return BooleanValue.FALSE;
   }
@@ -313,66 +166,7 @@ public class MysqliStatement {
    */
   public int param_count()
   {
-    if (_query == null)
-      return -1;
-
-    int count = 0;
-    int length = _query.length();
-    boolean inQuotes = false;
-    char c;
-
-    for (int i = 0; i < length; i++) {
-      c = _query.charAt(i);
-
-      if (c == '\\') {
-        if (i < length - 1)
-          i++;
-        continue;
-      }
-
-      if (inQuotes) {
-        if (c == '\'')
-          inQuotes = false;
-        continue;
-      }
-
-      if (c == '\'') {
-        inQuotes = true;
-        continue;
-      }
-
-      if (c == '?') {
-        count++;
-      }
-    }
-
-    return count;
-  }
-
-  /**
-   * prepares statement for query
-   *
-   * @param query SQL query
-   *
-   * @return true on success or false on failure
-   */
-  public boolean prepare(String query)
-  {
-    try {
-      if (_pstmt != null)
-        _pstmt.close();
-
-      _query = query;
-
-      _pstmt = _conn.getConnection().prepareStatement(query);
-
-      return true;
-    } catch (SQLException e) {
-      log.log(Level.FINE, e.toString(), e);
-      _errorMessage = e.getMessage();
-      _errorCode = e.getErrorCode();
-      return false;
-    }
+    return paramCount();
   }
 
   /**
@@ -382,7 +176,6 @@ public class MysqliStatement {
   {
     return true;
   }
-
 
   /**
    * mysqli_stmt_result_metadata seems to be some initial
@@ -427,12 +220,15 @@ public class MysqliStatement {
   public Value result_metadata(Env env)
   {
     try {
-      if (_rs != null) {
-        return new MysqliResult(_rs.getMetaData(), _conn);
+
+      if (getResultSet() != null) {
+        return new MysqliResult(getMetaData(),
+                                validateConnection());
       }
       else
         return null;
-    } catch (SQLException e) {
+
+    } catch (Exception e) {
       throw new QuercusModuleException(e);
     }
   }
@@ -451,137 +247,5 @@ public class MysqliStatement {
   public boolean store_result()
   {
     return true;
-  }
-
-  public boolean close()
-  {
-    try {
-      JdbcConnectionResource conn = _conn;
-      _conn = null;
-
-      Statement stmt = _pstmt;
-      _pstmt = null;
-
-      _rs = null;
-
-      if (stmt != null)
-        stmt.close();
-
-      return conn != null;
-    } catch (SQLException e) {
-      log.log(Level.FINE, e.toString(), e);
-      return false;
-    }
-  }
-
-  public JdbcConnectionResource validateConnection()
-  {
-    return _conn;
-  }
-
-  public ResultSet getResultSet()
-  {
-    return _rs;
-  }
-
-  public PreparedStatement getPreparedStatement()
-  {
-    return _pstmt;
-  }
-
-  private ResultSetMetaData getMetaData()
-  {
-    try {
-      if (_rsMetaData == null)
-        _rsMetaData = _rs.getMetaData();
-
-      return _rsMetaData;
-    } catch (SQLException e) {
-      throw new QuercusModuleException(e);
-    }
-  }
-
-  public String getStatementType()
-  {
-    // Oracle Statement type:
-    // (SELECT, UPDATE, DELETE, INSERT, CREATE, DROP, ALTER, BEGIN, DECLARE, UNKNOWN)
-
-    _stmtType = _query;
-    _stmtType = _stmtType.replaceAll("\\s+.*", "");
-    if (_stmtType.equals("")) {
-      _stmtType = "UNKNOWN";
-    } else {
-      String s = _stmtType.replaceAll("(SELECT|UPDATE|DELETE|INSERT|CREATE|DROP|ALTER|BEGIN|DECLARE)", "");
-      if (!s.equals("")) {
-        _stmtType = "UNKNOWN";
-      }
-    }
-
-    return _stmtType;
-  }
-
-  public void putBindingVariable(String name, Integer value)
-  {
-    _bindingVariables.put(name, value);
-  }
-
-  public Integer getBindingVariable(String name)
-  {
-    return _bindingVariables.get(name);
-  }
-
-  public Integer removeBindingVariable(String name)
-  {
-    return _bindingVariables.remove(name);
-  }
-
-  public HashMap<String,Integer> getBindingVariables()
-  {
-    return _bindingVariables;
-  }
-
-  public void resetBindingVariables()
-  {
-    _bindingVariables = new HashMap<String,Integer>();
-  }
-
-  public void setResultBuffer(Value resultBuffer)
-  {
-    _resultBuffer = resultBuffer;
-  }
-
-  public Value getResultBuffer()
-  {
-    return _resultBuffer;
-  }
-
-  public void putByNameVariable(String name, Value value)
-  {
-    _byNameVariables.put(name, value);
-  }
-
-  public Value getByNameVariable(String name)
-  {
-    return _byNameVariables.get(name);
-  }
-
-  public Value removeByNameVariable(String name)
-  {
-    return _byNameVariables.remove(name);
-  }
-
-  public HashMap<String,Value> getByNameVariables()
-  {
-    return _byNameVariables;
-  }
-
-  public void resetByNameVariables()
-  {
-    _byNameVariables = new HashMap<String,Value>();
-  }
-
-  public String toString()
-  {
-    return "MysqliStatement[" + _conn + "]";
   }
 }

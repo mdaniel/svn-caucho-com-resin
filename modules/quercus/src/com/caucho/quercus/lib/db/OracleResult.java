@@ -24,16 +24,14 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Charles Reich
+ * @author Rodrigo Westrupp
  */
 
 package com.caucho.quercus.lib.db;
 
-import java.util.logging.Logger;
+import java.sql.*;
 
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.Statement;
+import java.util.logging.Logger;
 
 import com.caucho.util.L10N;
 
@@ -45,21 +43,21 @@ import com.caucho.quercus.module.Optional;
 import com.caucho.quercus.module.ReturnNullAsFalse;
 
 /**
- * mysqli object oriented API facade
+ * oracle result set class (postgres has NO object oriented API)
  */
-public class MysqliResult extends JdbcResultResource {
+public class OracleResult extends JdbcResultResource {
   private static final Logger log
-    = Logger.getLogger(MysqliResult.class.getName());
-  private static final L10N L = new L10N(MysqliResult.class);
+    = Logger.getLogger(OracleResult.class.getName());
+  private static final L10N L = new L10N(OracleResult.class);
 
-  public MysqliResult(Statement stmt,
+  public OracleResult(Statement stmt,
                       ResultSet rs,
-                      Mysqli conn)
+                      JdbcConnectionResource conn)
   {
     super(stmt, rs, conn);
   }
 
-  public MysqliResult(ResultSetMetaData md,
+  public OracleResult(ResultSetMetaData md,
                       JdbcConnectionResource conn)
   {
     super(md, conn);
@@ -79,15 +77,6 @@ public class MysqliResult extends JdbcResultResource {
 
       return false;
     }
-  }
-
-  /**
-   * Returns an array representing the row.
-   */
-  @ReturnNullAsFalse
-  public ArrayValue fetch_array(@Optional("MYSQLI_BOTH") int type)
-  {
-    return fetchArray(type);
   }
 
   /**
@@ -267,15 +256,21 @@ public class MysqliResult extends JdbcResultResource {
   }
 
   /**
-   * Returns a string representation for this object
+   * Closes the result.
    */
-  public JdbcResultResource validateResult()
+  public void close()
   {
-    return this;
+    super.close();
   }
 
+  /**
+   * Returns a string representation for this object
+   */
   public String toString()
   {
-    return "MysqliResult[" + super.toString() + "]";
+    if (!_closed)
+      return "OracleResult[" + super.toString() + "]";
+    else
+      return "OracleResult[closed]";
   }
 }

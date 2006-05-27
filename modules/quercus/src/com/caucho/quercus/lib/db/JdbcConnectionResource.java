@@ -83,12 +83,6 @@ public abstract class JdbcConnectionResource implements Closeable {
 
   private boolean _connected;
 
-  // postgres asynchronous queries
-  MysqliResult _asyncResult;
-  // named prepared statements for postgres
-  private HashMap<String,MysqliStatement> _stmtTable
-    = new HashMap<String,MysqliStatement>();
-
   /**
    * mysqli_multi_query populates _resultValues
    * NB: any updates (ie: INSERT, UPDATE, DELETE) will
@@ -108,9 +102,6 @@ public abstract class JdbcConnectionResource implements Closeable {
   private ArrayList<JdbcResultResource> _resultValues = new ArrayList<JdbcResultResource>();
   private int _nextResultValue = 0;
   private boolean _hasBeenUsed = true;
-
-  // This is a workaround flag for postgres features (should be replaced with PostgresModule)
-  private boolean _pgconn = false;
 
   public JdbcConnectionResource(Env env)
   {
@@ -173,8 +164,7 @@ public abstract class JdbcConnectionResource implements Closeable {
                             int port,
                             Connection conn,
                             String driver,
-                            String url,
-                            boolean pgconn)
+                            String url)
   {
     _host = host;
     _userName = userName;
@@ -193,8 +183,6 @@ public abstract class JdbcConnectionResource implements Closeable {
 
       _env.addClose(this);
     }
-
-    _pgconn = pgconn;
   }
 
   /**
@@ -250,7 +238,7 @@ public abstract class JdbcConnectionResource implements Closeable {
       ResultSet rs = _dmd.getCatalogs();
 
       if (rs != null)
-        return new JdbcResultResource(_stmt, rs, this);
+        return createResult(_stmt, rs);
       else
         return BooleanValue.FALSE;
     } catch (SQLException e) {
@@ -694,9 +682,9 @@ public abstract class JdbcConnectionResource implements Closeable {
    * @return a {@link JdbcResultResource}, or null for failure
    */
   protected Value query(String sql,
-                     @Optional("MYSQLI_STORE_RESULT") int resultMode)
+                        @Optional("MYSQLI_STORE_RESULT") int resultMode)
   {
-  // XXX: the query can return true for successful update, e.g. mysql
+    // XXX: the query can return true for successful update, e.g. mysql
     try {
       return real_query(sql);
     } catch (Exception e) {
@@ -849,27 +837,6 @@ public abstract class JdbcConnectionResource implements Closeable {
   }
 
   /**
-   * returns a statement for use with
-   * mysqli_stmt_prepare
-   */
-  public MysqliStatement stmt_init(Env env)
-  {
-    return new MysqliStatement(validateConnection());
-  }
-
-  /**
-   * returns a prepared statement
-   */
-  public MysqliStatement prepare(Env env, String query)
-  {
-    MysqliStatement stmt = new MysqliStatement(validateConnection());
-
-    stmt.prepare(query);
-
-    return stmt;
-  }
-
-  /**
    * Transfers the result set from the last query on the
    * database connection represented by conn.
    *
@@ -928,7 +895,7 @@ public abstract class JdbcConnectionResource implements Closeable {
       env.removeClose(this);
       close();
     }
-    
+
     return true;
   }
 
@@ -939,32 +906,6 @@ public abstract class JdbcConnectionResource implements Closeable {
     }
 
     return this;
-  }
-
-  public void putStatement(String name,
-                           MysqliStatement stmt)
-  {
-    _stmtTable.put(name, stmt);
-  }
-
-  public MysqliStatement getStatement(String name)
-  {
-    return (MysqliStatement) _stmtTable.get(name);
-  }
-
-  public MysqliStatement removeStatement(String name)
-  {
-    return (MysqliStatement) _stmtTable.remove(name);
-  }
-
-  public void setAsynchronousResult(MysqliResult asyncResult)
-  {
-    _asyncResult = asyncResult;
-  }
-
-  public MysqliResult getAsynchronousResult()
-  {
-    return _asyncResult;
   }
 
   /**
@@ -1065,17 +1006,18 @@ public abstract class JdbcConnectionResource implements Closeable {
         // future reference (PostgresModule.pg_last_oid)
 
         // php/1f33
-        if (_pgconn) {
-          _rs = createResult(stmt, null);
-          _resultValues.add(_rs);
-        }
+
+        // This is overriden in Postgres.java
+        keepResourceValues(stmt);
+
         _affectedRows = 0;
         _affectedRows = stmt.getUpdateCount();
-	if (_rs != null)
-	  _rs.setAffectedRows(_affectedRows);
+        if (_rs != null)
+          _rs.setAffectedRows(_affectedRows);
         _warnings = stmt.getWarnings();
+
         // for php/4310
-        if (!_pgconn) {
+        if (!keepStatementOpen()) {
           stmt.close();
         }
       }
@@ -1108,10 +1050,11 @@ public abstract class JdbcConnectionResource implements Closeable {
    * Creates a database-specific result.
    */
   protected JdbcResultResource createResult(Statement stmt,
-					      ResultSet rs)
+                                            ResultSet rs)
   {
     return new JdbcResultResource(stmt, rs, this);
   }
+
 
   /**
    * Used by the
@@ -1137,7 +1080,7 @@ public abstract class JdbcConnectionResource implements Closeable {
       stmt.setEscapeProcessing(false);
 
       if (stmt.execute(sql)) {
-        Value result = new JdbcResultResource(stmt, stmt.getResultSet(), this);
+        Value result = createResult(stmt, stmt.getResultSet());
         _conn.setCatalog(currentCatalog.toString());
         return result;
       } else {
@@ -1188,7 +1131,7 @@ public abstract class JdbcConnectionResource implements Closeable {
         stmt.setEscapeProcessing(false);
         if (stmt.execute(s)) {
           _affectedRows = 0;
-          _rs = new JdbcResultResource(stmt, stmt.getResultSet(), this);
+          _rs = createResult(stmt, stmt.getResultSet());
           _resultValues.add(_rs);
           _warnings = stmt.getWarnings();
         } else {
@@ -1393,6 +1336,48 @@ public abstract class JdbcConnectionResource implements Closeable {
         return 0;
     } else
       return 0;
+  }
+
+  /**
+   * This function is overriden in Postgres to keep
+   * result set references for php/4310 (see also php/1f33)
+   */
+  protected void keepResourceValues(Statement stmt)
+  {
+    return;
+  }
+
+  /**
+   * This function is overriden in Postgres to keep
+   * statement references for php/4310
+   */
+  protected boolean keepStatementOpen()
+  {
+    return false;
+  }
+
+  /**
+   * Get the current result resource
+   */
+  protected JdbcResultResource getResultResource()
+  {
+    return _rs;
+  }
+
+  /**
+   * Set the current result resource
+   */
+  protected void setResultResource(JdbcResultResource rs)
+  {
+    _rs = rs;
+  }
+
+  /**
+   * Add a result resource value
+   */
+  protected void addResultValue(JdbcResultResource rs)
+  {
+    _resultValues.add(rs);
   }
 
   /**

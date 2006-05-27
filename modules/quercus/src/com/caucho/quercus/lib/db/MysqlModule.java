@@ -456,8 +456,8 @@ public class MysqlModule extends AbstractQuercusModule {
 
     Object metaResult = conn.validateConnection().query(sql, 1);
 
-    if (metaResult instanceof MysqliResult) // JdbcResultResource)
-      return (((MysqliResult) metaResult).validateResult()).getFieldFlags();
+    if (metaResult instanceof MysqliResult)
+      return ((MysqliResult) metaResult).getFieldFlags();
 
     return BooleanValue.FALSE;
   }

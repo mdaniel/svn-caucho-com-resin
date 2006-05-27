@@ -30,8 +30,6 @@
 package com.caucho.quercus.lib.db;
 
 import com.caucho.util.Log;
-import com.caucho.quercus.lib.db.MysqliModule;
-import com.caucho.quercus.lib.db.JdbcConnectionResource;
 import com.caucho.quercus.env.*;
 
 import java.sql.*;
@@ -65,24 +63,30 @@ public class JdbcResultResource extends ResourceValue {
 
   private int _affectedRows;
 
+  boolean _closed;
+
   public JdbcResultResource(Statement stmt,
                             ResultSet rs,
                             JdbcConnectionResource conn)
   {
+    _closed = false;
     _stmt = stmt;
     _rs = rs;
     _conn = conn;
   }
 
-  public JdbcResultResource(ResultSetMetaData md, JdbcConnectionResource conn)
+  public JdbcResultResource(ResultSetMetaData md,
+                            JdbcConnectionResource conn)
   {
+    _closed = true;
+
     _metaData = md;
     _conn = conn;
   }
 
   /**
-   * getter and setter for _conn needed by fetch_field and other functions that do a query on the connection which
-   * created this result set
+   * getter and setter for _conn needed by fetch_field and other functions
+   * that do a query on the connection which created this result set
    */
   public JdbcConnectionResource getConnection()
   {
@@ -421,12 +425,12 @@ public class JdbcResultResource extends ResourceValue {
 
 
   /**
-   * returns the following field flags: not_null, primary_key, multiple_key, blob, unsigned zerofill, binary, enum,
-   * auto_increment and timestamp
+   * returns the following field flags: not_null, primary_key, multiple_key, blob,
+   * unsigned zerofill, binary, enum, auto_increment and timestamp
    * <p/>
    * it does not return the MySQL / PHP flag unique_key
    * <p/>
-   * QuercusMysqlModule generates a special result set with the appropriate values
+   * MysqlModule generates a special result set with the appropriate values
    */
   public Value getFieldFlags()
   {
@@ -513,12 +517,12 @@ public class JdbcResultResource extends ResourceValue {
         return BooleanValue.FALSE;
       }
       else {
-  String tableName = _metaData.getTableName(fieldOffset + 1);
+        String tableName = _metaData.getTableName(fieldOffset + 1);
 
-  if (tableName == null || tableName.equals(""))
-    return BooleanValue.FALSE;
-  else
-    return new StringValueImpl(tableName);
+        if (tableName == null || tableName.equals(""))
+          return BooleanValue.FALSE;
+        else
+          return new StringValueImpl(tableName);
       }
     } catch (SQLException e) {
       log.log(Level.FINE, e.toString(), e);
@@ -527,8 +531,8 @@ public class JdbcResultResource extends ResourceValue {
   }
 
   /**
-   * special function used my mysql_insert_id() to return the ID generated for an AUTO_INCREMENT column by the previous
-   * INSERT query
+   * special function used my mysql_insert_id() to return the ID generated
+   * for an AUTO_INCREMENT column by the previous INSERT query
    */
   public long getInsertID()
     throws SQLException
@@ -606,7 +610,8 @@ public class JdbcResultResource extends ResourceValue {
   }
 
   /**
-   * returns an ArrayValue of lengths of the columns in the most recently accessed row. If a function like
+   * returns an ArrayValue of lengths of the columns in the most
+   * recently accessed row. If a function like
    * mysql_fetch_array() has not yet been called this will return BooleanValue.FALSE
    */
   public Value getLengths()
@@ -740,7 +745,8 @@ public class JdbcResultResource extends ResourceValue {
   }
 
   /**
-   * helper function for mysql_tablename expects that this _rs was created by a call to mysql_list_tables().
+   * helper function for mysql_tablename expects that this _rs was created
+   * by a call to mysql_list_tables().
    * <p/>
    * note PHP i is zero based
    */
@@ -847,7 +853,8 @@ public class JdbcResultResource extends ResourceValue {
   }
 
   /**
-   * returns an object with properties that correspond to the fetched row and moves the internal data pointer ahead.
+   * returns an object with properties that correspond to the fetched row and
+   * moves the internal data pointer ahead.
    */
   public Value fetchObject(Env env)
   {
@@ -1019,6 +1026,8 @@ public class JdbcResultResource extends ResourceValue {
 
       if (_stmt != null)
         _stmt.close();
+
+      _closed = true;
 
     } catch (SQLException e) {
       log.log(Level.FINE, e.toString(), e);
