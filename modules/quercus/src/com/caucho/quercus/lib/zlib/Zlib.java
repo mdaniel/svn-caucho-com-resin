@@ -33,14 +33,14 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.DataFormatException;
-import java.util.zip.Deflater;
-import java.util.zip.Inflater;
-import java.util.zip.InflaterInputStream;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 
 import com.caucho.quercus.QuercusModuleException;
 
@@ -67,7 +67,6 @@ public class Zlib {
   private static final Logger log = Logger.getLogger(Zlib.class.getName());
   private static final L10N L = new L10N(Zlib.class);
 
-  private Deflater _deflater;
   private BufferedReader _bufferedReader;
 
   private Path _path;
@@ -90,14 +89,23 @@ public class Zlib {
               String mode,
               int useIncludePath)
   {
-    // Set level
+
     Pattern pattern = Pattern.compile("[0-9]");
     Matcher matcher = pattern.matcher(mode);
-    if (matcher.find()) {
-      _deflater = new Deflater((int) mode.charAt(matcher.start()) - (int) '0');
+
+    if (matcher.find())
       mode = mode.substring(0,matcher.start());
-    } else
-      _deflater = new Deflater();
+
+   /**
+    * XXX: GZIP has only one compression method and level (deflate)
+    *
+    * if (matcher.find()) {
+    *  _deflater = new Deflater((int) mode.charAt(matcher.start()) - (int) '0');
+    *   mode = mode.substring(0,matcher.start());
+    * } else
+    *   _deflater = new Deflater();
+    *
+    */
 
     /**
      * XXX: Skipping strategy for now because it breaks
@@ -145,24 +153,19 @@ public class Zlib {
       length = Math.min(length, s.length());
 
     byte[] input = s.getBytes();
-
-    _deflater.setInput(input);
-    _deflater.finish();
-    byte[] output = new byte[input.length];
     ByteBuffer buf = new ByteBuffer();
-    int compressedDataLength;
-    int fullCompressedDataLength = 0;
-
-    while (!_deflater.finished()) {
-      compressedDataLength = _deflater.deflate(output);
-      fullCompressedDataLength += compressedDataLength;
-      buf.append(output,0,compressedDataLength);
-    }
+    OutputStream out = buf.createOutputStream();
 
     try {
-      fileValue.write(buf.getBuffer(), 0, fullCompressedDataLength);
+
+      GZIPOutputStream gout = new GZIPOutputStream( out );
+      gout.write( input, 0, length );
+      gout.close();
+
+      fileValue.write(buf.getBuffer(), 0, buf.size());
       fileValue.flush();
-    } catch (IOException e) {
+    }
+    catch (IOException e) {
       log.log(Level.FINE, e.getMessage(), e);
       env.warning(L.l(e.getMessage()));
     }
@@ -303,7 +306,15 @@ public class Zlib {
   InputStream readgzfile()
     throws IOException, DataFormatException
   {
-    return new InflaterInputStream(_path.openRead(), new Inflater());
+    try
+    {
+      return new GZIPInputStream(_path.openRead());
+    }
+    catch(IOException e)
+    {
+      // read uncompressed file
+      return _path.openRead();
+    }
   }
 
   /**
@@ -402,8 +413,9 @@ public class Zlib {
    * @throws IOException
    */
   public boolean gzrewind()
+    throws IOException
   {
-    //getBufferedReader();
+    getBufferedReader();
     
     return true;
   }
@@ -422,7 +434,15 @@ public class Zlib {
     if (bufferedReader != null)
       bufferedReader.close();
 
-    _bufferedReader = new BufferedReader(new InputStreamReader(new InflaterInputStream(_path.openRead(), new Inflater())));
+    try
+    {
+      _bufferedReader = new BufferedReader( new InputStreamReader(new GZIPInputStream(_path.openRead())) );
+    }
+    catch(IOException e)
+    {
+      // read uncompressed file
+      _bufferedReader = new BufferedReader( new InputStreamReader(_path.openRead()) );
+    }
   }
 
   public String toString()

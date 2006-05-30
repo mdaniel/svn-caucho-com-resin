@@ -89,11 +89,11 @@ public class ZlibModule extends AbstractQuercusModule {
    * @param useIncludePath
    * @return array of uncompressed lines from fileName
    */
-  public Zlib gzfile(Env env,
+  public Value gzfile(Env env,
 		     String fileName,
 		     @Optional("0") int useIncludePath)
   {
-    return new Zlib(env, fileName, "r", useIncludePath);
+    return (new Zlib(env, fileName, "r", useIncludePath)).gzfile();
   }
 
   /**
