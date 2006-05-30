@@ -52,8 +52,6 @@ import com.caucho.vfs.Path;
 import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.WriteStream;
 
-//@todo create a PostgresResult/Statement instead
-
 // Do not add new compile dependencies (using reflection instead)
 // import org.postgresql.largeobject.*;
 import java.lang.reflect.*;
@@ -513,7 +511,7 @@ public class PostgresModule extends AbstractQuercusModule {
   public boolean pg_delete(Env env,
                            @NotNull Postgres conn,
                            String tableName,
-                           Value assocArray,
+                           ArrayValue assocArray,
                            @Optional("-1") int options)
   {
     // From php.net: this function is EXPERIMENTAL.
@@ -835,12 +833,47 @@ public class PostgresModule extends AbstractQuercusModule {
   /**
    * Test if a field is SQL NULL
    */
-  public Value pg_field_is_null(Env env,
-                                @NotNull PostgresResult result,
-                                @Optional("-1") int row,
-                                Value mixedField)
+  @ReturnNullAsFalse
+  public Object pg_field_is_null(Env env,
+                                 @NotNull PostgresResult result,
+                                 int row,
+                                 @Optional("-1") Value fieldNameOrNumber)
   {
-    throw new UnimplementedException("pg_field_is_null");
+    try {
+
+      int fieldNumber = -1;
+
+      // Handle the case: optional row with mandatory fieldNameOrNumber.
+      if (fieldNameOrNumber.isLongConvertible() &&
+          (fieldNameOrNumber.toInt() == -1)) {
+        fieldNumber = row;
+        row = -1;
+      }
+
+      if (row >= 0) {
+        result.data_seek(env, row);
+      }
+
+      if (fieldNumber < 0) {
+        if (fieldNameOrNumber.isLongConvertible()) {
+          fieldNumber = fieldNameOrNumber.toInt();
+        } else {
+          fieldNumber = pg_field_num(env, result, fieldNameOrNumber.toString());
+        }
+      }
+
+      String field = pg_fetch_result(env, result, -1, fieldNumber);
+
+      if (field == null) {
+        return new Integer(1);
+      }
+
+      return new Integer(0);
+
+    } catch (Exception ex) {
+      log.log(Level.FINE, ex.toString(), ex);
+      return null;
+    }
   }
 
   /**
@@ -953,23 +986,47 @@ public class PostgresModule extends AbstractQuercusModule {
 
   /**
    * Returns the name or oid of the tables field
+   *
+   * @return By default the tables name that field belongs to is returned but if oid_only is set to TRUE, then the oid will instead be returned.
    */
-  public int pg_field_table(Env env,
-                            @NotNull PostgresResult result,
-                            int fieldNumber,
-                            boolean oidOnly)
+  @ReturnNullAsFalse
+  public Object pg_field_table(Env env,
+                               @NotNull PostgresResult result,
+                               int fieldNumber,
+                               @Optional("false") boolean oidOnly)
   {
+    // The Postgres JDBC driver doesn't have a concept of exposing to the client
+    // what table maps to a particular select item in a result set, therefore the
+    // driver cannot report anything useful to the caller. Thus the driver always
+    // returns "" to ResultSetMetaData.getTableName(fieldNumber+1)
+
     throw new UnimplementedException("pg_field_table");
   }
 
   /**
    * Returns the type ID (OID) for the corresponding field number
    */
-  public int pg_field_type_oid(Env env,
-                               @NotNull PostgresResult result,
-                               int fieldNumber)
+  @ReturnNullAsFalse
+  public Integer pg_field_type_oid(Env env,
+                                   @NotNull PostgresResult result,
+                                   int fieldNumber)
   {
-    throw new UnimplementedException("pg_field_type_oid");
+    try {
+
+      ResultSetMetaData metaData = result.getMetaData();
+
+      String columnTypeName = metaData.getColumnTypeName(fieldNumber + 1);
+
+      String metaQuery = ("SELECT oid FROM pg_type WHERE typname='"+columnTypeName+"'");
+
+      result = pg_query(env, (Postgres) result.getConnection(), metaQuery);
+
+      return new Integer(pg_fetch_result(env, result, -1, 0));
+
+    } catch (Exception ex) {
+      log.log(Level.FINE, ex.toString(), ex);
+      return null;
+    }
   }
 
   /**
@@ -1084,11 +1141,13 @@ public class PostgresModule extends AbstractQuercusModule {
                            @NotNull Postgres conn,
                            String tableName,
                            ArrayValue assocArray,
-                           @Optional int options)
+                           @Optional("-1") int options)
   {
     try {
 
-      //@todo use options
+      if (options > 0) {
+        throw new UnimplementedException("pg_convert with options");
+      }
 
       ArrayValueImpl newArray = (ArrayValueImpl) assocArray;
 
@@ -1796,18 +1855,23 @@ public class PostgresModule extends AbstractQuercusModule {
                              @NotNull Postgres conn,
                              String data)
   {
-    throw new UnimplementedException("pg_put_line");
-    /*
+    //throw new UnimplementedException("pg_put_line");
+
 
     try {
 
       Class cl = Class.forName("org.postgresql.core.PGStream");
 
-      Object object = cl.newInstance();
+      Constructor constructor = cl.getDeclaredConstructor(new Class[] {
+        String.class, Integer.TYPE});
 
-      //      Method m = c.getDeclaredMethod("getOutputStream", null);
+      Object object = constructor.newInstance(new Object[] {conn.getHost(), conn.getPort()});
 
-      // object = m.invoke(object, new Object[]{});
+      byte dataArray[] = data.getBytes();
+
+      Method m = cl.getDeclaredMethod("Send", new Class[] {byte[].class});
+
+      m.invoke(object, new Object[] {dataArray});
 
       return true;
 
@@ -1815,7 +1879,7 @@ public class PostgresModule extends AbstractQuercusModule {
       log.log(Level.FINE, ex.toString(), ex);
       return false;
     }
-    */
+
   }
 
   /**
@@ -2180,20 +2244,81 @@ public class PostgresModule extends AbstractQuercusModule {
   /**
    * Update table
    */
-  public Value pg_update(Env env,
-                         @NotNull Postgres conn,
-                         String tableName,
-                         Value data,
-                         Value condition,
-                         @Optional int options)
+  public boolean pg_update(Env env,
+                           @NotNull Postgres conn,
+                           String tableName,
+                           ArrayValue data,
+                           ArrayValue condition,
+                           @Optional int options)
   {
-    // @todo from php.net: This function is EXPERIMENTAL.
+    // From php.net: This function is EXPERIMENTAL.
 
     // The behaviour of this function, the name of this function, and
     // anything else documented about this function may change without
     // notice in a future release of PHP. Use this function at your own risk.
 
-    throw new UnimplementedException("pg_update");
+    try {
+
+      if (options > 0) {
+        throw new UnimplementedException("pg_update with options");
+      }
+
+      ArrayValueImpl dataArray = (ArrayValueImpl) data;
+
+      StringBuilder values = new StringBuilder();
+
+      boolean isFirst = true;
+
+      for (Map.Entry<Value,Value> entry : dataArray.entrySet()) {
+        Value k = entry.getKey();
+        Value v = entry.getValue();
+        if (isFirst) {
+          isFirst = false;
+        } else {
+          values.append(", ");
+        }
+        values.append(k.toString());
+        values.append("='");
+        values.append(v.toString());
+        values.append("'");
+      }
+
+      ArrayValueImpl conditionArray = (ArrayValueImpl) condition;
+
+      StringBuilder whereClause = new StringBuilder();
+
+      isFirst = true;
+
+      for (Map.Entry<Value,Value> entry : conditionArray.entrySet()) {
+        Value k = entry.getKey();
+        Value v = entry.getValue();
+        if (isFirst) {
+          isFirst = false;
+        } else {
+          whereClause.append(" AND ");
+        }
+        whereClause.append(k.toString());
+        whereClause.append("='");
+        whereClause.append(v.toString());
+        whereClause.append("'");
+      }
+
+      StringBuilder query = new StringBuilder();
+      query.append("UPDATE ");
+      query.append(tableName);
+      query.append(" SET ");
+      query.append(values);
+      query.append(" WHERE ");
+      query.append(whereClause);
+
+      pg_query(env, conn, query.toString());
+
+      return true;
+
+    } catch (Exception ex) {
+      log.log(Level.FINE, ex.toString(), ex);
+      return false;
+    }
   }
 
   /**
