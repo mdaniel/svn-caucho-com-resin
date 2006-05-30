@@ -1797,7 +1797,10 @@ public class Application extends ServletContextImpl
         if (_cache != null)
           chain = _cache.createFilterChain(chain, this);
 
-	WebAppFilterChain webAppChain = new WebAppFilterChain(chain, this);
+        if (CauchoSystem.isDetailedStatistics())
+          chain = new StatisticsFilterChain(chain, this);
+
+        WebAppFilterChain webAppChain = new WebAppFilterChain(chain, this);
 
 	webAppChain.setSecurityRoleMap(invocation.getSecurityRoleMap());
 
@@ -2317,6 +2320,14 @@ public class Application extends ServletContextImpl
       return 0;
   }
 
+  void updateStatistics(long time,
+                        int readBytes,
+                        int writeBytes,
+                        boolean isClientDisconnect)
+  {
+    _controller.updateStatistics(time, readBytes, writeBytes, isClientDisconnect);
+  }
+
   /**
    * Stops the application.
    */
@@ -2426,6 +2437,7 @@ public class Application extends ServletContextImpl
   {
     return "WebApp[" + getURL() + "]";
   }
+
 
   static class FilterChainEntry {
     FilterChain _filterChain;

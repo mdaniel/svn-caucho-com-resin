@@ -76,11 +76,6 @@ public interface HostMBean extends DeployControllerMBean {
   public String getWarExpandDirectory();
 
   /**
-   * Returns the host start time.
-   */
-  public Date getStartTime();
-
-  /**
    * Returns an array of the webapp names.
    */
   public ObjectName []getWebAppObjectNames();

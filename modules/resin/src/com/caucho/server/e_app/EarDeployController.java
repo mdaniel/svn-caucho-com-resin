@@ -40,6 +40,7 @@ import java.io.IOException;
 
 import javax.servlet.jsp.el.VariableResolver;
 import javax.servlet.jsp.el.ELException;
+import javax.management.JMException;
 
 import com.caucho.util.L10N;
 
@@ -67,6 +68,8 @@ import com.caucho.server.webapp.ApplicationContainer;
 
 import com.caucho.server.deploy.EnvironmentDeployController;
 import com.caucho.server.deploy.DeployContainer;
+import com.caucho.jmx.IntrospectionMBean;
+import com.caucho.mbeans.EarMBean;
 
 /**
  * A configuration entry for an Enterprise Application
@@ -75,7 +78,7 @@ public class EarDeployController
   extends EnvironmentDeployController<EnterpriseApplication,EarConfig> {
   private static final Logger log = Log.open(EarDeployController.class);
   private static final L10N L = new L10N(EarDeployController.class);
-  
+
   private ApplicationContainer _container;
 
   // private Var _hostVar = new Var();
@@ -86,22 +89,22 @@ public class EarDeployController
   private ArrayList<EarConfig> _eAppDefaults = new ArrayList<EarConfig>();
 
   EarDeployController(String name,
-		      ApplicationContainer container, EarConfig config)
+                      ApplicationContainer container, EarConfig config)
   {
     super(config);
 
     _container = container;
-    
+
     if (container != null) {
       _eAppDefaults.addAll(container.getEarDefaultList());
     }
   }
 
   EarDeployController(String name, Path rootDirectory,
-		      ApplicationContainer container)
+                      ApplicationContainer container)
   {
     super(name, rootDirectory);
-    
+
     _container = container;
 
     if (container != null) {
@@ -118,7 +121,7 @@ public class EarDeployController
 
     // XXX: super.setId(name);
   }
-  
+
   /**
    * Returns the ear directory set by the hosts-directory.
    */
@@ -135,6 +138,12 @@ public class EarDeployController
     _earRootDir = rootDir;
   }
 
+  protected Object createMBean()
+    throws JMException
+  {
+    return new IntrospectionMBean(new EarAdmin(this), EarMBean.class);
+  }
+
   /**
    * Finds any web-app in the ear matching the contextPath.
    */
@@ -144,9 +153,9 @@ public class EarDeployController
       EnterpriseApplication eApp = request();
 
       if (eApp != null)
-	return eApp.findWebAppEntry(name);
+        return eApp.findWebAppEntry(name);
       else
-	return null;
+        return null;
     } catch (Throwable e) {
       log.log(Level.FINER, e.toString(), e);
 
@@ -166,13 +175,13 @@ public class EarDeployController
   {
     return "EApp";
   }
-  
+
   protected Path calculateRootDirectory()
     throws ELException
   {
     Path rootDir = getRootDirectory();
     EnterpriseApplication eApp = getDeployInstance();
- 
+
     if (rootDir == null && eApp != null)
       rootDir = eApp.getRootDirectory();
 

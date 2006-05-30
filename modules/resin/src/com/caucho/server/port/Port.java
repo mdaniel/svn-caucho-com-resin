@@ -57,9 +57,6 @@ import com.caucho.config.types.Period;
 import com.caucho.lifecycle.Lifecycle;
 
 import com.caucho.jmx.Jmx;
-import com.caucho.jmx.AdminAttributeCategory;
-import com.caucho.jmx.AdminInfo;
-import com.caucho.jmx.AdminInfoFactory;
 
 import com.caucho.mbeans.PortMBean;
 
@@ -67,7 +64,7 @@ import com.caucho.mbeans.PortMBean;
  * Represents a protocol connection.
  */
 public class Port
-  implements EnvironmentListener, Runnable, PortMBean, AdminInfoFactory
+  implements EnvironmentListener, Runnable, PortMBean
 {
   private static final L10N L = new L10N(Port.class);
 
@@ -122,8 +119,6 @@ public class Port
 
   private boolean _tcpNoDelay = true;
 
-  private boolean _isIgnoreClientDisconnect;
-
   // The JMX name
   private ObjectName _objectName;
 
@@ -143,11 +138,15 @@ public class Port
 
   private volatile int _connectionCount;
 
+  private volatile long _lifetimeConnectionCount;
+  private volatile long _lifetimeKeepaliveCount;
+  private volatile long _lifetimeClientDisconnectCount;
+  private volatile long _lifetimeConnectionTime;
+  private volatile long _lifetimeReadBytes;
+  private volatile long _lifetimeWriteBytes;
+
   private volatile int _keepaliveCount;
   private final Object _keepaliveCountLock = new Object();
-
-  // The TcpServer thread.
-  private Thread _thread;
 
   // True if the port has been bound
   private volatile boolean _isBound;
@@ -513,9 +512,39 @@ public class Port
   /**
    * Returns the number of connections
    */
-  public int getConnectionCount()
+  public int getTotalConnectionCount()
   {
     return _connectionCount;
+  }
+
+  public long getLifetimeConnectionCount()
+  {
+    return _lifetimeConnectionCount;
+  }
+
+  public long getLifetimeKeepaliveCount()
+  {
+    return _lifetimeKeepaliveCount;
+  }
+
+  public long getLifetimeClientDisconnectCount()
+  {
+    return _lifetimeClientDisconnectCount;
+  }
+
+  public long getLifetimeConnectionTime()
+  {
+    return _lifetimeConnectionTime;
+  }
+
+  public long getLifetimeReadBytes()
+  {
+    return _lifetimeReadBytes;
+  }
+
+  public long getLifetimeWriteBytes()
+  {
+    return _lifetimeWriteBytes;
   }
 
   /**
@@ -597,62 +626,6 @@ public class Port
 
     if (_writeTimeout <= 0)
       _writeTimeout = _timeout;
-  }
-
-  public AdminInfo getAdminInfo()
-  {
-    AdminInfo descriptor = new AdminInfo();
-
-    String host = getHost();
-
-    if (host == null || host.length() == 0)
-      host = "*";
-
-    descriptor.setTitle(L.l("Port {0}:{1}", host, getPort()));
-
-    descriptor.createAdminAttributeInfo("ProtocolName")
-      .setCategory(AdminAttributeCategory.CONFIGURATION);
-
-    descriptor.createAdminAttributeInfo("Host")
-      .setCategory(AdminAttributeCategory.CONFIGURATION);
-
-    descriptor.createAdminAttributeInfo("Port")
-      .setCategory(AdminAttributeCategory.CONFIGURATION);
-
-    descriptor.createAdminAttributeInfo("ThreadCount")
-      .setCategory(AdminAttributeCategory.STATISTIC);
-
-    descriptor.createAdminAttributeInfo("ActiveThreadCount")
-      .setCategory(AdminAttributeCategory.STATISTIC);
-
-    descriptor.createAdminAttributeInfo("IdleThreadCount")
-      .setCategory(AdminAttributeCategory.STATISTIC);
-
-    descriptor.createAdminAttributeInfo("ConnectionMax")
-      .setCategory(AdminAttributeCategory.CONFIGURATION);
-
-    descriptor.createAdminAttributeInfo("KeepaliveMax")
-      .setCategory(AdminAttributeCategory.CONFIGURATION);
-
-    descriptor.createAdminAttributeInfo("KeepaliveCount")
-      .setDeprecated("3.0.15 Use KeepaliveConnectionCount");
-
-    descriptor.createAdminAttributeInfo("Active")
-      .setCategory(AdminAttributeCategory.STATISTIC);
-
-    descriptor.createAdminAttributeInfo("TotalConnectionCount")
-      .setCategory(AdminAttributeCategory.STATISTIC);
-
-    descriptor.createAdminAttributeInfo("ActiveConnectionCount")
-      .setCategory(AdminAttributeCategory.STATISTIC);
-
-    descriptor.createAdminAttributeInfo("KeepaliveConnectionCount")
-      .setCategory(AdminAttributeCategory.STATISTIC);
-
-    descriptor.createAdminAttributeInfo("SelectConnectionCount")
-      .setCategory(AdminAttributeCategory.STATISTIC);
-
-    return descriptor;
   }
 
   /**
@@ -753,10 +726,10 @@ public class Port
         _keepaliveMax = 256;
 
       String name = "resin-port-" + _serverSocket.getLocalPort();
-      _thread = new Thread(this, name);
-      _thread.setDaemon(true);
+      Thread thread = new Thread(this, name);
+      thread.setDaemon(true);
 
-      _thread.start();
+      thread.start();
     } catch (Throwable e) {
       close();
 
@@ -764,14 +737,6 @@ public class Port
 
       throw e;
     }
-  }
-
-  /**
-   * Returns the total connections.
-   */
-  public int getTotalConnectionCount()
-  {
-    return _connectionCount;
   }
 
   /**
@@ -850,8 +815,6 @@ public class Port
       if (_lifecycle.isActive() && log.isLoggable(Level.FINER))
         log.log(Level.FINER, e.toString(), e);
     } finally {
-      boolean newConn = false;
-
       synchronized (this) {
         _idleThreadCount--;
 
@@ -887,10 +850,19 @@ public class Port
   /**
    * Marks a new thread as stopped.
    */
-  void threadEnd(TcpConnection conn)
+  void threadEnd(TcpConnection conn,
+                 long milliseconds,
+                 int readBytes,
+                 int writeBytes,
+                 boolean isClientDisconnect)
   {
     synchronized (_threadCountLock) {
       _threadCount--;
+      _lifetimeConnectionCount++;
+      if (isClientDisconnect) _lifetimeClientDisconnectCount++;
+      _lifetimeConnectionTime += milliseconds;
+      _lifetimeReadBytes += readBytes;
+      _lifetimeWriteBytes += writeBytes;
     }
   }
 
@@ -905,6 +877,7 @@ public class Port
       else if (_connectionMax <= _connectionCount + _minSpareConnection)
         return false;
 
+      _lifetimeKeepaliveCount++;
       _keepaliveCount++;
 
       return true;
@@ -942,7 +915,7 @@ public class Port
   public void run()
   {
     while (_lifecycle.isActive()) {
-      boolean isStart = false;
+      boolean isStart;
 
       try {
         // need delay to avoid spawing too many threads over a short time,
@@ -979,8 +952,6 @@ public class Port
         e.printStackTrace();
       }
     }
-
-    _thread = null;
   }
 
   /**

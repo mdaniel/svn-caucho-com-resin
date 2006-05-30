@@ -227,7 +227,7 @@ public class DispatchServer implements Dependency {
   }
 
   /**
-   * Clears the invocation cache.
+   * Clears the proxy cache.
    */
   public void clearCache()
   {

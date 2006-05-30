@@ -52,6 +52,9 @@ public class SocketStream extends StreamImpl {
 
   private boolean _throwReadInterrupts = false;
 
+  private int _totalReadBytes;
+  private int _totalWriteBytes;
+
   public SocketStream()
   {
   }
@@ -73,6 +76,7 @@ public class SocketStream extends StreamImpl {
     _is = null;
     _os = null;
     _needsFlush = false;
+
   }
 
   /**
@@ -144,6 +148,9 @@ public class SocketStream extends StreamImpl {
 
       int readLength = _is.read(buf, offset, length);
 
+      if (readLength >= 0)
+        _totalReadBytes += readLength;
+
       return readLength;
     } catch (IOException e) {
       if (_throwReadInterrupts)
@@ -201,6 +208,7 @@ public class SocketStream extends StreamImpl {
     try {
       _needsFlush = true;
       _os.write(buf, offset, length);
+      _totalWriteBytes += length;
     } catch (IOException e) {
       try {
         close();
@@ -230,6 +238,22 @@ public class SocketStream extends StreamImpl {
       
       throw ClientDisconnectException.create(e);
     }
+  }
+
+  public void resetTotalBytes()
+  {
+    _totalReadBytes = 0;
+    _totalWriteBytes = 0;
+  }
+
+  public int getTotalReadBytes()
+  {
+    return _totalReadBytes;
+  }
+
+  public int getTotalWriteBytes()
+  {
+    return _totalWriteBytes;
   }
 
   /**

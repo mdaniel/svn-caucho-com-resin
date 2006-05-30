@@ -333,7 +333,7 @@ public class CauchoSystem {
   /**
    * Set true to cause the tracking of detailed statistcs, default false.
    * Detailed statistics cause various parts of Resin to keep more detailed
-   * statistics at the possible expense of some performance.
+   * statistics at the possible expense of performance.
    */
   public static void setDetailedStatistics(boolean isVerboseStatistics)
   {

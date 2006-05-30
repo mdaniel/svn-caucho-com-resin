@@ -46,7 +46,7 @@ import com.caucho.vfs.*;
 import com.caucho.config.ConfigException;
 
 /**
- * Represents a protocol connection.
+ * A select manager handles keepalive connections.
  */
 abstract public class AbstractSelectManager {
   private static final L10N L = new L10N(AbstractSelectManager.class);

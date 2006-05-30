@@ -41,8 +41,6 @@ import com.caucho.mbeans.HostMBean;
 import com.caucho.mbeans.WebAppMBean;
 
 import com.caucho.server.webapp.WebAppController;
-import com.caucho.jmx.AdminAttributeCategory;
-import com.caucho.jmx.AdminInfo;
 import com.caucho.util.L10N;
 
 /**
@@ -61,64 +59,6 @@ public class HostAdmin extends DeployControllerAdmin<HostController>
     super(controller);
   }
 
-  public AdminInfo getAdminInfo()
-  {
-    AdminInfo descriptor = super.getAdminInfo();
-
-    String hostName = getHostName();
-
-    if (hostName == null || hostName.length() == 0)
-      hostName = "*";
-
-    descriptor.setTitle(L.l("Host {0}", hostName));
-
-    descriptor.createAdminAttributeInfo("HostName")
-      .setCategory(AdminAttributeCategory.CONFIGURATION);
-
-    descriptor.createAdminAttributeInfo("URL")
-      .setCategory(AdminAttributeCategory.CONFIGURATION);
-
-    descriptor.createAdminAttributeInfo("RootDirectory")
-      .setCategory(AdminAttributeCategory.CONFIGURATION);
-
-    boolean isDocumentDirectoryIgnored = getDocumentDirectory().equals(getRootDirectory());
-
-    descriptor.createAdminAttributeInfo("DocumentDirectory")
-      .setCategory(AdminAttributeCategory.CONFIGURATION)
-      .setIgnored(isDocumentDirectoryIgnored);
-
-    descriptor.createAdminAttributeInfo("WebAppObjectNames")
-      .setCategory(AdminAttributeCategory.CHILD);
-
-    descriptor.createAdminAttributeInfo("WebAppNames")
-      .setCategory(AdminAttributeCategory.CHILD)
-      .setDeprecated("3.0.15 Use WebAppObjectNames");
-
-    descriptor.createAdminAttributeInfo("WebApps")
-      .setDeprecated("3.0.15 Use WebAppNames");
-
-    descriptor.createAdminAttributeInfo("WarDirectory")
-      .setIgnored(true);
-
-    descriptor.createAdminAttributeInfo("WarExpandDirectory")
-      .setIgnored(true);
-
-    descriptor.createAdminAttributeInfo("UpdateWebAppDeploy")
-      .setIgnored(true);
-
-    descriptor.createAdminAttributeInfo("UpdateEarDeploy")
-      .setIgnored(true);
-
-    descriptor.createAdminAttributeInfo("ExpandEarDeploy")
-      .setIgnored(true);
-
-    descriptor.createAdminAttributeInfo("StartEarDeploy")
-      .setIgnored(true);
-
-    return descriptor;
-  }
-
-
   public String getName()
   {
     return getController().getName();
@@ -127,14 +67,6 @@ public class HostAdmin extends DeployControllerAdmin<HostController>
   public String getHostName()
   {
     return getController().getHostName();
-  }
-
-  /**
-   * Returns the mbean object.
-   */
-  public ObjectName getObjectName()
-  {
-    return getController().getObjectName();
   }
 
   public String getURL()

@@ -35,6 +35,7 @@ import java.util.logging.*;
 
 import com.caucho.util.ThreadPool;
 import com.caucho.util.ThreadTask;
+import com.caucho.util.Alarm;
 
 import com.caucho.vfs.QSocket;
 import com.caucho.vfs.ClientDisconnectException;
@@ -83,7 +84,7 @@ public class TcpConnection extends PortConnection implements ThreadTask {
       _id = "resin-tcp-connection-*:" + port.getPort() + "-" + _g_id++;
     else
       _id = ("resin-tcp-connection-" + port.getHost() + ":" +
-	     port.getPort() + "-" + _g_id++);
+             port.getPort() + "-" + _g_id++);
 
     _socket = socket;
   }
@@ -318,7 +319,10 @@ public class TcpConnection extends PortConnection implements ThreadTask {
     }
     else if (port.getSelectManager() != null) {
       if (! port.getSelectManager().keepalive(this)) {
-	port.keepaliveEnd(this);
+        // XXX: s/b
+        // setKeepalive();
+        // ThreadPool.schedule(this);
+        port.keepaliveEnd(this);
 	free();
       }
     }
@@ -364,6 +368,12 @@ public class TcpConnection extends PortConnection implements ThreadTask {
 
     ClassLoader systemLoader = ClassLoader.getSystemClassLoader();
 
+    boolean isClientDisconnect = false;
+    int readBytes = 0;
+    int writeBytes = 0;
+
+    long startTime = Alarm.getExactTime();
+
     try {
       while (! _isDead) {
 	if (isKeepalive) {
@@ -372,7 +382,10 @@ public class TcpConnection extends PortConnection implements ThreadTask {
 	  return;
 	}
 
-	isFirst = false;
+        int startReadBytes = _socket.getTotalReadBytes();
+        int startWriteBytes = _socket.getTotalWriteBytes();
+
+        isFirst = false;
 	
 	try {
 	  thread.interrupted();
@@ -391,7 +404,7 @@ public class TcpConnection extends PortConnection implements ThreadTask {
 	    }
 	  } while (isKeepalive && readNonBlock() && ! port.isClosed());
 
-	  if (isKeepalive) {
+          if (isKeepalive) {
 	    return;
 	  }
 	  else {
@@ -400,8 +413,9 @@ public class TcpConnection extends PortConnection implements ThreadTask {
 	}
 	catch (ClientDisconnectException e) {
 	  isKeepalive = false;
-	  
-	  if (log.isLoggable(Level.FINER))
+          isClientDisconnect = true;
+
+          if (log.isLoggable(Level.FINER))
 	    log.finer("[" + getId() + "] " + e);
 	}
 	catch (IOException e) {
@@ -413,8 +427,11 @@ public class TcpConnection extends PortConnection implements ThreadTask {
         }
 	finally {
 	  thread.setContextClassLoader(systemLoader);
-	  
-	  if (! isKeepalive)
+
+          readBytes = _socket.getTotalReadBytes() - startReadBytes;
+          writeBytes = _socket.getTotalWriteBytes() - startWriteBytes;
+
+          if (! isKeepalive)
 	    closeImpl();
 	}
       }
@@ -422,7 +439,9 @@ public class TcpConnection extends PortConnection implements ThreadTask {
       log.log(Level.WARNING, e.toString(), e);
       isKeepalive = false;
     } finally {
-      port.threadEnd(this);
+      long time = Alarm.getExactTime() - startTime;
+
+      port.threadEnd(this, time, readBytes, writeBytes, isClientDisconnect);
 
       if (isKeepalive)
 	keepalive();

@@ -74,6 +74,14 @@ public class WebAppController
 
   private String _sourceType = "unknown";
 
+  private final Object _statisticsLock = new Object();
+
+  private volatile long _lifetimeConnectionCount;
+  private volatile long _lifetimeConnectionTime;
+  private volatile long _lifetimeReadBytes;
+  private volatile long _lifetimeWriteBytes;
+  private volatile long _lifetimeClientDisconnectCount;
+
   private WebAppAdmin _admin = new WebAppAdmin(this);
 
   public WebAppController()
@@ -455,6 +463,63 @@ public class WebAppController
     super.removeExpandFile(path, relPath);
   }
 
+  public long getLifetimeConnectionCount()
+  {
+    synchronized (_statisticsLock) {
+      return _lifetimeConnectionCount;
+    }
+  }
+
+  public long getLifetimeConnectionTime()
+  {
+    synchronized (_statisticsLock) {
+      return _lifetimeConnectionTime;
+    }
+  }
+
+  public long getLifetimeReadBytes()
+  {
+    synchronized (_statisticsLock) {
+      return _lifetimeReadBytes;
+    }
+  }
+
+  public long getLifetimeWriteBytes()
+  {
+    synchronized (_statisticsLock) {
+      return _lifetimeWriteBytes;
+    }
+  }
+
+  public long getLifetimeClientDisconnectCount()
+  {
+    synchronized (_statisticsLock) {
+      return _lifetimeClientDisconnectCount;
+    }
+  }
+
+  /**
+   * Update statistics with the results of one request.
+   *
+   * @param milliseconds the number of millesconds for the request
+   * @param readBytes the number of bytes read
+   * @param writeBytes the number of bytes written
+   * @param isClientDisconnect true if the request ended with a client DisconnectException
+   */
+  public void updateStatistics(long milliseconds,
+                               int readBytes,
+                               int writeBytes,
+                               boolean isClientDisconnect)
+  {
+    synchronized (_statisticsLock) {
+      _lifetimeConnectionCount++;
+      _lifetimeConnectionTime += milliseconds;
+      _lifetimeReadBytes += readBytes;
+      _lifetimeWriteBytes += writeBytes;
+      if (isClientDisconnect)
+        _lifetimeClientDisconnectCount++;
+    }
+  }
   /**
    * Returns a printable view.
    */
@@ -477,17 +542,17 @@ public class WebAppController
       String id = WebAppController.this.getId();
 
       if (id != null)
-	return id;
+        return id;
       else
-	return WebAppController.this.getContextPath();
+        return WebAppController.this.getContextPath();
     }
 
     public String getName()
     {
       if (getWarName() != null)
-	return getWarName();
+        return getWarName();
       else
-	return getId();
+        return getId();
     }
 
     public Path getAppDir()

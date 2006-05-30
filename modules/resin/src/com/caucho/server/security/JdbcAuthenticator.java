@@ -353,10 +353,12 @@ public class JdbcAuthenticator extends AbstractAuthenticator {
      if (updateCookie(user, id)) {
        Cookie cookie = new Cookie("resinauthid", id);
        cookie.setPath("/");
+
        if (getCookieVersion() >= 0)
          cookie.setVersion(getCookieVersion());
        else
          cookie.setVersion(sm.getCookieVersion());
+
        if (_cookieDomain != null)
          cookie.setDomain(_cookieDomain);
        else if (getCookieDomain() != null)
@@ -366,6 +368,7 @@ public class JdbcAuthenticator extends AbstractAuthenticator {
  
        if (_cookieMaxAge > 0)
          cookie.setMaxAge((int) (_cookieMaxAge / 1000L));
+
        response.addCookie(cookie);
      }
    }

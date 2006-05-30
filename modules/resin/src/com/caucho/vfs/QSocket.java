@@ -40,7 +40,7 @@ import com.caucho.util.*;
 import com.caucho.vfs.*;
 
 /**
- * Abstract socket to handle both normal sockets and bin/resin sockets.
+ * Abstract socket to handle both normal sockets and JNI sockets.
  */
 abstract public class QSocket {
   /**
@@ -155,6 +155,17 @@ abstract public class QSocket {
   abstract public StreamImpl getStream()
     throws IOException;
 
+
+  /**
+   * Returns the total number of bytes read from the socket connection.
+   */
+  abstract public int getTotalReadBytes();
+
+  /**
+   * Returns the total number of bytes written to the socket connection.
+   */
+  abstract public int getTotalWriteBytes();
+
   /**
    * returns true if it's closed.
    */
@@ -162,5 +173,6 @@ abstract public class QSocket {
   
   abstract public void close()
     throws IOException;
+
 }
 

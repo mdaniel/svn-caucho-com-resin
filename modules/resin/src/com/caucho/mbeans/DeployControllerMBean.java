@@ -29,6 +29,10 @@
 
 package com.caucho.mbeans;
 
+import com.caucho.jmx.MBeanAttribute;
+import com.caucho.jmx.MBeanOperation;
+import com.caucho.jmx.MBeanAttributeCategory;
+
 import java.util.Date;
 
 import javax.management.ObjectName;
@@ -41,39 +45,73 @@ public interface DeployControllerMBean
   /**
    * Returns the ObjectName.
    */
+  @MBeanAttribute(description="The JMX ObjectName for the MBean",
+                  category = MBeanAttributeCategory.CONFIGURATION)
   public ObjectName getObjectName();
+
+  /**
+   * Returns the startup mode, one of "default", "automatic", "lazy", or "manual".
+   */
+  @MBeanAttribute(description="The startup-mode, one of `default', `automatic',"
+                              + " `lazy', or `manual'",
+                  category =MBeanAttributeCategory.CONFIGURATION)
+  public String getStartupMode();
+
+  /**
+   * Returns the redeploy mode, one of "default", "automatic", "lazy", or "manual".
+   */
+  @MBeanAttribute(description="The redeploy-mode, one of `default', `automatic',"
+                              + " `lazy', or `manual'",
+                  category =MBeanAttributeCategory.CONFIGURATION)
+  public String getRedeployMode();
+
+  /**
+   * Returns the interval between redploy checks.
+   */
+  @MBeanAttribute(description="The millisecond interval between checks for the"
+                              + " need to redeploy",
+                  category =MBeanAttributeCategory.CONFIGURATION)
+  public long getRedeployCheckInterval();
 
   /**
    * Returns the controller's state.
    */
+  @MBeanAttribute(description="The lifecycle state",
+                  category =MBeanAttributeCategory.STATISTIC)
   public String getState();
 
   /**
-   * Returns the time the controller was last started
+   * Returns the time the controller was last started.
    */
+  @MBeanAttribute(description="The time of the last start",
+                  category =MBeanAttributeCategory.STATISTIC)
   public Date getStartTime();
 
   /**
    * Starts the instance.
    */
+  @MBeanOperation(description="Start")
   public void start()
     throws Exception;
 
   /**
    * Stops the instance.
    */
+  @MBeanOperation(description="Stop")
   public void stop()
     throws Exception;
 
   /**
    * Restarts the instance.
    */
+  @MBeanOperation(description="Restart (Stop then Start)")
   public void restart()
     throws Exception;
 
   /**
    * Restarts the instance if any changes are detected.
    */
+  @MBeanOperation(description="Update")
   public void update()
     throws Exception;
 }

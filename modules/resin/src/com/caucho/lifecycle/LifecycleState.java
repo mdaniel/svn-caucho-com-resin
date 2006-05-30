@@ -43,4 +43,34 @@ public interface LifecycleState {
   public static final int IS_STOPPED = 7;
   public static final int IS_DESTROYING = 8;
   public static final int IS_DESTROYED = 9;
+
+  public int getState();
+
+  public String getStateName();
+
+  public boolean isInitializing();
+
+  public boolean isInit();
+
+  public boolean isBeforeInit();
+
+  public boolean isAfterInit();
+
+  public boolean isStarting();
+
+  public boolean isBeforeActive();
+
+  public boolean isAfterActive();
+
+  public boolean isActive();
+
+  public boolean isError();
+
+  public boolean isStopping();
+
+  public boolean isStopped();
+
+  public boolean isDestroying();
+
+  public boolean isDestroyed();
 }

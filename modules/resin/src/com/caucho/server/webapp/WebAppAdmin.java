@@ -37,8 +37,6 @@ import com.caucho.mbeans.WebAppMBean;
 
 import com.caucho.server.cluster.Store;
 
-import com.caucho.jmx.AdminAttributeCategory;
-import com.caucho.jmx.AdminInfo;
 import com.caucho.util.L10N;
 
 /**
@@ -52,27 +50,6 @@ public class WebAppAdmin extends DeployControllerAdmin<WebAppController>
   public WebAppAdmin(WebAppController controller)
   {
     super(controller);
-  }
-
-  public AdminInfo getAdminInfo()
-  {
-    AdminInfo descriptor = super.getAdminInfo();
-
-    String contextPath = getContextPath();
-
-    if (contextPath == null || contextPath.length() == 0)
-      contextPath = "/";
-
-    descriptor.setTitle(L.l("WebApp {0}", contextPath));
-    descriptor.setDescription(L.l("A web application is a self-contained subtree of the web site."));
-
-    descriptor.createAdminAttributeInfo("ContextPath")
-      .setCategory(AdminAttributeCategory.CONFIGURATION);
-
-    descriptor.createAdminAttributeInfo("ActiveSessionCount")
-      .setCategory(AdminAttributeCategory.STATISTIC);
-
-    return descriptor;
   }
 
   /**
@@ -202,6 +179,37 @@ public class WebAppAdmin extends DeployControllerAdmin<WebAppController>
 
     return app.getSessionManager();
   }
+
+  public int getConnectionCount()
+  {
+    return getApplication().getRequestCount();
+  }
+
+  public long getLifetimeConnectionCount()
+  {
+    return getController().getLifetimeConnectionCount();
+  }
+
+  public long getLifetimeConnectionTime()
+  {
+    return getController().getLifetimeConnectionTime();
+  }
+
+  public long getLifetimeReadBytes()
+  {
+    return getController().getLifetimeReadBytes();
+  }
+
+  public long getLifetimeWriteBytes()
+  {
+    return getController().getLifetimeWriteBytes();
+  }
+
+  public long getLifetimeClientDisconnectCount()
+  {
+    return getController().getLifetimeClientDisconnectCount();
+  }
+
   /**
    * Returns the active application.
    */

@@ -40,6 +40,8 @@ import java.util.logging.Logger;
 import java.util.logging.Level;
 
 import javax.servlet.jsp.el.VariableResolver;
+import javax.management.ObjectName;
+import javax.management.MalformedObjectNameException;
 
 import com.caucho.config.ConfigException;
 import com.caucho.config.SchemaBean;
@@ -49,9 +51,9 @@ import com.caucho.config.types.Period;
 import com.caucho.el.EL;
 import com.caucho.el.MapVariableResolver;
 import com.caucho.el.SystemPropertiesResolver;
-import com.caucho.jmx.Jmx;
 import com.caucho.jsp.cfg.JspPropertyGroup;
 import com.caucho.lifecycle.Lifecycle;
+import com.caucho.lifecycle.LifecycleState;
 
 import com.caucho.loader.Environment;
 import com.caucho.loader.EnvironmentBean;
@@ -67,18 +69,30 @@ import com.caucho.util.L10N;
 import com.caucho.util.Log;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
+import com.caucho.jmx.Jmx;
 
 public class ResinServer
   implements EnvironmentBean, SchemaBean,
-	     ServerListener {
+             ServerListener {
   private static final Logger log = Log.open(ResinServer.class);
   private static final L10N L = new L10N(ResinServer.class);
 
   private static ResinServer _resinServer;
 
+  private static final ObjectName OBJECT_NAME;
+
+  static {
+    try {
+      OBJECT_NAME = Jmx.getObjectName("resin:type=ResinServer");
+    }
+    catch (MalformedObjectNameException e) {
+      throw new AssertionError(e);
+    }
+  }
+
   private final EnvironmentLocal<String> _serverIdLocal =
     new EnvironmentLocal<String>("caucho.server-id");
-  
+
   private ClassLoader _classLoader;
 
   private final ResinServerAdmin _resinServerAdmin;
@@ -100,7 +114,7 @@ public class ResinServer
   private SecurityManager _securityManager;
 
   private HashMap<String,Object> _variableMap = new HashMap<String,Object>();
-  
+
   private ArrayList<ServerController> _servers
     = new ArrayList<ServerController>();
 
@@ -133,7 +147,7 @@ public class ResinServer
 
     _variableMap.put("resinHome", CauchoSystem.getResinHome());
     _variableMap.put("serverRoot", CauchoSystem.getServerRoot());
-    
+
     _variableMap.put("resin-home", CauchoSystem.getResinHome());
     _variableMap.put("server-root", CauchoSystem.getServerRoot());
 
@@ -148,7 +162,7 @@ public class ResinServer
     _resinServerAdmin = new ResinServerAdmin(this);
 
     try {
-      Jmx.register(_resinServerAdmin, "resin:type=ResinServer");
+      Jmx.register(_resinServerAdmin, OBJECT_NAME);
     } catch (Exception e) {
       e.printStackTrace();
     }
@@ -168,6 +182,11 @@ public class ResinServer
   public ClassLoader getClassLoader()
   {
     return _classLoader;
+  }
+
+  public ObjectName getObjectName()
+  {
+    return OBJECT_NAME;
   }
 
   /**
@@ -269,10 +288,10 @@ public class ResinServer
       if (id != null && ! id.equals("")) {
       }
       else
-	id = String.valueOf(_servers.size());
-      
+        id = String.valueOf(_servers.size());
+
       ServerController controller = new ServerController(config);
-    
+
       _servers.add(controller);
 
       // XXX: controller.addServerListener(this);
@@ -365,7 +384,7 @@ public class ResinServer
     throws ConfigException
   {
     // the start is necessary to handle the QA tests
-    
+
     tm.start();
   }
 
@@ -391,8 +410,8 @@ public class ResinServer
   {
     if (! Provider.class.isAssignableFrom(providerClass))
       throw new ConfigException(L.l("security-provider {0} must implement java.security.Provider",
-				    providerClass.getName()));
-    
+                                    providerClass.getName()));
+
     Security.addProvider((Provider) providerClass.newInstance());
   }
 
@@ -437,6 +456,14 @@ public class ResinServer
   }
 
   /**
+   * Returns the current lifecycle state.
+   */
+  public LifecycleState getLifecycleState()
+  {
+    return _lifecycle;
+  }
+
+  /**
    * Initialize the server.
    */
   public void init()
@@ -451,14 +478,14 @@ public class ResinServer
   {
     if (_userName != null) {
       try {
-	int uid = CauchoSystem.setUser(_userName, _groupName);
-	if (uid >= 0)
-	  log.info(L.l("Running as {0}(uid={1})", _userName, "" + uid));
-	else
-	  log.warning(L.l("Can't run as {0}(uid={1}), running as root.",
-			  _userName, "" + uid));
+        int uid = CauchoSystem.setUser(_userName, _groupName);
+        if (uid >= 0)
+          log.info(L.l("Running as {0}(uid={1})", _userName, "" + uid));
+        else
+          log.warning(L.l("Can't run as {0}(uid={1}), running as root.",
+                          _userName, "" + uid));
       } catch (Exception e) {
-	log.log(Level.WARNING, e.toString(), e);
+        log.log(Level.WARNING, e.toString(), e);
       }
     }
   }
@@ -473,7 +500,7 @@ public class ResinServer
       return;
 
     long start = Alarm.getCurrentTime();
-    
+
     // force a GC on start
     System.gc();
 
@@ -484,12 +511,12 @@ public class ResinServer
 
       server.start();
     }
-    
+
     Environment.start(getClassLoader());
 
     if (! hasListeningPort()) {
       log.warning(L.l("-server \"{0}\" has no matching http or srun ports.  Check the resin.conf and -server values.",
-		      _serverId));
+                      _serverId));
     }
 
     log.info("Resin started in " + (Alarm.getCurrentTime() - start) + "ms");
@@ -504,12 +531,12 @@ public class ResinServer
       ServerController server = _servers.get(i);
 
       if (server.hasListeningPort())
-	return true;
+        return true;
     }
 
     return false;
   }
-    
+
   /**
    * Adds a listener.
    */
@@ -554,15 +581,15 @@ public class ResinServer
 
     try {
       for (ServerController server : _servers) {
-	server.destroy();
+        server.destroy();
       }
 
       ArrayList<ResinServerListener> listeners = _listeners;
-    
-      for (int i = 0; i < listeners.size(); i++) {
-	ResinServerListener listener = listeners.get(i);
 
-	listener.closeEvent(this);
+      for (int i = 0; i < listeners.size(); i++) {
+        ResinServerListener listener = listeners.get(i);
+
+        listener.closeEvent(this);
       }
 
       Environment.closeGlobal();
@@ -582,7 +609,7 @@ public class ResinServer
     {
       return _serverId;
     }
-    
+
     /**
      * Returns the resin home.
      */
@@ -645,18 +672,18 @@ public class ResinServer
 
   class SecurityManagerConfig {
     private boolean _isEnable;
-    
+
     SecurityManagerConfig()
     {
       if (_securityManager == null)
-	_securityManager = new SecurityManager();
+        _securityManager = new SecurityManager();
     }
-    
+
     public void setEnable(boolean enable)
     {
       _isEnable = enable;
     }
-    
+
     public void setValue(boolean enable)
     {
       setEnable(enable);
@@ -666,15 +693,15 @@ public class ResinServer
       throws ConfigException
     {
       if (! path.canRead())
-	throw new ConfigException(L.l("policy-file '{0}' must be readable.",
-				      path));
+        throw new ConfigException(L.l("policy-file '{0}' must be readable.",
+                                      path));
 
     }
 
     public void init()
     {
       if (_isEnable)
-	System.setSecurityManager(_securityManager);
+        System.setSecurityManager(_securityManager);
     }
   }
 }

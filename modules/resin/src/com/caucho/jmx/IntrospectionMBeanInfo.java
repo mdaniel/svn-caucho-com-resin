@@ -26,64 +26,41 @@
  * @author Sam
  */
 
+
 package com.caucho.jmx;
 
+import javax.management.MBeanInfo;
+import javax.management.MBeanAttributeInfo;
+import javax.management.MBeanConstructorInfo;
 import javax.management.MBeanOperationInfo;
+import javax.management.MBeanNotificationInfo;
 
-public class AdminOperationInfo
-  extends AdminFeatureInfo
+public class IntrospectionMBeanInfo
+  extends MBeanInfo
 {
-  private int _impact = MBeanOperationInfo.UNKNOWN;
-  private Closure<Boolean> _enabled;
-
-  AdminOperationInfo(String name)
+  public IntrospectionMBeanInfo(Class cl,
+                                MBeanAttributeInfo[] attributes,
+                                MBeanConstructorInfo[] constructors,
+                                MBeanOperationInfo[] operations,
+                                MBeanNotificationInfo[] notifications)
+    throws IllegalArgumentException
   {
-    super(name);
+    super(cl.getName(),
+          createDescription(cl),
+          attributes,
+          constructors,
+          operations,
+          notifications);
   }
 
-  /**
-   * Set the impact that is returned by
-   * {@link javax.management.MBeanOperationInfo#getImpact()},
-   * default is
-   * {@link javax.management.MBeanOperationInfo#UNKNOWN}.
-   */
-  public AdminOperationInfo setImpact(int impact)
+  @SuppressWarnings({"unchecked"})
+  private static String createDescription(Class cl)
   {
-    _impact = impact;
+    MBean ann = (MBean) cl.getAnnotation(MBean.class);
 
-    return this;
-  }
-
-  public int getImpact()
-  {
-    return _impact;
-  }
-
-  /**
-   * If true, the operation can be performed.  If false, the oepration cannot
-   * be performed.
-   *
-   * <p>
-   * This is a hint to the client, clients can still perform the operation
-   * even if this is false.
-   * </p>
-   *
-   * <p>The corresponding descriptor field is "enabled".</p>
-   */
-  public AdminOperationInfo setEnabled(Closure<Boolean> closure)
-  {
-    _enabled = closure;
-
-    return this;
-  }
-
-  public boolean isEnabled()
-  {
-    return _enabled.eval();
-  }
-
-  public interface Closure<T> {
-    public T eval()
-      throws RuntimeException;
+    if (ann != null)
+      return ann.description();
+    else
+      return "Standard MBean for " + cl.getName();
   }
 }

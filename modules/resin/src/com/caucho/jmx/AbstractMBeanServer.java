@@ -1057,21 +1057,6 @@ abstract public class AbstractMBeanServer implements MBeanServer {
     return getView().getMBean(name);
   }
 
-  public AdminInfo getAdminInfo(ObjectName name)
-  {
-    MBeanWrapper wrapper = getMBean(name);
-
-    if (wrapper == null)
-      return null;
-
-    Object obj = wrapper.getObject();
-
-    if (!(obj instanceof AdminInfoFactory))
-      return null;
-
-    return (((AdminInfoFactory) obj).getAdminInfo());
-  }
-
   /**
    * Handles the case where a class loader is dropped.
    */

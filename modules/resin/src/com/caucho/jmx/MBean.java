@@ -26,31 +26,16 @@
  * @author Sam
  */
 
+
 package com.caucho.jmx;
 
-public class AdminAttributeInfo
-  extends AdminFeatureInfo
-{
-  AdminAttributeCategory _category = AdminAttributeCategory.GENERAL;
+import java.lang.annotation.Target;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
-  AdminAttributeInfo(String name)
-  {
-    super(name);
-  }
-
-  /**
-   * Set a logical category that this attribute belongs to, default is
-   * {@link AdminAttributeCategory#GENERAL}.
-   */
-  public AdminAttributeInfo setCategory(AdminAttributeCategory category)
-  {
-    _category = category;
-
-    return this;
-  }
-
-  public AdminAttributeCategory getCategory()
-  {
-    return _category;
-  }
+@Target({ElementType.TYPE})
+@Retention(RetentionPolicy.RUNTIME)
+public @interface MBean {
+  public String description();
 }

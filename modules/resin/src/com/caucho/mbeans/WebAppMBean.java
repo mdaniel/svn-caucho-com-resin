@@ -46,14 +46,24 @@ public interface WebAppMBean extends DeployControllerMBean {
   public String getContextPath();
 
   /**
-   * Returns the count of active sessions.
-   */
-  public int getActiveSessionCount();
-
-  /**
    * Returns the session timeout
    */
   public long getSessionTimeout();
+
+  /**
+   * Returns the persistent store type.
+   */
+  public String getSessionStoreType();
+
+  /**
+   * Returns the current number of requests being serviced by the web-app.
+   */
+  public int getConnectionCount();
+
+  /**
+   * Returns the count of active sessions.
+   */
+  public int getActiveSessionCount();
 
   /**
    * Returns the count of active sessions.
@@ -76,7 +86,32 @@ public interface WebAppMBean extends DeployControllerMBean {
   public long getSessionTimeoutCount();
 
   /**
-   * Returns the persistent store type.
+   * Returns the total number of requests serviced by the web-app
+   * since it started.
    */
-  public String getSessionStoreType();
+  public long getLifetimeConnectionCount();
+
+  /**
+   * Returns the total duration in milliseconds that connections serviced by
+   * this web-app have taken.
+   */
+  public long getLifetimeConnectionTime();
+
+  /**
+   * Returns the total number of bytes that connections serviced by
+   * this web-app have read.
+   */
+  public long getLifetimeReadBytes();
+
+  /**
+   * Returns the total number of bytes that connections serviced by this
+   * web-app have written.
+   */
+  public long getLifetimeWriteBytes();
+
+  /**
+   * Returns the number of connections that have ended with a
+   * {@link com.caucho.vfs.ClientDisconnectException} for this web-app in it's lifetime.
+   */
+  public long getLifetimeClientDisconnectCount();
 }

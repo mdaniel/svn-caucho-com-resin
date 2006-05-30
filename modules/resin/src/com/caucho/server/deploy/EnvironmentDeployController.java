@@ -299,12 +299,8 @@ abstract public class
   /**
    * Creates the managed object.
    */
-  protected Object createMBean()
-    throws JMException
-  {
-    return new IntrospectionMBean(new DeployControllerAdmin(this),
-                                  DeployControllerMBean.class);
-  }
+  abstract protected Object createMBean()
+    throws JMException;
 
   /**
    * Returns true if the entry matches.

@@ -38,8 +38,8 @@ import javax.servlet.*;
  */
 public class ClassLoaderFilterChain implements FilterChain {
   // Loader to use.
-  private ClassLoader _loader;
-  private FilterChain _next;
+  private final ClassLoader _loader;
+  private final FilterChain _next;
 
   /**
    * Creates a new FilterChainFilter.

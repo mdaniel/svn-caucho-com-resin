@@ -491,7 +491,7 @@ public class JavaClassDef extends ClassDef {
     JavaMethod method = _functionMap.get(name);
 
     if (method == null) {
-      env.error("'" + name + "' is an unknown method.");
+      env.error(L.l("`{0}' is an unknown method of {1}.", name, _name));
     }
 
     return method;
@@ -768,6 +768,7 @@ public class JavaClassDef extends ClassDef {
     }
 
     Method []methods = type.getDeclaredMethods();
+
 
     for (Method method : methods) {
       if (_functionMap.get(method.getName()) != null)

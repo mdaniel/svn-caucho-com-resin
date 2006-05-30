@@ -30,13 +30,9 @@ package com.caucho.server.resin;
 
 import com.caucho.util.CauchoSystem;
 import com.caucho.util.L10N;
-import com.caucho.jmx.AdminAttributeCategory;
-import com.caucho.jmx.AdminInfoFactory;
-import com.caucho.jmx.AdminInfo;
 import com.caucho.mbeans.ResinServerMBean;
 
 import javax.management.ObjectName;
-import javax.management.MBeanOperationInfo;
 import javax.management.MalformedObjectNameException;
 import java.util.Date;
 import java.util.ArrayList;
@@ -46,11 +42,11 @@ public class ResinServerAdmin
 {
   private static final L10N L = new L10N(ResinServerAdmin.class);
 
-  private static final ObjectName THREADPOOL_OBJECTNAME;
+  private static final ObjectName THREAD_POOL_OBJECT_NAME;
 
   static {
     try {
-      THREADPOOL_OBJECTNAME = new ObjectName("resin:type=ThreadPool");
+      THREAD_POOL_OBJECT_NAME = new ObjectName("resin:type=ThreadPool");
     }
     catch (MalformedObjectNameException e) {
       throw new AssertionError(e);
@@ -59,14 +55,20 @@ public class ResinServerAdmin
 
   private final ResinServer _resinServer;
 
+  /**
+   * Creates the admin object and registers with JMX.
+   */
   public ResinServerAdmin(ResinServer resinServer)
   {
     _resinServer = resinServer;
   }
 
+  /**
+   * Returns the JMX {@link ObjectName}.
+   */
   public ObjectName getObjectName()
   {
-    return null;  // XXX:
+    return _resinServer.getObjectName();
   }
 
   public String getLocalHost()
@@ -94,42 +96,14 @@ public class ResinServerAdmin
     return CauchoSystem.getServerRoot().getNativePath();
   }
 
-  public String getState()
+  public boolean isDetailedStatistics()
   {
-    // XXX: s/b _resinServer.getLifecycle()....
-
-    if (_resinServer.isClosed())
-      return "destroyed";
-
-    if (_resinServer.isClosing())
-      return "destroying";
-
-    return "active";
-  }
-
-  public Date getInitialStartTime()
-  {
-    return _resinServer.getInitialStartTime();
-  }
-
-  public Date getStartTime()
-  {
-    return _resinServer.getStartTime();
+    return CauchoSystem.isDetailedStatistics();
   }
 
   public ObjectName getThreadPoolObjectName()
   {
-    return THREADPOOL_OBJECTNAME;
-  }
-
-  public long getTotalMemory()
-  {
-    return Runtime.getRuntime().totalMemory();
-  }
-
-  public long getFreeMemory()
-  {
-    return Runtime.getRuntime().freeMemory();
+    return THREAD_POOL_OBJECT_NAME;
   }
 
   public ObjectName[] getServerObjectNames()
@@ -147,9 +121,38 @@ public class ResinServerAdmin
     return objectNames;
   }
 
+  public String getState()
+  {
+    return _resinServer.getLifecycleState().getStateName();
+  }
+
+  public Date getInitialStartTime()
+  {
+    return _resinServer.getInitialStartTime();
+  }
+
+  public Date getStartTime()
+  {
+    return _resinServer.getStartTime();
+  }
+
+  public long getTotalMemory()
+  {
+    return Runtime.getRuntime().totalMemory();
+  }
+
+  public long getFreeMemory()
+  {
+    return Runtime.getRuntime().freeMemory();
+  }
+
   public void restart()
   {
     _resinServer.destroy();
   }
 
+  public String toString()
+  {
+    return "ResinServerAdmin[" + getObjectName() + "]";
+  }
 }

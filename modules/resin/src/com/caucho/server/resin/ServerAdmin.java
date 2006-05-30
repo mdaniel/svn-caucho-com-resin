@@ -34,15 +34,19 @@ import javax.management.ObjectName;
 import com.caucho.util.*;
 import com.caucho.vfs.*;
 
-import com.caucho.jmx.AdminAttributeCategory;
-import com.caucho.jmx.AdminInfo;
-
 import com.caucho.server.deploy.DeployControllerAdmin;
+import com.caucho.server.port.Port;
+import com.caucho.server.cluster.Cluster;
+import com.caucho.server.host.HostController;
 
-import com.caucho.mbeans.ServletServerMBean;
+import com.caucho.mbeans.ServerMBean;
+import com.caucho.jmx.MBeanAttribute;
+import com.caucho.jmx.MBeanAttributeCategory;
+
+import java.util.ArrayList;
 
 public class ServerAdmin extends DeployControllerAdmin<ServerController>
-  implements ServletServerMBean
+  implements ServerMBean
 {
   private static final L10N L = new L10N(ServerAdmin.class);
 
@@ -51,48 +55,7 @@ public class ServerAdmin extends DeployControllerAdmin<ServerController>
     super(controller);
   }
 
-  public AdminInfo getAdminInfo()
-  {
-    AdminInfo descriptor = super.getAdminInfo();
-
-    String title;
-
-    String id = getId();
-
-    if (id == null || id.length() == 0)
-      title = L.l("Server");
-    else
-      title = L.l("Server {0}", id);
-
-    descriptor.setTitle(title);
-
-    descriptor.createAdminAttributeInfo("PortObjectNames")
-      .setCategory(AdminAttributeCategory.CHILD);
-
-    descriptor.createAdminAttributeInfo("ClusterObjectNames")
-      .setCategory(AdminAttributeCategory.CHILD);
-
-    descriptor.createAdminAttributeInfo("HostObjectNames")
-      .setCategory(AdminAttributeCategory.CHILD);
-
-    descriptor.createAdminAttributeInfo("InvocationCacheHitCount")
-      .setCategory(AdminAttributeCategory.STATISTIC);
-
-    descriptor.createAdminAttributeInfo("InvocationCacheMissCount")
-      .setCategory(AdminAttributeCategory.STATISTIC);
-
-    descriptor.createAdminAttributeInfo("ProxyCacheHitCount")
-      .setIgnored(true);
-
-    descriptor.createAdminAttributeInfo("ProxyCacheMissCount")
-      .setIgnored(true);
-
-    return descriptor;
-  }
-
-  /**
-   * Returns the server directory.
-   */
+  @Override
   public String getRootDirectory()
   {
     Path path = getController().getRootDirectory();
@@ -103,6 +66,11 @@ public class ServerAdmin extends DeployControllerAdmin<ServerController>
       return null;
   }
 
+  public boolean isSelectManager()
+  {
+    return getDeployInstance().getSelectManager() != null;
+  }
+
   /**
    * Returns the id
    */
@@ -111,48 +79,237 @@ public class ServerAdmin extends DeployControllerAdmin<ServerController>
     return getController().getId();
   }
 
-  /**
-   * Returns the array of ports.
-   */
   public ObjectName []getPortObjectNames()
   {
     ServletServer server = getDeployInstance();
 
-    if (server != null)
-      return server.getPortObjectNames();
-    else
+    if (server == null)
       return new ObjectName[0];
+
+    ArrayList<ObjectName> portNameList = new ArrayList<ObjectName>();
+
+    for (Port port : server.getPorts()) {
+      ObjectName name = port.getObjectName();
+
+      if (name != null)
+        portNameList.add(name);
+    }
+
+    return portNameList.toArray(new ObjectName[portNameList.size()]);
   }
 
-  /**
-   * Returns the array of cluster.
-   */
   public ObjectName []getClusterObjectNames()
   {
     ServletServer server = getDeployInstance();
 
-    if (server != null)
-      return server.getClusterObjectNames();
-    else
+    if (server == null)
       return new ObjectName[0];
+
+    ArrayList<ObjectName> clusterNameList = new ArrayList<ObjectName>();
+
+    for (Cluster cluster : server.getClusters()) {
+      ObjectName name = cluster.getObjectName();
+
+      if (name != null)
+        clusterNameList.add(name);
+    }
+
+    return clusterNameList.toArray(new ObjectName[clusterNameList.size()]);
   }
 
-  /**
-   * Returns the array of hosts
-   */
   public ObjectName []getHostObjectNames()
   {
     ServletServer server = getDeployInstance();
 
-    if (server != null)
-      return server.getHostObjectNames();
-    else
+    if (server == null)
       return new ObjectName[0];
+
+    ArrayList<ObjectName> hostNameList = new ArrayList<ObjectName>();
+
+    for (HostController host : server.getHostControllers()) {
+      ObjectName name = host.getObjectName();
+
+      if (name != null)
+        hostNameList.add(name);
+    }
+
+    return hostNameList.toArray(new ObjectName[hostNameList.size()]);
   }
 
-  /**
-   * Clears the cache.
-   */
+  public int getTotalConnectionCount()
+  {
+    ServletServer server = getDeployInstance();
+
+    if (server == null)
+      return -1;
+
+    int connectionCount = -1;
+
+    for (Port port : server.getPorts()) {
+      if (port.getTotalConnectionCount() >= 0) {
+        if (connectionCount == -1)
+          connectionCount = 0;
+
+        connectionCount += port.getTotalConnectionCount();
+      }
+    }
+
+    return connectionCount;
+  }
+
+  public int getActiveConnectionCount()
+  {
+    ServletServer server = getDeployInstance();
+
+    if (server == null)
+      return -1;
+
+    int activeConnectionCount = -1;
+
+    for (Port port : server.getPorts()) {
+      if (port.getActiveConnectionCount() >= 0) {
+        if (activeConnectionCount == -1)
+          activeConnectionCount = 0;
+
+        activeConnectionCount += port.getActiveConnectionCount();
+      }
+    }
+
+    return activeConnectionCount;
+  }
+
+  public int getKeepaliveConnectionCount()
+  {
+    ServletServer server = getDeployInstance();
+
+    if (server == null)
+      return -1;
+
+    int keepaliveConnectionCount = -1;
+
+    for (Port port : server.getPorts()) {
+      if (port.getKeepaliveConnectionCount() >= 0) {
+        if (keepaliveConnectionCount == -1)
+          keepaliveConnectionCount = 0;
+
+        keepaliveConnectionCount += port.getKeepaliveConnectionCount();
+      }
+    }
+
+    return keepaliveConnectionCount;
+  }
+
+  public int getSelectConnectionCount()
+  {
+    ServletServer server = getDeployInstance();
+
+    if (server == null)
+      return -1;
+
+    int selectConnectionCount = -1;
+
+    for (Port port : server.getPorts()) {
+      if (port.getSelectConnectionCount() >= 0) {
+        if (selectConnectionCount == -1)
+          selectConnectionCount = 0;
+
+        selectConnectionCount += port.getSelectConnectionCount();
+      }
+    }
+
+    return selectConnectionCount;
+  }
+
+  public long getLifetimeConnectionCount()
+  {
+    ServletServer server = getDeployInstance();
+
+    if (server == null)
+      return -1;
+
+    long lifetimeConnectionCount = 0;
+
+    for (Port port : server.getPorts())
+      lifetimeConnectionCount += port.getLifetimeConnectionCount();
+
+    return lifetimeConnectionCount;
+  }
+
+  public long getLifetimeConnectionTime()
+  {
+    ServletServer server = getDeployInstance();
+
+    if (server == null)
+      return -1;
+
+    long lifetimeConnectionTime = 0;
+
+    for (Port port : server.getPorts())
+      lifetimeConnectionTime += port.getLifetimeConnectionTime();
+
+    return lifetimeConnectionTime;
+  }
+
+  public long getLifetimeReadBytes()
+  {
+    ServletServer server = getDeployInstance();
+
+    if (server == null)
+      return -1;
+
+    long lifetimeReadBytes = 0;
+
+    for (Port port : server.getPorts())
+      lifetimeReadBytes += port.getLifetimeReadBytes();
+
+    return lifetimeReadBytes;
+  }
+
+  public long getLifetimeWriteBytes()
+  {
+    ServletServer server = getDeployInstance();
+
+    if (server == null)
+      return -1;
+
+    long lifetimeWriteBytes = 0;
+
+    for (Port port : server.getPorts())
+      lifetimeWriteBytes += port.getLifetimeWriteBytes();
+
+    return lifetimeWriteBytes;
+  }
+
+  public long getLifetimeClientDisconnectCount()
+  {
+    ServletServer server = getDeployInstance();
+
+    if (server == null)
+      return -1;
+
+    long lifetimeClientDisconnectCount = 0;
+
+    for (Port port : server.getPorts())
+      lifetimeClientDisconnectCount += port.getLifetimeClientDisconnectCount();
+
+    return lifetimeClientDisconnectCount;
+  }
+
+  public long getLifetimeKeepaliveCount()
+  {
+    ServletServer server = getDeployInstance();
+
+    if (server == null)
+      return -1;
+
+    long lifetimeKeepaliveCount = 0;
+
+    for (Port port : server.getPorts())
+      lifetimeKeepaliveCount += port.getLifetimeKeepaliveCount();
+
+    return lifetimeKeepaliveCount;
+  }
+
   public void clearCache()
   {
     ServletServer server = getDeployInstance();
@@ -161,12 +318,6 @@ public class ServerAdmin extends DeployControllerAdmin<ServerController>
       server.clearCache();
   }
 
-  /**
-   * Clears the cache by regexp patterns.
-   *
-   * @param hostRegexp the regexp to match the host.  Null matches all.
-   * @param urlRegexp the regexp to match the url. Null matches all.
-   */
   public void clearCacheByPattern(String hostRegexp, String urlRegexp)
   {
     ServletServer server = getDeployInstance();
@@ -175,9 +326,6 @@ public class ServerAdmin extends DeployControllerAdmin<ServerController>
       server.clearCacheByPattern(hostRegexp, urlRegexp);
   }
 
-  /**
-   * Returns the invocation cache hit count.
-   */
   public long getInvocationCacheHitCount()
   {
     ServletServer server = getDeployInstance();
@@ -188,9 +336,6 @@ public class ServerAdmin extends DeployControllerAdmin<ServerController>
       return -1;
   }
 
-  /**
-   * Returns the invocation cache miss count.
-   */
   public long getInvocationCacheMissCount()
   {
     ServletServer server = getDeployInstance();
@@ -201,9 +346,6 @@ public class ServerAdmin extends DeployControllerAdmin<ServerController>
       return -1;
   }
 
-  /**
-   * Returns the proxy cache hit count.
-   */
   public long getProxyCacheHitCount()
   {
     ServletServer server = getDeployInstance();
@@ -214,9 +356,6 @@ public class ServerAdmin extends DeployControllerAdmin<ServerController>
       return -1;
   }
 
-  /**
-   * Returns the proxy cache miss count.
-   */
   public long getProxyCacheMissCount()
   {
     ServletServer server = getDeployInstance();

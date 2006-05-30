@@ -279,6 +279,22 @@ public class QSocketWrapper extends QSocket {
     return _os;
   }
 
+  public void resetTotalBytes()
+  {
+    if (_streamImpl != null)
+      _streamImpl.resetTotalBytes();
+  }
+
+  public int getTotalReadBytes()
+  {
+    return (_streamImpl == null) ? 0 : _streamImpl.getTotalReadBytes();
+  }
+
+  public int getTotalWriteBytes()
+  {
+    return (_streamImpl == null) ? 0 : _streamImpl.getTotalWriteBytes();
+  }
+
   /**
    * Returns true for closes.
    */

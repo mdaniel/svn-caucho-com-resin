@@ -41,13 +41,8 @@ import javax.management.NotificationFilter;
 import javax.management.ListenerNotFoundException;
 import javax.management.MBeanNotificationInfo;
 import javax.management.NotificationEmitter;
-import javax.management.MBeanOperationInfo;
 
 import com.caucho.jmx.MBeanHandle;
-import com.caucho.jmx.AdminAttributeCategory;
-import com.caucho.jmx.AdminInfoFactory;
-import com.caucho.jmx.AdminInfo;
-import com.caucho.jmx.AdminOperationInfo;
 
 import com.caucho.mbeans.DeployControllerMBean;
 
@@ -60,11 +55,10 @@ import com.caucho.util.Alarm;
 /**
  * A deploy controller for an environment.
  */
-public class DeployControllerAdmin<C extends EnvironmentDeployController>
+abstract public class DeployControllerAdmin<C extends EnvironmentDeployController>
   implements DeployControllerMBean,
              NotificationEmitter,
              LifecycleListener,
-             AdminInfoFactory,
              java.io.Serializable
 {
   private transient final C _controller;
@@ -81,48 +75,6 @@ public class DeployControllerAdmin<C extends EnvironmentDeployController>
     controller.addLifecycleListener(this);
   }
 
-  public AdminInfo getAdminInfo()
-  {
-    AdminInfo descriptor = new AdminInfo();
-
-    descriptor.createAdminAttributeInfo("ObjectName")
-      .setIgnored(true);
-
-    descriptor.createAdminAttributeInfo("RootDirectory")
-      .setCategory(AdminAttributeCategory.CONFIGURATION);
-
-    descriptor.createAdminAttributeInfo("State")
-      .setCategory(AdminAttributeCategory.STATISTIC);
-
-    descriptor.createAdminAttributeInfo("StartTime")
-      .setCategory(AdminAttributeCategory.STATISTIC);
-
-    descriptor.createAdminOperationInfo("Start")
-      .setImpact(MBeanOperationInfo.ACTION)
-      .setEnabled(
-        new AdminOperationInfo.Closure() {
-          public Object eval()
-          {
-            return getController().isStopped();
-          }
-        });
-
-    descriptor.createAdminOperationInfo("Restart")
-      .setImpact(MBeanOperationInfo.ACTION)
-      .setEnabled(
-        new AdminOperationInfo.Closure() {
-          public Object eval()
-          {
-            return getController().isActive();
-          }
-        });
-
-    descriptor.createAdminOperationInfo("Update")
-      .setImpact(MBeanOperationInfo.ACTION);
-
-    return descriptor;
-  }
-
   /**
    * Returns the controller.
    */
@@ -131,32 +83,38 @@ public class DeployControllerAdmin<C extends EnvironmentDeployController>
     return _controller;
   }
 
-  /**
-   * Returns the object name.
-   */
   public ObjectName getObjectName()
   {
     return _controller.getObjectName();
   }
 
-  /**
-   * Returns the controller state.
-   */
+  public String getStartupMode()
+  {
+    return _controller.getStartupMode();
+  }
+
+  public String getRedeployMode()
+  {
+    return _controller.getRedeployMode();
+  }
+
+  public long getRedeployCheckInterval()
+  {
+    return _controller.getRedeployCheckInterval();
+  }
+
   public String getState()
   {
     return getController().getState();
   }
 
-  /**
-   * Returns the time of the last start
-   */
   public Date getStartTime()
   {
     return new Date(getController().getStartTime());
   }
 
   /**
-   * Starts the server.
+   * Starts the controller.
    */
   public void start()
     throws Exception
@@ -164,18 +122,12 @@ public class DeployControllerAdmin<C extends EnvironmentDeployController>
     getController().start();
   }
 
-  /**
-   * Stops the server.
-   */
   public void stop()
     throws Exception
   {
     getController().stop();
   }
 
-  /**
-   * Restarts the server.
-   */
   public void restart()
     throws Exception
   {
@@ -183,9 +135,6 @@ public class DeployControllerAdmin<C extends EnvironmentDeployController>
     getController().start();
   }
 
-  /**
-   * Restarts the server if changes are detected.
-   */
   public void update()
     throws Exception
   {

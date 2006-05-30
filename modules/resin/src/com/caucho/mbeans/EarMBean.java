@@ -26,9 +26,10 @@
  * @author Sam
  */
 
-package com.caucho.jmx;
 
-public enum AdminAttributeCategory
+package com.caucho.mbeans;
+
+public interface EarMBean
+  extends DeployControllerMBean
 {
-  GENERAL, CONFIGURATION, STATISTIC, CHILD;
 }

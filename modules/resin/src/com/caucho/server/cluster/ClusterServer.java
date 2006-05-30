@@ -40,10 +40,6 @@ import javax.management.MBeanOperationInfo;
 import com.caucho.log.Log;
 
 import com.caucho.jmx.Jmx;
-import com.caucho.jmx.AdminAttributeCategory;
-import com.caucho.jmx.AdminInfoFactory;
-import com.caucho.jmx.AdminInfo;
-import com.caucho.jmx.AdminOperationInfo;
 
 import com.caucho.vfs.Vfs;
 import com.caucho.vfs.Path;
@@ -56,7 +52,7 @@ import com.caucho.util.L10N;
  * Defines a connection to one of the servers in a distribution group.
  */
 public class ClusterServer
-  implements ClusterClientMBean, AdminInfoFactory
+  implements ClusterClientMBean
 {
   private static final Logger log = Log.open(ClusterServer.class);
   private static final L10N L = new L10N(ClusterServer.class);
@@ -76,48 +72,6 @@ public class ClusterServer
   public ClusterServer()
   {
   }
-
-  public AdminInfo getAdminInfo()
-  {
-    AdminInfo descriptor = new AdminInfo();
-
-    descriptor.setTitle(L.l("ClusterClient {0}:{1}", getHost(), getPort()));
-
-    descriptor.createAdminAttributeInfo("ObjectName")
-      .setIgnored(true);
-
-    descriptor.createAdminAttributeInfo("ActiveCount")
-      .setCategory(AdminAttributeCategory.STATISTIC);
-
-    descriptor.createAdminAttributeInfo("Active")
-      .setCategory(AdminAttributeCategory.CONFIGURATION);
-
-    descriptor.createAdminOperationInfo("Enable")
-      .setImpact(MBeanOperationInfo.ACTION)
-      .setEnabled(
-        new AdminOperationInfo.Closure() {
-          public Object eval()
-          {
-            return !isActive();
-          }
-        });
-
-    descriptor.createAdminOperationInfo("Disable")
-      .setImpact(MBeanOperationInfo.ACTION)
-      .setEnabled(
-        new AdminOperationInfo.Closure() {
-          public Object eval()
-          {
-            return isActive();
-          }
-        });
-
-    descriptor.createAdminOperationInfo("CanConnect")
-      .setImpact(MBeanOperationInfo.INFO);
-
-    return descriptor;
-  }
-
 
   /**
    * Sets the owning cluster.

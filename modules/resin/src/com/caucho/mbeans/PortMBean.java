@@ -78,28 +78,55 @@ public interface PortMBean {
   public int getIdleThreadCount();
 
   /**
-   * Returns the total connections.
+   * Returns the current number of connections.
    */
   public int getTotalConnectionCount();
 
   /**
-   * Returns the active connections.
+   * Returns the current number of active connections.
    */
   public int getActiveConnectionCount();
 
   /**
-   * Returns the keepalive connections.
+   * Returns the current number of keepalive connections.
    */
   public int getKeepaliveConnectionCount();
 
   /**
-   * Returns the select connections.
+   * Returns the current number of select connections.
    */
   public int getSelectConnectionCount();
 
   /**
-   * Returns the keepalive connection count.
+   * Returns the number of connections that have been serviced by this
+   * port in it's lifetime.
    */
-  public int getKeepaliveCount();
+  public long getLifetimeConnectionCount();
 
+  /**
+   * Returns the number of connections that have ended up in the keepalive state
+   * for this port in it's lifetime.
+   */
+  public long getLifetimeKeepaliveCount();
+
+  /**
+   * Returns the number of connections that have ended with a {@link com.caucho.vfs.ClientDisconnectException}
+   * for this port in it's lifetime.
+   */
+  public long getLifetimeClientDisconnectCount();
+
+  /**
+   * Returns the total duration in milliseconds that connections serviced by this port have taken.
+   */
+  public long getLifetimeConnectionTime();
+
+  /**
+   * Returns the total number of bytes that connections serviced by this port have read.
+   */
+  public long getLifetimeReadBytes();
+
+  /**
+   * Returns the total number of bytes that connections serviced by this port have written.
+   */
+  public long getLifetimeWriteBytes();
 }

@@ -84,7 +84,7 @@ public class ResinStatusServlet extends GenericServlet {
 
   private MBeanServer _mbeanServer;
   private ResinServerMBean _resinServer;
-  private ServletServerMBean _servletServer;
+  private ServerMBean _servletServer;
 
   /**
    * Set to read or write.
@@ -120,7 +120,7 @@ public class ResinStatusServlet extends GenericServlet {
       //_servletServer = (ServletServerMBean) Jmx.find("resin:name=default,type=Server");
 
       _resinServer = (ResinServerMBean) Jmx.findGlobal("resin:type=ResinServer");
-      _servletServer = (ServletServerMBean) Jmx.findGlobal("resin:name=default,type=Server");
+      _servletServer = (ServerMBean) Jmx.findGlobal("resin:name=default,type=Server");
     } catch (Exception e) {
       throw new ServletException(e);
     }
@@ -382,7 +382,7 @@ public class ResinStatusServlet extends GenericServlet {
           out.print("    <td>" + port.getActiveThreadCount());
           out.print("<td>" + port.getIdleThreadCount());
           out.print("<td>" + port.getThreadCount());
-          out.print("<td>" + port.getKeepaliveCount());
+          out.print("<td>" + port.getKeepaliveConnectionCount());
           out.print("<td>" + port.getSelectConnectionCount());
           out.println();
 

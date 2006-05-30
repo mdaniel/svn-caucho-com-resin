@@ -53,6 +53,8 @@ import com.caucho.vfs.Depend;
 
 import com.caucho.xml.QName;
 import com.caucho.xml.QNode;
+import com.caucho.xml.CauchoNode;
+import com.caucho.xml.QAbstractNode;
 
 public class BeanTypeStrategy extends TypeStrategy {
   protected static final L10N L = new L10N(BeanTypeStrategy.class);
@@ -85,13 +87,13 @@ public class BeanTypeStrategy extends TypeStrategy {
     _replaceObject = findMethod("replaceObject", new Class[0]);
 
     _setLocation = findMethod("setConfigLocation",
-	   	              new Class[] { String.class, int.class });
+                              new Class[] { String.class, int.class });
 
     _addDependency = findMethod("addDependency",
-	   	              new Class[] { PersistentDependency.class });
+                                new Class[] { PersistentDependency.class });
 
     _setSystemId = findMethod("setConfigSystemId",
-	   	              new Class[] { String.class  });
+                              new Class[] { String.class  });
 
     /*
     _setSystemId = findMethod("setConfigSystemId",
@@ -170,15 +172,15 @@ public class BeanTypeStrategy extends TypeStrategy {
       strategy = getAttributeStrategyImpl(attrName);
 
       if (strategy == null && attrName.getName().equals("#text")) {
-	strategy = getAttributeStrategyImpl(new QName("text"));
+        strategy = getAttributeStrategyImpl(new QName("text"));
 
-	if (strategy == null)
-	  strategy = getAttributeStrategyImpl(new QName("value"));
+        if (strategy == null)
+          strategy = getAttributeStrategyImpl(new QName("value"));
       }
 
       if (strategy == null)
-	throw new ConfigException(L.l("'{0}' is an unknown property of '{1}'.",
-				      attrName.getName(), _type.getName()));
+        throw new ConfigException(L.l("'{0}' is an unknown property of '{1}'.",
+                                      attrName.getName(), _type.getName()));
 
       _nsAttributeMap.put(attrName, strategy);
     }
@@ -202,31 +204,31 @@ public class BeanTypeStrategy extends TypeStrategy {
     ClassLoader oldLoader = thread.getContextClassLoader();
 
     try {
-      if (node instanceof QNode) {
-	QNode qNode = (QNode) node;
-	
-	if (_setNode != null)
-	  _setNode.invoke(bean, qNode);
-    
-	if (_setLocation != null)
-	  _setLocation.invoke(bean, qNode.getFilename(), qNode.getLine());
-      
-	if (_setSystemId != null)
-	  _setSystemId.invoke(bean, qNode.getBaseURI());
+      if (node instanceof CauchoNode) {
+        CauchoNode cauchoNode = (CauchoNode) node;
 
-	if (_addDependency != null) {
-	  ArrayList<Depend> dependList = qNode.getDependencyList();
+        if (_setNode != null)
+          _setNode.invoke(bean, cauchoNode);
 
-	  for (int i = 0; dependList != null && i < dependList.size(); i++) {
-	    _addDependency.invoke(bean, dependList.get(i));
-	  }
-	}
+        if (_setLocation != null)
+          _setLocation.invoke(bean, cauchoNode.getFilename(), cauchoNode.getLine());
+
+        if (_setSystemId != null)
+          _setSystemId.invoke(bean, cauchoNode.getBaseURI());
+      }
+
+      if (_addDependency != null && (node instanceof QAbstractNode)) {
+        QAbstractNode qAbstractNode = (QAbstractNode) node;
+        ArrayList<Depend> dependList = qAbstractNode.getDependencyList();
+
+        for (int i = 0; dependList != null && i < dependList.size(); i++)
+          _addDependency.invoke(bean, dependList.get(i));
       }
 
       super.configureBean(builder, bean, node);
 
       if (bean instanceof Validator)
-	builder.addValidator((Validator) bean);
+        builder.addValidator((Validator) bean);
     } finally {
       thread.setContextClassLoader(oldLoader);
     }
@@ -247,7 +249,7 @@ public class BeanTypeStrategy extends TypeStrategy {
     AttributeStrategy flow = getFlowAttribute(qName);
     if (flow != null) {
       if (builderMethod != null)
-	return new ProgramAttributeStrategy(builderMethod);
+        return new ProgramAttributeStrategy(builderMethod);
 
       return flow;
     }
@@ -373,8 +375,8 @@ public class BeanTypeStrategy extends TypeStrategy {
       Method method = methods[i];
 
       if (! Modifier.isPublic(method.getModifiers()))
-	continue;
-	
+        continue;
+
       if (!ignoreCase && !method.getName().equals(methodName))
         continue;
       if (ignoreCase && !method.getName().equalsIgnoreCase(methodName))
@@ -408,7 +410,7 @@ public class BeanTypeStrategy extends TypeStrategy {
       if (ch == '-')
         cb.append(Character.toUpperCase(name.charAt(++i)));
       else if (ch == ':')
-	cb.clear();
+        cb.clear();
       else if (ch == '.')
         cb.append('_');
       else
@@ -449,12 +451,12 @@ public class BeanTypeStrategy extends TypeStrategy {
     Method method;
 
     method = findSetPropertyMethod(methodName,
-				   String.class, BuilderProgram.class);
+                                   String.class, BuilderProgram.class);
     if (method != null)
       return method;
 
     method = findSetPropertyMethod(methodName,
-				   Object.class, BuilderProgram.class);
+                                   Object.class, BuilderProgram.class);
     if (method != null)
       return method;
 
@@ -484,8 +486,8 @@ public class BeanTypeStrategy extends TypeStrategy {
   }
 
   protected Method findSetPropertyMethod(String name,
-					 Class keyClass,
-					 Class valueClass)
+                                         Class keyClass,
+                                         Class valueClass)
   {
     Method []methods = getMethods();
 
@@ -503,10 +505,10 @@ public class BeanTypeStrategy extends TypeStrategy {
         continue;
 
       if (! methodTypes[0].equals(keyClass))
-	continue;
+        continue;
 
       if (valueClass != null && ! methodTypes[1].equals(valueClass))
-	continue;
+        continue;
 
       return method;
     }
@@ -582,8 +584,8 @@ public class BeanTypeStrategy extends TypeStrategy {
       Method []methods = type.getDeclaredMethods();
 
       for (int i = 0; i < methods.length; i++) {
-	if (! contains(list, methods[i]))
-	  list.add(methods[i]);
+        if (! contains(list, methods[i]))
+          list.add(methods[i]);
       }
     }
 
@@ -598,7 +600,7 @@ public class BeanTypeStrategy extends TypeStrategy {
   {
     for (int i = 0; i < list.size(); i++) {
       if (isMatch(list.get(i), method))
-	return true;
+        return true;
     }
 
     return false;
@@ -617,7 +619,7 @@ public class BeanTypeStrategy extends TypeStrategy {
 
     for (int i = 0; i < paramA.length; i++) {
       if (! paramA[i].equals(paramB[i]))
-	return false;
+        return false;
     }
 
     return true;

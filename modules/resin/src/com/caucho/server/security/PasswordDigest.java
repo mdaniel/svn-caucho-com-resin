@@ -146,7 +146,7 @@ public class PasswordDigest {
       setAlgorithm(null);
     }
     else
-      throw new ConfigException(L.l("{0} is an illegal algorithm.  Espected MD5-hex64 or none.", value));
+      throw new ConfigException(L.l("{0} is an illegal algorithm.  Expected `none' or `alogorithm-format', for example `MD5-base64'.", value));
   }
 
   /**

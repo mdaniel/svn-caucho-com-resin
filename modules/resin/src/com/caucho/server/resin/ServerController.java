@@ -49,7 +49,7 @@ import com.caucho.jmx.IntrospectionMBean;
 import com.caucho.server.deploy.EnvironmentDeployController;
 import com.caucho.server.deploy.DeployControllerAdmin;
 
-import com.caucho.mbeans.ServletServerMBean;
+import com.caucho.mbeans.ServerMBean;
 
 /**
  * Controls the server.
@@ -154,7 +154,7 @@ public class ServerController
     throws JMException
   {
     return new IntrospectionMBean(getDeployAdmin(),
-                                  ServletServerMBean.class);
+                                  ServerMBean.class);
   }
 
   /**

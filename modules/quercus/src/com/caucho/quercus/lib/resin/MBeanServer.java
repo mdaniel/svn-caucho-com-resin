@@ -29,8 +29,7 @@
 
 package com.caucho.quercus.lib.resin;
 
-import javax.management.MalformedObjectNameException;
-import javax.management.ObjectName;
+import javax.management.*;
 import java.util.Map;
 import java.util.Hashtable;
 import java.util.Set;
@@ -119,6 +118,22 @@ public class MBeanServer {
 
       return objectName.getCanonicalName();
     } catch (MalformedObjectNameException e) {
+      throw new QuercusModuleException(e);
+    }
+  }
+
+  public MBeanInfo info(String name)
+  {
+    javax.management.MBeanServer mbeanServer;
+
+    if (name.contains(":"))
+      mbeanServer = Jmx.getGlobalMBeanServer();
+    else
+      mbeanServer = Jmx.getMBeanServer();
+
+    try {
+      return mbeanServer.getMBeanInfo(new ObjectName(name));
+    } catch (Exception e) {
       throw new QuercusModuleException(e);
     }
   }

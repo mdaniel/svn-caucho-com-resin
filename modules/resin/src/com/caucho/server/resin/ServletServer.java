@@ -81,6 +81,9 @@ import javax.resource.spi.ResourceAdapter;
 import javax.servlet.http.HttpServletResponse;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Collections;
+import java.util.Collection;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
@@ -688,33 +691,16 @@ public class ServletServer extends ProtocolDispatchServer
   }
 
   /**
-   * Returns the hosts
+   * Returns the host controllers.
    */
-  public ObjectName []getHostObjectNames()
+  public Collection<HostController> getHostControllers()
   {
     HostContainer hostContainer = _hostContainer;
 
     if (hostContainer == null)
-      return new ObjectName[] {};
+      return Collections.emptyList();
 
-    ArrayList<HostController> hostList = hostContainer.getHostList();
-
-    int size = hostList.size();
-
-    ArrayList<ObjectName> hostNameList = new ArrayList<ObjectName>(size);
-
-    for (int i = 0; i < size; i++) {
-      ObjectName name = hostList.get(i).getObjectName();
-
-      if (name != null)
-        hostNameList.add(name);
-    }
-
-    ObjectName[] hostNames = new ObjectName[hostNameList.size()];
-
-    hostNames = hostNameList.toArray(hostNames);
-
-    return hostNames;
+    return Collections.unmodifiableList(hostContainer.getHostList());
   }
 
   /**
@@ -788,46 +774,25 @@ public class ServletServer extends ProtocolDispatchServer
   }
 
   /**
-   * Returns the ports.
+   * Returns the {@link Port}s for this server.
    */
-  public ObjectName []getPortObjectNames()
+  public Collection<Port> getPorts()
   {
-    ArrayList<ObjectName> portNameList = new ArrayList<ObjectName>();
-    
-    for (int i = 0; i < _ports.size(); i++) {
-      ObjectName name = _ports.get(i).getObjectName();
-
-      if (name != null)
-	portNameList.add(name);
-    }
-
-    ObjectName []portNames = new ObjectName[portNameList.size()];
-
-    portNameList.toArray(portNames);
-
-    return portNames;
+    return Collections.unmodifiableList(_ports);
   }
 
   /**
-   * Returns the clusters.
+   * Returns the {@link Cluster}s for this server.
    */
-  public ObjectName []getClusterObjectNames()
+  public Collection<Cluster> getClusters()
   {
     ClusterContainer clusterContainer
       = ClusterContainer.getLocal(getClassLoader());
+
     if (clusterContainer == null)
-      return new ObjectName[0];
-    
-    ArrayList<Cluster> clusterList = clusterContainer.getClusterList();
-    ObjectName []clusterNames = new ObjectName[clusterList.size()];
+      return Collections.emptyList();
 
-    for (int i = 0; i < clusterList.size(); i++) {
-      Cluster subCluster = clusterList.get(i);
-
-      clusterNames[i] = subCluster.getObjectName();
-    }
-
-    return clusterNames;
+    return Collections.unmodifiableList(clusterContainer.getClusterList());
   }
 
   /**
@@ -1211,7 +1176,7 @@ public class ServletServer extends ProtocolDispatchServer
   }
 
   /**
-   * Clears the invocation cache.
+   * Clears the proxy cache.
    */
   public void clearCache()
   {

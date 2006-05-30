@@ -26,9 +26,9 @@
  * @author Sam
  */
 
+
 package com.caucho.jmx;
 
-public enum AdminOperationCategory
-{
-  QUERY, COMMAND;
+public enum MBeanAttributeCategory {
+  CONFIGURATION, STATISTIC;
 }

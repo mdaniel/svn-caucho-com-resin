@@ -1293,7 +1293,8 @@ abstract public class Marshall {
 
     public Value unmarshall(Env env, Object value)
     {
-      throw new UnsupportedOperationException();
+      // XXX: need test
+      return env.getQuercus().getJavaClassDefinition(value.getClass().getName()).wrap(env, value);
     }
 
     public void generate(PhpWriter out, Expr expr, Class argClass)
