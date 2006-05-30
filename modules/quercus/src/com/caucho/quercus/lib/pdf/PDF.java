@@ -89,7 +89,8 @@ public class PDF {
     _out = new PDFWriter(env.getOut());
   }
 
-  public boolean begin_document(String fileName, @Optional String optList)
+  public boolean begin_document(@Optional String fileName,
+				@Optional String optList)
     throws IOException
   {
     _tempStream = new TempStream();
@@ -796,7 +797,10 @@ public class PDF {
    * Sets the color
    */
   public boolean setcolor(String fstype, String colorspace,
-			  double c1, double c2, double c3, double c4)
+			  double c1,
+			  @Optional double c2,
+			  @Optional double c3,
+			  @Optional double c4)
   {
     return _stream.setcolor(fstype, colorspace, c1, c2, c3, c4);
   }

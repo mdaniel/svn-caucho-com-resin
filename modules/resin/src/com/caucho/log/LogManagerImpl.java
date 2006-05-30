@@ -147,4 +147,19 @@ public class LogManagerImpl extends LogManager {
     else
       return envLogger;
   }
+
+  /**
+   * Returns an enumeration of loggers.
+   */
+  public Enumeration<String> getLoggerNames()
+  {
+    return Collections.enumeration(_envLoggers.keySet());
+  }
+
+  /**
+   * Returns an enumeration of loggers.
+   */
+  public void reset()
+  {
+  }
 }

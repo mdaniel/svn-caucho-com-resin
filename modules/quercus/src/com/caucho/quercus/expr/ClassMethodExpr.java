@@ -55,6 +55,8 @@ public class ClassMethodExpr extends Expr {
   private final String _name;
   private final Expr []_args;
 
+  private boolean _isMethod;
+
   public ClassMethodExpr(Location location, String className, String name, ArrayList<Expr> args)
   {
     super(location);
@@ -123,6 +125,8 @@ public class ClassMethodExpr extends Expr {
    */
   public void analyze(AnalyzeInfo info)
   {
+    _isMethod = info.getFunction().isMethod();
+    
     for (int i = 0; i < _args.length; i++) {
       _args[i].analyze(info);
     }
@@ -140,7 +144,12 @@ public class ClassMethodExpr extends Expr {
     out.printJavaString(_className);
     out.print("\").getFunction(\"");
     out.printJavaString(_name);
-    out.print("\").callMethod(env, q_this");
+    out.print("\").callMethod(env, ");
+
+    if (_isMethod)
+      out.print("q_this");
+    else
+      out.print("NullValue.NULL");
       
     if (_args.length <= 5) {
       for (int i = 0; i < _args.length; i++) {

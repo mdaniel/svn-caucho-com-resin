@@ -19,41 +19,18 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
  * @author Scott Ferguson
  */
 
-package com.caucho.mbeans;
+package com.caucho.mbeans.server;
 
 /**
- * Management interface for the thread pool.
+ * MBean interface for the dynamic class loader.
  */
-public interface ThreadPoolMBean {
-  /**
-   * Returns the maximum number of threads.
-   */
-  public int getThreadMax();
-  
-  /**
-   * Returns the minimum number of spare threads.
-   */
-  public int getSpareThreadMin();
-  
-  /**
-   * Returns the current number of threads.
-   */
-  public int getThreadCount();
-  
-  /**
-   * Returns the current number of active threads.
-   */
-  public int getActiveThreadCount();
-  
-  /**
-   * Returns the current number of idle threads.
-   */
-  public int getIdleThreadCount();
+public interface DynamicClassLoaderMBean {
 }

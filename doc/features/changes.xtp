@@ -4,6 +4,12 @@
 
 <s2 title='3.0.snap - May 26, 2006'>
 <ul>
+<li>Quercus: mysql_query regression with UPDATE (#1131, rep by koreth)
+<li>TransactionManagerImpl._transactionList was not properly synchronized (#1151, rep by Matt Pangaro)
+<li>Added implementation for java.util.logging.LogManager.getLoggerNames() (#1124, rep by eahollin)
+<li>Quercus: self::foo from static method not properly handling q_this (#1145, rep by koreth)
+<li>Quercus: add str_ireplace (#1152, rep by koreth)
+<li>Quercus: multidimensional array unset wasn't copy-on-write (#1155, rep by koreth)
 <li>max-close-statements was not in the .rnc (rep by Takahir Fukuda)
 <li>(2006-05-22) Quercus: while (1) must handle java "statement not reached" (#1139, rep by koreth)
 <li>Quercus: mktime timezone issues (#1132, rep by koreth)

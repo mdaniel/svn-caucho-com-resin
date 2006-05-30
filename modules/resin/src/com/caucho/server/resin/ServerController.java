@@ -49,7 +49,7 @@ import com.caucho.jmx.IntrospectionMBean;
 import com.caucho.server.deploy.EnvironmentDeployController;
 import com.caucho.server.deploy.DeployControllerAdmin;
 
-import com.caucho.mbeans.ServerMBean;
+import com.caucho.mbeans.server.ServerMBean;
 
 /**
  * Controls the server.

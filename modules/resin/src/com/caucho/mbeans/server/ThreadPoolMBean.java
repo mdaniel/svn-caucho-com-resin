@@ -27,27 +27,34 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.mbeans;
-
-import com.caucho.config.ConfigException;
+package com.caucho.mbeans.server;
 
 /**
- * Interface for a log.
+ * Management interface for the thread pool.
  */
-public interface LogMBean {
+public interface ThreadPoolMBean {
   /**
-   * Returns the name.
+   * Returns the maximum number of threads.
    */
-  public String getName();
+  public int getThreadMax();
   
   /**
-   * Returns the level.
+   * Returns the minimum number of spare threads.
    */
-  public String getLevel();
+  public int getSpareThreadMin();
   
   /**
-   * Sets the level.
+   * Returns the current number of threads.
    */
-  public void setLevel(String level)
-    throws ConfigException;
+  public int getThreadCount();
+  
+  /**
+   * Returns the current number of active threads.
+   */
+  public int getActiveThreadCount();
+  
+  /**
+   * Returns the current number of idle threads.
+   */
+  public int getIdleThreadCount();
 }

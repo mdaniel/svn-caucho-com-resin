@@ -47,7 +47,7 @@ import com.caucho.jmx.Jmx;
 import com.caucho.loader.Environment;
 import com.caucho.loader.CloseListener;
 
-import com.caucho.mbeans.LogMBean;
+import com.caucho.mbeans.server.LogMBean;
 
 import com.caucho.util.L10N;
 

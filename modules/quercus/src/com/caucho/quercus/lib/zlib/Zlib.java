@@ -413,11 +413,14 @@ public class Zlib {
    * @throws IOException
    */
   public boolean gzrewind()
-    throws IOException
   {
-    getBufferedReader();
+    try {
+      getBufferedReader();
     
-    return true;
+      return true;
+    } catch (Exception e) {
+      throw QuercusModuleException.create(e);
+    }
   }
 
   /**

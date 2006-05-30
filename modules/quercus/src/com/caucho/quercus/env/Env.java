@@ -409,7 +409,7 @@ public final class Env {
    */
   public void setTimeLimit(long ms)
   {
-    // _timeLimit = ms;
+    _timeLimit = ms;
   }
 
   /**

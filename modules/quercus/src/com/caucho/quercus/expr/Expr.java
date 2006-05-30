@@ -325,6 +325,19 @@ abstract public class Expr {
   abstract public Value eval(Env env);
 
   /**
+   * Evaluates the expression, with the object expected to be modified,
+   * e.g. from an unset.
+   *
+   * @param env the calling environment.
+   *
+   * @return the expression value.
+   */
+  public Value evalDirty(Env env)
+  {
+    return eval(env);
+  }
+
+  /**
    * Evaluates the expression, creating an array for unassigned values.
    *
    * @param env the calling environment.
@@ -540,7 +553,7 @@ abstract public class Expr {
   }
 
   /**
-   * Generates code to recreate the expression.
+   * Generates code to evaluate the expression.
    *
    * @param out the writer to the Java source code.
    */
@@ -550,6 +563,17 @@ abstract public class Expr {
     String var = out.addExpr(this);
 
     out.print(var + ".eval(env)");
+  }
+
+  /**
+   * Generates code to evaluate the expression, expecting a modification.
+   *
+   * @param out the writer to the Java source code.
+   */
+  public void generateDirty(PhpWriter out)
+    throws IOException
+  {
+    generate(out);
   }
 
   /**

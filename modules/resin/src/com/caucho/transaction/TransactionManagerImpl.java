@@ -303,14 +303,16 @@ public class TransactionManagerImpl
 
   private void addTransaction(TransactionImpl trans)
   {
-    for (int i = _transactionList.size() - 1; i >= 0; i--) {
-      WeakReference<TransactionImpl> ref = _transactionList.get(i);
+    synchronized (_transactionList) {
+      for (int i = _transactionList.size() - 1; i >= 0; i--) {
+	WeakReference<TransactionImpl> ref = _transactionList.get(i);
 
-      if (ref.get() == null)
-	_transactionList.remove(i);
+	if (ref.get() == null)
+	  _transactionList.remove(i);
+      }
+
+      _transactionList.add(new WeakReference<TransactionImpl>(trans));
     }
-
-    _transactionList.add(new WeakReference<TransactionImpl>(trans));
   }
 
   /**
@@ -388,16 +390,18 @@ public class TransactionManagerImpl
 
     _serverId = 0;
 
-    for (int i = _transactionList.size() - 1; i >= 0; i--) {
-      WeakReference<TransactionImpl> ref = _transactionList.get(i);
-      TransactionImpl xa = ref.get();
+    synchronized (_transactionList) {
+      for (int i = _transactionList.size() - 1; i >= 0; i--) {
+	WeakReference<TransactionImpl> ref = _transactionList.get(i);
+	TransactionImpl xa = ref.get();
 
-      try {
-	if (xa != null) {
-	  xa.rollback();
+	try {
+	  if (xa != null) {
+	    xa.rollback();
+	  }
+	} catch (Throwable e) {
+	  log.log(Level.WARNING, e.toString(), e);
 	}
-      } catch (Throwable e) {
-	log.log(Level.WARNING, e.toString(), e);
       }
     }
   }

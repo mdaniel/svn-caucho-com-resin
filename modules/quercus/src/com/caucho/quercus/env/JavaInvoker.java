@@ -147,7 +147,8 @@ abstract public class JavaInvoker
       boolean isRestReference = false;
 
       if (_param.length > 0 &&
-	  _param[_param.length - 1].equals(Value[].class)) {
+	  (_param[_param.length - 1].equals(Value[].class) ||
+	   _param[_param.length - 1].equals(Object[].class))) {
 	hasRestArgs = true;
 
 	for (Annotation ann : _paramAnn[_param.length - 1]) {

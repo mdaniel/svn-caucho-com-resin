@@ -69,7 +69,7 @@ import com.caucho.vfs.Vfs;
 
 import com.caucho.server.deploy.ExpandDeployController;
 
-import com.caucho.mbeans.DeployControllerMBean;
+import com.caucho.mbeans.server.DeployControllerMBean;
 
 /**
  * A deploy controller for an environment.

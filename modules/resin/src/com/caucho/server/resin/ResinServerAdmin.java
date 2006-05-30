@@ -30,7 +30,7 @@ package com.caucho.server.resin;
 
 import com.caucho.util.CauchoSystem;
 import com.caucho.util.L10N;
-import com.caucho.mbeans.ResinServerMBean;
+import com.caucho.mbeans.server.ResinServerMBean;
 
 import javax.management.ObjectName;
 import javax.management.MalformedObjectNameException;

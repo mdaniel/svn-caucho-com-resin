@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.mbeans;
+package com.caucho.mbeans.server;
 
 import com.caucho.jmx.MBeanAttribute;
 import com.caucho.jmx.MBeanOperation;

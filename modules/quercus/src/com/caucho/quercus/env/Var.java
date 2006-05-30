@@ -610,6 +610,14 @@ public class Var extends Value {
   }
 
   /**
+   * Returns the value, doing a copy-on-write if needed.
+   */
+  public Value getDirty(Value index)
+  {
+    return _value.getDirty(index);
+  }
+
+  /**
    * Returns the value, creating an object if unset.
    */
   public Value getObject(Env env, Value index)

@@ -52,6 +52,7 @@ public class FunctionInfo {
     = new ArrayList<String>();
 
   private ClassDef _classDef;
+  private Function _fun;
 
   private boolean _isGlobal;
   
@@ -84,6 +85,14 @@ public class FunctionInfo {
   public String getName()
   {
     return _name;
+  }
+
+  /**
+   * Sets the actual function.
+   */
+  public void setFunction(Function fun)
+  {
+    _fun = fun;
   }
 
   /**
@@ -155,7 +164,7 @@ public class FunctionInfo {
    */
   public boolean isMethod()
   {
-    return _classDef != null;
+    return _classDef != null && ! _fun.isStatic();
   }
 
   /**

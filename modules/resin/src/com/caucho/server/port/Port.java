@@ -58,7 +58,7 @@ import com.caucho.lifecycle.Lifecycle;
 
 import com.caucho.jmx.Jmx;
 
-import com.caucho.mbeans.PortMBean;
+import com.caucho.mbeans.server.PortMBean;
 
 /**
  * Represents a protocol connection.

@@ -1049,6 +1049,14 @@ abstract public class Value {
   }
 
   /**
+   * Returns the array value, copying on write if necessary.
+   */
+  public Value getDirty(Value index)
+  {
+    return NullValue.NULL;
+  }
+
+  /**
    * Returns the array ref for an argument.
    */
   public Value getArgRef(Value index)

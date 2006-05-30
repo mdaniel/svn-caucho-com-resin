@@ -45,7 +45,7 @@ import com.caucho.vfs.Vfs;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.ReadWritePair;
 
-import com.caucho.mbeans.ClusterClientMBean;
+import com.caucho.mbeans.server.ClusterClientMBean;
 import com.caucho.util.L10N;
 
 /**

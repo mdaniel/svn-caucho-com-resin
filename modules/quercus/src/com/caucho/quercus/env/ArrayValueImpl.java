@@ -497,6 +497,17 @@ public class ArrayValueImpl extends ArrayValue {
   }
 
   /**
+   * Returns the value as an array, using copy on write if necessary.
+   */
+  public Value getDirty(Value index)
+  {
+    if (_isDirty)
+      copyOnWrite();
+    
+    return get(index);
+  }
+
+  /**
    * Add
    */
   public Value put(Value value)

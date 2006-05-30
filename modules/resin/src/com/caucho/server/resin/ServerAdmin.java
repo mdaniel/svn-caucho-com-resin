@@ -39,7 +39,7 @@ import com.caucho.server.port.Port;
 import com.caucho.server.cluster.Cluster;
 import com.caucho.server.host.HostController;
 
-import com.caucho.mbeans.ServerMBean;
+import com.caucho.mbeans.server.ServerMBean;
 import com.caucho.jmx.MBeanAttribute;
 import com.caucho.jmx.MBeanAttributeCategory;
 

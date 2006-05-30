@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2005 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -19,17 +19,49 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Sam
+ * @author Scott Ferguson
  */
 
+package com.caucho.mbeans.server;
 
-package com.caucho.mbeans;
+import javax.management.ObjectName;
 
-public interface EarMBean
-  extends DeployControllerMBean
-{
+/**
+ * Admin for a cluster.
+ */
+public interface ClusterClientMBean {
+  /**
+   * Returns the cluster client's object name.
+   */
+  public ObjectName getObjectName();
+  
+  /**
+   * Returns true if active.
+   */
+  public boolean isActive();
+
+  /**
+   * Returns the active count.
+   */
+  public int getActiveCount();
+  
+  /**
+   * Check if can connect.
+   */
+  public boolean canConnect();
+
+  /**
+   * enable the client
+   */
+  public void enable();
+
+  /**
+   * disable the client
+   */
+  public void disable();
 }

@@ -44,7 +44,7 @@ import javax.management.NotificationEmitter;
 
 import com.caucho.jmx.MBeanHandle;
 
-import com.caucho.mbeans.DeployControllerMBean;
+import com.caucho.mbeans.server.DeployControllerMBean;
 
 import com.caucho.lifecycle.Lifecycle;
 import com.caucho.lifecycle.LifecycleListener;

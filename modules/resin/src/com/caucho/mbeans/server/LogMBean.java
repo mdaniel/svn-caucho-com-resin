@@ -19,28 +19,35 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
  * @author Scott Ferguson
  */
 
-package com.caucho.mbeans;
+package com.caucho.mbeans.server;
 
-import javax.management.ObjectName;
+import com.caucho.config.ConfigException;
 
 /**
- * Admin for a cluster.
+ * Interface for a log.
  */
-public interface ClusterMBean {
+public interface LogMBean {
   /**
-   * Returns the cluster's object name.
+   * Returns the name.
    */
-  public ObjectName getObjectName();
-
+  public String getName();
+  
   /**
-   * Returns the cluster client's object names.
+   * Returns the level.
    */
-  public ObjectName []getClientObjectNames();
+  public String getLevel();
+  
+  /**
+   * Sets the level.
+   */
+  public void setLevel(String level)
+    throws ConfigException;
 }

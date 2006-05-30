@@ -84,6 +84,7 @@ public class Function extends AbstractFunction {
     
     _name = name.intern();
     _info = info;
+    _info.setFunction(this);
     _isReturnsReference = info.isReturnsReference();
     _args = args;
     _statement = new BlockStatement(location, statements);
@@ -101,6 +102,7 @@ public class Function extends AbstractFunction {
     
     _name = name.intern();
     _info = info;
+    _info.setFunction(this);
     _isReturnsReference = info.isReturnsReference();
 
     _args = new Arg[argList.size()];

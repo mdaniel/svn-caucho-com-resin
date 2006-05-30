@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.mbeans;
+package com.caucho.mbeans.server;
 
 /**
  * MBean API for the JCA connection pool.

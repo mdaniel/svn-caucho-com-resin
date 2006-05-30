@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
  *
@@ -64,7 +63,7 @@ import com.caucho.server.e_app.EarConfig;
 import com.caucho.server.deploy.DeployController;
 import com.caucho.server.deploy.EnvironmentDeployController;
 
-import com.caucho.mbeans.HostMBean;
+import com.caucho.mbeans.server.HostMBean;
 
 /**
  * A configuration entry for a host

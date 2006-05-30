@@ -158,29 +158,6 @@ public class StaticMethodExpr extends Expr {
   public void generate(PhpWriter out)
     throws IOException
   {
-    /*
-    PhpProgram program = out.getProgram();
-    QuercusClass cl = program.findClass(_className);
-    AbstractFunction fun = null;
-
-    if (cl != null)
-      fun = cl.findFunction(_name);
-
-    if (fun != null) {
-      // XXX: check that the null value is okay
-      
-      out.print("__quercus_class_" + _className + "." + _name + "(env, null");
-
-      try {
-	args = fun.bindArguments(null, null, _args);
-      } catch (IOException e) {
-	throw e;
-      } catch (Exception e) {
-	throw new IOException(e.toString());
-      }
-    }
-    else {
-    */
     Expr []args = _args;
 
     out.print("env.getClass(\"");

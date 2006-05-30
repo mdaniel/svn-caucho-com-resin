@@ -124,6 +124,22 @@ public class ArrayGetExpr extends AbstractVarExpr {
   }
 
   /**
+   * Evaluates the expression, marking as dirty.
+   *
+   * @param env the calling environment.
+   *
+   * @return the expression value.
+   */
+  public Value evalDirty(Env env)
+  {
+    Value array = _expr.eval(env);
+
+    Value index = _index.eval(env);
+
+    return array.getDirty(index);
+  }
+
+  /**
    * Evaluates the expression, creating an object if the value is unset.
    *
    * @param env the calling environment.
@@ -192,7 +208,7 @@ public class ArrayGetExpr extends AbstractVarExpr {
    */
   public void evalUnset(Env env)
   {
-    Value array = _expr.eval(env);
+    Value array = _expr.evalDirty(env);
 
     Value index = _index.eval(env);
 
@@ -247,6 +263,21 @@ public class ArrayGetExpr extends AbstractVarExpr {
   {
     _expr.generate(out);
     out.print(".get(");
+    _index.generate(out);
+    out.print(")");
+  }
+
+  /**
+   * Generates code to evaluate the expression, marking as dirty, i.e.
+   * copy-on-write for an unset.
+   *
+   * @param out the writer to the Java source code.
+   */
+  public void generateDirty(PhpWriter out)
+    throws IOException
+  {
+    _expr.generate(out);
+    out.print(".getDirty(");
     _index.generate(out);
     out.print(")");
   }
@@ -359,7 +390,7 @@ public class ArrayGetExpr extends AbstractVarExpr {
   public void generateUnset(PhpWriter out)
     throws IOException
   {
-    _expr.generate(out);
+    _expr.generateDirty(out);
     out.print(".remove(");
     _index.generate(out);
     out.print(")");

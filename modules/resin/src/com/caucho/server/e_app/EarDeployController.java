@@ -69,7 +69,7 @@ import com.caucho.server.webapp.ApplicationContainer;
 import com.caucho.server.deploy.EnvironmentDeployController;
 import com.caucho.server.deploy.DeployContainer;
 import com.caucho.jmx.IntrospectionMBean;
-import com.caucho.mbeans.EarMBean;
+import com.caucho.mbeans.server.EarMBean;
 
 /**
  * A configuration entry for an Enterprise Application

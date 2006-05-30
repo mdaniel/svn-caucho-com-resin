@@ -630,7 +630,6 @@ v   *
       glue = piecesV.toStringValue();
     }
     else {
-      Thread.dumpStack();
       env.error(L.l("neither argument to implode is an array: {0}, {1}",
 		    glueV.getClass().getName(), piecesV.getClass().getName()));
 
@@ -2247,6 +2246,41 @@ v   *
                                   Value subject,
                                   @Reference @Optional Value count)
   {
+    return strReplace(env, search, replace, subject, count, false);
+  }
+
+  /**
+   * replaces substrings.
+   *
+   * @param search search string
+   * @param replace replacement string
+   * @param subject replacement
+   * @param count return value
+   */
+  public static Value str_ireplace(Env env,
+                                  Value search,
+                                  Value replace,
+                                  Value subject,
+                                  @Reference @Optional Value count)
+  {
+    return strReplace(env, search, replace, subject, count, true);
+  }
+
+  /**
+   * replaces substrings.
+   *
+   * @param search search string
+   * @param replace replacement string
+   * @param subject replacement
+   * @param count return value
+   */
+  private static Value strReplace(Env env,
+				  Value search,
+				  Value replace,
+				  Value subject,
+				  @Reference @Optional Value count,
+				  boolean isInsensitive)
+  {
     count.set(LongValue.ZERO);
 
     if (subject.isNull())
@@ -2261,10 +2295,11 @@ v   *
 
       for (Value value : subjectArray.values()) {
         Value result = strReplaceImpl(env,
-                                        search,
-                                        replace,
-                                        value.toStringValue(),
-                                        count);
+				      search,
+				      replace,
+				      value.toStringValue(),
+				      count,
+				      isInsensitive);
 
         resultArray.append(result);
       }
@@ -2278,10 +2313,11 @@ v   *
         return StringValue.EMPTY;
 
       return strReplaceImpl(env,
-                              search,
-                              replace,
-                              subjectString,
-                              count);
+			    search,
+			    replace,
+			    subjectString,
+			    count,
+			    isInsensitive);
     }
   }
 
@@ -2294,10 +2330,11 @@ v   *
    * @param count return value
    */
   private static Value strReplaceImpl(Env env,
-                                        Value search,
-                                        Value replace,
-                                        StringValue subject,
-                                        Value count)
+				      Value search,
+				      Value replace,
+				      StringValue subject,
+				      Value count,
+				      boolean isInsensitive)
   {
     if (! search.isArray()) {
       StringValue searchString = search.toStringValue();
@@ -2310,10 +2347,11 @@ v   *
       }
 
       subject = strReplaceImpl(env,
-                                 searchString,
-                                 replace.toStringValue(),
-                                 subject,
-                                 count);
+			       searchString,
+			       replace.toStringValue(),
+			       subject,
+			       count,
+			       isInsensitive);
     }
     else if (replace instanceof ArrayValue) {
       ArrayValue searchArray = (ArrayValue) search;
@@ -2330,10 +2368,11 @@ v   *
           replaceItem = NullValue.NULL;
 
         subject = strReplaceImpl(env,
-                                   searchItem.toStringValue(),
-                                   replaceItem.toStringValue(),
-                                   subject,
-                                   count);
+				 searchItem.toStringValue(),
+				 replaceItem.toStringValue(),
+				 subject,
+				 count,
+				 isInsensitive);
       }
     }
     else {
@@ -2345,10 +2384,11 @@ v   *
         Value searchItem = searchIter.next();
 
         subject = strReplaceImpl(env,
-                                   searchItem.toStringValue(),
-                                   replace.toStringValue(),
-                                   subject,
-                                   count);
+				 searchItem.toStringValue(),
+				 replace.toStringValue(),
+				 subject,
+				 count,
+				 isInsensitive);
       }
     }
 
@@ -2364,10 +2404,11 @@ v   *
    * @param countV return value
    */
   private static StringValue strReplaceImpl(Env env,
-                                         StringValue search,
-                                         StringValue replace,
-                                         StringValue subject,
-                                         Value countV)
+					    StringValue search,
+					    StringValue replace,
+					    StringValue subject,
+					    Value countV,
+					    boolean isInsensitive)
   {
     long count = countV.toLong();
 
@@ -2378,7 +2419,7 @@ v   *
 
     StringBuilderValue result = null;
 
-    while ((next = subject.indexOf(search, head)) >= head) {
+    while ((next = indexOf(subject, search, head, isInsensitive)) >= head) {
       if (result == null)
 	result = new StringBuilderValue();
 	
@@ -2403,6 +2444,41 @@ v   *
     }
     else
       return subject;
+  }
+
+  /**
+   * Returns the next index.
+   */
+  private static int indexOf(StringValue subject,
+			     StringValue match,
+			     int head,
+			     boolean isInsensitive)
+  {
+    if (! isInsensitive)
+      return subject.indexOf(match, head);
+    else {
+      int length = subject.length();
+      int matchLen = match.length();
+
+      if (matchLen <= 0)
+	return -1;
+
+      char ch = Character.toLowerCase(match.charAt(0));
+      loop:
+      for (; head + matchLen <= length; head++) {
+	if (ch == Character.toLowerCase(subject.charAt(head))) {
+	  for (int i = 1; i < matchLen; i++) {
+	    if (Character.toLowerCase(subject.charAt(head + i)) !=
+		Character.toLowerCase(match.charAt(i)))
+	      continue loop;
+	  }
+
+	  return head;
+	}
+      }
+
+      return -1;
+    }
   }
 
   /**

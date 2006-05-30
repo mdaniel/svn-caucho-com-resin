@@ -27,9 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.mbeans;
-
-import com.caucho.mbeans.DeployControllerMBean;
+package com.caucho.mbeans.server;
 
 /**
  * MBean API for the WebApp.

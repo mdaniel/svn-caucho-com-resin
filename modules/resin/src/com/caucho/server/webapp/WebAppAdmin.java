@@ -33,7 +33,7 @@ import com.caucho.server.deploy.DeployControllerAdmin;
 
 import com.caucho.server.session.SessionManager;
 
-import com.caucho.mbeans.WebAppMBean;
+import com.caucho.mbeans.server.WebAppMBean;
 
 import com.caucho.server.cluster.Store;
 

@@ -19,49 +19,28 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *
- *   Free Software Foundation, Inc.
+ *   Free SoftwareFoundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
  * @author Scott Ferguson
  */
 
-package com.caucho.mbeans;
+package com.caucho.mbeans.server;
 
 import javax.management.ObjectName;
 
 /**
  * Admin for a cluster.
  */
-public interface ClusterClientMBean {
+public interface ClusterMBean {
   /**
-   * Returns the cluster client's object name.
+   * Returns the cluster's object name.
    */
   public ObjectName getObjectName();
-  
-  /**
-   * Returns true if active.
-   */
-  public boolean isActive();
 
   /**
-   * Returns the active count.
+   * Returns the cluster client's object names.
    */
-  public int getActiveCount();
-  
-  /**
-   * Check if can connect.
-   */
-  public boolean canConnect();
-
-  /**
-   * enable the client
-   */
-  public void enable();
-
-  /**
-   * disable the client
-   */
-  public void disable();
+  public ObjectName []getClientObjectNames();
 }
