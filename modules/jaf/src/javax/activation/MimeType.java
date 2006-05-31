@@ -47,17 +47,33 @@ public class MimeType implements Serializable, Externalizable {
   private String _primary;
   private String _sub;
   private MimeTypeParameterList _parameters;
-  
+
+  /**
+   * Default constructor.
+   */  
   public MimeType()
   {
     _parameters = new MimeTypeParameterList();
   }
 
+  /**
+   * Constructor that builds a MimeType from a String.
+   */
   public MimeType(String rawData)
     throws MimeTypeParseException
   {
+    int slash = rawData.indexOf('/');
+    if (slash == -1)
+      throw new javax.activation.MimeTypeParseException("Unable to find a sub type.");
+    _primary = rawData.substring(0, slash);
+    _sub = rawData.substring(slash+1);
+    _parameters = new MimeTypeParameterList();
   }
 
+  /**
+   * Constructor that builds a MimeType with the given primary and sub
+   * type but has an empty parameter list.
+   */
   public MimeType(String primary, String sub)
     throws MimeTypeParseException
   {
@@ -67,57 +83,101 @@ public class MimeType implements Serializable, Externalizable {
     _parameters = new MimeTypeParameterList();
   }
 
+  /**
+   * Retrieve the primary type of this object.
+   */
   public String getPrimaryType()
   {
     return _primary;
   }
 
+  /**
+   * Set the primary type for this object to the given String.
+   */
   public void setPrimaryType(String primary)
     throws MimeTypeParseException
   {
     _primary = primary;
   }
 
+  /**
+   * Retrieve the sub type of this object.
+   */
   public String getSubType()
   {
     return _sub;
   }
 
+  /**
+   * Set the sub type for this object to the given String.
+   */
   public void setSubType(String sub)
     throws MimeTypeParseException
   {
     _sub = sub;
   }
 
+  /**
+   * Retrieve this object's parameter list.
+   */
   public MimeTypeParameterList getParameters()
   {
     return _parameters;
   }
 
+  /**
+   * Retrieve the value associated with the given name, or null if
+   * there is no current association.
+   */
   public String getParameter(String name)
   {
     return getParameters().get(name);
   }
 
+  /**
+   * Set the value to be associated with the given name, replacing any
+   * previous association.
+   */
   public void setParameter(String name, String value)
   {
     getParameters().set(name, value);
   }
 
+  /**
+   * Remove any value associated with the given name.
+   */
   public void removeParameter(String name)
   {
     getParameters().remove(name);
   }
 
+  /**
+   * Return a String representation of this object without the
+   * parameter list.
+   */
   public String getBaseType()
   {
     return getPrimaryType() + "/" + getSubType();
   }
 
+  /**
+   * Determine if the primary and sub type of this object is the same
+   * as the content type described in rawdata.
+   */
   public boolean match(String rawData)
     throws MimeTypeParseException
   {
     return getBaseType().equals(rawData);
+  }
+
+  /**
+   * Determine if the primary and sub type of this object is the same
+   * as what is in the given type.
+   */
+  public boolean match(MimeType type)
+    throws MimeTypeParseException
+  {
+    return getBaseType().equals(type.getBaseType());
   }
 
   public void writeExternal(ObjectOutput out)

@@ -41,6 +41,7 @@ import java.io.IOException;
  */
 public class FileDataSource implements DataSource {
   private File _file;
+  private FileTypeMap _fileTypeMap;
 
   public FileDataSource(File file)
   {
@@ -71,11 +72,18 @@ public class FileDataSource implements DataSource {
   }
   
   /**
-   * Returns the MIME type of the data.  If the imlementation can't
-   * determine the type, it should use "application/octet-stream".
+   * Returns the MIME type of the data.  If there is no FileTypeMap
+   * explictly set, the FileDataSource will call the
+   * getDefaultFileTypeMap method on FileTypeMap to acquire a default
+   * FileTypeMap. Note: By default, the FileTypeMap used will be a
+   * MimetypesFileTypeMap
    */
   public String getContentType()
   {
+    FileTypeMap map =
+      _fileTypeMap != null
+      ? _fileTypeMap
+      : FileTypeMap.getDefaultFileTypeMap();
     return "application/octet-stream";
   }
   
@@ -87,4 +95,18 @@ public class FileDataSource implements DataSource {
   {
     return _file.getName();
   }
+
+  /**
+   * Set the FileTypeMap to use with this FileDataSource.
+   */
+  public void setFileTypeMap(FileTypeMap map)
+  {
+    _fileTypeMap = map;
+  }
+
+  public File getFile()
+  {
+    return _file;
+  }
+
 }

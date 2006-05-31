@@ -43,6 +43,9 @@ public class MimeTypeParameterList {
   {
   }
 
+  /**
+   * Constructs a new MimeTypeParameterList with the passed in data.
+   */
   public MimeTypeParameterList(String parameterList)
     throws MimeTypeParseException
   {

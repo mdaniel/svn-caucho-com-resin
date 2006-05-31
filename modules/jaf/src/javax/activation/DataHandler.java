@@ -125,6 +125,7 @@ public class DataHandler implements Transferable {
   public void writeTo(OutputStream os)
     throws IOException
   {
+    // XXX: ?
     String text = (String) _object;
     byte []bytes = text.getBytes();
 

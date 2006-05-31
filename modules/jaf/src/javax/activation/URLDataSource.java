@@ -61,15 +61,28 @@ public class URLDataSource implements DataSource {
   public OutputStream getOutputStream()
     throws IOException
   {
-    throw new UnsupportedOperationException();
+    return _url.openConnection().getOutputStream();
   }
   
   /**
-   * Returns the MIME type of the data.  If the imlementation can't
-   * determine the type, it should use "application/octet-stream".
+   * Returns the MIME type of the data.  Note: this method attempts to
+   * call the openConnection method on the URL. If this method fails,
+   * or if a content type is not returned from the URLConnection,
+   * getContentType returns "application/octet-stream" as the content
+   * type.
    */
   public String getContentType()
   {
+    try
+      {
+	String mimeType =
+	  _url.openConnection().getContentType();
+
+	if (mimeType!=null)
+	  return mimeType;
+      } catch (Throwable t) {
+	// deliberately ignored
+      }
     return "application/octet-stream";
   }
 
@@ -87,6 +100,6 @@ public class URLDataSource implements DataSource {
    */
   public String getName()
   {
-    return getURL().toString();
+    return getURL().getPath();
   }
 }

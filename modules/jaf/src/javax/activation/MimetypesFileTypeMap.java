@@ -29,19 +29,32 @@
 
 package javax.activation;
 
-import java.io.File;
-import java.io.InputStream;
-import java.io.IOException;
+import java.util.*;
+import java.io.*;
+import com.caucho.vfs.*;
 
 /**
  * API for finding the mime-type for a file.
  */
 public class MimetypesFileTypeMap extends FileTypeMap {
+
+  /**
+   * The key is a filename extension, the value is the mime type
+   */
+  private HashMap _mimeTypesByExtension = new HashMap();
+
   /**
    * Default constructor.
    */
   public MimetypesFileTypeMap()
   {
+    ClassLoader cl = getClass().getClassLoader();
+
+    // added in reverse priority order
+    //addMimeTypes(new ReadStream(cl.getResourceStream("META-INF/mimetypes.default")).openRead());
+    //addMimeTypes(new ReadStream(cl.getResourceStream("META-INF/mime.types")).openRead());
+    //addMimeTypes(Vfs.lookup("file:"+System.getProperty("java.home")+"/lib/mime.types"));
+    //addMimeTypes(Vfs.lookup("file:"+System.getProperty("user.home")+"/.mime.types"));
   }
   
   /**
@@ -49,6 +62,8 @@ public class MimetypesFileTypeMap extends FileTypeMap {
    */
   public MimetypesFileTypeMap(InputStream is)
   {
+    this();
+    addMimeTypes(is);
   }
   
   /**
@@ -57,6 +72,38 @@ public class MimetypesFileTypeMap extends FileTypeMap {
   public MimetypesFileTypeMap(String mimeTypeFileName)
     throws IOException
   {
+    addMimeTypes(Vfs.lookup(mimeTypeFileName).openRead());
+  }
+
+  private void addMimeTypes(InputStream is)
+  {
+    try
+      {
+	BufferedReader mimeTypes =
+	  new BufferedReader(new InputStreamReader(is));
+	// XXX: use CharScanner
+	for(String s = mimeTypes.readLine(); s!=null;
+	    s = mimeTypes.readLine())
+	  {
+	    s = s.trim();
+	    if (s.charAt(0)=='#') continue;
+	    int space = s.indexOf(' ');
+	    if (space==-1) continue;
+	    String mimeType = s.substring(0, space);
+	    while(true) {
+	      while(space < s.length() && s.charAt(space)==' ') space++;
+	      if (space==s.length()) break;
+	      int nextSpace = s.indexOf(' ', space+1);
+	      if (nextSpace==-1) nextSpace = s.length() + 1;
+	      String extension = s.substring(space+1, nextSpace);
+	      _mimeTypesByExtension.put(extension, mimeType);
+	      space = nextSpace;
+	    }
+	  }
+      }
+    catch (IOException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   /**
@@ -64,6 +111,7 @@ public class MimetypesFileTypeMap extends FileTypeMap {
    */
   public void addMimeTypes(String mimeTypes)
   {
+    addMimeTypes(StringStream.open(mimeTypes));
   }
 
   /**
@@ -71,6 +119,7 @@ public class MimetypesFileTypeMap extends FileTypeMap {
    */
   public String getContentType(File file)
   {
+    // XXX: could do better here?
     return getContentType(file.getName());
   }
 
@@ -79,6 +128,15 @@ public class MimetypesFileTypeMap extends FileTypeMap {
    */
   public String getContentType(String fileName)
   {
-    return "application/octet-stream";
+    int dot = fileName.indexOf('.');
+    if (dot==-1)
+      return "application/octet-stream";
+    String extension =
+      fileName.substring(fileName.lastIndexOf('.')+1);
+    String mimeType =
+      (String)_mimeTypesByExtension.get(extension);
+    if (mimeType != null) return mimeType;
+    // XXX
+    return null;
   }
 }

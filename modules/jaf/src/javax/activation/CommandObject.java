@@ -37,7 +37,8 @@ import java.io.IOException;
  */
 public interface CommandObject {
   /**
-   * Iintialize the command with its verb.
+   * Initialize the Command with the verb it is requested to handle
+   * and the DataHandler that describes the data it will operate on.
    */
   public void setCommandContext(String verb, DataHandler handler)
     throws IOException;
