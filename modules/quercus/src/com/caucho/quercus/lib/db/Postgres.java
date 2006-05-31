@@ -49,7 +49,7 @@ public class Postgres extends JdbcConnectionResource {
   private static final Logger log = Logger.getLogger(Postgres.class.getName());
   private static final L10N L = new L10N(Postgres.class);
 
-  PostgresResult _asyncResult;
+  ResourceValue _asyncResult;
 
   // named prepared statements for postgres
   private HashMap<String,PostgresStatement> _stmtTable
@@ -145,12 +145,12 @@ public class Postgres extends JdbcConnectionResource {
     return new PostgresResult(stmt, rs, this);
   }
 
-  public void setAsynchronousResult(PostgresResult asyncResult)
+  public void setAsynchronousResult(ResourceValue asyncResult)
   {
     _asyncResult = asyncResult;
   }
 
-  public PostgresResult getAsynchronousResult()
+  public ResourceValue getAsynchronousResult()
   {
     return _asyncResult;
   }
