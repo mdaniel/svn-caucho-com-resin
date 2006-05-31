@@ -31,7 +31,6 @@ package javax.activation;
 
 import java.util.*;
 import java.io.*;
-import com.caucho.vfs.*;
 
 /**
  * API for finding the mime-type for a file.
@@ -72,7 +71,13 @@ public class MimetypesFileTypeMap extends FileTypeMap {
   public MimetypesFileTypeMap(String mimeTypeFileName)
     throws IOException
   {
-    addMimeTypes(Vfs.lookup(mimeTypeFileName).openRead());
+    InputStream is = new FileInputStream(mimeTypeFileName);
+
+    try {
+      addMimeTypes(is);
+    } finally {
+      is.close();
+    }
   }
 
   private void addMimeTypes(InputStream is)
@@ -111,7 +116,7 @@ public class MimetypesFileTypeMap extends FileTypeMap {
    */
   public void addMimeTypes(String mimeTypes)
   {
-    addMimeTypes(StringStream.open(mimeTypes));
+    addMimeTypes(new ByteArrayInputStream(mimeTypes.getBytes()));
   }
 
   /**

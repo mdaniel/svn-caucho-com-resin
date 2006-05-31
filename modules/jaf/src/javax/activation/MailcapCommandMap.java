@@ -28,9 +28,9 @@
  */
 
 package javax.activation;
+
 import java.util.*;
 import java.io.*;
-import com.caucho.vfs.*;
 
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.UnsupportedFlavorException;
@@ -112,7 +112,13 @@ public class MailcapCommandMap extends CommandMap {
    */
   public MailcapCommandMap(String fileName) throws IOException
   {
-    addMailcap(Vfs.lookup(fileName).openRead());
+    FileInputStream is = new FileInputStream(fileName);
+
+    try {
+      addMailcap(is);
+    } finally {
+      is.close();
+    }
   }
 
   /**
@@ -191,7 +197,7 @@ public class MailcapCommandMap extends CommandMap {
   public void addMailcap(String mail_cap)
   {
     try {
-      addMailcap(StringStream.open(mail_cap));
+      addMailcap(new ByteArrayInputStream(mail_cap.getBytes()));
     }
     catch (IOException e) {
       throw new RuntimeException(e);
