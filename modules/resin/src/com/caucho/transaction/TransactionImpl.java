@@ -523,6 +523,8 @@ public class TransactionImpl implements Transaction, AlarmListener {
 
     _status = Status.STATUS_MARKED_ROLLBACK;
 
+    _timeout = 0;
+
     if (log.isLoggable(Level.FINER))
       log.finer("setting rollback-only");
   }

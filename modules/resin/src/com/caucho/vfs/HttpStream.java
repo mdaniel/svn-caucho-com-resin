@@ -588,6 +588,8 @@ class HttpStream extends StreamImpl {
       }
     }
 
+    _attributes.clear();
+
     parseHeaders();
 
     if (_isHead)

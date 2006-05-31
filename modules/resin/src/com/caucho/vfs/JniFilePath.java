@@ -52,7 +52,7 @@ public class JniFilePath {
       Class pathClass = Class.forName("com.caucho.vfs.JniFilePathImpl");
 
       Method isEnabled = pathClass.getMethod("isEnabled", new Class[0]);
-      
+
       Object result = isEnabled.invoke(null);
 
       if (Boolean.TRUE.equals(result))
