@@ -44,6 +44,8 @@ import com.caucho.jsp.ResinJspWriter;
 import com.caucho.jsp.BodyContentImpl;
 import com.caucho.jsp.PageContextImpl;
 
+import com.caucho.server.connection.*;
+
 import com.caucho.jstl.NameValueTag;
 import com.caucho.el.*;
 
@@ -265,8 +267,15 @@ public class ImportTag extends BodyTagSupport implements NameValueTag {
 
 	try {
 	  RequestDispatcher disp = app.getRequestDispatcher(url);
-          
-	  disp.include(pageContext.getRequest(), pageContext.getResponse());
+
+	  if (disp == null)
+	    throw new JspException(L.l("URL `{0}' does not map to any servlet",
+				       url));
+	  
+	  CauchoResponse response = (CauchoResponse) pageContext.getResponse();
+	  response.getResponseStream().setEncoding(null);
+
+	  disp.include(pageContext.getRequest(), response);
 	} catch (FileNotFoundException e) {
 	  throw new JspException(L.l("`{0}' is an unknown file or servlet.",
 				     url));
@@ -289,8 +298,11 @@ public class ImportTag extends BodyTagSupport implements NameValueTag {
 	if (disp == null)
 	  throw new JspException(L.l("URL `{0}' does not map to any servlet",
 				     url));
-      
-	disp.include(request, pageContext.getResponse());
+	  
+	CauchoResponse response = (CauchoResponse) pageContext.getResponse();
+	response.getResponseStream().setEncoding(null);
+
+	disp.include(pageContext.getRequest(), response);
       } catch (FileNotFoundException e) {
 	throw new JspException(L.l("URL `{0}' is an unknown file or servlet.",
 				   url));

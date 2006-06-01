@@ -123,6 +123,8 @@ public class CompactVerifierFactoryImpl implements VerifierFactory {
       schema.setFilename(is.getSystemId());
 
       return schema;
+    } catch (SAXException e) {
+      throw e;
     } catch (Exception e) {
       throw new SAXException(e);
     }

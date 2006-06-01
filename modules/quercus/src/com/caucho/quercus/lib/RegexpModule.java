@@ -161,7 +161,7 @@ public class RegexpModule
                                @Optional int offset)
   {
     if (patternString.length() < 2) {
-      env.warning(L.l("Pattern must have at least opening and closing delimiters"));
+      env.warning(L.l("Regexp pattern must have opening and closing delimiters"));
       return 0;
     }
 

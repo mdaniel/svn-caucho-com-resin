@@ -1085,10 +1085,9 @@ public class XmlParser extends AbstractParser {
     if (value > 0xffff)
       throw error(L.l("malformed entity ref at {0}", "" + value));
 
-    /*
+    // xml/0072
     if (_strictCharacters && ! isChar(value))
       throw error(L.l("illegal character ref at {0}", badChar(value)));
-    */
 
     return value;
   }

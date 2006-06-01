@@ -333,6 +333,8 @@ abstract public class GenericTag extends JspContainerNode {
 
 	if (className == null)
 	  className = DEFAULT_VAR_TYPE;
+
+	validateClass(className, var.getVarName());
 	
         out.print(className + " " + var.getVarName() + " = ");
 
@@ -724,6 +726,7 @@ abstract public class GenericTag extends JspContainerNode {
 
       if (className == null)
 	className = DEFAULT_VAR_TYPE;
+
       /*
       if (var.getClassName() == null)
         throw error(L.l("tag variable `{0}' expects a classname",
@@ -736,8 +739,11 @@ abstract public class GenericTag extends JspContainerNode {
           var.getScope() == scope &&
           var.getScope() == VariableInfo.NESTED &&
 	  hasScripting() &&
-          ! varAlreadyDeclared(var.getVarName()))
+          ! varAlreadyDeclared(var.getVarName())) {
+	validateClass(className, var.getVarName());
+	
         out.println(className + " " + var.getVarName() + ";");
+      }
     }
   }
 
@@ -884,5 +890,20 @@ abstract public class GenericTag extends JspContainerNode {
     }
 
     return false;
+  }
+
+  /**
+   * Checks that the given class is a valid variable class.
+   */
+  protected void validateClass(String className, String varName)
+    throws JspParseException
+  {
+    try {
+      ClassLoader loader = Thread.currentThread().getContextClassLoader();
+      Class cl = Class.forName(className, false, loader);
+    } catch (ClassNotFoundException e) {
+      throw error(L.l("'{0}' is an unknown class for tag variable '{1}'.",
+		      className, varName));
+    }
   }
 }

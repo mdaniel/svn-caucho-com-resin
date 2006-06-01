@@ -194,7 +194,9 @@ public class MysqlModule extends AbstractQuercusModule {
     if (databaseName == null)
       return false;
 
-    return mysql_query(env, "DROP DATABASE " + databaseName, conn) != null;
+    Value value = mysql_query(env, "DROP DATABASE " + databaseName, conn);
+
+    return (value != null && value.toBoolean());
   }
 
   /**
@@ -505,9 +507,9 @@ public class MysqlModule extends AbstractQuercusModule {
   /**
    * Returns the field type.
    */
-  public Value mysql_field_type(Env env,
-                                @NotNull MysqliResult result,
-                                int fieldOffset)
+  public static Value mysql_field_type(Env env,
+				       @NotNull MysqliResult result,
+				       int fieldOffset)
   {
     if (result == null)
       return BooleanValue.FALSE;
@@ -518,9 +520,9 @@ public class MysqlModule extends AbstractQuercusModule {
   /**
    * Deprecated alias for mysql_field_len.
    */
-  public Value mysql_fieldlen(Env env,
-                              @NotNull MysqliResult result,
-                              int fieldOffset)
+  public static Value mysql_fieldlen(Env env,
+				     @NotNull MysqliResult result,
+				     int fieldOffset)
   {
     return mysql_field_len(env, result, fieldOffset);
   }
@@ -528,9 +530,9 @@ public class MysqlModule extends AbstractQuercusModule {
   /**
    * Returns the length of the specified field
    */
-  public Value mysql_field_len(Env env,
-                               @NotNull MysqliResult result,
-                               int fieldOffset)
+  public static Value mysql_field_len(Env env,
+				      @NotNull MysqliResult result,
+				      int fieldOffset)
   {
     if (result == null)
       return BooleanValue.FALSE;
@@ -623,10 +625,11 @@ public class MysqlModule extends AbstractQuercusModule {
   /**
    * Retrieves information about the given table name
    */
-  public Object mysql_list_fields(Env env,
-                                  @NotNull String databaseName,
-                                  @NotNull String tableName,
-                                  @Optional Mysqli conn)
+  @ReturnNullAsFalse
+  public MysqliResult mysql_list_fields(Env env,
+					String databaseName,
+					String tableName,
+					@Optional Mysqli conn)
   {
     if (databaseName == null)
       return null; // BooleanValue.FALSE;
@@ -645,20 +648,14 @@ public class MysqlModule extends AbstractQuercusModule {
    */
   @ReturnNullAsFalse
   public MysqliResult mysql_db_query(Env env,
-                                     @NotNull String databaseName,
-                                     @NotNull String query,
+				     String databaseName,
+                                     String query,
                                      @Optional Mysqli conn)
   {
-    if (databaseName == null)
-      return null; // BooleanValue.FALSE;
-
-    if (query == null)
-      return null; // BooleanValue.FALSE;
-
     if (conn == null)
       conn = getConnection(env);
 
-    if (!conn.select_db(databaseName))
+    if (! conn.select_db(databaseName))
       return null; // BooleanValue.FALSE;
 
     Value value = conn.query(query, 1);
@@ -674,12 +671,9 @@ public class MysqlModule extends AbstractQuercusModule {
    * Selects the database
    */
   public boolean mysql_select_db(Env env,
-                                 @NotNull String name,
+                                 String name,
                                  @Optional Mysqli conn)
   {
-    if (name == null)
-      return false;
-
     if (conn == null)
       conn = getConnection(env);
 
@@ -690,12 +684,9 @@ public class MysqlModule extends AbstractQuercusModule {
    * Retrieves a list of table names from a MySQL database.
    */
   public Object mysql_list_tables(Env env,
-                                  @NotNull String databaseName,
+                                  String databaseName,
                                   @Optional Mysqli conn)
   {
-    if (databaseName == null)
-      return null; // BooleanValue.FALSE;
-
     return mysql_query(env, "SHOW TABLES FROM " + databaseName, conn);
   }
 

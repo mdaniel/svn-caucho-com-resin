@@ -310,7 +310,7 @@ public abstract class ToByteResponseStream extends AbstractResponseStream {
     throws IOException
   {
     boolean isFinished = false;
-    
+
     if (_isClosed)
       return;
     else if (_isHead) {

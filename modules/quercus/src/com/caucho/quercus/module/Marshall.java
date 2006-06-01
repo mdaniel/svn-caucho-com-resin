@@ -155,84 +155,16 @@ abstract public class Marshall {
       
       JavaClassDef javaDef = moduleContext.getJavaClassDefinition(typeName);
       
-      return new JavaMarshall(javaDef, isNotNull, isNullAsFalse);
+      marshall = new JavaMarshall(javaDef, isNotNull, isNullAsFalse);
     }
-
+    
     if (!isNullAsFalse)
       return marshall;
     else {
-
       if (Value.class.equals(argType))
-        throw new UnsupportedOperationException(ReturnNullAsFalse.class.getName() + " with return type `Value'");
+        throw new UnsupportedOperationException("@ReturnNullAsFalse cannot be used with return type `Value'");
 
-      return new Marshall() {
-        public boolean isBoolean()
-        {
-          return marshall.isBoolean();
-        }
-
-        public boolean isString()
-        {
-          return marshall.isString();
-        }
-
-        public boolean isLong()
-        {
-          return marshall.isLong();
-        }
-
-        public boolean isDouble()
-        {
-          return marshall.isDouble();
-        }
-
-        public boolean isReadOnly()
-        {
-          return marshall.isReadOnly();
-        }
-
-        public boolean isReference()
-        {
-          return marshall.isReference();
-        }
-
-        public Object marshall(Env env, Expr expr, Class argClass)
-        {
-          return marshall.marshall(env, expr, argClass);
-        }
-
-        public Object marshall(Env env, Value value, Class argClass)
-        {
-          return marshall.marshall(env, value, argClass);
-        }
-
-        public void generate(PhpWriter out, Expr expr, Class argClass)
-          throws IOException
-        {
-          marshall.generate(out, expr, argClass);
-        }
-
-        public Value unmarshall(Env env, Object value)
-        {
-          Value result = marshall.unmarshall(env, value);
-
-          return result == null ? BooleanValue.FALSE : result;
-        }
-
-        public void generateResultStart(PhpWriter out)
-          throws IOException
-        {
-          out.print("env.nullAsFalse(");
-          marshall.generateResultStart(out);
-        }
-
-        public void generateResultEnd(PhpWriter out)
-          throws IOException
-        {
-          marshall.generateResultEnd(out);
-          out.print(")");
-        }
-      };
+      return new MarshallNullAsFalse(marshall);
     }
   }
 
@@ -1465,5 +1397,86 @@ abstract public class Marshall {
     {
     }
   };
+
+  static class MarshallNullAsFalse extends Marshall {
+    private Marshall _marshall;
+
+    MarshallNullAsFalse(Marshall marshall)
+    {
+      _marshall = marshall;
+    }
+    
+    public boolean isBoolean()
+    {
+      return _marshall.isBoolean();
+    }
+
+    public boolean isString()
+    {
+      return _marshall.isString();
+    }
+
+    public boolean isLong()
+    {
+      return _marshall.isLong();
+    }
+
+    public boolean isDouble()
+    {
+      return _marshall.isDouble();
+    }
+
+    public boolean isReadOnly()
+    {
+      return _marshall.isReadOnly();
+    }
+
+    public boolean isReference()
+    {
+      return _marshall.isReference();
+    }
+
+    public Object marshall(Env env, Expr expr, Class argClass)
+    {
+      return _marshall.marshall(env, expr, argClass);
+    }
+
+    public Object marshall(Env env, Value value, Class argClass)
+    {
+      return _marshall.marshall(env, value, argClass);
+    }
+
+    public void generate(PhpWriter out, Expr expr, Class argClass)
+      throws IOException
+    {
+      _marshall.generate(out, expr, argClass);
+    }
+
+    public Value unmarshall(Env env, Object value)
+    {
+      Value result = _marshall.unmarshall(env, value);
+
+      return (result == null || result.isNull()) ? BooleanValue.FALSE : result;
+    }
+
+    public void generateResultStart(PhpWriter out)
+      throws IOException
+    {
+      out.print("env.nullAsFalse(");
+      _marshall.generateResultStart(out);
+    }
+
+    public void generateResultEnd(PhpWriter out)
+      throws IOException
+    {
+      _marshall.generateResultEnd(out);
+      out.print(")");
+    }
+
+    public String toString()
+    {
+      return "NullAsFalseMarshall[" + _marshall + "]";
+    }
+  }
 }
 

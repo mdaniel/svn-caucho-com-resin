@@ -80,7 +80,7 @@ class QElementDef extends QNode {
       if (attrDef._deflt != null && 
 	  element.getAttribute(attrDef._name).equals("")) {
 	QAttr attr = (QAttr) element._owner.createAttribute(attrDef._name,
-                                                            attrDef._deflt);
+							    attrDef._deflt);
 	attr._owner = element._owner;
 	attr.setSpecified(false);
 	element.setAttributeNode(attr);
@@ -97,7 +97,7 @@ class QElementDef extends QNode {
       QAttributeDef attrDef = _attr.get(i);
       if (attrDef._deflt != null && 
 	  attributes.getIndex(attrDef._name) < 0) {
-	attributes.add(new QName(attrDef._name, ""), attrDef._deflt);
+	attributes.add(new QName(null, attrDef._name, null), attrDef._deflt);
       }
     }
   }

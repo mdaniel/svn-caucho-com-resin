@@ -540,6 +540,8 @@ public class JavaCompiler {
 	String []batchFiles = new String[len];
 
 	System.arraycopy(files, i, batchFiles, 0, len);
+
+	Arrays.sort(batchFiles);
 	
 	compileInt(batchFiles, null);
       }

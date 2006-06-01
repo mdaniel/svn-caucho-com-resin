@@ -242,7 +242,7 @@ public class BodyResponseStream extends AbstractResponseStream {
 
     if (_encodingReader == null) {
       for (; length > 0; length--) {
-	print((char) buf[offset++]);
+	print((char) (buf[offset++] & 0xff));
       }
       return;
     }

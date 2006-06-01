@@ -994,7 +994,6 @@ public abstract class JdbcConnectionResource implements Closeable {
 
       if (stmt.execute(sql)) {
         ResultSet rs = stmt.getResultSet();
-
         _rs = createResult(stmt, rs);
         _affectedRows = 0;
         _resultValues.add(_rs);

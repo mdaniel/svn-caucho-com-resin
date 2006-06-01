@@ -529,7 +529,7 @@ abstract public class JavaInvoker
     }
 
     Object result = invoke(obj, javaArgs);
-    
+
     return _unmarshallReturn.unmarshall(env, result);
   }
 

@@ -153,14 +153,18 @@ public class PageFilterChain implements FilterChain {
       String uri = (String) req.getAttribute("javax.servlet.include.request_uri");
       String forward = (String) req.getAttribute("caucho.forward");
 
-      if (errorUri != null) {
-	throw new FileNotFoundException(errorUri);
-      }
-      else if (uri != null) {
-	throw new FileNotFoundException(uri);
+      // jsp/01ch
+      if (uri != null) {
+	//throw new FileNotFoundException(uri);
+	throw notFound;
       }
       else if (forward != null) {
-	throw new FileNotFoundException(req.getRequestURI());
+	//throw new FileNotFoundException(req.getRequestURI());
+	throw notFound;
+      }
+      else if (errorUri != null) {
+	//throw new FileNotFoundException(errorUri);
+	throw notFound;
       }
 	
       ((HttpServletResponse) res).sendError(HttpServletResponse.SC_NOT_FOUND);

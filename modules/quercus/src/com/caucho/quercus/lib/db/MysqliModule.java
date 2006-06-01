@@ -502,11 +502,12 @@ public class MysqliModule extends AbstractQuercusModule {
   /**
    * Returns a row for the result.
    */
-  public static Value mysqli_fetch_array(@NotNull MysqliResult result,
-                                         @Optional("MYSQLI_BOTH") int type)
+  @ReturnNullAsFalse
+  public static ArrayValue mysqli_fetch_array(@NotNull MysqliResult result,
+					      @Optional("MYSQLI_BOTH") int type)
   {
     if (result == null)
-      return BooleanValue.FALSE;
+      return null;
 
     return result.fetch_array(type);
   }
@@ -526,10 +527,11 @@ public class MysqliModule extends AbstractQuercusModule {
   /**
    * Returns a row for the result.
    */
-  public static Value mysqli_fetch_row(@NotNull MysqliResult result)
+  @ReturnNullAsFalse
+  public static ArrayValue mysqli_fetch_row(@NotNull MysqliResult result)
   {
     if (result == null)
-      return BooleanValue.FALSE;
+      return null;
 
     return result.fetch_row();
   }
@@ -830,13 +832,13 @@ public class MysqliModule extends AbstractQuercusModule {
                              String sql)
   {
     if (conn == null)
-      return null; // BooleanValue.FALSE;
+      return BooleanValue.FALSE;
 
     try {
       return conn.query(sql, MYSQLI_STORE_RESULT);
-    } catch (Throwable e) {
+    } catch (Exception e) {
       log.log(Level.FINE, e.toString(), e);
-      return null; // BooleanValue.FALSE;
+      return BooleanValue.FALSE;
     }
   }
 

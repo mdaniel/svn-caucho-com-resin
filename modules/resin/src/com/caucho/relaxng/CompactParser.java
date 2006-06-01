@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -29,6 +30,7 @@
 package com.caucho.relaxng;
 
 import java.util.*;
+import java.util.logging.*;
 import java.io.*;
 
 import org.xml.sax.*;
@@ -75,6 +77,8 @@ import com.caucho.relaxng.pattern.RefPattern;
  */
 public class CompactParser {
   private static final L10N L = new L10N(CompactParser.class);
+  private static final Logger log
+    = Logger.getLogger(CompactParser.class.getName());
 
   private static final int IDENTIFIER = 256;
   
@@ -170,7 +174,11 @@ public class CompactParser {
     try {
       parse();
     } catch (RelaxException e) {
-      throw new SAXException(_filename + ":" + _line + ": " + e.getMessage(), e);
+      log.log(Level.FINER, e.toString(), e);
+      
+      // xml/1196
+      //throw new SAXException(_filename + ":" + _line + ": " + e.getMessage(), e);
+      throw new SAXException(_filename + ":" + _line + ": " + e.getMessage());
     } finally {
       _is.close();
     }

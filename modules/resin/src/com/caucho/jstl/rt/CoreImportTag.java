@@ -44,6 +44,8 @@ import com.caucho.jsp.ResinJspWriter;
 import com.caucho.jsp.PageContextImpl;
 import com.caucho.jsp.BodyContentImpl;
 
+import com.caucho.server.connection.*;
+
 import com.caucho.jsp.el.*;
 
 import com.caucho.jstl.NameValueTag;
@@ -172,10 +174,10 @@ public class CoreImportTag extends BodyTagSupport implements NameValueTag {
       if (_varReader != null) {
         jspWriter = pageContext.pushBody();
         
-        handleBody();
-        
         BodyContentImpl body = (BodyContentImpl) pageContext.getOut();
 
+        handleBody(body);
+        
         _reader = body.getReader();
 
         pageContext.setAttribute(_varReader, _reader);
@@ -206,9 +208,9 @@ public class CoreImportTag extends BodyTagSupport implements NameValueTag {
       try {
 	JspWriter jspWriter = pageContext.pushBody();
           
-	handleBody();
-
 	BodyContentImpl body = (BodyContentImpl) pageContext.getOut();
+
+	handleBody(body);
 
 	if (_var != null) {
 	  String value = body.getString();
@@ -234,7 +236,8 @@ public class CoreImportTag extends BodyTagSupport implements NameValueTag {
     return EVAL_PAGE;
   }
 
-  private void handleBody() throws JspException, ServletException, IOException
+  private void handleBody(BodyContentImpl body)
+    throws JspException, ServletException, IOException
   {
     String url = _url;
 
@@ -249,7 +252,7 @@ public class CoreImportTag extends BodyTagSupport implements NameValueTag {
     else
       url = url + '?' + _query;
 
-    JspWriter out = pageContext.getOut();
+    JspWriter out = body;
     if (out instanceof ResinJspWriter)
       ((ResinJspWriter) out).flushBuffer();
     else {
@@ -271,8 +274,11 @@ public class CoreImportTag extends BodyTagSupport implements NameValueTag {
         if (disp == null)
           throw new JspException(L.l("URL `{0}' does not map to any servlet",
                                      url));
-          
-        disp.include(pageContext.getRequest(), pageContext.getResponse());
+	
+	CauchoResponse response = (CauchoResponse) pageContext.getResponse();
+	response.getResponseStream().setEncoding(null);
+
+        disp.include(pageContext.getRequest(), response);
       }
       else
         handleExternalBody(context + url);
@@ -284,9 +290,12 @@ public class CoreImportTag extends BodyTagSupport implements NameValueTag {
     int slash = url.indexOf('/');
     if (slash == 0 || colon < 0 || slash < 0 || slash < colon) {
       ServletRequest request = pageContext.getRequest();
+      CauchoResponse response = (CauchoResponse) pageContext.getResponse();
+      response.getResponseStream().setEncoding(null);
+      
       RequestDispatcher disp = request.getRequestDispatcher(url);
 
-      disp.include(request, pageContext.getResponse());
+      disp.include(request, response);
     }
     else
       handleExternalBody(url);

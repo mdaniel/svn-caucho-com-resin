@@ -30,15 +30,20 @@
 package com.caucho.quercus.lib.pdf;
 
 import java.io.IOException;
+import java.io.FileNotFoundException;
 
 import com.caucho.vfs.Path;
 import com.caucho.vfs.MergePath;
 import com.caucho.vfs.ReadStream;
 
+import com.caucho.util.L10N;
+
 /**
  * parses afm
  */
 public class AfmParser {
+  private static final L10N L = new L10N(AfmParser.class);
+  
   private static final String END_OF_FILE = "end of file";
 
   private ReadStream _is;
@@ -52,10 +57,10 @@ public class AfmParser {
     MergePath mergePath = new MergePath();
     mergePath.addClassPath();
 
-    Path path = mergePath.lookup("com/caucho/quercus/pdflib/font/" + name + ".afm");
+    Path path = mergePath.lookup("com/caucho/quercus/lib/pdf/font/" + name + ".afm");
 
     if (! path.canRead())
-      return null;
+      throw new FileNotFoundException(L.l("Can't find font {0}", name));
 
     _is = path.openRead();
 

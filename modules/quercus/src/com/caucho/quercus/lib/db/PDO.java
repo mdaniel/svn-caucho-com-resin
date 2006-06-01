@@ -46,6 +46,8 @@ import com.caucho.util.L10N;
 import com.caucho.quercus.env.*;
 
 import com.caucho.quercus.module.Optional;
+import com.caucho.quercus.module.ReturnNullAsFalse;
+
 import com.caucho.quercus.UnimplementedException;
 
 /**
@@ -468,21 +470,27 @@ public class PDO implements java.io.Closeable {
     return _lastInsertId;
   }
 
-  public Value prepare(String statement, ArrayValue driverOptions)
+  /**
+   * Prepares a statement for execution.
+   */
+  @ReturnNullAsFalse
+  public PDOStatement prepare(String statement,
+			      @Optional ArrayValue driverOptions)
   {
     if (_conn == null)
-      return BooleanValue.FALSE;
+      return null;
 
     try {
       closeStatements();
 
       PDOStatement pdoStatement = new PDOStatement(_env, _conn, statement, true, driverOptions);
       _lastPDOStatement = pdoStatement;
-      return _env.wrapJava(pdoStatement);
+      
+      return pdoStatement;
     } catch (SQLException e) {
       _error.error(e);
 
-      return BooleanValue.FALSE;
+      return null;
     }
   }
 
