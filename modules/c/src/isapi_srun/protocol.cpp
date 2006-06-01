@@ -756,7 +756,9 @@ write_request(stream_t *s, EXTENSION_CONTROL_BLOCK *r, config_t *config, char *h
 			memcpy(buf, r->lpbData + totalLen, len);
 			r->cbAvailable -= len;
 		}
-		else if (r->cbTotalBytes > 0 && r->cbTotalBytes <= totalLen)
+		else if (r->cbTotalBytes <= 0)
+			break;
+		else if (r->cbTotalBytes <= totalLen)
 			break;
 		else if (! r->ReadClient(r->ConnID, buf, &len) || len <= 0)
 			break;
