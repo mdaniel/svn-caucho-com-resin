@@ -136,10 +136,8 @@ public class MimetypesFileTypeMap extends FileTypeMap {
     int dot = fileName.indexOf('.');
     if (dot==-1)
       return "application/octet-stream";
-    String extension =
-      fileName.substring(fileName.lastIndexOf('.')+1);
-    String mimeType =
-      (String)_mimeTypesByExtension.get(extension);
+    String extension = fileName.substring(fileName.lastIndexOf('.')+1);
+    String mimeType = (String)_mimeTypesByExtension.get(extension);
     if (mimeType != null) return mimeType;
     // XXX
     return null;

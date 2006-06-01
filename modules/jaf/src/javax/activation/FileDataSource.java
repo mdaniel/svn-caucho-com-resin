@@ -96,6 +96,11 @@ public class FileDataSource implements DataSource {
     return _file.getName();
   }
 
+  public File getFile()
+  {
+    return _file;
+  }
+
   /**
    * Set the FileTypeMap to use with this FileDataSource.
    */
@@ -103,10 +108,4 @@ public class FileDataSource implements DataSource {
   {
     _fileTypeMap = map;
   }
-
-  public File getFile()
-  {
-    return _file;
-  }
-
 }

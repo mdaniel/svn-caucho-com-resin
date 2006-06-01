@@ -157,18 +157,6 @@ public class DataHandler implements Transferable {
   }
 
   /**
-   * Returns the handler.
-   */
-  private DataContentHandler getDataContentHandler()
-  {
-    if (_factory != null) {
-      return _factory.createDataContentHandler(getContentType());
-    }
-    else
-      throw new UnsupportedOperationException();
-  }
-
-  /**
    * Checks to see if the specified flavor is supported.
    */
   public boolean isDataFlavorSupported(DataFlavor flavor)
@@ -267,5 +255,17 @@ public class DataHandler implements Transferable {
       throw new Error("factory already set.");
 
     _factory = factory;
+  }
+
+  /**
+   * Returns the handler.
+   */
+  private DataContentHandler getDataContentHandler()
+  {
+    if (_factory != null) {
+      return _factory.createDataContentHandler(getContentType());
+    }
+    else
+      throw new UnsupportedOperationException();
   }
 }

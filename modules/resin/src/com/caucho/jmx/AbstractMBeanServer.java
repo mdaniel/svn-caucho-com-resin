@@ -469,10 +469,13 @@ abstract public class AbstractMBeanServer implements MBeanServer {
 
       String mbeanName = cl.getName() + "MBean";
 
+      int p = mbeanName.lastIndexOf('.');
+      mbeanName = mbeanName.substring(p);
+
       for (int i = 0; i < interfaces.length; i++) {
         Class ifc = interfaces[i];
 
-        if (ifc.getName().equals(mbeanName))
+        if (ifc.getName().endsWith(mbeanName))
           return ifc;
       }
     }

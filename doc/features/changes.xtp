@@ -2,9 +2,9 @@
 
 <a href='changes-2.xtp'>Resin 2.1 changes</a>
 
-<s2 title='3.0.snap - May 26, 2006'>
+<s2 title='3.0.snap - May 31, 2006'>
 <ul>
-<li>HttpProxyServlet needs to clear attributes on reading response (#1143, rep by Anoop Achuthan)
+<li>(2006-05-31) HttpProxyServlet needs to clear attributes on reading response (#1143, rep by Anoop Achuthan)
 <li>Quercus: mysql_query regression with UPDATE (#1131, rep by koreth)
 <li>TransactionManagerImpl._transactionList was not properly synchronized (#1151, rep by Matt Pangaro)
 <li>Added implementation for java.util.logging.LogManager.getLoggerNames() (#1124, rep by eahollin)
