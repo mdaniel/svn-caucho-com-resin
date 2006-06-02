@@ -767,18 +767,22 @@ public class MysqliModule extends AbstractQuercusModule {
    *
    * Used in conjunction with {@link #mysqli_multi_query}
    */
-  public static Value mysqli_store_result(Env env, @NotNull Mysqli conn)
+  @ReturnNullAsFalse
+  public static JdbcResultResource mysqli_store_result(Env env,
+						 @NotNull Mysqli conn)
   {
     if (conn == null)
-      return BooleanValue.FALSE;
+      return null;
 
     return conn.store_result(env);
   }
 
-  public static Value mysqli_use_result(Env env, @NotNull Mysqli conn)
+  @ReturnNullAsFalse
+  public static JdbcResultResource mysqli_use_result(Env env,
+					       @NotNull Mysqli conn)
   {
     if (conn == null)
-      return BooleanValue.FALSE;
+      return null;
 
     return conn.use_result(env);
   }
@@ -817,10 +821,11 @@ public class MysqliModule extends AbstractQuercusModule {
     // ERRATUM: <i>resultMode</i> is ignored, MYSQLI_USE_RESULT would represent
     //  an unbuffered query, but that is not supported.
 
+    // XXX: change query api
     Value value = query(conn, sql);
-
-    if (value instanceof JdbcResultResource) {
-      JdbcResultResource resultResource = (JdbcResultResource) value;
+    Object o = value.toJavaObject();
+    if (o instanceof JdbcResultResource) {
+      JdbcResultResource resultResource = (JdbcResultResource) o;
 
       return env.wrapJava(resultResource);
     }

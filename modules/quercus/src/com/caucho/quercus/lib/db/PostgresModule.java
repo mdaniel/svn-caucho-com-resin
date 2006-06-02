@@ -636,13 +636,12 @@ public class PostgresModule extends AbstractQuercusModule {
    * and waits for the result
    */
   @ReturnNullAsFalse
-  public ResourceValue pg_execute(Env env,
-                                  @NotNull Postgres conn,
-                                  String stmtName,
-                                  ArrayValue params)
+  public PostgresResult pg_execute(Env env,
+				   @NotNull Postgres conn,
+				   String stmtName,
+				   ArrayValue params)
   {
     try {
-
       PostgresStatement pstmt = conn.getStatement(stmtName);
 
       ArrayValueImpl arr = (ArrayValueImpl)params;
@@ -666,7 +665,9 @@ public class PostgresModule extends AbstractQuercusModule {
       if (pstmt.getStatementType().equals("SELECT")) {
         return new PostgresResult(null, pstmt.getResultSet(), null);
       } else {
-        return pstmt;
+	// XXX: ??? return type?
+	return null;
+        // return pstmt;
       }
 
     } catch (Exception ex) {
@@ -1239,7 +1240,7 @@ public class PostgresModule extends AbstractQuercusModule {
    * Get asynchronous query result
    */
   @ReturnNullAsFalse
-  public ResourceValue pg_get_result(Env env,
+  public PostgresResult pg_get_result(Env env,
                                      @Optional Postgres conn)
   {
     try {
@@ -1247,7 +1248,7 @@ public class PostgresModule extends AbstractQuercusModule {
       if (conn == null)
         conn = getConnection(env);
 
-      ResourceValue resource = conn.getAsynchronousResult();
+      PostgresResult resource = conn.getAsynchronousResult();
 
       conn.setAsynchronousResult(null);
 
@@ -2019,7 +2020,7 @@ public class PostgresModule extends AbstractQuercusModule {
    * with the ability to pass parameters separately from the SQL command text
    */
   @ReturnNullAsFalse
-  public ResourceValue pg_query_params(Env env,
+  public PostgresResult pg_query_params(Env env,
                                        @NotNull Postgres conn,
                                        String query,
                                        ArrayValue params)
@@ -2053,9 +2054,10 @@ public class PostgresModule extends AbstractQuercusModule {
         conn = getConnection(env);
 
       Value queryV = conn.query(query, 1);
+      Object queryO = queryV.toJavaObject();
 
-      if (queryV instanceof PostgresResult) {
-        PostgresResult resultResource = (PostgresResult) queryV;
+      if (queryO instanceof PostgresResult) {
+        PostgresResult resultResource = (PostgresResult) queryO;
 
         if (resultResource != null) {
           return resultResource;
@@ -2184,7 +2186,7 @@ public class PostgresModule extends AbstractQuercusModule {
 
       // Note: for now, this is essentially the same as pg_execute.
 
-      ResourceValue resource = (ResourceValue) pg_execute(env, conn, stmtName, params);
+      PostgresResult resource = pg_execute(env, conn, stmtName, params);
 
       conn.setAsynchronousResult(resource);
 
@@ -2214,7 +2216,7 @@ public class PostgresModule extends AbstractQuercusModule {
 
       PostgresStatement stmt = pg_prepare(env, conn, stmtName, query);
 
-      conn.setAsynchronousResult(stmt);
+      conn.setAsynchronousStatement(stmt);
 
       if (stmt != null) {
         return true;
